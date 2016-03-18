@@ -12,7 +12,7 @@ namespace Elastos {
 namespace Droid {
 namespace Provider {
 
-class SearchIndexableData
+class ECO_PUBLIC SearchIndexableData
     : public Object
     , public ISearchIndexableData
 {

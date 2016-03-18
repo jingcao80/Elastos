@@ -3,8 +3,8 @@
 #define __ELASTOS_DROID_JAVAPROXY_CBINDERNATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CBinderNative.h"
-#include <elastos/core/Object.h>
 #include "Elastos.Droid.Os.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
 using Elastos::Droid::Os::IBinder;
@@ -28,8 +28,8 @@ public:
         /* [out] */ String* str);
 
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
 private:
     static const String TAG;

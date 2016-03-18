@@ -3,13 +3,13 @@
 #define __ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDTITLE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::IParcel;
-using Elastos::Droid::Os::IParcelable;
 
 namespace Elastos {
 namespace Droid {
@@ -59,7 +59,7 @@ public:
      * indicating that no identifier value is set.  All other values (including those below -1)
      * are valid.
      */
-    static const Int64 TILE_ID_UNDEFINED = -1;
+    static const Int64 TILE_ID_UNDEFINED;
 
     /**
      * Identifier for this tile, to correlate with a new list when
@@ -67,7 +67,7 @@ public:
      * {@link com.android.settings.dashboard.DashboardTile#TILE_ID_UNDEFINED}, meaning no id.
      * @attr ref android.R.styleable#PreferenceHeader_id
      */
-    Int64 mId = TILE_ID_UNDEFINED;
+    Int64 mId;
 
     /**
      * Resource ID of title of the tile that is shown to the user.

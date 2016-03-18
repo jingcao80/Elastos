@@ -1,82 +1,42 @@
-/**
- * Copyright (C) 2007 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy
- * of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
- */
+
 #ifndef __ELASTOS_DROID_SETTINGS_UTILS_H__
 #define __ELASTOS_DROID_SETTINGS_UTILS_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.View.h>
+#include <Elastos.Droid.Widget.h>
+#include <elastos/core/Object.h>
+#include "elastos/droid/settings/UserSpinnerAdapter.h"
+#include "elastos/droid/settings/dashboard/DashboardTile.h"
 
-using Elastos::Droid::App::IActivityManager;
-using Elastos::Droid::App::IActivityManagerNative;
-using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::App::IDialog;
 using Elastos::Droid::App::IFragment;
-using Elastos::Droid::App::IIActivityManager;
-using Elastos::Droid::Content::IContentResolver;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IDialogInterface;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IPackageInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
-using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::Pm::ISignature;
 using Elastos::Droid::Content::Pm::IUserInfo;
 using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Database::ICursor;
-using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Droid::Graphics::IBitmapFactory;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Net::ILinkProperties;
-using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Os::IBatteryManager;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::IIBinder;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserManager;
-using Elastos::Droid::Preference::IPreference;
-using Elastos::Droid::Preference::IPreferenceFrameLayout;
 using Elastos::Droid::Preference::IPreferenceGroup;
-using Elastos::Droid::Provider::IContactsContractCommonDataKinds;
-using Elastos::Droid::Provider::IContactsContractContacts;
-using Elastos::Droid::Provider::IContactsContractData;
-using Elastos::Droid::Provider::IContactsContractProfile;
-using Elastos::Droid::Provider::IContactsContractRawContacts;
-using Elastos::Droid::Service::Persistentdata::IPersistentDataBlockManager;
-using Elastos::Droid::Telephony::ITelephonyManager;
-using Elastos::Droid::Text::IBidiFormatter;
-using Elastos::Droid::Text::ITextDirectionHeuristics;
-using Elastos::Droid::Utility::ILog;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IListView;
-using Elastos::Droid::Widget::ITabWidget;
-
-using Elastos::Droid::Internal::Utility::IImageUtils;
-using Elastos::Droid::Internal::Utility::IUserIcons;
 using Elastos::Droid::Settings::UserSpinnerAdapter;
-using Elastos::Droid::Settings::Dashboard::IDashboardCategory;
-using Elastos::Droid::Settings::Dashboard::IDashboardTile;
-using Elastos::Droid::Settings::Drawable::ICircleFramedDrawable;
-
-using Elastos::IO::IInputStream;
-using Elastos::Net::IInetAddress;
-using Elastos::Text::INumberFormat;
-using Elastos::Utility::IArrayList;
-using Elastos::Utility::IIterator;
+using Elastos::Droid::Settings::Dashboard::DashboardTile;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::IRunnable;
 using Elastos::Utility::IList;
 using Elastos::Utility::ILocale;
 
@@ -429,6 +389,9 @@ private:
         /* [in] */ Double percentage);
 
     static CARAPI_(String) GetShorterNameIfPossible(
+        /* [in] */ IContext* context);
+
+    static CARAPI_(String) GetLocalProfileGivenName(
         /* [in] */ IContext* context);
 
     static CARAPI_(String) GetProfileDisplayName(

@@ -1,5 +1,6 @@
 
 #include "elastos/droid/webkit/CWebStorageHelper.h"
+#include "elastos/droid/webkit/WebViewFactory.h"
 
 namespace Elastos {
 namespace Droid {
@@ -12,8 +13,10 @@ CAR_SINGLETON_IMPL(CWebStorageHelper);
 ECode CWebStorageHelper::GetInstance(
     /* [out] */ IWebStorage ** ppInstance)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(ppInstance);
+    WebViewFactory::GetProvider()->GetWebStorage(ppInstance);
+    REFCOUNT_ADD(*ppInstance);
+    return NOERROR;
 }
 
 } // namespace Webkit

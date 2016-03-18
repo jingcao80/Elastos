@@ -1,12 +1,16 @@
 
 #include "elastos/droid/javaproxy/CApplicationThreadNative.h"
 #include "elastos/droid/javaproxy/Util.h"
-#include "elastos/droid/ext/frameworkhash.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+// #include "Elastos.Droid.Net.h"
+// #include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::App::EIID_IApplicationThread;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::JavaProxy::Util;
-using Elastos::Droid::Content::EIID_IIntent;
 
 namespace Elastos {
 namespace Droid {
@@ -17,6 +21,10 @@ const String CApplicationThreadNative::TAG("CApplicationThreadNative");
 HashMap<AutoPtr<IBinder>, jobject> CApplicationThreadNative::sTokenMap;
 HashMap<AutoPtr<IBinder>, jobject> CApplicationThreadNative::sServiceTokenMap;
 
+CAR_INTERFACE_IMPL_2(CApplicationThreadNative, Object, IApplicationThread, IBinder)
+
+CAR_OBJECT_IMPL(CApplicationThreadNative)
+
 CApplicationThreadNative::~CApplicationThreadNative(){
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -24,8 +32,8 @@ CApplicationThreadNative::~CApplicationThreadNative(){
 }
 
 ECode CApplicationThreadNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -36,9 +44,10 @@ ECode CApplicationThreadNative::SchedulePauseActivity(
     /* [in] */ IBinder* token,
     /* [in] */ Boolean finished,
     /* [in] */ Boolean userLeaving,
-    /* [in] */ Int32 configChanges)
+    /* [in] */ Int32 configChanges,
+    /* [in] */ Boolean dontReport)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::SchedulePauseActivity()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::SchedulePauseActivity()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -50,22 +59,22 @@ ECode CApplicationThreadNative::SchedulePauseActivity(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("CApplicationThreadNative::SchedulePauseActivity() cannot find token!"));
+            LOGGERE(TAG, "CApplicationThreadNative::SchedulePauseActivity() cannot find token!");
         }
     }
 
     jclass c = env->FindClass("android/app/IApplicationThread");
-    Util::CheckErrorAndLog(env, TAG, String("FindClass: IApplicationThread"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IApplicationThread", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "schedulePauseActivity", "(Landroid/os/IBinder;ZZI)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: schedulePauseActivity"), __LINE__);
+    jmethodID m = env->GetMethodID(c, "schedulePauseActivity", "(Landroid/os/IBinder;ZZIZ)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: schedulePauseActivity", __LINE__);
 
-    env->CallVoidMethod(mJInstance, m, jToken, finished, userLeaving, configChanges);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod:"), __LINE__);
+    env->CallVoidMethod(mJInstance, m, jToken, finished, userLeaving, configChanges, dontReport);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod:", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::SchedulePauseActivity()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::SchedulePauseActivity()");
     return NOERROR;
 }
 
@@ -76,16 +85,17 @@ ECode CApplicationThreadNative::ScheduleLaunchActivity(
     /* [in] */ IActivityInfo* info,
     /* [in] */ IConfiguration* curConfig,
     /* [in] */ ICompatibilityInfo* compatInfo,
+    /* [in] */ IIVoiceInteractor* voiceInteractor,
+    /* [in] */ Int32 procState,
     /* [in] */ IBundle* state,
-    /* [in] */ IObjectContainer* pendingResults,
-    /* [in] */ IObjectContainer* pendingNewIntents,
+    /* [in] */ IPersistableBundle* persistentState,
+    /* [in] */ IList* pendingResults,   //List<ResultInfo>
+    /* [in] */ IList* pendingNewIntents, //List<Intent>
     /* [in] */ Boolean notResumed,
     /* [in] */ Boolean isForward,
-    /* [in] */ const String& profileName,
-    /* [in] */ IParcelFileDescriptor* profileFd,
-    /* [in] */ Boolean autoStopProfiler)
+    /* [in] */ IProfilerInfo* pi)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleLaunchActivity()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleLaunchActivity()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -95,16 +105,17 @@ ECode CApplicationThreadNative::ScheduleLaunchActivity(
     jobject jInfo = NULL;
     jobject jCurConfig = NULL;
     jobject jCompatInfo = NULL;
+    jobject jVoiceInteractor = NULL;
     jobject jState = NULL;
+    jobject jPersistentState = NULL;
     jobject jPendingResults = NULL;
     jobject jPendingNewIntents = NULL;
-    jstring jProfileName = NULL;
-    jobject jProfileFd = NULL;
+    jobject jPi = NULL;
 
     if (intent != NULL) {
         jIntent = Util::ToJavaIntent(env, intent);
         if (jIntent == NULL) {
-            LOGGERE(TAG, String("ScheduleLaunchActivity: jIntent is NULL!"));
+            LOGGERE(TAG, "ScheduleLaunchActivity: jIntent is NULL!");
         }
     }
 
@@ -115,13 +126,13 @@ ECode CApplicationThreadNative::ScheduleLaunchActivity(
         }
         else {
             jclass c = env->FindClass("android/view/ElApplicationTokenProxy");
-            Util::CheckErrorAndLog(env, TAG, String("FindClass: ElApplicationTokenProxy"), __LINE__);
+            Util::CheckErrorAndLog(env, TAG, "FindClass: ElApplicationTokenProxy", __LINE__);
 
-            jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
-            Util::CheckErrorAndLog(env, TAG, String("GetMethodID: ElApplicationTokenProxy"), __LINE__);
+            jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
+            Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElApplicationTokenProxy", __LINE__);
 
-            jobject tempToken = env->NewObject(c, m, (jint)token);
-            Util::CheckErrorAndLog(env, TAG, String("NewObject: ElApplicationTokenProxy"), __LINE__);
+            jobject tempToken = env->NewObject(c, m, (jlong)token);
+            Util::CheckErrorAndLog(env, TAG, "NewObject: ElApplicationTokenProxy", __LINE__);
             token->AddRef();
 
             env->DeleteLocalRef(c);
@@ -136,14 +147,14 @@ ECode CApplicationThreadNative::ScheduleLaunchActivity(
     if (info != NULL) {
         jInfo = Util::ToJavaActivityInfo(env, info);
         if (jInfo == NULL) {
-            LOGGERE(TAG, String("ScheduleLaunchActivity: jInfo is NULL!"));
+            LOGGERE(TAG, "ScheduleLaunchActivity: jInfo is NULL!");
         }
     }
 
     if (curConfig != NULL) {
         jCurConfig = Util::ToJavaConfiguration(env, curConfig);
         if (jCurConfig == NULL) {
-            LOGGERE(TAG, String("ScheduleLaunchActivity: jCurConfig is NULL!"));
+            LOGGERE(TAG, "ScheduleLaunchActivity: jCurConfig is NULL!");
         }
     }
 
@@ -151,32 +162,83 @@ ECode CApplicationThreadNative::ScheduleLaunchActivity(
         jCompatInfo = Util::ToJavaCompatibilityInfo(env, compatInfo);
     }
 
+    if (voiceInteractor != NULL) {
+        jclass c = env->FindClass("android/app/ElVoiceInteractor");
+        Util::CheckErrorAndLog(env, "ScheduleLaunchActivity", "FindClass: ElVoiceInteractor %d", __LINE__);
+
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
+        Util::CheckErrorAndLog(env, "ScheduleLaunchActivity", "GetMethodID: ElVoiceInteractor %d", __LINE__);
+
+        jVoiceInteractor = env->NewObject(c, m, (jlong)voiceInteractor);
+        Util::CheckErrorAndLog(env, "ScheduleLaunchActivity", "NewObject: ElVoiceInteractor %d", __LINE__);
+
+        voiceInteractor->AddRef();
+        env->DeleteLocalRef(c);
+    }
+
     if (state != NULL) {
         jState = Util::ToJavaBundle(env, state);
         if (jState == NULL) {
-            LOGGERE(TAG, String("ScheduleLaunchActivity: jState is NULL!"));
+            LOGGERE(TAG, "ScheduleLaunchActivity: jState is NULL!");
         }
     }
 
+    if (persistentState != NULL) {
+        jPersistentState = Util::ToJavaPersistableBundle(env, persistentState);
+    }
+
     if (pendingResults != NULL) {
-        LOGGERE(TAG, String("ScheduleLaunchActivity: pendingResults not NULL!"));
+        jclass c = env->FindClass("java/util/ArrayList");
+        Util::CheckErrorAndLog(env, "ScheduleLaunchActivity", "Fail FindClass: ArrayList", __LINE__);
+        jmethodID m = env->GetMethodID(c,"<init>","()V");
+        Util::CheckErrorAndLog(env, "ScheduleLaunchActivity", "Fail GetMethodID: ArrayList", __LINE__);
+        jPendingResults = env->NewObject(c, m);
+        Util::CheckErrorAndLog(env, "ScheduleLaunchActivity", "Fail NewObject: ArrayList", __LINE__);
+        m = env->GetMethodID(c, "add", "(Ljava/lang/Object;)Z");
+        Util::CheckErrorAndLog(env, "ScheduleLaunchActivity", "Fail GetMethodID: add", __LINE__);
+
+        Int32 size;
+        pendingResults->GetSize(&size);
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> obj;
+            pendingResults->Get(i, (IInterface**)&obj);
+            jobject jpendingResult = Util::ToJavaResultInfo(env, IResultInfo::Probe(obj));
+            env->CallBooleanMethod(jPendingResults, m, jpendingResult);
+            env->DeleteLocalRef(jpendingResult);
+        }
+
+        env->DeleteLocalRef(c);
     }
 
     if (pendingNewIntents != NULL) {
-        LOGGERE(TAG, String("ScheduleLaunchActivity: pendingNewIntents not NULL!"));
+        jclass c = env->FindClass("java/util/ArrayList");
+        Util::CheckErrorAndLog(env, "ScheduleLaunchActivity", "Fail FindClass: ArrayList", __LINE__);
+        jmethodID m = env->GetMethodID(c,"<init>","()V");
+        Util::CheckErrorAndLog(env, "ScheduleLaunchActivity", "Fail GetMethodID: ArrayList", __LINE__);
+        jPendingNewIntents = env->NewObject(c, m);
+        Util::CheckErrorAndLog(env, "ScheduleLaunchActivity", "Fail NewObject: ArrayList", __LINE__);
+        m = env->GetMethodID(c, "add", "(Ljava/lang/Object;)Z");
+        Util::CheckErrorAndLog(env, "ScheduleLaunchActivity", "Fail GetMethodID: add", __LINE__);
+
+        Int32 size;
+        pendingNewIntents->GetSize(&size);
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> obj;
+            pendingNewIntents->Get(i, (IInterface**)&obj);
+            jobject jpendingNewIntent = Util::ToJavaIntent(env, IIntent::Probe(obj));
+            env->CallBooleanMethod(jPendingNewIntents, m, jpendingNewIntent);
+            env->DeleteLocalRef(jpendingNewIntent);
+        }
+
+        env->DeleteLocalRef(c);
     }
 
-    if (!profileName.IsNull()) {
-        LOGGERD(TAG, String("ScheduleLaunchActivity: profileName:") + profileName);
-        jProfileName = Util::ToJavaString(env, profileName);
-    }
-
-    if (profileFd != NULL) {
-        jProfileFd = Util::ToJavaParcelFileDescriptor(env, profileFd);
+    if (pi != NULL) {
+        jPi = Util::ToJavaProfilerInfo(env, pi);
     }
 
     jclass c = env->FindClass("android/app/IApplicationThread");
-    Util::CheckErrorAndLog(env, TAG, String("FindClass: IApplicationThread"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IApplicationThread", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "scheduleLaunchActivity",
         "(Landroid/content/Intent;"\
@@ -184,72 +246,73 @@ ECode CApplicationThreadNative::ScheduleLaunchActivity(
          "ILandroid/content/pm/ActivityInfo;"\
          "Landroid/content/res/Configuration;"\
          "Landroid/content/res/CompatibilityInfo;"\
-         "Landroid/os/Bundle;"\
+         "Landroid/internal/app/IVoiceInteractor;"\
+         "ILandroid/os/Bundle;"\
+         "Landroid/os/PersistableBundle;"\
          "Ljava/util/List;"\
          "Ljava/util/List;"\
-         "ZZLjava/lang/String;"\
-         "Landroid/os/ParcelFileDescriptor;Z)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: scheduleLaunchActivity"), __LINE__);
+         "Landroid/app/ProfilerInfo;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleLaunchActivity", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jIntent, jToken, (jint)ident, jInfo, jCurConfig,
-    jCompatInfo, jState, jPendingResults, jPendingNewIntents, (jboolean)notResumed, (jboolean)isForward,
-    jProfileName, jProfileFd, (jboolean)autoStopProfiler);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: scheduleLaunchActivity"), __LINE__);
+        jCompatInfo, jVoiceInteractor, (jint)procState, jState, jPersistentState, jPendingResults,
+        jPendingNewIntents, (jboolean)notResumed, (jboolean)isForward, jPi);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleLaunchActivity", __LINE__);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jIntent);
     env->DeleteLocalRef(jInfo);
     env->DeleteLocalRef(jCurConfig);
     env->DeleteLocalRef(jCompatInfo);
+    env->DeleteLocalRef(jVoiceInteractor);
     env->DeleteLocalRef(jState);
+    env->DeleteLocalRef(jPersistentState);
     env->DeleteLocalRef(jPendingResults);
     env->DeleteLocalRef(jPendingNewIntents);
-    env->DeleteLocalRef(jProfileName);
-    env->DeleteLocalRef(jProfileFd);
+    env->DeleteLocalRef(jPi);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleLaunchActivity()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleLaunchActivity()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::BindApplication(
-    /* [in] */ const String& packageName,
+    /* [in] */ const String& processName,
     /* [in] */ IApplicationInfo* appInfo,
-    /* [in] */ IObjectContainer* providers,
+    /* [in] */ IList* providers,
     /* [in] */ IComponentName* instrumentationName,
-    /* [in] */ const String& profileName,
-    /* [in] */ IParcelFileDescriptor* profileFd,
-    /* [in] */ Boolean autoStopProfiler,
+    /* [in] */ IProfilerInfo* pi,
     /* [in] */ IBundle* instrumentationArgs,
     /* [in] */ IInstrumentationWatcher* instrumentationWatcher,
+    /* [in] */ IIUiAutomationConnection* instrumentationUiConnection,
     /* [in] */ Int32 debugMode,
-    /* [in] */ Boolean openGlTrace,
-    /* [in] */ Boolean restrictedBackupMode,
+    /* [in] */ Boolean enableOpenGlTrace,
+    /* [in] */ Boolean isRestrictedBackupMode,
     /* [in] */ Boolean persistent,
     /* [in] */ IConfiguration* config,
     /* [in] */ ICompatibilityInfo* compatInfo,
-    /* [in] */ IObjectStringMap* services,
+    /* [in] */ IMap* services,
     /* [in] */ IBundle* coreSettings)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::BindApplication()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::BindApplication()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jstring jPackageName = NULL;
+    jstring jprocessName = NULL;
     jobject jAppInfo = NULL;
     jobject jProviders = NULL;
     jobject jInstrumentationName = NULL;
-    jstring jProfileName = NULL;
-    jobject jProfileFd = NULL;
+    jobject jPi = NULL;
     jobject jInstrumentationArgs = NULL;
     jobject jInstrumentationWatcher = NULL;
+    jobject jInstrumentationUiConnection = NULL;
     jobject jConfig = NULL;
     jobject jCompatInfo = NULL;
     jobject jServices = NULL;
     jobject jCoreSettings = NULL;
 
-    if (!packageName.IsNull()) {
-        jPackageName = Util::ToJavaString(env, packageName);
+    if (!processName.IsNull()) {
+        jprocessName = Util::ToJavaString(env, processName);
     }
 
     if (appInfo != NULL) {
@@ -266,15 +329,12 @@ ECode CApplicationThreadNative::BindApplication(
         m = env->GetMethodID(c, "add", "(Ljava/lang/Object;)Z");
         Util::CheckErrorAndLog(env, "BindApplication", "Fail GetMethodID: add", __LINE__);
 
-        Boolean hasNext = FALSE;
-        AutoPtr<IObjectEnumerator> enumerator;
-        providers->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
-        while (enumerator->MoveNext(&hasNext), hasNext) {
+        Int32 size;
+        providers->GetSize(&size);
+        for (Int32 i = 0; i < size; ++i) {
             AutoPtr<IInterface> obj;
-            enumerator->Current((IInterface**)&obj);
-            AutoPtr<IProviderInfo> pInfo = IProviderInfo::Probe(obj);
-
-            jobject jproviderInfo = Util::ToJavaProviderInfo(env, pInfo);
+            providers->Get(i, (IInterface**)&obj);
+            jobject jproviderInfo = Util::ToJavaProviderInfo(env, IProviderInfo::Probe(obj));
             env->CallBooleanMethod(jProviders, m, jproviderInfo);
             env->DeleteLocalRef(jproviderInfo);
         }
@@ -283,38 +343,42 @@ ECode CApplicationThreadNative::BindApplication(
     }
 
     if (instrumentationName != NULL) {
-        LOGGERE(TAG, String("BindApplication: instrumentationName not NULL!"));
         jInstrumentationName = Util::ToJavaComponentName(env, instrumentationName);
     }
 
-    if (!profileName.IsNull()) {
-        LOGGERD(TAG, String("BindApplication: profileName: ") + profileName);
-        jProfileName = Util::ToJavaString(env, profileName);
-    }
-
-    if (profileFd != NULL) {
-        LOGGERE(TAG, String("BindApplication: profileFd not NULL!"));
-        jProfileFd = Util::ToJavaParcelFileDescriptor(env, profileFd);
+    if (pi != NULL) {
+        jPi = Util::ToJavaProfilerInfo(env, pi);
     }
 
     if (instrumentationArgs != NULL) {
-        LOGGERE(TAG, String("BindApplication: instrumentationArgs not NULL!"));
         jInstrumentationArgs = Util::ToJavaBundle(env, instrumentationArgs);
     }
 
     if (instrumentationWatcher != NULL) {
-        LOGGERE(TAG, String("BindApplication: instrumentationWatcher not NULL!"));
-
         jclass c = env->FindClass("android/app/ElInstrumentationWatcherProxy");
         Util::CheckErrorAndLog(env, "BindApplication", "FindClass: ElInstrumentationWatcherProxy %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, "BindApplication", "GetMethodID: ElInstrumentationWatcherProxy %d", __LINE__);
 
-        jInstrumentationWatcher = env->NewObject(c, m, (jint)instrumentationWatcher);
+        jInstrumentationWatcher = env->NewObject(c, m, (jlong)instrumentationWatcher);
         Util::CheckErrorAndLog(env, "BindApplication", "NewObject: ElInstrumentationWatcherProxy %d", __LINE__);
 
         instrumentationWatcher->AddRef();
+        env->DeleteLocalRef(c);
+    }
+
+    if (instrumentationUiConnection != NULL) {
+        jclass c = env->FindClass("android/app/ElUiAutomationConnection");
+        Util::CheckErrorAndLog(env, "BindApplication", "FindClass: ElUiAutomationConnection %d", __LINE__);
+
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
+        Util::CheckErrorAndLog(env, "BindApplication", "GetMethodID: ElUiAutomationConnection %d", __LINE__);
+
+        jInstrumentationUiConnection = env->NewObject(c, m, (jlong)instrumentationUiConnection);
+        Util::CheckErrorAndLog(env, "BindApplication", "NewObject: ElUiAutomationConnection %d", __LINE__);
+
+        instrumentationUiConnection->AddRef();
         env->DeleteLocalRef(c);
     }
 
@@ -376,43 +440,44 @@ ECode CApplicationThreadNative::BindApplication(
          "Landroid/content/pm/ApplicationInfo;"\
          "Ljava/util/List;"\
          "Landroid/content/ComponentName;"\
-         "Ljava/lang/String;"\
-         "Landroid/os/ParcelFileDescriptor;"\
-         "ZLandroid/os/Bundle;"\
+         "Landroid/app/ProfilerInfo;"\
+         "Landroid/os/Bundle;"\
          "Landroid/app/IInstrumentationWatcher;"\
+         "Landroid/app/IIUiAutomationConnection;"\
          "IZZZLandroid/content/res/Configuration;"\
          "Landroid/content/res/CompatibilityInfo;"\
          "Ljava/util/Map;"\
          "Landroid/os/Bundle;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: bindApplication"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: bindApplication", __LINE__);
 
-    env->CallVoidMethod(mJInstance, m, jPackageName, jAppInfo, jProviders, jInstrumentationName, jProfileName,
-        jProfileFd, (jboolean)autoStopProfiler, jInstrumentationArgs, jInstrumentationWatcher, (jint)debugMode,
-        (jboolean)openGlTrace, (jboolean)restrictedBackupMode, (jboolean)persistent, jConfig, jCompatInfo, jServices, jCoreSettings);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: bindApplication"), __LINE__);
+    env->CallVoidMethod(mJInstance, m, jprocessName, jAppInfo, jProviders, jInstrumentationName, jPi,
+        jInstrumentationArgs, jInstrumentationWatcher, jInstrumentationUiConnection, (jint)debugMode,
+        (jboolean)enableOpenGlTrace, (jboolean)isRestrictedBackupMode, (jboolean)persistent, jConfig,
+        jCompatInfo, jServices, jCoreSettings);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: bindApplication", __LINE__);
 
     env->DeleteLocalRef(c);
-    env->DeleteLocalRef(jPackageName);
+    env->DeleteLocalRef(jprocessName);
     env->DeleteLocalRef(jAppInfo);
     env->DeleteLocalRef(jProviders);
     env->DeleteLocalRef(jInstrumentationName);
-    env->DeleteLocalRef(jProfileName);
-    env->DeleteLocalRef(jProfileFd);
+    env->DeleteLocalRef(jPi);
     env->DeleteLocalRef(jInstrumentationArgs);
     env->DeleteLocalRef(jInstrumentationWatcher);
+    env->DeleteLocalRef(jInstrumentationUiConnection);
     env->DeleteLocalRef(jConfig);
     env->DeleteLocalRef(jCompatInfo);
     env->DeleteLocalRef(jServices);
     env->DeleteLocalRef(jCoreSettings);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::BindApplication()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::BindApplication()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleTrimMemory(
     /* [in] */ Int32 level)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleTrimMemory()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleTrimMemory()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -421,26 +486,26 @@ ECode CApplicationThreadNative::ScheduleTrimMemory(
     Util::CheckErrorAndLog(env, "ScheduleTrimMemory", "Fail FindClass: IApplicationThread", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "scheduleTrimMemory", "(I)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: scheduleTrimMemory"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleTrimMemory", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)level);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: scheduleTrimMemory"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleTrimMemory", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleTrimMemory()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleTrimMemory()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleRelaunchActivity(
     /* [in] */ IBinder* token,
-    /* [in] */ ArrayOf<IResultInfo *>* pendingResults,
-    /* [in] */ ArrayOf<IIntent *>* pendingNewIntents,
+    /* [in] */ IList* pendingResults,
+    /* [in] */ IList* pendingNewIntents,
     /* [in] */ Int32 configChanges,
     /* [in] */ Boolean notResumed,
     /* [in] */ IConfiguration* config)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleRelaunchActivity()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleRelaunchActivity()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -455,16 +520,54 @@ ECode CApplicationThreadNative::ScheduleRelaunchActivity(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("CApplicationThreadNative::ScheduleRelaunchActivity() cannot find token!"));
+            LOGGERE(TAG, "CApplicationThreadNative::ScheduleRelaunchActivity() cannot find token!");
         }
     }
 
-    if(pendingResults != NULL) {
-        LOGGERE("Eric", String("CApplicationThreadNative::ScheduleRelaunchActivity() pendingResults not NULL!"));
+    if (pendingResults != NULL) {
+        jclass c = env->FindClass("java/util/ArrayList");
+        Util::CheckErrorAndLog(env, "ScheduleRelaunchActivity", "Fail FindClass: ArrayList", __LINE__);
+        jmethodID m = env->GetMethodID(c,"<init>","()V");
+        Util::CheckErrorAndLog(env, "ScheduleRelaunchActivity", "Fail GetMethodID: ArrayList", __LINE__);
+        jpendingResults = env->NewObject(c, m);
+        Util::CheckErrorAndLog(env, "ScheduleRelaunchActivity", "Fail NewObject: ArrayList", __LINE__);
+        m = env->GetMethodID(c, "add", "(Ljava/lang/Object;)Z");
+        Util::CheckErrorAndLog(env, "ScheduleRelaunchActivity", "Fail GetMethodID: add", __LINE__);
+
+        Int32 size;
+        pendingResults->GetSize(&size);
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> obj;
+            pendingResults->Get(i, (IInterface**)&obj);
+            jobject jpendingResult = Util::ToJavaResultInfo(env, IResultInfo::Probe(obj));
+            env->CallBooleanMethod(jpendingResults, m, jpendingResult);
+            env->DeleteLocalRef(jpendingResult);
+        }
+
+        env->DeleteLocalRef(c);
     }
 
-    if(pendingNewIntents != NULL) {
-        LOGGERE("Eric", String("CApplicationThreadNative::ScheduleRelaunchActivity() pendingNewIntents not NULL!"));
+    if (pendingNewIntents != NULL) {
+        jclass c = env->FindClass("java/util/ArrayList");
+        Util::CheckErrorAndLog(env, "ScheduleRelaunchActivity", "Fail FindClass: ArrayList", __LINE__);
+        jmethodID m = env->GetMethodID(c,"<init>","()V");
+        Util::CheckErrorAndLog(env, "ScheduleRelaunchActivity", "Fail GetMethodID: ArrayList", __LINE__);
+        jpendingNewIntents = env->NewObject(c, m);
+        Util::CheckErrorAndLog(env, "ScheduleRelaunchActivity", "Fail NewObject: ArrayList", __LINE__);
+        m = env->GetMethodID(c, "add", "(Ljava/lang/Object;)Z");
+        Util::CheckErrorAndLog(env, "ScheduleRelaunchActivity", "Fail GetMethodID: add", __LINE__);
+
+        Int32 size;
+        pendingNewIntents->GetSize(&size);
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> obj;
+            pendingNewIntents->Get(i, (IInterface**)&obj);
+            jobject jpendingNewIntent = Util::ToJavaIntent(env, IIntent::Probe(obj));
+            env->CallBooleanMethod(jpendingNewIntents, m, jpendingNewIntent);
+            env->DeleteLocalRef(jpendingNewIntent);
+        }
+
+        env->DeleteLocalRef(c);
     }
 
     if(config != NULL) {
@@ -479,18 +582,18 @@ ECode CApplicationThreadNative::ScheduleRelaunchActivity(
          "Ljava/util/List;"\
          "Ljava/util/List;"\
          "IZLandroid/content/res/Configuration;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: scheduleRelaunchActivity"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleRelaunchActivity", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jToken, jpendingResults, jpendingNewIntents,
         (jint)configChanges, (jboolean)notResumed, jconfig);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: ScheduleRelaunchActivity"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: ScheduleRelaunchActivity", __LINE__);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jpendingResults);
     env->DeleteLocalRef(jpendingNewIntents);
     env->DeleteLocalRef(jconfig);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleRelaunchActivity()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleRelaunchActivity()");
     return NOERROR;
 }
 
@@ -499,7 +602,7 @@ ECode CApplicationThreadNative::ScheduleStopActivity(
     /* [in] */ Boolean showWindow,
     /* [in] */ Int32 configChanges)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleStopActivity()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleStopActivity()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -511,7 +614,7 @@ ECode CApplicationThreadNative::ScheduleStopActivity(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("ScheduleStopActivity() cannot find token!"));
+            LOGGERE(TAG, "ScheduleStopActivity() cannot find token!");
         }
     }
 
@@ -519,14 +622,14 @@ ECode CApplicationThreadNative::ScheduleStopActivity(
     Util::CheckErrorAndLog(env, "ScheduleStopActivity", "Fail FindClass: IApplicationThread", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "scheduleStopActivity", "(Landroid/os/IBinder;ZI)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: scheduleStopActivity"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleStopActivity", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jToken, (jboolean)showWindow, (jint)configChanges);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: scheduleStopActivity"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleStopActivity", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleStopActivity()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleStopActivity()");
     return NOERROR;
 }
 
@@ -535,7 +638,7 @@ ECode CApplicationThreadNative::ScheduleDestroyActivity(
     /* [in] */ Boolean finished,
     /* [in] */ Int32 configChanges)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleDestroyActivity()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleDestroyActivity()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -548,7 +651,7 @@ ECode CApplicationThreadNative::ScheduleDestroyActivity(
             sTokenMap.Erase(it);
         }
         else {
-            LOGGERE(TAG, String("ScheduleDestroyActivity() cannot find token!"));
+            LOGGERE(TAG, "ScheduleDestroyActivity() cannot find token!");
         }
     }
 
@@ -556,23 +659,23 @@ ECode CApplicationThreadNative::ScheduleDestroyActivity(
     Util::CheckErrorAndLog(env, "ScheduleDestroyActivity", "Fail FindClass: IApplicationThread", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "scheduleDestroyActivity", "(Landroid/os/IBinder;ZI)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: scheduleDestroyActivity"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleDestroyActivity", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jToken, (jboolean)finished, (jint)configChanges);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: scheduleDestroyActivity"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleDestroyActivity", __LINE__);
 
     env->DeleteLocalRef(c);
     env->DeleteGlobalRef(jToken);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleDestroyActivity()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleDestroyActivity()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleSendResult(
     /* [in] */ IBinder* token,
-    /* [in] */ IObjectContainer* results)
+    /* [in] */ IList* results)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleSendResult()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleSendResult()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     jobject jToken = NULL;
@@ -583,7 +686,7 @@ ECode CApplicationThreadNative::ScheduleSendResult(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("ScheduleSendResult() cannot find token!"));
+            LOGGERE(TAG, "ScheduleSendResult() cannot find token!");
         }
     }
     jobject jresults = NULL;
@@ -606,12 +709,11 @@ ECode CApplicationThreadNative::ScheduleSendResult(
         m = env->GetMethodID(rnfoKlass, "<init>", "(Ljava/lang/String;IILandroid/content/Intent;)V");
         Util::CheckErrorAndLog(env, "scheduleSendResult", "Fail GetMethodID: ResultInfo ", __LINE__);
 
-        AutoPtr<IObjectEnumerator> it;
-        results->GetObjectEnumerator((IObjectEnumerator**)&it);
-        Boolean hasNext;
-        while (it->MoveNext(&hasNext), hasNext) {
+        Int32 size;
+        results->GetSize(&size);
+        for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
-            it->Current((IInterface**)&obj);
+            results->Get(i, (IInterface**)&obj);
             AutoPtr<IResultInfo> rInfo = IResultInfo::Probe(obj);
             String resultWho;
             rInfo->GetResultWho(&resultWho);
@@ -646,10 +748,10 @@ ECode CApplicationThreadNative::ScheduleSendResult(
     Util::CheckErrorAndLog(env, "scheduleSendResult", "Fail FindClass: IApplicationThread", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "scheduleSendResult", "(Landroid/os/IBinder;Ljava/util/List;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: scheduleSendResult"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleSendResult", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jToken, jresults);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: scheduleSendResult"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleSendResult", __LINE__);
 
     if(jresults){
         env->DeleteLocalRef(jresults);
@@ -657,15 +759,17 @@ ECode CApplicationThreadNative::ScheduleSendResult(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleSendResult()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleSendResult()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleResumeActivity(
     /* [in] */ IBinder* token,
-    /* [in] */ Boolean isForward)
+    /* [in] */ Int32 processState,
+    /* [in] */ Boolean isForward,
+    /* [in] */ IBundle* resumeArgs)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleResumeActivity()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleResumeActivity()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     jobject jToken = NULL;
@@ -676,30 +780,35 @@ ECode CApplicationThreadNative::ScheduleResumeActivity(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("ScheduleResumeActivity() cannot find token!"));
+            LOGGERE(TAG, "ScheduleResumeActivity() cannot find token!");
         }
+    }
+    jobject jresumeArgs = NULL;
+    if (resumeArgs != NULL) {
+        jresumeArgs = Util::ToJavaBundle(env, resumeArgs);
     }
 
     jclass c = env->FindClass("android/app/IApplicationThread");
     Util::CheckErrorAndLog(env, "ScheduleResumeActivity", "Fail FindClass: IApplicationThread", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "scheduleResumeActivity", "(Landroid/os/IBinder;Z)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: scheduleResumeActivity"), __LINE__);
+    jmethodID m = env->GetMethodID(c, "scheduleResumeActivity", "(Landroid/os/IBinder;IZLandroid/os/Bundle;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleResumeActivity", __LINE__);
 
-    env->CallVoidMethod(mJInstance, m, jToken, (jboolean)isForward);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: scheduleResumeActivity"), __LINE__);
+    env->CallVoidMethod(mJInstance, m, jToken, processState, (jboolean)isForward, jresumeArgs);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleResumeActivity", __LINE__);
 
     env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jresumeArgs);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleResumeActivity()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleResumeActivity()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleNewIntent(
-    /* [in] */ IObjectContainer* intents,
+    /* [in] */ IList* intents,
     /* [in] */ IBinder* token)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleNewIntent()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleNewIntent()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     jobject jToken = NULL;
@@ -707,32 +816,29 @@ ECode CApplicationThreadNative::ScheduleNewIntent(
     jobject jintents = NULL;
     if (intents != NULL) {
         Int32 count;
-        intents->GetObjectCount(&count);
+        intents->GetSize(&count);
 
         jclass listKlass = env->FindClass("java/util/ArrayList");
-        Util::CheckErrorAndLog(env, TAG, String("FindClass: ArrayList "), __LINE__);
+        Util::CheckErrorAndLog(env, TAG, "FindClass: ArrayList ", __LINE__);
 
         jmethodID m = env->GetMethodID(listKlass, "<init>", "()V");
-        Util::CheckErrorAndLog(env, TAG, String("GetMethodID: ArrayList "), __LINE__);
+        Util::CheckErrorAndLog(env, TAG, "GetMethodID: ArrayList ", __LINE__);
 
         jintents = env->NewObject(listKlass, m);
-        Util::CheckErrorAndLog(env, TAG, String("NewObject: ArrayList "), __LINE__);
+        Util::CheckErrorAndLog(env, TAG, "NewObject: ArrayList ", __LINE__);
 
         jmethodID mAdd = env->GetMethodID(listKlass, "add", "(Ljava/lang/Object;)Z");
-        Util::CheckErrorAndLog(env, TAG, String("GetMethodID: add "), __LINE__);
+        Util::CheckErrorAndLog(env, TAG, "GetMethodID: add ", __LINE__);
 
         if (count > 0) {
-            AutoPtr<IObjectEnumerator> objEnumerator;
-            intents->GetObjectEnumerator((IObjectEnumerator**)&objEnumerator);
-            Boolean hasNext = FALSE;
-            while ((objEnumerator->MoveNext(&hasNext), hasNext)) {
+            for (Int32 i = 0; i < count; i++) {
                 AutoPtr<IInterface> obj;
-                objEnumerator->Current((IInterface**)&obj);
+                intents->Get(i, (IInterface**)&obj);
                 AutoPtr<IIntent> intent = IIntent::Probe(obj);
                 if (intent != NULL) {
                     jobject jintent =  Util::ToJavaIntent(env, intent);
                     env->CallBooleanMethod(jintents, mAdd, jintent);
-                    Util::CheckErrorAndLog(env, TAG, String("CallObjectMethod: mAdd "), __LINE__);
+                    Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: mAdd ", __LINE__);
                     env->DeleteLocalRef(jintent);
                 }
             }
@@ -747,7 +853,7 @@ ECode CApplicationThreadNative::ScheduleNewIntent(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("ScheduleNewIntent() cannot find token!"));
+            LOGGERE(TAG, "ScheduleNewIntent() cannot find token!");
         }
     }
 
@@ -755,10 +861,10 @@ ECode CApplicationThreadNative::ScheduleNewIntent(
     Util::CheckErrorAndLog(env, "ScheduleNewIntent", "Fail FindClass: IApplicationThread", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "scheduleNewIntent", "(Ljava/util/List;Landroid/os/IBinder;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: scheduleNewIntent"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleNewIntent", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jintents, jToken);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: scheduleNewIntent"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleNewIntent", __LINE__);
 
     if(jintents){
         env->DeleteLocalRef(jintents);
@@ -766,16 +872,17 @@ ECode CApplicationThreadNative::ScheduleNewIntent(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleNewIntent()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleNewIntent()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleCreateService(
     /* [in] */ IBinder* token,
     /* [in] */ IServiceInfo* info,
-    /* [in] */ ICompatibilityInfo* compatInfo)
+    /* [in] */ ICompatibilityInfo* compatInfo,
+    /* [in] */ Int32 processState)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleCreateService()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleCreateService()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     jobject jToken = NULL;
@@ -787,13 +894,13 @@ ECode CApplicationThreadNative::ScheduleCreateService(
         }
         else {
             jclass c = env->FindClass("android/os/ElBinderProxy");
-            Util::CheckErrorAndLog(env, TAG, String("FindClass: ElBinderProxy"), __LINE__);
+            Util::CheckErrorAndLog(env, TAG, "FindClass: ElBinderProxy", __LINE__);
 
-            jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
-            Util::CheckErrorAndLog(env, TAG, String("GetMethodID: ElBinderProxy"), __LINE__);
+            jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
+            Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElBinderProxy", __LINE__);
 
-            jobject tempToken = env->NewObject(c, m, (jint)token);
-            Util::CheckErrorAndLog(env, TAG, String("NewObject: ElBinderProxy"), __LINE__);
+            jobject tempToken = env->NewObject(c, m, (jlong)token);
+            Util::CheckErrorAndLog(env, TAG, "NewObject: ElBinderProxy", __LINE__);
             token->AddRef();
 
             env->DeleteLocalRef(c);
@@ -817,11 +924,11 @@ ECode CApplicationThreadNative::ScheduleCreateService(
     jclass c = env->FindClass("android/app/IApplicationThread");
     Util::CheckErrorAndLog(env, "ScheduleCreateService", "Fail FindClass: IApplicationThread", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "scheduleCreateService", "(Landroid/os/IBinder;Landroid/content/pm/ServiceInfo;Landroid/content/res/CompatibilityInfo;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: ScheduleCreateService"), __LINE__);
+    jmethodID m = env->GetMethodID(c, "scheduleCreateService", "(Landroid/os/IBinder;Landroid/content/pm/ServiceInfo;Landroid/content/res/CompatibilityInfo;I)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: ScheduleCreateService", __LINE__);
 
-    env->CallVoidMethod(mJInstance, m, jToken, jinfo, jcompatInfo);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: ScheduleCreateService"), __LINE__);
+    env->CallVoidMethod(mJInstance, m, jToken, jinfo, jcompatInfo, processState);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: ScheduleCreateService", __LINE__);
 
     env->DeleteLocalRef(c);
 
@@ -833,7 +940,7 @@ ECode CApplicationThreadNative::ScheduleCreateService(
         env->DeleteLocalRef(jcompatInfo);
     }
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleCreateService()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleCreateService()");
     return NOERROR;
 }
 
@@ -844,7 +951,7 @@ ECode CApplicationThreadNative::ScheduleServiceArgs(
     /* [in] */ Int32 flags,
     /* [in] */ IIntent* args)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleServiceArgs()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleServiceArgs()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     jobject jToken = NULL;
@@ -855,7 +962,7 @@ ECode CApplicationThreadNative::ScheduleServiceArgs(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("ScheduleServiceArgs() cannot find token!"));
+            LOGGERE(TAG, "ScheduleServiceArgs() cannot find token!");
         }
     }
 
@@ -868,10 +975,10 @@ ECode CApplicationThreadNative::ScheduleServiceArgs(
     Util::CheckErrorAndLog(env, "ScheduleServiceArgs", "Fail FindClass: IApplicationThread", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "scheduleServiceArgs", "(Landroid/os/IBinder;ZIILandroid/content/Intent;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: ScheduleServiceArgs"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: ScheduleServiceArgs", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jToken, (jboolean)taskRemoved, (jint)startId, (jint)flags, jargs);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: ScheduleServiceArgs"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: ScheduleServiceArgs", __LINE__);
 
     env->DeleteLocalRef(c);
 
@@ -879,7 +986,7 @@ ECode CApplicationThreadNative::ScheduleServiceArgs(
         env->DeleteLocalRef(jargs);
     }
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleServiceArgs()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleServiceArgs()");
     return NOERROR;
 }
 
@@ -887,7 +994,7 @@ ECode CApplicationThreadNative::ScheduleWindowVisibility(
     /* [in] */ IBinder* token,
     /* [in] */ Boolean showWindow)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleWindowVisibility()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleWindowVisibility()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     jobject jToken = NULL;
@@ -898,7 +1005,7 @@ ECode CApplicationThreadNative::ScheduleWindowVisibility(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("CApplicationThreadNative() cannot find token!"));
+            LOGGERE(TAG, "CApplicationThreadNative() cannot find token!");
         }
     }
 
@@ -906,14 +1013,14 @@ ECode CApplicationThreadNative::ScheduleWindowVisibility(
     Util::CheckErrorAndLog(env, "scheduleWindowVisibility", "Fail FindClass: IApplicationThread", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "scheduleWindowVisibility", "(Landroid/os/IBinder;Z)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: scheduleWindowVisibility"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleWindowVisibility", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jToken, (jboolean)showWindow);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: scheduleWindowVisibility"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleWindowVisibility", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleWindowVisibility()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleWindowVisibility()");
     return NOERROR;
 }
 
@@ -925,9 +1032,10 @@ ECode CApplicationThreadNative::ScheduleRegisteredReceiver(
     /* [in] */ IBundle* extras,
     /* [in] */ Boolean ordered,
     /* [in] */ Boolean sticky,
-    /* [in] */ Int32 sendingUser)
+    /* [in] */ Int32 sendingUser,
+    /* [in] */ Int32 processState)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleRegisteredReceiver()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleRegisteredReceiver()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -951,11 +1059,13 @@ ECode CApplicationThreadNative::ScheduleRegisteredReceiver(
     jclass c = env->FindClass("android/app/IApplicationThread");
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IApplicationThread Line: %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "scheduleRegisteredReceiver", "(Landroid/content/IIntentReceiver;Landroid/content/Intent;ILjava/lang/String;Landroid/os/Bundle;ZZI)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: scheduleRegisteredReceiver Line: %d"), __LINE__);
+    jmethodID m = env->GetMethodID(c, "scheduleRegisteredReceiver", "(Landroid/content/IIntentReceiver;"
+        "Landroid/content/Intent;ILjava/lang/String;Landroid/os/Bundle;ZZII)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleRegisteredReceiver Line: %d", __LINE__);
 
-    env->CallVoidMethod(mJInstance, m, jreceiver, jintent, (jint)resultCode, jdata, jextras, (jboolean)ordered, (jboolean)sticky, (jint)sendingUser);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: scheduleRegisteredReceiver Line: %d"), __LINE__);
+    env->CallVoidMethod(mJInstance, m, jreceiver, jintent, (jint)resultCode, jdata, jextras,
+        (jboolean)ordered, (jboolean)sticky, (jint)sendingUser, processState);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleRegisteredReceiver Line: %d", __LINE__);
 
     env->DeleteLocalRef(c);
 
@@ -972,7 +1082,7 @@ ECode CApplicationThreadNative::ScheduleRegisteredReceiver(
     if(jextras){
         env->DeleteLocalRef(jextras);
     }
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleRegisteredReceiver()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleRegisteredReceiver()");
     return NOERROR;
 }
 
@@ -984,9 +1094,10 @@ ECode CApplicationThreadNative::ScheduleReceiver(
     /* [in] */ const String& data,
     /* [in] */ IBundle* extras,
     /* [in] */ Boolean sync,
-    /* [in] */ Int32 sendingUser)
+    /* [in] */ Int32 sendingUser,
+    /* [in] */ Int32 processState)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleReceiver()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleReceiver()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1015,11 +1126,13 @@ ECode CApplicationThreadNative::ScheduleReceiver(
     jclass c = env->FindClass("android/app/IApplicationThread");
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IApplicationThread Line: %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "scheduleReceiver", "(Landroid/content/Intent;Landroid/content/pm/ActivityInfo;Landroid/content/res/CompatibilityInfo;ILjava/lang/String;Landroid/os/Bundle;ZI)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: scheduleReceiver Line: %d"), __LINE__);
+    jmethodID m = env->GetMethodID(c, "scheduleReceiver", "(Landroid/content/Intent;Landroid/content/pm/ActivityInfo;"
+        "Landroid/content/res/CompatibilityInfo;ILjava/lang/String;Landroid/os/Bundle;ZII)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleReceiver Line: %d", __LINE__);
 
-    env->CallVoidMethod(mJInstance, m, jintent, jinfo, jcompatInfo, (jint)resultCode, jdata, jextras, (jboolean)sync, (jint)sendingUser);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: scheduleReceiver Line: %d"), __LINE__);
+    env->CallVoidMethod(mJInstance, m, jintent, jinfo, jcompatInfo, (jint)resultCode, jdata, jextras,
+        (jboolean)sync, (jint)sendingUser, processState);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleReceiver Line: %d", __LINE__);
 
     env->DeleteLocalRef(c);
     if(jintent){
@@ -1040,16 +1153,17 @@ ECode CApplicationThreadNative::ScheduleReceiver(
         env->DeleteLocalRef(jextras);
     }
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleReceiver()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleReceiver()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleBindService(
     /* [in] */ IBinder* token,
     /* [in] */ IIntent* intent,
-    /* [in] */ Boolean rebind)
+    /* [in] */ Boolean rebind,
+    /* [in] */ Int32 processState)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleBindService()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleBindService()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1061,7 +1175,7 @@ ECode CApplicationThreadNative::ScheduleBindService(
             jtoken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("CApplicationThreadNative() cannot find token!"));
+            LOGGERE(TAG, "CApplicationThreadNative() cannot find token!");
         }
     }
 
@@ -1073,11 +1187,11 @@ ECode CApplicationThreadNative::ScheduleBindService(
     jclass c = env->FindClass("android/app/IApplicationThread");
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IApplicationThread Line: %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "scheduleBindService", "(Landroid/os/IBinder;Landroid/content/Intent;Z)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: scheduleReceiver Line: %d"), __LINE__);
+    jmethodID m = env->GetMethodID(c, "scheduleBindService", "(Landroid/os/IBinder;Landroid/content/Intent;ZI)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleReceiver Line: %d", __LINE__);
 
-    env->CallVoidMethod(mJInstance, m, jtoken, jintent, (jboolean)rebind);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: scheduleReceiver Line: %d"), __LINE__);
+    env->CallVoidMethod(mJInstance, m, jtoken, jintent, (jboolean)rebind, processState);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleReceiver Line: %d", __LINE__);
 
     env->DeleteLocalRef(c);
 
@@ -1085,7 +1199,7 @@ ECode CApplicationThreadNative::ScheduleBindService(
         env->DeleteLocalRef(jintent);
     }
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleBindService()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleBindService()");
     return NOERROR;
 }
 
@@ -1093,7 +1207,7 @@ ECode CApplicationThreadNative::ScheduleUnbindService(
     /* [in] */ IBinder* token,
     /* [in] */ IIntent* intent)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleUnbindService()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleUnbindService()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1105,7 +1219,7 @@ ECode CApplicationThreadNative::ScheduleUnbindService(
             jtoken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("ScheduleUnbindService() cannot find token!"));
+            LOGGERE(TAG, "ScheduleUnbindService() cannot find token!");
         }
     }
 
@@ -1118,10 +1232,10 @@ ECode CApplicationThreadNative::ScheduleUnbindService(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IApplicationThread Line: %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "scheduleUnbindService", "(Landroid/os/IBinder;Landroid/content/Intent;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: scheduleUnbindService Line: %d"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleUnbindService Line: %d", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jtoken, jintent);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: scheduleUnbindService Line: %d"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleUnbindService Line: %d", __LINE__);
 
     env->DeleteLocalRef(c);
 
@@ -1129,14 +1243,14 @@ ECode CApplicationThreadNative::ScheduleUnbindService(
         env->DeleteLocalRef(jintent);
     }
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleUnbindService()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleUnbindService()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleStopService(
     /* [in] */ IBinder* token)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleStopService()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleStopService()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1149,7 +1263,7 @@ ECode CApplicationThreadNative::ScheduleStopService(
             sServiceTokenMap.Erase(it);
         }
         else {
-            LOGGERE(TAG, String("ScheduleStopService() cannot find token!"));
+            LOGGERE(TAG, "ScheduleStopService() cannot find token!");
         }
     }
 
@@ -1165,14 +1279,14 @@ ECode CApplicationThreadNative::ScheduleStopService(
     env->DeleteLocalRef(c);
     env->DeleteGlobalRef(jToken);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleStopService()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleStopService()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleConfigurationChanged(
     /* [in] */ IConfiguration* config)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleConfigurationChanged()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleConfigurationChanged()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1196,14 +1310,14 @@ ECode CApplicationThreadNative::ScheduleConfigurationChanged(
         env->DeleteLocalRef(jconfig);
     }
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleConfigurationChanged()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleConfigurationChanged()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleActivityConfigurationChanged(
     /* [in] */ IBinder* token)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleActivityConfigurationChanged()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleActivityConfigurationChanged()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1214,7 +1328,7 @@ ECode CApplicationThreadNative::ScheduleActivityConfigurationChanged(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("ScheduleActivityConfigurationChanged() cannot find token!"));
+            LOGGERE(TAG, "ScheduleActivityConfigurationChanged() cannot find token!");
         }
     }
 
@@ -1229,7 +1343,7 @@ ECode CApplicationThreadNative::ScheduleActivityConfigurationChanged(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleActivityConfigurationChanged()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleActivityConfigurationChanged()");
     return NOERROR;
 }
 
@@ -1237,7 +1351,7 @@ ECode CApplicationThreadNative::ScheduleSleeping(
     /* [in] */ IBinder* token,
     /* [in] */ Boolean sleeping)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleSleeping()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleSleeping()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1248,7 +1362,7 @@ ECode CApplicationThreadNative::ScheduleSleeping(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("ScheduleActivityConfigurationChanged() cannot find token!"));
+            LOGGERE(TAG, "ScheduleActivityConfigurationChanged() cannot find token!");
         }
     }
 
@@ -1263,13 +1377,13 @@ ECode CApplicationThreadNative::ScheduleSleeping(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleSleeping()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleSleeping()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleSuicide()
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleSuicide()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleSuicide()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1284,13 +1398,13 @@ ECode CApplicationThreadNative::ScheduleSuicide()
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleSuicide()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleSuicide()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleExit()
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleExit()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleExit()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1305,14 +1419,14 @@ ECode CApplicationThreadNative::ScheduleExit()
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleExit()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleExit()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleCrash(
     /* [in] */ const String& msg)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleCrash()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleCrash()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1330,13 +1444,13 @@ ECode CApplicationThreadNative::ScheduleCrash(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jmsg);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleCrash()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleCrash()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ScheduleLowMemory()
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleLowMemory()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleLowMemory()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1351,7 +1465,7 @@ ECode CApplicationThreadNative::ScheduleLowMemory()
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleLowMemory()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleLowMemory()");
     return NOERROR;
 }
 
@@ -1359,7 +1473,7 @@ ECode CApplicationThreadNative::ScheduleDestroyBackupAgent(
     /* [in] */ IApplicationInfo* app,
     /* [in] */ ICompatibilityInfo* compatInfo)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleDestroyBackupAgent()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleDestroyBackupAgent()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1386,7 +1500,7 @@ ECode CApplicationThreadNative::ScheduleDestroyBackupAgent(
     env->DeleteLocalRef(japp);
     env->DeleteLocalRef(jcompatInfo);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleDestroyBackupAgent()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleDestroyBackupAgent()");
     return NOERROR;
 }
 
@@ -1395,7 +1509,7 @@ ECode CApplicationThreadNative::ScheduleCreateBackupAgent(
     /* [in] */ ICompatibilityInfo* compatInfo,
     /* [in] */ Int32 backupMode)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ScheduleCreateBackupAgent()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleCreateBackupAgent()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1422,13 +1536,13 @@ ECode CApplicationThreadNative::ScheduleCreateBackupAgent(
     env->DeleteLocalRef(japp);
     env->DeleteLocalRef(jcompatInfo);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ScheduleCreateBackupAgent()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleCreateBackupAgent()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::UpdateTimeZone()
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::UpdateTimeZone()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::UpdateTimeZone()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -1443,13 +1557,13 @@ ECode CApplicationThreadNative::UpdateTimeZone()
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::UpdateTimeZone()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::UpdateTimeZone()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ClearDnsCache()
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ClearDnsCache()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ClearDnsCache()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1465,16 +1579,17 @@ ECode CApplicationThreadNative::ClearDnsCache()
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ClearDnsCache()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ClearDnsCache()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::SetHttpProxy(
     /* [in] */ const String& proxy,
     /* [in] */ const String& port,
-    /* [in] */ const String& exclList)
+    /* [in] */ const String& exclList,
+    /* [in] */ IUri* pacFileUrl)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::SetHttpProxy()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::SetHttpProxy()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1482,28 +1597,30 @@ ECode CApplicationThreadNative::SetHttpProxy(
     jstring jproxy = Util::ToJavaString(env, proxy);
     jstring jport = Util::ToJavaString(env, port);
     jstring jexclList = Util::ToJavaString(env, exclList);
+    jobject jpacFileUrl = Util::ToJavaUri(env, pacFileUrl);
 
     jclass c = env->FindClass("android/app/IApplicationThread");
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IApplicationThread %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "setHttpProxy", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+    jmethodID m = env->GetMethodID(c, "setHttpProxy", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroid/net/Uri;)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: setHttpProxy %d", __LINE__);
 
-    env->CallVoidMethod(mJInstance, m, jproxy, jport, jexclList);
+    env->CallVoidMethod(mJInstance, m, jproxy, jport, jexclList, jpacFileUrl);
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: setHttpProxy %d", __LINE__);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jproxy);
     env->DeleteLocalRef(jport);
     env->DeleteLocalRef(jexclList);
+    env->DeleteLocalRef(jpacFileUrl);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::SetHttpProxy()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::SetHttpProxy()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ProcessInBackground()
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::ProcessInBackground()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ProcessInBackground()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1519,49 +1636,45 @@ ECode CApplicationThreadNative::ProcessInBackground()
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::ProcessInBackground()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ProcessInBackground()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ProfilerControl(
     /* [in] */ Boolean start,
-    /* [in] */ const String& path,
-    /* [in] */ IParcelFileDescriptor* fd,
+    /* [in] */ IProfilerInfo* profilerInfo,
     /* [in] */ Int32 profileType)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::ProfilerControl()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ProfilerControl()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jstring jpath = Util::ToJavaString(env, path);
-
-    jobject jfd = NULL;
-    if (fd != NULL) {
-        jfd = Util::ToJavaParcelFileDescriptor(env, fd);
+    jobject jprofilerInfo = NULL;
+    if (profilerInfo != NULL) {
+        jprofilerInfo = Util::ToJavaProfilerInfo(env, profilerInfo);
     }
 
     jclass c = env->FindClass("android/app/IApplicationThread");
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IApplicationThread %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "profilerControl", "(ZLjava/lang/String;Landroid/os/ParcelFileDescriptor;I)V");
+    jmethodID m = env->GetMethodID(c, "profilerControl", "(ZLandroid/app/ProfilerInfo;I)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: profilerControl %d", __LINE__);
 
-    env->CallVoidMethod(mJInstance, m, (jboolean)start, jpath, jfd, (jint)profileType);
+    env->CallVoidMethod(mJInstance, m, (jboolean)start, jprofilerInfo, (jint)profileType);
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: profilerControl %d", __LINE__);
 
     env->DeleteLocalRef(c);
-    env->DeleteLocalRef(jpath);
-    env->DeleteLocalRef(jfd);
+    env->DeleteLocalRef(jprofilerInfo);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::ProfilerControl()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ProfilerControl()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::SetSchedulingGroup(
     /* [in] */ Int32 group)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::SetSchedulingGroup()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::SetSchedulingGroup()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1577,37 +1690,7 @@ ECode CApplicationThreadNative::SetSchedulingGroup(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::SetSchedulingGroup()"));
-    return NOERROR;
-}
-
-ECode CApplicationThreadNative::GetMemoryInfo(
-    /* [in] */ IDebugMemoryInfo* outInfo)
-{
-    LOGGERD(TAG, String("+ CApplicationThreadNative::GetMemoryInfo()"));
-
-    JNIEnv* env;
-    mJVM->AttachCurrentThread(&env, NULL);
-
-    jobject joutInfo = Util::ToJavaDebugMemoryInfo(env, outInfo);
-
-    jclass c = env->FindClass("android/app/IApplicationThread");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IApplicationThread %d", __LINE__);
-
-    jmethodID m = env->GetMethodID(c, "getMemoryInfo", "(Landroid/os/Debug$MemoryInfo;)V");
-    Util::CheckErrorAndLog(env, TAG, "GetMethodID: getMemoryInfo %d", __LINE__);
-
-    env->CallVoidMethod(mJInstance, m, joutInfo);
-    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: getMemoryInfo %d", __LINE__);
-
-    if (!Util::GetElDebugMemoryInfo(env, joutInfo, outInfo)) {
-        LOGGERE(TAG, "GetMemoryInfo() GetElDebugMemoryInfo fail!");
-    }
-
-    env->DeleteLocalRef(c);
-    env->DeleteLocalRef(joutInfo);
-
-    LOGGERD(TAG, String("- CApplicationThreadNative::GetMemoryInfo()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::SetSchedulingGroup()");
     return NOERROR;
 }
 
@@ -1615,7 +1698,7 @@ ECode CApplicationThreadNative::DispatchPackageBroadcast(
     /* [in] */ Int32 cmd,
     /* [in] */ ArrayOf<String>* packages)
 {
-     // LOGGERD(TAG, String("+ CApplicationThreadNative::DispatchPackageBroadcast()"));
+     // LOGGERD(TAG, "+ CApplicationThreadNative::DispatchPackageBroadcast()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1626,10 +1709,10 @@ ECode CApplicationThreadNative::DispatchPackageBroadcast(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IApplicationThread Line: %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "dispatchPackageBroadcast", "(I[Ljava/lang/String;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: dispatchPackageBroadcast Line: %d"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: dispatchPackageBroadcast Line: %d", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)cmd, jpackages);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: dispatchPackageBroadcast Line: %d"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: dispatchPackageBroadcast Line: %d", __LINE__);
 
     env->DeleteLocalRef(c);
 
@@ -1637,7 +1720,7 @@ ECode CApplicationThreadNative::DispatchPackageBroadcast(
         env->DeleteLocalRef(jpackages);
     }
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::DispatchPackageBroadcast()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::DispatchPackageBroadcast()");
 
     return NOERROR;
 }
@@ -1645,7 +1728,7 @@ ECode CApplicationThreadNative::DispatchPackageBroadcast(
 ECode CApplicationThreadNative::SetCoreSettings(
     /* [in] */ IBundle* coreSettings)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::SetCoreSettings()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::SetCoreSettings()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1667,7 +1750,7 @@ ECode CApplicationThreadNative::SetCoreSettings(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jcoreSettings);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::SetCoreSettings()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::SetCoreSettings()");
     return NOERROR;
 }
 
@@ -1675,7 +1758,7 @@ ECode CApplicationThreadNative::UpdatePackageCompatibilityInfo(
     /* [in] */ const String& pkg,
     /* [in] */ ICompatibilityInfo* info)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::UpdatePackageCompatibilityInfo()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::UpdatePackageCompatibilityInfo()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1700,48 +1783,14 @@ ECode CApplicationThreadNative::UpdatePackageCompatibilityInfo(
     env->DeleteLocalRef(jpkg);
     env->DeleteLocalRef(jinfo);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::UpdatePackageCompatibilityInfo()"));
-    return NOERROR;
-}
-
-ECode CApplicationThreadNative::RequestThumbnail(
-    /* [in] */ IBinder* token)
-{
-    LOGGERD(TAG, String("+ CApplicationThreadNative::RequestThumbnail()"));
-
-    JNIEnv* env;
-    mJVM->AttachCurrentThread(&env, NULL);
-
-    jobject jToken = NULL;
-    if (token != NULL) {
-        HashMap<AutoPtr<IBinder>, jobject>::Iterator it = sTokenMap.Find(token);
-        if (it != sTokenMap.End()) {
-            jToken = it->mSecond;
-        }
-        else {
-            LOGGERE(TAG, String("RequestThumbnail() cannot find token!"));
-        }
-    }
-
-    jclass c = env->FindClass("android/app/IApplicationThread");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IApplicationThread %d", __LINE__);
-
-    jmethodID m = env->GetMethodID(c, "requestThumbnail", "(Landroid/os/IBinder;)V");
-    Util::CheckErrorAndLog(env, TAG, "GetMethodID: requestThumbnail %d", __LINE__);
-
-    env->CallVoidMethod(mJInstance, m, jToken);
-    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: requestThumbnail %d", __LINE__);
-
-    env->DeleteLocalRef(c);
-
-    LOGGERD(TAG, String("- CApplicationThreadNative::RequestThumbnail()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::UpdatePackageCompatibilityInfo()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::UnstableProviderDied(
     /* [in] */ IBinder* provider)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::UnstableProviderDied()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::UnstableProviderDied()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1753,7 +1802,7 @@ ECode CApplicationThreadNative::UnstableProviderDied(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("UnstableProviderDied() cannot find token!"));
+            LOGGERE(TAG, "UnstableProviderDied() cannot find token!");
         }
     }
 
@@ -1768,7 +1817,7 @@ ECode CApplicationThreadNative::UnstableProviderDied(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::UnstableProviderDied()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::UnstableProviderDied()");
     return NOERROR;
 }
 
@@ -1777,7 +1826,7 @@ ECode CApplicationThreadNative::DumpService(
     /* [in] */ IBinder* servicetoken,
     /* [in] */ ArrayOf<String>* args)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::DumpService()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::DumpService()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1794,7 +1843,7 @@ ECode CApplicationThreadNative::DumpService(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("DumpService() cannot find token!"));
+            LOGGERE(TAG, "DumpService() cannot find token!");
         }
     }
 
@@ -1816,7 +1865,7 @@ ECode CApplicationThreadNative::DumpService(
     env->DeleteLocalRef(jfd);
     env->DeleteLocalRef(jargs);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::DumpService()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::DumpService()");
     return NOERROR;
 }
 
@@ -1825,7 +1874,7 @@ ECode CApplicationThreadNative::DumpProvider(
     /* [in] */ IBinder* servicetoken,
     /* [in] */ ArrayOf<String>* args)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::DumpProvider()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::DumpProvider()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1842,7 +1891,7 @@ ECode CApplicationThreadNative::DumpProvider(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("DumpService() cannot find token!"));
+            LOGGERE(TAG, "DumpService() cannot find token!");
         }
     }
 
@@ -1864,7 +1913,7 @@ ECode CApplicationThreadNative::DumpProvider(
     env->DeleteLocalRef(jfd);
     env->DeleteLocalRef(jargs);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::DumpProvider()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::DumpProvider()");
     return NOERROR;
 }
 
@@ -1873,7 +1922,7 @@ ECode CApplicationThreadNative::DumpHeap(
     /* [in] */ const String& path,
     /* [in] */ IParcelFileDescriptor* fd)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::DumpHeap()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::DumpHeap()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1898,7 +1947,7 @@ ECode CApplicationThreadNative::DumpHeap(
     env->DeleteLocalRef(jpath);
     env->DeleteLocalRef(jfd);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::DumpHeap()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::DumpHeap()");
     return NOERROR;
 }
 
@@ -1908,7 +1957,7 @@ ECode CApplicationThreadNative::DumpActivity(
     /* [in] */ const String& prefix,
     /* [in] */ ArrayOf<String>* args)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::DumpActivity()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::DumpActivity()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1925,7 +1974,7 @@ ECode CApplicationThreadNative::DumpActivity(
             jToken = it->mSecond;
         }
         else {
-            LOGGERE(TAG, String("DumpService() cannot find token!"));
+            LOGGERE(TAG, "DumpService() cannot find token!");
         }
     }
 
@@ -1950,18 +1999,19 @@ ECode CApplicationThreadNative::DumpActivity(
     env->DeleteLocalRef(jargs);
     env->DeleteLocalRef(jfd);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::DumpActivity()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::DumpActivity()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::DumpMemInfo(
     /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IDebugMemoryInfo* mem,
     /* [in] */ Boolean checkin,
-    /* [in] */ Boolean all,
-    /* [in] */ ArrayOf<String>* args,
-    /* [out] */ IDebugMemoryInfo** info)
+    /* [in] */ Boolean dumpFullInfo,
+    /* [in] */ Boolean dumpDalvik,
+    /* [in] */ ArrayOf<String>* args)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::DumpMemInfo()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::DumpMemInfo()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1969,6 +2019,11 @@ ECode CApplicationThreadNative::DumpMemInfo(
     jobject jfd = NULL;
     if (fd != NULL) {
         jfd = Util::ToJavaFileDescriptor(env, fd);
+    }
+
+    jobject jmem = NULL;
+    if (mem != NULL) {
+        jmem = Util::ToJavaDebugMemoryInfo(env, mem);
     }
 
     jobjectArray jargs;
@@ -1979,22 +2034,18 @@ ECode CApplicationThreadNative::DumpMemInfo(
     jclass c = env->FindClass("android/app/IApplicationThread");
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IApplicationThread %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "dumpMemInfo", "(Ljava/io/FileDescriptor;ZZ[Ljava/lang/String;)Landroid/os/Debug$MemoryInfo;");
+    jmethodID m = env->GetMethodID(c, "dumpMemInfo", "(Ljava/io/FileDescriptor;Landroid/os/Debug$MemoryInfo;ZZZ[Ljava/lang/String;)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: dumpMemInfo %d", __LINE__);
 
-    jobject jinfo = env->CallObjectMethod(mJInstance, m, jfd, (jboolean)checkin, (jboolean)all, jargs);
+    env->CallVoidMethod(mJInstance, m, jfd, jmem, (jboolean)checkin, (jboolean)dumpFullInfo, dumpDalvik, jargs);
     Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: dumpMemInfo %d", __LINE__);
-
-    if (!Util::GetElDebugMemoryInfo(env, jinfo, info)) {
-        LOGGERE(TAG, "DumpMemInfo() GetElDebugMemoryInfo fail!");
-    }
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jfd);
-    env->DeleteLocalRef(jinfo);
+    env->DeleteLocalRef(jmem);
     env->DeleteLocalRef(jargs);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::DumpMemInfo()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::DumpMemInfo()");
     return NOERROR;
 }
 
@@ -2002,7 +2053,7 @@ ECode CApplicationThreadNative::DumpGfxInfo(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ ArrayOf<String>* args)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::DumpGfxInfo()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::DumpGfxInfo()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -2030,7 +2081,7 @@ ECode CApplicationThreadNative::DumpGfxInfo(
     env->DeleteLocalRef(jfd);
     env->DeleteLocalRef(jargs);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::DumpGfxInfo()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::DumpGfxInfo()");
     return NOERROR;
 }
 
@@ -2038,7 +2089,7 @@ ECode CApplicationThreadNative::DumpDbInfo(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ ArrayOf<String>* args)
 {
-    LOGGERD(TAG, String("+ CApplicationThreadNative::DumpDbInfo()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::DumpDbInfo()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -2066,14 +2117,14 @@ ECode CApplicationThreadNative::DumpDbInfo(
     env->DeleteLocalRef(jfd);
     env->DeleteLocalRef(jargs);
 
-    LOGGERD(TAG, String("- CApplicationThreadNative::DumpDbInfo()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::DumpDbInfo()");
     return NOERROR;
 }
 
 ECode CApplicationThreadNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CApplicationThreadNative::ToString()"));
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ToString()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -2081,17 +2132,342 @@ ECode CApplicationThreadNative::ToString(
     Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
 
     jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
 
     *str = Util::GetElString(env, jstr);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CApplicationThreadNative::ToString()"));
+    // LOGGERD(TAG, "- CApplicationThreadNative::ToString()");
+    return NOERROR;
+}
+
+ECode CApplicationThreadNative::RequestAssistContextExtras(
+    /* [in] */ IBinder* activityToken,
+    /* [in] */ IBinder* requestToken,
+    /* [in] */ Int32 requestType)
+{
+    // LOGGERD(TAG, "+ CApplicationThreadNative::RequestAssistContextExtras()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject jactivityToken = NULL;
+    if (activityToken != NULL) {
+        HashMap<AutoPtr<IBinder>, jobject>::Iterator it = sTokenMap.Find(activityToken);
+        if (it != sTokenMap.End()) {
+            jactivityToken = it->mSecond;
+        }
+        else {
+            LOGGERE(TAG, "RequestAssistContextExtras() cannot find activityToken!");
+        }
+    }
+
+    jobject jrequestToken = NULL;
+    if (requestToken != NULL) {
+        jclass c = env->FindClass("android/os/ElBinderProxy");
+        Util::CheckErrorAndLog(env, TAG, "FindClass: ElBinderProxy", __LINE__);
+
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
+        Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElBinderProxy", __LINE__);
+
+        jrequestToken = env->NewObject(c, m, (jlong)requestToken);
+        Util::CheckErrorAndLog(env, TAG, "NewObject: ElBinderProxy", __LINE__);
+        requestToken->AddRef();
+
+        env->DeleteLocalRef(c);
+    }
+
+    jclass c = env->FindClass("android/app/IApplicationThread");
+    Util::CheckErrorAndLog(env, "RequestAssistContextExtras", "Fail FindClass: IApplicationThread", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "requestAssistContextExtras", "(Landroid/os/IBinder;Landroid/os/IBinder;I)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: requestAssistContextExtras", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, jactivityToken, jrequestToken, (jint)requestType);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: requestAssistContextExtras", __LINE__);
+
+    env->DeleteLocalRef(jactivityToken);
+    env->DeleteLocalRef(jrequestToken);
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CApplicationThreadNative::RequestAssistContextExtras()");
+    return NOERROR;
+}
+
+ECode CApplicationThreadNative::ScheduleTranslucentConversionComplete(
+    /* [in] */ IBinder* token,
+    /* [in] */ Boolean drawComplete)
+{
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleTranslucentConversionComplete()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject jToken = NULL;
+    if (token != NULL) {
+        HashMap<AutoPtr<IBinder>, jobject>::Iterator it = sTokenMap.Find(token);
+        if (it != sTokenMap.End()) {
+            jToken = it->mSecond;
+        }
+        else {
+            LOGGERE(TAG, "ScheduleTranslucentConversionComplete() cannot find token!");
+        }
+    }
+
+    jclass c = env->FindClass("android/app/IApplicationThread");
+    Util::CheckErrorAndLog(env, "ScheduleTranslucentConversionComplete", "Fail FindClass: IApplicationThread", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "scheduleTranslucentConversionComplete", "(Landroid/os/IBinder;Z)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleTranslucentConversionComplete", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, jToken, (jboolean)drawComplete);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleTranslucentConversionComplete", __LINE__);
+
+    env->DeleteLocalRef(jToken);
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleTranslucentConversionComplete()");
+    return NOERROR;
+}
+
+ECode CApplicationThreadNative::ScheduleOnNewActivityOptions(
+    /* [in] */ IBinder* token,
+    /* [in] */ IActivityOptions* options)
+{
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleOnNewActivityOptions()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject jToken = NULL;
+    if (token != NULL) {
+        HashMap<AutoPtr<IBinder>, jobject>::Iterator it = sTokenMap.Find(token);
+        if (it != sTokenMap.End()) {
+            jToken = it->mSecond;
+        }
+        else {
+            LOGGERE(TAG, "ScheduleActivityConfigurationChanged() cannot find token!");
+        }
+    }
+
+    jobject joptions = NULL;
+    if (options != NULL) {
+        AutoPtr<IBundle> bundle;
+        options->ToBundle((IBundle**)&bundle);
+        if (bundle != NULL) {
+            jobject jbundle = Util::ToJavaBundle(env, bundle);
+            jclass c = env->FindClass("android/app/ActivityOptions");
+            Util::CheckErrorAndLog(env, TAG, "ScheduleOnNewActivityOptions Fail FindClass: ActivityOptions %d", __LINE__);
+
+            jmethodID m = env->GetMethodID(c, "<init>", "(Landroid/os/Bundle;)V");
+            Util::CheckErrorAndLog(env, TAG, "ScheduleOnNewActivityOptions Fail GetMethodID: ActivityOptions %d", __LINE__);
+
+            joptions = env->NewObject(c, m, jbundle);
+            Util::CheckErrorAndLog(env, TAG, "ScheduleOnNewActivityOptions Fail NewObject: ActivityOptions %d", __LINE__);
+            env->DeleteLocalRef(c);
+            env->DeleteLocalRef(jbundle);
+        }
+    }
+
+    jclass c = env->FindClass("android/app/IApplicationThread");
+    Util::CheckErrorAndLog(env, TAG, "ScheduleOnNewActivityOptions", "Fail FindClass: IApplicationThread", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "scheduleOnNewActivityOptions", "(Landroid/os/IBinder;Landroid/app/ActivityOptions;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleOnNewActivityOptions", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, jToken, joptions);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleOnNewActivityOptions", __LINE__);
+
+    env->DeleteLocalRef(jToken);
+    env->DeleteLocalRef(joptions);
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleOnNewActivityOptions()");
+    return NOERROR;
+}
+
+ECode CApplicationThreadNative::SetProcessState(
+    /* [in] */ Int32 state)
+{
+    // LOGGERD(TAG, "+ CApplicationThreadNative::SetProcessState()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("android/app/IApplicationThread");
+    Util::CheckErrorAndLog(env, "SetProcessState", "Fail FindClass: IApplicationThread", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "setProcessState", "(I)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: setProcessState", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, (jint)state);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: setProcessState", __LINE__);
+
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CApplicationThreadNative::SetProcessState()");
+    return NOERROR;
+}
+
+ECode CApplicationThreadNative::ScheduleInstallProvider(
+    /* [in] */ IProviderInfo* provider)
+{
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleInstallProvider()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject jProvider;
+    if (provider != NULL) {
+        jProvider = Util::ToJavaProviderInfo(env, provider);
+    }
+    jclass c = env->FindClass("android/app/IApplicationThread");
+    Util::CheckErrorAndLog(env, "ScheduleInstallProvider", "Fail FindClass: IApplicationThread", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "scheduleInstallProvider", "(Landroid/content/pm/ProviderInfo;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleInstallProvider", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, jProvider);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleInstallProvider", __LINE__);
+
+    env->DeleteLocalRef(jProvider);
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleInstallProvider()");
+    return NOERROR;
+}
+
+ECode CApplicationThreadNative::UpdateTimePrefs(
+    /* [in] */ Boolean is24Hour)
+{
+    // LOGGERD(TAG, "+ CApplicationThreadNative::UpdateTimePrefs()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("android/app/IApplicationThread");
+    Util::CheckErrorAndLog(env, "UpdateTimePrefs", "Fail FindClass: IApplicationThread", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "updateTimePrefs", "(I)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: updateTimePrefs", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, (jboolean)is24Hour);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: updateTimePrefs", __LINE__);
+
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CApplicationThreadNative::UpdateTimePrefs()");
+    return NOERROR;
+}
+
+ECode CApplicationThreadNative::ScheduleCancelVisibleBehind(
+    /* [in] */ IBinder* token)
+{
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleCancelVisibleBehind()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject jToken = NULL;
+    if (token != NULL) {
+        HashMap<AutoPtr<IBinder>, jobject>::Iterator it = sTokenMap.Find(token);
+        if (it != sTokenMap.End()) {
+            jToken = it->mSecond;
+        }
+        else {
+            LOGGERE(TAG, "ScheduleActivityConfigurationChanged() cannot find token!");
+        }
+    }
+
+    jclass c = env->FindClass("android/app/IApplicationThread");
+    Util::CheckErrorAndLog(env, "ScheduleCancelVisibleBehind", "Fail FindClass: IApplicationThread", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "scheduleCancelVisibleBehind", "(Landroid/os/IBinder;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleCancelVisibleBehind", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, jToken);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleCancelVisibleBehind", __LINE__);
+
+    env->DeleteLocalRef(jToken);
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleCancelVisibleBehind()");
+    return NOERROR;
+}
+
+ECode CApplicationThreadNative::ScheduleBackgroundVisibleBehindChanged(
+    /* [in] */ IBinder* token,
+    /* [in] */ Boolean visible)
+{
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleBackgroundVisibleBehindChanged()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject jToken = NULL;
+    if (token != NULL) {
+        HashMap<AutoPtr<IBinder>, jobject>::Iterator it = sTokenMap.Find(token);
+        if (it != sTokenMap.End()) {
+            jToken = it->mSecond;
+        }
+        else {
+            LOGGERE(TAG, "ScheduleActivityConfigurationChanged() cannot find token!");
+        }
+    }
+
+    jclass c = env->FindClass("android/app/IApplicationThread");
+    Util::CheckErrorAndLog(env, "ScheduleBackgroundVisibleBehindChanged", "Fail FindClass: IApplicationThread", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "scheduleBackgroundVisibleBehindChanged", "(Landroid/os/IBinder;Z)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleBackgroundVisibleBehindChanged", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, token, (jboolean)visible);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleBackgroundVisibleBehindChanged", __LINE__);
+
+    env->DeleteLocalRef(jToken);
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleBackgroundVisibleBehindChanged()");
+    return NOERROR;
+}
+
+ECode CApplicationThreadNative::ScheduleEnterAnimationComplete(
+    /* [in] */ IBinder* token)
+{
+    // LOGGERD(TAG, "+ CApplicationThreadNative::ScheduleEnterAnimationComplete()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject jToken = NULL;
+    if (token != NULL) {
+        HashMap<AutoPtr<IBinder>, jobject>::Iterator it = sTokenMap.Find(token);
+        if (it != sTokenMap.End()) {
+            jToken = it->mSecond;
+        }
+        else {
+            LOGGERE(TAG, "ScheduleActivityConfigurationChanged() cannot find token!");
+        }
+    }
+
+    jclass c = env->FindClass("android/app/IApplicationThread");
+    Util::CheckErrorAndLog(env, "ScheduleEnterAnimationComplete", "Fail FindClass: IApplicationThread", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "scheduleEnterAnimationComplete", "(Landroid/os/IBinder;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleEnterAnimationComplete", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, jToken);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: scheduleEnterAnimationComplete", __LINE__);
+
+    env->DeleteLocalRef(jToken);
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CApplicationThreadNative::ScheduleEnterAnimationComplete()");
     return NOERROR;
 }
 

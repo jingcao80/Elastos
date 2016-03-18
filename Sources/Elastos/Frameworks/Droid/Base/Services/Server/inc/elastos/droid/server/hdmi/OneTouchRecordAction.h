@@ -17,8 +17,30 @@ namespace Hdmi {
  */
 class OneTouchRecordAction
     : public HdmiCecFeatureAction
+    , public IOneTouchRecordAction
 {
+private:
+    class InnerSub_SendMessageCallback
+        : public Object
+        , public IHdmiControlServiceSendMessageCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_SendMessageCallback(
+            /* [in] */ OneTouchRecordAction* host);
+
+        //@Override
+        CARAPI OnSendCompleted(
+            /* [in] */ Int32 error);
+
+    private:
+        OneTouchRecordAction* mHost;
+    };
+
 public:
+    CAR_INTERFACE_DECL()
+
     OneTouchRecordAction();
 
     CARAPI constructor(
@@ -45,9 +67,8 @@ public:
 private:
     CARAPI SendRecordOn();
 
-    CARAPI HandleRecordStatus(
-        /* [in] */ IHdmiCecMessage* cmd,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) HandleRecordStatus(
+        /* [in] */ IHdmiCecMessage* cmd);
 
 private:
     static const String TAG;

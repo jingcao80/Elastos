@@ -1,0 +1,65 @@
+module
+{
+    using interface Elastos.Droid.Content.Res.IResources;
+    using interface Elastos.Droid.Text.ISpannableStringBuilder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Widget {
+
+    /**
+     * Axis along a {@link ChartView} that knows how to convert between raw point
+     * and screen coordinate systems.
+     */
+    interface IChartAxis {
+
+        /** Set range of raw values this axis should cover. */
+        SetBounds(
+            [in] Int64 min,
+            [in] Int64 max,
+            [out] Boolean* result);
+
+        /** Set range of screen points this axis should cover. */
+        SetSize(
+            [in] Float size,
+            [out] Boolean* result);
+
+        /** Convert raw value into screen point. */
+        ConvertToPoint(
+            [in] Int64 value,
+            [out] Float* result);
+
+        /** Convert screen point into raw value. */
+        ConvertToValue(
+            [in] Float point,
+            [out] Int64* result);
+
+        /**
+         * Build label that describes given raw value. If the label is rounded for
+         * display, return the rounded value.
+         */
+        BuildLabel(
+            [in] IResources* res,
+            [in] ISpannableStringBuilder* builder,
+            [in] Int64 value,
+            [out] Int64* result);
+
+        /** Return list of tick points for drawing a grid. */
+        GetTickPoints(
+            [out, callee] ArrayOf<Float>* array);
+
+        /**
+         * Test if given raw value should cause the axis to grow or shrink;
+         * returning positive value to grow and negative to shrink.
+         */
+        ShouldAdjustAxis(
+            [in] Int64 value,
+            [out] Int32* result);
+    }
+
+    } // namespace Widget
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -21,6 +21,25 @@ class RequestArcTerminationAction
     : public RequestArcAction
     , public IRequestArcTerminationAction
 {
+private:
+    class InnerSub_SendMessageCallback
+        : public Object
+        , public IHdmiControlServiceSendMessageCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_SendMessageCallback(
+            /* [in] */ RequestArcTerminationAction* host);
+
+        //@Override
+        CARAPI OnSendCompleted(
+            /* [in] */ Int32 error);
+
+    private:
+        RequestArcTerminationAction* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

@@ -77,10 +77,10 @@
 
     </com.android.settings.widget.SetupWizardIllustration>
 
-    <fragment
+<!--     <fragment
         android:id="@+id/navigation_bar"
         android:name="com.android.setupwizard.navigationbar.SetupWizardNavBar"
-        style="@style/setup_wizard_navbar_style" />
+        style="@style/setup_wizard_navbar_style" /> -->
 
 </LinearLayout>
 

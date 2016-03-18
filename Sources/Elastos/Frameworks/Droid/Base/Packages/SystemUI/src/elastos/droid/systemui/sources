@@ -48,7 +48,7 @@ ELASTOS_LIBS += qs/qs.lib
 ELASTOS_LIBS += recents/recents.lib
 ELASTOS_LIBS += screenshot/screenshot.lib
 ELASTOS_LIBS += settings/settings.lib
-//ELASTOS_LIBS += usb/usb.lib
+ELASTOS_LIBS += usb/usb.lib
 //ELASTOS_LIBS += volume/volume.lib
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib

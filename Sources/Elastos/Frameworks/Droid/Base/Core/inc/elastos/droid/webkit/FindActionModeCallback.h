@@ -4,6 +4,7 @@
 
 #include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Webkit.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 
@@ -35,6 +36,7 @@ class ECO_PUBLIC FindActionModeCallback
     , public IActionModeCallback
     , public ITextWatcher
     , public IViewOnClickListener
+    , public IWebViewFindListener
 {
 public:
     class NoAction

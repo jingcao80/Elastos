@@ -7,6 +7,11 @@ module
     namespace Elastos {
     namespace Utility {
 
+    /**
+     * @Involved
+     * interface ISerializable;
+     * interface ICloneable;
+     */
     interface IBitSet {
         /**
          * Returns the bit at index {@code index}. Indexes greater than the current length return false.

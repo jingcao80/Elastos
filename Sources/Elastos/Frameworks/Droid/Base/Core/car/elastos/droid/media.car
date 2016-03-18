@@ -1352,6 +1352,10 @@ module
         interface IMediaScanner;
     }
 
+    singleton class CMediaScannerHelper {
+        interface IMediaScannerHelper;
+    }
+
     singleton class CMediaRouterHelper {
         interface IMediaRouterHelper;
     }

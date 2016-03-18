@@ -32,7 +32,7 @@ module
     merge("telecomm/telecom/Response.car");
     merge("telecomm/telecom/TelecomManager.car");
     merge("telecomm/telecom/VideoCallImpl.car");
-    // merge("telecomm/telecom/VideoCallbackServant.car");
+    merge("telecomm/telecom/VideoCallbackServant.car");
     merge("telecomm/internal/IConnectionServiceAdapter.car");
     merge("telecomm/internal/IConnectionService.car");
     merge("telecomm/internal/IInCallAdapter.car");
@@ -45,6 +45,7 @@ module
     interface Elastos.Droid.Os.IHandler;
     interface Elastos.Droid.Telecomm.Internal.IRemoteServiceCallback;
     interface Elastos.Droid.Telecomm.Internal.IIVideoProvider;
+    interface Elastos.Droid.Telecomm.Internal.IIInCallService;
 
     namespace Elastos {
     namespace Droid {
@@ -72,6 +73,13 @@ module
             [in] IHandler* handler);
 
         interface IIVideoProvider;
+    }
+
+    class CInCallServiceBinder {
+        constructor(
+            [in] IHandler* handler);
+
+        interface IIInCallService;
     }
 
     } // namespace Telecom

@@ -3,51 +3,60 @@
 #define __ELASTOS_DROID_JAVAPROXY_CAPPLICATIONTHREADNATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CApplicationThreadNative.h"
-#include <jni.h>
-#include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
+#define HASH_FOR_OS
+#include "elastos/droid/ext/frameworkhash.h"
+#include <jni.h>
 
+using Elastos::Droid::App::IActivityOptions;
+using Elastos::Droid::App::IApplicationThread;
 using Elastos::Droid::App::IInstrumentationWatcher;
+using Elastos::Droid::App::IIUiAutomationConnection;
+using Elastos::Droid::App::IProfilerInfo;
 using Elastos::Droid::App::IResultInfo;
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentReceiver;
+using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IServiceInfo;
+using Elastos::Droid::Content::Pm::IProviderInfo;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Content::Res::ICompatibilityInfo;
+using Elastos::Droid::Internal::App::IIVoiceInteractor;
+using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IDebugMemoryInfo;
 using Elastos::Droid::Os::IParcelFileDescriptor;
+using Elastos::Droid::Os::IPersistableBundle;
+
 using Elastos::IO::IFileDescriptor;
-using Elastos::Utility::IObjectStringMap;
-
-
-_ETL_NAMESPACE_BEGIN
-
-template<> struct Hash<IBinder*>
-{
-    size_t operator()(IBinder* x) const { return (size_t)x; }
-};
-_ETL_NAMESPACE_END
-
+using Elastos::IO::IPrintWriter;
+using Elastos::Utility::IList;
+using Elastos::Utility::IMap;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 CarClass(CApplicationThreadNative)
+    , public Object
+    , public IApplicationThread
+    , public IBinder
 {
 public:
-
     ~CApplicationThreadNative();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI ToString(
         /* [out] */ String* str);
@@ -56,7 +65,8 @@ public:
         /* [in] */ IBinder* token,
         /* [in] */ Boolean finished,
         /* [in] */ Boolean userLeaving,
-        /* [in] */ Int32 configChanges);
+        /* [in] */ Int32 configChanges,
+        /* [in] */ Boolean dontReport);
 
     CARAPI ScheduleStopActivity(
         /* [in] */ IBinder* token,
@@ -73,11 +83,13 @@ public:
 
     CARAPI ScheduleResumeActivity(
         /* [in] */ IBinder* token,
-        /* [in] */ Boolean isForward);
+        /* [in] */ Int32 processState,
+        /* [in] */ Boolean isForward,
+        /* [in] */ IBundle* resumeArgs);
 
     CARAPI ScheduleSendResult(
         /* [in] */ IBinder* token,
-        /* [in] */ IObjectContainer* results);
+        /* [in] */ IList* results);
 
     CARAPI ScheduleLaunchActivity(
         /* [in] */ IIntent* intent,
@@ -86,25 +98,26 @@ public:
         /* [in] */ IActivityInfo* info,
         /* [in] */ IConfiguration* curConfig,
         /* [in] */ ICompatibilityInfo* compatInfo,
+        /* [in] */ IIVoiceInteractor* voiceInteractor,
+        /* [in] */ Int32 procState,
         /* [in] */ IBundle* state,
-        /* [in] */ IObjectContainer* pendingResults,
-        /* [in] */ IObjectContainer* pendingNewIntents,
+        /* [in] */ IPersistableBundle* persistentState,
+        /* [in] */ IList* pendingResults,   //List<ResultInfo>
+        /* [in] */ IList* pendingNewIntents, //List<Intent>
         /* [in] */ Boolean notResumed,
         /* [in] */ Boolean isForward,
-        /* [in] */ const String& profileName,
-        /* [in] */ IParcelFileDescriptor* profileFd,
-        /* [in] */ Boolean autoStopProfiler);
+        /* [in] */ IProfilerInfo* pi);
 
     CARAPI ScheduleRelaunchActivity(
         /* [in] */ IBinder* token,
-        /* [in] */ ArrayOf<IResultInfo*>* pendingResults,
-        /* [in] */ ArrayOf<IIntent*>* pendingNewIntents,
+        /* [in] */ IList* pendingResults,
+        /* [in] */ IList* pendingNewIntents,
         /* [in] */ Int32 configChanges,
         /* [in] */ Boolean notResumed,
         /* [in] */ IConfiguration* config);
 
     CARAPI ScheduleNewIntent(
-        /* [in] */ IObjectContainer* intents,
+        /* [in] */ IList* intents,
         /* [in] */ IBinder* token);
 
     CARAPI ScheduleDestroyActivity(
@@ -120,7 +133,8 @@ public:
         /* [in] */ const String& data,
         /* [in] */ IBundle* extras,
         /* [in] */ Boolean sync,
-        /* [in] */ Int32 sendingUser);
+        /* [in] */ Int32 sendingUser,
+        /* [in] */ Int32 processState);
 
     CARAPI ScheduleCreateBackupAgent(
         /* [in] */ IApplicationInfo* app,
@@ -134,12 +148,14 @@ public:
     CARAPI ScheduleCreateService(
         /* [in] */ IBinder* token,
         /* [in] */ IServiceInfo* info,
-        /* [in] */ ICompatibilityInfo* compatInfo);
+        /* [in] */ ICompatibilityInfo* compatInfo,
+        /* [in] */ Int32 processState);
 
     CARAPI ScheduleBindService(
         /* [in] */ IBinder* token,
         /* [in] */ IIntent* intent,
-        /* [in] */ Boolean rebind);
+        /* [in] */ Boolean rebind,
+        /* [in] */ Int32 processState);
 
     CARAPI ScheduleUnbindService(
         /* [in] */ IBinder* token,
@@ -156,30 +172,26 @@ public:
         /* [in] */ IBinder* token);
 
     CARAPI BindApplication(
-        /* [in] */ const String& packageName,
+        /* [in] */ const String& processName,
         /* [in] */ IApplicationInfo* appInfo,
-        /* [in] */ IObjectContainer* providers,
+        /* [in] */ IList* providers,
         /* [in] */ IComponentName* instrumentationName,
-        /* [in] */ const String& profileName,
-        /* [in] */ IParcelFileDescriptor* profileFd,
-        /* [in] */ Boolean autoStopProfiler,
+        /* [in] */ IProfilerInfo* pi,
         /* [in] */ IBundle* instrumentationArgs,
         /* [in] */ IInstrumentationWatcher* instrumentationWatcher,
+        /* [in] */ IIUiAutomationConnection* instrumentationUiConnection,
         /* [in] */ Int32 debugMode,
-        /* [in] */ Boolean openGlTrace,
-        /* [in] */ Boolean restrictedBackupMode,
+        /* [in] */ Boolean enableOpenGlTrace,
+        /* [in] */ Boolean isRestrictedBackupMode,
         /* [in] */ Boolean persistent,
         /* [in] */ IConfiguration* config,
         /* [in] */ ICompatibilityInfo* compatInfo,
-        /* [in] */ IObjectStringMap* services,
+        /* [in] */ IMap* services,
         /* [in] */ IBundle* coreSettings);
 
     CARAPI ScheduleExit();
 
     CARAPI ScheduleSuicide();
-
-    CARAPI RequestThumbnail(
-        /* [in] */ IBinder* token);
 
     CARAPI ScheduleConfigurationChanged(
         /* [in] */ IConfiguration* config);
@@ -191,7 +203,8 @@ public:
     CARAPI SetHttpProxy(
         /* [in] */ const String& proxy,
         /* [in] */ const String& port,
-        /* [in] */ const String& exclList);
+        /* [in] */ const String& exclList,
+        /* [in] */ IUri* pacFileUrl);
 
     CARAPI ProcessInBackground();
 
@@ -213,7 +226,8 @@ public:
         /* [in] */ IBundle* extras,
         /* [in] */ Boolean ordered,
         /* [in] */ Boolean sticky,
-        /* [in] */ Int32 sendingUser);
+        /* [in] */ Int32 sendingUser,
+        /* [in] */ Int32 processState);
 
     CARAPI ScheduleLowMemory();
 
@@ -222,8 +236,7 @@ public:
 
     CARAPI ProfilerControl(
         /* [in] */ Boolean start,
-        /* [in] */ const String& path,
-        /* [in] */ IParcelFileDescriptor* fd,
+        /* [in] */ IProfilerInfo* profilerInfo,
         /* [in] */ Int32 profileType);
 
     CARAPI DumpHeap(
@@ -233,9 +246,6 @@ public:
 
     CARAPI SetSchedulingGroup(
         /* [in] */ Int32 group);
-
-    CARAPI GetMemoryInfo(
-        /* [in] */ IDebugMemoryInfo* outInfo);
 
     CARAPI DispatchPackageBroadcast(
         /* [in] */ Int32 cmd,
@@ -262,10 +272,11 @@ public:
 
     CARAPI DumpMemInfo(
         /* [in] */ IFileDescriptor* fd,
+        /* [in] */ IDebugMemoryInfo* mem,
         /* [in] */ Boolean checkin,
-        /* [in] */ Boolean all,
-        /* [in] */ ArrayOf<String>* args,
-        /* [out] */ IDebugMemoryInfo** info);
+        /* [in] */ Boolean dumpFullInfo,
+        /* [in] */ Boolean dumpDalvik,
+        /* [in] */ ArrayOf<String>* args);
 
     CARAPI DumpGfxInfo(
         /* [in] */ IFileDescriptor* fd,
@@ -277,6 +288,38 @@ public:
 
     CARAPI UnstableProviderDied(
         /* [in] */ IBinder* provider);
+
+    CARAPI RequestAssistContextExtras(
+        /* [in] */ IBinder* activityToken,
+        /* [in] */ IBinder* requestToken,
+        /* [in] */ Int32 requestType);
+
+    CARAPI ScheduleTranslucentConversionComplete(
+        /* [in] */ IBinder* token,
+        /* [in] */ Boolean drawComplete);
+
+    CARAPI ScheduleOnNewActivityOptions(
+        /* [in] */ IBinder* token,
+        /* [in] */ IActivityOptions* options);
+
+    CARAPI SetProcessState(
+        /* [in] */ Int32 state);
+
+    CARAPI ScheduleInstallProvider(
+        /* [in] */ IProviderInfo* provider);
+
+    CARAPI UpdateTimePrefs(
+        /* [in] */ Boolean is24Hour);
+
+    CARAPI ScheduleCancelVisibleBehind(
+        /* [in] */ IBinder* token);
+
+    CARAPI ScheduleBackgroundVisibleBehindChanged(
+        /* [in] */ IBinder* token,
+        /* [in] */ Boolean visible);
+
+    CARAPI ScheduleEnterAnimationComplete(
+        /* [in] */ IBinder* token);
 
 private:
     static const String TAG;

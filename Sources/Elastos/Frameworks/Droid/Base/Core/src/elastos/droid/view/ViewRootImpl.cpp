@@ -483,13 +483,14 @@ ECode ViewRootImpl::TraversalRunnable::Run()
 //=======================================================================================
 // ViewRootImpl::WindowInputEventReceiver
 //=======================================================================================
-ViewRootImpl::WindowInputEventReceiver::WindowInputEventReceiver(
+ECode ViewRootImpl::WindowInputEventReceiver::constructor(
     /* [in] */ IInputChannel* inputChannel,
     /* [in] */ ILooper* looper,
     /* [in] */ IWeakReference* viewRootImpl)
-    : InputEventReceiver(inputChannel, looper)
-    , mHost(viewRootImpl)
-{}
+{
+    mHost = viewRootImpl;
+    return InputEventReceiver::constructor(inputChannel, looper);
+}
 
 ECode ViewRootImpl::WindowInputEventReceiver::OnInputEvent(
     /* [in] */ IInputEvent* event)
@@ -1654,7 +1655,8 @@ ECode ViewRootImpl::SetView(
             }
             AutoPtr<IWeakReference> weakThis;
             GetWeakReference((IWeakReference**)&weakThis);
-            mInputEventReceiver = new WindowInputEventReceiver(mInputChannel, mHandler->mLooper, weakThis);
+            mInputEventReceiver = new WindowInputEventReceiver();
+            mInputEventReceiver->constructor(mInputChannel, mHandler->mLooper, weakThis);
             assert(mInputEventReceiver != NULL);
         }
 

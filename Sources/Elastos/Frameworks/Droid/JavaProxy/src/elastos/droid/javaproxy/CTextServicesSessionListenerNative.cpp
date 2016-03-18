@@ -3,6 +3,8 @@
 #include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::TextService::EIID_IITextServicesSessionListener;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,15 +13,20 @@ namespace JavaProxy {
 
 const String CTextServicesSessionListenerNative::TAG("CTextServicesSessionListenerNative");
 
-CTextServicesSessionListenerNative::~CTextServicesSessionListenerNative(){
+CAR_INTERFACE_IMPL_2(CTextServicesSessionListenerNative, Object, IITextServicesSessionListener, IBinder)
+
+CAR_OBJECT_IMPL(CTextServicesSessionListenerNative)
+
+CTextServicesSessionListenerNative::~CTextServicesSessionListenerNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
 ECode CTextServicesSessionListenerNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     JNIEnv* env;
@@ -32,7 +39,7 @@ ECode CTextServicesSessionListenerNative::constructor(
 ECode CTextServicesSessionListenerNative::OnServiceConnected(
     /* [in] */ IISpellCheckerSession* spellCheckerSession)
 {
-    LOGGERD(TAG, String("+ CTextServicesSessionListenerNative::OnServiceConnected()"));
+    // LOGGERD(TAG, String("+ CTextServicesSessionListenerNative::OnServiceConnected()"));
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -52,15 +59,16 @@ ECode CTextServicesSessionListenerNative::OnServiceConnected(
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: onServiceConnected %d", __LINE__);
 
     env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jspellCheckerSession);
 
-    LOGGERD(TAG, String("- CTextServicesSessionListenerNative::OnServiceConnected()"));
+    // LOGGERD(TAG, "- CTextServicesSessionListenerNative::OnServiceConnected()");
     return NOERROR;
 }
 
 ECode CTextServicesSessionListenerNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CTextServicesSessionListenerNative::ToString()"));
+    // LOGGERD(TAG, "+ CTextServicesSessionListenerNative::ToString()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -68,17 +76,17 @@ ECode CTextServicesSessionListenerNative::ToString(
     Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
 
     jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
 
     *str = Util::GetElString(env, jstr);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CTextServicesSessionListenerNative::ToString()"));
+    // LOGGERD(TAG, "- CTextServicesSessionListenerNative::ToString()");
     return NOERROR;
 }
 

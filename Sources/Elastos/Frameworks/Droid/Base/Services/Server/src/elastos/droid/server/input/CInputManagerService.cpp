@@ -388,15 +388,15 @@ ECode CInputManagerService::BroadcastReceiverInStart::OnReceive(
 
 
 //------------------------------------------------------------------------------
-//  CInputManagerService::BroadcastReceiver1InSystemRunning
+//  CInputManagerService::BroadcastReceiverPackage
 //------------------------------------------------------------------------------
-CInputManagerService::BroadcastReceiver1InSystemRunning::BroadcastReceiver1InSystemRunning(
+CInputManagerService::BroadcastReceiverPackage::BroadcastReceiverPackage(
     /* [in] */ CInputManagerService* owner)
     : mOwner(owner)
 {}
 
 //@Override
-ECode CInputManagerService::BroadcastReceiver1InSystemRunning::OnReceive(
+ECode CInputManagerService::BroadcastReceiverPackage::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
@@ -406,15 +406,15 @@ ECode CInputManagerService::BroadcastReceiver1InSystemRunning::OnReceive(
 
 
 //------------------------------------------------------------------------------
-//  CInputManagerService::BroadcastReceiver2InSystemRunning
+//  CInputManagerService::BroadcastReceiverAlias
 //------------------------------------------------------------------------------
-CInputManagerService::BroadcastReceiver2InSystemRunning::BroadcastReceiver2InSystemRunning(
+CInputManagerService::BroadcastReceiverAlias::BroadcastReceiverAlias(
     /* [in] */ CInputManagerService* owner)
     : mOwner(owner)
 {}
 
 //@Override
-ECode CInputManagerService::BroadcastReceiver2InSystemRunning::OnReceive(
+ECode CInputManagerService::BroadcastReceiverAlias::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
@@ -646,8 +646,6 @@ ECode CInputManagerService::constructor(
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     resources->GetBoolean(R::bool_::config_useDevInputEventForAudioJack, &mUseDevInputEventForAudioJack);
-    Slogger::I(TAG, "Initializing input manager, mUseDevInputEventForAudioJack=%d",
-            mUseDevInputEventForAudioJack);
     looper = NULL;
     mHandler->GetLooper((ILooper**)&looper);
     AutoPtr<IMessageQueue> queue;
@@ -672,18 +670,15 @@ ECode CInputManagerService::NativeInit(
         return E_RUNTIME_EXCEPTION;
     }
 
-    NativeInputManager* im = new NativeInputManager(context, this,
+    mPtr = new NativeInputManager(context, this,
             nativeMessageQueue->GetLooper());
-    im->incStrong(0);
-    mPtr = reinterpret_cast<Int64>(im);
+    mPtr->incStrong(0);
     return NOERROR;
 }
 
 ECode CInputManagerService::NativeStart()
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    android::status_t result = im->getInputManager()->start();
+    android::status_t result = mPtr->getInputManager()->start();
     if (result) {
         Slogger::E(TAG, "Input manager could not be started.");
         return E_RUNTIME_EXCEPTION;
@@ -706,8 +701,6 @@ void CInputManagerService::NativeSetDisplayViewport(
     /* [in] */ Int32 deviceWidth,
     /* [in] */ Int32 deviceHeight)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
     android::DisplayViewport v;
     v.displayId = displayId;
     v.orientation = rotation;
@@ -721,7 +714,7 @@ void CInputManagerService::NativeSetDisplayViewport(
     v.physicalBottom = physicalBottom;
     v.deviceWidth = deviceWidth;
     v.deviceHeight = deviceHeight;
-    im->setDisplayViewport(external, v);
+    mPtr->setDisplayViewport(external, v);
 }
 
 Int32 CInputManagerService::NativeGetScanCodeState(
@@ -729,9 +722,7 @@ Int32 CInputManagerService::NativeGetScanCodeState(
     /* [in] */ Int32 sourceMask,
     /* [in] */ Int32 scanCode)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    return im->getInputManager()->getReader()->getScanCodeState(
+    return mPtr->getInputManager()->getReader()->getScanCodeState(
             deviceId, uint32_t(sourceMask), scanCode);
 }
 
@@ -740,9 +731,7 @@ Int32 CInputManagerService::NativeGetKeyCodeState(
     /* [in] */ Int32 sourceMask,
     /* [in] */ Int32 keyCode)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    return im->getInputManager()->getReader()->getKeyCodeState(
+    return mPtr->getInputManager()->getReader()->getKeyCodeState(
             deviceId, uint32_t(sourceMask), keyCode);
 }
 
@@ -751,9 +740,7 @@ Int32 CInputManagerService::NativeGetSwitchState(
     /* [in] */ Int32 sourceMask,
     /* [in] */ Int32 sw)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    return im->getInputManager()->getReader()->getSwitchState(
+    return mPtr->getInputManager()->getReader()->getSwitchState(
             deviceId, uint32_t(sourceMask), sw);
 }
 
@@ -763,13 +750,11 @@ Boolean CInputManagerService::NativeHasKeys(
     /* [in] */ const ArrayOf<Int32>& keyCodes,
     /* [in] */ ArrayOf<Boolean>* keyExists)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
     int32_t* codes = (int32_t*)keyCodes.GetPayload();
     uint8_t* flags = (uint8_t*)keyExists->GetPayload();
     Int32 numCodes = keyCodes.GetLength();
     if (numCodes == keyExists->GetLength()) {
-        return im->getInputManager()->getReader()->hasKeys(
+        return mPtr->getInputManager()->getReader()->hasKeys(
                 deviceId, uint32_t(sourceMask), numCodes, codes, flags);
     }
 
@@ -793,8 +778,6 @@ ECode CInputManagerService::NativeRegisterInputChannel(
     /* [in] */ InputWindowHandle* inputWindowHandleObj,
     /* [in] */ Boolean monitor)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
     Handle64 ptr;
     inputChannelObj->GetNativeInputChannel(&ptr);
     NativeInputChannel* nativeInputChannel = reinterpret_cast<NativeInputChannel*>(ptr);
@@ -807,7 +790,7 @@ ECode CInputManagerService::NativeRegisterInputChannel(
     android::sp<android::InputWindowHandle> inputWindowHandle =
             GetNativeInputWindowHandle(inputWindowHandleObj);
 
-    android::status_t status = im->registerInputChannel(
+    android::status_t status = mPtr->registerInputChannel(
             inputChannel, inputWindowHandle, monitor);
     if (status) {
         Slogger::E(TAG, "Failed to register input channel.  status=%d", status);
@@ -815,8 +798,7 @@ ECode CInputManagerService::NativeRegisterInputChannel(
     }
 
     if (!monitor) {
-        nativeInputChannel->setDisposeCallback(
-            HandleInputChannelDisposed, im);
+        nativeInputChannel->setDisposeCallback(HandleInputChannelDisposed, mPtr);
     }
 
     return NOERROR;
@@ -825,8 +807,6 @@ ECode CInputManagerService::NativeRegisterInputChannel(
 ECode CInputManagerService::NativeUnregisterInputChannel(
     /* [in] */ IInputChannel* inputChannelObj)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
     Handle64 ptr;
     inputChannelObj->GetNativeInputChannel(&ptr);
     NativeInputChannel* nativeInputChannel = reinterpret_cast<NativeInputChannel*>(ptr);
@@ -838,7 +818,7 @@ ECode CInputManagerService::NativeUnregisterInputChannel(
 
     nativeInputChannel->setDisposeCallback(NULL, NULL);
 
-    android::status_t status = im->unregisterInputChannel(inputChannel);
+    android::status_t status = mPtr->unregisterInputChannel(inputChannel);
     if (status && status != android::BAD_VALUE) { // ignore already unregistered channel
         Slogger::E(TAG, "Failed to unregister input channel.  status=%d", status);
         return E_RUNTIME_EXCEPTION;
@@ -850,9 +830,7 @@ ECode CInputManagerService::NativeUnregisterInputChannel(
 void CInputManagerService::NativeSetInputFilterEnabled(
     /* [in] */ Boolean enable)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    im->getInputManager()->getDispatcher()->setInputFilterEnabled(enable);
+    mPtr->getInputManager()->getDispatcher()->setInputFilterEnabled(enable);
 }
 
 static void KeyEvent_toNative(
@@ -894,13 +872,11 @@ Int32 CInputManagerService::NativeInjectInputEvent(
     /* [in] */ Int32 timeoutMillis,
     /* [in] */ Int32 policyFlags)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
     if (IKeyEvent::Probe(event)) {
         android::KeyEvent keyEvent;
         KeyEvent_toNative(IKeyEvent::Probe(event), &keyEvent);
 
-        return (Int32)im->getInputManager()->getDispatcher()->injectInputEvent(
+        return (Int32)mPtr->getInputManager()->getDispatcher()->injectInputEvent(
                 &keyEvent, displayId, injectorPid, injectorUid, syncMode, timeoutMillis,
                 uint32_t(policyFlags));
     }
@@ -909,7 +885,7 @@ Int32 CInputManagerService::NativeInjectInputEvent(
         IMotionEvent::Probe(event)->GetNative(&ptr);
         const android::MotionEvent* motionEvent = reinterpret_cast<android::MotionEvent*>(ptr);
 
-        return im->getInputManager()->getDispatcher()->injectInputEvent(
+        return mPtr->getInputManager()->getDispatcher()->injectInputEvent(
                 motionEvent, displayId, injectorPid, injectorUid, syncMode, timeoutMillis,
                 uint32_t(policyFlags));
     }
@@ -922,42 +898,32 @@ Int32 CInputManagerService::NativeInjectInputEvent(
 void CInputManagerService::NativeSetInputWindows(
     /* [in] */ ArrayOf<InputWindowHandle*>* windowHandles)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    im->setInputWindows(windowHandles);
+    mPtr->setInputWindows(windowHandles);
 }
 
 void CInputManagerService::NativeSetInputDispatchMode(
     /* [in] */ Boolean enabled,
     /* [in] */ Boolean frozen)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    im->setInputDispatchMode(enabled, frozen);
+    mPtr->setInputDispatchMode(enabled, frozen);
 }
 
 void CInputManagerService::NativeSetSystemUiVisibility(
     /* [in] */ Int32 visibility)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    im->setSystemUiVisibility(visibility);
+    mPtr->setSystemUiVisibility(visibility);
 }
 
 void CInputManagerService::NativeSetFocusedApplication(
     /* [in] */ InputApplicationHandle* application)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    im->setFocusedApplication(application);
+    mPtr->setFocusedApplication(application);
 }
 
 Boolean CInputManagerService::NativeTransferTouchFocus(
     /* [in] */ IInputChannel* fromChannelObj,
     /* [in] */ IInputChannel* toChannelObj)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
     Handle64 ptr;
     fromChannelObj->GetNativeInputChannel(&ptr);
     NativeInputChannel* nativeInputChannel = reinterpret_cast<NativeInputChannel*>(ptr);
@@ -971,38 +937,30 @@ Boolean CInputManagerService::NativeTransferTouchFocus(
         return FALSE;
     }
 
-    return im->getInputManager()->getDispatcher()->transferTouchFocus(fromChannel, toChannel);
+    return mPtr->getInputManager()->getDispatcher()->transferTouchFocus(fromChannel, toChannel);
 }
 
 void CInputManagerService::NativeSetPointerSpeed(
     /* [in] */ Int32 speed)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    im->setPointerSpeed(speed);
+    mPtr->setPointerSpeed(speed);
 }
 
 void CInputManagerService::NativeSetShowTouches(
     /* [in] */ Boolean enabled)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    im->setShowTouches(enabled);
+    mPtr->setShowTouches(enabled);
 }
 
 void CInputManagerService::NativeSetInteractive(
     /* [in] */ Boolean interactive)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    im->setInteractive(interactive);
+    mPtr->setInteractive(interactive);
 }
 
 void CInputManagerService::NativeReloadCalibration()
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    im->reloadCalibration();
+    mPtr->reloadCalibration();
 }
 
 void CInputManagerService::NativeVibrate(
@@ -1011,8 +969,6 @@ void CInputManagerService::NativeVibrate(
     /* [in] */ Int32 repeat,
     /* [in] */ Int32 token)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
     size_t patternSize = pattern.GetLength();
     if (patternSize > MAX_VIBRATE_PATTERN_SIZE) {
         Slogger::I(TAG, "Skipped requested vibration because the pattern size is %d "
@@ -1027,7 +983,7 @@ void CInputManagerService::NativeVibrate(
             (Int64)MAX_VIBRATE_PATTERN_DELAY_NSECS / 1000000LL)) * 1000000LL;
     }
 
-    im->getInputManager()->getReader()->vibrate(
+    mPtr->getInputManager()->getReader()->vibrate(
             deviceId, patternTmp, patternSize, repeat, token);
 }
 
@@ -1035,42 +991,32 @@ void CInputManagerService::NativeCancelVibrate(
     /* [in] */ Int32 deviceId,
     /* [in] */ Int32 token)
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    im->getInputManager()->getReader()->cancelVibrate(deviceId, token);
+    mPtr->getInputManager()->getReader()->cancelVibrate(deviceId, token);
 }
 
 void CInputManagerService::NativeReloadKeyboardLayouts()
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    im->getInputManager()->getReader()->requestRefreshConfiguration(
+    mPtr->getInputManager()->getReader()->requestRefreshConfiguration(
             android::InputReaderConfiguration::CHANGE_KEYBOARD_LAYOUTS);
 }
 
 void CInputManagerService::NativeReloadDeviceAliases()
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    im->getInputManager()->getReader()->requestRefreshConfiguration(
+    mPtr->getInputManager()->getReader()->requestRefreshConfiguration(
             android::InputReaderConfiguration::CHANGE_DEVICE_ALIAS);
 }
 
 String CInputManagerService::NativeDump()
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
     android::String8 dump;
-    im->dump(dump);
+    mPtr->dump(dump);
     return String(dump.string());
 }
 
 void CInputManagerService::NativeMonitor()
 {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
-
-    im->getInputManager()->getReader()->monitor();
-    im->getInputManager()->getDispatcher()->monitor();
+    mPtr->getInputManager()->getReader()->monitor();
+    mPtr->getInputManager()->getDispatcher()->monitor();
 }
 
 void CInputManagerService::SetWindowManagerCallbacks(
@@ -1087,7 +1033,8 @@ void CInputManagerService::SetWiredAccessoryCallbacks(
 
 ECode CInputManagerService::Start()
 {
-    Slogger::I(TAG, "Starting input manager");
+    Slogger::D(TAG, "CInputManagerService::Start()");
+
     FAIL_RETURN(NativeStart());
 
     // Add ourself to the Watchdog monitors.
@@ -1111,7 +1058,7 @@ ECode CInputManagerService::Start()
 }
 
 // TODO(BT) Pass in paramter for bluetooth system
-void CInputManagerService::SystemRunning()
+ECode CInputManagerService::SystemRunning()
 {
     if (DEBUG) {
         Slogger::D(TAG, "System ready.");
@@ -1127,7 +1074,7 @@ void CInputManagerService::SystemRunning()
     filter->AddAction(IIntent::ACTION_PACKAGE_CHANGED);
     filter->AddAction(IIntent::ACTION_PACKAGE_REPLACED);
     filter->AddDataScheme(String("package"));
-    AutoPtr<BroadcastReceiver1InSystemRunning> myBREx = new BroadcastReceiver1InSystemRunning(this);
+    AutoPtr<BroadcastReceiverPackage> myBREx = new BroadcastReceiverPackage(this);
     AutoPtr<IIntent> result;
     mContext->RegisterReceiver(
         myBREx.Get(), filter, String(NULL), mHandler, (IIntent**)&result);
@@ -1135,7 +1082,7 @@ void CInputManagerService::SystemRunning()
     filter = NULL;
     result = NULL;
     CIntentFilter::New(IBluetoothDevice::ACTION_ALIAS_CHANGED, (IIntentFilter**)&filter);
-    AutoPtr<BroadcastReceiver2InSystemRunning> myBREx2 = new BroadcastReceiver2InSystemRunning(this);
+    AutoPtr<BroadcastReceiverAlias> myBREx2 = new BroadcastReceiverAlias(this);
     mContext->RegisterReceiver(
         myBREx2, filter,String(NULL), mHandler, (IIntent**)&result);
 
@@ -1146,6 +1093,7 @@ void CInputManagerService::SystemRunning()
     if (mWiredAccessoryCallbacks != NULL) {
         mWiredAccessoryCallbacks->SystemReady();
     }
+    return NOERROR;
 }
 
 void CInputManagerService::ReloadKeyboardLayouts()
@@ -1588,8 +1536,8 @@ void CInputManagerService::DeliverInputDevicesChanged(
 {
     // Scan for changes.
     Int32 numFullKeyboardsAdded = 0;
-    mTempInputDevicesChangedListenersToNotify.Clear();
-    mTempFullKeyboards.Clear();
+    mTempInputDevicesChangedListenersToNotify->Clear();
+    mTempFullKeyboards->Clear();
     AutoPtr<ArrayOf<Int32> > deviceIdAndGeneration;
     synchronized (mInputDevicesLock) {
         if (!mInputDevicesChangedPending) {
@@ -1639,7 +1587,7 @@ void CInputManagerService::DeliverInputDevicesChanged(
         InputDevicesChangedListenerRecord* inputDeviceRec = (InputDevicesChangedListenerRecord*)IObject::Probe(obj);
         inputDeviceRec->NotifyInputDevicesChanged(deviceIdAndGeneration);
     }
-    mTempInputDevicesChangedListenersToNotify.Clear();
+    mTempInputDevicesChangedListenersToNotify->Clear();
 
     // Check for missing keyboard layouts.
     if (mNotificationManager != NULL) {
@@ -1689,7 +1637,7 @@ void CInputManagerService::DeliverInputDevicesChanged(
             HideMissingKeyboardLayoutNotification();
         }
     }
-    mTempFullKeyboards.Clear();
+    mTempFullKeyboards->Clear();
 }
 
 // @Override // Binder call & native callback
@@ -1937,15 +1885,19 @@ void CInputManagerService::VisitKeyboardLayoutsInPackage(
     /* [in] */ Int32 requestedPriority,
     /* [in] */ IKeyboardLayoutVisitor* visitor)
 {
+    IPackageItemInfo* pi = IPackageItemInfo::Probe(receiver);
+    IComponentInfo* ci = IComponentInfo::Probe(receiver);
+    assert(pi != NULL && ci != NULL);
+
     AutoPtr<IBundle> metaData;
-    IPackageItemInfo::Probe(receiver)->GetMetaData((IBundle**)&metaData);
+    pi->GetMetaData((IBundle**)&metaData);
     if (metaData == NULL) {
         return;
     }
 
     String packageName, receiverName;
-    IPackageItemInfo::Probe(receiver)->GetPackageName(&packageName);
-    IPackageItemInfo::Probe(receiver)->GetName(&receiverName);
+    pi->GetPackageName(&packageName);
+    pi->GetName(&receiverName);
 
     Int32 configResId;
     metaData->GetInt32(IInputManager::META_DATA_KEYBOARD_LAYOUTS, &configResId);
@@ -1957,16 +1909,16 @@ void CInputManagerService::VisitKeyboardLayoutsInPackage(
     }
 
     AutoPtr<ICharSequence> receiverLabel;
-    IPackageItemInfo::Probe(receiver)->LoadLabel(pm, (ICharSequence**)&receiverLabel);
+    pi->LoadLabel(pm, (ICharSequence**)&receiverLabel);
     String collection("");
     if (receiverLabel != NULL) {
         receiverLabel->ToString(&collection);
     }
     Int32 priority;
-    AutoPtr<IApplicationInfo> info;
-    IComponentInfo::Probe(receiver)->GetApplicationInfo((IApplicationInfo**)&info);
+    AutoPtr<IApplicationInfo> appInfo;
+    ci->GetApplicationInfo((IApplicationInfo**)&appInfo);
     Int32 flags;
-    if (info->GetFlags(&flags), (flags & IApplicationInfo::FLAG_SYSTEM) != 0) {
+    if (appInfo->GetFlags(&flags), (flags & IApplicationInfo::FLAG_SYSTEM) != 0) {
         priority = requestedPriority;
     }
     else {
@@ -1974,12 +1926,10 @@ void CInputManagerService::VisitKeyboardLayoutsInPackage(
     }
 
     ECode ec;
-    AutoPtr<IApplicationInfo> appInfo;
     AutoPtr<IResources> resources;
     AutoPtr<IXmlResourceParser> parser;
     AutoPtr<IXmlPullParser> pullParser;
 
-    IComponentInfo::Probe(receiver)->GetApplicationInfo((IApplicationInfo**)&appInfo);
     ec = pm->GetResourcesForApplication(appInfo, (IResources**)&resources);
     FAIL_GOTO(ec, _Exit3_);
     ec = resources->GetXml(configResId, (IXmlResourceParser**)&parser);

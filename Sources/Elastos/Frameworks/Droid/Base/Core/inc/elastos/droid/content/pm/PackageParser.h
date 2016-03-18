@@ -801,6 +801,7 @@ public:
         /* [in] */ IFile* packageFile,
         /* [in] */ Int32 flags,
         /* [in] */ ArrayOf<Byte>* readBuffer,
+        /* [in] */ Boolean isEpk,
         /* [out] */ Package** pkgLite);
 
     /**

@@ -292,6 +292,13 @@ module
         GetCharSequenceArray(
             [in] String key,
             [out, callee] ArrayOf<ICharSequence*>* value);
+
+        // add for java compatible
+        SetJavaData(
+            [in] ArrayOf<Byte>* data);
+
+        GetJavaData(
+            [out, callee] ArrayOf<Byte>* data);
     }
 
     } // namespace Os

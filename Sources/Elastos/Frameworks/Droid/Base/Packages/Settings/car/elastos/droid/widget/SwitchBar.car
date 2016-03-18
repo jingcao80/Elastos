@@ -1,0 +1,35 @@
+module
+{
+    using interface Elastos.Droid.Widget.ISwitch;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Widget {
+
+    [local]
+    interface ISwitchBarOnSwitchChangeListener {
+        /**
+         * Called when the checked state of the Switch has changed.
+         *
+         * @param switchView The Switch view whose state has changed.
+         * @param isChecked  The new checked state of switchView.
+         */
+        OnSwitchChanged(
+            [in] ISwitch* switchView,
+            [in] Boolean isChecked);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface IParcelable
+     */
+    interface ISwitchBarSavedState {}
+
+    } // namespace Widget
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -12,8 +12,11 @@ module
      * This class contains the back/forward list for a WebView.
      * WebView.copyBackForwardList() will return a copy of this class used to
      * inspect the entries in the list.
+     * @involve
+     * interface Elastos.Core.ICloneable
+     * interface Elastos.IO.ISerializable
      */
-    interface IWebBackForwardList /*implements Cloneable, Serializable*/ {
+    interface IWebBackForwardList {
 
         /**
          * Return the current history item. This method returns null if the list is

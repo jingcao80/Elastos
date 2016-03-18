@@ -34,6 +34,7 @@ ELASTOS_LIBS += emoji/emoji.lib
 ELASTOS_LIBS += gesture/gesture.lib
 ELASTOS_LIBS += graphics/graphics.lib
 ELASTOS_LIBS += hardware/hardware.lib
+ELASTOS_LIBS += ims/ims.lib
 ELASTOS_LIBS += inputmethodservice/inputmethodservice.lib
 ELASTOS_LIBS += internal/internal.lib
 ELASTOS_LIBS += location/location.lib

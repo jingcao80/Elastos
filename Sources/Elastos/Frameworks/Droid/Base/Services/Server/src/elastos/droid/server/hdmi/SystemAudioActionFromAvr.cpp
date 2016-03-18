@@ -1,9 +1,13 @@
 
-#include "elastos/droid/server/hdmi/SystemAudioActionFromAvr.h"
+#include "elastos/droid/server/hdmi/Constants.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDeviceTv.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessageBuilder.h"
 #include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include "elastos/droid/server/hdmi/HdmiUtils.h"
+#include "elastos/droid/server/hdmi/SystemAudioActionFromAvr.h"
 
-using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
+using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 
 namespace Elastos {
 namespace Droid {
@@ -18,13 +22,11 @@ ECode SystemAudioActionFromAvr::constructor(
     /* [in] */ Boolean targetStatus,
     /* [in] */ IIHdmiControlCallback* callback)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super::constructor(source, avrAddress, targetStatus, callback);
-        Int32 srcAddr;
-        GetSourceAddress(&srcAddr);
-        HdmiUtils->VerifyAddressType(srcAddr, IHdmiDeviceInfo::DEVICE_TV);
-#endif
+    SystemAudioAction::constructor(source, avrAddress, targetStatus, callback);
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    HdmiUtils::VerifyAddressType(srcAddr, IHdmiDeviceInfo::DEVICE_TV);
+    return NOERROR;
 }
 
 ECode SystemAudioActionFromAvr::Start(
@@ -32,51 +34,46 @@ ECode SystemAudioActionFromAvr::Start(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        RemoveSystemAudioActionInProgress();
-        HandleSystemAudioActionFromAvr();
-        *result = TRUE;
-        return NOERROR;
-#endif
+    RemoveSystemAudioActionInProgress();
+    HandleSystemAudioActionFromAvr();
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode SystemAudioActionFromAvr::HandleSystemAudioActionFromAvr()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        AutoPtr<IHdmiCecLocalDeviceTv> tv;
-        Tv((IHdmiCecLocalDeviceTv**)&tv);
-        Boolean isSystemAudioActivated;
-        tv->IsSystemAudioActivated(&isSystemAudioActivated);
-        if (mTargetAudioStatus == isSystemAudioActivated) {
-            FinishWithCallback(IHdmiControlManager::RESULT_SUCCESS);
-            return NOERROR;
-        }
-        AutoPtr<IHdmiCecLocalDeviceTv> tv;
-        Tv((IHdmiCecLocalDeviceTv**)&tv);
-        Boolean isProhibitMode;
-        tv->IsProhibitMode(&isProhibitMode);
-        if (isProhibitMode) {
-            Int32 srcAddr;
-            GetSourceAddress(&srcAddr);
-            SendCommand(HdmiCecMessageBuilder->BuildFeatureAbortCommand(srcAddr, mAvrLogicalAddress,
-                    Constants::MESSAGE_SET_SYSTEM_AUDIO_MODE, Constants::ABORT_REFUSED));
-            mTargetAudioStatus = FALSE;
-            SendSystemAudioModeRequest();
-            return NOERROR;
-        }
+    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+    Tv((IHdmiCecLocalDeviceTv**)&tv);
+    Boolean isSystemAudioActivated;
+    ((HdmiCecLocalDeviceTv*) tv.Get())->IsSystemAudioActivated(&isSystemAudioActivated);
+    if (mTargetAudioStatus == isSystemAudioActivated) {
+        FinishWithCallback(IHdmiControlManager::RESULT_SUCCESS);
+        return NOERROR;
+    }
+    Boolean isProhibitMode;
+    ((HdmiCecLocalDeviceTv*) tv.Get())->IsProhibitMode(&isProhibitMode);
+    if (isProhibitMode) {
+        Int32 srcAddr;
+        GetSourceAddress(&srcAddr);
+        AutoPtr<IHdmiCecMessage> cmd;
+        HdmiCecMessageBuilder::BuildFeatureAbortCommand(srcAddr, mAvrLogicalAddress,
+                Constants::MESSAGE_SET_SYSTEM_AUDIO_MODE, Constants::ABORT_REFUSED, (IHdmiCecMessage**)&cmd);
+        SendCommand(cmd);
+        mTargetAudioStatus = FALSE;
+        SendSystemAudioModeRequest();
+        return NOERROR;
+    }
 
-        RemoveAction(ECLSID_CSystemAudioAutoInitiationAction);
+    RemoveAction(ECLSID_CSystemAudioAutoInitiationAction);
 
-        if (mTargetAudioStatus) {
-            SetSystemAudioMode(TRUE);
-            StartAudioStatusAction();
-        } else {
-            SetSystemAudioMode(FALSE);
-            FinishWithCallback(IHdmiControlManager::RESULT_SUCCESS);
-        }
-#endif
+    if (mTargetAudioStatus) {
+        SetSystemAudioMode(TRUE);
+        StartAudioStatusAction();
+    } else {
+        SetSystemAudioMode(FALSE);
+        FinishWithCallback(IHdmiControlManager::RESULT_SUCCESS);
+    }
+    return NOERROR;
 }
 
 } // namespace Hdmi

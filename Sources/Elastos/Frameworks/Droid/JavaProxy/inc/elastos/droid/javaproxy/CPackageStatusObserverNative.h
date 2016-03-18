@@ -3,22 +3,32 @@
 #define __ELASTOS_DROID_JAVAPROXY_CPACKAGESTATSOBSERVERNATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CPackageStatusObserverNative.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
 using Elastos::Droid::Content::Pm::IPackageStats;
+using Elastos::Droid::Content::Pm::IIPackageStatsObserver;
+using Elastos::Droid::Os::IBinder;
 
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 CarClass(CPackageStatusObserverNative)
+    , public Object
+    , public IIPackageStatsObserver
+    , public IBinder
 {
 public:
     ~CPackageStatusObserverNative();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI OnGetStatsCompleted(
         /* [in] */ IPackageStats* pStats,

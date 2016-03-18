@@ -3,6 +3,8 @@
 #include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::View::EIID_IInputMethodCallback;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -10,6 +12,10 @@ namespace Droid {
 namespace JavaProxy {
 
 const String CInputMethodCallbackNative::TAG("CInputMethodCallbackNative");
+
+CAR_INTERFACE_IMPL_2(CInputMethodCallbackNative, Object, IInputMethodCallback, IBinder)
+
+CAR_OBJECT_IMPL(CInputMethodCallbackNative)
 
 CInputMethodCallbackNative::~CInputMethodCallbackNative()
 {
@@ -19,8 +25,8 @@ CInputMethodCallbackNative::~CInputMethodCallbackNative()
 }
 
 ECode CInputMethodCallbackNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -31,7 +37,7 @@ ECode CInputMethodCallbackNative::FinishedEvent(
     /* [in] */ Int32 seq,
     /* [in] */ Boolean handled)
 {
-    // LOGGERD(TAG, String("+ CInputMethodCallbackNative::FinishedEvent()"));
+    // LOGGERD(TAG, "+ CInputMethodCallbackNative::FinishedEvent()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -40,23 +46,49 @@ ECode CInputMethodCallbackNative::FinishedEvent(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputMethodCallback", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "finishedEvent", "(IZ)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: finishedEvent"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: finishedEvent", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)seq, (jboolean)handled);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: finishedEvent"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: finishedEvent", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputMethodCallbackNative::FinishedEvent()"));
+    // LOGGERD(TAG, "- CInputMethodCallbackNative::FinishedEvent()");
     return NOERROR;
 }
 
 ECode CInputMethodCallbackNative::SessionCreated(
     /* [in] */ IIInputMethodSession* session)
 {
-    LOGGERD(TAG, String("CInputMethodCallbackNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CInputMethodCallbackNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
+}
+
+ECode CInputMethodCallbackNative::ToString(
+    /* [out] */ String* str)
+{
+    // LOGGERD(TAG, "+ CInputMethodCallbackNative::ToString()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("java/lang/Object");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: Object %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString %d", __LINE__);
+
+    jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString %d", __LINE__);
+
+    *str = Util::GetElString(env, jstr);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jstr);
+
+    // LOGGERD(TAG, "- CInputMethodCallbackNative::ToString()");
+    return NOERROR;
 }
 
 }

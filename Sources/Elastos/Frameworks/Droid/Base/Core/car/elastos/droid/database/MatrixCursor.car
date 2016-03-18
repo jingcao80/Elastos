@@ -21,6 +21,10 @@ module
          */
         Add(
             [in] IInterface* columnValue);
+
+        Add(
+            [in] String columnName,
+            [in] IInterface* value);
     }
 
     /**

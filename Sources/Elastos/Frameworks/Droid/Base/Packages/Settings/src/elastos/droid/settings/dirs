@@ -1,0 +1,5 @@
+
+DIRS += dashboard
+DIRS += drawable
+DIRS += search
+DIRS += widget

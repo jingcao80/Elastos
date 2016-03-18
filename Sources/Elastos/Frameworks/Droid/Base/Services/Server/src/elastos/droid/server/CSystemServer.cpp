@@ -18,7 +18,7 @@
 #include "elastos/droid/server/CVibratorService.h"
 #include "elastos/droid/server/CUiModeManagerService.h"
 
-//#include "elastos/droid/server/appwidget/CAppWidgetService.h"
+#include "elastos/droid/server/appwidget/CAppWidgetService.h"
 #include "elastos/droid/server/clipboard/CClipboardService.h"
 #include "elastos/droid/server/content/CContentService.h"
 #include "elastos/droid/server/lights/LightsService.h"
@@ -26,7 +26,7 @@
 #include "elastos/droid/server/os/CSchedulingPolicyService.h"
 #include "elastos/droid/server/pm/CLauncherAppsService.h"
 #include "elastos/droid/server/power/ShutdownThread.h"
-// #include "elastos/droid/server/Twilight/CTwilightService.h"
+#include "elastos/droid/server/twilight/CTwilightService.h"
 #include "elastos/droid/server/webkit/WebViewUpdateService.h"
 #include "elastos/droid/server/wm/InputMonitor.h"
 #include "elastos/droid/server/wm/CWindowManagerService.h"
@@ -88,7 +88,7 @@ using Elastos::Droid::Webkit::IWebViewFactory;
 using Elastos::Droid::Webkit::CWebViewFactory;
 using Elastos::Droid::Utility::CDisplayMetrics;
 
-// using Elastos::Droid::Server::AppWidget::CAppWidgetService;
+using Elastos::Droid::Server::AppWidget::CAppWidgetService;
 using Elastos::Droid::Server::Clipboard::CClipboardService;
 using Elastos::Droid::Server::Content::CContentService;
 using Elastos::Droid::Server::Lights::LightsService;
@@ -96,7 +96,7 @@ using Elastos::Droid::Server::Notification::CNotificationManagerService;
 using Elastos::Droid::Server::Os::CSchedulingPolicyService;
 using Elastos::Droid::Server::Pm::CLauncherAppsService;
 using Elastos::Droid::Server::Power::ShutdownThread;
-// using Elastos::Droid::Server::Twilight::CTwilightService;
+using Elastos::Droid::Server::Twilight::CTwilightService;
 using Elastos::Droid::Server::Webkit::WebViewUpdateService;
 using Elastos::Droid::Server::Wm::InputMonitor;
 
@@ -243,7 +243,8 @@ ECode SystemServer::Run()
     // Prepare the main looper thread (this thread).
     Process::SetThreadPriority(IProcess::THREAD_PRIORITY_FOREGROUND);
     Process::SetCanSelfBackground(false);
-    Looper::PrepareMainLooper();
+    ec = Looper::PrepareMainLooper();
+    if (FAILED(ec)) ReportWtf("failed to PrepareMainLooper", ec);
 
     // Initialize native services.
     // System.loadLibrary("android_servers");
@@ -288,8 +289,9 @@ ECode SystemServer::Run()
     return E_RUNTIME_EXCEPTION;
 
 _EXIT_:
-    Slogger::E(TAG, "******************************************");
-    Slogger::E(TAG, "************ Failure starting system services, error ecode: %08x", ec);
+    Slogger::E(TAG, "****************************************************************");
+    Slogger::E(TAG, "************ Failure starting system services, error code: %08x", ec);
+    Slogger::E(TAG, "****************************************************************");
     return ec;
 }
 
@@ -299,6 +301,8 @@ void SystemServer::ReportWtf(
 {
     Slogger::W(TAG, "***********************************************");
     Slogger::W(TAG, "BOOT FAILURE %s, error code: %08x", msg, ec);
+    Slogger::W(TAG, "***********************************************");
+    assert(0);
 }
 
 ECode SystemServer::PerformPendingShutdown()
@@ -916,11 +920,11 @@ ECode SystemServer::StartOtherServices()
         //     }
         // }
 
-        Slogger::I(TAG, "Twilight Service todo");
-        // systemService = NULL;
-        // ec = CTwilightService::New(context, (ISystemService**)&systemService);
-        // if (FAILED(ec)) ReportWtf("making TwilightService ready", ec);
-        // mSystemServiceManager->StartService(systemService);
+        Slogger::I(TAG, "Twilight Service");
+        systemService = NULL;
+        ec = CTwilightService::New(context, (ISystemService**)&systemService);
+        if (FAILED(ec)) ReportWtf("making TwilightService ready", ec);
+        mSystemServiceManager->StartService(systemService);
 
         Slogger::I(TAG, "UiMode manager Service");
         systemService = NULL;
@@ -928,10 +932,13 @@ ECode SystemServer::StartOtherServices()
         if (FAILED(ec)) ReportWtf("making UiMode manager Service ready", ec);
         mSystemServiceManager->StartService(systemService);
 
-        //mSystemServiceManager->StartService(JobSchedulerService.class);
+        Slogger::I(TAG, "Job Scheduler Service todo");
+        // AutoPtr<JobSchedulerService> jss = new JobSchedulerService();
+        // ec = jss->constructor(context);
+        // if (FAILED(ec)) ReportWtf("making Job Scheduler Service ready", ec);
+        //mSystemServiceManager->StartService(JobSchedulerService.Get());
 
         if (!disableNonCoreServices) {
-
             mPackageManager->HasSystemFeature(IPackageManager::FEATURE_BACKUP, &bval);
             if (bval) {
                 Slogger::I(TAG, "Bacup manager Service todo");
@@ -941,9 +948,9 @@ ECode SystemServer::StartOtherServices()
             mPackageManager->HasSystemFeature(IPackageManager::FEATURE_APP_WIDGETS, &bval);
             if (bval) {
                 Slogger::I(TAG, "AppWidget Service");
-                // systemService = NULL;
-                // CAppWidgetService::New(context, (ISystemService**)&systemService);
-                // mSystemServiceManager->StartService(systemService);
+                systemService = NULL;
+                CAppWidgetService::New(context, (ISystemService**)&systemService);
+                mSystemServiceManager->StartService(systemService);
             }
 
             mPackageManager->HasSystemFeature(IPackageManager::FEATURE_VOICE_RECOGNIZERS, &bval);
@@ -1336,13 +1343,13 @@ ECode SystemServer::SystemReadyRunnable::Run()
     //     }
     // }
 
-    // if (mServiceBundle->mInputManagerF != NULL) {
-    //     // TODO(BT) Pass parameter to input manager
-    //     ec = mServiceBundle->mInputManagerF->SystemRunning();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("Notifying InputManagerService running", ec);
-    //     }
-    // }
+    if (mServiceBundle->mInputManagerF != NULL) {
+        // TODO(BT) Pass parameter to input manager
+        ec = mServiceBundle->mInputManagerF->SystemRunning();
+        if (FAILED(ec)) {
+            mHost->ReportWtf("Notifying InputManagerService running", ec);
+        }
+    }
 
     // if (mServiceBundle->mTelephonyRegistryF != NULL) {
     //     ec = mServiceBundle->mTelephonyRegistryF->SystemRunning();

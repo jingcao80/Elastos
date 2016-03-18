@@ -3,9 +3,8 @@
 #include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Content::Pm::IContainerEncryptionParams;
-using Elastos::Droid::Content::Res::IObbInfo;
+using Elastos::Droid::Internal::App::EIID_IIMediaContainerService;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -14,110 +13,107 @@ namespace JavaProxy {
 
 const String CMediaContainerServiceNative::TAG("CMediaContainerServiceNative");
 
-CMediaContainerServiceNative::~CMediaContainerServiceNative(){
+CAR_INTERFACE_IMPL_2(CMediaContainerServiceNative, Object, IIMediaContainerService, IBinder)
+
+CAR_OBJECT_IMPL(CMediaContainerServiceNative)
+
+CMediaContainerServiceNative::~CMediaContainerServiceNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
 ECode CMediaContainerServiceNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
     return NOERROR;
 }
 
-ECode CMediaContainerServiceNative::CopyResourceToContainer(
-    /* [in] */ IUri* packageURI,
+ECode CMediaContainerServiceNative::CopyPackageToContainer(
+    /* [in] */ const String& packagePath,
     /* [in] */ const String& containerId,
     /* [in] */ const String& key,
-    /* [in] */ const String& resFileName,
-    /* [in] */ const String& publicResFileName,
     /* [in] */ Boolean isExternal,
     /* [in] */ Boolean isForwardLocked,
+    /* [in] */ const String& abiOverride,
     /* [out] */ String* path)
 {
-    LOGGERD(TAG, "+ CMediaContainerServiceNative::CopyResourceToContainer()");
+    // LOGGERD(TAG, "+ CMediaContainerServiceNative::CopyPackageToContainer()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jobject jpackageURI = NULL;
-    if (packageURI != NULL) {
-        jpackageURI = Util::ToJavaUri(env, packageURI);
-    }
+    jobject jpackagePath = Util::ToJavaString(env, packagePath);
     jobject jcontainerId = Util::ToJavaString(env, containerId);
     jobject jkey = Util::ToJavaString(env, key);
-    jobject jresFileName = Util::ToJavaString(env, resFileName);
-    jobject jpublicResFileName = Util::ToJavaString(env, publicResFileName);
+    jobject jabiOverride = Util::ToJavaString(env, abiOverride);
 
     jclass c = env->FindClass("com/android/internal/app/IMediaContainerService");
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IMediaContainerService %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "copyResourceToContainer", "(Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)Ljava/lang/String;");
-    Util::CheckErrorAndLog(env, TAG, "GetMethodID: copyResourceToContainer %d", __LINE__);
+    jmethodID m = env->GetMethodID(c, "copyPackageToContainer", "(Ljava/lang/String;"
+        "Ljava/lang/String;Ljava/lang/String;ZZLjava/lang/String;)Ljava/lang/String;");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: copyPackageToContainer %d", __LINE__);
 
-    jstring jpkgLite = (jstring)env->CallObjectMethod(mJInstance, m, jpackageURI, jcontainerId, jkey, jresFileName, jpublicResFileName,  (jboolean)isExternal, (jboolean)isForwardLocked);
-    Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: copyResourceToContainer %d", __LINE__);
+    jstring jpkgLite = (jstring)env->CallObjectMethod(mJInstance, m, jpackagePath, jcontainerId, jkey,
+        (jboolean)isExternal, (jboolean)isForwardLocked, jabiOverride);
+    Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: copyPackageToContainer %d", __LINE__);
 
     *path = Util::GetElString(env, jpkgLite);
 
     env->DeleteLocalRef(c);
-    env->DeleteLocalRef(jpackageURI);
+    env->DeleteLocalRef(jpackagePath);
     env->DeleteLocalRef(jcontainerId);
     env->DeleteLocalRef(jkey);
-    env->DeleteLocalRef(jresFileName);
-    env->DeleteLocalRef(jpublicResFileName);
+    env->DeleteLocalRef(jabiOverride);
     env->DeleteLocalRef(jpkgLite);
 
-    LOGGERD(TAG, "- CMediaContainerServiceNative::CopyResourceToContainer()");
+    // LOGGERD(TAG, "- CMediaContainerServiceNative::CopyPackageToContainer()");
     return NOERROR;
 }
 
-ECode CMediaContainerServiceNative::CopyResource(
-    /* [in] */ IUri* packageURI,
-    /* [in] */ IContainerEncryptionParams* encryptionParams,
-    /* [in] */ IParcelFileDescriptor* outStream,
+ECode CMediaContainerServiceNative::CopyPackage(
+    /* [in] */ const String& packagePath,
+    /* [in] */ IIParcelFileDescriptorFactory* target,
     /* [out] */ Int32* res)
 {
-    // LOGGERD(TAG, "+ CMediaContainerServiceNative::CopyResource()");
+    // LOGGERD(TAG, "+ CMediaContainerServiceNative::CopyPackage()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jobject jpackageURI = Util::ToJavaUri(env, packageURI);
+    jobject jpackagePath = Util::ToJavaString(env, packagePath);
 
-    jobject jencryptionParams = NULL;
-    if (encryptionParams != NULL) {
-        jencryptionParams = Util::ToJavaContainerEncryptionParams(env, encryptionParams);
+    jobject jtarget = NULL;
+    if (target != NULL) {
+        LOGGERE(TAG, "TODO:CopyPackage target != NULL!");
     }
-
-    jobject joutStream = Util::ToJavaParcelFileDescriptor(env, outStream);
 
     jclass c = env->FindClass("com/android/internal/app/IMediaContainerService");
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IMediaContainerService %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "copyResource", "(Landroid/net/Uri;Landroid/content/pm/ContainerEncryptionParams;Landroid/os/ParcelFileDescriptor;)I");
-    Util::CheckErrorAndLog(env, TAG, "GetMethodID: copyResource %d", __LINE__);
+    jmethodID m = env->GetMethodID(c, "copyPackage", "(Ljava/lang/String;Lcom/android/internal/os/IParcelFileDescriptorFactory;)I");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: copyPackage %d", __LINE__);
 
-    *res = env->CallIntMethod(mJInstance, m, jpackageURI, jencryptionParams, joutStream);
-    Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: copyResource %d", __LINE__);
+    *res = env->CallIntMethod(mJInstance, m, jpackagePath, jtarget);
+    Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: copyPackage %d", __LINE__);
 
     env->DeleteLocalRef(c);
-    env->DeleteLocalRef(jpackageURI);
-    env->DeleteLocalRef(jencryptionParams);
-    env->DeleteLocalRef(joutStream);
+    env->DeleteLocalRef(jpackagePath);
+    env->DeleteLocalRef(jtarget);
 
-    // LOGGERD(TAG, "- CMediaContainerServiceNative::CopyResource()");
+    // LOGGERD(TAG, "- CMediaContainerServiceNative::CopyPackage()");
     return NOERROR;
 }
 
 ECode CMediaContainerServiceNative::GetMinimalPackageInfo(
     /* [in] */ const String& packagePath,
     /* [in] */ Int32 flags,
-    /* [in] */ Int64 threshold,
+    /* [in] */ const String& abiOverride,
     /* [out] */ IPackageInfoLite** pkgLite)
 {
     // LOGGERD(TAG, "+ CMediaContainerServiceNative::GetMinimalPackageInfo()");
@@ -126,14 +122,15 @@ ECode CMediaContainerServiceNative::GetMinimalPackageInfo(
     mJVM->AttachCurrentThread(&env, NULL);
 
     jobject jpackagePath = Util::ToJavaString(env, packagePath);
+    jobject jabiOverride = Util::ToJavaString(env, abiOverride);
 
     jclass c = env->FindClass("com/android/internal/app/IMediaContainerService");
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IMediaContainerService %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "getMinimalPackageInfo", "(Ljava/lang/String;IJ)Landroid/content/pm/PackageInfoLite;");
+    jmethodID m = env->GetMethodID(c, "getMinimalPackageInfo", "(Ljava/lang/String;ILjava/lang/String;)Landroid/content/pm/PackageInfoLite;");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: getMinimalPackageInfo %d", __LINE__);
 
-    jobject jpkgLite = env->CallObjectMethod(mJInstance, m, jpackagePath, (jint)flags, (jlong)threshold);
+    jobject jpkgLite = env->CallObjectMethod(mJInstance, m, jpackagePath, (jint)flags, jabiOverride);
     Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: getMinimalPackageInfo %d", __LINE__);
 
     if (!Util::GetElPackageInfoLite(env, jpkgLite, pkgLite))
@@ -141,80 +138,10 @@ ECode CMediaContainerServiceNative::GetMinimalPackageInfo(
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jpackagePath);
+    env->DeleteLocalRef(jabiOverride);
     env->DeleteLocalRef(jpkgLite);
 
     // LOGGERD(TAG, "- CMediaContainerServiceNative::GetMinimalPackageInfo()");
-    return NOERROR;
-}
-
-ECode CMediaContainerServiceNative::CheckInternalFreeStorage(
-    /* [in] */ IUri* fileUri,
-    /* [in] */ Boolean isForwardLocked,
-    /* [in] */ Int64 threshold,
-    /* [out] */ Boolean* res)
-{
-    LOGGERD(TAG, "+ CMediaContainerServiceNative::CheckInternalFreeStorage()");
-    if (res == NULL) {
-        LOGGERE(TAG, "CheckInternalFreeStorage() Invalid argumenet!");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-
-    JNIEnv* env;
-    mJVM->AttachCurrentThread(&env, NULL);
-
-    jobject jfileUri = NULL;
-    if (fileUri != NULL) {
-        jfileUri = Util::ToJavaUri(env, fileUri);
-    }
-
-    jclass c = env->FindClass("com/android/internal/app/IMediaContainerService");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IMediaContainerService %d", __LINE__);
-
-    jmethodID m = env->GetMethodID(c, "checkInternalFreeStorage", "(Landroid/net/Uri;ZJ)Z");
-    Util::CheckErrorAndLog(env, TAG, "GetMethodID: checkInternalFreeStorage %d", __LINE__);
-
-    *res = (Boolean)env->CallBooleanMethod(mJInstance, m, jfileUri, (jboolean)isForwardLocked, (jlong)threshold);
-    Util::CheckErrorAndLog(env, TAG, "CallLongMethod: checkInternalFreeStorage %d", __LINE__);
-
-    env->DeleteLocalRef(c);
-    env->DeleteLocalRef(jfileUri);
-
-    LOGGERD(TAG, "- CMediaContainerServiceNative::CheckInternalFreeStorage()");
-    return NOERROR;
-}
-
-ECode CMediaContainerServiceNative::CheckExternalFreeStorage(
-    /* [in] */ IUri* fileUri,
-    /* [in] */ Boolean isForwardLocked,
-    /* [out] */ Boolean* res)
-{
-    LOGGERD(TAG, "+ CMediaContainerServiceNative::CheckExternalFreeStorage()");
-    if (res == NULL) {
-        LOGGERE(TAG, "CheckExternalFreeStorage() Invalid argumenet!");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-
-    JNIEnv* env;
-    mJVM->AttachCurrentThread(&env, NULL);
-
-    jobject jfileUri = NULL;
-    if (fileUri != NULL) {
-        jfileUri = Util::ToJavaUri(env, fileUri);
-    }
-
-    jclass c = env->FindClass("com/android/internal/app/IMediaContainerService");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IMediaContainerService %d", __LINE__);
-
-    jmethodID m = env->GetMethodID(c, "checkExternalFreeStorage", "(Landroid/net/Uri;Z)Z");
-    Util::CheckErrorAndLog(env, TAG, "GetMethodID: checkExternalFreeStorage %d", __LINE__);
-
-    *res = (Boolean)env->CallBooleanMethod(mJInstance, m, jfileUri, (jboolean)isForwardLocked);
-    Util::CheckErrorAndLog(env, TAG, "CallLongMethod: checkExternalFreeStorage %d", __LINE__);
-
-    env->DeleteLocalRef(c);
-    env->DeleteLocalRef(jfileUri);
-
-    LOGGERD(TAG, "- CMediaContainerServiceNative::CheckExternalFreeStorage()");
     return NOERROR;
 }
 
@@ -222,7 +149,7 @@ ECode CMediaContainerServiceNative::GetObbInfo(
     /* [in] */ const String& filename,
     /* [out] */ IObbInfo** obbInfo)
 {
-    LOGGERD(TAG, "+ CMediaContainerServiceNative::GetObbInfo()");
+    // LOGGERD(TAG, "+ CMediaContainerServiceNative::GetObbInfo()");
 
     if (obbInfo == NULL) {
         LOGGERE(TAG, "GetObbInfo() Invalid argumenet!");
@@ -253,7 +180,7 @@ ECode CMediaContainerServiceNative::GetObbInfo(
     env->DeleteLocalRef(jfilename);
     env->DeleteLocalRef(jobbInfo);
 
-    LOGGERD(TAG, "- CMediaContainerServiceNative::GetObbInfo()");
+    // LOGGERD(TAG, "- CMediaContainerServiceNative::GetObbInfo()");
     return NOERROR;
 }
 
@@ -325,7 +252,7 @@ ECode CMediaContainerServiceNative::GetFileSystemStats(
 ECode CMediaContainerServiceNative::ClearDirectory(
     /* [in] */ const String& directory)
 {
-    LOGGERD(TAG, "+ CMediaContainerServiceNative::ClearDirectory()");
+    // LOGGERD(TAG, "+ CMediaContainerServiceNative::ClearDirectory()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -344,16 +271,17 @@ ECode CMediaContainerServiceNative::ClearDirectory(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jdirectory);
 
-    LOGGERD(TAG, "- CMediaContainerServiceNative::ClearDirectory()");
+    // LOGGERD(TAG, "- CMediaContainerServiceNative::ClearDirectory()");
     return NOERROR;
 }
 
 ECode CMediaContainerServiceNative::CalculateInstalledSize(
     /* [in] */ const String& packagePath,
     /* [in] */ Boolean isForwardLocked,
+    /* [in] */ const String& abiOverride,
     /* [out] */ Int64* size)
 {
-    LOGGERD(TAG, "+ CMediaContainerServiceNative::CalculateInstalledSize()");
+    // LOGGERD(TAG, "+ CMediaContainerServiceNative::CalculateInstalledSize()");
 
     if (size == NULL) {
         LOGGERE("CMediaContainerServiceNative", "Invalid argumenet!");
@@ -364,27 +292,29 @@ ECode CMediaContainerServiceNative::CalculateInstalledSize(
     mJVM->AttachCurrentThread(&env, NULL);
 
     jobject jpackagePath = Util::ToJavaString(env, packagePath);
+    jobject jabiOverride = Util::ToJavaString(env, abiOverride);
 
     jclass c = env->FindClass("com/android/internal/app/IMediaContainerService");
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IMediaContainerService %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "calculateInstalledSize", "(Ljava/lang/String;Z)J");
+    jmethodID m = env->GetMethodID(c, "calculateInstalledSize", "(Ljava/lang/String;ZLjava/lang/String;)J");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: calculateInstalledSize %d", __LINE__);
 
-    *size = (Int64)(jlong)env->CallObjectMethod(mJInstance, m, jpackagePath, (jboolean)isForwardLocked);
+    *size = (Int64)(jlong)env->CallObjectMethod(mJInstance, m, jpackagePath, (jboolean)isForwardLocked, jabiOverride);
     Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: getMinimalPackageInfo %d", __LINE__);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jpackagePath);
+    env->DeleteLocalRef(jabiOverride);
 
-    LOGGERD(TAG, "- CMediaContainerServiceNative::CalculateInstalledSize()");
+    // LOGGERD(TAG, "- CMediaContainerServiceNative::CalculateInstalledSize()");
     return NOERROR;
 }
 
 ECode CMediaContainerServiceNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CMediaContainerServiceNative::ToString()"));
+    // LOGGERD(TAG, "+ CMediaContainerServiceNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -393,17 +323,17 @@ ECode CMediaContainerServiceNative::ToString(
     Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
 
     jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
 
     *str = Util::GetElString(env, jstr);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CMediaContainerServiceNative::ToString()"));
+    // LOGGERD(TAG, "- CMediaContainerServiceNative::ToString()");
     return NOERROR;
 }
 

@@ -9,26 +9,26 @@ module
     namespace Telecomm {
     namespace Telecom {
 
-        /**
-         *  A parcelable representation of a conference connection.
-         *  @hide
-         *
-         * @Involve
-         * interface IParcelable
-         */
-        interface IParcelableConference {
-            GetPhoneAccount(
-                [out] IPhoneAccountHandle** res);
+    /**
+     *  A parcelable representation of a conference connection.
+     *  @hide
+     *
+     * @Involve
+     * interface IParcelable
+     */
+    interface IParcelableConference {
+        GetPhoneAccount(
+            [out] IPhoneAccountHandle** res);
 
-            GetState(
-                [out] Int32* res);
+        GetState(
+            [out] Int32* res);
 
-            GetCapabilities(
-                [out] Int32* res);
+        GetCapabilities(
+            [out] Int32* res);
 
-            GetConnectionIds(
-                [out] IList** res);
-        }
+        GetConnectionIds(
+            [out] IList** res);
+    }
 
     } // namespace Telecom
     } // namespace Telecomm

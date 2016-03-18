@@ -414,6 +414,20 @@ module
         ReopenReadWrite();
 
         /**
+         * Registers a CustomFunction callback as a function that can be called from
+         * SQLite database triggers.
+         *
+         * @param name the name of the sqlite3 function
+         * @param numArgs the number of arguments for the function
+         * @param function callback to call when the function is executed
+         * @hide
+        */
+        AddCustomFunction(
+            [in] String name,
+            [in] Int32 numArgs,
+            [in] ICustomFunction* function);
+
+        /**
          * Gets the database version.
          *
          * @return the database version

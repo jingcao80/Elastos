@@ -3,6 +3,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::Internal::View::EIID_IIInputContextCallback;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,15 +13,20 @@ namespace JavaProxy {
 
 const String CIInputContextCallbackNative::TAG("CIInputContextCallbackNative");
 
-CIInputContextCallbackNative::~CIInputContextCallbackNative(){
+CAR_INTERFACE_IMPL_2(CIInputContextCallbackNative, Object, IIInputContextCallback, IBinder)
+
+CAR_OBJECT_IMPL(CIInputContextCallbackNative)
+
+CIInputContextCallbackNative::~CIInputContextCallbackNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
 ECode CIInputContextCallbackNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -30,7 +37,7 @@ ECode CIInputContextCallbackNative::SetTextBeforeCursor(
     /* [in] */ ICharSequence* textBeforeCursor,
     /* [in] */ Int32 seq)
 {
-    // LOGGERD(TAG, String("+ CIInputContextCallbackNative::SetTextBeforeCursor()"));
+    // LOGGERD(TAG, "+ CIInputContextCallbackNative::SetTextBeforeCursor()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -57,7 +64,7 @@ ECode CIInputContextCallbackNative::SetTextBeforeCursor(
         env->DeleteLocalRef(jtextBeforeCursor);
     }
 
-    // LOGGERD(TAG, String("- CIInputContextCallbackNative::SetTextBeforeCursor()"));
+    // LOGGERD(TAG, "- CIInputContextCallbackNative::SetTextBeforeCursor()");
     return NOERROR;
 }
 
@@ -65,7 +72,7 @@ ECode CIInputContextCallbackNative::SetTextAfterCursor(
     /* [in] */ ICharSequence* textAfterCursor,
     /* [in] */ Int32 seq)
 {
-    // LOGGERD(TAG, String("+ CIInputContextCallbackNative::SetTextAfterCursor()"));
+    // LOGGERD(TAG, "+ CIInputContextCallbackNative::SetTextAfterCursor()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -92,7 +99,7 @@ ECode CIInputContextCallbackNative::SetTextAfterCursor(
         env->DeleteLocalRef(jtextAfterCursor);
     }
 
-    // LOGGERD(TAG, String("- CIInputContextCallbackNative::SetTextAfterCursor()"));
+    // LOGGERD(TAG, "- CIInputContextCallbackNative::SetTextAfterCursor()");
     return NOERROR;
 }
 
@@ -100,7 +107,7 @@ ECode CIInputContextCallbackNative::SetCursorCapsMode(
     /* [in] */ Int32 capsMode,
     /* [in] */ Int32 seq)
 {
-    // LOGGERD(TAG, String("+ CIInputContextCallbackNative::SetCursorCapsMode()"));
+    // LOGGERD(TAG, "+ CIInputContextCallbackNative::SetCursorCapsMode()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -116,7 +123,7 @@ ECode CIInputContextCallbackNative::SetCursorCapsMode(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CIInputContextCallbackNative::SetCursorCapsMode()"));
+    // LOGGERD(TAG, "- CIInputContextCallbackNative::SetCursorCapsMode()");
     return NOERROR;
 }
 
@@ -124,7 +131,7 @@ ECode CIInputContextCallbackNative::SetExtractedText(
     /* [in] */ IExtractedText* extractedText,
     /* [in] */ Int32 seq)
 {
-    // LOGGERD(TAG, String("+ CIInputContextCallbackNative::SetExtractedText()"));
+    // LOGGERD(TAG, "+ CIInputContextCallbackNative::SetExtractedText()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -146,7 +153,7 @@ ECode CIInputContextCallbackNative::SetExtractedText(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jextractedText);
 
-    // LOGGERD(TAG, String("- CIInputContextCallbackNative::SetExtractedText()"));
+    // LOGGERD(TAG, "- CIInputContextCallbackNative::SetExtractedText()");
     return NOERROR;
 }
 
@@ -154,7 +161,7 @@ ECode CIInputContextCallbackNative::SetSelectedText(
     /* [in] */ ICharSequence* selectedText,
     /* [in] */ Int32 seq)
 {
-    // LOGGERD(TAG, String("+ CIInputContextCallbackNative::SetSelectedText()"));
+    // LOGGERD(TAG, "+ CIInputContextCallbackNative::SetSelectedText()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -181,7 +188,56 @@ ECode CIInputContextCallbackNative::SetSelectedText(
         env->DeleteLocalRef(jselectedText);
     }
 
-    // LOGGERD(TAG, String("- CIInputContextCallbackNative::SetSelectedText()"));
+    // LOGGERD(TAG, "- CIInputContextCallbackNative::SetSelectedText()");
+    return NOERROR;
+}
+
+ECode CIInputContextCallbackNative::SetRequestUpdateCursorAnchorInfoResult(
+    /* [in] */ Boolean result,
+    /* [in] */ Int32 seq)
+{
+    // LOGGERD(TAG, "+ CIInputContextCallbackNative::SetRequestUpdateCursorAnchorInfoResult()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("com/android/internal/view/IIInputContextCallback");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IIInputContextCallback %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "setRequestUpdateCursorAnchorInfoResult", "(ZI)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: setRequestUpdateCursorAnchorInfoResult %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, result, (jint)seq);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: setRequestUpdateCursorAnchorInfoResult %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CIInputContextCallbackNative::SetRequestUpdateCursorAnchorInfoResult()");
+    return NOERROR;
+}
+
+ECode CIInputContextCallbackNative::ToString(
+    /* [out] */ String* str)
+{
+    // LOGGERD(TAG, "+ CIInputContextCallbackNative::ToString()");
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("java/lang/Object");
+    Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
+
+    jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
+
+    *str = Util::GetElString(env, jstr);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jstr);
+
+    // LOGGERD(TAG, "- CIInputContextCallbackNative::ToString()");
     return NOERROR;
 }
 

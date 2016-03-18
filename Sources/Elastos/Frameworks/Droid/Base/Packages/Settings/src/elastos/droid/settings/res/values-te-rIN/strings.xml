@@ -1953,7 +1953,7 @@
     <string name="enter_pin" msgid="5305333588093263790">"Androidని ప్రారంభించడానికి, మీ పిన్‌ను నమోదు చేయండి"</string>
     <string name="enter_pattern" msgid="4187435713036808566">"Androidని ప్రారంభించడానికి, మీ నమూనాను గీయండి"</string>
     <string name="try_again" msgid="4272075051293936921">"మళ్లీ ప్రయత్నించండి."</string>
-    <string name="delete" msgid="4219243412325163003">"తొలగించు"</string>
+    <string name="delete_" msgid="4219243412325163003">"తొలగించు"</string>
     <string name="misc_files" msgid="6720680815969643497">"నానావిధమైన ఫైల్‌లు"</string>
     <string name="misc_files_selected_count" msgid="4647048020823912088">"<xliff:g id="TOTAL">%2$d</xliff:g>లో <xliff:g id="NUMBER">%1$d</xliff:g> ఎంచుకోబడ్డాయి"</string>
     <string name="misc_files_selected_count_bytes" msgid="2876232009069114352">"<xliff:g id="TOTAL">%2$s</xliff:g>లో <xliff:g id="NUMBER">%1$s</xliff:g>"</string>

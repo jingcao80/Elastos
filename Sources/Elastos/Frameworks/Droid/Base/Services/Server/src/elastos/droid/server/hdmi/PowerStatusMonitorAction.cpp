@@ -1,19 +1,49 @@
 
-#include "elastos/droid/server/hdmi/PowerStatusMonitorAction.h"
-#include <Elastos.Droid.Hardware.h>
-#include <Elastos.CoreLibrary.Utility.h>
-#include <Elastos.Droid.Utility.h>
+#include "elastos/droid/server/hdmi/Constants.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDeviceTv.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessageBuilder.h"
 #include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include "elastos/droid/server/hdmi/PowerStatusMonitorAction.h"
+#include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.Droid.Hardware.h>
+#include <elastos/droid/net/ReturnOutValue.h>
 
+using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Server::Hdmi::IHdmiControlServiceSendMessageCallback;
-using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
+using Elastos::Droid::Utility::CSparseInt32Array;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Hdmi {
 
+//=============================================================================
+// PowerStatusMonitorAction::InnerSub_SendMessageCallback
+//=============================================================================
+CAR_INTERFACE_IMPL(PowerStatusMonitorAction::InnerSub_SendMessageCallback, Object, IHdmiControlServiceSendMessageCallback)
+
+PowerStatusMonitorAction::InnerSub_SendMessageCallback::InnerSub_SendMessageCallback(
+    /* [in] */ PowerStatusMonitorAction* host,
+    /* [in] */ Int32 logicalAddress)
+    : mHost(host)
+    , mLogicalAddress(logicalAddress)
+{}
+
+ECode PowerStatusMonitorAction::InnerSub_SendMessageCallback::OnSendCompleted(
+    /* [in] */ Int32 error)
+{
+    // If fails to send <Give Device Power Status>,
+    // update power status into UNKNOWN.
+    if (error != Constants::SEND_RESULT_SUCCESS) {
+       mHost->UpdatePowerStatus(mLogicalAddress, IHdmiControlManager::POWER_STATUS_UNKNOWN, TRUE);
+    }
+    return NOERROR;
+}
+
+//=============================================================================
+// PowerStatusMonitorAction
+//=============================================================================
 CAR_INTERFACE_IMPL(PowerStatusMonitorAction, HdmiCecFeatureAction, IPowerStatusMonitorAction)
 
 const String PowerStatusMonitorAction::TAG("PowerStatusMonitorAction");
@@ -25,19 +55,13 @@ const Int32 PowerStatusMonitorAction::REPORT_POWER_STATUS_TIMEOUT_MS = 5000;
 
 PowerStatusMonitorAction::PowerStatusMonitorAction()
 {
-#if 0 // TODO: Translate codes below
-    mPowerStatus = new SparseInt32Array();
-#endif
+    CSparseInt32Array::New((ISparseInt32Array**)&mPowerStatus);
 }
 
 ECode PowerStatusMonitorAction::constructor(
     /* [in] */ IHdmiCecLocalDevice* source)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super::constructor(source);
-
-#endif
+    return HdmiCecFeatureAction::constructor(source);
 }
 
 ECode PowerStatusMonitorAction::Start(
@@ -45,12 +69,9 @@ ECode PowerStatusMonitorAction::Start(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        QueryPowerStatus();
-        *result = TRUE;
-        return NOERROR;
-#endif
+    QueryPowerStatus();
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode PowerStatusMonitorAction::ProcessCommand(
@@ -59,120 +80,104 @@ ECode PowerStatusMonitorAction::ProcessCommand(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mState != STATE_WAIT_FOR_REPORT_POWER_STATUS) {
-            *result = FALSE;
-            return NOERROR;
-        }
-        return HandleReportPowerStatus(cmd);
-#endif
+    if (mState != STATE_WAIT_FOR_REPORT_POWER_STATUS) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    *result = HandleReportPowerStatus(cmd);
+    return NOERROR;
 }
 
-ECode PowerStatusMonitorAction::HandleReportPowerStatus(
-    /* [in] */ IHdmiCecMessage* cmd,
-    /* [out] */ Boolean* result)
+Boolean PowerStatusMonitorAction::HandleReportPowerStatus(
+    /* [in] */ IHdmiCecMessage* cmd)
 {
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Int32 srcAddr;
-        cmd->GetSource(&srcAddr);
-        Int32 sourceAddress = srcAddr;
-        Int32 oldStatus = mPowerStatus->Get(sourceAddress, INVALID_POWER_STATUS);
-        if (oldStatus == INVALID_POWER_STATUS) {
-            // if no device exists for incoming message, hands it over to other actions.
-            *result = FALSE;
-            return NOERROR;
-        }
-        AutoPtr<ArrayOf<Byte> > params;
-        cmd->GetParams((ArrayOf<Byte>**)&params);
-        Int32 newStatus = (*params)[0] & 0xFF;
-        UpdatePowerStatus(sourceAddress, newStatus, TRUE);
-        *result = TRUE;
-        return NOERROR;
-#endif
+    Int32 sourceAddress;
+    cmd->GetSource(&sourceAddress);
+    Int32 oldStatus;
+    mPowerStatus->Get(sourceAddress, INVALID_POWER_STATUS, &oldStatus);
+    if (oldStatus == INVALID_POWER_STATUS) {
+        // if no device exists for incoming message, hands it over to other actions.
+        return FALSE;
+    }
+    AutoPtr<ArrayOf<Byte> > params;
+    cmd->GetParams((ArrayOf<Byte>**)&params);
+    Int32 newStatus = (*params)[0] & 0xFF;
+    UpdatePowerStatus(sourceAddress, newStatus, TRUE);
+    return TRUE;
 }
 
 ECode PowerStatusMonitorAction::HandleTimerEvent(
     /* [in] */ Int32 state)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        switch (mState) {
-            case STATE_WAIT_FOR_NEXT_MONITORING:
-                QueryPowerStatus();
-                break;
-            case STATE_WAIT_FOR_REPORT_POWER_STATUS:
-                HandleTimeout();
-                break;
-        }
-#endif
+    switch (mState) {
+        case STATE_WAIT_FOR_NEXT_MONITORING:
+            QueryPowerStatus();
+            break;
+        case STATE_WAIT_FOR_REPORT_POWER_STATUS:
+            HandleTimeout();
+            break;
+    }
+    return NOERROR;
 }
 
 ECode PowerStatusMonitorAction::HandleTimeout()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Int32 size;
-        mPowerStatus->GetSize(&size);
-        for (Int32 i = 0; i < size; ++i) {
-            Int32 logicalAddress = mPowerStatus->KeyAt(i);
-            UpdatePowerStatus(logicalAddress, POWER_STATUS_UNKNOWN, FALSE);
-        }
-        mPowerStatus->Clear();
-        mState = STATE_WAIT_FOR_NEXT_MONITORING;
-#endif
+    Int32 size;
+    mPowerStatus->GetSize(&size);
+    for (Int32 i = 0; i < size; ++i) {
+        Int32 logicalAddress;
+        mPowerStatus->KeyAt(i, &logicalAddress);
+        UpdatePowerStatus(logicalAddress, IHdmiControlManager::POWER_STATUS_UNKNOWN, FALSE);
+    }
+    mPowerStatus->Clear();
+    mState = STATE_WAIT_FOR_NEXT_MONITORING;
+    return NOERROR;
 }
 
 ECode PowerStatusMonitorAction::ResetPowerStatus(
     /* [in] */ IList* deviceInfos)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mPowerStatus->Clear();
-        for (HdmiDeviceInfo info : deviceInfos) {
-            Int32 logicalAddr;
-            info->GetLogicalAddress(&logicalAddr);
-            mPowerStatus->Append(logicalAddr, info->GetDevicePowerStatus());
-        }
-#endif
+    mPowerStatus->Clear();
+    FOR_EACH(it, deviceInfos) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IHdmiDeviceInfo> info = IHdmiDeviceInfo::Probe(obj);
+        Int32 logicalAddr;
+        info->GetLogicalAddress(&logicalAddr);
+        Int32 devicePowerStatus;
+        info->GetDevicePowerStatus(&devicePowerStatus);
+        mPowerStatus->Append(logicalAddr, devicePowerStatus);
+    }
+    return NOERROR;
 }
 
 ECode PowerStatusMonitorAction::QueryPowerStatus()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        AutoPtr<IHdmiCecLocalDeviceTv> tv;
-        Tv((IHdmiCecLocalDeviceTv**)&tv);
-        List<HdmiDeviceInfo> deviceInfos = tv->GetDeviceInfoList(FALSE);
-        ResetPowerStatus(deviceInfos);
-        for (HdmiDeviceInfo info : deviceInfos) {
-            Int32 logicalAddress;
-            info->GetLogicalAddress(&logicalAddress);
-            Int32 srcAddr;
-            GetSourceAddress(&srcAddr);
-            SendCommand(HdmiCecMessageBuilder->BuildGiveDevicePowerStatus(srcAddr,
-                    logicalAddress),
-                    new SendMessageCallback() {
-                        //@Override
-                        CARAPI OnSendCompleted(Int32 error) {
-                            // If fails to send <Give Device Power Status>,
-                            // update power status into UNKNOWN.
-                            if (error != Constants::SEND_RESULT_SUCCESS) {
-                               UpdatePowerStatus(logicalAddress, POWER_STATUS_UNKNOWN, TRUE);
-                            }
-                        }
-                    });
-        }
+    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+    Tv((IHdmiCecLocalDeviceTv**)&tv);
+    AutoPtr<IList> deviceInfos;
+    ((HdmiCecLocalDeviceTv*) tv.Get())->GetDeviceInfoList(FALSE, (IList**)&deviceInfos);
+    ResetPowerStatus(deviceInfos);
+    FOR_EACH(it, deviceInfos) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IHdmiDeviceInfo> info = IHdmiDeviceInfo::Probe(obj);
+        Int32 logicalAddress;
+        info->GetLogicalAddress(&logicalAddress);
+        Int32 srcAddr;
+        GetSourceAddress(&srcAddr);
+        AutoPtr<IHdmiCecMessage> cmd;
+        HdmiCecMessageBuilder::BuildGiveDevicePowerStatus(srcAddr,
+                logicalAddress, (IHdmiCecMessage**)&cmd);
+        SendCommand(cmd, new InnerSub_SendMessageCallback(this, logicalAddress));
+    }
 
-        mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
+    mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
 
-        // Add both timers, monitoring and timeout.
-        AddTimer(STATE_WAIT_FOR_NEXT_MONITORING, MONITIROING_INTERNAL_MS);
-        AddTimer(STATE_WAIT_FOR_REPORT_POWER_STATUS, REPORT_POWER_STATUS_TIMEOUT_MS);
-#endif
+    // Add both timers, monitoring and timeout.
+    AddTimer(STATE_WAIT_FOR_NEXT_MONITORING, MONITIROING_INTERNAL_MS);
+    AddTimer(STATE_WAIT_FOR_REPORT_POWER_STATUS, REPORT_POWER_STATUS_TIMEOUT_MS);
+    return NOERROR;
 }
 
 ECode PowerStatusMonitorAction::UpdatePowerStatus(
@@ -180,16 +185,14 @@ ECode PowerStatusMonitorAction::UpdatePowerStatus(
     /* [in] */ Int32 newStatus,
     /* [in] */ Boolean remove)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        AutoPtr<IHdmiCecLocalDeviceTv> tv;
-        Tv((IHdmiCecLocalDeviceTv**)&tv);
-        tv->UpdateDevicePowerStatus(logicalAddress, newStatus);
+    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+    Tv((IHdmiCecLocalDeviceTv**)&tv);
+    ((HdmiCecLocalDeviceTv*) tv.Get())->UpdateDevicePowerStatus(logicalAddress, newStatus);
 
-        if (remove) {
-            mPowerStatus->Delete(logicalAddress);
-        }
-#endif
+    if (remove) {
+        mPowerStatus->Delete(logicalAddress);
+    }
+    return NOERROR;
 }
 
 } // namespace Hdmi

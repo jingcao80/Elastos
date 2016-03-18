@@ -15,7 +15,6 @@
 #include "CArrayList.h"
 #include "CoreUtils.h"
 
-
 using Elastos::Core::IChar32;
 using Elastos::Core::CChar32;
 using Elastos::Core::CSystem;

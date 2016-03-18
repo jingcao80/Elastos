@@ -3,117 +3,56 @@
 #define __ELASTOS_DROID_SETTINGS_SETTINGSACTIVITY_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include <elastos/droid/app/Activity.h>
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.Preference.h"
+#include "Elastos.Droid.Widget.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/settings/dashboard/DashboardTile.h"
+#include "elastos/droid/settings/search/DynamicIndexableContentMonitor.h"
+#include "elastos/droid/settings/widget/SwitchBar.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/os/Handler.h"
+#include "_Settings.h"
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::IActionBar;
-using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IFragment;
-using Elastos::Droid::App::IFragmentManager;
-using Elastos::Droid::App::IFragmentTransaction;
+using Elastos::Droid::App::IFragmentManagerBackStackEntry;
 using Elastos::Droid::App::IFragmentManagerOnBackStackChangedListener;
-using Elastos::Droid::Content::IBroadcastReceiver;
-using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::ISharedPreferencesOnSharedPreferenceChangeListener;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::ISharedPreferences;
-using Elastos::Droid::Content::Pm::IActivityInfo;
-using Elastos::Droid::Content::Pm::IPackageManager;
-using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::Res::IConfiguration;
-using Elastos::Droid::Content::Res::ITypedArray;
-using Elastos::Droid::Content::Res::IXmlResourceParser;
-using Elastos::Droid::Nfc::INfcAdapter;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::IINetworkManagementService;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::Preference::IPreferenceFragment;
-using Elastos::Droid::Preference::IPreferenceManager;
 using Elastos::Droid::Preference::IPreferenceScreen;
 using Elastos::Droid::Preference::IPreferenceManagerOnPreferenceTreeClickListener;
 using Elastos::Droid::Preference::IPreferenceFragmentOnPreferenceStartFragmentCallback;
-using Elastos::Droid::Transition::ITransitionManager;
-using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Settings::Dashboard::ISearchResultsSummary;
+using Elastos::Droid::Settings::Dashboard::DashboardTile;
+using Elastos::Droid::Settings::Search::DynamicIndexableContentMonitor;
+using Elastos::Droid::Settings::Widget::SwitchBar;
 using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::View::IMenu;
-using Elastos::Droid::View::IMenuInflater;
 using Elastos::Droid::View::IMenuItem;
-using Elastos::Droid::View::IMenuItemOnActionExpandListener;
 using Elastos::Droid::View::IView;
-using Elastos::Droid::View::View::IOnClickListener;
+using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IOnActionExpandListener;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::ISearchView;
 using Elastos::Droid::Widget::ISearchViewOnCloseListener;
 using Elastos::Droid::Widget::ISearchViewOnQueryTextListener;
-
-using Elastos::Droid::Text::TextUtils;
-using Elastos::Droid::Utility::Xml;
-using Elastos::Droid::Internal::Utility::ArrayUtils;
-using Elastos::Droid::Internal::Utility::XmlUtils;
-
-// using Elastos::Droid::Settings::Accessibility::IAccessibilitySettings;
-// using Elastos::Droid::Settings::Accessibility::ICaptionPropertiesFragment;
-// using Elastos::Droid::Settings::Accounts::IAccountSettings;
-// using Elastos::Droid::Settings::Accounts::IAccountSyncSettings;
-// using Elastos::Droid::Settings::Applications::IInstalledAppDetails;
-// using Elastos::Droid::Settings::Applications::IManageApplications;
-// using Elastos::Droid::Settings::Applications::IProcessStatsUi;
-// using Elastos::Droid::Settings::Bluetooth::IBluetoothSettings;
-// using Elastos::Droid::Settings::Dashboard::IDashboardCategory;
-// using Elastos::Droid::Settings::Dashboard::IDashboardSummary;
-// using Elastos::Droid::Settings::Dashboard::IDashboardTile;
-// using Elastos::Droid::Settings::Dashboard::INoHomeDialogFragment;
-// using Elastos::Droid::Settings::Dashboard::ISearchResultsSummary;
-// using Elastos::Droid::Settings::Deviceinfo::IMemory;
-// using Elastos::Droid::Settings::Deviceinfo::IUsbSettings;
-// using Elastos::Droid::Settings::Fuelgauge::IBatterySaverSettings;
-// using Elastos::Droid::Settings::Fuelgauge::IPowerUsageSummary;
-// using Elastos::Droid::Settings::Notification::INotificationAppList;
-// using Elastos::Droid::Settings::Notification::IOtherSoundSettings;
-// using Elastos::Droid::Settings::Quicklaunch::IQuickLaunchSettings;
-// using Elastos::Droid::Settings::Search::IDynamicIndexableContentMonitor;
-// using Elastos::Droid::Settings::Search::IIndex;
-// using Elastos::Droid::Settings::Inputmethod::IInputMethodAndLanguageSettings;
-// using Elastos::Droid::Settings::Inputmethod::IKeyboardLayoutPickerFragment;
-// using Elastos::Droid::Settings::Inputmethod::ISpellCheckersSettings;
-// using Elastos::Droid::Settings::Inputmethod::IUserDictionaryList;
-// using Elastos::Droid::Settings::Location::ILocationSettings;
-// using Elastos::Droid::Settings::Nfc::IAndroidBeam;
-// using Elastos::Droid::Settings::Nfc::IPaymentSettings;
-// using Elastos::Droid::Settings::Notification::IAppNotificationSettings;
-// using Elastos::Droid::Settings::Notification::IConditionProviderSettings;
-// using Elastos::Droid::Settings::Notification::INotificationAccessSettings;
-// using Elastos::Droid::Settings::Notification::INotificationSettings;
-// using Elastos::Droid::Settings::Notification::INotificationStation;
-// using Elastos::Droid::Settings::Notification::IZenModeSettings;
-// using Elastos::Droid::Settings::Print::IPrintJobSettingsFragment;
-// using Elastos::Droid::Settings::Print::IPrintSettingsFragment;
-// using Elastos::Droid::Settings::Sim::ISimSettings;
-// using Elastos::Droid::Settings::Tts::ITextToSpeechSettings;
-// using Elastos::Droid::Settings::Users::IUserSettings;
-// using Elastos::Droid::Settings::Voice::IVoiceInputSettings;
-// using Elastos::Droid::Settings::Vpn2::IVpnSettings;
-// using Elastos::Droid::Settings::Wfd::IWifiDisplaySettings;
-// using Elastos::Droid::Settings::Widget::ISwitchBar;
-// using Elastos::Droid::Settings::Wifi::IAdvancedWifiSettings;
-// using Elastos::Droid::Settings::Wifi::ISavedAccessPointsWifiSettings;
-// using Elastos::Droid::Settings::Wifi::IWifiSettings;
-// using Elastos::Droid::Settings::Wifi::P2p::IWifiP2pSettings;
-
-using Org::Xmlpull::V1::IXmlPullParser;
-
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
 using Elastos::Utility::ISet;
-
-// using static com::Android::Settings::Dashboard::DashboardTile::ITILE_ID_UNDEFINED;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -215,8 +154,8 @@ public:
 
     ~SettingsActivity();
 
-    CARAPI GetSwitchBar(
-        /* [out] */ ISwitchBar** switchBar);
+   CARAPI GetSwitchBar(
+       /* [out] */ SwitchBar** switchBar);
 
     CARAPI GetDashboardCategories(
         /* [in] */ Boolean forceRefresh,
@@ -230,8 +169,8 @@ public:
 
     //@Override
     CARAPI OnPreferenceTreeClick(
-        /* [in] */ PreferenceScreen* preferenceScreen,
-        /* [in] */ IPreference* pref,
+        /* [in] */ IPreferenceScreen* preferenceScreen,
+        /* [in] */ IPreference* preference,
         /* [out] */ Boolean* result);
 
     //@Override
@@ -378,7 +317,7 @@ public:
 
 protected:
     //@Override
-     CARAPI OnStart();
+    CARAPI OnStart();
 
     //@Override
     CARAPI OnCreate(
@@ -512,7 +451,7 @@ private:
     static const String EXTRA_PREFS_SET_BACK_TEXT;
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
 
     // Constants for state save/restore
     static const String SAVE_KEY_CATEGORIES;
@@ -548,14 +487,13 @@ private:
     AutoPtr<ISharedPreferences> mDevelopmentPreferences;
     AutoPtr<ISharedPreferencesOnSharedPreferenceChangeListener> mDevelopmentPreferencesListener;
 
-    Boolean mBatteryPresent = TRUE;
+    Boolean mBatteryPresent;
     AutoPtr<IBroadcastReceiver> mBatteryInfoReceiver;
 
     AutoPtr<DynamicIndexableContentMonitor> mDynamicIndexableContentMonitor;
-        // = new DynamicIndexableContentMonitor();
 
     AutoPtr<IActionBar> mActionBar;
-    AutoPtr<ISwitchBar> mSwitchBar;
+    AutoPtr<SwitchBar> mSwitchBar;
 
     AutoPtr<IButton> mNextButton;
 

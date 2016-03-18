@@ -1,160 +1,119 @@
 
+#ifndef __ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDSUMMARY_H__
+#define __ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDSUMMARY_H__
 
-package com.android.settings.dashboard;
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/settings/dashboard/DashboardTile.h"
+#include "elastos/droid/app/Fragment.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/os/Handler.h"
 
-using Elastos::Droid::App::IFragment;
-using Elastos::Droid::Content::IBroadcastReceiver;
+using Elastos::Droid::App::Fragment;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Text::ITextUtils;
-using Elastos::Droid::Utility::ILog;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::Widget::ITextView;
-using Elastos::Droid::Settings::IR;
-using Elastos::Droid::Settings::ISettingsActivity;
-
 using Elastos::Utility::IList;
 
-public class DashboardSummary extends Fragment {
-    private static const String LOG_TAG = "DashboardSummary";
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Dashboard {
 
-    private LayoutInflater mLayoutInflater;
-    private ViewGroup mDashboard;
+class DashboardSummary
+    : public Fragment
+{
+private:
+    class MyHandler
+        : public Handler
+    {
+    public:
+        MyHandler(
+            /* [in] */ DashboardSummary* host);
 
-    private static const Int32 MSG_REBUILD_UI = 1;
-    private Handler mHandler = new Handler() {
+        ~MyHandler();
+
         //@Override
-        CARAPI HandleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_REBUILD_UI: {
-                    final Context context = GetActivity();
-                    RebuildUI(context);
-                } break;
-            }
-        }
+        CARAPI HandleMessage(
+            /* [in] */ IMessage* msg);
+
+    private:
+        DashboardSummary* mHost;
     };
 
-    private class HomePackageReceiver extends BroadcastReceiver {
+    class HomePackageReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        HomePackageReceiver(
+            /* [in] */ DashboardSummary* host);
+
+        ~HomePackageReceiver();
+
         //@Override
-        CARAPI OnReceive(Context context, Intent intent) {
-            RebuildUI(context);
-        }
-    }
-    private HomePackageReceiver mHomePackageReceiver = new HomePackageReceiver();
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        DashboardSummary* mHost;
+    };
+
+public:
+    DashboardSummary();
+
+    ~DashboardSummary();
 
     //@Override
-    CARAPI OnResume() {
-        super->OnResume();
-
-        SendRebuildUI();
-
-        final IntentFilter filter = new IntentFilter(IIntent::ACTION_PACKAGE_ADDED);
-        filter->AddAction(IIntent::ACTION_PACKAGE_REMOVED);
-        filter->AddAction(IIntent::ACTION_PACKAGE_CHANGED);
-        filter->AddAction(IIntent::ACTION_PACKAGE_REPLACED);
-        filter->AddDataScheme("package");
-        GetActivity()->RegisterReceiver(mHomePackageReceiver, filter);
-    }
+    CARAPI OnResume();
 
     //@Override
-    CARAPI OnPause() {
-        super->OnPause();
-
-        GetActivity()->UnregisterReceiver(mHomePackageReceiver);
-    }
+    CARAPI OnPause();
 
     //@Override
-    public View OnCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    CARAPI OnCreateView(
+        /* [in] */ ILayoutInflater* inflater,
+        /* [in] */ IViewGroup* container,
+        /* [in] */ IBundle* savedInstanceState,
+        /* [out] */ IView** view);
 
-        mLayoutInflater = inflater;
+private:
+    CARAPI_(void) RebuildUI(
+        /* [in] */ IContext* context);
 
-        final View rootView = inflater->Inflate(R.layout.dashboard, container, FALSE);
-        mDashboard = (ViewGroup) rootView->FindViewById(R.id.dashboard_container);
+    CARAPI_(void) UpdateTileView(
+        /* [in] */ IContext* context,
+        /* [in] */ IResources* res,
+        /* [in] */ DashboardTile* tile,
+        /* [in] */ IImageView* tileIcon,
+        /* [in] */ ITextView* tileTextView,
+        /* [in] */ ITextView* statusTextView);
 
-        return rootView;
-    }
+    CARAPI_(void) SendRebuildUI();
 
-    private void RebuildUI(Context context) {
-        if (!IsAdded()) {
-            Logger::W(LOG_TAG, "Cannot build the DashboardSummary UI yet as the Fragment is not added");
-            return;
-        }
+public:
+    static const String TAG;
 
-        Int64 start = System->CurrentTimeMillis();
-        final Resources res = GetResources();
+    AutoPtr<ILayoutInflater> mLayoutInflater;
+    AutoPtr<IViewGroup> mDashboard;
 
-        mDashboard->RemoveAllViews();
+    static const Int32 MSG_REBUILD_UI = 1;
+    AutoPtr<MyHandler> mHandler;
 
-        List<DashboardCategory> categories =
-                ((SettingsActivity) context).GetDashboardCategories(TRUE);
+    AutoPtr<HomePackageReceiver> mHomePackageReceiver;
+};
 
-        final Int32 count = categories->Size();
+} // namespace Dashboard
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
 
-        for (Int32 n = 0; n < count; n++) {
-            DashboardCategory category = categories->Get(n);
-
-            View categoryView = mLayoutInflater->Inflate(R.layout.dashboard_category, mDashboard,
-                    FALSE);
-
-            TextView categoryLabel = (TextView) categoryView->FindViewById(R.id.category_title);
-            categoryLabel->SetText(category->GetTitle(res));
-
-            ViewGroup categoryContent =
-                    (ViewGroup) categoryView->FindViewById(R.id.category_content);
-
-            final Int32 tilesCount = category->GetTilesCount();
-            for (Int32 i = 0; i < tilesCount; i++) {
-                DashboardTile tile = category->GetTile(i);
-
-                DashboardTileView tileView = new DashboardTileView(context);
-                UpdateTileView(context, res, tile, tileView->GetImageView(),
-                        tileView->GetTitleTextView(), tileView->GetStatusTextView());
-
-                tileView->SetTile(tile);
-
-                categoryContent->AddView(tileView);
-            }
-
-            // Add the category
-            mDashboard->AddView(categoryView);
-        }
-        Int64 delta = System->CurrentTimeMillis() - start;
-        Logger::D(LOG_TAG, "rebuildUI took: " + delta + " ms");
-    }
-
-    private void UpdateTileView(Context context, Resources res, DashboardTile tile,
-            ImageView tileIcon, TextView tileTextView, TextView statusTextView) {
-
-        if (tile.iconRes > 0) {
-            tileIcon->SetImageResource(tile.iconRes);
-        } else {
-            tileIcon->SetImageDrawable(NULL);
-            tileIcon->SetBackground(NULL);
-        }
-
-        tileTextView->SetText(tile->GetTitle(res));
-
-        CharSequence summary = tile->GetSummary(res);
-        if (!TextUtils->IsEmpty(summary)) {
-            statusTextView->SetVisibility(View.VISIBLE);
-            statusTextView->SetText(summary);
-        } else {
-            statusTextView->SetVisibility(View.GONE);
-        }
-    }
-
-    private void SendRebuildUI() {
-        if (!mHandler->HasMessages(MSG_REBUILD_UI)) {
-            mHandler->SendEmptyMessage(MSG_REBUILD_UI);
-        }
-    }
-}
+#endif //__ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDSUMMARY_H__

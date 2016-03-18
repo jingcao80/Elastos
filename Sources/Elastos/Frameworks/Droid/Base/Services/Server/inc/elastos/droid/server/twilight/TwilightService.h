@@ -4,6 +4,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos.Droid.Server.h"
+#include <Elastos.Droid.App.h>
 #include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/server/TwilightCalculator.h"
 #include "elastos/droid/content/BroadcastReceiver.h"

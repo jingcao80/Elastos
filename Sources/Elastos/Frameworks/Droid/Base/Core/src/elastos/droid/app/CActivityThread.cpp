@@ -137,7 +137,7 @@ namespace App {
 const String CActivityThread::TAG("CActivityThread");
 const Boolean CActivityThread::localLOGV = FALSE;
 const Boolean CActivityThread::DEBUG_MESSAGES = TRUE;
-const Boolean CActivityThread::DEBUG_BROADCAST = FALSE;
+const Boolean CActivityThread::DEBUG_BROADCAST = TRUE;
 const Boolean CActivityThread::DEBUG_RESULTS = FALSE;
 const Boolean CActivityThread::DEBUG_BACKUP = FALSE;
 const Boolean CActivityThread::DEBUG_CONFIGURATION = FALSE;
@@ -1642,8 +1642,6 @@ ECode CActivityThread::InstallSystemApplicationInfo(
     /* [in] */ IApplicationInfo* info,
     /* [in] */ IClassLoader* classLoader)
 {
-    Slogger::D(TAG, " > TODO: CActivityThread::InstallSystemApplicationInfo: %s", TO_CSTR(info));
-
     synchronized(this) {
         AutoPtr<IContextImpl> ctx;
         GetSystemContext((IContextImpl**)&ctx);
@@ -4109,6 +4107,7 @@ ECode CActivityThread::OnCoreSettingsChange()
 ECode CActivityThread::HandleUpdatePackageCompatibilityInfo(
     /* [in] */ UpdateCompatibilityData* data)
 {
+    Slogger::I(TAG, " === HandleUpdatePackageCompatibilityInfo SetCompatibilityInfo");
     assert(data != NULL);
     AutoPtr<ILoadedPkg> pkg;
     PeekPackageInfo(data->mPkg, FALSE, (ILoadedPkg**)&pkg);

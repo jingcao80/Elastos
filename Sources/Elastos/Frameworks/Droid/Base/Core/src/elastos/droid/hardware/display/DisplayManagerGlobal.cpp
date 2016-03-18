@@ -194,10 +194,10 @@ ECode DisplayManagerGlobal::GetDisplayInfo(
     /* [out] */ IDisplayInfo** displayInfo)
 {
     VALIDATE_NOT_NULL(displayInfo);
+    *displayInfo = NULL;
 
     //try {
     synchronized(mLock) {
-        AutoPtr<IDisplayInfo> info;
         if (USE_CACHE) {
             HashMap<Int32, AutoPtr<IDisplayInfo> >::Iterator find
                 = mDisplayInfoCache.Find(displayId);
@@ -208,19 +208,25 @@ ECode DisplayManagerGlobal::GetDisplayInfo(
             }
         }
 
-        mDm->GetDisplayInfo(displayId, displayInfo);
-        if (*displayInfo == NULL) {
+
+        AutoPtr<IDisplayInfo> info;
+        ECode ec = mDm->GetDisplayInfo(displayId, (IDisplayInfo**)&info);
+        if (FAILED(ec) || info == NULL) {
+            Logger::E(TAG, "Could not get display information from display manager. ec=%08x", ec);
             return NOERROR;
         }
 
         if (USE_CACHE) {
-            mDisplayInfoCache[displayId] = *displayInfo;
+            mDisplayInfoCache[displayId] = info;
         }
 
         RegisterCallbackIfNeededLocked();
 
+        *displayInfo = info;
+        REFCOUNT_ADD(*displayInfo)
+
         if (DEBUG) {
-            Logger::D(TAG, "getDisplayInfo: displayId=%d, info", displayId/*, info*/);
+            Logger::D(TAG, "getDisplayInfo: displayId=%d, info=%s", displayId, TO_CSTR(info));
         }
     }
 
@@ -236,7 +242,9 @@ ECode DisplayManagerGlobal::GetDisplayIds(
     /* [out, calee] */ ArrayOf<Int32>** displayIds)
 {
     VALIDATE_NOT_NULL(displayIds);
+    *displayIds = NULL;
 
+    AutoPtr< ArrayOf<Int32> > ids;
     //try {
     synchronized(mLock) {
         if (USE_CACHE) {
@@ -247,19 +255,22 @@ ECode DisplayManagerGlobal::GetDisplayIds(
             }
         }
 
-        if (FAILED(mDm->GetDisplayIds(displayIds))) {
-            *displayIds = ArrayOf<Int32>::Alloc(1);
-            REFCOUNT_ADD(*displayIds);
-            (**displayIds)[0] = IDisplay::DEFAULT_DISPLAY;
-            return NOERROR;
+        ECode ec = mDm->GetDisplayIds((ArrayOf<Int32>**)&ids);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "Could not get display ids from display manager. %08x", ec);
+            ids = ArrayOf<Int32>::Alloc(1);
+            ids->Set(0, IDisplay::DEFAULT_DISPLAY);
         }
-
-        if (USE_CACHE) {
-            mDisplayIdCache = *displayIds;
+        else {
+            if (USE_CACHE) {
+                mDisplayIdCache = ids;
+            }
+            RegisterCallbackIfNeededLocked();
         }
-        RegisterCallbackIfNeededLocked();
     }
 
+    *displayIds = ids;
+    REFCOUNT_ADD(*displayIds);
     return NOERROR;
 
     // } catch (RemoteException ex) {

@@ -151,6 +151,7 @@ ECode BaseBundle::constructor(
     }
 
     mClassLoader = b->mClassLoader;
+    mJavaData = b->mJavaData;
     return NOERROR;
 }
 
@@ -1658,7 +1659,7 @@ ECode BaseBundle::WriteToParcelInner(
 {
     if (mParcelledData != NULL) {
         if (mParcelledData == EMPTY_PARCEL) {
-            return dest->WriteInt32(0);
+            dest->WriteInt32(0);
         }
         else {
             Int32 length;
@@ -1666,7 +1667,6 @@ ECode BaseBundle::WriteToParcelInner(
             dest->WriteInt32(length);
             dest->WriteInt32(BUNDLE_MAGIC); // 'B' 'N' 'D' 'L'
             dest->AppendFrom(mParcelledData, 0, length);
-            return NOERROR;
         }
     }
     else {
@@ -1677,26 +1677,32 @@ ECode BaseBundle::WriteToParcelInner(
         }
         if (size == 0) {
             dest->WriteInt32(0);
-            return NOERROR;
         }
+        else {
+            Int32 lengthPos;
+            dest->GetDataPosition(&lengthPos);
 
-        Int32 lengthPos;
-        dest->GetDataPosition(&lengthPos);
+            dest->WriteInt32(-1); // dummy, will hold length
+            dest->WriteInt32(BUNDLE_MAGIC); // 'B' 'N' 'D' 'L'
 
-        dest->WriteInt32(-1); // dummy, will hold length
-        dest->WriteInt32(BUNDLE_MAGIC); // 'B' 'N' 'D' 'L'
+            Int32 startPos, endPos;
+            dest->GetDataPosition(&startPos);
+            WriteArrayMapInternal(dest, mMap);
+            dest->GetDataPosition(&endPos);
 
-        Int32 startPos, endPos;
-        dest->GetDataPosition(&startPos);
-        WriteArrayMapInternal(dest, mMap);
-        dest->GetDataPosition(&endPos);
-
-        // Backpatch length
-        dest->SetDataPosition(lengthPos);
-        Int32 length = endPos - startPos;
-        dest->WriteInt32(length);
-        dest->SetDataPosition(endPos);
+            // Backpatch length
+            dest->SetDataPosition(lengthPos);
+            Int32 length = endPos - startPos;
+            dest->WriteInt32(length);
+            dest->SetDataPosition(endPos);
+        }
     }
+    if (mJavaData != NULL) {
+        dest->WriteInt32(mJavaData->GetLength());
+        dest->WriteArrayOf((Handle32)mJavaData.Get());
+    }
+    else
+        dest->WriteInt32(0);
 
     return NOERROR;
 }
@@ -1710,7 +1716,12 @@ ECode BaseBundle::ReadFromParcelInner(
         // throw new RuntimeException("Bad length in parcel: " + length);
         return E_RUNTIME_EXCEPTION;
     }
-    return ReadFromParcelInner(parcel, length);
+    FAIL_RETURN(ReadFromParcelInner(parcel, length));
+    parcel->ReadInt32(&length);
+    if (length > 0) {
+        parcel->ReadArrayOf((Handle32*)&mJavaData);
+    }
+    return NOERROR;
 }
 
 ECode BaseBundle::ReadFromParcelInner(
@@ -1750,6 +1761,21 @@ ECode BaseBundle::ReadFromParcelInner(
     return NOERROR;
 }
 
+ECode BaseBundle::SetJavaData(
+    /* [in] */ ArrayOf<Byte>* data)
+{
+    mJavaData = data;
+    return NOERROR;
+}
+
+ECode BaseBundle::GetJavaData(
+    /* [out, callee] */ ArrayOf<Byte>** data)
+{
+    VALIDATE_NOT_NULL(data)
+    *data = mJavaData;
+    REFCOUNT_ADD(*data)
+    return NOERROR;
+}
 
 } // namespace Os
 } // namespace Droid

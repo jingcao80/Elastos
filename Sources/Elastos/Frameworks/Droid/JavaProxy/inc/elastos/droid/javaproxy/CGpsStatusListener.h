@@ -3,18 +3,31 @@
 #define __ELASTOS_DROID_JAVAPROXY_CGPSSTATUSLISTENER_H__
 
 #include "_Elastos_Droid_JavaProxy_CGpsStatusListener.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
-#include "elastos/droid/ext/frameworkdef.h"
+
+using Elastos::Droid::Location::IIGpsStatusListener;
+using Elastos::Droid::Os::IBinder;
 
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 CarClass(CGpsStatusListener)
+    , public Object
+    , public IIGpsStatusListener
+    , public IBinder
 {
 public:
-    CGpsStatusListener();
     ~CGpsStatusListener();
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
+    CARAPI constructor(
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI OnGpsStarted();
 
@@ -37,9 +50,8 @@ public:
         /* [in] */ Int64 timestamp,
         /* [in] */ const String& nmea);
 
-    CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
     static const String TAG;

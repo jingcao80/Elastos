@@ -263,11 +263,11 @@ private:
         CInputManagerService* mOwner;
     };
 
-    class BroadcastReceiver1InSystemRunning
+    class BroadcastReceiverPackage
         : public BroadcastReceiver
     {
     public:
-        BroadcastReceiver1InSystemRunning(
+        BroadcastReceiverPackage(
             /* [in] */ CInputManagerService* owner);
 
         //@Override
@@ -279,7 +279,7 @@ private:
             /* [out] */ String* info)
         {
             VALIDATE_NOT_NULL(info);
-            *info = "CInputManagerService::BroadcastReceiver1InSystemRunning: ";
+            *info = "CInputManagerService::BroadcastReceiverPackage: ";
             (*info).AppendFormat("%p", this);
             return NOERROR;
         }
@@ -288,11 +288,11 @@ private:
         CInputManagerService* mOwner;
     };
 
-    class BroadcastReceiver2InSystemRunning
+    class BroadcastReceiverAlias
         : public BroadcastReceiver
     {
     public:
-        BroadcastReceiver2InSystemRunning(
+        BroadcastReceiverAlias(
             /* [in] */ CInputManagerService* owner);
 
         //@Override
@@ -304,7 +304,7 @@ private:
             /* [out] */ String* info)
         {
             VALIDATE_NOT_NULL(info);
-            *info = "CInputManagerService::BroadcastReceiver2InSystemRunning: ";
+            *info = "CInputManagerService::BroadcastReceiverAlias: ";
             (*info).AppendFormat("%p", this);
             return NOERROR;
         }
@@ -452,7 +452,7 @@ public:
     CARAPI Start();
 
     // TODO(BT) Pass in paramter for bluetooth system
-    CARAPI_(void) SystemRunning();
+    CARAPI SystemRunning();
 
     /**
      * Gets the current state of a key or button by key code.
@@ -1062,7 +1062,7 @@ private:
     const static Int32 MSG_RELOAD_DEVICE_ALIASES = 5;
 
     // Pointer to native input manager service object.
-    Int64 mPtr;
+    NativeInputManager* mPtr;
 
     AutoPtr<IContext> mContext;
     AutoPtr<InputManagerHandler> mHandler;

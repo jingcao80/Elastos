@@ -1,9 +1,17 @@
 
-#include "elastos/droid/server/hdmi/NewDeviceAction.h"
+#include "elastos/droid/server/hdmi/Constants.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessageBuilder.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessageCache.h"
+#include "elastos/droid/server/hdmi/HdmiConfig.h"
 #include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include "elastos/droid/server/hdmi/HdmiUtils.h"
+#include "elastos/droid/server/hdmi/NewDeviceAction.h"
+#include <elastos/utility/logging/Slogger.h>
 
+// using Elastos::Droid::Hardware::Hdmi::CHdmiDeviceInfo;
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Utility::ISlog;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -27,13 +35,11 @@ ECode NewDeviceAction::constructor(
     /* [in] */ Int32 deviceLogicalAddress,
     /* [in] */ Int32 devicePhysicalAddress)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super::constructor(source);
-        mDeviceLogicalAddress = deviceLogicalAddress;
-        mDevicePhysicalAddress = devicePhysicalAddress;
-        mVendorId = Constants::UNKNOWN_VENDOR_ID;
-#endif
+    HdmiCecFeatureAction::constructor(source);
+    mDeviceLogicalAddress = deviceLogicalAddress;
+    mDevicePhysicalAddress = devicePhysicalAddress;
+    mVendorId = Constants::UNKNOWN_VENDOR_ID;
+    return NOERROR;
 }
 
 ECode NewDeviceAction::Start(
@@ -41,22 +47,20 @@ ECode NewDeviceAction::Start(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mState = STATE_WAITING_FOR_SET_OSD_NAME;
-        if (MayProcessCommandIfCached(mDeviceLogicalAddress, Constants::MESSAGE_SET_OSD_NAME)) {
-            *result = TRUE;
-            return NOERROR;
-        }
-
-        Int32 srcAddr;
-        GetSourceAddress(&srcAddr);
-        SendCommand(HdmiCecMessageBuilder->BuildGiveOsdNameCommand(srcAddr,
-                mDeviceLogicalAddress));
-        AddTimer(mState, HdmiConfig::TIMEOUT_MS);
+    mState = STATE_WAITING_FOR_SET_OSD_NAME;
+    if (MayProcessCommandIfCached(mDeviceLogicalAddress, Constants::MESSAGE_SET_OSD_NAME)) {
         *result = TRUE;
         return NOERROR;
-#endif
+    }
+
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    AutoPtr<IHdmiCecMessage> cmd;
+    HdmiCecMessageBuilder::BuildGiveOsdNameCommand(srcAddr, mDeviceLogicalAddress, (IHdmiCecMessage**)&cmd);
+    SendCommand(cmd);
+    AddTimer(mState, HdmiConfig::TIMEOUT_MS);
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode NewDeviceAction::ProcessCommand(
@@ -65,141 +69,137 @@ ECode NewDeviceAction::ProcessCommand(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // For the logical device in interest, we want two more pieces of information -
-        // osd name and vendor id. They are requested in sequence. In case we don't
-        // get the expected responses (either by timeout or by receiving <feature abort> command),
-        // set them to a default osd name and unknown vendor id respectively.
-        Int32 opcode;
-        cmd->GetOpcode(&opcode);
-        Int32 src;
-        cmd->GetSource(&src);
-        AutoPtr<ArrayOf<Byte> > params;
-        cmd->GetParams((ArrayOf<Byte>**)&params);
+    // For the logical device in interest, we want two more pieces of information -
+    // osd name and vendor id. They are requested in sequence. In case we don't
+    // get the expected responses (either by timeout or by receiving <feature abort> command),
+    // set them to a default osd name and unknown vendor id respectively.
+    Int32 opcode;
+    cmd->GetOpcode(&opcode);
+    Int32 src;
+    cmd->GetSource(&src);
+    AutoPtr<ArrayOf<Byte> > params;
+    cmd->GetParams((ArrayOf<Byte>**)&params);
 
-        if (mDeviceLogicalAddress != src) {
-            *result = FALSE;
+    if (mDeviceLogicalAddress != src) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    if (mState == STATE_WAITING_FOR_SET_OSD_NAME) {
+        if (opcode == Constants::MESSAGE_SET_OSD_NAME) {
+            // try {
+            mDisplayName = String(*params/* , "US-ASCII" */);
+            // } catch (UnsupportedEncodingException e) {
+                // Slogger::E(TAG, "Failed to get OSD name: " + e->GetMessage());
+            // }
+            RequestVendorId();
+            *result = TRUE;
             return NOERROR;
-        }
-
-        if (mState == STATE_WAITING_FOR_SET_OSD_NAME) {
-            if (opcode == Constants::MESSAGE_SET_OSD_NAME) {
-                try {
-                    mDisplayName = new String(params, "US-ASCII");
-                } catch (UnsupportedEncodingException e) {
-                    Slogger::E(TAG, "Failed to get OSD name: " + e->GetMessage());
-                }
+        } else if (opcode == Constants::MESSAGE_FEATURE_ABORT) {
+            Int32 requestOpcode = (*params)[0] & 0xFF;
+            if (requestOpcode == Constants::MESSAGE_GIVE_OSD_NAME) {
                 RequestVendorId();
                 *result = TRUE;
                 return NOERROR;
-            } else if (opcode == Constants::MESSAGE_FEATURE_ABORT) {
-                Int32 requestOpcode = (*params)[0] & 0xFF;
-                if (requestOpcode == Constants::MESSAGE_GIVE_OSD_NAME) {
-                    RequestVendorId();
-                    *result = TRUE;
-                    return NOERROR;
-                }
             }
-        } else if (mState == STATE_WAITING_FOR_DEVICE_VENDOR_ID) {
-            if (opcode == Constants::MESSAGE_DEVICE_VENDOR_ID) {
-                mVendorId = HdmiUtils->ThreeBytesToInt32(params);
+        }
+    } else if (mState == STATE_WAITING_FOR_DEVICE_VENDOR_ID) {
+        if (opcode == Constants::MESSAGE_DEVICE_VENDOR_ID) {
+            mVendorId = HdmiUtils::ThreeBytesToInt32(params);
+            AddDeviceInfo();
+            Finish();
+            *result = TRUE;
+            return NOERROR;
+        } else if (opcode == Constants::MESSAGE_FEATURE_ABORT) {
+            Int32 requestOpcode = (*params)[0] & 0xFF;
+            if (requestOpcode == Constants::MESSAGE_GIVE_DEVICE_VENDOR_ID) {
                 AddDeviceInfo();
                 Finish();
                 *result = TRUE;
                 return NOERROR;
-            } else if (opcode == Constants::MESSAGE_FEATURE_ABORT) {
-                Int32 requestOpcode = (*params)[0] & 0xFF;
-                if (requestOpcode == Constants::MESSAGE_GIVE_DEVICE_VENDOR_ID) {
-                    AddDeviceInfo();
-                    Finish();
-                    *result = TRUE;
-                    return NOERROR;
-                }
             }
         }
-        *result = FALSE;
-        return NOERROR;
-#endif
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
-ECode NewDeviceAction::MayProcessCommandIfCached(
+Boolean NewDeviceAction::MayProcessCommandIfCached(
     /* [in] */ Int32 destAddress,
-    /* [in] */ Int32 opcode,
-    /* [out] */ Boolean* result)
+    /* [in] */ Int32 opcode)
 {
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        HdmiCecMessage message = GetCecMessageCache()->GetMessage(destAddress, opcode);
-        if (message != NULL) {
-            return ProcessCommand(message, result);
-        }
-        *result = FALSE;
-        return NOERROR;
-#endif
+    AutoPtr<HdmiCecMessageCache> cache;
+    GetCecMessageCache((HdmiCecMessageCache**)&cache);
+    AutoPtr<IHdmiCecMessage> message;
+    cache->GetMessage(destAddress, opcode, (IHdmiCecMessage**)&message);
+    if (message != NULL) {
+        Boolean rev;
+        ProcessCommand(message, &rev);
+        return rev;
+    }
+    return FALSE;
 }
 
 ECode NewDeviceAction::RequestVendorId()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // At first, transit to waiting status for <Device Vendor Id>.
-        mState = STATE_WAITING_FOR_DEVICE_VENDOR_ID;
-        // If the message is already in cache, process it.
-        if (MayProcessCommandIfCached(mDeviceLogicalAddress,
-                Constants::MESSAGE_DEVICE_VENDOR_ID)) {
-            return NOERROR;
-        }
-        Int32 srcAddr;
-        GetSourceAddress(&srcAddr);
-        SendCommand(HdmiCecMessageBuilder->BuildGiveDeviceVendorIdCommand(srcAddr,
-                mDeviceLogicalAddress));
-        AddTimer(mState, HdmiConfig::TIMEOUT_MS);
-#endif
+    // At first, transit to waiting status for <Device Vendor Id>.
+    mState = STATE_WAITING_FOR_DEVICE_VENDOR_ID;
+    // If the message is already in cache, process it.
+    if (MayProcessCommandIfCached(mDeviceLogicalAddress,
+            Constants::MESSAGE_DEVICE_VENDOR_ID)) {
+        return NOERROR;
+    }
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    AutoPtr<IHdmiCecMessage> cmd;
+    HdmiCecMessageBuilder::BuildGiveDeviceVendorIdCommand(srcAddr,
+            mDeviceLogicalAddress, (IHdmiCecMessage**)&cmd);
+    SendCommand(cmd);
+    AddTimer(mState, HdmiConfig::TIMEOUT_MS);
+    return NOERROR;
 }
 
 ECode NewDeviceAction::AddDeviceInfo()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mDisplayName == NULL) {
-            mDisplayName = HdmiUtils->GetDefaultDeviceName(mDeviceLogicalAddress);
-        }
-        AutoPtr<IHdmiCecLocalDeviceTv> tv;
-        Tv((IHdmiCecLocalDeviceTv**)&tv);
-        HdmiDeviceInfo deviceInfo = new HdmiDeviceInfo(
-                mDeviceLogicalAddress, mDevicePhysicalAddress,
-                tv->GetPortId(mDevicePhysicalAddress),
-                HdmiUtils->GetTypeFromAddress(mDeviceLogicalAddress),
-                mVendorId, mDisplayName);
-        tv->AddCecDevice(deviceInfo);
+    if (mDisplayName == NULL) {
+        mDisplayName = HdmiUtils::GetDefaultDeviceName(mDeviceLogicalAddress);
+    }
+    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+    Tv((IHdmiCecLocalDeviceTv**)&tv);
+    Int32 portId;
+    ((HdmiCecLocalDeviceTv*) tv.Get())->GetPortId(mDevicePhysicalAddress, &portId);
+    AutoPtr<IHdmiDeviceInfo> deviceInfo;
+    // TODO: Waiting for CHdmiDeviceInfo
+    assert(0);
+    // CHdmiDeviceInfo::New(
+    //         mDeviceLogicalAddress, mDevicePhysicalAddress,
+    //         portId,
+    //         HdmiUtils::GetTypeFromAddress(mDeviceLogicalAddress),
+    //         mVendorId, mDisplayName, (IHdmiDeviceInfo**)&deviceInfo);
+    ((HdmiCecLocalDeviceTv*) tv.Get())->AddCecDevice(deviceInfo);
 
-        if (HdmiUtils->GetTypeFromAddress(mDeviceLogicalAddress)
-                == IHdmiDeviceInfo::DEVICE_AUDIO_SYSTEM) {
-            tv->OnNewAvrAdded(deviceInfo);
-        }
-#endif
+    if (HdmiUtils::GetTypeFromAddress(mDeviceLogicalAddress)
+            == IHdmiDeviceInfo::DEVICE_AUDIO_SYSTEM) {
+        ((HdmiCecLocalDeviceTv*) tv.Get())->OnNewAvrAdded(deviceInfo);
+    }
+    return NOERROR;
 }
 
 ECode NewDeviceAction::HandleTimerEvent(
     /* [in] */ Int32 state)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mState == STATE_NONE || mState != state) {
-            return NOERROR;
-        }
-        if (state == STATE_WAITING_FOR_SET_OSD_NAME) {
-            // Osd name request timed out. Try vendor id
-            RequestVendorId();
-        } else if (state == STATE_WAITING_FOR_DEVICE_VENDOR_ID) {
-            // vendor id timed out. Go ahead creating the device info what we've got so far.
-            AddDeviceInfo();
-            Finish();
-        }
-#endif
+    if (mState == STATE_NONE || mState != state) {
+        return NOERROR;
+    }
+    if (state == STATE_WAITING_FOR_SET_OSD_NAME) {
+        // Osd name request timed out. Try vendor id
+        RequestVendorId();
+    } else if (state == STATE_WAITING_FOR_DEVICE_VENDOR_ID) {
+        // vendor id timed out. Go ahead creating the device info what we've got so far.
+        AddDeviceInfo();
+        Finish();
+    }
+    return NOERROR;
 }
 
 ECode NewDeviceAction::IsActionOf(
@@ -208,11 +208,9 @@ ECode NewDeviceAction::IsActionOf(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return (mDeviceLogicalAddress == activeSource->mLogicalAddress)
-                && (mDevicePhysicalAddress == activeSource->mPhysicalAddress);
-#endif
+    *result = (mDeviceLogicalAddress == ((HdmiCecLocalDevice::ActiveSource*) activeSource)->mLogicalAddress)
+            && (mDevicePhysicalAddress == ((HdmiCecLocalDevice::ActiveSource*) activeSource)->mPhysicalAddress);
+    return NOERROR;
 }
 
 } // namespace Hdmi

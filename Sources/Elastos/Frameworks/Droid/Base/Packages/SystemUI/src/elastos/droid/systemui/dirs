@@ -12,5 +12,5 @@ DIRS += qs
 #DIRS += recents
 DIRS += screenshot
 DIRS += settings
-#DIRS += usb
+DIRS += usb
 #DIRS += volume

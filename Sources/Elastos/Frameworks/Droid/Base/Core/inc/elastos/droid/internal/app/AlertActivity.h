@@ -13,7 +13,7 @@ namespace Droid {
 namespace Internal {
 namespace App {
 
-class AlertActivity
+class ECO_PUBLIC AlertActivity
     : public Activity
     , public IAlertActivity
     , public IDialogInterface

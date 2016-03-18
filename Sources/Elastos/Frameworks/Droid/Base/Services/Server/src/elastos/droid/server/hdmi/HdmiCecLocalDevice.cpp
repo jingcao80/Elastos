@@ -665,7 +665,7 @@ ECode HdmiCecLocalDevice::HandleUserControlPressed(
     // Note that we don't support parameterized keycode now.
     // TODO: translate parameterized keycode as well.
     Int32 keycode;
-    HdmiCecKeycode::CecKeyToAndroidKey((*params)[0], &keycode);
+    HdmiCecKeycode::CecKeyToElastosKey((*params)[0], &keycode);
     Int32 keyRepeatCount = 0;
     if (mLastKeycode != HdmiCecKeycode::UNSUPPORTED_KEYCODE) {
         if (keycode == mLastKeycode) {

@@ -99,6 +99,9 @@ module
 
         GetHandler(
             [out] IHandler** handler);
+
+        AddRemoteConference(
+            [in] IRemoteConference* remoteConference);
     }
 
     } // namespace Telecom

@@ -18,7 +18,7 @@ ECode CMediaScannerHelper::IsNoMediaPath(
     return CMediaScanner::IsNoMediaPath(path, result);
 }
 
-ECode CARAPI ClearMediaPathCache(
+ECode CMediaScannerHelper::ClearMediaPathCache(
     /* [in] */ Boolean clearMediaPaths,
     /* [in] */ Boolean clearNoMediaPaths)
 {

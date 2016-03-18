@@ -107,7 +107,7 @@ ECode CActivityManagerRunningTaskInfo::SetId(
 }
 
 ECode CActivityManagerRunningTaskInfo::GetLastActiveTime(
-    /* [out] */ Int32* lastActiveTime)
+    /* [out] */ Int64* lastActiveTime)
 {
     VALIDATE_NOT_NULL(lastActiveTime);
     *lastActiveTime = mLastActiveTime;
@@ -115,7 +115,7 @@ ECode CActivityManagerRunningTaskInfo::GetLastActiveTime(
 }
 
 ECode CActivityManagerRunningTaskInfo::SetLastActiveTime(
-    /* [in] */ Int32 lastActiveTime)
+    /* [in] */ Int64 lastActiveTime)
 {
     mLastActiveTime = lastActiveTime;
     return NOERROR;

@@ -8,12 +8,11 @@
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::View::Animation::IInterpolator;
 
 namespace Elastos {
 namespace Droid {
 namespace Widget {
-
-using Elastos::Droid::View::Animation::IInterpolator;
 
 class Scroller
     : public Object

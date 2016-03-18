@@ -19,6 +19,25 @@ class TimerRecordingAction
     : public HdmiCecFeatureAction
     , public ITimerRecordingAction
 {
+private:
+    class InnerSub_SendMessageCallback
+        : public Object
+        , public IHdmiControlServiceSendMessageCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_SendMessageCallback(
+            /* [in] */ TimerRecordingAction* host);
+
+        //@Override
+        CARAPI OnSendCompleted(
+            /* [in] */ Int32 error);
+
+    private:
+        TimerRecordingAction* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -46,18 +65,15 @@ public:
 private:
     CARAPI SendTimerMessage();
 
-    CARAPI HandleTimerStatus(
-        /* [in] */ IHdmiCecMessage* cmd,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) HandleTimerStatus(
+        /* [in] */ IHdmiCecMessage* cmd);
 
-    CARAPI HandleFeatureAbort(
-        /* [in] */ IHdmiCecMessage* cmd,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) HandleFeatureAbort(
+        /* [in] */ IHdmiCecMessage* cmd);
 
     // Convert byte array to int.
-    static CARAPI BytesToInt32(
-        /* [in] */ ArrayOf<Byte>* data,
-        /* [out] */ Int32* result);
+    static CARAPI_(Int32) BytesToInt32(
+        /* [in] */ ArrayOf<Byte>* data);
 
 private:
     static const String TAG;

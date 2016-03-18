@@ -7,11 +7,10 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/view/DisplayAdjustments.h"
-#include "elastos/droid/content/res/CCompatibilityInfoHelper.h"
+#include "elastos/droid/content/res/CCompatibilityInfo.h"
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Droid::Content::Res::ICompatibilityInfoHelper;
-using Elastos::Droid::Content::Res::CCompatibilityInfoHelper;
+using Elastos::Droid::Content::Res::CCompatibilityInfo;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -23,7 +22,9 @@ AutoPtr<IDisplayAdjustments> DisplayAdjustments::DEFAULT_DISPLAY_ADJUSTMENTS = n
 CAR_INTERFACE_IMPL(DisplayAdjustments, Object, IDisplayAdjustments)
 
 DisplayAdjustments::DisplayAdjustments()
-{}
+{
+    mCompatInfo = CCompatibilityInfo::DEFAULT_COMPATIBILITY_INFO;
+}
 
 DisplayAdjustments::DisplayAdjustments(
     /* [in] */ IBinder* token)
@@ -74,11 +75,7 @@ ECode DisplayAdjustments::SetCompatibilityInfo(
         mCompatInfo = compatInfo;
     }
     else {
-        AutoPtr<ICompatibilityInfoHelper> helper;
-        CCompatibilityInfoHelper::AcquireSingleton((ICompatibilityInfoHelper**)&helper);
-        AutoPtr<ICompatibilityInfo> defInfo;
-        helper->GetDefault((ICompatibilityInfo**)&defInfo);
-        mCompatInfo = defInfo;
+        mCompatInfo = CCompatibilityInfo::DEFAULT_COMPATIBILITY_INFO;
     }
     return NOERROR;
 }

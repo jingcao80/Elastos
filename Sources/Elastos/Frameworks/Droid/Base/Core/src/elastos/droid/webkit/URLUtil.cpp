@@ -1,7 +1,6 @@
 
 #include <Elastos.CoreLibrary.Net.h>
 #include "elastos/droid/net/Uri.h"
-//#include "elastos/droid/net/WebAddress.h"
 #include "elastos/droid/webkit/URLUtil.h"
 #include "elastos/droid/webkit/MimeTypeMap.h"
 #include <elastos/core/StringBuilder.h>
@@ -10,8 +9,11 @@ using Elastos::Core::StringBuilder;
 using Elastos::Utility::Regex::CPatternHelper;
 using Elastos::Utility::Regex::IPatternHelper;
 using Elastos::Utility::Regex::IMatcher;
+using Elastos::Utility::Regex::IMatchResult;
 using Elastos::Net::CURLEncoder;
 using Elastos::Net::IURLEncoder;
+using Elastos::Droid::Net::IWebAddress;
+//TODO using Elastos::Droid::Net::CWebAddress;
 using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Net::IWebAddress;
 
@@ -70,10 +72,8 @@ String URLUtil::GuessUrl(
         inUrl = inUrl.Substring(0, inUrl.GetLength() - 1);
     }
 
-    assert(0);
-
     //try {
-//        webAddress = new WebAddress(inUrl);
+        //TODO CWebAddress::New(inUrl, (IWebAddress**)&webAddress);
     //} catch (ParseException ex) {
 
     //    if (DebugFlags.URL_UTIL) {
@@ -83,16 +83,19 @@ String URLUtil::GuessUrl(
     //}
 
     // Check host
-//    if (webAddress->GetHost().IndexOf('.') == -1) {
-//        StringBuilder sb;
-//        sb.Append("www.");
-//        sb.Append(webAddress->GetHost());
-//        sb.Append(".com");
+    String host;
+    webAddress->GetHost(&host);
+    if (host.IndexOf('.') == -1) {
+        AutoPtr<StringBuilder> sb = new StringBuilder();
+        sb->Append("www.");
+        sb->Append(host);
+        sb->Append(".com");
         // no dot: user probably entered a bare domain.  try .com
-//        webAddress->SetHost(sb.ToString());
-//    }
-//    return webAddress->ToString();
-    return String(NULL);
+        webAddress->SetHost(sb->ToString());
+    }
+    String result;
+    //TODO webAddress->ToString(&result);
+    return result;
 }
 
 String URLUtil::ComposeSearchUrl(
@@ -106,33 +109,26 @@ String URLUtil::ComposeSearchUrl(
     }
 
     String query;
-    StringBuilder buffer;
-    assert(0);
-    // TODO
-    // buffer.AppendString(templateStr.Substring(0, placeHolderIndex));
+    AutoPtr<StringBuilder> buffer = new StringBuilder();
+    buffer->Append(templateStr.Substring(0, placeHolderIndex));
 
     //try {
     //    query = java.net.URLEncoder.encode(inQuery, "utf-8");
     AutoPtr<IURLEncoder> URLEncoder;
-    assert(0);
-//        CURLEncoder::New((IURLEncoder**)&URLEncoder);
+    CURLEncoder::AcquireSingleton((IURLEncoder**)&URLEncoder);
     if (FAILED(URLEncoder->Encode(inQuery, String("utf-8"), &query))){
         return String(NULL);
     }
-    assert(0);
-    // TODO
-    // buffer.AppendString(query);
+    buffer->Append(query);
 
     //} catch (UnsupportedEncodingException ex) {
     //    return null;
     //}
 
-    assert(0);
-    // TODO
-    // buffer.AppendString(templateStr.Substring(
-    //         placeHolderIndex + queryPlaceHolder.GetLength()));
+    buffer->Append(templateStr.Substring(
+             placeHolderIndex + queryPlaceHolder.GetLength()));
 
-    return buffer.ToString();
+    return buffer->ToString();
 }
 
 ECode URLUtil::Decode(
@@ -445,9 +441,7 @@ String URLUtil::ParseContentDisposition(
     Boolean bFind = FALSE;
     if (m->Find(&bFind), bFind) {
         String str;
-        assert(0);
-        // TODO
-        // m->Group(2, &str);
+        IMatchResult::Probe(m)->Group(2, &str);
         return str;
     }
     //} catch (IllegalStateException ex) {

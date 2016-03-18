@@ -1,7 +1,10 @@
 
 #include "elastos/droid/javaproxy/CMountServiceListener.h"
+#include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::Storage::EIID_IIMountServiceListener;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -9,6 +12,10 @@ namespace Droid {
 namespace JavaProxy {
 
 const String CMountServiceListener::TAG("CMountServiceListener");
+
+CAR_INTERFACE_IMPL_2(CMountServiceListener, Object, IIMountServiceListener, IBinder)
+
+CAR_OBJECT_IMPL(CMountServiceListener)
 
 CMountServiceListener::~CMountServiceListener()
 {
@@ -18,8 +25,8 @@ CMountServiceListener::~CMountServiceListener()
 }
 
 ECode CMountServiceListener::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -29,7 +36,7 @@ ECode CMountServiceListener::constructor(
 ECode CMountServiceListener::OnUsbMassStorageConnectionChanged(
     /* [in] */ Boolean connected)
 {
-    // LOGGERD(TAG, String("+ CMountServiceListener::OnUsbMassStorageConnectionChanged()"));
+    // LOGGERD(TAG, "+ CMountServiceListener::OnUsbMassStorageConnectionChanged()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -45,7 +52,7 @@ ECode CMountServiceListener::OnUsbMassStorageConnectionChanged(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CMountServiceListener::OnUsbMassStorageConnectionChanged()"));
+    // LOGGERD(TAG, "- CMountServiceListener::OnUsbMassStorageConnectionChanged()");
     return NOERROR;
 }
 
@@ -54,7 +61,7 @@ ECode CMountServiceListener::OnStorageStateChanged(
     /* [in] */ const String& oldState,
     /* [in] */ const String& newState)
 {
-    // LOGGERD(TAG, String("+ CMountServiceListener::OnUsbMassStorageConnectionChanged()"));
+    // LOGGERD(TAG, "+ CMountServiceListener::OnUsbMassStorageConnectionChanged()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -77,7 +84,32 @@ ECode CMountServiceListener::OnStorageStateChanged(
     env->DeleteLocalRef(joldState);
     env->DeleteLocalRef(jnewState);
 
-    // LOGGERD(TAG, String("- CMountServiceListener::OnUsbMassStorageConnectionChanged()"));
+    // LOGGERD(TAG, "- CMountServiceListener::OnUsbMassStorageConnectionChanged()");
+    return NOERROR;
+}
+
+ECode CMountServiceListener::ToString(
+    /* [out] */ String* str)
+{
+    // LOGGERD(TAG, "+ CMountServiceListener::ToString()");
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("java/lang/Object");
+    Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
+
+    jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
+
+    *str = Util::GetElString(env, jstr);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jstr);
+
+    // LOGGERD(TAG, "- CMountServiceListener::ToString()");
     return NOERROR;
 }
 

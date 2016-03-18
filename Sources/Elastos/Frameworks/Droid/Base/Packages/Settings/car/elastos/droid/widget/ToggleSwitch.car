@@ -1,0 +1,36 @@
+module
+{
+    using interface Elastos.Droid.Widget.ISwitch;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Widget {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.Widget.ISwitch
+     * extends Elastos.Droid.Widget.ICompoundButton
+     * extends Elastos.Droid.Widget.ITextView
+     * extends Elastos.Droid.View.IView
+     *
+     * interface Elastos.Droid.View.OnPreDrawListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.Widget.ICheckable
+     */
+    interface IToggleSwitch {}
+
+    interface IToggleSwitchOnBeforeCheckedChangeListener {
+        OnBeforeCheckedChanged(
+            [in] IToggleSwitch* toggleSwitch,
+            [in] Boolean checked,
+            [out] Boolean* result);
+    }
+
+    } // namespace Widget
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+}

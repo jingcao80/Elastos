@@ -82,13 +82,14 @@ ECode EncodingUtils::GetAsciiBytes(
 {
     VALIDATE_NOT_NULL(bytes)
     *bytes = NULL;
-     if (data == NULL) {
+     if (data.IsNull()) {
         Logger::E("EncodingUtils", "Parameter may not be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     // try {
-    *bytes = data.GetBytes(); // return data.getBytes(HTTP.US_ASCII);
+    AutoPtr< ArrayOf<Byte> > bs = data.GetBytes(); // return data.getBytes(HTTP.US_ASCII);
+    *bytes = bs;
     REFCOUNT_ADD(*bytes)
     return NOERROR;
     // } catch (UnsupportedEncodingException e) {

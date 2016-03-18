@@ -2,11 +2,18 @@
 #include "elastos/droid/javaproxy/CIRemoteControlDisplay.h"
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::Media::EIID_IIRemoteControlDisplay;
+using Elastos::Droid::Os::EIID_IBinder;
+
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 const String CIRemoteControlDisplay::TAG("CIRemoteControlDisplay");
+
+CAR_INTERFACE_IMPL_3(CIRemoteControlDisplay, Object, IIRemoteControlDisplay, IJavaNativeProxy, IBinder)
+
+CAR_OBJECT_IMPL(CIRemoteControlDisplay)
 
 CIRemoteControlDisplay::~CIRemoteControlDisplay()
 {
@@ -16,17 +23,18 @@ CIRemoteControlDisplay::~CIRemoteControlDisplay()
 }
 
 ECode CIRemoteControlDisplay::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
     return NOERROR;
 }
 
-ECode CIRemoteControlDisplay::GetJavaInstance(Handle32* obj)
+ECode CIRemoteControlDisplay::GetJavaInstance(
+    /* [out] */ Handle64* obj)
 {
-    *obj = (Handle32)mJInstance;
+    *obj = (Handle64)mJInstance;
     return NOERROR;
 }
 
@@ -54,10 +62,8 @@ ECode CIRemoteControlDisplay::SetCurrentClientId(
     return NOERROR;
 }
 
-ECode CIRemoteControlDisplay::SetPlaybackState(
-    /* [in] */ Int32 generationId,
-    /* [in] */ Int32 state,
-    /* [in] */ Int64 stateChangeTimeMs)
+ECode CIRemoteControlDisplay::SetEnabled(
+        /* [in] */ Boolean enabled)
 {
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -65,19 +71,43 @@ ECode CIRemoteControlDisplay::SetPlaybackState(
     jclass c = env->FindClass("android/media/IRemoteControlDisplay");
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IRemoteControlDisplay %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "setPlaybackState", "(IIJ)V");
+    jmethodID m = env->GetMethodID(c, "setEnabled", "(Z)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: setEnabled %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, enabled);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: setEnabled %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+    return NOERROR;
+}
+
+ECode CIRemoteControlDisplay::SetPlaybackState(
+    /* [in] */ Int32 generationId,
+    /* [in] */ Int32 state,
+    /* [in] */ Int64 stateChangeTimeMs,
+    /* [in] */ Int64 currentPosMs,
+    /* [in] */ Float speed)
+{
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("android/media/IRemoteControlDisplay");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IRemoteControlDisplay %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "setPlaybackState", "(IIJJF)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: setPlaybackState %d", __LINE__);
 
-    env->CallVoidMethod(mJInstance, m, generationId, state, stateChangeTimeMs);
+    env->CallVoidMethod(mJInstance, m, generationId, state, stateChangeTimeMs, currentPosMs, speed);
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: setPlaybackState %d", __LINE__);
 
     env->DeleteLocalRef(c);
     return NOERROR;
 }
 
-ECode CIRemoteControlDisplay::SetTransportControlFlags(
+ECode CIRemoteControlDisplay::SetTransportControlInfo(
     /* [in] */ Int32 generationId,
-    /* [in] */ Int32 transportControlFlags)
+    /* [in] */ Int32 transportControlFlags,
+    /* [in] */ Int32 posCapabilities)
 {
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -85,11 +115,11 @@ ECode CIRemoteControlDisplay::SetTransportControlFlags(
     jclass c = env->FindClass("android/media/IRemoteControlDisplay");
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IRemoteControlDisplay %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "setTransportControlFlags", "(II)V");
-    Util::CheckErrorAndLog(env, TAG, "GetMethodID: setTransportControlFlags %d", __LINE__);
+    jmethodID m = env->GetMethodID(c, "setTransportControlInfo", "(III)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: setTransportControlInfo %d", __LINE__);
 
-    env->CallVoidMethod(mJInstance, m, generationId, transportControlFlags);
-    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: setTransportControlFlags %d", __LINE__);
+    env->CallVoidMethod(mJInstance, m, generationId, transportControlFlags, posCapabilities);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: setTransportControlInfo %d", __LINE__);
 
     env->DeleteLocalRef(c);
     return NOERROR;

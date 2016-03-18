@@ -2,23 +2,34 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Net.h"
+#include "elastos/droid/app/CAlertDialogBuilder.h"
 #include "elastos/droid/webkit/JsDialogHelper.h"
 #include "elastos/droid/webkit/URLUtil.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::ILayoutInflaterHelper;
+//TODO using Elastos::Droid::View::CLayoutInflaterHelper;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::R;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::CString;
 using Elastos::Net::IURL;
+using Elastos::Net::CURL;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -69,9 +80,7 @@ ECode JsDialogHelper::PositiveListener::OnClick(
     /* [in] */ Int32 which)
 {
     if (mEdit == NULL) {
-        assert(0);
-        // TODO
-        // mOwner->mResult->Confirm();
+        IJsResult::Probe(mOwner->mResult)->Confirm();
     }
     else {
         AutoPtr<ICharSequence> cs;
@@ -143,94 +152,106 @@ ECode JsDialogHelper::InvokeCallback(
 ECode JsDialogHelper::ShowDialog(
     /* [in] */ IContext* context)
 {
-    assert(0);
-    // TODO
-    // if (!CanShowAlertDialog(context)) {
-    //     Logger::W(TAG, "Cannot create a dialog, the WebView context is not an Activity");
-    //     return mResult->Cancel();
-    // }
+    if (!CanShowAlertDialog(context)) {
+        Logger::W(TAG, "Cannot create a dialog, the WebView context is not an Activity");
+        return IJsResult::Probe(mResult)->Cancel();
+    }
 
-    // String title, displayMessage;
-    // Int32 positiveTextId, negativeTextId;
-    // if (mType == UNLOAD) {
-    //     context->GetString(com::android::internal::R::string::js_dialog_before_unload_title, &title);
-    //     context->GetString(
-    //             com::android::internal::R::string::js_dialog_before_unload, mMessage, &displayMessage);
-    //     positiveTextId = com::android::internal::R::string::js_dialog_before_unload_positive_button;
-    //     negativeTextId = com::android::internal::R::string::js_dialog_before_unload_negative_button;
-    // }
-    // else {
-    //     title = GetJsDialogTitle(context);
-    //     displayMessage = mMessage;
-    //     positiveTextId = com::android::internal::R::string::ok;
-    //     negativeTextId = com::android::internal::R::string::cancel;
-    // }
-    // AutoPtr<IAlertDialogBuilder> builder;
-    // CAlertDialogBuilder::New(context, (IAlertDialogBuilder**)&builder);
-    // builder->SetTitle(title);
-    // AutoPtr<IDialogInterfaceOnCancelListener> listener = new CancelListener(this);
-    // builder->SetOnCancelListener(listener);
-    // if (mType != PROMPT) {
-    //     builder->SetMessage(displayMessage);
-    //     AutoPtr<IDialogInterfaceOnClickListener> positiveListener = new PositiveListener(this, NULL);
-    //     builder->SetPositiveButton(positiveTextId, positiveListener);
-    // }
-    // else {
-    //     AutoPtr<ILayoutInflaterHelper> helper;
-    //     CLayoutInflaterHelper::AcquireSingleton((ILayoutInflaterHelper**)&helper);
-    //     AutoPtr<ILayoutInflater> flater;
-    //     AutoPtr<IView> view;
-    //     flater->Inflate(
-    //             com::android::internal::R::layout::js_prompt, NULL, (IView**)&view);
-    //     AutoPtr<IEditText> edit;
-    //     view->FindViewById(com::android::internal::R::id::value, (IInterface**)&edit);
-    //     edit->SetText(mDefaultValue);
-    //     AutoPtr<IDialogInterfaceOnClickListener> positiveListener = new PositiveListener(this, edit);
-    //     builder->SetPositiveButton(positiveTextId, positiveListener);
-    //     AutoPtr<ITextView> textView;
-    //     view->FindViewById(com::android::internal::R::id::message, (ITextView**)&textView);
-    //     textView->SetText(mMessage);
-    //     builder->SetView(view);
-    // }
+    String title, displayMessage;
+    Int32 positiveTextId, negativeTextId;
+    if (mType == UNLOAD) {
+        context->GetString(/*com::android::internal::*/R::string::js_dialog_before_unload_title, &title);
+        AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+        AutoPtr<ICharSequence> cs;
+        CString::New(mMessage, (ICharSequence**)&cs);
+        array->Set(0, TO_IINTERFACE(cs));
+        context->GetString(
+                /*com::android::internal::*/R::string::js_dialog_before_unload, array, &displayMessage);
+        positiveTextId = /*com::android::internal::*/R::string::js_dialog_before_unload_positive_button;
+        negativeTextId = /*com::android::internal::*/R::string::js_dialog_before_unload_negative_button;
+    }
+    else {
+        title = GetJsDialogTitle(context);
+        displayMessage = mMessage;
+        positiveTextId = /*com::android::internal::*/R::string::ok;
+        negativeTextId = /*com::android::internal::*/R::string::cancel;
+    }
+    AutoPtr<IAlertDialogBuilder> builder;
+    CAlertDialogBuilder::New(context, (IAlertDialogBuilder**)&builder);
+    AutoPtr<ICharSequence> csTitile;
+    CString::New(title, (ICharSequence**)&csTitile);
+    builder->SetTitle(csTitile);
+    AutoPtr<IDialogInterfaceOnCancelListener> listener = new CancelListener(this);
+    builder->SetOnCancelListener(listener);
+    if (mType != PROMPT) {
+        AutoPtr<ICharSequence> csMessage;
+        CString::New(displayMessage, (ICharSequence**)&csMessage);
+        builder->SetMessage(csMessage);
+        AutoPtr<IDialogInterfaceOnClickListener> positiveListener = new PositiveListener(this, NULL);
+        builder->SetPositiveButton(positiveTextId, positiveListener);
+    }
+    else {
+        AutoPtr<ILayoutInflaterHelper> helper;
+        //TODO CLayoutInflaterHelper::AcquireSingleton((ILayoutInflaterHelper**)&helper);
+        AutoPtr<ILayoutInflater> flater;
+        AutoPtr<IView> view;
+        flater->Inflate(
+                /*com::android::internal::*/R::layout::js_prompt, NULL, (IView**)&view);
+        AutoPtr<IView> editView;
+        view->FindViewById(/*com::android::internal::*/R::id::value, (IView**)&editView);
+        AutoPtr<IEditText> edit = IEditText::Probe(editView);
+        AutoPtr<ICharSequence> csText;
+        CString::New(mDefaultValue, (ICharSequence**)&csText);
+        ITextView::Probe(edit)->SetText(csText);
+        AutoPtr<IDialogInterfaceOnClickListener> positiveListener = new PositiveListener(this, edit);
+        builder->SetPositiveButton(positiveTextId, positiveListener);
+        AutoPtr<IView> textV;
+        view->FindViewById(/*com::android::internal::*/R::id::message, (IView**)&textV);
+        AutoPtr<ITextView> textView = ITextView::Probe(textV);
+        AutoPtr<ICharSequence> csMessage;
+        CString::New(mMessage, (ICharSequence**)&csMessage);
+        textView->SetText(csMessage);
+        builder->SetView(view);
+    }
 
-    // if (mType != ALERT) {
-    //     AutoPtr<IDialogInterfaceOnClickListener> listener = new CancelListener(this);
-    //     builder->SetNegativeButton(negativeTextId, listener);
-    // }
+    if (mType != ALERT) {
+        AutoPtr<IDialogInterfaceOnClickListener> listener = new CancelListener(this);
+        builder->SetNegativeButton(negativeTextId, listener);
+    }
 
-    // return builder->Show();
-
-    return E_NOT_IMPLEMENTED;
+    AutoPtr<IAlertDialog> ad;
+    return builder->Show((IAlertDialog**)&ad);
 }
 
 String JsDialogHelper::GetJsDialogTitle(
     /* [in] */ IContext* context)
 {
-    assert(0);
-    // TODO
-    // String title = mUrl;
-    // if (URLUtil::IsDataUrl(mUrl)) {
-    //     // For data: urls, we just display 'JavaScript' similar to Chrome.
-    //      context->GetString(com::android::internal::R::string::js_dialog_title_default, &title);
-    // } else {
-    //     // try {
-    //         AutoPtr<IURL> alertUrl;
-    //         CURL::New(mUrl, (IURL**)&alertUrl);
-    //         // For example: "The page at 'http://www.mit.edu' says:"
-    //         String protocol, host;
-    //         alertUrl->GetProtocol(&protocol);
-    //         alertUrl->GetHost(&host);
-    //         StringBuilder str(host);
-    //         str += "://";
-    //         str += host;
-    //         context->GetString(com::android::internal::R::string::js_dialog_title,
-    //                 str.ToString(), &title);
-    //     // } catch (MalformedURLException ex) {
-    //     //     // do nothing. just use the url as the title
-    //     // }
-    // }
-    // return title;
-    return String(NULL);
+    String title = mUrl;
+    if (URLUtil::IsDataUrl(mUrl)) {
+        // For data: urls, we just display 'JavaScript' similar to Chrome.
+         context->GetString(/*com::android::internal::*/R::string::js_dialog_title_default, &title);
+    } else {
+        // try {
+            AutoPtr<IURL> alertUrl;
+            CURL::New(mUrl, (IURL**)&alertUrl);
+            // For example: "The page at 'http://www.mit.edu' says:"
+            String protocol, host;
+            alertUrl->GetProtocol(&protocol);
+            alertUrl->GetHost(&host);
+            StringBuilder str(host);
+            str += "://";
+            str += host;
+            AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+            AutoPtr<ICharSequence> cs;
+            CString::New(str.ToString(), (ICharSequence**)&cs);
+            array->Set(0, TO_IINTERFACE(cs));
+            context->GetString(/*com::android::internal::*/R::string::js_dialog_title,
+                    array, &title);
+        // } catch (MalformedURLException ex) {
+        //     // do nothing. just use the url as the title
+        // }
+    }
+    return title;
 }
 
 Boolean JsDialogHelper::CanShowAlertDialog(

@@ -1738,7 +1738,7 @@
     <string name="status_wimax_mac_address" msgid="8390791848661413416">"4G MAC ünvanı"</string>
     <string name="enter_password" msgid="4131758584074246224">"Yaddaşı deşifrə etmək üçün parol daxil edin"</string>
     <string name="try_again" msgid="4272075051293936921">"Yenidən cəhd edin."</string>
-    <string name="delete" msgid="4219243412325163003">"Sil"</string>
+    <string name="delete_" msgid="4219243412325163003">"Sil"</string>
     <string name="misc_files" msgid="6720680815969643497">"Qarışıq fayllar"</string>
     <string name="misc_files_selected_count" msgid="4647048020823912088">"<xliff:g id="NUMBER">%1$d</xliff:g> ədəddın <xliff:g id="TOTAL">%2$d</xliff:g> seçildi"</string>
     <string name="misc_files_selected_count_bytes" msgid="2876232009069114352">"<xliff:g id="TOTAL">%2$s</xliff:g> ədəddən <xliff:g id="NUMBER">%1$s</xliff:g> qədər"</string>

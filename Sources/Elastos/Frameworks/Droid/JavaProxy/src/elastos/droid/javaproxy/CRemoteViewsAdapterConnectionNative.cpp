@@ -1,10 +1,13 @@
 
 #include "elastos/droid/javaproxy/CRemoteViewsAdapterConnectionNative.h"
 #include "elastos/droid/javaproxy/Util.h"
+#include "Elastos.Droid.Widget.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Internal::Widget::EIID_IIRemoteViewsAdapterConnection;
+using Elastos::Droid::Internal::Widget::IIRemoteViewsFactory;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::Widget::Internal::IIRemoteViewsFactory;
 
 namespace Elastos {
 namespace Droid {
@@ -12,8 +15,9 @@ namespace JavaProxy {
 
 const String CRemoteViewsAdapterConnectionNative::TAG("CRemoteViewsAdapterConnectionNative");
 
-CRemoteViewsAdapterConnectionNative::CRemoteViewsAdapterConnectionNative(){
-}
+CAR_INTERFACE_IMPL_2(CRemoteViewsAdapterConnectionNative, Object, IIRemoteViewsAdapterConnection, IBinder)
+
+CAR_OBJECT_IMPL(CRemoteViewsAdapterConnectionNative)
 
 CRemoteViewsAdapterConnectionNative::~CRemoteViewsAdapterConnectionNative(){
     JNIEnv* env;
@@ -21,10 +25,9 @@ CRemoteViewsAdapterConnectionNative::~CRemoteViewsAdapterConnectionNative(){
     env->DeleteGlobalRef(mJInstance);
 }
 
-
 ECode CRemoteViewsAdapterConnectionNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     JNIEnv* env;
@@ -36,6 +39,7 @@ ECode CRemoteViewsAdapterConnectionNative::constructor(
 ECode CRemoteViewsAdapterConnectionNative::OnServiceConnected(
     /* [in] */ IBinder* service)
 {
+    // LOGGERD(TAG, "+ CRemoteViewsAdapterConnectionNative::OnServiceConnected()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -45,10 +49,10 @@ ECode CRemoteViewsAdapterConnectionNative::OnServiceConnected(
         jclass proxyClass = env->FindClass("com/android/internal/widget/ElIRemoteViewsFactoryProxy");
         Util::CheckErrorAndLog(env, TAG, "FindClass: ElIRemoteViewsFactoryProxy %d", __LINE__);
 
-        jmethodID mid = env->GetMethodID(proxyClass, "<init>", "(I)V");
+        jmethodID mid = env->GetMethodID(proxyClass, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "Fail GetMethodID: ElIRemoteViewsFactoryProxy(I) %d", __LINE__);
 
-        jobject jfactoryProxy = env->NewObject(proxyClass, mid, (Int32)factory.Get());
+        jobject jfactoryProxy = env->NewObject(proxyClass, mid, (jlong)factory.Get());
         Util::CheckErrorAndLog(env, "ToJavaComponentName", "Fail NewObject: componentNameKlass", __LINE__);
         factory->AddRef();
 
@@ -69,11 +73,14 @@ ECode CRemoteViewsAdapterConnectionNative::OnServiceConnected(
         Logger::E(TAG, "CRemoteViewsAdapterConnectionNative::OnServiceConnected() factory null");
     }
 
+    // LOGGERD(TAG, "- CRemoteViewsAdapterConnectionNative::OnServiceConnected()");
+
     return NOERROR;
 }
 
 ECode CRemoteViewsAdapterConnectionNative::OnServiceDisconnected()
 {
+    // LOGGERD(TAG, "+ CRemoteViewsAdapterConnectionNative::OnServiceDisconnected()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -87,6 +94,7 @@ ECode CRemoteViewsAdapterConnectionNative::OnServiceDisconnected()
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: onServiceDisconnected : %d!\n", __LINE__);
 
     env->DeleteLocalRef(connClass);
+    // LOGGERD(TAG, "- CRemoteViewsAdapterConnectionNative::OnServiceDisconnected()");
 
     return NOERROR;
 }
@@ -94,7 +102,7 @@ ECode CRemoteViewsAdapterConnectionNative::OnServiceDisconnected()
 ECode CRemoteViewsAdapterConnectionNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CRemoteViewsAdapterConnectionNative::ToString()"));
+    // LOGGERD(TAG, "+ CRemoteViewsAdapterConnectionNative::ToString()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -102,17 +110,17 @@ ECode CRemoteViewsAdapterConnectionNative::ToString(
     Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
 
     jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
 
     *str = Util::GetElString(env, jstr);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CRemoteViewsAdapterConnectionNative::ToString()"));
+    // LOGGERD(TAG, "- CRemoteViewsAdapterConnectionNative::ToString()");
     return NOERROR;
 }
 

@@ -57,29 +57,30 @@ private:
     static CARAPI_(String) ToLogString(
         /* [in] */ const char* fmt, ...);
 
-    static CARAPI GetLogger(
-        /* [out] */ HdmiLogger** result);
+    static CARAPI_(AutoPtr<HdmiLogger>) GetLogger();
 
-    static CARAPI UpdateLog(
+    static CARAPI_(String) UpdateLog(
         /* [in] */ IHashMap* cache,
-        /* [in] */ const String& logMessage,
-        /* [out] */ String* result);
+        /* [in] */ const String& logMessage);
 
-    static CARAPI BuildMessage(
+    static CARAPI_(String) BuildMessage(
         /* [in] */ const String& message,
-        /* [in] */ IPair* timing,
-        /* [out] */ String* result);
+        /* [in] */ IPair* timing);
 
     static CARAPI IncreaseLogCount(
         /* [in] */ IHashMap* cache,
         /* [in] */ const String& message);
 
-    static CARAPI ShouldLogNow(
+    static CARAPI_(Boolean) ShouldLogNow(
         /* [in] */ IPair* timing,
-        /* [in] */ Int64 curTime,
-        /* [out] */ Boolean* result);
+        /* [in] */ Int64 curTime);
 
-    static CARAPI_(AutoPtr<IThreadLocal>) InitLogger();
+    static CARAPI_(Boolean) InitDEBUG();
+
+public:
+    // private static final ThreadLocal<HdmiLogger> sLogger = new ThreadLocal<>();
+    static pthread_key_t sKey;
+    static pthread_once_t sKeyOnce;
 
 private:
     static const String TAG;
@@ -89,8 +90,6 @@ private:
 
     // 20s
     static const Boolean DEBUG;
-
-    static const AutoPtr<IThreadLocal> sLogger;
 
     // Key (String): log message.
     // Value (Pair(Long, Integer)): a pair of last log time millis and the number of logMessage.

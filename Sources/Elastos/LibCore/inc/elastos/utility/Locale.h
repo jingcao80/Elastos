@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_UTILITY_LOCALE_H__
 #define __ELASTOS_UTILITY_LOCALE_H__
 
+#include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>

@@ -1,9 +1,8 @@
 
-#include <Elastos.Droid.Hardware.h>
-#include <Elastos.Droid.Utility.h>
 #include "elastos/droid/server/hdmi/HdmiMhlControllerStub.h"
+#include <Elastos.Droid.Utility.h>
 
-using Elastos::Droid::Hardware::Hdmi::IHdmiPortInfo;
+using Elastos::Droid::Utility::CSparseArray;
 
 namespace Elastos {
 namespace Droid {
@@ -25,11 +24,8 @@ ECode HdmiMhlControllerStub::IsReady(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
         *result = FALSE;
         return NOERROR;
-#endif
 }
 
 ECode HdmiMhlControllerStub::Create(
@@ -38,19 +34,17 @@ ECode HdmiMhlControllerStub::Create(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return new HdmiMhlControllerStub(service);
-#endif
+    *result = new HdmiMhlControllerStub(service);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode HdmiMhlControllerStub::GetPortInfos(
     /* [out, callee] */ ArrayOf<IHdmiPortInfo*>** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return EMPTY_PORT_INFO;
-#endif
+    *result = EMPTY_PORT_INFO;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode HdmiMhlControllerStub::GetLocalDevice(
@@ -59,11 +53,8 @@ ECode HdmiMhlControllerStub::GetLocalDevice(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        *result = NULL;
-        return NOERROR;
-#endif
+    *result = NULL;
+    return NOERROR;
 }
 
 ECode HdmiMhlControllerStub::GetLocalDeviceById(
@@ -72,11 +63,8 @@ ECode HdmiMhlControllerStub::GetLocalDeviceById(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        *result = NULL;
-        return NOERROR;
-#endif
+    *result = NULL;
+    return NOERROR;
 }
 
 ECode HdmiMhlControllerStub::GetAllLocalDevices(
@@ -84,10 +72,9 @@ ECode HdmiMhlControllerStub::GetAllLocalDevices(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mLocalDevices;
-#endif
+    *result = mLocalDevices;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode HdmiMhlControllerStub::RemoveLocalDevice(
@@ -96,11 +83,8 @@ ECode HdmiMhlControllerStub::RemoveLocalDevice(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        *result = NULL;
-        return NOERROR;
-#endif
+    *result = NULL;
+    return NOERROR;
 }
 
 ECode HdmiMhlControllerStub::AddLocalDevice(
@@ -109,19 +93,13 @@ ECode HdmiMhlControllerStub::AddLocalDevice(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        *result = NULL;
-        return NOERROR;
-#endif
+    *result = NULL;
+    return NOERROR;
 }
 
 ECode HdmiMhlControllerStub::ClearAllLocalDevices()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-
-#endif
+    return NOERROR;
 }
 
 ECode HdmiMhlControllerStub::SendVendorCommand(
@@ -130,20 +108,14 @@ ECode HdmiMhlControllerStub::SendVendorCommand(
     /* [in] */ Int32 length,
     /* [in] */ ArrayOf<Byte>* data)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-
-#endif
+    return NOERROR;
 }
 
 ECode HdmiMhlControllerStub::SetOption(
     /* [in] */ Int32 flag,
     /* [in] */ Int32 value)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-
-#endif
+    return NOERROR;
 }
 
 ECode HdmiMhlControllerStub::GetMhlVersion(
@@ -152,10 +124,8 @@ ECode HdmiMhlControllerStub::GetMhlVersion(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return INVALID_MHL_VERSION;
-#endif
+    *result = INVALID_MHL_VERSION;
+    return NOERROR;
 }
 
 ECode HdmiMhlControllerStub::GetPeerMhlVersion(
@@ -164,10 +134,8 @@ ECode HdmiMhlControllerStub::GetPeerMhlVersion(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return INVALID_MHL_VERSION;
-#endif
+    *result = INVALID_MHL_VERSION;
+    return NOERROR;
 }
 
 ECode HdmiMhlControllerStub::GetSupportedFeatures(
@@ -176,11 +144,8 @@ ECode HdmiMhlControllerStub::GetSupportedFeatures(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return NO_SUPPORTED_FEATURES;
-
-#endif
+    *result = NO_SUPPORTED_FEATURES;
+    return NOERROR;
 }
 
 ECode HdmiMhlControllerStub::GetEcbusDeviceRoles(
@@ -189,19 +154,14 @@ ECode HdmiMhlControllerStub::GetEcbusDeviceRoles(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return INVALID_DEVICE_ROLES;
-
-#endif
+    *result = INVALID_DEVICE_ROLES;
+    return NOERROR;
 }
 
 AutoPtr<ISparseArray> HdmiMhlControllerStub::InitArray()
 {
     AutoPtr<ISparseArray> rev;
-#if 0 // TODO: Translate codes below
-    = new SparseArray<>()
-#endif
+    CSparseArray::New((ISparseArray**)&rev);
     return rev;
 }
 

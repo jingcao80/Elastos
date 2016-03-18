@@ -1,63 +1,65 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_SETTINGS_WIDGET_TOGGLESWITCH_H__
+#define __ELASTOS_DROID_SETTINGS_WIDGET_TOGGLESWITCH_H__
 
-package com.android.settings.widget;
+#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/widget/Switch.h"
+#include "_Settings.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Utility::IAttributeSet;
-using Elastos::Droid::Widget::ISwitch;
+using Elastos::Droid::Widget::Switch;
 
-public class ToggleSwitch extends Switch {
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Widget {
 
-    private ToggleSwitch.OnBeforeCheckedChangeListener mOnBeforeListener;
+class ToggleSwitch
+    : public Switch
+    , public IToggleSwitch
+{
+public:
+    CAR_INTERFACE_DECL();
 
-    public static interface OnBeforeCheckedChangeListener {
-        public Boolean OnBeforeCheckedChanged(ToggleSwitch toggleSwitch, Boolean checked);
-    }
+    ToggleSwitch();
 
-    public ToggleSwitch(Context context) {
-        Super(context);
-    }
+    ~ToggleSwitch();
 
-    public ToggleSwitch(Context context, AttributeSet attrs) {
-        Super(context, attrs);
-    }
+    CARAPI constructor(
+        /* [in] */ IContext* context);
 
-    public ToggleSwitch(Context context, AttributeSet attrs, Int32 defStyleAttr) {
-        Super(context, attrs, defStyleAttr);
-    }
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs);
 
-    public ToggleSwitch(Context context, AttributeSet attrs, Int32 defStyleAttr, Int32 defStyleRes) {
-        Super(context, attrs, defStyleAttr, defStyleRes);
-    }
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs,
+        /* [in] */ Int32 defStyleAttr);
 
-    CARAPI SetOnBeforeCheckedChangeListener(OnBeforeCheckedChangeListener listener) {
-        mOnBeforeListener = listener;
-    }
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs,
+        /* [in] */ Int32 defStyleAttr,
+        /* [in] */ Int32 defStyleRes);
+
+    CARAPI SetOnBeforeCheckedChangeListener(
+        /* [in] */ IToggleSwitchOnBeforeCheckedChangeListener* listener);
 
     //@Override
-    CARAPI SetChecked(Boolean checked) {
-        if (mOnBeforeListener != NULL
-                && mOnBeforeListener->OnBeforeCheckedChanged(this, checked)) {
-            return;
-        }
-        super->SetChecked(checked);
-    }
+    CARAPI SetChecked(
+        /* [in] */ Boolean checked);
 
-    CARAPI SetCheckedInternal(Boolean checked) {
-        super->SetChecked(checked);
-    }
-}
+    CARAPI SetCheckedInternal(
+        /* [in] */ Boolean checked);
+
+private:
+    AutoPtr<IToggleSwitchOnBeforeCheckedChangeListener> mOnBeforeListener;
+};
+
+} // namespace Widget
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_WIDGET_TOGGLESWITCH_H__

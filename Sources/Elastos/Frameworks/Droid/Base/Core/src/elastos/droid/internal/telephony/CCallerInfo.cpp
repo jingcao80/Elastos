@@ -1,6 +1,5 @@
 #include "elastos/droid/internal/telephony/CCallerInfo.h"
-// TODO: Need CCallerInfoAsyncQuery
-// #include "elastos/droid/internal/telephony/CCallerInfoAsyncQuery.h"
+#include "elastos/droid/internal/telephony/CCallerInfoAsyncQuery.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/provider/CContactsContractCommonDataKindsPhone.h"
 #include "elastos/droid/provider/ContactsContractContacts.h"
@@ -355,8 +354,7 @@ ECode CCallerInfo::GetCallerInfo(
 {
     VALIDATE_NOT_NULL(callerInfo);
     AutoPtr<IContentResolver> resolver;
-// TODO: Need CCallerInfoAsyncQuery
-    // CCallerInfoAsyncQuery::GetCurrentProfileContentResolver(context, (IContentResolver**)&resolver);
+    CCallerInfoAsyncQuery::GetCurrentProfileContentResolver(context, (IContentResolver**)&resolver);
     AutoPtr<ICursor> cursor;
     resolver->Query(contactRef, (ArrayOf<String>*)NULL, String(NULL), (ArrayOf<String>*)NULL, String(NULL), (ICursor**)&cursor);
     return GetCallerInfo(context, contactRef, cursor, callerInfo);

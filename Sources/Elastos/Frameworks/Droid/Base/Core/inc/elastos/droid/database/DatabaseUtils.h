@@ -26,6 +26,8 @@ class DatabaseUtils
 {
 public:
     class InsertHelper
+        : public Object
+        , public IDatabaseInsertHelper
     {
     public:
         InsertHelper()
@@ -41,6 +43,8 @@ public:
             /* [in] */ const String& tableName);
 
         virtual ~InsertHelper();
+
+        CAR_INTERFACE_DECL()
 
         /**
          * Returns the index of the specified column. This is index is suitagble for use

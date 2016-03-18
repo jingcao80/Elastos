@@ -67,7 +67,7 @@ using Elastos::Utility::IArrayList;
 
 class FastScroller;
 
-class AbsListView
+class ECO_PUBLIC AbsListView
     : public AdapterView
     , public IAbsListView
     , public ITextWatcher

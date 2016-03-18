@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/webkit/webview/chromium/DrawGLFunctor.h"
+#include "elastos/droid/webkit/webview/chromium/NativeDrawGLFunctor.h"
 
 using Elastos::Core::EIID_IRunnable;
 
@@ -157,21 +158,45 @@ ECode DrawGLFunctor::SetChromiumAwDrawGLFunction(
     return NOERROR;
 }
 
+// Raise the file handle soft limit to the hard limit since gralloc buffers
+// uses file handles.
+static void RaiseFileNumberLimit() {
+    static bool have_raised_limit = FALSE;
+    if (have_raised_limit)
+        return;
+
+    have_raised_limit = TRUE;
+    struct rlimit limit_struct;
+    limit_struct.rlim_cur = 0;
+    limit_struct.rlim_max = 0;
+    if (getrlimit(RLIMIT_NOFILE, &limit_struct) == 0) {
+        limit_struct.rlim_cur = limit_struct.rlim_max;
+        if (setrlimit(RLIMIT_NOFILE, &limit_struct) != 0) {
+            ALOGE("setrlimit failed: %s", strerror(errno));
+        }
+    } else {
+        ALOGE("getrlimit failed: %s", strerror(errno));
+    }
+}
+
 Int64 DrawGLFunctor::NativeCreateGLFunctor(
     /* [in] */ Int64 viewContext)
 {
-    return 0;
+    RaiseFileNumberLimit();
+    return (Int64)(new NativeDrawGLFunctor(viewContext));
 }
 
 ECode DrawGLFunctor::NativeDestroyGLFunctor(
     /* [in] */ Int64 functor)
 {
+    delete (NativeDrawGLFunctor*)(functor);
     return NOERROR;
 }
 
 ECode DrawGLFunctor::NativeSetChromiumAwDrawGLFunction(
     /* [in] */ Int64 functionPointer)
 {
+    NativeDrawGLFunctor::g_aw_drawgl_function = (AwDrawGLFunction*)(functionPointer);
     return NOERROR;
 }
 
@@ -180,5 +205,3 @@ ECode DrawGLFunctor::NativeSetChromiumAwDrawGLFunction(
 } // namespace Webkit
 } // namespace Droid
 } // namespace Elastos
-
-

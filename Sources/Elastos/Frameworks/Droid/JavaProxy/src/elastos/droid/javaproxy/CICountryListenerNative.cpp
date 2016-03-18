@@ -3,6 +3,8 @@
 #include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Location::EIID_IICountryListener;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -10,6 +12,10 @@ namespace Droid {
 namespace JavaProxy {
 
 const String CICountryListenerNative::TAG("CICountryListenerNative");
+
+CAR_INTERFACE_IMPL_2(CICountryListenerNative, Object, IICountryListener, IBinder)
+
+CAR_OBJECT_IMPL(CICountryListenerNative)
 
 CICountryListenerNative::~CICountryListenerNative()
 {
@@ -19,8 +25,8 @@ CICountryListenerNative::~CICountryListenerNative()
 }
 
 ECode CICountryListenerNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -30,7 +36,7 @@ ECode CICountryListenerNative::constructor(
 ECode CICountryListenerNative::OnCountryDetected(
     /* [in] */ ICountry* country)
 {
-    LOGGERD(TAG, String("+ CICountryListenerNative::OnCountryDetected()"));
+    // LOGGERD(TAG, "+ CICountryListenerNative::OnCountryDetected()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -51,20 +57,20 @@ ECode CICountryListenerNative::OnCountryDetected(
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jcountry);
-    LOGGERD(TAG, String("- CICountryListenerNative::OnCountryDetected()"));
+    // LOGGERD(TAG, "- CICountryListenerNative::OnCountryDetected()");
     return NOERROR;
 }
 
 ECode CICountryListenerNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CICountryListenerNative::ToString()"));
+    // LOGGERD(TAG, "+ CICountryListenerNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     *str = Util::GetJavaToStringResult(env, mJInstance);
 
-    // LOGGERD(TAG, String("- CICountryListenerNative::ToString()"));
+    // LOGGERD(TAG, "- CICountryListenerNative::ToString()");
     return NOERROR;
 }
 

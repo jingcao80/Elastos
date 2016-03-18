@@ -124,6 +124,9 @@ private:
         /* [in] */ Boolean staged,
         /* [in] */ Boolean existing);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 public:
     /**
      * Location where install is coming from, before it has been

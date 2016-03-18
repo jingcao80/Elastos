@@ -86,6 +86,15 @@ public:
         /* [in] */ Int32 height,
         /* [in] */ Int32 densityDpi);
 
+    /**
+     * Releases the virtual display and destroys its underlying surface.
+     * <p>
+     * All remaining windows on the virtual display will be forcibly removed
+     * as part of releasing the virtual display.
+     * </p>
+     */
+    CARAPI ReleaseResources();
+
     CARAPI ToString(
         /* [out] */ String* result);
 

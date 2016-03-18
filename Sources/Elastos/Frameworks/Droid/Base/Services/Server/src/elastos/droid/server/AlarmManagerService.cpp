@@ -1,5 +1,6 @@
 
 #include "elastos/droid/server/AlarmManagerService.h"
+#include "elastos/droid/server/CAlarmManagerBinderService.h"
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/os/Binder.h>
 #include <elastos/droid/os/UserHandle.h>
@@ -1651,6 +1652,7 @@ ECode AlarmManagerService::constructor(
 
     CSparseArray::New((ISparseArray**)&mBroadcastStats);
 
+    CAlarmManagerBinderService::New(this, (IBinder**)&mService);
     return NOERROR;
 }
 

@@ -141,13 +141,13 @@ void WindowAnimator::HideWallpapersLocked(
 void WindowAnimator::UpdateAppWindowsLocked(
     /* [in] */ Int32 displayId)
 {
-    AutoPtr< List<AutoPtr<TaskStack> > > stacks = mService->GetDisplayContentLocked(displayId)->GetStacks();
-    List<AutoPtr<TaskStack> >::ReverseIterator stackRit = stacks->RBegin();
-    for (; stackRit != stacks->REnd(); ++stackRit) {
+    List< AutoPtr<TaskStack> >& stacks = mService->GetDisplayContentLocked(displayId)->GetStacks();
+    List<AutoPtr<TaskStack> >::ReverseIterator stackRit = stacks.RBegin();
+    for (; stackRit != stacks.REnd(); ++stackRit) {
         AutoPtr<TaskStack> stack = *stackRit;
-        AutoPtr< List<AutoPtr<Task> > > tasks = stack->GetTasks();
-        List<AutoPtr<Task> >::ReverseIterator taskRit = tasks->RBegin();
-        for (; taskRit != tasks->REnd(); ++taskRit) {
+        List< AutoPtr<Task> >& tasks = stack->GetTasks();
+        List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
+        for (; taskRit != tasks.REnd(); ++taskRit) {
             AppTokenList tokens = (*taskRit)->mAppTokens;
             AppTokenList::ReverseIterator tokenRit = tokens.RBegin();
             for (; tokenRit != tokens.REnd(); ++tokenRit) {
@@ -510,9 +510,9 @@ void WindowAnimator::TestTokenMayBeDrawnLocked(
 {
     // See if any windows have been drawn, so they (and others
     // associated with them) can now be shown.
-    AutoPtr< List<AutoPtr<Task> > > tasks = mService->GetDisplayContentLocked(displayId)->GetTasks();
-    List<AutoPtr<Task> >::Iterator it = tasks->Begin();
-    for (; it != tasks->End(); ++it) {
+    List< AutoPtr<Task> >& tasks = mService->GetDisplayContentLocked(displayId)->GetTasks();
+    List<AutoPtr<Task> >::Iterator it = tasks.Begin();
+    for (; it != tasks.End(); ++it) {
         AppTokenList tokens = (*it)->mAppTokens;
         AppTokenList::Iterator tokenIt = tokens.Begin();
         for (; tokenIt != tokens.End(); ++tokenIt) {

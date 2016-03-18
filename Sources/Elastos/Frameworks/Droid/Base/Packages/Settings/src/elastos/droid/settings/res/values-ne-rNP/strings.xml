@@ -1955,7 +1955,7 @@
     <string name="enter_pin" msgid="5305333588093263790">"Android सुरु गर्न, आफ्नो पिन प्रविष्ट गर्नुहोस्"</string>
     <string name="enter_pattern" msgid="4187435713036808566">"Android सुरु गर्न, आफ्नो ढाँचा कोर्नुहोस्"</string>
     <string name="try_again" msgid="4272075051293936921">"फेरि प्रयोग गर्नुहोस्।"</string>
-    <string name="delete" msgid="4219243412325163003">"मेट्नुहोस्"</string>
+    <string name="delete_" msgid="4219243412325163003">"मेट्नुहोस्"</string>
     <string name="misc_files" msgid="6720680815969643497">"विविध फाइलहरू"</string>
     <string name="misc_files_selected_count" msgid="4647048020823912088">"चयनित <xliff:g id="NUMBER">%1$d</xliff:g> यस <xliff:g id="TOTAL">%2$d</xliff:g>भन्दा बाहिर"</string>
     <string name="misc_files_selected_count_bytes" msgid="2876232009069114352">"<xliff:g id="NUMBER">%1$s</xliff:g> मा <xliff:g id="TOTAL">%2$s</xliff:g>"</string>

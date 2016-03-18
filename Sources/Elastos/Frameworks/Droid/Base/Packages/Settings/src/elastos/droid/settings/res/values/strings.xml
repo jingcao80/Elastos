@@ -4674,7 +4674,7 @@
 
     <!-- the following are for Settings Storage screen -->
     <!-- Menu item/button 'delete' -->
-    <string name="delete">Delete</string>
+    <string name="delete_">Delete</string>
     <!-- Misc files [CHAR LIMIT=25] -->
     <string name="misc_files">Misc files</string>
     <!-- number of misc files selected [CHAR LIMIT=40] -->

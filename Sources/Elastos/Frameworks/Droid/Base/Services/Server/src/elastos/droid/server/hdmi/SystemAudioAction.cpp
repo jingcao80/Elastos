@@ -1,21 +1,70 @@
 
-#include "elastos/droid/server/hdmi/SystemAudioAction.h"
+#include "elastos/droid/server/hdmi/Constants.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDeviceTv.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessageBuilder.h"
 #include "elastos/droid/server/hdmi/HdmiConfig.h"
-#include <Elastos.CoreLibrary.Utility.h>
-#include <Elastos.Droid.Hardware.h>
 #include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include "elastos/droid/server/hdmi/HdmiLogger.h"
+#include "elastos/droid/server/hdmi/HdmiUtils.h"
+#include "elastos/droid/server/hdmi/RoutingControlAction.h"
+#include "elastos/droid/server/hdmi/SystemAudioAction.h"
+#include "elastos/droid/server/hdmi/SystemAudioActionFromAvr.h"
+#include "elastos/droid/server/hdmi/SystemAudioStatusAction.h"
+#include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.CoreLibrary.h>
+#include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
+using Elastos::Core::EIID_IRunnable;
 using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
+using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Utility::ISlog;
-
 using Elastos::Utility::IList;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Hdmi {
 
+//=============================================================================
+// SystemAudioAction::InnerSub_Runnable
+//=============================================================================
+CAR_INTERFACE_IMPL(SystemAudioAction::InnerSub_Runnable, Object, IRunnable)
+
+SystemAudioAction::InnerSub_Runnable::InnerSub_Runnable(
+    /* [in] */ SystemAudioAction* host)
+    : mHost(host)
+{}
+
+ECode SystemAudioAction::InnerSub_Runnable::Run()
+{
+    return mHost->SendSystemAudioModeRequestInternal();
+}
+
+//=============================================================================
+// SystemAudioAction::InnerSub_SendMessageCallback
+//=============================================================================
+CAR_INTERFACE_IMPL(SystemAudioAction::InnerSub_SendMessageCallback, Object, IHdmiControlServiceSendMessageCallback)
+
+SystemAudioAction::InnerSub_SendMessageCallback::InnerSub_SendMessageCallback(
+    /* [in] */ SystemAudioAction* host)
+    : mHost(host)
+{}
+
+ECode SystemAudioAction::InnerSub_SendMessageCallback::OnSendCompleted(
+    /* [in] */ Int32 error)
+{
+    if (error != Constants::SEND_RESULT_SUCCESS) {
+        HdmiLogger::Debug("Failed to send <System Audio Mode Request>:%s", error);
+        mHost->SetSystemAudioMode(FALSE);
+        mHost->FinishWithCallback(IHdmiControlManager::RESULT_COMMUNICATION_FAILED);
+    }
+    return NOERROR;
+}
+
+//=============================================================================
+// SystemAudioAction
+//=============================================================================
 CAR_INTERFACE_IMPL(SystemAudioAction, HdmiCecFeatureAction, ISystemAudioAction)
 
 const String SystemAudioAction::TAG("SystemAudioAction");
@@ -37,94 +86,72 @@ ECode SystemAudioAction::constructor(
     /* [in] */ Boolean targetStatus,
     /* [in] */ IIHdmiControlCallback* callback)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super::constructor(source);
-        HdmiUtils->VerifyAddressType(avrAddress, IHdmiDeviceInfo::DEVICE_AUDIO_SYSTEM);
-        mAvrLogicalAddress = avrAddress;
-        mTargetAudioStatus = targetStatus;
-        mCallback = callback;
-#endif
+    HdmiCecFeatureAction::constructor(source);
+    HdmiUtils::VerifyAddressType(avrAddress, IHdmiDeviceInfo::DEVICE_AUDIO_SYSTEM);
+    mAvrLogicalAddress = avrAddress;
+    mTargetAudioStatus = targetStatus;
+    mCallback = callback;
+    return NOERROR;
 }
 
 ECode SystemAudioAction::SendSystemAudioModeRequest()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        List<RoutingControlAction> routingActions = GetActions(ECLSID_CRoutingControlAction);
-        Boolean isEmpty;
-        routingActions->IsEmpty(&isEmpty);
-        if (!isEmpty) {
-            mState = STATE_CHECK_ROUTING_IN_PRGRESS;
-            // Should have only one Routing Control Action
-            AutoPtr<IInterface> obj;
-            routingActions->Get(0, (IInterface**)&obj);
-            RoutingControlAction routingAction = I::Probe(obj);
-            routingAction->AddOnFinishedCallback(this, new Runnable() {
-                //@Override
-                CARAPI Run() {
-                    SendSystemAudioModeRequestInternal();
-                }
-            });
-            return NOERROR;
-        }
-        SendSystemAudioModeRequestInternal();
-#endif
+    AutoPtr<IList> routingActions;
+    GetActions(ECLSID_CRoutingControlAction, (IList**)&routingActions);
+    Boolean isEmpty;
+    routingActions->IsEmpty(&isEmpty);
+    if (!isEmpty) {
+        mState = STATE_CHECK_ROUTING_IN_PRGRESS;
+        // Should have only one Routing Control Action
+        AutoPtr<IInterface> obj;
+        routingActions->Get(0, (IInterface**)&obj);
+        AutoPtr<RoutingControlAction> routingAction = (RoutingControlAction*) IObject::Probe(obj);
+        routingAction->AddOnFinishedCallback(this, new InnerSub_Runnable(this));
+        return NOERROR;
+    }
+    SendSystemAudioModeRequestInternal();
+    return NOERROR;
 }
 
 ECode SystemAudioAction::SendSystemAudioModeRequestInternal()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        AutoPtr<IHdmiCecLocalDeviceTv> tv;
-        Tv((IHdmiCecLocalDeviceTv**)&tv);
-        AutoPtr<IHdmiDeviceInfo> info;
-        tv->GetAvrDeviceInfo((IHdmiDeviceInfo**)&info);
-        Int32 avrPhysicalAddress;
-        info->GetPhysicalAddress(&avrPhysicalAddress);
-        Int32 srcAddr;
-        GetSourceAddress(&srcAddr);
-        HdmiCecMessage command = HdmiCecMessageBuilder->BuildSystemAudioModeRequest(srcAddr,
-                mAvrLogicalAddress, avrPhysicalAddress, mTargetAudioStatus);
-        SendCommand(command, new HdmiControlService->SendMessageCallback() {
-            //@Override
-            CARAPI OnSendCompleted(Int32 error) {
-                if (error != Constants::SEND_RESULT_SUCCESS) {
-                    HdmiLogger->Debug("Failed to send <System Audio Mode Request>:" + error);
-                    SetSystemAudioMode(FALSE);
-                    FinishWithCallback(IHdmiControlManager::RESULT_COMMUNICATION_FAILED);
-                }
-            }
-        });
-        mState = STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE;
-        AddTimer(mState, mTargetAudioStatus ? ON_TIMEOUT_MS : OFF_TIMEOUT_MS);
-#endif
+    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+    Tv((IHdmiCecLocalDeviceTv**)&tv);
+    AutoPtr<IHdmiDeviceInfo> info;
+    ((HdmiCecLocalDeviceTv*) tv.Get())->GetAvrDeviceInfo((IHdmiDeviceInfo**)&info);
+    Int32 avrPhysicalAddress;
+    info->GetPhysicalAddress(&avrPhysicalAddress);
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    AutoPtr<IHdmiCecMessage> command;
+    HdmiCecMessageBuilder::BuildSystemAudioModeRequest(srcAddr,
+            mAvrLogicalAddress, avrPhysicalAddress, mTargetAudioStatus, (IHdmiCecMessage**)&command);
+    SendCommand(command, new InnerSub_SendMessageCallback(this));
+    mState = STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE;
+    AddTimer(mState, mTargetAudioStatus ? ON_TIMEOUT_MS : OFF_TIMEOUT_MS);
+    return NOERROR;
 }
 
 ECode SystemAudioAction::HandleSendSystemAudioModeRequestTimeout()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (!mTargetAudioStatus  // Don't retry for Off case.
-                || mSendRetryCount++ >= MAX_SEND_RETRY_COUNT) {
-            HdmiLogger->Debug("[T]:wait for <Set System Audio Mode>.");
-            SetSystemAudioMode(FALSE);
-            FinishWithCallback(IHdmiControlManager::RESULT_TIMEOUT);
-            return NOERROR;
-        }
-        SendSystemAudioModeRequest();
-#endif
+    if (!mTargetAudioStatus  // Don't retry for Off case.
+            || mSendRetryCount++ >= MAX_SEND_RETRY_COUNT) {
+        HdmiLogger::Debug("[T]:wait for <Set System Audio Mode>.");
+        SetSystemAudioMode(FALSE);
+        FinishWithCallback(IHdmiControlManager::RESULT_TIMEOUT);
+        return NOERROR;
+    }
+    SendSystemAudioModeRequest();
+    return NOERROR;
 }
 
 ECode SystemAudioAction::SetSystemAudioMode(
     /* [in] */ Boolean mode)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        AutoPtr<IHdmiCecLocalDeviceTv> tv;
-        Tv((IHdmiCecLocalDeviceTv**)&tv);
-        tv->SetSystemAudioMode(mode, TRUE);
-#endif
+    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+    Tv((IHdmiCecLocalDeviceTv**)&tv);
+    ((HdmiCecLocalDeviceTv*) tv.Get())->SetSystemAudioMode(mode, TRUE);
+    return NOERROR;
 }
 
 ECode SystemAudioAction::ProcessCommand(
@@ -133,102 +160,99 @@ ECode SystemAudioAction::ProcessCommand(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        switch (mState) {
-            case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
-            {
-                Int32 opcode;
-                cmd->GetOpcode(&opcode);
-                if (opcode == Constants::MESSAGE_FEATURE_ABORT
-                        AutoPtr<ArrayOf<Byte> > params;
-                        cmd->GetParams((ArrayOf<Byte>**)&params);
-                        && ((*params)[0] & 0xFF)
-                                == Constants::MESSAGE_SYSTEM_AUDIO_MODE_REQUEST) {
-                    HdmiLogger->Debug("Failed to start system audio mode request.");
-                    SetSystemAudioMode(FALSE);
-                    FinishWithCallback(IHdmiControlManager::RESULT_EXCEPTION);
-                    *result = TRUE;
-                    return NOERROR;
-                }
-                if (opcode != Constants::MESSAGE_SET_SYSTEM_AUDIO_MODE
-                        || !HdmiUtils->CheckCommandSource(cmd, mAvrLogicalAddress, TAG)) {
-                    *result = FALSE;
-                    return NOERROR;
-                }
-                Boolean receivedStatus = HdmiUtils->ParseCommandParamSystemAudioStatus(cmd);
-                if (receivedStatus == mTargetAudioStatus) {
-                    SetSystemAudioMode(receivedStatus);
-                    StartAudioStatusAction();
-                    *result = TRUE;
-                    return NOERROR;
-                } else {
-                    HdmiLogger->Debug("Unexpected system audio mode request:" + receivedStatus);
-                    // Unexpected response, consider the request is newly initiated by AVR.
-                    // To return 'FALSE' will initiate new SystemAudioActionFromAvr by the control
-                    // service.
-                    FinishWithCallback(IHdmiControlManager::RESULT_EXCEPTION);
-                    *result = FALSE;
-                    return NOERROR;
-                }
+    switch (mState) {
+        case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
+        {
+            Int32 opcode;
+            cmd->GetOpcode(&opcode);
+            AutoPtr<ArrayOf<Byte> > params;
+            cmd->GetParams((ArrayOf<Byte>**)&params);
+            if (opcode == Constants::MESSAGE_FEATURE_ABORT
+                    && ((*params)[0] & 0xFF) == Constants::MESSAGE_SYSTEM_AUDIO_MODE_REQUEST) {
+                HdmiLogger::Debug("Failed to start system audio mode request.");
+                SetSystemAudioMode(FALSE);
+                FinishWithCallback(IHdmiControlManager::RESULT_EXCEPTION);
+                *result = TRUE;
+                return NOERROR;
             }
-            default:
+            if (opcode != Constants::MESSAGE_SET_SYSTEM_AUDIO_MODE
+                    || !HdmiUtils::CheckCommandSource(cmd, mAvrLogicalAddress, TAG)) {
                 *result = FALSE;
                 return NOERROR;
+            }
+            Boolean receivedStatus = HdmiUtils::ParseCommandParamSystemAudioStatus(cmd);
+            if (receivedStatus == mTargetAudioStatus) {
+                SetSystemAudioMode(receivedStatus);
+                StartAudioStatusAction();
+                *result = TRUE;
+                return NOERROR;
+            } else {
+                HdmiLogger::Debug("Unexpected system audio mode request:%s", receivedStatus ? "true" : "false");
+                // Unexpected response, consider the request is newly initiated by AVR.
+                // To return 'FALSE' will initiate new SystemAudioActionFromAvr by the control
+                // service.
+                FinishWithCallback(IHdmiControlManager::RESULT_EXCEPTION);
+                *result = FALSE;
+                return NOERROR;
+            }
         }
-#endif
+        default:
+            *result = FALSE;
+            return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode SystemAudioAction::StartAudioStatusAction()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        AutoPtr<SystemAudioStatusAction> newSystemAudioStatusAction = new SystemAudioStatusAction();
-        newSystemAudioStatusAction->constructor(Tv(), mAvrLogicalAddress, mCallback);
-        AddAndStartAction(newSystemAudioStatusAction);
-        Finish();
-#endif
+    AutoPtr<SystemAudioStatusAction> newSystemAudioStatusAction = new SystemAudioStatusAction();
+    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+    Tv((IHdmiCecLocalDeviceTv**)&tv);
+    newSystemAudioStatusAction->constructor(IHdmiCecLocalDevice::Probe(tv), mAvrLogicalAddress, mCallback);
+    AddAndStartAction(newSystemAudioStatusAction);
+    Finish();
+    return NOERROR;
 }
 
 ECode SystemAudioAction::RemoveSystemAudioActionInProgress()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        RemoveActionExcept(ECLSID_CSystemAudioActionFromTv, this);
-        RemoveActionExcept(ECLSID_CSystemAudioActionFromAvr, this);
-#endif
+    RemoveActionExcept(ECLSID_CSystemAudioActionFromTv, this);
+    RemoveActionExcept(ECLSID_CSystemAudioActionFromAvr, this);
+    return NOERROR;
 }
 
 ECode SystemAudioAction::HandleTimerEvent(
     /* [in] */ Int32 state)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mState != state) {
+    if (mState != state) {
+        return NOERROR;
+    }
+    switch (mState) {
+        case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
+            HandleSendSystemAudioModeRequestTimeout();
             return NOERROR;
-        }
-        switch (mState) {
-            case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
-                HandleSendSystemAudioModeRequestTimeout();
-                return NOERROR;
-        }
-#endif
+    }
+    return NOERROR;
 }
 
 ECode SystemAudioAction::FinishWithCallback(
     /* [in] */ Int32 returnCode)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mCallback != NULL) {
-            try {
-                mCallback->OnComplete(returnCode);
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Failed to invoke callback.", e);
+    if (mCallback != NULL) {
+        // try {
+        ECode ec = mCallback->OnComplete(returnCode);
+        // } catch (RemoteException e) {
+        if (FAILED(ec)) {
+            if ((ECode) E_REMOTE_EXCEPTION == ec) {
+                Slogger::E(TAG, "Failed to invoke callback.%d", ec);
             }
+            else
+                return ec;
         }
-        Finish();
-#endif
+        // }
+    }
+    Finish();
+    return NOERROR;
 }
 
 } // namespace Hdmi

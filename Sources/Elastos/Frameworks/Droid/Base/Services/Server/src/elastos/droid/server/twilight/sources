@@ -10,3 +10,4 @@ include $(MAKEDIR)/../../../../../../../../sources.inc
 
 SOURCES = TwilightService.cpp
 SOURCES += TwilightState.cpp
+SOURCES += CTwilightService.cpp

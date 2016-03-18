@@ -2,8 +2,8 @@
 #ifndef __ELASTOS_DROID_CONTENT_PM_PROVIDERINFO_H__
 #define __ELASTOS_DROID_CONTENT_PM_PROVIDERINFO_H__
 
-#include "_Elastos.Droid.Os.h"
-#include "ComponentInfo.h"
+#include "Elastos.Droid.Os.h"
+#include "elastos/droid/content/pm/ComponentInfo.h"
 
 using Elastos::Droid::Os::IPatternMatcher;
 

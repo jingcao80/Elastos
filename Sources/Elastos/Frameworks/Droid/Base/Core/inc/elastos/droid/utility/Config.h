@@ -10,7 +10,7 @@ namespace Elastos {
 namespace Droid {
 namespace Utility {
 
-class Config
+class ECO_PUBLIC Config
 {
 public:
     /**
@@ -44,7 +44,7 @@ public:
     static const Boolean LOGD = TRUE;
 
 private:
-    Config();
+    ECO_LOCAL Config();
 };
 
 }

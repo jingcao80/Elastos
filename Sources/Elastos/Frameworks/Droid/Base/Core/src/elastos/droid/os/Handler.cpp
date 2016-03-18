@@ -97,6 +97,9 @@ Handler::Handler()
     , mAsynchronous(FALSE)
 {
     // sub class must call constructor() implicitly.
+#if defined(_DEBUG)
+     mIsConstructed = FALSE;
+#endif
 }
 
 Handler::Handler(
@@ -137,7 +140,6 @@ Handler::Handler(
     constructor(looper, callback, takeStrongRefOfCallback, async);
 }
 
-
 ECode Handler::constructor(
     /* [in] */ Boolean async)
 {
@@ -153,6 +155,9 @@ ECode Handler::constructor(
     mLooper->GetQueue((IMessageQueue**)&mQueue);
     mTakeStrongRefOfCallback = TRUE;
     mAsynchronous = async;
+#if defined(_DEBUG)
+     mIsConstructed = TRUE;
+#endif
     return NOERROR;
 }
 
@@ -188,6 +193,10 @@ ECode Handler::constructor(
             }
         }
     }
+
+#if defined(_DEBUG)
+     mIsConstructed = TRUE;
+#endif
     return NOERROR;
 }
 
@@ -217,6 +226,10 @@ ECode Handler::constructor(
             }
         }
     }
+
+#if defined(_DEBUG)
+     mIsConstructed = TRUE;
+#endif
     return NOERROR;
 }
 
@@ -482,6 +495,13 @@ Boolean Handler::EnqueueMessage(
     /* [in] */ IMessage* msg,
     /* [in] */ Int64 uptimeMillis)
 {
+#if defined(_DEBUG)
+     if (!mIsConstructed) {
+        Logger::E("Handler", "Error: Handler::constructor is not called.");
+        assert(0 && "Error: Handler::constructor is not called.");
+     }
+#endif
+
     msg->SetTarget(THIS_PROBE(IHandler));
     if (mAsynchronous) {
         msg->SetAsynchronous(true);
@@ -567,6 +587,13 @@ ECode Handler::RemoveMessages(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
+#if defined(_DEBUG)
+     if (!mIsConstructed) {
+        Logger::E("Handler", "Error: Handler::constructor is not called.");
+        assert(0 && "Error: Handler::constructor is not called.");
+     }
+#endif
+
     AutoPtr<IMessageQueue> queue = mQueue;
     if (queue == NULL) {
         Logger::E("Handler", "Error: RemoveMessages called with no mQueue");
@@ -584,6 +611,13 @@ ECode Handler::RemoveMessages(
 ECode Handler::RemoveCallbacksAndMessages(
     /* [in] */ IInterface* obj)
 {
+#if defined(_DEBUG)
+     if (!mIsConstructed) {
+        Logger::E("Handler", "Error: Handler::constructor is not called.");
+        assert(0 && "Error: Handler::constructor is not called.");
+     }
+#endif
+
     AutoPtr<IMessageQueue> queue = mQueue;
     if (queue == NULL) {
         Logger::E("Handler", "Error: RemoveCallbacksAndMessages called with no mQueue");

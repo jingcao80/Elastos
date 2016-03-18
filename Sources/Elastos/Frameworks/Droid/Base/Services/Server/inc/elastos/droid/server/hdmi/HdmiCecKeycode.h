@@ -55,14 +55,14 @@ private:
         CARAPI_(Int32) ToCecKeycodeIfMatched(
             /* [in] */ Int32 androidKeycode);
 
-        CARAPI_(Int32) ToAndroidKeycodeIfMatched(
+        CARAPI_(Int32) ToElastosKeycodeIfMatched(
             /* [in] */ Int32 cecKeycode);
 
         CARAPI_(AutoPtr<IBoolean>) IsRepeatableIfMatched(
             /* [in] */ Int32 androidKeycode);
 
     private:
-        Int32 mAndroidKeycode;
+        Int32 mElastosKeycode;
 
         Int32 mCecKeycode;
 
@@ -76,7 +76,7 @@ public:
      * @param keycode Android keycode. For details, refer {@link KeyEvent}
      * @return single byte CEC keycode if matched.
      */
-    static CARAPI AndroidKeyToCecKey(
+    static CARAPI ElastosKeyToCecKey(
         /* [in] */ Int32 keycode,
         /* [out] */ Int32* result);
 
@@ -87,7 +87,7 @@ public:
      * @return cec keycode corresponding to the given android keycode.
      *         If finds no matched keycode, return {@link #UNSUPPORTED_KEYCODE}
      */
-    static CARAPI CecKeyToAndroidKey(
+    static CARAPI CecKeyToElastosKey(
         /* [in] */ Int32 keycode,
         /* [out] */ Int32* result);
 

@@ -14,6 +14,7 @@
 #include "elastos/droid/webkit/webview/chromium/native/android_webview/JsResultReceiver.h"
 #include "elastos/droid/webkit/webview/chromium/native/android_webview/permission/AwPermissionRequest.h"
 #include "elastos/droid/webkit/WebViewClient.h"
+#include <Elastos.CoreLibrary.Security.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IBitmap;

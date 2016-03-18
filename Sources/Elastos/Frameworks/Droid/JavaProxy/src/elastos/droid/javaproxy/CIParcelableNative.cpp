@@ -3,6 +3,7 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -10,6 +11,10 @@ namespace Droid {
 namespace JavaProxy {
 
 const String CIParcelableNative::TAG("CIParcelableNative");
+
+CAR_INTERFACE_IMPL_2(CIParcelableNative, Object, IParcelable, IBinder)
+
+CAR_OBJECT_IMPL(CIParcelableNative)
 
 ECode CIParcelableNative::constructor()
 {
@@ -53,6 +58,12 @@ ECode CIParcelableNative::WriteToParcel(
     dest->WriteString(mPkgPath);
     dest->WriteArrayOf((Handle32)mObject.Get());
     return NOERROR;
+}
+
+ECode CIParcelableNative::ToString(
+    /* [out] */ String* str)
+{
+    return Object::ToString(str);
 }
 
 }

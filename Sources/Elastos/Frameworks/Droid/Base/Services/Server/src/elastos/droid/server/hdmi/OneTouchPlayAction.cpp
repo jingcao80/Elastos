@@ -1,12 +1,18 @@
 
+#include "elastos/droid/server/hdmi/Constants.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDevicePlayback.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessageBuilder.h"
+#include "elastos/droid/server/hdmi/HdmiConfig.h"
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
 #include "elastos/droid/server/hdmi/OneTouchPlayAction.h"
 #include <Elastos.CoreLibrary.Utility.h>
-#include <Elastos.Droid.Hardware.h>
-#include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include <Elastos.CoreLibrary.h>
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
 using Elastos::Droid::Hardware::Hdmi::IHdmiPlaybackClientOneTouchPlayCallback;
 using Elastos::Droid::Utility::ISlog;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -32,16 +38,15 @@ ECode OneTouchPlayAction::Create(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (source == NULL || callback == NULL) {
-            Slogger::E(TAG, "Wrong arguments");
-            *result = NULL;
-            return NOERROR;
-        }
-        return new OneTouchPlayAction(source, targetAddress,
-                callback);
-#endif
+    if (source == NULL || callback == NULL) {
+        Slogger::E(TAG, "Wrong arguments");
+        *result = NULL;
+        return NOERROR;
+    }
+    *result = new OneTouchPlayAction(source, targetAddress,
+            callback);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 OneTouchPlayAction::OneTouchPlayAction(
@@ -51,11 +56,9 @@ OneTouchPlayAction::OneTouchPlayAction(
     : mTargetAddress(0)
     , mPowerStatusCounter(0)
 {
-#if 0 // TODO: Translate codes below
-        super::constructor(localDevice);
-        mTargetAddress = targetAddress;
-        mCallback = callback;
-#endif
+    HdmiCecFeatureAction::constructor(localDevice);
+    mTargetAddress = targetAddress;
+    mCallback = callback;
 }
 
 ECode OneTouchPlayAction::Start(
@@ -63,41 +66,44 @@ ECode OneTouchPlayAction::Start(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Int32 srcAddr;
-        GetSourceAddress(&srcAddr);
-        SendCommand(HdmiCecMessageBuilder->BuildTextViewOn(srcAddr, mTargetAddress));
-        BroadcastActiveSource();
-        QueryDevicePowerStatus();
-        mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
-        AddTimer(mState, HdmiConfig::TIMEOUT_MS);
-        *result = TRUE;
-        return NOERROR;
-#endif
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    AutoPtr<IHdmiCecMessage> cmd;
+    HdmiCecMessageBuilder::BuildTextViewOn(srcAddr, mTargetAddress, (IHdmiCecMessage**)&cmd);
+    SendCommand(cmd);
+    BroadcastActiveSource();
+    QueryDevicePowerStatus();
+    mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
+    AddTimer(mState, HdmiConfig::TIMEOUT_MS);
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode OneTouchPlayAction::BroadcastActiveSource()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Int32 srcAddr;
-        GetSourceAddress(&srcAddr);
-        SendCommand(HdmiCecMessageBuilder->BuildActiveSource(srcAddr, GetSourcePath()));
-        // Because only playback device can create this action, it's safe to cast.
-        Playback()->MarkActiveSource();
-#endif
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    Int32 srcPath;
+    GetSourcePath(&srcPath);
+    AutoPtr<IHdmiCecMessage> cmd;
+    HdmiCecMessageBuilder::BuildActiveSource(srcAddr, srcPath, (IHdmiCecMessage**)&cmd);
+    SendCommand(cmd);
+    // Because only playback device can create this action, it's safe to cast.
+    AutoPtr<HdmiCecLocalDevicePlayback> playback;
+    Playback((HdmiCecLocalDevicePlayback**)&playback);
+    playback->MarkActiveSource();
+    return NOERROR;
 }
 
 ECode OneTouchPlayAction::QueryDevicePowerStatus()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Int32 srcAddr;
-        GetSourceAddress(&srcAddr);
-        SendCommand(HdmiCecMessageBuilder->BuildGiveDevicePowerStatus(srcAddr,
-                mTargetAddress));
-#endif
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    AutoPtr<IHdmiCecMessage> cmd;
+    HdmiCecMessageBuilder::BuildGiveDevicePowerStatus(srcAddr,
+            mTargetAddress, (IHdmiCecMessage**)&cmd);
+    SendCommand(cmd);
+    return NOERROR;
 }
 
 ECode OneTouchPlayAction::ProcessCommand(
@@ -106,63 +112,62 @@ ECode OneTouchPlayAction::ProcessCommand(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mState != STATE_WAITING_FOR_REPORT_POWER_STATUS) {
-            *result = FALSE;
-            return NOERROR;
-        }
-        Int32 opcode;
-        cmd->GetOpcode(&opcode);
-        if (opcode == Constants::MESSAGE_REPORT_POWER_STATUS) {
-            AutoPtr<ArrayOf<Byte> > params;
-            cmd->GetParams((ArrayOf<Byte>**)&params);
-            Int32 status = (*params)[0];
-            if (status == IHdmiControlManager::POWER_STATUS_ON) {
-                BroadcastActiveSource();
-                InvokeCallback(IHdmiControlManager::RESULT_SUCCESS);
-                Finish();
-            }
-            *result = TRUE;
-            return NOERROR;
-        }
+    if (mState != STATE_WAITING_FOR_REPORT_POWER_STATUS) {
         *result = FALSE;
         return NOERROR;
-#endif
+    }
+    Int32 opcode;
+    cmd->GetOpcode(&opcode);
+    if (opcode == Constants::MESSAGE_REPORT_POWER_STATUS) {
+        AutoPtr<ArrayOf<Byte> > params;
+        cmd->GetParams((ArrayOf<Byte>**)&params);
+        Int32 status = (*params)[0];
+        if (status == IHdmiControlManager::POWER_STATUS_ON) {
+            BroadcastActiveSource();
+            InvokeCallback(IHdmiControlManager::RESULT_SUCCESS);
+            Finish();
+        }
+        *result = TRUE;
+        return NOERROR;
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode OneTouchPlayAction::HandleTimerEvent(
     /* [in] */ Int32 state)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mState != state) {
-            return NOERROR;
+    if (mState != state) {
+        return NOERROR;
+    }
+    if (state == STATE_WAITING_FOR_REPORT_POWER_STATUS) {
+        if (mPowerStatusCounter++ < LOOP_COUNTER_MAX) {
+            QueryDevicePowerStatus();
+            AddTimer(mState, HdmiConfig::TIMEOUT_MS);
+        } else {
+            // Couldn't wake up the TV for whatever reason. Report failure.
+            InvokeCallback(IHdmiControlManager::RESULT_TIMEOUT);
+            Finish();
         }
-        if (state == STATE_WAITING_FOR_REPORT_POWER_STATUS) {
-            if (mPowerStatusCounter++ < LOOP_COUNTER_MAX) {
-                QueryDevicePowerStatus();
-                AddTimer(mState, HdmiConfig::TIMEOUT_MS);
-            } else {
-                // Couldn't wake up the TV for whatever reason. Report failure.
-                InvokeCallback(IHdmiControlManager::RESULT_TIMEOUT);
-                Finish();
-            }
-        }
-#endif
+    }
+    return NOERROR;
 }
 
 ECode OneTouchPlayAction::InvokeCallback(
     /* [in] */ Int32 result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        try {
-            mCallback->OnComplete(result);
-        } catch (RemoteException e) {
-            Slogger::E(TAG, "Callback failed:" + e);
+    // try {
+    ECode ec = mCallback->OnComplete(result);
+    // } catch (RemoteException e) {
+    if (FAILED(ec)) {
+        if ((ECode) E_REMOTE_EXCEPTION == ec) {
+            Slogger::E(TAG, "Callback failed:%d", ec);
         }
-#endif
+        else
+            return ec;
+    }
+    // }
+    return NOERROR;
 }
 
 } // namespace Hdmi

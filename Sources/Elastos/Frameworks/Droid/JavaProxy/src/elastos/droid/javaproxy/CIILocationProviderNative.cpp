@@ -1,9 +1,11 @@
 
 #include "elastos/droid/javaproxy/CIILocationProviderNative.h"
 #include "elastos/droid/javaproxy/Util.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Internal::Location::EIID_IILocationProvider;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -11,17 +13,20 @@ namespace JavaProxy {
 
 const String CIILocationProviderNative::TAG("CIILocationProviderNative");
 
+CAR_INTERFACE_IMPL_2(CIILocationProviderNative, Object, IILocationProvider, IBinder)
 
-CIILocationProviderNative::~CIILocationProviderNative(){
+CAR_OBJECT_IMPL(CIILocationProviderNative)
+
+CIILocationProviderNative::~CIILocationProviderNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
-
 ECode CIILocationProviderNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     JNIEnv* env;
@@ -32,7 +37,7 @@ ECode CIILocationProviderNative::constructor(
 
 ECode CIILocationProviderNative::Enable()
 {
-    // Slogger::D(TAG, String("+ CIILocationProviderNative::Enable()"));
+    // LOGGERD(TAG, "+ CIILocationProviderNative::Enable()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -48,13 +53,13 @@ ECode CIILocationProviderNative::Enable()
 
     env->DeleteLocalRef(c);
 
-    // Slogger::D(TAG, String("- CIILocationProviderNative::Enable()"));
+    // LOGGERD(TAG, "- CIILocationProviderNative::Enable()");
     return NOERROR;
 }
 
 ECode CIILocationProviderNative::Disable()
 {
-    // Slogger::D(TAG, String("+ CIILocationProviderNative::Disable()"));
+    // LOGGERD(TAG, "+ CIILocationProviderNative::Disable()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -70,7 +75,7 @@ ECode CIILocationProviderNative::Disable()
 
     env->DeleteLocalRef(c);
 
-    // Slogger::D(TAG, String("- CIILocationProviderNative::Disable()"));
+    // LOGGERD(TAG, "- CIILocationProviderNative::Disable()");
     return NOERROR;
 }
 
@@ -78,7 +83,7 @@ ECode CIILocationProviderNative::SetRequest(
     /* [in] */ IProviderRequest* request,
     /* [in] */ IWorkSource* ws)
 {
-    // Slogger::D(TAG, String("+ CIILocationProviderNative::SetRequest()"));
+    // LOGGERD(TAG, "+ CIILocationProviderNative::SetRequest()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -106,14 +111,14 @@ ECode CIILocationProviderNative::SetRequest(
     env->DeleteLocalRef(jrequest);
     env->DeleteLocalRef(jws);
 
-    // Slogger::D(TAG, String("- CIILocationProviderNative::SetRequest()"));
+    // LOGGERD(TAG, "- CIILocationProviderNative::SetRequest()");
     return NOERROR;
 }
 
 ECode CIILocationProviderNative::GetProperties(
     /* [out] */ IProviderProperties** properties)
 {
-    // Slogger::D(TAG, String("+ CIILocationProviderNative::GetProperties()"));
+    // LOGGERD(TAG, "+ CIILocationProviderNative::GetProperties()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -129,7 +134,7 @@ ECode CIILocationProviderNative::GetProperties(
 
     if (jproperties != NULL) {
         if (!Util::GetElProviderProperties(env, jproperties, properties)) {
-            Slogger::E(TAG, "GetProperties() GetElProviderProperties fail!");
+            Logger::E(TAG, "GetProperties() GetElProviderProperties fail!");
         }
         env->DeleteLocalRef(jproperties);
     } else {
@@ -138,7 +143,7 @@ ECode CIILocationProviderNative::GetProperties(
 
     env->DeleteLocalRef(c);
 
-    // Slogger::D(TAG, String("- CIILocationProviderNative::GetProperties()"));
+    // LOGGERD(TAG, "- CIILocationProviderNative::GetProperties()");
     return NOERROR;
 }
 
@@ -146,7 +151,7 @@ ECode CIILocationProviderNative::GetStatus(
     /* [out] */ IBundle** extras,
     /* [out] */ Int32* status)
 {
-    Slogger::D(TAG, String("+ CIILocationProviderNative::GetStatus()"));
+    // LOGGERD(TAG, "+ CIILocationProviderNative::GetStatus()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -155,7 +160,7 @@ ECode CIILocationProviderNative::GetStatus(
     if (*extras != NULL) {
         Util::ToJavaBundle(env, *extras);
     } else {
-        Slogger::D(TAG, "CIILocationProviderNative::GetStatus() *extras is NULL");
+        LOGGERD(TAG, "CIILocationProviderNative::GetStatus() *extras is NULL");
     }
 
     jclass c = env->FindClass("com/android/internal/location/ILocationProvider");
@@ -170,28 +175,28 @@ ECode CIILocationProviderNative::GetStatus(
     if (jextras != NULL) {
         if (*extras != NULL) {
             if (!Util::GetElBundle(env, jextras, *extras)) {
-                Slogger::E(TAG, "GetStatus() GetElBundle fail!");
+                Logger::E(TAG, "GetStatus() GetElBundle fail!");
             }
         } else {
             if (!Util::GetElBundle(env, jextras, extras)) {
-                Slogger::E(TAG, "GetStatus() GetElBundle fail!");
+                Logger::E(TAG, "GetStatus() GetElBundle fail!");
             }
         }
         env->DeleteLocalRef(jextras);
     } else {
-        Slogger::E(TAG, "CIILocationProviderNative::GetStatus() jextras is NULL");
+        Logger::E(TAG, "CIILocationProviderNative::GetStatus() jextras is NULL");
     }
 
     env->DeleteLocalRef(c);
 
-    Slogger::D(TAG, String("- CIILocationProviderNative::GetStatus()"));
+    // LOGGERD(TAG, "- CIILocationProviderNative::GetStatus()");
     return NOERROR;
 }
 
 ECode CIILocationProviderNative::GetStatusUpdateTime(
     /* [out] */ Int64* updateTime)
 {
-    // Slogger::D(TAG, String("+ CIILocationProviderNative::GetStatusUpdateTime()"));
+    // LOGGERD(TAG, "+ CIILocationProviderNative::GetStatusUpdateTime()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -207,23 +212,24 @@ ECode CIILocationProviderNative::GetStatusUpdateTime(
 
     env->DeleteLocalRef(c);
 
-    // Slogger::D(TAG, String("- CIILocationProviderNative::GetStatusUpdateTime()"));
+    // LOGGERD(TAG, "- CIILocationProviderNative::GetStatusUpdateTime()");
     return NOERROR;
 }
 
 ECode CIILocationProviderNative::SendExtraCommand(
     /* [in] */ const String& command,
-    /* [out] */ IBundle** extras,
+    /* [in] */ IBundle* inExtras,
+    /* [out] */ IBundle** outExtras,
     /* [out] */ Boolean* result)
 {
-    Slogger::D(TAG, String("+ CIILocationProviderNative::SendExtraCommand()"));
+    // LOGGERD(TAG, "+ CIILocationProviderNative::SendExtraCommand()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
     jstring jcommand = Util::ToJavaString(env, command);
 
-    jobject jextras = Util::ToJavaBundle(env, *extras);
+    jobject jextras = Util::ToJavaBundle(env, inExtras);
 
     jclass c = env->FindClass("com/android/internal/location/ILocationProvider");
     Util::CheckErrorAndLog(env, TAG, "FindClass: ILocationProvider %d", __LINE__);
@@ -234,22 +240,22 @@ ECode CIILocationProviderNative::SendExtraCommand(
     *result = (Boolean)env->CallBooleanMethod(mJInstance, m, jcommand, jextras);
     Util::CheckErrorAndLog(env, TAG, "CallBooleanMethod: sendExtraCommand %d", __LINE__);
 
-    if (!Util::GetElBundle(env, jextras, *extras)) {
-        Slogger::E(TAG, "GetStatus() GetElBundle fail!");
+    if (!Util::GetElBundle(env, jextras, outExtras)) {
+        Logger::E(TAG, "GetStatus() GetElBundle fail!");
     }
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jcommand);
     env->DeleteLocalRef(jextras);
 
-    Slogger::D(TAG, String("- CIILocationProviderNative::SendExtraCommand()"));
+    // LOGGERD(TAG, "- CIILocationProviderNative::SendExtraCommand()");
     return NOERROR;
 }
 
 ECode CIILocationProviderNative::ToString(
     /* [out] */ String* str)
 {
-    // Slogger::D(TAG, String("+ CIILocationProviderNative::ToString()"));
+    // LOGGERD(TAG, "+ CIILocationProviderNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -258,17 +264,17 @@ ECode CIILocationProviderNative::ToString(
     Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
 
     jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
 
     *str = Util::GetElString(env, jstr);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // Slogger::D(TAG, String("- CIILocationProviderNative::ToString()"));
+    // LOGGERD(TAG, "- CIILocationProviderNative::ToString()");
     return NOERROR;
 }
 

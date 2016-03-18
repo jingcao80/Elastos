@@ -3,9 +3,12 @@
 #define __ELASTOS_DROID_JAVAPROXY_CIWALLPAPERCONNECTIONNATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CIWallpaperConnectionNative.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
-using Elastos::Droid::Service::Wallpaper::IWallpaperEngine;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Service::Wallpaper::IIWallpaperConnection;
+using Elastos::Droid::Service::Wallpaper::IIWallpaperEngine;
 using Elastos::Droid::Os::IParcelFileDescriptor;
 
 namespace Elastos {
@@ -13,19 +16,26 @@ namespace Droid {
 namespace JavaProxy {
 
 CarClass(CIWallpaperConnectionNative)
+    , public Object
+    , public IIWallpaperConnection
+    , public IBinder
 {
 public:
     ~CIWallpaperConnectionNative();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI AttachEngine(
-        /* [in] */ IWallpaperEngine* engine);
+        /* [in] */ IIWallpaperEngine* engine);
 
     CARAPI EngineShown(
-        /* [in] */ IWallpaperEngine* engine);
+        /* [in] */ IIWallpaperEngine* engine);
 
     CARAPI SetWallpaper(
         /* [in] */ const String& name,

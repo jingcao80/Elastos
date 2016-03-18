@@ -3,10 +3,13 @@
 #define __ELASTOS_DROID_JAVAPROXY_CIREMOTECONTROLDISPLAY_H__
 
 #include "_Elastos_Droid_JavaProxy_CIRemoteControlDisplay.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Media::IIRemoteControlDisplay;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 
 namespace Elastos {
@@ -14,30 +17,44 @@ namespace Droid {
 namespace JavaProxy {
 
 CarClass(CIRemoteControlDisplay)
+    , public Object
+    , public IIRemoteControlDisplay
+    , public IJavaNativeProxy
+    , public IBinder
 {
 public:
     ~CIRemoteControlDisplay();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI GetJavaInstance(
-        /* [out] */ Handle32* obj);
+        /* [out] */ Handle64* obj);
 
     CARAPI SetCurrentClientId(
         /* [in] */ Int32 clientGeneration,
         /* [in] */ IPendingIntent* clientMediaIntent,
         /* [in] */ Boolean clearing);
 
+    CARAPI SetEnabled(
+        /* [in] */ Boolean enabled);
+
     CARAPI SetPlaybackState(
         /* [in] */ Int32 generationId,
         /* [in] */ Int32 state,
-        /* [in] */ Int64 stateChangeTimeMs);
+        /* [in] */ Int64 stateChangeTimeMs,
+        /* [in] */ Int64 currentPosMs,
+        /* [in] */ Float speed);
 
-    CARAPI SetTransportControlFlags(
+    CARAPI SetTransportControlInfo(
         /* [in] */ Int32 generationId,
-        /* [in] */ Int32 transportControlFlags);
+        /* [in] */ Int32 transportControlFlags,
+        /* [in] */ Int32 posCapabilities);
 
     CARAPI SetMetadata(
         /* [in] */ Int32 generationId,

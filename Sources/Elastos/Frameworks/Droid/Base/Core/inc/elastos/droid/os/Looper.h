@@ -182,13 +182,14 @@ private:
     ECO_LOCAL static CARAPI Prepare(
         /* [in] */ Boolean quitAllowed);
 
-    ECO_LOCAL static CARAPI_(void) InitTLS();
-
 public:
     AutoPtr<IMessageQueue> mQueue;
     AutoPtr<IThread> mThread;
 
+    static pthread_key_t sKey;
 private:
+    static pthread_once_t sKeyOnce;
+
     static const String TAG;
 
     static AutoPtr<ILooper> sMainLooper;  // guarded by Looper.class

@@ -1,0 +1,22 @@
+module
+{
+    namespace Elastos {
+    namespace Providers {
+    namespace MediaProvider {
+    namespace Media {
+
+    interface IIMtpService
+    {
+        SendObjectAdded(
+            [in] Int32 objectHandle);
+
+        SendObjectRemoved(
+            [in] Int32 objectHandle);
+    }
+
+    } // namespace Media
+    } // namespace MediaProvider
+    } // namespace Providers
+    } // namespace Elastos
+
+}

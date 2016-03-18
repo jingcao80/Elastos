@@ -3,6 +3,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::Content::Pm::EIID_IIPackageDataObserver;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,15 +13,20 @@ namespace JavaProxy {
 
 const String CIPackageDataObserverNative::TAG("CIPackageDataObserverNative");
 
-CIPackageDataObserverNative::~CIPackageDataObserverNative(){
+CAR_INTERFACE_IMPL_2(CIPackageDataObserverNative, Object, IIPackageDataObserver, IBinder)
+
+CAR_OBJECT_IMPL(CIPackageDataObserverNative)
+
+CIPackageDataObserverNative::~CIPackageDataObserverNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
 ECode CIPackageDataObserverNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -30,7 +37,7 @@ ECode CIPackageDataObserverNative::OnRemoveCompleted(
     /* [in] */ const String& packageName,
     /* [in] */ Boolean succeeded)
 {
-    // LOGGERD(TAG, String("+ CIPackageDataObserverNative::OnRemoveCompleted()"));
+    // LOGGERD(TAG, "+ CIPackageDataObserverNative::OnRemoveCompleted()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -49,14 +56,14 @@ ECode CIPackageDataObserverNative::OnRemoveCompleted(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jpackageName);
 
-    // LOGGERD(TAG, String("- CIPackageDataObserverNative::OnRemoveCompleted()"));
+    // LOGGERD(TAG, "- CIPackageDataObserverNative::OnRemoveCompleted()");
     return NOERROR;
 }
 
 ECode CIPackageDataObserverNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CIPackageDataObserverNative::ToString()"));
+    // LOGGERD(TAG, "+ CIPackageDataObserverNative::ToString()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -64,17 +71,17 @@ ECode CIPackageDataObserverNative::ToString(
     Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
 
     jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
 
     *str = Util::GetElString(env, jstr);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CIPackageDataObserverNative::ToString()"));
+    // LOGGERD(TAG, "- CIPackageDataObserverNative::ToString()");
     return NOERROR;
 }
 

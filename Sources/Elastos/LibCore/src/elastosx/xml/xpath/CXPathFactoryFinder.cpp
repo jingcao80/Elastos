@@ -41,8 +41,8 @@ namespace XPath {
 static AutoPtr<IProperties> initCacheProps()
 {
     AutoPtr<IProperties> cp;
-    CProperties::NewByFriend( (CProperties**)&cp );
-    return (IProperties*)cp.Get();
+    CProperties::New((IProperties**)&cp);
+    return cp;
 }
 
 Boolean CXPathFactoryFinder::debug = FALSE;

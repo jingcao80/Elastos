@@ -1,9 +1,10 @@
 
 #include "elastos/droid/javaproxy/CIAudioFocusDispatcher.h"
-
 #include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Media::EIID_IIAudioFocusDispatcher;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,6 +12,10 @@ namespace Droid {
 namespace JavaProxy {
 
 const String CIAudioFocusDispatcher::TAG("CIAudioFocusDispatcher");
+
+CAR_INTERFACE_IMPL_2(CIAudioFocusDispatcher, Object, IIAudioFocusDispatcher, IBinder)
+
+CAR_OBJECT_IMPL(CIAudioFocusDispatcher)
 
 CIAudioFocusDispatcher::~CIAudioFocusDispatcher()
 {
@@ -20,8 +25,8 @@ CIAudioFocusDispatcher::~CIAudioFocusDispatcher()
 }
 
 ECode CIAudioFocusDispatcher::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -32,6 +37,7 @@ ECode CIAudioFocusDispatcher::DispatchAudioFocusChange(
     /* [in] */ Int32 focusChange,
     /* [in] */ const String& clientId)
 {
+     // LOGGERD(TAG, "+ CIAudioFocusDispatcher::DispatchAudioFocusChange");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -48,6 +54,7 @@ ECode CIAudioFocusDispatcher::DispatchAudioFocusChange(
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jclientId);
+     // LOGGERD(TAG, "+ CIAudioFocusDispatcher::DispatchAudioFocusChange");
     return NOERROR;
 }
 

@@ -1,20 +1,18 @@
-
 #ifndef __ELASTOS_DROID_WEBKIT_WEBVIEWFRAGMENT_H__
 #define __ELASTOS_DROID_WEBKIT_WEBVIEWFRAGMENT_H__
 
 #include "Elastos.Droid.Webkit.h"
 #include "elastos/droid/ext/frameworkext.h"
-// TODO #include "elastos/droid/app/Fragment.h"
+#include "elastos/droid/app/Fragment.h"
 #include <elastos/core/Object.h>
 
-// TODO using Elastos::Droid::App::Fragment;
+using Elastos::Droid::App::Fragment;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IFragment;
 using Elastos::Droid::App::IFragmentManager;
 using Elastos::Droid::App::IFragmentManagerImpl;
 using Elastos::Droid::App::IFragmentSavedState;
 using Elastos::Droid::App::ILoaderManager;
-// TODO using Elastos::Droid::App::ILoaderManagerImpl;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
@@ -24,28 +22,13 @@ namespace Elastos {
 namespace Droid {
 namespace Webkit {
 
-// TODO
-// class InnerWebViewFragment
-//     : public Fragment
-// {
-// public:
-//     IFRAGMENT_METHODS_DECL();
-
-//     CARAPI ToString(
-//         /* [out] */ String* info);
-
-// protected:
-//     InnerWebViewFragment();
-// };
-
 /**
  * A fragment that displays a WebView.
  * <p>
  * The WebView is automically paused or resumed when the Fragment is paused or resumed.
  */
 class WebViewFragment
-    // TODO : public InnerWebViewFragment
-    : public Object
+    : public Fragment
     , public IWebViewFragment
 {
 public:

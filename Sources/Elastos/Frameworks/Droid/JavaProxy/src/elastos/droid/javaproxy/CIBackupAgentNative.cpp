@@ -3,7 +3,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
-using Elastos::Droid::JavaProxy::Util;
+using Elastos::Droid::App::EIID_IIBackupAgent;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,6 +12,10 @@ namespace Droid {
 namespace JavaProxy {
 
 const String CIBackupAgentNative::TAG("CIBackupAgentNative");
+
+CAR_INTERFACE_IMPL_2(CIBackupAgentNative, Object, IIBackupAgent, IBinder)
+
+CAR_OBJECT_IMPL(CIBackupAgentNative)
 
 CIBackupAgentNative::~CIBackupAgentNative()
 {
@@ -20,8 +25,8 @@ CIBackupAgentNative::~CIBackupAgentNative()
 }
 
 ECode CIBackupAgentNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -35,7 +40,7 @@ ECode CIBackupAgentNative::DoBackup(
     /* [in] */ Int32 token,
     /* [in] */ IIBackupManager* callbackBinder)
 {
-    // LOGGERD(TAG, String("+ CIBackupAgentNative::DoBackup()"));
+    // LOGGERD(TAG, "+ CIBackupAgentNative::DoBackup()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -61,10 +66,10 @@ ECode CIBackupAgentNative::DoBackup(
         c = env->FindClass("android/app/backup/ElBackupManagerProxy");
         Util::CheckErrorAndLog(env, TAG, "FindClass: ElBackupManagerProxy : %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElBackupManagerProxy : %d", __LINE__);
 
-        jcallbackBinder = env->NewObject(c, m, (jint)callbackBinder);
+        jcallbackBinder = env->NewObject(c, m, (jlong)callbackBinder);
         Util::CheckErrorAndLog(env, TAG, "NewObject: ElBackupManagerProxy : %d", __LINE__);
         callbackBinder->AddRef();
 
@@ -85,7 +90,7 @@ ECode CIBackupAgentNative::DoBackup(
     env->DeleteLocalRef(jdata);
     env->DeleteLocalRef(jnewState);
     env->DeleteLocalRef(jcallbackBinder);
-    // LOGGERD(TAG, String("- CIBackupAgentNative::DoBackup()"));
+    // LOGGERD(TAG, "- CIBackupAgentNative::DoBackup()");
     return NOERROR;
 }
 
@@ -96,7 +101,7 @@ ECode CIBackupAgentNative::DoRestore(
     /* [in] */ Int32 token,
     /* [in] */ IIBackupManager* callbackBinder)
 {
-    LOGGERD(TAG, String("+ CIBackupAgentNative::DoRestore()"));
+    // LOGGERD(TAG, "+ CIBackupAgentNative::DoRestore()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -116,10 +121,10 @@ ECode CIBackupAgentNative::DoRestore(
         jclass c = env->FindClass("android/app/backup/ElBackupManagerProxy");
         Util::CheckErrorAndLog(env, TAG, "FindClass: ElBackupManagerProxy : %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElBackupManagerProxy : %d", __LINE__);
 
-        jcallbackBinder = env->NewObject(c, m, (jint)callbackBinder);
+        jcallbackBinder = env->NewObject(c, m, (jlong)callbackBinder);
         Util::CheckErrorAndLog(env, TAG, "NewObject: ElBackupManagerProxy : %d", __LINE__);
         callbackBinder->AddRef();
         env->DeleteLocalRef(c);
@@ -138,7 +143,7 @@ ECode CIBackupAgentNative::DoRestore(
     env->DeleteLocalRef(jdata);
     env->DeleteLocalRef(jnewState);
     env->DeleteLocalRef(jcallbackBinder);
-    LOGGERD(TAG, String("- CIBackupAgentNative::DoRestore()"));
+    // LOGGERD(TAG, "- CIBackupAgentNative::DoRestore()");
     return NOERROR;
 }
 
@@ -147,7 +152,7 @@ ECode CIBackupAgentNative::DoFullBackup(
     /* [in] */ Int32 token,
     /* [in] */ IIBackupManager* callbackBinder)
 {
-    LOGGERD(TAG, String("+ CIBackupAgentNative::DoFullBackup()"));
+    // LOGGERD(TAG, "+ CIBackupAgentNative::DoFullBackup()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -162,10 +167,10 @@ ECode CIBackupAgentNative::DoFullBackup(
         jclass c = env->FindClass("android/app/backup/ElBackupManagerProxy");
         Util::CheckErrorAndLog(env, TAG, "FindClass: ElBackupManagerProxy : %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElBackupManagerProxy : %d", __LINE__);
 
-        jcallbackBinder = env->NewObject(c, m, (jint)callbackBinder);
+        jcallbackBinder = env->NewObject(c, m, (jlong)callbackBinder);
         Util::CheckErrorAndLog(env, TAG, "NewObject: ElBackupManagerProxy : %d", __LINE__);
         callbackBinder->AddRef();
 
@@ -184,7 +189,7 @@ ECode CIBackupAgentNative::DoFullBackup(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jdata);
     env->DeleteLocalRef(jcallbackBinder);
-    LOGGERD(TAG, String("- CIBackupAgentNative::DoFullBackup()"));
+    // LOGGERD(TAG, "- CIBackupAgentNative::DoFullBackup()");
     return NOERROR;
 }
 
@@ -199,7 +204,7 @@ ECode CIBackupAgentNative::DoRestoreFile(
     /* [in] */ Int32 token,
     /* [in] */ IIBackupManager* callbackBinder)
 {
-   LOGGERD(TAG, String("+ CIBackupAgentNative::DoRestoreFile()"));
+    // LOGGERD(TAG, "+ CIBackupAgentNative::DoRestoreFile()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -217,10 +222,10 @@ ECode CIBackupAgentNative::DoRestoreFile(
         jclass c = env->FindClass("android/app/backup/ElBackupManagerProxy");
         Util::CheckErrorAndLog(env, TAG, "FindClass: ElBackupManagerProxy : %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElBackupManagerProxy : %d", __LINE__);
 
-        jcallbackBinder = env->NewObject(c, m, (jint)callbackBinder);
+        jcallbackBinder = env->NewObject(c, m, (jlong)callbackBinder);
         Util::CheckErrorAndLog(env, TAG, "NewObject: ElBackupManagerProxy : %d", __LINE__);
         callbackBinder->AddRef();
 
@@ -241,7 +246,130 @@ ECode CIBackupAgentNative::DoRestoreFile(
     env->DeleteLocalRef(jdomainName);
     env->DeleteLocalRef(jpath);
     env->DeleteLocalRef(jcallbackBinder);
-    LOGGERD(TAG, String("- CIBackupAgentNative::DoRestoreFile()"));
+    // LOGGERD(TAG, "- CIBackupAgentNative::DoRestoreFile()");
+    return NOERROR;
+}
+
+ECode CIBackupAgentNative::DoRestoreFinished(
+    /* [in] */ Int32 token,
+    /* [in] */ IIBackupManager* callbackBinder)
+{
+    // LOGGERD(TAG, "+ CIBackupAgentNative::DoRestoreFinished()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject jcallbackBinder = NULL;
+    if (callbackBinder != NULL) {
+        jclass c = env->FindClass("android/app/backup/ElBackupManagerProxy");
+        Util::CheckErrorAndLog(env, TAG, "FindClass: ElBackupManagerProxy : %d", __LINE__);
+
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
+        Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElBackupManagerProxy : %d", __LINE__);
+
+        jcallbackBinder = env->NewObject(c, m, (jlong)callbackBinder);
+        Util::CheckErrorAndLog(env, TAG, "NewObject: ElBackupManagerProxy : %d", __LINE__);
+        callbackBinder->AddRef();
+
+        env->DeleteLocalRef(c);
+    }
+
+    jclass c = env->FindClass("android/app/IBackupAgent");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IBackupAgent %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "doRestoreFinished", "(ILandroid/app/backup/IBackupManager;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: doRestoreFinished Line: %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, (jint)token, jcallbackBinder);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: doRestoreFinished Line: %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jcallbackBinder);
+    // LOGGERD(TAG, "- CIBackupAgentNative::DoRestoreFinished()");
+    return NOERROR;
+}
+
+ECode CIBackupAgentNative::Fail(
+    /* [in] */ const String& message)
+{
+    // LOGGERD(TAG, "+ CIBackupAgentNative::Fail()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jstring jmessage = NULL;
+    if (message != NULL) {
+        jmessage = Util::ToJavaString(env, message);
+    }
+
+    jclass c = env->FindClass("android/app/IBackupAgent");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IBackupAgent %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "fail", "(Ljava/lang/String;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: fail Line: %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m,  jmessage);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: fail Line: %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jmessage);
+    // LOGGERD(TAG, "- CIBackupAgentNative::Fail()");
+    return NOERROR;
+}
+
+ECode CIBackupAgentNative::DoBackupFiles(
+    /* [in] */ IParcelFileDescriptor* data,
+    /* [in] */ Int32 token,
+    /* [in] */ ArrayOf<String>* domainTokens,
+    /* [in] */ const String& excludeFilesRegex,
+    /* [in] */ IIBackupManager* callbackBinder)
+{
+    // LOGGERD(TAG, "+ CIBackupAgentNative::DoBackupFiles()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject jdata = NULL;
+    if (data != NULL) {
+        jdata = Util::ToJavaParcelFileDescriptor(env, data);
+    }
+    jobjectArray jdomainTokens = NULL;
+    if (domainTokens != NULL) {
+        jdomainTokens = Util::ToJavaStringArray(env, domainTokens);
+    }
+    jstring jexcludeFilesRegex = Util::ToJavaString(env, excludeFilesRegex);
+
+    jobject jcallbackBinder = NULL;
+    if (callbackBinder != NULL) {
+        jclass c = env->FindClass("android/app/backup/ElBackupManagerProxy");
+        Util::CheckErrorAndLog(env, TAG, "FindClass: ElBackupManagerProxy : %d", __LINE__);
+
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
+        Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElBackupManagerProxy : %d", __LINE__);
+
+        jcallbackBinder = env->NewObject(c, m, (jlong)callbackBinder);
+        Util::CheckErrorAndLog(env, TAG, "NewObject: ElBackupManagerProxy : %d", __LINE__);
+        callbackBinder->AddRef();
+
+        env->DeleteLocalRef(c);
+    }
+
+    jclass c = env->FindClass("android/app/IBackupAgent");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IBackupAgent %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "doBackupFiles", "(Landroid/os/ParcelFileDescriptor;"
+        "I[Ljava/lang/String;Ljava/lang/String;Landroid/app/backup/IBackupManager;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: doBackupFiles Line: %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m,  jdata, token, jdomainTokens, jexcludeFilesRegex, jcallbackBinder);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: doBackupFiles Line: %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jdata);
+    env->DeleteLocalRef(jdomainTokens);
+    env->DeleteLocalRef(jexcludeFilesRegex);
+    env->DeleteLocalRef(jcallbackBinder);
+    // LOGGERD(TAG, "- CIBackupAgentNative::DoBackupFiles()");
     return NOERROR;
 }
 

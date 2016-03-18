@@ -270,6 +270,10 @@ public:
     AutoPtr<IWeakReference> mWeakCallback;
     Boolean mTakeStrongRefOfCallback;
     Boolean mAsynchronous;
+
+#if defined(_DEBUG)
+     Boolean mIsConstructed;
+#endif
 };
 
 } // namespace Os

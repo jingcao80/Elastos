@@ -1,0 +1,25 @@
+
+module
+{
+    using interface Elastos.Droid.Widget.ITextView;
+    using interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Usb {
+
+    /**
+    * @Involve Elastos.Droid.SystemUI.ISystemUI
+    */
+
+    interface IStorageNotification {
+        UpdateUsbMassStorageNotification(
+            [in] Boolean available);
+    }
+
+    } // namespace Usb
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,5 +1,8 @@
 
 #include "elastos/droid/settings/SubSettings.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {

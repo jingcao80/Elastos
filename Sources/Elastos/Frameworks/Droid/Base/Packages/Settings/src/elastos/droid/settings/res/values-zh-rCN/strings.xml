@@ -1953,7 +1953,7 @@
     <string name="enter_pin" msgid="5305333588093263790">"要启动Android，请输入您的PIN码"</string>
     <string name="enter_pattern" msgid="4187435713036808566">"要启动Android，请绘制您的解锁图案"</string>
     <string name="try_again" msgid="4272075051293936921">"请重试。"</string>
-    <string name="delete" msgid="4219243412325163003">"删除"</string>
+    <string name="delete_" msgid="4219243412325163003">"删除"</string>
     <string name="misc_files" msgid="6720680815969643497">"其他文件"</string>
     <string name="misc_files_selected_count" msgid="4647048020823912088">"已选择 <xliff:g id="NUMBER">%1$d</xliff:g> 个，共 <xliff:g id="TOTAL">%2$d</xliff:g> 个"</string>
     <string name="misc_files_selected_count_bytes" msgid="2876232009069114352">"<xliff:g id="NUMBER">%1$s</xliff:g>，共 <xliff:g id="TOTAL">%2$s</xliff:g>"</string>

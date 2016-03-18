@@ -22,14 +22,24 @@ namespace Elastos {
 namespace Droid {
 namespace Database {
 
-MatrixCursor::RowBuilder::RowBuilder(
+MatrixCursor::RowBuilder::RowBuilder()
+    : mRow(0)
+    , mEndIndex(0)
+    , mIndex(0)
+{}
+
+MatrixCursor::RowBuilder::~RowBuilder()
+{}
+
+ECode MatrixCursor::RowBuilder::constructor(
     /* [in] */ Int32 row,
-    /* [in] */ MatrixCursor* owner)
-    : mRow(row)
-    , mIndex(row * owner->mColumnCount)
-    , mOwner(owner)
+    /* [in] */ IMatrixCursor* owner)
 {
-    mEndIndex = mIndex + owner->mColumnCount;
+    mRow = row;
+    mIndex = row * (((MatrixCursor*)owner)->mColumnCount);
+    mOwner = (MatrixCursor*)owner;
+    mEndIndex = mIndex + ((MatrixCursor*)owner)->mColumnCount;
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(MatrixCursor::RowBuilder, Object, IRowBuilder)
@@ -122,8 +132,9 @@ ECode MatrixCursor::NewRow(
     const Int32 row = mRowCount++;
     const Int32 endIndex = mRowCount * mColumnCount;
     EnsureCapacity(endIndex);
-    AutoPtr<IRowBuilder> m_builder = new RowBuilder(row, this);
-    *builder = m_builder;
+    AutoPtr<RowBuilder> m_builder = new RowBuilder();
+    m_builder->constructor(row, IMatrixCursor::Probe(this));
+    *builder = IRowBuilder::Probe(m_builder);
     REFCOUNT_ADD(*builder)
     return NOERROR;
 }

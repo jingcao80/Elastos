@@ -7,6 +7,33 @@ module
     namespace Telecomm {
     namespace Telecom {
 
+        interface IVideoProfileVideoState {
+            /**
+             * Call is currently in an audio-only mode with no video transmission or receipt.
+             */
+            const Int32 AUDIO_ONLY = 0x0;
+
+            /**
+             * Video transmission is enabled.
+             */
+            const Int32 TX_ENABLED = 0x1;
+
+            /**
+             * Video reception is enabled.
+             */
+            const Int32 RX_ENABLED = 0x2;
+
+            /**
+             * Video signal is bi-directional.
+             */
+            const Int32 BIDIRECTIONAL = TX_ENABLED | RX_ENABLED;
+
+            /**
+             * Video is paused.
+             */
+            const Int32 PAUSED = 0x4;
+        }
+
         /**
          *  Represents attributes of video calls.
          *  @hide

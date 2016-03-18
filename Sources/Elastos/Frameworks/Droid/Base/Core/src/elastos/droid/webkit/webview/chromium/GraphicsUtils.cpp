@@ -3,9 +3,10 @@
 #include "elastos/droid/webkit/webview/chromium/GraphicBufferImpl.h"
 #include "elastos/droid/webkit/webview/chromium/PixelInfo.h"
 #include <Elastos.Droid.Graphics.h>
+//#include "elastos/droid/graphics/GraphicsNative.h"
 
 using Elastos::Droid::Graphics::ICanvas;
-//using Elastos::Droid::Graphics::GraphicsNative;
+//TODO using Elastos::Droid::Graphics::GraphicsNative;
 
 namespace Elastos {
 namespace Droid {
@@ -34,7 +35,7 @@ Int64 GraphicsUtils::GetDrawGLFunctionTable()
 
 AwPixelInfo* GetPixels(IInterface* _canvas) {
     AutoPtr<ICanvas> ca = ICanvas::Probe(_canvas);
-    SkCanvas* canvas = NULL;// = GraphicsNative::GetNativeCanvas(ca);
+    SkCanvas* canvas = NULL; //TOOD GraphicsNative::GetNativeCanvas(ca);
     if (!canvas)
         return NULL;
 

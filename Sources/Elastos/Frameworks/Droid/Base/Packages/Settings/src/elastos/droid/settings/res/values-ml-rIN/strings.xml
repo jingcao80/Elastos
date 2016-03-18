@@ -1953,7 +1953,7 @@
     <string name="enter_pin" msgid="5305333588093263790">"Android ആരംഭിക്കുന്നതിന്, നിങ്ങളുടെ പിൻ നൽകുക"</string>
     <string name="enter_pattern" msgid="4187435713036808566">"Android ആരംഭിക്കുന്നതിന്, നിങ്ങളുടെ പാറ്റേൺ വരയ്‌ക്കുക"</string>
     <string name="try_again" msgid="4272075051293936921">"വീണ്ടും ശ്രമിക്കൂ."</string>
-    <string name="delete" msgid="4219243412325163003">"ഇല്ലാതാക്കുക"</string>
+    <string name="delete_" msgid="4219243412325163003">"ഇല്ലാതാക്കുക"</string>
     <string name="misc_files" msgid="6720680815969643497">"പലവക ഫയലുകൾ"</string>
     <string name="misc_files_selected_count" msgid="4647048020823912088">"<xliff:g id="TOTAL">%2$d</xliff:g>-ൽ <xliff:g id="NUMBER">%1$d</xliff:g> എണ്ണം തിരഞ്ഞടുത്തു"</string>
     <string name="misc_files_selected_count_bytes" msgid="2876232009069114352">"<xliff:g id="TOTAL">%2$s</xliff:g>-ൽ <xliff:g id="NUMBER">%1$s</xliff:g>"</string>

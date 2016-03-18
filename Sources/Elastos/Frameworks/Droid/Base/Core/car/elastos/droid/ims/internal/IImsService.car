@@ -1,0 +1,93 @@
+
+module
+{
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.Ims.IImsCallProfile;
+    interface Elastos.Droid.Ims.Internal.IIImsUt;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Ims {
+    namespace Internal {
+
+    /**
+     * {@hide}
+     */
+    interface IIImsService {
+        Open(
+            [in] Int32 serviceClass,
+            [in] IPendingIntent* incomingCallIntent,
+            [in] IIImsRegistrationListener* listener,
+            [out] Int32* result);
+
+        Close(
+            [in] Int32 serviceId);
+
+        IsConnected(
+            [in] Int32 serviceId,
+            [in] Int32 serviceType,
+            [in] Int32 callType,
+            [out] Boolean* result);
+
+        IsOpened(
+            [in] Int32 serviceId,
+            [out] Boolean* result);
+
+        SetRegistrationListener(
+            [in] Int32 serviceId,
+            [in] IIImsRegistrationListener* listener);
+
+        CreateCallProfile(
+            [in] Int32 serviceId,
+            [in] Int32 serviceType,
+            [in] Int32 callType,
+            [out] IImsCallProfile** result);
+
+        CreateCallSession(
+            [in] Int32 serviceId,
+            [in] IImsCallProfile* profile,
+            [in] IIImsCallSessionListener* listener,
+            [out] IIImsCallSession** result);
+
+        GetPendingCallSession(
+            [in] Int32 serviceId,
+            [in] String callId,
+            [out] IIImsCallSession** result);
+
+        /**
+         * Ut interface for the supplementary service configuration.
+         */
+        GetUtInterface(
+            [in] Int32 serviceId,
+            [out] IIImsUt** result);
+
+        /**
+         * Config interface to Get/set IMS service/capability parameters.
+         */
+        GetConfigInterface(
+            [out] IIImsConfig** result);
+
+        /**
+         * Used for turning on IMS when its in OFF state.
+         */
+        TurnOnIms();
+
+        /**
+         * Used for turning off IMS when its in ON state.
+         * When IMS is OFF, device will behave as CSFB'ed.
+         */
+        TurnOffIms();
+
+        /**
+         * ECBM interface for Emergency Callback mode mechanism.
+         */
+        GetEcbmInterface(
+            [in] Int32 serviceId,
+            [out] IIImsEcbm** result);
+    }
+
+    } // namespace Internal
+    } // namespace Ims
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,19 +1,44 @@
 
 module
 {
+    interface Elastos.Droid.Telecomm.Internal.IIConnectionServiceAdapter;
 
     namespace Elastos {
     namespace Droid {
     namespace Telecomm {
     namespace Telecom {
 
-        /**
-         * Provides methods for IConnectionService implementations to interact with the system phone app.
-         *
-         * @hide
-         */
-        interface IConnectionServiceAdapterServant {
-        }
+    /**
+     * Provides methods for IConnectionService implementations to interact with the system phone app.
+     *
+     * @hide
+     */
+    interface IConnectionServiceAdapterServant {
+
+        const Int32 MSG_HANDLE_CREATE_CONNECTION_COMPLETE = 1;
+        const Int32 MSG_SET_ACTIVE = 2;
+        const Int32 MSG_SET_RINGING = 3;
+        const Int32 MSG_SET_DIALING = 4;
+        const Int32 MSG_SET_DISCONNECTED = 5;
+        const Int32 MSG_SET_ON_HOLD = 6;
+        const Int32 MSG_SET_RINGBACK_REQUESTED = 7;
+        const Int32 MSG_SET_CALL_CAPABILITIES = 8;
+        const Int32 MSG_SET_IS_CONFERENCED = 9;
+        const Int32 MSG_ADD_CONFERENCE_CALL = 10;
+        const Int32 MSG_REMOVE_CALL = 11;
+        const Int32 MSG_ON_POST_DIAL_WAIT = 12;
+        const Int32 MSG_QUERY_REMOTE_CALL_SERVICES = 13;
+        const Int32 MSG_SET_VIDEO_STATE = 14;
+        const Int32 MSG_SET_VIDEO_CALL_PROVIDER = 15;
+        const Int32 MSG_SET_IS_VOIP_AUDIO_MODE = 16;
+        const Int32 MSG_SET_STATUS_HINTS = 17;
+        const Int32 MSG_SET_ADDRESS = 18;
+        const Int32 MSG_SET_CALLER_DISPLAY_NAME = 19;
+        const Int32 MSG_SET_CONFERENCEABLE_CONNECTIONS = 20;
+
+        GetStub(
+            [out] IIConnectionServiceAdapter** result);
+    }
 
     } // namespace Telecom
     } // namespace Telecomm

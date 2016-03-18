@@ -292,6 +292,7 @@ ECode ProcessList::UpdateOomLevels(
         CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&bbHelper);
         AutoPtr<IByteBuffer> buf;
         bbHelper->Allocate(4 * (2*mOomAdj->GetLength() + 1), (IByteBuffer**)&buf);
+        assert(buf != NULL);
         buf->PutInt32(LMK_TARGET);
         for (Int32 i = 0; i < mOomAdj->GetLength(); i++) {
             buf->PutInt32(((*mOomMinFree)[i] * 1024) / MEMORY_PAGE_SIZE);

@@ -5,6 +5,7 @@
 #include "_Elastos.Droid.Server.h"
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Object.h>
+#include <Elastos.Droid.Hardware.h>
 
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::Hardware::Hdmi::IHdmiPortInfo;

@@ -4,11 +4,10 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/webkit/CPluginList.h"
 #include <elastos/core/AutoLock.h>
-// TODO #include <elastos/utility/Clist.h>
 #include <elastos/utility/etl/Algorithm.h>
 
 using Elastos::Core::AutoLock;
-// TODOusing Elastos::Utility::CList;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -28,9 +27,7 @@ ECode CPluginList::GetList(
 {
     VALIDATE_NOT_NULL(plugins);
     AutoLock lock(this);
-    assert(0);
-    // TODO
-    // FAIL_RETURN(CList::New(plugins));
+    FAIL_RETURN(CArrayList::New(plugins));
     List< AutoPtr<CPlugin> >::Iterator it;
     for (it = mPlugins.Begin(); it != mPlugins.End(); ++it) {
         (*plugins)->Add((IPlugin*)it->Get());
@@ -42,8 +39,9 @@ ECode CPluginList::AddPlugin(
     /* [in] */ IPlugin* plugin)
 {
     AutoLock lock(this);
-    if (Find(mPlugins.Begin(), mPlugins.End(), plugin) == mPlugins.End()) {
-        mPlugins.PushBack((CPlugin*)plugin);
+    AutoPtr<CPlugin> ap = (CPlugin*)plugin;
+    if (Find(mPlugins.Begin(), mPlugins.End(), ap) == mPlugins.End()) {
+        mPlugins.PushBack(ap);
     }
     return NOERROR;
 }

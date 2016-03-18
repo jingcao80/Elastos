@@ -1,9 +1,11 @@
 
 #include "elastos/droid/javaproxy/CCursorNative.h"
-#include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
+#include "Elastos.Droid.Content.h"
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::JavaProxy::Util;
+using Elastos::Droid::Database::EIID_ICursor;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -15,6 +17,10 @@ const String CCursorNative::TAG("CCursorNative");
 HashMap<IContentObserver*, jobject> CCursorNative::mContentObserverMap;
 HashMap<IDataSetObserver*, jobject> CCursorNative::mDataSetObserverMap;
 
+CAR_INTERFACE_IMPL_2(CCursorNative, Object, ICursor, IBinder)
+
+CAR_OBJECT_IMPL(CCursorNative)
+
 CCursorNative::~CCursorNative()
 {
     JNIEnv* env;
@@ -23,8 +29,8 @@ CCursorNative::~CCursorNative()
 }
 
 ECode CCursorNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -34,7 +40,7 @@ ECode CCursorNative::constructor(
 ECode CCursorNative::GetCount(
     /* [out] */ Int32* count)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::GetCount()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetCount()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -50,7 +56,7 @@ ECode CCursorNative::GetCount(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::GetCount()"));
+    // LOGGERD(TAG, "- CCursorNative::GetCount()");
     return NOERROR;
 }
 
@@ -58,7 +64,7 @@ ECode CCursorNative::GetColumnIndexOrThrow(
     /* [in] */ const String& columnName,
     /* [out] */ Int32* columnIndex)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::GetColumnIndexOrThrow()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetColumnIndexOrThrow()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -80,7 +86,7 @@ ECode CCursorNative::GetColumnIndexOrThrow(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jcolumnName);
 
-    // LOGGERD(TAG, String("- CCursorNative::GetColumnIndexOrThrow()"));
+    // LOGGERD(TAG, "- CCursorNative::GetColumnIndexOrThrow()");
     return ec;
 }
 
@@ -88,7 +94,7 @@ ECode CCursorNative::GetColumnIndex(
     /* [in] */ const String& columnName,
     /* [out] */ Int32* columnIndex)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::GetColumnIndex()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetColumnIndex()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -109,7 +115,7 @@ ECode CCursorNative::GetColumnIndex(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jcolumnName);
 
-    // LOGGERD(TAG, String("- CCursorNative::GetColumnIndex()"));
+    // LOGGERD(TAG, "- CCursorNative::GetColumnIndex()");
     return NOERROR;
 }
 
@@ -117,7 +123,7 @@ ECode CCursorNative::MoveToPosition(
     /* [in] */ Int32 position,
     /* [out] */ Boolean* succeeded)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::MoveToPosition()"));
+    // LOGGERD(TAG, "+ CCursorNative::MoveToPosition()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -135,7 +141,7 @@ ECode CCursorNative::MoveToPosition(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::MoveToPosition()"));
+    // LOGGERD(TAG, "- CCursorNative::MoveToPosition()");
     return NOERROR;
 }
 
@@ -143,7 +149,7 @@ ECode CCursorNative::GetInt64(
     /* [in] */ Int32 columnIndex,
     /* [out] */ Int64* columnValue)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::GetInt64()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetInt64()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -161,14 +167,14 @@ ECode CCursorNative::GetInt64(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::GetInt64()"));
+    // LOGGERD(TAG, "- CCursorNative::GetInt64()");
     return NOERROR;
 }
 
 ECode CCursorNative::IsClosed(
     /* [out] */ Boolean* closed)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::IsClosed()"));
+    // LOGGERD(TAG, "+ CCursorNative::IsClosed()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -186,13 +192,13 @@ ECode CCursorNative::IsClosed(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::IsClosed()"));
+    // LOGGERD(TAG, "- CCursorNative::IsClosed()");
     return NOERROR;
 }
 
 ECode CCursorNative::Close()
 {
-    // LOGGERD(TAG, String("+ CCursorNative::Close()"));
+    // LOGGERD(TAG, "+ CCursorNative::Close()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -208,7 +214,7 @@ ECode CCursorNative::Close()
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::Close()"));
+    // LOGGERD(TAG, "- CCursorNative::Close()");
     return NOERROR;
 }
 
@@ -216,7 +222,7 @@ ECode CCursorNative::Move(
     /* [in] */ Int32 offset,
     /* [out] */ Boolean* succeeded)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::Move()"));
+    // LOGGERD(TAG, "+ CCursorNative::Move()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -234,14 +240,14 @@ ECode CCursorNative::Move(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::Move()"));
+    // LOGGERD(TAG, "- CCursorNative::Move()");
     return NOERROR;
 }
 
 ECode CCursorNative::GetPosition(
     /* [out] */ Int32* position)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::GetPosition()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetPosition()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -259,14 +265,14 @@ ECode CCursorNative::GetPosition(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::GetPosition()"));
+    // LOGGERD(TAG, "- CCursorNative::GetPosition()");
     return NOERROR;
 }
 
 ECode CCursorNative::MoveToFirst(
     /* [out] */ Boolean* succeeded)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::MoveToFirst()"));
+    // LOGGERD(TAG, "+ CCursorNative::MoveToFirst()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -284,14 +290,14 @@ ECode CCursorNative::MoveToFirst(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::MoveToFirst()"));
+    // LOGGERD(TAG, "- CCursorNative::MoveToFirst()");
     return NOERROR;
 }
 
 ECode CCursorNative::MoveToLast(
     /* [out] */ Boolean* succeeded)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::MoveToLast()"));
+    // LOGGERD(TAG, "+ CCursorNative::MoveToLast()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -309,14 +315,14 @@ ECode CCursorNative::MoveToLast(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::MoveToFirst()"));
+    // LOGGERD(TAG, "- CCursorNative::MoveToFirst()");
     return NOERROR;
 }
 
 ECode CCursorNative::MoveToNext(
     /* [out] */ Boolean* succeeded)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::MoveToNext()"));
+    // LOGGERD(TAG, "+ CCursorNative::MoveToNext()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -334,14 +340,14 @@ ECode CCursorNative::MoveToNext(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::MoveToNext()"));
+    // LOGGERD(TAG, "- CCursorNative::MoveToNext()");
     return NOERROR;
 }
 
 ECode CCursorNative::MoveToPrevious(
     /* [out] */ Boolean* succeeded)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::MoveToPrevious()"));
+    // LOGGERD(TAG, "+ CCursorNative::MoveToPrevious()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -359,14 +365,14 @@ ECode CCursorNative::MoveToPrevious(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::MoveToFirst()"));
+    // LOGGERD(TAG, "- CCursorNative::MoveToFirst()");
     return NOERROR;
 }
 
 ECode CCursorNative::IsFirst(
     /* [out] */ Boolean* isFirst)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::IsFirst()"));
+    // LOGGERD(TAG, "+ CCursorNative::IsFirst()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -384,14 +390,14 @@ ECode CCursorNative::IsFirst(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::IsFirst()"));
+    // LOGGERD(TAG, "- CCursorNative::IsFirst()");
     return NOERROR;
 }
 
 ECode CCursorNative::IsLast(
     /* [out] */ Boolean* isLast)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::IsLast()"));
+    // LOGGERD(TAG, "+ CCursorNative::IsLast()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -409,14 +415,14 @@ ECode CCursorNative::IsLast(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::IsLast()"));
+    // LOGGERD(TAG, "- CCursorNative::IsLast()");
     return NOERROR;
 }
 
 ECode CCursorNative::IsBeforeFirst(
     /* [out] */ Boolean* isBeforeFirst)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::IsBeforeFirst()"));
+    // LOGGERD(TAG, "+ CCursorNative::IsBeforeFirst()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -434,14 +440,14 @@ ECode CCursorNative::IsBeforeFirst(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::IsBeforeFirst()"));
+    // LOGGERD(TAG, "- CCursorNative::IsBeforeFirst()");
     return NOERROR;
 }
 
 ECode CCursorNative::IsAfterLast(
     /* [out] */ Boolean* isAfterLast)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::IsAfterLast()"));
+    // LOGGERD(TAG, "+ CCursorNative::IsAfterLast()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -459,7 +465,7 @@ ECode CCursorNative::IsAfterLast(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::IsAfterLast()"));
+    // LOGGERD(TAG, "- CCursorNative::IsAfterLast()");
     return NOERROR;
 }
 
@@ -467,7 +473,7 @@ ECode CCursorNative::GetColumnName(
     /* [in] */ Int32 columnIndex,
     /* [out] */ String* columnName)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::GetColumnName()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetColumnName()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -486,14 +492,14 @@ ECode CCursorNative::GetColumnName(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jcolumnName);
 
-    // LOGGERD(TAG, String("- CCursorNative::GetColumnName()"));
+    // LOGGERD(TAG, "- CCursorNative::GetColumnName()");
     return NOERROR;
 }
 
 ECode CCursorNative::GetColumnNames(
     /* [out, callee] */ ArrayOf<String>** columnNames)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::GetColumnNames()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetColumnNames()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -527,14 +533,14 @@ ECode CCursorNative::GetColumnNames(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::GetColumnName()"));
+    // LOGGERD(TAG, "- CCursorNative::GetColumnName()");
     return NOERROR;
 }
 
 ECode CCursorNative::GetColumnCount(
     /* [out] */ Int32* columnCount)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::GetColumnCount()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetColumnCount()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -550,7 +556,7 @@ ECode CCursorNative::GetColumnCount(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::GetColumnCount()"));
+    // LOGGERD(TAG, "- CCursorNative::GetColumnCount()");
     return NOERROR;
 }
 
@@ -558,7 +564,7 @@ ECode CCursorNative::GetBlob(
     /* [in] */ Int32 columnIndex,
     /* [out, callee] */ ArrayOf<Byte>** blob)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::GetBlob()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetBlob()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -586,7 +592,7 @@ ECode CCursorNative::GetBlob(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::GetBlob()"));
+    // LOGGERD(TAG, "- CCursorNative::GetBlob()");
     return NOERROR;
 }
 
@@ -594,7 +600,7 @@ ECode CCursorNative::GetString(
     /* [in] */ Int32 columnIndex,
     /* [out] */ String* columnValue)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::GetString()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -616,7 +622,7 @@ ECode CCursorNative::GetString(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jcolumnValue);
 
-    // LOGGERD(TAG, String("- CCursorNative::GetString()"));
+    // LOGGERD(TAG, "- CCursorNative::GetString()");
     return NOERROR;
 }
 
@@ -624,7 +630,7 @@ ECode CCursorNative::GetInt32(
     /* [in] */ Int32 columnIndex,
     /* [out] */ Int32* columnValue)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::GetInt32()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetInt32()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -640,14 +646,14 @@ ECode CCursorNative::GetInt32(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::GetInt32()"));
+    // LOGGERD(TAG, "- CCursorNative::GetInt32()");
     return NOERROR;
 }
 
 ECode CCursorNative::RegisterContentObserver(
     /* [in] */ IContentObserver* observer)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::RegisterContentObserver()"));
+    // LOGGERD(TAG, "+ CCursorNative::RegisterContentObserver()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -657,10 +663,10 @@ ECode CCursorNative::RegisterContentObserver(
         jclass c = env->FindClass("android/database/ElContentObserverProxy");
         Util::CheckErrorAndLog(env, TAG, "FindClass: ElContentObserverProxy %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElContentObserverProxy %d", __LINE__);
 
-        jobserver = env->NewObject(c, m, (jint)observer);
+        jobserver = env->NewObject(c, m, (jlong)observer);
         Util::CheckErrorAndLog(env, TAG, "NewObject: ElContentObserverProxy %d", __LINE__);
         observer->AddRef(); // add ref for jobserver
 
@@ -680,14 +686,14 @@ ECode CCursorNative::RegisterContentObserver(
     env->CallVoidMethod(mJInstance, m, jobserver);
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: registerContentObserver %d", __LINE__);
 
-    // LOGGERD(TAG, String("- CCursorNative::RegisterContentObserver()"));
+    // LOGGERD(TAG, "- CCursorNative::RegisterContentObserver()");
     return NOERROR;
 }
 
 ECode CCursorNative::UnregisterContentObserver(
     /* [in] */ IContentObserver* observer)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::UnregisterContentObserver()"));
+    // LOGGERD(TAG, "+ CCursorNative::UnregisterContentObserver()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -718,14 +724,14 @@ ECode CCursorNative::UnregisterContentObserver(
         env->DeleteGlobalRef(jobserver);
     }
 
-    // LOGGERD(TAG, String("- CCursorNative::UnregisterContentObserver()"));
+    // LOGGERD(TAG, "- CCursorNative::UnregisterContentObserver()");
     return NOERROR;
 }
 
 ECode CCursorNative::Requery(
     /* [out] */ Boolean* succeeded)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::Requery()"));
+    // LOGGERD(TAG, "+ CCursorNative::Requery()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -741,7 +747,7 @@ ECode CCursorNative::Requery(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::Requery()"));
+    // LOGGERD(TAG, "- CCursorNative::Requery()");
     return NOERROR;
 }
 
@@ -749,7 +755,7 @@ ECode CCursorNative::IsNull(
     /* [in] */ Int32 columnIndex,
     /* [out] */ Boolean* isNull)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::IsNull()"));
+    // LOGGERD(TAG, "+ CCursorNative::IsNull()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -765,7 +771,7 @@ ECode CCursorNative::IsNull(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::IsNull()"));
+    // LOGGERD(TAG, "- CCursorNative::IsNull()");
     return NOERROR;
 }
 
@@ -773,7 +779,7 @@ ECode CCursorNative::CopyStringToBuffer(
     /* [in] */ Int32 columnIndex,
     /* [in] */ ICharArrayBuffer* buf)
 {
-    LOGGERD(TAG, String("+ CCursorNative::CopyStringToBuffer()"));
+    // LOGGERD(TAG, "+ CCursorNative::CopyStringToBuffer()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -795,7 +801,7 @@ ECode CCursorNative::CopyStringToBuffer(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jbuf);
 
-    LOGGERD(TAG, String("- CCursorNative::CopyStringToBuffer()"));
+    // LOGGERD(TAG, "- CCursorNative::CopyStringToBuffer()");
     return NOERROR;
 }
 
@@ -803,7 +809,7 @@ ECode CCursorNative::GetInt16(
     /* [in] */ Int32 columnIndex,
     /* [out] */ Int16* columnValue)
 {
-    LOGGERD(TAG, String("+ CCursorNative::GetInt16()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetInt16()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -819,7 +825,7 @@ ECode CCursorNative::GetInt16(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CCursorNative::GetInt16()"));
+    // LOGGERD(TAG, "- CCursorNative::GetInt16()");
     return NOERROR;
 }
 
@@ -827,7 +833,7 @@ ECode CCursorNative::GetFloat(
     /* [in] */ Int32 columnIndex,
     /* [out] */ Float* columnValue)
 {
-    LOGGERD(TAG, String("+ CCursorNative::GetFloat()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetFloat()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -843,7 +849,7 @@ ECode CCursorNative::GetFloat(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CCursorNative::GetFloat()"));
+    // LOGGERD(TAG, "- CCursorNative::GetFloat()");
     return NOERROR;
 }
 
@@ -851,7 +857,7 @@ ECode CCursorNative::GetDouble(
     /* [in] */ Int32 columnIndex,
     /* [out] */ Double* columnValue)
 {
-    // LOGGERD(TAG, String("+ CCursorNative::GetDouble()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetDouble()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -867,7 +873,7 @@ ECode CCursorNative::GetDouble(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CCursorNative::GetDouble()"));
+    // LOGGERD(TAG, "- CCursorNative::GetDouble()");
     return NOERROR;
 }
 
@@ -875,7 +881,7 @@ ECode CCursorNative::GetType(
     /* [in] */ Int32 columnIndex,
     /* [out] */ Int32* index)
 {
-    LOGGERD(TAG, String("+ CCursorNative::GetType()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetType()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -891,13 +897,13 @@ ECode CCursorNative::GetType(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CCursorNative::GetType()"));
+    // LOGGERD(TAG, "- CCursorNative::GetType()");
     return NOERROR;
 }
 
 ECode CCursorNative::Deactivate()
 {
-    LOGGERD(TAG, String("+ CCursorNative::Deactivate()"));
+    // LOGGERD(TAG, "+ CCursorNative::Deactivate()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -913,14 +919,14 @@ ECode CCursorNative::Deactivate()
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CCursorNative::Deactivate()"));
+    // LOGGERD(TAG, "- CCursorNative::Deactivate()");
     return NOERROR;
 }
 
 ECode CCursorNative::RegisterDataSetObserver(
     /* [in] */ IDataSetObserver* observer)
 {
-    LOGGERD(TAG, String("+ CCursorNative::RegisterDataSetObserver()"));
+    // LOGGERD(TAG, "+ CCursorNative::RegisterDataSetObserver()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -930,10 +936,10 @@ ECode CCursorNative::RegisterDataSetObserver(
         jclass c = env->FindClass("android/database/ElDataSetObserverProxy");
         Util::CheckErrorAndLog(env, TAG, "FindClass: ElDataSetObserverProxy %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElDataSetObserverProxy %d", __LINE__);
 
-        jobserver = env->NewObject(c, m, (jint)observer);
+        jobserver = env->NewObject(c, m, (jlong)observer);
         Util::CheckErrorAndLog(env, TAG, "NewObject: ElDataSetObserverProxy %d", __LINE__);
         observer->AddRef(); // add ref for jobserver
 
@@ -953,14 +959,14 @@ ECode CCursorNative::RegisterDataSetObserver(
     env->CallVoidMethod(mJInstance, m, jobserver);
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: registerDataSetObserver %d", __LINE__);
 
-    LOGGERD(TAG, String("- CCursorNative::RegisterDataSetObserver()"));
+    // LOGGERD(TAG, "- CCursorNative::RegisterDataSetObserver()");
     return NOERROR;
 }
 
 ECode CCursorNative::UnregisterDataSetObserver(
     /* [in] */ IDataSetObserver* observer)
 {
-    LOGGERD(TAG, String("+ CCursorNative::UnregisterDataSetObserver()"));
+    // LOGGERD(TAG, "+ CCursorNative::UnregisterDataSetObserver()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -991,7 +997,7 @@ ECode CCursorNative::UnregisterDataSetObserver(
         env->DeleteGlobalRef(jobserver);
     }
 
-    LOGGERD(TAG, String("- CCursorNative::UnregisterDataSetObserver()"));
+    // LOGGERD(TAG, "- CCursorNative::UnregisterDataSetObserver()");
     return NOERROR;
 }
 
@@ -999,7 +1005,7 @@ ECode CCursorNative::SetNotificationUri(
     /* [in] */ IContentResolver* cr,
     /* [in] */ IUri* uri)
 {
-    LOGGERD(TAG, String("+ CCursorNative::SetNotificationUri()"));
+    // LOGGERD(TAG, "+ CCursorNative::SetNotificationUri()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1009,10 +1015,10 @@ ECode CCursorNative::SetNotificationUri(
         jclass c = env->FindClass("android/content/ElContentResolverProxy");
         Util::CheckErrorAndLog(env, TAG, "FindClass: ElContentResolverProxy %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElContentResolverProxy %d", __LINE__);
 
-        jcr = env->NewObject(c, m, (jint)cr);
+        jcr = env->NewObject(c, m, (jlong)cr);
         Util::CheckErrorAndLog(env, TAG, "NewObject: ElContentResolverProxy %d", __LINE__);
         cr->AddRef();
 
@@ -1037,14 +1043,45 @@ ECode CCursorNative::SetNotificationUri(
     env->DeleteLocalRef(jcr);
     env->DeleteLocalRef(juri);
 
-    LOGGERD(TAG, String("- CCursorNative::SetNotificationUri()"));
+    // LOGGERD(TAG, "- CCursorNative::SetNotificationUri()");
+    return NOERROR;
+}
+
+ECode CCursorNative::GetNotificationUri(
+    /* [out] */ IUri** uri)
+{
+    // LOGGERD(TAG, "+ CCursorNative::GetNotificationUri()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("android/database/Cursor");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: Cursor %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "getNotificationUri", "(V)Landroid/net/Uri;");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: getNotificationUri %d", __LINE__);
+
+    jobject juri = env->CallObjectMethod(mJInstance, m);
+    Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: getNotificationUri %d", __LINE__);
+
+    *uri = NULL;
+    if (juri != NULL) {
+        if (!Util::GetElUri(env, juri, uri)) {
+            LOGGERE(TAG, "GetNotificationUri() GetElUri fail!");
+        }
+        env->DeleteLocalRef(juri);
+    }
+
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CCursorNative::GetNotificationUri()");
     return NOERROR;
 }
 
 ECode CCursorNative::GetWantsAllOnMoveCalls(
     /* [out] */ Boolean* result)
 {
-    LOGGERD(TAG, String("+ CCursorNative::GetWantsAllOnMoveCalls()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetWantsAllOnMoveCalls()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1060,14 +1097,14 @@ ECode CCursorNative::GetWantsAllOnMoveCalls(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CCursorNative::GetWantsAllOnMoveCalls()"));
+    // LOGGERD(TAG, "- CCursorNative::GetWantsAllOnMoveCalls()");
     return NOERROR;
 }
 
 ECode CCursorNative::GetExtras(
     /* [out] */ IBundle** extras)
 {
-    LOGGERD(TAG, String("+ CCursorNative::GetExtras()"));
+    // LOGGERD(TAG, "+ CCursorNative::GetExtras()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1091,7 +1128,7 @@ ECode CCursorNative::GetExtras(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CCursorNative::GetExtras()"));
+    // LOGGERD(TAG, "- CCursorNative::GetExtras()");
     return NOERROR;
 }
 
@@ -1099,7 +1136,7 @@ ECode CCursorNative::Respond(
     /* [in] */ IBundle* extras,
     /* [out] */ IBundle** result)
 {
-    LOGGERD(TAG, String("+ CCursorNative::Respond()"));
+    // LOGGERD(TAG, "+ CCursorNative::Respond()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -1129,7 +1166,32 @@ ECode CCursorNative::Respond(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jextras);
 
-    LOGGERD(TAG, String("- CCursorNative::Respond()"));
+    // LOGGERD(TAG, "- CCursorNative::Respond()");
+    return NOERROR;
+}
+
+ECode CCursorNative::ToString(
+    /* [out] */ String* str)
+{
+    // LOGGERD(TAG, "+ CCursorNative::ToString()");
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("java/lang/Object");
+    Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
+
+    jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
+
+    *str = Util::GetElString(env, jstr);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jstr);
+
+    // LOGGERD(TAG, "- CCursorNative::ToString()");
     return NOERROR;
 }
 

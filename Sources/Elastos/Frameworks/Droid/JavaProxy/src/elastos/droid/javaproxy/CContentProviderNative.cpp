@@ -2,21 +2,24 @@
 #include "elastos/droid/javaproxy/CContentProviderNative.h"
 #include "elastos/droid/javaproxy/CCursorNative.h"
 #include "elastos/droid/javaproxy/CICancellationSignalNative.h"
-#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/javaproxy/Util.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/utility/logging/Logger.h>
 #include <unistd.h>
 
+using Elastos::Droid::Content::EIID_IIContentProvider;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
-
-using Elastos::Droid::JavaProxy::CCursorNative;
-using Elastos::Droid::JavaProxy::CICancellationSignalNative;
 
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 const String CContentProviderNative::TAG("CContentProviderNative");
+
+CAR_INTERFACE_IMPL_2(CContentProviderNative, Object, IIContentProvider, IBinder)
+
+CAR_OBJECT_IMPL(CContentProviderNative)
 
 CContentProviderNative::~CContentProviderNative()
 {
@@ -26,8 +29,8 @@ CContentProviderNative::~CContentProviderNative()
 }
 
 ECode CContentProviderNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -35,6 +38,7 @@ ECode CContentProviderNative::constructor(
 }
 
 ECode CContentProviderNative::Call(
+    /* [in] */ const String& callingPkg,
     /* [in] */ const String& method,
     /* [in] */ const String& arg,
     /* [in] */ IBundle* extras,
@@ -45,6 +49,7 @@ ECode CContentProviderNative::Call(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
+    jstring jcallingPkg = Util::ToJavaString(env, callingPkg);
     jobject jmethod = Util::ToJavaString(env, method);
     jobject jarg = Util::ToJavaString(env, arg);
     jobject jextras = NULL;
@@ -57,11 +62,12 @@ ECode CContentProviderNative::Call(
 
     jmethodID m = env->GetMethodID(c, "call",
         "(Ljava/lang/String;"\
-         "Ljava/lang/String;"\
-         "Landroid/os/Bundle;)Landroid/os/Bundle;");
+        "Ljava/lang/String;"\
+        "Ljava/lang/String;"\
+        "Landroid/os/Bundle;)Landroid/os/Bundle;");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: call Line: %d", __LINE__);
 
-    jobject jbundle = env->CallObjectMethod(mJInstance, m, jmethod, jarg, jextras);
+    jobject jbundle = env->CallObjectMethod(mJInstance, m, jcallingPkg, jmethod, jarg, jextras);
     Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: call Line: %d", __LINE__);
 
     if (jbundle != NULL) {
@@ -73,6 +79,7 @@ ECode CContentProviderNative::Call(
     }
 
     env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jcallingPkg);
     env->DeleteLocalRef(jmethod);
     env->DeleteLocalRef(jarg);
 
@@ -85,6 +92,7 @@ ECode CContentProviderNative::Call(
 }
 
 ECode CContentProviderNative::Query(
+    /* [in] */ const String& callingPkg,
     /* [in] */ IUri* uri,
     /* [in] */ ArrayOf<String>* projection,
     /* [in] */ const String& selection,
@@ -99,6 +107,7 @@ ECode CContentProviderNative::Query(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
+    jstring jcallingPkg = Util::ToJavaString(env, callingPkg);
     jobject juri = NULL;
     if (uri != NULL) {
         juri = Util::ToJavaUri(env, uri);
@@ -122,21 +131,28 @@ ECode CContentProviderNative::Query(
 
     jobject jcancellationSignal = NULL;
     if (cancellationSignal != NULL) {
-        LOGGERE(TAG, "Query() cancellationSignal not NULL!");
+        ClassID clsid;
+        IObject::Probe(cancellationSignal)->GetClassID(&clsid);
+        if (clsid == ECLSID_CICancellationSignalNative) {
+            jcancellationSignal = ((CICancellationSignalNative*)cancellationSignal)->mJInstance;
+        }
+        else
+            LOGGERE(TAG, "Query() cancellationSignal not NULL!");
     }
 
     jclass c = env->FindClass("android/content/IContentProvider");
     Util::CheckErrorAndLog(env, "Query", "Fail FindClass: IContentProvider", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "query",
-        "(Landroid/net/Uri;"\
-         "[Ljava/lang/String;Ljava/lang/String;"\
-         "[Ljava/lang/String;Ljava/lang/String;"\
-         "Landroid/os/ICancellationSignal;)Landroid/database/Cursor;");
+        "(Ljava/lang/String;"\
+        "Landroid/net/Uri;"\
+        "[Ljava/lang/String;Ljava/lang/String;"\
+        "[Ljava/lang/String;Ljava/lang/String;"\
+        "Landroid/os/ICancellationSignal;)Landroid/database/Cursor;");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: query Line: %d", __LINE__);
 
     ECode ec = NOERROR;
-    jobject jcursor = env->CallObjectMethod(mJInstance, m, juri, jprojection, jselection,
+    jobject jcursor = env->CallObjectMethod(mJInstance, m, jcallingPkg, juri, jprojection, jselection,
         jselectionArgs, jsortOrder, jcancellationSignal);
 
     // is it better to check in CheckErrorAndLog with JavaException2ECode?
@@ -152,11 +168,12 @@ ECode CContentProviderNative::Query(
         if (jcursor != NULL) {
             jobject jInstance = env->NewGlobalRef(jcursor);
             env->DeleteLocalRef(jcursor);
-            CCursorNative::New((Handle32)mJVM, (Handle32)jInstance, cursor);
+            CCursorNative::New((Handle64)mJVM, (Handle64)jInstance, cursor);
         }
     }
 
     env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jcallingPkg);
     if(juri){
         env->DeleteLocalRef(juri);
     }
@@ -173,18 +190,16 @@ ECode CContentProviderNative::Query(
         env->DeleteLocalRef(jsortOrder);
     }
 
-    if(jcancellationSignal){
-        env->DeleteLocalRef(jcancellationSignal);
-    }
-
     // LOGGERD(TAG, "- CContentProviderNative::Query()");
     return ec;
 }
 
 ECode CContentProviderNative::OpenTypedAssetFile(
+    /* [in] */ const String& callingPkg,
     /* [in] */ IUri* uri,
     /* [in] */ const String& mimeType,
     /* [in] */ IBundle* opts,
+    /* [in] */ IICancellationSignal* cancellationSignal,
     /* [out] */ IAssetFileDescriptor** fileDescriptor)
 {
     // LOGGERD(TAG, "+ CContentProviderNative::OpenTypedAssetFile()");
@@ -193,6 +208,7 @@ ECode CContentProviderNative::OpenTypedAssetFile(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
+    jstring jcallingPkg = Util::ToJavaString(env, callingPkg);
     jobject juri = NULL;
     if (uri != NULL) {
         juri = Util::ToJavaUri(env, uri);
@@ -204,17 +220,30 @@ ECode CContentProviderNative::OpenTypedAssetFile(
         jopts = Util::ToJavaBundle(env, opts);
     }
 
+    jobject jcancellationSignal = NULL;
+    if (cancellationSignal != NULL) {
+        ClassID clsid;
+        IObject::Probe(cancellationSignal)->GetClassID(&clsid);
+        if (clsid == ECLSID_CICancellationSignalNative) {
+            jcancellationSignal = ((CICancellationSignalNative*)cancellationSignal)->mJInstance;
+        }
+        else
+            LOGGERE(TAG, "OpenTypedAssetFile() cancellationSignal not NULL!");
+    }
+
     jclass c = env->FindClass("android/content/IContentProvider");
     Util::CheckErrorAndLog(env, "OpenTypedAssetFile", "Fail FindClass: IContentProvider", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "openTypedAssetFile",
-        "(Landroid/net/Uri;"\
-         "Ljava/lang/String;"\
-         "Landroid/os/Bundle;)Landroid/content/res/AssetFileDescriptor;");
+        "(Ljava/lang/String;"\
+        "Landroid/net/Uri;"\
+        "Ljava/lang/String;"\
+        "Landroid/os/Bundle;)Landroid/content/res/AssetFileDescriptor;");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: openTypedAssetFile Line: %d", __LINE__);
 
     ECode ec = NOERROR;
-    jobject jfileDescriptor = env->CallObjectMethod(mJInstance, m, juri, jmimeType, jopts);
+    jobject jfileDescriptor = env->CallObjectMethod(mJInstance, m, jcallingPkg,
+        juri, jmimeType, jopts, jcancellationSignal);
 
     // is it better to check in CheckErrorAndLog with JavaException2ECode?
     // throw java/io/FileNotFoundException
@@ -235,6 +264,7 @@ ECode CContentProviderNative::OpenTypedAssetFile(
     }
 
     env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jcallingPkg);
 
     if(juri){
         env->DeleteLocalRef(juri);
@@ -283,20 +313,22 @@ ECode CContentProviderNative::GetType(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(juri);
     env->DeleteLocalRef(jtype);
-    // LOGGERD(TAG, String("- CContentProviderNative::GetType()"));
+    // LOGGERD(TAG, "- CContentProviderNative::GetType()");
     return NOERROR;
 }
 
 ECode CContentProviderNative::Insert(
+    /* [in] */ const String& callingPkg,
     /* [in] */ IUri* uri,
     /* [in] */ IContentValues* initialValues,
     /* [out] */ IUri** insertedUri)
 {
-    // LOGGERD(TAG, String("+ CContentProviderNative::Insert()"));
+    // LOGGERD(TAG, "+ CContentProviderNative::Insert()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
+    jstring jcallingPkg = Util::ToJavaString(env, callingPkg);
     jobject juri = NULL;
     if (uri != NULL) {
         juri = Util::ToJavaUri(env, uri);
@@ -309,17 +341,17 @@ ECode CContentProviderNative::Insert(
         jInitialValues = Util::ToJavaContentValues(env, initialValues);
     }
     else {
-        LOGGERE(TAG, String("Insert() initialValues is NULL!"));
+        LOGGERE(TAG, "Insert() initialValues is NULL!");
     }
 
     jclass c = env->FindClass("android/content/IContentProvider");
     Util::CheckErrorAndLog(env, "Insert", "Fail FindClass: IContentProvider", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "insert",
-        "(Landroid/net/Uri;Landroid/content/ContentValues;)Landroid/net/Uri;");
+        "(Ljava/lang/String;Landroid/net/Uri;Landroid/content/ContentValues;)Landroid/net/Uri;");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: insert Line: %d", __LINE__);
 
-    jobject jrUri = env->CallObjectMethod(mJInstance, m, juri, jInitialValues);
+    jobject jrUri = env->CallObjectMethod(mJInstance, m, jcallingPkg, juri, jInitialValues);
     ECode ec = Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: Insert Line: %d", __LINE__);
 
     if (SUCCEEDED(ec) && jrUri != NULL) {
@@ -333,6 +365,7 @@ ECode CContentProviderNative::Insert(
     if (NULL != c) {
         env->DeleteLocalRef(c);
     }
+    env->DeleteLocalRef(jcallingPkg);
 
     if (NULL != jInitialValues) {
         env->DeleteLocalRef(jInitialValues);
@@ -342,11 +375,12 @@ ECode CContentProviderNative::Insert(
         env->DeleteLocalRef(juri);
     }
 
-    // LOGGERD(TAG, String("- CContentProviderNative::Insert()"));
+    // LOGGERD(TAG, "- CContentProviderNative::Insert()");
     return ec;
 }
 
 ECode CContentProviderNative::BulkInsert(
+    /* [in] */ const String& callingPkg,
     /* [in] */ IUri* uri,
     /* [in] */ ArrayOf<IContentValues *>* initialValues,
     /* [out] */ Int32* number)
@@ -354,6 +388,7 @@ ECode CContentProviderNative::BulkInsert(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
+    jstring jcallingPkg = Util::ToJavaString(env, callingPkg);
     jobject juri = NULL;
     if (uri != NULL) {
         juri = Util::ToJavaUri(env, uri);
@@ -387,7 +422,7 @@ ECode CContentProviderNative::BulkInsert(
     jclass c = env->FindClass("android/content/IContentProvider");
     Util::CheckErrorAndLog(env, "Insert", "Fail FindClass: IContentProvider", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "bulkInsert", "(Landroid/net/Uri;[Landroid/content/ContentValues;)I");
+    jmethodID m = env->GetMethodID(c, "bulkInsert", "(Ljava/lang/String;Landroid/net/Uri;[Landroid/content/ContentValues;)I");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: bulkInsert Line: %d", __LINE__);
 
     *number = env->CallIntMethod(mJInstance, m, juri, jinitialValues);
@@ -396,10 +431,12 @@ ECode CContentProviderNative::BulkInsert(
     env->DeleteLocalRef(juri);
     env->DeleteLocalRef(jinitialValues);
     env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jcallingPkg);
     return NOERROR;
 }
 
 ECode CContentProviderNative::Delete(
+    /* [in] */ const String& callingPkg,
     /* [in] */ IUri* uri,
     /* [in] */ const String& selection,
     /* [in] */ ArrayOf<String>* selectionArgs,
@@ -408,6 +445,7 @@ ECode CContentProviderNative::Delete(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
+    jstring jcallingPkg = Util::ToJavaString(env, callingPkg);
     jobject juri = NULL;
     if (uri != NULL) {
         juri = Util::ToJavaUri(env, uri);
@@ -426,7 +464,7 @@ ECode CContentProviderNative::Delete(
     Util::CheckErrorAndLog(env, "Delete()", "Fail FindClass: IContentProvider", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "delete",
-        "(Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I");
+        "(Ljava/lang/String;Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: Delete Line: %d", __LINE__);
 
     *rowsAffected = env->CallIntMethod(mJInstance, m, juri, jselection, jselectionArgs);
@@ -435,6 +473,7 @@ ECode CContentProviderNative::Delete(
     if (NULL != c) {
         env->DeleteLocalRef(c);
     }
+    env->DeleteLocalRef(jcallingPkg);
 
     if (NULL != juri) {
         env->DeleteLocalRef(juri);
@@ -452,6 +491,7 @@ ECode CContentProviderNative::Delete(
 }
 
 ECode CContentProviderNative::Update(
+    /* [in] */ const String& callingPkg,
     /* [in] */ IUri* uri,
     /* [in] */ IContentValues* values,
     /* [in] */ const String& selection,
@@ -462,6 +502,7 @@ ECode CContentProviderNative::Update(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
+    jstring jcallingPkg = Util::ToJavaString(env, callingPkg);
     jobject juri = NULL;
     if (uri != NULL) {
         juri = Util::ToJavaUri(env, uri);
@@ -488,7 +529,7 @@ ECode CContentProviderNative::Update(
     Util::CheckErrorAndLog(env, "Update()", "Fail FindClass: IContentProvider", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "update",
-        "(Landroid/net/Uri;Landroid/content/ContentValues;Ljava/lang/String;[Ljava/lang/String;)I");
+        "(Ljava/lang/String;Landroid/net/Uri;Landroid/content/ContentValues;Ljava/lang/String;[Ljava/lang/String;)I");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: Update Line: %d", __LINE__);
 
     *rowsAffected = env->CallIntMethod(mJInstance, m, juri, jInitialValues, jselection, jselectionArgs);
@@ -497,6 +538,7 @@ ECode CContentProviderNative::Update(
     if (NULL != c) {
         env->DeleteLocalRef(c);
     }
+    env->DeleteLocalRef(jcallingPkg);
 
     if (NULL != juri) {
         env->DeleteLocalRef(juri);
@@ -520,15 +562,18 @@ ECode CContentProviderNative::Update(
 }
 
 ECode CContentProviderNative::OpenFile(
+    /* [in] */ const String& callingPkg,
     /* [in] */ IUri* uri,
     /* [in] */ const String& mode,
+    /* [in] */ IICancellationSignal* cancellationSignal,
     /* [out] */ IParcelFileDescriptor** fileDescriptor)
 {
-    LOGGERD(TAG, String("+ CContentProviderNative::OpenFile()"));
+    // LOGGERD(TAG, "+ CContentProviderNative::OpenFile()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
+    jstring jcallingPkg = Util::ToJavaString(env, callingPkg);
     jobject juri = NULL;
     if (uri != NULL) {
         juri = Util::ToJavaUri(env, uri);
@@ -538,14 +583,25 @@ ECode CContentProviderNative::OpenFile(
 
     jstring jmode = Util::ToJavaString(env, mode);
 
+    jobject jcancellationSignal = NULL;
+    if (cancellationSignal != NULL) {
+        ClassID clsid;
+        IObject::Probe(cancellationSignal)->GetClassID(&clsid);
+        if (clsid == ECLSID_CICancellationSignalNative) {
+            jcancellationSignal = ((CICancellationSignalNative*)cancellationSignal)->mJInstance;
+        }
+        else
+            LOGGERE(TAG, "OpenFile() cancellationSignal not NULL!");
+    }
+
     jclass c = env->FindClass("android/content/IContentProvider");
     Util::CheckErrorAndLog(env, TAG, "FindClass: IContentProvider %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "openFile",
-        "(Landroid/net/Uri;Ljava/lang/String;)Landroid/os/ParcelFileDescriptor;");
+        "(Ljava/lang/String;Landroid/net/Uri;Ljava/lang/String;)Landroid/os/ParcelFileDescriptor;");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: openFile Line: %d", __LINE__);
 
-    jobject jfileDescriptor = env->CallObjectMethod(mJInstance, m, juri, jmode);
+    jobject jfileDescriptor = env->CallObjectMethod(mJInstance, m, jcallingPkg, juri, jmode, jcancellationSignal);
     Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: openFile Line: %d", __LINE__);
 
     if (jfileDescriptor != NULL) {
@@ -555,23 +611,27 @@ ECode CContentProviderNative::OpenFile(
     }
 
     env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jcallingPkg);
     env->DeleteLocalRef(juri);
     env->DeleteLocalRef(jmode);
     env->DeleteLocalRef(jfileDescriptor);
-    LOGGERD(TAG, String("- CContentProviderNative::OpenFile()"));
+    // LOGGERD(TAG, "- CContentProviderNative::OpenFile()");
     return NOERROR;
 }
 
 ECode CContentProviderNative::OpenAssetFile(
+    /* [in] */ const String& callingPkg,
     /* [in] */ IUri* uri,
     /* [in] */ const String& mode,
+    /* [in] */ IICancellationSignal* cancellationSignal,
     /* [out] */ IAssetFileDescriptor** fileDescriptor)
 {
-    LOGGERD(TAG, String("+ CContentProviderNative::OpenAssetFile()"));
+    // LOGGERD(TAG, "+ CContentProviderNative::OpenAssetFile()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
+    jstring jcallingPkg = Util::ToJavaString(env, callingPkg);
     jobject juri = NULL;
     if (uri != NULL) {
         juri = Util::ToJavaUri(env, uri);
@@ -581,14 +641,25 @@ ECode CContentProviderNative::OpenAssetFile(
 
     jstring jmode = Util::ToJavaString(env, mode);
 
+    jobject jcancellationSignal = NULL;
+    if (cancellationSignal != NULL) {
+        ClassID clsid;
+        IObject::Probe(cancellationSignal)->GetClassID(&clsid);
+        if (clsid == ECLSID_CICancellationSignalNative) {
+            jcancellationSignal = ((CICancellationSignalNative*)cancellationSignal)->mJInstance;
+        }
+        else
+            LOGGERE(TAG, "OpenAssetFile() cancellationSignal not NULL!");
+    }
+
     jclass c = env->FindClass("android/content/IContentProvider");
     Util::CheckErrorAndLog(env, TAG, "FindClass: IContentProvider %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "openAssetFile",
-        "(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/res/AssetFileDescriptor;");
+        "(Ljava/lang/String;Landroid/net/Uri;Ljava/lang/String;)Landroid/content/res/AssetFileDescriptor;");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: openAssetFile Line: %d", __LINE__);
 
-    jobject jfileDescriptor = env->CallObjectMethod(mJInstance, m, juri, jmode);
+    jobject jfileDescriptor = env->CallObjectMethod(mJInstance, m, jcallingPkg, juri, jmode, jcancellationSignal);
     Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: openAssetFile Line: %d", __LINE__);
 
     if (jfileDescriptor != NULL) {
@@ -598,26 +669,29 @@ ECode CContentProviderNative::OpenAssetFile(
     }
 
     env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jcallingPkg);
     env->DeleteLocalRef(juri);
     env->DeleteLocalRef(jmode);
     env->DeleteLocalRef(jfileDescriptor);
-    LOGGERD(TAG, String("- CContentProviderNative::OpenAssetFile()"));
+    // LOGGERD(TAG, "- CContentProviderNative::OpenAssetFile()");
     return NOERROR;
 }
 
 ECode CContentProviderNative::ApplyBatch(
-    /* [in] */ IObjectContainer* operations,
+    /* [in] */ const String& callingPkg,
+    /* [in] */ IArrayList* operations,
     /* [out, callee] */ ArrayOf<IContentProviderResult*>** providerResults)
 {
-    LOGGERD(TAG, String("+ CContentProviderNative::ApplyBatch()"));
+    // LOGGERD(TAG, "+ CContentProviderNative::ApplyBatch()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-     jobject joperations = NULL;
+    jstring jcallingPkg = Util::ToJavaString(env, callingPkg);
+    jobject joperations = NULL;
     if (operations != NULL) {
         Int32 count = 0;
-        operations->GetObjectCount(&count);
+        operations->GetSize(&count);
         if (count > 0) {
             jclass listKlass = env->FindClass("java/util/ArrayList");
             Util::CheckErrorAndLog(env, TAG, "NewObject: ArrayList line: %d", __LINE__);
@@ -631,13 +705,9 @@ ECode CContentProviderNative::ApplyBatch(
             jmethodID mAdd = env->GetMethodID(listKlass, "add", "(Ljava/lang/Object;)Z");
             Util::CheckErrorAndLog(env, TAG, "GetMethodID: add line: %d", __LINE__);
 
-            AutoPtr<IObjectEnumerator> it;
-            operations->GetObjectEnumerator((IObjectEnumerator**)&it);
-
-            Boolean hasNext;
-            while (it->MoveNext(&hasNext), hasNext) {
+            for (Int32 i = 0; i < count; i++) {
                 AutoPtr<IInterface> obj;
-                it->Current((IInterface**)&obj);
+                operations->Get(i, (IInterface**)&obj);
                 AutoPtr<IContentProviderOperation> operation = IContentProviderOperation::Probe(obj);
 
                 jobject joperation = Util::ToJavaContentProviderOperation(env, operation);
@@ -654,17 +724,17 @@ ECode CContentProviderNative::ApplyBatch(
     jclass c = env->FindClass("android/content/IContentProvider");
     Util::CheckErrorAndLog(env, TAG, "FindClass: IContentProvider %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "applyBatch",  "(Ljava/util/ArrayList;)[Landroid/content/ContentProviderResult;");
+    jmethodID m = env->GetMethodID(c, "applyBatch",  "(Ljava/lang/String;Ljava/util/ArrayList;)[Landroid/content/ContentProviderResult;");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: applyBatch Line: %d", __LINE__);
 
-    jobjectArray jproviderResults = (jobjectArray)env->CallObjectMethod(mJInstance, m, joperations);
+    jobjectArray jproviderResults = (jobjectArray)env->CallObjectMethod(mJInstance, m, jcallingPkg, joperations);
     ECode ec = Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: applyBatch Line: %d", __LINE__);
 
     if(SUCCEEDED(ec) && jproviderResults != NULL) {
         jint jcount = env->GetArrayLength(jproviderResults);
         if (jcount > 0) {
             *providerResults = ArrayOf<IContentProviderResult*>::Alloc((Int32)jcount);
-            ARRAYOF_ADDREF(*providerResults);
+            REFCOUNT_ADD(*providerResults);
             if (*providerResults  != NULL) {
                 for (Int32 i = 0; i < jcount; i++) {
                     jobject jproviderResult = env->GetObjectArrayElement(jproviderResults, i);
@@ -684,7 +754,7 @@ ECode CContentProviderNative::ApplyBatch(
             }
         } else {
             *providerResults = ArrayOf<IContentProviderResult*>::Alloc(0);
-            ARRAYOF_ADDREF(*providerResults);
+            REFCOUNT_ADD(*providerResults);
         }
 
         env->DeleteLocalRef(jproviderResults);
@@ -693,15 +763,16 @@ ECode CContentProviderNative::ApplyBatch(
     }
 
     env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jcallingPkg);
     env->DeleteLocalRef(joperations);
-    LOGGERD(TAG, String("- CContentProviderNative::ApplyBatch()"));
+    // LOGGERD(TAG, "- CContentProviderNative::ApplyBatch()");
     return NOERROR;
 }
 
 ECode CContentProviderNative::CreateCancellationSignal(
     /* [out] */ IICancellationSignal** cancellationSignal)
 {
-    LOGGERD(TAG, String("+ CContentProviderNative::CreateCancellationSignal()"));
+    // LOGGERD(TAG, "+ CContentProviderNative::CreateCancellationSignal()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -720,13 +791,101 @@ ECode CContentProviderNative::CreateCancellationSignal(
         jobject jInstance = env->NewGlobalRef(jcancellationSignal);
         env->DeleteLocalRef(jcancellationSignal);
 
-        if(NOERROR != CICancellationSignalNative::New((Handle32)mJVM, (Handle32)jInstance, cancellationSignal)) {
-            LOGGERE(TAG, String("CreateCancellationSignal() new CICancellationSignalNative fail!"));
+        if(NOERROR != CICancellationSignalNative::New((Handle64)mJVM, (Handle64)jInstance, cancellationSignal)) {
+            LOGGERE(TAG, "CreateCancellationSignal() new CICancellationSignalNative fail!");
         }
     }
 
     env->DeleteLocalRef(c);
-    LOGGERD(TAG, String("- CContentProviderNative::CreateCancellationSignal()"));
+    // LOGGERD(TAG, "- CContentProviderNative::CreateCancellationSignal()");
+    return NOERROR;
+}
+
+ECode CContentProviderNative::Canonicalize(
+    /* [in] */ const String& callingPkg,
+    /* [in] */ IUri* uri,
+    /* [out] */ IUri** result)
+{
+    // LOGGERD(TAG, "+ CContentProviderNative::Canonicalize()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jstring jcallingPkg = Util::ToJavaString(env, callingPkg);
+    jobject juri = NULL;
+    if (uri != NULL) {
+        juri = Util::ToJavaUri(env, uri);
+    }
+    else {
+        LOGGERE(TAG, "CContentProviderNative::Canonicalize() uri is NULL!");
+    }
+
+    jclass c = env->FindClass("android/content/IContentProvider");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IContentProvider %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "canonicalize",
+        "(Ljava/lang/String;Landroid/net/Uri;)Landroid/net/Uri;");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: canonicalize Line: %d", __LINE__);
+
+    jobject jresult = env->CallObjectMethod(mJInstance, m, jcallingPkg, juri);
+    Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: canonicalize Line: %d", __LINE__);
+
+    if (jresult != NULL) {
+        if (!Util::GetElUri(env, jresult, result)) {
+            LOGGERE(TAG, "Canonicalize() GetElUri fail!");
+        }
+        env->DeleteLocalRef(jresult);
+    }
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jcallingPkg);
+    env->DeleteLocalRef(juri);
+    env->DeleteLocalRef(jresult);
+    // LOGGERD(TAG, "- CContentProviderNative::Canonicalize()");
+    return NOERROR;
+}
+
+ECode CContentProviderNative::Uncanonicalize(
+    /* [in] */ const String& callingPkg,
+    /* [in] */ IUri* uri,
+    /* [out] */ IUri** result)
+{
+    // LOGGERD(TAG, "+ CContentProviderNative::Uncanonicalize()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jstring jcallingPkg = Util::ToJavaString(env, callingPkg);
+    jobject juri = NULL;
+    if (uri != NULL) {
+        juri = Util::ToJavaUri(env, uri);
+    }
+    else {
+        LOGGERE(TAG, "CContentProviderNative::Uncanonicalize() uri is NULL!");
+    }
+
+    jclass c = env->FindClass("android/content/IContentProvider");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IContentProvider %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "uncanonicalize",
+        "(Ljava/lang/String;Landroid/net/Uri;)Landroid/net/Uri;");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: uncanonicalize Line: %d", __LINE__);
+
+    jobject jresult = env->CallObjectMethod(mJInstance, m, jcallingPkg, juri);
+    Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: uncanonicalize Line: %d", __LINE__);
+
+    if (jresult != NULL) {
+        if (!Util::GetElUri(env, jresult, result)) {
+            LOGGERE(TAG, "Uncanonicalize() GetElUri fail!");
+        }
+        env->DeleteLocalRef(jresult);
+    }
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jcallingPkg);
+    env->DeleteLocalRef(juri);
+    env->DeleteLocalRef(jresult);
+    // LOGGERD(TAG, "- CContentProviderNative::Uncanonicalize()");
     return NOERROR;
 }
 
@@ -735,7 +894,7 @@ ECode CContentProviderNative::GetStreamTypes(
     /* [in] */ const String& mimeTypeFilter,
     /* [out, callee] */ ArrayOf<String>** streamTypes)
 {
-    LOGGERD(TAG, String("+ CContentProviderNative::GetStreamTypes()"));
+    // LOGGERD(TAG, "+ CContentProviderNative::GetStreamTypes()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -777,14 +936,14 @@ ECode CContentProviderNative::GetStreamTypes(
     env->DeleteLocalRef(juri);
     env->DeleteLocalRef(jmimeTypeFilter);
     env->DeleteLocalRef(jstreamTypes);
-    LOGGERD(TAG, String("- CContentProviderNative::GetStreamTypes()"));
+    // LOGGERD(TAG, "- CContentProviderNative::GetStreamTypes()");
     return NOERROR;
 }
 
 ECode CContentProviderNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CContentProviderNative::ToString()"));
+    // LOGGERD(TAG, "+ CContentProviderNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -803,7 +962,7 @@ ECode CContentProviderNative::ToString(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CContentProviderNative::ToString()"));
+    // LOGGERD(TAG, "- CContentProviderNative::ToString()");
     return NOERROR;
 }
 

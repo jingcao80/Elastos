@@ -3,6 +3,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::Internal::View::EIID_IIInputContext;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,6 +13,10 @@ namespace JavaProxy {
 
 const String CInputContextNative::TAG("CInputContextNative");
 
+CAR_INTERFACE_IMPL_2(CInputContextNative, Object, IIInputContext, IBinder)
+
+CAR_OBJECT_IMPL(CInputContextNative)
+
 CInputContextNative::~CInputContextNative(){
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -18,8 +24,8 @@ CInputContextNative::~CInputContextNative(){
 }
 
 ECode CInputContextNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -29,7 +35,7 @@ ECode CInputContextNative::constructor(
 ECode CInputContextNative::ReportFullscreenMode(
     /* [in] */ Boolean enabled)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::ReportFullscreenMode()"));
+    // LOGGERD(TAG, "+ CInputContextNative::ReportFullscreenMode()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -38,20 +44,20 @@ ECode CInputContextNative::ReportFullscreenMode(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "reportFullscreenMode", "(Z)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: onDisplayEvent"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: onDisplayEvent", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jboolean)enabled);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: reportFullscreenMode"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: reportFullscreenMode", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputContextNative::ReportFullscreenMode()"));
+    // LOGGERD(TAG, "- CInputContextNative::ReportFullscreenMode()");
     return NOERROR;
 }
 
 ECode CInputContextNative::FinishComposingText()
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::FinishComposingText()"));
+    // LOGGERD(TAG, "+ CInputContextNative::FinishComposingText()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -60,14 +66,14 @@ ECode CInputContextNative::FinishComposingText()
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "finishComposingText", "()V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: onDisplayEvent"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: onDisplayEvent", __LINE__);
 
     env->CallVoidMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: finishComposingText"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: finishComposingText", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputContextNative::FinishComposingText()"));
+    // LOGGERD(TAG, "- CInputContextNative::FinishComposingText()");
     return NOERROR;
 }
 
@@ -75,7 +81,7 @@ ECode CInputContextNative::CommitText(
     /* [in] */ ICharSequence* text,
     /* [in] */ Int32 newCursorPosition)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::CommitText()"));
+    // LOGGERD(TAG, "+ CInputContextNative::CommitText()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -91,10 +97,10 @@ ECode CInputContextNative::CommitText(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "commitText", "(Ljava/lang/CharSequence;I)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: commitText"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: commitText", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jtext, (jint)newCursorPosition);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: commitText"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: commitText", __LINE__);
 
     env->DeleteLocalRef(c);
 
@@ -102,7 +108,7 @@ ECode CInputContextNative::CommitText(
         env->DeleteLocalRef(jtext);
     }
 
-    // LOGGERD(TAG, String("- CInputContextNative::CommitText()"));
+    // LOGGERD(TAG, "- CInputContextNative::CommitText()");
     return NOERROR;
 }
 
@@ -111,7 +117,7 @@ ECode CInputContextNative::GetCursorCapsMode(
     /* [in] */ Int32 seq,
     /* [in] */ IIInputContextCallback* icCallback)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::GetCursorCapsMode()"));
+    // LOGGERD(TAG, "+ CInputContextNative::GetCursorCapsMode()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -121,10 +127,10 @@ ECode CInputContextNative::GetCursorCapsMode(
         jclass c = env->FindClass("com/android/internal/view/ElInputContextCallbackProxy");
         Util::CheckErrorAndLog(env, TAG, "Fail FindClass: ElInputContextCallbackProxy", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElInputContextCallbackProxy", __LINE__);
 
-        jicCallback = env->NewObject(c, m, (jint)icCallback);
+        jicCallback = env->NewObject(c, m, (jlong)icCallback);
         Util::CheckErrorAndLog(env, TAG, "NewObject: ElInputContextCallbackProxy", __LINE__);
         icCallback->AddRef();
 
@@ -135,24 +141,24 @@ ECode CInputContextNative::GetCursorCapsMode(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "getCursorCapsMode", "(IILcom/android/internal/view/IIInputContextCallback;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: GetCursorCapsMode"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: GetCursorCapsMode", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)reqModes, (jint)seq, jicCallback);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: GetCursorCapsMode"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: GetCursorCapsMode", __LINE__);
 
     env->DeleteLocalRef(c);
     if(jicCallback){
         env->DeleteLocalRef(jicCallback);
     }
 
-    // LOGGERD(TAG, String("- CInputContextNative::GetCursorCapsMode()"));
+    // LOGGERD(TAG, "- CInputContextNative::GetCursorCapsMode()");
     return NOERROR;
 }
 
 ECode CInputContextNative::SendKeyEvent(
     /* [in] */ IKeyEvent* event)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::SendKeyEvent()"));
+    // LOGGERD(TAG, "+ CInputContextNative::SendKeyEvent()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -166,17 +172,17 @@ ECode CInputContextNative::SendKeyEvent(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "sendKeyEvent", "(Landroid/view/KeyEvent;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: SendKeyEvent"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: SendKeyEvent", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jevent);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: SendKeyEvent"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: SendKeyEvent", __LINE__);
 
     env->DeleteLocalRef(c);
     if(jevent){
         env->DeleteLocalRef(jevent);
     }
 
-    // LOGGERD(TAG, String("- CInputContextNative::SendKeyEvent()"));
+    // LOGGERD(TAG, "- CInputContextNative::SendKeyEvent()");
     return NOERROR;
 }
 
@@ -186,7 +192,7 @@ ECode CInputContextNative::GetTextBeforeCursor(
     /* [in] */ Int32 seq,
     /* [in] */ IIInputContextCallback* icCallback)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::GetTextBeforeCursor()"));
+    // LOGGERD(TAG, "+ CInputContextNative::GetTextBeforeCursor()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -196,11 +202,11 @@ ECode CInputContextNative::GetTextBeforeCursor(
         jclass c = env->FindClass("com/android/internal/view/ElInputContextCallbackProxy");
         Util::CheckErrorAndLog(env, TAG, "Fail FindClass: ElInputContextCallbackProxy", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
-        Util::CheckErrorAndLog(env, TAG, String("GetMethodID: ElInputContextCallbackProxy"), __LINE__);
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
+        Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElInputContextCallbackProxy", __LINE__);
 
-        jicCallback = env->NewObject(c, m, (jint)icCallback);
-        Util::CheckErrorAndLog(env, TAG, String("NewObject: ElInputContextCallbackProxy"), __LINE__);
+        jicCallback = env->NewObject(c, m, (jlong)icCallback);
+        Util::CheckErrorAndLog(env, TAG, "NewObject: ElInputContextCallbackProxy", __LINE__);
         icCallback->AddRef();
 
         env->DeleteLocalRef(c);
@@ -210,24 +216,24 @@ ECode CInputContextNative::GetTextBeforeCursor(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "getTextBeforeCursor", "(IIILcom/android/internal/view/IIInputContextCallback;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: getTextBeforeCursor"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: getTextBeforeCursor", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)length, (jint)flags, (jint)seq, jicCallback);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: getTextBeforeCursor"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: getTextBeforeCursor", __LINE__);
 
     env->DeleteLocalRef(c);
     if(jicCallback){
         env->DeleteLocalRef(jicCallback);
     }
 
-    // LOGGERD(TAG, String("- CInputContextNative::GetTextBeforeCursor()"));
+    // LOGGERD(TAG, "- CInputContextNative::GetTextBeforeCursor()");
     return NOERROR;
 }
 
 ECode CInputContextNative::ClearMetaKeyStates(
     /* [in] */ Int32 states)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::ClearMetaKeyStates()"));
+    // LOGGERD(TAG, "+ CInputContextNative::ClearMetaKeyStates()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -236,21 +242,21 @@ ECode CInputContextNative::ClearMetaKeyStates(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "clearMetaKeyStates", "(I)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: clearMetaKeyStates"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: clearMetaKeyStates", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)states);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: clearMetaKeyStates"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: clearMetaKeyStates", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputContextNative::ClearMetaKeyStates()"));
+    // LOGGERD(TAG, "- CInputContextNative::ClearMetaKeyStates()");
     return NOERROR;
 }
 
 ECode CInputContextNative::PerformEditorAction(
     /* [in] */ Int32 actionCode)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::PerformEditorAction()"));
+    // LOGGERD(TAG, "+ CInputContextNative::PerformEditorAction()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -259,20 +265,20 @@ ECode CInputContextNative::PerformEditorAction(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "performEditorAction", "(I)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: performEditorAction"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: performEditorAction", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)actionCode);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: performEditorAction"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: performEditorAction", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputContextNative::PerformEditorAction()"));
+    // LOGGERD(TAG, "- CInputContextNative::PerformEditorAction()");
     return NOERROR;
 }
 
 ECode CInputContextNative::BeginBatchEdit()
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::BeginBatchEdit()"));
+    // LOGGERD(TAG, "+ CInputContextNative::BeginBatchEdit()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -281,20 +287,20 @@ ECode CInputContextNative::BeginBatchEdit()
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "beginBatchEdit", "()V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: beginBatchEdit"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: beginBatchEdit", __LINE__);
 
     env->CallVoidMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: beginBatchEdit"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: beginBatchEdit", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputContextNative::BeginBatchEdit()"));
+    // LOGGERD(TAG, "- CInputContextNative::BeginBatchEdit()");
     return NOERROR;
 }
 
 ECode CInputContextNative::EndBatchEdit()
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::EndBatchEdit()"));
+    // LOGGERD(TAG, "+ CInputContextNative::EndBatchEdit()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -303,14 +309,14 @@ ECode CInputContextNative::EndBatchEdit()
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "endBatchEdit", "()V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: endBatchEdit"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: endBatchEdit", __LINE__);
 
     env->CallVoidMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: endBatchEdit"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: endBatchEdit", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputContextNative::EndBatchEdit()"));
+    // LOGGERD(TAG, "- CInputContextNative::EndBatchEdit()");
     return NOERROR;
 }
 
@@ -318,7 +324,7 @@ ECode CInputContextNative::SetComposingText(
     /* [in] */ ICharSequence* text,
     /* [in] */ Int32 newCursorPosition)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::SetComposingText()"));
+    // LOGGERD(TAG, "+ CInputContextNative::SetComposingText()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -334,10 +340,10 @@ ECode CInputContextNative::SetComposingText(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "setComposingText", "(Ljava/lang/CharSequence;I)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: setComposingText"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: setComposingText", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jtext, (jint)newCursorPosition);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: setComposingText"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: setComposingText", __LINE__);
 
     env->DeleteLocalRef(c);
 
@@ -345,7 +351,7 @@ ECode CInputContextNative::SetComposingText(
         env->DeleteLocalRef(jtext);
     }
 
-    // LOGGERD(TAG, String("- CInputContextNative::SetComposingText()"));
+    // LOGGERD(TAG, "- CInputContextNative::SetComposingText()");
     return NOERROR;
 }
 
@@ -355,7 +361,7 @@ ECode CInputContextNative::GetExtractedText(
     /* [in] */ Int32 seq,
     /* [in] */ IIInputContextCallback* icCallback)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::GetExtractedText()"));
+    // LOGGERD(TAG, "+ CInputContextNative::GetExtractedText()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -370,10 +376,10 @@ ECode CInputContextNative::GetExtractedText(
         jclass c = env->FindClass("com/android/internal/view/ElInputContextCallbackProxy");
         Util::CheckErrorAndLog(env, TAG, "GetExtractedText FindClass: ElInputContextCallbackProxy %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "GetExtractedText GetMethodID: ElInputContextCallbackProxy %d", __LINE__);
 
-        jicCallback = env->NewObject(c, m, (jint)icCallback);
+        jicCallback = env->NewObject(c, m, (jlong)icCallback);
         Util::CheckErrorAndLog(env, TAG, "GetExtractedText NewObject: ElInputContextCallbackProxy %d", __LINE__);
         icCallback->AddRef();
 
@@ -399,14 +405,14 @@ ECode CInputContextNative::GetExtractedText(
         env->DeleteLocalRef(jicCallback);
     }
 
-    // LOGGERD(TAG, String("- CInputContextNative::GetExtractedText()"));
+    // LOGGERD(TAG, "- CInputContextNative::GetExtractedText()");
     return NOERROR;
 }
 
 ECode CInputContextNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::ToString()"));
+    // LOGGERD(TAG, "+ CInputContextNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -425,7 +431,7 @@ ECode CInputContextNative::ToString(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CInputContextNative::ToString()"));
+    // LOGGERD(TAG, "- CInputContextNative::ToString()");
     return NOERROR;
 }
 
@@ -435,7 +441,7 @@ ECode CInputContextNative::GetTextAfterCursor(
     /* [in] */ Int32 seq,
     /* [in] */ IIInputContextCallback* icCallback)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::GetTextAfterCursor()"));
+    // LOGGERD(TAG, "+ CInputContextNative::GetTextAfterCursor()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -445,10 +451,10 @@ ECode CInputContextNative::GetTextAfterCursor(
         jclass c = env->FindClass("com/android/internal/view/ElInputContextCallbackProxy");
         Util::CheckErrorAndLog(env, TAG, "Fail FindClass: ElInputContextCallbackProxy %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElInputContextCallbackProxy %d", __LINE__);
 
-        jicCallback = env->NewObject(c, m, (jint)icCallback);
+        jicCallback = env->NewObject(c, m, (jlong)icCallback);
         Util::CheckErrorAndLog(env, TAG, "NewObject: ElInputContextCallbackProxy %d", __LINE__);
         icCallback->AddRef();
 
@@ -470,7 +476,7 @@ ECode CInputContextNative::GetTextAfterCursor(
         env->DeleteLocalRef(jicCallback);
     }
 
-    // LOGGERD(TAG, String("- CInputContextNative::GetTextAfterCursor()"));
+    // LOGGERD(TAG, "- CInputContextNative::GetTextAfterCursor()");
     return NOERROR;
 }
 
@@ -478,7 +484,7 @@ ECode CInputContextNative::DeleteSurroundingText(
     /* [in] */ Int32 leftLength,
     /* [in] */ Int32 rightLength)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::DeleteSurroundingText()"));
+    // LOGGERD(TAG, "+ CInputContextNative::DeleteSurroundingText()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -494,14 +500,14 @@ ECode CInputContextNative::DeleteSurroundingText(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputContextNative::DeleteSurroundingText()"));
+    // LOGGERD(TAG, "- CInputContextNative::DeleteSurroundingText()");
     return NOERROR;
 }
 
 ECode CInputContextNative::CommitCompletion(
     /* [in] */ ICompletionInfo* completion)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::CommitCompletion()"));
+    // LOGGERD(TAG, "+ CInputContextNative::CommitCompletion()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -525,14 +531,14 @@ ECode CInputContextNative::CommitCompletion(
         env->DeleteLocalRef(jcompletion);
     }
 
-    // LOGGERD(TAG, String("- CInputContextNative::CommitCompletion()"));
+    // LOGGERD(TAG, "- CInputContextNative::CommitCompletion()");
     return NOERROR;
 }
 
 ECode CInputContextNative::CommitCorrection(
     /* [in] */ ICorrectionInfo* correction)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::CommitCorrection()"));
+    // LOGGERD(TAG, "+ CInputContextNative::CommitCorrection()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -557,7 +563,7 @@ ECode CInputContextNative::CommitCorrection(
         env->DeleteLocalRef(jcorrection);
     }
 
-    // LOGGERD(TAG, String("- CInputContextNative::CommitCorrection()"));
+    // LOGGERD(TAG, "- CInputContextNative::CommitCorrection()");
     return NOERROR;
 }
 
@@ -565,7 +571,7 @@ ECode CInputContextNative::SetSelection(
     /* [in] */ Int32 start,
     /* [in] */ Int32 end)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::SetSelection()"));
+    // LOGGERD(TAG, "+ CInputContextNative::SetSelection()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -581,14 +587,14 @@ ECode CInputContextNative::SetSelection(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputContextNative::SetSelection()"));
+    // LOGGERD(TAG, "- CInputContextNative::SetSelection()");
     return NOERROR;
 }
 
 ECode CInputContextNative::PerformContextMenuAction(
     /* [in] */ Int32 id)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::PerformContextMenuAction()"));
+    // LOGGERD(TAG, "+ CInputContextNative::PerformContextMenuAction()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -604,7 +610,7 @@ ECode CInputContextNative::PerformContextMenuAction(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputContextNative::PerformContextMenuAction()"));
+    // LOGGERD(TAG, "- CInputContextNative::PerformContextMenuAction()");
     return NOERROR;
 }
 
@@ -612,7 +618,7 @@ ECode CInputContextNative::PerformPrivateCommand(
     /* [in] */ const String& action,
     /* [in] */ IBundle* data)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::PerformPrivateCommand()"));
+    // LOGGERD(TAG, "+ CInputContextNative::PerformPrivateCommand()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -639,7 +645,7 @@ ECode CInputContextNative::PerformPrivateCommand(
         env->DeleteLocalRef(jdata);
     }
 
-    // LOGGERD(TAG, String("- CInputContextNative::PerformPrivateCommand()"));
+    // LOGGERD(TAG, "- CInputContextNative::PerformPrivateCommand()");
     return NOERROR;
 }
 
@@ -647,7 +653,7 @@ ECode CInputContextNative::SetComposingRegion(
     /* [in] */ Int32 start,
     /* [in] */ Int32 end)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::SetComposingRegion()"));
+    // LOGGERD(TAG, "+ CInputContextNative::SetComposingRegion()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -663,7 +669,7 @@ ECode CInputContextNative::SetComposingRegion(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputContextNative::SetComposingRegion()"));
+    // LOGGERD(TAG, "- CInputContextNative::SetComposingRegion()");
     return NOERROR;
 }
 
@@ -672,7 +678,7 @@ ECode CInputContextNative::GetSelectedText(
     /* [in] */ Int32 seq,
     /* [in] */ IIInputContextCallback* icCallback)
 {
-    // LOGGERD(TAG, String("+ CInputContextNative::GetSelectedText()"));
+    // LOGGERD(TAG, "+ CInputContextNative::GetSelectedText()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -682,10 +688,10 @@ ECode CInputContextNative::GetSelectedText(
         jclass c = env->FindClass("com/android/internal/view/ElInputContextCallbackProxy");
         Util::CheckErrorAndLog(env, TAG, "FindClass: ElInputContextCallbackProxy %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElInputContextCallbackProxy %d", __LINE__);
 
-        jicCallback = env->NewObject(c, m, (jint)icCallback);
+        jicCallback = env->NewObject(c, m, (jlong)icCallback);
         Util::CheckErrorAndLog(env, TAG, "NewObject: ElInputContextCallbackProxy %d", __LINE__);
         icCallback->AddRef();
 
@@ -706,11 +712,53 @@ ECode CInputContextNative::GetSelectedText(
         env->DeleteLocalRef(jicCallback);
     }
 
-    // LOGGERD(TAG, String("- CInputContextNative::GetSelectedText()"));
+    // LOGGERD(TAG, "- CInputContextNative::GetSelectedText()");
+    return NOERROR;
+}
+
+ECode CInputContextNative::RequestUpdateCursorAnchorInfo(
+    /* [in] */ Int32 cursorUpdateMode,
+    /* [in] */ Int32 seq,
+    /* [in] */ IIInputContextCallback* icCallback)
+{
+    // LOGGERD(TAG, "+ CInputContextNative::RequestUpdateCursorAnchorInfo()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject jicCallback = NULL;
+    if (icCallback != NULL) {
+        jclass c = env->FindClass("com/android/internal/view/ElInputContextCallbackProxy");
+        Util::CheckErrorAndLog(env, TAG, "FindClass: ElInputContextCallbackProxy %d", __LINE__);
+
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
+        Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElInputContextCallbackProxy %d", __LINE__);
+
+        jicCallback = env->NewObject(c, m, (jlong)icCallback);
+        Util::CheckErrorAndLog(env, TAG, "NewObject: ElInputContextCallbackProxy %d", __LINE__);
+        icCallback->AddRef();
+
+        env->DeleteLocalRef(c);
+    }
+
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IIInputContext %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "requestUpdateCursorAnchorInfo", "(IILcom/android/internal/view/IIInputContextCallback;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: requestUpdateCursorAnchorInfo %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, (jint)cursorUpdateMode, (jint)seq, jicCallback);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: requestUpdateCursorAnchorInfo %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+    if(jicCallback){
+        env->DeleteLocalRef(jicCallback);
+    }
+
+    // LOGGERD(TAG, "- CInputContextNative::RequestUpdateCursorAnchorInfo()");
     return NOERROR;
 }
 
 }
 }
 }
-

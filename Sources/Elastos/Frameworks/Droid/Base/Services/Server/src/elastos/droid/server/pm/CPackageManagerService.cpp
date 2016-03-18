@@ -451,36 +451,41 @@ void CPackageManagerService::PackageUsage::WriteInternal()
 
 ECode CPackageManagerService::PackageUsage::ReadLP()
 {
+    ECode ec = NOERROR;
     synchronized (mFileLock) {
-        AutoPtr<IAtomicFile> file = GetFile();
-        AutoPtr<IBufferedInputStream> in;
-        // try {
+        AutoPtr<IInputStream> in;
         AutoPtr<IFileInputStream> fileIn;
-        file->OpenRead((IFileInputStream**)&fileIn);
-        CBufferedInputStream::New(IInputStream::Probe(fileIn), (IBufferedInputStream**)&in);
         StringBuilder sb;
+        String packageName, timeInMillisString;
+
+        AutoPtr<IAtomicFile> file = GetFile();
+        ec = file->OpenRead((IFileInputStream**)&fileIn);
+        FAIL_GOTO(ec, _EXIT_)
+
+        ec = CBufferedInputStream::New(IInputStream::Probe(fileIn), (IInputStream**)&in);
+        FAIL_GOTO(ec, _EXIT_)
+
         while (TRUE) {
-            AutoPtr<IInputStream> is = IInputStream::Probe(in);
-            String packageName;
-            if (FAILED(ReadToken(is, sb, ' ', &packageName))) {
+            ec = ReadToken(in, sb, ' ', &packageName);
+            if (FAILED(ec)) {
                 Logger::W(CPackageManagerService::TAG, "Failed to read package usage times");
                 break;
             }
             if (packageName.IsNull()) {
                 break;
             }
-            String timeInMillisString;
-            if (FAILED(ReadToken(is, sb, '\n', &timeInMillisString))) {
-                Logger::W(CPackageManagerService::TAG, "Failed to read package usage times");
+
+            ec = ReadToken(in, sb, '\n', &timeInMillisString);
+            if (FAILED(ec)) {
+                Logger::W(TAG, "Failed to read package usage times");
                 break;
             }
             if (timeInMillisString.IsNull()) {
-                Logger::E(CPackageManagerService::TAG, "Failed to find last usage time for package %s", packageName.string());
-                AutoPtr<IIoUtils> ioUtils;
-                CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-                ioUtils->CloseQuietly(ICloseable::Probe(in));
-                return E_IO_EXCEPTION;
+                Logger::E(TAG, "Failed to find last usage time for package %s", packageName.string());
+                ec = E_IO_EXCEPTION;
+                break;
             }
+
             AutoPtr<PackageParser::Package> pkg;
             HashMap<String, AutoPtr<PackageParser::Package> >::Iterator it = mHost->mPackages.Find(packageName);
             if (it != mHost->mPackages.End()) {
@@ -489,25 +494,28 @@ ECode CPackageManagerService::PackageUsage::ReadLP()
             if (pkg == NULL) {
                 continue;
             }
-            // try {
-            // Int64 timeInMillis = StringUtils::ParseInt64(timeInMillisString);
-            // } catch (NumberFormatException e) {
-            //     throw new IOException("Failed to parse " + timeInMillisString
-            //                           + " as a long.", e);
-            // }
-            pkg->mLastPackageUsageTimeInMills = StringUtils::ParseInt64(timeInMillisString);
+
+            ec = StringUtils::Parse(timeInMillisString, &pkg->mLastPackageUsageTimeInMills);
+            if (ec == (ECode)E_NUMBER_FORMAT_EXCEPTION) {
+                Logger::E(TAG, "Failed to parse %s as a long.", timeInMillisString.string());
+                ec = E_IO_EXCEPTION;
+                break;
+            }
         }
-        // } catch (FileNotFoundException expected) {
-        //     mIsHistoricalPackageUsageAvailable = false;
-        // } catch (IOException e) {
-        //     Log.w(TAG, "Failed to read package usage times", e);
-        // } finally {
-        //     IoUtils.closeQuietly(in);
-        // }
+
+_EXIT_:
         AutoPtr<IIoUtils> ioUtils;
         CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
         ioUtils->CloseQuietly(ICloseable::Probe(in));
+
+        if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
+            mIsHistoricalPackageUsageAvailable = FALSE;
+        }
+        else if (ec == (ECode)E_IO_EXCEPTION) {
+            Logger::W(TAG, "Failed to read package usage times");
+        }
     }
+
     mLastWritten->Set(SystemClock::GetElapsedRealtime());
     return NOERROR;
 }
@@ -522,9 +530,9 @@ ECode CPackageManagerService::PackageUsage::ReadToken(
     *token = NULL;
 
     sb.SetLength(0);
+    Int32 ch;
     while (TRUE) {
-        Int32 ch;
-        in->Read(&ch);
+        FAIL_RETURN(in->Read(&ch))
         if (ch == -1) {
             if (sb.GetLength() == 0) {
                 *token = String(NULL);
@@ -534,7 +542,9 @@ ECode CPackageManagerService::PackageUsage::ReadToken(
         }
         if ((Char32)ch == endOfToken) {
             *token = sb.ToString();
+            return NOERROR;
         }
+
         sb.AppendChar((Char32)ch);
     }
     return NOERROR;
@@ -2268,6 +2278,13 @@ AutoPtr<OriginInfo> OriginInfo::FromStagedContainer(
     return new OriginInfo(NULL, cid, TRUE, FALSE);
 }
 
+ECode OriginInfo::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    *str = mResolvedPath;
+    return NOERROR;
+}
 
 //==============================================================================
 //                  CPackageManagerService::InstallParams::CopyBroadcastReceiver
@@ -2748,12 +2765,10 @@ InstallArgs::InstallArgs(
     , mIsEpk(FALSE)
 {
     // for epk
-    // if (packageURI != NULL) {
-    //     String path;
-    //     packageURI->GetPath(&path);
-    //     if (path.EndWith(".epk"))
-    //         mIsEpk = TRUE;
-    // }
+    if (mOrigin->mResolvedPath.EndWith(".epk")) {
+        mIsEpk = TRUE;
+    }
+    Slogger::I("CPackageManagerService", "InstallArgs: %s", mOrigin->mResolvedPath.string());
 }
 
 void InstallArgs::Init(
@@ -2776,13 +2791,12 @@ void InstallArgs::Init(
     mAbiOverride = abiOverride;
     mInstructionSets = instructionSets;
     mHost = owner;
+
     // for epk
-    // if (packageURI != NULL) {
-    //     String path;
-    //     packageURI->GetPath(&path);
-    //     if (path.EndWith(".epk"))
-    //         mIsEpk = TRUE;
-    // }
+    if (mOrigin->mResolvedPath.EndWith(".epk")) {
+        mIsEpk = TRUE;
+    }
+    Slogger::I("CPackageManagerService", "InstallArgs: %s", mOrigin->mResolvedPath.string());
 }
 
 Int32 InstallArgs::DoPreCopy()
@@ -3137,7 +3151,6 @@ Boolean CPackageManagerService::FileInstallArgs::DoPostDeleteLI(
     CleanUpResourcesLI();
     return TRUE;
 }
-
 
 //==============================================================================
 //                  CPackageManagerService::FileInstallArgs
@@ -3968,20 +3981,20 @@ ECode CPackageManagerService::RemoveUnusedPackagesRunnable::Run()
 //==============================================================================
 
 const String CPackageManagerService::TAG("CPackageManagerService");
-const Boolean CPackageManagerService::DEBUG_SETTINGS = FALSE;
-const Boolean CPackageManagerService::DEBUG_PREFERRED = FALSE;
-const Boolean CPackageManagerService::DEBUG_UPGRADE = FALSE;
-const Boolean CPackageManagerService::DEBUG_INSTALL = FALSE;
-const Boolean CPackageManagerService::DEBUG_REMOVE = FALSE;
-const Boolean CPackageManagerService::DEBUG_BROADCASTS = FALSE;
-const Boolean CPackageManagerService::DEBUG_SHOW_INFO = FALSE;
-const Boolean CPackageManagerService::DEBUG_PACKAGE_INFO = FALSE;
-const Boolean CPackageManagerService::DEBUG_INTENT_MATCHING = FALSE;
-const Boolean CPackageManagerService::DEBUG_PACKAGE_SCANNING = FALSE;
-const Boolean CPackageManagerService::DEBUG_VERIFY = FALSE;
-const Boolean CPackageManagerService::DEBUG_DEXOPT = FALSE;
-const Boolean CPackageManagerService::DEBUG_ABI_SELECTION = FALSE;
-const Boolean CPackageManagerService::DEBUG_SD_INSTALL = FALSE;
+const Boolean CPackageManagerService::DEBUG_SETTINGS = TRUE;
+const Boolean CPackageManagerService::DEBUG_PREFERRED = TRUE;
+const Boolean CPackageManagerService::DEBUG_UPGRADE = TRUE;
+const Boolean CPackageManagerService::DEBUG_INSTALL = TRUE;
+const Boolean CPackageManagerService::DEBUG_REMOVE = TRUE;
+const Boolean CPackageManagerService::DEBUG_BROADCASTS = TRUE;
+const Boolean CPackageManagerService::DEBUG_SHOW_INFO = TRUE;
+const Boolean CPackageManagerService::DEBUG_PACKAGE_INFO = TRUE;
+const Boolean CPackageManagerService::DEBUG_INTENT_MATCHING = TRUE;
+const Boolean CPackageManagerService::DEBUG_PACKAGE_SCANNING = TRUE;
+const Boolean CPackageManagerService::DEBUG_VERIFY = TRUE;
+const Boolean CPackageManagerService::DEBUG_DEXOPT = TRUE;
+const Boolean CPackageManagerService::DEBUG_ABI_SELECTION = TRUE;
+const Boolean CPackageManagerService::DEBUG_SD_INSTALL = TRUE;
 
 const Int32 CPackageManagerService::RADIO_UID;
 const Int32 CPackageManagerService::LOG_UID;
@@ -7338,6 +7351,7 @@ ECode CPackageManagerService::QueryIntentActivities(
     /* [out, callee] */ IList** infos)
 {
     VALIDATE_NOT_NULL(infos)
+    *infos = NULL;
 
     AutoPtr<IIntent> intent = _intent;
     if (!sUserManager->Exists(userId)) {
@@ -7392,6 +7406,7 @@ ECode CPackageManagerService::QueryIntentActivities(
                 REFCOUNT_ADD(*infos)
                 return NOERROR;
             }
+
             // Check for cross profile results.
             resolveInfo = QueryCrossProfileIntents(
                     matchingFilters, intent, resolvedType, flags, userId);
@@ -7412,8 +7427,10 @@ ECode CPackageManagerService::QueryIntentActivities(
                 cols->Sort(list, sResolvePrioritySorter);
             }
             *infos = list;
+            REFCOUNT_ADD(*infos)
             return NOERROR;
         }
+
         AutoPtr<PackageParser::Package> pkg;
         HashMap<String, AutoPtr<PackageParser::Package> >::Iterator pit = mPackages.Find(pkgName);
         if (pit != mPackages.End()) {
@@ -7432,9 +7449,10 @@ ECode CPackageManagerService::QueryIntentActivities(
             REFCOUNT_ADD(*infos)
             return NOERROR;
         }
-        AutoPtr<IArrayList> al;
-        CArrayList::New((IArrayList**)&al);
-        *infos = IList::Probe(al);
+
+        AutoPtr<IList> al;
+        CArrayList::New((IList**)&al);
+        *infos = al;
         REFCOUNT_ADD(*infos)
     }
     return NOERROR;
@@ -7786,6 +7804,7 @@ ECode CPackageManagerService::QueryIntentReceivers(
     VALIDATE_NOT_NULL(receivers)
     *receivers = NULL;
 
+    Slogger::D(TAG, " >> QueryIntentReceivers %s", TO_CSTR(_intent));
     AutoPtr<IIntent> intent = _intent;
     if (!sUserManager->Exists(userId)) {
         AutoPtr<ICollections> cols;
@@ -8781,7 +8800,7 @@ ECode CPackageManagerService::ScanPackageLI(
 
     AutoPtr<PackageParser::Package> pkg;
     // try {
-    if (FAILED(pp->ParsePackage(scanFile, parseFlags, readBuffer, (PackageParser::Package**)&pkg))) {
+    if (FAILED(pp->ParsePackage(scanFile, parseFlags, readBuffer, FALSE, (PackageParser::Package**)&pkg))) {
         sLastScanError = pp->GetParseError();
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
@@ -9309,6 +9328,10 @@ void CPackageManagerService::PerformBootDexOpt(
     /* [in] */ Int32 curr,
     /* [in] */ Int32 total)
 {
+    if (pkg->mIsEpk) {
+        return;
+    }
+
     if (DEBUG_DEXOPT) {
         Logger::I(TAG, "Optimizing app %d of %d: %s", curr, total, pkg->mPackageName.string());
     }
@@ -9379,7 +9402,7 @@ Boolean CPackageManagerService::PerformDexOpt(
         if (it != mPackages.End()) {
             p = it->mSecond;
         }
-        if (p == NULL) {
+        if (p == NULL || p->mIsEpk) {
             return FALSE;
         }
         if (updateUsage) {
@@ -10112,6 +10135,7 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
     VALIDATE_NOT_NULL(outPkg)
     *outPkg = NULL;
 
+Slogger::I(TAG, " >>>>>>>>> ScanPackageDirtyLI %s", TO_CSTR(pkg));
     AutoPtr<IFile> scanFile;
     CFile::New(pkg->mCodePath, (IFile**)&scanFile);
     String codePath, resPath;
@@ -10220,7 +10244,7 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
     AutoPtr<IFile> destCodeFile, destResourceFile;
     ASSERT_SUCCEEDED(CFile::New(codePath, (IFile**)&destCodeFile))
     ASSERT_SUCCEEDED(CFile::New(resPath, (IFile**)&destResourceFile))
-
+Slogger::I(TAG, "  codePath:%s, resPath:%s", codePath.string(), resPath.string());
     AutoPtr<SharedUserSetting> suid;
     AutoPtr<PackageSetting> pkgSetting;
 
@@ -10931,7 +10955,8 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
                 pkg, forceDex, (scanFlags & SCAN_DEFER_DEX) != 0);
     }
 
-    if ((scanFlags & SCAN_NO_DEX) == 0) {
+    // for epk
+    if (!pkg->mIsEpk && (scanFlags & SCAN_NO_DEX) == 0) {
         if (PerformDexOptLI(pkg, NULL /* instruction sets */, forceDex,
                 (scanFlags & SCAN_DEFER_DEX) != 0, FALSE) == DEX_OPT_FAILED) {
             Slogger::E(TAG, "scanPackageLI");
@@ -10940,6 +10965,14 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
             return E_PACKAGE_MANAGER_EXCEPTION;
         }
     }
+
+    // for epk
+    // if (pkg->mIsEpk) {
+    //     if (MoveEcoFilesLI(pkg) != IPackageManager::INSTALL_SUCCEEDED) {
+    //         sLastScanError = IPackageManager::INSTALL_FAILED_INVALID_APK;
+    //         return E_PACKAGE_MANAGER_EXCEPTION;
+    //     }
+    // }
 
     if (mFactoryTest &&
             Find(pkg->mRequestedPermissions.Begin(), pkg->mRequestedPermissions.End(),
@@ -11032,13 +11065,14 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
         }
     }
 
-    if (pkg->mIsEpk) {
-        if (MoveEcoFilesLI(pkg) != IPackageManager::INSTALL_SUCCEEDED) {
-            sLastScanError = IPackageManager::INSTALL_FAILED_INVALID_APK;
-            *outPkg = NULL;
-            return NOERROR;
-        }
-    }
+    // for epk
+    // if (pkg->mIsEpk) {
+    //     if (MoveEcoFilesLI(pkg) != IPackageManager::INSTALL_SUCCEEDED) {
+    //         sLastScanError = IPackageManager::INSTALL_FAILED_INVALID_APK;
+    //         *outPkg = NULL;
+    //         return NOERROR;
+    //     }
+    // }
 
     // Request the ActivityManager to kill the process(only for existing packages)
     // so that we do not end up in a confused state while the user is still using the older
@@ -11050,7 +11084,6 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
         pkg->mApplicationInfo->GetUid(&pkgAppUid);
         KillApplication(pkgAppPkgName, pkgAppUid, String("update pkg"));
     }
-
     // writer
     synchronized (mPackagesLock) {
         // We don't expect installation to fail beyond this point
@@ -11214,7 +11247,7 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
             }
         }
         if (r != NULL) {
-            if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Providers: %s", r->ToString().string());
+            if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Providers: %s", TO_CSTR(r));
         }
 
         r = NULL;
@@ -11239,7 +11272,7 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
             }
         }
         if (r != NULL) {
-            if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Services: %s", r->ToString().string());
+            if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Services: %s", TO_CSTR(r));
         }
 
         r = NULL;
@@ -11264,7 +11297,7 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
             }
         }
         if (r != NULL) {
-            if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Receivers: %s", r->ToString().string());
+            if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Receivers: %s", TO_CSTR(r));
         }
 
         r = NULL;
@@ -11295,7 +11328,7 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
             }
         }
         if (r != NULL) {
-            if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Activities: %s", r->ToString().string());
+            if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Activities: %s", TO_CSTR(r));
         }
 
         r = NULL;
@@ -11337,9 +11370,10 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
                 }
             }
         }
-//         if (r != NULL) {
-//             if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Permission Groups: " + r);
-//         }
+
+        if (r != NULL) {
+            if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Permission Groups: %s", TO_CSTR(r));
+        }
 
         r = NULL;
         List< AutoPtr<PackageParser::Permission> >::Iterator ppmit;
@@ -11438,7 +11472,7 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
             }
         }
         if (r != NULL) {
-            if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Permissions: %s", r->ToString().string());
+            if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Permissions: %s", TO_CSTR(r));
         }
 
         String pkgAppSrcDir, pkgAppPubSrcDir, pkgAppDataDir, pkgAppNatLibDir;
@@ -11477,6 +11511,7 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
                 r->Append(aInfoName);
             }
         }
+
         if (r != NULL) {
             if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Instrumentation: %s", r->ToString().string());
         }
@@ -11527,6 +11562,8 @@ ECode CPackageManagerService::ScanPackageDirtyLI(
         }
     }
 
+
+Slogger::I(TAG, " <<<<<<<<<< ScanPackageDirtyLI %s", TO_CSTR(pkg));
     *outPkg = pkg;
     REFCOUNT_ADD(*outPkg)
     return NOERROR;
@@ -11611,8 +11648,8 @@ void CPackageManagerService::AdjustCpuAbisForSharedUserLPw(
                     ps->mPkg->mApplicationInfo->SetPrimaryCpuAbi(adjustedAbi);
                     Slogger::I(TAG, "Adjusting ABI for : %s to %s", ps->mName.string(), adjustedAbi.string());
 
-                    if (PerformDexOptLI(ps->mPkg, NULL /* instruction sets */, forceDexOpt,
-                            deferDexOpt, TRUE) == DEX_OPT_FAILED) {
+                    if (!ps->mPkg->mIsEpk && PerformDexOptLI(
+                        ps->mPkg, NULL /* instruction sets */, forceDexOpt, deferDexOpt, TRUE) == DEX_OPT_FAILED) {
                         ps->mPrimaryCpuAbiString = NULL;
                         ps->mPkg->mApplicationInfo->SetPrimaryCpuAbi(String(NULL));
                         return;
@@ -13673,14 +13710,13 @@ String CPackageManagerService::DeriveCodePathName(
     if (codeFile->IsDirectory(&isDirectory), isDirectory) {
         return name;
     }
-    else if (name.EndWith(".apk") || name.EndWith(".tmp")) {
+    else if (name.EndWith(".epk") || name.EndWith(".apk") || name.EndWith(".tmp")) {
         Int32 lastDot = name.LastIndexOf('.');
         return name.Substring(0, lastDot);
     }
-    else {
-        Slogger::W(TAG, "Odd, %s doesn't look like an APK", codePath.string());
-        return String(NULL);
-    }
+
+    Slogger::W(TAG, "Odd, %s doesn't look like an EPK or APK.", codePath.string());
+    return String(NULL);
 }
 
 void CPackageManagerService::InstallNewPackageLI(
@@ -14138,6 +14174,13 @@ void CPackageManagerService::UpdateSettingsLI(
         mSettings->WriteLPr();
     }
 
+    // for epk
+    // res->mReturnCode = newPackage->mIsEpk ? IPackageManager::INSTALL_SUCCEEDED : MoveDexFilesLI(newPackage);
+    // if (res->mReturnCode != IPackageManager::INSTALL_SUCCEEDED) {
+    //     // Discontinue if moving dex files failed.
+    //     return;
+    // }
+
     if (DEBUG_INSTALL) Slogger::D(TAG, "New package installed in %s", newPackage->mCodePath.string());
 
     synchronized (mPackagesLock) {
@@ -14216,7 +14259,7 @@ void CPackageManagerService::InstallPackageLI(
 
     AutoPtr<PackageParser::Package> pkg;
     // try {
-    ECode ec = pp->ParsePackage(tmpPackageFile, parseFlags, readBuffer, (PackageParser::Package**)&pkg);
+    ECode ec = pp->ParsePackage(tmpPackageFile, parseFlags, readBuffer, args->mIsEpk, (PackageParser::Package**)&pkg);
     if (FAILED(ec)) {
         res->SetError(String("Failed parse during installPackageLI"), pp->GetParseError(), ec);
         return;

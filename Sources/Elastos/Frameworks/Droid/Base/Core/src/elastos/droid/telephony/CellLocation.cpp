@@ -1,7 +1,6 @@
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/telephony/CellLocation.h"
-// TODO: Need CTelephonyManagerHelper
-// #include "elastos/droid/telephony/CTelephonyManagerHelper.h"
+#include "elastos/droid/telephony/CTelephonyManagerHelper.h"
 #include "elastos/droid/telephony/cdma/CCdmaCellLocation.h"
 #include "elastos/droid/telephony/gsm/CGsmCellLocation.h"
 
@@ -53,13 +52,12 @@ ECode CellLocation::NewFromBundle(
     VALIDATE_NOT_NULL(cl);
     // TelephonyManager.getDefault().getCurrentPhoneType() handles the case when
     // ITelephony interface is not up yet.
+    AutoPtr<ITelephonyManagerHelper> helper;
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
+    AutoPtr<ITelephonyManager> tm;
+    helper->GetDefault((ITelephonyManager**)&tm);
     Int32 currentPhoneType;
-// TODO: Need CTelephonyManagerHelper
-    // AutoPtr<ITelephonyManagerHelper> helper;
-    // CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
-    // AutoPtr<ITelephonyManager> tm;
-    // helper->GetDefault((ITelephonyManager**)&tm);
-    // tm->GetCurrentPhoneType(&currentPhoneType);
+    tm->GetCurrentPhoneType(&currentPhoneType);
     switch(currentPhoneType) {
     case IPhoneConstants::PHONE_TYPE_CDMA:
         {
@@ -89,13 +87,12 @@ ECode CellLocation::GetEmpty(
     VALIDATE_NOT_NULL(cl);
     // TelephonyManager.getDefault().getCurrentPhoneType() handles the case when
     // ITelephony interface is not up yet.
+    AutoPtr<ITelephonyManagerHelper> helper;
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
+    AutoPtr<ITelephonyManager> tm;
+    helper->GetDefault((ITelephonyManager**)&tm);
     Int32 currentPhoneType;
-// TODO: Need CTelephonyManagerHelper
-    // AutoPtr<ITelephonyManagerHelper> helper;
-    // CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
-    // AutoPtr<ITelephonyManager> tm;
-    // helper->GetDefault((ITelephonyManager**)&tm);
-    // tm->GetCurrentPhoneType(&currentPhoneType);
+    tm->GetCurrentPhoneType(&currentPhoneType);
     switch(currentPhoneType) {
     case IPhoneConstants::PHONE_TYPE_CDMA:
         {

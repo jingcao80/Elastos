@@ -9,83 +9,103 @@ module
     namespace Telecomm {
     namespace Telecom {
 
-        interface IRemoteConferenceCallback {
-            OnStateChanged(
-                [in] IRemoteConference* conference,
-                [in] Int32 oldState,
-                [in] Int32 newState);
+    interface IRemoteConferenceCallback {
+        OnStateChanged(
+            [in] IRemoteConference* conference,
+            [in] Int32 oldState,
+            [in] Int32 newState);
 
-            OnDisconnected(
-                [in] IRemoteConference* conference,
-                [in] IDisconnectCause* disconnectCause);
+        OnDisconnected(
+            [in] IRemoteConference* conference,
+            [in] IDisconnectCause* disconnectCause);
 
-            OnConnectionAdded(
-                [in] IRemoteConference* conference,
-                [in] IRemoteConnection* connection);
+        OnConnectionAdded(
+            [in] IRemoteConference* conference,
+            [in] IRemoteConnection* connection);
 
-            OnConnectionRemoved(
-                [in] IRemoteConference* conference,
-                [in] IRemoteConnection* connection);
+        OnConnectionRemoved(
+            [in] IRemoteConference* conference,
+            [in] IRemoteConnection* connection);
 
-            OnCapabilitiesChanged(
-                [in] IRemoteConference* conference,
-                [in] Int32 capabilities);
+        OnCapabilitiesChanged(
+            [in] IRemoteConference* conference,
+            [in] Int32 capabilities);
 
-            OnConferenceableConnectionsChanged(
-                [in] IRemoteConference* conference,
-                [in] IList* conferenceableConnections);
+        OnConferenceableConnectionsChanged(
+            [in] IRemoteConference* conference,
+            [in] IList* conferenceableConnections);
 
-            OnDestroyed(
-                [in] IRemoteConference* conference);
-        }
+        OnDestroyed(
+            [in] IRemoteConference* conference);
+    }
 
-        /**
-         * Represents a conference call which can contain any number of {@link Connection} objects.
-         * @hide
-         */
-        interface IRemoteConference {
-            GetConnections(
-                [out] IList** res);
+    /**
+     * Represents a conference call which can contain any number of {@link Connection} objects.
+     * @hide
+     */
+    interface IRemoteConference {
+        GetConnections(
+            [out] IList** res);
 
-            GetState(
-                [out] Int32* res);
+        GetState(
+            [out] Int32* res);
 
-            GetCallCapabilities(
-                [out] Int32* res);
+        GetCallCapabilities(
+            [out] Int32* res);
 
-            Disconnect();
+        Disconnect();
 
-            Separate(
-                [in] IRemoteConnection* connection);
+        Separate(
+            [in] IRemoteConnection* connection);
 
-            Merge();
+        Merge();
 
-            Swap();
+        Swap();
 
-            Hold();
+        Hold();
 
-            Unhold();
+        Unhold();
 
-            GetDisconnectCause(
-                [out] IDisconnectCause** res);
+        GetDisconnectCause(
+            [out] IDisconnectCause** res);
 
-            PlayDtmfTone(
-                [in] Char32 digit);
+        PlayDtmfTone(
+            [in] Char32 digit);
 
-            StopDtmfTone();
+        StopDtmfTone();
 
-            SetAudioState(
-                [in] IAudioState* state);
+        SetAudioState(
+            [in] IAudioState* state);
 
-            GetConferenceableConnections(
-                [out] IList** res);
+        GetConferenceableConnections(
+            [out] IList** res);
 
-            RegisterCallback(
-                [out] IRemoteConferenceCallback** cb);
+        RegisterCallback(
+            [in] IRemoteConferenceCallback* cb);
 
-            UnregisterCallback(
-                [out] IRemoteConferenceCallback** cb);
-        }
+        UnregisterCallback(
+            [in] IRemoteConferenceCallback* cb);
+
+        RemoveConnection(
+            [in] IRemoteConnection* connection);
+
+        AddConnection(
+            [in] IRemoteConnection* connection);
+
+        SetState(
+            [in] Int32 newState);
+
+        SetCallCapabilities(
+            [in] Int32 capabilities);
+
+        SetDisconnected(
+            [in] IDisconnectCause* disconnectCause);
+
+        SetDestroyed();
+
+        SetConferenceableConnections(
+            [in] IList* conferenceableConnections);
+    }
 
     } // namespace Telecom
     } // namespace Telecomm

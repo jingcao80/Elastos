@@ -16,7 +16,17 @@ ECode CSettingsSystem::GetUriFor(
     /* [in] */ const String& name,
     /* [out] */ IUri** value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::NameValueTable::GetUriFor(u, name, value);
+}
+
+ECode CSettingsSystem::GetCONTENT_URI(
+    /* [out] */ IUri** uri)
+{
+    VALIDATE_NOT_NULL(uri)
+    *uri = Settings::System::CONTENT_URI;
+    REFCOUNT_ADD(*uri)
+    return NOERROR;
 }
 
 ECode CSettingsSystem::GetSETTINGS_TO_BACKUP(
@@ -25,15 +35,6 @@ ECode CSettingsSystem::GetSETTINGS_TO_BACKUP(
     VALIDATE_NOT_NULL(array)
     *array = Settings::System::SETTINGS_TO_BACKUP;
     REFCOUNT_ADD(*array)
-    return NOERROR;
-}
-
-ECode CSettingsSystem::GetVOLUME_SETTINGS(
-    /* [out, callee] */ ArrayOf<String>** settings)
-{
-    VALIDATE_NOT_NULL(settings)
-    *settings = Settings::System::VOLUME_SETTINGS;
-    REFCOUNT_ADD(*settings)
     return NOERROR;
 }
 
@@ -64,12 +65,12 @@ ECode CSettingsSystem::GetDEFAULT_ALARM_ALERT_URI(
     return NOERROR;
 }
 
-ECode CSettingsSystem::GetCONTENT_URI(
-    /* [out] */ IUri** uri)
+ECode CSettingsSystem::GetVOLUME_SETTINGS(
+    /* [out, callee] */ ArrayOf<String>** settings)
 {
-    VALIDATE_NOT_NULL(uri)
-    *uri = Settings::System::CONTENT_URI;
-    REFCOUNT_ADD(*uri)
+    VALIDATE_NOT_NULL(settings)
+    *settings = Settings::System::VOLUME_SETTINGS;
+    REFCOUNT_ADD(*settings)
     return NOERROR;
 }
 
@@ -90,6 +91,7 @@ ECode CSettingsSystem::GetString(
     /* [in] */ const String& name,
     /* [out] */ String* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetString(resolver, name, value);
 }
 
@@ -99,6 +101,7 @@ ECode CSettingsSystem::GetStringForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ String* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetStringForUser(resolver, name, userHandle, value);
 }
 
@@ -108,6 +111,7 @@ ECode CSettingsSystem::PutString(
     /* [in] */ const String& value,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     return Settings::System::PutString(resolver, name, value, result);
 }
 
@@ -118,6 +122,7 @@ ECode CSettingsSystem::PutStringForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     return Settings::System::PutStringForUser(resolver, name, value, userHandle, res);
 }
 
@@ -125,6 +130,7 @@ ECode CSettingsSystem::GetUriFor(
     /* [in] */ const String& name,
     /* [out] */ IUri** uri)
 {
+    VALIDATE_NOT_NULL(uri)
     return Settings::System::GetUriFor(name, uri);
 }
 
@@ -134,6 +140,7 @@ ECode CSettingsSystem::GetInt32(
     /* [in] */ Int32 def,
     /* [out] */ Int32* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetInt32(cr, name, def, value);
 }
 
@@ -144,6 +151,7 @@ ECode CSettingsSystem::GetInt32ForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Int32* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetInt32ForUser(cr, name, def, userHandle, value);
 }
 
@@ -152,6 +160,7 @@ ECode CSettingsSystem::GetInt32(
     /* [in] */ const String& name,
     /* [out] */ Int32* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetInt32(cr, name, value);
 }
 
@@ -161,6 +170,7 @@ ECode CSettingsSystem::GetInt32ForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Int32* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetInt32ForUser(cr, name, userHandle, value);
 }
 
@@ -170,6 +180,7 @@ ECode CSettingsSystem::PutInt32(
     /* [in] */ Int32 value,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     return Settings::System::PutInt32(cr, name, value, result);
 }
 
@@ -181,6 +192,7 @@ ECode CSettingsSystem::PutInt32ForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     return Settings::System::PutInt32ForUser(cr, name, value, userHandle, res);
 }
 
@@ -190,6 +202,7 @@ ECode CSettingsSystem::GetInt64(
     /* [in] */ Int64 def,
     /* [out] */ Int64* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetInt64(cr, name, def, value);
 }
 
@@ -200,6 +213,7 @@ ECode CSettingsSystem::GetInt64ForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Int64* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetInt64ForUser(cr, name, def, userHandle, value);
 }
 
@@ -208,6 +222,7 @@ ECode CSettingsSystem::GetInt64(
     /* [in] */ const String& name,
     /* [out] */ Int64* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetInt64(cr, name, value);
 }
 
@@ -217,6 +232,7 @@ ECode CSettingsSystem::GetInt64ForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Int64* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetInt64ForUser(cr, name, userHandle, value);
 }
 
@@ -226,6 +242,7 @@ ECode CSettingsSystem::PutInt64(
     /* [in] */ Int64 value,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     return Settings::System::PutInt64(cr, name, value, result);
 }
 
@@ -236,6 +253,7 @@ ECode CSettingsSystem::PutInt64ForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     return Settings::System::PutInt64ForUser(cr, name, value, userHandle, res);
 }
 
@@ -245,6 +263,7 @@ ECode CSettingsSystem::GetFloat(
     /* [in] */ Float def,
     /* [out] */ Float* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetFloat(cr, name, def, value);
 }
 
@@ -255,6 +274,7 @@ ECode CSettingsSystem::GetFloatForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Float* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetFloatForUser(cr, name, def, userHandle, value);
 }
 
@@ -263,6 +283,7 @@ ECode CSettingsSystem::GetFloat(
     /* [in] */ const String& name,
     /* [out] */ Float* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetFloat(cr, name, value);
 }
 
@@ -272,6 +293,7 @@ ECode CSettingsSystem::GetFloatForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Float* value)
 {
+    VALIDATE_NOT_NULL(value)
     return Settings::System::GetFloatForUser(cr, name, userHandle, value);
 }
 
@@ -281,6 +303,7 @@ ECode CSettingsSystem::PutFloat(
     /* [in] */ Float value,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     return Settings::System::PutFloat(cr, name, value, result);
 }
 
@@ -291,6 +314,7 @@ ECode CSettingsSystem::PutFloatForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     return Settings::System::PutFloatForUser(cr, name, value, userHandle, result);
 }
 
@@ -323,6 +347,7 @@ ECode CSettingsSystem::PutConfiguration(
     /* [in] */ IConfiguration* config,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     return Settings::System::PutConfiguration(cr, config, result);
 }
 
@@ -332,6 +357,7 @@ ECode CSettingsSystem::PutConfigurationForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     return Settings::System::PutConfigurationForUser(cr, config, userHandle, result);
 }
 
@@ -348,6 +374,7 @@ ECode CSettingsSystem::GetShowGTalkServiceStatus(
     /* [in] */ IContentResolver* cr,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     return Settings::System::GetShowGTalkServiceStatus(cr, result);
 }
 
@@ -356,6 +383,7 @@ ECode CSettingsSystem::GetShowGTalkServiceStatusForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     return Settings::System::GetShowGTalkServiceStatusForUser(cr, userHandle, result);
 }
 

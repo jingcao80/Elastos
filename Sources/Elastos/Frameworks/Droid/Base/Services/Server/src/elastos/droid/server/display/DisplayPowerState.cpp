@@ -161,6 +161,7 @@ DisplayPowerState::PhotonicModulator::PhotonicModulator(
     , mHost(host)
 {
     mTask = (IRunnable*)new TaskRunnable(this);
+    Thread::constructor(String("PhotonicModulator"));
 }
 
 Boolean DisplayPowerState::PhotonicModulator::SetState(

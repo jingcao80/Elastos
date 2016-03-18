@@ -74,8 +74,8 @@ void DragState::Register(
         mService->mInputManager->RegisterInputChannel(mServerChannel, NULL);
         AutoPtr<ILooper> hLooper;
         mService->mH->GetLooper((ILooper**)&hLooper);
-        mInputEventReceiver = new DragInputEventReceiver(
-                mClientChannel, hLooper, mService);
+        mInputEventReceiver = new DragInputEventReceiver();
+        mInputEventReceiver->constructor(mClientChannel, hLooper, mService);
 
         mDragApplicationHandle = new InputApplicationHandle(NULL);
         mDragApplicationHandle->mName = String("drag");

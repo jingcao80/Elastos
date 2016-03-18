@@ -18,7 +18,7 @@ HdmiCecKeycode::KeycodeEntry::KeycodeEntry(
     /* [in] */ Int32 cecKeycode,
     /* [in] */ Boolean isRepeatable)
 {
-    mAndroidKeycode = androidKeycode;
+    mElastosKeycode = androidKeycode;
     mCecKeycode = cecKeycode;
     mIsRepeatable = isRepeatable;
 }
@@ -33,18 +33,18 @@ HdmiCecKeycode::KeycodeEntry::KeycodeEntry(
 Int32 HdmiCecKeycode::KeycodeEntry::ToCecKeycodeIfMatched(
     /* [in] */ Int32 androidKeycode)
 {
-    if (mAndroidKeycode == androidKeycode) {
+    if (mElastosKeycode == androidKeycode) {
         return mCecKeycode;
     } else {
         return UNSUPPORTED_KEYCODE;
     }
 }
 
-Int32 HdmiCecKeycode::KeycodeEntry::ToAndroidKeycodeIfMatched(
+Int32 HdmiCecKeycode::KeycodeEntry::ToElastosKeycodeIfMatched(
     /* [in] */ Int32 cecKeycode)
 {
     if (cecKeycode == mCecKeycode) {
-        return mAndroidKeycode;
+        return mElastosKeycode;
     } else {
         return UNSUPPORTED_KEYCODE;
     }
@@ -54,7 +54,7 @@ AutoPtr<IBoolean> HdmiCecKeycode::KeycodeEntry::IsRepeatableIfMatched(
     /* [in] */ Int32 androidKeycode)
 {
     AutoPtr<IBoolean> rev;
-    if (mAndroidKeycode == androidKeycode) {
+    if (mElastosKeycode == androidKeycode) {
         CBoolean::New(mIsRepeatable, (IBoolean**)&rev);
     }
     return rev;
@@ -180,7 +180,7 @@ const AutoPtr<ArrayOf<HdmiCecKeycode::KeycodeEntry*> > HdmiCecKeycode::KEYCODE_E
 HdmiCecKeycode::HdmiCecKeycode()
 {}
 
-ECode HdmiCecKeycode::AndroidKeyToCecKey(
+ECode HdmiCecKeycode::ElastosKeyToCecKey(
     /* [in] */ Int32 keycode,
     /* [out] */ Int32* result)
 {
@@ -197,14 +197,14 @@ ECode HdmiCecKeycode::AndroidKeyToCecKey(
     return NOERROR;
 }
 
-ECode HdmiCecKeycode::CecKeyToAndroidKey(
+ECode HdmiCecKeycode::CecKeyToElastosKey(
     /* [in] */ Int32 keycode,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
 
     for (Int32 i = 0; i < KEYCODE_ENTRIES->GetLength(); ++i) {
-        Int32 androidKey = (*KEYCODE_ENTRIES)[i]->ToAndroidKeycodeIfMatched(keycode);
+        Int32 androidKey = (*KEYCODE_ENTRIES)[i]->ToElastosKeycodeIfMatched(keycode);
         if (androidKey != UNSUPPORTED_KEYCODE) {
             *result = androidKey;
             return NOERROR;
@@ -237,7 +237,7 @@ ECode HdmiCecKeycode::IsSupportedKeycode(
     VALIDATE_NOT_NULL(result)
 
     Int32 cecKey;
-    HdmiCecKeycode::AndroidKeyToCecKey(androidKeycode, &cecKey);
+    HdmiCecKeycode::ElastosKeyToCecKey(androidKeycode, &cecKey);
     *result = cecKey != HdmiCecKeycode::UNSUPPORTED_KEYCODE;
     return NOERROR;
 }

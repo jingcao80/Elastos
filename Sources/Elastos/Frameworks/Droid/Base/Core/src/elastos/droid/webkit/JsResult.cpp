@@ -61,8 +61,7 @@ ECode JsResult::GetResult(
 /* Notify the caller that the JsResult has completed */
 void JsResult::WakeUp()
 {
-    assert(0);
-//    mReceiver->OnJsResultComplete((IJsResult*)this->Probe(EIID_IJsResult));
+    mReceiver->OnJsResultComplete(IJsResult::Probe(this));
 }
 
 ECode JsResult::ToString(

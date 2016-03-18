@@ -9,7 +9,7 @@ module
     namespace Telecomm {
     namespace Telecom {
 
-    inteface IVideoCallbackServant {
+    interface IVideoCallbackServant {
         GetStub(
             [out] IIVideoCallback** stub);
     }

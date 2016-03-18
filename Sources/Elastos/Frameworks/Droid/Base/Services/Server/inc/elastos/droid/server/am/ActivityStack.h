@@ -87,7 +87,7 @@ protected:
 
 public:
     ActivityStack(
-        /* [in] */ ActivityStackSupervisor::ActivityContainer* activityContainer);
+        /* [in] */ IIActivityContainer* activityContainer);
 
     CARAPI_(Int32) NumActivities();
 
@@ -564,7 +564,7 @@ private:
       * the resumed state (either by launching it or explicitly telling it),
       * this function updates the rest of our state to match that fact.
       */
-    CARAPI_(void) CompleteResumeLocked(
+    CARAPI CompleteResumeLocked(
         /* [in] */ ActivityRecord* next);
 
     CARAPI_(void) SetVisibile(
@@ -701,7 +701,7 @@ public:
     Int64 mFullyDrawnStartTime;
     Int32 mCurrentUser;
     /*const*/ Int32 mStackId;//TODO
-    AutoPtr<ActivityStackSupervisor::ActivityContainer> mActivityContainer;
+    AutoPtr<IIActivityContainer> mActivityContainer;
     /** The other stacks, in order, on the attached display. Updated at attach/detach time. */
     AutoPtr<IArrayList> mStacks;//ActivityStack
     /** The attached Display's unique identifier, or -1 if detached */

@@ -76,6 +76,15 @@ ECode CVirtualDisplay::Resize(
     return mGlobal->ResizeVirtualDisplay(mToken, width, height, densityDpi);
 }
 
+ECode CVirtualDisplay::ReleaseResources()
+{
+    if (mToken != NULL) {
+        mGlobal->ReleaseVirtualDisplay(mToken);
+        mToken = NULL;
+    }
+    return NOERROR;
+}
+
 ECode CVirtualDisplay::ToString(
     /* [out] */ String* result)
 {

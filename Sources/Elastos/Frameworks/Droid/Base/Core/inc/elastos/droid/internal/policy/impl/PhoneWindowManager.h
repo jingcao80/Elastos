@@ -318,7 +318,7 @@ protected:
         : public InputEventReceiver
     {
     public:
-        HideNavInputEventReceiver(
+        CARAPI constructor(
             /* [in] */ IInputChannel* inputChannel,
             /* [in] */ ILooper* looper,
             /* [in] */ PhoneWindowManager* host);
@@ -549,7 +549,6 @@ private:
     {
     public:
         ScreenshotHandler(
-            /* [in] */ ILooper* looper,
             /* [in] */ IServiceConnection *conn,
             /* [in] */ PhoneWindowManager* host);
 

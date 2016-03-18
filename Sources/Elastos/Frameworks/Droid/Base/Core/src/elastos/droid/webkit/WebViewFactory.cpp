@@ -15,16 +15,26 @@
 #include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/os/CStrictMode.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/webkit/WebViewFactory.h"
+#include "elastos/core/AutoLock.h"
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::AppGlobals;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Content::Res::IAssetManager;
+using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::Os::IStrictMode;
+using Elastos::Droid::Os::CStrictMode;
+using Elastos::Core::AutoLock;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -34,7 +44,8 @@ namespace Webkit {
 static void* gReservedAddress = NULL;
 static size_t gReservedSize = 0;
 
-const String WebViewFactory::CHROMIUM_WEBVIEW_FACTORY("com.android.webview.chromium.WebViewChromiumFactoryProvider");
+//const String WebViewFactory::CHROMIUM_WEBVIEW_FACTORY("com.android.webview.chromium.WebViewChromiumFactoryProvider");
+const String WebViewFactory::CHROMIUM_WEBVIEW_FACTORY("LElastos/Droid/Webkit/Webview/Chromium/WebViewChromiumFactoryProvider;");
 const String WebViewFactory::NULL_WEBVIEW_FACTORY("com.android.webview.nullwebview.NullWebViewFactoryProvider");
 const String WebViewFactory::CHROMIUM_WEBVIEW_NATIVE_RELRO_32("/data/misc/shared_relro/libwebviewchromium32.relro");
 const String WebViewFactory::CHROMIUM_WEBVIEW_NATIVE_RELRO_64("/data/misc/shared_relro/libwebviewchromium64.relro");
@@ -48,23 +59,23 @@ const Boolean WebViewFactory::DEBUG = FALSE;
 //============================================================================================
 // native codes
 //============================================================================================
-static Boolean nativeReserveAddressSpace(
-    /* [in] */ Int64 size)
-{
-    size_t vsize = static_cast<size_t>(size);
-
-    void* addr = mmap(NULL, vsize, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (addr == MAP_FAILED) {
-        ALOGE("Failed to reserve %zd bytes of address space for future load of "
-              "libwebviewchromium.so: %s",
-              vsize, strerror(errno));
-        return FALSE;
-    }
-    gReservedAddress = addr;
-    gReservedSize = vsize;
-    ALOGV("Reserved %zd bytes at %p", vsize, addr);
-    return TRUE;
-}
+//static Boolean nativeReserveAddressSpace(
+//    /* [in] */ Int64 size)
+//{
+//    size_t vsize = static_cast<size_t>(size);
+//
+//    void* addr = mmap(NULL, vsize, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+//    if (addr == MAP_FAILED) {
+//        ALOGE("Failed to reserve %zd bytes of address space for future load of "
+//              "libwebviewchromium.so: %s",
+//              vsize, strerror(errno));
+//        return FALSE;
+//    }
+//    gReservedAddress = addr;
+//    gReservedSize = vsize;
+//    ALOGV("Reserved %zd bytes at %p", vsize, addr);
+//    return TRUE;
+//}
 
 //============================================================================================
 // WebViewFactory
@@ -81,6 +92,8 @@ String WebViewFactory::GetWebViewPackageName()
     AutoPtr<IApplication> application = AppGlobals::GetInitialApplication();
     String result;
     IContext::Probe(application)->GetString(R::string::config_webViewPackageName, &result);
+    //TODO the package name maybe need update
+    Logger::D("WebViewFactory::GetWebViewPackageName", "packageName is: %s", result.string());
     return result;
 }
 
@@ -91,87 +104,154 @@ AutoPtr<IPackageInfo> WebViewFactory::GetLoadedPackageInfo()
 
 AutoPtr<IWebViewFactoryProvider> WebViewFactory::GetProvider()
 {
-    assert(0);
-    // TODO
-    // synchronized(sProviderLock) {
-    //     // For now the main purpose of this function (and the factory abstraction) is to keep
-    //     // us honest and minimize usage of WebView internals when binding the proxy.
-    //     if (sProviderInstance != null) return sProviderInstance;
+    {
+        AutoLock lock(sProviderLock);
+        // For now the main purpose of this function (and the factory abstraction) is to keep
+        // us honest and minimize usage of WebView internals when binding the proxy.
+        if (sProviderInstance != NULL) return sProviderInstance;
 
-    //     Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getProvider()");
-    //     try {
-    //         Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
-    //         loadNativeLibrary();
-    //         Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+        //Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getProvider()");
+        //try {
+            //Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
+            //loadNativeLibrary();
+            //Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
 
-    //         Class<WebViewFactoryProvider> providerClass;
-    //         Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getFactoryClass()");
-    //         try {
-    //             providerClass = getFactoryClass();
-    //         } catch (ClassNotFoundException e) {
-    //             Log.e(LOGTAG, "error loading provider", e);
-    //             throw new AndroidRuntimeException(e);
-    //         } finally {
-    //             Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
-    //         }
+            //Class<WebViewFactoryProvider> providerClass;
+            //Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getFactoryClass()");
+            //try {
+            //    providerClass = getFactoryClass();
+            //} catch (ClassNotFoundException e) {
+            //    Log.e(LOGTAG, "error loading provider", e);
+            //    throw new AndroidRuntimeException(e);
+            //} finally {
+            //    Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+            //}
+            AutoPtr<IClassInfo> providerClass = GetFactoryClass();
+            if (providerClass == NULL) {
+                Logger::E(LOGTAG, "error loading provider");
+                return NULL;
+            }
 
-    //         StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
-    //         Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "providerClass.newInstance()");
-    //         try {
-    //             sProviderInstance = providerClass.newInstance();
-    //             if (DEBUG) Log.v(LOGTAG, "Loaded provider: " + sProviderInstance);
-    //             return sProviderInstance;
-    //         } catch (Exception e) {
-    //             Log.e(LOGTAG, "error instantiating provider", e);
-    //             throw new AndroidRuntimeException(e);
-    //         } finally {
-    //             Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
-    //             StrictMode.setThreadPolicy(oldPolicy);
-    //         }
-    //     } finally {
-    //         Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
-    //     }
-    // }
-    return NULL;
+            //StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+            AutoPtr<IStrictMode> strictMode;
+            CStrictMode::AcquireSingleton((IStrictMode**)&strictMode);
+            AutoPtr<IStrictModeThreadPolicy> oldPolicy;
+            strictMode->AllowThreadDiskReads((IStrictModeThreadPolicy**)&oldPolicy);
+            //Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "providerClass.newInstance()");
+            //try {
+                //sProviderInstance = providerClass.newInstance();
+                AutoPtr<IConstructorInfo> constructor;
+                //ECode ec = providerClass->GetConstructorInfoByCount(0, (IConstructorInfo**)&constructor);
+                ECode ec = providerClass->GetConstructorInfoByParamNames(String(""), (IConstructorInfo**)&constructor);
+                if (FAILED(ec)) {
+                    Logger::E(LOGTAG, "WebViewFactory: get constructor failed.");
+                    return NULL;
+                }
+                AutoPtr<IArgumentList> args;
+                constructor->CreateArgumentList((IArgumentList**)&args);
+                AutoPtr<IInterface> object;
+                ec = constructor->CreateObject(args, (IInterface**)&object);
+                if (FAILED(ec)) {
+                    Logger::E(LOGTAG, "WebViewFactory: Create webviewfactory object failed.");
+                    return NULL;
+                }
+                sProviderInstance = IWebViewFactoryProvider::Probe(object);
+                if (DEBUG) Logger::V(LOGTAG, "Loaded provider: %p", sProviderInstance.Get());
+            //} catch (Exception e) {
+            //    Log.e(LOGTAG, "error instantiating provider", e);
+            //    throw new AndroidRuntimeException(e);
+            //} finally {
+            //    Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+                //StrictMode.setThreadPolicy(oldPolicy);
+                strictMode->SetThreadPolicy(oldPolicy);
+            //}
+        //} finally {
+        //    Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+        //}
+    }
+    return sProviderInstance;
 }
 
-// TODO
-// private static Class<WebViewFactoryProvider> getFactoryClass() throws ClassNotFoundException {
-//     Application initialApplication = AppGlobals.getInitialApplication();
-//     try {
-//         // First fetch the package info so we can log the webview package version.
-//         String packageName = getWebViewPackageName();
-//         sPackageInfo = initialApplication.getPackageManager().getPackageInfo(packageName, 0);
-//         Log.i(LOGTAG, "Loading " + packageName + " version " + sPackageInfo.versionName +
-//                       " (code " + sPackageInfo.versionCode + ")");
+//private static Class<WebViewFactoryProvider> getFactoryClass() throws ClassNotFoundException {
+AutoPtr<IClassInfo> WebViewFactory::GetFactoryClass()
+{
+    AutoPtr<IApplication> initialApplication = AppGlobals::GetInitialApplication();
+    //try {
+        // First fetch the package info so we can log the webview package version.
+        String packageName = GetWebViewPackageName();
+        AutoPtr<IPackageManager> pm;
+        IContext::Probe(initialApplication)->GetPackageManager((IPackageManager**)&pm);
+        sPackageInfo  = NULL;
+        pm->GetPackageInfo(packageName, 0, (IPackageInfo**)&sPackageInfo);
+        String versionName;
+        Int32 versionCode;
+        sPackageInfo->GetVersionName(&versionName);
+        sPackageInfo->GetVersionCode(&versionCode);
+        Logger::I(LOGTAG, "Loading %s versionName: %s, versionCode: %d",
+                packageName.string(), versionName.string(), versionCode);
 
-//         // Construct a package context to load the Java code into the current app.
-//         Context webViewContext = initialApplication.createPackageContext(packageName,
-//                 Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
-//         initialApplication.getAssets().addAssetPath(
-//                 webViewContext.getApplicationInfo().sourceDir);
-//         ClassLoader clazzLoader = webViewContext.getClassLoader();
-//         Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");
-//         try {
-//             return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY, true,
-//                                                                  clazzLoader);
-//         } finally {
-//             Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
-//         }
-//     } catch (PackageManager.NameNotFoundException e) {
-//         // If the package doesn't exist, then try loading the null WebView instead.
-//         // If that succeeds, then this is a device without WebView support; if it fails then
-//         // swallow the failure, complain that the real WebView is missing and rethrow the
-//         // original exception.
-//         try {
-//             return (Class<WebViewFactoryProvider>) Class.forName(NULL_WEBVIEW_FACTORY);
-//         } catch (ClassNotFoundException e2) {
-//             // Ignore.
-//         }
-//         Log.e(LOGTAG, "Chromium WebView package does not exist", e);
-//         throw new AndroidRuntimeException(e);
-//     }
-// }
+        // Construct a package context to load the Java code into the current app.
+        AutoPtr<IContext> webViewContext;
+        IContext::Probe(initialApplication)->CreatePackageContext(packageName,
+                IContext::CONTEXT_INCLUDE_CODE | IContext::CONTEXT_IGNORE_SECURITY,
+                (IContext**)&webViewContext);
+        AutoPtr<IAssetManager> assetManager;
+        IContext::Probe(initialApplication)->GetAssets((IAssetManager**)&assetManager);
+
+        AutoPtr<IApplicationInfo> appInfo;
+        webViewContext->GetApplicationInfo((IApplicationInfo**)&appInfo);
+        String srcDir;
+        appInfo->GetSourceDir(&srcDir);
+        Int32 cookie;
+        assetManager->AddAssetPath(srcDir, &cookie);
+
+        StringBuilder sb;
+        sb.Append("/data/elastos/");
+        sb.Append(packageName);
+        sb.Append(".eco");
+
+        String path = sb.ToString();
+        AutoPtr<IModuleInfo> moduleInfo;
+        ECode ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&moduleInfo);
+        if (FAILED(ec)) {
+            Logger::E(LOGTAG, "WebViewFactory: Cann't Find the path is %s", path.string());
+            return NULL;
+        }
+
+        //String className = CHROMIUM_WEBVIEW_FACTORY;
+        //Int32 index = className.LastIndexOf('.');
+        //String shortClassName = index > 0 ? className.Substring(index + 1) : className;
+        AutoPtr<IClassInfo> classInfo;
+        ec = moduleInfo->GetClassInfo(CHROMIUM_WEBVIEW_FACTORY, (IClassInfo**)&classInfo);
+        if (FAILED(ec)) {
+            Logger::E(LOGTAG, "WebViewFactory: Get class info of %s failed.", CHROMIUM_WEBVIEW_FACTORY.string());
+            return NULL;
+        }
+
+        return classInfo;
+
+        //ClassLoader clazzLoader = webViewContext.getClassLoader();
+        //Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");
+        //try {
+        //    return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY, true,
+        //                                                         clazzLoader);
+        //} finally {
+        //    Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+        //}
+    //} catch (PackageManager.NameNotFoundException e) {
+    //    // If the package doesn't exist, then try loading the null WebView instead.
+    //    // If that succeeds, then this is a device without WebView support; if it fails then
+    //    // swallow the failure, complain that the real WebView is missing and rethrow the
+    //    // original exception.
+    //    try {
+    //        return (Class<WebViewFactoryProvider>) Class.forName(NULL_WEBVIEW_FACTORY);
+    //    } catch (ClassNotFoundException e2) {
+    //        // Ignore.
+    //    }
+    //    Log.e(LOGTAG, "Chromium WebView package does not exist", e);
+    //    throw new AndroidRuntimeException(e);
+    //}
+}
 
 /**
  * Perform any WebView loading preparations that must happen in the zygote.
@@ -182,18 +262,20 @@ ECode WebViewFactory::PrepareWebViewInZygote()
     // TODO
     // try {
     //     System.loadLibrary("webviewchromium_loader");
-    Int64 addressSpaceToReserve;
-    SystemProperties::GetInt64(IWebViewFactory::CHROMIUM_WEBVIEW_VMSIZE_SIZE_PROPERTY,
-        CHROMIUM_WEBVIEW_DEFAULT_VMSIZE_BYTES, &addressSpaceToReserve);
-    sAddressSpaceReserved = nativeReserveAddressSpace(addressSpaceToReserve);
-
-    if (sAddressSpaceReserved) {
-        if (DEBUG) {
-            Logger::V(LOGTAG, "address space reserved: %lld bytes", addressSpaceToReserve);
-        }
-    } else {
-        Logger::E(LOGTAG, "reserving %lld bytes of address space failed", addressSpaceToReserve);
-    }
+//TODO(leliang) the codes below used to reserved memory for the native so,
+// do not think it is needed here
+//    Int64 addressSpaceToReserve;
+//    SystemProperties::GetInt64(IWebViewFactory::CHROMIUM_WEBVIEW_VMSIZE_SIZE_PROPERTY,
+//        CHROMIUM_WEBVIEW_DEFAULT_VMSIZE_BYTES, &addressSpaceToReserve);
+//    sAddressSpaceReserved = nativeReserveAddressSpace(addressSpaceToReserve);
+//
+//    if (sAddressSpaceReserved) {
+//        if (DEBUG) {
+//            Logger::V(LOGTAG, "address space reserved: %lld bytes", addressSpaceToReserve);
+//        }
+//    } else {
+//        Logger::E(LOGTAG, "reserving %lld bytes of address space failed", addressSpaceToReserve);
+//    }
     // } catch (Throwable t) {
     //     // Log and discard errors at this stage as we must not crash the zygote.
     //     Log.e(LOGTAG, "error preparing native loader", t);
@@ -222,23 +304,25 @@ ECode WebViewFactory::PrepareWebViewInSystemServer()
 ECode WebViewFactory::PrepareWebViewInSystemServer(
     /* [in] */ ArrayOf<String>* nativeLibraryPaths)
 {
-    if (DEBUG) {
-        Logger::V(LOGTAG, "creating relro files");
-    }
-
-    // We must always trigger createRelRo regardless of the value of nativeLibraryPaths. Any
-    // unexpected values will be handled there to ensure that we trigger notifying any process
-    // waiting on relreo creation.
-    if (Build::SUPPORTED_32_BIT_ABIS->GetLength() > 0) {
-        if (DEBUG) Logger::V(LOGTAG, "Create 32 bit relro");
-        CreateRelroFile(FALSE /* is64Bit */, nativeLibraryPaths);
-    }
-
-    if (Build::SUPPORTED_64_BIT_ABIS->GetLength() > 0) {
-        if (DEBUG) Logger::V(LOGTAG, "Create 64 bit relro");
-        CreateRelroFile(TRUE /* is64Bit */, nativeLibraryPaths);
-    }
-
+    Logger::D(LOGTAG, "WebViewFactory::PrepareWebViewInSystemServer(paths)");
+////TODO now the relro not supported
+//    if (DEBUG) {
+//        Logger::V(LOGTAG, "creating relro files");
+//    }
+//
+//    // We must always trigger createRelRo regardless of the value of nativeLibraryPaths. Any
+//    // unexpected values will be handled there to ensure that we trigger notifying any process
+//    // waiting on relreo creation.
+//    if (Build::SUPPORTED_32_BIT_ABIS->GetLength() > 0) {
+//        if (DEBUG) Logger::V(LOGTAG, "Create 32 bit relro");
+//        CreateRelroFile(FALSE /* is64Bit */, nativeLibraryPaths);
+//    }
+//
+//    if (Build::SUPPORTED_64_BIT_ABIS->GetLength() > 0) {
+//        if (DEBUG) Logger::V(LOGTAG, "Create 64 bit relro");
+//        CreateRelroFile(TRUE /* is64Bit */, nativeLibraryPaths);
+//    }
+//
     return NOERROR;
 }
 
@@ -287,42 +371,43 @@ ECode WebViewFactory::OnWebViewUpdateInstalled()
 
 AutoPtr< ArrayOf<String> > WebViewFactory::GetWebViewNativeLibraryPaths()
 {
-    assert(0);
-    // TODO
-    // final String NATIVE_LIB_FILE_NAME = "libwebviewchromium.so";
-
-    // PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
-    // ApplicationInfo ai = pm.getApplicationInfo(getWebViewPackageName(), 0);
-
-    AutoPtr<ISystem> system;
-    CSystem::AcquireSingleton((ISystem**)&system);
-    // String path32;
-    // String path64;
-    // boolean primaryArchIs64bit;
-    // system->Is64BitAbi(ai.primaryCpuAbi, &primaryArchIs64bit);
-    // if (!TextUtils.isEmpty(ai.secondaryCpuAbi)) {
-    //     // Multi-arch case.
-    //     if (primaryArchIs64bit) {
-    //         // Primary arch: 64-bit, secondary: 32-bit.
-    //         path64 = ai.nativeLibraryDir;
-    //         path32 = ai.secondaryNativeLibraryDir;
-    //     } else {
-    //         // Primary arch: 32-bit, secondary: 64-bit.
-    //         path64 = ai.secondaryNativeLibraryDir;
-    //         path32 = ai.nativeLibraryDir;
-    //     }
-    // } else if (primaryArchIs64bit) {
-    //     // Single-arch 64-bit.
-    //     path64 = ai.nativeLibraryDir;
-    //     path32 = "";
-    // } else {
-    //     // Single-arch 32-bit.
-    //     path32 = ai.nativeLibraryDir;
-    //     path64 = "";
-    // }
-    // if (!TextUtils.isEmpty(path32)) path32 += "/" + NATIVE_LIB_FILE_NAME;
-    // if (!TextUtils.isEmpty(path64)) path64 += "/" + NATIVE_LIB_FILE_NAME;
-    // return new String[] { path32, path64 };
+//TODO(leliang) do not needed
+//    assert(0);
+//    // TODO
+//    // final String NATIVE_LIB_FILE_NAME = "libwebviewchromium.so";
+//
+//    // PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
+//    // ApplicationInfo ai = pm.getApplicationInfo(getWebViewPackageName(), 0);
+//
+//    AutoPtr<ISystem> system;
+//    CSystem::AcquireSingleton((ISystem**)&system);
+//    // String path32;
+//    // String path64;
+//    // boolean primaryArchIs64bit;
+//    // system->Is64BitAbi(ai.primaryCpuAbi, &primaryArchIs64bit);
+//    // if (!TextUtils.isEmpty(ai.secondaryCpuAbi)) {
+//    //     // Multi-arch case.
+//    //     if (primaryArchIs64bit) {
+//    //         // Primary arch: 64-bit, secondary: 32-bit.
+//    //         path64 = ai.nativeLibraryDir;
+//    //         path32 = ai.secondaryNativeLibraryDir;
+//    //     } else {
+//    //         // Primary arch: 32-bit, secondary: 64-bit.
+//    //         path64 = ai.secondaryNativeLibraryDir;
+//    //         path32 = ai.nativeLibraryDir;
+//    //     }
+//    // } else if (primaryArchIs64bit) {
+//    //     // Single-arch 64-bit.
+//    //     path64 = ai.nativeLibraryDir;
+//    //     path32 = "";
+//    // } else {
+//    //     // Single-arch 32-bit.
+//    //     path32 = ai.nativeLibraryDir;
+//    //     path64 = "";
+//    // }
+//    // if (!TextUtils.isEmpty(path32)) path32 += "/" + NATIVE_LIB_FILE_NAME;
+//    // if (!TextUtils.isEmpty(path64)) path64 += "/" + NATIVE_LIB_FILE_NAME;
+//    // return new String[] { path32, path64 };
 
     return NULL;
 }
@@ -331,7 +416,7 @@ void WebViewFactory::CreateRelroFile(
     /* [in] */ Boolean is64Bit,
     /* [in] */ ArrayOf<String>* nativeLibraryPaths)
 {
-    assert(0);
+    // assert(0);
     // TODO
     // final String abi =
     //         is64Bit ? Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0];
@@ -368,6 +453,9 @@ void WebViewFactory::CreateRelroFile(
 
 void WebViewFactory::LoadNativeLibrary()
 {
+    Logger::W(LOGTAG, "TODO WebViewFactory::LoadNativeLibrary()");
+    return;
+
     if (!sAddressSpaceReserved) {
         Logger::E(LOGTAG, "can't load with relro file; address space not reserved");
         return;

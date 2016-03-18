@@ -3,40 +3,43 @@
 #define __ELASTOS_DROID_JAVAPROXY_CCURSORNATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CCursorNative.h"
-#include <jni.h>
-#include "elastos/droid/ext/frameworkdef.h"
+#include "Elastos.Droid.Database.h"
+#include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
+#include <jni.h>
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Database::ICharArrayBuffer;
+using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Utility::Etl::HashMap;
 
-_ETL_NAMESPACE_BEGIN
-
-template<> struct Hash<IContentObserver*>
-{
-    size_t operator()(IContentObserver* x) const { return (size_t)x; }
-};
-
-template<> struct Hash<IDataSetObserver*>
-{
-    size_t operator()(IDataSetObserver* x) const { return (size_t)x; }
-};
-
-_ETL_NAMESPACE_END
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Database::IContentObserver)
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Database::IDataSetObserver)
 
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 CarClass(CCursorNative)
+    , public Object
+    , public ICursor
+    , public IBinder
 {
 public:
     ~CCursorNative();
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
+    CARAPI constructor(
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI GetCount(
         /* [out] */ Int32* count);
@@ -160,6 +163,9 @@ public:
         /* [in] */ IContentResolver* cr,
         /* [in] */ IUri* uri);
 
+    CARAPI GetNotificationUri(
+        /* [out] */ IUri** uri);
+
     CARAPI GetWantsAllOnMoveCalls(
         /* [out] */ Boolean* result);
 
@@ -170,9 +176,8 @@ public:
         /* [in] */ IBundle* extras,
         /* [out] */ IBundle** result);
 
-    CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
     static const String TAG;

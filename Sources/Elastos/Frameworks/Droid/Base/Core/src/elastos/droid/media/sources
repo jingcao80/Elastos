@@ -136,6 +136,7 @@ SOURCES += CMetadata.cpp
 SOURCES += CMetadataHelper.cpp
 SOURCES += CMediaScannerConnection.cpp
 SOURCES += CMediaScannerConnectionHelper.cpp
+SOURCES += CMediaScannerHelper.cpp
 SOURCES += CRemoteDisplay.cpp
 SOURCES += CRemoteDisplayHelper.cpp
 SOURCES += Rating.cpp

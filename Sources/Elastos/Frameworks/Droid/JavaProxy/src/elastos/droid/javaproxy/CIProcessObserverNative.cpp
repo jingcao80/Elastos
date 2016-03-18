@@ -3,6 +3,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::App::EIID_IIProcessObserver;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,15 +13,20 @@ namespace JavaProxy {
 
 const String CIProcessObserverNative::TAG("CIProcessObserverNative");
 
-CIProcessObserverNative::~CIProcessObserverNative(){
+CAR_INTERFACE_IMPL_2(CIProcessObserverNative, Object, IIProcessObserver, IBinder)
+
+CAR_OBJECT_IMPL(CIProcessObserverNative)
+
+CIProcessObserverNative::~CIProcessObserverNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
 ECode CIProcessObserverNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -31,7 +38,7 @@ ECode CIProcessObserverNative::OnForegroundActivitiesChanged(
     /* [in] */ Int32 uid,
     /* [in] */ Boolean foregroundActivities)
 {
-    LOGGERD(TAG, String("+ CIProcessObserverNative::OnForegroundActivitiesChanged()"));
+    // LOGGERD(TAG, "+ CIProcessObserverNative::OnForegroundActivitiesChanged()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -47,16 +54,16 @@ ECode CIProcessObserverNative::OnForegroundActivitiesChanged(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIProcessObserverNative::OnForegroundActivitiesChanged()"));
+    // LOGGERD(TAG, "- CIProcessObserverNative::OnForegroundActivitiesChanged()");
     return NOERROR;
 }
 
-ECode CIProcessObserverNative::OnImportanceChanged(
+ECode CIProcessObserverNative::OnProcessStateChanged(
     /* [in] */ Int32 pid,
     /* [in] */ Int32 uid,
     /* [in] */ Int32 importance)
 {
-    LOGGERD(TAG, String("+ CIProcessObserverNative::OnImportanceChanged()"));
+    // LOGGERD(TAG, "+ CIProcessObserverNative::OnProcessStateChanged()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -64,15 +71,15 @@ ECode CIProcessObserverNative::OnImportanceChanged(
     jclass c = env->FindClass("android/app/IProcessObserver");
     Util::CheckErrorAndLog(env, TAG, "FindClass: IProcessObserver %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "onImportanceChanged", "(III)V");
-    Util::CheckErrorAndLog(env, TAG, "GetMethodID: onImportanceChanged %d", __LINE__);
+    jmethodID m = env->GetMethodID(c, "onProcessStateChanged", "(III)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: onProcessStateChanged %d", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)pid, (jint)uid, (jint)importance);
-    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: onImportanceChanged %d", __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: onProcessStateChanged %d", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIProcessObserverNative::OnImportanceChanged()"));
+    // LOGGERD(TAG, "- CIProcessObserverNative::OnProcessStateChanged()");
     return NOERROR;
 }
 
@@ -80,7 +87,7 @@ ECode CIProcessObserverNative::OnProcessDied(
     /* [in] */ Int32 pid,
     /* [in] */ Int32 uid)
 {
-    // LOGGERD(TAG, String("+ CIProcessObserverNative::OnProcessDied()"));
+    // LOGGERD(TAG, "+ CIProcessObserverNative::OnProcessDied()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -96,14 +103,14 @@ ECode CIProcessObserverNative::OnProcessDied(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CIProcessObserverNative::OnProcessDied()"));
+    // LOGGERD(TAG, "- CIProcessObserverNative::OnProcessDied()");
     return NOERROR;
 }
 
 ECode CIProcessObserverNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CIProcessObserverNative::ToString()"));
+    // LOGGERD(TAG, "+ CIProcessObserverNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -122,7 +129,7 @@ ECode CIProcessObserverNative::ToString(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CIProcessObserverNative::ToString()"));
+    // LOGGERD(TAG, "- CIProcessObserverNative::ToString()");
     return NOERROR;
 }
 

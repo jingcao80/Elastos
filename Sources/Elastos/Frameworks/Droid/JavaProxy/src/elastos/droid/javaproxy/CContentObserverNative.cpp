@@ -3,6 +3,8 @@
 #include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Database::EIID_IContentObserver;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,6 +13,10 @@ namespace JavaProxy {
 
 const String CContentObserverNative::TAG("CContentObserverNative");
 
+CAR_INTERFACE_IMPL_2(CContentObserverNative, Object, IContentObserver, IBinder)
+
+CAR_OBJECT_IMPL(CContentObserverNative)
+
 CContentObserverNative::~CContentObserverNative(){
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -18,8 +24,8 @@ CContentObserverNative::~CContentObserverNative(){
 }
 
 ECode CContentObserverNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -29,7 +35,7 @@ ECode CContentObserverNative::constructor(
 ECode CContentObserverNative::GetContentObserver(
     /* [out] */ IIContentObserver** observer)
 {
-    LOGGERD(TAG, String("CContentObserverNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CContentObserverNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -37,7 +43,7 @@ ECode CContentObserverNative::GetContentObserver(
 ECode CContentObserverNative::ReleaseContentObserver(
     /* [out] */ IIContentObserver** oldObserver)
 {
-    LOGGERD(TAG, String("CContentObserverNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CContentObserverNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -45,7 +51,7 @@ ECode CContentObserverNative::ReleaseContentObserver(
 ECode CContentObserverNative::DeliverSelfNotifications(
     /* [out] */ Boolean* result)
 {
-    LOGGERD(TAG, String("+ CContentObserverNative::DeliverSelfNotifications()"));
+    // LOGGERD(TAG, "+ CContentObserverNative::DeliverSelfNotifications()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -61,14 +67,14 @@ ECode CContentObserverNative::DeliverSelfNotifications(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIPackageDeleteObserverNative::DeliverSelfNotifications()"));
+    // LOGGERD(TAG, "- CContentObserverNative::DeliverSelfNotifications()");
     return NOERROR;
 }
 
 ECode CContentObserverNative::OnChange(
     /* [in] */ Boolean selfChange)
 {
-    LOGGERD(TAG, String("+ CContentObserverNative::OnChange()"));
+    // LOGGERD(TAG, "+ CContentObserverNative::OnChange()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -84,15 +90,15 @@ ECode CContentObserverNative::OnChange(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIPackageDeleteObserverNative::OnChange()"));
+    // LOGGERD(TAG, "- CContentObserverNative::OnChange()");
     return NOERROR;
 }
 
-ECode CContentObserverNative::OnChangeEx(
+ECode CContentObserverNative::OnChange(
     /* [in] */ Boolean selfChange,
     /* [in] */ IUri* uri)
 {
-    // LOGGERD(TAG, String("+ CContentObserverNative::OnChangeEx()"));
+    // LOGGERD(TAG, "+ CContentObserverNative::OnChange()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -114,14 +120,45 @@ ECode CContentObserverNative::OnChangeEx(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(juri);
 
-    // LOGGERD(TAG, String("- CIPackageDeleteObserverNative::OnChangeEx()"));
+    // LOGGERD(TAG, "- CContentObserverNative::OnChange()");
+    return NOERROR;
+}
+
+ECode CContentObserverNative::OnChange(
+    /* [in] */ Boolean selfChange,
+    /* [in] */ IUri* uri,
+    /* [in] */ Int32 userId)
+{
+    // LOGGERD(TAG, "+ CContentObserverNative::OnChange()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject juri = NULL;
+    if (uri != NULL) {
+        juri = Util::ToJavaUri(env, uri);
+    }
+
+    jclass c = env->FindClass("android/database/ContentObserver");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: ContentObserver %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "onChange", "(ZLandroid/net/Uri;I)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: onChange %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, (jboolean)selfChange, juri, userId);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: onChange %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(juri);
+
+    // LOGGERD(TAG, "- CContentObserverNative::OnChange()");
     return NOERROR;
 }
 
 ECode CContentObserverNative::DispatchChange(
     /* [in] */ Boolean selfChange)
 {
-    // LOGGERD(TAG, String("+ CContentObserverNative::DispatchChange()"));
+    // LOGGERD(TAG, "+ CContentObserverNative::DispatchChange()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -137,15 +174,15 @@ ECode CContentObserverNative::DispatchChange(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CIPackageDeleteObserverNative::DispatchChange()"));
+    // LOGGERD(TAG, "- CContentObserverNative::DispatchChange()");
     return NOERROR;
 }
 
-ECode CContentObserverNative::DispatchChangeEx(
+ECode CContentObserverNative::DispatchChange(
     /* [in] */ Boolean selfChange,
     /* [in] */ IUri* uri)
 {
-    // LOGGERD(TAG, String("+ CContentObserverNative::DispatchChangeEx()"));
+    // LOGGERD(TAG, "+ CContentObserverNative::DispatchChange()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -167,7 +204,64 @@ ECode CContentObserverNative::DispatchChangeEx(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(juri);
 
-    // LOGGERD(TAG, String("- CIPackageDeleteObserverNative::DispatchChangeEx()"));
+    // LOGGERD(TAG, "- CContentObserverNative::DispatchChange()");
+    return NOERROR;
+}
+
+ECode CContentObserverNative::DispatchChange(
+    /* [in] */ Boolean selfChange,
+    /* [in] */ IUri* uri,
+    /* [in] */ Int32 userId)
+{
+    // LOGGERD(TAG, "+ CContentObserverNative::DispatchChange()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject juri = NULL;
+    if (uri != NULL) {
+        juri = Util::ToJavaUri(env, uri);
+    }
+
+    jclass c = env->FindClass("android/database/ContentObserver");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: ContentObserver %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "dispatchChange", "(ZLandroid/net/Uri;I)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: dispatchChange %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, (jboolean)selfChange, juri, userId);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: dispatchChange %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(juri);
+
+    // LOGGERD(TAG, "- CContentObserverNative::DispatchChange()");
+    return NOERROR;
+}
+
+ECode CContentObserverNative::ToString(
+    /* [out] */ String* str)
+{
+    // LOGGERD(TAG, "+ CContentObserverNative::ToString()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("java/lang/Object");
+    Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
+
+    jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
+
+    *str = Util::GetElString(env, jstr);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jstr);
+
+    // LOGGERD(TAG, "- CContentObserverNative::ToString()");
     return NOERROR;
 }
 

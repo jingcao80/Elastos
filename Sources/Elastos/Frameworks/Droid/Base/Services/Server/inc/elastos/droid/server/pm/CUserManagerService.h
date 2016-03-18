@@ -68,10 +68,7 @@ private:
         public:
             FinishRemoveUserThread(
                 /* [in] */ CUserManagerService* host,
-                /* [in] */ Int32 userHandle)
-                : mHost(host)
-                , mUserHandle(userHandle)
-            {}
+                /* [in] */ Int32 userHandle);
 
             CARAPI Run();
 

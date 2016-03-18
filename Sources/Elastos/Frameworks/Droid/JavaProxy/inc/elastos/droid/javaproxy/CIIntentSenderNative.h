@@ -3,23 +3,33 @@
 #define __ELASTOS_DROID_JAVAPROXY_CIIntentSenderNative_H__
 
 #include "_Elastos_Droid_JavaProxy_CIIntentSenderNative.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentReceiver;
+using Elastos::Droid::Content::IIIntentSender;
 
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 CarClass(CIIntentSenderNative)
+    , public Object
+    , public IIIntentSender
+    , public IBinder
 {
 public:
     ~CIIntentSenderNative();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI Send(
         /* [in] */ Int32 code,

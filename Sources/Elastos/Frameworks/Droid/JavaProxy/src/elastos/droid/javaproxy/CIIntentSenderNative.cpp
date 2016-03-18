@@ -3,6 +3,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::Content::EIID_IIIntentSender;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -10,6 +12,10 @@ namespace Droid {
 namespace JavaProxy {
 
 const String CIIntentSenderNative::TAG("CIIntentSenderNative");
+
+CAR_INTERFACE_IMPL_2(CIIntentSenderNative, Object, IIIntentSender, IBinder)
+
+CAR_OBJECT_IMPL(CIIntentSenderNative)
 
 CIIntentSenderNative::~CIIntentSenderNative()
 {
@@ -19,8 +25,8 @@ CIIntentSenderNative::~CIIntentSenderNative()
 }
 
 ECode CIIntentSenderNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -35,7 +41,7 @@ ECode CIIntentSenderNative::Send(
     /* [in] */ const String& requiredPermission,
     /* [out] */ Int32* result)
 {
-    // LOGGERD(TAG, String("+ CIIntentSenderNative::Send()"));
+    // LOGGERD(TAG, "+ CIIntentSenderNative::Send()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -77,14 +83,14 @@ ECode CIIntentSenderNative::Send(
 
     env->DeleteLocalRef(jrequiredPermission);
 
-    // LOGGERD(TAG, String("- CIIntentSenderNative::Send()"));
+    // LOGGERD(TAG, "- CIIntentSenderNative::Send()");
     return NOERROR;
 }
 
 ECode CIIntentSenderNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CIIntentSenderNative::ToString()"));
+    // LOGGERD(TAG, "+ CIIntentSenderNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -103,7 +109,7 @@ ECode CIIntentSenderNative::ToString(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CIIntentSenderNative::ToString()"));
+    // LOGGERD(TAG, "- CIIntentSenderNative::ToString()");
     return NOERROR;
 }
 

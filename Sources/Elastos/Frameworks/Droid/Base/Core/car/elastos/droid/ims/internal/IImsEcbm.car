@@ -1,0 +1,33 @@
+
+module
+{
+    interface Elastos.Droid.Ims.Internal.IIImsEcbmListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Ims {
+    namespace Internal {
+
+    /**
+     * Provides the ECBM interface
+     *
+     * {@hide}
+     */
+    interface IIImsEcbm {
+        /**
+         * Sets the listener.
+         */
+        SetListener(
+            [in] IIImsEcbmListener* listener);
+
+        /**
+         * Requests Modem to come out of ECBM mode
+         */
+        ExitEmergencyCallbackMode();
+    }
+
+    } // namespace Internal
+    } // namespace Ims
+    } // namespace Droid
+    } // namespace Elastos
+}

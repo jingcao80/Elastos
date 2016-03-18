@@ -12,9 +12,12 @@ module
      * of a WebView. Each WebHistoryItem is a snapshot of the requested history
      * item. Each history item may be updated during the load of a page.
      * @see WebBackForwardList
+     *
+     * @involved
+     * interface Elastos.Core.ICloneable
      */
     [deprecated]
-    interface IWebHistoryItem /*implements Cloneable*/ {
+    interface IWebHistoryItem {
 
         /**
          * Return an identifier for this history item. If an item is a copy of

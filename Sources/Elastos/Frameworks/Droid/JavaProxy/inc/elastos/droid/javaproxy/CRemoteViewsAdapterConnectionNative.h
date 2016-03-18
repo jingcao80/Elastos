@@ -3,8 +3,10 @@
 #define __ELASTOS_DROID_JAVAPROXY_CREMOTEVIEWSADAPTERCONNECTIONNATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CRemoteViewsAdapterConnectionNative.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
+using Elastos::Droid::Internal::Widget::IIRemoteViewsAdapterConnection;
 using Elastos::Droid::Os::IBinder;
 
 namespace Elastos {
@@ -12,10 +14,20 @@ namespace Droid {
 namespace JavaProxy {
 
 CarClass(CRemoteViewsAdapterConnectionNative)
+    , public Object
+    , public IIRemoteViewsAdapterConnection
+    , public IBinder
 {
 public:
-    CRemoteViewsAdapterConnectionNative();
     ~CRemoteViewsAdapterConnectionNative();
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
+    CARAPI constructor(
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI OnServiceConnected(
         /* [in] */ IBinder* pService);
@@ -25,9 +37,6 @@ public:
     CARAPI ToString(
         /* [out] */ String* str);
 
-    CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
 private:
     static const String TAG;
 

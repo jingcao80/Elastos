@@ -611,10 +611,11 @@ ECode DisplayInfo::GetHashCode(
 ECode DisplayInfo::GetNaturalWidth(
     /* [out] */ Int32* width)
 {
-    if(mRotation == ISurface::ROTATION_0 || mRotation == ISurface::ROTATION_180)
-    {
+    VALIDATE_NOT_NULL(width)
+    if (mRotation == ISurface::ROTATION_0 || mRotation == ISurface::ROTATION_180) {
         *width = mLogicalWidth;
-    }else {
+    }
+    else {
         *width = mLogicalHeight;
     }
     return NOERROR;
@@ -623,10 +624,11 @@ ECode DisplayInfo::GetNaturalWidth(
 ECode DisplayInfo::GetNaturalHeight(
     /* [out] */ Int32* height)
 {
-    if(mRotation == ISurface::ROTATION_0 || mRotation == ISurface::ROTATION_180)
-    {
+    VALIDATE_NOT_NULL(height)
+    if (mRotation == ISurface::ROTATION_0 || mRotation == ISurface::ROTATION_180) {
         *height = mLogicalHeight;
-    }else {
+    }
+    else {
         *height = mLogicalWidth;
     }
     return NOERROR;
@@ -639,6 +641,7 @@ ECode DisplayInfo::HasAccess(
     /* [in] */ Int32 uid,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = Display::HasAccess(uid, mFlags, mOwnerUid);
     return NOERROR;
 }

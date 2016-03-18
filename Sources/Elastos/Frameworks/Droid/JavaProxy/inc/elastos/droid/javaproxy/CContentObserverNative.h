@@ -3,23 +3,33 @@
 #define __ELASTOS_DROID_JAVAPROXY_CCONTENTOBSERVERNATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CContentObserverNative.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
+using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Database::IIContentObserver;
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IBinder;
 
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 CarClass(CContentObserverNative)
+    , public Object
+    , public IContentObserver
+    , public IBinder
 {
 public:
     ~CContentObserverNative();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI GetContentObserver(
         /* [out] */ IIContentObserver** observer);
@@ -33,16 +43,29 @@ public:
     CARAPI OnChange(
         /* [in] */ Boolean selfChange);
 
-    CARAPI OnChangeEx(
+    CARAPI OnChange(
         /* [in] */ Boolean selfChange,
         /* [in] */ IUri* uri);
+
+    CARAPI OnChange(
+        /* [in] */ Boolean selfChange,
+        /* [in] */ IUri* uri,
+        /* [in] */ Int32 userId);
 
     CARAPI DispatchChange(
         /* [in] */ Boolean selfChange);
 
-    CARAPI DispatchChangeEx(
+    CARAPI DispatchChange(
         /* [in] */ Boolean selfChange,
         /* [in] */ IUri* uri);
+
+    CARAPI DispatchChange(
+        /* [in] */ Boolean selfChange,
+        /* [in] */ IUri* uri,
+        /* [in] */ Int32 userId);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
     static const String TAG;

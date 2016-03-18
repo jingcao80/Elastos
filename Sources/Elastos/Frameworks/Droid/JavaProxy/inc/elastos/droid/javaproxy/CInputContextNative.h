@@ -3,8 +3,10 @@
 #define __ELASTOS_DROID_JAVAPROXY_CINPUTCONTEXTNATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CInputContextNative.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
+using Elastos::Droid::Os::IBinder;
 using Elastos::Core::ICharSequence;
 
 using Elastos::Droid::Os::IBundle;
@@ -12,6 +14,7 @@ using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::InputMethod::ICompletionInfo;
 using Elastos::Droid::View::InputMethod::ICorrectionInfo;
 using Elastos::Droid::View::InputMethod::IExtractedTextRequest;
+using Elastos::Droid::Internal::View::IIInputContext;
 using Elastos::Droid::Internal::View::IIInputContextCallback;
 
 namespace Elastos {
@@ -19,13 +22,20 @@ namespace Droid {
 namespace JavaProxy {
 
 CarClass(CInputContextNative)
+    , public Object
+    , public IIInputContext
+    , public IBinder
 {
 public:
     ~CInputContextNative();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI ToString(
         /* [out] */ String* str);
@@ -106,6 +116,11 @@ public:
 
     CARAPI GetSelectedText(
         /* [in] */ Int32 flags,
+        /* [in] */ Int32 seq,
+        /* [in] */ IIInputContextCallback* icCallback);
+
+    CARAPI RequestUpdateCursorAnchorInfo(
+        /* [in] */ Int32 cursorUpdateMode,
         /* [in] */ Int32 seq,
         /* [in] */ IIInputContextCallback* icCallback);
 

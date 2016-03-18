@@ -1,0 +1,73 @@
+
+module
+{
+    interface Elastos.Droid.Ims.IImsCallForwardInfo;
+    interface Elastos.Droid.Ims.IImsReasonInfo;
+    interface Elastos.Droid.Ims.IImsSsInfo;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Ims {
+    namespace Internal {
+
+    /**
+     * {@hide}
+     */
+    [deprecated]
+    interface IIImsUtListener {
+        /**
+         * Notifies the result of the supplementary service configuration udpate.
+         */
+        UtConfigurationUpdated(
+            [in] IIImsUt* ut,
+            [in] Int32 id);
+
+        UtConfigurationUpdateFailed(
+            [in] IIImsUt* ut,
+            [in] Int32 id,
+            [in] IImsReasonInfo* error);
+
+        /**
+         * Notifies the result of the supplementary service configuration query.
+         */
+        UtConfigurationQueried(
+            [in] IIImsUt* ut,
+            [in] Int32 id,
+            [in] IBundle* ssInfo);
+
+        UtConfigurationQueryFailed(
+            [in] IIImsUt* ut,
+            [in] Int32 id,
+            [in] IImsReasonInfo* error);
+
+        /**
+         * Notifies the status of the call barring supplementary service.
+         */
+        UtConfigurationCallBarringQueried(
+            [in] IIImsUt* ut,
+            [in] Int32 id,
+            [in] ArrayOf<IImsSsInfo*>* cbInfo);
+
+        /**
+         * Notifies the status of the call forwarding supplementary service.
+         */
+        UtConfigurationCallForwardQueried(
+            [in] IIImsUt* ut,
+            [in] Int32 id,
+            [in] ArrayOf<IImsCallForwardInfo*>* cfInfo);
+
+        /**
+         * Notifies the status of the call waiting supplementary service.
+         */
+        UtConfigurationCallWaitingQueried(
+            [in] IIImsUt* ut,
+            [in] Int32 id,
+            [in] ArrayOf<IImsSsInfo*>* cwInfo);
+    }
+
+    } // namespace Internal
+    } // namespace Ims
+    } // namespace Droid
+    } // namespace Elastos
+}

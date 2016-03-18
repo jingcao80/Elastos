@@ -16,6 +16,8 @@ namespace Droid {
 namespace Server {
 namespace Twilight {
 
+CAR_INTERFACE_IMPL(TwilightState, Object, ITwilightState)
+
 TwilightState::TwilightState(
     /* [in] */ Boolean isNight,
     /* [in] */ Int64 yesterdaySunset,

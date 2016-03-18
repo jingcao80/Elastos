@@ -24,7 +24,7 @@ DashboardTile::DashboardTile()
 DashboardTile::~DashboardTile()
 {}
 
-AutoPtr<ICharSequence>) DashboardTile::GetTitle(
+AutoPtr<ICharSequence> DashboardTile::GetTitle(
     /* [in] */ IResources* res)
 {
     if (mTitleRes != 0) {

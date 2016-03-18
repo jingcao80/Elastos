@@ -115,8 +115,6 @@ AppWidgetServiceImpl::CallbackHandler::CallbackHandler(
     : Handler(looper, NULL, FALSE)
     , mOwner(owner)
 {
-    // ==================before translated======================
-    // super(looper, null, false);
     assert(NULL != mOwner);
 }
 
@@ -124,50 +122,6 @@ ECode AppWidgetServiceImpl::CallbackHandler::HandleMessage(
     /* [in] */ IMessage* message)
 {
     VALIDATE_NOT_NULL(message);
-    // ==================before translated======================
-    // switch (message.what) {
-    //     case MSG_NOTIFY_UPDATE_APP_WIDGET: {
-    //         SomeArgs args = (SomeArgs) message.obj;
-    //         Host host = (Host) args.arg1;
-    //         IAppWidgetHost callbacks = (IAppWidgetHost) args.arg2;
-    //         RemoteViews views = (RemoteViews) args.arg3;
-    //         final int appWidgetId = args.argi1;
-    //         args.recycle();
-    //
-    //         handleNotifyUpdateAppWidget(host, callbacks, appWidgetId, views);
-    //     } break;
-    //
-    //     case MSG_NOTIFY_PROVIDER_CHANGED: {
-    //         SomeArgs args = (SomeArgs) message.obj;
-    //         Host host = (Host) args.arg1;
-    //         IAppWidgetHost callbacks = (IAppWidgetHost) args.arg2;
-    //         AppWidgetProviderInfo info = (AppWidgetProviderInfo)args.arg3;
-    //         final int appWidgetId = args.argi1;
-    //         args.recycle();
-    //
-    //         handleNotifyProviderChanged(host, callbacks, appWidgetId, info);
-    //     } break;
-    //
-    //     case MSG_NOTIFY_PROVIDERS_CHANGED: {
-    //         SomeArgs args = (SomeArgs) message.obj;
-    //         Host host = (Host) args.arg1;
-    //         IAppWidgetHost callbacks = (IAppWidgetHost) args.arg2;
-    //         args.recycle();
-    //
-    //         handleNotifyProvidersChanged(host, callbacks);
-    //     } break;
-    //
-    //     case MSG_NOTIFY_VIEW_DATA_CHANGED: {
-    //         SomeArgs args = (SomeArgs) message.obj;
-    //         Host host = (Host) args.arg1;
-    //         IAppWidgetHost callbacks = (IAppWidgetHost) args.arg2;
-    //         final int appWidgetId = args.argi1;
-    //         final int viewId = args.argi2;
-    //         args.recycle();
-    //
-    //         handleNotifyAppWidgetViewDataChanged(host, callbacks, appWidgetId, viewId);
-    //     } break;
-    // }
 
     Int32 what = 0;
     message->GetWhat(&what);
@@ -703,10 +657,6 @@ ECode AppWidgetServiceImpl::SecurityPolicy::IsProviderInPackageForUid(
 {
     VALIDATE_NOT_NULL(provider);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // Packages providing the AppWidget have access to it.
-    // return provider != null && provider.id.uid == uid
-    //         && provider.id.componentName.getPackageName().equals(packageName);
 
     // Packages providing the AppWidget have access to it.
     String packageNameTmp;
@@ -2928,20 +2878,6 @@ AppWidgetServiceImpl::AppWidgetServiceImpl()
 ECode AppWidgetServiceImpl::constructor(
     /* [in] */ IContext* context)
 {
-    // ==================before translated======================
-    // mContext = context;
-    // mPackageManager = AppGlobals.getPackageManager();
-    // mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-    // mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-    // mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
-    // mSaveStateHandler = BackgroundThread.getHandler();
-    // mCallbackHandler = new CallbackHandler(mContext.getMainLooper());
-    // mBackupRestoreController = new BackupRestoreController();
-    // mSecurityPolicy = new SecurityPolicy();
-    // computeMaximumWidgetBitmapMemory();
-    // registerBroadcastReceiver();
-    // registerOnCrossProfileProvidersChangedListener();
-
     mContext = context;
     mPackageManager = AppGlobals::GetPackageManager();
 
@@ -2963,7 +2899,7 @@ ECode AppWidgetServiceImpl::constructor(
 
     AutoPtr<ILooper> lopper;
     mContext->GetMainLooper((ILooper**)&lopper);
-    //mCallbackHandler = new CallbackHandler(lopper);
+    mCallbackHandler = new CallbackHandler(lopper, this);
 
     mBackupRestoreController = new BackupRestoreController(this);
     mSecurityPolicy = new SecurityPolicy(this);
@@ -2976,9 +2912,6 @@ ECode AppWidgetServiceImpl::constructor(
 ECode AppWidgetServiceImpl::SetSafeMode(
     /* [in] */ Boolean safeMode)
 {
-    // ==================before translated======================
-    // mSafeMode = safeMode;
-
     mSafeMode = safeMode;
     return NOERROR;
 }
@@ -5225,21 +5158,13 @@ void AppWidgetServiceImpl::RegisterBroadcastReceiver()
 
 void AppWidgetServiceImpl::RegisterOnCrossProfileProvidersChangedListener()
 {
-    // ==================before translated======================
-    // DevicePolicyManagerInternal devicePolicyManager = LocalServices.getService(
-    //         DevicePolicyManagerInternal.class);
+    Slogger::I(TAG, "TODO RegisterOnCrossProfileProvidersChangedListener");
+    // AutoPtr<IInterface> interfaceTmp = LocalServices::GetService(EIID_IDevicePolicyManagerInternal);
+    // IDevicePolicyManagerInternal* devicePolicyManager = IDevicePolicyManagerInternal::Probe(interfaceTmp);
     // // The device policy is an optional component.
-    // if (devicePolicyManager != null) {
-    //     devicePolicyManager.addOnCrossProfileWidgetProvidersChangeListener(this);
+    // if (devicePolicyManager NULL) {
+    //     devicePolicyManager->AddOnCrossProfileWidgetProvidersChangeListener(this);
     // }
-
-    assert(0);
-    //AutoPtr<IInterface> interfaceTmp;// = LocalServices::GetService(EIID_IDevicePolicyManagerInternal);
-    //IDevicePolicyManagerInternal* devicePolicyManager = IDevicePolicyManagerInternal::Probe(interfaceTmp);
-    // The device policy is an optional component.
-    if (/*devicePolicyManager !=*/ NULL) {
-        //devicePolicyManager->AddOnCrossProfileWidgetProvidersChangeListener(this);
-    }
 }
 
 void AppWidgetServiceImpl::OnConfigurationChanged()

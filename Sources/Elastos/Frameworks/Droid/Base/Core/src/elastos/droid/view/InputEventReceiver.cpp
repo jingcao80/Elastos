@@ -389,8 +389,14 @@ android::status_t NativeInputEventReceiver::consumeEvents(
 }
 
 CAR_INTERFACE_IMPL_2(InputEventReceiver, Object, IInputEventReceiver, IWeakReferenceSource);
+
 InputEventReceiver::InputEventReceiver()
 {}
+
+InputEventReceiver::~InputEventReceiver()
+{
+    Dispose();
+}
 
 /**
  * Creates an input event receiver bound to the specified input channel.
@@ -398,18 +404,6 @@ InputEventReceiver::InputEventReceiver()
  * @param inputChannel The input channel.
  * @param looper The looper to use when invoking callbacks.
  */
-InputEventReceiver::InputEventReceiver(
-    /* [in] */ IInputChannel* inputChannel,
-    /* [in] */ ILooper* looper)
-{
-    constructor(inputChannel, looper);
-}
-
-InputEventReceiver::~InputEventReceiver()
-{
-    Dispose();
-}
-
 InputEventReceiver::constructor(
     /* [in] */ IInputChannel* inputChannel,
     /* [in] */ ILooper* looper)

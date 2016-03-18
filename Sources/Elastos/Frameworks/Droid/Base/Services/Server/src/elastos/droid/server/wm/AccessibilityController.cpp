@@ -224,8 +224,7 @@ void AccessibilityController::DisplayMagnifier::MagnifiedViewport::ViewportWindo
     /* [in] */ Boolean shown,
     /* [in] */ Boolean animate)
 {
-    Object& lock = mHost->mHost->mWindowManagerService->mWindowMapLock;
-    synchronized (lock) {
+    synchronized(mHost->mHost->mWindowManagerService->mWindowMapLock) {
         if (mShown == shown) {
             return;
         }
@@ -246,8 +245,7 @@ Int32 AccessibilityController::DisplayMagnifier::MagnifiedViewport::ViewportWind
 void AccessibilityController::DisplayMagnifier::MagnifiedViewport::ViewportWindow::SetAlpha(
     /* [in] */ Int32 alpha)
 {
-    Object& lock = mHost->mHost->mWindowManagerService->mWindowMapLock;
-    synchronized (lock) {
+    synchronized(mHost->mHost->mWindowManagerService->mWindowMapLock) {
         if (mAlpha == alpha) {
             return;
         }
@@ -262,8 +260,7 @@ void AccessibilityController::DisplayMagnifier::MagnifiedViewport::ViewportWindo
 void AccessibilityController::DisplayMagnifier::MagnifiedViewport::ViewportWindow::SetBounds(
     /* [in] */ IRegion* bounds)
 {
-    Object& lock = mHost->mHost->mWindowManagerService->mWindowMapLock;
-    synchronized (lock) {
+    synchronized(mHost->mHost->mWindowManagerService->mWindowMapLock) {
         Boolean equals;
         if (IObject::Probe(mBounds)->Equals(bounds, &equals), equals) {
             return;
@@ -279,8 +276,7 @@ void AccessibilityController::DisplayMagnifier::MagnifiedViewport::ViewportWindo
 
 void AccessibilityController::DisplayMagnifier::MagnifiedViewport::ViewportWindow::UpdateSize()
 {
-    Object& lock = mHost->mHost->mWindowManagerService->mWindowMapLock;
-    synchronized (lock) {
+    synchronized(mHost->mHost->mWindowManagerService->mWindowMapLock) {
         AutoPtr<IDisplay> display;
         mHost->mWindowManager->GetDefaultDisplay((IDisplay**)&display);
         display->GetRealSize(mHost->mTempPoint);
@@ -307,8 +303,7 @@ void AccessibilityController::DisplayMagnifier::MagnifiedViewport::ViewportWindo
 
 void AccessibilityController::DisplayMagnifier::MagnifiedViewport::ViewportWindow::DrawIfNeeded()
 {
-    Object& lock = mHost->mHost->mWindowManagerService->mWindowMapLock;
-    synchronized (lock) {
+    synchronized(mHost->mHost->mWindowManagerService->mWindowMapLock) {
         if (!mInvalidated) {
             return;
         }
@@ -700,8 +695,7 @@ ECode AccessibilityController::DisplayMagnifier::MyHandler::HandleMessage(
         } break;
 
         case MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED : {
-            Object& lock = mHost->mWindowManagerService->mWindowMapLock;
-            synchronized (lock) {
+            synchronized(mHost->mWindowManagerService->mWindowMapLock) {
                 if (mHost->mMagnifedViewport->IsMagnifyingLocked()) {
                     mHost->mMagnifedViewport->SetMagnifiedRegionBorderShownLocked(TRUE, TRUE);
                     mHost->mWindowManagerService->ScheduleAnimationLocked();
@@ -1017,8 +1011,7 @@ void AccessibilityController::WindowsForAccessibilityObserver::ComputeChangedWin
         Slogger::I(TAG, "computeChangedWindows()");
     }
 
-    Object& lock = mWindowManagerService->mWindowMapLock;
-    synchronized (lock) {
+    synchronized(mWindowManagerService->mWindowMapLock) {
         // Do not send the windows if there is no current focus as
         // the window manager is still looking for where to put it.
         // We will do the work when we get a focus change callback.

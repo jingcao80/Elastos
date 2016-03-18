@@ -2,11 +2,18 @@
 #include "elastos/droid/javaproxy/CIAudioRoutesObserver.h"
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::Media::EIID_IIAudioRoutesObserver;
+using Elastos::Droid::Os::EIID_IBinder;
+
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 const String CIAudioRoutesObserver::TAG("CIAudioRoutesObserver");
+
+CAR_INTERFACE_IMPL_2(CIAudioRoutesObserver, Object, IIAudioRoutesObserver, IBinder)
+
+CAR_OBJECT_IMPL(CIAudioRoutesObserver)
 
 CIAudioRoutesObserver::~CIAudioRoutesObserver()
 {
@@ -16,8 +23,8 @@ CIAudioRoutesObserver::~CIAudioRoutesObserver()
 }
 
 ECode CIAudioRoutesObserver::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;

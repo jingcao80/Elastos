@@ -3,7 +3,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
-using Elastos::Droid::JavaProxy::Util;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::EIID_IICancellationSignal;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,6 +12,10 @@ namespace Droid {
 namespace JavaProxy {
 
 const String CICancellationSignalNative::TAG("CICancellationSignalNative");
+
+CAR_INTERFACE_IMPL_2(CICancellationSignalNative, Object, IICancellationSignal, IBinder)
+
+CAR_OBJECT_IMPL(CICancellationSignalNative)
 
 CICancellationSignalNative::~CICancellationSignalNative()
 {
@@ -20,8 +25,8 @@ CICancellationSignalNative::~CICancellationSignalNative()
 }
 
 ECode CICancellationSignalNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -30,7 +35,7 @@ ECode CICancellationSignalNative::constructor(
 
 ECode CICancellationSignalNative::Cancel()
 {
-    LOGGERD(TAG, String("+ CICancellationSignalNative::Cancel()"));
+    // LOGGERD(TAG, "+ CICancellationSignalNative::Cancel()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -45,14 +50,14 @@ ECode CICancellationSignalNative::Cancel()
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: cancel Line: %d", __LINE__);
 
     env->DeleteLocalRef(c);
-    LOGGERD(TAG, String("- CICancellationSignalNative::Cancel()"));
+    // LOGGERD(TAG, "- CICancellationSignalNative::Cancel()");
     return NOERROR;
 }
 
 ECode CICancellationSignalNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CICancellationSignalNative::ToString()"));
+    // LOGGERD(TAG, "+ CICancellationSignalNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -71,7 +76,7 @@ ECode CICancellationSignalNative::ToString(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CICancellationSignalNative::ToString()"));
+    // LOGGERD(TAG, "- CICancellationSignalNative::ToString()");
     return NOERROR;
 }
 

@@ -3,15 +3,26 @@
 #define __ELASTOS_DROID_JAVAPROXY_CISERIALIZABLENATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CISerializableNative.h"
-#include <jni.h>
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Os::IBinder;
+using Elastos::IO::ISerializable;
 
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 CarClass(CISerializableNative)
+    , public Object
+    , public ISerializable
+    , public IParcelable
+    , public IBinder
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
     CARAPI constructor(
@@ -25,6 +36,9 @@ public:
 
     CARAPI WriteToParcel(
         /* [in] */ IParcel * pDest);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 public:
     Boolean mIsDexClassLoader;

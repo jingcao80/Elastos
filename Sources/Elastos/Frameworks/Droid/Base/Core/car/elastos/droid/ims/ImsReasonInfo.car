@@ -1,0 +1,244 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Ims {
+
+    /**
+     * This class enables an application to get details on why a method call failed.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IImsReasonInfo {
+        /**
+         * Reason types, defines the error category.
+         *    UNSPECIFIED - unknown error reason
+         *    LOCAL - indicates the local/device error reason
+         *    LOCAL_TIMEOUT - indicates the local error reason when a specific timer is expired
+         *    STATUSCODE - indicates the interworking error reason by SIP status code received
+         *        from the network
+         *    MEDIA - indicates the media error reason (local resource, SDP parameter, etc.)
+         *    USER - indicates the error reason by the local or remote user
+         *    UT - indicates the error reason for the supplementary service configuration
+         */
+        const Int32 TYPE_UNSPECIFIED = 0;
+        const Int32 TYPE_LOCAL = 1;
+        const Int32 TYPE_TIMEOUT = 2;
+        const Int32 TYPE_STATUSCODE = 3;
+        const Int32 TYPE_MEDIA = 4;
+        const Int32 TYPE_USER = 5;
+        const Int32 TYPE_UT = 8;
+
+        /**
+         * Specific code of each types
+         */
+        const Int32 CODE_UNSPECIFIED = 0;
+
+        /**
+         * LOCAL
+         */
+        // IMS -> Telephony
+        // The passed argument is an invalid
+        const Int32 CODE_LOCAL_ILLEGAL_ARGUMENT = 101;
+        // The operation is invoked in invalid call state
+        const Int32 CODE_LOCAL_ILLEGAL_STATE = 102;
+        // IMS service internal error
+        const Int32 CODE_LOCAL_INTERNAL_ERROR = 103;
+        // IMS service goes down (service connection is lost)
+        const Int32 CODE_LOCAL_IMS_SERVICE_DOWN = 106;
+        // No pending incoming call exists
+        const Int32 CODE_LOCAL_NO_PENDING_CALL = 107;
+
+        // IMS -> Telephony
+        // Service unavailable; by power off
+        const Int32 CODE_LOCAL_POWER_OFF = 111;
+        // Service unavailable; by low battery
+        const Int32 CODE_LOCAL_LOW_BATTERY = 112;
+        // Service unavailable; by out of service (data service state)
+        const Int32 CODE_LOCAL_NETWORK_NO_SERVICE = 121;
+        // Service unavailable; by no LTE coverage
+        // (VoLTE is not supported even though IMS is registered)
+        const Int32 CODE_LOCAL_NETWORK_NO_LTE_COVERAGE = 122;
+        // Service unavailable; by located in roaming area
+        const Int32 CODE_LOCAL_NETWORK_ROAMING = 123;
+        // Service unavailable; by IP changed
+        const Int32 CODE_LOCAL_NETWORK_IP_CHANGED = 124;
+        // Service unavailable; other
+        const Int32 CODE_LOCAL_SERVICE_UNAVAILABLE = 131;
+        // Service unavailable; IMS connection is lost (IMS is not registered)
+        const Int32 CODE_LOCAL_NOT_REGISTERED = 132;
+
+        // IMS <-> Telephony
+        // Max call exceeded
+        const Int32 CODE_LOCAL_CALL_EXCEEDED = 141;
+        // IMS <- Telephony
+        // Call busy
+        const Int32 CODE_LOCAL_CALL_BUSY = 142;
+        // Call decline
+        const Int32 CODE_LOCAL_CALL_DECLINE = 143;
+        // IMS -> Telephony
+        // SRVCC is in progress
+        const Int32 CODE_LOCAL_CALL_VCC_ON_PROGRESSING = 144;
+        // Resource reservation is failed (QoS precondition)
+        const Int32 CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED = 145;
+        // Retry CS call; VoLTE service can't be provided by the network or remote end
+        // Resolve the extra code(EXTRA_CODE_CALL_RETRY_*) if the below code is set
+        const Int32 CODE_LOCAL_CALL_CS_RETRY_REQUIRED = 146;
+        // Retry VoLTE call; VoLTE service can't be provided by the network temporarily
+        const Int32 CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED = 147;
+        // IMS call is already terminated (in TERMINATED state)
+        const Int32 CODE_LOCAL_CALL_TERMINATED = 148;
+
+        /**
+         * TIMEOUT (IMS -> Telephony)
+         */
+        // 1xx waiting timer is expired after sending INVITE request (MO only)
+        const Int32 CODE_TIMEOUT_1XX_WAITING = 201;
+        // User no answer during call setup operation (MO/MT)
+        // MO : 200 OK to INVITE request is not received,
+        // MT : No action from user after alerting the call
+        const Int32 CODE_TIMEOUT_NO_ANSWER = 202;
+        // User no answer during call update operation (MO/MT)
+        // MO : 200 OK to re-INVITE request is not received,
+        // MT : No action from user after alerting the call
+        const Int32 CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE = 203;
+
+        /**
+         * STATUSCODE (SIP response code) (IMS -> Telephony)
+         */
+        // 3xx responses
+        // SIP request is redirected
+        const Int32 CODE_SIP_REDIRECTED = 321;
+        // 4xx responses
+        // 400 : Bad Request
+        const Int32 CODE_SIP_BAD_REQUEST = 331;
+        // 403 : Forbidden
+        const Int32 CODE_SIP_FORBIDDEN = 332;
+        // 404 : Not Found
+        const Int32 CODE_SIP_NOT_FOUND = 333;
+        // 415 : Unsupported Media Type
+        // 416 : Unsupported URI Scheme
+        // 420 : Bad Extension
+        const Int32 CODE_SIP_NOT_SUPPORTED = 334;
+        // 408 : Request Timeout
+        const Int32 CODE_SIP_REQUEST_TIMEOUT = 335;
+        // 480 : Temporarily Unavailable
+        const Int32 CODE_SIP_TEMPRARILY_UNAVAILABLE = 336;
+        // 484 : Address Incomplete
+        const Int32 CODE_SIP_BAD_ADDRESS = 337;
+        // 486 : Busy Here
+        // 600 : Busy Everywhere
+        const Int32 CODE_SIP_BUSY = 338;
+        // 487 : Request Terminated
+        const Int32 CODE_SIP_REQUEST_CANCELLED = 339;
+        // 406 : Not Acceptable
+        // 488 : Not Acceptable Here
+        // 606 : Not Acceptable
+        const Int32 CODE_SIP_NOT_ACCEPTABLE = 340;
+        // 410 : Gone
+        // 604 : Does Not Exist Anywhere
+        const Int32 CODE_SIP_NOT_REACHABLE = 341;
+        // Others
+        const Int32 CODE_SIP_CLIENT_ERROR = 342;
+        // 5xx responses
+        // 501 : Server Internal Error
+        const Int32 CODE_SIP_SERVER_INTERNAL_ERROR = 351;
+        // 503 : Service Unavailable
+        const Int32 CODE_SIP_SERVICE_UNAVAILABLE = 352;
+        // 504 : Server Time-out
+        const Int32 CODE_SIP_SERVER_TIMEOUT = 353;
+        // Others
+        const Int32 CODE_SIP_SERVER_ERROR = 354;
+        // 6xx responses
+        // 603 : Decline
+        const Int32 CODE_SIP_USER_REJECTED = 361;
+        // Others
+        const Int32 CODE_SIP_GLOBAL_ERROR = 362;
+
+        /**
+         * MEDIA (IMS -> Telephony)
+         */
+        // Media resource initialization failed
+        const Int32 CODE_MEDIA_INIT_FAILED = 401;
+        // RTP timeout (no audio / video traffic in the session)
+        const Int32 CODE_MEDIA_NO_DATA = 402;
+        // Media is not supported; so dropped the call
+        const Int32 CODE_MEDIA_NOT_ACCEPTABLE = 403;
+        // Unknown media related errors
+        const Int32 CODE_MEDIA_UNSPECIFIED = 404;
+
+        /**
+         * USER
+         */
+        // Telephony -> IMS
+        // User triggers the call end
+        const Int32 CODE_USER_TERMINATED = 501;
+        // No action while an incoming call is ringing
+        const Int32 CODE_USER_NOANSWER = 502;
+        // User ignores an incoming call
+        const Int32 CODE_USER_IGNORE = 503;
+        // User declines an incoming call
+        const Int32 CODE_USER_DECLINE = 504;
+        // IMS -> Telephony
+        // The call is terminated by the network or remote user
+        const Int32 CODE_USER_TERMINATED_BY_REMOTE = 510;
+
+        /**
+         * Extra codes for the specific code value
+         * This value can be referred when the code is CODE_LOCAL_CALL_CS_RETRY_REQUIRED.
+         */
+        // Try to connect CS call; normal
+        const Int32 EXTRA_CODE_CALL_RETRY_NORMAL = 1;
+        // Try to connect CS call without the notification to user
+        const Int32 EXTRA_CODE_CALL_RETRY_SILENT_REDIAL = 2;
+        // Try to connect CS call by the settings of the menu
+        const Int32 EXTRA_CODE_CALL_RETRY_BY_SETTINGS = 3;
+
+        /**
+         * UT
+         */
+        const Int32 CODE_UT_NOT_SUPPORTED = 801;
+        const Int32 CODE_UT_SERVICE_UNAVAILABLE = 802;
+        const Int32 CODE_UT_OPERATION_NOT_ALLOWED = 803;
+        const Int32 CODE_UT_NETWORK_ERROR = 804;
+        const Int32 CODE_UT_CB_PASSWORD_MISMATCH = 821;
+
+        /**
+         * ECBM
+         */
+        const Int32 CODE_ECBM_NOT_SUPPORTED = 901;
+
+        /**
+         *
+         */
+        GetCode(
+            [out] Int32* result);
+
+        /**
+         *
+         */
+        GetExtraCode(
+            [out] Int32* result);
+
+        /**
+         *
+         */
+        GetExtraMessage(
+            [out] String* result);
+
+        /**
+         *
+         */
+        GetReasonType(
+            [out] Int32* result);
+    }
+
+    } // namespace Ims
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -2,11 +2,18 @@
 #include "elastos/droid/javaproxy/CIRemoteVolumeObserver.h"
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::Media::EIID_IIRemoteVolumeObserver;
+using Elastos::Droid::Os::EIID_IBinder;
+
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 const String CIRemoteVolumeObserver::TAG("CIRemoteVolumeObserver");
+
+CAR_INTERFACE_IMPL_2(CIRemoteVolumeObserver, Object, IIRemoteVolumeObserver, IBinder)
+
+CAR_OBJECT_IMPL(CIRemoteVolumeObserver)
 
 CIRemoteVolumeObserver::~CIRemoteVolumeObserver()
 {
@@ -16,8 +23,8 @@ CIRemoteVolumeObserver::~CIRemoteVolumeObserver()
 }
 
 ECode CIRemoteVolumeObserver::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;

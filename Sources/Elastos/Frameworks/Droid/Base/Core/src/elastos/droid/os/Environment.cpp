@@ -811,16 +811,17 @@ AutoPtr<IStorageVolume> Environment::GetStorageVolume(
 
     AutoPtr<IInterface> obj = ServiceManager::GetService(String("mount"));
     IIMountService* mountService = IIMountService::Probe(obj);
-    AutoPtr<ArrayOf<IStorageVolume*> > volumes;
-    mountService->GetVolumeList((ArrayOf<IStorageVolume*>**)&volumes);
-    for (Int32 i = 0; i < volumes->GetLength(); ++i) {
-        AutoPtr<IStorageVolume> volume = (*volumes)[i];
-        AutoPtr<IFile> file;
-        volume->GetPathFile((IFile**)&file);
-        if (FileUtils::Contains(file, path)) {
-            return volume;
-        }
-    }
+    // TODO:
+    // AutoPtr<ArrayOf<IStorageVolume*> > volumes;
+    // mountService->GetVolumeList((ArrayOf<IStorageVolume*>**)&volumes);
+    // for (Int32 i = 0; i < volumes->GetLength(); ++i) {
+    //     AutoPtr<IStorageVolume> volume = (*volumes)[i];
+    //     AutoPtr<IFile> file;
+    //     volume->GetPathFile((IFile**)&file);
+    //     if (FileUtils::Contains(file, path)) {
+    //         return volume;
+    //     }
+    // }
 
     return NULL;
 }

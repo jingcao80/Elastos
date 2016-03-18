@@ -1,4 +1,5 @@
 
+#include "elastos/droid/server/hdmi/Constants.h"
 #include "elastos/droid/server/hdmi/HdmiMhlLocalDeviceStub.h"
 
 namespace Elastos {
@@ -16,20 +17,14 @@ ECode HdmiMhlLocalDeviceStub::constructor(
     /* [in] */ IHdmiControlService* service,
     /* [in] */ Int32 portId)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mService = service;
-        mPortId = portId;
-
-#endif
+    mService = service;
+    mPortId = portId;
+    return NOERROR;
 }
 
 ECode HdmiMhlLocalDeviceStub::OnDeviceRemoved()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-
-#endif
+    return NOERROR;
 }
 
 ECode HdmiMhlLocalDeviceStub::GetInfo(
@@ -37,39 +32,28 @@ ECode HdmiMhlLocalDeviceStub::GetInfo(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return INFO;
-
-#endif
+    *result = INFO;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode HdmiMhlLocalDeviceStub::SetBusMode(
     /* [in] */ Int32 cbusmode)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-
-#endif
+    return NOERROR;
 }
 
 ECode HdmiMhlLocalDeviceStub::OnBusOvercurrentDetected(
     /* [in] */ Boolean on)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-
-#endif
+    return NOERROR;
 }
 
 ECode HdmiMhlLocalDeviceStub::SetDeviceStatusChange(
     /* [in] */ Int32 adopterId,
     /* [in] */ Int32 deviceId)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-
-#endif
+    return NOERROR;
 }
 
 ECode HdmiMhlLocalDeviceStub::GetPortId(
@@ -77,39 +61,29 @@ ECode HdmiMhlLocalDeviceStub::GetPortId(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mPortId;
-
-#endif
+    *result = mPortId;
+    return NOERROR;
 }
 
 ECode HdmiMhlLocalDeviceStub::TurnOn(
     /* [in] */ IIHdmiControlCallback* callback)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-
-#endif
+    return NOERROR;
 }
 
 ECode HdmiMhlLocalDeviceStub::SendKeyEvent(
     /* [in] */ Int32 keycode,
     /* [in] */ Boolean isPressed)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-
-#endif
+    return NOERROR;
 }
 
 AutoPtr<IHdmiDeviceInfo> HdmiMhlLocalDeviceStub::InitINFO()
 {
     AutoPtr<IHdmiDeviceInfo> rev;
-#if 0 // TODO: Translate codes below
-    = new HdmiDeviceInfo(
-            Constants::INVALID_PHYSICAL_ADDRESS, Constants::INVALID_PORT_ID, -1, -1)
-#endif
+    // TODO: Waiting for CHdmiDeviceInfo
+    // assert(0);
+    // CHdmiDeviceInfo::New(Constants::INVALID_PHYSICAL_ADDRESS, Constants::INVALID_PORT_ID, -1, -1, (IHdmiDeviceInfo**)&rev);
     return rev;
 }
 

@@ -1,5 +1,31 @@
-I/DEBUG   (  146):     #00 pc 016e1694  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  146):     #01 pc 016e12d4  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  146):     #02 pc 0003d630  /system/lib/Elastos.Runtime.eco
-
-
+I/DEBUG   (  145):     #00 pc 009b2260  /system/lib/Elastos.CoreLibrary.eco
+I/DEBUG   (  145):     #01 pc 0017851c  /system/lib/Elastos.CoreLibrary.eco
+I/DEBUG   (  145):     #02 pc 0043259c  /system/lib/Elastos.CoreLibrary.eco
+I/DEBUG   (  145):     #03 pc 01380bc0  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  145):     #04 pc 01380360  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  145):     #05 pc 006d89e0  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  145):     #06 pc 006d7b10  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  145):     #07 pc 006bea58  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  145):     #08 pc 0030ed68  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  145):     #09 pc 0030ee38  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  145):     #10 pc 006a6fe4  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  145):     #11 pc 006bcc7c  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  145):     #12 pc 001c2644  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  145):     #13 pc 001c18ec  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  145):     #14 pc 001c143c  /system/lib/Elastos.Droid.Server.eco
+I/DEBUG   (  145):     #15 pc 0003d630  /system/lib/Elastos.Runtime.eco/home/kesalin/ElastosRDK5/Sources/Elastos/Runtime/Library/eltypes/elstring/elstring.cpp:520
+/home/kesalin/ElastosRDK5/Targets/obj/rdk/arm.gnu.android.dbg/inc/elstring.h:486
+/home/kesalin/ElastosRDK5/Sources/Elastos/LibCore/src/elastos/io/File.cpp:365
+/home/kesalin/ElastosRDK5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/content/pm/PackageParser.cpp:1523
+/home/kesalin/ElastosRDK5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/content/pm/PackageParser.cpp:1406
+/home/kesalin/ElastosRDK5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/pm/CPackageManagerService.cpp:8775
+/home/kesalin/ElastosRDK5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/pm/CPackageManagerService.cpp:8587
+/home/kesalin/ElastosRDK5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/pm/CPackageManagerService.cpp:4514
+/home/kesalin/ElastosRDK5/Targets/obj/rdk/arm.gnu.android.dbg/mirror/Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/_Elastos_Droid_Server_Pm_CPackageManagerService.cpp:26 (discriminator 3)
+/home/kesalin/ElastosRDK5/Targets/obj/rdk/arm.gnu.android.dbg/mirror/Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/_Elastos_Droid_Server_Pm_CPackageManagerService.cpp:71
+/home/kesalin/ElastosRDK5/Targets/obj/rdk/arm.gnu.android.dbg/mirror/Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/pm/../_Elastos_Droid_Server_Pm_CPackageManagerService.h:37
+/home/kesalin/ElastosRDK5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/pm/CPackageManagerService.cpp:4138
+/home/kesalin/ElastosRDK5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/CSystemServer.cpp:382
+/home/kesalin/ElastosRDK5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/CSystemServer.cpp:247 (discriminator 6)
+/home/kesalin/ElastosRDK5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/CSystemServer.cpp:133 (discriminator 3)
+/home/kesalin/ElastosRDK5/Sources/Elastos/Runtime/Core/reflection/invoke_gnuc.S:38

@@ -1,0 +1,50 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Search {
+
+    interface IIndexDatabaseHelperTables {
+        const String TABLE_PREFS_INDEX = "prefs_index";
+        const String TABLE_META_INDEX = "meta_index";
+        const String TABLE_SAVED_QUERIES = "saved_queries";
+    }
+
+    interface IIndexDatabaseHelperIndexColumns {
+        const String DOCID = "docid";
+        const String LOCALE = "locale";
+        const String DATA_RANK = "data_rank";
+        const String DATA_TITLE = "data_title";
+        const String DATA_TITLE_NORMALIZED = "data_title_normalized";
+        const String DATA_SUMMARY_ON = "data_summary_on";
+        const String DATA_SUMMARY_ON_NORMALIZED = "data_summary_on_normalized";
+        const String DATA_SUMMARY_OFF = "data_summary_off";
+        const String DATA_SUMMARY_OFF_NORMALIZED = "data_summary_off_normalized";
+        const String DATA_ENTRIES = "data_entries";
+        const String DATA_KEYWORDS = "data_keywords";
+        const String CLASS_NAME = "class_name";
+        const String SCREEN_TITLE = "screen_title";
+        const String INTENT_ACTION = "intent_action";
+        const String INTENT_TARGET_PACKAGE = "intent_target_package";
+        const String INTENT_TARGET_CLASS = "intent_target_class";
+        const String ICON = "icon";
+        const String ENABLED = "enabled";
+        const String DATA_KEY_REF = "data_key_reference";
+        const String USER_ID = "user_id";
+    }
+
+    interface IIndexDatabaseHelperMetaColumns {
+        const String BUILD = "build";
+    }
+
+    interface IIndexDatabaseHelperSavedQueriesColums {
+        const String QUERY = "query";
+        const String TIME_STAMP = "timestamp";
+    }
+
+    } // namespace Search
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -25,6 +25,7 @@ SOURCES += Elastos.Droid.Core.cpp
 SOURCES += ContentSettingsAdapter.cpp
 SOURCES += CookieManagerAdapter.cpp
 SOURCES += DrawGLFunctor.cpp
+SOURCES += NativeDrawGLFunctor.cpp
 SOURCES += FileChooserParamsAdapter.cpp
 SOURCES += GeolocationPermissionsAdapter.cpp
 SOURCES += GraphicsUtils.cpp

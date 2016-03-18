@@ -104,12 +104,10 @@ ECode Intent::constructor(
     AutoPtr<IComponentName> componentName;
     intent->GetComponent((IComponentName**)&componentName);
     if (componentName != NULL) {
-        String packageName;
-        String className;
+        String packageName, className;
         componentName->GetPackageName(&packageName);
         componentName->GetClassName(&className);
-        CComponentName::New(
-            packageName, className, (IComponentName**)&mComponent);
+        CComponentName::New(packageName, className, (IComponentName**)&mComponent);
     }
     AutoPtr< ArrayOf<String> > categories;
     intent->GetCategories((ArrayOf<String>**)&categories);
@@ -161,12 +159,10 @@ ECode Intent::constructor(
     AutoPtr<IComponentName> componentName;
     intent->GetComponent((IComponentName**)&componentName);
     if (componentName != NULL) {
-        String packageName;
-        String className;
+        String packageName, className;
         componentName->GetPackageName(&packageName);
         componentName->GetClassName(&className);
-        CComponentName::New(
-            packageName, className, (IComponentName**)&mComponent);
+        CComponentName::New(packageName, className, (IComponentName**)&mComponent);
     }
     AutoPtr< ArrayOf<String> > categories;
     intent->GetCategories((ArrayOf<String>**)&categories);
@@ -2037,6 +2033,7 @@ ECode Intent::SetClassName(
     /* [in] */ IContext* packageContext,
     /* [in] */ const String& className)
 {
+    mComponent = NULL;
     return CComponentName::New(packageContext, className, (IComponentName**)&mComponent);
 }
 
@@ -2044,6 +2041,7 @@ ECode Intent::SetClassName(
     /* [in] */ const String& packageName,
     /* [in] */ const String& className)
 {
+    mComponent = NULL;
     return CComponentName::New(packageName, className, (IComponentName**)&mComponent);
 }
 
@@ -2051,6 +2049,7 @@ ECode Intent::SetClass(
     /* [in] */ IContext* packageContext,
     /* [in] */ const ClassID& clsId)
 {
+    mComponent = NULL;
     AutoPtr<IClassInfo> info = TransformClassInfo(clsId);
     return CComponentName::New(packageContext, info, (IComponentName**)&mComponent);
 }

@@ -20,6 +20,25 @@ class SystemAudioAutoInitiationAction
     : public HdmiCecFeatureAction
     , public ISystemAudioAutoInitiationAction
 {
+private:
+    class InnerSub_SendMessageCallback
+        : public Object
+        , public IHdmiControlServiceSendMessageCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_SendMessageCallback(
+            /* [in] */ SystemAudioAutoInitiationAction* host);
+
+        //@Override
+        CARAPI OnSendCompleted(
+            /* [in] */ Int32 error);
+
+    private:
+        SystemAudioAutoInitiationAction* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

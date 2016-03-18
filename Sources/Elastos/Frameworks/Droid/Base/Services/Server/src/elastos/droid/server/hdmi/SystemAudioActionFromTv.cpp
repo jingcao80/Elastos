@@ -1,6 +1,7 @@
 
-#include "elastos/droid/server/hdmi/SystemAudioActionFromTv.h"
 #include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include "elastos/droid/server/hdmi/HdmiUtils.h"
+#include "elastos/droid/server/hdmi/SystemAudioActionFromTv.h"
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 
@@ -17,13 +18,11 @@ ECode SystemAudioActionFromTv::constructor(
     /* [in] */ Boolean targetStatus,
     /* [in] */ IIHdmiControlCallback* callback)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super::constructor(sourceAddress, avrAddress, targetStatus, callback);
-        Int32 srcAddr;
-        GetSourceAddress(&srcAddr);
-        HdmiUtils->VerifyAddressType(srcAddr, IHdmiDeviceInfo::DEVICE_TV);
-#endif
+    SystemAudioAction::constructor(sourceAddress, avrAddress, targetStatus, callback);
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    HdmiUtils::VerifyAddressType(srcAddr, IHdmiDeviceInfo::DEVICE_TV);
+    return NOERROR;
 }
 
 ECode SystemAudioActionFromTv::Start(
@@ -31,13 +30,10 @@ ECode SystemAudioActionFromTv::Start(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        RemoveSystemAudioActionInProgress();
-        SendSystemAudioModeRequest();
-        *result = TRUE;
-        return NOERROR;
-#endif
+    RemoveSystemAudioActionInProgress();
+    SendSystemAudioModeRequest();
+    *result = TRUE;
+    return NOERROR;
 }
 
 } // namespace Hdmi

@@ -140,7 +140,7 @@ public:
             : public InputEventReceiver
         {
         public:
-            WallpaperInputEventReceiver(
+            CARAPI constructor(
                 /* [in] */ IInputChannel* inputChannel,
                 /* [in] */ ILooper* looper,
                 /* [in] */ Engine* host);

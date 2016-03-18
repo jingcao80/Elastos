@@ -10,19 +10,10 @@ namespace Droid {
 namespace Webkit {
 
 //===============================================================
-//                   InnerWebViewFragment
-//===============================================================
-// InnerWebViewFragment::InnerWebViewFragment()
-// {
-// }
-
-// IFRAGMENT_METHODS_IMPL(InnerWebViewFragment, Fragment);
-
-//===============================================================
 //                      WebViewFragment
 //===============================================================
 
-CAR_INTERFACE_IMPL(WebViewFragment, Object, IWebViewFragment);
+CAR_INTERFACE_IMPL(WebViewFragment, Fragment, IWebViewFragment);
 
 WebViewFragment::WebViewFragment()
 {
@@ -42,20 +33,18 @@ ECode WebViewFragment::OnCreateView(
     /* [in] */ IBundle* savedInstanceState,
     /* [out] */ IView** view)
 {
-    assert(0);
-    // TODO
-    // VALIDATE_NOT_NULL(view);
-    // if (mWebView != NULL) {
-    //     mWebView->Destroy();
-    // }
-    // AutoPtr<IActivity> activity;
-    // GetActivity((IActivity**)&activity);
-    // mWebView = NULL;
-    // CWebView::New(activity, (IWebView**)&mWebView);
-    // mIsWebViewAvailable = TRUE;
-    // *view = (IView*)mWebView.Get();
-    // REFCOUNT_ADD(*view);
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(view);
+    if (mWebView != NULL) {
+        mWebView->Destroy();
+    }
+    AutoPtr<IActivity> activity;
+    GetActivity((IActivity**)&activity);
+    mWebView = NULL;
+    CWebView::New(IContext::Probe(activity), (IWebView**)&mWebView);
+    mIsWebViewAvailable = TRUE;
+    *view = IView::Probe(mWebView);
+    REFCOUNT_ADD(*view);
+    return NOERROR;
 }
 
 /**
@@ -63,11 +52,9 @@ ECode WebViewFragment::OnCreateView(
  */
 ECode WebViewFragment::OnPause()
 {
-    assert(0);
-    // TODO
-    // InnerWebViewFragment::OnPause();
-    // mWebView->OnPause();
-    return E_NOT_IMPLEMENTED;
+    Fragment::OnPause();
+    mWebView->OnPause();
+    return NOERROR;
 }
 
 /**
@@ -75,11 +62,9 @@ ECode WebViewFragment::OnPause()
  */
 ECode WebViewFragment::OnResume()
 {
-    assert(0);
-    // TODO
-    // mWebView->OnResume();
-    // InnerWebViewFragment::OnResume();
-    return E_NOT_IMPLEMENTED;
+    mWebView->OnResume();
+    Fragment::OnResume();
+    return NOERROR;
 }
 
 /**
@@ -88,11 +73,9 @@ ECode WebViewFragment::OnResume()
  */
 ECode WebViewFragment::OnDestroyView()
 {
-    assert(0);
-    // TODO
-    // mIsWebViewAvailable = FALSE;
-    // InnerWebViewFragment::OnDestroyView();
-    return E_NOT_IMPLEMENTED;
+    mIsWebViewAvailable = FALSE;
+    Fragment::OnDestroyView();
+    return NOERROR;
 }
 
 /**
@@ -100,14 +83,12 @@ ECode WebViewFragment::OnDestroyView()
  */
 ECode WebViewFragment::OnDestroy()
 {
-    assert(0);
-    // TODO
-    // if (mWebView != NULL) {
-    //     mWebView->Destroy();
-    //     mWebView = NULL;
-    // }
-    // InnerWebViewFragment::OnDestroy();
-    return E_NOT_IMPLEMENTED;
+    if (mWebView != NULL) {
+        mWebView->Destroy();
+        mWebView = NULL;
+    }
+    Fragment::OnDestroy();
+    return NOERROR;
 }
 
 /**

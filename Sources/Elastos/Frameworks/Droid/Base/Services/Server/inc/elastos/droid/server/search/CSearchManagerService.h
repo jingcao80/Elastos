@@ -75,7 +75,7 @@ private:
         : public BroadcastReceiver
     {
     private:
-        class MyThread : public ThreadBase
+        class MyThread : public Thread
         {
         public:
             MyThread(

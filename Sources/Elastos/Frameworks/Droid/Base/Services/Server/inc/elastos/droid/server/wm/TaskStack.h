@@ -26,7 +26,7 @@ public:
 
     CARAPI_(AutoPtr<DisplayContent>) GetDisplayContent();
 
-    CARAPI_(AutoPtr< List<AutoPtr<Task> > >) GetTasks();
+    CARAPI_(List< AutoPtr<Task> >&) GetTasks();
 
     CARAPI_(void) ResizeWindows();
 

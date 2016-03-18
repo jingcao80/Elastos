@@ -1953,7 +1953,7 @@
     <string name="enter_pin" msgid="5305333588093263790">"Per avviare Android, inserisci il PIN"</string>
     <string name="enter_pattern" msgid="4187435713036808566">"Per avviare Android, traccia la tua sequenza"</string>
     <string name="try_again" msgid="4272075051293936921">"Riprova."</string>
-    <string name="delete" msgid="4219243412325163003">"Elimina"</string>
+    <string name="delete_" msgid="4219243412325163003">"Elimina"</string>
     <string name="misc_files" msgid="6720680815969643497">"File vari"</string>
     <string name="misc_files_selected_count" msgid="4647048020823912088">"selezionati <xliff:g id="NUMBER">%1$d</xliff:g> di <xliff:g id="TOTAL">%2$d</xliff:g>"</string>
     <string name="misc_files_selected_count_bytes" msgid="2876232009069114352">"<xliff:g id="NUMBER">%1$s</xliff:g> su <xliff:g id="TOTAL">%2$s</xliff:g>"</string>

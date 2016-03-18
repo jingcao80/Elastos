@@ -3,26 +3,36 @@
 #define __ELASTOS_DROID_JAVAPROXY_CIUSERSWITCHOBSERVERNATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CIUserSwitchObserverNative.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
-using Elastos::Droid::Os::IRemoteCallback;
+using Elastos::Droid::App::IIUserSwitchObserver;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IIRemoteCallback;
 
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 CarClass(CIUserSwitchObserverNative)
+    , public Object
+    , public IIUserSwitchObserver
+    , public IBinder
 {
 public:
     ~CIUserSwitchObserverNative();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI OnUserSwitching(
         /* [in] */ Int32 newUserId,
-        /* [in] */ IRemoteCallback* reply);
+        /* [in] */ IIRemoteCallback* reply);
 
     CARAPI OnUserSwitchComplete(
         /* [in] */ Int32 newUserId);

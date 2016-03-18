@@ -6,6 +6,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/bluetooth/BluetoothInputStream.h"

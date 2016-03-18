@@ -1,0 +1,52 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Ims {
+
+    /**
+     * Parcelable object to handle IMS stream media profile.
+     * It provides the media direction, quality of audio and/or video.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IImsStreamMediaProfile {
+        /**
+         * Media directions
+         */
+        const Int32 DIRECTION_INVALID = -1;
+        const Int32 DIRECTION_INACTIVE = 0;
+        const Int32 DIRECTION_RECEIVE = 1;
+        const Int32 DIRECTION_SEND = 2;
+        const Int32 DIRECTION_SEND_RECEIVE = 3;
+
+        /**
+         * Audio information
+         */
+        const Int32 AUDIO_QUALITY_NONE = 0;
+        const Int32 AUDIO_QUALITY_AMR = 1 << 0;
+        const Int32 AUDIO_QUALITY_AMR_WB = 1 << 1;
+
+        /**
+         * Video information
+         */
+        const Int32 VIDEO_QUALITY_NONE = 0;
+        const Int32 VIDEO_QUALITY_QCIF = 1 << 0;
+        const Int32 VIDEO_QUALITY_QVGA_LANDSCAPE = 1 << 1;
+        const Int32 VIDEO_QUALITY_QVGA_PORTRAIT = 1 << 2;
+        const Int32 VIDEO_QUALITY_VGA_LANDSCAPE = 1 << 3;
+        const Int32 VIDEO_QUALITY_VGA_PORTRAIT = 1 << 4;
+
+        CopyFrom(
+            [in] IImsStreamMediaProfile* profile);
+    }
+
+    } // namespace Ims
+    } // namespace Droid
+    } // namespace Elastos
+}

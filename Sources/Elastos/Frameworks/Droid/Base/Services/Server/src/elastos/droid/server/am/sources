@@ -11,12 +11,14 @@ include $(MAKEDIR)/../../../../../../../../sources.inc
 
 C_DEFINES += -DDROID_SERVER
 
+SOURCES += am.cpp
 SOURCES += CActivityManagerService.cpp
 SOURCES += ActiveServices.cpp
 SOURCES += CActivityRecordToken.cpp
 SOURCES += ActivityRecord.cpp
 SOURCES += ActivityResult.cpp
 SOURCES += ActivityStack.cpp
+SOURCES += ActivityContainer.cpp
 SOURCES += ActivityStackSupervisor.cpp
 SOURCES += AppErrorResult.cpp
 SOURCES += AppBindRecord.cpp
@@ -29,8 +31,6 @@ SOURCES += BatteryStatsService.cpp
 SOURCES += BroadcastFilter.cpp
 SOURCES += BroadcastQueue.cpp
 SOURCES += BroadcastRecord.cpp
-SOURCES += CActivityContainer.cpp
-SOURCES += CBatteryStatsService.cpp
 SOURCES += CompatModeDialog.cpp
 SOURCES += CompatModePackages.cpp
 SOURCES += ConnectionRecord.cpp

@@ -3,6 +3,8 @@
 #include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Accounts::EIID_IAccountManagerResponse;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,15 +13,20 @@ namespace JavaProxy {
 
 const String CAccountManagerResponseNative::TAG("CAccountManagerResponseNative");
 
-CAccountManagerResponseNative::~CAccountManagerResponseNative(){
+CAR_INTERFACE_IMPL_2(CAccountManagerResponseNative, Object, IAccountManagerResponse, IBinder)
+
+CAR_OBJECT_IMPL(CAccountManagerResponseNative)
+
+CAccountManagerResponseNative::~CAccountManagerResponseNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
 ECode CAccountManagerResponseNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -29,7 +36,7 @@ ECode CAccountManagerResponseNative::constructor(
 ECode CAccountManagerResponseNative::OnResult(
     /* [in] */ IBundle* value)
 {
-    // LOGGERD(TAG, String("+ CAccountManagerResponseNative::OnResult()"));
+    // LOGGERD(TAG, "+ CAccountManagerResponseNative::OnResult()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -54,7 +61,7 @@ ECode CAccountManagerResponseNative::OnResult(
         env->DeleteLocalRef(jvalue);
     }
 
-    // LOGGERD(TAG, String("- CAccountManagerResponseNative::OnResult()"));
+    // LOGGERD(TAG, "- CAccountManagerResponseNative::OnResult()");
     return NOERROR;
 }
 
@@ -62,7 +69,7 @@ ECode CAccountManagerResponseNative::OnError(
     /* [in] */ Int32 errorCode,
     /* [in] */ const String& errorMessage)
 {
-    // LOGGERD(TAG, String("+ CAccountManagerResponseNative::OnError()"));
+    // LOGGERD(TAG, "+ CAccountManagerResponseNative::OnError()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -81,7 +88,32 @@ ECode CAccountManagerResponseNative::OnError(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jerrorMessage);
 
-    // LOGGERD(TAG, String("- CAccountManagerResponseNative::OnError()"));
+    // LOGGERD(TAG, "- CAccountManagerResponseNative::OnError()");
+    return NOERROR;
+}
+
+ECode CAccountManagerResponseNative::ToString(
+    /* [out] */ String* str)
+{
+    // LOGGERD(TAG, "+ CAccountManagerResponseNative::ToString()");
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("java/lang/Object");
+    Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
+
+    jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
+
+    *str = Util::GetElString(env, jstr);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jstr);
+
+    // LOGGERD(TAG, "- CAccountManagerResponseNative::ToString()");
     return NOERROR;
 }
 

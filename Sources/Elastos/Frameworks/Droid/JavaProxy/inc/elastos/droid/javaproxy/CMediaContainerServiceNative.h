@@ -3,61 +3,66 @@
 #define __ELASTOS_DROID_JAVAPROXY_CMEDIACONTAINERSERVICENATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CMediaContainerServiceNative.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
+
+using Elastos::Droid::Content::Pm::IPackageInfoLite;
+using Elastos::Droid::Content::Res::IObbInfo;
+using Elastos::Droid::Internal::App::IIMediaContainerService;
+using Elastos::Droid::Internal::Os::IIParcelFileDescriptorFactory;
+using Elastos::Droid::Os::IBinder;
 
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 CarClass(CMediaContainerServiceNative)
+    , public Object
+    , public IIMediaContainerService
+    , public IBinder
 {
 public:
     ~CMediaContainerServiceNative();
 
-    CARAPI CopyResourceToContainer(
-        /* [in] */ Elastos::Droid::Net::IUri * pPackageURI,
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
+    CARAPI constructor(
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
+
+    CARAPI CopyPackageToContainer(
+        /* [in] */ const String& packagePath,
         /* [in] */ const String& containerId,
         /* [in] */ const String& key,
-        /* [in] */ const String& resFileName,
-        /* [in] */ const String& publicResFileName,
         /* [in] */ Boolean isExternal,
         /* [in] */ Boolean isForwardLocked,
-        /* [out] */ String * pPath);
+        /* [in] */ const String& abiOverride,
+        /* [out] */ String* path);
 
-    CARAPI CopyResource(
-        /* [in] */ Elastos::Droid::Net::IUri * pPackageURI,
-        /* [in] */ Elastos::Droid::Content::Pm::IContainerEncryptionParams * pEncryptionParams,
-        /* [in] */ Elastos::Droid::Os::IParcelFileDescriptor * pOutStream,
-        /* [out] */ Int32 * pRes);
+    CARAPI CopyPackage(
+        /* [in] */ const String& packagePath,
+        /* [in] */ IIParcelFileDescriptorFactory* target,
+        /* [out] */ Int32* result);
 
     CARAPI GetMinimalPackageInfo(
         /* [in] */ const String& packagePath,
         /* [in] */ Int32 flags,
-        /* [in] */ Int64 threshold,
-        /* [out] */ Elastos::Droid::Content::Pm::IPackageInfoLite ** ppPkgLite);
-
-    CARAPI CheckInternalFreeStorage(
-        /* [in] */ Elastos::Droid::Net::IUri * pFileUri,
-        /* [in] */ Boolean isForwardLocked,
-        /* [in] */ Int64 threshold,
-        /* [out] */ Boolean * pRes);
-
-    CARAPI CheckExternalFreeStorage(
-        /* [in] */ Elastos::Droid::Net::IUri * pFileUri,
-        /* [in] */ Boolean isForwardLocked,
-        /* [out] */ Boolean * pRes);
+        /* [in] */ const String& abiOverride,
+        /* [out] */ IPackageInfoLite** pkgLite);
 
     CARAPI GetObbInfo(
         /* [in] */ const String& filename,
-        /* [out] */ Elastos::Droid::Content::Res::IObbInfo ** ppObbInfo);
+        /* [out] */ IObbInfo** obbInfo);
 
     CARAPI CalculateDirectorySize(
         /* [in] */ const String& directory,
-        /* [out] */ Int64 * pSize);
+        /* [out] */ Int64* size);
 
     CARAPI GetFileSystemStats(
         /* [in] */ const String& path,
-        /* [out, callee] */ ArrayOf<Int64> ** ppStats);
+        /* [out, callee] */ ArrayOf<Int64>** stats);
 
     CARAPI ClearDirectory(
         /* [in] */ const String& directory);
@@ -65,14 +70,11 @@ public:
     CARAPI CalculateInstalledSize(
         /* [in] */ const String& packagePath,
         /* [in] */ Boolean isForwardLocked,
-        /* [out] */ Int64 * pSize);
+        /* [in] */ const String& abiOverride,
+        /* [out] */ Int64* size);
 
     CARAPI ToString(
         /* [out] */ String* str);
-
-    CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
 
 private:
     static const String TAG;

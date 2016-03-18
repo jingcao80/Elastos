@@ -3,8 +3,13 @@
 #define __ELASTOS_DROID_JAVAPROXY_CSPELLCHECKERSESSIONLISTENERNATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CSpellCheckerSessionListenerNative.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
+using Elastos::Droid::Internal::TextService::IISpellCheckerSessionListener;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::View::TextService::ISentenceSuggestionsInfo;
 using Elastos::Droid::View::TextService::ISuggestionsInfo;
 
@@ -13,19 +18,26 @@ namespace Droid {
 namespace JavaProxy {
 
 CarClass(CSpellCheckerSessionListenerNative)
+    , public Object
+    , public IISpellCheckerSessionListener
+    , public IBinder
 {
 public:
     ~CSpellCheckerSessionListenerNative();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI OnGetSuggestions(
-        /* [in] */ const ArrayOf<ISuggestionsInfo *>& results);
+        /* [in] */ ArrayOf<ISuggestionsInfo*>* results);
 
     CARAPI OnGetSentenceSuggestions(
-        /* [in] */ const ArrayOf<ISentenceSuggestionsInfo *>& results);
+        /* [in] */ ArrayOf<ISentenceSuggestionsInfo*>* results);
 
     CARAPI ToString(
         /* [out] */ String* str);

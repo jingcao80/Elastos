@@ -1,10 +1,10 @@
 
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/settings/dashboard/DashboardCategory.h"
 #include "elastos/droid/text/TextUtils.h"
 
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -19,7 +19,7 @@ DashboardCategory::DashboardCategory()
     : mId(CAT_ID_UNDEFINED)
     , mTitleRes(0)
 {
-    CArryList::New((IList**)&mTiles);
+    CArrayList::New((IList**)&mTiles);
 }
 
 DashboardCategory::~DashboardCategory()
@@ -75,7 +75,7 @@ AutoPtr<ICharSequence> DashboardCategory::GetTitle(
     if (mTitleRes != 0) {
         AutoPtr<ICharSequence> seq;
         res->GetText(mTitleRes, (ICharSequence**)&seq);
-        return req;
+        return seq;
     }
     return mTitle;
 }
@@ -84,7 +84,7 @@ ECode DashboardCategory::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     dest->WriteInt32(mTitleRes);
-    TextUtils::WriteToParcel(title, dest);
+    TextUtils::WriteToParcel(mTitle, dest);
 
     Int32 count;
     mTiles->GetSize(&count);
@@ -110,7 +110,7 @@ ECode DashboardCategory::ReadFromParcel(
 
     for (Int32 n = 0; n < count; n++) {
         AutoPtr<DashboardTile> tile = new DashboardTile();
-        IParcelable::Probe((IObject*)tile))->ReadFromParcel(in);
+        IParcelable::Probe((IObject*)tile)->ReadFromParcel(in);
         mTiles->Add((IObject*)tile);
     }
     return NOERROR;

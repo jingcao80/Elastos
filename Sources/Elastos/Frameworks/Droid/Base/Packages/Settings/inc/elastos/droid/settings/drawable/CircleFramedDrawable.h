@@ -1,39 +1,19 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 #ifndef __ELASTOS_DROID_SETTINGS_DRAWABLE_CIRCLEFRAMEDDRAWABLE_H__
 #define __ELASTOS_DROID_SETTINGS_DRAWABLE_CIRCLEFRAMEDDRAWABLE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/graphics/drawable/Drawable.h"
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::Res::IResources;
+// using Elastos::Droid::Graphics::Drawable::Drawable;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::ICanvas;
-using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Graphics::IColorFilter;
 using Elastos::Droid::Graphics::IPaint;
 using Elastos::Droid::Graphics::IPath;
-using Elastos::Droid::Graphics::IPixelFormat;
-using Elastos::Droid::Graphics::IPorterDuff;
-using Elastos::Droid::Graphics::IPorterDuffXfermode;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::IRectF;
-using Elastos::Droid::Graphics::Drawable::IDrawable;
-
-using Elastos::Droid::Settings::IR;
 
 namespace Elastos {
 namespace Droid {
@@ -45,7 +25,7 @@ namespace Drawable {
  * TODO: Move this to an internal framework class and share with the one in Keyguard.
  */
 class CircleFramedDrawable
-    : public Drawable
+    : public Elastos::Droid::Graphics::Drawable::Drawable
 {
 public:
     CircleFramedDrawable(

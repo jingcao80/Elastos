@@ -92,6 +92,15 @@ namespace Pm {
 //                  CUserManagerService::FinishRemoveUserReceiver::FinishRemoveUserThread
 //==============================================================================
 
+CUserManagerService::FinishRemoveUserReceiver::FinishRemoveUserThread::FinishRemoveUserThread(
+    /* [in] */ CUserManagerService* host,
+    /* [in] */ Int32 userHandle)
+    : mHost(host)
+    , mUserHandle(userHandle)
+{
+    Thread::constructor(String("FinishRemoveUserThread"));
+}
+
 ECode CUserManagerService::FinishRemoveUserReceiver::FinishRemoveUserThread::Run()
 {
     AutoPtr<IObject> lock = mHost->mInstallLock;

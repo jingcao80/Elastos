@@ -680,13 +680,13 @@ ECode PhoneWindowManager::MyOrientationListener::OnProposedRotationChanged(
 //          ++ PhoneWindowManager::HideNavInputEventReceiver ++
 //==============================================================================
 
-PhoneWindowManager::HideNavInputEventReceiver::HideNavInputEventReceiver(
+ECode PhoneWindowManager::HideNavInputEventReceiver::constructor(
     /* [in] */ IInputChannel* inputChannel,
     /* [in] */ ILooper* looper,
     /* [in] */ PhoneWindowManager* host)
-    : InputEventReceiver(inputChannel, looper)
-    , mHost(host)
 {
+    mHost = host;
+    return InputEventReceiver::constructor(inputChannel, looper);
 }
 
 ECode PhoneWindowManager::HideNavInputEventReceiver::OnInputEvent(
@@ -764,7 +764,9 @@ ECode PhoneWindowManager::HideNavInputEventReceiverFactory::CreateInputEventRece
    /* [out] */ IInputEventReceiver** receiver)
 {
     VALIDATE_NOT_NULL(receiver);
-    *receiver = new HideNavInputEventReceiver(inputChannel, looper, mHost);
+    AutoPtr<HideNavInputEventReceiver> hner = new HideNavInputEventReceiver();
+    hner->constructor(inputChannel, looper, mHost);
+    *receiver = (IInputEventReceiver*)hner.Get();
     REFCOUNT_ADD(*receiver);
     return NOERROR;
 }
@@ -1171,7 +1173,6 @@ ECode PhoneWindowManager::CollapsePanelsRunnable::Run()
 //==============================================================================
 
 PhoneWindowManager::ScreenshotHandler::ScreenshotHandler(
-    /* [in] */ ILooper* looper,
     /* [in] */ IServiceConnection *conn,
     /* [in] */ PhoneWindowManager* host)
     : myConn(conn)
@@ -1224,7 +1225,8 @@ ECode PhoneWindowManager::ScreenshotServiceConnection::OnServiceConnected(
     const AutoPtr<IServiceConnection> myConn = this;
     AutoPtr<ILooper> looper;
     mHost->mHandler->GetLooper((ILooper**)&looper);
-    AutoPtr<ScreenshotHandler> h = new ScreenshotHandler(looper, myConn, mHost);
+    AutoPtr<ScreenshotHandler> h = new ScreenshotHandler(myConn, mHost);
+    h->constructor(looper);
     AutoPtr<IMessenger> msgTmp;
     CMessenger::New(h, (IMessenger**)&msgTmp);
     msg->SetReplyTo(msgTmp);
@@ -1924,7 +1926,9 @@ ECode PhoneWindowManager::Init(
     mWindowManagerInternal = IWindowManagerInternal::Probe(LocalServices::GetService(EIID_IWindowManagerInternal));
     mDreamManagerInternal = IDreamManagerInternal::Probe(LocalServices::GetService(EIID_IDreamManagerInternal));
 
-    mHandler = new PolicyHandler(this);
+    AutoPtr<PolicyHandler> ph = new PolicyHandler(this);
+    ph->constructor();
+    mHandler = (IHandler*)ph.Get();
     mWakeGestureListener = new MyWakeGestureListener(mContext, mHandler, this);
     mOrientationListener = new MyOrientationListener(mContext, mHandler, this);
     mSettingsObserver = new SettingsObserver(mHandler, this);
@@ -6915,7 +6919,12 @@ ECode PhoneWindowManager::SystemReady()
     mSystemReady = TRUE;
     AutoPtr<UpdateSettingRunnable> updateSettingRunnable = new UpdateSettingRunnable(this);
     Boolean isSuccess = FALSE;
-    return mHandler->Post(updateSettingRunnable, &isSuccess);
+    ECode ec = mHandler->Post(updateSettingRunnable, &isSuccess);
+    if (FAILED(ec)) {
+        Logger::E(TAG, " =========PhoneWindowManager::SystemReady() %08x", ec);
+        assert(0 && "TODO");
+    }
+    return ec;
 }
 
 ECode PhoneWindowManager::SystemBooted()

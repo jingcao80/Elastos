@@ -1,0 +1,164 @@
+
+module
+{
+    interface Elastos.Droid.Ims.IImsCallProfile;
+    interface Elastos.Droid.Ims.IImsConferenceState;
+    interface Elastos.Droid.Ims.IImsStreamMediaProfile;
+    interface Elastos.Droid.Ims.IImsReasonInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Ims {
+    namespace Internal {
+
+    /**
+     * A listener type for receiving notification on IMS call session events.
+     * When an event is generated for an {@link IImsCallSession}, the application is notified
+     * by having one of the methods called on the {@link IImsCallSessionListener}.
+     * {@hide}
+     */
+    interface IIImsCallSessionListener {
+        /**
+         * Notifies the result of the basic session operation (setup / terminate).
+         */
+        CallSessionProgressing(
+            [in] IIImsCallSession* session,
+            [in] IImsStreamMediaProfile* profile);
+
+        CallSessionStarted(
+            [in] IIImsCallSession* session,
+            [in] IImsCallProfile* profile);
+
+        CallSessionStartFailed(
+            [in] IIImsCallSession* session,
+            [in] IImsReasonInfo* reasonInfo);
+
+        CallSessionTerminated(
+            [in] IIImsCallSession* session,
+            [in] IImsReasonInfo* reasonInfo);
+
+        /**
+         * Notifies the result of the call hold/resume operation.
+         */
+        CallSessionHeld(
+            [in] IIImsCallSession* session,
+            [in] IImsCallProfile* profile);
+
+        CallSessionHoldFailed(
+            [in] IIImsCallSession* session,
+            [in] IImsReasonInfo* reasonInfo);
+
+        CallSessionHoldReceived(
+            [in] IIImsCallSession* session,
+            [in] IImsCallProfile* profile);
+
+        CallSessionResumed(
+            [in] IIImsCallSession* session,
+            [in] IImsCallProfile* profile);
+
+        CallSessionResumeFailed(
+            [in] IIImsCallSession* session,
+            [in] IImsReasonInfo* reasonInfo);
+
+        CallSessionResumeReceived(
+            [in] IIImsCallSession* session,
+            [in] IImsCallProfile* profile);
+
+        /**
+         * Notifiies the result of call merge operation.
+         */
+        CallSessionMerged(
+            [in] IIImsCallSession* session,
+            [in] IIImsCallSession* newSession,
+            [in] IImsCallProfile* profile);
+
+        CallSessionMergeFailed(
+            [in] IIImsCallSession* session,
+            [in] IImsReasonInfo* reasonInfo);
+
+        /**
+         * Notifies the result of call upgrade / downgrade or any other call updates.
+         */
+        CallSessionUpdated(
+            [in] IIImsCallSession* session,
+            [in] IImsCallProfile* profile);
+
+        CallSessionUpdateFailed(
+            [in] IIImsCallSession* session,
+            [in] IImsReasonInfo* reasonInfo);
+
+        CallSessionUpdateReceived(
+            [in] IIImsCallSession* session,
+            [in] IImsCallProfile* profile);
+
+        /**
+         * Notifies the result of conference extension.
+         */
+        CallSessionConferenceExtended(
+            [in] IIImsCallSession* session,
+            [in] IIImsCallSession* newSession,
+            [in] IImsCallProfile* profile);
+
+        CallSessionConferenceExtendFailed(
+            [in] IIImsCallSession* session,
+            [in] IImsReasonInfo* reasonInfo);
+
+        CallSessionConferenceExtendReceived(
+            [in] IIImsCallSession* session,
+            [in] IIImsCallSession* newSession,
+            [in] IImsCallProfile* profile);
+
+        /**
+         * Notifies the result of the participant invitation / removal to/from the conference session.
+         */
+        CallSessionInviteParticipantsRequestDelivered(
+            [in] IIImsCallSession* session);
+
+        CallSessionInviteParticipantsRequestFailed(
+            [in] IIImsCallSession* session,
+            [in] IImsReasonInfo* reasonInfo);
+
+        CallSessionRemoveParticipantsRequestDelivered(
+            [in] IIImsCallSession* session);
+
+        CallSessionRemoveParticipantsRequestFailed(
+            [in] IIImsCallSession* session,
+            [in] IImsReasonInfo* reasonInfo);
+
+        /**
+         * Notifies the changes of the conference info.
+         * in the conference session.
+         */
+        CallSessionConferenceStateUpdated(
+            [in] IIImsCallSession* session,
+            [in] IImsConferenceState* state);
+
+        /**
+         * Notifies the incoming USSD message.
+         */
+        CallSessionUssdMessageReceived(
+            [in] IIImsCallSession* session,
+            [in] Int32 mode,
+            [in] String ussdMessage);
+
+        /**
+         * Notifies of handover information for this call
+         */
+        CallSessionHandover(
+            [in] IIImsCallSession* session,
+            [in] Int32 srcAccessTech,
+            [in] Int32 targetAccessTech,
+            [in] IImsReasonInfo* reasonInfo);
+
+        CallSessionHandoverFailed(
+            [in] IIImsCallSession* session,
+            [in] Int32 srcAccessTech,
+            [in] Int32 targetAccessTech,
+            [in] IImsReasonInfo* reasonInfo);
+    }
+
+    } // namespace Internal
+    } // namespace Ims
+    } // namespace Droid
+    } // namespace Elastos
+}

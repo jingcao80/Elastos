@@ -8,6 +8,8 @@
 using Elastos::Core::ICharSequence;
 using Elastos::IO::IFileDescriptor;
 using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::App::IProfilerInfo;
+using Elastos::Droid::App::IResultInfo;
 using Elastos::Droid::App::Backup::IRestoreSet;
 using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
 using Elastos::Droid::Content::IComponentName;
@@ -45,11 +47,15 @@ using Elastos::Droid::Internal::Location::IProviderProperties;
 using Elastos::Droid::Internal::Location::IProviderRequest;
 using Elastos::Droid::Location::ILocation;
 using Elastos::Droid::Location::ILocationRequest;
+using Elastos::Droid::Media::IAudioAttributes;
+using Elastos::Droid::Media::IRating;
+using Elastos::Droid::Os::IBaseBundle;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IDebugMemoryInfo;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Os::IParcelFileDescriptor;
+using Elastos::Droid::Os::IPersistableBundle;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IWorkSource;
 using Elastos::Droid::Os::Storage::IStorageVolume;
@@ -173,6 +179,10 @@ public:
         /* [in] */ JNIEnv* env,
         /* [in] */ ArrayOf<Int64>* lArray);
 
+    static jfloatArray ToJavaFloatArray(
+        /* [in] */ JNIEnv* env,
+        /* [in] */ ArrayOf<Float>* floatArray);
+
     static bool GetElInt32Array(
         /* [in] */ JNIEnv* env,
         /* [in] */ jintArray jiArr,
@@ -212,6 +222,12 @@ public:
     static jobject ToJavaBundle(
         /* [in] */ JNIEnv* env,
         /* [in] */ IBundle* bundle);
+
+    static Boolean SetJavaBaseBundle(
+        /* [in] */ JNIEnv* env,
+        /* [in] */ IBaseBundle* bundle,
+        /* [in] */ jclass bundleKlass,
+        /* [in] */ jobject jbundle);
 
     static jobject ToJavaBitmap(
         /* [in] */ JNIEnv* env,
@@ -538,6 +554,26 @@ public:
     static jobject ToJavaMessenger(
         /* [in] */ JNIEnv* env,
         /* [in] */ IMessenger* msgr);
+
+    static jobject ToJavaPersistableBundle(
+        /* [in] */ JNIEnv* env,
+        /* [in] */ IPersistableBundle* persistableBundle);
+
+    static jobject ToJavaProfilerInfo(
+        /* [in] */ JNIEnv* env,
+        /* [in] */ IProfilerInfo* profilerInfo);
+
+    static jobject ToJavaResultInfo(
+        /* [in] */ JNIEnv* env,
+        /* [in] */ IResultInfo* resultInfo);
+
+    static jobject ToJavaRating(
+        /* [in] */ JNIEnv* env,
+        /* [in] */ IRating* rating);
+
+    static jobject ToJavaAudioAttributes(
+        /* [in] */ JNIEnv* env,
+        /* [in] */ IAudioAttributes* aa);
 
     static String GetElString(
         /* [in] */ JNIEnv* env,

@@ -2,6 +2,7 @@
 module
 {
     interface Elastos.Droid.Telephony.ISubInfoRecord;
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
@@ -25,7 +26,7 @@ module
          */
         GetSubInfoUsingIccId(
             [in] String iccId,
-            [out, callee] ArrayOf<ISubInfoRecord*>* list);
+            [out] IList** list);
 
         /**
          * Get the SubInfoRecord according to slotId
@@ -34,21 +35,21 @@ module
          */
         GetSubInfoUsingSlotId(
             [in] Int32 slotId,
-            [out, callee] ArrayOf<ISubInfoRecord*>* list);
+            [out] IList** list);
 
         /**
          * Get all the SubInfoRecord(s) in subinfo database
          * @return Array list of all SubInfoRecords in database, include thsoe that were inserted before
          */
         GetAllSubInfoList(
-            [out, callee] ArrayOf<ISubInfoRecord*>* list);
+            [out] IList** list);
 
         /**
          * Get the SubInfoRecord(s) of the currently inserted SIM(s)
          * @return Array list of currently inserted SubInfoRecord(s)
          */
         GetActiveSubInfoList(
-            [out, callee] ArrayOf<ISubInfoRecord*>* list);
+            [out] IList** list);
 
         /**
          * Get the SUB count of all SUB(s) in subinfo database

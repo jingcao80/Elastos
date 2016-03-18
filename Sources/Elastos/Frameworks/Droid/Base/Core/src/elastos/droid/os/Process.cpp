@@ -140,7 +140,9 @@ ECode Process::ZygoteState::Connect(
     ec = CBufferedWriter::New(IWriter::Probe(outputStreamWriter), 256, (IBufferedWriter**)&zygoteWriter);
     FAIL_GOTO(ec, _EXIT_)
 
-    Process::GetAbiList(zygoteWriter, zygoteInputStream, &abiListString);
+    ec =  Process::GetAbiList(zygoteWriter, zygoteInputStream, &abiListString);
+    FAIL_GOTO(ec, _EXIT_)
+
     Logger::I("Zygote", "Process: zygote socket opened, supported ABIS: %s", abiListString.string());
 
     StringUtils::Split(abiListString, String(","), (ArrayOf<String>**)&splits);
@@ -156,6 +158,7 @@ _EXIT_:
     if (zygoteSocket) {
         ICloseable::Probe(zygoteSocket)->Close();
     }
+    Logger::E(TAG, "failed to Connect %s", socketAddress.string());
     return ec;
 }
 
@@ -207,6 +210,7 @@ ECode Process::Start(
             debugFlags, mountExternal, targetSdkVersion, seInfo,
             abi, instructionSet, appDataDir, zygoteArgs, result);
     if (ec == (ECode)E_ZYGOTE_START_FAILED_EXCEPTION) {
+        Logger::E(TAG, "Starting process through Zygote failed");
         return E_RUNTIME_EXCEPTION;
     }
     return ec;
@@ -223,24 +227,45 @@ ECode Process::GetAbiList(
     /* [in] */ IDataInputStream* inputStream,
     /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    ECode ec = NOERROR;
+    IDataInput* di = IDataInput::Probe(inputStream);
+    Int32 numBytes;
+    AutoPtr<ArrayOf<Byte> > bytes;
+Logger::I(TAG, " >> 1");
     // Each query starts with the argument count (1 in this case)
-    IWriter::Probe(writer)->Write(String("1"));
+    FAIL_GOTO(IWriter::Probe(writer)->Write(String("1")), _EXIT_)
+
+Logger::I(TAG, " >> 2");
     // ... followed by a new-line.
-    writer->NewLine();
+    FAIL_GOTO(writer->NewLine(), _EXIT_)
+Logger::I(TAG, " >> 3");
     // ... followed by our only argument.
-    IWriter::Probe(writer)->Write(String("--query-abi-list"));
-    writer->NewLine();
-    IFlushable::Probe(writer)->Flush();
+    FAIL_GOTO(IWriter::Probe(writer)->Write(String("--query-abi-list")), _EXIT_)
+Logger::I(TAG, " >> 4");
+    FAIL_GOTO(writer->NewLine(), _EXIT_)
+Logger::I(TAG, " >> 5");
+    FAIL_GOTO(IFlushable::Probe(writer)->Flush(), _EXIT_)
+Logger::I(TAG, " >> 6");
 
     // The response is a length prefixed stream of ASCII bytes.
-    Int32 numBytes;
-    IDataInput::Probe(inputStream)->ReadInt32(&numBytes);
-    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(numBytes);
-    IDataInput::Probe(inputStream)->ReadFully(bytes);
+    FAIL_GOTO(di->ReadInt32(&numBytes), _EXIT_)
+Logger::I(TAG, " >> 7");
+    bytes = ArrayOf<Byte>::Alloc(numBytes);
+Logger::I(TAG, " >> 8");
+    FAIL_GOTO(di->ReadFully(bytes), _EXIT_)
+Logger::I(TAG, " >> 9");
 
+    Logger::I(TAG, " GetAbiList: %d, %s", numBytes, (const char*)bytes->GetPayload());
     *result = String((const char*)bytes->GetPayload());
     // return new String(bytes, StandardCharsets.US_ASCII);
     return NOERROR;
+
+_EXIT_:
+    Logger::E(TAG, "failed to GetAbiList");
+    return ec;
 }
 
 ECode Process::ElastosZygoteSendArgsAndGetResult(
@@ -308,6 +333,7 @@ ECode Process::ElastosZygoteSendArgsAndGetResult(
 
 _EXIT_:
     zygoteState->Close();
+    Logger::E(TAG, "failed to start process");
     return E_ZYGOTE_START_FAILED_EXCEPTION;
     // } catch (IOException ex) {
             // zygoteState.close();
@@ -381,6 +407,7 @@ ECode Process::JavaZygoteSendArgsAndGetResult(
 
 _EXIT_:
     zygoteState->Close();
+    Logger::E(TAG, "failed to start process");
     return E_ZYGOTE_START_FAILED_EXCEPTION;
     // } catch (IOException ex) {
             // zygoteState.close();
@@ -457,8 +484,8 @@ ECode Process::StartViaZygote(
                 }
                 sb.Append((*gids)[i]);
             }
-            String temp;
-            Logger::I("permissionRelated", "processClass:%s niceName:%s groups:%s", processClass.string(), niceName.string(), (sb.ToString(&temp), temp.string()));
+            Logger::I("permissionRelated", "processClass:%s niceName:%s groups:%s",
+                	processClass.string(), niceName.string(), sb.ToString().string());
             argsForZygote->PushBack(sb.ToString());
         }
 
@@ -492,6 +519,8 @@ ECode Process::StartViaZygote(
             }
         }
 
+        Logger::I(TAG, "Process::StartViaZygote isJava:%d, %s, %s",
+            startJavaProcess, processClass.string(), niceName.string());
         if (startJavaProcess){
             AutoPtr<ZygoteState> zygoteState;
             FAIL_RETURN(OpenJavaZygoteSocketIfNeeded(abi, (ZygoteState**)&zygoteState))
@@ -1563,7 +1592,7 @@ ECode Process::OpenElastosZygoteSocketIfNeeded(
     }
 
     // throw new ZygoteStartFailedEx("Unsupported zygote ABI: " + abi);
-    Logger::E(TAG, "Unsupported zygote ABI: %s", abi.string());
+    Logger::E(TAG, "OpenElastosZygoteSocketIfNeeded::Unsupported zygote ABI: %s", abi.string());
     return E_ZYGOTE_START_FAILED_EXCEPTION;
 }
 
@@ -1612,7 +1641,7 @@ ECode Process::OpenJavaZygoteSocketIfNeeded(
     }
 
     // throw new ZygoteStartFailedEx("Unsupported zygote ABI: " + abi);
-    Logger::E(TAG, "Unsupported zygote ABI: %s", abi.string());
+    Logger::E(TAG, "OpenJavaZygoteSocketIfNeeded::Unsupported zygote ABI: %s", abi.string());
     return E_ZYGOTE_START_FAILED_EXCEPTION;
 }
 

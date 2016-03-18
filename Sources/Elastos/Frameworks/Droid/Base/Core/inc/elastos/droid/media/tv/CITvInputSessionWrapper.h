@@ -41,7 +41,7 @@ private:
         : public InputEventReceiver
     {
     public:
-        TvInputEventReceiver(
+        CARAPI constructor(
             /* [in] */ IInputChannel* inputChannel,
             /* [in] */ ILooper* looper,
             /* [in] */ ITvInputServiceSession* impl);

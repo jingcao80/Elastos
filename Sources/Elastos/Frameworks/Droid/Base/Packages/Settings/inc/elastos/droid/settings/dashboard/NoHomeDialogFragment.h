@@ -1,25 +1,39 @@
 
+#ifndef __ELASTOS_DROID_SETTINGS_DASHBOARD_NOHOMEDIALOGFRAGMENT_H__
+#define __ELASTOS_DROID_SETTINGS_DASHBOARD_NOHOMEDIALOGFRAGMENT_H__
 
-package com.android.settings.dashboard;
+#include "elastos/droid/app/DialogFragment.h"
 
+using Elastos::Droid::App::DialogFragment;
 using Elastos::Droid::App::IActivity;
-using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::App::IDialog;
-using Elastos::Droid::App::IDialogFragment;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Settings::IR;
 
-public class NoHomeDialogFragment extends DialogFragment {
-    public static void Show(Activity parent) {
-        final NoHomeDialogFragment dialog = new NoHomeDialogFragment();
-        dialog->Show(parent->GetFragmentManager(), NULL);
-    }
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Dashboard {
+
+class NoHomeDialogFragment
+    : public DialogFragment
+{
+public:
+    NoHomeDialogFragment();
+
+    ~NoHomeDialogFragment();
+
+    static CARAPI_(void) Show(
+        /* [in] */ IActivity* parent);
 
     //@Override
-    public Dialog OnCreateDialog(Bundle savedInstanceState) {
-        return new AlertDialog->Builder(GetActivity())
-                .SetMessage(R::string::only_one_home_message)
-                .SetPositiveButton(android.R::string::ok, NULL)
-                .Create();
-    }
-}
+    CARAPI OnCreateDialog(
+        /* [in] */ IBundle* savedInstanceState,
+        /* [out] */ IDialog** dialog);
+};
+
+} // namespace Dashboard
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_DASHBOARD_NOHOMEDIALOGFRAGMENT_H__

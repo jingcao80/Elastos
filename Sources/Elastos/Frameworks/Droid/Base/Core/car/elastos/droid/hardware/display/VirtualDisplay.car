@@ -92,8 +92,14 @@ module
             [in] Int32 height,
             [in] Int32 densityDpi);
 
-        ToString(
-            [out] String* result);
+        /**
+         * Releases the virtual display and destroys its underlying surface.
+         * <p>
+         * All remaining windows on the virtual display will be forcibly removed
+         * as part of releasing the virtual display.
+         * </p>
+         */
+        ReleaseResources();
     }
 
     } // namespace Display

@@ -21,6 +21,25 @@ class RequestArcInitiationAction
     : public RequestArcAction
     , public IRequestArcInitiationAction
 {
+private:
+    class InnerSub_HdmiControlServiceSendMessageCallback
+        : public Object
+        , public IHdmiControlServiceSendMessageCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_HdmiControlServiceSendMessageCallback(
+            /* [in] */ RequestArcInitiationAction* host);
+
+        //@Override
+        CARAPI OnSendCompleted(
+            /* [in] */ Int32 error);
+
+    private:
+        RequestArcInitiationAction* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

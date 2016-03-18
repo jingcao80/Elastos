@@ -1414,7 +1414,7 @@ ECode ApplicationPackageManager::GetResourcesForApplication(
         return NOERROR;
     }
 
-    Slogger::E("ApplicationPackageManager", "Unable to open [%s]",  publicSourceDir.string());
+    Slogger::E(TAG, "Unable to open [%s], ApplicationInfo:[%s]", publicSourceDir.string(), TO_CSTR(app));
     return E_NAME_NOT_FOUND_EXCEPTION;
 }
 
@@ -1461,7 +1461,7 @@ ECode ApplicationPackageManager::GetResourcesForApplicationAsUser(
     //     throw new RuntimeException("Package manager has died", e);
     // }
 
-    Slogger::E("ApplicationPackageManager", "UPackage [%s] doesn't exist",  appPackageName.string());
+    Slogger::E(TAG, "UPackage [%s] doesn't exist",  appPackageName.string());
     return E_NAME_NOT_FOUND_EXCEPTION;
 }
 

@@ -3,14 +3,19 @@
 #define __ELASTOS_DROID_JAVAPROXY_CINPUTMETHODSESSIONNATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CInputMethodSessionNative.h"
+#include "Elastos.Droid.Internal.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
 using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::InputMethod::ICompletionInfo;
+using Elastos::Droid::View::InputMethod::ICursorAnchorInfo;
 using Elastos::Droid::View::InputMethod::IExtractedText;
+using Elastos::Droid::View::InputMethod::IInputMethodSession;
 using Elastos::Droid::View::InputMethod::ILocalInputMethodSessionEventCallback;
 
 namespace Elastos {
@@ -18,15 +23,21 @@ namespace Droid {
 namespace JavaProxy {
 
 CarClass(CInputMethodSessionNative)
+    , public Object
+    , public IInputMethodSession
+    , public IInputMethodSessionNative
+    , public IBinder
 {
 public:
-    CInputMethodSessionNative();
-
     ~CInputMethodSessionNative();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI SetEnabled(
         /* [in] */ Boolean enabled);
@@ -50,10 +61,6 @@ public:
     CARAPI DisplayCompletions(
         /* [in] */ ArrayOf<ICompletionInfo *>* completions);
 
-    CARAPI UpdateExtractedText(
-        /* [in] */ Int32 token,
-        /* [in] */ IExtractedText* text);
-
     CARAPI DispatchKeyEvent(
         /* [in] */ Int32 seq,
         /* [in] */ IKeyEvent* event,
@@ -69,6 +76,10 @@ public:
         /* [in] */ IMotionEvent* event,
         /* [in] */ ILocalInputMethodSessionEventCallback* cb);
 
+    CARAPI UpdateExtractedText(
+        /* [in] */ Int32 token,
+        /* [in] */ IExtractedText* text);
+
     CARAPI AppPrivateCommand(
         /* [in] */ const String& action,
         /* [in] */ IBundle* data);
@@ -76,6 +87,12 @@ public:
     CARAPI ToggleSoftInput(
         /* [in] */ Int32 showFlags,
         /* [in] */ Int32 hideFlags);
+
+    CARAPI UpdateCursorAnchorInfo(
+        /* [in] */ ICursorAnchorInfo* cursorAnchorInfo);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
     static const String TAG;

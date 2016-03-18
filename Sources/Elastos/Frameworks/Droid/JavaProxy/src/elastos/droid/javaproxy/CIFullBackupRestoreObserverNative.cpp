@@ -3,6 +3,8 @@
 #include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::App::Backup::EIID_IIFullBackupRestoreObserver;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -10,6 +12,10 @@ namespace Droid {
 namespace JavaProxy {
 
 const String CIFullBackupRestoreObserverNative::TAG("CIFullBackupRestoreObserverNative");
+
+CAR_INTERFACE_IMPL_2(CIFullBackupRestoreObserverNative, Object, IIFullBackupRestoreObserver, IBinder)
+
+CAR_OBJECT_IMPL(CIFullBackupRestoreObserverNative)
 
 CIFullBackupRestoreObserverNative::~CIFullBackupRestoreObserverNative()
 {
@@ -19,8 +25,8 @@ CIFullBackupRestoreObserverNative::~CIFullBackupRestoreObserverNative()
 }
 
 ECode CIFullBackupRestoreObserverNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -29,7 +35,7 @@ ECode CIFullBackupRestoreObserverNative::constructor(
 
 ECode CIFullBackupRestoreObserverNative::OnStartBackup()
 {
-    LOGGERD(TAG, String("+ CIFullBackupRestoreObserverNative::OnStartBackup()"));
+    // LOGGERD(TAG, "+ CIFullBackupRestoreObserverNative::OnStartBackup()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -45,14 +51,14 @@ ECode CIFullBackupRestoreObserverNative::OnStartBackup()
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIFullBackupRestoreObserverNative::OnStartBackup()"));
+    // LOGGERD(TAG, "- CIFullBackupRestoreObserverNative::OnStartBackup()");
     return NOERROR;
 }
 
 ECode CIFullBackupRestoreObserverNative::OnBackupPackage(
     /* [in] */ const String& name)
 {
-    LOGGERD(TAG, String("+ CIFullBackupRestoreObserverNative::OnBackupPackage()"));
+    // LOGGERD(TAG, "+ CIFullBackupRestoreObserverNative::OnBackupPackage()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -70,13 +76,13 @@ ECode CIFullBackupRestoreObserverNative::OnBackupPackage(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIFullBackupRestoreObserverNative::OnBackupPackage()"));
+    // LOGGERD(TAG, "- CIFullBackupRestoreObserverNative::OnBackupPackage()");
     return NOERROR;
 }
 
 ECode CIFullBackupRestoreObserverNative::OnEndBackup()
 {
-    LOGGERD(TAG, String("+ CIFullBackupRestoreObserverNative::OnEndBackup()"));
+    // LOGGERD(TAG, "+ CIFullBackupRestoreObserverNative::OnEndBackup()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -92,13 +98,36 @@ ECode CIFullBackupRestoreObserverNative::OnEndBackup()
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIFullBackupRestoreObserverNative::OnEndBackup()"));
+    // LOGGERD(TAG, "- CIFullBackupRestoreObserverNative::OnEndBackup()");
+    return NOERROR;
+}
+
+ECode CIFullBackupRestoreObserverNative::OnEndBackupWithResult(
+    /* [in] */ Int32 result)
+{
+    // LOGGERD(TAG, "+ CIFullBackupRestoreObserverNative::OnEndBackupWithResult()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("android/app/backup/IFullBackupRestoreObserver");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IFullBackupRestoreObserver %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "onEndBackupWithResult", "(I)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: onEndBackupWithResult %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, result);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: onEndBackupWithResult %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CIFullBackupRestoreObserverNative::OnEndBackupWithResult()");
     return NOERROR;
 }
 
 ECode CIFullBackupRestoreObserverNative::OnStartRestore()
 {
-    LOGGERD(TAG, String("+ CIFullBackupRestoreObserverNative::OnStartRestore()"));
+    // LOGGERD(TAG, "+ CIFullBackupRestoreObserverNative::OnStartRestore()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -114,14 +143,14 @@ ECode CIFullBackupRestoreObserverNative::OnStartRestore()
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIFullBackupRestoreObserverNative::OnStartRestore()"));
+    // LOGGERD(TAG, "- CIFullBackupRestoreObserverNative::OnStartRestore()");
     return NOERROR;
 }
 
 ECode CIFullBackupRestoreObserverNative::OnRestorePackage(
     /* [in] */ const String& name)
 {
-    LOGGERD(TAG, String("+ CIFullBackupRestoreObserverNative::OnRestorePackage()"));
+    // LOGGERD(TAG, "+ CIFullBackupRestoreObserverNative::OnRestorePackage()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -139,13 +168,13 @@ ECode CIFullBackupRestoreObserverNative::OnRestorePackage(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIFullBackupRestoreObserverNative::OnRestorePackage()"));
+    // LOGGERD(TAG, "- CIFullBackupRestoreObserverNative::OnRestorePackage()");
     return NOERROR;
 }
 
 ECode CIFullBackupRestoreObserverNative::OnEndRestore()
 {
-    LOGGERD(TAG, String("+ CIFullBackupRestoreObserverNative::OnEndRestore()"));
+    // LOGGERD(TAG, "+ CIFullBackupRestoreObserverNative::OnEndRestore()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -161,13 +190,36 @@ ECode CIFullBackupRestoreObserverNative::OnEndRestore()
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIFullBackupRestoreObserverNative::OnEndRestore()"));
+    // LOGGERD(TAG, "- CIFullBackupRestoreObserverNative::OnEndRestore()");
+    return NOERROR;
+}
+
+ECode CIFullBackupRestoreObserverNative::OnEndRestoreWithResult(
+    /* [in] */ Int32 result)
+{
+    // LOGGERD(TAG, "+ CIFullBackupRestoreObserverNative::OnEndRestoreWithResult()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("android/app/backup/IFullBackupRestoreObserver");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IFullBackupRestoreObserver %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "onEndRestoreWithResult", "(I)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: onEndRestoreWithResult %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, result);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: onEndRestoreWithResult %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CIFullBackupRestoreObserverNative::OnEndRestoreWithResult()");
     return NOERROR;
 }
 
 ECode CIFullBackupRestoreObserverNative::OnTimeout()
 {
-    LOGGERD(TAG, String("+ CIFullBackupRestoreObserverNative::OnTimeout()"));
+    // LOGGERD(TAG, "+ CIFullBackupRestoreObserverNative::OnTimeout()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -183,7 +235,7 @@ ECode CIFullBackupRestoreObserverNative::OnTimeout()
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIFullBackupRestoreObserverNative::OnTimeout()"));
+    // LOGGERD(TAG, "- CIFullBackupRestoreObserverNative::OnTimeout()");
     return NOERROR;
 }
 

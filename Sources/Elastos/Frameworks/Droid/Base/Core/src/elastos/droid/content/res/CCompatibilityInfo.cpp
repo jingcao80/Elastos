@@ -523,163 +523,162 @@ ECode CCompatibilityInfo::constructor(
     /* [in] */ Int32 sw,
     /* [in] */ Boolean forceCompat)
 {
-    assert(0 && "TODO");
-    // Int32 compatFlags = 0;
+    Int32 compatFlags = 0;
 
-    // AutoPtr<CApplicationInfo> appInfoCls = (CApplicationInfo*)appInfo;
+    AutoPtr<CApplicationInfo> appInfoCls = (CApplicationInfo*)appInfo;
 
-    // if (appInfoCls->mRequiresSmallestWidthDp != 0 || appInfoCls->mCompatibleWidthLimitDp != 0
-    //         || appInfoCls->mLargestWidthLimitDp != 0) {
-    //     // New style screen requirements spec.
-    //     Int32 required = appInfoCls->mRequiresSmallestWidthDp != 0
-    //             ? appInfoCls->mRequiresSmallestWidthDp
-    //             : appInfoCls->mCompatibleWidthLimitDp;
-    //     if (required == 0) {
-    //         required = appInfoCls->mLargestWidthLimitDp;
-    //     }
-    //     Int32 compat = appInfoCls->mCompatibleWidthLimitDp != 0
-    //             ? appInfoCls->mCompatibleWidthLimitDp : required;
-    //     if (compat < required) {
-    //         compat = required;
-    //     }
-    //     Int32 largest = appInfoCls->mLargestWidthLimitDp;
+    if (appInfoCls->mRequiresSmallestWidthDp != 0 || appInfoCls->mCompatibleWidthLimitDp != 0
+            || appInfoCls->mLargestWidthLimitDp != 0) {
+        // New style screen requirements spec.
+        Int32 required = appInfoCls->mRequiresSmallestWidthDp != 0
+                ? appInfoCls->mRequiresSmallestWidthDp
+                : appInfoCls->mCompatibleWidthLimitDp;
+        if (required == 0) {
+            required = appInfoCls->mLargestWidthLimitDp;
+        }
+        Int32 compat = appInfoCls->mCompatibleWidthLimitDp != 0
+                ? appInfoCls->mCompatibleWidthLimitDp : required;
+        if (compat < required) {
+            compat = required;
+        }
+        Int32 largest = appInfoCls->mLargestWidthLimitDp;
 
-    //     if (required > DEFAULT_NORMAL_SHORT_DIMENSION) {
-    //         // For now -- if they require a size larger than the only
-    //         // size we can do in compatibility mode, then don't ever
-    //         // allow the app to go in to compat mode.  Trying to run
-    //         // it at a smaller size it can handle will make it far more
-    //         // broken than running at a larger size than it wants or
-    //         // thinks it can handle.
-    //         compatFlags |= NEVER_NEEDS_COMPAT;
-    //     }
-    //     else if (largest != 0 && sw > largest) {
-    //         // If the screen size is larger than the largest size the
-    //         // app thinks it can work with, then always force it in to
-    //         // compatibility mode.
-    //         compatFlags |= NEEDS_SCREEN_COMPAT | ALWAYS_NEEDS_COMPAT;
-    //     }
-    //     else if (compat >= sw) {
-    //         // The screen size is something the app says it was designed
-    //         // for, so never do compatibility mode.
-    //         compatFlags |= NEVER_NEEDS_COMPAT;
-    //     }
-    //     else if (forceCompat) {
-    //         // The app may work better with or without compatibility mode.
-    //         // Let the user decide.
-    //         compatFlags |= NEEDS_SCREEN_COMPAT;
-    //     }
+        if (required > DEFAULT_NORMAL_SHORT_DIMENSION) {
+            // For now -- if they require a size larger than the only
+            // size we can do in compatibility mode, then don't ever
+            // allow the app to go in to compat mode.  Trying to run
+            // it at a smaller size it can handle will make it far more
+            // broken than running at a larger size than it wants or
+            // thinks it can handle.
+            compatFlags |= NEVER_NEEDS_COMPAT;
+        }
+        else if (largest != 0 && sw > largest) {
+            // If the screen size is larger than the largest size the
+            // app thinks it can work with, then always force it in to
+            // compatibility mode.
+            compatFlags |= NEEDS_SCREEN_COMPAT | ALWAYS_NEEDS_COMPAT;
+        }
+        else if (compat >= sw) {
+            // The screen size is something the app says it was designed
+            // for, so never do compatibility mode.
+            compatFlags |= NEVER_NEEDS_COMPAT;
+        }
+        else if (forceCompat) {
+            // The app may work better with or without compatibility mode.
+            // Let the user decide.
+            compatFlags |= NEEDS_SCREEN_COMPAT;
+        }
 
-    //     // Modern apps always support densities.
-    //     mApplicationDensity = CDisplayMetrics::DENSITY_DEVICE;
-    //     mApplicationScale = 1.0f;
-    //     mApplicationInvertedScale = 1.0f;
+        // Modern apps always support densities.
+        mApplicationDensity = CDisplayMetrics::DENSITY_DEVICE;
+        mApplicationScale = 1.0f;
+        mApplicationInvertedScale = 1.0f;
 
-    // }
-    // else {
-    //     /**
-    //      * Has the application said that its UI is expandable?  Based on the
-    //      * <supports-screen> android:expandible in the manifest.
-    //      */
-    //     Int32 EXPANDABLE = 2;
+    }
+    else {
+        /**
+         * Has the application said that its UI is expandable?  Based on the
+         * <supports-screen> android:expandible in the manifest.
+         */
+        Int32 EXPANDABLE = 2;
 
-    //     /**
-    //      * Has the application said that its UI supports large screens?  Based on the
-    //      * <supports-screen> android:largeScreens in the manifest.
-    //      */
-    //     Int32 LARGE_SCREENS = 8;
+        /**
+         * Has the application said that its UI supports large screens?  Based on the
+         * <supports-screen> android:largeScreens in the manifest.
+         */
+        Int32 LARGE_SCREENS = 8;
 
-    //     /**
-    //      * Has the application said that its UI supports xlarge screens?  Based on the
-    //      * <supports-screen> android:xlargeScreens in the manifest.
-    //      */
-    //     Int32 XLARGE_SCREENS = 32;
+        /**
+         * Has the application said that its UI supports xlarge screens?  Based on the
+         * <supports-screen> android:xlargeScreens in the manifest.
+         */
+        Int32 XLARGE_SCREENS = 32;
 
-    //     Int32 sizeInfo = 0;
+        Int32 sizeInfo = 0;
 
-    //     // We can't rely on the application always setting
-    //     // FLAG_RESIZEABLE_FOR_SCREENS so will compute it based on various input.
-    //     Boolean anyResizeable = FALSE;
+        // We can't rely on the application always setting
+        // FLAG_RESIZEABLE_FOR_SCREENS so will compute it based on various input.
+        Boolean anyResizeable = FALSE;
 
-    //     if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
-    //         sizeInfo |= LARGE_SCREENS;
-    //         anyResizeable = TRUE;
-    //         if (!forceCompat) {
-    //             // If we aren't forcing the app into compatibility mode, then
-    //             // assume if it supports large screens that we should allow it
-    //             // to use the full space of an xlarge screen as well.
-    //             sizeInfo |= XLARGE_SCREENS | EXPANDABLE;
-    //         }
-    //     }
+        if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
+            sizeInfo |= LARGE_SCREENS;
+            anyResizeable = TRUE;
+            if (!forceCompat) {
+                // If we aren't forcing the app into compatibility mode, then
+                // assume if it supports large screens that we should allow it
+                // to use the full space of an xlarge screen as well.
+                sizeInfo |= XLARGE_SCREENS | EXPANDABLE;
+            }
+        }
 
-    //     if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
-    //         anyResizeable = TRUE;
-    //         if (!forceCompat) {
-    //             sizeInfo |= XLARGE_SCREENS | EXPANDABLE;
-    //         }
-    //     }
+        if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
+            anyResizeable = TRUE;
+            if (!forceCompat) {
+                sizeInfo |= XLARGE_SCREENS | EXPANDABLE;
+            }
+        }
 
-    //     if ((appInfoCls->mFlags & IApplicationInfo::FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
-    //         anyResizeable = TRUE;
-    //         sizeInfo |= EXPANDABLE;
-    //     }
+        if ((appInfoCls->mFlags & IApplicationInfo::FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
+            anyResizeable = TRUE;
+            sizeInfo |= EXPANDABLE;
+        }
 
-    //     if (forceCompat) {
-    //         // If we are forcing compatibility mode, then ignore an app that
-    //         // just says it is resizable for screens.  We'll only have it fill
-    //         // the screen if it explicitly says it supports the screen size we
-    //         // are running in.
-    //         sizeInfo &= ~EXPANDABLE;
-    //     }
+        if (forceCompat) {
+            // If we are forcing compatibility mode, then ignore an app that
+            // just says it is resizable for screens.  We'll only have it fill
+            // the screen if it explicitly says it supports the screen size we
+            // are running in.
+            sizeInfo &= ~EXPANDABLE;
+        }
 
-    //     compatFlags |= NEEDS_SCREEN_COMPAT;
-    //     switch (screenLayout & IConfiguration::SCREENLAYOUT_SIZE_MASK) {
-    //         case IConfiguration::SCREENLAYOUT_SIZE_XLARGE:
-    //             if ((sizeInfo & XLARGE_SCREENS) != 0) {
-    //                 compatFlags &= ~NEEDS_SCREEN_COMPAT;
-    //             }
-    //             if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
-    //                 compatFlags |= NEVER_NEEDS_COMPAT;
-    //             }
-    //             break;
-    //         case IConfiguration::SCREENLAYOUT_SIZE_LARGE:
-    //             if ((sizeInfo & LARGE_SCREENS) != 0) {
-    //                 compatFlags &= ~NEEDS_SCREEN_COMPAT;
-    //             }
-    //             if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
-    //                 compatFlags |= NEVER_NEEDS_COMPAT;
-    //             }
-    //             break;
-    //     }
+        compatFlags |= NEEDS_SCREEN_COMPAT;
+        switch (screenLayout & IConfiguration::SCREENLAYOUT_SIZE_MASK) {
+            case IConfiguration::SCREENLAYOUT_SIZE_XLARGE:
+                if ((sizeInfo & XLARGE_SCREENS) != 0) {
+                    compatFlags &= ~NEEDS_SCREEN_COMPAT;
+                }
+                if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
+                    compatFlags |= NEVER_NEEDS_COMPAT;
+                }
+                break;
+            case IConfiguration::SCREENLAYOUT_SIZE_LARGE:
+                if ((sizeInfo & LARGE_SCREENS) != 0) {
+                    compatFlags &= ~NEEDS_SCREEN_COMPAT;
+                }
+                if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
+                    compatFlags |= NEVER_NEEDS_COMPAT;
+                }
+                break;
+        }
 
-    //     if ((screenLayout & IConfiguration::SCREENLAYOUT_COMPAT_NEEDED) != 0) {
-    //         if ((sizeInfo&EXPANDABLE) != 0) {
-    //             compatFlags &= ~NEEDS_SCREEN_COMPAT;
-    //         }
-    //         else if (!anyResizeable) {
-    //             compatFlags |= ALWAYS_NEEDS_COMPAT;
-    //         }
-    //     }
-    //     else {
-    //         compatFlags &= ~NEEDS_SCREEN_COMPAT;
-    //         compatFlags |= NEVER_NEEDS_COMPAT;
-    //     }
+        if ((screenLayout & IConfiguration::SCREENLAYOUT_COMPAT_NEEDED) != 0) {
+            if ((sizeInfo&EXPANDABLE) != 0) {
+                compatFlags &= ~NEEDS_SCREEN_COMPAT;
+            }
+            else if (!anyResizeable) {
+                compatFlags |= ALWAYS_NEEDS_COMPAT;
+            }
+        }
+        else {
+            compatFlags &= ~NEEDS_SCREEN_COMPAT;
+            compatFlags |= NEVER_NEEDS_COMPAT;
+        }
 
-    //     if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
-    //         mApplicationDensity = CDisplayMetrics::DENSITY_DEVICE;
-    //         mApplicationScale = 1.0f;
-    //         mApplicationInvertedScale = 1.0f;
-    //     }
-    //     else {
-    //         mApplicationDensity = IDisplayMetrics::DENSITY_DEFAULT;
-    //         mApplicationScale = CDisplayMetrics::DENSITY_DEVICE
-    //                 / (Float) IDisplayMetrics::DENSITY_DEFAULT;
-    //         mApplicationInvertedScale = 1.0f / mApplicationScale;
-    //         compatFlags |= SCALING_REQUIRED;
-    //     }
-    // }
+        if ((appInfoCls->mFlags & IApplicationInfo::FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
+            mApplicationDensity = CDisplayMetrics::DENSITY_DEVICE;
+            mApplicationScale = 1.0f;
+            mApplicationInvertedScale = 1.0f;
+        }
+        else {
+            mApplicationDensity = IDisplayMetrics::DENSITY_DEFAULT;
+            mApplicationScale = CDisplayMetrics::DENSITY_DEVICE
+                    / (Float) IDisplayMetrics::DENSITY_DEFAULT;
+            mApplicationInvertedScale = 1.0f / mApplicationScale;
+            compatFlags |= SCALING_REQUIRED;
+        }
+    }
 
-    // mCompatibilityFlags = compatFlags;
+    mCompatibilityFlags = compatFlags;
 
     return NOERROR;
 }

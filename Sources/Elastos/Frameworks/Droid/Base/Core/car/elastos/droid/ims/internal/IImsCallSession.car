@@ -1,0 +1,253 @@
+
+module
+{
+    interface Elastos.Droid.Ims.IImsCallProfile;
+    interface Elastos.Droid.Ims.IImsStreamMediaProfile;
+    interface Elastos.Droid.Ims.Internal.IIImsCallSessionListener;
+    interface Elastos.Droid.Ims.Internal.IIImsVideoCallProvider;
+    interface Elastos.Droid.Os.IMessage;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Ims {
+    namespace Internal {
+
+    /**
+     * An IMS session that is associated with a SIP dialog which is established from/to
+     * INVITE request or a mid-call transaction to control the session.
+     * {@hide}
+     */
+    [deprecated]
+    interface IIImsCallSession {
+        /**
+         * Closes the object. This object is not usable after being closed.
+         */
+        Close();
+
+        /**
+         * Gets the call ID of the session.
+         *
+         * @return the call ID
+         */
+        GetCallId(
+            [out] String* result);
+
+        /**
+         * Gets the call profile that this session is associated with
+         *
+         * @return the call profile that this session is associated with
+         */
+        GetCallProfile(
+            [out] IImsCallProfile** result);
+
+        /**
+         * Gets the local call profile that this session is associated with
+         *
+         * @return the local call profile that this session is associated with
+         */
+        GetLocalCallProfile(
+            [out] IImsCallProfile** result);
+
+        /**
+         * Gets the value associated with the specified property of this session.
+         *
+         * @return the string value associated with the specified property
+         */
+        GetProperty(
+            [in] String name,
+            [out] String* result);
+
+        /**
+         * Gets the session state. The value returned must be one of the states in
+         * {@link ImsCallSession#State}.
+         *
+         * @return the session state
+         */
+        GetState(
+            [out] Int32* result);
+
+        /**
+         * Checks if the session is in a call.
+         *
+         * @return true if the session is in a call
+         */
+        IsInCall(
+            [out] Boolean* result);
+
+        /**
+         * Sets the listener to listen to the session events. A {@link IImsCallSession}
+         * can only hold one listener at a time. Subsequent calls to this method
+         * override the previous listener.
+         *
+         * @param listener to listen to the session events of this object
+         */
+        SetListener(
+            [in] IIImsCallSessionListener* listener);
+
+        /**
+         * Mutes or unmutes the mic for the active call.
+         *
+         * @param muted true if the call is muted, false otherwise
+         */
+        SetMute(
+            [in] Boolean muted);
+
+        /**
+         * Initiates an IMS call with the specified target and call profile.
+         * The session listener is called back upon defined session events.
+         * The method is only valid to call when the session state is in
+         * {@link ImsCallSession#State#IDLE}.
+         *
+         * @param callee dialed string to make the call to
+         * @param profile call profile to make the call with the specified service type,
+         *      call type and media information
+         * @see Listener#callSessionStarted, Listener#callSessionStartFailed
+         */
+        Start(
+            [in] String calleeStr,
+            [in] IImsCallProfile* profile);
+
+        /**
+         * Initiates an IMS call with the specified participants and call profile.
+         * The session listener is called back upon defined session events.
+         * The method is only valid to call when the session state is in
+         * {@link ImsCallSession#State#IDLE}.
+         *
+         * @param participants participant list to initiate an IMS conference call
+         * @param profile call profile to make the call with the specified service type,
+         *      call type and media information
+         * @see Listener#callSessionStarted, Listener#callSessionStartFailed
+         */
+        StartConference(
+            [in] ArrayOf<String>* participants,
+            [in] IImsCallProfile* profile);
+
+        /**
+         * Accepts an incoming call or session update.
+         *
+         * @param callType call type specified in {@link ImsCallProfile} to be answered
+         * @param profile stream media profile {@link ImsStreamMediaProfile} to be answered
+         * @see Listener#callSessionStarted
+         */
+        Accept(
+            [in] Int32 callType,
+            [in] IImsStreamMediaProfile* profile);
+
+        /**
+         * Rejects an incoming call or session update.
+         *
+         * @param reason reason code to reject an incoming call
+         * @see Listener#callSessionStartFailed
+         */
+        Reject(
+            [in] Int32 reason);
+
+        /**
+         * Terminates a call.
+         *
+         * @see Listener#callSessionTerminated
+         */
+        Terminate(
+            [in] Int32 reason);
+
+        /**
+         * Puts a call on hold. When it succeeds, {@link Listener#callSessionHeld} is called.
+         *
+         * @param profile stream media profile {@link ImsStreamMediaProfile} to hold the call
+         * @see Listener#callSessionHeld, Listener#callSessionHoldFailed
+         */
+        Hold(
+            [in] IImsStreamMediaProfile* profile);
+
+        /**
+         * Continues a call that's on hold. When it succeeds, {@link Listener#callSessionResumed}
+         * is called.
+         *
+         * @param profile stream media profile {@link ImsStreamMediaProfile} to resume the call
+         * @see Listener#callSessionResumed, Listener#callSessionResumeFailed
+         */
+        Resume(
+            [in] IImsStreamMediaProfile* profile);
+
+        /**
+         * Merges the active & hold call. When it succeeds, {@link Listener#callSessionMerged}
+         * is called.
+         *
+         * @see Listener#callSessionMerged, Listener#callSessionMergeFailed
+         */
+        Merge();
+
+        /**
+         * Updates the current call's properties (ex. call mode change: video upgrade / downgrade).
+         *
+         * @param callType call type specified in {@link ImsCallProfile} to be updated
+         * @param profile stream media profile {@link ImsStreamMediaProfile} to be updated
+         * @see Listener#callSessionUpdated, Listener#callSessionUpdateFailed
+         */
+        Update(
+            [in] Int32 callType,
+            [in] IImsStreamMediaProfile* profile);
+
+        /**
+         * Extends this call to the conference call with the specified recipients.
+         *
+         * @param participants participant list to be invited to the conference call after extending the call
+         * @see Listener#sessionConferenceExtened, Listener#sessionConferenceExtendFailed
+         */
+        ExtendToConference(
+            [in] ArrayOf<String>* participants);
+
+        /**
+         * Requests the conference server to invite an additional participants to the conference.
+         *
+         * @param participants participant list to be invited to the conference call
+         * @see Listener#sessionInviteParticipantsRequestDelivered,
+         *      Listener#sessionInviteParticipantsRequestFailed
+         */
+        InviteParticipants(
+            [in] ArrayOf<String>* participants);
+
+        /**
+         * Requests the conference server to remove the specified participants from the conference.
+         *
+         * @param participants participant list to be removed from the conference call
+         * @see Listener#sessionRemoveParticipantsRequestDelivered,
+         *      Listener#sessionRemoveParticipantsRequestFailed
+         */
+        RemoveParticipants(
+            [in] ArrayOf<String>* participants);
+
+        /**
+         * Sends a DTMF code. According to <a href="http://tools.ietf.org/html/rfc2833">RFC 2833</a>,
+         * event 0 ~ 9 maps to decimal value 0 ~ 9, '*' to 10, '#' to 11, event 'A' ~ 'D' to 12 ~ 15,
+         * and event flash to 16. Currently, event flash is not supported.
+         *
+         * @param c the DTMF to send. '0' ~ '9', 'A' ~ 'D', '*', '#' are valid inputs.
+         * @param result.
+         */
+        SendDtmf(
+            [in] Char32 c,
+            [in] IMessage* result);
+
+        /**
+         * Sends an USSD message.
+         *
+         * @param ussdMessage USSD message to send
+         */
+        SendUssd(
+            [in] String* ussdMessage);
+
+        /**
+         * Returns a binder for the video call provider implementation contained within the IMS service
+         * process. This binder is used by the VideoCallProvider subclass in Telephony which
+         * intermediates between the propriety implementation and Telecomm/InCall.
+         */
+        GetVideoCallProvider(
+            [out] IIImsVideoCallProvider** result);
+    }
+
+    } // namespace Internal
+    } // namespace Ims
+    } // namespace Droid
+    } // namespace Elastos
+}

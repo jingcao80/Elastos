@@ -5,9 +5,11 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/server/am/ActivityRecord.h"
+#include "elastos/droid/server/am/ActivityStack.h"
 #include "elastos/droid/server/am/CActivityManagerService.h"
 #include "elastos/droid/server/am/LockTaskNotify.h"
-//TODO #include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/server/am/ActivityStack.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
 
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
 using Elastos::Droid::App::Admin::IIDevicePolicyManager;
@@ -35,7 +37,7 @@ using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Server::Am::IUserStartedState;
-//TODO using Elastos::Droid::Server::Wm::CWindowManagerService;
+using Elastos::Droid::Server::Wm::CWindowManagerService;
 using Elastos::Droid::Service::Voice::IIVoiceInteractionSession;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::Utility::ISparseInt32Array;
@@ -97,241 +99,6 @@ public:
         ActivityStackSupervisor* mOwner;
     };
 
-    /** Exactly one of these classes per Display in the system. Capable of holding zero or more
-      * attached {@link ActivityStack}s */
-    class ActivityDisplay
-        : public Object
-    {
-    public:
-        ActivityDisplay(
-            /* [in] */ ActivityStackSupervisor* owner);
-
-        // After instantiation, check that mDisplay is not null before using this. The alternative
-        // is for this to throw an exception if mDisplayManager.getDisplay() returns null.
-        ActivityDisplay(
-            /* [in] */ Int32 displayId,
-            /* [in] */ ActivityStackSupervisor* owner);
-
-        virtual CARAPI Init(
-            /* [in] */ IDisplay* display);
-
-        virtual CARAPI AttachActivities(
-            /* [in] */ ActivityStack* stack);
-
-        virtual CARAPI DetachActivitiesLocked(
-            /* [in] */ ActivityStack* stack);
-
-        virtual CARAPI GetBounds(
-            /* [in] */ IPoint* bounds);
-
-        virtual CARAPI SetVisibleBehindActivity(
-            /* [in] */ ActivityRecord* r);
-
-        virtual CARAPI_(Boolean) HasVisibleBehindActivity();
-
-        // @Override
-        CARAPI_(String) ToString();
-
-        CARAPI ToString(
-            /* [out] */ String* result);
-
-    public:
-        /** Actual Display this object tracks. */
-        Int32 mDisplayId;
-        AutoPtr<IDisplay> mDisplay;
-        AutoPtr<IDisplayInfo> mDisplayInfo;
-        /** All of the stacks on this display. Order matters, topmost stack is in front of all other
-          * stacks, bottommost behind. Accessed directly by ActivityManager package classes */
-        AutoPtr<IArrayList> mStacks;//ActivityStack
-        AutoPtr<ActivityRecord> mVisibleBehindActivity;
-        ActivityStackSupervisor* mOwner;
-    };
-
-    class ActivityContainer
-        : public Object
-        , public IBinder
-        , public IIActivityContainer
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        ActivityContainer();
-
-        CARAPI constructor(
-            /* [in] */ Int32 stackId,
-            /* [in] */ IInterface* owner);//ActivityStackSupervisor
-
-        ActivityContainer(
-            /* [in] */ Int32 stackId,
-            /* [in] */ ActivityStackSupervisor* owner);
-
-        CARAPI AttachToDisplayLocked(
-            /* [in] */ ActivityDisplay* activityDisplay);
-
-        // @Override
-        CARAPI AttachToDisplay(
-            /* [in] */ Int32 displayId);
-
-        // @Override
-        CARAPI GetDisplayId(
-            /* [out] */ Int32 *result);
-
-        // @Override
-        CARAPI InjectEvent(
-            /* [in] */ IInputEvent* event,
-            /* [out] */ Boolean* result);
-
-        // @Override
-        CARAPI ReleaseResources();
-
-        // @Override
-        CARAPI StartActivity(
-            /* [in] */ IIntent* intent,
-            /* [out] */ Int32* result);
-
-        // @Override
-        CARAPI StartActivityIntentSender(
-            /* [in] */ IIIntentSender* intentSender,
-            /* [out] */ Int32* result);
-
-        /** Throw a SecurityException if allowEmbedded is not true */
-        // @Override
-        CARAPI CheckEmbeddedAllowed(
-            /* [in] */ IIntent* intent);
-
-        /** Throw a SecurityException if allowEmbedded is not true */
-        // @Override
-        CARAPI CheckEmbeddedAllowedIntentSender(
-            /* [in] */ IIIntentSender* intentSender);
-
-        // @Override
-        //CARAPI_(AutoPtr<IBinder>) AsBinder();
-
-        // @Override
-        CARAPI SetSurface(
-            /* [in] */ ISurface* surface,
-            /* [in] */ Int32 width,
-            /* [in] */ Int32 height,
-            /* [in] */ Int32 density);
-
-        virtual CARAPI_(AutoPtr<ActivityStackSupervisor>) GetOuter();
-
-        virtual CARAPI_(Boolean) IsAttachedLocked();
-
-        virtual CARAPI GetBounds(
-            /* [in] */ IPoint* outBounds);
-
-        // TODO: Make sure every change to ActivityRecord.visible results in a call to this.
-        virtual CARAPI SetVisible(
-            /* [in] */ Boolean visible);
-
-        virtual CARAPI SetDrawn();
-
-        // You can always start a new task on a regular ActivityStack.
-        virtual CARAPI_(Boolean) IsEligibleForNewTasks();
-
-        virtual CARAPI OnTaskListEmptyLocked();
-
-        // @Override
-        CARAPI_(String) ToString();
-
-        virtual CARAPI ToString(
-            /* [out] */ String* info);
-
-        CARAPI_(void) DetachLocked();
-
-    private:
-        CARAPI CheckEmbeddedAllowedInner(
-            /* [in] */ IIntent* intent,
-            /* [in] */ const String& resolvedType);
-
-    public:
-        static const Int32 FORCE_NEW_TASK_FLAGS;// = IIntent::FLAG_ACTIVITY_NEW_TASK | IIntent::FLAG_ACTIVITY_MULTIPLE_TASK | IIntent::FLAG_ACTIVITY_NO_ANIMATION;
-        Int32 mStackId;
-        AutoPtr<IActivityContainerCallback> mCallback;
-        AutoPtr<ActivityStack> mStack;
-        AutoPtr<ActivityRecord> mParentActivity;
-        String mIdString;
-        Boolean mVisible;
-        /** Display this ActivityStack is currently on. Null if not attached to a Display. */
-        AutoPtr<ActivityDisplay> mActivityDisplay;
-        static const Int32 CONTAINER_STATE_HAS_SURFACE;// = 0;
-        static const Int32 CONTAINER_STATE_NO_SURFACE;// = 1;
-        static const Int32 CONTAINER_STATE_FINISHING;// = 2;
-        Int32 mContainerState;
-        ActivityStackSupervisor* mOwner;
-    };
-
-    class VirtualActivityDisplay
-        : public ActivityDisplay
-    {
-    public:
-        VirtualActivityDisplay(
-            /* [in] */ Int32 width,
-            /* [in] */ Int32 height,
-            /* [in] */ Int32 density,
-            /* [in] */ ActivityStackSupervisor* owner);
-
-        CARAPI SetSurface(
-            /* [in] */ ISurface* surface);
-
-        // @Override
-        CARAPI DetachActivitiesLocked(
-            /* [in] */ ActivityStack* stack);
-
-        // @Override
-        //CARAPI_(String) ToString();
-
-        CARAPI ToString(
-            /* [out] */ String* result);
-
-    public:
-        AutoPtr<IVirtualDisplay> mVirtualDisplay;
-    };
-
-private:
-    class VirtualActivityContainer
-        : public ActivityContainer
-    {
-    public:
-        VirtualActivityContainer(
-            /* [in] */ ActivityRecord* parent,
-            /* [in] */ IActivityContainerCallback* callback,
-            /* [in] */ ActivityStackSupervisor* owner);
-
-        // @Override
-        CARAPI SetSurface(
-            /* [in] */ ISurface* surface,
-            /* [in] */ Int32 width,
-            /* [in] */ Int32 height,
-            /* [in] */ Int32 density);
-
-        // @Override
-        CARAPI_(Boolean) IsAttachedLocked();
-
-        // @Override
-        CARAPI SetDrawn();
-
-        // Never start a new task on an ActivityView if it isn't explicitly specified.
-        // @Override
-        CARAPI_(Boolean) IsEligibleForNewTasks();
-
-        CARAPI OnTaskListEmptyLocked();
-
-    private:
-        CARAPI_(void) SetSurfaceLocked(
-            /* [in] */ ISurface* surface,
-            /* [in] */ Int32 width,
-            /* [in] */ Int32 height,
-            /* [in] */ Int32 density);
-
-        CARAPI_(void) SetSurfaceIfReadyLocked();
-
-    public:
-        AutoPtr<ISurface> mSurface;
-        Boolean mDrawn;
-    };
-
 public:
     CAR_INTERFACE_DECL();
 
@@ -345,7 +112,7 @@ public:
     virtual CARAPI InitPowerManagement();
 
     virtual CARAPI SetWindowManager(
-        /* [in] */ /*TODO CWindowManagerService*/IInterface* wm);
+        /* [in] */ CWindowManagerService* wm);
 
     virtual CARAPI NotifyActivityDrawnForKeyguard();
 
@@ -505,7 +272,7 @@ public:
         /* [in] */ IBundle* options,
         /* [in] */ Boolean componentSpecified,
         /* [in] */ ArrayOf<ActivityRecord*>* outActivity,
-        /* [in] */ ActivityContainer* container,
+        /* [in] */ IIActivityContainer* container,
         /* [in] */ TaskRecord* inTask,
         /* [out] */ Int32* result);
 
@@ -589,7 +356,7 @@ public:
 
     virtual CARAPI_(AutoPtr<ActivityRecord>) GetHomeActivity();
 
-    virtual CARAPI_(AutoPtr<ActivityContainer>) CreateActivityContainer(
+    virtual CARAPI_(AutoPtr<IIActivityContainer>) CreateActivityContainer(
         /* [in] */ ActivityRecord* parentActivity,
         /* [in] */ IActivityContainerCallback* callback);
 
@@ -818,7 +585,7 @@ public:
     AutoPtr<CActivityManagerService> mService;
     AutoPtr<ActivityStackSupervisorHandler> mHandler;
     /** Short cut */
-    //TODO AutoPtr<CWindowManagerService> mWindowManager;
+    AutoPtr<CWindowManagerService> mWindowManager;
     AutoPtr<IDisplayManager> mDisplayManager;
     /** List of activities that are waiting for a new activity to become visible before completing
       * whatever operation they are supposed to do. */
@@ -866,7 +633,9 @@ public:
     AutoPtr<IArrayList> mPendingActivityLaunches; // PendingActivityLaunch
 
 private:
-    static const String VIRTUAL_DISPLAY_BASE_NAME;
+    friend class ActivityContainer;
+    friend class VirtualActivityContainer;
+
     static const String LOCK_TASK_TAG;
     /** Status Bar Service **/
     AutoPtr<IBinder> mToken;

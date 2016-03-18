@@ -1,10 +1,81 @@
 
-
+#include "Elastos.Droid.Transition.h"
 #include "elastos/droid/settings/SettingsActivity.h"
+#include "elastos/droid/settings/DevelopmentSettings.h"
+#include "elastos/droid/settings/HomeSettings.h"
+#include "elastos/droid/settings/dashboard/DashboardCategory.h"
+#include "elastos/droid/settings/dashboard/NoHomeDialogFragment.h"
+#include "elastos/droid/settings/dashboard/SearchResultsSummary.h"
+#include "elastos/droid/settings/search/Index.h"
+#include "elastos/droid/settings/Utils.h"
+#include "elastos/droid/internal/utility/ArrayUtils.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
+#include "elastos/droid/os/Build.h"
+#include "elastos/droid/os/ServiceManager.h"
+#include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/Xml.h"
-#include <elastos/droid/app/Activity.h>
+#include <elastos/utility/logging/Slogger.h>
+#include "elastos/droid/R.h"
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
 
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::IFragmentManager;
+using Elastos::Droid::App::CFragmentHelper;
+using Elastos::Droid::App::IFragmentHelper;
+using Elastos::Droid::App::IFragmentTransaction;
+using Elastos::Droid::App::EIID_IFragmentManagerOnBackStackChangedListener;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::CIntentHelper;
+using Elastos::Droid::Content::IIntentHelper;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::EIID_ISharedPreferencesOnSharedPreferenceChangeListener;
+using Elastos::Droid::Content::ISharedPreferencesEditor;
+using Elastos::Droid::Content::Pm::IActivityInfo;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Content::Res::IXmlResourceParser;
+using Elastos::Droid::Internal::Utility::ArrayUtils;
+using Elastos::Droid::Internal::Utility::XmlUtils;
+// using Elastos::Droid::NFC::INfcAdapter;
+// using Elastos::Droid::NFC::CNfcAdapterHelper;
+using Elastos::Droid::NFC::INfcAdapterHelper;
+using Elastos::Droid::Os::IINetworkManagementService;
+using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Os::IUserManagerHelper;
+using Elastos::Droid::Os::CUserManagerHelper;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::CMessage;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::Build;
+using Elastos::Droid::Preference::EIID_IPreferenceFragmentOnPreferenceStartFragmentCallback;
+using Elastos::Droid::Preference::EIID_IPreferenceManagerOnPreferenceTreeClickListener;
+using Elastos::Droid::Settings::Dashboard::DashboardCategory;
+using Elastos::Droid::Settings::Dashboard::SearchResultsSummary;
+using Elastos::Droid::Settings::Dashboard::NoHomeDialogFragment;
+using Elastos::Droid::Settings::Search::Index;
+using Elastos::Droid::Settings::EIID_IButtonBarHandler;
+using Elastos::Droid::Transition::ITransitionManagerHelper;
+// using Elastos::Droid::Transition::CTransitionManagerHelper;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::Utility::Xml;
+using Elastos::Droid::View::IMenuInflater;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::EIID_IOnActionExpandListener;
+using Elastos::Droid::Widget::EIID_ISearchViewOnCloseListener;
+using Elastos::Droid::Widget::EIID_ISearchViewOnQueryTextListener;
+using Elastos::Droid::Widget::ILinearLayout;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -29,7 +100,7 @@ const String SettingsActivity::EXTRA_PREFS_SHOW_BUTTON_BAR("extra_prefs_show_but
 const String SettingsActivity::EXTRA_PREFS_SET_NEXT_TEXT("extra_prefs_set_next_text");
 const String SettingsActivity::EXTRA_PREFS_SET_BACK_TEXT("extra_prefs_set_back_text");
 
-const String SettingsActivity::LOG_TAG("Settings");
+const String SettingsActivity::TAG("Settings");
 
 const String SettingsActivity::SAVE_KEY_CATEGORIES(":settings:categories");
 const String SettingsActivity::SAVE_KEY_SEARCH_MENU_EXPANDED(":settings:search_menu_expanded");
@@ -183,7 +254,7 @@ ECode SettingsActivity::BuildCategoriesHandler::HandleMessage(
             Boolean forceRefresh;
             data->GetBoolean(MSG_DATA_FORCE_REFRESH, &forceRefresh);
             if (forceRefresh) {
-                mHost->BuildDashboardCategories(mCategories);
+                mHost->BuildDashboardCategories(IList::Probe(mHost->mCategories));
             }
         } break;
     }
@@ -210,14 +281,20 @@ ECode SettingsActivity::OnCreateOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     switch (mId) {
-        case 0:
-            SetResult(RESULT_CANCELED, GetResultIntentData());
-            Finish();
+        case 0: {
+            AutoPtr<IIntent> intent;
+            mHost->GetResultIntentData((IIntent**)&intent);
+            mHost->SetResult(RESULT_CANCELED, intent);
+            mHost->Finish();
             break;
-        case 1:
-            SetResult(RESULT_OK, GetResultIntentData());
-            Finish();
+        }
+        case 1: {
+            AutoPtr<IIntent> intent;
+            mHost->GetResultIntentData((IIntent**)&intent);
+            mHost->SetResult(RESULT_OK, intent);
+            mHost->Finish();
             break;
+        }
     }
     return NOERROR;
 }
@@ -230,15 +307,18 @@ CAR_INTERFACE_IMPL(SettingsActivity::OnResumeOnSharedPreferenceChangeListener,
         Object, ISharedPreferencesOnSharedPreferenceChangeListener);
 
 SettingsActivity::OnResumeOnSharedPreferenceChangeListener::OnResumeOnSharedPreferenceChangeListener(
-    /* [in] */ SettingsActivity* host);
+    /* [in] */ SettingsActivity* host)
+    : mHost(host)
+{}
 
-SettingsActivity::OnResumeOnSharedPreferenceChangeListener::~OnResumeOnSharedPreferenceChangeListener();
+SettingsActivity::OnResumeOnSharedPreferenceChangeListener::~OnResumeOnSharedPreferenceChangeListener()
+{}
 
 ECode SettingsActivity::OnResumeOnSharedPreferenceChangeListener::OnSharedPreferenceChanged(
     /* [in] */ ISharedPreferences* sharedPreferences,
     /* [in] */ const String& key)
 {
-    InvalidateCategories(TRUE);
+    mHost->InvalidateCategories(TRUE);
     return NOERROR;
 }
 
@@ -308,7 +388,7 @@ ECode SettingsActivity::GetSwitchBar(
     /* [out] */ SwitchBar** switchBar)
 {
     VALIDATE_NOT_NULL(switchBar);
-    *switchBar = switchBar;
+    *switchBar = mSwitchBar;
     REFCOUNT_ADD(*switchBar);
     return NOERROR;
 }
@@ -322,10 +402,10 @@ ECode SettingsActivity::GetDashboardCategories(
     Int32 size;
     mCategories->GetSize(&size);
     if (forceRefresh || size == 0) {
-        BuildDashboardCategories(mCategories);
+        BuildDashboardCategories(IList::Probe(mCategories));
     }
 
-    *categories = mCategories;
+    *categories = IList::Probe(mCategories);
     REFCOUNT_ADD(*categories);
     return NOERROR;
 }
@@ -342,11 +422,11 @@ ECode SettingsActivity::OnPreferenceStartFragment(
     pref->GetTitleRes(&titleRes);
     String str;
     pref->GetFragment(&str);
-    if (str.Equals(String("Elastos.Droid.Settings.WallpaperTypeSettings"))) {
+    if (str.Equals("Elastos.Droid.Settings.WallpaperTypeSettings")) {
         titleRes = R::string::wallpaper_settings_fragment_title;
     }
-    else if (str.Equals(String("Elastos.Droid.Settings.OwnerInfoSettings"))
-            && UserHandle::MyUserId() != IUserHandle::USER_OWNER) {
+    else if (str.Equals("Elastos.Droid.Settings.OwnerInfoSettings")
+            && UserHandle::GetMyUserId() != IUserHandle::USER_OWNER) {
         AutoPtr<IUserManagerHelper> helper;
         CUserManagerHelper::AcquireSingleton((IUserManagerHelper**)&helper);
         AutoPtr<IUserManager> manager;
@@ -363,19 +443,19 @@ ECode SettingsActivity::OnPreferenceStartFragment(
     pref->GetExtras((IBundle**)&bundle);
     AutoPtr<ICharSequence> cs;
     pref->GetTitle((ICharSequence**)&cs);
-    StartPreferencePanel(str, bundle, titleRes, cs,
-            NULL, 0);
+    StartPreferencePanel(str, bundle, titleRes, cs, NULL, 0);
 
     *result = TRUE;
     return NOERROR;
 }
 
 ECode SettingsActivity::OnPreferenceTreeClick(
-    /* [in] */ PreferenceScreen* preferenceScreen,
-    /* [in] */ IPreference* pref,
+    /* [in] */ IPreferenceScreen* preferenceScreen,
+    /* [in] */ IPreference* preference,
     /* [out] */ Boolean* result)
-(
+{
     VALIDATE_NOT_NULL(result);
+
     *result = FALSE;
     return NOERROR;
 }
@@ -383,7 +463,8 @@ ECode SettingsActivity::OnPreferenceTreeClick(
 void SettingsActivity::InvalidateCategories(
     /* [in] */ Boolean forceRefresh)
 {
-    if (!mHandler->HasMessages(MSG_BUILD_CATEGORIES)) {
+    Boolean res;
+    if (mHandler->HasMessages(MSG_BUILD_CATEGORIES, &res), !res) {
         AutoPtr<IMessage> msg;
         CMessage::New((IMessage**)&msg);
         msg->SetWhat(MSG_BUILD_CATEGORIES);
@@ -397,8 +478,7 @@ ECode SettingsActivity::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     Activity::OnConfigurationChanged(newConfig);
-    assert(0 && "TODO");
-    // Index->GetInstance(this).Update();
+    Index::GetInstance((IContext*)this)->Update();
     return NOERROR;
 }
 
@@ -417,7 +497,7 @@ ECode SettingsActivity::OnCreateOptionsMenu(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *res = FALSE;
+    *result = FALSE;
 
     if (!mDisplaySearch) {
         return NOERROR;
@@ -439,8 +519,8 @@ ECode SettingsActivity::OnCreateOptionsMenu(
         return NOERROR;
     }
 
-    if (mSearchResultsFragment != NULL) {
-        (SearchResultsSummary*)mSearchResultsFragment.Get()->SetSearchView(mSearchView);
+    if (mSearchResultsFragment) {
+        ((SearchResultsSummary*)mSearchResultsFragment.Get())->SetSearchView(mSearchView);
     }
 
     mSearchMenuItem->SetOnActionExpandListener(this);
@@ -448,11 +528,13 @@ ECode SettingsActivity::OnCreateOptionsMenu(
     mSearchView->SetOnCloseListener(this);
 
     if (mSearchMenuItemExpanded) {
-        mSearchMenuItem->ExpandActionView();
+        Boolean res;
+        mSearchMenuItem->ExpandActionView(&res);
     }
-    mSearchView->SetQuery(query, TRUE /* submit */);
+    mSearchView->SetQuery(CoreUtils::Convert(query), TRUE /* submit */);
 
-    return TRUE;
+    *result = TRUE;
+    return NOERROR;
 }
 
 Boolean SettingsActivity::IsShortCutIntent(
@@ -463,7 +545,7 @@ Boolean SettingsActivity::IsShortCutIntent(
     if (categories != NULL) {
         for (Int32 i = 0; i < categories->GetLength(); i++) {
             if ((*categories)[i].Equals(
-                    String("com.android.settings.SHORTCUT"))) {
+                    "com.android.settings.SHORTCUT")) {
                 return TRUE;
             }
         }
@@ -509,7 +591,7 @@ ECode SettingsActivity::OnCreate(
 
     // Getting Intent properties can only be done after the super.OnCreate(...)
     String initialFragmentName;
-    ]intent->GetStringExtra(EXTRA_SHOW_FRAGMENT, &initialFragmentName);
+    intent->GetStringExtra(EXTRA_SHOW_FRAGMENT, &initialFragmentName);
 
     intent->GetBooleanExtra(EXTRA_SHOW_FRAGMENT_AS_SHORTCUT, FALSE, &res);
     mIsShortcut = IsShortCutIntent(intent)
@@ -520,13 +602,13 @@ ECode SettingsActivity::OnCreate(
     String className;
     cn->GetClassName(&className);
 
-    mIsShowingDashboard = className.Equals(String("Elastos.Droid.Settings.Settings"));
+    mIsShowingDashboard = className.Equals("Elastos.Droid..");
 
-    // This is a "Sub Settings" when:
+    // This is a "Sub " when:
     // - this is a real SubSettings
     // - or :settings:show_fragment_as_subsetting is passed to the Intent
     intent->GetBooleanExtra(EXTRA_SHOW_FRAGMENT_AS_SUBSETTING, FALSE, &res);
-    Boolean isSubSettings = className.Equals(String("Elastos.Droid.Settings.SubSettings")) || res;
+    Boolean isSubSettings = className.Equals("Elastos.Droid..SubSettings") || res;
 
     // If this is a sub settings, then apply the SubSettings Theme for the ActionBar content insets
     if (isSubSettings) {
@@ -551,8 +633,9 @@ ECode SettingsActivity::OnCreate(
     manager->AddOnBackStackChangedListener(this);
 
     if (mIsShowingDashboard) {
-        assert(0 && "TODO");
-        // Index->GetInstance(GetApplicationContext()).Update();
+        AutoPtr<IContext> context;
+        GetApplicationContext((IContext**)&context);
+        Index::GetInstance(context)->Update();
     }
 
     if (savedState != NULL) {
@@ -567,7 +650,7 @@ ECode SettingsActivity::OnCreate(
         savedState->GetParcelableArrayList(SAVE_KEY_CATEGORIES, (IArrayList**)&categories);
         if (categories != NULL) {
             mCategories->Clear();
-            mCategories->AddAll(categories);
+            mCategories->AddAll(ICollection::Probe(categories));
             SetTitleFromBackStack();
         }
 
@@ -578,7 +661,7 @@ ECode SettingsActivity::OnCreate(
     }
     else {
         if (!mIsShowingDashboard) {
-            // Search is shown we are launched thru a Settings "shortcut". UP will be shown
+            // Search is shown we are launched thru a  "shortcut". UP will be shown
             // only if it is a sub settings
             if (mIsShortcut) {
                 mDisplayHomeAsUpEnabled = isSubSettings;
@@ -597,8 +680,9 @@ ECode SettingsActivity::OnCreate(
             AutoPtr<IBundle> initialArguments;
             intent->GetBundleExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS,
                     (IBundle**)&initialArguments);
+            AutoPtr<IFragment> fragment;
             SwitchToFragment(initialFragmentName, initialArguments, TRUE, FALSE,
-                    mInitialTitleResId, mInitialTitle, FALSE);
+                    mInitialTitleResId, mInitialTitle, FALSE, (IFragment**)&fragment);
         }
         else {
             // No UP affordance if we are displaying the main Dashboard
@@ -606,9 +690,11 @@ ECode SettingsActivity::OnCreate(
             // Show Search affordance
             mDisplaySearch = TRUE;
             mInitialTitleResId = R::string::dashboard_title;
+            AutoPtr<IFragment> fragment;
             SwitchToFragment(
-                    String("Elastos.Droid.Settings.Dashboard.DashboardSummary"),
-                    NULL, FALSE, FALSE, mInitialTitleResId, mInitialTitle, FALSE);
+                    String("Elastos.Droid..Dashboard.DashboardSummary"),
+                    NULL, FALSE, FALSE, mInitialTitleResId, mInitialTitle,
+                    FALSE, (IFragment**)&fragment);
         }
     }
 
@@ -635,43 +721,43 @@ ECode SettingsActivity::OnCreate(
             AutoPtr<IButton> backButton = IButton::Probe(_view);
             AutoPtr<OnCreateOnClickListener> myListener =
                     new OnCreateOnClickListener(this, 0);
-            backButton->SetOnClickListener(myListener);
+            IView::Probe(backButton)->SetOnClickListener(myListener);
 
             _view = NULL;
             FindViewById(R::id::skip_button, (IView**)&_view);
             AutoPtr<IButton> skipButton = IButton::Probe(_view);
             AutoPtr<OnCreateOnClickListener> myListener1 =
                     new OnCreateOnClickListener(this, 1);
-            skipButton->SetOnClickListener(myListener1);
+            IView::Probe(skipButton)->SetOnClickListener(myListener1);
 
             _view = NULL;
             FindViewById(R::id::next_button, (IView**)&_view);
             mNextButton = IButton::Probe(_view);
-            mNextButton->SetOnClickListener(myListener1);
+            IView::Probe(mNextButton)->SetOnClickListener(myListener1);
 
             // set our various button parameters
             if (intent->HasExtra(EXTRA_PREFS_SET_NEXT_TEXT, &res), res) {
                 String buttonText;
                 intent->GetStringExtra(EXTRA_PREFS_SET_NEXT_TEXT, &buttonText);
-                if (TextUtils->IsEmpty(buttonText)) {
-                    mNextButton->SetVisibility(IView::GONE);
+                if (TextUtils::IsEmpty(buttonText)) {
+                    IView::Probe(mNextButton)->SetVisibility(IView::GONE);
                 }
                 else {
-                    mNextButton->SetText(buttonText);
+                    ITextView::Probe(mNextButton)->SetText(CoreUtils::Convert(buttonText));
                 }
             }
             if (intent->HasExtra(EXTRA_PREFS_SET_BACK_TEXT, &res), res) {
                 String buttonText;
                 intent->GetStringExtra(EXTRA_PREFS_SET_BACK_TEXT, &buttonText);
-                if (TextUtils->IsEmpty(buttonText, &res), res) {
-                    backButton->SetVisibility(IView::GONE);
+                if (TextUtils::IsEmpty(buttonText)) {
+                    IView::Probe(backButton)->SetVisibility(IView::GONE);
                 }
                 else {
-                    backButton->SetText(buttonText);
+                    ITextView::Probe(backButton)->SetText(CoreUtils::Convert(buttonText));
                 }
             }
             if (intent->GetBooleanExtra(EXTRA_PREFS_SHOW_SKIP, FALSE, &res), res) {
-                skipButton->SetVisibility(IView::VISIBLE);
+                IView::Probe(skipButton)->SetVisibility(IView::VISIBLE);
             }
         }
     }
@@ -707,14 +793,11 @@ void SettingsActivity::SetTitleFromIntent(
         mInitialTitleResId = -1;
         String initialTitle;
         intent->GetStringExtra(EXTRA_SHOW_FRAGMENT_TITLE, &initialTitle);
-        Boolean res;
         if (!initialTitle.IsNull()) {
-            mInitialTitle = initialTitle;
+            mInitialTitle = CoreUtils::Convert(initialTitle);
         }
         else {
-            AutoPtr<ICharSequence> cs;
-            GetTitle((ICharSequence**)&cs);
-            cs->ToString(&mInitialTitle);
+            GetTitle((ICharSequence**)&mInitialTitle);
         }
         SetTitle(mInitialTitle);
     }
@@ -772,7 +855,6 @@ ECode SettingsActivity::OnSaveInstanceState(
 {
     Activity::OnSaveInstanceState(outState);
 
-    Boolean res;
     Int32 size;
     mCategories->GetSize(&size);
     if (size > 0) {
@@ -784,7 +866,7 @@ ECode SettingsActivity::OnSaveInstanceState(
 
     if (mDisplaySearch) {
         // The option menus are created if the ActionBar is visible and they are also created
-        // asynchronously. If you launch Settings with an Intent action like
+        // asynchronously. If you launch  with an Intent action like
         // android.intent.action.POWER_USAGE_SUMMARY and at the same time your device is locked
         // thru a LockScreen, OnCreateOptionsMenu() is not yet called and references to the search
         // menu item and search view are NULL.
@@ -828,12 +910,14 @@ ECode SettingsActivity::OnResume()
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(IIntent::ACTION_BATTERY_CHANGED, (IIntentFilter**)&filter);
 
-    RegisterReceiver(mBatteryInfoReceiver, filter);
+    AutoPtr<IIntent> intent;
+    RegisterReceiver(mBatteryInfoReceiver, filter, (IIntent**)&intent);
 
     mDynamicIndexableContentMonitor->Register(IContext::Probe(this));
 
     if (mDisplaySearch && !TextUtils::IsEmpty(mSearchQuery)) {
-        OnQueryTextSubmit(mSearchQuery);
+        Boolean res;
+        OnQueryTextSubmit(mSearchQuery, &res);
     }
     return NOERROR;
 }
@@ -862,7 +946,7 @@ Boolean SettingsActivity::IsValidFragment(
 {
     // Almost all fragments are wrapped in this,
     // except for a few that have their own activities.
-    for (Int32 i = 0; i < ENTRY_FRAGMENTS->GetLength; i++) {
+    for (Int32 i = 0; i < ENTRY_FRAGMENTS->GetLength(); i++) {
         if ((*ENTRY_FRAGMENTS)[i].Equals(fragmentName)) return TRUE;
     }
     return FALSE;
@@ -892,7 +976,7 @@ ECode SettingsActivity::GetIntent(
         else {
             CBundle::New((IBundle**)&args);
         }
-        args->PutParcelable("intent", superIntent);
+        args->PutParcelable(String("intent"), IParcelable::Probe(superIntent));
         modIntent->PutExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS, args);
         *intent = modIntent;
         REFCOUNT_ADD(*intent);
@@ -912,11 +996,11 @@ String SettingsActivity::GetStartingFragmentClass(
     intent->GetComponent((IComponentName**)&comp);
     String intentClass;
     comp->GetClassName(&intentClass);
-    if (intentClass.Equals(String("Elastos.Droid.Settings.SettingsActivity"))) return NULL;
+    if (intentClass.Equals("Elastos.Droid..SettingsActivity")) return String(NULL);
 
-    if ("com.android.settings.ManageApplications".Equals(intentClass)
-            || "com.android.settings.RunningServices".Equals(intentClass)
-            || "com.android.settings.applications.StorageUse".Equals(intentClass)) {
+    if (String("com.android.settings.ManageApplications").Equals(intentClass)
+            || String("com.android.settings.RunningServices").Equals(intentClass)
+            || String("com.android.settings.applications.StorageUse").Equals(intentClass)) {
         // Old names of manage apps.
         intentClass = "com.android.settings.applications.ManageApplications";
     }
@@ -932,7 +1016,7 @@ ECode SettingsActivity::StartPreferencePanel(
     /* [in] */ IFragment* resultTo,
     /* [in] */ Int32 resultRequestCode)
 {
-    String title = NULL;
+    String title;
     if (titleRes < 0) {
         if (titleText != NULL) {
             titleText->ToString(&title);
@@ -942,8 +1026,8 @@ ECode SettingsActivity::StartPreferencePanel(
             title = "";
         }
     }
-    Utils::StartWithFragment(this, fragmentClass, args, resultTo, resultRequestCode,
-            titleRes, title, mIsShortcut);
+    Utils::StartWithFragment((IContext*)this, fragmentClass, args, resultTo, resultRequestCode,
+            titleRes, CoreUtils::Convert(title), mIsShortcut);
     return NOERROR;
 }
 
@@ -954,7 +1038,7 @@ ECode SettingsActivity::StartPreferencePanelAsUser(
     /* [in] */ ICharSequence* titleText,
     /* [in] */ IUserHandle* userHandle)
 {
-    String title = NULL;
+    String title;
     if (titleRes < 0) {
         if (titleText != NULL) {
             titleText->ToString(&title);
@@ -964,8 +1048,8 @@ ECode SettingsActivity::StartPreferencePanelAsUser(
             title = "";
         }
     }
-    Utils::StartWithFragmentAsUser(this, fragmentClass, args,
-            titleRes, title, mIsShortcut, userHandle);
+    Utils::StartWithFragmentAsUser((IContext*)this, fragmentClass, args,
+            titleRes, CoreUtils::Convert(title), mIsShortcut, userHandle);
     return NOERROR;
 }
 
@@ -1013,7 +1097,7 @@ ECode SettingsActivity::SwitchToFragment(
     *fragment = NULL;
 
     if (validate && !IsValidFragment(fragmentName)) {
-        Slogger::E("SettingsActivity", "Invalid fragment for this activity: %s", fragmentName.String());
+        Slogger::E("SettingsActivity", "Invalid fragment for this activity: %s", fragmentName.string());
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
         // throw new IllegalArgumentException("Invalid fragment for this activity: "
         //         + fragmentName);
@@ -1022,14 +1106,17 @@ ECode SettingsActivity::SwitchToFragment(
     AutoPtr<IFragmentHelper> helper;
     CFragmentHelper::AcquireSingleton((IFragmentHelper**)&helper);
     AutoPtr<IFragment> f;
-    helper->Instantiate(this, fragmentName, args, (IFragment**)&f);
+    helper->Instantiate((IContext*)this, fragmentName, args, (IFragment**)&f);
     AutoPtr<IFragmentManager> manager;
     GetFragmentManager((IFragmentManager**)&manager);
     AutoPtr<IFragmentTransaction> transaction;
     manager->BeginTransaction((IFragmentTransaction**)&transaction);
     transaction->Replace(R::id::main_content, f);
     if (withTransition) {
-        TransitionManager->BeginDelayedTransition(mContent);
+        AutoPtr<ITransitionManagerHelper> helper;
+        assert(0 && "TODO");
+        // CTransitionManagerHelper::AcquireSingleton((ITransitionManagerHelper**)&helper);
+        helper->BeginDelayedTransition(IViewGroup::Probe(mContent));
     }
     if (addToBackStack) {
         transaction->AddToBackStack(SettingsActivity::BACK_STACK_PREFS);
@@ -1040,8 +1127,10 @@ ECode SettingsActivity::SwitchToFragment(
     else if (title != NULL) {
         transaction->SetBreadCrumbTitle(title);
     }
-    transaction->CommitAllowingStateLoss();
-    manager->ExecutePendingTransactions();
+    Int32 value;
+    transaction->CommitAllowingStateLoss(&value);
+    Boolean res;
+    manager->ExecutePendingTransactions(&res);
 
     *fragment = f;
     REFCOUNT_ADD(*fragment);
@@ -1053,7 +1142,7 @@ ECode SettingsActivity::BuildDashboardCategories(
 {
     categories->Clear();
     FAIL_RETURN(LoadCategoriesFromResource(R::xml::dashboard_categories, categories));
-    FAIL_RETURNUpdateTilesList(categories));
+    FAIL_RETURN(UpdateTilesList(categories));
     return NOERROR;
 }
 
@@ -1076,7 +1165,7 @@ ECode SettingsActivity::LoadCategoriesFromResource(
 
     String nodeName;
     IXmlPullParser::Probe(parser)->GetName(&nodeName);
-    if (!"dashboard-categories".Equals(nodeName)) {
+    if (!String("dashboard-categories").Equals(nodeName)) {
         String desc;
         IXmlPullParser::Probe(parser)->GetPositionDescription(&desc);
         Slogger::E("SettingsActivity", "XML document must start with <preference-categories> tag; found %s at %s",
@@ -1102,24 +1191,26 @@ ECode SettingsActivity::LoadCategoriesFromResource(
 
         nodeName = String(NULL);
         IXmlPullParser::Probe(parser)->GetName(&nodeName);
-        if ("dashboard-category".Equals(nodeName)) {
+        if (String("dashboard-category").Equals(nodeName)) {
             AutoPtr<DashboardCategory> category = new DashboardCategory();
 
             AutoPtr< ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                    const_cast<Int32 *>(R::styleable::PreferenceHeader),
-                    ARRAY_SIZE(R::styleable::PreferenceHeader));
+                    const_cast<Int32 *>(Elastos::Droid::R::styleable::PreferenceHeader),
+                    ArraySize(Elastos::Droid::R::styleable::PreferenceHeader));
             AutoPtr<ITypedArray> sa;
             ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&sa);
+            Int32 id;
             sa->GetResourceId(
-                    R::styleable::PreferenceHeader_id,
-                    (Int32)DashboardCategory::CAT_ID_UNDEFINED, &category->mId);
+                    Elastos::Droid::R::styleable::PreferenceHeader_id,
+                    (Int32)DashboardCategory::CAT_ID_UNDEFINED, &id);
+            category->mId = id;
 
             AutoPtr<ITypedValue> tv;
             sa->PeekValue(
-                    R::styleable::PreferenceHeader_title, (ITypedValue**)&tv);
+                    Elastos::Droid::R::styleable::PreferenceHeader_title, (ITypedValue**)&tv);
             Int32 type;
             Int32 resourceId;
-            if (tv != NULL && (tv->GetType(&type), type) == TypedValue::TYPE_STRING) {
+            if (tv != NULL && (tv->GetType(&type), type) == ITypedValue::TYPE_STRING) {
                 if ((tv->GetResourceId(&resourceId), resourceId) != 0) {
                     category->mTitleRes = resourceId;
                 }
@@ -1130,7 +1221,7 @@ ECode SettingsActivity::LoadCategoriesFromResource(
             sa->Recycle();
 
             Int32 innerDepth;
-            parser->GetDepth(&innerDepth);
+            IXmlPullParser::Probe(parser)->GetDepth(&innerDepth);
             while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_DOCUMENT
                     && (type != IXmlPullParser::END_TAG
                         || (IXmlPullParser::Probe(parser)->GetDepth(&depth), depth) > innerDepth)) {
@@ -1140,18 +1231,19 @@ ECode SettingsActivity::LoadCategoriesFromResource(
 
                 String innerNodeName;
                 IXmlPullParser::Probe(parser)->GetName(&innerNodeName);
-                if (innerNodeName.Equals(String("dashboard-tile"))) {
+                if (innerNodeName.Equals("dashboard-tile")) {
                     AutoPtr<DashboardTile> tile = new DashboardTile();
 
                     sa = NULL;
                     ObtainStyledAttributes(
                             attrs, attrIds, (ITypedArray**)&sa);
                     sa->GetResourceId(
-                            R::styleable::PreferenceHeader_id,
-                            (Int32)TILE_ID_UNDEFINED, &tile->mId);
+                            Elastos::Droid::R::styleable::PreferenceHeader_id,
+                            (Int32)DashboardTile::TILE_ID_UNDEFINED, &id);
+                    tile->mId = id;
                     tv = NULL;
                     sa->PeekValue(
-                            R::styleable::PreferenceHeader_title, (ITypedValue**)&tv);
+                            Elastos::Droid::R::styleable::PreferenceHeader_title, (ITypedValue**)&tv);
                     if (tv != NULL && (tv->GetType(&type), type) == ITypedValue::TYPE_STRING) {
                         if ((tv->GetResourceId(&resourceId), resourceId) != 0) {
                             tile->mTitleRes = resourceId;
@@ -1162,7 +1254,7 @@ ECode SettingsActivity::LoadCategoriesFromResource(
                     }
                     tv = NULL;
                     sa->PeekValue(
-                            R::styleable::PreferenceHeader_summary, (ITypedValue**)&tv);
+                            Elastos::Droid::R::styleable::PreferenceHeader_summary, (ITypedValue**)&tv);
                     if (tv != NULL && (tv->GetType(&type), type) == ITypedValue::TYPE_STRING) {
                         if ((tv->GetResourceId(&resourceId), resourceId) != 0) {
                             tile->mSummaryRes = resourceId;
@@ -1172,9 +1264,9 @@ ECode SettingsActivity::LoadCategoriesFromResource(
                         }
                     }
                     sa->GetResourceId(
-                            R::styleable::PreferenceHeader_icon, 0, &tile->mIconRes);
+                            Elastos::Droid::R::styleable::PreferenceHeader_icon, 0, &tile->mIconRes);
                     sa->GetString(
-                            R::styleable::PreferenceHeader_fragment, &tile->mFragment);
+                            Elastos::Droid::R::styleable::PreferenceHeader_fragment, &tile->mFragment);
                     sa->Recycle();
 
                     if (curBundle == NULL) {
@@ -1183,31 +1275,31 @@ ECode SettingsActivity::LoadCategoriesFromResource(
 
                     Int32 innerDepth2;
                     IXmlPullParser::Probe(parser)->GetDepth(&innerDepth2);
-                    while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT
-                            && (type != IXmlPullParser::END_TAG || (parser->GetDepth(&depth), depth) > innerDepth2)) {
+                    while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_DOCUMENT
+                            && (type != IXmlPullParser::END_TAG ||
+                                (IXmlPullParser::Probe(parser)->GetDepth(&depth), depth) > innerDepth2)) {
                         if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
                             continue;
                         }
 
                         String innerNodeName2;
                         IXmlPullParser::Probe(parser)->GetName(&innerNodeName2);
-                        if (innerNodeName2.Equals(String("extra"))) {
+                        if (innerNodeName2.Equals("extra")) {
                             AutoPtr<IResources> res;
                             GetResources((IResources**)&res);
                             res->ParseBundleExtra(String("extra"), attrs, curBundle);
-                            XmlUtils::SkipCurrentTag(parser);
+                            XmlUtils::SkipCurrentTag(IXmlPullParser::Probe(parser));
 
                         }
-                        else if (innerNodeName2.Equals(String("intent"))) {
+                        else if (innerNodeName2.Equals("intent")) {
                             AutoPtr<IResources> res;
                             GetResources((IResources**)&res);
                             AutoPtr<IIntentHelper> helper;
                             CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
-                            helper->ParseIntent(res, parser, attrs, (IIntent**)&tile->mIntent);
-
+                            helper->ParseIntent(res, IXmlPullParser::Probe(parser), attrs, (IIntent**)&tile->mIntent);
                         }
                         else {
-                            XmlUtils::SkipCurrentTag(parser);
+                            XmlUtils::SkipCurrentTag(IXmlPullParser::Probe(parser));
                         }
                     }
 
@@ -1224,14 +1316,14 @@ ECode SettingsActivity::LoadCategoriesFromResource(
 
                 }
                 else {
-                    XmlUtils::SkipCurrentTag(parser);
+                    XmlUtils::SkipCurrentTag(IXmlPullParser::Probe(parser));
                 }
             }
 
-            target->Add(category);
+            target->Add((IObject*)category);
         }
         else {
-            XmlUtils::SkipCurrentTag(parser);
+            XmlUtils::SkipCurrentTag(IXmlPullParser::Probe(parser));
         }
     }
 
@@ -1268,6 +1360,7 @@ ECode SettingsActivity::UpdateTilesList(
         // Ids are integers, so downcasting is ok
         Int32 id = (Int32) category->mId;
         Int32 n = category->GetTilesCount() - 1;
+        Boolean res;
         while (n >= 0) {
 
             AutoPtr<DashboardTile> tile = category->GetTile(n);
@@ -1279,18 +1372,18 @@ ECode SettingsActivity::UpdateTilesList(
                 }
             }
             else if (id == R::id::wifi_settings) {
-                // Remove WiFi Settings if WiFi service is not available.
+                // Remove WiFi  if WiFi service is not available.
                 AutoPtr<IPackageManager> manager;
                 GetPackageManager((IPackageManager**)&manager);
-                if (!manager->HasSystemFeature(IPackageManager::FEATURE_WIFI)) {
+                if (manager->HasSystemFeature(IPackageManager::FEATURE_WIFI, &res), !res) {
                     removeTile = TRUE;
                 }
             }
             else if (id == R::id::bluetooth_settings) {
-                // Remove Bluetooth Settings if Bluetooth service is not available.
+                // Remove Bluetooth  if Bluetooth service is not available.
                 AutoPtr<IPackageManager> manager;
                 GetPackageManager((IPackageManager**)&manager);
-                if (!manager->HasSystemFeature(IPackageManager::FEATURE_BLUETOOTH)) {
+                if (manager->HasSystemFeature(IPackageManager::FEATURE_BLUETOOTH, &res), !res) {
                     removeTile = TRUE;
                 }
             }
@@ -1299,7 +1392,6 @@ ECode SettingsActivity::UpdateTilesList(
                 AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::NETWORKMANAGEMENT_SERVICE);
                 AutoPtr<IINetworkManagementService> netManager = IINetworkManagementService::Probe(obj);
                 // try {
-                Boolean res;
                 if (netManager->IsBandwidthControlEnabled(&res), !res) {
                     removeTile = TRUE;
                 }
@@ -1315,7 +1407,8 @@ ECode SettingsActivity::UpdateTilesList(
                 }
             }
             else if (id == R::id::home_settings) {
-                if (!UpdateHomeSettingTiles(tile)) {
+                Boolean res;
+                if (UpdateHomeSettingTiles(tile, &res), !res) {
                     removeTile = TRUE;
                 }
             }
@@ -1328,7 +1421,6 @@ ECode SettingsActivity::UpdateTilesList(
 
                 AutoPtr<IUserManagerHelper> helper;
                 CUserManagerHelper::AcquireSingleton((IUserManagerHelper**)&helper);
-                Boolean res;
                 helper->SupportsMultipleUsers(&res);
                 if (!IUserHandle::MU_ENABLED
                         || (!res && !hasMultipleUsers)
@@ -1339,23 +1431,23 @@ ECode SettingsActivity::UpdateTilesList(
             else if (id == R::id::nfc_payment_settings) {
                 AutoPtr<IPackageManager> manager;
                 GetPackageManager((IPackageManager**)&manager);
-                Boolean res;
                 if (manager->HasSystemFeature(IPackageManager::FEATURE_NFC, &res), !res) {
                     removeTile = TRUE;
                 }
                 else {
                     // Only show if NFC is on and we have the HCE feature
-                    AutoPtr<INfcAdapterHelper> helper;
-                    CNfcAdapterHelper::AcquireSingleton((INfcAdapterHelper**)&helper);
-                    AutoPtr<INfcAdapter> adapter;
-                    helper->GetDefaultAdapter(IContext::Probe(this), (INfcAdapter**)&adapter);
-                    Boolean isEnabled;
-                    if (adapter == NULL
-                            || (adapter->IsEnabled(&isEnabled), !isEnabled)
-                            || (manager->HasSystemFeature(
-                                    IPackageManager::FEATURE_NFC_HOST_CARD_EMULATION, &res), !res)) {
-                        removeTile = TRUE;
-                    }
+                    assert(0 && "TODO");
+                    // AutoPtr<INfcAdapterHelper> helper;
+                    // CNfcAdapterHelper::AcquireSingleton((INfcAdapterHelper**)&helper);
+                    // AutoPtr<INfcAdapter> adapter;
+                    // helper->GetDefaultAdapter(IContext::Probe(this), (INfcAdapter**)&adapter);
+                    // Boolean isEnabled;
+                    // if (adapter == NULL
+                    //         || (adapter->IsEnabled(&isEnabled), !isEnabled)
+                    //         || (manager->HasSystemFeature(
+                    //                 IPackageManager::FEATURE_NFC_HOST_CARD_EMULATION, &res), !res)) {
+                    //     removeTile = TRUE;
+                    // }
                 }
             }
             else if (id == R::id::print_settings) {
@@ -1369,15 +1461,14 @@ ECode SettingsActivity::UpdateTilesList(
                 }
             }
             else if (id == R::id::development_settings) {
-                Boolean res;
                 if (!showDev || (um->HasUserRestriction(
                         IUserManager::DISALLOW_DEBUGGING_FEATURES, &res), res)) {
                     removeTile = TRUE;
                 }
             }
 
-            if (IUserHandle::MU_ENABLED && UserHandle::MyUserId() != 0
-                    && !ArrayUtils::Contains(SETTINGS_FOR_RESTRICTED, id)) {
+            if (IUserHandle::MU_ENABLED && UserHandle::GetMyUserId() != 0
+                    && !ArrayUtils::Contains(SETTINGS_FOR_RESTRICTED.Get(), id)) {
                 removeTile = TRUE;
             }
 
@@ -1391,7 +1482,7 @@ ECode SettingsActivity::UpdateTilesList(
 }
 
 ECode SettingsActivity::UpdateHomeSettingTiles(
-    /* [in] */ IDashboardTile* tile,
+    /* [in] */ DashboardTile* tile,
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
@@ -1400,8 +1491,8 @@ ECode SettingsActivity::UpdateHomeSettingTiles(
     AutoPtr<ISharedPreferences> sp;
     GetSharedPreferences(HomeSettings::HOME_PREFS,
             IContext::MODE_PRIVATE, (ISharedPreferences**)&sp);
-    Boolean res;
-    if (sp->GetBoolean(HomeSettings::HOME_PREFS_DO_SHOW, FALSE, &res), res) {
+    Boolean result;
+    if (sp->GetBoolean(HomeSettings::HOME_PREFS_DO_SHOW, FALSE, &result), result) {
         *res = TRUE;
         return NOERROR;
     }
@@ -1415,7 +1506,7 @@ ECode SettingsActivity::UpdateHomeSettingTiles(
         // now tell them about why they aren't seeing 'Home' in the list.
         if (sShowNoHomeNotice) {
             sShowNoHomeNotice = FALSE;
-            NoHomeDialogFragment->Show(this);
+            NoHomeDialogFragment::Show(this);
         }
         *res = FALSE;
         return NOERROR;
@@ -1431,7 +1522,7 @@ ECode SettingsActivity::UpdateHomeSettingTiles(
     }
     // } catch (Exception e) {
     //     // Can't look up the home activity; bail on configuring the icon
-    //     Logger::W(LOG_TAG, "Problem looking up home activity!", e);
+    //     Logger::W(TAG, "Problem looking up home activity!", e);
     // }
 
     AutoPtr<ISharedPreferencesEditor> editor;
@@ -1463,7 +1554,7 @@ ECode SettingsActivity::GetMetaData()
     metaData->GetString(META_DATA_KEY_FRAGMENT_CLASS, &mFragmentClass);
     // } catch (NameNotFoundException nnfe) {
     //     // No recovery
-    //     Logger::D(LOG_TAG, "Cannot get Metadata for: " + GetComponentName()->ToString());
+    //     Logger::D(TAG, "Cannot get Metadata for: " + GetComponentName()->ToString());
     // }
     return NOERROR;
 }
@@ -1509,7 +1600,8 @@ ECode SettingsActivity::OnQueryTextSubmit(
     VALIDATE_NOT_NULL(result);
     SwitchToSearchResultsFragmentIfNeeded();
     mSearchQuery = query;
-    return (SearchResultsSummary*)mSearchResultsFragment.Get()->OnQueryTextSubmit(query, result);
+    *result = ((SearchResultsSummary*)mSearchResultsFragment.Get())->OnQueryTextSubmit(query);
+    return NOERROR;
 }
 
 ECode SettingsActivity::OnQueryTextChange(
@@ -1522,7 +1614,8 @@ ECode SettingsActivity::OnQueryTextChange(
         *result = FALSE;
         return NOERROR;
     }
-    return (SearchResultsSummary*)mSearchResultsFragment.Get()->OnQueryTextChange(newText, result);
+    *result = ((SearchResultsSummary*)mSearchResultsFragment.Get())->OnQueryTextChange(newText);
+    return NOERROR;
 }
 
 ECode SettingsActivity::OnClose(
@@ -1581,12 +1674,12 @@ void SettingsActivity::SwitchToSearchResultsFragmentIfNeeded()
     else {
         AutoPtr<IFragment> fragment;
         SwitchToFragment(
-                String("Elastos.Droid.Settings.Dashboard.SearchResultsSummary"),
+                String("Elastos.Droid..Dashboard.SearchResultsSummary"),
                 NULL, FALSE, TRUE, R::string::search_results_title, NULL,
                 TRUE, (IFragment**)&fragment);
         mSearchResultsFragment = ISearchResultsSummary::Probe(fragment);
     }
-    (SearchResultsSummary*)mSearchResultsFragment.Get()->SetSearchView(mSearchView);
+    ((SearchResultsSummary*)mSearchResultsFragment.Get())->SetSearchView(mSearchView);
     mSearchMenuItemExpanded = TRUE;
 }
 
@@ -1607,7 +1700,8 @@ void SettingsActivity::RevertToInitialFragment()
     manager->PopBackStackImmediate(SettingsActivity::BACK_STACK_PREFS,
             IFragmentManager::POP_BACK_STACK_INCLUSIVE, &res);
     if (mSearchMenuItem != NULL) {
-        mSearchMenuItem->CollapseActionView();
+        Boolean res;
+        mSearchMenuItem->CollapseActionView(&res);
     }
 }
 

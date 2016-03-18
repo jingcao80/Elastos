@@ -18,7 +18,9 @@ namespace Wm {
 class PointerEventDispatcher : public InputEventReceiver
 {
 public:
-    PointerEventDispatcher(
+    PointerEventDispatcher();
+
+    CARAPI constructor(
         /* [in] */ IInputChannel* inputChannel);
 
     CARAPI OnInputEvent(

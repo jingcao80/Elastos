@@ -4,7 +4,7 @@
 
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkext.h"
-// TODO #include "elastos/droid/widget/AbsoluteLayout.h"
+#include "elastos/droid/widget/AbsoluteLayout.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
@@ -19,7 +19,7 @@ using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Net::Http::ISslCertificate;
-// TODO using Elastos::Droid::Widget::AbsoluteLayout;
+using Elastos::Droid::Widget::AbsoluteLayout;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::View::Accessibility::IAccessibilityNodeInfo;
 using Elastos::Droid::View::Accessibility::IAccessibilityNodeProvider;
@@ -250,11 +250,12 @@ namespace Webkit {
 // file are fully delegated, whereas public and protected methods from the View base classes are
 // only delegated where a specific need exists for them to do so.
 //@Widget
-class WebView // TODO: public AbsoluteLayout
-    : public Object
+class WebView
+    : public AbsoluteLayout
     , public IWebView
 {
     friend class PrivateAccess;
+    friend class FindActionModeCallback;
 public:
     /**
      *  Transportation object for returning WebView across thread boundaries.
@@ -1788,7 +1789,7 @@ protected:
     CARAPI_(void) OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
-    CARAPI_(void) OnVisibilityChanged(
+    CARAPI OnVisibilityChanged(
         /* [in] */ IView* changedView,
         /* [in] */ Int32 visibility);
 
@@ -1845,7 +1846,7 @@ private:
     // Throwing an exception for incorrect thread usage if the
     // build target is JB MR2 or newer. Defaults to false, and is
     // set in the WebView constructor.
-    static /*volatile*/ Boolean sEnforceThreadChecking;
+    static volatile Boolean sEnforceThreadChecking;
 
     //-------------------------------------------------------------------------
     // Private internal stuff

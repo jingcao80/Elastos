@@ -1,17 +1,44 @@
 
+#include "elastos/droid/server/hdmi/Constants.h"
+#include "elastos/droid/server/hdmi/HdmiCecKeycode.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDeviceTv.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessageBuilder.h"
+#include "elastos/droid/server/hdmi/HdmiConfig.h"
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
 #include "elastos/droid/server/hdmi/SystemAudioStatusAction.h"
 #include <Elastos.CoreLibrary.Utility.h>
-#include <Elastos.Droid.Hardware.h>
-#include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include <Elastos.CoreLibrary.h>
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
 using Elastos::Droid::Utility::ISlog;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Hdmi {
 
+//=============================================================================
+// SystemAudioStatusAction::InnerSub_SendMessageCallback
+//=============================================================================
+CAR_INTERFACE_IMPL(SystemAudioStatusAction::InnerSub_SendMessageCallback, Object, IHdmiControlServiceSendMessageCallback)
+
+SystemAudioStatusAction::InnerSub_SendMessageCallback::InnerSub_SendMessageCallback(
+    /* [in] */ SystemAudioStatusAction* host)
+    : mHost(host)
+{}
+
+ECode SystemAudioStatusAction::InnerSub_SendMessageCallback::OnSendCompleted(Int32 error) {
+    if (error != Constants::SEND_RESULT_SUCCESS) {
+        mHost->HandleSendGiveAudioStatusFailure();
+    }
+    return NOERROR;
+}
+
+//=============================================================================
+// SystemAudioStatusAction
+//=============================================================================
 CAR_INTERFACE_IMPL(SystemAudioStatusAction, HdmiCecFeatureAction, ISystemAudioStatusAction)
 
 const String SystemAudioStatusAction::TAG("SystemAudioStatusAction");
@@ -26,12 +53,10 @@ ECode SystemAudioStatusAction::constructor(
     /* [in] */ Int32 avrAddress,
     /* [in] */ IIHdmiControlCallback* callback)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super::constructor(source);
-        mAvrAddress = avrAddress;
-        mCallback = callback;
-#endif
+    HdmiCecFeatureAction::constructor(source);
+    mAvrAddress = avrAddress;
+    mCallback = callback;
+    return NOERROR;
 }
 
 ECode SystemAudioStatusAction::Start(
@@ -39,54 +64,41 @@ ECode SystemAudioStatusAction::Start(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mState = STATE_WAIT_FOR_REPORT_AUDIO_STATUS;
-        AddTimer(mState, HdmiConfig::TIMEOUT_MS);
-        SendGiveAudioStatus();
-        *result = TRUE;
-        return NOERROR;
-#endif
+    mState = STATE_WAIT_FOR_REPORT_AUDIO_STATUS;
+    AddTimer(mState, HdmiConfig::TIMEOUT_MS);
+    SendGiveAudioStatus();
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode SystemAudioStatusAction::SendGiveAudioStatus()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Int32 srcAddr;
-        GetSourceAddress(&srcAddr);
-        SendCommand(HdmiCecMessageBuilder->BuildGiveAudioStatus(srcAddr, mAvrAddress),
-                new SendMessageCallback() {
-            //@Override
-            CARAPI OnSendCompleted(Int32 error) {
-                if (error != Constants::SEND_RESULT_SUCCESS) {
-                    HandleSendGiveAudioStatusFailure();
-                }
-            }
-        });
-#endif
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    AutoPtr<IHdmiCecMessage> cmd;
+    HdmiCecMessageBuilder::BuildGiveAudioStatus(srcAddr, mAvrAddress, (IHdmiCecMessage**)&cmd);
+    SendCommand(cmd, new InnerSub_SendMessageCallback(this));
+    return NOERROR;
 }
 
 ECode SystemAudioStatusAction::HandleSendGiveAudioStatusFailure()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // Inform to all application that the audio status (volumn, mute) of
-        // the audio amplifier is unknown.
-        AutoPtr<IHdmiCecLocalDeviceTv> tv;
-        Tv((IHdmiCecLocalDeviceTv**)&tv);
-        tv->SetAudioStatus(FALSE, Constants::UNKNOWN_VOLUME);
+    // Inform to all application that the audio status (volumn, mute) of
+    // the audio amplifier is unknown.
+    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+    Tv((IHdmiCecLocalDeviceTv**)&tv);
+    ((HdmiCecLocalDeviceTv*) tv.Get())->SetAudioStatus(FALSE, Constants::UNKNOWN_VOLUME);
 
-        Boolean isSystemAudioActivated;
-        tv->IsSystemAudioActivated(&isSystemAudioActivated);
-        Int32 uiCommand = isSystemAudioActivated
-                ? HdmiCecKeycode::CEC_KEYCODE_RESTORE_VOLUME_FUNCTION  // SystemAudioMode: ON
-                : HdmiCecKeycode::CEC_KEYCODE_MUTE_FUNCTION;           // SystemAudioMode: OFF
-        SendUserControlPressedAndReleased(mAvrAddress, uiCommand);
+    Boolean isSystemAudioActivated;
+    ((HdmiCecLocalDeviceTv*) tv.Get())->IsSystemAudioActivated(&isSystemAudioActivated);
+    Int32 uiCommand = isSystemAudioActivated
+            ? HdmiCecKeycode::CEC_KEYCODE_RESTORE_VOLUME_FUNCTION  // SystemAudioMode: ON
+            : HdmiCecKeycode::CEC_KEYCODE_MUTE_FUNCTION;           // SystemAudioMode: OFF
+    SendUserControlPressedAndReleased(mAvrAddress, uiCommand);
 
-        // Still return SUCCESS to callback.
-        FinishWithCallback(IHdmiControlManager::RESULT_SUCCESS);
-#endif
+    // Still return SUCCESS to callback.
+    FinishWithCallback(IHdmiControlManager::RESULT_SUCCESS);
+    return NOERROR;
 }
 
 ECode SystemAudioStatusAction::ProcessCommand(
@@ -95,77 +107,73 @@ ECode SystemAudioStatusAction::ProcessCommand(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mState != STATE_WAIT_FOR_REPORT_AUDIO_STATUS) {
-            *result = FALSE;
-            return NOERROR;
-        }
-
-        Int32 opcode;
-        cmd->GetOpcode(&opcode);
-        switch (opcode) {
-            case Constants::MESSAGE_REPORT_AUDIO_STATUS:
-                HandleReportAudioStatus(cmd);
-                *result = TRUE;
-                return NOERROR;
-        }
-
+    if (mState != STATE_WAIT_FOR_REPORT_AUDIO_STATUS) {
         *result = FALSE;
         return NOERROR;
-#endif
+    }
+
+    Int32 opcode;
+    cmd->GetOpcode(&opcode);
+    if (opcode == Constants::MESSAGE_REPORT_AUDIO_STATUS) {
+        HandleReportAudioStatus(cmd);
+        *result = TRUE;
+        return NOERROR;
+    }
+
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode SystemAudioStatusAction::HandleReportAudioStatus(
     /* [in] */ IHdmiCecMessage* cmd)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        AutoPtr<ArrayOf<Byte> > params;
-        cmd->GetParams((ArrayOf<Byte>**)&params);
-        Boolean mute = ((*params)[0] & 0x80) == 0x80;
-        Int32 volume = (*params)[0] & 0x7F;
-        AutoPtr<IHdmiCecLocalDeviceTv> tv;
-        Tv((IHdmiCecLocalDeviceTv**)&tv);
-        tv->SetAudioStatus(mute, volume);
+    AutoPtr<ArrayOf<Byte> > params;
+    cmd->GetParams((ArrayOf<Byte>**)&params);
+    Boolean mute = ((*params)[0] & 0x80) == 0x80;
+    Int32 volume = (*params)[0] & 0x7F;
+    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+    Tv((IHdmiCecLocalDeviceTv**)&tv);
+    ((HdmiCecLocalDeviceTv*) tv.Get())->SetAudioStatus(mute, volume);
 
-        Boolean isSystemAudioActivated;
-        tv->IsSystemAudioActivated(&isSystemAudioActivated);
-        if (!(isSystemAudioActivated ^ mute)) {
-            // Toggle AVR's mute status to match with the system audio status.
-            SendUserControlPressedAndReleased(mAvrAddress, HdmiCecKeycode::CEC_KEYCODE_MUTE);
-        }
-        FinishWithCallback(IHdmiControlManager::RESULT_SUCCESS);
-#endif
+    Boolean isSystemAudioActivated;
+    ((HdmiCecLocalDeviceTv*) tv.Get())->IsSystemAudioActivated(&isSystemAudioActivated);
+    if (!(isSystemAudioActivated ^ mute)) {
+        // Toggle AVR's mute status to match with the system audio status.
+        SendUserControlPressedAndReleased(mAvrAddress, HdmiCecKeycode::CEC_KEYCODE_MUTE);
+    }
+    FinishWithCallback(IHdmiControlManager::RESULT_SUCCESS);
+    return NOERROR;
 }
 
 ECode SystemAudioStatusAction::FinishWithCallback(
     /* [in] */ Int32 returnCode)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mCallback != NULL) {
-            try {
-                mCallback->OnComplete(returnCode);
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Failed to invoke callback.", e);
+    if (mCallback != NULL) {
+        // try {
+        ECode ec = mCallback->OnComplete(returnCode);
+        // } catch (RemoteException e) {
+        if (FAILED(ec)) {
+            if ((ECode) E_REMOTE_EXCEPTION == ec) {
+                Slogger::E(TAG, "Failed to invoke callback.%d", ec);
             }
+            else
+                return ec;
         }
-        Finish();
-#endif
+        // }
+    }
+    Finish();
+    return NOERROR;
 }
 
 ECode SystemAudioStatusAction::HandleTimerEvent(
     /* [in] */ Int32 state)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mState != state) {
-            return NOERROR;
-        }
+    if (mState != state) {
+        return NOERROR;
+    }
 
-        HandleSendGiveAudioStatusFailure();
-#endif
+    HandleSendGiveAudioStatusFailure();
+    return NOERROR;
 }
 
 } // namespace Hdmi

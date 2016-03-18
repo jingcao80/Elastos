@@ -9,14 +9,23 @@ INCLUDES += $(MAKEDIR)/../../../../inc/
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
-IMPORTS += Elastos.CoreLibrary.eco
-
 SOURCES = Settings.car
+SOURCES += R.cpp
 SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.CoreLibrary.cpp
-#SOURCES += R.cpp
+SOURCES += SettingsActivity.cpp
+SOURCES += DevelopmentSettings.cpp
+SOURCES += HomeSettings.cpp
+SOURCES += Utils.cpp
+SOURCES += UserSpinnerAdapter.cpp
+SOURCES += CUserSpinnerAdapter.cpp
+SOURCES += CSettings.cpp
+SOURCES += SubSettings.cpp
 
-#ELASTOS_LIBS += accessibility/accessibility.lib
+ELASTOS_LIBS += dashboard/dashboard.lib
+ELASTOS_LIBS += drawable/drawable.lib
+ELASTOS_LIBS += search/search.lib
+ELASTOS_LIBS += widget/widget.lib
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
@@ -28,6 +37,4 @@ LIBRARIES += -lm -licuuc -llog -lutils -landroidfw
 APPPACK = 1
 APP_PACKAGE_NAME = com.android.settings
 RES_NAMESPACE = Elastos.Droid.Settings
-#EXTRA_RES_DIR = $(MAKEDIR)/../../../../../Keyguard/res
-#AAPT_FLAGS = --auto-add-overlay --extra-packages com.android.keyguard
 DIRRESOURCES += $(MAKEDIR)/res;

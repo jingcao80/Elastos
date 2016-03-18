@@ -1,13 +1,16 @@
 
 #include "elastos/droid/javaproxy/CIServiceConnectionNative.h"
 #include "elastos/droid/javaproxy/CServiceNative.h"
-#include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Service.h"
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::Internal::App::IMediaContainerService;
+using Elastos::Droid::App::EIID_IIServiceConnection;
+using Elastos::Droid::Internal::App::IIMediaContainerService;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Service::Wallpaper::IIWallpaperService;
-using Elastos::Droid::JavaProxy::CServiceNative;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -15,15 +18,20 @@ namespace JavaProxy {
 
 const String CIServiceConnectionNative::TAG("CIServiceConnectionNative");
 
-CIServiceConnectionNative::~CIServiceConnectionNative(){
+CAR_INTERFACE_IMPL_2(CIServiceConnectionNative, Object, IIServiceConnection, IBinder)
+
+CAR_OBJECT_IMPL(CIServiceConnectionNative)
+
+CIServiceConnectionNative::~CIServiceConnectionNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
 ECode CIServiceConnectionNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -34,6 +42,7 @@ ECode CIServiceConnectionNative::Connected(
     /* [in] */ IComponentName* name,
     /* [in] */ IBinder* service)
 {
+    // LOGGERD(TAG, "+ CIServiceConnectionNative::Connected()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -49,17 +58,17 @@ ECode CIServiceConnectionNative::Connected(
     jobject jservice = NULL;
     jmethodID m = NULL;
     if (service != NULL) {
-        if (IMediaContainerService::Probe(service) != NULL) {
+        if (IIMediaContainerService::Probe(service) != NULL) {
             m = env->GetMethodID(c, "connected", "(Landroid/content/ComponentName;Landroid/os/IBinder;)V");
             Util::CheckErrorAndLog(env, TAG, "GetMethodID: connected %d", __LINE__);
 
             jclass serKlass = env->FindClass("com/android/internal/app/ElIMediaContainerServiceProxy");
             Util::CheckErrorAndLog(env, TAG, "FindClass: ElIMediaContainerServiceProxy line: %d", __LINE__);
 
-            jmethodID m = env->GetMethodID(serKlass, "<init>", "(I)V");
+            jmethodID m = env->GetMethodID(serKlass, "<init>", "(J)V");
             Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElIMediaContainerServiceProxy line: %d", __LINE__);
 
-            jservice = env->NewObject(serKlass, m, (jint)IMediaContainerService::Probe(service));
+            jservice = env->NewObject(serKlass, m, (jlong)IIMediaContainerService::Probe(service));
             Util::CheckErrorAndLog(env, TAG, "NewObject: ElIMediaContainerServiceProxy line: %d", __LINE__);
             service->AddRef();
 
@@ -72,10 +81,10 @@ ECode CIServiceConnectionNative::Connected(
             jclass wsKlass = env->FindClass("android/service/wallpaper/ElWallpaperServiceProxy");
             Util::CheckErrorAndLog(env, TAG, "FindClass: ElWallpaperServiceProxy line: %d", __LINE__);
 
-            jmethodID m = env->GetMethodID(wsKlass, "<init>", "(I)V");
+            jmethodID m = env->GetMethodID(wsKlass, "<init>", "(J)V");
             Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElWallpaperServiceProxy line: %d", __LINE__);
 
-            jservice = env->NewObject(wsKlass, m, (jint)IIWallpaperService::Probe(service));
+            jservice = env->NewObject(wsKlass, m, (jlong)IIWallpaperService::Probe(service));
             Util::CheckErrorAndLog(env, TAG, "NewObject: ElWallpaperServiceProxy line: %d", __LINE__);
             service->AddRef();
 
@@ -86,7 +95,7 @@ ECode CIServiceConnectionNative::Connected(
             Util::CheckErrorAndLog(env, TAG, "GetMethodID: connected %d", __LINE__);
 
             CServiceNative* cservice = (CServiceNative*)service;
-            Handle32 hservice;
+            Handle64 hservice;
             cservice->GetRemoteInstance(env, &hservice);
             jservice = (jobject)hservice;
         }
@@ -99,14 +108,14 @@ ECode CIServiceConnectionNative::Connected(
     env->DeleteLocalRef(jname);
     env->DeleteLocalRef(jservice);
 
-    // LOGGERD(TAG, String("- CIServiceConnectionNative::Connected()"));
+    // LOGGERD(TAG, "- CIServiceConnectionNative::Connected()");
     return NOERROR;
 }
 
 ECode CIServiceConnectionNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CIServiceConnectionNative::ToString()"));
+    // LOGGERD(TAG, "+ CIServiceConnectionNative::ToString()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -114,17 +123,17 @@ ECode CIServiceConnectionNative::ToString(
     Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
 
     jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
 
     *str = Util::GetElString(env, jstr);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CIServiceConnectionNative::ToString()"));
+    // LOGGERD(TAG, "- CIServiceConnectionNative::ToString()");
     return NOERROR;
 }
 

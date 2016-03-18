@@ -3,9 +3,12 @@
 #define __ELASTOS_DROID_JAVAPROXY_CCONTENTRESOLVERNATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CContentResolverNative.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
 using Elastos::Droid::Content::IContentProviderClient;
+using Elastos::Droid::Content::IContentProviderResult;
+using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContentResolverOpenResourceIdResult;
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::IIContentProvider;
@@ -13,24 +16,34 @@ using Elastos::Droid::Content::Res::IAssetFileDescriptor;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::ICancellationSignal;
 using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IOutputStream;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 CarClass(CContentResolverNative)
+    , public Object
+    , public IContentResolver
+    , public IBinder
 {
 public:
     ~CContentResolverNative();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI ReleaseProvider(
         /* [in] */ IIContentProvider* icp,
@@ -60,7 +73,7 @@ public:
         /* [in] */ const String& sortOrder,
         /* [out] */ ICursor** cursor);
 
-    CARAPI QueryEx(
+    CARAPI Query(
         /* [in] */ IUri* uri,
         /* [in] */ ArrayOf<String>* projection,
         /* [in] */ const String& selection,
@@ -68,6 +81,14 @@ public:
         /* [in] */ const String& sortOrder,
         /* [in] */ ICancellationSignal* cancellationSignal,
         /* [out] */ ICursor** cursor);
+
+    CARAPI Canonicalize(
+        /* [in] */ IUri* uri,
+        /* [out] */ IUri** result);
+
+    CARAPI Uncanonicalize(
+        /* [in] */ IUri* uri,
+        /* [out] */ IUri** result);
 
     CARAPI OpenInputStream(
         /* [in] */ IUri* uri,
@@ -77,7 +98,7 @@ public:
         /* [in] */ IUri* uri,
         /* [out] */ IOutputStream** outStream);
 
-    CARAPI OpenOutputStreamEx(
+    CARAPI OpenOutputStream(
         /* [in] */ IUri* uri,
         /* [in] */ const String& mode,
         /* [out] */ IOutputStream** outStream);
@@ -87,15 +108,34 @@ public:
         /* [in] */ const String& mode,
         /* [out] */ IParcelFileDescriptor** fileDescriptor);
 
+    CARAPI OpenFileDescriptor(
+        /* [in] */ IUri* uri,
+        /* [in] */ const String& mode,
+        /* [in] */ ICancellationSignal* cancellationSignal,
+        /* [out] */ IParcelFileDescriptor** fileDescriptor);
+
     CARAPI OpenAssetFileDescriptor(
         /* [in] */ IUri* uri,
         /* [in] */ const String& mode,
+        /* [out] */ IAssetFileDescriptor** fileDescriptor);
+
+    CARAPI OpenAssetFileDescriptor(
+        /* [in] */ IUri* uri,
+        /* [in] */ const String& mode,
+        /* [in] */ ICancellationSignal* cancellationSignal,
         /* [out] */ IAssetFileDescriptor** fileDescriptor);
 
     CARAPI OpenTypedAssetFileDescriptor(
         /* [in] */ IUri* uri,
         /* [in] */ const String& mimeType,
         /* [in] */ IBundle* opts,
+        /* [out] */ IAssetFileDescriptor** fileDescriptor);
+
+    CARAPI OpenTypedAssetFileDescriptor(
+        /* [in] */ IUri* uri,
+        /* [in] */ const String& mimeType,
+        /* [in] */ IBundle* opts,
+        /* [in] */ ICancellationSignal* cancellationSignal,
         /* [out] */ IAssetFileDescriptor** fileDescriptor);
 
     CARAPI GetResourceId(
@@ -109,12 +149,12 @@ public:
 
     CARAPI ApplyBatch(
         /* [in] */ const String& authority,
-        /* [in] */ IObjectContainer* operations,
-        /* [out, callee] */ ArrayOf<Elastos::Droid::Content::IContentProviderResult *>** providerResults);
+        /* [in] */ IArrayList* operations,
+        /* [out, callee] */ ArrayOf<IContentProviderResult*>** providerResults);
 
     CARAPI BulkInsert(
         /* [in] */ IUri* uri,
-        /* [in] */ ArrayOf<IContentValues *>* values,
+        /* [in] */ ArrayOf<IContentValues*>* values,
         /* [out] */ Int32* number);
 
     CARAPI Delete(
@@ -145,7 +185,7 @@ public:
         /* [in] */ IUri* uri,
         /* [out] */ IIContentProvider** contentProvider);
 
-    CARAPI AcquireProviderEx(
+    CARAPI AcquireProvider(
         /* [in] */ const String& name,
         /* [out] */ IIContentProvider** contentProvider);
 
@@ -153,7 +193,7 @@ public:
         /* [in] */ IUri* uri,
         /* [out] */ IIContentProvider** contentProvider);
 
-    CARAPI AcquireUnstableProviderEx(
+    CARAPI AcquireUnstableProvider(
         /* [in] */ const String& name,
         /* [out] */ IIContentProvider** contentProvider);
 
@@ -161,7 +201,7 @@ public:
         /* [in] */ IUri* uri,
         /* [out] */ IContentProviderClient** client);
 
-    CARAPI AcquireContentProviderClientEx(
+    CARAPI AcquireContentProviderClient(
         /* [in] */ const String& name,
         /* [out] */ IContentProviderClient** client);
 
@@ -169,7 +209,7 @@ public:
         /* [in] */ IUri* uri,
         /* [out] */ IContentProviderClient** client);
 
-    CARAPI AcquireUnstableContentProviderClientEx(
+    CARAPI AcquireUnstableContentProviderClient(
         /* [in] */ const String& name,
         /* [out] */ IContentProviderClient** client);
 
@@ -178,7 +218,7 @@ public:
         /* [in] */ Boolean notifyForDescendents,
         /* [in] */ IContentObserver* observer);
 
-    CARAPI RegisterContentObserverEx(
+    CARAPI RegisterContentObserver(
         /* [in] */ IUri* uri,
         /* [in] */ Boolean notifyForDescendents,
         /* [in] */ IContentObserver* observer,
@@ -191,16 +231,30 @@ public:
         /* [in] */ IUri* uri,
         /* [in] */ IContentObserver* observer);
 
-    CARAPI NotifyChangeEx(
+    CARAPI NotifyChange(
         /* [in] */ IUri* uri,
         /* [in] */ IContentObserver* observer,
         /* [in] */ Boolean syncToNetwork);
 
-    CARAPI NotifyChangeEx2(
+    CARAPI NotifyChange(
         /* [in] */ IUri* uri,
         /* [in] */ IContentObserver* observer,
         /* [in] */ Boolean syncToNetwork,
         /* [in] */ Int32 userHandle);
+
+    CARAPI TakePersistableUriPermission(
+        /* [in] */ IUri* uri,
+        /* [in] */ Int32 mode);
+
+    CARAPI ReleasePersistableUriPermission(
+        /* [in] */ IUri* uri,
+        /* [in] */ Int32 mode);
+
+    CARAPI GetPersistedUriPermissions(
+        /* [out] */ IList** permissions);
+
+    CARAPI GetOutgoingPersistedUriPermissions(
+        /* [out] */ IList** permissions);
 
     CARAPI StartSync(
         /* [in] */ IUri* uri,
@@ -208,6 +262,9 @@ public:
 
     CARAPI CancelSync(
         /* [in] */ IUri* uri);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
     static const String TAG;

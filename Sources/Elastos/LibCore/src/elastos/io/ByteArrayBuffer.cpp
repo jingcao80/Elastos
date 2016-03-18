@@ -10,20 +10,21 @@
 #include "ByteBufferAsInt64Buffer.h"
 #include "CByteOrderHelper.h"
 #include "Math.h"
+#include "logging/Logger.h"
 
 using Libcore::IO::ISizeOf;
 using Libcore::IO::Memory;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace IO {
 
+CAR_INTERFACE_IMPL(ByteArrayBuffer, ByteBuffer, IByteArrayBuffer)
 
 ByteArrayBuffer::ByteArrayBuffer()
     : mArrayOffset(0)
     , mIsReadOnly(FALSE)
 {}
-
-CAR_INTERFACE_IMPL(ByteArrayBuffer, ByteBuffer, IByteArrayBuffer)
 
 ECode ByteArrayBuffer::constructor(
     /* [in] */ ArrayOf<Byte>* backingArray)
@@ -39,11 +40,12 @@ ECode ByteArrayBuffer::constructor(
 {
     FAIL_RETURN(ByteBuffer::constructor(capacity, 0))
 
-    if (mArrayOffset + capacity > backingArray->GetLength()) {
+    if (arrayOffset + capacity > backingArray->GetLength()) {
 //        throw new IndexOutOfBoundsException("backingArray.length=" + backingArray.length +
 //                                              ", capacity=" + capacity + ", arrayOffset=" + arrayOffset);
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
+
     mBackingArray = backingArray;
     mArrayOffset = arrayOffset;
     mIsReadOnly = isReadOnly;
@@ -143,7 +145,7 @@ ECode ByteArrayBuffer::ProtectedArray(
     *array = NULL;
 
     if (mIsReadOnly) {
-        // throw new ReadOnlyBufferException();
+        Logger::E("ByteArrayBuffer", "ProtectedArray: ReadOnlyBufferException");
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
     *array = mBackingArray;
@@ -159,7 +161,7 @@ ECode ByteArrayBuffer::ProtectedArrayOffset(
     *offset = 0;
 
     if (mIsReadOnly) {
-        // throw new ReadOnlyBufferException();
+        Logger::E("ByteArrayBuffer", "ProtectedArrayOffset: ReadOnlyBufferException");
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
     *offset = mArrayOffset;
@@ -186,7 +188,7 @@ ECode ByteArrayBuffer::Get(
     *value = '\0';
 
     if (mPosition == mLimit) {
-        // throw new BufferUnderflowException();
+        Logger::E("ByteArrayBuffer", "Get: BufferUnderflowException");
         return E_BUFFER_UNDERFLOW_EXCEPTION;
     }
     *value = (*mBackingArray)[mArrayOffset + mPosition++];

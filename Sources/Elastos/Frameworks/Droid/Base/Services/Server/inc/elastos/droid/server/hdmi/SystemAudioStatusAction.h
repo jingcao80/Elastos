@@ -22,6 +22,25 @@ class SystemAudioStatusAction
     : public HdmiCecFeatureAction
     , public ISystemAudioStatusAction
 {
+private:
+    class InnerSub_SendMessageCallback
+        : public Object
+        , public IHdmiControlServiceSendMessageCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_SendMessageCallback(
+            /* [in] */ SystemAudioStatusAction* host);
+
+        //@Override
+        CARAPI OnSendCompleted(
+            /* [in] */ Int32 error);
+
+    private:
+        SystemAudioStatusAction* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

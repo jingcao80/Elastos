@@ -3,6 +3,8 @@
 #include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::Widget::EIID_IIRemoteViewsFactory;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,15 +13,20 @@ namespace JavaProxy {
 
 const String CRemoteViewsFactoryNative::TAG("CRemoteViewsFactoryNative");
 
-CRemoteViewsFactoryNative::~CRemoteViewsFactoryNative(){
+CAR_INTERFACE_IMPL_2(CRemoteViewsFactoryNative, Object, IIRemoteViewsFactory, IBinder)
+
+CAR_OBJECT_IMPL(CRemoteViewsFactoryNative)
+
+CRemoteViewsFactoryNative::~CRemoteViewsFactoryNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
 ECode CRemoteViewsFactoryNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     JNIEnv* env;
@@ -32,7 +39,7 @@ ECode CRemoteViewsFactoryNative::constructor(
 ECode CRemoteViewsFactoryNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CRemoteViewsFactoryNative::ToString()"));
+    // LOGGERD(TAG, "+ CRemoteViewsFactoryNative::ToString()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -40,17 +47,17 @@ ECode CRemoteViewsFactoryNative::ToString(
     Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
 
     jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
 
     *str = Util::GetElString(env, jstr);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CRemoteViewsFactoryNative::ToString()"));
+    // LOGGERD(TAG, "- CRemoteViewsFactoryNative::ToString()");
     return NOERROR;
 }
 

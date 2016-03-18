@@ -70,10 +70,9 @@ public:
     static const Int32 STATE_WAITING_FOR_DEVICE_VENDOR_ID;
 
 private:
-    CARAPI MayProcessCommandIfCached(
+    CARAPI_(Boolean) MayProcessCommandIfCached(
         /* [in] */ Int32 destAddress,
-        /* [in] */ Int32 opcode,
-        /* [out] */ Boolean* result);
+        /* [in] */ Int32 opcode);
 
     CARAPI RequestVendorId();
 

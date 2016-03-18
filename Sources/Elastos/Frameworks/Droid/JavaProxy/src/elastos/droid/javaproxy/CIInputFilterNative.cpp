@@ -3,6 +3,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::View::EIID_IIInputFilter;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,15 +13,20 @@ namespace JavaProxy {
 
 const String CIInputFilterNative::TAG("CIInputFilterNative");
 
-CIInputFilterNative::~CIInputFilterNative(){
+CAR_INTERFACE_IMPL_2(CIInputFilterNative, Object, IIInputFilter, IBinder)
+
+CAR_OBJECT_IMPL(CIInputFilterNative)
+
+CIInputFilterNative::~CIInputFilterNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
 ECode CIInputFilterNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -27,15 +34,17 @@ ECode CIInputFilterNative::constructor(
 }
 
 ECode CIInputFilterNative::Install(
-    /* [in] */ IInputFilterHost* host)
+    /* [in] */ IIInputFilterHost* host)
 {
-    LOGGERD(TAG, String("CIInputFilterNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CIInputFilterNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
+    assert(0);
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CIInputFilterNative::Uninstall()
 {
-    LOGGERD(TAG, String("CIInputFilterNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CIInputFilterNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
+    assert(0);
     return E_NOT_IMPLEMENTED;
 }
 
@@ -43,14 +52,15 @@ ECode CIInputFilterNative::FilterInputEvent(
     /* [in] */ IInputEvent* event,
     /* [in] */ Int32 policyFlags)
 {
-    LOGGERD(TAG, String("CIInputFilterNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CIInputFilterNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
+    assert(0);
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CIInputFilterNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CIInputFilterNative::ToString()"));
+    // LOGGERD(TAG, "+ CIInputFilterNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -69,7 +79,7 @@ ECode CIInputFilterNative::ToString(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CIInputFilterNative::ToString()"));
+    // LOGGERD(TAG, "- CIInputFilterNative::ToString()");
     return NOERROR;
 }
 

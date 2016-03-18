@@ -4,6 +4,7 @@
 
 #include "_Elastos_Droid_Bluetooth_CBluetoothAdapterHelper.h"
 #include "Elastos.Droid.Bluetooth.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/core/Singleton.h"
 

@@ -1,239 +1,174 @@
 
+#ifndef __ELASTOS_DROID_SETTINGS_WIDGET_SWITCHBAR_H__
+#define __ELASTOS_DROID_SETTINGS_WIDGET_SWITCHBAR_H__
 
-package com.android.settings.widget;
+#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/widget/LinearLayout.h"
+#include "elastos/droid/view/View.h"
+#include "_Settings.h"
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::Res::ITypedArray;
-using Elastos::Droid::Os::IParcel;
-using Elastos::Droid::Os::IParcelable;
 using Elastos::Droid::Utility::IAttributeSet;
-using Elastos::Droid::Utility::ITypedValue;
-using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IView;
-using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::Widget::ICompoundButton;
-using Elastos::Droid::Widget::ILinearLayout;
-
+using Elastos::Droid::Widget::ICompoundButtonOnCheckedChangeListener;
+using Elastos::Droid::Widget::LinearLayout;
 using Elastos::Droid::Widget::ISwitch;
 using Elastos::Droid::Widget::ITextView;
-using Elastos::Droid::Settings::IR;
-
 using Elastos::Utility::IArrayList;
 
-public class SwitchBar extends LinearLayout implements CompoundButton.OnCheckedChangeListener,
-        View.OnClickListener {
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Widget {
 
-    public static interface OnSwitchChangeListener {
-        /**
-         * Called when the checked state of the Switch has changed.
-         *
-         * @param switchView The Switch view whose state has changed.
-         * @param isChecked  The new checked state of switchView.
-         */
-        void OnSwitchChanged(Switch switchView, Boolean isChecked);
-    }
+class SwitchBar
+    : public LinearLayout
+    , public ICompoundButtonOnCheckedChangeListener
+    , public IViewOnClickListener
+{
+public:
+    class SavedState
+        : public View::BaseSavedState
+        , public ISwitchBarSavedState
+    {
+    public:
+        CAR_INTERFACE_DECL();
 
-    private ToggleSwitch mSwitch;
-    private TextView mTextView;
+        SavedState();
 
-    private ArrayList<OnSwitchChangeListener> mSwitchChangeListeners =
-            new ArrayList<OnSwitchChangeListener>();
+        CARAPI constructor();
 
-    private static Int32[] MARGIN_ATTRIBUTES = {
-            R.attr.switchBarMarginStart, R.attr.switchBarMarginEnd};
-
-    public SwitchBar(Context context) {
-        This(context, NULL);
-    }
-
-    public SwitchBar(Context context, AttributeSet attrs) {
-        This(context, attrs, 0);
-    }
-
-    public SwitchBar(Context context, AttributeSet attrs, Int32 defStyleAttr) {
-        This(context, attrs, defStyleAttr, 0);
-    }
-
-    public SwitchBar(Context context, AttributeSet attrs, Int32 defStyleAttr, Int32 defStyleRes) {
-        Super(context, attrs, defStyleAttr, defStyleRes);
-
-        LayoutInflater->From(context).Inflate(R.layout.switch_bar, this);
-
-        final TypedArray a = context->ObtainStyledAttributes(attrs, MARGIN_ATTRIBUTES);
-        Int32 switchBarMarginStart = (Int32) a->GetDimension(0, 0);
-        Int32 switchBarMarginEnd = (Int32) a->GetDimension(1, 0);
-        a->Recycle();
-
-        mTextView = (TextView) FindViewById(R.id.switch_text);
-        mTextView->SetText(R::string::switch_off_text);
-        ViewGroup.MarginLayoutParams lp = (MarginLayoutParams) mTextView->GetLayoutParams();
-        lp->SetMarginStart(switchBarMarginStart);
-
-        mSwitch = (ToggleSwitch) FindViewById(R.id.switch_widget);
-        // Prevent OnSaveInstanceState() to be called as we are managing the state of the Switch
-        // on our own
-        mSwitch->SetSaveEnabled(FALSE);
-        lp = (MarginLayoutParams) mSwitch->GetLayoutParams();
-        lp->SetMarginEnd(switchBarMarginEnd);
-
-        AddOnSwitchChangeListener(new OnSwitchChangeListener() {
-            //@Override
-            CARAPI OnSwitchChanged(Switch switchView, Boolean isChecked) {
-                SetTextViewLabel(isChecked);
-            }
-        });
-
-        SetOnClickListener(this);
-
-        // Default is hide
-        SetVisibility(View.GONE);
-    }
-
-    CARAPI SetTextViewLabel(Boolean isChecked) {
-        mTextView->SetText(isChecked ? R::string::switch_on_text : R::string::switch_off_text);
-    }
-
-    CARAPI SetChecked(Boolean checked) {
-        SetTextViewLabel(checked);
-        mSwitch->SetChecked(checked);
-    }
-
-    CARAPI SetCheckedInternal(Boolean checked) {
-        SetTextViewLabel(checked);
-        mSwitch->SetCheckedInternal(checked);
-    }
-
-    public Boolean IsChecked() {
-        return mSwitch->IsChecked();
-    }
-
-    CARAPI SetEnabled(Boolean enabled) {
-        super->SetEnabled(enabled);
-        mTextView->SetEnabled(enabled);
-        mSwitch->SetEnabled(enabled);
-    }
-
-    public final ToggleSwitch GetSwitch() {
-        return mSwitch;
-    }
-
-    CARAPI Show() {
-        if (!IsShowing()) {
-            SetVisibility(View.VISIBLE);
-            mSwitch->SetOnCheckedChangeListener(this);
-        }
-    }
-
-    CARAPI Hide() {
-        if (IsShowing()) {
-            SetVisibility(View.GONE);
-            mSwitch->SetOnCheckedChangeListener(NULL);
-        }
-    }
-
-    public Boolean IsShowing() {
-        return (GetVisibility() == View.VISIBLE);
-    }
-
-    //@Override
-    CARAPI OnClick(View v) {
-        final Boolean isChecked = !mSwitch->IsChecked();
-        SetChecked(isChecked);
-    }
-
-    CARAPI PropagateChecked(Boolean isChecked) {
-        final Int32 count = mSwitchChangeListeners->Size();
-        for (Int32 n = 0; n < count; n++) {
-            mSwitchChangeListeners->Get(n).OnSwitchChanged(mSwitch, isChecked);
-        }
-    }
-
-    //@Override
-    CARAPI OnCheckedChanged(CompoundButton buttonView, Boolean isChecked) {
-        PropagateChecked(isChecked);
-    }
-
-    CARAPI AddOnSwitchChangeListener(OnSwitchChangeListener listener) {
-        if (mSwitchChangeListeners->Contains(listener)) {
-            throw new IllegalStateException("Cannot add twice the same OnSwitchChangeListener");
-        }
-        mSwitchChangeListeners->Add(listener);
-    }
-
-    CARAPI RemoveOnSwitchChangeListener(OnSwitchChangeListener listener) {
-        if (!mSwitchChangeListeners->Contains(listener)) {
-            throw new IllegalStateException("Cannot remove OnSwitchChangeListener");
-        }
-        mSwitchChangeListeners->Remove(listener);
-    }
-
-    static class SavedState extends BaseSavedState {
-        Boolean checked;
-        Boolean visible;
-
-        SavedState(Parcelable superState) {
-            Super(superState);
-        }
-
-        /**
-         * Constructor called from {@link #CREATOR}
-         */
-        private SavedState(Parcel in) {
-            Super(in);
-            checked = (Boolean)in->ReadValue(NULL);
-            visible = (Boolean)in->ReadValue(NULL);
-        }
+        CARAPI constructor(
+            /* [in] */ IParcelable* superState);
 
         //@Override
-        CARAPI WriteToParcel(Parcel out, Int32 flags) {
-            super->WriteToParcel(out, flags);
-            out->WriteValue(checked);
-            out->WriteValue(visible);
-        }
+        CARAPI ReadFromParcel(
+            /* [in] */ IParcel* source);
+
+        //@Override
+        CARAPI WriteToParcel(
+            /* [in] */ IParcel* out);
 
         //@Override
         CARAPI ToString(
-        /* [out] */ String* str)
+            /* [out] */ String* str);
+
+    public:
+        Boolean mChecked;
+        Boolean mVisible;
+    };
+
+private:
+    class SwitchBarOnSwitchChangeListener
+        : public Object
+        , public ISwitchBarOnSwitchChangeListener
     {
-            return "SwitchBar.SavedState{"
-                    + Integer->ToHexString(System->IdentityHashCode(this))
-                    + " checked=" + checked
-                    + " visible=" + visible + "}";
-        }
+    public:
+        CAR_INTERFACE_DECL();
 
-        public static const Parcelable.Creator<SavedState> CREATOR
-                = new Parcelable.Creator<SavedState>() {
-            public SavedState CreateFromParcel(Parcel in) {
-                return new SavedState(in);
-            }
+        SwitchBarOnSwitchChangeListener(
+            /* [in] */ SwitchBar* host);
 
-            public SavedState[] NewArray(Int32 size) {
-                return new SavedState[size];
-            }
-        };
-    }
+        ~SwitchBarOnSwitchChangeListener();
+
+        //@Override
+        CARAPI OnSwitchChanged(
+            /* [in] */ ISwitch* switchView,
+            /* [in] */ Boolean isChecked);
+
+    private:
+        SwitchBar* mHost;
+    };
+
+public:
+    CAR_INTERFACE_DECL();
+
+    SwitchBar();
+
+    ~SwitchBar();
+
+    CARAPI constructor(
+        /* [in] */ IContext* context);
+
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs);
+
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs,
+        /* [in] */ Int32 defStyleAttr);
+
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs,
+        /* [in] */ Int32 defStyleAttr,
+        /* [in] */ Int32 defStyleRes);
+
+    CARAPI SetTextViewLabel(
+        /* [in] */ Boolean isChecked);
+
+    CARAPI SetChecked(
+        /* [in] */ Boolean checked);
+
+    CARAPI SetCheckedInternal(
+        /* [in] */ Boolean checked);
+
+    CARAPI IsChecked(
+        /* [out] */ Boolean* result);
+
+    CARAPI SetEnabled(
+        /* [in] */ Boolean enabled);
+
+    CARAPI_(AutoPtr<IToggleSwitch>) GetSwitch();
+
+    CARAPI Show();
+
+    CARAPI Hide();
+
+    CARAPI_(Boolean) IsShowing();
 
     //@Override
-    public Parcelable OnSaveInstanceState() {
-        Parcelable superState = super->OnSaveInstanceState();
+    CARAPI OnClick(
+        /* [in] */ IView* v);
 
-        SavedState ss = new SavedState(superState);
-        ss.checked = mSwitch->IsChecked();
-        ss.visible = IsShowing();
-        return ss;
-    }
+    CARAPI PropagateChecked(
+        /* [in] */ Boolean isChecked);
 
     //@Override
-    CARAPI OnRestoreInstanceState(Parcelable state) {
-        SavedState ss = (SavedState) state;
+    CARAPI OnCheckedChanged(
+        /* [in] */ ICompoundButton* buttonView,
+        /* [in] */ Boolean isChecked);
 
-        super->OnRestoreInstanceState(ss->GetSuperState());
+    CARAPI AddOnSwitchChangeListener(
+        /* [in] */ ISwitchBarOnSwitchChangeListener* listener);
 
-        mSwitch->SetCheckedInternal(ss.checked);
-        SetTextViewLabel(ss.checked);
-        SetVisibility(ss.visible ? View.VISIBLE : View.GONE);
-        mSwitch->SetOnCheckedChangeListener(ss.visible ? this : NULL);
+    CARAPI RemoveOnSwitchChangeListener(
+        /* [in] */ ISwitchBarOnSwitchChangeListener* listener);
 
-        RequestLayout();
-    }
-}
+    //@Override
+    CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
+
+    //@Override
+    CARAPI_(void) OnRestoreInstanceState(
+        /* [in] */ IParcelable* state);
+
+private:
+    AutoPtr<IToggleSwitch> mSwitch;
+    AutoPtr<ITextView> mTextView;
+
+    // ArrayList<OnSwitchChangeListener> mSwitchChangeListeners =
+    //     new ArrayList<OnSwitchChangeListener>();
+    AutoPtr<IArrayList> mSwitchChangeListeners;
+
+    static AutoPtr< ArrayOf<Int32> > MARGIN_ATTRIBUTES;
+};
+
+} // namespace Widget
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_WIDGET_SWITCHBAR_H__

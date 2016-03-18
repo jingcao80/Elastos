@@ -22,7 +22,6 @@ CAR_INTERFACE_IMPL_2(Plugin::DefaultClickHandler, Object, IPreferencesClickHandl
 ECode Plugin::DefaultClickHandler::HandleClickEvent(
     /* [in] */ IContext* context)
 {
-    assert(0);
     // Show a simple popup dialog containing the description
     // string of the plugin.
     if (mDialog == NULL) {

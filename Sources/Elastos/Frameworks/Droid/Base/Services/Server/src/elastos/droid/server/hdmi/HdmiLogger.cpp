@@ -1,8 +1,24 @@
 
 #include "elastos/droid/server/hdmi/HdmiLogger.h"
 #include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.CoreLibrary.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/droid/os/SystemClock.h>
+#include <elastos/utility/logging/Slogger.h>
+#include <elastos/core/StringUtils.h>
+#include <Elastos.Droid.Utility.h>
 
+using Elastos::Droid::Utility::CPair;
+using Elastos::Core::IInteger64;
+using Elastos::Core::CInteger64;
+using Elastos::Core::CInteger32;
+using Elastos::Core::IInteger32;
+using Elastos::Core::StringBuilder;
+using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Utility::ISlog;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -11,198 +27,192 @@ namespace Hdmi {
 
 const String HdmiLogger::TAG("HDMI");
 const Int64 HdmiLogger::ERROR_LOG_DURATTION_MILLIS = 20 * 1000;
-const Boolean HdmiLogger::DEBUG = FALSE;
-const AutoPtr<IThreadLocal> HdmiLogger::sLogger = InitLogger();
+const Boolean HdmiLogger::DEBUG = InitDEBUG();
+
+pthread_key_t HdmiLogger::sKey;
+pthread_once_t HdmiLogger::sKeyOnce = PTHREAD_ONCE_INIT;
+
+static void HdmiLoggerDestructor(void* st)
+{
+    HdmiLogger* obj = static_cast<HdmiLogger*>(st);
+    if (obj) {
+        delete obj;
+    }
+}
+
+static void MakeKey()
+{
+    ASSERT_TRUE(pthread_key_create(&HdmiLogger::sKey, HdmiLoggerDestructor) == 0);
+}
+
+Boolean HdmiLogger::InitDEBUG()
+{
+    pthread_once(&sKeyOnce, MakeKey);
+    pthread_setspecific(sKey, NULL);
+
+    return FALSE;
+}
 
 HdmiLogger::HdmiLogger()
 {
-#if 0 // TODO: Translate codes below
-    mWarningTimingCache = new HashMap<>();
-    mErrorTimingCache = new HashMap<>();
-#endif
+    CHashMap::New((IHashMap**)&mWarningTimingCache);
+    CHashMap::New((IHashMap**)&mErrorTimingCache);
 }
 
 ECode HdmiLogger::Warning(
     /* [in] */ const char* fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        va_list ap;
-        va_start(ap, fmt);
-        GetLogger()->WarningInternal(ToLogString(fmt, ap));
-        va_end(ap);
-#endif
+    va_list ap;
+    va_start(ap, fmt);
+    GetLogger()->WarningInternal(ToLogString(fmt, ap));
+    va_end(ap);
+    return NOERROR;
 }
 
 ECode HdmiLogger::WarningInternal(
     /* [in] */ const String& logMessage)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        String log = UpdateLog(mWarningTimingCache, logMessage);
-        Boolean isEmpty;
-        log->IsEmpty(&isEmpty);
-        if (!isEmpty) {
-            Slogger::W(TAG, log);
-        }
-#endif
+    String log = UpdateLog(mWarningTimingCache, logMessage);
+    if (!log.IsEmpty()) {
+        Slogger::W(TAG, log);
+    }
+    return NOERROR;
 }
 
 ECode HdmiLogger::Error(
     /* [in] */ const char* fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        va_list ap;
-        va_start(ap, fmt);
-        GetLogger()->ErrorInternal(ToLogString(fmt, ap));
-        va_end(ap);
-#endif
+    va_list ap;
+    va_start(ap, fmt);
+    GetLogger()->ErrorInternal(ToLogString(fmt, ap));
+    va_end(ap);
+    return NOERROR;
 }
 
 ECode HdmiLogger::ErrorInternal(
     /* [in] */ const String& logMessage)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        String log = UpdateLog(mErrorTimingCache, logMessage);
-        Boolean isEmpty;
-        log->IsEmpty(&isEmpty);
-        if (!isEmpty) {
-            Slogger::E(TAG, log);
-        }
-#endif
+    String log = UpdateLog(mErrorTimingCache, logMessage);
+    if (!log.IsEmpty()) {
+        Slogger::E(TAG, log);
+    }
+    return NOERROR;
 }
 
 ECode HdmiLogger::Debug(
     /* [in] */ const char* fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
     va_list ap;
     va_start(ap, fmt);
     GetLogger()->DebugInternal(ToLogString(fmt, ap));
     va_end(ap);
-#endif
+    return NOERROR;
 }
 
 ECode HdmiLogger::DebugInternal(
     /* [in] */ const String& logMessage)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (!DEBUG) {
-            return NOERROR;
-        }
-        Slogger::D(TAG, logMessage);
-#endif
+    if (!DEBUG) {
+        return NOERROR;
+    }
+    Slogger::D(TAG, logMessage);
+    return NOERROR;
 }
 
 String HdmiLogger::ToLogString(
     /* [in] */ const char* fmt, ...)
 {
     String rev;
-#if 0 // TODO: Translate codes below
     va_list ap;
     va_start(ap, fmt);
     rev.AppendFormat(fmt, ap);
     va_end(ap);
-#endif
     return rev;
 }
 
-ECode HdmiLogger::GetLogger(
-    /* [out] */ HdmiLogger** result)
+AutoPtr<HdmiLogger> HdmiLogger::GetLogger()
 {
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        AutoPtr<IInterface> obj;
-        sLogger->Get(, (IInterface**)&obj);
-        HdmiLogger logger = I::Probe(obj);
-        if (logger == NULL) {
-            logger = new HdmiLogger();
-            sLogger->Set(logger);
-        }
-        return logger;
-#endif
+    AutoPtr<HdmiLogger> logger = (HdmiLogger*) pthread_getspecific(sKey);
+    if (logger == NULL) {
+        logger = new HdmiLogger();
+        pthread_setspecific(sKey, logger.Get());
+    }
+    return logger;
 }
 
-ECode HdmiLogger::UpdateLog(
+String HdmiLogger::UpdateLog(
     /* [in] */ IHashMap* cache,
-    /* [in] */ const String& logMessage,
-    /* [out] */ String* result)
+    /* [in] */ const String& logMessage)
 {
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Int64 curTime = SystemClock->UptimeMillis();
-        AutoPtr<IInterface> obj;
-        cache->Get(logMessage, (IInterface**)&obj);
-        Pair<Long, Integer> timing = I::Probe(obj);
-        if (ShouldLogNow(timing, curTime)) {
-            String log = BuildMessage(logMessage, timing);
-            cache->Put(logMessage, new Pair<>(curTime, 1));
-            return log;
-        } else {
-            IncreaseLogCount(cache, logMessage);
-        }
-        return "";
-#endif
+    Int64 curTime = SystemClock::GetUptimeMillis();
+    AutoPtr<IInterface> obj;
+    cache->Get(StringUtils::ParseCharSequence(logMessage), (IInterface**)&obj);
+    AutoPtr<IPair> timing = IPair::Probe(obj);
+    if (ShouldLogNow(timing, curTime)) {
+        String log = BuildMessage(logMessage, timing);
+        AutoPtr<IInteger64> i64CurTime;
+        CInteger64::New(curTime, (IInteger64**)&i64CurTime);
+        AutoPtr<IInteger32> i32;
+        CInteger32::New(1, (IInteger32**)&i32);
+        AutoPtr<IPair> pair;
+        CPair::New(i64CurTime, i32, (IPair**)&pair);
+        cache->Put(StringUtils::ParseCharSequence(logMessage), pair);
+        return log;
+    } else {
+        IncreaseLogCount(cache, logMessage);
+    }
+    return String("");
 }
 
-ECode HdmiLogger::BuildMessage(
+String HdmiLogger::BuildMessage(
     /* [in] */ const String& message,
-    /* [in] */ IPair* timing,
-    /* [out] */ String* result)
+    /* [in] */ IPair* timing)
 {
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return new StringBuilder()
-                .Append("[").Append(timing == NULL ? 1 : timing->mSecond).Append("]:")
-                .Append(message).ToString();
-#endif
+    StringBuilder sb;
+    sb.Append("[");
+    AutoPtr<IInterface> second;
+    timing->GetSecond((IInterface**)&second);
+    Int32 iSecond;
+    IInteger32::Probe(second)->GetValue(&iSecond);
+    sb.Append(timing == NULL ? 1 : iSecond);
+    sb.Append("]:");
+    sb.Append(message);
+    return sb.ToString();
 }
 
 ECode HdmiLogger::IncreaseLogCount(
     /* [in] */ IHashMap* cache,
     /* [in] */ const String& message)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        AutoPtr<IInterface> obj;
-        cache->Get(message, (IInterface**)&obj);
-        Pair<Long, Integer> timing = I::Probe(obj);
-        if (timing != NULL) {
-            cache->Put(message, new Pair<>(timing->mFirst, timing->mSecond + 1));
-        }
-#endif
+    AutoPtr<IInterface> obj;
+    cache->Get(StringUtils::ParseCharSequence(message), (IInterface**)&obj);
+    AutoPtr<IPair> timing = IPair::Probe(obj);
+    if (timing != NULL) {
+        AutoPtr<IPair> pair;
+        AutoPtr<IInterface> first;
+        timing->GetFirst((IInterface**)&first);
+        AutoPtr<IInterface> second;
+        timing->GetSecond((IInterface**)&second);
+        Int32 i32;
+        IInteger32::Probe(second)->GetValue(&i32);
+        i32 += 1;
+        AutoPtr<IInteger32> i32Second;
+        CInteger32::New(i32, (IInteger32**)&i32Second);
+        CPair::New(first, i32Second, (IPair**)&pair);
+        cache->Put(StringUtils::ParseCharSequence(message), pair);
+    }
+    return NOERROR;
 }
 
-ECode HdmiLogger::ShouldLogNow(
+Boolean HdmiLogger::ShouldLogNow(
     /* [in] */ IPair* timing,
-    /* [in] */ Int64 curTime,
-    /* [out] */ Boolean* result)
+    /* [in] */ Int64 curTime)
 {
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return timing == NULL || curTime - timing->mFirst > ERROR_LOG_DURATTION_MILLIS;
-#endif
-}
-
-AutoPtr<IThreadLocal> HdmiLogger::InitLogger()
-{
-    AutoPtr<IThreadLocal> rev;
-#if 0 // TODO: Translate codes below
-    = new ThreadLocal<>();
-#endif
-    return rev;
+    AutoPtr<IInterface> iFirst;
+    timing->GetFirst((IInterface**)&iFirst);
+    Int64 first;
+    IInteger64::Probe(iFirst)->GetValue(&first);
+    return timing == NULL || curTime - first > ERROR_LOG_DURATTION_MILLIS;
 }
 
 } // namespace Hdmi

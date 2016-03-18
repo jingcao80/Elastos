@@ -28,6 +28,43 @@ class HotplugDetectionAction
     : public HdmiCecFeatureAction
     , public IHotplugDetectionAction
 {
+private:
+    class AllDevicesDevicePollingCallback
+        : public Object
+        , public IHdmiControlServiceDevicePollingCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        AllDevicesDevicePollingCallback(
+            /* [in] */ HotplugDetectionAction* host);
+
+        //@Override
+        CARAPI OnPollingFinished(
+            /* [in] */ IList* ackedAddress);
+
+    private:
+        HotplugDetectionAction* mHost;
+    };
+
+    class AudioSystemDevicePollingCallback
+        : public Object
+        , public IHdmiControlServiceDevicePollingCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        AudioSystemDevicePollingCallback(
+            /* [in] */ HotplugDetectionAction* host);
+
+        //@Override
+        CARAPI OnPollingFinished(
+            /* [in] */ IList* ackedAddress);
+
+    private:
+        HotplugDetectionAction* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -71,20 +108,17 @@ private:
         /* [in] */ IList* ackedAddress,
         /* [in] */ Boolean audioOnly);
 
-    static CARAPI InfoListToBitSet(
+    static CARAPI_(AutoPtr<IBitSet>) InfoListToBitSet(
         /* [in] */ IList* infoList,
-        /* [in] */ Boolean audioOnly,
-        /* [out] */ IBitSet** result);
+        /* [in] */ Boolean audioOnly);
 
-    static CARAPI AddressListToBitSet(
-        /* [in] */ IList* list,
-        /* [out] */ IBitSet** result);
+    static CARAPI_(AutoPtr<IBitSet>) AddressListToBitSet(
+        /* [in] */ IList* list);
 
     // A - B = A & ~B
-    static CARAPI Complement(
+    static CARAPI_(AutoPtr<IBitSet>) Complement(
         /* [in] */ IBitSet* first,
-        /* [in] */ IBitSet* second,
-        /* [out] */ IBitSet** result);
+        /* [in] */ IBitSet* second);
 
     CARAPI AddDevice(
         /* [in] */ Int32 addedAddress);

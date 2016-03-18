@@ -3773,7 +3773,6 @@ protected:
 //protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
 
 private:
-    static const String TAG;
     static const Boolean DEBUG_LIFECYCLE;
 
     static const String WINDOW_HIERARCHY_TAG;

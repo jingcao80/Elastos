@@ -1,7 +1,7 @@
 
 #include "elastos/droid/app/CInnerReceiver.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
-// #include "elastos/droid/app/CActivityThread.h"
+#include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/app/LoadedPkg.h"
 #include <elastos/utility/logging/Slogger.h>
 
@@ -45,7 +45,7 @@ ECode CInnerReceiver::PerformReceive(
         dispatcher = (LoadedPkg::ReceiverDispatcher*)rd;
     }
 
-    if (FALSE/*CActivityThread::DEBUG_BROADCAST*/) {
+    if (CActivityThread::DEBUG_BROADCAST) {
         Int32 seq = -1;
         intent->GetInt32Extra(String("seq"), -1, &seq);
         String action;
@@ -53,8 +53,7 @@ ECode CInnerReceiver::PerformReceive(
         Slogger::I("CInnerReceiver", "Receiving broadcast %s seq=%d to %p", action.string(), seq, dispatcher.Get());
     }
     if (dispatcher != NULL) {
-        dispatcher->PerformReceive(
-                intent, resultCode, data, extras, ordered, sticky, sendingUser);
+        dispatcher->PerformReceive(intent, resultCode, data, extras, ordered, sticky, sendingUser);
         return NOERROR;
     }
     else {
@@ -62,7 +61,7 @@ ECode CInnerReceiver::PerformReceive(
         // receiver in this process, but before it could be delivered the
         // receiver was unregistered.  Acknowledge the broadcast on its
         // behalf so that the system's broadcast sequence can continue.
-        if (FALSE/*CActivityThread::DEBUG_BROADCAST*/) {
+        if (CActivityThread::DEBUG_BROADCAST) {
             Slogger::I("CInnerReceiver", "Finishing broadcast to unregistered receiver");
         }
         AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
@@ -72,8 +71,7 @@ ECode CInnerReceiver::PerformReceive(
             extras->SetAllowFds(FALSE, &bval);
         }
 
-        ECode ec = mgr->FinishReceiver((IBinder*)this->Probe(EIID_IBinder),
-                resultCode, data, extras, FALSE);
+        ECode ec = mgr->FinishReceiver((IBinder*)this, resultCode, data, extras, FALSE);
         if (FAILED(ec)) {
             Slogger::W("CInnerReceiver", "Couldn't finish broadcast to unregistered receiver");
         }

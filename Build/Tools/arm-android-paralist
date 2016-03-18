@@ -243,6 +243,7 @@
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/telephony/cdma
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/telephony/gsm
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/telephony
+- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/ims
 #- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/statusbar
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/server
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/server/backup
@@ -354,6 +355,7 @@
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/doze
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/egg
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/keyguard
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/usb
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/net
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents/misc
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/settings
@@ -368,8 +370,14 @@
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/tv
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui
+> Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings Settings.car
+  Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/dashboard
+  Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/drawable
+  Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/search
+  Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/widget
+> Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings
   Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider SettingsProvider.car
->  Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider
+> Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider
 #  Elastos/Frameworks/Droid/DevSamples/SoftKeyboard
 #- Elastos/Frameworks/Droid/DevSamples/PinyinIME/share
 #> Elastos/Frameworks/Droid/DevSamples/PinyinIME

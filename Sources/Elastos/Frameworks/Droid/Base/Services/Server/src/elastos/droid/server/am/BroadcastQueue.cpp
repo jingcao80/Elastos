@@ -44,7 +44,7 @@ static Boolean IsLowRamDeviceStatic()
 
 const String BroadcastQueue::TAG("BroadcastQueue");
 const String BroadcastQueue::TAG_MU("BroadcastQueueMU");
-const Boolean BroadcastQueue::DEBUG_BROADCAST = FALSE;
+const Boolean BroadcastQueue::DEBUG_BROADCAST = TRUE;
 const Boolean BroadcastQueue::DEBUG_BROADCAST_LIGHT = FALSE;
 const Boolean BroadcastQueue::DEBUG_MU = FALSE;
 const Int32 BroadcastQueue::MAX_BROADCAST_HISTORY = IsLowRamDeviceStatic() ? 10 : 50;
@@ -137,9 +137,7 @@ Boolean BroadcastQueue::ReplaceParallelBroadcastLocked(
         r->mIntent->FilterEquals((*it)->mIntent, &b);
         if (b) {
             if (DEBUG_BROADCAST) {
-                String str;
-                IObject::Probe(r->mIntent)->ToString(&str);
-                Slogger::V(TAG, "***** DROPPING PARALLEL [%s]:%s", mQueueName.string(), str.string());
+                Slogger::V(TAG, "***** DROPPING PARALLEL [%s]:%s", mQueueName.string(), TO_CSTR(r->mIntent));
             }
             *it = r;
             return TRUE;
@@ -200,7 +198,7 @@ ECode BroadcastQueue::ProcessCurBroadcastLocked(
     if (DEBUG_BROADCAST_LIGHT) {
         String str;
         IObject::Probe(r->mCurComponent)->ToString(&str);
-        Slogger::V(TAG, "Delivering to component %s: %s", str.string(), r->ToString().string());
+        Slogger::V(TAG, "Delivering to component %s: %s", str.string(), TO_CSTR(r));
     }
     AutoPtr<IComponentName> name;
     r->mIntent->GetComponent((IComponentName**)&name);
@@ -218,14 +216,14 @@ ECode BroadcastQueue::ProcessCurBroadcastLocked(
     }
     if (DEBUG_BROADCAST)
         Slogger::V(TAG, "Process cur broadcast %s DELIVERED for app ",
-            r->ToString().string(), app->ToString().string());
+            TO_CSTR(r), app->ToString().string());
     started = TRUE;
     // } finally {
 failed:
     if (!started) {
         if (DEBUG_BROADCAST)
             Slogger::V(TAG, "Process cur broadcast %s: NOT STARTED!",
-                r->ToString().string());
+                TO_CSTR(r));
         r->mReceiver = NULL;
         r->mCurApp = NULL;
         app->mCurReceiver = NULL;
@@ -294,7 +292,7 @@ void BroadcastQueue::SkipCurrentReceiverLocked(
     r = mPendingBroadcast;
     if (r != NULL && r->mCurApp.Get() == app) {
         if (DEBUG_BROADCAST)
-            Slogger::V(TAG, "[%s] skip & discard pending app %s", mQueueName.string(), r->ToString().string());
+            Slogger::V(TAG, "[%s] skip & discard pending app %s", mQueueName.string(), TO_CSTR(r));
         LogBroadcastReceiverDiscardLocked(r);
         FinishReceiverLocked(r, r->mResultCode, r->mResultData,
                 r->mResultExtras, r->mResultAbort, FALSE);
@@ -453,6 +451,7 @@ ECode BroadcastQueue::PerformReceiveLocked(
     // Send the intent to the receiver asynchronously using one-way binder calls.
     if (app != NULL) {
         if (app->mThread != NULL) {
+            Slogger::I(TAG, " >> PerformReceiveLocked 1 %s", TO_CSTR(app));
             // If we have an app thread, do the call through that so it is
             // correctly ordered with other one-way calls.
             return app->mThread->ScheduleRegisteredReceiver(receiver, intent, resultCode,
@@ -464,8 +463,8 @@ ECode BroadcastQueue::PerformReceiveLocked(
         }
     }
     else {
-        return receiver->PerformReceive(intent, resultCode, data, extras, ordered,
-                sticky, sendingUser);
+        Slogger::I(TAG, " >> PerformReceiveLocked 2 %s ", TO_CSTR(receiver));
+        return receiver->PerformReceive(intent, resultCode, data, extras, ordered, sticky, sendingUser);
     }
 }
 
@@ -500,9 +499,9 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
             String str;
             r->mIntent->ToString(&str);
             Slogger::W(TAG, "Permission Denial: broadcasting %s from %s (pid=%d, uid=%d)"
-                    " requires %s due to registered receiver x"
-                    , str.string(), r->mCallerPackage.string(),  r->mCallingPid, r->mCallingUid
-                    , filter->mRequiredPermission.string(), filter->ToString().string());
+                " requires %s due to registered receiver x"
+                , str.string(), r->mCallerPackage.string(),  r->mCallingPid, r->mCallingUid
+                , filter->mRequiredPermission.string(), TO_CSTR(r));
             skip = TRUE;
         }
     }
@@ -540,7 +539,7 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
 
     if (filter->mReceiverList->mApp == NULL || filter->mReceiverList->mApp->mCrashing) {
         Slogger::W(TAG, "Skipping deliver [%s] %s to %s: process crashing",
-            mQueueName.string(), r->ToString().string(), filter->mReceiverList->ToString().string());
+            mQueueName.string(), TO_CSTR(r), TO_CSTR(filter->mReceiverList));
         skip = TRUE;
     }
 
@@ -569,8 +568,7 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
         if (DEBUG_BROADCAST_LIGHT) {
             Int32 seq;
             r->mIntent->GetInt32Extra(String("seq"), -1, &seq);
-            Slogger::I(TAG, "Delivering to %s (seq=%d): %s", filter->ToString().string(),
-                seq, r->ToString().string());
+            Slogger::I(TAG, "Delivering to %s (seq=%d): %s", TO_CSTR(r), seq, TO_CSTR(r));
         }
 
         AutoPtr<IIntent> newIntent;
@@ -579,9 +577,7 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
             newIntent, r->mResultCode, r->mResultData,
             r->mResultExtras, r->mOrdered, r->mInitialSticky, r->mUserId);
         if (FAILED(ec)) {
-            String str;
-            IObject::Probe(r->mIntent)->ToString(&str);
-            Slogger::W(TAG, "Failure sending broadcast %s 0x%08x", str.string(), ec);
+            Slogger::W(TAG, "Failure sending broadcast %s, ec=0x%08x", TO_CSTR(r->mIntent), ec);
             if (ordered) {
                 r->mReceiver = NULL;
                 r->mCurFilter = NULL;
@@ -627,7 +623,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
         Int32 N;
         r->mReceivers->GetSize(&N);
         if (DEBUG_BROADCAST_LIGHT) {
-            Slogger::V(TAG, "Processing parallel broadcast [%s] %s", mQueueName.string(), r->ToString().string());
+            Slogger::V(TAG, "Processing parallel broadcast [%s] %s", mQueueName.string(), TO_CSTR(r));
         }
 
         for (Int32 i = 0; i < N; i++) {
@@ -637,14 +633,14 @@ ECode BroadcastQueue::ProcessNextBroadcast(
                 String str;
                 IObject::Probe(target)->ToString(&str);
                 Slogger::V(TAG, "Delivering non-ordered on [%s] to registered %s: %s"
-                        , mQueueName.string(), str.string(), r->ToString().string());
+                        , mQueueName.string(), str.string(), TO_CSTR(r));
             }
             DeliverToRegisteredReceiverLocked(r, (BroadcastFilter*)IBroadcastFilter::Probe(target), FALSE);
         }
         AddBroadcastToHistoryLocked(r);
         if (DEBUG_BROADCAST_LIGHT) {
             Slogger::V(TAG, "Done with parallel broadcast [%s] %s",
-                mQueueName.string(), r->ToString().string());
+                mQueueName.string(), TO_CSTR(r));
         }
     }
 
@@ -746,24 +742,20 @@ ECode BroadcastQueue::ProcessNextBroadcast(
                     r->mIntent->GetInt32Extra(String("seq"), -1, &seq);
                     String action;
                     r->mIntent->GetAction(&action);
-                    Slogger::I(TAG, "Finishing broadcast [%s] %s seq=%d app=%s"
-                        , mQueueName.string(), action.string(), seq, r->mCallerApp->ToString().string());
+                    Slogger::I(TAG, "Finishing broadcast [%s] %s seq=%d app=%s",
+                        mQueueName.string(), action.string(), seq, TO_CSTR(r->mCallerApp));
                 }
                 AutoPtr<IIntent> newIntent;
                 CIntent::New(r->mIntent, (IIntent**)&newIntent);
                 ECode ec = PerformReceiveLocked(r->mCallerApp, r->mResultTo, newIntent, r->mResultCode,
                         r->mResultData, r->mResultExtras, FALSE, FALSE, r->mUserId);
-                if (FAILED(ec)) {
-                    r->mResultTo = NULL;
-                    String str;
-                    IObject::Probe(r->mIntent)->ToString(&str);
-                    Slogger::W(TAG, "Failure [%s] sending broadcast result of %s 0x%08x"
-                            , mQueueName.string(), str.string(), ec);
-                    break;
-                }
                 // Set this to NULL so that the reference
                 // (local and remote) isn't kept in the mBroadcastHistory.
                 r->mResultTo = NULL;
+                if (FAILED(ec)) {
+                    Slogger::W(TAG, "Failure [%s] sending broadcast result of %s, ec=0x%08x",
+                            mQueueName.string(), TO_CSTR(r->mIntent), ec);
+                }
                 // } catch (RemoteException e) {
                 //     Slog.w(TAG, "Failure ["
                 //             + mQueueName + "] sending broadcast result of "
@@ -775,7 +767,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
             CancelBroadcastTimeoutLocked();
 
             if (DEBUG_BROADCAST_LIGHT)
-                Slogger::V(TAG, "Finished with ordered broadcast %s", r->ToString().string());
+                Slogger::V(TAG, "Finished with ordered broadcast %s", TO_CSTR(r));
 
             // ... and on to the next...
             AddBroadcastToHistoryLocked(r);
@@ -796,38 +788,36 @@ ECode BroadcastQueue::ProcessNextBroadcast(
         r->mDispatchTime = r->mReceiverTime;
         system->GetCurrentTimeMillis(&r->mDispatchClockTime);
         if (DEBUG_BROADCAST_LIGHT) {
-            Slogger::V(TAG, "Processing ordered broadcast [%s] %s", mQueueName.string(),
-                r->ToString().string());
+            Slogger::V(TAG, "Processing ordered broadcast [%s] %s", mQueueName.string(), TO_CSTR(r));
         }
     }
     if (!mPendingBroadcastTimeoutMessage) {
         Int64 timeoutTime = r->mReceiverTime + mTimeoutPeriod;
         if (DEBUG_BROADCAST) {
             Slogger::V(TAG, "Submitting BROADCAST_TIMEOUT_MSG [%s] for %s at %d",
-                mQueueName.string(), r->ToString().string(), timeoutTime);
+                mQueueName.string(), TO_CSTR(r), timeoutTime);
         }
         SetBroadcastTimeoutLocked(timeoutTime);
     }
 
     AutoPtr<IInterface> nextReceiver;
     r->mReceivers->Get(recIdx, (IInterface**)&nextReceiver);
-    if (IBroadcastFilter::Probe(nextReceiver) != NULL) {
+    IBroadcastFilter* bf = IBroadcastFilter::Probe(nextReceiver);
+    if (bf != NULL) {
         // Simple case: this is a registered receiver who gets
         // a direct call.
-        AutoPtr<BroadcastFilter> filter = (BroadcastFilter*)IBroadcastFilter::Probe(nextReceiver);
+        AutoPtr<BroadcastFilter> filter = (BroadcastFilter*)bf;
         if (DEBUG_BROADCAST)  {
-            Slogger::V(TAG, "Delivering ordered [%s] to registered %s: %s"
-                    , mQueueName.string(), filter->ToString().string(), r->ToString().string());
+            Slogger::V(TAG, "Delivering ordered [%s] to registered %s: %s",
+                mQueueName.string(), TO_CSTR(filter), TO_CSTR(r));
         }
         DeliverToRegisteredReceiverLocked(r, filter, r->mOrdered);
         if (r->mReceiver == NULL || !r->mOrdered) {
             // The receiver has already finished, so schedule to
             // process the next one.
             if (DEBUG_BROADCAST) {
-                String str;
-                IObject::Probe(r->mReceiver)->ToString(&str);
-                Slogger::V(TAG, "Quick finishing [%s]: ordered=%d receiver=%s"
-                        , mQueueName.string(), r->mOrdered, str.string());
+                Slogger::V(TAG, "Quick finishing [%s]: ordered=%d receiver=%s",
+                    mQueueName.string(), r->mOrdered, TO_CSTR(r->mReceiver));
             }
             r->mState = BroadcastRecord::IDLE;
             ScheduleBroadcastsLocked();
@@ -941,7 +931,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
     if (r->mCurApp != NULL && r->mCurApp->mCrashing) {
         // If the target process is crashing, just skip it.
         Slogger::W(TAG, "Skipping deliver ordered [%s] %s to %s: process crashing"
-            , mQueueName.string(), r->ToString().string(), r->mCurApp->ToString().string());
+            , mQueueName.string(), TO_CSTR(r), r->mCurApp->ToString().string());
         skip = TRUE;
     }
     AutoPtr<IUserHandleHelper> uhHelper;
@@ -967,7 +957,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
     if (skip) {
         if (DEBUG_BROADCAST)  {
             Slogger::V(TAG, "Skipping delivery of ordered [%s] %s for whatever reason",
-                mQueueName.string(), r->ToString().string());
+                mQueueName.string(), TO_CSTR(r));
         }
         r->mReceiver = NULL;
         r->mCurFilter = NULL;
@@ -1047,7 +1037,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
     // Not running -- get it started, to be executed when the app comes up.
     if (DEBUG_BROADCAST) {
         Slogger::V(TAG, "Need to start app [%s] %s for broadcast %s"
-                , mQueueName.string(), targetProcess.string(), r->ToString().string());
+                , mQueueName.string(), targetProcess.string(), TO_CSTR(r));
     }
     Int32 intentFlags;
     r->mIntent->GetFlags(&intentFlags);
@@ -1278,7 +1268,7 @@ void BroadcastQueue::LogBroadcastReceiverDiscardLocked(
     }
     else {
         Slogger::W(TAG, "Discarding broadcast before first receiver is invoked: %s",
-                r->ToString().string());
+                TO_CSTR(r));
     //     EventLog.writeEvent(EventLogTags.AM_BROADCAST_DISCARD_APP,
     //             -1, System.identityHashCode(r),
     //             r->mIntent.getAction(),

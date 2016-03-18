@@ -66,6 +66,8 @@ DatabaseUtils::InsertHelper::~InsertHelper()
     mColumns = NULL;
 }
 
+CAR_INTERFACE_IMPL(DatabaseUtils::InsertHelper, Object, IDatabaseInsertHelper)
+
 ECode DatabaseUtils::InsertHelper::BuildSQL()
 {
     StringBuilder sb(128);

@@ -3,6 +3,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::View::EIID_IRotationWatcher;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,15 +13,20 @@ namespace JavaProxy {
 
 const String CIRotationWatcherNative::TAG("CIRotationWatcherNative");
 
-CIRotationWatcherNative::~CIRotationWatcherNative(){
+CAR_INTERFACE_IMPL_2(CIRotationWatcherNative, Object, IRotationWatcher, IBinder)
+
+CAR_OBJECT_IMPL(CIRotationWatcherNative)
+
+CIRotationWatcherNative::~CIRotationWatcherNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
 ECode CIRotationWatcherNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -29,7 +36,7 @@ ECode CIRotationWatcherNative::constructor(
 ECode CIRotationWatcherNative::OnRotationChanged(
     /* [in] */ Int32 rotation)
 {
-    LOGGERD(TAG, String("+ CIRotationWatcherNative::OnRotationChanged()"));
+    // LOGGERD(TAG, "+ CIRotationWatcherNative::OnRotationChanged()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -45,14 +52,14 @@ ECode CIRotationWatcherNative::OnRotationChanged(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIRotationWatcherNative::OnRotationChanged()"));
+    // LOGGERD(TAG, "- CIRotationWatcherNative::OnRotationChanged()");
     return NOERROR;
 }
 
 ECode CIRotationWatcherNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CIRotationWatcherNative::ToString()"));
+    // LOGGERD(TAG, "+ CIRotationWatcherNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -71,7 +78,7 @@ ECode CIRotationWatcherNative::ToString(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CIRotationWatcherNative::ToString()"));
+    // LOGGERD(TAG, "- CIRotationWatcherNative::ToString()");
     return NOERROR;
 }
 

@@ -16,25 +16,16 @@ using Elastos::Core::IRunnable;
 using Elastos::Core::Thread;
 using Elastos::Core::StringBuilder;
 
-extern "C" pthread_key_t sLooperKey;
-extern "C" Boolean sLooperKeyInited;
-
 namespace Elastos {
 namespace Droid {
 namespace Os {
-
-CAR_INTERFACE_IMPL(Looper, Object, ILooper)
 
 const String Looper::TAG("Looper");
 AutoPtr<ILooper> Looper::sMainLooper;
 Object Looper::sClassLock;
 
-Looper::Looper(
-    /* [in] */ Boolean quitAllowed)
-{
-    CMessageQueue::New(quitAllowed, (IMessageQueue**)&mQueue);
-    mThread = Thread::GetCurrentThread();
-}
+pthread_key_t Looper::sKey;
+pthread_once_t Looper::sKeyOnce = PTHREAD_ONCE_INIT;
 
 static void LooperDestructor(void* st)
 {
@@ -44,12 +35,22 @@ static void LooperDestructor(void* st)
     }
 }
 
-void Looper::InitTLS()
+static void MakeKey()
 {
-    if (!sLooperKeyInited) {
-        ASSERT_TRUE(pthread_key_create(&sLooperKey, LooperDestructor) == 0);
-        sLooperKeyInited = TRUE;
-    }
+    ASSERT_TRUE(pthread_key_create(&Looper::sKey, LooperDestructor) == 0);
+}
+
+//==========================================================================
+// Looper
+//==========================================================================
+CAR_INTERFACE_IMPL(Looper, Object, ILooper)
+
+Looper::Looper(
+    /* [in] */ Boolean quitAllowed)
+{
+    CMessageQueue::New(quitAllowed, (IMessageQueue**)&mQueue);
+    assert(mQueue != NULL);
+    mThread = Thread::GetCurrentThread();
 }
 
 ECode Looper::Prepare()
@@ -60,14 +61,14 @@ ECode Looper::Prepare()
 ECode Looper::Prepare(
     /* [in] */ Boolean quitAllowed)
 {
-    InitTLS();
-    if (pthread_getspecific(sLooperKey) != NULL) {
+    pthread_once(&sKeyOnce, MakeKey);
+    if (pthread_getspecific(sKey) != NULL) {
         Slogger::E(TAG, "Only one Looper may be created per thread");
         return E_RUNTIME_EXCEPTION;
     }
 
     AutoPtr<Looper> l = new Looper(quitAllowed);
-    ASSERT_TRUE(pthread_setspecific(sLooperKey, l.Get()) == 0);
+    ASSERT_TRUE(pthread_setspecific(sKey, l.Get()) == 0);
     l->AddRef();
     return NOERROR;
 }
@@ -83,6 +84,7 @@ ECode Looper::PrepareMainLooper()
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         sMainLooper = GetMyLooper();
+        assert(sMainLooper != NULL);
     }
     return NOERROR;
 }
@@ -98,7 +100,7 @@ ECode Looper::Loop()
 {
     AutoPtr<Looper> me = (Looper*)GetMyLooper().Get();
     if (me == NULL) {
-        Slogger::E(TAG, "No Looper; Looper.prepare() wasn't called on this thread.");
+        Slogger::E(TAG, "No Looper; Looper::Prepare() wasn't called on this thread.");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -158,7 +160,7 @@ ECode Looper::Loop()
 
 AutoPtr<ILooper> Looper::GetMyLooper()
 {
-    AutoPtr<ILooper> l = (Looper*)pthread_getspecific(sLooperKey);
+    AutoPtr<ILooper> l = (Looper*)pthread_getspecific(sKey);
     return l;
 }
 

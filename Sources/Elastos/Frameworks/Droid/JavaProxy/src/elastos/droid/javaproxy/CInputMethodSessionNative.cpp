@@ -3,7 +3,8 @@
 #include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::JavaProxy::Util;
+using Elastos::Droid::View::InputMethod::EIID_IInputMethodSession;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -12,9 +13,9 @@ namespace JavaProxy {
 
 const String CInputMethodSessionNative::TAG("CInputMethodSessionNative");
 
-CInputMethodSessionNative::CInputMethodSessionNative()
-{
-}
+CAR_INTERFACE_IMPL_3(CInputMethodSessionNative, Object, IInputMethodSession, IInputMethodSessionNative, IBinder)
+
+CAR_OBJECT_IMPL(CInputMethodSessionNative)
 
 CInputMethodSessionNative::~CInputMethodSessionNative()
 {
@@ -24,8 +25,8 @@ CInputMethodSessionNative::~CInputMethodSessionNative()
 }
 
 ECode CInputMethodSessionNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -35,7 +36,7 @@ ECode CInputMethodSessionNative::constructor(
 ECode CInputMethodSessionNative::SetEnabled(
     /* [in] */ Boolean enabled)
 {
-    // LOGGERD(TAG, String("+ CInputMethodSessionNative::SetEnabled()"));
+    // LOGGERD(TAG, "+ CInputMethodSessionNative::SetEnabled()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -51,13 +52,13 @@ ECode CInputMethodSessionNative::SetEnabled(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputMethodSessionNative::SetEnabled()"));
+    // LOGGERD(TAG, "- CInputMethodSessionNative::SetEnabled()");
     return NOERROR;
 }
 
 ECode CInputMethodSessionNative::FinishInput()
 {
-    LOGGERD(TAG, "+ CInputMethodSessionNative::FinishInput()");
+    // LOGGERD(TAG, "+ CInputMethodSessionNative::FinishInput()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -73,7 +74,7 @@ ECode CInputMethodSessionNative::FinishInput()
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, "- CInputMethodSessionNative::FinishInput()");
+    // LOGGERD(TAG, "- CInputMethodSessionNative::FinishInput()");
     return NOERROR;
 }
 
@@ -85,7 +86,7 @@ ECode CInputMethodSessionNative::UpdateSelection(
     /* [in] */ Int32 candidatesStart,
     /* [in] */ Int32 candidatesEnd)
 {
-    LOGGERD(TAG, String("CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -93,7 +94,7 @@ ECode CInputMethodSessionNative::UpdateSelection(
 ECode CInputMethodSessionNative::ViewClicked(
     /* [in] */ Boolean focusChanged)
 {
-    LOGGERD(TAG, String("CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -101,7 +102,7 @@ ECode CInputMethodSessionNative::ViewClicked(
 ECode CInputMethodSessionNative::UpdateCursor(
     /* [in] */ IRect* newCursor)
 {
-    LOGGERD(TAG, String("CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -109,7 +110,7 @@ ECode CInputMethodSessionNative::UpdateCursor(
 ECode CInputMethodSessionNative::DisplayCompletions(
     /* [in] */ ArrayOf<ICompletionInfo *>* completions)
 {
-    LOGGERD(TAG, String("CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -118,7 +119,7 @@ ECode CInputMethodSessionNative::UpdateExtractedText(
     /* [in] */ Int32 token,
     /* [in] */ IExtractedText* text)
 {
-    LOGGERD(TAG, String("CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -128,7 +129,7 @@ ECode CInputMethodSessionNative::DispatchKeyEvent(
     /* [in] */ IKeyEvent* event,
     /* [in] */ ILocalInputMethodSessionEventCallback* eventCallback)
 {
-    LOGGERD(TAG, String("CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -138,7 +139,7 @@ ECode CInputMethodSessionNative::DispatchTrackballEvent(
     /* [in] */ IMotionEvent* event,
     /* [in] */ ILocalInputMethodSessionEventCallback* eventCallback)
 {
-    LOGGERD(TAG, String("CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -148,7 +149,7 @@ ECode CInputMethodSessionNative::DispatchGenericMotionEvent(
     /* [in] */ IMotionEvent* event,
     /* [in] */ ILocalInputMethodSessionEventCallback* cb)
 {
-    LOGGERD(TAG, String("CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -157,7 +158,7 @@ ECode CInputMethodSessionNative::AppPrivateCommand(
     /* [in] */ const String& action,
     /* [in] */ IBundle* data)
 {
-    LOGGERD(TAG, String("CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -166,9 +167,42 @@ ECode CInputMethodSessionNative::ToggleSoftInput(
     /* [in] */ Int32 showFlags,
     /* [in] */ Int32 hideFlags)
 {
-    LOGGERD(TAG, String("CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
+}
+
+ECode CInputMethodSessionNative::UpdateCursorAnchorInfo(
+    /* [in] */ ICursorAnchorInfo* cursorAnchorInfo)
+{
+    LOGGERD(TAG, "CInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
+    assert(0);
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CInputMethodSessionNative::ToString(
+    /* [out] */ String* str)
+{
+    // LOGGERD(TAG, "+ CInputMethodSessionNative::ToString()");
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("java/lang/Object");
+    Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
+
+    jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
+
+    *str = Util::GetElString(env, jstr);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jstr);
+
+    // LOGGERD(TAG, "- CInputMethodSessionNative::ToString()");
+    return NOERROR;
 }
 
 }

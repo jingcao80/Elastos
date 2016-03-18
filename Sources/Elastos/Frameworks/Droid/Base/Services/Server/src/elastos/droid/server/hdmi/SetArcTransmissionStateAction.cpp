@@ -1,13 +1,51 @@
 
+#include "elastos/droid/server/hdmi/Constants.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDeviceTv.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessage.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessageBuilder.h"
+#include "elastos/droid/server/hdmi/HdmiConfig.h"
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include "elastos/droid/server/hdmi/HdmiLogger.h"
+#include "elastos/droid/server/hdmi/HdmiUtils.h"
 #include "elastos/droid/server/hdmi/SetArcTransmissionStateAction.h"
 #include <Elastos.CoreLibrary.Utility.h>
-#include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include <Elastos.CoreLibrary.h>
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Droid::Server::Hdmi::IHdmiControlServiceSendMessageCallback;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Hdmi {
 
+//=============================================================================
+// SetArcTransmissionStateAction::InnerSub_SendMessageCallback
+//=============================================================================
+CAR_INTERFACE_IMPL(SetArcTransmissionStateAction::InnerSub_SendMessageCallback, Object, IHdmiControlServiceSendMessageCallback)
+
+SetArcTransmissionStateAction::InnerSub_SendMessageCallback::InnerSub_SendMessageCallback(
+    /* [in] */ SetArcTransmissionStateAction* host)
+    : mHost(host)
+{}
+
+ECode SetArcTransmissionStateAction::InnerSub_SendMessageCallback::OnSendCompleted(
+    /* [in] */ Int32 error)
+{
+    if (error != Constants::SEND_RESULT_SUCCESS) {
+        // If fails to send <Report ARC Initiated>, disable ARC and
+        // send <Report ARC Terminated> directly.
+        mHost->SetArcStatus(FALSE);
+        HdmiLogger::Debug("Failed to send <Report Arc Initiated>.");
+        mHost->Finish();
+    }
+    return NOERROR;
+}
+
+//=============================================================================
+// SetArcTransmissionStateAction
+//=============================================================================
 CAR_INTERFACE_IMPL(SetArcTransmissionStateAction, HdmiCecFeatureAction, ISetArcTransmissionStateAction)
 
 const String SetArcTransmissionStateAction::TAG("SetArcTransmissionStateAction");
@@ -23,16 +61,14 @@ ECode SetArcTransmissionStateAction::constructor(
     /* [in] */ Int32 avrAddress,
     /* [in] */ Boolean enabled)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super::constructor(source);
-        Int32 srcAddr;
-        GetSourceAddress(&srcAddr);
-        HdmiUtils->VerifyAddressType(srcAddr, IHdmiDeviceInfo::DEVICE_TV);
-        HdmiUtils->VerifyAddressType(avrAddress, IHdmiDeviceInfo::DEVICE_AUDIO_SYSTEM);
-        mAvrAddress = avrAddress;
-        mEnabled = enabled;
-#endif
+    HdmiCecFeatureAction::constructor(source);
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    HdmiUtils::VerifyAddressType(srcAddr, IHdmiDeviceInfo::DEVICE_TV);
+    HdmiUtils::VerifyAddressType(avrAddress, IHdmiDeviceInfo::DEVICE_AUDIO_SYSTEM);
+    mAvrAddress = avrAddress;
+    mEnabled = enabled;
+    return NOERROR;
 }
 
 ECode SetArcTransmissionStateAction::Start(
@@ -40,72 +76,58 @@ ECode SetArcTransmissionStateAction::Start(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mEnabled) {
-            // Enable ARC status immediately after sending <Report Arc Initiated>.
-            // If AVR responds with <Feature Abort>, disable ARC status again.
-            // This is different from spec that says that turns ARC status to
-            // "Enabled" if <Report ARC Initiated> is acknowledged and no
-            // <Feature Abort> is received.
-            // But implemented this way to save the time having to wait for
-            // <Feature Abort>.
-            SetArcStatus(TRUE);
-            // If succeeds to send <Report ARC Initiated>, wait general timeout
-            // to check whether there is no <Feature Abort> for <Report ARC Initiated>.
-            mState = STATE_WAITING_TIMEOUT;
-            AddTimer(mState, HdmiConfig::TIMEOUT_MS);
-            SendReportArcInitiated();
-        } else {
-            SetArcStatus(FALSE);
-            Finish();
-        }
-        *result = TRUE;
-        return NOERROR;
-#endif
+    if (mEnabled) {
+        // Enable ARC status immediately after sending <Report Arc Initiated>.
+        // If AVR responds with <Feature Abort>, disable ARC status again.
+        // This is different from spec that says that turns ARC status to
+        // "Enabled" if <Report ARC Initiated> is acknowledged and no
+        // <Feature Abort> is received.
+        // But implemented this way to save the time having to wait for
+        // <Feature Abort>.
+        SetArcStatus(TRUE);
+        // If succeeds to send <Report ARC Initiated>, wait general timeout
+        // to check whether there is no <Feature Abort> for <Report ARC Initiated>.
+        mState = STATE_WAITING_TIMEOUT;
+        AddTimer(mState, HdmiConfig::TIMEOUT_MS);
+        SendReportArcInitiated();
+    } else {
+        SetArcStatus(FALSE);
+        Finish();
+    }
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode SetArcTransmissionStateAction::SendReportArcInitiated()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Int32 srcAddr;
-        GetSourceAddress(&srcAddr);
-        HdmiCecMessage command = HdmiCecMessageBuilder->BuildReportArcInitiated(srcAddr, mAvrAddress);
-        SendCommand(command, new HdmiControlService->SendMessageCallback() {
-            //@Override
-            CARAPI OnSendCompleted(Int32 error) {
-                if (error != Constants::SEND_RESULT_SUCCESS) {
-                    // If fails to send <Report ARC Initiated>, disable ARC and
-                    // send <Report ARC Terminated> directly.
-                    SetArcStatus(FALSE);
-                    HdmiLogger->Debug("Failed to send <Report Arc Initiated>.");
-                    Finish();
-                }
-            }
-        });
-#endif
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    AutoPtr<IHdmiCecMessage> command;
+    HdmiCecMessageBuilder::BuildReportArcInitiated(srcAddr, mAvrAddress, (IHdmiCecMessage**)&command);
+    SendCommand(command, new InnerSub_SendMessageCallback(this));
+    return NOERROR;
 }
 
 ECode SetArcTransmissionStateAction::SetArcStatus(
     /* [in] */ Boolean enabled)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        AutoPtr<IHdmiCecLocalDeviceTv> tv;
-        Tv((IHdmiCecLocalDeviceTv**)&tv);
-        Boolean wasEnabled = tv->SetArcStatus(enabled);
-        Slogger::I(TAG, "Change arc status [old:" + wasEnabled + ", new:" + enabled + "]");
+    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+    Tv((IHdmiCecLocalDeviceTv**)&tv);
+    Boolean wasEnabled;
+    ((HdmiCecLocalDeviceTv*) tv.Get())->SetArcStatus(enabled, &wasEnabled);
+    Slogger::I(TAG, "Change arc status [old:%s, new:%s]",
+        wasEnabled ? "true" : "false", enabled ? "true" : "false");
 
-        // If enabled before and set to "disabled" and send <Report Arc Terminated> to
-        // av reciever.
-        if (!enabled && wasEnabled) {
-            Int32 srcAddr;
-            GetSourceAddress(&srcAddr);
-            SendCommand(HdmiCecMessageBuilder->BuildReportArcTerminated(srcAddr,
-                    mAvrAddress));
-        }
-#endif
+    // If enabled before and set to "disabled" and send <Report Arc Terminated> to
+    // av reciever.
+    if (!enabled && wasEnabled) {
+        Int32 srcAddr;
+        GetSourceAddress(&srcAddr);
+        AutoPtr<IHdmiCecMessage> cmd;
+        HdmiCecMessageBuilder::BuildReportArcTerminated(srcAddr, mAvrAddress, (IHdmiCecMessage**)&cmd);
+        SendCommand(cmd);
+    }
+    return NOERROR;
 }
 
 ECode SetArcTransmissionStateAction::ProcessCommand(
@@ -114,44 +136,38 @@ ECode SetArcTransmissionStateAction::ProcessCommand(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mState != STATE_WAITING_TIMEOUT) {
-            *result = FALSE;
-            return NOERROR;
-        }
-
-        Int32 opcode;
-        cmd->GetOpcode(&opcode);
-        Int32 opcode = opcode;
-        if (opcode == Constants::MESSAGE_FEATURE_ABORT) {
-            AutoPtr<ArrayOf<Byte> > params;
-            cmd->GetParams((ArrayOf<Byte>**)&params);
-            Int32 originalOpcode = (*params)[0] & 0xFF;
-            if (originalOpcode == Constants::MESSAGE_REPORT_ARC_INITIATED) {
-                HdmiLogger->Debug("Feature aborted for <Report Arc Initiated>");
-                SetArcStatus(FALSE);
-                Finish();
-                *result = TRUE;
-                return NOERROR;
-            }
-        }
+    if (mState != STATE_WAITING_TIMEOUT) {
         *result = FALSE;
         return NOERROR;
-#endif
+    }
+
+    Int32 opcode;
+    cmd->GetOpcode(&opcode);
+    if (opcode == Constants::MESSAGE_FEATURE_ABORT) {
+        AutoPtr<ArrayOf<Byte> > params;
+        cmd->GetParams((ArrayOf<Byte>**)&params);
+        Int32 originalOpcode = (*params)[0] & 0xFF;
+        if (originalOpcode == Constants::MESSAGE_REPORT_ARC_INITIATED) {
+            HdmiLogger::Debug("Feature aborted for <Report Arc Initiated>");
+            SetArcStatus(FALSE);
+            Finish();
+            *result = TRUE;
+            return NOERROR;
+        }
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode SetArcTransmissionStateAction::HandleTimerEvent(
     /* [in] */ Int32 state)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mState != state || mState != STATE_WAITING_TIMEOUT) {
-            return NOERROR;
-        }
-        // Expire timeout for <Feature Abort>.
-        Finish();
-#endif
+    if (mState != state || mState != STATE_WAITING_TIMEOUT) {
+        return NOERROR;
+    }
+    // Expire timeout for <Feature Abort>.
+    Finish();
+    return NOERROR;
 }
 
 } // namespace Hdmi

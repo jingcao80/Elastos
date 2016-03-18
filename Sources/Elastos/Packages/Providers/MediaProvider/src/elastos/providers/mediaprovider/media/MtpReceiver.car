@@ -1,0 +1,21 @@
+module
+{
+    namespace Elastos {
+    namespace Providers {
+    namespace MediaProvider {
+    namespace Media {
+
+    /**
+     * @Involve
+     * interface IBroadcastReceiver
+     */
+    interface IMtpReceiver
+    {}
+
+    } // namespace Media
+    } // namespace MediaProvider
+    } // namespace Providers
+    } // namespace Elastos
+
+}
+

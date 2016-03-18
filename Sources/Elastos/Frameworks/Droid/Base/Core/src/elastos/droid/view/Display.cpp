@@ -445,6 +445,7 @@ ECode Display::HasAccess(
     /* [in] */ Int32 uid,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = Display::HasAccess(uid, mFlags, mOwnerUid);
     return NOERROR;
 }
@@ -466,10 +467,10 @@ Boolean Display::HasAccess(
  * @hide
  */
 ECode Display::IsPublicPresentation(
-        /* [out] */ Boolean* result)
+    /* [out] */ Boolean* result)
 {
-    *result = (mFlags & (FLAG_PRIVATE | FLAG_PRESENTATION)) ==
-            FLAG_PRESENTATION;
+    VALIDATE_NOT_NULL(result)
+    *result = (mFlags & (FLAG_PRIVATE | FLAG_PRESENTATION)) == FLAG_PRESENTATION;
     return NOERROR;
 }
 
@@ -543,10 +544,6 @@ String Display::TypeToString(
     }
 }
 
-
-    /**
-     * @hide
-     */
 String Display::StateToString(
     /* [in] */ Int32 state)
 {

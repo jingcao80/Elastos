@@ -72,7 +72,6 @@ ECode CBundle::constructor(
 
     mHasFds = b->mHasFds;
     mFdsKnown = b->mFdsKnown;
-    mJavaData = b->mJavaData;
     return NOERROR;
 }
 
@@ -550,11 +549,6 @@ ECode CBundle::ReadFromParcel(
     BaseBundle::ReadFromParcelInner(parcel);
     mParcelledData->HasFileDescriptors(&mHasFds);
     mFdsKnown = TRUE;
-    Int32 size;
-    parcel->ReadInt32(&size);
-    if (size > 0) {
-        parcel->ReadArrayOf((Handle32*)&mJavaData);
-    }
     return NOERROR;
 }
 
@@ -566,12 +560,6 @@ ECode CBundle::WriteToParcel(
     //parcel->PushAllowFds(mAllowFds, &oldAllowFds);
     // try {
     BaseBundle::WriteToParcelInner(parcel);
-    if (mJavaData != NULL) {
-        parcel->WriteInt32(mJavaData->GetLength());
-        parcel->WriteArrayOf((Handle32)mJavaData.Get());
-    }
-    else
-        parcel->WriteInt32(0);
     // } finally {
     // parcel->RestoreAllowFds(oldAllowFds);
     // }
@@ -1086,22 +1074,6 @@ ECode CBundle::GetCharSequenceArray(
     /* [out, callee] */ ArrayOf<ICharSequence*>** value)
 {
     return BaseBundle::GetCharSequenceArray(key, value);
-}
-
-ECode CBundle::SetJavaData(
-    /* [in] */ ArrayOf<Byte>* data)
-{
-    mJavaData = data;
-    return NOERROR;
-}
-
-ECode CBundle::GetJavaData(
-    /* [out, callee] */ ArrayOf<Byte>** data)
-{
-    VALIDATE_NOT_NULL(data)
-    *data = mJavaData;
-    REFCOUNT_ADD(*data)
-    return NOERROR;
 }
 
 } // namespace Os

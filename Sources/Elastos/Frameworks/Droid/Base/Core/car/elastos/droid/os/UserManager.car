@@ -379,6 +379,23 @@ module
             [out] Boolean* result);
 
         /**
+         * Used to check if the user making this call is linked to another user. Linked users may have
+         * a reduced number of available apps, app restrictions and account restrictions.
+         * @return whether the user making this call is a linked user
+         * @hide
+         */
+        IsLinkedUser(
+            [out] Boolean* result);
+
+        /**
+         * Checks if the calling app is running as a guest user.
+         * @return whether the caller is a guest user.
+         * @hide
+         */
+        IsGuestUser(
+            [out] Boolean* result);
+
+        /**
          * Return whether the given user is actively running.  This means that
          * the user is in the "started" state, not "stopped" -- it is currently
          * allowed to run code through scheduled alarms, receiving broadcasts,

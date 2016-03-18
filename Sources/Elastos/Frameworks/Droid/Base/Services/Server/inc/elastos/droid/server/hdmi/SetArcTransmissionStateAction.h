@@ -25,6 +25,25 @@ class SetArcTransmissionStateAction
     : public HdmiCecFeatureAction
     , public ISetArcTransmissionStateAction
 {
+private:
+    class InnerSub_SendMessageCallback
+        : public Object
+        , public IHdmiControlServiceSendMessageCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_SendMessageCallback(
+            /* [in] */ SetArcTransmissionStateAction* host);
+
+        //@Override
+        CARAPI OnSendCompleted(
+            /* [in] */ Int32 error);
+
+    private:
+        SetArcTransmissionStateAction* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

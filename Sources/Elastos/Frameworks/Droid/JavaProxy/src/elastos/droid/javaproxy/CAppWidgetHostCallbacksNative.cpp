@@ -3,8 +3,9 @@
 #include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::AppWidget::EIID_IIAppWidgetHost;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
 
 namespace Elastos {
 namespace Droid {
@@ -12,19 +13,20 @@ namespace JavaProxy {
 
 const String CAppWidgetHostCallbacksNative::TAG("CAppWidgetHostCallbacksNative");
 
-CAppWidgetHostCallbacksNative::CAppWidgetHostCallbacksNative(){
+CAR_INTERFACE_IMPL_2(CAppWidgetHostCallbacksNative, Object, IIAppWidgetHost, IBinder)
 
-}
+CAR_OBJECT_IMPL(CAppWidgetHostCallbacksNative)
 
-CAppWidgetHostCallbacksNative::~CAppWidgetHostCallbacksNative(){
+CAppWidgetHostCallbacksNative::~CAppWidgetHostCallbacksNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
 ECode CAppWidgetHostCallbacksNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     JNIEnv* env;
@@ -35,29 +37,25 @@ ECode CAppWidgetHostCallbacksNative::constructor(
 
 ECode CAppWidgetHostCallbacksNative::UpdateAppWidget(
     /* [in] */ Int32 appWidgetId,
-    /* [in] */ IParcelable* views)
+    /* [in] */ IRemoteViews* remoteViews)
 {
+    // LOGGERD(TAG, "+ UpdateAppWidget()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
     jclass c = env->FindClass("com/android/internal/appwidget/IAppWidgetHost");
-    Util::CheckErrorAndLog(env, TAG, String("FindClass: IAppWidgetHost"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IAppWidgetHost", __LINE__);
     jmethodID m = env->GetMethodID(c, "updateAppWidget", "(ILandroid/widget/RemoteViews;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: updateAppWidget"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: updateAppWidget", __LINE__);
 
-    AutoPtr<IRemoteViews> remoteViews;
-
-    if(views != NULL){
-        remoteViews = IRemoteViews::Probe(views);
-    }
-
-    jobject jremoteviews = Util::ToJavaRemoteViews(env, remoteViews.Get());
+    jobject jremoteviews = Util::ToJavaRemoteViews(env, remoteViews);
 
     env->CallVoidMethod(mJInstance, m, (jint)appWidgetId, jremoteviews);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod:updateAppWidget()"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod:updateAppWidget()", __LINE__);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jremoteviews);
+    // LOGGERD(TAG, "- UpdateAppWidget()");
     return NOERROR;
 }
 
@@ -65,40 +63,44 @@ ECode CAppWidgetHostCallbacksNative::ProviderChanged(
     /* [in] */ Int32 appWidgetId,
     /* [in] */ IAppWidgetProviderInfo* info)
 {
+    // LOGGERD(TAG, "+ ProviderChanged()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
     jclass c = env->FindClass("com/android/internal/appwidget/IAppWidgetHost");
-    Util::CheckErrorAndLog(env, TAG, String("FindClass: IAppWidgetHost"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IAppWidgetHost", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "providerChanged", "(ILandroid/appwidget/AppWidgetProviderInfo;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: providerChanged"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: providerChanged", __LINE__);
 
     jobject jinfo = Util::ToJavaAppWidgetProviderInfo(env, info);
 
     env->CallVoidMethod(mJInstance, m, (jint)appWidgetId, jinfo);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod:providerChanged()"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod:providerChanged()", __LINE__);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jinfo);
+    // LOGGERD(TAG, "- ProviderChanged()");
     return NOERROR;
 }
 
 ECode CAppWidgetHostCallbacksNative::ProvidersChanged()
 {
+    // LOGGERD(TAG, "+ ProvidersChanged()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
     jclass c = env->FindClass("com/android/internal/appwidget/IAppWidgetHost");
-    Util::CheckErrorAndLog(env, TAG, String("FindClass: IAppWidgetHost"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IAppWidgetHost", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "providersChanged", "()V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: providersChanged"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: providersChanged", __LINE__);
 
     env->CallVoidMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod:providersChanged()"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod:providersChanged()", __LINE__);
 
     env->DeleteLocalRef(c);
+    // LOGGERD(TAG, "- ProvidersChanged()");
     return NOERROR;
 }
 
@@ -106,19 +108,46 @@ ECode CAppWidgetHostCallbacksNative::ViewDataChanged(
     /* [in] */ Int32 appWidgetId,
     /* [in] */ Int32 viewId)
 {
+    // LOGGERD(TAG, "+ ViewDataChanged()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
     jclass c = env->FindClass("com/android/internal/appwidget/IAppWidgetHost");
-    Util::CheckErrorAndLog(env, TAG, String("FindClass: IAppWidgetHost"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IAppWidgetHost", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "viewDataChanged", "(II)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: viewDataChanged"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: viewDataChanged", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)appWidgetId, (jint)viewId);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod:viewDataChanged()"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod:viewDataChanged()", __LINE__);
 
     env->DeleteLocalRef(c);
+    // LOGGERD(TAG, "- ViewDataChanged()");
+    return NOERROR;
+}
+
+ECode CAppWidgetHostCallbacksNative::ToString(
+    /* [out] */ String* str)
+{
+    // LOGGERD(TAG, "+ CAppWidgetHostCallbacksNative::ToString()");
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("java/lang/Object");
+    Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
+
+    jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
+
+    *str = Util::GetElString(env, jstr);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jstr);
+
+    // LOGGERD(TAG, "- CAppWidgetHostCallbacksNative::ToString()");
     return NOERROR;
 }
 

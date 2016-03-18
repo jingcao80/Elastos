@@ -156,13 +156,13 @@ ECode WallpaperService::Engine::MSurfaceHolder::SetKeepScreenOn(
 //WallpaperService::Engine::WallpaperInputEventReceiver
 //===============================
 
-WallpaperService::Engine::WallpaperInputEventReceiver::WallpaperInputEventReceiver(
+ECode WallpaperService::Engine::WallpaperInputEventReceiver::constructor(
     /* [in] */ IInputChannel* inputChannel,
     /* [in] */ ILooper* looper,
     /* [in] */ Engine* host)
-    : InputEventReceiver(inputChannel, looper)
-    , mHost(host)
 {
+    mHost= host;
+    return InputEventReceiver::constructor(inputChannel, looper);
 }
 
 ECode WallpaperService::Engine::WallpaperInputEventReceiver::OnInputEvent(
@@ -686,8 +686,8 @@ ECode WallpaperService::Engine::UpdateSurface(
             }
             mCreated = TRUE;
 
-            mInputEventReceiver = new WallpaperInputEventReceiver(
-                    mInputChannel, Looper::GetMyLooper(), this);
+            mInputEventReceiver = new WallpaperInputEventReceiver();
+            mInputEventReceiver->constructor(mInputChannel, Looper::GetMyLooper(), this);
         }
 
         mSurfaceHolder->mSurfaceLock->Lock();

@@ -1,0 +1,74 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Ims {
+
+    /**
+     * Provides the conference information (defined in RFC 4575) for IMS conference call.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IImsConferenceState {
+        /**
+         * conference-info : user
+         */
+        // user (String) : Tel or SIP URI
+        const String USER = "user";
+        // user > display text (String)
+        const String DISPLAY_TEXT = "display-text";
+        // user > endpoint (String) : URI or GRUU or Phone number
+        const String ENDPOINT = "endpoint";
+        // user > endpoint > status
+        const String STATUS = "status";
+
+        /**
+         * status-type (String) :
+         * "pending" : Endpoint is not yet in the session, but it is anticipated that he/she will
+         *      join in the near future.
+         * "dialing-out" : Focus has dialed out to connect the endpoint to the conference,
+         *      but the endpoint is not yet in the roster (probably being authenticated).
+         * "dialing-in" : Endpoint is dialing into the conference, not yet in the roster
+         *      (probably being authenticated).
+         * "alerting" : PSTN alerting or SIP 180 Ringing was returned for the outbound call;
+         *      endpoint is being alerted.
+         * "on-hold" : Active signaling dialog exists between an endpoint and a focus,
+         *      but endpoint is "on-hold" for this conference, i.e., he/she is neither "hearing"
+         *      the conference mix nor is his/her media being mixed in the conference.
+         * "connected" : Endpoint is a participant in the conference. Depending on the media policies,
+         *      he/she can send and receive media to and from other participants.
+         * "disconnecting" : Focus is in the process of disconnecting the endpoint
+         *      (e.g. in SIP a DISCONNECT or BYE was sent to the endpoint).
+         * "disconnected" : Endpoint is not a participant in the conference, and no active dialog
+         *      exists between the endpoint and the focus.
+         * "muted-via-focus" : Active signaling dialog exists beween an endpoint and a focus and
+         *      the endpoint can "listen" to the conference, but the endpoint's media is not being
+         *      mixed into the conference.
+         * "connect-fail" : Endpoint fails to join the conference by rejecting the conference call.
+         */
+        const String STATUS_PENDING = "pending";
+        const String STATUS_DIALING_OUT = "dialing-out";
+        const String STATUS_DIALING_IN = "dialing-in";
+        const String STATUS_ALERTING = "alerting";
+        const String STATUS_ON_HOLD = "on-hold";
+        const String STATUS_CONNECTED = "connected";
+        const String STATUS_DISCONNECTING = "disconnecting";
+        const String STATUS_DISCONNECTED = "disconnected";
+        const String STATUS_MUTED_VIA_FOCUS = "muted-via-focus";
+        const String STATUS_CONNECT_FAIL = "connect-fail";
+
+        /**
+         * conference-info : SIP status code (integer)
+         */
+        const String SIP_STATUS_CODE = "sipstatuscode";
+    }
+
+    } // namespace Ims
+    } // namespace Droid
+    } // namespace Elastos
+}

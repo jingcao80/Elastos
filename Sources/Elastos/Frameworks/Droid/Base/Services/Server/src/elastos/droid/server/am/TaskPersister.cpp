@@ -74,7 +74,7 @@ TaskPersister::LazyTaskWriterThread::LazyTaskWriterThread(
     /* [in] */ TaskPersister* host)
     : mHost(host)
 {
-    constructor(name);
+    Thread::constructor(name);
 }
 
 ECode TaskPersister::LazyTaskWriterThread::Run()

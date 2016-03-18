@@ -120,7 +120,7 @@ class WindowAnimator;
 class DragInputEventReceiver : public InputEventReceiver
 {
 public:
-    DragInputEventReceiver(
+    CARAPI constructor(
         /* [in] */ IInputChannel* inputChannel,
         /* [in] */ ILooper* looper,
         /* [in] */ CWindowManagerService* host);
@@ -250,9 +250,7 @@ public:
     {
     public:
         H(
-            /* [in] */ CWindowManagerService * host)
-            : mHost(host)
-        {}
+            /* [in] */ CWindowManagerService * host);
 
         ECode HandleMessage(
             /* [in] */ IMessage* msg);
@@ -2126,7 +2124,7 @@ public:
      * NOTE: Never call into methods that lock ActivityManagerService while holding this object.
      */
     HashMap<AutoPtr<IBinder>, AutoPtr<WindowState> > mWindowMap;
-    Object mWindowMapLock;
+    AutoPtr<Object> mWindowMapLock;
 
     /**
      * Mapping from a token IBinder to a WindowToken object.

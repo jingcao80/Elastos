@@ -230,7 +230,7 @@ private:
         : public InputEventReceiver
     {
     public:
-        WindowInputEventReceiver(
+        CARAPI constructor(
             /* [in] */ IInputChannel* inputChannel,
             /* [in] */ ILooper* looper,
             /* [in] */ IWeakReference* viewRootImpl);

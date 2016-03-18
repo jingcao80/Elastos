@@ -55,13 +55,13 @@ CAR_INTERFACE_IMPL_2(CITvInputSessionWrapper, Object, IITvInputSession, IHandler
 
 CAR_OBJECT_IMPL(CITvInputSessionWrapper)
 
-CITvInputSessionWrapper::TvInputEventReceiver::TvInputEventReceiver(
+ECode CITvInputSessionWrapper::TvInputEventReceiver::constructor(
     /* [in] */ IInputChannel* inputChannel,
     /* [in] */ ILooper* looper,
     /* [in] */ ITvInputServiceSession* impl)
-    : InputEventReceiver(inputChannel, looper)
-    , mImpl(impl)
 {
+    mImpl = impl;
+    return InputEventReceiver::constructor(inputChannel, looper);
 }
 
 ECode CITvInputSessionWrapper::TvInputEventReceiver::OnInputEvent(
@@ -100,7 +100,9 @@ ECode CITvInputSessionWrapper::constructor(
     if (channel != NULL) {
         AutoPtr<ILooper> mainLooper;
         context->GetMainLooper((ILooper**)&mainLooper);
-        mReceiver = new TvInputEventReceiver(channel, mainLooper, mTvInputSessionImpl);
+        AutoPtr<TvInputEventReceiver> ti = new TvInputEventReceiver();
+        ti->constructor(channel, mainLooper, mTvInputSessionImpl);
+        mReceiver = (TvInputEventReceiver*)ti.Get();
     }
     return NOERROR;
 }

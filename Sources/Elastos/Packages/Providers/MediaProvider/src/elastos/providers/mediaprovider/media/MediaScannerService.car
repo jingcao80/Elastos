@@ -1,0 +1,25 @@
+module
+{
+    namespace Elastos {
+    namespace Providers {
+    namespace MediaProvider {
+    namespace Media {
+
+    /**
+     * @Involve
+     * // interface Elastos.Droid.Content.IContext
+     * // interface Elastos.Droid.Content.IContextWrapper
+     * // interface IComponentCallbacks
+     * // interface IComponentCallbacks2
+     * interface IService
+     * interface IRunnable
+     */
+    interface IMediaScannerService
+    {}
+
+    } // namespace Media
+    } // namespace MediaProvider
+    } // namespace Providers
+    } // namespace Elastos
+
+}

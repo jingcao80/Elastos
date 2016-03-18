@@ -30,6 +30,14 @@
 #include "elastos/droid/server/am/NativeCrashListener.h"
 #include "elastos/droid/server/am/CAppTaskImpl.h"
 #include "elastos/droid/server/am/UserSwitchingDialog.h"
+#include "elastos/droid/server/am/CActivityManagerBootCompletedReceiver.h"
+#include "elastos/droid/server/am/CActivityManagerSwitchUserReceiver.h"
+#include "elastos/droid/server/am/CActivityManagerNeedStartReceiver.h"
+#include "elastos/droid/server/am/CActivityManagerPreBootCompletedReceiver.h"
+#include "elastos/droid/server/am/CActivityManagerSystemReadyReceiver.h"
+#include "elastos/droid/server/am/CActivityManagerShutdownReceiver.h"
+#include "elastos/droid/server/am/CActivityManagerStoppingReceiver.h"
+#include "elastos/droid/server/am/CActivityManagerDispatchUserSwitchCallback.h"
 #include "elastos/droid/server/wm/AppTransition.h"
 #include "elastos/droid/server/wm/CWindowManagerService.h"
 #include "elastos/droid/server/AttributeCache.h"
@@ -965,15 +973,16 @@ ECode CActivityManagerService::AppDeathRecipient::ProxyDied()
 CAR_INTERFACE_IMPL(CActivityManagerService::AppDeathRecipient, Object, IProxyDeathRecipient)
 
 //==============================================================================
-// CActivityManagerService::SwitchUserIntentReceiver
+// CActivityManagerService::SwitchUserReceiver
 //==============================================================================
 
 CAR_INTERFACE_IMPL_2(CActivityManagerService::BootCompletedReceiver, Object, IIntentReceiver, IBinder)
 
-CActivityManagerService::BootCompletedReceiver::BootCompletedReceiver(
-    /* [in] */ CActivityManagerService* host)
-    : mHost(host)
+ECode CActivityManagerService::BootCompletedReceiver::constructor(
+    /* [in] */ IIActivityManager* host)
 {
+    mHost = (CActivityManagerService*)host;
+    return NOERROR;
 }
 
 ECode CActivityManagerService::BootCompletedReceiver::PerformReceive(
@@ -986,8 +995,7 @@ ECode CActivityManagerService::BootCompletedReceiver::PerformReceive(
     /* [in] */ Int32 sendingUser)
 {
     synchronized(mHost) {
-        mHost->RequestPssAllProcsLocked(SystemClock::GetUptimeMillis(),
-            TRUE, FALSE);
+        mHost->RequestPssAllProcsLocked(SystemClock::GetUptimeMillis(), TRUE, FALSE);
     }
     return NOERROR;
 }
@@ -995,16 +1003,33 @@ ECode CActivityManagerService::BootCompletedReceiver::PerformReceive(
 ECode CActivityManagerService::BootCompletedReceiver::ToString(
     /* [out] */ String* str)
 {
-    return Object::ToString(str);
+    VALIDATE_NOT_NULL(str)
+    *str = "CActivityManagerService::BootCompletedReceiver";
+    return NOERROR;
 }
 
 //==============================================================================
-// CActivityManagerService::SwitchUserIntentReceiver
+// CActivityManagerService::SwitchUserReceiver
 //==============================================================================
 
-CAR_INTERFACE_IMPL_2(CActivityManagerService::SwitchUserIntentReceiver, Object, IIntentReceiver, IBinder);
+CAR_INTERFACE_IMPL_2(CActivityManagerService::SwitchUserReceiver, Object, IIntentReceiver, IBinder);
 
-ECode CActivityManagerService::SwitchUserIntentReceiver::PerformReceive(
+ECode CActivityManagerService::SwitchUserReceiver::constructor(
+    /* [in] */ IIActivityManager* host,
+    /* [in] */ IUserStartedState* uss,
+    /* [in] */ Boolean foreground,
+    /* [in] */ Int32 oldUserId,
+    /* [in] */ Int32 userId)
+{
+    mHost = (CActivityManagerService*)host;
+    mUss = (UserStartedState*)uss;
+    mForeground = foreground;
+    mOldUserId = oldUserId;
+    mUserId = userId;
+    return NOERROR;
+}
+
+ECode CActivityManagerService::SwitchUserReceiver::PerformReceive(
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 resultCode,
     /* [in] */ const String& data,
@@ -1016,19 +1041,26 @@ ECode CActivityManagerService::SwitchUserIntentReceiver::PerformReceive(
     return mHost->OnUserInitialized(mUss, mForeground, mOldUserId, mUserId);
 }
 
-ECode CActivityManagerService::SwitchUserIntentReceiver::ToString(
+ECode CActivityManagerService::SwitchUserReceiver::ToString(
     /* [out] */ String* str)
 {
-    return Object::ToString(str);
+    VALIDATE_NOT_NULL(str)
+    *str = "CActivityManagerService::SwitchUserReceiver";
+    return NOERROR;
 }
 
 //==============================================================================
-// CActivityManagerService::NeedStartIntentReceiver
+// CActivityManagerService::NeedStartReceiver
 //==============================================================================
 
-CAR_INTERFACE_IMPL_2(CActivityManagerService::NeedStartIntentReceiver, Object, IIntentReceiver, IBinder);
+CAR_INTERFACE_IMPL_2(CActivityManagerService::NeedStartReceiver, Object, IIntentReceiver, IBinder);
 
-ECode CActivityManagerService::NeedStartIntentReceiver::PerformReceive(
+ECode CActivityManagerService::NeedStartReceiver::constructor()
+{
+    return NOERROR;
+}
+
+ECode CActivityManagerService::NeedStartReceiver::PerformReceive(
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 resultCode,
     /* [in] */ const String& data,
@@ -1040,10 +1072,12 @@ ECode CActivityManagerService::NeedStartIntentReceiver::PerformReceive(
     return E_REMOTE_EXCEPTION;
 }
 
-ECode CActivityManagerService::NeedStartIntentReceiver::ToString(
+ECode CActivityManagerService::NeedStartReceiver::ToString(
     /* [out] */ String* str)
 {
-    return Object::ToString(str);
+    VALIDATE_NOT_NULL(str)
+    *str = "CActivityManagerService::NeedStartReceiver";
+    return NOERROR;
 }
 
 //==============================================================================
@@ -1416,12 +1450,20 @@ ECode CActivityManagerService::RestartBroadcastReceiver::OnReceive(
 }
 
 //==============================================================================
-// CActivityManagerService::PreBootCompletedIntentReceiver
+// CActivityManagerService::PreBootCompletedReceiver
 //==============================================================================
 
-CAR_INTERFACE_IMPL_2(CActivityManagerService::PreBootCompletedIntentReceiver, Object, IIntentReceiver, IBinder)
+CAR_INTERFACE_IMPL_2(CActivityManagerService::PreBootCompletedReceiver, Object, IIntentReceiver, IBinder)
 
-ECode CActivityManagerService::PreBootCompletedIntentReceiver::PerformReceive(
+ECode CActivityManagerService::PreBootCompletedReceiver::constructor(
+    /* [in] */ IHandler* handler,
+    /* [in] */ IRunnable* onFinishCallback)
+{
+    mHandler = handler;
+    return NOERROR;
+}
+
+ECode CActivityManagerService::PreBootCompletedReceiver::PerformReceive(
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 resultCode,
     /* [in] */ const String& data,
@@ -1434,10 +1476,12 @@ ECode CActivityManagerService::PreBootCompletedIntentReceiver::PerformReceive(
     return mHandler->Post(mOnFinishCallback, &res);
 }
 
-ECode CActivityManagerService::PreBootCompletedIntentReceiver::ToString(
+ECode CActivityManagerService::PreBootCompletedReceiver::ToString(
     /* [out] */ String* str)
 {
-    return Object::ToString(str);
+    VALIDATE_NOT_NULL(str)
+    *str = "CActivityManagerService::PreBootCompletedReceiver";
+    return NOERROR;
 }
 
 //==============================================================================
@@ -1482,12 +1526,17 @@ ECode CActivityManagerService::ErrorMsgButtonOnClickListener::OnClick(
 CAR_INTERFACE_IMPL(CActivityManagerService::ErrorMsgButtonOnClickListener, Object, IDialogInterfaceOnClickListener)
 
 //==============================================================================
-// CActivityManagerService::SystemBroadcastReceiver
+// CActivityManagerService::SystemReadyReceiver
 //==============================================================================
 
-CAR_INTERFACE_IMPL_2(CActivityManagerService::SystemBroadcastReceiver, Object, IIntentReceiver, IBinder)
+CAR_INTERFACE_IMPL_2(CActivityManagerService::SystemReadyReceiver, Object, IIntentReceiver, IBinder)
 
-ECode CActivityManagerService::SystemBroadcastReceiver::PerformReceive(
+ECode CActivityManagerService::SystemReadyReceiver::constructor()
+{
+    return NOERROR;
+}
+
+ECode CActivityManagerService::SystemReadyReceiver::PerformReceive(
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 resultCode,
     /* [in] */ const String& data,
@@ -1499,10 +1548,12 @@ ECode CActivityManagerService::SystemBroadcastReceiver::PerformReceive(
     return E_REMOTE_EXCEPTION;
 }
 
-ECode CActivityManagerService::SystemBroadcastReceiver::ToString(
+ECode CActivityManagerService::SystemReadyReceiver::ToString(
     /* [out] */ String* str)
 {
-    return Object::ToString(str);
+    VALIDATE_NOT_NULL(str)
+    *str = "CActivityManagerService::SystemReadyReceiver";
+    return NOERROR;
 }
 
 //==============================================================================
@@ -1707,6 +1758,22 @@ ECode CActivityManagerService::StopUserLockedRunnable::Run()
 
 CAR_INTERFACE_IMPL_2(CActivityManagerService::DispatchUserSwitchCallback, Object, IIRemoteCallback, IBinder)
 
+ECode CActivityManagerService::DispatchUserSwitchCallback::constructor(
+    /* [in] */ IIActivityManager* host,
+    /* [in] */ Int32 n,
+    /* [in] */ IUserStartedState* uss,
+    /* [in] */ Int32 oldUserId,
+    /* [in] */ Int32 newUserId)
+{
+    mHost = (CActivityManagerService*)host;
+    mUss = (UserStartedState*)uss;
+    mCount = 0;
+    N = n;
+    mOldUserId = oldUserId;
+    mNewUserId = newUserId;
+    return NOERROR;
+}
+
 CActivityManagerService::DispatchUserSwitchCallback::SendResult(
     /* [in] */ IBundle* data)
 {
@@ -1723,7 +1790,9 @@ CActivityManagerService::DispatchUserSwitchCallback::SendResult(
 ECode CActivityManagerService::DispatchUserSwitchCallback::ToString(
     /* [out] */ String* str)
 {
-    return Object::ToString(str);
+    VALIDATE_NOT_NULL(str)
+    *str = "CActivityManagerService::DispatchUserSwitchCallback";
+    return NOERROR;
 }
 
 //==============================================================================
@@ -2187,12 +2256,13 @@ AutoPtr<CActivityManagerService> CActivityManagerService::Lifecycle::GetService(
 
 CAR_INTERFACE_IMPL_2(CActivityManagerService::ShutdownReceiver, Object, IIntentReceiver, IBinder)
 
-CActivityManagerService::ShutdownReceiver::ShutdownReceiver(
-    /* [in] */ CActivityManagerService* host,
-    /* [in] */ UserStartedState* uss)
-    : mHost(host)
-    , mUss(uss)
+ECode CActivityManagerService::ShutdownReceiver::constructor(
+    /* [in] */ IIActivityManager* host,
+    /* [in] */ IUserStartedState* uss)
 {
+    mHost = (CActivityManagerService*)host;
+    mUss = (UserStartedState*)uss;
+    return NOERROR;
 }
 
 ECode CActivityManagerService::ShutdownReceiver::PerformReceive(
@@ -2211,7 +2281,9 @@ ECode CActivityManagerService::ShutdownReceiver::PerformReceive(
 ECode CActivityManagerService::ShutdownReceiver::ToString(
     /* [out] */ String* str)
 {
-    return Object::ToString(str);
+    VALIDATE_NOT_NULL(str)
+    *str = "CActivityManagerService::ShutdownReceiver";
+    return NOERROR;
 }
 
 //==============================================================================
@@ -2220,18 +2292,19 @@ ECode CActivityManagerService::ShutdownReceiver::ToString(
 
 CAR_INTERFACE_IMPL_2(CActivityManagerService::StoppingReceiver, Object, IIntentReceiver, IBinder)
 
-CActivityManagerService::StoppingReceiver::StoppingReceiver(
-    /* [in] */ CActivityManagerService* host,
-    /* [in] */ UserStartedState* uss,
+ECode CActivityManagerService::StoppingReceiver::constructor(
+    /* [in] */ IIActivityManager* host,
+    /* [in] */ IUserStartedState* uss,
     /* [in] */ IIntent* shutdownIntent,
     /* [in] */ IIntentReceiver* shutdownReceiver,
     /* [in] */ Int32 userId)
-    : mHost(host)
-    , mUss(uss)
-    , mShutdownIntent(shutdownIntent)
-    , mShutdownReceiver(shutdownReceiver)
-    , mUserId(userId)
 {
+    mHost = (CActivityManagerService*)host;
+    mUss = (UserStartedState*)uss;
+    mShutdownIntent = shutdownIntent;
+    mShutdownReceiver = shutdownReceiver;
+    mUserId = userId;
+    return NOERROR;
 }
 
 ECode CActivityManagerService::StoppingReceiver::PerformReceive(
@@ -2267,7 +2340,9 @@ ECode CActivityManagerService::StoppingReceiver::PerformReceive(
 ECode CActivityManagerService::StoppingReceiver::ToString(
     /* [out] */ String* str)
 {
-    return Object::ToString(str);
+    VALIDATE_NOT_NULL(str)
+    *str = "CActivityManagerService::StoppingReceiver";
+    return NOERROR;
 }
 
 //==============================================================================
@@ -2812,7 +2887,7 @@ void CActivityManagerService::SetWindowManager(
     /* [in] */ CWindowManagerService* wm)
 {
     mWindowManager = wm;
-    mStackSupervisor->SetWindowManager(TO_IINTERFACE(wm));
+    mStackSupervisor->SetWindowManager(wm);
 }
 
 void CActivityManagerService::SetUsageStatsManager(
@@ -3693,7 +3768,6 @@ AutoPtr<ProcessRecord> CActivityManagerService::StartProcessLocked(
     // (3) There is a pid assigned to it, so it is either starting or
     //     already running.
     if (DEBUG_PROCESSES) {
-        String appDes = app->ToString();
         Slogger::V(TAG, "startProcess: name=%s app=%s knownToBeDead=%d thread=%s pid=%d",
             processName.string(), TO_CSTR(app), knownToBeDead,
             (app != NULL ? TO_CSTR(app->mThread) : "NULL"), (app != NULL ? app->mPid : -1));
@@ -3704,8 +3778,7 @@ AutoPtr<ProcessRecord> CActivityManagerService::StartProcessLocked(
             // We already have the app running, or are waiting for it to
             // come up (we have a pid but not yet its thread), so keep it.
             if (DEBUG_PROCESSES) {
-                String appDes = app->ToString();
-                Slogger::V(TAG, "App already running: %s", appDes.string());
+                Slogger::V(TAG, "App already running: %s", TO_CSTR(app));
             }
             // If this is a new package in the process, add the package to the list
             String packageName;
@@ -3718,8 +3791,9 @@ AutoPtr<ProcessRecord> CActivityManagerService::StartProcessLocked(
         }
         // An application record is attached to a previous process,
         // clean it up now.
-        if (DEBUG_PROCESSES || DEBUG_CLEANUP)
+        if (DEBUG_PROCESSES || DEBUG_CLEANUP) {
             Slogger::V(TAG, "App died: %s", TO_CSTR(app));
+        }
         CheckTime(startTime, String("startProcess: bad proc running, killing"));
         Int32 uid;
         app->mInfo->GetUid(&uid);
@@ -3728,13 +3802,12 @@ AutoPtr<ProcessRecord> CActivityManagerService::StartProcessLocked(
         CheckTime(startTime, String("startProcess: done killing old proc"));
     }
 
-    String hostingNameStr;
+    String hostingNameStr, infoProcName;
+    info->GetProcessName(&infoProcName);
     if (hostingName != NULL) {
         hostingName->FlattenToShortString(&hostingNameStr);
     }
 
-    String infoProcName;
-    info->GetProcessName(&infoProcName);
     if (!isolated) {
         if ((intentFlags & IIntent::FLAG_FROM_BACKGROUND) != 0) {
             // If we are in the background, then check to see if this process
@@ -3830,8 +3903,9 @@ ECode CActivityManagerService::StartProcessLocked(
     /* [in] */ const String& hostingType,
     /* [in] */ const String& hostingNameStr)
 {
-    return StartProcessLocked(app, hostingType, hostingNameStr, String(NULL) /* abiOverride */,
-            String(NULL) /* entryPoint */, NULL /* entryPointArgs */);
+    String nullStr;
+    return StartProcessLocked(app, hostingType, hostingNameStr, nullStr /* abiOverride */,
+        nullStr /* entryPoint */, NULL /* entryPointArgs */);
 }
 
 ECode CActivityManagerService::StartProcessLocked(
@@ -3842,6 +3916,9 @@ ECode CActivityManagerService::StartProcessLocked(
     /* [in] */ const String& _entryPoint,
     /* [in] */ ArrayOf<String>* entryPointArgs)
 {
+    Slogger::I(TAG, " >> StartProcessLocked: hostingType:%s, hostingName:%s, abiOverride:%s, entryPoint:%s",
+        hostingType.string(), hostingNameStr.string(), abiOverride.string(), _entryPoint.string());
+    ECode ec = NOERROR;
     String entryPoint = _entryPoint;
     Int64 startTime = SystemClock::GetElapsedRealtime();
     if (app->mPid > 0 && app->mPid != MY_PID) {
@@ -3849,8 +3926,7 @@ ECode CActivityManagerService::StartProcessLocked(
         {
             AutoLock lock(mPidsSelfLockedLock);
             mPidsSelfLocked.Erase(app->mPid);
-            mHandler->RemoveMessages(PROC_START_TIMEOUT_MSG,
-                app ? app->Probe(EIID_IInterface) : NULL);
+            mHandler->RemoveMessages(PROC_START_TIMEOUT_MSG, TO_IINTERFACE(app));
         }
         CheckTime(startTime, String("startProcess: done removing from pids map"));
         app->SetPid(0);
@@ -3859,8 +3935,7 @@ ECode CActivityManagerService::StartProcessLocked(
     AutoPtr<ProcessRecord> temp = app;
     if (DEBUG_PROCESSES &&
             Find(mProcessesOnHold.Begin(), mProcessesOnHold.End(), temp) != mProcessesOnHold.End()) {
-        String appDes = app->ToString();
-        Slogger::V(TAG, "startProcessLocked removing on hold: ", appDes.string());
+        Slogger::V(TAG, "startProcessLocked removing on hold: ", TO_CSTR(app));
     }
     mProcessesOnHold.Remove(app);
 
@@ -3889,8 +3964,8 @@ ECode CActivityManagerService::StartProcessLocked(
                 CheckTime(startTime, String("startProcess: checking external storage perm"));
                 Int32 res;
                 pm->CheckPermission(
-                        Manifest::permission::ACCESS_ALL_EXTERNAL_STORAGE,
-                        packageName, &res);
+                    Manifest::permission::ACCESS_ALL_EXTERNAL_STORAGE,
+                    packageName, &res);
                 if (res == IPackageManager::PERMISSION_GRANTED) {
                     mountExternal = IZygote::MOUNT_EXTERNAL_MULTIUSER_ALL;
                 }
@@ -3986,22 +4061,32 @@ ECode CActivityManagerService::StartProcessLocked(
     // Start the process.  It will either succeed and return a result containing
     // the PID of the new process, or else throw a RuntimeException.
     Boolean isActivityProcess = (entryPoint == NULL);
-    if (entryPoint == NULL)
+    if (isActivityProcess) {
         entryPoint = "android.app.ActivityThread";
+    }
     CheckTime(startTime, String("startProcess: asking zygote to start proc"));
 
-    String sourcePath, dataDir;
+    Int32 targetSdkVersion;
+    String sourcePath, dataDir, seinfo, processClass;
     app->mInfo->GetSourceDir(&sourcePath);
     app->mInfo->GetDataDir(&dataDir);
-    Int32 targetSdkVersion;
     app->mInfo->GetTargetSdkVersion(&targetSdkVersion);
-    String seinfo;
     app->mInfo->GetSeinfo(&seinfo);
+    processClass = sourcePath.EndWith(".apk") ? entryPoint : String("CActivityThreadHelper");
+    Slogger::I(TAG, " >>> StartProcessLocked %s, ProcessName:%s, processClass: %s, dataDir: %s, seinfo: %s",
+        sourcePath.string(), app->mProcessName.string(), processClass.string(),
+        dataDir.string(), seinfo.string());
+
     AutoPtr<IProcessStartResult> startResult;
-    Process::Start(sourcePath.EndWith(".apk") ? entryPoint : String("CActivityThreadHelper"),
-        app->mProcessName, uid, uid, gids, debugFlags, mountExternal,
+    ec = Process::Start(processClass, app->mProcessName,
+        uid, uid, gids, debugFlags, mountExternal,
         targetSdkVersion, seinfo, requiredAbi, instructionSet, dataDir,
         entryPointArgs, (IProcessStartResult**)&startResult);
+    if (FAILED(ec)) {
+        Slogger::E(TAG, "faield to StartProcessLocked %s, ProcessName:%s",
+            sourcePath.string(), app->mProcessName.string());
+        assert(0 && "TODO");
+    }
     CheckTime(startTime, String("startProcess: returned from zygote!"));
 
     Int32 infoUid;
@@ -4069,7 +4154,7 @@ ECode CActivityManagerService::StartProcessLocked(
         if (isActivityProcess) {
             AutoPtr<IMessage> msg;
             mHandler->ObtainMessage(PROC_START_TIMEOUT_MSG, (IMessage**)&msg);
-            msg->SetObj(app->Probe(EIID_IInterface));
+            msg->SetObj(TO_IINTERFACE(app));
             Boolean result;
             mHandler->SendMessageDelayed(msg,
                 usingWrapper ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT,
@@ -4140,6 +4225,8 @@ AutoPtr<IIntent> CActivityManagerService::GetHomeIntent()
 Boolean CActivityManagerService::StartHomeActivityLocked(
     /* [in] */ Int32 userId)
 {
+    Slogger::I(TAG, "StartHomeActivityLocked, mTopAction: %s", mTopAction.string());
+
     if (mFactoryTest == FactoryTest::FACTORY_TEST_LOW_LEVEL
             && mTopAction.IsNull()) {
         // We are running in factory test mode, but unable to find
@@ -4149,10 +4236,13 @@ Boolean CActivityManagerService::StartHomeActivityLocked(
     }
 
     AutoPtr<IIntent> intent = GetHomeIntent();
+    Slogger::I(TAG, "StartHomeActivityLocked, GetHomeIntent: %s", TO_CSTR(intent));
     AutoPtr<IActivityInfo> aInfo = ResolveActivityInfo(intent, STOCK_PM_FLAGS, userId);
+    Slogger::I(TAG, "StartHomeActivityLocked, ResolveActivityInfo: %s", TO_CSTR(aInfo));
     if (aInfo != NULL) {
+        IComponentInfo* ci = IComponentInfo::Probe(aInfo);
         AutoPtr<IApplicationInfo> appInfo;
-        IComponentInfo::Probe(aInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+        ci->GetApplicationInfo((IApplicationInfo**)&appInfo);
 
         String cname, name, pname;
         IPackageItemInfo::Probe(appInfo)->GetPackageName(&cname);
@@ -4163,17 +4253,23 @@ Boolean CActivityManagerService::StartHomeActivityLocked(
 
         // Don't do this if the home app is currently being
         // instrumented.
-        AutoPtr<IActivityInfo> newActivityInfo;
-        CActivityInfo::New(aInfo, (IActivityInfo**)&newActivityInfo);
+        AutoPtr<IActivityInfo> temp = aInfo;
+        aInfo = NULL;
+        CActivityInfo::New(temp, (IActivityInfo**)&aInfo);
+        ci = IComponentInfo::Probe(aInfo);
+
+        appInfo = NULL;
+        ci->GetApplicationInfo((IApplicationInfo**)&appInfo);
+
         AutoPtr<IApplicationInfo> newAppInfo = GetAppInfoForUser(appInfo, userId);
-        IComponentInfo::Probe(newActivityInfo)->SetApplicationInfo(newAppInfo);
+        ci->SetApplicationInfo(newAppInfo);
+
         Int32 uid;
         newAppInfo->GetUid(&uid);
-        IComponentInfo::Probe(newActivityInfo)->GetProcessName(&pname);
+        ci->GetProcessName(&pname);
         AutoPtr<ProcessRecord> app = GetProcessRecordLocked(pname, uid, TRUE);
         if (app == NULL || app->mInstrumentationClass == NULL) {
             Int32 flags;
-            String nullStr;
             intent->GetFlags(&flags);
             intent->SetFlags(flags | IIntent::FLAG_ACTIVITY_NEW_TASK);
             mStackSupervisor->StartHomeActivity(intent, aInfo);
@@ -4207,6 +4303,9 @@ AutoPtr<IActivityInfo> CActivityManagerService::ResolveActivityInfo(
 
             if (info != NULL) {
                 info->GetActivityInfo((IActivityInfo**)&ai);
+            }
+            else {
+                Slogger::E(TAG, "Failed to resolve activity info for %s", TO_CSTR(intent));
             }
         }
 //    } catch (RemoteException e) {
@@ -4266,19 +4365,22 @@ ECode CActivityManagerService::StartSetupActivityLocked()
         if (ri != NULL) {
             AutoPtr<IActivityInfo> aInfo;
             ri->GetActivityInfo((IActivityInfo**)&aInfo);
+            IPackageItemInfo* pi = IPackageItemInfo::Probe(aInfo);
             AutoPtr<IBundle> metaData;
-            IPackageItemInfo::Probe(aInfo)->GetMetaData((IBundle**)&metaData);
+            pi->GetMetaData((IBundle**)&metaData);
             String vers;
             if (metaData != NULL) {
                 metaData->GetString(IIntent::METADATA_SETUP_VERSION, &vers);
             }
-            AutoPtr<IApplicationInfo> appInfo;
-            IComponentInfo::Probe(aInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
-            AutoPtr<IBundle> appMetaData;
-            IPackageItemInfo::Probe(appInfo)->GetMetaData((IBundle**)&appMetaData);
-            if (vers.IsNull() && appMetaData != NULL) {
-                appMetaData->GetString(
-                       IIntent::METADATA_SETUP_VERSION, &vers);
+
+            if (vers.IsNull()) {
+                AutoPtr<IApplicationInfo> appInfo;
+                IComponentInfo::Probe(pi)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+                AutoPtr<IBundle> appMetaData;
+                IPackageItemInfo::Probe(appInfo)->GetMetaData((IBundle**)&appMetaData);
+                if (appMetaData != NULL) {
+                    appMetaData->GetString(IIntent::METADATA_SETUP_VERSION, &vers);
+                }
             }
 
             String lastVers;
@@ -4286,8 +4388,8 @@ ECode CActivityManagerService::StartSetupActivityLocked()
             if (!vers.IsNull() && !vers.Equals(lastVers)) {
                 intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
                 String pkgName, name;
-                IPackageItemInfo::Probe(aInfo)->GetPackageName(&pkgName);
-                IPackageItemInfo::Probe(aInfo)->GetName(&name);
+                pi->GetPackageName(&pkgName);
+                pi->GetName(&name);
                 AutoPtr<IComponentName> component;
                 CComponentName::New(pkgName, name, (IComponentName**)&component);
                 intent->SetComponent(component);
@@ -6276,6 +6378,9 @@ void CActivityManagerService::DumpStackTraces(
     /* [in] */ HashMap<Int32, Boolean>* lastPids,
     /* [in] */ ArrayOf<String>* nativeProcs)
  {
+    //assert(0 && "TODO");
+    return;
+
     // Use a FileObserver to detect when traces finish writing.
     // The order of traces is considered important to maintain for legibility.
     AutoPtr<DumpStackTracesFileObserver> observer =
@@ -8048,7 +8153,8 @@ ECode CActivityManagerService::FinishBooting()
                     CIntent::New(IIntent::ACTION_BOOT_COMPLETED, NULL, (IIntent**)&intent);
                     intent->PutExtra(IIntent::EXTRA_USER_HANDLE, userId);
                     intent->AddFlags(IIntent::FLAG_RECEIVER_NO_ABORT);
-                    AutoPtr<IIntentReceiver> receiver = new BootCompletedReceiver(this);
+                    AutoPtr<IIntentReceiver> receiver;
+                    CActivityManagerBootCompletedReceiver::New(this, (IIntentReceiver**)&receiver);
                     BroadcastIntentLocked(NULL, nullStr, intent,
                         nullStr, receiver, 0, nullStr, NULL,
                         Manifest::permission::RECEIVE_BOOT_COMPLETED, IAppOpsManager::OP_NONE,
@@ -12857,13 +12963,13 @@ ECode CActivityManagerService::LogLockScreen(
     /* [in] */ const String& msg)
 {
     if (DEBUG_LOCKSCREEN) {
-        AutoPtr<IDebug> debug;
-        assert(0);
-        // CDebug::AcquireSingleton((IDebug**)&debug);
-        String callers;
-        // debug->GetCallers(2, &callers);
-        Slogger::D(TAG, "%s:%s mLockScreenShown=%d mWentToSleep=%d mSleeping=%d",
-            callers.string(), msg.string(), mLockScreenShown, mWentToSleep, mSleeping);
+        // AutoPtr<IDebug> debug;
+        // assert(0 && "TODO");
+        // // CDebug::AcquireSingleton((IDebug**)&debug);
+        // String callers;
+        // // debug->GetCallers(2, &callers);
+        // Slogger::D(TAG, "%s:%s mLockScreenShown=%d mWentToSleep=%d mSleeping=%d",
+        //     callers.string(), msg.string(), mLockScreenShown, mWentToSleep, mSleeping);
     }
     return NOERROR;
 }
@@ -14140,14 +14246,15 @@ Boolean CActivityManagerService::DeliverPreBootCompleted(
         if (userId == IUserHandle::USER_OWNER) {
             AutoPtr<IList> lastDoneReceivers = ReadLastDonePreBootReceivers();
             ris->GetSize(&size);
+            String packageName, name;
             for (Int32 i = 0; i < size; i++) {
                 AutoPtr<IInterface> item;
                 ris->Get(i, (IInterface**)&item);
                 AutoPtr<IActivityInfo> ai;
                 IResolveInfo::Probe(item)->GetActivityInfo((IActivityInfo**)&ai);
-                String packageName, name;
-                IPackageItemInfo::Probe(ai)->GetPackageName(&packageName);
-                IPackageItemInfo::Probe(ai)->GetName(&name);
+                IPackageItemInfo* pi = IPackageItemInfo::Probe(ai);
+                pi->GetPackageName(&packageName);
+                pi->GetName(&name);
                 AutoPtr<IComponentName> comp;
                 CComponentName::New(packageName, name, (IComponentName**)&comp);
                 Boolean contains;
@@ -14166,17 +14273,20 @@ Boolean CActivityManagerService::DeliverPreBootCompleted(
         // If primary user, send broadcast to all available users, else just to userId
         AutoPtr<ArrayOf<Int32> > users = userId == IUserHandle::USER_OWNER ? GetUsersLocked()
                 : AutoPtr<ArrayOf<Int32> >(ArrayOf<Int32>::Alloc(1));
-        if (userId != IUserHandle::USER_OWNER)
-             (*users)[0] = userId;
+        if (userId != IUserHandle::USER_OWNER) {
+            (*users)[0] = userId;
+        }
+
         ris->GetSize(&size);
+        String packageName, name;
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> item;
             ris->Get(i, (IInterface**)&item);
             AutoPtr<IActivityInfo> ai;
             IResolveInfo::Probe(item)->GetActivityInfo((IActivityInfo**)&ai);
-            String packageName, name;
-            IPackageItemInfo::Probe(ai)->GetPackageName(&packageName);
-            IPackageItemInfo::Probe(ai)->GetName(&name);
+            IPackageItemInfo* pi = IPackageItemInfo::Probe(ai);
+            pi->GetPackageName(&packageName);
+            pi->GetName(&name);
             AutoPtr<IComponentName> comp;
             CComponentName::New(packageName, name, (IComponentName**)&comp);
             doneReceivers->PushBack(comp);
@@ -14185,13 +14295,14 @@ Boolean CActivityManagerService::DeliverPreBootCompleted(
                 AutoPtr<IIntentReceiver> finisher;
                 // On last receiver and user, set up a completion callback
                 if (i == size - 1 && j == users->GetLength() - 1 && onFinishCallback != NULL) {
-                    finisher = new PreBootCompletedIntentReceiver(mHandler, onFinishCallback);
+                    CActivityManagerPreBootCompletedReceiver::New(
+                        mHandler.Get(), onFinishCallback, (IIntentReceiver**)&finisher);
                 }
                 Slogger::I(TAG, "Sending system update to %s for user %d", TO_CSTR(comp), (*users)[j]);
                 Int32 res;
                 BroadcastIntentLocked(NULL, String(NULL), intent, String(NULL), finisher,
-                        0, String(NULL), NULL, String(NULL), IAppOpsManager::OP_NONE,
-                        TRUE, FALSE, MY_PID, IProcess::SYSTEM_UID, (*users)[j], &res);
+                    0, String(NULL), NULL, String(NULL), IAppOpsManager::OP_NONE,
+                    TRUE, FALSE, MY_PID, IProcess::SYSTEM_UID, (*users)[j], &res);
                 if (finisher != NULL) {
                     waitingUpdate = TRUE;
                 }
@@ -14215,7 +14326,6 @@ ECode CActivityManagerService::SystemReady(
                 goingCallback->Run();
             return NOERROR;
         }
-
         // Make sure we have the current profile info, since it is needed for
         // security checks.
         UpdateCurrentProfileIdsLocked();
@@ -14234,9 +14344,10 @@ ECode CActivityManagerService::SystemReady(
             if (mWaitingUpdate) {
                 return NOERROR;
             }
+            Slogger::I(TAG, " >> TODO SystemReady(): DeliverPreBootCompleted");
             AutoPtr<List<AutoPtr<IComponentName> > > doneReceivers = new List<AutoPtr<IComponentName> >();
             AutoPtr<IRunnable> runnable = new OnFinishCallback(this, doneReceivers.Get(), goingCallback);
-            mWaitingUpdate = DeliverPreBootCompleted(runnable, doneReceivers, IUserHandle::USER_OWNER);
+            // mWaitingUpdate = DeliverPreBootCompleted(runnable, doneReceivers, IUserHandle::USER_OWNER);
 
             if (mWaitingUpdate) {
                 return NOERROR;
@@ -14419,20 +14530,23 @@ ECode CActivityManagerService::SystemReady(
         CIntent::New(IIntent::ACTION_USER_STARTING, (IIntent**)&newIntent);
         newIntent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY);
         newIntent->PutExtra(IIntent::EXTRA_USER_HANDLE, mCurrentUserId);
-        AutoPtr<IIntentReceiver> receiver = new SystemBroadcastReceiver();
+        AutoPtr<IIntentReceiver> receiver;
+        CActivityManagerSystemReadyReceiver::New((IIntentReceiver**)&receiver);
         BroadcastIntentLocked(NULL, String(NULL), newIntent,
-                String(NULL), receiver, 0, String(NULL), NULL,
-                Manifest::permission::INTERACT_ACROSS_USERS, IAppOpsManager::OP_NONE,
-                TRUE, FALSE, MY_PID, IProcess::SYSTEM_UID, IUserHandle::USER_ALL, &result);
+            String(NULL), receiver, 0, String(NULL), NULL,
+            Manifest::permission::INTERACT_ACROSS_USERS, IAppOpsManager::OP_NONE,
+            TRUE, FALSE, MY_PID, IProcess::SYSTEM_UID, IUserHandle::USER_ALL, &result);
         // catch (Throwable t) {
         //     Slog.wtf(TAG, "Failed sending first user broadcasts", t);
         // }
         // } finally {
         Binder::RestoreCallingIdentity(ident);
+
         // }
         mStackSupervisor->ResumeTopActivitiesLocked();
         SendUserSwitchBroadcastsLocked(-1, mCurrentUserId);
     }
+
     return NOERROR;
 }
 
@@ -19346,6 +19460,7 @@ AutoPtr<IList> CActivityManagerService::CollectReceiverComponents(
                 IUserManager::DISALLOW_DEBUGGING_FEATURES, user, &res), res)) {
                 continue;
             }
+            Slogger::D(TAG, " >> CollectReceiverComponents %s", TO_CSTR(intent));
             AutoPtr<IList> newReceivers;
             pm->QueryIntentReceivers(intent, resolvedType, STOCK_PM_FLAGS, user, (IList**)&newReceivers);
             if (user != 0 && newReceivers != NULL) {
@@ -19464,6 +19579,9 @@ ECode CActivityManagerService::BroadcastIntentLocked(
     /* [in] */ Int32 userId,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = IActivityManager::BROADCAST_STICKY_CANT_HAVE_PERMISSION;
+
     AutoPtr<IIntent> intent;
     CIntent::New(_intent, (IIntent **)&intent);
 
@@ -19471,15 +19589,11 @@ ECode CActivityManagerService::BroadcastIntentLocked(
     intent->AddFlags(IIntent::FLAG_EXCLUDE_STOPPED_PACKAGES);
 
     if (DEBUG_BROADCAST_LIGHT) {
-        String intDes;
-        intent->ToString(&intDes);
         Slogger::D(TAG, "Send %s ordered=%d, userId=%d, %s",
-            (sticky ? "broadcast sticky: " : "broadcast: "), ordered, userId, intDes.string());
+            (sticky ? "broadcast sticky: " : "broadcast: "), ordered, userId, TO_CSTR(intent));
     }
     if ((resultTo != NULL) && !ordered) {
-        String str;
-        intent->GetAction(&str);
-        Slogger::W(TAG, "Broadcast %s not ordered but result callback requested!", str.string());
+        Slogger::W(TAG, "Broadcast %s not ordered but result callback requested!", TO_CSTR(intent));
     }
 
    FAIL_RETURN(HandleIncomingUser(callingPid, callingUid, userId,
@@ -19716,11 +19830,10 @@ ECode CActivityManagerService::BroadcastIntentLocked(
     // Add to the sticky list if requested.
     if (sticky) {
         Int32 permission;
-        CheckPermission(Manifest::permission::BROADCAST_STICKY,
-                        callingPid, callingUid, &permission);
+        CheckPermission(Manifest::permission::BROADCAST_STICKY, callingPid, callingUid, &permission);
         if (permission != IPackageManager::PERMISSION_GRANTED) {
-            Slogger::W(TAG, "Permission Denial: broadcastIntent() requesting a sticky broadcast from pid=%d, uid=%d requires Manifest::permission::BROADCAST_STICKY"
-                    , callingPid, callingUid);
+            Slogger::W(TAG, "Permission Denial: broadcastIntent() requesting a sticky broadcast" \
+                " from pid=%d, uid=%d requires Manifest::permission::BROADCAST_STICKY", callingPid, callingUid);
             return E_SECURITY_EXCEPTION;
         }
         if (!requiredPermission.IsNull()) {
@@ -20225,9 +20338,7 @@ ECode CActivityManagerService::FinishReceiver(
     /* [in] */ Boolean resultAbort)
 {
     if (DEBUG_BROADCAST) {
-        String whoDes;
-        who->ToString(&whoDes);
-        Slogger::V(TAG, "Finish receiver: %s", whoDes.string());
+        Slogger::V(TAG, "Finish receiver: %s", TO_CSTR(who));
     }
 
     // Refuse possible leaked file descriptors
@@ -20639,7 +20750,7 @@ Boolean CActivityManagerService::UpdateConfigurationLocked(
                 }
             }
             AutoPtr<IIntent> intent;
-            CIntent::New(String(IIntent::ACTION_CONFIGURATION_CHANGED), (IIntent**)&intent);
+            CIntent::New((IIntent::ACTION_CONFIGURATION_CHANGED), (IIntent**)&intent);
             intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY
                     | IIntent::FLAG_RECEIVER_REPLACE_PENDING
                     | IIntent::FLAG_RECEIVER_FOREGROUND);
@@ -20650,7 +20761,7 @@ Boolean CActivityManagerService::UpdateConfigurationLocked(
                     IProcess::SYSTEM_UID, IUserHandle::USER_ALL, &result);
             if ((changes & IActivityInfo::CONFIG_LOCALE) != 0) {
                 AutoPtr<IIntent> newIntent;
-                CIntent::New(String(IIntent::ACTION_LOCALE_CHANGED), (IIntent**)&newIntent);
+                CIntent::New((IIntent::ACTION_LOCALE_CHANGED), (IIntent**)&newIntent);
                 intent->AddFlags(IIntent::FLAG_RECEIVER_FOREGROUND);
                 BroadcastIntentLocked(NULL, nullStr, newIntent,
                     nullStr, NULL, 0, nullStr, NULL, nullStr, IAppOpsManager::OP_NONE,
@@ -23162,13 +23273,14 @@ ECode CActivityManagerService::StartUser(
                     AutoPtr<IIntent> intent;
                     CIntent::New(IIntent::ACTION_USER_INITIALIZE, (IIntent**)&intent);
                     intent->AddFlags(IIntent::FLAG_RECEIVER_FOREGROUND);
-                    AutoPtr<IIntentReceiver> receiver = new SwitchUserIntentReceiver(
-                        this, uss, foreground, oldUserId,  userId);
+                    AutoPtr<IIntentReceiver> receiver;
+                    CActivityManagerSwitchUserReceiver::New(this, uss.Get(), foreground,
+                        oldUserId,  userId, (IIntentReceiver**)&receiver);
                     Int32 bval;
                     BroadcastIntentLocked(NULL, nullStr, intent, nullStr,
-                            receiver, 0, nullStr, NULL, nullStr, IAppOpsManager::OP_NONE,
-                            TRUE, FALSE, MY_PID, IProcess::SYSTEM_UID,
-                            userId, &bval);
+                        receiver, 0, nullStr, NULL, nullStr, IAppOpsManager::OP_NONE,
+                        TRUE, FALSE, MY_PID, IProcess::SYSTEM_UID,
+                        userId, &bval);
                     uss->mInitializing = TRUE;
                 }
                 else {
@@ -23192,7 +23304,8 @@ ECode CActivityManagerService::StartUser(
                 CIntent::New(IIntent::ACTION_USER_STARTING, (IIntent**)&intent);
                 intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY);
                 intent->PutExtra(IIntent::EXTRA_USER_HANDLE, userId);
-                AutoPtr<IIntentReceiver> receiver = new NeedStartIntentReceiver();
+                AutoPtr<IIntentReceiver> receiver;
+                CActivityManagerNeedStartReceiver::New((IIntentReceiver**)&receiver);
                 Int32 bval;
                 BroadcastIntentLocked(NULL, nullStr, intent,
                     nullStr, receiver, 0, nullStr, NULL,
@@ -23285,7 +23398,9 @@ ECode CActivityManagerService::DispatchUserSwitch(
     Int32 N;
     mUserSwitchObservers->BeginBroadcast(&N);
     if (N > 0) {
-        AutoPtr<IIRemoteCallback> callback = new DispatchUserSwitchCallback(this, N, uss, oldUserId, newUserId);
+        AutoPtr<IIRemoteCallback> callback;
+        CActivityManagerDispatchUserSwitchCallback::New(
+            this, N, uss, oldUserId, newUserId, (IIRemoteCallback**)&callback);
 
         {
             AutoLock lock(this);
@@ -23617,11 +23732,13 @@ Int32 CActivityManagerService::StopUserLocked(
             CIntent::New(IIntent::ACTION_SHUTDOWN, (IIntent**)&shutdownIntent);
 
             // This is the result receiver for the final shutdown broadcast.
-            AutoPtr<IIntentReceiver> shutdownReceiver = new ShutdownReceiver(this, uss);
+            AutoPtr<IIntentReceiver> shutdownReceiver;
+            CActivityManagerShutdownReceiver::New(this, uss.Get(), (IIntentReceiver**)&shutdownReceiver);
 
             // This is the result receiver for the initial stopping broadcast.
-            AutoPtr<IIntentReceiver> stoppingReceiver = new StoppingReceiver(
-                this, uss, shutdownIntent, shutdownReceiver, userId);
+            AutoPtr<IIntentReceiver> stoppingReceiver;
+            CActivityManagerStoppingReceiver::New(
+                this, uss.Get(), shutdownIntent, shutdownReceiver, userId, (IIntentReceiver**)&stoppingReceiver);
             // Kick things off.
             Int32 result;
             String nullStr;

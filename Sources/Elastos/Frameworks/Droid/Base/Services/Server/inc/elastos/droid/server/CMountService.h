@@ -389,7 +389,7 @@ private:
     * USB mass storage disconnected while enabled
     */
     class UsbMassStorageThread
-        : public ThreadBase
+        : public Thread
     {
     public:
         UsbMassStorageThread(
@@ -407,7 +407,7 @@ private:
      * Callback from NativeDaemonConnector
      */
     class OnDaemonConnectedThread
-        : public ThreadBase
+        : public Thread
     {
     public:
 
@@ -422,7 +422,7 @@ private:
     };
 
     class OnEventThread
-        : public ThreadBase
+        : public Thread
     {
     public:
         OnEventThread(

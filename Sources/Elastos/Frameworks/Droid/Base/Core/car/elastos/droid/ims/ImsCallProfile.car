@@ -1,0 +1,241 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Ims {
+
+    /**
+     * Parcelable object to handle IMS call profile.
+     * It is created from GSMA IR.92/IR.94, 3GPP TS 24.229/TS 26.114/TS26.111.
+     * It provides the service and call type, the additional information related to the call.
+     *
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IImsCallProfile {
+
+        /**
+         * Service types
+         */
+        /**
+         * It is for a special case. It helps that the application can make a call
+         * without IMS connection (not registered).
+         * In the moment of the call initiation, the device try to connect to the IMS network
+         * and initiates the call.
+         */
+        const Int32 SERVICE_TYPE_NONE = 0;
+        /**
+         * It is a default type and can be selected when the device is connected to the IMS network.
+         */
+        const Int32 SERVICE_TYPE_NORMAL = 1;
+        /**
+         * It is for an emergency call.
+         */
+        const Int32 SERVICE_TYPE_EMERGENCY = 2;
+
+        /**
+         * Call types
+         */
+        /**
+         * IMSPhone to support IR.92 & IR.94 (voice + video upgrade/downgrade)
+         */
+        const Int32 CALL_TYPE_VOICE_N_VIDEO = 1;
+        /**
+         * IR.92 (Voice only)
+         */
+        const Int32 CALL_TYPE_VOICE = 2;
+        /**
+         * VT to support IR.92 & IR.94 (voice + video upgrade/downgrade)
+         */
+        const Int32 CALL_TYPE_VIDEO_N_VOICE = 3;
+        /**
+         * Video Telephony (audio / video two way)
+         */
+        const Int32 CALL_TYPE_VT = 4;
+        /**
+         * Video Telephony (audio two way / video TX one way)
+         */
+        const Int32 CALL_TYPE_VT_TX = 5;
+        /**
+         * Video Telephony (audio two way / video RX one way)
+         */
+        const Int32 CALL_TYPE_VT_RX = 6;
+        /**
+         * Video Telephony (audio two way / video inactive)
+         */
+        const Int32 CALL_TYPE_VT_NODIR = 7;
+        /**
+         * VideoShare (video two way)
+         */
+        const Int32 CALL_TYPE_VS = 8;
+        /**
+         * VideoShare (video TX one way)
+         */
+        const Int32 CALL_TYPE_VS_TX = 9;
+        /**
+         * VideoShare (video RX one way)
+         */
+        const Int32 CALL_TYPE_VS_RX = 10;
+
+        /**
+         * Extra properties for IMS call.
+         */
+        /**
+         * Boolean extra properties - "true" / "false"
+         *  conference : Indicates if the session is for the conference call or not.
+         *  e_call : Indicates if the session is for the emergency call or not.
+         *  vms : Indicates if the session is connected to the voice mail system or not.
+         *  call_mode_changeable : Indicates if the session is able to upgrade/downgrade
+         *      the video during voice call.
+         *  conference_avail : Indicates if the session can be extended to the conference.
+         */
+        const String EXTRA_CONFERENCE = "conference";
+        const String EXTRA_E_CALL = "e_call";
+        const String EXTRA_VMS = "vms";
+        const String EXTRA_CALL_MODE_CHANGEABLE = "call_mode_changeable";
+        const String EXTRA_CONFERENCE_AVAIL = "conference_avail";
+
+        /**
+         * Integer extra properties
+         *  oir : Rule for originating identity (number) presentation, MO/MT.
+         *      {@link ImsCallProfile#OIR_DEFAULT}
+         *      {@link ImsCallProfile#OIR_PRESENTATION_RESTRICTED}
+         *      {@link ImsCallProfile#OIR_PRESENTATION_NOT_RESTRICTED}
+         *  cnap : Rule for calling name presentation
+         *      {@link ImsCallProfile#OIR_DEFAULT}
+         *      {@link ImsCallProfile#OIR_PRESENTATION_RESTRICTED}
+         *      {@link ImsCallProfile#OIR_PRESENTATION_NOT_RESTRICTED}
+         *  dialstring : To identify the Ims call type, MO
+         *      {@link ImsCallProfile#DIALSTRING_NORMAL_CALL}
+         *      {@link ImsCallProfile#DIALSTRING_SS_CONF}
+         *      {@link ImsCallProfile#DIALSTRING_USSD}
+         */
+        const String EXTRA_OIR = "oir";
+        const String EXTRA_CNAP = "cnap";
+        const String EXTRA_DIALSTRING = "dialstring";
+
+        /**
+         * Values for EXTRA_OIR / EXTRA_CNAP
+         */
+        const Int32 OIR_DEFAULT = 0;    // "user subscription default value"
+        const Int32 OIR_PRESENTATION_RESTRICTED = 1;
+        const Int32 OIR_PRESENTATION_NOT_RESTRICTED = 2;
+
+        /**
+         * Values for EXTRA_DIALSTRING
+         */
+        // default (normal call)
+        const Int32 DIALSTRING_NORMAL = 0;
+        // Call for SIP-based user configuration
+        const Int32 DIALSTRING_SS_CONF = 1;
+        // Call for USSD message
+        const Int32 DIALSTRING_USSD = 2;
+
+        /**
+         * String extra properties
+         *  oi : Originating identity (number), MT only
+         *  cna : Calling name
+         *  ussd : For network-initiated USSD, MT only
+         *  remote_uri : Connected user identity (it can be used for the conference)
+         */
+        const String EXTRA_OI = "oi";
+        const String EXTRA_CNA = "cna";
+        const String EXTRA_USSD = "ussd";
+        const String EXTRA_REMOTE_URI = "remote_uri";
+
+        GetCallExtra(
+            [in] String name,
+            [out] String* result);
+
+        GetCallExtra(
+            [in] String name,
+            [in] String defaultValue,
+            [out] String* result);
+
+        GetCallExtraBoolean(
+            [in] String name,
+            [out] Boolean* result);
+
+        GetCallExtraBoolean(
+            [in] String name,
+            [in] Boolean defaultValue,
+            [out] Boolean* result);
+
+        GetCallExtraInt32(
+            [in] String name,
+            [out] Int32* result);
+
+        GetCallExtraInt32(
+            [in] String name,
+            [in] Int32 defaultValue,
+            [out] Int32* result);
+
+        SetCallExtra(
+            [in] String name,
+            [in] String value);
+
+        SetCallExtraBoolean(
+            [in] String name,
+            [in] Boolean value);
+
+        SetCallExtraInt32(
+            [in] String name,
+            [in] Int32 value);
+
+        UpdateCallType(
+            [in] IImsCallProfile* profile);
+
+        UpdateCallExtras(
+            [in] IImsCallProfile* profile);
+    }
+
+    interface IImsCallProfileHelper {
+        /**
+         * Converts from the call types defined in {@link com.android.ims.ImsCallProfile} to the
+         * video state values defined in {@link VideoProfile}.
+         *
+         * @param callType The call type.
+         * @return The video state.
+         */
+        GetVideoStateFromCallType(
+            [in] Int32 callType,
+            [out] Int32* result);
+
+        /**
+         * Converts from the video state values defined in {@link VideoProfile}
+         * to the call types defined in {@link ImsCallProfile}.
+         *
+         * @param videoState The video state.
+         * @return The call type.
+         */
+        GetCallTypeFromVideoState(
+            [in] Int32 videoState,
+            [out] Int32* result);
+
+        /**
+         * Translate presentation value to OIR value
+         * @param presentation
+         * @return OIR valuse
+         */
+        PresentationToOIR(
+            [in] Int32 presentation,
+            [out] Int32* result);
+
+        /**
+         * Translate OIR value to presentation value
+         * @param oir value
+         * @return presentation value
+         */
+        OIRToPresentation(
+            [in] Int32 oir,
+            [out] Int32* result);
+    }
+
+    } // namespace Ims
+    } // namespace Droid
+    } // namespace Elastos
+}

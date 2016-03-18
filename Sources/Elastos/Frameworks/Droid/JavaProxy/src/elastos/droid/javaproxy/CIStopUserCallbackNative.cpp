@@ -3,6 +3,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::App::EIID_IStopUserCallback;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,15 +13,20 @@ namespace JavaProxy {
 
 const String CIStopUserCallbackNative::TAG("CIStopUserCallbackNative");
 
-CIStopUserCallbackNative::~CIStopUserCallbackNative(){
+CAR_INTERFACE_IMPL_2(CIStopUserCallbackNative, Object, IStopUserCallback, IBinder)
+
+CAR_OBJECT_IMPL(CIStopUserCallbackNative)
+
+CIStopUserCallbackNative::~CIStopUserCallbackNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
 ECode CIStopUserCallbackNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -29,7 +36,7 @@ ECode CIStopUserCallbackNative::constructor(
 ECode CIStopUserCallbackNative::UserStopped(
     /* [in] */ Int32 userId)
 {
-    LOGGERD(TAG, String("+ CIStopUserCallbackNative::UserStopped()"));
+    // LOGGERD(TAG, "+ CIStopUserCallbackNative::UserStopped()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -45,14 +52,14 @@ ECode CIStopUserCallbackNative::UserStopped(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIStopUserCallbackNative::UserStopped()"));
+    // LOGGERD(TAG, "- CIStopUserCallbackNative::UserStopped()");
     return NOERROR;
 }
 
 ECode CIStopUserCallbackNative::UserStopAborted(
     /* [in] */ Int32 userId)
 {
-    LOGGERD(TAG, String("+ CIStopUserCallbackNative::UserStopAborted()"));
+    // LOGGERD(TAG, "+ CIStopUserCallbackNative::UserStopAborted()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -68,14 +75,14 @@ ECode CIStopUserCallbackNative::UserStopAborted(
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIStopUserCallbackNative::UserStopAborted()"));
+    // LOGGERD(TAG, "- CIStopUserCallbackNative::UserStopAborted()");
     return NOERROR;
 }
 
 ECode CIStopUserCallbackNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CIStopUserCallbackNative::ToString()"));
+    // LOGGERD(TAG, "+ CIStopUserCallbackNative::ToString()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -83,17 +90,17 @@ ECode CIStopUserCallbackNative::ToString(
     Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
 
     jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
 
     *str = Util::GetElString(env, jstr);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CIStopUserCallbackNative::ToString()"));
+    // LOGGERD(TAG, "- CIStopUserCallbackNative::ToString()");
     return NOERROR;
 }
 

@@ -83,23 +83,23 @@ Boolean DisplayContent::IsPrivate()
     return (mDisplay->GetFlags(&flags), flags & IDisplay::FLAG_PRIVATE) != 0;
 }
 
-AutoPtr<List<AutoPtr<TaskStack> > > DisplayContent::GetStacks()
+List< AutoPtr<TaskStack> >& DisplayContent::GetStacks()
 {
-    return &mStacks;
+    return mStacks;
 }
 
-AutoPtr<List<AutoPtr<Task> > > DisplayContent::GetTasks()
+List< AutoPtr<Task> >& DisplayContent::GetTasks()
 {
     mTmpTaskHistory.Clear();
     List<AutoPtr<TaskStack> >::Iterator it = mStacks.Begin();
     for (; it != mStacks.End(); ++it) {
-        AutoPtr< List<AutoPtr<Task> > > tasks = (*it)->GetTasks();
-        List<AutoPtr<Task> >::Iterator taskIt = tasks->Begin();
-        for (; taskIt != tasks->End(); ++taskIt) {
+        List< AutoPtr<Task> >& tasks = (*it)->GetTasks();
+        List<AutoPtr<Task> >::Iterator taskIt = tasks.Begin();
+        for (; taskIt != tasks.End(); ++taskIt) {
             mTmpTaskHistory.PushBack(*taskIt);
         }
     }
-    return &mTmpTaskHistory;
+    return mTmpTaskHistory;
 }
 
 AutoPtr<TaskStack> DisplayContent::GetHomeStack()
@@ -317,9 +317,9 @@ void DisplayContent::CheckForDeferredActions()
             if (stack->mDeferDetach) {
                 mService->DetachStackLocked(this, stack);
             }
-            AutoPtr<List<AutoPtr<Task> > > tasks = stack->GetTasks();
-            List<AutoPtr<Task> >::ReverseIterator taskRit = tasks->RBegin();
-            for (; taskRit != tasks->REnd(); ++taskRit) {
+            List< AutoPtr<Task> >& tasks = stack->GetTasks();
+            List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
+            for (; taskRit != tasks.REnd(); ++taskRit) {
                 AutoPtr<Task> task = *taskRit;
                 List<AutoPtr<AppWindowToken> > tokens = task->mAppTokens;
                 List<AutoPtr<AppWindowToken> >::ReverseIterator tokenRit = tokens.RBegin();

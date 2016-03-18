@@ -3,6 +3,7 @@ module
 {
 
     interface Elastos.Droid.Telecomm.Telecom.IRemoteConnectionVideoProvider;
+    interface Elastos.Droid.Telecomm.Internal.IIConnectionService;
     interface Elastos.Droid.View.ISurface;
     interface Elastos.Droid.Net.IUri;
     using interface Elastos.Utility.IList;
@@ -192,7 +193,7 @@ module
 
             Answer();
 
-            Vnswer(
+            Answer(
                 [in] Int32 videoState);
 
             Reject();
@@ -219,6 +220,55 @@ module
 
             GetConference(
                 [out] IRemoteConference** res);
+
+            GetId(
+                [out] String* result);
+
+            SetConference(
+                [in] IRemoteConference* conference);
+
+            GetConnectionService(
+                [out] IIConnectionService** result);
+
+            SetCallCapabilities(
+                [in] Int32 callCapabilities);
+
+            SetAddress(
+                [in] IUri* address,
+                [in] Int32 presentation);
+
+            SetCallerDisplayName(
+                [in] String callerDisplayName,
+                [in] Int32 presentation);
+
+            SetDisconnected(
+                [in] IDisconnectCause* disconnectCause);
+
+            SetState(
+                [in] Int32 state);
+
+            SetConferenceableConnections(
+                [in] IList* conferenceableConnections);
+
+            SetVideoState(
+                [in] Int32 videoState);
+
+            SetDestroyed();
+
+            SetRingbackRequested(
+                [in] Boolean ringback);
+
+            SetPostDialWait(
+                [in] String remainingDigits);
+
+            SetVideoProvider(
+                [in] IRemoteConnectionVideoProvider* videoProvider);
+
+            SetIsVoipAudioMode(
+                [in] Boolean isVoip);
+
+            SetStatusHints(
+                [in] IStatusHints* statusHints);
         }
 
         interface IRemoteConnectionHelper {

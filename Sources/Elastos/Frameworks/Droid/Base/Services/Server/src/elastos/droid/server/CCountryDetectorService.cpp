@@ -1,7 +1,8 @@
 
 #include "elastos/droid/server/CCountryDetectorService.h"
-#include "elastos/droid/os/Process.h"
-#include "elastos/droid/os/Handler.h"
+#include <elastos/droid/os/Process.h>
+#include <elastos/droid/os/Handler.h>
+#include <elastos/droid/os/Looper.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <Elastos.Droid.Os.h>
@@ -10,8 +11,7 @@
 
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
-using Elastos::Droid::Os::ILooperHelper;
-using Elastos::Droid::Os::CLooperHelper;
+using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Location::EIID_IICountryDetector;
@@ -205,14 +205,12 @@ ECode CCountryDetectorService::Initialize()
 
 ECode CCountryDetectorService::Run()
 {
-    AutoPtr<ILooperHelper> helper;
-    CLooperHelper::AcquireSingleton((ILooperHelper**)&helper);
     Process::SetThreadPriority(IProcess::THREAD_PRIORITY_BACKGROUND);
-    helper->Prepare();
+    Looper::Prepare();
     CHandler::New((IHandler**)&mHandler);
     Initialize();
     mSystemReady = TRUE;
-    helper->Loop();
+    Looper::Loop();
 
     return NOERROR;
 }

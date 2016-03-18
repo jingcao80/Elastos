@@ -210,6 +210,14 @@ module
         interface IMatrixCursor;
     }
 
+    class CMatrixCursorRowBuilder {
+        constructor(
+            [in] Int32 row,
+            [in] IMatrixCursor* owner);
+
+        interface IRowBuilder;
+    }
+
     class CCursorToBulkCursorAdaptor {
         constructor(
             [in] ICursor* cursor,
@@ -225,13 +233,13 @@ module
         interface IDatabaseUtils;
     }
 
-    //class CDatabaseInsertHelper {
-    //    constructor(
-    //        [in] ISQLiteDatabase* db,
-    //        [in] String tableName);
+    class CDatabaseInsertHelper {
+        constructor(
+            [in] ISQLiteDatabase* db,
+            [in] String tableName);
 
-    //    interface IDatabaseInsertHelper;
-    //}
+      interface IDatabaseInsertHelper;
+    }
 
     class CBulkCursorDescriptor {
         constructor();

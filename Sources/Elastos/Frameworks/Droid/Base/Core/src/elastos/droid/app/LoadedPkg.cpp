@@ -600,6 +600,7 @@ ECode LoadedPkg::constructor(
     mIncludeCode = includeCode;
     mRegisterPackage = registerPackage;
     mDisplayAdjustments->SetCompatibilityInfo(compatInfo);
+    assert(compatInfo != NULL);
     return NOERROR;
 }
 

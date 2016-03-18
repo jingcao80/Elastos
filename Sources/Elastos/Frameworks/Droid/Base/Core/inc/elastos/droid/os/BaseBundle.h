@@ -410,6 +410,13 @@ public:
     CARAPI ReadFromParcelInner(
         /* [in] */ IParcel* parcel);
 
+    // add for java compatible
+    CARAPI SetJavaData(
+        /* [in] */ ArrayOf<Byte>* data);
+
+    CARAPI GetJavaData(
+        /* [out, callee] */ ArrayOf<Byte>** data);
+
 protected:
     BaseBundle();
 
@@ -502,6 +509,10 @@ protected:
     static const Int32 VAL_BOOLEANARRAY;// = 24;
     static const Int32 VAL_CHARSEQUENCEARRAY;// = 25;
     static const Int32 VAL_ARRAYOF;// = 26;
+
+private:
+    // add for java compatible
+    AutoPtr<ArrayOf<Byte> > mJavaData;
 };
 
 } // namespace Os

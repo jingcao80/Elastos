@@ -28,15 +28,11 @@ public:
 
     InputEventReceiver();
 
-    InputEventReceiver(
-        /* [in] */ IInputChannel* inputChannel,
-        /* [in] */ ILooper* looper);
+    virtual ~InputEventReceiver();
 
     CARAPI constructor(
         /* [in] */ IInputChannel* inputChannel,
         /* [in] */ ILooper* looper);
-
-    virtual ~InputEventReceiver();
 
     virtual CARAPI Dispose();
 

@@ -6,6 +6,7 @@
 #include "elastos/droid/R.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/Looper.h"
+#include "elastos/droid/os/CStrictMode.h"
 #include "elastos/droid/webkit/CookieSyncManager.h"
 #include "elastos/droid/webkit/CPluginList.h"
 #include "elastos/droid/webkit/DebugFlags.h"
@@ -19,6 +20,8 @@
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::IStrictMode;
+using Elastos::Droid::Os::CStrictMode;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CString;
@@ -80,28 +83,22 @@ ECode WebView::PrivateAccess::Super_getScrollBarStyle(
     /* [out] */ Int32* style)
 {
     VALIDATE_NOT_NULL(style);
-    assert(0);
-    // TODO
-    // *style = mHost->AbsoluteLayout::GetScrollBarStyle();
-    return E_NOT_IMPLEMENTED;
+    mHost->AbsoluteLayout::GetScrollBarStyle(style);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::Super_scrollTo(
     /* [in] */ Int32 scrollX,
     /* [in] */ Int32 scrollY)
 {
-    assert(0);
-    // TODO
-    // mHost->AbsoluteLayout::ScrollTo(scrollX, scrollY);
-    return E_NOT_IMPLEMENTED;
+    mHost->AbsoluteLayout::ScrollTo(scrollX, scrollY);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::Super_computeScroll()
 {
-    assert(0);
-    // TODO
-    // mHost->AbsoluteLayout::ComputeScroll();
-    return E_NOT_IMPLEMENTED;
+    mHost->AbsoluteLayout::ComputeScroll();
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::Super_onHoverEvent(
@@ -109,10 +106,8 @@ ECode WebView::PrivateAccess::Super_onHoverEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0);
-    // TODO
-    // *result = mHost->AbsoluteLayout::OnHoverEvent(event);
-    return E_NOT_IMPLEMENTED;
+    mHost->AbsoluteLayout::OnHoverEvent(event, result);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::Super_performAccessibilityAction(
@@ -121,20 +116,15 @@ ECode WebView::PrivateAccess::Super_performAccessibilityAction(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0);
-    // TODO
-    // *result = mHost->AbsoluteLayout::PerformAccessibilityAction(action, arguments);
-    return E_NOT_IMPLEMENTED;
+    return mHost->AbsoluteLayout::PerformAccessibilityAction(action, arguments, result);
 }
 
 ECode WebView::PrivateAccess::Super_performLongClick(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0);
-    // TODO
-    // *result = mHost->AbsoluteLayout::PerformLongClick();
-    return E_NOT_IMPLEMENTED;
+    mHost->AbsoluteLayout::PerformLongClick(result);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::Super_setFrame(
@@ -145,10 +135,8 @@ ECode WebView::PrivateAccess::Super_setFrame(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0);
-    // TODO
-    // *result = mHost->AbsoluteLayout::SetFrame(left, top, right, bottom);
-    return E_NOT_IMPLEMENTED;
+    *result = mHost->AbsoluteLayout::SetFrame(left, top, right, bottom);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::Super_dispatchKeyEvent(
@@ -156,10 +144,8 @@ ECode WebView::PrivateAccess::Super_dispatchKeyEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0);
-    // TODO
-    // *result = mHost->AbsoluteLayout::DispatchKeyEvent(event);
-    return E_NOT_IMPLEMENTED;
+    mHost->AbsoluteLayout::DispatchKeyEvent(event, result);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::Super_onGenericMotionEvent(
@@ -167,10 +153,8 @@ ECode WebView::PrivateAccess::Super_onGenericMotionEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0);
-    // TODO
-    // *result = mHost->AbsoluteLayout::OnGenericMotionEvent(event);
-    return E_NOT_IMPLEMENTED;
+    mHost->AbsoluteLayout::OnGenericMotionEvent(event, result);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::Super_requestFocus(
@@ -179,19 +163,15 @@ ECode WebView::PrivateAccess::Super_requestFocus(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0);
-    // TODO
-    // *result = mHost->AbsoluteLayout::RequestFocus(direction, previouslyFocusedRect);
-    return E_NOT_IMPLEMENTED;
+    mHost->AbsoluteLayout::RequestFocus(direction, previouslyFocusedRect, result);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::Super_setLayoutParams(
     /* [in] */ IViewGroupLayoutParams* params)
 {
-    assert(0);
-    // TODO
-    // mHost->AbsoluteLayout::SetLayoutParams(params);
-    return E_NOT_IMPLEMENTED;
+    mHost->AbsoluteLayout::SetLayoutParams(params);
+    return NOERROR;
 }
 
 // ---- Access to non-public methods ----
@@ -206,60 +186,48 @@ ECode WebView::PrivateAccess::OverScrollBy(
     /* [in] */ Int32 maxOverScrollY,
     /* [in] */ Boolean isTouchEvent)
 {
-    assert(0);
-    // TODO
-    // mHost->OverScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX, scrollRangeY,
-    //                 maxOverScrollX, maxOverScrollY, isTouchEvent);
-    return E_NOT_IMPLEMENTED;
+    mHost->OverScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX, scrollRangeY,
+                     maxOverScrollX, maxOverScrollY, isTouchEvent);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::AwakenScrollBars(
     /* [in] */ Int32 duration)
 {
-    assert(0);
-    // TODO
-    // mHost->AwakenScrollBars(duration);
-    return E_NOT_IMPLEMENTED;
+    mHost->AwakenScrollBars(duration);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::AwakenScrollBars(
     /* [in] */ Int32 duration,
     /* [in] */ Boolean invalidate)
 {
-    assert(0);
-    // TODO
-    // mHost->AwakenScrollBars(duration, invalidate);
-    return E_NOT_IMPLEMENTED;
+    mHost->AwakenScrollBars(duration, invalidate);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::GetVerticalScrollFactor(
     /* [out] */ Float* factor)
 {
     VALIDATE_NOT_NULL(factor);
-    assert(0);
-    // TODO
-    // *factor = mHost->GetVerticalScrollFactor();
-    return E_NOT_IMPLEMENTED;
+    mHost->GetVerticalScrollFactor(factor);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::GetHorizontalScrollFactor(
     /* [out] */ Float* factor)
 {
     VALIDATE_NOT_NULL(factor);
-    assert(0);
-    // TODO
-    // *factor = mHost->GetHorizontalScrollFactor();
-    return E_NOT_IMPLEMENTED;
+    mHost->GetHorizontalScrollFactor(factor);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::SetMeasuredDimension(
     /* [in] */ Int32 measuredWidth,
     /* [in] */ Int32 measuredHeight)
 {
-    assert(0);
-    // TODO
-    // mHost->SetMeasuredDimension(measuredWidth, measuredHeight);
-    return E_NOT_IMPLEMENTED;
+    mHost->SetMeasuredDimension(measuredWidth, measuredHeight);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::OnScrollChanged(
@@ -268,20 +236,16 @@ ECode WebView::PrivateAccess::OnScrollChanged(
     /* [in] */ Int32 oldl,
     /* [in] */ Int32 oldt)
 {
-    assert(0);
-    // TODO
-    // mHost->OnScrollChanged(l, t, oldl, oldt);
-    return E_NOT_IMPLEMENTED;
+    mHost->OnScrollChanged(l, t, oldl, oldt);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::GetHorizontalScrollbarHeight(
     /* [out] */ Int32* height)
 {
     VALIDATE_NOT_NULL(height);
-    assert(0);
-    // TODO
-    // *height = mHost->GetHorizontalScrollbarHeight();
-    return E_NOT_IMPLEMENTED;
+    mHost->GetHorizontalScrollbarHeight(height);
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::Super_onDrawVerticalScrollBar(
@@ -292,10 +256,8 @@ ECode WebView::PrivateAccess::Super_onDrawVerticalScrollBar(
             /* [in] */ Int32 r,
             /* [in] */ Int32 b)
 {
-    assert(0);
-    // TODO
-    // WebView.super.onDrawVerticalScrollBar(canvas, scrollBar, l, t, r, b);
-    return E_NOT_IMPLEMENTED;
+    mHost->AbsoluteLayout::OnDrawVerticalScrollBar(canvas, scrollBar, l, t, r, b);
+    return NOERROR;
 }
 
 // ---- Access to (non-public) fields ----
@@ -303,20 +265,16 @@ ECode WebView::PrivateAccess::Super_onDrawVerticalScrollBar(
 ECode WebView::PrivateAccess::SetScrollXRaw(
     /* [in] */ Int32 scrollX)
 {
-    assert(0);
-    // TODO
-    // mHost->mScrollX = scrollX;
-    return E_NOT_IMPLEMENTED;
+    mHost->mScrollX = scrollX;
+    return NOERROR;
 }
 
 /** Raw setter for the scroll Y value, without invoking onScrollChanged handlers etc. */
 ECode WebView::PrivateAccess::SetScrollYRaw(
     /* [in] */ Int32 scrollY)
 {
-    assert(0);
-    // TODO
-    // mHost->mScrollY = scrollY;
-    return E_NOT_IMPLEMENTED;
+    mHost->mScrollY = scrollY;
+    return NOERROR;
 }
 
 ECode WebView::PrivateAccess::ToString(
@@ -363,7 +321,7 @@ ECode WebView::FindListenerDistributor::OnFindResultReceived(
 
 const String WebView::LOGTAG("WebView_proxy");
 
-Boolean WebView::sEnforceThreadChecking = FALSE;
+volatile Boolean WebView::sEnforceThreadChecking = FALSE;
 
 Object WebView::sLock;
 
@@ -423,9 +381,7 @@ ECode WebView::constructor(
     if (context == NULL) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    assert(0);
-    // TODO
-    // FAIL_RETURN(AbsoluteLayout::Init(context, attrs, defStyle));
+    FAIL_RETURN(AbsoluteLayout::constructor(context, attrs, defStyle));
     FAIL_RETURN(CheckThread());
 
     EnsureProviderCreated();
@@ -440,9 +396,7 @@ ECode WebView::constructor(
     /* [in] */ IMap* javaScriptInterfaces,
     /* [in] */ Boolean privateBrowsing)
 {
-    assert(0);
-    // TODO
-    // super(context, attrs, defStyleAttr, defStyleRes);
+    AbsoluteLayout::constructor(context, attrs, defStyleAttr, defStyleRes);
     if (context == NULL) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -1697,9 +1651,9 @@ ECode WebView::FindAll(
     if (DebugFlags::TRACE_API) {
         Logger::D(LOGTAG, "findAll");
     }
-    assert(0);
-    // TODO
-    // StrictMode.noteSlowCall("findAll blocks UI: prefer findAllAsync");
+    AutoPtr<IStrictMode> sm;
+    CStrictMode::AcquireSingleton((IStrictMode**)&sm);
+    sm->NoteSlowCall(String("findAll blocks UI: prefer findAllAsync"));
     return mProvider->FindAll(find, all);
 }
 
@@ -2148,11 +2102,13 @@ ECode WebView::ZoomBy(
 
     if (zoomFactor < 0.01) {
         //throw new IllegalArgumentException("zoomFactor must be greater than 0.01.");
+        Logger::E("WebView::ZoomBy", "zoomFactor must be greater than 0.01.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     if (zoomFactor > 100.0) {
         //throw new IllegalArgumentException("zoomFactor must be less than 100.");
+        Logger::E("WebView::ZoomBy", "zoomFactor must be less than 100.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -2292,8 +2248,6 @@ ECode WebView::CheckThread()
     // Ignore mWebViewThread == null because this can be called during in the super class
     // constructor, before this class's own constructor has even started.
     if (mWebViewThread != NULL && Looper::GetMyLooper() != mWebViewThread) {
-        assert(0);
-        // TODO
         // Throwable throwable = new Throwable(
         //         "A WebView method was called on thread '" +
         //         Thread.currentThread().getName() + "'. " +
@@ -2302,14 +2256,19 @@ ECode WebView::CheckThread()
         //         ", FYI main Looper is " + Looper.getMainLooper() + ")");
         // Log.w(LOGTAG, Log.getStackTraceString(throwable));
         // StrictMode.onWebViewMethodCalledOnWrongThread(throwable);
+        Logger::E("WebView::CheckThread", "called on the wrong thread");
+        AutoPtr<IStrictMode> sm;
+        CStrictMode::AcquireSingleton((IStrictMode**)&sm);
+        sm->OnWebViewMethodCalledOnWrongThread();
 
         if (sEnforceThreadChecking) {
             //throw new RuntimeException(throwable);
+            Logger::E("WebView::CheckThread", "called on the wrong thread");
             return E_RUNTIME_EXCEPTION;
         }
     }
 
-    return E_NOT_IMPLEMENTED;
+    return NOERROR;
 }
 
 //-------------------------------------------------------------------------
@@ -2321,9 +2280,7 @@ ECode WebView::CheckThread()
 
 ECode WebView::OnAttachedToWindow()
 {
-    assert(0);
-    // TODO
-    // FAIL_RETURN(AbsoluteLayout::OnAttachedToWindow());
+    FAIL_RETURN(AbsoluteLayout::OnAttachedToWindow());
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     return viewDelegate->OnAttachedToWindow();
@@ -2334,10 +2291,7 @@ ECode WebView::OnDetachedFromWindowInternal()
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnDetachedFromWindow();
-    assert(0);
-    // TODO
-    // return AbsoluteLayout::OnDetachedFromWindow();
-    return E_NOT_IMPLEMENTED;
+    return AbsoluteLayout::OnDetachedFromWindow();
 }
 
 ECode WebView::SetLayoutParams(
@@ -2352,9 +2306,7 @@ ECode WebView::SetLayoutParams(
 ECode WebView::SetOverScrollMode(
     /* [in] */ Int32 mode)
 {
-    assert(0);
-    // TODO
-    // FAIL_RETURN(AbsoluteLayout::SetOverScrollMode(mode));
+    FAIL_RETURN(AbsoluteLayout::SetOverScrollMode(mode));
 
     // This method may be called in the constructor chain, before the WebView provider is
     // created.
@@ -2362,7 +2314,7 @@ ECode WebView::SetOverScrollMode(
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->SetOverScrollMode(mode);
-    return E_NOT_IMPLEMENTED;
+    return NOERROR;
 }
 
 ECode WebView::SetScrollBarStyle(
@@ -2371,10 +2323,7 @@ ECode WebView::SetScrollBarStyle(
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->SetScrollBarStyle(style);
-    assert(0);
-    // TODO
-    // return AbsoluteLayout::SetScrollBarStyle(style);
-    return E_NOT_IMPLEMENTED;
+    return AbsoluteLayout::SetScrollBarStyle(style);
 }
 
 Int32 WebView::ComputeHorizontalScrollRange()
@@ -2513,10 +2462,7 @@ ECode WebView::GetAccessibilityNodeProvider(
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&delegate);
     delegate->GetAccessibilityNodeProvider(provider);
     if (provider == NULL) {
-        assert(0);
-        // TODO
-        // return super.getAccessibilityNodeProvider(provider);
-        return NOERROR;
+        return AbsoluteLayout::GetAccessibilityNodeProvider(provider);
     }
     return NOERROR;
 }
@@ -2533,31 +2479,27 @@ Boolean WebView::ShouldDelayChildPressedState()
 ECode WebView::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
-    assert(0);
-    // TODO
-    // FAIL_RETURN(AbsoluteLayout::OnInitializeAccessibilityNodeInfo(info));
+    FAIL_RETURN(AbsoluteLayout::OnInitializeAccessibilityNodeInfo(info));
     AutoPtr<ICharSequence> cs;
     CString::New(String("Elastos::Droid::Webkit::CWebView")/*WebView.class.getName()*/, (ICharSequence**)&cs);
     info->SetClassName(cs);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnInitializeAccessibilityNodeInfo(info);
-    return E_NOT_IMPLEMENTED;
+    return NOERROR;
 }
 
 ECode WebView::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
-    assert(0);
-    // TODO
-    // FAIL_RETURN(AbsoluteLayout::OnInitializeAccessibilityEvent(event));
+    FAIL_RETURN(AbsoluteLayout::OnInitializeAccessibilityEvent(event));
     AutoPtr<ICharSequence> cs;
     CString::New(String("Elastos::Droid::Webkit::CWebView")/*WebView.class.getName()*/, (ICharSequence**)&cs);
     IAccessibilityRecord::Probe(event)->SetClassName(cs);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnInitializeAccessibilityEvent(event);
-    return E_NOT_IMPLEMENTED;
+    return NOERROR;
 }
 
 Boolean WebView::PerformAccessibilityAction(
@@ -2599,9 +2541,7 @@ void WebView::OnOverScrolled(
 void WebView::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
-    assert(0);
-    // TODO
-    // AbsoluteLayout::OnWindowVisibilityChanged(visibility);
+    AbsoluteLayout::OnWindowVisibilityChanged(visibility);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnWindowVisibilityChanged(visibility);
@@ -2642,19 +2582,17 @@ AutoPtr<IInputConnection> WebView::OnCreateInputConnection(
     return conn;
 }
 
-void WebView::OnVisibilityChanged(
+ECode WebView::OnVisibilityChanged(
     /* [in] */ IView* changedView,
     /* [in] */ Int32 visibility)
 {
-    assert(0);
-    // TODO
-    // AbsoluteLayout::OnVisibilityChanged(changedView, visibility);
+    AbsoluteLayout::OnVisibilityChanged(changedView, visibility);
     // This method may be called in the constructor chain, before the WebView provider is
     // created.
     EnsureProviderCreated();
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    viewDelegate->OnVisibilityChanged(changedView, visibility);
+    return viewDelegate->OnVisibilityChanged(changedView, visibility);
 }
 
 ECode WebView::OnWindowFocusChanged(
@@ -2663,10 +2601,8 @@ ECode WebView::OnWindowFocusChanged(
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnWindowFocusChanged(hasWindowFocus);
-    assert(0);
-    // TODO
-    // AbsoluteLayout::OnWindowFocusChanged(hasWindowFocus);
-    return E_NOT_IMPLEMENTED;
+    AbsoluteLayout::OnWindowFocusChanged(hasWindowFocus);
+    return NOERROR;
 }
 
 void WebView::OnFocusChanged(
@@ -2677,9 +2613,7 @@ void WebView::OnFocusChanged(
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnFocusChanged(focused, direction, previouslyFocusedRect);
-    assert(0);
-    // TODO
-    // AbsoluteLayout::OnFocusChanged(focused, direction, previouslyFocusedRect);
+    AbsoluteLayout::OnFocusChanged(focused, direction, previouslyFocusedRect);
 }
 
 /** @hide */
@@ -2702,9 +2636,7 @@ void WebView::OnSizeChanged(
     /* [in] */ Int32 ow,
     /* [in] */ Int32 oh)
 {
-    assert(0);
-    // TODO
-    // AbsoluteLayout::OnSizeChanged(w, h, ow, oh);
+    AbsoluteLayout::OnSizeChanged(w, h, ow, oh);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnSizeChanged(w, h, ow, oh);
@@ -2716,9 +2648,7 @@ void WebView::OnScrollChanged(
     /* [in] */ Int32 oldl,
     /* [in] */ Int32 oldt)
 {
-    assert(0);
-    // TODO
-    // AbsoluteLayout::OnScrollChanged(l, t, oldl, oldt);
+    AbsoluteLayout::OnScrollChanged(l, t, oldl, oldt);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnScrollChanged(l, t, oldl, oldt);
@@ -2749,9 +2679,7 @@ void WebView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    assert(0);
-    // TODO
-    // AbsoluteLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    AbsoluteLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -2763,9 +2691,7 @@ void WebView::DispatchDraw(
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->PreDispatchDraw(canvas);
-    assert(0);
-    // TODO
-    // super.dispatchDraw(canvas);
+    AbsoluteLayout::DispatchDraw(canvas);
 }
 
 Boolean WebView::RequestChildRectangleOnScreen(
@@ -2792,9 +2718,7 @@ ECode WebView::SetLayerType(
     /* [in] */ Int32 layerType,
     /* [in] */ IPaint* paint)
 {
-    assert(0);
-    // TODO
-    // AbsoluteLayout::SetLayerType(layerType, paint);
+    AbsoluteLayout::SetLayerType(layerType, paint);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     return viewDelegate->SetLayerType(layerType, paint);
@@ -2802,9 +2726,7 @@ ECode WebView::SetLayerType(
 
 ECode WebView::OnStartTemporaryDetach()
 {
-    assert(0);
-    // TODO
-    // super.onStartTemporaryDetach();
+    AbsoluteLayout::OnStartTemporaryDetach();
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     return viewDelegate->OnStartTemporaryDetach();
@@ -2812,9 +2734,7 @@ ECode WebView::OnStartTemporaryDetach()
 
 ECode WebView::OnFinishTemporaryDetach()
 {
-    assert(0);
-    // TODO
-    // super.onFinishTemporaryDetach();
+    AbsoluteLayout::OnFinishTemporaryDetach();
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     return viewDelegate->OnFinishTemporaryDetach();

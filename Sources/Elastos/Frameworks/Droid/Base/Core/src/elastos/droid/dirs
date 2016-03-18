@@ -17,6 +17,7 @@ DIRS += emoji
 DIRS += gesture
 DIRS += graphics
 DIRS += hardware
+DIRS += ims
 DIRS += inputmethodservice
 DIRS += internal
 DIRS += location

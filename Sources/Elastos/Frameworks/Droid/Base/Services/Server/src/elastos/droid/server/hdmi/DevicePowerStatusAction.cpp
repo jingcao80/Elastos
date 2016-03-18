@@ -15,6 +15,8 @@ namespace Droid {
 namespace Server {
 namespace Hdmi {
 
+CAR_INTERFACE_IMPL(DevicePowerStatusAction, Object, IDevicePowerStatusAction)
+
 const String DevicePowerStatusAction::TAG("DevicePowerStatusAction");
 const Int32 DevicePowerStatusAction::STATE_WAITING_FOR_REPORT_POWER_STATUS = 1;
 

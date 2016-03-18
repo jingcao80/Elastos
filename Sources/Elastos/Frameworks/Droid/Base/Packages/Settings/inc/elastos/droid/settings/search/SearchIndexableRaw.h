@@ -1,9 +1,17 @@
 
+#ifndef __ELASTOS_DROID_SETTINGS_SEARCH_SEARCHINDEXABLERAW_H__
+#define __ELASTOS_DROID_SETTINGS_SEARCH_SEARCHINDEXABLERAW_H__
 
-package com.android.settings.search;
+#include "elastos/droid/provider/SearchIndexableData.h"
+#include "_Settings.h"
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Provider::ISearchIndexableData;
+using Elastos::Droid::Provider::SearchIndexableData;
+
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Search {
 
 /**
  * Indexable raw data for Search.
@@ -12,39 +20,55 @@ using Elastos::Droid::Provider::ISearchIndexableData;
  *
  * See {@link Indexable} and {@link android.provider.SearchIndexableResource}.
  */
-public class SearchIndexableRaw extends SearchIndexableData {
+class SearchIndexableRaw
+    : public SearchIndexableData
+    , public ISearchIndexableRaw
+{
+public:
+    CAR_INTERFACE_DECL();
 
+    SearchIndexableRaw();
+
+    ~SearchIndexableRaw();
+
+    CARAPI constructor(
+        /* [in] */ IContext* context);
+
+public:
     /**
      * Title's raw data.
      */
-    public String title;
+    String mTitle;
 
     /**
      * Summary's raw data when the data is "ON".
      */
-    public String summaryOn;
+    String mSummaryOn;
 
     /**
      * Summary's raw data when the data is "OFF".
      */
-    public String summaryOff;
+    String mSummaryOff;
 
     /**
      * Entries associated with the raw data (when the data can have several values).
      */
-    public String entries;
+    String mEntries;
 
     /**
      * Keywords' raw data.
      */
-    public String keywords;
+    String mKeywords;
 
     /**
      * Fragment's or Activity's title associated with the raw data.
      */
-    public String screenTitle;
+    String mScreenTitle;
+};
 
-    public SearchIndexableRaw(Context context) {
-        Super(context);
-    }
-}
+} // namespace Search
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_SEARCH_SEARCHINDEXABLERAW_H__

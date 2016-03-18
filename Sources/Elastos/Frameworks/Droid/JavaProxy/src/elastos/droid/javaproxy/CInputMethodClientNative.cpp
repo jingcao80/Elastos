@@ -3,6 +3,8 @@
 #include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::View::EIID_IInputMethodClient;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -10,6 +12,10 @@ namespace Droid {
 namespace JavaProxy {
 
 const String CInputMethodClientNative::TAG("CInputMethodClientNative");
+
+CAR_INTERFACE_IMPL_2(CInputMethodClientNative, Object, IInputMethodClient, IBinder)
+
+CAR_OBJECT_IMPL(CInputMethodClientNative)
 
 CInputMethodClientNative::~CInputMethodClientNative()
 {
@@ -19,8 +25,8 @@ CInputMethodClientNative::~CInputMethodClientNative()
 }
 
 ECode CInputMethodClientNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -30,7 +36,7 @@ ECode CInputMethodClientNative::constructor(
 ECode CInputMethodClientNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CInputMethodClientNative::ToString()"));
+    // LOGGERD(TAG, "+ CInputMethodClientNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -49,14 +55,14 @@ ECode CInputMethodClientNative::ToString(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CInputMethodClientNative::ToString()"));
+    // LOGGERD(TAG, "- CInputMethodClientNative::ToString()");
     return NOERROR;
 }
 
 ECode CInputMethodClientNative::SetUsingInputMethod(
     /* [in] */ Boolean state)
 {
-    // LOGGERD(TAG, String("+ CInputMethodClientNative::SetUsingInputMethod()"));
+    // LOGGERD(TAG, "+ CInputMethodClientNative::SetUsingInputMethod()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -65,21 +71,21 @@ ECode CInputMethodClientNative::SetUsingInputMethod(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputMethodClient", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "setUsingInputMethod", "(Z)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: SetUsingInputMethod"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: SetUsingInputMethod", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)state);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: SetUsingInputMethod"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: SetUsingInputMethod", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputMethodClientNative::SetUsingInputMethod()"));
+    // LOGGERD(TAG, "- CInputMethodClientNative::SetUsingInputMethod()");
     return NOERROR;
 }
 
 ECode CInputMethodClientNative::OnBindMethod(
     /* [in] */ IInputBindResult* res)
 {
-    // LOGGERD(TAG, String("+ CInputMethodClientNative::OnBindMethod()"));
+    // LOGGERD(TAG, "+ CInputMethodClientNative::OnBindMethod()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -88,7 +94,7 @@ ECode CInputMethodClientNative::OnBindMethod(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputMethodClient", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "onBindMethod", "(Lcom/android/internal/view/InputBindResult;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: OnBindMethod"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: OnBindMethod", __LINE__);
 
     jobject jres = NULL;
     if (res != NULL) {
@@ -96,21 +102,21 @@ ECode CInputMethodClientNative::OnBindMethod(
     }
 
     env->CallVoidMethod(mJInstance, m, jres);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: OnBindMethod"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: OnBindMethod", __LINE__);
 
     env->DeleteLocalRef(c);
     if(jres){
         env->DeleteLocalRef(jres);
     }
 
-    // LOGGERD(TAG, String("- CInputMethodClientNative::OnBindMethod()"));
+    // LOGGERD(TAG, "- CInputMethodClientNative::OnBindMethod()");
     return NOERROR;
 }
 
 ECode CInputMethodClientNative::OnUnbindMethod(
     /* [in] */ Int32 sequence)
 {
-    // LOGGERD(TAG, String("+ CInputMethodClientNative::OnUnbindMethod()"));
+    // LOGGERD(TAG, "+ CInputMethodClientNative::OnUnbindMethod()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -119,21 +125,21 @@ ECode CInputMethodClientNative::OnUnbindMethod(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputMethodClient", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "onUnbindMethod", "(I)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: OnUnbindMethod"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: OnUnbindMethod", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)sequence);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: OnUnbindMethod"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: OnUnbindMethod", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputMethodClientNative::OnUnbindMethod()"));
+    // LOGGERD(TAG, "- CInputMethodClientNative::OnUnbindMethod()");
     return NOERROR;
 }
 
 ECode CInputMethodClientNative::SetActive(
     /* [in] */ Boolean active)
 {
-    // LOGGERD(TAG, String("+ CInputMethodClientNative::SetActive()"));
+    // LOGGERD(TAG, "+ CInputMethodClientNative::SetActive()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -142,14 +148,37 @@ ECode CInputMethodClientNative::SetActive(
     Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputMethodClient", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "setActive", "(Z)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: SetActive"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: SetActive", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jboolean)active);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: SetActive"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: SetActive", __LINE__);
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CInputMethodClientNative::SetActive()"));
+    // LOGGERD(TAG, "- CInputMethodClientNative::SetActive()");
+    return NOERROR;
+}
+
+ECode CInputMethodClientNative::SetUserActionNotificationSequenceNumber(
+    /* [in] */ Int32 sequenceNumber)
+{
+    // LOGGERD(TAG, "+ CInputMethodClientNative::SetUserActionNotificationSequenceNumber()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("com/android/internal/view/IInputMethodClient");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputMethodClient", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "setUserActionNotificationSequenceNumber", "(I)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: SetUserActionNotificationSequenceNumber", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, (jint)sequenceNumber);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: SetUserActionNotificationSequenceNumber", __LINE__);
+
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CInputMethodClientNative::SetUserActionNotificationSequenceNumber()");
     return NOERROR;
 }
 

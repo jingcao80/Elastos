@@ -1,0 +1,15 @@
+TARGET_NAME = search
+TARGET_TYPE = lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES = DynamicIndexableContentMonitor.cpp
+SOURCES += Index.cpp
+SOURCES += IndexDatabaseHelper.cpp
+SOURCES += Ranking.cpp
+SOURCES += SearchIndexableRaw.cpp
+SOURCES += SearchIndexableResources.cpp

@@ -1,8 +1,21 @@
 
-#include "elastos/droid/server/hdmi/HdmiUtils.h"
 #include "elastos/droid/server/hdmi/Constants.h"
-#include <Elastos.Droid.Hardware.h>
+#include "elastos/droid/server/hdmi/HdmiUtils.h"
 #include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.CoreLibrary.h>
+#include <Elastos.Droid.Hardware.h>
+#include <elastos/utility/logging/Logger.h>
+#include <elastos/utility/logging/Slogger.h>
+#include <Elastos.Droid.Utility.h>
+
+// using Elastos::Droid::Hardware::Hdmi::CHdmiDeviceInfo;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Core::CInteger32;
+using Elastos::Core::IInteger32;
+using Elastos::Utility::ICollection;
 
 namespace Elastos {
 namespace Droid {
@@ -46,14 +59,12 @@ ECode HdmiUtils::VerifyAddressType(
     /* [in] */ Int32 logicalAddress,
     /* [in] */ Int32 deviceType)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Int32 actualDeviceType = GetTypeFromAddress(logicalAddress);
-        if (actualDeviceType != deviceType) {
-            Logger::E(TAG, "Device type missmatch:[Expected:" + deviceType + ", Actual:" + actualDeviceType);
-            return E_IllegalArgumentException;
-        }
-#endif
+    Int32 actualDeviceType = GetTypeFromAddress(logicalAddress);
+    if (actualDeviceType != deviceType) {
+        Logger::E("HdmiUtils", "Device type missmatch:[Expected:%d, Actual:%d", deviceType, actualDeviceType);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    return NOERROR;
 }
 
 Boolean HdmiUtils::CheckCommandSource(
@@ -61,89 +72,74 @@ Boolean HdmiUtils::CheckCommandSource(
     /* [in] */ Int32 expectedAddress,
     /* [in] */ const String& tag)
 {
-    return FALSE;
-#if 0 // TODO: Translate codes below
-        Int32 srcAddr;
-        cmd->GetSource(&srcAddr);
-        Int32 src = srcAddr;
-        if (src != expectedAddress) {
-            Slogger::W(tag, "Invalid source [Expected:" + expectedAddress + ", Actual:" + src + "]");
-            return FALSE;
-        }
-        return = TRUE;
-#endif
+    Int32 srcAddr;
+    cmd->GetSource(&srcAddr);
+    Int32 src = srcAddr;
+    if (src != expectedAddress) {
+        Slogger::W(tag, "Invalid source [Expected:%d, Actual:%d]", expectedAddress, src);
+        return FALSE;
+    }
+    return TRUE;
 }
 
 Boolean HdmiUtils::ParseCommandParamSystemAudioStatus(
     /* [in] */ IHdmiCecMessage* cmd)
 {
-    return FALSE;
-#if 0 // TODO: Translate codes below
-        AutoPtr<ArrayOf<Byte> > params;
-        cmd->GetParams((ArrayOf<Byte>**)&params);
-        return (*params)[0] == Constants::SYSTEM_AUDIO_STATUS_ON;
-#endif
+    AutoPtr<ArrayOf<Byte> > params;
+    cmd->GetParams((ArrayOf<Byte>**)&params);
+    return (*params)[0] == Constants::SYSTEM_AUDIO_STATUS_ON;
 }
 
 AutoPtr<IList> HdmiUtils::AsImmutableList(
     /* [in] */ ArrayOf<Int32>* is)
 {
     AutoPtr<IList> rev;
-#if 0 // TODO: Translate codes below
-        AutoPtr<IArrayList> list;
-        CArrayList::New(is->GetLength(), (IArrayList**)&list);
-        for (Int32 type : is) {
-            list->Add(type);
-        }
-        return Collections->UnmodifiableList(list);
-#endif
+    AutoPtr<IArrayList> list;
+    CArrayList::New(is->GetLength(), (IArrayList**)&list);
+    for (Int32 i = 0; i < is->GetLength(); ++i) {
+        Int32 type = (*is)[i];
+        AutoPtr<IInteger32> i32Type;
+        CInteger32::New(type, (IInteger32**)&i32Type);
+        list->Add(i32Type);
+    }
+    AutoPtr<ICollections> helper;
+    CCollections::AcquireSingleton((ICollections**)&helper);
+    helper->UnmodifiableList(IList::Probe(list), (IList**)&rev);
     return rev;
 }
 
 Int32 HdmiUtils::TwoBytesToInt32(
     /* [in] */ ArrayOf<Byte>* data)
 {
-    return 0;
-#if 0 // TODO: Translate codes below
-        return (((*data)[offset] & 0xFF) << 8) | ((*data)[offset + 1] & 0xFF);
-#endif
+    return (((*data)[0] & 0xFF) << 8) | ((*data)[1] & 0xFF);
 }
 
 Int32 HdmiUtils::TwoBytesToInt32(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 offset)
 {
-    return 0;
-#if 0 // TODO: Translate codes below
-        return (((*data)[0] & 0xFF) << 16) | (((*data)[1] & 0xFF) << 8) | ((*data)[2] & 0xFF);
-#endif
+    return (((*data)[offset] & 0xFF) << 8) | ((*data)[offset + 1] & 0xFF);
 }
 
 Int32 HdmiUtils::ThreeBytesToInt32(
     /* [in] */ ArrayOf<Byte>* data)
 {
-    return 0;
-#if 0 // TODO: Translate codes below
-        return (((*data)[0] & 0xFF) << 16) | (((*data)[1] & 0xFF) << 8) | ((*data)[2] & 0xFF);
-
-#endif
+    return (((*data)[0] & 0xFF) << 16) | (((*data)[1] & 0xFF) << 8) | ((*data)[2] & 0xFF);
 }
 
 AutoPtr<IList> HdmiUtils::SparseArrayToList(
     /* [in] */ ISparseArray* array)
 {
-    AutoPtr<IList> rev;
-#if 0 // TODO: Translate codes below
-        AutoPtr<IArrayList> list;
-        CArrayList::New((IArrayList**)&list);
-        Int32 size;
-        array->GetSize(&size);
-        for (Int32 i = 0; i < size; ++i) {
-            list->Add(array->ValueAt(i));
-        }
-        return list;
-#endif
-    return rev;
+    AutoPtr<IArrayList> list;
+    CArrayList::New((IArrayList**)&list);
+    Int32 size;
+    array->GetSize(&size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        array->ValueAt(i, (IInterface**)&obj);
+        list->Add(obj);
+    }
+    return IList::Probe(list);
 }
 
 AutoPtr<IList> HdmiUtils::MergeToUnmodifiableList(
@@ -151,26 +147,29 @@ AutoPtr<IList> HdmiUtils::MergeToUnmodifiableList(
     /* [in] */ IList* b)
 {
     AutoPtr<IList> rev;
-#if 0 // TODO: Translate codes below
-        Boolean aIsEmpty;
-        a->IsEmpty(&aIsEmpty);
-        Boolean bIsEmpty;
-        b->IsEmpty(&bIsEmpty);
-        if (aIsEmpty && bIsEmpty) {
-            return Collections->EmptyList();
-        }
-        if (aIsEmpty) {
-            return Collections->UnmodifiableList(b);
-        }
-        if (bIsEmpty) {
-            return Collections->UnmodifiableList(a);
-        }
-        AutoPtr<IList> newList;
-        CArrayList::New((IList**)&newList);
-        newList->AddAll(a);
-        newList->AddAll(b);
-        return Collections->UnmodifiableList(newList);
-#endif
+    AutoPtr<ICollections> helper;
+    CCollections::AcquireSingleton((ICollections**)&helper);
+    Boolean aIsEmpty;
+    a->IsEmpty(&aIsEmpty);
+    Boolean bIsEmpty;
+    b->IsEmpty(&bIsEmpty);
+    if (aIsEmpty && bIsEmpty) {
+        helper->GetEmptyList((IList**)&rev);
+        return rev;
+    }
+    if (aIsEmpty) {
+        helper->UnmodifiableList(b, (IList**)&rev);
+        return rev;
+    }
+    if (bIsEmpty) {
+        helper->UnmodifiableList(a, (IList**)&rev);
+        return rev;
+    }
+    AutoPtr<IList> newList;
+    CArrayList::New((IList**)&newList);
+    newList->AddAll(ICollection::Probe(a));
+    newList->AddAll(ICollection::Probe(b));
+    helper->UnmodifiableList(newList, (IList**)&rev);
     return rev;
 }
 
@@ -178,62 +177,53 @@ Boolean HdmiUtils::IsAffectingActiveRoutingPath(
     /* [in] */ Int32 activePath,
     /* [in] */ Int32 newPath)
 {
-    return FALSE;
-#if 0 // TODO: Translate codes below
-        // The new path affects the current active path if the parent of the new path
-        // is an ancestor of the active path.
-        // (1.1.0.0, 2.0.0.0) -> TRUE, new path alters the parent
-        // (1.1.0.0, 1.2.0.0) -> TRUE, new path is a sibling
-        // (1.1.0.0, 1.2.1.0) -> FALSE, new path is a descendant of a sibling
-        // (1.0.0.0, 3.2.0.0) -> FALSE, in a completely different path
+    // The new path affects the current active path if the parent of the new path
+    // is an ancestor of the active path.
+    // (1.1.0.0, 2.0.0.0) -> TRUE, new path alters the parent
+    // (1.1.0.0, 1.2.0.0) -> TRUE, new path is a sibling
+    // (1.1.0.0, 1.2.1.0) -> FALSE, new path is a descendant of a sibling
+    // (1.0.0.0, 3.2.0.0) -> FALSE, in a completely different path
 
-        // Get the parent of the new path by clearing the least significant
-        // non-zero nibble.
-        for (Int32 i = 0; i <= 12; i += 4) {
-            Int32 nibble = (newPath >> i) & 0xF;
-            if (nibble != 0) {
-                Int32 mask = 0xFFF0 << i;
-                newPath &= mask;
-                break;
-            }
+    // Get the parent of the new path by clearing the least significant
+    // non-zero nibble.
+    for (Int32 i = 0; i <= 12; i += 4) {
+        Int32 nibble = (newPath >> i) & 0xF;
+        if (nibble != 0) {
+            Int32 mask = 0xFFF0 << i;
+            newPath &= mask;
+            break;
         }
-        if (newPath == 0x0000) {
-            *result = TRUE;
-            return NOERROR;  // Top path always affects the active path
-        }
-        return IsInActiveRoutingPath(activePath, newPath);
-#endif
+    }
+    if (newPath == 0x0000) {
+        return TRUE;  // Top path always affects the active path
+    }
+    return IsInActiveRoutingPath(activePath, newPath);
 }
 
 Boolean HdmiUtils::IsInActiveRoutingPath(
     /* [in] */ Int32 activePath,
     /* [in] */ Int32 newPath)
 {
-    return FALSE;
-#if 0 // TODO: Translate codes below
-        // Check each nibble of the currently active path and the new path till the position
-        // where the active nibble is not zero. For (activePath, newPath),
-        // (1.1.0.0, 1.0.0.0) -> TRUE, new path is a parent
-        // (1.2.1.0, 1.2.1.2) -> TRUE, new path is a descendant
-        // (1.1.0.0, 1.2.0.0) -> FALSE, new path is a sibling
-        // (1.0.0.0, 2.0.0.0) -> FALSE, in a completely different path
-        for (Int32 i = 12; i >= 0; i -= 4) {
-            Int32 nibbleActive = (activePath >> i) & 0xF;
-            if (nibbleActive == 0) {
-                break;
-            }
-            Int32 nibbleNew = (newPath >> i) & 0xF;
-            if (nibbleNew == 0) {
-                break;
-            }
-            if (nibbleActive != nibbleNew) {
-                *result = FALSE;
-                return NOERROR;
-            }
+    // Check each nibble of the currently active path and the new path till the position
+    // where the active nibble is not zero. For (activePath, newPath),
+    // (1.1.0.0, 1.0.0.0) -> TRUE, new path is a parent
+    // (1.2.1.0, 1.2.1.2) -> TRUE, new path is a descendant
+    // (1.1.0.0, 1.2.0.0) -> FALSE, new path is a sibling
+    // (1.0.0.0, 2.0.0.0) -> FALSE, in a completely different path
+    for (Int32 i = 12; i >= 0; i -= 4) {
+        Int32 nibbleActive = (activePath >> i) & 0xF;
+        if (nibbleActive == 0) {
+            break;
         }
-        *result = TRUE;
-        return NOERROR;
-#endif
+        Int32 nibbleNew = (newPath >> i) & 0xF;
+        if (nibbleNew == 0) {
+            break;
+        }
+        if (nibbleActive != nibbleNew) {
+            return FALSE;
+        }
+    }
+    return TRUE;
 }
 
 AutoPtr<IHdmiDeviceInfo> HdmiUtils::CloneHdmiDeviceInfo(
@@ -241,31 +231,30 @@ AutoPtr<IHdmiDeviceInfo> HdmiUtils::CloneHdmiDeviceInfo(
     /* [in] */ Int32 newPowerStatus)
 {
     AutoPtr<IHdmiDeviceInfo> rev;
-#if 0 // TODO: Translate codes below
-        Int32 logicalAddr;
-        info->GetLogicalAddress(&logicalAddr);
-        Int32 physicalAddr;
-        info->GetPhysicalAddress(&physicalAddr);
-        String displayName;
-        info->GetDisplayName(&displayName);
-        Int32 portId;
-        info->GetPortId(&portId);
-        Int32 deviceType;
-        info->GetDeviceType(&deviceType);
-        Int32 vendorId;
-        info->GetVendorId(&vendorId);
-        return new HdmiDeviceInfo(logicalAddr,
-                physicalAddr, portId, deviceType,
-                vendorId, displayName, newPowerStatus);
-#endif
+    Int32 logicalAddr;
+    info->GetLogicalAddress(&logicalAddr);
+    Int32 physicalAddr;
+    info->GetPhysicalAddress(&physicalAddr);
+    String displayName;
+    info->GetDisplayName(&displayName);
+    Int32 portId;
+    info->GetPortId(&portId);
+    Int32 deviceType;
+    info->GetDeviceType(&deviceType);
+    Int32 vendorId;
+    info->GetVendorId(&vendorId);
+    // TODO: Waiting for CHdmiDeviceInfo
+    assert(0);
+    // CHdmiDeviceInfo::New(logicalAddr,
+    //         physicalAddr, portId, deviceType,
+    //         vendorId, displayName, newPowerStatus, (IHdmiDeviceInfo**)&rev);
     return rev;
 }
 
 AutoPtr<ArrayOf<Int32> > HdmiUtils::InitADDRESS_TO_TYPE()
 {
     AutoPtr<ArrayOf<Int32> > rev;
-#if 0 // TODO: Translate codes below
-    private static int[] ADDRESS_TO_TYPE = {
+    Int32 ADDRESS_TO_TYPE[] = {
         IHdmiDeviceInfo::DEVICE_TV,  // ADDR_TV
         IHdmiDeviceInfo::DEVICE_RECORDER,  // ADDR_RECORDER_1
         IHdmiDeviceInfo::DEVICE_RECORDER,  // ADDR_RECORDER_2
@@ -281,33 +270,32 @@ AutoPtr<ArrayOf<Int32> > HdmiUtils::InitADDRESS_TO_TYPE()
         IHdmiDeviceInfo::DEVICE_RESERVED,
         IHdmiDeviceInfo::DEVICE_RESERVED,
         IHdmiDeviceInfo::DEVICE_TV,  // ADDR_SPECIFIC_USE
-    }
-#endif
+    };
+    rev = ArrayOf<Int32>::Alloc(ADDRESS_TO_TYPE, sizeof(ADDRESS_TO_TYPE)/sizeof(Int32));
     return rev;
 }
 
 AutoPtr<ArrayOf<String> > HdmiUtils::InitDEFAULT_NAMES()
 {
     AutoPtr<ArrayOf<String> > rev;
-#if 0 // TODO: Translate codes below
-    private static AutoPtr<ArrayOf<String> > DEFAULT_NAMES = {
-        "TV",
-        "Recorder_1",
-        "Recorder_2",
-        "Tuner_1",
-        "Playback_1",
-        "AudioSystem",
-        "Tuner_2",
-        "Tuner_3",
-        "Playback_2",
-        "Recorder_3",
-        "Tuner_4",
-        "Playback_3",
-        "Reserved_1",
-        "Reserved_2",
-        "Secondary_TV",
-    }
-#endif
+    String DEFAULT_NAMES[] = {
+        String("TV"),
+        String("Recorder_1"),
+        String("Recorder_2"),
+        String("Tuner_1"),
+        String("Playback_1"),
+        String("AudioSystem"),
+        String("Tuner_2"),
+        String("Tuner_3"),
+        String("Playback_2"),
+        String("Recorder_3"),
+        String("Tuner_4"),
+        String("Playback_3"),
+        String("Reserved_1"),
+        String("Reserved_2"),
+        String("Secondary_TV"),
+    };
+    rev = ArrayOf<String>::Alloc(DEFAULT_NAMES, sizeof(DEFAULT_NAMES)/sizeof(String));
     return rev;
 }
 

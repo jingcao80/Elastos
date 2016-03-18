@@ -2129,8 +2129,8 @@ ECode HdmiCecLocalDeviceTv::DisableDevice(
     AssertRunOnServiceThread();
     // Remove any repeated working actions.
     // HotplugDetectionAction will be reinstated during the wake up process.
-    // HdmiControlService->OnWakeUp() -> InitializeLocalDevices() ->
-    //     LocalDeviceTv->OnAddressAllocated() -> LaunchDeviceDiscovery().
+    // HdmiControlService.onWakeUp() -> initializeLocalDevices() ->
+    //     LocalDeviceTv.onAddressAllocated() -> launchDeviceDiscovery().
     RemoveAction(ECLSID_CDeviceDiscoveryAction);
     RemoveAction(ECLSID_CHotplugDetectionAction);
     RemoveAction(ECLSID_CPowerStatusMonitorAction);

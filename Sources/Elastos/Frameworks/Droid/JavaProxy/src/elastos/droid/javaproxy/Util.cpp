@@ -366,6 +366,28 @@ jlongArray Util::ToJavaLongArray(
     return jlArray;
 }
 
+jfloatArray Util::ToJavaFloatArray(
+    /* [in] */ JNIEnv* env,
+    /* [in] */ ArrayOf<Float>* floatArray)
+{
+    if (env == NULL || floatArray == NULL) {
+        LOGGERW("Util", "ToJavaFloatArray() Invalid arguments!");
+        return NULL;
+    }
+
+    Int32 count = floatArray->GetLength();
+
+    jfloatArray jfloatArray = env->NewFloatArray((jsize)count);
+    CheckErrorAndLog(env, "Util", "ToJavaFloatArray, NewFloatArray failed %d", __LINE__);
+
+    jfloat* floatArrayInd = (jfloat*)floatArray->GetPayload();
+
+    env->SetFloatArrayRegion(jfloatArray, 0, count, floatArrayInd);
+    CheckErrorAndLog(env, "Util", "ToJavaFloatArray, SetFloatArrayRegion: failed %d", __LINE__);
+
+    return jfloatArray;
+}
+
 bool Util::GetElInt32Array(
     /* [in] */ JNIEnv* env,
     /* [in] */ jintArray jiArr,
@@ -1251,6 +1273,7 @@ jobject Util::ToJavaActivityInfo(
     return jactInfo;
 }
 
+
 jobject Util::ToJavaBundle(
     /* [in] */ JNIEnv* env,
     /* [in] */ IBundle* bundle)
@@ -1269,13 +1292,31 @@ jobject Util::ToJavaBundle(
     jobject jBundle = env->NewObject(bundleKlass, m);
     Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail NewObject: bundleKlass %d", __LINE__);
 
+    if (!SetJavaBaseBundle(env, IBaseBundle::Probe(bundle), bundleKlass, jBundle)) {
+        LOGGERE(TAG, "ToJavaBundle SetJavaBaseBundle failed!");
+    }
+    env->DeleteLocalRef(bundleKlass);
+    return jBundle;
+}
+
+Boolean Util::SetJavaBaseBundle(
+    /* [in] */ JNIEnv* env,
+    /* [in] */ IBaseBundle* bundle,
+    /* [in] */ jclass bundleKlass,
+    /* [in] */ jobject jbundle)
+{
+    if (env == NULL || bundle == NULL || bundleKlass == NULL || jbundle == NULL) {
+        LOGGERE("SetJavaBaseBundle", "Invalid arguments!");
+        return FALSE;
+    }
+
     AutoPtr<ArrayOf<Byte> > data;
     bundle->GetJavaData((ArrayOf<Byte>**)&data);
     if (data != NULL) {
         jclass parcelClass = env->FindClass("android/os/Parcel");
         Util::CheckErrorAndLog(env, "ToJavaBundle", "FindClass: Parcel : %d", __LINE__);
 
-        m = env->GetStaticMethodID(parcelClass, "obtain", "(J)Landroid/os/Parcel;");
+        jmethodID m = env->GetStaticMethodID(parcelClass, "obtain", "(J)Landroid/os/Parcel;");
         Util::CheckErrorAndLog(env, "ToJavaBundle", "GetStaticMethodID: obtain : %d", __LINE__);
 
         jobject jparcel = env->CallStaticObjectMethod(parcelClass, m, 0);
@@ -1295,14 +1336,13 @@ jobject Util::ToJavaBundle(
         m = env->GetMethodID(bundleKlass, "readFromParcel", "(Landroid/os/Parcel;)V");
         CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID readFromParcel : %d!\n", __LINE__);
 
-        env->CallVoidMethod(jBundle, m, jparcel);
+        env->CallVoidMethod(jbundle, m, jparcel);
         CheckErrorAndLog(env, "ToJavaBundle", "Bundle readFromParcel : %d!\n", __LINE__);
 
         env->DeleteLocalRef(parcelClass);
         env->DeleteLocalRef(jparcel);
-        env->DeleteLocalRef(bundleKlass);
 
-        return jBundle;
+        return TRUE;
     }
 
     AutoPtr<ISet> keySet;
@@ -1325,7 +1365,7 @@ jobject Util::ToJavaBundle(
                 jmethodID m = env->GetMethodID(bundleKlass, "putByte", "(Ljava/lang/String;B)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putByte %d", __LINE__);
 
-                env->CallVoidMethod(jBundle, m, jKey, (jbyte)bv);
+                env->CallVoidMethod(jbundle, m, jKey, (jbyte)bv);
             }
             else if (IInteger16::Probe(value) != NULL) {
                 Int16 iv;
@@ -1334,7 +1374,7 @@ jobject Util::ToJavaBundle(
                 jmethodID m = env->GetMethodID(bundleKlass, "putShort", "(Ljava/lang/String;S)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putShort %d", __LINE__);
 
-                env->CallVoidMethod(jBundle, m, jKey, iv);
+                env->CallVoidMethod(jbundle, m, jKey, iv);
             }
             else if (IInteger32::Probe(value) != NULL) {
                 Int32 iv;
@@ -1343,7 +1383,7 @@ jobject Util::ToJavaBundle(
                 jmethodID m = env->GetMethodID(bundleKlass, "putInt", "(Ljava/lang/String;I)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putInt %d", __LINE__);
 
-                env->CallVoidMethod(jBundle, m, jKey, iv);
+                env->CallVoidMethod(jbundle, m, jKey, iv);
             }
             else if (IInteger64::Probe(value) != NULL) {
                 Int64 longValue;
@@ -1352,7 +1392,7 @@ jobject Util::ToJavaBundle(
                 jmethodID m = env->GetMethodID(bundleKlass, "putLong", "(Ljava/lang/String;J)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putLong %d", __LINE__);
 
-                env->CallVoidMethod(jBundle, m, jKey, longValue);
+                env->CallVoidMethod(jbundle, m, jKey, longValue);
             }
             else if (IBoolean::Probe(value) != NULL) {
                 Boolean bv;
@@ -1360,7 +1400,7 @@ jobject Util::ToJavaBundle(
                 jmethodID m = env->GetMethodID(bundleKlass, "putBoolean", "(Ljava/lang/String;Z)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putBoolean %d", __LINE__);
 
-                env->CallVoidMethod(jBundle, m, jKey, bv);
+                env->CallVoidMethod(jbundle, m, jKey, bv);
             }
             else if (ICharSequence::Probe(value) != NULL) {
                 String sv;
@@ -1370,7 +1410,7 @@ jobject Util::ToJavaBundle(
                 jmethodID m = env->GetMethodID(bundleKlass, "putString", "(Ljava/lang/String;Ljava/lang/String;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putString %d", __LINE__);
 
-                env->CallVoidMethod(jBundle, m, jKey, jValue);
+                env->CallVoidMethod(jbundle, m, jKey, jValue);
                 env->DeleteLocalRef(jValue);
             }
             else if (IIntent::Probe(value) != NULL) {
@@ -1378,7 +1418,7 @@ jobject Util::ToJavaBundle(
                 jobject jintent = ToJavaIntent(env, intent.Get());
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putParcelable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jintent);
+                env->CallVoidMethod(jbundle, m, jKey, jintent);
                 env->DeleteLocalRef(jintent);
             }
             else if (IBundle::Probe(value) != NULL) {
@@ -1386,7 +1426,7 @@ jobject Util::ToJavaBundle(
                 jobject jbundle = ToJavaBundle(env, bundle.Get());
                 jmethodID m = env->GetMethodID(bundleKlass, "putBundle", "(Ljava/lang/String;Landroid/os/Bundle;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putBundle %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jbundle);
+                env->CallVoidMethod(jbundle, m, jKey, jbundle);
                 env->DeleteLocalRef(jbundle);
             }
             else if (IArrayOf::Probe(value) != NULL){
@@ -1419,7 +1459,7 @@ jobject Util::ToJavaBundle(
 
                             jmethodID m = env->GetMethodID(bundleKlass, "putParcelableArray", "(Ljava/lang/String;[Landroid/os/Parcelable;)V");
                             Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putParcelableArray %d", __LINE__);
-                            env->CallVoidMethod(jBundle, m, jKey, jintentArray);
+                            env->CallVoidMethod(jbundle, m, jKey, jintentArray);
                             env->DeleteLocalRef(intentKlass);
                             env->DeleteLocalRef(jintentArray);
                             Logger::D("ToJavaBundle", "ToJavaBundle() Intent array set into bundle for key:%s", keyStr.string());
@@ -1441,7 +1481,7 @@ jobject Util::ToJavaBundle(
 
                             jmethodID m = env->GetMethodID(bundleKlass, "putIntArray", "(Ljava/lang/String;[I)V");
                             Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putIntArray %d", __LINE__);
-                            env->CallVoidMethod(jBundle, m, jKey, jarr);
+                            env->CallVoidMethod(jbundle, m, jKey, jarr);
                             env->DeleteLocalRef(jarr);
                             Logger::D("ToJavaBundle", "ToJavaBundle() int array set into bundle for key:%s", keyStr.string());
                         }
@@ -1462,7 +1502,7 @@ jobject Util::ToJavaBundle(
 
                             jmethodID m = env->GetMethodID(bundleKlass, "putByteArray", "(Ljava/lang/String;[B)V");
                             Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putByteArray %d", __LINE__);
-                            env->CallVoidMethod(jBundle, m, jKey, jarr);
+                            env->CallVoidMethod(jbundle, m, jKey, jarr);
                             env->DeleteLocalRef(jarr);
                             Logger::D("ToJavaBundle", "ToJavaBundle() int array set into bundle for key:%s", keyStr.string());
                         }
@@ -1485,7 +1525,7 @@ jobject Util::ToJavaBundle(
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 CheckErrorAndLog(env, "Util", "ToJavaBundle Fail GetMethodID: putParcelable %d", __LINE__);
 
-                env->CallVoidMethod(jBundle, m, jKey, jbitmap);
+                env->CallVoidMethod(jbundle, m, jKey, jbitmap);
                 env->DeleteLocalRef(jbitmap);
             }
             else if (INetworkInfo::Probe(value) != NULL) {
@@ -1493,7 +1533,7 @@ jobject Util::ToJavaBundle(
                 jobject jinfo = ToJavaNetworkInfo(env, info);
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable  %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jinfo);
+                env->CallVoidMethod(jbundle, m, jKey, jinfo);
                 env->DeleteLocalRef(jinfo);
             }
             else if (IWifiInfo::Probe(value) != NULL) {
@@ -1501,7 +1541,7 @@ jobject Util::ToJavaBundle(
                 jobject jinfo = ToJavaWifiInfo(env, info);
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable  %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jinfo);
+                env->CallVoidMethod(jbundle, m, jKey, jinfo);
                 env->DeleteLocalRef(jinfo);
             }
             else if (ILinkProperties::Probe(value) != NULL) {
@@ -1509,7 +1549,7 @@ jobject Util::ToJavaBundle(
                 jobject jproperties = ToJavaLinkProperties(env, properties);
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jproperties);
+                env->CallVoidMethod(jbundle, m, jKey, jproperties);
                 env->DeleteLocalRef(jproperties);
             }
             else if (IStorageVolume::Probe(value) != NULL) {
@@ -1517,7 +1557,7 @@ jobject Util::ToJavaBundle(
                 jobject jvolume = ToJavaStorageVolume(env, volume);
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jvolume);
+                env->CallVoidMethod(jbundle, m, jKey, jvolume);
                 env->DeleteLocalRef(jvolume);
             }
             else if (IApplicationInfo::Probe(value) != NULL) {
@@ -1525,7 +1565,7 @@ jobject Util::ToJavaBundle(
                 jobject jinfo = ToJavaApplicationInfo(env, info);
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jinfo);
+                env->CallVoidMethod(jbundle, m, jKey, jinfo);
                 env->DeleteLocalRef(jinfo);
             }
             else if (IHashMap::Probe(value) != NULL) {
@@ -1533,7 +1573,7 @@ jobject Util::ToJavaBundle(
                 jobject jmap = ToJavaHashMap(env, map);
                 jmethodID m = env->GetMethodID(bundleKlass, "putSerializable", "(Ljava/lang/String;Ljava/io/Serializable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putSerializable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jmap);
+                env->CallVoidMethod(jbundle, m, jKey, jmap);
                 env->DeleteLocalRef(jmap);
             }
             else if (IIntentShortcutIconResource::Probe(value) != NULL) {
@@ -1558,7 +1598,7 @@ jobject Util::ToJavaBundle(
 
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jiconRes);
+                env->CallVoidMethod(jbundle, m, jKey, jiconRes);
                 env->DeleteLocalRef(iconResKlass);
                 env->DeleteLocalRef(jiconRes);
             }
@@ -1567,7 +1607,7 @@ jobject Util::ToJavaBundle(
                 jobject jprofile = ToJavaVpnProfile(env, profile);
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jprofile);
+                env->CallVoidMethod(jbundle, m, jKey, jprofile);
                 env->DeleteLocalRef(jprofile);
             }
             else if (IComponentName::Probe(value) != NULL) {
@@ -1575,7 +1615,7 @@ jobject Util::ToJavaBundle(
                 jobject jcomponentName = ToJavaComponentName(env, componentName);
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jcomponentName);
+                env->CallVoidMethod(jbundle, m, jKey, jcomponentName);
                 env->DeleteLocalRef(jcomponentName);
             }
             else if (ISupplicantState::Probe(value) != NULL) {
@@ -1583,7 +1623,7 @@ jobject Util::ToJavaBundle(
                 jobject jSupState = ToJavaSupplicantState(env, supState);
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jSupState);
+                env->CallVoidMethod(jbundle, m, jKey, jSupState);
                 env->DeleteLocalRef(jSupState);
             }
             else if (IWifiP2pInfo::Probe(value) != NULL) {
@@ -1591,7 +1631,7 @@ jobject Util::ToJavaBundle(
                 jobject jinfo = ToJavaWifiP2pInfo(env, info);
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jinfo);
+                env->CallVoidMethod(jbundle, m, jKey, jinfo);
                 env->DeleteLocalRef(jinfo);
             }
             else if (IWifiP2pDevice::Probe(value) != NULL) {
@@ -1599,7 +1639,7 @@ jobject Util::ToJavaBundle(
                 jobject jdevice = ToJavaWifiP2pDevice(env, device);
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jdevice);
+                env->CallVoidMethod(jbundle, m, jKey, jdevice);
                 env->DeleteLocalRef(jdevice);
             }
             else if (IWifiConfiguration::Probe(value) != NULL) {
@@ -1607,7 +1647,7 @@ jobject Util::ToJavaBundle(
                 jobject jconfiguration = ToJavaWifiConfiguration(env, configuration);
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jconfiguration);
+                env->CallVoidMethod(jbundle, m, jKey, jconfiguration);
                 env->DeleteLocalRef(jconfiguration);
             }
             else if (IPendingIntent::Probe(value) != NULL) {
@@ -1615,7 +1655,7 @@ jobject Util::ToJavaBundle(
                 jobject jpIntent = ToJavaPendingIntent(env, pIntent);
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jpIntent);
+                env->CallVoidMethod(jbundle, m, jKey, jpIntent);
                 env->DeleteLocalRef(jpIntent);
             }
             else if (IWifiDisplayStatus::Probe(value) != NULL) {
@@ -1623,7 +1663,7 @@ jobject Util::ToJavaBundle(
                 jobject jpDataObj = ToJavaWifiDisplayStatus(env, pDataObj);
                 jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                 Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelable %d", __LINE__);
-                env->CallVoidMethod(jBundle, m, jKey, jpDataObj);
+                env->CallVoidMethod(jbundle, m, jKey, jpDataObj);
                 env->DeleteLocalRef(jpDataObj);
             }
             else if (IList::Probe(value) != NULL) {
@@ -1677,7 +1717,7 @@ jobject Util::ToJavaBundle(
                     m = env->GetMethodID(bundleKlass, "putParcelableArrayList", "(Ljava/lang/String;Ljava/util/ArrayList;)V");
                     Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putParcelableArrayList %d", __LINE__);
 
-                    env->CallVoidMethod(jBundle, m, jKey, jlist);
+                    env->CallVoidMethod(jbundle, m, jKey, jlist);
                     Util::CheckErrorAndLog(env, "ToJavaBundle", "CallVoidMethod: putParcelableArrayList %d", __LINE__);
 
                     env->DeleteLocalRef(listKlass);
@@ -1695,7 +1735,7 @@ jobject Util::ToJavaBundle(
                     jmethodID m = env->GetMethodID(bundleKlass, "putSerializable", "(Ljava/lang/String;Ljava/io/Serializable;)V");
                     Util::CheckErrorAndLog(env, "ToJavaBundle", "GetMethodID: putSerializable %d", __LINE__);
 
-                    env->CallVoidMethod(jBundle, m, jKey, jserializable);
+                    env->CallVoidMethod(jbundle, m, jKey, jserializable);
                     Util::CheckErrorAndLog(env, "ToJavaBundle", "CallVoidMethod: putSerializable %d", __LINE__);
 
                     env->DeleteLocalRef(jserializable);
@@ -1716,7 +1756,7 @@ jobject Util::ToJavaBundle(
                         jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
                         Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putParcelable %d", __LINE__);
 
-                        env->CallVoidMethod(jBundle, m, jKey, jparcelable);
+                        env->CallVoidMethod(jbundle, m, jKey, jparcelable);
                         Util::CheckErrorAndLog(env, "ToJavaBundle", "CallVoidMethod: putParcelable %d", __LINE__);
                     }
                     else {
@@ -1742,13 +1782,11 @@ jobject Util::ToJavaBundle(
             jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
             Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putParcelable %d", __LINE__);
 
-            env->CallVoidMethod(jBundle, m, jKey, NULL);
+            env->CallVoidMethod(jbundle, m, jKey, NULL);
             Util::CheckErrorAndLog(env, "ToJavaBundle", "CallVoidMethod: putParcelable %d", __LINE__);
         }
     }
-
-    env->DeleteLocalRef(bundleKlass);
-    return jBundle;
+    return TRUE;
 }
 
 Boolean Util::GetElBitmap(
@@ -3608,15 +3646,16 @@ Boolean Util::GetElBundle(
                         for (int i = 0; i < arraySize; ++i) {
                             jobject jParcelItem = env->GetObjectArrayElement(jArrayValue, i);
                             String itemClassName = GetClassName(env, jParcelItem);
-                            // Logger::E("GetElBundle", String("GetElBundle(); item in arrayOf type:") + itemClassName);
+                            // Logger::E("GetElBundle", "GetElBundle(); item in arrayOf type:%s", itemClassName.string());
 
                             if (String("android.content.Intent").Equals(itemClassName)){
                                 AutoPtr<IIntent> intent;
                                 Util::GetElIntent(env, jParcelItem, (IIntent**)&intent);
                                 AutoPtr<IParcelable> pracelable = IParcelable::Probe(intent);
                                 parcelableArray->Set(i, pracelable);
-                            }else{
-                                Logger::E("GetElBundle", String("GetElBundle(); Unsupported arrayOf type") + itemClassName);
+                            }
+                            else{
+                                Logger::E("GetElBundle", "GetElBundle(); Unsupported arrayOf type%s", itemClassName.string());
                             }
 
                             env->DeleteLocalRef(jParcelItem);
@@ -3627,8 +3666,7 @@ Boolean Util::GetElBundle(
                         bundle->PutParcelableArray(key, parcelableArray);
                     }
                     else {
-                        Logger::E("GetElBundle", String("GetElBundle, Unsupported type:") + objClassName + String("; Key:") + key);
-                        // LOGGERE("GetElBundle", "GetElBundle() Unsupported type!, key is%sn", key.string());
+                        Logger::E("GetElBundle", "GetElBundle, Unsupported type:%s; Key:%s", objClassName.string(), key.string());
                     }
 
                     env->DeleteLocalRef(jValue);
@@ -4514,10 +4552,10 @@ jobject Util::ToJavaInputBindResult(
         jclass imsKlass = env->FindClass("android/inputmethodservice/ElIInputMethodSessionProxy");
         Util::CheckErrorAndLog(env, "ToJavaInputBindResult", "FindClass: ElIInputMethodSessionProxy  %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(imsKlass, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(imsKlass, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, "ToJavaInputBindResult", "GetMethodID: ElIInputMethodSessionProxy  %d", __LINE__);
 
-        jIms = env->NewObject(imsKlass, m, (jint)method.Get());
+        jIms = env->NewObject(imsKlass, m, (jlong)method.Get());
         Util::CheckErrorAndLog(env, "ToJavaInputBindResult", "NewObject: ElIInputMethodSessionProxy  %d", __LINE__);
         method->AddRef();
 
@@ -5564,10 +5602,10 @@ jobject Util::ToJavaIntentReceiver(
     jclass revrKlass = env->FindClass("android/content/ElIIntentReceiverProxy");
     Util::CheckErrorAndLog(env, "ToJavaIntentReceiver", "FindClass: ElIIntentReceiverProxy line: %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(revrKlass, "<init>", "(I)V");
+    jmethodID m = env->GetMethodID(revrKlass, "<init>", "(J)V");
     Util::CheckErrorAndLog(env, "ToJavaIntentReceiver", "GetMethodID: ElIIntentReceiverProxy line: %d", __LINE__);
 
-    jobject jreceiver = env->NewObject(revrKlass, m, receiver);
+    jobject jreceiver = env->NewObject(revrKlass, m, (jlong)receiver);
     Util::CheckErrorAndLog(env, "ToJavaIntentReceiver", "NewObject: ElIIntentReceiverProxy line: %d", __LINE__);
     receiver->AddRef();
 
@@ -5693,10 +5731,10 @@ jobject Util::ToJavaInputBinding(
             jclass conKlass = env->FindClass("com/android/internal/view/ElIInputContextProxy");
             Util::CheckErrorAndLog(env, "ToJavaInputBinding", "FindClass: ElIInputContextProxy line: %d", __LINE__);
 
-            jmethodID m = env->GetMethodID(conKlass, "<init>", "(I)V");
+            jmethodID m = env->GetMethodID(conKlass, "<init>", "(J)V");
             Util::CheckErrorAndLog(env, "ToJavaInputBinding", "GetMethodID: ElIInputContextProxy line: %d", __LINE__);
 
-            jconnToken = env->NewObject(conKlass, m, (jint)IIInputContext::Probe(connToken));
+            jconnToken = env->NewObject(conKlass, m, (jlong)IIInputContext::Probe(connToken));
             Util::CheckErrorAndLog(env, "ToJavaInputBinding", "NewObject: ElIInputContextProxy line: %d", __LINE__);
             connToken->AddRef();
 
@@ -8208,7 +8246,7 @@ Boolean Util::GetElPendingIntent(
     jobject jInstance = env->NewGlobalRef(jtarget);
 
     AutoPtr<IIIntentSender> iisender;
-    // if (NOERROR != CIIntentSenderNative::New((Handle32)jvm, (Handle32)jInstance, (IIIntentSender**)&iisender)) {
+    // if (NOERROR != CIIntentSenderNative::New((Handle64)jvm, (Handle64)jInstance, (IIIntentSender**)&iisender)) {
     //     LOGGERD(TAG, "GetElPendingIntent new CIIntentSenderNative fail!\n");
     //     return FALSE;
     // }
@@ -8268,10 +8306,10 @@ jobject Util::ToJavaIIntentSender(
     jclass pergKlass = env->FindClass("android/content/ElIIntentSenderProxy");
     CheckErrorAndLog(env, "Util", "ToJavaIIntentSender FindClass: ElIIntentSenderProxy : %d!\n", __LINE__);
 
-    jmethodID m = env->GetMethodID(pergKlass, "<init>", "(I)V");
+    jmethodID m = env->GetMethodID(pergKlass, "<init>", "(J)V");
     CheckErrorAndLog(env, "Util", "ToJavaIIntentSender GetMethodID: ElIIntentSenderProxy : %d!\n", __LINE__);
 
-    jobject jisender = env->NewObject(pergKlass, m, (jint)isender);
+    jobject jisender = env->NewObject(pergKlass, m, (jlong)isender);
     CheckErrorAndLog(env, "Util", "ToJavaIIntentSender NewObject: ElIIntentSenderProxy : %d!\n", __LINE__);
     isender->AddRef();
 
@@ -11829,10 +11867,10 @@ jobject Util::ToJavaMessenger(
     jclass elmsgerKlass = env->FindClass("android/os/ElMessengerProxy");
     Util::CheckErrorAndLog(env, "ToJavaMessenger", "FindClass ElMessengerProxy line: %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(elmsgerKlass, "<init>", "(I)V");
+    jmethodID m = env->GetMethodID(elmsgerKlass, "<init>", "(J)V");
     Util::CheckErrorAndLog(env, "ToJavaMessenger", "GetMethodID ElMessengerProxy line: %d", __LINE__);
 
-    jobject jelMgr = env->NewObject(elmsgerKlass, m, (jint)mgr.Get());
+    jobject jelMgr = env->NewObject(elmsgerKlass, m, (jlong)mgr.Get());
     Util::CheckErrorAndLog(env, "ToJavaMessenger", "NewObject ElMessengerProxy line: %d", __LINE__);
     mgr->AddRef();
 
@@ -11968,6 +12006,220 @@ jobject Util::ToJavaCountry(
     env->DeleteLocalRef(cKlass);
     env->DeleteLocalRef(jcountryIso);
     return jcountry;
+}
+
+jobject Util::ToJavaPersistableBundle(
+    /* [in] */ JNIEnv* env,
+    /* [in] */ IPersistableBundle* persistableBundle)
+{
+    if (env == NULL || persistableBundle == NULL) {
+        LOGGERE("ToJavaPersistableBundle", "Invalid arguments!");
+        return NULL;
+    }
+
+    jclass bundleKlass = env->FindClass("android/os/PersistableBundle");
+    Util::CheckErrorAndLog(env, "ToJavaPersistableBundle", "Fail FindClass: PersistableBundle %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(bundleKlass, "<init>", "()V");
+    Util::CheckErrorAndLog(env, "ToJavaPersistableBundle", "Fail GetMethodID: bundleKlass %d", __LINE__);
+
+    jobject jBundle = env->NewObject(bundleKlass, m);
+    Util::CheckErrorAndLog(env, "ToJavaPersistableBundle", "Fail NewObject: bundleKlass %d", __LINE__);
+
+    if (!SetJavaBaseBundle(env, IBaseBundle::Probe(persistableBundle), bundleKlass, jBundle)) {
+        LOGGERE(TAG, "ToJavaPersistableBundle SetJavaBaseBundle failed!");
+    }
+    env->DeleteLocalRef(bundleKlass);
+    return jBundle;
+}
+
+jobject Util::ToJavaProfilerInfo(
+    /* [in] */ JNIEnv* env,
+    /* [in] */ IProfilerInfo* profilerInfo)
+{
+    if (env == NULL || profilerInfo == NULL) {
+        LOGGERE("ToJavaProfilerInfo", "Invalid arguments!");
+        return NULL;
+    }
+
+    String profileFile;
+    profilerInfo->GetProfileFile(&profileFile);
+    jstring jprofileFile = ToJavaString(env, profileFile);
+
+    AutoPtr<IParcelFileDescriptor> profileFd;
+    profilerInfo->GetProfileFd((IParcelFileDescriptor**)&profileFd);
+    jobject jprofileFd = ToJavaParcelFileDescriptor(env, profileFd);
+
+    Int32 samplingInterval;
+    profilerInfo->GetSamplingInterval(&samplingInterval);
+
+    Boolean autoStopProfiler;
+    profilerInfo->IsAutoStopProfiler(&autoStopProfiler);
+
+    jclass piKlass = env->FindClass("android/app/ProfilerInfo");
+    Util::CheckErrorAndLog(env, "ToJavaProfilerInfo", "Fail FindClass: ProfilerInfo %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(piKlass, "<init>", "(Ljava/lang/String;Landroid/os/ParcelFileDescriptor;IZ)V");
+    Util::CheckErrorAndLog(env, "ToJavaProfilerInfo", "Fail GetMethodID: piKlass %d", __LINE__);
+
+    jobject jprofilerInfo = env->NewObject(piKlass, m, jprofileFile, jprofileFd, samplingInterval, autoStopProfiler);
+    Util::CheckErrorAndLog(env, "ToJavaProfilerInfo", "Fail NewObject: piKlass %d", __LINE__);
+
+    env->DeleteLocalRef(jprofileFile);
+    env->DeleteLocalRef(jprofileFd);
+    env->DeleteLocalRef(piKlass);
+
+    return jprofilerInfo;
+}
+
+jobject Util::ToJavaResultInfo(
+    /* [in] */ JNIEnv* env,
+    /* [in] */ IResultInfo* resultInfo)
+{
+    if (env == NULL || resultInfo == NULL) {
+        LOGGERE("ToJavaResultInfo", "Invalid arguments!");
+        return NULL;
+    }
+
+    String resultWho;
+    resultInfo->GetResultWho(&resultWho);
+    jstring jresultWho = ToJavaString(env, resultWho);
+
+    Int32 requestCode;
+    resultInfo->GetRequestCode(&requestCode);
+
+    Int32 resultCode;
+    resultInfo->GetResultCode(&resultCode);
+
+    AutoPtr<IIntent> data;
+    resultInfo->GetData((IIntent**)&data);
+    jobject jdata = ToJavaIntent(env, data);
+
+    jclass riKlass = env->FindClass("android/app/ResultInfo");
+    Util::CheckErrorAndLog(env, "ToJavaResultInfo", "Fail FindClass: ResultInfo %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(riKlass, "<init>", "(Ljava/lang/String;IILandroid/content/Intent;)V");
+    Util::CheckErrorAndLog(env, "ToJavaResultInfo", "Fail GetMethodID: ResultInfo %d", __LINE__);
+
+    jobject jresultInfo = env->NewObject(riKlass, m, jresultWho, requestCode, resultCode, jdata);
+    Util::CheckErrorAndLog(env, "ToJavaResultInfo", "Fail NewObject: ResultInfo %d", __LINE__);
+
+    env->DeleteLocalRef(jresultWho);
+    env->DeleteLocalRef(jdata);
+    env->DeleteLocalRef(riKlass);
+    return jresultInfo;
+}
+
+jobject Util::ToJavaRating(
+    /* [in] */ JNIEnv* env,
+    /* [in] */ IRating* rating)
+{
+    if (env == NULL || rating == NULL) {
+        LOGGERE("ToJavaRating", "Invalid arguments!");
+        return NULL;
+    }
+
+    AutoPtr<IParcel> parcel;
+    Elastos::Droid::Os::CParcel::New((IParcel**)&parcel);
+    IParcelable::Probe(rating)->WriteToParcel(parcel);
+    parcel->SetDataPosition(0);
+
+    Int32 ratingStyle;
+    parcel->ReadInt32(&ratingStyle);
+
+    Float ratingValue;
+    parcel->ReadFloat(&ratingValue);
+
+    jclass rKlass = env->FindClass("android/meida/Rating");
+    Util::CheckErrorAndLog(env, "ToJavaRating", "Fail FindClass: Rating %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(rKlass, "<init>", "(IF)V");
+    Util::CheckErrorAndLog(env, "ToJavaRating", "Fail GetMethodID: Rating %d", __LINE__);
+
+    jobject jrating = env->NewObject(rKlass, m, ratingStyle, ratingValue);
+    Util::CheckErrorAndLog(env, "ToJavaRating", "Fail NewObject: Rating %d", __LINE__);
+
+    env->DeleteLocalRef(rKlass);
+    return jrating;
+}
+
+jobject Util::ToJavaAudioAttributes(
+    /* [in] */ JNIEnv* env,
+    /* [in] */ IAudioAttributes* aa)
+{
+    if (env == NULL || aa == NULL) {
+        LOGGERE("ToJavaAudioAttributes", "Invalid arguments!");
+        return NULL;
+    }
+
+    jclass aaKlass = env->FindClass("android/meida/AudioAttributes");
+    Util::CheckErrorAndLog(env, "ToJavaAudioAttributes", "Fail FindClass: AudioAttributes %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(aaKlass, "<init>", "()V");
+    Util::CheckErrorAndLog(env, "ToJavaAudioAttributes", "Fail GetMethodID: AudioAttributes %d", __LINE__);
+
+    jobject jaa = env->NewObject(aaKlass, m);
+    Util::CheckErrorAndLog(env, "ToJavaAudioAttributes", "Fail NewObject: AudioAttributes %d", __LINE__);
+
+    AutoPtr<IParcel> parcel;
+    Elastos::Droid::Os::CParcel::New((IParcel**)&parcel);
+    IParcelable::Probe(aa)->WriteToParcel(parcel);
+    parcel->SetDataPosition(0);
+
+    Int32 tempInt;
+    parcel->ReadInt32(&tempInt);
+    Util::SetJavaIntField(env, aaKlass, jaa, tempInt, "mUsage", "ToJavaAudioAttributes");
+
+    parcel->ReadInt32(&tempInt);
+    Util::SetJavaIntField(env, aaKlass, jaa, tempInt, "mContentType", "ToJavaAudioAttributes");
+
+    parcel->ReadInt32(&tempInt);
+    Util::SetJavaIntField(env, aaKlass, jaa, tempInt, "mSource", "ToJavaAudioAttributes");
+
+    parcel->ReadInt32(&tempInt);
+    Util::SetJavaIntField(env, aaKlass, jaa, tempInt, "mFlags", "ToJavaAudioAttributes");
+
+    String formattedTags;
+    parcel->ReadString(&formattedTags);
+    Util::SetJavaStringField(env, aaKlass, jaa, formattedTags, "mFormattedTags", "ToJavaAudioAttributes");
+
+    AutoPtr<ISet> set;
+    aa->GetTags((ISet**)&set);
+    if (set != NULL) {
+        AutoPtr<ArrayOf<IInterface*> > tags;
+        set->ToArray((ArrayOf<IInterface*>**)&tags);
+
+        jclass hsKlass = env->FindClass("java/util/HashSet");
+        Util::CheckErrorAndLog(env, "ToJavaAudioAttributes", "FindClass: HashSet line: %d", __LINE__);
+
+        jmethodID m = env->GetMethodID(hsKlass, "<init>", "()V");
+        Util::CheckErrorAndLog(env, "ToJavaAudioAttributes", "GetMethodID: HashSet line: %d", __LINE__);
+
+        jobject jset = env->NewObject(hsKlass, m);
+        Util::CheckErrorAndLog(env, "ToJavaAudioAttributes", "NewObject: HashSet line: %d", __LINE__);
+
+        m = env->GetMethodID(hsKlass, "add", "(Ljava/lang/Object;)Z");
+        Util::CheckErrorAndLog(env, "ToJavaAudioAttributes", "GetMethodID: add line: %d", __LINE__);
+
+        for (Int32 i = 0; i < tags->GetLength(); i++) {
+            AutoPtr<IInterface> item = (*tags)[i];
+            String tag;
+            ICharSequence::Probe(item)->ToString(&tag);
+            jstring jtag = Util::ToJavaString(env, tag);
+            env->CallBooleanMethod(jset, m, jtag);
+            env->DeleteLocalRef(jtag);
+        }
+        jfieldID f = env->GetFieldID(aaKlass, "mTags", "Ljava/util/HashSet;");
+        Util::CheckErrorAndLog(env, "ToJavaAudioAttributes", "GetFieldID: mTags %d", __LINE__);
+
+        env->SetObjectField(jaa, f, jset);
+        Util::CheckErrorAndLog(env, "ToJavaAudioAttributes", "SetObjectField: jdata %d", __LINE__);
+        env->DeleteLocalRef(hsKlass);
+        env->DeleteLocalRef(jset);
+    }
+
+    env->DeleteLocalRef(aaKlass);
+    return jaa;
 }
 
 } // JavaProxy

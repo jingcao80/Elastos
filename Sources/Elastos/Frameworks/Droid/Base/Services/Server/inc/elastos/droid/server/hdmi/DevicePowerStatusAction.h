@@ -29,8 +29,11 @@ class HdmiCecLocalDevice;
  */
 class DevicePowerStatusAction
     : public HdmiCecFeatureAction
+    , public IDevicePowerStatusAction
 {
 public:
+    CAR_INTERFACE_DECL()
+
     DevicePowerStatusAction();
 
     static CARAPI Create(

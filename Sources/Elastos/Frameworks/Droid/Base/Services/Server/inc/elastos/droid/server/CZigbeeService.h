@@ -22,7 +22,7 @@ CarClass(CZigbeeService)
 {
 private:
     /***** History record manager *********/
-    class HistoryRecordThread : public ThreadBase
+    class HistoryRecordThread : public Thread
     {
     public:
         HistoryRecordThread(
@@ -50,7 +50,7 @@ private:
      *  DelayTime: delay time between each change
      *  RandomDelay: set TRUE to make random delay time (0~delayTime seconds)
     */
-     class BulbScenarioModeThread : public ThreadBase
+     class BulbScenarioModeThread : public Thread
     {
     public:
         BulbScenarioModeThread(
@@ -111,7 +111,7 @@ private:
         CZigbeeService* mHost;
     };
 
-    class CallbackThread : public ThreadBase
+    class CallbackThread : public Thread
     {
     public:
         CallbackThread(

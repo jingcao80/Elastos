@@ -83,7 +83,7 @@ CProcessStatsService::PipeOutputThread::PipeOutputThread(
     : mFd(fd)
     , mOutData(outData)
 {
-    constructor(String("ProcessStats pipe output"));
+    Thread::constructor(String("ProcessStats pipe output"));
 }
 
 ECode CProcessStatsService::PipeOutputThread::Run()

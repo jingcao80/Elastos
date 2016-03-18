@@ -37,12 +37,13 @@ namespace Droid {
 namespace Internal {
 namespace App {
 
-class ResolverActivity
+class ECO_PUBLIC ResolverActivity
     : public Activity
     , public IResolverActivity
     , public IAdapterViewOnItemClickListener
 {
     friend class ResolveListAdapter;
+
 public:
     class ViewHolder : public Object
     {
@@ -156,7 +157,7 @@ public:
     };
 
 private:
-    class _PackageMonitor
+    ECO_LOCAL class _PackageMonitor
         : public PackageMonitor
     {
     public:
@@ -171,7 +172,7 @@ private:
         ResolverActivity* mHost;
     };
 
-    class ActionTitle : public Object
+    ECO_LOCAL class ActionTitle : public Object
     {
     public:
         ActionTitle(
@@ -203,7 +204,7 @@ private:
         static const AutoPtr<ArrayOf<ActionTitle*> > sArray;
     };
 
-    class ViewOnClickListener
+    ECO_LOCAL class ViewOnClickListener
         : public Object
         , public IViewOnClickListener
     {
@@ -221,7 +222,7 @@ private:
         ResolverActivity* mHost;
     };
 
-    class DisplayResolveInfo : public Object
+    ECO_LOCAL class DisplayResolveInfo : public Object
     {
     public:
         DisplayResolveInfo(
@@ -243,7 +244,7 @@ private:
         AutoPtr<IIntent> mOrigIntent;
     };
 
-    class ResolveListAdapter
+    ECO_LOCAL class ResolveListAdapter
         : public BaseAdapter
     {
     public:
@@ -321,7 +322,7 @@ private:
         Boolean mFilterLastUsed;
     };
 
-    class FilteredItemContainerOnLongCliskListener
+    ECO_LOCAL class FilteredItemContainerOnLongCliskListener
         : public Object
         , public IViewOnLongClickListener
     {

@@ -26,10 +26,3 @@ extern "C" const ClassID ECLSID_CDummyObject =
 
 } // namespace Utility
 } // namespace Elastos
-
-
-#ifdef DROID_CORE
-ECO_PUBLIC pthread_key_t sLooperKey;
-ECO_PUBLIC Boolean sLooperKeyInited = FALSE;
-#endif
-

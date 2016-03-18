@@ -4,6 +4,9 @@
 #include "Math.h"
 #include "AutoLock.h"
 #include "CSystem.h"
+#if defined(_DEBUG)
+#include "cutils/log.h"
+#endif
 
 namespace Elastos {
 namespace Core {
@@ -37,7 +40,11 @@ Thread::Thread()
     , mHasBeenStarted(FALSE)
     , mId(-1)
     , mParkState(ParkState::UNPARKED)
-{}
+{
+#if defined(_DEBUG)
+    mIsConstructed = FALSE;
+#endif
+}
 
 Thread::~Thread()
 {}
@@ -152,6 +159,10 @@ ECode Thread::constructor(
     /* add ourselves to our ThreadGroup of choice */
     ThreadGroup* tg = (ThreadGroup*)group;
     tg->AddThread(THIS_PROBE(IThread));
+
+#if defined(_DEBUG)
+     mIsConstructed = TRUE;
+#endif
     return NOERROR;
 }
 
@@ -161,11 +172,6 @@ ECode Thread::Create(
     /* [in] */ const String& threadName,
     /* [in] */ Int64 stackSize)
 {
-    Object obj;
-    synchronized(obj) {
-
-    }
-
     AutoPtr<IThreadGroup> group = _group;
     AutoPtr<IThread> currentThread = Thread::GetCurrentThread();
     if (group == NULL) {
@@ -206,6 +212,10 @@ ECode Thread::Create(
     // add ourselves to our ThreadGroup of choice
     ThreadGroup* tg = (ThreadGroup*)group.Get();
     tg->AddThread(THIS_PROBE(IThread));
+
+#if defined(_DEBUG)
+     mIsConstructed = TRUE;
+#endif
     return NOERROR;
 }
 
@@ -711,6 +721,13 @@ ECode Thread::SetUncaughtExceptionHandler(
 
 ECode Thread::Start()
 {
+#if defined(_DEBUG)
+    if (!mIsConstructed) {
+        ALOGE("Error: Thread::constructor is not called.");
+        assert(0 && "Thread::constructor is not called");
+    }
+#endif
+
     AutoLock lock(this);
 
     if (mHasBeenStarted) {

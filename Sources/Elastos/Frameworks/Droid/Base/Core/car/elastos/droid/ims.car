@@ -1,0 +1,104 @@
+
+module
+{
+    merge("ims/ImsCallForwardInfo.car");
+    merge("ims/ImsCallProfile.car");
+    merge("ims/ImsConferenceState.car");
+    merge("ims/ImsConfigListener.car");
+    merge("ims/ImsReasonInfo.car");
+    merge("ims/ImsSsInfo.car");
+    merge("ims/ImsStreamMediaProfile.car");
+    merge("ims/internal/IImsCallSession.car");
+    merge("ims/internal/IImsCallSessionListener.car");
+    merge("ims/internal/IImsConfig.car");
+    merge("ims/internal/IImsEcbm.car");
+    merge("ims/internal/IImsEcbmListener.car");
+    merge("ims/internal/IImsRegistrationListener.car");
+    merge("ims/internal/IImsService.car");
+    merge("ims/internal/IImsStreamMediaSession.car");
+    merge("ims/internal/IImsUt.car");
+    merge("ims/internal/IImsUtListener.car");
+    merge("ims/internal/IImsVideoCallCallback.car");
+    merge("ims/internal/IImsVideoCallProvider.car");
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Ims {
+
+        class CImsStreamMediaProfile {
+
+            constructor();
+
+            constructor(
+                [in] Int32 audioQuality,
+                [in] Int32 audioDirection,
+                [in] Int32 videoQuality,
+                [in] Int32 videoDirection);
+
+            interface IImsStreamMediaProfile;
+            interface IParcelable;
+        }
+
+        class CImsSsInfo {
+
+            constructor();
+
+            interface IImsSsInfo;
+            interface IParcelable;
+        }
+
+        class CImsCallForwardInfo {
+
+            constructor();
+
+            interface IImsCallForwardInfo;
+            interface IParcelable;
+        }
+
+        class CImsConferenceState {
+
+            constructor();
+
+            interface IImsConferenceState;
+            interface IParcelable;
+        }
+
+        class CImsReasonInfo {
+
+            constructor();
+
+            constructor(
+                [in] Int32 code,
+                [in] Int32 extraCode);
+
+            constructor(
+                [in] Int32 code,
+                [in] Int32 extraCode,
+                [in] String extraMessage);
+
+            interface IImsReasonInfo;
+            interface IParcelable;
+        }
+
+        class CImsCallProfile {
+
+            constructor();
+
+            constructor(
+                [in] Int32 serviceType,
+                [in] Int32 callType);
+
+            interface IImsCallProfile;
+            interface IParcelable;
+        }
+
+        singleton class CImsCallProfileHelper {
+
+            interface IImsCallProfileHelper;
+        }
+
+    } // namespace Ims
+    } // namespace Droid
+    } // namespace Elastos
+
+}

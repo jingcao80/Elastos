@@ -462,29 +462,6 @@ public:
         CActivityManagerService* mHost;
     };
 
-private:
-    class AppDeathRecipient
-        : public Object
-        , public IProxyDeathRecipient
-    {
-    public:
-        AppDeathRecipient(
-            /* [in] */ ProcessRecord* app,
-            /* [in] */ Int32 pid,
-            /* [in] */ IApplicationThread* thread,
-            /* [in] */ CActivityManagerService* owner);
-
-        CARAPI ProxyDied();
-
-        CAR_INTERFACE_DECL()
-
-    public:
-        AutoPtr<ProcessRecord> mApp;
-        Int32 mPid;
-        AutoPtr<IApplicationThread> mAppThread;
-        CActivityManagerService* mOwner;
-    };
-
     class BootCompletedReceiver
         : public Object
         , public IIntentReceiver
@@ -493,8 +470,8 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        BootCompletedReceiver(
-            /* [in] */ CActivityManagerService* host);
+        CARAPI constructor(
+            /* [in] */ IIActivityManager* host);
 
         CARAPI PerformReceive(
             /* [in] */ IIntent* intent,
@@ -512,26 +489,20 @@ private:
         CActivityManagerService* mHost;
     };
 
-    class SwitchUserIntentReceiver
+    class SwitchUserReceiver
         : public Object
         , public IIntentReceiver
         , public IBinder
     {
     public:
-        SwitchUserIntentReceiver(
-            /* [in] */ CActivityManagerService* host,
-            /* [in] */ UserStartedState* uss,
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IIActivityManager* host,
+            /* [in] */ IUserStartedState* uss,
             /* [in] */ Boolean foreground,
             /* [in] */ Int32 oldUserId,
-            /* [in] */ Int32 userId)
-            : mHost(host)
-            , mUss(uss)
-            , mForeground(foreground)
-            , mOldUserId(oldUserId)
-            , mUserId(userId)
-        {}
-
-        CAR_INTERFACE_DECL()
+            /* [in] */ Int32 userId);
 
         CARAPI PerformReceive(
             /* [in] */ IIntent* intent,
@@ -553,13 +524,15 @@ private:
         Int32 mUserId;
     };
 
-    class NeedStartIntentReceiver
+    class NeedStartReceiver
         : public Object
         , public IIntentReceiver
         , public IBinder
     {
     public:
         CAR_INTERFACE_DECL()
+
+        CARAPI constructor();
 
         CARAPI PerformReceive(
             /* [in] */ IIntent* intent,
@@ -572,6 +545,175 @@ private:
 
         CARAPI ToString(
             /* [out] */ String* str);
+    };
+
+    class DispatchUserSwitchCallback
+        : public Object
+        , public IIRemoteCallback
+        , public IBinder
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IIActivityManager* host,
+            /* [in] */ Int32 n,
+            /* [in] */ IUserStartedState* uss,
+            /* [in] */ Int32 oldUserId,
+            /* [in] */ Int32 newUserId);
+
+        CARAPI SendResult(
+            /* [in] */ IBundle* data);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    private:
+        CActivityManagerService* mHost;
+        Int32 mCount;
+        Int32 N;
+        AutoPtr<UserStartedState> mUss;
+        Int32 mOldUserId;
+        Int32 mNewUserId;
+    };
+
+    class PreBootCompletedReceiver
+        : public Object
+        , public IIntentReceiver
+        , public IBinder
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IHandler* handler,
+            /* [in] */ IRunnable* onFinishCallback);
+
+        CARAPI PerformReceive(
+            /* [in] */ IIntent* intent,
+            /* [in] */ Int32 resultCode,
+            /* [in] */ const String& data,
+            /* [in] */ IBundle* extras,
+            /* [in] */ Boolean ordered,
+            /* [in] */ Boolean sticky,
+            /* [in] */ Int32 sendingUser);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    private:
+        AutoPtr<IHandler> mHandler;
+        AutoPtr<IRunnable> mOnFinishCallback;
+    };
+
+    class SystemReadyReceiver
+        : public Object
+        , public IIntentReceiver
+        , public IBinder
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor();
+
+        CARAPI PerformReceive(
+            /* [in] */ IIntent* intent,
+            /* [in] */ Int32 resultCode,
+            /* [in] */ const String& data,
+            /* [in] */ IBundle* extras,
+            /* [in] */ Boolean ordered,
+            /* [in] */ Boolean sticky,
+            /* [in] */ Int32 sendingUser);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+    };
+
+    class ShutdownReceiver
+        : public Object
+        , public IIntentReceiver
+        , public IBinder
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IIActivityManager* host,
+            /* [in] */ IUserStartedState* uss);
+
+        CARAPI PerformReceive(
+            /* [in] */ IIntent* intent,
+            /* [in] */ Int32 resultCode,
+            /* [in] */ const String& data,
+            /* [in] */ IBundle* extras,
+            /* [in] */ Boolean ordered,
+            /* [in] */ Boolean sticky,
+            /* [in] */ Int32 sendingUser);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    private:
+        CActivityManagerService* mHost;
+        AutoPtr<UserStartedState> mUss;
+    };
+
+    class StoppingReceiver
+        : public Object
+        , public IIntentReceiver
+        , public IBinder
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IIActivityManager* host,
+            /* [in] */ IUserStartedState* uss,
+            /* [in] */ IIntent* shutdownIntent,
+            /* [in] */ IIntentReceiver* shutdownReceiver,
+            /* [in] */ Int32 userId);
+
+        CARAPI PerformReceive(
+            /* [in] */ IIntent* intent,
+            /* [in] */ Int32 resultCode,
+            /* [in] */ const String& data,
+            /* [in] */ IBundle* extras,
+            /* [in] */ Boolean ordered,
+            /* [in] */ Boolean sticky,
+            /* [in] */ Int32 sendingUser);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    private:
+        CActivityManagerService* mHost;
+        AutoPtr<UserStartedState> mUss;
+        AutoPtr<IIntent> mShutdownIntent;
+        AutoPtr<IIntentReceiver> mShutdownReceiver;
+        Int32 mUserId;
+    };
+
+private:
+    class AppDeathRecipient
+        : public Object
+        , public IProxyDeathRecipient
+    {
+    public:
+        AppDeathRecipient(
+            /* [in] */ ProcessRecord* app,
+            /* [in] */ Int32 pid,
+            /* [in] */ IApplicationThread* thread,
+            /* [in] */ CActivityManagerService* owner);
+
+        CARAPI ProxyDied();
+
+        CAR_INTERFACE_DECL()
+
+    public:
+        AutoPtr<ProcessRecord> mApp;
+        Int32 mPid;
+        AutoPtr<IApplicationThread> mAppThread;
+        CActivityManagerService* mOwner;
     };
 
     class ReportMemUsageThread
@@ -794,37 +936,6 @@ private:
         CActivityManagerService* mHost;
     };
 
-    class PreBootCompletedIntentReceiver
-        : public Object
-        , public IIntentReceiver
-        , public IBinder
-    {
-    public:
-        PreBootCompletedIntentReceiver(
-            /* [in] */ Handler* handler,
-            /* [in] */ IRunnable* onFinishCallback)
-            : mHandler(handler)
-        {}
-
-        CAR_INTERFACE_DECL()
-
-        CARAPI PerformReceive(
-            /* [in] */ IIntent* intent,
-            /* [in] */ Int32 resultCode,
-            /* [in] */ const String& data,
-            /* [in] */ IBundle* extras,
-            /* [in] */ Boolean ordered,
-            /* [in] */ Boolean sticky,
-            /* [in] */ Int32 sendingUser);
-
-        CARAPI ToString(
-            /* [out] */ String* str);
-
-    private:
-        AutoPtr<Handler> mHandler;
-        AutoPtr<IRunnable> mOnFinishCallback;
-    };
-
     class OnFinishCallback : public Runnable
     {
     public:
@@ -859,27 +970,6 @@ private:
 
     private:
         CActivityManagerService* mHost;
-    };
-
-    class SystemBroadcastReceiver
-        : public Object
-        , public IIntentReceiver
-        , public IBinder
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        CARAPI PerformReceive(
-            /* [in] */ IIntent* intent,
-            /* [in] */ Int32 resultCode,
-            /* [in] */ const String& data,
-            /* [in] */ IBundle* extras,
-            /* [in] */ Boolean ordered,
-            /* [in] */ Boolean sticky,
-            /* [in] */ Int32 sendingUser);
-
-        CARAPI ToString(
-            /* [out] */ String* str);
     };
 
     class DropBoxTagThread
@@ -995,107 +1085,6 @@ private:
     private:
         Int32 mUserId;
         AutoPtr<IStopUserCallback> mCallback;
-    };
-
-    class DispatchUserSwitchCallback
-        : public Object
-        , public IIRemoteCallback
-        , public IBinder
-    {
-    public:
-        DispatchUserSwitchCallback(
-            /* [in] */ CActivityManagerService* host,
-            /* [in] */ Int32 n,
-            /* [in] */ UserStartedState* uss,
-            /* [in] */ Int32 oldUserId,
-            /* [in] */ Int32 newUserId)
-            : mHost(host)
-            , mCount(0)
-            , N(n)
-            , mUss(uss)
-            , mOldUserId(oldUserId)
-            , mNewUserId(newUserId)
-        {}
-
-        CAR_INTERFACE_DECL()
-
-        CARAPI SendResult(
-            /* [in] */ IBundle* data);
-
-        CARAPI ToString(
-            /* [out] */ String* str);
-
-    private:
-        CActivityManagerService* mHost;
-        Int32 mCount;
-        Int32 N;
-        AutoPtr<UserStartedState> mUss;
-        Int32 mOldUserId;
-        Int32 mNewUserId;
-    };
-
-    class ShutdownReceiver
-        : public Object
-        , public IIntentReceiver
-        , public IBinder
-    {
-    public:
-        ShutdownReceiver(
-            /* [in] */ CActivityManagerService* host,
-            /* [in] */ UserStartedState* uss);
-
-        CAR_INTERFACE_DECL()
-
-        CARAPI PerformReceive(
-            /* [in] */ IIntent* intent,
-            /* [in] */ Int32 resultCode,
-            /* [in] */ const String& data,
-            /* [in] */ IBundle* extras,
-            /* [in] */ Boolean ordered,
-            /* [in] */ Boolean sticky,
-            /* [in] */ Int32 sendingUser);
-
-        CARAPI ToString(
-            /* [out] */ String* str);
-
-    private:
-        CActivityManagerService* mHost;
-        AutoPtr<UserStartedState> mUss;
-    };
-
-    class StoppingReceiver
-        : public Object
-        , public IIntentReceiver
-        , public IBinder
-    {
-    public:
-        StoppingReceiver(
-            /* [in] */ CActivityManagerService* host,
-            /* [in] */ UserStartedState* uss,
-            /* [in] */ IIntent* shutdownIntent,
-            /* [in] */ IIntentReceiver* shutdownReceiver,
-            /* [in] */ Int32 userId);
-
-        CAR_INTERFACE_DECL()
-
-        CARAPI PerformReceive(
-            /* [in] */ IIntent* intent,
-            /* [in] */ Int32 resultCode,
-            /* [in] */ const String& data,
-            /* [in] */ IBundle* extras,
-            /* [in] */ Boolean ordered,
-            /* [in] */ Boolean sticky,
-            /* [in] */ Int32 sendingUser);
-
-        CARAPI ToString(
-            /* [out] */ String* str);
-
-    private:
-        CActivityManagerService* mHost;
-        AutoPtr<UserStartedState> mUss;
-        AutoPtr<IIntent> mShutdownIntent;
-        AutoPtr<IIntentReceiver> mShutdownReceiver;
-        Int32 mUserId;
     };
 
     class LocalService

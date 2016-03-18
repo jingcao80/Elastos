@@ -14,14 +14,17 @@ namespace Droid {
 namespace Server {
 namespace Wm {
 
-PointerEventDispatcher::PointerEventDispatcher(
-    /* [in] */ IInputChannel* inputChannel)
+PointerEventDispatcher::PointerEventDispatcher()
 {
     mListenersArray = ArrayOf<IPointerEventListener*>::Alloc(0);
+}
 
+ECode PointerEventDispatcher::constructor(
+    /* [in] */ IInputChannel* inputChannel)
+{
     AutoPtr<ILooper> l;
     UiThread::GetHandler()->GetLooper((ILooper**)&l);
-    constructor(inputChannel, l);
+    return InputEventReceiver::constructor(inputChannel, l);
 }
 
 ECode PointerEventDispatcher::OnInputEvent(
@@ -58,9 +61,9 @@ ECode PointerEventDispatcher::RegisterInputEventListener(
     /* [in] */ IPointerEventListener* listener)
 {
     synchronized (mListenersLock) {
-        List<AutoPtr<IPointerEventListener> >::Iterator it = Find(
-                mListeners.Begin(), mListeners.End(), AutoPtr<IPointerEventListener>(listener));
-        if (it == mListeners.End()) {
+        AutoPtr<IPointerEventListener> temp = listener;
+        List<AutoPtr<IPointerEventListener> >::Iterator it = Find(mListeners.Begin(), mListeners.End(), temp);
+        if (it != mListeners.End()) {
             Slogger::E("PointerEventDispatcher", "registerInputEventListener: trying to register %p twice.", listener);
             return E_ILLEGAL_STATE_EXCEPTION;
         }
@@ -74,8 +77,8 @@ ECode PointerEventDispatcher::UnregisterInputEventListener(
     /* [in] */ IPointerEventListener* listener)
 {
     synchronized (mListenersLock) {
-        List<AutoPtr<IPointerEventListener> >::Iterator it = Find(
-                mListeners.Begin(), mListeners.End(), AutoPtr<IPointerEventListener>(listener));
+        AutoPtr<IPointerEventListener> temp = listener;
+        List<AutoPtr<IPointerEventListener> >::Iterator it = Find(mListeners.Begin(), mListeners.End(), temp);
         if (it == mListeners.End()) {
             Slogger::E("PointerEventDispatcher", "registerInputEventListener: %p not registered.", listener);
             return E_ILLEGAL_STATE_EXCEPTION;

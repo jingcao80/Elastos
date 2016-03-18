@@ -2,25 +2,22 @@
 #ifndef __ELASTOS_DROID_SETTINGS_USERSPINNERADAPTER_H__
 #define __ELASTOS_DROID_SETTINGS_USERSPINNERADAPTER_H__
 
+#include <Elastos.CoreLibrary.Utility.h>
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Widget.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::Pm::IUserInfo;
-using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::IDataSetObserver;
-using Elastos::Droid::Graphics::Drawable::IBitmapDrawable;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
-using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::ISpinnerAdapter;
-using Elastos::Droid::Widget::ITextView;
-
-using Elastos::Droid::Internal::Utility::IUserIcons;
-
 using Elastos::Utility::IArrayList;
 
 namespace Elastos {
@@ -41,6 +38,7 @@ public:
     class UserDetails
         : public Object
     {
+        friend class UserSpinnerAdapter;
     public:
         UserDetails(
             /* [in] */ IUserHandle* userHandle,
@@ -73,7 +71,7 @@ public:
     CARAPI GetDropDownView(
         /* [in] */ Int32 position,
         /* [in] */ IView* convertView,
-        /* [in] */ ViewGroup* parent,
+        /* [in] */ IViewGroup* parent,
         /* [out] */ IView** view);
 
     //@Override

@@ -1,8 +1,10 @@
 
 #include "Buffer.h"
 #include "StringBuilder.h"
+#include "logging/Logger.h"
 
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace IO {
@@ -28,7 +30,7 @@ ECode Buffer::constructor(
     /* [in] */ Int64 effectiveDirectAddress)
 {
     if (capacity < 0) {
-        // throw new IllegalArgumentException("capacity < 0: " + capacity);
+        Logger::E("Buffer", "IllegalArgumentException: capacity < 0: %d", capacity);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 

@@ -3,6 +3,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::App::EIID_IIUserSwitchObserver;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -10,6 +12,10 @@ namespace Droid {
 namespace JavaProxy {
 
 const String CIUserSwitchObserverNative::TAG("CIUserSwitchObserverNative");
+
+CAR_INTERFACE_IMPL_2(CIUserSwitchObserverNative, Object, IIUserSwitchObserver, IBinder)
+
+CAR_OBJECT_IMPL(CIUserSwitchObserverNative)
 
 CIUserSwitchObserverNative::~CIUserSwitchObserverNative()
 {
@@ -19,8 +25,8 @@ CIUserSwitchObserverNative::~CIUserSwitchObserverNative()
 }
 
 ECode CIUserSwitchObserverNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -29,25 +35,60 @@ ECode CIUserSwitchObserverNative::constructor(
 
 ECode CIUserSwitchObserverNative::OnUserSwitching(
     /* [in] */ Int32 newUserId,
-    /* [in] */ IRemoteCallback* reply)
+    /* [in] */ IIRemoteCallback* reply)
 {
-    LOGGERD(TAG, String("CIUserSwitchObserverNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    // LOGGERD(TAG, "+ CIUserSwitchObserverNative::OnUserSwitching()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject jreply = NULL;
+    if (reply) {
+        LOGGERE(TAG, "TODO: OnUserSwitching reply != NULL");
+    }
+    jclass c = env->FindClass("android/app/IUserSwitchObserver");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IUserSwitchObserver %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "onUserSwitching", "(ILandroid/os/IRemoteCallback;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: onUserSwitching %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, newUserId, jreply);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: onUserSwitching %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jreply);
+
+    // LOGGERD(TAG, "- CIUserSwitchObserverNative::OnUserSwitching()");
+    return NOERROR;
 }
 
 ECode CIUserSwitchObserverNative::OnUserSwitchComplete(
     /* [in] */ Int32 newUserId)
 {
-    LOGGERD(TAG, String("CIUserSwitchObserverNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    // LOGGERD(TAG, "+ CIUserSwitchObserverNative::OnUserSwitchComplete()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jclass c = env->FindClass("android/app/IUserSwitchObserver");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IUserSwitchObserver %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "onUserSwitchComplete", "(I)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: onUserSwitchComplete %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, newUserId);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: onUserSwitchComplete %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+
+    // LOGGERD(TAG, "- CIUserSwitchObserverNative::OnUserSwitchComplete()");
+    return NOERROR;
 }
 
 ECode CIUserSwitchObserverNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CIUserSwitchObserverNative::ToString()"));
+    // LOGGERD(TAG, "+ CIUserSwitchObserverNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -66,7 +107,7 @@ ECode CIUserSwitchObserverNative::ToString(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CIUserSwitchObserverNative::ToString()"));
+    // LOGGERD(TAG, "- CIUserSwitchObserverNative::ToString()");
     return NOERROR;
 }
 

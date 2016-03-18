@@ -104,6 +104,7 @@ module
 
     using interface Elastos.Droid.AccessibilityService.IAccessibilityServiceInfo;
     using interface Elastos.Droid.AccessibilityService.IIAccessibilityServiceConnection;
+    using interface Elastos.Droid.App.IActivityContainerCallback;
     using interface Elastos.Droid.App.IIActivityContainer;
     using interface Elastos.Droid.App.IIActivityManager;
     using interface Elastos.Droid.App.IIAlarmManager;
@@ -147,6 +148,7 @@ module
     using interface Elastos.Droid.Hardware.Hdmi.IIHdmiControlService;
     using interface Elastos.Droid.Hardware.Input.IIInputManager;
     using interface Elastos.Droid.Hardware.Location.IIFusedLocationHardware;
+    using interface Elastos.Droid.Hardware.Display.IDisplayListener;
     using interface Elastos.Droid.Internal.App.IIProcessStats;
     using interface Elastos.Droid.Internal.App.IIBatteryStats;
     using interface Elastos.Droid.Internal.App.IIAppOpsService;
@@ -200,6 +202,7 @@ module
     using interface Elastos.Droid.Os.IIUserManager;
     using interface Elastos.Droid.Os.IIBatteryPropertiesListener;
     using interface Elastos.Droid.Os.IResultReceiver;
+    using interface Elastos.Droid.Os.IIRemoteCallback;
     using interface Elastos.Droid.Os.Storage.IIMountShutdownObserver;
     using interface Elastos.Droid.Server.IWidgetBackupProvider;
     using interface Elastos.Droid.Service.Dreams.IIDreamManager;
@@ -1389,6 +1392,82 @@ module
         interface IBinder;
     }
 
+    class CActivityManagerBootCompletedReceiver {
+        constructor(
+            [in] IIActivityManager* host);
+
+        interface IIntentReceiver;
+        interface IBinder;
+    }
+
+    class CActivityManagerSwitchUserReceiver {
+        constructor(
+            [in] IIActivityManager* host,
+            [in] IUserStartedState* uss,
+            [in] Boolean foreground,
+            [in] Int32 oldUserId,
+            [in] Int32 userId);
+
+        interface IIntentReceiver;
+        interface IBinder;
+    }
+
+    class CActivityManagerNeedStartReceiver {
+        constructor();
+
+        interface IIntentReceiver;
+        interface IBinder;
+    }
+
+    class CActivityManagerPreBootCompletedReceiver {
+        constructor(
+            [in] IHandler* handler,
+            [in] IRunnable* onFinishCallback);
+
+        interface IIntentReceiver;
+        interface IBinder;
+    }
+
+    class CActivityManagerSystemReadyReceiver {
+        constructor();
+
+        interface IIntentReceiver;
+        interface IBinder;
+    }
+
+    class CActivityManagerShutdownReceiver {
+        constructor(
+            [in] IIActivityManager* host,
+            [in] IUserStartedState* uss);
+
+        interface IIntentReceiver;
+        interface IBinder;
+    }
+
+    class CActivityManagerStoppingReceiver {
+        constructor(
+            [in] IIActivityManager* host,
+            [in] IUserStartedState* uss,
+            [in] IIntent* shutdownIntent,
+            [in] IIntentReceiver* shutdownReceiver,
+            [in] Int32 userId);
+
+        interface IIntentReceiver;
+        interface IBinder;
+    }
+
+    class CActivityManagerDispatchUserSwitchCallback {
+        constructor(
+            [in] IIActivityManager* host,
+            [in] Int32 n,
+            [in] IUserStartedState* uss,
+            [in] Int32 oldUserId,
+            [in] Int32 newUserId);
+
+        interface IIRemoteCallback;
+        interface IBinder;
+    }
+
     class CBatteryStatsService {
         constructor(
             [in] IFile* systemDir,
@@ -1402,7 +1481,17 @@ module
     class CActivityContainer {
         constructor(
             [in] Int32 stackId,
-            [in] IInterface* owner);
+            [in] IDisplayListener* owner);
+
+        interface IIActivityContainer;
+        interface IBinder;
+    }
+
+    class CVirtualActivityContainer {
+        constructor(
+            [in] IActivityRecord* parent,
+            [in] IActivityContainerCallback* cb,
+            [in] IDisplayListener* owner);
 
         interface IIActivityContainer;
         interface IBinder;
@@ -1756,6 +1845,23 @@ module
     //} // namespace Server
     //} // namepsace Droid
     //} // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Twilight {
+
+    class CTwilightService {
+        constructor(
+            [in] IContext* ctx);
+
+        interface ISystemService;
+    }
+
+    } // namespace Twilight
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
 
     namespace Elastos {
     namespace Droid {

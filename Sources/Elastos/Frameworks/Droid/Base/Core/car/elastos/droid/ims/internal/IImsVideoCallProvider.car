@@ -1,0 +1,68 @@
+
+module
+{
+    interface Elastos.Droid.Ims.Internal.IIImsVideoCallCallback;
+    interface Elastos.Droid.Telecomm.Telecom.IVideoProfile;
+    interface Elastos.Droid.View.ISurface;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Ims {
+    namespace Internal {
+
+    /**
+     * Internal remote interface for IMS's video call provider.
+     *
+     * At least initially, this aidl mirrors telecomm's {@link IVideoCallProvider}. We created a
+     * separate aidl interface even though the methods and parameters are same because the
+     * {@link IVideoCallProvider} was specifically created as a binder for inter-process communication
+     * between Telecomm and Telephony.
+     *
+     * We don't want to use the same aidl in other places for communication, namely communication
+     * between Telephony and the IMS Service, even if that communication may be for similar methods.
+     * This decouples the communication among these processes. Similarly, third parties implementing a
+     * video call provider will not have the benefit of accessing the internal
+     * {@link IVideoCallProvider} aidl for interprocess communication.
+     *
+     * @see android.telecom.internal.IVideoCallProvider
+     * @see android.telecom.VideoCallProvider
+     * @hide
+     */
+    interface IIImsVideoCallProvider {
+        SetCallback(
+            [in] IIImsVideoCallCallback* cb);
+
+        SetCamera(
+            [in] String cameraId);
+
+        SetPreviewSurface(
+            [in] ISurface* surface);
+
+        SetDisplaySurface(
+            [in] ISurface* surface);
+
+        SetDeviceOrientation(
+            [in] Int32 rotation);
+
+        SetZoom(
+            [in] Float value);
+
+        SendSessionModifyRequest(
+            [in] IVideoProfile* reqProfile);
+
+        SendSessionModifyResponse(
+            [in] IVideoProfile* responseProfile);
+
+        RequestCameraCapabilities();
+
+        RequestCallDataUsage();
+
+        SetPauseImage(
+            [in] String uri);
+    }
+
+    } // namespace Internal
+    } // namespace Ims
+    } // namespace Droid
+    } // namespace Elastos
+}

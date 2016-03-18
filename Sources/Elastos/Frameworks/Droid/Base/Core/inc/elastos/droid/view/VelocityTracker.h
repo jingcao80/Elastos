@@ -27,7 +27,7 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
-class VelocityTracker
+class ECO_PUBLIC VelocityTracker
     : public Object
     , public IVelocityTracker
 {
@@ -79,7 +79,7 @@ public:
             /* [out] */ Float* result);
 
     private:
-        CARAPI_(Float) Estimate(
+        ECO_LOCAL CARAPI_(Float) Estimate(
             /* [in] */ Float time,
             /* [in] */ ArrayOf<Float>* c);
 
@@ -106,35 +106,35 @@ public:
 
     private:
         //Must match VelocityTracker::Estimator::MAX_DEGREE
-        static const Int32 MAX_DEGREE;
+        ECO_LOCAL static const Int32 MAX_DEGREE;
     };
 
 private:
 
-    static CARAPI_(AutoPtr<VelocityTrackerState>) NativeInitialize(
+    ECO_LOCAL static CARAPI_(AutoPtr<VelocityTrackerState>) NativeInitialize(
         /* [in] */ const String& strategy);
 
-    static CARAPI_(void) NativeClear(
+    ECO_LOCAL static CARAPI_(void) NativeClear(
         /* [in] */ VelocityTrackerState* ptr);
 
-    static CARAPI_(void) NativeAddMovement(
+    ECO_LOCAL static CARAPI_(void) NativeAddMovement(
         /* [in] */ VelocityTrackerState* ptr,
         /* [in] */ IMotionEvent* event);
 
-    static CARAPI_(void) NativeComputeCurrentVelocity(
+    ECO_LOCAL static CARAPI_(void) NativeComputeCurrentVelocity(
         /* [in] */ VelocityTrackerState* ptr,
         /* [in] */ Int32 units,
         /* [in] */ Float maxVelocity);
 
-    static CARAPI_(Float) NativeGetXVelocity(
+    ECO_LOCAL static CARAPI_(Float) NativeGetXVelocity(
         /* [in] */ VelocityTrackerState* ptr,
         /* [in] */ Int32 id);
 
-    static CARAPI_(Float) NativeGetYVelocity(
+    ECO_LOCAL static CARAPI_(Float) NativeGetYVelocity(
         /* [in] */ VelocityTrackerState* ptr,
         /* [in] */ Int32 id);
 
-    static CARAPI_(Boolean) NativeGetEstimator(
+    ECO_LOCAL static CARAPI_(Boolean) NativeGetEstimator(
         /* [in] */ VelocityTrackerState* ptr,
         /* [in] */ Int32 id,
         /* [in] */ Estimator* outEstimator);
@@ -204,15 +204,15 @@ public:
         /* [out] */ Boolean* result);
 
 private:
-    VelocityTracker(
+    ECO_LOCAL VelocityTracker(
         /* [in] */ const String& strategy);
 
 public:
     ~VelocityTracker();
 
 private:
-    static const Int32 ACTIVE_POINTER_ID;
-    static AutoPtr<Pools::SynchronizedPool<IVelocityTracker> > sPool;
+   ECO_LOCAL static const Int32 ACTIVE_POINTER_ID;
+   ECO_LOCAL static AutoPtr<Pools::SynchronizedPool<IVelocityTracker> > sPool;
 
 private:
     AutoPtr<VelocityTrackerState> mPtr;

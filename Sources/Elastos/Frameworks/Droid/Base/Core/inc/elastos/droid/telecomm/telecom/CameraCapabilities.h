@@ -23,6 +23,8 @@ class CameraCapabilities
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     /**
      * Create a call camera capabilities instance.
      *

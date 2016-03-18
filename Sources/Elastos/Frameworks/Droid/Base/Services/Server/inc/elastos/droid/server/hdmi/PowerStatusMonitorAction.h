@@ -23,6 +23,27 @@ class PowerStatusMonitorAction
     : public HdmiCecFeatureAction
     , public IPowerStatusMonitorAction
 {
+private:
+    class InnerSub_SendMessageCallback
+        : public Object
+        , public IHdmiControlServiceSendMessageCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_SendMessageCallback(
+            /* [in] */ PowerStatusMonitorAction* host,
+            /* [in] */ Int32 logicalAddress);
+
+        //@Override
+        CARAPI OnSendCompleted(
+            /* [in] */ Int32 error);
+
+    private:
+        PowerStatusMonitorAction* mHost;
+        Int32 mLogicalAddress;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -45,9 +66,8 @@ public:
         /* [in] */ Int32 state);
 
 private:
-    CARAPI HandleReportPowerStatus(
-        /* [in] */ IHdmiCecMessage* cmd,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) HandleReportPowerStatus(
+        /* [in] */ IHdmiCecMessage* cmd);
 
     CARAPI HandleTimeout();
 

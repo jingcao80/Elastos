@@ -104,9 +104,9 @@ namespace Droid {
 namespace Content {
 namespace Pm {
 
-const Boolean PackageParser::DEBUG_JAR = FALSE;
-const Boolean PackageParser::DEBUG_PARSER = FALSE;
-const Boolean PackageParser::DEBUG_BACKUP = FALSE;
+const Boolean PackageParser::DEBUG_JAR = TRUE;
+const Boolean PackageParser::DEBUG_PARSER = TRUE;
+const Boolean PackageParser::DEBUG_BACKUP = TRUE;
 
 const String PackageParser::TAG("PackageParser");
 
@@ -519,8 +519,20 @@ ECode PackageParser::Package::ToString(
     VALIDATE_NOT_NULL(str)
     StringBuilder sb("Package(");
     sb += StringUtils::ToHexString((Int32)this);
-    sb += " ";
+    sb += " packageName=";
     sb += mPackageName;
+    sb += " codePath=";
+    sb += mCodePath;
+    sb += " baseCodePath=";
+    sb += mBaseCodePath;
+    sb += " realPackage=";
+    sb += mRealPackage;
+    sb += " path=";
+    sb += mPath;
+    sb += " versionName=";
+    sb += mVersionName;
+    sb += " sharedUserId=";
+    sb += mSharedUserId;
     sb += "}";
     *str = sb.ToString();
     return NOERROR;
@@ -1434,17 +1446,31 @@ ECode PackageParser::ParsePackage(
     /* [in] */ IFile* packageFile,
     /* [in] */ Int32 flags,
     /* [in] */ ArrayOf<Byte>* readBuffer,
+    /* [in] */ Boolean isEpk,
     /* [out] */ Package** pkgLite)
 {
     VALIDATE_NOT_NULL(pkgLite)
 
+    ECode ec = NOERROR;
     Boolean isDir;
     packageFile->IsDirectory(&isDir);
     if (isDir) {
-        return ParseClusterPackage(packageFile, flags, readBuffer, pkgLite);
+        ec = ParseClusterPackage(packageFile, flags, readBuffer, pkgLite);
+    }
+    else {
+        ec = ParseMonolithicPackage(packageFile, flags, readBuffer, pkgLite);
     }
 
-    return ParseMonolithicPackage(packageFile, flags, readBuffer, pkgLite);
+    // for epk
+    if (*pkgLite != NULL) {
+        String name;
+        packageFile->GetName(&name);
+        if (isEpk || name.EndWith(".epk")) {
+            (*pkgLite)->mIsEpk = TRUE;
+        }
+    }
+
+    return ec;
 }
 
 ECode PackageParser::ParseClusterPackage(
@@ -2297,7 +2323,9 @@ String PackageParser::ValidateName(
         return String(NULL);
     }
     else {
-        return String("must have at least one '.' separator");
+        StringBuilder sb(name);
+        sb += " must have at least one '.' separator";
+        return sb.ToString();
     }
 }
 

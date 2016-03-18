@@ -11,74 +11,74 @@ module
     namespace Telecomm {
     namespace Telecom {
 
-        /**
-         *  Information about a call that is used between InCallService and Telecom.
-         *  @hide
-         *
-         * @Involve
-         * interface IParcelable
-         */
-        interface IParcelableCall {
-            GetId(
-                [out] String* res);
+    /**
+     *  Information about a call that is used between InCallService and Telecom.
+     *  @hide
+     *
+     * @Involve
+     * interface IParcelable
+     */
+    interface IParcelableCall {
+        GetId(
+            [out] String* res);
 
-            GetState(
-                [out] Int32* res);
+        GetState(
+            [out] Int32* res);
 
-            GetDisconnectCause(
-                [out] IDisconnectCause** res);
+        GetDisconnectCause(
+            [out] IDisconnectCause** res);
 
-            GetCannedSmsResponses(
-                [out] IList** res);
+        GetCannedSmsResponses(
+            [out] IList** res);
 
-            GetCapabilities(
-                [out] Int32* res);
+        GetCapabilities(
+            [out] Int32* res);
 
-            GetProperties(
-                [out] Int32* res);
+        GetProperties(
+            [out] Int32* res);
 
-            GetConnectTimeMillis(
-                [out] Int64* res);
+        GetConnectTimeMillis(
+            [out] Int64* res);
 
-            GetHandle(
-                [out] IUri** res);
+        GetHandle(
+            [out] IUri** res);
 
-            GetHandlePresentation(
-                [out] Int32* res);
+        GetHandlePresentation(
+            [out] Int32* res);
 
-            GetCallerDisplayName(
-                [out] String* res);
+        GetCallerDisplayName(
+            [out] String* res);
 
-            GetCallerDisplayNamePresentation(
-                [out] Int32* res);
+        GetCallerDisplayNamePresentation(
+            [out] Int32* res);
 
-            GetGatewayInfo(
-                [out] IGatewayInfo** res);
+        GetGatewayInfo(
+            [out] IGatewayInfo** res);
 
-            GetAccountHandle(
-                [out] IPhoneAccountHandle** res);
+        GetAccountHandle(
+            [out] IPhoneAccountHandle** res);
 
-            GetVideoCall(
-                [out] IInCallServiceVideoCall** res);
+        GetVideoCall(
+            [out] IInCallServiceVideoCall** res);
 
-            GetParentCallId(
-                [out] String* res);
+        GetParentCallId(
+            [out] String* res);
 
-            GetChildCallIds(
-                [out] IList** res);
+        GetChildCallIds(
+            [out] IList** res);
 
-            GetConferenceableCallIds(
-                [out] IList** res);
+        GetConferenceableCallIds(
+            [out] IList** res);
 
-            GetStatusHints(
-                [out] IStatusHints** res);
+        GetStatusHints(
+            [out] IStatusHints** res);
 
-            GetVideoState(
-                [out] Int32* res);
+        GetVideoState(
+            [out] Int32* res);
 
-            GetExtras(
-                [out] IBundle** res);
-        }
+        GetExtras(
+            [out] IBundle** res);
+    }
 
     } // namespace Telecom
     } // namespace Telecomm

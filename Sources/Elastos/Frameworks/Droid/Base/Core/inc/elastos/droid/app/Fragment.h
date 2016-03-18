@@ -116,7 +116,7 @@ public:
     AutoPtr<IFragment> mInstance;
 };
 
-class Fragment
+class ECO_PUBLIC Fragment
     : public Object
     , public IFragment
     , public IComponentCallbacks
@@ -1040,7 +1040,7 @@ public:
     AutoPtr<ISharedElementCallback> mExitTransitionCallback;// = SharedElementCallback.NULL_CALLBACK;
 
 private:
-   static HashMap<String, AutoPtr<IClassInfo> > sClassMap;
+    ECO_LOCAL static HashMap<String, AutoPtr<IClassInfo> > sClassMap;
 };
 
 } // namespace App

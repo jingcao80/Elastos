@@ -3,6 +3,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::EIID_IIRemoteCallback;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,15 +13,20 @@ namespace JavaProxy {
 
 const String CIRemoteCallbackNative::TAG("CIRemoteCallbackNative");
 
-CIRemoteCallbackNative::~CIRemoteCallbackNative(){
+CAR_INTERFACE_IMPL_2(CIRemoteCallbackNative, Object, IIRemoteCallback, IBinder)
+
+CAR_OBJECT_IMPL(CIRemoteCallbackNative)
+
+CIRemoteCallbackNative::~CIRemoteCallbackNative()
+{
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
     env->DeleteGlobalRef(mJInstance);
 }
 
 ECode CIRemoteCallbackNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -29,15 +36,35 @@ ECode CIRemoteCallbackNative::constructor(
 ECode CIRemoteCallbackNative::SendResult(
     /* [in] */ IBundle* data)
 {
-    LOGGERD(TAG, String("CIRemoteCallbackNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    // LOGGERD(TAG, "+ CIRemoteCallbackNative::SendResult()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject jdata = NULL;
+    if (data != NULL) {
+        jdata = Util::ToJavaBundle(env, data);
+    }
+    jclass c = env->FindClass("java/lang/Object");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: Object %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "sendResult", "(Landroid/os/Bundle;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: sendResult %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, jdata);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: sendResult %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jdata);
+
+    // LOGGERD(TAG, "- CIRemoteCallbackNative::SendResult()");
+    return NOERROR;
 }
 
 ECode CIRemoteCallbackNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CIRemoteCallbackNative::ToString()"));
+    // LOGGERD(TAG, "+ CIRemoteCallbackNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -56,7 +83,7 @@ ECode CIRemoteCallbackNative::ToString(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CIRemoteCallbackNative::ToString()"));
+    // LOGGERD(TAG, "- CIRemoteCallbackNative::ToString()");
     return NOERROR;
 }
 

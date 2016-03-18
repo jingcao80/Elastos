@@ -1,7 +1,9 @@
 #include "elastos/droid/os/CSystemProperties.h"
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/R.h"
+#include "elastos/droid/telephony/CTelephonyManager.h"
 #include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include "elastos/droid/telephony/SubscriptionManager.h"
 #include "elastos/droid/text/CSpannableStringBuilder.h"
 #include "elastos/droid/utility/CSparseInt32Array.h"
 #include <elastos/core/Character.h>
@@ -1539,8 +1541,7 @@ ECode PhoneNumberUtils::IsVoiceMailNumber(
     /* [out] */ Boolean* res)
 {
     Int64 id;
-// TODO: Need CSubscriptionManager
-    // CSubscriptionManager::GetDefaultSubId(&id);
+    SubscriptionManager::GetDefaultSubId(&id);
     return IsVoiceMailNumber(id, number, res);
 }
 
@@ -1554,8 +1555,9 @@ ECode PhoneNumberUtils::IsVoiceMailNumber(
     String vmNumber;
 
     // try {
-// TODO: Need TelephonyManager
-    // vmNumber = TelephonyManager.getDefault().getVoiceMailNumber(subId);
+    AutoPtr<ITelephonyManager> tm;
+    CTelephonyManager::GetDefault((ITelephonyManager**)&tm);
+    tm->GetVoiceMailNumber(subId, &vmNumber);
     // } catch (SecurityException ex) {
     //     return false;
     // }
@@ -2164,8 +2166,7 @@ ECode PhoneNumberUtils::IsEmergencyNumberInternal(
 
     String numbers;
     Int32 slotId;
-// TODO: Need CSubscriptionManager
-    // CSubscriptionManager::GetSlotId(subId, &slotId);
+    SubscriptionManager::GetSlotId(subId, &slotId);
     // retrieve the list of emergency numbers
     // check read-write ecclist property first
     String ecclist = (slotId <= 0) ? String("ril.ecclist") : (String("ril.ecclist") + slotId);
@@ -2765,9 +2766,7 @@ ECode PhoneNumberUtils::GetDefaultVoiceSubId(
     /* [out] */ Int64* res)
 {
     VALIDATE_NOT_NULL(res)
-// TODO: Need CSubscriptionManager
-    // return CSubscriptionManager::GetDefaultSubId(res);
-    return NOERROR;
+    return SubscriptionManager::GetDefaultSubId(res);
 }
 
 } // namespace Telephony

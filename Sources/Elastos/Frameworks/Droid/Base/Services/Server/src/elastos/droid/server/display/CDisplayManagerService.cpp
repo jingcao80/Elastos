@@ -9,6 +9,7 @@
 #include "elastos/droid/server/UiThread.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Process.h"
+#include "elastos/droid/os/Binder.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/Manifest.h"
@@ -18,6 +19,7 @@
 #include <elastos/core/Thread.h>
 
 using Elastos::Droid::Manifest;
+using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
@@ -96,28 +98,23 @@ ECode CDisplayManagerService::BinderService::GetDisplayInfo(
 {
     VALIDATE_NOT_NULL(info)
 
-    AutoPtr<IBinderHelper> binder;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binder);
-    Int32 callingUid;
-    binder->GetCallingUid(&callingUid);
-    Int64 token;
-    binder->ClearCallingIdentity(&token);
+    Int32 callingUid = Binder::GetCallingUid();
+    Int64 token = Binder::ClearCallingIdentity();
     mService->GetDisplayInfoInternal(displayId, callingUid, info);
-    binder->RestoreCallingIdentity(token);
+    Binder::RestoreCallingIdentity(token);
     return NOERROR;
 }
 
 ECode CDisplayManagerService::BinderService::GetDisplayIds(
     /* [out, callee] */ ArrayOf<Int32>** ids)
 {
-    AutoPtr<IBinderHelper> binder;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binder);
-    Int32 callingUid;
-    binder->GetCallingUid(&callingUid);
-    Int64 token;
-    binder->ClearCallingIdentity(&token);
+    VALIDATE_NOT_NULL(ids)
+    *ids = NULL;
+
+    Int32 callingUid = Binder::GetCallingUid();
+    Int64 token = Binder::ClearCallingIdentity();
     mService->GetDisplayIdsInternal(callingUid, ids);
-    binder->RestoreCallingIdentity(token);
+    Binder::RestoreCallingIdentity(token);
     return NOERROR;
 }
 
@@ -1044,10 +1041,10 @@ ECode CDisplayManagerService::GetDisplayInfoInternal(
 
     Object* syncRoot = (Object*)mSyncRoot.Get();
     synchronized(syncRoot) {
-        Boolean access;
         HashMap<Int32, AutoPtr<LogicalDisplay> >::Iterator it = mLogicalDisplays.Find(displayId);
         if (it != mLogicalDisplays.End()) {
             AutoPtr<IDisplayInfo> info = it->mSecond->GetDisplayInfoLocked();
+            Boolean access;
             info->HasAccess(callingUid, &access);
             if (access) {
                 *displayInfo = info;
@@ -1568,8 +1565,7 @@ void CDisplayManagerService::AddLogicalDisplayLocked(
     /* [in] */ DisplayDevice* device)
 {
     AutoPtr<DisplayDeviceInfo> deviceInfo = device->GetDisplayDeviceInfoLocked();
-    Boolean isDefault = (deviceInfo->mFlags
-        & DisplayDeviceInfo::FLAG_DEFAULT_DISPLAY) != 0;
+    Boolean isDefault = (deviceInfo->mFlags & DisplayDeviceInfo::FLAG_DEFAULT_DISPLAY) != 0;
     if (isDefault && mLogicalDisplays.Find(IDisplay::DEFAULT_DISPLAY) != mLogicalDisplays.End()) {
         Slogger::W(TAG, "Ignoring attempt to add a second default display: %s", TO_CSTR(deviceInfo));
         isDefault = FALSE;
@@ -1594,6 +1590,8 @@ void CDisplayManagerService::AddLogicalDisplayLocked(
     }
 
     mLogicalDisplays[displayId] = display;
+    Slogger::D(TAG, " >> AddLogicalDisplayLocked: id=%d, device=%p, display=%p, isDefault=%d, layerStack=%d",
+        displayId, device, display.Get(), isDefault, layerStack);
 
     // Wake up waitForDefaultDisplay.
     if (isDefault) {

@@ -1,0 +1,18 @@
+module
+{
+    using interface Elastos.Utility.ITimeZone;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+
+    interface IZoneSelectionListener {
+        // You can add any argument if you really need it...
+        OnZoneSelected(
+            [in] ITimeZone* tz);
+    }
+
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+}

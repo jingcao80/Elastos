@@ -53,10 +53,10 @@ public:
         /* [in] */ Int32 id);
 
     CARAPI GetLastActiveTime(
-        /* [out] */ Int32* lastTime);
+        /* [out] */ Int64* lastTime);
 
     CARAPI SetLastActiveTime(
-        /* [in] */ Int32 lastTime);
+        /* [in] */ Int64 lastTime);
 
     /**
      * The component launched as the first activity in the task.  This can

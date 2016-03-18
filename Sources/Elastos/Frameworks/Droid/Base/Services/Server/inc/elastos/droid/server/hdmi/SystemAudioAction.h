@@ -8,6 +8,7 @@
 #include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
 #include <Elastos.Droid.Hardware.h>
 
+using Elastos::Core::IRunnable;
 using Elastos::Droid::Hardware::Hdmi::IIHdmiControlCallback;
 
 namespace Elastos {
@@ -22,6 +23,42 @@ class SystemAudioAction
     : public HdmiCecFeatureAction
     , public ISystemAudioAction
 {
+private:
+    class InnerSub_Runnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_Runnable(
+            /* [in] */ SystemAudioAction* host);
+
+        //@Override
+        CARAPI Run();
+
+    private:
+        SystemAudioAction* mHost;
+    };
+
+    class InnerSub_SendMessageCallback
+        : public Object
+        , public IHdmiControlServiceSendMessageCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_SendMessageCallback(
+            /* [in] */ SystemAudioAction* host);
+
+        //@Override
+        CARAPI OnSendCompleted(
+            /* [in] */ Int32 error);
+
+    private:
+        SystemAudioAction* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

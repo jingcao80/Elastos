@@ -12,6 +12,11 @@ namespace Telecom {
 //===============================================================
 CAR_INTERFACE_IMPL_2(CameraCapabilities, Object, ICameraCapabilities, IParcelable)
 
+ECode CameraCapabilities::constructor()
+{
+    return NOERROR;
+}
+
 ECode CameraCapabilities::constructor(
     /* [in] */ Boolean zoomSupported,
     /* [in] */ Float maxZoom,

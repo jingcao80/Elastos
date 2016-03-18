@@ -3,9 +3,13 @@
 #define __ELASTOS_DROID_JAVAPROXY_CIWALLPAPERENGINENATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CIWallpaperEngineNative.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Service::Wallpaper::IIWallpaperEngine;
 using Elastos::Droid::View::IMotionEvent;
 
 namespace Elastos {
@@ -13,18 +17,27 @@ namespace Droid {
 namespace JavaProxy {
 
 CarClass(CIWallpaperEngineNative)
+    , public Object
+    , public IIWallpaperEngine
+    , public IBinder
 {
 public:
     ~CIWallpaperEngineNative();
 
-    CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+    CAR_INTERFACE_DECL()
 
+    CAR_OBJECT_DECL()
+
+    CARAPI constructor(
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI SetDesiredSize(
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);
+
+    CARAPI SetDisplayPadding(
+        /* [in] */ IRect* padding);
 
     CARAPI SetVisibility(
         /* [in] */ Boolean visible);

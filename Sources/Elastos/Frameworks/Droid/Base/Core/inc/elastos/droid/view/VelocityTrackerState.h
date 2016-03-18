@@ -15,7 +15,7 @@ namespace View {
 
 using android::BitSet32;
 
-class VelocityTrackerState
+class ECO_PUBLIC VelocityTrackerState
     : public Object
 {
 public:
@@ -53,7 +53,7 @@ private:
     BitSet32 mCalculatedIdBits;
     Velocity mCalculatedVelocity[MAX_POINTERS];
 
-    static const Int32 ACTIVE_POINTER_ID = -1;
+    ECO_LOCAL static const Int32 ACTIVE_POINTER_ID = -1;
 };
 
 } // namespace View

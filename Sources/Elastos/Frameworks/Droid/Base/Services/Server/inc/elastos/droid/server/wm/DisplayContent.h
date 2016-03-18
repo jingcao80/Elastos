@@ -55,13 +55,13 @@ public:
 
     CARAPI_(Boolean) IsPrivate();
 
-    CARAPI_(AutoPtr< List<AutoPtr<TaskStack> > >) GetStacks();
+    CARAPI_(List< AutoPtr<TaskStack> >&) GetStacks();
 
     /**
      * Retrieve the tasks on this display in stack order from the bottommost TaskStack up.
      * @return All the Tasks, in order, on this display.
      */
-    CARAPI_(AutoPtr< List<AutoPtr<Task> > >) GetTasks();
+    CARAPI_(List< AutoPtr<Task> >&) GetTasks();
 
     CARAPI_(AutoPtr<TaskStack>) GetHomeStack();
 

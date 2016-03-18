@@ -1,9 +1,93 @@
 
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Net.h>
+#include <Elastos.CoreLibrary.Text.h>
+#include <Elastos.Droid.App.h>
+#include <Elastos.Droid.Graphics.h>
+#include <Elastos.Droid.Internal.h>
+#include <Elastos.Droid.Net.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.Preference.h>
+#include <Elastos.Droid.Provider.h>
+#include <Elastos.Droid.Service.h>
+#include <Elastos.Droid.Telephony.h>
+#include <Elastos.Droid.Text.h>
 #include "elastos/droid/settings/Utils.h"
+#include "elastos/droid/settings/CUserSpinnerAdapter.h"
+#include "elastos/droid/settings/SettingsActivity.h"
+#include "elastos/droid/settings/drawable/CircleFramedDrawable.h"
+#include "elastos/droid/app/ActivityManagerNative.h"
+#include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "R.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
+using Elastos::Droid::App::ActivityManagerNative;
+using Elastos::Droid::App::IIActivityManager;
+using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::App::IActivityManagerHelper;
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Content::Pm::IComponentInfo;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Content::Pm::IActivityInfo;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::CBitmapFactory;
+using Elastos::Droid::Graphics::IBitmapFactory;
+using Elastos::Droid::Internal::Utility::CUserIcons;
+using Elastos::Droid::Internal::Utility::IUserIcons;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriBuilder;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::IBatteryManager;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::Preference::IPreferenceFrameLayout;
+using Elastos::Droid::Preference::IPreferenceFrameLayoutParams;
+using Elastos::Droid::Provider::IBaseColumns;
+using Elastos::Droid::Provider::IContactsContractSyncColumns;
+using Elastos::Droid::Provider::IContactsContractCommonDataKindsStructuredName;
+using Elastos::Droid::Provider::IContactsContractContactsData;
+using Elastos::Droid::Provider::IContactsContractContactsColumns;
+using Elastos::Droid::Provider::IContactsContractContacts;
 using Elastos::Droid::Provider::CContactsContractContacts;
+using Elastos::Droid::Provider::IContactsContractDataColumns;
 using Elastos::Droid::Provider::CContactsContractProfile;
+using Elastos::Droid::Provider::IContactsContractProfile;
+using Elastos::Droid::Settings::Drawable::CircleFramedDrawable;
+using Elastos::Droid::Service::Persistentdata::IPersistentDataBlockManager;
+using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Text::IBidiFormatter;
+using Elastos::Droid::Text::IBidiFormatterHelper;
+using Elastos::Droid::Text::CBidiFormatterHelper;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::IO::ICloseable;
+using Elastos::IO::IInputStream;
+using Elastos::Net::IInetAddress;
+using Elastos::Text::INumberFormat;
+using Elastos::Text::CNumberFormatHelper;
+using Elastos::Text::INumberFormatHelper;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::CLocale;
+using Elastos::Utility::CLocaleHelper;
+using Elastos::Utility::ILocaleHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -177,7 +261,7 @@ Boolean Utils::UpdateTileToSpecificActivityFromMetaDataOrRemove(
                     metaData->GetInt32(META_DATA_PREFERENCE_ICON, &value);
                     res->GetDrawable(value, (IDrawable**)&icon);
                     metaData->GetInt32(META_DATA_PREFERENCE_TITLE, &value);
-                    res->GetString(value, &tile);
+                    res->GetString(value, &title);
                     metaData->GetInt32(META_DATA_PREFERENCE_SUMMARY, &value);
                     res->GetString(value, &summary);
                 }
@@ -197,8 +281,8 @@ Boolean Utils::UpdateTileToSpecificActivityFromMetaDataOrRemove(
                 // Set icon, title and summary for the preference
                 // TODO:
                 //tile.icon = icon;
-                tile->mTitle = title;
-                tile->mSummary = summary;
+                tile->mTitle = CoreUtils::Convert(title);
+                tile->mSummary = CoreUtils::Convert(summary);
                 // Replace the intent with this specific activity
                 String name;
                 IPackageItemInfo::Probe(activityInfo)->GetPackageName(&name);
@@ -276,16 +360,16 @@ String Utils::FormatIpAddresses(
     Boolean res;
     if (iter->HasNext(&res), !res) return String(NULL);
     // Concatenate all available addresses, comma separated
-    String addresses("");
+    StringBuilder addresses("");
     while (iter->HasNext(&res), res) {
         AutoPtr<IInterface> obj;
         iter->GetNext((IInterface**)&obj);
         String str;
-        IInetAddress::Probe(obj)->GetHostAddress(&value);
+        IInetAddress::Probe(obj)->GetHostAddress(&str);
         addresses += str;
         if (iter->HasNext(&res), res) addresses += "\n";
     }
-    return addresses;
+    return addresses.ToString();
 }
 
 AutoPtr<ILocale> Utils::CreateLocaleFromString(
@@ -435,9 +519,9 @@ void Utils::ForcePrepareCustomPreferencesList(
     /* [in] */ IListView* list,
     /* [in] */ Boolean ignoreSidePadding)
 {
-    list->SetScrollBarStyle(IView::SCROLLBARS_OUTSIDE_OVERLAY);
-    list->SetClipToPadding(FALSE);
-    PrepareCustomPreferencesList(parent, child, list, ignoreSidePadding);
+    IView::Probe(list)->SetScrollBarStyle(IView::SCROLLBARS_OUTSIDE_OVERLAY);
+    IViewGroup::Probe(list)->SetClipToPadding(FALSE);
+    PrepareCustomPreferencesList(parent, child, IView::Probe(list), ignoreSidePadding);
 }
 
 void Utils::PrepareCustomPreferencesList(
@@ -456,7 +540,8 @@ void Utils::PrepareCustomPreferencesList(
         res->GetDimensionPixelSize(R::dimen::settings_side_margin, &paddingSide);
         Int32 paddingBottom;
         res->GetDimensionPixelSize(
-                R::dimen::preference_fragment_padding_bottom, &paddingBottom);
+                Elastos::Droid::R::dimen::preference_fragment_padding_bottom,
+                &paddingBottom);
 
         if (IPreferenceFrameLayout::Probe(parent) != NULL) {
             AutoPtr<IViewGroupLayoutParams> params;
@@ -488,7 +573,7 @@ void Utils::ForceCustomPadding(
             (additive ? (view->GetPaddingEnd(&end), end) : 0);
     Int32 paddingBottom;
     res->GetDimensionPixelSize(
-            R::dimen::preference_fragment_padding_bottom, &paddingBottom);
+            Elastos::Droid::R::dimen::preference_fragment_padding_bottom, &paddingBottom);
 
     view->SetPaddingRelative(paddingStart, 0, paddingEnd, paddingBottom);
 }
@@ -616,12 +701,12 @@ String Utils::GetLocalProfileGivenName(
     // try {
     Boolean res;
     if (localRawProfile->MoveToFirst(&res), !res) {
-        localRawProfile->Close();
+        ICloseable::Probe(localRawProfile)->Close();
         return String(NULL);
     }
     localRawProfile->GetInt64(0, &localRowProfileId);
     // } finally {
-    localRawProfile->Close();
+    ICloseable::Probe(localRawProfile)->Close();
     // }
 
     // Find the structured name for the raw contact.
@@ -647,7 +732,7 @@ String Utils::GetLocalProfileGivenName(
 
     // try {
     if (structuredName->MoveToFirst(&res), !res) {
-        structuredName->Close();
+        ICloseable::Probe(structuredName)->Close();
         return String(NULL);
     }
     String partialName;
@@ -655,7 +740,7 @@ String Utils::GetLocalProfileGivenName(
     if (TextUtils::IsEmpty(partialName)) {
         structuredName->GetString(1, &partialName);
     }
-    structuredName->Close();
+    ICloseable::Probe(structuredName)->Close();
     return partialName;
     // } finally {
         // structuredName->Close();
@@ -668,10 +753,10 @@ String Utils::GetProfileDisplayName(
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
 
-    AutoPtr<IContactsContractProfile> profile;
-    CContactsContractProfile::AcquireSingleton((IContactsContractProfile**)&profile);
+    AutoPtr<IContactsContractProfile> ccProfile;
+    CContactsContractProfile::AcquireSingleton((IContactsContractProfile**)&ccProfile);
     AutoPtr<IUri> uri;
-    profile->GetCONTENT_URI((IUri**)&uri);
+    ccProfile->GetCONTENT_URI((IUri**)&uri);
 
     AutoPtr< ArrayOf<String> > args = ArrayOf<String>::Alloc(1);
     (*args)[0] = IContactsContractContactsColumns::DISPLAY_NAME;
@@ -683,12 +768,12 @@ String Utils::GetProfileDisplayName(
     // try {
     Boolean res;
     if (profile->MoveToFirst(&res), !res) {
-        profile->Close();
+        ICloseable::Probe(profile)->Close();
         return String(NULL);
     }
     String result;
     profile->GetString(0, &result);
-    profile->Close();
+    ICloseable::Probe(profile)->Close();
     return result;
     // } finally {
     //     profile->Close();
@@ -706,8 +791,8 @@ AutoPtr<IDialog> Utils::BuildGlobalChangeWarningDialog(
     builder->SetMessage(R::string::global_change_warning);
     AutoPtr<DialogInterfaceOnClickListener> listener =
             new DialogInterfaceOnClickListener(positiveAction);
-    builder->SetPositiveButton(R::string::ok, listener);
-    builder->SetNegativeButton(R::string::cancel, NULL);
+    builder->SetPositiveButton(Elastos::Droid::R::string::ok, listener);
+    builder->SetNegativeButton(Elastos::Droid::R::string::cancel, NULL);
 
     AutoPtr<IAlertDialog> dia;
     builder->Create((IAlertDialog**)&dia);
@@ -863,7 +948,11 @@ AutoPtr<UserSpinnerAdapter> Utils::CreateUserSpinnerAdapter(
                 userManager, context);
         userDetails->Add((IObject*)detail);
     }
-    return new UserSpinnerAdapter(context, userDetails);
+
+    AutoPtr<ISpinnerAdapter> adapter;
+    CUserSpinnerAdapter::New(context, userDetails, (ISpinnerAdapter**)&adapter);
+
+    return (UserSpinnerAdapter*)adapter.Get();
 }
 
 AutoPtr<IUserHandle> Utils::GetSecureTargetUser(
@@ -895,7 +984,7 @@ AutoPtr<IUserHandle> Utils::GetSecureTargetUser(
     AutoPtr<IUserHandle> extrasUser;
     if (intentExtras != NULL) {
         AutoPtr<IParcelable> parcelable;
-        intentExtras->GetParcelable(EXTRA_USER, (IParcelable**)&parcelable);
+        intentExtras->GetParcelable(IIntent::EXTRA_USER, (IParcelable**)&parcelable);
         extrasUser = IUserHandle::Probe(parcelable);
     }
     if (extrasUser != NULL && (extrasUser->Equals(currentUser, &res), !res)) {
@@ -907,7 +996,7 @@ AutoPtr<IUserHandle> Utils::GetSecureTargetUser(
     AutoPtr<IUserHandle> argumentsUser;
     if (arguments != NULL) {
         AutoPtr<IParcelable> parcelable;
-        arguments->GetParcelable(EXTRA_USER, (IParcelable**)&parcelable);
+        arguments->GetParcelable(IIntent::EXTRA_USER, (IParcelable**)&parcelable);
         argumentsUser = IUserHandle::Probe(parcelable);
     }
     if (argumentsUser != NULL && (argumentsUser->Equals(currentUser, &res), !res)) {
@@ -945,7 +1034,7 @@ AutoPtr<IUserHandle> Utils::GetInsecureTargetUser(
     AutoPtr<IUserHandle> extrasUser;
     if (intentExtras != NULL) {
         AutoPtr<IParcelable> parcelable;
-        intentExtras->GetParcelable(EXTRA_USER, (IParcelable**)&parcelable);
+        intentExtras->GetParcelable(IIntent::EXTRA_USER, (IParcelable**)&parcelable);
         extrasUser = IUserHandle::Probe(parcelable);
     }
     if (extrasUser != NULL && (extrasUser->Equals(currentUser, &res), !res)) {
@@ -955,7 +1044,7 @@ AutoPtr<IUserHandle> Utils::GetInsecureTargetUser(
     AutoPtr<IUserHandle> argumentsUser;
     if (arguments != NULL) {
         AutoPtr<IParcelable> parcelable;
-        arguments->GetParcelable(EXTRA_USER, (IParcelable**)&parcelable);
+        arguments->GetParcelable(IIntent::EXTRA_USER, (IParcelable**)&parcelable);
         argumentsUser = IUserHandle::Probe(parcelable);
     }
     if (argumentsUser != NULL && (argumentsUser->Equals(currentUser, &res), !res)) {
@@ -1019,7 +1108,7 @@ AutoPtr<IDialog> Utils::CreateRemoveConfirmationDialog(
     builder->SetTitle(titleResId);
     builder->SetMessage(messageResId);
     builder->SetPositiveButton(R::string::user_delete_button, onConfirmListener);
-    builder->SetNegativeButton(android.R::string::cancel, NULL);
+    builder->SetNegativeButton(Elastos::Droid::R::string::cancel, NULL);
     AutoPtr<IAlertDialog> dialog;
     builder->Create((IAlertDialog**)&dialog);
     AutoPtr<IDialog> dlg = IDialog::Probe(dialog);
@@ -1058,13 +1147,14 @@ AutoPtr<IDrawable> Utils::GetUserIcon(
 {
     String iconPath;
     user->GetIconPath(&iconPath);
+    Int32 id;
+    user->GetId(&id);
     if (!iconPath.IsNull()) {
-        Int32 id;
-        user->GetId(&id);
         AutoPtr<IBitmap> icon;
         um->GetUserIcon(id, (IBitmap**)&icon);
         if (icon != NULL) {
-            return (IDrawable*)CircleFramedDrawable::GetInstance(context, icon);
+            AutoPtr<CircleFramedDrawable> cfd = CircleFramedDrawable::GetInstance(context, icon);
+            return (IDrawable*)cfd.Get();
         }
     }
     AutoPtr<IUserIcons> userIcons;
@@ -1091,13 +1181,13 @@ Boolean Utils::IsSystemPackage(
     /* [in] */ IPackageInfo* pkg)
 {
     if (sSystemSignature == NULL) {
-        AutoPtr< ArrayOf<ISignature*> > signatures = ArrayOf<ISignature>::Alloc(1);
+        AutoPtr< ArrayOf<ISignature*> > signatures = ArrayOf<ISignature*>::Alloc(1);
         signatures->Set(0, GetSystemSignature(pm));
         sSystemSignature = signatures;
     }
     Boolean res;
     return (*sSystemSignature)[0] != NULL &&
-            ((*sSystemSignature)[0]->Equals(GetFirstSignature(pkg), &res), res);
+            (IObject::Probe((*sSystemSignature)[0])->Equals(GetFirstSignature(pkg), &res), res);
 }
 
 AutoPtr<ISignature> Utils::GetFirstSignature(
@@ -1122,7 +1212,7 @@ AutoPtr<ISignature> Utils::GetSystemSignature(
     AutoPtr<IPackageInfo> sys;
     ECode ec = pm->GetPackageInfo(String("android"),
             IPackageManager::GET_SIGNATURES, (IPackageInfo**)&sys);
-    if (SUCCEED(ec)) {
+    if (SUCCEEDED(ec)) {
         return GetFirstSignature(sys);
     }
     // } catch (NameNotFoundException e) {
@@ -1135,9 +1225,7 @@ String Utils::FormatElapsedTime(
     /* [in] */ Double millis,
     /* [in] */ Boolean withSeconds)
 {
-    StringBuilder sb;
-    using Elastos::Core::Math;
-    Int32 seconds = (Int32) Math::Floor(millis / 1000);
+    Int32 seconds = (Int32) Elastos::Core::Math::Floor(millis / 1000);
     if (!withSeconds) {
         // Round up.
         seconds += 30;
@@ -1157,42 +1245,70 @@ String Utils::FormatElapsedTime(
         seconds -= minutes * SECONDS_PER_MINUTE;
     }
 
+    StringBuilder sb;
     String str;
     if (withSeconds) {
         if (days > 0) {
-            context->GetString(R::string::battery_history_days,
-                    days, hours, minutes, seconds, &str);
+            AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(4);
+            (*formatArgs)[0] = CoreUtils::Convert(days);
+            (*formatArgs)[1] = CoreUtils::Convert(hours);
+            (*formatArgs)[2] = CoreUtils::Convert(minutes);
+            (*formatArgs)[3] = CoreUtils::Convert(seconds);
+
+            context->GetString(R::string::battery_history_days, formatArgs, &str);
             sb.Append(str);
         }
         else if (hours > 0) {
-            context->GetString(R::string::battery_history_hours,
-                    hours, minutes, seconds, &str);
+            AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(3);
+            (*formatArgs)[0] = CoreUtils::Convert(hours);
+            (*formatArgs)[1] = CoreUtils::Convert(minutes);
+            (*formatArgs)[2] = CoreUtils::Convert(seconds);
+
+            context->GetString(R::string::battery_history_hours, formatArgs, &str);
             sb.Append(str);
         }
         else if (minutes > 0) {
-            context->GetString(R::string::battery_history_minutes, minutes,
-                    seconds, &str);
+            AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(2);
+            (*formatArgs)[0] = CoreUtils::Convert(minutes);
+            (*formatArgs)[1] = CoreUtils::Convert(seconds);
+
+            context->GetString(R::string::battery_history_minutes, formatArgs, &str);
             sb.Append(str);
         }
         else {
-            context->GetString(R::string::battery_history_seconds, seconds, &str);
+            AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(1);
+            (*formatArgs)[0] = CoreUtils::Convert(seconds);
+
+            context->GetString(R::string::battery_history_seconds, formatArgs, &str);
             sb.Append(str);
         }
     }
     else {
         if (days > 0) {
+            AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(3);
+            (*formatArgs)[0] = CoreUtils::Convert(days);
+            (*formatArgs)[1] = CoreUtils::Convert(hours);
+            (*formatArgs)[2] = CoreUtils::Convert(minutes);
+
             context->GetString(R::string::battery_history_days_no_seconds,
-                    days, hours, minutes, &str);
+                    formatArgs, &str);
             sb.Append(str);
         }
         else if (hours > 0) {
+            AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(2);
+            (*formatArgs)[0] = CoreUtils::Convert(hours);
+            (*formatArgs)[1] = CoreUtils::Convert(minutes);
+
             context->GetString(R::string::battery_history_hours_no_seconds,
-                    hours, minutes, &str);
+                    formatArgs, &str);
             sb.Append(str);
         }
         else {
+            AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(1);
+            (*formatArgs)[0] = CoreUtils::Convert(minutes);
+
             context->GetString(R::string::battery_history_minutes_no_seconds,
-                    minutes, &str);
+                    formatArgs, &str);
             sb.Append(str);
         }
     }

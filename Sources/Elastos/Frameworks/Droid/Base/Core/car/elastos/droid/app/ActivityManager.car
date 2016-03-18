@@ -1292,10 +1292,10 @@ module
             [in] Int32 id);
 
         GetLastActiveTime(
-            [out] Int32* lastTime);
+            [out] Int64* lastTime);
 
         SetLastActiveTime(
-            [in] Int32 lastTime);
+            [in] Int64 lastTime);
 
         /**
          * The component launched as the first activity in the task.  This can

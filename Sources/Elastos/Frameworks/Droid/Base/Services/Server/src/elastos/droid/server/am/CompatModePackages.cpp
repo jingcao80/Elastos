@@ -192,16 +192,16 @@ void CompatModePackages::HandlePackageAddedLocked(
 AutoPtr<ICompatibilityInfo> CompatModePackages::CompatibilityInfoForPackageLocked(
     /* [in] */ IApplicationInfo* ai)
 {
-    Int32 layout;
+    Int32 layout, widthDp;
     mService->mConfiguration->GetScreenLayout(&layout);
-    Int32 widthDp;
     mService->mConfiguration->GetSmallestScreenWidthDp(&widthDp);
     String pkgName;
     IPackageItemInfo::Probe(ai)->GetPackageName(&pkgName);
     AutoPtr<ICompatibilityInfo> ci;
     CCompatibilityInfo::New(ai, layout, widthDp,
         (GetPackageFlags(pkgName)&COMPAT_FLAG_ENABLED) != 0, (ICompatibilityInfo**)&ci);
-    // Slogger::I(TAG, "*********** COMPAT FOR PKG  ai.packageName :%s  + ci ", pkgName.string());
+    Slogger::I(TAG, "*********** COMPAT FOR PKG  ai.packageName :%s, %s",
+        pkgName.string(), TO_CSTR(ci));
     return ci;
 }
 

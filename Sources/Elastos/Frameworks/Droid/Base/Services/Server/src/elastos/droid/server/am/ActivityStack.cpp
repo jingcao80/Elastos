@@ -10,6 +10,7 @@
 #include "elastos/droid/server/am/ActivityRecord.h"
 #include "elastos/droid/server/am/ActivityStack.h"
 #include "elastos/droid/server/am/ActivityState.h"
+#include "elastos/droid/server/am/ActivityContainer.h"
 #include "elastos/droid/server/wm/AppTransition.h"
 #include "elastos/droid/server/wm/TaskGroup.h"
 #include "elastos/droid/server/Watchdog.h"
@@ -76,6 +77,8 @@ namespace Droid {
 namespace Server {
 namespace Am {
 
+static const String TAG("ActivityStack");
+
 //=====================================================================
 //                  ActivityStack::ScheduleDestroyArgs
 //=====================================================================
@@ -111,7 +114,7 @@ ECode ActivityStack::ActivityStackHandler::HandleMessage(
             ActivityRecord* r = (ActivityRecord*)(IObject::Probe(obj));
             // We don't at this point know if the activity is fullscreen,
             // so we need to be conservative and assume it isn't.
-            Slogger::W("ActivityStack::ActivityStackHandler::HandleMessage", "Activity pause timeout for %s", r->ToString().string());
+            Slogger::W("ActivityStack::ActivityStackHandler::HandleMessage", "Activity pause timeout for %s", TO_CSTR(r));
             {
                 AutoLock lock(mOwner->mService);
                 if (r->mApp != NULL) {
@@ -138,7 +141,7 @@ ECode ActivityStack::ActivityStackHandler::HandleMessage(
             // We don't at this point know if the activity is fullscreen,
             // so we need to be conservative and assume it isn't.
             Slogger::W("ActivityStack::ActivityStackHandler::HandleMessage",
-                    "Activity destroy timeout for %s", r->ToString().string());
+                    "Activity destroy timeout for %s", TO_CSTR(r));
             {
                 AutoLock lock(mOwner->mService);
                 mOwner->ActivityDestroyedLocked(r != NULL? IBinder::Probe(r->mAppToken) : NULL);
@@ -151,7 +154,7 @@ ECode ActivityStack::ActivityStackHandler::HandleMessage(
             // We don't at this point know if the activity is fullscreen,
             // so we need to be conservative and assume it isn't.
             Slogger::W("ActivityStack::ActivityStackHandler::HandleMessage",
-                    "Activity stop timeout for %s", r->ToString().string());
+                    "Activity stop timeout for %s", TO_CSTR(r));
             {
                 AutoLock lock(mOwner->mService);
                 if (r->IsInHistory()) {
@@ -179,7 +182,7 @@ ECode ActivityStack::ActivityStackHandler::HandleMessage(
                 AutoLock lock(mOwner->mService);
                 AutoPtr<ActivityRecord> r = mOwner->GetVisibleBehindActivity();
                 Slogger::E("ActivityStack::ActivityStackHandler::HandleMessage",
-                        "Timeout waiting for cancelVisibleBehind player=%s", r->ToString().string());
+                        "Timeout waiting for cancelVisibleBehind player=%s", TO_CSTR(r));
                 if (r != NULL) {
                     mOwner->mService->KillAppAtUsersRequest(r->mApp, NULL);
                 }
@@ -222,7 +225,7 @@ const Int32 ActivityStack::FINISH_AFTER_PAUSE;
 const Int32 ActivityStack::FINISH_AFTER_VISIBLE;
 
 ActivityStack::ActivityStack(
-    /* [in] */ ActivityStackSupervisor::ActivityContainer* activityContainer)
+    /* [in] */ IIActivityContainer* activityContainer)
     : mConfigWillChange(FALSE)
     , mLaunchStartTime(0)
     , mFullyDrawnStartTime(0)
@@ -230,14 +233,15 @@ ActivityStack::ActivityStack(
     , mDisplayId(0)
     , mInResumeTopActivity(FALSE)
 {
+    ActivityContainer* ac = (ActivityContainer*)activityContainer;
     mActivityContainer = activityContainer;
-    mStackSupervisor = activityContainer->GetOuter();
+    mStackSupervisor = ac->GetOuter();
     mService = mStackSupervisor->mService;
     AutoPtr<ILooper> looper;
     mService->mHandler->GetLooper((ILooper**)&looper);
     mHandler = new ActivityStackHandler(looper, this);
     mWindowManager = mService->mWindowManager;
-    mStackId = activityContainer->mStackId;
+    mStackId = ac->mStackId;
     mCurrentUser = mService->mCurrentUserId;//TODO friend this class in ActivityManagerService
 
     CArrayList::New((IArrayList**)&mTaskHistory);
@@ -405,7 +409,7 @@ AutoPtr<ActivityRecord> ActivityStack::IsInStackLocked(
 
             if (activitiesContainsTask && taskHistoryContainsTask) {
                 if (task->mStack != this)
-                    Slogger::W(CActivityManagerService::TAG, "Illegal state! task does not point to stack it is in.");
+                    Slogger::W(TAG, "Illegal state! task does not point to stack it is in.");
                 return r;
             }
         }
@@ -429,8 +433,8 @@ Boolean ActivityStack::IsHomeStack()
 
 Boolean ActivityStack::IsOnHomeDisplay()
 {
-    return IsAttached() &&
-            mActivityContainer->mActivityDisplay->mDisplayId == IDisplay::DEFAULT_DISPLAY;
+    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
+    return IsAttached() && ac->mActivityDisplay->mDisplayId == IDisplay::DEFAULT_DISPLAY;
 }
 
 void ActivityStack::MoveToFront()
@@ -483,7 +487,7 @@ AutoPtr<ActivityRecord> ActivityStack::FindTaskLocked(
         intent->GetData((IUri**)&documentData);
     }
 
-    //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(CActivityManagerService::TAG, "Looking for task of " + target + " in " + this);
+    //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Looking for task of " + target + " in " + this);
     Int32 size;
     mTaskHistory->GetSize(&size);
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
@@ -492,18 +496,18 @@ AutoPtr<ActivityRecord> ActivityStack::FindTaskLocked(
         AutoPtr<TaskRecord> task = (TaskRecord*)(IObject::Probe(obj));
         if (task->mVoiceSession != NULL) {
             // We never match voice sessions; those always run independently.
-            if (CActivityManagerService::DEBUG_TASKS) Slogger::D(CActivityManagerService::TAG, "Skipping %s: voice session", task->ToString().string());
+            if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Skipping %s: voice session", task->ToString().string());
             continue;
         }
         if (task->mUserId != userId) {
             // Looking for a different task.
-            if (CActivityManagerService::DEBUG_TASKS) Slogger::D(CActivityManagerService::TAG, "Skipping %s: different user", task->ToString().string());
+            if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Skipping %s: different user", task->ToString().string());
             continue;
         }
         AutoPtr<ActivityRecord> r = task->GetTopActivity();
         if (r == NULL || r->mFinishing || r->mUserId != userId ||
                 r->mLaunchMode == IActivityInfo::LAUNCH_SINGLE_INSTANCE) {
-            if (CActivityManagerService::DEBUG_TASKS) Slogger::D(CActivityManagerService::TAG, "Skipping %s: mismatch root %s", task->ToString().string(), r->ToString().string());
+            if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Skipping %s: mismatch root %s", task->ToString().string(), TO_CSTR(r));
             continue;
         }
 
@@ -528,13 +532,13 @@ AutoPtr<ActivityRecord> ActivityStack::FindTaskLocked(
             taskIsDocument = FALSE;
         }
 
-        if (CActivityManagerService::DEBUG_TASKS) Slogger::D(CActivityManagerService::TAG, "Comparing existing cls=");
+        if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Comparing existing cls=");
         //        + taskIntent.getComponent().flattenToShortString()
         //        + "/aff=" + r.task.rootAffinity + " to new cls="
         //        + intent.getComponent().flattenToShortString() + "/aff=" + info.taskAffinity);
         if (!isDocument && !taskIsDocument && (!task->mRootAffinity.IsNull())) {
             if (task->mRootAffinity.Equals(target->mTaskAffinity)) {
-                if (CActivityManagerService::DEBUG_TASKS) Slogger::D(CActivityManagerService::TAG, "Found matching affinity!");
+                if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Found matching affinity!");
                 return r;
             }
             return NULL;
@@ -546,9 +550,9 @@ AutoPtr<ActivityRecord> ActivityStack::FindTaskLocked(
             Boolean equals;
             IObject::Probe(documentData)->Equals(TO_IINTERFACE(taskDocumentData), &equals);
             if (result == 0 && equals) {
-                if (CActivityManagerService::DEBUG_TASKS) Slogger::D(CActivityManagerService::TAG, "Found matching class!");
+                if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Found matching class!");
                 //dump();
-                //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(CActivityManagerService::TAG, "For Intent " + intent + " bringing to top: " + r.intent);
+                //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
                 return r;
             }
         }
@@ -560,14 +564,14 @@ AutoPtr<ActivityRecord> ActivityStack::FindTaskLocked(
             Boolean equals;
             IObject::Probe(documentData)->Equals(TO_IINTERFACE(taskDocumentData), &equals);
             if (result == 0 && equals) {
-                if (CActivityManagerService::DEBUG_TASKS) Slogger::D(CActivityManagerService::TAG, "Found matching class!!");
+                if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Found matching class!!");
                 //dump();
-                //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(CActivityManagerService::TAG, "For Intent " + intent + " bringing to top: " + r.intent);
+                //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
                 return r;
             }
         }
         if (CActivityManagerService::DEBUG_TASKS) {
-            Slogger::D(CActivityManagerService::TAG, "Not a match: %s", task->ToString().string());
+            Slogger::D(TAG, "Not a match: %s", task->ToString().string());
         }
     }
 
@@ -616,9 +620,9 @@ AutoPtr<ActivityRecord> ActivityStack::FindActivityLocked(
                 Boolean equals;
                 IObject::Probe(clstmp)->Equals(TO_IINTERFACE(cls), &equals);
                 if (equals && r->mUserId == userId) {
-                    //Slog.i(CActivityManagerService::TAG, "Found matching class!");
+                    //Slogger::I(TAG, "Found matching class!");
                     //dump();
-                    //Slog.i(CActivityManagerService::TAG, "For Intent " + intent + " bringing to top: " + r.intent);
+                    //Slogger::I(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
                     return r;
                 }
             }
@@ -644,7 +648,7 @@ void ActivityStack::SwitchUserLocked(
         mTaskHistory->Get(i, (IInterface**)&obj);
         AutoPtr<TaskRecord> task = (TaskRecord*)(IObject::Probe(obj));
         if (IsCurrentProfileLocked(task->mUserId)) {
-            //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(CActivityManagerService::TAG, "switchUserLocked: stack=" + getStackId() + " moving " + task + " to top");
+            //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "switchUserLocked: stack=" + getStackId() + " moving " + task + " to top");
             mTaskHistory->Remove(i);
             mTaskHistory->Add(TO_IINTERFACE(task));
             --index;
@@ -662,7 +666,7 @@ void ActivityStack::MinimalResumeActivityLocked(
     /* [in] */ ActivityRecord* r)
 {
     r->mState = ActivityState_RESUMED;
-    //if (ActivityStackSupervisor::DEBUG_STATES) Slog.v(CActivityManagerService::TAG, "Moving to RESUMED: " + r + " (starting new instance)");
+    //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to RESUMED: " + r + " (starting new instance)");
     r->mStopped = FALSE;
     mResumedActivity = r;
     r->mTask->TouchActiveTime();
@@ -671,7 +675,7 @@ void ActivityStack::MinimalResumeActivityLocked(
     mStackSupervisor->CheckReadyForSleepLocked();
     SetLaunchTime(r);
     //if (ActivityStackSupervisor::DEBUG_SAVED_STATE)
-    //    Slogger::I(CActivityManagerService::TAG, "Launch completed; removing icicle of " + r->mIcicle->ToString().string());
+    //    Slogger::I(TAG, "Launch completed; removing icicle of " + r->mIcicle->ToString().string());
 }
 
 void ActivityStack::SetLaunchTime(
@@ -725,16 +729,16 @@ Boolean ActivityStack::CheckReadyForSleepLocked()
     if (mResumedActivity != NULL) {
         // Still have something resumed; can't sleep until it is paused.
         if (CActivityManagerService::DEBUG_PAUSE)
-            Slogger::V(CActivityManagerService::TAG, "Sleep needs to pause %s", mResumedActivity->ToString().string());
+            Slogger::V(TAG, "Sleep needs to pause %s", mResumedActivity->ToString().string());
         if (CActivityManagerService::DEBUG_USER_LEAVING)
-            Slogger::V(CActivityManagerService::TAG, "Sleep => pause with userLeaving=false");
+            Slogger::V(TAG, "Sleep => pause with userLeaving=false");
         StartPausingLocked(FALSE, TRUE, FALSE, FALSE);
         return TRUE;
     }
     if (mPausingActivity != NULL) {
         // Still waiting for something to pause; can't sleep yet.
         if (CActivityManagerService::DEBUG_PAUSE)
-            Slogger::V(CActivityManagerService::TAG, "Sleep still waiting to pause %s", mPausingActivity->ToString().string());
+            Slogger::V(TAG, "Sleep still waiting to pause %s", mPausingActivity->ToString().string());
         return TRUE;
     }
 
@@ -768,9 +772,9 @@ void ActivityStack::GoToSleep()
 AutoPtr<IBitmap> ActivityStack::ScreenshotActivities(
     /* [in] */ ActivityRecord* who)
 {
-    if (ActivityStackSupervisor::DEBUG_SCREENSHOTS) Slogger::D(CActivityManagerService::TAG, "screenshotActivities: %s", who->ToString().string());
+    if (ActivityStackSupervisor::DEBUG_SCREENSHOTS) Slogger::D(TAG, "screenshotActivities: %s", who->ToString().string());
     if (who->mNoDisplay) {
-        if (ActivityStackSupervisor::DEBUG_SCREENSHOTS) Slogger::D(CActivityManagerService::TAG, "\tNo display");
+        if (ActivityStackSupervisor::DEBUG_SCREENSHOTS) Slogger::D(TAG, "\tNo display");
         return NULL;
     }
 
@@ -780,7 +784,7 @@ AutoPtr<IBitmap> ActivityStack::ScreenshotActivities(
         // the case where the most recent task is not the task that was supplied, then the stack
         // has changed, so invalidate the last screenshot().
         InvalidateLastScreenshot();
-        if (ActivityStackSupervisor::DEBUG_SCREENSHOTS) Slogger::D(CActivityManagerService::TAG, "\tIs Home stack? %d", IsHomeStack());
+        if (ActivityStackSupervisor::DEBUG_SCREENSHOTS) Slogger::D(TAG, "\tIs Home stack? %d", IsHomeStack());
         return NULL;
     }
 
@@ -792,13 +796,15 @@ AutoPtr<IBitmap> ActivityStack::ScreenshotActivities(
                 || mLastScreenshotActivity->mState == ActivityState_RESUMED
                 || (mLastScreenshotBitmap->GetWidth(&width), width) != w
                 || (mLastScreenshotBitmap->GetHeight(&height), height) != h) {
-            if (ActivityStackSupervisor::DEBUG_SCREENSHOTS) Slogger::D(CActivityManagerService::TAG, "\tUpdating screenshot");
+            if (ActivityStackSupervisor::DEBUG_SCREENSHOTS) Slogger::D(TAG, "\tUpdating screenshot");
             mLastScreenshotActivity = who;
-            //TODO mLastScreenshotBitmap = mWindowManager->ScreenshotApplications(
-            //        IBinder::Probe(who->mAppToken), IDisplay::DEFAULT_DISPLAY, w, h, SCREENSHOT_FORCE_565);
+            mLastScreenshotBitmap = NULL;
+            mWindowManager->ScreenshotApplications(
+                IBinder::Probe(who->mAppToken), IDisplay::DEFAULT_DISPLAY, w, h,
+                SCREENSHOT_FORCE_565, (IBitmap**)&mLastScreenshotBitmap);
         }
         if (mLastScreenshotBitmap != NULL) {
-            if (ActivityStackSupervisor::DEBUG_SCREENSHOTS) Slogger::D(CActivityManagerService::TAG, "\tReusing last screenshot");
+            if (ActivityStackSupervisor::DEBUG_SCREENSHOTS) Slogger::D(TAG, "\tReusing last screenshot");
             BitmapConfig config;
             mLastScreenshotBitmap->GetConfig(&config);
             AutoPtr<IBitmap> bitmap;
@@ -806,7 +812,7 @@ AutoPtr<IBitmap> ActivityStack::ScreenshotActivities(
             return bitmap;
         }
     }
-    Slogger::E(CActivityManagerService::TAG, "Invalid thumbnail dimensions: %d x %d", w, h);
+    Slogger::E(TAG, "Invalid thumbnail dimensions: %d x %d", w, h);
     return NULL;
 }
 
@@ -817,27 +823,28 @@ Boolean ActivityStack::StartPausingLocked(
     /* [in] */ Boolean dontWait)
 {
     if (mPausingActivity != NULL) {
-        //Slogger::Wtf(CActivityManagerService::TAG, "Going to pause when pause is already pending for " + mPausingActivity);
+        //Slogger::Wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity);
         CompletePauseLocked(FALSE);
     }
     AutoPtr<ActivityRecord> prev = mResumedActivity;
     if (prev == NULL) {
         if (!resuming) {
-            //Slogger::Wtf(CActivityManagerService::TAG, "Trying to pause when nothing is resumed");
+            //Slogger::Wtf(TAG, "Trying to pause when nothing is resumed");
             mStackSupervisor->ResumeTopActivitiesLocked();
         }
         return FALSE;
     }
 
-    if (mActivityContainer->mParentActivity == NULL) {
+    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
+    if (ac->mParentActivity == NULL) {
         // Top level stack, not a child. Look for child stacks.
         mStackSupervisor->PauseChildStacks(prev, userLeaving, uiSleeping, resuming, dontWait);
     }
 
     if (ActivityStackSupervisor::DEBUG_STATES)
-        Slogger::V(CActivityManagerService::TAG, "Moving to PAUSING: %s", prev->ToString().string());
+        Slogger::V(TAG, "Moving to PAUSING: %s", TO_CSTR(prev));
     else if (CActivityManagerService::DEBUG_PAUSE)
-        Slogger::V(CActivityManagerService::TAG, "Start pausing: %s", prev->ToString().string());
+        Slogger::V(TAG, "Start pausing: %s", TO_CSTR(prev));
     mResumedActivity = NULL;
     mPausingActivity = prev;
     mLastPausedActivity = prev;
@@ -860,20 +867,21 @@ Boolean ActivityStack::StartPausingLocked(
 
     if (prev->mApp != NULL && prev->mApp->mThread != NULL) {
         if (CActivityManagerService::DEBUG_PAUSE)
-            Slogger::V(CActivityManagerService::TAG, "Enqueueing pending pause: %s", prev->ToString().string());
+            Slogger::V(TAG, "Enqueueing pending pause: %s", TO_CSTR(prev));
         //try {
             //TODO EventLog.writeEvent(EventLogTags.AM_PAUSE_ACTIVITY, prev.userId, System.identityHashCode(prev), prev.shortComponentName);
-            mService->UpdateUsageStats(prev, FALSE);
-            prev->mApp->mThread->SchedulePauseActivity(IBinder::Probe(prev->mAppToken), prev->mFinishing,
-                    userLeaving, prev->mConfigChangeFlags, dontWait);
-        //} catch (Exception e) {
-        //    // Ignore exception, if process died other code will cleanup.
-        //    Slogger::W(CActivityManagerService::TAG, "Exception thrown during pause", e);
-        //    mPausingActivity = NULL;
-        //    mLastPausedActivity = NULL;
-        //    mLastNoHistoryActivity = NULL;
-        //}
-    } else {
+        mService->UpdateUsageStats(prev, FALSE);
+        ECode ec = prev->mApp->mThread->SchedulePauseActivity(IBinder::Probe(prev->mAppToken), prev->mFinishing,
+                userLeaving, prev->mConfigChangeFlags, dontWait);
+        if (FAILED(ec)) {
+            // Ignore exception, if process died other code will cleanup.
+            Slogger::W(TAG, "Exception thrown during pause. ec=%08x", ec);
+            mPausingActivity = NULL;
+            mLastPausedActivity = NULL;
+            mLastNoHistoryActivity = NULL;
+        }
+    }
+    else {
         mPausingActivity = NULL;
         mLastPausedActivity = NULL;
         mLastNoHistoryActivity = NULL;
@@ -894,7 +902,7 @@ Boolean ActivityStack::StartPausingLocked(
             prev->PauseKeyDispatchingLocked();
         } else {
             if (CActivityManagerService::DEBUG_PAUSE)
-                Slogger::V(CActivityManagerService::TAG, "Key dispatch not paused for screen off");
+                Slogger::V(TAG, "Key dispatch not paused for screen off");
         }
 
         if (dontWait) {
@@ -914,7 +922,7 @@ Boolean ActivityStack::StartPausingLocked(
             Boolean result;
             mHandler->SendMessageDelayed(msg, PAUSE_TIMEOUT, &result);
             if (CActivityManagerService::DEBUG_PAUSE)
-                Slogger::V(CActivityManagerService::TAG, "Waiting for pause to complete...");
+                Slogger::V(TAG, "Waiting for pause to complete...");
             return TRUE;
         }
 
@@ -922,7 +930,7 @@ Boolean ActivityStack::StartPausingLocked(
         // This activity failed to schedule the
         // pause, so just treat it as being paused now.
         if (CActivityManagerService::DEBUG_PAUSE)
-            Slogger::V(CActivityManagerService::TAG, "Activity not running, resuming next.");
+            Slogger::V(TAG, "Activity not running, resuming next.");
         if (!resuming) {
             mStackSupervisor->GetFocusedStack()->ResumeTopActivityLocked(NULL);
         }
@@ -936,13 +944,13 @@ void ActivityStack::ActivityPausedLocked(
     /* [in] */ Boolean timeout)
 {
     //if (CActivityManagerService::DEBUG_PAUSE)
-    //  Slogger::V( CActivityManagerService::TAG, "Activity paused: token=" + token + ", timeout=" + timeout);
+    //  Slogger::V( TAG, "Activity paused: token=" + token + ", timeout=" + timeout);
 
     AutoPtr<ActivityRecord> r = IsInStackLocked(token);
     if (r != NULL) {
         mHandler->RemoveMessages(PAUSE_TIMEOUT_MSG, TO_IINTERFACE(r));
         if (mPausingActivity == r) {
-            //if (ActivityStackSupervisor::DEBUG_STATES) Slog.v(CActivityManagerService::TAG, "Moving to PAUSED: " + r + (timeout ? " (due to timeout)" : " (pause complete)"));
+            //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to PAUSED: " + r + (timeout ? " (due to timeout)" : " (pause complete)"));
             CompletePauseLocked(TRUE);
         } else {
             //TODO EventLog.writeEvent(EventLogTags.AM_FAILED_TO_PAUSE,
@@ -960,7 +968,7 @@ void ActivityStack::ActivityStoppedLocked(
     /* [in] */ ICharSequence* description)
 {
     if (r->mState != ActivityState_STOPPING) {
-        //Slog.i(CActivityManagerService::TAG, "Activity reported stop, but no longer stopping: " + r);
+        //Slogger::I(TAG, "Activity reported stop, but no longer stopping: " + r);
         mHandler->RemoveMessages(STOP_TIMEOUT_MSG, TO_IINTERFACE(r));
         return;
     }
@@ -968,7 +976,7 @@ void ActivityStack::ActivityStoppedLocked(
         r->mPersistentState = persistentState;
         mService->NotifyTaskPersisterLocked(r->mTask, FALSE);
     }
-    //if (ActivityStackSupervisor::DEBUG_SAVED_STATE) Slog.i(CActivityManagerService::TAG, "Saving icicle of " + r + ": " + icicle);
+    //if (ActivityStackSupervisor::DEBUG_SAVED_STATE) Slogger::I(TAG, "Saving icicle of " + r + ": " + icicle);
     if (icicle != NULL) {
         // If icicle is NULL, this is happening due to a timeout, so we
         // haven't really saved the state.
@@ -978,11 +986,13 @@ void ActivityStack::ActivityStoppedLocked(
         r->UpdateThumbnail(NULL, description);
     }
     if (!r->mStopped) {
-        //if (ActivityStackSupervisor::DEBUG_STATES) Slog.v(CActivityManagerService::TAG, "Moving to STOPPED: " + r + " (stop complete)");
+        //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to STOPPED: " + r + " (stop complete)");
         mHandler->RemoveMessages(STOP_TIMEOUT_MSG, TO_IINTERFACE(r));
         r->mStopped = TRUE;
         r->mState = ActivityState_STOPPED;
-        if (mActivityContainer->mActivityDisplay->mVisibleBehindActivity.Get() == r) {
+
+        ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
+        if (ac->mActivityDisplay->mVisibleBehindActivity.Get() == r) {
             mStackSupervisor->RequestVisibleBehindLocked(r, FALSE);
         }
         if (r->mFinishing) {
@@ -1070,8 +1080,8 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
     if (top == NULL) {
         return;
     }
-    //if (CActivityManagerService::DEBUG_VISBILITY) Slog.v(
-    //        CActivityManagerService::TAG, "ensureActivitiesVisible behind " + top
+    //if (CActivityManagerService::DEBUG_VISBILITY) Slogger::V(
+    //        TAG, "ensureActivitiesVisible behind " + top
     //        + " configChanges=0x" + Integer.toHexString(configChanges));
 
     if (mTranslucentActivityWaiting != top) {
@@ -1109,8 +1119,8 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
             // mLaunchingBehind: Activities launching behind are at the back of the task stack
             // but must be drawn initially for the animation as though they were visible.
             if (!behindFullscreen || r->mLaunchTaskBehind) {
-                //if (CActivityManagerService::DEBUG_VISBILITY) Slog.v(
-                //        CActivityManagerService::TAG, "Make visible? " + r + " finishing=" + r.finishing
+                //if (CActivityManagerService::DEBUG_VISBILITY) Slogger::V(
+                //        TAG, "Make visible? " + r + " finishing=" + r.finishing
                 //        + " state=" + r.state);
 
                 // First: if this is not the current activity being started, make
@@ -1124,13 +1134,13 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                     // running...  get it started, but don't resume it
                     // at this point.
                     //if (CActivityManagerService::DEBUG_VISBILITY)
-                    //  Slog.v(CActivityManagerService::TAG, "Start and freeze screen for " + r);
+                    //  Slogger::V(TAG, "Start and freeze screen for " + r);
                     if (r.Get() != starting) {
                         r->StartFreezingScreenLocked(r->mApp, configChanges);
                     }
                     if (!r->mVisible || r->mLaunchTaskBehind) {
                         //if (CActivityManagerService::DEBUG_VISBILITY)
-                        //  Slog.v(CActivityManagerService::TAG, "Starting and making visible: " + r);
+                        //  Slogger::V(TAG, "Starting and making visible: " + r);
                         SetVisibile(r, TRUE);
                     }
                     if (r.Get() != starting) {
@@ -1141,7 +1151,7 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                     // If this activity is already visible, then there is nothing
                     // else to do here.
                     //if (CActivityManagerService::DEBUG_VISBILITY)
-                    //  Slog.v(CActivityManagerService::TAG, "Skipping: already visible at " + r);
+                    //  Slogger::V(TAG, "Skipping: already visible at " + r);
                     r->StopFreezingScreenLocked(FALSE);
                     //try {
                     if (r->mReturningOptions != NULL) {
@@ -1158,7 +1168,7 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                         // If this activity is paused, tell it
                         // to now show its window.
                         //if (CActivityManagerService::DEBUG_VISBILITY)
-                        //  Slog.v(CActivityManagerService::TAG, "Making visible and scheduling visibility: " + r);
+                        //  Slogger::V(TAG, "Making visible and scheduling visibility: " + r);
                         //try {
                         if (mTranslucentActivityWaiting != NULL) {
                             r->UpdateOptionsLocked(r->mReturningOptions);
@@ -1172,7 +1182,7 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                         //} catch (Exception e) {
                         //    // Just skip on any failure; we'll make it
                         //    // visible when it next restarts.
-                        //    Slogger::W(CActivityManagerService::TAG, "Exception thrown making visibile: "
+                        //    Slogger::W(TAG, "Exception thrown making visibile: "
                         //            + r.intent.getComponent(), e);
                         //}
                     }
@@ -1184,24 +1194,24 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                 if (r->mFullscreen) {
                     // At this point, nothing else needs to be shown
                     //if (CActivityManagerService::DEBUG_VISBILITY)
-                    //  Slog.v(CActivityManagerService::TAG, "Fullscreen: at " + r);
+                    //  Slogger::V(TAG, "Fullscreen: at " + r);
                     behindFullscreen = TRUE;
                 } else if (!IsHomeStack() && r->mFrontOfTask && task->IsOverHomeStack()) {
                     //if (CActivityManagerService::DEBUG_VISBILITY)
-                    //  Slog.v(CActivityManagerService::TAG, "Showing home: at " + r);
+                    //  Slogger::V(TAG, "Showing home: at " + r);
                     behindFullscreen = TRUE;
                 }
             } else {
                 //if (CActivityManagerService::DEBUG_VISBILITY)
-                //  Slog.v(
-                //    CActivityManagerService::TAG, "Make invisible? " + r + " finishing=" + r.finishing
+                //  Slogger::V(
+                //    TAG, "Make invisible? " + r + " finishing=" + r.finishing
                 //    + " state=" + r.state
                 //    + " behindFullscreen=" + behindFullscreen);
                 // Now for any activities that aren't visible to the user, make
                 // sure they no longer are keeping the screen frozen.
                 if (r->mVisible) {
                     //if (CActivityManagerService::DEBUG_VISBILITY)
-                    //  Slog.v(CActivityManagerService::TAG, "Making invisible: " + r);
+                    //  Slogger::V(TAG, "Making invisible: " + r);
                     //try {
                     SetVisibile(r, FALSE);
                     switch (r->mState) {
@@ -1209,7 +1219,7 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                         case ActivityState_STOPPED:
                             if (r->mApp != NULL && r->mApp->mThread != NULL) {
                                 //if (CActivityManagerService::DEBUG_VISBILITY)
-                                //  Slog.v(CActivityManagerService::TAG, "Scheduling invisibility: " + r);
+                                //  Slogger::V(TAG, "Scheduling invisibility: " + r);
                                 r->mApp->mThread->ScheduleWindowVisibility(IBinder::Probe(r->mAppToken), FALSE);
                             }
                             break;
@@ -1238,12 +1248,12 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                     //} catch (Exception e) {
                     //    // Just skip on any failure; we'll make it
                     //    // visible when it next restarts.
-                    //    Slogger::W(CActivityManagerService::TAG, "Exception thrown making hidden: "
+                    //    Slogger::W(TAG, "Exception thrown making hidden: "
                     //            + r.intent.getComponent(), e);
                     //}
                 } else {
                     if (CActivityManagerService::DEBUG_VISBILITY)
-                        Slogger::V(CActivityManagerService::TAG, "Already invisible: %s", r->ToString().string());
+                        Slogger::V(TAG, "Already invisible: %s", TO_CSTR(r));
                 }
             }
         }
@@ -1269,7 +1279,8 @@ void ActivityStack::ConvertToTranslucent(
 void ActivityStack::NotifyActivityDrawnLocked(
     /* [in] */ ActivityRecord* r)
 {
-    mActivityContainer->SetDrawn();
+    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
+    ac->SetDrawn();
     if (r == NULL){
         Boolean remove, isEmpty;
         mUndrawnActivitiesBelowTopTranslucent->Remove(TO_IINTERFACE(r), &remove);
@@ -1283,7 +1294,7 @@ void ActivityStack::NotifyActivityDrawnLocked(
             mHandler->RemoveMessages(TRANSLUCENT_TIMEOUT_MSG);
 
             if (waitingActivity != NULL) {
-                //TODO mWindowManager->SetWindowOpaque(IBinder::Probe(waitingActivity->mAppToken), FALSE);
+                mWindowManager->SetWindowOpaque(IBinder::Probe(waitingActivity->mAppToken), FALSE);
                 if (waitingActivity->mApp != NULL && waitingActivity->mApp->mThread != NULL) {
                     //try {
                     waitingActivity->mApp->mThread->ScheduleTranslucentConversionComplete(
@@ -1320,9 +1331,9 @@ void ActivityStack::CancelInitializingActivities()
 
             if (r->mState == ActivityState_INITIALIZING && r->mStartingWindowShown) {
                 if (CActivityManagerService::DEBUG_VISBILITY)
-                    Slogger::W(CActivityManagerService::TAG, "Found orphaned starting window %s", r->ToString().string());
+                    Slogger::W(TAG, "Found orphaned starting window %s", TO_CSTR(r));
                 r->mStartingWindowShown = FALSE;
-                //TODO mWindowManager->RemoveAppStartingWindow(IBinder::Probe(r->mAppToken));
+                mWindowManager->RemoveAppStartingWindow(IBinder::Probe(r->mAppToken));
             }
         }
     }
@@ -1358,6 +1369,7 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
     /* [in] */ ActivityRecord* prev,
     /* [in] */ IBundle* options)
 {
+    ECode ec = NOERROR;
     if (CActivityManagerService::DEBUG_LOCKSCREEN) mService->LogLockScreen(String(""));
 
     if (!mService->mBooting && !mService->mBooted) {
@@ -1365,9 +1377,10 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
         return FALSE;
     }
 
-    AutoPtr<ActivityRecord> parent = mActivityContainer->mParentActivity;
+    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
+    AutoPtr<ActivityRecord> parent = (ActivityRecord*)ac->mParentActivity.Get();
     if ((parent != NULL && parent->mState != ActivityState_RESUMED) ||
-            !mActivityContainer->IsAttachedLocked()) {
+            !ac->IsAttachedLocked()) {
         // Do not resume this stack if its parent is not resumed.
         // TODO: If in a loop, make sure that parent stack resumeTopActivity is called 1st.
         return FALSE;
@@ -1390,10 +1403,12 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
         // There are no more activities!  Let's just start up the
         // Launcher...
         aoHelper->Abort(options);
-        if (ActivityStackSupervisor::DEBUG_STATES)
-            Slogger::D(CActivityManagerService::TAG, "resumeTopActivityLocked: No more activities go home");
-        if (CActivityManagerService::DEBUG_STACK)
+        if (ActivityStackSupervisor::DEBUG_STATES) {
+            Slogger::D(TAG, "resumeTopActivityLocked: No more activities go home");
+        }
+        if (CActivityManagerService::DEBUG_STACK) {
             mStackSupervisor->ValidateTopActivitiesLocked();
+        }
         // Only resume home if on home display
         Int32 returnTaskType = prevTask == NULL || !prevTask->IsOverHomeStack() ?
             ActivityRecord::HOME_ACTIVITY_TYPE : prevTask->GetTaskToReturnTo();
@@ -1411,10 +1426,12 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
         mWindowManager->ExecuteAppTransition();
         mNoAnimActivities->Clear();
         aoHelper->Abort(options);
-        if (ActivityStackSupervisor::DEBUG_STATES)
-            Slogger::D(CActivityManagerService::TAG, "resumeTopActivityLocked: Top activity resumed %s", next->ToString().string());
-        if (CActivityManagerService::DEBUG_STACK)
+        if (ActivityStackSupervisor::DEBUG_STATES) {
+            Slogger::D(TAG, "resumeTopActivityLocked: Top activity resumed %s", TO_CSTR(next));
+        }
+        if (CActivityManagerService::DEBUG_STACK) {
             mStackSupervisor->ValidateTopActivitiesLocked();
+        }
 
         // Make sure to notify Keyguard as well if it is waiting for an activity to be drawn.
         mStackSupervisor->NotifyActivityDrawnForKeyguard();
@@ -1438,8 +1455,9 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
             ((TaskRecord*)(IObject::Probe(taskobj)))->SetTaskToReturnTo(ActivityRecord::HOME_ACTIVITY_TYPE);
         } else {
-            if (ActivityStackSupervisor::DEBUG_STATES && IsOnHomeDisplay())
-                Slogger::D(CActivityManagerService::TAG, "resumeTopActivityLocked: Launching home next");
+            if (ActivityStackSupervisor::DEBUG_STATES && IsOnHomeDisplay()) {
+                Slogger::D(TAG, "resumeTopActivityLocked: Launching home next");
+            }
             // Only resume home if on home display
             Int32 returnTaskType = prevTask == NULL || !prevTask->IsOverHomeStack() ?
                 ActivityRecord::HOME_ACTIVITY_TYPE : prevTask->GetTaskToReturnTo();
@@ -1458,9 +1476,12 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
         mWindowManager->ExecuteAppTransition();
         mNoAnimActivities->Clear();
         aoHelper->Abort(options);
-        if (ActivityStackSupervisor::DEBUG_STATES) Slogger::D(CActivityManagerService::TAG, "resumeTopActivityLocked: Going to sleep and all paused");
-        if (CActivityManagerService::DEBUG_STACK)
+        if (ActivityStackSupervisor::DEBUG_STATES)  {
+            Slogger::D(TAG, "resumeTopActivityLocked: Going to sleep and all paused");
+        }
+        if (CActivityManagerService::DEBUG_STACK) {
             mStackSupervisor->ValidateTopActivitiesLocked();
+        }
         return FALSE;
     }
 
@@ -1468,10 +1489,10 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
     // we will just leave it as is because someone should be bringing
     // another user's activities to the top of the stack.
     if (mService->mStartedUsers[next->mUserId] == NULL) {
-        //Slogger::W(CActivityManagerService::TAG, "Skipping resume of top activity " + next
-        //        + ": user " + next.userId + " is stopped");
-        if (CActivityManagerService::DEBUG_STACK)
+        Slogger::W(TAG, "Skipping resume of top activity %s: user %d is stopped.", TO_CSTR(next), next->mUserId);
+        if (CActivityManagerService::DEBUG_STACK) {
             mStackSupervisor->ValidateTopActivitiesLocked();
+        }
         return FALSE;
     }
 
@@ -1482,17 +1503,20 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
     next->mSleeping = FALSE;
     mStackSupervisor->mWaitingVisibleActivities->Remove(TO_IINTERFACE(next));
 
-    if (CActivityManagerService::DEBUG_SWITCH)
-        Slogger::V(CActivityManagerService::TAG, "Resuming %s", next->ToString().string());
+    if (CActivityManagerService::DEBUG_SWITCH) {
+        Slogger::V(TAG, "Resuming %s", TO_CSTR(next));
+    }
 
     // If we are currently pausing an activity, then don't do anything
     // until that is done.
     if (!mStackSupervisor->AllPausedActivitiesComplete()) {
-        if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_PAUSE || ActivityStackSupervisor::DEBUG_STATES)
-            Slogger::V(CActivityManagerService::TAG,
-                "resumeTopActivityLocked: Skip resume: some activity pausing.");
-        if (CActivityManagerService::DEBUG_STACK)
+        if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_PAUSE
+            || ActivityStackSupervisor::DEBUG_STATES) {
+            Slogger::V(TAG, "resumeTopActivityLocked: Skip resume: some activity pausing.");
+        }
+        if (CActivityManagerService::DEBUG_STACK) {
             mStackSupervisor->ValidateTopActivitiesLocked();
+        }
         return FALSE;
     }
 
@@ -1533,12 +1557,14 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
     Boolean pausing = mStackSupervisor->PauseBackStacks(userLeaving, TRUE, dontWaitForPause);
     if (mResumedActivity != NULL) {
         pausing |= StartPausingLocked(userLeaving, FALSE, TRUE, dontWaitForPause);
-        if (ActivityStackSupervisor::DEBUG_STATES) Slogger::D(CActivityManagerService::TAG, "resumeTopActivityLocked: Pausing %s", mResumedActivity->ToString().string());
+        if (ActivityStackSupervisor::DEBUG_STATES) {
+            Slogger::D(TAG, "resumeTopActivityLocked: Pausing %s", mResumedActivity->ToString().string());
+        }
     }
     if (pausing) {
-        if (CActivityManagerService::DEBUG_SWITCH || ActivityStackSupervisor::DEBUG_STATES)
-            Slogger::V(CActivityManagerService::TAG,
-                "resumeTopActivityLocked: Skip resume: need to start pausing");
+        if (CActivityManagerService::DEBUG_SWITCH || ActivityStackSupervisor::DEBUG_STATES) {
+            Slogger::V(TAG, "resumeTopActivityLocked: Skip resume: need to start pausing");
+        }
         // At this point we want to put the upcoming activity's process
         // at the top of the LRU list, since we know we will be needing it
         // very soon and it would be a waste to let it get killed if it
@@ -1556,7 +1582,9 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
     // sure to finish it as we're making a new activity topmost.
     if (mService->IsSleeping() && mLastNoHistoryActivity != NULL &&
             !mLastNoHistoryActivity->mFinishing) {
-        if (ActivityStackSupervisor::DEBUG_STATES) Slogger::D(CActivityManagerService::TAG, "no-history finish of %s on new resume", mLastNoHistoryActivity->ToString().string());
+        if (ActivityStackSupervisor::DEBUG_STATES) {
+            Slogger::D(TAG, "no-history finish of %s on new resume", TO_CSTR(mLastNoHistoryActivity));
+        }
         RequestFinishActivityLocked(IBinder::Probe(mLastNoHistoryActivity->mAppToken), IActivity::RESULT_CANCELED,
                 NULL, String("no-history"), FALSE);
         mLastNoHistoryActivity = NULL;
@@ -1566,9 +1594,10 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
         if (!prev->mWaitingVisible && next != NULL && !next->mNowVisible) {
             prev->mWaitingVisible = TRUE;
             mStackSupervisor->mWaitingVisibleActivities->Add(TO_IINTERFACE(prev));
-            if (CActivityManagerService::DEBUG_SWITCH) Slogger::V(
-                    CActivityManagerService::TAG, "Resuming top, waiting visible to hide: %s", prev->ToString().string());
-        } else {
+            if (CActivityManagerService::DEBUG_SWITCH)
+                Slogger::V(TAG, "Resuming top, waiting visible to hide: %s", TO_CSTR(prev));
+        }
+        else {
             // The next activity is already visible, so hide the previous
             // activity's windows right now so we can show the new one ASAP.
             // We only do this if the previous is finishing, which should mean
@@ -1578,18 +1607,17 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             // previous should actually be hidden depending on whether the
             // new one is found to be full-screen or not.
             if (prev->mFinishing) {
-                //TODO mWindowManager->SetAppVisibility(IBinder::Probe(prev->mAppToken), FALSE);
-                if (CActivityManagerService::DEBUG_SWITCH)
-                    Slogger::V(CActivityManagerService::TAG, "Not waiting for visible to hide: ");
-                //        + prev + ", waitingVisible="
-                //        + (prev != NULL ? prev.waitingVisible : NULL)
-                //        + ", nowVisible=" + next.nowVisible);
-            } else {
-                if (CActivityManagerService::DEBUG_SWITCH)
-                    Slogger::V(CActivityManagerService::TAG, "Previous already visible but still waiting to hide: ");
-                //        + prev + ", waitingVisible="
-                //        + (prev != NULL ? prev.waitingVisible : NULL)
-                //        + ", nowVisible=" + next.nowVisible);
+                mWindowManager->SetAppVisibility(IBinder::Probe(prev->mAppToken), FALSE);
+                if (CActivityManagerService::DEBUG_SWITCH) {
+                    Slogger::V(TAG, "Not waiting for visible to hide: %s, waitingVisible=%d, nowVisible=%d",
+                        TO_CSTR(prev), prev != NULL ? prev->mWaitingVisible : 0, next->mNowVisible);
+                }
+            }
+            else {
+                if (CActivityManagerService::DEBUG_SWITCH) {
+                    Slogger::V(TAG, "Previous already visible but still waiting to hide: %s, waitingVisible=%d, nowVisible=%d",
+                        TO_CSTR(prev), prev != NULL ? prev->mWaitingVisible : 0, next->mNowVisible);
+                }
             }
         }
     }
@@ -1597,12 +1625,15 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
     // Launching this app's activity, make sure the app is no longer
     // considered stopped.
     //try {
-    AppGlobals::GetPackageManager()->SetPackageStoppedState(
-                next->mPackageName, FALSE, next->mUserId); /* TODO: Verify if correct userid */
+    ec = AppGlobals::GetPackageManager()->SetPackageStoppedState(
+            next->mPackageName, FALSE, next->mUserId); /* TODO: Verify if correct userid */
+    if (FAILED(ec)) {
+        Slogger::W(TAG, "Failed trying to unstop package %s : ec=%08x", next->mPackageName.string(), ec);
+    }
     //} catch (RemoteException e1) {
     //} catch (IllegalArgumentException e) {
-    //    Slogger::W(CActivityManagerService::TAG, "Failed trying to unstop package "
-    //            + next.packageName + ": " + e);
+       // Slogger::W(TAG, "Failed trying to unstop package "
+       //         + next.packageName + ": " + e);
     //}
 
     // We are starting up the next activity, so tell the window manager
@@ -1611,23 +1642,26 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
     Boolean anim = true;
     if (prev != NULL) {
         if (prev->mFinishing) {
-            if (CActivityManagerService::DEBUG_TRANSITION)
-                Slogger::V(CActivityManagerService::TAG,
-                    "Prepare close transition: prev=%s", prev->ToString().string());
+            if (CActivityManagerService::DEBUG_TRANSITION) {
+                Slogger::V(TAG, "Prepare close transition: prev=%s", TO_CSTR(prev));
+            }
             Boolean bTemp = FALSE;
             if (mNoAnimActivities->Contains(TO_IINTERFACE(prev), &bTemp), bTemp) {
                 anim = FALSE;
                 mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_NONE, FALSE);
-            } else {
+            }
+            else {
                 mWindowManager->PrepareAppTransition(prev->mTask == next->mTask
                        ? AppTransition::TRANSIT_ACTIVITY_CLOSE
                        :  AppTransition::TRANSIT_TASK_CLOSE, FALSE);
             }
             mWindowManager->SetAppWillBeHidden(IBinder::Probe(prev->mAppToken));
             mWindowManager->SetAppVisibility(IBinder::Probe(prev->mAppToken), FALSE);
-        } else {
-            if (CActivityManagerService::DEBUG_TRANSITION)
-                Slogger::V(CActivityManagerService::TAG, "Prepare open transition: prev=%s", prev->ToString().string());
+        }
+        else {
+            if (CActivityManagerService::DEBUG_TRANSITION) {
+                Slogger::V(TAG, "Prepare open transition: prev=%s", TO_CSTR(prev));
+            }
             Boolean bTemp;
             if (mNoAnimActivities->Contains(TO_IINTERFACE(next), &bTemp), bTemp) {
                 anim = FALSE;
@@ -1644,23 +1678,25 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             mWindowManager->SetAppWillBeHidden(IBinder::Probe(prev->mAppToken));
             mWindowManager->SetAppVisibility(IBinder::Probe(prev->mAppToken), FALSE);
         }
-    } else {
-        if (CActivityManagerService::DEBUG_TRANSITION)
-            Slogger::V(CActivityManagerService::TAG, "Prepare open transition: no previous");
+    }
+    else {
+        if (CActivityManagerService::DEBUG_TRANSITION) {
+            Slogger::V(TAG, "Prepare open transition: no previous");
+        }
         Boolean bTemp;
         if (mNoAnimActivities->Contains(TO_IINTERFACE(next), &bTemp), bTemp) {
             anim = FALSE;
             mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_NONE, FALSE);
-        } else {
+        }
+        else {
             mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_ACTIVITY_OPEN, FALSE);
         }
     }
 
-    AutoPtr<IBundle> resumeAnimOptions = NULL;
+    AutoPtr<IBundle> resumeAnimOptions;
     if (anim) {
         AutoPtr<IActivityOptions> opts = next->GetOptionsForTargetActivityLocked();
         if (opts != NULL) {
-            //resumeAnimOptions = opts.toBundle();
             opts->ToBundle((IBundle**)&resumeAnimOptions);
         }
         next->ApplyOptionsLocked();
@@ -1670,8 +1706,9 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
 
     AutoPtr<ActivityStack> lastStack = mStackSupervisor->GetLastStack();
     if (next->mApp != NULL && next->mApp->mThread != NULL) {
-        if (CActivityManagerService::DEBUG_SWITCH)
-            Slogger::V(CActivityManagerService::TAG, "Resume running: %s", next->ToString().string());
+        if (CActivityManagerService::DEBUG_SWITCH) {
+            Slogger::V(TAG, "Resume running: %s", TO_CSTR(next));
+        }
 
         // This activity is now becoming visible.
         mWindowManager->SetAppVisibility(IBinder::Probe(next->mAppToken), TRUE);
@@ -1685,7 +1722,9 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
 
         mService->UpdateCpuStats();
 
-        if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(CActivityManagerService::TAG, "Moving to RESUMED: %s (in existing)", next->ToString().string());
+        if (ActivityStackSupervisor::DEBUG_STATES) {
+            Slogger::V(TAG, "Moving to RESUMED: %s (in existing)", TO_CSTR(next));
+        }
         next->mState = ActivityState_RESUMED;
         mResumedActivity = next;
         next->mTask->TouchActiveTime();
@@ -1694,6 +1733,7 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
         UpdateLRUListLocked(next);
         mService->UpdateOomAdjLocked();
 
+        IBinder* nextAppToken = IBinder::Probe(next->mAppToken);
         // Have the window manager re-evaluate the orientation of
         // the screen based on the new activity order.
         Boolean notUpdated = TRUE;
@@ -1701,7 +1741,7 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             AutoPtr<IConfiguration> config;
             mWindowManager->UpdateOrientationFromAppTokens(
                    mService->mConfiguration,
-                   next->MayFreezeScreenLocked(next->mApp) ? IBinder::Probe(next->mAppToken) : NULL,
+                   next->MayFreezeScreenLocked(next->mApp) ? nextAppToken : NULL,
                    (IConfiguration**)&config);
             if (config != NULL) {
                 next->mFrozenBeforeDestroy = TRUE;
@@ -1716,140 +1756,153 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             // is still at the top and schedule another run if something
             // weird happened.
             AutoPtr<ActivityRecord> nextNext = TopRunningActivityLocked(NULL);
-            //if (CActivityManagerService::DEBUG_SWITCH || ActivityStackSupervisor::DEBUG_STATES)
-            //  Slog.i(CActivityManagerService::TAG,
-            //        "Activity config changed during resume: " + next
-            //        + ", new next: " + nextNext);
+            if (CActivityManagerService::DEBUG_SWITCH || ActivityStackSupervisor::DEBUG_STATES) {
+                Slogger::I(TAG, "Activity config changed during resume: %s, new next: %s", TO_CSTR(next), TO_CSTR(nextNext));
+            }
             if (nextNext != next) {
                 // Do over!
                 mStackSupervisor->ScheduleResumeTopActivities();
             }
             if (mStackSupervisor->ReportResumedActivityLocked(next)) {
                 mNoAnimActivities->Clear();
-                if (CActivityManagerService::DEBUG_STACK)
+                if (CActivityManagerService::DEBUG_STACK) {
                     mStackSupervisor->ValidateTopActivitiesLocked();
+                }
                 return TRUE;
             }
-            if (CActivityManagerService::DEBUG_STACK)
+            if (CActivityManagerService::DEBUG_STACK) {
                 mStackSupervisor->ValidateTopActivitiesLocked();
+            }
             return FALSE;
         }
 
-        //try {
-            // Deliver all pending results.
-            //ArrayList<ResultInfo> a = next.results;
-            AutoPtr< List< AutoPtr<ActivityResult> > > a = next->mResults;
-            if (a != NULL) {
-                Int32 N = a->GetSize();
-                if (!next->mFinishing && N > 0) {
-                    //if (CActivityManagerService::DEBUG_RESULTS) Slog.v(
-                    //        CActivityManagerService::TAG, "Delivering results to " + next
-                    //        + ": " + a);
-                    AutoPtr<IList> list;
-                    CArrayList::New((IList**)&list);
-                    for (UInt32 i = 0; i < a->GetSize(); ++i) {
-                        AutoPtr<ActivityResult> ar = (*a)[i];
-                        list->Add(TO_IINTERFACE(ar));
-                    }
-                    next->mApp->mThread->ScheduleSendResult(IBinder::Probe(next->mAppToken), list);
+        // Deliver all pending results.
+        //ArrayList<ResultInfo> a = next.results;
+        AutoPtr< List< AutoPtr<ActivityResult> > > a = next->mResults;
+        if (a != NULL) {
+            Int32 N = a->GetSize();
+            if (!next->mFinishing && N > 0) {
+                if (CActivityManagerService::DEBUG_RESULTS) {
+                    Slogger::V(TAG, "Delivering results to %s : result size:%d", TO_CSTR(next), N);
                 }
-            }
-
-            if (next->mNewIntents != NULL) {
                 AutoPtr<IList> list;
                 CArrayList::New((IList**)&list);
-                for (UInt32 i = 0; i < next->mNewIntents->GetSize(); ++i) {
-                    AutoPtr<IIntent> intent = (*(next->mNewIntents))[i];
-                    list->Add(TO_IINTERFACE(intent));
+                for (UInt32 i = 0; i < a->GetSize(); ++i) {
+                    AutoPtr<ActivityResult> ar = (*a)[i];
+                    list->Add(TO_IINTERFACE(ar));
                 }
-                next->mApp->mThread->ScheduleNewIntent(list, IBinder::Probe(next->mAppToken));
+                ec = next->mApp->mThread->ScheduleSendResult(nextAppToken, list);
+                FAIL_GOTO(ec, _ERROR_)
             }
+        }
 
-            //EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY,
-            //        next.userId, System.identityHashCode(next),
-            //        next.task.taskId, next.shortComponentName);
+        if (next->mNewIntents != NULL) {
+            AutoPtr<IList> list;
+            CArrayList::New((IList**)&list);
+            for (UInt32 i = 0; i < next->mNewIntents->GetSize(); ++i) {
+                AutoPtr<IIntent> intent = (*(next->mNewIntents))[i];
+                list->Add(TO_IINTERFACE(intent));
+            }
+            ec = next->mApp->mThread->ScheduleNewIntent(list, nextAppToken);
+            FAIL_GOTO(ec, _ERROR_)
+        }
 
-            next->mSleeping = FALSE;
-            mService->ShowAskCompatModeDialogLocked(next);
-            next->mApp->mPendingUiClean = TRUE;
-            next->mApp->ForceProcessStateUpTo(IActivityManager::PROCESS_STATE_TOP);
-            next->ClearOptionsLocked();
-            next->mApp->mThread->ScheduleResumeActivity(IBinder::Probe(next->mAppToken), next->mApp->mRepProcState,
-                    mService->IsNextTransitionForward(), resumeAnimOptions);
+        //EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY,
+        //        next.userId, System.identityHashCode(next),
+        //        next.task.taskId, next.shortComponentName);
 
-            mStackSupervisor->CheckReadyForSleepLocked();
+        next->mSleeping = FALSE;
+        mService->ShowAskCompatModeDialogLocked(next);
+        next->mApp->mPendingUiClean = TRUE;
+        next->mApp->ForceProcessStateUpTo(IActivityManager::PROCESS_STATE_TOP);
+        next->ClearOptionsLocked();
+        ec = next->mApp->mThread->ScheduleResumeActivity(nextAppToken, next->mApp->mRepProcState,
+                mService->IsNextTransitionForward(), resumeAnimOptions);
+        FAIL_GOTO(ec, _ERROR_)
 
-            if (ActivityStackSupervisor::DEBUG_STATES) Slogger::D(CActivityManagerService::TAG, "resumeTopActivityLocked: Resumed %s", next->ToString().string());
-            assert(lastState);//TODO remove
-        //TODO } catch (Exception e) {
-        //    // Whoops, need to restart this activity!
-        //    if (ActivityStackSupervisor::DEBUG_STATES) Slog.v(CActivityManagerService::TAG, "Resume failed; resetting state to "
-        //            + lastState + ": " + next);
-        //    next->mState = lastState;
-        //    if (lastStack != NULL) {
-        //        lastStack->mResumedActivity = lastResumedActivity;
-        //    }
-        //    Slog.i(CActivityManagerService::TAG, "Restarting because process died: " + next);
-        //    if (!next->mHasBeenLaunched) {
-        //        next->mHasBeenLaunched = TRUE;
-        //    } else  if (SHOW_APP_STARTING_PREVIEW && lastStack != NULL &&
-        //            mStackSupervisor->IsFrontStack(lastStack)) {
-        //        AutoPtr<IApplicationInfo> appInfo;
-        //        IComponentInfo::Probe(next->mInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
-        //        mWindowManager->SetAppStartingWindow(
-        //                IBinder::Probe(next->mAppToken), next->mPackageName, next->mTheme,
-        //                mService->CompatibilityInfoForPackageLocked(appInfo),
-        //                next->mNonLocalizedLabel, next->mLabelRes, next->mIcon, next->mLogo,
-        //                next->mWindowFlags, NULL, TRUE);
-        //    }
-        //    mStackSupervisor->StartSpecificActivityLocked(next, TRUE, FALSE);
-        //    if (CActivityManagerService::DEBUG_STACK)
-        //      mStackSupervisor->ValidateTopActivitiesLocked();
-        //    return TRUE;
-        //}
+        mStackSupervisor->CheckReadyForSleepLocked();
+
+        if (ActivityStackSupervisor::DEBUG_STATES) {
+            Slogger::D(TAG, "resumeTopActivityLocked: Resumed %s", TO_CSTR(next));
+        }
+
+_ERROR_:
+        if (FAILED(ec)) {
+            // Whoops, need to restart this activity!
+            if (ActivityStackSupervisor::DEBUG_STATES) {
+                Slogger::V(TAG, "Resume failed; resetting state to %d: %s", lastState, TO_CSTR(next));
+            }
+            next->mState = lastState;
+            if (lastStack != NULL) {
+                lastStack->mResumedActivity = lastResumedActivity;
+            }
+            Slogger::I(TAG, "Restarting because process died: %s", TO_CSTR(next));
+            if (!next->mHasBeenLaunched) {
+                next->mHasBeenLaunched = TRUE;
+            }
+            else if (SHOW_APP_STARTING_PREVIEW && lastStack != NULL &&
+                mStackSupervisor->IsFrontStack(lastStack)) {
+                AutoPtr<IApplicationInfo> appInfo;
+                IComponentInfo::Probe(next->mInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+                mWindowManager->SetAppStartingWindow(
+                    nextAppToken, next->mPackageName, next->mTheme,
+                    mService->CompatibilityInfoForPackageLocked(appInfo),
+                    next->mNonLocalizedLabel, next->mLabelRes, next->mIcon, next->mLogo,
+                    next->mWindowFlags, NULL, TRUE);
+            }
+            mStackSupervisor->StartSpecificActivityLocked(next, TRUE, FALSE);
+            if (CActivityManagerService::DEBUG_STACK) {
+                mStackSupervisor->ValidateTopActivitiesLocked();
+            }
+            return TRUE;
+        }
 
         // From this point on, if something goes wrong there is no way
         // to recover the activity.
-        //try {
-            next->mVisible = TRUE;
-            CompleteResumeLocked(next);
-        //} catch (Exception e) {
-        //    // If any exception gets thrown, toss away this
-        //    // activity and try the next one.
-        //    Slogger::W(CActivityManagerService::TAG, "Exception thrown during resume of " + next, e);
-        //    RequestFinishActivityLocked(IBinder::Probe(next->mAppToken), IActivity::RESULT_CANCELED, NULL,
-        //            String("resume-exception"), TRUE);
-        //    if (CActivityManagerService::DEBUG_STACK)
-        //    mStackSupervisor->ValidateTopActivitiesLocked();
-        //    return TRUE;
-        //}
+        next->mVisible = TRUE;
+        ec = CompleteResumeLocked(next);
+        if (FAILED(ec)) {
+            // If any exception gets thrown, toss away this
+            // activity and try the next one.
+            Slogger::W(TAG, "Exception thrown during resume of %d: ec=%08x", TO_CSTR(next), ec);
+            RequestFinishActivityLocked(nextAppToken,
+                IActivity::RESULT_CANCELED, NULL, String("resume-exception"), TRUE);
+            if (CActivityManagerService::DEBUG_STACK) {
+                mStackSupervisor->ValidateTopActivitiesLocked();
+            }
+            return TRUE;
+        }
         next->mStopped = FALSE;
-
-    } else {
+    }
+    else {
         // Whoops, need to restart this activity!
         if (!next->mHasBeenLaunched) {
             next->mHasBeenLaunched = TRUE;
-        } else {
+        }
+        else {
             if (SHOW_APP_STARTING_PREVIEW) {
                 AutoPtr<IApplicationInfo> appInfo;
                 IComponentInfo::Probe(next->mInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
                 mWindowManager->SetAppStartingWindow(
-                       IBinder::Probe(next->mAppToken), next->mPackageName, next->mTheme,
-                       mService->CompatibilityInfoForPackageLocked(
-                           appInfo),
-                       next->mNonLocalizedLabel,
-                       next->mLabelRes, next->mIcon, next->mLogo, next->mWindowFlags,
-                       NULL, TRUE);
+                   IBinder::Probe(next->mAppToken), next->mPackageName, next->mTheme,
+                   mService->CompatibilityInfoForPackageLocked(appInfo),
+                   next->mNonLocalizedLabel,
+                   next->mLabelRes, next->mIcon, next->mLogo, next->mWindowFlags,
+                   NULL, TRUE);
             }
-            if (CActivityManagerService::DEBUG_SWITCH)
-                Slogger::V(CActivityManagerService::TAG, "Restarting: %s", next->ToString().string());
+            if (CActivityManagerService::DEBUG_SWITCH) {
+                Slogger::V(TAG, "Restarting: %s", TO_CSTR(next));
+            }
         }
-        if (ActivityStackSupervisor::DEBUG_STATES) Slogger::D(CActivityManagerService::TAG, "resumeTopActivityLocked: Restarting %s", next->ToString().string());
+        if (ActivityStackSupervisor::DEBUG_STATES) {
+            Slogger::D(TAG, "resumeTopActivityLocked: Restarting %s", TO_CSTR(next));
+        }
         mStackSupervisor->StartSpecificActivityLocked(next, TRUE, TRUE);
     }
 
-    if (CActivityManagerService::DEBUG_STACK)
+    if (CActivityManagerService::DEBUG_STACK) {
         mStackSupervisor->ValidateTopActivitiesLocked();
+    }
     return TRUE;
 }
 
@@ -1889,13 +1942,13 @@ void ActivityStack::StartActivityLocked(
                 // user, then just add it without starting; it will
                 // get started when the user navigates back to it.
                 if (!startIt) {
-                    //if (ActivityStackSupervisor::DEBUG_ADD_REMOVE) Slog.i(CActivityManagerService::TAG, "Adding activity " + r + " to task "
-                    //        + task, new RuntimeException("here").fillInStackTrace());
+                    if (ActivityStackSupervisor::DEBUG_ADD_REMOVE) {
+                        Slogger::I(TAG, "Adding activity %s to task %s", TO_CSTR(r), TO_CSTR(task));
+                    }
                     task->AddActivityToTop(r);
                     r->PutInHistory();
-                    //task.mActivities.indexOf(r)
                     AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-                    Int32 activityNdx = -1;//IndexOf
+                    Int32 activityNdx = -1;
                     for(UInt32 i = 0; i < activities->GetSize(); ++i) {
                         if (((*activities)[i]).Get() == r) {
                             activityNdx = i;
@@ -1907,7 +1960,7 @@ void ActivityStack::StartActivityLocked(
                     info->GetScreenOrientation(&screenOrientation);
                     info->GetFlags(&flags);
                     info->GetConfigChanges(&configChanges);
-                    assert(activityNdx);//TODO remove
+                    assert(activityNdx >= 0);
                     mWindowManager->AddAppToken(activityNdx, r->mAppToken,
                            r->mTask->mTaskId, mStackId, screenOrientation, r->mFullscreen,
                            (flags & IActivityInfo::FLAG_SHOW_ON_LOCK_SCREEN) != 0,
@@ -1941,14 +1994,13 @@ void ActivityStack::StartActivityLocked(
     if (task == r->mTask && taskIndex != (taskSize - 1)) {
         mStackSupervisor->mUserLeaving = FALSE;
         if (CActivityManagerService::DEBUG_USER_LEAVING)
-            Slogger::V(CActivityManagerService::TAG,
-                "startActivity() behind front, mUserLeaving=false");
+            Slogger::V(TAG, "startActivity() behind front, mUserLeaving=false");
     }
 
     task = r->mTask;
 
     // Slot the activity into the history stack and proceed
-    //if (ActivityStackSupervisor::DEBUG_ADD_REMOVE) Slog.i(CActivityManagerService::TAG, "Adding activity " + r + " to stack to task " + task,
+    //if (ActivityStackSupervisor::DEBUG_ADD_REMOVE) Slogger::I(TAG, "Adding activity " + r + " to stack to task " + task,
     //        new RuntimeException("here").fillInStackTrace());
     task->AddActivityToTop(r);
     task->SetFrontOfTask();
@@ -1971,44 +2023,39 @@ void ActivityStack::StartActivityLocked(
             showStartingIcon = TRUE;
         }
         if (CActivityManagerService::DEBUG_TRANSITION)
-            Slogger::V(CActivityManagerService::TAG,
-                "Prepare open transition: starting %s", r->ToString().string());
+            Slogger::V(TAG, "Prepare open transition: starting %s", TO_CSTR(r));
         Int32 intentFlags;
         if (((r->mIntent->GetFlags(&intentFlags), intentFlags)&IIntent::FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-            mWindowManager->PrepareAppTransition(0/*TODO AppTransition::TRANSIT_NONE*/, keepCurTransition);
+            mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_NONE, keepCurTransition);
             mNoAnimActivities->Add(TO_IINTERFACE(r));
-        } else {
-            mWindowManager->PrepareAppTransition(newTask
-                   ? r->mLaunchTaskBehind
-                   ? 16/*TODO AppTransition::TRANSIT_TASK_OPEN_BEHIND */
-                   : 8/*TODO AppTransition::TRANSIT_TASK_OPEN*/
-                   : 6/*TODO AppTransition::TRANSIT_ACTIVITY_OPEN*/, keepCurTransition);
+        }
+        else {
+            mWindowManager->PrepareAppTransition(
+                newTask ?
+                    (r->mLaunchTaskBehind ? AppTransition::TRANSIT_TASK_OPEN_BEHIND : AppTransition::TRANSIT_TASK_OPEN)
+                   : AppTransition::TRANSIT_ACTIVITY_OPEN,
+                keepCurTransition);
             mNoAnimActivities->Remove(TO_IINTERFACE(r));
         }
 
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         Int32 activityNdx = -1;//IndexOf
-        for(UInt32 i = 0; i < activities->GetSize(); ++i) {
+        for (UInt32 i = 0; i < activities->GetSize(); ++i) {
             if (((*activities)[i]).Get() == r) {
                 activityNdx = i;
                 break;
             }
         }
         AutoPtr<IActivityInfo> info = r->mInfo;
-        //r.info.screenOrientation
-        Int32 screenOrientation;
+        Int32 screenOrientation, flags, configChanges;
         info->GetScreenOrientation(&screenOrientation);
-        //r.info.flags
-        Int32 flags;
         info->GetFlags(&flags);
-        //r.info.configChanges
-        Int32 configChanges;
         info->GetConfigChanges(&configChanges);
-        assert(activityNdx);//TODO remove
+        assert(activityNdx >= 0);
         mWindowManager->AddAppToken(activityNdx,
-               r->mAppToken, r->mTask->mTaskId, mStackId, screenOrientation, r->mFullscreen,
-               (flags & IActivityInfo::FLAG_SHOW_ON_LOCK_SCREEN) != 0, r->mUserId,
-               configChanges, task->mVoiceSession != NULL, r->mLaunchTaskBehind);
+           r->mAppToken, r->mTask->mTaskId, mStackId, screenOrientation, r->mFullscreen,
+           (flags & IActivityInfo::FLAG_SHOW_ON_LOCK_SCREEN) != 0, r->mUserId,
+           configChanges, task->mVoiceSession != NULL, r->mLaunchTaskBehind);
         Boolean doShow = TRUE;
         if (newTask) {
             // Even though this activity is starting fresh, we still need
@@ -2055,7 +2102,6 @@ void ActivityStack::StartActivityLocked(
             }
             AutoPtr<IApplicationInfo> appInfo;
             IComponentInfo::Probe(r->mInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
-            assert(showStartingIcon);//TODO remove
             mWindowManager->SetAppStartingWindow(
                    IBinder::Probe(r->mAppToken), r->mPackageName, r->mTheme,
                    mService->CompatibilityInfoForPackageLocked(appInfo),
@@ -2064,7 +2110,8 @@ void ActivityStack::StartActivityLocked(
                    prev != NULL ? IBinder::Probe(prev->mAppToken) : NULL, showStartingIcon);
             r->mStartingWindowShown = TRUE;
         }
-    } else {
+    }
+    else {
         // If this is the first activity, don't do any fancy animations,
         // because there is nothing for it to animate on top of.
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
@@ -2076,16 +2123,12 @@ void ActivityStack::StartActivityLocked(
             }
         }
         AutoPtr<IActivityInfo> info = r->mInfo;
-        //r.info.screenOrientation
-        Int32 screenOrientation;
+        Int32 screenOrientation, flags;
         info->GetScreenOrientation(&screenOrientation);
-        //r.info.flags
-        Int32 flags;
         info->GetFlags(&flags);
-        //r.info.configChanges
         Int32 configChanges;
         info->GetConfigChanges(&configChanges);
-        assert(activityNdx);//TODO remove
+        assert(activityNdx >= 0);
         mWindowManager->AddAppToken(activityNdx, r->mAppToken,
                r->mTask->mTaskId, mStackId, screenOrientation, r->mFullscreen,
                (flags & IActivityInfo::FLAG_SHOW_ON_LOCK_SCREEN) != 0, r->mUserId,
@@ -2209,18 +2252,17 @@ AutoPtr<IActivityOptions> ActivityStack::ResetTargetTaskIfNeededLocked(
                 // same task affinity as the one we are moving,
                 // then merge it into the same task.
                 targetTask = bottom->mTask;
-                //if (CActivityManagerService::DEBUG_TASKS) Slog.v(CActivityManagerService::TAG, "Start pushing activity " + target
+                //if (CActivityManagerService::DEBUG_TASKS) Slogger::V(TAG, "Start pushing activity " + target
                 //        + " out to bottom task " + bottom.task);
             } else {
                 targetTask = CreateTaskRecord(mStackSupervisor->GetNextTaskId(), target->mInfo,
                         NULL, NULL, NULL, FALSE);
                 targetTask->mAffinityIntent = target->mIntent;
-                //if (CActivityManagerService::DEBUG_TASKS) Slog.v(CActivityManagerService::TAG, "Start pushing activity " + target
+                //if (CActivityManagerService::DEBUG_TASKS) Slogger::V(TAG, "Start pushing activity " + target
                 //        + " out to new task " + target.task);
             }
 
             Int32 targetTaskId = targetTask->mTaskId;
-            assert(targetTaskId);//TODO remove
             mWindowManager->SetAppGroupId(IBinder::Probe(target->mAppToken), targetTaskId);
 
             Boolean noOptions = canMoveOptions;
@@ -2238,10 +2280,10 @@ AutoPtr<IActivityOptions> ActivityStack::ResetTargetTaskIfNeededLocked(
                         noOptions = FALSE;
                     }
                 }
-                //if (ActivityStackSupervisor::DEBUG_ADD_REMOVE) Slog.i(CActivityManagerService::TAG, "Removing activity " + p + " from task="
+                //if (ActivityStackSupervisor::DEBUG_ADD_REMOVE) Slogger::I(TAG, "Removing activity " + p + " from task="
                 //        + task + " adding to task=" + targetTask
                 //        + " Callers=" + Debug.getCallers(4));
-                //if (CActivityManagerService::DEBUG_TASKS) Slog.v(CActivityManagerService::TAG, "Pushing next activity " + p
+                //if (CActivityManagerService::DEBUG_TASKS) Slogger::V(TAG, "Pushing next activity " + p
                 //        + " out to target's task " + target.task);
                 p->SetTask(targetTask, NULL);
                 targetTask->AddActivityAtBottom(p);
@@ -2284,7 +2326,7 @@ AutoPtr<IActivityOptions> ActivityStack::ResetTargetTaskIfNeededLocked(
                         noOptions = FALSE;
                     }
                 }
-                if (CActivityManagerService::DEBUG_TASKS) Slogger::W(CActivityManagerService::TAG, "resetTaskIntendedTask: calling finishActivity on %s", p->ToString().string());
+                if (CActivityManagerService::DEBUG_TASKS) Slogger::W(TAG, "resetTaskIntendedTask: calling finishActivity on %s", p->ToString().string());
                 if (FinishActivityLocked(p, IActivity::RESULT_CANCELED, NULL, String("reset"), FALSE)) {
                     end--;
                     srcPos--;
@@ -2382,7 +2424,7 @@ void ActivityStack::SendActivityResultLocked(
     }
 
     //if (CActivityManagerService::DEBUG_RESULTS)
-    //  Slog.v(CActivityManagerService::TAG, "Send activity result to " + r
+    //  Slogger::V(TAG, "Send activity result to " + r
     //        + " : who=" + resultWho + " req=" + requestCode
     //        + " res=" + resultCode + " data=" + data);
     if (mResumedActivity.Get() == r && r->mApp != NULL && r->mApp->mThread != NULL) {
@@ -2396,7 +2438,7 @@ void ActivityStack::SendActivityResultLocked(
             r->mApp->mThread->ScheduleSendResult(IBinder::Probe(r->mAppToken), IList::Probe(list));
             return;
         //} catch (Exception e) {
-        //    Slogger::W(CActivityManagerService::TAG, "Exception thrown sending result to " + r, e);
+        //    Slogger::W(TAG, "Exception thrown sending result to " + r, e);
         //}
     }
 
@@ -2407,7 +2449,7 @@ void ActivityStack::StopActivityLocked(
     /* [in] */ ActivityRecord* r)
 {
     if (CActivityManagerService::DEBUG_SWITCH)
-        Slogger::D(CActivityManagerService::TAG, "Stopping: %s", r->ToString().string());
+        Slogger::D(TAG, "Stopping: %s", TO_CSTR(r));
     Int32 intentFlags;
     r->mIntent->GetFlags(&intentFlags);
     Int32 infoFlags;
@@ -2417,13 +2459,13 @@ void ActivityStack::StopActivityLocked(
         if (!r->mFinishing) {
             if (!mService->IsSleeping()) {
                 if (ActivityStackSupervisor::DEBUG_STATES) {
-                    Slogger::D(CActivityManagerService::TAG, "no-history finish of %s", r->ToString().string());
+                    Slogger::D(TAG, "no-history finish of %s", TO_CSTR(r));
                 }
                 RequestFinishActivityLocked(IBinder::Probe(r->mAppToken), IActivity::RESULT_CANCELED, NULL,
                         String("no-history"), FALSE);
             } else {
                 if (ActivityStackSupervisor::DEBUG_STATES)
-                    Slogger::D(CActivityManagerService::TAG, "Not finishing noHistory %s on stop because we're just sleeping", r->ToString().string());
+                    Slogger::D(TAG, "Not finishing noHistory %s on stop because we're just sleeping", TO_CSTR(r));
             }
         }
     }
@@ -2434,10 +2476,10 @@ void ActivityStack::StopActivityLocked(
         //try {
             r->mStopped = FALSE;
             //if (ActivityStackSupervisor::DEBUG_STATES)
-            //  Slog.v(CActivityManagerService::TAG, "Moving to STOPPING: " + r + " (stop requested)");
+            //  Slogger::V(TAG, "Moving to STOPPING: " + r + " (stop requested)");
             r->mState = ActivityState_STOPPING;
             //if (CActivityManagerService::DEBUG_VISBILITY)
-            //  Slog.v(CActivityManagerService::TAG, "Stopping visible=" + r.visible + " for " + r);
+            //  Slogger::V(TAG, "Stopping visible=" + r.visible + " for " + r);
             if (!r->mVisible) {
                 mWindowManager->SetAppVisibility(IBinder::Probe(r->mAppToken), FALSE);
             }
@@ -2454,10 +2496,10 @@ void ActivityStack::StopActivityLocked(
         //    // Maybe just ignore exceptions here...  if the process
         //    // has crashed, our death notification will clean things
         //    // up.
-        //    //Slogger::W(CActivityManagerService::TAG, "Exception thrown during pause", e);
+        //    //Slogger::W(TAG, "Exception thrown during pause", e);
         //    // Just in case, assume it to be stopped.
         //    r->mStopped = TRUE;
-        //    //if (ActivityStackSupervisor::DEBUG_STATES) Slog.v(CActivityManagerService::TAG, "Stop failed; moving to STOPPED: " + r);
+        //    //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Stop failed; moving to STOPPED: " + r);
         //    r->mState = ActivityState_STOPPED;
         //    if (r->mConfigDestroy) {
         //        DestroyActivityLocked(r, TRUE, String("stop-except"));
@@ -2475,8 +2517,8 @@ Boolean ActivityStack::RequestFinishActivityLocked(
 {
     AutoPtr<ActivityRecord> r = IsInStackLocked(token);
     //if (CActivityManagerService::DEBUG_RESULTS || ActivityStackSupervisor::DEBUG_STATES)
-    //  Slog.v(
-    //        CActivityManagerService::TAG, "Finishing activity token=" + token + " r="
+    //  Slogger::V(
+    //        TAG, "Finishing activity token=" + token + " r="
     //        + ", result=" + resultCode + ", data=" + resultData
     //        + ", reason=" + reason);
     if (r == NULL) {
@@ -2522,7 +2564,7 @@ void ActivityStack::FinishTopRunningActivityLocked(
     if (r != NULL && r->mApp.Get() == app) {
         // If the top running activity is from this crashing
         // process, then terminate it to avoid getting in a loop.
-        //Slogger::W(CActivityManagerService::TAG, "  Force finishing activity " + r.intent.getComponent().flattenToShortString());
+        //Slogger::W(TAG, "  Force finishing activity " + r.intent.getComponent().flattenToShortString());
         Int32 taskNdx;
         mTaskHistory->IndexOf(TO_IINTERFACE(r->mTask), &taskNdx);
         //int activityNdx = r.task.mActivities.IndexOf(r);
@@ -2562,7 +2604,7 @@ void ActivityStack::FinishTopRunningActivityLocked(
                     || r->mState == ActivityState_PAUSING
                     || r->mState == ActivityState_PAUSED) {
                 if (!r->IsHomeActivity() || mService->mHomeProcess != r->mApp) {
-                    //Slogger::W(CActivityManagerService::TAG, "  Force finishing activity "
+                    //Slogger::W(TAG, "  Force finishing activity "
                     //        + r.intent.getComponent().flattenToShortString());
                     FinishActivityLocked(r, IActivity::RESULT_CANCELED, NULL, String("crashed"), FALSE);
                 }
@@ -2638,7 +2680,7 @@ void ActivityStack::FinishActivityResultsLocked(
     AutoPtr<ActivityRecord> resultTo = r->mResultTo;
     if (resultTo != NULL) {
         //if (CActivityManagerService::DEBUG_RESULTS)
-        //  Slog.v(CActivityManagerService::TAG, "Adding result to " + resultTo
+        //  Slogger::V(TAG, "Adding result to " + resultTo
         //        + " who=" + r.resultWho + " req=" + r.requestCode
         //        + " res=" + resultCode + " data=" + resultData);
         if (resultTo->mUserId != r->mUserId) {
@@ -2663,7 +2705,7 @@ void ActivityStack::FinishActivityResultsLocked(
         r->mResultTo = NULL;
     }
     else if (CActivityManagerService::DEBUG_RESULTS)
-        Slogger::V(CActivityManagerService::TAG, "No result destination from %s", r->ToString().string());
+        Slogger::V(TAG, "No result destination from %s", TO_CSTR(r));
 
     // Make sure this HistoryRecord is not holding on to other resources,
     // because clients have remote IPC references to this object so we
@@ -2682,7 +2724,7 @@ Boolean ActivityStack::FinishActivityLocked(
     /* [in] */ Boolean oomAdj)
 {
     if (r->mFinishing) {
-        Slogger::W(CActivityManagerService::TAG, "Duplicate finish request for %s", r->ToString().string());
+        Slogger::W(TAG, "Duplicate finish request for %s", TO_CSTR(r));
         return FALSE;
     }
 
@@ -2725,20 +2767,20 @@ Boolean ActivityStack::FinishActivityLocked(
     if (mResumedActivity.Get() == r) {
         Boolean endTask = index <= 0;
         //if (CActivityManagerService::DEBUG_VISBILITY || CActivityManagerService::DEBUG_TRANSITION)
-        //  Slog.v(CActivityManagerService::TAG,
+        //  Slogger::V(TAG,
         //        "Prepare close transition: finishing " + r);
         mWindowManager->PrepareAppTransition(endTask
-               ? 9/*TODO AppTransition::TRANSIT_TASK_CLOSE*/
-               : 7/*TODO AppTransition::TRANSIT_ACTIVITY_CLOSE*/, FALSE);
+               ? AppTransition::TRANSIT_TASK_CLOSE
+               : AppTransition::TRANSIT_ACTIVITY_CLOSE, FALSE);
 
         // Tell window manager to prepare for this one to be removed.
         mWindowManager->SetAppVisibility(IBinder::Probe(r->mAppToken), FALSE);
 
         if (mPausingActivity == NULL) {
             if (CActivityManagerService::DEBUG_PAUSE)
-                Slogger::V(CActivityManagerService::TAG, "Finish needs to pause: %s", r->ToString().string());
+                Slogger::V(TAG, "Finish needs to pause: %s", TO_CSTR(r));
             if (CActivityManagerService::DEBUG_USER_LEAVING)
-                Slogger::V(CActivityManagerService::TAG, "finish() => pause with userLeaving=false");
+                Slogger::V(TAG, "finish() => pause with userLeaving=false");
             StartPausingLocked(FALSE, FALSE, FALSE, FALSE);
         }
 
@@ -2749,11 +2791,11 @@ Boolean ActivityStack::FinishActivityLocked(
         // If the activity is PAUSING, we will complete the finish once
         // it is done pausing; else we can just directly finish it here.
         if (CActivityManagerService::DEBUG_PAUSE)
-            Slogger::V(CActivityManagerService::TAG, "Finish not pausing: %s", r->ToString().string());
+            Slogger::V(TAG, "Finish not pausing: %s", TO_CSTR(r));
         return FinishCurrentActivityLocked(r, FINISH_AFTER_PAUSE, oomAdj) == NULL;
     } else {
         if (CActivityManagerService::DEBUG_PAUSE)
-            Slogger::V(CActivityManagerService::TAG, "Finish waiting for pause of: %s", r->ToString().string());
+            Slogger::V(TAG, "Finish waiting for pause of: %s", TO_CSTR(r));
     }
 
     return FALSE;
@@ -2787,7 +2829,7 @@ AutoPtr<ActivityRecord> ActivityStack::FinishCurrentActivityLocked(
                 mStackSupervisor->CheckReadyForSleepLocked();
             }
         }
-        //if (ActivityStackSupervisor::DEBUG_STATES) Slog.v(CActivityManagerService::TAG, "Moving to STOPPING: " + r
+        //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to STOPPING: " + r
         //        + " (finish requested)");
         r->mState = ActivityState_STOPPING;
         if (oomAdj) {
@@ -2804,7 +2846,7 @@ AutoPtr<ActivityRecord> ActivityStack::FinishCurrentActivityLocked(
         mResumedActivity = NULL;
     }
     ActivityState prevState = r->mState;
-    if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(CActivityManagerService::TAG, "Moving to FINISHING: %s", r->ToString().string());
+    if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to FINISHING: %s", TO_CSTR(r));
     r->mState = ActivityState_FINISHING;
 
     if (mode == FINISH_IMMEDIATELY
@@ -2817,7 +2859,7 @@ AutoPtr<ActivityRecord> ActivityStack::FinishCurrentActivityLocked(
         if (activityRemoved) {
             mStackSupervisor->ResumeTopActivitiesLocked();
         }
-        //if (ActivityStackSupervisor::DEBUG_CONTAINERS) Slogger::D(CActivityManagerService::TAG,
+        //if (ActivityStackSupervisor::DEBUG_CONTAINERS) Slogger::D(TAG,
         //        "destroyActivityLocked: finishCurrentActivityLocked r=" + r +
         //        " destroy returned removed=" + activityRemoved);
         return activityRemoved ? NULL : r;
@@ -2825,7 +2867,7 @@ AutoPtr<ActivityRecord> ActivityStack::FinishCurrentActivityLocked(
 
     // Need to go through the full pause cycle to get this
     // activity into the stopped state and then finish it.
-    if (CActivityManagerService::localLOGV) Slogger::V(CActivityManagerService::TAG, "Enqueueing pending finish: %s", r->ToString().string());
+    if (CActivityManagerService::localLOGV) Slogger::V(TAG, "Enqueueing pending finish: %s", TO_CSTR(r));
     mStackSupervisor->mFinishingActivities->Add(TO_IINTERFACE(r));
     r->ResumeKeyDispatchingLocked();
     mStackSupervisor->GetFocusedStack()->ResumeTopActivityLocked(NULL);
@@ -2850,12 +2892,13 @@ void ActivityStack::FinishAllActivitiesLocked(
             if (r->mFinishing && !immediately) {
                 continue;
             }
-            //Slogger::D(CActivityManagerService::TAG, "finishAllActivitiesLocked: finishing " + r + " immediately");
+            //Slogger::D(TAG, "finishAllActivitiesLocked: finishing " + r + " immediately");
             FinishCurrentActivityLocked(r, FINISH_IMMEDIATELY, FALSE);
         }
     }
     if (noActivitiesInStack) {
-        mActivityContainer->OnTaskListEmptyLocked();
+        ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
+        ac->OnTaskListEmptyLocked();
     }
 }
 
@@ -2866,7 +2909,7 @@ Boolean ActivityStack::ShouldUpRecreateTaskLocked(
     // Basic case: for simple app-centric recents, we need to recreate
     // the task if the affinity has changed.
     if (srec == NULL
-            //|| srec->mTask->mAffinity == NULL
+            || srec->mTask->mAffinity == NULL
             || !srec->mTask->mAffinity.Equals(destAffinity)) {
         return TRUE;
     }
@@ -2874,10 +2917,14 @@ Boolean ActivityStack::ShouldUpRecreateTaskLocked(
     // they need to re-create their task if this current activity is the root
     // of a document, unless simply finishing it will return them to the the
     // correct app behind.
-    Boolean bTemp = FALSE;
-    assert(bTemp);//TODO remove
-    if (srec->mFrontOfTask && srec->mTask != NULL && srec->mTask->GetBaseIntent() != NULL
-            && FALSE/*TODO (((CIntent*)srec->mTask->GetBaseIntent().Get())->IsDocument(&bTemp), bTemp)*/) {
+    Boolean bval = FALSE;
+    if (srec->mFrontOfTask && srec->mTask != NULL) {
+        AutoPtr<IIntent> intent = srec->mTask->GetBaseIntent();
+        if (intent != NULL) {
+            intent->IsDocument(&bval);
+        }
+    }
+    if (bval) {
         // Okay, this activity is at the root of its task.  What to do, what to do...
         if (srec->mTask->GetTaskToReturnTo() != ActivityRecord::APPLICATION_ACTIVITY_TYPE) {
             // Finishing won't return to an application, so we need to recreate.
@@ -2887,7 +2934,7 @@ Boolean ActivityStack::ShouldUpRecreateTaskLocked(
         Int32 taskIdx;
         mTaskHistory->IndexOf(TO_IINTERFACE(srec->mTask), &taskIdx);
         if (taskIdx <= 0) {
-            //Slogger::W(CActivityManagerService::TAG, "shouldUpRecreateTask: task not in history for " + srec);
+            //Slogger::W(TAG, "shouldUpRecreateTask: task not in history for " + srec);
             return FALSE;
         }
         if (taskIdx == 0) {
@@ -2896,7 +2943,7 @@ Boolean ActivityStack::ShouldUpRecreateTaskLocked(
         }
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskIdx, (IInterface**)&taskobj);
-        TaskRecord* prevTask = (TaskRecord*)(IObject::Probe(taskobj));//mTaskHistory.get(taskIdx);
+        TaskRecord* prevTask = (TaskRecord*)IObject::Probe(taskobj);
         if (!srec->mTask->mAffinity.Equals(prevTask->mAffinity)) {
             // These are different apps, so need to recreate.
             return TRUE;
@@ -2913,9 +2960,7 @@ Boolean ActivityStack::NavigateUpToLocked(
 {
     AutoPtr<ActivityRecord> srec = ActivityRecord::ForToken(token);
     AutoPtr<TaskRecord> task = srec->mTask;
-    //final ArrayList<ActivityRecord> activities = task.mActivities;
     AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-    //final int start = activities.indexOf(srec);
     Int32 start = -1;//IndexOf
     for(UInt32 i = 0; i < activities->GetSize(); ++i) {
         if ((*activities)[i] == srec) {
@@ -2931,23 +2976,18 @@ Boolean ActivityStack::NavigateUpToLocked(
     Int32 finishTo = start - 1;
     AutoPtr<ActivityRecord> parent = finishTo < 0 ? NULL : (*activities)[finishTo];
     Boolean foundParentInTask = FALSE;
-    //final ComponentName dest = destIntent.GetComponent();
     AutoPtr<IComponentName> dest;
     destIntent->GetComponent((IComponentName**)&dest);
+    String packageName, name, pName, cName;
 
     if (start > 0 && dest != NULL) {
         for (Int32 i = finishTo; i >= 0; i--) {
             AutoPtr<ActivityRecord> r = (*activities)[i];
-            String packageName;
-            String name;
             IPackageItemInfo::Probe(r->mInfo)->GetPackageName(&packageName);
             IPackageItemInfo::Probe(r->mInfo)->GetName(&name);
-            String pName;
-            String cName;
             dest->GetPackageName(&pName);
             dest->GetClassName(&cName);
-            if (packageName.Equals(pName) &&
-                    name.Equals(cName)) {
+            if (packageName.Equals(pName) && name.Equals(cName)) {
                 finishTo = i;
                 parent = r;
                 foundParentInTask = TRUE;
@@ -2983,7 +3023,8 @@ Boolean ActivityStack::NavigateUpToLocked(
     binderHelper->ClearCallingIdentity(&origId);
     for (Int32 i = start; i > finishTo; i--) {
         AutoPtr<ActivityRecord> r = (*activities)[i];
-        RequestFinishActivityLocked(IBinder::Probe(r->mAppToken), resultCode, resultData, String("navigate-up"), TRUE);
+        RequestFinishActivityLocked(IBinder::Probe(r->mAppToken), resultCode, resultData,
+            String("navigate-up"), TRUE);
         // Only return the supplied result for the first activity finished
         resultCode = IActivity::RESULT_CANCELED;
         resultData = NULL;
@@ -3003,22 +3044,34 @@ Boolean ActivityStack::NavigateUpToLocked(
             Int32 uid;
             appInfo->GetUid(&uid);
             parent->DeliverNewIntentLocked(uid, destIntent);
-        } else {
+        }
+        else {
+            ECode ec = NOERROR;
+            Int32 res;
             //try {
-                AutoPtr<IComponentName> cn;
-                destIntent->GetComponent((IComponentName**)&cn);
-                AutoPtr<IActivityInfo> aInfo;
-                AppGlobals::GetPackageManager()->GetActivityInfo(
-                        cn, 0, srec->mUserId, (IActivityInfo**)&aInfo);
-                Int32 res;
-                mStackSupervisor->StartActivityLocked(srec->mApp->mThread, destIntent,
-                        String(NULL), aInfo, NULL, NULL, IBinder::Probe(parent->mAppToken), String(NULL),
-                        0, -1, parent->mLaunchedFromUid, parent->mLaunchedFromPackage,
-                        -1, parent->mLaunchedFromUid, 0, NULL, TRUE, NULL, NULL, NULL, &res);
-                foundParentInTask = res == IActivityManager::START_SUCCESS;
+            AutoPtr<IComponentName> cn;
+            destIntent->GetComponent((IComponentName**)&cn);
+            AutoPtr<IActivityInfo> aInfo;
+            ec = AppGlobals::GetPackageManager()->GetActivityInfo(
+                    cn, 0, srec->mUserId, (IActivityInfo**)&aInfo);
+            if (FAILED(ec)) {
+                foundParentInTask = FALSE;
+                goto _ERROR_;
+            }
+            ec = mStackSupervisor->StartActivityLocked(srec->mApp->mThread, destIntent,
+                    String(NULL), aInfo, NULL, NULL, IBinder::Probe(parent->mAppToken), String(NULL),
+                    0, -1, parent->mLaunchedFromUid, parent->mLaunchedFromPackage,
+                    -1, parent->mLaunchedFromUid, 0, NULL, TRUE, NULL, NULL, NULL, &res);
+            if (FAILED(ec)) {
+                foundParentInTask = FALSE;
+                goto _ERROR_;
+            }
+
+            foundParentInTask = res == IActivityManager::START_SUCCESS;
             //} catch (RemoteException e) {
-                //TODO foundParentInTask = FALSE;
+                //foundParentInTask = FALSE;
             //}
+_ERROR_:
             RequestFinishActivityLocked(IBinder::Probe(parent->mAppToken), resultCode,
                     resultData, String("navigate-up"), TRUE);
         }
@@ -3044,9 +3097,9 @@ void ActivityStack::CleanUpActivityLocked(
     r->mFrozenBeforeDestroy = FALSE;
 
     if (setState) {
-        //if (ActivityStackSupervisor::DEBUG_STATES) Slog.v(CActivityManagerService::TAG, "Moving to DESTROYED: " + r + " (cleaning up)");
+        //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to DESTROYED: " + r + " (cleaning up)");
         r->mState = ActivityState_DESTROYED;
-        //if (ActivityStackSupervisor::DEBUG_APP) Slog.v(CActivityManagerService::TAG, "Clearing app during cleanUp for activity " + r);
+        //if (ActivityStackSupervisor::DEBUG_APP) Slogger::V(TAG, "Clearing app during cleanUp for activity " + r);
         r->mApp = NULL;
     }
 
@@ -3149,7 +3202,7 @@ void ActivityStack::DestroyActivitiesLocked(
             }
             if (r->IsDestroyable()) {
                 //if (CActivityManagerService::DEBUG_SWITCH)
-                //  Slog.v(CActivityManagerService::TAG, "Destroying " + r + " in state " + r.state
+                //  Slogger::V(TAG, "Destroying " + r + " in state " + r.state
                 //        + " resumed=" + mResumedActivity
                 //        + " pausing=" + mPausingActivity + " for reason " + reason);
                 if (DestroyActivityLocked(r, TRUE, reason)) {
@@ -3169,7 +3222,7 @@ Boolean ActivityStack::SafelyDestroyActivityLocked(
 {
     if (r->IsDestroyable()) {
         //if (CActivityManagerService::DEBUG_SWITCH)
-        //  Slog.v(CActivityManagerService::TAG, "Destroying " + r + " in state " + r.state
+        //  Slogger::V(TAG, "Destroying " + r + " in state " + r.state
         //        + " resumed=" + mResumedActivity
         //        + " pausing=" + mPausingActivity + " for reason " + reason);
         return DestroyActivityLocked(r, TRUE, reason);
@@ -3184,7 +3237,7 @@ Int32 ActivityStack::ReleaseSomeActivitiesLocked(
     /* [in] */ const String& reason)
 {
     // Iterate over tasks starting at the back (oldest) first.
-    //if (ActivityStackSupervisor::DEBUG_RELEASE) Slogger::D(CActivityManagerService::TAG, "Trying to release some activities in " + app);
+    //if (ActivityStackSupervisor::DEBUG_RELEASE) Slogger::D(TAG, "Trying to release some activities in " + app);
     Int32 taskSize;
     ISet::Probe(tasks)->GetSize(&taskSize);
     Int32 maxTasks = taskSize / 4;
@@ -3203,14 +3256,14 @@ Int32 ActivityStack::ReleaseSomeActivitiesLocked(
         if (!result) {
             continue;
         }
-        //if (ActivityStackSupervisor::DEBUG_RELEASE) Slogger::D(CActivityManagerService::TAG, "Looking for activities to release in " + task);
+        //if (ActivityStackSupervisor::DEBUG_RELEASE) Slogger::D(TAG, "Looking for activities to release in " + task);
         Int32 curNum = 0;
         //final ArrayList<ActivityRecord> activities = task.mActivities;
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (UInt32 actNdx = 0; actNdx < activities->GetSize(); actNdx++) {
             AutoPtr<ActivityRecord> activity = (*activities)[actNdx];
             if (activity->mApp.Get() == app && activity->IsDestroyable()) {
-                //if (ActivityStackSupervisor::DEBUG_RELEASE) Slog.v(CActivityManagerService::TAG, "Destroying " + activity
+                //if (ActivityStackSupervisor::DEBUG_RELEASE) Slogger::V(TAG, "Destroying " + activity
                 //        + " in state " + activity.state + " resumed=" + mResumedActivity
                 //        + " pausing=" + mPausingActivity + " for reason " + reason);
                 DestroyActivityLocked(activity, TRUE, reason);
@@ -3233,7 +3286,7 @@ Int32 ActivityStack::ReleaseSomeActivitiesLocked(
             }
         }
     }
-    //if (ActivityStackSupervisor::DEBUG_RELEASE) Slogger::D(CActivityManagerService::TAG, "Done releasing: did " + numReleased + " activities");
+    //if (ActivityStackSupervisor::DEBUG_RELEASE) Slogger::D(TAG, "Done releasing: did " + numReleased + " activities");
     return numReleased;
 }
 
@@ -3243,8 +3296,8 @@ Boolean ActivityStack::DestroyActivityLocked(
     /* [in] */ const String& reason)
 {
     //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CLEANUP)
-    //  Slog.v(
-    //    CActivityManagerService::TAG, "Removing activity from " + reason + ": token=" + r
+    //  Slogger::V(
+    //    TAG, "Removing activity from " + reason + ": token=" + r
     //      + ", app=" + (r.app != NULL ? r.app.processName : "(NULL)"));
     //TODO EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY,
     //        r.userId, System.identityHashCode(r),
@@ -3280,7 +3333,7 @@ Boolean ActivityStack::DestroyActivityLocked(
 
         //try {
             if (CActivityManagerService::DEBUG_SWITCH)
-                Slogger::I(CActivityManagerService::TAG, "Destroying: %s", r->ToString().string());
+                Slogger::I(TAG, "Destroying: %s", TO_CSTR(r));
             ECode ec = r->mApp->mThread->ScheduleDestroyActivity(IBinder::Probe(r->mAppToken), r->mFinishing,
                     r->mConfigChangeFlags);
         //} catch (Exception e) {
@@ -3288,7 +3341,7 @@ Boolean ActivityStack::DestroyActivityLocked(
             // We can just ignore exceptions here...  if the process
             // has crashed, our death notification will clean things
             // up.
-            //Slogger::W(CActivityManagerService::TAG, "Exception thrown during finish", e);
+            //Slogger::W(TAG, "Exception thrown during finish", e);
             if (r->mFinishing) {
                 RemoveActivityFromHistoryLocked(r);
                 removedFromHistory = TRUE;
@@ -3307,7 +3360,7 @@ Boolean ActivityStack::DestroyActivityLocked(
         // it in the destroyed state since we are not removing it from the
         // list.
         if (r->mFinishing && !skipDestroy) {
-            //if (ActivityStackSupervisor::DEBUG_STATES) Slog.v(CActivityManagerService::TAG, "Moving to DESTROYING: " + r
+            //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to DESTROYING: " + r
             //        + " (destroy requested)");
             r->mState = ActivityState_DESTROYING;
             AutoPtr<IMessage> msg;
@@ -3315,9 +3368,9 @@ Boolean ActivityStack::DestroyActivityLocked(
             Boolean result;
             mHandler->SendMessageDelayed(msg, DESTROY_TIMEOUT, &result);
         } else {
-            //if (ActivityStackSupervisor::DEBUG_STATES) Slog.v(CActivityManagerService::TAG, "Moving to DESTROYED: " + r + " (destroy skipped)");
+            //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to DESTROYED: " + r + " (destroy skipped)");
             r->mState = ActivityState_DESTROYED;
-            if (ActivityStackSupervisor::DEBUG_APP) Slogger::V(CActivityManagerService::TAG, "Clearing app during destroy for activity %s", r->ToString().string());
+            if (ActivityStackSupervisor::DEBUG_APP) Slogger::V(TAG, "Clearing app during destroy for activity %s", TO_CSTR(r));
             r->mApp = NULL;
         }
     } else {
@@ -3326,9 +3379,9 @@ Boolean ActivityStack::DestroyActivityLocked(
             RemoveActivityFromHistoryLocked(r);
             removedFromHistory = TRUE;
         } else {
-            //if (ActivityStackSupervisor::DEBUG_STATES) Slog.v(CActivityManagerService::TAG, "Moving to DESTROYED: " + r + " (no app)");
+            //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to DESTROYED: " + r + " (no app)");
             r->mState = ActivityState_DESTROYED;
-            if (ActivityStackSupervisor::DEBUG_APP) Slogger::V(CActivityManagerService::TAG, "Clearing app during destroy for activity %s", r->ToString().string());
+            if (ActivityStackSupervisor::DEBUG_APP) Slogger::V(TAG, "Clearing app during destroy for activity %s", TO_CSTR(r));
             r->mApp = NULL;
         }
     }
@@ -3338,7 +3391,7 @@ Boolean ActivityStack::DestroyActivityLocked(
     Boolean removed;
     mLRUActivities->Remove(TO_IINTERFACE(r), &removed);
     if (!removed && hadApp) {
-        Slogger::W(CActivityManagerService::TAG, "Activity %s being finished, but not in LRU list", r->ToString().string());
+        Slogger::W(TAG, "Activity %s being finished, but not in LRU list", TO_CSTR(r));
     }
 
     return removedFromHistory;
@@ -3356,7 +3409,7 @@ void ActivityStack::ActivityDestroyedLocked(
         if (r != NULL) {
             mHandler->RemoveMessages(DESTROY_TIMEOUT_MSG, TO_IINTERFACE(r));
         }
-        if (ActivityStackSupervisor::DEBUG_CONTAINERS) Slogger::D(CActivityManagerService::TAG, "activityDestroyedLocked: r=%s", r->ToString().string());
+        if (ActivityStackSupervisor::DEBUG_CONTAINERS) Slogger::D(TAG, "activityDestroyedLocked: r=%s", TO_CSTR(r));
 
         if (IsInStackLocked(token) != NULL) {
             if (r->mState == ActivityState_DESTROYING) {
@@ -3381,7 +3434,7 @@ void ActivityStack::ReleaseBackgroundResources()
             // activity.
             return;
         }
-        //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::D(CActivityManagerService::TAG, "releaseBackgroundResources activtyDisplay=" +
+        //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::D(TAG, "releaseBackgroundResources activtyDisplay=" +
         //        mActivityContainer.mActivityDisplay + " visibleBehind=" + r + " app=" + r.app +
         //        " thread=" + r.app.thread);
         if (r != NULL && r->mApp != NULL && r->mApp->mThread != NULL) {
@@ -3392,7 +3445,7 @@ void ActivityStack::ReleaseBackgroundResources()
             Boolean res;
             mHandler->SendEmptyMessageDelayed(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG, 500, &res);
         } else {
-            //Slog.e(CActivityManagerService::TAG, "releaseBackgroundResources: activity " + r + " no longer running");
+            //Slog.e(TAG, "releaseBackgroundResources: activity " + r + " no longer running");
             BackgroundResourcesReleased(IBinder::Probe(r->mAppToken));
         }
     }
@@ -3412,20 +3465,26 @@ void ActivityStack::BackgroundResourcesReleased(
 
 Boolean ActivityStack::HasVisibleBehindActivity()
 {
-    return IsAttached() && mActivityContainer->mActivityDisplay->HasVisibleBehindActivity();
+    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
+    return IsAttached() && ac->mActivityDisplay->HasVisibleBehindActivity();
 }
 
 void ActivityStack::SetVisibleBehindActivity(
     /* [in] */ ActivityRecord* r)
 {
     if (IsAttached()) {
-        mActivityContainer->mActivityDisplay->SetVisibleBehindActivity(r);
+        ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
+        ac->mActivityDisplay->SetVisibleBehindActivity(r);
     }
 }
 
 AutoPtr<ActivityRecord> ActivityStack::GetVisibleBehindActivity()
 {
-    return IsAttached() ? mActivityContainer->mActivityDisplay->mVisibleBehindActivity : NULL;
+    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
+    if (IsAttached()) {
+        return (ActivityRecord*)ac->mActivityDisplay->mVisibleBehindActivity.Get();
+    }
+    return NULL;
 }
 
 Boolean ActivityStack::RemoveHistoryRecordsForAppLocked(
@@ -3445,8 +3504,8 @@ Boolean ActivityStack::RemoveHistoryRecordsForAppLocked(
 
     // Clean out the history list.
     Int32 i = NumActivities();
-    //if (CActivityManagerService::DEBUG_CLEANUP) Slog.v(
-    //    CActivityManagerService::TAG, "Removing app " + app + " from history with " + i + " entries");
+    //if (CActivityManagerService::DEBUG_CLEANUP) Slogger::V(
+    //    TAG, "Removing app " + app + " from history with " + i + " entries");
     Int32 taskSize;
     mTaskHistory->GetSize(&taskSize);
     for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
@@ -3458,8 +3517,8 @@ Boolean ActivityStack::RemoveHistoryRecordsForAppLocked(
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
             AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
             --i;
-            //if (CActivityManagerService::DEBUG_CLEANUP) Slog.v(
-            //    CActivityManagerService::TAG, "Record #" + i + " " + r + ": app=" + r.app);
+            //if (CActivityManagerService::DEBUG_CLEANUP) Slogger::V(
+            //    TAG, "Record #" + i + " " + r + ": app=" + r.app);
             if (r->mApp.Get() == app) {
                 Boolean remove;
                 if ((!r->mHaveState && !r->mStateNotNeeded) || r->mFinishing) {
@@ -3479,14 +3538,14 @@ Boolean ActivityStack::RemoveHistoryRecordsForAppLocked(
                     //if (ActivityStackSupervisor::DEBUG_ADD_REMOVE || CActivityManagerService::DEBUG_CLEANUP) {
                     //    RuntimeException here = new RuntimeException("here");
                     //    here.fillInStackTrace();
-                    //    Slog.i(CActivityManagerService::TAG, "Removing activity " + r + " from stack at " + i
+                    //    Slogger::I(TAG, "Removing activity " + r + " from stack at " + i
                     //            + ": haveState=" + r.haveState
                     //            + " stateNotNeeded=" + r.stateNotNeeded
                     //            + " finishing=" + r.finishing
                     //            + " state=" + r.state, here);
                     //}
                     if (!r->mFinishing) {
-                        //Slogger::W(CActivityManagerService::TAG, "Force removing " + r + ": app died, no saved state");
+                        //Slogger::W(TAG, "Force removing " + r + ": app died, no saved state");
                         //TODO EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
                         //        r.userId, System.identityHashCode(r),
                         //        r.task.taskId, r.shortComponentName,
@@ -3500,16 +3559,16 @@ Boolean ActivityStack::RemoveHistoryRecordsForAppLocked(
                 } else {
                     // We have the current state for this activity, so
                     // it can be restarted later when needed.
-                    if (CActivityManagerService::localLOGV) Slogger::V( CActivityManagerService::TAG, "Keeping entry, setting app to NULL");
+                    if (CActivityManagerService::localLOGV) Slogger::V( TAG, "Keeping entry, setting app to NULL");
                     if (r->mVisible) {
                         hasVisibleActivities = TRUE;
                     }
-                    if (ActivityStackSupervisor::DEBUG_APP) Slogger::V(CActivityManagerService::TAG, "Clearing app during removeHistory for activity %s", r->ToString().string());
+                    if (ActivityStackSupervisor::DEBUG_APP) Slogger::V(TAG, "Clearing app during removeHistory for activity %s", TO_CSTR(r));
                     r->mApp = NULL;
                     r->mNowVisible = FALSE;
                     if (!r->mHaveState) {
                         if (ActivityStackSupervisor::DEBUG_SAVED_STATE)
-                            Slogger::I(CActivityManagerService::TAG, "App died, clearing saved state of %s", r->ToString().string());
+                            Slogger::I(TAG, "App died, clearing saved state of %s", TO_CSTR(r));
                         r->mIcicle = NULL;
                     }
                 }
@@ -3570,7 +3629,7 @@ void ActivityStack::MoveHomeStackTaskToTop(
         TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
         if (task->mTaskType == homeStackTaskType) {
             //if (CActivityManagerService::DEBUG_TASKS || CActivityManagerService::DEBUG_STACK)
-            //    Slogger::D(CActivityManagerService::TAG, "moveHomeStackTaskToTop: moving " + task);
+            //    Slogger::D(TAG, "moveHomeStackTaskToTop: moving " + task);
             mTaskHistory->Remove(taskNdx);
             mTaskHistory->Add(top, TO_IINTERFACE(task));
             UpdateTaskMovement(task, TRUE);
@@ -3586,7 +3645,7 @@ void ActivityStack::MoveTaskToFrontLocked(
     /* [in] */ IBundle* options)
 {
     //if (CActivityManagerService::DEBUG_SWITCH)
-    //  Slog.v(CActivityManagerService::TAG, "moveTaskToFront: " + tr);
+    //  Slogger::V(TAG, "moveTaskToFront: " + tr);
 
     Int32 numTasks;
     mTaskHistory->GetSize(&numTasks);
@@ -3602,7 +3661,7 @@ void ActivityStack::MoveTaskToFrontLocked(
             CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&aoHelper);
             aoHelper->Abort(options);
         } else {
-            UpdateTransitLocked(10/*TODO AppTransition::TRANSIT_TASK_TO_FRONT*/, options);
+            UpdateTransitLocked(AppTransition::TRANSIT_TASK_TO_FRONT, options);
         }
         return;
     }
@@ -3614,11 +3673,11 @@ void ActivityStack::MoveTaskToFrontLocked(
     InsertTaskAtTop(tr);
 
     //if (CActivityManagerService::DEBUG_TRANSITION)
-    //  Slog.v(CActivityManagerService::TAG, "Prepare to front transition: task=" + tr);
+    //  Slogger::V(TAG, "Prepare to front transition: task=" + tr);
     Int32 flags;
     if (reason != NULL &&
             ((reason->mIntent->GetFlags(&flags), flags)&IIntent::FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-        mWindowManager->PrepareAppTransition(0/*TODO AppTransition::TRANSIT_NONE*/, FALSE);
+        mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_NONE, FALSE);
         AutoPtr<ActivityRecord> r = TopRunningActivityLocked(NULL);
         if (r != NULL) {
             mNoAnimActivities->Add(TO_IINTERFACE(r));
@@ -3628,7 +3687,7 @@ void ActivityStack::MoveTaskToFrontLocked(
         CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&aoHelper);
         aoHelper->Abort(options);
     } else {
-        UpdateTransitLocked(10/*TODO AppTransition::TRANSIT_TASK_TO_FRONT*/, options);
+        UpdateTransitLocked(AppTransition::TRANSIT_TASK_TO_FRONT, options);
     }
 
     mWindowManager->MoveTaskToTop(tr->mTaskId);
@@ -3647,11 +3706,11 @@ Boolean ActivityStack::MoveTaskToBackLocked(
 {
     AutoPtr<TaskRecord> tr = TaskForIdLocked(taskId);
     if (tr == NULL) {
-        Slogger::I(CActivityManagerService::TAG, "moveTaskToBack: bad taskId=%d", taskId);
+        Slogger::I(TAG, "moveTaskToBack: bad taskId=%d", taskId);
         return FALSE;
     }
 
-    Slogger::I(CActivityManagerService::TAG, "moveTaskToBack: %s", tr->ToString().string());
+    Slogger::I(TAG, "moveTaskToBack: %s", TO_CSTR(tr));
 
     mStackSupervisor->EndLockTaskModeIfTaskEnding(tr);
 
@@ -3681,7 +3740,7 @@ Boolean ActivityStack::MoveTaskToBackLocked(
     }
 
     if (CActivityManagerService::DEBUG_TRANSITION)
-        Slogger::V(CActivityManagerService::TAG, "Prepare to back transition: task=%d", taskId);
+        Slogger::V(TAG, "Prepare to back transition: task=%d", taskId);
 
     mTaskHistory->Remove(TO_IINTERFACE(tr));
     mTaskHistory->Add(0, TO_IINTERFACE(tr));
@@ -3707,13 +3766,13 @@ Boolean ActivityStack::MoveTaskToBackLocked(
     Int32 flags;
     if (reason != NULL &&
             ((reason->mIntent->GetFlags(&flags), flags) & IIntent::FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-        mWindowManager->PrepareAppTransition(0/*TODO AppTransition::TRANSIT_NONE*/, FALSE);
+        mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_NONE, FALSE);
         AutoPtr<ActivityRecord> r = TopRunningActivityLocked(NULL);
         if (r != NULL) {
             mNoAnimActivities->Add(TO_IINTERFACE(r));
         }
     } else {
-        mWindowManager->PrepareAppTransition(11/*TODO AppTransition::TRANSIT_TASK_TO_BACK*/, FALSE);
+        mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_TASK_TO_BACK, FALSE);
     }
     mWindowManager->MoveTaskToBottom(taskId);
 
@@ -3748,10 +3807,8 @@ void ActivityStack::LogStartActivity(
         data->ToSafeString(&strData);
     }
 
-    //TODO EventLog.writeEvent(tag,
-    //         r.userId, System.identityHashCode(r), task.taskId,
-    //         r.shortComponentName, r.intent.getAction(),
-    //         r.intent.getType(), strData, r.intent.getFlags());
+    Slogger::I(TAG, "userId:%d, taskId:%d, shortComponentName:%s, intent:%s, uri:%s",
+        r->mUserId, task->mTaskId, r->mShortComponentName.string(), TO_CSTR(r->mIntent), strData.string());
 }
 
 Boolean ActivityStack::EnsureActivityConfigurationLocked(
@@ -3760,27 +3817,27 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
 {
     if (mConfigWillChange) {
         //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-        //  Slog.v(CActivityManagerService::TAG,
+        //  Slogger::V(TAG,
         //        "Skipping config check (will change): " + r);
         return TRUE;
     }
 
     if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-        Slogger::V(CActivityManagerService::TAG, "Ensuring correct configuration: %s", r->ToString().string());
+        Slogger::V(TAG, "Ensuring correct configuration: %s", TO_CSTR(r));
 
     // Short circuit: if the two configurations are the exact same
     // object (the common case), then there is nothing to do.
     AutoPtr<IConfiguration> newConfig = mService->mConfiguration;
     if (r->mConfiguration == newConfig && !r->mForceNewConfig) {
         //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-        //  Slog.v(CActivityManagerService::TAG, "Configuration unchanged in " + r);
+        //  Slogger::V(TAG, "Configuration unchanged in " + r);
         return TRUE;
     }
 
     // We don't worry about activities that are finishing.
     if (r->mFinishing) {
         //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-        //  Slog.v(CActivityManagerService::TAG, "Configuration doesn't matter in finishing " + r);
+        //  Slogger::V(TAG, "Configuration doesn't matter in finishing " + r);
         r->StopFreezingScreenLocked(FALSE);
         return TRUE;
     }
@@ -3798,7 +3855,7 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
     oldConfig->Diff(newConfig, &changes);
     if (changes == 0 && !r->mForceNewConfig) {
         //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-        //  Slog.v(CActivityManagerService::TAG, "Configuration no differences in " + r);
+        //  Slogger::V(TAG, "Configuration no differences in " + r);
         return TRUE;
     }
 
@@ -3806,7 +3863,7 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
     // configuration and it will pick that up next time it starts.
     if (r->mApp == NULL || r->mApp->mThread == NULL) {
         //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-        //  Slog.v(CActivityManagerService::TAG,
+        //  Slogger::V(TAG,
         //        "Configuration doesn't matter not running " + r);
         r->StopFreezingScreenLocked(FALSE);
         r->mForceNewConfig = FALSE;
@@ -3815,7 +3872,7 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
 
     // Figure out how to handle the changes between the configurations.
     //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION) {
-    //    Slog.v(CActivityManagerService::TAG, "Checking to restart " + r.info.name + ": changed=0x"
+    //    Slogger::V(TAG, "Checking to restart " + r.info.name + ": changed=0x"
     //            + Integer.toHexString(changes) + ", handles=0x"
     //            + Integer.toHexString(r.info.getRealConfigChanged())
     //            + ", newConfig=" + newConfig);
@@ -3829,7 +3886,7 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
         r->mForceNewConfig = FALSE;
         if (r->mApp == NULL || r->mApp->mThread == NULL) {
             //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-            //  Slog.v(CActivityManagerService::TAG,
+            //  Slogger::V(TAG,
             //        "Config is destroying non-running " + r);
             DestroyActivityLocked(r, TRUE, String("config"));
         } else if (r->mState == ActivityState_PAUSING) {
@@ -3837,7 +3894,7 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
             // finish pausing.  Let's not do anything now, but just
             // flag that it needs to be restarted when done pausing.
             //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-            //  Slog.v(CActivityManagerService::TAG,
+            //  Slogger::V(TAG,
             //        "Config is skipping already pausing " + r);
             r->mConfigDestroy = TRUE;
             return TRUE;
@@ -3847,13 +3904,13 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
             // Instead of doing the normal handshaking, just say
             // "restart!".
             //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-            //  Slog.v(CActivityManagerService::TAG,
+            //  Slogger::V(TAG,
             //        "Config is relaunching resumed " + r);
             RelaunchActivityLocked(r, r->mConfigChangeFlags, TRUE);
             r->mConfigChangeFlags = 0;
         } else {
             //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-            //  Slog.v(CActivityManagerService::TAG,
+            //  Slogger::V(TAG,
             //        "Config is relaunching non-resumed " + r);
             RelaunchActivityLocked(r, r->mConfigChangeFlags, FALSE);
             r->mConfigChangeFlags = 0;
@@ -3871,7 +3928,7 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
     // it last got.
     if (r->mApp != NULL && r->mApp->mThread != NULL) {
         //try {
-            //if (CActivityManagerService::DEBUG_CONFIGURATION) Slog.v(CActivityManagerService::TAG, "Sending new config to " + r);
+            //if (CActivityManagerService::DEBUG_CONFIGURATION) Slogger::V(TAG, "Sending new config to " + r);
             r->mApp->mThread->ScheduleActivityConfigurationChanged(IBinder::Probe(r->mAppToken));
         //} catch (RemoteException e) {
             // If process died, whatever.
@@ -3908,7 +3965,7 @@ Boolean ActivityStack::WillActivityBeVisibleLocked(
     if (r == NULL) {
         return FALSE;
     }
-    //if (r->mFinishing) Slog.e(CActivityManagerService::TAG, "willActivityBeVisibleLocked: Returning false,"
+    //if (r->mFinishing) Slog.e(TAG, "willActivityBeVisibleLocked: Returning false,"
     //        + " would have returned true for r=" + r);
     return !r->mFinishing;
 }
@@ -3972,14 +4029,14 @@ Boolean ActivityStack::ForceStopPackageLocked(
                     //if (homeActivity != null && homeActivity.equals(r.realActivity))
                     if (homeActivity != NULL
                         && (IComparable::Probe(homeActivity)->CompareTo(TO_IINTERFACE(r->mRealActivity), &result), result == 0)) {
-                        Slogger::I(CActivityManagerService::TAG, "Skip force-stop again %s", r->ToString().string());
+                        Slogger::I(TAG, "Skip force-stop again %s", TO_CSTR(r));
                         continue;
                     } else {
                         homeActivity = r->mRealActivity;
                     }
                 }
                 didSomething = TRUE;
-                Slogger::I(CActivityManagerService::TAG, "  Force finishing activity %s", r->ToString().string());
+                Slogger::I(TAG, "  Force finishing activity %s", TO_CSTR(r));
                 if (samePackage) {
                     if (r->mApp != NULL) {
                         r->mApp->mRemoved = TRUE;
@@ -4038,8 +4095,8 @@ void ActivityStack::GetTasksLocked(
                 numRunning++;
             }
 
-            //if (CActivityManagerService::localLOGV) Slog.v(
-            //    CActivityManagerService::TAG, r.intent.getComponent().flattenToShortString()
+            //if (CActivityManagerService::localLOGV) Slogger::V(
+            //    TAG, r.intent.getComponent().flattenToShortString()
             //    + ": task=" + r.task);
         }
 
@@ -4072,7 +4129,7 @@ void ActivityStack::UnhandledBackLocked()
     --top;
     //if (CActivityManagerService::DEBUG_SWITCH)
     //  Slogger::D(
-    //    CActivityManagerService::TAG, "Performing unhandledBack(): top activity at " + top);
+    //    TAG, "Performing unhandledBack(): top activity at " + top);
     if (top >= 0) {
         //final ArrayList<ActivityRecord> activities = mTaskHistory.get(top).mActivities;
         AutoPtr<IInterface> taskobj;
@@ -4092,7 +4149,7 @@ Boolean ActivityStack::HandleAppDiedLocked(
 {
     if (mPausingActivity != NULL && mPausingActivity->mApp.Get() == app) {
         //if (CActivityManagerService::DEBUG_PAUSE || CActivityManagerService::DEBUG_CLEANUP)
-        //  Slog.v(CActivityManagerService::TAG,
+        //  Slogger::V(TAG,
         //        "App died while pausing: " + mPausingActivity);
         mPausingActivity = NULL;
     }
@@ -4118,7 +4175,7 @@ void ActivityStack::HandleAppCrashLocked(
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
             AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
             if (r->mApp.Get() == app) {
-                //Slogger::W(CActivityManagerService::TAG, "  Force finishing activity "
+                //Slogger::W(TAG, "  Force finishing activity "
                 //        + r.intent.getComponent().flattenToShortString());
                 // Force the destroy to skip right to removal.
                 r->mApp = NULL;
@@ -4307,7 +4364,7 @@ void ActivityStack::RemoveTask(
     Boolean bTemp;
     if ((mTaskHistory->IsEmpty(&bTemp), bTemp)) {
         //if (CActivityManagerService::DEBUG_STACK)
-        //    Slog.i(CActivityManagerService::TAG, "removeTask: moving to back stack=" + this);
+        //    Slogger::I(TAG, "removeTask: moving to back stack=" + this);
         if (IsOnHomeDisplay()) {
             mStackSupervisor->MoveHomeStack(!IsHomeStack());
         }
@@ -4315,7 +4372,8 @@ void ActivityStack::RemoveTask(
             mStacks->Remove(TO_IINTERFACE(this));
             mStacks->Add(0, TO_IINTERFACE(this));
         }
-        mActivityContainer->OnTaskListEmptyLocked();
+        ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
+        ac->OnTaskListEmptyLocked();
     }
 }
 
@@ -4400,6 +4458,8 @@ Boolean ActivityStack::IsCurrentProfileLocked(
 
 void ActivityStack::StartLaunchTraces()
 {
+    return;
+    //assert(0 && "TODO");
     AutoPtr<ITrace> trace;
     //TODO CTrace::AcquireSingleton((ITrace**)&trace);
     if (mFullyDrawnStartTime != 0)  {
@@ -4411,6 +4471,8 @@ void ActivityStack::StartLaunchTraces()
 
 void ActivityStack::StopFullyDrawnTraceIfNeeded()
 {
+    return;
+    //assert(0 && "TODO");
     if (mFullyDrawnStartTime != 0 && mLaunchStartTime == 0) {
         AutoPtr<ITrace> trace;
         //TODO CTrace::AcquireSingleton((ITrace**)&trace);
@@ -4433,23 +4495,23 @@ void ActivityStack::CompletePauseLocked(
 {
     AutoPtr<ActivityRecord> prev = mPausingActivity;
     if (CActivityManagerService::DEBUG_PAUSE)
-        Slogger::V(CActivityManagerService::TAG, "Complete pause: %s", prev->ToString().string());
+        Slogger::V(TAG, "Complete pause: %s", TO_CSTR(prev));
 
     if (prev != NULL) {
         prev->mState = ActivityState_PAUSED;
         if (prev->mFinishing) {
             if (CActivityManagerService::DEBUG_PAUSE)
-                Slogger::V(CActivityManagerService::TAG, "Executing finish of activity: %s", prev->ToString().string());
+                Slogger::V(TAG, "Executing finish of activity: %s", TO_CSTR(prev));
             prev = FinishCurrentActivityLocked(prev, FINISH_AFTER_VISIBLE, FALSE);
         } else if (prev->mApp != NULL) {
             if (CActivityManagerService::DEBUG_PAUSE)
-                Slogger::V(CActivityManagerService::TAG, "Enqueueing pending stop: %s", prev->ToString().string());
+                Slogger::V(TAG, "Enqueueing pending stop: %s", TO_CSTR(prev));
             if (prev->mWaitingVisible) {
                 prev->mWaitingVisible = FALSE;
                 mStackSupervisor->mWaitingVisibleActivities->Remove(TO_IINTERFACE(prev));
                 if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_PAUSE)
                     Slogger::V(
-                        CActivityManagerService::TAG, "Complete pause, no longer waiting: %s", prev->ToString().string());
+                        TAG, "Complete pause, no longer waiting: %s", TO_CSTR(prev));
             }
             if (prev->mConfigDestroy) {
                 // The previous is being paused because the configuration
@@ -4458,7 +4520,7 @@ void ActivityStack::CompletePauseLocked(
                 // instance right now, we need to first completely stop
                 // the current instance before starting the new one.
                 if (CActivityManagerService::DEBUG_PAUSE)
-                    Slogger::V(CActivityManagerService::TAG, "Destroying after pause: %s", prev->ToString().string());
+                    Slogger::V(TAG, "Destroying after pause: %s", TO_CSTR(prev));
                 DestroyActivityLocked(prev, TRUE, String("pause-config"));
             } else if (!HasVisibleBehindActivity()) {
                 // If we were visible then resumeTopActivities will release resources before
@@ -4474,7 +4536,7 @@ void ActivityStack::CompletePauseLocked(
                     // them out. Or if r is the last of activity of the last task the stack
                     // will be empty and must be cleared immediately.
                     if (CActivityManagerService::DEBUG_PAUSE)
-                        Slogger::V(CActivityManagerService::TAG, "To many pending stops, forcing idle");
+                        Slogger::V(TAG, "To many pending stops, forcing idle");
                     mStackSupervisor->ScheduleIdleLocked();
                 } else {
                     mStackSupervisor->CheckReadyForSleepLocked();
@@ -4482,7 +4544,7 @@ void ActivityStack::CompletePauseLocked(
             }
         } else {
             if (CActivityManagerService::DEBUG_PAUSE)
-                Slogger::V(CActivityManagerService::TAG, "App died during pause, not stopping: %s", prev->ToString().string());
+                Slogger::V(TAG, "App died during pause, not stopping: %s", TO_CSTR(prev));
             prev = NULL;
         }
         mPausingActivity = NULL;
@@ -4540,7 +4602,7 @@ void ActivityStack::CompletePauseLocked(
     }
 }
 
-void ActivityStack::CompleteResumeLocked(
+ECode ActivityStack::CompleteResumeLocked(
     /* [in] */ ActivityRecord* next)
 {
     next->mIdle = FALSE;
@@ -4584,10 +4646,12 @@ void ActivityStack::CompleteResumeLocked(
     }
     next->mReturningOptions = NULL;
 
-    if (mActivityContainer->mActivityDisplay->mVisibleBehindActivity.Get() == next) {
+    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
+    if (ac->mActivityDisplay->mVisibleBehindActivity.Get() == next) {
         // When resuming an activity, require it to call requestVisibleBehind() again.
-        mActivityContainer->mActivityDisplay->SetVisibleBehindActivity(NULL);
+        ac->mActivityDisplay->SetVisibleBehindActivity(NULL);
     }
+    return NOERROR;
 }
 
 void ActivityStack::SetVisibile(
@@ -4596,11 +4660,10 @@ void ActivityStack::SetVisibile(
 {
     r->mVisible = visible;
     mWindowManager->SetAppVisibility(IBinder::Probe(r->mAppToken), visible);
-    //final ArrayList<ActivityContainer> containers = r.mChildContainers;
     List<AutoPtr<IIActivityContainer> > containers = r->mChildContainers;
     for (Int32 containerNdx = containers.GetSize() - 1; containerNdx >= 0; --containerNdx) {
         AutoPtr<IIActivityContainer> icontainer = containers[containerNdx];
-        ActivityStackSupervisor::ActivityContainer* container = (ActivityStackSupervisor::ActivityContainer*)(icontainer.Get());
+        ActivityContainer* container = (ActivityContainer*)(icontainer.Get());
         container->SetVisible(visible);
     }
 }
@@ -4750,7 +4813,7 @@ Int32 ActivityStack::ResetAffinityTaskIfNeededLocked(
             // in a task that is not currently on top.)
             if (forceReset || finishOnTaskLaunch) {
                 Int32 start = replyChainEnd >= 0 ? replyChainEnd : i;
-                //if (CActivityManagerService::DEBUG_TASKS) Slog.v(CActivityManagerService::TAG, "Finishing task at index " + start + " to " + i);
+                //if (CActivityManagerService::DEBUG_TASKS) Slogger::V(TAG, "Finishing task at index " + start + " to " + i);
                 for (Int32 srcPos = start; srcPos >= i; --srcPos) {
                     AutoPtr<ActivityRecord> p = (*activities)[srcPos];
                     if (p->mFinishing) {
@@ -4761,25 +4824,23 @@ Int32 ActivityStack::ResetAffinityTaskIfNeededLocked(
             } else {
                 if (taskInsertionPoint < 0) {
                     taskInsertionPoint = task->mActivities->GetSize();
-
                 }
 
                 Int32 start = replyChainEnd >= 0 ? replyChainEnd : i;
-                //if (CActivityManagerService::DEBUG_TASKS) Slog.v(CActivityManagerService::TAG, "Reparenting from task=" + affinityTask + ":"
+                //if (CActivityManagerService::DEBUG_TASKS) Slogger::V(TAG, "Reparenting from task=" + affinityTask + ":"
                 //        + start + "-" + i + " to task=" + task + ":" + taskInsertionPoint);
                 for (Int32 srcPos = start; srcPos >= i; --srcPos) {
                     AutoPtr<ActivityRecord> p = (*activities)[srcPos];
                     p->SetTask(task, NULL);
                     task->AddActivityAtIndex(taskInsertionPoint, p);
 
-                    //if (ActivityStackSupervisor::DEBUG_ADD_REMOVE) Slog.i(CActivityManagerService::TAG, "Removing and adding activity " + p
+                    //if (ActivityStackSupervisor::DEBUG_ADD_REMOVE) Slogger::I(TAG, "Removing and adding activity " + p
                     //        + " to stack at " + task,
                     //        new RuntimeException("here").fillInStackTrace());
-                    //if (CActivityManagerService::DEBUG_TASKS) Slog.v(CActivityManagerService::TAG, "Pulling activity " + p + " from " + srcPos
+                    //if (CActivityManagerService::DEBUG_TASKS) Slogger::V(TAG, "Pulling activity " + p + " from " + srcPos
                     //        + " in to resetting task " + task);
                     mWindowManager->SetAppGroupId(IBinder::Probe(p->mAppToken), taskId);
                 }
-                assert(taskId);//TODO remove
                 mWindowManager->MoveTaskToTop(taskId);
                 if (CActivityManagerService::VALIDATE_TOKENS) {
                     ValidateAppTokensLocked();
@@ -4866,13 +4927,13 @@ void ActivityStack::RemoveActivityFromHistoryLocked(
     //if (ActivityStackSupervisor::DEBUG_ADD_REMOVE) {
     //    RuntimeException here = new RuntimeException("here");
     //    here.fillInStackTrace();
-    //    Slog.i(CActivityManagerService::TAG, "Removing activity " + r + " from stack");
+    //    Slogger::I(TAG, "Removing activity " + r + " from stack");
     //}
     r->TakeFromHistory();
     RemoveTimeoutsForActivityLocked(r);
-    //if (ActivityStackSupervisor::DEBUG_STATES) Slog.v(CActivityManagerService::TAG, "Moving to DESTROYED: " + r + " (removed from history)");
+    //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to DESTROYED: " + r + " (removed from history)");
     r->mState = ActivityState_DESTROYED;
-    //if (ActivityStackSupervisor::DEBUG_APP) Slog.v(CActivityManagerService::TAG, "Clearing app during remove for activity " + r);
+    //if (ActivityStackSupervisor::DEBUG_APP) Slogger::V(TAG, "Clearing app during remove for activity " + r);
     r->mApp = NULL;
     mWindowManager->RemoveAppToken(IBinder::Probe(r->mAppToken));
     if (CActivityManagerService::VALIDATE_TOKENS) {
@@ -4881,7 +4942,7 @@ void ActivityStack::RemoveActivityFromHistoryLocked(
     AutoPtr<TaskRecord> task = r->mTask;
     if (task != NULL && task->RemoveActivity(r)) {
         //if (CActivityManagerService::DEBUG_STACK)
-        //  Slog.i(CActivityManagerService::TAG, "removeActivityFromHistoryLocked: last activity removed from " + this);
+        //  Slogger::I(TAG, "removeActivityFromHistoryLocked: last activity removed from " + this);
         if (mStackSupervisor->IsFrontStack(this) && task == TopTask() &&
                 task->IsOverHomeStack()) {
             mStackSupervisor->MoveHomeStackTaskToTop(task->GetTaskToReturnTo());
@@ -4899,8 +4960,8 @@ void ActivityStack::RemoveHistoryRecordsForAppLocked(
 {
     Int32 i;
     list->GetSize(&i);
-    //if (CActivityManagerService::DEBUG_CLEANUP) Slog.v(
-    //    CActivityManagerService::TAG, "Removing app " + app + " from list " + listName
+    //if (CActivityManagerService::DEBUG_CLEANUP) Slogger::V(
+    //    TAG, "Removing app " + app + " from list " + listName
     //    + " with " + i + " entries");
     while (i > 0) {
         i--;
@@ -4908,10 +4969,10 @@ void ActivityStack::RemoveHistoryRecordsForAppLocked(
         list->Get(i, (IInterface**)&activityobj);
         ActivityRecord* r = (ActivityRecord*)(IObject::Probe(activityobj));
         if (CActivityManagerService::DEBUG_CLEANUP)
-            Slogger::V(CActivityManagerService::TAG, "Record #%d %s",  i, r->ToString().string());
+            Slogger::V(TAG, "Record #%d %s",  i, TO_CSTR(r));
         if (r->mApp.Get() == app) {
             if (CActivityManagerService::DEBUG_CLEANUP)
-                Slogger::V(CActivityManagerService::TAG, "---> REMOVING this entry!");
+                Slogger::V(TAG, "---> REMOVING this entry!");
             list->Remove(i);
             RemoveTimeoutsForActivityLocked(r);
         }
@@ -4932,7 +4993,7 @@ Boolean ActivityStack::RelaunchActivityLocked(
         newIntents = r->mNewIntents;
     }
     //if (CActivityManagerService::DEBUG_SWITCH)
-    //  Slog.v(CActivityManagerService::TAG, "Relaunching: " + r
+    //  Slogger::V(TAG, "Relaunching: " + r
     //        + " with results=" + results + " newIntents=" + newIntents
     //        + " andResume=" + andResume);
     //TODO EventLog.writeEvent(andResume ? EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY
@@ -4961,7 +5022,7 @@ Boolean ActivityStack::RelaunchActivityLocked(
 
     //try {
         //if (CActivityManagerService::DEBUG_SWITCH || ActivityStackSupervisor::DEBUG_STATES)
-        //  Slog.i(CActivityManagerService::TAG,
+        //  Slogger::I(TAG,
         //        (andResume ? "Relaunching to RESUMED " : "Relaunching to PAUSED ")
         //        + r);
         r->mForceNewConfig = FALSE;
@@ -4974,7 +5035,7 @@ Boolean ActivityStack::RelaunchActivityLocked(
         // currently resumed, which implies we aren't sleeping.
     //} catch (RemoteException e) {
         //if (CActivityManagerService::DEBUG_SWITCH || ActivityStackSupervisor::DEBUG_STATES)
-        //  Slog.i(CActivityManagerService::TAG, "Relaunch failed", e);
+        //  Slogger::I(TAG, "Relaunch failed", e);
     //}
 
     if (andResume) {

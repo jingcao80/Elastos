@@ -3,8 +3,11 @@
 #define __ELASTOS_DROID_JAVAPROXY_CIRINGTONEPLAYER_H__
 
 #include "_Elastos_Droid_JavaProxy_CIRingtonePlayer.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
+using Elastos::Droid::Media::IAudioAttributes;
+using Elastos::Droid::Media::IIRingtonePlayer;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IUserHandle;
@@ -14,18 +17,25 @@ namespace Droid {
 namespace JavaProxy {
 
 CarClass(CIRingtonePlayer)
+    , public Object
+    , public IIRingtonePlayer
+    , public IBinder
 {
 public:
     ~CIRingtonePlayer();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI Play(
         /* [in] */ IBinder* token,
         /* [in] */ IUri* uri,
-        /* [in] */ Int32 streamType);
+        /* [in] */ IAudioAttributes* aa);
 
     CARAPI Stop(
         /* [in] */ IBinder* token);
@@ -34,11 +44,15 @@ public:
         /* [in] */ IBinder* token,
         /* [out] */ Boolean* result);
 
+    CARAPI SetVolume(
+        /* [in] */ IBinder* token,
+        /* [in] */ Float volume);
+
     CARAPI PlayAsync(
         /* [in] */ IUri* uri,
         /* [in] */ IUserHandle* user,
         /* [in] */ Boolean looping,
-        /* [in] */ Int32 streamType);
+        /* [in] */ IAudioAttributes* aa);
 
     CARAPI StopAsync();
 

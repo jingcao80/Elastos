@@ -2,12 +2,10 @@
 #ifndef __ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDCATEGORY_H__
 #define __ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDCATEGORY_H__
 
-#include "elastos/droid/ext/frameworkext.h"
-#include <elastos/core/Object.h>
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/settings/dashboard/DashboardTile.h"
 
 using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Os::IParcel;
-using Elastos::Droid::Os::IParcelable;
 using Elastos::Utility::IList;
 
 namespace Elastos {
@@ -65,7 +63,7 @@ public:
      * indicating that no identifier value is set.  All other values (including those below -1)
      * are valid.
      */
-    static const Int64 CAT_ID_UNDEFINED = -1;
+    static const Int64 CAT_ID_UNDEFINED;
 
     /**
      * Identifier for this tile, to correlate with a new list when
@@ -73,7 +71,7 @@ public:
      * {@link com.android.settings.dashboard.DashboardTile#TILE_ID_UNDEFINED}, meaning no id.
      * @attr ref android.R.styleable#PreferenceHeader_id
      */
-    Int64 mId = CAT_ID_UNDEFINED;
+    Int64 mId;
 
     /**
      * Resource ID of title of the category that is shown to the user.
@@ -98,4 +96,3 @@ public:
 } // namespace Elastos
 
 #endif //__ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDCATEGORY_H__
-

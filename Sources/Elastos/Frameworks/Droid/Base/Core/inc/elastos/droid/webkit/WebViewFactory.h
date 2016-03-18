@@ -81,7 +81,8 @@ public:
     static CARAPI OnWebViewUpdateInstalled();
 
 private:
-    // TODO static Class<WebViewFactoryProvider> getFactoryClass();
+    //static Class<WebViewFactoryProvider> getFactoryClass();
+    static AutoPtr<IClassInfo> GetFactoryClass();
 
     static CARAPI PrepareWebViewInSystemServer(
         /* [in] */ ArrayOf<String>* nativeLibraryPaths);

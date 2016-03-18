@@ -181,6 +181,10 @@ module
     merge("../../../car/elastos/droid/telephony.car");
     }
 
+    submodule Elastos.Droid.Ims {
+    merge("../../../car/elastos/droid/ims.car");
+    }
+
     submodule Elastos.Droid.Telecomm {
     merge("../../../car/elastos/droid/telecomm.car");
     }

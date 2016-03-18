@@ -11,7 +11,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class Button
+class ECO_PUBLIC Button
     : public TextView
     , public IButton
 {

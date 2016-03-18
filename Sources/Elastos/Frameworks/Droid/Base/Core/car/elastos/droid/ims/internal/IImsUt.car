@@ -1,0 +1,141 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Ims.Internal.IIImsUtListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Ims {
+    namespace Internal {
+
+    /**
+     * Provides the Ut interface interworking to get/set the supplementary service configuration.
+     *
+     * {@hide}
+     */
+    [deprecated]
+    interface IIImsUt {
+        /**
+         * Closes the object. This object is not usable after being closed.
+         */
+        Close();
+
+        /**
+         * Retrieves the configuration of the call barring.
+         */
+        QueryCallBarring(
+            [in] Int32 cbType,
+            [out] Int32* result);
+
+        /**
+         * Retrieves the configuration of the call forward.
+         */
+        QueryCallForward(
+            [in] Int32 condition,
+            [in] String number,
+            [out] Int32* result);
+
+        /**
+         * Retrieves the configuration of the call waiting.
+         */
+        QueryCallWaiting(
+            [out] Int32* result);
+
+        /**
+         * Retrieves the default CLIR setting.
+         */
+        QueryCLIR(
+            [out] Int32* result);
+
+        /**
+         * Retrieves the CLIP call setting.
+         */
+        QueryCLIP(
+            [out] Int32* result);
+
+        /**
+         * Retrieves the COLR call setting.
+         */
+        QueryCOLR(
+            [out] Int32* result);
+
+        /**
+         * Retrieves the COLP call setting.
+         */
+        QueryCOLP(
+            [out] Int32* result);
+
+        /**
+         * Updates or retrieves the supplementary service configuration.
+         */
+        Transact(
+            [in] IBundle* ssInfo,
+            [out] Int32* result);
+
+        /**
+         * Updates the configuration of the call barring.
+         */
+        UpdateCallBarring(
+            [in] Int32 cbType,
+            [in] Boolean en,
+            [in] ArrayOf<String>* barrList,
+            [out] Int32* result);
+
+        /**
+         * Updates the configuration of the call forward.
+         */
+        UpdateCallForward(
+            [in] Int32 action,
+            [in] Int32 condition,
+            [in] String number,
+            [in] Int32 timeSeconds,
+            [out] Int32* result);
+
+        /**
+         * Updates the configuration of the call waiting.
+         */
+        UpdateCallWaiting(
+            [in] Boolean en,
+            [out] Int32* result);
+
+        /**
+         * Updates the configuration of the CLIR supplementary service.
+         */
+        UpdateCLIR(
+            [in] Int32 clirMode,
+            [out] Int32* result);
+
+        /**
+         * Updates the configuration of the CLIP supplementary service.
+         */
+        UpdateCLIP(
+            [in] Boolean en,
+            [out] Int32* result);
+
+        /**
+         * Updates the configuration of the COLR supplementary service.
+         */
+        UpdateCOLR(
+            [in] Int32 presentation,
+            [out] Int32* result);
+
+        /**
+         * Updates the configuration of the COLP supplementary service.
+         */
+        UpdateCOLP(
+            [in] Boolean en,
+            [out] Int32* result);
+
+        /**
+         * Sets the listener.
+         */
+        SetListener(
+            [in] IIImsUtListener* listener);
+    }
+
+    } // namespace Internal
+    } // namespace Ims
+    } // namespace Droid
+    } // namespace Elastos
+}

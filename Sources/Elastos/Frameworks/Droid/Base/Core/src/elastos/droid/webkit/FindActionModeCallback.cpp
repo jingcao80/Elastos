@@ -7,6 +7,7 @@
 #include "elastos/droid/text/Selection.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/R.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Text::EIID_ITextWatcher;
 using Elastos::Droid::Text::ISpannable;
@@ -23,6 +24,7 @@ using Elastos::Core::CInteger32;
 using Elastos::Core::CString;
 using Elastos::Core::IInteger32;
 using Elastos::Core::IString;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -79,7 +81,8 @@ ECode FindActionModeCallback::NoAction::ToString(
 //                   FindActionModeCallback
 //===============================================================
 
-CAR_INTERFACE_IMPL_3(FindActionModeCallback, Object, IActionModeCallback, ITextWatcher, IViewOnClickListener);
+CAR_INTERFACE_IMPL_4(FindActionModeCallback, Object, IActionModeCallback, ITextWatcher,
+        IViewOnClickListener, IWebViewFindListener);
 
 FindActionModeCallback::FindActionModeCallback(
     /* [in] */ IContext* context)
@@ -142,10 +145,8 @@ ECode FindActionModeCallback::SetWebView(
         return E_ASSERTION_ERROR;
     }
     mWebView = webView;
-    assert(0);
-    // TODO
-    // return mWebView->SetFindDialogFindListener(this);
-    return E_NOT_IMPLEMENTED;
+    mWebView->SetFindDialogFindListener(this);
+    return NOERROR;
 }
 
 ECode FindActionModeCallback::OnFindResultReceived(
@@ -168,7 +169,9 @@ void FindActionModeCallback::FindAll()
     if (mWebView == NULL) {
         //throw new AssertionError(
         //        "No WebView for FindActionModeCallback::findAll");
+        Logger::E("FindActionModeCallback::FindAll", "No WebView for FindActionModeCallback::findAll");
         assert(0);
+        return;
     }
 
     AutoPtr<ICharSequence> find;
@@ -262,9 +265,8 @@ ECode FindActionModeCallback::OnCreateActionMode(
     AutoPtr<ICharSequence> text;
     CString::New(String("0"), (ICharSequence**)&text);
     mMatches->SetText(text);
-    assert(0);
-    // TODO don't find RequestFocus
-    // mEditText->RequestFocus(NULL);
+    //don't find RequestFocus
+    IView::Probe(mEditText)->RequestFocus(NULL);
 
     if (result) {
         *result = TRUE;
@@ -277,10 +279,8 @@ ECode FindActionModeCallback::OnDestroyActionMode(
     /* [in] */ IActionMode* mode)
 {
     mActionMode = NULL;
-    assert(0);
-    // TODO
-    // mWebView->NotifyFindDialogDismissed();
-    // mWebView->SetFindDialogFindListener(NULL);
+    mWebView->NotifyFindDialogDismissed();
+    mWebView->SetFindDialogFindListener(NULL);
     AutoPtr<IBinder> binder;
     IView::Probe(mWebView)->GetWindowToken((IBinder**)&binder);
     Boolean result;
@@ -310,7 +310,9 @@ ECode FindActionModeCallback::OnActionItemClicked(
     if (mWebView == NULL) {
         //throw new AssertionError(
         //        "No WebView for FindActionModeCallback::onActionItemClicked");
-        assert(0);
+        Logger::E("FindActionModeCallback::OnActionItemClicked",
+                "No WebView for FindActionModeCallback::onActionItemClicked");
+        return E_ASSERTION_ERROR;
     }
 
     AutoPtr<IBinder> binder;

@@ -126,6 +126,8 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
+static const String TAG("Activity");
+
 //=============================================================================
 // Activity::FragmentContainerLocal
 //=============================================================================
@@ -166,7 +168,6 @@ ECode Activity::FragmentContainerLocal::HasView(
 //=============================================================================
 // Activity
 //=============================================================================
-const String Activity::TAG("Activity");
 const Boolean Activity::DEBUG_LIFECYCLE = FALSE;
 const String Activity::FRAGMENTS_TAG("android:fragments");
 

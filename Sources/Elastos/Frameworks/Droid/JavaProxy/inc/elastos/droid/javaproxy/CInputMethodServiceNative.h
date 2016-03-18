@@ -3,13 +3,16 @@
 #define __ELASTOS_DROID_JAVAPROXY_CINPUTMETHODSERVICENATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CInputMethodServiceNative.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
-using Elastos::Droid::Internal::View::IIInputMethodSession;
 using Elastos::Droid::Internal::View::IIInputContext;
+using Elastos::Droid::Internal::View::IIInputMethod;
+using Elastos::Droid::Internal::View::IIInputMethodSession;
+using Elastos::Droid::Internal::View::IIInputSessionCallback;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IResultReceiver;
-using Elastos::Droid::View::IInputMethodCallback;
+using Elastos::Droid::View::IInputChannel;
 using Elastos::Droid::View::InputMethod::IEditorInfo;
 using Elastos::Droid::View::InputMethod::IInputBinding;
 using Elastos::Droid::View::InputMethod::IInputMethodSubtype;
@@ -19,13 +22,20 @@ namespace Droid {
 namespace JavaProxy {
 
 CarClass(CInputMethodServiceNative)
+    , public Object
+    , public IIInputMethod
+    , public IBinder
 {
 public:
     ~CInputMethodServiceNative();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI AttachToken(
         /* [in] */ IBinder* token);
@@ -44,7 +54,8 @@ public:
         /* [in] */ IEditorInfo* attribute);
 
     CARAPI CreateSession(
-        /* [in] */ IInputMethodCallback* inputMethodCalllback);
+        /* [in] */ IInputChannel* channel,
+        /* [in] */ IIInputSessionCallback* inputSessionCalllback);
 
     CARAPI SetSessionEnabled(
         /* [in] */ IIInputMethodSession* session,

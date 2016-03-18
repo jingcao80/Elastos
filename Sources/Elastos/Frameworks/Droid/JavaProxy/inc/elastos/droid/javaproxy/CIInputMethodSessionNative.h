@@ -3,14 +3,17 @@
 #define __ELASTOS_DROID_JAVAPROXY_CIINPUTMETHODSESSIONNATIVE_H__
 
 #include "_Elastos_Droid_JavaProxy_CIInputMethodSessionNative.h"
+#include <elastos/core/Object.h>
 #include <jni.h>
 
 using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Internal::View::IIInputMethodSession;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::View::IInputMethodCallback;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::InputMethod::ICompletionInfo;
+using Elastos::Droid::View::InputMethod::ICursorAnchorInfo;
 using Elastos::Droid::View::InputMethod::IExtractedText;
 using Elastos::Droid::View::InputMethod::IInputMethodSession;
 
@@ -19,13 +22,20 @@ namespace Droid {
 namespace JavaProxy {
 
 CarClass(CIInputMethodSessionNative)
+    , public Object
+    , public IIInputMethodSession
+    , public IBinder
 {
 public:
     ~CIInputMethodSessionNative();
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 jVM,
-        /* [in] */ Handle32 jInstance);
+        /* [in] */ Handle64 jVM,
+        /* [in] */ Handle64 jInstance);
 
     CARAPI GetInternalInputMethodSession(
         /* [out] */ IInputMethodSessionNative** session);
@@ -53,21 +63,6 @@ public:
     CARAPI DisplayCompletions(
         /* [in] */ ArrayOf<ICompletionInfo *>* completions);
 
-    CARAPI DispatchKeyEvent(
-        /* [in] */ Int32 seq,
-        /* [in] */ IKeyEvent* event,
-        /* [in] */ IInputMethodCallback* eventCallback);
-
-    CARAPI DispatchTrackballEvent(
-        /* [in] */ Int32 seq,
-        /* [in] */ IMotionEvent* event,
-        /* [in] */ IInputMethodCallback* eventCallback);
-
-    CARAPI DispatchGenericMotionEvent(
-        /* [in] */ Int32 seq,
-        /* [in] */ IMotionEvent* event,
-        /* [in] */ IInputMethodCallback* cb);
-
     CARAPI AppPrivateCommand(
         /* [in] */ const String& action,
         /* [in] */ IBundle* data);
@@ -77,6 +72,9 @@ public:
         /* [in] */ Int32 hideFlags);
 
     CARAPI FinishSession();
+
+    CARAPI UpdateCursorAnchorInfo(
+        /* [in] */ ICursorAnchorInfo* cursorAnchorInfo);
 
     CARAPI ToString(
         /* [out] */ String* str);

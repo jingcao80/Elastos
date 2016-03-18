@@ -1,0 +1,16 @@
+TARGET_NAME = dashboard
+TARGET_TYPE = lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES += DashboardCategory.cpp
+SOURCES += DashboardSummary.cpp
+SOURCES += DashboardTile.cpp
+SOURCES += DashboardTileView.cpp
+SOURCES += NoHomeDialogFragment.cpp
+SOURCES += SearchResultsSummary.cpp
+SOURCES += dashboard.cpp

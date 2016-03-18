@@ -40,9 +40,9 @@ AutoPtr<DisplayContent> TaskStack::GetDisplayContent()
     return mDisplayContent;
 }
 
-AutoPtr<List<AutoPtr<Task> > > TaskStack::GetTasks()
+List< AutoPtr<Task> >& TaskStack::GetTasks()
 {
-    return &mTasks;
+    return mTasks;
 }
 
 void TaskStack::ResizeWindows()

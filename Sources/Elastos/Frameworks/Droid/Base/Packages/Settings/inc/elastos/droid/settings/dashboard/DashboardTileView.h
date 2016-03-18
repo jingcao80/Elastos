@@ -1,85 +1,80 @@
 
+#ifndef __ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDTILEVIEW_H__
+#define __ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDTILEVIEW_H__
 
-package com.android.settings.dashboard;
+#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/widget/FrameLayout.h"
+#include "elastos/droid/settings/dashboard/DashboardTile.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IView;
-using Elastos::Droid::Widget::IFrameLayout;
-
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::Widget::FrameLayout;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::Widget::ITextView;
-using Elastos::Droid::Settings::IR;
-using Elastos::Droid::Settings::IUtils;
 
-public class DashboardTileView extends FrameLayout implements View.OnClickListener {
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Dashboard {
 
-    private static const Int32 DEFAULT_COL_SPAN = 1;
+class DashboardTileView
+    : public FrameLayout
+    , public IViewOnClickListener
+{
+public:
+    CAR_INTERFACE_DECL();
 
-    private ImageView mImageView;
-    private TextView mTitleTextView;
-    private TextView mStatusTextView;
-    private View mDivider;
+    DashboardTileView();
 
-    private Int32 mColSpan = DEFAULT_COL_SPAN;
+    ~DashboardTileView();
 
-    private DashboardTile mTile;
+    CARAPI constructor(
+        /* [in] */ IContext* context);
 
-    public DashboardTileView(Context context) {
-        This(context, NULL);
-    }
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs);
 
-    public DashboardTileView(Context context, AttributeSet attrs) {
-        Super(context, attrs);
+    CARAPI_(AutoPtr<ITextView>) GetTitleTextView();
 
-        final View view = LayoutInflater->From(context).Inflate(R.layout.dashboard_tile, this);
+    CARAPI_(AutoPtr<ITextView>) GetStatusTextView();
 
-        mImageView = (ImageView) view->FindViewById(R.id.icon);
-        mTitleTextView = (TextView) view->FindViewById(R.id.title);
-        mStatusTextView = (TextView) view->FindViewById(R.id.status);
-        mDivider = view->FindViewById(R.id.tile_divider);
+    CARAPI_(AutoPtr<IImageView>) GetImageView();
 
-        SetOnClickListener(this);
-        SetBackgroundResource(R.drawable.dashboard_tile_background);
-        SetFocusable(TRUE);
-    }
+    CARAPI SetTile(
+        /* [in] */ DashboardTile* tile);
 
-    public TextView GetTitleTextView() {
-        return mTitleTextView;
-    }
+    CARAPI SetDividerVisibility(
+        /* [in] */ Boolean visible);
 
-    public TextView GetStatusTextView() {
-        return mStatusTextView;
-    }
+    CARAPI_(void) SetColumnSpan(
+        /* [in] */ Int32 span);
 
-    public ImageView GetImageView() {
-        return mImageView;
-    }
-
-    CARAPI SetTile(DashboardTile tile) {
-        mTile = tile;
-    }
-
-    CARAPI SetDividerVisibility(Boolean visible) {
-        mDivider->SetVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-
-    void SetColumnSpan(Int32 span) {
-        mColSpan = span;
-    }
-
-    Int32 GetColumnSpan() {
-        return mColSpan;
-    }
+    CARAPI_(Int32) GetColumnSpan();
 
     //@Override
-    CARAPI OnClick(View v) {
-        if (mTile.fragment != NULL) {
-            Utils->StartWithFragment(GetContext(), mTile.fragment, mTile.fragmentArguments, NULL, 0,
-                    mTile.titleRes, mTile->GetTitle(GetResources()));
-        } else if (mTile.intent != NULL) {
-            GetContext()->StartActivity(mTile.intent);
-        }
-    }
-}
+    CARAPI OnClick(
+        /* [in] */ IView* v);
+
+private:
+    static const Int32 DEFAULT_COL_SPAN;
+
+    AutoPtr<IImageView> mImageView;
+    AutoPtr<ITextView> mTitleTextView;
+    AutoPtr<ITextView> mStatusTextView;
+    AutoPtr<IView> mDivider;
+
+    Int32 mColSpan;
+
+    AutoPtr<DashboardTile> mTile;
+};
+
+} // namespace Dashboard
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDTILEVIEW_H__

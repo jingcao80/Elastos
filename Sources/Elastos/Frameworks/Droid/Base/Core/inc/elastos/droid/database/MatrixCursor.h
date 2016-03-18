@@ -38,9 +38,13 @@ public:
         , public IRowBuilder
     {
     public:
-        RowBuilder(
+        RowBuilder();
+
+        virtual ~RowBuilder();
+
+        CARAPI constructor(
             /* [in] */ Int32 row,
-            /* [in] */ MatrixCursor* owner);
+            /* [in] */ IMatrixCursor* owner);
 
         CAR_INTERFACE_DECL()
 

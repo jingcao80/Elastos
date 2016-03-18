@@ -1,20 +1,24 @@
 
 #include "elastos/droid/javaproxy/CIInputMethodSessionNative.h"
 #include "elastos/droid/javaproxy/CInputMethodSessionNative.h"
-#include <elastos/utility/logging/Logger.h>
+#include "Elastos.Droid.View.h"
 #include "elastos/droid/javaproxy/Util.h"
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Logger;
-
-using Elastos::Droid::JavaProxy::IInputMethodSessionNative;
-using Elastos::Droid::JavaProxy::CInputMethodSessionNative;
+using Elastos::Droid::Internal::View::EIID_IIInputMethodSession;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::View::InputMethod::ICompletionInfo;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace JavaProxy {
 
 const String CIInputMethodSessionNative::TAG("CIInputMethodSessionNative");
+
+CAR_INTERFACE_IMPL_2(CIInputMethodSessionNative, Object, IIInputMethodSession, IBinder)
+
+CAR_OBJECT_IMPL(CIInputMethodSessionNative)
 
 CIInputMethodSessionNative::~CIInputMethodSessionNative()
 {
@@ -24,8 +28,8 @@ CIInputMethodSessionNative::~CIInputMethodSessionNative()
 }
 
 ECode CIInputMethodSessionNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -35,8 +39,8 @@ ECode CIInputMethodSessionNative::constructor(
 ECode CIInputMethodSessionNative::GetInternalInputMethodSession(
     /* [out] */ IInputMethodSessionNative** session)
 {
+    // LOGGERD(TAG, "+ CIInputMethodSessionNative::GetInternalInputMethodSession()");
     *session = NULL;
-    //LOGGERD(TAG, String("+ CIInputMethodSessionNative::GetInternalInputMethodSession()"));
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -54,7 +58,7 @@ ECode CIInputMethodSessionNative::GetInternalInputMethodSession(
 
     if (jsession != NULL) {
         jobject jInstance = env->NewGlobalRef(jsession);
-        ECode ec = CInputMethodSessionNative::New((Handle32)mJVM, (Handle32)jInstance, session);
+        ECode ec = CInputMethodSessionNative::New((Handle64)mJVM, (Handle64)jInstance, session);
         if (FAILED(ec)) {
             LOGGERW(TAG, "new CIServiceConnectionNative fail!");
         }
@@ -65,67 +69,14 @@ ECode CIInputMethodSessionNative::GetInternalInputMethodSession(
         LOGGERW(TAG, "GetInternalInputMethodSession() jsession is NULL!");
     }
 
-    //LOGGERD(TAG, "- CIInputMethodSessionNative::GetInternalInputMethodSession()");
-    return NOERROR;
-}
-
-ECode CIInputMethodSessionNative::DispatchKeyEvent(
-    /* [in] */ Int32 seq,
-    /* [in] */ IKeyEvent* event,
-    /* [in] */ IInputMethodCallback* eventCallback)
-{
-    // LOGGERD(TAG, String("+ CIInputMethodSessionNative::DispatchKeyEvent()"));
-
-    JNIEnv* env;
-    mJVM->AttachCurrentThread(&env, NULL);
-
-    jclass c = env->FindClass("com/android/internal/view/IInputMethodSession");
-    Util::CheckErrorAndLog(env, TAG, "FindClass: IInputMethodSession %d", __LINE__);
-
-    jmethodID m = env->GetMethodID(c, "dispatchKeyEvent", "(ILandroid/view/KeyEvent;Lcom/android/internal/view/IInputMethodCallback;)V");
-    Util::CheckErrorAndLog(env, TAG, "GetMethodID: dispatchKeyEvent %d", __LINE__);
-
-    jobject jevent = NULL;
-    if (event != NULL) {
-        jevent = Util::ToJavaKeyEvent(env, event);
-    }
-
-    jobject jeventCallback = NULL;
-    if (eventCallback != NULL) {
-        jclass imcbc = env->FindClass("com/android/internal/view/ElIInputMethodCallbackProxy");
-        Util::CheckErrorAndLog(env, TAG, "FindClass: ElIInputMethodCallbackProxy %d", __LINE__);
-
-        jmethodID imcbm = env->GetMethodID(imcbc, "<init>", "(I)V");
-        Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElIInputMethodCallbackProxy %d", __LINE__);
-
-        jeventCallback = env->NewObject(imcbc, imcbm, (jint)eventCallback);
-        Util::CheckErrorAndLog(env, TAG, "NewObject: ElIInputMethodCallbackProxy %d", __LINE__);
-        eventCallback->AddRef();
-
-        env->DeleteLocalRef(imcbc);
-    }
-
-    env->CallVoidMethod(mJInstance, m, (jint)seq, jevent, jeventCallback);
-    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: dispatchKeyEvent %d", __LINE__);
-
-    env->DeleteLocalRef(c);
-
-    if(jevent){
-        env->DeleteLocalRef(jevent);
-    }
-
-    if(jeventCallback){
-        env->DeleteLocalRef(jeventCallback);
-    }
-
-    // LOGGERD(TAG, String("- CIInputMethodSessionNative::DispatchKeyEvent()"));
+    // LOGGERD(TAG, "- CIInputMethodSessionNative::GetInternalInputMethodSession()");
     return NOERROR;
 }
 
 ECode CIInputMethodSessionNative::ViewClicked(
     /* [in] */ Boolean focusChanged)
 {
-    // LOGGERD(TAG, String("+ CIInputMethodSessionNative::ViewClicked()"));
+    // LOGGERD(TAG, "+ CIInputMethodSessionNative::ViewClicked()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -141,7 +92,7 @@ ECode CIInputMethodSessionNative::ViewClicked(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CIInputMethodSessionNative::DispatchKeyEvent()"));
+    // LOGGERD(TAG, "- CIInputMethodSessionNative::ViewClicked()");
     return NOERROR;
 }
 
@@ -153,8 +104,7 @@ ECode CIInputMethodSessionNative::UpdateSelection(
     /* [in] */ Int32 candidatesStart,
     /* [in] */ Int32 candidatesEnd)
 {
-
-    // LOGGERD(TAG, String("+ CIInputMethodSessionNative::ViewClicked()"));
+    // LOGGERD(TAG, "+ CIInputMethodSessionNative::UpdateSelection()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -171,14 +121,14 @@ ECode CIInputMethodSessionNative::UpdateSelection(
 
     env->DeleteLocalRef(c);
 
-    // LOGGERD(TAG, String("- CIInputMethodSessionNative::DispatchKeyEvent()"));
+    // LOGGERD(TAG, "- CIInputMethodSessionNative::UpdateSelection()");
     return NOERROR;
 }
 
 ECode CIInputMethodSessionNative::DisplayCompletions(
     /* [in] */ ArrayOf<ICompletionInfo*>* completions)
 {
-    // LOGGERD(TAG, String("+ CIInputMethodSessionNative::DisplayCompletions()"));
+    // LOGGERD(TAG, "+ CIInputMethodSessionNative::DisplayCompletions()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -218,13 +168,13 @@ ECode CIInputMethodSessionNative::DisplayCompletions(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jciArray);
 
-    // LOGGERD(TAG, String("- CIInputMethodSessionNative::DispatchKeyEvent()"));
+    // LOGGERD(TAG, "- CIInputMethodSessionNative::DisplayCompletions()");
     return NOERROR;
 }
 
 ECode CIInputMethodSessionNative::FinishInput()
 {
-    LOGGERD(TAG, "CIInputMethodSessionNative::FinishInput()");
+    // LOGGERD(TAG, "CIInputMethodSessionNative::FinishInput()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -240,7 +190,7 @@ ECode CIInputMethodSessionNative::FinishInput()
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, "CIInputMethodSessionNative::FinishInput()");
+    // LOGGERD(TAG, "CIInputMethodSessionNative::FinishInput()");
     return E_NOT_IMPLEMENTED;
 }
 
@@ -249,7 +199,7 @@ ECode CIInputMethodSessionNative::UpdateExtractedText(
     /* [in] */ IExtractedText* text)
 {
 
-    LOGGERD(TAG, String("CIInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CIInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -257,68 +207,7 @@ ECode CIInputMethodSessionNative::UpdateExtractedText(
 ECode CIInputMethodSessionNative::UpdateCursor(
     /* [in] */ IRect* newCursor)
 {
-    LOGGERD(TAG, String("CIInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
-    assert(0);
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CIInputMethodSessionNative::DispatchTrackballEvent(
-    /* [in] */ Int32 seq,
-    /* [in] */ IMotionEvent* event,
-    /* [in] */ IInputMethodCallback* eventCallback)
-{
-    LOGGERD(TAG, String("+ CIInputMethodSessionNative::DispatchTrackballEvent()"));
-
-    JNIEnv* env;
-    mJVM->AttachCurrentThread(&env, NULL);
-
-    jobject jevent = NULL;
-    if (event != NULL) {
-        jevent = Util::ToJavaMotionEvent(env, event);
-    }
-
-    jobject jeventCallback = NULL;
-    if (eventCallback != NULL) {
-        jclass imcbc = env->FindClass("com/android/internal/view/ElIInputMethodCallbackProxy");
-        Util::CheckErrorAndLog(env, TAG, "FindClass: ElIInputMethodCallbackProxy %d", __LINE__);
-
-        jmethodID imcbm = env->GetMethodID(imcbc, "<init>", "(I)V");
-        Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElIInputMethodCallbackProxy %d", __LINE__);
-
-        jeventCallback = env->NewObject(imcbc, imcbm, (jint)eventCallback);
-        Util::CheckErrorAndLog(env, TAG, "NewObject: ElIInputMethodCallbackProxy %d", __LINE__);
-        eventCallback->AddRef();
-
-        env->DeleteLocalRef(imcbc);
-    }
-
-    jclass c = env->FindClass("com/android/internal/view/IInputMethodSession");
-    Util::CheckErrorAndLog(env, TAG, "FindClass: IInputMethodSession %d", __LINE__);
-
-    jmethodID m = env->GetMethodID(c, "dispatchTrackballEvent", "(ILandroid/view/MotionEvent;Lcom/android/internal/view/IInputMethodCallback;)V");
-    Util::CheckErrorAndLog(env, TAG, "GetMethodID: dispatchTrackballEvent %d", __LINE__);
-
-    env->CallVoidMethod(mJInstance, m, (jint)seq, jevent, jeventCallback);
-    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: dispatchTrackballEvent %d", __LINE__);
-
-    if (jevent) {
-        env->DeleteLocalRef(jevent);
-    }
-    if (jeventCallback) {
-        env->DeleteLocalRef(jeventCallback);
-    }
-    env->DeleteLocalRef(c);
-
-    LOGGERD(TAG, String("- CIInputMethodSessionNative::DispatchTrackballEvent()"));
-    return NOERROR;
-}
-
-ECode CIInputMethodSessionNative::DispatchGenericMotionEvent(
-    /* [in] */ Int32 seq,
-    /* [in] */ IMotionEvent* event,
-    /* [in] */ IInputMethodCallback* cb)
-{
-    LOGGERD(TAG, String("CIInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CIInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -327,7 +216,7 @@ ECode CIInputMethodSessionNative::AppPrivateCommand(
     /* [in] */ const String& action,
     /* [in] */ IBundle* data)
 {
-    LOGGERD(TAG, String("CIInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CIInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
@@ -336,14 +225,14 @@ ECode CIInputMethodSessionNative::ToggleSoftInput(
     /* [in] */ Int32 showFlags,
     /* [in] */ Int32 hideFlags)
 {
-    LOGGERD(TAG, String("CIInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d"), __LINE__);
+    LOGGERD(TAG, "CIInputMethodSessionNative E_NOT_IMPLEMENTED Line:%d", __LINE__);
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CIInputMethodSessionNative::FinishSession()
 {
-    LOGGERD(TAG, String("+ CIInputMethodSessionNative::FinishSession()"));
+    // LOGGERD(TAG, "+ CIInputMethodSessionNative::FinishSession()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -359,14 +248,22 @@ ECode CIInputMethodSessionNative::FinishSession()
 
     env->DeleteLocalRef(c);
 
-    LOGGERD(TAG, String("- CIInputMethodSessionNative::FinishSession()"));
+    // LOGGERD(TAG, "- CIInputMethodSessionNative::FinishSession()");
     return NOERROR;
+}
+
+ECode CIInputMethodSessionNative::UpdateCursorAnchorInfo(
+    /* [in] */ ICursorAnchorInfo* cursorAnchorInfo)
+{
+    LOGGERD(TAG, "UpdateCursorAnchorInfo E_NOT_IMPLEMENTED Line:%d", __LINE__);
+    assert(0);
+    return E_NOT_IMPLEMENTED;
 }
 
 ECode CIInputMethodSessionNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CIInputMethodSessionNative::ToString()"));
+    // LOGGERD(TAG, "+ CIInputMethodSessionNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -385,7 +282,7 @@ ECode CIInputMethodSessionNative::ToString(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CIInputMethodSessionNative::ToString()"));
+    // LOGGERD(TAG, "- CIInputMethodSessionNative::ToString()");
     return NOERROR;
 }
 

@@ -1,0 +1,51 @@
+
+module
+{
+    interface Elastos.Droid.Telecomm.Telecom.IVideoProfile;
+    interface Elastos.Droid.Telecomm.Telecom.ICameraCapabilities;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Ims {
+    namespace Internal {
+
+    /**
+     * Internal remote interface for IMS's video call provider.
+     *
+     * At least initially, this aidl mirrors telecomm's {@link VideoCallCallback}. We created a
+     * separate aidl interface for invoking callbacks in Telephony from the IMS Service to without
+     * accessing internal interfaces. See {@link IImsVideoCallProvider} for additional detail.
+     *
+     * @see android.telecom.internal.IVideoCallCallback
+     * @see android.telecom.VideoCallImpl
+     *
+     * {@hide}
+     */
+    interface IIImsVideoCallCallback {
+        ReceiveSessionModifyRequest(
+            [in] IVideoProfile* videoProfile);
+
+        ReceiveSessionModifyResponse(
+            [in] Int32 status,
+            [in] IVideoProfile* requestedProfile,
+            [in] IVideoProfile* responseProfile);
+
+        HandleCallSessionEvent(
+            [in] Int32 event);
+
+        ChangePeerDimensions(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        ChangeCallDataUsage(
+            [in] Int32 dataUsage);
+
+        ChangeCameraCapabilities(
+            [in] ICameraCapabilities* cameraCapabilities);
+    }
+
+    } // namespace Internal
+    } // namespace Ims
+    } // namespace Droid
+    } // namespace Elastos
+}

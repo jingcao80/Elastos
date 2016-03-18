@@ -158,6 +158,7 @@ NativeInputManager::NativeInputManager(
 
 NativeInputManager::~NativeInputManager()
 {
+    mContext = NULL;
     mService = NULL;
 }
 

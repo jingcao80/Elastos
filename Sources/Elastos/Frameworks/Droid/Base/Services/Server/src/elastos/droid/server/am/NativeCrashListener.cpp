@@ -81,6 +81,7 @@ const Int64 NativeCrashListener::SOCKET_TIMEOUT_MILLIS;
 NativeCrashListener::NativeCrashListener(
     /* [in] */ CActivityManagerService* am)
 {
+    Thread::constructor(String("NativeCrashListener"));
     mAm = am;
 }
 

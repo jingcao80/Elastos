@@ -4,9 +4,9 @@
 #include "elastos/droid/javaproxy/Util.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::JavaProxy::Util;
-using Elastos::Droid::JavaProxy::CIInputMethodSessionNative;
+using Elastos::Droid::Internal::View::EIID_IIInputMethod;
 using Elastos::Droid::View::InputMethod::IInputMethodSession;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -14,6 +14,10 @@ namespace Droid {
 namespace JavaProxy {
 
 const String CInputMethodServiceNative::TAG("CInputMethodServiceNative");
+
+CAR_INTERFACE_IMPL_2(CInputMethodServiceNative, Object, IIInputMethod, IBinder)
+
+CAR_OBJECT_IMPL(CInputMethodServiceNative)
 
 CInputMethodServiceNative::~CInputMethodServiceNative()
 {
@@ -23,8 +27,8 @@ CInputMethodServiceNative::~CInputMethodServiceNative()
 }
 
 ECode CInputMethodServiceNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -34,7 +38,7 @@ ECode CInputMethodServiceNative::constructor(
 ECode CInputMethodServiceNative::AttachToken(
     /* [in] */ IBinder* token)
 {
-    //LOGGERD(TAG, "+ CInputMethodServiceNative::AttachToken() %p",  token);
+    // LOGGERD(TAG, "+ CInputMethodServiceNative::AttachToken() %p",  token);
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -45,76 +49,83 @@ ECode CInputMethodServiceNative::AttachToken(
     jobject jtoken = NULL;
     if (token != NULL) {
         jclass c = env->FindClass("android/os/ElBinderProxy");
-        Util::CheckErrorAndLog(env, TAG, String("FindClass: ElBinderProxy"), __LINE__);
+        Util::CheckErrorAndLog(env, TAG, "FindClass: ElBinderProxy", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
-        Util::CheckErrorAndLog(env, TAG, String("GetMethodID: ElBinderProxy"), __LINE__);
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
+        Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElBinderProxy", __LINE__);
 
-        jtoken = env->NewObject(c, m, (jint)token);
-        Util::CheckErrorAndLog(env, TAG, String("NewObject: ElBinderProxy"), __LINE__);
+        jtoken = env->NewObject(c, m, (jlong)token);
+        Util::CheckErrorAndLog(env, TAG, "NewObject: ElBinderProxy", __LINE__);
         token->AddRef();
 
         env->DeleteLocalRef(c);
     }
 
     jmethodID m = env->GetMethodID(c, "attachToken", "(Landroid/os/IBinder;)V");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: attachToken"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: attachToken", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jtoken);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: attachToken"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: attachToken", __LINE__);
 
     env->DeleteLocalRef(c);
     if(jtoken){
         env->DeleteLocalRef(jtoken);
     }
 
-    //LOGGERD(TAG, String("- CInputMethodServiceNative::AttachToken()"));
+    // LOGGERD(TAG, "- CInputMethodServiceNative::AttachToken()");
     return NOERROR;
 }
 
 ECode CInputMethodServiceNative::CreateSession(
-    /* [in] */ IInputMethodCallback* inputMethodCalllback)
+    /* [in] */ IInputChannel* channel,
+    /* [in] */ IIInputSessionCallback* inputSessionCalllback)
 {
-    //LOGGERD(TAG, "+ CInputMethodServiceNative::CreateSession() inputMethodCalllback: %p", inputMethodCalllback);
+    // LOGGERD(TAG, "+ CInputMethodServiceNative::CreateSession()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
+    jobject jchannel = NULL;
+    if (channel != NULL) {
+        jchannel = Util::ToJavaInputChannel(env, channel);
+    }
+
     jclass c = env->FindClass("com/android/internal/view/IInputMethod");
     Util::CheckErrorAndLog(env, TAG, "FindClass: IInputMethod %d", __LINE__);
 
-    jobject jinputMethodCalllback = NULL;
-    if (inputMethodCalllback != NULL) {
-        jclass c = env->FindClass("com/android/internal/view/ElIInputMethodCallbackProxy");
-        Util::CheckErrorAndLog(env, TAG, "FindClass: ElIInputMethodCallbackProxy %d", __LINE__);
+    jobject jinputSessionCalllback = NULL;
+    if (inputSessionCalllback != NULL) {
+        jclass c = env->FindClass("com/android/internal/view/ElIInputSessionCallbackProxy");
+        Util::CheckErrorAndLog(env, TAG, "FindClass: ElIInputSessionCallbackProxy %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
-        Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElIInputMethodCallbackProxy %d", __LINE__);
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
+        Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElIInputSessionCallbackProxy %d", __LINE__);
 
-        jinputMethodCalllback = env->NewObject(c, m, (jint)inputMethodCalllback);
-        Util::CheckErrorAndLog(env, TAG, "NewObject: ElIInputMethodCallbackProxy %d", __LINE__);
-        inputMethodCalllback->AddRef();
+        jinputSessionCalllback = env->NewObject(c, m, (jlong)inputSessionCalllback);
+        Util::CheckErrorAndLog(env, TAG, "NewObject: ElIInputSessionCallbackProxy %d", __LINE__);
+        inputSessionCalllback->AddRef();
 
         env->DeleteLocalRef(c);
     }
 
-    jmethodID m = env->GetMethodID(c, "createSession", "(Lcom/android/internal/view/IInputMethodCallback;)V");
+    jmethodID m = env->GetMethodID(c, "createSession", "(Landroid/view/InputChannel;Lcom/android/internal/view/IInputSessionCallback;)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: createSession %d", __LINE__);
 
-    env->CallVoidMethod(mJInstance, m, jinputMethodCalllback);
+    env->CallVoidMethod(mJInstance, m, jchannel, jinputSessionCalllback);
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: createSession %d", __LINE__);
 
     env->DeleteLocalRef(c);
-    env->DeleteLocalRef(jinputMethodCalllback);
+    env->DeleteLocalRef(jchannel);
+    env->DeleteLocalRef(jinputSessionCalllback);
 
-    //LOGGERD(TAG, "- CInputMethodServiceNative::CreateSession()");
+    // LOGGERD(TAG, "- CInputMethodServiceNative::CreateSession()");
     return NOERROR;
 }
 
 ECode CInputMethodServiceNative::BindInput(
     /* [in] */ IInputBinding* binding)
 {
-    //LOGGERD(TAG, String("+ CInputMethodServiceNative::BindInput()"));
+    // LOGGERD(TAG, "+ CInputMethodServiceNative::BindInput()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -135,13 +146,13 @@ ECode CInputMethodServiceNative::BindInput(
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jbinding);
-    //LOGGERD(TAG, String("- CInputMethodServiceNative::BindInput()"));
+    // LOGGERD(TAG, "- CInputMethodServiceNative::BindInput()");
     return NOERROR;
 }
 
 ECode CInputMethodServiceNative::UnbindInput()
 {
-    //LOGGERD(TAG, String("+ CInputMethodServiceNative::UnbindInput()"));
+    // LOGGERD(TAG, "+ CInputMethodServiceNative::UnbindInput()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -157,7 +168,7 @@ ECode CInputMethodServiceNative::UnbindInput()
 
     env->DeleteLocalRef(c);
 
-    //LOGGERD(TAG, String("- CInputMethodServiceNative::UnbindInput()"));
+    // LOGGERD(TAG, "- CInputMethodServiceNative::UnbindInput()");
     return NOERROR;
 }
 
@@ -165,7 +176,7 @@ ECode CInputMethodServiceNative::SetSessionEnabled(
     /* [in] */ IIInputMethodSession* session,
     /* [in] */ Boolean enabled)
 {
-    //LOGGERD(TAG, "+ CInputMethodServiceNative::SetSessionEnabled() : session %p, %d", session, enabled);
+    // LOGGERD(TAG, "+ CInputMethodServiceNative::SetSessionEnabled() : session %p, %d", session, enabled);
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -179,10 +190,10 @@ ECode CInputMethodServiceNative::SetSessionEnabled(
             jclass c = env->FindClass("android/view/inputmethod/ElInputMethodSessionProxy");
             Util::CheckErrorAndLog(env, TAG, "FindClass: ElInputMethodSessionProxy %d", __LINE__);
 
-            jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+            jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
             Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElInputMethodSessionProxy %d", __LINE__);
 
-            jobject jinrSession = env->NewObject(c, m, (jint)ls.Get());
+            jobject jinrSession = env->NewObject(c, m, (jlong)ls.Get());
             Util::CheckErrorAndLog(env, TAG, "NewObject: ElInputMethodSessionProxy %d", __LINE__);
             ls->AddRef();
 
@@ -218,7 +229,7 @@ ECode CInputMethodServiceNative::SetSessionEnabled(
         }
     }
 
-    //LOGGERD(TAG, String("- CInputMethodServiceNative::SetSessionEnabled()"));
+    // LOGGERD(TAG, "- CInputMethodServiceNative::SetSessionEnabled()");
     return NOERROR;
 }
 
@@ -226,7 +237,7 @@ ECode CInputMethodServiceNative::StartInput(
     /* [in] */ IIInputContext* inputContext,
     /* [in] */ IEditorInfo* attribute)
 {
-    // LOGGERD(TAG, String("+ CInputMethodServiceNative::StartInput()"));
+    // LOGGERD(TAG, "+ CInputMethodServiceNative::StartInput()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -236,10 +247,10 @@ ECode CInputMethodServiceNative::StartInput(
         jclass conKlass = env->FindClass("com/android/internal/view/ElIInputContextProxy");
         Util::CheckErrorAndLog(env, TAG, "StartInput %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(conKlass, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(conKlass, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "StartInput %d", __LINE__);
 
-        jinputContext = env->NewObject(conKlass, m, (jint)inputContext);
+        jinputContext = env->NewObject(conKlass, m, (jlong)inputContext);
         Util::CheckErrorAndLog(env, TAG, "StartInput %d", __LINE__);
         inputContext->AddRef();
 
@@ -267,7 +278,7 @@ ECode CInputMethodServiceNative::StartInput(
 
     env->DeleteLocalRef(jattribute);
 
-    // LOGGERD(TAG, String("- CInputMethodServiceNative::StartInput()"));
+    // LOGGERD(TAG, "- CInputMethodServiceNative::StartInput()");
     return NOERROR;
 }
 
@@ -275,14 +286,14 @@ ECode CInputMethodServiceNative::ShowSoftInput(
     /* [in] */ Int32 flags,
     /* [in] */ IResultReceiver* resultReceiver)
 {
-    // LOGGERD(TAG, String("+ CInputMethodServiceNative::StartInput()"));
+    // LOGGERD(TAG, "+ CInputMethodServiceNative::StartInput()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
     jobject jresultReceiver = NULL;
     if (resultReceiver != NULL) {
-        LOGGERE(TAG, String("CInputMethodServiceNative::ShowSoftInput() resultReceiver not NULL!"));
+        LOGGERE(TAG, "CInputMethodServiceNative::ShowSoftInput() resultReceiver not NULL!");
     }
 
     jclass c = env->FindClass("com/android/internal/view/IInputMethod");
@@ -297,7 +308,7 @@ ECode CInputMethodServiceNative::ShowSoftInput(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jresultReceiver);
 
-    // LOGGERD(TAG, String("- CInputMethodServiceNative::StartInput()"));
+    // LOGGERD(TAG, "- CInputMethodServiceNative::StartInput()");
     return NOERROR;
 }
 
@@ -305,7 +316,7 @@ ECode CInputMethodServiceNative::RestartInput(
     /* [in] */ IIInputContext* inputContext,
     /* [in] */ IEditorInfo* attribute)
 {
-    // LOGGERD(TAG, String("+ CInputMethodServiceNative::RestartInput()"));
+    // LOGGERD(TAG, "+ CInputMethodServiceNative::RestartInput()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -315,10 +326,10 @@ ECode CInputMethodServiceNative::RestartInput(
         jclass conKlass = env->FindClass("com/android/internal/view/ElIInputContextProxy");
         Util::CheckErrorAndLog(env, TAG, "FindClass: IInputMethod %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(conKlass, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(conKlass, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, "ToJavaInputBinding", "GetMethodID: ElIInputContextProxy line: %d", __LINE__);
 
-        jinputContext = env->NewObject(conKlass, m, (jint)inputContext);
+        jinputContext = env->NewObject(conKlass, m, (jlong)inputContext);
         Util::CheckErrorAndLog(env, TAG, "restartInput %d", __LINE__);
         inputContext->AddRef();
 
@@ -345,7 +356,7 @@ ECode CInputMethodServiceNative::RestartInput(
     }
     env->DeleteLocalRef(jattribute);
 
-    // LOGGERD(TAG, String("- CInputMethodServiceNative::RestartInput()"));
+    // LOGGERD(TAG, "- CInputMethodServiceNative::RestartInput()");
     return NOERROR;
 }
 
@@ -353,14 +364,14 @@ ECode CInputMethodServiceNative::HideSoftInput(
     /* [in] */ Int32 flags,
     /* [in] */ IResultReceiver* resultReceiver)
 {
-    // LOGGERD(TAG, String("+ CInputMethodServiceNative::HideSoftInput()"));
+    // LOGGERD(TAG, "+ CInputMethodServiceNative::HideSoftInput()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
     jobject jresultReceiver = NULL;
     if (resultReceiver != NULL) {
-        LOGGERE(TAG, String("CInputMethodServiceNative::ShowSoftInput() resultReceiver not NULL!"));
+        LOGGERE(TAG, "CInputMethodServiceNative::ShowSoftInput() resultReceiver not NULL!");
     }
 
     jclass c = env->FindClass("com/android/internal/view/IInputMethod");
@@ -375,14 +386,14 @@ ECode CInputMethodServiceNative::HideSoftInput(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jresultReceiver);
 
-    // LOGGERD(TAG, String("- CInputMethodServiceNative::HideSoftInput()"));
+    // LOGGERD(TAG, "- CInputMethodServiceNative::HideSoftInput()");
     return NOERROR;
 }
 
 ECode CInputMethodServiceNative::RevokeSession(
     /* [in] */ IIInputMethodSession* session)
 {
-    LOGGERD(TAG, String("+ CInputMethodServiceNative::RevokeSession()"));
+    // LOGGERD(TAG, "+ CInputMethodServiceNative::RevokeSession()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -402,10 +413,10 @@ ECode CInputMethodServiceNative::RevokeSession(
             jclass lsc = env->FindClass("android/view/inputmethod/ElInputMethodSessionProxy");
             Util::CheckErrorAndLog(env, TAG, "FindClass: ElInputMethodSessionProxy %d", __LINE__);
 
-            jmethodID m = env->GetMethodID(lsc, "<init>", "(I)V");
+            jmethodID m = env->GetMethodID(lsc, "<init>", "(J)V");
             Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElInputMethodSessionProxy %d", __LINE__);
 
-            jinrSession = env->NewObject(lsc, m, (jint)ls.Get());
+            jinrSession = env->NewObject(lsc, m, (jlong)ls.Get());
             Util::CheckErrorAndLog(env, TAG, "NewObject: ElInputMethodSessionProxy %d", __LINE__);
             ls->AddRef();
 
@@ -431,21 +442,21 @@ ECode CInputMethodServiceNative::RevokeSession(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jsession);
 
-    LOGGERD(TAG, String("- CInputMethodServiceNative::RevokeSession()"));
+    // LOGGERD(TAG, "- CInputMethodServiceNative::RevokeSession()");
     return NOERROR;
 }
 
 ECode CInputMethodServiceNative::ChangeInputMethodSubtype(
     /* [in] */ IInputMethodSubtype* subtype)
 {
-    LOGGERD(TAG, String("+ CInputMethodServiceNative::ChangeInputMethodSubtype()"));
+    // LOGGERD(TAG, "+ CInputMethodServiceNative::ChangeInputMethodSubtype()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
     jobject jsubtype = NULL;
     if (subtype != NULL) {
-        LOGGERE(TAG, String("CInputMethodServiceNative::ChangeInputMethodSubtype() subtype not NULL!"));
+        LOGGERE(TAG, "CInputMethodServiceNative::ChangeInputMethodSubtype() subtype not NULL!");
     }
 
     jclass c = env->FindClass("com/android/internal/view/IInputMethod");
@@ -460,14 +471,14 @@ ECode CInputMethodServiceNative::ChangeInputMethodSubtype(
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jsubtype);
 
-    LOGGERD(TAG, String("- CInputMethodServiceNative::ChangeInputMethodSubtype()"));
+    // LOGGERD(TAG, "- CInputMethodServiceNative::ChangeInputMethodSubtype()");
     return NOERROR;
 }
 
 ECode CInputMethodServiceNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CInputMethodServiceNative::ToString()"));
+    // LOGGERD(TAG, "+ CInputMethodServiceNative::ToString()");
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
@@ -475,17 +486,17 @@ ECode CInputMethodServiceNative::ToString(
     Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
 
     jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
 
     *str = Util::GetElString(env, jstr);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CInputMethodServiceNative::ToString()"));
+    // LOGGERD(TAG, "- CInputMethodServiceNative::ToString()");
     return NOERROR;
 }
 

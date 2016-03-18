@@ -14,164 +14,157 @@ module
     namespace Telecomm {
     namespace Telecom {
 
-        interface IPhoneAccountBuilder {
-            SetAddress(
-                [in] IUri* value,
-                [out] IPhoneAccountBuilder** res);
+    interface IPhoneAccountBuilder {
+        SetAddress(
+            [in] IUri* value);
 
-            SetSubscriptionAddress(
-                [in] IUri* value,
-                [out] IPhoneAccountBuilder** res);
+        SetSubscriptionAddress(
+            [in] IUri* value);
 
-            SetCapabilities(
-                [in] Int32 value,
-                [out] IPhoneAccountBuilder** res);
+        SetCapabilities(
+            [in] Int32 value);
 
-            SetIconResId(
-                [in] Int32 value,
-                [out] IPhoneAccountBuilder** res);
+        SetIconResId(
+            [in] Int32 value);
 
-            SetShortDescription(
-                [in] ICharSequence* value,
-                [out] IPhoneAccountBuilder** res);
+        SetShortDescription(
+            [in] ICharSequence* value);
 
-            AddSupportedUriScheme(
-                [in] String uriScheme,
-                [out] IPhoneAccountBuilder** res);
+        AddSupportedUriScheme(
+            [in] String uriScheme);
 
-            SetSupportedUriSchemes(
-                [in] IList* uriSchemes,
-                [out] IPhoneAccountBuilder** res);
+        SetSupportedUriSchemes(
+            [in] IList* uriSchemes);
 
-            Build(
-                [out] IPhoneAccount** res);
-        }
+        Build(
+            [out] IPhoneAccount** res);
+    }
+
+    /**
+     * Describes a distinct account, line of service or call placement method that the system
+     * can use to place phone calls.
+     *  @hide
+     *
+     * @Involve
+     * interface IParcelable
+     */
+    interface IPhoneAccount {
+        /**
+         * Flag indicating that this {@code PhoneAccount} can act as a connection manager for
+         * other connections. The {@link ConnectionService} associated with this {@code
+         * PhoneAccount}
+         * will be allowed to manage phone calls including using its own proprietary phone-call
+         * implementation (like VoIP calling) to make calls instead of the telephony stack.
+         * <p>
+         * When a user opts to place a call using the SIM-based telephony stack, the
+         * {@link ConnectionService} associated with this {@code PhoneAccount} will be attempted
+         * first
+         * if the user has explicitly selected it to be used as the default connection manager.
+         * <p>
+         * See {@link #getCapabilities}
+         */
+        const Int32 CAPABILITY_CONNECTION_MANAGER = 0x1;
 
         /**
-         * Describes a distinct account, line of service or call placement method that the system
-         * can use to place phone calls.
-         *  @hide
-         *
-         * @Involve
-         * interface IParcelable
+         * Flag indicating that this {@code PhoneAccount} can make phone calls in place of
+         * traditional SIM-based telephony calls. This account will be treated as a distinct method
+         * for placing calls alongside the traditional SIM-based telephony stack. This flag is
+         * distinct from {@link #CAPABILITY_CONNECTION_MANAGER} in that it is not allowed to manage
+         * calls from or use the built-in telephony stack to place its calls.
+         * <p>
+         * See {@link #getCapabilities}
+         * <p>
+         * {@hide}
          */
-        interface IPhoneAccount {
-            /**
-             * Flag indicating that this {@code PhoneAccount} can act as a connection manager for
-             * other connections. The {@link ConnectionService} associated with this {@code
-             * PhoneAccount}
-             * will be allowed to manage phone calls including using its own proprietary phone-call
-             * implementation (like VoIP calling) to make calls instead of the telephony stack.
-             * <p>
-             * When a user opts to place a call using the SIM-based telephony stack, the
-             * {@link ConnectionService} associated with this {@code PhoneAccount} will be attempted
-             * first
-             * if the user has explicitly selected it to be used as the default connection manager.
-             * <p>
-             * See {@link #getCapabilities}
-             */
-            const Int32 CAPABILITY_CONNECTION_MANAGER = 0x1;
+        const Int32 CAPABILITY_CALL_PROVIDER = 0x2;
 
-            /**
-             * Flag indicating that this {@code PhoneAccount} can make phone calls in place of
-             * traditional SIM-based telephony calls. This account will be treated as a distinct method
-             * for placing calls alongside the traditional SIM-based telephony stack. This flag is
-             * distinct from {@link #CAPABILITY_CONNECTION_MANAGER} in that it is not allowed to manage
-             * calls from or use the built-in telephony stack to place its calls.
-             * <p>
-             * See {@link #getCapabilities}
-             * <p>
-             * {@hide}
-             */
-            const Int32 CAPABILITY_CALL_PROVIDER = 0x2;
+        /**
+         * Flag indicating that this {@code PhoneAccount} represents a built-in PSTN SIM
+         * subscription.
+         * <p>
+         * Only the Android framework can register a {@code PhoneAccount} having this capability.
+         * <p>
+         * See {@link #getCapabilities}
+         */
+        const Int32 CAPABILITY_SIM_SUBSCRIPTION = 0x4;
 
-            /**
-             * Flag indicating that this {@code PhoneAccount} represents a built-in PSTN SIM
-             * subscription.
-             * <p>
-             * Only the Android framework can register a {@code PhoneAccount} having this capability.
-             * <p>
-             * See {@link #getCapabilities}
-             */
-            const Int32 CAPABILITY_SIM_SUBSCRIPTION = 0x4;
+        /**
+         * Flag indicating that this {@code PhoneAccount} is capable of placing video calls.
+         * <p>
+         * See {@link #getCapabilities}
+         * @hide
+         */
+        const Int32 CAPABILITY_VIDEO_CALLING = 0x8;
 
-            /**
-             * Flag indicating that this {@code PhoneAccount} is capable of placing video calls.
-             * <p>
-             * See {@link #getCapabilities}
-             * @hide
-             */
-            const Int32 CAPABILITY_VIDEO_CALLING = 0x8;
+        /**
+         * Flag indicating that this {@code PhoneAccount} is capable of placing emergency calls.
+         * By default all PSTN {@code PhoneAccount}s are capable of placing emergency calls.
+         * <p>
+         * See {@link #getCapabilities}
+         */
+        const Int32 CAPABILITY_PLACE_EMERGENCY_CALLS = 0x10;
 
-            /**
-             * Flag indicating that this {@code PhoneAccount} is capable of placing emergency calls.
-             * By default all PSTN {@code PhoneAccount}s are capable of placing emergency calls.
-             * <p>
-             * See {@link #getCapabilities}
-             */
-            const Int32 CAPABILITY_PLACE_EMERGENCY_CALLS = 0x10;
+        /**
+         * URI scheme for telephone number URIs.
+         */
+        const String SCHEME_TEL = "tel";
 
-            /**
-             * URI scheme for telephone number URIs.
-             */
-            const String SCHEME_TEL = "tel";
+        /**
+         * URI scheme for voicemail URIs.
+         */
+        const String SCHEME_VOICEMAIL = "voicemail";
 
-            /**
-             * URI scheme for voicemail URIs.
-             */
-            const String SCHEME_VOICEMAIL = "voicemail";
+        /**
+         * URI scheme for SIP URIs.
+         */
+        const String SCHEME_SIP = "sip";
 
-            /**
-             * URI scheme for SIP URIs.
-             */
-            const String SCHEME_SIP = "sip";
+        ToBuilder(
+            [out] IPhoneAccountBuilder** res);
 
-            ToBuilder(
-                [out] IPhoneAccountBuilder** res);
+        GetAccountHandle(
+            [out] IPhoneAccountHandle** res);
 
-            GetAccountHandle(
-                [out] IPhoneAccountHandle** res);
+        GetAddress(
+            [out] IUri** res);
 
-            GetAddress(
-                [out] IUri** res);
+        GetSubscriptionAddress(
+            [out] IUri** res);
 
-            GetSubscriptionAddress(
-                [out] IUri** res);
+        GetCapabilities(
+            [out] Int32* res);
 
-            GetCapabilities(
-                [out] Int32* res);
+        HasCapabilities(
+            [in] Int32 capability,
+            [out] Boolean* res);
 
-            HasCapabilities(
-                [in] Int32 capability,
-                [out] Boolean* res);
+        GetLabel(
+            [out] ICharSequence** res);
 
-            GetLabel(
-                [out] ICharSequence** res);
+        GetShortDescription(
+            [out] ICharSequence** res);
 
-            GetShortDescription(
-                [out] ICharSequence** res);
+        GetSupportedUriSchemes(
+            [out] IList** res);
 
-            GetSupportedUriSchemes(
-                [out] IList** res);
+        SupportsUriScheme(
+            [in] String uriScheme,
+            [out] Boolean* res);
 
-            SupportsUriScheme(
-                [in] String uriScheme,
-                [out] Boolean* res);
+        GetIconResId(
+            [out] Int32* res);
 
-            GetIconResId(
-                [out] Int32* res);
+        GetIcon(
+            [in] IContext* ctx,
+            [out] IDrawable** res);
+    }
 
-            GetIcon(
-                [in] IContext* ctx,
-                [out] IDrawable** res);
-        }
-
-        interface IPhoneAccountHelper {
-            Builder(
-                [in] IPhoneAccountHandle* accountHandle,
-                [in] ICharSequence* label,
-                [out] IPhoneAccountBuilder** res);
-        }
+    interface IPhoneAccountHelper {
+        Builder(
+            [in] IPhoneAccountHandle* accountHandle,
+            [in] ICharSequence* label,
+            [out] IPhoneAccountBuilder** res);
+    }
 
     } // namespace Telecom
     } // namespace Telecomm

@@ -44,7 +44,7 @@ namespace Widget {
  * @attr ref android.R.styleable#Switch_thumbTextPadding
  * @attr ref android.R.styleable#Switch_track
  */
-class Switch
+class ECO_PUBLIC Switch
     : public CompoundButton
     , public ISwitch
 {
@@ -355,21 +355,21 @@ protected:
         /* [in] */ IDrawable* who);
 
 private:
-    CARAPI_(void) SetSwitchTypefaceByIndex(
+    ECO_LOCAL CARAPI_(void) SetSwitchTypefaceByIndex(
         /* [in] */ Int32 typefaceIndex,
         /* [in] */ Int32 styleIndex);
 
-    AutoPtr<ILayout> MakeLayout(
+    ECO_LOCAL AutoPtr<ILayout> MakeLayout(
         /* [in] */ ICharSequence* text);
 
     /**
      * @return true if (x, y) is within the target area of the switch thumb
      */
-    CARAPI_(Boolean) HitThumb(
+    ECO_LOCAL CARAPI_(Boolean) HitThumb(
         /* [in] */ Float x,
         /* [in] */ Float y);
 
-    CARAPI_(void) CancelSuperTouch(
+    ECO_LOCAL CARAPI_(void) CancelSuperTouch(
         /* [in] */ IMotionEvent* ev);
 
     /**
@@ -377,33 +377,33 @@ private:
      *
      * @param ev Event that triggered the end of drag mode - ACTION_UP or ACTION_CANCEL
      */
-    CARAPI_(void) StopDrag(
+    ECO_LOCAL CARAPI_(void) StopDrag(
         /* [in] */ IMotionEvent* ev);
 
-    CARAPI_(void) AnimateThumbToCheckedState(
+    ECO_LOCAL CARAPI_(void) AnimateThumbToCheckedState(
         /* [in] */ Boolean newCheckedState);
 
-    CARAPI_(Boolean) GetTargetCheckedState();
+    ECO_LOCAL CARAPI_(Boolean) GetTargetCheckedState();
 
-    CARAPI_(void) SetThumbPosition(
+    ECO_LOCAL CARAPI_(void) SetThumbPosition(
         /* [in] */ Float position);
 
-    CARAPI_(Int32) GetThumbScrollRange();
+    ECO_LOCAL CARAPI_(Int32) GetThumbScrollRange();
 
-    CARAPI_(Int32) GetThumbOffset();
+    ECO_LOCAL CARAPI_(Int32) GetThumbOffset();
 
-    CARAPI_(void) CancelPositionAnimator();
+    ECO_LOCAL CARAPI_(void) CancelPositionAnimator();
 
 private:
-    static const Int32 THUMB_ANIMATION_DURATION = 250;
-    static const Int32 TOUCH_MODE_IDLE = 0;
-    static const Int32 TOUCH_MODE_DOWN = 1;
-    static const Int32 TOUCH_MODE_DRAGGING = 2;
+    ECO_LOCAL static const Int32 THUMB_ANIMATION_DURATION = 250;
+    ECO_LOCAL static const Int32 TOUCH_MODE_IDLE = 0;
+    ECO_LOCAL static const Int32 TOUCH_MODE_DOWN = 1;
+    ECO_LOCAL static const Int32 TOUCH_MODE_DRAGGING = 2;
 
     // Enum for the "typeface" XML parameter.
-    static const Int32 SANS = 1;
-    static const Int32 SERIF = 2;
-    static const Int32 MONOSPACE = 3;
+    ECO_LOCAL static const Int32 SANS = 1;
+    ECO_LOCAL static const Int32 SERIF = 2;
+    ECO_LOCAL static const Int32 MONOSPACE = 3;
 
     AutoPtr<IDrawable> mThumbDrawable;
     AutoPtr<IDrawable> mTrackDrawable;
@@ -441,10 +441,10 @@ private:
 
     AutoPtr<IRect> mTempRect;// = new Rect();
 
-    static const AutoPtr<ArrayOf<Int32> > CHECKED_STATE_SET;
-    const static String SWITCH_NAME;
+    ECO_LOCAL static const AutoPtr<ArrayOf<Int32> > CHECKED_STATE_SET;
+    ECO_LOCAL const static String SWITCH_NAME;
 
-    static AutoPtr<IFloatProperty> THUMB_POS;
+    ECO_LOCAL static AutoPtr<IFloatProperty> THUMB_POS;
 };
 
 } // namespace Widget

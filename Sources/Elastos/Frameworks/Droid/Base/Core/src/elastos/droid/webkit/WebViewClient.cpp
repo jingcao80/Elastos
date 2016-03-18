@@ -3,10 +3,9 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/webkit/WebViewClient.h"
-//#include "elastos/droid/view/ViewRootImpl.h"
 
-//using Elastos::Droid::View::ViewRootImpl;
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewRootImpl;
 
 namespace Elastos {
@@ -159,9 +158,7 @@ ECode WebViewClient::ShouldInterceptRequest(
     AutoPtr<IUri> url;
     request->GetUrl((IUri**)&url);
     String str;
-    assert(0);
-    // TODO
-    // url->ToString(&str);
+    IObject::Probe(url)->ToString(&str);
     return ShouldInterceptRequest(view, str, wrr);
 }
 
@@ -385,9 +382,7 @@ void WebViewClient::OnUnhandledInputEventInternal(
     /* [in] */ IInputEvent* event)
 {
     AutoPtr<IViewRootImpl> root;
-    assert(0);
-    // TODO
-    // view->GetViewRootImpl((IViewRootImpl**)&root);
+    IView::Probe(view)->GetViewRootImpl((IViewRootImpl**)&root);
     if (root != NULL) {
         root->DispatchUnhandledInputEvent(event);
     }

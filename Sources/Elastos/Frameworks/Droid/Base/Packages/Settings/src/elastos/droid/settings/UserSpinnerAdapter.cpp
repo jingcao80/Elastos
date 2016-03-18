@@ -1,24 +1,28 @@
 
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
 #include "elastos/droid/settings/UserSpinnerAdapter.h"
+#include "R.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IUserInfo;
 using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Database::IDataSetObserver;
-using Elastos::Droid::Graphics::Drawable::IBitmapDrawable;
-using Elastos::Droid::Graphics::Drawable::IDrawable;
-using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::IUserManager;
-using Elastos::Droid::View::ILayoutInflater;
-using Elastos::Droid::View::IView;
-using Elastos::Droid::View::IViewGroup;
-using Elastos::Droid::Widget::IImageView;
-using Elastos::Droid::Widget::ISpinnerAdapter;
-using Elastos::Droid::Widget::ITextView;
-
+using Elastos::Droid::Content::Res::IResourcesHelper;
+using Elastos::Droid::Content::Res::CResourcesHelper;
+using Elastos::Droid::Graphics::Drawable::CBitmapDrawable;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Internal::Utility::CUserIcons;
 using Elastos::Droid::Internal::Utility::IUserIcons;
-
-using Elastos::Utility::IArrayList;
+using Elastos::Droid::Widget::EIID_IAdapter;
+using Elastos::Droid::Widget::EIID_ISpinnerAdapter;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -46,7 +50,7 @@ UserSpinnerAdapter::UserDetails::UserDetails(
         AutoPtr<IResources> resources;
         helper->GetSystem((IResources**)&resources);
         resources->GetDrawable(
-                R::drawable::ic_corp_icon, (IDrawable**)&mIcon);
+                Elastos::Droid::R::drawable::ic_corp_icon, (IDrawable**)&mIcon);
     }
     else {
         userInfo->GetName(&mName);
@@ -114,23 +118,29 @@ AutoPtr<IUserHandle> UserSpinnerAdapter::GetUserHandle(
 ECode UserSpinnerAdapter::GetDropDownView(
     /* [in] */ Int32 position,
     /* [in] */ IView* convertView,
-    /* [in] */ ViewGroup* parent,
+    /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view);
 
-    AutoPtr<IView> row = convertView != NULL ? convertView : CreateUser(parent);
+    AutoPtr<IView> row;
+    if (convertView != NULL) {
+        row = convertView;
+    }
+    else {
+        row = CreateUser(parent);
+    }
 
     AutoPtr<IInterface> obj;
     mData->Get(position, (IInterface**)&obj);
     AutoPtr<UserDetails> user = (UserDetails*)IObject::Probe(obj);
 
     AutoPtr<IView> other;
-    row->FindViewById(R::id::icon, (IView**)&other);
+    row->FindViewById(Elastos::Droid::R::id::icon, (IView**)&other);
     IImageView::Probe(other)->SetImageDrawable(user->mIcon);
     other = NULL;
-    row->FindViewById(R::id::title, (IView**)&other);
-    ITextView::Probe(other)->SetText(user->mName);
+    row->FindViewById(Elastos::Droid::R::id::title, (IView**)&other);
+    ITextView::Probe(other)->SetText(CoreUtils::Convert(user->mName));
     *view = row;
     REFCOUNT_ADD(*view);
     return NOERROR;

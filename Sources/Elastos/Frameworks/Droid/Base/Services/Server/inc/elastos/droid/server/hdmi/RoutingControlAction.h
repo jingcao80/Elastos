@@ -32,6 +32,25 @@ class RoutingControlAction
     : public HdmiCecFeatureAction
     , public IRoutingControlAction
 {
+private:
+    class InnerSub_SendMessageCallback
+        : public Object
+        , public IHdmiControlServiceSendMessageCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_SendMessageCallback(
+            /* [in] */ RoutingControlAction* host);
+
+        //@Override
+        CARAPI OnSendCompleted(
+            /* [in] */ Int32 error);
+
+    private:
+        RoutingControlAction* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -63,9 +82,8 @@ private:
     CARAPI GetTvPowerStatus(
         /* [out] */ Int32* result);
 
-    static CARAPI IsPowerOnOrTransient(
-        /* [in] */ Int32 status,
-        /* [out] */ Boolean* result);
+    static CARAPI_(Boolean) IsPowerOnOrTransient(
+        /* [in] */ Int32 status);
 
     CARAPI SendSetStreamPath();
 

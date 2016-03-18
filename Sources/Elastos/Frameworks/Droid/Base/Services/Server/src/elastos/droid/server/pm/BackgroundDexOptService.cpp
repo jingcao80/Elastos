@@ -31,7 +31,9 @@ BackgroundDexOptService::OnStartJobThread::OnStartJobThread(
     , mPm(pm)
     , mPkgs(pkgs)
     , mJobParams(jobParams)
-{}
+{
+    Thread::constructor(String("OnStartJobThread"));
+}
 
 ECode BackgroundDexOptService::OnStartJobThread::Run()
 {

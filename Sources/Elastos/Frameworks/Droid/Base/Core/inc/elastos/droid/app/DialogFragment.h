@@ -21,7 +21,7 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-class DialogFragment
+class ECO_PUBLIC DialogFragment
     : public Fragment
     , public IDialogFragment
     , public IDialogInterfaceOnCancelListener
@@ -127,12 +127,12 @@ public:
     Boolean mShownByMe;
 
 private:
-    static const String SAVED_DIALOG_STATE_TAG;
-    static const String SAVED_STYLE;
-    static const String SAVED_THEME;
-    static const String SAVED_CANCELABLE;
-    static const String SAVED_SHOWS_DIALOG;
-    static const String SAVED_BACK_STACK_ID;
+    ECO_LOCAL static const String SAVED_DIALOG_STATE_TAG;
+    ECO_LOCAL static const String SAVED_STYLE;
+    ECO_LOCAL static const String SAVED_THEME;
+    ECO_LOCAL static const String SAVED_CANCELABLE;
+    ECO_LOCAL static const String SAVED_SHOWS_DIALOG;
+    ECO_LOCAL static const String SAVED_BACK_STACK_ID;
 
 };
 

@@ -1040,6 +1040,10 @@ private:
      * The synchronization object responsible for this thread's join/sleep/park operations.
      */
     //Object mLock;
+
+#if defined(_DEBUG)
+     Boolean mIsConstructed;
+#endif
 };
 
 } // namespace Core

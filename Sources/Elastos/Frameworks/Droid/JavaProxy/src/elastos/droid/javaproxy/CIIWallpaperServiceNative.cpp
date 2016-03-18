@@ -1,8 +1,11 @@
 
 #include "elastos/droid/javaproxy/CIIWallpaperServiceNative.h"
+#include "Elastos.Droid.Service.h"
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/javaproxy/Util.h"
 
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Service::Wallpaper::EIID_IIWallpaperService;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -10,6 +13,10 @@ namespace Droid {
 namespace JavaProxy {
 
 const String CIIWallpaperServiceNative::TAG("CIIWallpaperServiceNative");
+
+CAR_INTERFACE_IMPL_2(CIIWallpaperServiceNative, Object, IIWallpaperService, IBinder)
+
+CAR_OBJECT_IMPL(CIIWallpaperServiceNative)
 
 CIIWallpaperServiceNative::~CIIWallpaperServiceNative()
 {
@@ -19,8 +26,8 @@ CIIWallpaperServiceNative::~CIIWallpaperServiceNative()
 }
 
 ECode CIIWallpaperServiceNative::constructor(
-    /* [in] */ Handle32 jVM,
-    /* [in] */ Handle32 jInstance)
+    /* [in] */ Handle64 jVM,
+    /* [in] */ Handle64 jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -28,12 +35,13 @@ ECode CIIWallpaperServiceNative::constructor(
 }
 
 ECode CIIWallpaperServiceNative::Attach(
-    /* [in] */ IWallpaperConnection* connection,
+    /* [in] */ IIWallpaperConnection* connection,
     /* [in] */ IBinder* windowToken,
     /* [in] */ Int32 windowType,
     /* [in] */ Boolean isPreview,
     /* [in] */ Int32 reqWidth,
-    /* [in] */ Int32 reqHeight)
+    /* [in] */ Int32 reqHeight,
+    /* [in] */ IRect* padding)
 {
     // LOGGERD(TAG, "+ CIIWallpaperServiceNative::Attach()");
 
@@ -45,10 +53,10 @@ ECode CIIWallpaperServiceNative::Attach(
         jclass c = env->FindClass("android/service/wallpaper/ElWallpaperConnectionProxy");
         Util::CheckErrorAndLog(env, TAG, "FindClass: ElWallpaperConnectionProxy %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElWallpaperConnectionProxy %d", __LINE__);
 
-        jconnection = env->NewObject(c, m, (jint)connection);
+        jconnection = env->NewObject(c, m, (jlong)connection);
         Util::CheckErrorAndLog(env, TAG, "NewObject: ElWallpaperConnectionProxy %d", __LINE__);
         connection->AddRef();
 
@@ -60,28 +68,34 @@ ECode CIIWallpaperServiceNative::Attach(
         jclass c = env->FindClass("android/os/ElBinderProxy");
         Util::CheckErrorAndLog(env, TAG, "FindClass: ElBinderProxy %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c, "<init>", "(I)V");
+        jmethodID m = env->GetMethodID(c, "<init>", "(J)V");
         Util::CheckErrorAndLog(env, TAG, "GetMethodID: ElBinderProxy %d", __LINE__);
 
-        jwindowToken = env->NewObject(c, m, (jint)windowToken);
+        jwindowToken = env->NewObject(c, m, (jlong)windowToken);
         Util::CheckErrorAndLog(env, TAG, "NewObject: ElBinderProxy %d", __LINE__);
         windowToken->AddRef();
 
         env->DeleteLocalRef(c);
     }
 
+    jobject jpadding = NULL;
+    if (padding != NULL) {
+        jpadding = Util::ToJavaRect(env, padding);
+    }
+
     jclass c = env->FindClass("android/service/wallpaper/IWallpaperService");
     Util::CheckErrorAndLog(env, TAG, "FindClass: IWallpaperService %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "attach", "(Landroid/service/wallpaper/IWallpaperConnection;Landroid/os/IBinder;IZII)V");
+    jmethodID m = env->GetMethodID(c, "attach", "(Landroid/service/wallpaper/IWallpaperConnection;Landroid/os/IBinder;IZII;Landroid/graphics/Rect;)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: attach %d", __LINE__);
 
-    env->CallVoidMethod(mJInstance, m, jconnection, jwindowToken, (jint)windowType, (jboolean)isPreview, (jint)reqWidth, (jint)reqHeight);
+    env->CallVoidMethod(mJInstance, m, jconnection, jwindowToken, (jint)windowType, (jboolean)isPreview, (jint)reqWidth, (jint)reqHeight, jpadding);
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: attach %d", __LINE__);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jconnection);
     env->DeleteLocalRef(jwindowToken);
+    env->DeleteLocalRef(jpadding);
 
     // LOGGERD(TAG, "- CIIWallpaperServiceNative::Attach()");
     return NOERROR;
@@ -90,7 +104,7 @@ ECode CIIWallpaperServiceNative::Attach(
 ECode CIIWallpaperServiceNative::ToString(
     /* [out] */ String* str)
 {
-    // LOGGERD(TAG, String("+ CIIWallpaperServiceNative::ToString()"));
+    // LOGGERD(TAG, "+ CIIWallpaperServiceNative::ToString()");
 
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
@@ -99,17 +113,17 @@ ECode CIIWallpaperServiceNative::ToString(
     Util::CheckErrorAndLog(env, "ToString", "FindClass: Object", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "toString", "()Ljava/lang/String;");
-    Util::CheckErrorAndLog(env, TAG, String("GetMethodID: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: toString", __LINE__);
 
     jstring jstr = (jstring)env->CallObjectMethod(mJInstance, m);
-    Util::CheckErrorAndLog(env, TAG, String("CallVoidMethod: toString"), __LINE__);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: toString", __LINE__);
 
     *str = Util::GetElString(env, jstr);
 
     env->DeleteLocalRef(c);
     env->DeleteLocalRef(jstr);
 
-    // LOGGERD(TAG, String("- CIIWallpaperServiceNative::ToString()"));
+    // LOGGERD(TAG, "- CIIWallpaperServiceNative::ToString()");
     return NOERROR;
 }
 

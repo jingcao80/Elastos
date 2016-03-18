@@ -27,7 +27,7 @@ namespace Widget {
  * android.R.styleable#View View Attributes}
  * </p>
  */
-class CompoundButton
+class ECO_PUBLIC CompoundButton
     : public Button
     , public ICompoundButton
     , public ICheckable
@@ -247,7 +247,7 @@ protected:
         /* [in] */ IDrawable* who);
 
 private:
-    CARAPI_(void) ApplyButtonTint();
+    ECO_LOCAL CARAPI_(void) ApplyButtonTint();
 
 private:
     Boolean mChecked;
@@ -262,7 +262,7 @@ private:
     AutoPtr<ICompoundButtonOnCheckedChangeListener> mOnCheckedChangeListener;
     AutoPtr<ICompoundButtonOnCheckedChangeListener> mOnCheckedChangeWidgetListener;
 
-    static AutoPtr<ArrayOf<Int32> > CHECKED_STATE_SET;
+    ECO_LOCAL static AutoPtr<ArrayOf<Int32> > CHECKED_STATE_SET;
 };
 
 }// namespace Widget

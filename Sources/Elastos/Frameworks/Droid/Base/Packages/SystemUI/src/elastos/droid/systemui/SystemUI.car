@@ -33,6 +33,10 @@ module
     merge("../../../../car/elastos/droid/keyguard/KeyguardService.car");
     merge("../../../../car/elastos/droid/keyguard/KeyguardViewMediator.car");
 
+    //usb
+    merge("../../../../car/elastos/droid/usb/StorageNotification.car");
+    merge("../../../../car/elastos/droid/usb/UsbStorageActivity.car");
+
     //media
     merge("../../../../car/elastos/droid/media/MediaProjectionPermissionActivity.car");
     merge("../../../../car/elastos/droid/media/NotificationPlayer.car");
@@ -252,6 +256,8 @@ module
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
     using interface Elastos.Droid.Content.IDialogInterface;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
     using interface Elastos.Droid.Content.IIntent;
     using interface Elastos.Droid.Content.Pm.IResolveInfo;
     using interface Elastos.Droid.Utility.IAttributeSet;
@@ -261,6 +267,8 @@ module
     using interface Elastos.Droid.App.IActivity;
 //     using interface Elastos.Droid.App.INotification;
 //     using interface Elastos.Droid.App.IActivityOptionsOnAnimationStartedListener;
+    using interface Elastos.Droid.Internal.App.IAlertActivity;
+    using interface Elastos.Droid.Internal.App.IResolverActivity;
     using interface Elastos.Droid.Internal.Policy.IIKeyguardService;
     using interface Elastos.Droid.Internal.StatusBar.IIStatusBar;
     using interface Elastos.Droid.Internal.StatusBar.IStatusBarIconList;
@@ -289,6 +297,7 @@ module
     using interface Elastos.Droid.View.IKeyEventCallback;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+    using interface Elastos.Droid.Widget.ICompoundButtonOnCheckedChangeListener;
     using interface Elastos.Droid.Widget.IFrameLayout;
     using interface Elastos.Droid.Widget.IImageButton;
     using interface Elastos.Droid.Widget.IImageView;
@@ -616,6 +625,137 @@ module
         }
 
     } // namespace Keyguard
+
+    //===========================================================================
+    //                              usb
+    //===========================================================================
+    namespace Usb {
+
+        class CStorageNotification {
+            constructor();
+
+            interface IStorageNotification;
+            interface ISystemUI;
+        }
+
+        class CUsbAccessoryUriActivity {
+            constructor();
+
+            interface IContext;
+            interface IContextWrapper;
+            interface IContextThemeWrapper;
+            interface ILayoutInflaterFactory;
+            interface ILayoutInflaterFactory2;
+            interface IWindowCallback;
+            interface IKeyEventCallback;
+            interface IViewOnCreateContextMenuListener;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+            interface IOnWindowDismissedCallback;
+            interface IActivity;
+            interface IAlertActivity;
+            interface IDialogInterfaceOnClickListener;
+        }
+
+        class CUsbConfirmActivity {
+            constructor();
+
+            interface IContext;
+            interface IContextWrapper;
+            interface IContextThemeWrapper;
+            interface ILayoutInflaterFactory;
+            interface ILayoutInflaterFactory2;
+            interface IWindowCallback;
+            interface IKeyEventCallback;
+            interface IViewOnCreateContextMenuListener;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+            interface IOnWindowDismissedCallback;
+            interface IActivity;
+            interface IAlertActivity;
+            interface IDialogInterfaceOnClickListener;
+            interface ICompoundButtonOnCheckedChangeListener;
+        }
+
+        class CUsbStorageActivity {
+            constructor();
+
+            interface IUsbStorageActivity;
+            interface IContext;
+            interface IContextWrapper;
+            interface IContextThemeWrapper;
+            interface ILayoutInflaterFactory;
+            interface ILayoutInflaterFactory2;
+            interface IWindowCallback;
+            interface IKeyEventCallback;
+            interface IViewOnCreateContextMenuListener;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+            interface IOnWindowDismissedCallback;
+            interface IActivity;
+            interface IViewOnClickListener;
+            interface IDialogInterfaceOnCancelListener;
+        }
+
+        class CUsbDebuggingActivity {
+            constructor();
+
+            interface IContext;
+            interface IContextWrapper;
+            interface IContextThemeWrapper;
+            interface ILayoutInflaterFactory;
+            interface ILayoutInflaterFactory2;
+            interface IWindowCallback;
+            interface IKeyEventCallback;
+            interface IViewOnCreateContextMenuListener;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+            interface IOnWindowDismissedCallback;
+            interface IActivity;
+            interface IAlertActivity;
+            interface IDialogInterfaceOnClickListener;
+        }
+
+        class CUsbPermissionActivity {
+            constructor();
+
+            interface IContext;
+            interface IContextWrapper;
+            interface IContextThemeWrapper;
+            interface ILayoutInflaterFactory;
+            interface ILayoutInflaterFactory2;
+            interface IWindowCallback;
+            interface IKeyEventCallback;
+            interface IViewOnCreateContextMenuListener;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+            interface IOnWindowDismissedCallback;
+            interface IActivity;
+            interface IAlertActivity;
+            interface IDialogInterfaceOnClickListener;
+            interface ICompoundButtonOnCheckedChangeListener;
+        }
+
+        class CUsbResolverActivity {
+            constructor();
+
+            interface IContext;
+            interface IContextWrapper;
+            interface IContextThemeWrapper;
+            interface ILayoutInflaterFactory;
+            interface ILayoutInflaterFactory2;
+            interface IWindowCallback;
+            interface IKeyEventCallback;
+            interface IViewOnCreateContextMenuListener;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+            interface IOnWindowDismissedCallback;
+            interface IActivity;
+            interface IAdapterViewOnItemClickListener;
+            interface IResolverActivity;
+        }
+
+    } // namespace Usb
 
 //     //===========================================================================
 //     //                              Media

@@ -1,23 +1,26 @@
 
+#include <Elastos.Droid.Content.h>
 #include "elastos/droid/settings/drawable/CircleFramedDrawable.h"
+#include "../R.h"
+#include <elastos/core/Math.h>
 
-using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::CBitmapHelper;
+using Elastos::Droid::Graphics::IBitmapHelper;
+using Elastos::Droid::Graphics::CColor;
 using Elastos::Droid::Graphics::IColor;
-using Elastos::Droid::Graphics::IColorFilter;
-using Elastos::Droid::Graphics::IPaint;
-using Elastos::Droid::Graphics::IPath;
+using Elastos::Droid::Graphics::CCanvas;
+using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CPath;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CRectF;
 using Elastos::Droid::Graphics::IPixelFormat;
-using Elastos::Droid::Graphics::IPorterDuff;
-using Elastos::Droid::Graphics::IPorterDuffXfermode;
-using Elastos::Droid::Graphics::IRect;
-using Elastos::Droid::Graphics::IRectF;
-using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Graphics::CPorterDuffXfermode;
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
-
-using Elastos::Droid::Settings::IR;
+using Elastos::Droid::Graphics::PaintStyle_FILL;
+using Elastos::Droid::Graphics::PaintStyle_STROKE;
+using Elastos::Droid::Graphics::PorterDuffMode_CLEAR;
+using Elastos::Droid::Graphics::PorterDuffMode_SRC_IN;
 
 namespace Elastos {
 namespace Droid {
@@ -32,8 +35,17 @@ CircleFramedDrawable::CircleFramedDrawable(
     /* [in] */ Int32 frameShadowColor,
     /* [in] */ Float shadowRadius,
     /* [in] */ Int32 highlightColor)
+    : mSize(0)
+    , mShadowRadius(0.f)
+    , mStrokeWidth(0.f)
+    , mFrameColor(0)
+    , mHighlightColor(0)
+    , mFrameShadowColor(0)
+    , mScale(0.f)
+    , mPressed(FALSE)
 {
-    Drawable::Drawable();
+    assert(0 && "TODO");
+    // Drawable::Drawable();
     mSize = size;
     mShadowRadius = shadowRadius;
     mFrameColor = frameColor;
@@ -57,13 +69,13 @@ CircleFramedDrawable::CircleFramedDrawable(
     CRect::New((width - square) / 2, (height - square) / 2, square, square,
             (IRect**)&cropRect);
     AutoPtr<IRectF> circleRect;
-    CRectF::New(0f, 0f, mSize, mSize, (IRectF**)&circleRect);
-    circleRect->Inset(mStrokeWidth / 2f, mStrokeWidth / 2f);
+    CRectF::New(0.f, 0.f, mSize, mSize, (IRectF**)&circleRect);
+    circleRect->Inset(mStrokeWidth / 2.f, mStrokeWidth / 2.f);
     circleRect->Inset(mShadowRadius, mShadowRadius);
 
     AutoPtr<IPath> fillPath;
     CPath::New((IPath**)&fillPath);
-    fillPath->AddArc(circleRect, 0f, 360f);
+    fillPath->AddArc(circleRect, 0.f, 360.f);
 
     canvas->DrawColor(0, PorterDuffMode_CLEAR);
 
@@ -83,7 +95,7 @@ CircleFramedDrawable::CircleFramedDrawable(
     // prepare paint for frame drawing
     mPaint->SetXfermode(NULL);
 
-    mScale = 1f;
+    mScale = 1.f;
 
     CRect::New(0, 0, mSize, mSize, (IRect**)&mSrcRect);
     CRectF::New(0, 0, mSize, mSize, (IRectF**)&mDstRect);
@@ -123,17 +135,17 @@ ECode CircleFramedDrawable::Draw(
     /* [in] */ ICanvas* canvas)
 {
     Float inside = mScale * mSize;
-    Float pad = (mSize - inside) / 2f;
+    Float pad = (mSize - inside) / 2.f;
 
     mDstRect->Set(pad, pad, mSize - pad, mSize - pad);
     canvas->DrawBitmap(mBitmap, mSrcRect, mDstRect, NULL);
 
     mFrameRect->Set(mDstRect);
-    mFrameRect->Inset(mStrokeWidth / 2f, mStrokeWidth / 2f);
+    mFrameRect->Inset(mStrokeWidth / 2.f, mStrokeWidth / 2.f);
     mFrameRect->Inset(mShadowRadius, mShadowRadius);
 
     mFramePath->Reset();
-    mFramePath->AddArc(mFrameRect, 0f, 360f);
+    mFramePath->AddArc(mFrameRect, 0.f, 360.f);
 
     // white frame
     if (mPressed) {
@@ -152,7 +164,7 @@ ECode CircleFramedDrawable::Draw(
     mPaint->SetStrokeWidth(mStrokeWidth);
     mPaint->SetStyle(PaintStyle_STROKE);
     mPaint->SetColor(mPressed ? mHighlightColor : mFrameColor);
-    mPaint->SetShadowLayer(mShadowRadius, 0f, 0f, mFrameShadowColor);
+    mPaint->SetShadowLayer(mShadowRadius, 0.f, 0.f, mFrameShadowColor);
     canvas->DrawPath(mFramePath, mPaint);
     return NOERROR;
 }
