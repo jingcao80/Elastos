@@ -32,7 +32,7 @@ ECode URLDecoder::Decode(
     AutoPtr<ICharset> charset;
     AutoPtr<ICharsetHelper> charsetHelper;
     CCharsetHelper::AcquireSingleton((ICharsetHelper**)&charsetHelper);
-    charsetHelper->ForName(encoding, (ICharset**)&charset);
+    FAIL_RETURN(charsetHelper->ForName(encoding, (ICharset**)&charset));
     return UriCodec::Decode(s, TRUE, charset, TRUE, decodedS);
 }
 

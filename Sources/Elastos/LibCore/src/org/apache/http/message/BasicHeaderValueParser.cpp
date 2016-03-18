@@ -65,7 +65,7 @@ ECode BasicHeaderValueParser::ParseElements(
     AutoPtr<CCharArrayBuffer> buffer;
     CCharArrayBuffer::NewByFriend(value.GetLength(), (CCharArrayBuffer**)&buffer);
     buffer->Append(value);
-    AutoPtr<IParserCursor> cursor;
+    AutoPtr<CParserCursor> cursor;
     CParserCursor::NewByFriend(0, value.GetLength(), (CParserCursor**)&cursor);
     return parser->ParseElements(buffer, cursor, elements);
 }

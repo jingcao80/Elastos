@@ -165,7 +165,7 @@ ECode HashMap::Clone(
     // }
 
     // Restore clone to empty state, retaining our capacity and threshold
-    /*AutoPtr<IHashMap> result;
+    /*AutoPtr<CHashMap> result;
     CHashMap::NewByFriend((CHashMap**)&result);
     result->MakeTable(mTable->GetLength());
     result->mEntryForNullKey = NULL;

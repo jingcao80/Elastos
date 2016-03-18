@@ -3,6 +3,7 @@
 #include "ServiceLoader.h"
 #include "io/CInputStreamReader.h"
 #include "io/CBufferedReader.h"
+#include "core/ClassLoader.h"
 #include "core/CString.h"
 #include "core/Character.h"
 #include "utility/CHashSet.h"
@@ -10,6 +11,7 @@
 #include "core/Thread.h"
 #include "core/CSystem.h"
 
+using Elastos::Core::ClassLoader;
 using Elastos::Core::CString;
 using Elastos::Core::Character;
 using Elastos::Core::Thread;
@@ -183,7 +185,9 @@ AutoPtr<IServiceLoader> ServiceLoader::Load(
     /* [in] */ IClassLoader* cl)
 {
     if (!cl) {
-        //cl = ClassLoader.getSystemClassLoader();
+        AutoPtr<IClassLoader> loader = ClassLoader::GetSystemClassLoader();
+        cl = loader;
+        REFCOUNT_ADD(cl);
     }
     return new ServiceLoader(service, cl);
 }
@@ -200,7 +204,7 @@ AutoPtr<IServiceLoader> ServiceLoader::Load(
 AutoPtr<IServiceLoader> ServiceLoader::LoadInstalled(
     /* [in] */ InterfaceID service)
 {
-    AutoPtr<IClassLoader> cl ;//= ClassLoader.getSystemClassLoader();
+    AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
     if (cl) {
         while (TRUE /*cl->GetParent() != null*/) {
             //cl = cl->GetParent();
@@ -216,9 +220,13 @@ AutoPtr<IInterface> ServiceLoader::LoadFromSystemProperty(
     CSystem::AcquireSingleton((ISystem**)&st);
     String className;
     st->GetProperty(className/*service->GetName()*/, &className);
-    if (className.IsNullOrEmpty()) {
-        //InterfaceID c = ClassLoader.getSystemClassLoader().loadClass(className);
-        //return (S) c.newInstance();
+    if (!className.IsNullOrEmpty()) {
+        AutoPtr<IClassInfo> classInfo;
+        AutoPtr<IInterface> obj;
+        AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
+        cl->LoadClass(className, (IClassInfo**)&classInfo);
+        classInfo->CreateObject((IInterface**)&obj);
+        return obj;
     }
     return NULL;
 }
@@ -248,6 +256,8 @@ AutoPtr<ISet> ServiceLoader::GetServices()
 
 ECode ServiceLoader::InternalLoad()
 {
+    return E_NOT_IMPLEMENTED;
+
     (ICollection::Probe(mServices))->Clear();
     String name = String("META-INF/services/");// + service.getName();
     AutoPtr<IArrayList> list;

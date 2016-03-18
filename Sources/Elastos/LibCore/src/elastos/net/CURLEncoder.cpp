@@ -34,7 +34,7 @@ ECode CURLEncoder::Encode(
     AutoPtr<ICharsetHelper> helper;
     AutoPtr<ICharset> charset = StandardCharsets::UTF_8;
     CCharsetHelper::AcquireSingleton((ICharsetHelper**)&helper);
-    helper->ForName(charsetName, (ICharset**)&charset);
+    FAIL_RETURN(helper->ForName(charsetName, (ICharset**)&charset));
     return ENCODER.Encode(s, charset, result);
 }
 

@@ -248,7 +248,7 @@ ECode BasicLineParser::ParseRequestLine(
     AutoPtr<CCharArrayBuffer> buffer;
     CCharArrayBuffer::NewByFriend(value.GetLength(), (CCharArrayBuffer**)&buffer);
     buffer->Append(value);
-    AutoPtr<IParserCursor> cursor;
+    AutoPtr<CParserCursor> cursor;
     CParserCursor::NewByFriend(0, value.GetLength(), (CParserCursor**)&cursor);
     return parser->ParseRequestLine(buffer, cursor, requestLine);
 }
@@ -352,7 +352,7 @@ ECode BasicLineParser::ParseStatusLine(
     AutoPtr<CCharArrayBuffer> buffer;
     CCharArrayBuffer::NewByFriend(value.GetLength(), (CCharArrayBuffer**)&buffer);
     buffer->Append(value);
-    AutoPtr<IParserCursor> cursor;
+    AutoPtr<CParserCursor> cursor;
     CParserCursor::NewByFriend(0, value.GetLength(), (CParserCursor**)&cursor);
     return parser->ParseStatusLine(buffer, cursor, statusLine);
 }

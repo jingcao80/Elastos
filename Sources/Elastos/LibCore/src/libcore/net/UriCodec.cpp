@@ -384,7 +384,7 @@ AutoPtr<ICharset> UriCodec::GetDefaultCharset()
 {
     AutoPtr<ICharset> charset;
     AutoPtr<ICharsets> charsets;
-    // CCharsets::AcquireSingleton((ICharsets**)&charsets);
+    CCharsets::AcquireSingleton((ICharsets**)&charsets);
     charsets->GetUTF_8((ICharset**)&charset);
     return charset;
 }

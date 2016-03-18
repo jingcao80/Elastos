@@ -619,7 +619,7 @@ ECode URI::Create(
     VALIDATE_NOT_NULL(obj);
 
 //    try {
-    AutoPtr<URI> outuri;
+    AutoPtr<CURI> outuri;
     ECode ec = CURI::NewByFriend(uri, (CURI**)&outuri);
     if (ec == (ECode)E_URI_SYNTAX_EXCEPTION) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -634,7 +634,7 @@ ECode URI::Create(
 
 AutoPtr<IURI> URI::Duplicate()
 {
-    AutoPtr<URI> clone;
+    AutoPtr<CURI> clone;
     CURI::NewByFriend((CURI**)&clone);
     clone->mAbsolute = mAbsolute;
     clone->mAuthority = mAuthority;
@@ -1122,7 +1122,7 @@ ECode URI::Relativize(
         }
     }
 
-    AutoPtr<URI> result;
+    AutoPtr<CURI> result;
     CURI::NewByFriend((CURI**)&result);
     result->mFragment = relativeObj->mFragment;
     result->mQuery = relativeObj->mQuery;

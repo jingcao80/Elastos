@@ -743,16 +743,16 @@ ECode Database::Prepare(
     /* [out] */ IStmt ** st)
 {
     VALIDATE_NOT_NULL(st);
-    ECode ec = NOERROR;
+
     synchronized(this) {
         AutoPtr<IStmt> stmt;
         CStmt::New((IStmt **)&stmt);
-        ec = Stmt_prepare(sql, stmt);
+        FAIL_RETURN(Stmt_prepare(sql, stmt));
         *st = stmt;
         REFCOUNT_ADD(*st);
     }
 
-    return ec;
+    return NOERROR;
 }
 
 ECode Database::OpenBlob(
