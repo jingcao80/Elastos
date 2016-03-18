@@ -30,6 +30,7 @@ ResourcesKey::ResourcesKey(
         mOverrideConfiguration->SetTo(overrideConfiguration);
     }
     mScale = scale;
+    mIsThemeable = isThemeable;
     mToken = token;
 
     Int32 hash = 17;
@@ -38,6 +39,12 @@ ResourcesKey::ResourcesKey(
     hash = 31 * hash + (mOverrideConfiguration != NULL
         ? Object::GetHashCode(mOverrideConfiguration) : 0);
     hash = 31 * hash + Elastos::Core::Math::FloatToInt32Bits(mScale);
+    hash = 31 * hash + (mIsThemeable ? 1 : 0);
+    Int32 configHash = 0;
+    if (themeConfig != NULL) {
+        IObject::Probe(themeConfig)->GetHashCode(&configHash);
+    }
+    hash = 31 * hash + configHash;
     mHash = hash;
 }
 
@@ -97,7 +104,7 @@ ECode ResourcesKey::Equals(
         return NOERROR;
     }
 
-    *result = TRUE;
+    *result = mIsThemeable == peer->mIsThemeable;;
     return NOERROR;
 }
 

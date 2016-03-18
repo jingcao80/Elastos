@@ -7,6 +7,8 @@
 #include "elastos/droid/content/CRestrictionEntry.h"
 #include "elastos/droid/content/CSyncAdaptersCache.h"
 #include "elastos/droid/content/CSyncActivityTooManyDeletes.h"
+#include "elastos/droid/content/res/CThemeConfig.h"
+#include "elastos/droid/content/res/CAppTheme.h"
 
 namespace Elastos {
 namespace Droid {
@@ -21,7 +23,19 @@ CAR_OBJECT_IMPL(CRestrictionEntry)
 CAR_OBJECT_IMPL(CSyncAdaptersCache)
 CAR_OBJECT_IMPL(CSyncActivityTooManyDeletes)
 
+}
+}
+}
 
+namespace Elastos {
+namespace Droid {
+namespace Content {
+namespace Res {
+
+CAR_OBJECT_IMPL(CThemeConfig)
+CAR_OBJECT_IMPL(CAppTheme)
+
+}
 }
 }
 }

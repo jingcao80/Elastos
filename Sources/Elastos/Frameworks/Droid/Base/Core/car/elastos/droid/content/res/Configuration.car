@@ -4,6 +4,8 @@ module
     interface Elastos.Droid.Content.Res.IThemeConfig;
     using interface Elastos.Utility.ILocale;
 
+    interface Elastos.Droid.Content.Res.IThemeConfig;
+
     namespace Elastos {
     namespace Droid {
     namespace Content {
@@ -196,20 +198,16 @@ module
          * @hide
          * @deprecated
          */
-        const String THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY
-                = "persist.sys.themePackageName";
-        /**
-         * @hide
-         * @deprecated
-         */
         const String THEME_ICONPACK_PACKAGE_NAME_PERSISTENCE_PROPERTY
                 = "themeIconPackPkgName";
+
         /**
          * @hide
          * @deprecated
          */
         const String THEME_FONT_PACKAGE_NAME_PERSISTENCE_PROPERTY
                 = "themeFontPackPkgName";
+
         /**
          * @hide
          * Serialized json structure mapping app pkgnames to their set theme.
@@ -228,6 +226,13 @@ module
          *          'com.google.vending' -> 'com.white.theme'
          */
         const String THEME_PKG_CONFIGURATION_PERSISTENCE_PROPERTY = "themeConfig";
+
+        /**
+         * @hide
+         * @deprecated
+         */
+        const String THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY
+                = "persist.sys.themePackageName";
 
         const Int32 UI_MODE_TYPE_MASK = 0x0f;
         const Int32 UI_MODE_TYPE_UNDEFINED = 0x00;

@@ -231,7 +231,8 @@ module
             [in] Int32 resultCode,
             [in] String resultData,
             [in] IBundle* map,
-            [in] Boolean abortBroadcast);
+            [in] Boolean abortBroadcast,
+            [in] Int32 flags);
 
         AttachApplication(
             [in] IApplicationThread* app);
@@ -261,6 +262,10 @@ module
 
         GetCallingPackage(
             [in] IBinder* token,
+            [out] String* pkg);
+
+        GetCallingPackageForBroadcast(
+            [in] Boolean foreground,
             [out] String* pkg);
 
         GetCallingActivity(

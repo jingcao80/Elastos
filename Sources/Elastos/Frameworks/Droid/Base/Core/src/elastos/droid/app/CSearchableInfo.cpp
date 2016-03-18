@@ -506,7 +506,7 @@ ECode CSearchableInfo::GetActivityMetaData(
     AutoPtr<IUserHandle> userHandle;
     CUserHandle::New(userId, (IUserHandle**)&userHandle);
     FAIL_RETURN(ctx->CreatePackageContextAsUser(
-        String("system"), 0, userHandle, (IContext**)&userContext));
+            String("system"), 0, userHandle, (IContext**)&userContext));
     // for each component, try to find metadata
     AutoPtr<IXmlResourceParser> xml;
     AutoPtr<IPackageManager> pm;

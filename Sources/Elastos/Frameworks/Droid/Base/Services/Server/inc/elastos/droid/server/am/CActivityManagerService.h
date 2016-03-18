@@ -1329,7 +1329,8 @@ public:
         /* [in] */ Int32 resultCode,
         /* [in] */ const String& resultData,
         /* [in] */ IBundle* map,
-        /* [in] */ Boolean abortBroadcast);
+        /* [in] */ Boolean abortBroadcast,
+        /* [in] */ Int32 flags);
 
     CARAPI AttachApplication(
         /* [in] */ IApplicationThread* app);
@@ -1368,6 +1369,10 @@ public:
 
     CARAPI GetCallingPackage(
         /* [in] */ IBinder* token,
+        /* [out] */ String* pkg);
+
+    CARAPI GetCallingPackageForBroadcast(
+        /* [in] */ Boolean foreground,
         /* [out] */ String* pkg);
 
     CARAPI GetCallingActivity(

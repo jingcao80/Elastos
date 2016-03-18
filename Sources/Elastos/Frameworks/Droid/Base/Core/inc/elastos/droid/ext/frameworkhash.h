@@ -40,6 +40,8 @@ DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Content::IIntentFilterComparison)
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Content::IServiceConnection)
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Content::ISharedPreferencesOnSharedPreferenceChangeListener)
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Content::Pm::ISignature)
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Content::Res::IThemeChangeListener)
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Content::Res::IThemeProcessingListener)
 #endif
 
 //

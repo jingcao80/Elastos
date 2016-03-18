@@ -170,6 +170,7 @@ private:
     CARAPI_(void) DetachThemeAssets(
         /* [in] */ IAssetManager* assets);
 
+private:
     CARAPI_(AutoPtr<IThemeConfig>) GetThemeConfig();
 
 private:

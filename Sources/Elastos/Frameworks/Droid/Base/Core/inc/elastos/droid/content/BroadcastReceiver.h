@@ -68,7 +68,8 @@ public:
             /* [in] */ Boolean ordered,
             /* [in] */ Boolean sticky,
             /* [in] */ IBinder* token,
-            /* [in] */ Int32 userId);
+            /* [in] */ Int32 userId,
+            /* [in] */ Int32 flags);
 
         virtual ~PendingResult();
 
@@ -80,7 +81,8 @@ public:
             /* [in] */ Boolean ordered,
             /* [in] */ Boolean sticky,
             /* [in] */ IBinder* token,
-            /* [in] */ Int32 userId);
+            /* [in] */ Int32 userId,
+            /* [in] */ Int32 flags);
 
         /**
          * Version of {@link BroadcastReceiver#setResultCode(int)
@@ -204,6 +206,7 @@ public:
         Boolean mInitialStickyHint;
         AutoPtr<IBinder> mToken;
         Int32 mSendingUser;
+        Int32 mFlags;
         Int32 mResultCode;
         String mResultData;
         AutoPtr<IBundle> mResultExtras;
@@ -480,6 +483,11 @@ public:
     /** @hide */
     virtual CARAPI GetSendingUserId(
         /* [out] */ Int32* userId);
+
+    /** @hide */
+    virtual CARAPI GetSendingPackage(
+        /* [in] */ IIntent* intent,
+        /* [out] */ String* pkg);
 
     /**
      * Control inclusion of debugging help for mismatched

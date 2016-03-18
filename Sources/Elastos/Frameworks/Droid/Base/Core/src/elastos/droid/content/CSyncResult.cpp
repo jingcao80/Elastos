@@ -351,11 +351,9 @@ ECode CSyncResult::ReadFromParcel(
     mPartialSyncUnavailable = (source->ReadInt32(&value), value) != 0;
     mMoreRecordsToGet = (source->ReadInt32(&value), value) != 0;
     source->ReadInt64(&mDelayUntil);
-    if (NULL == mStats) {
-        FAIL_RETURN(CSyncStats::New((ISyncStats**)&mStats))
-    }
-    AutoPtr<IParcelable> parcelable = IParcelable::Probe(mStats);
-    FAIL_RETURN(parcelable->ReadFromParcel(source))
+    AutoPtr<IInterface> stats;
+    source->ReadInterfacePtr((Handle32*)(IInterface**)&stats);
+    mStats = ISyncStats::Probe(stats);
     return NOERROR;
 }
 
@@ -370,8 +368,7 @@ ECode CSyncResult::WriteToParcel(
     dest->WriteInt32(mPartialSyncUnavailable ? 1 : 0);
     dest->WriteInt32(mMoreRecordsToGet ? 1 : 0);
     dest->WriteInt64(mDelayUntil);
-    AutoPtr<IParcelable> parcelable = IParcelable::Probe(mStats);
-    FAIL_RETURN(parcelable->WriteToParcel(dest))
+    dest->WriteInterfacePtr(mStats);
     return NOERROR;
 }
 

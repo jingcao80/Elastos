@@ -368,7 +368,8 @@ module
             [in] IUserHandle* user,
             [in] Boolean restricted,
             [in] IDisplay* display,
-            [in] IConfiguration* overrideConfiguration);
+            [in] IConfiguration* overrideConfiguration,
+            [in] String themePackageName);
 
         interface IContextImpl;
         interface IContextWrapper;

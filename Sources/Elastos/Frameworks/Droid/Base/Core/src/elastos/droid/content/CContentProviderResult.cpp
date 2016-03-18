@@ -111,16 +111,15 @@ ECode CContentProviderResult::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     VALIDATE_NOT_NULL(source)
-    Int32 tmpType = 0;
-    source->ReadInt32(&tmpType);
-
-    if (1 == tmpType) {
+    Int32 tmpType;
+    if (source->ReadInt32(&tmpType), tmpType == 1) {
         source->ReadInt32(&mCount);
         mUri = NULL;
     }
     else {
-        assert(0 && "TODO");
-        // Uri::ReadFromParcel(source, (IUri**)&mUri);
+        AutoPtr<IInterface> uri;
+        source->ReadInterfacePtr((Handle32*)(IInterface**)&uri);
+        mUri = IUri::Probe(uri);
     }
 
     return NOERROR;
@@ -137,8 +136,7 @@ ECode CContentProviderResult::WriteToParcel(
     }
     else {
         dest->WriteInt32(2);
-        AutoPtr<IParcelable> parcelable = (IParcelable*) mUri->Probe(EIID_IParcelable);
-        FAIL_RETURN(parcelable->WriteToParcel(dest))
+        dest->WriteInterfacePtr(mUri);
     }
 
     return NOERROR;

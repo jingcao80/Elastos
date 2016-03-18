@@ -255,16 +255,19 @@ ECode ResolveInfo::ReadFromParcel(
     Int32 ival;
     source->ReadInt32(&ival);
     if (ival == 1) {
-        CActivityInfo::New((IActivityInfo**)&mActivityInfo);
-        IParcelable::Probe(mActivityInfo)->ReadFromParcel(source);
+        AutoPtr<IInterface> info;
+        source->ReadInterfacePtr((Handle32*)(IInterface**)&info);
+        mActivityInfo = IActivityInfo::Probe(info);
     }
     else if (ival == 2) {
-        CServiceInfo::New((IServiceInfo**)&mServiceInfo);
-        IParcelable::Probe(mServiceInfo)->ReadFromParcel(source);
+        AutoPtr<IInterface> info;
+        source->ReadInterfacePtr((Handle32*)(IInterface**)&info);
+        mServiceInfo = IServiceInfo::Probe(info);
     }
     else if (ival == 3) {
-        CProviderInfo::New((IProviderInfo**)&mProviderInfo);
-        IParcelable::Probe(mProviderInfo)->ReadFromParcel(source);
+        AutoPtr<IInterface> info;
+        source->ReadInterfacePtr((Handle32*)(IInterface**)&info);
+        mProviderInfo = IProviderInfo::Probe(info);
     }
 
     source->ReadInterfacePtr((Handle32*)&mFilter);
@@ -288,15 +291,15 @@ ECode ResolveInfo::WriteToParcel(
 {
     if (mActivityInfo != NULL) {
         dest->WriteInt32(1);
-        IParcelable::Probe(mActivityInfo)->WriteToParcel(dest);
+        dest->WriteInterfacePtr(mActivityInfo);
     }
     else if (mServiceInfo != NULL) {
         dest->WriteInt32(2);
-        IParcelable::Probe(mServiceInfo)->WriteToParcel(dest);
+        dest->WriteInterfacePtr(mServiceInfo);
     }
     else if (mProviderInfo != NULL) {
         dest->WriteInt32(3);
-        IParcelable::Probe(mProviderInfo)->WriteToParcel(dest);
+        dest->WriteInterfacePtr(mProviderInfo);
     }
     else {
         dest->WriteInt32(0);

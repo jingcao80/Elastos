@@ -71,9 +71,11 @@ ECode LoadedPkg::ReceiverDispatcher::Args::constructor(
     /* [in] */ Int32 sendingUser,
     /* [in] */ ReceiverDispatcher* rd)
 {
+    Int32 flags;
+    intent->GetFlags(&flags);
     FAIL_RETURN(BroadcastReceiver::PendingResult::constructor(resultCode, resultData, resultExtras,
         rd->mRegistered ? TYPE_REGISTERED : TYPE_UNREGISTERED,
-        ordered, sticky, IBinder::Probe(rd->mIIntentReceiver), sendingUser))
+        ordered, sticky, IBinder::Probe(rd->mIIntentReceiver), sendingUser, flags))
     mCurIntent = intent;
     mOrdered = ordered;
     mHost = rd;
@@ -978,9 +980,12 @@ ECode LoadedPkg::GetResources(
 
     if (mResources == NULL) {
         CApplicationInfo* cai = (CApplicationInfo*)mApplicationInfo.Get();
+        AutoPtr<IContextImpl> contextImpl;
+        mainThread->GetSystemContext((IContextImpl**)&contextImpl);
         ((CActivityThread*)mainThread)->GetTopLevelResources(
             mResDir, mSplitResDirs, mOverlayDirs, cai->mSharedLibraryFiles,
-            IDisplay::DEFAULT_DISPLAY, NULL, this, (IResources**)&mResources);
+            IDisplay::DEFAULT_DISPLAY, NULL, this, IContext::Probe(contextImpl),
+            mPackageName, (IResources**)&mResources);
     }
     *res = mResources.Get();
     REFCOUNT_ADD(*res);

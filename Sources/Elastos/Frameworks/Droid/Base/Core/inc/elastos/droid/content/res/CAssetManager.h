@@ -175,6 +175,9 @@ public:
     CARAPI_(void) EnsureStringBlocks();
 
     /*package*/
+    CARAPI_(void) RecreateStringBlocks();
+
+    /*package*/
     CARAPI_(void) MakeStringBlocks(
         /* [in] */ ArrayOf<StringBlock*>* seed);
 
@@ -370,55 +373,6 @@ public:
         /* [in] */ const String& path,
         /* [out] */ Int32* cookie);
 
-    CARAPI AddOverlayPath(
-        /* [in] */ const String& idmapPath,
-        /* [in] */ const String& themePkgPath,
-        /* [in] */ const String& resPkgPath,
-        /* [in] */ const String& targetPkgPath,
-        /* [in] */ const String& prefixPath,
-        /* [out] */ Int32* cookie);
-
-    /**
-     * Add a set of common assets.
-     *
-     * {@hide}
-     */
-    CARAPI AddCommonOverlayPath(
-        /* [in] */ const String& themePkgPath,
-        /* [in] */ const String& resPkgPath,
-        /* [in] */ const String& prefixPath,
-        /* [out] */ Int32* cookie);
-
-    /**
-     * Add a set of assets as an icon pack. A pkgIdOverride value will change the package's id from
-     * what is in the resource table to a new value. Manage this carefully, if icon pack has more
-     * than one package then that next package's id will use pkgIdOverride+1.
-     *
-     * Icon packs are different from overlays as they have a different pkg id and
-     * do not use idmap so no targetPkg is required
-     *
-     * {@hide}
-     */
-    CARAPI AddIconPath(
-        /* [in] */ const String& idmapPath,
-        /* [in] */ const String& resApkPath,
-        /* [in] */ const String& prefixPath,
-        /* [in] */ Int32 pkgIdOverride,
-        /* [out] */ Int32* cookie);
-
-    /**
-    * Delete a set of overlay assets from the asset manager. Not for use by
-    * applications. Returns true if succeeded or false on failure.
-    *
-    * Also works for icon packs
-    *
-    * {@hide}
-    */
-    CARAPI RemoveOverlayPath(
-        /* [in] */ const String& packageName,
-        /* [in] */ Int32 cookie,
-        /* [out] */ Boolean* result);
-
     /**
      * Add multiple sets of assets to the asset manager at once.  See
      * {@link #addAssetPath(String)} for more information.  Returns array of
@@ -447,14 +401,14 @@ public:
      * {@hide}
      */
     CARAPI HasThemeSupport(
-        /* [out] */ Boolean* themeSupport);
+        /* [out] */ Boolean* hasThemeSupport);
 
     /**
      * Get package name of current icon pack (may return null).
      * {@hide}
      */
     CARAPI GetIconPackageName(
-        /* [out] */ String* pkgName);
+        /* [out] */ String* packageName);
 
     /**
      * Sets icon package name
@@ -468,7 +422,7 @@ public:
      * {@hide}
      */
     CARAPI GetCommonResPackageName(
-        /* [out] */ String* pkgName);
+        /* [out] */ String* packageName);
 
     /**
      * Sets common resources package name
@@ -482,7 +436,7 @@ public:
      * {@hide}
      */
     CARAPI GetThemePackageName(
-        /* [out] */ String* pkgName);
+        /* [out] */ String* packageName);
 
     /**
      * Sets package name and highest level style id for current theme (null, 0 is allowed).
@@ -522,10 +476,18 @@ public:
         /* [in] */ Int32 cookie);
 
     /** {@hide} */
+    CARAPI GetAppName(
+        /* [out] */ String* appName);
+
+    /** {@hide} */
     CARAPI SetAppName(
         /* [in] */ const String& pkgName);
 
-    /**
+    /** {@hide} */
+    CARAPI HasThemedAssets(
+        /* [out] */ Boolean* hasThemeAssets);
+
+     /**
      * Add a set of assets to overlay an already added set of assets.
      *
      * This is only intended for application resources. System wide resources
@@ -533,13 +495,55 @@ public:
      *
      * {@hide}
      */
+    // TODO: change the signature of this method to match addOverlayPathNative
     CARAPI AddOverlayPath(
         /* [in] */ const String& idmapPath,
-        /* [out] */ Int32* cookie);
+        /* [in] */ const String& themeApkPath,
+        /* [in] */ const String& resApkPath,
+        /* [in] */ const String& targetPkgPath,
+        /* [in] */ const String& prefixPath,
+        /* [out] */ Int32* result);
 
-    /** {@hide} */
-    CARAPI GetAppName(
-        /* [out] */ String* appName);
+    /**
+     * Add a set of common assets.
+     *
+     * {@hide}
+     */
+    CARAPI AddCommonOverlayPath(
+        /* [in] */ const String& themeApkPath,
+        /* [in] */ const String& resApkPath,
+        /* [in] */ const String& prefixPath,
+        /* [out] */ Int32* result);
+
+    /**
+     * Add a set of assets as an icon pack. A pkgIdOverride value will change the package's id from
+     * what is in the resource table to a new value. Manage this carefully, if icon pack has more
+     * than one package then that next package's id will use pkgIdOverride+1.
+     *
+     * Icon packs are different from overlays as they have a different pkg id and
+     * do not use idmap so no targetPkg is required
+     *
+     * {@hide}
+     */
+    CARAPI AddIconPath(
+        /* [in] */ const String& idmapPath,
+        /* [in] */ const String& resApkPath,
+        /* [in] */ const String& prefixPath,
+        /* [in] */ Int32 pkgIdOverride,
+        /* [out] */ Int32* result);
+
+    /**
+    * Delete a set of overlay assets from the asset manager. Not for use by
+    * applications. Returns true if succeeded or false on failure.
+    *
+    * Also works for icon packs
+    *
+    * {@hide}
+    */
+    CARAPI RemoveOverlayPath(
+        /* [in] */ const String& packageName,
+        /* [in] */ Int32 cookie,
+        /* [out] */ Boolean* result);
 
     /**
      * Determine whether the state in this asset manager is up-to-date with
@@ -876,6 +880,17 @@ private:
 
     AutoPtr< ArrayOf<StringBlock*> > mStringBlocks;
     HashMap<Int64, String> mRefStacks;
+
+    String mAppName;
+
+    Boolean mThemeSupport;
+    String mThemePackageName;
+    String mIconPackageName;
+    String mCommonResPackageName;
+    AutoPtr<IArrayList> mThemeCookies;
+    Int32 mIconPackCookie;
+    Int32 mCommonResCookie;
+
     Int32 mNumRefs;
     Boolean mOpen;
 //  HashMap< Int32, AutoPtr<IRuntimeException> > mRefStacks;

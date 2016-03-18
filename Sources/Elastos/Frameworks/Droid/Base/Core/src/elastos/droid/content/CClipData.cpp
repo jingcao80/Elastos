@@ -337,13 +337,11 @@ ECode CClipData::ToShortString(
 ECode CClipData::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    AutoPtr<IParcelable> parcelable = (IParcelable*)mClipDescription->Probe(EIID_IParcelable);
-    FAIL_RETURN(parcelable->WriteToParcel(dest));
+    dest->WriteInterfacePtr(mClipDescription);
 
     if (mIcon != NULL) {
         dest->WriteInt32(1);
-        parcelable = (IParcelable*)mIcon->Probe(EIID_IParcelable);
-        FAIL_RETURN(parcelable->WriteToParcel(dest));
+        dest->WriteInterfacePtr(mIcon);
     }
     else {
         dest->WriteInt32(0);
@@ -358,15 +356,14 @@ ECode CClipData::WriteToParcel(
         dest->WriteString(item->mHtmlText);
         if (item->mIntent != NULL) {
             dest->WriteInt32(1);
-            parcelable = (IParcelable*)item->mIntent->Probe(EIID_IParcelable);
-            FAIL_RETURN(parcelable->WriteToParcel(dest));
+            dest->WriteInterfacePtr(item->mIntent);
         }
         else {
             dest->WriteInt32(0);
         }
         if (item->mUri != NULL) {
             dest->WriteInt32(1);
-            assert(0 && "TODO");
+            dest->WriteInterfacePtr(item->mUri);
             // Uri::WriteToParcel(dest, item->mUri);
         }
         else {
@@ -380,15 +377,16 @@ ECode CClipData::WriteToParcel(
 ECode CClipData::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    ASSERT_SUCCEEDED(CClipDescription::New((IClipDescription**)&mClipDescription));
-    AutoPtr<IParcelable> p = (IParcelable*)mClipDescription->Probe(EIID_IParcelable);
-    p->ReadFromParcel(source);
+    AutoPtr<IInterface> interfaceV;
+    source->ReadInterfacePtr((Handle32*)(IInterface**)&interfaceV);
+    mClipDescription  = IClipDescription::Probe(interfaceV);
+
     Int32 value;
     source->ReadInt32(&value);
     if (value != 0) {
-        ASSERT_SUCCEEDED(CBitmap::New((IBitmap**)&mIcon));
-        p = (IParcelable*)mIcon->Probe(EIID_IParcelable);
-        p->ReadFromParcel(source);
+        AutoPtr<IInterface> icon;
+        source->ReadInterfacePtr((Handle32*)(IInterface**)&icon);
+        mIcon = IBitmap::Probe(icon);
     }
     else {
         mIcon = NULL;
@@ -403,15 +401,12 @@ ECode CClipData::ReadFromParcel(
         source->ReadInt32(&value);
         AutoPtr<IIntent> intent;
         if (value != 0) {
-            ASSERT_SUCCEEDED(CIntent::New((IIntent**)&intent));
-            p = (IParcelable*)intent->Probe(EIID_IParcelable);
-            p->ReadFromParcel(source);
+            source->ReadInterfacePtr((Handle32*)&intent);
         }
         source->ReadInt32(&value);
         AutoPtr<IUri> uri;
         if (value != 0) {
-            assert(0 && "TODO");
-            // Uri::ReadFromParcel(source, (IUri**)&uri);
+            source->ReadInterfacePtr((Handle32*)&uri);
         }
         AutoPtr<IClipDataItem> item;
         ASSERT_SUCCEEDED(CClipDataItem::New(text, htmlText, intent, uri, (IClipDataItem**)&item));

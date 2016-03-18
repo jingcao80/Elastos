@@ -6,7 +6,7 @@
 #include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/content/res/CAssetManager.h"
 #include "elastos/droid/content/res/CResources.h"
-#include "elastos/droid/content/res/CThemeConfig.h"
+#include "elastos/droid/content/res/ThemeConfig.h"
 #include "elastos/droid/content/res/CThemeConfigBuilder.h"
 #include "elastos/droid/content/res/ResourcesKey.h"
 #include "elastos/droid/os/ServiceManager.h"
@@ -28,7 +28,7 @@ using Elastos::Droid::Content::Res::CConfiguration;
 using Elastos::Droid::Content::Res::IAssetManager;
 using Elastos::Droid::Content::Res::CAssetManager;
 using Elastos::Droid::Content::Res::CResources;
-using Elastos::Droid::Content::Res::CThemeConfig;
+using Elastos::Droid::Content::Res::ThemeConfig;
 using Elastos::Droid::Content::Res::IThemeConfigBuilder;
 using Elastos::Droid::Content::Res::CThemeConfigBuilder;
 using Elastos::Droid::Content::Res::ResourcesKey;
@@ -231,8 +231,8 @@ ECode CResourcesManager::GetTopLevelResources(
     Boolean isThemeable;
     compatInfo->GetIsThemeable(&isThemeable);
     AutoPtr<IThemeConfig> themeConfig = GetThemeConfig();
-    AutoPtr<IResourcesKey> key = (IResourcesKey*)new ResourcesKey(resDir, displayId, overrideConfiguration, scale,
-            isThemeable, themeConfig, token);
+    AutoPtr<IResourcesKey> key = (IResourcesKey*)new ResourcesKey(resDir, displayId,
+            overrideConfiguration, scale, isThemeable, themeConfig, token);
     AutoPtr<IResources> r;
     synchronized(this) {
         // Resources is app scale dependent.
@@ -302,8 +302,7 @@ ECode CResourcesManager::GetTopLevelResources(
     if (overlayDirs != NULL) {
         Int32 ival;
         for (Int32 i = 0; i < overlayDirs->GetLength(); ++i) {
-            assets->AddOverlayPath((*overlayDirs)[i],
-                    String(NULL), String(NULL), String(NULL), String(NULL), &ival);
+            assets->AddOverlayPath((*overlayDirs)[i], String(NULL), String(NULL), String(NULL), String(NULL), &ival);
         }
     }
 
@@ -355,11 +354,7 @@ ECode CResourcesManager::GetTopLevelResources(
             // try {
             AutoPtr<IContentResolver> resolver;
             context->GetContentResolver((IContentResolver**)&resolver);
-            ECode ec = CThemeConfig::GetBootTheme(resolver, (IThemeConfig**)&tc);
-            if (FAILED(ec)) {
-                Logger::D(TAG, "ThemeConfig.getBootTheme failed, falling back to system theme");
-                CThemeConfig::GetSystemTheme((IThemeConfig**)&tc);
-            }
+            tc = ThemeConfig::GetBootTheme(resolver);
             config->SetThemeConfig(tc);
             // } catch (Exception e) {
             //     Slog.d(TAG, "ThemeConfig.getBootTheme failed, falling back to system theme", e);

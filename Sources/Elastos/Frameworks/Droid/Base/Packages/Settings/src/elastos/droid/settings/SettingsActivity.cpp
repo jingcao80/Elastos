@@ -43,7 +43,7 @@ using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 // using Elastos::Droid::NFC::INfcAdapter;
 // using Elastos::Droid::NFC::CNfcAdapterHelper;
-using Elastos::Droid::NFC::INfcAdapterHelper;
+// using Elastos::Droid::NFC::INfcAdapterHelper;
 using Elastos::Droid::Os::IINetworkManagementService;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::IUserManager;

@@ -25,6 +25,7 @@ using Elastos::Droid::Utility::IInt64SparseArray;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::Utility::CDisplayMetrics;
 using Elastos::Droid::Utility::Pools;
+using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::IHashMap;
 using Libcore::ICU::INativePluralRules;
@@ -165,7 +166,7 @@ public:
          * @throws NotFoundException Throws NotFoundException if the given ID
          *         does not exist.
          */
-         CARAPI GetDrawable(
+        CARAPI GetDrawable(
             /* [in] */ Int32 id,
             /* [out] */ IDrawable** drawable);
 
@@ -951,6 +952,12 @@ public:
         /* [in, out] */ ITypedValue* outValue,
         /* [in] */ Boolean resolveRefs);
 
+    CARAPI GetValue(
+        /* [in] */ Int32 id,
+        /* [in, out] */ ITypedValue* outValue,
+        /* [in] */ Boolean resolveRefs,
+        /* [in] */ Boolean supportComposedIcons);
+
     /**
      * Get the raw value associated with a resource with associated density.
      *
@@ -968,6 +975,14 @@ public:
         /* [in] */ Int32 id,
         /* [in] */ Int32 density,
         /* [in] */ ITypedValue* outValue,
+        /* [in] */ Boolean resolveRefs);
+
+    /** @hide */
+    CARAPI GetValueForDensity(
+        /* [in] */ Int32 id,
+        /* [in] */ Int32 density,
+        /* [in] */ ITypedValue* outValue,
+        /* [in] */ Boolean supportComposedIcons,
         /* [in] */ Boolean resolveRefs);
 
     /**
@@ -1295,7 +1310,6 @@ public:
     /** @hide */
     CARAPI UpdateStringCache();
 
-    /** @hide */
     CARAPI SetIconResources(
         /* [in] */ ISparseArray* icons);
 
@@ -1417,6 +1431,9 @@ private:
     AutoPtr<ICompatibilityInfo> mCompatibilityInfo;
 
     AutoPtr<IWeakReference> mToken;//WeakReference<IBinder> mToken;
+
+    AutoPtr<ISparseArray> mIcons;
+    AutoPtr<IComposedIconInfo> mComposedIconInfo;
 
     static const String WIDGET_SUFFIX;
 

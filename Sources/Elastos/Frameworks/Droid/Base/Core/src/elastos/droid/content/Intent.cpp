@@ -2638,7 +2638,7 @@ ECode Intent::WriteToParcel(
 {
     assert(0 && "TODO");
     dest->WriteString(mAction);
-    // Uri::WriteToParcel(dest, mData);
+    dest->WriteInterfacePtr(mData);
     dest->WriteString(mType);
     dest->WriteInt32(mFlags);
     dest->WriteString(mPackage);
@@ -2695,11 +2695,13 @@ ECode Intent::WriteToParcel(
 ECode Intent::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    String action;
-    source->ReadString(&action);
-    SetAction(action);
-    assert(0 && "TODO");
-    // Uri::ReadFromParcel(source, (IUri**)&mData);
+    source->ReadString(&mAction);
+    Int32 tag;
+    if (source->ReadInt32(&tag), tag == 1) {
+        AutoPtr<IInterface> data;
+        source->ReadInterfacePtr((Handle32*)(IInterface**)&data);
+        mData = IUri::Probe(data);
+    }
     source->ReadString(&mType);
     source->ReadInt32(&mFlags);
     source->ReadString(&mPackage);

@@ -1,11 +1,21 @@
 
 module
 {
+    using interface Elastos.Utility.IMap;
+
+    interface Elastos.Droid.Content.IContentResolver;
+
     namespace Elastos {
     namespace Droid {
     namespace Content {
     namespace Res {
 
+    /**
+     * @Involve
+     * interface Elastos.Core.ICloneable
+     * interface Elastos.Core.IComparable
+     * interface IParcelable
+     */
     interface IThemeConfig {
 
         const String SYSTEM_DEFAULT = "system";
@@ -16,15 +26,93 @@ module
         const String SYSTEMUI_NAVBAR_PKG = "com.android.systemui.navbar";
         const String SYSTEMUI_STATUS_BAR_PKG = "com.android.systemui";
 
+        GetOverlayPkgName(
+            [out] String* str);
+
+        GetOverlayForStatusBar(
+            [out] String* str);
+
+        GetOverlayForNavBar(
+            [out] String* str);
+
         GetOverlayPkgNameForApp(
             [in] String appPkgName,
-            [out] String* overlayPkgName);
+            [out] String* str);
 
         GetIconPackPkgName(
-            [out] String* icPkgName);
+            [out] String* str);
+
+        GetIconPackPkgNameForApp(
+            [in] String appPkgName,
+            [out] String* str);
+
+        GetFontPkgName(
+            [out] String* pkgName);
+
+        GetFontPkgNameForApp(
+            [in] String appPkgName,
+            [out] String* str);
+
+        GetAppThemes(
+            [out] IMap** themes);
+
+        GetLastThemeChangeRequestType(
+            [out] RequestType* requestType);
+
+        ToJson(
+            [out] String* str);
+
+    }
+
+    interface IThemeConfigHelper {
+
+        FromJson(
+            [in] String json,
+            [out] IThemeConfig** themeConfig);
+
+        /**
+         * Represents the theme that the device booted into. This is used to
+         * simulate a "default" configuration based on the user's last known
+         * preference until the theme is switched at runtime.
+         */
+        GetBootTheme(
+            [in] IContentResolver* resolver,
+            [out] IThemeConfig** themeConfig);
+
+        GetBootThemeForUser(
+            [in] IContentResolver* resolver,
+            [in] Int32 userHandle,
+            [out] IThemeConfig** themeConfig);
+
+        /**
+         * Represents the system framework theme, perceived by the system as there
+         * being no theme applied.
+         */
+        GetSystemTheme(
+            [out] IThemeConfig** themeConfig);
+
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Core.ICloneable
+     * interface Elastos.Core.IComparable
+     */
+    interface IAppTheme {
+
+        GetIconPackPkgName(
+            [out] String* pkgName);
+
+        GetOverlayPkgName(
+            [out] String* pkgName);
+
+        GetFontPackPkgName(
+            [out] String* pkgName);
+
     }
 
     interface IThemeConfigBuilder {
+
         /**
          * For uniquely theming a specific app. ex. "Dialer gets red theme,
          * Calculator gets blue theme"
@@ -37,6 +125,21 @@ module
 
         DefaultIcon(
             [in] String themePkgName);
+
+        Icon(
+            [in] String appPkgName,
+            [in] String themePkgName);
+
+        Overlay(
+            [in] String appPkgName,
+            [in] String themePkgName);
+
+        Font(
+            [in] String appPkgName,
+            [in] String themePkgName);
+
+        SetLastThemeChangeRequestType(
+            [in] RequestType requestType);
 
         Build(
             [out] IThemeConfig** themeConfig);

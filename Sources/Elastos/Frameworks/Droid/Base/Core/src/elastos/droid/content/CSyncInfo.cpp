@@ -123,9 +123,9 @@ ECode CSyncInfo::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     source->ReadInt32(&mAuthorityId);
-    assert(0 && "TODO");
-    //CAccount::New((IAccount**)&mAccount);
-    FAIL_RETURN(IParcelable::Probe(mAccount)->ReadFromParcel(source))
+    AutoPtr<IInterface> account;
+    source->ReadInterfacePtr((Handle32*)(IInterface**)&account);
+    mAccount = IAccount::Probe(account);
     source->ReadString(&mAuthority);
     source->ReadInt64(&mStartTime);
     return NOERROR;
@@ -135,7 +135,7 @@ ECode CSyncInfo::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     dest->WriteInt32(mAuthorityId);
-    FAIL_RETURN(IParcelable::Probe(mAccount)->WriteToParcel(dest))
+    dest->WriteInterfacePtr(mAccount);
     dest->WriteString(mAuthority);
     dest->WriteInt64(mStartTime);
     return NOERROR;

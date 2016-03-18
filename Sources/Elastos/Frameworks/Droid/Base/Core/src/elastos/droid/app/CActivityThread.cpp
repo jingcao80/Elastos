@@ -384,12 +384,15 @@ CActivityThread::ReceiverData::ReceiverData(
     /* [in] */ Boolean sticky,
     /* [in] */ IBinder* token,
     /* [in] */ Int32 sendingUser)
-    : BroadcastReceiver::PendingResult(
-        resultCode, resultData, resultExtras,
-        CActivityThread::ReceiverData::TYPE_COMPONENT,
-        ordered, sticky, token, sendingUser)
-    , mIntent(intent)
-{}
+    : mIntent(intent)
+{
+    Int32 flags;
+    intent->GetFlags(&flags);
+    BroadcastReceiver::PendingResult::constructor(
+            resultCode, resultData, resultExtras,
+            CActivityThread::ReceiverData::TYPE_COMPONENT,
+            ordered, sticky, token, sendingUser, flags);
+}
 
 ECode CActivityThread::ReceiverData::SetResultCode(
     /* [in] */ Int32 code)
@@ -1306,12 +1309,14 @@ ECode CActivityThread::GetTopLevelResources(
     /* [in] */ Int32 displayId,
     /* [in] */ IConfiguration* overrideConfiguration,
     /* [in] */ LoadedPkg* pkgInfo,
+    /* [in] */ IContext* context,
+    /* [in] */ const String& pkgName,
     /* [out] */ IResources** res)
 {
     AutoPtr<ICompatibilityInfo> info;
     pkgInfo->GetCompatibilityInfo((ICompatibilityInfo**)&info);
     return mResourcesManager->GetTopLevelResources(resDir, splitResDirs, overlayDirs,
-        libDirs, displayId, String(NULL), overrideConfiguration, info, NULL, NULL, res);
+        libDirs, displayId, pkgName, overrideConfiguration, info, NULL, context, res);
 }
 
 ECode CActivityThread::GetHandler(

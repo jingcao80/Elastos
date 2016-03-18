@@ -203,9 +203,9 @@ ECode CPeriodicSync::ToString(
 ECode CPeriodicSync::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    assert(0 && "TODO");
-//***    FAIL_RETURN(CAccount::New(String("null"), String("null"), (IAccount*)&mAccount))
-    FAIL_RETURN(IParcelable::Probe(mAccount)->ReadFromParcel(source))
+    AutoPtr<IInterface> account;
+    source->ReadInterfacePtr((Handle32*)(IInterface**)&account);
+    mAccount = IAccount::Probe(account);
     source->ReadString(&mAuthority);
     source->ReadInterfacePtr((Handle32*)&mExtras);
     source->ReadInt64(&mPeriod);
@@ -216,8 +216,7 @@ ECode CPeriodicSync::ReadFromParcel(
 ECode CPeriodicSync::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    AutoPtr<IParcelable> parcelable = IParcelable::Probe(mAccount);
-    FAIL_RETURN(parcelable->WriteToParcel(dest))
+    dest->WriteInterfacePtr(mAccount);
     dest->WriteString(mAuthority);
     dest->WriteInterfacePtr(mExtras);
     dest->WriteInt64(mPeriod);

@@ -49,10 +49,10 @@ ECode CPackageInstallerSessionParams::WriteToParcel(
     dest->WriteInt32(mInstallLocation);
     dest->WriteInt64(mSizeBytes);
     dest->WriteString(mAppPackageName);
-    IParcelable::Probe(mAppIcon)->WriteToParcel(dest);
+    dest->WriteInterfacePtr(mAppIcon);
     dest->WriteString(mAppLabel);
-    IParcelable::Probe(mOriginatingUri)->WriteToParcel(dest);
-    IParcelable::Probe(mReferrerUri)->WriteToParcel(dest);
+    dest->WriteInterfacePtr(mOriginatingUri);
+    dest->WriteInterfacePtr(mReferrerUri);
     dest->WriteString(mAbiOverride);
     return NOERROR;
 }
@@ -65,11 +65,16 @@ ECode CPackageInstallerSessionParams::ReadFromParcel(
     source->ReadInt32(&mInstallLocation);
     source->ReadInt64(&mSizeBytes);
     source->ReadString(&mAppPackageName);
-    CBitmap::New((IBitmap**)&mAppIcon);
-    IParcelable::Probe(mAppIcon)->ReadFromParcel(source);
+    AutoPtr<IInterface> appIcon;
+    source->ReadInterfacePtr((Handle32*)(IInterface**)&appIcon);
+    mAppIcon = IBitmap::Probe(appIcon);
     source->ReadString(&mAppLabel);
-    IParcelable::Probe(mOriginatingUri)->ReadFromParcel(source);
-    IParcelable::Probe(mReferrerUri)->ReadFromParcel(source);
+    AutoPtr<IInterface> uri;
+    source->ReadInterfacePtr((Handle32*)(IInterface**)&uri);
+    mOriginatingUri = IUri::Probe(uri);
+    uri = NULL;
+    source->ReadInterfacePtr((Handle32*)(IInterface**)&uri);
+    mReferrerUri = IUri::Probe(uri);
     source->ReadString(&mAbiOverride);
     return NOERROR;
 }

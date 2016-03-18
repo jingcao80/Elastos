@@ -1,10 +1,11 @@
 
 module
 {
-    interface Elastos.Droid.Content.Res.IAssetFileDescriptor;
-    interface Elastos.Droid.Content.Res.IXmlResourceParser;
     using interface Elastos.IO.IInputStream;
     using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Content.Res.IAssetFileDescriptor;
+    interface Elastos.Droid.Content.Res.IXmlResourceParser;
 
     namespace Elastos {
     namespace Droid {
@@ -209,14 +210,6 @@ module
             [in] String path,
             [out] Int32* cookie);
 
-        AddOverlayPath(
-            [in] String idmapPath,
-            [in] String themePkgPath,
-            [in] String resPkgPath,
-            [in] String targetPkgPath,
-            [in] String prefixPath,
-            [out] Int32* cookie);
-
         /**
          * Add a set of common assets.
          *
@@ -227,36 +220,6 @@ module
             [in] String resPkgPath,
             [in] String prefixPath,
             [out] Int32* cookie);
-
-        /**
-         * Add a set of assets as an icon pack. A pkgIdOverride value will change the package's id from
-         * what is in the resource table to a new value. Manage this carefully, if icon pack has more
-         * than one package then that next package's id will use pkgIdOverride+1.
-         *
-         * Icon packs are different from overlays as they have a different pkg id and
-         * do not use idmap so no targetPkg is required
-         *
-         * {@hide}
-         */
-        AddIconPath(
-            [in] String idmapPath,
-            [in] String resApkPath,
-            [in] String prefixPath,
-            [in] Int32 pkgIdOverride,
-            [out] Int32* cookie);
-
-        /**
-        * Delete a set of overlay assets from the asset manager. Not for use by
-        * applications. Returns true if succeeded or false on failure.
-        *
-        * Also works for icon packs
-        *
-        * {@hide}
-        */
-        RemoveOverlayPath(
-            [in] String packageName,
-            [in] Int32 cookie,
-            [out] Boolean* result);
 
         /**
          * Add multiple sets of assets to the asset manager at once.  See
@@ -286,14 +249,14 @@ module
          * {@hide}
          */
         HasThemeSupport(
-            [out] Boolean* themeSupport);
+            [out] Boolean* hasThemeSupport);
 
         /**
          * Get package name of current icon pack (may return null).
          * {@hide}
          */
         GetIconPackageName(
-            [out] String* pkgName);
+            [out] String* packageName);
 
         /**
          * Sets icon package name
@@ -307,7 +270,7 @@ module
          * {@hide}
          */
         GetCommonResPackageName(
-            [out] String* pkgName);
+            [out] String* packageName);
 
         /**
          * Sets common resources package name
@@ -321,7 +284,7 @@ module
          * {@hide}
          */
         GetThemePackageName(
-            [out] String* pkgName);
+            [out] String* packageName);
 
         /**
          * Sets package name and highest level style id for current theme (null, 0 is allowed).
@@ -361,10 +324,18 @@ module
             [in] Int32 cookie);
 
         /** {@hide} */
+        GetAppName(
+            [out] String* appName);
+
+        /** {@hide} */
         SetAppName(
             [in] String pkgName);
 
-        /**
+        /** {@hide} */
+        HasThemedAssets(
+            [out] Boolean* hasThemeAssets);
+
+         /**
          * Add a set of assets to overlay an already added set of assets.
          *
          * This is only intended for application resources. System wide resources
@@ -374,11 +345,41 @@ module
          */
         AddOverlayPath(
             [in] String idmapPath,
+            [in] String themeApkPath,
+            [in] String resApkPath,
+            [in] String targetPkgPath,
+            [in] String prefixPath,
             [out] Int32* cookie);
 
-        /** {@hide} */
-        GetAppName(
-            [out] String* appName);
+        /**
+         * Add a set of assets as an icon pack. A pkgIdOverride value will change the package's id from
+         * what is in the resource table to a new value. Manage this carefully, if icon pack has more
+         * than one package then that next package's id will use pkgIdOverride+1.
+         *
+         * Icon packs are different from overlays as they have a different pkg id and
+         * do not use idmap so no targetPkg is required
+         *
+         * {@hide}
+         */
+        AddIconPath(
+            [in] String idmapPath,
+            [in] String resApkPath,
+            [in] String prefixPath,
+            [in] Int32 pkgIdOverride,
+            [out] Int32* result);
+
+        /**
+        * Delete a set of overlay assets from the asset manager. Not for use by
+        * applications. Returns true if succeeded or false on failure.
+        *
+        * Also works for icon packs
+        *
+        * {@hide}
+        */
+        RemoveOverlayPath(
+            [in] String packageName,
+            [in] Int32 cookie,
+            [out] Boolean* result);
 
         /**
          * Determine whether the state in this asset manager is up-to-date with

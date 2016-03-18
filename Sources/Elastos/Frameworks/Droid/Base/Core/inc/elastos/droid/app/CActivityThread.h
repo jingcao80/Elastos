@@ -840,6 +840,8 @@ public:
         /* [in] */ Int32 displayId,
         /* [in] */ IConfiguration* overrideConfiguration,
         /* [in] */ LoadedPkg* pkgInfo,
+        /* [in] */ IContext* context,
+        /* [in] */ const String& pkgName,
         /* [out] */ IResources** res);
 
     CARAPI GetHandler(

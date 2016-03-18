@@ -1,0 +1,102 @@
+
+module
+{
+    using interface Elastos.Utility.IMap;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Res {
+
+    interface IThemeChangeListener {
+        OnProgress(
+            [in] Int32 progress);
+
+        OnFinish(
+            [in] Boolean isSuccess);
+    }
+
+    interface IThemeProcessingListener {
+        OnFinishedProcessing(
+            [in] String pkgName);
+    }
+
+    interface IThemeManager {
+        AddClient(
+            [in] IThemeChangeListener* listener);
+
+        RemoveClient(
+            [in] IThemeChangeListener* listener);
+
+        OnClientPaused(
+            [in] IThemeChangeListener* listener);
+
+        OnClientResumed(
+            [in] IThemeChangeListener* listener);
+
+        OnClientDestroyed(
+            [in] IThemeChangeListener* listener);
+
+        /**
+         * Register a ThemeProcessingListener to be notified when a theme is done being processed.
+         * @param listener ThemeChangeListener to register
+         */
+        RegisterProcessingListener(
+            [in] IThemeProcessingListener* listener);
+
+        /**
+         * Unregister a ThemeChangeListener.
+         * @param listener ThemeChangeListener to unregister
+         */
+        UnregisterProcessingListener(
+            [in] IThemeProcessingListener* listener);
+
+        /**
+         * Convenience method. Applies the entire theme.
+         */
+        RequestThemeChange(
+            [in] String pkgName);
+
+        RequestThemeChange(
+            [in] String pkgName,
+            [in] IList* components);
+
+        RequestThemeChange(
+            [in] String pkgName,
+            [in] IList* components,
+            [in] Boolean removePerAppThemes);
+
+        RequestThemeChange(
+            [in] IMap* componentMap);
+
+        RequestThemeChange(
+            [in] IMap* componentMap,
+            [in] Boolean removePerAppThemes);
+
+        RequestThemeChange(
+            [in] IThemeChangeRequest* request,
+            [in] Boolean removePerAppThemes);
+
+        ApplyDefaultTheme();
+
+        IsThemeApplying(
+            [out] Boolean* result);
+
+        IsThemeBeingProcessed(
+            [in] String themePkgName,
+            [out] Boolean* result);
+
+        GetProgress(
+            [out] Int32* progress);
+
+        ProcessThemeResources(
+            [in] String themePkgName,
+            [out] Boolean* result);
+    }
+
+    } // namespace Res
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

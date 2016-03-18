@@ -1,7 +1,9 @@
 
 module
 {
-//    interface Elastos.Droid.Content.Res.IIThemeChangeListener;
+    interface Elastos.Droid.Content.Res.IIThemeChangeListener;
+    interface Elastos.Droid.Content.Res.IThemeChangeRequest;
+    interface Elastos.Droid.Content.Res.IIThemeProcessingListener;
     interface Elastos.Droid.Graphics.IBitmap;
 
     namespace Elastos {
@@ -10,15 +12,15 @@ module
     namespace Res {
 
     interface IIThemeService {
-//        RequestThemeChangeUpdates(
-//            [in] IIThemeChangeListener* listener);
-//
-//        RemoveUpdates(
-//            [in] IIThemeChangeListener* listener);
-//
-//        RequestThemeChange(
-//            [in] IThemeChangeRequest* request,
-//            [in] Boolean removePerAppThemes);
+        RequestThemeChangeUpdates(
+            [in] IIThemeChangeListener* listener);
+
+        RemoveUpdates(
+            [in] IIThemeChangeListener* listener);
+
+        RequestThemeChange(
+            [in] IThemeChangeRequest* request,
+            [in] Boolean removePerAppThemes);
 
         ApplyDefaultTheme();
 
@@ -41,11 +43,11 @@ module
             [in] String themePkgName,
             [out] Boolean* result);
 
-//        RegisterThemeProcessingListener(
-//            [in] IIThemeProcessingListener* listener);
-//
-//        UnregisterThemeProcessingListener(
-//            [in] IIThemeProcessingListener* listener);
+        RegisterThemeProcessingListener(
+            [in] IIThemeProcessingListener* listener);
+
+        UnregisterThemeProcessingListener(
+            [in] IIThemeProcessingListener* listener);
 
         RebuildResourceCache();
     }

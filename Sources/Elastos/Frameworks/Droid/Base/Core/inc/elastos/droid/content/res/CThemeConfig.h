@@ -1,12 +1,9 @@
 
-#ifndef __ELASTOS_DROID_CONTENT_RES_CThemeConfig_H__
-#define __ELASTOS_DROID_CONTENT_RES_CThemeConfig_H__
+#ifndef __ELASTOS_DROID_CONTENT_RES_CTHEMECONFIG_H__
+#define __ELASTOS_DROID_CONTENT_RES_CTHEMECONFIG_H__
 
 #include "_Elastos_Droid_Content_Res_CThemeConfig.h"
-#include <elastos/core/Object.h>
-
-using Elastos::Core::ICloneable;
-using Elastos::Core::IComparable;
+#include "elastos/droid/content/res/ThemeConfig.h"
 
 namespace Elastos {
 namespace Droid {
@@ -21,57 +18,10 @@ namespace Res {
  * @hide
  */
 CarClass(CThemeConfig)
-    , public Object
-    , public IThemeConfig
-    , public ICloneable
-    , public IParcelable
-    , public IComparable
+    , public ThemeConfig
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL()
-
-    CARAPI constructor();
-
-    CARAPI GetOverlayPkgNameForApp(
-        /* [in] */ const String& appPkgName,
-        /* [out] */ String* overlayPkgName);
-
-    CARAPI GetIconPackPkgName(
-        /* [out] */ String* icPkgName);
-
-    CARAPI Clone(
-        /* [out] */ IInterface** object);
-
-    CARAPI CompareTo(
-        /* [in] */ IInterface* another,
-        /* [out] */ Int32* result);
-
-    CARAPI WriteToParcel(
-        /* [in] */ IParcel* dest);
-
-    CARAPI ReadFromParcel(
-        /* [in] */ IParcel* source);
-
-    /**
-     * Represents the theme that the device booted into. This is used to
-     * simulate a "default" configuration based on the user's last known
-     * preference until the theme is switched at runtime.
-     */
-    static CARAPI GetBootTheme(
-        /* [in] */ IContentResolver* resolver,
-        /* [out] */ IThemeConfig** themeConfig);
-
-    static CARAPI_(AutoPtr<IThemeConfig>) FromJson(
-        /* [in] */ const String& json);
-
-    /**
-     * Represents the system framework theme, perceived by the system as there
-     * being no theme applied.
-     */
-    static CARAPI GetSystemTheme(
-        /* [out] */ IThemeConfig** themeConfig);
 };
 
 } // namespace Res
@@ -79,4 +29,4 @@ public:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_CONTENT_RES_CThemeConfig_H__
+#endif // __ELASTOS_DROID_CONTENT_RES_CTHEMECONFIG_H__

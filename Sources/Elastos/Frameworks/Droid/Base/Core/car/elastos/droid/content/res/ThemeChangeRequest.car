@@ -1,0 +1,150 @@
+
+module
+{
+    using interface Elastos.Utility.IMap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Res {
+
+    enum RequestType {
+        RequestType_USER_REQUEST,
+        RequestType_USER_REQUEST_MIXNMATCH,
+        RequestType_THEME_UPDATED,
+        RequestType_THEME_REMOVED,
+        RequestType_THEME_RESET,
+    }
+
+    interface IThemeChangeRequest {
+
+        GetOverlayThemePackageName(
+            [out] String* pkgName);
+
+        GetStatusBarThemePackageName(
+            [out] String* pkgName);
+
+        GetNavBarThemePackageName(
+            [out] String* pkgName);
+
+        GetFontThemePackageName(
+            [out] String* pkgName);
+
+        GetIconsThemePackageName(
+            [out] String* pkgName);
+
+        GetBootanimationThemePackageName(
+            [out] String* pkgName);
+
+        GetWallpaperThemePackageName(
+            [out] String* pkgName);
+
+        GetLockWallpaperThemePackageName(
+            [out] String* pkgName);
+
+        GetAlarmThemePackageName(
+            [out] String* pkgName);
+
+        GetNotificationThemePackageName(
+            [out] String* pkgName);
+
+        GetRingtoneThemePackageName(
+            [out] String* pkgName);
+
+        GetThemeComponentsMap(
+            [out] IMap** components);
+
+        SetThemeComponentsMap(
+            [in] IMap* components);
+
+        /**
+         * Get the mapping for per app themes
+         * @return A mapping of apps and the theme to apply for each one. or null if none set.
+         */
+        GetPerAppOverlays(
+            [out] IMap** components);
+
+        SetPerAppOverlays(
+            [in] IMap* components);
+
+        GetNumChangesRequested(
+            [out] Int32* num);
+
+        GetReqeustType(
+            [out] RequestType* type);
+
+        SetReqeustType(
+            [in] RequestType type);
+
+    }
+
+    interface IThemeChangeRequestBuilder {
+
+        SetOverlay(
+            [in] String pkgName,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        SetStatusBar(
+            [in] String pkgName,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        SetNavBar(
+            [in] String pkgName,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        SetFont(
+            [in] String pkgName,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        SetIcons(
+            [in] String pkgName,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        SetBootanimation(
+            [in] String pkgName,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        SetWallpaper(
+            [in] String pkgName,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        SetLockWallpaper(
+            [in] String pkgName,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        SetAlarm(
+            [in] String pkgName,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        SetNotification(
+            [in] String pkgName,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        SetRingtone(
+            [in] String pkgName,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        SetComponent(
+            [in] String component,
+            [in] String pkgName,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        SetAppOverlay(
+            [in] String appPkgName,
+            [in] String themePkgName,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        SetRequestType(
+            [in] RequestType requestType,
+            [out] IThemeChangeRequestBuilder** builder);
+
+        Build(
+            [out] IThemeChangeRequest** request);
+
+    }
+
+    }
+    }
+    }
+    }
+}

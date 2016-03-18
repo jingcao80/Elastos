@@ -131,7 +131,11 @@ module
     merge("content/res/ResourcesKey.car");
     merge("content/res/TypedArray.car");
     merge("content/res/XmlResourceParser.car");
+    merge("content/res/ThemeChangeRequest.car");
     merge("content/res/ThemeConfig.car");
+    merge("content/res/IThemeChangeListener.car");
+    merge("content/res/IThemeProcessingListener.car");
+    merge("content/res/ThemeManager.car");
 
     using interface Elastos.Core.IComparator;
     using interface Elastos.Core.IComparable;
@@ -146,6 +150,7 @@ module
     using interface Elastos.IO.IFlushable;
     using interface Elastos.Utility.IList;
     using interface Elastos.Utility.IObservable;
+    using interface Elastos.Utility.IMap;
     using interface Elastos.Security.IPublicKey;
     using interface Elastos.Security.Spec.IAlgorithmParameterSpec;
     using interface Elastosx.Crypto.ISecretKey;
@@ -221,7 +226,8 @@ module
                 [in] Boolean ordered,
                 [in] Boolean sticky,
                 [in] IBinder* token,
-                [in] Int32 userId);
+                [in] Int32 userId,
+                [in] Int32 flags);
 
             interface IPendingResult;
         }
@@ -1464,6 +1470,8 @@ module
         constructor(
             [in] IBundle* bundle);
 
+        constructor();
+
         interface IThemeInfo;
         interface IBaseThemeInfo;
         interface IParcelable;
@@ -1569,12 +1577,6 @@ module
             [in] Int32 sw,
             [in] Boolean forceCompat);
 
-        constructor(
-            [in] Int32 compFlags,
-            [in] Int32 dens,
-            [in] Float scale,
-            [in] Float invertedScale);
-
         constructor();
 
         interface ICompatibilityInfo;
@@ -1664,13 +1666,36 @@ module
         interface ITypedArray;
     }
 
+    class CThemeChangeRequest {
+        constructor();
+
+        interface IThemeChangeRequest;
+        interface IParcelable;
+    }
+
+    class CThemeChangeRequestBuilder {
+        constructor();
+
+        constructor(
+            [in] IThemeConfig* themeConfig);
+
+        interface IThemeChangeRequestBuilder;
+    }
+
     class CThemeConfig {
+        constructor(
+            [in] IMap* appThemes);
+
         constructor();
 
         interface IThemeConfig;
         interface ICloneable;
         interface IParcelable;
         interface IComparable;
+    }
+
+    singleton class CThemeConfigHelper {
+        interface IThemeConfigHelper;
     }
 
     class CThemeConfigBuilder {
@@ -1680,6 +1705,57 @@ module
             [in] IThemeConfig* theme);
 
         interface IThemeConfigBuilder;
+    }
+
+    class CSystemThemeConfig {
+        constructor();
+
+        interface IThemeConfig;
+        interface ICloneable;
+        interface IParcelable;
+        interface IComparable;
+    }
+
+    class CAppTheme {
+        constructor(
+            [in] String overlayPkgName,
+            [in] String iconPkgName,
+            [in] String fontPkgName);
+
+        interface IAppTheme;
+        interface ICloneable;
+        interface IComparable;
+    }
+
+    class CSystemAppTheme {
+        constructor();
+
+        interface IAppTheme;
+        interface ICloneable;
+        interface IComparable;
+    }
+
+    [local]
+    class CThemeManager {
+        constructor(
+            [in] IContext* context,
+            [in] IIThemeService* service);
+
+        interface IThemeManager;
+    }
+
+    class CThemeChangeListener {
+        constructor(
+            [in] Handle64 host);
+
+        interface IIThemeChangeListener;
+    }
+
+    class CThemeProcessingListener {
+        constructor(
+            [in] Handle64 host);
+
+        interface IIThemeProcessingListener;
     }
 
     } // namespace Res

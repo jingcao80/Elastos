@@ -134,9 +134,6 @@ module
         GetApplicationInvertedScale(
             [out] Float* applicationInvertedScale);
 
-        GetIsThemeable(
-            [out] Boolean* isThemeable);
-
         /**
          * @return true if the scaling is required
          */
@@ -165,6 +162,12 @@ module
         ApplyToConfiguration(
             [in] Int32 displayDensity,
             [in] IConfiguration* inoutConfig);
+
+        SetIsThemeable(
+            [in] Boolean isThemeable);
+
+        GetIsThemeable(
+            [out] Boolean* isThemeable);
     }
 
     interface ICompatibilityInfoHelper {

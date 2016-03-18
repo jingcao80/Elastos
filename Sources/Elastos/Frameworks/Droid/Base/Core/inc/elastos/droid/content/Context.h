@@ -199,6 +199,8 @@ public:
     virtual CARAPI GetTheme(
         /* [out] */ IResourcesTheme** theme) = 0;
 
+    virtual CARAPI RecreateTheme() = 0;
+
     /**
      * Retrieve styled attribute information in this Context's theme.  See
      * {@link Resources.Theme#obtainStyledAttributes(int[])}

@@ -71,7 +71,9 @@ ECode CInnerReceiver::PerformReceive(
             extras->SetAllowFds(FALSE, &bval);
         }
 
-        ECode ec = mgr->FinishReceiver((IBinder*)this, resultCode, data, extras, FALSE);
+        Int32 flags;
+        intent->GetFlags(&flags);
+        ECode ec = mgr->FinishReceiver((IBinder*)this, resultCode, data, extras, FALSE, flags);
         if (FAILED(ec)) {
             Slogger::W("CInnerReceiver", "Couldn't finish broadcast to unregistered receiver");
         }

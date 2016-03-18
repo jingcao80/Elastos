@@ -633,6 +633,10 @@ module
         GetSendingUserId(
             [out] Int32* userId);
 
+        GetSendingPackage(
+            [in] IIntent* intent,
+            [out] String* pkg);
+
         /**
          * Control inclusion of debugging help for mismatched
          * calls to Context#registerReceiver(BroadcastReceiver, IntentFilter) Context.registerReceiver().

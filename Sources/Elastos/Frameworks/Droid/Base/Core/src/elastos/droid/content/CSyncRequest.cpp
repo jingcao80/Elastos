@@ -119,8 +119,7 @@ ECode CSyncRequest:: WriteToParcel(
     parcel->WriteInt32((mDisallowMetered ? 1 : 0));
     parcel->WriteInt32((mIsAuthority ? 1 : 0));
     parcel->WriteInt32((mIsExpedited? 1 : 0));
-    IParcelable* p = IParcelable::Probe(mAccountToSync);
-    p->WriteToParcel(parcel);
+    parcel->WriteInterfacePtr(mAccountToSync);
     parcel->WriteString(mAuthority);
     return NOERROR;
 }
@@ -142,9 +141,9 @@ ECode CSyncRequest:: ReadFromParcel(
     mIsAuthority = (ival != 0);
     in->ReadInt32(&ival);
     mIsExpedited = (ival != 0);
-    assert(0 && "TODO");
-    // CAccount::New((IAccount**)&mAccountToSync);
-    IParcelable::Probe(mAccountToSync)->ReadFromParcel(in);
+    AutoPtr<IInterface> account;
+    in->ReadInterfacePtr((Handle32*)(IInterface**)&account);
+    mAccountToSync = IAccount::Probe(account);
     in->ReadString(&mAuthority);
     return NOERROR;
 }

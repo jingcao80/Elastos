@@ -73,7 +73,9 @@ ECode CUriPermission::GetPersistedTime(
 ECode CUriPermission::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
-    IParcelable::Probe(mUri)->ReadFromParcel(in);
+    AutoPtr<IInterface> uri;
+    in->ReadInterfacePtr((Handle32*)(IInterface**)&uri);
+    mUri = IUri::Probe(uri);
     in->ReadInt32(&mModeFlags);
     in->ReadInt64(&mPersistedTime);
     return NOERROR;
@@ -82,7 +84,7 @@ ECode CUriPermission::ReadFromParcel(
 ECode CUriPermission::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    IParcelable::Probe(mUri)->WriteToParcel(dest);
+    dest->WriteInterfacePtr(mUri);
     dest->WriteInt32(mModeFlags);
     dest->WriteInt64(mPersistedTime);
     return NOERROR;

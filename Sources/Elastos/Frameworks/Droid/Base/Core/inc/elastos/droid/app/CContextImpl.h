@@ -94,7 +94,8 @@ public:
         /* [in] */ IUserHandle* user,
         /* [in] */ Boolean restricted,
         /* [in] */ IDisplay* display,
-        /* [in] */ IConfiguration* overrideConfiguration);
+        /* [in] */ IConfiguration* overrideConfiguration,
+        /* [in] */ const String& themePackageName);
 
     static CARAPI_(AutoPtr<CContextImpl>) GetImpl(
         /* [in] */ IContext* context);
@@ -144,6 +145,8 @@ public:
 
     CARAPI GetTheme(
         /* [out] */ IResourcesTheme** theme);
+
+    CARAPI RecreateTheme();
 
     CARAPI ObtainStyledAttributes(
         /* [in] */ ArrayOf<Int32>* attrs,
@@ -602,6 +605,12 @@ public:
         /* [in] */ Int32 flags,
         /* [out] */ IContext** ctx);
 
+    CARAPI CreateApplicationContext(
+        /* [in] */ IApplicationInfo* application,
+        /* [in] */ const String& themePackageName,
+        /* [in] */ Int32 flags,
+        /* [out] */ IContext** ctx);
+
     CARAPI CreatePackageContext(
         /* [in] */ const String& packageName,
         /* [in] */ Int32 flags,
@@ -609,6 +618,13 @@ public:
 
     CARAPI CreatePackageContextAsUser(
         /* [in] */ const String& packageName,
+        /* [in] */ Int32 flags,
+        /* [in] */ IUserHandle* user,
+        /* [out] */ IContext** ctx);
+
+    CARAPI CreatePackageContextAsUser(
+        /* [in] */ const String& packageName,
+        /* [in] */ const String& themePackageName,
         /* [in] */ Int32 flags,
         /* [in] */ IUserHandle* user,
         /* [out] */ IContext** ctx);

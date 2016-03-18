@@ -63,6 +63,7 @@ public:
 private:
     String mResDir;
     Float mScale;
+    Boolean mIsThemeable;
     Int32 mHash;
     AutoPtr<IBinder> mToken;
 };

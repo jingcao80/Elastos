@@ -394,6 +394,11 @@ public:
     AutoPtr<ILocale> mLocale;
 
     /**
+     * @hide
+     */
+    AutoPtr<IThemeConfig> mThemeConfig;
+
+    /**
      * Locale should persist on setting.  This is hidden because it is really
      * questionable whether this is the right way to expose the functionality.
      * @hide

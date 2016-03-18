@@ -82,6 +82,9 @@ public:
     CARAPI GetType(
         /* [out] */ Int32* type);
 
+    CARAPI IsDeleteOperation(
+        /* [out] */ Boolean* resutl);
+
     CARAPI IsWriteOperation(
         /* [out] */ Boolean* isWrite);
 

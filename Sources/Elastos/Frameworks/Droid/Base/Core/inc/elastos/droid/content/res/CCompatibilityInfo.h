@@ -28,6 +28,7 @@ namespace Res {
 CarClass(CCompatibilityInfo)
     , public Object
     , public ICompatibilityInfo
+    , public IParcelable
 {
 public:
     /**
@@ -174,8 +175,14 @@ public:
     CARAPI GetApplicationInvertedScale(
         /* [out] */ Float* applicationInvertedScale);
 
+    CARAPI SetApplicationInvertedScale(
+        /* [in] */ Float applicationInvertedScale);
+
     CARAPI GetIsThemeable(
         /* [out] */ Boolean* isThemeable);
+
+    CARAPI SetIsThemeable(
+        /* [in] */ Boolean isThemeable);
 
     CARAPI constructor(
         /* [in] */ IApplicationInfo* appInfo,
@@ -183,13 +190,17 @@ public:
         /* [in] */ Int32 sw,
         /* [in] */ Boolean forceCompat);
 
+    CARAPI constructor();
+
+private:
     CARAPI constructor(
         /* [in] */ Int32 compFlags,
         /* [in] */ Int32 dens,
         /* [in] */ Float scale,
-        /* [in] */ Float invertedScale);
+        /* [in] */ Float invertedScale,
+        /* [in] */ Boolean isThemeable);
 
-    CARAPI constructor();
+    static CARAPI_(AutoPtr<ICompatibilityInfo>) InitDefaultCompatibilityInfo();
 
 public:
     /** default compatibility info object for compatible applications */
@@ -209,6 +220,11 @@ public:
      * Application's inverted scale.
      */
     Float mApplicationInvertedScale;
+
+    /**
+     * Whether the application supports third-party theming.
+     */
+    Boolean mIsThemeable;
 
 private:
 

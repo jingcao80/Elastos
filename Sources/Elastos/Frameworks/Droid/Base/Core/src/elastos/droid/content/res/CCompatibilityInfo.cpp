@@ -25,6 +25,10 @@ namespace Droid {
 namespace Content {
 namespace Res {
 
+//==============================================================================
+//                  CCompatibilityInfo::Translator
+//==============================================================================
+
 CAR_INTERFACE_IMPL(CCompatibilityInfo::Translator, Object, ICompatibilityInfoTranslator)
 
 CCompatibilityInfo::Translator::Translator(
@@ -202,7 +206,11 @@ ECode CCompatibilityInfo::Translator::GetTranslatedTouchableArea(
 }
 
 
-static AutoPtr<ICompatibilityInfo> InitDefaultCompatibilityInfo()
+//==============================================================================
+//                  CCompatibilityInfo
+//==============================================================================
+
+AutoPtr<ICompatibilityInfo> CCompatibilityInfo::InitDefaultCompatibilityInfo()
 {
     AutoPtr<ICompatibilityInfo> info;
     ASSERT_SUCCEEDED(CCompatibilityInfo::New((ICompatibilityInfo**)&info));
@@ -210,14 +218,14 @@ static AutoPtr<ICompatibilityInfo> InitDefaultCompatibilityInfo()
 }
 
 INIT_PROI_3 const AutoPtr<ICompatibilityInfo> CCompatibilityInfo::DEFAULT_COMPATIBILITY_INFO
-        = InitDefaultCompatibilityInfo();
+        = CCompatibilityInfo::InitDefaultCompatibilityInfo();
 
 const Int32 CCompatibilityInfo::SCALING_REQUIRED = 1;
 const Int32 CCompatibilityInfo::ALWAYS_NEEDS_COMPAT = 2;
 const Int32 CCompatibilityInfo::NEVER_NEEDS_COMPAT = 4;
 const Int32 CCompatibilityInfo::NEEDS_SCREEN_COMPAT = 8;
 
-CAR_INTERFACE_IMPL(CCompatibilityInfo, Object, ICompatibilityInfo)
+CAR_INTERFACE_IMPL_2(CCompatibilityInfo, Object, ICompatibilityInfo, IParcelable)
 
 CAR_OBJECT_IMPL(CCompatibilityInfo)
 
@@ -225,6 +233,7 @@ CCompatibilityInfo::CCompatibilityInfo()
     : mApplicationDensity(0)
     , mApplicationScale(0)
     , mApplicationInvertedScale(0)
+    , mIsThemeable(FALSE)
     , mCompatibilityFlags(0)
 {}
 
@@ -461,6 +470,10 @@ ECode CCompatibilityInfo::Equals(
         *result = FALSE;
         return NOERROR;
     }
+    if (mIsThemeable != oc->mIsThemeable) {
+        *result = FALSE;
+        return NOERROR;
+    }
 
     *result = TRUE;
     return NOERROR;
@@ -473,6 +486,7 @@ ECode CCompatibilityInfo::ReadFromParcel(
     source->ReadInt32(&mApplicationDensity);
     source->ReadFloat(&mApplicationScale);
     source->ReadFloat(&mApplicationInvertedScale);
+    source->ReadBoolean(&mIsThemeable);
     return NOERROR;
 }
 
@@ -483,6 +497,7 @@ ECode CCompatibilityInfo::WriteToParcel(
     dest->WriteInt32(mApplicationDensity);
     dest->WriteFloat(mApplicationScale);
     dest->WriteFloat(mApplicationInvertedScale);
+    dest->WriteBoolean(mIsThemeable);
     return NOERROR;
 }
 
@@ -510,10 +525,25 @@ ECode CCompatibilityInfo::GetApplicationInvertedScale(
     return NOERROR;
 }
 
+ECode CCompatibilityInfo::SetIsThemeable(
+    /* [in] */ Boolean isThemeable)
+{
+    mIsThemeable = isThemeable;
+    return NOERROR;
+}
+
 ECode CCompatibilityInfo::GetIsThemeable(
     /* [out] */ Boolean* isThemeable)
 {
-    assert(0);
+    VALIDATE_NOT_NULL(isThemeable)
+    *isThemeable = mIsThemeable;
+    return NOERROR;
+}
+
+ECode CCompatibilityInfo::SetApplicationInvertedScale(
+    /* [in] */ Float applicationInvertedScale)
+{
+    mApplicationInvertedScale = applicationInvertedScale;
     return NOERROR;
 }
 
@@ -687,18 +717,20 @@ ECode CCompatibilityInfo::constructor(
     /* [in] */ Int32 compFlags,
     /* [in] */ Int32 dens,
     /* [in] */ Float scale,
-    /* [in] */ Float invertedScale)
+    /* [in] */ Float invertedScale,
+    /* [in] */ Boolean isThemeable)
 {
     mCompatibilityFlags = compFlags;
     mApplicationDensity = dens;
     mApplicationScale = scale;
     mApplicationInvertedScale = invertedScale;
+    mIsThemeable = isThemeable;
     return NOERROR;
 }
 
 ECode CCompatibilityInfo::constructor()
 {
-    return constructor(NEVER_NEEDS_COMPAT, CDisplayMetrics::DENSITY_DEVICE, 1.0f, 1.0f);
+    return constructor(NEVER_NEEDS_COMPAT, CDisplayMetrics::DENSITY_DEVICE, 1.0f, 1.0f, TRUE);
 }
 
 } // namespace Res

@@ -15,6 +15,8 @@ using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
+using Elastos::Core::ICloneable;
+using Elastos::Core::IComparable;
 using Elastos::Utility::CLocale;
 using Elastos::Utility::Etl::List;
 
@@ -239,6 +241,13 @@ ECode CConfiguration::SetTo(
     o->GetCompatScreenHeightDp(&mCompatScreenHeightDp);
     o->GetCompatSmallestScreenWidthDp(&mCompatSmallestScreenWidthDp);
     o->GetSeq(&mSeq);
+    AutoPtr<IThemeConfig> themeConfig;
+    o->GetThemeConfig((IThemeConfig**)&themeConfig);
+    if (themeConfig != NULL) {
+        AutoPtr<IInterface> value;
+        ICloneable::Probe(themeConfig)->Clone((IInterface**)&value);
+        mThemeConfig = IThemeConfig::Probe(value);
+    }
 
     return NOERROR;
 }
@@ -269,6 +278,7 @@ ECode CConfiguration::SetToDefaults()
     mScreenLayout = SCREENLAYOUT_SIZE_UNDEFINED;
     mUiMode = UI_MODE_TYPE_UNDEFINED;
     mSeq = 0;
+    mThemeConfig = NULL;
     return NOERROR;
 }
 
@@ -433,6 +443,23 @@ ECode CConfiguration::UpdateFrom(
         mSeq = config->mSeq;
     }
 
+    Boolean equals;
+    if (config->mThemeConfig != NULL
+            && (mThemeConfig == NULL ||
+                    (IObject::Probe(mThemeConfig)->Equals(config->mThemeConfig, &equals), !equals))) {
+        *changes |= IActivityInfo::CONFIG_THEME_RESOURCE;
+        String fontPkgName;
+        config->mThemeConfig->GetFontPkgName(&fontPkgName);
+        String fontPkgName1;
+        if (mThemeConfig == NULL ||
+                (!fontPkgName.IsNull() && (mThemeConfig->GetFontPkgName(&fontPkgName1), !fontPkgName.Equals(fontPkgName1)))) {
+            *changes |= IActivityInfo::CONFIG_THEME_FONT;
+        }
+        AutoPtr<IInterface> value;
+        ICloneable::Probe(config->mThemeConfig)->Clone((IInterface**)&value);
+        mThemeConfig = IThemeConfig::Probe(value);
+    }
+
     return NOERROR;
 }
 
@@ -537,6 +564,20 @@ ECode CConfiguration::Diff(
         *result |= IActivityInfo::CONFIG_DENSITY;
     }
 
+    Boolean equals;
+    if (config->mThemeConfig != NULL &&
+            (mThemeConfig == NULL || (IObject::Probe(mThemeConfig)->Equals(config->mThemeConfig, &equals), !equals))) {
+        *result |= IActivityInfo::CONFIG_THEME_RESOURCE;
+        String fontPkgName;
+        config->mThemeConfig->GetFontPkgName(&fontPkgName);
+        String fontPkgName1;
+        if (mThemeConfig == NULL ||
+                (!fontPkgName.IsNull() &&
+                        (mThemeConfig->GetFontPkgName(&fontPkgName1), !fontPkgName.Equals(fontPkgName1)))) {
+            *result |= IActivityInfo::CONFIG_THEME_FONT;
+        }
+    }
+
     return NOERROR;
 }
 
@@ -544,7 +585,9 @@ Boolean CConfiguration::NeedNewResources(
     /* [in] */ Int32 configChanges,
     /* [in] */ Int32 interestingChanges)
 {
-    return (configChanges & (interestingChanges | IActivityInfo::CONFIG_FONT_SCALE)) != 0;
+    return (configChanges & (interestingChanges |
+            IActivityInfo::CONFIG_FONT_SCALE |
+            IActivityInfo::CONFIG_THEME_RESOURCE)) != 0;
 }
 
 ECode CConfiguration::IsOtherSeqNewer(
@@ -631,6 +674,7 @@ ECode CConfiguration::WriteToParcel(
     dest->WriteInt32(mCompatScreenHeightDp);
     dest->WriteInt32(mCompatSmallestScreenWidthDp);
     dest->WriteInt32(mSeq);
+    dest->WriteInterfacePtr(mThemeConfig);
 
     return NOERROR;
 }
@@ -674,6 +718,9 @@ ECode CConfiguration::ReadFromParcel(
     source->ReadInt32(&mCompatScreenHeightDp);
     source->ReadInt32(&mCompatSmallestScreenWidthDp);
     source->ReadInt32(&mSeq);
+    AutoPtr<IInterface> value;
+    source->ReadInterfacePtr((Handle32*)(IInterface**)&value);
+    mThemeConfig = IThemeConfig::Probe(value);
     return NOERROR;
 }
 
@@ -815,7 +862,16 @@ ECode CConfiguration::CompareTo(
     }
 
     *result = mDensityDpi - config->mDensityDpi;
-    //if (n != 0) return n;
+    if (*result != 0) {
+        return NOERROR;
+    }
+    if (mThemeConfig == NULL) {
+        if (config->mThemeConfig != NULL)
+            *result = 1;
+    }
+    else {
+        return IComparable::Probe(mThemeConfig)->CompareTo(config->mThemeConfig, result);
+    }
 
     return NOERROR;
 }
@@ -997,6 +1053,10 @@ ECode CConfiguration::ToString(
         sb += " s.";
         sb += mSeq;
     }
+    sb += " themeResource=";
+    String configStr;
+    IObject::Probe(mThemeConfig)->ToString(&configStr);
+    sb += configStr;
     sb += '}';
     *str = sb.ToString();
     return NOERROR;
@@ -1014,14 +1074,16 @@ ECode CConfiguration::SetLocale(
 ECode CConfiguration::GetThemeConfig(
     /* [out] */ IThemeConfig** themeConfig)
 {
-    assert(0);
+    VALIDATE_NOT_NULL(themeConfig)
+    *themeConfig = mThemeConfig;
+    REFCOUNT_ADD(*themeConfig)
     return NOERROR;
 }
 
 ECode CConfiguration::SetThemeConfig(
     /* [in] */ IThemeConfig* themeConfig)
 {
-    assert(0);
+    mThemeConfig = themeConfig;
     return NOERROR;
 }
 

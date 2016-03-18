@@ -18,7 +18,6 @@ using Elastos::Droid::Content::Res::IAssetFileDescriptorAutoCloseInputStream;
 using Elastos::Droid::Content::Res::IAssetFileDescriptorAutoCloseOutputStream;
 using Elastos::Droid::Content::Res::CAssetFileDescriptorAutoCloseInputStream;
 using Elastos::Droid::Content::Res::CAssetFileDescriptorAutoCloseOutputStream;
-
 using Elastos::IO::EIID_ICloseable;
 
 namespace Elastos {
@@ -172,8 +171,9 @@ ECode CAssetFileDescriptor::CreateOutputStream(
 ECode CAssetFileDescriptor::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    FAIL_RETURN(CParcelFileDescriptor::New((IParcelFileDescriptor**)&mFd));
-    IParcelable::Probe(mFd)->ReadFromParcel(source);
+    AutoPtr<IInterface> fd;
+    source->ReadInterfacePtr((Handle32*)(IInterface**)&fd);
+    mFd = IParcelFileDescriptor::Probe(fd);
     FAIL_RETURN(source->ReadInt64(&mStartOffset));
     FAIL_RETURN(source->ReadInt64(&mLength));
     Int32 ival;
@@ -191,7 +191,7 @@ ECode CAssetFileDescriptor::ReadFromParcel(
 ECode CAssetFileDescriptor::WriteToParcel(
     /* [in] */ IParcel * dest)
 {
-    IParcelable::Probe(mFd)->WriteToParcel(dest);
+    dest->WriteInterfacePtr(mFd);
     FAIL_RETURN(dest->WriteInt64(mStartOffset));
     FAIL_RETURN(dest->WriteInt64(mLength));
     if (mExtras != NULL) {

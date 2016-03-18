@@ -21,6 +21,11 @@ ECode CThemeInfo::constructor(
     return NOERROR;
 }
 
+ECode CThemeInfo::constructor()
+{
+    return NOERROR;
+}
+
 } // namespace Pm
 } // namespace Content
 } // namespace Droid

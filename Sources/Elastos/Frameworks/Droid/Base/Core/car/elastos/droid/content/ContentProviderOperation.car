@@ -36,6 +36,9 @@ module
         GetType(
             [out] Int32* type);
 
+        IsDeleteOperation(
+            [out] Boolean* result);
+
         IsWriteOperation(
             [out] Boolean* isWrite);
 

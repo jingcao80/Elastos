@@ -8322,6 +8322,14 @@ ECode CActivityManagerService::GetCallingPackage(
     return NOERROR;
 }
 
+ECode CActivityManagerService::GetCallingPackageForBroadcast(
+    /* [in] */ Boolean foreground,
+    /* [out] */ String* pkg)
+{
+    assert(0);
+    return NOERROR;
+}
+
 ECode CActivityManagerService::GetCallingActivity(
     /* [in] */ IBinder* token,
     /* [out] */ IComponentName** componentName)
@@ -20335,7 +20343,8 @@ ECode CActivityManagerService::FinishReceiver(
     /* [in] */ Int32 resultCode,
     /* [in] */ const String& resultData,
     /* [in] */ IBundle* resultExtras,
-    /* [in] */ Boolean resultAbort)
+    /* [in] */ Boolean resultAbort,
+    /* [in] */ Int32 flags)
 {
     if (DEBUG_BROADCAST) {
         Slogger::V(TAG, "Finish receiver: %s", TO_CSTR(who));

@@ -1403,11 +1403,13 @@ ECode ApplicationPackageManager::GetResourcesForApplication(
 
     AutoPtr<IResources> r;
     CContextImpl* ci = (CContextImpl*)IContextImpl::Probe(mContext);
+    String packageName;
+    IPackageItemInfo::Probe(app)->GetPackageName(&packageName);
     ci->mMainThread->GetTopLevelResources(
             sameUid ? sourceDir : publicSourceDir,
             sameUid ? splitSourceDirs : splitPublicSourceDirs,
             resourceDirs, sharedLibraryFiles, IDisplay::DEFAULT_DISPLAY,
-            NULL, ci->mPackageInfo, (IResources**)&r);
+            NULL, ci->mPackageInfo, mContext, packageName, (IResources**)&r);
     if (r != NULL) {
         *res = r;
         REFCOUNT_ADD(*res)

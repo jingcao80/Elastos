@@ -3499,9 +3499,9 @@ module
             [out] IContext** ctx);
 
         /**
-         * Similar to {@sa #createPackageContext(String, int)}, but with a
-         * different {@sa UserHandle}. For example, {@sa #getContentResolver()}
-         * will open any {@sa Uri} as the given user.
+         * Similar to {@link #createPackageContext(String, int)}, but with a
+         * different {@link UserHandle}. For example, {@link #getContentResolver()}
+         * will open any {@link Uri} as the given user.
          *
          * @hide
          */
@@ -3526,11 +3526,11 @@ module
             [in] IUserHandle* user,
             [out] IContext** ctx);
 
-            /** 3479
-            * Creates a context given an {@link android.content.pm.ApplicationInfo}.
-            *
-            * @hide
-            */
+        /** 3479
+        * Creates a context given an {@link android.content.pm.ApplicationInfo}.
+        *
+        * @hide
+        */
         CreateApplicationContext(
             [in] IApplicationInfo* application,
             [in] String themePackageName,

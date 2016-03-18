@@ -125,15 +125,16 @@ ECode CContentProviderOperation::ReadFromParcel(
     source->ReadInt32(&mType);
 
     Int32 value = 0;
-
-    assert(0 && "TODO");
-    // Uri::ReadFromParcel(source, (IUri**)&mUri);
+    if (source->ReadInt32(&value), value != 0) {
+        AutoPtr<IInterface> uri;
+        source->ReadInterfacePtr((Handle32*)(IInterface**)&uri);
+        mUri = IUri::Probe(uri);
+    }
 
     if (source->ReadInt32(&value), value != 0) {
-        AutoPtr<IContentValues> values;
-        CContentValues::New((IContentValues**)&values);
-        IParcelable::Probe(values)->ReadFromParcel(source);
-        mValues = values;
+        AutoPtr<IInterface> contentValues;
+        source->ReadInterfacePtr((Handle32*)(IInterface**)&contentValues);
+        mValues = IContentValues::Probe(contentValues);
     }
 
     if (source->ReadInt32(&value), value != 0) {
@@ -182,8 +183,7 @@ ECode CContentProviderOperation::WriteToParcel(
 
     if (NULL != mUri) {
         dest->WriteInt32(1);
-        AutoPtr<IParcelable> parcelable = IParcelable::Probe(mUri);
-        FAIL_RETURN(parcelable->WriteToParcel(dest))
+        dest->WriteInterfacePtr(mUri);
     }
     else {
         dest->WriteInt32(0);
@@ -191,8 +191,7 @@ ECode CContentProviderOperation::WriteToParcel(
 
     if (NULL != mValues) {
         dest->WriteInt32(1);
-        AutoPtr<IParcelable> valueParcelable = IParcelable::Probe(mValues);
-        FAIL_RETURN(valueParcelable->WriteToParcel(dest))
+        dest->WriteInterfacePtr(mValues);
     }
     else {
         dest->WriteInt32(0);
@@ -323,6 +322,14 @@ ECode CContentProviderOperation::GetType(
 {
     VALIDATE_NOT_NULL(type)
     *type = mType;
+    return NOERROR;
+}
+
+ECode CContentProviderOperation::IsDeleteOperation(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mType == TYPE_DELETE;
     return NOERROR;
 }
 

@@ -4,7 +4,7 @@
 #include <Elastos.CoreLibrary.Utility.Zip.h>
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/content/pm/ThemeUtils.h"
-#include "elastos/droid/content/res/CThemeConfig.h"
+#include "elastos/droid/content/res/ThemeConfig.h"
 #include "elastos/droid/content/CContentValues.h"
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/database/sqlite/CSQLiteDatabaseHelper.h"
@@ -26,7 +26,7 @@ using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::EIID_IContext;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::Res::IConfiguration;
-using Elastos::Droid::Content::Res::CThemeConfig;
+using Elastos::Droid::Content::Res::ThemeConfig;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Database::Sqlite::ISQLiteDatabase;
 using Elastos::Droid::Database::Sqlite::ISQLiteDatabaseHelper;
@@ -986,7 +986,7 @@ AutoPtr<IThemeConfig> ThemeUtils::GetBootThemeDirty()
                 String json;
                 c->GetString(0, &json);
                 if (!json.IsNull()) {
-                    config = CThemeConfig::FromJson(json);
+                    config = ThemeConfig::FromJson(json);
                 }
             }
             ICloseable::Probe(c)->Close();

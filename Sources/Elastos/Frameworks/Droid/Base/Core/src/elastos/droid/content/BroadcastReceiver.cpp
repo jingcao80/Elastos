@@ -58,6 +58,7 @@ BroadcastReceiver::PendingResult::PendingResult()
     , mInitialStickyHint(FALSE)
     , mToken(NULL)
     , mSendingUser(0)
+    , mFlags(0)
     , mResultCode(0)
     , mResultExtras(NULL)
     , mAbortBroadcast(FALSE)
@@ -72,12 +73,14 @@ BroadcastReceiver::PendingResult::PendingResult(
     /* [in] */ Boolean ordered,
     /* [in] */ Boolean sticky,
     /* [in] */ IBinder* token,
-    /* [in] */ Int32 userId)
+    /* [in] */ Int32 userId,
+    /* [in] */ Int32 flags)
     : mType(type)
     , mOrderedHint(ordered)
     , mInitialStickyHint(sticky)
     , mToken(token)
     , mSendingUser(userId)
+    , mFlags(flags)
     , mResultCode(resultCode)
     , mResultData(resultData)
     , mResultExtras(resultExtras)
@@ -96,7 +99,8 @@ ECode BroadcastReceiver::PendingResult::constructor(
     /* [in] */ Boolean ordered,
     /* [in] */ Boolean sticky,
     /* [in] */ IBinder* token,
-    /* [in] */ Int32 userId)
+    /* [in] */ Int32 userId,
+    /* [in] */ Int32 flags)
 {
     mResultCode = resultCode;
     mResultData = resultData;
@@ -106,6 +110,7 @@ ECode BroadcastReceiver::PendingResult::constructor(
     mInitialStickyHint = sticky;
     mToken = token;
     mSendingUser = userId;
+    mFlags = flags;
     return NOERROR;
 }
 
@@ -267,12 +272,12 @@ ECode BroadcastReceiver::PendingResult::SendFinished(
 
     ECode ec = NOERROR;
     if (mOrderedHint) {
-        ec = am->FinishReceiver(mToken, mResultCode, mResultData, mResultExtras, mAbortBroadcast);
+        ec = am->FinishReceiver(mToken, mResultCode, mResultData, mResultExtras, mAbortBroadcast, mFlags);
     }
     else {
         // This broadcast was sent to a component; it is not ordered,
         // but we still need to tell the activity manager we are done.
-        ec = am->FinishReceiver(mToken, 0, String(NULL), (IBundle*)NULL, FALSE);
+        ec = am->FinishReceiver(mToken, 0, String(NULL), (IBundle*)NULL, FALSE, mFlags);
     }
 
     return ec;
@@ -543,6 +548,22 @@ ECode BroadcastReceiver::GetSendingUserId(
     /* [out] */ Int32* userId)
 {
     return mPendingResult->GetSendingUserId(userId);
+}
+
+ECode BroadcastReceiver::GetSendingPackage(
+    /* [in] */ IIntent* intent,
+    /* [out] */ String* pkg)
+{
+    VALIDATE_NOT_NULL(pkg)
+    AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
+    // try {
+    Int32 flags;
+    intent->GetFlags(&flags);
+    Boolean fg = (flags & IIntent::FLAG_RECEIVER_FOREGROUND) != 0;
+    return mgr->GetCallingPackageForBroadcast(fg, pkg);
+    // } catch (RemoteException ex) {
+    //     return null;
+    // }
 }
 
 ECode BroadcastReceiver::SetDebugUnregister(

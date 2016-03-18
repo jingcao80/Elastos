@@ -3,6 +3,7 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
+#include "elastos/droid/app/IconPackHelper.h"
 #include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/content/res/CColorStateList.h"
 #include "elastos/droid/content/res/XmlBlock.h"
@@ -20,9 +21,11 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
 
+using Elastos::Droid::App::IconPackHelper;
 using Elastos::Droid::Content::Pm::IActivityInfoHelper;
 using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::CActivityInfo;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Graphics::Movie;
@@ -31,7 +34,6 @@ using Elastos::Droid::Graphics::Drawable::IColorDrawable;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableConstantState;
 using Elastos::Droid::Graphics::Drawable::Drawable;
 using Elastos::Droid::Utility::CInt64SparseArray;
-
 using Libcore::ICU::INativePluralRulesHelper;
 using Libcore::ICU::CNativePluralRulesHelper;
 using Libcore::ICU::INativePluralRules;
@@ -422,10 +424,10 @@ ECode CResources::constructor()
     // NOTE: Intentionally leaving this uninitialized (all values set
     // to zero), so that anyone who tries to do something that requires
     // metrics will get a very wrong value.
-    FAIL_RETURN(mConfiguration->SetToDefaults())
-    FAIL_RETURN(mMetrics->SetToDefaults())
-    FAIL_RETURN(UpdateConfiguration(NULL, NULL))
-    mAssets->EnsureStringBlocks();
+    mConfiguration->SetToDefaults();
+    mMetrics->SetToDefaults();
+    UpdateConfiguration(NULL, NULL);
+    mAssets->RecreateStringBlocks();
     return NOERROR;
 }
 
@@ -933,7 +935,29 @@ ECode CResources::GetDrawable(
     /* [out] */ IDrawable** drawable)
 {
     VALIDATE_NOT_NULL(drawable)
+    return GetDrawable(id, theme, TRUE, drawable);
+}
+
+ECode CResources::GetDrawable(
+    /* [in] */ Int32 id,
+    /* [in] */ IResourcesTheme* theme,
+    /* [in] */ Boolean supportComposedIcons,
+    /* [out] */ IDrawable** drawable)
+{
+    VALIDATE_NOT_NULL(drawable)
     *drawable = NULL;
+
+    //Check if an icon is themed
+    AutoPtr<IPackageItemInfo> info;
+    if (mIcons != NULL) {
+        AutoPtr<IInterface> value;
+        mIcons->Get(id, (IInterface**)&value);
+        info = IPackageItemInfo::Probe(value);
+    }
+    Int32 themedIcon;
+    if (info != NULL && (info->GetThemedIcon(&themedIcon), themedIcon != 0)) {
+        id = themedIcon;
+    }
 
     AutoPtr<ITypedValue> value;
     synchronized(mAccessLock) {
@@ -944,10 +968,40 @@ ECode CResources::GetDrawable(
         else {
             mTmpValue = NULL;
         }
-        GetValue(id, value, TRUE);
+        GetValue(id, value, TRUE, supportComposedIcons);
     }
+
     AutoPtr<IDrawable> res;
-    LoadDrawable(value, id, theme, (IDrawable**)&res);
+    // try {
+    ECode ec = LoadDrawable(value, id, theme, (IDrawable**)&res);
+    if (ec == (ECode)E_NOT_FOUND_EXCEPTION) {
+        // The below statement will be true if we were trying to load a composed icon.
+        // Since we received a NotFoundException, try to load the original if this
+        // condition is true, otherwise throw the original exception.
+        if (supportComposedIcons && mComposedIconInfo != NULL && info != NULL &&
+                (info->GetThemedIcon(&themedIcon), themedIcon == 0)) {
+            Logger::E(TAG, "Failed to retrieve composed icon. 0x%08x", ec);
+            GetValue(id, value, TRUE, FALSE);
+            LoadDrawable(value, id, theme, (IDrawable**)&res);
+        }
+        else {
+            return ec;
+        }
+    }
+    // } catch (NotFoundException e) {
+    //     // The below statement will be true if we were trying to load a composed icon.
+    //     // Since we received a NotFoundException, try to load the original if this
+    //     // condition is true, otherwise throw the original exception.
+    //     if (supportComposedIcons && mComposedIconInfo != null && info != null &&
+    //             info.themedIcon == 0) {
+    //         Log.e(TAG, "Failed to retrieve composed icon.", e);
+    //         getValue(id, value, true, false);
+    //         res = loadDrawable(value, id, theme);
+    //     } else {
+    //         throw e;
+    //     }
+    // }
+
     synchronized(mAccessLock) {
         if (mTmpValue == NULL) {
             mTmpValue = (CTypedValue*)value.Get();
@@ -956,16 +1010,6 @@ ECode CResources::GetDrawable(
 
     *drawable = res;
     REFCOUNT_ADD(*drawable)
-    return NOERROR;
-}
-
-ECode CResources::GetDrawable(
-    /* [in] */ Int32 id,
-    /* [in] */ IResourcesTheme* theme,
-    /* [in] */ Boolean supportComposedIcons,
-    /* [out] */ IDrawable** drawable)
-{
-    assert(0);
     return NOERROR;
 }
 
@@ -984,7 +1028,30 @@ ECode CResources::GetDrawableForDensity(
     /* [out] */ IDrawable** drawable)
 {
     VALIDATE_NOT_NULL(drawable)
+    return GetDrawableForDensity(id, density, theme, TRUE, drawable);
+}
+
+ECode CResources::GetDrawableForDensity(
+    /* [in] */ Int32 id,
+    /* [in] */ Int32 density,
+    /* [in] */ IResourcesTheme* theme,
+    /* [in] */ Boolean supportComposedIcons,
+    /* [out] */ IDrawable** drawable)
+{
+    VALIDATE_NOT_NULL(drawable)
     *drawable = NULL;
+
+    //Check if an icon was themed
+    AutoPtr<IPackageItemInfo> info;
+    if (mIcons != NULL) {
+        AutoPtr<IInterface> value;
+        mIcons->Get(id, (IInterface**)&value);
+        info = IPackageItemInfo::Probe(value);
+    }
+    Int32 themedIcon;
+    if (info != NULL && (info->GetThemedIcon(&themedIcon), themedIcon != 0)) {
+        id = themedIcon;
+    }
 
     AutoLock lock(mAccessLock);
     AutoPtr<ITypedValue> value = (ITypedValue*)mTmpValue.Get();
@@ -995,7 +1062,7 @@ ECode CResources::GetDrawableForDensity(
         mTmpValue = NULL;
     }
 
-    FAIL_RETURN(GetValueForDensity(id, density, value, TRUE))
+    FAIL_RETURN(GetValueForDensity(id, density, value, TRUE, supportComposedIcons))
 
     /*
      * Pretend the requested density is actually the display density. If
@@ -1024,17 +1091,6 @@ ECode CResources::GetDrawableForDensity(
 
     *drawable = res;
     REFCOUNT_ADD(*drawable)
-    return NOERROR;
-}
-
-ECode CResources::GetDrawableForDensity(
-    /* [in] */ Int32 id,
-    /* [in] */ Int32 density,
-    /* [in] */ IResourcesTheme* theme,
-    /* [in] */ Boolean supportComposedIcons,
-    /* [out] */ IDrawable** drawable)
-{
-    assert(0);
     return NOERROR;
 }
 
@@ -1324,9 +1380,37 @@ ECode CResources::GetValue(
     /* [in, out] */ ITypedValue* outValue,
     /* [in] */ Boolean resolveRefs)
 {
-    VALIDATE_NOT_NULL(outValue);
+    return GetValue(id, outValue, resolveRefs, TRUE);
+}
 
+ECode CResources::GetValue(
+    /* [in] */ Int32 id,
+    /* [in, out] */ ITypedValue* outValue,
+    /* [in] */ Boolean resolveRefs,
+    /* [in] */ Boolean supportComposedIcons)
+{
+    VALIDATE_NOT_NULL(outValue)
+
+    //Check if an icon was themed
+    AutoPtr<IPackageItemInfo> info;
+    if (mIcons != NULL) {
+        AutoPtr<IInterface> value;
+        mIcons->Get(id, (IInterface**)&value);
+        info = IPackageItemInfo::Probe(value);
+    }
+    Int32 themedIcon;
+    if (info != NULL && (info->GetThemedIcon(&themedIcon), themedIcon != 0)) {
+        id = themedIcon;
+    }
+
+    Boolean result;
     if (mAssets->GetResourceValue(id, 0, outValue, resolveRefs)) {
+        if (supportComposedIcons && (IconPackHelper::ShouldComposeIcon(mComposedIconInfo, &result), result)
+                && info != NULL && (info->GetThemedIcon(&themedIcon), themedIcon == 0)) {
+            AutoPtr<IDrawable> dr;
+            LoadDrawable(outValue, id, NULL, (IDrawable**)&dr);
+            IconPackHelper::IconCustomizer::GetValue((IResources*)this, id, outValue, dr);
+        }
         return NOERROR;
     }
     Logger::E(TAG, "Resource ID #0x%08x", id);
@@ -1339,7 +1423,59 @@ ECode CResources::GetValueForDensity(
     /* [in] */ ITypedValue* outValue,
     /* [in] */ Boolean resolveRefs)
 {
+    return GetValueForDensity(id, density, outValue, resolveRefs, TRUE);
+}
+
+ECode CResources::GetValueForDensity(
+    /* [in] */ Int32 id,
+    /* [in] */ Int32 density,
+    /* [in] */ ITypedValue* outValue,
+    /* [in] */ Boolean supportComposedIcons,
+    /* [in] */ Boolean resolveRefs)
+{
+    //Check if an icon was themed
+    AutoPtr<IPackageItemInfo> info;
+    if (mIcons != NULL) {
+        AutoPtr<IInterface> value;
+        mIcons->Get(id, (IInterface**)&value);
+        info = IPackageItemInfo::Probe(value);
+    }
+    Int32 themedIcon;
+    if (info != NULL && (info->GetThemedIcon(&themedIcon), themedIcon != 0)) {
+        id = themedIcon;
+    }
+
     if (mAssets->GetResourceValue(id, density, outValue, resolveRefs)) {
+        Boolean result;
+        if (supportComposedIcons && (IconPackHelper::ShouldComposeIcon(mComposedIconInfo, &result), result) &&
+                info != NULL && (info->GetThemedIcon(&themedIcon), themedIcon == 0)) {
+            Int32 outDensity;
+            outValue->GetDensity(&outDensity);
+            Int32 tmpDensity = outDensity;
+            /*
+             * Pretend the requested density is actually the display density. If
+             * the drawable returned is not the requested density, then force it
+             * to be scaled later by dividing its density by the ratio of
+             * requested density to actual device density. Drawables that have
+             * undefined density or no density don't need to be handled here.
+             */
+            if ((outValue->GetDensity(&outDensity), outDensity > 0) && outDensity != ITypedValue::DENSITY_NONE) {
+                if (outDensity == density) {
+                    outValue->SetDensity(mMetrics->mDensityDpi);
+                }
+                else {
+                    outValue->SetDensity((outDensity * mMetrics->mDensityDpi) / density);
+                }
+            }
+            AutoPtr<IDrawable> dr;
+            LoadDrawable(outValue, id, NULL, (IDrawable**)&dr);
+
+            // Return to original density. If we do not do this then
+            // the caller will get the wrong density for the given id and perform
+            // more of its own scaling in loadDrawable
+            outValue->SetDensity(tmpDensity);
+            IconPackHelper::IconCustomizer::GetValue(this, id, outValue, dr);
+        }
         return NOERROR;
     }
     Logger::E(TAG, "Resource ID #0x%08x", id);
@@ -1463,7 +1599,16 @@ ECode CResources::UpdateConfiguration(
                 mTmpConfig->SetLayoutDirection(mTmpConfig->mLocale);
             }
             mConfiguration->UpdateFrom(mTmpConfig, &configChanges);
-            configChanges = CActivityInfo::ActivityInfoConfigToNative(configChanges);
+
+            /* This is ugly, but modifying the activityInfoConfigToNative
+             * adapter would be messier */
+            if ((configChanges & IActivityInfo::CONFIG_THEME_RESOURCE) != 0) {
+                configChanges = CActivityInfo::ActivityInfoConfigToNative(configChanges);
+                configChanges |= IActivityInfo::CONFIG_THEME_RESOURCE;
+            }
+            else {
+                configChanges = CActivityInfo::ActivityInfoConfigToNative(configChanges);
+            }
         }
         if (mConfiguration->mLocale == NULL) {
             AutoPtr<ILocaleHelper> helper;
@@ -1551,6 +1696,19 @@ void CResources::ClearDrawableCacheLocked(
     /* [in] */ IInt64SparseArray* cache,
     /* [in] */ Int32 configChanges)
 {
+    /*
+     * Quick test to find out if the config change that occurred should
+     * trigger a full cache wipe.
+     */
+    if (CConfiguration::NeedNewResources(configChanges, 0)) {
+        if (DEBUG_CONFIG) {
+            Logger::D(TAG, "Clear drawable cache from config changes: 0x%s",
+                    StringUtils::ToHexString(configChanges).string());
+        }
+        cache->Clear();
+        return;
+    }
+
     if (DEBUG_CONFIG) {
         Logger::D(TAG, "Cleaning up drawables config changes: 0x%08x", configChanges);
     }
@@ -1966,6 +2124,14 @@ Boolean CResources::VerifyPreloadConfig(
     return TRUE;
 }
 
+ECode CResources::UpdateStringCache()
+{
+    synchronized (mAccessLock) {
+        mAssets->RecreateStringBlocks();
+    }
+    return NOERROR;
+}
+
 ECode CResources::LoadDrawable(
     /* [in] */ ITypedValue* typedValue,
     /* [in] */ Int32 id,
@@ -2017,16 +2183,22 @@ ECode CResources::LoadDrawable(
     // themeable attributes.
     AutoPtr<IWeakReference> wr;
     if (isColorDrawable) {
-        AutoPtr<IInterface> value;
-        sPreloadedColorDrawables->Get(key, (IInterface**)&value);
-        wr = IWeakReference::Probe(value);
+        Boolean hasThemedAssets;
+        if (mAssets->HasThemedAssets(&hasThemedAssets), !hasThemedAssets) {
+            AutoPtr<IInterface> value;
+            sPreloadedColorDrawables->Get(key, (IInterface**)&value);
+            wr = IWeakReference::Probe(value);
+        }
     }
     else {
-        Int32 direction;
-        mConfiguration->GetLayoutDirection(&direction);
-        AutoPtr<IInterface> value;
-        (*sPreloadedDrawables)[direction]->Get(key, (IInterface**)&value);
-        wr = IWeakReference::Probe(value);
+        Boolean hasThemedAssets;
+        if (mAssets->HasThemedAssets(&hasThemedAssets), !hasThemedAssets) {
+            Int32 direction;
+            mConfiguration->GetLayoutDirection(&direction);
+            AutoPtr<IInterface> value;
+            (*sPreloadedDrawables)[direction]->Get(key, (IInterface**)&value);
+            wr = IWeakReference::Probe(value);
+        }
     }
 
     AutoPtr<IDrawableConstantState> cs;
@@ -2285,11 +2457,14 @@ ECode CResources::LoadColorStateList(
     Int32 type;
     value->GetType(&type);
     if (type >= ITypedValue::TYPE_FIRST_COLOR_INT && type <= ITypedValue::TYPE_LAST_COLOR_INT) {
-        ColorStateIterator it = sPreloadedColorStateLists.Find(key);
-        if (it != sPreloadedColorStateLists.End()) {
-            AutoPtr<IWeakReference> wr = it->mSecond;
-            if (wr) {
-                wr->Resolve(EIID_IColorStateList, (IInterface**)&csl);
+        Boolean hasThemedAssets;
+        if (mAssets->HasThemedAssets(&hasThemedAssets), !hasThemedAssets) {
+            ColorStateIterator it = sPreloadedColorStateLists.Find(key);
+            if (it != sPreloadedColorStateLists.End()) {
+                AutoPtr<IWeakReference> wr = it->mSecond;
+                if (wr) {
+                    wr->Resolve(EIID_IColorStateList, (IInterface**)&csl);
+                }
             }
         }
 
@@ -2324,14 +2499,16 @@ ECode CResources::LoadColorStateList(
         return NOERROR;
     }
 
-    ColorStateIterator it = sPreloadedColorStateLists.Find(key);
-    if (it != sPreloadedColorStateLists.End()) {
-        AutoPtr<IWeakReference> wr = it->mSecond;
-        if (wr) {
-            wr->Resolve(EIID_IColorStateList, (IInterface**)&csl);
+    Boolean hasThemedAssets;
+    if (mAssets->HasThemedAssets(&hasThemedAssets), !hasThemedAssets) {
+        ColorStateIterator it = sPreloadedColorStateLists.Find(key);
+        if (it != sPreloadedColorStateLists.End()) {
+            AutoPtr<IWeakReference> wr = it->mSecond;
+            if (wr) {
+                wr->Resolve(EIID_IColorStateList, (IInterface**)&csl);
+            }
         }
     }
-
     if (csl != NULL) {
         *stateList = csl;
         REFCOUNT_ADD(*stateList)
@@ -2554,32 +2731,26 @@ ECode CResources::RecycleCachedStyledAttributes(
     return NOERROR;
 }
 
-ECode CResources::UpdateStringCache()
-{
-    assert(0);
-    return NOERROR;
-}
-
-/** @hide */
 ECode CResources::SetIconResources(
     /* [in] */ ISparseArray* icons)
 {
-    assert(0);
+    mIcons = icons;
     return NOERROR;
 }
 
-/** @hide */
 ECode CResources::SetComposedIconInfo(
     /* [in] */ IComposedIconInfo* iconInfo)
 {
-    assert(0);
+    mComposedIconInfo = iconInfo;
     return NOERROR;
 }
 
 ECode CResources::GetComposedIconInfo(
     /* [out] */ IComposedIconInfo** iconInfo)
 {
-    assert(0);
+    VALIDATE_NOT_NULL(iconInfo)
+    *iconInfo = mComposedIconInfo;
+    REFCOUNT_ADD(*iconInfo)
     return NOERROR;
 }
 

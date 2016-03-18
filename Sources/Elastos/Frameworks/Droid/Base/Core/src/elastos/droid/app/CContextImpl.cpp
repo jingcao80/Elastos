@@ -500,6 +500,12 @@ ECode CContextImpl::GetTheme(
     return NOERROR;
 }
 
+ECode CContextImpl::RecreateTheme()
+{
+    assert(0);
+    return NOERROR;
+}
+
 ECode CContextImpl::ObtainStyledAttributes(
     /* [in] */ ArrayOf<Int32>* attrs,
     /* [out] */ ITypedArray** styles)
@@ -3299,6 +3305,15 @@ ECode CContextImpl::CreateApplicationContext(
     /* [in] */ Int32 flags,
     /* [out] */ IContext** ctx)
 {
+    return CreateApplicationContext(application, String(NULL), flags, ctx);
+}
+
+ECode CContextImpl::CreateApplicationContext(
+    /* [in] */ IApplicationInfo* application,
+    /* [in] */ const String& themePackageName,
+    /* [in] */ Int32 flags,
+    /* [out] */ IContext** ctx)
+{
     VALIDATE_NOT_NULL(ctx);
     *ctx = NULL;
     AutoPtr<ICompatibilityInfo> ci;
@@ -3316,7 +3331,7 @@ ECode CContextImpl::CreateApplicationContext(
         AutoPtr<IContextImpl> c;
         CContextImpl::New(this, mMainThread, pi, mActivityToken,
             uh, restricted,
-            mDisplay, mOverrideConfiguration, (IContextImpl**)&c);
+            mDisplay, mOverrideConfiguration, themePackageName, (IContextImpl**)&c);
         if (((CContextImpl*)c.Get())->mResources != NULL) {
             *ctx = IContext::Probe(c);
             REFCOUNT_ADD(*ctx)
@@ -3327,7 +3342,7 @@ ECode CContextImpl::CreateApplicationContext(
     String pkgName;
     IPackageItemInfo::Probe(application)->GetPackageName(&pkgName);
     Logger::E(TAG, "NameNotFoundException: Application package %s not found", pkgName.string());
-    return E_NAME_NOT_FOUND_EXCEPTION;;
+    return E_NAME_NOT_FOUND_EXCEPTION;
 }
 
 ECode CContextImpl::CreatePackageContext(
@@ -3337,12 +3352,22 @@ ECode CContextImpl::CreatePackageContext(
 {
     AutoPtr<IUserHandle> userHandle;
     Process::MyUserHandle((IUserHandle**)&userHandle);
-    return CreatePackageContextAsUser(packageName, flags,
+    return CreatePackageContextAsUser(packageName, String(NULL), flags,
             mUser != NULL ? mUser : userHandle, ctx);
 }
 
 ECode CContextImpl::CreatePackageContextAsUser(
     /* [in] */ const String& packageName,
+    /* [in] */ Int32 flags,
+    /* [in] */ IUserHandle* user,
+    /* [out] */ IContext** ctx)
+{
+    return CreatePackageContextAsUser(packageName, String(NULL), flags, user, ctx);
+}
+
+ECode CContextImpl::CreatePackageContextAsUser(
+    /* [in] */ const String& packageName,
+    /* [in] */ const String& themePackageName,
     /* [in] */ Int32 flags,
     /* [in] */ IUserHandle* user,
     /* [out] */ IContext** ctx)
@@ -3354,7 +3379,7 @@ ECode CContextImpl::CreatePackageContextAsUser(
     if (packageName.Equals("system") || packageName.Equals("android")) {
         AutoPtr<IContextImpl> c;
         CContextImpl::New(this, mMainThread, mPackageInfo, mActivityToken,
-            user, restricted, mDisplay, mOverrideConfiguration, (IContextImpl**)&c);
+            user, restricted, mDisplay, mOverrideConfiguration, themePackageName, (IContextImpl**)&c);
         *ctx = IContext::Probe(c);
         REFCOUNT_ADD(*ctx)
         return NOERROR;
@@ -3370,7 +3395,7 @@ ECode CContextImpl::CreatePackageContextAsUser(
     if (pi != NULL) {
         AutoPtr<IContextImpl> c;
         CContextImpl::New(this, mMainThread, pi, mActivityToken,
-            user, restricted, mDisplay, mOverrideConfiguration, (IContextImpl**)&c);
+            user, restricted, mDisplay, mOverrideConfiguration, themePackageName, (IContextImpl**)&c);
         if (((CContextImpl*)c.Get())->mResources != NULL) {
             *ctx = IContext::Probe(c);
             REFCOUNT_ADD(*ctx)
@@ -3384,7 +3409,6 @@ ECode CContextImpl::CreatePackageContextAsUser(
         packageName.string());
 
     return E_NAME_NOT_FOUND_EXCEPTION;
-
 }
 
 ECode CContextImpl::CreateConfigurationContext(
@@ -3401,7 +3425,7 @@ ECode CContextImpl::CreateConfigurationContext(
 
     AutoPtr<IContextImpl> c;
     CContextImpl::New(this, mMainThread, mPackageInfo, mActivityToken,
-        mUser, mRestricted, mDisplay, overrideConfiguration, (IContextImpl**)&c);
+        mUser, mRestricted, mDisplay, overrideConfiguration, String(NULL), (IContextImpl**)&c);
 
     *ctx = IContext::Probe(c);
     REFCOUNT_ADD(*ctx);
@@ -3422,7 +3446,7 @@ ECode CContextImpl::CreateDisplayContext(
 
     AutoPtr<IContextImpl> c;
     CContextImpl::New(this, mMainThread, mPackageInfo, mActivityToken,
-        mUser, mRestricted, display, mOverrideConfiguration, (IContextImpl**)&c);
+        mUser, mRestricted, display, mOverrideConfiguration, String(NULL), (IContextImpl**)&c);
 
     *ctx = IContext::Probe(c);
     REFCOUNT_ADD(*ctx);
@@ -3467,7 +3491,7 @@ AutoPtr<CContextImpl> CContextImpl::CreateSystemContext(
 
     AutoPtr<CContextImpl> ci;
     CContextImpl::NewByFriend(NULL, mainThread,
-        (ILoadedPkg*)packageInfo.Get(), NULL, NULL, FALSE, NULL, NULL, (CContextImpl**)&ci);
+        (ILoadedPkg*)packageInfo.Get(), NULL, NULL, FALSE, NULL, NULL, String(NULL), (CContextImpl**)&ci);
 
     AutoPtr<IConfiguration> config;
     ci->mResourcesManager->GetConfiguration((IConfiguration**)&config);
@@ -3491,7 +3515,7 @@ ECode CContextImpl::CreateAppContext(
 
     AutoPtr<IContextImpl> c;
     CContextImpl::New(NULL, mainThread,
-        packageInfo, NULL, NULL, FALSE, NULL, NULL, (IContextImpl**)&c);
+        packageInfo, NULL, NULL, FALSE, NULL, NULL, String(NULL), (IContextImpl**)&c);
     *result = c;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -3512,7 +3536,7 @@ ECode CContextImpl::CreateActivityContext(
 
     AutoPtr<IContextImpl> c;
     CContextImpl::New(NULL, mainThread,
-        packageInfo, activityToken, NULL, FALSE, NULL, NULL, (IContextImpl**)&c);
+        packageInfo, activityToken, NULL, FALSE, NULL, NULL, String(NULL), (IContextImpl**)&c);
     *result = c;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -3526,7 +3550,8 @@ ECode CContextImpl::constructor(
     /* [in] */ IUserHandle* user,
     /* [in] */ Boolean restricted,
     /* [in] */ IDisplay* display,
-    /* [in] */ IConfiguration* overrideConfiguration)
+    /* [in] */ IConfiguration* overrideConfiguration,
+    /* [in] */ const String& themePackageName)
 {
     assert(mainThread != NULL);
 
@@ -3563,7 +3588,7 @@ ECode CContextImpl::constructor(
     AutoPtr<IResources> resources;
     mPackageInfo->GetResources(mainThread, (IResources**)&resources);
     if (resources != NULL) {
-        Boolean get = (activityToken != NULL
+        Boolean get = (activityToken != NULL || !themePackageName.IsNull()
             || displayId != IDisplay::DEFAULT_DISPLAY
             || overrideConfiguration != NULL);
         if (!get && compatInfo != NULL) {
@@ -3576,18 +3601,34 @@ ECode CContextImpl::constructor(
             get = as != cs;
         }
         if (get) {
-            String resDir;
-            mPackageInfo->GetResDir(&resDir);
-            AutoPtr< ArrayOf<String> > splitResDirs, overlayDirs, sharedLibraryFiles;
-            mPackageInfo->GetSplitResDirs((ArrayOf<String>**)&splitResDirs);
-            mPackageInfo->GetOverlayDirs((ArrayOf<String>**)&overlayDirs);
-            AutoPtr<IApplicationInfo> ai;
-            mPackageInfo->GetApplicationInfo((IApplicationInfo**)&ai);
-            ai->GetSharedLibraryFiles((ArrayOf<String>**)&sharedLibraryFiles);
-            mResourcesManager->GetTopLevelResources(
-                resDir, splitResDirs, overlayDirs, sharedLibraryFiles, displayId, String(NULL),
-                overrideConfiguration, compatInfo, activityToken, NULL,
-                (IResources**)&resources);
+            if (themePackageName.IsNull()) {
+                String resDir;
+                mPackageInfo->GetResDir(&resDir);
+                AutoPtr< ArrayOf<String> > splitResDirs, overlayDirs, sharedLibraryFiles;
+                mPackageInfo->GetSplitResDirs((ArrayOf<String>**)&splitResDirs);
+                mPackageInfo->GetOverlayDirs((ArrayOf<String>**)&overlayDirs);
+                AutoPtr<IApplicationInfo> ai;
+                mPackageInfo->GetApplicationInfo((IApplicationInfo**)&ai);
+                ai->GetSharedLibraryFiles((ArrayOf<String>**)&sharedLibraryFiles);
+                String appDir;
+                mPackageInfo->GetAppDir(&appDir);
+                AutoPtr<IContext> ctx;
+                if (mOuterContext != NULL) {
+                    mOuterContext->Resolve(EIID_IContext, (IInterface**)&ctx);
+                }
+                mResourcesManager->GetTopLevelResources(
+                    resDir, splitResDirs, overlayDirs, sharedLibraryFiles, displayId,
+                    appDir, overrideConfiguration, compatInfo, activityToken,
+                    ctx, (IResources**)&resources);
+            }
+            else {
+                String resDir;
+                mPackageInfo->GetResDir(&resDir);
+                String packageName;
+                mPackageInfo->GetPackageName(&packageName);
+                mResourcesManager->GetTopLevelThemedResources(resDir, displayId,
+                        packageName, themePackageName, compatInfo ,activityToken, (IResources**)&resources);
+            }
         }
     }
     mResources = resources;

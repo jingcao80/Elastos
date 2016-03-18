@@ -4,8 +4,9 @@
 
 #include "_Elastos_Droid_Content_Res_CThemeConfigBuilder.h"
 #include <elastos/core/Object.h>
+#include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Core::Object;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -39,8 +40,29 @@ public:
     CARAPI DefaultIcon(
         /* [in] */ const String& themePkgName);
 
+    CARAPI Icon(
+        /* [in] */ const String&appPkgName,
+        /* [in] */ const String&themePkgName);
+
+    CARAPI Overlay(
+        /* [in] */ const String&appPkgName,
+        /* [in] */ const String&themePkgName);
+
+    CARAPI Font(
+        /* [in] */ const String&appPkgName,
+        /* [in] */ const String&themePkgName);
+
+    CARAPI SetLastThemeChangeRequestType(
+        /* [in] */ RequestType requestType);
+
     CARAPI Build(
         /* [out] */ IThemeConfig** themeConfig);
+
+private:
+    HashMap<String, String> mOverlays;
+    HashMap<String, String> mIcons;
+    HashMap<String, String> mFonts;
+    RequestType mLastThemeChangeRequestType;
 };
 
 } // namespace Res

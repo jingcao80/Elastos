@@ -11,6 +11,7 @@ module
     interface Elastos.Droid.Utility.ISparseArray;
     interface Elastos.Droid.Utility.ITypedValue;
     interface Elastos.Droid.Utility.IInt64SparseArray;
+    interface Elastos.Droid.Utility.ISparseArray;
     interface Elastos.Droid.Graphics.Drawable.IDrawable;
     interface Elastos.Droid.Graphics.IMovie;
     interface Elastos.Droid.Content.Res.IColorStateList;
@@ -990,6 +991,13 @@ module
             [in] ITypedValue* outValue,
             [in] Boolean resolveRefs);
 
+        /** @hide */
+        GetValue(
+            [in] Int32 id,
+            [in] ITypedValue* outValue,
+            [in] Boolean resolveRefs,
+            [in] Boolean supportComposedIcons);
+
         /**
         * Get the raw value associated with a resource with associated density.
         *
@@ -1320,7 +1328,6 @@ module
         /** @hide */
         UpdateStringCache();
 
-        /** @hide */
         SetIconResources(
             [in] ISparseArray* icons);
 
@@ -1331,6 +1338,7 @@ module
         /** @hide */
         GetComposedIconInfo(
             [out] IComposedIconInfo** iconInfo);
+
     }
 
     interface IResourcesHelper {

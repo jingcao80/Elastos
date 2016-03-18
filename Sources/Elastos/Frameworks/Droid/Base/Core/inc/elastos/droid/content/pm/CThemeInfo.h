@@ -23,6 +23,8 @@ public:
 
     CARAPI constructor(
         /* [in] */ IBundle* bundle);
+
+    CARAPI constructor();
 };
 
 } // namespace Pm

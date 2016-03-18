@@ -313,17 +313,17 @@ ECode PackageItemInfo::SetIcon(
 }
 
 ECode PackageItemInfo::GetThemedIcon(
-    /* [out] */ Int32* themedIcon)
+    /* [out] */ Int32* themeIcon)
 {
-    VALIDATE_NOT_NULL(themedIcon)
-    *themedIcon = mThemedIcon;
+    VALIDATE_NOT_NULL(themeIcon)
+    *themeIcon = mThemedIcon;
     return NOERROR;
 }
 
 ECode PackageItemInfo::SetThemedIcon(
-    /* [in] */ Int32 themedIcon)
+    /* [in] */ Int32 themeIcon)
 {
-    mThemedIcon = themedIcon;
+    mThemedIcon = themeIcon;
     return NOERROR;
 }
 
