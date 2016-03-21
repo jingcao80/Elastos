@@ -32,7 +32,9 @@ ECode ServiceThread::Run()
     CStrictMode::AcquireSingleton((IStrictMode**)&strictMode);
     Boolean bval;
     if (!mAllowIo && (strictMode->ConditionallyEnableDebugLogging(&bval), bval)) {
-        Slogger::I(TAG, "Enabled StrictMode logging for %s looper.");
+        String name;
+        GetName(&name);
+        Slogger::I(TAG, "Enabled StrictMode logging for %s looper.", name.string());
     }
 
     return HandlerThread::Run();
