@@ -80,11 +80,9 @@ public:
 
         static CARAPI_(AutoPtr<IRandom>) Init_sRandom();
 
-        static CARAPI_(AutoPtr<IIThemeService>) Init_sThemeService();
-
     private:
         static const AutoPtr<IRandom> sRandom;
-        static const AutoPtr<IIThemeService> sThemeService;
+        static AutoPtr<IIThemeService> sThemeService;
     };
 
     class ColorFilterUtils
