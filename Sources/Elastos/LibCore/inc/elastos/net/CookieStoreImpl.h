@@ -4,12 +4,9 @@
 
 #include "Elastos.CoreLibrary.Net.h"
 #include "Object.h"
-#include <elastos/utility/etl/List.h>
-#include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Utility::IList;
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::IMap;
 
 using Elastos::Net::IURI;
 
@@ -25,6 +22,7 @@ class CookieStoreImpl
 public:
     CAR_INTERFACE_DECL()
 
+    CookieStoreImpl();
     ~CookieStoreImpl();
 
     CARAPI Add(
@@ -55,7 +53,7 @@ private:
 
 private:
     /** this map may have null keys! */
-    HashMap<AutoPtr<IURI>, AutoPtr<List<AutoPtr<IHttpCookie> > > > mMap;
+    AutoPtr<IMap> mMap;
 };
 
 } // namespace Net
