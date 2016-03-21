@@ -26,6 +26,9 @@ ECode MatchResultImpl::End(
     /* [out] */ Int32* index)
 {
     VALIDATE_NOT_NULL(index);
+
+    if ((mOffsets->GetLength() / 2 - 1) < group) return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+
     *index = (*mOffsets)[2 * group + 1];
     return NOERROR;
 }
@@ -70,6 +73,9 @@ ECode MatchResultImpl::Start(
     /* [out] */ Int32* index)
 {
     VALIDATE_NOT_NULL(index);
+
+    if ((mOffsets->GetLength() / 2 - 1) < group) return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+
     *index = (*mOffsets)[2 * group];
     return NOERROR;
 }

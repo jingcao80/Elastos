@@ -1836,7 +1836,7 @@ ECode CTreeMap::BoundedMap::BoundedEntrySet::GetIterator(
 {
     VALIDATE_NOT_NULL(outiter)
 
-    *outiter = new BoundedEntrySetIterator(mHost->Endpoint(FALSE), mHost);
+    *outiter = new BoundedEntrySetIterator(mHost->Endpoint(TRUE), mHost);
     REFCOUNT_ADD(*outiter);
     return NOERROR;
 }

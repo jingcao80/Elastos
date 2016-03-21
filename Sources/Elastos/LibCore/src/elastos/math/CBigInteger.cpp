@@ -195,7 +195,7 @@ ECode CBigInteger::constructor(
             return E_NUMBER_FORMAT_EXCEPTION;
         }
 
-        CBigInteger::ParseFromString(*this, value, radix);
+        FAIL_RETURN(CBigInteger::ParseFromString(*this, value, radix));
     }
 
     return NOERROR;
@@ -1191,7 +1191,7 @@ Int32 CBigInteger::InplaceAdd(
 }
 
 /** @see BigInteger#BigInteger(String, Int32) */
-void CBigInteger::ParseFromString(
+ECode CBigInteger::ParseFromString(
     /* [in] */ CBigInteger& bi,
     /* [in] */ const String& value,
     /* [in] */ Int32 radix)
@@ -1238,13 +1238,16 @@ void CBigInteger::ParseFromString(
             substrStart < endChar;
             substrStart = substrEnd, substrEnd = substrStart + charsPerInt) {
         String subStr(value.Substring(substrStart, substrEnd));
-        Int32 bigRadixDigit = StringUtils::ParseInt32(subStr, radix);
+        Int32 bigRadixDigit;
+        FAIL_RETURN(StringUtils::Parse(subStr, radix, &bigRadixDigit));
         Int32 newDigit = MultiplyByInt(*digits, *digits, digitIndex, bigRadix);
         newDigit += InplaceAdd(*digits, digitIndex, bigRadixDigit);
         (*digits)[digitIndex++] = newDigit;
     }
     Int32 numberLength = digitIndex;
     bi.SetJavaRepresentation(sign, numberLength, *digits);
+
+    return NOERROR;
 }
 
 ECode CBigInteger::ToString(
