@@ -1,6 +1,7 @@
 
 #include "elastos/droid/server/am/CoreSettingsObserver.h"
 #include "elastos/droid/server/am/CActivityManagerService.h"
+#include <elastos/droid/provider/Settings.h>
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
 #include <elastos/core/AutoLock.h>
@@ -8,9 +9,7 @@
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Os::CBundle;
-using Elastos::Droid::Provider::CSettingsGlobal;
-using Elastos::Droid::Provider::CSettingsSecure;
-using Elastos::Droid::Provider::CSettingsSystem;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::ISettingsSystem;
@@ -22,7 +21,7 @@ namespace Droid {
 namespace Server {
 namespace Am {
 
-const String CoreSettingsObserver::TAG("CoreSettingsObserver"); // = CoreSettingsObserver.class.getSimpleName();
+const String CoreSettingsObserver::TAG("CoreSettingsObserver");
 
 // mapping form property name to its type
 HashMap<String, String> CoreSettingsObserver::sSecureSettingToTypeMap;
@@ -44,14 +43,21 @@ Boolean CoreSettingsObserver::Init()
 
 Boolean sInit = CoreSettingsObserver::Init();
 
-CoreSettingsObserver::CoreSettingsObserver(
+CoreSettingsObserver::CoreSettingsObserver()
+{
+}
+
+ECode CoreSettingsObserver::constructor(
     /* [in] */ CActivityManagerService* activityManagerService)
-    : mActivityManagerService(activityManagerService)
 {
     ContentObserver::constructor(activityManagerService->mHandler);
+    mActivityManagerService = activityManagerService;
+
     CBundle::New((IBundle**)&mCoreSettings);
+    assert(mCoreSettings != NULL);
     BeginObserveCoreSettings();
     SendCoreSettings();
+    return NOERROR;
 }
 
 AutoPtr<IBundle> CoreSettingsObserver::GetCoreSettingsLocked()
@@ -80,29 +86,24 @@ void CoreSettingsObserver::SendCoreSettings()
 
 void CoreSettingsObserver::BeginObserveCoreSettings()
 {
-    AutoPtr<ISettingsSecure> settingsSecure;
-    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
     AutoPtr<IContentResolver> resolver;
     mActivityManagerService->mContext->GetContentResolver((IContentResolver**)&resolver);
     HashMap<String, String>::Iterator it;
     for (it = sSecureSettingToTypeMap.Begin(); it != sSecureSettingToTypeMap.End(); ++it) {
-        String setting = it->mFirst;
         AutoPtr<IUri> uri;
-        settingsSecure->GetUriFor(setting, (IUri**)&uri);
+        Settings::Secure::GetUriFor(it->mFirst, (IUri**)&uri);
         resolver->RegisterContentObserver(uri, FALSE, this);
     }
 
     for (it = sSystemSettingToTypeMap.Begin(); it != sSystemSettingToTypeMap.End(); ++it) {
-        String setting = it->mFirst;
         AutoPtr<IUri> uri;
-        settingsSecure->GetUriFor(setting, (IUri**)&uri);
+        Settings::System::GetUriFor(it->mFirst, (IUri**)&uri);
         resolver->RegisterContentObserver(uri, FALSE, this);
     }
 
     for (it = sGlobalSettingToTypeMap.Begin(); it != sGlobalSettingToTypeMap.End(); ++it) {
-        String setting = it->mFirst;
         AutoPtr<IUri> uri;
-        settingsSecure->GetUriFor(setting, (IUri**)&uri);
+        Settings::Global::GetUriFor(it->mFirst, (IUri**)&uri);
         resolver->RegisterContentObserver(uri, FALSE, this);
     }
 }
@@ -112,13 +113,6 @@ void CoreSettingsObserver::PopulateSettings(
     /* [in] */ HashMap<String, String>* map)
 {
     AutoPtr<IContext> context = mActivityManagerService->mContext;
-    AutoPtr<ISettingsSecure> settingsSecure;
-    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
-    AutoPtr<ISettingsSystem> settingsSystem;
-    CSettingsSystem::AcquireSingleton((ISettingsSystem**)&settingsSystem);
-    AutoPtr<ISettingsGlobal> settingsGlobal;
-    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);
-
     AutoPtr<IContentResolver> resolver;
     context->GetContentResolver((IContentResolver**)&resolver);
     HashMap<String, String>::Iterator it;
@@ -131,13 +125,13 @@ void CoreSettingsObserver::PopulateSettings(
             if (type.Equals("String")) {
                 String value;
                 if (map == &sSecureSettingToTypeMap) {
-                    ec = settingsSecure->GetString(resolver, setting, &value);
+                    ec = Settings::Secure::GetString(resolver, setting, &value);
                 }
                 else if (map == &sSystemSettingToTypeMap) {
-                    ec = settingsSystem->GetString(resolver, setting, &value);
+                    ec = Settings::System::GetString(resolver, setting, &value);
                 }
                 else {
-                    ec = settingsGlobal->GetString(resolver, setting, &value);
+                    ec = Settings::Global::GetString(resolver, setting, &value);
                 }
                 if (FAILED(ec))
                     break;
@@ -146,13 +140,13 @@ void CoreSettingsObserver::PopulateSettings(
             else if (type.Equals("Int32")) {
                 Int32 value;
                 if (map == &sSecureSettingToTypeMap) {
-                    ec = settingsSecure->GetInt32(resolver, setting, &value);
+                    ec = Settings::Secure::GetInt32(resolver, setting, &value);
                 }
                 else if (map == &sSystemSettingToTypeMap) {
-                    ec = settingsSystem->GetInt32(resolver, setting, &value);
+                    ec = Settings::System::GetInt32(resolver, setting, &value);
                 }
                 else {
-                    ec = settingsGlobal->GetInt32(resolver, setting, &value);
+                    ec = Settings::Global::GetInt32(resolver, setting, &value);
                 }
                 if (FAILED(ec))
                     break;
@@ -161,13 +155,13 @@ void CoreSettingsObserver::PopulateSettings(
             else if (type.Equals("Float")) {
                 Float value;
                 if (map == &sSecureSettingToTypeMap) {
-                    ec = settingsSecure->GetFloat(resolver, setting, &value);
+                    ec = Settings::Secure::GetFloat(resolver, setting, &value);
                 }
                 else if (map == &sSystemSettingToTypeMap) {
-                    ec = settingsSystem->GetFloat(resolver, setting, &value);
+                    ec = Settings::System::GetFloat(resolver, setting, &value);
                 }
                 else {
-                    ec = settingsGlobal->GetFloat(resolver, setting, &value);
+                    ec = Settings::Global::GetFloat(resolver, setting, &value);
                 }
                 if (FAILED(ec))
                     break;
@@ -176,13 +170,13 @@ void CoreSettingsObserver::PopulateSettings(
             else if (type.Equals("Int64")) {
                 Int64 value;
                 if (map == &sSecureSettingToTypeMap) {
-                    ec = settingsSecure->GetInt64(resolver, setting, &value);
+                    ec = Settings::Secure::GetInt64(resolver, setting, &value);
                 }
                 else if (map == &sSystemSettingToTypeMap) {
-                    ec = settingsSystem->GetInt64(resolver, setting, &value);
+                    ec = Settings::System::GetInt64(resolver, setting, &value);
                 }
                 else {
-                    ec = settingsGlobal->GetInt64(resolver, setting, &value);
+                    ec = Settings::Global::GetInt64(resolver, setting, &value);
                 }
                 if (FAILED(ec))
                     break;

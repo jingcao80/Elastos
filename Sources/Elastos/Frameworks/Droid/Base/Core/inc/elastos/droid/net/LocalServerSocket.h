@@ -83,6 +83,9 @@ public:
      */
     CARAPI Close();
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 private:
     AutoPtr<LocalSocketImpl> mImpl;
     AutoPtr<ILocalSocketAddress> mLocalAddress;

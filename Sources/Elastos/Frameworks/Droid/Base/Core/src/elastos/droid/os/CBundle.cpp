@@ -114,8 +114,8 @@ ECode CBundle::Clone(
 {
     VALIDATE_NOT_NULL(obj)
     AutoPtr<IBundle> bundle;
-    CBundle::New(THIS_PROBE(IBundle), (IBundle**)&bundle);
-    *obj = bundle;
+    CBundle::New((IBundle*)this, (IBundle**)&bundle);
+    *obj = bundle.Get();
     REFCOUNT_ADD(*obj)
     return NOERROR;
 }
@@ -233,6 +233,7 @@ ECode CBundle::PutParcelable(
     /* [in] */ const String& key,
     /* [in] */ IParcelable* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     mMap->Put(keyObj.Get(), value);
@@ -244,6 +245,7 @@ ECode CBundle::PutSize(
     /* [in] */ const String& key,
     /* [in] */ ISize* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     mMap->Put(keyObj.Get(), value);
@@ -254,6 +256,7 @@ ECode CBundle::PutSizeF(
     /* [in] */ const String& key,
     /* [in] */ ISizeF* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     mMap->Put(keyObj.Get(), value);
@@ -264,6 +267,7 @@ ECode CBundle::PutParcelableArray(
     /* [in] */ const String& key,
     /* [in] */ ArrayOf<IParcelable*>* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IArrayOf> valueObj = CoreUtils::Convert(value);
@@ -276,6 +280,7 @@ ECode CBundle::PutParcelableArrayList(
     /* [in] */ const String& key,
     /* [in] */ IArrayList* value) //ArrayList<? extends Parcelable> value
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     mMap->Put(keyObj.Get(), value);
@@ -287,6 +292,7 @@ ECode CBundle::PutParcelableList(
     /* [in] */ const String& key,
     /* [in] */ IList* value)//List<? extends Parcelable> value
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     mMap->Put(keyObj.Get(), value);
@@ -298,6 +304,7 @@ ECode CBundle::PutSparseParcelableArray(
     /* [in] */ const String& key,
     /* [in] */ ISparseArray* value)//SparseArray<? extends Parcelable> value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     mMap->Put(keyObj.Get(), value);
@@ -309,6 +316,7 @@ ECode CBundle::PutBundle(
     /* [in] */ const String& key,
     /* [in] */ IBundle* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     mMap->Put(keyObj.Get(), value);
@@ -319,6 +327,7 @@ ECode CBundle::PutBinder(
     /* [in] */ const String& key,
     /* [in] */ IBinder* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     mMap->Put(keyObj.Get(), value);
@@ -329,6 +338,7 @@ ECode CBundle::PutIBinder(
     /* [in] */ const String& key,
     /* [in] */ IBinder* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     mMap->Put(keyObj.Get(), value);

@@ -613,7 +613,7 @@ ECode CInterfaceProxy::ProxyEntry(
             _DumpGUID(thisPtr->mInfo->mIID);
         }
 
-        ALOGD(" >>> Method index(%d), args size(%d)\n", methodIndex + 4, argNum * 4);
+        ALOGD(" >>> Method index(%d), args size(%d)\n", methodIndex, argNum * 4);
         ALOGD(" >>> Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize);
 
         assert(0);

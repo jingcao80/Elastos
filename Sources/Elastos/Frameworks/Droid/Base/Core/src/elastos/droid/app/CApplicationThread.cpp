@@ -48,6 +48,7 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
+static const String TAG("CApplicationThread");
 const String CApplicationThread::ONE_COUNT_COLUMN("%21s %8d");
 const String CApplicationThread::TWO_COUNT_COLUMNS("%21s %8d %21s %8d");
 const String CApplicationThread::DB_INFO_FORMAT("  %8s %8s %14s %14s  %s");
@@ -342,6 +343,7 @@ ECode CApplicationThread::BindApplication(
     /* [in] */ IMap* services,
     /* [in] */ IBundle* coreSettings)
 {
+    Slogger::I(TAG, " >> BindApplication %s", processName.string());
     if (services != NULL) {
         // Setup the service cache in the ServiceManager
         AutoPtr<CServiceManager> serviceManager;

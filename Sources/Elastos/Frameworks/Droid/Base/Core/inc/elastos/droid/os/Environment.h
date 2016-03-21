@@ -106,6 +106,9 @@ public:
 
 public:
 
+    /** {@hide} */
+    static CARAPI InitForCurrentUser();
+
     /**
      * Return root of the "system" partition holding the core Android OS.
      * Always present and mounted read-only.

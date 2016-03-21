@@ -547,9 +547,9 @@ ECode SystemServer::StartOtherServices()
             mFactoryTestMode == FactoryTest::FACTORY_TEST_LOW_LEVEL);
     contentService = (CContentService*)cs.Get();
 
-    Slogger::I(TAG, "System Content Providers todo");
-    // ec = mActivityManagerService->InstallSystemProviders();
-    // if (FAILED(ec)) Slogger::E(TAG, "failed to isntall System Content Providers");
+    Slogger::I(TAG, "System Content Providers");
+    ec = mActivityManagerService->InstallSystemProviders();
+    if (FAILED(ec)) Slogger::E(TAG, "failed to isntall System Content Providers");
 
     Slogger::I(TAG, "Vibrator Service");
     AutoPtr<IIVibratorService> vs;

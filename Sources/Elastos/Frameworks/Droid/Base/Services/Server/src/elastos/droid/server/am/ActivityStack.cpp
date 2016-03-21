@@ -85,10 +85,9 @@ static const String TAG("ActivityStack");
 ActivityStack::ScheduleDestroyArgs::ScheduleDestroyArgs(
     /* [in] */ ProcessRecord* owner,
     /* [in] */ const String& reason)
+    : mOwner(owner)
+    , mReason(reason)
 {
-    // ==================before translated======================
-    // mOwner = owner;
-    // mReason = reason;
 }
 
 //=====================================================================
@@ -97,7 +96,7 @@ ActivityStack::ScheduleDestroyArgs::ScheduleDestroyArgs(
 ActivityStack::ActivityStackHandler::ActivityStackHandler(
     /* [in] */ ILooper* looper,
     /* [in] */ ActivityStack* owner)
-    :Handler(looper)
+    : Handler(looper)
     , mOwner(owner)
 {
 }
@@ -111,7 +110,7 @@ ECode ActivityStack::ActivityStackHandler::HandleMessage(
         case PAUSE_TIMEOUT_MSG: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ActivityRecord* r = (ActivityRecord*)(IObject::Probe(obj));
+            ActivityRecord* r = (ActivityRecord*)IObject::Probe(obj);
             // We don't at this point know if the activity is fullscreen,
             // so we need to be conservative and assume it isn't.
             Slogger::W("ActivityStack::ActivityStackHandler::HandleMessage", "Activity pause timeout for %s", TO_CSTR(r));
@@ -126,7 +125,7 @@ ECode ActivityStack::ActivityStackHandler::HandleMessage(
         case LAUNCH_TICK_MSG: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ActivityRecord* r = (ActivityRecord*)(IObject::Probe(obj));
+            ActivityRecord* r = (ActivityRecord*)IObject::Probe(obj);
             {
                 AutoLock lock(mOwner->mService);
                 if (r->ContinueLaunchTickingLocked()) {
@@ -137,7 +136,7 @@ ECode ActivityStack::ActivityStackHandler::HandleMessage(
         case DESTROY_TIMEOUT_MSG: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ActivityRecord* r = (ActivityRecord*)(IObject::Probe(obj));
+            ActivityRecord* r = (ActivityRecord*)IObject::Probe(obj);
             // We don't at this point know if the activity is fullscreen,
             // so we need to be conservative and assume it isn't.
             Slogger::W("ActivityStack::ActivityStackHandler::HandleMessage",
@@ -150,7 +149,7 @@ ECode ActivityStack::ActivityStackHandler::HandleMessage(
         case STOP_TIMEOUT_MSG: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ActivityRecord* r = (ActivityRecord*)(IObject::Probe(obj));
+            ActivityRecord* r = (ActivityRecord*)IObject::Probe(obj);
             // We don't at this point know if the activity is fullscreen,
             // so we need to be conservative and assume it isn't.
             Slogger::W("ActivityStack::ActivityStackHandler::HandleMessage",
@@ -165,7 +164,7 @@ ECode ActivityStack::ActivityStackHandler::HandleMessage(
         case DESTROY_ACTIVITIES_MSG: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ScheduleDestroyArgs* args = (ScheduleDestroyArgs*)(IObject::Probe(obj));
+            ScheduleDestroyArgs* args = (ScheduleDestroyArgs*)IObject::Probe(obj);
             {
                 AutoLock lock(mOwner->mService);
                 mOwner->DestroyActivitiesLocked(args->mOwner, args->mReason);
@@ -259,7 +258,7 @@ Int32 ActivityStack::NumActivities()
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        TaskRecord* tr = (TaskRecord*)(IObject::Probe(obj));
+        TaskRecord* tr = (TaskRecord*)IObject::Probe(obj);
         count += tr->mActivities->GetSize();
     }
     return count;
@@ -281,7 +280,7 @@ AutoPtr<ActivityRecord> ActivityStack::TopRunningActivityLocked(
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> tr = (TaskRecord*)(IObject::Probe(obj));
+        AutoPtr<TaskRecord> tr = (TaskRecord*)IObject::Probe(obj);
         AutoPtr<ActivityRecord> r = tr->TopRunningActivityLocked(notTop);
         if (r != NULL) {
             return r;
@@ -298,7 +297,7 @@ AutoPtr<ActivityRecord> ActivityStack::TopRunningNonDelayedActivityLocked(
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> task = (TaskRecord*)(IObject::Probe(obj));
+        AutoPtr<TaskRecord> task = (TaskRecord*)IObject::Probe(obj);
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
             AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
@@ -319,7 +318,7 @@ AutoPtr<ActivityRecord> ActivityStack::TopRunningActivityLocked(
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> task = (TaskRecord*)(IObject::Probe(obj));
+        AutoPtr<TaskRecord> task = (TaskRecord*)IObject::Probe(obj);
         if (task->mTaskId == taskId) {
             continue;
         }
@@ -344,7 +343,7 @@ AutoPtr<ActivityRecord> ActivityStack::TopActivity()
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> tr = (TaskRecord*)(IObject::Probe(obj));
+        AutoPtr<TaskRecord> tr = (TaskRecord*)IObject::Probe(obj);
         //ArrayList<ActivityRecord> activities = tr->mActivities;
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = tr->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
@@ -365,7 +364,7 @@ AutoPtr<TaskRecord> ActivityStack::TopTask()
     if (size > 0) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(size - 1, (IInterface**)&obj);
-        AutoPtr<TaskRecord> tr = (TaskRecord*)(IObject::Probe(obj));
+        AutoPtr<TaskRecord> tr = (TaskRecord*)IObject::Probe(obj);
         return tr;
     }
     return NULL;
@@ -380,7 +379,7 @@ AutoPtr<TaskRecord> ActivityStack::TaskForIdLocked(
         //final TaskRecord task = mTaskHistory.get(taskNdx);
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> task = (TaskRecord*)(IObject::Probe(obj));
+        AutoPtr<TaskRecord> task = (TaskRecord*)IObject::Probe(obj);
         if (task->mTaskId == id) {
             return task;
         }
@@ -493,7 +492,7 @@ AutoPtr<ActivityRecord> ActivityStack::FindTaskLocked(
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> task = (TaskRecord*)(IObject::Probe(obj));
+        AutoPtr<TaskRecord> task = (TaskRecord*)IObject::Probe(obj);
         if (task->mVoiceSession != NULL) {
             // We never match voice sessions; those always run independently.
             if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Skipping %s: voice session", task->ToString().string());
@@ -605,7 +604,7 @@ AutoPtr<ActivityRecord> ActivityStack::FindActivityLocked(
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> task = (TaskRecord*)(IObject::Probe(obj));
+        AutoPtr<TaskRecord> task = (TaskRecord*)IObject::Probe(obj);
         if (!IsCurrentProfileLocked(task->mUserId)) {
             return NULL;
         }
@@ -646,7 +645,7 @@ void ActivityStack::SwitchUserLocked(
     for (Int32 i = 0; i < index; ) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(i, (IInterface**)&obj);
-        AutoPtr<TaskRecord> task = (TaskRecord*)(IObject::Probe(obj));
+        AutoPtr<TaskRecord> task = (TaskRecord*)IObject::Probe(obj);
         if (IsCurrentProfileLocked(task->mUserId)) {
             //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "switchUserLocked: stack=" + getStackId() + " moving " + task + " to top");
             mTaskHistory->Remove(i);
@@ -714,7 +713,7 @@ void ActivityStack::AwakeFromSleepingLocked()
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> tr = (TaskRecord*)(IObject::Probe(obj));
+        AutoPtr<TaskRecord> tr = (TaskRecord*)IObject::Probe(obj);
         //ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = tr->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
@@ -757,7 +756,7 @@ void ActivityStack::GoToSleep()
         //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> tr = (TaskRecord*)(IObject::Probe(obj));
+        AutoPtr<TaskRecord> tr = (TaskRecord*)IObject::Probe(obj);
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = tr->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
             //final ActivityRecord r = activities.get(activityNdx);
@@ -1045,7 +1044,7 @@ AutoPtr<ActivityRecord> ActivityStack::FindNextTranslucentActivity(
     while (stackNdx < numStacks) {
         AutoPtr<IInterface> obj;
         mStacks->Get(stackNdx, (IInterface**)&obj);
-        ActivityStack* as = (ActivityStack*)(IObject::Probe(obj));
+        ActivityStack* as = (ActivityStack*)IObject::Probe(obj);
         tasks = as->mTaskHistory;
         Int32 numTasks;
         tasks->GetSize(&numTasks);
@@ -1053,7 +1052,7 @@ AutoPtr<ActivityRecord> ActivityStack::FindNextTranslucentActivity(
             AutoPtr<IInterface> taskobj;
             tasks->Get(taskNdx, (IInterface**)&taskobj);
             //activities = tasks.get(taskNdx).mActivities;
-            activities = ((TaskRecord*)(IObject::Probe(taskobj)))->mActivities;
+            activities = ((TaskRecord*)IObject::Probe(taskobj))->mActivities;
             Int32 numActivities = activities->GetSize();
             while (activityNdx < numActivities) {
                 AutoPtr<ActivityRecord> activity = (*activities)[activityNdx];
@@ -1104,7 +1103,7 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
     for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         //ArrayList<ActivityRecord> activities = task.mActivities;
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
@@ -1317,7 +1316,7 @@ void ActivityStack::CancelInitializingActivities()
         //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
             //final ActivityRecord r = activities.get(activityNdx);
@@ -1453,7 +1452,7 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             ++taskNdx;
             AutoPtr<IInterface> taskobj;
             mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-            ((TaskRecord*)(IObject::Probe(taskobj)))->SetTaskToReturnTo(ActivityRecord::HOME_ACTIVITY_TYPE);
+            ((TaskRecord*)IObject::Probe(taskobj))->SetTaskToReturnTo(ActivityRecord::HOME_ACTIVITY_TYPE);
         } else {
             if (ActivityStackSupervisor::DEBUG_STATES && IsOnHomeDisplay()) {
                 Slogger::D(TAG, "resumeTopActivityLocked: Launching home next");
@@ -1932,7 +1931,7 @@ void ActivityStack::StartActivityLocked(
         for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
             AutoPtr<IInterface> taskobj;
             mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-            task = (TaskRecord*)(IObject::Probe(taskobj));
+            task = (TaskRecord*)IObject::Probe(taskobj);
             if (task->GetTopActivity() == NULL) {
                 // All activities in task are finishing.
                 continue;
@@ -2156,7 +2155,7 @@ void ActivityStack::ValidateAppTokensLocked()
     for (Int32 taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         //ArrayList<ActivityRecord> activities = task.mActivities;
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         //if (activities.isEmpty())
@@ -2238,7 +2237,7 @@ AutoPtr<IActivityOptions> ActivityStack::ResetTargetTaskIfNeededLocked(
             if (!isEmpty) {
                 AutoPtr<IInterface> taskobj;
                 mTaskHistory->Get(0, (IInterface**)&taskobj);
-                TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+                TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
                 AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
                 if (!activities->IsEmpty()) {
                     bottom = (*(activities->Begin()));
@@ -2377,7 +2376,7 @@ AutoPtr<ActivityRecord> ActivityStack::ResetTaskIfNeededLocked(
     for (Int32 i = historySize - 1; i >= 0; --i) {
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(i, (IInterface**)&taskobj);
-        TaskRecord* targetTask = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* targetTask = (TaskRecord*)IObject::Probe(taskobj);
 
         if (targetTask == task.Get()) {
             topOptions = ResetTargetTaskIfNeededLocked(task, forceReset);
@@ -2393,7 +2392,7 @@ AutoPtr<ActivityRecord> ActivityStack::ResetTaskIfNeededLocked(
     do {
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx--, (IInterface**)&taskobj);
-        TaskRecord* tr = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* tr = (TaskRecord*)IObject::Probe(taskobj);
         taskTop = tr->GetTopActivity();
     } while (taskTop == NULL && taskNdx >= 0);
 
@@ -2540,7 +2539,7 @@ void ActivityStack::FinishSubActivityLocked(
         //ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
             AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
@@ -2589,7 +2588,7 @@ void ActivityStack::FinishTopRunningActivityLocked(
                 }
                 AutoPtr<IInterface> taskobj;
                 mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-                TaskRecord* tr = (TaskRecord*)(IObject::Probe(taskobj));
+                TaskRecord* tr = (TaskRecord*)IObject::Probe(taskobj);
                 activityNdx = tr->mActivities->GetSize() - 1;
             } while (activityNdx < 0);
         }
@@ -2597,7 +2596,7 @@ void ActivityStack::FinishTopRunningActivityLocked(
         if (activityNdx >= 0) {
             AutoPtr<IInterface> taskobj;
             mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-            TaskRecord* tr = (TaskRecord*)(IObject::Probe(taskobj));
+            TaskRecord* tr = (TaskRecord*)IObject::Probe(taskobj);
             AutoPtr<List<AutoPtr<ActivityRecord> > > activities = tr->mActivities;
             r = (*activities)[activityNdx];
             if (r->mState == ActivityState_RESUMED
@@ -2624,7 +2623,7 @@ void ActivityStack::FinishVoiceTask(
     for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* tr = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* tr = (TaskRecord*)IObject::Probe(taskobj);
         if (tr->mVoiceSession != NULL) {
             AutoPtr<IBinder> trSessionBinder = IBinder::Probe(tr->mVoiceSession);
             if (trSessionBinder == sessionBinder) {
@@ -2659,11 +2658,7 @@ Boolean ActivityStack::FinishActivityAffinityLocked(
     }
     for (Int32 index = activityNdx; index >= 0; --index) {
         AutoPtr<ActivityRecord> cur = (*activities)[index];
-        //TODO the java semantic here,
-        // cur->mTaskAffinity and r->mTaskAffinity should be the same object
-        // mTaskAffinity which got from IActivityInfo
-        //TODO if (!IObject::Equals(cur->mTaskAffinity, r->mTaskAffinity))
-        if (cur->mTaskAffinity.Equals(r->mTaskAffinity)) {
+        if (!cur->mTaskAffinity.Equals(r->mTaskAffinity)) {
             break;
         }
         FinishActivityLocked(cur, IActivity::RESULT_CANCELED, NULL, String("request-affinity"), TRUE);
@@ -2679,10 +2674,11 @@ void ActivityStack::FinishActivityResultsLocked(
     // send the result
     AutoPtr<ActivityRecord> resultTo = r->mResultTo;
     if (resultTo != NULL) {
-        //if (CActivityManagerService::DEBUG_RESULTS)
-        //  Slogger::V(TAG, "Adding result to " + resultTo
-        //        + " who=" + r.resultWho + " req=" + r.requestCode
-        //        + " res=" + resultCode + " data=" + resultData);
+        if (CActivityManagerService::DEBUG_RESULTS) {
+            Slogger::V(TAG, "Adding result to %s who=%s req=%d res=%d data=%s",
+                TO_CSTR(resultTo), r->mResultWho.string(), r->mRequestCode,
+                resultCode, TO_CSTR(resultData));
+        }
         if (resultTo->mUserId != r->mUserId) {
             if (resultData != NULL) {
                 resultData->SetContentUserHint(r->mUserId);
@@ -2734,11 +2730,9 @@ Boolean ActivityStack::FinishActivityLocked(
     //EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
     //        r.userId, System.identityHashCode(r),
     //        task.taskId, r.shortComponentName, reason);
-    //TODO end
-    //final ArrayList<ActivityRecord> activities = task.mActivities;
+
     AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-    //final int index = activities.IndexOf(r);
-    Int32 index = -1;//IndexOf
+    Int32 index = -1;
     for(UInt32 i = 0; i < activities->GetSize(); ++i) {
         if (((*activities)[i]).Get() == r) {
             index = i;
@@ -2766,9 +2760,9 @@ Boolean ActivityStack::FinishActivityLocked(
 
     if (mResumedActivity.Get() == r) {
         Boolean endTask = index <= 0;
-        //if (CActivityManagerService::DEBUG_VISBILITY || CActivityManagerService::DEBUG_TRANSITION)
-        //  Slogger::V(TAG,
-        //        "Prepare close transition: finishing " + r);
+        if (CActivityManagerService::DEBUG_VISBILITY || CActivityManagerService::DEBUG_TRANSITION) {
+            Slogger::V(TAG, "Prepare close transition: finishing %s", TO_CSTR(r));
+        }
         mWindowManager->PrepareAppTransition(endTask
                ? AppTransition::TRANSIT_TASK_CLOSE
                : AppTransition::TRANSIT_ACTIVITY_CLOSE, FALSE);
@@ -2787,13 +2781,15 @@ Boolean ActivityStack::FinishActivityLocked(
         if (endTask) {
             mStackSupervisor->EndLockTaskModeIfTaskEnding(task);
         }
-    } else if (r->mState != ActivityState_PAUSING) {
+    }
+    else if (r->mState != ActivityState_PAUSING) {
         // If the activity is PAUSING, we will complete the finish once
         // it is done pausing; else we can just directly finish it here.
         if (CActivityManagerService::DEBUG_PAUSE)
             Slogger::V(TAG, "Finish not pausing: %s", TO_CSTR(r));
         return FinishCurrentActivityLocked(r, FINISH_AFTER_PAUSE, oomAdj) == NULL;
-    } else {
+    }
+    else {
         if (CActivityManagerService::DEBUG_PAUSE)
             Slogger::V(TAG, "Finish waiting for pause of: %s", TO_CSTR(r));
     }
@@ -2829,8 +2825,9 @@ AutoPtr<ActivityRecord> ActivityStack::FinishCurrentActivityLocked(
                 mStackSupervisor->CheckReadyForSleepLocked();
             }
         }
-        //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to STOPPING: " + r
-        //        + " (finish requested)");
+        if (ActivityStackSupervisor::DEBUG_STATES) {
+            Slogger::V(TAG, "Moving to STOPPING: %s (finish requested)", TO_CSTR(r));
+        }
         r->mState = ActivityState_STOPPING;
         if (oomAdj) {
             mService->UpdateOomAdjLocked();
@@ -2846,7 +2843,9 @@ AutoPtr<ActivityRecord> ActivityStack::FinishCurrentActivityLocked(
         mResumedActivity = NULL;
     }
     ActivityState prevState = r->mState;
-    if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to FINISHING: %s", TO_CSTR(r));
+    if (ActivityStackSupervisor::DEBUG_STATES) {
+        Slogger::V(TAG, "Moving to FINISHING: %s", TO_CSTR(r));
+    }
     r->mState = ActivityState_FINISHING;
 
     if (mode == FINISH_IMMEDIATELY
@@ -2859,15 +2858,18 @@ AutoPtr<ActivityRecord> ActivityStack::FinishCurrentActivityLocked(
         if (activityRemoved) {
             mStackSupervisor->ResumeTopActivitiesLocked();
         }
-        //if (ActivityStackSupervisor::DEBUG_CONTAINERS) Slogger::D(TAG,
-        //        "destroyActivityLocked: finishCurrentActivityLocked r=" + r +
-        //        " destroy returned removed=" + activityRemoved);
+        if (ActivityStackSupervisor::DEBUG_CONTAINERS) {
+            Slogger::D(TAG, "destroyActivityLocked: finishCurrentActivityLocked r=%s"
+               " destroy returned removed=%d", TO_CSTR(r), activityRemoved);
+        }
         return activityRemoved ? NULL : r;
     }
 
     // Need to go through the full pause cycle to get this
     // activity into the stopped state and then finish it.
-    if (CActivityManagerService::localLOGV) Slogger::V(TAG, "Enqueueing pending finish: %s", TO_CSTR(r));
+    if (CActivityManagerService::localLOGV) {
+        Slogger::V(TAG, "Enqueueing pending finish: %s", TO_CSTR(r));
+    }
     mStackSupervisor->mFinishingActivities->Add(TO_IINTERFACE(r));
     r->ResumeKeyDispatchingLocked();
     mStackSupervisor->GetFocusedStack()->ResumeTopActivityLocked(NULL);
@@ -2881,10 +2883,9 @@ void ActivityStack::FinishAllActivitiesLocked(
     Int32 taskSize;
     mTaskHistory->GetSize(&taskSize);
     for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
-        //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
             AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
@@ -2892,7 +2893,7 @@ void ActivityStack::FinishAllActivitiesLocked(
             if (r->mFinishing && !immediately) {
                 continue;
             }
-            //Slogger::D(TAG, "finishAllActivitiesLocked: finishing " + r + " immediately");
+            Slogger::D(TAG, "finishAllActivitiesLocked: finishing %s immediately", TO_CSTR(r));
             FinishCurrentActivityLocked(r, FINISH_IMMEDIATELY, FALSE);
         }
     }
@@ -2934,7 +2935,7 @@ Boolean ActivityStack::ShouldUpRecreateTaskLocked(
         Int32 taskIdx;
         mTaskHistory->IndexOf(TO_IINTERFACE(srec->mTask), &taskIdx);
         if (taskIdx <= 0) {
-            //Slogger::W(TAG, "shouldUpRecreateTask: task not in history for " + srec);
+            Slogger::W(TAG, "shouldUpRecreateTask: task not in history for %s", TO_CSTR(srec));
             return FALSE;
         }
         if (taskIdx == 0) {
@@ -3097,9 +3098,13 @@ void ActivityStack::CleanUpActivityLocked(
     r->mFrozenBeforeDestroy = FALSE;
 
     if (setState) {
-        //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to DESTROYED: " + r + " (cleaning up)");
+        if (ActivityStackSupervisor::DEBUG_STATES) {
+            Slogger::V(TAG, "Moving to DESTROYED: %s (cleaning up)", TO_CSTR(r));
+        }
         r->mState = ActivityState_DESTROYED;
-        //if (ActivityStackSupervisor::DEBUG_APP) Slogger::V(TAG, "Clearing app during cleanUp for activity " + r);
+        if (ActivityStackSupervisor::DEBUG_APP) {
+            Slogger::V(TAG, "Clearing app during cleanUp for activity %s", TO_CSTR(r));
+        }
         r->mApp = NULL;
     }
 
@@ -3111,19 +3116,15 @@ void ActivityStack::CleanUpActivityLocked(
 
     // Remove any pending results.
     if (r->mFinishing && r->mPendingResults != NULL) {
-        //for (WeakReference<PendingIntentRecord> apr : r.pendingResults) {
-        //    PendingIntentRecord rec = apr.get();
-        //    if (rec != NULL) {
-        //        mService.cancelIntentSenderLocked(rec, false);
-        //    }
-        //}
         HashSet<AutoPtr<IWeakReference> >::Iterator iter = r->mPendingResults->Begin();
         while(iter != r->mPendingResults->End()) {
             AutoPtr<IWeakReference> weakRef = *iter;
             AutoPtr<IInterface> ws;
             weakRef->Resolve(EIID_IInterface, (IInterface**)&ws);
             AutoPtr<IIIntentSender> rec = IIIntentSender::Probe(ws);
-            mService->CancelIntentSenderLocked(rec, FALSE);
+            if (rec != NULL) {
+                mService->CancelIntentSenderLocked(rec, FALSE);
+            }
             ++iter;
         }
         r->mPendingResults = NULL;
@@ -3145,12 +3146,7 @@ void ActivityStack::CleanUpActivityServicesLocked(
 {
     // Throw away any services that have been bound by this activity.
     if (r->mConnections != NULL) {
-        //Iterator<ConnectionRecord> it = r.connections.iterator();
         HashSet<AutoPtr<ConnectionRecord> >::Iterator iter = r->mConnections->Begin();
-        //while (it.hasNext()) {
-        //    ConnectionRecord c = it.next();
-        //    mService.mServices.removeConnectionLocked(c, NULL, r);
-        //}
         while (iter != r->mConnections->End()) {
             AutoPtr<ConnectionRecord> cr = *iter;
             mService->mServices->RemoveConnectionLocked(cr, NULL, r);
@@ -3183,11 +3179,11 @@ void ActivityStack::DestroyActivitiesLocked(
     for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
-        //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
+        List<AutoPtr<ActivityRecord> >::ReverseIterator rit = task->mActivities->RBegin();
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+        for (; rit != task->mActivities->REnd(); ++rit) {
+            AutoPtr<ActivityRecord> r = *rit;
             if (r->mFinishing) {
                 continue;
             }
@@ -3201,10 +3197,11 @@ void ActivityStack::DestroyActivitiesLocked(
                 continue;
             }
             if (r->IsDestroyable()) {
-                //if (CActivityManagerService::DEBUG_SWITCH)
-                //  Slogger::V(TAG, "Destroying " + r + " in state " + r.state
-                //        + " resumed=" + mResumedActivity
-                //        + " pausing=" + mPausingActivity + " for reason " + reason);
+                if (CActivityManagerService::DEBUG_SWITCH) {
+                    Slogger::V(TAG, "Destroying %s in state %d resumed=%s pausing=%s for reason %s",
+                       TO_CSTR(r),  r->mState, TO_CSTR(mResumedActivity),
+                       TO_CSTR(mPausingActivity), reason.string());
+                }
                 if (DestroyActivityLocked(r, TRUE, reason)) {
                     activityRemoved = TRUE;
                 }
@@ -3221,10 +3218,11 @@ Boolean ActivityStack::SafelyDestroyActivityLocked(
     /* [in] */ const String& reason)
 {
     if (r->IsDestroyable()) {
-        //if (CActivityManagerService::DEBUG_SWITCH)
-        //  Slogger::V(TAG, "Destroying " + r + " in state " + r.state
-        //        + " resumed=" + mResumedActivity
-        //        + " pausing=" + mPausingActivity + " for reason " + reason);
+        if (CActivityManagerService::DEBUG_SWITCH) {
+            Slogger::V(TAG, "Destroying %s in state %d resumed=%s pausing=%s for reason %s",
+               TO_CSTR(r),  r->mState, TO_CSTR(mResumedActivity),
+               TO_CSTR(mPausingActivity), reason.string());
+        }
         return DestroyActivityLocked(r, TRUE, reason);
     }
     return FALSE;
@@ -3232,14 +3230,15 @@ Boolean ActivityStack::SafelyDestroyActivityLocked(
 
 Int32 ActivityStack::ReleaseSomeActivitiesLocked(
     /* [in] */ ProcessRecord* app,
-    ///* [in] */ IArraySet<TaskRecord*>* tasks,
-    /* [in] */ IArraySet* tasks,
+    /* [in] */ IArraySet* tasks, //TaskRecord
     /* [in] */ const String& reason)
 {
     // Iterate over tasks starting at the back (oldest) first.
-    //if (ActivityStackSupervisor::DEBUG_RELEASE) Slogger::D(TAG, "Trying to release some activities in " + app);
+    if (ActivityStackSupervisor::DEBUG_RELEASE) {
+        Slogger::D(TAG, "Trying to release some activities in %s", TO_CSTR(app));
+    }
     Int32 taskSize;
-    ISet::Probe(tasks)->GetSize(&taskSize);
+    tasks->GetSize(&taskSize);
     Int32 maxTasks = taskSize / 4;
     if (maxTasks < 1) {
         maxTasks = 1;
@@ -3250,15 +3249,16 @@ Int32 ActivityStack::ReleaseSomeActivitiesLocked(
     for (Int32 taskNdx = 0; taskNdx < historySize && maxTasks > 0; taskNdx++) {
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         Boolean result;
-        ISet::Probe(tasks)->Contains(TO_IINTERFACE(task), &result);
+        tasks->Contains(taskobj, &result);
         if (!result) {
             continue;
         }
-        //if (ActivityStackSupervisor::DEBUG_RELEASE) Slogger::D(TAG, "Looking for activities to release in " + task);
+        if (ActivityStackSupervisor::DEBUG_RELEASE) {
+            Slogger::D(TAG, "Looking for activities to release in %s", TO_CSTR(task));
+        }
         Int32 curNum = 0;
-        //final ArrayList<ActivityRecord> activities = task.mActivities;
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (UInt32 actNdx = 0; actNdx < activities->GetSize(); actNdx++) {
             AutoPtr<ActivityRecord> activity = (*activities)[actNdx];
@@ -3295,10 +3295,12 @@ Boolean ActivityStack::DestroyActivityLocked(
     /* [in] */ Boolean removeFromApp,
     /* [in] */ const String& reason)
 {
-    //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CLEANUP)
-    //  Slogger::V(
-    //    TAG, "Removing activity from " + reason + ": token=" + r
-    //      + ", app=" + (r.app != NULL ? r.app.processName : "(NULL)"));
+    if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CLEANUP) {
+        String processName;
+        if (r->mApp != NULL) processName = r->mApp->mProcessName;
+        Slogger::V(TAG, "Removing activity from %s: token=%s, app=%s",
+            reason.string(), TO_CSTR(r), processName.string());
+    }
     //TODO EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY,
     //        r.userId, System.identityHashCode(r),
     //        r.task.taskId, r.shortComponentName, reason);
@@ -3311,13 +3313,13 @@ Boolean ActivityStack::DestroyActivityLocked(
 
     if (hadApp) {
         if (removeFromApp) {
-            AutoPtr<ActivityRecord> ar(r);//TODO use the AutoPtr type which is the type of elements in mActivities.
+            AutoPtr<ActivityRecord> ar(r);
             r->mApp->mActivities.Remove(ar);
             if (mService->mHeavyWeightProcess == r->mApp && r->mApp->mActivities.GetSize() <= 0) {
                 mService->mHeavyWeightProcess = NULL;
                 Boolean result;
                 mService->mHandler->SendEmptyMessage(
-                        CActivityManagerService::CANCEL_HEAVY_NOTIFICATION_MSG, &result);
+                    CActivityManagerService::CANCEL_HEAVY_NOTIFICATION_MSG, &result);
             }
             if (r->mApp->mActivities.IsEmpty()) {
                 // Update any services we are bound to that might care about whether
@@ -3332,8 +3334,9 @@ Boolean ActivityStack::DestroyActivityLocked(
         Boolean skipDestroy = FALSE;
 
         //try {
-            if (CActivityManagerService::DEBUG_SWITCH)
+            if (CActivityManagerService::DEBUG_SWITCH) {
                 Slogger::I(TAG, "Destroying: %s", TO_CSTR(r));
+            }
             ECode ec = r->mApp->mThread->ScheduleDestroyActivity(IBinder::Probe(r->mAppToken), r->mFinishing,
                     r->mConfigChangeFlags);
         //} catch (Exception e) {
@@ -3341,7 +3344,7 @@ Boolean ActivityStack::DestroyActivityLocked(
             // We can just ignore exceptions here...  if the process
             // has crashed, our death notification will clean things
             // up.
-            //Slogger::W(TAG, "Exception thrown during finish", e);
+            Slogger::W(TAG, "Exception thrown during finish, ec=%08x", ec);
             if (r->mFinishing) {
                 RemoveActivityFromHistoryLocked(r);
                 removedFromHistory = TRUE;
@@ -3360,28 +3363,40 @@ Boolean ActivityStack::DestroyActivityLocked(
         // it in the destroyed state since we are not removing it from the
         // list.
         if (r->mFinishing && !skipDestroy) {
-            //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to DESTROYING: " + r
-            //        + " (destroy requested)");
+            if (ActivityStackSupervisor::DEBUG_STATES) {
+                Slogger::V(TAG, "Moving to DESTROYING: %s (destroy requested)", TO_CSTR(r));
+            }
             r->mState = ActivityState_DESTROYING;
             AutoPtr<IMessage> msg;
             mHandler->ObtainMessage(DESTROY_TIMEOUT_MSG, TO_IINTERFACE(r), (IMessage**)&msg);
             Boolean result;
             mHandler->SendMessageDelayed(msg, DESTROY_TIMEOUT, &result);
-        } else {
-            //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to DESTROYED: " + r + " (destroy skipped)");
+        }
+        else {
+            if (ActivityStackSupervisor::DEBUG_STATES) {
+                Slogger::V(TAG, "Moving to DESTROYING: %s (destroy skipped)", TO_CSTR(r));
+            }
             r->mState = ActivityState_DESTROYED;
-            if (ActivityStackSupervisor::DEBUG_APP) Slogger::V(TAG, "Clearing app during destroy for activity %s", TO_CSTR(r));
+            if (ActivityStackSupervisor::DEBUG_APP) {
+                Slogger::V(TAG, "Clearing app during destroy for activity %s", TO_CSTR(r));
+            }
             r->mApp = NULL;
         }
-    } else {
+    }
+    else {
         // remove this record from the history.
         if (r->mFinishing) {
             RemoveActivityFromHistoryLocked(r);
             removedFromHistory = TRUE;
-        } else {
-            //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::V(TAG, "Moving to DESTROYED: " + r + " (no app)");
+        }
+        else {
+            if (ActivityStackSupervisor::DEBUG_STATES) {
+                Slogger::V(TAG, "Moving to DESTROYED: %s (no app)", TO_CSTR(r));
+            }
             r->mState = ActivityState_DESTROYED;
-            if (ActivityStackSupervisor::DEBUG_APP) Slogger::V(TAG, "Clearing app during destroy for activity %s", TO_CSTR(r));
+            if (ActivityStackSupervisor::DEBUG_APP) {
+                Slogger::V(TAG, "Clearing app during destroy for activity %s", TO_CSTR(r));
+            }
             r->mApp = NULL;
         }
     }
@@ -3409,7 +3424,9 @@ void ActivityStack::ActivityDestroyedLocked(
         if (r != NULL) {
             mHandler->RemoveMessages(DESTROY_TIMEOUT_MSG, TO_IINTERFACE(r));
         }
-        if (ActivityStackSupervisor::DEBUG_CONTAINERS) Slogger::D(TAG, "activityDestroyedLocked: r=%s", TO_CSTR(r));
+        if (ActivityStackSupervisor::DEBUG_CONTAINERS) {
+            Slogger::D(TAG, "activityDestroyedLocked: r=%s", TO_CSTR(r));
+        }
 
         if (IsInStackLocked(token) != NULL) {
             if (r->mState == ActivityState_DESTROYING) {
@@ -3434,9 +3451,11 @@ void ActivityStack::ReleaseBackgroundResources()
             // activity.
             return;
         }
-        //if (ActivityStackSupervisor::DEBUG_STATES) Slogger::D(TAG, "releaseBackgroundResources activtyDisplay=" +
-        //        mActivityContainer.mActivityDisplay + " visibleBehind=" + r + " app=" + r.app +
-        //        " thread=" + r.app.thread);
+        if (ActivityStackSupervisor::DEBUG_STATES) {
+            ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
+            Slogger::D(TAG, "releaseBackgroundResources activtyDisplay=%s visibleBehind=%s app=%s thread=%s",
+                TO_CSTR(ac->mActivityDisplay), TO_CSTR(r), TO_CSTR(r->mApp), TO_CSTR(r->mApp->mThread));
+        }
         if (r != NULL && r->mApp != NULL && r->mApp->mThread != NULL) {
             //try {
                 r->mApp->mThread->ScheduleCancelVisibleBehind(IBinder::Probe(r->mAppToken));
@@ -3444,8 +3463,9 @@ void ActivityStack::ReleaseBackgroundResources()
             //}
             Boolean res;
             mHandler->SendEmptyMessageDelayed(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG, 500, &res);
-        } else {
-            //Slog.e(TAG, "releaseBackgroundResources: activity " + r + " no longer running");
+        }
+        else {
+            Slogger::E(TAG, "releaseBackgroundResources: activity %s no longer running", TO_CSTR(r));
             BackgroundResourcesReleased(IBinder::Probe(r->mAppToken));
         }
     }
@@ -3512,7 +3532,7 @@ Boolean ActivityStack::RemoveHistoryRecordsForAppLocked(
         //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
             AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
@@ -3545,7 +3565,7 @@ Boolean ActivityStack::RemoveHistoryRecordsForAppLocked(
                     //            + " state=" + r.state, here);
                     //}
                     if (!r->mFinishing) {
-                        //Slogger::W(TAG, "Force removing " + r + ": app died, no saved state");
+                        Slogger::W(TAG, "Force removing %s: app died, no saved state" ,TO_CSTR(r));
                         //TODO EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
                         //        r.userId, System.identityHashCode(r),
                         //        r.task.taskId, r.shortComponentName,
@@ -3559,16 +3579,21 @@ Boolean ActivityStack::RemoveHistoryRecordsForAppLocked(
                 } else {
                     // We have the current state for this activity, so
                     // it can be restarted later when needed.
-                    if (CActivityManagerService::localLOGV) Slogger::V( TAG, "Keeping entry, setting app to NULL");
+                    if (CActivityManagerService::localLOGV) {
+                        Slogger::V( TAG, "Keeping entry, setting app to NULL");
+                    }
                     if (r->mVisible) {
                         hasVisibleActivities = TRUE;
                     }
-                    if (ActivityStackSupervisor::DEBUG_APP) Slogger::V(TAG, "Clearing app during removeHistory for activity %s", TO_CSTR(r));
+                    if (ActivityStackSupervisor::DEBUG_APP) {
+                        Slogger::V(TAG, "Clearing app during removeHistory for activity %s", TO_CSTR(r));
+                    }
                     r->mApp = NULL;
                     r->mNowVisible = FALSE;
                     if (!r->mHaveState) {
-                        if (ActivityStackSupervisor::DEBUG_SAVED_STATE)
+                        if (ActivityStackSupervisor::DEBUG_SAVED_STATE) {
                             Slogger::I(TAG, "App died, clearing saved state of %s", TO_CSTR(r));
+                        }
                         r->mIcicle = NULL;
                     }
                 }
@@ -3603,7 +3628,6 @@ void ActivityStack::UpdateTaskMovement(
     /* [in] */ Boolean toFront)
 {
     if (task->mIsPersistable) {
-        //task->mLastTimeMoved = System::CurrentTimeMillis();
         AutoPtr<ISystem> system;
         CSystem::AcquireSingleton((ISystem**)&system);
         system->GetCurrentTimeMillis(&(task->mLastTimeMoved));
@@ -3623,10 +3647,9 @@ void ActivityStack::MoveHomeStackTaskToTop(
     mTaskHistory->GetSize(&size);
     Int32 top = size - 1;
     for (Int32 taskNdx = top; taskNdx >= 0; --taskNdx) {
-        //TaskRecord task = mTaskHistory.get(taskNdx);
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         if (task->mTaskType == homeStackTaskType) {
             //if (CActivityManagerService::DEBUG_TASKS || CActivityManagerService::DEBUG_STACK)
             //    Slogger::D(TAG, "moveHomeStackTaskToTop: moving " + task);
@@ -3644,8 +3667,9 @@ void ActivityStack::MoveTaskToFrontLocked(
     /* [in] */ ActivityRecord* reason,
     /* [in] */ IBundle* options)
 {
-    //if (CActivityManagerService::DEBUG_SWITCH)
-    //  Slogger::V(TAG, "moveTaskToFront: " + tr);
+    if (CActivityManagerService::DEBUG_SWITCH) {
+        Slogger::V(TAG, "moveTaskToFront: %s", TO_CSTR(tr));
+    }
 
     Int32 numTasks;
     mTaskHistory->GetSize(&numTasks);
@@ -3656,7 +3680,6 @@ void ActivityStack::MoveTaskToFrontLocked(
         Int32 flags;
         if (reason != NULL &&
                 ((reason->mIntent->GetFlags(&flags), flags)&IIntent::FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-            //ActivityOptions.Abort(options);
             AutoPtr<IActivityOptionsHelper> aoHelper;
             CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&aoHelper);
             aoHelper->Abort(options);
@@ -3672,8 +3695,9 @@ void ActivityStack::MoveTaskToFrontLocked(
     // of the stack, keeping them in the same internal order.
     InsertTaskAtTop(tr);
 
-    //if (CActivityManagerService::DEBUG_TRANSITION)
-    //  Slogger::V(TAG, "Prepare to front transition: task=" + tr);
+    if (CActivityManagerService::DEBUG_TRANSITION) {
+        Slogger::V(TAG, "Prepare to front transition: task=%s", TO_CSTR(tr));
+    }
     Int32 flags;
     if (reason != NULL &&
             ((reason->mIntent->GetFlags(&flags), flags)&IIntent::FLAG_ACTIVITY_NO_ANIMATION) != 0) {
@@ -3753,7 +3777,7 @@ Boolean ActivityStack::MoveTaskToBackLocked(
     for (Int32 taskNdx = numTasks - 1; taskNdx >= 1; --taskNdx) {
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         if (task->IsOverHomeStack()) {
             break;
         }
@@ -3947,7 +3971,7 @@ Boolean ActivityStack::WillActivityBeVisibleLocked(
     for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
@@ -3965,7 +3989,7 @@ Boolean ActivityStack::WillActivityBeVisibleLocked(
     if (r == NULL) {
         return FALSE;
     }
-    //if (r->mFinishing) Slog.e(TAG, "willActivityBeVisibleLocked: Returning false,"
+    //if (r->mFinishing) Slogger::E(TAG, "willActivityBeVisibleLocked: Returning false,"
     //        + " would have returned true for r=" + r);
     return !r->mFinishing;
 }
@@ -3977,7 +4001,7 @@ void ActivityStack::CloseSystemDialogsLocked()
     for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
@@ -4006,7 +4030,7 @@ Boolean ActivityStack::ForceStopPackageLocked(
         //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         Int32 numActivities = activities->GetSize();
         for (Int32 activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
@@ -4067,7 +4091,7 @@ void ActivityStack::GetTasksLocked(
         //final TaskRecord task = mTaskHistory.get(taskNdx);
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         AutoPtr<ActivityRecord> r = NULL;
         AutoPtr<ActivityRecord> top = NULL;
         Int32 numActivities = 0;
@@ -4134,7 +4158,7 @@ void ActivityStack::UnhandledBackLocked()
         //final ArrayList<ActivityRecord> activities = mTaskHistory.get(top).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(top, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         Int32 activityTop = activities->GetSize() - 1;
         if (activityTop > 0) {
@@ -4170,7 +4194,7 @@ void ActivityStack::HandleAppCrashLocked(
         //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
             AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
@@ -4202,7 +4226,7 @@ Boolean ActivityStack::DumpActivitiesLocked(
         //final TaskRecord task = mTaskHistory.get(taskNdx);
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         AutoPtr<IList> list;
         CArrayList::New((IList**)&list);
         AutoPtr<List<AutoPtr<ActivityRecord> > > ars = task->mActivities;
@@ -4234,7 +4258,7 @@ AutoPtr<IArrayList> ActivityStack::GetDumpActivitiesLocked(
         for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
             AutoPtr<IInterface> taskobj;
             mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-            TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+            TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
             AutoPtr<List<AutoPtr<ActivityRecord> > > ars = task->mActivities;
             for (Int32 activityNdx = ars->GetSize() - 1; activityNdx >= 0; --activityNdx) {
                 AutoPtr<ActivityRecord> r = (*ars)[activityNdx];
@@ -4249,7 +4273,7 @@ AutoPtr<IArrayList> ActivityStack::GetDumpActivitiesLocked(
             //final ArrayList<ActivityRecord> list = mTaskHistory.get(top).mActivities;
             AutoPtr<IInterface> taskobj;
             mTaskHistory->Get(top, (IInterface**)&taskobj);
-            TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+            TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
             AutoPtr<List<AutoPtr<ActivityRecord> > > list = task->mActivities;
             Int32 listTop = list->GetSize() - 1;
             if (listTop >= 0) {
@@ -4271,7 +4295,7 @@ AutoPtr<IArrayList> ActivityStack::GetDumpActivitiesLocked(
             //}
             AutoPtr<IInterface> taskobj;
             mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-            TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+            TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
             AutoPtr<List<AutoPtr<ActivityRecord> > > ars = task->mActivities;
             for (Int32 activityNdx = ars->GetSize() - 1; activityNdx >= 0; --activityNdx) {
                 AutoPtr<ActivityRecord> r = (*ars)[activityNdx];
@@ -4299,7 +4323,7 @@ AutoPtr<ActivityRecord> ActivityStack::RestartPackage(
         //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
             //final ActivityRecord a = activities.get(activityNdx);
@@ -4337,7 +4361,7 @@ void ActivityStack::RemoveTask(
     if (task->IsOverHomeStack() && taskNdx < topTaskNdx) {
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx + 1, (IInterface**)&taskobj);
-        TaskRecord* nextTask = (TaskRecord*)(IObject::Probe(taskobj));
+        TaskRecord* nextTask = (TaskRecord*)IObject::Probe(taskobj);
         if (!nextTask->IsOverHomeStack()) {
             nextTask->SetTaskToReturnTo(ActivityRecord::HOME_ACTIVITY_TYPE);
         }
@@ -4691,14 +4715,14 @@ Boolean ActivityStack::IsStackVisible()
         //final ArrayList<TaskRecord> tasks = mStacks.get(i).GetAllTasks();
         AutoPtr<IInterface> obj;
         mStacks->Get(i, (IInterface**)&obj);
-        ActivityStack* as = (ActivityStack*)(IObject::Probe(obj));
+        ActivityStack* as = (ActivityStack*)IObject::Probe(obj);
         AutoPtr<IArrayList> tasks = as->GetAllTasks();
         Int32 tasksSize;
         tasks->GetSize(&tasksSize);
         for (Int32 taskNdx = 0; taskNdx < tasksSize; taskNdx++) {
             AutoPtr<IInterface> taskobj;
             tasks->Get(taskNdx, (IInterface**)&taskobj);
-            TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+            TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
             //ArrayList<ActivityRecord> activities = task.mActivities;
             AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
             for (UInt32 activityNdx = 0; activityNdx < activities->GetSize(); activityNdx++) {
@@ -4749,7 +4773,7 @@ void ActivityStack::InsertTaskAtTop(
         while (--taskNdx >= 0) {
             AutoPtr<IInterface> taskobj;
             mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
-            TaskRecord* tr = (TaskRecord*)(IObject::Probe(taskobj));
+            TaskRecord* tr = (TaskRecord*)IObject::Probe(taskobj);
             if (!IsCurrentProfileLocked(tr->mUserId)) {
                 break;
             }

@@ -6,6 +6,7 @@
 #include "_Elastos_Droid_Content_Res_CConfiguration.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Core::IComparable;
 using Elastos::Utility::ILocale;
 using Org::Xmlpull::V1::IXmlPullParser;
 using Org::Xmlpull::V1::IXmlSerializer;
@@ -28,6 +29,8 @@ namespace Res {
 CarClass(CConfiguration)
     , public Object
     , public IConfiguration
+    , public IParcelable
+    , public IComparable
 {
 public:
     CAR_INTERFACE_DECL()

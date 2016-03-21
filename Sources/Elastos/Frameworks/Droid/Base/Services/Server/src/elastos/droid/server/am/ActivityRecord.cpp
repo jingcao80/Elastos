@@ -817,14 +817,13 @@ void ActivityRecord::ApplyOptionsLocked()
             {
                 String packageName;
                 Int32 enterResId, exitResId;
-                AutoPtr<IRemoteCallback> listener;
+                AutoPtr<IIRemoteCallback> listener;
                 mPendingOptions->GetPackageName(&packageName);
                 mPendingOptions->GetCustomEnterResId(&enterResId);
                 mPendingOptions->GetCustomExitResId(&exitResId);
-                mPendingOptions->GetOnAnimationStartListener((IRemoteCallback**)&listener);
-                assert(0);
-                // mService->mWindowManager->OverridePendingAppTransition(
-                //     packageName, enterResId, exitResId, listener);
+                mPendingOptions->GetOnAnimationStartListener((IIRemoteCallback**)&listener);
+                mService->mWindowManager->OverridePendingAppTransition(
+                    packageName, enterResId, exitResId, listener);
                 break;
             }
             case IActivityOptions::ANIM_SCALE_UP:
@@ -834,8 +833,7 @@ void ActivityRecord::ApplyOptionsLocked()
                 mPendingOptions->GetStartY(&y);
                 mPendingOptions->GetWidth(&w);
                 mPendingOptions->GetHeight(&h);
-                assert(0);
-                // mService->mWindowManager->OverridePendingAppTransitionScaleUp(x, y, w, h);
+                mService->mWindowManager->OverridePendingAppTransitionScaleUp(x, y, w, h);
                 AutoPtr<IRect> rect;
                 mIntent->GetSourceBounds((IRect**)&rect);
                 if (rect == NULL) {
@@ -853,11 +851,10 @@ void ActivityRecord::ApplyOptionsLocked()
                 Int32 x, y;
                 mPendingOptions->GetStartX(&x);
                 mPendingOptions->GetStartY(&y);
-                AutoPtr<IRemoteCallback> listener;
-                mPendingOptions->GetOnAnimationStartListener((IRemoteCallback**)&listener);
-                assert(0);
-/*                mService->mWindowManager->OverridePendingAppTransitionThumb(
-                    thumb, x, y, listener, scaleUp);*/
+                AutoPtr<IIRemoteCallback> listener;
+                mPendingOptions->GetOnAnimationStartListener((IIRemoteCallback**)&listener);
+                mService->mWindowManager->OverridePendingAppTransitionThumb(
+                    thumb, x, y, listener, scaleUp);
                 AutoPtr<IRect> rect;
                 mIntent->GetSourceBounds((IRect**)&rect);
                 if (rect == NULL) {
@@ -879,12 +876,11 @@ void ActivityRecord::ApplyOptionsLocked()
                 mPendingOptions->GetStartY(&y);
                 mPendingOptions->GetWidth(&w);
                 mPendingOptions->GetHeight(&h);
-                AutoPtr<IRemoteCallback> cb;
-                mPendingOptions->GetOnAnimationStartListener((IRemoteCallback**)&cb);
-                assert(0);
-                // mService->mWindowManager->OverridePendingAppTransitionAspectScaledThumb(
-                //     thumbnail, x, y, w, h, cb,
-                //     (animationType == IActivityOptions::ANIM_THUMBNAIL_ASPECT_SCALE_UP));
+                AutoPtr<IIRemoteCallback> cb;
+                mPendingOptions->GetOnAnimationStartListener((IIRemoteCallback**)&cb);
+                mService->mWindowManager->OverridePendingAppTransitionAspectScaledThumb(
+                    thumbnail, x, y, w, h, cb,
+                    (animationType == IActivityOptions::ANIM_THUMBNAIL_ASPECT_SCALE_UP));
                 AutoPtr<IRect> rect;
                 mIntent->GetSourceBounds((IRect**)&rect);
                 if (rect == NULL) {
@@ -936,8 +932,7 @@ void ActivityRecord::PauseKeyDispatchingLocked()
 {
     if (!mKeysPaused) {
         mKeysPaused = TRUE;
-        assert(0);
-        // mService->mWindowManager->PauseKeyDispatching(IBinder::Probe(mAppToken));
+        mService->mWindowManager->PauseKeyDispatching(IBinder::Probe(mAppToken));
     }
 }
 
@@ -945,8 +940,7 @@ void ActivityRecord::ResumeKeyDispatchingLocked()
 {
     if (mKeysPaused) {
         mKeysPaused = FALSE;
-        assert(0);
-        // mService->mWindowManager->ResumeKeyDispatching(IBinder::Probe(mAppToken));
+        mService->mWindowManager->ResumeKeyDispatching(IBinder::Probe(mAppToken));
     }
 }
 
@@ -1016,8 +1010,7 @@ ECode ActivityRecord::StartFreezingScreenLocked(
 {
     Boolean b = MayFreezeScreenLocked(app);
     if (b) {
-        assert(0);
-        // return mService->mWindowManager->StartAppFreezingScreen(IBinder::Probe(mAppToken), configChanges);
+        return mService->mWindowManager->StartAppFreezingScreen(IBinder::Probe(mAppToken), configChanges);
     }
     return NOERROR;
 }
@@ -1027,8 +1020,7 @@ ECode ActivityRecord::StopFreezingScreenLocked(
 {
     if (force || mFrozenBeforeDestroy) {
         mFrozenBeforeDestroy = FALSE;
-        assert(0);
-        // FAIL_RETURN(mService->mWindowManager->StopAppFreezingScreen(IBinder::Probe(mAppToken), force));
+        FAIL_RETURN(mService->mWindowManager->StopAppFreezingScreen(IBinder::Probe(mAppToken), force));
     }
     return NOERROR;
 }

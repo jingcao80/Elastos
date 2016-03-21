@@ -27,7 +27,7 @@ namespace System {
 //======================================================================
 // native codes : art/runtime/signal_catcher.cc
 //======================================================================
-static const String TAG("CZygote");
+static const String TAG("CZygoteHooks");
 static pthread_t sSignalCatcherHandle;
 
 static void* SignalCatcherThreadStart(void* arg);

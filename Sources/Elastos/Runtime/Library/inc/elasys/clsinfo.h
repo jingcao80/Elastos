@@ -42,14 +42,14 @@ typedef _ELASTOS UInt32  CIBaseType;
 #define BT_TYPE_UINT32          0x00000003
 #define BT_TYPE_UINT64          0x00000004
 #define BT_TYPE_EMUID           0x00000005
-#define BT_TYPE_ARRAYOF         0x00000007
-#define BT_TYPE_BUFFEROF        0x00000008
-#define BT_TYPE_DELEGATE        0x00000009
-#define BT_TYPE_STRINGBUF       0x0000000A
-#define BT_TYPE_INTERFACE       0x0000000B
-#define BT_TYPE_EGUID           0x0000000C
-#define BT_TYPE_STRING          0x0000000D
-#define BT_TYPE_STRUCT          0x0000000E
+#define BT_TYPE_ARRAYOF         0x00000006
+#define BT_TYPE_DELEGATE        0x00000007
+#define BT_TYPE_INTERFACE       0x00000008
+#define BT_TYPE_EGUID           0x00000009
+#define BT_TYPE_STRING          0x0000000A
+#define BT_TYPE_STRUCT          0x0000000B
+#define BT_TYPE_BUFFEROF        0x0000000C //TODO delete
+#define BT_TYPE_STRINGBUF       0x0000000D //TODO delete
 
 #define BT_TYPE_POINTER         0x00000100
 

@@ -16,9 +16,8 @@ ECode LocalServerSocket::constructor(
 {
     mImpl = new LocalSocketImpl();
 
-    mImpl->Create(ILocalSocket::SOCKET_STREAM);
-
-    CLocalSocketAddress::New(name, (ILocalSocketAddress**)&mLocalAddress);
+    FAIL_RETURN(mImpl->Create(ILocalSocket::SOCKET_STREAM))
+    FAIL_RETURN(CLocalSocketAddress::New(name, (ILocalSocketAddress**)&mLocalAddress))
     FAIL_RETURN(mImpl->Bind(mLocalAddress));
     return mImpl->Listen(LISTEN_BACKLOG);
 }
@@ -27,7 +26,8 @@ ECode LocalServerSocket::constructor(
     /* [in] */ IFileDescriptor* fd)
 {
     mImpl = new LocalSocketImpl();
-    mImpl->constructor(fd);
+
+    FAIL_RETURN(mImpl->constructor(fd))
     FAIL_RETURN(mImpl->Listen(LISTEN_BACKLOG));
     return mImpl->GetSockAddress((ILocalSocketAddress**)&mLocalAddress);
 }
@@ -46,12 +46,13 @@ ECode LocalServerSocket::Accept(
     /* [out] */ ILocalSocket** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
 
-    LocalSocketImpl* acceptedImpl = new LocalSocketImpl();
+    AutoPtr<LocalSocketImpl> acceptedImpl = new LocalSocketImpl();
 
-    mImpl->Accept(acceptedImpl);
+    FAIL_RETURN(mImpl->Accept(acceptedImpl.Get()))
 
-    return CLocalSocket::New(acceptedImpl, LocalSocket::SOCKET_UNKNOWN, result);
+    return CLocalSocket::New(acceptedImpl.Get(), LocalSocket::SOCKET_UNKNOWN, result);
 }
 
 ECode LocalServerSocket::GetFileDescriptor(
@@ -65,6 +66,14 @@ ECode LocalServerSocket::GetFileDescriptor(
 ECode LocalServerSocket::Close()
 {
     return mImpl->Close();
+}
+
+ECode LocalServerSocket::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    *str = Object::ToString(mImpl);
+    return NOERROR;
 }
 
 

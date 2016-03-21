@@ -11354,8 +11354,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
     /* [in] */ Boolean recoveringMemory)
 {
     if (DEBUG_WINDOW_TRACE) {
-        Slogger::V(TAG, "performLayoutAndPlaceSurfacesLockedInner: entry. Called by "
-                /*+ Debug.getCallers(3)*/);
+        Slogger::V(TAG, "performLayoutAndPlaceSurfacesLockedInner: entry ");
     }
 
     Int64 currentTime = SystemClock::GetUptimeMillis();

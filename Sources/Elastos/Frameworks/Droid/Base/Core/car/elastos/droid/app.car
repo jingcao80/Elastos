@@ -164,7 +164,7 @@ module
     interface Elastos.Droid.Os.IHandler;
     interface Elastos.Droid.Os.ILooper;
     interface Elastos.Droid.Os.IUserHandle;
-    interface Elastos.Droid.Os.IRemoteCallback;
+    interface Elastos.Droid.Os.IIRemoteCallback;
     interface Elastos.Droid.Os.IPersistableBundle;
     interface Elastos.Droid.Os.IParcelFileDescriptor;
     interface Elastos.Droid.Content.IIntent;
@@ -1716,7 +1716,7 @@ module
             [in] IHandler* handler,
             [in] IActivityOptionsOnAnimationStartedListener* listener);
 
-        interface IRemoteCallback;
+        interface IIRemoteCallback;
         interface IBinder;
     }
 

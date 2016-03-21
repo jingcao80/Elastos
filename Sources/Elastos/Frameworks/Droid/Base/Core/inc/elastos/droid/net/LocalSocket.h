@@ -28,7 +28,8 @@ class LocalSocket
 public:
     CAR_INTERFACE_DECL()
 
-public:
+    LocalSocket();
+
     /**
      * Creates a AF_LOCAL/UNIX domain stream socket.
      */

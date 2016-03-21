@@ -111,8 +111,9 @@ ECode Process::ZygoteState::Connect(
     VALIDATE_NOT_NULL(state)
     *state = NULL;
 
-    AutoPtr<IDataInputStream> zygoteInputStream = NULL;
-    AutoPtr<IBufferedWriter> zygoteWriter = NULL;
+    Logger::D(TAG, "Process::ZygoteState::Connect: %s", socketAddress.string());
+    AutoPtr<IDataInputStream> zygoteInputStream;
+    AutoPtr<IBufferedWriter> zygoteWriter;
     AutoPtr<ILocalSocket> zygoteSocket;
     CLocalSocket::New((ILocalSocket**)&zygoteSocket);
 
@@ -125,31 +126,40 @@ ECode Process::ZygoteState::Connect(
 
     ECode ec = NOERROR;
     AutoPtr<ILocalSocketAddress> lsa;
-    CLocalSocketAddress::New(socketAddress, LocalSocketAddressNamespace_RESERVED, (ILocalSocketAddress**)&lsa);
+    ec = CLocalSocketAddress::New(socketAddress, LocalSocketAddressNamespace_RESERVED, (ILocalSocketAddress**)&lsa);
+    FAIL_GOTO(ec, _EXIT_)
+
     ec = zygoteSocket->Connect(lsa);
     FAIL_GOTO(ec, _EXIT_)
 
     ec = zygoteSocket->GetInputStream((IInputStream**)&inputStream);
     FAIL_GOTO(ec, _EXIT_)
-    CDataInputStream::New(inputStream, (IDataInputStream**)&zygoteInputStream);
+
+    ec = CDataInputStream::New(inputStream, (IDataInputStream**)&zygoteInputStream);
+    FAIL_GOTO(ec, _EXIT_)
 
     ec = zygoteSocket->GetOutputStream((IOutputStream**)&outputStream);
     FAIL_GOTO(ec, _EXIT_)
-    ec = COutputStreamWriter::New(outputStream, (IOutputStreamWriter**)&outputStreamWriter);
+
+    ec = COutputStreamWriter::New(outputStream, (IWriter**)&outputStreamWriter);
     FAIL_GOTO(ec, _EXIT_)
+
     ec = CBufferedWriter::New(IWriter::Probe(outputStreamWriter), 256, (IBufferedWriter**)&zygoteWriter);
     FAIL_GOTO(ec, _EXIT_)
 
     ec =  Process::GetAbiList(zygoteWriter, zygoteInputStream, &abiListString);
     FAIL_GOTO(ec, _EXIT_)
 
-    Logger::I("Zygote", "Process: zygote socket opened, supported ABIS: %s", abiListString.string());
+    Logger::I(TAG, "Process: zygote socket opened, supported ABIS: [%s]", abiListString.string());
 
     StringUtils::Split(abiListString, String(","), (ArrayOf<String>**)&splits);
-    lists = new List<String>(splits->GetLength());
-    for (Int32 i = 0; i < splits->GetLength(); ++i) {
-        lists->PushBack((*splits)[i]);
+    if (splits != NULL) {
+        lists = new List<String>(splits->GetLength());
+        for (Int32 i = 0; i < splits->GetLength(); ++i) {
+            lists->PushBack((*splits)[i]);
+        }
     }
+
     *state = new ZygoteState(zygoteSocket, zygoteInputStream, zygoteWriter, lists);
     REFCOUNT_ADD(*state)
     return NOERROR;
@@ -158,7 +168,7 @@ _EXIT_:
     if (zygoteSocket) {
         ICloseable::Probe(zygoteSocket)->Close();
     }
-    Logger::E(TAG, "failed to Connect %s", socketAddress.string());
+    Logger::E(TAG, "Error: failed to Connect %s", socketAddress.string());
     return ec;
 }
 
@@ -214,12 +224,6 @@ ECode Process::Start(
         return E_RUNTIME_EXCEPTION;
     }
     return ec;
-    // } catch (ZygoteStartFailedEx ex) {
-    //     Log.e(TAG,
-    //             "Starting VM process through Zygote failed");
-    //     throw new RuntimeException(
-    //             "Starting VM process through Zygote failed", ex);
-    // }
 }
 
 ECode Process::GetAbiList(
@@ -234,33 +238,23 @@ ECode Process::GetAbiList(
     IDataInput* di = IDataInput::Probe(inputStream);
     Int32 numBytes;
     AutoPtr<ArrayOf<Byte> > bytes;
-Logger::I(TAG, " >> 1");
     // Each query starts with the argument count (1 in this case)
     FAIL_GOTO(IWriter::Probe(writer)->Write(String("1")), _EXIT_)
 
-Logger::I(TAG, " >> 2");
     // ... followed by a new-line.
     FAIL_GOTO(writer->NewLine(), _EXIT_)
-Logger::I(TAG, " >> 3");
     // ... followed by our only argument.
     FAIL_GOTO(IWriter::Probe(writer)->Write(String("--query-abi-list")), _EXIT_)
-Logger::I(TAG, " >> 4");
     FAIL_GOTO(writer->NewLine(), _EXIT_)
-Logger::I(TAG, " >> 5");
     FAIL_GOTO(IFlushable::Probe(writer)->Flush(), _EXIT_)
-Logger::I(TAG, " >> 6");
 
     // The response is a length prefixed stream of ASCII bytes.
     FAIL_GOTO(di->ReadInt32(&numBytes), _EXIT_)
-Logger::I(TAG, " >> 7");
     bytes = ArrayOf<Byte>::Alloc(numBytes);
-Logger::I(TAG, " >> 8");
     FAIL_GOTO(di->ReadFully(bytes), _EXIT_)
-Logger::I(TAG, " >> 9");
 
-    Logger::I(TAG, " GetAbiList: %d, %s", numBytes, (const char*)bytes->GetPayload());
+    // Logger::I(TAG, " GetAbiList: %d, %s", numBytes, (const char*)bytes->GetPayload());
     *result = String((const char*)bytes->GetPayload());
-    // return new String(bytes, StandardCharsets.US_ASCII);
     return NOERROR;
 
 _EXIT_:
@@ -298,8 +292,7 @@ ECode Process::ElastosZygoteSendArgsAndGetResult(
     for (it = args->Begin(); it != args->End(); ++it) {
         String& arg = *it;
         if (arg.IndexOf('\n') >= 0) {
-            // throw new ZygoteStartFailed(
-            //         "embedded newlines not allowed");
+            Logger::E(TAG, "ZygoteStartFailed: embedded newlines not allowed");
             return E_ZYGOTE_START_FAILED_EXCEPTION;
         }
         IWriter::Probe(writer)->Write(arg);
@@ -319,7 +312,7 @@ ECode Process::ElastosZygoteSendArgsAndGetResult(
 
     result->SetPid(pid);
     if (pid < 0) {
-        // throw new ZygoteStartFailed("fork() failed");
+        Logger::E(TAG, "ZygoteStartFailed: fork() failed");
         return E_ZYGOTE_START_FAILED_EXCEPTION;
     }
 
@@ -371,8 +364,7 @@ ECode Process::JavaZygoteSendArgsAndGetResult(
     for (it = args->Begin(); it != args->End(); ++it) {
         String& arg = *it;
         if (arg.IndexOf('\n') >= 0) {
-            // throw new ZygoteStartFailed(
-            //         "embedded newlines not allowed");
+            Logger::E(TAG, "ZygoteStartFailed: embedded newlines not allowed");
             return E_ZYGOTE_START_FAILED_EXCEPTION;
         }
         IWriter::Probe(writer)->Write(arg);
@@ -393,7 +385,7 @@ ECode Process::JavaZygoteSendArgsAndGetResult(
 
     result->SetPid(pid);
     if (pid < 0) {
-        // throw new ZygoteStartFailed("fork() failed");
+        Logger::E(TAG, "ZygoteStartFailed: fork() failed");
         return E_ZYGOTE_START_FAILED_EXCEPTION;
     }
 
@@ -433,6 +425,9 @@ ECode Process::StartViaZygote(
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
+
+    Logger::I(TAG, "Process::StartViaZygote isJava:%d, processClass:%s, niceName:%s, uid:%d, gid:%d",
+        processClass.StartWith("android."), processClass.string(), niceName.string(), uid, gid);
 
     {
         AutoLock lock(sLock);
@@ -485,7 +480,7 @@ ECode Process::StartViaZygote(
                 sb.Append((*gids)[i]);
             }
             Logger::I("permissionRelated", "processClass:%s niceName:%s groups:%s",
-                	processClass.string(), niceName.string(), sb.ToString().string());
+                processClass.string(), niceName.string(), sb.ToString().string());
             argsForZygote->PushBack(sb.ToString());
         }
 
@@ -519,8 +514,6 @@ ECode Process::StartViaZygote(
             }
         }
 
-        Logger::I(TAG, "Process::StartViaZygote isJava:%d, %s, %s",
-            startJavaProcess, processClass.string(), niceName.string());
         if (startJavaProcess){
             AutoPtr<ZygoteState> zygoteState;
             FAIL_RETURN(OpenJavaZygoteSocketIfNeeded(abi, (ZygoteState**)&zygoteState))
@@ -1555,12 +1548,9 @@ ECode Process::OpenElastosZygoteSocketIfNeeded(
     *state = NULL;
 
     if (mPrimaryZygoteState == NULL || mPrimaryZygoteState->IsClosed()) {
-        // try {
         mPrimaryZygoteState = NULL;
         ECode ec = ZygoteState::Connect(ZYGOTE_SOCKET_ELASTOS, (ZygoteState**)&mPrimaryZygoteState);
-        // } catch (IOException ioe) {
-        if (ec == (ECode)E_IO_EXCEPTION) {
-            // throw new ZygoteStartFailedEx("Error connecting to primary zygote", ioe);
+        if (FAILED(ec)) {
             Logger::E(TAG, "Error connecting to primary zygote");
             return E_ZYGOTE_START_FAILED_EXCEPTION;
         }
@@ -1574,12 +1564,9 @@ ECode Process::OpenElastosZygoteSocketIfNeeded(
 
     // The primary zygote didn't match. Try the secondary.
     if (mSecondaryZygoteState == NULL || mSecondaryZygoteState->IsClosed()) {
-        // try {
         mSecondaryZygoteState = NULL;
         ECode ec = ZygoteState::Connect(SECONDARY_ZYGOTE_SOCKET_ELASTOS, (ZygoteState**)&mSecondaryZygoteState);
-        if (ec == (ECode)E_IO_EXCEPTION) {
-        // } catch (IOException ioe) {
-        //     throw new ZygoteStartFailedEx("Error connecting to secondary zygote", ioe);
+        if (FAILED(ec)) {
             Logger::E(TAG, "Error connecting to secondary zygote");
             return E_ZYGOTE_START_FAILED_EXCEPTION;
         }

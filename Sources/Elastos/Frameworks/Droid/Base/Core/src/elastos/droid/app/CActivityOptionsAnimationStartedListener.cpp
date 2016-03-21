@@ -3,14 +3,14 @@
 #include "elastos/droid/app/CActivityOptions.h"
 #include "elastos/droid/os/Handler.h"
 
-using Elastos::Droid::Os::EIID_IRemoteCallback;
+using Elastos::Droid::Os::EIID_IIRemoteCallback;
 using Elastos::Droid::Os::EIID_IBinder;
 
 namespace Elastos {
 namespace Droid {
 namespace App {
 
-CAR_INTERFACE_IMPL_2(CActivityOptionsAnimationStartedListener, Object, IRemoteCallback, IBinder)
+CAR_INTERFACE_IMPL_2(CActivityOptionsAnimationStartedListener, Object, IIRemoteCallback, IBinder)
 
 CAR_OBJECT_IMPL(CActivityOptionsAnimationStartedListener)
 

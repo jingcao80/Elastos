@@ -3,10 +3,12 @@
 #include "elastos/droid/net/LocalSocket.h"
 #include "elastos/droid/net/LocalSocketImpl.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
+using Elastos::Core::StringBuilder;
 using Elastos::Net::ISocketOptions;
 using Elastos::IO::EIID_ICloseable;
 using Elastos::IO::IFileDescriptor;
@@ -20,6 +22,14 @@ CAR_INTERFACE_IMPL_2(LocalSocket, Object, ILocalSocket, ICloseable)
 
 const Int32 LocalSocket::SOCKET_UNKNOWN = 0;
 
+LocalSocket::LocalSocket()
+    : mImplCreated(FALSE)
+    , mIsBound(FALSE)
+    , mIsConnected(FALSE)
+    , mSockType(SOCKET_UNKNOWN)
+{
+}
+
 ECode LocalSocket::constructor()
 {
     return constructor(SOCKET_STREAM);
@@ -30,18 +40,15 @@ ECode LocalSocket::constructor(
 {
     AutoPtr<LocalSocketImpl> localSocketImpl = new LocalSocketImpl();
     localSocketImpl->constructor();
-    constructor(localSocketImpl, sockType);
-    mIsBound = FALSE;
-    mIsConnected = FALSE;
-    return NOERROR;
+    return constructor(localSocketImpl, sockType);
 }
 
 ECode LocalSocket::constructor(
     /* [in] */ IFileDescriptor* fd)
 {
     AutoPtr<LocalSocketImpl> localSocketImpl = new LocalSocketImpl();
-    localSocketImpl->constructor(fd);
-    constructor(localSocketImpl, SOCKET_UNKNOWN);
+    FAIL_RETURN(localSocketImpl->constructor(fd))
+    FAIL_RETURN(constructor(localSocketImpl, SOCKET_UNKNOWN))
     mIsBound = TRUE;
     mIsConnected = TRUE;
     return NOERROR;
@@ -53,8 +60,6 @@ ECode LocalSocket::constructor(
 {
     mImpl = impl;
     mSockType = sockType;
-    mIsConnected = FALSE;
-    mIsBound = FALSE;
     return NOERROR;
 }
 
@@ -62,12 +67,9 @@ ECode LocalSocket::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-
-    Object::ToString(result);
-    *result += " impl:";
-    String s;
-    IObject::Probe(mImpl)->ToString(&s);
-    *result += s;
+    StringBuilder sb("LocalSocket: impl:");
+    sb += Object::ToString(mImpl);
+    *result = sb.ToString();
     return NOERROR;
 }
 
@@ -77,9 +79,15 @@ ECode LocalSocket::ImplCreateIfNeeded()
         synchronized(this) {
             if (!mImplCreated) {
     //            try {
-                mImpl->Create(mSockType);
-    //            } finally {
+                ECode ec = mImpl->Create(mSockType);
                 mImplCreated = TRUE;
+
+                if (FAILED(ec)) {
+                    Logger::E("LocalSocket", "ImplCreateIfNeeded failed: %s", TO_CSTR(this));
+                    assert(0);
+                    return ec;
+                }
+    //            } finally {
     //            }
             }
         }
@@ -96,8 +104,8 @@ ECode LocalSocket::Connect(
             return E_IO_EXCEPTION;
         }
 
-        ImplCreateIfNeeded();
-        ((LocalSocketImpl*)mImpl.Get())->Connect(endpoint, 0);
+        FAIL_RETURN(ImplCreateIfNeeded())
+        FAIL_RETURN(((LocalSocketImpl*)mImpl.Get())->Connect(endpoint, 0))
         mIsConnected = TRUE;
         mIsBound = TRUE;
     }
@@ -107,7 +115,7 @@ ECode LocalSocket::Connect(
 ECode LocalSocket::Bind(
     /* [in] */ ILocalSocketAddress* bindpoint)
 {
-    ImplCreateIfNeeded();
+    FAIL_RETURN(ImplCreateIfNeeded())
 
     synchronized(this) {
         if (mIsBound) {
@@ -116,7 +124,7 @@ ECode LocalSocket::Bind(
         }
 
         mLocalAddress = bindpoint;
-        mImpl->Bind(mLocalAddress);
+        FAIL_RETURN(mImpl->Bind(mLocalAddress))
         mIsBound = TRUE;
     }
     return NOERROR;
@@ -137,7 +145,7 @@ ECode LocalSocket::GetInputStream(
 {
     VALIDATE_NOT_NULL(is);
 
-    ImplCreateIfNeeded();
+    FAIL_RETURN(ImplCreateIfNeeded())
     return ((LocalSocketImpl*)mImpl.Get())->GetInputStream(is);
 }
 
@@ -146,25 +154,25 @@ ECode LocalSocket::GetOutputStream(
 {
     VALIDATE_NOT_NULL(os);
 
-    ImplCreateIfNeeded();
+    FAIL_RETURN(ImplCreateIfNeeded())
     return ((LocalSocketImpl*)mImpl.Get())->GetOutputStream(os);
 }
 
 ECode LocalSocket::Close()
 {
-    ImplCreateIfNeeded();
+    FAIL_RETURN(ImplCreateIfNeeded())
     return mImpl->Close();
 }
 
 ECode LocalSocket::ShutdownInput()
 {
-    ImplCreateIfNeeded();
+    FAIL_RETURN(ImplCreateIfNeeded())
     return ((LocalSocketImpl*)mImpl.Get())->ShutdownInput();
 }
 
 ECode LocalSocket::ShutdownOutput()
 {
-    ImplCreateIfNeeded();
+    FAIL_RETURN(ImplCreateIfNeeded())
     return ((LocalSocketImpl*)mImpl.Get())->ShutdownOutput();
 }
 
@@ -313,13 +321,7 @@ ECode LocalSocket::GetPeerCredentials(
 ECode LocalSocket::GetFileDescriptor(
     /* [out] */ IFileDescriptor** fd)
 {
-    VALIDATE_NOT_NULL(fd);
-
-    AutoPtr<IFileDescriptor> _fd;
-    ((LocalSocketImpl*)mImpl.Get())->GetFileDescriptor((IFileDescriptor**)&_fd);
-    *fd = _fd;
-    REFCOUNT_ADD(*fd);
-    return NOERROR;
+    return ((LocalSocketImpl*)mImpl.Get())->GetFileDescriptor(fd);
 }
 
 } // namespace Net

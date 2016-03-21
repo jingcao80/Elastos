@@ -323,6 +323,7 @@ ECode BaseBundle::PutBoolean(
     /* [in] */ const String& key,
     /* [in] */ Boolean value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IBoolean> valueObj = CoreUtils::Convert(value);
@@ -333,6 +334,7 @@ ECode BaseBundle::PutByte(
     /* [in] */ const String& key,
     /* [in] */ Byte value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IByte> valueObj = CoreUtils::ConvertByte(value);
@@ -343,6 +345,7 @@ ECode BaseBundle::PutChar(
     /* [in] */ const String& key,
     /* [in] */ Char32 value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IChar32> valueObj = CoreUtils::ConvertChar32(value);
@@ -353,6 +356,7 @@ ECode BaseBundle::PutInt16(
     /* [in] */ const String& key,
     /* [in] */ Int16 value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IInteger16> valueObj = CoreUtils::Convert(value);
@@ -363,6 +367,7 @@ ECode BaseBundle::PutInt32(
     /* [in] */ const String& key,
     /* [in] */ Int32 value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IInteger32> valueObj = CoreUtils::Convert(value);
@@ -373,6 +378,7 @@ ECode BaseBundle::PutInt64(
     /* [in] */ const String& key,
     /* [in] */ Int64 value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IInteger64> valueObj = CoreUtils::Convert(value);
@@ -383,6 +389,7 @@ ECode BaseBundle::PutFloat(
     /* [in] */ const String& key,
     /* [in] */ Float value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IFloat> valueObj = CoreUtils::Convert(value);
@@ -393,6 +400,7 @@ ECode BaseBundle::PutDouble(
     /* [in] */ const String& key,
     /* [in] */ Double value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IDouble> valueObj = CoreUtils::Convert(value);
@@ -402,6 +410,7 @@ ECode BaseBundle::PutString(
     /* [in] */ const String& key,
     /* [in] */ const String& value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<ICharSequence> valueObj = CoreUtils::Convert(value);
@@ -412,6 +421,7 @@ ECode BaseBundle::PutCharSequence(
     /* [in] */ const String& key,
     /* [in] */ ICharSequence* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     return mMap->Put(keyObj.Get(), value);
@@ -421,6 +431,7 @@ ECode BaseBundle::PutIntegerArrayList(
     /* [in] */ const String& key,
     /* [in] */ IArrayList* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     return mMap->Put(keyObj.Get(), value);
@@ -430,6 +441,7 @@ ECode BaseBundle::PutStringArrayList(
     /* [in] */ const String& key,
     /* [in] */ IArrayList* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     return mMap->Put(keyObj.Get(), value);
@@ -439,6 +451,7 @@ ECode BaseBundle::PutCharSequenceArrayList(
     /* [in] */ const String& key,
     /* [in] */ IArrayList* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     return mMap->Put(keyObj.Get(), value);
@@ -448,6 +461,7 @@ ECode BaseBundle::PutSerializable(
     /* [in] */ const String& key,
     /* [in] */ ISerializable* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     return mMap->Put(keyObj.Get(), value);
@@ -457,6 +471,7 @@ ECode BaseBundle::PutBooleanArray(
     /* [in] */ const String& key,
     /* [in] */ ArrayOf<Boolean>* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IArrayOf> valueObj = CoreUtils::Convert(value);
@@ -467,6 +482,7 @@ ECode BaseBundle::PutByteArray(
     /* [in] */ const String& key,
     /* [in] */ ArrayOf<Byte>* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IArrayOf> valueObj = CoreUtils::ConvertByteArray(value);
@@ -477,6 +493,7 @@ ECode BaseBundle::PutCharArray(
     /* [in] */ const String& key,
     /* [in] */ ArrayOf<Char32>* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IArrayOf> valueObj = CoreUtils::ConvertChar32Array(value);
@@ -487,6 +504,7 @@ ECode BaseBundle::PutInt16Array(
     /* [in] */ const String& key,
     /* [in] */ ArrayOf<Int16>* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IArrayOf> valueObj = CoreUtils::Convert(value);
@@ -497,6 +515,7 @@ ECode BaseBundle::PutInt32Array(
     /* [in] */ const String& key,
     /* [in] */ ArrayOf<Int32>* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IArrayOf> valueObj = CoreUtils::Convert(value);
@@ -507,6 +526,7 @@ ECode BaseBundle::PutInt64Array(
     /* [in] */ const String& key,
     /* [in] */ ArrayOf<Int64>* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IArrayOf> valueObj = CoreUtils::Convert(value);
@@ -517,6 +537,7 @@ ECode BaseBundle::PutFloatArray(
     /* [in] */ const String& key,
     /* [in] */ ArrayOf<Float>* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IArrayOf> valueObj = CoreUtils::Convert(value);
@@ -527,6 +548,7 @@ ECode BaseBundle::PutDoubleArray(
     /* [in] */ const String& key,
     /* [in] */ ArrayOf<Double>* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IArrayOf> valueObj = CoreUtils::Convert(value);
@@ -537,6 +559,7 @@ ECode BaseBundle::PutStringArray(
     /* [in] */ const String& key,
     /* [in] */ ArrayOf<String>* value)
 {
+    assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
     AutoPtr<IArrayOf> valueObj = CoreUtils::Convert(value);
@@ -1607,13 +1630,12 @@ ECode BaseBundle::ReadArrayMapInternal(
     String key;
     AutoPtr<ICharSequence> keyObj;
     AutoPtr<IInterface> valueObj;
-    AutoPtr<IMap> map = IMap::Probe(arrayMap);
     while (size > 0) {
         source->ReadString(&key);
         keyObj = CoreUtils::Convert(key);
         valueObj = ReadValue(source);
 
-        map->Put(keyObj.Get(), valueObj.Get());
+        arrayMap->Put(keyObj.Get(), valueObj.Get());
         size--;
     }
     return NOERROR;
@@ -1626,29 +1648,31 @@ ECode BaseBundle::WriteArrayMapInternal(
     assert(map != NULL);
 
     Int32 size = 0;
-    IMap::Probe(map)->GetSize(&size);
-
+    map->GetSize(&size);
     dest->WriteInt32(size);
 
-    AutoPtr<ISet> outset;
-    IMap::Probe(map)->GetEntrySet((ISet**)&outset);
-    AutoPtr<IIterator> it;
-    outset->GetIterator((IIterator**)&it);
-    Boolean hasNext = FALSE;
-    String key;
-    while ((it->HasNext(&hasNext), hasNext)) {
-        AutoPtr<IInterface> outface;
-        it->GetNext((IInterface**)&outface);
-        AutoPtr<IMapEntry> entry = IMapEntry::Probe(outface);
-        AutoPtr<IInterface> obj;
-        entry->GetKey((IInterface**)&obj);
-        assert(ICharSequence::Probe(obj) != NULL);
-        ICharSequence::Probe(obj)->ToString(&key);
-        dest->WriteString(key);
+    if (size > 0) {
+        AutoPtr<ISet> outset;
+        map->GetEntrySet((ISet**)&outset);
+        AutoPtr<IIterator> it;
+        outset->GetIterator((IIterator**)&it);
+        Boolean hasNext = FALSE;
+        String key;
+        Int32 i = 0;
+        while ((it->HasNext(&hasNext), hasNext)) {
+            AutoPtr<IInterface> outface;
+            it->GetNext((IInterface**)&outface);
+            AutoPtr<IMapEntry> entry = IMapEntry::Probe(outface);
+            AutoPtr<IInterface> obj;
+            entry->GetKey((IInterface**)&obj);
+            assert(ICharSequence::Probe(obj) != NULL);
+            ICharSequence::Probe(obj)->ToString(&key);
+            dest->WriteString(key);
 
-        obj = NULL;
-        entry->GetValue((IInterface**)&obj);
-        WriteValue(dest, obj);
+            obj = NULL;
+            entry->GetValue((IInterface**)&obj);
+            WriteValue(dest, obj);
+        }
     }
 
     return NOERROR;
@@ -1697,12 +1721,14 @@ ECode BaseBundle::WriteToParcelInner(
             dest->SetDataPosition(endPos);
         }
     }
+
     if (mJavaData != NULL) {
         dest->WriteInt32(mJavaData->GetLength());
         dest->WriteArrayOf((Handle32)mJavaData.Get());
     }
-    else
+    else {
         dest->WriteInt32(0);
+    }
 
     return NOERROR;
 }

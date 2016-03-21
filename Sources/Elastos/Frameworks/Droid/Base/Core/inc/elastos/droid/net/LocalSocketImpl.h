@@ -114,7 +114,11 @@ public:
         LocalSocketImpl* mHost;
     };
 
+public:
+
     CAR_INTERFACE_DECL()
+
+    LocalSocketImpl();
 
     virtual ~LocalSocketImpl();
 
@@ -304,6 +308,11 @@ private:
     CARAPI NativeWrite(
         /* [in] */ Int32 b,
         /* [in] */ IFileDescriptor* fd);
+
+    CARAPI NativeAccept(
+        /* [in] */ IFileDescriptor* fd,
+        /* [in] */ ILocalSocketImpl* s,
+        /* [out] */ IFileDescriptor** resultFd);
 
     CARAPI ConnectLocal(
         /* [in] */ IFileDescriptor* fd,

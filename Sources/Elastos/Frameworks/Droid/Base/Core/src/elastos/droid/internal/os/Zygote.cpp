@@ -54,7 +54,7 @@ static AutoPtr<IZygoteHooks> InitZygoteHooks()
 }
 
 const AutoPtr<IZygoteHooks> Zygote::VM_HOOKS = InitZygoteHooks();
-static const String TAG("CZygote");
+static const String TAG("Zygote");
 static const Boolean DEBUG = TRUE;
 
 Int32 Zygote::ForkAndSpecialize(

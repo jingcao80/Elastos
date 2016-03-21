@@ -1094,8 +1094,7 @@ private:
     // State for the currently installed input filter.
     Object mInputFilterLock;
     AutoPtr<IIInputFilter> mInputFilter;         // guarded by mInputFilterLock
-    // need call AddRef and Release manually
-    CInputFilterHost* mInputFilterHost;  // guarded by mInputFilterLock
+    AutoPtr<IIInputFilterHost> mInputFilterHost;  // guarded by mInputFilterLock
 
     // Input event injection constants defined in InputDispatcher.h.
     const static Int32 INPUT_EVENT_INJECTION_SUCCEEDED = 0;

@@ -1331,7 +1331,8 @@ void CInputManagerService::SetInputFilter(
 
         if (oldFilter != NULL) {
             mInputFilter = NULL;
-            mInputFilterHost->DisconnectLocked();
+            CInputFilterHost* ifh = (CInputFilterHost*)mInputFilterHost.Get();
+            ifh->DisconnectLocked();
             mInputFilterHost = NULL;
             //try {
             oldFilter->Uninstall();
@@ -1343,7 +1344,7 @@ void CInputManagerService::SetInputFilter(
         if (filter != NULL) {
             mInputFilter = filter;
             mInputFilterHost = NULL;
-            CInputFilterHost::NewByFriend((IIInputManager*)this, (CInputFilterHost**)&mInputFilterHost);
+            CInputFilterHost::New(this, (IIInputFilterHost**)&mInputFilterHost);
             //try {
             filter->Install(mInputFilterHost);
             //} catch (RemoteException re) {
@@ -1480,6 +1481,7 @@ ECode CInputManagerService::GetInputDeviceIds(
 ECode CInputManagerService::GetInputDevices(
     /* [out, callee] */ ArrayOf<IInputDevice*>** inputDevices)
 {
+    VALIDATE_NOT_NULL(inputDevices)
     synchronized (mInputDevicesLock) {
         *inputDevices = mInputDevices;
         REFCOUNT_ADD(*inputDevices);

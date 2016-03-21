@@ -106,7 +106,7 @@ ECode CActivityOptions::SetOnAnimationStartedListener(
 {
     if (listener != NULL) {
         mAnimationStartedListener = NULL;
-        CActivityOptionsAnimationStartedListener::New(handler, listener, (IRemoteCallback**)&mAnimationStartedListener);
+        CActivityOptionsAnimationStartedListener::New(handler, listener, (IIRemoteCallback**)&mAnimationStartedListener);
     }
     return NOERROR;
 }
@@ -433,7 +433,7 @@ ECode CActivityOptions::constructor(
 
         AutoPtr<IBinder> binder;
         opts->GetIBinder(IActivityOptions::KEY_ANIM_START_LISTENER, (IBinder**)&binder);
-        mAnimationStartedListener = IRemoteCallback::Probe(binder);
+        mAnimationStartedListener = IIRemoteCallback::Probe(binder);
     }
     else if (mAnimationType == IActivityOptions::ANIM_SCALE_UP) {
         opts->GetInt32(IActivityOptions::KEY_ANIM_START_X, 0, &mStartX);
@@ -455,7 +455,7 @@ ECode CActivityOptions::constructor(
         opts->GetInt32(IActivityOptions::KEY_ANIM_START_Y, 0, &mHeight);
         AutoPtr<IBinder> binder;
         opts->GetBinder(IActivityOptions::KEY_ANIM_START_LISTENER, (IBinder**)&binder);
-        mAnimationStartedListener = IRemoteCallback::Probe(binder);
+        mAnimationStartedListener = IIRemoteCallback::Probe(binder);
     }
     else if (mAnimationType == IActivityOptions::ANIM_SCENE_TRANSITION) {
         AutoPtr<IParcelable> parcelable;
@@ -619,7 +619,7 @@ ECode CActivityOptions::SetHeight(
 
 /** @hide */
 ECode CActivityOptions::GetOnAnimationStartListener(
-    /* [out] */ IRemoteCallback** cb)
+    /* [out] */ IIRemoteCallback** cb)
 {
     VALIDATE_NOT_NULL(cb);
     *cb = mAnimationStartedListener;
@@ -628,7 +628,7 @@ ECode CActivityOptions::GetOnAnimationStartListener(
 }
 
 ECode CActivityOptions::SetOnAnimationStartListener(
-    /* [in] */ IRemoteCallback* cb)
+    /* [in] */ IIRemoteCallback* cb)
 {
     mAnimationStartedListener = cb;
     return NOERROR;
@@ -646,7 +646,7 @@ ECode CActivityOptions::Abort()
 {
    if (mAnimationStartedListener != NULL) {
         // try {
-            mAnimationStartedListener->SendResult(NULL);
+            return mAnimationStartedListener->SendResult(NULL);
         // } catch (RemoteException e) {
         // }
     }
@@ -656,7 +656,9 @@ ECode CActivityOptions::Abort()
 ECode CActivityOptions::IsReturning(
     /* [out] */ Boolean* bval)
 {
-    return mIsReturning;
+    VALIDATE_NOT_NULL(bval)
+    *bval = mIsReturning;
+    return NOERROR;
 }
 
 ECode CActivityOptions::GetSharedElementNames(

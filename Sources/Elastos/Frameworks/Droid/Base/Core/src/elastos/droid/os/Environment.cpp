@@ -103,7 +103,7 @@ String GetCanonicalPathOrNull(
     return cp;
 }
 
-AutoPtr<IUserEnvironment> InitForCurrentUser()
+static AutoPtr<IUserEnvironment> InitCurrentUser()
 {
     Int32 userId = UserHandle::GetMyUserId();
     AutoPtr<CUserEnvironment> ue;
@@ -126,7 +126,7 @@ const String Environment::CANONCIAL_EMULATED_STORAGE_TARGET =
 
 const String Environment::SYSTEM_PROPERTY_EFS_ENABLED("persist.security.efs.enabled");
 
-AutoPtr<IUserEnvironment> Environment::sCurrentUser = InitForCurrentUser();
+AutoPtr<IUserEnvironment> Environment::sCurrentUser = InitCurrentUser();
 Boolean Environment::sUserRequired;
 
 //===========================================================================================
@@ -404,6 +404,12 @@ ECode Environment::UserEnvironment::BuildExternalStorageAppCacheDirs(
 //===========================================================================================
 // Environment::UserEnvironment
 //===========================================================================================
+
+ECode Environment::InitForCurrentUser()
+{
+    sCurrentUser = InitCurrentUser();
+    return NOERROR;
+}
 
 AutoPtr<IFile> Environment::GetRootDirectory()
 {
@@ -811,17 +817,18 @@ AutoPtr<IStorageVolume> Environment::GetStorageVolume(
 
     AutoPtr<IInterface> obj = ServiceManager::GetService(String("mount"));
     IIMountService* mountService = IIMountService::Probe(obj);
-    // TODO:
-    // AutoPtr<ArrayOf<IStorageVolume*> > volumes;
-    // mountService->GetVolumeList((ArrayOf<IStorageVolume*>**)&volumes);
-    // for (Int32 i = 0; i < volumes->GetLength(); ++i) {
-    //     AutoPtr<IStorageVolume> volume = (*volumes)[i];
-    //     AutoPtr<IFile> file;
-    //     volume->GetPathFile((IFile**)&file);
-    //     if (FileUtils::Contains(file, path)) {
-    //         return volume;
-    //     }
-    // }
+    if (mountService) {
+        AutoPtr<ArrayOf<IStorageVolume*> > volumes;
+        mountService->GetVolumeList((ArrayOf<IStorageVolume*>**)&volumes);
+        for (Int32 i = 0; i < volumes->GetLength(); ++i) {
+            AutoPtr<IStorageVolume> volume = (*volumes)[i];
+            AutoPtr<IFile> file;
+            volume->GetPathFile((IFile**)&file);
+            if (FileUtils::Contains(file, path)) {
+                return volume;
+            }
+        }
+    }
 
     return NULL;
 }

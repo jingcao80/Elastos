@@ -127,7 +127,7 @@ public:
      * @param err new stderr
      * @throws IOException
      */
-    static CARAPI_(void) ReopenStdio(
+    static CARAPI ReopenStdio(
         /* [in] */ IFileDescriptor* in,
         /* [in] */ IFileDescriptor* out,
         /* [in] */ IFileDescriptor* err);

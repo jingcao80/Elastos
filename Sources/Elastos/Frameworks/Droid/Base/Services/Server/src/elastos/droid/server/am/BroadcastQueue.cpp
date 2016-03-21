@@ -44,7 +44,7 @@ static Boolean IsLowRamDeviceStatic()
 
 const String BroadcastQueue::TAG("BroadcastQueue");
 const String BroadcastQueue::TAG_MU("BroadcastQueueMU");
-const Boolean BroadcastQueue::DEBUG_BROADCAST = TRUE;
+const Boolean BroadcastQueue::DEBUG_BROADCAST = FALSE;
 const Boolean BroadcastQueue::DEBUG_BROADCAST_LIGHT = FALSE;
 const Boolean BroadcastQueue::DEBUG_MU = FALSE;
 const Int32 BroadcastQueue::MAX_BROADCAST_HISTORY = IsLowRamDeviceStatic() ? 10 : 50;
@@ -451,7 +451,6 @@ ECode BroadcastQueue::PerformReceiveLocked(
     // Send the intent to the receiver asynchronously using one-way binder calls.
     if (app != NULL) {
         if (app->mThread != NULL) {
-            Slogger::I(TAG, " >> PerformReceiveLocked 1 %s", TO_CSTR(app));
             // If we have an app thread, do the call through that so it is
             // correctly ordered with other one-way calls.
             return app->mThread->ScheduleRegisteredReceiver(receiver, intent, resultCode,
@@ -463,7 +462,6 @@ ECode BroadcastQueue::PerformReceiveLocked(
         }
     }
     else {
-        Slogger::I(TAG, " >> PerformReceiveLocked 2 %s ", TO_CSTR(receiver));
         return receiver->PerformReceive(intent, resultCode, data, extras, ordered, sticky, sendingUser);
     }
 }

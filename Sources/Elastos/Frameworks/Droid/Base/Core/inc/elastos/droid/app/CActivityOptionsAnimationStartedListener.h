@@ -9,7 +9,7 @@
 
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::IRemoteCallback;
+using Elastos::Droid::Os::IIRemoteCallback;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Core::Object;
 
@@ -19,7 +19,7 @@ namespace App {
 
 CarClass(CActivityOptionsAnimationStartedListener)
     , public Object
-    , public IRemoteCallback
+    , public IIRemoteCallback
     , public IBinder
 {
 public:

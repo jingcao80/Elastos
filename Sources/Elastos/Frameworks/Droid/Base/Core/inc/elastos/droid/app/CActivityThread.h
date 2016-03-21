@@ -1340,8 +1340,6 @@ private:
     CARAPI_(AutoPtr<ActivityClientRecord>) GetActivityClientRecord(
         /* [in] */ IBinder* token);
 
-    static CARAPI_(void) InitTLS();
-
     // static void PrintRow(
     //     /* [in] */ IPrintWriter* pw,
     //     /* [in] */ const char* format,
@@ -1466,8 +1464,6 @@ private:
 
     AutoPtr<IConfiguration> mMainThreadConfig;
 
-    static pthread_key_t sCurrentBroadcastIntentKey;
-//    static ThreadLocal<Intent> sCurrentBroadcastIntent = new ThreadLocal<Intent>();
 
     Int32 mThumbnailWidth;
     Int32 mThumbnailHeight;
@@ -1478,8 +1474,11 @@ private:
     Object mProviderMapLock;
     Object mPackagesLock;
 
+public:
+    static pthread_key_t sCurrentBroadcastIntentKey;
+//    static ThreadLocal<Intent> sCurrentBroadcastIntent = new ThreadLocal<Intent>();
     static pthread_key_t sKey;
-    static Boolean sHaveKey;
+    static pthread_once_t sKeyOnce;
 };
 
 } // namespace App

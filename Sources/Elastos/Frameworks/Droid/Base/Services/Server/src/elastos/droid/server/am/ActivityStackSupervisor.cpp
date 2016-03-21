@@ -679,9 +679,13 @@ AutoPtr<ActivityRecord> ActivityStackSupervisor::ResumedAppLocked()
     return resumedActivity;
 }
 
-Boolean ActivityStackSupervisor::AttachApplicationLocked(
-    /* [in] */ ProcessRecord* app)
+ECode ActivityStackSupervisor::AttachApplicationLocked(
+    /* [in] */ ProcessRecord* app,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
     String processName = app->mProcessName;
     Boolean didSomething = FALSE;
     Int32 adSize;
@@ -708,18 +712,21 @@ Boolean ActivityStackSupervisor::AttachApplicationLocked(
                 Int32 uid;
                 appInfo->GetUid(&uid);
 
-                if (hr->mApp == NULL && app->mUid == uid
-                        && processName.Equals(hr->mProcessName)) {
-                    //try {
-                        Boolean bTemp;
-                        if (RealStartActivityLocked(hr, app, TRUE, TRUE, &bTemp), bTemp) {
-                            didSomething = TRUE;
-                        }
-                    //} catch (RemoteException e) {
-                    //    Slogger::W(TAG, "Exception in new application when starting activity "
-                    //          + hr.intent.getComponent().flattenToShortString(), e);
-                    //TODO    throw e;
-                    //}
+                if (hr->mApp == NULL && app->mUid == uid && processName.Equals(hr->mProcessName)) {
+                    Boolean bTemp;
+                    ECode ec = RealStartActivityLocked(hr, app, TRUE, TRUE, &bTemp);
+                    if (FAILED(ec)) {
+                        AutoPtr<IComponentName> cn;
+                        hr->mIntent->GetComponent((IComponentName**)&cn);
+                        String info;
+                        cn->FlattenToShortString(&info);
+                        Slogger::W(TAG, "Exception in new application when starting activity %s", info.string());
+                        return ec;
+                    }
+
+                    if (bTemp) {
+                        didSomething = TRUE;
+                    }
                 }
             }
         }
@@ -727,7 +734,9 @@ Boolean ActivityStackSupervisor::AttachApplicationLocked(
     if (!didSomething) {
         EnsureActivitiesVisibleLocked(NULL, 0);
     }
-    return didSomething;
+
+    *result = didSomething;
+    return NOERROR;
 }
 
 Boolean ActivityStackSupervisor::AllResumedActivitiesIdle()

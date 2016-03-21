@@ -36,6 +36,7 @@
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/os/CPersistableBundle.h"
 #include "elastos/droid/os/CMessage.h"
+#include "elastos/droid/os/Environment.h"
 #include "elastos/droid/internal/os/CRuntimeInit.h"
 #include "elastos/droid/database/sqlite/CSQLiteDatabaseHelper.h"
 #include "elastos/droid/hardware/display/DisplayManagerGlobal.h"
@@ -103,6 +104,7 @@ using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::CPersistableBundle;
 using Elastos::Droid::Os::CMessage;
+using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Utility::IPair;
 using Elastos::Droid::Internal::Os::IRuntimeInit;
 using Elastos::Droid::Internal::Os::CRuntimeInit;
@@ -135,15 +137,15 @@ namespace Droid {
 namespace App {
 
 const String CActivityThread::TAG("CActivityThread");
-const Boolean CActivityThread::localLOGV = FALSE;
+const Boolean CActivityThread::localLOGV = TRUE;
 const Boolean CActivityThread::DEBUG_MESSAGES = TRUE;
-const Boolean CActivityThread::DEBUG_BROADCAST = TRUE;
-const Boolean CActivityThread::DEBUG_RESULTS = FALSE;
+const Boolean CActivityThread::DEBUG_BROADCAST = FALSE;
+const Boolean CActivityThread::DEBUG_RESULTS = TRUE;
 const Boolean CActivityThread::DEBUG_BACKUP = FALSE;
-const Boolean CActivityThread::DEBUG_CONFIGURATION = FALSE;
-const Boolean CActivityThread::DEBUG_SERVICE = FALSE;
-const Boolean CActivityThread::DEBUG_MEMORY_TRIM = FALSE;
-const Boolean CActivityThread::DEBUG_PROVIDER = FALSE;
+const Boolean CActivityThread::DEBUG_CONFIGURATION = TRUE;
+const Boolean CActivityThread::DEBUG_SERVICE = TRUE;
+const Boolean CActivityThread::DEBUG_MEMORY_TRIM = TRUE;
+const Boolean CActivityThread::DEBUG_PROVIDER = TRUE;
 
 const Int64 CActivityThread::MIN_TIME_BETWEEN_GCS;
 const Int32 CActivityThread::SQLITE_MEM_RELEASED_EVENT_LOG_TAG;
@@ -165,13 +167,13 @@ static AutoPtr<IPattern> InitPATTERN_SEMICOLON()
 }
 
 AutoPtr<IIPackageManager> CActivityThread::sPackageManager;
-pthread_key_t CActivityThread::sCurrentBroadcastIntentKey;
 AutoPtr<IHandler> CActivityThread::sMainThreadHandler;
 AutoPtr<IPattern> CActivityThread::PATTERN_SEMICOLON = InitPATTERN_SEMICOLON();
 AutoPtr<IActivityThread> CActivityThread::sCurrentActivityThread;
 
+pthread_key_t CActivityThread::sCurrentBroadcastIntentKey;
 pthread_key_t CActivityThread::sKey;
-Boolean CActivityThread::sHaveKey;
+pthread_once_t CActivityThread::sKeyOnce = PTHREAD_ONCE_INIT;
 
 
 CAR_INTERFACE_IMPL(CActivityThread::RequestAssistContextExtras, Object, IRequestAssistContextExtras)
@@ -1164,33 +1166,6 @@ CAR_INTERFACE_IMPL(CActivityThread, Object, IActivityThread)
 
 CAR_OBJECT_IMPL(CActivityThread)
 
-CActivityThread::CActivityThread()
-    : mCurDefaultDisplayDpi(0)
-    , mDensityCompatMode(0)
-    , mSystemThread(FALSE)
-    , mJitEnabled(FALSE)
-    , mSomeActivitiesChanged(FALSE)
-    , mGcIdlerScheduled(FALSE)
-{
-    ASSERT_SUCCEEDED(CApplicationThread::New((IApplicationThread**)&mAppThread));
-    ((CApplicationThread*)mAppThread.Get())->mAThread = this;
-    mLooper = Looper::GetMyLooper();
-
-    mResourcesManager = CResourcesManager::GetInstance();
-    mH = new H(this);
-}
-
-CActivityThread::~CActivityThread()
-{
-    mOnPauseListeners.Clear();
-}
-
-ECode CActivityThread::constructor()
-{
-    InitTLS();
-    return NOERROR;
-}
-
 static void ActivityThreadDestructor(void* st)
 {
     IActivityThread* obj = static_cast<IActivityThread*>(st);
@@ -1207,17 +1182,42 @@ static void IntentDestructor(void* st)
     }
 }
 
-void CActivityThread::InitTLS()
+static void MakeKey()
 {
-    if (!sHaveKey) {
-        Int32 UNUSED(result) = pthread_key_create(&sKey, ActivityThreadDestructor);
-        assert(result == 0);
+    Int32 UNUSED(result) = pthread_key_create(&CActivityThread::sKey, ActivityThreadDestructor);
+    assert(result == 0);
 
-        result = pthread_key_create(&sCurrentBroadcastIntentKey, IntentDestructor);
-        assert(result == 0);
+    result = pthread_key_create(&CActivityThread::sCurrentBroadcastIntentKey, IntentDestructor);
+    assert(result == 0);
+}
 
-        sHaveKey = TRUE;
-    }
+CActivityThread::CActivityThread()
+    : mCurDefaultDisplayDpi(0)
+    , mDensityCompatMode(0)
+    , mSystemThread(FALSE)
+    , mJitEnabled(FALSE)
+    , mSomeActivitiesChanged(FALSE)
+    , mGcIdlerScheduled(FALSE)
+{
+}
+
+CActivityThread::~CActivityThread()
+{
+    mOnPauseListeners.Clear();
+}
+
+ECode CActivityThread::constructor()
+{
+    pthread_once(&sKeyOnce, MakeKey);
+
+    ASSERT_SUCCEEDED(CApplicationThread::New((IApplicationThread**)&mAppThread));
+    ((CApplicationThread*)mAppThread.Get())->mAThread = this;
+    mLooper = Looper::GetMyLooper();
+
+    mResourcesManager = CResourcesManager::GetInstance();
+    mH = new H(this);
+
+    return NOERROR;
 }
 
 AutoPtr<IActivityThread> CActivityThread::GetCurrentActivityThread()
@@ -1259,7 +1259,7 @@ AutoPtr<IApplication> CActivityThread::GetCurrentApplication()
 AutoPtr<IIPackageManager> CActivityThread::GetPackageManager()
 {
     if (sPackageManager != NULL) {
-        //Slogger::V("PackageManager", "returning cur default = " + sPackageManager);
+        // Slogger::V("PackageManager", "returning cur default = %s", TO_CSTR(sPackageManager));
         return sPackageManager;
     }
     AutoPtr<IInterface> b = ServiceManager::GetService(String("package"));
@@ -1374,7 +1374,7 @@ ECode CActivityThread::GetPackageInfo(
                 packageInfo = (LoadedPkg*)IObject::Probe(obj);
             }
         }
-        //Slog.i(TAG, "getPackageInfo " + packageName + ": " + packageInfo);
+        Slogger::I(TAG, "getPackageInfo %s : %s", packageName.string(), TO_CSTR(packageInfo));
         //if (packageInfo != NULL) Slog.i(TAG, "isUptoDate " + packageInfo.mResDir
         //        + ": " + packageInfo.mResources.getAssets().isUpToDate());
         AutoPtr<IAssetManager> assertmr;
@@ -1570,7 +1570,7 @@ ECode CActivityThread::GetApplicationThread(
     /* [out] */ IApplicationThread** thread)
 {
     VALIDATE_NOT_NULL(thread);
-    *thread = (IApplicationThread*)mAppThread;
+    *thread = mAppThread;
     REFCOUNT_ADD(*thread);
     return NOERROR;
 }
@@ -5154,7 +5154,7 @@ ECode CActivityThread::HandleBindApplication(
         // use hardware accelerated drawing, since this can add too much
         // overhead to the process.
        if (!CActivityManager::IsHighEndGfx()) {
-//            HardwareRenderer.disable(FALSE);
+            HardwareRenderer::Disable(FALSE);
        }
     }
 
@@ -5750,8 +5750,10 @@ ECode CActivityThread::ReleaseProvider(
     /* [in] */ Boolean stable,
     /* [out] */ Boolean* released)
 {
+    VALIDATE_NOT_NULL(released)
+    *released = FALSE;
+
     if (provider == NULL) {
-        *released = FALSE;
         return NOERROR;
     }
 
@@ -5773,8 +5775,9 @@ ECode CActivityThread::ReleaseProvider(
         Boolean lastRef = FALSE;
         if (stable) {
             if (prc->mStableCount == 0) {
-                if (DEBUG_PROVIDER) Slogger::V(TAG,
-                        "releaseProvider: stable ref count already 0, how?");
+                if (DEBUG_PROVIDER) {
+                    Slogger::V(TAG, "releaseProvider: stable ref count already 0, how?");
+                }
                 *released = FALSE;
                 return NOERROR;
             }
@@ -5793,8 +5796,8 @@ ECode CActivityThread::ReleaseProvider(
                         prc->mHolder->GetProviderInfo((IProviderInfo**)&pInfo);
                         String name;
                         IPackageItemInfo::Probe(pInfo)->GetName(&name);
-                        Slogger::V(TAG, "releaseProvider: No longer stable w/lastRef=%d - %s"
-                                , lastRef, name.string());
+                        Slogger::V(TAG, "releaseProvider: No longer stable w/lastRef=%d - %s",
+                            lastRef, name.string());
                     }
                     AutoPtr<IBinder> connection;
                     prc->mHolder->GetConnection((IBinder**)&connection);
@@ -5825,8 +5828,7 @@ ECode CActivityThread::ReleaseProvider(
                             prc->mHolder->GetProviderInfo((IProviderInfo**)&pInfo);
                             String name;
                             IPackageItemInfo::Probe(pInfo)->GetName(&name);
-                            Slogger::V(TAG, "releaseProvider: No longer unstable - %s"
-                                    , name.string());
+                            Slogger::V(TAG, "releaseProvider: No longer unstable - %s", name.string());
                         }
                         AutoPtr<IBinder> connection;
                         prc->mHolder->GetConnection((IBinder**)&connection);
@@ -5852,8 +5854,7 @@ ECode CActivityThread::ReleaseProvider(
                     prc->mHolder->GetProviderInfo((IProviderInfo**)&pInfo);
                     String name;
                     IPackageItemInfo::Probe(pInfo)->GetName(&name);
-                    Slogger::V(TAG, "releaseProvider: Enqueueing pending removal - %s"
-                            , name.string());
+                    Slogger::V(TAG, "releaseProvider: Enqueueing pending removal - %s", name.string());
                 }
                 prc->mRemovePending = TRUE;
                 AutoPtr<IMessage> msg;
@@ -6304,6 +6305,7 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
 ECode CActivityThread::Attach(
     /* [in] */ Boolean sys)
 {
+    Slogger::I(TAG, " >>> Enter Attach <<<");
     sCurrentActivityThread = this;
     mSystemThread = sys;
     if (!sys) {
@@ -6319,7 +6321,9 @@ ECode CActivityThread::Attach(
         runtimeInit->SetApplicationObject(IBinder::Probe(mAppThread));
         AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
 //         try {
+    Slogger::I(TAG, " >>> AttachApplication");
         mgr->AttachApplication(mAppThread);
+    Slogger::I(TAG, " <<< AttachApplication");
 //         } catch (RemoteException ex) {
 //             // Ignore
 //         }
@@ -6359,6 +6363,7 @@ ECode CActivityThread::Attach(
     GetWeakReference((IWeakReference**)&wr);
     AutoPtr<IComponentCallbacks> callbacks = new ConfigurationChangedCallbacks(wr);
     ViewRootImpl::AddConfigCallback(callbacks);
+    Slogger::I(TAG, " >>> Leave Attach <<<");
     return NOERROR;
 }
 
@@ -6368,9 +6373,10 @@ AutoPtr<IActivityThread> CActivityThread::GetSystemMain()
     // accelerated drawing, since this can add too much overhead to the
     // process.
     if (!CActivityManager::IsHighEndGfx()) {
-        // HardwareRenderer::Disable(TRUE);
-    } else {
-        // HardwareRenderer::EnableForegroundTrimming();
+        HardwareRenderer::Disable(TRUE);
+    }
+    else {
+        HardwareRenderer::EnableForegroundTrimming();
     }
 
     AutoPtr<CActivityThread> thread;
@@ -6418,12 +6424,11 @@ ECode CActivityThread::Main(
     CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
     helper->SetEnabled(FALSE);
 
-//    Environment.initForCurrentUser();
+    Environment::InitForCurrentUser();
 
     // Set the reporter for event logging in libcore
 //    EventLogger.setReporter(new EventLoggingReporter());
 
-    assert(0 && "TODO");
     // Security.addProvider(new AndroidKeyStoreProvider());
 
     // // Make sure TrustedCertificateStore looks in the right place for CA certificates
@@ -6449,9 +6454,11 @@ ECode CActivityThread::Main(
 //                LogPrinter(Log.DEBUG, "ActivityThread"));
 //    }
 
+    Slogger::I(TAG, "ActivityThread looper started.");
+
     Looper::Loop();
 
-    // throw new RuntimeException("Main thread loop unexpectedly exited");
+    Slogger::E(TAG, "RuntimeException: Main thread loop unexpectedly exited");
     return E_RUNTIME_EXCEPTION;
 }
 

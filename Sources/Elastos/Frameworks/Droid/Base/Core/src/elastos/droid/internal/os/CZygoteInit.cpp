@@ -56,6 +56,7 @@ namespace Droid {
 namespace Internal {
 namespace Os {
 
+static const Boolean DBG = TRUE;
 const String CZygoteInit::TAG("CZygoteInit");
 const String CZygoteInit::PROPERTY_DISABLE_OPENGL_PRELOADING("ro.zygote.disable_gl_preload");
 const String CZygoteInit::ANDROID_SOCKET_PREFIX("ANDROID_SOCKET_");
@@ -122,26 +123,28 @@ ECode CZygoteInit::RegisterZygoteSocket(
         Elastos::Core::CSystem::AcquireSingleton((Elastos::Core::ISystem**)&system);
 
         Int32 fileDesc;
-        // try {
+        AutoPtr<IFileDescriptor> fd;
+
         String env;
         system->GetEnv(fullSocketName, &env);
         if (env.IsNull()) {
-            Logger::E("CZygoteInit", "%s unset or invalid", fullSocketName.string());
+            Logger::E("CZygoteInit", "RegisterZygoteSocket %s unset or invalid", fullSocketName.string());
             return E_RUNTIME_EXCEPTION;
         }
 
         ECode ec = StringUtils::Parse(env, &fileDesc);
         if (FAILED(ec)) {
-            Logger::E("CZygoteInit", "%s, %s unset or invalid", fullSocketName.string(), env.string());
+            Logger::E("CZygoteInit", "RegisterZygoteSocket %s, %s unset or invalid",
+                fullSocketName.string(), env.string());
             return E_RUNTIME_EXCEPTION;
         }
-        // } catch (RuntimeException ex) {
-        //     throw new RuntimeException(
-        //             fullSocketName + " unset or invalid", ex);
-        // }
+
+        Logger::I("CZygoteInit", " RegisterZygoteSocket: %s, %s, fileDesc:%d",
+            fullSocketName.string(), env.string(), fileDesc);
 
         // try {
-        ec = CLocalServerSocket::New(CreateFileDescriptor(fileDesc), (ILocalServerSocket**)&sServerSocket);
+        fd = CreateFileDescriptor(fileDesc);
+        ec = CLocalServerSocket::New(fd, (ILocalServerSocket**)&sServerSocket);
         if (FAILED(ec) || sServerSocket == NULL) {
             Logger::E("CZygoteInit", "Error binding to local socket! %s, ec=%08x\n",
                 fullSocketName.string(), ec);
@@ -153,7 +156,6 @@ ECode CZygoteInit::RegisterZygoteSocket(
         // }
     }
 
-    Logger::I(TAG, " RegisterZygoteSocket %s: %p", socketName.string(), sServerSocket.Get());
     return NOERROR;
 }
 
@@ -162,16 +164,21 @@ ECode CZygoteInit::AcceptCommandPeer(
     /* [out] */ ZygoteConnection** peer)
 {
     VALIDATE_NOT_NULL(peer)
-    // try {
+    *peer = NULL;
+
     AutoPtr<ILocalSocket> socket;
-    FAIL_RETURN(sServerSocket->Accept((ILocalSocket**)&socket));
-    *peer = new ZygoteConnection(socket, abiList);
+    ECode ec = sServerSocket->Accept((ILocalSocket**)&socket);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "IOException during accept() %s", abiList.string());
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    AutoPtr<ZygoteConnection> conn = new ZygoteConnection();
+    FAIL_RETURN(conn->constructor(socket, abiList))
+
+    *peer = conn;
     REFCOUNT_ADD(*peer);
     return NOERROR;
-    // } catch (IOException ex) {
-    //     throw new RuntimeException(
-    //             "IOException during accept()", ex);
-    // }
 }
 
 void CZygoteInit::CloseServerSocket()
@@ -397,7 +404,11 @@ ECode CZygoteInit::StartSystemServer(
     /* [in] */ const String& socketName,
     /* [out] */ IRunnable** task)
 {
-    Logger::I(TAG, "CZygoteInit::StartSystemServer: abiList:[%s], socketName:[%s]", abiList.string(), socketName.string());
+    if (DBG) {
+        Logger::I(TAG, "CZygoteInit::StartSystemServer: abiList:[%s], socketName:[%s]",
+            abiList.string(), socketName.string());
+    }
+
     VALIDATE_NOT_NULL(task);
     *task = NULL;
 
@@ -437,7 +448,9 @@ ECode CZygoteInit::StartSystemServer(
     ZygoteConnection::ApplyDebuggerSystemProperty(parsedArgs);
     ZygoteConnection::ApplyInvokeWithSystemProperty(parsedArgs);
 
-    Logger::I(TAG, "Request to fork the system server process...");
+    if (DBG) {
+        Logger::I(TAG, "Request to fork the system server process...");
+    }
     /* Request to fork the system server process */
     pid = Zygote::ForkSystemServer(
             parsedArgs->mUid, parsedArgs->mGid,
@@ -450,7 +463,9 @@ ECode CZygoteInit::StartSystemServer(
 //        throw new RuntimeException(ex);
 //    }
 //
-    Logger::I(TAG, "Request to fork the system server process done pid: %d", pid);
+    if (DBG) {
+        Logger::I(TAG, "Request to fork the system server process done pid: %d", pid);
+    }
     /* For child process */
     if (pid == 0) {
         if (HasSecondZygote(abiList)) {
@@ -482,9 +497,11 @@ ECode CZygoteInit::PosixCapabilitiesAsBits(
 ECode CZygoteInit::Main(
     /* [in] */ const ArrayOf<String>& argv)
 {
-    Logger::I(TAG, "CZygoteInit::Main.");
-    for (Int32 i = 0; i < argv.GetLength(); i++) {
-        Logger::I(TAG, "  >> arg %d: %s", i, argv[i].string());
+    if (DBG) {
+        Logger::I(TAG, "CZygoteInit::Main.");
+        for (Int32 i = 0; i < argv.GetLength(); i++) {
+            Logger::I(TAG, "  >> arg %d: %s", i, argv[i].string());
+        }
     }
 
     // try {
@@ -543,7 +560,9 @@ ECode CZygoteInit::Main(
             if (task != NULL) goto _RUN_TASK_;
         }
 
-        Logger::V(TAG, "Accepting command socket connections");
+        if (DBG) {
+            Logger::V(TAG, "Accepting command socket connections");
+        }
         task = NULL;
         RunSelectLoop(abiList, (IRunnable**)&task);
         if (task != NULL) goto _RUN_TASK_;
@@ -712,7 +731,7 @@ ECode CZygoteInit::Getpgid(
     return NOERROR;
 }
 
-void CZygoteInit::ReopenStdio(
+ECode CZygoteInit::ReopenStdio(
     /* [in] */ IFileDescriptor* infd,
     /* [in] */ IFileDescriptor* outfd,
     /* [in] */ IFileDescriptor* errfd)
@@ -720,19 +739,19 @@ void CZygoteInit::ReopenStdio(
     Int32 fd;
     int err;
 
-    infd->GetDescriptor(&fd);
+    FAIL_RETURN(infd->GetDescriptor(&fd))
 
     do {
         err = dup2(fd, STDIN_FILENO);
     } while (err < 0 && errno == EINTR);
 
-    outfd->GetDescriptor(&fd);
+    FAIL_RETURN(outfd->GetDescriptor(&fd))
 
     do {
         err = dup2(fd, STDOUT_FILENO);
     } while (err < 0 && errno == EINTR);
 
-    errfd->GetDescriptor(&fd);
+    FAIL_RETURN(errfd->GetDescriptor(&fd))
 
     do {
         err = dup2(fd, STDERR_FILENO);

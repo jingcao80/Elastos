@@ -149,13 +149,15 @@ public:
     };
 
 public:
+    ZygoteConnection();
+
     /**
      * Constructs instance from connected socket.
      *
      * @param socket non-null; connected socket
      * @throws IOException
      */
-    ZygoteConnection(
+    CARAPI constructor(
         /* [in] */ ILocalSocket* socket,
         /* [in] */ const String& abiList);
 

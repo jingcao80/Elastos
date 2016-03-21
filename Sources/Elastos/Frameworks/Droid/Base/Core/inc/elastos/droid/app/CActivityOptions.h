@@ -11,7 +11,7 @@ using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::IRemoteCallback;
+using Elastos::Droid::Os::IIRemoteCallback;
 using Elastos::Droid::Os::IResultReceiver;
 using Elastos::Droid::Utility::IPair;
 using Elastos::Droid::Content::IContext;
@@ -45,7 +45,7 @@ CarClass(CActivityOptions)
 private:
     class AnimationStartedListener
         : public Object
-        , public IRemoteCallback
+        , public IIRemoteCallback
     {
     public:
         CAR_INTERFACE_DECL()
@@ -143,10 +143,10 @@ public:
 
     /** @hide */
     CARAPI GetOnAnimationStartListener(
-        /* [out] */ IRemoteCallback** cb);
+        /* [out] */ IIRemoteCallback** cb);
 
     CARAPI SetOnAnimationStartListener(
-        /* [in] */ IRemoteCallback* cb);
+        /* [in] */ IIRemoteCallback* cb);
 
     CARAPI GetExitCoordinatorKey(
         /* [out] */ Int32* key);
@@ -540,7 +540,7 @@ private:
     Int32 mStartY;
     Int32 mWidth;
     Int32 mHeight;
-    AutoPtr<IRemoteCallback> mAnimationStartedListener;
+    AutoPtr<IIRemoteCallback> mAnimationStartedListener;
     AutoPtr<IResultReceiver> mTransitionReceiver;
     Boolean mIsReturning;
     AutoPtr<IArrayList> mSharedElementNames;

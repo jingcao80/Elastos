@@ -8,6 +8,7 @@
 #include "elastos/droid/system/OsConstants.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/Thread.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Logger.h>
@@ -28,6 +29,7 @@ using Elastos::Core::CInteger32;
 using Elastos::Core::IBoolean;
 using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::Thread;
 using Elastos::IO::CFileDescriptor;
 using Elastos::IO::IFileDescriptor;
@@ -414,6 +416,10 @@ static Int32 socket_write_all(
     return 0;
 }
 
+LocalSocketImpl::LocalSocketImpl()
+    : mFdCreatedInternally(FALSE)
+{}
+
 LocalSocketImpl::~LocalSocketImpl()
 {
     Close();
@@ -596,6 +602,47 @@ ECode LocalSocketImpl::NativeWrite(
 
     // A return of -1 above means an exception is pending
     if (err < 0) return E_IO_EXCEPTION;
+    return NOERROR;
+}
+
+ECode LocalSocketImpl::NativeAccept(
+    /* [in] */ IFileDescriptor* fdObj,
+    /* [in] */ ILocalSocketImpl* s,
+    /* [out] */ IFileDescriptor** resultFd)
+{
+    VALIDATE_NOT_NULL(resultFd)
+    *resultFd = NULL;
+
+    union {
+        struct sockaddr address;
+        struct sockaddr_un un_address;
+    } sa;
+
+    int ret;
+    int retFD;
+    int fd;
+    socklen_t addrlen;
+
+    if (s == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    FAIL_RETURN(fdObj->GetDescriptor(&fd))
+
+    do {
+        addrlen = sizeof(sa);
+        ret = accept(fd, &(sa.address), &addrlen);
+    } while (ret < 0 && errno == EINTR);
+
+    if (ret < 0) {
+        Logger::E("LocalSocketImpl", "failed to Accept %s, ret:%d", TO_CSTR(fdObj), ret);
+        return E_IO_EXCEPTION;
+    }
+
+    retFD = ret;
+
+    CFileDescriptor::New(resultFd);
+    (*resultFd)->SetDescriptor(retFD);
     return NOERROR;
 }
 
@@ -844,41 +891,7 @@ ECode LocalSocketImpl::Accept(
     /* [in] */ ILocalSocketImpl* s,
     /* [out] */ IFileDescriptor** result)
 {
-    VALIDATE_NOT_NULL(result)
-    *result = NULL;
-
-    union {
-        struct sockaddr address;
-        struct sockaddr_un un_address;
-    } sa;
-
-    int ret;
-    Int32 retFD;
-    Int32 fd;
-    socklen_t addrlen;
-
-    if (s == NULL) {
-        *result = NULL;
-        return E_NULL_POINTER_EXCEPTION;
-    }
-
-    fileDescriptor->GetDescriptor(&fd);
-
-    do {
-        addrlen = sizeof(sa);
-        ret = accept(fd, &(sa.address), &addrlen);
-    } while (ret < 0 && errno == EINTR);
-
-    if (ret < 0) {
-        *result = NULL;
-        return E_IO_EXCEPTION;
-    }
-
-    retFD = ret;
-
-    CFileDescriptor::New(result);
-    (*result)->SetDescriptor(retFD);
-    return NOERROR;
+    return NativeAccept(fileDescriptor, s, result);
 }
 
 ECode LocalSocketImpl::constructor()
@@ -890,6 +903,7 @@ ECode LocalSocketImpl::constructor(
     /* [in] */ IFileDescriptor* fd)
 {
     mFd = fd;
+    assert(mFd != NULL);
     return NOERROR;
 }
 
@@ -898,8 +912,9 @@ ECode LocalSocketImpl::ToString(
 {
     VALIDATE_NOT_NULL(result)
 
-    Object::ToString(result);
-    result->AppendFormat(" fd:%s", Object::ToString(mFd.Get()).string());
+    StringBuilder sb("LocalSocketImpl: fd:");
+    sb += Object::ToString(mFd);
+    *result = sb.ToString();
     return NOERROR;
 }
 
@@ -921,7 +936,7 @@ ECode LocalSocketImpl::Create(
                 osType = OsConstants::_SOCK_SEQPACKET;
                 break;
             default:
-                Logger::E("LocalSocketImpl", "unknown sockType");
+                Logger::E("LocalSocketImpl", "unknown sockType %d");
                 return E_ILLEGAL_STATE_EXCEPTION;
         }
         // try {
@@ -1008,8 +1023,11 @@ ECode LocalSocketImpl::Accept(
         return E_IO_EXCEPTION;
     }
 
-    ((LocalSocketImpl*)s)->mFd = NULL;
-    ((LocalSocketImpl*)s)->mFdCreatedInternally = TRUE;
+    AutoPtr<IFileDescriptor> fd;
+    LocalSocketImpl* lsi = (LocalSocketImpl*)s;
+    FAIL_RETURN(NativeAccept(mFd, s, (IFileDescriptor**)&fd))
+    lsi->mFd = fd;
+    lsi->mFdCreatedInternally = TRUE;
     return NOERROR;
 }
 
@@ -1096,15 +1114,17 @@ ECode LocalSocketImpl::GetFileDescriptor(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mFd);
+    *result = mFd;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode LocalSocketImpl::SupportsUrgentData(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-
-    FUNC_RETURN(FALSE)
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode LocalSocketImpl::SendUrgentData(
@@ -1129,7 +1149,9 @@ ECode LocalSocketImpl::GetOption(
     if (optID == ISocketOptions::_SO_TIMEOUT) {
         AutoPtr<IInteger32> i32;
         CInteger32::New(0, (IInteger32**)&i32);
-        FUNC_RETURN(IInterface::Probe(i32))
+        *result = i32.Get();
+        REFCOUNT_ADD(*result);
+        return NOERROR;
     }
 
     Int32 value;
@@ -1139,12 +1161,16 @@ ECode LocalSocketImpl::GetOption(
         case ISocketOptions::_SO_RCVBUF:
         case ISocketOptions::_SO_SNDBUF: {
             CInteger32::New(value, (IInteger32**)&i32);
-            FUNC_RETURN(IInterface::Probe(i32))
+            *result = i32.Get();
+            REFCOUNT_ADD(*result);
+            return NOERROR;
         }
         case ISocketOptions::_SO_REUSEADDR:
         default: {
             CInteger32::New(value, (IInteger32**)&i32);
-            FUNC_RETURN(IInterface::Probe(i32))
+            *result = i32.Get();
+            REFCOUNT_ADD(*result);
+            return NOERROR;
         }
     }
     return NOERROR;
@@ -1205,14 +1231,14 @@ ECode LocalSocketImpl::GetAncillaryFileDescriptors(
 
         mInboundFileDescriptors = NULL;
     }
-    FUNC_RETURN(rev)
+    *result = rev;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode LocalSocketImpl::GetPeerCredentials(
     /* [out] */ ICredentials** result)
 {
-    VALIDATE_NOT_NULL(result);
-
     return NativeGetPeerCredentials(mFd, result);
 }
 

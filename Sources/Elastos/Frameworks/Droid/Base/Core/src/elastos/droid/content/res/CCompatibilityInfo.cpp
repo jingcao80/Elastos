@@ -25,10 +25,9 @@ namespace Droid {
 namespace Content {
 namespace Res {
 
-//==============================================================================
-//                  CCompatibilityInfo::Translator
-//==============================================================================
-
+//===============================================================
+// CCompatibilityInfo::Translator
+//===============================================================
 CAR_INTERFACE_IMPL(CCompatibilityInfo::Translator, Object, ICompatibilityInfoTranslator)
 
 CCompatibilityInfo::Translator::Translator(
@@ -205,12 +204,10 @@ ECode CCompatibilityInfo::Translator::GetTranslatedTouchableArea(
     return NOERROR;
 }
 
-
-//==============================================================================
-//                  CCompatibilityInfo
-//==============================================================================
-
-AutoPtr<ICompatibilityInfo> CCompatibilityInfo::InitDefaultCompatibilityInfo()
+//===============================================================
+// CCompatibilityInfo
+//===============================================================
+static AutoPtr<ICompatibilityInfo> InitDefaultCompatibilityInfo()
 {
     AutoPtr<ICompatibilityInfo> info;
     ASSERT_SUCCEEDED(CCompatibilityInfo::New((ICompatibilityInfo**)&info));
@@ -218,7 +215,7 @@ AutoPtr<ICompatibilityInfo> CCompatibilityInfo::InitDefaultCompatibilityInfo()
 }
 
 INIT_PROI_3 const AutoPtr<ICompatibilityInfo> CCompatibilityInfo::DEFAULT_COMPATIBILITY_INFO
-        = CCompatibilityInfo::InitDefaultCompatibilityInfo();
+        = InitDefaultCompatibilityInfo();
 
 const Int32 CCompatibilityInfo::SCALING_REQUIRED = 1;
 const Int32 CCompatibilityInfo::ALWAYS_NEEDS_COMPAT = 2;
@@ -509,11 +506,25 @@ ECode CCompatibilityInfo::GetApplicationDensity(
     return NOERROR;
 }
 
+ECode CCompatibilityInfo::SetApplicationDensity(
+    /* [in] */ Int32 applicationDensity)
+{
+    mApplicationDensity = applicationDensity;
+    return NOERROR;
+}
+
 ECode CCompatibilityInfo::GetApplicationScale(
     /* [out] */ Float* applicationScale)
 {
     VALIDATE_NOT_NULL(applicationScale);
     *applicationScale = mApplicationScale;
+    return NOERROR;
+}
+
+ECode CCompatibilityInfo::SetApplicationScale(
+    /* [in] */ Float applicationScale)
+{
+    mApplicationScale = applicationScale;
     return NOERROR;
 }
 

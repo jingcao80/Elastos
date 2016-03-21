@@ -27,7 +27,9 @@ class CoreSettingsObserver
     : public ContentObserver
 {
 public:
-    CoreSettingsObserver(
+    CoreSettingsObserver();
+
+    CARAPI constructor(
         /* [in] */ CActivityManagerService* activityManagerService);
 
     CARAPI_(AutoPtr<IBundle>) GetCoreSettingsLocked();

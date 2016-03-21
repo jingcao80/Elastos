@@ -6,6 +6,7 @@
 #include "elastos/droid/internal/os/ZygoteConnection.h"
 #include "elastos/droid/internal/os/CZygoteInit.h"
 #include "elastos/droid/internal/os/RuntimeInit.h"
+#include "elastos/droid/internal/os/WrapperInit.h"
 #include "elastos/droid/internal/os/Zygote.h"
 #include "elastos/droid/os/SELinux.h"
 #include "elastos/droid/os/Process.h"
@@ -37,6 +38,8 @@ using Elastos::IO::IDataInput;
 using Elastos::IO::IDataOutput;
 using Elastos::IO::CPrintStream;
 using Elastos::Core::StringUtils;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::Utility::Logging::Logger;
 using Libcore::IO::IIoUtils;
 using Libcore::IO::CIoUtils;
@@ -46,6 +49,7 @@ namespace Droid {
 namespace Internal {
 namespace Os {
 
+static const Boolean DBG = TRUE;
 const String ZygoteConnection::TAG("ZygoteConnection");
 const Int32 ZygoteConnection::CONNECTION_TIMEOUT_MILLIS;
 const Int32 ZygoteConnection::MAX_ZYGOTE_ARGC;
@@ -242,10 +246,10 @@ ECode ZygoteConnection::Arguments::ParseArgs(
         }
     }
 
-    // if (runtimeInit && classpath != null) {
-    //     throw new IllegalArgumentException(
-    //             "--runtime-init and -classpath are incompatible");
-    // }
+    if (mRuntimeInit && mClasspath != NULL) {
+        Logger::E(TAG, "IllegalArgumentException: --runtime-init and -classpath are incompatible");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
     mRemainingArgs = ArrayOf<String>::Alloc(args.GetLength() - curArg);
 
@@ -255,37 +259,54 @@ ECode ZygoteConnection::Arguments::ParseArgs(
     return NOERROR;
 }
 
-ZygoteConnection::ZygoteConnection(
+ZygoteConnection::ZygoteConnection()
+{}
+
+ECode ZygoteConnection::constructor(
     /* [in] */ ILocalSocket* socket,
     /* [in] */ const String& abiList)
-    : mSocket(socket)
-    , mAbiList(abiList)
 {
-    AutoPtr<IOutputStream> out;
-    socket->GetOutputStream((IOutputStream**)&out);
-    CDataOutputStream::New(out, (IDataOutputStream**)&mSocketOutStream);
+    mSocket = socket;
+    mAbiList = abiList;
 
     AutoPtr<IInputStream> in;
-    socket->GetInputStream((IInputStream**)&in);
-    AutoPtr<IInputStreamReader> reader;
-    CInputStreamReader::New(in, (IInputStreamReader**)&reader);
-    CBufferedReader::New(IReader::Probe(reader), 256, (IBufferedReader**)&mSocketReader);
+    AutoPtr<IOutputStream> out;
+    AutoPtr<IReader> reader;
+    AutoPtr<IFileDescriptor> fd;
+
+    ECode ec = socket->GetOutputStream((IOutputStream**)&out);
+    FAIL_GOTO(ec, _EXIT_)
+
+    ec = CDataOutputStream::New(out, (IDataOutputStream**)&mSocketOutStream);
+    FAIL_GOTO(ec, _EXIT_)
+
+    ec = socket->GetInputStream((IInputStream**)&in);
+    FAIL_GOTO(ec, _EXIT_)
+
+    ec = CInputStreamReader::New(in, (IReader**)&reader);
+    FAIL_GOTO(ec, _EXIT_)
+
+    ec = CBufferedReader::New(reader, 256, (IBufferedReader**)&mSocketReader);
+    FAIL_GOTO(ec, _EXIT_)
 
     mSocket->SetSoTimeout(CONNECTION_TIMEOUT_MILLIS);
 
     // try {
-    ECode ec = mSocket->GetPeerCredentials((ICredentials**)&mPeer);
-    if (ec == (ECode)E_IO_EXCEPTION) {
+    ec = mSocket->GetPeerCredentials((ICredentials**)&mPeer);
+    if (FAILED(ec)) {
         Logger::E(TAG, "Cannot read peer credentials");
+        goto _EXIT_;
     }
-    // } catch (IOException ex) {
-    //     Log.e(TAG, "Cannot read peer credentials", ex);
-    //     throw ex;
-    // }
 
-    AutoPtr<IFileDescriptor> fd;
     mSocket->GetFileDescriptor((IFileDescriptor**)&fd);
     mPeerSecurityContext = SELinux::GetPeerContext(fd);
+
+_EXIT_:
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Cannot create ZygoteConnection with abi list: [%s]", abiList.string());
+        return E_IO_EXCEPTION;
+    }
+    return ec;
 }
 
 void ZygoteConnection::CheckTime(
@@ -336,18 +357,25 @@ Boolean ZygoteConnection::RunOnce(
         return TRUE;
     }
 
+    if (DBG) {
+        Int32 size = args != NULL ? args->GetLength() : 0;
+        Logger::I(TAG, " ZygoteConnection::RunOnce with %d args:", size);
+        for (Int32 i = 0; i < size; ++i) {
+            Logger::I(TAG, " arg %d : [%s]", i, (*args)[i].string());
+        }
+    }
+
     /** the stderr of the most recent request, if avail */
     AutoPtr<IPrintStream> newStderr;
 
     if (descriptors != NULL && descriptors->GetLength() >= 3) {
-        AutoPtr<IFileOutputStream> fops;
-        CFileOutputStream::New((*descriptors)[2], (IFileOutputStream**)&fops);
-        CPrintStream::New(IOutputStream::Probe(fops), (IPrintStream**)&newStderr);
+        AutoPtr<IOutputStream> fops;
+        CFileOutputStream::New((*descriptors)[2], (IOutputStream**)&fops);
+        CPrintStream::New(fops, (IPrintStream**)&newStderr);
     }
 
     Int32 pid = -1;
-    AutoPtr<IFileDescriptor> childPipeFd;
-    AutoPtr<IFileDescriptor> serverPipeFd;
+    AutoPtr<IFileDescriptor> childPipeFd, serverPipeFd;
 
     ec = NOERROR;
     do {
@@ -390,8 +418,7 @@ Boolean ZygoteConnection::RunOnce(
             List< Int32Array >::Iterator it;
             Int32 i = 0;
             for (it = parsedArgs->mRlimits->Begin(); it != parsedArgs->mRlimits->End(); ++it) {
-                Int32Array array = *it;
-                rlimits->Set(i++, array);
+                rlimits->Set(i++, *it);
             }
        }
 
@@ -442,6 +469,12 @@ Boolean ZygoteConnection::RunOnce(
 
         CheckTime(startTime, String("zygoteConnection.runOnce: preForkAndSpecialize"));
 
+        if (DBG) {
+            Logger::I(TAG, "ZygoteConnection::RunOnce start ForkAndSpecialize: uid:%d, gid:%d, "
+                "niceName:%s, InstructionSet:%s, AppDataDir:%s",
+                parsedArgs->mUid, parsedArgs->mGid, parsedArgs->mNiceName.string(),
+                parsedArgs->mInstructionSet.string(), parsedArgs->mAppDataDir.string());
+        }
         pid = Zygote::ForkAndSpecialize(parsedArgs->mUid, parsedArgs->mGid, parsedArgs->mGids,
                 parsedArgs->mDebugFlags, rlimits, parsedArgs->mMountExternal, parsedArgs->mSeInfo,
                 parsedArgs->mNiceName, fdsToClose, parsedArgs->mInstructionSet, parsedArgs->mAppDataDir);
@@ -738,9 +771,13 @@ ECode ZygoteConnection::HandleChildProc(
     /* [in] */ Arguments* parsedArgs,
     /* [in] */ ArrayOf<IFileDescriptor*>* descriptors,
     /* [in] */ IFileDescriptor* pipeFd,
-    /* [in] */ IPrintStream* newStderr,
+    /* [in] */ IPrintStream* err,
     /* [out] */ IRunnable** task)
 {
+    VALIDATE_NOT_NULL(task)
+
+    AutoPtr<IPrintStream> newStderr = err;
+    ECode ec = NOERROR;
     /**
      * By the time we get here, the native code has closed the two actual Zygote
      * socket connections, and substituted /dev/null in their place.  The LocalSocket
@@ -751,47 +788,50 @@ ECode ZygoteConnection::HandleChildProc(
 
     if (descriptors != NULL) {
         // try {
-        CZygoteInit::ReopenStdio((*descriptors)[0],
-                (*descriptors)[1], (*descriptors)[2]);
-
+        ec = CZygoteInit::ReopenStdio((*descriptors)[0], (*descriptors)[1], (*descriptors)[2]);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "Error reopening stdio. ec=%08x", ec);
+        }
         AutoPtr<IIoUtils> ioUtils;
         CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
         for (Int32 i = 0; i < descriptors->GetLength(); ++i) {
             AutoPtr<IFileDescriptor> fd = (*descriptors)[i];
             ioUtils->CloseQuietly(fd);
         }
-//        newStderr = System.err;
-        // } catch (IOException ex) {
-        //     Log.e(TAG, "Error reopening stdio", ex);
-        // }
+
+        newStderr = NULL;
+        AutoPtr<ISystem> system;
+        CSystem::AcquireSingleton((ISystem**)&system);
+        system->GetErr((IPrintStream**)&newStderr);
     }
 
     if (!parsedArgs->mNiceName.IsNull()) {
         Process::SetArgV0(parsedArgs->mNiceName);
     }
 
+    if (DBG) {
+        Logger::I(TAG, "HandleChildProc: %s, RuntimeInit:%d, invokeWith:%s, sdkversion:%d",
+            parsedArgs->mNiceName.string(), parsedArgs->mRuntimeInit,
+            parsedArgs->mInvokeWith.string(), parsedArgs->mTargetSdkVersion);
+    }
     if (parsedArgs->mRuntimeInit) {
         if (!parsedArgs->mInvokeWith.IsNull()) {
-            assert(0);
-//            WrapperInit.execApplication(parsedArgs.invokeWith,
-//                    parsedArgs.niceName, parsedArgs.targetSdkVersion,
-//                    pipeFd, parsedArgs.remainingArgs);
+            WrapperInit::ExecApplication(parsedArgs->mInvokeWith,
+               parsedArgs->mNiceName, parsedArgs->mTargetSdkVersion,
+               pipeFd, parsedArgs->mRemainingArgs);
         }
         else {
             RuntimeInit::ZygoteInit(parsedArgs->mTargetSdkVersion,
-                    parsedArgs->mRemainingArgs, task);
+                parsedArgs->mRemainingArgs, task);
         }
     }
     else {
-        assert(0);
-//        String className;
-//        // try {
-//        className = parsedArgs.remainingArgs[0];
-//        // } catch (ArrayIndexOutOfBoundsException ex) {
-//        //     logAndPrintError(newStderr,
-//        //             "Missing required class name argument", null);
-//        //     return;
-//        // }
+        String className;
+        if (parsedArgs->mRemainingArgs == NULL || parsedArgs->mRemainingArgs->GetLength() == 0) {
+            LogAndPrintError(newStderr, String("Missing required class name argument"));
+            return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+        }
+        assert(0 && "TODO");
 //
 //        String[] mainArgs = new String[parsedArgs.remainingArgs.length - 1];
 //        System.arraycopy(parsedArgs.remainingArgs, 1,
@@ -840,23 +880,20 @@ Boolean ZygoteConnection::HandleParentProc(
         }
     }
 
+    ECode ec = NOERROR;
     Boolean usingWrapper = FALSE;
     if (pipeFd != NULL && pid > 0) {
-        AutoPtr<IFileInputStream> fis;
-        CFileInputStream::New(pipeFd, (IFileInputStream**)&fis);
+        AutoPtr<IInputStream> fis;
+        CFileInputStream::New(pipeFd, (IInputStream**)&fis);
         AutoPtr<IDataInputStream> is;
-        CDataInputStream::New((IInputStream*)fis.Get(), (IDataInputStream**)&is);
+        CDataInputStream::New(fis, (IDataInputStream**)&is);
         Int32 innerPid = -1;
-        // try {
-        IDataInput::Probe(is)->ReadInt32(&innerPid);
-        // } catch (IOException ex) {
-        //     Log.w(TAG, "Error reading pid from wrapped process, child may have died", ex);
-        // } finally {
-        //     try {
+
+        ec = IDataInput::Probe(is)->ReadInt32(&innerPid);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "Error reading pid from wrapped process, child may have died, ec=%08x", ec);
+        }
         ICloseable::Probe(is)->Close();
-        //     } catch (IOException ex) {
-        //     }
-        // }
 
         // Ensure that the pid reported by the wrapped process is either the
         // child process that we forked, or a descendant of it.
@@ -866,27 +903,28 @@ Boolean ZygoteConnection::HandleParentProc(
                 parentPid = Process::GetParentPid(parentPid);
             }
             if (parentPid > 0) {
-                // Log.i(TAG, "Wrapped process has pid " + innerPid);
+                if(DBG) Logger::I(TAG, "Wrapped process has pid %d", innerPid);
                 pid = innerPid;
                 usingWrapper = TRUE;
             }
             else {
-                // Log.w(TAG, "Wrapped process reported a pid that is not a child of "
-                //         + "the process that we forked: childPid=" + pid
-                //         + " innerPid=" + innerPid);
+                Logger::W(TAG, "Wrapped process reported a pid that is not a child of "
+                    "the process that we forked: childPid=%d, innerPid=%d", pid, innerPid);
             }
         }
     }
 
-    // try {
-    IDataOutput::Probe(mSocketOutStream)->WriteInt32(pid);
-    IDataOutput::Probe(mSocketOutStream)->WriteBoolean(usingWrapper);
-    // } catch (IOException ex) {
-    //     Log.e(TAG, "Error reading from command socket", ex);
-    //     return true;
-    // }
+    IDataOutput* op = IDataOutput::Probe(mSocketOutStream);
+    ec = op->WriteInt32(pid);
+    FAIL_GOTO(ec, _EXIT_)
+    ec = op->WriteBoolean(usingWrapper);
+    FAIL_GOTO(ec, _EXIT_)
 
     return FALSE;
+
+_EXIT_:
+    Logger::E(TAG, "Error reading from command socket. ec=%08x", ec);
+    return TRUE;
 }
 
 void ZygoteConnection::SetChildPgid(
@@ -897,16 +935,18 @@ void ZygoteConnection::SetChildPgid(
     Int32 ppid;
     mPeer->GetPid(&ppid);
     Int32 pgid;
-    CZygoteInit::Getpgid(ppid, &pgid);
+    ECode ec = CZygoteInit::Getpgid(ppid, &pgid);
+    FAIL_GOTO(ec, _EXIT_)
+
     CZygoteInit::Setpgid(pid, pgid);
-//    } catch (IOException ex) {
-//        // This exception is expected in the case where
-//        // the peer is not in our session
-//        // TODO get rid of this log message in the case where
-//        // getsid(0) != getsid(peer.getPid())
-//        Log.i(TAG, "Zygote: setpgid failed. This is "
-//            + "normal if peer is not in our session");
-//    }
+    return;
+
+_EXIT_:
+   // This exception is expected in the case where
+   // the peer is not in our session
+   // TODO get rid of this log message in the case where
+   // getsid(0) != getsid(peer.getPid())
+   Logger::I(TAG, "Zygote: setpgid failed. This is normal if peer is not in our session");
 }
 
 /**
