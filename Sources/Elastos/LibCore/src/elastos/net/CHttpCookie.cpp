@@ -771,9 +771,9 @@ ECode CHttpCookie::Equals(
             *result = TRUE;
         }
         else{
-            *result = mDomain.IsNull() ? cObj->mDomain.IsNull() : cObj->mDomain == mDomain;
-            *result = *result && (mName == cObj->mName);
-            *result = *result && (mPath == cObj->mPath);
+            *result = mDomain.IsNull() ? cObj->mDomain.IsNull() : mDomain.EqualsIgnoreCase(cObj->mDomain);
+            *result = *result && (mName.EqualsIgnoreCase(cObj->mName));
+            *result = *result && (mPath.Equals(cObj->mPath));
         }
     }
     return NOERROR;

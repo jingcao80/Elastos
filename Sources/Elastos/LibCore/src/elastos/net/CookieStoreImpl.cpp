@@ -3,21 +3,29 @@
 #include "CURI.h"
 #include "CHttpCookie.h"
 #include "CArrayList.h"
+#include "CHashMap.h"
 #include "Collections.h"
 #include "AutoLock.h"
 
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::Collections;
+using Elastos::Utility::IMapEntry;
 
 namespace Elastos {
 namespace Net {
 
 CAR_INTERFACE_IMPL(CookieStoreImpl, Object, ICookieStore)
 
+CookieStoreImpl::CookieStoreImpl()
+{
+    CHashMap::New((IMap**)&mMap);
+}
+
 CookieStoreImpl::~CookieStoreImpl()
 {
-    mMap.Clear();
+    mMap->Clear();
 }
 
 ECode CookieStoreImpl::Add(
@@ -26,27 +34,23 @@ ECode CookieStoreImpl::Add(
 {
     synchronized(this) {
         if (cookie == NULL) {
-            // throw new NullPointerException("cookie == null");
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            return E_NULL_POINTER_EXCEPTION;
         }
 
         AutoPtr<IURI> cookiesUri = GetCookiesUri(uri);
 
-        AutoPtr<List< AutoPtr<IHttpCookie> > > cookies = NULL;
-        HashMap<AutoPtr<IURI>, AutoPtr<List< AutoPtr<IHttpCookie> > > >::Iterator it =
-                mMap.Find(cookiesUri);
-        if (it != mMap.End()) {
-            cookies = it->mSecond;
-        }
-
+        AutoPtr<IList> cookies;
+        AutoPtr<IInterface> outObj;
+        mMap->Get(cookiesUri, (IInterface**)&outObj);
+        cookies = IList::Probe(outObj);
         if (cookies == NULL) {
-            cookies = new List< AutoPtr<IHttpCookie> >();
-            mMap[uri] = cookies;
+            CArrayList::New((IList**)&cookies);
+            mMap->Put(cookiesUri, cookies);
         }
         else {
             cookies->Remove(cookie);
         }
-        cookies->PushBack(cookie);
+        cookies->Add(cookie);
     }
     return NOERROR;
 }
@@ -57,7 +61,7 @@ AutoPtr<IURI> CookieStoreImpl::GetCookiesUri(
     if (uri == NULL) {
         return NULL;
     }
-//    try {
+
     String host;
     uri->GetHost(&host);
     AutoPtr<IURI> cookiesUri;
@@ -67,9 +71,6 @@ AutoPtr<IURI> CookieStoreImpl::GetCookiesUri(
     }
 
     return cookiesUri;
-    // } catch (URISyntaxException e) {
-    //     return uri; // probably a URI with no host
-    // }
 }
 
 ECode CookieStoreImpl::Get(
@@ -80,63 +81,79 @@ ECode CookieStoreImpl::Get(
 
     synchronized(this) {
         if (uri == NULL) {
-            // throw new NullPointerException("uri == null");
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            return E_NULL_POINTER_EXCEPTION;
         }
 
         AutoPtr<IList> outresult;
-        CArrayList::New((IArrayList**)&outresult);
+        CArrayList::New((IList**)&outresult);
 
         // get cookies associated with given URI. If none, returns an empty list
-        AutoPtr<List< AutoPtr<IHttpCookie> > > cookiesForUri;
-        HashMap<AutoPtr<IURI>, AutoPtr<List< AutoPtr<IHttpCookie> > > >::Iterator it =
-                mMap.Find(uri);
-        if (it != mMap.End()) {
-            cookiesForUri = it->mSecond;
-        }
+        AutoPtr<IList> cookiesForUri;
+        AutoPtr<IInterface> outObj;
+        mMap->Get(uri, (IInterface**)&outObj);
+        cookiesForUri = IList::Probe(outObj);
         if (cookiesForUri != NULL) {
-            List<AutoPtr<IHttpCookie> >::Iterator cookieIt = cookiesForUri->Begin();
-            while(cookieIt != cookiesForUri->End()) {
-                AutoPtr<IHttpCookie> cookie = *cookieIt;
-                Boolean hasExpired;
+            AutoPtr<IIterator> iterator;
+            cookiesForUri->GetIterator((IIterator**)&iterator);
+
+            Boolean isflag = FALSE, hasExpired = FALSE;
+            while (iterator->HasNext(&isflag), isflag) {
+                AutoPtr<IHttpCookie> cookie;
+                AutoPtr<IInterface> nextface;
+                iterator->GetNext((IInterface**)&nextface);
+                cookie = IHttpCookie::Probe(nextface);
                 if (cookie->HasExpired(&hasExpired), hasExpired) {
-                    cookieIt = cookiesForUri->Erase(cookieIt);
-                }
-                else {
-                    outresult->Add(cookie, &hasExpired);
-                    ++cookieIt;
+                    iterator->Remove();// remove expired cookies
+                } else {
+                    outresult->Add(cookie);
                 }
             }
         }
 
         // get all cookies that domain matches the URI
-        for (it = mMap.Begin(); it != mMap.End(); ++it) {
-            if (uri == it->mFirst/*uri.equals(entry.getKey()*/) {
+        AutoPtr<ArrayOf<IInterface*> > entries;
+        AutoPtr<ISet> entrySet;
+        mMap->GetEntrySet((ISet**)&entrySet);
+        (ICollection::Probe(entrySet))->ToArray((ArrayOf<IInterface*>**)&entries);
+        for (Int32 i = 0; i < entries->GetLength(); i++) {
+            AutoPtr<IMapEntry> entry = IMapEntry::Probe((*entries)[i]);
+            AutoPtr<IInterface> keyface;
+            AutoPtr<IInterface> valueface;
+            AutoPtr<IList> entryCookies;
+            entry->GetKey((IInterface**)&keyface);
+
+            Boolean isEqual = FALSE;
+            if (IObject::Probe(uri)->Equals(keyface, &isEqual), isEqual) {
                 continue; // skip the given URI; we've already handled it
             }
+            entry->GetValue((IInterface**)&valueface);
+            entryCookies = IList::Probe(valueface);
 
-            AutoPtr<List<AutoPtr<IHttpCookie> > > entryCookies = it->mSecond;
-            List<AutoPtr<IHttpCookie> >::Iterator cookieIt = entryCookies->Begin();
-            while (cookieIt != entryCookies->End()) {
-                AutoPtr<IHttpCookie> cookie = *cookieIt;
+            AutoPtr<IIterator> iterator;
+            entryCookies->GetIterator((IIterator**)&iterator);
+
+            Boolean isflag = FALSE, hasExpired = FALSE;
+            while (iterator->HasNext(&isflag), isflag) {
+                AutoPtr<IHttpCookie> cookie;
+                AutoPtr<IInterface> nextface;
+                iterator->GetNext((IInterface**)&nextface);
+                cookie = IHttpCookie::Probe(nextface);
+
                 String attr, host;
                 cookie->GetDomainAttr(&attr);
                 uri->GetHost(&host);
                 if (!CHttpCookie::IsDomainMatches(attr, host)) {
-                    ++cookieIt;
                     continue;
                 }
-                Boolean hasExpired;
+
                 if (cookie->HasExpired(&hasExpired), hasExpired) {
-                    cookieIt = entryCookies->Erase(cookieIt);
-                }
-                else {
+                    iterator->Remove();// remove expired cookies
+                } else {
                     Boolean found = FALSE;
                     outresult->Contains(cookie, &found);
                     if (!found) {
-                        outresult->Add(cookie, &found);
+                        outresult->Add(cookie);
                     }
-                    ++cookieIt;
                 }
             }
         }
@@ -153,25 +170,31 @@ ECode CookieStoreImpl::GetCookies(
 
     synchronized(this) {
         AutoPtr<IList> outresult;
-        CArrayList::New((IArrayList**)&outresult);
+        CArrayList::New((IList**)&outresult);
 
-        HashMap<AutoPtr<IURI>, AutoPtr<List< AutoPtr<IHttpCookie> > > >::Iterator it = mMap.Begin();
-        for (it = mMap.Begin(); it != mMap.End(); ++it) {
-            AutoPtr<List< AutoPtr<IHttpCookie> > >  list = it->mSecond;
-            List<AutoPtr<IHttpCookie> >::Iterator listIt = list->Begin();
-            while (listIt!= list->End()) {
-                AutoPtr<IHttpCookie> cookie = *listIt;
-                Boolean hasExpired;
+        AutoPtr<ICollection> collection;
+        AutoPtr<ArrayOf<IInterface*> > entries;
+        mMap->GetValues((ICollection**)&collection);
+        collection->ToArray((ArrayOf<IInterface*>**)&entries);
+        for (Int32 i = 0; i < entries->GetLength(); i++) {
+            AutoPtr<IList> entry = IList::Probe((*entries)[i]);
+            AutoPtr<IIterator> iterator;
+            entry->GetIterator((IIterator**)&iterator);
+
+            Boolean isflag = FALSE, hasExpired = FALSE;
+            while (iterator->HasNext(&isflag), isflag) {
+                AutoPtr<IHttpCookie> cookie;
+                AutoPtr<IInterface> nextface;
+                iterator->GetNext((IInterface**)&nextface);
+                cookie = IHttpCookie::Probe(nextface);
                 if (cookie->HasExpired(&hasExpired), hasExpired) {
-                    listIt = list->Erase(listIt);
-                }
-                else {
+                    iterator->Remove();// remove expired cookies
+                } else {
                     Boolean found = FALSE;
                     outresult->Contains(cookie, &found);
                     if (!found) {
-                        outresult->Add(cookie, &found);
+                        outresult->Add(cookie);
                     }
-                    ++listIt;
                 }
             }
         }
@@ -188,14 +211,11 @@ ECode CookieStoreImpl::GetURIs(
 
     synchronized(this) {
         AutoPtr<IList> outresult;
-        CArrayList::New((IArrayList**)&outresult);
+        AutoPtr<ISet> keyset;
+        mMap->GetKeySet((ISet**)&keyset);
+        CArrayList::New(ICollection::Probe(keyset), (IList**)&outresult);
 
-        Boolean isflag = FALSE;
-        HashMap<AutoPtr<IURI>, AutoPtr<List< AutoPtr<IHttpCookie> > > >::Iterator it;
-        for (it = mMap.Begin(); it != mMap.End(); ++it) {
-            AutoPtr<IURI> uri = it->mFirst;
-            outresult->Add(uri, &isflag);
-        }
+        Boolean isflag;
         outresult->Remove(NULL, &isflag); // sigh
         return Collections::UnmodifiableList(outresult, URIs);
     }
@@ -211,19 +231,18 @@ ECode CookieStoreImpl::Remove(
 
     synchronized(this) {
         if (cookie == NULL) {
-            //throw new NullPointerException("cookie == null");
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            return E_NULL_POINTER_EXCEPTION;
         }
 
-        AutoPtr<List< AutoPtr<IHttpCookie> > >  cookies = NULL;
-        HashMap<AutoPtr<IURI>, AutoPtr<List< AutoPtr<IHttpCookie> > > >::Iterator it =
-                mMap.Find(GetCookiesUri(uri));
-        if (it != mMap.End()) {
-            cookies = it->mSecond;
-        }
+        AutoPtr<IURI> cookiesUri = GetCookiesUri(uri);
+
+        AutoPtr<IList> cookies;
+        AutoPtr<IInterface> outObj;
+        mMap->Get(cookiesUri, (IInterface**)&outObj);
+        cookies = IList::Probe(outObj);
+
         if (cookies != NULL) {
-            cookies->Remove(cookie);
-            *succeeded = TRUE;
+            cookies->Remove(cookie, succeeded);
         }
         else {
             *succeeded = FALSE;
@@ -238,8 +257,10 @@ ECode CookieStoreImpl::RemoveAll(
     VALIDATE_NOT_NULL(succeeded);
 
     synchronized(this) {
-        *succeeded = mMap.Begin() != mMap.End();
-        mMap.Clear();
+        Boolean isEmpty;
+        mMap->IsEmpty(&isEmpty);
+        *succeeded = !isEmpty;
+        mMap->Clear();
     }
 
     return NOERROR;

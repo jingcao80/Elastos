@@ -101,17 +101,12 @@ ECode ServerSocket::constructor(
         mIsBound = TRUE;
         ec = mImpl->Listen(backlog > 0 ? backlog : DEFAULT_BACKLOG);
         FAIL_GOTO(ec, _EXIT_)
+
+        return NOERROR;
     }
 
 _EXIT_:
-
     Close();
-
-//    } catch (IOException e) {
-//        close();
-//        throw e;
-//    }
-
     return ec;
 }
 
@@ -337,7 +332,7 @@ ECode ServerSocket::Bind(
     }
 
     AutoLock lock(this);
-//    try {
+
     ECode ec = mImpl->Bind(addr, port);
     FAIL_GOTO(ec, _EXIT_)
 
@@ -347,10 +342,9 @@ ECode ServerSocket::Bind(
 
     ec = mImpl->Listen(backlog > 0 ? backlog : DEFAULT_BACKLOG);
     FAIL_GOTO(ec, _EXIT_)
-    // } catch (IOException e) {
-    //     close();
-    //     throw e;
-    // }
+
+    return NOERROR;
+
 _EXIT_:
     Close();
     return ec;
