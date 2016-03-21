@@ -88,19 +88,13 @@ namespace App {
 // IconPackHelper::IconCustomizer
 //==========================================================
 const AutoPtr<IRandom> IconPackHelper::IconCustomizer::sRandom = Init_sRandom();
-const AutoPtr<IIThemeService> IconPackHelper::IconCustomizer::sThemeService = Init_sThemeService();
+AutoPtr<IIThemeService> IconPackHelper::IconCustomizer::sThemeService;
 
 AutoPtr<IRandom> IconPackHelper::IconCustomizer::Init_sRandom()
 {
     AutoPtr<IRandom> r;
     CRandom::New((IRandom**)&r);
     return r;
-}
-
-AutoPtr<IIThemeService> IconPackHelper::IconCustomizer::Init_sThemeService()
-{
-    AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::THEME_SERVICE);
-    return IIThemeService::Probe(obj);
 }
 
 ECode IconPackHelper::IconCustomizer::GetComposedIconDrawable(
@@ -368,6 +362,10 @@ Boolean IconPackHelper::IconCustomizer::CacheComposedIcon(
     /* [in] */ const String& path)
 {
     // try {
+    if (sThemeService == NULL) {
+        AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::THEME_SERVICE);
+        sThemeService = IIThemeService::Probe(obj);
+    }
     Boolean result = FALSE;
     sThemeService->CacheComposedIcon(bmp, path, &result);
     return result;
