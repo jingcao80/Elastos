@@ -233,7 +233,7 @@ static AutoPtr<IStructTimeval> MakeStructTimeval(
 {
     AutoPtr<IStructTimeval> rst;
     CStructTimeval::New(static_cast<Int32>(tv.tv_sec), static_cast<Int32>(tv.tv_usec), (IStructTimeval**)&rst);
-    return NOERROR;
+    return rst;
 }
 
 static AutoPtr<IStructUcred> MakeStructUcred(

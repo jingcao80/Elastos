@@ -88,9 +88,11 @@ ECode CIoBridge::_Bind(
     /* [in] */ Int32 port)
 {
     AutoPtr<IInet6Address> inet6 = IInet6Address::Probe(inetAddress);
+    AutoPtr<IInet6Address> v6Addr;
+    AutoPtr<IInetAddress> arg = inetAddress;
     Int32 scopeid = 0;
     Boolean isLinkLocalAddress;
-    AutoPtr<IInet6Address> v6Addr;
+
     if (inet6 != NULL && ((inet6->GetScopeId(&scopeid), scopeid) == 0) &&
             (inetAddress->IsLinkLocalAddress(&isLinkLocalAddress), isLinkLocalAddress)) {
        // Linux won't let you bind a link-local address without a scope id. Find one.
@@ -108,12 +110,12 @@ ECode CIoBridge::_Bind(
         Int32 index = 0;
         nif->GetIndex(&index);
         CInet6Address::GetByAddress(hostname, outbyte, index, (IInet6Address**)&v6Addr);
+        arg = IInetAddress::Probe(v6Addr);
         // } catch (UnknownHostException ex) {
         //     // throw new AssertionError(ex); // Can't happen.
         // }
     }
     // try {
-    AutoPtr<IInetAddress> arg = IInetAddress::Probe(v6Addr);
     return CLibcore::sOs->Bind(fd, arg, port);
     // } catch (ErrnoException errnoException) {
     //    throw new BindException(errnoException.getMessage(), errnoException);
