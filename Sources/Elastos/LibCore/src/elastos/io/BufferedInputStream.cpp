@@ -59,7 +59,6 @@ ECode BufferedInputStream::Available(
 ECode BufferedInputStream::StreamClosed()
 {
     ALOGE("BufferedInputStream::StreamClosed: IOException, BufferedInputStream is closed");
-    assert(0 && "TODO");
     return E_IO_EXCEPTION;
 }
 
