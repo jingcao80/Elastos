@@ -591,40 +591,49 @@ AutoPtr<IThemeConfig> ThemeConfig::FromJson(
     return JsonSerializer::FromJson(json);
 }
 
-AutoPtr<IThemeConfig> ThemeConfig::GetBootTheme(
-    /* [in] */ IContentResolver* resolver)
+ECode ThemeConfig::GetBootTheme(
+    /* [in] */ IContentResolver* resolver,
+    /* [out] */ IThemeConfig** theme)
 {
-    return GetBootThemeForUser(resolver, IUserHandle::USER_OWNER);
+    return GetBootThemeForUser(resolver, IUserHandle::USER_OWNER, theme);
 }
 
-AutoPtr<IThemeConfig> ThemeConfig::GetBootThemeForUser(
+ECode ThemeConfig::GetBootThemeForUser(
     /* [in] */ IContentResolver* resolver,
-    /* [in] */ Int32 userHandle)
+    /* [in] */ Int32 userHandle,
+    /* [out] */ IThemeConfig** theme)
 {
+    VALIDATE_NOT_NULL(theme);
+    *theme = NULL;
+
     AutoPtr<IThemeConfig> bootTheme = sSystemConfig;
     // try {
     AutoPtr<ISettingsSecure> settingSecure;
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingSecure);
     String json;
-    settingSecure->GetStringForUser(resolver,
+    ECode ec = settingSecure->GetStringForUser(resolver,
             IConfiguration::THEME_PKG_CONFIGURATION_PERSISTENCE_PROPERTY,
             userHandle, &json);
+    FAIL_RETURN(ec);
     bootTheme = ThemeConfig::FromJson(json);
 
     // Handle upgrade Case: Previously the theme configuration was in separate fields
     if (bootTheme == NULL) {
         String overlayPkgName;
-        settingSecure->GetStringForUser(resolver,
+        ec = settingSecure->GetStringForUser(resolver,
                 IConfiguration::THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY,
                 userHandle, &overlayPkgName);
+        FAIL_RETURN(ec);
         String iconPackPkgName;
-        settingSecure->GetStringForUser(resolver,
+        ec = settingSecure->GetStringForUser(resolver,
                 IConfiguration::THEME_ICONPACK_PACKAGE_NAME_PERSISTENCE_PROPERTY,
                 userHandle, &iconPackPkgName);
+        FAIL_RETURN(ec);
         String fontPkgName;
-        settingSecure->GetStringForUser(resolver,
+        ec = settingSecure->GetStringForUser(resolver,
                 IConfiguration::THEME_FONT_PACKAGE_NAME_PERSISTENCE_PROPERTY,
                 userHandle, &fontPkgName);
+        FAIL_RETURN(ec);
 
         AutoPtr<IThemeConfigBuilder> builder;
         CThemeConfigBuilder::New((IThemeConfigBuilder**)&builder);
@@ -636,7 +645,9 @@ AutoPtr<IThemeConfig> ThemeConfig::GetBootThemeForUser(
     // } catch (SecurityException e) {
     //     Log.e(TAG, "Could not get boot theme", e);
     // }
-    return bootTheme;
+    *theme = bootTheme;
+    REFCOUNT_ADD(*theme);
+    return NOERROR;
 }
 
 AutoPtr<IThemeConfig> ThemeConfig::GetSystemTheme()

@@ -6,7 +6,7 @@
 #include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/content/res/CAssetManager.h"
 #include "elastos/droid/content/res/CResources.h"
-#include "elastos/droid/content/res/ThemeConfig.h"
+#include "elastos/droid/content/res/CThemeConfig.h"
 #include "elastos/droid/content/res/CThemeConfigBuilder.h"
 #include "elastos/droid/content/res/ResourcesKey.h"
 #include "elastos/droid/os/ServiceManager.h"
@@ -28,7 +28,7 @@ using Elastos::Droid::Content::Res::CConfiguration;
 using Elastos::Droid::Content::Res::IAssetManager;
 using Elastos::Droid::Content::Res::CAssetManager;
 using Elastos::Droid::Content::Res::CResources;
-using Elastos::Droid::Content::Res::ThemeConfig;
+using Elastos::Droid::Content::Res::CThemeConfig;
 using Elastos::Droid::Content::Res::IThemeConfigBuilder;
 using Elastos::Droid::Content::Res::CThemeConfigBuilder;
 using Elastos::Droid::Content::Res::ResourcesKey;
@@ -354,7 +354,11 @@ ECode CResourcesManager::GetTopLevelResources(
             // try {
             AutoPtr<IContentResolver> resolver;
             context->GetContentResolver((IContentResolver**)&resolver);
-            tc = ThemeConfig::GetBootTheme(resolver);
+            ECode ec = CThemeConfig::GetBootTheme(resolver, (IThemeConfig**)&tc);
+            if (FAILED(ec)) {
+                Logger::D(TAG, "ThemeConfig.getBootTheme failed, falling back to system theme");
+                tc = CThemeConfig::GetSystemTheme();
+            }
             config->SetThemeConfig(tc);
             // } catch (Exception e) {
             //     Slog.d(TAG, "ThemeConfig.getBootTheme failed, falling back to system theme", e);

@@ -16,7 +16,8 @@ ECode CThemeConfigHelper::FromJson(
     /* [out] */ IThemeConfig** themeConfig)
 {
     VALIDATE_NOT_NULL(themeConfig)
-    *themeConfig = ThemeConfig::FromJson(json);
+    AutoPtr<IThemeConfig> tc = ThemeConfig::FromJson(json);
+    *themeConfig = tc;
     REFCOUNT_ADD(*themeConfig)
     return NOERROR;
 }
@@ -26,9 +27,7 @@ ECode CThemeConfigHelper::GetBootTheme(
     /* [out] */ IThemeConfig** themeConfig)
 {
     VALIDATE_NOT_NULL(themeConfig)
-    *themeConfig = ThemeConfig::GetBootTheme(resolver);
-    REFCOUNT_ADD(*themeConfig)
-    return NOERROR;
+    return ThemeConfig::GetBootTheme(resolver, themeConfig);
 }
 
 ECode CThemeConfigHelper::GetBootThemeForUser(
@@ -37,16 +36,15 @@ ECode CThemeConfigHelper::GetBootThemeForUser(
     /* [out] */ IThemeConfig** themeConfig)
 {
     VALIDATE_NOT_NULL(themeConfig)
-    *themeConfig = ThemeConfig::GetBootThemeForUser(resolver, userHandle);
-    REFCOUNT_ADD(*themeConfig)
-    return NOERROR;
+    return ThemeConfig::GetBootThemeForUser(resolver, userHandle, themeConfig);
 }
 
 ECode CThemeConfigHelper::GetSystemTheme(
     /* [out] */ IThemeConfig** themeConfig)
 {
     VALIDATE_NOT_NULL(themeConfig)
-    *themeConfig = ThemeConfig::GetSystemTheme();
+    AutoPtr<IThemeConfig> tc = ThemeConfig::GetSystemTheme();
+    *themeConfig = tc;
     REFCOUNT_ADD(*themeConfig)
     return NOERROR;
 }
