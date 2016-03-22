@@ -42,14 +42,15 @@ ServerSocket::ServerSocket()
 ECode ServerSocket::constructor()
 {
     if (sFactory != NULL) {
-        return sFactory->CreateSocketImpl((ISocketImpl**)&mImpl);
+        FAIL_RETURN(sFactory->CreateSocketImpl((ISocketImpl**)&mImpl));
     }
     else {
         AutoPtr<CPlainServerSocketImpl> pss;
         FAIL_RETURN(CPlainServerSocketImpl::NewByFriend((CPlainServerSocketImpl**)&pss));
-        mImpl = (ISocketImpl*) pss->Probe(EIID_ISocketImpl);
-        return NOERROR;
+        mImpl = (ISocketImpl*)pss->Probe(EIID_ISocketImpl);
     }
+    mImpl->Create(TRUE);
+    return NOERROR;
 }
 
 ECode ServerSocket::constructor(
@@ -73,17 +74,11 @@ ECode ServerSocket::constructor(
     FAIL_RETURN(CheckListen(aPort));
     ECode ec = NOERROR;
     if (sFactory != NULL) {
-        ec = sFactory->CreateSocketImpl((ISocketImpl**)&mImpl);
-        if (FAILED(ec)) {
-            return ec;
-        }
+        FAIL_RETURN(sFactory->CreateSocketImpl((ISocketImpl**)&mImpl));
     }
     else {
         AutoPtr<CPlainServerSocketImpl> pss;
-        ec = CPlainServerSocketImpl::NewByFriend((CPlainServerSocketImpl**)&pss);
-        if (FAILED(ec)) {
-            return ec;
-        }
+        FAIL_RETURN(CPlainServerSocketImpl::NewByFriend((CPlainServerSocketImpl**)&pss));
         mImpl = (ISocketImpl*)pss->Probe(EIID_ISocketImpl);
     }
 
@@ -91,7 +86,7 @@ ECode ServerSocket::constructor(
 
     synchronized (this) {
         mImpl->Create(TRUE);
-    //    try {
+
         ec = mImpl->Bind(addr, aPort);
         FAIL_GOTO(ec, _EXIT_)
 
