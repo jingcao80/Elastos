@@ -478,6 +478,34 @@ int _DumpCLSID(RClassID rclsid)
     ALOGD("%s\n", rclsid.mUunm);
     return printf("%s\n", rclsid.mUunm);
 }
+
+void _DumpInterfaceProxy(CInterfaceProxy* ip)
+{
+    ALOGE("  >> interface index:%d, id:", ip->mIndex);
+    if (ip->mInfo) {
+        _DumpGUID(ip->mInfo->mIID);
+    }
+    else {
+        ALOGE("null");
+    }
+}
+
+void _DumpObjectProxy(CObjectProxy* op)
+{
+    if (op->mInfo) {
+        ALOGE(" >>> module: %s, CLSID:", op->mInfo->mUunm, op->mInfo->mInterfaceNum);
+        _DumpGUID(op->mInfo->mCLSID);
+    }
+
+    ALOGD(" >>> %d interfaces:", op->mInterfaceNum);
+    CInterfaceProxy* p = op->mInterfaces;
+    for (Int32 i = 0; i < op->mInterfaceNum; ++i) {
+        if (p) {
+            _DumpInterfaceProxy(p);
+        }
+        ++p;
+    }
+}
 #endif // _DEBUG || _MARSHAL_DEBUG
 
 ECode CInterfaceProxy::ProxyEntry(
@@ -493,7 +521,6 @@ ECode CInterfaceProxy::ProxyEntry(
 #ifndef _mips
     UInt32 argNum __attribute__((__unused__));
 #endif
-
 
     args++; // skip ret address
 
@@ -543,6 +570,14 @@ ECode CInterfaceProxy::ProxyEntry(
             "Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize));
     assert(inSize >= sizeof(MarshalHeader));
 
+// #if defined(_DEBUG) || defined(_MARSHAL_DEBUG)
+//     _DumpObjectProxy(thisPtr->mOwner);
+//     ALOGD(" >>> Current Interface:");
+//     _DumpInterfaceProxy(thisPtr);
+//     ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex, argNum);
+//     ALOGD(" >>> Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize);
+// #endif
+
     inParcel = new CRemoteParcel();
     ec = thisPtr->MarshalIn(methodIndex, args, inParcel);
 
@@ -561,13 +596,10 @@ ECode CInterfaceProxy::ProxyEntry(
         android::status_t st;
         if ((st = thisPtr->mOwner->mBinder->transact(IStub::INVOKE, *data, &reply, flags))
                 != android::NO_ERROR) {
-            if (thisPtr->mOwner && thisPtr->mOwner->mInfo) {
-                MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("package : %s, interfaceNum: %d",
-                    thisPtr->mOwner->mInfo->mUunm, thisPtr->mOwner->mInfo->mInterfaceNum));
-            }
-            MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("iid: "));
-            MARSHAL_DBGOUT(MSHDBG_ERROR, DUMP_GUID(thisPtr->mInfo->mIID));
-            MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("Method index(%d), args size(%d)\n", methodIndex + 4, argNum * 4));
+            MARSHAL_DBGOUT(MSHDBG_ERROR, _DumpObjectProxy(thisPtr->mOwner));
+            MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(" >>> Current Interface:"));
+            MARSHAL_DBGOUT(MSHDBG_ERROR, _DumpInterfaceProxy(thisPtr));
+            MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("Method index:%d, argNum: %d\n", methodIndex + 4, argNum));
             MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize));
             MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("Remote invoke failed. <status: 0x%x>\n", st));
 
@@ -603,17 +635,10 @@ ECode CInterfaceProxy::ProxyEntry(
                 ALOGE("proxy MarshalIn() failed. ec = %x\n", ec));
 
 #if defined(_DEBUG) || defined(_MARSHAL_DEBUG)
-        if (thisPtr->mOwner && thisPtr->mOwner->mInfo) {
-            ALOGE(" >>> package : %s, interfaceNum: %d",
-                thisPtr->mOwner->mInfo->mUunm, thisPtr->mOwner->mInfo->mInterfaceNum);
-        }
-
-        if (thisPtr->mInfo) {
-            ALOGE(" >>> interface id");
-            _DumpGUID(thisPtr->mInfo->mIID);
-        }
-
-        ALOGD(" >>> Method index(%d), args size(%d)\n", methodIndex, argNum * 4);
+        _DumpObjectProxy(thisPtr->mOwner);
+        ALOGD(" >>> Current Interface:");
+        _DumpInterfaceProxy(thisPtr);
+        ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex, argNum);
         ALOGD(" >>> Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize);
 
         assert(0);

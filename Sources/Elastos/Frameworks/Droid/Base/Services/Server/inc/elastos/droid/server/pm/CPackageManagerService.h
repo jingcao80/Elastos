@@ -2364,6 +2364,15 @@ private:
         /* [in] */ const String& processName,
         /* [in] */ Int32 uid);
 
+    static CARAPI_(void) SetApplicationInfoPaths(
+        /* [in] */ PackageParser::Package* pkg,
+        /* [in] */ const String& codePath,
+        /* [in] */ const String& baseCodePath,
+        /* [in] */ ArrayOf<String>* splitCodePaths,
+        /* [in] */ const String& resourcePath,
+        /* [in] */ const String& baseResourcePath,
+        /* [in] */ ArrayOf<String>* splitResourcePaths);
+
     CARAPI VerifySignaturesLP(
         /* [in] */ PackageSetting* pkgSetting,
         /* [in] */ PackageParser::Package* pkg);

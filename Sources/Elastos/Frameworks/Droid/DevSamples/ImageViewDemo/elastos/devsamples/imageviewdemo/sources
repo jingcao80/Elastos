@@ -1,4 +1,4 @@
-TARGET_NAME = ImageViewDemo
+TARGET_NAME = Elastos.DevSamples.ImageViewDemo
 TARGET_TYPE = eco
 
 CAR_FLAGS += -n -u
@@ -8,7 +8,7 @@ include $(MAKEDIR)/../../../../../sources.inc
 INCLUDES += $(MAKEDIR)
 INCLUDES += $(MAKEDIR)/../../../
 
-SOURCES = ImageViewDemo.car
+SOURCES = Elastos.DevSamples.ImageViewDemo.car
 SOURCES += R.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
@@ -23,5 +23,5 @@ LIBRARIES += -lm -licuuc -llog
 
 APPPACK = 1
 DIRRESOURCES += $(MAKEDIR)/res;
-APP_PACKAGE_NAME = elastos.devsamples.imageviewdemo
+APP_PACKAGE_NAME = Elastos.DevSamples.ImageViewDemo
 RES_NAMESPACE = Elastos.DevSamples.ImageViewDemo

@@ -1581,7 +1581,7 @@ ECode ActivityStackSupervisor::RealStartActivityLocked(
     r->mLaunchCount++;
     r->mLastLaunchTime = SystemClock::GetUptimeMillis();
 
-    //if (CActivityManagerService::localLOGV) Slogger::V(TAG, "Launching: " + r);
+    if (CActivityManagerService::localLOGV) Slogger::V(TAG, "Launching: %s", TO_CSTR(r));
 
     //app.activities.indexOf(r);
     Int32 idx = -1;
@@ -1598,152 +1598,161 @@ ECode ActivityStackSupervisor::RealStartActivityLocked(
     mService->UpdateLruProcessLocked(app, TRUE, NULL);
     mService->UpdateOomAdjLocked();
 
+    ECode ec = NOERROR;
     AutoPtr<ActivityStack> stack = r->mTask->mStack;
+
     //try {
-    {
-        if (app->mThread == NULL) {
-            //throw new RemoteException();
-            goto RemoteException;
-        }
-        //List<ResultInfo> results = NULL;
-        //List<Intent> newIntents = NULL;
-        AutoPtr< List< AutoPtr<ActivityResult> > > results;
-        AutoPtr< List< AutoPtr<IIntent> > > newIntents;
-        if (andResume) {
-            results = r->mResults;
-            newIntents = r->mNewIntents;
-        }
-        //if (CActivityManagerService::DEBUG_SWITCH) Slogger::V(TAG, "Launching: " + r
-        //        + " icicle=" + r.icicle
-        //        + " with results=" + results + " newIntents=" + newIntents
-        //        + " andResume=" + andResume);
-        if (andResume) {
-            //TODO EventLog.writeEvent(IEventLogTags::AM_RESTART_ACTIVITY,
-            //        r.userId, System.identityHashCode(r),
-            //        r.task.taskId, r.shortComponentName);
-        }
-        if (r->IsHomeActivity() && r->IsNotResolverActivity()) {
-            // Home process is the root process of the task.
-            //mService->mHomeProcess = r->mTask->mActivities.get(0).app;
-            AutoPtr<List<AutoPtr<ActivityRecord> > > activities = r->mTask->mActivities;
-            AutoPtr<ActivityRecord> ar = (*activities)[0];
-            mService->mHomeProcess = ar->mApp;
-        }
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
 
-        AutoPtr<IComponentName> icn;
-        r->mIntent->GetComponent((IComponentName**)&icn);
-        String packageName;
-        icn->GetPackageName(&packageName);
-        mService->EnsurePackageDexOpt(packageName);
-        r->mSleeping = FALSE;
-        r->mForceNewConfig = FALSE;
-        mService->ShowAskCompatModeDialogLocked(r);
-        AutoPtr<IApplicationInfo> appInfo;
-        IComponentInfo::Probe(r->mInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
-        r->mCompat = mService->CompatibilityInfoForPackageLocked(appInfo);
-        String profileFile;
-        AutoPtr<IParcelFileDescriptor> profileFd;
-        if (mService->mProfileApp.Equals(app->mProcessName)) {
-            if (mService->mProfileProc == NULL || mService->mProfileProc.Get() == app) {
-                mService->mProfileProc = app;
-                profileFile = mService->mProfileFile;
-                profileFd = mService->mProfileFd;
+    Int32 flags, hash;
+    String packageName, profileFile;
+    AutoPtr<IComponentName> icn;
+    AutoPtr<IApplicationInfo> appInfo;
+    AutoPtr<IIntent> slaIntent;
+    AutoPtr<IConfiguration> slaConfig;
+    AutoPtr< List< AutoPtr<ActivityResult> > > results;
+    AutoPtr< List< AutoPtr<IIntent> > > newIntents;
+    AutoPtr<IList> resultsList, newIntentsList;
+    AutoPtr<IParcelFileDescriptor> profileFd;
+    AutoPtr<IProfilerInfo> profilerInfo;
+    String info1;
+
+    if (app->mThread == NULL) {
+        ec = E_REMOTE_EXCEPTION;
+        goto _EXIT_;
+    }
+
+    if (andResume) {
+        results = r->mResults;
+        newIntents = r->mNewIntents;
+    }
+    if (CActivityManagerService::DEBUG_SWITCH) {
+        Slogger::V(TAG, "Launching: %s icicle=%s with results=%p newIntents=%p andResume=%d",
+            TO_CSTR(r), TO_CSTR(r->mIcicle), results.Get(), newIntents.Get(), andResume);
+    }
+    if (andResume) {
+        //TODO EventLog.writeEvent(IEventLogTags::AM_RESTART_ACTIVITY,
+        //        r.userId, System.identityHashCode(r),
+        //        r.task.taskId, r.shortComponentName);
+    }
+    if (r->IsHomeActivity() && r->IsNotResolverActivity()) {
+        // Home process is the root process of the task.
+        //mService->mHomeProcess = r->mTask->mActivities.get(0).app;
+        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = r->mTask->mActivities;
+        AutoPtr<ActivityRecord> ar = (*activities)[0];
+        mService->mHomeProcess = ar->mApp;
+    }
+
+    r->mIntent->GetComponent((IComponentName**)&icn);
+    icn->GetPackageName(&packageName);
+
+
+    icn->FlattenToShortString(&info1);
+    Slogger::I(TAG, "Launching %s, package:%s, intent packageName:%s, %s",
+        r->mProcessName.string(), r->mPackageName.string(), packageName.string(), info1.string());
+
+    mService->EnsurePackageDexOpt(packageName);
+    r->mSleeping = FALSE;
+    r->mForceNewConfig = FALSE;
+    mService->ShowAskCompatModeDialogLocked(r);
+    IComponentInfo::Probe(r->mInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+    r->mCompat = mService->CompatibilityInfoForPackageLocked(appInfo);
+    if (mService->mProfileApp.Equals(app->mProcessName)) {
+        if (mService->mProfileProc == NULL || mService->mProfileProc.Get() == app) {
+            mService->mProfileProc = app;
+            profileFile = mService->mProfileFile;
+            profileFd = mService->mProfileFd;
+        }
+    }
+    app->mHasShownUi = TRUE;
+    app->mPendingUiClean = TRUE;
+    if (profileFd != NULL) {
+        //try {
+        AutoPtr<IParcelFileDescriptor> tmpProfileFd;
+        ECode ec = profileFd->Dup((IParcelFileDescriptor**)&tmpProfileFd);
+        if (!FAILED(ec)) {
+            profileFd = tmpProfileFd;
+        }
+        else {
+            if (profileFd != NULL) {
+                profileFd->Close();
+                profileFd = NULL;
             }
         }
-        app->mHasShownUi = TRUE;
-        app->mPendingUiClean = TRUE;
-        if (profileFd != NULL) {
-            //try {
-            AutoPtr<IParcelFileDescriptor> tmpProfileFd;
-            ECode ec = profileFd->Dup((IParcelFileDescriptor**)&tmpProfileFd);
-            if (!FAILED(ec)) {
-                profileFd = tmpProfileFd;
-            } else {
-                //} catch (IOException e) {
-                if (profileFd != NULL) {
-                    //try {
-                    profileFd->Close();
-                    //} catch (IOException o) {
-                    //}
-                    profileFd = NULL;
-                }
-            }
-        //}
-        }
+    }
 
-        AutoPtr<IProfilerInfo> profilerInfo;
-        if (profileFile != NULL) {
-            CProfilerInfo::New(profileFile, profileFd, mService->mSamplingInterval,
-                    mService->mAutoStopProfiler, (IProfilerInfo**)&profilerInfo);
-        }
-        app->ForceProcessStateUpTo(IActivityManager::PROCESS_STATE_TOP);
-        AutoPtr<IIntent> slaIntent;
-        CIntent::New(r->mIntent, (IIntent**)&slaIntent);
-        AutoPtr<ISystem> system;
-        CSystem::AcquireSingleton((ISystem**)&system);
-        Int32 hash;
-        system->IdentityHashCode(TO_IINTERFACE(r), &hash);
-        AutoPtr<IConfiguration> slaConfig;
-        CConfiguration::New(mService->mConfiguration, (IConfiguration**)&slaConfig);
-        AutoPtr<IList> resultsList;
+    if (profileFile != NULL) {
+        CProfilerInfo::New(profileFile, profileFd, mService->mSamplingInterval,
+            mService->mAutoStopProfiler, (IProfilerInfo**)&profilerInfo);
+    }
+    app->ForceProcessStateUpTo(IActivityManager::PROCESS_STATE_TOP);
+    CIntent::New(r->mIntent, (IIntent**)&slaIntent);
+    system->IdentityHashCode(TO_IINTERFACE(r), &hash);
+    CConfiguration::New(mService->mConfiguration, (IConfiguration**)&slaConfig);
+
+    if (results) {
         CArrayList::New((IList**)&resultsList);
         List< AutoPtr<ActivityResult> >::Iterator iter = results->Begin();
         while (iter != results->End()) {
             resultsList->Add(TO_IINTERFACE(*iter));
             ++iter;
         }
-        AutoPtr<IList> newIntentsList;
+    }
+
+    if (newIntents) {
         CArrayList::New((IList**)&newIntentsList);
         List< AutoPtr<IIntent> >::Iterator iter2 = newIntents->Begin();
         while (iter2 != newIntents->End()) {
-            newIntentsList->Add(TO_IINTERFACE(*iter2));
+            newIntentsList->Add((*iter2).Get());
             ++iter2;
         }
-
-        app->mThread->ScheduleLaunchActivity(slaIntent, IBinder::Probe(r->mAppToken),
-                hash, r->mInfo, slaConfig,
-                r->mCompat, r->mTask->mVoiceInteractor, app->mRepProcState, r->mIcicle, r->mPersistentState,
-                resultsList, newIntentsList, !andResume, mService->IsNextTransitionForward(),
-                profilerInfo);
-
-        Int32 flags;
-        app->mInfo->GetFlags(&flags);
-        if ((flags&IApplicationInfo::FLAG_CANT_SAVE_STATE) != 0) {
-            // This may be a heavy-weight process!  Note that the package
-            // manager will ensure that only activity can run in the main
-            // process of the .apk, which is the only thing that will be
-            // considered heavy-weight.
-            String packageName;
-            IPackageItemInfo::Probe(app->mInfo)->GetPackageName(&packageName);
-            if (app->mProcessName.Equals(packageName)) {
-                if (mService->mHeavyWeightProcess != NULL
-                        && mService->mHeavyWeightProcess.Get() != app) {
-                    //Slogger::W(TAG, "Starting new heavy weight process " + app
-                    //        + " when already running "
-                    //        + mService.mHeavyWeightProcess);
-                }
-                mService->mHeavyWeightProcess = app;
-                AutoPtr<IMessage> msg;
-                mService->mHandler->ObtainMessage(
-                        CActivityManagerService::POST_HEAVY_NOTIFICATION_MSG, (IMessage**)&msg);
-                msg->SetObj(TO_IINTERFACE(r));
-                Boolean tmpRes;
-                mService->mHandler->SendMessage(msg, &tmpRes);
-            }
-        }
-    goto CONTINUE;;
-    //} catch (RemoteException e) {
     }
-RemoteException:
+
+    ec = app->mThread->ScheduleLaunchActivity(slaIntent, IBinder::Probe(r->mAppToken),
+        hash, r->mInfo, slaConfig,
+        r->mCompat, r->mTask->mVoiceInteractor, app->mRepProcState, r->mIcicle, r->mPersistentState,
+        resultsList, newIntentsList, !andResume, mService->IsNextTransitionForward(),
+        profilerInfo);
+    if (FAILED(ec)) goto _EXIT_;
+
+    app->mInfo->GetFlags(&flags);
+    if ((flags&IApplicationInfo::FLAG_CANT_SAVE_STATE) != 0) {
+        // This may be a heavy-weight process!  Note that the package
+        // manager will ensure that only activity can run in the main
+        // process of the .apk, which is the only thing that will be
+        // considered heavy-weight.
+        String packageName;
+        IPackageItemInfo::Probe(app->mInfo)->GetPackageName(&packageName);
+        if (app->mProcessName.Equals(packageName)) {
+            if (mService->mHeavyWeightProcess != NULL
+                    && mService->mHeavyWeightProcess.Get() != app) {
+                Slogger::W(TAG, "Starting new heavy weight process %s when already running %s",
+                    TO_CSTR(app), TO_CSTR(mService->mHeavyWeightProcess));
+            }
+            mService->mHeavyWeightProcess = app;
+            AutoPtr<IMessage> msg;
+            mService->mHandler->ObtainMessage(
+                CActivityManagerService::POST_HEAVY_NOTIFICATION_MSG, (IMessage**)&msg);
+            msg->SetObj(TO_IINTERFACE(r));
+            Boolean tmpRes;
+            mService->mHandler->SendMessage(msg, &tmpRes);
+        }
+    }
+
+_EXIT_:
+    if (FAILED(ec)) {
         if (r->mLaunchFailed) {
             // This is the second time we failed -- finish activity
             // and give up.
-            //Slog.e(TAG, "Second failure launching "
-            //      + r.intent.getComponent().flattenToShortString()
-            //      + ", giving up", e);
+            AutoPtr<IComponentName> icn;
+            r->mIntent->GetComponent((IComponentName**)&icn);
+            String info;
+            icn->FlattenToShortString(&info);
+            Slogger::E(TAG, "Second failure launching %s, giving up. ec=%08x", info.string(), ec);
             mService->AppDiedLocked(app);
-            stack->RequestFinishActivityLocked(IBinder::Probe(r->mAppToken), IActivity::RESULT_CANCELED, NULL,
-                    String("2nd-crash"), FALSE);
+            stack->RequestFinishActivityLocked(IBinder::Probe(r->mAppToken),
+                IActivity::RESULT_CANCELED, NULL, String("2nd-crash"), FALSE);
             *result = FALSE;
             return NOERROR;
         }
@@ -1751,27 +1760,27 @@ RemoteException:
         // This is the first time we failed -- restart process and
         // retry.
         app->mActivities.Remove(r);
-        //throw e;
-        return E_REMOTE_EXCEPTION;
-    //}
-CONTINUE:
+        return ec;
+    }
+
     r->mLaunchFailed = FALSE;
     if (stack->UpdateLRUListLocked(r)) {
-        //Slogger::W(TAG, "Activity " + r
-        //      + " being launched, but already in LRU list");
+        Slogger::W(TAG, "Activity %s being launched, but already in LRU list", TO_CSTR(r));
     }
 
     if (andResume) {
         // As part of the process of launching, ActivityThread also performs
         // a resume.
         stack->MinimalResumeActivityLocked(r);
-    } else {
+    }
+    else {
         // This activity is not starting in the resumed state... which
         // should look like we asked it to pause+stop (but remain visible),
         // and it has done so and reported back the current icicle and
         // other state.
-        //if (DEBUG_STATES) Slogger::V(TAG, "Moving to STOPPED: " + r
-        //        + " (starting in stopped state)");
+        if (DEBUG_STATES) {
+            Slogger::V(TAG, "Moving to STOPPED: %s (starting in stopped state)", TO_CSTR(r));
+        }
         r->mState = ActivityState_STOPPED;
         r->mStopped = TRUE;
     }
@@ -2796,7 +2805,7 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
     if (r->mResultTo == NULL && inTask == NULL && !addingToTask
             && (launchFlags & IIntent::FLAG_ACTIVITY_NEW_TASK) != 0) {
         if (IsLockTaskModeViolation(reuseTask)) {
-            //Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
+            //Slogger::E(TAG, "Attempted Lock Task Mode violation r=" + r);
             *result = IActivityManager::START_RETURN_LOCK_TASK_MODE_VIOLATION;
             return NOERROR;
         }
@@ -2828,7 +2837,7 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
     } else if (sourceRecord != NULL) {
         AutoPtr<TaskRecord> sourceTask = sourceRecord->mTask;
         if (IsLockTaskModeViolation(sourceTask)) {
-            //Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
+            //Slogger::E(TAG, "Attempted Lock Task Mode violation r=" + r);
             *result = IActivityManager::START_RETURN_LOCK_TASK_MODE_VIOLATION;
             return NOERROR;
         }
@@ -2892,7 +2901,7 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
         // The calling is asking that the new activity be started in an explicit
         // task it has provided to us.
         if (IsLockTaskModeViolation(inTask)) {
-            //Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
+            //Slogger::E(TAG, "Attempted Lock Task Mode violation r=" + r);
             *result = IActivityManager::START_RETURN_LOCK_TASK_MODE_VIOLATION;
             return NOERROR;
         }
@@ -4217,27 +4226,27 @@ ECode ActivityStackSupervisor::ValidateTopActivitiesLocked()
     ////     final ActivityState state = r == NULL ? ActivityState.DESTROYED : r.state;
     ////     if (isFrontStack(stack)) {
     ////         if (r == NULL) {
-    ////             Slog.e(TAG, "validateTop...: NULL top activity, stack=" + stack);
+    ////             Slogger::E(TAG, "validateTop...: NULL top activity, stack=" + stack);
     ////         } else {
     ////             final ActivityRecord pausing = stack.mPausingActivity;
     ////             if (pausing != NULL && pausing == r) {
-    ////                 Slog.e(TAG, "validateTop...: top stack has pausing activity r=" + r +
+    ////                 Slogger::E(TAG, "validateTop...: top stack has pausing activity r=" + r +
     ////                     " state=" + state);
     ////             }
     ////             if (state != ActivityState.INITIALIZING && state != ActivityState.RESUMED) {
-    ////                 Slog.e(TAG, "validateTop...: activity in front not resumed r=" + r +
+    ////                 Slogger::E(TAG, "validateTop...: activity in front not resumed r=" + r +
     ////                         " state=" + state);
     ////             }
     ////         }
     ////     } else {
     ////         final ActivityRecord resumed = stack.mResumedActivity;
     ////         if (resumed != NULL && resumed == r) {
-    ////             Slog.e(TAG, "validateTop...: back stack has resumed activity r=" + r +
+    ////             Slogger::E(TAG, "validateTop...: back stack has resumed activity r=" + r +
     ////                 " state=" + state);
     ////         }
     ////         if (r != NULL && (state == ActivityState.INITIALIZING
     ////                 || state == ActivityState.RESUMED)) {
-    ////             Slog.e(TAG, "validateTop...: activity in back resumed r=" + r +
+    ////             Slogger::E(TAG, "validateTop...: activity in back resumed r=" + r +
     ////                     " state=" + state);
     ////         }
     ////     }

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="elastos.devsamples.imageviewdemo"
+      package="Elastos.DevSamples.ImageViewDemo"
       android:versionCode="1"
       android:versionName="1.0">
 
     <application android:icon="@null" android:label="@string/app_name">
-        <activity android:name="CActivityOne"
+        <activity android:name="Elastos.DevSamples.ImageViewDemo.CActivityOne"
                   android:label="@string/app_name"
                   android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>

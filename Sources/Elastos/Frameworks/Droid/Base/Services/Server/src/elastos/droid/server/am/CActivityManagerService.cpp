@@ -7916,29 +7916,31 @@ Boolean CActivityManagerService::AttachApplicationLocked(
         CProfilerInfo::New(profileFile, profileFd, samplingInterval,
             profileAutoStop, (IProfilerInfo**)&profilerInfo);
     }
+    ECode ec = NOERROR;
     AutoPtr<IHashMap> services = GetCommonServicesLocked();
     AutoPtr<IConfiguration> configuration;
     CConfiguration::New(mConfiguration, (IConfiguration**)&configuration);
     AutoPtr<IBundle> coreSettings = mCoreSettingsObserver->GetCoreSettingsLocked();
-    thread->BindApplication(processName, appInfo, providers,
-            app->mInstrumentationClass, profilerInfo, app->mInstrumentationArguments,
-            app->mInstrumentationWatcher, app->mInstrumentationUiAutomationConnection, testMode,
-            enableOpenGlTrace, isRestrictedBackupMode || !normalMode, app->mPersistent,
-            configuration, app->mCompat, IMap::Probe(services), coreSettings);
+    ec = thread->BindApplication(processName, appInfo, providers,
+        app->mInstrumentationClass, profilerInfo, app->mInstrumentationArguments,
+        app->mInstrumentationWatcher, app->mInstrumentationUiAutomationConnection, testMode,
+        enableOpenGlTrace, isRestrictedBackupMode || !normalMode, app->mPersistent,
+        configuration, app->mCompat, IMap::Probe(services), coreSettings);
+    if (FAILED(ec)) {
+        // todo: Yikes!  What should we do?  For now we will try to
+        // start another process, but that could easily get us in
+        // an infinite loop of restarting processes...
+        Slogger::W(TAG, "Exception thrown during bind of %s, ec=%08x", TO_CSTR(app), ec);
+
+        app->ResetPackageList(mProcessStats);
+        app->UnlinkDeathRecipient();
+        StartProcessLocked(app, String("bind fail"), processName);
+        return FALSE;
+    }
+
     UpdateLruProcessLocked(app, FALSE, NULL);
     app->mLastRequestedGc = app->mLastLowMemory = SystemClock::GetUptimeMillis();
-//    } catch (Exception e) {
-//        // todo: Yikes!  What should we do?  For now we will try to
-//        // start another process, but that could easily get us in
-//        // an infinite loop of restarting processes...
-//        Slogger::wtf(TAG, "Exception thrown during bind of " + app, e);
-//
-//        app.resetPackageList(mProcessStats);
-//        app.unlinkDeathRecipient();
-//        startProcessLocked(app, "bind fail", processName);
-//        return FALSE;
-//    }
-//
+
     // Remove this record from the list of starting applications.
     mPersistentStartingProcesses.Remove(app);
     if (DEBUG_PROCESSES && (Find(mProcessesOnHold.Begin(),
@@ -7951,20 +7953,19 @@ Boolean CActivityManagerService::AttachApplicationLocked(
 
     // See if the top visible activity is waiting to run in this process...
     if (normalMode) {
-        // try {
-        mStackSupervisor->AttachApplicationLocked(app, &bval);
+        ec = mStackSupervisor->AttachApplicationLocked(app, &bval);
         if (bval) {
             didSomething = TRUE;
         }
-        // } catch (Exception e) {
-        //     Slog.wtf(TAG, "Exception thrown launching activities in " + app, e);
-        //     badApp = TRUE;
-        // }
+        if (FAILED(ec)) {
+            Slogger::W(TAG, "Exception thrown starting activities in %s", TO_CSTR(app));
+            badApp = TRUE;
+        }
     }
 
     // Find any services that should be running in this process...
     if (!badApp) {
-        ECode ec = mServices->AttachApplicationLocked(app, processName, &bval);
+        ec = mServices->AttachApplicationLocked(app, processName, &bval);
         didSomething |= bval;
         if (FAILED(ec)) {
             Slogger::W/*wtf*/(TAG, "Exception thrown starting services in %s", TO_CSTR(app));

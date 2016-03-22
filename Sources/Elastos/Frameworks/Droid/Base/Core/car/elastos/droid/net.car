@@ -234,9 +234,10 @@ module
             [in] Handle32 query,
             [in] Handle32 fragment);
 
+        interface IHierarchicalUri;
+        interface IUri;
         interface IParcelable;
         interface IComparable;
-        interface IUri;
     }
 
     class CInterfaceConfiguration {
@@ -691,9 +692,10 @@ module
             [in] Handle32 sspPart,
             [in] Handle32 fragmentPart);
 
+        interface IOpaqueUri;
+        interface IUri;
         interface IParcelable;
         interface IComparable;
-        interface IUri;
     }
 
     class CPacProxySelector {
@@ -871,6 +873,7 @@ module
         constructor(
             [in] String uriString);
 
+        interface IStringUri;
         interface IParcelable;
         interface IComparable;
         interface IUri;

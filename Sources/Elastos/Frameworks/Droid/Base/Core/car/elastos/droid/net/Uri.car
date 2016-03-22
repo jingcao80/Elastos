@@ -10,6 +10,9 @@ module
     namespace Droid {
     namespace Net {
 
+    interface IAbstractPart {
+    }
+
     /**
      * Immutable URI reference. A URI reference includes a URI and a fragment, the
      * component of the URI following a '#'. Builds and parses URI references

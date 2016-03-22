@@ -2636,9 +2636,8 @@ void Intent::ToUriInner(
 ECode Intent::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    assert(0 && "TODO");
     dest->WriteString(mAction);
-    dest->WriteInterfacePtr(mData);
+    Uri::WriteToParcel(dest, mData);
     dest->WriteString(mType);
     dest->WriteInt32(mFlags);
     dest->WriteString(mPackage);
@@ -2695,13 +2694,10 @@ ECode Intent::WriteToParcel(
 ECode Intent::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    source->ReadString(&mAction);
-    Int32 tag;
-    if (source->ReadInt32(&tag), tag == 1) {
-        AutoPtr<IInterface> data;
-        source->ReadInterfacePtr((Handle32*)(IInterface**)&data);
-        mData = IUri::Probe(data);
-    }
+    String action;
+    source->ReadString(&action);
+    SetAction(action);
+    Uri::ReadFromParcel(source, (IUri**)&mData);
     source->ReadString(&mType);
     source->ReadInt32(&mFlags);
     source->ReadString(&mPackage);

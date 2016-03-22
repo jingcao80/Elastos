@@ -348,13 +348,13 @@ AutoPtr<ILoaderManagerImpl> Activity::GetLoaderManager(
         if (create) {
             // TODO
 //            CLoaderManagerImpl::New(who,
-//                    THIS_PROBE(IActivity), started, (ILoaderManagerImpl**)&lm);
+//                    (IActivity*)this, started, (ILoaderManagerImpl**)&lm);
 //            mAllLoaderManagers->Put(who, (IInterface*)lm.Get());
         }
     }
     else {
         // LoaderManagerImpl* lmi = (LoaderManagerImpl*)lm.Get();
-        // lmi->UpdateActivity(THIS_PROBE(IActivity));
+        // lmi->UpdateActivity((IActivity*)this);
     }
 
     return lm;
@@ -413,11 +413,11 @@ ECode Activity::OnCreate(
 
     AutoPtr<IApplication> app = GetApplication();
     assert(app != NULL);
-    FAIL_RETURN(app->DispatchActivityCreated(THIS_PROBE(IActivity), savedInstanceState));
+    FAIL_RETURN(app->DispatchActivityCreated((IActivity*)this, savedInstanceState));
 
     if (mVoiceInteractor != NULL) {
         VoiceInteractor* vi = (VoiceInteractor*)mVoiceInteractor.Get();
-        vi->AttachActivity(THIS_PROBE(IActivity));
+        vi->AttachActivity((IActivity*)this);
     }
 
     mCalled = TRUE;
@@ -587,7 +587,7 @@ ECode Activity::OnStart()
     }
 
     AutoPtr<IApplication> app = GetApplication();
-    return app->DispatchActivityStarted(THIS_PROBE(IActivity));
+    return app->DispatchActivityStarted((IActivity*)this);
 }
 
 ECode Activity::OnRestart()
@@ -604,7 +604,7 @@ ECode Activity::OnResume()
         Slogger::V(TAG, sb.ToString());
     }
     AutoPtr<IApplication> app = GetApplication();
-    FAIL_RETURN(app->DispatchActivityResumed(THIS_PROBE(IActivity)));
+    FAIL_RETURN(app->DispatchActivityResumed((IActivity*)this));
     mActivityTransitionState->OnResume();
     mCalled = TRUE;
     return NOERROR;
@@ -696,7 +696,7 @@ ECode Activity::OnSaveInstanceState(
         outState->PutParcelable(FRAGMENTS_TAG, p);
     }
     AutoPtr<IApplication> app = GetApplication();
-    return app->DispatchActivitySaveInstanceState(THIS_PROBE(IActivity), outState);
+    return app->DispatchActivitySaveInstanceState((IActivity*)this, outState);
 }
 
 ECode Activity::OnSaveInstanceState(
@@ -745,7 +745,7 @@ ECode Activity::OnPause()
         Slogger::V(TAG, sb.ToString());
     }
     AutoPtr<IApplication> app = GetApplication();
-    FAIL_RETURN(app->DispatchActivityPaused(THIS_PROBE(IActivity)));
+    FAIL_RETURN(app->DispatchActivityPaused((IActivity*)this));
     mCalled = TRUE;
     return NOERROR;
 }
@@ -791,7 +791,7 @@ ECode Activity::OnStop()
     }
     FAIL_RETURN(mActivityTransitionState->OnStop())
     AutoPtr<IApplication> app = GetApplication();
-    FAIL_RETURN(app->DispatchActivityDestroyed(THIS_PROBE(IActivity)));
+    FAIL_RETURN(app->DispatchActivityDestroyed((IActivity*)this));
     mTranslucentCallback = NULL;
     mCalled = TRUE;
     return NOERROR;
@@ -839,7 +839,7 @@ ECode Activity::OnDestroy()
     }
 
     AutoPtr<IApplication> app = GetApplication();
-    return app->DispatchActivityDestroyed(THIS_PROBE(IActivity));
+    return app->DispatchActivityDestroyed((IActivity*)this);
 }
 
 ECode Activity::ReportFullyDrawn()
@@ -1192,7 +1192,7 @@ ECode Activity::InitWindowDecorActionBar()
         return NOERROR;
     }
 
-    FAIL_RETURN(CWindowDecorActionBar::New(THIS_PROBE(IActivity), (IActionBar**)&mActionBar));
+    FAIL_RETURN(CWindowDecorActionBar::New((IActivity*)this, (IActionBar**)&mActionBar));
     FAIL_RETURN(mActionBar->SetDefaultDisplayHomeAsUpEnabled(mEnableDefaultActionBarUp))
 
     IComponentInfo* ci = IComponentInfo::Probe(mActivityInfo);
@@ -1866,7 +1866,7 @@ ECode Activity::OnMenuItemSelected(
                 if (mParent == NULL) {
                     return OnNavigateUp(toFinish);
                 } else {
-                    return mParent->OnNavigateUpFromChild(THIS_PROBE(IActivity), toFinish);
+                    return mParent->OnNavigateUpFromChild((IActivity*)this, toFinish);
                 }
             }
             *toFinish = FALSE;
@@ -2024,7 +2024,7 @@ ECode Activity::OnCreateNavigateUpTaskStack(
     /* [in] */ ITaskStackBuilder* builder)
 {
     VALIDATE_NOT_NULL(builder);
-    return builder->AddParentStack(THIS_PROBE(IActivity));
+    return builder->AddParentStack((IActivity*)this);
 }
 
 ECode Activity::OnPrepareNavigateUpTaskStack(
@@ -2135,7 +2135,7 @@ void Activity::OnPrepareDialog(
     /* [in] */ IDialog* dialog)
 {
     if (dialog);
-        dialog->SetOwnerActivity(THIS_PROBE(IActivity));
+        dialog->SetOwnerActivity((IActivity*)this);
 }
 
 void Activity::OnPrepareDialog(
@@ -2403,7 +2403,7 @@ ECode Activity::StartActivityForResult(
         AutoPtr<IApplicationThread> at;
         FAIL_RETURN(mMainThread->GetApplicationThread((IApplicationThread**)&at));
         FAIL_RETURN(mInstrumentation->ExecStartActivity(
-            mBase, IBinder::Probe(at), mToken, THIS_PROBE(IActivity),
+            mBase, IBinder::Probe(at), mToken, (IActivity*)this,
             intent, requestCode, options, (IInstrumentationActivityResult**)&result))
         if (result != NULL) {
             Int32 resultCode;
@@ -2435,18 +2435,18 @@ ECode Activity::StartActivityForResult(
     }
     else {
         if (options != NULL) {
-            return mParent->StartActivityFromChild(THIS_PROBE(IActivity), intent, requestCode, options);
+            return mParent->StartActivityFromChild((IActivity*)this, intent, requestCode, options);
         }
         else {
             // Note we want to go through this method for compatibility with
             // existing applications that may have overridden it.
-            return mParent->StartActivityFromChild(THIS_PROBE(IActivity), intent, requestCode);
+            return mParent->StartActivityFromChild((IActivity*)this, intent, requestCode);
         }
     }
 
     Boolean bval;
     if (options != NULL && (IsTopOfTask(&bval), !bval)) {
-        mActivityTransitionState->StartExitOutTransition(THIS_PROBE(IActivity), options);
+        mActivityTransitionState->StartExitOutTransition((IActivity*)this, options);
     }
 
     return NOERROR;
@@ -2467,7 +2467,7 @@ ECode Activity::StartActivityForResultAsUser(
     /* [in] */ IUserHandle* user)
 {
     if (options != NULL) {
-        mActivityTransitionState->StartExitOutTransition(THIS_PROBE(IActivity), options);
+        mActivityTransitionState->StartExitOutTransition((IActivity*)this, options);
     }
     if (mParent != NULL) {
         Logger::E(TAG, "Can't be called from a child");
@@ -2479,7 +2479,7 @@ ECode Activity::StartActivityForResultAsUser(
 
     AutoPtr<IInstrumentationActivityResult> ar;
     mInstrumentation->ExecStartActivity(
-        THIS_PROBE(IContext), IBinder::Probe(at), mToken, THIS_PROBE(IActivity),
+        THIS_PROBE(IContext), IBinder::Probe(at), mToken, (IActivity*)this,
         intent, requestCode, options, user, (IInstrumentationActivityResult**)&ar);
     if (ar != NULL) {
         Int32 code;
@@ -2532,16 +2532,16 @@ ECode Activity::StartIntentSenderForResult(
 {
     if (mParent == NULL) {
         return StartIntentSenderForResultInner(intent, requestCode, fillInIntent,
-                flagsMask, flagsValues, THIS_PROBE(IActivity), options);
+                flagsMask, flagsValues, (IActivity*)this, options);
     }
     else if (options != NULL) {
-        return mParent->StartIntentSenderFromChild(THIS_PROBE(IActivity),
+        return mParent->StartIntentSenderFromChild((IActivity*)this,
                 intent, requestCode, fillInIntent, flagsMask, flagsValues, extraFlags, options);
     }
     else {
         // Note we want to go through this call for compatibility with
         // existing applications that may have overridden the method.
-        return mParent->StartIntentSenderFromChild(THIS_PROBE(IActivity),
+        return mParent->StartIntentSenderFromChild((IActivity*)this,
                 intent, requestCode, fillInIntent, flagsMask, flagsValues, extraFlags);
     }
 }
@@ -2985,7 +2985,7 @@ ECode Activity::Finish(
         return ec;
     }
     else {
-        return mParent->FinishFromChild(THIS_PROBE(IActivity));
+        return mParent->FinishFromChild((IActivity*)this);
     }
 
     return NOERROR;
@@ -3030,7 +3030,7 @@ ECode Activity::FinishAffinity()
 ECode Activity::FinishAfterTransition()
 {
     Boolean bval;
-    if (mActivityTransitionState->StartExitBackTransition(THIS_PROBE(IActivity), &bval), !bval) {
+    if (mActivityTransitionState->StartExitBackTransition((IActivity*)this, &bval), !bval) {
         Finish();
     }
     return NOERROR;
@@ -3057,7 +3057,7 @@ ECode Activity::FinishActivity(
 //            // Empty
 //        }
     } else {
-        return mParent->FinishActivityFromChild(THIS_PROBE(IActivity), requestCode);
+        return mParent->FinishActivityFromChild((IActivity*)this, requestCode);
     }
 }
 
@@ -3304,7 +3304,7 @@ ECode Activity::SetTitle(
 
     if (mParent != NULL) {
         Activity* p = (Activity*)mParent.Get();
-        return p->OnChildTitleChanged(THIS_PROBE(IActivity), title);
+        return p->OnChildTitleChanged((IActivity*)this, title);
     }
     return NOERROR;
 }
@@ -3670,9 +3670,9 @@ ECode Activity::OnTranslucentConversionComplete(
 ECode Activity::OnNewActivityOptions(
     /* [in] */ IActivityOptions* options)
 {
-    mActivityTransitionState->SetEnterActivityOptions(THIS_PROBE(IActivity), options);
+    mActivityTransitionState->SetEnterActivityOptions((IActivity*)this, options);
     if (!mStopped) {
-        return mActivityTransitionState->EnterReady(THIS_PROBE(IActivity));
+        return mActivityTransitionState->EnterReady((IActivity*)this);
     }
     return NOERROR;
 }
@@ -3896,7 +3896,7 @@ ECode Activity::NavigateUpTo(
 //        }
     }
     else {
-        return mParent->NavigateUpToFromChild(THIS_PROBE(IActivity), inUpIntent, success);
+        return mParent->NavigateUpToFromChild((IActivity*)this, inUpIntent, success);
     }
 }
 
@@ -4013,10 +4013,11 @@ ECode Activity::Attach(
     /* [in] */ IConfiguration* config,
     /* [in] */ IIVoiceInteractor* voiceInteractor)
 {
+    Slogger::I(TAG, " >>> Activity::Attach");
     FAIL_RETURN(AttachBaseContext(context));
-
-    FAIL_RETURN(mFragments->AttachActivity(THIS_PROBE(IActivity), mContainer, NULL));
-
+Slogger::I(TAG, "    1 ");
+    FAIL_RETURN(mFragments->AttachActivity((IActivity*)this, mContainer, NULL));
+Slogger::I(TAG, "    2 ");
     AutoPtr<IPolicyManager> pm;
     CPolicyManager::AcquireSingleton((IPolicyManager**)&pm);
     mWindow = NULL;
@@ -4037,7 +4038,7 @@ ECode Activity::Attach(
     if (uiOptions != 0) {
         FAIL_RETURN(mWindow->SetUiOptions(uiOptions));
     }
-
+Slogger::I(TAG, "    3 ");
     mUiThread = Thread::GetCurrentThread();
 
     mMainThread = aThread;
@@ -4061,11 +4062,11 @@ ECode Activity::Attach(
         }
         else {
             AutoPtr<ILooper> looper = Looper::GetMyLooper();
-            CVoiceInteractor::New(voiceInteractor, THIS_PROBE(IContext), THIS_PROBE(IActivity),
+            CVoiceInteractor::New(voiceInteractor, THIS_PROBE(IContext), (IActivity*)this,
                 looper, (IVoiceInteractor**)&mVoiceInteractor);
         }
     }
-
+Slogger::I(TAG, "    4 ");
     AutoPtr<IInterface> service;
     FAIL_RETURN(context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&service))
     AutoPtr<IWindowManager> wm = IWindowManager::Probe(service);
@@ -4075,17 +4076,18 @@ ECode Activity::Attach(
     info->GetFlags(&flags);
     FAIL_RETURN(mWindow->SetWindowManager(wm, mToken, str,
             (flags & IActivityInfo::FLAG_HARDWARE_ACCELERATED) != 0));
-
+Slogger::I(TAG, "    5 ");
     if (mParent != NULL) {
         AutoPtr<IWindow> pWindow;
         FAIL_RETURN(mParent->GetWindow((IWindow**)&pWindow));
         FAIL_RETURN(mWindow->SetContainer(pWindow));
     }
-
+Slogger::I(TAG, "    6 ");
     mWindowManager = NULL;
     FAIL_RETURN(mWindow->GetWindowManager((IWindowManager**)&mWindowManager));
     mCurrentConfig = config;
 
+    Slogger::I(TAG, " <<< Activity::Attach");
     return NOERROR;
 }
 
@@ -4113,7 +4115,7 @@ ECode Activity::Activity::PerformCreateCommon()
     FAIL_RETURN(mFragments->DispatchActivityCreated());
     AutoPtr<IActivityOptions> options;
     GetActivityOptions((IActivityOptions**)&options);
-    return mActivityTransitionState->SetEnterActivityOptions(THIS_PROBE(IActivity), options);
+    return mActivityTransitionState->SetEnterActivityOptions((IActivity*)this, options);
 }
 
 ECode Activity::PerformCreate(
@@ -4137,13 +4139,13 @@ ECode Activity::PerformStart()
 {
     AutoPtr<IActivityOptions> options;
     GetActivityOptions((IActivityOptions**)&options);
-    FAIL_RETURN(mActivityTransitionState->SetEnterActivityOptions(THIS_PROBE(IActivity), options))
+    FAIL_RETURN(mActivityTransitionState->SetEnterActivityOptions((IActivity*)this, options))
 
     FAIL_RETURN(mFragments->NoteStateNotSaved());
     mCalled = FALSE;
     Boolean exected;
     FAIL_RETURN(mFragments->ExecPendingActions(&exected));
-    FAIL_RETURN(mInstrumentation->CallActivityOnStart(THIS_PROBE(IActivity)));
+    FAIL_RETURN(mInstrumentation->CallActivityOnStart((IActivity*)this));
     if (!mCalled) {
         String temp;
         mComponent->ToShortString(&temp);
@@ -4172,7 +4174,7 @@ ECode Activity::PerformStart()
         }
     }
 
-    return mActivityTransitionState->EnterReady(THIS_PROBE(IActivity));
+    return mActivityTransitionState->EnterReady((IActivity*)this);
 }
 
 ECode Activity::PerformRestart()
@@ -4214,7 +4216,7 @@ ECode Activity::PerformRestart()
         }
 
         mCalled = FALSE;
-        FAIL_RETURN(mInstrumentation->CallActivityOnRestart(THIS_PROBE(IActivity)));
+        FAIL_RETURN(mInstrumentation->CallActivityOnRestart((IActivity*)this));
         if (!mCalled) {
 //            throw new SuperNotCalledException(
 //                "Activity " + mComponent.toShortString() +
@@ -4240,7 +4242,7 @@ ECode Activity::PerformResume()
 
     mCalled = FALSE;
     // mResumed is set by the instrumentation
-    FAIL_RETURN(mInstrumentation->CallActivityOnResume(THIS_PROBE(IActivity)));
+    FAIL_RETURN(mInstrumentation->CallActivityOnResume((IActivity*)this));
     if (!mCalled) {
 //        throw new SuperNotCalledException(
 //            "Activity " + mComponent.toShortString() +
@@ -4334,7 +4336,7 @@ ECode Activity::PerformStop()
         FAIL_RETURN(mFragments->DispatchStop());
 
         mCalled = FALSE;
-        FAIL_RETURN(mInstrumentation->CallActivityOnStop(THIS_PROBE(IActivity)));
+        FAIL_RETURN(mInstrumentation->CallActivityOnStop((IActivity*)this));
         if (!mCalled) {
 //            throw new SuperNotCalledException(
 //                "Activity " + mComponent.toShortString() +
@@ -4679,7 +4681,7 @@ ECode Activity::StartActivityAsUser(
     AutoPtr<IApplicationThread> at;
     mMainThread->GetApplicationThread((IApplicationThread**)&at);
     FAIL_RETURN(mInstrumentation->ExecStartActivity(
-            mBase, IBinder::Probe(at), mToken, THIS_PROBE(IActivity),
+            mBase, IBinder::Probe(at), mToken, (IActivity*)this,
             intent, -1, options, user,
             (IInstrumentationActivityResult**)&result));
     if (result != NULL) {
@@ -4708,7 +4710,7 @@ ECode Activity::StartActivityAsCaller(
     mMainThread->GetApplicationThread((IApplicationThread**)&at);
 
     FAIL_RETURN(mInstrumentation->ExecStartActivityAsCaller(
-        THIS_PROBE(IContext), IBinder::Probe(at), mToken, THIS_PROBE(IActivity),
+        THIS_PROBE(IContext), IBinder::Probe(at), mToken, (IActivity*)this,
         intent, -1, options, userId, (IInstrumentationActivityResult**)&result));
     if (result != NULL) {
         Int32 resultCode;
@@ -4736,7 +4738,7 @@ ECode Activity::StartActivities(
     AutoPtr<IApplicationThread> at;
     mMainThread->GetApplicationThread((IApplicationThread**)&at);
     return mInstrumentation->ExecStartActivities(
-            mBase, IBinder::Probe(at.Get()), mToken, THIS_PROBE(IActivity),
+            mBase, IBinder::Probe(at.Get()), mToken, (IActivity*)this,
             intents, options);
 }
 
@@ -4755,7 +4757,7 @@ ECode Activity::StartActivitiesAsUser(
     AutoPtr<IApplicationThread> at;
     mMainThread->GetApplicationThread((IApplicationThread**)&at);
     FAIL_RETURN(mInstrumentation->ExecStartActivitiesAsUser(
-            mBase, IBinder::Probe(at.Get()), mToken, THIS_PROBE(IActivity),
+            mBase, IBinder::Probe(at.Get()), mToken, (IActivity*)this,
             intents, options, myUserId));
     return NOERROR;
 }

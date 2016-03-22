@@ -10,6 +10,8 @@
 #include "elastos/droid/net/CUriBuilder.h"
 #include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Build.h"
+#include "elastos/droid/os/Environment.h"
+#include "elastos/droid/os/CStrictMode.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Objects.h>
@@ -19,9 +21,8 @@
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Os::Build;
-// using Elastos::Droid::Os::CEnvironment;
-// using Elastos::Droid::Os::CStrictMode;
-using Elastos::Droid::Os::IEnvironment;
+using Elastos::Droid::Os::Environment;
+using Elastos::Droid::Os::CStrictMode;
 using Elastos::Droid::Os::IStrictMode;
 using Elastos::Droid::Utility::ILog;
 
@@ -67,6 +68,8 @@ namespace Net {
 //====================================================================
 //                    StringUri
 //====================================================================
+CAR_INTERFACE_IMPL(StringUri, AbstractHierarchicalUri, IStringUri)
+
 StringUri::StringUri()
     : mCachedSsi(Uri::NOT_CALCULATED)
     , mCachedFsi(Uri::NOT_CALCULATED)
@@ -106,7 +109,6 @@ ECode StringUri::ReadFrom(
 ECode StringUri::WriteToParcel(
     /* [in] */ IParcel* parcel)
 {
-    parcel->WriteInt32(TYPE_ID);
     parcel->WriteString(mUriString);
     return NOERROR;
 }
@@ -561,6 +563,7 @@ ECode StringUri::BuildUpon(
 //====================================================================
 //                    OpaqueUri
 //====================================================================
+CAR_INTERFACE_IMPL(OpaqueUri, Uri, IOpaqueUri)
 
 ECode OpaqueUri::constructor()
 {
@@ -604,7 +607,6 @@ ECode OpaqueUri::WriteToParcel(
     /* [in] */ IParcel* parcel)
 {
     VALIDATE_NOT_NULL(parcel);
-    parcel->WriteInt32(OpaqueUri::TYPE_ID);
     parcel->WriteString(mScheme);
 
     assert(mSsp != NULL);
@@ -1106,6 +1108,8 @@ Int32 AbstractHierarchicalUri::ParsePort()
 //====================================================================
 //                      HierarchicalUri
 //====================================================================
+CAR_INTERFACE_IMPL(HierarchicalUri, AbstractHierarchicalUri, IHierarchicalUri)
+
 HierarchicalUri::HierarchicalUri()
 {
     mUriString = Uri::NOT_CACHED;
@@ -1176,7 +1180,6 @@ ECode HierarchicalUri::ReadFromParcel(
 ECode HierarchicalUri::WriteToParcel(
     /* [in] */ IParcel* parcel)
 {
-    parcel->WriteInt32(TYPE_ID);
     parcel->WriteString(mScheme);
     mAuthority->WriteTo(parcel);
     mPath->WriteTo(parcel);
@@ -1680,6 +1683,8 @@ ECode UriBuilder::ToString(
 //====================================================================================
 //              Uri::AbstractPart
 //====================================================================================
+CAR_INTERFACE_IMPL(Uri::AbstractPart, Object, IAbstractPart)
+
 Uri::AbstractPart::AbstractPart(
     /* [in] */ const String& encoded,
     /* [in] */ const String& decoded)
@@ -2067,7 +2072,6 @@ const Int32 Uri::NOT_FOUND = -1;
 const Int32 Uri::NOT_CALCULATED = -2;
 const String Uri::NOT_HIERARCHICAL("This isn't a hierarchical URI.");
 const String Uri::DEFAULT_ENCODING("UTF-8");
-const Int32 Uri::NULL_TYPE_ID = 0;
 
 AutoPtr<IUri> Uri::CreateEmpty()
 {
@@ -2473,6 +2477,65 @@ ECode Uri::NormalizeScheme(
 }
 
 ECode Uri::WriteToParcel(
+    /* [in] */ IParcel* parcel,
+    /* [in] */ IUri* data)
+{
+    if (IStringUri::Probe(data) != NULL) {
+        parcel->WriteInt32(1);
+        IParcelable::Probe(data)->WriteToParcel(parcel);
+    }
+    else if (IOpaqueUri::Probe(data) != NULL) {
+        parcel->WriteInt32(2);
+        IParcelable::Probe(data)->WriteToParcel(parcel);
+    }
+    else if (IHierarchicalUri::Probe(data) != NULL) {
+        parcel->WriteInt32(3);
+        IParcelable::Probe(data)->WriteToParcel(parcel);
+    }
+    else {
+        parcel->WriteInt32(0);
+        if (data != NULL) {
+            assert(0 && "Unknown Uri type!");
+        }
+    }
+
+    return NOERROR;
+}
+
+ECode Uri::ReadFromParcel(
+    /* [in] */ IParcel* parcel,
+    /* [out] */ IUri** data)
+{
+    VALIDATE_NOT_NULL(data)
+    *data = NULL;
+
+    Int32 value;
+    parcel->ReadInt32(&value);
+    if (value == 1) {
+        AutoPtr<IParcelable> obj;
+        CStringUri::New((IParcelable**)&obj);
+        obj->ReadFromParcel(parcel);
+        *data = IUri::Probe(obj);
+        REFCOUNT_ADD(*data)
+    }
+    else if (value == 2) {
+        AutoPtr<IParcelable> obj;
+        COpaqueUri::New((IParcelable**)&obj);
+        obj->ReadFromParcel(parcel);
+        *data = IUri::Probe(obj);
+        REFCOUNT_ADD(*data)
+    }
+    else if (value == 3) {
+        AutoPtr<IParcelable> obj;
+        CHierarchicalUri::New((IParcelable**)&obj);
+        obj->ReadFromParcel(parcel);
+        *data = IUri::Probe(obj);
+        REFCOUNT_ADD(*data)
+    }
+    return NOERROR;
+}
+
+ECode Uri::WriteToParcel(
     /* [in] */ IParcel* out)
 {
     return NOERROR;
@@ -2654,22 +2717,15 @@ ECode Uri::GetCanonicalUri(
         ec = file->GetCanonicalPath(&canonicalPath);
         if (FAILED(ec)) goto _Exit_;
 
-        AutoPtr<IEnvironment> env;
-        // TODO: Waiting for CEnvironment
-        assert(0);
-        // CEnvironment::AcquireSingleton((IEnvironment**)&env);
-        Boolean isEmulated;
-        if (env->IsExternalStorageEmulated(&isEmulated), isEmulated) {
-            AutoPtr<IFile> dirFile;
-            env->GetLegacyExternalStorageDirectory((IFile**)&dirFile);
+        if (Environment::IsExternalStorageEmulated()) {
+            AutoPtr<IFile> dirFile = Environment::GetLegacyExternalStorageDirectory();
             assert(dirFile != NULL);
             String legacyPath;
             dirFile->ToString(&legacyPath);
 
             // Splice in user-specific path when legacy path is found
             if (!canonicalPath.IsNull() && canonicalPath.StartWith(legacyPath)) {
-                dirFile = NULL;
-                env->GetExternalStorageDirectory((IFile**)&dirFile);
+                dirFile = Environment::GetExternalStorageDirectory();
                 assert(dirFile != NULL);
                 String dirPath, mode;
                 dirFile->ToString(&dirPath);
@@ -2694,10 +2750,10 @@ ECode Uri::CheckFileUriExposed(
 {
     String s;
     GetScheme(&s);
-    if (String("file").Equals(s)) {
-        // TODO: Waiting for CStrictMode
-        assert(0);
-        // CStrictMode::OnFileUriExposed(location);
+    if (s.Equals("file")) {
+        AutoPtr<IStrictMode> sm;
+        CStrictMode::AcquireSingleton((IStrictMode**)&sm);
+        sm->OnFileUriExposed(location);
     }
     return NOERROR;
 }

@@ -125,11 +125,8 @@ ECode CContentProviderOperation::ReadFromParcel(
     source->ReadInt32(&mType);
 
     Int32 value = 0;
-    if (source->ReadInt32(&value), value != 0) {
-        AutoPtr<IInterface> uri;
-        source->ReadInterfacePtr((Handle32*)(IInterface**)&uri);
-        mUri = IUri::Probe(uri);
-    }
+
+    Uri::ReadFromParcel(source, (IUri**)&mUri);
 
     if (source->ReadInt32(&value), value != 0) {
         AutoPtr<IInterface> contentValues;
@@ -181,13 +178,7 @@ ECode CContentProviderOperation::WriteToParcel(
     VALIDATE_NOT_NULL(dest)
     dest->WriteInt32(mType);
 
-    if (NULL != mUri) {
-        dest->WriteInt32(1);
-        dest->WriteInterfacePtr(mUri);
-    }
-    else {
-        dest->WriteInt32(0);
-    }
+    Uri::WriteToParcel(dest, mUri);
 
     if (NULL != mValues) {
         dest->WriteInt32(1);

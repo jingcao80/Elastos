@@ -150,6 +150,7 @@ public:
      */
     class AbstractPart
         : public Object
+        , public IAbstractPart
     {
     public:
         /**
@@ -164,6 +165,8 @@ public:
         };
 
     public:
+        CAR_INTERFACE_DECL()
+
         AbstractPart(
             /* [in] */ const String& encoded,
             /* [in] */ const String& decoded);
@@ -528,6 +531,14 @@ public:
     CARAPI WriteToParcel(
         /* [in] */ IParcel* out);
 
+    static CARAPI WriteToParcel(
+        /* [in] */ IParcel* parcel,
+        /* [in] */ IUri* data);
+
+    static CARAPI ReadFromParcel(
+        /* [in] */ IParcel* parcel,
+        /* [out] */ IUri** data);
+
     /**
      * Encodes characters in the given string as '%'-escaped octets
      * using the UTF-8 scheme. Leaves letters ("A-Z", "a-z"), numbers
@@ -680,9 +691,6 @@ private:
     /** Default encoding. */
     static const String DEFAULT_ENCODING;
 
-    /** Identifies a null parcelled Uri. */
-    static const Int32 NULL_TYPE_ID;
-
     friend class StringUri;
     friend class AbstractHierarchicalUri;
     friend class OpaqueUri;
@@ -734,9 +742,12 @@ private:
  */
 class StringUri
     : public AbstractHierarchicalUri
+    , public IStringUri
 {
 public:
     StringUri();
+
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor();
 
@@ -852,10 +863,6 @@ private:
 
     CARAPI_(String) ParseFragment();
 
-public:
-    /** Used in parcelling. */
-    static const Int32 TYPE_ID = 1;
-
 protected:
     /** URI string representation. */
     String mUriString;
@@ -876,9 +883,13 @@ protected:
     friend class Uri;
 };
 
-class OpaqueUri : public Uri
+class OpaqueUri
+    : public Uri
+    , public IOpaqueUri
 {
 public:
+    CAR_INTERFACE_DECL()
+
     CARAPI constructor();
 
     CARAPI constructor(
@@ -959,10 +970,6 @@ public:
     virtual CARAPI BuildUpon(
         /* [out] */ IUriBuilder** result);
 
-public:
-    /** Used in parcelling. */
-    static const Int32 TYPE_ID = 2;
-
 private:
     String mScheme;
     AutoPtr<Uri::Part> mSsp;
@@ -975,12 +982,15 @@ private:
 
 class HierarchicalUri
     : public AbstractHierarchicalUri
+    , public IHierarchicalUri
 {
     friend class UriBuilder;
     friend class Uri;
 
 public:
     HierarchicalUri();
+
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor();
 
@@ -1061,10 +1071,6 @@ private:
     CARAPI AppendSspTo(StringBuilder& builder);
 
     CARAPI_(String) MakeUriString();
-
-public:
-    /** Used in parcelling. */
-    static const Int32 TYPE_ID = 3;
 
 private:
     String mScheme; // can be null

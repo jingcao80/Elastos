@@ -80,7 +80,7 @@ static install_status_t copyFileIfChanged(void* arg, ZipFileRO* zipFile, ZipEntr
 static install_status_t iterateOverNativeFiles(Int64 apkHandle, const String& javaCpuAbi, iterFunc callFunc, void* callArg);
 static int findSupportedAbi(Int64 apkHandle, ArrayOf<String>* supportedAbis);
 
-const String CNativeLibraryHelper::TAG("NativeHelper");
+const String CNativeLibraryHelper::TAG("CNativeLibraryHelper");
 const Boolean CNativeLibraryHelper::DEBUG_NATIVE = FALSE;
 const Int32 CNativeLibraryHelper::BITCODE_PRESENT = 1;
 
@@ -542,15 +542,17 @@ ECode CNativeLibraryHelper::CopyEcoLI(
 
     ZipFileRO* zipFile = ZipFileRO::open(epkPath.string());;
     if (zipFile == NULL) {
-        ALOGI("Couldn't open EPK %s\n", epkPath.string());
+        Slogger::E(TAG, "Couldn't open EPK %s, target ecoName:%s, target dir:%s\n",
+            epkPath.string(), ecoName.string(), ecoDir.string());
         *result = INSTALL_FAILED_INVALID_APK;
         return NOERROR;
     }
 
     const ZipEntryRO entry = zipFile->findEntryByName(ecoName.string());
     if (entry == NULL) {
-        ALOGE("%s isn't found in %s", ecoName.string(), epkPath.string());
+        Slogger::E(TAG, "%s isn't found in %s", ecoName.string(), epkPath.string());
         *result = INSTALL_FAILED_INVALID_APK;
+        delete zipFile;
         return NOERROR;
     }
 
@@ -558,7 +560,7 @@ ECode CNativeLibraryHelper::CopyEcoLI(
         const_cast<char*>(ecoDir.string()), zipFile, entry, ecoName.string());
 
     if (ret != INSTALL_SUCCEEDED) {
-        ALOGV("Failure for entry %s", ecoName.string());
+        Slogger::E(TAG, "Failure to copy from %s to %s", epkPath.string(), ecoName.string());
     }
     *result = ret;
     delete zipFile;

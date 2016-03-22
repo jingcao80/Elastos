@@ -2143,6 +2143,18 @@ ECode CActivityThread::ScheduleContextCleanup(
     return SendMessage(H::CLEAN_UP_CONTEXT, TO_IINTERFACE(cci));
 }
 
+String CActivityThread::GetReflectionClassName(
+    /* [in] */ const String& rawClassName)
+{
+    // convert from "ABC.DEF.ClassName" to "LABC/DEF/ClassName;"
+    assert(rawClassName != NULL);
+    StringBuilder sb(128);
+    sb += "L";
+    sb += rawClassName.Replace('.', '/');
+    sb += ";";
+    return sb.ToString();
+}
+
 ECode CActivityThread::PerformLaunchActivity(
     /* [in] */ ActivityClientRecord* r,
     /* [in] */ IIntent* customIntent,
@@ -2151,6 +2163,7 @@ ECode CActivityThread::PerformLaunchActivity(
     VALIDATE_NOT_NULL(activity);
     *activity = NULL;
 
+    Slogger::I(TAG, " >>> PerformLaunchActivity");
     ECode ec = NOERROR;
     AutoPtr<IActivityInfo> aInfo = r->mActivityInfo;
     if (r->mPackageInfo == NULL) {
@@ -2203,31 +2216,31 @@ ECode CActivityThread::PerformLaunchActivity(
         sb.Append(".eco");
     }
     String path = sb.ToString();
+
+    Slogger::I(TAG, " >> PerformLaunchActivity: %s, packageName:%s, className:%s",
+        path.string(), packageName.string(), className.string());
+
     AutoPtr<IModuleInfo> moduleInfo;
     ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&moduleInfo);
     if (FAILED(ec)) {
-        if (localLOGV) {
-           Slogger::E(TAG, "PerformLaunchActivity: Cann't Find the path is %s", path.string());
-        }
+        Slogger::E(TAG, "PerformLaunchActivity: Cann't Find the path is %s", path.string());
         return E_RUNTIME_EXCEPTION;
     }
-    Int32 index = className.LastIndexOf('.');
-    String shortClassName = index > 0 ? className.Substring(index + 1) : className;
+
+    String reflectionClsName = GetReflectionClassName(className);
     AutoPtr<IClassInfo> classInfo;
-    ec = moduleInfo->GetClassInfo(shortClassName, (IClassInfo**)&classInfo);
+    ec = moduleInfo->GetClassInfo(reflectionClsName, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
-        if (localLOGV) {
-           Slogger::E(TAG, "PerformLaunchActivity: Get class info of %s failed.", shortClassName.string());
-        }
+        Slogger::E(TAG, "PerformLaunchActivity: Get class info of [%s] failed.",
+            reflectionClsName.string());
         return E_RUNTIME_EXCEPTION;
     }
 
     AutoPtr<IInterface> object;
     ec = classInfo->CreateObject((IInterface**)&object);
     if (FAILED(ec)) {
-        if (localLOGV) {
-           Slogger::E(TAG, "PerformLaunchActivity: Create activity object failed.");
-        }
+        Slogger::E(TAG, "PerformLaunchActivity: Create activity object [%s] failed.",
+            reflectionClsName.string());
         return E_RUNTIME_EXCEPTION;
     }
     AutoPtr<IActivity> a;
@@ -2239,23 +2252,20 @@ ECode CActivityThread::PerformLaunchActivity(
     AutoPtr<IApplication> app;
     lp->MakeApplication(FALSE, mInstrumentation, (IApplication**)&app);
 
-    if (localLOGV) Slogger::V(TAG, "Performing launch of %p", r);
     if (localLOGV) {
-        String appName;
+        Slogger::V(TAG, "Performing launch of %s", TO_CSTR(r));
+        String appName, pkg, comp, dir;
         IContext::Probe(app)->GetPackageName(&appName);
-        String pkg;
         lp->GetPackageName(&pkg);
         AutoPtr<IComponentName> component;
         r->mIntent->GetComponent((IComponentName**)&component);
-        String comp;
         component->ToShortString(&comp);
-        String dir;
         lp->GetAppDir(&dir);
-        Slogger::V(
-            TAG, "%p: app=%p, appName=%s, pkg=%s, comp=%s, dir=%s",
-            r, app.Get(), appName.string(), pkg.string(), comp.string(), dir.string());
+        Slogger::V(TAG, "app=%s, appName=%s, pkg=%s, comp=%s, dir=%s",
+            TO_CSTR(app), appName.string(), pkg.string(), comp.string(), dir.string());
     }
 
+    Slogger::I(TAG, " == 1");
     if (a != NULL) {
         AutoPtr<IContext> appContext = CreateBaseContextForActivity(r, a);
         AutoPtr<ICharSequence> title;
@@ -2266,21 +2276,18 @@ ECode CActivityThread::PerformLaunchActivity(
         CConfiguration::New(mCompatConfiguration, (IConfiguration**)&config);
 //       if (DEBUG_CONFIGURATION) Slogger::V(TAG, "Launching activity %s with config %p"
 //               , r->mActivityInfo->mName.string(), config.Get());
-//        activity.attach(appContext, this, getInstrumentation(), r.token,
-//                r.ident, app, r.intent, r.activityInfo, title, r.parent,
-//                r.embeddedID, r.lastNonConfigurationInstance,
-//                r.lastNonConfigurationChildInstances, config);
-
         a->Attach(appContext,
             this, mInstrumentation, r->mToken, r->mIdent, app, r->mIntent,
             r->mActivityInfo, title, r->mParent, r->mEmbeddedID,
             r->mLastNonConfigurationInstances, config,
             r->mVoiceInteractor);
 
+    Slogger::I(TAG, " == 2");
         if (customIntent != NULL) {
             a->SetIntent(customIntent);
         }
 
+    Slogger::I(TAG, " == 3");
         r->mLastNonConfigurationInstances = NULL;
         a->SetStartedActivity(FALSE);
         Int32 theme = 0;
@@ -2289,6 +2296,7 @@ ECode CActivityThread::PerformLaunchActivity(
             IContext::Probe(a)->SetTheme(theme);
         }
 
+    Slogger::I(TAG, " == 4");
         String debugOnKey("debug.on");
         String defaultValue("0");
         String debugOnValue;
@@ -2304,6 +2312,7 @@ ECode CActivityThread::PerformLaunchActivity(
             }
         }
 
+    Slogger::I(TAG, " == 5");
         a->SetCalled(FALSE);
 
         if (r->IsPersistable()) {
@@ -2313,6 +2322,7 @@ ECode CActivityThread::PerformLaunchActivity(
             mInstrumentation->CallActivityOnCreate(a, r->mState);
         }
 
+    Slogger::I(TAG, " == 6");
         Boolean bval;
         a->IsCalled(&bval);
         if (!bval) {
@@ -2329,6 +2339,7 @@ ECode CActivityThread::PerformLaunchActivity(
         r->mActivity = a;
         r->mStopped = TRUE;
 
+    Slogger::I(TAG, " == 7");
         Boolean finished;
         r->mActivity->IsFinishing(&finished);
         if (!finished) {
@@ -2336,6 +2347,7 @@ ECode CActivityThread::PerformLaunchActivity(
             r->mStopped = FALSE;
         }
 
+    Slogger::I(TAG, " == 8");
         r->mActivity->IsFinishing(&finished);
         if (!finished) {
             if (r->IsPersistable()) {
@@ -2348,6 +2360,7 @@ ECode CActivityThread::PerformLaunchActivity(
             }
         }
 
+    Slogger::I(TAG, " == 9");
         r->mActivity->IsFinishing(&finished);
         if (!finished) {
             a->SetCalled(FALSE);
@@ -2361,6 +2374,7 @@ ECode CActivityThread::PerformLaunchActivity(
                 mInstrumentation->CallActivityOnPostCreate(a, r->mState);
             }
 
+    Slogger::I(TAG, " == 10");
             Boolean called;
             a->IsCalled(&called);
            if (!called) {
@@ -2390,6 +2404,7 @@ ECode CActivityThread::PerformLaunchActivity(
 //        }
 //    }
 
+    Slogger::I(TAG, " <<< PerformLaunchActivity");
     *activity = a;
     REFCOUNT_ADD(*activity);
     return NOERROR;
@@ -2759,7 +2774,7 @@ ECode CActivityThread::HandleReceiver(
     AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
 
     AutoPtr<IBroadcastReceiver> receiver;
-    String path, shortClassName;
+    String path, reflectionClsName;
     //TODO: com.android.server.BootReceiver is declared in android system manifest xml file.
     // the package declared in the same xml file is "android"
     // so maybe we should change the package name in that xml file
@@ -2773,7 +2788,7 @@ ECode CActivityThread::HandleReceiver(
             className = String("C");
             className.AppendFormat(temp.Substring(lastIndex + 1));
         }
-        shortClassName = className;
+        reflectionClsName = GetReflectionClassName(className);
     }
     else {
         StringBuilder sb;
@@ -2782,12 +2797,12 @@ ECode CActivityThread::HandleReceiver(
         sb.Append(".eco");
         path = sb.ToString();
 
-        Int32 index = className.LastIndexOf('.');
-        shortClassName = index > 0 ? className.Substring(index + 1) : className;
+        reflectionClsName = GetReflectionClassName(className);
 
         Slogger::D(TAG, "HandleReceiver: load object from pakcage: %s, class: %s",
             packageName.string(), className.string());
     }
+
 
 //    try {
     AutoPtr<IModuleInfo> moduleInfo;
@@ -2799,15 +2814,16 @@ ECode CActivityThread::HandleReceiver(
         return ec;
     }
 
-    ec = moduleInfo->GetClassInfo(shortClassName, (IClassInfo**)&classInfo);
+    ec = moduleInfo->GetClassInfo(reflectionClsName, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "HandleReceiver: Get class info of %s failed.", shortClassName.string());
+        Slogger::E(TAG, "HandleReceiver: Get class info of [%s] failed.", reflectionClsName.string());
+        assert(0 && "TODO");
         return ec;
     }
 
     ec = classInfo->CreateObject((IInterface**)&object);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "HandleReceiver: Create activity object %s failed.", shortClassName.string());
+        Slogger::E(TAG, "HandleReceiver: Create activity object [%s] failed.", reflectionClsName.string());
         return ec;
     }
 
@@ -2931,13 +2947,13 @@ ECode CActivityThread::HandleCreateBackupAgent(
     }
 
     AutoPtr<IBackupAgent> agent;
-    String classname;
-    data->mAppInfo->GetBackupAgentName(&classname);
+    String className;
+    data->mAppInfo->GetBackupAgentName(&className);
 
     // full backup operation but no app-supplied agent?  use the default implementation
-    if (classname == NULL && (data->mBackupMode == IApplicationThread::BACKUP_MODE_FULL
+    if (className == NULL && (data->mBackupMode == IApplicationThread::BACKUP_MODE_FULL
             || data->mBackupMode == IApplicationThread::BACKUP_MODE_RESTORE_FULL)) {
-        classname = "Elastos.Droid.App.Backup.FullBackupAgent";
+        className = "Elastos.Droid.App.Backup.FullBackupAgent";
     }
 
 //     try {
@@ -2957,7 +2973,7 @@ ECode CActivityThread::HandleCreateBackupAgent(
 //         try {
         String appDir;
         packageInfo->GetAppDir(&appDir);
-        if (DEBUG_BACKUP) Slogger::V(TAG, "Initializing agent class[%s], pkgName[%s], appDir[%s]", classname.string(), pkgName.string(), appDir.string());
+        if (DEBUG_BACKUP) Slogger::V(TAG, "Initializing agent class[%s], pkgName[%s], appDir[%s]", className.string(), pkgName.string(), appDir.string());
 
         StringBuilder sb;
         if (appDir.EndWith(".epk")) {
@@ -2985,11 +3001,12 @@ ECode CActivityThread::HandleCreateBackupAgent(
             Slogger::E(TAG, "CreateBackupAgent: Can't find the path is %s", path.string());
             return E_RUNTIME_EXCEPTION;
         }
-        Int32 index = classname.LastIndexOf('.');
-        String shortClassName = index > 0 ? classname.Substring(index + 1) : classname;
+        Int32 index = className.LastIndexOf('.');
+        String shortClassName = index > 0 ? className.Substring(index + 1) : className;
         ec = moduleInfo->GetClassInfo(shortClassName, (IClassInfo**)&classInfo);
         if (FAILED(ec)) {
-            Slogger::E(TAG, "CreateBackupAgent: Get class info of %s failed.", classname.string());
+            Slogger::E(TAG, "CreateBackupAgent: Get class info of %s failed.", className.string());
+            assert(0 && "TODO");
             return E_RUNTIME_EXCEPTION;
         }
         ec = classInfo->CreateObject((IInterface**)&object);
@@ -3034,7 +3051,7 @@ ECode CActivityThread::HandleCreateBackupAgent(
 //         }
 //     } catch (Exception e) {
 //         throw new RuntimeException("Unable to create BackupAgent "
-//                 + classname + ": " + e.toString(), e);
+//                 + className + ": " + e.toString(), e);
 //     }
     return NOERROR;
 }
@@ -3116,6 +3133,7 @@ ECode CActivityThread::HandleCreateService(
     if (FAILED(ec)) {
         if (localLOGV) {
            Slogger::E(TAG, "HandleCreateService: Get class info of %s failed.", shortClassName.string());
+           assert(0 && "TODO");
         }
         return E_RUNTIME_EXCEPTION;
     }
@@ -3692,9 +3710,10 @@ ECode CActivityThread::HandlePauseActivity(
     /* [in] */ Int32 configChanges,
     /* [in] */ Boolean dontReport)
 {
+    Slogger::V(TAG, " >>>> HandlePauseActivity");
     AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(token);
     if (r != NULL) {
-        Slogger::V(TAG, "userLeaving=%d handling pause of %p", userLeaving, r.Get());
+        Slogger::V(TAG, "userLeaving=%d handling pause of %s", userLeaving, TO_CSTR(r));
         if (userLeaving) {
             PerformUserLeavingActivity(r);
         }
@@ -3718,6 +3737,7 @@ ECode CActivityThread::HandlePauseActivity(
 
        mSomeActivitiesChanged = TRUE;
     }
+    Slogger::V(TAG, " <<<< HandlePauseActivity");
     return NOERROR;
 }
 
@@ -5408,8 +5428,7 @@ ECode CActivityThread::HandleBindApplication(
         if (mProfiler->mProfileFile != NULL && !isHandle && mProfiler->mProfileFd == NULL) {
             mProfiler->mHandlingProfiling = TRUE;
             AutoPtr<IFile> file;
-//TODO
-//            CFile::New(mProfiler->mProfileFile, (IFile**)&file);
+            CFile::New(mProfiler->mProfileFile, (IFile**)&file);
             AutoPtr<IFile> parentfile;
             file->GetParentFile((IFile**)&parentfile);
             Boolean hasdirs;
@@ -6321,9 +6340,7 @@ ECode CActivityThread::Attach(
         runtimeInit->SetApplicationObject(IBinder::Probe(mAppThread));
         AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
 //         try {
-    Slogger::I(TAG, " >>> AttachApplication");
         mgr->AttachApplication(mAppThread);
-    Slogger::I(TAG, " <<< AttachApplication");
 //         } catch (RemoteException ex) {
 //             // Ignore
 //         }

@@ -1100,22 +1100,15 @@ ECode LoadedPkg::MakeApplication(
     mApplication = app;
 
     if (instrumentation != NULL) {
-//        try {
         ECode ec = instrumentation->CallApplicationOnCreate(app);
         if (FAILED(ec)) {
             Boolean val;
             instrumentation->OnException(app, ec, &val);
             if (!val) {
+                Slogger::E(TAG, "Unable to create application %s.", TO_CSTR(app));
                 return E_RUNTIME_EXCEPTION;
             }
         }
-//        } catch (Exception e) {
-//            if (!instrumentation.onException(app, e)) {
-//                throw new RuntimeException(
-//                    "Unable to create application " + app.getClass().getName()
-//                    + ": " + e.toString(), e);
-//            }
-//        }
     }
 
     // Rewrite the R 'constants' for all library apks.

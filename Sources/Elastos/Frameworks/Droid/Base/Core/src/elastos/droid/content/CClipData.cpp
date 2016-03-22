@@ -363,8 +363,7 @@ ECode CClipData::WriteToParcel(
         }
         if (item->mUri != NULL) {
             dest->WriteInt32(1);
-            dest->WriteInterfacePtr(item->mUri);
-            // Uri::WriteToParcel(dest, item->mUri);
+            Uri::WriteToParcel(dest, item->mUri);
         }
         else {
             dest->WriteInt32(0);
@@ -406,7 +405,7 @@ ECode CClipData::ReadFromParcel(
         source->ReadInt32(&value);
         AutoPtr<IUri> uri;
         if (value != 0) {
-            source->ReadInterfacePtr((Handle32*)&uri);
+            Uri::ReadFromParcel(source, (IUri**)&uri);
         }
         AutoPtr<IClipDataItem> item;
         ASSERT_SUCCEEDED(CClipDataItem::New(text, htmlText, intent, uri, (IClipDataItem**)&item));
