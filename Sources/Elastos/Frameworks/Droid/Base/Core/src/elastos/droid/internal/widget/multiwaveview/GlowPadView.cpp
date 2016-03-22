@@ -1769,17 +1769,14 @@ ECode GlowPadView::OnLayout(
     /* [in] */ Int32 bottom)
 {
     View::OnLayout(changed, left, top, right, bottom);
-    Int32 width = right - left;
-    Int32 height = bottom - top;
 
     // Target placement width/height. This puts the targets on the greater of the ring
     // width or the specified outer radius.
     Float placementWidth = GetRingWidth();
     Float placementHeight = GetRingHeight();
-    Float newWaveCenterX = mHorizontalInset
-            + Elastos::Core::Math::Max((Float) width, mMaxTargetWidth + placementWidth) / 2;
-    Float newWaveCenterY = mVerticalInset
-            + Elastos::Core::Math::Max((Float) height, + mMaxTargetHeight + placementHeight) / 2;
+
+    Float newWaveCenterX = mHorizontalInset + (mMaxTargetWidth + placementWidth) / 2;
+    Float newWaveCenterY = mVerticalInset + (mMaxTargetHeight + placementHeight) / 2;
 
     if (mInitialLayout) {
         StopAndHideWaveAnimation();
@@ -1973,7 +1970,7 @@ String GlowPadView::GetTargetDescription(
         mTargetDrawables->GetSize(&s1);
         mTargetDescriptions->GetSize(&s2);
         if (s1 != s2) {
-            Logger::W(TAG, "The number of target drawables must be"
+            if (DEBUG) Logger::V(TAG, "The number of target drawables must be"
                         " equal to the number of target descriptions.");
             return String(NULL);
         }
@@ -1996,7 +1993,7 @@ String GlowPadView::GetDirectionDescription(
         mTargetDrawables->GetSize(&s1);
         mDirectionDescriptions->GetSize(&s2);
         if (s1 != s2) {
-            Logger::W(TAG, "The number of target drawables must be"
+            if (DEBUG) Logger::V(TAG, "The number of target drawables must be"
                         " equal to the number of direction descriptions.");
             return String(NULL);
         }

@@ -2134,10 +2134,8 @@ ECode DatabaseHelper::UpgradeLockPatternLocation(
             // try {
             AutoPtr<ILockPatternUtils> lpu;
             CLockPatternUtils::New(mContext, (ILockPatternUtils**)&lpu);
-            AutoPtr<ILockPatternUtilsHelper> helper;
-            CLockPatternUtilsHelper::AcquireSingleton((ILockPatternUtilsHelper**)&helper);
             AutoPtr<IList> cellPattern;
-            helper->StringToPattern(lockPattern, (IList**)&cellPattern);
+            lpu->StringToPattern(lockPattern, (IList**)&cellPattern);
             ECode ec = lpu->SaveLockPattern(cellPattern);
             if (FAILED(ec)) {
                 // Don't want corrupted lock pattern to hang the reboot process

@@ -183,6 +183,10 @@ public:
         /* [in] */ Int32 userId,
         /* [out] */ String* retValue);
 
+    CARAPI GetLockPatternSize(
+        /* [in] */ Int32 userId,
+        /* [out] */ Byte* result);
+
     CARAPI RegisterObserver(
         /* [in] */ IILockSettingsObserver* remote);
 

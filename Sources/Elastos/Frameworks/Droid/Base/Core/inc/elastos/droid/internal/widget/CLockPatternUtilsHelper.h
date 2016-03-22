@@ -58,33 +58,14 @@ public:
         /* [out] */ Boolean* isDeviceEncryptionEnabled);
 
     /**
-     * Deserialize a pattern.
-     * @param string The pattern serialized with {@link #patternToString}
-     * @return The pattern.
-     */
-    CARAPI StringToPattern(
-        /* [in] */ const String& string,
-        /* [out] */ IList** list);
-
-    /**
      * Serialize a pattern.
      * @param pattern The pattern.
      * @return The pattern in string form.
      */
     CARAPI PatternToString(
         /* [in] */ IList* pattern,
+        /* [in] */ Int32 patternGridSize,
         /* [out] */ String* str);
-
-    /*
-     * Generate an SHA-1 hash for the pattern. Not the most secure, but it is
-     * at least a second level of protection. First level is that the file
-     * is in a location only readable by the system process.
-     * @param pattern the gesture pattern.
-     * @return the hash of the pattern in a byte array.
-     */
-    CARAPI PatternToHash(
-        /* [in] */ IList* pattern,
-        /* [out, callee] */ ArrayOf<Byte>** arr);
 
     CARAPI IsSafeModeEnabled(
         /* [out] */ Boolean* result);

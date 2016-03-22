@@ -612,6 +612,26 @@ ECode CLockSettingsService::GetString(
     return ReadFromDb(key, defaultValue, userId, retValue);
 }
 
+ECode CLockSettingsService::GetLockPatternSize(
+    /* [in] */ Int32 userId,
+    /* [out] */ Byte* result)
+{
+    VALIDATE_NOT_NULL(result);
+
+    // try {
+    Int64 size;
+    GetInt64(ISettingsSecure::LOCK_PATTERN_SIZE, -1, userId, &size);
+    if (size > 0 && size < 128) {
+        *result = (Byte) size;
+        return NOERROR;
+    }
+    // } catch (RemoteException re) {
+    //     //Any invalid size handled below
+    // }
+    *result = ILockPatternUtils::PATTERN_SIZE_DEFAULT;
+    return NOERROR;
+}
+
 ECode CLockSettingsService::RegisterObserver(
     /* [in] */ IILockSettingsObserver* remote)
 {
