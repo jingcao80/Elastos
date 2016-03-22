@@ -894,7 +894,8 @@ ECode CTreeMap::GetSubMap(
 
     Bound fromBound = fromInclusive ? INCLUSIVE : EXCLUSIVE;
     Bound toBound = toInclusive ? INCLUSIVE : EXCLUSIVE;
-    AutoPtr<BoundedMap> res = new BoundedMap(TRUE, fromKey, fromBound, toKey, toBound, this);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(TRUE, fromKey, fromBound, toKey, toBound, this));
     *outnav = (INavigableMap*)res.Get();
     REFCOUNT_ADD(*outnav)
     return NOERROR;
@@ -907,7 +908,8 @@ ECode CTreeMap::GetSubMap(
 {
     VALIDATE_NOT_NULL(sortmap)
 
-    AutoPtr<BoundedMap> res = new BoundedMap(TRUE, startKey, INCLUSIVE, endKey, EXCLUSIVE, this);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(TRUE, startKey, INCLUSIVE, endKey, EXCLUSIVE, this));
     AutoPtr<ISortedMap> outsort = (ISortedMap*)res.Get();
     *sortmap = outsort;
     REFCOUNT_ADD(*sortmap)
@@ -922,7 +924,8 @@ ECode CTreeMap::GetHeadMap(
     VALIDATE_NOT_NULL(outnav)
 
     Bound toBound = inclusive ? INCLUSIVE : EXCLUSIVE;
-    AutoPtr<BoundedMap> res = new BoundedMap(TRUE, NULL, NO_BOUND, toKey, toBound, this);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(TRUE, NULL, NO_BOUND, toKey, toBound, this));
     *outnav = (INavigableMap*)res.Get();
     REFCOUNT_ADD(*outnav)
     return NOERROR;
@@ -934,7 +937,8 @@ ECode CTreeMap::GetHeadMap(
 {
     VALIDATE_NOT_NULL(sortmap)
 
-    AutoPtr<BoundedMap> res = new BoundedMap(TRUE, NULL, NO_BOUND, endKey, EXCLUSIVE, this);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(TRUE, NULL, NO_BOUND, endKey, EXCLUSIVE, this));
     AutoPtr<ISortedMap> outsort = (ISortedMap*)res.Get();
     *sortmap = outsort;
     REFCOUNT_ADD(*sortmap)
@@ -949,7 +953,8 @@ ECode CTreeMap::GetTailMap(
     VALIDATE_NOT_NULL(outnav)
 
     Bound fromBound = inclusive ? INCLUSIVE : EXCLUSIVE;
-    AutoPtr<BoundedMap> res = new BoundedMap(TRUE, fromKey, fromBound, NULL, NO_BOUND, this);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(TRUE, fromKey, fromBound, NULL, NO_BOUND, this));
     *outnav = (INavigableMap*)res.Get();
     REFCOUNT_ADD(*outnav)
     return NOERROR;
@@ -961,7 +966,8 @@ ECode CTreeMap::GetTailMap(
 {
     VALIDATE_NOT_NULL(sortmap)
 
-    AutoPtr<BoundedMap> res = new BoundedMap(TRUE, startKey, INCLUSIVE, NULL, NO_BOUND, this);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(TRUE, startKey, INCLUSIVE, NULL, NO_BOUND, this));
     AutoPtr<ISortedMap> outsort = (ISortedMap*)res.Get();
     *sortmap = outsort;
     REFCOUNT_ADD(*sortmap)
@@ -973,7 +979,8 @@ ECode CTreeMap::GetDescendingMap(
 {
     VALIDATE_NOT_NULL(outnav)
 
-    AutoPtr<BoundedMap> res = new BoundedMap(FALSE, NULL, NO_BOUND, NULL, NO_BOUND, this);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(FALSE, NULL, NO_BOUND, NULL, NO_BOUND, this));
     *outnav = (INavigableMap*)res.Get();
     REFCOUNT_ADD(*outnav)
     return NOERROR;
@@ -984,7 +991,8 @@ ECode CTreeMap::GetDescendingKeySet(
 {
     VALIDATE_NOT_NULL(outnav)
 
-    AutoPtr<BoundedMap> res = new BoundedMap(FALSE, NULL, NO_BOUND, NULL, NO_BOUND, this);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(FALSE, NULL, NO_BOUND, NULL, NO_BOUND, this));
     return res->GetNavigableKeySet(outnav);
 }
 
@@ -1659,7 +1667,8 @@ ECode CTreeMap::_KeySet::GetDescendingSet(
 {
     VALIDATE_NOT_NULL(outnav)
     *outnav = NULL;
-    AutoPtr<BoundedMap> res = new BoundedMap(FALSE, NULL, NO_BOUND, NULL, NO_BOUND, mHost);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(FALSE, NULL, NO_BOUND, NULL, NO_BOUND, mHost));
     return res->GetNavigableKeySet(outnav);
 }
 
@@ -2200,9 +2209,9 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::GetDescendingSet(
     /* [out] */ INavigableSet** outnav)
 {
     VALIDATE_NOT_NULL(outnav)
-    AutoPtr<BoundedMap> res = new BoundedMap(
-        !mHost->mAscending, mHost->mFrom, mHost->mFromBound,
-        mHost->mTo, mHost->mToBound, mHost->mHost);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(!mHost->mAscending, mHost->mFrom, mHost->mFromBound,
+        mHost->mTo, mHost->mToBound, mHost->mHost));
     return res->GetNavigableKeySet(outnav);
 }
 
@@ -2308,7 +2317,7 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::RetainAll(
 
 CAR_INTERFACE_IMPL_3(CTreeMap::BoundedMap, AbstractMap, ISortedMap, INavigableMap, ISerializable)
 
-CTreeMap::BoundedMap::BoundedMap(
+ECode CTreeMap::BoundedMap::constructor(
     /* [in] */ Boolean ascending,
     /* [in] */ IInterface* from,
     /* [in] */ Bound fromBound,
@@ -2324,7 +2333,7 @@ CTreeMap::BoundedMap::BoundedMap(
     Int32 comvalue = 0;
     if (fromBound != NO_BOUND && toBound != NO_BOUND) {
         if ((mHost->mComparator->Compare(from, to, &comvalue), comvalue) > 0) {
-            assert(0 && "TODO");
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
             // throw new IllegalArgumentException(from + " > " + to);
         }
     }
@@ -2339,6 +2348,8 @@ CTreeMap::BoundedMap::BoundedMap(
     mFromBound = fromBound;
     mTo = to;
     mToBound = toBound;
+
+    return NOERROR;
 }
 
 ECode CTreeMap::BoundedMap::GetSize(
@@ -2797,7 +2808,8 @@ ECode CTreeMap::BoundedMap::GetDescendingMap(
 {
     VALIDATE_NOT_NULL(outnav)
 
-    AutoPtr<BoundedMap> res = new BoundedMap(!mAscending, mFrom, mFromBound, mTo, mToBound, mHost);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(!mAscending, mFrom, mFromBound, mTo, mToBound, mHost));
     *outnav = (INavigableMap*)res.Get();
     REFCOUNT_ADD(*outnav)
     return NOERROR;
@@ -2808,7 +2820,8 @@ ECode CTreeMap::BoundedMap::GetDescendingKeySet(
 {
     VALIDATE_NOT_NULL(outnav)
 
-    AutoPtr<BoundedMap> res = new BoundedMap(!mAscending, mFrom, mFromBound, mTo, mToBound, mHost);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(!mAscending, mFrom, mFromBound, mTo, mToBound, mHost));
     return res->GetNavigableKeySet(outnav);
 }
 
@@ -2938,7 +2951,8 @@ AutoPtr<INavigableMap> CTreeMap::BoundedMap::SubMap(
         }
     }
 
-    AutoPtr<BoundedMap> res = new BoundedMap(mAscending, from, fromBound, to, toBound, mHost);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(mAscending, from, fromBound, to, toBound, mHost));
     return (INavigableMap*)res.Get();
 }
 
@@ -3037,7 +3051,8 @@ AutoPtr<IInterface> CTreeMap::NavigableSubMap::ReadResolve()
     Bound fromBound = mFromStart ? NO_BOUND : (mLoInclusive ? INCLUSIVE : EXCLUSIVE);
     Bound toBound = mToEnd ? NO_BOUND : (mHiInclusive ? INCLUSIVE : EXCLUSIVE);
     Boolean ascending = !mIsDescending;
-    AutoPtr<BoundedMap> res = new BoundedMap(ascending, mLo, fromBound, mHi, toBound, mM);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(ascending, mLo, fromBound, mHi, toBound, mM));
     return res->Probe(EIID_IInterface);
 }
 
@@ -3168,7 +3183,8 @@ AutoPtr<IInterface> CTreeMap::SubMap::ReadResolve()
 {
     Bound fromBound = mFromStart ? NO_BOUND : INCLUSIVE;
     Bound toBound = mToEnd ? NO_BOUND : EXCLUSIVE;
-    AutoPtr<BoundedMap> res = new BoundedMap(TRUE, mFromKey, fromBound, mToKey, toBound, mHost);
+    AutoPtr<BoundedMap> res = new BoundedMap();
+    FAIL_RETURN(res->constructor(TRUE, mFromKey, fromBound, mToKey, toBound, mHost));
     return res->Probe(EIID_IInterface);
 }
 
