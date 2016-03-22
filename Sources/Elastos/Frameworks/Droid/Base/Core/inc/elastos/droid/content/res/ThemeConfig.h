@@ -196,12 +196,14 @@ public:
      * simulate a "default" configuration based on the user's last known
      * preference until the theme is switched at runtime.
      */
-    static CARAPI_(AutoPtr<IThemeConfig>) GetBootTheme(
-        /* [in] */ IContentResolver* resolver);
-
-    static CARAPI_(AutoPtr<IThemeConfig>) GetBootThemeForUser(
+    static CARAPI GetBootTheme(
         /* [in] */ IContentResolver* resolver,
-        /* [in] */ Int32 userHandle);
+        /* [out] */ IThemeConfig** theme);
+
+    static CARAPI GetBootThemeForUser(
+        /* [in] */ IContentResolver* resolver,
+        /* [in] */ Int32 userHandle,
+        /* [out] */ IThemeConfig** theme);
 
     /**
      * Represents the system framework theme, perceived by the system as there
