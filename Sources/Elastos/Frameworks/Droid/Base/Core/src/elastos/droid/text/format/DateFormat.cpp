@@ -443,9 +443,6 @@ AutoPtr<ICharSequence> DateFormat::Format(
                 {
                     inDate->Get(ICalendar::DATE, &temp);
                     replacement = ZeroPad(temp, count);
-                    AutoPtr<IDateUtils> du;
-                    CDateUtils::AcquireSingleton((IDateUtils**)&du);
-                    du->GetAMPMString(temp, &replacement);
                 }
                 break;
             case 'c':

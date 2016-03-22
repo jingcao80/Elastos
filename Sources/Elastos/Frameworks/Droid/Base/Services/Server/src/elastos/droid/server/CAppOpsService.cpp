@@ -358,6 +358,7 @@ ECode CAppOpsService::SystemReady()
             AutoPtr<ICollection> values;
             pkgs->GetValues((ICollection**)&values);
             AutoPtr<IIterator> it;
+            values->GetIterator((IIterator**)&it);
             while (it->HasNext(&hasNext), hasNext) {
                 obj = NULL;
                 it->GetNext((IInterface**)&obj);

@@ -238,21 +238,35 @@ ECode Process::GetAbiList(
     IDataInput* di = IDataInput::Probe(inputStream);
     Int32 numBytes;
     AutoPtr<ArrayOf<Byte> > bytes;
+Logger::I(TAG, " >> 1");
+    ec = IWriter::Probe(writer)->Write(String("1"));
     // Each query starts with the argument count (1 in this case)
-    FAIL_GOTO(IWriter::Probe(writer)->Write(String("1")), _EXIT_)
+    FAIL_GOTO(ec, _EXIT_)
 
     // ... followed by a new-line.
-    FAIL_GOTO(writer->NewLine(), _EXIT_)
+    ec = writer->NewLine();
+    FAIL_GOTO(ec, _EXIT_)
+Logger::I(TAG, " >> 3");
     // ... followed by our only argument.
-    FAIL_GOTO(IWriter::Probe(writer)->Write(String("--query-abi-list")), _EXIT_)
-    FAIL_GOTO(writer->NewLine(), _EXIT_)
-    FAIL_GOTO(IFlushable::Probe(writer)->Flush(), _EXIT_)
+    ec = IWriter::Probe(writer)->Write(String("--query-abi-list"));
+    FAIL_GOTO(ec, _EXIT_)
+Logger::I(TAG, " >> 4");
+    ec = writer->NewLine();
+    FAIL_GOTO(ec, _EXIT_)
+Logger::I(TAG, " >> 5");
+    ec = IFlushable::Probe(writer)->Flush();
+    FAIL_GOTO(ec, _EXIT_)
+Logger::I(TAG, " >> 6");
 
     // The response is a length prefixed stream of ASCII bytes.
-    FAIL_GOTO(di->ReadInt32(&numBytes), _EXIT_)
+    ec = di->ReadInt32(&numBytes);
+    FAIL_GOTO(ec, _EXIT_)
+Logger::I(TAG, " >> 7");
     bytes = ArrayOf<Byte>::Alloc(numBytes);
-    FAIL_GOTO(di->ReadFully(bytes), _EXIT_)
-
+Logger::I(TAG, " >> 8");
+    ec = di->ReadFully(bytes);
+    FAIL_GOTO(ec, _EXIT_)
+Logger::I(TAG, " >> 9");
     // Logger::I(TAG, " GetAbiList: %d, %s", numBytes, (const char*)bytes->GetPayload());
     *result = String((const char*)bytes->GetPayload());
     return NOERROR;

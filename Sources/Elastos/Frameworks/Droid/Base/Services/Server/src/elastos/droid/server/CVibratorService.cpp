@@ -1,6 +1,7 @@
 
 #include "elastos/droid/server/CVibratorService.h"
 #include "elastos/droid/server/LocalServices.h"
+
 #include <elastos/droid/os/Binder.h>
 #include <elastos/droid/os/UserHandle.h>
 #include <elastos/droid/os/Handler.h>
@@ -42,7 +43,7 @@ using Elastos::Droid::Os::EIID_IPowerManagerInternal;
 using Elastos::Droid::Os::EIID_ILowPowerModeListener;
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::App::IAppOpsManagerHelper;
-// using Elastos::Droid::App::CAppOpsManagerHelper;
+using Elastos::Droid::App::CAppOpsManagerHelper;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
@@ -631,8 +632,7 @@ void CVibratorService::StartVibrationLocked(
     }
 
     AutoPtr<IAppOpsManagerHelper> helper;
-    assert(0 && "TODO");
-    // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&helper);
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&helper);
     AutoPtr<IBinder> token;
     helper->GetToken(mAppOpsService, (IBinder**)&token);
 
@@ -669,8 +669,7 @@ void CVibratorService::ReportFinishVibrationLocked()
 {
     if (mCurrentVibration != NULL) {
         AutoPtr<IAppOpsManagerHelper> helper;
-        assert(0 && "TODO");
-        // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&helper);
+        CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&helper);
         AutoPtr<IBinder> token;
         helper->GetToken(mAppOpsService, (IBinder**)&token);
         mAppOpsService->FinishOperation(token,

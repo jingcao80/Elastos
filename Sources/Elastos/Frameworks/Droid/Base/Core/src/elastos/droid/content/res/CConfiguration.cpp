@@ -1055,7 +1055,8 @@ ECode CConfiguration::ToString(
     }
     sb += " themeResource=";
     String configStr;
-    IObject::Probe(mThemeConfig)->ToString(&configStr);
+    if (IObject::Probe(mThemeConfig) != NULL)
+        IObject::Probe(mThemeConfig)->ToString(&configStr);
     sb += configStr;
     sb += '}';
     *str = sb.ToString();
