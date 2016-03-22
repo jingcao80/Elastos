@@ -41,6 +41,10 @@ module
             [in] Int32 userId,
             [out] String* str);
 
+        GetLockPatternSize(
+            [in] Int32 userId,
+            [out] Byte* result);
+
         SetLockPattern(
             [in] String pattern,
             [in] Int32 userId);

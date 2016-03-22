@@ -55,6 +55,11 @@ module
         const Int32 MIN_LOCK_PATTERN_SIZE = 4;
 
         /**
+         * The default size of the pattern lockscreen. Ex: 3x3
+         */
+        const Byte PATTERN_SIZE_DEFAULT = 3;
+
+        /**
          * The minimum number of dots the user must include in a wrong pattern
          * attempt for it to be counted against the counts that affect
          * {@link #FAILED_ATTEMPTS_BEFORE_TIMEOUT} and {@link #FAILED_ATTEMPTS_BEFORE_RESET}
@@ -364,6 +369,35 @@ module
             [out] Boolean* weak);
 
         /**
+         * Deserialize a pattern.
+         * @param string The pattern serialized with {@link #patternToString}
+         * @return The pattern.
+         */
+        StringToPattern(
+            [in] String string,
+            [out] IList** list);
+
+        /**
+         * Serialize a pattern.
+         * @param pattern The pattern.
+         * @return The pattern in string form.
+         */
+        PatternToString(
+            [in] IList* pattern,
+            [out] String* str);
+
+        /*
+         * Generate an SHA-1 hash for the pattern. Not the most secure, but it is
+         * at least a second level of protection. First level is that the file
+         * is in a location only readable by the system process.
+         * @param pattern the gesture pattern.
+         * @return the hash of the pattern in a byte array.
+         */
+        PatternToHash(
+            [in] IList* pattern,
+            [out, callee] ArrayOf<Byte>* arr);
+
+        /**
          * @return Whether the lock password is enabled, or if it is set as a backup for biometric weak
          */
         IsLockPasswordEnabled(
@@ -416,6 +450,30 @@ module
          */
         IsTactileFeedbackEnabled(
             [out] Boolean* enabled);
+
+        /**
+         * @return the pattern lockscreen size
+         */
+        GetLockPatternSize(
+            [out] Byte* result);
+
+        /**
+         * Set the pattern lockscreen size
+         */
+        SetLockPatternSize(
+            [in] Int64 size);
+
+        SetVisibleDotsEnabled(
+            [in] Boolean enabled);
+
+        IsVisibleDotsEnabled(
+            [out] Boolean* result);
+
+        SetShowErrorPath(
+            [in] Boolean enabled);
+
+        IsShowErrorPath(
+            [out] Boolean* result);
 
         /**
          * Set and store the lockout deadline, meaning the user can't attempt his/her unlock
@@ -493,6 +551,9 @@ module
 
         IsSecure(
             [out] Boolean* secure);
+
+        GetActiveProfileLockMode(
+            [out] Int32* result);
 
         /**
          * Sets the emergency button visibility based on isEmergencyCallCapable().
@@ -646,33 +707,15 @@ module
             [out] Boolean* isDeviceEncryptionEnabled);
 
         /**
-         * Deserialize a pattern.
-         * @param string The pattern serialized with {@link #patternToString}
-         * @return The pattern.
-         */
-        StringToPattern(
-            [in] String string,
-            [out] IList** list);
-
-        /**
          * Serialize a pattern.
          * @param pattern The pattern.
+         * @param patternGridSize the pattern size
          * @return The pattern in string form.
          */
         PatternToString(
             [in] IList* pattern,
+            [in] Int32 patternGridSize,
             [out] String* str);
-
-        /*
-         * Generate an SHA-1 hash for the pattern. Not the most secure, but it is
-         * at least a second level of protection. First level is that the file
-         * is in a location only readable by the system process.
-         * @param pattern the gesture pattern.
-         * @return the hash of the pattern in a byte array.
-         */
-        PatternToHash(
-            [in] IList* pattern,
-            [out, callee] ArrayOf<Byte>* arr);
 
         IsSafeModeEnabled(
             [out] Boolean* result);

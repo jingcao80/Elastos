@@ -37,35 +37,12 @@ ECode CLockPatternUtilsHelper::IsDeviceEncryptionEnabled(
     return NOERROR;
 }
 
-ECode CLockPatternUtilsHelper::StringToPattern(
-    /* [in] */ const String& string,
-    /* [out] */ IList** list)
-{
-    VALIDATE_NOT_NULL(list);
-    AutoPtr<IList> pattern = LockPatternUtils::StringToPattern(string);
-    *list = pattern;
-    REFCOUNT_ADD(*list);
-    return NOERROR;
-}
-
 ECode CLockPatternUtilsHelper::PatternToString(
     /* [in] */ IList* pattern,
+    /* [in] */ Int32 patternGridSize,
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str);
-    *str = LockPatternUtils::PatternToString(pattern);
-    return NOERROR;
-}
-
-ECode CLockPatternUtilsHelper::PatternToHash(
-    /* [in] */ IList* pattern,
-    /* [out, callee] */ ArrayOf<Byte>** arr)
-{
-    VALIDATE_NOT_NULL(arr)
-    AutoPtr < ArrayOf<Byte> > bytes = LockPatternUtils::PatternToHash(pattern);
-    *arr = bytes;
-    REFCOUNT_ADD(*arr)
-    return NOERROR;
+    return LockPatternUtils::PatternToString(pattern, patternGridSize, str);
 }
 
 ECode CLockPatternUtilsHelper::IsSafeModeEnabled(

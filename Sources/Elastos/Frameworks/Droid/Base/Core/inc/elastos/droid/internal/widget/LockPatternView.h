@@ -42,7 +42,8 @@ public:
 
         CARAPI constructor(
             /* [in] */ Int32 row,
-            /* [in] */ Int32 column);
+            /* [in] */ Int32 column,
+            /* [in] */ Byte size);
 
         virtual CARAPI GetRow(
             /* [out] */ Int32* result);
@@ -56,7 +57,11 @@ public:
          */
         static CARAPI_(AutoPtr<ILockPatternViewCell>) Of(
             /* [in] */ Int32 row,
-            /* [in] */ Int32 column);
+            /* [in] */ Int32 column,
+            /* [in] */ Byte size);
+
+        static CARAPI UpdateSize(
+            /* [in] */ Byte size);
 
         virtual CARAPI ToString(
             /* [out] */ String* str);
@@ -64,14 +69,14 @@ public:
     private:
         static CARAPI CheckRange(
             /* [in] */ Int32 row,
-            /* [in] */ Int32 column);
+            /* [in] */ Int32 column,
+            /* [in] */ Byte size);
 
     public:
         Int32 mRow;
         Int32 mColumn;
-        static AutoPtr<ILockPatternViewCell> sCells[3][3];
+        static AutoPtr<ArrayOf<IArrayOf*> > sCells;
         static Boolean sInit;
-        // static AutoPtr< ArrayOf< AutoPtr< ArrayOf<Cell*> > > > sCells;
     };
 
     class CellState
@@ -156,15 +161,21 @@ public:
             /* [in] */ IParcelable* superState,
             /* [in] */ const String& serializedPattern,
             /* [in] */ Int32 displayMode,
+            /* [in] */ Byte patternSize,
             /* [in] */ Boolean inputEnabled,
             /* [in] */ Boolean inStealthMode,
-            /* [in] */ Boolean tactileFeedbackEnabled);
+            /* [in] */ Boolean tactileFeedbackEnabled,
+            /* [in] */ Boolean visibleDots,
+            /* [in] */ Boolean showErrorPath);
 
         CARAPI GetSerializedPattern(
             /* [out] */ String* pattern);
 
         CARAPI GetDisplayMode(
             /* [out] */ Int32* mode);
+
+        CARAPI GetPatternSize(
+            /* [out] */ Byte* result);
 
         CARAPI IsInputEnabled(
             /* [out] */ Boolean* result);
@@ -175,12 +186,21 @@ public:
         CARAPI IsTactileFeedbackEnabled(
             /* [out] */ Boolean* result);
 
+        CARAPI IsVisibleDots(
+            /* [out] */ Boolean* result);
+
+        CARAPI IsShowErrorPath(
+            /* [out] */ Boolean* result);
+
     private:
         String mSerializedPattern;
         Int32 mDisplayMode;
+        Byte mPatternSize;
         Boolean mInputEnabled;
         Boolean mInStealthMode;
         Boolean mTactileFeedbackEnabled;
+        Boolean mVisibleDots;
+        Boolean mShowErrorPath;
     };
 
 private:
@@ -298,11 +318,32 @@ public:
     virtual CARAPI IsTactileFeedbackEnabled(
         /* [out] */ Boolean* result);
 
+    virtual CARAPI GetLockPatternSize(
+        /* [out] */ Int32* result);
+
     virtual CARAPI SetInStealthMode(
         /* [in] */ Boolean inStealthMode);
 
+    virtual CARAPI SetVisibleDots(
+        /* [in] */ Boolean visibleDots);
+
+    virtual CARAPI IsVisibleDots(
+        /* [out] */ Boolean* result);
+
+    virtual CARAPI SetShowErrorPath(
+        /* [in] */ Boolean showErrorPath);
+
+    virtual CARAPI IsShowErrorPath(
+        /* [out] */ Boolean* result);
+
     virtual CARAPI SetTactileFeedbackEnabled(
         /* [in] */ Boolean tactileFeedbackEnabled);
+
+    virtual CARAPI SetLockPatternSize(
+        /* [in] */ Byte size);
+
+    virtual CARAPI SetLockPatternUtils(
+        /* [in] */ ILockPatternUtils* utils);
 
     virtual CARAPI SetOnPatternListener(
         /* [in] */ IOnPatternListener* onPatternListener);
@@ -463,10 +504,11 @@ private:
 
     AutoPtr<IPaint> mPaint;
     AutoPtr<IPaint> mPathPaint;
+    Byte mPatternSize;
     AutoPtr<IOnPatternListener> mOnPatternListener;
     AutoPtr<IArrayList/*<Cell*/> mPattern;
 
-    Boolean mPatternDrawLookup[3][3];
+    AutoPtr<ArrayOf<IArrayOf*> > mPatternDrawLookup;
 
     Float mInProgressX;
     Float mInProgressY;
@@ -478,6 +520,8 @@ private:
     Boolean mInStealthMode;
     Boolean mEnableHapticFeedback;
     Boolean mPatternInProgress;
+    Boolean mVisibleDots;
+    Boolean mShowErrorPath;
 
     Float mHitFactor;
 
@@ -496,6 +540,8 @@ private:
 
     AutoPtr<IInterpolator> mFastOutSlowInInterpolator;
     AutoPtr<IInterpolator> mLinearOutSlowInInterpolator;
+
+    AutoPtr<ILockPatternUtils> mLockPatternUtils;
 };
 
 }// namespace Widget

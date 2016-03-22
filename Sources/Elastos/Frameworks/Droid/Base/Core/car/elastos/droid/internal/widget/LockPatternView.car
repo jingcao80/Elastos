@@ -85,7 +85,11 @@ module
         Of(
             [in] Int32 row,
             [in] Int32 column,
+            [in] Byte size,
             [out] ILockPatternViewCell** result);
+
+        UpdateSize(
+            [in] Byte size);
     }
 
     /**
@@ -128,6 +132,9 @@ module
         GetDisplayMode(
             [out] Int32* result);
 
+        GetPatternSize(
+            [out] Byte* result);
+
         IsInputEnabled(
             [out] Boolean* result);
 
@@ -135,6 +142,12 @@ module
             [out] Boolean* result);
 
         IsTactileFeedbackEnabled(
+            [out] Boolean* result);
+
+        IsVisibleDots(
+            [out] Boolean* result);
+
+        IsShowErrorPath(
             [out] Boolean* result);
     }
 
@@ -154,7 +167,7 @@ module
      * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
      * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      */
-     [deprecated]
+     [deprecated, local]
     interface ILockPatternView {
         GetCellStates(
             [out, callee] ArrayOf<IArrayOf*>* states);
@@ -172,6 +185,12 @@ module
             [out] Boolean* enabled);
 
         /**
+         * @return the current pattern lockscreen size.
+         */
+        GetLockPatternSize(
+            [out] Int32* result);
+
+        /**
          * Set whether the view is in stealth mode.  If true, there will be no
          * visible feedback as the user enters the pattern.
          *
@@ -179,6 +198,18 @@ module
          */
         SetInStealthMode(
             [in] Boolean inStealthMode);
+
+        SetVisibleDots(
+            [in] Boolean visibleDots);
+
+        IsVisibleDots(
+            [out] Boolean* result);
+
+        SetShowErrorPath(
+            [in] Boolean showErrorPath);
+
+        IsShowErrorPath(
+            [out] Boolean* result);
 
         /**
          * Set whether the view will use tactile feedback.  If true, there will be
@@ -188,6 +219,21 @@ module
          */
         SetTactileFeedbackEnabled(
             [in] Boolean tactileFeedbackEnabled);
+
+        /**
+         * Set the pattern size of the lockscreen
+         *
+         * @param size The pattern size.
+         */
+        SetLockPatternSize(
+            [in] Byte size);
+
+        /**
+         * Set the LockPatternUtil instance used to encode a pattern to a string
+         * @param utils The instance.
+         */
+        SetLockPatternUtils(
+            [in] ILockPatternUtils* utils);
 
         /**
          * Set the call back for pattern detection.

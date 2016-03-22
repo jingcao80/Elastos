@@ -856,7 +856,8 @@ module
     class CLockPatternViewCell {
         constructor(
             [in] Int32 row,
-            [in] Int32 column);
+            [in] Int32 column,
+            [in] Byte size);
 
         interface ILockPatternViewCell;
     }
@@ -873,9 +874,12 @@ module
             [in] IParcelable* superState,
             [in] String serializedPattern,
             [in] Int32 displayMode,
+            [in] Byte patternSize,
             [in] Boolean inputEnabled,
             [in] Boolean inStealthMode,
-            [in] Boolean tactileFeedbackEnabled);
+            [in] Boolean tactileFeedbackEnabled,
+            [in] Boolean visibleDots,
+            [in] Boolean showErrorPath);
 
         interface ILockPatternViewSavedState;
         interface IViewBaseSavedState;

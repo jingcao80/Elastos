@@ -103,6 +103,10 @@ public:
         /* [in] */ Int32 userId,
         /* [out] */ Boolean* retValue) /*throws RemoteException*/;
 
+    CARAPI GetLockPatternSize(
+        /* [in] */ Int32 userId,
+        /* [out] */ Byte* result) /*throws RemoteException*/;
+
     // @Override
     CARAPI SetLockPattern(
         /* [in] */ const String& pattern,

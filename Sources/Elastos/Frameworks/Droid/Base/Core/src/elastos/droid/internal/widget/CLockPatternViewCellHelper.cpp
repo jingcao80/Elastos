@@ -12,13 +12,20 @@ CAR_INTERFACE_IMPL(CLockPatternViewCellHelper, Singleton, ILockPatternViewCellHe
 ECode CLockPatternViewCellHelper::Of(
     /* [in] */ Int32 row,
     /* [in] */ Int32 column,
+    /* [in] */ Byte size,
     /* [out] */ ILockPatternViewCell** cell)
 {
     VALIDATE_NOT_NULL(cell);
-    AutoPtr<ILockPatternViewCell> c = LockPatternView::Cell::Of(row, column);
+    AutoPtr<ILockPatternViewCell> c = LockPatternView::Cell::Of(row, column, size);
     *cell = c;
     REFCOUNT_ADD(*cell);
     return NOERROR;
+}
+
+ECode CLockPatternViewCellHelper::UpdateSize(
+    /* [in] */ Byte size)
+{
+    return LockPatternView::Cell::UpdateSize(size);
 }
 
 }// namespace Widget

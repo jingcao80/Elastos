@@ -198,6 +198,13 @@ ECode CLockPatternUtilsCache::GetBoolean(
     return NOERROR;
 }
 
+ECode CLockPatternUtilsCache::GetLockPatternSize(
+    /* [in] */ Int32 userId,
+    /* [out] */ Byte* result) /*throws RemoteException*/
+{
+    return mService->GetLockPatternSize(userId, result);
+}
+
 ECode CLockPatternUtilsCache::SetLockPattern(
     /* [in] */ const String& pattern,
     /* [in] */ Int32 userId) /*throws RemoteException*/

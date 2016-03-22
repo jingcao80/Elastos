@@ -11,6 +11,8 @@
 
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
 using Elastos::Droid::App::IAlarmClockInfo;
+//TODO: Need IProfileManager
+// using Elastos::Droid::App::IProfileManager;
 using Elastos::Droid::App::Trust::ITrustManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
@@ -211,11 +213,45 @@ public:
     virtual CARAPI UsingBiometricWeak(
         /* [out] */ Boolean* result);
 
-    static CARAPI_(AutoPtr<IList>) StringToPattern(
-        /* [in] */ const String& string);
+    /**
+     * Deserialize a pattern.
+     * @param string The pattern serialized with {@link #patternToString}
+     * @return The pattern.
+     */
+    virtual CARAPI StringToPattern(
+        /* [in] */ const String& string,
+        /* [out] */ IList** list);
 
-    static CARAPI_(String) PatternToString(
-        /* [in] */ IList* pattern);
+    /**
+     * Serialize a pattern.
+     * @param pattern The pattern.
+     * @return The pattern in string form.
+     */
+    virtual CARAPI PatternToString(
+        /* [in] */ IList* pattern,
+        /* [out] */ String* str);
+
+    /**
+     * Serialize a pattern.
+     * @param pattern The pattern.
+     * @param patternGridSize the pattern size
+     * @return The pattern in string form.
+     */
+    static CARAPI PatternToString(
+        /* [in] */ IList* pattern,
+        /* [in] */ Int32 patternGridSize,
+        /* [out] */ String* str);
+
+    /*
+     * Generate an SHA-1 hash for the pattern. Not the most secure, but it is
+     * at least a second level of protection. First level is that the file
+     * is in a location only readable by the system process.
+     * @param pattern the gesture pattern.
+     * @return the hash of the pattern in a byte array.
+     */
+    virtual CARAPI PatternToHash(
+        /* [in] */ IList* pattern,
+        /* [out, callee] */ ArrayOf<Byte>** arr);
 
     CARAPI PasswordToHash(
         /* [in] */ const String& password,
@@ -248,6 +284,24 @@ public:
 
     virtual CARAPI IsTactileFeedbackEnabled(
         /* [out] */ Boolean* enabled);
+
+    virtual CARAPI GetLockPatternSize(
+        /* [out] */ Byte* result);
+
+    virtual CARAPI SetLockPatternSize(
+        /* [in] */ Int64 size);
+
+    virtual CARAPI SetVisibleDotsEnabled(
+        /* [in] */ Boolean enabled);
+
+    virtual CARAPI IsVisibleDotsEnabled(
+        /* [out] */ Boolean* result);
+
+    virtual CARAPI SetShowErrorPath(
+        /* [in] */ Boolean enabled);
+
+    virtual CARAPI IsShowErrorPath(
+        /* [out] */ Boolean* result);
 
     virtual CARAPI SetLockoutAttemptDeadline(
         /* [out] */ Int64* result);
@@ -293,6 +347,9 @@ public:
 
     virtual CARAPI IsSecure(
         /* [out] */ Boolean* result);
+
+    virtual CARAPI GetActiveProfileLockMode(
+        /* [out] */ Int32* result);
 
     /**
      * Sets the emergency button visibility based on isEmergencyCallCapable().
@@ -358,9 +415,6 @@ public:
      */
     static CARAPI_(Int32) MaxLengthSequence(
         /* [in] */ const String& string);
-
-    static CARAPI_(AutoPtr < ArrayOf<Byte> >) PatternToHash(
-        /* [in] */ IList* pattern);
 
     /**
      * Determine whether the user has selected any non-system widgets in keyguard
@@ -515,6 +569,8 @@ private:
     AutoPtr<IContentResolver> mContentResolver;
     AutoPtr<IDevicePolicyManager> mDevicePolicyManager;
     AutoPtr<IILockSettings> mLockSettingsService;
+//TODO: Need IProfileManager
+    // AutoPtr<IProfileManager> mProfileManager;
 
     Boolean mMultiUserMode;
 

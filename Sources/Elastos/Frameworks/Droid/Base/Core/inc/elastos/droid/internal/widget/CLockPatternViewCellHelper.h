@@ -21,7 +21,11 @@ public:
     CARAPI Of(
         /* [in] */ Int32 row,
         /* [in] */ Int32 column,
+        /* [in] */ Byte size,
         /* [out] */ ILockPatternViewCell** cell);
+
+    CARAPI UpdateSize(
+        /* [in] */ Byte size);
 };
 
 }// namespace Widget

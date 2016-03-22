@@ -33,7 +33,10 @@ using Elastos::Droid::View::Accessibility::IAccessibilityManager;
 using Elastos::Droid::View::Accessibility::CAccessibilityManager;
 using Elastos::Droid::View::Animation::AnimationUtils;
 using Elastos::Core::CArrayOf;
+using Elastos::Core::CBoolean;
 using Elastos::Core::CString;
+using Elastos::Core::EIID_IBoolean;
+using Elastos::Core::IBoolean;
 using Elastos::Core::IFloat;
 using Elastos::Core::Math;
 using Elastos::Core::StringBuilder;
@@ -55,13 +58,7 @@ const Float LockPatternView::DRAG_THRESHHOLD = 0.0f;
 
 Boolean static InitStatic()
 {
-    for (Int32 i = 0; i < 3; i++) {
-        for (Int32 j = 0; j < 3; j++) {
-            AutoPtr<CLockPatternViewCell> cell;
-            CLockPatternViewCell::NewByFriend(i, j, (CLockPatternViewCell**)&cell);
-            LockPatternView::Cell::sCells[i][j] = cell;
-        }
-    }
+    LockPatternView::Cell::UpdateSize(ILockPatternUtils::PATTERN_SIZE_DEFAULT);
     return TRUE;
 }
 
@@ -69,7 +66,7 @@ Boolean static InitStatic()
 //                  LockPatternView::Cell
 /////////////////////////////////////////////////////////////
 Boolean LockPatternView::Cell::sInit = InitStatic();
-AutoPtr<ILockPatternViewCell> LockPatternView::Cell::sCells[3][3];
+AutoPtr<ArrayOf<IArrayOf*> > LockPatternView::Cell::sCells;
 CAR_INTERFACE_IMPL(LockPatternView::Cell, Object, ILockPatternViewCell);
 LockPatternView::Cell::Cell()
     : mRow(0)
@@ -78,9 +75,10 @@ LockPatternView::Cell::Cell()
 
 ECode LockPatternView::Cell::constructor(
     /* [in] */ Int32 row,
-    /* [in] */ Int32 column)
+    /* [in] */ Int32 column,
+    /* [in] */ Byte size)
 {
-    CheckRange(row, column);
+    CheckRange(row, column, size);
     mRow = row;
     mColumn = column;
     return NOERROR;
@@ -88,12 +86,13 @@ ECode LockPatternView::Cell::constructor(
 
 ECode LockPatternView::Cell::CheckRange(
     /* [in] */ Int32 row,
-    /* [in] */ Int32 column)
+    /* [in] */ Int32 column,
+    /* [in] */ Byte size)
 {
-    if (row < 0 || row > 2) {
+    if (row < 0 || row > size - 1) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    if (column < 0 || column > 2) {
+    if (column < 0 || column > size - 1) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -117,10 +116,32 @@ ECode LockPatternView::Cell::GetColumn(
 
 AutoPtr<ILockPatternViewCell> LockPatternView::Cell::Of(
     /* [in] */ Int32 row,
-    /* [in] */ Int32 column)
+    /* [in] */ Int32 column,
+    /* [in] */ Byte size)
 {
-    CheckRange(row, column);
-    return sCells[row][column];
+    CheckRange(row, column, size);
+    AutoPtr<IInterface> obj;
+    (*sCells)[row]->Get(column, (IInterface**)&obj);
+    return ILockPatternViewCell::Probe(obj);
+}
+
+ECode LockPatternView::Cell::UpdateSize(
+    /* [in] */ Byte size)
+{
+    sCells = ArrayOf<IArrayOf*>::Alloc(size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IArrayOf> item;
+        CArrayOf::New(EIID_ILockPatternViewCell, size, (IArrayOf**)&item);
+
+        for (Int32 j = 0; j < size; j++) {
+            AutoPtr<ILockPatternViewCell> cell;
+            CLockPatternViewCell::New(i, j, size, (ILockPatternViewCell**)&cell);
+            item->Set(j, cell);
+        }
+
+        sCells->Set(i, item);
+    }
+    return NOERROR;
 }
 
 ECode LockPatternView::Cell::ToString(
@@ -260,9 +281,12 @@ ECode LockPatternView::CellState::SetLineAnimator(
 CAR_INTERFACE_IMPL(LockPatternView::SavedState, View::BaseSavedState, ILockPatternViewSavedState);
 LockPatternView::SavedState::SavedState()
     : mDisplayMode(0)
+    , mPatternSize(0)
     , mInputEnabled(FALSE)
     , mInStealthMode(FALSE)
     , mTactileFeedbackEnabled(FALSE)
+    , mVisibleDots(FALSE)
+    , mShowErrorPath(FALSE)
 {}
 
 ECode LockPatternView::SavedState::constructor()
@@ -274,16 +298,22 @@ ECode LockPatternView::SavedState::constructor(
     /* [in] */ IParcelable* superState,
     /* [in] */ const String& serializedPattern,
     /* [in] */ Int32 displayMode,
+    /* [in] */ Byte patternSize,
     /* [in] */ Boolean inputEnabled,
     /* [in] */ Boolean inStealthMode,
-    /* [in] */ Boolean tactileFeedbackEnabled)
+    /* [in] */ Boolean tactileFeedbackEnabled,
+    /* [in] */ Boolean visibleDots,
+    /* [in] */ Boolean showErrorPath)
 {
     BaseSavedState::constructor(superState);
     mSerializedPattern = serializedPattern;
     mDisplayMode = displayMode;
+    mPatternSize = patternSize;
     mInputEnabled = inputEnabled;
     mInStealthMode = inStealthMode;
     mTactileFeedbackEnabled = tactileFeedbackEnabled;
+    mVisibleDots = visibleDots;
+    mShowErrorPath = showErrorPath;
     return NOERROR;
 }
 
@@ -300,6 +330,14 @@ ECode LockPatternView::SavedState::GetDisplayMode(
 {
     VALIDATE_NOT_NULL(mode);
     *mode = mDisplayMode;
+    return NOERROR;
+}
+
+ECode LockPatternView::SavedState::GetPatternSize(
+    /* [out] */ Byte* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mPatternSize;
     return NOERROR;
 }
 
@@ -324,6 +362,22 @@ ECode LockPatternView::SavedState::IsTactileFeedbackEnabled(
 {
     VALIDATE_NOT_NULL(result);
     *result = mTactileFeedbackEnabled;
+    return NOERROR;
+}
+
+ECode LockPatternView::SavedState::IsVisibleDots(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mVisibleDots;
+    return NOERROR;
+}
+
+ECode LockPatternView::SavedState::IsShowErrorPath(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mShowErrorPath;
     return NOERROR;
 }
 
@@ -435,6 +489,7 @@ LockPatternView::LockPatternView()
     , mDotSizeActivated(0)
     , mPathWidth(0)
     , mDrawingProfilingStarted(FALSE)
+    , mPatternSize(ILockPatternUtils::PATTERN_SIZE_DEFAULT)
     , mInProgressX(-1)
     , mInProgressY(-1)
     , mAnimatingPeriodStart(0)
@@ -443,6 +498,8 @@ LockPatternView::LockPatternView()
     , mInStealthMode(FALSE)
     , mEnableHapticFeedback(TRUE)
     , mPatternInProgress(FALSE)
+    , mVisibleDots(TRUE)
+    , mShowErrorPath(TRUE)
     , mHitFactor(0.6f)
     , mSquareWidth(0)
     , mSquareHeight(0)
@@ -453,8 +510,7 @@ LockPatternView::LockPatternView()
 {
     CPaint::New((IPaint**)&mPaint);
     CPaint::New((IPaint**)&mPathPaint);
-    CArrayList::New(9, (IArrayList**)&mPattern);
-    memset(mPatternDrawLookup, 0, sizeof(mPatternDrawLookup));
+    CArrayList::New(mPatternSize * mPatternSize, (IArrayList**)&mPattern);
     CPaint::New((IPaint**)&mCurrentPath);
     CRect::NewByFriend((CRect**)&mInvalidate);
     CRect::NewByFriend((CRect**)&mTmpInvalidateRect);
@@ -523,7 +579,8 @@ ECode LockPatternView::constructor(
     mPaint->SetAntiAlias(TRUE);
     mPaint->SetDither(TRUE);
 
-    const Int32 LEN = 3;
+    const Int32 LEN = mPatternSize;
+
     mCellStates = ArrayOf<IArrayOf*>::Alloc(LEN);
     for (Int32 i = 0; i < LEN; i++) {
         AutoPtr<IArrayOf> item;
@@ -536,6 +593,20 @@ ECode LockPatternView::constructor(
         }
 
         mCellStates->Set(i, item);
+    }
+
+    mPatternDrawLookup = ArrayOf<IArrayOf*>::Alloc(LEN);
+    for (Int32 i = 0; i < LEN; i++) {
+        AutoPtr<IArrayOf> item;
+        CArrayOf::New(EIID_IBoolean, LEN, (IArrayOf**)&item);
+
+        for (Int32 j = 0; j < LEN; j++) {
+            AutoPtr<IBoolean> state;
+            CBoolean::New(FALSE, (IBoolean**)&state);
+            item->Set(j, state);
+        }
+
+        mPatternDrawLookup->Set(i, item);
     }
 
     AnimationUtils::LoadInterpolator(context, R::interpolator::fast_out_slow_in,
@@ -570,6 +641,14 @@ ECode LockPatternView::IsTactileFeedbackEnabled(
     return NOERROR;
 }
 
+ECode LockPatternView::GetLockPatternSize(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mPatternSize;
+    return NOERROR;
+}
+
 ECode LockPatternView::SetInStealthMode(
     /* [in] */ Boolean inStealthMode)
 {
@@ -577,10 +656,87 @@ ECode LockPatternView::SetInStealthMode(
     return NOERROR;
 }
 
+ECode LockPatternView::SetVisibleDots(
+    /* [in] */ Boolean visibleDots)
+{
+    mVisibleDots = visibleDots;
+    return NOERROR;
+}
+
+ECode LockPatternView::IsVisibleDots(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mVisibleDots;
+    return NOERROR;
+}
+
+ECode LockPatternView::SetShowErrorPath(
+    /* [in] */ Boolean showErrorPath)
+{
+    mShowErrorPath = showErrorPath;
+    return NOERROR;
+}
+
+ECode LockPatternView::IsShowErrorPath(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mShowErrorPath;
+    return NOERROR;
+}
+
 ECode LockPatternView::SetTactileFeedbackEnabled(
     /* [in] */ Boolean tactileFeedbackEnabled)
 {
     mEnableHapticFeedback = tactileFeedbackEnabled;
+    return NOERROR;
+}
+
+ECode LockPatternView::SetLockPatternSize(
+    /* [in] */ Byte size)
+{
+    mPatternSize = size;
+    Cell::UpdateSize(size);
+
+    const Int32 LEN = mPatternSize;
+    mCellStates = ArrayOf<IArrayOf*>::Alloc(LEN);
+    for (Int32 i = 0; i < LEN; i++) {
+        AutoPtr<IArrayOf> item;
+        CArrayOf::New(EIID_ILockPatternViewCellState, LEN, (IArrayOf**)&item);
+
+        for (Int32 j = 0; j < LEN; j++) {
+            AutoPtr<ILockPatternViewCellState> state = new CellState();
+            ((CellState*)state.Get())->mSize = mDotSize;
+            item->Set(j, state);
+        }
+        mCellStates->Set(i, item);
+    }
+
+    CArrayList::New(size * size, (IArrayList**)&mPattern);
+
+    mPatternDrawLookup = NULL;
+    mPatternDrawLookup = ArrayOf<IArrayOf*>::Alloc(LEN);
+    for (Int32 i = 0; i < LEN; i++) {
+        AutoPtr<IArrayOf> item;
+        CArrayOf::New(EIID_IBoolean, LEN, (IArrayOf**)&item);
+
+        for (Int32 j = 0; j < LEN; j++) {
+            AutoPtr<IBoolean> state;
+            CBoolean::New(FALSE, (IBoolean**)&state);
+            item->Set(j, state);
+        }
+
+        mPatternDrawLookup->Set(i, item);
+    }
+
+    return NOERROR;
+}
+
+ECode LockPatternView::SetLockPatternUtils(
+    /* [in] */ ILockPatternUtils* utils)
+{
+    mLockPatternUtils = utils;
     return NOERROR;
 }
 
@@ -607,7 +763,9 @@ ECode LockPatternView::SetPattern(
         Cell* cell = (Cell*)IObject::Probe(item);
         cell->GetRow(&row);
         cell->GetColumn(&column);
-        mPatternDrawLookup[row][column] = TRUE;
+        AutoPtr<IBoolean> b;
+        CBoolean::New(TRUE, (IBoolean**)&b);
+        (*mPatternDrawLookup)[row]->Set(column, b);
     }
 
     SetDisplayMode(displayMode);
@@ -768,9 +926,11 @@ void LockPatternView::ResetPattern()
 
 void LockPatternView::ClearPatternDrawLookup()
 {
-    for (Int32 i = 0; i < 3; i++) {
-        for (Int32 j = 0; j < 3; j++) {
-            mPatternDrawLookup[i][j] = FALSE;
+    for (Int32 i = 0; i < mPatternSize; i++) {
+        for (Int32 j = 0; j < mPatternSize; j++) {
+            AutoPtr<IBoolean> b;
+            CBoolean::New(FALSE, (IBoolean**)&b);
+            (*mPatternDrawLookup)[i]->Set(j, b);
         }
     }
 }
@@ -782,10 +942,10 @@ void LockPatternView::OnSizeChanged(
     /* [in] */ Int32 oldh)
 {
     Int32 width = w - mPaddingLeft - mPaddingRight;
-    mSquareWidth = width / 3.0f;
+    mSquareWidth = width / (Float)mPatternSize;
 
     Int32 height = h - mPaddingTop - mPaddingBottom;
-    mSquareHeight = height / 3.0f;
+    mSquareHeight = height / (Float)mPatternSize;
 }
 
 Int32 LockPatternView::ResolveMeasured(
@@ -816,7 +976,6 @@ AutoPtr<LockPatternView::Cell> LockPatternView::DetectAndAddHit(
     AutoPtr<Cell> cell = (Cell*)c.Get();
     if (cell != NULL) {
 
-        AutoPtr<Cell> fillInGapCell;
         AutoPtr<IArrayList> pattern = mPattern;
         Int32 size = 0;
         if ((pattern->GetSize(&size), size) != 0) {
@@ -829,20 +988,26 @@ AutoPtr<LockPatternView::Cell> LockPatternView::DetectAndAddHit(
             Int32 fillInRow = lastCell->mRow;
             Int32 fillInColumn = lastCell->mColumn;
 
-            if (Elastos::Core::Math::Abs(dRow) == 2 && Elastos::Core::Math::Abs(dColumn) != 1) {
-                fillInRow = lastCell->mRow + ((dRow > 0) ? 1 : -1);
+            if (dRow == 0 || dColumn == 0 ||
+                    Elastos::Core::Math::Abs(dRow) == Elastos::Core::Math::Abs(dColumn)) {
+                while (TRUE) {
+                    fillInRow += Elastos::Core::Math::Signum(dRow);
+                    fillInColumn += Elastos::Core::Math::Signum(dColumn);
+                    if (fillInRow == cell->mRow && fillInColumn == cell->mColumn) break;
+                    AutoPtr<ILockPatternViewCell> iCell = Cell::Of(fillInRow, fillInColumn, mPatternSize);
+                    AutoPtr<Cell> fillInGapCell = (Cell*)iCell.Get();
+                    AutoPtr<IInterface> obj;
+                    (*mPatternDrawLookup)[fillInGapCell->mRow]->Get(fillInGapCell->mColumn, (IInterface**)&obj);
+                    AutoPtr<IBoolean> ib = IBoolean::Probe(obj);
+                    Boolean b;
+                    ib->GetValue(&b);
+                    if (!b) {
+                        AddCellToPattern(fillInGapCell);
+                    }
+                }
             }
-
-            if (Elastos::Core::Math::Abs(dColumn) == 2 && Elastos::Core::Math::Abs(dRow) != 1) {
-                fillInColumn = lastCell->mColumn + ((dColumn > 0) ? 1 : -1);
-            }
-
-            fillInGapCell = (Cell*)Cell::Of(fillInRow, fillInColumn).Get();
         }
 
-        if (fillInGapCell && !mPatternDrawLookup[fillInGapCell->mRow][fillInGapCell->mColumn]) {
-            AddCellToPattern(fillInGapCell);
-        }
         AddCellToPattern(cell);
         if (mEnableHapticFeedback) {
             Boolean tmp = FALSE;
@@ -861,7 +1026,9 @@ void LockPatternView::AddCellToPattern(
     Int32 row = 0, column = 0;
     newCell->GetRow(&row);
     newCell->GetColumn(&column);
-    mPatternDrawLookup[row][column] = TRUE;
+    AutoPtr<IBoolean> b;
+    CBoolean::New(TRUE, (IBoolean**)&b);
+    (*mPatternDrawLookup)[row]->Set(column, b);
     Int32 size = 0;
     mPattern->GetSize(&size);
     mPattern->Set(size, (IObject*)newCell->Probe(EIID_IObject));
@@ -944,10 +1111,15 @@ AutoPtr<ILockPatternViewCell> LockPatternView::CheckForNewHit(
         return NULL;
     }
 
-    if (mPatternDrawLookup[rowHit][columnHit]) {
+    AutoPtr<IInterface> obj;
+    (*mPatternDrawLookup)[rowHit]->Get(columnHit, (IInterface**)&obj);
+    AutoPtr<IBoolean> ib = IBoolean::Probe(obj);
+    Boolean b;
+    ib->GetValue(&b);
+    if (b) {
         return NULL;
     }
-    return Cell::Of(rowHit, columnHit);
+    return Cell::Of(rowHit, columnHit, mPatternSize);
 }
 
 Int32 LockPatternView::GetRowHit(
@@ -957,7 +1129,7 @@ Int32 LockPatternView::GetRowHit(
     Float hitSize = squareHeight * mHitFactor;
 
     Float offset = mPaddingTop + (squareHeight - hitSize) / 2.0f;
-    for (Int32 i = 0; i < 3; i++) {
+    for (Int32 i = 0; i < mPatternSize; i++) {
 
         Float hitTop = offset + squareHeight * i;
         if (y >= hitTop && y <= hitTop + hitSize) {
@@ -974,7 +1146,7 @@ Int32 LockPatternView::GetColumnHit(
     Float hitSize = squareWidth * mHitFactor;
 
     Float offset = mPaddingLeft + (squareWidth - hitSize) / 2.0f;
-    for (Int32 i = 0; i < 3; i++) {
+    for (Int32 i = 0; i < mPatternSize; i++) {
 
         Float hitLeft = offset + squareWidth * i;
         if (x >= hitLeft && x <= hitLeft + hitSize) {
@@ -1094,9 +1266,9 @@ void LockPatternView::HandleActionUp(
 
 void LockPatternView::CancelLineAnimations()
 {
-    for (Int32 i = 0; i < 3; i++) {
+    for (Int32 i = 0; i < mPatternSize; i++) {
         AutoPtr<IArrayOf> rows = (*mCellStates)[i];
-        for (Int32 j = 0; j < 3; j++) {
+        for (Int32 j = 0; j < mPatternSize; j++) {
             AutoPtr<IInterface> item;
             rows->Get(j, (IInterface**)&item);
             CellState* state = (CellState*)ILockPatternViewCellState::Probe(item);
@@ -1174,7 +1346,9 @@ Float LockPatternView::CalculateLastSegmentAlpha(
 Int32 LockPatternView::GetCurrentColor(
     /* [in] */ Boolean partOfPattern)
 {
-    if (!partOfPattern || mInStealthMode || mPatternInProgress) {
+    if (!partOfPattern || (mInStealthMode && mPatternDisplayMode != DisplayMode_Wrong)
+            || (mPatternDisplayMode == DisplayMode_Wrong && !mShowErrorPath)
+            || mPatternInProgress) {
         // unselected circle
         return mRegularColor;
     }
@@ -1199,6 +1373,9 @@ void LockPatternView::DrawCircle(
     /* [in] */ Boolean partOfPattern,
     /* [in] */ Float alpha)
 {
+    if (!mVisibleDots) {
+        return;
+    }
     mPaint->SetColor(GetCurrentColor(partOfPattern));
     mPaint->SetAlpha((Int32) (alpha * 255));
     canvas->DrawCircle(centerX, centerY, size / 2, mPaint);
@@ -1246,7 +1423,9 @@ void LockPatternView::OnDraw(
             Cell* cell = (Cell*)IObject::Probe(item);
             cell->GetRow(&row);
             cell->GetColumn(&column);
-            mPatternDrawLookup[row][column] = TRUE;
+            AutoPtr<IBoolean> b;
+            CBoolean::New(TRUE, (IBoolean**)&b);
+            (*mPatternDrawLookup)[row]->Set(column, b);
         }
 
         Boolean needToUpdateInProgressPoint = numCircles > 0 && numCircles < count;
@@ -1276,25 +1455,33 @@ void LockPatternView::OnDraw(
     currentPath->Rewind();
 
     // draw the circles
-    for (Int32 i = 0; i < 3; i++) {
+    for (Int32 i = 0; i < mPatternSize; i++) {
         Float centerY = GetCenterYForRow(i);
         AutoPtr<IArrayOf> rows = (*mCellStates)[i];
-        for (Int32 j = 0; j < 3; j++) {
+        for (Int32 j = 0; j < mPatternSize; j++) {
             AutoPtr<IInterface> item;
             rows->Get(j, (IInterface**)&item);
             CellState* cellState = (CellState*)ILockPatternViewCellState::Probe(item);
             Float centerX = GetCenterXForColumn(j);
             Float size = cellState->mSize * cellState->mScale;
             Float translationY = cellState->mTranslateY;
+
+            AutoPtr<IInterface> obj;
+            (*mPatternDrawLookup)[i]->Get(j, (IInterface**)&obj);
+            AutoPtr<IBoolean> ib = IBoolean::Probe(obj);
+            Boolean b;
+            ib->GetValue(&b);
+
             DrawCircle(canvas, (Int32) centerX, (Int32) centerY + translationY,
-                    size, mPatternDrawLookup[i][j], cellState->mAlpha);
+                    size, b, cellState->mAlpha);
         }
     }
 
     // TODO: the path should be created and cached every time we hit-detect a cell
     // only the last segment of the path should be computed here
     // draw the path of the pattern (unless we are in stealth mode)
-    const Boolean drawPath = !mInStealthMode;
+    const Boolean drawPath = ((!mInStealthMode && mPatternDisplayMode != DisplayMode_Wrong)
+            || (mPatternDisplayMode == DisplayMode_Wrong && mShowErrorPath));
     if (drawPath) {
         mPathPaint->SetColor(GetCurrentColor(TRUE /* partOfPattern */));
 
@@ -1309,7 +1496,12 @@ void LockPatternView::OnDraw(
             // only draw the part of the pattern stored in
             // the lookup table (this is only different in the case
             // of animation).
-            if (!mPatternDrawLookup[cell->mRow][cell->mColumn]) {
+            AutoPtr<IInterface> obj;
+            (*mPatternDrawLookup)[cell->mRow]->Get(cell->mColumn, (IInterface**)&obj);
+            AutoPtr<IBoolean> ib = IBoolean::Probe(obj);
+            Boolean b;
+            ib->GetValue(&b);
+            if (!b) {
                 break;
             }
             anyCircles = TRUE;
@@ -1353,11 +1545,12 @@ void LockPatternView::OnDraw(
 AutoPtr<IParcelable> LockPatternView::OnSaveInstanceState()
 {
     AutoPtr<IParcelable> superState = View::OnSaveInstanceState();
+    String str;
+    LockPatternUtils::PatternToString(IList::Probe(mPattern), mPatternSize, &str);
     AutoPtr<IParcelable> state;
-    CLockPatternViewSavedState::New(superState,
-            LockPatternUtils::PatternToString(IList::Probe(mPattern)),
-            mPatternDisplayMode/*.ordinal()*/,
-            mInputEnabled, mInStealthMode, mEnableHapticFeedback, (IParcelable**)&state);
+    CLockPatternViewSavedState::New(superState, str,
+            mPatternDisplayMode/*.ordinal()*/, mPatternSize,
+            mInputEnabled, mInStealthMode, mEnableHapticFeedback, mVisibleDots, mShowErrorPath, (IParcelable**)&state);
     return state;
 }
 
@@ -1370,14 +1563,18 @@ void LockPatternView::OnRestoreInstanceState(
     View::OnRestoreInstanceState(value);
     String pattern;
     ss->GetSerializedPattern(&pattern);
-    SetPattern(DisplayMode_Correct,
-            LockPatternUtils::StringToPattern(pattern));
+    AutoPtr<IList> list;
+    mLockPatternUtils->StringToPattern(pattern, (IList**)&list);
+    SetPattern(DisplayMode_Correct, list);
     Int32 mode = 0;
     ss->GetDisplayMode(&mode);
     mPatternDisplayMode = mode/*DisplayMode.values()[mode]*/;
+    ss->GetPatternSize(&mPatternSize);
     ss->IsInputEnabled(&mInputEnabled);
     ss->IsInStealthMode(&mInStealthMode);
     ss->IsTactileFeedbackEnabled(&mEnableHapticFeedback);
+    ss->IsVisibleDots(&mVisibleDots);
+    ss->IsShowErrorPath(&mShowErrorPath);
 }
 
 }// namespace Widget

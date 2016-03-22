@@ -29,6 +29,8 @@
 using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::IIActivityManager;
+using Elastos::Droid::App::IProfile;
+using Elastos::Droid::App::IProfileLockMode;
 using Elastos::Droid::AppWidget::IAppWidgetManager;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
@@ -161,6 +163,10 @@ ECode LockPatternUtils::constructor(
 {
     mContext = context;
     context->GetContentResolver((IContentResolver**)&mContentResolver);
+    AutoPtr<IInterface> service;
+    context->GetSystemService(IContext::PROFILE_SERVICE, (IInterface**)&service);
+//TODO: Need IProfileManager
+    // mProfileManager = IProfileManager::Probe(service);
 
     // If this is being called by the system or by an application like keyguard that
     // has permision INTERACT_ACROSS_USERS, then LockPatternUtils will operate in multi-user
@@ -319,7 +325,9 @@ ECode LockPatternUtils::CheckPattern(
     VALIDATE_NOT_NULL(result);
     Int32 userId = GetCurrentOrCallingUserId();
     Boolean matched = FALSE;
-    ECode ec = GetLockSettings()->CheckPattern(PatternToString(pattern), userId, &matched);
+    String str;
+    PatternToString(pattern, &str);
+    ECode ec = GetLockSettings()->CheckPattern(str, userId, &matched);
     if (FAILED(ec)) {
         *result = TRUE;
         return NOERROR;
@@ -564,7 +572,9 @@ ECode LockPatternUtils::SaveLockPattern(
     Boolean required = FALSE;
     Int32 size = 0;
     ECode ec = NOERROR;
-    ec = GetLockSettings()->SetLockPattern(PatternToString(pattern), userId);
+    String str;
+    PatternToString(pattern, &str);
+    ec = GetLockSettings()->SetLockPattern(str, userId);
     FAIL_GOTO(ec, Error);
     dpm = GetDevicePolicyManager();
     if (pattern != NULL) {
@@ -575,7 +585,8 @@ ECode LockPatternUtils::SaveLockPattern(
                 ClearEncryptionPassword();
             }
             else {
-                String stringPattern = PatternToString(pattern);
+                String stringPattern;
+                PatternToString(pattern, &stringPattern);
                 UpdateEncryptionPassword(IStorageManager::CRYPT_TYPE_PATTERN, stringPattern);
             }
         }
@@ -980,30 +991,53 @@ ECode LockPatternUtils::UsingBiometricWeak(
     return NOERROR;
 }
 
-AutoPtr<IList> LockPatternUtils::StringToPattern(
-    /* [in] */ const String& string)
+ECode LockPatternUtils::StringToPattern(
+    /* [in] */ const String& string,
+    /* [out] */ IList** list)
 {
     AutoPtr<IList> result;
     CArrayList::New((IList**)&result);
 
     AutoPtr<ILockPatternViewCellHelper> helper;
     CLockPatternViewCellHelper::AcquireSingleton((ILockPatternViewCellHelper**)&helper);
+
+    Byte size;
+    GetLockPatternSize(&size);
+    helper->UpdateSize(size);
+
     AutoPtr<ArrayOf<Byte> > bytes = string.GetBytes();
     for (Int32 i = 0; i < bytes->GetLength(); i++) {
         Byte b = (*bytes)[i];
 
         AutoPtr<ILockPatternViewCell> cell;
-        helper->Of(b / 3, b % 3, (ILockPatternViewCell**)&cell);
+        helper->Of(b / size, b % size, size, (ILockPatternViewCell**)&cell);
         result->Add(cell);
     }
-    return result;
+    *list = result;
+    REFCOUNT_ADD(*list)
+    return NOERROR;
 }
 
-String LockPatternUtils::PatternToString(
-    /* [in] */ IList* pattern)
+ECode LockPatternUtils::PatternToString(
+    /* [in] */ IList* pattern,
+    /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str)
+    Byte size;
+    GetLockPatternSize(&size);
+    return PatternToString(pattern, size, str);
+}
+
+ECode LockPatternUtils::PatternToString(
+    /* [in] */ IList* pattern,
+    /* [in] */ Int32 patternGridSize,
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+
     if (pattern == NULL) {
-        return String("");
+        *str = String("");
+        return NOERROR;
     }
     Int32 patternSize = 0;
     pattern->GetSize(&patternSize);
@@ -1016,16 +1050,20 @@ String LockPatternUtils::PatternToString(
         Int32 row = 0, column = 0;
         cell->GetRow(&row);
         cell->GetColumn(&column);
-        (*res)[i] = (Byte) (row * 3 + column);
+        (*res)[i] = (Byte) (row * patternGridSize + column);
     }
-    return String(*res);
+    *str = String(*res);
+    return NOERROR;
 }
 
-AutoPtr< ArrayOf<Byte> > LockPatternUtils::PatternToHash(
-    /* [in] */ IList* pattern)
+ECode LockPatternUtils::PatternToHash(
+    /* [in] */ IList* pattern,
+    /* [out, callee] */ ArrayOf<Byte>** arr)
 {
     if (pattern == NULL) {
-        return NULL;
+        *arr = NULL;
+        REFCOUNT_ADD(*arr)
+        return NOERROR;
     }
 
     Int32 patternSize = 0;
@@ -1039,7 +1077,9 @@ AutoPtr< ArrayOf<Byte> > LockPatternUtils::PatternToHash(
         cell->GetRow(&row);
         cell->GetColumn(&column);
 
-        (*res)[i] = (Byte) (row * 3 + column);
+        Byte size;
+        GetLockPatternSize(&size);
+        (*res)[i] = (Byte) (row * size + column);
     }
 
     AutoPtr<IMessageDigestHelper> helper;
@@ -1047,16 +1087,22 @@ AutoPtr< ArrayOf<Byte> > LockPatternUtils::PatternToHash(
     AutoPtr<IMessageDigest> md;
     ECode ec = helper->GetInstance(String("SHA-1"), (IMessageDigest**)&md);
     if (FAILED(ec)) {
-        return res;
+        *arr = res;
+        REFCOUNT_ADD(*arr)
+        return NOERROR;
     }
 
     AutoPtr<ArrayOf<Byte> > hash;
     ec = md->Digest(res, (ArrayOf<Byte>**)&hash);
     if (FAILED(ec)) {
-        return res;
+        *arr = res;
+        REFCOUNT_ADD(*arr)
+        return NOERROR;
     }
 
-    return hash;
+    *arr = hash;
+    REFCOUNT_ADD(*arr)
+    return NOERROR;
 }
 
 String LockPatternUtils::GetSalt(
@@ -1282,6 +1328,55 @@ ECode LockPatternUtils::IsTactileFeedbackEnabled(
     Settings::System::GetInt32ForUser(mContentResolver,
             ISettingsSystem::HAPTIC_FEEDBACK_ENABLED, 1, IUserHandle::USER_CURRENT, &value);
     *enabled = value != 0;
+    return NOERROR;
+}
+
+ECode LockPatternUtils::GetLockPatternSize(
+    /* [out] */ Byte* result)
+{
+    VALIDATE_NOT_NULL(result);
+
+    // try {
+    return GetLockSettings()->GetLockPatternSize(GetCurrentOrCallingUserId(), result);
+    // } catch (RemoteException re) {
+    //     return PATTERN_SIZE_DEFAULT;
+    // }
+}
+
+ECode LockPatternUtils::SetLockPatternSize(
+    /* [in] */ Int64 size)
+{
+    SetInt64(ISettingsSecure::LOCK_PATTERN_SIZE, size);
+    return NOERROR;
+}
+
+ECode LockPatternUtils::SetVisibleDotsEnabled(
+    /* [in] */ Boolean enabled)
+{
+    SetBoolean(ISettingsSecure::LOCK_DOTS_VISIBLE, enabled);
+    return NOERROR;
+}
+
+ECode LockPatternUtils::IsVisibleDotsEnabled(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = GetBoolean(ISettingsSecure::LOCK_DOTS_VISIBLE, TRUE);
+    return NOERROR;
+}
+
+ECode LockPatternUtils::SetShowErrorPath(
+    /* [in] */ Boolean enabled)
+{
+    SetBoolean(ISettingsSecure::LOCK_SHOW_ERROR_PATH, enabled);
+    return NOERROR;
+}
+
+ECode LockPatternUtils::IsShowErrorPath(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = GetBoolean(ISettingsSecure::LOCK_SHOW_ERROR_PATH, TRUE);
     return NOERROR;
 }
 
@@ -1664,6 +1759,31 @@ ECode LockPatternUtils::IsSecure(
     Boolean secure = (isPattern && (IsLockPatternEnabled(&tmp), tmp) && (SavedPatternExists(&tmp), tmp))
             || (isPassword && (SavedPasswordExists(&tmp), tmp));
     *result = secure;
+    return NOERROR;
+}
+
+ECode LockPatternUtils::GetActiveProfileLockMode(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+
+    // Check device policy
+    AutoPtr<IDevicePolicyManager> dpm = GetDevicePolicyManager();
+    Boolean b;
+    if (dpm->RequireSecureKeyguard(GetCurrentOrCallingUserId(), &b), b) {
+        // Always enforce lock screen
+        *result = IProfileLockMode::DEFAULT;
+        return NOERROR;
+    }
+    AutoPtr<IProfile> profile;
+//TODO: Need IProfileManager
+    // mProfileManager->GetActiveProfile((IProfile**)&profile);
+    if (profile == NULL) {
+        *result = IProfileLockMode::DEFAULT;
+    }
+    else {
+        profile->GetScreenLockMode(result);
+    }
     return NOERROR;
 }
 
