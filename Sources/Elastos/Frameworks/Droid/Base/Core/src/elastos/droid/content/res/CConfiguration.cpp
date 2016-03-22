@@ -15,6 +15,7 @@ using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
+using Elastos::Core::ICloneable;
 using Elastos::Core::EIID_IComparable;
 using Elastos::Utility::CLocale;
 using Elastos::Utility::Etl::List;

@@ -150,8 +150,9 @@ public:
 
     virtual CARAPI_(AutoPtr<ActivityRecord>) ResumedAppLocked();
 
-    virtual CARAPI_(Boolean) AttachApplicationLocked(
-        /* [in] */ ProcessRecord* app);
+    virtual CARAPI AttachApplicationLocked(
+        /* [in] */ ProcessRecord* app,
+        /* [out] */ Boolean* result);
 
     virtual CARAPI_(Boolean) AllResumedActivitiesIdle();
 

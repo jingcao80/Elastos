@@ -206,8 +206,6 @@ private:
         /* [in] */ Float invertedScale,
         /* [in] */ Boolean isThemeable);
 
-    static CARAPI_(AutoPtr<ICompatibilityInfo>) InitDefaultCompatibilityInfo();
-
 public:
     /** default compatibility info object for compatible applications */
     static const AutoPtr<ICompatibilityInfo> DEFAULT_COMPATIBILITY_INFO;

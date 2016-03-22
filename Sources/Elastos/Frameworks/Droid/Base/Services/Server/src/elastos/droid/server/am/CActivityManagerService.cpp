@@ -7938,15 +7938,15 @@ Boolean CActivityManagerService::AttachApplicationLocked(
     }
     mProcessesOnHold.Remove(app);
 
-    Boolean badApp = FALSE;
-    Boolean didSomething = FALSE;
+    Boolean badApp = FALSE, didSomething = FALSE, bval = FALSE;
 
     // See if the top visible activity is waiting to run in this process...
     if (normalMode) {
         // try {
-            if (mStackSupervisor->AttachApplicationLocked(app)) {
-                didSomething = TRUE;
-            }
+        mStackSupervisor->AttachApplicationLocked(app, &bval);
+        if (bval) {
+            didSomething = TRUE;
+        }
         // } catch (Exception e) {
         //     Slog.wtf(TAG, "Exception thrown launching activities in " + app, e);
         //     badApp = TRUE;
@@ -7955,9 +7955,8 @@ Boolean CActivityManagerService::AttachApplicationLocked(
 
     // Find any services that should be running in this process...
     if (!badApp) {
-        Boolean result = FALSE;
-        ECode ec = mServices->AttachApplicationLocked(app, processName, &result);
-        didSomething |= result;
+        ECode ec = mServices->AttachApplicationLocked(app, processName, &bval);
+        didSomething |= bval;
         if (FAILED(ec)) {
             Slogger::W/*wtf*/(TAG, "Exception thrown starting services in %s", TO_CSTR(app));
             badApp = TRUE;
