@@ -215,6 +215,14 @@ module
             [out] IFile** dir);
 
         /**
+         * Return the root directory for "prebundled" apps.  These apps will be installed directly
+         * from this partition but will not be marked as system apps and will hence be uninstallable.
+         * @hide
+         */
+        GetPrebundledDirectory(
+            [out] IFile** dir);
+
+        /**
          * Gets the system directory available for secure storage.
          * If Encrypted File system is enabled, it returns an encrypted directory (/data/secure/system).
          * Otherwise, it returns the unencrypted /data/system directory.
@@ -340,6 +348,10 @@ module
             [out] IFile** dir);
 
         /** {@hide} */
+        GetSecondaryStorageDirectory(
+            [out] IFile** dir);
+
+        /** {@hide} */
         GetLegacyExternalStorageDirectory(
             [out] IFile** dir);
 
@@ -454,6 +466,12 @@ module
             [out] String* state);
 
         /**
+         * @hide
+         */
+         GetSecondaryStorageState(
+            [out] String* state);
+
+        /**
          * Returns the current state of the storage device that provides the given
          * path.
          *
@@ -478,6 +496,10 @@ module
         IsExternalStorageRemovable(
             [in] IFile* path,
             [out] Boolean* isRemovable);
+
+        /** {@hide} */
+        IsNoEmulatedStorageExist(
+            [out] Boolean* isExist);
 
         /**
          * Returns whether the storage device that provides the given path is
@@ -568,6 +590,10 @@ module
         GetExternalStorageDirectory(
             [out] IFile** file);
 
+        /** {@hide} */
+        GetSecondaryStorageDirectory(
+            [out] IFile** file);
+
         //@Deprecated
         GetExternalStoragePublicDirectory(
             [in] String type,
@@ -590,6 +616,9 @@ module
             [out, callee] ArrayOf<IFile*>* files);
 
         BuildExternalStorageAndroidObbDirs(
+            [out, callee] ArrayOf<IFile*>* files);
+
+        BuildExternalStorageAndroidObbDirsForVold(
             [out, callee] ArrayOf<IFile*>* files);
 
         BuildExternalStorageAppDataDirs(

@@ -102,6 +102,7 @@ public:
         /* [in] */ const String& abi,
         /* [in] */ const String& instructionSet,
         /* [in] */ const String& appDataDir,
+        /* [in] */ Boolean refreshTheme,
         /* [in] */ ArrayOf<String>* zygoteArgs,
         /* [out] */ IProcessStartResult** result);
 
@@ -545,6 +546,7 @@ private:
         /* [in] */ const String& abi,
         /* [in] */ const String& instructionSet,
         /* [in] */ const String& appDataDir,
+        /* [in] */ Boolean refreshTheme,
         /* [in] */ ArrayOf<String>* zygoteArgs,
         /* [out] */ IProcessStartResult** result);
 

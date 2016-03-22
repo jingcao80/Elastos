@@ -1914,6 +1914,18 @@ ECode CNetworkManagementService::DisableNat(
     return ModifyNat(String("disable"), internalInterface, externalInterface);
 }
 
+ECode CNetworkManagementService::AddUpstreamV6Interface(
+    /* [in] */ const String& iface)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CNetworkManagementService::RemoveUpstreamV6Interface(
+    /* [in] */ const String& iface)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode CNetworkManagementService::ListTtys(
     /* [out, callee] */ ArrayOf<String>** result)
 {

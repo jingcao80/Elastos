@@ -471,38 +471,99 @@ public:
         /* [in] */ IIPowerManager* service,
         /* [in] */ IHandler* handler);
 
+    /**
+     * Boost the CPU. Boosts the cpu for the given duration in microseconds.
+     * Requires the {@link android.Manifest.permission#CPU_BOOST} permission.
+     *
+     * @param duration in microseconds to boost the CPU
+     *
+     * @hide
+     */
     CARAPI CpuBoost(
         /* [in] */ Int32 duration);
 
+    /**
+     * True if the system supports power profiles
+     *
+     * @hide
+     */
     CARAPI HasPowerProfiles(
         /* [out] */ Boolean* result);
 
+    /**
+     * Gets the default power profile for the device.
+     *
+     * Returns null if not enabled.
+     *
+     * @hide
+     */
     CARAPI GetDefaultPowerProfile(
         /* [out] */ String* profile);
 
+    /**
+     * Set the system power profile
+     *
+     * @throws IllegalArgumentException if invalid
+     * @hide
+     */
     CARAPI SetPowerProfile(
         /* [in] */ const String& profile,
         /* [out] */ Boolean* result);
 
+    /**
+     * Gets the current power profile
+     *
+     * Returns null if power profiles are not enabled
+     * @hide
+     */
     CARAPI GetPowerProfile(
         /* [out] */ String* result);
 
+    /**
+     * Update profile for resumed app, called from ActivityStack
+     * @hide
+     */
     CARAPI ActivityResumed(
         /* [in] */ IIntent* intent);
 
+    /**
+     * @hide
+     */
     CARAPI SetKeyboardVisibility(
         /* [in] */ Boolean visible);
 
+    /**
+     * sets the keyboard LED state
+     *
+     * @param on boolean state
+     * @param key 1 for caps, 2 for fn
+     *
+     * {@hide}
+     */
     CARAPI SetKeyboardLight(
         /* [in] */ Boolean on,
         /* [in] */ Int32 key);
 
+    /**
+     * Gets the default button brightness value.
+     * @hide
+     */
     CARAPI GetDefaultButtonBrightness(
         /* [out] */ Int32* result);
 
+    /**
+     * Gets the default keyboard brightness value.
+     * @hide
+     */
     CARAPI GetDefaultKeyboardBrightness(
         /* [out] */ Int32* result);
 
+    /**
+     * Forces the device to wake up from sleep only if
+     * nothing is blocking the proximity sensor
+     * @see #wakeUp
+     * @hide
+     */
     CARAPI WakeUpWithProximityCheck(
         /* [in] */ Int64 time);
 

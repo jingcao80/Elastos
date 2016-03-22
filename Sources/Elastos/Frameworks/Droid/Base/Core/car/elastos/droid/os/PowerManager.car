@@ -625,6 +625,12 @@ module
         WakeUp(
             [in] Int64 eventTime);
 
+        /**
+         * Forces the device to wake up from sleep only if
+         * nothing is blocking the proximity sensor
+         * @see #wakeUp
+         * @hide
+         */
         WakeUpWithProximityCheck(
             [in] Int64 time);
 
@@ -714,35 +720,91 @@ module
         IsPowerSaveMode(
             [out] Boolean* result);
 
+
+        /**
+         * Boost the CPU. Boosts the cpu for the given duration in microseconds.
+         * Requires the {@link android.Manifest.permission#CPU_BOOST} permission.
+         *
+         * @param duration in microseconds to boost the CPU
+         *
+         * @hide
+         */
         CpuBoost(
             [in] Int32 duration);
 
+        /**
+         * True if the system supports power profiles
+         *
+         * @hide
+         */
         HasPowerProfiles(
             [out] Boolean* result);
 
+        /**
+         * Gets the default power profile for the device.
+         *
+         * Returns null if not enabled.
+         *
+         * @hide
+         */
         GetDefaultPowerProfile(
             [out] String* profile);
 
+        /**
+         * Set the system power profile
+         *
+         * @throws IllegalArgumentException if invalid
+         * @hide
+         */
         SetPowerProfile(
             [in] String profile,
             [out] Boolean* result);
 
+        /**
+         * Gets the current power profile
+         *
+         * Returns null if power profiles are not enabled
+         * @hide
+         */
         GetPowerProfile(
             [out] String* result);
 
+        /**
+         * Update profile for resumed app, called from ActivityStack
+         * @hide
+         */
         ActivityResumed(
             [in] IIntent* intent);
 
+        /**
+         * @hide
+         */
         SetKeyboardVisibility(
             [in] Boolean visible);
 
+        /**
+         * sets the keyboard LED state
+         *
+         * @param on boolean state
+         * @param key 1 for caps, 2 for fn
+         *
+         * {@hide}
+         */
         SetKeyboardLight(
             [in] Boolean on,
             [in] Int32 key);
 
+        /**
+         * Gets the default button brightness value.
+         * @hide
+         */
         GetDefaultButtonBrightness(
             [out] Int32* result);
 
+        /**
+         * Gets the default keyboard brightness value.
+         * @hide
+         */
         GetDefaultKeyboardBrightness(
             [out] Int32* result);
     }

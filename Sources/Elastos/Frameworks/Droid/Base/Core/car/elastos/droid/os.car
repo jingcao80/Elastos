@@ -573,6 +573,10 @@ module
         interface IFileBridge;
     }
 
+    singleton class CRecoverySystem {
+        interface IRecoverySystem;
+    }
+
     // [deprecated]
     // class CDropBoxManagerEntry {
     //     constructor();

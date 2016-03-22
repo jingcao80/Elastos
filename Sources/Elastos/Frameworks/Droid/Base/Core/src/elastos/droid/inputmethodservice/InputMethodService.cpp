@@ -1711,17 +1711,16 @@ ECode InputMethodService::OnKeyDown(
         AutoPtr<IContentResolver> resolver;
         GetContentResolver((IContentResolver**)&resolver);
         AutoPtr<ISettingsSystem> settingsSystem;
-        CSettingsSystem::AcquireSingleton(
-            (ISettingsSystem**)&settingsSystem);
+        CSettingsSystem::AcquireSingleton((ISettingsSystem**)&settingsSystem);
         settingsSystem->GetInt32(resolver,
-            ISettingsSystem::VOLUME_KEY_CURSOR_CONTROL,
-            0, &mVolumeKeyCursorControl);
+                ISettingsSystem::VOLUME_KEY_CURSOR_CONTROL,
+                0, &mVolumeKeyCursorControl);
         Boolean isShown = FALSE;
         if ((IsInputViewShown(&isShown), isShown)
-            && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
+                && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
             SendDownUpKeyEvents(
-                (mVolumeKeyCursorControl == VOLUME_CURSOR_ON_REVERSE)
-                ? IKeyEvent::KEYCODE_DPAD_RIGHT : IKeyEvent::KEYCODE_DPAD_LEFT);
+                    (mVolumeKeyCursorControl == VOLUME_CURSOR_ON_REVERSE)
+                    ? IKeyEvent::KEYCODE_DPAD_RIGHT : IKeyEvent::KEYCODE_DPAD_LEFT);
             *state = TRUE;
             return NOERROR;
         }
@@ -1732,17 +1731,16 @@ ECode InputMethodService::OnKeyDown(
         AutoPtr<IContentResolver> resolver;
         GetContentResolver((IContentResolver**)&resolver);
         AutoPtr<ISettingsSystem> settingsSystem;
-        CSettingsSystem::AcquireSingleton(
-            (ISettingsSystem**)&settingsSystem);
+        CSettingsSystem::AcquireSingleton((ISettingsSystem**)&settingsSystem);
         settingsSystem->GetInt32(resolver,
-            ISettingsSystem::VOLUME_KEY_CURSOR_CONTROL,
-            0, &mVolumeKeyCursorControl);
+                ISettingsSystem::VOLUME_KEY_CURSOR_CONTROL,
+                0, &mVolumeKeyCursorControl);
         Boolean isShown = FALSE;
         if ((IsInputViewShown(&isShown), isShown)
-            && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
+                && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
             SendDownUpKeyEvents(
-                (mVolumeKeyCursorControl == VOLUME_CURSOR_ON_REVERSE)
-                ? IKeyEvent::KEYCODE_DPAD_LEFT : IKeyEvent::KEYCODE_DPAD_RIGHT);
+                    (mVolumeKeyCursorControl == VOLUME_CURSOR_ON_REVERSE)
+                    ? IKeyEvent::KEYCODE_DPAD_LEFT : IKeyEvent::KEYCODE_DPAD_RIGHT);
             *state = TRUE;
             return NOERROR;
         }
@@ -1796,14 +1794,13 @@ ECode InputMethodService::OnKeyUp(
         AutoPtr<IContentResolver> resolver;
         GetContentResolver((IContentResolver**)&resolver);
         AutoPtr<ISettingsSystem> settingsSystem;
-        CSettingsSystem::AcquireSingleton(
-            (ISettingsSystem**)&settingsSystem);
+        CSettingsSystem::AcquireSingleton((ISettingsSystem**)&settingsSystem);
         settingsSystem->GetInt32(resolver,
-            ISettingsSystem::VOLUME_KEY_CURSOR_CONTROL,
-            0, &mVolumeKeyCursorControl);
+                ISettingsSystem::VOLUME_KEY_CURSOR_CONTROL,
+                0, &mVolumeKeyCursorControl);
         Boolean isShown = FALSE;
         if ((IsInputViewShown(&isShown), isShown)
-            && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
+                && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
             *state = TRUE;
             return NOERROR;
         }

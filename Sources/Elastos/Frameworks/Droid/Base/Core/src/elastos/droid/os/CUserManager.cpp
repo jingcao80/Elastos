@@ -368,6 +368,7 @@ ECode CUserManager::CreateGuest(
             mService->GetDefaultGuestRestrictions((IBundle**)&guestRestrictions);
             IBaseBundle::Probe(guestRestrictions)->PutBoolean(DISALLOW_SMS, TRUE);
             IBaseBundle::Probe(guestRestrictions)->PutBoolean(DISALLOW_INSTALL_UNKNOWN_SOURCES, TRUE);
+            IBaseBundle::Probe(guestRestrictions)->PutBoolean(DISALLOW_SU, TRUE);
             mService->SetUserRestrictions(guestRestrictions, id);
         // } catch (RemoteException re) {
         //     Log.w(TAG, "Could not update guest restrictions");
@@ -414,6 +415,7 @@ ECode CUserManager::AddDefaultUserRestrictions(
 {
     IBaseBundle::Probe(restrictions)->PutBoolean(DISALLOW_OUTGOING_CALLS, TRUE);
     IBaseBundle::Probe(restrictions)->PutBoolean(DISALLOW_SMS, TRUE);
+    IBaseBundle::Probe(restrictions)->PutBoolean(DISALLOW_SU, TRUE);
     return NOERROR;
 }
 

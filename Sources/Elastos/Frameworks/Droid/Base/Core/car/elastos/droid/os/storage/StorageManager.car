@@ -2,6 +2,7 @@
 module
 {
     using interface Elastos.IO.IFile;
+    using interface Elastos.Utility.IArrayList;
 
     interface Elastos.Droid.Content.IContext;
 
@@ -230,6 +231,20 @@ module
         GetPrimaryVolume(
             [in] ArrayOf<IStorageVolume*>* volumes,
             [out] IStorageVolume** result);
+
+        /** {@hide} */
+        GetNoEmulatedVolume(
+            [in] ArrayOf<IStorageVolume*>* volumes,
+            [out] IStorageVolume** result);
+
+        /**
+         * Return the list of physical external storages
+         *
+         * @hide
+         */
+        GetPhysicalExternalVolume(
+            [in] ArrayOf<IStorageVolume*>* volumesphy,
+            [out] IArrayList** result);
     }
 
     }//namespace Storage

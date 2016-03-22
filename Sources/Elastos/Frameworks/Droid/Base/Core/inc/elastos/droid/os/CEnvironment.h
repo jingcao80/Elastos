@@ -48,6 +48,14 @@ public:
         /* [out] */ IFile** dir);
 
     /**
+     * Return the root directory for "prebundled" apps.  These apps will be installed directly
+     * from this partition but will not be marked as system apps and will hence be uninstallable.
+     * @hide
+     */
+     CARAPI GetPrebundledDirectory(
+        /* [out] */ IFile** dir);
+
+    /**
      * Gets the system directory available for secure storage.
      * If Encrypted File system is enabled, it returns an encrypted directory (/data/secure/system).
      * Otherwise, it returns the unencrypted /data/system directory.
@@ -173,6 +181,10 @@ public:
         /* [out] */ IFile** dir);
 
     /** {@hide} */
+    CARAPI GetSecondaryStorageDirectory(
+        /* [out] */ IFile** dir);
+
+    /** {@hide} */
     CARAPI GetLegacyExternalStorageDirectory(
         /* [out] */ IFile** dir);
 
@@ -287,6 +299,12 @@ public:
         /* [out] */ String* state);
 
     /**
+     * @hide
+     */
+    CARAPI GetSecondaryStorageState(
+        /* [out] */ String* state);
+
+    /**
      * Returns the current state of the storage device that provides the given
      * path.
      *
@@ -311,6 +329,10 @@ public:
     CARAPI IsExternalStorageRemovable(
         /* [in] */ IFile* path,
         /* [out] */ Boolean* isRemovable);
+
+    /** {@hide} */
+    CARAPI IsNoEmulatedStorageExist(
+        /* [out] */ Boolean* isExist);
 
     /**
      * Returns whether the storage device that provides the given path is

@@ -43,6 +43,16 @@ ECode CEnvironment::GetVendorDirectory(
     return NOERROR;
 }
 
+ECode CEnvironment::GetPrebundledDirectory(
+    /* [out] */ IFile** dir)
+{
+    VALIDATE_NOT_NULL(dir)
+    AutoPtr<IFile> f = Environment::GetPrebundledDirectory();
+    *dir = f;
+    REFCOUNT_ADD(*dir)
+    return NOERROR;
+}
+
 ECode CEnvironment::GetSystemSecureDirectory(
     /* [out] */ IFile** dir)
 {
@@ -118,6 +128,16 @@ ECode CEnvironment::GetExternalStorageDirectory(
 {
     VALIDATE_NOT_NULL(dir)
     AutoPtr<IFile> f = Environment::GetExternalStorageDirectory();
+    *dir = f;
+    REFCOUNT_ADD(*dir)
+    return NOERROR;
+}
+
+ECode CEnvironment::GetSecondaryStorageDirectory(
+    /* [out] */ IFile** dir)
+{
+    VALIDATE_NOT_NULL(dir)
+    AutoPtr<IFile> f = Environment::GetSecondaryStorageDirectory();
     *dir = f;
     REFCOUNT_ADD(*dir)
     return NOERROR;
@@ -267,6 +287,14 @@ ECode CEnvironment::GetStorageState(
     return NOERROR;
 }
 
+ECode CEnvironment::GetSecondaryStorageState(
+    /* [out] */ String* state)
+{
+    VALIDATE_NOT_NULL(state)
+    *state = Environment::GetSecondaryStorageState();
+    return NOERROR;
+}
+
 ECode CEnvironment::GetExternalStorageState(
     /* [in] */ IFile* path,
     /* [out] */ String* state)
@@ -282,6 +310,14 @@ ECode CEnvironment::IsExternalStorageRemovable(
 {
     VALIDATE_NOT_NULL(isRemovable)
     *isRemovable = Environment::IsExternalStorageRemovable(path);
+    return NOERROR;
+}
+
+ECode CEnvironment::IsNoEmulatedStorageExist(
+    /* [out] */ Boolean* isExist)
+{
+    VALIDATE_NOT_NULL(isExist)
+    *isExist = Environment::IsNoEmulatedStorageExist();
     return NOERROR;
 }
 

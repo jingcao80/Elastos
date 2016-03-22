@@ -528,23 +528,93 @@ Boolean FileUtils::DeleteContents(
     return success;
 }
 
+Boolean FileUtils::IsValidExtFilenameChar(
+        /* [in] */ Char32 c)
+{
+    switch (c) {
+        case '\0':
+        case '/':
+            return FALSE;
+        default:
+            return TRUE;
+    }
+}
+
 Boolean FileUtils::IsValidExtFilename(
     /* [in] */ const String& name)
 {
-    assert(0);
-    // if (TextUtils::IsEmpty(name)
-    //     || name.Equals(".")
-    //     || name.Equals("..") {
-    //     return FALSE;
-    // }
+    return !name.IsNull() && name.Equals(BuildValidExtFilename(name));
+}
 
-    for (Int32 i = 0; i < name.GetLength(); i++) {
+String FileUtils::BuildValidExtFilename(
+    /* [in] */ const String& name)
+{
+    if (name.IsEmpty() || name.Equals(String(".")) || name.Equals(String(".."))) {
+        return String("(invalid)");
+    }
+
+    Int32 length = name.GetLength();
+    StringBuilder res(length);
+    for (Int32 i = 0; i < length; i++) {
         Char32 c = name.GetChar(i);
-        if (c == '\0' || c == '/') {
-            return FALSE;
+        if (IsValidExtFilenameChar(c)) {
+            res.AppendChar(c);
+        }
+        else {
+            res.AppendChar('_');
         }
     }
-    return TRUE;
+    return res.ToString();
+}
+
+Boolean FileUtils::IsValidFatFilenameChar(
+    /* [in] */ Char32 c)
+{
+    if ((0x00 <= c && c <= 0x1f)) {
+        return FALSE;
+    }
+    switch (c) {
+        case '"':
+        case '*':
+        case '/':
+        case ':':
+        case '<':
+        case '>':
+        case '?':
+        case '\\':
+        case '|':
+        case 0x7F:
+            return FALSE;
+        default:
+            return TRUE;
+    }
+}
+
+Boolean FileUtils::IsValidFatFilename(
+    /* [in] */ const String& name)
+{
+    return !name.IsNull() && name.Equals(BuildValidFatFilename(name));
+}
+
+String FileUtils::BuildValidFatFilename(
+    /* [in] */ const String& name)
+{
+    if (name.IsEmpty() || name.Equals(String(".")) || name.Equals(String(".."))) {
+        return String("(invalid)");
+    }
+
+    Int32 length = name.GetLength();
+    StringBuilder res(length);
+    for (Int32 i = 0; i < length; i++) {
+        Char32 c = name.GetChar(i);
+        if (IsValidFatFilenameChar(c)) {
+            res.AppendChar(c);
+        }
+        else {
+            res.AppendChar('_');
+        }
+    }
+    return res.ToString();
 }
 
 String FileUtils::RewriteAfterRename(

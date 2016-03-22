@@ -8,6 +8,7 @@
 
 using Elastos::Core::Singleton;
 using Elastos::Droid::Content::IContext;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -30,6 +31,14 @@ public:
     CARAPI GetPrimaryVolume(
         /* [in] */ ArrayOf<IStorageVolume*>* volumes,
         /* [out] */ IStorageVolume** result );
+
+    CARAPI GetNoEmulatedVolume(
+        /* [in] */ ArrayOf<IStorageVolume*>* volumes,
+        /* [out] */ IStorageVolume** result);
+
+    CARAPI GetPhysicalExternalVolume(
+        /* [in] */ ArrayOf<IStorageVolume*>* volumesphy,
+        /* [out] */ IArrayList** result);
 };
 
 } // namespace Storage

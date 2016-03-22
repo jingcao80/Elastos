@@ -361,6 +361,18 @@ public:
         /* [in] */ const String& internalInterface,
         /* [in] */ const String& externalInterface);
 
+    /**
+     * Add an upstream IPv6 interface
+     */
+    CARAPI AddUpstreamV6Interface(
+        /* [in] */ const String& iface);
+
+    /**
+     * Remove an upstream IPv6 interface
+     */
+    CARAPI RemoveUpstreamV6Interface(
+        /* [in] */ const String& iface);
+
     CARAPI ListTtys(
         /* [out] */ ArrayOf<String>** result);
 

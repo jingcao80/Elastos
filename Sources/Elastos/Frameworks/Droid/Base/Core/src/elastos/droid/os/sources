@@ -99,6 +99,8 @@ SOURCES += CUserManager.cpp
 SOURCES += CUserManagerHelper.cpp
 SOURCES += Vibrator.cpp
 SOURCES += CWorkSource.cpp
+SOURCES += RecoverySystem.cpp
+SOURCES += CRecoverySystem.cpp
 
 SOURCES += BinderProxy.cpp
 #SOURCES += CBinderDeathRecipient.cpp

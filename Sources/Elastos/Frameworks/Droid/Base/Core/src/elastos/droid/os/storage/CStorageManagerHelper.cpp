@@ -4,6 +4,7 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -46,6 +47,55 @@ ECode CStorageManagerHelper::GetPrimaryVolume(
     }
     Logger::W(CStorageManager::TAG, "No primary storage defined");
     *result = NULL;
+    return NOERROR;
+}
+
+
+/** {@hide} */
+ECode CStorageManagerHelper::GetNoEmulatedVolume(
+    /* [in] */ ArrayOf<IStorageVolume*>* volumes,
+    /* [out] */ IStorageVolume** result)
+{
+   VALIDATE_NOT_NULL(result);
+
+    for (Int32 i = 0; i < volumes->GetLength(); i++) {
+        AutoPtr<IStorageVolume> volume = (*volumes)[i];
+        Boolean isEmulated = FALSE;
+        if (volume->IsEmulated(&isEmulated), !isEmulated) {
+            *result = volume;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
+        }
+    } 
+
+    *result = NULL;
+    return NOERROR;
+}
+
+/**
+* Return the list of physical external storages
+*
+* @hide
+*/
+ECode CStorageManagerHelper::GetPhysicalExternalVolume(
+    /* [in] */ ArrayOf<IStorageVolume*>* volumesphy,
+    /* [out] */ IArrayList** result)
+{
+    VALIDATE_NOT_NULL(result);
+
+    Int32 count = volumesphy->GetLength();
+    AutoPtr<IArrayList> volumes;
+    CArrayList::New((IArrayList**)&volumes);
+
+    for (Int32 i = 0; i < count; i++) {
+        AutoPtr<IStorageVolume> volume = (*volumesphy)[i];
+        Boolean isEmulated = FALSE;
+        if (volume->IsEmulated(&isEmulated), !isEmulated) {
+            volumes->Add(volume);
+        }
+    }
+    *result = volumes;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 

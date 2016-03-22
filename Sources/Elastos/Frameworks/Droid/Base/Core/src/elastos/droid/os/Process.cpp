@@ -210,6 +210,7 @@ ECode Process::Start(
     /* [in] */ const String& abi,
     /* [in] */ const String& instructionSet,
     /* [in] */ const String& appDataDir,
+    /* [in] */ Boolean refreshTheme,
     /* [in] */ ArrayOf<String>* zygoteArgs,
     /* [out] */ IProcessStartResult** result)
 {
@@ -218,7 +219,7 @@ ECode Process::Start(
     // try {
     ECode ec = StartViaZygote(processClass, niceName, uid, gid, gids,
             debugFlags, mountExternal, targetSdkVersion, seInfo,
-            abi, instructionSet, appDataDir, zygoteArgs, result);
+            abi, instructionSet, appDataDir, refreshTheme, zygoteArgs, result);
     if (ec == (ECode)E_ZYGOTE_START_FAILED_EXCEPTION) {
         Logger::E(TAG, "Starting process through Zygote failed");
         return E_RUNTIME_EXCEPTION;
@@ -434,6 +435,7 @@ ECode Process::StartViaZygote(
     /* [in] */ const String& abi,
     /* [in] */ const String& instructionSet,
     /* [in] */ const String& appDataDir,
+    /* [in] */ Boolean refreshTheme,
     /* [in] */ ArrayOf<String>* extraArgs,
     /* [out] */ IProcessStartResult** result)
 {
@@ -476,6 +478,9 @@ ECode Process::StartViaZygote(
         // else if (mountExternal == Zygote.MOUNT_EXTERNAL_MULTIUSER_ALL) {
         //     argsForZygote->add("--mount-external-multiuser-all");
         // }
+        if (refreshTheme) {
+            argsForZygote->PushBack(String("--refresh_theme"));
+        }
         argsForZygote->PushBack(String("--target-sdk-version=") + StringUtils::ToString(targetSdkVersion));
 
         //TODO optionally enable debuger

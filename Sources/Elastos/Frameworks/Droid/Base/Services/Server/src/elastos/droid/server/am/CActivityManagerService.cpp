@@ -556,6 +556,7 @@ const Int32 CActivityManagerService::MAX_PERSISTED_URI_GRANTS;
 const Int32 CActivityManagerService::MY_PID = InitMyPid();
 const AutoPtr< ArrayOf<String> > CActivityManagerService::EMPTY_STRING_ARRAY = ArrayOf<String>::Alloc(0);
 const Int32 CActivityManagerService::DROPBOX_MAX_SIZE;
+const String CActivityManagerService::PROP_REFRESH_THEME("sys.refresh_theme");
 const Int32 CActivityManagerService::ALLOW_NON_FULL;
 const Int32 CActivityManagerService::ALLOW_NON_FULL_IN_PROFILE;
 const Int32 CActivityManagerService::ALLOW_FULL_ONLY;
@@ -4038,6 +4039,14 @@ ECode CActivityManagerService::StartProcessLocked(
         debugFlags |= IZygote::DEBUG_ENABLE_ASSERT;
     }
 
+    //Check if zygote should refresh its fonts
+    Boolean refreshTheme = FALSE;
+    Boolean propValue = FALSE;
+    if (sysProp->GetBoolean(PROP_REFRESH_THEME, FALSE, &propValue), propValue) {
+        sysProp->Set(PROP_REFRESH_THEME, String("false"));
+        refreshTheme = TRUE;
+    }
+
     String requiredAbi, primaryCpuAbi;
     if (abiOverride != NULL) {
         requiredAbi = abiOverride;
@@ -4081,7 +4090,7 @@ ECode CActivityManagerService::StartProcessLocked(
     ec = Process::Start(processClass, app->mProcessName,
         uid, uid, gids, debugFlags, mountExternal,
         targetSdkVersion, seinfo, requiredAbi, instructionSet, dataDir,
-        entryPointArgs, (IProcessStartResult**)&startResult);
+        refreshTheme, entryPointArgs, (IProcessStartResult**)&startResult);
     if (FAILED(ec)) {
         Slogger::E(TAG, "faield to StartProcessLocked %s, ProcessName:%s",
             sourcePath.string(), app->mProcessName.string());

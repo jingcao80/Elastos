@@ -3730,6 +3730,8 @@ public:
     // How many bytes to write into the dropbox log before truncating
     static const Int32 DROPBOX_MAX_SIZE = 256 * 1024;
 
+    static const String PROP_REFRESH_THEME; // = "sys.refresh_theme";
+
     // Access modes for handleIncomingUser.
     static const Int32 ALLOW_NON_FULL = 0;
     static const Int32 ALLOW_NON_FULL_IN_PROFILE = 1;

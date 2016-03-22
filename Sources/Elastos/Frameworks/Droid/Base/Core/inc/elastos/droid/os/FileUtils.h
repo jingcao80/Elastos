@@ -162,10 +162,36 @@ public:
     static CARAPI_(Boolean) DeleteContents(
         /* [in] */ IFile* dir);
 
+    static CARAPI_(Boolean) IsValidExtFilenameChar(
+        /* [in] */ Char32 c);
+
     /**
-     * Assert that given filename is valid on ext4.
+     * Check if given filename is valid for an ext4 filesystem.
      */
     static CARAPI_(Boolean) IsValidExtFilename(
+        /* [in] */ const String& name);
+
+    /**
+     * Mutate the given filename to make it valid for an ext4 filesystem,
+     * replacing any invalid characters with "_".
+     */
+    static CARAPI_(String) BuildValidExtFilename(
+        /* [in] */ const String& name);
+
+    static CARAPI_(Boolean) IsValidFatFilenameChar(
+        /* [in] */ Char32 c);
+
+    /**
+     * Check if given filename is valid for a FAT filesystem.
+     */
+    static CARAPI_(Boolean) IsValidFatFilename(
+        /* [in] */ const String& name);
+
+    /**
+     * Mutate the given filename to make it valid for a FAT filesystem,
+     * replacing any invalid characters with "_".
+     */
+    static CARAPI_(String) BuildValidFatFilename(
         /* [in] */ const String& name);
 
     static CARAPI_(String) RewriteAfterRename(

@@ -39,6 +39,10 @@ public:
         CARAPI GetExternalStorageDirectory(
             /* [out] */ IFile** file);
 
+        /** {@hide} */
+        CARAPI GetSecondaryStorageDirectory(
+            /* [out] */ IFile** file);
+
         //@Deprecated
         CARAPI GetExternalStoragePublicDirectory(
             /* [in] */ const String& type,
@@ -61,6 +65,9 @@ public:
             /* [out, callee] */ ArrayOf<IFile*>** files);
 
         CARAPI BuildExternalStorageAndroidObbDirs(
+            /* [out, callee] */ ArrayOf<IFile*>** files);
+
+        CARAPI BuildExternalStorageAndroidObbDirsForVold(
             /* [out, callee] */ ArrayOf<IFile*>** files);
 
         CARAPI BuildExternalStorageAppDataDirs(
@@ -129,6 +136,13 @@ public:
      * @hide
      */
     static AutoPtr<IFile> GetVendorDirectory();
+
+    /**
+     * Return the root directory for "prebundled" apps.  These apps will be installed directly
+     * from this partition but will not be marked as system apps and will hence be uninstallable.
+     * @hide
+     */
+     static AutoPtr<IFile> GetPrebundledDirectory();
 
     /**
      * Gets the system directory available for secure storage.
@@ -248,6 +262,9 @@ public:
     static AutoPtr<IFile> GetExternalStorageDirectory();
 
     /** {@hide} */
+    static AutoPtr<IFile> GetSecondaryStorageDirectory();
+
+    /** {@hide} */
     static AutoPtr<IFile> GetLegacyExternalStorageDirectory();
 
     /** {@hide} */
@@ -357,6 +374,11 @@ public:
         /* [in] */ IFile* path);
 
     /**
+     * @hide
+     */
+    static String GetSecondaryStorageState();
+
+    /**
      * Returns the current state of the storage device that provides the given
      * path.
      *
@@ -377,6 +399,9 @@ public:
      *         physically removed.
      */
     static Boolean IsExternalStorageRemovable();
+
+    /** {@hide} */
+    static Boolean IsNoEmulatedStorageExist();
 
     /**
      * Returns whether the storage device that provides the given path is
@@ -459,6 +484,7 @@ public:
         /* [in] */ IFile* path);
 
 private:
+    ECO_LOCAL static AutoPtr<IStorageVolume> GetNoEmulatedVolume();
 
     ECO_LOCAL static CARAPI ThrowIfUserRequired();
 
@@ -662,6 +688,7 @@ private:
     ECO_LOCAL static const String ENV_ANDROID_ROOT; // = "ANDROID_ROOT";
     ECO_LOCAL static const String ENV_OEM_ROOT; // = "OEM_ROOT";
     ECO_LOCAL static const String ENV_VENDOR_ROOT; // = "VENDOR_ROOT";
+    ECO_LOCAL static const String ENV_PREBUNDLED_ROOT; // = "PREBUNDLED_ROOT";
 
     ECO_LOCAL static const String DIR_DATA; // = "data";
     ECO_LOCAL static const String DIR_MEDIA; // = "media";
@@ -672,6 +699,7 @@ private:
     ECO_LOCAL static const AutoPtr<IFile> DIR_ANDROID_ROOT; // = GetDirectory(ENV_ANDROID_ROOT, "/system");
     ECO_LOCAL static const AutoPtr<IFile> DIR_OEM_ROOT; // = GetDirectory(ENV_OEM_ROOT, "/oem");
     ECO_LOCAL static const AutoPtr<IFile> DIR_VENDOR_ROOT; // = GetDirectory(ENV_VENDOR_ROOT, "/vendor");
+    ECO_LOCAL static const AutoPtr<IFile> DIR_PREBUNDLED_ROOT; // = GetDirectory(ENV_PREBUNDLED_ROOT, "/vendor/bundled-app");
     ECO_LOCAL static const AutoPtr<IFile> DIR_MEDIA_STORAGE; // = GetDirectory(ENV_MEDIA_STORAGE, "/data/media");
 
     ECO_LOCAL static const AutoPtr<IFile> DATA_DIRECTORY; //= GetDirectory("ANDROID_DATA", "/data");
@@ -691,6 +719,11 @@ private:
 
     ECO_LOCAL static AutoPtr<IUserEnvironment> sCurrentUser;
     ECO_LOCAL static Boolean sUserRequired;
+
+    ECO_LOCAL static /* const */ Object sLock;
+    //@GuardedBy("sLock")
+
+    ECO_LOCAL static /* volatile */ AutoPtr<IStorageVolume> sNoEmulatedVolume;
 
 private:
     ECO_LOCAL Environment();

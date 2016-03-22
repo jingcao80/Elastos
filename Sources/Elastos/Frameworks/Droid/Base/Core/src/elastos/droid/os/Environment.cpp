@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/os/CUserEnvironment.h"
+#include "elastos/droid/os/storage/CStorageManagerHelper.h"
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/FileUtils.h"
@@ -11,9 +12,12 @@
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
+#include <elastos/core/AutoLock.h>
 
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Os::Storage::IIMountService;
+using Elastos::Droid::Os::Storage::CStorageManagerHelper;
+using Elastos::Droid::Os::Storage::IStorageManagerHelper;
 using Elastos::IO::CFile;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -57,6 +61,7 @@ const String Environment::ENV_SECONDARY_STORAGE("SECONDARY_STORAGE");
 const String Environment::ENV_ANDROID_ROOT("ANDROID_ROOT");
 const String Environment::ENV_OEM_ROOT("OEM_ROOT");
 const String Environment::ENV_VENDOR_ROOT("VENDOR_ROOT");
+const String Environment::ENV_PREBUNDLED_ROOT("PREBUNDLED_ROOT");
 
 const String Environment::DIR_DATA("data");
 const String Environment::DIR_MEDIA("media");
@@ -114,6 +119,7 @@ static AutoPtr<IUserEnvironment> InitCurrentUser()
 const AutoPtr<IFile> Environment::DIR_ANDROID_ROOT = GetDirectoryImpl(String("ANDROID_ROOT")/*ENV_ANDROID_ROOT*/, String("/system"));
 const AutoPtr<IFile> Environment::DIR_OEM_ROOT = GetDirectoryImpl(String("OEM_ROOT")/*ENV_OEM_ROOT*/, String("/oem"));
 const AutoPtr<IFile> Environment::DIR_VENDOR_ROOT = GetDirectoryImpl(String("VENDOR_ROOT")/*ENV_VENDOR_ROOT*/, String("/vendor"));
+const AutoPtr<IFile> Environment::DIR_PREBUNDLED_ROOT = GetDirectoryImpl(String("PREBUNDLED_ROOT")/*ENV_PREBUNDLED_ROOT*/, String("/vendor/bundled-app"));
 const AutoPtr<IFile> Environment::DIR_MEDIA_STORAGE = GetDirectoryImpl(String("MEDIA_STORAGE")/*ENV_MEDIA_STORAGE*/, String("/data/media"));
 
 const AutoPtr<IFile> Environment::DATA_DIRECTORY = GetDirectoryImpl(String("ANDROID_DATA"), String("/data"));
@@ -128,6 +134,34 @@ const String Environment::SYSTEM_PROPERTY_EFS_ENABLED("persist.security.efs.enab
 
 AutoPtr<IUserEnvironment> Environment::sCurrentUser = InitCurrentUser();
 Boolean Environment::sUserRequired;
+
+Object Environment::sLock;
+
+AutoPtr<IStorageVolume> Environment::sNoEmulatedVolume;
+
+AutoPtr<IStorageVolume> Environment::GetNoEmulatedVolume()
+{
+    if (!sNoEmulatedVolume) {
+        synchronized(sLock) {
+            if (!sNoEmulatedVolume) {
+                // try {
+                AutoPtr<IInterface> obj = ServiceManager::GetService(String("mount"));
+                IIMountService* mountService = IIMountService::Probe(obj);
+                AutoPtr<ArrayOf<IStorageVolume*> > volumes;
+                mountService->GetVolumeList((ArrayOf<IStorageVolume*>**)&volumes);
+
+                AutoPtr<IStorageManagerHelper> storageMgrHelper;
+                CStorageManagerHelper::AcquireSingleton((IStorageManagerHelper**)&storageMgrHelper);
+                storageMgrHelper->GetNoEmulatedVolume((ArrayOf<IStorageVolume*>*)volumes,
+                        (IStorageVolume**)&sNoEmulatedVolume);
+                // } catch (Exception e) {
+                //     Log.e(TAG, "couldn't talk to MountService", e);
+                // }
+            }
+        }
+    }
+    return sNoEmulatedVolume;
+}
 
 //===========================================================================================
 // Environment::UserEnvironment
@@ -241,6 +275,21 @@ ECode Environment::UserEnvironment::GetExternalStorageDirectory(
     return NOERROR;
 }
 
+ECode Environment::UserEnvironment::GetSecondaryStorageDirectory(
+    /* [out] */ IFile** file)
+{
+    VALIDATE_NOT_NULL(file)
+    Int32 length = mExternalDirsForApp->GetLength();
+    if (length > 1) {
+        *file = (*mExternalDirsForApp)[1];
+    }
+    else {
+        *file = (*mExternalDirsForApp)[0];
+    }
+    REFCOUNT_ADD(*file)
+    return NOERROR;
+}
+
 ECode Environment::UserEnvironment::GetExternalStoragePublicDirectory(
     /* [in] */ const String& type,
     /* [out] */ IFile** file)
@@ -303,11 +352,19 @@ ECode Environment::UserEnvironment::BuildExternalStorageAndroidDataDirs(
 ECode Environment::UserEnvironment::BuildExternalStorageAndroidObbDirs(
     /* [out, callee] */ ArrayOf<IFile*>** files)
 {
-    AutoPtr<ArrayOf<String> > params = ArrayOf<String>::Alloc(3);
+    AutoPtr<ArrayOf<String> > params = ArrayOf<String>::Alloc(2);
     params->Set(0, Environment::DIR_ANDROID);
     params->Set(1, Environment::DIR_OBB);
-    params->Set(2, Environment::DIR_DATA);
     return BuildPaths(mExternalDirsForApp, params, files);
+}
+
+ECode Environment::UserEnvironment::BuildExternalStorageAndroidObbDirsForVold(
+    /* [out, callee] */ ArrayOf<IFile*>** files)
+{
+    AutoPtr<ArrayOf<String> > params = ArrayOf<String>::Alloc(2);
+    params->Set(0, Environment::DIR_ANDROID);
+    params->Set(1, Environment::DIR_OBB);
+    return BuildPaths(mExternalDirsForVold, params, files);
 }
 
 ECode Environment::UserEnvironment::BuildExternalStorageAppDataDirs(
@@ -426,6 +483,11 @@ AutoPtr<IFile> Environment::GetVendorDirectory()
     return DIR_VENDOR_ROOT;
 }
 
+AutoPtr<IFile> Environment::GetPrebundledDirectory()
+{
+    return DIR_PREBUNDLED_ROOT;
+}
+
 AutoPtr<IFile> Environment::GetSystemSecureDirectory()
 {
     AutoPtr<IFile> file;
@@ -496,9 +558,17 @@ AutoPtr<IFile> Environment::GetDataDirectory()
 AutoPtr<IFile> Environment::GetExternalStorageDirectory()
 {
     if (FAILED(ThrowIfUserRequired())) return NULL;
-    AutoPtr<ArrayOf<IFile*> > files;
-    sCurrentUser->GetExternalDirsForApp((ArrayOf<IFile*>**)&files);
-    return (*files)[0];
+    AutoPtr<IFile> file;
+    sCurrentUser->GetExternalStorageDirectory((IFile**)&file);
+    return file;
+}
+
+AutoPtr<IFile> Environment::GetSecondaryStorageDirectory()
+{
+    if (FAILED(ThrowIfUserRequired())) return NULL;
+    AutoPtr<IFile> file;
+    sCurrentUser->GetSecondaryStorageDirectory((IFile**)&file);
+    return file;
 }
 
 AutoPtr<IFile> Environment::GetLegacyExternalStorageDirectory()
@@ -627,6 +697,14 @@ String Environment::GetStorageState(
     return GetExternalStorageState(path);
 }
 
+String Environment::GetSecondaryStorageState()
+{
+    AutoPtr<ArrayOf<IFile*> > files;
+    sCurrentUser->GetExternalDirsForApp((ArrayOf<IFile*>**)&files);
+    IFile* externalDir = (*files)[1];
+    return GetStorageState(externalDir);
+}
+
 String Environment::GetExternalStorageState(
     /* [in] */ IFile* path)
 {
@@ -655,6 +733,12 @@ Boolean Environment::IsExternalStorageRemovable()
     sCurrentUser->GetExternalDirsForApp((ArrayOf<IFile*>**)&files);
     AutoPtr<IFile> externalDir = (*files)[0];
     return IsExternalStorageRemovable(externalDir);
+}
+
+Boolean Environment::IsNoEmulatedStorageExist()
+{
+    AutoPtr<IStorageVolume> volume = GetNoEmulatedVolume();
+    return (volume != NULL);
 }
 
 Boolean Environment::IsExternalStorageRemovable(
