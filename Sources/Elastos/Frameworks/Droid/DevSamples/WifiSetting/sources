@@ -21,7 +21,7 @@ LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 LIBRARIES += $(PREBUILD_LIB)/cxx-stl/gnu-libstdc++/armeabi/libstdc++.a
-LIBRARIES += -lstdc++ -lutils -lcutils -landroid -ldl -lui -lmedia -lbinder -lhardware_legacy -lnetutils -landroid_runtime -lm -llog -lz -licuuc
+LIBRARIES += -lstdc++ -lutils -lcutils -landroid -ldl -lui -lmedia -lbinder -lhardware_legacy -lnetutils -lm -llog -lz -licuuc
 
 APPPACK = 1
 DIRRESOURCES += $(MAKEDIR)/res;
