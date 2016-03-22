@@ -759,15 +759,15 @@ public:
         };
 
     public:
-        BoundedMap(
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
             /* [in] */ Boolean ascending,
             /* [in] */ IInterface* from,
             /* [in] */ Bound fromBound,
             /* [in] */ IInterface* to,
             /* [in] */ Bound toBound,
             /* [in] */ CTreeMap* host);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI Clear();
 
