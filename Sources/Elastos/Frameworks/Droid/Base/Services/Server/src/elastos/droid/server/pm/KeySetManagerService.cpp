@@ -809,7 +809,7 @@ ECode KeySetManagerService::ReadIdentifierLPw(
     /* [out] */ Int64* value)
 {
     VALIDATE_NOT_NULL(value)
-    value = 0;
+    *value = 0;
     String v;
     FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("identifier"), &v))
     *value = StringUtils::ParseInt64(v);

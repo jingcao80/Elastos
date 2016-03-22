@@ -500,7 +500,8 @@ ECode Watchdog::Run()
         String subject;
         Boolean allowRestart;
         Int32 debuggerWasConnected = 0;
-        synchronized(this) {
+        {
+            AutoLock lock(this);
             Int64 timeout = CHECK_INTERVAL;
             // Make sure we (re)spin the checkers that have become idle within
             // this wait-and-check interval

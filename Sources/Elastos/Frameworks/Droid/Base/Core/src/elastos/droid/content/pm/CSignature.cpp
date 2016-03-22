@@ -113,7 +113,7 @@ ECode CSignature::ToChars(
     Int32 N = sig->GetLength();
     Int32 N2 = N*2;
     AutoPtr<ArrayOf<Char32> > textArray = existingArray == NULL || N2 > existingArray->GetLength()
-                ? ArrayOf<Char32>::Alloc(2) : existingArray;
+                ? ArrayOf<Char32>::Alloc(N2) : existingArray;
     for (Int32 j = 0; j < N; j++) {
         Byte v = (*sig)[j];
         Int32 d = (v >> 4) & 0xf;

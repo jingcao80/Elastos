@@ -451,7 +451,7 @@ ECode CArraySet::AddAll(
     if (mSize == 0) {
         if (N > 0) {
             mHashes->Copy(array->mHashes, 0, N);
-            mArray->Copy(mArray, 0, N);
+            mArray->Copy(array->mArray, 0, N);
             mSize = N;
         }
     }

@@ -6300,6 +6300,9 @@ ECode PackageParser::ParsePublicKey(
         return NOERROR;
     }
 
+    Slogger::E(TAG, "TODO: PackageParser::ParsePublicKey is not implemented!");
+    return NOERROR;
+
     AutoPtr<IEncodedKeySpec> keySpec;
     // try {
     AutoPtr<IBase64> base64;
