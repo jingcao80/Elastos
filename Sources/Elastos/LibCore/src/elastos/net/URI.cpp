@@ -490,8 +490,20 @@ ECode URI::CompareTo(
 
     // compare schemes
     URI* uriObj = (URI*)uo;
-    if (!mScheme.IsNull() || !uriObj->mScheme.IsNull()) {
-        return mScheme.Compare(uriObj->mScheme);
+    if (mScheme.IsNull() && !uriObj->mScheme.IsNull()) {
+        *result = -1;
+        return NOERROR;
+    }
+    else if (!mScheme.IsNull() && uriObj->mScheme.IsNull()) {
+        *result = 1;
+        return NOERROR;
+    }
+    else if (!mScheme.IsNull() && !uriObj->mScheme.IsNull()) {
+        ret = mScheme.CompareIgnoreCase(uriObj->mScheme);
+        if (ret != 0) {
+            *result = ret;
+            return NOERROR;
+        }
     }
 
     // compare opacities
@@ -550,7 +562,8 @@ ECode URI::CompareTo(
 
                 // compare port
                 if (mPort != uriObj->mPort) {
-                    return mPort - uriObj->mPort;
+                    *result = mPort - uriObj->mPort;
+                    return NOERROR;
                 }
             }
             else { // one or both are registry based, compare the whole

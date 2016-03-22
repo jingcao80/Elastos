@@ -447,10 +447,10 @@ void CURL::SetupStreamHandler()
     mStreamHandler = NULL;
     // Fall back to a built-in stream handler if the user didn't supply one
     if (mProtocol.Equals("file")) {
-        CFileHandler::New((IFileHandler**)&mStreamHandler);
+        CFileHandler::New((IURLStreamHandler**)&mStreamHandler);
     }
     else if (mProtocol.Equals("ftp")) {
-        CFtpHandler::New((IFtpHandler**)&mStreamHandler);
+        CFtpHandler::New((IURLStreamHandler**)&mStreamHandler);
     }
     else if (mProtocol.Equals("http")) {
         assert(0);
