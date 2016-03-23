@@ -136,4 +136,4 @@ SOURCES += CCalendarContractExtendedProperties.cpp
 SOURCES += CCalendarContractSyncState.cpp
 SOURCES += CContactsContractDeletedContacts.cpp
 SOURCES += provider.cpp
-SROUCES += ThemesContract.cpp
+SOURCES += ThemesContract.cpp

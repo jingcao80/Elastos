@@ -205,6 +205,8 @@ private:
 public:
     IconPackHelper();
 
+    CAR_INTERFACE_DECL()
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 

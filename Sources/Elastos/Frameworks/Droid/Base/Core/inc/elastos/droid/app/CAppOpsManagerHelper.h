@@ -89,6 +89,23 @@ public:
     CARAPI OpAllowsReset(
         /* [in] */ Int32 op,
         /* [out] */ Boolean* result);
+
+    CARAPI IsStrictEnable(
+        /* [out] */ Boolean* result);
+
+    CARAPI IsStrictOp(
+        /* [in] */ Int32 code,
+        /* [out] */ Boolean* isStrictOp);
+
+    /** @hide */
+    CARAPI StringToMode(
+        /* [in] */ const String& permission,
+        /* [out] */ Int32* mode);
+
+    /** @hide */
+    CARAPI StringOpToOp(
+        /* [in] */ const String& op,
+        /* [out] */ Int32* value);
 };
 
 } // namespace App

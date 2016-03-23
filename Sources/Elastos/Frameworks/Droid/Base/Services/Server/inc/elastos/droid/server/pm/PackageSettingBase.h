@@ -129,7 +129,9 @@ public:
         /* [in] */ const String& lastDisableAppCaller,
         /* [in] */ HashSet<String>* enabledComponents,
         /* [in] */ HashSet<String>* disabledComponents,
-        /* [in] */ Boolean blockUninstall);
+        /* [in] */ Boolean blockUninstall,
+        /* [in] */ HashSet<String>* protectedComponents,
+        /* [in] */ HashSet<String>* visibleComponents);
 
     CARAPI_(AutoPtr<HashSet<Elastos::String> >) GetEnabledComponents(
         /* [in] */ Int32 userId);
@@ -158,6 +160,9 @@ public:
         /* [in] */ Boolean disabled,
         /* [in] */ Boolean enabled);
 
+    CARAPI_(AutoPtr<PackageUserState>) ModifyUserStateComponents(
+        /* [in] */ Int32 userId);
+
     CARAPI_(void) AddDisabledComponent(
         /* [in] */ const String& componentClassName,
         /* [in] */ Int32 userId);
@@ -180,6 +185,14 @@ public:
 
     CARAPI_(Int32) GetCurrentEnabledStateLPr(
         /* [in] */ const String& componentName,
+        /* [in] */ Int32 userId);
+
+    CARAPI_(Boolean) ProtectComponentLPw(
+        /* [in] */ const String& componentClassName,
+        /* [in] */ Boolean protect,
+        /* [in] */ Int32 userId);
+
+    CARAPI_(AutoPtr<HashSet<Elastos::String> >) GetProtectedComponents(
         /* [in] */ Int32 userId);
 
     CARAPI_(void) RemoveUser(

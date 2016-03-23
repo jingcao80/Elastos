@@ -827,6 +827,8 @@ IconPackHelper::IconPackHelper()
     : mIconBackCount(0)
 {}
 
+CAR_INTERFACE_IMPL(IconPackHelper, Object , IIconPackHelper)
+
 ECode IconPackHelper::constructor(
     /* [in] */ IContext* context)
 {

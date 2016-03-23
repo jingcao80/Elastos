@@ -764,6 +764,46 @@ module
         const Int32 INSTALL_FAILED_ABORTED = -115;
 
         /**
+         * Used by themes
+         * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
+         * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
+         * if the system failed to install the theme because aapt could not compile the app
+         * @hide
+         */
+        // @SystemApi
+        const Int32 INSTALL_FAILED_THEME_AAPT_ERROR = -400;
+
+        /**
+         * Used by themes
+         * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
+         * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
+         * if the system failed to install the theme because idmap failed
+         * apps.
+         * @hide
+         */
+        // @SystemApi
+        const Int32 INSTALL_FAILED_THEME_IDMAP_ERROR = -401;
+
+        /**
+         * Used by themes
+         * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
+         * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
+         * if the system failed to install the theme for an unknown reason
+         * apps.
+         * @hide
+         */
+        // @SystemApi
+        const Int32 INSTALL_FAILED_THEME_UNKNOWN_ERROR = -402;
+
+        /**
+         * Used for prebundles
+         * Installation failed for a prebundled app because the user previously uninstalled it
+         * and we don't want to bring it back
+         * @hide
+         */
+        const Int32 INSTALL_FAILED_UNINSTALLED_PREBUNDLE = -403;
+
+        /**
          * Flag parameter for {@link #deletePackage} to indicate that you don't want to delete the
          * package's data directory.
          *

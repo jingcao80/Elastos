@@ -53,8 +53,7 @@ public:
         /* [in] */ Boolean full);
 
     CARAPI_(Boolean) SameSet(
-        /* [in] */ IList* query,
-        /* [in] */ Int32 priority);
+        /* [in] */ IList* query);
 
     CARAPI_(Boolean) SameSet(
         /* [in] */ ArrayOf<IComponentName*>* comps);

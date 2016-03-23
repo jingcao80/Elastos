@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_PROVIDER_THEMESCONTRACT_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "_Elastos.Droid.Provider.h"
 
 using Elastos::Droid::Net::IUri;
 
@@ -9,7 +10,7 @@ namespace Elastos {
 namespace Droid {
 namespace Provider {
 
-class ThemesContract
+class ECO_PUBLIC ThemesContract
 {
 public:
     class ThemesColumns

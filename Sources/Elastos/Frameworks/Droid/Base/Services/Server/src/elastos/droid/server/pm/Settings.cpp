@@ -9,6 +9,7 @@
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/utility/Xml.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include <Elastos.CoreLibrary.Libcore.h>
 #include <Elastos.CoreLibrary.Text.h>
@@ -31,6 +32,14 @@ using Elastos::IO::IBufferedOutputStream;
 using Elastos::IO::CBufferedOutputStream;
 using Elastos::IO::IFlushable;
 using Elastos::IO::ICloseable;
+using Elastos::IO::CFileWriter;
+using Elastos::IO::IPrintWriter;
+using Elastos::IO::CPrintWriter;
+using Elastos::IO::CBufferedWriter;
+using Elastos::IO::IBufferedReader;
+using Elastos::IO::CBufferedReader;
+using Elastos::IO::CFileReader;
+using Elastos::IO::IWriter;
 using Elastos::Text::ISimpleDateFormat;
 using Elastos::Text::CSimpleDateFormat;
 using Elastos::Utility::IDate;
@@ -68,6 +77,7 @@ using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::Server::Pm::CPackageManagerService;
 using Elastos::Droid::Server::Pm::PackageSettingBase;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Internal::Utility::IJournaledFile;
 using Elastos::Droid::Internal::Utility::CJournaledFile;
@@ -104,6 +114,8 @@ const String Settings::TAG_PACKAGE_RESTRICTIONS("package-restrictions");
 const String Settings::TAG_PACKAGE("pkg");
 const String Settings::TAG_PERSISTENT_PREFERRED_ACTIVITIES("persistent-preferred-activities");
 const String Settings::TAG_CROSS_PROFILE_INTENT_FILTERS("crossProfile-intent-filters");
+const String Settings::TAG_PROTECTED_COMPONENTS("protected-components");
+const String Settings::TAG_VISIBLE_COMPONENTS("visible-components");
 const String Settings::ATTR_NAME("name");
 const String Settings::ATTR_USER("user");
 const String Settings::ATTR_CODE("code");
@@ -173,6 +185,7 @@ void Settings::Init(
     CFile::New(mSystemDir, String("packages-backup.xml"), (IFile**)&mBackupSettingsFilename);
     CFile::New(mSystemDir, String("packages.list"), (IFile**)&mPackageListFilename);
     FileUtils::SetPermissions(mPackageListFilename, 0660, IProcess::SYSTEM_UID, IProcess::PACKAGE_INFO_GID);
+    CFile::New(mSystemDir, String("prebundled-packages.list"), (IFile**)&mPrebundledPackagesFilename);
 
     // Deprecated: Needed for migration
     CFile::New(mSystemDir, String("packages-stopped.xml"), (IFile**)&mStoppedPackagesFilename);
@@ -603,7 +616,9 @@ AutoPtr<PackageSetting> Settings::GetPackageLPw(
                                 TRUE, // notLaunched
                                 FALSE, // hidden
                                 String(NULL), NULL, NULL,
-                                FALSE // blockUninstall
+                                FALSE, // blockUninstall
+                                NULL,
+                                NULL
                                 );
                         WritePackageRestrictionsLPr(userId);
                     }
@@ -1275,7 +1290,9 @@ void Settings::ReadPackageRestrictionsLPr(
                         FALSE,  // notLaunched
                         FALSE,  // hidden
                         String(NULL), NULL, NULL,
-                        FALSE // blockUninstall
+                        FALSE, // blockUninstall
+                        NULL,
+                        NULL
                         );
             }
             return;
@@ -1353,6 +1370,8 @@ void Settings::ReadPackageRestrictionsLPr(
 
             AutoPtr<HashSet<String> > enabledComponents;
             AutoPtr<HashSet<String> > disabledComponents;
+            AutoPtr<HashSet<String> > protectedComponents;
+            AutoPtr<HashSet<String> > visibleComponents;
 
             Int32 packageDepth, packageDepth1;
             FAIL_GOTO(ecode = parser->GetDepth(&packageDepth), EXIT);
@@ -1377,10 +1396,17 @@ void Settings::ReadPackageRestrictionsLPr(
                     assert(disabledComponents == NULL);
                     disabledComponents = ReadComponentsLPr(parser);
                 }
+                else if (tagName.Equals(TAG_PROTECTED_COMPONENTS)) {
+                    protectedComponents = ReadComponentsLPr(parser);
+                }
+                else if (tagName.Equals(TAG_VISIBLE_COMPONENTS)) {
+                    visibleComponents = ReadComponentsLPr(parser);
+                }
             }
 
             ps->SetUserState(userId, enabled, installed, stopped, notLaunched, hidden,
-                    enabledCaller, enabledComponents, disabledComponents, blockUninstall);
+                    enabledCaller, enabledComponents, disabledComponents, blockUninstall,
+                    protectedComponents, visibleComponents);
         }
         else if (tagName.Equals("preferred-activities")) {
             ReadPreferredActivitiesLPw(parser, userId);
@@ -1595,7 +1621,11 @@ void Settings::WritePackageRestrictionsLPr(
                         && !ustate->mEnabledComponents->IsEmpty())
                 || (ustate->mDisabledComponents != NULL
                         && !ustate->mDisabledComponents->IsEmpty())
-                || ustate->mBlockUninstall) {
+                || ustate->mBlockUninstall
+                || (ustate->mProtectedComponents != NULL
+                        && !ustate->mProtectedComponents->IsEmpty())
+                || (ustate->mVisibleComponents != NULL
+                        && !ustate->mVisibleComponents->IsEmpty())) {
             serializer->WriteStartTag(String(NULL), TAG_PACKAGE);
             serializer->WriteAttribute(String(NULL), ATTR_NAME, pkg->mName);
             if (DEBUG_MU) {
@@ -1646,6 +1676,30 @@ void Settings::WritePackageRestrictionsLPr(
                     serializer->WriteEndTag(String(NULL), TAG_ITEM);
                 }
                 serializer->WriteEndTag(String(NULL), TAG_DISABLED_COMPONENTS);
+            }
+            if (ustate->mProtectedComponents != NULL
+                    && !ustate->mProtectedComponents->IsEmpty()) {
+                serializer->WriteStartTag(String(NULL), TAG_PROTECTED_COMPONENTS);
+                HashSet<String>::Iterator it4 = ustate->mProtectedComponents->Begin();
+                for (; it4 != ustate->mDisabledComponents->End(); it4++) {
+                    String name = (*it4);
+                    serializer->WriteStartTag(String(NULL), TAG_ITEM);
+                    serializer->WriteAttribute(String(NULL), ATTR_NAME, name);
+                    serializer->WriteEndTag(String(NULL), TAG_ITEM);
+                }
+                serializer->WriteEndTag(String(NULL), TAG_PROTECTED_COMPONENTS);
+            }
+            if (ustate->mVisibleComponents != NULL
+                    && !ustate->mVisibleComponents->IsEmpty()) {
+                serializer->WriteStartTag(String(NULL), TAG_VISIBLE_COMPONENTS);
+                HashSet<String>::Iterator it5 = ustate->mVisibleComponents->Begin();
+                for (; it5 != ustate->mVisibleComponents->End(); it5++) {
+                    String name = (*it5);
+                    serializer->WriteStartTag(String(NULL), TAG_ITEM);
+                    serializer->WriteAttribute(String(NULL), ATTR_NAME, name);
+                    serializer->WriteEndTag(String(NULL), TAG_ITEM);
+                }
+                serializer->WriteEndTag(String(NULL), TAG_VISIBLE_COMPONENTS);
             }
             serializer->WriteEndTag(String(NULL), TAG_PACKAGE);
         }
@@ -2157,6 +2211,77 @@ void Settings::WriteLPr()
                     , (mSettingsFilename->ToString(&temp), temp.string()));
         }
     }
+}
+
+void Settings::WritePrebundledPackagesLPr()
+{
+    AutoPtr<IPrintWriter> writer;
+    // try {
+    AutoPtr<IWriter> fw;
+    CFileWriter::New(mPrebundledPackagesFilename, FALSE, (IWriter**)&fw);
+    AutoPtr<IWriter> bw;
+    CBufferedWriter::New(fw, (IWriter**)&bw);
+    CPrintWriter::New(bw, (IPrintWriter**)&writer);
+    HashSet<String>::Iterator it = mPrebundledPackages.Begin();
+    for (; it != mPrebundledPackages.End(); ++it) {
+        writer->Println(*it);
+    }
+    // } catch (IOException e) {
+    //     Slog.e(PackageManagerService.TAG, "Unable to write prebundled package list", e);
+    // } finally {
+    //     if (writer != null) {
+    //         writer.close();
+    //     }
+    // }
+    if (writer != NULL) {
+        ICloseable::Probe(writer)->Close();
+    }
+}
+
+void Settings::ReadPrebundledPackagesLPr()
+{
+    Boolean exists;
+    if (mPrebundledPackagesFilename->Exists(&exists), !exists) {
+        return;
+    }
+
+    AutoPtr<IBufferedReader> reader;
+    // try {
+    AutoPtr<IReader> fr;
+    CFileReader::New(mPrebundledPackagesFilename, (IReader**)&fr);
+    CBufferedReader::New(fr, (IBufferedReader**)&reader);
+    String packageName;
+    reader->ReadLine(&packageName);
+    while (!packageName.IsNull()) {
+        if (!TextUtils::IsEmpty(packageName)) {
+            mPrebundledPackages.Insert(packageName);
+        }
+        reader->ReadLine(&packageName);
+    }
+    // } catch (IOException e) {
+    //     Slog.e(PackageManagerService.TAG, "Unable to read prebundled package list", e);
+    // } finally {
+    //     if (reader != null) {
+    //         try {
+    //             reader.close();
+    //         } catch (IOException e) {}
+    //     }
+    // }
+    if (reader != NULL) {
+        ICloseable::Probe(reader)->Close();
+    }
+}
+
+void Settings::MarkPrebundledPackageInstalledLPr(
+    /* [in] */ const String& packageName)
+{
+    mPrebundledPackages.Insert(packageName);
+}
+
+Boolean Settings::WasPrebundledPackageInstalledLPr(
+    /* [in] */ const String& packageName)
+{
+    return mPrebundledPackages.Find(packageName) == mPrebundledPackages.End() ? FALSE : TRUE;
 }
 
 ECode Settings::WriteDisabledSysPackageLPr(
@@ -4222,7 +4347,7 @@ ECode Settings::SetPackageStoppedStateLPw(
                 AutoPtr<ArrayOf<Int32> > iArray = ArrayOf<Int32>::Alloc(1);
                 iArray->Set(0, userId);
                 CPackageManagerService::SendPackageBroadcast(IIntent::ACTION_PACKAGE_FIRST_LAUNCH,
-                       pkgSetting->mName, NULL,
+                       pkgSetting->mName, String(NULL), NULL,
                        pkgSetting->mInstallerPackageName, NULL, iArray);
             }
             pkgSetting->SetNotLaunched(FALSE, userId);

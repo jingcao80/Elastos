@@ -5,20 +5,22 @@
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/content/pm/ThemeUtils.h"
 #include "elastos/droid/content/res/ThemeConfig.h"
+#include "elastos/droid/os/FileUtils.h"
+#include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/provider/ThemesContract.h"
+#include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Slogger.h>
+#ifdef DROID_CORE
 #include "elastos/droid/content/CContentValues.h"
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/database/sqlite/CSQLiteDatabaseHelper.h"
 #include "elastos/droid/media/CRingtoneManagerHelper.h"
 #include "elastos/droid/net/CUriHelper.h"
-#include "elastos/droid/os/FileUtils.h"
-#include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/provider/CMediaStoreAudioMedia.h"
-#include "elastos/droid/provider/Settings.h"
-#include "elastos/droid/provider/ThemesContract.h"
-#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/CDisplayMetrics.h"
-#include <elastos/core/StringUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#endif
 
 using Elastos::Droid::Content::CContentValues;
 using Elastos::Droid::Content::IContentValues;

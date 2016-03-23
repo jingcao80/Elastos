@@ -418,9 +418,19 @@ ECode CPackageInstallerSession::OpenWriteInternal(
         if (mStageDir != NULL && deltaBytes > 0) {
             mPm->FreeStorage(deltaBytes);
         }
-        if (FAILED(os->Posix_fallocate(targetFd, 0, lengthBytes))) {
+        // try {
+        ECode ec = os->Posix_fallocate(targetFd, 0, lengthBytes);
+        if (ec == (ECode)E_ERRNO_EXCEPTION) {
             return E_IO_EXCEPTION;
         }
+        // } catch (ErrnoException e) {
+        //     if (e.errno == OsConstants.ENOTSUP) {
+        //         Libcore.os.ftruncate(targetFd, lengthBytes);
+        //     } else {
+        //         throw e.rethrowAsIOException();
+        //     }
+        // }
+
     }
 
     if (offsetBytes > 0) {

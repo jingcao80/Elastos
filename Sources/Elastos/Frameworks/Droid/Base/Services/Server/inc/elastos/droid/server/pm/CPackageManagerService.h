@@ -22,6 +22,7 @@
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/HashSet.h>
+#include <elastos/utility/etl/Pair.h>
 #include "elastos/droid/server/pm/PackageVerificationResponse.h"
 #include "elastos/droid/server/pm/Installer.h"
 #include "elastos/droid/server/pm/Settings.h"
@@ -37,6 +38,7 @@ using Elastos::IO::IFilenameFilter;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Etl::HashSet;
+using Elastos::Utility::Etl::Pair;
 using Elastos::Utility::ISet;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IHashMap;
@@ -44,6 +46,8 @@ using Elastos::Utility::IList;
 using Elastos::Utility::Concurrent::Atomic::IAtomicInteger64;
 using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
 using Elastos::Droid::App::IComposedIconInfo;
+using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Droid::App::IIconPackHelper;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Content::IIntentReceiver;
@@ -78,6 +82,7 @@ using Elastos::Droid::Content::Pm::IKeySet;
 using Elastos::Droid::Content::Pm::PackageParser;
 using Elastos::Droid::Content::Pm::IPackageInstallerSessionParams;
 using Elastos::Droid::Content::Pm::IIPackageInstaller;
+using Elastos::Droid::Content::Res::IThemeConfig;
 using Elastos::Droid::Internal::App::IIMediaContainerService;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::Runnable;
@@ -861,6 +866,7 @@ public:/* package */
             , mRemovedAppId(-1)
             , mIsRemovedPackageSystemUpdate(FALSE)
             , mHost(owner)
+            , mIsThemeApk(FALSE)
         {}
 
         CARAPI_(void) SendBroadcast(
@@ -877,6 +883,8 @@ public:/* package */
         // Clean up resources deleted capsules.
         AutoPtr<InstallArgs> mArgs;
         CPackageManagerService* mHost;
+
+        Boolean mIsThemeApk;
     };
 
     class DumpState
@@ -1874,6 +1882,7 @@ public:
     static CARAPI_(void) SendPackageBroadcast(
         /* [in] */ const String& action,
         /* [in] */ const String& pkg,
+        /* [in] */ const String& intentCategory,
         /* [in] */ IBundle* extras,
         /* [in] */ const String& targetPkg,
         /* [in] */ IIntentReceiver* finishedReceiver,
@@ -2245,6 +2254,10 @@ private:
         /* [in] */ PackageParser::Package* pkg,
         /* [in] */ BasePermission* bp);
 
+    CARAPI_(Boolean) IsAllowedSignature(
+        /* [in] */ PackageParser::Package* pkg,
+        /* [in] */ const String& permissionName);
+
     /**
      * If the database version for this type of package (internal storage or
      * external storage) is less than the version where package signatures
@@ -2269,6 +2282,11 @@ private:
     CARAPI_(Int32) CompareSignaturesRecover(
         /* [in] */ PackageSignatures* existingSigs,
         /* [in] */ PackageParser::Package* scannedPkg);
+
+    CARAPI_(AutoPtr<IResolveInfo>) FindPreLaunchCheckResolve(
+        /* [in] */ IIntent* intent,
+        /* [in] */ IResolveInfo* rInfo,
+        /* [in] */ Int32 userId);
 
     CARAPI ChooseBestActivity(
         /* [in] */ IIntent* intent,
@@ -2326,14 +2344,11 @@ private:
         /* [in] */ Int32 flags,
         /* [in] */ Int32 userId);
 
-    CARAPI_(void) CreateIdmapsForPackageLI(
-        /* [in] */ PackageParser::Package* pkg);
-
     CARAPI_(Boolean) CreateIdmapForPackagePairLI(
         /* [in] */ PackageParser::Package* pkg,
         /* [in] */ PackageParser::Package* opkg);
 
-    CARAPI_(void) ScanDirLI(
+    CARAPI ScanDirLI(
         /* [in] */ IFile* dir,
         /* [in] */ Int32 flags,
         /* [in] */ Int32 scanMode,
@@ -2350,6 +2365,10 @@ private:
         /* [in] */ Int32 parseFlags,
         /* [in] */ ArrayOf<Byte>* readBuffer);
 
+    /*
+     *  Scan a package and return the newly parsed package.
+     *  Returns null in case of errors and the error code is stored in
+     */
     CARAPI ScanPackageLI(
         /* [in] */ IFile* scanFile,
         /* [in] */ Int32 parseFlags,
@@ -2516,7 +2535,107 @@ private:
         /* [in] */ Boolean forceDexOpt,
         /* [in] */ Boolean deferDexOpt);
 
+    CARAPI_(Boolean) IsIconCompileNeeded(
+        /* [in] */ PackageParser::Package* pkg);
+
+    CARAPI CompileResourcesAndIdmapIfNeeded(
+        /* [in] */ PackageParser::Package* targetPkg,
+        /* [in] */ PackageParser::Package* themePkg);
+
+    CARAPI CompileResourcesIfNeeded(
+        /* [in] */ const String& target,
+        /* [in] */ PackageParser::Package* pkg);
+
+    CARAPI CompileResources(
+        /* [in] */ const String& target,
+        /* [in] */ PackageParser::Package* pkg);
+
+    CARAPI CompileIconPack(
+        /* [in] */ PackageParser::Package* pkg);
+
+    CARAPI_(void) InsertIntoOverlayMap(
+        /* [in] */ const String& target,
+        /* [in] */ PackageParser::Package* opkg);
+
+    CARAPI GenerateIdmap(
+        /* [in] */ const String& target,
+        /* [in] */ PackageParser::Package* opkg);
+
+    CARAPI_(Boolean) HasCommonResources(
+        /* [in] */ PackageParser::Package* pkg);
+
+    CARAPI CompileResourcesWithAapt(
+        /* [in] */ const String& target,
+        /* [in] */ PackageParser::Package* pkg);
+
+    CARAPI CompileIconsWithAapt(
+        /* [in] */ PackageParser::Package* pkg);
+
+    CARAPI_(void) UninstallThemeForAllApps(
+        /* [in] */ PackageParser::Package* opkg);
+
+    CARAPI_(void) UninstallThemeForApp(
+        /* [in] */ PackageParser::Package* appPkg);
+
+    CARAPI_(void) RecursiveDelete(
+        /* [in] */ IFile* f);
+
+    CARAPI CreateTempManifest(
+        /* [in] */ const String& pkgName);
+
+    CARAPI_(void) CleanupTempManifest();
+
+    /**
+     * Checks for existance of resources.arsc in target apk, then
+     * Compares the 32 bit hash of the target and overlay to those stored
+     * in the idmap and returns true if either hash differs
+     * @param targetPkg
+     * @param overlayPkg
+     * @return
+     * @throws IOException
+     */
+    CARAPI_(Boolean) ShouldCreateIdmap(
+        /* [in] */ PackageParser::Package* targetPkg,
+        /* [in] */ PackageParser::Package* overlayPkg);
+
+    CARAPI_(Boolean) ShouldCompileCommonResources(
+        /* [in] */ PackageParser::Package* pkg);
+
+    /**
+     * Get the file modified times for the overlay and target from the idmap
+     * @param idmap
+     * @return
+     * @throws IOException
+     */
+    CARAPI GetIdmapHashes(
+        /* [in] */ IFile* idmap,
+        /* [out] */ ArrayOf<Int32>** hashes);
+
+    /**
+     * Get a 32 bit hashcode for the given package.
+     * @param pkg
+     * @return
+     */
+    CARAPI_(Int32) GetPackageHashCode(
+        /* [in] */ PackageParser::Package* pkg);
+
+    CARAPI_(AutoPtr<ArrayOf<Byte> >) GetFileCrC(
+        /* [in] */ const String& path);
+
     CARAPI_(void) SetUpCustomResolverActivity(
+        /* [in] */ PackageParser::Package* pkg);
+
+    /**
+     * Matches scanned packages with the requested PreLaunchCheckActivity, and prepares
+     * mPreLaunchCheckResolveInfo.
+     *
+     * - mCustomPreLaunchComponentName holds the requested ComponentName.  This
+     *   value may refer to a package that is not yet available (not yet installed or
+     *   not yet detected).
+     * - When mPreLaunchCheckPackagesReplaced is true, it indicates that
+     *   mPreLaunchCheckResolveInfo properly installed.
+     */
+    CARAPI_(void) SetUpCustomPreLaunchCheckActivity(
         /* [in] */ PackageParser::Package* pkg);
 
     static CARAPI_(String) CalculateBundledApkRoot(
@@ -2930,6 +3049,19 @@ private:
     CARAPI_(Boolean) UserNeedsBadging(
         /* [in] */ Int32 userId);
 
+    CARAPI_(void) ClearIconMapping();
+
+    CARAPI_(void) ProcessThemeResourcesInThemeService(
+        /* [in] */ const String& pkgName);
+
+    /**
+     * The new resource cache structure does not flatten the paths for idmaps, so this method
+     * checks for files that end with @idmap and assumes this indicates the older format and
+     * removes all files and directories from the resource cache so that it can be rebuilt
+     * using the new format.
+     */
+    static CARAPI_(void) RemoveLegacyResourceCache();
+
 public:/*package*/
     static const String TAG;
     static const Boolean DEBUG_SETTINGS;
@@ -3035,6 +3167,8 @@ public:/*package*/
     Object mPackagesLock;
 
     // Tracks available target package names -> overlay package paths.
+    // Example: com.angrybirds -> (com.theme1 -> theme1pkg, com.theme2 -> theme2pkg)
+    //          com.facebook   -> (com.theme1 -> theme1pkg)
     HashMap<String, AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > > mOverlays;
 
     AutoPtr<Settings> mSettings;
@@ -3044,6 +3178,7 @@ public:/*package*/
     AutoPtr< ArrayOf<Int32> > mGlobalGids;
     AutoPtr< HashMap<Int32, AutoPtr<HashSet<String> > > > mSystemPermissions;
     AutoPtr< HashMap<String, AutoPtr<IFeatureInfo> > > mAvailableFeatures;
+    AutoPtr< HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > > > mSignatureAllowances;
     // ActionsCode(songzhining, new code: add extra hardware feature support)
     AutoPtr< HashMap<String, AutoPtr<IFeatureInfo> > > mExtraFeatures;
     // If mac_permissions.xml was found for seinfo labeling.
@@ -3106,6 +3241,22 @@ public:/*package*/
     AutoPtr<IComponentName> mCustomResolverComponentName;
 
     Boolean mResolverReplaced;
+    AutoPtr<IAppOpsManager> mAppOps;
+    AutoPtr<IIconPackHelper> mIconPackHelper;
+
+    HashMap<String, AutoPtr<Pair<AutoPtr<IInteger32>, Int64> > > mPackageHashes;
+
+    HashMap<String, Int64> mAvailableCommonResources;
+
+    AutoPtr<IThemeConfig> mBootThemeConfig;
+
+    AutoPtr<IResolveInfo> mPreLaunchCheckResolveInfo;
+    AutoPtr<IComponentName> mCustomPreLaunchComponentName;
+    AutoPtr<ISet> mPreLaunchCheckPackages;
+
+    Boolean mPreLaunchCheckPackagesReplaced;
+
+    AutoPtr<IArrayList> mDisabledComponentsList;
 
     AutoPtr<PendingPackageBroadcasts> mPendingBroadcasts;
 
@@ -3136,6 +3287,8 @@ private:
     // Suffix used during package installation when copying/moving
     // package apks to install directory.
     static const String INSTALL_PACKAGE_SUFFIX;
+
+    static const String SECURITY_BRIDGE_NAME;
 
     /**
      * Timeout (in milliseconds) after which the watchdog should declare that
@@ -3183,12 +3336,34 @@ private:
 
     static String sPreferredInstructionSet;
 
-    static const String IDMAP_PREFIX;
-    static const String IDMAP_SUFFIX;
+    //Where overlays are be found in a theme APK
+    static const String APK_PATH_TO_OVERLAY;
+
+    //Where the icon pack can be found in a themed apk
+    static const String APK_PATH_TO_ICONS;
+
+    static const String COMMON_OVERLAY;
+
+    static const Int64 PACKAGE_HASH_EXPIRATION = 3 * 60 * 1000; // 3 minutes
+    static const Int64 COMMON_RESOURCE_EXPIRATION = 3 * 60 * 1000; // 3 minutes
+
+    /**
+     * IDMAP hash version code used to alter the resulting hash and force recreating
+     * of the idmap.  This value should be changed whenever there is a need to force
+     * an update to all idmaps.
+     */
+    static const Byte IDMAP_HASH_VERSION = 3;
+
+    /**
+     * The offset in bytes to the beginning of the hashes in an idmap
+     */
+    static const Int32 IDMAP_HASH_START_OFFSET = 16;
 
     static const String SD_ENCRYPTION_KEYSTORE_NAME;
 
     static const String SD_ENCRYPTION_ALGORITHM;
+
+    // PackageManagerMonitor mSecurityBridge;
 
     /**
      * Messages for {@link #mHandler} that need to wait for system ready before

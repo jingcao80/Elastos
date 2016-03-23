@@ -2138,6 +2138,14 @@ module
 
     }
 
+    [local]
+    class CIconPackHelper {
+        constructor(
+            [in] IContext* context);
+
+        interface IIconPackHelper;
+    }
+
     }
     } // namespace App
     } // namespace Droid

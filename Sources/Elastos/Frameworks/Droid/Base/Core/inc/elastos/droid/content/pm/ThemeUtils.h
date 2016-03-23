@@ -18,7 +18,7 @@ namespace Droid {
 namespace Content {
 namespace Pm {
 
-class ThemeUtils
+class ECO_PUBLIC ThemeUtils
 {
 public:
     class ThemedUiContext : public ContextWrapper

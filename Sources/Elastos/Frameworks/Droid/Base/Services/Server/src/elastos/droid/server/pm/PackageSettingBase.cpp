@@ -298,7 +298,9 @@ void PackageSettingBase::SetUserState(
     /* [in] */ const String& lastDisableAppCaller,
     /* [in] */ HashSet<String>* enabledComponents,
     /* [in] */ HashSet<String>* disabledComponents,
-    /* [in] */ Boolean blockUninstall)
+    /* [in] */ Boolean blockUninstall,
+    /* [in] */ HashSet<String>* protectedComponents,
+    /* [in] */ HashSet<String>* visibleComponents)
 {
     AutoPtr<PackageUserState> state = ModifyUserState(userId);
     state->mEnabled = enabled;
@@ -310,6 +312,8 @@ void PackageSettingBase::SetUserState(
     state->mEnabledComponents = enabledComponents;
     state->mDisabledComponents = disabledComponents;
     state->mBlockUninstall = blockUninstall;
+    state->mProtectedComponents = protectedComponents;
+    state->mVisibleComponents = visibleComponents;
 }
 
 AutoPtr<HashSet<String> > PackageSettingBase::GetEnabledComponents(
@@ -369,6 +373,19 @@ AutoPtr<PackageUserState> PackageSettingBase::ModifyUserStateComponents(
     }
     if (enabled && state->mEnabledComponents == NULL) {
         state->mEnabledComponents = new HashSet<String>(1);
+    }
+    return state;
+}
+
+AutoPtr<PackageUserState> PackageSettingBase::ModifyUserStateComponents(
+    /* [in] */ Int32 userId)
+{
+    AutoPtr<PackageUserState> state = ModifyUserState(userId);
+    if (state->mProtectedComponents == NULL) {
+        state->mProtectedComponents = new HashSet<String>(1);
+    }
+    if (state->mVisibleComponents == NULL) {
+        state->mVisibleComponents = new HashSet<String>(1);
     }
     return state;
 }
@@ -468,6 +485,54 @@ Int32 PackageSettingBase::GetCurrentEnabledStateLPr(
     else {
         return IPackageManager::COMPONENT_ENABLED_STATE_DEFAULT;
     }
+}
+
+Boolean PackageSettingBase::ProtectComponentLPw(
+    /* [in] */ const String& componentClassName,
+    /* [in] */ Boolean protect,
+    /* [in] */ Int32 userId)
+{
+    AutoPtr<PackageUserState> state = ModifyUserStateComponents(userId);
+    Boolean changed = FALSE;
+    if (protect == IPackageManager::COMPONENT_VISIBLE_STATUS) {
+        if (state->mProtectedComponents != NULL) {
+            HashSet<String>::Iterator it = state->mProtectedComponents->Find(componentClassName);
+            if (it != state->mProtectedComponents->End()) {
+                state->mProtectedComponents->Erase(componentClassName);
+                changed = TRUE;
+            }
+        }
+        HashSet<String>::Iterator it = state->mVisibleComponents->Find(componentClassName);
+        if (it != state->mVisibleComponents->End()) {
+            state->mVisibleComponents->Insert(componentClassName);
+            changed = TRUE;
+        }
+        else changed = FALSE;
+    }
+    else {
+        if (state->mVisibleComponents != NULL) {
+            HashSet<String>::Iterator it = state->mVisibleComponents->Find(componentClassName);
+            if (it != state->mVisibleComponents->End()) {
+                state->mVisibleComponents->Erase(componentClassName);
+                changed = TRUE;
+            }
+        }
+        HashSet<String>::Iterator it = state->mProtectedComponents->Find(componentClassName);
+        if (it != state->mProtectedComponents->End()) {
+            state->mProtectedComponents->Insert(componentClassName);
+            changed = TRUE;
+        }
+        else changed = FALSE;
+    }
+
+    return changed;
+}
+
+AutoPtr<HashSet<Elastos::String> > PackageSettingBase::GetProtectedComponents(
+    /* [in] */ Int32 userId)
+{
+    AutoPtr<PackageUserState> state = ModifyUserStateComponents(userId);
+    return state->mProtectedComponents;
 }
 
 void PackageSettingBase::RemoveUser(

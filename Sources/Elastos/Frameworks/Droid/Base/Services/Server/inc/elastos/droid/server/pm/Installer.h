@@ -61,7 +61,19 @@ public:
     CARAPI_(Int32) Idmap(
         /* [in] */ const String& targetApkPath,
         /* [in] */ const String& overlayApkPath,
-        /* [in] */ Int32 uid);
+        /* [in] */ const String& cachePath,
+        /* [in] */ Int32 uid,
+        /* [in] */ Int32 targetHash,
+        /* [in] */ Int32 overlayHash);
+
+    CARAPI_(Int32) Aapt(
+        /* [in] */ const String& themeApkPath,
+        /* [in] */ const String& internalPath,
+        /* [in] */ const String& resTablePath,
+        /* [in] */ Int32 uid,
+        /* [in] */ Int32 pkgId,
+        /* [in] */ Int32 minSdkVersion,
+        /* [in] */ const String& commonResourcesPath);
 
     CARAPI_(Int32) Movedex(
         /* [in] */ const String& srcPath,

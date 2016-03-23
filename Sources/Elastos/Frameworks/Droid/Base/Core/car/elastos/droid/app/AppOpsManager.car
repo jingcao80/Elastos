@@ -593,6 +593,27 @@ module
         /** @hide */
         FinishOp(
             [in] Int32 op);
+
+        /** @hide */
+        IsControlAllowed(
+            [in] Int32 op,
+            [in] String packageName,
+            [out] Boolean* result);
+
+        /** @hide */
+        GetPrivacyGuardSettingForPackage(
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Boolean* state);
+
+        /** @hide */
+        SetPrivacyGuardSettingForPackage(
+            [in] Int32 uid,
+            [in] String packageName,
+            [in] Boolean state);
+
+        /** @hide */
+        ResetCounters();
     }
 
     interface IAppOpsManagerHelper {
@@ -664,6 +685,28 @@ module
         OpAllowsReset(
             [in] Int32 op,
             [out] Boolean* result);
+
+        IsStrictEnable(
+            [out] Boolean* result);
+
+        /**
+         * Check if op in strict mode
+         * @hide
+         */
+        IsStrictOp(
+            [in] Int32 code,
+            [out] Boolean* isStrictOp);
+
+
+        /** @hide */
+        StringToMode(
+            [in] String permission,
+            [out] Int32* mode);
+
+        /** @hide */
+        StringOpToOp(
+            [in] String op,
+            [out] Int32* value);
     }
 
     } // namespace App

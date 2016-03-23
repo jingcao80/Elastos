@@ -14,4 +14,6 @@ module
     //==========================================================================
     // Elastos PackageManager exception codes (Family: 0x71 - F1)
     const E_PACKAGE_MANAGER_EXCEPTION          = 0xF1010000;
+    const E_AAPT_EXCEPTION                     = 0xF1020000;
+    const E_IDMAP_EXCEPTION                    = 0xF1030000;
 }
