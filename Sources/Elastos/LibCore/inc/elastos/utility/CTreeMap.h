@@ -972,11 +972,12 @@ public:
             /* [in] */ IInterface* key,
             /* [in] */ Relation relation);
 
-        CARAPI_(AutoPtr<INavigableMap>) SubMap(
+        CARAPI SubMap(
             /* [in] */ IInterface* from,
             /* [in] */ Bound fromBound,
             /* [in] */ IInterface* to,
-            /* [in] */ Bound toBound);
+            /* [in] */ Bound toBound,
+            /* [out] */ INavigableMap** outnav);
 
         CARAPI OutOfBounds(
             /* [in] */ IInterface* value,
@@ -1059,7 +1060,8 @@ public:
 
     protected:
         // @SuppressWarnings("unchecked") // we have to trust that the bounds are Ks
-        CARAPI_(AutoPtr<IInterface>) ReadResolve();
+        CARAPI ReadResolve(
+            /* [out] */ IInterface** outface);
 
     public:
         AutoPtr<CTreeMap> mM;
@@ -1158,7 +1160,8 @@ public:
 
         // @SuppressWarnings("unchecked") // we have to trust that the bounds are Ks
     protected:
-        CARAPI_(AutoPtr<IInterface>) ReadResolve();
+        CARAPI ReadResolve(
+            /* [out] */ IInterface** outface);
 
     public:
         AutoPtr<IInterface> mFromKey;

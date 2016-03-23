@@ -2332,16 +2332,17 @@ ECode CTreeMap::BoundedMap::constructor(
     mHost = host;
     Int32 comvalue = 0;
     if (fromBound != NO_BOUND && toBound != NO_BOUND) {
-        if ((mHost->mComparator->Compare(from, to, &comvalue), comvalue) > 0) {
+        FAIL_RETURN(mHost->mComparator->Compare(from, to, &comvalue));
+        if(comvalue > 0){
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
             // throw new IllegalArgumentException(from + " > " + to);
         }
     }
     else if (fromBound != NO_BOUND) {
-        mHost->mComparator->Compare(from, from, &comvalue);
+        FAIL_RETURN(mHost->mComparator->Compare(from, from, &comvalue));
     }
     else if (toBound != NO_BOUND) {
-        mHost->mComparator->Compare(to, to, &comvalue);
+        FAIL_RETURN(mHost->mComparator->Compare(to, to, &comvalue));
     }
     mAscending = ascending;
     mFrom = from;
@@ -2836,7 +2837,8 @@ ECode CTreeMap::BoundedMap::GetSubMap(
 
     Bound fromBound = fromInclusive ? INCLUSIVE : EXCLUSIVE;
     Bound toBound = toInclusive ? INCLUSIVE : EXCLUSIVE;
-    AutoPtr<INavigableMap> res = SubMap(fromKey, fromBound, toKey, toBound);
+    AutoPtr<INavigableMap> res;
+    SubMap(fromKey, fromBound, toKey, toBound, (INavigableMap**)&res);
     *outnav = res;
     REFCOUNT_ADD(*outnav)
     return NOERROR;
@@ -2849,7 +2851,8 @@ ECode CTreeMap::BoundedMap::GetSubMap(
 {
     VALIDATE_NOT_NULL(sortmap)
 
-    AutoPtr<INavigableMap> res = SubMap(startKey, INCLUSIVE, endKey, EXCLUSIVE);
+    AutoPtr<INavigableMap> res;
+    SubMap(startKey, INCLUSIVE, endKey, EXCLUSIVE, (INavigableMap**)&res);
     *sortmap = (ISortedMap*)res.Get();
     REFCOUNT_ADD(*sortmap);
     return NOERROR;
@@ -2863,7 +2866,8 @@ ECode CTreeMap::BoundedMap::GetHeadMap(
     VALIDATE_NOT_NULL(outnav)
 
     Bound toBound = inclusive ? INCLUSIVE : EXCLUSIVE;
-    AutoPtr<INavigableMap> res = SubMap(NULL, NO_BOUND, toKey, toBound);
+    AutoPtr<INavigableMap> res;
+    SubMap(NULL, NO_BOUND, toKey, toBound, (INavigableMap**)&res);
     *outnav = res;
     REFCOUNT_ADD(*outnav)
     return NOERROR;
@@ -2875,7 +2879,8 @@ ECode CTreeMap::BoundedMap::GetHeadMap(
 {
     VALIDATE_NOT_NULL(sortmap)
 
-    AutoPtr<INavigableMap> res = SubMap(NULL, NO_BOUND, endKey, EXCLUSIVE);
+    AutoPtr<INavigableMap> res;
+    SubMap(NULL, NO_BOUND, endKey, EXCLUSIVE, (INavigableMap**)&res);
     *sortmap = (ISortedMap*)res.Get();
     REFCOUNT_ADD(*sortmap)
     return NOERROR;
@@ -2889,7 +2894,8 @@ ECode CTreeMap::BoundedMap::GetTailMap(
     VALIDATE_NOT_NULL(outnav)
 
     Bound fromBound = inclusive ? INCLUSIVE : EXCLUSIVE;
-    AutoPtr<INavigableMap> res = SubMap(fromKey, fromBound, NULL, NO_BOUND);
+    AutoPtr<INavigableMap> res;
+    SubMap(fromKey, fromBound, NULL, NO_BOUND, (INavigableMap**)&res);
     *outnav = res;
     REFCOUNT_ADD(*outnav)
     return NOERROR;
@@ -2901,17 +2907,19 @@ ECode CTreeMap::BoundedMap::GetTailMap(
 {
     VALIDATE_NOT_NULL(sortmap)
 
-    AutoPtr<INavigableMap> res = SubMap(startKey, INCLUSIVE, NULL, NO_BOUND);
+    AutoPtr<INavigableMap> res;
+    SubMap(startKey, INCLUSIVE, NULL, NO_BOUND, (INavigableMap**)&res);
     *sortmap = (ISortedMap*)res.Get();
     REFCOUNT_ADD(*sortmap)
     return NOERROR;
 }
 
-AutoPtr<INavigableMap> CTreeMap::BoundedMap::SubMap(
+ECode CTreeMap::BoundedMap::SubMap(
     /* [in] */ IInterface* from,
     /* [in] */ Bound fromBound,
     /* [in] */ IInterface* to,
-    /* [in] */ Bound toBound)
+    /* [in] */ Bound toBound,
+    /* [out] */ INavigableMap** outnav)
 {
     if (!mAscending) {
         AutoPtr<IInterface> fromTmp = from;
@@ -2935,7 +2943,7 @@ AutoPtr<INavigableMap> CTreeMap::BoundedMap::SubMap(
         Bound fromBoundToCheck = fromBound == mFromBound ? INCLUSIVE : mFromBound;
         if (!IsInBounds(from, fromBoundToCheck, mToBound)) {
             // throw outOfBounds(to, fromBoundToCheck, this.toBound);
-            return NULL;
+            return OutOfBounds(from, fromBoundToCheck, mToBound);
         }
     }
 
@@ -2947,13 +2955,15 @@ AutoPtr<INavigableMap> CTreeMap::BoundedMap::SubMap(
         Bound toBoundToCheck = toBound == mToBound ? INCLUSIVE : mToBound;
         if (!IsInBounds(to, mFromBound, toBoundToCheck)) {
             // throw outOfBounds(to, this.fromBound, toBoundToCheck);
-            return NULL;
+            return OutOfBounds(to, mFromBound, toBoundToCheck);
         }
     }
 
     AutoPtr<BoundedMap> res = new BoundedMap();
     FAIL_RETURN(res->constructor(mAscending, from, fromBound, to, toBound, mHost));
-    return (INavigableMap*)res.Get();
+    *outnav = (INavigableMap*)res.Get();
+    REFCOUNT_ADD(*outnav)
+    return NOERROR;
 }
 
 ECode CTreeMap::BoundedMap::OutOfBounds(
@@ -3046,14 +3056,17 @@ ECode CTreeMap::NavigableSubMap::GetEntrySet(
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
-AutoPtr<IInterface> CTreeMap::NavigableSubMap::ReadResolve()
+ECode CTreeMap::NavigableSubMap::ReadResolve(
+    /* [out] */ IInterface** outface)
 {
     Bound fromBound = mFromStart ? NO_BOUND : (mLoInclusive ? INCLUSIVE : EXCLUSIVE);
     Bound toBound = mToEnd ? NO_BOUND : (mHiInclusive ? INCLUSIVE : EXCLUSIVE);
     Boolean ascending = !mIsDescending;
     AutoPtr<BoundedMap> res = new BoundedMap();
     FAIL_RETURN(res->constructor(ascending, mLo, fromBound, mHi, toBound, mM));
-    return res->Probe(EIID_IInterface);
+    *outface = res->Probe(EIID_IInterface);
+    REFCOUNT_ADD(*outface)
+    return NOERROR;
 }
 
 ECode CTreeMap::NavigableSubMap::Clear()
@@ -3179,13 +3192,16 @@ ECode CTreeMap::SubMap::GetEntrySet(
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
-AutoPtr<IInterface> CTreeMap::SubMap::ReadResolve()
+ECode CTreeMap::SubMap::ReadResolve(
+    /* [out] */ IInterface** outface)
 {
     Bound fromBound = mFromStart ? NO_BOUND : INCLUSIVE;
     Bound toBound = mToEnd ? NO_BOUND : EXCLUSIVE;
     AutoPtr<BoundedMap> res = new BoundedMap();
     FAIL_RETURN(res->constructor(TRUE, mFromKey, fromBound, mToKey, toBound, mHost));
-    return res->Probe(EIID_IInterface);
+    *outface = res->Probe(EIID_IInterface);
+    REFCOUNT_ADD(*outface)
+    return NOERROR;
 }
 
 ECode CTreeMap::SubMap::Clear()
