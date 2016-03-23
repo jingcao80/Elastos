@@ -234,6 +234,16 @@ public:
 
     CARAPI_(void) WriteLPr();
 
+    CARAPI_(void) WritePrebundledPackagesLPr();
+
+    CARAPI_(void) ReadPrebundledPackagesLPr();
+
+    CARAPI_(void) MarkPrebundledPackageInstalledLPr(
+        /* [in] */ const String& packageName);
+
+    CARAPI_(Boolean) WasPrebundledPackageInstalledLPr(
+        /* [in] */ const String& packageName);
+
     CARAPI WriteDisabledSysPackageLPr(
         /* [in] */ IXmlSerializer* serializer,
         /* [in] */ PackageSetting* pkg);
@@ -542,6 +552,9 @@ private:
     static const String TAG_PACKAGE;
     static const String TAG_PERSISTENT_PREFERRED_ACTIVITIES;
 
+    static const String TAG_PROTECTED_COMPONENTS;
+    static const String TAG_VISIBLE_COMPONENTS;
+
     static const String ATTR_NAME;
     static const String ATTR_USER;
     static const String ATTR_CODE;
@@ -561,9 +574,11 @@ private:
     AutoPtr<IFile> mPackageListFilename;
     AutoPtr<IFile> mStoppedPackagesFilename;
     AutoPtr<IFile> mBackupStoppedPackagesFilename;
+    AutoPtr<IFile> mPrebundledPackagesFilename;
 
     // List of replaced system applications
     HashMap<String, AutoPtr<PackageSetting> > mDisabledSysPackages;
+    HashSet<String> mPrebundledPackages;
 
     static Int32 mFirstAvailableUid;
 

@@ -2,6 +2,7 @@
 #include "Elastos.Droid.Net.h"
 #include "elastos/droid/server/pm/Installer.h"
 #include "elastos/droid/os/Build.h"
+#include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
@@ -15,6 +16,7 @@ using Elastos::Droid::Net::CLocalSocket;
 using Elastos::Droid::Net::ILocalSocketAddress;
 using Elastos::Droid::Net::CLocalSocketAddress;
 using Elastos::Droid::Os::Build;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -129,7 +131,10 @@ Int32 Installer::Dexopt(
 Int32 Installer::Idmap(
     /* [in] */ const String& targetApkPath,
     /* [in] */ const String& overlayApkPath,
-    /* [in] */ Int32 uid)
+    /* [in] */ const String& cachePath,
+    /* [in] */ Int32 uid,
+    /* [in] */ Int32 targetHash,
+    /* [in] */ Int32 overlayHash)
 {
     StringBuilder builder("idmap");
     builder.AppendChar(' ');
@@ -137,7 +142,52 @@ Int32 Installer::Idmap(
     builder.AppendChar(' ');
     builder.Append(overlayApkPath);
     builder.AppendChar(' ');
+    builder.Append(cachePath);
+    builder.AppendChar(' ');
     builder.Append(uid);
+    builder.AppendChar(' ');
+    builder.Append(targetHash);
+    builder.AppendChar(' ');
+    builder.Append(overlayHash);
+    Int32 result;
+    mInstaller->Execute(builder.ToString(), &result);
+    return result;
+}
+
+Int32 Installer::Aapt(
+    /* [in] */ const String& themeApkPath,
+    /* [in] */ const String& internalPath,
+    /* [in] */ const String& resTablePath,
+    /* [in] */ Int32 uid,
+    /* [in] */ Int32 pkgId,
+    /* [in] */ Int32 minSdkVersion,
+    /* [in] */ const String& commonResourcesPath)
+{
+    StringBuilder builder;
+    if (TextUtils::IsEmpty(commonResourcesPath)) {
+        builder.Append("aapt");
+    }
+    else {
+        builder.Append("aapt_with_common");
+    }
+    builder.AppendChar(' ');
+    builder.Append(themeApkPath);
+    builder.AppendChar(' ');
+    builder.Append(internalPath);
+    builder.AppendChar(' ');
+    builder.Append(resTablePath);
+    builder.AppendChar(' ');
+    builder.Append(uid);
+    builder.AppendChar(' ');
+    builder.Append(pkgId);
+    builder.AppendChar(' ');
+    builder.Append(minSdkVersion);
+
+    if (!TextUtils::IsEmpty(commonResourcesPath)) {
+        builder.AppendChar(' ');
+        builder.Append(commonResourcesPath);
+    }
+
     Int32 result;
     mInstaller->Execute(builder.ToString(), &result);
     return result;

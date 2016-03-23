@@ -10,6 +10,7 @@
 #include <elastos/utility/etl/HashSet.h>
 
 using Elastos::Droid::Content::Pm::IFeatureInfo;
+using Elastos::Droid::Content::Pm::ISignature;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Etl::HashSet;
 using Elastos::IO::IFile;
@@ -58,6 +59,8 @@ public:
     AutoPtr<HashSet<String> > GetAllowInPowerSave();
 
     AutoPtr<HashSet<String> > GetFixedImeApps();
+
+    AutoPtr< HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > > > GetSignatureAllowances();
 
     SystemConfig();
 

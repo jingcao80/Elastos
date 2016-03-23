@@ -14,7 +14,7 @@ static AutoPtr<IUri> InitURI(
     /* [in] */ const char* str)
 {
     AutoPtr<IUri> uri;
-    Uri::WithAppendedPath(ThemesContract::AUTHORITY_URI, str, (IUri**)&uri);
+    Uri::WithAppendedPath(ThemesContract::AUTHORITY_URI, String(str), (IUri**)&uri);
     return uri;
 }
 
@@ -23,7 +23,6 @@ static AutoPtr<IUri> InitURI(
 //============================================================================
 
 const AutoPtr<IUri> ThemesContract::ThemesColumns::CONTENT_URI = InitURI("themes");
-
 
 //============================================================================
 //              ThemesContract::MixnMatchColumns

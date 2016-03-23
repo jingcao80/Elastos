@@ -87,6 +87,41 @@ ECode CAppOpsManagerHelper::OpAllowsReset(
     return NOERROR;
 }
 
+ECode CAppOpsManagerHelper::IsStrictEnable(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = AppOpsManager::IsStrictEnable();
+    return NOERROR;
+}
+
+ECode CAppOpsManagerHelper::IsStrictOp(
+    /* [in] */ Int32 code,
+    /* [out] */ Boolean* isStrictOp)
+{
+    VALIDATE_NOT_NULL(isStrictOp)
+    *isStrictOp = AppOpsManager::IsStrictOp(code);
+    return NOERROR;
+}
+
+ECode CAppOpsManagerHelper::StringToMode(
+    /* [in] */ const String& permission,
+    /* [out] */ Int32* mode)
+{
+    VALIDATE_NOT_NULL(mode)
+    *mode = AppOpsManager::StringToMode(permission);
+    return NOERROR;
+}
+
+ECode CAppOpsManagerHelper::StringOpToOp(
+    /* [in] */ const String& op,
+    /* [out] */ Int32* value)
+{
+    VALIDATE_NOT_NULL(value)
+    *value = AppOpsManager::StringOpToOp(op);
+    return NOERROR;
+}
+
 } // namespace App
 } // namespace Droid
 } // namespace Elastos

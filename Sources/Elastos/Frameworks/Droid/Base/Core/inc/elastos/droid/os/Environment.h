@@ -142,7 +142,7 @@ public:
      * from this partition but will not be marked as system apps and will hence be uninstallable.
      * @hide
      */
-     static AutoPtr<IFile> GetPrebundledDirectory();
+    static AutoPtr<IFile> GetPrebundledDirectory();
 
     /**
      * Gets the system directory available for secure storage.

@@ -50,6 +50,7 @@
 #include "elastos/droid/app/CVoiceInteractorCompleteVoiceRequest.h"
 #include "elastos/droid/app/CVoiceInteractorAbortVoiceRequest.h"
 #include "elastos/droid/app/CVoiceInteractorCommandRequest.h"
+#include "elastos/droid/app/CIconPackHelper.h"
 
 namespace Elastos {
 namespace Droid {
@@ -106,6 +107,7 @@ CAR_OBJECT_IMPL(CVoiceInteractorConfirmationRequest)
 CAR_OBJECT_IMPL(CVoiceInteractorCompleteVoiceRequest)
 CAR_OBJECT_IMPL(CVoiceInteractorAbortVoiceRequest)
 CAR_OBJECT_IMPL(CVoiceInteractorCommandRequest)
+CAR_OBJECT_IMPL(CIconPackHelper)
 
 } // namespace App
 } // namespace Droid

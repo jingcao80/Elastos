@@ -75,6 +75,12 @@ AutoPtr<HashSet<String> > SystemConfig::GetFixedImeApps()
     return mFixedImeApps;
 }
 
+AutoPtr< HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > > > SystemConfig::GetSignatureAllowances()
+{
+    assert(0);
+    return NULL;
+}
+
 SystemConfig::SystemConfig()
 {
     mSystemPermissions = new HashMap<Int32, AutoPtr<HashSet<String> > >();

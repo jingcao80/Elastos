@@ -444,6 +444,8 @@ public:
         /* [in] */ Int32 uid,
         /* [in] */ const String& packageName);
 
+    static CARAPI_(Boolean) IsStrictEnable();
+
     /**
      * Do a quick check for whether an application might be able to perform an operation.
      * This is <em>not</em> a security check; you must use {@link #noteOp(Int32, Int32, String)}
@@ -607,6 +609,43 @@ public:
     /** @hide */
     CARAPI FinishOp(
         /* [in] */ Int32 op);
+
+    /** @hide */
+    CARAPI IsControlAllowed(
+        /* [in] */ Int32 op,
+        /* [in] */ const String& packageName,
+        /* [out] */ Boolean* result);
+
+    /** @hide */
+    CARAPI GetPrivacyGuardSettingForPackage(
+        /* [in] */ Int32 uid,
+        /* [in] */ const String& packageName,
+        /* [out] */ Boolean* state);
+
+    /** @hide */
+    CARAPI SetPrivacyGuardSettingForPackage(
+        /* [in] */ Int32 uid,
+        /* [in] */ const String& packageName,
+        /* [in] */ Boolean state);
+
+    /** @hide */
+    CARAPI ResetCounters();
+
+    /**
+     * Check if op in strict mode
+     * @hide
+     */
+    static CARAPI_(Boolean) IsStrictOp(
+        /* [in] */ Int32 code);
+
+
+    /** @hide */
+    static CARAPI_(Int32) StringToMode(
+        /* [in] */ const String& permission);
+
+    /** @hide */
+    static CARAPI_(Int32) StringOpToOp(
+        /* [in] */ const String& op);
 
 private:
     String BuildSecurityExceptionMsg(

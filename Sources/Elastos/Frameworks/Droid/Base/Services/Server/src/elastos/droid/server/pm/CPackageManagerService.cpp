@@ -10,6 +10,7 @@
 #include "elastos/droid/R.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/app/AppGlobals.h"
+#include "elastos/droid/content/pm/ThemeUtils.h"
 #include "elastos/droid/internal/utility/ArrayUtils.h"
 #include "elastos/droid/os/SELinux.h"
 #include "elastos/droid/os/FileUtils.h"
@@ -32,6 +33,7 @@
 #include <Elastos.CoreLibrary.Libcore.h>
 #include <Elastos.CoreLibrary.Text.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
+#include <Elastos.CoreLibrary.Utility.Zip.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
@@ -48,6 +50,9 @@ using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IPackageDeleteObserver;
 using Elastos::Droid::App::CLegacyPackageDeleteObserver;
+using Elastos::Droid::App::IAppOpsManagerHelper;
+using Elastos::Droid::App::CAppOpsManagerHelper;
+using Elastos::Droid::App::CIconPackHelper;
 using Elastos::Droid::App::Admin::IIDevicePolicyManager;
 using Elastos::Droid::App::Backup::IIBackupManager;
 using Elastos::Droid::Content::EIID_IServiceConnection;
@@ -77,8 +82,12 @@ using Elastos::Droid::Content::Pm::EIID_IIPackageManager;
 using Elastos::Droid::Content::Pm::ISignatureHelper;
 using Elastos::Droid::Content::Pm::CSignatureHelper;
 using Elastos::Droid::Content::Pm::CKeySet;
+using Elastos::Droid::Content::Pm::IThemeUtils;
+using Elastos::Droid::Content::Pm::ThemeUtils;
 using Elastos::Droid::Content::Res::IResourcesHelper;
 using Elastos::Droid::Content::Res::CResourcesHelper;
+using Elastos::Droid::Content::Res::CAssetManager;
+using Elastos::Droid::Content::Res::IThemeManager;
 using Elastos::Droid::Hardware::Display::IDisplayManager;
 using Elastos::Droid::Internal::App::IIntentForwarderActivity;
 using Elastos::Droid::Internal::Content::IPackageHelper;
@@ -96,6 +105,8 @@ using Elastos::Droid::KeyStore::Security::IKeyStoreHelper;
 // using Elastos::Droid::Keystore::Security::CKeyStoreHelper;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::Environment;
@@ -146,6 +157,7 @@ using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
+using Elastos::Core::CInteger32;
 using Elastos::Core::EIID_IComparator;
 using Elastos::IO::CFile;
 using Elastos::IO::CFileHelper;
@@ -163,7 +175,21 @@ using Elastos::IO::IBufferedInputStream;
 using Elastos::IO::CBufferedInputStream;
 using Elastos::IO::IFlushable;
 using Elastos::IO::IFileInputStream;
+using Elastos::IO::CFileInputStream;
 using Elastos::IO::EIID_IFilenameFilter;
+using Elastos::IO::CDataInputStream;
+using Elastos::IO::IFileWriter;
+using Elastos::IO::CFileWriter;
+using Elastos::IO::IBufferedWriter;
+using Elastos::IO::CBufferedWriter;
+using Elastos::IO::IByteBufferHelper;
+using Elastos::IO::CByteBufferHelper;
+using Elastos::IO::IInt32Buffer;
+using Elastos::IO::ByteOrder_LITTLE_ENDIAN;
+using Elastos::IO::IDataInput;
+using Elastos::IO::CDataOutputStream;
+using Elastos::IO::IDataOutputStream;
+using Elastos::IO::IWriter;
 using Elastos::Text::IDateFormat;
 using Elastos::Text::CSimpleDateFormat;
 using Elastos::Security::IPublicKey;
@@ -184,6 +210,9 @@ using Elastos::Utility::Concurrent::Atomic::CAtomicInteger64;
 using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Zip::IZipEntry;
+using Elastos::Utility::Zip::IZipFile;
+using Elastos::Utility::Zip::CZipFile;
 using Libcore::IO::CLibcore;
 using Libcore::IO::ILibcore;
 using Libcore::IO::IIoUtils;
@@ -200,8 +229,6 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Pm {
-
-static const String READ_EXTERNAL_STORAGE = Manifest::permission::READ_EXTERNAL_STORAGE;
 
 //==============================================================================
 //                  CPackageManagerService::PendingPackageBroadcasts
@@ -915,23 +942,27 @@ void CPackageManagerService::PackageHandler::DoHandleMessage(
                     }
                     String packageName;
                     IPackageItemInfo::Probe(res->mPkg->mApplicationInfo)->GetPackageName(&packageName);
-                    mHost->SendPackageBroadcast(
-                            IIntent::ACTION_PACKAGE_ADDED, packageName,
+                    CPackageManagerService::SendPackageBroadcast(
+                            IIntent::ACTION_PACKAGE_ADDED, packageName, String(NULL),
                             extras, String(NULL), NULL, firstUsers);
                     Boolean update = res->mRemovedInfo->mRemovedPackage != NULL;
                     if (update) {
                         extras->PutBoolean(IIntent::EXTRA_REPLACING, TRUE);
                     }
-                    mHost->SendPackageBroadcast(
-                            IIntent::ACTION_PACKAGE_ADDED, packageName,
+                    String category(NULL);
+                    if(res->mPkg->mIsThemeApk) {
+                        category = IIntent::CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE;
+                    }
+                    CPackageManagerService::SendPackageBroadcast(
+                            IIntent::ACTION_PACKAGE_ADDED, packageName, category,
                             extras, String(NULL), NULL, updateUsers);
                     if (update) {
-                        mHost->SendPackageBroadcast(
-                                IIntent::ACTION_PACKAGE_REPLACED, packageName,
+                        CPackageManagerService::SendPackageBroadcast(
+                                IIntent::ACTION_PACKAGE_REPLACED, packageName, category,
                                 extras, String(NULL), NULL, updateUsers);
-                        mHost->SendPackageBroadcast(
+                        CPackageManagerService::SendPackageBroadcast(
                                 IIntent::ACTION_MY_PACKAGE_REPLACED,
-                                String(NULL), NULL, packageName, NULL, updateUsers);
+                                String(NULL), String(NULL), NULL, packageName, NULL, updateUsers);
 
                         // treat asec-hosted packages like removable media on upgrade
                         if (mHost->IsForwardLocked(res->mPkg) || mHost->IsExternal(res->mPkg)) {
@@ -947,9 +978,31 @@ void CPackageManagerService::PackageHandler::DoHandleMessage(
                             mHost->SendResourcesChangedBroadcast(TRUE, TRUE, pkgList, uidArray, NULL);
                         }
                     }
+                    // if this was a theme, send it off to the theme service for processing
+                    if(res->mPkg->mIsThemeApk || res->mPkg->mIsLegacyIconPackApk) {
+                        mHost->ProcessThemeResourcesInThemeService(res->mPkg->mPackageName);
+                    }
                     if (res->mRemovedInfo->mArgs != NULL) {
                         // Remove the replaced package's older resources safely now
                         deleteOld = TRUE;
+                    }
+
+                    if (!update && !CPackageManagerService::IsSystemApp(res->mPkg->mApplicationInfo)) {
+                        AutoPtr<ISettingsSecure> secure;
+                        CSettingsSecure::AcquireSingleton((ISettingsSecure**)&secure);
+                        AutoPtr<IContentResolver> cr;
+                        mHost->mContext->GetContentResolver((IContentResolver**)&cr);
+                        Int32 value;
+                        secure->GetInt32ForUser(cr, ISettingsSecure::PRIVACY_GUARD_DEFAULT,
+                                0, IUserHandle::USER_CURRENT, &value);
+                        Boolean privacyGuard = value == 1;
+                        if (privacyGuard) {
+                            Int32 uid;
+                            res->mPkg->mApplicationInfo->GetUid(&uid);
+                            IPackageItemInfo::Probe(res->mPkg->mApplicationInfo)->GetPackageName(&packageName);
+                            mHost->mAppOps->SetPrivacyGuardSettingForPackage(
+                                    uid, packageName, TRUE);
+                        }
                     }
 
                     // Log current value of "unknown sources" setting
@@ -1170,8 +1223,38 @@ CPackageManagerService::ActivityIntentResolver::QueryIntent(
 {
     if (!sUserManager->Exists(userId)) return NULL;
     mFlags = flags;
-    return Super::QueryIntent(intent, resolvedType,
-        (flags & IPackageManager::MATCH_DEFAULT_ONLY) != 0, userId);
+    AutoPtr<List<AutoPtr<IResolveInfo> > > list = IntentResolver::QueryIntent(intent, resolvedType,
+            (flags & IPackageManager::MATCH_DEFAULT_ONLY) != 0, userId);
+    // Remove protected Application components
+    Int32 callingUid = Binder::GetCallingUid();
+    AutoPtr<ArrayOf<String> > pkgs;
+    mHost->GetPackagesForUid(callingUid, (ArrayOf<String>**)&pkgs);
+    AutoPtr<IList> packages;
+    Arrays::AsList(pkgs, (IList**)&packages);
+    Int32 f;
+    if (callingUid != IProcess::SYSTEM_UID &&
+            (mHost->GetFlagsForUid(callingUid, &f), (f & IApplicationInfo::FLAG_SYSTEM) == 0)) {
+        List<AutoPtr<IResolveInfo> >::Iterator it = list->Begin();
+        while (it != list->End()) {
+            AutoPtr<IActivityInfo> activityInfo;
+            (*it)->GetActivityInfo((IActivityInfo**)&activityInfo);
+            AutoPtr<IApplicationInfo> appInfo;
+            IComponentInfo::Probe(activityInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+            String packageName;
+            IPackageItemInfo::Probe(activityInfo)->GetPackageName(&packageName);
+            Boolean protect, contains;
+            if (appInfo->GetProtect(&protect), protect) {
+                AutoPtr<ICharSequence> cs;
+                CString::New(packageName, (ICharSequence**)&cs);
+                if (packages == NULL || (packages->Contains(cs, &contains), !contains)) {
+                    it = list->Erase(it);
+                    continue;
+                }
+            }
+            ++it;
+        }
+    }
+    return list;
 }
 
 AutoPtr<List<AutoPtr<IResolveInfo> > >
@@ -2367,6 +2450,10 @@ Int32 CPackageManagerService::InstallParams::InstallLocationPolicy(
         if (it != mHost->mPackages.End()) {
             pkg = it->mSecond;
         }
+        Boolean isTheme;
+        if (pkgLite->GetIsTheme(&isTheme), isTheme) {
+            return IPackageHelper::RECOMMEND_INSTALL_INTERNAL;
+        }
         if (pkg != NULL) {
             if ((mInstallFlags & IPackageManager::INSTALL_REPLACE_EXISTING) != 0) {
                 // Check for downgrading.
@@ -2525,10 +2612,11 @@ ECode CPackageManagerService::InstallParams::HandleStartCopy()
         else {
             // Override with defaults if needed.
             loc = InstallLocationPolicy(pkgLite);
+            Boolean isTheme;
             if (loc == IPackageHelper::RECOMMEND_FAILED_VERSION_DOWNGRADE) {
                 ret = IPackageManager::INSTALL_FAILED_VERSION_DOWNGRADE;
             }
-            else if (!onSd && !onInt) {
+            else if ((!onSd && !onInt) || (pkgLite->GetIsTheme(&isTheme), isTheme)) {
                 // Override install location with flags
                 if (loc == IPackageHelper::RECOMMEND_INSTALL_EXTERNAL) {
                     // Set the flag to install on external media.
@@ -2540,6 +2628,9 @@ ECode CPackageManagerService::InstallParams::HandleStartCopy()
                     // media is unset
                     mInstallFlags |= IPackageManager::INSTALL_INTERNAL;
                     mInstallFlags &= ~IPackageManager::INSTALL_EXTERNAL;
+                }
+                if (pkgLite->GetIsTheme(&isTheme), isTheme) {
+                    mInstallFlags &= ~IPackageManager::INSTALL_FORWARD_LOCK;
                 }
             }
         }
@@ -3659,15 +3750,19 @@ void CPackageManagerService::PackageRemovedInfo::SendBroadcast(
     }
     extras->PutBoolean(IIntent::EXTRA_REMOVED_FOR_ALL_USERS, removedForAllUsers);
     if (!mRemovedPackage.IsNull()) {
-        mHost->SendPackageBroadcast(IIntent::ACTION_PACKAGE_REMOVED, mRemovedPackage,
+        String category(NULL);
+        if (mIsThemeApk) {
+            category = IIntent::CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE;
+        }
+        CPackageManagerService::SendPackageBroadcast(IIntent::ACTION_PACKAGE_REMOVED, mRemovedPackage, category,
                 extras, String(NULL), NULL, mRemovedUsers);
         if (fullRemove && !replacing) {
-            mHost->SendPackageBroadcast(IIntent::ACTION_PACKAGE_FULLY_REMOVED, mRemovedPackage,
-                    extras, String(NULL), NULL, mRemovedUsers);
+            CPackageManagerService::SendPackageBroadcast(IIntent::ACTION_PACKAGE_FULLY_REMOVED, mRemovedPackage,
+                    category, extras, String(NULL), NULL, mRemovedUsers);
         }
     }
     if (mRemovedAppId >= 0) {
-        mHost->SendPackageBroadcast(IIntent::ACTION_UID_REMOVED, String(NULL),
+        CPackageManagerService::SendPackageBroadcast(IIntent::ACTION_UID_REMOVED, String(NULL), String(NULL),
                 extras, String(NULL), NULL, mRemovedUsers);
     }
 }
@@ -3996,6 +4091,7 @@ const Int32 CPackageManagerService::BLUETOOTH_UID;
 const Int32 CPackageManagerService::SHELL_UID;
 const Int32 CPackageManagerService::MAX_PERMISSION_TREE_FOOTPRINT;
 const String CPackageManagerService::INSTALL_PACKAGE_SUFFIX("-");
+const String CPackageManagerService::SECURITY_BRIDGE_NAME("com.android.services.SecurityBridge.core.PackageManagerSB");
 const Int32 CPackageManagerService::SCAN_NO_DEX;
 const Int32 CPackageManagerService::SCAN_FORCE_DEX;
 const Int32 CPackageManagerService::SCAN_UPDATE_SIGNATURE;
@@ -4009,7 +4105,7 @@ const Int32 CPackageManagerService::SCAN_DELETE_DATA_ON_FAILURES;
 const Int32 CPackageManagerService::SCAN_REPLACING;
 const Int32 CPackageManagerService::REMOVE_CHATTY;
 const Int64 CPackageManagerService::WATCHDOG_TIMEOUT;
-const Int64 CPackageManagerService::DEFAULT_MANDATORY_FSTRIM_INTERVAL = 3 * IDateUtils::DAY_IN_MILLIS;
+const Int64 CPackageManagerService::DEFAULT_MANDATORY_FSTRIM_INTERVAL =  3 * IDateUtils::DAY_IN_MILLIS;
 const Boolean CPackageManagerService::DEFAULT_VERIFY_ENABLE;
 const Int64 CPackageManagerService::DEFAULT_VERIFICATION_TIMEOUT;
 const Int32 CPackageManagerService::DEFAULT_VERIFICATION_RESPONSE;
@@ -4026,9 +4122,18 @@ const AutoPtr<IComponentName> CPackageManagerService::DEFAULT_CONTAINER_COMPONEN
 const String CPackageManagerService::PACKAGE_MIME_TYPE("application/vnd.android.package-archive");
 const String CPackageManagerService::VENDOR_OVERLAY_DIR("/vendor/overlay");
 const String CPackageManagerService::VENDOR_APP_DIR("/system/vendor/app");
+const String CPackageManagerService::APK_PATH_TO_OVERLAY("assets/overlays/");
+const String CPackageManagerService::APK_PATH_TO_ICONS("assets/icons/");
+const String CPackageManagerService::COMMON_OVERLAY = IThemeUtils::COMMON_RES_TARGET;
+const Int64 CPackageManagerService::PACKAGE_HASH_EXPIRATION; // 3 minutes
+const Int64 CPackageManagerService::COMMON_RESOURCE_EXPIRATION; // 3 minutes
+const Byte CPackageManagerService::IDMAP_HASH_VERSION;
+
+/**
+ * The offset in bytes to the beginning of the hashes in an idmap
+ */
+static const Int32 IDMAP_HASH_START_OFFSET = 16;
 String CPackageManagerService::sPreferredInstructionSet;
-const String CPackageManagerService::IDMAP_PREFIX("/data/resource-cache/");
-const String CPackageManagerService::IDMAP_SUFFIX("@idmap");
 const Int32 CPackageManagerService::SEND_PENDING_BROADCAST;
 const Int32 CPackageManagerService::MCS_BOUND;
 const Int32 CPackageManagerService::END_COPY;
@@ -4085,10 +4190,17 @@ CPackageManagerService::CPackageManagerService()
     , mSafeMode(FALSE)
     , mHasSystemUidErrors(FALSE)
     , mResolverReplaced(FALSE)
+    , mPreLaunchCheckPackagesReplaced(FALSE)
     , mNextInstallToken(1)
     , mPendingVerificationToken(0)
     , mMediaMounted(FALSE)
 {
+    CResolveInfo::New((IResolveInfo**)&mPreLaunchCheckResolveInfo);
+    AutoPtr<ISet> set;
+    CHashSet::New((ISet**)&set);
+    AutoPtr<ICollections> col;
+    CCollections::AcquireSingleton((ICollections**)&col);
+    col->SynchronizedSet(set, (ISet**)&mPreLaunchCheckPackages);
 }
 
 CAR_INTERFACE_IMPL_2(CPackageManagerService, Object, IIPackageManager, IBinder)
@@ -4200,6 +4312,21 @@ ECode CPackageManagerService::constructor(
         Slogger::W(TAG, "**** ro.build.version.sdk not set!");
     }
 
+    Object bridgeObject;
+
+    // try {
+    /*
+     * load and create the security bridge
+     */
+    // TODO: SecurityBridge has not implimented!
+    // bridgeObject = getClass().getClassLoader().loadClass(SECURITY_BRIDGE_NAME).newInstance();
+    // mSecurityBridge = (PackageManagerMonitor)bridgeObject;
+    Slogger::E(TAG, "No security bridge jar found, using default");
+    // } catch (Exception e){
+    //     Slog.w(TAG, "No security bridge jar found, using default");
+    //     mSecurityBridge = new PackageManagerMonitor();
+    // }
+
     //TODO: SELinux
     // mShouldRestoreconData = SELinuxMMAC::ShouldRestorecon();
     mActivities = new ActivityIntentResolver(this);
@@ -4219,7 +4346,9 @@ ECode CPackageManagerService::constructor(
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
     String value;
     sysProp->Get(String("ro.build.type"), &value);
-    mLazyDexOpt = String("eng").Equals(value);
+    Boolean dexopt;
+    mLazyDexOpt = String("eng").Equals(value) || (String("userdebug").Equals(value) &&
+            (sysProp->GetBoolean(String("persist.sys.lazy.dexopt"), FALSE, &dexopt), dexopt));
     CDisplayMetrics::New((IDisplayMetrics**)&mMetrics);
     mSettings = new Settings(context);
     mSettings->AddSharedUserLPw(String("android.uid.system"), IProcess::SYSTEM_UID,
@@ -4234,6 +4363,10 @@ ECode CPackageManagerService::constructor(
             IApplicationInfo::FLAG_SYSTEM | IApplicationInfo::FLAG_PRIVILEGED);
     mSettings->AddSharedUserLPw(String("android.uid.shell"), SHELL_UID,
             IApplicationInfo::FLAG_SYSTEM | IApplicationInfo::FLAG_PRIVILEGED);
+
+    AutoPtr<IInterface> appopsService;
+    context->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&appopsService);
+    mAppOps = IAppOpsManager::Probe(appopsService);
 
     String separateProcesses;
     sysProp->Get(String("debug.separate_processes"), &separateProcesses);
@@ -4256,10 +4389,13 @@ ECode CPackageManagerService::constructor(
 
     GetDefaultDisplayMetrics(context, mMetrics);
 
+    RemoveLegacyResourceCache();
+
     AutoPtr<SystemConfig> systemConfig = SystemConfig::GetInstance();
     mGlobalGids = systemConfig->GetGlobalGids();
     mSystemPermissions = systemConfig->GetSystemPermissions();
     mAvailableFeatures = systemConfig->GetAvailableFeatures();
+    mSignatureAllowances = systemConfig->GetSignatureAllowances();
 
     AutoPtr<ArrayOf<Byte> > readBuffer = ArrayOf<Byte>::Alloc(PackageParser::CERTIFICATE_BUFFER_SIZE);
     if (readBuffer == NULL) {
@@ -4506,6 +4642,10 @@ ECode CPackageManagerService::constructor(
             //     }
             // }
 
+            if (!mOnlyCore) {
+                mBootThemeConfig = ThemeUtils::GetBootThemeDirty();
+            }
+
             // Collect vendor overlay packages.
             // (Do this before scanning any apps.)
             // For security and version matching reason, only consider
@@ -4554,6 +4694,10 @@ ECode CPackageManagerService::constructor(
             CFile::New(oemDir, String("app"), (IFile**)&oemAppDir);
             ScanDirLI(oemAppDir, PackageParser::PARSE_IS_SYSTEM | PackageParser::PARSE_IS_SYSTEM_DIR,
                     scanFlags, 0, readBuffer);
+
+            // Collect all prebundled packages.
+            ScanDirLI(Environment::GetPrebundledDirectory(),
+                    PackageParser::PARSE_IS_PREBUNDLED_DIR, scanFlags, 0, readBuffer);
 
             if (DEBUG_UPGRADE) Logger::V(TAG, "Running installd update commands");
             mInstaller->MoveFiles();
@@ -4787,6 +4931,64 @@ ECode CPackageManagerService::constructor(
             // we need to initialize the default preferred apps.
             if (!mRestoredSettings && !onlyCore) {
                 mSettings->ReadDefaultPreferredAppsLPw(this, 0);
+            }
+
+            // Disable components marked for disabling at build-time
+            CArrayList::New((IArrayList**)&mDisabledComponentsList);
+            res = NULL;
+            mContext->GetResources((IResources**)&res);
+            AutoPtr<ArrayOf<String> > strs;
+            res->GetStringArray(Elastos::Droid::R::array::config_disabledComponents, (ArrayOf<String>**)&strs);
+            for (Int32 i = 0; i < strs->GetLength(); ++i) {
+                String name = (*strs)[i];
+                AutoPtr<IComponentNameHelper> cnHelper;
+                CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&cnHelper);
+                AutoPtr<IComponentName> cn;
+                cnHelper->UnflattenFromString(name, (IComponentName**)&cn);
+                mDisabledComponentsList->Add(cn);
+                Slogger::V(TAG, "Disabling %s", name.string());
+                String className;
+                cn->GetClassName(&className);
+                String pkgName;
+                cn->GetPackageName(&pkgName);
+                AutoPtr<PackageSetting> pkgSetting;
+                HashMap<String, AutoPtr<PackageSetting> >::Iterator pkgIt = mSettings->mPackages.Find(pkgName);
+                if (pkgIt != mSettings->mPackages.End()) {
+                    pkgSetting = pkgIt->mSecond;
+                }
+                if (pkgSetting == NULL || pkgSetting->mPkg == NULL
+                        || !pkgSetting->mPkg->HasComponentClassName(className)) {
+                    Slogger::W(TAG, "Unable to disable %s", name.string());
+                    continue;
+                }
+                pkgSetting->DisableComponentLPw(className, IUserHandle::USER_OWNER);
+            }
+
+            // Enable components marked for forced-enable at build-time
+            strs = NULL;
+            res->GetStringArray(Elastos::Droid::R::array::config_forceEnabledComponents, (ArrayOf<String>**)&strs);
+            for (Int32 i = 0; i < strs->GetLength(); ++i) {
+                String name = (*strs)[i];
+                AutoPtr<IComponentNameHelper> cnHelper;
+                CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&cnHelper);
+                AutoPtr<IComponentName> cn;
+                cnHelper->UnflattenFromString(name, (IComponentName**)&cn);
+                Slogger::V(TAG, "Enabling %s", name.string());
+                String className;
+                cn->GetClassName(&className);
+                String pkgName;
+                cn->GetPackageName(&pkgName);
+                AutoPtr<PackageSetting> pkgSetting;
+                HashMap<String, AutoPtr<PackageSetting> >::Iterator pkgIt = mSettings->mPackages.Find(pkgName);
+                if (pkgIt != mSettings->mPackages.End()) {
+                    pkgSetting = pkgIt->mSecond;
+                }
+                if (pkgSetting == NULL || pkgSetting->mPkg == NULL
+                        || !pkgSetting->mPkg->HasComponentClassName(className)) {
+                    Slogger::W(TAG, "Unable to enable %s", name.string());
+                    continue;
+                }
+                pkgSetting->EnableComponentLPw(className, IUserHandle::USER_OWNER);
             }
 
             // If this is first boot after an OTA, and a normal boot, then
@@ -6332,6 +6534,24 @@ ECode CPackageManagerService::CheckGrantRevokePermissions(
     return NOERROR;
 }
 
+Boolean CPackageManagerService::IsAllowedSignature(
+    /* [in] */ PackageParser::Package* pkg,
+    /* [in] */ const String& permissionName)
+{
+    for (Int32 i = 0; i < pkg->mSignatures->GetLength(); ++i) {
+        AutoPtr<ISignature> pkgSig = (*pkg->mSignatures)[i];
+        AutoPtr<HashSet<String> > perms;
+        HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > >::Iterator it = mSignatureAllowances->Find(pkgSig);
+        if (it != mSignatureAllowances->End()) {
+            perms = it->mSecond;
+        }
+        if (perms != NULL && perms->Find(permissionName) != perms->End()) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 ECode CPackageManagerService::GrantPermission(
     /* [in] */ const String& packageName,
     /* [in] */ const String& permissionName)
@@ -6908,6 +7128,118 @@ ECode CPackageManagerService::GetLastChosenActivity(
     return NOERROR;
 }
 
+AutoPtr<IResolveInfo> CPackageManagerService::FindPreLaunchCheckResolve(
+    /* [in] */ IIntent* intent,
+    /* [in] */ IResolveInfo* rInfo,
+    /* [in] */ Int32 userId)
+{
+    Boolean cachedPreLaunchCheckPackagesReplaced;
+    AutoPtr<IResolveInfo> cachedPreLaunchCheckResolveInfo;
+
+    // Retrieve a consistent read on the prelaunch configuration
+    synchronized (mPackagesLock) {
+        cachedPreLaunchCheckPackagesReplaced = mPreLaunchCheckPackagesReplaced;
+        CResolveInfo::New(mPreLaunchCheckResolveInfo, (IResolveInfo**)&cachedPreLaunchCheckResolveInfo);
+    }
+
+    // Skip if the prelaunch check is not set (using setPreLaunchCheckActivity).
+    if (!cachedPreLaunchCheckPackagesReplaced) {
+        return rInfo;
+    }
+
+    AutoPtr<IActivityInfo> ai;
+    rInfo->GetActivityInfo((IActivityInfo**)&ai);
+    String packageName;
+    IPackageItemInfo::Probe(ai)->GetPackageName(&packageName);
+    // If pre launch check has been enabled for this package, return the appropriate
+    // resolve info.
+    AutoPtr<ICharSequence> cs;
+    CString::New(packageName, (ICharSequence**)&cs);
+    Boolean contains;
+    if (mPreLaunchCheckPackages->Contains(cs, &contains), !contains) {
+        return rInfo;
+    }
+
+    // Only pre-check for intents that show up in the Launcher. If the intent originates
+    // else where, ignore it.
+    Boolean hasCategory;
+    if (intent->HasCategory(IIntent::CATEGORY_LAUNCHER, &hasCategory), !hasCategory) {
+        return rInfo;
+    }
+
+    // Make sure that the package which handles the preLaunchChecks is still installed.
+    AutoPtr<IActivityInfo> preLaunchCheckActivity;
+    cachedPreLaunchCheckResolveInfo->GetActivityInfo((IActivityInfo**)&preLaunchCheckActivity);
+
+    if (preLaunchCheckActivity != NULL){
+        String pkgName;
+        IPackageItemInfo::Probe(preLaunchCheckActivity)->GetPackageName(&pkgName);
+        Boolean isPackageAvailable;
+        if (IsPackageAvailable(pkgName, userId, &isPackageAvailable), !isPackageAvailable) {
+            return rInfo;
+        }
+    }
+
+    // Make sure the package that handles preLaunchCheck is not disabled.
+    synchronized (mPackagesLock) {
+        if (preLaunchCheckActivity != NULL) {
+            AutoPtr<IPackageItemInfo> pii = IPackageItemInfo::Probe(preLaunchCheckActivity);
+            String pkgName;
+            pii->GetPackageName(&pkgName);
+            AutoPtr<PackageSetting> ps;
+            HashMap<String, AutoPtr<PackageSetting> >::Iterator it = mSettings->mPackages.Find(pkgName);
+            if (it != mSettings->mPackages.End()) {
+                ps = it->mSecond;
+            }
+            String name;
+            pii->GetName(&name);
+            Int32 enableState = ps->GetCurrentEnabledStateLPr(name, userId);
+            if (enableState == IPackageManager::COMPONENT_ENABLED_STATE_DISABLED ||
+                    enableState == IPackageManager::COMPONENT_ENABLED_STATE_DISABLED_USER) {
+                return rInfo;
+            }
+        }
+    }
+
+    if (userId != 0) {
+        AutoPtr<IResolveInfo> ri;
+        CResolveInfo::New(cachedPreLaunchCheckResolveInfo, (IResolveInfo**)&ri);
+        AutoPtr<IActivityInfo> oldAi;
+        ri->GetActivityInfo((IActivityInfo**)&oldAi);
+        AutoPtr<IActivityInfo> newAi;
+        CActivityInfo::New(oldAi, (IActivityInfo**)&newAi);
+        ri->SetActivityInfo(newAi);
+        AutoPtr<IApplicationInfo> oldAppInfo;
+        IComponentInfo::Probe(newAi)->GetApplicationInfo((IApplicationInfo**)&oldAppInfo);
+        AutoPtr<IApplicationInfo> newAppInfo;
+        CApplicationInfo::New(oldAppInfo, (IApplicationInfo**)&newAppInfo);
+        IComponentInfo::Probe(newAi)->SetApplicationInfo(newAppInfo);
+        Int32 oldUid;
+        oldAppInfo->GetUid(&oldUid);
+        Int32 newUid = UserHandle::GetUid(userId, UserHandle::GetAppId(oldUid));
+        newAppInfo->SetUid(newUid);
+        String pkgName, targetActivity;
+        IPackageItemInfo::Probe(newAi)->GetPackageName(&pkgName);
+        newAi->GetTargetActivity(&targetActivity);
+        AutoPtr<IComponentName> newCn;
+        CComponentName::New(pkgName, targetActivity, (IComponentName**)&newCn);
+        ri->SetTargetComponentName(newCn);
+        return ri;
+    }
+
+    // Set the new target component before returning the redirection.
+    ai = NULL;
+    rInfo->GetActivityInfo((IActivityInfo**)&ai);
+    String pkgName, name;
+    AutoPtr<IPackageItemInfo> pii = IPackageItemInfo::Probe(ai);
+    pii->GetPackageName(&pkgName);
+    pii->GetName(&name);
+    AutoPtr<IComponentName> newCn;
+    CComponentName::New(pkgName, name, (IComponentName**)&newCn);
+    cachedPreLaunchCheckResolveInfo->SetTargetComponentName(newCn);
+    return cachedPreLaunchCheckResolveInfo;
+}
+
 ECode CPackageManagerService::ChooseBestActivity(
     /* [in] */ IIntent* intent,
     /* [in] */ const String& resolvedType,
@@ -6922,9 +7254,17 @@ ECode CPackageManagerService::ChooseBestActivity(
         Int32 size;
         query->GetSize(&size);
         if (size == 1) {
+            // Check if we have to perform pre launch check for this activity.
             AutoPtr<IInterface> value;
             query->Get(0, (IInterface**)&value);
-            *resolveInfo = IResolveInfo::Probe(value);
+            AutoPtr<IResolveInfo> ri = IResolveInfo::Probe(value);
+            if ((flags & IPackageManager::PERFORM_PRE_LAUNCH_CHECK) ==
+                    IPackageManager::PERFORM_PRE_LAUNCH_CHECK) {
+                *resolveInfo = FindPreLaunchCheckResolve(intent, ri, userId);
+            }
+            else {
+                *resolveInfo = ri;
+            }
             REFCOUNT_ADD(*resolveInfo)
             return NOERROR;
         }
@@ -7238,7 +7578,7 @@ AutoPtr<IResolveInfo> CPackageManagerService::FindPreferredActivity(
                     // If the result set is different from when this
                     // was created, we need to clear it and re-ask the
                     // user their preference, if we're looking for an "always" type entry.
-                    if (always && !pa->mPref->SameSet(query, priority)) {
+                    if (always && !pa->mPref->SameSet(query)) {
                         Slogger::I(TAG, "Result set changed, dropping preferred activity for %p type %s",
                                 intent.Get(), resolvedType.string());
                         if (DEBUG_PREFERRED) {
@@ -8496,41 +8836,25 @@ ECode CPackageManagerService::QueryInstrumentation(
     return NOERROR;
 }
 
-void CPackageManagerService::CreateIdmapsForPackageLI(
-    /* [in] */ PackageParser::Package* pkg)
-{
-    AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > overlays;
-    HashMap<String, AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > >::Iterator it
-            = mOverlays.Find(pkg->mPackageName);
-    if (it != mOverlays.End()) {
-        overlays = it->mSecond;
-    }
-    if (overlays == NULL) {
-        Slogger::W(TAG, "Unable to create idmap for %s: no overlay packages", pkg->mPackageName.string());
-        return;
-    }
-    HashMap<String, AutoPtr<PackageParser::Package> >::Iterator overlayIt = overlays->Begin();
-    for (; overlayIt != overlays->End(); ++overlayIt) {
-        // Not much to do if idmap fails: we already logged the error
-        // and we certainly don't want to abort installation of pkg simply
-        // because an overlay didn't fit properly. For these reasons,
-        // ignore the return value of createIdmapForPackagePairLI.
-        CreateIdmapForPackagePairLI(pkg, overlayIt->mSecond);
-    }
-}
-
 Boolean CPackageManagerService::CreateIdmapForPackagePairLI(
     /* [in] */ PackageParser::Package* pkg,
     /* [in] */ PackageParser::Package* opkg)
 {
+    if (DEBUG_PACKAGE_SCANNING) {
+        Logger::D(TAG, "Generating idmaps between %s:%s", pkg->mPackageName.string(), opkg->mPackageName.string());
+    }
     if (!opkg->mTrustedOverlay) {
         Slogger::W(TAG, "Skipping target and overlay pair %s and %s: overlay not trusted",
                 pkg->mBaseCodePath.string(), opkg->mBaseCodePath.string());
         return FALSE;
     }
+
+    // Some apps like to take on the package name of an existing app so we'll use the
+    // "real" package name, if it is non-null, when performing the idmap
+    String pkgName = !pkg->mRealPackage.IsNull() ? pkg->mRealPackage : pkg->mPackageName;
     AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > overlaySet;
     HashMap<String, AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > >::Iterator it
-            = mOverlays.Find(pkg->mPackageName);
+            = mOverlays.Find(pkgName);
     if (it != mOverlays.End()) {
         overlaySet = it->mSecond;
     }
@@ -8542,37 +8866,17 @@ Boolean CPackageManagerService::CreateIdmapForPackagePairLI(
     Int32 uid;
     pkg->mApplicationInfo->GetUid(&uid);
     Int32 sharedGid = UserHandle::GetSharedAppGid(uid);
-    // TODO: generate idmap for split APKs
-    if (mInstaller->Idmap(pkg->mBaseCodePath, opkg->mBaseCodePath, sharedGid) != 0) {
-        Slogger::E(TAG, "Failed to generate idmap for %s and %s", pkg->mBaseCodePath.string(), opkg->mBaseCodePath.string());
+    String cachePath = ThemeUtils::GetTargetCacheDir(pkgName, opkg->mPackageName);
+    if (mInstaller->Idmap(pkg->mBaseCodePath, opkg->mBaseCodePath, cachePath, sharedGid,
+            GetPackageHashCode(pkg), GetPackageHashCode(opkg)) != 0) {
+        Slogger::E(TAG, "Failed to generate idmap for %s and %s",
+                pkg->mBaseCodePath.string(), opkg->mBaseCodePath.string());
         return FALSE;
     }
-    AutoPtr<IHashMap> hm;
-    CHashMap::New((IHashMap**)&hm);
-    HashMap<String, AutoPtr<PackageParser::Package> >::Iterator setIt = overlaySet->Begin();
-    for (; setIt != overlaySet->End(); ++setIt) {
-        AutoPtr<ICharSequence> cs = CoreUtils::Convert(setIt->mFirst);
-        hm->Put(cs, TO_IINTERFACE(setIt->mSecond));
-    }
-
-    AutoPtr<ICollection> col;
-    hm->GetValues((ICollection**)&col);
-    AutoPtr<ArrayOf<IInterface*> > inArray = ArrayOf<IInterface*>::Alloc(0);
-    AutoPtr<ArrayOf<IInterface*> > overlayArray;
-    col->ToArray(inArray, (ArrayOf<IInterface*>**)&overlayArray);
-    AutoPtr<IComparator> cmp = (IComparator*)new PackageComparator();
-    Arrays::Sort(overlayArray, cmp);
-
-    AutoPtr< ArrayOf<String> > dirs = ArrayOf<String>::Alloc(overlayArray->GetLength());
-    for (Int32 i = 0; i < overlayArray->GetLength(); ++i) {
-        AutoPtr<PackageParser::Package> p = (PackageParser::Package*)(IObject*)(*overlayArray)[i];
-        (*dirs)[i] = p->mBaseCodePath;
-    }
-    pkg->mApplicationInfo->SetResourceDirs(dirs);
     return TRUE;
 }
 
-void CPackageManagerService::ScanDirLI(
+ECode CPackageManagerService::ScanDirLI(
     /* [in] */ IFile* dir,
     /* [in] */ Int32 parseFlags,
     /* [in] */ Int32 scanFlags,
@@ -8583,11 +8887,18 @@ void CPackageManagerService::ScanDirLI(
     dir->ListFiles((ArrayOf<IFile*>**)&files);
     if (ArrayUtils::IsEmpty<IFile*>(files)) {
         Logger::D(TAG, "No files in app dir %s", TO_CSTR(dir));
-        return;
+        return NOERROR;
     }
 
     if (DEBUG_PACKAGE_SCANNING) {
         Logger::D(TAG, "Scanning app dir %s scanFlags=%d flags=%d", TO_CSTR(dir), scanFlags, parseFlags);
+    }
+
+    Boolean isPrebundled = (parseFlags & PackageParser::PARSE_IS_PREBUNDLED_DIR) != 0;
+    if (isPrebundled) {
+        synchronized (mPackagesLock) {
+            mSettings->ReadPrebundledPackagesLPr();
+        }
     }
 
     // ActionsCode(authro:songzhining, comment: fix uninstall bug for apk in vendor/app/app.)
@@ -8624,6 +8935,18 @@ void CPackageManagerService::ScanDirLI(
                 file->Delete();
             }
         }
+        if (isPrebundled) {
+            AutoPtr<PackageParser::Package> pkg;
+            // try {
+            AutoPtr<PackageParser> pp = new PackageParser();
+            FAIL_RETURN(pp->ParsePackage(file, parseFlags, readBuffer, pkg->mIsEpk, (PackageParser::Package**)&pkg))
+            // } catch (PackageParserException e) {
+            //     throw PackageManagerException.from(e);
+            // }
+            synchronized (mPackagesLock) {
+                mSettings->MarkPrebundledPackageInstalledLPr(pkg->mPackageName);
+            }
+        }
         // } catch (PackageManagerException e) {
         //     Slog.w(TAG, "Failed to parse " + file + ": " + e.getMessage());
 
@@ -8638,6 +8961,13 @@ void CPackageManagerService::ScanDirLI(
         //     }
         // }
     }
+
+    if (isPrebundled) {
+        synchronized (mPackagesLock) {
+            mSettings->WritePrebundledPackagesLPr();
+        }
+    }
+    return NOERROR;
 }
 
 AutoPtr<IFile> CPackageManagerService::GetSettingsProblemFile()
@@ -8802,6 +9132,33 @@ ECode CPackageManagerService::ScanPackageLI(
     // }
     assert(pkg != NULL);
 
+    if ((parseFlags & PackageParser::PARSE_IS_PREBUNDLED_DIR) != 0) {
+        synchronized (mPackagesLock) {
+            AutoPtr<PackageSetting> existingSettings = mSettings->PeekPackageLPr(pkg->mPackageName);
+            if (mSettings->WasPrebundledPackageInstalledLPr(pkg->mPackageName) &&
+                    existingSettings == NULL) {
+                // The prebundled app was installed at some point in time, but now it is
+                // gone.  Assume that the user uninstalled it intentionally: do not reinstall.
+                Slogger::E(TAG, "%d skip reinstall for %s",
+                        IPackageManager::INSTALL_FAILED_UNINSTALLED_PREBUNDLE, pkg->mPackageName.string());
+                return E_PACKAGE_MANAGER_EXCEPTION;
+            }
+            else if (existingSettings != NULL
+                    && existingSettings->mVersionCode >= pkg->mVersionCode) {
+                String path;
+                Environment::GetPrebundledDirectory()->GetPath(&path);
+                if (!existingSettings->mCodePathString.Contains(path)) {
+                    // This app is installed in a location that is not the prebundled location
+                    // and has a higher (or same) version as the prebundled one.  Skip
+                    // installing the prebundled version.
+                    Slogger::D(TAG, "%s already installed at %s",
+                            pkg->mPackageName.string(), existingSettings->mCodePathString.string());
+                    return NOERROR; // return null so we still mark package as installed
+                }
+            }
+        }
+    }
+
     AutoPtr<PackageSetting> ps;
     AutoPtr<PackageSetting> updatedPkg;
     // reader
@@ -8832,6 +9189,15 @@ ECode CPackageManagerService::ScanPackageLI(
     Boolean updatedPkgBetter = FALSE;
     // First check if this is a system package that may involve an update
     if (updatedPkg != NULL && (parseFlags & PackageParser::PARSE_IS_SYSTEM) != 0) {
+        // If new package is not located in "/system/priv-app" (e.g. due to an OTA),
+        // it needs to drop FLAG_PRIVILEGED.
+        if (LocationIsPrivileged(scanFile)) {
+            updatedPkg->mPkgFlags |= IApplicationInfo::FLAG_PRIVILEGED;
+        }
+        else {
+            updatedPkg->mPkgFlags &= ~IApplicationInfo::FLAG_PRIVILEGED;
+        }
+
         if (ps != NULL && !Object::Equals(ps->mCodePath, scanFile)) {
             // The path has changed from what was last scanned...  check the
             // version of the new path against what we have stored to determine
@@ -8850,12 +9216,8 @@ ECode CPackageManagerService::ScanPackageLI(
                             , ps->mName.string(), updatedPkg->mCodePathString.string(), str.string());
                     updatedPkg->mCodePath = scanFile;
                     updatedPkg->mCodePathString = str;
-                    // This is the point at which we know that the system-disk APK
-                    // for this package has moved during a reboot (e.g. due to an OTA),
-                    // so we need to reevaluate it for privilege policy.
-                    if (LocationIsPrivileged(scanFile)) {
-                        updatedPkg->mPkgFlags |= IApplicationInfo::FLAG_PRIVILEGED;
-                    }
+                    updatedPkg->mResourcePath = scanFile;
+                    IObject::Probe(scanFile)->ToString(&updatedPkg->mResourcePathString);
                 }
                 updatedPkg->mPkg = pkg;
                 sLastScanError = IPackageManager::INSTALL_FAILED_DUPLICATE_PACKAGE;
@@ -9110,6 +9472,53 @@ ECode CPackageManagerService::PerformBootDexOpt()
 {
     FAIL_RETURN(EnforceSystemOrRoot(String("Only the system can request dexopt be performed")))
 
+    // Before everything else, see whether we need to fstrim.
+    // try {
+    AutoPtr<IPackageHelper> pkgHelper;
+    CPackageHelper::AcquireSingleton((IPackageHelper**)&pkgHelper);
+    AutoPtr<IIMountService> ms;
+    pkgHelper->GetMountService((IIMountService**)&ms);
+    if (ms != NULL) {
+        AutoPtr<ISettingsGlobal> settingsGlobal;
+        CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);
+        AutoPtr<IContentResolver> cr;
+        mContext->GetContentResolver((IContentResolver**)&cr);
+        Int64 interval;
+        settingsGlobal->GetInt64(cr, ISettingsGlobal::FSTRIM_MANDATORY_INTERVAL,
+                DEFAULT_MANDATORY_FSTRIM_INTERVAL, &interval);
+        if (interval > 0) {
+            AutoPtr<ISystem> sys;
+            CSystem::AcquireSingleton((ISystem**)&sys);
+            Int64 now, timeStamp;
+            sys->GetCurrentTimeMillis(&now);
+            ms->LastMaintenance(&timeStamp);
+            Int64 timeSinceLast = now - timeStamp;
+            if (timeSinceLast > interval) {
+                Slogger::W(TAG, "No disk maintenance in %d; running immediately", timeSinceLast);
+                Boolean isFirstBoot;
+                if (IsFirstBoot(&isFirstBoot), !isFirstBoot) {
+                    // try {
+                    AutoPtr<IResources> res;
+                    mContext->GetResources((IResources**)&res);
+                    String str;
+                    res->GetString(Elastos::Droid::R::string::android_upgrading_fstrim, &str);
+                    AutoPtr<ICharSequence> cs;
+                    CString::New(str, (ICharSequence**)&cs);
+                    ActivityManagerNative::GetDefault()->ShowBootMessage(cs, TRUE);
+                    // } catch (RemoteException e) {
+                    // }
+                }
+                ms->RunMaintenance();
+            }
+        }
+    }
+    else {
+        Slogger::E(TAG, "Mount service unavailable!");
+    }
+    // } catch (RemoteException e) {
+    //     // Can't happen; MountService is local
+    // }
+
     AutoPtr< HashSet<AutoPtr<PackageParser::Package> > > pkgs;
     synchronized (mPackagesLock) {
         pkgs = mDeferredDexOpt;
@@ -9343,23 +9752,30 @@ void CPackageManagerService::PerformBootDexOpt(
     if (DEBUG_DEXOPT) {
         Logger::I(TAG, "Optimizing app %d of %d: %s", curr, total, pkg->mPackageName.string());
     }
+
+    Int32 messageRes = Elastos::Droid::R::string::android_upgrading_apk;
     Boolean isFirstBoot;
-    if (IsFirstBoot(&isFirstBoot), !isFirstBoot) {
-        // try {
-        AutoPtr<IResources> res;
-        mContext->GetResources((IResources**)&res);
-        AutoPtr<IInteger32> currInt = CoreUtils::Convert(curr);
-        AutoPtr<IInteger32> totalInt = CoreUtils::Convert(total);
-        AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-        args->Set(0, currInt);
-        args->Set(1, totalInt);
-        String str;
-        res->GetString(R::string::android_upgrading_apk, args, &str);
-        AutoPtr<ICharSequence> cs = CoreUtils::Convert(str);
-        ActivityManagerNative::GetDefault()->ShowBootMessage(cs, TRUE);
-        // } catch (RemoteException e) {
-        // }
+    if (IsFirstBoot(&isFirstBoot), isFirstBoot) {
+        messageRes = Elastos::Droid::R::string::android_installing_apk;
     }
+
+    // try {
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    AutoPtr<ArrayOf<IInterface*> > attrs = ArrayOf<IInterface*>::Alloc(2);
+    AutoPtr<IInteger32> integer1, integer2;
+    CInteger32::New(curr, (IInteger32**)&integer1);
+    CInteger32::New(total, (IInteger32**)&integer2);
+    attrs->Set(0, integer1);
+    attrs->Set(1, integer2);
+    String str;
+    res->GetString(messageRes, attrs, &str);
+    AutoPtr<ICharSequence> cs;
+    CString::New(str, (ICharSequence**)&cs);
+    ActivityManagerNative::GetDefault()->ShowBootMessage(cs, TRUE);
+    // } catch (RemoteException e) {
+    // }
+
     AutoPtr<PackageParser::Package> p = pkg;
     synchronized (mInstallLock) {
         PerformDexOptLI(p, NULL /* instruction sets */, FALSE /* force dex */,
@@ -10182,6 +10598,12 @@ Slogger::I(TAG, " >>>>>>>>> ScanPackageDirtyLI %s", TO_CSTR(pkg));
         }
     }
 
+    // Is there a custom pre launch check activity defined in this package
+    if (mCustomPreLaunchComponentName != NULL &&
+            (mCustomPreLaunchComponentName->GetPackageName(&packageName), pkg->mPackageName.Equals(packageName))) {
+        SetUpCustomPreLaunchCheckActivity(pkg);
+    }
+
     if (pkg->mPackageName.Equals("android")) {
         synchronized (mPackagesLock) {
             if (mElastosApplication != NULL) {
@@ -10244,6 +10666,26 @@ Slogger::I(TAG, " >>>>>>>>> ScanPackageDirtyLI %s", TO_CSTR(pkg));
                 , pkg->mPackageName.string());
         sLastScanError = IPackageManager::INSTALL_FAILED_DUPLICATE_PACKAGE;
         return E_PACKAGE_MANAGER_EXCEPTION;
+    }
+
+    if (Build::TAGS.Equals("test-keys")) {
+        String sourceDir;
+        pkg->mApplicationInfo->GetSourceDir(&sourceDir);
+        String path;
+        Environment::GetRootDirectory()->GetPath(&path);
+        if (!sourceDir.StartWith(path) && !sourceDir.StartWith("/vendor")) {
+            AutoPtr<IInterface> obj = mSettings->GetUserIdLPr(1000);
+            AutoPtr<ArrayOf<ISignature*> > s1;
+            AutoPtr<SharedUserSetting> sharedSetting = reinterpret_cast<SharedUserSetting*>(obj->Probe(EIID_SharedUserSetting));
+            if (sharedSetting != NULL) {
+                s1 = sharedSetting->mSignatures->mSignatures;
+            }
+            if ((CompareSignatures(pkg->mSignatures, s1) == IPackageManager::SIGNATURE_MATCH)) {
+                Slogger::E(TAG, "%d Cannot install platform packages to user storage!",
+                        IPackageManager::INSTALL_FAILED_INVALID_INSTALL_LOCATION);
+                return E_PACKAGE_MANAGER_EXCEPTION;
+            }
+        }
     }
 
     // Initialize package source and resource directories
@@ -10852,8 +11294,37 @@ Slogger::I(TAG, "  codePath:%s, resPath:%s", codePath.string(), resPath.string()
                 nlh->FindSupportedAbi(handle, abiList, &copyRet);
             }
             else {
-                nlh->CopyNativeBinariesForSupportedAbi(handle,
-                        nativeLibraryRoot, abiList, useIsaSpecificSubdirs, &copyRet);
+                Int32 preCopyRet;
+                nlh->FindSupportedAbi(handle, abiList, &preCopyRet);
+                if (preCopyRet < 0 && preCopyRet != IPackageManager::NO_NATIVE_LIBRARIES) {
+                    Slogger::E(TAG, "%s Error unpackaging native libs for app, errorCode=%d",
+                            IPackageManager::INSTALL_FAILED_INTERNAL_ERROR, preCopyRet);
+                    return E_PACKAGE_MANAGER_EXCEPTION;
+                }
+
+                String primaryCpuAbi;
+                if (preCopyRet >= 0) {
+                    primaryCpuAbi = (*abiList)[preCopyRet];
+                }
+                else {
+                    primaryCpuAbi = (*abiList)[0];
+                }
+
+                // String instructionSet;
+                // system->GetInstructionSet(primaryCpuAbi, &instructionSet);
+                // String dexCodeInstructionSet = GetDexCodeInstructionSet(instructionSet);
+                // TODO
+                // Byte dexoptRequired = DexFile.isDexOptNeededInternal(pkg.baseCodePath, pkg.packageName, dexCodeInstructionSet, false);
+                // boolean isDexOptNeeded =  dexoptRequired != DexFile.UP_TO_DATE;
+
+                Boolean isCopyNativeBinariesNeeded = /*isDexOptNeeded ||*/ IsUpdatedSystemApp(pkg);
+                if (isCopyNativeBinariesNeeded) {
+                    nlh->CopyNativeBinariesForSupportedAbi(handle,
+                            nativeLibraryRoot, abiList, useIsaSpecificSubdirs, &copyRet);
+                }
+                else {
+                    copyRet = preCopyRet;
+                }
             }
 
             if (copyRet < 0 && copyRet != IPackageManager::NO_NATIVE_LIBRARIES) {
@@ -11084,12 +11555,33 @@ Slogger::I(TAG, "  codePath:%s, resPath:%s", codePath.string(), resPath.string()
         KillApplication(pkgAppPkgName, pkgAppUid, String("update pkg"));
     }
 
+    // Also need to kill any apps that are dependent on the library.
+    if (clientLibPkgs != NULL) {
+        List<AutoPtr<PackageParser::Package> >::Iterator pkgIt = clientLibPkgs->Begin();
+        for (; pkgIt != clientLibPkgs->End(); ++pkgIt) {
+            AutoPtr<PackageParser::Package> clientPkg = *pkgIt;
+            String packageName;
+            IPackageItemInfo::Probe(clientPkg->mApplicationInfo)->GetPackageName(&packageName);
+            Int32 uid;
+            clientPkg->mApplicationInfo->GetUid(&uid);
+            KillApplication(packageName, uid, String("update lib"));
+        }
+    }
+
     // writer
     synchronized (mPackagesLock) {
         // We don't expect installation to fail beyond this point
 
         // Add the new setting to mSettings
         mSettings->InsertPackageSettingLPw(pkgSetting, pkg);
+
+        // Themes: handle case where app was installed after icon mapping applied
+        if (mIconPackHelper != NULL) {
+            Int32 id;
+            mIconPackHelper->GetResourceIdForApp(pkg->mPackageName, &id);
+            IPackageItemInfo::Probe(pkg->mApplicationInfo)->SetThemedIcon(id);
+        }
+
         // Add the new setting to mPackages
         String pkgAppPkgName;
         IPackageItemInfo::Probe(pkg->mApplicationInfo)->GetPackageName(&pkgAppPkgName);
@@ -11313,6 +11805,14 @@ Slogger::I(TAG, "  codePath:%s, resPath:%s", codePath.string(), resPath.string()
             String aInfoProcName;
             IComponentInfo::Probe(a->mInfo)->GetProcessName(&aInfoProcName);
             aInfoProcName = FixProcessName(pkgAppProcName, aInfoProcName, pkgAppUid);
+
+            // Themes: handle case where app was installed after icon mapping applied
+            if (mIconPackHelper != NULL) {
+                Int32 icon;
+                mIconPackHelper->GetResourceIdForActivityIcon(a->mInfo, &icon);
+                IPackageItemInfo::Probe(a->mInfo)->SetThemedIcon(icon);
+            }
+
             IComponentInfo::Probe(a->mInfo)->SetProcessName(aInfoProcName);
             mActivities->AddActivity(a, String("activity"));
             if ((parseFlags & PackageParser::PARSE_CHATTY) != 0) {
@@ -11525,40 +12025,151 @@ Slogger::I(TAG, "  codePath:%s, resPath:%s", codePath.string(), resPath.string()
 
         pkgSetting->SetTimeStamp(scanFileTime);
 
-        // Create idmap files for pairs of (packages, overlay packages).
-        // Note: "android", ie framework-res.apk, is handled by native layers.
-        if (!pkg->mOverlayTarget.IsNull()) {
-            // This is an overlay package.
-            if (!pkg->mOverlayTarget.IsNull() && !pkg->mOverlayTarget.Equals("android")) {
-                if (mOverlays.Find(pkg->mOverlayTarget) == mOverlays.End()) {
-                    AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > pps
-                            = new HashMap<String, AutoPtr<PackageParser::Package> >();
-                    mOverlays[pkg->mOverlayTarget] = pps;
+        Boolean isBootScan = (scanFlags & SCAN_BOOTING) != 0;
+        // Generate resources & idmaps if pkg is NOT a theme
+        // We must compile resources here because during the initial boot process we may get
+        // here before a default theme has had a chance to compile its resources
+        Boolean isEmpty;
+        if (pkg->mOverlayTargets->IsEmpty(&isEmpty), isEmpty) {
+            HashMap<String, AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > >::Iterator overlayIt
+                    = mOverlays.Find(pkg->mPackageName);
+            if (overlayIt != mOverlays.End()) {
+                AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > themes = overlayIt->mSecond;
+                HashMap<String, AutoPtr<PackageParser::Package> >::Iterator themeIt = themes->Begin();
+                for (; themeIt != themes->End(); ++themeIt) {
+                    AutoPtr<PackageParser::Package> themePkg = themeIt->mSecond;
+                    String overlayPkgName, appPkgName;
+                    if (!isBootScan || (mBootThemeConfig != NULL &&
+                            ((mBootThemeConfig->GetOverlayPkgName(&overlayPkgName), themePkg->mPackageName.Equals(overlayPkgName)) ||
+                            (mBootThemeConfig->GetOverlayPkgNameForApp(pkg->mPackageName, &appPkgName), themePkg->mPackageName.Equals(appPkgName))))) {
+                        // try {
+                        if (FAILED(CompileResourcesAndIdmapIfNeeded(pkg, themePkg))) {
+                            Logger::E(TAG, "Unable to compile %s for target %s",
+                                    themePkg->mPackageName.string(), pkg->mPackageName.string());
+                        }
+                        // } catch (Exception e) {
+                        //     // Do not stop a pkg installation just because of one bad theme
+                        //     // Also we don't break here because we should try to compile other
+                        //     // themes
+                        //     Log.e(TAG, "Unable to compile " + themePkg.packageName
+                        //             + " for target " + pkg.packageName, e);
+                        // }
+                    }
                 }
-                AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > map;
-                HashMap<String, AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > >::Iterator overlayIt
-                        = mOverlays.Find(pkg->mOverlayTarget);
-                if (overlayIt != mOverlays.End()) {
-                    map = overlayIt->mSecond;
+            }
+        }
+
+        // If this is a theme we should re-compile common resources if they exist so
+        // remove this package from mAvailableCommonResources.
+        Int32 size;
+        if (!isBootScan && (pkg->mOverlayTargets->GetSize(&size), size > 0)) {
+            mAvailableCommonResources.Erase(pkg->mPackageName);
+        }
+
+        // Generate Idmaps and res tables if pkg is a theme
+        AutoPtr<IIterator> targetIt;
+        pkg->mOverlayTargets->GetIterator((IIterator**)&targetIt);
+        Boolean hasNext;
+        while (targetIt->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> next;
+            targetIt->GetNext((IInterface**)&next);
+            String target;
+            ICharSequence::Probe(next)->ToString(&target);
+            Int32 failReason = 0;
+
+            InsertIntoOverlayMap(target, pkg);
+            String overlayPkgName, appPkgName;
+            if (isBootScan && mBootThemeConfig != NULL &&
+                    ((mBootThemeConfig->GetOverlayPkgName(&overlayPkgName), pkg->mPackageName.Equals(overlayPkgName)) ||
+                    (mBootThemeConfig->GetOverlayPkgNameForApp(target, &appPkgName), pkg->mPackageName.Equals(appPkgName)))) {
+                // try {
+                HashMap<String, AutoPtr<PackageParser::Package> >::Iterator pkgIt = mPackages.Find(target);
+                ECode ec = CompileResourcesAndIdmapIfNeeded(pkgIt->mSecond, pkg);
+                if (ec == (ECode)E_IDMAP_EXCEPTION) {
+                    failReason = IPackageManager::INSTALL_FAILED_THEME_IDMAP_ERROR;
                 }
-                (*map)[pkg->mPackageName] = pkg;
-                AutoPtr<PackageParser::Package> orig;
-                HashMap<String, AutoPtr<PackageParser::Package> >::Iterator pkgIt = mPackages.Find(pkg->mOverlayTarget);
-                if (pkgIt != mPackages.End()) {
-                    orig = pkgIt->mSecond;
+                else if (ec == (ECode)E_AAPT_EXCEPTION) {
+                    failReason = IPackageManager::INSTALL_FAILED_THEME_AAPT_ERROR;
                 }
-                if (orig != NULL && !CreateIdmapForPackagePairLI(orig, pkg)) {
-                    Slogger::E(TAG, "scanPackageLI failed to createIdmap");
-                    *outPkg = NULL;
-                    sLastScanError = IPackageManager::INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+                else {
+                    failReason = IPackageManager::INSTALL_FAILED_THEME_UNKNOWN_ERROR;
+                }
+                // } catch (IdmapException e) {
+                //     failedException = e;
+                //     failReason = PackageManager.INSTALL_FAILED_THEME_IDMAP_ERROR;
+                // } catch (AaptException e) {
+                //     failedException = e;
+                //     failReason = PackageManager.INSTALL_FAILED_THEME_AAPT_ERROR;
+                // } catch (Exception e) {
+                //     failedException = e;
+                //     failReason = PackageManager.INSTALL_FAILED_THEME_UNKNOWN_ERROR;
+                // }
+
+                if (FAILED(ec)) {
+                    Logger::W(TAG, "Unable to process theme %s, 0x%08x", pkgName.string(), ec);
+                    UninstallThemeForAllApps(pkg);
+                    AutoPtr<ArrayOf<Byte> > readBuffer = ArrayOf<Byte>::Alloc(PackageParser::CERTIFICATE_BUFFER_SIZE);
+                    if (readBuffer == NULL) {
+                        Slogger::E(TAG, "Failed delete package: out of memory!");
+                        return IPackageManager::DELETE_FAILED_INTERNAL_ERROR;
+                    }
+                    DeletePackageLI(pkg->mPackageName, NULL, TRUE, NULL, NULL, 0, NULL, FALSE, readBuffer);
+                    Slogger::E(TAG, "%d Unable to process theme %s, 0x%08x", failReason, pkgName.string(), ec);
                     return E_PACKAGE_MANAGER_EXCEPTION;
                 }
             }
         }
-        else if (mOverlays.Find(pkg->mPackageName) != mOverlays.End() &&
-                !pkg->mPackageName.Equals("android")) {
-            // This is a regular package, with one or more known overlay packages.
-            CreateIdmapsForPackageLI(pkg);
+
+        //Icon Packs need aapt too
+        String iconPkgName;
+        if (isBootScan && (mBootThemeConfig != NULL &&
+                (mBootThemeConfig->GetIconPackPkgName(&iconPkgName), pkg->mPackageName.Equals(iconPkgName)))) {
+            if (IsIconCompileNeeded(pkg)) {
+                // try {
+                if (FAILED(ThemeUtils::CreateCacheDirIfNotExists())) {
+                    UninstallThemeForAllApps(pkg);
+                    AutoPtr<ArrayOf<Byte> > readBuffer = ArrayOf<Byte>::Alloc(PackageParser::CERTIFICATE_BUFFER_SIZE);
+                    if (readBuffer == NULL) {
+                        Slogger::E(TAG, "Failed delete package: out of memory!");
+                        return IPackageManager::DELETE_FAILED_INTERNAL_ERROR;
+                    }
+                    DeletePackageLI(pkg->mPackageName, NULL, TRUE, NULL, NULL, 0, NULL, FALSE, readBuffer);
+                    Slogger::E(TAG, "%d Unable to process theme %s",
+                            IPackageManager::INSTALL_FAILED_THEME_AAPT_ERROR, pkgName.string());
+                    return E_PACKAGE_MANAGER_EXCEPTION;
+                }
+                if (FAILED(ThemeUtils::CreateIconDirIfNotExists(pkg->mPackageName))) {
+                    UninstallThemeForAllApps(pkg);
+                    AutoPtr<ArrayOf<Byte> > readBuffer = ArrayOf<Byte>::Alloc(PackageParser::CERTIFICATE_BUFFER_SIZE);
+                    if (readBuffer == NULL) {
+                        Slogger::E(TAG, "Failed delete package: out of memory!");
+                        return IPackageManager::DELETE_FAILED_INTERNAL_ERROR;
+                    }
+                    DeletePackageLI(pkg->mPackageName, NULL, TRUE, NULL, NULL, 0, NULL, FALSE, readBuffer);
+                    Slogger::E(TAG, "%d Unable to process theme %s",
+                            IPackageManager::INSTALL_FAILED_THEME_AAPT_ERROR, pkgName.string());
+                    return E_PACKAGE_MANAGER_EXCEPTION;
+                }
+                if (FAILED(CompileIconPack(pkg))) {
+                    UninstallThemeForAllApps(pkg);
+                    AutoPtr<ArrayOf<Byte> > readBuffer = ArrayOf<Byte>::Alloc(PackageParser::CERTIFICATE_BUFFER_SIZE);
+                    if (readBuffer == NULL) {
+                        Slogger::E(TAG, "Failed delete package: out of memory!");
+                        return IPackageManager::DELETE_FAILED_INTERNAL_ERROR;
+                    }
+                    DeletePackageLI(pkg->mPackageName, NULL, TRUE, NULL, NULL, 0, NULL, FALSE, readBuffer);
+                    Slogger::E(TAG, "%d Unable to process theme %s",
+                            IPackageManager::INSTALL_FAILED_THEME_AAPT_ERROR, pkgName.string());
+                    return E_PACKAGE_MANAGER_EXCEPTION;
+                }
+                // } catch (Exception e) {
+                //     uninstallThemeForAllApps(pkg);
+                //     deletePackageLI(pkg.packageName, null, true, null, null, 0, null, false);
+                //     throw new PackageManagerException(
+                //             PackageManager.INSTALL_FAILED_THEME_AAPT_ERROR,
+                //             "Unable to process theme " + pkgName);
+                // }
+            }
         }
     }
 
@@ -11664,6 +12275,542 @@ void CPackageManagerService::AdjustCpuAbisForSharedUserLPw(
     }
 }
 
+Boolean CPackageManagerService::IsIconCompileNeeded(
+    /* [in] */ PackageParser::Package* pkg)
+{
+    if (!pkg->mHasIconPack) return FALSE;
+    // Read in the stored hash value and compare to the pkgs computed hash value
+    AutoPtr<IInputStream> in;
+    AutoPtr<IDataInput> dataInput;
+    // try {
+    String hashFile = ThemeUtils::GetIconHashFile(pkg->mPackageName);
+    CFileInputStream::New(hashFile, (IInputStream**)&in);
+    CDataInputStream::New(in, (IDataInput**)&dataInput);
+    Int32 storedHashCode;
+    dataInput->ReadInt32(&storedHashCode);
+    Int32 actualHashCode = GetPackageHashCode(pkg);
+    AutoPtr<IIoUtils> ioUtils;
+    CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+    ioUtils->CloseQuietly(ICloseable::Probe(in));
+    ioUtils->CloseQuietly(ICloseable::Probe(dataInput));
+    return storedHashCode != actualHashCode;
+    // } catch(IOException e) {
+    //     // all is good enough for government work here,
+    //     // we'll just return true and the icons will be processed
+    // } finally {
+    //     IoUtils.closeQuietly(in);
+    //     IoUtils.closeQuietly(dataInput);
+    // }
+
+    // return true;
+}
+
+ECode CPackageManagerService::CompileResourcesAndIdmapIfNeeded(
+    /* [in] */ PackageParser::Package* targetPkg,
+    /* [in] */ PackageParser::Package* themePkg)
+{
+    if (!ShouldCreateIdmap(targetPkg, themePkg)) {
+        return NOERROR;
+    }
+
+    // Always use the manifest's pkgName when compiling resources
+    // the member value of "packageName" is dependent on whether this was a clean install
+    // or an upgrade w/  If the app is an upgrade then the original package name is used.
+    // because libandroidfw uses the manifests's pkgName during idmap creation we must
+    // be consistent here and use the same name, otherwise idmap will look in the wrong place
+    // for the resource table.
+    String pkgName = !targetPkg->mRealPackage.IsNull() ?
+            targetPkg->mRealPackage : targetPkg->mPackageName;
+    FAIL_RETURN(CompileResourcesIfNeeded(pkgName, themePkg))
+    FAIL_RETURN(GenerateIdmap(targetPkg->mPackageName, themePkg))
+    return NOERROR;
+}
+
+ECode CPackageManagerService::CompileResourcesIfNeeded(
+    /* [in] */ const String& target,
+    /* [in] */ PackageParser::Package* pkg)
+{
+    FAIL_RETURN(ThemeUtils::CreateCacheDirIfNotExists())
+
+    if (HasCommonResources(pkg)
+            && ShouldCompileCommonResources(pkg)) {
+        FAIL_RETURN(ThemeUtils::CreateResourcesDirIfNotExists(COMMON_OVERLAY, pkg->mPackageName))
+        FAIL_RETURN(CompileResources(COMMON_OVERLAY, pkg))
+        AutoPtr<ISystem> sys;
+        CSystem::AcquireSingleton((ISystem**)&sys);
+        Int64 millis;
+        sys->GetCurrentTimeMillis(&millis);
+        mAvailableCommonResources[pkg->mPackageName] = millis;
+    }
+
+    FAIL_RETURN(ThemeUtils::CreateResourcesDirIfNotExists(target, pkg->mPackageName))
+    FAIL_RETURN(CompileResources(target, pkg))
+    return NOERROR;
+}
+
+ECode CPackageManagerService::CompileResources(
+    /* [in] */ const String& target,
+    /* [in] */ PackageParser::Package* pkg)
+{
+    if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Compile resource table for %s", pkg->mPackageName.string());
+    //TODO: cleanup this hack. Modify aapt? Aapt uses the manifests package name
+    //when creating the resource table. We care about the resource table's name because
+    //it is used when removing the table by cookie.
+    // try {
+    ECode ec = CreateTempManifest(COMMON_OVERLAY.Equals(target)
+            ? ThemeUtils::GetCommonPackageName(pkg->mPackageName) : pkg->mPackageName);
+    FAIL_GOTO(ec, fail)
+    ec = CompileResourcesWithAapt(target, pkg);
+    // } finally {
+    //     cleanupTempManifest();
+    // }
+fail:
+    CleanupTempManifest();
+    return ec;
+}
+
+ECode CPackageManagerService::CompileIconPack(
+    /* [in] */ PackageParser::Package* pkg)
+{
+    if (DEBUG_PACKAGE_SCANNING) Logger::D(TAG, "  Compile resource table for %s", pkg->mPackageName.string());
+    AutoPtr<IOutputStream> out;
+    AutoPtr<IDataOutputStream> dataOut;
+    // try {
+    FAIL_RETURN(CreateTempManifest(pkg->mPackageName))
+    Int32 code = GetPackageHashCode(pkg);
+    String hashFile = ThemeUtils::GetIconHashFile(pkg->mPackageName);
+    CFileOutputStream::New(hashFile, (IOutputStream**)&out);
+    CDataOutputStream::New(out, (IDataOutputStream**)&dataOut);
+    dataOut->WriteInt32(code);
+    ECode ec = CompileIconsWithAapt(pkg);
+    // } finally {
+    //     IoUtils.closeQuietly(out);
+    //     IoUtils.closeQuietly(dataOut);
+    //     cleanupTempManifest();
+    // }
+    AutoPtr<IIoUtils> ioUtils;
+    CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+    ioUtils->CloseQuietly(ICloseable::Probe(out));
+    ioUtils->CloseQuietly(ICloseable::Probe(dataOut));
+    CleanupTempManifest();
+    return ec;
+}
+
+void CPackageManagerService::InsertIntoOverlayMap(
+    /* [in] */ const String& target,
+    /* [in] */ PackageParser::Package* opkg)
+{
+    AutoPtr<HashMap<String, AutoPtr<PackageParser::Package> > > map;
+    HashMap<String, AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > >::Iterator it
+            = mOverlays.Find(target);
+    if (mOverlays.Find(target) == mOverlays.End()) {
+        map = new HashMap<String, AutoPtr<PackageParser::Package> >();
+        mOverlays[target] = map;
+    }
+    else {
+        map = it->mSecond;
+    }
+    (*map)[opkg->mPackageName] = opkg;
+}
+
+ECode CPackageManagerService::GenerateIdmap(
+    /* [in] */ const String& target,
+    /* [in] */ PackageParser::Package* opkg)
+{
+    AutoPtr<PackageParser::Package> targetPkg;
+    HashMap<String, AutoPtr<PackageParser::Package> >::Iterator it = mPackages.Find(target);
+    if (it != mPackages.End()) {
+        targetPkg = it->mSecond;
+    }
+    if (targetPkg != NULL && !CreateIdmapForPackagePairLI(targetPkg, opkg)) {
+        Slogger::E(TAG, "idmap failed for targetPkg: %s and opkg: %s", target.string(), TO_CSTR(opkg));
+        return E_IDMAP_EXCEPTION;
+    }
+    return NOERROR;
+}
+
+Boolean CPackageManagerService::HasCommonResources(
+    /* [in] */ PackageParser::Package* pkg)
+{
+    Boolean ret = FALSE;
+    // check if assets/overlays/common exists in this theme
+    AutoPtr<IAssetManager> assets;
+    CAssetManager::New((IAssetManager**)&assets);
+    Int32 result;
+    assets->AddAssetPath(pkg->mBaseCodePath, &result);
+    AutoPtr<ArrayOf<String> > common;
+    assets->List(String("overlays/common"), (ArrayOf<String>**)&common);
+    if (common != NULL && common->GetLength() > 0) ret = TRUE;
+
+    return ret;
+}
+
+ECode CPackageManagerService::CompileResourcesWithAapt(
+    /* [in] */ const String& target,
+    /* [in] */ PackageParser::Package* pkg)
+{
+    AutoPtr<IFileHelper> fh;
+    CFileHelper::AcquireSingleton((IFileHelper**)&fh);
+    String separator;
+    fh->GetSeparator(&separator);
+    String internalPath = APK_PATH_TO_OVERLAY + target + separator;
+    String resPath = ThemeUtils::GetTargetCacheDir(target, pkg);
+    AutoPtr<IUserHandleHelper> hh;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&hh);
+    Int32 uid;
+    pkg->mApplicationInfo->GetUid(&uid);
+    Int32 sharedGid;
+    hh->GetSharedAppGid(uid, &sharedGid);
+    Int32 pkgId;
+    if (target.Equals("android")) {
+        pkgId = IResources::THEME_FRAMEWORK_PKG_ID;
+    }
+    else if (COMMON_OVERLAY.Equals(target)) {
+        pkgId = IResources::THEME_COMMON_PKG_ID;
+    }
+    else {
+        pkgId = IResources::THEME_APP_PKG_ID;
+    }
+
+    Boolean hasCommonResources = (HasCommonResources(pkg) && !target.Equals(COMMON_OVERLAY));
+    Int32 version;
+    pkg->mApplicationInfo->GetTargetSdkVersion(&version);
+    if (mInstaller->Aapt(pkg->mBaseCodePath, internalPath, resPath, sharedGid, pkgId,
+            version,
+            hasCommonResources ? ThemeUtils::GetTargetCacheDir(COMMON_OVERLAY, pkg)
+                    + separator + "resources.apk" : String("")) != 0) {
+        Slogger::E(TAG, "Failed to run aapt");
+        return E_AAPT_EXCEPTION;
+    }
+    return NOERROR;
+}
+
+ECode CPackageManagerService::CompileIconsWithAapt(
+    /* [in] */ PackageParser::Package* pkg)
+{
+    String resPath = ThemeUtils::GetIconPackDir(pkg->mPackageName);
+    AutoPtr<IUserHandleHelper> hh;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&hh);
+    Int32 uid;
+    pkg->mApplicationInfo->GetUid(&uid);
+    Int32 sharedGid;
+    hh->GetSharedAppGid(uid, &sharedGid);
+
+    Int32 version;
+    pkg->mApplicationInfo->GetTargetSdkVersion(&version);
+    if (mInstaller->Aapt(pkg->mBaseCodePath, APK_PATH_TO_ICONS, resPath, sharedGid,
+            IResources::THEME_ICON_PKG_ID, version, String("")) != 0) {
+        Slogger::E(TAG, "Failed to run aapt");
+        return E_AAPT_EXCEPTION;
+    }
+    return NOERROR;
+}
+
+void CPackageManagerService::UninstallThemeForAllApps(
+    /* [in] */ PackageParser::Package* opkg)
+{
+    AutoPtr<IIterator> it;
+    opkg->mOverlayTargets->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> next;
+        it->GetNext((IInterface**)&next);
+        String target;
+        ICharSequence::Probe(next)->ToString(&target);
+        AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > map;
+        HashMap<String, AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > >::Iterator iter
+                = mOverlays.Find(target);
+        if (iter != mOverlays.End()) {
+            map = iter->mSecond;
+        }
+        if (map != NULL) {
+            map->Erase(opkg->mPackageName);
+
+            if (map->Begin() == map->End()) {
+                mOverlays.Erase(target);
+            }
+        }
+    }
+
+    // Now simply delete the root overlay cache directory and all its contents
+    AutoPtr<IFile> f;
+    CFile::New(ThemeUtils::GetOverlayResourceCacheDir(opkg->mPackageName), (IFile**)&f);
+    RecursiveDelete(f);
+}
+
+void CPackageManagerService::UninstallThemeForApp(
+    /* [in] */ PackageParser::Package* appPkg)
+{
+    AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > map;
+    HashMap<String, AutoPtr< HashMap<String, AutoPtr<PackageParser::Package> > > >::Iterator iter
+            = mOverlays.Find(appPkg->mPackageName);
+    if (iter != mOverlays.End()) {
+        map = iter->mSecond;
+    }
+    if (map == NULL) return;
+
+    HashMap<String, AutoPtr<PackageParser::Package> >::Iterator it = map->Begin();
+    for (; it != map->End(); ++it) {
+        AutoPtr<PackageParser::Package> opkg = it->mSecond;
+        String cachePath = ThemeUtils::GetTargetCacheDir(appPkg->mPackageName, opkg->mPackageName);
+        AutoPtr<IFile> f;
+        CFile::New(cachePath, (IFile**)&f);
+        RecursiveDelete(f);
+    }
+}
+
+void CPackageManagerService::RecursiveDelete(
+    /* [in] */ IFile* f)
+{
+    Boolean isDirectory;
+    if (f->IsDirectory(&isDirectory), isDirectory) {
+        AutoPtr<ArrayOf<IFile*> > files;
+        f->ListFiles((ArrayOf<IFile*>**)&files);
+        for (Int32 i = 0; i < files->GetLength(); ++i) {
+            RecursiveDelete((*files)[i]);
+        }
+    }
+    f->Delete();
+}
+
+ECode CPackageManagerService::CreateTempManifest(
+    /* [in] */ const String& pkgName)
+{
+    StringBuilder manifest;
+    manifest.Append("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+    manifest.Append("<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"");
+    manifest.Append(String(" package=\"") + pkgName+ "\">");
+    manifest.Append(" </manifest>");
+
+    AutoPtr<IWriter> bw;
+    // try {
+    AutoPtr<IFileWriter> fw;
+    CFileWriter::New(String("/data/app/AndroidManifest.xml"), (IFileWriter**)&fw);
+    CBufferedWriter::New(IWriter::Probe(fw), (IWriter**)&bw);
+    bw->Write(manifest.ToString());
+    IFlushable::Probe(bw)->Flush();
+    ICloseable::Probe(bw)->Close();
+    AutoPtr<IFile> resFile;
+    CFile::New(String("/data/app/AndroidManifest.xml"), (IFile**)&resFile);
+    FileUtils::SetPermissions(resFile,
+            FileUtils::sS_IRWXU | FileUtils::sS_IRWXG | FileUtils::sS_IROTH, -1, -1);
+    // } finally {
+    //     IoUtils.closeQuietly(bw);
+    // }
+    AutoPtr<IIoUtils> ioUtils;
+    CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+    ioUtils->CloseQuietly(ICloseable::Probe(bw));
+    return NOERROR;
+}
+
+void CPackageManagerService::CleanupTempManifest()
+{
+    AutoPtr<IFile> resFile;
+    CFile::New(String("/data/app/AndroidManifest.xml"), (IFile**)&resFile);
+    resFile->Delete();
+}
+
+Boolean CPackageManagerService::ShouldCreateIdmap(
+    /* [in] */ PackageParser::Package* targetPkg,
+    /* [in] */ PackageParser::Package* overlayPkg)
+{
+    if (targetPkg == NULL || targetPkg->mBaseCodePath.IsNull() || overlayPkg == NULL)
+        return FALSE;
+
+    // Check if the target app has resources.arsc.
+    // If it does not, then there is nothing to idmap
+    AutoPtr<IZipFile> zfile ;
+    // try {
+    CZipFile::New(targetPkg->mBaseCodePath, (IZipFile**)&zfile);
+    AutoPtr<IZipEntry> entry;
+    ECode ec = zfile->GetEntry(String("resources.arsc"), (IZipEntry**)&entry);
+    if (ec == (ECode)E_IO_EXCEPTION) {
+        Logger::E(TAG, "Error while checking resources.arsc on %s", targetPkg->mBaseCodePath.string());
+        AutoPtr<IIoUtils> ioUtils;
+        CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+        ioUtils->CloseQuietly(ICloseable::Probe(zfile));
+        return FALSE;
+    }
+    if (entry == NULL) {
+        AutoPtr<IIoUtils> ioUtils;
+        CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+        ioUtils->CloseQuietly(ICloseable::Probe(zfile));
+        return FALSE;
+    }
+    // } catch (IOException e) {
+    //     Log.e(TAG, "Error while checking resources.arsc on" + targetPkg.baseCodePath, e);
+    //     return false;
+    // } finally {
+    //     IoUtils.closeQuietly(zfile);
+    // }
+
+
+    Int32 targetHash = GetPackageHashCode(targetPkg);
+    Int32 overlayHash = GetPackageHashCode(overlayPkg);
+
+    AutoPtr<IFile> idmap;
+    CFile::New(ThemeUtils::GetIdmapPath(targetPkg->mPackageName, overlayPkg->mPackageName), (IFile**)&idmap);
+    Boolean exists;
+    if (idmap->Exists(&exists), !exists)
+        return TRUE;
+
+    AutoPtr<ArrayOf<Int32> > hashes;
+    // try {
+    ec = GetIdmapHashes(idmap, (ArrayOf<Int32>**)&hashes);
+    if (ec == (ECode)E_IO_EXCEPTION) {
+        return TRUE;
+    }
+    // } catch (IOException e) {
+    //     return true;
+    // }
+
+    if (targetHash == 0 || overlayHash == 0 ||
+            targetHash != (*hashes)[0] || overlayHash != (*hashes)[1]) {
+        // if the overlay changed we'll want to recreate the common resources if it has any
+        if (overlayHash != (*hashes)[1]
+                && mAvailableCommonResources.Find(overlayPkg->mPackageName) != mAvailableCommonResources.End()) {
+            mAvailableCommonResources.Erase(overlayPkg->mPackageName);
+        }
+        return TRUE;
+    }
+    return FALSE;
+}
+
+Boolean CPackageManagerService::ShouldCompileCommonResources(
+    /* [in] */ PackageParser::Package* pkg)
+{
+    HashMap<String, Int64>::Iterator it = mAvailableCommonResources.Find(pkg->mPackageName);
+    if (it == mAvailableCommonResources.End())
+        return TRUE;
+
+    Int64 lastUpdated = it->mSecond;
+    AutoPtr<ISystem> sys;
+    CSystem::AcquireSingleton((ISystem**)&sys);
+    Int64 currentTime;
+    sys->GetCurrentTimeMillis(&currentTime);
+    if (currentTime - lastUpdated > COMMON_RESOURCE_EXPIRATION) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+ECode CPackageManagerService::GetIdmapHashes(
+    /* [in] */ IFile* idmap,
+    /* [out] */ ArrayOf<Int32>** hashes)
+{
+    VALIDATE_NOT_NULL(hashes)
+    *hashes = NULL;
+    AutoPtr<ArrayOf<Int32> > times = ArrayOf<Int32>::Alloc(2);
+    AutoPtr<IByteBufferHelper> helper;
+    CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
+    AutoPtr<IByteBuffer> bb;
+    helper->Allocate(8, (IByteBuffer**)&bb);
+    bb->SetOrder(ByteOrder_LITTLE_ENDIAN);
+    AutoPtr<IInputStream> fis;
+    CFileInputStream::New(idmap, (IInputStream**)&fis);
+    Int64 number;
+    fis->Skip(IDMAP_HASH_START_OFFSET, &number);
+    AutoPtr<ArrayOf<Byte> > bbs;
+    bb->GetArray((ArrayOf<Byte>**)&bbs);
+    Int32 n;
+    fis->Read(bbs, &n);
+    ICloseable::Probe(fis)->Close();
+    AutoPtr<IInt32Buffer> ib;
+    bb->AsInt32Buffer((IInt32Buffer**)&ib);
+    ib->Get(0, &((*times)[0]));
+    ib->Get(1, &((*times)[1]));
+
+    *hashes = times;
+    REFCOUNT_ADD(*hashes)
+    return NOERROR;
+}
+
+Int32 CPackageManagerService::GetPackageHashCode(
+    /* [in] */ PackageParser::Package* pkg)
+{
+    AutoPtr<Pair<AutoPtr<IInteger32>, Int64> > p;
+    HashMap<String, AutoPtr<Pair<AutoPtr<IInteger32>, Int64> > >::Iterator it = mPackageHashes.Find(pkg->mPackageName);
+    if (it != mPackageHashes.End()) {
+        p = it->mSecond;
+    }
+    if (p != NULL) {
+        AutoPtr<ISystem> sys;
+        CSystem::AcquireSingleton((ISystem**)&sys);
+        Int64 millis;
+        sys->GetCurrentTimeMillis(&millis);
+        if (millis - p->mSecond < PACKAGE_HASH_EXPIRATION) {
+            Int32 value;
+            p->mFirst->GetValue(&value);
+            return value;
+        }
+    }
+    if (p != NULL) {
+        mPackageHashes.Erase(it);
+    }
+
+    AutoPtr<ArrayOf<Byte> > crc = GetFileCrC(pkg->mBaseCodePath);
+    if (crc == NULL) return 0;
+
+    AutoPtr<IByteBufferHelper> helper;
+    CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
+    AutoPtr<IByteBuffer> bb;
+    helper->Wrap(crc, (IByteBuffer**)&bb);
+    bb->Put(IDMAP_HASH_VERSION);
+    AutoPtr<ArrayOf<Byte> > bbs;
+    bb->GetArray((ArrayOf<Byte>**)&bbs);
+    AutoPtr<ISystem> sys;
+    CSystem::AcquireSingleton((ISystem**)&sys);
+    Int64 millis;
+    sys->GetCurrentTimeMillis(&millis);
+    Int32 hash = Arrays::GetHashCode(bbs);
+    AutoPtr<IInteger32> integer;
+    CInteger32::New(hash, (IInteger32**)&integer);
+    p = new Pair<AutoPtr<IInteger32>, Int64>(integer, millis);
+    mPackageHashes[pkg->mPackageName] = p;
+    return hash;
+}
+
+AutoPtr<ArrayOf<Byte> > CPackageManagerService::GetFileCrC(
+    /* [in] */ const String& path)
+{
+    AutoPtr<IZipFile> zfile;
+    AutoPtr<ArrayOf<Byte> > bbs;
+    // try {
+    CZipFile::New(path, (IZipFile**)&zfile);
+    AutoPtr<IZipEntry> entry;
+    ECode ec = zfile->GetEntry(String("META-INF/MANIFEST.MF"), (IZipEntry**)&entry);
+    if (FAILED(ec)) {
+        AutoPtr<IIoUtils> ioUtils;
+        CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+        ioUtils->CloseQuietly(ICloseable::Probe(zfile));
+        return bbs;
+    }
+    if (entry == NULL) {
+        Logger::E(TAG, "Unable to get MANIFEST.MF from %s", path.string());
+        return NULL;
+    }
+
+    Int64 crc;
+    entry->GetCrc(&crc);
+    if (crc == -1) Logger::E(TAG, "Unable to get CRC for %s", path.string());
+    AutoPtr<IByteBufferHelper> helper;
+    CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
+    AutoPtr<IByteBuffer> bb;
+    ec = helper->Allocate(8, (IByteBuffer**)&bb);
+    FAIL_GOTO(ec, fail)
+    bb->PutInt64(crc);
+    bb->GetArray((ArrayOf<Byte>**)&bbs);
+    // } catch (Exception e) {
+    // } finally {
+    //     IoUtils.closeQuietly(zfile);
+    // }
+fail:
+    AutoPtr<IIoUtils> ioUtils;
+    CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+    ioUtils->CloseQuietly(ICloseable::Probe(zfile));
+    return bbs;
+}
+
 void CPackageManagerService::SetUpCustomResolverActivity(
     /* [in] */ PackageParser::Package* pkg)
 {
@@ -11693,6 +12840,41 @@ void CPackageManagerService::SetUpCustomResolverActivity(
         mResolveComponentName = mCustomResolverComponentName;
         Slogger::I(TAG, "Replacing default ResolverActivity with custom activity: %s",
             TO_CSTR(mResolveComponentName));
+    }
+}
+
+void CPackageManagerService::SetUpCustomPreLaunchCheckActivity(
+    /* [in] */ PackageParser::Package* pkg)
+{
+    synchronized (mPackagesLock) {
+        mPreLaunchCheckPackagesReplaced = TRUE;
+        // Set up information for custom user intent resolution activity.
+        AutoPtr<IActivityInfo> preLaunchCheckActivity;
+        CActivityInfo::New((IActivityInfo**)&preLaunchCheckActivity);
+        AutoPtr<IPackageItemInfo> pii = IPackageItemInfo::Probe(preLaunchCheckActivity);
+        AutoPtr<IComponentInfo> ci = IComponentInfo::Probe(preLaunchCheckActivity);
+        ci->SetApplicationInfo(pkg->mApplicationInfo);
+        String className;
+        mCustomPreLaunchComponentName->GetClassName(&className);
+        pii->SetName(className);
+        String pkgName;
+        IPackageItemInfo::Probe(pkg->mApplicationInfo)->GetPackageName(&pkgName);
+        pii->SetPackageName(pkgName);
+        ci->SetProcessName(pkgName);
+        preLaunchCheckActivity->SetTheme(Elastos::Droid::R::style::Theme_Holo_Dialog_Alert);
+        preLaunchCheckActivity->SetLaunchMode(IActivityInfo::LAUNCH_MULTIPLE);
+        preLaunchCheckActivity->SetFlags(IActivityInfo::FLAG_EXCLUDE_FROM_RECENTS |
+                IActivityInfo::FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS);
+        ci->SetExported(TRUE);
+        ci->SetEnabled(TRUE);
+
+        mPreLaunchCheckResolveInfo->SetActivityInfo(preLaunchCheckActivity);
+        mPreLaunchCheckResolveInfo->SetPriority(0);
+        mPreLaunchCheckResolveInfo->SetPreferredOrder(0);
+        mPreLaunchCheckResolveInfo->SetMatch(0);
+
+        Slogger::I(TAG, "Replacing default Pre Launch Activity with custom activity: %s",
+                TO_CSTR(mCustomPreLaunchComponentName));
     }
 }
 
@@ -12575,11 +13757,15 @@ Boolean CPackageManagerService::GrantSignaturePermission(
                     == IPackageManager::SIGNATURE_MATCH);
     if (!allowed && (bp->mProtectionLevel
             & IPermissionInfo::PROTECTION_FLAG_SYSTEM) != 0) {
-        if (IsSystemApp(pkg)) {
+        Boolean allowedSig = IsAllowedSignature(pkg, perm);
+        if (IsSystemApp(pkg) || allowedSig) {
             // For updated system applications, a system permission
             // is granted only if it had been defined by the original application.
             if (IsUpdatedSystemApp(pkg)) {
                 AutoPtr<PackageSetting> sysPs = mSettings->GetDisabledSystemPkgLPr(pkg->mPackageName);
+                if (sysPs == NULL) {
+                    return FALSE;
+                }
                 AutoPtr<GrantedPermissions> origGp = sysPs->mSharedUser != NULL
                         ? (GrantedPermissions*)sysPs->mSharedUser.Get() : (GrantedPermissions*)sysPs.Get();
 
@@ -12587,7 +13773,9 @@ Boolean CPackageManagerService::GrantSignaturePermission(
                     // If the original was granted this permission, we take
                     // that grant decision as read and propagate it to the
                     // update.
-                    allowed = TRUE;
+                    if (sysPs->IsPrivileged()) {
+                        allowed = TRUE;
+                    }
                 }
                 else {
                     // The system apk may have been updated with an older
@@ -12608,7 +13796,7 @@ Boolean CPackageManagerService::GrantSignaturePermission(
                 }
             }
             else {
-                allowed = IsPrivilegedApp(pkg);
+                allowed = IsPrivilegedApp(pkg) || allowedSig;
             }
         }
     }
@@ -12624,6 +13812,7 @@ Boolean CPackageManagerService::GrantSignaturePermission(
 void CPackageManagerService::SendPackageBroadcast(
     /* [in] */ const String& action,
     /* [in] */ const String& pkg,
+    /* [in] */ const String& intentCategory,
     /* [in] */ IBundle* extras,
     /* [in] */ const String& targetPkg,
     /* [in] */ IIntentReceiver* finishedReceiver,
@@ -12676,6 +13865,9 @@ void CPackageManagerService::SendPackageBroadcast(
             //             + intent.toShortString(false, true, false, false)
             //             + " " + intent.getExtras(), here);
             // }
+            if (!intentCategory.IsNull()) {
+                intent->AddCategory(intentCategory);
+            }
             Int32 res;
             am->BroadcastIntent(NULL, intent, String(NULL), finishedReceiver,
                     0, String(NULL), NULL, String(NULL), IAppOpsManager::OP_NONE,
@@ -12829,9 +14021,23 @@ ECode CPackageManagerService::InstallPackageAsUser(
     CFile::New(originPath, (IFile**)&originFile);
     AutoPtr<OriginInfo> origin = OriginInfo::FromUntrustedFile(originFile);
 
+    Int32 userFilteredFlags;
+    Int32 loc;
+    if (GetInstallLocation(&loc), loc == IPackageHelper::APP_INSTALL_INTERNAL) {
+        Slogger::W(TAG, "PackageManager.INSTALL_INTERNAL"  );
+        userFilteredFlags = installFlags | IPackageManager::INSTALL_INTERNAL;
+    }
+    else if (GetInstallLocation(&loc), loc == IPackageHelper::APP_INSTALL_EXTERNAL) {
+        Slogger::W(TAG, "PackageManager.INSTALL_EXTERNAL"  );
+        userFilteredFlags = installFlags | IPackageManager::INSTALL_EXTERNAL;
+    }
+    else{
+        userFilteredFlags = installFlags;
+    }
+
     AutoPtr<IMessage> msg;
     mHandler->ObtainMessage(INIT_COPY, (IMessage**)&msg);
-    AutoPtr<InstallParams> params = new InstallParams(origin, observer, installFlags,
+    AutoPtr<InstallParams> params = new InstallParams(origin, observer, userFilteredFlags,
             installerPackageName, verificationParams, user, packageAbiOverride, this);
     msg->SetObj((IInterface*)(IObject*)params);
     Boolean result;
@@ -12887,7 +14093,7 @@ void CPackageManagerService::SendPackageAddedForUser(
 
     AutoPtr< ArrayOf<Int32> > userIds = ArrayOf<Int32>::Alloc(1);
     (*userIds)[0] = userId;
-    SendPackageBroadcast(IIntent::ACTION_PACKAGE_ADDED, packageName, extras, String(NULL), NULL, userIds);
+    SendPackageBroadcast(IIntent::ACTION_PACKAGE_ADDED, String(NULL), packageName, extras, String(NULL), NULL, userIds);
     // try {
     AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
     Boolean isSystem = IsSystemApp(pkgSetting) || IsUpdatedSystemApp(pkgSetting);
@@ -14253,6 +15459,14 @@ void CPackageManagerService::InstallPackageLI(
     res->mReturnCode = IPackageManager::INSTALL_SUCCEEDED;
 
     if (DEBUG_INSTALL) Slogger::D(TAG, "installPackageLI: path=%s", TO_CSTR(tmpPackageFile));
+    // TODO
+    // if (true != mSecurityBridge.approveAppInstallRequest(
+    //                 args.getResourcePath(),
+    //                 Uri.fromFile(args.origin.file).toSafeString())) {
+    //     res.returnCode = PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
+    //     return;
+    // }
+
     // Retrieve PackageSettings and parse package
     Int32 parseFlags = mDefParseFlags | PackageParser::PARSE_CHATTY |
             (forwardLocked ? PackageParser::PARSE_FORWARD_LOCK : 0) |
@@ -14282,6 +15496,23 @@ void CPackageManagerService::InstallPackageLI(
     if ((pkgFlags & IApplicationInfo::FLAG_TEST_ONLY) != 0) {
         if ((installFlags & IPackageManager::INSTALL_ALLOW_TEST) == 0) {
             res->SetError(IPackageManager::INSTALL_FAILED_TEST_ONLY, String("installPackageLI"));
+            return;
+        }
+    }
+
+    AutoPtr<IAppOpsManagerHelper> helper;
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&helper);
+    Boolean isStrictEnable;
+    if ((helper->IsStrictEnable(&isStrictEnable), isStrictEnable)
+            && ((installFlags & IPackageManager::INSTALL_FROM_ADB) != 0)) {
+        AutoPtr<IContentResolver> cr;
+        mContext->GetContentResolver((IContentResolver**)&cr);
+        AutoPtr<ISettingsSecure> secure;
+        CSettingsSecure::AcquireSingleton((ISettingsSecure**)&secure);
+        Int32 v;
+        secure->GetInt32(cr, ISettingsSecure::INSTALL_NON_MARKET_APPS, 0, &v);
+        if (v <= 0) {
+            res->mReturnCode = IPackageManager::INSTALL_FAILED_UNKNOWN_SOURCES;
             return;
         }
     }
@@ -14764,11 +15995,16 @@ Int32 CPackageManagerService::DeletePackageX(
                     ? info->mRemovedAppId : info->mUid);
             extras->PutBoolean(IIntent::EXTRA_REPLACING, TRUE);
 
-            SendPackageBroadcast(IIntent::ACTION_PACKAGE_ADDED, packageName,
+            String category(NULL);
+            if (info->mIsThemeApk) {
+                category = IIntent::CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE;
+            }
+
+            SendPackageBroadcast(IIntent::ACTION_PACKAGE_ADDED, packageName, category,
                     extras, String(NULL), NULL, NULL);
-            SendPackageBroadcast(IIntent::ACTION_PACKAGE_REPLACED, packageName,
+            SendPackageBroadcast(IIntent::ACTION_PACKAGE_REPLACED, packageName, category,
                     extras, String(NULL), NULL, NULL);
-            SendPackageBroadcast(IIntent::ACTION_MY_PACKAGE_REPLACED, String(NULL),
+            SendPackageBroadcast(IIntent::ACTION_MY_PACKAGE_REPLACED, String(NULL), String(NULL),
                     NULL, packageName, NULL, NULL);
         }
     }
@@ -15112,8 +16348,8 @@ Boolean CPackageManagerService::DeletePackageLI(
                     TRUE,  //notLaunched
                     FALSE, //hidden
                     String(NULL), NULL, NULL,
-                    FALSE // blockUninstall
-                    );
+                    FALSE, // blockUninstall
+                    NULL, NULL);
             if (!IsSystemApp(ps)) {
                 AutoPtr<ArrayOf<Int32> > userIds = sUserManager->GetUserIds();
                 if (ps->IsAnyInstalled(*userIds)) {
@@ -15181,6 +16417,18 @@ Boolean CPackageManagerService::DeletePackageLI(
         KillApplication(packageName, ps->mAppId, String("uninstall pkg"));
         ret = DeleteInstalledPackageLI(ps, deleteCodeAndResources, flags,
                 allUserHandles, perUserInstalled, outInfo, writeSettings);
+    }
+    //Cleanup theme related data
+    if (ps->mPkg != NULL) {
+        Int32 size;
+        if (ps->mPkg->mOverlayTargets->GetSize(&size), size > 0) {
+            UninstallThemeForAllApps(ps->mPkg);
+        }
+        else {
+            if (mOverlays.Find(ps->mPkg->mPackageName) != mOverlays.End()) {
+                UninstallThemeForApp(ps->mPkg);
+            }
+        }
     }
     return ret;
 }
@@ -16119,6 +17367,14 @@ ECode CPackageManagerService::SetComponentEnabledSetting(
     /* [in] */ Int32 userId)
 {
     if (!sUserManager->Exists(userId)) return NOERROR;
+    // Don't allow to enable components marked for disabling at build-time
+    Boolean contains;
+    if (mDisabledComponentsList->Contains(componentName, &contains), contains) {
+        String str;
+        componentName->FlattenToString(&str);
+        Slogger::D(TAG, "Ignoring attempt to set enabled state of disabled component %s", str.string());
+        return NOERROR;
+    }
     String pkgName, clsName;
     componentName->GetPackageName(&pkgName);
     componentName->GetClassName(&clsName);
@@ -16310,7 +17566,7 @@ void CPackageManagerService::SendPackageChangedBroadcast(
     extras->PutInt32(IIntent::EXTRA_UID, packageUid);
     AutoPtr<ArrayOf<Int32> > iArray = ArrayOf<Int32>::Alloc(1);
     iArray->Set(0, UserHandle::GetUserId(packageUid));
-    SendPackageBroadcast(IIntent::ACTION_PACKAGE_CHANGED, packageName, extras, String(NULL), NULL,
+    SendPackageBroadcast(IIntent::ACTION_PACKAGE_CHANGED, packageName, String(NULL), extras, String(NULL), NULL,
             iArray);
 }
 
@@ -16705,7 +17961,7 @@ ECode CPackageManagerService::SendResourcesChangedBroadcast(
         String action = mediaStatus
                 ? IIntent::ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
                 : IIntent::ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
-        SendPackageBroadcast(action, String(NULL), extras, String(NULL), finishedReceiver, NULL);
+        SendPackageBroadcast(action, String(NULL), String(NULL), extras, String(NULL), finishedReceiver, NULL);
     }
     return NOERROR;
 }
@@ -17151,7 +18407,7 @@ ECode CPackageManagerService::SetPermissionEnforced(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Manifest::permission::GRANT_REVOKE_PERMISSIONS, String(NULL)))
-    if (READ_EXTERNAL_STORAGE.Equals(permission)) {
+    if (Elastos::Droid::Manifest::permission::READ_EXTERNAL_STORAGE.Equals(permission)) {
         synchronized (mPackagesLock) {
             Boolean value;
             if (mSettings->mReadExternalStorageEnforced == NULL
@@ -17193,6 +18449,160 @@ ECode CPackageManagerService::IsPermissionEnforced(
     return NOERROR;
 }
 
+ECode CPackageManagerService::GetPackageInstaller(
+    /* [out] */ IIPackageInstaller** installer)
+{
+    VALIDATE_NOT_NULL(installer)
+    *installer = mInstallerService;
+    REFCOUNT_ADD(*installer)
+    return NOERROR;
+}
+
+ECode CPackageManagerService::SetPreLaunchCheckActivity(
+    /* [in] */ IComponentName* componentName)
+{
+    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
+            Manifest::permission::INTERCEPT_PACKAGE_LAUNCH, String(NULL)))
+
+    synchronized (mPackagesLock) {
+        mCustomPreLaunchComponentName = componentName;
+
+        if (componentName == NULL) {
+            // When componentName is null, disable the custom activity.
+            Slogger::I(TAG, "Pre Launch Check: Removed");
+
+            // Note: setUpCustomPreLaunchCheckActivity is responsible for
+            // setting this boolean true.  This helps handle the situation where
+            // the package has not yet been scanned by the system or installed.
+            mPreLaunchCheckPackagesReplaced = FALSE;
+        }
+        else {
+            // Check if the package is already installed.
+            // If not, depend on scanPackageLI() to discover the package.
+            String pkgName;
+            componentName->GetPackageName(&pkgName);
+            AutoPtr<PackageParser::Package> pkg;
+            HashMap<String, AutoPtr<PackageParser::Package> >::Iterator it = mPackages.Find(pkgName);
+            if (it != mPackages.End()) {
+                pkg = it->mSecond;
+            }
+            if (pkg != NULL) {
+                SetUpCustomPreLaunchCheckActivity(pkg);
+            }
+            else {
+                Slogger::I(TAG, "Pre Launch Check: Pending installation of %s", pkgName.string());
+            }
+        }
+    }
+    return NOERROR;
+}
+
+ECode CPackageManagerService::AddPreLaunchCheckPackage(
+    /* [in] */ const String& packageName)
+{
+    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
+            Manifest::permission::INTERCEPT_PACKAGE_LAUNCH, String(NULL)))
+    AutoPtr<ICharSequence> cs;
+    CString::New(packageName, (ICharSequence**)&cs);
+    mPreLaunchCheckPackages->Add(cs);
+    return NOERROR;
+}
+
+ECode CPackageManagerService::RemovePreLaunchCheckPackage(
+    /* [in] */ const String& packageName)
+{
+    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
+            Manifest::permission::INTERCEPT_PACKAGE_LAUNCH, String(NULL)))
+    AutoPtr<ICharSequence> cs;
+    CString::New(packageName, (ICharSequence**)&cs);
+    mPreLaunchCheckPackages->Remove(cs);
+    return NOERROR;
+}
+
+ECode CPackageManagerService::ClearPreLaunchCheckPackages()
+{
+    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
+            Manifest::permission::INTERCEPT_PACKAGE_LAUNCH, String(NULL)))
+    mPreLaunchCheckPackages->Clear();
+    return NOERROR;
+}
+
+ECode CPackageManagerService::SetComponentProtectedSetting(
+    /* [in] */ IComponentName* componentName,
+    /* [in] */ Boolean newState,
+    /* [in] */ Int32 userId)
+{
+    FAIL_RETURN(EnforceCrossUserPermission(Binder::GetCallingUid(), userId,
+            FALSE, FALSE, String("set protected")))
+
+    String packageName, className;
+    componentName->GetPackageName(&packageName);
+    componentName->GetClassName(&className);
+
+    AutoPtr<PackageSetting> pkgSetting;
+    AutoPtr<IArrayList> components;
+
+    synchronized (mPackagesLock) {
+        HashMap<String, AutoPtr<PackageSetting> >::Iterator it = mSettings->mPackages.Find(packageName);
+        if (it != mSettings->mPackages.End()) {
+            pkgSetting = it->mSecond;
+        }
+
+        if (pkgSetting == NULL) {
+            if (className.IsNull()) {
+                Slogger::E(TAG, "Unknown package: %s", packageName.string());
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            }
+            Slogger::E(TAG, "Unknown component: %s/%s", packageName.string(), className.string());
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+
+        //Protection levels must be applied at the Component Level!
+        if (className.IsNull()) {
+            Slogger::E(TAG, "Must specify Component Class name.");
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+        else {
+            AutoPtr<PackageParser::Package> pkg = pkgSetting->mPkg;
+            if (pkg == NULL || !pkg->HasComponentClassName(className)) {
+                Int32 version;
+                if (pkg->mApplicationInfo->GetTargetSdkVersion(&version), version >= Build::VERSION_CODES::JELLY_BEAN) {
+                    Slogger::E(TAG, "Component class %s does not exist in %s", className.string(), packageName.string());
+                    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                }
+                else {
+                    Slogger::W(TAG, "Failed setComponentProtectedSetting: component class %s does not exist in %s",
+                            className.string(), packageName.string());
+                }
+            }
+
+            pkgSetting->ProtectComponentLPw(className, newState, userId);
+            mSettings->WritePackageRestrictionsLPr(userId);
+
+            components = mPendingBroadcasts->Get(userId, packageName);
+            Boolean newPackage = components == NULL;
+            if (newPackage) {
+                CArrayList::New((IArrayList**)&components);
+            }
+            AutoPtr<ICharSequence> cs;
+            CString::New(className, (ICharSequence**)&cs);
+            Boolean contains;
+            if (components->Contains(cs, &contains), !contains) {
+                components->Add(cs);
+            }
+        }
+    }
+
+    Int64 callingId = Binder::ClearCallingIdentity();
+    // try {
+    Int32 packageUid = UserHandle::GetUid(userId, pkgSetting->mAppId);
+    // } finally {
+    //     Binder.restoreCallingIdentity(callingId);
+    // }
+    Binder::RestoreCallingIdentity(callingId);
+    return NOERROR;
+}
+
 ECode CPackageManagerService::IsStorageLow(
     /* [out] */ Boolean* result)
 {
@@ -17212,15 +18622,6 @@ ECode CPackageManagerService::IsStorageLow(
     //     Binder.restoreCallingIdentity(token);
     // }
     Binder::RestoreCallingIdentity(token);
-    return NOERROR;
-}
-
-ECode CPackageManagerService::GetPackageInstaller(
-    /* [out] */ IIPackageInstaller** installer)
-{
-    VALIDATE_NOT_NULL(installer)
-    *installer = mInstallerService;
-    REFCOUNT_ADD(*installer)
     return NOERROR;
 }
 
@@ -17378,61 +18779,217 @@ ECode CPackageManagerService::IsPackageSignedByKeySetExactly(
     return NOERROR;
 }
 
-ECode CPackageManagerService::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str);
-    return Object::ToString(str);
-}
-
-ECode CPackageManagerService::SetComponentProtectedSetting(
-    /* [in] */ IComponentName* componentName,
-    /* [in] */ Boolean newState,
-    /* [in] */ Int32 userId)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
 ECode CPackageManagerService::UpdateIconMapping(
     /* [in] */ const String& pkgName)
 {
-    return E_NOT_IMPLEMENTED;
+    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
+            Manifest::permission::CHANGE_CONFIGURATION,
+            String("could not update icon mapping because caller ") + "does not have change config permission"))
+
+    synchronized (mPackagesLock) {
+        ThemeUtils::ClearIconCache();
+        if (pkgName.IsNull()) {
+            ClearIconMapping();
+            return NOERROR;
+        }
+        mIconPackHelper = NULL;
+        CIconPackHelper::New(mContext, (IIconPackHelper**)&mIconPackHelper);
+        // try {
+        ECode ec = mIconPackHelper->LoadIconPack(pkgName);
+        if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
+            Logger::E(TAG, "Unable to find icon pack: %s", pkgName.string());
+            ClearIconMapping();
+            return NOERROR;
+        }
+        // } catch(NameNotFoundException e) {
+        //     Log.e(TAG, "Unable to find icon pack: " + pkgName);
+        //     clearIconMapping();
+        //     return;
+        // }
+
+        HashMap<AutoPtr<IComponentName>, AutoPtr<PackageParser::Activity> >::Iterator it = mActivities->mActivities.Begin();
+        for (; it != mActivities->mActivities.End(); ++it) {
+            AutoPtr<PackageParser::Activity> activity = it->mSecond;
+            Int32 resId;
+            mIconPackHelper->GetResourceIdForActivityIcon(activity->mInfo, &resId);
+            IPackageItemInfo::Probe(activity->mInfo)->SetThemedIcon(resId);
+        }
+
+        HashMap<String, AutoPtr<PackageParser::Package> >::Iterator pkgIt = mPackages.Begin();
+        for (; pkgIt != mPackages.End(); ++pkgIt) {
+            AutoPtr<PackageParser::Package> pkg = pkgIt->mSecond;
+            Int32 resId;
+            mIconPackHelper->GetResourceIdForApp(pkg->mPackageName, &resId);
+            IPackageItemInfo::Probe(pkg->mApplicationInfo)->SetThemedIcon(resId);
+        }
+    }
+    return NOERROR;
+}
+
+void CPackageManagerService::ClearIconMapping()
+{
+    mIconPackHelper = NULL;
+    HashMap<AutoPtr<IComponentName>, AutoPtr<PackageParser::Activity> >::Iterator it = mActivities->mActivities.Begin();
+    for (; it != mActivities->mActivities.End(); ++it) {
+        AutoPtr<PackageParser::Activity> activity = it->mSecond;
+        IPackageItemInfo::Probe(activity->mInfo)->SetThemedIcon(0);
+    }
+    HashMap<String, AutoPtr<PackageParser::Package> >::Iterator pkgIt = mPackages.Begin();
+    for (; pkgIt != mPackages.End(); ++pkgIt) {
+        AutoPtr<PackageParser::Package> pkg = pkgIt->mSecond;
+        IPackageItemInfo::Probe(pkg->mApplicationInfo)->SetThemedIcon(0);
+    }
 }
 
 ECode CPackageManagerService::GetComposedIconInfo(
     /* [out] */ IComposedIconInfo** iconInfo)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(iconInfo)
+    *iconInfo = NULL;
+    if (mIconPackHelper != NULL) {
+        return mIconPackHelper->GetComposedIconInfo(iconInfo);
+    }
+    return NOERROR;
 }
 
 ECode CPackageManagerService::ProcessThemeResources(
     /* [in] */ const String& themePkgName,
     /* [out] */ Int32* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = 0;
+
+    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
+            Manifest::permission::ACCESS_THEME_MANAGER, String(NULL)))
+    AutoPtr<PackageParser::Package> pkg;
+    HashMap<String, AutoPtr<PackageParser::Package> >::Iterator pkgIt = mPackages.Find(themePkgName);
+    if (pkgIt != mPackages.End()) {
+        pkg = pkgIt->mSecond;
+    }
+    if (pkg == NULL) {
+        Logger::W(TAG, "Unable to get pkg for processing %s", themePkgName.string());
+        return NOERROR;
+    }
+
+    // Process icons
+    if (IsIconCompileNeeded(pkg)) {
+        // try {
+        if (FAILED(ThemeUtils::CreateCacheDirIfNotExists())) {
+            UninstallThemeForAllApps(pkg);
+            DeletePackageX(themePkgName, Binder::GetCallingUid(), IPackageManager::DELETE_ALL_USERS);
+            *res = IPackageManager::INSTALL_FAILED_THEME_AAPT_ERROR;
+            return NOERROR;
+        }
+        if (FAILED(ThemeUtils::CreateIconDirIfNotExists(pkg->mPackageName))) {
+            UninstallThemeForAllApps(pkg);
+            DeletePackageX(themePkgName, Binder::GetCallingUid(), IPackageManager::DELETE_ALL_USERS);
+            *res = IPackageManager::INSTALL_FAILED_THEME_AAPT_ERROR;
+            return NOERROR;
+        }
+        if (FAILED(CompileIconPack(pkg))) {
+            UninstallThemeForAllApps(pkg);
+            DeletePackageX(themePkgName, Binder::GetCallingUid(), IPackageManager::DELETE_ALL_USERS);
+            *res = IPackageManager::INSTALL_FAILED_THEME_AAPT_ERROR;
+            return NOERROR;
+        }
+        // } catch (Exception e) {
+        //     uninstallThemeForAllApps(pkg);
+        //     deletePackageX(themePkgName, getCallingUid(), PackageManager.DELETE_ALL_USERS);
+        //     return PackageManager.INSTALL_FAILED_THEME_AAPT_ERROR;
+        // }
+    }
+
+    Int32 errorCode = 0;
+    // Generate Idmaps and res tables if pkg is a theme
+    AutoPtr<IIterator> it;
+    pkg->mOverlayTargets->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> next;
+        it->GetNext((IInterface**)&next);
+        String target;
+        ICharSequence::Probe(next)->ToString(&target);
+
+        // try {
+        AutoPtr<PackageParser::Package> pkgTemp;
+        pkgIt = mPackages.Find(target);
+        if (pkgIt != mPackages.End()) {
+            pkgTemp = pkgIt->mSecond;
+        }
+        ECode ec = CompileResourcesAndIdmapIfNeeded(pkgTemp, pkg);
+        if (ec == (ECode)E_IDMAP_EXCEPTION) {
+            errorCode = IPackageManager::INSTALL_FAILED_THEME_IDMAP_ERROR;
+        }
+        else if (ec == (ECode)E_AAPT_EXCEPTION) {
+            errorCode = IPackageManager::INSTALL_FAILED_THEME_IDMAP_ERROR;
+        }
+        else {
+            errorCode = IPackageManager::INSTALL_FAILED_THEME_UNKNOWN_ERROR;
+        }
+        // } catch (IdmapException e) {
+        //     failedException = e;
+        //     errorCode = PackageManager.INSTALL_FAILED_THEME_IDMAP_ERROR;
+        // } catch (AaptException e) {
+        //     failedException = e;
+        //     errorCode = PackageManager.INSTALL_FAILED_THEME_AAPT_ERROR;
+        // } catch (Exception e) {
+        //     failedException = e;
+        //     errorCode = PackageManager.INSTALL_FAILED_THEME_UNKNOWN_ERROR;
+        // }
+
+        if (FAILED(ec)) {
+            Logger::E(TAG, "Unable to process theme, uninstalling %s, 0x%08x",
+                    pkg->mPackageName.string(), ec);
+            UninstallThemeForAllApps(pkg);
+            DeletePackageX(themePkgName, Binder::GetCallingUid(), IPackageManager::DELETE_ALL_USERS);
+            *res = errorCode;
+            return ec;
+        }
+
+    }
+
+    return NOERROR;
 }
 
-ECode CPackageManagerService::SetPreLaunchCheckActivity(
-    /* [in] */ IComponentName* componentName)
+void CPackageManagerService::ProcessThemeResourcesInThemeService(
+    /* [in] */ const String& pkgName)
 {
-    return E_NOT_IMPLEMENTED;
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::THEME_SERVICE, (IInterface**)&service);
+    AutoPtr<IThemeManager> tm = IThemeManager::Probe(service);
+    if (tm != NULL) {
+        Boolean result;
+        tm->ProcessThemeResources(pkgName, &result);
+    }
 }
 
-ECode CPackageManagerService::AddPreLaunchCheckPackage(
-    /* [in] */ const String& packageName)
+void CPackageManagerService::RemoveLegacyResourceCache()
 {
-    return E_NOT_IMPLEMENTED;
+    AutoPtr<IFile> cacheDir;
+    CFile::New(IThemeUtils::RESOURCE_CACHE_DIR, (IFile**)&cacheDir);
+    Boolean exists;
+    if (cacheDir->Exists(&exists), exists) {
+        AutoPtr<ArrayOf<IFile*> > files;
+        cacheDir->ListFiles((ArrayOf<IFile*>**)&files);
+        for (Int32 i = 0; i < files->GetLength(); ++i) {
+            AutoPtr<IFile> f = (*files)[i];
+            String name;
+            if (f->GetName(&name), name.EndWith(IThemeUtils::IDMAP_SUFFIX)) {
+                Logger::I(TAG, "Removing old resource cache");
+                AutoPtr<IFile> resCacheDir;
+                CFile::New(IThemeUtils::RESOURCE_CACHE_DIR, (IFile**)&resCacheDir);
+                FileUtils::DeleteContents(resCacheDir);
+                return;
+            }
+        }
+    }
 }
 
-ECode CPackageManagerService::RemovePreLaunchCheckPackage(
-    /* [in] */ const String& packageName)
+ECode CPackageManagerService::ToString(
+    /* [out] */ String* str)
 {
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CPackageManagerService::ClearPreLaunchCheckPackages()
-{
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(str);
+    return Object::ToString(str);
 }
 
 } // namespace Pm

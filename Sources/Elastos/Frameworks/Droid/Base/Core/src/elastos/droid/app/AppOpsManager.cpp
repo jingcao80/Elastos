@@ -5,6 +5,7 @@
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/CBinder.h"
 #include "elastos/droid/os/Process.h"
+#include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/utility/CArrayMap.h"
 #include "elastos/droid/Manifest.h"
 #include <elastos/core/StringBuilder.h>
@@ -16,6 +17,7 @@ using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::CBinder;
 using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Utility::CArrayMap;
 
 using Elastos::Core::ISystem;
@@ -882,7 +884,7 @@ String AppOpsManager::BuildSecurityExceptionMsg(
     return sb.ToString();
 }
 
-CARAPI AppOpsManager::StrOpToOp(
+ECode AppOpsManager::AppOpsManager::StrOpToOp(
     /* [in] */ const String& op,
     /* [out] */ Int32* result)
 {
@@ -985,6 +987,13 @@ ECode AppOpsManager::FinishOp(
     Int32 ival;
     FAIL_RETURN(StrOpToOp(op, &ival))
     return FinishOp(ival, uid, packageName);
+}
+
+Boolean AppOpsManager::IsStrictEnable()
+{
+    Boolean value;
+    SystemProperties::GetBoolean(String("persist.sys.strict_op_enable"), FALSE, &value);
+    return value;
 }
 
 ECode AppOpsManager::CheckOp(
@@ -1124,7 +1133,7 @@ ECode AppOpsManager::NoteOp(
     return NoteOp(op, Process::MyUid(), pkgName, result);
 }
 
-CARAPI AppOpsManager::GetToken(
+ECode AppOpsManager::AppOpsManager::GetToken(
     /* [in] */ IIAppOpsService* service,
     /* [out] */ IBinder** binder)
 {
@@ -1205,6 +1214,60 @@ ECode AppOpsManager::FinishOp(
 {
     String pkgName;
     return FinishOp(op, Process::MyUid(), pkgName);
+}
+
+ECode AppOpsManager::IsControlAllowed(
+    /* [in] */ Int32 op,
+    /* [in] */ const String& packageName,
+    /* [out] */ Boolean* result)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode AppOpsManager::GetPrivacyGuardSettingForPackage(
+    /* [in] */ Int32 uid,
+    /* [in] */ const String& packageName,
+    /* [out] */ Boolean* state)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode AppOpsManager::SetPrivacyGuardSettingForPackage(
+    /* [in] */ Int32 uid,
+    /* [in] */ const String& packageName,
+    /* [in] */ Boolean state)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode AppOpsManager::ResetCounters()
+{
+    assert(0);
+    return NOERROR;
+}
+
+Boolean AppOpsManager::IsStrictOp(
+    /* [in] */ Int32 code)
+{
+    assert(0);
+    return FALSE;
+}
+
+Int32 AppOpsManager::StringToMode(
+    /* [in] */ const String& permission)
+{
+    assert(0);
+    return 0;
+}
+
+Int32 AppOpsManager::StringOpToOp(
+    /* [in] */ const String& op)
+{
+    assert(0);
+    return 0;
 }
 
 } // namespace App

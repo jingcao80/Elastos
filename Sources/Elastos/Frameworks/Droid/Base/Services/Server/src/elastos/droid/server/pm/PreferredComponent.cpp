@@ -197,8 +197,7 @@ ECode PreferredComponent::WriteToXml(
 }
 
 Boolean PreferredComponent::SameSet(
-    /* [in] */ IList* query,
-    /* [in] */ Int32 priority)
+    /* [in] */ IList* query)
 {
     if (mSetPackages == NULL) {
         return query == NULL;
@@ -215,9 +214,6 @@ Boolean PreferredComponent::SameSet(
         AutoPtr<IInterface> item;
         it->GetNext((IInterface**)&item);
         AutoPtr<IResolveInfo> ri = IResolveInfo::Probe(item);
-        Int32 riPriority;
-        ri->GetPriority(&riPriority);
-        if (riPriority != priority) continue;
         AutoPtr<IActivityInfo> ai;
         ri->GetActivityInfo((IActivityInfo**)&ai);
         String packageName, name;
