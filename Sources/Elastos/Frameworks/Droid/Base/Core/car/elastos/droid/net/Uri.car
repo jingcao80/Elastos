@@ -410,6 +410,38 @@ module
             [out] Boolean* result);
     }
 
+    /**
+     * An implementation which wraps a String URI. This URI can be opaque or
+     * hierarchical, but we extend AbstractHierarchicalUri in case we need
+     * the hierarchical functionality.
+     */
+    /**
+     * @Involved
+     * interface IParcelable;
+     * interface IComparable;
+     * interface IUri
+     */
+    interface IStringUri {
+    }
+
+    /**
+     * @Involved
+     * interface IParcelable;
+     * interface IComparable;
+     * interface IUri
+     */
+    interface IOpaqueUri {
+    }
+
+    /**
+     * @Involved
+     * interface IParcelable;
+     * interface IComparable;
+     * interface IUri
+     */
+    interface IHierarchicalUri {
+    }
+
     interface IUriHelper {
         /**
          * The empty URI, equivalent to "".
