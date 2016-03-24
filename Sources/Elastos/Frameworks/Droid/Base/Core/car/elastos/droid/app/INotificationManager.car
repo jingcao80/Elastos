@@ -79,6 +79,16 @@ module
             [in] Int32 uid,
             [out] Int32* result);
 
+        SetShowNotificationForPackageOnKeyguard(
+            [in] String pkg,
+            [in] Int32 uid,
+            [in] Int32 status);
+
+        GetShowNotificationForPackageOnKeyguard(
+            [in] String pkg,
+            [in] Int32 uid,
+            [out] Int32* result);
+
         // TODO: Remove this when callers have been migrated to the equivalent
         // INotificationListener method.
         GetActiveNotifications(

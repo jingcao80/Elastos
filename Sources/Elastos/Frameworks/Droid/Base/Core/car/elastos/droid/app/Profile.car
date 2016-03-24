@@ -89,10 +89,6 @@ module
             [in] Int32 state,
             [in] String name);
 
-        CompareTo(
-            [in] IInterface* obj,
-            [out] Int32* result);
-
         AddProfileGroup(
             [in] IProfileGroup* value);
 

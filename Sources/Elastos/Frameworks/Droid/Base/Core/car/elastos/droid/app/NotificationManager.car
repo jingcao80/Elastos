@@ -144,6 +144,14 @@ module
          */
         GetEffectsSuppressor(
             [out] IComponentName** name);
+
+        /**
+         * @hide
+         */
+        GetShowNotificationForPackageOnKeyguard(
+            [in] String pkg,
+            [in] Int32 uid,
+            [out] Int32* result);
     }
 
     interface INotificationManagerHelper {

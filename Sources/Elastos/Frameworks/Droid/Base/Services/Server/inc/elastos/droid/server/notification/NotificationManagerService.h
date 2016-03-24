@@ -147,6 +147,18 @@ public:
             /* [in] */ Int32 uid,
             /* [out] */ Int32* result);
 
+        //@Override
+        CARAPI SetShowNotificationForPackageOnKeyguard(
+            /* [in] */ const String& pkg,
+            /* [in] */ Int32 uid,
+            /* [in] */ Int32 status);
+
+        //@Override
+        CARAPI GetShowNotificationForPackageOnKeyguard(
+            /* [in] */ const String& pkg,
+            /* [in] */ Int32 uid,
+            /* [out] */ Int32* result);
+
         /**
          * System-only API for getting a list of current (i.e. not cleared) notifications.
          *

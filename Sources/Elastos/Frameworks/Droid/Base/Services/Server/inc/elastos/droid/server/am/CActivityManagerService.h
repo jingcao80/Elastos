@@ -1451,6 +1451,10 @@ public:
     CARAPI DeleteActivityContainer(
         /* [in] */ IIActivityContainer* container);
 
+    CARAPI GetActivityDisplayId(
+        /* [in] */ IBinder* activityToken,
+        /* [out] */ Int32* container);
+
     CARAPI GetEnclosingActivityContainer(
         /* [in] */ IBinder* activityToken,
         /* [out] */ IIActivityContainer** container);

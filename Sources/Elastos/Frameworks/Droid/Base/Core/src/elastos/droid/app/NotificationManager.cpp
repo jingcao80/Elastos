@@ -216,6 +216,20 @@ ECode NotificationManager::MatchesCallFilter(
     return service->MatchesCallFilter(extras, result);
 }
 
+ECode NotificationManager::GetShowNotificationForPackageOnKeyguard(
+    /* [in] */ const String& pkg,
+    /* [in] */ Int32 uid,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IINotificationManager> service = GetService();
+    // try {
+    return service->GetShowNotificationForPackageOnKeyguard(pkg, uid, result);
+    // } catch (RemoteException e) {
+    //     return Notification.SHOW_ALL_NOTI_ON_KEYGUARD;
+    // }
+}
+
 }
 }
 }

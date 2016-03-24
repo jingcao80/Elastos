@@ -137,6 +137,8 @@ AppOpsManager::OpEntry::OpEntry()
     , mTime(0)
     , mRejectTime(0)
     , mDuration(0)
+    , mAllowedCount(0)
+    , mIgnoredCount(0)
 {
 }
 
@@ -153,13 +155,17 @@ ECode AppOpsManager::OpEntry::constructor(
     /* [in] */ Int32 mode,
     /* [in] */ Int32 time,
     /* [in] */ Int32 rejectTime,
-    /* [in] */ Int32 duration)
+    /* [in] */ Int32 duration,
+    /* [in] */ Int32 allowedCount,
+    /* [in] */ Int32 ignoredCount)
 {
     mOp = op;
     mMode = mode;
     mTime = time;
     mRejectTime = rejectTime;
     mDuration = duration;
+    mAllowedCount = allowedCount;
+    mIgnoredCount = ignoredCount;
     return NOERROR;
 }
 
@@ -218,6 +224,22 @@ ECode AppOpsManager::OpEntry::GetDuration(
     return NOERROR;
 }
 
+ECode AppOpsManager::OpEntry::GetAllowedCount(
+    /* [out] */ Int32* allowedCount)
+{
+    VALIDATE_NOT_NULL(allowedCount)
+    *allowedCount = mAllowedCount;
+    return NOERROR;
+}
+
+ECode AppOpsManager::OpEntry::GetIgnoredCount(
+    /* [out] */ Int32* ignoredCount)
+{
+    VALIDATE_NOT_NULL(ignoredCount)
+    *ignoredCount = mIgnoredCount;
+    return NOERROR;
+}
+
 ECode AppOpsManager::OpEntry::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
@@ -226,6 +248,8 @@ ECode AppOpsManager::OpEntry::WriteToParcel(
     dest->WriteInt64(mTime);
     dest->WriteInt64(mRejectTime);
     dest->WriteInt32(mDuration);
+    dest->WriteInt32(mAllowedCount);
+    dest->WriteInt32(mIgnoredCount);
     return NOERROR;
 }
 
@@ -237,6 +261,8 @@ ECode AppOpsManager::OpEntry::ReadFromParcel(
     source->ReadInt64(&mTime);
     source->ReadInt64(&mRejectTime);
     source->ReadInt32(&mDuration);
+    source->ReadInt32(&mAllowedCount);
+    source->ReadInt32(&mIgnoredCount);
     return NOERROR;
 }
 
@@ -283,7 +309,64 @@ Object AppOpsManager::sClassLock;
 AutoPtr<IBinder> AppOpsManager::sToken;
 const Int32 AppOpsManager::sOpLength = 48;
 
-Int32 AppOpsManager::sOpToSwitch[48] = {
+String AppOpsManager::OPSTR_GPS("android:gps");
+String AppOpsManager::OPSTR_VIBRATE("android:vibrate");
+String AppOpsManager::OPSTR_READ_CONTACTS("android:read_contacts");
+String AppOpsManager::OPSTR_WRITE_CONTACTS("android:write_contacts");
+String AppOpsManager::OPSTR_READ_CALL_LOG("android:read_call_log");
+String AppOpsManager::OPSTR_WRITE_CALL_LOG("android:write_call_log");
+String AppOpsManager::OPSTR_READ_CALENDAR("android:read_calendar");
+String AppOpsManager::OPSTR_WRITE_CALENDAR("android:write_calendar");
+String AppOpsManager::OPSTR_WIFI_SCAN("android:wifi_scan");
+String AppOpsManager::OPSTR_POST_NOTIFICATION("android:post_notification");
+String AppOpsManager::OPSTR_NEIGHBORING_CELLS("android:neighboring_cells");
+String AppOpsManager::OPSTR_CALL_PHONE("android:call_phone");
+String AppOpsManager::OPSTR_READ_SMS("android:read_sms");
+String AppOpsManager::OPSTR_WRITE_SMS("android:write_sms");
+String AppOpsManager::OPSTR_RECEIVE_SMS("android:receive_sms");
+String AppOpsManager::OPSTR_RECEIVE_EMERGECY_SMS("android:receive_emergecy_sms");
+String AppOpsManager::OPSTR_RECEIVE_MMS("android:receive_mms");
+String AppOpsManager::OPSTR_RECEIVE_WAP_PUSH("android:receive_wap_push");
+String AppOpsManager::OPSTR_SEND_SMS("android:send_sms");
+String AppOpsManager::OPSTR_READ_ICC_SMS("android:read_icc_sms");
+String AppOpsManager::OPSTR_WRITE_ICC_SMS("android:write_icc_sms");
+String AppOpsManager::OPSTR_WRITE_SETTINGS("android:write_settings");
+String AppOpsManager::OPSTR_SYSTEM_ALERT_WINDOW("android:system_alert_window");
+String AppOpsManager::OPSTR_ACCESS_NOTIFICATIONS("android:access_notifications");
+String AppOpsManager::OPSTR_CAMERA("android:camera");
+String AppOpsManager::OPSTR_RECORD_AUDIO("android:record_audio");
+String AppOpsManager::OPSTR_PLAY_AUDIO("android:play_audio");
+String AppOpsManager::OPSTR_READ_CLIPBOARD("android:read_clipboard");
+String AppOpsManager::OPSTR_WRITE_CLIPBOARD("android:write_clipboard");
+String AppOpsManager::OPSTR_TAKE_MEDIA_BUTTONS("android:take_media_buttons");
+String AppOpsManager::OPSTR_TAKE_AUDIO_FOCUS("android:take_audio_focus");
+String AppOpsManager::OPSTR_AUDIO_MASTER_VOLUME("android:audio_master_volume");
+String AppOpsManager::OPSTR_AUDIO_VOICE_VOLUME("android:audio_voice_volume");
+String AppOpsManager::OPSTR_AUDIO_RING_VOLUME("android:audio_ring_volume");
+String AppOpsManager::OPSTR_AUDIO_MEDIA_VOLUME("android:audio_media_volume");
+String AppOpsManager::OPSTR_AUDIO_ALARM_VOLUME("android:audio_alarm_volume");
+String AppOpsManager::OPSTR_AUDIO_NOTIFICATION_VOLUME("android:audio_notification_volume");
+String AppOpsManager::OPSTR_AUDIO_BLUETOOTH_VOLUME("android:audio_bluetooth_volume");
+String AppOpsManager::OPSTR_WAKE_LOCK("android:wake_lock");
+String AppOpsManager::OPSTR_MUTE_MICROPHONE("android:mute_microphone");
+String AppOpsManager::OPSTR_TOAST_WINDOW("android:toast_window");
+String AppOpsManager::OPSTR_PROJECT_MEDIA("android:project_media");
+String AppOpsManager::OPSTR_WIFI_CHANGE("android:wifi_change");
+String AppOpsManager::OPSTR_BLUETOOTH_CHANGE("android:bluetooth_change");
+String AppOpsManager::OPSTR_SEND_MMS("android:send_mms");
+String AppOpsManager::OPSTR_READ_MMS("android:read_mms");
+String AppOpsManager::OPSTR_WRITE_MMS("android:write_mms");
+String AppOpsManager::OPSTR_BOOT_COMPLETED("android:boot_completed");
+String AppOpsManager::OPSTR_NFC_CHANGE("android:nfc_change");
+String AppOpsManager::OPSTR_DELETE_SMS("android:delete_sms");
+String AppOpsManager::OPSTR_DELETE_MMS("android:delete_mms");
+String AppOpsManager::OPSTR_DELETE_CONTACTS("android:delete_contacts");
+String AppOpsManager::OPSTR_DELETE_CALL_LOG("android:delete_call_log");
+String AppOpsManager::OPSTR_DATA_CONNECT_CHANGE("android:data_connect_change");
+String AppOpsManager::OPSTR_ALARM_WAKEUP("android:alarm_wakeup");
+String AppOpsManager::OPSTR_SU("android:su");
+
+Int32 AppOpsManager::sOpToSwitch[62] = {
         IAppOpsManager::OP_COARSE_LOCATION,
         IAppOpsManager::OP_COARSE_LOCATION,
         IAppOpsManager::OP_COARSE_LOCATION,
@@ -332,9 +415,23 @@ Int32 AppOpsManager::sOpToSwitch[48] = {
         IAppOpsManager::OP_TOAST_WINDOW,
         IAppOpsManager::OP_PROJECT_MEDIA,
         IAppOpsManager::OP_ACTIVATE_VPN,
+        IAppOpsManager::OP_WIFI_CHANGE,
+        IAppOpsManager::OP_BLUETOOTH_CHANGE,
+        IAppOpsManager::OP_SEND_MMS,
+        IAppOpsManager::OP_READ_MMS,
+        IAppOpsManager::OP_WRITE_MMS,
+        IAppOpsManager::OP_BOOT_COMPLETED,
+        IAppOpsManager::OP_NFC_CHANGE,
+        IAppOpsManager::OP_DELETE_SMS,
+        IAppOpsManager::OP_DELETE_MMS,
+        IAppOpsManager::OP_DELETE_CONTACTS,
+        IAppOpsManager::OP_DELETE_CALL_LOG,
+        IAppOpsManager::OP_DATA_CONNECT_CHANGE,
+        IAppOpsManager::OP_ALARM_WAKEUP,
+        IAppOpsManager::OP_SU,
 };
 
-String AppOpsManager::sOpToString[54] = {
+String AppOpsManager::sOpToString[62] = {
         IAppOpsManager::OPSTR_COARSE_LOCATION,
         IAppOpsManager::OPSTR_FINE_LOCATION,
         String(NULL),
@@ -383,9 +480,88 @@ String AppOpsManager::sOpToString[54] = {
         String(NULL),
         String(NULL),
         IAppOpsManager::OPSTR_ACTIVATE_VPN,
+        String(NULL),
+        String(NULL),
+        String(NULL),
+        String(NULL),
+        String(NULL),
+        String(NULL),
+        String(NULL),
+        String(NULL),
+        String(NULL),
+        String(NULL),
+        String(NULL),
+        String(NULL),
+        String(NULL),
+        OPSTR_SU,
 };
 
-String AppOpsManager::sOpNames[48] = {
+String AppOpsManager::sOpToOpString[62] = {
+        IAppOpsManager::OPSTR_COARSE_LOCATION,
+        IAppOpsManager::OPSTR_FINE_LOCATION,
+        OPSTR_GPS,
+        OPSTR_VIBRATE,
+        OPSTR_READ_CONTACTS,
+        OPSTR_WRITE_CONTACTS,
+        OPSTR_READ_CALL_LOG,
+        OPSTR_WRITE_CALL_LOG,
+        OPSTR_READ_CALENDAR,
+        OPSTR_WRITE_CALENDAR,
+        OPSTR_WIFI_SCAN,
+        OPSTR_POST_NOTIFICATION,
+        OPSTR_NEIGHBORING_CELLS,
+        OPSTR_CALL_PHONE,
+        OPSTR_READ_SMS,
+        OPSTR_WRITE_SMS,
+        OPSTR_RECEIVE_SMS,
+        OPSTR_RECEIVE_EMERGECY_SMS,
+        OPSTR_RECEIVE_MMS,
+        OPSTR_RECEIVE_WAP_PUSH,
+        OPSTR_SEND_SMS,
+        OPSTR_READ_ICC_SMS,
+        OPSTR_WRITE_ICC_SMS,
+        OPSTR_WRITE_SETTINGS,
+        OPSTR_SYSTEM_ALERT_WINDOW,
+        OPSTR_ACCESS_NOTIFICATIONS,
+        OPSTR_CAMERA,
+        OPSTR_RECORD_AUDIO,
+        OPSTR_PLAY_AUDIO,
+        OPSTR_READ_CLIPBOARD,
+        OPSTR_WRITE_CLIPBOARD,
+        OPSTR_TAKE_MEDIA_BUTTONS,
+        OPSTR_TAKE_AUDIO_FOCUS,
+        OPSTR_AUDIO_MASTER_VOLUME,
+        OPSTR_AUDIO_VOICE_VOLUME,
+        OPSTR_AUDIO_RING_VOLUME,
+        OPSTR_AUDIO_MEDIA_VOLUME,
+        OPSTR_AUDIO_ALARM_VOLUME,
+        OPSTR_AUDIO_NOTIFICATION_VOLUME,
+        OPSTR_AUDIO_BLUETOOTH_VOLUME,
+        OPSTR_WAKE_LOCK,
+        OPSTR_MONITOR_LOCATION,
+        OPSTR_MONITOR_HIGH_POWER_LOCATION,
+        OPSTR_GET_USAGE_STATS,
+        OPSTR_MUTE_MICROPHONE,
+        OPSTR_TOAST_WINDOW,
+        OPSTR_PROJECT_MEDIA,
+        OPSTR_ACTIVATE_VPN,
+        OPSTR_WIFI_CHANGE,
+        OPSTR_BLUETOOTH_CHANGE,
+        OPSTR_SEND_MMS,
+        OPSTR_READ_MMS,
+        OPSTR_WRITE_MMS,
+        OPSTR_BOOT_COMPLETED,
+        OPSTR_NFC_CHANGE,
+        OPSTR_DELETE_SMS,
+        OPSTR_DELETE_MMS,
+        OPSTR_DELETE_CONTACTS,
+        OPSTR_DELETE_CALL_LOG,
+        OPSTR_DATA_CONNECT_CHANGE,
+        OPSTR_ALARM_WAKEUP,
+        OPSTR_SU,
+};
+
+String AppOpsManager::sOpNames[62] = {
         String("COARSE_LOCATION"),
         String("FINE_LOCATION"),
         String("GPS"),
@@ -434,9 +610,23 @@ String AppOpsManager::sOpNames[48] = {
         String("TOAST_WINDOW"),
         String("PROJECT_MEDIA"),
         String("ACTIVATE_VPN"),
+        String("WIFI_CHANGE"),
+        String("BLUETOOTH_CHANGE"),
+        String("SEND_MMS"),
+        String("READ_MMS"),
+        String("WRITE_MMS"),
+        String("BOOT_COMPLETED"),
+        String("NFC_CHANGE"),
+        String("DELETE_SMS"),
+        String("DELETE_MMS"),
+        String("DELETE_CONTACTS"),
+        String("DELETE_CALL_LOG"),
+        String("DATA_CONNECT_CHANGE"),
+        String("ALARM_WAKEUP"),
+        String("SU"),
 };
 
-String AppOpsManager::sOpPerms[48] =  {
+String AppOpsManager::sOpPerms[62] =  {
         Manifest::permission::ACCESS_COARSE_LOCATION,
         Manifest::permission::ACCESS_FINE_LOCATION,
         String(NULL),
@@ -485,9 +675,23 @@ String AppOpsManager::sOpPerms[48] =  {
         String(NULL), // no permission for displaying toasts
         String(NULL), // no permission for projecting media
         String(NULL), // no permission for activating vpn
+        Manifest::permission::CHANGE_WIFI_STATE,
+        Manifest::permission::BLUETOOTH,
+        Manifest::permission::SEND_SMS,
+        Manifest::permission::READ_SMS,
+        Manifest::permission::WRITE_SMS,
+        Manifest::permission::RECEIVE_BOOT_COMPLETED,
+        Manifest::permission::NFC,
+        Manifest::permission::WRITE_SMS,
+        Manifest::permission::WRITE_SMS,
+        Manifest::permission::WRITE_CONTACTS,
+        Manifest::permission::WRITE_CALL_LOG,
+        Manifest::permission::MODIFY_PHONE_STATE,
+        String(NULL), // OP_ALARM_WAKEUP
+        String(NULL),
 };
 
-String AppOpsManager::sOpRestrictions[48] = {
+String AppOpsManager::sOpRestrictions[62] = {
         IUserManager::DISALLOW_SHARE_LOCATION, //COARSE_LOCATION
         IUserManager::DISALLOW_SHARE_LOCATION, //FINE_LOCATION
         IUserManager::DISALLOW_SHARE_LOCATION, //GPS
@@ -536,9 +740,23 @@ String AppOpsManager::sOpRestrictions[48] = {
         IUserManager::DISALLOW_CREATE_WINDOWS, // TOAST_WINDOW
         String(NULL), //PROJECT_MEDIA
         IUserManager::DISALLOW_CONFIG_VPN, // ACTIVATE_VPN
+        String(NULL), //WIFI_CHANGE
+        String(NULL), //BLUETOOTH_CHANGE
+        String(NULL), //SEND_MMS
+        String(NULL), //READ_MMS
+        String(NULL), //WRITE_MMS
+        String(NULL), //BOOT_COMPLETED
+        String(NULL), //NFC_CHANGE
+        String(NULL), //DELETE_SMS
+        String(NULL), //DELETE_MMS
+        String(NULL), //DELETE_CONTACTS
+        String(NULL), //DELETE_CALL_LOG
+        String(NULL), //DATA_CONNECT_CHANGE
+        String(NULL), //ALARM_WAKEUP
+        IUserManager::DISALLOW_SU, //SU TODO: this should really be investigated.
 };
 
-Boolean AppOpsManager::sOpAllowSystemRestrictionBypass[48] = {
+Boolean AppOpsManager::sOpAllowSystemRestrictionBypass[62] = {
         FALSE, //COARSE_LOCATION
         FALSE, //FINE_LOCATION
         FALSE, //GPS
@@ -587,9 +805,23 @@ Boolean AppOpsManager::sOpAllowSystemRestrictionBypass[48] = {
         TRUE, //TOAST_WINDOW
         FALSE, //PROJECT_MEDIA
         FALSE, //ACTIVATE_VPN
+        FALSE, // WIFI_CHANGE
+        FALSE, // BLUETOOTH_CHANGE
+        FALSE, // SEND_MMS
+        FALSE, // READ_MMS
+        FALSE, // WRITE_MMS
+        FALSE, // BOOT_COMPLETED
+        FALSE, // NFC_CHANGE
+        FALSE, //DELETE_SMS
+        FALSE, //DELETE_MMS
+        FALSE, //DELETE_CONTACTS
+        FALSE, //DELETE_CALL_LOG
+        FALSE, //DATA_CONNECT_CHANGE
+        TRUE, //ALARM_WAKEUP
+        FALSE, //SU
 };
 
-Int32 AppOpsManager::sOpDefaultMode[48] = {
+Int32 AppOpsManager::sOpDefaultMode[62] = {
         IAppOpsManager::MODE_ALLOWED,
         IAppOpsManager::MODE_ALLOWED,
         IAppOpsManager::MODE_ALLOWED,
@@ -638,9 +870,153 @@ Int32 AppOpsManager::sOpDefaultMode[48] = {
         IAppOpsManager::MODE_ALLOWED,
         IAppOpsManager::MODE_IGNORED, // OP_PROJECT_MEDIA
         IAppOpsManager::MODE_IGNORED, // OP_ACTIVATE_VPN
+        IAppOpsManager::MODE_ALLOWED,
+        IAppOpsManager::MODE_ALLOWED,
+        IAppOpsManager::MODE_ALLOWED,
+        IAppOpsManager::MODE_ALLOWED,
+        IAppOpsManager::MODE_ALLOWED,
+        IAppOpsManager::MODE_ALLOWED,
+        IAppOpsManager::MODE_ALLOWED,
+        IAppOpsManager::MODE_ALLOWED,
+        IAppOpsManager::MODE_ALLOWED,
+        IAppOpsManager::MODE_ALLOWED,
+        IAppOpsManager::MODE_ALLOWED,
+        IAppOpsManager::MODE_ALLOWED,
+        IAppOpsManager::MODE_ALLOWED, // OP_ALARM_WAKEUP
+        IAppOpsManager::MODE_ASK, // OP_SU
 };
 
-Boolean AppOpsManager::sOpDisableReset[48] = {
+Int32 AppOpsManager::sOpDefaultStrictMode[62] = {
+        IAppOpsManager::MODE_ASK,     // OP_COARSE_LOCATION
+        IAppOpsManager::MODE_ASK,     // OP_FINE_LOCATION
+        IAppOpsManager::MODE_ASK,     // OP_GPS
+        IAppOpsManager::MODE_ALLOWED, // OP_VIBRATE
+        IAppOpsManager::MODE_ASK,     // OP_READ_CONTACTS
+        IAppOpsManager::MODE_ASK,     // OP_WRITE_CONTACTS
+        IAppOpsManager::MODE_ASK,     // OP_READ_CALL_LOG
+        IAppOpsManager::MODE_ASK,     // OP_WRITE_CALL_LOG
+        IAppOpsManager::MODE_ALLOWED, // OP_READ_CALENDAR
+        IAppOpsManager::MODE_ALLOWED, // OP_WRITE_CALENDAR
+        IAppOpsManager::MODE_ASK,     // OP_WIFI_SCAN
+        IAppOpsManager::MODE_ALLOWED, // OP_POST_NOTIFICATION
+        IAppOpsManager::MODE_ALLOWED, // OP_NEIGHBORING_CELLS
+        IAppOpsManager::MODE_ASK,     // OP_CALL_PHONE
+        IAppOpsManager::MODE_ASK,     // OP_READ_SMS
+        IAppOpsManager::MODE_ASK,     // OP_WRITE_SMS
+        IAppOpsManager::MODE_ALLOWED, // OP_RECEIVE_SMS
+        IAppOpsManager::MODE_ALLOWED, // OP_RECEIVE_EMERGECY_SMS
+        IAppOpsManager::MODE_ALLOWED, // OP_RECEIVE_MMS
+        IAppOpsManager::MODE_ALLOWED, // OP_RECEIVE_WAP_PUSH
+        IAppOpsManager::MODE_ASK,     // OP_SEND_SMS
+        IAppOpsManager::MODE_ALLOWED, // OP_READ_ICC_SMS
+        IAppOpsManager::MODE_ALLOWED, // OP_WRITE_ICC_SMS
+        IAppOpsManager::MODE_ALLOWED, // OP_WRITE_SETTINGS
+        IAppOpsManager::MODE_ALLOWED, // OP_SYSTEM_ALERT_WINDOW
+        IAppOpsManager::MODE_ALLOWED, // OP_ACCESS_NOTIFICATIONS
+        IAppOpsManager::MODE_ASK,     // OP_CAMERA
+        IAppOpsManager::MODE_ASK,     // OP_RECORD_AUDIO
+        IAppOpsManager::MODE_ALLOWED, // OP_PLAY_AUDIO
+        IAppOpsManager::MODE_ALLOWED, // OP_READ_CLIPBOARD
+        IAppOpsManager::MODE_ALLOWED, // OP_WRITE_CLIPBOARD
+        IAppOpsManager::MODE_ALLOWED, // OP_TAKE_MEDIA_BUTTONS
+        IAppOpsManager::MODE_ALLOWED, // OP_TAKE_AUDIO_FOCUS
+        IAppOpsManager::MODE_ALLOWED, // OP_AUDIO_MASTER_VOLUME
+        IAppOpsManager::MODE_ALLOWED, // OP_AUDIO_VOICE_VOLUME
+        IAppOpsManager::MODE_ALLOWED, // OP_AUDIO_RING_VOLUME
+        IAppOpsManager::MODE_ALLOWED, // OP_AUDIO_MEDIA_VOLUME
+        IAppOpsManager::MODE_ALLOWED, // OP_AUDIO_ALARM_VOLUME
+        IAppOpsManager::MODE_ALLOWED, // OP_AUDIO_NOTIFICATION_VOLUME
+        IAppOpsManager::MODE_ALLOWED, // OP_AUDIO_BLUETOOTH_VOLUME
+        IAppOpsManager::MODE_ALLOWED, // OP_WAKE_LOCK
+        IAppOpsManager::MODE_ALLOWED, // OP_MONITOR_LOCATION
+        IAppOpsManager::MODE_ASK,     // OP_MONITOR_HIGH_POWER_LOCATION
+        IAppOpsManager::MODE_DEFAULT, // OP_GET_USAGE_STATS
+        IAppOpsManager::MODE_ALLOWED, // OP_MUTE_MICROPHONE
+        IAppOpsManager::MODE_ALLOWED, // OP_TOAST_WINDOW
+        IAppOpsManager::MODE_IGNORED, // OP_PROJECT_MEDIA
+        IAppOpsManager::MODE_IGNORED, // OP_ACTIVATE_VPN
+        IAppOpsManager::MODE_ASK,     // OP_WIFI_CHANGE
+        IAppOpsManager::MODE_ASK,     // OP_BLUETOOTH_CHANGE
+        IAppOpsManager::MODE_ASK,     // OP_SEND_MMS
+        IAppOpsManager::MODE_ASK,     // OP_READ_MMS
+        IAppOpsManager::MODE_ASK,     // OP_WRITE_MMS
+        IAppOpsManager::MODE_ALLOWED, // OP_BOOT_COMPLETED
+        IAppOpsManager::MODE_ASK,     // OP_NFC_CHANGE
+        IAppOpsManager::MODE_ASK,     // OP_DELETE_SMS
+        IAppOpsManager::MODE_ASK,     // OP_DELETE_MMS
+        IAppOpsManager::MODE_ASK,     // OP_DELETE_CONTACTS
+        IAppOpsManager::MODE_ASK,     // OP_DELETE_CALL_LOG
+        IAppOpsManager::MODE_ASK,     // OP_DATA_CONNECT_CHANGE
+        IAppOpsManager::MODE_ALLOWED, // OP_ALARM_WAKEUP
+        IAppOpsManager::MODE_ASK,     // OP_SU
+};
+
+Boolean AppOpsManager::sOpStrictMode[62] = {
+        TRUE,     // OP_COARSE_LOCATION
+        TRUE,     // OP_FINE_LOCATION
+        TRUE,     // OP_GPS
+        FALSE,    // OP_VIBRATE
+        TRUE,     // OP_READ_CONTACTS
+        TRUE,     // OP_WRITE_CONTACTS
+        TRUE,     // OP_READ_CALL_LOG
+        TRUE,     // OP_WRITE_CALL_LOG
+        FALSE,    // OP_READ_CALENDAR
+        FALSE,    // OP_WRITE_CALENDAR
+        TRUE,     // OP_WIFI_SCAN
+        FALSE,    // OP_POST_NOTIFICATION
+        FALSE,    // OP_NEIGHBORING_CELLS
+        TRUE,     // OP_CALL_PHONE
+        TRUE,     // OP_READ_SMS
+        TRUE,     // OP_WRITE_SMS
+        FALSE,    // OP_RECEIVE_SMS
+        FALSE,    // OP_RECEIVE_EMERGECY_SMS
+        FALSE,    // OP_RECEIVE_MMS
+        FALSE,    // OP_RECEIVE_WAP_PUSH
+        TRUE,     // OP_SEND_SMS
+        FALSE,    // OP_READ_ICC_SMS
+        FALSE,    // OP_WRITE_ICC_SMS
+        FALSE,    // OP_WRITE_SETTINGS
+        FALSE,    // OP_SYSTEM_ALERT_WINDOW
+        FALSE,    // OP_ACCESS_NOTIFICATIONS
+        TRUE,     // OP_CAMERA
+        TRUE,     // OP_RECORD_AUDIO
+        FALSE,    // OP_PLAY_AUDIO
+        FALSE,    // OP_READ_CLIPBOARD
+        FALSE,    // OP_WRITE_CLIPBOARD
+        FALSE,    // OP_TAKE_MEDIA_BUTTONS
+        FALSE,    // OP_TAKE_AUDIO_FOCUS
+        FALSE,    // OP_AUDIO_MASTER_VOLUME
+        FALSE,    // OP_AUDIO_VOICE_VOLUME
+        FALSE,    // OP_AUDIO_RING_VOLUME
+        FALSE,    // OP_AUDIO_MEDIA_VOLUME
+        FALSE,    // OP_AUDIO_ALARM_VOLUME
+        FALSE,    // OP_AUDIO_NOTIFICATION_VOLUME
+        FALSE,    // OP_AUDIO_BLUETOOTH_VOLUME
+        FALSE,    // OP_WAKE_LOCK
+        FALSE,    // OP_MONITOR_LOCATION
+        TRUE,     // OP_MONITOR_HIGH_POWER_LOCATION
+        FALSE,    // OP_GET_USAGE_STATS
+        FALSE,    // OP_MUTE_MICROPHONE
+        FALSE,    // OP_TOAST_WINDOW
+        FALSE,    // OP_PROJECT_MEDIA
+        FALSE,    // OP_ACTIVATE_VPN
+        TRUE,     // OP_WIFI_CHANGE
+        TRUE,     // OP_BLUETOOTH_CHANGE
+        TRUE,     // OP_SEND_MMS
+        TRUE,     // OP_READ_MMS
+        TRUE,     // OP_WRITE_MMS
+        FALSE,    // OP_BOOT_COMPLETED
+        TRUE,     // OP_NFC_CHANGE
+        TRUE,     // OP_DELETE_SMS
+        TRUE,     // OP_DELETE_MMS
+        TRUE,     // OP_DELETE_CONTACTS
+        TRUE,     // OP_DELETE_CALL_LOG
+        TRUE,     // OP_DATA_CONNECT_CHANGE
+        FALSE,    // OP_ALARM_WAKEUP
+        TRUE,     // OP_SU
+};
+
+Boolean AppOpsManager::sOpDisableReset[62] = {
         FALSE,
         FALSE,
         FALSE,
@@ -689,20 +1065,45 @@ Boolean AppOpsManager::sOpDisableReset[48] = {
         FALSE,
         FALSE,
         FALSE,
+        FALSE,     // OP_WIFI_CHANGE
+        FALSE,     // OP_BLUETOOTH_CHANGE
+        FALSE,     // OP_SEND_MMS
+        FALSE,     // OP_READ_MMS
+        FALSE,     // OP_WRITE_MMS
+        FALSE,     // OP_BOOT_COMPLETED
+        FALSE,     // OP_NFC_CHANGE
+        FALSE,     // OP_DELETE_SMS
+        FALSE,     // OP_DELETE_MMS
+        FALSE,     // OP_DELETE_CONTACTS
+        FALSE,     // OP_DELETE_CALL_LOG
+        FALSE,     // OP_DATA_CONNECT_CHANGE
+        FALSE,     // OP_ALARM_WAKEUP
+        FALSE,     // OP_SU
 };
 
-static AutoPtr<HashMap<String, Int32> > InitOpStrToOp()
+static AutoPtr<HashMap<String, Int32> > InitOpStrToOp(String strs[])
 {
     AutoPtr<HashMap<String, Int32> > map = new HashMap<String, Int32>();
     for (Int32 i = 0; i < IAppOpsManager::_NUM_OP; i++) {
-        if (!AppOpsManager::sOpToString[i].IsNull()) {
-            (*map)[AppOpsManager::sOpToString[i]] = i;
+        if (!strs[i].IsNull()) {
+            (*map)[strs[i]] = i;
         }
     }
     return map;
 }
 
-AutoPtr<HashMap<String, Int32> > AppOpsManager::sOpStrToOp = InitOpStrToOp();
+static AutoPtr<HashMap<String, Int32> > InitNameToOp()
+{
+    AutoPtr<HashMap<String, Int32> > map = new HashMap<String, Int32>();
+    for (Int32 i = 0; i < IAppOpsManager::_NUM_OP; i++) {
+        (*map)[AppOpsManager::sOpNames[i]] = i;
+    }
+    return map;
+}
+
+AutoPtr<HashMap<String, Int32> > AppOpsManager::sOpStrToOp = InitOpStrToOp(AppOpsManager::sOpToString);
+AutoPtr<HashMap<String, Int32> > AppOpsManager::sOpStringToOp = InitOpStrToOp(AppOpsManager::sOpToOpString);
+AutoPtr<HashMap<String, Int32> > AppOpsManager::sNameToOp = InitNameToOp();
 
 CAR_INTERFACE_IMPL(AppOpsManager, Object, IAppOpsManager)
 
@@ -740,6 +1141,17 @@ String AppOpsManager::OpToName(
     return sb.ToString();
 }
 
+Int32 AppOpsManager::NameToOp(
+    /* [in] */ const String& name)
+{
+    HashMap<String, Int32>::Iterator it = sNameToOp->Find(name);
+    if (it == sNameToOp->End()) {
+        return IAppOpsManager::OP_NONE;
+    }
+
+    return it->mSecond;
+}
+
 String AppOpsManager::OpToPermission(
     /* [in] */ Int32 op)
 {
@@ -759,8 +1171,12 @@ Boolean AppOpsManager::OpAllowSystemBypassRestriction(
 }
 
 Int32 AppOpsManager::OpToDefaultMode(
-    /* [in] */ Int32 op)
+    /* [in] */ Int32 op,
+    /* [in] */ Boolean isStrict)
 {
+    if (isStrict) {
+        return sOpDefaultStrictMode[op];
+    }
     return sOpDefaultMode[op];
 }
 
@@ -1221,7 +1637,13 @@ ECode AppOpsManager::IsControlAllowed(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    assert(0);
+    VALIDATE_NOT_NULL(result)
+    Boolean isShow = TRUE;
+    // try {
+    mService->IsControlAllowed(op, packageName, &isShow);
+    // } catch (RemoteException e) {
+    // }
+    *result = isShow;
     return NOERROR;
 }
 
@@ -1230,7 +1652,19 @@ ECode AppOpsManager::GetPrivacyGuardSettingForPackage(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* state)
 {
-    assert(0);
+    VALIDATE_NOT_NULL(state)
+    Boolean value = FALSE;
+    // try {
+    ECode ec = mService->GetPrivacyGuardSettingForPackage(uid, packageName, &value);
+    // } catch (RemoteException e) {
+    // }
+    if (FAILED(ec)) {
+        *state = FALSE;
+    }
+    else {
+        *state = value;
+    }
+
     return NOERROR;
 }
 
@@ -1239,35 +1673,50 @@ ECode AppOpsManager::SetPrivacyGuardSettingForPackage(
     /* [in] */ const String& packageName,
     /* [in] */ Boolean state)
 {
-    assert(0);
-    return NOERROR;
+    // try {
+    return mService->SetPrivacyGuardSettingForPackage(uid, packageName, state);
+    // } catch (RemoteException e) {
+    // }
 }
 
 ECode AppOpsManager::ResetCounters()
 {
-    assert(0);
-    return NOERROR;
+    // try {
+    return mService->ResetCounters();
+    // } catch (RemoteException e) {
+    // }
 }
 
 Boolean AppOpsManager::IsStrictOp(
     /* [in] */ Int32 code)
 {
-    assert(0);
-    return FALSE;
+    return sOpStrictMode[code];
 }
 
 Int32 AppOpsManager::StringToMode(
     /* [in] */ const String& permission)
 {
-    assert(0);
-    return 0;
+    if (permission.EqualsIgnoreCase("allowed")) {
+        return IAppOpsManager::MODE_ALLOWED;
+    }
+    else if (permission.EqualsIgnoreCase("ignored")) {
+        return IAppOpsManager::MODE_IGNORED;
+    }
+    else if (permission.EqualsIgnoreCase("ask")) {
+        return IAppOpsManager::MODE_ASK;
+    }
+    return IAppOpsManager::MODE_ERRORED;
 }
 
 Int32 AppOpsManager::StringOpToOp(
     /* [in] */ const String& op)
 {
-    assert(0);
-    return 0;
+    HashMap<String, Int32>::Iterator it = sOpStringToOp->Find(op);
+    if (it == sOpStringToOp->End()) {
+        return IAppOpsManager::OP_NONE;
+    }
+
+    return it->mSecond;
 }
 
 } // namespace App

@@ -473,6 +473,22 @@ ECode NotificationManagerService::BinderService::GetPackageVisibilityOverride(
     return mHost->mRankingHelper->GetPackageVisibilityOverride(pkg, uid, result);
 }
 
+ECode NotificationManagerService::BinderService::SetShowNotificationForPackageOnKeyguard(
+    /* [in] */ const String& pkg,
+    /* [in] */ Int32 uid,
+    /* [in] */ Int32 status)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode NotificationManagerService::BinderService::GetShowNotificationForPackageOnKeyguard(
+    /* [in] */ const String& pkg,
+    /* [in] */ Int32 uid,
+    /* [out] */ Int32* result)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode NotificationManagerService::BinderService::GetActiveNotifications(
     /* [in] */ const String& callingPkg,
     /* [out, callee] */ ArrayOf<IStatusBarNotification*>** ns)

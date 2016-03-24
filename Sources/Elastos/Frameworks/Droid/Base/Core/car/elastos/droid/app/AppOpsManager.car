@@ -76,6 +76,12 @@ module
 
         GetDuration(
             [out] Int32* duration);
+
+        GetAllowedCount(
+            [out] Int32* allowedCount);
+
+        GetIgnoredCount(
+            [out] Int32* ignoredCount);
     }
 
     /**
@@ -88,6 +94,9 @@ module
      */
     [deprecated]
     interface IAppOpsManager {
+        /** {@hide */
+        const String ACTION_SU_SESSION_CHANGED =
+            "android.intent.action.SU_SESSION_CHANGED";
 
         /**
          * Result from {@link #checkOp}, {@link #noteOp}, {@link #startOp}: the given caller is
@@ -222,7 +231,35 @@ module
         /** @hide Activate a VPN connection without user intervention. */
         const Int32 OP_ACTIVATE_VPN = 47;
         /** @hide */
-        const Int32 _NUM_OP = 48;
+        const Int32 OP_WIFI_CHANGE = 48;
+        /** @hide */
+        const Int32 OP_BLUETOOTH_CHANGE = 49;
+        /** @hide */
+        const Int32 OP_SEND_MMS = 50;
+        /** @hide */
+        const Int32 OP_READ_MMS = 51;
+        /** @hide */
+        const Int32 OP_WRITE_MMS = 52;
+        /** @hide */
+        const Int32 OP_BOOT_COMPLETED = 53;
+        /** @hide */
+        const Int32 OP_NFC_CHANGE = 54;
+        /** @hide */
+        const Int32 OP_DELETE_SMS = 55;
+        /** @hide */
+        const Int32 OP_DELETE_MMS = 56;
+        /** @hide */
+        const Int32 OP_DELETE_CONTACTS = 57;
+        /** @hide */
+        const Int32 OP_DELETE_CALL_LOG = 58;
+        /** @hide */
+        const Int32 OP_DATA_CONNECT_CHANGE = 59;
+        /** @hide */
+        const Int32 OP_ALARM_WAKEUP = 60;
+        /** @hide */
+        const Int32 OP_SU = 61;
+        /** @hide */
+        const Int32 _NUM_OP = 62;
 
         // when adding one of these:
         //  - increment _NUM_OP
@@ -646,6 +683,14 @@ module
             [out] String* result);
 
         /**
+         * Map a non-localized name for the operation back to the Op number
+         * @hide
+         */
+        NameToOp(
+            [in] String name,
+            [out] Int32* op);
+
+        /**
          * Retrieve the permission associated with an operation, or null if there is not one.
          * @hide
          */
@@ -676,6 +721,7 @@ module
          */
         OpToDefaultMode(
             [in] Int32 op,
+            [in] Boolean isStrict,
             [out] Int32* result);
 
         /**
@@ -686,6 +732,7 @@ module
             [in] Int32 op,
             [out] Boolean* result);
 
+        /** @hide */
         IsStrictEnable(
             [out] Boolean* result);
 
@@ -696,7 +743,6 @@ module
         IsStrictOp(
             [in] Int32 code,
             [out] Boolean* isStrictOp);
-
 
         /** @hide */
         StringToMode(

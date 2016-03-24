@@ -173,6 +173,8 @@ SOURCES += CWallpaperInfo.cpp
 SOURCES += CWallpaperManager.cpp
 SOURCES += CWallpaperManagerHelper.cpp
 SOURCES += CGlobalsWallpaperManagerCallback.cpp
+SOURCES += ProfileManager.cpp
+SOURCES += CProfileManagerHelper.cpp
 
 #ELASTOS_LIBS += admin/admin.lib
 #ELASTOS_LIBS += backup/backup.lib

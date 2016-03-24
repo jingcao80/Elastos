@@ -1472,7 +1472,33 @@ ECode ApplicationPackageManager::GetThemedResourcesForApplication(
     /* [in] */ const String& themePkgName,
     /* [out] */ IResources** res)
 {
-    return E_NOT_IMPLEMENTED;
+    String packageName;
+    IPackageItemInfo::Probe(app)->GetPackageName(&packageName);
+    AutoPtr<IContextImpl> ctx;
+    CContextImpl* ci = (CContextImpl*)IContextImpl::Probe(mContext);
+    if (packageName.Equals("system")) {
+        ci->mMainThread->GetSystemContext((IContextImpl**)&ctx);
+        return IContext::Probe(ctx)->GetResources(res);
+    }
+
+    Int32 uid;
+    app->GetUid(&uid);
+    String sourceDir;
+    if (uid == Process::MyUid()) {
+        app->GetSourceDir(&sourceDir);
+    }
+    else {
+        app->GetPublicSourceDir(&sourceDir);
+    }
+    ci->mMainThread->GetTopLevelThemedResources(
+            sourceDir, IDisplay::DEFAULT_DISPLAY,
+            ci->mPackageInfo, packageName, themePkgName, res);
+    if ((*res) != NULL) {
+        return NOERROR;
+    }
+
+    // throw new NameNotFoundException("Unable to open " + app.publicSourceDir);
+    return E_NAME_NOT_FOUND_EXCEPTION;
 }
 
 ECode ApplicationPackageManager::GetThemedResourcesForApplication(
@@ -1480,7 +1506,9 @@ ECode ApplicationPackageManager::GetThemedResourcesForApplication(
     /* [in] */ const String& themePkgName,
     /* [out] */ IResources** res)
 {
-    return E_NOT_IMPLEMENTED;
+    AutoPtr<IApplicationInfo> appInfo;
+    GetApplicationInfo(appPackageName, 0, (IApplicationInfo**)&appInfo);
+    return GetThemedResourcesForApplication(appInfo, themePkgName, res);
 }
 
 ECode ApplicationPackageManager::GetThemedResourcesForApplicationAsUser(
@@ -1489,7 +1517,22 @@ ECode ApplicationPackageManager::GetThemedResourcesForApplicationAsUser(
     /* [in] */ Int32 userId,
     /* [out] */ IResources** res)
 {
-    return E_NOT_IMPLEMENTED;
+    if (userId < 0) {
+        // throw new IllegalArgumentException(
+        //         "Call does not support special user #" + userId);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    // try {
+    AutoPtr<IApplicationInfo> ai;
+    mPM->GetApplicationInfo(appPackageName, 0, userId, (IApplicationInfo**)&ai);
+    if (ai != NULL) {
+        return GetThemedResourcesForApplication(ai, themePkgName, res);
+    }
+    // } catch (RemoteException e) {
+    //     throw new RuntimeException("Package manager has died", e);
+    // }
+    // throw new NameNotFoundException("Package " + appPackageName + " doesn't exist");
+    return E_NAME_NOT_FOUND_EXCEPTION;
 }
 
 ECode ApplicationPackageManager::IsSafeMode(
@@ -2233,7 +2276,17 @@ ECode ApplicationPackageManager::SetComponentProtectedSetting(
     /* [in] */ IComponentName* componentName,
     /* [in] */ Boolean newState)
 {
-    return E_NOT_IMPLEMENTED;
+    // try {
+    Int32 userId;
+    mContext->GetUserId(&userId);
+    ECode ec = mPM->SetComponentProtectedSetting(componentName, newState, userId);
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        Logger::E(TAG, "Failed to set component protected setting");
+    }
+    // } catch (RemoteException re) {
+    //     Log.e(TAG, "Failed to set component protected setting", re);
+    // }
+    return ec;
 }
 
 ECode ApplicationPackageManager::GetPackageInstaller(
@@ -2469,14 +2522,33 @@ AutoPtr<IUserInfo> ApplicationPackageManager::GetUserIfProfile(
 ECode ApplicationPackageManager::UpdateIconMaps(
     /* [in] */ const String& pkgName)
 {
-    return E_NOT_IMPLEMENTED;
+    // try {
+    ECode ec = mPM->UpdateIconMapping(pkgName);
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        Logger::E(TAG, "Failed to update icon maps");
+    }
+    // } catch (RemoteException re) {
+    //     Log.e(TAG, "Failed to update icon maps", re);
+    // }
+
+    return ec;
 }
 
 ECode ApplicationPackageManager::ProcessThemeResources(
     /* [in] */ const String& themePkgName,
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
+    // try {
+    ECode ec = mPM->ProcessThemeResources(themePkgName, result);
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        Logger::E(TAG, "Unable to process theme resources for %s", themePkgName.string());
+        *result = 0;
+    }
+    // } catch (RemoteException e) {
+    //     Log.e(TAG, "Unable to process theme resources for " + themePkgName, e);
+    // }
+
+    return NOERROR;
 }
 
 //==========================================================================

@@ -463,6 +463,13 @@ ECode AlarmManagerService::BinderService::GetNextAlarmClock(
     return NOERROR;
 }
 
+ECode AlarmManagerService::BinderService::UpdateBlockedUids(
+    /* [in] */ Int32 uid,
+    /* [in] */ Boolean isBlocked)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode AlarmManagerService::BinderService::Dump(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ IPrintWriter* pw,

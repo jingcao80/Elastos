@@ -998,9 +998,9 @@ module
         DeleteActivityContainer(
             [in] IIActivityContainer* container);
 
-        GetEnclosingActivityContainer(
+        GetActivityDisplayId(
             [in] IBinder* activityToken,
-            [out] IIActivityContainer** container);
+            [out] Int32* container);
 
         GetHomeActivityToken(
             [out] IBinder** result);

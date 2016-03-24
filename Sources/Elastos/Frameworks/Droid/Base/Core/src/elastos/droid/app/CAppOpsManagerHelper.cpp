@@ -42,6 +42,15 @@ ECode CAppOpsManagerHelper::OpToName(
     return NOERROR;
 }
 
+ECode CAppOpsManagerHelper::NameToOp(
+    /* [in] */ const String& name,
+    /* [out] */ Int32* op)
+{
+    VALIDATE_NOT_NULL(op)
+    *op = AppOpsManager::NameToOp(name);
+    return NOERROR;
+}
+
 ECode CAppOpsManagerHelper::OpToPermission(
     /* [in] */ Int32 op,
     /* [out] */ String* result)
@@ -71,10 +80,11 @@ ECode CAppOpsManagerHelper::OpAllowSystemBypassRestriction(
 
 ECode CAppOpsManagerHelper::OpToDefaultMode(
     /* [in] */ Int32 op,
+    /* [in] */ Boolean isStrict,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = AppOpsManager::OpToDefaultMode(op);
+    *result = AppOpsManager::OpToDefaultMode(op, isStrict);
     return NOERROR;
 }
 

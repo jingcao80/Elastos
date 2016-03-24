@@ -37,6 +37,11 @@ module
         GetNextAlarmClock(
             [in] Int32 userId,
             [out] IAlarmClockInfo** info);
+
+        // update the uids being synchronized by network socket request manager
+        UpdateBlockedUids(
+            [in] Int32 uid,
+            [in] Boolean isBlocked);
     }
 
     } // namespace App

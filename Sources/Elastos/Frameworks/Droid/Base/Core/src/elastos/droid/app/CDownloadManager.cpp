@@ -207,6 +207,9 @@ Int64 CDownloadManager::CursorTranslator::GetPausedReason(
         case IDownloadsImpl::STATUS_QUEUED_FOR_WIFI:
             return PAUSED_QUEUED_FOR_WIFI;
 
+        case IDownloadsImpl::STATUS_PAUSED_BY_APP:
+            return PAUSED_BY_APP;
+
         default:
             return PAUSED_UNKNOWN;
     }
@@ -572,6 +575,37 @@ ECode CDownloadManager::RestartDownload(
     AutoPtr<ArrayOf<String> > args = GetWhereArgsForIds(ids);
     Int32 res;
     mResolver->Update(mBaseUri, values, GetWhereClauseForIds(ids), args, &res);
+    return NOERROR;
+}
+
+ECode CDownloadManager::PauseDownload(
+    /* [in] */ Int64 id)
+{
+    AutoPtr<IContentValues> values;
+    CContentValues::New((IContentValues**)&values);
+    values->Put(IDownloadsImpl::COLUMN_CONTROL, IDownloadsImpl::CONTROL_PAUSED);
+
+    AutoPtr<IContentUris> cUris;
+    CContentUris::AcquireSingleton((IContentUris**)&cUris);
+    AutoPtr<IUri> uri;
+    cUris->WithAppendedId(mBaseUri, id, (IUri**)&uri);
+    Int32 res;
+    mResolver->Update(uri, values, String(NULL), NULL, &res);
+    return NOERROR;
+}
+
+ECode CDownloadManager::ResumeDownload(
+    /* [in] */ Int64 id)
+{
+    AutoPtr<IContentValues> values;
+    CContentValues::New((IContentValues**)&values);
+    values->Put(IDownloadsImpl::COLUMN_CONTROL, IDownloadsImpl::CONTROL_RUN);
+    AutoPtr<IContentUris> cUris;
+    CContentUris::AcquireSingleton((IContentUris**)&cUris);
+    AutoPtr<IUri> uri;
+    cUris->WithAppendedId(mBaseUri, id, (IUri**)&uri);
+    Int32 res;
+    mResolver->Update(uri, values, String(NULL), NULL, &res);
     return NOERROR;
 }
 
