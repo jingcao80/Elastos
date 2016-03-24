@@ -844,6 +844,17 @@ public:
         /* [in] */ const String& pkgName,
         /* [out] */ IResources** res);
 
+    /**
+     * Creates the top level resources for the given package.
+     */
+    CARAPI GetTopLevelThemedResources(
+        /* [in] */ const String& resDir,
+        /* [in] */ Int32 displayId,
+        /* [in] */ LoadedPkg* pkgInfo,
+        /* [in] */ const String& pkgName,
+        /* [in] */ const String& themePkgName,
+        /* [out] */ IResources** res);
+
     CARAPI GetHandler(
         /* [out] */ IHandler** h);
 

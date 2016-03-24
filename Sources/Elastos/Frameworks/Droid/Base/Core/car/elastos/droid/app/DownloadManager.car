@@ -289,6 +289,13 @@ module
         const Int32 PAUSED_UNKNOWN = 4;
 
         /**
+        * Value of {@link #COLUMN_REASON} when the download is paused by user.
+        *
+        * @hide
+        */
+        const Int32 PAUSED_BY_APP = 5;
+
+        /**
          * Broadcast intent action sent by the download manager when a download completes.
          */
         const String ACTION_DOWNLOAD_COMPLETE = "android.intent.action.DOWNLOAD_COMPLETE";
@@ -455,6 +462,24 @@ module
          */
         RestartDownload(
             [in] ArrayOf<Int64>* ids);
+
+        /**
+         * Pause the given running download by user.
+         *
+         * @param id the ID of the download to be paused
+         * @hide
+         */
+        PauseDownload(
+            [in] Int64 id);
+
+        /**
+         * Resume the given paused download by user.
+         *
+         * @param id the ID of the download to be resumed
+         * @hide
+         */
+        ResumeDownload(
+            [in] Int64 id);
 
         /**
          * Adds a file to the downloads database system, so it could appear in Downloads App

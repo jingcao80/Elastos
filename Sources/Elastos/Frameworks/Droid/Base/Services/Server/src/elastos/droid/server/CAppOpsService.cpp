@@ -112,18 +112,17 @@ ECode CAppOpsService::WriteRunner::Run()
 CAppOpsService::Op::Op(
     /* [in] */ Int32 uid,
     /* [in] */ const String& packageName,
-    /* [in] */ Int32 op)
+    /* [in] */ Int32 op,
+    /* [in] */ Int32 mode)
     : mUid(uid)
     , mPackageName(packageName)
     , mOp(op)
+    , mMode(mode)
     , mDuration(0)
     , mTime(0)
     , mRejectTime(0)
     , mNesting(0)
 {
-    AutoPtr<IAppOpsManagerHelper> aom;
-    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
-    aom->OpToDefaultMode(op, &mMode);
 }
 
 //================================================================================
@@ -459,7 +458,8 @@ AutoPtr<IArrayList> CAppOpsService::CollectOps( //ArrayList><IAppOpsManager::OpE
             Op* curOp = (Op*)IObject::Probe(obj);
             AutoPtr<IAppOpsManagerOpEntry> oe;
             CAppOpsManagerOpEntry::New(curOp->mOp, curOp->mMode, curOp->mTime,
-                curOp->mRejectTime, curOp->mDuration, (IAppOpsManagerOpEntry**)&oe);
+                curOp->mRejectTime, curOp->mDuration, curOp->mAllowedCount,
+                curOp->mIgnoredCount, (IAppOpsManagerOpEntry**)&oe);
             resOps->Add(oe.Get());
         }
     }
@@ -474,7 +474,8 @@ AutoPtr<IArrayList> CAppOpsService::CollectOps( //ArrayList><IAppOpsManager::OpE
                 }
                 AutoPtr<IAppOpsManagerOpEntry> oe;
                 CAppOpsManagerOpEntry::New(curOp->mOp, curOp->mMode, curOp->mTime,
-                    curOp->mRejectTime, curOp->mDuration, (IAppOpsManagerOpEntry**)&oe);
+                    curOp->mRejectTime, curOp->mDuration, curOp->mAllowedCount,
+                    curOp->mIgnoredCount, (IAppOpsManagerOpEntry**)&oe);
                 resOps->Add(oe.Get());
             }
         }
@@ -639,8 +640,9 @@ ECode CAppOpsService::SetMode(
                     repCbs->AddAll(ICollection::Probe(obj));
                 }
 
-                Int32 defaultMode;
-                aom->OpToDefaultMode(op->mOp, &defaultMode);
+                // TODO: should be GetDefaultMode
+                assert(0 && "TODO:");
+                Int32 defaultMode = 0; // = GetDefaultMode(code, uid, packageName);
                 if (mode == defaultMode) {
                     // If going into the default mode, prune this op
                     // if there is nothing else interesting in it.
@@ -753,7 +755,11 @@ ECode CAppOpsService::ResetAllModes()
                     Boolean allow;
                     Int32 defaultMode = 0;
                     aom->OpAllowsReset(curOp->mOp, &allow);
-                    if (allow) aom->OpToDefaultMode(curOp->mOp, &defaultMode);
+                    if (allow) {
+                        assert(0 && "TODO:");
+                        // defaultMode = GetDefaultMode(curOp->mOp, curOp->mUid,
+                        //         curOp->mPackageName);
+                    }
                     if (allow && curOp->mMode != defaultMode) {
                         curOp->mMode = defaultMode;
                         changed = TRUE;
@@ -947,7 +953,9 @@ ECode CAppOpsService::CheckOperation(
         aom->OpToSwitch(code, &sw);
         AutoPtr<Op> op = GetOpLocked(sw, uid, packageName, FALSE);
         if (op == NULL) {
-            return aom->OpToDefaultMode(code, result);
+            assert(0 && "TODO:");
+            // *result = GetDefaultMode(code, uid, packageName)
+            return NOERROR;
         }
 
         *result = op->mMode;
@@ -1389,6 +1397,7 @@ AutoPtr<CAppOpsService::Op> CAppOpsService::GetOpLocked(
     /* [in] */ Int32 code,
     /* [in] */ Boolean edit)
 {
+    Int32 mode;
     AutoPtr<IInterface> obj;
     ops->Get(code, (IInterface**)&obj);
     AutoPtr<Op> op = (Op*)IObject::Probe(obj);
@@ -1396,7 +1405,9 @@ AutoPtr<CAppOpsService::Op> CAppOpsService::GetOpLocked(
         if (!edit) {
             return NULL;
         }
-        op = new Op(ops->mUid, ops->mPackageName, code);
+        assert(0 && "TODO");
+        //  mode = GetDefaultMode(code, ops.uid, ops.packageName);
+        op = new Op(ops->mUid, ops->mPackageName, code, mode);
         ops->Put(code, TO_IINTERFACE(op));
     }
     if (edit) {
@@ -1613,7 +1624,8 @@ ECode CAppOpsService::ReadUid(
         parser->GetName(&tagName);
         if (tagName.Equals("op")) {
             parser->GetAttributeValue(nullStr, String("n"), &str);
-            AutoPtr<Op> op = new Op(uid, pkgName, StringUtils::ParseInt32(str));
+            AutoPtr<Op> op = new Op(uid, pkgName, StringUtils::ParseInt32(str),
+                    IAppOpsManager::MODE_ERRORED);
 
             parser->GetAttributeValue(nullStr, String("m"), &str);
             if (str != NULL) {
@@ -1733,7 +1745,9 @@ ECode CAppOpsService::WriteState()
                     IAppOpsManagerOpEntry* op = IAppOpsManagerOpEntry::Probe(opObj);
                     out->WriteStartTag(nullStr, String("op"));
                     op->GetOp(&ival);
-                    aom->OpToDefaultMode(ival, &defaultMode);
+                    assert(0 && "TODO:");
+                    // defaultMode = GetDefaultMode(op.getOp(),
+                    //                 pkg.getUid(), pkg.getPackageName());
                     out->WriteAttribute(nullStr, String("n"), StringUtils::ToString(ival));
                     op->GetMode(&mode);
                     if (mode != defaultMode) {

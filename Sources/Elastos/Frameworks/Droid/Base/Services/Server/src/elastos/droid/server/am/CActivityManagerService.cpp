@@ -11161,6 +11161,13 @@ ECode CActivityManagerService::DeleteActivityContainer(
     return NOERROR;
 }
 
+ECode CActivityManagerService::GetActivityDisplayId(
+    /* [in] */ IBinder* activityToken,
+    /* [out] */ Int32* container)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode CActivityManagerService::GetEnclosingActivityContainer(
     /* [in] */ IBinder* activityToken,
     /* [out] */ IIActivityContainer** container)

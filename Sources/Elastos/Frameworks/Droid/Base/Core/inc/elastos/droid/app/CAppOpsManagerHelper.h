@@ -50,6 +50,14 @@ public:
         /* [out] */ String* result);
 
     /**
+     * Map a non-localized name for the operation back to the Op number
+     * @hide
+     */
+    CARAPI NameToOp(
+        /* [in] */ const String& name,
+        /* [out] */ Int32* op);
+
+    /**
      * Retrieve the permission associated with an operation, or null if there is not one.
      * @hide
      */
@@ -80,6 +88,7 @@ public:
      */
     CARAPI OpToDefaultMode(
         /* [in] */ Int32 op,
+        /* [in] */ Boolean isStrict,
         /* [out] */ Int32* result);
 
     /**
@@ -90,9 +99,14 @@ public:
         /* [in] */ Int32 op,
         /* [out] */ Boolean* result);
 
+    /** @hide */
     CARAPI IsStrictEnable(
         /* [out] */ Boolean* result);
 
+    /**
+     * Check if op in strict mode
+     * @hide
+     */
     CARAPI IsStrictOp(
         /* [in] */ Int32 code,
         /* [out] */ Boolean* isStrictOp);

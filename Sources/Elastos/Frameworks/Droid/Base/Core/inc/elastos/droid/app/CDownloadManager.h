@@ -199,6 +199,24 @@ public:
     CARAPI RestartDownload(
         /* [in] */ ArrayOf<Int64>* ids);
 
+    /**
+     * Pause the given running download by user.
+     *
+     * @param id the ID of the download to be paused
+     * @hide
+     */
+    CARAPI PauseDownload(
+        /* [in] */ Int64 id);
+
+    /**
+     * Resume the given paused download by user.
+     *
+     * @param id the ID of the download to be resumed
+     * @hide
+     */
+    CARAPI ResumeDownload(
+        /* [in] */ Int64 id);
+
     static CARAPI GetMaxBytesOverMobile(
         /* [in] */ IContext* context,
         /* [out] */ Int64* size);

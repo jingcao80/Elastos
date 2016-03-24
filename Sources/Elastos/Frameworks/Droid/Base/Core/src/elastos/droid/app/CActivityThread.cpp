@@ -21,6 +21,7 @@
 #include "elastos/droid/graphics/Canvas.h"
 #include "elastos/droid/graphics/CCanvas.h"
 #include "elastos/droid/graphics/CBitmap.h"
+#include "elastos/droid/graphics/Typeface.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/HardwareRenderer.h"
 #include "elastos/droid/view/ViewRootImpl.h"
@@ -66,6 +67,7 @@ using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::CBitmap;
 using Elastos::Droid::Graphics::Canvas;
 using Elastos::Droid::Graphics::CCanvas;
+using Elastos::Droid::Graphics::Typeface;
 using Elastos::Droid::Content::IContextWrapper;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::EIID_IPendingResult;
@@ -1319,6 +1321,21 @@ ECode CActivityThread::GetTopLevelResources(
         libDirs, displayId, pkgName, overrideConfiguration, info, NULL, context, res);
 }
 
+
+ECode CActivityThread::GetTopLevelThemedResources(
+    /* [in] */ const String& resDir,
+    /* [in] */ Int32 displayId,
+    /* [in] */ LoadedPkg* pkgInfo,
+    /* [in] */ const String& pkgName,
+    /* [in] */ const String& themePkgName,
+    /* [out] */ IResources** res)
+{
+    AutoPtr<ICompatibilityInfo> info;
+    pkgInfo->GetCompatibilityInfo((ICompatibilityInfo**)&info);
+    return mResourcesManager->GetTopLevelThemedResources(resDir, displayId, pkgName,
+        themePkgName, info, NULL, res);
+}
+
 ECode CActivityThread::GetHandler(
     /* [out] */ IHandler** h)
 {
@@ -1559,6 +1576,10 @@ ECode CActivityThread::GetPackageInfo(
         else {
             mResourcePackages[pkgName] = wr;
         }
+    }
+    if (packageInfo->mResources != NULL
+            && (packageInfo->mResources->GetAssets((IAssetManager**)&asset), asset->IsUpToDate(&isUp), !isUp)) {
+        packageInfo->mResources = NULL;
     }
 
     *loadedPkg = ILoadedPkg::Probe(packageInfo);
@@ -2422,13 +2443,8 @@ AutoPtr<IContext> CActivityThread::CreateBaseContextForActivity(
 
     AutoPtr<IDisplayManagerGlobal> dm = DisplayManagerGlobal::GetInstance();
     // try {
-    AutoPtr<IIActivityContainer> container;
-    ActivityManagerNative::GetDefault()->GetEnclosingActivityContainer(
-        r->mToken, (IIActivityContainer**)&container);
-    Int32 displayId = IDisplay::DEFAULT_DISPLAY;
-    if (container != NULL) {
-        container->GetDisplayId(&displayId);
-    }
+    Int32 displayId;
+    ActivityManagerNative::GetDefault()->GetActivityDisplayId(r->mToken, &displayId);
     if (displayId > IDisplay::DEFAULT_DISPLAY) {
         AutoPtr<IDisplay> display;
         dm->GetRealDisplay(displayId, r->mToken, (IDisplay**)&display);
@@ -4934,8 +4950,10 @@ ECode CActivityThread::FreeTextLayoutCachesIfNeeded(
     if (configDiff != 0) {
         // Ask text layout engine to free its caches if there is a locale change
         Boolean hasLocaleConfigChange = ((configDiff & IActivityInfo::CONFIG_LOCALE) != 0);
-        if (hasLocaleConfigChange) {
+        Boolean hasFontConfigChange = ((configDiff & IActivityInfo::CONFIG_THEME_FONT) != 0);
+        if (hasLocaleConfigChange || hasFontConfigChange) {
             Canvas::FreeTextLayoutCaches();
+            Typeface::RecreateDefaults();
             if (DEBUG_CONFIGURATION) Slogger::V(TAG, "Cleared TextLayout Caches");
         }
     }
@@ -5028,30 +5046,32 @@ ECode CActivityThread::HandleDispatchPackageBroadcast(
 {
     Boolean hasPkgInfo = FALSE;
     if (packages != NULL) {
-        for (Int32 i = packages->GetLength() - 1; i >= 0; --i) {
-            //Slogger::I(TAG, "Cleaning old package: %s", (*packages)[i].string());
-            if (!hasPkgInfo) {
-                AutoPtr<IWeakReference> wr = mPackages[(*packages)[i]];
-                AutoPtr<IInterface> obj;
-                if (wr != NULL)
-                    wr->Resolve(EIID_IInterface, (IInterface**)&obj);
-                if (obj != NULL) {
-                    hasPkgInfo = TRUE;
-                }
-                else {
-                    wr = mResourcePackages[(*packages)[i]];
-                    if (wr != NULL) {
+        synchronized (mResourcesManager) {
+            for (Int32 i = packages->GetLength() - 1; i >= 0; --i) {
+                //Slogger::I(TAG, "Cleaning old package: %s", (*packages)[i].string());
+                if (!hasPkgInfo) {
+                    AutoPtr<IWeakReference> wr = mPackages[(*packages)[i]];
+                    AutoPtr<IInterface> obj;
+                    if (wr != NULL)
                         wr->Resolve(EIID_IInterface, (IInterface**)&obj);
-                    }
-
                     if (obj != NULL) {
                         hasPkgInfo = TRUE;
                     }
-                }
-            }
+                    else {
+                        wr = mResourcePackages[(*packages)[i]];
+                        if (wr != NULL) {
+                            wr->Resolve(EIID_IInterface, (IInterface**)&obj);
+                        }
 
-            mPackages.Erase((*packages)[i]);
-            mResourcePackages.Erase((*packages)[i]);
+                        if (obj != NULL) {
+                            hasPkgInfo = TRUE;
+                        }
+                    }
+                }
+
+                mPackages.Erase((*packages)[i]);
+                mResourcePackages.Erase((*packages)[i]);
+            }
         }
     }
     ApplicationPackageManager::HandlePackageBroadcast(cmd, packages, hasPkgInfo);

@@ -102,7 +102,8 @@ private:
         Op(
             /* [in] */ Int32 uid,
             /* [in] */ const String& packageName,
-            /* [in] */ Int32 op);
+            /* [in] */ Int32 op,
+            /* [in] */ Int32 mode);
 
     public:
         Int32 mUid;

@@ -126,7 +126,9 @@ public:
             /* [in] */ Int32 mode,
             /* [in] */ Int32 time,
             /* [in] */ Int32 rejectTime,
-            /* [in] */ Int32 duration);
+            /* [in] */ Int32 duration,
+            /* [in] */ Int32 allowedCount,
+            /* [in] */ Int32 ignoredCount);
 
         CARAPI GetOp(
             /* [out] */ Int32* op);
@@ -146,6 +148,12 @@ public:
         CARAPI GetDuration(
             /* [out] */ Int32* duration);
 
+        CARAPI GetAllowedCount(
+            /* [out] */ Int32* allowedCount);
+
+        CARAPI GetIgnoredCount(
+            /* [out] */ Int32* ignoredCount);
+
         CARAPI WriteToParcel(
             /* [in] */ IParcel* dest);
 
@@ -160,6 +168,8 @@ public:
         Int64 mTime;
         Int64 mRejectTime;
         Int32 mDuration;
+        Int32 mAllowedCount;
+        Int32 mIgnoredCount;
     };
 
     /**
@@ -212,6 +222,13 @@ public:
         /* [in] */ Int32 op);
 
     /**
+     * Map a non-localized name for the operation back to the Op number
+     * @hide
+     */
+    static Int32 NameToOp(
+        /* [in] */ const String& name);
+
+    /**
      * Retrieve the permission associated with an operation, or null if there is not one.
      * @hide
      */
@@ -238,7 +255,8 @@ public:
      * @hide
      */
     static Int32 OpToDefaultMode(
-        /* [in] */ Int32 op);
+        /* [in] */ Int32 op,
+        /* [in] */ Boolean isStrict);
 
     /**
      * Retrieve whether the op allows itself to be reset.
@@ -658,7 +676,19 @@ public:
      * This maps each operation to the string constant for it.
      * If it doesn't have a string constant, it maps to null.
      */
-    static String sOpToString[54];
+    static String sOpToString[62];
+
+    /**
+     * This maps each operation to the public string constant for it.
+     * If it doesn't have a public string constant, it maps to null.
+     */
+    static String sOpToOpString[62];
+
+    /**
+     * This provides a simple name for each operation to be used
+     * in debug output.
+     */
+    static String sOpNames[62];
 
 private:
     static const String TAG;
@@ -673,6 +703,63 @@ private:
 
     static const Int32 sOpLength;
 
+    static String OPSTR_GPS; // ="android:gps";
+    static String OPSTR_VIBRATE; // = "android:vibrate";
+    static String OPSTR_READ_CONTACTS; // = "android:read_contacts";
+    static String OPSTR_WRITE_CONTACTS; //= "android:write_contacts";
+    static String OPSTR_READ_CALL_LOG; // = "android:read_call_log";
+    static String OPSTR_WRITE_CALL_LOG; // = "android:write_call_log";
+    static String OPSTR_READ_CALENDAR; // = "android:read_calendar";
+    static String OPSTR_WRITE_CALENDAR; // = "android:write_calendar";
+    static String OPSTR_WIFI_SCAN; // = "android:wifi_scan";
+    static String OPSTR_POST_NOTIFICATION; // = "android:post_notification";
+    static String OPSTR_NEIGHBORING_CELLS; // = "android:neighboring_cells";
+    static String OPSTR_CALL_PHONE; // = "android:call_phone";
+    static String OPSTR_READ_SMS; // = "android:read_sms";
+    static String OPSTR_WRITE_SMS; // = "android:write_sms";
+    static String OPSTR_RECEIVE_SMS; // = "android:receive_sms";
+    static String OPSTR_RECEIVE_EMERGECY_SMS; // = "android:receive_emergecy_sms";
+    static String OPSTR_RECEIVE_MMS; // = "android:receive_mms";
+    static String OPSTR_RECEIVE_WAP_PUSH; // = "android:receive_wap_push";
+    static String OPSTR_SEND_SMS; // = "android:send_sms";
+    static String OPSTR_READ_ICC_SMS; //= "android:read_icc_sms";
+    static String OPSTR_WRITE_ICC_SMS; // = "android:write_icc_sms";
+    static String OPSTR_WRITE_SETTINGS; // = "android:write_settings";
+    static String OPSTR_SYSTEM_ALERT_WINDOW; // = "android:system_alert_window";
+    static String OPSTR_ACCESS_NOTIFICATIONS; // = "android:access_notifications";
+    static String OPSTR_CAMERA; // = "android:camera";
+    static String OPSTR_RECORD_AUDIO; // = "android:record_audio";
+    static String OPSTR_PLAY_AUDIO; // = "android:play_audio";
+    static String OPSTR_READ_CLIPBOARD; // = "android:read_clipboard";
+    static String OPSTR_WRITE_CLIPBOARD; // = "android:write_clipboard";
+    static String OPSTR_TAKE_MEDIA_BUTTONS; // = "android:take_media_buttons";
+    static String OPSTR_TAKE_AUDIO_FOCUS; // = "android:take_audio_focus";
+    static String OPSTR_AUDIO_MASTER_VOLUME; // = "android:audio_master_volume";
+    static String OPSTR_AUDIO_VOICE_VOLUME; // = "android:audio_voice_volume";
+    static String OPSTR_AUDIO_RING_VOLUME; // = "android:audio_ring_volume";
+    static String OPSTR_AUDIO_MEDIA_VOLUME; // = "android:audio_media_volume";
+    static String OPSTR_AUDIO_ALARM_VOLUME; // = "android:audio_alarm_volume";
+    static String OPSTR_AUDIO_NOTIFICATION_VOLUME; // = "android:audio_notification_volume";
+    static String OPSTR_AUDIO_BLUETOOTH_VOLUME; // = "android:audio_bluetooth_volume";
+    static String OPSTR_WAKE_LOCK; // = "android:wake_lock";
+    static String OPSTR_MUTE_MICROPHONE; // = "android:mute_microphone";
+    static String OPSTR_TOAST_WINDOW; // = "android:toast_window";
+    static String OPSTR_PROJECT_MEDIA; // = "android:project_media";
+    static String OPSTR_WIFI_CHANGE; // = "android:wifi_change";
+    static String OPSTR_BLUETOOTH_CHANGE; // = "android:bluetooth_change";
+    static String OPSTR_SEND_MMS; // = "android:send_mms";
+    static String OPSTR_READ_MMS; // = "android:read_mms";
+    static String OPSTR_WRITE_MMS; // = "android:write_mms";
+    static String OPSTR_BOOT_COMPLETED; // = "android:boot_completed";
+    static String OPSTR_NFC_CHANGE; // = "android:nfc_change";
+    static String OPSTR_DELETE_SMS; // = "android:delete_sms";
+    static String OPSTR_DELETE_MMS; // = "android:delete_mms";
+    static String OPSTR_DELETE_CONTACTS; // = "android:delete_contacts";
+    static String OPSTR_DELETE_CALL_LOG; // = "android:delete_call_log";
+    static String OPSTR_DATA_CONNECT_CHANGE; // = "android:data_connect_change";
+    static String OPSTR_ALARM_WAKEUP; // = "android:alarm_wakeup";
+    static String OPSTR_SU; // = "android:su";
+
     /**
      * This maps each operation to the operation that serves as the
      * switch to determine whether it is allowed.  Generally this is
@@ -681,39 +768,42 @@ private:
      * presented to the user as one switch then this can be used to
      * make them all controlled by the same single operation.
      */
-    static Int32 sOpToSwitch[48];
-
-    /**
-     * This provides a simple name for each operation to be used
-     * in debug output.
-     */
-    static String sOpNames[48];
+    static Int32 sOpToSwitch[62];
 
     /**
      * This optionally maps a permission to an operation.  If there
      * is no permission associated with an operation, it is null.
      */
-    static String sOpPerms[48];
+    static String sOpPerms[62];
 
     /**
      * Specifies whether an Op should be restricted by a user restriction.
      * Each Op should be filled with a restriction string from UserManager or
      * null to specify it is not affected by any user restriction.
      */
-    static String sOpRestrictions[48];
+    static String sOpRestrictions[62];
 
     /**
      * This specifies whether each option should allow the system
      * (and system ui) to bypass the user restriction when active.
      */
-    static Boolean sOpAllowSystemRestrictionBypass[48];
+    static Boolean sOpAllowSystemRestrictionBypass[62];
 
 
     /**
      * This specifies the default mode for each operation.
      */
-    static Int32 sOpDefaultMode[48];
+    static Int32 sOpDefaultMode[62];
 
+    /**
+     * This specifies the default mode for each strict operation.
+     */
+    static Int32 sOpDefaultStrictMode[62];
+
+    /**
+     * This specifies if operation is in strict mode.
+     */
+    static Boolean sOpStrictMode[62];
 
     /**
      * This specifies whether each option is allowed to be reset
@@ -722,9 +812,11 @@ private:
      * system (such as OP_WRITE_SMS, which should be allowed only
      * for whichever app is selected as the current SMS app).
      */
-    static Boolean sOpDisableReset[48];
+    static Boolean sOpDisableReset[62];
 
     static AutoPtr<HashMap<String, Int32> > sOpStrToOp;
+    static AutoPtr<HashMap<String, Int32> > sOpStringToOp;
+    static AutoPtr<HashMap<String, Int32> > sNameToOp;
 };
 
 } // namespace App

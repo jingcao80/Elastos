@@ -80,6 +80,7 @@ module
     merge("app/Profile.car");
     merge("app/ProfileGroup.car");
     merge("app/ProfilerInfo.car");
+    merge("app/ProfileManager.car");
     merge("app/ProgressDialog.car");
     merge("app/RemoteInput.car");
     merge("app/ResultInfo.car");
@@ -984,6 +985,18 @@ module
         interface IProfileGroupHelper;
     }
 
+    class CProfileManager {
+        constructor(
+            [in] IContext* context,
+            [in] IHandler* handler);
+
+        interface IProfileManager;
+    }
+
+    singleton class CProfileManagerHelper {
+        interface IProfileManagerHelper;
+    }
+
     /** @hide */
     class CProfilerInfo {
 
@@ -1056,7 +1069,9 @@ module
             [in] Int32 mode,
             [in] Int32 time,
             [in] Int32 rejectTime,
-            [in] Int32 duration);
+            [in] Int32 duration,
+            [in] Int32 allowedCount,
+            [in] Int32 ignoredCount);
 
         interface IAppOpsManagerOpEntry;
         interface IParcelable;

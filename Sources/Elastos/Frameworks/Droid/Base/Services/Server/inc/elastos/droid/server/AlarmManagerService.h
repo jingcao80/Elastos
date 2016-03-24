@@ -112,6 +112,11 @@ public:
             /* [in] */ Int32 userId,
             /* [out] */IAlarmClockInfo** result);
 
+        //@Override
+        CARAPI UpdateBlockedUids(
+            /* [in] */ Int32 uid,
+            /* [in] */ Boolean isBlocked);
+
         CARAPI ToString(
             /* [out] */ String* str);
 

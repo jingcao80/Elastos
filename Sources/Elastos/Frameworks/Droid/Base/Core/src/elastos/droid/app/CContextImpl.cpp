@@ -22,12 +22,14 @@
 #include "elastos/droid/app/CResourcesManager.h"
 #include "elastos/droid/app/CAppOpsManager.h"
 #include "elastos/droid/app/CJobSchedulerImpl.h"
+#include "elastos/droid/app/CProfileManager.h"
 // #include "elastos/droid/app/admin/CDevicePolicyManager.h"
 // #include "elastos/droid/app/backup/CBackupManager.h"
 #include "elastos/droid/app/usage/CUsageStatsManager.h"
 #include "elastos/droid/app/trust/CTrustManager.h"
 #include "elastos/droid/appwidget/CAppWidgetManager.h"
 #include "elastos/droid/hardware/CConsumerIrManager.h"
+#include "elastos/droid/hardware/CCmHardwareManager.h"
 #include "elastos/droid/hardware/CSystemSensorManager.h"
 //#include "elastos/droid/hardware/CSerialManager.h"
 //#include "elastos/droid/hardware/usb/CUsbManager.h"
@@ -53,6 +55,7 @@
 #include "elastos/droid/content/CRestrictionsManager.h"
 #include "elastos/droid/content/res/CCompatibilityInfo.h"
 #include "elastos/droid/content/res/CResources.h"
+#include "elastos/droid/content/res/CThemeManager.h"
 #include "elastos/droid/content/pm/CLauncherApps.h"
 #include "elastos/droid/internal/policy/CPolicyManager.h"
 #include "elastos/droid/net/CConnectivityManager.h"
@@ -89,6 +92,8 @@ using Elastos::Droid::App::CStatusBarManager;
 using Elastos::Droid::App::CKeyguardManager;
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::App::CAppOpsManager;
+using Elastos::Droid::App::IProfileManager;
+using Elastos::Droid::App::CProfileManager;
 using Elastos::Droid::App::CJobSchedulerImpl;
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
 // using Elastos::Droid::App::Admin::CDevicePolicyManager;
@@ -114,12 +119,17 @@ using Elastos::Droid::Content::EIID_IContext;
 using Elastos::Droid::Content::Pm::IILauncherApps;
 using Elastos::Droid::Content::Pm::ILauncherApps;
 using Elastos::Droid::Content::Pm::CLauncherApps;
+using Elastos::Droid::Content::Res::IIThemeService;
+using Elastos::Droid::Content::Res::IThemeManager;
+using Elastos::Droid::Content::Res::CThemeManager;
 using Elastos::Droid::Database::Sqlite::SQLiteDatabase;
 using Elastos::Droid::Hardware::ISystemSensorManager;
 using Elastos::Droid::Hardware::CSystemSensorManager;
 // using Elastos::Droid::Hardware::CSerialManager;
 using Elastos::Droid::Hardware::IConsumerIrManager;
 using Elastos::Droid::Hardware::CConsumerIrManager;
+using Elastos::Droid::Hardware::ICmHardwareManager;
+using Elastos::Droid::Hardware::CCmHardwareManager;
 using Elastos::Droid::Hardware::ISerialManager;
 using Elastos::Droid::Hardware::IISerialManager;
 using Elastos::Droid::Hardware::EIID_IISerialManager;
@@ -158,6 +168,7 @@ using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::IIVibratorService;
@@ -502,7 +513,10 @@ ECode CContextImpl::GetTheme(
 
 ECode CContextImpl::RecreateTheme()
 {
-    assert(0);
+    AutoPtr<IResourcesTheme> newTheme;
+    mResources->NewTheme((IResourcesTheme**)&newTheme);
+    newTheme->ApplyStyle(mThemeResource, TRUE);
+    mTheme->SetTo(newTheme);
     return NOERROR;
 }
 
@@ -2879,6 +2893,40 @@ ECode CContextImpl::GetSystemService(
         REFCOUNT_ADD(*object);
         return NOERROR;
     }
+    else if (IContext::PROFILE_SERVICE.Equals(name)) {
+        AutoPtr<IProfileManager> mgr;
+        CProfileManager::New(GetOuterContext(),
+                mMainThread->GetHandler(), (IProfileManager**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::THEME_SERVICE.Equals(name)) {
+        AutoPtr<IInterface> b = ServiceManager::GetService(IContext::THEME_SERVICE);
+        AutoPtr<IIThemeService> service = IIThemeService::Probe(b);
+        AutoPtr<IThemeManager> mgr;
+        CThemeManager::New(GetOuterContext(), service, (IThemeManager**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::TORCH_SERVICE.Equals(name)) {
+        assert(0 && "TODO");
+        // AutoPtr<IInterface> b = ServiceManager::GetService(IContext::TORCH_SERVICE);
+        // AutoPtr<IITorchService> service = IITorchService::Probe(b);
+        // AutoPtr<ITorchManager> mgr;
+        // CTorchManager::New(GetOuterContext(), service, (ITorchManager**)&mgr);
+        // *object = mgr.Get();
+        // REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::CMHW_SERVICE.Equals(name)) {
+        AutoPtr<ICmHardwareManager> mgr;
+        CCmHardwareManager::New(this, (ICmHardwareManager**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
     else {
         Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
         assert(0 && "TODO");
@@ -3806,6 +3854,10 @@ AutoPtr<ArrayOf<IFile*> > CContextImpl::EnsureDirsExistOrFilter(
     Boolean bval;
     for (Int32 i = 0; i < dirs->GetLength(); i++) {
         AutoPtr<IFile> dir = (*dirs)[i];
+        if (IEnvironment::MEDIA_REMOVED.Equals(Environment::GetStorageState(dir))) {
+            continue;
+        }
+
         dir->Exists(&bval);
         if (!bval) {
             dir->Mkdirs(&bval);

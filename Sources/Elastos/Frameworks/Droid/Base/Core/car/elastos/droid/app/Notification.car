@@ -265,6 +265,21 @@ module
         const Int32 PRIORITY_MAX = 2;
 
         /**
+         * Default.
+         * Show all notifications from an app on keyguard.
+         *
+         * @hide
+         */
+        const Int32 SHOW_ALL_NOTI_ON_KEYGUARD = 0x01;
+
+        /**
+         * Show only notifications from an app which are not ongoing ones.
+         *
+         * @hide
+         */
+        const Int32 SHOW_NO_ONGOING_NOTI_ON_KEYGUARD = 0x02;
+
+        /**
          * Special value of {@link #color} telling the system not to decorate this notification with
          * any special color but instead use default colors when presenting this notification.
          */
@@ -554,6 +569,13 @@ module
          * @hide
          */
         const Int32 HEADS_UP_REQUESTED = 2;
+
+        /**
+         * Used by light picker in Settings to force
+         * notification lights on when screen is on
+         * @hide
+         */
+        const String EXTRA_FORCE_SHOW_LIGHTS = "android.forceShowLights";
 
         GetWhen(
             [out] Int64* when);

@@ -122,6 +122,14 @@ public:
         /* [in] */ IBundle* extras,
         /* [out] */ Boolean* result);
 
+    /**
+     * @hide
+     */
+    CARAPI GetShowNotificationForPackageOnKeyguard(
+        /* [in] */ const String& pkg,
+        /* [in] */ Int32 uid,
+        /* [out] */ Int32* result);
+
 private:
     static const String TAG;
     static const Boolean DEBUG;
