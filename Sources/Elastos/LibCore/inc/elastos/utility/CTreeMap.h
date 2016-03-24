@@ -1909,8 +1909,9 @@ public:
         /* [out] */ Node ** node);
 
     // @SuppressWarnings("unchecked") // this method throws ClassCastExceptions!
-    CARAPI_(AutoPtr<Node>) FindByObject(
-        /* [in] */ IInterface* key);
+    CARAPI FindByObject(
+        /* [in] */ IInterface* key,
+        /* [out] */ Node** node);
 
     /**
      * Returns this map's entry that has the same key and value as {@code
@@ -1921,8 +1922,9 @@ public:
      * {@code String.CASE_INSENSITIVE_ORDER}), then {@code remove()} and {@code
      * contains()} will violate the collections API.
      */
-    CARAPI_(AutoPtr<Node>) FindByEntry(
-        /* [in] */ IMapEntry* entry);
+    CARAPI FindByEntry(
+        /* [in] */ IMapEntry* entry,
+        /* [out] */ Node** node);
 
     /**
      * Removes {@code node} from this tree, rearranging the tree's structure as
@@ -1931,8 +1933,9 @@ public:
     CARAPI RemoveInternal(
         /* [in] */ Node* node);
 
-    CARAPI_(AutoPtr<Node>) RemoveInternalByKey(
-        /* [in] */ IInterface* key);
+    CARAPI RemoveInternalByKey(
+        /* [in] */ IInterface* key,
+        /* [out] */ Node** removement);
 
     /**
      * Returns the number of elements in the iteration.

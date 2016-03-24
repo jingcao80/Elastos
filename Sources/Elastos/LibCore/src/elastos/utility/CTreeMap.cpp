@@ -164,7 +164,8 @@ ECode CTreeMap::Get(
 {
     VALIDATE_NOT_NULL(value)
 
-    AutoPtr<IMapEntry> entry = FindByObject(key);
+    AutoPtr<IMapEntry> entry;
+    FAIL_RETURN(FindByObject(key, (Node**)&entry));
     AutoPtr<IInterface> valueface;
     *value = entry != NULL ? (entry->GetValue((IInterface**)&valueface), valueface) : NULL;
     REFCOUNT_ADD(*value)
@@ -177,7 +178,10 @@ ECode CTreeMap::ContainsKey(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = FindByObject(key) != NULL;
+    AutoPtr<IMapEntry> entry;
+    FAIL_RETURN(FindByObject(key, (Node**)&entry));
+    if (NULL != entry) *result = TRUE;
+    else *result = FALSE;
     return NOERROR;
 }
 
@@ -211,7 +215,8 @@ ECode CTreeMap::Remove(
 {
     VALIDATE_NOT_NULL(value)
 
-    AutoPtr<Node> node = RemoveInternalByKey(key);
+    AutoPtr<Node> node;
+    FAIL_RETURN(RemoveInternalByKey(key, (Node**)&node));
     *value = node != NULL ? node->mValue : NULL;
     REFCOUNT_ADD(*value)
     return NOERROR;
@@ -383,25 +388,33 @@ ECode CTreeMap::Find(
     return NOERROR;
 }
 
-AutoPtr<CTreeMap::Node> CTreeMap::FindByObject(
-    /* [in] */ IInterface* key)
+ECode CTreeMap::FindByObject(
+    /* [in] */ IInterface* key,
+    /* [out] */ Node** node)
 {
     AutoPtr<Node> res;
-    Find(key, EQUAL, (Node**)&res);
-    return res;
+    FAIL_RETURN(Find(key, EQUAL, (Node**)&res));
+    *node = res;
+    REFCOUNT_ADD(*node)
+    return NOERROR;
 }
 
-AutoPtr<CTreeMap::Node> CTreeMap::FindByEntry(
-    /* [in] */ IMapEntry* entry)
+ECode CTreeMap::FindByEntry(
+    /* [in] */ IMapEntry* entry,
+    /* [out] */ Node** node)
 {
     assert(entry);
     AutoPtr<IInterface> keyface;
     entry->GetKey((IInterface**)&keyface);
-    AutoPtr<Node> mine = FindByObject(keyface);
+    AutoPtr<Node> mine;
+    FAIL_RETURN(FindByObject(keyface, (Node**)&mine));
     AutoPtr<IInterface> valueface;
     Boolean valuesEqual = mine != NULL && (Object::Equals(mine->mValue,
         (entry->GetValue((IInterface**)&valueface), valueface)));
-    return valuesEqual ? mine : NULL;
+    if (valuesEqual) *node = mine;
+    else *node = NULL;
+    REFCOUNT_ADD(*node)
+    return NOERROR;
 }
 
 ECode CTreeMap::RemoveInternal(
@@ -461,14 +474,18 @@ ECode CTreeMap::RemoveInternal(
     return NOERROR;
 }
 
-AutoPtr<CTreeMap::Node> CTreeMap::RemoveInternalByKey(
-    /* [in] */ IInterface* key)
+ECode CTreeMap::RemoveInternalByKey(
+    /* [in] */ IInterface* key,
+    /* [out] */ Node** removement)
 {
-    AutoPtr<Node> node = FindByObject(key);
+    AutoPtr<Node> node;
+    FAIL_RETURN(FindByObject(key, (Node**)&node));
     if (node != NULL) {
         RemoveInternal(node);
     }
-    return node;
+    *removement = node;
+    REFCOUNT_ADD(*removement)
+    return NOERROR;
 }
 
 ECode CTreeMap::ReplaceInParent(
@@ -1346,7 +1363,8 @@ ECode CTreeMap::_EntrySet::Contains(
 
     AutoPtr<IMapEntry> res = IMapEntry::Probe(o);
     AutoPtr<Node> outnode;
-    *value = res != NULL && (outnode = mHost->FindByEntry(res), outnode != NULL);
+    FAIL_RETURN(mHost->FindByEntry(res, (Node**)&outnode));
+    *value = res != NULL && outnode != NULL;
     return NOERROR;
 }
 
@@ -1361,7 +1379,8 @@ ECode CTreeMap::_EntrySet::Remove(
         return NOERROR;
     }
 
-    AutoPtr<Node> node = mHost->FindByEntry(IMapEntry::Probe(o));
+    AutoPtr<Node> node;
+    FAIL_RETURN(mHost->FindByEntry(IMapEntry::Probe(o), (Node**)&node));
     if (node == NULL) {
         *value = FALSE;
         return NOERROR;
@@ -1498,7 +1517,8 @@ ECode CTreeMap::_KeySet::Remove(
 {
     VALIDATE_NOT_NULL(value)
 
-    AutoPtr<Node> res = mHost->RemoveInternalByKey(key);
+    AutoPtr<Node> res;
+    FAIL_RETURN(mHost->RemoveInternalByKey(key, (Node**)&res));
     *value = res != NULL;
     return NOERROR;
 }
@@ -1864,7 +1884,9 @@ ECode CTreeMap::BoundedMap::BoundedEntrySet::Contains(
     AutoPtr<IInterface> keyface;
     entry->GetKey((IInterface**)&keyface);
 
-    *value = mHost->IsInBounds(keyface) && mHost->mHost->FindByEntry(entry) != NULL;
+    AutoPtr<Node> node;
+    FAIL_RETURN(mHost->mHost->FindByEntry(entry, (Node**)&node));
+    *value = mHost->IsInBounds(keyface) && node != NULL;
     return NOERROR;
 }
 
@@ -2042,7 +2064,9 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::Contains(
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = mHost->IsInBounds(o) && mHost->mHost->FindByObject(o) != NULL;
+    AutoPtr<Node> node;
+    FAIL_RETURN(mHost->mHost->FindByObject(o, (Node**)&node));
+    *value = mHost->IsInBounds(o) && node != NULL;
     return NOERROR;
 }
 
@@ -2051,7 +2075,9 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::Remove(
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = mHost->IsInBounds(o) && mHost->mHost->RemoveInternalByKey(o) != NULL;
+    AutoPtr<Node> node;
+    FAIL_RETURN(mHost->mHost->RemoveInternalByKey(o, (Node**)&node));
+    *value = mHost->IsInBounds(o) && node != NULL;
     return NOERROR;
 }
 
@@ -2838,7 +2864,7 @@ ECode CTreeMap::BoundedMap::GetSubMap(
     Bound fromBound = fromInclusive ? INCLUSIVE : EXCLUSIVE;
     Bound toBound = toInclusive ? INCLUSIVE : EXCLUSIVE;
     AutoPtr<INavigableMap> res;
-    SubMap(fromKey, fromBound, toKey, toBound, (INavigableMap**)&res);
+    FAIL_RETURN(SubMap(fromKey, fromBound, toKey, toBound, (INavigableMap**)&res));
     *outnav = res;
     REFCOUNT_ADD(*outnav)
     return NOERROR;
@@ -2852,8 +2878,8 @@ ECode CTreeMap::BoundedMap::GetSubMap(
     VALIDATE_NOT_NULL(sortmap)
 
     AutoPtr<INavigableMap> res;
-    SubMap(startKey, INCLUSIVE, endKey, EXCLUSIVE, (INavigableMap**)&res);
-    *sortmap = (ISortedMap*)res.Get();
+    FAIL_RETURN(SubMap(startKey, INCLUSIVE, endKey, EXCLUSIVE, (INavigableMap**)&res));
+    *sortmap = ISortedMap::Probe(res);
     REFCOUNT_ADD(*sortmap);
     return NOERROR;
 }
@@ -2867,7 +2893,7 @@ ECode CTreeMap::BoundedMap::GetHeadMap(
 
     Bound toBound = inclusive ? INCLUSIVE : EXCLUSIVE;
     AutoPtr<INavigableMap> res;
-    SubMap(NULL, NO_BOUND, toKey, toBound, (INavigableMap**)&res);
+    FAIL_RETURN(SubMap(NULL, NO_BOUND, toKey, toBound, (INavigableMap**)&res));
     *outnav = res;
     REFCOUNT_ADD(*outnav)
     return NOERROR;
@@ -2880,8 +2906,8 @@ ECode CTreeMap::BoundedMap::GetHeadMap(
     VALIDATE_NOT_NULL(sortmap)
 
     AutoPtr<INavigableMap> res;
-    SubMap(NULL, NO_BOUND, endKey, EXCLUSIVE, (INavigableMap**)&res);
-    *sortmap = (ISortedMap*)res.Get();
+    FAIL_RETURN(SubMap(NULL, NO_BOUND, endKey, EXCLUSIVE, (INavigableMap**)&res));
+    *sortmap = ISortedMap::Probe(res);
     REFCOUNT_ADD(*sortmap)
     return NOERROR;
 }
@@ -2895,7 +2921,7 @@ ECode CTreeMap::BoundedMap::GetTailMap(
 
     Bound fromBound = inclusive ? INCLUSIVE : EXCLUSIVE;
     AutoPtr<INavigableMap> res;
-    SubMap(fromKey, fromBound, NULL, NO_BOUND, (INavigableMap**)&res);
+    FAIL_RETURN(SubMap(fromKey, fromBound, NULL, NO_BOUND, (INavigableMap**)&res));
     *outnav = res;
     REFCOUNT_ADD(*outnav)
     return NOERROR;
@@ -2908,8 +2934,8 @@ ECode CTreeMap::BoundedMap::GetTailMap(
     VALIDATE_NOT_NULL(sortmap)
 
     AutoPtr<INavigableMap> res;
-    SubMap(startKey, INCLUSIVE, NULL, NO_BOUND, (INavigableMap**)&res);
-    *sortmap = (ISortedMap*)res.Get();
+    FAIL_RETURN(SubMap(startKey, INCLUSIVE, NULL, NO_BOUND, (INavigableMap**)&res));
+    *sortmap = ISortedMap::Probe(res);
     REFCOUNT_ADD(*sortmap)
     return NOERROR;
 }
@@ -2924,9 +2950,9 @@ ECode CTreeMap::BoundedMap::SubMap(
     if (!mAscending) {
         AutoPtr<IInterface> fromTmp = from;
         Bound fromBoundTmp = fromBound;
-        from = mTo;
+        from = to;
         fromBound = toBound;
-        mTo = fromTmp;
+        to = fromTmp;
         toBound = fromBoundTmp;
     }
 
