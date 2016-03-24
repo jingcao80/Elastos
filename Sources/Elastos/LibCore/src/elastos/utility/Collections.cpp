@@ -3182,7 +3182,7 @@ AutoPtr<IInterface> Collections::UnmodifiableRandomAccessList::WriteReplace()
 //====================================================================
 // Collections::_UnmodifiableList::ListIterator::
 //====================================================================
-CAR_INTERFACE_IMPL(Collections::_UnmodifiableList::ListIterator, Object, IListIterator)
+CAR_INTERFACE_IMPL_2(Collections::_UnmodifiableList::ListIterator, Object, IListIterator, IIterator)
 
 Collections::_UnmodifiableList::ListIterator::ListIterator(
     /* [in] */ _UnmodifiableList* owner,
@@ -6067,7 +6067,7 @@ ECode Collections::_CheckedCollection::GetHashCode(
 //====================================================================
 // Collections::CheckedListIterator::
 //====================================================================
-CAR_INTERFACE_IMPL(Collections::CheckedListIterator, Object, IListIterator)
+CAR_INTERFACE_IMPL_2(Collections::CheckedListIterator, Object, IListIterator, IIterator)
 
 Collections::CheckedListIterator::CheckedListIterator(
     /* [in] */ IListIterator* i,

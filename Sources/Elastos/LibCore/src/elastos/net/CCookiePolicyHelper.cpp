@@ -52,6 +52,8 @@ ECode CCookiePolicyHelper::CookiePolicyAcceptOriginalServer::ShouldAccept(
 {
     VALIDATE_NOT_NULL(result);
 
+    if ((NULL == uri) || (NULL == cookie)) return E_NULL_POINTER_EXCEPTION;
+
     String domain, host;
     cookie->GetDomainAttr(&domain);
     uri->GetHost(&host);
@@ -64,9 +66,9 @@ ECode CCookiePolicyHelper::CookiePolicyAcceptOriginalServer::ShouldAccept(
 // CCookiePolicyHelper
 //========================================================================
 
-AutoPtr<ICookiePolicy> CCookiePolicyHelper::ACCEPT_ALL;
-AutoPtr<ICookiePolicy> CCookiePolicyHelper::ACCEPT_NONE;
-AutoPtr<ICookiePolicy> CCookiePolicyHelper::ACCEPT_ORIGINAL_SERVER;
+INIT_PROI_1 AutoPtr<ICookiePolicy> CCookiePolicyHelper::ACCEPT_ALL = new CookiePolicyAcceptAll();
+INIT_PROI_1 AutoPtr<ICookiePolicy> CCookiePolicyHelper::ACCEPT_NONE = new CookiePolicyAcceptNone();
+INIT_PROI_1 AutoPtr<ICookiePolicy> CCookiePolicyHelper::ACCEPT_ORIGINAL_SERVER = new CookiePolicyAcceptOriginalServer();
 
 CAR_INTERFACE_IMPL(CCookiePolicyHelper, Singleton, ICookiePolicyHelper)
 

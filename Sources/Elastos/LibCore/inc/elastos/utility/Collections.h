@@ -1593,6 +1593,7 @@ public:
         class ListIterator
             : public Object
             , public IListIterator
+            , public IIterator
         {
         public:
             ListIterator(
@@ -2478,6 +2479,7 @@ public:
     class CheckedListIterator
         : public Object
         , public IListIterator
+        , public IIterator
     {
     public:
         CheckedListIterator(

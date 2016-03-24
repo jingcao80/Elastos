@@ -220,7 +220,9 @@ AutoPtr<List<AutoPtr<IHttpCookie> > > CCookieManager::ParseCookie(
         AutoPtr<IInterface> keyface;
         entry->GetKey((IInterface**)&keyface);
         String key;
-        ICharSequence::Probe(keyface)->ToString(&key);
+        if (ICharSequence::Probe(keyface)) {
+            ICharSequence::Probe(keyface)->ToString(&key);
+        }
         // Only "Set-cookie" and "Set-cookie2" pair will be parsed
         if (!key.IsNull() && (key.EqualsIgnoreCase(VERSION_ZERO_HEADER)
                 || key.EqualsIgnoreCase(VERSION_ONE_HEADER))) {
