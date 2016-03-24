@@ -46,6 +46,11 @@ namespace View {
 
 CAR_INTERFACE_IMPL(RenderNode, Object, IRenderNode)
 
+RenderNode::RenderNode()
+    : mValid(FALSE)
+    , mNativeRenderNode(0)
+{}
+
 ECode RenderNode::Start(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,

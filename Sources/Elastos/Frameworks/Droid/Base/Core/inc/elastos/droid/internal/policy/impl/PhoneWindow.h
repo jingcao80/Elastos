@@ -248,7 +248,9 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        _DecorView(
+        _DecorView();
+
+        CARAPI constructor(
             /* [in] */ PhoneWindow* host,
             /* [in] */ IContext* context,
             /* [in] */ Int32 featureId);
@@ -472,7 +474,7 @@ private:
         AutoPtr<IActionBarContextView> mActionModeView;
         AutoPtr<IPopupWindow> mActionModePopup;
         AutoPtr<IRunnable> mShowActionModePopup;
-		// View added at runtime to draw under the status bar area
+        // View added at runtime to draw under the status bar area
         AutoPtr<IView> mStatusGuard;
         // View added at runtime to draw under the navigation bar area
         AutoPtr<IView> mNavigationGuard;

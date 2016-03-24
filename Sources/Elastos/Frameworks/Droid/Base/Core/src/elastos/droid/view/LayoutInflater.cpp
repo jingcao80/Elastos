@@ -362,17 +362,18 @@ ECode LayoutInflater::From(
     /* [out] */ ILayoutInflater** inflater)
 {
     VALIDATE_NOT_NULL(inflater);
+    *inflater = NULL;
 
     AutoPtr<IInterface> tmp;
     ECode ec = context->GetSystemService(
             IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&tmp);
-    *inflater = ILayoutInflater::Probe(tmp);
-
-    REFCOUNT_ADD(*inflater)
-    if (FAILED(ec) || (*inflater == NULL)) {
+    if (FAILED(ec) || tmp == NULL) {
         Slogger::W(TAG, "LayoutInflater not found.");
         return E_ASSERTION_ERROR;
     }
+
+    *inflater = ILayoutInflater::Probe(tmp);
+    REFCOUNT_ADD(*inflater)
     return ec;
 }
 

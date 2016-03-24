@@ -3561,12 +3561,8 @@ ECode CContextImpl::CreateAppContext(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    AutoPtr<IContextImpl> c;
-    CContextImpl::New(NULL, mainThread,
-        packageInfo, NULL, NULL, FALSE, NULL, NULL, String(NULL), (IContextImpl**)&c);
-    *result = c;
-    REFCOUNT_ADD(*result)
-    return NOERROR;
+    return CContextImpl::New(NULL, mainThread,
+        packageInfo, NULL, NULL, FALSE, NULL, NULL, String(NULL), result);
 }
 
 ECode CContextImpl::CreateActivityContext(
@@ -3582,12 +3578,8 @@ ECode CContextImpl::CreateActivityContext(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    AutoPtr<IContextImpl> c;
-    CContextImpl::New(NULL, mainThread,
-        packageInfo, activityToken, NULL, FALSE, NULL, NULL, String(NULL), (IContextImpl**)&c);
-    *result = c;
-    REFCOUNT_ADD(*result)
-    return NOERROR;
+    return CContextImpl::New(NULL, mainThread,
+        packageInfo, activityToken, NULL, FALSE, NULL, NULL, String(NULL), result);
 }
 
 ECode CContextImpl::constructor(

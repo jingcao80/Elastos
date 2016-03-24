@@ -2800,11 +2800,12 @@ ECode CActivityThread::HandleReceiver(
         path = "/system/lib/Elastos.Droid.Server.eco";
         Int32 lastIndex = className.LastIndexOf(".");
         if (lastIndex != -1) {
-            String temp(className);
-            className = String("C");
-            className.AppendFormat(temp.Substring(lastIndex + 1));
+            StringBuilder sb("LElastos/Droid/Server/C");
+            sb += className.Substring(lastIndex + 1);
+            sb += ";";
+            className = sb.ToString();
         }
-        reflectionClsName = GetReflectionClassName(className);
+        reflectionClsName = className;
     }
     else {
         StringBuilder sb;
@@ -2816,7 +2817,7 @@ ECode CActivityThread::HandleReceiver(
         reflectionClsName = GetReflectionClassName(className);
 
         Slogger::D(TAG, "HandleReceiver: load object from pakcage: %s, class: %s",
-            packageName.string(), className.string());
+            packageName.string(), reflectionClsName.string());
     }
 
 
@@ -2833,7 +2834,6 @@ ECode CActivityThread::HandleReceiver(
     ec = moduleInfo->GetClassInfo(reflectionClsName, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
         Slogger::E(TAG, "HandleReceiver: Get class info of [%s] failed.", reflectionClsName.string());
-        assert(0 && "TODO");
         return ec;
     }
 
@@ -3017,11 +3017,11 @@ ECode CActivityThread::HandleCreateBackupAgent(
             Slogger::E(TAG, "CreateBackupAgent: Can't find the path is %s", path.string());
             return E_RUNTIME_EXCEPTION;
         }
-        Int32 index = className.LastIndexOf('.');
-        String shortClassName = index > 0 ? className.Substring(index + 1) : className;
-        ec = moduleInfo->GetClassInfo(shortClassName, (IClassInfo**)&classInfo);
+
+        String reflectionClsName = GetReflectionClassName(className);
+        ec = moduleInfo->GetClassInfo(reflectionClsName, (IClassInfo**)&classInfo);
         if (FAILED(ec)) {
-            Slogger::E(TAG, "CreateBackupAgent: Get class info of %s failed.", className.string());
+            Slogger::E(TAG, "CreateBackupAgent: Get class info of %s failed.", reflectionClsName.string());
             assert(0 && "TODO");
             return E_RUNTIME_EXCEPTION;
         }
@@ -3142,23 +3142,17 @@ ECode CActivityThread::HandleCreateService(
     }
     String className;
     IPackageItemInfo::Probe(data->mInfo)->GetName(&className);
-    Int32 index = className.LastIndexOf('.');
-    String shortClassName = index > 0 ? className.Substring(index + 1) : className;
+    String reflectionClsName = GetReflectionClassName(className);
     AutoPtr<IClassInfo> classInfo;
-    ec = moduleInfo->GetClassInfo(shortClassName, (IClassInfo**)&classInfo);
+    ec = moduleInfo->GetClassInfo(reflectionClsName, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
-        if (localLOGV) {
-           Slogger::E(TAG, "HandleCreateService: Get class info of %s failed.", shortClassName.string());
-           assert(0 && "TODO");
-        }
+        Slogger::E(TAG, "HandleCreateService: Get class info of %s failed.", reflectionClsName.string());
         return E_RUNTIME_EXCEPTION;
     }
     AutoPtr<IInterface> object;
     ec = classInfo->CreateObject((IInterface**)&object);
     if (FAILED(ec)) {
-        if (localLOGV) {
-           Slogger::E(TAG, "HandleCreateService: Create activity object failed.");
-        }
+        Slogger::E(TAG, "HandleCreateService: Create activity object failed.");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -5417,10 +5411,10 @@ ECode CActivityThread::HandleBindApplication(
             return E_RUNTIME_EXCEPTION;
         }
 
-        String shortClassName = className.Substring(index + 1);
+        String reflectionClsName = GetReflectionClassName(className);
         AutoPtr<IClassInfo> classInfo;
-        if (FAILED(moduleInfo->GetClassInfo(shortClassName, (IClassInfo**)&classInfo))) {
-            Slogger::E(TAG, "HandleBindApplication: Get class info of %s failed.", shortClassName.string());
+        if (FAILED(moduleInfo->GetClassInfo(reflectionClsName, (IClassInfo**)&classInfo))) {
+            Slogger::E(TAG, "HandleBindApplication: Get class info of %s failed.", reflectionClsName.string());
             return E_RUNTIME_EXCEPTION;
         }
         AutoPtr<IInterface> object;
@@ -6187,6 +6181,7 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
         if (name.Equals("com.android.providers.settings.SettingsProvider")) {
             packagePath = String("/data/elastos/SettingsProvider.eco");
             className = String("CSettingsProvider");
+            assert(0 && "TODO");
         }
         else {
             Int32 index = name.LastIndexOf('.');
@@ -6198,6 +6193,7 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
 
             packagePath = sb.ToString();
             className = name.Substring(index + 1);
+            assert("0" && "TODO");
         }
 
         AutoPtr<IModuleInfo> moduleInfo;

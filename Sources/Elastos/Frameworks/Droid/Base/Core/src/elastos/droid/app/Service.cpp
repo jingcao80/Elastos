@@ -78,7 +78,7 @@ ECode Service::InitializeTheme()
         GetResources((IResources**)&resources);
         resources->NewTheme((IResourcesTheme**)&mTheme);
         AutoPtr<IResourcesTheme> theme;
-        mBase->GetTheme((IResourcesTheme**)&theme);
+        ContextWrapper::GetTheme((IResourcesTheme**)&theme);
         if (theme != NULL) {
             mTheme->SetTo(theme);
         }
@@ -258,7 +258,6 @@ ECode Service::Attach(
 {
     FAIL_RETURN(AttachBaseContext(context));
 
-    mBase = context;
     mThread = thread;            // NOTE:  unused - remove?
     mClassName = className;
     mToken = token;

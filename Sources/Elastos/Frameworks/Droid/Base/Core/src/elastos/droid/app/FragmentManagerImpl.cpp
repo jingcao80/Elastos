@@ -148,6 +148,7 @@ FragmentManagerImpl::FragmentManagerImpl()
     : mTmpActions(NULL)
     , mExecutingActions(FALSE)
     , mCurState(IFragment::INITIALIZING)
+    , mActivity(NULL)
     , mNeedMenuInvalidate(FALSE)
     , mStateSaved(FALSE)
     , mDestroyed(FALSE)
@@ -2098,8 +2099,10 @@ ECode FragmentManagerImpl::AttachActivity(
     /* [in] */ IFragmentContainer* container,
     /* [in] */ IFragment* parent)
 {
-    if (mActivity != NULL) //throw new IllegalStateException("Already attached");
+    if (mActivity != NULL) {
+        Logger::E(TAG, "IllegalStateException: Already attached");
         return E_ILLEGAL_STATE_EXCEPTION;
+    }
     mActivity = activity;
     mContainer = container;
     mParent = parent;

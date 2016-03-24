@@ -2403,7 +2403,7 @@ ECode Activity::StartActivityForResult(
         AutoPtr<IApplicationThread> at;
         FAIL_RETURN(mMainThread->GetApplicationThread((IApplicationThread**)&at));
         FAIL_RETURN(mInstrumentation->ExecStartActivity(
-            mBase, IBinder::Probe(at), mToken, (IActivity*)this,
+            this, IBinder::Probe(at), mToken, (IActivity*)this,
             intent, requestCode, options, (IInstrumentationActivityResult**)&result))
         if (result != NULL) {
             Int32 resultCode;
@@ -2727,7 +2727,7 @@ ECode Activity::StartActivityFromChild(
     FAIL_RETURN(mMainThread->GetApplicationThread((IApplicationThread**)&at));
 
     FAIL_RETURN(mInstrumentation->ExecStartActivity(
-            mBase, IBinder::Probe(at), mToken, child, intent, requestCode, options,
+            this, IBinder::Probe(at), mToken, child, intent, requestCode, options,
             (IInstrumentationActivityResult**)&result));
     if (result != NULL) {
         String id;
@@ -2765,7 +2765,7 @@ ECode Activity::StartActivityFromFragment(
     FAIL_RETURN(mMainThread->GetApplicationThread((IApplicationThread**)&at));
 
     FAIL_RETURN(mInstrumentation->ExecStartActivity(
-            mBase, IBinder::Probe(at), mToken, fragment, intent, requestCode, options,
+            this, IBinder::Probe(at), mToken, fragment, intent, requestCode, options,
             (IInstrumentationActivityResult**)&result));
     if (result != NULL) {
         Int32 resultCode;
@@ -4015,9 +4015,9 @@ ECode Activity::Attach(
 {
     Slogger::I(TAG, " >>> Activity::Attach");
     FAIL_RETURN(AttachBaseContext(context));
-Slogger::I(TAG, "    1 ");
+Slogger::I(TAG, "    Attach 1 ");
     FAIL_RETURN(mFragments->AttachActivity((IActivity*)this, mContainer, NULL));
-Slogger::I(TAG, "    2 ");
+Slogger::I(TAG, "    Attach 2 ");
     AutoPtr<IPolicyManager> pm;
     CPolicyManager::AcquireSingleton((IPolicyManager**)&pm);
     mWindow = NULL;
@@ -4038,7 +4038,7 @@ Slogger::I(TAG, "    2 ");
     if (uiOptions != 0) {
         FAIL_RETURN(mWindow->SetUiOptions(uiOptions));
     }
-Slogger::I(TAG, "    3 ");
+Slogger::I(TAG, "    Attach 3 ");
     mUiThread = Thread::GetCurrentThread();
 
     mMainThread = aThread;
@@ -4066,7 +4066,7 @@ Slogger::I(TAG, "    3 ");
                 looper, (IVoiceInteractor**)&mVoiceInteractor);
         }
     }
-Slogger::I(TAG, "    4 ");
+Slogger::I(TAG, "    Attach 4 ");
     AutoPtr<IInterface> service;
     FAIL_RETURN(context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&service))
     AutoPtr<IWindowManager> wm = IWindowManager::Probe(service);
@@ -4076,13 +4076,13 @@ Slogger::I(TAG, "    4 ");
     info->GetFlags(&flags);
     FAIL_RETURN(mWindow->SetWindowManager(wm, mToken, str,
             (flags & IActivityInfo::FLAG_HARDWARE_ACCELERATED) != 0));
-Slogger::I(TAG, "    5 ");
+Slogger::I(TAG, "    Attach 5 ");
     if (mParent != NULL) {
         AutoPtr<IWindow> pWindow;
         FAIL_RETURN(mParent->GetWindow((IWindow**)&pWindow));
         FAIL_RETURN(mWindow->SetContainer(pWindow));
     }
-Slogger::I(TAG, "    6 ");
+Slogger::I(TAG, "    Attach 6 ");
     mWindowManager = NULL;
     FAIL_RETURN(mWindow->GetWindowManager((IWindowManager**)&mWindowManager));
     mCurrentConfig = config;
@@ -4499,7 +4499,7 @@ ECode Activity::InitializeTheme()
         GetResources((IResources**)&resources);
         resources->NewTheme((IResourcesTheme**)&mTheme);
         AutoPtr<IResourcesTheme> theme;
-        mBase->GetTheme((IResourcesTheme**)&theme);
+        ContextThemeWrapper::GetTheme((IResourcesTheme**)&theme);
         if (theme != NULL) {
             mTheme->SetTo(theme);
         }
@@ -4681,7 +4681,7 @@ ECode Activity::StartActivityAsUser(
     AutoPtr<IApplicationThread> at;
     mMainThread->GetApplicationThread((IApplicationThread**)&at);
     FAIL_RETURN(mInstrumentation->ExecStartActivity(
-            mBase, IBinder::Probe(at), mToken, (IActivity*)this,
+            this, IBinder::Probe(at), mToken, (IActivity*)this,
             intent, -1, options, user,
             (IInstrumentationActivityResult**)&result));
     if (result != NULL) {
@@ -4738,7 +4738,7 @@ ECode Activity::StartActivities(
     AutoPtr<IApplicationThread> at;
     mMainThread->GetApplicationThread((IApplicationThread**)&at);
     return mInstrumentation->ExecStartActivities(
-            mBase, IBinder::Probe(at.Get()), mToken, (IActivity*)this,
+            this, IBinder::Probe(at.Get()), mToken, (IActivity*)this,
             intents, options);
 }
 
@@ -4757,7 +4757,7 @@ ECode Activity::StartActivitiesAsUser(
     AutoPtr<IApplicationThread> at;
     mMainThread->GetApplicationThread((IApplicationThread**)&at);
     FAIL_RETURN(mInstrumentation->ExecStartActivitiesAsUser(
-            mBase, IBinder::Probe(at.Get()), mToken, (IActivity*)this,
+            this, IBinder::Probe(at.Get()), mToken, (IActivity*)this,
             intents, options, myUserId));
     return NOERROR;
 }
@@ -4821,19 +4821,19 @@ ECode Activity::GetSystemService(
         REFCOUNT_ADD(*object);
         return NOERROR;
     }
-    else if (IContext::LAYOUT_INFLATER_SERVICE.Equals(name)) {
-        if (mInflater == NULL) {
-            AutoPtr<IInterface> service;
-            FAIL_RETURN(mBase->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&service))
-            AutoPtr<ILayoutInflater> temp = ILayoutInflater::Probe(service);
-            temp->CloneInContext(this, (ILayoutInflater**)&mInflater);
-        }
-        *object = mInflater;
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
+    // else if (IContext::LAYOUT_INFLATER_SERVICE.Equals(name)) {
+    //     if (mInflater == NULL) {
+    //         AutoPtr<IInterface> service;
+    //         FAIL_RETURN(ContextThemeWrapper::GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&service))
+    //         AutoPtr<ILayoutInflater> temp = ILayoutInflater::Probe(service);
+    //         temp->CloneInContext(this, (ILayoutInflater**)&mInflater);
+    //     }
+    //     *object = mInflater;
+    //     REFCOUNT_ADD(*object);
+    //     return NOERROR;
+    // }
 
-    return mBase->GetSystemService(name, object);
+    return ContextThemeWrapper::GetSystemService(name, object);
 }
 
 } // namespace App

@@ -22,6 +22,8 @@ class RenderNode
 public:
     CAR_INTERFACE_DECL()
 
+    RenderNode();
+
     CARAPI Start(
         /* [in] */ Int32 width,
         /* [in] */ Int32 height,

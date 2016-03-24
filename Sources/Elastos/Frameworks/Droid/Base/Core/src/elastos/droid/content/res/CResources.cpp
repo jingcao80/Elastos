@@ -456,10 +456,11 @@ ECode CResources::constructor(
     }
     FAIL_RETURN(UpdateConfiguration(config, metrics))
     mAssets->EnsureStringBlocks();
-    if (token) {
-        IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(token);
-        wrs->GetWeakReference((IWeakReference**)&mToken);
-    }
+    // if (token) {
+    //     assert(0 && "error: get GetWeakReference from IPC!!");
+    //     IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(token);
+    //     wrs->GetWeakReference((IWeakReference**)&mToken);
+    // }
     return NOERROR;
 }
 

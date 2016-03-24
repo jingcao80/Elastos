@@ -3767,7 +3767,6 @@ public:
     AutoPtr<ISharedElementCallback> mExitTransitionListener;// = SharedElementCallback.NULL_CALLBACK;
 
 protected:
-    AutoPtr<IContext> mBase;
     AutoPtr<IBinder> mToken;
 
 //protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};

@@ -44,7 +44,13 @@ class ActivityRecord
     , public IActivityRecord
 {
 public:
-    ActivityRecord(
+    CAR_INTERFACE_DECL()
+
+    ActivityRecord();
+
+    ~ActivityRecord();
+
+    CARAPI constructor(
         /* [in] */ CActivityManagerService* service,
         /* [in] */ ProcessRecord* caller,
         /* [in] */ Int32 launchedFromUid,
@@ -61,9 +67,6 @@ public:
         /* [in] */ IIActivityContainer* container,
         /* [in] */ IBundle* options);
 
-    ~ActivityRecord();
-
-    CAR_INTERFACE_DECL()
 
     CARAPI_(void) Dump(
         /* [in] */ IPrintWriter* pw,

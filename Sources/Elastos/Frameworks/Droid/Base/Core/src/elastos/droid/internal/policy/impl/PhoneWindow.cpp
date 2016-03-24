@@ -319,12 +319,8 @@ ECode PhoneWindow::_DecorView::ActionModeCallbackWrapper::OnDestroyActionMode(
 
 CAR_INTERFACE_IMPL(PhoneWindow::_DecorView, Object, IRootViewSurfaceTaker)
 
-PhoneWindow::_DecorView::_DecorView(
-    /* [in] */ PhoneWindow* host,
-    /* [in] */ IContext* context,
-    /* [in] */ Int32 featureId)
-    : mHost(host)
-    , mFeatureId(featureId)
+PhoneWindow::_DecorView::_DecorView()
+    : mFeatureId(0)
     , mChanging(FALSE)
     , mWatchingForMenu(FALSE)
     , mDownY(0)
@@ -332,27 +328,35 @@ PhoneWindow::_DecorView::_DecorView(
     , mLastBottomInset(0)
     , mLastRightInset(0)
     , mDefaultOpacity(IPixelFormat::OPAQUE)
+{}
+
+ECode PhoneWindow::_DecorView::constructor(
+    /* [in] */ PhoneWindow* host,
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 featureId)
 {
-    FrameLayout::constructor(context);
+    FAIL_RETURN(FrameLayout::constructor(context))
+
+    mHost = host;
+    mFeatureId = featureId;
+
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mDrawingBounds));
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mBackgroundPadding));
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mFramePadding));
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mFrameOffsets));
-    CBackgroundFallback::New((IBackgroundFallback**)&mBackgroundFallback);
+    return CBackgroundFallback::New((IBackgroundFallback**)&mBackgroundFallback);
 }
 
 ECode PhoneWindow::_DecorView::WillYouTakeTheSurface(
     /* [out] */ ISurfaceHolderCallback2** cback)
 {
     VALIDATE_NOT_NULL(cback);
+    *cback = NULL;
+
     if (mFeatureId < 0) {
         *cback = mHost->mTakeSurfaceCallback;
         REFCOUNT_ADD(*cback);
     }
-    else {
-        *cback = NULL;
-    }
-
     return NOERROR;
 }
 
@@ -2729,11 +2733,6 @@ PhoneWindow::PhoneWindow()
     , mBackgroundFadeDurationMillis(-1)
     , mSharedElementsUseOverlay(TRUE)
 {
-    mVolumeControlStreamType = IAudioManager::USE_DEFAULT_STREAM_TYPE;
-    mContextMenuCallback = new DialogMenuCallback(IWindow::FEATURE_CONTEXT_MENU, this);
-    CTypedValue::New((ITypedValue**)&mMinWidthMajor);
-    CTypedValue::New((ITypedValue**)&mMinWidthMinor);
-    mInvalidatePanelMenuRunnable = new InvalidatePanelMenuRunnable(this);
 }
 
 PhoneWindow::~PhoneWindow()
@@ -2748,13 +2747,18 @@ PhoneWindow::~PhoneWindow()
 ECode PhoneWindow::constructor(
     /* [in] */ IContext* context)
 {
+    mVolumeControlStreamType = IAudioManager::USE_DEFAULT_STREAM_TYPE;
+    mContextMenuCallback = new DialogMenuCallback(IWindow::FEATURE_CONTEXT_MENU, this);
+    CTypedValue::New((ITypedValue**)&mMinWidthMajor);
+    CTypedValue::New((ITypedValue**)&mMinWidthMinor);
+    mInvalidatePanelMenuRunnable = new InvalidatePanelMenuRunnable(this);
+
     mContext = context;
     mRetainContext = IActivity::Probe(mContext) == NULL && IService::Probe(mContext) == NULL;
     if (mRetainContext) {
         mContext->AddRef();
     }
-    LayoutInflater::From(context, (ILayoutInflater**)&mLayoutInflater);
-    return NOERROR;
+    return LayoutInflater::From(context, (ILayoutInflater**)&mLayoutInflater);
 }
 
 //PInterface PhoneWindow::Probe(
@@ -3282,7 +3286,8 @@ Boolean PhoneWindow::InitializePanelDecor(
 {
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    st->mDecorView = new _DecorView(this, context, st->mFeatureId);//, TRUE);
+    st->mDecorView = new _DecorView();
+    st->mDecorView->constructor(this, context, st->mFeatureId);//, TRUE);//TODO memory leak.
     st->mGravity = IGravity::CENTER | IGravity::BOTTOM;
     st->SetStyle(context);
 
@@ -4766,7 +4771,8 @@ AutoPtr<PhoneWindow::_DecorView> PhoneWindow::GenerateDecor()
 {
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<PhoneWindow::_DecorView> decor = new _DecorView(this, context.Get(), -1);
+    AutoPtr<PhoneWindow::_DecorView> decor = new _DecorView();
+    decor->constructor(this, context.Get(), -1);    //TODO memory leak.
     return decor;
 }
 

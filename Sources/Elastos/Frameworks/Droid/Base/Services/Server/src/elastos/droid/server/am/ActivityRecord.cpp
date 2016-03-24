@@ -79,33 +79,11 @@ const String ActivityRecord::ATTR_COMPONENTSPECIFIED("component_specified");
 
 CAR_INTERFACE_IMPL(ActivityRecord, Object, IActivityRecord)
 
-ActivityRecord::ActivityRecord(
-    /* [in] */ CActivityManagerService* service,
-    /* [in] */ ProcessRecord* caller,
-    /* [in] */ Int32 launchedFromUid,
-    /* [in] */ const String& launchedFromPackage,
-    /* [in] */ IIntent* intent,
-    /* [in] */ const String& resolvedType,
-    /* [in] */ IActivityInfo* aInfo,
-    /* [in] */ IConfiguration* configuration,
-    /* [in] */ ActivityRecord* resultTo,
-    /* [in] */ const String& resultWho,
-    /* [in] */ Int32 reqCode,
-    /* [in] */ Boolean componentSpecified,
-    /* [in] */ ActivityStackSupervisor* supervisor,
-    /* [in] */ IIActivityContainer* container,
-    /* [in] */ IBundle* options)
-    : mService(service)
-    , mInfo(aInfo)
-    , mLaunchedFromUid(launchedFromUid)
-    , mLaunchedFromPackage(launchedFromPackage)
-    , mUserId(0)
-    , mIntent(intent)
-    , mResolvedType(resolvedType)
+ActivityRecord::ActivityRecord()
+    : mUserId(0)
     , mStateNotNeeded(FALSE)
     , mFullscreen(FALSE)
     , mNoDisplay(FALSE)
-    , mComponentSpecified(componentSpecified)
     , mActivityType(0)
     , mLabelRes(0)
     , mIcon(0)
@@ -120,11 +98,6 @@ ActivityRecord::ActivityRecord(
     , mCpuTimeAtResume(0)
     , mPauseTime(0)
     , mLaunchTickTime(0)
-    , mConfiguration(configuration)
-    , mResultTo(resultTo)
-    , mResultWho(resultWho)
-    , mRequestCode(reqCode)
-    , mApp(NULL)
     , mState(ActivityState_INITIALIZING)
     , mFrontOfTask(FALSE)
     , mLaunchFailed(FALSE)
@@ -147,12 +120,48 @@ ActivityRecord::ActivityRecord(
     , mForceNewConfig(FALSE)
     , mLaunchCount(0)
     , mLastLaunchTime(0)
-    , mStackSupervisor(supervisor)
     , mStartingWindowShown(FALSE)
-    , mInitialActivityContainer(container)
     , mLaunchTaskBehind(FALSE)
     , mInHistory(FALSE)
 {
+}
+
+ActivityRecord::~ActivityRecord()
+{
+    Slogger::D("ActivityRecord", " =========== ~ActivityRecord() %s", ToString().string());
+}
+
+ECode ActivityRecord::constructor(
+    /* [in] */ CActivityManagerService* service,
+    /* [in] */ ProcessRecord* caller,
+    /* [in] */ Int32 launchedFromUid,
+    /* [in] */ const String& launchedFromPackage,
+    /* [in] */ IIntent* intent,
+    /* [in] */ const String& resolvedType,
+    /* [in] */ IActivityInfo* aInfo,
+    /* [in] */ IConfiguration* configuration,
+    /* [in] */ ActivityRecord* resultTo,
+    /* [in] */ const String& resultWho,
+    /* [in] */ Int32 reqCode,
+    /* [in] */ Boolean componentSpecified,
+    /* [in] */ ActivityStackSupervisor* supervisor,
+    /* [in] */ IIActivityContainer* container,
+    /* [in] */ IBundle* options)
+{
+    mService = service;
+    mInfo = aInfo;
+    mLaunchedFromUid = launchedFromUid;
+    mLaunchedFromPackage = launchedFromPackage;
+    mIntent = intent;
+    mResolvedType = resolvedType;
+    mComponentSpecified = componentSpecified;
+    mConfiguration = configuration;
+    mResultTo = resultTo;
+    mResultWho = resultWho;
+    mRequestCode = reqCode;
+    mStackSupervisor = supervisor;
+    mInitialActivityContainer = container;
+
     ASSERT_SUCCEEDED(CActivityRecordToken::New(this, (IApplicationToken**)&mAppToken));
 
     AutoPtr<IComponentName> component;
@@ -174,8 +183,12 @@ ActivityRecord::ActivityRecord(
     mHaveState = TRUE;
 
     if (mInfo != NULL) {
+        IPackageItemInfo* piInfo = IPackageItemInfo::Probe(mInfo);
+        IComponentInfo* ciInfo = IComponentInfo::Probe(mInfo);
+
         AutoPtr<IApplicationInfo> appInfo;
-        IComponentInfo::Probe(mInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+        ciInfo->GetApplicationInfo((IApplicationInfo**)&appInfo);
+        IPackageItemInfo* piAppInfo = IPackageItemInfo::Probe(appInfo);
         Int32 uid;
         appInfo->GetUid(&uid);
 
@@ -183,7 +196,6 @@ ActivityRecord::ActivityRecord(
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
         helper->GetUserId(uid, &mUserId);
 
-        IPackageItemInfo* piInfo = IPackageItemInfo::Probe(mInfo);
         String target;
         mInfo->GetTargetActivity(&target);
         Int32 mode;
@@ -205,11 +217,11 @@ ActivityRecord::ActivityRecord(
         piInfo->GetNonLocalizedLabel((ICharSequence**)&mNonLocalizedLabel);
         piInfo->GetLabelRes(&mLabelRes);
         if (mNonLocalizedLabel == NULL && mLabelRes == 0) {
-            IPackageItemInfo::Probe(appInfo)->GetNonLocalizedLabel((ICharSequence**)&mNonLocalizedLabel);
-            IPackageItemInfo::Probe(appInfo)->GetLabelRes(&mLabelRes);
+            piAppInfo->GetNonLocalizedLabel((ICharSequence**)&mNonLocalizedLabel);
+            piAppInfo->GetLabelRes(&mLabelRes);
         }
-        IComponentInfo::Probe(mInfo)->GetIconResource(&mIcon);
-        IComponentInfo::Probe(mInfo)->GetLogoResource(&mLogo);
+        ciInfo->GetIconResource(&mIcon);
+        ciInfo->GetLogoResource(&mLogo);
         mInfo->GetThemeResource(&mTheme);
         mRealTheme = mTheme;
         if (mRealTheme == 0) {
@@ -230,14 +242,14 @@ ActivityRecord::ActivityRecord(
             mProcessName = caller->mProcessName;
         }
         else {
-            IComponentInfo::Probe(mInfo)->GetProcessName(&mProcessName);
+            ciInfo->GetProcessName(&mProcessName);
         }
 
         if (intent != NULL && (flags & IActivityInfo::FLAG_EXCLUDE_FROM_RECENTS) != 0) {
             intent->AddFlags(IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         }
 
-        IPackageItemInfo::Probe(appInfo)->GetPackageName(&mPackageName);
+        piAppInfo->GetPackageName(&mPackageName);
         mInfo->GetLaunchMode(&mLaunchMode);
 
         AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
@@ -293,11 +305,7 @@ ActivityRecord::ActivityRecord(
         mActivityType = APPLICATION_ACTIVITY_TYPE;
         mImmersive = FALSE;
     }
-}
-
-ActivityRecord::~ActivityRecord()
-{
-    Slogger::D("ActivityRecord", " =========== ~ActivityRecord() %s", ToString().string());
+    return NOERROR;
 }
 
 void ActivityRecord::Dump(
@@ -1488,15 +1496,14 @@ ECode ActivityRecord::RestoreFromXml(
     AutoPtr<IActivityInfo> aInfo = stackSupervisor->ResolveActivity(
         intent, resolvedType, 0, NULL, userId);
     if (aInfo == NULL) {
-        String str;
-        IObject::Probe(intent)->ToString(&str);
         Slogger::E(TAG, "restoreActivity resolver error. Intent=%s resolvedType=%s",
-            str.string(), resolvedType.string());
+            TO_CSTR(intent), resolvedType.string());
         return E_XML_PULL_PARSER_EXCEPTION;
     }
     AutoPtr<IConfiguration> config;
     service->GetConfiguration((IConfiguration**)&config);
-    AutoPtr<ActivityRecord> r = new ActivityRecord(service, /*caller*/NULL, launchedFromUid,
+    AutoPtr<ActivityRecord> r = new ActivityRecord();
+    r->constructor(service, /*caller*/NULL, launchedFromUid,
             launchedFromPackage, intent, resolvedType, aInfo, config,
             NULL, String(NULL), 0, componentSpecified, stackSupervisor, NULL, NULL);
 

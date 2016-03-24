@@ -406,24 +406,27 @@ AutoPtr<ICharSequence> DateFormat::Format(
     AutoPtr<ILocaleData> localeData;
     localDataHelper->Get(defaultLocale, (ILocaleData**)&localeData);
 
-    Int32 len;
+    ICharSequence* csq = ICharSequence::Probe(s);
+
+    Int32 len, csqLength;
     inFormat->GetLength(&len);
+    csq->GetLength(&csqLength);
 
     for (Int32 i = 0; i < len; i += count) {
         Int32 temp;
+        Char32 c;
 
         count = 1;
-        Char32 c;
-        ICharSequence::Probe(s)->GetCharAt(i, &c);
+        csq->GetCharAt(i, &c);
 
         if (c == Elastos::Droid::Text::Format::IDateFormat::QUOTE) {
             count = AppendQuotedText(s, i, len);
-            ICharSequence::Probe(s)->GetLength(&len);
+            len = csqLength;
             continue;
         }
 
         Char32 cc;
-        while ((i + count < len) && (ICharSequence::Probe(s)->GetCharAt(i + count, &cc), cc == c)) {
+        while ((i + count < len) && (csq->GetCharAt(i + count, &cc), cc == c)) {
             count++;
         }
 
@@ -476,8 +479,6 @@ AutoPtr<ICharSequence> DateFormat::Format(
                     }
                     replacement = ZeroPad(hour, count);
                 }
-
-                replacement = ZeroPad(temp, count);
                 break;
             case 'L':
             case 'M':

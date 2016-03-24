@@ -415,7 +415,7 @@ ECode CResourcesManager::GetTopLevelResources(
         IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(r);
         AutoPtr<IWeakReference> wr;
         wrs->GetWeakReference((IWeakReference**)&wr);
-        mActiveResources->Put(TO_IINTERFACE(key), TO_IINTERFACE(wr));
+        mActiveResources->Put(TO_IINTERFACE(key), wr.Get());
         *result = r;
         REFCOUNT_ADD(*result)
     }

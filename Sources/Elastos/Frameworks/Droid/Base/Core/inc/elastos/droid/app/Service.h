@@ -129,7 +129,6 @@ private:
     AutoPtr<IIActivityManager> mActivityManager;
     Boolean mStartCompatibility;
 
-    AutoPtr<IContext> mBase;
     Int32 mThemeResource;
     AutoPtr<IResourcesTheme> mTheme;
     AutoPtr<ILayoutInflater> mInflater;

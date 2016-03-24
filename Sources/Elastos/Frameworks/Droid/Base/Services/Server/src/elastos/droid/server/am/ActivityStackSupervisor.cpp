@@ -1445,7 +1445,7 @@ ECode ActivityStackSupervisor::StartActivities(
     /* [in] */ const String& callingPackage,
     /* [in] */ ArrayOf<IIntent*>* intents,
     /* [in] */ ArrayOf<String>* resolvedTypes,
-    /* [in] */ IBinder* resultTo,
+    /* [in] */ IBinder* inResultTo,
     /* [in] */ IBundle* options,
     /* [in] */ Int32 userId,
     /* [out] */ Int32* result)
@@ -1468,7 +1468,7 @@ ECode ActivityStackSupervisor::StartActivities(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-
+    AutoPtr<IBinder> resultTo = inResultTo;
     Int32 callingPid;
     if (callingUid >= 0) {
         callingPid = -1;
@@ -1482,10 +1482,8 @@ ECode ActivityStackSupervisor::StartActivities(
     //try {
         {
             AutoLock lock(mService);
-            //ActivityRecord[] outActivity = new ActivityRecord[1];
             AutoPtr<ArrayOf<ActivityRecord*> > outActivity = ArrayOf<ActivityRecord*>::Alloc(1);
-            //outActivity->Set(0, new ActivityRecord());
-            for (Int32 i=0; i < intents->GetLength(); ++i) {
+            for (Int32 i = 0; i < intents->GetLength(); ++i) {
                 AutoPtr<IIntent> intent = (*intents)[i];
                 if (intent == NULL) {
                     continue;
@@ -1494,7 +1492,6 @@ ECode ActivityStackSupervisor::StartActivities(
                 // Refuse possible leaked file descriptors
                 Boolean hasFileDescriptors;
                 if (intent != NULL && (intent->HasFileDescriptors(&hasFileDescriptors), hasFileDescriptors)) {
-                    //throw new IllegalArgumentException("File descriptors passed in Intent");
                     Binder::RestoreCallingIdentity(origId);
                     Slogger::E("ActivityStackSupervisor::StartActivities", "File descriptors passed in Intent");
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1535,17 +1532,16 @@ ECode ActivityStackSupervisor::StartActivities(
                 }
                 Int32 res;
                 StartActivityLocked(caller, intent, (*resolvedTypes)[i],
-                        aInfo, NULL, NULL, resultTo, String(NULL), -1, callingPid, callingUid,
-                        callingPackage, callingPid, callingUid,
-                        0, theseOptions, componentSpecified, outActivity, NULL, NULL,
-                        &res);
+                    aInfo, NULL, NULL, resultTo, String(NULL), -1, callingPid, callingUid,
+                    callingPackage, callingPid, callingUid,
+                    0, theseOptions, componentSpecified, outActivity, NULL, NULL,
+                    &res);
                 if (res < 0) {
                     *result = res;
                     Binder::RestoreCallingIdentity(origId);
                     return NOERROR;
                 }
 
-                //resultTo = outActivity[0] != NULL ? outActivity[0].appToken : NULL;
                 if ((*outActivity)[0] != NULL) {
                     resultTo = IBinder::Probe((*outActivity)[0]->mAppToken);
                 } else {
@@ -1569,11 +1565,12 @@ ECode ActivityStackSupervisor::RealStartActivityLocked(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-
     *result = FALSE;
+
+    IBinder* appToken = IBinder::Probe(r->mAppToken);
     r->StartFreezingScreenLocked(app, 0);
-    //if (FALSE) Slogger::D(TAG, "realStartActivity: setting app visibility TRUE");
-    mWindowManager->SetAppVisibility(IBinder::Probe(r->mAppToken), TRUE);
+    if (FALSE) Slogger::D(TAG, "realStartActivity: setting app visibility TRUE. appToken:%p, %s", appToken, TO_CSTR(appToken));
+    mWindowManager->SetAppVisibility(appToken, TRUE);
 
     // schedule launch ticks to collect information about slow apps.
     r->StartLaunchTickingLocked();
@@ -1588,7 +1585,7 @@ ECode ActivityStackSupervisor::RealStartActivityLocked(
         AutoPtr<IConfiguration> config;
         mWindowManager->UpdateOrientationFromAppTokens(
                mService->mConfiguration,
-               r->MayFreezeScreenLocked(app) ? (IBinder::Probe(r->mAppToken)) : NULL,
+               r->MayFreezeScreenLocked(app) ? appToken : NULL,
                (IConfiguration**)&config);
         mService->UpdateConfigurationLocked(config, r, FALSE, FALSE);
     }
@@ -1726,7 +1723,7 @@ ECode ActivityStackSupervisor::RealStartActivityLocked(
         }
     }
 
-    ec = app->mThread->ScheduleLaunchActivity(slaIntent, IBinder::Probe(r->mAppToken),
+    ec = app->mThread->ScheduleLaunchActivity(slaIntent, appToken,
         hash, r->mInfo, slaConfig,
         r->mCompat, r->mTask->mVoiceInteractor, app->mRepProcState, r->mIcicle, r->mPersistentState,
         resultsList, newIntentsList, !andResume, mService->IsNextTransitionForward(),
@@ -1768,7 +1765,7 @@ _EXIT_:
             icn->FlattenToShortString(&info);
             Slogger::E(TAG, "Second failure launching %s, giving up. ec=%08x", info.string(), ec);
             mService->AppDiedLocked(app);
-            stack->RequestFinishActivityLocked(IBinder::Probe(r->mAppToken),
+            stack->RequestFinishActivityLocked(appToken,
                 IActivity::RESULT_CANCELED, NULL, String("2nd-crash"), FALSE);
             *result = FALSE;
             return NOERROR;
@@ -2164,9 +2161,10 @@ ECode ActivityStackSupervisor::StartActivityLocked(
         return NOERROR;
     }
 
-    AutoPtr<ActivityRecord> r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,
-            intent, resolvedType, aInfo, mService->mConfiguration, resultRecord, resultWho,
-            requestCode, componentSpecified, this, container, options);
+    AutoPtr<ActivityRecord> r = new ActivityRecord();
+    r->constructor(mService, callerApp, callingUid, callingPackage,
+        intent, resolvedType, aInfo, mService->mConfiguration, resultRecord, resultWho,
+        requestCode, componentSpecified, this, container, options);
     if (outActivity != NULL) {
         outActivity->Set(0, r);
     }

@@ -110,7 +110,7 @@ ECode CActivityRecordToken::ToString(
 {
     VALIDATE_NOT_NULL(str);
     StringBuilder sb(128);
-    sb += "Token{";
+    sb += "CActivityRecordToken{";
     sb += StringUtils::ToString(Int32(this), 16);
     sb += ", ActivityRecord:";
 
