@@ -138,10 +138,8 @@ ECode CCalls::AddCall(
     /* [in] */ Int64 dataUsage,
     /* [out] */ IUri** uri)
 {
-    assert(0 && "TODO"); // IPhoneAccountHandle
-    // return AddCall(ci, context, number, presentation, callType, features, accountHandle,
-    //                 start, duration, dataUsage, FALSE);
-    return NOERROR;
+    return AddCall(ci, context, number, presentation, callType, features, accountHandle,
+                    start, duration, dataUsage, FALSE, DURATION_TYPE_ACTIVE);
 }
 
 ECode CCalls::AddCall(
@@ -156,6 +154,25 @@ ECode CCalls::AddCall(
     /* [in] */ Int32 duration,
     /* [in] */ Int64 dataUsage,
     /* [in] */ Boolean addForAllUsers,
+    /* [out] */ IUri** uri)
+{
+    return AddCall(ci, context, number, presentation, callType, features, accountHandle,
+                    start, duration, dataUsage, addForAllUsers, DURATION_TYPE_ACTIVE);
+}
+
+ECode CCalls::AddCall(
+    /* [in] */ ICallerInfo* ci,
+    /* [in] */ IContext* context,
+    /* [in] */ const String& number,
+    /* [in] */ Int32 presentation,
+    /* [in] */ Int32 callType,
+    /* [in] */ Int32 features,
+    /* [in] */ IPhoneAccountHandle* handle,
+    /* [in] */ Int64 start,
+    /* [in] */ Int32 duration,
+    /* [in] */ Int64 dataUsage,
+    /* [in] */ Boolean addForAllUsers,
+    /* [in] */ Int32 durationType,
     /* [out] */ IUri** uri)
 {
     VALIDATE_NOT_NULL(uri);
@@ -203,6 +220,7 @@ ECode CCalls::AddCall(
     values->Put(FEATURES, features);
     values->Put(DATE, StringUtils::ToString(start));
     values->Put(DURATION, StringUtils::ToString(duration));
+    values->Put(DURATION_TYPE, StringUtils::ToString(durationType));
     values->Put(DATA_USAGE, dataUsage);
     values->Put(PHONE_ACCOUNT_COMPONENT_NAME, accountComponentString);
     values->Put(PHONE_ACCOUNT_ID, accountId);

@@ -1,0 +1,89 @@
+module {
+
+    interface Elastos.Droid.Content.IContentResolver;
+    interface Elastos.Droid.Content.IContentUris;
+    interface Elastos.Droid.Content.IContentValues;
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Provider.IContactsContractCommonDataKinds;
+    interface Elastos.Droid.Provider.IContactsContractData;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Provider {
+
+
+    /**
+     * @hide
+     */
+    interface ILocalGroups {
+
+        const String AUTHORITY = "com.android.contacts.groups";
+
+        GetAUTHORITY_URI(
+            [out] IUri** uri);
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
+    }
+
+    interface ILocalGroupsGroupColumns {
+
+        const String _ID = "_id";
+
+        const String TITLE = "title";
+
+        const String COUNT = "count";
+    }
+
+    interface ILocalGroupsGroup {
+        GetId(
+            [out] Int64* id);
+
+        SetId(
+            [in] Int64 id);
+
+        GetTitle(
+            [out] String* title);
+
+        SetTitle(
+            [in] String title);
+
+        GetCount(
+            [out] Int32* count);
+
+        SetCount(
+            [in] Int32 count);
+
+        ToContentValues(
+            [out] IContentValues** contentValues);
+
+        Save(
+            [in] IContentResolver* cr,
+            [out] Boolean* result);
+
+        Update(
+            [in] IContentResolver* cr,
+            [out] Boolean* result);
+
+        Delete(
+            [in] IContentResolver* cr,
+            [out] Boolean* result);
+    }
+
+    interface ILocalGroupsGroupHelper {
+        RestoreGroup(
+            [in] ICursor* cursor,
+            [out] ILocalGroupsGroup** group);
+
+        RestoreGroupById(
+            [in] IContentResolver* cr,
+            [in] Int64 groupId,
+            [out] ILocalGroupsGroup** group);
+    }
+
+    } // namespace Provider
+    } // namespace Droid
+    } // namespace Elastos
+
+}

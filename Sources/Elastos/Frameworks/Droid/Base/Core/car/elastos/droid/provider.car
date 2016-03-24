@@ -12,6 +12,7 @@ module
     merge("provider/DocumentsProvider.car");
     merge("provider/Downloads.car");
     merge("provider/LiveFolders.car");
+    merge("provider/LocalGroups.car");
     merge("provider/MediaStore.car");
     merge("provider/OpenableColumns.car");
     merge("provider/SearchIndexableData.car");
@@ -491,6 +492,12 @@ module
         interface IContactsContractPresenceColumns;
     }
 
+    singleton class CContactsContractCommonDataKindsLocalGroup
+    {
+        interface IContactsContractCommonDataKindsLocalGroup;
+        interface IContactsContractDataColumnsWithJoins;
+    }
+
     singleton class CContactsContractCommonDataKindsPhone
     {
         interface IContactsContractCommonDataKindsPhone;
@@ -758,6 +765,42 @@ module
     singleton class CContactsContractDeletedContacts
     {
         interface IContactsContractDeletedContacts;
+    }
+
+    singleton class CLocalGroups
+    {
+        interface ILocalGroups;
+    }
+
+    class CLocalGroupsGroup
+    {
+        constructor();
+        interface ILocalGroupsGroup;
+    }
+
+    singleton class CLocalGroupsGroupHelper
+    {
+        interface ILocalGroupsGroupHelper;
+    }
+
+    singleton class CThemesContract
+    {
+        interface IThemesContract;
+    }
+
+    singleton class CThemesContractThemesColumns
+    {
+        interface IThemesContractThemesColumns;
+    }
+
+    singleton class CThemesContractMixnMatchColumns
+    {
+        interface IThemesContractMixnMatchColumns;
+    }
+
+    singleton class CThemesContractPreviewColumns
+    {
+        interface IThemesContractPreviewColumns;
     }
 
     } // namespace Provider

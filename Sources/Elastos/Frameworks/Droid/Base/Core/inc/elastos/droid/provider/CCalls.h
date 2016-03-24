@@ -52,12 +52,18 @@ public:
      * if the contact is unknown.
      * @param context the context used to get the ContentResolver
      * @param number the phone number to be added to the calls db
-     * @param presentation the number presenting rules set by the network for
+     * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+     *        is set by the network and denotes the number presenting rules for
      *        "allowed", "payphone", "restricted" or "unknown"
      * @param callType enumerated values for "incoming", "outgoing", or "missed"
+     * @param features features of the call (e.g. Video).
+     * @param accountHandle The accountHandle object identifying the provider of the call
      * @param start time stamp for the call in milliseconds
      * @param duration call duration in seconds
-     *
+     * @param dataUsage data usage for the call in bytes, null if data usage was not tracked for
+     *                  the call.
+     * @result The URI of the call log entry belonging to the user that made or received this
+     *        call.
      * {@hide}
      */
     CARAPI AddCall(
@@ -73,6 +79,30 @@ public:
         /* [in] */ Int64 dataUsage,
         /* [out] */ IUri** uri);
 
+    /**
+     * Adds a call to the call log.
+     *
+     * @param ci the CallerInfo object to get the target contact from.  Can be null
+     * if the contact is unknown.
+     * @param context the context used to get the ContentResolver
+     * @param number the phone number to be added to the calls db
+     * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+     *        is set by the network and denotes the number presenting rules for
+     *        "allowed", "payphone", "restricted" or "unknown"
+     * @param callType enumerated values for "incoming", "outgoing", or "missed"
+     * @param features features of the call (e.g. Video).
+     * @param accountHandle The accountHandle object identifying the provider of the call
+     * @param start time stamp for the call in milliseconds
+     * @param duration call duration in seconds
+     * @param dataUsage data usage for the call in bytes, null if data usage was not tracked for
+     *                  the call.
+     * @param addForAllUsers If true, the call is added to the call log of all currently
+     *        running users. The caller must have the MANAGE_USERS permission if this is true.
+     *
+     * @result The URI of the call log entry belonging to the user that made or received this
+     *        call.
+     * {@hide}
+     */
     CARAPI AddCall(
         /* [in] */ ICallerInfo* ci,
         /* [in] */ IContext* context,
@@ -85,6 +115,46 @@ public:
         /* [in] */ Int32 duration,
         /* [in] */ Int64 dataUsage,
         /* [in] */ Boolean addForAllUsers,
+        /* [out] */ IUri** uri);
+
+    /**
+     * Adds a call to the call log.
+     *
+     * @param ci the CallerInfo object to get the target contact from.  Can be null
+     * if the contact is unknown.
+     * @param context the context used to get the ContentResolver
+     * @param number the phone number to be added to the calls db
+     * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+     *        is set by the network and denotes the number presenting rules for
+     *        "allowed", "payphone", "restricted" or "unknown"
+     * @param callType enumerated values for "incoming", "outgoing", or "missed"
+     * @param features features of the call (e.g. Video).
+     * @param accountHandle The accountHandle object identifying the provider of the call
+     * @param start time stamp for the call in milliseconds
+     * @param duration call duration in seconds
+     * @param dataUsage data usage for the call in bytes, null if data usage was not tracked for
+     *                  the call.
+     * @param addForAllUsers If true, the call is added to the call log of all currently
+     *        running users. The caller must have the MANAGE_USERS permission if this is true.
+     * @param durationType valid value is 0 or 1.
+     *
+     * @result The URI of the call log entry belonging to the user that made or received this
+     *        call.
+     * {@hide}
+     */
+    CARAPI AddCall(
+        /* [in] */ ICallerInfo* ci,
+        /* [in] */ IContext* context,
+        /* [in] */ const String& number,
+        /* [in] */ Int32 presentation,
+        /* [in] */ Int32 callType,
+        /* [in] */ Int32 features,
+        /* [in] */ IPhoneAccountHandle* handle,
+        /* [in] */ Int64 start,
+        /* [in] */ Int32 duration,
+        /* [in] */ Int64 dataUsage,
+        /* [in] */ Boolean addForAllUsers,
+        /* [in] */ Int32 durationType,
         /* [out] */ IUri** uri);
 
     /**

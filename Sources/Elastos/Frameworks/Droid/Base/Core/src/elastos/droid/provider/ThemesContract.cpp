@@ -69,7 +69,7 @@ static AutoPtr<ArrayOf<String> > InitROWS()
     (*rows)[10] = IThemesContractMixnMatchColumns::KEY_NAVIGATION_BAR;
     return rows;
 }
-const AutoPtr<ArrayOf<String> > ROWS = InitROWS();
+const AutoPtr<ArrayOf<String> > ThemesContract::MixnMatchColumns::ROWS = InitROWS();
 
 ECode ThemesContract::MixnMatchColumns::ComponentToImageColName(
     /* [in] */ const String& component,

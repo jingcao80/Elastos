@@ -224,7 +224,6 @@ ECode CMediaStoreInternalThumbnails::GetThumbnail(
         // This happens when original image/video doesn't exist.
         if (c == NULL) {
             *outBitmap = NULL;
-            REFCOUNT_ADD(*outBitmap);
             return NOERROR;
         }
 
@@ -286,7 +285,7 @@ ECode CMediaStoreInternalThumbnails::GetThumbnail(
             CUriHelper::AcquireSingleton((IUriHelper**)&helper);
             helper->Parse(result, (IUri**)&uri);
 
-            if (filePath == NULL) {
+            if (filePath == NULL) { // TODO:
                 if (c != NULL) {
                     ICloseable::Probe(c)->Close();
                     c = NULL;
@@ -296,10 +295,15 @@ ECode CMediaStoreInternalThumbnails::GetThumbnail(
                 Boolean bSucceeded;
                 if (c == NULL || !(c->MoveToFirst(&bSucceeded), bSucceeded)) {
                     *outBitmap = NULL;
-                    REFCOUNT_ADD(*outBitmap);
                     return NOERROR;
                 }
                 c->GetString(1, &filePath);
+                // this DB query can return null under some synchronization issue,
+                // returning NULL bitmap in such cases.
+                if (filePath == NULL) {
+                    *outBitmap = NULL;
+                    return NOERROR;
+                }
             }
             if (isVideo) {
                 // TODO:
