@@ -22,13 +22,15 @@ BroadcastFilter::BroadcastFilter(
     /* [in] */ const String& packageName,
     /* [in] */ const String& requiredPermission,
     /* [in] */ Int32 owningUid,
-    /* [in] */ Int32 userId)
+    /* [in] */ Int32 userId,
+    /* [in] */ Boolean isSystem)
     : IntentFilter(intentFilter)
     , mReceiverList(receiverList)
     , mPackageName(packageName)
     , mRequiredPermission(requiredPermission)
     , mOwningUid(owningUid)
     , mOwningUserId(userId)
+    , mIsSystem(isSystem)
 {
     IntentFilter::constructor(intentFilter);
 }
@@ -87,10 +89,30 @@ String BroadcastFilter::ToString()
 }
 
 ECode BroadcastFilter::ToString(
-        /* [out] */ String* str)
+    /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
     *str = ToString();
+    return NOERROR;
+}
+
+ECode BroadcastFilter::OnCompareTie(
+    /* [in] */ IIntentFilter* other,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    // in case of a tie when sorting ordered broadcasts,
+    // favor system apps.
+    BroadcastFilter* bf = (BroadcastFilter*)other;
+    if (mIsSystem) {
+        *result = -1;
+        return NOERROR;
+    }
+    if (bf->mIsSystem) {
+        *result = 1;
+        return NOERROR;
+    }
+    *result = 0;
     return NOERROR;
 }
 

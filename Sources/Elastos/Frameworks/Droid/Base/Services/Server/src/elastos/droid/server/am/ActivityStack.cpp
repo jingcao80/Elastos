@@ -7,10 +7,10 @@
 #include "elastos/droid/app/AppGlobals.h"
 //TODO #include "elastos/droid/internal/os/BatteryStatsImpl.h"
 #include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/server/am/ActivityContainer.h"
 #include "elastos/droid/server/am/ActivityRecord.h"
 #include "elastos/droid/server/am/ActivityStack.h"
 #include "elastos/droid/server/am/ActivityState.h"
-#include "elastos/droid/server/am/ActivityContainer.h"
 #include "elastos/droid/server/wm/AppTransition.h"
 #include "elastos/droid/server/wm/TaskGroup.h"
 #include "elastos/droid/server/Watchdog.h"
@@ -232,15 +232,14 @@ ActivityStack::ActivityStack(
     , mDisplayId(0)
     , mInResumeTopActivity(FALSE)
 {
-    ActivityContainer* ac = (ActivityContainer*)activityContainer;
-    mActivityContainer = activityContainer;
-    mStackSupervisor = ac->GetOuter();
+    mActivityContainer = (ActivityContainer*)activityContainer;
+    mStackSupervisor = mActivityContainer->GetOuter();
     mService = mStackSupervisor->mService;
     AutoPtr<ILooper> looper;
     mService->mHandler->GetLooper((ILooper**)&looper);
     mHandler = new ActivityStackHandler(looper, this);
     mWindowManager = mService->mWindowManager;
-    mStackId = ac->mStackId;
+    mStackId = mActivityContainer->mStackId;
     mCurrentUser = mService->mCurrentUserId;//TODO friend this class in ActivityManagerService
 
     CArrayList::New((IArrayList**)&mTaskHistory);
@@ -432,8 +431,7 @@ Boolean ActivityStack::IsHomeStack()
 
 Boolean ActivityStack::IsOnHomeDisplay()
 {
-    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
-    return IsAttached() && ac->mActivityDisplay->mDisplayId == IDisplay::DEFAULT_DISPLAY;
+    return IsAttached() && mActivityContainer->mActivityDisplay->mDisplayId == IDisplay::DEFAULT_DISPLAY;
 }
 
 void ActivityStack::MoveToFront()
@@ -822,8 +820,11 @@ Boolean ActivityStack::StartPausingLocked(
     /* [in] */ Boolean dontWait)
 {
     if (mPausingActivity != NULL) {
-        //Slogger::Wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity);
-        CompletePauseLocked(FALSE);
+        // Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
+        //         + " state=" + mPausingActivity.state);
+        if (mPausingActivity->mState == ActivityState_PAUSING) {
+            CompletePauseLocked(FALSE);
+        }
     }
     AutoPtr<ActivityRecord> prev = mResumedActivity;
     if (prev == NULL) {
@@ -834,8 +835,7 @@ Boolean ActivityStack::StartPausingLocked(
         return FALSE;
     }
 
-    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
-    if (ac->mParentActivity == NULL) {
+    if (mActivityContainer->mParentActivity == NULL) {
         // Top level stack, not a child. Look for child stacks.
         mStackSupervisor->PauseChildStacks(prev, userLeaving, uiSleeping, resuming, dontWait);
     }
@@ -990,8 +990,7 @@ void ActivityStack::ActivityStoppedLocked(
         r->mStopped = TRUE;
         r->mState = ActivityState_STOPPED;
 
-        ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
-        if (ac->mActivityDisplay->mVisibleBehindActivity.Get() == r) {
+        if (mActivityContainer->mActivityDisplay->mVisibleBehindActivity.Get() == r) {
             mStackSupervisor->RequestVisibleBehindLocked(r, FALSE);
         }
         if (r->mFinishing) {
@@ -1107,6 +1106,9 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
         //ArrayList<ActivityRecord> activities = task.mActivities;
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
+            if (activityNdx >= activities->GetSize()) {
+                continue;
+            }
             AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
             if (r->mFinishing) {
                 continue;
@@ -1278,8 +1280,7 @@ void ActivityStack::ConvertToTranslucent(
 void ActivityStack::NotifyActivityDrawnLocked(
     /* [in] */ ActivityRecord* r)
 {
-    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
-    ac->SetDrawn();
+    mActivityContainer->SetDrawn();
     if (r == NULL){
         Boolean remove, isEmpty;
         mUndrawnActivitiesBelowTopTranslucent->Remove(TO_IINTERFACE(r), &remove);
@@ -1376,10 +1377,9 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
         return FALSE;
     }
 
-    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
-    AutoPtr<ActivityRecord> parent = (ActivityRecord*)ac->mParentActivity.Get();
+    AutoPtr<ActivityRecord> parent = (ActivityRecord*)mActivityContainer->mParentActivity.Get();
     if ((parent != NULL && parent->mState != ActivityState_RESUMED) ||
-            !ac->IsAttachedLocked()) {
+            !mActivityContainer->IsAttachedLocked()) {
         // Do not resume this stack if its parent is not resumed.
         // TODO: If in a loop, make sure that parent stack resumeTopActivity is called 1st.
         return FALSE;
@@ -1501,10 +1501,14 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
     mStackSupervisor->mGoingToSleepActivities->Remove(TO_IINTERFACE(next));
     next->mSleeping = FALSE;
     mStackSupervisor->mWaitingVisibleActivities->Remove(TO_IINTERFACE(next));
+    next->mWaitingVisible = FALSE;
 
     if (CActivityManagerService::DEBUG_SWITCH) {
         Slogger::V(TAG, "Resuming %s", TO_CSTR(next));
     }
+
+    // Some activities may want to alter the system power management
+    mStackSupervisor->mPm->ActivityResumed(next->mIntent);
 
     // If we are currently pausing an activity, then don't do anything
     // until that is done.
@@ -1606,6 +1610,8 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             // previous should actually be hidden depending on whether the
             // new one is found to be full-screen or not.
             if (prev->mFinishing) {
+                if (prev->mWaitingVisible)
+                    mStackSupervisor->mWaitingVisibleActivities->Add(TO_IINTERFACE(prev));
                 mWindowManager->SetAppVisibility(IBinder::Probe(prev->mAppToken), FALSE);
                 if (CActivityManagerService::DEBUG_SWITCH) {
                     Slogger::V(TAG, "Not waiting for visible to hide: %s, waitingVisible=%d, nowVisible=%d",
@@ -1653,6 +1659,9 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
                 mWindowManager->PrepareAppTransition(prev->mTask == next->mTask
                        ? AppTransition::TRANSIT_ACTIVITY_CLOSE
                        :  AppTransition::TRANSIT_TASK_CLOSE, FALSE);
+                if (prev->mTask != next->mTask) {
+                    mStackSupervisor->mPm->CpuBoost(2000 * 1000);
+                }
             }
             mWindowManager->SetAppWillBeHidden(IBinder::Probe(prev->mAppToken));
             mWindowManager->SetAppVisibility(IBinder::Probe(prev->mAppToken), FALSE);
@@ -1665,12 +1674,16 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             if (mNoAnimActivities->Contains(TO_IINTERFACE(next), &bTemp), bTemp) {
                 anim = FALSE;
                 mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_NONE, FALSE);
-            } else {
+            }
+            else {
                 mWindowManager->PrepareAppTransition(prev->mTask == next->mTask
                        ? AppTransition::TRANSIT_ACTIVITY_OPEN
                        : next->mLaunchTaskBehind
                        ? AppTransition::TRANSIT_TASK_OPEN_BEHIND
                        : AppTransition::TRANSIT_TASK_OPEN, FALSE);
+                if (prev->mTask != next->mTask) {
+                    mStackSupervisor->mPm->CpuBoost(2000 * 1000);
+                }
             }
         }
         if (FALSE) {
@@ -1761,6 +1774,9 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             if (nextNext != next) {
                 // Do over!
                 mStackSupervisor->ScheduleResumeTopActivities();
+            }
+            if (next == mLastScreenshotActivity) {
+                InvalidateLastScreenshot();
             }
             if (mStackSupervisor->ReportResumedActivityLocked(next)) {
                 mNoAnimActivities->Clear();
@@ -2306,7 +2322,7 @@ AutoPtr<IActivityOptions> ActivityStack::ResetTargetTaskIfNeededLocked(
                 // In this case, we want to finish this activity
                 // and everything above it, so be sneaky and pretend
                 // like these are all in the reply chain.
-                end = numActivities - 1;
+                end = activities->GetSize() - 1;
             } else if (replyChainEnd < 0) {
                 end = i;
             } else {
@@ -2839,6 +2855,7 @@ AutoPtr<ActivityRecord> ActivityStack::FinishCurrentActivityLocked(
     mStackSupervisor->mStoppingActivities->Remove(TO_IINTERFACE(r));
     mStackSupervisor->mGoingToSleepActivities->Remove(TO_IINTERFACE(r));
     mStackSupervisor->mWaitingVisibleActivities->Remove(TO_IINTERFACE(r));
+    r->mWaitingVisible = FALSE;
     if (mResumedActivity.Get() == r) {
         mResumedActivity = NULL;
     }
@@ -2898,8 +2915,7 @@ void ActivityStack::FinishAllActivitiesLocked(
         }
     }
     if (noActivitiesInStack) {
-        ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
-        ac->OnTaskListEmptyLocked();
+        mActivityContainer->OnTaskListEmptyLocked();
     }
 }
 
@@ -3113,6 +3129,7 @@ void ActivityStack::CleanUpActivityLocked(
     // down to the max limit while they are still waiting to finish.
     mStackSupervisor->mFinishingActivities->Remove(TO_IINTERFACE(r));
     mStackSupervisor->mWaitingVisibleActivities->Remove(TO_IINTERFACE(r));
+    r->mWaitingVisible = FALSE;
 
     // Remove any pending results.
     if (r->mFinishing && r->mPendingResults != NULL) {
@@ -3452,9 +3469,8 @@ void ActivityStack::ReleaseBackgroundResources()
             return;
         }
         if (ActivityStackSupervisor::DEBUG_STATES) {
-            ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
             Slogger::D(TAG, "releaseBackgroundResources activtyDisplay=%s visibleBehind=%s app=%s thread=%s",
-                TO_CSTR(ac->mActivityDisplay), TO_CSTR(r), TO_CSTR(r->mApp), TO_CSTR(r->mApp->mThread));
+                TO_CSTR(mActivityContainer->mActivityDisplay), TO_CSTR(r), TO_CSTR(r->mApp), TO_CSTR(r->mApp->mThread));
         }
         if (r != NULL && r->mApp != NULL && r->mApp->mThread != NULL) {
             //try {
@@ -3485,24 +3501,21 @@ void ActivityStack::BackgroundResourcesReleased(
 
 Boolean ActivityStack::HasVisibleBehindActivity()
 {
-    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
-    return IsAttached() && ac->mActivityDisplay->HasVisibleBehindActivity();
+    return IsAttached() && mActivityContainer->mActivityDisplay->HasVisibleBehindActivity();
 }
 
 void ActivityStack::SetVisibleBehindActivity(
     /* [in] */ ActivityRecord* r)
 {
     if (IsAttached()) {
-        ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
-        ac->mActivityDisplay->SetVisibleBehindActivity(r);
+        mActivityContainer->mActivityDisplay->SetVisibleBehindActivity(r);
     }
 }
 
 AutoPtr<ActivityRecord> ActivityStack::GetVisibleBehindActivity()
 {
-    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
     if (IsAttached()) {
-        return (ActivityRecord*)ac->mActivityDisplay->mVisibleBehindActivity.Get();
+        return (ActivityRecord*)mActivityContainer->mActivityDisplay->mVisibleBehindActivity.Get();
     }
     return NULL;
 }
@@ -3766,6 +3779,16 @@ Boolean ActivityStack::MoveTaskToBackLocked(
     if (CActivityManagerService::DEBUG_TRANSITION)
         Slogger::V(TAG, "Prepare to back transition: task=%d", taskId);
 
+    Boolean prevIsHome = FALSE;
+    if (tr->IsOverHomeStack()) {
+        AutoPtr<TaskRecord> nextTask = GetNextTask(tr);
+        if (nextTask != NULL) {
+            nextTask->SetTaskToReturnTo(tr->GetTaskToReturnTo());
+        }
+        else {
+            prevIsHome = TRUE;
+        }
+    }
     mTaskHistory->Remove(TO_IINTERFACE(tr));
     mTaskHistory->Add(0, TO_IINTERFACE(tr));
     UpdateTaskMovement(tr, FALSE);
@@ -3805,7 +3828,7 @@ Boolean ActivityStack::MoveTaskToBackLocked(
     }
 
     AutoPtr<TaskRecord> task = mResumedActivity != NULL ? mResumedActivity->mTask : NULL;
-    if ((task == tr && tr->IsOverHomeStack()) || (numTasks <= 1 && IsOnHomeDisplay())) {
+    if (prevIsHome || (task == tr && tr->IsOverHomeStack()) || (numTasks <= 1 && IsOnHomeDisplay())) {
         if (!mService->mBooting && !mService->mBooted) {
             // Not ready yet!
             return FALSE;
@@ -4396,8 +4419,7 @@ void ActivityStack::RemoveTask(
             mStacks->Remove(TO_IINTERFACE(this));
             mStacks->Add(0, TO_IINTERFACE(this));
         }
-        ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
-        ac->OnTaskListEmptyLocked();
+        mActivityContainer->OnTaskListEmptyLocked();
     }
 }
 
@@ -4670,11 +4692,12 @@ ECode ActivityStack::CompleteResumeLocked(
     }
     next->mReturningOptions = NULL;
 
-    ActivityContainer* ac = (ActivityContainer*)mActivityContainer.Get();
-    if (ac->mActivityDisplay->mVisibleBehindActivity.Get() == next) {
+    if (mActivityContainer->mActivityDisplay->mVisibleBehindActivity.Get() == next) {
         // When resuming an activity, require it to call requestVisibleBehind() again.
-        ac->mActivityDisplay->SetVisibleBehindActivity(NULL);
+        mActivityContainer->mActivityDisplay->SetVisibleBehindActivity(NULL);
     }
+
+    UpdatePrivacyGuardNotificationLocked(next);
     return NOERROR;
 }
 
@@ -4745,11 +4768,39 @@ Boolean ActivityStack::IsStackVisible()
     return TRUE;
 }
 
+AutoPtr<TaskRecord> ActivityStack::GetNextTask(
+    /* [in] */ TaskRecord* targetTask)
+{
+    Int32 index;
+    mTaskHistory->IndexOf(TO_IINTERFACE(targetTask), &index);
+    if (index >= 0) {
+        Int32 numTasks;
+        mTaskHistory->GetSize(&numTasks);
+        for (Int32 i = index + 1; i < numTasks; ++i) {
+            AutoPtr<IInterface> item;
+            mTaskHistory->Get(i, (IInterface**)&item);
+            TaskRecord* task = (TaskRecord*)IObject::Probe(item);
+            if (task->mUserId == targetTask->mUserId) {
+                return task;
+            }
+        }
+    }
+    return NULL;
+}
+
 void ActivityStack::InsertTaskAtTop(
     /* [in] */ TaskRecord* task)
 {
+    // If the moving task is over home stack, transfer its return type to next task
+    if (task->IsOverHomeStack()) {
+        AutoPtr<TaskRecord> nextTask = GetNextTask(task);
+        if (nextTask != NULL) {
+            nextTask->SetTaskToReturnTo(task->GetTaskToReturnTo());
+        }
+    }
+
     // If this is being moved to the top by another activity or being launched from the home
-    // activity, set mOnTopOfHome accordingly.
+    // activity, set mTaskToReturnTo accordingly.
     if (IsOnHomeDisplay()) {
         AutoPtr<ActivityStack> lastStack = mStackSupervisor->GetLastStack();
         Boolean fromHome = lastStack->IsHomeStack();
@@ -4782,6 +4833,34 @@ void ActivityStack::InsertTaskAtTop(
     }
     mTaskHistory->Add(taskNdx, TO_IINTERFACE(task));
     UpdateTaskMovement(task, TRUE);
+}
+
+void ActivityStack::UpdatePrivacyGuardNotificationLocked(
+    /* [in] */ ActivityRecord* next)
+{
+    String privacyGuardPackageName = mStackSupervisor->mPrivacyGuardPackageName;
+    if (privacyGuardPackageName != NULL && privacyGuardPackageName.Equals(next->mPackageName)) {
+        return;
+    }
+
+    Boolean privacy;
+    mService->mAppOpsService->GetPrivacyGuardSettingForPackage(
+            next->mApp->mUid, next->mPackageName, &privacy);
+
+    if (privacyGuardPackageName != NULL && !privacy) {
+        AutoPtr<IMessage> msg;
+        mService->mHandler->ObtainMessage(
+            CActivityManagerService::CANCEL_PRIVACY_NOTIFICATION_MSG, next->mUserId, 0, (IMessage**)&msg);
+        msg->SendToTarget();
+        mStackSupervisor->mPrivacyGuardPackageName = NULL;
+    }
+    else if (privacy) {
+        AutoPtr<IMessage> msg;
+        mService->mHandler->ObtainMessage(
+            CActivityManagerService::POST_PRIVACY_NOTIFICATION_MSG, (IActivityRecord*)next, (IMessage**)&msg);
+        msg->SendToTarget();
+        mStackSupervisor->mPrivacyGuardPackageName = next->mPackageName;
+    }
 }
 
 Int32 ActivityStack::ResetAffinityTaskIfNeededLocked(
@@ -4921,6 +5000,31 @@ void ActivityStack::AdjustFocusedActivityLocked(
         AutoPtr<ActivityRecord> next = TopRunningActivityLocked(NULL);
         if (next.Get() != r) {
             AutoPtr<TaskRecord> task = r->mTask;
+            if ((next == NULL || next->mTask != task) && r->mFrontOfTask) {
+                if (task->IsOverHomeStack() && task == TopTask()) {
+                    mStackSupervisor->MoveHomeStackTaskToTop(task->GetTaskToReturnTo());
+                }
+                else {
+                    Int32 size;
+                    mTaskHistory->GetSize(&size);
+                    for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
+                        AutoPtr<IInterface> item;
+                        mTaskHistory->Get(taskNdx, (IInterface**)&item);
+                        TaskRecord* tr = (TaskRecord*)IObject::Probe(item);
+                        if (tr->GetTopActivity() == NULL) {
+                            if (tr->IsOverHomeStack()) {
+                                mStackSupervisor->MoveHomeStackTaskToTop(
+                                    task->GetTaskToReturnTo());
+                                break;
+                            }
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                }
+            }
+
             if (r->mFrontOfTask && task == TopTask() && task->IsOverHomeStack()) {
                 mStackSupervisor->MoveHomeStackTaskToTop(task->GetTaskToReturnTo());
             }

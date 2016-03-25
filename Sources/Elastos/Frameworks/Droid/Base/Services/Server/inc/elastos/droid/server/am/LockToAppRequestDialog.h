@@ -13,6 +13,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Internal::Widget::IILockSettings;
+using Elastos::Droid::View::IWindowManagerPolicy;
 using Elastos::Droid::View::Accessibility::IAccessibilityManager;
 using Elastos::Droid::Widget::ICheckBox;
 
@@ -54,6 +55,7 @@ private:
     static const String TAG;
     AutoPtr<IContext> mContext;
     CActivityManagerService* mService;
+    AutoPtr<IWindowManagerPolicy> mPolicy;
     AutoPtr<IAlertDialog> mDialog;
     AutoPtr<TaskRecord> mRequestedTask;
     AutoPtr<ICheckBox> mCheckbox;

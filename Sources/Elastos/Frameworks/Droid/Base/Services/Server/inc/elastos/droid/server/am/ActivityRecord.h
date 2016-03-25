@@ -239,6 +239,7 @@ private:
 
 public:
     static const String TAG;
+    static const String TAG_TIMELINE;
     static const Boolean DEBUG_SAVED_STATE;
     static const String RECENTS_PACKAGE_NAME;
     static const String ACTIVITY_ICON_SUFFIX;

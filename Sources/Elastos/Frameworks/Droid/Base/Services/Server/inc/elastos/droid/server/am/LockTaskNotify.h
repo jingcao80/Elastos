@@ -11,6 +11,7 @@
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::View::IWindowManagerPolicy;
 using Elastos::Droid::View::Accessibility::IAccessibilityManager;
 using Elastos::Droid::Widget::IToast;
 
@@ -61,6 +62,7 @@ private:
 
     AutoPtr<IContext> mContext;
     AutoPtr<H> mHandler;
+    AutoPtr<IWindowManagerPolicy> mPolicy;
     AutoPtr<IAccessibilityManager> mAccessibilityManager;
     AutoPtr<IToast> mLastToast;
 };

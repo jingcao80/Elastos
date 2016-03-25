@@ -1,8 +1,11 @@
 
 #include "elastos/droid/server/am/LockTaskNotify.h"
 #include "elastos/droid/R.h"
+#include "Elastos.Droid.Internal.h"
 #include <elastos/core/CoreUtils.h>
 
+using Elastos::Droid::Internal::Policy::CPolicyManager;
+using Elastos::Droid::Internal::Policy::IPolicyManager;
 using Elastos::Droid::Widget::CToastHelper;
 using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Core::CoreUtils;
@@ -41,6 +44,9 @@ LockTaskNotify::LockTaskNotify(
     mContext->GetSystemService(IContext::ACCESSIBILITY_SERVICE, (IInterface**)&service);
     mAccessibilityManager = IAccessibilityManager::Probe(service);
     mHandler = new H(this);
+    AutoPtr<IPolicyManager> pm;
+    CPolicyManager::AcquireSingleton((IPolicyManager**)&pm);
+    pm->MakeNewWindowManager((IWindowManagerPolicy**)&mPolicy);
 }
 
 void LockTaskNotify::ShowToast(
@@ -57,9 +63,16 @@ void LockTaskNotify::HandleShowToast(
     String text;
     mContext->GetString(isLocked ? R::string::lock_to_app_toast_locked
         : R::string::lock_to_app_toast, &text);
-    Boolean isEnabled;
-    if (!isLocked && (mAccessibilityManager->IsEnabled(&isEnabled), isEnabled)) {
-        mContext->GetString(R::string::lock_to_app_toast_accessible, &text);
+    if (!isLocked) {
+        Boolean isEnabled;
+        if (mAccessibilityManager->IsEnabled(&isEnabled), isEnabled) {
+            mContext->GetString(R::string::lock_to_app_toast_accessible, &text);
+        }
+        Boolean hasNavigationBar;
+        mPolicy->HasNavigationBar(&hasNavigationBar);
+        if (!hasNavigationBar) {
+            mContext->GetString(R::string::lock_to_app_toast_no_navbar, &text);
+        }
     }
     if (mLastToast != NULL) {
         mLastToast->Cancel();

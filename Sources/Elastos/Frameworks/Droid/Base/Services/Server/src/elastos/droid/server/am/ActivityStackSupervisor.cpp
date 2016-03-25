@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Core.h"
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/app/AppGlobals.h"
+#include "elastos/droid/internal/os/BinderInternal.h"
 #include "elastos/droid/Manifest.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -56,6 +57,7 @@ using Elastos::Droid::Hardware::Display::IDisplayManagerGlobalHelper;
 using Elastos::Droid::Hardware::Input::EIID_IInputManagerInternal;
 using Elastos::Droid::Hardware::Input::IInputManager;
 using Elastos::Droid::Internal::App::IHeavyWeightSwitcherActivity;
+using Elastos::Droid::Internal::Os::BinderInternal;
 using Elastos::Droid::Internal::Os::CTransferPipe;
 using Elastos::Droid::Internal::Os::ITransferPipe;
 using Elastos::Droid::Internal::Widget::CLockPatternUtils;
@@ -423,11 +425,11 @@ ECode ActivityStackSupervisor::InitPowerManagement()
 {
     AutoPtr<IInterface> obj;
     mService->mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
-    IPowerManager* pm = IPowerManager::Probe(obj);
-    if (pm != NULL) {
-        pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK,
+    mPm = IPowerManager::Probe(obj);
+    if (mPm != NULL) {
+        mPm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK,
             String("ActivityManager-Sleep"), (IPowerManagerWakeLock**)&mGoingToSleep);
-        pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK,
+        mPm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK,
             String("ActivityManager-Launch"), (IPowerManagerWakeLock**)&mLaunchingActivity);
         mLaunchingActivity->SetReferenceCounted(FALSE);
     }
@@ -495,8 +497,7 @@ Boolean ActivityStackSupervisor::IsFrontStack(
 
     AutoPtr<ActivityRecord> parent;
     if(stack->mActivityContainer != NULL) {
-        ActivityContainer* ac = (ActivityContainer*)stack->mActivityContainer.Get();
-        parent = (ActivityRecord*)ac->mParentActivity.Get();
+        parent = (ActivityRecord*)stack->mActivityContainer->mParentActivity.Get();
     }
 
     if (parent != NULL) {
@@ -806,6 +807,7 @@ Boolean ActivityStackSupervisor::AllResumedActivitiesComplete()
 
 Boolean ActivityStackSupervisor::AllResumedActivitiesVisible()
 {
+    Boolean foundResumed = FALSE;
     Int32 adSize;
     mActivityDisplays->GetSize(&adSize);
     for (Int32 displayNdx = adSize - 1; displayNdx >= 0; --displayNdx) {
@@ -821,12 +823,15 @@ Boolean ActivityStackSupervisor::AllResumedActivitiesVisible()
             stacks->Get(stackNdx, (IInterface**)&stackobj);
             ActivityStack* stack = (ActivityStack*)(IObject::Probe(stackobj));
             AutoPtr<ActivityRecord> r = stack->mResumedActivity;
-            if (r != NULL && (!r->mNowVisible || r->mWaitingVisible)) {
-                return FALSE;
+            if (r != NULL) {
+                if (!r->mNowVisible || r->mWaitingVisible) {
+                    return FALSE;
+                }
+                foundResumed = TRUE;
             }
         }
     }
-    return TRUE;
+    return foundResumed;
 }
 
 Boolean ActivityStackSupervisor::PauseBackStacks(
@@ -917,8 +922,7 @@ ECode ActivityStackSupervisor::PauseChildStacks(
             AutoPtr<IInterface> stackobj;
             stacks->Get(stackNdx, (IInterface**)&stackobj);
             ActivityStack* stack = (ActivityStack*)IObject::Probe(stackobj);
-            ActivityContainer* ac = (ActivityContainer*)stack->mActivityContainer.Get();
-            ActivityRecord* ar = (ActivityRecord*)ac->mParentActivity.Get();
+            ActivityRecord* ar = (ActivityRecord*)stack->mActivityContainer->mParentActivity.Get();
             if (stack->mResumedActivity != NULL && ar == parent) {
                 stack->StartPausingLocked(userLeaving, uiSleeping, resuming, dontWait);
             }
@@ -1123,7 +1127,9 @@ AutoPtr<IActivityInfo> ActivityStackSupervisor::ResolveActivity(
     AutoPtr<IResolveInfo> rInfo;
     AppGlobals::GetPackageManager()->ResolveIntent(
         intent, resolvedType,
-        IPackageManager::MATCH_DEFAULT_ONLY | CActivityManagerService::STOCK_PM_FLAGS, userId,
+        IPackageManager::MATCH_DEFAULT_ONLY |
+        IPackageManager::PERFORM_PRE_LAUNCH_CHECK |
+        CActivityManagerService::STOCK_PM_FLAGS, userId,
         (IResolveInfo**)&rInfo);
     if (rInfo != NULL) {
         rInfo->GetActivityInfo((IActivityInfo**)&aInfo);
@@ -1142,6 +1148,17 @@ AutoPtr<IActivityInfo> ActivityStackSupervisor::ResolveActivity(
         AutoPtr<IComponentName> cn;
         CComponentName::New(packageName, name, (IComponentName**)&cn);
         intent->SetComponent(cn);
+
+        // Store the actual target componenet in an extra field of the intent.
+        // This will be set in case the receiver of the intent wants to retarget the
+        // intent. Ideally we should have a new extra field, but resusing the
+        // changed_component_name_list for now.
+        AutoPtr<IComponentName> targetComponentName;
+        if (rInfo != NULL && (rInfo->GetTargetComponentName((IComponentName**)&targetComponentName),
+            targetComponentName != NULL)) {
+            // Not creating a list to save an unnecessary object.
+            intent->PutExtra(IIntent::EXTRA_CHANGED_COMPONENT_NAME_LIST, IParcelable::Probe(targetComponentName));
+        }
 
         String processName;
         IComponentInfo::Probe(aInfo)->GetProcessName(&processName);
@@ -1247,8 +1264,8 @@ ECode ActivityStackSupervisor::StartActivityMayWait(
         Int32 changes;
         stack->mConfigWillChange = config != NULL
                 && (mService->mConfiguration->Diff(config, &changes), changes) != 0;
-        //if (CActivityManagerService::DEBUG_CONFIGURATION) Slogger::V(TAG,
-        //        "Starting activity when config will change = " + stack.mConfigWillChange);
+        if (CActivityManagerService::DEBUG_CONFIGURATION) Slogger::V(TAG,
+               "Starting activity when config will change = %d", stack->mConfigWillChange);
 
         Int64 origId = Binder::ClearCallingIdentity();
 
@@ -1932,8 +1949,6 @@ ECode ActivityStackSupervisor::StartActivityLocked(
         }
     }
 
-    AutoPtr<ActivityStack> resultStack = resultRecord == NULL? NULL: resultRecord->mTask->mStack;
-
     Int32 launchFlags;
     intent->GetFlags(&launchFlags);
     if ((launchFlags & IIntent::FLAG_ACTIVITY_FORWARD_RESULT) != 0
@@ -2034,6 +2049,8 @@ ECode ActivityStackSupervisor::StartActivityLocked(
                 err = IActivityManager::START_NOT_VOICE_COMPATIBLE;
         //}
     }
+
+    AutoPtr<ActivityStack> resultStack = resultRecord == NULL? NULL: resultRecord->mTask->mStack;
 
     if (err != IActivityManager::START_SUCCESS) {
         if (resultRecord != NULL) {
@@ -2216,12 +2233,13 @@ AutoPtr<ActivityStack> ActivityStackSupervisor::AdjustStackFocus(
             AutoPtr<ActivityStack> taskStack = task->mStack;
             if (taskStack->IsOnHomeDisplay()) {
                 if (mFocusedStack != taskStack) {
-                    //if (CActivityManagerService::DEBUG_FOCUS || CActivityManagerService::DEBUG_STACK) Slogger::D(TAG, "adjustStackFocus: Setting " +
-                    //        "focused stack to r=" + r + " task=" + task);
+                    if (CActivityManagerService::DEBUG_FOCUS || CActivityManagerService::DEBUG_STACK)
+                        Slogger::D(TAG, "adjustStackFocus: Setting focused stack to r=%s task=%s",
+                            TO_CSTR(r), TO_CSTR(task));
                     mFocusedStack = taskStack;
                 } else {
-                    //if (CActivityManagerService::DEBUG_FOCUS || CActivityManagerService::DEBUG_STACK) Slogger::D(TAG,
-                    //    "adjustStackFocus: Focused stack already=" + mFocusedStack);
+                    if (CActivityManagerService::DEBUG_FOCUS || CActivityManagerService::DEBUG_STACK)
+                        Slogger::D(TAG, "adjustStackFocus: Focused stack already=%s", TO_CSTR(mFocusedStack));
                 }
             }
             return taskStack;
@@ -2234,11 +2252,10 @@ AutoPtr<ActivityStack> ActivityStackSupervisor::AdjustStackFocus(
             return container->mStack;
         }
 
-        ActivityContainer* fac = (ActivityContainer*)mFocusedStack->mActivityContainer.Get();
         if (mFocusedStack != mHomeStack && (!newTask ||
-                fac->IsEligibleForNewTasks())) {
-            //if (CActivityManagerService::DEBUG_FOCUS || CActivityManagerService::DEBUG_STACK) Slogger::D(TAG,
-            //        "adjustStackFocus: Have a focused stack=" + mFocusedStack);
+                mFocusedStack->mActivityContainer->IsEligibleForNewTasks())) {
+            if (CActivityManagerService::DEBUG_FOCUS || CActivityManagerService::DEBUG_STACK)
+                Slogger::D(TAG, "adjustStackFocus: Have a focused stack=%s", TO_CSTR(mFocusedStack));
             return mFocusedStack;
         }
 
@@ -2251,8 +2268,8 @@ AutoPtr<ActivityStack> ActivityStackSupervisor::AdjustStackFocus(
             homeDisplayStacks->Get(stackNdx, (IInterface**)&stackobj);
             AutoPtr<ActivityStack> stack = (ActivityStack*)(IObject::Probe(stackobj));
             if (!stack->IsHomeStack()) {
-                //if (CActivityManagerService::DEBUG_FOCUS || CActivityManagerService::DEBUG_STACK) Slogger::D(TAG,
-                //        "adjustStackFocus: Setting focused stack=" + stack);
+                if (CActivityManagerService::DEBUG_FOCUS || CActivityManagerService::DEBUG_STACK)
+                    Slogger::D(TAG, "adjustStackFocus: Setting focused stack=%s", TO_CSTR(stack));
                 mFocusedStack = stack;
                 return mFocusedStack;
             }
@@ -2260,8 +2277,8 @@ AutoPtr<ActivityStack> ActivityStackSupervisor::AdjustStackFocus(
 
         // Need to create an app stack for this user.
         Int32 stackId = CreateStackOnDisplay(GetNextStackId(), IDisplay::DEFAULT_DISPLAY);
-        //if (CActivityManagerService::DEBUG_FOCUS || CActivityManagerService::DEBUG_STACK) Slogger::D(TAG, "adjustStackFocus: New stack r=" + r +
-        //        " stackId=" + stackId);
+        if (CActivityManagerService::DEBUG_FOCUS || CActivityManagerService::DEBUG_STACK)
+            Slogger::D(TAG, "adjustStackFocus: New stack r=%s stackId=%d", TO_CSTR(r), stackId);
         mFocusedStack = GetStack(stackId);
         return mFocusedStack;
     }
@@ -2278,8 +2295,7 @@ ECode ActivityStackSupervisor::SetFocusedStack(
             isHomeActivity = !task->IsApplicationTask();
         }
         if (!isHomeActivity && task != NULL) {
-            ActivityContainer* ac = (ActivityContainer*)task->mStack->mActivityContainer.Get();
-            AutoPtr<ActivityRecord> parent = (ActivityRecord*)ac->mParentActivity.Get();
+            AutoPtr<ActivityRecord> parent = (ActivityRecord*)task->mStack->mActivityContainer->mParentActivity.Get();
             isHomeActivity = parent != NULL && parent->IsHomeActivity();
         }
         MoveHomeStack(isHomeActivity);
@@ -2574,8 +2590,9 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
                 }
                 targetStack = intentActivity->mTask->mStack;
                 targetStack->mLastPausedActivity = NULL;
-                //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Bring to front target: " + targetStack
-                //        + " from " + intentActivity);
+                if (CActivityManagerService::DEBUG_TASKS)
+                    Slogger::D(TAG, "Bring to front target: %s from %s",
+                        TO_CSTR(targetStack), TO_CSTR(intentActivity));
                 targetStack->MoveToFront();
                 if (intentActivity->mTask->mIntent == NULL) {
                     // This task was started because of movement of
@@ -2820,8 +2837,8 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
                     newTaskIntent != NULL ? newTaskIntent : intent,
                     voiceSession, voiceInteractor, !launchTaskBehind /* toTop */),
                     taskToAffiliate);
-            //if (CActivityManagerService::DEBUG_TASKS) Slogger::V(TAG, "Starting new activity " + r + " in new task " +
-            //        r.task);
+            if (CActivityManagerService::DEBUG_TASKS)
+                Slogger::V(TAG, "Starting new activity %s in new task %s", TO_CSTR(r), TO_CSTR(r->mTask));
         } else {
             r->SetTask(reuseTask, taskToAffiliate);
         }
@@ -2894,8 +2911,9 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
         // to keep the new one in the same task as the one that is starting
         // it.
         r->SetTask(sourceTask, NULL);
-        //if (CActivityManagerService::DEBUG_TASKS) Slogger::V(TAG, "Starting new activity " + r
-        //        + " in existing task " + r.task + " from source " + sourceRecord);
+        if (CActivityManagerService::DEBUG_TASKS)
+            Slogger::V(TAG, "Starting new activity %s in existing task %s from source %s",
+                TO_CSTR(r), TO_CSTR(r->mTask), TO_CSTR(sourceRecord));
 
     } else if (inTask != NULL) {
         // The calling is asking that the new activity be started in an explicit
@@ -2944,8 +2962,8 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
         }
 
         r->SetTask(inTask, NULL);
-        //if (CActivityManagerService::DEBUG_TASKS) Slogger::V(TAG, "Starting new activity " + r
-        //        + " in explicit task " + r.task);
+        if (CActivityManagerService::DEBUG_TASKS)
+            Slogger::V(TAG, "Starting new activity %s in explicit task %s", TO_CSTR(r), TO_CSTR(r->mTask));
 
     } else {
         // This not being started from an existing activity, and not part
@@ -2957,8 +2975,8 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
         r->SetTask(prev != NULL ? prev->mTask : targetStack->CreateTaskRecord(GetNextTaskId(),
                         r->mInfo, intent, NULL, NULL, TRUE), NULL);
         mWindowManager->MoveTaskToTop(r->mTask->mTaskId);
-        //if (CActivityManagerService::DEBUG_TASKS) Slogger::V(TAG, "Starting new activity " + r
-        //        + " in new guessed " + r.task);
+        if (CActivityManagerService::DEBUG_TASKS)
+            Slogger::V(TAG, "Starting new activity %s in new guessed %s", TO_CSTR(r), TO_CSTR(r->mTask));
     }
 
     mService->GrantUriPermissionFromIntentLocked(callingUid, r->mPackageName,
@@ -3038,7 +3056,7 @@ ECode ActivityStackSupervisor::ActivityIdleInternalLocked(
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
-    //if (CActivityManagerService::localLOGV) Slogger::V(TAG, "Activity idle: " + token);
+    if (CActivityManagerService::localLOGV) Slogger::V(TAG, "Activity idle: %s", TO_CSTR(token));
 
     AutoPtr<IArrayList> stops = NULL; // ActivityRecord
     AutoPtr<IArrayList> finishes = NULL; // ActivityRecord
@@ -3431,8 +3449,8 @@ ECode ActivityStackSupervisor::FindTaskToMoveToFrontLocked(
         task->SetTaskToReturnTo(ActivityRecord::HOME_ACTIVITY_TYPE);
     }
     task->mStack->MoveTaskToFrontLocked(task, NULL, options);
-    //if (CActivityManagerService::DEBUG_STACK)
-    //    Slogger::D(TAG, "findTaskToMoveToFront: moved to front of stack=" + task.stack);
+    if (CActivityManagerService::DEBUG_STACK)
+       Slogger::D(TAG, "findTaskToMoveToFront: moved to front of stack=%s", TO_CSTR(task->mStack));
     return NOERROR;
 }
 
@@ -3611,7 +3629,7 @@ ECode ActivityStackSupervisor::MoveTaskToStack(
 AutoPtr<ActivityRecord> ActivityStackSupervisor::FindTaskLocked(
     /* [in] */ ActivityRecord* r)
 {
-    //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Looking for task of " + r);
+    if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Looking for task of %s", TO_CSTR(r));
     Int32 size;
     mActivityDisplays->GetSize(&size);
     for (Int32 displayNdx = size - 1; displayNdx >= 0; --displayNdx) {
@@ -3627,13 +3645,13 @@ AutoPtr<ActivityRecord> ActivityStackSupervisor::FindTaskLocked(
             stacks->Get(stackNdx, (IInterface**)&stackobj);
             ActivityStack* stack = (ActivityStack*)(IObject::Probe(stackobj));
             if (!r->IsApplicationActivity() && !stack->IsHomeStack()) {
-                //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Skipping stack: (home activity) " + stack);
+                if (CActivityManagerService::DEBUG_TASKS)
+                    Slogger::D(TAG, "Skipping stack: (home activity) %s", TO_CSTR(stack));
                 continue;
             }
-            ActivityContainer* ac = (ActivityContainer*)stack->mActivityContainer.Get();
-            if (!ac->IsEligibleForNewTasks()) {
-                //if (CActivityManagerService::DEBUG_TASKS)
-                //    Slogger::D(TAG, "Skipping stack: (new task not allowed) " + stack);
+            if (!stack->mActivityContainer->IsEligibleForNewTasks()) {
+                if (CActivityManagerService::DEBUG_TASKS)
+                   Slogger::D(TAG, "Skipping stack: (new task not allowed) %s", TO_CSTR(stack));
                 continue;
             }
             AutoPtr<ActivityRecord> ar = stack->FindTaskLocked(r);
@@ -3642,7 +3660,14 @@ AutoPtr<ActivityRecord> ActivityStackSupervisor::FindTaskLocked(
             }
         }
     }
-    //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "No task found");
+    mPm->CpuBoost(2000 * 1000);
+
+    /* Delay Binder Explicit GC during application launch */
+    // TODO:
+    // BinderInternal::ModifyDelayedGcParams();
+
+    if (CActivityManagerService::DEBUG_TASKS)
+        Slogger::D(TAG, "No task found");
     return NULL;
 }
 
@@ -3823,16 +3848,16 @@ ECode ActivityStackSupervisor::CheckReadyForSleepLocked()
         Int32 iTemp;
         if ((mStoppingActivities->GetSize(&iTemp), iTemp) > 0) {
             // Still need to tell some activities to stop; can't sleep yet.
-            //if (CActivityManagerService::DEBUG_PAUSE) Slogger::V(TAG, "Sleep still need to stop "
-            //        + mStoppingActivities.size() + " activities");
+            if (CActivityManagerService::DEBUG_PAUSE)
+                Slogger::V(TAG, "Sleep still need to stop %d activities", iTemp);
             ScheduleIdleLocked();
             dontSleep = TRUE;
         }
 
         if ((mGoingToSleepActivities->GetSize(&iTemp), iTemp) > 0) {
             // Still need to tell some activities to sleep; can't sleep yet.
-            //if (CActivityManagerService::DEBUG_PAUSE) Slogger::V(TAG, "Sleep still need to sleep "
-            //        + mGoingToSleepActivities.size() + " activities");
+            if (CActivityManagerService::DEBUG_PAUSE)
+                Slogger::V(TAG, "Sleep still need to sleep %d activities", iTemp);
             dontSleep = TRUE;
         }
 
@@ -4185,9 +4210,9 @@ AutoPtr<IArrayList> ActivityStackSupervisor::ProcessStoppingActivitiesLocked(
         AutoPtr<IInterface> obj;
         mStoppingActivities->Get(i, (IInterface**)&obj);
         ActivityRecord* s = (ActivityRecord*)(IObject::Probe(obj));
-        //if (CActivityManagerService::localLOGV) Slogger::V(TAG, "Stopping " + s + ": nowVisible="
-        //        + nowVisible + " waitingVisible=" + s.waitingVisible
-        //        + " finishing=" + s.finishing);
+        if (CActivityManagerService::localLOGV)
+            Slogger::V(TAG, "Stopping %s: nowVisible=%d waitingVisible=%d finishing=%d",
+                TO_CSTR(s), nowVisible, s->mWaitingVisible, s->mFinishing);
         if (s->mWaitingVisible && nowVisible) {
             mWaitingVisibleActivities->Remove(TO_IINTERFACE(s));
             s->mWaitingVisible = FALSE;
@@ -4197,12 +4222,12 @@ AutoPtr<IArrayList> ActivityStackSupervisor::ProcessStoppingActivitiesLocked(
                 // so get rid of it.  Otherwise, we need to go through the
                 // normal flow and hide it once we determine that it is
                 // hidden by the activities in front of it.
-                //if (CActivityManagerService::localLOGV) Slogger::V(TAG, "Before stopping, can hide: " + s);
+                if (CActivityManagerService::localLOGV) Slogger::V(TAG, "Before stopping, can hide: %s", TO_CSTR(s));
                 mWindowManager->SetAppVisibility(IBinder::Probe(s->mAppToken), FALSE);
             }
         }
         if ((!s->mWaitingVisible || mService->IsSleepingOrShuttingDown()) && remove) {
-            //if (CActivityManagerService::localLOGV) Slogger::V(TAG, "Ready to stop: " + s);
+            if (CActivityManagerService::localLOGV) Slogger::V(TAG, "Ready to stop: %s", TO_CSTR(s));
             if (stops == NULL) {
                 //stops = new ArrayList<ActivityRecord>();
                 CArrayList::New((IArrayList**)&stops);
@@ -4608,8 +4633,7 @@ ECode ActivityStackSupervisor::HandleDisplayRemovedLocked(
                 AutoPtr<IInterface> stackobj;
                 stacks->Get(stackNdx, (IInterface**)&stackobj);
                 ActivityStack* stack = (ActivityStack*)(IObject::Probe(stackobj));
-                ActivityContainer* ac = (ActivityContainer*)stack->mActivityContainer.Get();
-                ac->DetachLocked();
+                stack->mActivityContainer->DetachLocked();
             }
             mActivityDisplays->Remove(displayId);
         }

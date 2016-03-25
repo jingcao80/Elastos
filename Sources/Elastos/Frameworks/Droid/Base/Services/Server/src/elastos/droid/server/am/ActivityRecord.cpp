@@ -60,6 +60,7 @@ namespace Server {
 namespace Am {
 
 const String ActivityRecord::TAG("ActivityManager");
+const String ActivityRecord::TAG_TIMELINE("Timeline");
 const Boolean ActivityRecord::DEBUG_SAVED_STATE = FALSE;// ActivityStackSupervisor::DEBUG_SAVED_STATE;
 const String ActivityRecord::RECENTS_PACKAGE_NAME("com.android.systemui.recent");
 const String ActivityRecord::ACTIVITY_ICON_SUFFIX("_activity_icon_");
@@ -1152,6 +1153,8 @@ ECode ActivityRecord::WindowsVisible()
         }
         mService->ScheduleAppGcsLocked();
     }
+    Logger::I(TAG_TIMELINE, "Timeline: Activity_windows_visible id: %s time:%lld",
+        ToString().string(), SystemClock::GetUptimeMillis());
     return NOERROR;
 }
 
@@ -1172,7 +1175,7 @@ AutoPtr<ActivityRecord> ActivityRecord::GetWaitingHistoryRecordLocked()
     // for another app to start, then we have paused dispatching
     // for this activity.
     AutoPtr<ActivityRecord> r = this;
-    if (r->mWaitingVisible) {
+    if (r->mWaitingVisible || r->mStopped) {
         AutoPtr<ActivityStack> stack = mStackSupervisor->GetFocusedStack();
         // Hmmm, who might we be waiting for?
         r = stack->mResumedActivity;

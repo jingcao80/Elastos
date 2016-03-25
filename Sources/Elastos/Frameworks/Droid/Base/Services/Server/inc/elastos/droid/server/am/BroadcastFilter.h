@@ -28,7 +28,8 @@ public:
         /* [in] */ const String& packageName,
         /* [in] */ const String& requiredPermission,
         /* [in] */ Int32 owningUid,
-        /* [in] */ Int32 userId);
+        /* [in] */ Int32 userId,
+        /* [in] */ Boolean isSystem);
 
     ~BroadcastFilter();
 
@@ -56,6 +57,10 @@ public:
     CARAPI ToString(
         /* [out] */ String* str);
 
+    CARAPI OnCompareTie(
+        /* [in] */ IIntentFilter* other,
+        /* [out] */ Int32* result);
+
 public:
     // Back-pointer to the list this filter is in.
     ReceiverList* mReceiverList; // BroadcastFilter will be PushBack to ReceiverList
@@ -63,6 +68,7 @@ public:
     String mRequiredPermission;
     Int32 mOwningUid;
     Int32 mOwningUserId;
+    Boolean mIsSystem;
 };
 
 } // namespace Am

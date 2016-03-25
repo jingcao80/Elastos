@@ -13,6 +13,8 @@ using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::Res::CResourcesHelper;
 using Elastos::Droid::Content::Res::IResourcesHelper;
+using Elastos::Droid::Internal::Policy::CPolicyManager;
+using Elastos::Droid::Internal::Policy::IPolicyManager;
 using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 using Elastos::Droid::Internal::Widget::CLockPatternUtilsCacheHelper;
 using Elastos::Droid::Internal::Widget::ILockPatternUtilsCache;
@@ -55,6 +57,9 @@ LockToAppRequestDialog::LockToAppRequestDialog(
     mContext->GetSystemService(IContext::ACCESSIBILITY_SERVICE, (IInterface**)&obj);
     mAccessibilityService = IAccessibilityManager::Probe(obj);
     mService = activityManagerService;
+    AutoPtr<IPolicyManager> pm;
+    CPolicyManager::AcquireSingleton((IPolicyManager**)&pm);
+    pm->MakeNewWindowManager((IWindowManagerPolicy**)&mPolicy);
 }
 
 ECode LockToAppRequestDialog::ClearPrompt()
@@ -78,10 +83,18 @@ ECode LockToAppRequestDialog::ShowLockTaskPrompt(
     AutoPtr<IResources> r;
     resHelper->GetSystem((IResources**)&r);
     String description;
-    Boolean isEnabled;
-    r->GetString((mAccessibilityService->IsEnabled(&isEnabled), isEnabled)
-            ? R::string::lock_to_app_description_accessible
-            : R::string::lock_to_app_description, &description);
+    Boolean hasNavigationBar;
+    mPolicy->HasNavigationBar(&hasNavigationBar);
+    if (!hasNavigationBar) {
+        Boolean isEnabled;
+        r->GetString((mAccessibilityService->IsEnabled(&isEnabled), isEnabled)
+                ? R::string::lock_to_app_description_accessible
+                : R::string::lock_to_app_description, &description);
+    }
+    else {
+        r->GetString(R::string::lock_to_app_description_no_navbar, &description);
+    }
+
     String title, positiveButton, negativeButtion;
     r->GetString(R::string::lock_to_app_title, &title);
     r->GetString(R::string::lock_to_app_positive, &positiveButton);

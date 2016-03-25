@@ -118,6 +118,8 @@ public:
     CARAPI_(void) BackgroundServicesFinishedLocked(
         /* [in] */ Int32 userId);
 
+    CARAPI_(AutoPtr<BroadcastRecord>) GetProcessingBroadcast();
+
     CARAPI ProcessNextBroadcast(
         /* [in] */ Boolean fromMsg);
 
@@ -161,6 +163,8 @@ private:
         /* [in] */ BroadcastRecord* r,
         /* [in] */ BroadcastFilter* filter,
         /* [in] */ Boolean ordered);
+
+    CARAPI_(AutoPtr<List<String> >) GetWhiteList();
 
     CARAPI_(void) AddBroadcastToHistoryLocked(
         /* [in] */ BroadcastRecord* r);
@@ -244,9 +248,16 @@ public:
     AutoPtr<BroadcastRecord> mPendingBroadcast;
 
     /**
+      * Intent broadcast that we are currently processing
+      */
+    AutoPtr<BroadcastRecord> mCurrentBroadcast;
+
+    /**
      * The receiver index that is pending, to restart the broadcast if needed.
      */
     Int32 mPendingBroadcastRecvIndex;
+
+    static AutoPtr<List<String> > mQuickbootWhiteList;
 
     AutoPtr<BroadcastHandler> mHandler;
 };

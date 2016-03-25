@@ -16,6 +16,8 @@
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::App::IActivityManager;
+using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::Content::Res::CResourcesHelper;
 using Elastos::Droid::Content::Res::IResourcesHelper;
 using Elastos::Droid::Content::Res::IResources;
@@ -65,7 +67,16 @@ const Int32 ProcessList::SYSTEM_ADJ;
 const Int32 ProcessList::NATIVE_ADJ;
 const Int32 ProcessList::MEMORY_PAGE_SIZE;
 const Int32 ProcessList::MIN_CACHED_APPS;
-const Int32 ProcessList::MAX_CACHED_APPS;
+
+static Int32 InitMAX_CACHED_APPS()
+{
+    Int32 value;
+    AutoPtr<ISystemProperties> sp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
+    sp->GetInt32(String("ro.sys.fw.bg_apps_limit"), 32, &value);
+    return value;
+}
+const Int32 ProcessList::MAX_CACHED_APPS = InitMAX_CACHED_APPS();
 const Int64 ProcessList::MAX_EMPTY_TIME;
 const Int32 ProcessList::MAX_EMPTY_APPS = ProcessList::ComputeEmptyProcessLimit(
     ProcessList::MAX_CACHED_APPS);
@@ -166,12 +177,19 @@ ProcessList::ProcessList()
 
     Int32 oomMinFreeHigh[] =  {
         73728, 92160, 110592,
-        129024, 225000, 325000
+        129024, 147456, 184320
     };
     size = ArraySize(oomMinFreeHigh);
     mOomMinFreeHigh = ArrayOf<Int32>::Alloc(oomMinFreeHigh, size);
 
     mOomMinFree = ArrayOf<Int32>::Alloc(mOomAdj->GetLength());
+
+    Int32 oomMinFreeLowRam[] =  {
+        12288, 20478, 32766,
+        40962, 49152, 57342
+    };
+    size = ArraySize(oomMinFreeLowRam);
+    mOomMinFreeLowRam = ArrayOf<Int32>::Alloc(oomMinFreeLowRam, size);
 
     AutoPtr<IMemInfoReader> minfo;
     CMemInfoReader::New((IMemInfoReader**)&minfo);
@@ -241,9 +259,19 @@ ECode ProcessList::UpdateOomLevels(
     }
 
     for (Int32 i = 0; i < mOomAdj->GetLength(); i++) {
-        Int32 low = (*mOomMinFreeLow)[i];
-        Int32 high = (*mOomMinFreeHigh)[i];
-        (*mOomMinFree)[i] = (Int32)(low + ((high-low)*scale));
+        AutoPtr<IActivityManagerHelper> amHelper;
+        CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&amHelper);
+        Boolean isLowRamDeviceStatic;
+        amHelper->IsLowRamDeviceStatic(&isLowRamDeviceStatic);
+        if (isLowRamDeviceStatic) {
+            // Overwrite calculated LMK parameters with the low-tier tested/validated values
+            (*mOomMinFree)[i] = (*mOomMinFreeLowRam)[i];
+        }
+        else {
+            Int32 low = (*mOomMinFreeLow)[i];
+            Int32 high = (*mOomMinFreeHigh)[i];
+            (*mOomMinFree)[i] = (Int32)(low + ((high-low)*scale));
+        }
     }
 
     if (minfree_abs >= 0) {
@@ -468,6 +496,14 @@ Int64 ProcessList::ComputeNextPssTime(
     const Int64* table = sleeping
         ? (first ? sFirstAwakePssTimes : sSameAwakePssTimes)
         : (first ? sFirstAwakePssTimes : sSameAwakePssTimes);
+
+    // handle an invalid state scenario
+    if ((procState < 0) || (procState >= 14/*table.length*/)) {
+        Slogger::W(CActivityManagerService::TAG,
+                "Invalid Process State within computeNextPssTime");
+        return now + PSS_MIN_TIME_FROM_STATE_CHANGE;
+    }
+
     return now + table[procState];
 }
 
