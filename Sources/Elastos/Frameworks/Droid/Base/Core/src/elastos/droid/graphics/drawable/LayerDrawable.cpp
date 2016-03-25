@@ -341,7 +341,7 @@ ECode LayerDrawable::InflateLayers(
             Int32 config = 0;
             layer->mDrawable->GetChangingConfigurations(&config);
             state->mChildrenChangingConfigurations |= config;
-            layer->mDrawable->SetCallback(THIS_PROBE(IDrawableCallback));
+            layer->mDrawable->SetCallback(this);
         }
 
         AddLayer(layer);
@@ -524,7 +524,7 @@ AutoPtr<LayerDrawable::ChildDrawable> LayerDrawable::AddLayer(
     Int32 config = 0;
     layer->GetChangingConfigurations(&config);
     mLayerState->mChildrenChangingConfigurations |= config;
-    layer->SetCallback(THIS_PROBE(IDrawableCallback));
+    layer->SetCallback(this);
 
     return childDrawable;
 }
@@ -605,7 +605,7 @@ ECode LayerDrawable::SetDrawableByLayerId(
             }
 
             if (drawable != NULL) {
-                drawable->SetCallback((IDrawableCallback*)this->Probe(EIID_IDrawableCallback));
+                drawable->SetCallback(this);
             }
 
             childDrawable->mDrawable = drawable;
@@ -1164,7 +1164,7 @@ ECode LayerDrawable::constructor(
         AutoPtr<ChildDrawable> cdTemp = new ChildDrawable();
         r->Set(i, cdTemp);
         (*r)[i]->mDrawable = (*layers)[i];
-        (*layers)[i]->SetCallback((IDrawableCallback*)this->Probe(EIID_IDrawableCallback));
+        (*layers)[i]->SetCallback(this);
         Int32 config;
         (*layers)[i]->GetChangingConfigurations(&config);
         mLayerState->mChildrenChangingConfigurations |= config;

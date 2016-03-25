@@ -57,14 +57,14 @@ ECode ColorDrawable::ColorState::CanApplyTheme(
 ECode ColorDrawable::ColorState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    return CColorDrawable::New(THIS_PROBE(IDrawableConstantState), NULL, NULL, drawable);
+    return CColorDrawable::New(this, NULL, NULL, drawable);
 }
 
 ECode ColorDrawable::ColorState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
-    return CColorDrawable::New(THIS_PROBE(IDrawableConstantState), res, NULL, drawable);
+    return CColorDrawable::New(this, res, NULL, drawable);
 }
 
 ECode ColorDrawable::ColorState::NewDrawable(
@@ -72,7 +72,7 @@ ECode ColorDrawable::ColorState::NewDrawable(
     /* [in] */ IResourcesTheme* theme,
     /* [out] */ IDrawable** drawable)
 {
-    return CColorDrawable::New(THIS_PROBE(IDrawableConstantState), res, theme, drawable);
+    return CColorDrawable::New(this, res, theme, drawable);
 }
 
 ECode ColorDrawable::ColorState::GetChangingConfigurations(

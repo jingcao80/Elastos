@@ -89,7 +89,7 @@ ECode MonkeyNetworkMonitor::Register(
         PFL_EX("registering Receiver");
     }
     AutoPtr<IIntent> intent;
-    return am->RegisterReceiver(NULL, String(), THIS_PROBE(IIntentReceiver), mFilter, String(), IUserHandle::USER_ALL
+    return am->RegisterReceiver(NULL, String(), this, mFilter, String(), IUserHandle::USER_ALL
         , (IIntent**)&intent);
 }
 
@@ -99,7 +99,7 @@ ECode MonkeyNetworkMonitor::Unregister(
     if (LDEBUG) {
         PFL_EX("unregistering Receiver");
     }
-    return am->UnregisterReceiver(THIS_PROBE(IIntentReceiver));
+    return am->UnregisterReceiver(this);
 }
 
 ECode MonkeyNetworkMonitor::Stop()

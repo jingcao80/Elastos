@@ -695,7 +695,7 @@ Boolean ExpandableListView::HandleItemClick(
 
         if (mOnGroupClickListener.Get() != NULL) {
             Boolean res = FALSE;
-            mOnGroupClickListener->OnGroupClick(THIS_PROBE(IExpandableListView), v,
+            mOnGroupClickListener->OnGroupClick(this, v,
                 listPosition->mGroupPos, id, &res);
             if (res) {
                 posMetadata->Recycle();
@@ -740,7 +740,7 @@ Boolean ExpandableListView::HandleItemClick(
     else {
         if (mOnChildClickListener.Get() != NULL) {
             PlaySoundEffect(SoundEffectConstants::CLICK);
-            mOnChildClickListener->OnChildClick(THIS_PROBE(IExpandableListView), v,
+            mOnChildClickListener->OnChildClick(this, v,
                     listPosition->mGroupPos, listPosition->mChildPos, id, &returnValue);
             return returnValue;
         }

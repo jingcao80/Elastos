@@ -533,7 +533,7 @@ ECode InputMethodService::OnCreate()
         IContext::INPUT_METHOD_SERVICE, (IInterface**)&mImm);
     AbstractInputMethodService::GetSystemService(
         IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&mInflater);
-    CSoftInputWindow::New((IContext*)this->Probe(EIID_IContext), String("InputMethod"),
+    CSoftInputWindow::New(this, String("InputMethod"),
             mTheme, NULL, NULL, mDispatcherState, IWindowManagerLayoutParams::TYPE_INPUT_METHOD,
             IGravity::BOTTOM, FALSE, (ISoftInputWindow**)&mWindow);
 
@@ -970,13 +970,13 @@ void InputMethodService::UpdateExtractFrameVisibility()
         if (animRes != 0) {
             AutoPtr<IAnimation> ani;
 #ifdef DROID_CORE
-            AnimationUtils::LoadAnimation((IContext*)this->Probe(EIID_IContext),
+            AnimationUtils::LoadAnimation(this,
                     animRes, (IAnimation**)&ani);
 #else
             AutoPtr<IAnimationUtils> animationUtils;
             CAnimationUtils::AcquireSingleton((IAnimationUtils**)&animationUtils);
             assert(animationUtils != NULL);
-            animationUtils->LoadAnimation((IContext*)this->Probe(EIID_IContext),
+            animationUtils->LoadAnimation(this,
                     animRes, (IAnimation**)&ani);
 #endif
             IView::Probe(mFullscreenArea)->StartAnimation(ani);
@@ -1171,7 +1171,7 @@ ECode InputMethodService::SetExtractView(
     if (view != NULL) {
         view->FindViewById(R::id::inputExtractEditText,
             (IView**)&mExtractEditText);
-        mExtractEditText->SetIME(THIS_PROBE(IInputMethodService));
+        mExtractEditText->SetIME(this);
         view->FindViewById(R::id::inputExtractAction,
             (IView**)&mExtractAction);
         if (mExtractAction != NULL) {

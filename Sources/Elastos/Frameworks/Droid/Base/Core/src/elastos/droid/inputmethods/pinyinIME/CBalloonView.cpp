@@ -24,10 +24,10 @@ PInterface CBalloonView::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == Elastos::Droid::View::EIID_View) {
-        return reinterpret_cast<PInterface>((View*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     else if (riid == EIID_IBalloonView) {
-        return (IInterface*)(IBalloonView*)this;
+        return (IInterface*)this;
     }
 
     return View::Probe(riid);

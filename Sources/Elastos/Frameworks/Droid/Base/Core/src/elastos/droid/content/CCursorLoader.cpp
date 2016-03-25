@@ -27,7 +27,7 @@ ECode CCursorLoader::constructor(
     /* [in] */ IContext* context)
 {
     FAIL_RETURN(AsyncTaskLoader::constructor(context));
-    FAIL_RETURN(CLoaderForceLoadContentObserver::New(THIS_PROBE(ILoader), (ILoaderForceLoadContentObserver**)&mObserver));
+    FAIL_RETURN(CLoaderForceLoadContentObserver::New(this, (ILoaderForceLoadContentObserver**)&mObserver));
     return NOERROR;
 }
 
@@ -40,7 +40,7 @@ ECode CCursorLoader::constructor(
     /* [in] */ const String& sortOrder)
 {
     FAIL_RETURN(AsyncTaskLoader::constructor(context));
-    FAIL_RETURN(CLoaderForceLoadContentObserver::New(THIS_PROBE(ILoader), (ILoaderForceLoadContentObserver**)&mObserver));
+    FAIL_RETURN(CLoaderForceLoadContentObserver::New(this, (ILoaderForceLoadContentObserver**)&mObserver));
     mUri = uri;
     mProjection = projection;
     mSelection = selection;

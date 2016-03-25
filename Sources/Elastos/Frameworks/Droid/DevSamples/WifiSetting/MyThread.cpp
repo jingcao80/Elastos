@@ -19,10 +19,10 @@ PInterface MyThread::Probe(
         return (PInterface)this;
     }
     else if (riid == EIID_IObject) {
-        return (IObject*)this;
+        return this;
     }
     else if (riid == EIID_IThread) {
-        return (IThread*)this;
+        return this;
     }
 
     return NULL;
@@ -36,7 +36,7 @@ ECode MyThread::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)(IThread*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IThread;
     }
     else if (pObject == (IInterface *)(IObject *)this) {

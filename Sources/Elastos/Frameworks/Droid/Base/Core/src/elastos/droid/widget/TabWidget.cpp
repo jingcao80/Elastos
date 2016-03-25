@@ -145,7 +145,7 @@ void TabWidget::InitTabWidget()
     // Deal with focus, as we don't want the focus to go by default
     // to a tab other than the current tab
     SetFocusable(TRUE);
-    SetOnFocusChangeListener(THIS_PROBE(IViewOnFocusChangeListener));
+    SetOnFocusChangeListener(this);
 }
 
 void TabWidget::MeasureChildBeforeLayout(
@@ -625,7 +625,7 @@ ECode TabWidget::AddView(
     GetTabCount(&count);
     AutoPtr<TabClickListener> listener = new TabClickListener(count - 1, this);
     child->SetOnClickListener((IViewOnClickListener*)listener);
-    child->SetOnFocusChangeListener(THIS_PROBE(IViewOnFocusChangeListener));
+    child->SetOnFocusChangeListener(this);
 
     return NOERROR;
 }
@@ -652,7 +652,7 @@ ECode TabWidget::OnFocusChange(
     /* [in] */ Boolean hasFocus)
 {
     Int32 count;
-    if (v == THIS_PROBE(IView) && hasFocus
+    if (v == this && hasFocus
         && (GetTabCount(&count), count) > 0 && ( mSelectedTab!= -1) ) {
         AutoPtr<IView> tabView;
         GetChildTabViewAt(mSelectedTab, (IView**)&tabView);

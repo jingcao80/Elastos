@@ -345,7 +345,7 @@ ECode SparseArray::ToString(
         buffer.AppendChar('=');
         AutoPtr<IInterface> value;
         ValueAt(i, (IInterface**)&value);
-        if (TO_IINTERFACE(value) != THIS_PROBE(IInterface)) {
+        if (TO_IINTERFACE(value) != TO_IINTERFACE(this)) {
             buffer.Append(value);
         }
         else {

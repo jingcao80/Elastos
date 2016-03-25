@@ -443,7 +443,7 @@ void GamepadList::NativeSetGamepadData(
     /* [in] */ ArrayOf<Float>* axes,
     /* [in] */ ArrayOf<Float>* buttons)
 {
-    Elastos_GamepadList_nativeSetGamepadData(THIS_PROBE(IInterface), webGamepadsPtr,
+    Elastos_GamepadList_nativeSetGamepadData(TO_IINTERFACE(this), webGamepadsPtr,
             index, mapping, connected, devicename, timestamp, axes, buttons);
 }
 

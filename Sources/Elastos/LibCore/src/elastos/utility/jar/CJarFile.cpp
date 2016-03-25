@@ -132,7 +132,7 @@ ECode CJarFile::JarFileInputStream::Skip(
     VALIDATE_NOT_NULL(val)
     AutoPtr<IStreams> stream;
     FAIL_RETURN(CStreams::AcquireSingleton((IStreams**)&stream))
-    return stream->SkipByReading(THIS_PROBE(IInputStream), byteCount, val);
+    return stream->SkipByReading(this, byteCount, val);
 }
 
 //===========================================================
@@ -458,7 +458,7 @@ ECode CJarFile::GetEntry(
 
     AutoPtr<IJarEntry> je;
     FAIL_RETURN(CJarEntry::New((IZipEntry*)ze.Get(), (IJarEntry**)&je));
-    ((CJarEntry*)je.Get())->mParentJar = THIS_PROBE(IJarFile);
+    ((CJarEntry*)je.Get())->mParentJar = this;
     *entry = IZipEntry::Probe(je);
     REFCOUNT_ADD(*entry)
     return NOERROR;

@@ -28,7 +28,7 @@ ECode CDessertCase::OnStart()
     AutoPtr<IComponentName> cn;
 
     AutoPtr<IClassInfo> classInfo = Utils::GetClassInfo(String("CDessertCaseDream"));
-    CComponentName::New(THIS_PROBE(IContext), classInfo, (IComponentName**)&cn);
+    CComponentName::New(this, classInfo, (IComponentName**)&cn);
     Int32 value = 0;
     pm->GetComponentEnabledSetting(cn, &value);
     if (value != IPackageManager::COMPONENT_ENABLED_STATE_ENABLED) {
@@ -38,9 +38,9 @@ ECode CDessertCase::OnStart()
                 IPackageManager::DONT_KILL_APP);
     }
 
-    CDessertCaseView::New(THIS_PROBE(IContext), (IDessertCaseView**)&mView);
+    CDessertCaseView::New(this, (IDessertCaseView**)&mView);
     AutoPtr<CDessertCaseView::RescalingContainer> container =
-        new CDessertCaseView::RescalingContainer(THIS_PROBE(IContext));
+        new CDessertCaseView::RescalingContainer(this);
 
     container->SetView(mView);
     SetContentView(IView::Probe(container));

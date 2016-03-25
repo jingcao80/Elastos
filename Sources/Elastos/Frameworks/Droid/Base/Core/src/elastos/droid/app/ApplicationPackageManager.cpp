@@ -1841,7 +1841,7 @@ ECode ApplicationPackageManager::GetApplicationLabel(
     /* [out] */ ICharSequence** label)
 {
     assert(info != NULL);
-    return IPackageItemInfo::Probe(info)->LoadLabel((IPackageManager*)this, label);
+    return IPackageItemInfo::Probe(info)->LoadLabel(this, label);
 }
 
 ECode ApplicationPackageManager::InstallPackage(
@@ -2396,7 +2396,7 @@ ECode ApplicationPackageManager::LoadItemIcon(
         GetDrawable(itemInfo->mPackageName, itemInfo->mIcon, appInfo, (IDrawable**)&dr);
     }
     if (dr == NULL) {
-        itemInfo->LoadDefaultIcon((IPackageManager*)this, (IDrawable**)&dr);
+        itemInfo->LoadDefaultIcon(this, (IDrawable**)&dr);
     }
     Int32 userId;
     mContext->GetUserId(&userId);

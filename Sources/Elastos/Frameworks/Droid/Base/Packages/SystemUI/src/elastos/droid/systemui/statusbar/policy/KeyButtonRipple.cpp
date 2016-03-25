@@ -284,7 +284,7 @@ void KeyButtonRipple::EnterSoftware()
     (*fa)[1] = GLOW_MAX_SCALE_FACTOR;
 
     AutoPtr<IObjectAnimator> scaleAnimator;
-    helper->OfFloat(THIS_PROBE(IInterface), String("glowScale"), fa, (IObjectAnimator**)&scaleAnimator);
+    helper->OfFloat(TO_IINTERFACE(this), String("glowScale"), fa, (IObjectAnimator**)&scaleAnimator);
     IAnimator::Probe(scaleAnimator)->SetInterpolator(ITimeInterpolator::Probe(mInterpolator));
     IAnimator::Probe(scaleAnimator)->SetDuration(ANIMATION_DURATION_SCALE);
     IAnimator::Probe(scaleAnimator)->AddListener(mAnimatorListener);
@@ -300,7 +300,7 @@ void KeyButtonRipple::ExitSoftware()
     (*fa)[0] = mGlowAlpha;
     (*fa)[1] = 0.f;
     AutoPtr<IObjectAnimator> alphaAnimator;
-    helper->OfFloat(THIS_PROBE(IInterface), String("glowAlpha"), fa, (IObjectAnimator**)&alphaAnimator);
+    helper->OfFloat(TO_IINTERFACE(this), String("glowAlpha"), fa, (IObjectAnimator**)&alphaAnimator);
     IAnimator::Probe(alphaAnimator)->SetInterpolator(ITimeInterpolator::Probe(mAlphaExitInterpolator));
     IAnimator::Probe(alphaAnimator)->SetDuration(ANIMATION_DURATION_FADE);
     IAnimator::Probe(alphaAnimator)->AddListener(mAnimatorListener);

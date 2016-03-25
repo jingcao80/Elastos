@@ -152,7 +152,7 @@ ECode CRandomAccessFile::GetChannel(
     AutoLock lock(this);
 
     if (mChannel == NULL) {
-        mChannel = NioUtils::NewFileChannel(THIS_PROBE(ICloseable), mFd, mMode);
+        mChannel = NioUtils::NewFileChannel(this, mFd, mMode);
     }
 
     *channel = mChannel;

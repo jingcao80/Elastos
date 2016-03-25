@@ -22,10 +22,10 @@ PInterface ListActivity::MyListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IAdapterViewOnItemClickListener*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IAdapterViewOnItemClickListener) {
-        return (IAdapterViewOnItemClickListener*)this;
+        return this;
     }
 
     return NULL;
@@ -68,10 +68,10 @@ PInterface ListActivity::RequestRunnable::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IRunnable*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IRunnable) {
-        return (IRunnable*)this;
+        return this;
     }
 
     return NULL;

@@ -15,6 +15,7 @@
 #include "elastos/droid/os/NativeBinder.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
 #include <gui/SurfaceComposerClient.h>
@@ -46,6 +47,7 @@ using Elastos::Core::CCloseGuardHelper;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using android::sp;
 
 namespace Elastos {
@@ -573,12 +575,11 @@ ECode Surface::ToString(
     VALIDATE_NOT_NULL(str)
 
     AutoLock lock(this);
-    AutoPtr<ISystem> stm;
-    CSystem::AcquireSingleton((ISystem**)&stm);
-    Int32 hash;
-    stm->IdentityHashCode((ISystem*)this, &hash);
-    *str = String("Surface(name=") + mName + ")/@0x" +
-            StringUtils::ToHexString(hash);
+    StringBuilder sb("Surface(name=");
+    sb += mName;
+    sb += ")/@0x";
+    sb += StringUtils::ToHexString((Int32)this);
+    *str = sb.ToString();
     return NOERROR;
 }
 

@@ -40,7 +40,7 @@ PInterface CGetAuthTokenSession::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_AccountManagerServiceSession) {
-        return reinterpret_cast<PInterface>((AccountManagerServiceSession*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CGetAuthTokenSession::Probe(riid);
 }
@@ -68,11 +68,11 @@ ECode CGetAuthTokenSession::Run()
     // "grant permission" intent instead of the "getAuthToken" intent.
     if (!mPermissionGranted) {
         return mAuthenticator->GetAuthTokenLabel(
-                (IIAccountAuthenticatorResponse*)this, mAuthTokenType);
+                this, mAuthTokenType);
     }
     else {
         return mAuthenticator->GetAuthToken(
-                (IIAccountAuthenticatorResponse*)this, mAccount,
+                this, mAccount,
                 mAuthTokenType, mLoginOptions);
     }
 }
@@ -85,7 +85,7 @@ ECode CGetAuthTokenSession::OnResult(
         if (result->ContainsKey(IAccountManager::KEY_AUTH_TOKEN_LABEL, &isContains),
                 isContains) {
             AutoPtr<IAccountAuthenticatorResponse> response;
-            CAccountAuthenticatorResponse::New((IIAccountAuthenticatorResponse*)this,
+            CAccountAuthenticatorResponse::New(this,
                     (IAccountAuthenticatorResponse**)&response);
             String value;
             result->GetString(IAccountManager::KEY_AUTH_TOKEN_LABEL, &value);

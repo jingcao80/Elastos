@@ -43,8 +43,8 @@ ECode CCandidatesContainer::Initialize(
 
     mLeftArrowBtn = IImageButton::Probe(FindViewById(0x7f0a0001 /*R::id::arrow_left_btn*/));
     mRightArrowBtn = IImageButton::Probe(FindViewById(0x7f0a0002/*R::id::arrow_right_btn*/));
-    mLeftArrowBtn->SetOnTouchListener((IViewOnTouchListener*)this->Probe(EIID_IViewOnTouchListener));
-    mRightArrowBtn->SetOnTouchListener((IViewOnTouchListener*)this->Probe(EIID_IViewOnTouchListener));
+    mLeftArrowBtn->SetOnTouchListener(this);
+    mRightArrowBtn->SetOnTouchListener(this);
 
     mFlipper = IViewFlipper::Probe(FindViewById(0x7f0a0003 /*R::id::candidate_flipper*/));
     mFlipper->SetMeasureAllChildren(TRUE);
@@ -58,7 +58,7 @@ ECode CCandidatesContainer::Initialize(
         AutoPtr<IView> view;
         mFlipper->GetChildAt(i, (IView**)&view);
         AutoPtr<ICandidateView> cv = ICandidateView::Probe(view);
-        cv->Initialize(THIS_PROBE(IArrowUpdater), balloonHint, gestureDetector, mCvListener);
+        cv->Initialize(this, balloonHint, gestureDetector, mCvListener);
     }
     return NOERROR;
 }
@@ -378,7 +378,7 @@ ECode CCandidatesContainer::LoadAnimation(
         }
     }
 
-    mInAnimInUse->SetAnimationListener(THIS_PROBE(IAnimationAnimationListener));
+    mInAnimInUse->SetAnimationListener(this);
 
     mFlipper->SetInAnimation(mInAnimInUse);
     mFlipper->SetOutAnimation(mOutAnimInUse);
@@ -424,13 +424,13 @@ PInterface CCandidatesContainer::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_View) {
-        return reinterpret_cast<PInterface>((View*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     else if (riid == EIID_ViewGroup) {
-        return reinterpret_cast<PInterface>((ViewGroup*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     else if (riid == EIID_ICandidatesContainer) {
-        return reinterpret_cast<PInterface>((ICandidatesContainer*)this);
+        return reinterpret_cast<PInterface>(this);
     }
 
     return RelativeLayout::Probe(riid);

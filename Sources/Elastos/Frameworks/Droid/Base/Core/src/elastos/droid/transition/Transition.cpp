@@ -523,11 +523,11 @@ ECode Transition::CreateAnimators(
         AutoPtr<CTransitionValues> cEnd = (CTransitionValues*)end.Get();
         Boolean bStartContain = FALSE, bEndContain = FALSE;
         if (start != NULL &&
-            !(cStart->mTargetedTransitions->Contains(THIS_PROBE(IInterface), &bStartContain), bStartContain)) {
+            !(cStart->mTargetedTransitions->Contains(TO_IINTERFACE(this), &bStartContain), bStartContain)) {
             start = NULL;
         }
         if (end != NULL &&
-            !(cEnd->mTargetedTransitions->Contains(THIS_PROBE(IInterface), &bEndContain), bEndContain)) {
+            !(cEnd->mTargetedTransitions->Contains(TO_IINTERFACE(this), &bEndContain), bEndContain)) {
             end = NULL;
         }
         if (start == NULL && end == NULL) {
@@ -1019,7 +1019,7 @@ ECode Transition::CaptureValues(
                 else {
                     CaptureEndValues(values);
                 }
-                cv->mTargetedTransitions->Add(THIS_PROBE(IInterface));
+                cv->mTargetedTransitions->Add(TO_IINTERFACE(this));
                 CapturePropagationValues(values);
                 if (start) {
                     AddViewValues(mStartValues, view, values);
@@ -1045,7 +1045,7 @@ ECode Transition::CaptureValues(
             else {
                 CaptureEndValues(values);
             }
-            cv->mTargetedTransitions->Add(THIS_PROBE(IInterface));
+            cv->mTargetedTransitions->Add(TO_IINTERFACE(this));
             CapturePropagationValues(values);
             if (start) {
                 AddViewValues(mStartValues, view, values);
@@ -1217,7 +1217,7 @@ void Transition::CaptureHierarchy(
         else {
             CaptureEndValues(values);
         }
-        cv->mTargetedTransitions->Add(THIS_PROBE(IInterface));
+        cv->mTargetedTransitions->Add(TO_IINTERFACE(this));
         CapturePropagationValues(values);
         if (start) {
             AddViewValues(mStartValues, view, values);

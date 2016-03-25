@@ -13,7 +13,7 @@ PInterface CTableRowLayoutParams::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_TableRowLayoutParams) {
-        return reinterpret_cast<PInterface>((TableRowLayoutParams*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CTableRowLayoutParams::Probe(riid);
 }

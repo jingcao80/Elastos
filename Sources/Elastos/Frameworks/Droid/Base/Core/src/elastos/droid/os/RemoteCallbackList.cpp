@@ -23,7 +23,7 @@ RemoteCallbackList::Callback::Callback(
 
 ECode RemoteCallbackList::Callback::ProxyDied()
 {
-    Slogger::W("RemoteCallbackList::Callback", " >> %p ProxyDied()", (IProxyDeathRecipient*)this);
+    Slogger::W("RemoteCallbackList::Callback", " >> %p ProxyDied()", this);
     {
         AutoLock lock(mOwner->mCallbacksLock);
 

@@ -1089,7 +1089,7 @@ ECode MotionEvent::Copy(
 {
     VALIDATE_NOT_NULL(event);
     AutoPtr<IMotionEvent> motionEvent;
-    FAIL_RETURN(Obtain((IMotionEvent*)this, (IMotionEvent**)&motionEvent));
+    FAIL_RETURN(Obtain(this, (IMotionEvent**)&motionEvent));
     *event = IInputEvent::Probe(motionEvent);
     REFCOUNT_ADD(*event);
 

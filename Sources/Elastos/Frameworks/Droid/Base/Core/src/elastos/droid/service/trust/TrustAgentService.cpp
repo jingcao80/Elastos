@@ -189,7 +189,7 @@ ECode TrustAgentService::OnCreate()
     String shortClassName("");//TODO
     ec = moduleInfo->GetClassInfo(shortClassName, (IClassInfo**)&classInfo);
     AutoPtr<IComponentName> component;
-    CComponentName::New((IContext*)this, classInfo, (IComponentName**)&component);
+    CComponentName::New(this, classInfo, (IComponentName**)&component);
     AutoPtr<IPackageManager> pm;
     GetPackageManager((IPackageManager**)&pm);
     AutoPtr<IServiceInfo> serviceInfo;

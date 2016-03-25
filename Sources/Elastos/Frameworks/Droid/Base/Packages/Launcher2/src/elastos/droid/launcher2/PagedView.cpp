@@ -1162,7 +1162,7 @@ ECode PagedView::FocusableViewAvailable(
         if (v == current) {
             return ViewGroup::FocusableViewAvailable(focused);
         }
-        if (v.Get() == (IView*)this) {
+        if (v.Get() == this) {
             return NOERROR;
         }
         AutoPtr<IViewParent> parent;

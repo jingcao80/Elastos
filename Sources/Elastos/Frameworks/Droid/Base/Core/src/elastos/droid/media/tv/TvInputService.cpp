@@ -163,8 +163,7 @@ ECode TvInputService::ServiceHandler::HandleMessage(
             }
             ((TvInputServiceSession*)sessionImpl.Get())->SetSessionCallback(cb);
             AutoPtr<IITvInputSession> stub;
-            CITvInputSessionWrapper::New(THIS_PROBE(IContext),
-                    sessionImpl, channel, (IITvInputSession**)&stub);
+            CITvInputSessionWrapper::New(mHost, sessionImpl, channel, (IITvInputSession**)&stub);
 
             if (ITvInputServiceHardwareSession::Probe(sessionImpl) != NULL) {
                 AutoPtr<ITvInputServiceHardwareSession> proxySession =

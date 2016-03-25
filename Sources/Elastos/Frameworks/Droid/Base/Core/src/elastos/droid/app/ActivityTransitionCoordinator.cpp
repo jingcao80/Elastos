@@ -143,7 +143,7 @@ ECode ActivityTransitionCoordinator::GhostViewListeners::OnPreDraw(
     if (ghostView == NULL) {
         AutoPtr<IViewTreeObserver> vto;
         mParent->GetViewTreeObserver((IViewTreeObserver**)&vto);
-        vto->RemoveOnPreDrawListener(THIS_PROBE(IOnPreDrawListener));
+        vto->RemoveOnPreDrawListener(this);
     }
     else {
         GhostView::CalculateMatrix(mView, mDecor, mMatrix);
@@ -208,7 +208,7 @@ ECode ActivityTransitionCoordinator::DecorViewOnPreDrawListener::OnPreDraw(
 
     AutoPtr<IViewTreeObserver> vto;
     mDecorView->GetViewTreeObserver((IViewTreeObserver**)&vto);
-    vto->RemoveOnPreDrawListener(THIS_PROBE(IOnPreDrawListener));
+    vto->RemoveOnPreDrawListener(this);
     mHost->NotifySharedElementEnd(mSnapshots);
 
     *result= TRUE;
@@ -245,7 +245,7 @@ ECode ActivityTransitionCoordinator::GhostVisibilityOnPreDrawListener::OnPreDraw
 
     AutoPtr<IViewTreeObserver> vto;
     mDecorView->GetViewTreeObserver((IViewTreeObserver**)&vto);
-    vto->RemoveOnPreDrawListener(THIS_PROBE(IOnPreDrawListener));
+    vto->RemoveOnPreDrawListener(this);
     mHost->SetGhostVisibility(mVisibility);
 
     *result= TRUE;

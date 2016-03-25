@@ -370,7 +370,7 @@ ECode ManagedServices::MyServiceConnection::OnServiceConnected(
         // try {
         mService = TO_IINTERFACE(binder);
         info = mHost->NewServiceInfo(mService, name,
-                mUserid, FALSE /*isSystem*/, (IServiceConnection*)this, mTargetSdkVersion);
+                mUserid, FALSE /*isSystem*/, this, mTargetSdkVersion);
 
         AutoPtr<IProxy> proxy = (IProxy*)binder->Probe(EIID_IProxy);
         if (proxy != NULL && FAILED(proxy->LinkToDeath(info, 0))) {

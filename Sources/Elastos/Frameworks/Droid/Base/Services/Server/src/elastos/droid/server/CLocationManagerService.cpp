@@ -253,10 +253,10 @@ PInterface CLocationManagerService::LocationContentObserver::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IContentObserver*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IContentObserver) {
-        return (IContentObserver*)this;
+        return this;
     }
 
     return NULL;
@@ -321,11 +321,11 @@ PInterface CLocationManagerService::Receiver::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IProxyDeathRecipient*)this;
+        return (PInterface)this;
     } else if(riid == EIID_IProxyDeathRecipient) {
-        return (IProxyDeathRecipient*)this;
+        return this;
     } else if (riid == EIID_IPendingIntentOnFinished) {
-        return (IPendingIntentOnFinished*)this;
+        return this;
     }
     return NULL;
 }
@@ -631,7 +631,7 @@ CLocationManagerService::~CLocationManagerService()
 ECode CLocationManagerService::SystemReady()
 {
     AutoPtr<IThread> thread;
-    ASSERT_SUCCEEDED(CThread::New(NULL, (IRunnable*)this, String("CLocationManagerService"),
+    ASSERT_SUCCEEDED(CThread::New(NULL, this, String("CLocationManagerService"),
             (IThread**)&thread));
     thread->Start();
     return NOERROR;

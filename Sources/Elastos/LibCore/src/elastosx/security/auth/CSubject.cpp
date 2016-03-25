@@ -218,7 +218,7 @@ ECode CSubject::Equals(
     VALIDATE_NOT_NULL(isEqual)
     *isEqual = FALSE;
 
-    if (THIS_PROBE(IInterface) == obj) {
+    if (TO_IINTERFACE(this) == obj) {
         *isEqual = TRUE;
     }
 
@@ -235,7 +235,7 @@ ECode CSubject::Equals(
         return NOERROR;
     }
 
-    if (THIS_PROBE(ISubject) == thatObj) {
+    if (this == thatObj) {
         *isEqual = TRUE;
         return NOERROR;
     }

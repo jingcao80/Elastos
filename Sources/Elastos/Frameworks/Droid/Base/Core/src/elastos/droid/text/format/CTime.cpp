@@ -130,9 +130,9 @@ ECode CTime::Normalize(
     /* [out] */ Int64* ret)
 {
     VALIDATE_NOT_NULL(ret)
-    mCalculator->CopyFieldsFromTime(THIS_PROBE(ITime));
+    mCalculator->CopyFieldsFromTime(this);
     Int64 timeInMillis = mCalculator->ToMillis(ignoreDst);
-    mCalculator->CopyFieldsToTime(THIS_PROBE(ITime));
+    mCalculator->CopyFieldsToTime(this);
     *ret = timeInMillis;
     return NOERROR;
 }
@@ -140,9 +140,9 @@ ECode CTime::Normalize(
 ECode CTime::SwitchTimezone(
     /* [in] */ const String& timezone)
 {
-    mCalculator->CopyFieldsFromTime(THIS_PROBE(ITime));
+    mCalculator->CopyFieldsFromTime(this);
     mCalculator->SwitchTimezone(timezone);
-    mCalculator->CopyFieldsToTime(THIS_PROBE(ITime));
+    mCalculator->CopyFieldsToTime(this);
     mTimezone = timezone;
     return NOERROR;
 }
@@ -249,7 +249,7 @@ ECode CTime::Format(
     /* [out] */ String* ret)
 {
     VALIDATE_NOT_NULL(ret)
-    mCalculator->CopyFieldsFromTime(THIS_PROBE(ITime));
+    mCalculator->CopyFieldsFromTime(this);
     *ret = mCalculator->Format(const_cast<String&>(format));
     return NOERROR;
 }
@@ -261,7 +261,7 @@ ECode CTime::ToString(
     // toString() uses its own TimeCalculator rather than the shared one. Otherwise crazy stuff
     // happens during debugging when the debugger calls toString().
     AutoPtr<TimeCalculator> timeCalculator = new TimeCalculator(mTimezone);
-    mCalculator->CopyFieldsFromTime(THIS_PROBE(ITime));
+    mCalculator->CopyFieldsFromTime(this);
     *ret = mCalculator->ToStringInternal();
     return NOERROR;
 }
@@ -566,7 +566,7 @@ ECode CTime::ToMillis(
     /* [in] */ Boolean ignoreDst,
     /* [out] */ Int64* ret)
 {
-    mCalculator->CopyFieldsFromTime(THIS_PROBE(ITime));
+    mCalculator->CopyFieldsFromTime(this);
     *ret = mCalculator->ToMillis(ignoreDst);
     return NOERROR;
 }
@@ -577,7 +577,7 @@ ECode CTime::Set(
     mAllDay = FALSE;
     mCalculator->mTimeZone = mTimezone;
     mCalculator->SetTimeInMillis(millis);
-    mCalculator->CopyFieldsToTime(THIS_PROBE(ITime));
+    mCalculator->CopyFieldsToTime(this);
     return NOERROR;
 }
 
@@ -585,7 +585,7 @@ ECode CTime::Format2445(
     /* [out] */ String* ret)
 {
     VALIDATE_NOT_NULL(ret)
-    mCalculator->CopyFieldsFromTime(THIS_PROBE(ITime));
+    mCalculator->CopyFieldsFromTime(this);
     *ret = mCalculator->Format2445(!mAllDay);
     return NOERROR;
 }

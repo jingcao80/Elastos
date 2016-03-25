@@ -77,7 +77,7 @@ ECode CollationKeyICU::Equals(
     /* [in] */ IInterface * object,
     /* [out] */ Boolean * value)
 {
-    if (object == this->Probe(EIID_IInterface)) {
+    if (object == TO_IINTERFACE(this)) {
         *value = TRUE;
         return NOERROR;
     }

@@ -184,7 +184,7 @@ ECode MultihomePlainSocketFactory::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = (other == this->Probe(EIID_IInterface));
+    *result = (other == TO_IINTERFACE(this));
     return NOERROR;
 }
 
@@ -193,7 +193,7 @@ ECode MultihomePlainSocketFactory::GetHashCode(
 {
     VALIDATE_NOT_NULL(hashCode)
     ClassID clsid;
-    ((IObject*)this->Probe(EIID_IObject))->GetClassID(&clsid);
+    (this)->GetClassID(&clsid);
     *hashCode = clsid.mClsid.mData1;
     return NOERROR;
 }

@@ -215,10 +215,10 @@ PInterface SmsIOThread::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IRunnable*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IThread) {
-        return (IThread*)this;
+        return this;
     }
 
     return NULL;

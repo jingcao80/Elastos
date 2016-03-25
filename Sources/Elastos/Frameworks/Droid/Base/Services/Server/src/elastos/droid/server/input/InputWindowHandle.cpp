@@ -16,7 +16,7 @@ CAR_INTERFACE_IMPL(InputWindowHandle, Object, IInputWindowHandle);
 
 InputWindowHandle::InputWindowHandle(
     /* [in] */ InputApplicationHandle* inputApplicationHandle,
-    /* [in] */ IInterface* windowState,
+    /* [in] */ IWindowState* windowState,
     /* [in] */ Int32 displayId)
     : mInputApplicationHandle(inputApplicationHandle)
     , mWindowState(windowState)

@@ -45,7 +45,7 @@ ThreadPoolExecutor::Worker::Worker(
     SetState(-1); // inhibit interrupts until runWorker
     AutoPtr<IThreadFactory> factory;
     mOwner->GetThreadFactory((IThreadFactory**)&factory);
-    factory->NewThread((IRunnable*)this, (IThread**)&mThread);
+    factory->NewThread(this, (IThread**)&mThread);
 }
 
 void ThreadPoolExecutor::Worker::InterruptIfStarted()

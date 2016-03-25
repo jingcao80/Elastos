@@ -56,7 +56,7 @@ using Elastos::Droid::Media::IAudioAttributesBuilder;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettingsSystem;
-using Elastos::Droid::Hardware::Input::IInputDeviceListener;
+using Elastos::Droid::Hardware::Input::EIID_IInputDeviceListener;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CThread;
 using Elastos::Utility::Logging::Slogger;
@@ -330,7 +330,7 @@ ECode CVibratorService::IntentReceiver::OnReceive(
 //====================================================================
 // CVibratorService
 //====================================================================
-CAR_INTERFACE_IMPL_2(CVibratorService, Object, IIVibratorService, IBinder)
+CAR_INTERFACE_IMPL_3(CVibratorService, Object, IIVibratorService, IInputDeviceListener, IBinder)
 
 CAR_OBJECT_IMPL(CVibratorService)
 
@@ -737,13 +737,13 @@ void CVibratorService::UpdateInputDeviceVibrators()
         if (mVibrateInputDevicesSetting) {
             if (!mInputDeviceListenerRegistered) {
                 mInputDeviceListenerRegistered = TRUE;
-                mIm->RegisterInputDeviceListener((IInputDeviceListener*)this, mH);
+                mIm->RegisterInputDeviceListener(this, mH);
             }
         }
         else {
             if (mInputDeviceListenerRegistered) {
                 mInputDeviceListenerRegistered = FALSE;
-                mIm->UnregisterInputDeviceListener((IInputDeviceListener*)this);
+                mIm->UnregisterInputDeviceListener(this);
             }
         }
 

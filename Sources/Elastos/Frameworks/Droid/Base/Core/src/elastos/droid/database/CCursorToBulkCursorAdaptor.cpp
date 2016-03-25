@@ -117,7 +117,7 @@ ECode CCursorToBulkCursorAdaptor::GetBulkCursorDescriptor(
 
         AutoPtr<CBulkCursorDescriptor> d;
         CBulkCursorDescriptor::NewByFriend((CBulkCursorDescriptor**)&d);
-        d->mCursor = (IBulkCursor*)this;
+        d->mCursor = this;
         ICursor::Probe(mCursor)->GetColumnNames((ArrayOf<String>**)&d->mColumnNames);
         ICursor::Probe(mCursor)->GetWantsAllOnMoveCalls(&d->mWantsAllOnMoveCalls);
         ICursor::Probe(mCursor)->GetCount(&d->mCount);
@@ -264,7 +264,7 @@ ECode CCursorToBulkCursorAdaptor::CreateAndRegisterObserverProxyLocked(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     mObserver = new ContentObserverProxy();
-    mObserver->constructor(observer, THIS_PROBE(IProxyDeathRecipient));
+    mObserver->constructor(observer, this);
     return ICursor::Probe(mCursor)->RegisterContentObserver((IContentObserver*)mObserver);
 }
 
@@ -273,7 +273,7 @@ ECode CCursorToBulkCursorAdaptor::UnregisterObserverProxyLocked()
     if (mObserver != NULL) {
         ICursor::Probe(mCursor)->UnregisterContentObserver(mObserver);
         Boolean result;
-        mObserver->UnlinkToDeath(THIS_PROBE(IProxyDeathRecipient), &result);
+        mObserver->UnlinkToDeath(this, &result);
         mObserver = NULL;
     }
     return NOERROR;

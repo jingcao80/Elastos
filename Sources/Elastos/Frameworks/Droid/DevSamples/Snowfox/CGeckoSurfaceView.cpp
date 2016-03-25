@@ -52,10 +52,10 @@ PInterface CGeckoSurfaceView::MySurfaceHoderCallback::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(ISurfaceHolderCallback*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_ISurfaceHolderCallback) {
-        return (ISurfaceHolderCallback*)this;
+        return this;
     }
 
     return NULL;
@@ -78,7 +78,7 @@ ECode CGeckoSurfaceView::MySurfaceHoderCallback::GetInterfaceID(
     if (pIID == NULL) {
         return E_INVALID_ARGUMENT;
     }
-    if (pObject == (IInterface*)(ISurfaceHolderCallback*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_ISurfaceHolderCallback;
     }
     else {
@@ -255,10 +255,10 @@ PInterface CGeckoSurfaceView::MyTouchDelegate::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(ITouchDelegate*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_ITouchDelegate) {
-        return (ITouchDelegate*)this;
+        return this;
     }
 
     return NULL;
@@ -281,7 +281,7 @@ ECode CGeckoSurfaceView::MyTouchDelegate::GetInterfaceID(
     if (pIID == NULL) {
         return E_INVALID_ARGUMENT;
     }
-    if (pObject == (IInterface*)(ITouchDelegate*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_ITouchDelegate;
     }
     else {
@@ -314,8 +314,8 @@ ECode CGeckoSurfaceView::constructor(
     ASSERT_SUCCEEDED(CSurfaceView::New(context, (ISurfaceView**)&mSurfaceView));
     AutoPtr<MyTouchDelegate> delegate = new MyTouchDelegate(this);
     mSurfaceView->SetTouchDelegate(delegate);
-    mSurfaceView->SetCreateInputConnectionDelegate((IView*)this);
-    mSurfaceView->SetKeyEventCallbackDelegate((IKeyEventCallback*)this);
+    mSurfaceView->SetCreateInputConnectionDelegate(this);
+    mSurfaceView->SetKeyEventCallbackDelegate(this);
 
     AutoPtr<ISurfaceHolder> holder;
     ASSERT_SUCCEEDED(GetHolder((ISurfaceHolder**)&holder));

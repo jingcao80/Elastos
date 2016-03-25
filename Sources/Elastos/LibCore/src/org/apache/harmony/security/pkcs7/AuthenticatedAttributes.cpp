@@ -175,7 +175,7 @@ ECode AuthenticatedAttributes::GetEncoded(
 {
     VALIDATE_NOT_NULL(encoded)
     if (mEncoding == NULL) {
-        ASN1->Encode(THIS_PROBE(IInterface), (ArrayOf<Byte>**)&mEncoding);
+        ASN1->Encode(TO_IINTERFACE(this), (ArrayOf<Byte>**)&mEncoding);
     }
     *encoded = mEncoding;
     REFCOUNT_ADD(*encoded)

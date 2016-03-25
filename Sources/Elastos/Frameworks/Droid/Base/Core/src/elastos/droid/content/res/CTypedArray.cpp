@@ -867,7 +867,7 @@ ECode CTypedArray::Recycle()
     mXml = NULL;
     mTheme = NULL;
 
-    mResources->mTypedArrayPool->ReleaseItem(THIS_PROBE(ITypedArray));
+    mResources->mTypedArrayPool->ReleaseItem(this);
     return NOERROR;
 }
 

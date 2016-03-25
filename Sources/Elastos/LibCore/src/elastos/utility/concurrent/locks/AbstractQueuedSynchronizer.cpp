@@ -93,7 +93,7 @@ ECode AbstractQueuedSynchronizer::ConditionObject::AwaitUninterruptibly()
     Int32 savedState = mHost->FullyRelease(node);
     Boolean interrupted = FALSE;
     while (!mHost->IsOnSyncQueue(node)) {
-        LockSupport::Park(this->Probe(EIID_IInterface));
+        LockSupport::Park(TO_IINTERFACE(this));
         if (Thread::Interrupted()) {
             interrupted = TRUE;
         }
@@ -114,7 +114,7 @@ ECode AbstractQueuedSynchronizer::ConditionObject::Await()
     Int32 savedState = mHost->FullyRelease(node);
     Int32 interruptMode = 0;
     while (!mHost->IsOnSyncQueue(node)) {
-        LockSupport::Park(this->Probe(EIID_IInterface));
+        LockSupport::Park(TO_IINTERFACE(this));
         if ((interruptMode = CheckInterruptWhileWaiting(node)) != 0)
             break;
     }
@@ -151,7 +151,7 @@ ECode AbstractQueuedSynchronizer::ConditionObject::AwaitNanos(
             mHost->TransferAfterCancelledWait(node);
             break;
         }
-        LockSupport::ParkNanos(this->Probe(EIID_IInterface), nanosTimeout);
+        LockSupport::ParkNanos(TO_IINTERFACE(this), nanosTimeout);
         if ((interruptMode = CheckInterruptWhileWaiting(node)) != 0)
             break;
 
@@ -204,7 +204,7 @@ ECode AbstractQueuedSynchronizer::ConditionObject::AwaitUntil(
             timedout = mHost->TransferAfterCancelledWait(node);
             break;
         }
-        LockSupport::ParkUntil(this->Probe(EIID_IInterface), abstime);
+        LockSupport::ParkUntil(TO_IINTERFACE(this), abstime);
         if ((interruptMode = CheckInterruptWhileWaiting(node)) != 0)
             break;
     }
@@ -251,7 +251,7 @@ ECode AbstractQueuedSynchronizer::ConditionObject::Await(
             break;
         }
         if (nanosTimeout >= mHost->sSpinForTimeoutThreshold)
-            LockSupport::ParkNanos(this->Probe(EIID_IInterface), nanosTimeout);
+            LockSupport::ParkNanos(TO_IINTERFACE(this), nanosTimeout);
         if ((interruptMode = CheckInterruptWhileWaiting(node)) != 0)
             break;
         Int64 now;
@@ -954,7 +954,7 @@ Boolean AbstractQueuedSynchronizer::DoAcquireNanos(
         if (ShouldParkAfterFailedAcquire(p, node) &&
             nanosTimeout > sSpinForTimeoutThreshold) {
             assert(0 && "TODO");
-            // LockSupport::ParkNanos(this->Probe(EIID_IInterface), nanosTimeout);
+            // LockSupport::ParkNanos(TO_IINTERFACE(this), nanosTimeout);
         }
         Int64 now;
         system->GetNanoTime(&now);

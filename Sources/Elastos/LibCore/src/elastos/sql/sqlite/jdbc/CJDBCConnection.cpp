@@ -133,7 +133,7 @@ ECode CJDBCConnection::GetMetaData(
     /* [out] */ Elastos::Sql::IDatabaseMetaData ** ppMetadata)
 {
     if (*ppMetadata == NULL) {
-        CJDBCDatabaseMetaData::New((IJDBCConnection*)this, (IJDBCDatabaseMetaData **)ppMetadata);
+        CJDBCDatabaseMetaData::New(this, (IJDBCDatabaseMetaData **)ppMetadata);
     }
     return NOERROR;
 }
@@ -213,7 +213,7 @@ ECode CJDBCConnection::PrepareStatement(
     /* [in] */ const String& sql,
     /* [out] */ Elastos::Sql::IPreparedStatement ** ppPreparedStatement)
 {
-    return CJDBCPreparedStatement::New((IJDBCConnection*)this, sql, (IJDBCPreparedStatement**) ppPreparedStatement);
+    return CJDBCPreparedStatement::New(this, sql, (IJDBCPreparedStatement**) ppPreparedStatement);
 }
 
 ECode CJDBCConnection::PrepareStatement(
@@ -485,7 +485,7 @@ ECode CJDBCConnection::constructor(
         }
     }
 
-    IBusyHandler* hd = IBusyHandler::Probe((IJDBCConnection*)this);
+    IBusyHandler* hd = IBusyHandler::Probe(this);
     ec = mDb->BusyHandler(hd);
     //ec = mDb->BusyHandler(this);
     if (FAILED(ec)) {

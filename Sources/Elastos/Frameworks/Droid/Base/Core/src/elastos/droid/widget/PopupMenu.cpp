@@ -217,7 +217,7 @@ ECode PopupMenu::OnCloseMenu(
     /* [in] */ Boolean allMenusAreClosing)
 {
     if (mDismissListener != NULL) {
-        mDismissListener->OnDismiss((IPopupMenu*)this->Probe(EIID_IPopupMenu));
+        mDismissListener->OnDismiss(this);
     }
     return NOERROR;
 }

@@ -79,10 +79,6 @@ using namespace Elastos;
     } while(0);
 #endif
 
-#ifndef THIS_PROBE
-#define THIS_PROBE(Interface) ((Interface *)this->Probe(EIID_##Interface))
-#endif
-
 #ifndef TO_IINTERFACE
 #define TO_IINTERFACE(obj) ((obj) == NULL ? NULL : (obj)->Probe(EIID_IInterface))
 #endif

@@ -196,7 +196,7 @@ ECode LocationManager::ListenerTransport::_handleMessage(
             break;
         }
     }
-    ECode ec = mLMHost->mService->LocationCallbackFinished(THIS_PROBE(IILocationListener));
+    ECode ec = mLMHost->mService->LocationCallbackFinished(this);
     if (FAILED(ec)) {
         Logger::E(TAG, "locationCallbackFinished: RemoteException");
         return E_REMOTE_EXCEPTION;
@@ -893,7 +893,7 @@ ECode LocationManager::AddGpsStatusListener(
     }
 
     AutoPtr<IIGpsStatusListener> transport;
-    CLocationManagerGpsStatusListenerTransport::New((ILocationManager*)this, listener, (IIGpsStatusListener**)&transport);
+    CLocationManagerGpsStatusListenerTransport::New(this, listener, (IIGpsStatusListener**)&transport);
 
     String packageName;
     mContext->GetPackageName(&packageName);
@@ -939,7 +939,7 @@ ECode LocationManager::AddNmeaListener(
     }
 
     AutoPtr<IIGpsStatusListener> transport;
-    CLocationManagerGpsStatusListenerTransport::New((ILocationManager*)this, listener, (IIGpsStatusListener**)&transport);
+    CLocationManagerGpsStatusListenerTransport::New(this, listener, (IIGpsStatusListener**)&transport);
 
     String packageName;
     mContext->GetPackageName(&packageName);
@@ -1056,7 +1056,7 @@ AutoPtr<IILocationListener> LocationManager::WrapListener(
         AutoPtr<IILocationListener> transport;
         if ((it == mListeners.End()) || (it->mSecond == NULL)) {
             AutoPtr<IILocationListener> lt;
-            CLocationManagerListenerTransport::New((ILocationManager*)this, listener, looper, (IILocationListener**)&lt);
+            CLocationManagerListenerTransport::New(this, listener, looper, (IILocationListener**)&lt);
             transport = lt.Get();
         }
         mListeners[tempKey] = transport;

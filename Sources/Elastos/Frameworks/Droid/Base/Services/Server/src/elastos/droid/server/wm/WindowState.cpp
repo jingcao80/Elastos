@@ -219,7 +219,7 @@ WindowState::WindowState(
     CRect::New((IRect**)&mDecorFrame);
     CRect::New((IRect**)&mStableFrame);
 
-    CWindowId::New((IWindowState*)this, (IIWindowId**)&mWindowId);
+    CWindowId::New(this, (IIWindowId**)&mWindowId);
 
     AutoPtr<DeathRecipient> deathRecipient = new DeathRecipient(this);
 
@@ -336,8 +336,8 @@ WindowState::WindowState(
         attrs->GetAlpha(&mWinAnimator->mAlpha);
 
         mInputWindowHandle = new InputWindowHandle(
-                mAppToken != NULL ? mAppToken->mInputApplicationHandle : NULL, (IWindowState*)this,
-                displayContent->GetDisplayId());
+            mAppToken != NULL ? mAppToken->mInputApplicationHandle : NULL, this,
+            displayContent->GetDisplayId());
     }
 }
 

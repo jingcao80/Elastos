@@ -29,7 +29,7 @@ PInterface ChatManager::Probe(
         return (PInterface)this;
     }
     else if (riid == EIID_IRunnable) {
-        return (IRunnable*)this;
+        return this;
     }
     else if (riid == EIID_ChatManager) {
         return reinterpret_cast<PInterface>(this);
@@ -56,7 +56,7 @@ ECode ChatManager::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)(IRunnable*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IRunnable;
     }
     else {
@@ -86,7 +86,7 @@ ECode ChatManager::Run()
     AutoPtr<IMessageHelper> helper;
     CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
     AutoPtr<IMessage> msg;
-    helper->Obtain(mHandler, CActivityOne::MY_HANDLE, this->Probe(EIID_IInterface),
+    helper->Obtain(mHandler, CActivityOne::MY_HANDLE, TO_IINTERFACE(this),
         (IMessage**)&msg);
     msg->SendToTarget();
 

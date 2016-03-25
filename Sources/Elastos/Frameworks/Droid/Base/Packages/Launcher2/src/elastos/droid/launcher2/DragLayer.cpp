@@ -718,7 +718,7 @@ ECode DragLayer::GetDescendantCoordRelativeToSelf(
     (*pt)[1] += top;
     AutoPtr<IViewParent> viewParent;
     descendant->GetParent((IViewParent**)&viewParent);
-    while (IView::Probe(viewParent) != NULL && TO_IINTERFACE(viewParent) != THIS_PROBE(IInterface)) {
+    while (IView::Probe(viewParent) != NULL && TO_IINTERFACE(viewParent) != TO_IINTERFACE(this)) {
         AutoPtr<IView> view = IView::Probe(viewParent);
         AutoPtr<IMatrix> _matrix;
         view->GetMatrix((IMatrix**)&_matrix);

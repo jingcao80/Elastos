@@ -140,7 +140,7 @@ ECode ScaleGestureDetector::constructor(
 
     mInputEventConsistencyVerifier =
             InputEventConsistencyVerifier::IsInstrumentationEnabled() ?
-                    new InputEventConsistencyVerifier(THIS_PROBE(IInterface), 0) : NULL;
+                    new InputEventConsistencyVerifier(TO_IINTERFACE(this), 0) : NULL;
 
     mContext = context;
     mListener = listener;
@@ -273,7 +273,7 @@ ECode ScaleGestureDetector::OnTouchEvent(
         // If it's an ACTION_DOWN we're beginning a new event stream.
         // This means the app probably didn't give us all the events. Shame on it.
         if (mInProgress) {
-            mListener->OnScaleEnd((IScaleGestureDetector*)this);
+            mListener->OnScaleEnd(this);
             mInProgress = FALSE;
             mInitialSpan = 0;
             mDoubleTapMode = DOUBLE_TAP_MODE_NONE;
@@ -370,7 +370,7 @@ ECode ScaleGestureDetector::OnTouchEvent(
     mFocusX = focusX;
     mFocusY = focusY;
     if ( !InDoubleTapMode() && mInProgress && (span < mMinSpan || configChanged)) {
-        mListener->OnScaleEnd((IScaleGestureDetector*)this);
+        mListener->OnScaleEnd(this);
         mInProgress = FALSE;
         mInitialSpan = span;
         mDoubleTapMode = DOUBLE_TAP_MODE_NONE;
@@ -388,7 +388,7 @@ ECode ScaleGestureDetector::OnTouchEvent(
         mPrevSpanY = mCurrSpanY = spanY;
         mPrevSpan = mCurrSpan = span;
         Boolean result;
-        mInProgress = mListener->OnScaleBegin((IScaleGestureDetector*)this, &result);
+        mInProgress = mListener->OnScaleBegin(this, &result);
     }
 
     // Handle motion; focal point and span/scale factor are changing.
@@ -400,7 +400,7 @@ ECode ScaleGestureDetector::OnTouchEvent(
         Boolean updatePrev = TRUE;
         if (mInProgress) {
             Boolean result;
-            updatePrev = mListener->OnScale((IScaleGestureDetector*)this, &result);
+            updatePrev = mListener->OnScale(this, &result);
         }
 
         if (updatePrev) {

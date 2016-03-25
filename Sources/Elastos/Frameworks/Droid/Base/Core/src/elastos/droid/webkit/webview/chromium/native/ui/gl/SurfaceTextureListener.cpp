@@ -59,14 +59,14 @@ ECode SurfaceTextureListener::Finalize()
 ECode SurfaceTextureListener::NativeFrameAvailable(
     /* [in] */ Handle64 nativeSurfaceTextureListener)
 {
-    Elastos_SurfaceTextureListener_nativeFrameAvailable(THIS_PROBE(IInterface), (Handle64)nativeSurfaceTextureListener);
+    Elastos_SurfaceTextureListener_nativeFrameAvailable(TO_IINTERFACE(this), (Handle64)nativeSurfaceTextureListener);
     return NOERROR;
 }
 
 ECode SurfaceTextureListener::NativeDestroy(
     /* [in] */ Handle64 nativeSurfaceTextureListener)
 {
-    Elastos_SurfaceTextureListener_nativeDestroy(THIS_PROBE(IInterface), (Handle64)nativeSurfaceTextureListener);
+    Elastos_SurfaceTextureListener_nativeDestroy(TO_IINTERFACE(this), (Handle64)nativeSurfaceTextureListener);
     return NOERROR;
 }
 

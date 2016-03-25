@@ -176,7 +176,7 @@ ECode CASN1Choice::EncodeASN(
 ECode CASN1Choice::EncodeContent(
     /* [in] */ IBerOutputStream* bos)
 {
-    bos->EncodeChoice(THIS_PROBE(IASN1Choice));
+    bos->EncodeChoice(this);
 }
 
 ECode CASN1Choice::SetEncodingContent(

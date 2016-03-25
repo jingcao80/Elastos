@@ -21,7 +21,7 @@ ECode CCodeSigner::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    if (THIS_PROBE(IInterface) == obj) {
+    if (TO_IINTERFACE(this) == obj) {
         *result = TRUE;
         return NOERROR;
     }

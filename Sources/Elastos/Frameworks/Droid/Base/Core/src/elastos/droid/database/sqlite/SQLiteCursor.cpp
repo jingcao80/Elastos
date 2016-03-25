@@ -254,7 +254,7 @@ ECode SQLiteCursor::Requery(
         mPos = -1;
         mCount = NO_COUNT;
 
-        mDriver->CursorRequeried((ICursor*)this->Probe(EIID_ICursor));
+        mDriver->CursorRequeried(this);
     }
 
     Boolean result;

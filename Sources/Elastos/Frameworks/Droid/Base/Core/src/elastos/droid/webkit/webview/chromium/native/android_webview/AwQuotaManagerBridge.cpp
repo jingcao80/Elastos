@@ -178,27 +178,27 @@ void AwQuotaManagerBridge::OnGetUsageAndQuotaForOriginCallback(
 void AwQuotaManagerBridge::NativeInit(
     /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl)
 {
-    Elastos_AwQuotaManagerBridge_nativeInit(THIS_PROBE(IInterface), nativeAwQuotaManagerBridgeImpl);
+    Elastos_AwQuotaManagerBridge_nativeInit(TO_IINTERFACE(this), nativeAwQuotaManagerBridgeImpl);
 }
 
 void AwQuotaManagerBridge::NativeDeleteAllData(
     /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl)
 {
-    Elastos_AwQuotaManagerBridge_nativeDeleteAllData(THIS_PROBE(IInterface), nativeAwQuotaManagerBridgeImpl);
+    Elastos_AwQuotaManagerBridge_nativeDeleteAllData(TO_IINTERFACE(this), nativeAwQuotaManagerBridgeImpl);
 }
 
 void AwQuotaManagerBridge::NativeDeleteOrigin(
     /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl,
     /* [in] */ const String& origin)
 {
-    Elastos_AwQuotaManagerBridge_nativeDeleteOrigin(THIS_PROBE(IInterface), nativeAwQuotaManagerBridgeImpl, origin);
+    Elastos_AwQuotaManagerBridge_nativeDeleteOrigin(TO_IINTERFACE(this), nativeAwQuotaManagerBridgeImpl, origin);
 }
 
 void AwQuotaManagerBridge::NativeGetOrigins(
     /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl,
     /* [in] */ Int32 callbackId)
 {
-    Elastos_AwQuotaManagerBridge_nativeGetOrigins(THIS_PROBE(IInterface), nativeAwQuotaManagerBridgeImpl, callbackId);
+    Elastos_AwQuotaManagerBridge_nativeGetOrigins(TO_IINTERFACE(this), nativeAwQuotaManagerBridgeImpl, callbackId);
 }
 
 void AwQuotaManagerBridge::NativeGetUsageAndQuotaForOrigin(
@@ -207,7 +207,7 @@ void AwQuotaManagerBridge::NativeGetUsageAndQuotaForOrigin(
     /* [in] */ Int32 callbackId,
     /* [in] */ Boolean isQuota)
 {
-    Elastos_AwQuotaManagerBridge_nativeGetUsageAndQuotaForOrigin(THIS_PROBE(IInterface), nativeAwQuotaManagerBridgeImpl, origin, callbackId, isQuota);
+    Elastos_AwQuotaManagerBridge_nativeGetUsageAndQuotaForOrigin(TO_IINTERFACE(this), nativeAwQuotaManagerBridgeImpl, origin, callbackId, isQuota);
 }
 //callback function definition
 void AwQuotaManagerBridge::OnGetOriginsCallback(

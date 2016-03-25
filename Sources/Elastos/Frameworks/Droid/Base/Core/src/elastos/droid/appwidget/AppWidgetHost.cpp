@@ -153,7 +153,7 @@ CAR_INTERFACE_IMPL(AppWidgetHost, Object, IAppWidgetHost);
 AppWidgetHost::AppWidgetHost()
     : mHostId(0)
 {
-    CAppWidgetHostCallbacks::New((IAppWidgetHost*)this, (IIAppWidgetHost**)&mCallbacks);
+    CAppWidgetHostCallbacks::New(this, (IIAppWidgetHost**)&mCallbacks);
 }
 
 AppWidgetHost::~AppWidgetHost()

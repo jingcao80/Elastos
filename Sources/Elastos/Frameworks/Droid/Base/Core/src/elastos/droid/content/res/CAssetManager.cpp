@@ -172,7 +172,7 @@ ECode CAssetManager::AssetInputStream::Close()
     if (mAsset != 0) {
         mAssetManager->DestroyAsset(mAsset);
         mAsset = 0;
-        mAssetManager->DecRefsLocked((Int32)(IInputStream*)this, "AssetInputStream::Close()");
+        mAssetManager->DecRefsLocked((Int32)this, "AssetInputStream::Close()");
     }
     return NOERROR;
 }
@@ -264,7 +264,7 @@ CAssetManager::~CAssetManager()
     Close();
     if (DEBUG_REFS && mNumRefs > 1 && this != sSystem) {
         Logger::V(TAG, "==== CAssetManager::~CAssetManager, mNumRefs: %d, this: %p ====",
-            mNumRefs, THIS_PROBE(IAssetManager));
+            mNumRefs, this);
 
         HashMap<Int64, String>::Iterator it;
         for (it = mRefStacks.Begin(); it != mRefStacks.End(); ++it) {
@@ -3042,7 +3042,7 @@ void CAssetManager::IncRefsLocked(
     if (DEBUG_REFS) {
         String stack;
         stack.AppendFormat("CAssetManager::IncRefsLocked by %s, ref count: %d, obj:%p",
-            info, mNumRefs, THIS_PROBE(IAssetManager));
+            info, mNumRefs, this);
         mRefStacks[id] = stack;
     }
 }

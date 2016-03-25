@@ -88,7 +88,8 @@ ECode PasswordEntryKeyboardHelper::constructor(
     mContext = context;
     mTargetView = targetView;
     mKeyboardView = keyboardView;
-    mKeyboardView->SetOnKeyboardActionListener(THIS_PROBE(IOnKeyboardActionListener));
+    assert(0 && "TODO"); // IKeyboardActionListener not implmented.
+    // mKeyboardView->SetOnKeyboardActionListener(this);
     mUsingScreenWidth = useFullScreenWidth;
     if (layouts != NULL) {
         if (layouts->GetLength() != mLayouts->GetLength()) {

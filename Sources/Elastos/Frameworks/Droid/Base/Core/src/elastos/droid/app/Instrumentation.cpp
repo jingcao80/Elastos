@@ -978,7 +978,7 @@ ECode Instrumentation::NewActivity(
     AutoPtr<IConfiguration> config;
     CConfiguration::New((IConfiguration**)&config);
     FAIL_RETURN(act->Attach(
-        context, NULL, THIS_PROBE(IInstrumentation), token, 0, application, intent,
+        context, NULL, this, token, 0, application, intent,
         info, title, parent, id, lastNonConfigurationInstance, config, NULL))
     *activity = actObj;
     REFCOUNT_ADD(*activity)

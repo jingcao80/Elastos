@@ -220,7 +220,7 @@ ECode CTonemapCurve::Equals(
         *equal = FALSE;
         return NOERROR;
     }
-    else if (THIS_PROBE(IInterface) == TO_IINTERFACE(obj)) {
+    else if (TO_IINTERFACE(this) == TO_IINTERFACE(obj)) {
         *equal = TRUE;
         return NOERROR;
     }

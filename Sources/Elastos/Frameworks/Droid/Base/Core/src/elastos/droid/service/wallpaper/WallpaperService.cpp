@@ -1252,7 +1252,7 @@ ECode WallpaperService::IWallpaperEngineWrapper::constructor(
 {
     AutoPtr<ILooper> looper;
     IContext::Probe(context)->GetMainLooper((ILooper**)&looper);
-    CHandlerCaller::New(IContext::Probe(context), looper.Get(), (IHandlerCallerCallback*)this, TRUE, TRUE, (IHandlerCaller**)&mCaller);
+    CHandlerCaller::New(IContext::Probe(context), looper.Get(), this, TRUE, TRUE, (IHandlerCaller**)&mCaller);
     mConnection = conn;
     mWindowToken = windowToken;
     mWindowType = windowType;

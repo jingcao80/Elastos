@@ -121,7 +121,7 @@ ECode SystemBackupAgent::OnBackup(
     }
     //TODO wait for CWallpaperBackupHelper
     // AutoPtr<IBackupHelper> bh;
-    // CWallpaperBackupHelper::New((IContext*)this, files.Get(), keys.Get(), (IBackupHelper**)&bh);
+    // CWallpaperBackupHelper::New(this, files.Get(), keys.Get(), (IBackupHelper**)&bh);
     // BackupAgentHelper::AddHelper(String("wallpaper"), bh.Get());
     // BackupAgentHelper::OnBackup(oldState, data, newState);
     return NOERROR;
@@ -144,7 +144,7 @@ ECode SystemBackupAgent::FullWallpaperBackup(
 
     // TODO wait extends BackupAgentHelper
     // String packageName;
-    // (IContext*)this->GetPackageName(&packageName);
+    // this->GetPackageName(&packageName);
     AutoPtr<IBackupDataOutput> data;
     output->GetData((IBackupDataOutput**)&data);
     // Int32 result;
@@ -170,7 +170,7 @@ ECode SystemBackupAgent::OnRestore(
     (*keys)[1] = WALLPAPER_INFO_KEY;
     //TODO
     // AutoPtr<IBackupHelper> bh;
-    // CWallpaperBackupHelper::New((IContext*)this, files.Get(), keys.Get(), (IBackupHelper**)&bh);
+    // CWallpaperBackupHelper::New(this, files.Get(), keys.Get(), (IBackupHelper**)&bh);
     // BackupAgentHelper::AddHelper(String("wallpaper"), bh.Get());
 
     AutoPtr<ArrayOf<String> > files2 = ArrayOf<String>::Alloc(1);
@@ -179,7 +179,7 @@ ECode SystemBackupAgent::OnRestore(
     (*keys2)[0] = WALLPAPER_IMAGE_KEY;
     //TODO
     // AutoPtr<IBackupHelper> bh2;
-    // CWallpaperBackupHelper::New((IContext*)this, files2.Get(), keys2.Get(), (IBackupHelper**)&bh2);
+    // CWallpaperBackupHelper::New(this, files2.Get(), keys2.Get(), (IBackupHelper**)&bh2);
     // BackupAgentHelper::AddHelper(String("system_files"), bh2.Get());
 
     //TODO wait BackupAgentHelper

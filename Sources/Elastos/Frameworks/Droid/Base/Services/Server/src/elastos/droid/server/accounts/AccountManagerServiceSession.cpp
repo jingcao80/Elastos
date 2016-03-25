@@ -70,7 +70,7 @@ void AccountManagerServiceSession::Close()
         assert(proxy != NULL);
         Boolean res;
         proxy->UnlinkToDeath(
-            (IProxyDeathRecipient*)this->Probe(EIID_IProxyDeathRecipient), 0/* flags */, &res);
+            this, 0/* flags */, &res);
 
         // clear this so that we don't accidentally send any further results
         mResponse = NULL;
@@ -120,7 +120,7 @@ void AccountManagerServiceSession::Unbind()
 {
     if (mAuthenticator != NULL) {
         mAuthenticator = NULL;
-        mHost->mContext->UnbindService((IServiceConnection*)this);
+        mHost->mContext->UnbindService(this);
     }
 }
 
@@ -129,7 +129,7 @@ void AccountManagerServiceSession::ScheduleTimeout()
     AutoPtr<IMessage> msg;
     mHost->mMessageHandler->ObtainMessage(
         CAccountManagerService::MESSAGE_TIMED_OUT,
-        this->Probe(EIID_IInterface), (IMessage**)&msg);
+        TO_IINTERFACE(this), (IMessage**)&msg);
     Boolean result;
     mHost->mMessageHandler->SendMessageDelayed(msg,
         CAccountManagerService::TIMEOUT_DELAY_MS, &result);
@@ -138,7 +138,7 @@ void AccountManagerServiceSession::ScheduleTimeout()
 void AccountManagerServiceSession::CancelTimeout()
 {
     mHost->mMessageHandler->RemoveMessages(
-        CAccountManagerService::MESSAGE_TIMED_OUT, (IInterface*)this);
+        CAccountManagerService::MESSAGE_TIMED_OUT, this);
 }
 
 ECode AccountManagerServiceSession::OnServiceConnected(
@@ -321,7 +321,7 @@ Boolean AccountManagerServiceSession::BindToAuthenticator(
     //     Log.v(TAG, "performing bindService to " + authenticatorInfo.componentName);
     // }
     Boolean result = FALSE;
-    if (mHost->mContext->BindService(intent, (IServiceConnection*)this,
+    if (mHost->mContext->BindService(intent, this,
             IContext::BIND_AUTO_CREATE, mAccounts->mUserId, &result), !result) {
         // if (Log.isLoggable(TAG, Log.VERBOSE)) {
         //     Log.v(TAG, "bindService to " + authenticatorInfo.componentName + " failed");
@@ -370,7 +370,7 @@ ECode AccountManagerServiceSession::Init(
     AutoPtr<IProxy> proxy = (IProxy*)response->Probe(EIID_IProxy);
     assert(proxy != NULL);
     if (FAILED(proxy->LinkToDeath(
-        (IProxyDeathRecipient*)this->Probe(EIID_IProxyDeathRecipient), 0/* flags */))) {
+        this, 0/* flags */))) {
         mResponse = NULL;
         ProxyDied();
     }

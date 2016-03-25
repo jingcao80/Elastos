@@ -9,6 +9,8 @@ namespace Elastos {
 namespace Droid {
 namespace Test {
 
+CAR_INTERFACE_IMPL(ActivityInstrumentationTestCase2, ActivityTestCase, IActivityInstrumentationTestCase2)
+
 ActivityInstrumentationTestCase2::ActivityInstrumentationTestCase2()
     : mInitialTouchMode(FALSE)
 {}
@@ -38,36 +40,6 @@ ECode ActivityInstrumentationTestCase2::Init(
 {
     mActivityClass = activityClass;
     return NOERROR;
-}
-
-PInterface ActivityInstrumentationTestCase2::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (IInterface*)(IActivityInstrumentationTestCase2*)this;
-    }
-    else if (riid == EIID_IActivityInstrumentationTestCase2) {
-        return (IActivityInstrumentationTestCase2*)this;
-    }
-    return ActivityTestCase::Probe(riid);
-}
-
-UInt32 ActivityInstrumentationTestCase2::AddRef()
-{
-    return ActivityTestCase::AddRef();
-}
-
-UInt32 ActivityInstrumentationTestCase2::Release()
-{
-    return ActivityTestCase::Release();
-}
-
-ECode ActivityInstrumentationTestCase2::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    assert(0);
-    return E_INVALID_ARGUMENT;
 }
 
 ECode ActivityInstrumentationTestCase2::GetActivity(

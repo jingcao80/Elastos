@@ -147,6 +147,7 @@ module
     using interface Elastos.Droid.Hardware.Hdmi.IIHdmiControlCallback;
     using interface Elastos.Droid.Hardware.Hdmi.IIHdmiControlService;
     using interface Elastos.Droid.Hardware.Input.IIInputManager;
+    using interface Elastos.Droid.Hardware.Input.IInputDeviceListener;
     using interface Elastos.Droid.Hardware.Location.IIFusedLocationHardware;
     using interface Elastos.Droid.Hardware.Display.IDisplayListener;
     using interface Elastos.Droid.Internal.App.IIProcessStats;
@@ -456,6 +457,7 @@ module
             [in] IContext* ctx);
 
         interface IIVibratorService;
+        interface IInputDeviceListener;
         interface IBinder;
     }
 

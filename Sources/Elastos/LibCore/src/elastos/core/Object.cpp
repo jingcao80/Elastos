@@ -108,7 +108,7 @@ ECode Object::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = THIS_PROBE(IObject) == IObject::Probe(other);
+    *result = (IObject*)this == IObject::Probe(other);
     return NOERROR;
 }
 
@@ -117,7 +117,7 @@ ECode Object::ToString(
 {
     VALIDATE_NOT_NULL(info);
     AutoPtr<IClassInfo> classInfo;
-    _CObject_ReflectClassInfo(THIS_PROBE(IInterface), (IClassInfo**)&classInfo);
+    _CObject_ReflectClassInfo(TO_IINTERFACE(this), (IClassInfo**)&classInfo);
     String className("--");
     if (classInfo != NULL) {
         classInfo->GetName(&className);
@@ -174,7 +174,7 @@ ECode Object::GetWeakReference(
     /* [out] */ IWeakReference** weakReference)
 {
     VALIDATE_NOT_NULL(weakReference);
-    *weakReference = new WeakReferenceImpl(THIS_PROBE(IInterface), CreateWeak(this));
+    *weakReference = new WeakReferenceImpl(TO_IINTERFACE(this), CreateWeak(this));
     (*weakReference)->AddRef();
     return NOERROR;
 }

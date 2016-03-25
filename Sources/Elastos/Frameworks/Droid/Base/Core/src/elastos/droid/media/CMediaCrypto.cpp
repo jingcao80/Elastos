@@ -227,7 +227,7 @@ ECode CMediaCrypto::RequiresSecureDecoderComponent(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    android::sp<JCrypto> crypto = getCrypto(THIS_PROBE(IMediaCrypto));
+    android::sp<JCrypto> crypto = getCrypto(this);
     if (crypto == NULL) {
         Slogger::E(TAG, "crypto is NULL.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;

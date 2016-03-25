@@ -112,7 +112,7 @@ ECode CPersistableBundle::Clone(
 {
     VALIDATE_NOT_NULL(obj)
     AutoPtr<IPersistableBundle> b;
-    CPersistableBundle::New(THIS_PROBE(IPersistableBundle), (IPersistableBundle**)&b);
+    CPersistableBundle::New(this, (IPersistableBundle**)&b);
     *obj = TO_IINTERFACE(b);
     REFCOUNT_ADD(*obj)
     return NOERROR;

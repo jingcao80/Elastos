@@ -49,8 +49,8 @@ ECode CMediaSessionToken::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IMediaSessionToken> other = IMediaSessionToken::Probe(obj);
-    if (THIS_PROBE(IMediaSessionToken) == IInterface::Probe(other)) {
+    IMediaSessionToken* other = IMediaSessionToken::Probe(obj);
+    if ((IMediaSessionToken*)this == other) {
         *result = TRUE;
         return NOERROR;
     }
@@ -62,7 +62,7 @@ ECode CMediaSessionToken::Equals(
     //     *result = FALSE;
     //     return NOERROR;
     // }
-    AutoPtr<CMediaSessionToken> o = (CMediaSessionToken*)other.Get();
+    AutoPtr<CMediaSessionToken> o = (CMediaSessionToken*)other;
     if (mBinder == NULL) {
         if (o->mBinder != NULL) {
             *result = FALSE;

@@ -325,19 +325,19 @@ void Ripple::Enter()
 
     AutoPtr<ArrayOf<Float> > fa = ArrayOf<Float>::Alloc(1);
     (*fa)[0] = 1;
-    AutoPtr<IObjectAnimator> radius = ObjectAnimator::OfFloat((IObject*)this, String("radiusGravity"), fa);
+    AutoPtr<IObjectAnimator> radius = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("radiusGravity"), fa);
     radius->SetAutoCancel(TRUE);
     IAnimator::Probe(radius)->SetDuration(radiusDuration);
     IAnimator::Probe(radius)->SetInterpolator(LINEAR_INTERPOLATOR);
     IAnimator::Probe(radius)->SetStartDelay(RIPPLE_ENTER_DELAY);
 
-    AutoPtr<IObjectAnimator> cX = ObjectAnimator::OfFloat((IObject*)this, String("xGravity"), fa);
+    AutoPtr<IObjectAnimator> cX = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("xGravity"), fa);
     cX->SetAutoCancel(TRUE);
     IAnimator::Probe(cX)->SetDuration(radiusDuration);
     IAnimator::Probe(cX)->SetInterpolator(LINEAR_INTERPOLATOR);
     IAnimator::Probe(cX)->SetStartDelay(RIPPLE_ENTER_DELAY);
 
-    AutoPtr<IObjectAnimator> cY = ObjectAnimator::OfFloat((IObject*)this, String("yGravity"), fa);
+    AutoPtr<IObjectAnimator> cY = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("yGravity"), fa);
     cY->SetAutoCancel(TRUE);
     IAnimator::Probe(cY)->SetDuration(radiusDuration);
     IAnimator::Probe(cY)->SetInterpolator(LINEAR_INTERPOLATOR);
@@ -481,23 +481,23 @@ void Ripple::ExitSoftware(
 {
     AutoPtr<ArrayOf<Float> > fa = ArrayOf<Float>::Alloc(1);
     (*fa)[0] = 1;
-    AutoPtr<IObjectAnimator> radiusAnim = ObjectAnimator::OfFloat((IObject*)this, String("radiusGravity"), fa);
+    AutoPtr<IObjectAnimator> radiusAnim = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("radiusGravity"), fa);
     radiusAnim->SetAutoCancel(TRUE);
     IAnimator::Probe(radiusAnim)->SetDuration(radiusDuration);
     IAnimator::Probe(radiusAnim)->SetInterpolator(DECEL_INTERPOLATOR);
 
-    AutoPtr<IObjectAnimator> xAnim = ObjectAnimator::OfFloat((IObject*)this, String("xGravity"), fa);
+    AutoPtr<IObjectAnimator> xAnim = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("xGravity"), fa);
     xAnim->SetAutoCancel(TRUE);
     IAnimator::Probe(xAnim)->SetDuration(radiusDuration);
     IAnimator::Probe(xAnim)->SetInterpolator(DECEL_INTERPOLATOR);
 
-    AutoPtr<IObjectAnimator> yAnim = ObjectAnimator::OfFloat((IObject*)this, String("yGravity"), fa);
+    AutoPtr<IObjectAnimator> yAnim = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("yGravity"), fa);
     yAnim->SetAutoCancel(TRUE);
     IAnimator::Probe(yAnim)->SetDuration(radiusDuration);
     IAnimator::Probe(yAnim)->SetInterpolator(DECEL_INTERPOLATOR);
 
     (*fa)[0] = 0;
-    AutoPtr<IObjectAnimator> opacityAnim = ObjectAnimator::OfFloat((IObject*)this, String("opacity"), fa);
+    AutoPtr<IObjectAnimator> opacityAnim = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("opacity"), fa);
     opacityAnim->SetAutoCancel(TRUE);
     IAnimator::Probe(opacityAnim)->SetDuration(opacityDuration);
     IAnimator::Probe(opacityAnim)->SetInterpolator(LINEAR_INTERPOLATOR);

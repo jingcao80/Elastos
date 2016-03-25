@@ -1376,7 +1376,7 @@ ECode CAccessibilityNodeInfo::Obtain(
 ECode CAccessibilityNodeInfo::Recycle()
 {
     Clear();
-    sPool->ReleaseItem((IAccessibilityNodeInfo*)this);
+    sPool->ReleaseItem(this);
     return NOERROR;
 }
 

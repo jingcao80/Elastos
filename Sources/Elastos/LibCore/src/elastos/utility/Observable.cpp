@@ -92,7 +92,7 @@ ECode Observable::NotifyObservers(
     if (arrays != NULL) {
         for (Int32 i = 0; i < arrays->GetLength(); i++) {
             AutoPtr<IObserver> observer = IObserver::Probe((*arrays)[i]);
-            observer->Update(THIS_PROBE(IObservable), data);
+            observer->Update(this, data);
         }
     }
     return NOERROR;

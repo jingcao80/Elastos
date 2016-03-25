@@ -50,7 +50,7 @@ CAR_INTERFACE_IMPL(SpellCheckerService, Service, ISpellCheckerService)
 
 SpellCheckerService::SpellCheckerService()
 {
-    CSpellCheckerServiceBinder::New((ISpellCheckerService*)this, (ISpellCheckerServiceBinder**)&mBinder);
+    CSpellCheckerServiceBinder::New(this, (ISpellCheckerServiceBinder**)&mBinder);
 }
 
 ECode SpellCheckerService::OnBind(
@@ -207,7 +207,7 @@ ECode SpellCheckerService::InternalISpellCheckerSession::constructor(
     mSession = session;
     mLocale = locale;
     mBundle = bundle;
-    session->SetInternalISpellCheckerSession((IInternalISpellCheckerSession*)this);
+    session->SetInternalISpellCheckerSession(this);
     return NOERROR;
 }
 

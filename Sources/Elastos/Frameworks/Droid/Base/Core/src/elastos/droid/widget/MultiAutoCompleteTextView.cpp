@@ -178,7 +178,7 @@ void MultiAutoCompleteTextView::PerformFiltering(
 {
     AutoPtr<ICharSequence> sub;
     text->SubSequence(start, end, (ICharSequence**)&sub);
-    GetFilter()->DoFilter(sub, (IFilterListener*)this->Probe(EIID_IFilterListener));
+    GetFilter()->DoFilter(sub, this);
 }
 
 void MultiAutoCompleteTextView::ReplaceText(

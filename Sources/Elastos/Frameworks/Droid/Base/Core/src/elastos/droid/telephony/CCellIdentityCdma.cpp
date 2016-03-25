@@ -71,7 +71,7 @@ ECode CCellIdentityCdma::Copy(
     /* [out] */ ICellIdentityCdma** cid)
 {
     VALIDATE_NOT_NULL(cid);
-    return CCellIdentityCdma::New((ICellIdentityCdma*)this, cid);
+    return CCellIdentityCdma::New(this, cid);
 }
 
 ECode CCellIdentityCdma::ReadFromParcel(

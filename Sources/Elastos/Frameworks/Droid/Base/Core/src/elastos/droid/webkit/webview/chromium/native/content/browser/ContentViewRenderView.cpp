@@ -305,39 +305,39 @@ void ContentViewRenderView::OnSwapBuffersCompleted()
 Handle64 ContentViewRenderView::NativeInit(
     /* [in] */ Handle64 rootWindowNativePointer)
 {
-    return Elastos_ContentViewRenderView_nativeInit(THIS_PROBE(IInterface), rootWindowNativePointer);
+    return Elastos_ContentViewRenderView_nativeInit(TO_IINTERFACE(this), rootWindowNativePointer);
 }
 
 void ContentViewRenderView::NativeDestroy(
     /* [in] */ Handle64 nativeContentViewRenderView)
 {
-    Elastos_ContentViewRenderView_nativeDestroy(THIS_PROBE(IInterface), nativeContentViewRenderView);
+    Elastos_ContentViewRenderView_nativeDestroy(TO_IINTERFACE(this), nativeContentViewRenderView);
 }
 
 void ContentViewRenderView::NativeSetCurrentContentViewCore(
     /* [in] */ Handle64 nativeContentViewRenderView,
     /* [in] */ Handle64 nativeContentViewCore)
 {
-    Elastos_ContentViewRenderView_nativeSetCurrentContentViewCore(THIS_PROBE(IInterface), nativeContentViewRenderView, nativeContentViewCore);
+    Elastos_ContentViewRenderView_nativeSetCurrentContentViewCore(TO_IINTERFACE(this), nativeContentViewRenderView, nativeContentViewCore);
 }
 
 void ContentViewRenderView::NativeSetLayerTreeBuildHelper(
     /* [in] */ Handle64 nativeContentViewRenderView,
     /* [in] */ Handle64 buildHelperNativePtr)
 {
-    Elastos_ContentViewRenderView_nativeSetLayerTreeBuildHelper(THIS_PROBE(IInterface), nativeContentViewRenderView, buildHelperNativePtr);
+    Elastos_ContentViewRenderView_nativeSetLayerTreeBuildHelper(TO_IINTERFACE(this), nativeContentViewRenderView, buildHelperNativePtr);
 }
 
 void ContentViewRenderView::NativeSurfaceCreated(
     /* [in] */ Handle64 nativeContentViewRenderView)
 {
-    Elastos_ContentViewRenderView_nativeSurfaceCreated(THIS_PROBE(IInterface), nativeContentViewRenderView);
+    Elastos_ContentViewRenderView_nativeSurfaceCreated(TO_IINTERFACE(this), nativeContentViewRenderView);
 }
 
 void ContentViewRenderView::NativeSurfaceDestroyed(
     /* [in] */ Handle64 nativeContentViewRenderView)
 {
-    Elastos_ContentViewRenderView_nativeSurfaceDestroyed(THIS_PROBE(IInterface), nativeContentViewRenderView);
+    Elastos_ContentViewRenderView_nativeSurfaceDestroyed(TO_IINTERFACE(this), nativeContentViewRenderView);
 }
 
 void ContentViewRenderView::NativeSurfaceChanged(
@@ -347,7 +347,7 @@ void ContentViewRenderView::NativeSurfaceChanged(
     /* [in] */ Int32 height,
     /* [in] */ ISurface* surface)
 {
-    Elastos_ContentViewRenderView_nativeSurfaceChanged(THIS_PROBE(IInterface), nativeContentViewRenderView,
+    Elastos_ContentViewRenderView_nativeSurfaceChanged(TO_IINTERFACE(this), nativeContentViewRenderView,
             format, width, height, TO_IINTERFACE(surface));
 }
 
@@ -355,7 +355,7 @@ void ContentViewRenderView::NativeSetOverlayVideoMode(
     /* [in] */ Handle64 nativeContentViewRenderView,
     /* [in] */ Boolean enabled)
 {
-    Elastos_ContentViewRenderView_nativeSetOverlayVideoMode(THIS_PROBE(IInterface), nativeContentViewRenderView, enabled);
+    Elastos_ContentViewRenderView_nativeSetOverlayVideoMode(TO_IINTERFACE(this), nativeContentViewRenderView, enabled);
 }
 
 void ContentViewRenderView::OnCompositorLayout(

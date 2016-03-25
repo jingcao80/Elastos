@@ -35,7 +35,7 @@ ECode CCursorJoiner::GetIterator(
 {
     VALIDATE_NOT_NULL(it)
 
-    *it = THIS_PROBE(IIterator);
+    *it = this;
     REFCOUNT_ADD(*it);
     return NOERROR;
 }

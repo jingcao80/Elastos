@@ -29,6 +29,9 @@ ECode CTestSuite::MyTestCase::GetTestAnnotation(
     return E_NOT_IMPLEMENTED;
 }
 
+CAR_INTERFACE_IMPL_2(CTestSuite, Object, ITest, ITestSuite)
+
+CAR_OBJECT_IMPL(CTestSuite)
 
 CTestSuite::CTestSuite()
 {
@@ -267,94 +270,6 @@ ECode CTestSuite::constructor(
 
 ECode CTestSuite::Initialize()
 {
-    return NOERROR;
-}
-
-PInterface CTestSuite::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(ITest*)this;
-    }
-    else if (riid == EIID_IObject) {
-        return (IObject*)this;
-    }
-    else if (riid == EIID_ITest) {
-        return (ITest*)this;
-    }
-    else if (riid == EIID_ITestSuite) {
-        return (ITestSuite*)this;
-    }
-    return NULL;
-}
-
-UInt32 CTestSuite::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 CTestSuite::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode CTestSuite::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    if (NULL == pIID) return E_INVALID_ARGUMENT;
-
-    if (pObject == (IInterface *)(IObject *)this) {
-        *pIID = EIID_IObject;
-        return NOERROR;
-    }
-    else if (pObject == (IInterface *)(ITest *)this) {
-        *pIID = EIID_ITest;
-        return NOERROR;
-    }
-    else if (pObject == (IInterface *)(ITestSuite *)this) {
-        *pIID = EIID_ITestSuite;
-        return NOERROR;
-    }
-
-    return E_INVALID_ARGUMENT;
-}
-
-ECode CTestSuite::Aggregate(
-    /* [in] */ AggrType aggrType,
-    /* [in] */ PInterface pObject)
-{
-    assert(0);
-    return NOERROR;
-}
-
-ECode CTestSuite::GetDomain(
-    /* [out] */ PInterface *ppObject)
-{
-    assert(0);
-    return NOERROR;
-}
-
-ECode CTestSuite::GetClassID(
-    /* [out] */ ClassID *pCLSID)
-{
-    VALIDATE_NOT_NULL(pCLSID);
-    *pCLSID = ECLSID_CTestSuite;
-    return NOERROR;
-}
-
-ECode CTestSuite::Equals(
-    /* [in] */ IInterface* other,
-    /* [out] */ Boolean * result)
-{
-    assert(0);
-    return NOERROR;
-}
-
-ECode CTestSuite::GetHashCode(
-    /* [out] */ Int32* hash)
-{
-    assert(0);
     return NOERROR;
 }
 

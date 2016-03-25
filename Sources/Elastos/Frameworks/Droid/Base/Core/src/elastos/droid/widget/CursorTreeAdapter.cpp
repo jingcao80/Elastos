@@ -311,7 +311,7 @@ ECode CursorTreeAdapter::GetFilter(
 {
     VALIDATE_NOT_NULL(filter);
     if (mCursorFilter == NULL) {
-        CCursorFilter::New(THIS_PROBE(ICursorFilterClient), (ICursorFilter**)&mCursorFilter);
+        CCursorFilter::New(this, (ICursorFilter**)&mCursorFilter);
     }
     *filter = IFilter::Probe(mCursorFilter);
     REFCOUNT_ADD(*filter);

@@ -4,9 +4,11 @@
 
 #include "Elastos.Droid.Hardware.h"
 #include "Elastos.Droid.Os.h"
-//#include "elastos/droid/app/Service.h"
+#include "Elastos.Droid.App.h"
+#include "elastos/droid/app/Service.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::App::Service;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Hardware::Location::IGeofenceHardwareImpl;
@@ -20,8 +22,7 @@ namespace Hardware {
 namespace Location {
 
 class GeofenceHardwareService
-    //: public Service   // use Object temporarily, because Service is not ready
-    : public Object
+    : public Elastos::Droid::App::Service
     , public IGeofenceHardwareService
 {
 private:

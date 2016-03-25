@@ -194,7 +194,7 @@ ECode DigitalClock::OnFinishInflate()
 
     mTimeDisplayForeground = ITextView::Probe((FindViewById(R::id::timeDisplayForeground)));
     mTimeDisplayForeground->SetTypeface(sForegroundFont);
-    mAmPm = new AmPm(THIS_PROBE(IView), NULL);
+    mAmPm = new AmPm(this, NULL);
     AutoPtr<ICalendarHelper> helper;
     CCalendarHelper::AcquireSingleton((ICalendarHelper**)&helper);
     mCalendar = NULL;

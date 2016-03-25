@@ -162,7 +162,7 @@ ECode AbstractSelectableChannel::ConfigureBlocking(
     AutoLock lock(mBlockingLock);
 
     if (mIsBlocking == blockingMode) {
-        *channel = THIS_PROBE(ISelectableChannel);
+        *channel = this;
         REFCOUNT_ADD(*channel);
         return NOERROR;
     }
@@ -174,7 +174,7 @@ ECode AbstractSelectableChannel::ConfigureBlocking(
 
     ImplConfigureBlocking(blockingMode);
 
-    *channel = THIS_PROBE(ISelectableChannel);
+    *channel = this;
     REFCOUNT_ADD(*channel);
     return NOERROR;
 }

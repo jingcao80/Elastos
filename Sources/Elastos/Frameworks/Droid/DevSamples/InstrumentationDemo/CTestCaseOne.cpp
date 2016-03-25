@@ -63,10 +63,10 @@ PInterface CTestCaseOne::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (IInterface*)(IMyTestCase*)this;
+        return (IInterface*)this;
     }
     else if (riid == EIID_IMyTestCase) {
-        return (IMyTestCase*)this;
+        return this;
     }
     return InstrumentationTestCase::Probe(riid);
 }

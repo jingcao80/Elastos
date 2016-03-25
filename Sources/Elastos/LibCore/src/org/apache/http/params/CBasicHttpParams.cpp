@@ -52,7 +52,7 @@ ECode CBasicHttpParams::SetParameter(
     AutoPtr<ICharSequence> cs;
     CString::New(name, (ICharSequence**)&cs);
     mParameters->Put(cs, value);
-    *httpParams = (IHttpParams*)this;
+    *httpParams = this;
     REFCOUNT_ADD(*httpParams)
     return NOERROR;
 }

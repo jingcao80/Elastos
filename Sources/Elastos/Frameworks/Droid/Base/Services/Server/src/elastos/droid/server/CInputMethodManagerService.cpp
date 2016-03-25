@@ -288,7 +288,7 @@ ECode CInputMethodManagerService::SettingsObserver::constructor(
     mHost->mContext->GetContentResolver((IContentResolver**)&resolver);
     assert(resolver != NULL);
 
-    IContentObserver* co = THIS_PROBE(IContentObserver);
+    IContentObserver* co = this;
     AutoPtr<IUri> uri;
     Settings::Secure::GetUriFor(ISettingsSecure::DEFAULT_INPUT_METHOD, (IUri**)&uri);
     assert(uri != NULL);
@@ -1098,7 +1098,7 @@ ECode CInputMethodManagerService::constructor(
     mIPackageManager = AppGlobals::GetPackageManager();
     mContext = context;
     context->GetResources((IResources**)&mRes);
-    CHandler::New(THIS_PROBE(IHandlerCallback), FALSE, (IHandler**)&mHandler);
+    CHandler::New(this, FALSE, (IHandler**)&mHandler);
     mIWindowManager = IIWindowManager::Probe(ServiceManager::GetService(IContext::WINDOW_SERVICE));
     AutoPtr<ILooper> looper;
     context->GetMainLooper((ILooper**)&looper);
@@ -2071,7 +2071,7 @@ ECode CInputMethodManagerService::UnbindCurrentMethodLocked(
     }
 
     if (mHaveConnection) {
-        mContext->UnbindService((IServiceConnection*)this->Probe(EIID_IServiceConnection));
+        mContext->UnbindService(this);
         mHaveConnection = FALSE;
     }
 
@@ -2804,7 +2804,7 @@ Boolean CInputMethodManagerService::ShowCurrentInputLocked(
         // EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME, mCurMethodId,
         //         SystemClock::UptimeMillis()-mLastBindTime,1);
         // Slogger::W(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
-        mContext->UnbindService((IServiceConnection*)this->Probe(EIID_IServiceConnection));
+        mContext->UnbindService(this);
         BindCurrentInputMethodService(mCurIntent, this, IContext::BIND_AUTO_CREATE
                     | IContext::BIND_NOT_VISIBLE);
     }

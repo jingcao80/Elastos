@@ -673,7 +673,7 @@ AutoPtr<LegacySensorManager> SensorManager::GetLegacySensorManager()
         if (mLegacySensorManager == NULL) {
             // Log.i(TAG, "This application is using deprecated SensorManager API which will "
             //         + "be removed someday.  Please consider switching to the new API.");
-            mLegacySensorManager = new LegacySensorManager((ISensorManager*)this->Probe(EIID_ISensorManager));
+            mLegacySensorManager = new LegacySensorManager(this);
         }
     }
 

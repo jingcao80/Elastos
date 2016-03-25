@@ -22,7 +22,7 @@ ECode ASN1Sequence::Decode(
     VALIDATE_NOT_NULL(object);
     *object = NULL;
 
-    FAIL_RETURN(bis->ReadSequence((IASN1Sequence*)this))
+    FAIL_RETURN(bis->ReadSequence(this))
 
     Boolean isVerify;
     if (bis->GetVerify(&isVerify), isVerify) {

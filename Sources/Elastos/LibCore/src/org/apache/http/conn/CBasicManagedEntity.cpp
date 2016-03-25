@@ -30,7 +30,7 @@ ECode CBasicManagedEntity::GetContent(
     AutoPtr<IInputStream> ins;
     mWrappedEntity->GetContent((IInputStream**)&ins);
     AutoPtr<IEofSensorInputStream> eofInputStream;
-    CEofSensorInputStream::New(ins, (IEofSensorWatcher*)this, (IEofSensorInputStream**)&eofInputStream);
+    CEofSensorInputStream::New(ins, this, (IEofSensorInputStream**)&eofInputStream);
     *inputStream = IInputStream::Probe(eofInputStream);
     REFCOUNT_ADD(*inputStream)
     return NOERROR;

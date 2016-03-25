@@ -286,7 +286,7 @@ MediaProjectionManagerService::MediaProjectionManagerService(
     mContext->GetSystemService(IContext::MEDIA_ROUTER_SERVICE, (IInterface**)&service);
     mMediaRouter = IMediaRouter::Probe(service);
     mMediaRouterCallback = new MediaRouterCallback(this);
-    Watchdog::GetInstance()->AddMonitor((IWatchdogMonitor*)this->Probe(EIID_IWatchdogMonitor));
+    Watchdog::GetInstance()->AddMonitor(this);
 }
 
 ECode MediaProjectionManagerService::OnStart()

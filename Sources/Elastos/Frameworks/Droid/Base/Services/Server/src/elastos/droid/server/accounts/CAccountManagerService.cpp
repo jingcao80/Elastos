@@ -435,7 +435,7 @@ ECode CAccountManagerService::constructor(
     mMessageHandler = new MessageHandler(this);
 
     mAuthenticatorCache = (IAccountAuthenticatorCache*)authenticatorCache;
-    mAuthenticatorCache->SetListener((IRegisteredServicesCacheListener*)this,
+    mAuthenticatorCache->SetListener(this,
             NULL /* Handler */);
 
     sThis = this;
@@ -1003,7 +1003,7 @@ ECode CAccountManagerService::HasFeatures(
     // try {
     AutoPtr<CTestFeaturesSession> session;
     ECode ec = CTestFeaturesSession::NewByFriend((Handle32)accounts.Get(),
-            response, account, features, (IIAccountManager*)this,
+            response, account, features, this,
             (CTestFeaturesSession**)&session);
     if (FAILED(ec)) {
         Binder::RestoreCallingIdentity(identityToken);
@@ -1065,7 +1065,7 @@ ECode CAccountManagerService::RemoveAccount(
     // try {
     AutoPtr<CRemoveAccountSession> session;
     ECode ec = CRemoveAccountSession::NewByFriend((Handle32)accounts.Get(), response, account,
-            (IIAccountManager*)this, (CRemoveAccountSession**)&session);
+            this, (CRemoveAccountSession**)&session);
     if (FAILED(ec)) {
         Binder::RestoreCallingIdentity(identityToken);
         return ec;
@@ -1564,7 +1564,7 @@ ECode CAccountManagerService::GetAuthTokenLabel(
     // try {
     AutoPtr<CGetAuthTokenLabelSession> session;
     ECode ec = CGetAuthTokenLabelSession::NewByFriend((Handle32)accounts.Get(), response, accountType,
-            authTokenType, (IIAccountManager*)this, (CGetAuthTokenLabelSession**)&session);
+            authTokenType, this, (CGetAuthTokenLabelSession**)&session);
     if (FAILED(ec)) {
         Binder::RestoreCallingIdentity(identityToken);
         return ec;
@@ -1671,7 +1671,7 @@ ECode CAccountManagerService::GetAuthToken(
     ECode ec = CGetAuthTokenSession::NewByFriend((Handle32)accounts.Get(), response,
             account, authTokenType, expectActivityLaunch, loginOptions,
             notifyOnAuthFailure, permissionGranted, customTokens,
-            (IIAccountManager*)this, (CGetAuthTokenSession**)&session);
+            this, (CGetAuthTokenSession**)&session);
     if (FAILED(ec)) {
         Binder::RestoreCallingIdentity(identityToken);
         return ec;
@@ -1870,7 +1870,7 @@ ECode CAccountManagerService::AddAcount(
     AutoPtr<CAddAcountSession> session;
     ECode ec = CAddAcountSession::NewByFriend((Handle32)accounts.Get(), response,
             accountType, expectActivityLaunch, authTokenType, requiredFeatures, options,
-            (IIAccountManager*)this, (CAddAcountSession**)&session);
+            this, (CAddAcountSession**)&session);
     if (FAILED(ec)) {
         Binder::RestoreCallingIdentity(identityToken);
         return ec;
@@ -1922,7 +1922,7 @@ ECode CAccountManagerService::ConfirmCredentialsAsUser(
     AutoPtr<CConfirmCredentialsAsUserSession> session;
     ECode ec = CConfirmCredentialsAsUserSession::NewByFriend((Handle32)accounts.Get(),
             response, expectActivityLaunch, account, options,
-            (IIAccountManager*)this, (CConfirmCredentialsAsUserSession**)&session);
+            this, (CConfirmCredentialsAsUserSession**)&session);
     if (FAILED(ec)) {
         Binder::RestoreCallingIdentity(identityToken);
         return ec;
@@ -1971,7 +1971,7 @@ ECode CAccountManagerService::UpdateCredentials(
     AutoPtr<CUpdateCredentialsSession> session;
     ECode ec = CUpdateCredentialsSession::NewByFriend((Handle32)accounts.Get(), response,
             expectActivityLaunch, account, authTokenType, options,
-            (IIAccountManager*)this, (CUpdateCredentialsSession**)&session);
+            this, (CUpdateCredentialsSession**)&session);
     if (FAILED(ec)) {
         Binder::RestoreCallingIdentity(identityToken);
         return ec;
@@ -2011,7 +2011,7 @@ ECode CAccountManagerService::EditProperties(
     // try {
     AutoPtr<CEditPropertiesSession> session;
     ECode ec = CEditPropertiesSession::NewByFriend((Handle32)accounts.Get(), response,
-            accountType, expectActivityLaunch, (IIAccountManager*)this,
+            accountType, expectActivityLaunch, this,
             (CEditPropertiesSession**)&session);
     if (FAILED(ec)) {
         Binder::RestoreCallingIdentity(identityToken);
@@ -2205,7 +2205,7 @@ ECode CAccountManagerService::GetAccountsByFeatures(
     }
     AutoPtr<CGetAccountsByTypeAndFeatureSession> session;
     ECode ec = CGetAccountsByTypeAndFeatureSession::NewByFriend((Handle32)userAccounts.Get(),
-            response, accountType, *features, (IIAccountManager*)this,
+            response, accountType, *features, this,
             (CGetAccountsByTypeAndFeatureSession**)&session);
     if (FAILED(ec)) {
         Binder::RestoreCallingIdentity(identityToken);

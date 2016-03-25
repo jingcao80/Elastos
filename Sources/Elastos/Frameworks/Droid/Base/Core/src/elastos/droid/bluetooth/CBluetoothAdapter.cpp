@@ -119,7 +119,7 @@ CAR_OBJECT_IMPL(CBluetoothAdapter);
 
 CBluetoothAdapter::CBluetoothAdapter()
 {
-    CBluetoothAdapterManagerCallback::New((IBluetoothAdapter*)this, (IIBluetoothManagerCallback**)&mManagerCallback);
+    CBluetoothAdapterManagerCallback::New(this, (IIBluetoothManagerCallback**)&mManagerCallback);
 }
 
 CBluetoothAdapter::~CBluetoothAdapter()

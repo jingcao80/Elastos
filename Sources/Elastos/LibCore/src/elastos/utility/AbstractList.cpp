@@ -600,7 +600,7 @@ ECode AbstractList::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    if (this->Probe(EIID_IInterface) == object) {
+    if (TO_IINTERFACE(this) == object) {
         *result = TRUE;
         return NOERROR;
     }
@@ -855,7 +855,7 @@ ECode AbstractList::GetSubList(
     GetSize(&size);
     if (start >= 0 && end <= size) {
         if (start <= end) {
-            if (THIS_PROBE(IRandomAccess)) {
+            if (this) {
                 AutoPtr<SubAbstractListRandomAccess> sublistrandom = new SubAbstractListRandomAccess(this, start, end);
                 *list = IList::Probe(sublistrandom);
                 REFCOUNT_ADD(*list);

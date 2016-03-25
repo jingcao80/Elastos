@@ -122,7 +122,7 @@ ECode CSystemUIApplication::StartServicesIfNeeded()
 
         mServices->Set(i, ISystemUI::Probe(object));
 
-        (*mServices)[i]->SetContext(THIS_PROBE(IContext));
+        (*mServices)[i]->SetContext(this);
         ((SystemUI*)(*mServices)[i])->SetComponents(mComponents);
         if (DEBUG) Logger::D(TAG, "running: %p", object.Get());
         (*mServices)[i]->Start();

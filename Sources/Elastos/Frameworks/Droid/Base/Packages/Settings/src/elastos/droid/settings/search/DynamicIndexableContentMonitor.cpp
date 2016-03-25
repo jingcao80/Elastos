@@ -254,7 +254,7 @@ ECode DynamicIndexableContentMonitor::Register(
     obj = NULL;
     context->GetSystemService(IContext::INPUT_SERVICE, (IInterface**)&obj);
     AutoPtr<IInputManager> inputManager = IInputManager::Probe(obj);
-    inputManager->RegisterInputDeviceListener((IInputDeviceListener*)this, mHandler);
+    inputManager->RegisterInputDeviceListener(this, mHandler);
 
     // Start tracking packages.
     PackageMonitor::Register(context, Looper::GetMainLooper(), UserHandle::CURRENT, FALSE);
@@ -269,7 +269,7 @@ ECode DynamicIndexableContentMonitor::Unregister()
     mContext->GetSystemService(IContext::INPUT_SERVICE, (IInterface**)&obj);
     AutoPtr<IInputManager> inputManager = IInputManager::Probe(obj);
 
-    inputManager->UnregisterInputDeviceListener((IInputDeviceListener*)this);
+    inputManager->UnregisterInputDeviceListener(this);
 
     if (mHasFeatureIme) {
         AutoPtr<IContentResolver> resolver;

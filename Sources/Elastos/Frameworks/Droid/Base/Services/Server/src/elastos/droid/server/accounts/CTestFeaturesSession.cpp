@@ -27,7 +27,7 @@ PInterface CTestFeaturesSession::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_AccountManagerServiceSession) {
-        return reinterpret_cast<PInterface>((AccountManagerServiceSession*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CTestFeaturesSession::Probe(riid);
 }
@@ -35,7 +35,7 @@ PInterface CTestFeaturesSession::Probe(
 ECode CTestFeaturesSession::Run()
 {
     // try {
-    ECode ec = mAuthenticator->HasFeatures((IIAccountAuthenticatorResponse*)this,
+    ECode ec = mAuthenticator->HasFeatures(this,
             mAccount, *mFeatures);
     if (FAILED(ec)) {
         OnError(IAccountManager::ERROR_CODE_REMOTE_EXCEPTION, String("remote exception"));

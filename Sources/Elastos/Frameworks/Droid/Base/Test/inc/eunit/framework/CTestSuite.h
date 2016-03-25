@@ -43,6 +43,10 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CTestSuite();
 
     CARAPI constructor();
@@ -86,34 +90,6 @@ public:
         /* [in] */ const String& name);
 
     CARAPI Initialize();
-
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
-
-    CARAPI_(UInt32) AddRef();
-
-    CARAPI_(UInt32) Release();
-
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface *pObject,
-        /* [out] */ InterfaceID *pIID);
-
-    CARAPI Aggregate(
-        /* [in] */ AggrType aggrType,
-        /* [in] */ PInterface pObject);
-
-    CARAPI GetDomain(
-        /* [out] */ PInterface *ppObject);
-
-    CARAPI GetClassID(
-        /* [out] */ ClassID *pCLSID);
-
-    CARAPI Equals(
-        /* [in] */ IInterface* other,
-        /* [out] */ Boolean * result);
-
-    CARAPI GetHashCode(
-        /* [out] */ Int32* hash);
 
     /**
      * ...as the moon sets over the early morning Merlin, Oregon

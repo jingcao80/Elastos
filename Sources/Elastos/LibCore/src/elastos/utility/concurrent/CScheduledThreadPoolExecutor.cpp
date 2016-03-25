@@ -70,7 +70,7 @@ ECode CScheduledThreadPoolExecutor::ScheduledFutureTask::CompareTo(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (Object::Equals(another, THIS_PROBE(IInterface))) { // compare zero if same object
+    if (Object::Equals(another, TO_IINTERFACE(this))) { // compare zero if same object
         *result = 0;
         return NOERROR;
     }
@@ -937,7 +937,7 @@ ECode CScheduledThreadPoolExecutor::DelayedWorkQueue::DrainTo(
 
     if (c == NULL)
         return E_NULL_POINTER_EXCEPTION;
-    if (Object::Equals(c->Probe(EIID_IInterface), THIS_PROBE(IInterface)))
+    if (Object::Equals(c->Probe(EIID_IInterface), TO_IINTERFACE(this)))
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     AutoPtr<IReentrantLock> lock = mLock;
     ILock::Probe(lock)->Lock();
@@ -962,7 +962,7 @@ ECode CScheduledThreadPoolExecutor::DelayedWorkQueue::DrainTo(
 
     if (c == NULL)
         return E_NULL_POINTER_EXCEPTION;
-    if (Object::Equals(c->Probe(EIID_IInterface), THIS_PROBE(IInterface)))
+    if (Object::Equals(c->Probe(EIID_IInterface), TO_IINTERFACE(this)))
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     if (maxElements <= 0) {
         *number = 0;

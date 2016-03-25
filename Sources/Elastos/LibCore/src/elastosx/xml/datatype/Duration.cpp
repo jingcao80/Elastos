@@ -205,16 +205,20 @@ ECode Duration::Equals(
     /* [in] */ IInterface* other,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    IDuration* rhs = IDuration::Probe(other);
     if (other == (IDuration*)this) {
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
     }
-    AutoPtr<IDuration> rhs = IDuration::Probe(other);
     if (rhs != NULL) {
         Int32 cpr;
         Compare(rhs, &cpr);
-        return cpr == IDatatypeConstants::EQUAL;
+        *result = cpr == IDatatypeConstants::EQUAL;
     }
-    return FALSE;
+    return NOERROR;
 }
 
 ECode Duration::ToString(

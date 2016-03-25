@@ -53,7 +53,7 @@ ECode Drawable::ConstantState::GetWeakReference(
     /* [out] */ IWeakReference** weakReference)
 {
     VALIDATE_NOT_NULL(weakReference)
-    *weakReference = new WeakReferenceImpl(THIS_PROBE(IInterface), CreateWeak(this));
+    *weakReference = new WeakReferenceImpl(TO_IINTERFACE(this), CreateWeak(this));
     REFCOUNT_ADD(*weakReference)
     return NOERROR;
 }
@@ -240,7 +240,7 @@ ECode Drawable::InvalidateSelf()
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->InvalidateDrawable((IDrawable*)this->Probe(EIID_IDrawable));
+        callback->InvalidateDrawable(this);
     }
 
     return NOERROR;
@@ -253,7 +253,7 @@ ECode Drawable::ScheduleSelf(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->ScheduleDrawable((IDrawable*)this->Probe(EIID_IDrawable),
+        callback->ScheduleDrawable(this,
                 what, when);
     }
     return NOERROR;
@@ -265,7 +265,7 @@ ECode Drawable::UnscheduleSelf(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->UnscheduleDrawable((IDrawable*)this->Probe(EIID_IDrawable),
+        callback->UnscheduleDrawable(this,
                 what);
     }
     return NOERROR;
@@ -439,7 +439,7 @@ ECode Drawable::GetCurrent(
     /* [out] */ IDrawable** drawable)
 {
     VALIDATE_NOT_NULL(drawable);
-    *drawable = (IDrawable*)this->Probe(EIID_IDrawable);
+    *drawable = this;
     REFCOUNT_ADD(*drawable);
     return NOERROR;
 }

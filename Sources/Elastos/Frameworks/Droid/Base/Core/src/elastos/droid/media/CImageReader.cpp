@@ -1066,7 +1066,7 @@ ECode CImageReader::constructor(
 
     GetNumPlanesFromFormat(&mNumPlanes);
 
-    NativeInit(THIS_PROBE(IImageReader), width, height, format, maxImages);
+    NativeInit(this, width, height, format, maxImages);
 
     NativeGetSurface((ISurface**)&mSurface);
     return NOERROR;

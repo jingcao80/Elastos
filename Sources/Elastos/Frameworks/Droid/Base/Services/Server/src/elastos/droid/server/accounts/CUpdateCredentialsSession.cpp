@@ -22,14 +22,14 @@ PInterface CUpdateCredentialsSession::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_AccountManagerServiceSession) {
-        return reinterpret_cast<PInterface>((AccountManagerServiceSession*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CUpdateCredentialsSession::Probe(riid);
 }
 
 ECode CUpdateCredentialsSession::Run()
 {
-    return mAuthenticator->UpdateCredentials((IIAccountAuthenticatorResponse*)this,
+    return mAuthenticator->UpdateCredentials(this,
             mAccount, mAuthTokenType, mLoginOptions);
 }
 

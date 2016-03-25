@@ -320,7 +320,7 @@ ECode ScrollBarDrawable::InvalidateDrawable(
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
         callback->InvalidateDrawable(
-                (IDrawable*)this->Probe(EIID_IDrawable));
+                this);
     }
     return NOERROR;
 }
@@ -334,7 +334,7 @@ ECode ScrollBarDrawable::ScheduleDrawable(
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
         callback->ScheduleDrawable(
-                (IDrawable*)this->Probe(EIID_IDrawable), what, when);
+                this, what, when);
     }
     return NOERROR;
 }
@@ -347,7 +347,7 @@ ECode ScrollBarDrawable::UnscheduleDrawable(
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
         callback->UnscheduleDrawable(
-                (IDrawable*)this->Probe(EIID_IDrawable), what);
+                this, what);
     }
     return NOERROR;
 }

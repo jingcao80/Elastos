@@ -276,7 +276,7 @@ ECode MediaController::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     FrameLayout::constructor(context, attrs);
-    mRoot = THIS_PROBE(IView);
+    mRoot = this;
     mContext = context;
     mUseFastForward = TRUE;
     mFromXml = TRUE;
@@ -323,7 +323,7 @@ void MediaController::InitFloatingWindow()
     mWindow->RequestFeature(IWindow::FEATURE_NO_TITLE, &result);
     mWindow->GetDecorView((IView**)&mDecor);
     mDecor->SetOnTouchListener(mTouchListener);
-    mWindow->SetContentView(THIS_PROBE(IView));
+    mWindow->SetContentView(this);
     mWindow->SetBackgroundDrawableResource(R::color::transparent);
 
     // While the media controller is up, the volume control keys should

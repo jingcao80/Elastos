@@ -18,10 +18,10 @@ PInterface CZoomActivity::MyListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IViewOnClickListener*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IViewOnClickListener) {
-        return (IViewOnClickListener*)this;
+        return this;
     }
 
     return NULL;
@@ -45,7 +45,7 @@ ECode CZoomActivity::MyListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)(IViewOnClickListener*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IViewOnClickListener;
     }
     else {
@@ -124,9 +124,9 @@ PInterface CZoomActivity::AnimatorListenerAdapter::Probe(
     /* [in] */ REIID riid)
 {
     if(riid == EIID_IInterface) {
-        return (IInterface*)(IAnimatorListener*)this;
+        return (IInterface*)this;
     } else if (riid == EIID_IAnimatorListener) {
-        return (IAnimatorListener*)this;
+        return this;
     }
     return NULL;
 }
@@ -136,7 +136,7 @@ ECode CZoomActivity::AnimatorListenerAdapter::GetInterfaceID(
     /* [out] */ InterfaceID *pIID)
 {
     assert(pIID != NULL);
-    if (pObject == (IInterface*)(IAnimatorListener*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IAnimatorListener;
     } else {
         return E_INVALID_ARGUMENT;

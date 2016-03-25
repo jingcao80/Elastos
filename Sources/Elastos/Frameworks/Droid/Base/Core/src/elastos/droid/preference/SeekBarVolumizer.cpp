@@ -99,9 +99,9 @@ void SeekBarVolumizer::SeekBarVolumizerReceiver::SetListening(
         AutoPtr<IIntentFilter> filter;
         CIntentFilter::New(IAudioManager::VOLUME_CHANGED_ACTION, (IIntentFilter**)&filter);
         AutoPtr<IIntent> intent;
-        mOwner->mContext->RegisterReceiver((IBroadcastReceiver*)this, filter, (IIntent**)&intent);
+        mOwner->mContext->RegisterReceiver(this, filter, (IIntent**)&intent);
     } else {
-        mOwner->mContext->UnregisterReceiver((IBroadcastReceiver*)this);
+        mOwner->mContext->UnregisterReceiver(this);
     }
 }
 
@@ -174,8 +174,8 @@ ECode SeekBarVolumizer::constructor(
     // constructor(
     //     [in] ILooper* looper,
     //     [in] IHandlerCallback* cb);
-    // CHandler::New(looper, (IHandlerCallback*)this, (IHandler**)&mHandler);
-    CHandler::New(looper, (IHandlerCallback*)this, TRUE, (IHandler**)&mHandler);
+    // CHandler::New(looper, this, (IHandler**)&mHandler);
+    CHandler::New(looper, this, TRUE, (IHandler**)&mHandler);
     mCallback = callback;
     mAudioManager->GetStreamVolume(mStreamType, &mOriginalStreamVolume);
     mVolumeObserver = new SeekBarVolumizerObserver(mHandler, this);
@@ -211,7 +211,7 @@ ECode SeekBarVolumizer::SetSeekBar(
     mSeekBar->SetOnSeekBarChangeListener(NULL);
     IProgressBar::Probe(mSeekBar)->SetMax(mMaxStreamVolume);
     IProgressBar::Probe(mSeekBar)->SetProgress(mLastProgress > -1 ? mLastProgress : mOriginalStreamVolume);
-     mSeekBar->SetOnSeekBarChangeListener((ISeekBarOnSeekBarChangeListener*)this);
+     mSeekBar->SetOnSeekBarChangeListener(this);
     return NOERROR;
 }
 
@@ -271,7 +271,7 @@ void SeekBarVolumizer::OnStartSample()
     IsSamplePlaying(&result);
     if (!result) {
         if (mCallback != NULL) {
-            mCallback->OnSampleStarting((ISeekBarVolumizer*)this);
+            mCallback->OnSampleStarting(this);
         }
         if (mRingtone != NULL) {
             ECode ec = mRingtone->Play();

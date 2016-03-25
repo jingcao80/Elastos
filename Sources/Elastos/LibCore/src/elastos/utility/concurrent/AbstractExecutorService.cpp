@@ -95,7 +95,7 @@ ECode AbstractExecutorService::DoInvokeAny(
     AutoPtr<IArrayList> futures;
     CArrayList::New(ntasks, (IArrayList**)&futures);
     AutoPtr<ICompletionService> ecs;
-    CExecutorCompletionService::New(THIS_PROBE(IExecutor), (ICompletionService**)&ecs);
+    CExecutorCompletionService::New(this, (ICompletionService**)&ecs);
 
     // For efficiency, especially in executors with limited
     // parallelism, check to see if previously submitted tasks are

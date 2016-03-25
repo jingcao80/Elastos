@@ -124,7 +124,7 @@ ECode CAudioAttributes::Equals(
 {
     VALIDATE_NOT_NULL(equal)
 
-    if (THIS_PROBE(IInterface) == o) {
+    if (TO_IINTERFACE(this) == o) {
         *equal = TRUE;
         return NOERROR;
     }

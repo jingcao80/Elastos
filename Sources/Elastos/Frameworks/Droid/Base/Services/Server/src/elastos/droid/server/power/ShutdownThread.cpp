@@ -127,7 +127,7 @@ ShutdownThread::CloseDialogReceiver::CloseDialogReceiver(
     AutoPtr<IIntentFilter> filter;
     ASSERT_SUCCEEDED(CIntentFilter::New(IIntent::ACTION_CLOSE_SYSTEM_DIALOGS, (IIntentFilter**)&filter));
     AutoPtr<IIntent> intent;
-    ASSERT_SUCCEEDED(context->RegisterReceiver((IBroadcastReceiver*)this,
+    ASSERT_SUCCEEDED(context->RegisterReceiver(this,
             filter, (IIntent**)&intent));
 }
 
@@ -141,7 +141,7 @@ ECode ShutdownThread::CloseDialogReceiver::OnReceive(
 ECode ShutdownThread::CloseDialogReceiver::OnDismiss(
     /* [in] */ IDialogInterface* unused)
 {
-    return mContext->UnregisterReceiver((IBroadcastReceiver*)this);
+    return mContext->UnregisterReceiver(this);
 }
 
 //==============================================================================
@@ -615,7 +615,7 @@ ECode ShutdownThread::Run()
 
     // Shutdown MountService to ensure media is in a safe state
     AutoPtr<IIMountShutdownObserver> observer;
-    CMountShutdownObserver::New((IThread*)this, (IIMountShutdownObserver**)&observer);
+    CMountShutdownObserver::New(this, (IIMountShutdownObserver**)&observer);
 
     Logger::I(TAG, "Shutting down MountService");
 

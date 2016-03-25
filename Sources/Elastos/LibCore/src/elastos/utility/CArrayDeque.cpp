@@ -718,7 +718,7 @@ ECode CArrayDeque::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = this->Probe(EIID_IInterface) == object;
+    *result = TO_IINTERFACE(this) == object;
     return NOERROR;
 }
 

@@ -38,7 +38,7 @@ PInterface CVideoView::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_View) {
-        return reinterpret_cast<PInterface>((View*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CVideoView::Probe(riid);
 }

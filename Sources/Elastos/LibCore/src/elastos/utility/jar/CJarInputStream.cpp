@@ -54,7 +54,7 @@ ECode CJarInputStream::constructor(
         AutoPtr<ArrayOf<Byte> > manifestBytes;
         AutoPtr<IStreams> streams;
         CStreams::AcquireSingleton((IStreams**)&streams);
-        streams->ReadFullyNoClose(THIS_PROBE(IInputStream), (ArrayOf<Byte>**)&manifestBytes);
+        streams->ReadFullyNoClose(this, (ArrayOf<Byte>**)&manifestBytes);
         CManifest::New((IManifest**)&mManifest);
         ((CManifest*)mManifest.Get())->constructor(manifestBytes, verify);
         FAIL_RETURN(CloseEntry())

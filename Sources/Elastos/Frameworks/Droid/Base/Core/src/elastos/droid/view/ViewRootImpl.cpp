@@ -1660,7 +1660,7 @@ ECode ViewRootImpl::SetView(
             assert(mInputEventReceiver != NULL);
         }
 
-        VIEW_PROBE(view)->AssignParent(THIS_PROBE(IViewParent));
+        VIEW_PROBE(view)->AssignParent(this);
         mAddedTouchMode = (res & IWindowManagerGlobal::ADD_FLAG_IN_TOUCH_MODE) != 0;
         mAppVisible = (res & IWindowManagerGlobal::ADD_FLAG_APP_VISIBLE) != 0;
 
@@ -4629,7 +4629,7 @@ Boolean ViewRootImpl::EnterTouchMode()
                         // is focusable in touch mode.. give it focus
                         //
                         Boolean result;
-                        IVIEW_PROBE(ancestorToTakeFocus)->RequestFocus(&result);
+                        IView::Probe(ancestorToTakeFocus)->RequestFocus(&result);
 
                         return result;
                     }
@@ -4665,20 +4665,20 @@ AutoPtr<IViewGroup> ViewRootImpl::FindAncestorToTakeFocusInTouchMode(
         Int32 focusability;
         vgParent->GetDescendantFocusability(&focusability);
         Boolean isFocusable;
-        IVIEW_PROBE(vgParent)->IsFocusableInTouchMode(&isFocusable);
+        IView::Probe(vgParent)->IsFocusableInTouchMode(&isFocusable);
         if (focusability == ViewGroup::FOCUS_AFTER_DESCENDANTS
             && isFocusable) {
             return vgParent;
         }
 
         Boolean isRootNamespace;
-        IVIEW_PROBE(vgParent)->IsRootNamespace(&isRootNamespace);
+        IView::Probe(vgParent)->IsRootNamespace(&isRootNamespace);
         if (isRootNamespace) {
             return NULL;
         }
         else {
             parent = NULL;
-            IVIEW_PROBE(vgParent)->GetParent((IViewParent**)&parent);
+            IView::Probe(vgParent)->GetParent((IViewParent**)&parent);
             vgParent = IViewGroup::Probe(parent);
         }
     }

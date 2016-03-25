@@ -91,7 +91,7 @@ ECode ZipInputStream::CloseEntry()
     //try {
     AutoPtr<IStreams> streams;
     CStreams::AcquireSingleton((IStreams**)&streams);
-    ECode ec = streams->SkipAll(THIS_PROBE(IInputStream));
+    ECode ec = streams->SkipAll(this);
     // } catch (Exception e) {
     //     failure = e;
     // }

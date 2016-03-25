@@ -668,7 +668,7 @@ ECode CPackageInstallerSession::CommitLocked()
     // We've reached point of no return; call into PMS to install the stage.
     // Regardless of success or failure we always destroy session.
     AutoPtr<IIPackageInstallObserver2> localObserver;
-    CLocalObserver::New((IIPackageInstallerSession*)this, (IIPackageInstallObserver2**)&localObserver);
+    CLocalObserver::New(this, (IIPackageInstallObserver2**)&localObserver);
 
     AutoPtr<IUserHandle> user;
     Int32 installFlags;

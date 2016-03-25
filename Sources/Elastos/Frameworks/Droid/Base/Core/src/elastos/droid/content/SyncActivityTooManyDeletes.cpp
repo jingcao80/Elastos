@@ -62,17 +62,17 @@ ECode SyncActivityTooManyDeletes::OnCreate(
     // res->GetText(R::string::sync_do_nothing, (ICharSequence**)&(*options)[2]);
 
     // AutoPtr<IListAdapter> adapter;
-    // // CArrayAdapter::New(THIS_PROBE(IContext),
+    // // CArrayAdapter::New(this,
     // //     R::layout::simple_list_item_1, R::id::text1, options, (IListAdapter**)&adapter);
 
     // AutoPtr<IListView> listView;
-    // // CListView::New(THIS_PROBE(IContext), (IListView**)&listView);
+    // // CListView::New(this, (IListView**)&listView);
     // listView->SetAdapter(adapter);
     // listView->SetItemsCanFocus(true);
-    // listView->SetOnItemClickListener(THIS_PROBE(IAdapterViewOnItemClickListener));
+    // listView->SetOnItemClickListener(this);
 
     // AutoPtr<ITextView> textView;
-    // // CTextView::New(THIS_PROBE(IContext), (ITextView**)&textView);
+    // // CTextView::New(this, (ITextView**)&textView);
 
     // AutoPtr<ICharSequence> tooManyDeletesDescFormat;
     // res->GetText(R::string::sync_too_many_deletes_desc, (ICharSequence**)&tooManyDeletesDescFormat);
@@ -84,7 +84,7 @@ ECode SyncActivityTooManyDeletes::OnCreate(
     // textView->SetText(str);
 
     AutoPtr<ILinearLayout> ll;
-    // CLinearLayout::New(THIS_PROBE(IContext), (ILinearLayout**)&ll);
+    // CLinearLayout::New(this, (ILinearLayout**)&ll);
     // ll->SetOrientation(ILinearLayout::VERTICAL);
     // AutoPtr<ILinearLayoutLayoutParams> lp;
     // CLinearLayoutLayoutParams::New(

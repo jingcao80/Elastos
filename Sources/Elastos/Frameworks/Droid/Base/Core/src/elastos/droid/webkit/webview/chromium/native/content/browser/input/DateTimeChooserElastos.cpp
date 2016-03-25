@@ -126,13 +126,13 @@ void DateTimeChooserElastos::NativeReplaceDateTime(
     /* [in] */ Handle64 nativeDateTimeChooserElastos,
     /* [in] */ Double dialogValue)
 {
-    Elastos_DateTimeChooserAndroid_nativeReplaceDateTime(THIS_PROBE(IInterface), (Handle64)nativeDateTimeChooserElastos, dialogValue);
+    Elastos_DateTimeChooserAndroid_nativeReplaceDateTime(TO_IINTERFACE(this), (Handle64)nativeDateTimeChooserElastos, dialogValue);
 }
 
 void DateTimeChooserElastos::NativeCancelDialog(
     /* [in] */ Handle64 nativeDateTimeChooserElastos)
 {
-    Elastos_DateTimeChooserAndroid_nativeCancelDialog(THIS_PROBE(IInterface), (Handle64)nativeDateTimeChooserElastos);
+    Elastos_DateTimeChooserAndroid_nativeCancelDialog(TO_IINTERFACE(this), (Handle64)nativeDateTimeChooserElastos);
 }
 
 AutoPtr<IInterface> DateTimeChooserElastos::CreateDateTimeChooser(

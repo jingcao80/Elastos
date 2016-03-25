@@ -223,7 +223,7 @@ CWindowManagerService::SettingsObserver::SettingsObserver(
 
     AutoPtr<IList> pathSegments;
     uri->GetPathSegments((IList**)&pathSegments);
-    resolver->RegisterContentObserver(uri, FALSE, (IContentObserver*)this);
+    resolver->RegisterContentObserver(uri, FALSE, this);
 }
 
 ECode CWindowManagerService::SettingsObserver::OnChange(

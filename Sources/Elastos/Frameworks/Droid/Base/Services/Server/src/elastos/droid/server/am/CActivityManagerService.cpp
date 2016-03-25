@@ -354,7 +354,7 @@ PInterface CActivityManagerService::StringObjectHashMap::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (IInterface*)this;
+        return this;
     }
     if (riid == EIID_StringObjectHashMap ) {
         return reinterpret_cast<PInterface>(this);
@@ -377,7 +377,7 @@ ECode CActivityManagerService::StringObjectHashMap::GetInterfaceID(
     /* [out] */ InterfaceID* iid)
 {
     VALIDATE_NOT_NULL(iid);
-    if (object == (IInterface*)this) {
+    if (object == this) {
         *iid = EIID_IInterface;
     }
     else {
@@ -1825,7 +1825,7 @@ CActivityManagerService::DispatchUserSwitchCallback::SendResult(
     /* [in] */ IBundle* data)
 {
     AutoLock lock(mHost);
-    if (mHost->mCurUserSwitchCallback.Get() == this->Probe(EIID_IInterface)) {
+    if (mHost->mCurUserSwitchCallback.Get() == TO_IINTERFACE(this)) {
         mCount++;
         if (mCount == N) {
             mHost->SendContinueUserSwitchLocked(mUss, mOldUserId, mNewUserId);

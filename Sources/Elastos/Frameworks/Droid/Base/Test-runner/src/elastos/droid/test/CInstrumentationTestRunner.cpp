@@ -470,7 +470,7 @@ ECode CInstrumentationTestRunner::Equals(
     /* [out] */ Boolean * result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = this->Probe(EIID_IInterface) == other->Probe(EIID_IInterface);
+    *result = TO_IINTERFACE(this) == other->Probe(EIID_IInterface);
     return NOERROR;
 }
 
@@ -553,7 +553,7 @@ ECode CInstrumentationTestRunner::OnCreate(
     }
 
     AutoPtr<IClassInfo> clsInfo;
-    _CObject_ReflectClassInfo((IObject*)this, (IClassInfo**)&clsInfo);
+    _CObject_ReflectClassInfo(TO_IINTERFACE(this), (IClassInfo**)&clsInfo);
     String clsName;
     clsInfo->GetName(&clsName);
     context = NULL;

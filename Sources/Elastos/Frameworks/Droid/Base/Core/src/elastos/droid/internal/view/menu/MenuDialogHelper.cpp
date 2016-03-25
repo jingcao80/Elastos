@@ -173,7 +173,7 @@ ECode MenuDialogHelper::OnKey(
                     AutoPtr<IDispatcherState> dispatcher;
                     decor->GetKeyDispatcherState((IDispatcherState**)&dispatcher);
                     if (dispatcher != NULL) {
-                        dispatcher->StartTracking(event, (IDialogInterfaceOnClickListener*)this);
+                        dispatcher->StartTracking(event, TO_IINTERFACE(this));
                         *flag = TRUE;
                         return NOERROR;
                     }

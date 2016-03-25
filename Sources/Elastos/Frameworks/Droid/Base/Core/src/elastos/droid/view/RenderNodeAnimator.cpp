@@ -273,7 +273,7 @@ ECode RenderNodeAnimator::Cancel()
         AutoPtr<ArrayOf<IAnimatorListener*> > listeners = CloneListeners();
         Int32 numListeners = listeners == NULL ? 0 : listeners->GetLength();
         for (Int32 i = 0; i < numListeners; i++) {
-            (*listeners)[i]->OnAnimationCancel((IAnimator*)this->Probe(EIID_IAnimator));
+            (*listeners)[i]->OnAnimationCancel(this);
         }
 
         if (mViewTarget != NULL) {

@@ -35,7 +35,7 @@ ECode COverlayViewGroup::Add(
         AutoPtr<IRect> bounds;
         drawable->GetBounds((IRect**)&bounds);
         Invalidate(bounds);
-        drawable->SetCallback(THIS_PROBE(IDrawableCallback));
+        drawable->SetCallback(this);
     }
     return NOERROR;
 }

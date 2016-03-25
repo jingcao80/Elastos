@@ -76,7 +76,7 @@ ECode InflaterInputStream::Read(
 {
     AutoPtr<IStreams> streams;
     CStreams::AcquireSingleton((IStreams**)&streams);
-    return streams->ReadSingleByte(THIS_PROBE(IInputStream), value);
+    return streams->ReadSingleByte(this, value);
 }
 
 ECode InflaterInputStream::Read(
@@ -184,7 +184,7 @@ ECode InflaterInputStream::Skip(
 
     AutoPtr<IStreams> streams;
     CStreams::AcquireSingleton((IStreams**)&streams);
-    IInputStream* is = THIS_PROBE(IInputStream);
+    IInputStream* is = this;
     return streams->SkipByReading(is, byteCount, number);
 }
 

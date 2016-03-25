@@ -13,7 +13,7 @@ CAR_OBJECT_IMPL(CSQLPermission);
 //     /* [in] */ REIID riid)
 // {
 //     if (riid == EIID_ISQLPermission) {
-//         return (IInterface*)(ISQLPermission*)this;
+//         return (IInterface*)this;
 //     }
 
 //     //TODO

@@ -79,10 +79,6 @@ class RenderNodeAnimator;
 #define VIEW_PROBE(host) ((View*)IView::Probe(host))
 #endif
 
-#ifndef IVIEW_PROBE
-#define IVIEW_PROBE(host) (IView::Probe(host))
-#endif
-
 #ifndef VIEWGROUP_PROBE
 #define VIEWGROUP_PROBE(host) ((ViewGroup*)IViewGroup::Probe(host))
 #endif

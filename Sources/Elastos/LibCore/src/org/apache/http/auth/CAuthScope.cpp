@@ -140,7 +140,7 @@ ECode CAuthScope::Equals(
         *equals = FALSE;
         return NOERROR;
     }
-    if (obj == this->Probe(EIID_IInterface)) {
+    if (obj == TO_IINTERFACE(this)) {
         *equals = TRUE;
         return NOERROR;
     }

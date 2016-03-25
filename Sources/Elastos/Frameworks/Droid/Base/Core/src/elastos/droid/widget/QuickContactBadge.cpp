@@ -415,7 +415,7 @@ ECode QuickContactBadge::OnClick(
         CContactsContractQuickContact::AcquireSingleton((IContactsContractQuickContact**)&quickContact);
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
-        quickContact->ShowQuickContact(context, THIS_PROBE(IView), mContactUri,
+        quickContact->ShowQuickContact(context, this, mContactUri,
                 IContactsContractQuickContact::MODE_LARGE, mExcludeMimes);
     }
     else if (mContactEmail != NULL && mQueryHandler != NULL) {

@@ -97,7 +97,7 @@ ECode CRect::Equals(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
-    if (THIS_PROBE(IInterface) == IInterface::Probe(o)) {
+    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
         *result = TRUE;
         return NOERROR;
     }

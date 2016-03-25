@@ -71,7 +71,7 @@ ECode CCheckedInputStream::Skip(
     VALIDATE_NOT_NULL(number);
     AutoPtr<IStreams> streams;
     CStreams::AcquireSingleton((IStreams**)&streams);
-    return streams->SkipByReading(THIS_PROBE(IInputStream), byteCount, number);
+    return streams->SkipByReading(this, byteCount, number);
 }
 
 ECode CCheckedInputStream::Read(

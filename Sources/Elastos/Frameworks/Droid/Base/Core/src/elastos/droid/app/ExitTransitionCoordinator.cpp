@@ -495,7 +495,7 @@ ECode ExitTransitionCoordinator::StartExit(
         }
 
         AutoPtr<IActivityOptions> options;
-        CActivityOptions::MakeSceneTransitionAnimation(mActivity, (IExitTransitionCoordinator*)this,
+        CActivityOptions::MakeSceneTransitionAnimation(mActivity, this,
             mAllSharedElementNames, resultCode, data, (IActivityOptions**)&options);
         AutoPtr<ITranslucentConversionListener> listener = new TranslucentConversionListener(this);
         Boolean bval;

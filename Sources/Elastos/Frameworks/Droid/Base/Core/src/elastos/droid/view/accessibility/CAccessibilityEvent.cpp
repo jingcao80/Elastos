@@ -68,7 +68,7 @@ ECode CAccessibilityEvent::SetSealed(
 ECode CAccessibilityEvent::Recycle()
 {
     Clear();
-    sPool->ReleaseItem((IAccessibilityEvent*)this);
+    sPool->ReleaseItem(this);
     return NOERROR;
 }
 
@@ -351,7 +351,7 @@ ECode CAccessibilityEvent::WriteToParcel(
     // TextUtils::WriteToParcel(mPackageName, parcel);
     parcel->WriteInt64(mEventTime);
     parcel->WriteInt32(mConnectionId);
-    WriteAccessibilityRecordToParcel(THIS_PROBE(IAccessibilityRecord), parcel);
+    WriteAccessibilityRecordToParcel(this, parcel);
 
     // Write the records.
     Int32 recordCount;
@@ -414,7 +414,7 @@ ECode CAccessibilityEvent::ReadFromParcel(
     // mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
     parcel->ReadInt64(&mEventTime);
     parcel->ReadInt32(&mConnectionId);
-    ReadAccessibilityRecordFromParcel((IAccessibilityRecord*)this, parcel);
+    ReadAccessibilityRecordFromParcel(this, parcel);
 
     // Read the records.
     Int32 recordCount;

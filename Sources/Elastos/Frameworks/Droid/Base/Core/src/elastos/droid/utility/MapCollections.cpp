@@ -97,7 +97,7 @@ ECode MapCollections::MapIterator::GetNext(
     VALIDATE_NOT_NULL(obj)
     mIndex++;
     mEntryValid = true;
-    *obj = THIS_PROBE(IMapEntry);
+    *obj = (IIterator*)this;
     REFCOUNT_ADD(*obj)
     return NOERROR;
 }

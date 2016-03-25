@@ -25,7 +25,7 @@ PInterface CRemoveAccountSession::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_AccountManagerServiceSession) {
-        return reinterpret_cast<PInterface>((AccountManagerServiceSession*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CRemoveAccountSession::Probe(riid);
 }
@@ -42,7 +42,7 @@ String CRemoveAccountSession::ToDebugString(
 ECode CRemoveAccountSession::Run()
 {
     return mAuthenticator->GetAccountRemovalAllowed(
-            (IIAccountAuthenticatorResponse*)this, mAccount);
+            this, mAccount);
 }
 
 ECode CRemoveAccountSession::OnResult(

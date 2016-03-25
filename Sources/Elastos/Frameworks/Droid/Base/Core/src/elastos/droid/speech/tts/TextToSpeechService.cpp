@@ -80,7 +80,7 @@ void TextToSpeechService::SynthThread::OnLooperPrepared()
     // GetLooper((ILooper**)&looper);
     AutoPtr<IMessageQueue> messageQueue;
     looper->GetQueue((IMessageQueue**)&messageQueue);
-    messageQueue->AddIdleHandler(THIS_PROBE(IIdleHandler));
+    messageQueue->AddIdleHandler(this);
 }
 
 ECode TextToSpeechService::SynthThread::QueueIdle(
@@ -366,6 +366,8 @@ Boolean TextToSpeechService::SpeechItem::IsStopped()
 }
 
 /******************************TextToSpeechService::UtteranceSpeechItem*************************/
+CAR_INTERFACE_IMPL(TextToSpeechService::UtteranceSpeechItem, SpeechItem, IUtteranceProgressDispatcher)
+
 TextToSpeechService::UtteranceSpeechItem::UtteranceSpeechItem()
 {}
 
@@ -737,7 +739,7 @@ void TextToSpeechService::SynthesisSpeechItemV1::PlayImpl()
 AbstractSynthesisCallback* TextToSpeechService::SynthesisSpeechItemV1::CreateSynthesisCallback()
 {
     AutoPtr<AbstractSynthesisCallback> asCallback = new PlaybackSynthesisCallback(GetAudioParams(),
-                    (AudioPlaybackHandler*)mTtss->mAudioPlaybackHandler, THIS_PROBE(IUtteranceProgressDispatcher), GetCallerIdentity(), mEventLogger, FALSE);
+                    (AudioPlaybackHandler*)mTtss->mAudioPlaybackHandler, this, GetCallerIdentity(), mEventLogger, FALSE);
 #if 0
     PlaybackSynthesisCallback(
         /* [in] */ AudioOutputParams* audioParams,
@@ -836,7 +838,7 @@ Boolean TextToSpeechService::SilenceSpeechItem::IsValid()
 void TextToSpeechService::SilenceSpeechItem::PlayImpl()
 {
     AutoPtr<SilencePlaybackQueueItem> spqi = new SilencePlaybackQueueItem();
-    spqi->constructor(THIS_PROBE(IUtteranceProgressDispatcher), GetCallerIdentity(), mDuration);
+    spqi->constructor(this, GetCallerIdentity(), mDuration);
     (mTtss->mAudioPlaybackHandler)->Enqueue(spqi.Get());
 }
 

@@ -33,16 +33,16 @@ PInterface CPlayActivity::PlayListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IViewOnTouchListener*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IViewOnTouchListener) {
-        return (IViewOnTouchListener*)this;
+        return this;
     }
     else if (riid == EIID_IViewOnKeyListener) {
-        return (IViewOnKeyListener*)this;
+        return this;
     }
     else if (riid == EIID_IMediaPlayerOnCompletionListener) {
-        return(IMediaPlayerOnCompletionListener*)this;
+        returnthis;
     }
 
     return NULL;
@@ -66,10 +66,10 @@ ECode CPlayActivity::PlayListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)(IViewOnTouchListener*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IRunnable;
     }
-    else if (pObject == (IInterface*)(IMediaPlayerOnCompletionListener*)this) {
+    else if (pObject == (IInterface*)this) {
         *pIID = EIID_IMediaPlayerOnCompletionListener;
     }
     else {
@@ -155,7 +155,7 @@ ECode CPlayActivity::OnCreate(
     mVideoView->SetVideoPath(videoPath);
 
     AutoPtr<IMediaController> mc;
-    CMediaController::New((IContext*)this->Probe(EIID_IContext), (IMediaController**)&mc);
+    CMediaController::New(this, (IMediaController**)&mc);
     mVideoView->SetMediaController(mc);
     mc->SetMediaPlayer(IMediaPlayerControl::Probe(mVideoView));
     Boolean rst;

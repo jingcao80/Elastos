@@ -377,7 +377,7 @@ ECode CWifiP2pDevice::Equals(
 {
     VALIDATE_NOT_NULL(isEqual);
 
-    if (this->Probe(EIID_IInterface) == obj) {
+    if (TO_IINTERFACE(this) == obj) {
         *isEqual = TRUE;
         return NOERROR;
     }

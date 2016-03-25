@@ -242,7 +242,7 @@ CPendingIntentRecord::~CPendingIntentRecord()
         AutoPtr<IMessage> msg;
         mOwner->mHandler->ObtainMessage(
             CActivityManagerService::FINALIZE_PENDING_INTENT_MSG,
-            (IPendingIntentRecord*)this, (IMessage**)&msg);
+            TO_IINTERFACE(this), (IMessage**)&msg);
         Boolean res;
         mOwner->mHandler->SendMessage(msg, &res);
     }

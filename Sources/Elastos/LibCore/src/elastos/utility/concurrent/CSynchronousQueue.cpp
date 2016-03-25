@@ -58,7 +58,7 @@ void CSynchronousQueue::TransferStack::SNode::TryCancel()
 
 Boolean CSynchronousQueue::TransferStack::SNode::IsCancelled()
 {
-    return Object::Equals(mMatch->Probe(EIID_IInterface), THIS_PROBE(IInterface));
+    return Object::Equals(mMatch->Probe(EIID_IInterface), TO_IINTERFACE(this));
 }
 
 //===============================================================================
@@ -237,9 +237,9 @@ AutoPtr<CSynchronousQueue::TransferStack::SNode> CSynchronousQueue::TransferStac
         else if (s->mWaiter == NULL)
             s->mWaiter = w; // establish waiter so can park next iter
         else if (!timed)
-            LockSupport::Park(THIS_PROBE(IInterface));
+            LockSupport::Park(TO_IINTERFACE(this));
         else if (nanos > mSpinForTimeoutThreshold)
-            LockSupport::ParkNanos(THIS_PROBE(IInterface), nanos);
+            LockSupport::ParkNanos(TO_IINTERFACE(this), nanos);
     }
 }
 
@@ -322,12 +322,12 @@ void CSynchronousQueue::TransferQueue::QNode::TryCancel(
 
 Boolean CSynchronousQueue::TransferQueue::QNode::IsCancelled()
 {
-    return Object::Equals(mItem->Probe(EIID_IInterface), THIS_PROBE(IInterface));
+    return Object::Equals(mItem->Probe(EIID_IInterface), TO_IINTERFACE(this));
 }
 
 Boolean CSynchronousQueue::TransferQueue::QNode::IsOffList()
 {
-    return Object::Equals(mNext->Probe(EIID_IInterface), THIS_PROBE(IInterface));
+    return Object::Equals(mNext->Probe(EIID_IInterface), TO_IINTERFACE(this));
 }
 
 //===============================================================================
@@ -495,9 +495,9 @@ AutoPtr<IInterface> CSynchronousQueue::TransferQueue::AwaitFulfill(
         else if (s->mWaiter == NULL)
             s->mWaiter = w;
         else if (!timed)
-            LockSupport::Park(THIS_PROBE(IInterface));
+            LockSupport::Park(TO_IINTERFACE(this));
         else if (nanos > mSpinForTimeoutThreshold)
-            LockSupport::ParkNanos(THIS_PROBE(IInterface), nanos);
+            LockSupport::ParkNanos(TO_IINTERFACE(this), nanos);
     }
 }
 
@@ -859,7 +859,7 @@ ECode CSynchronousQueue::DrainTo(
 
     if (c == NULL)
         return E_NULL_POINTER_EXCEPTION;
-    if (Object::Equals(c->Probe(EIID_IInterface), THIS_PROBE(IInterface)))
+    if (Object::Equals(c->Probe(EIID_IInterface), TO_IINTERFACE(this)))
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     Int32 n = 0;
     for (AutoPtr<IInterface> e; (Poll((IInterface**)&e), e) != NULL;) {
@@ -879,7 +879,7 @@ ECode CSynchronousQueue::DrainTo(
 
     if (c == NULL)
         return E_NULL_POINTER_EXCEPTION;
-    if (Object::Equals(c->Probe(EIID_IInterface), THIS_PROBE(IInterface)))
+    if (Object::Equals(c->Probe(EIID_IInterface), TO_IINTERFACE(this)))
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     Int32 n = 0;
     for (AutoPtr<IInterface> e; n < maxElements && (Poll((IInterface**)&e), e) != NULL;) {

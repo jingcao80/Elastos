@@ -159,7 +159,7 @@ PInterface CXBMCActivity::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_ISurfaceHolderCallback2) {
-        return (ISurfaceHolderCallback2*)this;
+        return this;
     }
 
     return Activity::Probe(riid);

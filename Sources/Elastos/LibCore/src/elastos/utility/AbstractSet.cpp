@@ -23,7 +23,7 @@ ECode AbstractSet::Equals(
 {
     VALIDATE_NOT_NULL(value)
 
-    if (this->Probe(EIID_IInterface) == object) {
+    if (TO_IINTERFACE(this) == object) {
         *value = TRUE;
         return NOERROR;
     }

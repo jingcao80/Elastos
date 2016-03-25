@@ -192,7 +192,7 @@ ECode WifiP2pServiceResponse::Equals(
     VALIDATE_NOT_NULL(isEqual);
     *isEqual = FALSE;
 
-    if (THIS_PROBE(IInterface) == obj) {
+    if (TO_IINTERFACE(this) == obj) {
         *isEqual = TRUE;
         return NOERROR;
     }

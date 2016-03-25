@@ -78,7 +78,7 @@ ECode BoringLayout::ReplaceOrMake(
 
     Init(source, paint, outerwidth, align, spacingmult, spacingadd,
         metrics, includepad, TRUE);
-    *layout = THIS_PROBE(IBoringLayout);
+    *layout = this;
     REFCOUNT_ADD(*layout);
     return NOERROR;
 }
@@ -109,7 +109,7 @@ ECode BoringLayout::ReplaceOrMake(
         trust = TRUE;
     } else {
        ReplaceWith(TextUtils::Ellipsize(source, paint, ellipsizedWidth,
-            ellipsize, TRUE, THIS_PROBE(ITextUtilsEllipsizeCallback)),
+            ellipsize, TRUE, this),
             paint, outerwidth, align, spacingmult,
             spacingadd);
 
@@ -122,7 +122,7 @@ ECode BoringLayout::ReplaceOrMake(
     Init(text, paint, outerwidth, align, spacingmult, spacingadd,
          metrics, includepad, trust);
 
-    *layout = THIS_PROBE(IBoringLayout);
+    *layout = this;
     REFCOUNT_ADD(*layout);
     return NOERROR;
 }
@@ -183,7 +183,7 @@ ECode BoringLayout::constructor(
     }
     else {
         ReplaceWith(TextUtils::Ellipsize(source, paint, ellipsizedWidth,
-                     ellipsize, TRUE, THIS_PROBE(ITextUtilsEllipsizeCallback)),
+                     ellipsize, TRUE, this),
                    paint, outerwidth, align, spacingmult,
                    spacingadd);
 

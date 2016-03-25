@@ -2266,7 +2266,7 @@ ECode ProcessStats::Add(
                             GetPackageStateLocked(pkgName, uid, vers, (IPackageState**)&pkgState);
                             thisProc = thisProc->Clone(thisProc->mPackage, now);
                             ((PackageState*)pkgState.Get())->mProcesses->Put(
-                                CoreUtils::Convert(thisProc->mName), (IProcessState*)thisProc);
+                                CoreUtils::Convert(thisProc->mName), (IPackageState*)thisProc.Get());
                         }
                         thisProc->Add(otherProc);
                     }
@@ -2280,7 +2280,8 @@ ECode ProcessStats::Add(
                     AutoPtr<IServiceState> thisSvc;
                     GetServiceStateLocked(pkgName, uid, vers, otherSvc->mProcessName,
                         otherSvc->mName, (IServiceState**)&thisSvc);
-                    ((ServiceState*)thisSvc.Get())->Add(otherSvc);
+                    ServiceState* ss = (ServiceState*)thisSvc.Get();
+                    ss->Add(otherSvc);
                 }
             }
         }
@@ -2301,9 +2302,9 @@ ECode ProcessStats::Add(
             AutoPtr<IInterface> uValue;
             uids->ValueAt(iu, (IInterface**)&uValue);
             ProcessState* otherProc = (ProcessState*)IProcessState::Probe(uValue);
-            AutoPtr<IInterface> _thisProc;
-            mProcesses->Get(otherProc->mName, uid, (IInterface**)&_thisProc);
-            AutoPtr<ProcessState> thisProc = (ProcessState*)IProcessState::Probe(_thisProc);
+            AutoPtr<IInterface> obj;
+            mProcesses->Get(otherProc->mName, uid, (IInterface**)&obj);
+            AutoPtr<ProcessState> thisProc = (ProcessState*)IProcessState::Probe(obj);
             if (DEBUG) Slogger::D(TAG, "Adding uid %d proc %s", uid, otherProc->mName.string());
             if (thisProc == NULL) {
                 if (DEBUG) Slogger::D(TAG, "Creating new process!");

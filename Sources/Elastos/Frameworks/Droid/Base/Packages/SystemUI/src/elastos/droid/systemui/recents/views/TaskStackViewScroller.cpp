@@ -178,7 +178,7 @@ void TaskStackViewScroller::AnimateScroll(
     AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(2);
     (*values)[0] = curScroll;
     (*values)[1] = newScroll;
-    oaHelper->OfFloat((IObject*)this, String("stackScroll"), values, (IObjectAnimator**)&mScrollAnimator);
+    oaHelper->OfFloat(TO_IINTERFACE(this), String("stackScroll"), values, (IObjectAnimator**)&mScrollAnimator);
     IAnimator* animator = IAnimator::Probe(mScrollAnimator);
     animator->SetDuration(mConfig->mTaskStackScrollDuration);
     animator->SetInterpolator(ITimeInterpolator::Probe(mConfig->mLinearOutSlowInInterpolator));

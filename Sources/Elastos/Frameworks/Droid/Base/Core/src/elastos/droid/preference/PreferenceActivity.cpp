@@ -768,7 +768,7 @@ ECode PreferenceActivity::OnCreate(
         }
     }
     else if (mHeaders->GetSize(&size), size > 0) {
-        AutoPtr<HeaderAdapter> ha = new HeaderAdapter((IContext*)this, mHeaders, mPreferenceHeaderItemResId, mPreferenceHeaderRemoveEmptyIcon);
+        AutoPtr<HeaderAdapter> ha = new HeaderAdapter(this, mHeaders, mPreferenceHeaderItemResId, mPreferenceHeaderRemoveEmptyIcon);
         ListActivity::SetListAdapter(IListAdapter::Probe(ha));
         if (!mSinglePane) {
             // Multi-pane.
@@ -789,9 +789,9 @@ ECode PreferenceActivity::OnCreate(
         mListFooter = IFrameLayout::Probe(view);
         view = Activity::FindViewById(R::id::prefs);
         mPrefsContainer = IViewGroup::Probe(view);
-        CPreferenceManager::New((IActivity*)this, FIRST_REQUEST_CODE, (IPreferenceManager**)&mPreferenceManager);
+        CPreferenceManager::New(this, FIRST_REQUEST_CODE, (IPreferenceManager**)&mPreferenceManager);
         AutoPtr<IPreferenceManagerOnPreferenceTreeClickListener> listener;
-        listener = (IPreferenceManagerOnPreferenceTreeClickListener*)this->Probe(EIID_IPreferenceManagerOnPreferenceTreeClickListener);
+        listener = this;
         mPreferenceManager->SetOnPreferenceTreeClickListener(listener);
     }
 
@@ -1310,7 +1310,7 @@ ECode PreferenceActivity::OnBuildStartFragmentIntent(
 
     ClassID id;
     GetClassID(&id);
-    intent->SetClass((IContext*)this, id);
+    intent->SetClass(this, id);
     intent->PutExtra(EXTRA_SHOW_FRAGMENT, fragmentName);
     intent->PutExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS, args);
     intent->PutExtra(EXTRA_SHOW_FRAGMENT_TITLE, titleRes);
@@ -1377,7 +1377,7 @@ ECode PreferenceActivity::ShowBreadCrumbs(
             SetTitle(title);
         }
         mFragmentBreadCrumbs->SetMaxVisible(2);
-        mFragmentBreadCrumbs->SetActivity((IActivity*)this);
+        mFragmentBreadCrumbs->SetActivity(this);
     }
     Int32 res;
     IView::Probe(mFragmentBreadCrumbs)->GetVisibility(&res);
@@ -1460,7 +1460,7 @@ ECode PreferenceActivity::SwitchToHeaderInner(
     }
 
     AutoPtr<IFragment> f;
-    Fragment::Instantiate((IContext*)this, fragmentName, args, (IFragment**)&f);
+    Fragment::Instantiate(this, fragmentName, args, (IFragment**)&f);
     AutoPtr<IFragmentTransaction> transaction;
     manager->BeginTransaction((IFragmentTransaction**)&transaction);
     transaction->SetTransition(IFragmentTransaction::TRANSIT_FRAGMENT_FADE);
@@ -1634,7 +1634,7 @@ ECode PreferenceActivity::StartPreferencePanel(
     }
     else {
         AutoPtr<IFragment> f;
-        Fragment::Instantiate((IContext*)this, fragmentClass, args, (IFragment**)&f);
+        Fragment::Instantiate(this, fragmentClass, args, (IFragment**)&f);
         if (resultTo != NULL) {
             f->SetTargetFragment(resultTo, resultRequestCode);
         }
@@ -1805,7 +1805,7 @@ ECode PreferenceActivity::AddPreferencesFromResource(
     AutoPtr<IPreferenceScreen> preferenceScreen;
     GetPreferenceScreen((IPreferenceScreen**)&preferenceScreen);
     AutoPtr<IPreferenceScreen> preScreen;
-    mPreferenceManager->InflateFromResource((IContext*)this, preferencesResId, preferenceScreen, (IPreferenceScreen**)&preScreen);
+    mPreferenceManager->InflateFromResource(this, preferencesResId, preferenceScreen, (IPreferenceScreen**)&preScreen);
     SetPreferenceScreen(preScreen);
     return NOERROR;
 }

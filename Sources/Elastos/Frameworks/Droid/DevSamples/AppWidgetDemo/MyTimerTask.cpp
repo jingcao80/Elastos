@@ -37,10 +37,10 @@ PInterface MyTimerTask::Probe(
         return (PInterface)this;
     }
     else if (riid == EIID_IRunnable) {
-        return (IRunnable*)this;
+        return this;
     }
     else if (riid == EIID_ITimerTask) {
-        return (ITimerTask*)this;
+        return this;
     }
 
     return NULL;
@@ -54,7 +54,7 @@ ECode MyTimerTask::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)(IRunnable*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IRunnable;
     }
     else {

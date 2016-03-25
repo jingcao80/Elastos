@@ -29,7 +29,7 @@ struct NativeCode : public ANativeActivity
 {
     NativeCode()
     {
-        memset((ANativeActivity*)this, 0, sizeof(ANativeActivity));
+        memset(this, 0, sizeof(ANativeActivity));
         memset(&mCallbacks, 0, sizeof(mCallbacks));
         mNativeWindow = NULL;
         // inputChannel = NULL;

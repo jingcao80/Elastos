@@ -32,7 +32,7 @@ ECode CHttpVersion::ForVersion(
     VALIDATE_NOT_NULL(ver)
 
     if ((major == mMajor) && (minor == mMinor)) {
-        *ver = (IProtocolVersion*)this;
+        *ver = this;
         REFCOUNT_ADD(*ver)
         return NOERROR;
     }

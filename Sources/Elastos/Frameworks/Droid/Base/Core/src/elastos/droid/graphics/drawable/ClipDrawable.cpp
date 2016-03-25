@@ -156,7 +156,7 @@ ECode ClipDrawable::Inflate(
     mClipState->mOrientation = orientation;
     mClipState->mGravity = g;
 
-    dr->SetCallback((IDrawableCallback*)this->Probe(EIID_IDrawableCallback));
+    dr->SetCallback(this);
     return NOERROR;
 }
 
@@ -167,7 +167,7 @@ ECode ClipDrawable::InvalidateDrawable(
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
         callback->InvalidateDrawable(
-                (IDrawable*)this->Probe(EIID_IDrawable));
+                this);
     }
     return NOERROR;
 }
@@ -181,7 +181,7 @@ ECode ClipDrawable::ScheduleDrawable(
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
         callback->ScheduleDrawable(
-                (IDrawable*)this->Probe(EIID_IDrawable), what, when);
+                this, what, when);
     }
     return NOERROR;
 }
@@ -194,7 +194,7 @@ ECode ClipDrawable::UnscheduleDrawable(
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
         callback->UnscheduleDrawable(
-                (IDrawable*)this->Probe(EIID_IDrawable), what);
+                this, what);
     }
     return NOERROR;
 }
@@ -399,7 +399,7 @@ ECode ClipDrawable::constructor(
 
     if (drawable != NULL) {
         drawable->SetCallback(
-                (IDrawableCallback*)this->Probe(EIID_IDrawableCallback));
+                this);
     }
     return NOERROR;
 }

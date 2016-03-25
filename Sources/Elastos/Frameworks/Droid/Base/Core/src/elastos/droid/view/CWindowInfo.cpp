@@ -77,7 +77,7 @@ ECode CWindowInfo::Obtain(
 ECode CWindowInfo::Recycle()
 {
     Clear();
-    // sPool->ReleaseItem(THIS_PROBE(IWindowInfo));
+    // sPool->ReleaseItem(this);
     return NOERROR;
 }
 

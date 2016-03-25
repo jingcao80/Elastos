@@ -175,7 +175,7 @@ ECode HashMap::Clone(
     result->mValues = NULL;
 
     result->Init_(); // Give subclass a chance to initialize itself
-    result->ConstructorPutAll((IMap*)this->Probe(EIID_IMap)); // Calls method overridden in subclass!!
+    result->ConstructorPutAll(this); // Calls method overridden in subclass!!
     AutoPtr<IMap> outmap = (IMap*) result->Probe(EIID_IMap);
     *object = outmap;
     REFCOUNT_ADD(*object)*/
@@ -1351,7 +1351,7 @@ ECode HashMap::_Values::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = this->Probe(EIID_IInterface) == object;
+    *result = TO_IINTERFACE(this) == object;
     return NOERROR;
 }
 

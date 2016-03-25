@@ -163,7 +163,7 @@ CAppOpsService::Callback::Callback(
 
     AutoPtr<IProxy> proxy = (IProxy*)mCallback->Probe(EIID_IProxy);
     if (proxy != NULL) {
-        proxy->LinkToDeath((IProxyDeathRecipient*)this, 0);
+        proxy->LinkToDeath(this, 0);
     }
 }
 
@@ -172,7 +172,7 @@ ECode CAppOpsService::Callback::UnlinkToDeath()
     AutoPtr<IProxy> proxy = (IProxy*)mCallback->Probe(EIID_IProxy);
     if (proxy != NULL) {
         Boolean bval;
-        proxy->UnlinkToDeath((IProxyDeathRecipient*)this, 0, &bval);
+        proxy->UnlinkToDeath(this, 0, &bval);
     }
     return NOERROR;
 }
@@ -209,7 +209,7 @@ CAppOpsService::ClientState::ClientState(
     AutoPtr<IProxy> proxy = (IProxy*)appToken->Probe(EIID_IProxy);
     if (proxy != NULL) {
         CArrayList::New((IArrayList**)&mStartedOps);
-        proxy->LinkToDeath((IProxyDeathRecipient*)this, 0);
+        proxy->LinkToDeath(this, 0);
     }
     else {
         // For local clients, there is no reason to track them.

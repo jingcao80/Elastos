@@ -2468,7 +2468,7 @@ ECode ListView::HandleHorizontalFocusWithinListItem(
             FocusFinder::GetInstance()->FindNextFocus(
                     theView, currentFocus, direction, (IView**)&globalNextFocus);
             if (globalNextFocus != NULL) {
-                *rst = IsViewAncestorOf(globalNextFocus, THIS_PROBE(IView));
+                *rst = IsViewAncestorOf(globalNextFocus, this);
                 return NOERROR;
             }
         }
@@ -2592,13 +2592,13 @@ Boolean ListView::ArrowScrollImpl(
         && selectedView != NULL && hasFocus) {
         AutoPtr<IView> focused;
         selectedView->FindFocus((IView**)&focused);
-        if (!IsViewAncestorOf(focused, THIS_PROBE(IView)) || DistanceToView(focused) > 0) {
+        if (!IsViewAncestorOf(focused, this) || DistanceToView(focused) > 0) {
             focused->ClearFocus();
         }
     }
 
     if (nextSelectedPosition == IAdapterView::INVALID_POSITION && selectedView != NULL
-            && !IsViewAncestorOf(selectedView, THIS_PROBE(IView))) {
+            && !IsViewAncestorOf(selectedView, this)) {
         selectedView = NULL;
         HideSelector();
         mResurrectToPosition = IAdapterView::INVALID_POSITION;
@@ -2919,7 +2919,7 @@ AutoPtr<ListView::ArrowScrollFocusResult> ListView::ArrowScrollFocused(
     if (selectedView != NULL && selectedViewHasFocus) {
         AutoPtr<IView> oldFocus;
         selectedView->FindFocus((IView**)&oldFocus);
-        FocusFinder::GetInstance()->FindNextFocus(THIS_PROBE(IViewGroup),
+        FocusFinder::GetInstance()->FindNextFocus(this,
                 oldFocus, direction, (IView**)&newFocus);
     }
     else {
@@ -2947,7 +2947,7 @@ AutoPtr<ListView::ArrowScrollFocusResult> ListView::ArrowScrollFocused(
                     selectedViewBottom : listBottom;
             mTempRect->Set(0, ySearchPoint, 0, ySearchPoint);
         }
-        FocusFinder::GetInstance()->FindNextFocusFromRect(THIS_PROBE(IViewGroup),
+        FocusFinder::GetInstance()->FindNextFocusFromRect(this,
                 mTempRect, direction, (IView**)&newFocus);
     }
 
@@ -3015,7 +3015,7 @@ Boolean ListView::IsViewAncestorOf(
     AutoPtr<IViewParent> theParent;
     child->GetParent((IViewParent**)&theParent);
     AutoPtr<IViewGroup> viewGroup = IViewGroup::Probe(theParent);
-    AutoPtr<IView> viewParent = IVIEW_PROBE(theParent);
+    AutoPtr<IView> viewParent = IView::Probe(theParent);
     return (viewGroup != NULL && IsViewAncestorOf(viewParent, parent));
 }
 

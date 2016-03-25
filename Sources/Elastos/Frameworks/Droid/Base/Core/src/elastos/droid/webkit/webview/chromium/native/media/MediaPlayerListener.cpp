@@ -192,7 +192,7 @@ void MediaPlayerListener::NativeOnMediaError(
     /* [in] */ Handle64 nativeMediaPlayerListener,
     /* [in] */ Int32 errorType)
 {
-    Elastos_MediaPlayerListener_nativeOnMediaError(THIS_PROBE(IInterface), nativeMediaPlayerListener, errorType);
+    Elastos_MediaPlayerListener_nativeOnMediaError(TO_IINTERFACE(this), nativeMediaPlayerListener, errorType);
 }
 
 void MediaPlayerListener::NativeOnVideoSizeChanged(
@@ -200,38 +200,38 @@ void MediaPlayerListener::NativeOnVideoSizeChanged(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
-    Elastos_MediaPlayerListener_nativeOnVideoSizeChanged(THIS_PROBE(IInterface), nativeMediaPlayerListener, width, height);
+    Elastos_MediaPlayerListener_nativeOnVideoSizeChanged(TO_IINTERFACE(this), nativeMediaPlayerListener, width, height);
 }
 
 void MediaPlayerListener::NativeOnBufferingUpdate(
     /* [in] */ Handle64 nativeMediaPlayerListener,
     /* [in] */ Int32 percent)
 {
-    Elastos_MediaPlayerListener_nativeOnBufferingUpdate(THIS_PROBE(IInterface), nativeMediaPlayerListener, percent);
+    Elastos_MediaPlayerListener_nativeOnBufferingUpdate(TO_IINTERFACE(this), nativeMediaPlayerListener, percent);
 }
 
 void MediaPlayerListener::NativeOnMediaPrepared(
     /* [in] */ Handle64 nativeMediaPlayerListener)
 {
-    Elastos_MediaPlayerListener_nativeOnMediaPrepared(THIS_PROBE(IInterface), nativeMediaPlayerListener);
+    Elastos_MediaPlayerListener_nativeOnMediaPrepared(TO_IINTERFACE(this), nativeMediaPlayerListener);
 }
 
 void MediaPlayerListener::NativeOnPlaybackComplete(
     /* [in] */ Handle64 nativeMediaPlayerListener)
 {
-    Elastos_MediaPlayerListener_nativeOnPlaybackComplete(THIS_PROBE(IInterface), nativeMediaPlayerListener);
+    Elastos_MediaPlayerListener_nativeOnPlaybackComplete(TO_IINTERFACE(this), nativeMediaPlayerListener);
 }
 
 void MediaPlayerListener::NativeOnSeekComplete(
     /* [in] */ Handle64 nativeMediaPlayerListener)
 {
-    Elastos_MediaPlayerListener_nativeOnSeekComplete(THIS_PROBE(IInterface), nativeMediaPlayerListener);
+    Elastos_MediaPlayerListener_nativeOnSeekComplete(TO_IINTERFACE(this), nativeMediaPlayerListener);
 }
 
 void MediaPlayerListener::NativeOnMediaInterrupted(
     /* [in] */ Handle64 nativeMediaPlayerListener)
 {
-    Elastos_MediaPlayerListener_nativeOnMediaInterrupted(THIS_PROBE(IInterface), nativeMediaPlayerListener);
+    Elastos_MediaPlayerListener_nativeOnMediaInterrupted(TO_IINTERFACE(this), nativeMediaPlayerListener);
 }
 
 //callback function definition

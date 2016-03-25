@@ -29,7 +29,7 @@ MultiTapKeyListener::Timeout::Timeout(
     mBuffer = buffer;
     Int32 bufLen;
     ICharSequence::Probe(mBuffer)->GetLength(&bufLen);
-    ISpannable::Probe(mBuffer)->SetSpan((IInterface*)(IRunnable*)this, 0, bufLen, ISpanned::SPAN_INCLUSIVE_INCLUSIVE);
+    ISpannable::Probe(mBuffer)->SetSpan(TO_IINTERFACE(this), 0, bufLen, ISpanned::SPAN_INCLUSIVE_INCLUSIVE);
     Boolean result;
     PostAtTime(this, SystemClock::GetUptimeMillis() + 2000, &result);
 }
@@ -57,7 +57,7 @@ ECode MultiTapKeyListener::Timeout::Run()
             Selection::SetSelection(ISpannable::Probe(buf), en);
         }
 
-        ISpannable::Probe(buf)->RemoveSpan((IInterface*)(IRunnable*)this);
+        ISpannable::Probe(buf)->RemoveSpan(TO_IINTERFACE(this));
     }
     return NOERROR;
 }
@@ -300,7 +300,7 @@ ECode MultiTapKeyListener::OnKeyDown(
         // cursor moves.
 
         Int32 spanStart;
-        if ((ISpanned::Probe(content)->GetSpanStart((IInterface*)(IMultiTapKeyListener*)this, &spanStart), spanStart) < 0) {
+        if ((ISpanned::Probe(content)->GetSpanStart(TO_IINTERFACE(this), &spanStart), spanStart) < 0) {
             AutoPtr< ArrayOf<IKeyListener*> > methods;
             Int32 contentLen;
             ISpanned::Probe(content)->GetSpans(0, (ICharSequence::Probe(content)->GetLength(&contentLen), contentLen), EIID_IKeyListener, (ArrayOf<IInterface*>**)&methods );
@@ -310,7 +310,7 @@ ECode MultiTapKeyListener::OnKeyDown(
                 AutoPtr<IKeyListener> method = (*methods)[i];
                 ISpannable::Probe(content)->RemoveSpan((IInterface*)(method.Get()));
             }
-            ISpannable::Probe(content)->SetSpan((IInterface*)(IMultiTapKeyListener*)this, 0, (ICharSequence::Probe(content)->GetLength(&contentLen), contentLen), ISpanned::SPAN_INCLUSIVE_INCLUSIVE);
+            ISpannable::Probe(content)->SetSpan(TO_IINTERFACE(this), 0, (ICharSequence::Probe(content)->GetLength(&contentLen), contentLen), ISpanned::SPAN_INCLUSIVE_INCLUSIVE);
         }
 
         *ret = TRUE;

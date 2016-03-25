@@ -858,12 +858,12 @@ Int32 BackStackRecord::CommitInternal(
 
     mCommitted = TRUE;
     if (mAddToBackStack) {
-        mManager->AllocBackStackIndex(THIS_PROBE(IBackStackRecord), &mIndex);
+        mManager->AllocBackStackIndex(this, &mIndex);
     }
     else {
         mIndex = -1;
     }
-    mManager->EnqueueAction((IRunnable*)this->Probe(EIID_IRunnable), allowStateLoss);
+    mManager->EnqueueAction(this, allowStateLoss);
     return mIndex;
 }
 
@@ -983,7 +983,7 @@ ECode BackStackRecord::Run()
     mManager->MoveToState(mManager->mCurState, mTransition, mTransitionStyle, TRUE);
 
     if (mAddToBackStack) {
-        mManager->AddBackStackState(THIS_PROBE(IBackStackRecord));
+        mManager->AddBackStackState(this);
     }
 
     return NOERROR;
@@ -1355,7 +1355,7 @@ ECode BackStackRecord::AddTargetsOnPreDrawListener::OnPreDraw(
 
     AutoPtr<IViewTreeObserver> vto;
     mContainer->GetViewTreeObserver((IViewTreeObserver**)&vto);
-    vto->RemoveOnPreDrawListener(THIS_PROBE(IOnPreDrawListener));
+    vto->RemoveOnPreDrawListener(this);
 
     // Don't include any newly-hidden fragments in the transition->
     Int32 id;
@@ -1735,7 +1735,7 @@ ECode BackStackRecord::RemoveTargetsOnPreDrawListener::OnPreDraw(
     AutoPtr<IViewTreeObserver> vto;
     IView::Probe(mSceneRoot)->GetViewTreeObserver((IViewTreeObserver**)&vto);
 
-    vto->RemoveOnPreDrawListener(THIS_PROBE(IOnPreDrawListener));
+    vto->RemoveOnPreDrawListener(this);
     if (mEnterTransition != NULL) {
         mEnterTransition->RemoveTarget(mNonExistingView);
         mHost->RemoveTargets(mEnterTransition, mEnteringViews);

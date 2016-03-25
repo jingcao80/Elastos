@@ -68,7 +68,7 @@ ECode CNTUserPrincipal::Equals(
         *equals = FALSE;
         return NOERROR;
     }
-    if (this->Probe(EIID_IInterface) == obj) {
+    if (TO_IINTERFACE(this) == obj) {
         *equals = TRUE;
         return NOERROR;
     }

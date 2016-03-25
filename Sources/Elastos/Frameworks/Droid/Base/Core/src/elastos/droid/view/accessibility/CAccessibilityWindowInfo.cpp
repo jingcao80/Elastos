@@ -303,7 +303,7 @@ ECode CAccessibilityWindowInfo::Obtain(
 ECode CAccessibilityWindowInfo::Recycle()
 {
     Clear();
-    sPool->ReleaseItem((IAccessibilityWindowInfo*)this);
+    sPool->ReleaseItem(this);
     return NOERROR;
 }
 
@@ -382,7 +382,7 @@ ECode CAccessibilityWindowInfo::Equals(
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
-    if ((IAccessibilityWindowInfo*)this == IAccessibilityWindowInfo::Probe(obj)) {
+    if (this == IAccessibilityWindowInfo::Probe(obj)) {
         *result = TRUE;
         return NOERROR;
     }

@@ -377,7 +377,7 @@ ECode CLinkedList::AddAll(
         return NOERROR;
     }
     AutoPtr<ICollection> elements;
-    if (collection == THIS_PROBE(ICollection)) {
+    if (collection == this) {
         AutoPtr<IArrayList> arrayList;
         CArrayList::New(collection, (IArrayList**)&arrayList);
         elements = ICollection::Probe(arrayList);
@@ -430,7 +430,7 @@ ECode CLinkedList::AddAll(
         return NOERROR;
     }
     AutoPtr<ICollection> elements;
-    if (collection == THIS_PROBE(ICollection)) {
+    if (collection == this) {
         AutoPtr<IArrayList> arrayList;
         CArrayList::New(collection, (IArrayList**)&arrayList);
         elements = ICollection::Probe(arrayList);

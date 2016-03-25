@@ -181,14 +181,14 @@ ECode CSignature::GetChainSignatures(
 
     if (mCertificateChain == NULL) {
         AutoPtr<ArrayOf<ISignature*> > sigs = ArrayOf<ISignature*>::Alloc(1);
-        sigs->Set(0, THIS_PROBE(ISignature));
+        sigs->Set(0, this);
         *result = sigs;
         REFCOUNT_ADD(*result)
         return NOERROR;
     }
 
     AutoPtr<ArrayOf<ISignature*> > chain = ArrayOf<ISignature*>::Alloc(1 + mCertificateChain->GetLength());
-    chain->Set(0, THIS_PROBE(ISignature));
+    chain->Set(0, this);
 
     Int32 i = 1;
     for (; i < mCertificateChain->GetLength(); ++i) {

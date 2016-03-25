@@ -255,7 +255,7 @@ CPinyinIME::~CPinyinIME()
 ECode CPinyinIME::constructor()
 {
     mFloatingWindowTimer = new PopupTimer(this);
-    CDecodingInfo::New((IPinyinIME*)this->Probe(EIID_IPinyinIME), (IDecodingInfo**)&mDecInfo);
+    CDecodingInfo::New(this, (IDecodingInfo**)&mDecInfo);
     return NOERROR;
 }
 
@@ -301,20 +301,20 @@ ECode CPinyinIME::OnCreate()
     CPinyinSettings::AcquireSingleton((ISettings**)&settings);
     settings->GetInstance(sp);
 
-    CInputModeSwitcher::New(THIS_PROBE(IPinyinIME), (IInputModeSwitcher**)&mInputModeSwitcher);
+    CInputModeSwitcher::New(this, (IInputModeSwitcher**)&mInputModeSwitcher);
     mChoiceNotifier = new ChoiceNotifier(this);
 
-    CPinyinGestureListener::New(FALSE, THIS_PROBE(IPinyinIME), (IGestureDetectorOnGestureListener**)&mGestureListenerSkb);
-    CPinyinGestureListener::New(TRUE, THIS_PROBE(IPinyinIME), (IGestureDetectorOnGestureListener**)&mGestureListenerCandidates);
-    CGestureDetector::New(THIS_PROBE(IContext), mGestureListenerSkb, (IGestureDetector**)&mGestureDetectorSkb);
-    CGestureDetector::New(THIS_PROBE(IContext), mGestureListenerCandidates, (IGestureDetector**)&mGestureDetectorCandidates);
+    CPinyinGestureListener::New(FALSE, this, (IGestureDetectorOnGestureListener**)&mGestureListenerSkb);
+    CPinyinGestureListener::New(TRUE, this, (IGestureDetectorOnGestureListener**)&mGestureListenerCandidates);
+    CGestureDetector::New(this, mGestureListenerSkb, (IGestureDetector**)&mGestureDetectorSkb);
+    CGestureDetector::New(this, mGestureListenerCandidates, (IGestureDetector**)&mGestureDetectorCandidates);
 
     AutoPtr<IResources> res;
     InputMethodService::GetResources((IResources**)&res);
     assert(res != NULL);
     AutoPtr<IConfiguration> config;
     res->GetConfiguration((IConfiguration**)&config);
-    return mEnvironment->OnConfigurationChanged(config, THIS_PROBE(IContext));
+    return mEnvironment->OnConfigurationChanged(config, this);
 }
 
 //add by kinier for fix the candidate word can not display bug
@@ -354,7 +354,7 @@ ECode CPinyinIME::OnConfigurationChanged(
     // can get the environment instance to handle size issues. When
     // super.onConfigurationChanged() is called, onCreateCandidatesView()
     // and onCreateInputView() will be executed if necessary.
-    env->OnConfigurationChanged(newConfig, THIS_PROBE(IContext));
+    env->OnConfigurationChanged(newConfig, this);
 
     // Clear related UI of the previous configuration.
     if (NULL != mSkbContainer) {
@@ -1201,7 +1201,7 @@ Boolean CPinyinIME::StartPinyinDecoderService()
     if (NULL == service) {
         AutoPtr<IIntent> serviceIntent;
         CIntent::New((IIntent**)&serviceIntent);
-        serviceIntent->SetClassName(THIS_PROBE(IContext), String("PinyinIME.CPinyinDecoderService"));
+        serviceIntent->SetClassName(this, String("PinyinIME.CPinyinDecoderService"));
 
         if (NULL == mPinyinDecoderServiceConnection) {
             mPinyinDecoderServiceConnection = new PinyinDecoderServiceConnection(this);
@@ -1241,7 +1241,7 @@ ECode CPinyinIME::OnCreateCandidatesView(
     // Create balloon hint for candidates view.
     const Int32 MODE_SHIFT = 30;
     const Int32 UNSPECIFIED = 0 << MODE_SHIFT;
-    CBalloonHint::New(THIS_PROBE(IContext), mCandidatesContainer, UNSPECIFIED/*MeasureSpec::UNSPECIFIED*/, (IBalloonHint**)&mCandidatesBalloon);
+    CBalloonHint::New(this, mCandidatesContainer, UNSPECIFIED/*MeasureSpec::UNSPECIFIED*/, (IBalloonHint**)&mCandidatesBalloon);
 
     AutoPtr<IResources> res;
     InputMethodService::GetResources((IResources**)&res);
@@ -1257,7 +1257,7 @@ ECode CPinyinIME::OnCreateCandidatesView(
         mFloatingWindowTimer->CancelShowing();
         mFloatingWindow->Dismiss();
     }
-    CPopupWindow::New(THIS_PROBE(IContext), (IPopupWindow**)&mFloatingWindow);
+    CPopupWindow::New(this, (IPopupWindow**)&mFloatingWindow);
     mFloatingWindow->SetClippingEnabled(FALSE);
     mFloatingWindow->SetBackgroundDrawable(NULL);
     mFloatingWindow->SetInputMethodMode(IPopupWindow::INPUT_METHOD_NOT_NEEDED);
@@ -1434,7 +1434,7 @@ ECode CPinyinIME::OnCreateInputView(
     AutoPtr<ILayoutInflater> inflater;
     InputMethodService::GetLayoutInflater((ILayoutInflater**)&inflater);
     inflater->Inflate(R::layout::skb_container, NULL, (IView**)&mSkbContainer);
-    mSkbContainer->SetService(THIS_PROBE(IInputMethodService));
+    mSkbContainer->SetService(this);
     mSkbContainer->SetInputModeSwitcher(mInputModeSwitcher);
     mSkbContainer->SetGestureDetector(mGestureDetectorSkb);
     *view = mSkbContainer;
@@ -1566,7 +1566,7 @@ ECode CPinyinIME::ShowOptionsMenu()
     assert(mOptionsDialog == NULL);
 
     AutoPtr<IAlertDialogBuilder> builder;
-    CAlertDialogBuilder::New(THIS_PROBE(IContext), (IAlertDialogBuilder**)&builder);
+    CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
     builder->SetCancelable(TRUE);
     builder->SetIcon(Elastos::Droid::DevSamples::PinyinIME::R::drawable::app_icon);
     builder->SetNegativeButton(Elastos::Droid::R::string::cancel, NULL);
@@ -1632,7 +1632,7 @@ void CPinyinIME::LaunchSettings()
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
     assert(0 && "TODO: CSettingsActivity Not Implement...");
-    intent->SetClassName(/*PinyinIME.this*/THIS_PROBE(IContext), String("PinyinIME.CSettingsActivity"));
+    intent->SetClassName(/*PinyinIME.this*/this, String("PinyinIME.CSettingsActivity"));
     intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
     InputMethodService::StartActivity(intent);
 }

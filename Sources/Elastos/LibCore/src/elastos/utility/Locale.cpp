@@ -321,7 +321,7 @@ ECode Locale::Equals(
         return NOERROR;
     }
 
-    if (other == this->Probe(EIID_IInterface)) {
+    if (other == TO_IINTERFACE(this)) {
         *result = TRUE;
         return NOERROR;
     }
@@ -397,9 +397,9 @@ ECode Locale::GetDisplayCountry(
     }
 
     String result;
-    ICUUtil::GetDisplayCountry(THIS_PROBE(ILocale), locale, &result);
+    ICUUtil::GetDisplayCountry(this, locale, &result);
     if (result.IsNull()) { // TODO: do we need to do this, or does ICU do it for us?
-        ICUUtil::GetDisplayCountry(THIS_PROBE(ILocale), CLocale::GetDefault(), &result);
+        ICUUtil::GetDisplayCountry(this, CLocale::GetDefault(), &result);
     }
     *country = result;
     return NOERROR;
@@ -438,9 +438,9 @@ ECode Locale::GetDisplayLanguage(
     }
 
     String result;
-    ICUUtil::GetDisplayLanguage(THIS_PROBE(ILocale), locale, &result);
+    ICUUtil::GetDisplayLanguage(this, locale, &result);
     if (result.IsNull()) { // TODO: do we need to do this, or does ICU do it for us?
-        ICUUtil::GetDisplayLanguage(THIS_PROBE(ILocale), CLocale::GetDefault(), &result);
+        ICUUtil::GetDisplayLanguage(this, CLocale::GetDefault(), &result);
     }
     *language = result;
     return NOERROR;
@@ -533,9 +533,9 @@ ECode Locale::GetDisplayVariant(
     //      return mVariantCode;
     // }
 
-    result = ICUUtil::GetDisplayVariant(THIS_PROBE(ILocale), locale);
+    result = ICUUtil::GetDisplayVariant(this, locale);
     if (result.IsNull()) { // TODO: do we need to do this, or does ICU do it for us?
-        result = ICUUtil::GetDisplayVariant(THIS_PROBE(ILocale), CLocale::GetDefault());
+        result = ICUUtil::GetDisplayVariant(this, CLocale::GetDefault());
     }
     *variantName = result;
     return NOERROR;
@@ -639,10 +639,10 @@ ECode Locale::GetDisplayScript(
     }
 
     // TODO upgrade
-    // String result = ICUUtil::GetDisplayScript(THIS_PROBE(ILocale), locale);
+    // String result = ICUUtil::GetDisplayScript(this, locale);
     // if (result.IsNull()) { // TODO: do we need to do this, or does ICU do it for us?
     //     AutoPtr<ILocale> locale = GetDefault();
-    //     result = ICUUtil::GetDisplayScript(THIS_PROBE(ILocale),locale);
+    //     result = ICUUtil::GetDisplayScript(this,locale);
     // }
 
     // *script = result;

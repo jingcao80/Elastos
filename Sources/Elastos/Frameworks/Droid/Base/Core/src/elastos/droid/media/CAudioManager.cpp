@@ -148,7 +148,7 @@ CAudioManager::CAudioManager()
     CBinder::New((IBinder**)&mToken);
     CBinder::New((IBinder**)&mICallBack);
     mAudioFocusEventHandlerDelegate = new FocusEventHandlerDelegate(this);
-    CAudioManagerAudioFocusDispatcher::New(THIS_PROBE(IAudioManager), (IIAudioFocusDispatcher**)&mAudioFocusDispatcher);
+    CAudioManagerAudioFocusDispatcher::New(this, (IIAudioFocusDispatcher**)&mAudioFocusDispatcher);
 
     CInteger32::New(AUDIOPORT_GENERATION_INIT, (IInteger32**)&mAudioPortGeneration);
     CArrayList::New((IArrayList**)&mAudioPortsCached);
@@ -168,7 +168,7 @@ ECode CAudioManager::constructor(
     resources->GetBoolean(R::bool_::config_useMasterVolume, &mUseMasterVolume);
     resources->GetBoolean(R::bool_::config_useVolumeKeySounds, &mUseVolumeKeySounds);
 
-    mAudioPortEventHandler = new AudioPortEventHandler(THIS_PROBE(IAudioManager));
+    mAudioPortEventHandler = new AudioPortEventHandler(this);
     resources->GetBoolean(R::bool_::config_useFixedVolume, &mUseFixedVolume);
 
     AutoPtr<IInterface> interfaceTmp;

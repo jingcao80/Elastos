@@ -105,7 +105,7 @@ ECode YearPickerView::Init(
     /* [in] */ IDatePickerController* controller)
 {
     mController = controller;
-    mController->RegisterOnDateChangedListener((IOnDateChangedListener*)this->Probe(EIID_IOnDateChangedListener));
+    mController->RegisterOnDateChangedListener(this);
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
     mAdapter = new YearAdapter();

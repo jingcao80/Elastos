@@ -186,7 +186,7 @@ void DownloadController::OnDangerousDownload(
 // native methods
 void DownloadController::NativeInit()
 {
-    Elastos_DownloadController_nativeInit(THIS_PROBE(IInterface));
+    Elastos_DownloadController_nativeInit(TO_IINTERFACE(this));
 }
 
 void DownloadController::NewHttpGetDownload(

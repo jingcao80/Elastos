@@ -525,7 +525,7 @@ HtmlToSpannedConverter::HtmlToSpannedConverter(
 
 AutoPtr<ISpanned> HtmlToSpannedConverter::Convert()
 {
-    mReader->SetContentHandler((IContentHandler*)this);
+    mReader->SetContentHandler(this);
     //try {
         AutoPtr<IStringReader> sr;
         CStringReader::New(mSource, (IStringReader**)&sr);

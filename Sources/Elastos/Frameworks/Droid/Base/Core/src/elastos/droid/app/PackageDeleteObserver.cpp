@@ -10,7 +10,7 @@ CAR_INTERFACE_IMPL(PackageDeleteObserver, Object, IPackageDeleteObserver)
 
 ECode PackageDeleteObserver::constructor()
 {
-    return CPackageDeleteObserver2::New((IPackageDeleteObserver*)this, (IIPackageDeleteObserver2**)&mBinder);
+    return CPackageDeleteObserver2::New(this, (IIPackageDeleteObserver2**)&mBinder);
 }
 
 ECode PackageDeleteObserver::GetBinder(

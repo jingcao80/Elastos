@@ -51,7 +51,7 @@ ECode AlertDialog::constructor(
     GetContext((IContext**)&ctx);
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
-    return CAlertController::New(ctx, THIS_PROBE(IDialogInterface), window,
+    return CAlertController::New(ctx, this, window,
             (IAlertController**)&mAlert);
 }
 
@@ -67,7 +67,7 @@ ECode AlertDialog::constructor(
     SetOnCancelListener(cancelListener);
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
-    return CAlertController::New(context, THIS_PROBE(IDialogInterface), window,
+    return CAlertController::New(context, this, window,
             (IAlertController**)&mAlert);
 }
 

@@ -40,12 +40,12 @@ ECode CResetSessionDialog::constructor(
     context->GetString(R::string::guest_wipe_session_wipe, &str);
     seq = NULL;
     CString::New(str, (ICharSequence**)&seq);
-    SetButton(BUTTON_WIPE, seq, THIS_PROBE(IDialogInterfaceOnClickListener));
+    SetButton(BUTTON_WIPE, seq, this);
 
     context->GetString(R::string::guest_wipe_session_dontwipe, &str);
     seq = NULL;
     CString::New(str, (ICharSequence**)&seq);
-    SetButton(BUTTON_DONTWIPE, seq, THIS_PROBE(IDialogInterfaceOnClickListener));
+    SetButton(BUTTON_DONTWIPE, seq, this);
 
     mUserId = userId;
     return NOERROR;

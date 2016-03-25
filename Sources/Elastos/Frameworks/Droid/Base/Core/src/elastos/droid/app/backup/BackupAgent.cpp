@@ -555,22 +555,22 @@ PInterface BackupAgent::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IBackupAgent*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IObject) {
-        return (IObject*)this;
+        return this;
     }
     else if (riid == EIID_IBackupAgent) {
-        return (IBackupAgent*)this;
+        return this;
     }
     else if (riid == EIID_IContextWrapper) {
-        return (IContextWrapper*)this;
+        return this;
     }
     else if (riid == EIID_IContext) {
-        return (IContext*)this;
+        return this;
     }
     else if (riid == EIID_IWeakReferenceSource) {
-        return (IWeakReferenceSource*)this;
+        return this;
     }
     else if (riid == EIID_BackupAgent) {
         return reinterpret_cast<PInterface>(this);
@@ -641,7 +641,7 @@ ECode BackupAgent::Equals(
 
     IBackupAgent * o = IBackupAgent::Probe(other);
     if (o != NULL) {
-        *result = (o == THIS_PROBE(IBackupAgent));
+        *result = (o == this);
     }
     return NOERROR;
 }
@@ -650,7 +650,7 @@ ECode BackupAgent::GetHashCode(
     /* [out] */ Int32* hash)
 {
     VALIDATE_NOT_NULL(hash);
-    *hash = (Int32)THIS_PROBE(IActivity);
+    *hash = (Int32)this;
     return NOERROR;
 }
 

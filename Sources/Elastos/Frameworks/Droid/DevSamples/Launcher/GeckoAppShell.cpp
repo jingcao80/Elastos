@@ -244,10 +244,10 @@ PInterface GeckoAppShell::LooperThread::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IRunnable*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IThread) {
-        return (IThread*)this;
+        return this;
     }
 
     return NULL;
@@ -424,10 +424,10 @@ PInterface GeckoAppShell::IMEStateUpdater::Probe(
         return (PInterface)this;
     }
     else if (riid == EIID_IRunnable) {
-        return (IRunnable*)this;
+        return this;
     }
 //    else if (riid == EIID_ITimerTask) {
-//        return (ITimerTask*)this;
+//        return this;
 //    }
 
     return NULL;
@@ -441,7 +441,7 @@ ECode GeckoAppShell::IMEStateUpdater::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)(IRunnable*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IRunnable;
     }
     else {

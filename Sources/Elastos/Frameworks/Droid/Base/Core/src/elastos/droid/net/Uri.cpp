@@ -2456,7 +2456,7 @@ ECode Uri::NormalizeScheme(
     String scheme;
     GetScheme(&scheme);
     if (scheme.IsNull()) {
-        *result = THIS_PROBE(IUri);
+        *result = this;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -2464,7 +2464,7 @@ ECode Uri::NormalizeScheme(
     String lowerScheme = scheme.ToLowerCase(); // String lowerScheme = scheme.toLowerCase(Locale.ROOT);
 
     if (scheme.Equals(lowerScheme)) {
-        *result = THIS_PROBE(IUri);
+        *result = this;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -2740,7 +2740,7 @@ ECode Uri::GetCanonicalUri(
     }
 
 _Exit_:
-    *result = THIS_PROBE(IUri);
+    *result = this;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

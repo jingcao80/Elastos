@@ -77,7 +77,7 @@ ECode WebViewUpdateService::BinderService::WaitForRelroCreationCompleted(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    ISynchronize* obj = (ISynchronize*)this;
+    ISynchronize* obj = this;
     AutoPtr<ISystem> system;
     CSystem::AcquireSingleton((ISystem**)&system);
     Int64 nt;

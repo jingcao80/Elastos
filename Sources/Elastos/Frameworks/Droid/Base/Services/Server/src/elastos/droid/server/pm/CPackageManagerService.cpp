@@ -2213,13 +2213,14 @@ ECode CPackageManagerService::MeasureParams::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    AutoPtr<ISystem> system;
-    CSystem::AcquireSingleton((ISystem**)&system);
-    Int32 hashCode;
-    system->IdentityHashCode((IObject*)this, &hashCode);
     String pkgN;
     mStats->GetPackageName(&pkgN);
-    *str = String("MeasureParams{") + StringUtils::ToHexString(hashCode) + pkgN + "}";
+    StringBuilder sb("MeasureParams{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += " ";
+    sb += pkgN;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 
@@ -2413,13 +2414,14 @@ ECode CPackageManagerService::InstallParams::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    AutoPtr<ISystem> sys;
-    CSystem::AcquireSingleton((ISystem**)&sys);
-    Int32 hashCode;
-    sys->IdentityHashCode((IObject*)this, &hashCode);
-    String fileStr = Object::ToString(mOrigin->mFile);
-    *str = String("InstallParams{") + StringUtils::ToHexString(hashCode)
-            + " file=" + fileStr + " cid=" + mOrigin->mCid + "}";
+    StringBuilder sb("InstallParams{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += " file=";
+    sb += Object::ToString(mOrigin->mFile);
+    sb += " cid=";
+    sb += mOrigin->mCid;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 
@@ -18257,7 +18259,7 @@ ECode CPackageManagerService::MovePackage(
     }
 
     AutoPtr<IIPackageInstallObserver2> installObserver;
-    CPackageInstallObserver2::New((IIPackageManager*)this, observer, packageName, (IIPackageInstallObserver2**)&installObserver);
+    CPackageInstallObserver2::New(this, observer, packageName, (IIPackageInstallObserver2**)&installObserver);
 
     // Treat a move like reinstalling an existing app, which ensures that we
     // process everythign uniformly, like unpacking native libraries.

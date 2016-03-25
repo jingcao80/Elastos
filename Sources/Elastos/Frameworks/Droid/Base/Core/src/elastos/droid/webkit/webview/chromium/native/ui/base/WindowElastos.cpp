@@ -350,21 +350,21 @@ ECode WindowElastos::RequestVSyncUpdate()
 Handle64 WindowElastos::NativeInit(
     /* [in] */ Int64 vsyncPeriod)
 {
-    return Elastos_WindowAndroid_nativeInit(THIS_PROBE(IInterface), vsyncPeriod);
+    return Elastos_WindowAndroid_nativeInit(TO_IINTERFACE(this), vsyncPeriod);
 }
 
 ECode WindowElastos::NativeOnVSync(
     /* [in] */ Handle64 nativeWindowElastos,
     /* [in] */ Int64 vsyncTimeMicros)
 {
-    Elastos_WindowAndroid_nativeOnVSync(THIS_PROBE(IInterface), (Handle64)nativeWindowElastos, vsyncTimeMicros);
+    Elastos_WindowAndroid_nativeOnVSync(TO_IINTERFACE(this), (Handle64)nativeWindowElastos, vsyncTimeMicros);
     return NOERROR;
 }
 
 ECode WindowElastos::NativeDestroy(
     /* [in] */ Handle64 nativeWindowElastos)
 {
-    Elastos_WindowAndroid_nativeDestroy(THIS_PROBE(IInterface), (Handle64)nativeWindowElastos);
+    Elastos_WindowAndroid_nativeDestroy(TO_IINTERFACE(this), (Handle64)nativeWindowElastos);
     return NOERROR;
 }
 

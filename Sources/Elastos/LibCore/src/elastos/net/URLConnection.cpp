@@ -129,7 +129,7 @@ ECode URLConnection::GetContent(
     if (!mContentType.IsNull()) {
         AutoPtr<IContentHandler> handler;
         GetContentHandler(mContentType, (IContentHandler**)&handler);
-        return handler->GetContent(THIS_PROBE(IURLConnection), content);
+        return handler->GetContent(this, content);
     }
 
     *content = NULL;
@@ -164,7 +164,7 @@ ECode URLConnection::GetContent(
         AutoPtr<IContentHandler> handler;
         GetContentHandler(mContentType, (IContentHandler**)&handler);
 
-        return handler->GetContent(THIS_PROBE(IURLConnection), types, obj);
+        return handler->GetContent(this, types, obj);
     }
 
     return NOERROR;

@@ -37,7 +37,7 @@ ECode CDeadZone::DebugFlashRunnable::Run()
     AutoPtr<IObjectAnimatorHelper> helper;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
     AutoPtr<IObjectAnimator> anim;
-    helper->OfFloat(THIS_PROBE(IInterface), String("flash"), params, (IObjectAnimator**)&anim);
+    helper->OfFloat(TO_IINTERFACE(this), String("flash"), params, (IObjectAnimator**)&anim);
     IViewPropertyAnimator::Probe(anim)->Start();
     return NOERROR;
 }

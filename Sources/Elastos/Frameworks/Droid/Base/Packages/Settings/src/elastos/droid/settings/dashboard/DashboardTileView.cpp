@@ -38,7 +38,7 @@ ECode DashboardTileView::constructor(
     AutoPtr<ILayoutInflater> inflater;
     LayoutInflater::From(context, (ILayoutInflater**)&inflater);
     AutoPtr<IView> view;
-    inflater->Inflate(R::layout::dashboard_tile, (IViewGroup*)this, (IView**)&view);
+    inflater->Inflate(R::layout::dashboard_tile, this, (IView**)&view);
 
     AutoPtr<IView> _view;
     view->FindViewById(R::id::icon, (IView**)&_view);

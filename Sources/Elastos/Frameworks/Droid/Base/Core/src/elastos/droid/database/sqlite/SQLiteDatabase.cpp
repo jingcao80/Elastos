@@ -175,7 +175,7 @@ String SQLiteDatabase::GetLabel()
 ECode SQLiteDatabase::OnCorruption()
 {
     //EventLog.writeEvent(EVENT_DB_CORRUPT, getLabel());
-    return mErrorHandler->OnCorruption(THIS_PROBE(ISQLiteDatabase));
+    return mErrorHandler->OnCorruption(this);
 }
 
 ECode SQLiteDatabase::GetThreadSession(
@@ -602,7 +602,7 @@ ECode SQLiteDatabase::GetVersion(
     /* [out] */ Int32* version)
 {
     VALIDATE_NOT_NULL(version);
-    Int64 value = DatabaseUtils::Int64ForQuery(THIS_PROBE(ISQLiteDatabase), String("PRAGMA user_version;"), NULL);
+    Int64 value = DatabaseUtils::Int64ForQuery(this, String("PRAGMA user_version;"), NULL);
     *version = (Int32)value;
     return NOERROR;
 }
@@ -619,7 +619,7 @@ ECode SQLiteDatabase::GetMaximumSize(
 {
     VALIDATE_NOT_NULL(maxSize);
 
-    Int64 pageCount = DatabaseUtils::Int64ForQuery(THIS_PROBE(ISQLiteDatabase), String("PRAGMA max_page_count;"), NULL);
+    Int64 pageCount = DatabaseUtils::Int64ForQuery(this, String("PRAGMA max_page_count;"), NULL);
     Int64 pageSize;
     GetPageSize(&pageSize);
     *maxSize = pageCount * pageSize;
@@ -639,7 +639,7 @@ ECode SQLiteDatabase::SetMaximumSize(
     if ((numBytes % pageSize) != 0) {
         numPages++;
     }
-    Int64 newPageCount = DatabaseUtils::Int64ForQuery(THIS_PROBE(ISQLiteDatabase),
+    Int64 newPageCount = DatabaseUtils::Int64ForQuery(this,
             String("PRAGMA max_page_count = ") + StringUtils::ToString(numPages), NULL);
     *maxSize = newPageCount * pageSize;
     return NOERROR;
@@ -649,7 +649,7 @@ ECode SQLiteDatabase::GetPageSize(
     /* [out] */ Int64* pageSize)
 {
     VALIDATE_NOT_NULL(pageSize);
-    *pageSize = DatabaseUtils::Int64ForQuery(THIS_PROBE(ISQLiteDatabase), String("PRAGMA page_size;"), NULL);
+    *pageSize = DatabaseUtils::Int64ForQuery(this, String("PRAGMA page_size;"), NULL);
     return NOERROR;
 }
 
@@ -712,7 +712,7 @@ ECode SQLiteDatabase::CompileStatement(
     VALIDATE_NOT_NULL(stmt)
     AcquireReference();
     //try {
-    ECode ec = CSQLiteStatement::New(THIS_PROBE(ISQLiteDatabase), sql, NULL, stmt);
+    ECode ec = CSQLiteStatement::New(this, sql, NULL, stmt);
     //} finally {
     SQLiteClosable::ReleaseReference();
     //}
@@ -879,7 +879,7 @@ ECode SQLiteDatabase::RawQueryWithFactory(
     *cursor = NULL;
     AcquireReference();
     // try {
-    AutoPtr<ISQLiteCursorDriver> driver = new SQLiteDirectCursorDriver(THIS_PROBE(ISQLiteDatabase), sql, editTable, NULL);
+    AutoPtr<ISQLiteCursorDriver> driver = new SQLiteDirectCursorDriver(this, sql, editTable, NULL);
     ECode ec = driver->Query(cursorFactory != NULL ? cursorFactory : mCursorFactory.Get(), selectionArgs, cursor);
     // } finally {
     ReleaseReference();
@@ -900,7 +900,7 @@ ECode SQLiteDatabase::RawQueryWithFactory(
 
     AcquireReference();
     // try {
-    AutoPtr<ISQLiteCursorDriver> driver = new SQLiteDirectCursorDriver(THIS_PROBE(ISQLiteDatabase), sql, editTable,
+    AutoPtr<ISQLiteCursorDriver> driver = new SQLiteDirectCursorDriver(this, sql, editTable,
             cancellationSignal);
     ECode ec = driver->Query(cursorFactory != NULL ? cursorFactory : mCursorFactory.Get(), selectionArgs, cursor);
     // } finally {
@@ -1025,7 +1025,7 @@ ECode SQLiteDatabase::InsertWithOnConflict(
     sql.Append(")");
 
     AutoPtr<ISQLiteStatement> statement;
-    ECode ec = CSQLiteStatement::New(THIS_PROBE(ISQLiteDatabase), sql.ToString(), bindArgs,
+    ECode ec = CSQLiteStatement::New(this, sql.ToString(), bindArgs,
             (ISQLiteStatement**)&statement);
     if (FAILED(ec)) {
         goto fail;
@@ -1067,7 +1067,7 @@ ECode SQLiteDatabase::Delete(
         }
     }
 
-    ECode ec = CSQLiteStatement::New(THIS_PROBE(ISQLiteDatabase), sb.ToString(), bindArgs, (ISQLiteStatement**)&statement);
+    ECode ec = CSQLiteStatement::New(this, sb.ToString(), bindArgs, (ISQLiteStatement**)&statement);
     if (FAILED(ec)) {
         goto fail;
     }
@@ -1160,7 +1160,7 @@ ECode SQLiteDatabase::UpdateWithOnConflict(
     // }
 
     AutoPtr<ISQLiteStatement> statement;
-    ECode ec = CSQLiteStatement::New(THIS_PROBE(ISQLiteDatabase), sql.ToString(), bindArgs, (ISQLiteStatement**)&statement);
+    ECode ec = CSQLiteStatement::New(this, sql.ToString(), bindArgs, (ISQLiteStatement**)&statement);
     if (FAILED(ec)) {
         goto fail;
     }
@@ -1215,7 +1215,7 @@ ECode SQLiteDatabase::ExecuteSql(
     }
 
     AutoPtr<ISQLiteStatement> statement;
-    ECode ec = CSQLiteStatement::New(THIS_PROBE(ISQLiteDatabase), sql, bindArgs, (ISQLiteStatement**)&statement);
+    ECode ec = CSQLiteStatement::New(this, sql, bindArgs, (ISQLiteStatement**)&statement);
     if (FAILED(ec)) {
         goto fail;
     }

@@ -146,7 +146,7 @@ ECode RotateDrawable::SetDrawable(
         }
         mState->mDrawable = drawable;
         if (drawable != NULL) {
-            drawable->SetCallback(THIS_PROBE(IDrawableCallback));
+            drawable->SetCallback(this);
         }
     }
     return NOERROR;
@@ -325,7 +325,7 @@ ECode RotateDrawable::InvalidateDrawable(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->InvalidateDrawable(THIS_PROBE(IDrawable));
+        callback->InvalidateDrawable(this);
     }
     return NOERROR;
 }
@@ -338,7 +338,7 @@ ECode RotateDrawable::ScheduleDrawable(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->ScheduleDrawable(THIS_PROBE(IDrawable), what, when);
+        callback->ScheduleDrawable(this, what, when);
     }
     return NOERROR;
 }
@@ -350,7 +350,7 @@ ECode RotateDrawable::UnscheduleDrawable(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->UnscheduleDrawable(THIS_PROBE(IDrawable), what);
+        callback->UnscheduleDrawable(this, what);
     }
     return NOERROR;
 }
@@ -538,7 +538,7 @@ ECode RotateDrawable::Inflate(
     mState->mToDegrees = toDegrees;
 
     if (drawable != NULL) {
-        drawable->SetCallback((IDrawableCallback*)this->Probe(EIID_IDrawableCallback));
+        drawable->SetCallback(this);
     }
     return NOERROR;
 }

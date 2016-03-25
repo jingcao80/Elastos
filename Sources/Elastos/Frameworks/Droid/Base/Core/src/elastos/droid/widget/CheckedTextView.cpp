@@ -165,7 +165,7 @@ ECode CheckedTextView::SetCheckMarkDrawable(
     }
     mNeedRequestlayout = (d != mCheckMarkDrawable);
     if (d != NULL) {
-        d->SetCallback((IDrawableCallback*)this->Probe(EIID_IDrawableCallback));
+        d->SetCallback(this);
 
         Int32 vis = 0;
         GetVisibility(&vis);

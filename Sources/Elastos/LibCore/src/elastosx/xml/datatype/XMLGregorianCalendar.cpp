@@ -99,11 +99,12 @@ ECode XMLGregorianCalendar::Equals(
     /* [in] */ IInterface* other,
     /* [out] */ Boolean* result)
 {
-    if (other == (IXMLGregorianCalendar*)this) {
+    VALIDATE_NOT_NULL(result)
+    IXMLGregorianCalendar* cdr = IXMLGregorianCalendar::Probe(other);
+    if (cdr == (IXMLGregorianCalendar*)this) {
         *result = TRUE;
         return NOERROR;
     }
-    AutoPtr<IXMLGregorianCalendar> cdr = IXMLGregorianCalendar::Probe(other);
     if (cdr != NULL) {
         Int32 cpr;
         Compare(cdr, &cpr);

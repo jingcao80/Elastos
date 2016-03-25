@@ -13,7 +13,6 @@ ECode Enum::Name(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-
     *str = mName;
     return NOERROR;
 }
@@ -42,7 +41,7 @@ ECode Enum::Equals(
 {
     VALIDATE_NOT_NULL(value)
 
-    *value = this->Probe(EIID_IInterface) == other;
+    *value = TO_IINTERFACE(this) == other;
     return NOERROR;
 }
 

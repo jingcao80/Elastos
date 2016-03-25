@@ -106,7 +106,7 @@ ECode CProxy::Equals(
         return NOERROR;
     }
 
-    if (other == THIS_PROBE(IProxy)) {
+    if (other == this) {
         *result = TRUE;
         return NOERROR;
     }

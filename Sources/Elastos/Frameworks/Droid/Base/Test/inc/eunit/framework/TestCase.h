@@ -90,6 +90,8 @@ class ECO_PUBLIC TestCase
     , public ITestCase
 {
 public:
+    CAR_INTERFACE_DECL()
+
     /**
      * No-arg constructor to enable serialization. This method
      * is not intended to be used by mere mortals without calling setName().
@@ -103,31 +105,6 @@ public:
         /* [in] */ const String& name);
 
     virtual CARAPI Initialize();
-
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
-
-    CARAPI_(UInt32) AddRef();
-
-    CARAPI_(UInt32) Release();
-
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface *pObject,
-        /* [out] */ InterfaceID *pIID);
-
-    CARAPI Aggregate(
-        /* [in] */ AggrType aggrType,
-        /* [in] */ PInterface pObject);
-
-    CARAPI GetDomain(
-        /* [out] */ PInterface *ppObject);
-
-    CARAPI Equals(
-        /* [in] */ IInterface* other,
-        /* [out] */ Boolean * result);
-
-    CARAPI GetHashCode(
-        /* [out] */ Int32* hash);
 
     /**
      * Counts the number of test cases executed by run(TestResult result).

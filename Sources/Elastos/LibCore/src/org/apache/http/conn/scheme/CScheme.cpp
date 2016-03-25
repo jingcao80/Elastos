@@ -89,7 +89,7 @@ ECode CScheme::Equals(
         *result = FALSE;
         return NOERROR;
     }
-    if (this->Probe(EIID_IInterface) == other) {
+    if (TO_IINTERFACE(this) == other) {
         *result = TRUE;
         return NOERROR;
     }

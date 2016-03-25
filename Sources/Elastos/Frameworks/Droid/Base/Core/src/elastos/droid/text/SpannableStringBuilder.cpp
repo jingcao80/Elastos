@@ -324,7 +324,7 @@ ECode SpannableStringBuilder::Replace(
     AutoPtr<ICharSequence> tb = _tb;
     for (Int32 i = 0; i < filtercount; i++) {
         AutoPtr<ICharSequence> repl;
-        AutoPtr<ISpanned> span = (ISpanned*)this->Probe(EIID_ISpanned);
+        AutoPtr<ISpanned> span = this;
         (*mFilters)[i]->Filter(tb, tbstart, tbend, span, start, end, (ICharSequence**)&repl);
         if (repl != NULL) {
             tb = repl;
@@ -360,8 +360,8 @@ ECode SpannableStringBuilder::Replace(
     Int32 selectionStart = 0;
     Int32 selectionEnd = 0;
     if (adjustSelection) {
-        selectionStart = Selection::GetSelectionStart((ICharSequence*)this->Probe(EIID_ICharSequence));
-        selectionEnd = Selection::GetSelectionEnd((ICharSequence*)this->Probe(EIID_ICharSequence));
+        selectionStart = Selection::GetSelectionStart(this);
+        selectionEnd = Selection::GetSelectionEnd(this);
     }
     Change(start, end, tb, tbstart, tbend);
 
@@ -671,7 +671,7 @@ ECode SpannableStringBuilder::SubSequence(
 {
     AutoPtr<ISpannableStringBuilder> sub;
     FAIL_RETURN(CSpannableStringBuilder::New(
-        THIS_PROBE(ICharSequence), start, end,
+        this, start, end,
         (ISpannableStringBuilder**)&sub));
     *cs = ICharSequence::Probe(sub);
     REFCOUNT_ADD(*cs);
@@ -1324,13 +1324,13 @@ void SpannableStringBuilder::SendBeforeTextChanged(
     /* [in] */ Int32 before,
     /* [in] */ Int32 after)
 {
-    AutoPtr<ISpannable> sp = (ISpannable*)this->Probe(EIID_ISpannable);
+    AutoPtr<ISpannable> sp = this;
     assert(watchers != NULL);
 
     Int32 n = watchers->GetLength();
 
     for (Int32 i = 0; i < n; i++) {
-        (*watchers)[i]->BeforeTextChanged((ICharSequence*)this->Probe(EIID_ICharSequence),
+        (*watchers)[i]->BeforeTextChanged(this,
                 start, before, after);
     }
 }
@@ -1346,7 +1346,7 @@ void SpannableStringBuilder::SendTextChanged(
     Int32 n = watchers->GetLength();
 
     for (Int32 i = 0; i < n; i++) {
-        (*watchers)[i]->OnTextChanged((ICharSequence*)this->Probe(EIID_ICharSequence),
+        (*watchers)[i]->OnTextChanged(this,
             start, before, after);
     }
 }
@@ -1359,7 +1359,7 @@ void SpannableStringBuilder::SendAfterTextChanged(
     Int32 n = watchers->GetLength();
 
     for (Int32 i = 0; i < n; i++) {
-        (*watchers)[i]->AfterTextChanged((IEditable*)this->Probe(EIID_IEditable));
+        (*watchers)[i]->AfterTextChanged(this);
     }
 }
 
@@ -1370,7 +1370,7 @@ void SpannableStringBuilder::SendSpanAdded(
 {
     AutoPtr< ArrayOf<IInterface*> > recip;
     GetSpans(start, end, EIID_ISpanWatcher, (ArrayOf<IInterface*>**)&recip);
-    ISpannable* spannable = THIS_PROBE(ISpannable);
+    ISpannable* spannable = this;
     Int32 n = recip->GetLength();
     for (Int32 i = 0; i < n; i++) {
         AutoPtr<ISpanWatcher> sw = ISpanWatcher::Probe((*recip)[i]);
@@ -1385,7 +1385,7 @@ void SpannableStringBuilder::SendSpanRemoved(
 {
     AutoPtr< ArrayOf<IInterface*> > recip;
     GetSpans(start, end, EIID_ISpanWatcher, (ArrayOf<IInterface*>**)&recip);
-    ISpannable* spannable = THIS_PROBE(ISpannable);
+    ISpannable* spannable = this;
     Int32 n = recip->GetLength();
     for (Int32 i = 0; i < n; i++) {
         AutoPtr<ISpanWatcher> sw = (ISpanWatcher*)((*recip)[i]->Probe(EIID_ISpanWatcher));
@@ -1410,7 +1410,7 @@ void SpannableStringBuilder::SendSpanChanged(
 
     AutoPtr< ArrayOf<IInterface*> > recip;
     GetSpans(rStart, rEnd, EIID_ISpanWatcher, (ArrayOf<IInterface*>**)&recip);
-    ISpannable* spannable = THIS_PROBE(ISpannable);
+    ISpannable* spannable = this;
 
     Int32 n = recip->GetLength();
     for (Int32 i = 0; i < n; i++) {

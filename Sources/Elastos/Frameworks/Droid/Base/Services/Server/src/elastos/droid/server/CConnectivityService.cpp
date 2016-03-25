@@ -481,7 +481,7 @@ CConnectivityService::NetworkRequestInfo::NetworkRequestInfo(
 
     AutoPtr<IProxy> proxy = (IProxy*)mBinder->Probe(EIID_IProxy);
     if (proxy != NULL) {
-        ECode ec = proxy->LinkToDeath((IProxyDeathRecipient*)this, 0);
+        ECode ec = proxy->LinkToDeath(this, 0);
         if (ec == (ECode)E_REMOTE_EXCEPTION) {
             ProxyDied();
         }
@@ -493,7 +493,7 @@ void CConnectivityService::NetworkRequestInfo::UnlinkDeathRecipient()
     AutoPtr<IProxy> proxy = (IProxy*)mBinder->Probe(EIID_IProxy);
     if (proxy != NULL) {
         Boolean bval;
-        proxy->UnlinkToDeath((IProxyDeathRecipient*)this, 0, &bval);
+        proxy->UnlinkToDeath(this, 0, &bval);
     }
 }
 
@@ -1041,7 +1041,7 @@ ECode CConnectivityService::SettingsObserver::Observe(
     AutoPtr<ISettingsGlobal> settingsGlobal;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);
     settingsGlobal->GetUriFor(ISettingsGlobal::HTTP_PROXY, (IUri**)&uri);
-    return resolver->RegisterContentObserver(uri, FALSE, (IContentObserver*)this);
+    return resolver->RegisterContentObserver(uri, FALSE, this);
 }
 
 ECode CConnectivityService::SettingsObserver::OnChange(
@@ -2966,7 +2966,7 @@ void CConnectivityService::Dump(
     // pw.decreaseIndent();
     // pw.println();
 
-    //ISynchronize* syncObj = THIS_PROBE(ISynchronize);
+    //ISynchronize* syncObj = this;
     // synchronized(syncObj) {
     //     pw.println("NetworkTransitionWakeLock is currently " +
     //             (mNetTransitionWakeLock.isHeld() ? "" : "not ") + "held.");
@@ -4557,7 +4557,7 @@ ECode CConnectivityService::RegisterNetworkAgent(
     AutoPtr<NetworkAgentInfo> nai = new NetworkAgentInfo(messenger, channel,
         ni, lp, nc, currentScore, mContext, mTrackerHandler, nm);
 
-    ISynchronize* syncObj = THIS_PROBE(ISynchronize);
+    ISynchronize* syncObj = this;
     synchronized(syncObj) {
         nai->mNetworkMonitor->mSystemReady = mSystemReady;
     }
@@ -5196,7 +5196,7 @@ void CConnectivityService::RematchNetworkAndRequests(
         if (isNewDefault) {
             // Notify system services that this network is up.
             MakeDefault(newNetwork);
-            ISynchronize* syncObj = THIS_PROBE(ISynchronize);
+            ISynchronize* syncObj = this;
             synchronized(syncObj) {
                 // have a new default network, release the transition wakelock in
                 // a second if it's held.  The second pause is to allow apps

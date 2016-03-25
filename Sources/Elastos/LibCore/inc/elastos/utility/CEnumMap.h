@@ -115,8 +115,6 @@ private:
         EnumMapKeySet(
             /*  */ CEnumMap* em);
 
-        CAR_INTERFACE_DECL()
-
         // @Override
         CARAPI Clear();
 
@@ -196,8 +194,6 @@ private:
     public:
         EnumMapValueCollection(
             /* [in] */ CEnumMap* em);
-
-        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI Clear();
@@ -292,8 +288,6 @@ private:
     public:
         EnumMapEntrySet(
             /* [in] */ CEnumMap* em);
-
-        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI Clear();

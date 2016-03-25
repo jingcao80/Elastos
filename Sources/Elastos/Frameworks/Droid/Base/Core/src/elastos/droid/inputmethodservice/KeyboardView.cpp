@@ -422,6 +422,20 @@ ECode KeyboardView::_SimpleOnGestureListener::OnFling(
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(KeyboardView::CloseButtonClickListener, Object, IViewOnClickListener)
+
+KeyboardView::CloseButtonClickListener::CloseButtonClickListener(
+    /* [in] */ KeyboardView* host)
+    : mHost(host)
+{}
+
+ECode KeyboardView::CloseButtonClickListener::OnClick(
+    /* [in] */ IView* view)
+{
+    mHost->DismissPopupKeyboard();
+    return NOERROR;
+}
+
 CAR_INTERFACE_IMPL(KeyboardView, View, IKeyboardView);
 KeyboardView::KeyboardView()
     : mCurrentKeyIndex(NOT_A_KEY)
@@ -595,7 +609,7 @@ ECode KeyboardView::constructor(
     mPopupKeyboard->SetBackgroundDrawable(NULL);
     //mPopupKeyboard.setClippingEnabled(FALSE);
 
-    mPopupParent = (IView*)this->Probe(EIID_IView);
+    mPopupParent = this;
     //mPredicting = TRUE;
 
     CPaint::New((IPaint**)&mPaint);
@@ -1515,13 +1529,14 @@ ECode KeyboardView::OnLongPress(
             FAIL_RETURN(context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&service))
             AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(service);
             inflater->Inflate(mPopupLayout, NULL, (IView**)&mMiniKeyboardContainer);
-            mMiniKeyboardContainer->FindViewById(R::id::keyboardView,
-                    (IView**)&mMiniKeyboard);
+            AutoPtr<IView> tempView;
+            mMiniKeyboardContainer->FindViewById(R::id::keyboardView, (IView**)&tempView);
+            mMiniKeyboard = IKeyboardView::Probe(tempView);
             AutoPtr<IView> closeButton;
-            mMiniKeyboardContainer->FindViewById(R::id::closeButton,
-                    (IView**)&closeButton);
+            mMiniKeyboardContainer->FindViewById(R::id::closeButton, (IView**)&closeButton);
             if (closeButton != NULL) {
-                closeButton->SetOnClickListener((IViewOnClickListener*)this->Probe(EIID_IViewOnClickListener));
+                AutoPtr<IViewOnClickListener> closeListener = new CloseButtonClickListener(this);
+                closeButton->SetOnClickListener(closeListener);
             }
             AutoPtr<_OnKeyboardActionListener> listener = new _OnKeyboardActionListener(this);
             mMiniKeyboard->SetOnKeyboardActionListener(listener);
@@ -1540,7 +1555,7 @@ ECode KeyboardView::OnLongPress(
                 keyboard = new Keyboard(context, popupKeyboardId);
             }
             ((KeyboardView*)mMiniKeyboard.Get())->SetKeyboard(keyboard);
-            ((KeyboardView*)mMiniKeyboard.Get())->SetPopupParent((IView*)this->Probe(EIID_IView));
+            ((KeyboardView*)mMiniKeyboard.Get())->SetPopupParent(this);
             Int32 w = 0, h = 0;
             GetWidth(&w);
             GetHeight(&h);
@@ -1551,8 +1566,9 @@ ECode KeyboardView::OnLongPress(
             (*mMiniKeyboardCache)[popupKey] = mMiniKeyboardContainer;
         }
         else {
-            mMiniKeyboardContainer->FindViewById(R::id::keyboardView,
-                    (IView**)&mMiniKeyboard);
+            AutoPtr<IView> tempView;
+            mMiniKeyboardContainer->FindViewById(R::id::keyboardView, (IView**)&tempView);
+            mMiniKeyboard = IKeyboardView::Probe(tempView);
         }
 
         GetLocationInWindow(mCoordinates);
@@ -1580,7 +1596,7 @@ ECode KeyboardView::OnLongPress(
         mPopupKeyboard->SetContentView(IView::Probe(mMiniKeyboardContainer));
         mPopupKeyboard->SetWidth(meauseredW);
         mPopupKeyboard->SetHeight(meauseredH);
-        mPopupKeyboard->ShowAtLocation((IView*)this->Probe(EIID_IView), IGravity::NO_GRAVITY, x, y);
+        mPopupKeyboard->ShowAtLocation(this, IGravity::NO_GRAVITY, x, y);
         mMiniKeyboardOnScreen = TRUE;
         //mMiniKeyboard.onTouchEvent(getTranslatedEvent(me));
         InvalidateAllKeys();

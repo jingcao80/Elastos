@@ -25,7 +25,7 @@ PInterface CGetAuthTokenLabelSession::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_AccountManagerServiceSession) {
-        return reinterpret_cast<PInterface>((AccountManagerServiceSession*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CGetAuthTokenLabelSession::Probe(riid);
 }
@@ -40,7 +40,7 @@ String CGetAuthTokenLabelSession::ToDebugString(
 
 ECode CGetAuthTokenLabelSession::Run()
 {
-    return mAuthenticator->GetAuthTokenLabel((IIAccountAuthenticatorResponse*)this,
+    return mAuthenticator->GetAuthTokenLabel(this,
             mAuthTokenType);
 }
 

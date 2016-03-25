@@ -316,12 +316,12 @@ void AwCookieManager::InvokeBooleanCookieCallback(
 void AwCookieManager::NativeSetShouldAcceptCookies(
     /* [in] */ Boolean accept)
 {
-    Elastos_AwCookieManager_nativeSetShouldAcceptCookies(THIS_PROBE(IInterface), accept);
+    Elastos_AwCookieManager_nativeSetShouldAcceptCookies(TO_IINTERFACE(this), accept);
 }
 
 Boolean AwCookieManager::NativeGetShouldAcceptCookies()
 {
-    return Elastos_AwCookieManager_nativeGetShouldAcceptCookies(THIS_PROBE(IInterface));
+    return Elastos_AwCookieManager_nativeGetShouldAcceptCookies(TO_IINTERFACE(this));
 }
 
 void AwCookieManager::NativeSetCookie(
@@ -329,68 +329,68 @@ void AwCookieManager::NativeSetCookie(
     /* [in] */ const String& value,
     /* [in] */ CookieCallback* callback)
 {
-    Elastos_AwCookieManager_nativeSetCookie(THIS_PROBE(IInterface), url, value, TO_IINTERFACE(callback));
+    Elastos_AwCookieManager_nativeSetCookie(TO_IINTERFACE(this), url, value, TO_IINTERFACE(callback));
 }
 
 void AwCookieManager::NativeSetCookieSync(
     /* [in] */ const String& url,
     /* [in] */ const String& value)
 {
-    Elastos_AwCookieManager_nativeSetCookieSync(THIS_PROBE(IInterface), url, value);
+    Elastos_AwCookieManager_nativeSetCookieSync(TO_IINTERFACE(this), url, value);
 }
 
 String AwCookieManager::NativeGetCookie(
     /* [in] */ const String& url)
 {
-    return Elastos_AwCookieManager_nativeGetCookie(THIS_PROBE(IInterface), url);
+    return Elastos_AwCookieManager_nativeGetCookie(TO_IINTERFACE(this), url);
 }
 
 void AwCookieManager::NativeRemoveSessionCookies(
     /* [in] */ CookieCallback* callback)
 {
-    Elastos_AwCookieManager_nativeRemoveSessionCookies(THIS_PROBE(IInterface), TO_IINTERFACE(callback));
+    Elastos_AwCookieManager_nativeRemoveSessionCookies(TO_IINTERFACE(this), TO_IINTERFACE(callback));
 }
 
 void AwCookieManager::NativeRemoveSessionCookiesSync()
 {
-    Elastos_AwCookieManager_nativeRemoveSessionCookiesSync(THIS_PROBE(IInterface));
+    Elastos_AwCookieManager_nativeRemoveSessionCookiesSync(TO_IINTERFACE(this));
 }
 
 void AwCookieManager::NativeRemoveAllCookies(
     /* [in] */ CookieCallback* callback)
 {
-    Elastos_AwCookieManager_nativeRemoveAllCookies(THIS_PROBE(IInterface), TO_IINTERFACE(callback));
+    Elastos_AwCookieManager_nativeRemoveAllCookies(TO_IINTERFACE(this), TO_IINTERFACE(callback));
 }
 
 void AwCookieManager::NativeRemoveAllCookiesSync()
 {
-    Elastos_AwCookieManager_nativeRemoveAllCookiesSync(THIS_PROBE(IInterface));
+    Elastos_AwCookieManager_nativeRemoveAllCookiesSync(TO_IINTERFACE(this));
 }
 
 void AwCookieManager::NativeRemoveExpiredCookies()
 {
-    Elastos_AwCookieManager_nativeRemoveExpiredCookies(THIS_PROBE(IInterface));
+    Elastos_AwCookieManager_nativeRemoveExpiredCookies(TO_IINTERFACE(this));
 }
 
 void AwCookieManager::NativeFlushCookieStore()
 {
-    Elastos_AwCookieManager_nativeFlushCookieStore(THIS_PROBE(IInterface));
+    Elastos_AwCookieManager_nativeFlushCookieStore(TO_IINTERFACE(this));
 }
 
 Boolean AwCookieManager::NativeHasCookies()
 {
-    return Elastos_AwCookieManager_nativeHasCookies(THIS_PROBE(IInterface));
+    return Elastos_AwCookieManager_nativeHasCookies(TO_IINTERFACE(this));
 }
 
 Boolean AwCookieManager::NativeAllowFileSchemeCookies()
 {
-    return Elastos_AwCookieManager_nativeAllowFileSchemeCookies(THIS_PROBE(IInterface));
+    return Elastos_AwCookieManager_nativeAllowFileSchemeCookies(TO_IINTERFACE(this));
 }
 
 void AwCookieManager::NativeSetAcceptFileSchemeCookies(
     /* [in] */ Boolean accept)
 {
-    Elastos_AwCookieManager_nativeSetAcceptFileSchemeCookies(THIS_PROBE(IInterface), accept);
+    Elastos_AwCookieManager_nativeSetAcceptFileSchemeCookies(TO_IINTERFACE(this), accept);
 }
 
 } // namespace AndroidWebview

@@ -71,7 +71,7 @@ ECode CContentProviderOperationBuilder::Build(
         }
     }
 
-    FAIL_RETURN(CContentProviderOperation::New(THIS_PROBE(IContentProviderOperationBuilder), providerOperation))
+    FAIL_RETURN(CContentProviderOperation::New(this, providerOperation))
     return NOERROR;
 }
 

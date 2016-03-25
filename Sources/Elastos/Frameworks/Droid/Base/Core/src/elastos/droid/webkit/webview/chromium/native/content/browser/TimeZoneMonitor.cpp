@@ -72,7 +72,7 @@ ECode TimeZoneMonitor::Stop()
 ECode TimeZoneMonitor::NativeTimeZoneChangedFromJava(
     /* [in] */ Handle64 nativeTimeZoneMonitorAndroid)
 {
-    Elastos_TimeZoneMonitor_nativeTimeZoneChangedFromJava(THIS_PROBE(IInterface), nativeTimeZoneMonitorAndroid);
+    Elastos_TimeZoneMonitor_nativeTimeZoneChangedFromJava(TO_IINTERFACE(this), nativeTimeZoneMonitorAndroid);
     return NOERROR;
 }
 

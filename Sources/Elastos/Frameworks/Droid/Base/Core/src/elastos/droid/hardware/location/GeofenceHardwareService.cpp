@@ -151,7 +151,7 @@ ECode GeofenceHardwareService::MyBinder::ToString(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(GeofenceHardwareService, Object, IGeofenceHardwareService)
+CAR_INTERFACE_IMPL(GeofenceHardwareService, Service, IGeofenceHardwareService)
 
 GeofenceHardwareService::GeofenceHardwareService()
     : mGeofenceHardwareImpl(NULL)
@@ -166,12 +166,12 @@ GeofenceHardwareService::~GeofenceHardwareService()
 
 ECode GeofenceHardwareService::constructor()
 {
-    return NOERROR;
+    return Service::constructor();
 }
 
 ECode GeofenceHardwareService::OnCreate()
 {
-    mContext = THIS_PROBE(IContext);
+    mContext = this;
     mGeofenceHardwareImpl = GeofenceHardwareImpl::GetInstance(mContext);
     return NOERROR;
 }

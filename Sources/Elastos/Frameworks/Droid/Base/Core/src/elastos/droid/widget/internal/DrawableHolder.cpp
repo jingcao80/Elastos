@@ -90,7 +90,7 @@ AutoPtr<IObjectAnimator> DrawableHolder::AddAnimTo(
     AutoPtr<IObjectAnimator> anim;
     AutoPtr<ArrayOf<Float> > arrayValue = ArrayOf<Float>::Alloc(1);
     (*arrayValue)[0] = toValue;
-    helper->OfFloat(THIS_PROBE(IInterface), property, arrayValue, (IObjectAnimator**)&anim);
+    helper->OfFloat(TO_IINTERFACE(this), property, arrayValue, (IObjectAnimator**)&anim);
     anim->SetDuration(duration);
     anim->SetStartDelay(delay);
     anim->SetInterpolator(EASE_OUT_INTERPOLATOR);
@@ -152,7 +152,7 @@ AutoPtr<IDrawableHolder> DrawableHolder::AddAnimation(
     if (anim != NULL)
         mAnimators.PushBack(anim);
     mNeedToStart.PushBack(anim);
-    return THIS_PROBE(IDrawableHolder);
+    return this;
 }
 
 /**
@@ -191,7 +191,7 @@ ECode DrawableHolder::StartAnimations(
     for (UInt32 i = 0; i < mNeedToStart.GetSize(); i++) {
         AutoPtr<IObjectAnimator> anim = mNeedToStart[i];
         anim->AddUpdateListener(listener);
-        anim->AddListener(THIS_PROBE(IAnimatorListener));
+        anim->AddListener(this);
         anim->Start();
     }
     mNeedToStart.Clear();

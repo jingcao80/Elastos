@@ -41,7 +41,7 @@ ECode CGuestResumeSessionReceiver::Register(
     AutoPtr<IUserHandle> user;
     helper->GetOWNER((IUserHandle**)&user);
     AutoPtr<IIntent> intent;
-    context->RegisterReceiverAsUser(THIS_PROBE(IBroadcastReceiver), user,
+    context->RegisterReceiverAsUser(this, user,
             f, String(NULL) /* permission */, NULL /* scheduler */, (IIntent**)&intent);
     return NOERROR;
 }

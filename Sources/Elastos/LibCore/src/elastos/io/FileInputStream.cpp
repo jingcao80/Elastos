@@ -127,7 +127,7 @@ ECode FileInputStream::GetChannel(
     AutoLock lock(this);
 
     if (mChannel == NULL) {
-        mChannel = NioUtils::NewFileChannel(THIS_PROBE(ICloseable), mFd, OsConstants::_O_RDONLY);
+        mChannel = NioUtils::NewFileChannel(this, mFd, OsConstants::_O_RDONLY);
     }
     *channel = mChannel;
     REFCOUNT_ADD(*channel)
@@ -149,7 +149,7 @@ ECode FileInputStream::Read(
 {
     AutoPtr<IStreams> streams;
     CStreams::AcquireSingleton((IStreams**)&streams);
-    return streams->ReadSingleByte(THIS_PROBE(IInputStream), value);
+    return streams->ReadSingleByte(this, value);
 }
 
 ECode FileInputStream::Read(

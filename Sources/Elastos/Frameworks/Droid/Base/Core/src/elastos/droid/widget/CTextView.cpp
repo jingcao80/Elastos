@@ -18,10 +18,10 @@ PInterface CTextView::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_View) {
-        return reinterpret_cast<PInterface>((View*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     else if (riid == EIID_TextView) {
-        return reinterpret_cast<PInterface>((TextView*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CTextView::Probe(riid);
 }

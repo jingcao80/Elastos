@@ -5,7 +5,8 @@ namespace Elastos {
 namespace Droid {
 namespace Sax {
 
-CAR_INTERFACE_IMPL_4(CRootElement::Handler, Object, IEntityResolver, IDTDHandler, IContentHandler, IErrorHandler);
+CAR_INTERFACE_IMPL_4(CRootElement::Handler, Object, IEntityResolver, \
+    IDTDHandler, IContentHandler, IErrorHandler);
 CAR_INTERFACE_IMPL(CRootElement, Object, IRootElement);
 
 CRootElement::Handler::~Handler()
@@ -61,17 +62,15 @@ ECode CRootElement::Handler::StartRoot(
     /* [in] */ const String& localName,
     /* [in] */ IAttributes* attributes)
 {
-    AutoPtr<IElement> root = (IElement*)this->Probe(EIID_IElement);
-    CElement* croot =  (CElement*)root.Get();
-    if (croot->mUri.Compare(uri) != 0
-            || croot->mLocalName.Compare(localName) != 0) {
+    if (mHost->mUri.Compare(uri) != 0
+            || mHost->mLocalName.Compare(localName) != 0) {
         //throw new BadXmlException("Root element name does"
         //        + " not match. Expected: " + root + ", Got: "
         //        + Element.toString(uri, localName), locator);
         return E_BAD_XML_EXCEPTION;
     }
 
-    return Start(root, attributes);
+    return Start(mHost, attributes);
 }
 
 ECode CRootElement::Handler::Start(
@@ -249,6 +248,7 @@ ECode CRootElement::constructor(
     /* [in] */ const String& uri,
     /* [in] */ const String& localName)
 {
+    mHandler = new Handler(this);
     return Element::constructor(NULL, uri, localName, 0);
 }
 
@@ -267,83 +267,6 @@ ECode CRootElement::GetContentHandler(
     REFCOUNT_ADD(*handler);
 
     return NOERROR;
-}
-
-ECode CRootElement::GetChild(
-    /* [in] */ const String& localName,
-    /* [out] */ IElement** result)
-{
-    return Element::GetChild(localName, result);
-}
-
-ECode CRootElement::GetChild(
-    /* [in] */ const String& uri,
-    /* [in] */ const String& localName,
-    /* [out] */ IElement** result)
-{
-    return Element::GetChild(uri, localName, result);
-}
-
-ECode CRootElement::RequireChild(
-    /* [in] */ const String& localName,
-    /* [out] */ IElement** result)
-{
-    return Element::RequireChild(localName, result);
-}
-
-ECode CRootElement::RequireChild(
-    /* [in] */ const String& uri,
-    /* [in] */ const String& localName,
-    /* [out] */ IElement** result)
-{
-    return Element::RequireChild(uri, localName, result);
-}
-
-ECode CRootElement::SetElementListener(
-    /* [in] */ IElementListener* elementListener)
-{
-    return Element::SetElementListener(elementListener);
-}
-
-ECode CRootElement::SetTextElementListener(
-    /* [in] */ ITextElementListener* elementListener)
-{
-    return Element::SetTextElementListener(elementListener);
-}
-
-ECode CRootElement::SetStartElementListener(
-    /* [in] */ IStartElementListener* startElementListener)
-{
-    return Element::SetStartElementListener(startElementListener);
-}
-
-ECode CRootElement::SetEndElementListener(
-    /* [in] */ IEndElementListener* endElementListener)
-{
-    return Element::SetEndElementListener(endElementListener);
-}
-
-ECode CRootElement::SetEndTextElementListener(
-    /* [in] */ IEndTextElementListener* endTextElementListener)
-{
-    return Element::SetEndTextElementListener(endTextElementListener);
-}
-
-ECode CRootElement::ToString(
-    /* [out] */ String* str)
-{
-    return Element::ToString(str);
-}
-
-ECode CRootElement::ResetRequiredChildren()
-{
-    return Element::ResetRequiredChildren();
-}
-
-ECode CRootElement::CheckRequiredChildren(
-    /* [in] */ ILocator* locator)
-{
-    return Element::CheckRequiredChildren(locator);
 }
 
 } // namespace Os

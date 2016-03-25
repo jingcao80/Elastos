@@ -114,7 +114,7 @@ ECode CBundle::Clone(
 {
     VALIDATE_NOT_NULL(obj)
     AutoPtr<IBundle> bundle;
-    CBundle::New((IBundle*)this, (IBundle**)&bundle);
+    CBundle::New(this, (IBundle**)&bundle);
     *obj = bundle.Get();
     REFCOUNT_ADD(*obj)
     return NOERROR;

@@ -486,7 +486,7 @@ ECode CSoftKeyboard::OnInitializeInterface()
         mLastDisplayWidth = displayWidth;
     }
 
-    AutoPtr<IContext> ctx = (IContext*)this->Probe(EIID_IContext);
+    AutoPtr<IContext> ctx = this;
     assert(ctx != NULL);
     mQwertyKeyboard = new LatinKeyboard(ctx, R::xml::qwerty);
     mSymbolsKeyboard = new LatinKeyboard(ctx, R::xml::symbols);
@@ -669,8 +669,8 @@ ECode CSoftKeyboard::OnCreateCandidatesView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view);
-    CCandidateView::New((IContext*)this->Probe(EIID_IContext), (ICandidateView**)&mCandidateView);
-    mCandidateView->SetService((ISoftKeyboard*)this);
+    CCandidateView::New(this, (ICandidateView**)&mCandidateView);
+    mCandidateView->SetService(this);
     *view = mCandidateView.Get();
     (*view)->AddRef();
     return NOERROR;

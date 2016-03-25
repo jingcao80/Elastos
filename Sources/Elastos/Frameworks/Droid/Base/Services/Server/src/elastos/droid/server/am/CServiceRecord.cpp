@@ -551,7 +551,7 @@ AutoPtr<IServiceState> CServiceRecord::GetTracker()
         appInfo->GetVersionCode(&versionCode);
         mTracker = mAms->mProcessStats->GetServiceStateLocked(packageName,
                 uid, versionCode, processName, name);
-        mTracker->ApplyNewOwner((IObject*)this);
+        mTracker->ApplyNewOwner((IBinder*)this);
     }
     return mTracker;
 }
@@ -559,7 +559,7 @@ AutoPtr<IServiceState> CServiceRecord::GetTracker()
 void CServiceRecord::ForceClearTracker()
 {
     if (mTracker != NULL) {
-        mTracker->ClearCurrentOwner((IObject*)this, TRUE);
+        mTracker->ClearCurrentOwner((IBinder*)this, TRUE);
         mTracker = NULL;
     }
 }

@@ -92,19 +92,19 @@ PInterface CBrowserActivity::MyListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IViewOnClickListener*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IViewOnClickListener) {
-        return (IViewOnClickListener*)this;
+        return this;
     }
     else if (riid == EIID_IPopupWindowOnDismissListener) {
-        return (IPopupWindowOnDismissListener*)this;
+        return this;
     }
     else if (riid == EIID_IViewOnTouchListener) {
-        return (IViewOnTouchListener*)this;
+        return this;
     }
     else if (riid == EIID_ICompoundButtonOnCheckedChangeListener) {
-        return (ICompoundButtonOnCheckedChangeListener*)this;
+        return this;
     }
 
     return NULL;
@@ -128,16 +128,16 @@ ECode CBrowserActivity::MyListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)(IViewOnClickListener*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IViewOnClickListener;
     }
-    else if (pObject == (IInterface*)(IPopupWindowOnDismissListener*)this) {
+    else if (pObject == (IInterface*)this) {
         *pIID = EIID_IPopupWindowOnDismissListener;
     }
-    else if (pObject == (IInterface*)(IViewOnTouchListener*)this) {
+    else if (pObject == (IInterface*)this) {
         *pIID = EIID_IViewOnTouchListener;
     }
-    else if (pObject == (IInterface*)(ICompoundButtonOnCheckedChangeListener*)this) {
+    else if (pObject == (IInterface*)this) {
         *pIID = EIID_ICompoundButtonOnCheckedChangeListener;
     }
     else {

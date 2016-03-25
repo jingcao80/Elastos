@@ -811,12 +811,12 @@ ECode VideoView::SetMediaController(
 void VideoView::AttachMediaController()
 {
     if (mMediaPlayer != NULL && mMediaController != NULL) {
-        mMediaController->SetMediaPlayer((IMediaPlayerControl*)this->Probe(EIID_IMediaPlayerControl));
+        mMediaController->SetMediaPlayer(this);
 
         AutoPtr<IViewParent> parent;
         GetParent((IViewParent**)&parent);
         IView* anchorView = IView::Probe(parent) != NULL ?
-                IView::Probe(parent) : (IView*)this->Probe(EIID_IView);
+                IView::Probe(parent) : this;
         mMediaController->SetAnchorView(anchorView);
         IView::Probe(mMediaController)->SetEnabled(IsInPlaybackState());
     }

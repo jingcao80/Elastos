@@ -450,7 +450,7 @@ ECode AnimatorSet::Play(
     VALIDATE_NOT_NULL(builder);
     if (anim != NULL) {
         mNeedsSort = TRUE;
-        return CAnimatorSetBuilder::New(THIS_PROBE(IAnimatorSet), anim, builder);
+        return CAnimatorSetBuilder::New(this, anim, builder);
     }
 
     *builder = NULL;
@@ -466,7 +466,7 @@ ECode AnimatorSet::Cancel()
         if (tmpListeners.IsEmpty() == FALSE) {
             List<AutoPtr<IAnimatorListener> >::Iterator it = tmpListeners.Begin();
             for (; it != tmpListeners.End(); it++) {
-                (*it)->OnAnimationCancel(THIS_PROBE(IAnimator));
+                (*it)->OnAnimationCancel(this);
             }
         }
         Boolean running;
@@ -483,7 +483,7 @@ ECode AnimatorSet::Cancel()
         if (tmpListeners.IsEmpty() == FALSE) {
             List<AutoPtr<IAnimatorListener> >::Iterator it = tmpListeners.Begin();
             for (; it != tmpListeners.End(); it++) {
-                (*it)->OnAnimationEnd(THIS_PROBE(IAnimator));
+                (*it)->OnAnimationEnd(this);
             }
         }
         mStarted = FALSE;
@@ -520,7 +520,7 @@ ECode AnimatorSet::End()
             List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
             List<AutoPtr<IAnimatorListener> >::Iterator it = tmpListeners.Begin();
             for (; it != tmpListeners.End(); it++) {
-                (*it)->OnAnimationEnd(THIS_PROBE(IAnimator));
+                (*it)->OnAnimationEnd(this);
             }
         }
         mStarted = FALSE;
@@ -740,7 +740,7 @@ ECode AnimatorSet::Start()
         List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
         List<AutoPtr<IAnimatorListener> >::Iterator tmpIt = tmpListeners.Begin();
         for (; tmpIt != tmpListeners.End(); ++tmpIt) {
-            (*tmpIt)->OnAnimationStart(THIS_PROBE(IAnimator));
+            (*tmpIt)->OnAnimationStart(this);
         }
     }
     if (mNodes.IsEmpty() && mStartDelay == 0) {
@@ -751,7 +751,7 @@ ECode AnimatorSet::Start()
             List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
             List<AutoPtr<IAnimatorListener> >::Iterator tmpIt = tmpListeners.Begin();
             for (; tmpIt != tmpListeners.End(); ++tmpIt) {
-                (*tmpIt)->OnAnimationEnd(THIS_PROBE(IAnimator));
+                (*tmpIt)->OnAnimationEnd(this);
             }
         }
     }

@@ -239,7 +239,7 @@ ECode FloatBuffer::Put(
 ECode FloatBuffer::Put(
     /* [in] */ IFloatBuffer* src)
 {
-    if (src == (IFloatBuffer*)this->Probe(EIID_IFloatBuffer)) {
+    if (src == this) {
         // throw new IllegalArgumentException("src == this");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

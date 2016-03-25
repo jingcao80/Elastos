@@ -398,7 +398,7 @@ ECode CLinkedHashMap::Clone(
     // result->mValues = NULL;
 
     result->Init_(); // Give subclass a chance to initialize itself
-    result->ConstructorPutAll((IMap*)this->Probe(EIID_IMap)); // Calls method overridden in subclass!!
+    result->ConstructorPutAll(this); // Calls method overridden in subclass!!
     AutoPtr<IMap> outmap = (IMap*) result->Probe(EIID_IMap);
     *object = outmap;
     REFCOUNT_ADD(*object)

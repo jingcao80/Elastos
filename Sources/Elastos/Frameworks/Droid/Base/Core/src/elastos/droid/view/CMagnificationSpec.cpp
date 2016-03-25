@@ -75,7 +75,7 @@ AutoPtr<IMagnificationSpec> CMagnificationSpec::Obtain()
 ECode CMagnificationSpec::Recycle()
 {
     Clear();
-    sPool->ReleaseItem(THIS_PROBE(IMagnificationSpec));
+    sPool->ReleaseItem(this);
     return NOERROR;
 }
 

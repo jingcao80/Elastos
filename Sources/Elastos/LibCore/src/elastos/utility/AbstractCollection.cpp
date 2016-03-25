@@ -318,7 +318,7 @@ ECode AbstractCollection::ToString(
     while ((it->HasNext(&hasnext), hasnext)) {
         AutoPtr<IInterface> nextobject;
         it->GetNext((IInterface**)&nextobject);
-        if (nextobject.Get() != this->Probe(EIID_IInterface)) {
+        if (nextobject.Get() != TO_IINTERFACE(this)) {
             buffer.Append(nextobject);
         }
         else {

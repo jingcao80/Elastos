@@ -24,6 +24,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Hardware::Input::IInputManager;
+using Elastos::Droid::Hardware::Input::IInputDeviceListener;
 using Elastos::Droid::Internal::App::IIBatteryStats;
 using Elastos::Droid::Internal::App::IIAppOpsService;
 using Elastos::Core::IThread;
@@ -36,6 +37,7 @@ namespace Server {
 CarClass(CVibratorService)
     , public Object
     , public IIVibratorService
+    , public IInputDeviceListener
     , public IBinder
 {
 public:

@@ -297,7 +297,7 @@ VectorDrawable::VPathRenderer::VPathRenderer(
     if (copy->mRootName != NULL) {
         AutoPtr<ICharSequence> cs;
         CString::New(copy->mRootName, (ICharSequence**)&cs);
-        IMap::Probe(mVGTargetsMap)->Put(cs, (IObject*)this);
+        mVGTargetsMap->Put(cs, TO_IINTERFACE(this));
     }
 }
 
@@ -528,7 +528,7 @@ VectorDrawable::VGroup::VGroup(
     if (mGroupName != NULL) {
         AutoPtr<ICharSequence> cs;
         CString::New(mGroupName, (ICharSequence**)&cs);
-        IMap::Probe(targetsMap)->Put(cs, (IVGroup*)this);
+        targetsMap->Put(cs, TO_IINTERFACE(this));
     }
 
     mLocalMatrix->Set(copy->mLocalMatrix);
@@ -558,7 +558,7 @@ VectorDrawable::VGroup::VGroup(
             if (newPath->mPathName != NULL) {
                 AutoPtr<ICharSequence> cs;
                 CString::New(newPath->mPathName, (ICharSequence**)&cs);
-                IMap::Probe(targetsMap)->Put(cs, (IVPath*)newPath);
+                targetsMap->Put(cs, (IVPath*)newPath);
             }
         }
     }

@@ -465,7 +465,7 @@ ECode AbstractPreferences::GetNode(
         CheckState();
         ValidateName(name);
         if (name.IsEmpty()) {
-            *pfs = THIS_PROBE(IPreferences);
+            *pfs = this;
             REFCOUNT_ADD(*pfs);
             return NOERROR;
         } else if (String("/").Equals(name)) {

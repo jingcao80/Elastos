@@ -129,7 +129,7 @@ ECode DeflaterOutputStream::Write(
 {
     AutoPtr<IStreams> streams;
     CStreams::AcquireSingleton((IStreams**)&streams);
-    return streams->WriteSingleByte(THIS_PROBE(IOutputStream), i);
+    return streams->WriteSingleByte(this, i);
 }
 
 ECode DeflaterOutputStream::Write(

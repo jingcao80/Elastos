@@ -69,19 +69,19 @@ void WebContentsImpl::Stop()
 String WebContentsImpl::NativeGetTitle(
     /* [in] */ Handle64 nativeWebContentsAndroid)
 {
-    return Elastos_WebContentsImpl_nativeGetTitle(THIS_PROBE(IInterface), nativeWebContentsAndroid);
+    return Elastos_WebContentsImpl_nativeGetTitle(TO_IINTERFACE(this), nativeWebContentsAndroid);
 }
 
 String WebContentsImpl::NativeGetVisibleURL(
     /* [in] */ Handle64 nativeWebContentsAndroid)
 {
-    return Elastos_WebContentsImpl_nativeGetVisibleURL(THIS_PROBE(IInterface), nativeWebContentsAndroid);
+    return Elastos_WebContentsImpl_nativeGetVisibleURL(TO_IINTERFACE(this), nativeWebContentsAndroid);
 }
 
 void WebContentsImpl::NativeStop(
     /* [in] */ Handle64 nativeWebContentsAndroid)
 {
-    Elastos_WebContentsImpl_nativeStop(THIS_PROBE(IInterface), nativeWebContentsAndroid);
+    Elastos_WebContentsImpl_nativeStop(TO_IINTERFACE(this), nativeWebContentsAndroid);
 }
 
 AutoPtr<IInterface> WebContentsImpl::Create(

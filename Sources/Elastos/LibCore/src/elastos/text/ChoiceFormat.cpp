@@ -175,7 +175,7 @@ ECode ChoiceFormat::Equals(
     VALIDATE_NOT_NULL(result)
 
     IChoiceFormat* cf = IChoiceFormat::Probe(object);
-    if (THIS_PROBE(IChoiceFormat) == cf) {
+    if (this == cf) {
         *result = TRUE;
         return NOERROR;
     }

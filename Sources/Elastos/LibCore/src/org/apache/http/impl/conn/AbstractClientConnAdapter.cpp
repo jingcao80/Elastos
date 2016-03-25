@@ -317,7 +317,7 @@ ECode AbstractClientConnAdapter::ReleaseConnection()
         CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper);
         AutoPtr<ITimeUnit> milliseconds;
         helper->GetMILLISECONDS((ITimeUnit**)&milliseconds);
-        mConnManager->ReleaseConnection((IManagedClientConnection*)this, mDuration, milliseconds);
+        mConnManager->ReleaseConnection(this, mDuration, milliseconds);
     }
     return NOERROR;
 }

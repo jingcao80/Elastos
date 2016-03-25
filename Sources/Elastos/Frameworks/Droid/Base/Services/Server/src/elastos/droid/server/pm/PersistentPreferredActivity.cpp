@@ -3,6 +3,7 @@
 #include "elastos/droid/server/pm/CPackageManagerService.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Content::CComponentNameHelper;
 using Elastos::Droid::Content::IComponentNameHelper;
@@ -10,8 +11,8 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Utility::ILogHelper;
 using Elastos::Core::StringUtils;
-using Elastos::Core::ISystem;
-using Elastos::Core::CSystem;
+using Elastos::Core::StringBuilder;
+
 
 namespace Elastos {
 namespace Droid {
@@ -99,14 +100,14 @@ ECode PersistentPreferredActivity::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    AutoPtr<ISystem> system;
-    CSystem::AcquireSingleton((ISystem**)&system);
-    Int32 hashCode;
-    system->IdentityHashCode((IObject*)this, &hashCode);
     String s;
     mComponent->FlattenToShortString(&s);
-    *str = String("PersistentPreferredActivity{0x") + StringUtils::ToHexString(hashCode)
-            + " " + s + "}";
+    StringBuilder sb("PersistentPreferredActivity{0x");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += " ";
+    sb += s;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

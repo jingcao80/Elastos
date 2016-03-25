@@ -492,13 +492,13 @@ ECode CBigDecimal::Add(
             return NOERROR;
         }
         if (augend->IsZero()) {
-            *result = (IBigDecimal*)this;
+            *result = this;
             REFCOUNT_ADD(*result);
             return NOERROR;
         }
     } else if (augend->IsZero()) {
         if (diffScale >= 0) {
-            *result = (IBigDecimal*)this;
+            *result = this;
              REFCOUNT_ADD(*result);
              return NOERROR;
         }
@@ -655,14 +655,14 @@ ECode CBigDecimal::Subtract(
             return subtrahend->Negate(result);
         }
         if (subtrahend->IsZero()) {
-            *result = (IBigDecimal*)this;
+            *result = this;
             REFCOUNT_ADD(*result);
             return NOERROR;
         }
     }
     else if (subtrahend->IsZero()) {
         if (diffScale >= 0) {
-            *result = (IBigDecimal*)this;
+            *result = this;
             REFCOUNT_ADD(*result);
             return NOERROR;
         }
@@ -1659,7 +1659,7 @@ ECode CBigDecimal::Pow(
 
         if ((m & oneBitMask) == oneBitMask) {
             temp = NULL;
-            FAIL_RETURN(accum->Multiply((IBigDecimal*)this, newPrecision, (IBigDecimal**)&temp));
+            FAIL_RETURN(accum->Multiply(this, newPrecision, (IBigDecimal**)&temp));
             accum = temp;
         }
         oneBitMask >>= 1;
@@ -1689,7 +1689,7 @@ ECode CBigDecimal::Abs(
         return Negate(result);
     }
 
-    *result = (IBigDecimal*)this;
+    *result = this;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -1848,7 +1848,7 @@ ECode CBigDecimal::SetScale(
     Int64 diffScale = newScale - (Int64)mScale;
     // Let be:  'this' = [u,s]
     if(diffScale == 0) {
-        *result = (IBigDecimal*)this;
+        *result = this;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -1984,7 +1984,7 @@ ECode CBigDecimal::StripTrailingZeros(
     if (IsZero()) {
         // Preserve RI compatibility, so BigDecimal.equals (which checks
         // value *and* scale) continues to work.
-        *result = (IBigDecimal*)this;
+        *result = this;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -2076,7 +2076,7 @@ ECode CBigDecimal::CompareTo(
                 valUnscaled = temp;
             }
 
-            IComparable* comp = (IComparable*)thisUnscaled->Probe(EIID_IComparable);
+            IComparable* comp = thisUnscaled->Probe(EIID_IComparable);
             return comp->CompareTo(valUnscaled, result);
         }
     }
@@ -2100,7 +2100,7 @@ ECode CBigDecimal::Equals(
 
     if (IBigDecimal::Probe(x) == NULL) return NOERROR;
 
-    if ((IBigDecimal*)this == IBigDecimal::Probe(x)) {
+    if (this == IBigDecimal::Probe(x)) {
         *result = TRUE;
         return NOERROR;
     }
@@ -2152,7 +2152,7 @@ ECode CBigDecimal::Min(
     Int32 cmp = 0;
     CompareTo(val, &cmp);
     if (cmp <= 0) {
-        *result = (IBigDecimal*)this;
+        *result = this;
     }
     else {
         *result = val;
@@ -2172,7 +2172,7 @@ ECode CBigDecimal::Max(
     Int32 cmp = 0;
     CompareTo(val, &cmp);
     if (cmp >= 0) {
-        *result = (IBigDecimal*)this;
+        *result = this;
     }
     else {
         *result = val;
@@ -2200,7 +2200,7 @@ ECode CBigDecimal::ToString(
 
     AutoPtr<IBigInteger> thisUnscaled = GetUnscaledValue();
     String intString;
-    IObject* o = (IObject*)thisUnscaled->Probe(EIID_IObject);
+    IObject* o = thisUnscaled->Probe(EIID_IObject);
     o->ToString(&intString);
     if (mScale == 0) {
         *str = String(intString);
@@ -2249,7 +2249,7 @@ ECode CBigDecimal::ToEngineeringString(
 
     AutoPtr<IBigInteger> thisUnscaled = GetUnscaledValue();
     String intString;
-    IObject* o = (IObject*)thisUnscaled->Probe(EIID_IObject);
+    IObject* o = thisUnscaled->Probe(EIID_IObject);
     o->ToString(&intString);
 
     if (mScale == 0) {
@@ -2324,7 +2324,7 @@ ECode CBigDecimal::ToPlainString(
 
     AutoPtr<IBigInteger> thisUnscaled = GetUnscaledValue();
     String intStr;
-    IObject* o = (IObject*)thisUnscaled->Probe(EIID_IObject);
+    IObject* o = thisUnscaled->Probe(EIID_IObject);
     o->ToString(&intStr);
 
     if ((mScale == 0) || ((IsZero()) && (mScale < 0))) {

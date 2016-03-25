@@ -11,7 +11,7 @@ CAR_INTERFACE_IMPL(PackageInstallObserver, Object, IPackageInstallObserver)
 
 ECode PackageInstallObserver::constructor()
 {
-    return CPackageInstallObserver2::New((IPackageInstallObserver*)this, (IIPackageInstallObserver2**)&mBinder);
+    return CPackageInstallObserver2::New(this, (IIPackageInstallObserver2**)&mBinder);
 }
 
 ECode PackageInstallObserver::GetBinder(

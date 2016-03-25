@@ -409,12 +409,12 @@ void AccessibilityInputFilter::EnableFeatures()
     if ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0) {
         mScreenMagnifier = new ScreenMagnifier(mContext, IDisplay::DEFAULT_DISPLAY, mAms);
         mEventHandler = (IEventStreamTransformation*)mScreenMagnifier.Get();
-        mEventHandler->SetNext(THIS_PROBE(IEventStreamTransformation));
+        mEventHandler->SetNext(this);
     }
 
     if ((mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) != 0) {
         mTouchExplorer = new TouchExplorer(mContext, mAms);
-        mTouchExplorer->SetNext(THIS_PROBE(IEventStreamTransformation));
+        mTouchExplorer->SetNext(this);
         if (mEventHandler != NULL) {
             mEventHandler->SetNext((IEventStreamTransformation*)mTouchExplorer);
         }

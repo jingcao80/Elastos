@@ -728,7 +728,7 @@ AutoPtr<ICharSequence> CFormatter::TransformFromString()
         if (Character::IsUpperCase(mFormatToken->GetConversionType())) {
             flags |= IFormattableFlags::UPPERCASE;
         }
-        res->FormatTo((IFormatter*)this->Probe(EIID_IFormatter), flags, mFormatToken->GetWidth(),
+        res->FormatTo(this, flags, mFormatToken->GetWidth(),
                 mFormatToken->GetPrecision());
         // all actions have been taken out in the
         // Formattable.formatTo, thus there is nothing to do, just

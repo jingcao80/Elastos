@@ -403,7 +403,7 @@ CNotificationStackScrollLayout::CNotificationStackScrollLayout()
     CHashSet::New((IHashSet**)&mFromMoreCardAdditions);
     CArrayList::New((IArrayList**)&mAnimationEvents);
     CArrayList::New((IArrayList**)&mSwipedOutViews);
-    mStateAnimator = new StackStateAnimator(THIS_PROBE(INotificationStackScrollLayout));
+    mStateAnimator = new StackStateAnimator(this);
     mChildrenUpdater = new ChildrenUpdater(this);
 }
 
@@ -444,7 +444,7 @@ ECode CNotificationStackScrollLayout::constructor(
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
     CExpandHelper::New(ctx, this, minHeight, maxHeight, (IExpandHelper**)&mExpandHelper);
-    mExpandHelper->SetEventSource(THIS_PROBE(IView));
+    mExpandHelper->SetEventSource(this);
     mExpandHelper->SetScrollAdapter(this);
 
     CSwipeHelper::New(CSwipeHelper::X, this, ctx, (ISwipeHelper**)&mSwipeHelper);
@@ -1108,7 +1108,7 @@ ECode CNotificationStackScrollLayout::OnTouchEvent(
         if (isCancelOrUp) {
             mDelegateToScrollView = FALSE;
         }
-        TransformTouchEvent(ev, THIS_PROBE(IView), IView::Probe(mScrollView));
+        TransformTouchEvent(ev, this, IView::Probe(mScrollView));
         return IView::Probe(mScrollView)->OnTouchEvent(ev, result);
     }
     Boolean expandWantsIt = FALSE;
@@ -1994,7 +1994,7 @@ ECode CNotificationStackScrollLayout::OnInterceptTouchEvent(
 {
     VALIDATE_NOT_NULL(result);
     if (mInterceptDelegateEnabled) {
-        TransformTouchEvent(ev, THIS_PROBE(IView), IView::Probe(mScrollView));
+        TransformTouchEvent(ev, this, IView::Probe(mScrollView));
         Boolean tmp = FALSE;
         if (mScrollView->OnInterceptTouchEvent(ev, &tmp), tmp) {
             mDelegateToScrollView = TRUE;
@@ -2002,7 +2002,7 @@ ECode CNotificationStackScrollLayout::OnInterceptTouchEvent(
             *result = TRUE;
             return NOERROR;
         }
-        TransformTouchEvent(ev, IView::Probe(mScrollView), THIS_PROBE(IView));
+        TransformTouchEvent(ev, IView::Probe(mScrollView), this);
     }
     InitDownStates(ev);
     Boolean expandWantsIt = FALSE;
@@ -2218,7 +2218,7 @@ ECode CNotificationStackScrollLayout::ChangeViewPosition(
     Int32 currentIndex = 0;
     IndexOfChild(child, &currentIndex);
     AutoPtr<IViewParent> vp;
-    if (child != NULL && (child->GetParent((IViewParent**)&vp), vp.Get()) == THIS_PROBE(IViewParent)
+    if (child != NULL && (child->GetParent((IViewParent**)&vp), vp.Get()) == this
             && currentIndex != newIndex) {
         mChangePositionInProgress = TRUE;
         RemoveView(child);
@@ -2622,7 +2622,7 @@ ECode CNotificationStackScrollLayout::GetHostView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view);
-    *view = THIS_PROBE(IView);
+    *view = this;
     REFCOUNT_ADD(*view);
     return NOERROR;
 }

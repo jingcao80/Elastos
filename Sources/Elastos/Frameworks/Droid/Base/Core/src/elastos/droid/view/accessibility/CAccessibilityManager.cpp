@@ -101,7 +101,7 @@ CAccessibilityManager::CAccessibilityManager()
     CCopyOnWriteArrayList::New((ICopyOnWriteArrayList**)&mAccessibilityStateChangeListeners);
     CCopyOnWriteArrayList::New((ICopyOnWriteArrayList**)&mTouchExplorationStateChangeListeners);
     CCopyOnWriteArrayList::New((ICopyOnWriteArrayList**)&mHighTextContrastStateChangeListeners);
-    CAccessibilityManagerClient::New((IAccessibilityManager*)this, (IIAccessibilityManagerClient**)&mClient);
+    CAccessibilityManagerClient::New(this, (IIAccessibilityManagerClient**)&mClient);
 }
 
 CAccessibilityManager::~CAccessibilityManager()

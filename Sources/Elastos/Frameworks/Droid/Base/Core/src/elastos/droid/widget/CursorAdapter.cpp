@@ -311,7 +311,7 @@ ECode CursorAdapter::GetFilter(
     VALIDATE_NOT_NULL(filter);
     if(mCursorFilter == NULL) {
         CCursorFilter::New(
-                (ICursorFilterClient*)this->Probe(EIID_ICursorFilterClient),
+                this,
                 (ICursorFilter**)&mCursorFilter);
     }
     *filter = IFilter::Probe(mCursorFilter);

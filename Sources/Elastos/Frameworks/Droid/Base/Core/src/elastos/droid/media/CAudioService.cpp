@@ -307,7 +307,7 @@ ECode CAudioService::VolumeStreamState::VolumeDeathHandler::Mute(
                 AutoPtr<IProxy> proxy = (IProxy*)mCallback->Probe(EIID_IProxy);
                 if (proxy != NULL) proxy->LinkToDeath(this, 0);
             }
-            mHost->mDeathHandlers->Add((IInterface*)(IObject*)this);
+            mHost->mDeathHandlers->Add(TO_IINTERFACE(this));
             // If the stream is not yet muted by any client, set level to 0
             if (!mHost->IsMuted()) {
                 updateVolume = TRUE;
@@ -331,7 +331,7 @@ ECode CAudioService::VolumeStreamState::VolumeDeathHandler::Mute(
             mMuteCount--;
             if (mMuteCount == 0) {
                 // Unregister from client death notification
-                mHost->mDeathHandlers->Remove((IInterface*)(IObject*)this);
+                mHost->mDeathHandlers->Remove(TO_IINTERFACE(this));
                 // mCallback can be 0 if muted by AudioService
                 if (mCallback != NULL) {
                     AutoPtr<IProxy> proxy = (IProxy*)mCallback->Probe(EIID_IProxy);
@@ -1245,7 +1245,7 @@ ECode CAudioService::SetModeDeathHandler::ProxyDied()
     synchronized(lock) {
         Logger::W(TAG, "setMode() client died");
         Int32 index;
-        mHost->mSetModeDeathHandlers->IndexOf((IInterface*)(IObject*)this, &index);
+        mHost->mSetModeDeathHandlers->IndexOf(TO_IINTERFACE(this), &index);
         if (index < 0) {
             Logger::W(TAG, "unregistered setMode() client died");
         }
@@ -1379,13 +1379,13 @@ ECode CAudioService::ScoClient::ProxyDied()
     synchronized(lock) {
         Logger::W(TAG, "SCO client died");
         Int32 index;
-        mHost->mScoClients->IndexOf((IInterface*)(IObject*)this, &index);
+        mHost->mScoClients->IndexOf(TO_IINTERFACE(this), &index);
         if (index < 0) {
             Logger::W(TAG, "unregistered SCO client died");
         }
         else {
             ClearCount(TRUE);
-            mHost->mScoClients->Remove((IInterface*)(IObject*)this);
+            mHost->mScoClients->Remove(TO_IINTERFACE(this));
         }
     }
     return NOERROR;
@@ -2953,7 +2953,7 @@ ECode CAudioService::constructor(
     mAudioHandler->GetLooper((ILooper**)&looper);
     mMediaFocusControl = new MediaFocusControl(looper,
             mContext, IAudioServiceVolumeController::Probe(mVolumeController),
-            THIS_PROBE(IAudioService));
+            this);
 
     AudioSystem::SetErrorCallback(mAudioSystemCallback);
 

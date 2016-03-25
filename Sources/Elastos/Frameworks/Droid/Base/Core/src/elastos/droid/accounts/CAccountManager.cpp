@@ -98,7 +98,7 @@ ECode CAccountManager::AmsTask::Start(
     // } catch (RemoteException e) {
     //     setException(e);
     // }
-    *accountManagerFuture = THIS_PROBE(IAccountManagerFuture);
+    *accountManagerFuture = this;
     REFCOUNT_ADD(*accountManagerFuture);
     return NOERROR;
 }
@@ -189,7 +189,7 @@ ECode CAccountManager::AmsTask::GetResult(
 void CAccountManager::AmsTask::Done()
 {
     if (mCallback != NULL) {
-        mHost->PostToHandler(mHandler, mCallback, (IAccountManagerFuture*)this);
+        mHost->PostToHandler(mHandler, mCallback, this);
     }
 }
 
@@ -293,7 +293,7 @@ ECode CAccountManager::Future2Task::Start(
     /* [out] */ IAccountManagerFuture** accountManagerFuture)
 {
     StartTask();
-    *accountManagerFuture = THIS_PROBE(IAccountManagerFuture);
+    *accountManagerFuture = this;
     REFCOUNT_ADD(*accountManagerFuture);
     return NOERROR;
 }
@@ -507,7 +507,7 @@ CAccountManager::GetAuthTokenByTypeAndFeaturesTask::GetAuthTokenByTypeAndFeature
     , mNumAccounts(0)
 {
     assert(!accountType.IsNull());
-    mMyCallback = (IAccountManagerCallback*)this;
+    mMyCallback = this;
 }
 
 ECode CAccountManager::GetAuthTokenByTypeAndFeaturesTask::DoWork()

@@ -356,7 +356,7 @@ ECode SuggestionSpan::NotifySelection(
         AutoPtr<IInputMethodManager> imm;
         //imm = InputMethodManager::PeekInstance();
         if (imm != NULL) {
-            imm->NotifySuggestionPicked(THIS_PROBE(ISuggestionSpan), original, index);
+            imm->NotifySuggestionPicked(this, original, index);
         }
     }
 

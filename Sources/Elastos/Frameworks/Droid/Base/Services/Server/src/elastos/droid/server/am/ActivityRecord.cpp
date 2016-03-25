@@ -987,7 +987,7 @@ Boolean ActivityRecord::ContinueLaunchTickingLocked()
         ActivityStack* stack = mTask->mStack;
         AutoPtr<IMessage> msg;
         stack->mHandler->ObtainMessage(ActivityStack::LAUNCH_TICK_MSG, (IMessage**)&msg);
-        msg->SetObj((IActivityRecord*)this);
+        msg->SetObj(TO_IINTERFACE(this));
 
         stack->mHandler->RemoveMessages(ActivityStack::LAUNCH_TICK_MSG);
         Boolean result;
@@ -1251,8 +1251,8 @@ ECode ActivityRecord::SetSleeping(
         else {
             Boolean contains;
             if (sleeping && !(mStackSupervisor->mGoingToSleepActivities->Contains(
-                this->Probe(EIID_IInterface), &contains), contains)) {
-                mStackSupervisor->mGoingToSleepActivities->Add(this->Probe(EIID_IInterface));
+                TO_IINTERFACE(this), &contains), contains)) {
+                mStackSupervisor->mGoingToSleepActivities->Add(TO_IINTERFACE(this));
             }
             mSleeping = sleeping;
         }

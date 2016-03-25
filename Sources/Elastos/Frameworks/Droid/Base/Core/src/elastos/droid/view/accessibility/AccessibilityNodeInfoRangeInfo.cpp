@@ -104,7 +104,7 @@ ECode AccessibilityNodeInfoRangeInfo::GetCurrent(
 ECode AccessibilityNodeInfoRangeInfo::Recycle()
 {
     Clear();
-    sPool->ReleaseItem((IAccessibilityNodeInfoRangeInfo*)this);
+    sPool->ReleaseItem(this);
     return NOERROR;
 }
 

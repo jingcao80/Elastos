@@ -294,7 +294,7 @@ ECode SingleClientConnManager::ReleaseConnection(
     }
 
     AutoPtr<IClientConnectionManager> manager = sca->GetManager();
-    if (manager != NULL && manager.Get() != (IClientConnectionManager*)this) {
+    if (manager != NULL && manager.Get() != this) {
         Logger::E("SingleClientConnManager", "Connection not obtained from this manager.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

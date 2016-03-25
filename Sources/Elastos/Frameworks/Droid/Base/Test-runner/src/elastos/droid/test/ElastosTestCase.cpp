@@ -15,35 +15,7 @@ namespace Elastos {
 namespace Droid {
 namespace Test {
 
-PInterface ElastosTestCase::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (IInterface*)(IElastosTestCase*)this;
-    }
-    else if (riid == EIID_IElastosTestCase) {
-        return (IElastosTestCase*)this;
-    }
-    return TestCase::Probe(riid);
-}
-
-UInt32 ElastosTestCase::AddRef()
-{
-    return TestCase::AddRef();
-}
-
-UInt32 ElastosTestCase::Release()
-{
-    return TestCase::Release();
-}
-
-ECode ElastosTestCase::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    assert(0);
-    return E_INVALID_ARGUMENT;
-}
+CAR_INTERFACE_IMPL(ElastosTestCase, TestCase, IElastosTestCase)
 
 ECode ElastosTestCase::SetUp()
 {

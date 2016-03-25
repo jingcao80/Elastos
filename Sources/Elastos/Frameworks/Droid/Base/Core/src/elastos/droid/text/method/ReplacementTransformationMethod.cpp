@@ -188,7 +188,7 @@ ECode ReplacementTransformationMethod::SpannedReplacementCharSequence::SubSequen
 {
     VALIDATE_NOT_NULL(csq);
     AutoPtr<ISpannedString> sS;
-    CSpannedString::New((ICharSequence*)this->Probe(EIID_ICharSequence), (ISpannedString**)&sS);
+    CSpannedString::New(this, (ISpannedString**)&sS);
     AutoPtr<CSpannedString> cS = (CSpannedString*)(sS.Get());
     return cS->SubSequence(start, end, csq);
 }

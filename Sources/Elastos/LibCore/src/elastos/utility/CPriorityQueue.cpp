@@ -243,7 +243,7 @@ ECode CPriorityQueue::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = Object::Equals(object, (IPriorityQueue*)this);
+    *result = Object::Equals(object, this);
     return NOERROR;
 }
 

@@ -519,7 +519,7 @@ ECode CPriorityBlockingQueue::ToString(
     sb.AppendChar('[');
     for (Int32 i = 0; i < n; ++i) {
         AutoPtr<IInterface> e = (*mQueue)[i];
-        if (Object::Equals(e, THIS_PROBE(IInterface))) {
+        if (Object::Equals(e, TO_IINTERFACE(this))) {
             sb.Append("(this Collection)");
         }
         else {
@@ -554,7 +554,7 @@ ECode CPriorityBlockingQueue::DrainTo(
 
     if (c == NULL)
         return E_NULL_POINTER_EXCEPTION;
-    if (Object::Equals(c->Probe(EIID_IInterface), THIS_PROBE(IInterface)))
+    if (Object::Equals(c->Probe(EIID_IInterface), TO_IINTERFACE(this)))
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     if (maxElements <= 0) {
         *number = 0;

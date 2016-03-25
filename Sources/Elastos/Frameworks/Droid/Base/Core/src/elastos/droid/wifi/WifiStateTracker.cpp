@@ -157,7 +157,7 @@ PInterface WifiStateTracker::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(INetworkStateTracker*)this;
+        return (PInterface)this;
     }
     return NULL;
 }

@@ -184,7 +184,7 @@ ECode ScaleDrawable::Inflate(
     mScaleState->mGravity = g;
     mScaleState->mUseIntrinsicSizeAsMin = min;
     if (dr != NULL) {
-        dr->SetCallback((IDrawableCallback*)this->Probe(EIID_IDrawableCallback));
+        dr->SetCallback(this);
     }
     return NOERROR;
 }
@@ -195,7 +195,7 @@ ECode ScaleDrawable::InvalidateDrawable(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->InvalidateDrawable(THIS_PROBE(IDrawable));
+        callback->InvalidateDrawable(this);
     }
     return NOERROR;
 }
@@ -208,7 +208,7 @@ ECode ScaleDrawable::ScheduleDrawable(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->ScheduleDrawable(THIS_PROBE(IDrawable), what, when);
+        callback->ScheduleDrawable(this, what, when);
     }
     return NOERROR;
 }
@@ -220,7 +220,7 @@ ECode ScaleDrawable::UnscheduleDrawable(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->UnscheduleDrawable(THIS_PROBE(IDrawable), what);
+        callback->UnscheduleDrawable(this, what);
     }
     return NOERROR;
 }
@@ -426,7 +426,7 @@ ECode ScaleDrawable::constructor(
 
     if (drawable != NULL) {
         drawable->SetCallback(
-                (IDrawableCallback*)this->Probe(EIID_IDrawableCallback));
+                this);
     }
     return NOERROR;
 }

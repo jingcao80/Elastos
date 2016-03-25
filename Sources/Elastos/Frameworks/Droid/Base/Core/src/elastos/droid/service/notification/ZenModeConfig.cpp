@@ -318,7 +318,7 @@ ECode ZenModeConfig::Equals(
         *result = FALSE;
         return NOERROR;
     }
-    if (o == IInterface::Probe((IObject*)this)) {
+    if (_other == (IZenModeConfig*)this) {
         *result = TRUE;
         return NOERROR;
     }

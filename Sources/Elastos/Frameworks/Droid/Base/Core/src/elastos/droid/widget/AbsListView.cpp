@@ -390,11 +390,7 @@ ECode AbsListView::SavedState::ToString(
     StringBuilder buider;
     buider += "AbsListView.SavedState{";
 
-    AutoPtr<ISystem> sys;
-    CSystem::AcquireSingleton((ISystem**)&sys);
-    Int32 value;
-    sys->IdentityHashCode((IAbsListView*)this, &value);
-    buider += StringUtils::ToHexString(value);
+    buider += StringUtils::ToHexString((Int32)this);
     buider += " selectedId=";
     buider += mSelectedId;
     buider += " firstId=";
@@ -708,7 +704,7 @@ void AbsListView::RecycleBin::MarkChildrenDirty()
         for (Int32 i = 0; i < scrapCount; i++) {
             AutoPtr<IInterface> obj;
             scrap->Get(i, (IInterface**)&obj);
-            IVIEW_PROBE(obj)->ForceLayout();
+            IView::Probe(obj)->ForceLayout();
         }
     }
     else {
@@ -720,7 +716,7 @@ void AbsListView::RecycleBin::MarkChildrenDirty()
             for (Int32 j = 0; j < scrapCount; j++) {
                 AutoPtr<IInterface> obj;
                 scrap->Get(i, (IInterface**)&obj);
-                IVIEW_PROBE(obj)->ForceLayout();
+                IView::Probe(obj)->ForceLayout();
             }
         }
     }
@@ -730,7 +726,7 @@ void AbsListView::RecycleBin::MarkChildrenDirty()
         for (Int32 i = 0; i < count; i++) {
             AutoPtr<IInterface> obj;
             mTransientStateViews->ValueAt(i, (IInterface**)&obj);
-            IVIEW_PROBE(obj)->ForceLayout();
+            IView::Probe(obj)->ForceLayout();
         }
     }
 
@@ -740,7 +736,7 @@ void AbsListView::RecycleBin::MarkChildrenDirty()
         for (Int32 i = 0; i < count; i++) {
             AutoPtr<IInterface> obj;
             mTransientStateViewsById->ValueAt(i, (IInterface**)&obj);
-            IVIEW_PROBE(obj)->ForceLayout();
+            IView::Probe(obj)->ForceLayout();
         }
     }
 }
@@ -822,7 +818,7 @@ AutoPtr<IView> AbsListView::RecycleBin::GetTransientStateView(
         IAdapter::Probe(mHost->mAdapter)->GetItemId(position, &id);
         AutoPtr<IInterface> obj;
         mTransientStateViewsById->Get(id, (IInterface**)&obj);
-        AutoPtr<IView> result = IVIEW_PROBE(obj);
+        AutoPtr<IView> result = IView::Probe(obj);
         mTransientStateViewsById->Remove(id);
         return result;
     }
@@ -832,7 +828,7 @@ AutoPtr<IView> AbsListView::RecycleBin::GetTransientStateView(
         if (index >= 0) {
             AutoPtr<IInterface> obj;
             mTransientStateViews->ValueAt(index, (IInterface**)&obj);
-            AutoPtr<IView> result = IVIEW_PROBE(obj);
+            AutoPtr<IView> result = IView::Probe(obj);
             mTransientStateViews->RemoveAt(index);
             return result;
         }
@@ -850,7 +846,7 @@ void AbsListView::RecycleBin::ClearTransientStateViews()
         for (Int32 i = 0; i < N; i++) {
             AutoPtr<IInterface> obj;
             viewsByPos->ValueAt(i, (IInterface**)&obj);
-            RemoveDetachedView(IVIEW_PROBE(obj), FALSE);
+            RemoveDetachedView(IView::Probe(obj), FALSE);
         }
         viewsByPos->Clear();
     }
@@ -862,7 +858,7 @@ void AbsListView::RecycleBin::ClearTransientStateViews()
         for (Int32 i = 0; i < N; i++) {
             AutoPtr<IInterface> obj;
             viewsById->ValueAt(i, (IInterface**)&obj);
-            RemoveDetachedView(IVIEW_PROBE(obj), FALSE);
+            RemoveDetachedView(IView::Probe(obj), FALSE);
         }
         viewsById->Clear();
     }
@@ -967,7 +963,7 @@ void AbsListView::RecycleBin::RemoveSkippedScrap()
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> obj;
         mSkippedScrap->Get(i, (IInterface**)&obj);
-        RemoveDetachedView(IVIEW_PROBE(obj), FALSE);
+        RemoveDetachedView(IView::Probe(obj), FALSE);
     }
     mSkippedScrap->Clear();
 }
@@ -1053,7 +1049,7 @@ void AbsListView::RecycleBin::PruneScrapViews()
         for (Int32 j = 0; j < extras; j++) {
             AutoPtr<IInterface> obj;
             scrapPile->Remove(size--, (IInterface**)&obj);
-            RemoveDetachedView(IVIEW_PROBE(obj), FALSE);
+            RemoveDetachedView(IView::Probe(obj), FALSE);
         }
     }
 
@@ -1064,7 +1060,7 @@ void AbsListView::RecycleBin::PruneScrapViews()
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             transViewsByPos->ValueAt(i, (IInterface**)&obj);
-            AutoPtr<IView> v = IVIEW_PROBE(obj);
+            AutoPtr<IView> v = IView::Probe(obj);
             Boolean res;
             if (v->HasTransientState(&res), !res) {
                 RemoveDetachedView(v, FALSE);
@@ -1081,7 +1077,7 @@ void AbsListView::RecycleBin::PruneScrapViews()
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             transViewsById->ValueAt(i, (IInterface**)&obj);
-            AutoPtr<IView> v = IVIEW_PROBE(obj);
+            AutoPtr<IView> v = IView::Probe(obj);
             Boolean res;
             if (v->HasTransientState(&res), !res) {
                 RemoveDetachedView(v, FALSE);
@@ -1118,7 +1114,7 @@ void AbsListView::RecycleBin::SetCacheColorHint(
         for (Int32 i = 0; i < scrapCount; i++) {
             AutoPtr<IInterface> obj;
             scrap->Get(i, (IInterface**)&obj);
-            IVIEW_PROBE(obj)->SetDrawingCacheBackgroundColor(color);
+            IView::Probe(obj)->SetDrawingCacheBackgroundColor(color);
         }
     }
     else {
@@ -1129,7 +1125,7 @@ void AbsListView::RecycleBin::SetCacheColorHint(
             for (Int32 j = 0; j < scrapCount; j++) {
                 AutoPtr<IInterface> obj;
                 scrap->Get(j, (IInterface**)&obj);
-                IVIEW_PROBE(obj)->SetDrawingCacheBackgroundColor(color);
+                IView::Probe(obj)->SetDrawingCacheBackgroundColor(color);
             }
         }
     }
@@ -1156,7 +1152,7 @@ AutoPtr<IView> AbsListView::RecycleBin::RetrieveFromScrap(
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             scrapViews->Get(i, (IInterface**)&obj);
-            AutoPtr<IView> view = IVIEW_PROBE(obj);
+            AutoPtr<IView> view = IView::Probe(obj);
             AutoPtr<IViewGroupLayoutParams> lp;
             view->GetLayoutParams((IViewGroupLayoutParams**)&lp);
             AutoPtr<IAbsListViewLayoutParams> params = IAbsListViewLayoutParams::Probe(lp);
@@ -1171,13 +1167,13 @@ AutoPtr<IView> AbsListView::RecycleBin::RetrieveFromScrap(
                 if (id == itemId) {
                     AutoPtr<IInterface> obj;
                     scrapViews->Remove(i, (IInterface**)&obj);
-                    return IVIEW_PROBE(obj);
+                    return IView::Probe(obj);
                 }
             }
             else if (pos == position) {
                 AutoPtr<IInterface> obj;
                 scrapViews->Remove(i, (IInterface**)&obj);
-                AutoPtr<IView> scrap = IVIEW_PROBE(obj);
+                AutoPtr<IView> scrap = IView::Probe(obj);
                 ClearAccessibilityFromScrap(scrap);
                 return scrap;
             }
@@ -1185,7 +1181,7 @@ AutoPtr<IView> AbsListView::RecycleBin::RetrieveFromScrap(
 
         AutoPtr<IInterface> object;
         scrapViews->Remove(size - 1, (IInterface**)&object);
-        AutoPtr<IView> scrap = IVIEW_PROBE(object);
+        AutoPtr<IView> scrap = IView::Probe(object);
         ClearAccessibilityFromScrap(scrap);
         return scrap;
     }
@@ -1202,7 +1198,7 @@ void AbsListView::RecycleBin::ClearScrap(
     for (Int32 j = 0; j < scrapCount; j++) {
         AutoPtr<IInterface> obj;
         scrap->Remove(scrapCount - 1 - j, (IInterface**)&obj);
-        RemoveDetachedView(IVIEW_PROBE(obj), FALSE);
+        RemoveDetachedView(IView::Probe(obj), FALSE);
     }
 }
 
@@ -2338,7 +2334,7 @@ AutoPtr<IInputConnection> AbsListView::InputConnectionWrapper::GetTarget()
 {
     if (mTarget == NULL) {
         AutoPtr<IEditText> text = mHost->GetTextFilterInput();
-        IVIEW_PROBE(text)->OnCreateInputConnection(mOutAttrs, (IInputConnection**)&mTarget);
+        IView::Probe(text)->OnCreateInputConnection(mOutAttrs, (IInputConnection**)&mTarget);
     }
     return mTarget;
 }
@@ -3366,7 +3362,7 @@ void AbsListView::SetFastScrollerEnabledUiThread(
         mFastScroll->SetEnabled(enabled);
     }
     else if (enabled) {
-        mFastScroll = new FastScroller((IAbsListView*)this, mFastScrollStyle);
+        mFastScroll = new FastScroller(this, mFastScrollStyle);
         mFastScroll->SetEnabled(TRUE);
     }
 
@@ -3529,7 +3525,7 @@ ECode AbsListView::InvokeOnItemScrollListener()
     }
 
     if (mOnScrollListener != NULL) {
-        mOnScrollListener->OnScroll(THIS_PROBE(IAbsListView),
+        mOnScrollListener->OnScroll(this,
                 mFirstPosition, count, mItemCount);
     }
 
@@ -3668,7 +3664,7 @@ ECode AbsListView::FindViewByAccessibilityIdTraversal(
 
     Int32 id;
     if (accessibilityId == (GetAccessibilityViewId(&id), id)) {
-        *view = THIS_PROBE(IView);
+        *view = this;
         REFCOUNT_ADD(*view);
         return NOERROR;
     }
@@ -3729,7 +3725,7 @@ ECode AbsListView::GetFocusedRect(
     if (view != NULL) {
         AutoPtr<IViewParent> vp;
         view->GetParent((IViewParent**)&vp);
-        if (IVIEW_PROBE(vp) == THIS_PROBE(IView)) {
+        if (IView::Probe(vp) == this) {
             // the focused rectangle of the selected view offset into the
             // coordinate space of this view.
             view->GetFocusedRect(r);
@@ -3965,7 +3961,7 @@ void AbsListView::OnRestoreInstanceState(
 Boolean AbsListView::AcceptFilter()
 {
     AutoPtr<IAdapter> adapter;
-    THIS_PROBE(IAdapterView)->GetAdapter((IAdapter**)&adapter);
+    this->GetAdapter((IAdapter**)&adapter);
     AutoPtr<IFilterable> temp = IFilterable::Probe(adapter);
     if (temp == NULL || !mTextFilterEnabled) {
         return FALSE;
@@ -4327,14 +4323,14 @@ AutoPtr<IView> AbsListView::GetAccessibilityFocusedChild(
 {
     AutoPtr<IViewParent> viewParent;
     focusedView->GetParent((IViewParent**)&viewParent);
-    while (IVIEW_PROBE(viewParent) && IVIEW_PROBE(viewParent) != THIS_PROBE(IView)) {
-        focusedView = IVIEW_PROBE(viewParent);
+    while (IView::Probe(viewParent) && IView::Probe(viewParent) != this) {
+        focusedView = IView::Probe(viewParent);
         AutoPtr<IViewParent> tmp;
         viewParent->GetParent((IViewParent**)&tmp);
         viewParent = tmp;
     }
 
-    if (IVIEW_PROBE(viewParent) == NULL) {
+    if (IView::Probe(viewParent) == NULL) {
         return NULL;
     }
     return focusedView;
@@ -4470,7 +4466,7 @@ AutoPtr<IView> AbsListView::ObtainView(
         params->GetViewType(&viewType2);
         if (viewType2 == viewType1) {
             AutoPtr<IView> updatedView;
-            adapter->GetView(position, transientView, THIS_PROBE(IViewGroup), (IView**)&updatedView);
+            adapter->GetView(position, transientView, this, (IView**)&updatedView);
 
             // If we failed to re-bind the data, scrap the obtained view.
             if (updatedView != transientView) {
@@ -4486,7 +4482,7 @@ AutoPtr<IView> AbsListView::ObtainView(
 
     const AutoPtr<IView> scrapView = mRecycler->GetScrapView(position);
     AutoPtr<IView> child;
-    adapter->GetView(position, scrapView, THIS_PROBE(IViewGroup), (IView**)&child);
+    adapter->GetView(position, scrapView, this, (IView**)&child);
     if (scrapView != NULL) {
         if (child != scrapView) {
             // Failed to re-bind the data, return scrap to the heap.
@@ -4836,7 +4832,7 @@ ECode AbsListView::SetSelector(
     padding->GetTop(&mSelectionTopPadding);
     padding->GetRight(&mSelectionRightPadding);
     padding->GetBottom(&mSelectionBottomPadding);
-    sel->SetCallback(THIS_PROBE(IDrawableCallback));
+    sel->SetCallback(this);
     UpdateSelectorState();
 
     return NOERROR;
@@ -5012,9 +5008,9 @@ ECode AbsListView::OnAttachedToWindow()
 
     AutoPtr<IViewTreeObserver> treeObserver;
     GetViewTreeObserver((IViewTreeObserver**)&treeObserver);
-    treeObserver->AddOnTouchModeChangeListener(THIS_PROBE(IOnTouchModeChangeListener));
+    treeObserver->AddOnTouchModeChangeListener(this);
     if (mTextFilterEnabled && mPopup != NULL && !mGlobalLayoutListenerAddedFilter) {
-        treeObserver->AddOnGlobalLayoutListener(THIS_PROBE(IOnGlobalLayoutListener));
+        treeObserver->AddOnGlobalLayoutListener(this);
     }
 
     if (mAdapter != NULL && mDataSetObserver == NULL) {
@@ -5043,9 +5039,9 @@ ECode AbsListView::OnDetachedFromWindow()
 
     AutoPtr<IViewTreeObserver> treeObserver;
     GetViewTreeObserver((IViewTreeObserver**)&treeObserver);
-    treeObserver->RemoveOnTouchModeChangeListener(THIS_PROBE(IOnTouchModeChangeListener));
+    treeObserver->RemoveOnTouchModeChangeListener(this);
     if (mTextFilterEnabled && mPopup != NULL) {
-        treeObserver->RemoveGlobalOnLayoutListener(THIS_PROBE(IOnGlobalLayoutListener));
+        treeObserver->RemoveGlobalOnLayoutListener(this);
         mGlobalLayoutListenerAddedFilter = FALSE;
     }
 
@@ -5213,12 +5209,12 @@ Boolean AbsListView::PerformLongPress(
 
     Boolean handled = FALSE;
     if (mOnItemLongClickListener != NULL) {
-        mOnItemLongClickListener->OnItemLongClick(THIS_PROBE(IAdapterView),
+        mOnItemLongClickListener->OnItemLongClick(this,
                 child, longPressPosition, longPressId, &handled);
     }
     if (!handled) {
         mContextMenuInfo = CreateContextMenuInfo(child, longPressPosition, longPressId);
-        AdapterView::ShowContextMenuForChild(THIS_PROBE(IView), &handled);
+        AdapterView::ShowContextMenuForChild(this, &handled);
     }
 
     if (handled) {
@@ -5258,7 +5254,7 @@ ECode AbsListView::ShowContextMenu(
         GetChildAt(position - mFirstPosition, (IView**)&child);
         if (child != NULL) {
             mContextMenuInfo = CreateContextMenuInfo(child, position, id);
-            return AdapterView::ShowContextMenuForChild(THIS_PROBE(IView), res);
+            return AdapterView::ShowContextMenuForChild(this, res);
         }
     }
 
@@ -5279,7 +5275,7 @@ ECode AbsListView::ShowContextMenuForChild(
 
         Boolean handled = FALSE;
         if (mOnItemLongClickListener != NULL) {
-            mOnItemLongClickListener->OnItemLongClick(THIS_PROBE(IAdapterView),
+            mOnItemLongClickListener->OnItemLongClick(this,
                     originalView, longPressPosition, longPressId, &handled);
         }
 
@@ -5421,7 +5417,7 @@ Boolean AbsListView::StartScrollIfNeeded(
     Boolean overscroll = mScrollY != 0;
 
     Int32 axes;
-    THIS_PROBE(IViewGroup)->GetNestedScrollAxes(&axes);
+    this->GetNestedScrollAxes(&axes);
     if ((overscroll || distance > mTouchSlop) &&
             (axes & SCROLL_AXIS_VERTICAL) == 0) {
         CreateScrollingCache();
@@ -5533,7 +5529,7 @@ void AbsListView::ScrollIfNeeded(
             }
 
             AutoPtr<IView> motionView;
-            THIS_PROBE(IViewGroup)->GetChildAt(motionIndex, (IView**)&motionView);
+            this->GetChildAt(motionIndex, (IView**)&motionView);
             Int32 motionViewPrevTop = 0;
             if (motionView != NULL) {
                 motionView->GetTop(&motionViewPrevTop);
@@ -5547,7 +5543,7 @@ void AbsListView::ScrollIfNeeded(
 
             // Check to see if we have bumped into the scroll limit
             motionView = NULL;
-            THIS_PROBE(IViewGroup)->GetChildAt(motionIndex, (IView**)&motionView);
+            this->GetChildAt(motionIndex, (IView**)&motionView);
             if (motionView != NULL) {
                 // Check if the top of the motion view is where it is
                 // supposed to be
@@ -5908,7 +5904,7 @@ void AbsListView::OnTouchDown(
         PointToPosition(x, y, &motionPosition);
         if (!mDataChanged) {
             AutoPtr<IAdapter> adapter;
-            THIS_PROBE(IAdapterView)->GetAdapter((IAdapter**)&adapter);
+            this->GetAdapter((IAdapter**)&adapter);
             Boolean isEnabled;
             IListAdapter::Probe(adapter)->IsEnabled(motionPosition, &isEnabled);
             if (mTouchMode == TOUCH_MODE_FLING) {
@@ -6707,7 +6703,7 @@ void AbsListView::ReportScrollStateChange(
     if (newState != mLastScrollState) {
         if (mOnScrollListener != NULL) {
             mLastScrollState = newState;
-            mOnScrollListener->OnScrollStateChanged(THIS_PROBE(IAbsListView), newState);
+            mOnScrollListener->OnScrollStateChanged(this, newState);
         }
     }
 }
@@ -7652,7 +7648,7 @@ void AbsListView::PositionPopup()
 
     Boolean showing;
     if (mPopup->IsShowing(&showing), !showing) {
-        mPopup->ShowAtLocation(THIS_PROBE(IView),
+        mPopup->ShowAtLocation(this,
                 IGravity::BOTTOM | IGravity::CENTER_HORIZONTAL, (*xy)[0], bottomGap);
     }
     else {
@@ -7773,7 +7769,7 @@ Boolean AbsListView::SendToTextFilter(
                     if (action == IKeyEvent::ACTION_DOWN && repeatCount == 0) {
                         AutoPtr<IDispatcherState> state;
                         GetKeyDispatcherState((IDispatcherState**)&state);
-                        state->StartTracking(event, (IAbsListView*)this);
+                        state->StartTracking(event, TO_IINTERFACE(this));
                         handled = TRUE;
                     }
                     else if (action == IKeyEvent::ACTION_UP && tracking && !canceled) {
@@ -7833,7 +7829,7 @@ AbsListView::OnCreateInputConnection(
     Boolean res;
     if (IsTextFilterEnabled(&res), res) {
         if (mPublicInputConnection == NULL) {
-            CBaseInputConnection::New(THIS_PROBE(IView), FALSE, (IInputConnection**)&mDefInputConnection);
+            CBaseInputConnection::New(this, FALSE, (IInputConnection**)&mDefInputConnection);
             mPublicInputConnection = new InputConnectionWrapper(this, outAttrs);
         }
         outAttrs->SetInputType(IInputType::TYPE_CLASS_TEXT | IInputType::TYPE_TEXT_VARIATION_FILTER);
@@ -7849,7 +7845,7 @@ ECode AbsListView::CheckInputConnectionProxy(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = view == IVIEW_PROBE(mTextFilter);
+    *res = view == IView::Probe(mTextFilter);
     return NOERROR;
 }
 
@@ -7866,14 +7862,14 @@ void AbsListView::CreateTextFilter(
         p->SetTouchable(FALSE);
 
         p->SetInputMethodMode(IPopupWindow::INPUT_METHOD_NOT_NEEDED);
-        p->SetContentView(IVIEW_PROBE(GetTextFilterInput()));
+        p->SetContentView(IView::Probe(GetTextFilterInput()));
         p->SetWidth(IViewGroupLayoutParams::WRAP_CONTENT);
         p->SetHeight(IViewGroupLayoutParams::WRAP_CONTENT);
         p->SetBackgroundDrawable(NULL);
         mPopup = p;
         AutoPtr<IViewTreeObserver> treeObserver;
         GetViewTreeObserver((IViewTreeObserver**)&treeObserver);
-        treeObserver->AddOnGlobalLayoutListener((IOnGlobalLayoutListener*)this->Probe(EIID_IOnGlobalLayoutListener));
+        treeObserver->AddOnGlobalLayoutListener(this);
         mGlobalLayoutListenerAddedFilter = TRUE;
     }
     if (animateEntrance) {
@@ -7900,7 +7896,7 @@ AutoPtr<IEditText> AbsListView::GetTextFilterInput()
         textview->SetRawInputType(IInputType::TYPE_CLASS_TEXT
                 | IInputType::TYPE_TEXT_VARIATION_FILTER);
         textview->SetImeOptions(IEditorInfo::IME_FLAG_NO_EXTRACT_UI);
-        textview->AddTextChangedListener(THIS_PROBE(ITextWatcher));
+        textview->AddTextChangedListener(this);
     }
     return mTextFilter;
 }
@@ -7992,7 +7988,7 @@ ECode AbsListView::OnTextChanged(
             filterable->GetFilter((IFilter**)&f);
             // Filter should not be NULL when we reach this part
             if (f != NULL) {
-                f->DoFilter(s, (IFilterListener*)this->Probe(EIID_IFilterListener));
+                f->DoFilter(s, this);
             }
             else {
                 Logger::E("AbsListView", "You cannot call onTextChanged with a non filterable adapter.");

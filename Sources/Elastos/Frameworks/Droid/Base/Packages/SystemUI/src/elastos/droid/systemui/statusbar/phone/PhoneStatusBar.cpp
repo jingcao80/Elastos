@@ -860,7 +860,7 @@ AutoPtr<IPhoneStatusBarView> MakeStatusBarView()
             mNavigationBarView = INavigationBarView::Probe(tmpView.Get());
 
             mNavigationBarView->SetDisabledFlags(mDisabled);
-            mNavigationBarView->SetBar(THIS_PROBE(IStatusBar));
+            mNavigationBarView->SetBar(this);
         }
     // } catch (RemoteException ex) {
     //     // no window manager? good luck with that

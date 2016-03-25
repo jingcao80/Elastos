@@ -22,14 +22,14 @@ PInterface CEditPropertiesSession::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_AccountManagerServiceSession) {
-        return reinterpret_cast<PInterface>((AccountManagerServiceSession*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CEditPropertiesSession::Probe(riid);
 }
 
 ECode CEditPropertiesSession::Run()
 {
-    return mAuthenticator->EditProperties((IIAccountAuthenticatorResponse*)this,
+    return mAuthenticator->EditProperties(this,
             mAccountType);
 }
 

@@ -220,7 +220,7 @@ ECode Int32Buffer::Put(
 ECode Int32Buffer::Put(
     /* [in] */ IInt32Buffer* src)
 {
-    if (src == (IInt32Buffer*)this->Probe(EIID_IInt32Buffer)) {
+    if (src == this) {
         // throw new IllegalArgumentException("src == this");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

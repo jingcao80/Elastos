@@ -156,7 +156,7 @@ ECode GestureStroke::ToPath(
 {
     VALIDATE_NOT_NULL(outPath);
 
-    AutoPtr<IGestureStroke> stroke = THIS_PROBE(IGestureStroke);
+    AutoPtr<IGestureStroke> stroke = this;
     AutoPtr<ArrayOf<Float> > pts = GestureUtils::TemporalSampling(stroke, numSample);
     AutoPtr<IRectF> rect = mBoundingBox;
 

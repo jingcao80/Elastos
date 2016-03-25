@@ -16,7 +16,7 @@ PInterface CEditableInputConnection::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_BaseInputConnection) {
-        return reinterpret_cast<PInterface>((BaseInputConnection*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CEditableInputConnection::Probe(riid);
 }

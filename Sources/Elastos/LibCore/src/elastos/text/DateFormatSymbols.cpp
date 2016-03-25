@@ -175,7 +175,7 @@ ECode DateFormatSymbols::Equals(
     *result = FALSE;
 
     IDateFormatSymbols * other = IDateFormatSymbols::Probe(object);
-    if (THIS_PROBE(IDateFormatSymbols) == other) {
+    if (this == other) {
         *result = TRUE;
         return NOERROR;
     }
@@ -192,7 +192,7 @@ ECode DateFormatSymbols::Equals(
             Arrays::Equals(mShortMonths, rhs->mShortMonths) &&
             Arrays::Equals(mShortWeekdays, rhs->mShortWeekdays) &&
             Arrays::Equals(mWeekdays, rhs->mWeekdays) &&
-            TimeZoneStringsEqual(THIS_PROBE(IDateFormatSymbols), rhs);
+            TimeZoneStringsEqual(this, rhs);
     return NOERROR;
 }
 

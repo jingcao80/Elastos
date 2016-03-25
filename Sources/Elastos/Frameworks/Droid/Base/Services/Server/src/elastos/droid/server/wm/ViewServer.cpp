@@ -154,21 +154,21 @@ ECode ViewServer::ViewServerWorker::FocusChanged()
 
 Boolean ViewServer::ViewServerWorker::WindowManagerAutolistLoop()
 {
-    mHost->mWindowManager->AddWindowChangeListener((IWindowChangeListener*)this);
+    mHost->mWindowManager->AddWindowChangeListener(this);
     AutoPtr<IBufferedWriter> out;
     // try {
     AutoPtr<IOutputStream> outputStream;
     if (FAILED(mClient->GetOutputStream((IOutputStream**)&outputStream))) {
-        mHost->mWindowManager->RemoveWindowChangeListener((IWindowChangeListener*)this);
+        mHost->mWindowManager->RemoveWindowChangeListener(this);
         return TRUE;
     }
     AutoPtr<IOutputStreamWriter> writer;
     if (FAILED(COutputStreamWriter::New(outputStream, (IOutputStreamWriter**)&writer))) {
-        mHost->mWindowManager->RemoveWindowChangeListener((IWindowChangeListener*)this);
+        mHost->mWindowManager->RemoveWindowChangeListener(this);
         return TRUE;
     }
     if (FAILED(CBufferedWriter::New(IWriter::Probe(writer), (IBufferedWriter**)&out))) {
-        mHost->mWindowManager->RemoveWindowChangeListener((IWindowChangeListener*)this);
+        mHost->mWindowManager->RemoveWindowChangeListener(this);
         return TRUE;
     }
     while (!Thread::Interrupted()) {
@@ -208,7 +208,7 @@ Boolean ViewServer::ViewServerWorker::WindowManagerAutolistLoop()
         //     // Ignore
         // }
     }
-    mHost->mWindowManager->RemoveWindowChangeListener((IWindowChangeListener*)this);
+    mHost->mWindowManager->RemoveWindowChangeListener(this);
     // }
     return TRUE;
 }
@@ -250,7 +250,7 @@ ECode ViewServer::Start(
     addrHelper->GetLocalHost((IInetAddress**)&addr);
     FAIL_RETURN(CServerSocket::New(mPort, VIEW_SERVER_MAX_CONNECTIONS, addr,
             (IServerSocket**)&mServer));
-    FAIL_RETURN(CThread::New((IRunnable*)this,
+    FAIL_RETURN(CThread::New(this,
             String("Remote View Server [port=") + StringUtils::ToString(mPort) + String("]"),
             (IThread**)&mThread));
     // AutoPtr<IExecutors> executors;

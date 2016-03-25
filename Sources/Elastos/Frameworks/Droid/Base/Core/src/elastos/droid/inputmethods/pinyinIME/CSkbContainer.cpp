@@ -318,7 +318,7 @@ void CSkbContainer::PopupSymbols()
             ((CSoftKeyboardView*)mPopupSkbView.Get())->OnMeasure(IViewGroupLayoutParams::WRAP_CONTENT,
                     IViewGroupLayoutParams::WRAP_CONTENT);
         }
-        mPopupSkbView->SetOnTouchListener((IViewOnTouchListener*)this->Probe(EIID_IViewOnTouchListener));
+        mPopupSkbView->SetOnTouchListener(this);
         Boolean result = FALSE;
         mPopupSkbView->SetSoftKeyboard(skb, &result);
         mPopupSkbView->SetBalloonHint(mBalloonOnKey, mBalloonPopup, TRUE);
@@ -336,7 +336,7 @@ void CSkbContainer::PopupSymbols()
         GetLocationInWindow(&x, &y);
         mXyPosTmp[0] = x;
         mXyPosTmp[1] = y;
-        mPopupSkb->ShowAtLocation(THIS_PROBE(IView), IGravity::NO_GRAVITY, mPopupX, mPopupY
+        mPopupSkb->ShowAtLocation(this, IGravity::NO_GRAVITY, mPopupX, mPopupY
                 + mXyPosTmp[1]);
         mPopupSkbShow = TRUE;
         mPopupSkbNoResponse = TRUE;
@@ -559,13 +559,13 @@ PInterface CSkbContainer::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_View) {
-        return reinterpret_cast<PInterface>((View*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     else if (riid == EIID_ViewGroup) {
-        return reinterpret_cast<PInterface>((ViewGroup*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     else if (riid == EIID_ISkbContainer) {
-        return (IInterface*)(ISkbContainer*)this;
+        return (IInterface*)this;
     }
 
     return RelativeLayout::Probe(riid);

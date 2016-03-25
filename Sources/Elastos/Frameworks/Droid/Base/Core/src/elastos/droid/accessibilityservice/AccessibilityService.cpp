@@ -48,7 +48,7 @@ ECode IAccessibilityServiceClientWrapper::constructor(
     /* [in] */ IAccessibilityServiceCallbacks* callback)
 {
     mCallback = callback;
-    CHandlerCaller::New(context, looper, THIS_PROBE(IHandlerCallerCallback), TRUE, FALSE,
+    CHandlerCaller::New(context, looper, this, TRUE, FALSE,
         (IHandlerCaller**)&mCaller);
     return NOERROR;
 }
@@ -379,7 +379,7 @@ ECode AccessibilityService::OnBind(
     Service::GetMainLooper((ILooper**)&looper);
     AutoPtr<MyAccessibilityServiceCallbacks> callbacks = new MyAccessibilityServiceCallbacks(this);
     AutoPtr<IIAccessibilityServiceClient> wrapper;
-    CAccessibilityServiceClientWrapper::New(THIS_PROBE(IContext), looper, callbacks,
+    CAccessibilityServiceClientWrapper::New(this, looper, callbacks,
         (IIAccessibilityServiceClient**)&wrapper);
     *binder = IBinder::Probe(wrapper);
     REFCOUNT_ADD(*binder);

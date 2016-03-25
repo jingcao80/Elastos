@@ -32,9 +32,9 @@ PInterface CCrossfadeActivity::AnimatorListenerAdapter::Probe(
     /* [in] */ REIID riid)
 {
     if(riid == EIID_IInterface) {
-        return (IInterface*)(IAnimatorListener*)this;
+        return (IInterface*)this;
     } else if (riid == EIID_IAnimatorListener) {
-        return (IAnimatorListener*)this;
+        return this;
     }
     return NULL;
 }
@@ -44,7 +44,7 @@ ECode CCrossfadeActivity::AnimatorListenerAdapter::GetInterfaceID(
     /* [out] */ InterfaceID *pIID)
 {
     assert(pIID != NULL);
-    if (pObject == (IInterface*)(IAnimatorListener*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IAnimatorListener;
     } else {
         return E_INVALID_ARGUMENT;

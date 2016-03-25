@@ -40,10 +40,10 @@ ECode SQLiteDirectCursorDriver::Query(
     }
 
     if (factory == NULL) {
-        ec = CSQLiteCursor::New((ISQLiteCursorDriver*)this, mEditTable, query, (ISQLiteCursor**)&cursor);
+        ec = CSQLiteCursor::New(this, mEditTable, query, (ISQLiteCursor**)&cursor);
     }
     else {
-        ec = factory->NewCursor(mDatabase, (ISQLiteCursorDriver*)this, mEditTable, query, (ICursor**)&cursor);
+        ec = factory->NewCursor(mDatabase, this, mEditTable, query, (ICursor**)&cursor);
     }
     if (FAILED(ec)) {
         ICloseable::Probe(query)->Close();

@@ -697,10 +697,10 @@ GlobalActions::SilentModeTriStateAction::SilentModeTriStateAction(
 //    /* [in]  */ REIID riid)
 //{
 //    if (riid == EIID_IInterface) {
-//        return (PInterface)(IViewOnClickListener*)this;
+//        return (PInterface)this;
 //    }
 //    if (riid == EIID_IViewOnClickListener) {
-//        return (IViewOnClickListener*)this;
+//        return this;
 //    }
 //    if (riid == EIID_SilentModeTriStateAction) {
 //        return reinterpret_cast<PInterface>(this);

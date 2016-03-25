@@ -225,7 +225,7 @@ void CleanupReference::HandleOnUiThread(
     AutoPtr<IMessageHelper> helper;
     CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
     AutoPtr<IMessage> msg;
-    helper->Obtain(LazyHolder::sHandler, what, (IObject*)this, (IMessage**)&msg);
+    helper->Obtain(LazyHolder::sHandler, what, TO_IINTERFACE(this), (IMessage**)&msg);
     AutoPtr<ILooperHelper> looperHelper;
     assert(0);
     CLooperHelper::AcquireSingleton((ILooperHelper**)&looperHelper);
@@ -250,7 +250,7 @@ void CleanupReference::RunCleanupTaskInternal()
         Slogger::D(TAG, "runCleanupTaskInternal");
     }
 
-    sRefs->Remove((IObject*)this);
+    sRefs->Remove(TO_IINTERFACE(this));
     if (mCleanupTask != NULL) {
         if (DEBUG) {
             Slogger::I(TAG, "--- CLEANING ONE REF");

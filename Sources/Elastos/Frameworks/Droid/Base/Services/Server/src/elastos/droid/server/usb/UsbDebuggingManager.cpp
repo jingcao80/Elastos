@@ -200,7 +200,7 @@ PInterface UsbDebuggingManager::Probe(
         return (PInterface)this;
     }
     else if (riid == EIID_IRunnable) {
-        return (IRunnable*)this;
+        return this;
     }
 
     return NULL;

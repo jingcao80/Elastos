@@ -66,7 +66,7 @@ ECode CCopyOnWriteArraySet::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (object == THIS_PROBE(IInterface)) {
+    if (object == TO_IINTERFACE(this)) {
         *result = TRUE;
         return NOERROR;
     }

@@ -660,7 +660,7 @@ ECode Layout::DrawText(
                     if (dir == ILayout::DIR_RIGHT_TO_LEFT) {
                         margin->DrawLeadingMargin(canvas, p, right, dir, ltop,
                             lbaseline, lbottom, buf,
-                            start, end, isFirstParaLine, THIS_PROBE(ILayout));
+                            start, end, isFirstParaLine, this);
 
                         Int32 tmp;
                         margin->GetLeadingMargin(useFirstLineMargin, &tmp);
@@ -669,7 +669,7 @@ ECode Layout::DrawText(
                     else {
                         margin->DrawLeadingMargin(canvas, p, left, dir, ltop,
                             lbaseline, lbottom, buf,
-                            start, end, isFirstParaLine, THIS_PROBE(ILayout));
+                            start, end, isFirstParaLine, this);
                         Int32 tmp;
                         margin->GetLeadingMargin(useFirstLineMargin, &tmp);
                         left += tmp;

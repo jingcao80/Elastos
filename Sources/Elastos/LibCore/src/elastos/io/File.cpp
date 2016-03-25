@@ -832,7 +832,7 @@ ECode File::List(
     for (Int32 i = 0; i < filenames->GetLength(); ++i) {
         String filename = (*filenames)[i];
         Boolean isAccept;
-        if (filter->Accept((IFile*)this->Probe(EIID_IFile),
+        if (filter->Accept(this,
                 filename, &isAccept), isAccept) {
             result.PushBack(filename);
         }
@@ -920,7 +920,7 @@ AutoPtr< ArrayOf<IFile*> > File::FilenamesToFiles(
     AutoPtr< ArrayOf<IFile*> > result = ArrayOf<IFile*>::Alloc(count);
     for (Int32 i = 0; i < count; ++i) {
         AutoPtr<IFile> file;
-        CFile::New((IFile*)this->Probe(EIID_IFile),
+        CFile::New(this,
                 (*filenames)[i], (IFile**)&file);
         result->Set(i, file);
     }

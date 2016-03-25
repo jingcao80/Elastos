@@ -645,7 +645,7 @@ ECode AppsCustomizeTabHost::SetVisibilityOfSiblingsWithLowerZOrder(
         for (Int32 i = 0; i < count; i++) {
             AutoPtr<IView> child;
             parent->GetChildAt(i, (IView**)&child);
-            if (THIS_PROBE(IInterface) == TO_IINTERFACE(child)) {
+            if (TO_IINTERFACE(this) == TO_IINTERFACE(child)) {
                 break;
             }
             else {

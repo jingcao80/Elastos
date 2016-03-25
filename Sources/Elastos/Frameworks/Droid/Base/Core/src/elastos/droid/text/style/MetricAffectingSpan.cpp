@@ -24,7 +24,7 @@ ECode MetricAffectingSpan::GetUnderlying(
     /* [out] */ ICharacterStyle** style)
 {
     VALIDATE_NOT_NULL(style)
-    *style = THIS_PROBE(ICharacterStyle);
+    *style = this;
     REFCOUNT_ADD(*style);
     return NOERROR;
 }

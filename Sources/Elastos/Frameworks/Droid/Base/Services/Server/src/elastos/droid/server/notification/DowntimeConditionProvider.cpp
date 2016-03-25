@@ -141,7 +141,7 @@ DowntimeConditionProvider::DowntimeConditionProvider()
     AutoPtr<ICalendarHelper> helper;
     CCalendarHelper::AcquireSingleton((ICalendarHelper**)&helper);
     helper->GetInstance((ICalendar**)&mCalendar);
-    mContext = THIS_PROBE(IContext);
+    mContext = this;
     CArraySet::New((IArraySet**)&mDays);
     mReceiver = new MyBroadcastReceiver(this);
 }

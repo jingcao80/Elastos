@@ -137,11 +137,11 @@ ECode Switch::constructor(
 
     a->GetDrawable(R::styleable::Switch_thumb, (IDrawable**)&mThumbDrawable);
     if (mThumbDrawable != NULL) {
-        mThumbDrawable->SetCallback(THIS_PROBE(IDrawableCallback));
+        mThumbDrawable->SetCallback(this);
     }
     a->GetDrawable(R::styleable::Switch_track, (IDrawable**)&mTrackDrawable);
     if (mTrackDrawable != NULL) {
-        mTrackDrawable->SetCallback(THIS_PROBE(IDrawableCallback));
+        mTrackDrawable->SetCallback(this);
     }
 
     a->GetText(R::styleable::Switch_textOn, (ICharSequence**)&mTextOn);
@@ -350,7 +350,7 @@ ECode Switch::SetTrackDrawable(
     }
     mTrackDrawable = track;
     if (track != NULL) {
-        track->SetCallback(THIS_PROBE(IDrawableCallback));
+        track->SetCallback(this);
     }
     RequestLayout();
     return NOERROR;
@@ -385,7 +385,7 @@ ECode Switch::SetThumbDrawable(
     }
     mThumbDrawable = thumb;
     if (thumb != NULL) {
-        thumb->SetCallback(THIS_PROBE(IDrawableCallback));
+        thumb->SetCallback(this);
     }
     RequestLayout();
     return NOERROR;
@@ -603,7 +603,7 @@ AutoPtr<ILayout> Switch::MakeLayout(
     AutoPtr<ICharSequence> transformed;
     if (mSwitchTransformationMethod) {
         ITransformationMethod::Probe(mSwitchTransformationMethod)->GetTransformation
-            (text, (IView*)this->Probe(EIID_IView), (ICharSequence**)&transformed);
+            (text, this, (ICharSequence**)&transformed);
     }
     else {
         transformed = text;
@@ -793,7 +793,7 @@ void Switch::AnimateThumbToCheckedState(
     AutoPtr< ArrayOf<Float> > param = ArrayOf<Float>::Alloc(1);
     (*param)[0] = targetPosition;
     mPositionAnimator = ObjectAnimator::OfFloat(
-        (IInterface*)this->Probe(EIID_IInterface), IProperty::Probe(THUMB_POS), param);
+        TO_IINTERFACE(this), IProperty::Probe(THUMB_POS), param);
     IAnimator::Probe(mPositionAnimator)->SetDuration(THUMB_ANIMATION_DURATION);
     mPositionAnimator->SetAutoCancel(TRUE);
     IAnimator::Probe(mPositionAnimator)->Start();

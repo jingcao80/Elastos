@@ -307,7 +307,7 @@ ECode CConcurrentLinkedQueue::AddAll(
     /* [out] */ Boolean* modified)
 {
     VALIDATE_NOT_NULL(modified);
-    if (collection->Probe(EIID_IInterface) == THIS_PROBE(IInterface))
+    if (collection->Probe(EIID_IInterface) == TO_IINTERFACE(this))
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
         // As historically specified in AbstractQueue#addAll
 

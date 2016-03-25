@@ -277,7 +277,7 @@ ECode CDriver::Parse(
     /* [in] */ IInputSource* source)
 {
     source->GetSystemId(&mSystemId);
-    mContentHandler->SetDocumentLocator((ILocator*)this->Probe(EIID_ILocator));
+    mContentHandler->SetDocumentLocator(this);
 
     AutoPtr<IReader> reader;
     source->GetCharacterStream((IReader**)&reader);
@@ -676,7 +676,7 @@ void CDriver::StartElement(
         /* [in] */ const String& localName,
         /* [in] */ const String& qName)
 {
-    mContentHandler->StartElement(namesp, localName, qName, (IAttributes*)this->Probe(EIID_IAttributes));
+    mContentHandler->StartElement(namesp, localName, qName, this);
 }
 
 } // namespace Sax2

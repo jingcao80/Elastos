@@ -94,16 +94,16 @@ PInterface CActivityOne::MyListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IViewOnClickListener*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IAdapterViewOnItemClickListener) {
-        return (IAdapterViewOnItemClickListener*)this;
+        return this;
     }
     else if (riid == EIID_IViewOnClickListener) {
-        return (IViewOnClickListener*)this;
+        return this;
     }
     else if (riid == EIID_IRadioGroupOnCheckedChangeListener) {
-        return (IRadioGroupOnCheckedChangeListener*)this;
+        return this;
     }
 
     return NULL;
@@ -127,7 +127,7 @@ ECode CActivityOne::MyListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)(IViewOnClickListener*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IViewOnClickListener;
     }
     else {
@@ -536,7 +536,7 @@ ECode CActivityOne::ShowToast(
     AutoPtr<IToastHelper> helper;
     CToastHelper::AcquireSingleton((IToastHelper**)&helper);
     AutoPtr<IToast> toast;
-    helper->MakeText((IContext*)this->Probe(EIID_IContext), cs, style, (IToast**)&toast);
+    helper->MakeText(this, cs, style, (IToast**)&toast);
     toast->Show();
 
     AppendInfo(info);
@@ -594,7 +594,7 @@ ECode CActivityOne::SetupWifi()
 
     mWifiP2pManagerChannelListener = new WifiP2pManagerChannelListener(this);
     mP2pManager->Initialize(
-        (IContext*)this->Probe(EIID_IContext), looper,
+        this, looper,
         mWifiP2pManagerChannelListener,
         (IWifiP2pManagerChannel**)&mChannel);
 
@@ -755,7 +755,7 @@ ECode CActivityOne::OnChannelDisconnected()
         AutoPtr<ILooper> looper;
         GetMainLooper((ILooper**)&looper);
         mP2pManager->Initialize(
-            (IContext*)this->Probe(EIID_IContext), looper,
+            this, looper,
             mWifiP2pManagerChannelListener,
             (IWifiP2pManagerChannel**)&mChannel);
     }

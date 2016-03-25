@@ -114,7 +114,7 @@ ECode CPeriodicSync::Equals(
     }
 
     AutoPtr<IPeriodicSync> other = IPeriodicSync::Probe(obj);
-    if (obj == THIS_PROBE(IPeriodicSync)) {
+    if (obj == (IPeriodicSync*)this) {
         *isEqual = TRUE;
         return NOERROR;
     }

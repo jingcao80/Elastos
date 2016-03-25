@@ -102,13 +102,13 @@ ECode ViewElastos::DecrementKeepScreenOnCount()
 Handle64 ViewElastos::NativeInit(
     /* [in] */ Handle64 windowPtr)
 {
-    return Elastos_ViewAndroid_nativeInit(THIS_PROBE(IInterface), windowPtr);
+    return Elastos_ViewAndroid_nativeInit(TO_IINTERFACE(this), windowPtr);
 }
 
 ECode ViewElastos::NativeDestroy(
     /* [in] */ Handle64 nativeViewElastos)
 {
-    Elastos_ViewAndroid_nativeDestroy(THIS_PROBE(IInterface), (Handle64)nativeViewElastos);
+    Elastos_ViewAndroid_nativeDestroy(TO_IINTERFACE(this), (Handle64)nativeViewElastos);
     return NOERROR;
 }
 

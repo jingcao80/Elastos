@@ -437,11 +437,11 @@ ScreenMagnifier::MagnifiedContentInteractonStateHandler::MagnifiedContentInterac
     , mHost(host)
 {
     ASSERT_SUCCEEDED(CScaleGestureDetector::New(context,
-            (IScaleGestureDetectorOnScaleGestureListener*)this,
+            this,
             (IScaleGestureDetector**)&mScaleGestureDetector));
     mScaleGestureDetector->SetQuickScaleEnabled(FALSE);
     ASSERT_SUCCEEDED(CGestureDetector::New(context,
-            (IGestureDetectorOnGestureListener*)this,
+            this,
             (IGestureDetector**)&mGestureDetector));
 }
 
@@ -1146,7 +1146,7 @@ ScreenMagnifier::ScreenStateObserver::ScreenStateObserver(
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(IIntent::ACTION_SCREEN_OFF, (IIntentFilter**)&filter);
     AutoPtr<IIntent> res;
-    mContext->RegisterReceiver((IBroadcastReceiver*)this, filter, (IIntent**)&res);
+    mContext->RegisterReceiver(this, filter, (IIntent**)&res);
 }
 
 ScreenMagnifier::ScreenStateObserver::~ScreenStateObserver()
@@ -1154,7 +1154,7 @@ ScreenMagnifier::ScreenStateObserver::~ScreenStateObserver()
 
 void ScreenMagnifier::ScreenStateObserver::Destroy()
 {
-    mContext->UnregisterReceiver((IBroadcastReceiver*)this);
+    mContext->UnregisterReceiver(this);
 }
 
 ECode ScreenMagnifier::ScreenStateObserver::OnReceive(
@@ -1347,13 +1347,13 @@ ScreenMagnifier::ScreenMagnifier(
     mMagnifiedContentInteractonStateHandler =
             new MagnifiedContentInteractonStateHandler(context, this);
 
-    CMagnificationController::New((IEventStreamTransformation*)this,
+    CMagnificationController::New(this,
             mLongAnimationDuration,
             (IMagnificationController**)&mMagnificationController);
     mScreenStateObserver = new ScreenStateObserver(context,
             mMagnificationController, this);
 
-    mWindowManager->SetMagnificationCallbacks((IMagnificationCallbacks*)this);
+    mWindowManager->SetMagnificationCallbacks(this);
 
     TransitionToState(STATE_DETECTING);
 }

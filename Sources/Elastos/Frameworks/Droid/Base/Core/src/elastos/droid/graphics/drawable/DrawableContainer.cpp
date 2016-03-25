@@ -424,7 +424,7 @@ ECode DrawableContainer::InvalidateDrawable(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (who == mCurrDrawable.Get() && callback != NULL) {
-        callback->InvalidateDrawable((IDrawable*)this->Probe(EIID_IDrawable));
+        callback->InvalidateDrawable(this);
     }
     return NOERROR;
 }
@@ -437,7 +437,7 @@ ECode DrawableContainer::ScheduleDrawable(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (who == mCurrDrawable.Get() && callback != NULL) {
-        callback->ScheduleDrawable((IDrawable*)this->Probe(EIID_IDrawable), what, when);
+        callback->ScheduleDrawable(this, what, when);
     }
     return NOERROR;
 }
@@ -449,7 +449,7 @@ ECode DrawableContainer::UnscheduleDrawable(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (who == mCurrDrawable && callback != NULL) {
-        callback->UnscheduleDrawable((IDrawable*)this->Probe(EIID_IDrawable), what);
+        callback->UnscheduleDrawable(this, what);
     }
     return NOERROR;
 }

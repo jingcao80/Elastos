@@ -78,7 +78,7 @@ void SystemMessageHandler::NativeDoRunLoopOnce(
     /* [in] */ Int64 messagePumpDelegateNative,
     /* [in] */ Int64 delayedScheduledTimeTicks)
 {
-    Elastos_SystemMessageHandler_nativeDoRunLoopOnce(THIS_PROBE(IInterface), messagePumpDelegateNative, delayedScheduledTimeTicks);
+    Elastos_SystemMessageHandler_nativeDoRunLoopOnce(TO_IINTERFACE(this), messagePumpDelegateNative, delayedScheduledTimeTicks);
 }
 
 void SystemMessageHandler::ScheduleWork(

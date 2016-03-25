@@ -43,7 +43,7 @@ ECode URLStreamHandler::ParseURL(
     /* [in] */ Int32 end)
 {
     CURL* curl = (CURL*)url;
-    if (THIS_PROBE(IURLStreamHandler) != curl->mStreamHandler) {
+    if (this != curl->mStreamHandler) {
        return E_SECURITY_EXCEPTION;
     }
 
@@ -171,7 +171,7 @@ ECode URLStreamHandler::SetURL(
     /* [in] */ const String& ref)
 {
     CURL* curl = (CURL*)url;
-    if (THIS_PROBE(IURLStreamHandler) != curl->mStreamHandler) {
+    if (this != curl->mStreamHandler) {
        return E_SECURITY_EXCEPTION;
     }
 
@@ -191,7 +191,7 @@ ECode URLStreamHandler::SetURL(
     /* [in] */ const String& ref)
 {
     CURL* curl = (CURL*)url;
-    if (THIS_PROBE(IURLStreamHandler) != curl->mStreamHandler) {
+    if (this != curl->mStreamHandler) {
        return E_SECURITY_EXCEPTION;
     }
     curl->Set(protocol, host, port, authority, userInfo, file, query, ref);

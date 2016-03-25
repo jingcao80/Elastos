@@ -435,7 +435,7 @@ ECode CIdentityHashMap::Equals(
      * in this class (or in one of our inner classes) for reference-based
      * comparison to take place.
      */
-    if (this->Probe(EIID_IInterface) == object) {
+    if (TO_IINTERFACE(this) == object) {
         *result = TRUE;
         return NOERROR;
     }
@@ -577,7 +577,7 @@ ECode CIdentityHashMap::IdentityHashMapEntry::Equals(
 {
     VALIDATE_NOT_NULL(value)
 
-    if (this->Probe(EIID_IInterface) == object) {
+    if (TO_IINTERFACE(this) == object) {
         *value = TRUE;
         return NOERROR;
     }
@@ -602,8 +602,8 @@ ECode CIdentityHashMap::IdentityHashMapEntry::GetHashCode(
     AutoPtr<ISystem> system;
     Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
     Int32 key, valuehash;
-    system->IdentityHashCode(this->Probe(EIID_IInterface), &key);
-    system->IdentityHashCode(this->Probe(EIID_IInterface), &valuehash);
+    system->IdentityHashCode(TO_IINTERFACE(this), &key);
+    system->IdentityHashCode(TO_IINTERFACE(this), &valuehash);
 
     *value = key ^ valuehash;
     return NOERROR;

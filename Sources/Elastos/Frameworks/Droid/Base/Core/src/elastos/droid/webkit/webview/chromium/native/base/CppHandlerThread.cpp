@@ -79,7 +79,7 @@ void CppHandlerThread::NativeInitializeThread(
     /* [in] */ Handle64 nativeCppHandlerThread,
     /* [in] */ Handle64 nativeEvent)
 {
-    Elastos_JavaHandlerThread_nativeInitializeThread(THIS_PROBE(IInterface), nativeCppHandlerThread, nativeEvent);
+    Elastos_JavaHandlerThread_nativeInitializeThread(TO_IINTERFACE(this), nativeCppHandlerThread, nativeEvent);
 }
 
 void CppHandlerThread::Start(

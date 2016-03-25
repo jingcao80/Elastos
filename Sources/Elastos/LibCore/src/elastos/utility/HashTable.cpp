@@ -578,7 +578,7 @@ ECode HashTable::_Values::Equals(
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = this->Probe(EIID_IInterface) == object;
+    *value = TO_IINTERFACE(this) == object;
     return NOERROR;
 }
 
@@ -913,7 +913,7 @@ ECode HashTable::Clone(
     result->mEntrySet = NULL;
     result->mValues = NULL;
 
-    result->ConstructorPutAll((IMap*)this->Probe(EIID_IMap));
+    result->ConstructorPutAll(this);
     *object = result->Probe(EIID_IInterface);
     REFCOUNT_ADD(*object)*/
     return NOERROR;
@@ -1438,7 +1438,7 @@ ECode HashTable::GetHashCode(
             e->GetKey((IInterface**)&key);
             AutoPtr<IInterface> value;
             e->GetValue((IInterface**)&value);
-            if (key.Get() == this->Probe(EIID_IInterface) || value.Get() == this->Probe(EIID_IInterface)) {
+            if (key.Get() == TO_IINTERFACE(this) || value.Get() == TO_IINTERFACE(this)) {
                 continue;
             }
             Int32 keyhash = Object::GetHashCode(key);
@@ -1474,7 +1474,7 @@ ECode HashTable::ToString(
             AutoPtr<IInterface> key;
             entry->GetKey((IInterface**)&key);
             String keystr;
-            result.Append(key.Get() == this->Probe(EIID_IInterface)
+            result.Append(key.Get() == TO_IINTERFACE(this)
                 ? String("(this Map)") : Object::ToString(key));
 
             result.AppendChar('=');
@@ -1482,7 +1482,7 @@ ECode HashTable::ToString(
             AutoPtr<IInterface> value;
             entry->GetValue((IInterface**)&value);
             String valuestr;
-            result.Append(value.Get() == this->Probe(EIID_IInterface)
+            result.Append(value.Get() == TO_IINTERFACE(this)
                 ? String("(this Map)") : Object::ToString(value));
 
             if (i->HasNext(&hasMore), hasMore) {

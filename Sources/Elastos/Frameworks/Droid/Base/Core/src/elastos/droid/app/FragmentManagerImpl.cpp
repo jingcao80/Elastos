@@ -174,7 +174,7 @@ FragmentManagerImpl::~FragmentManagerImpl()
 ECode FragmentManagerImpl::BeginTransaction(
     /* [out] */ IFragmentTransaction** transaction)
 {
-    return CBackStackRecord::New((IFragmentManagerImpl*)this, transaction);
+    return CBackStackRecord::New(this, transaction);
 }
 
 ECode FragmentManagerImpl::ExecutePendingTransactions(
@@ -2538,7 +2538,7 @@ ECode FragmentManagerImpl::GetLayoutInflaterFactory(
     /* [out] */ ILayoutInflaterFactory2** fact)
 {
     VALIDATE_NOT_NULL(fact)
-    *fact = THIS_PROBE(ILayoutInflaterFactory2);
+    *fact = this;
     REFCOUNT_ADD(*fact)
     return NOERROR;
 }

@@ -163,7 +163,7 @@ ECode RecentApplicationsBackground::Draw(
 ECode RecentApplicationsBackground::OnAttachedToWindow()
 {
     LinearLayout::OnAttachedToWindow();
-    mBackground->SetCallback(THIS_PROBE(IDrawableCallback));
+    mBackground->SetCallback(this);
     return SetWillNotDraw(FALSE);
 }
 

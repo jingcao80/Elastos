@@ -380,13 +380,13 @@ ECode TracingControllerElastos::ShowToast(
 
 Handle64 TracingControllerElastos::NativeInit()
 {
-    return Elastos_TracingControllerAndroid_nativeInit(THIS_PROBE(IInterface));
+    return Elastos_TracingControllerAndroid_nativeInit(TO_IINTERFACE(this));
 }
 
 ECode TracingControllerElastos::NativeDestroy(
     /* [in] */ Handle64 nativeTracingControllerElastos)
 {
-    Elastos_TracingControllerAndroid_nativeDestroy(THIS_PROBE(IInterface), nativeTracingControllerElastos);
+    Elastos_TracingControllerAndroid_nativeDestroy(TO_IINTERFACE(this), nativeTracingControllerElastos);
     return NOERROR;
 }
 
@@ -395,7 +395,7 @@ Boolean TracingControllerElastos::NativeStartTracing(
     /* [in] */ const String& categories,
     /* [in] */ Boolean recordContinuously)
 {
-    return Elastos_TracingControllerAndroid_nativeStartTracing(THIS_PROBE(IInterface),
+    return Elastos_TracingControllerAndroid_nativeStartTracing(TO_IINTERFACE(this),
         nativeTracingControllerElastos, categories, recordContinuously);
 }
 
@@ -403,7 +403,7 @@ ECode TracingControllerElastos::NativeStopTracing(
     /* [in] */ Handle64 nativeTracingControllerElastos,
     /* [in] */ const String& filename)
 {
-    Elastos_TracingControllerAndroid_nativeStopTracing(THIS_PROBE(IInterface),
+    Elastos_TracingControllerAndroid_nativeStopTracing(TO_IINTERFACE(this),
             nativeTracingControllerElastos, filename);
     return NOERROR;
 }
@@ -411,13 +411,13 @@ ECode TracingControllerElastos::NativeStopTracing(
 Boolean TracingControllerElastos::NativeGetKnownCategoryGroupsAsync(
     /* [in] */ Handle64 nativeTracingControllerElastos)
 {
-    return Elastos_TracingControllerAndroid_nativeGetKnownCategoryGroupsAsync(THIS_PROBE(IInterface),
+    return Elastos_TracingControllerAndroid_nativeGetKnownCategoryGroupsAsync(TO_IINTERFACE(this),
             nativeTracingControllerElastos);
 }
 
 String TracingControllerElastos::NativeGetDefaultCategories()
 {
-    return Elastos_TracingControllerAndroid_nativeGetDefaultCategories(THIS_PROBE(IInterface));
+    return Elastos_TracingControllerAndroid_nativeGetDefaultCategories(TO_IINTERFACE(this));
 }
 
 void TracingControllerElastos::OnTracingStopped(

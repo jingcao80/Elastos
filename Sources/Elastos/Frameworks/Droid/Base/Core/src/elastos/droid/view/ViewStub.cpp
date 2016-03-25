@@ -203,8 +203,8 @@ ECode ViewStub::Inflate(
             }
 
             Int32 index = 0;
-            parent->IndexOfChild((IView*)this->Probe(EIID_IView), &index);
-            parent->RemoveViewInLayout((IView*)this->Probe(EIID_IView));
+            parent->IndexOfChild(this, &index);
+            parent->RemoveViewInLayout(this);
 
             AutoPtr<IViewGroupLayoutParams> layoutParams;
             GetLayoutParams((IViewGroupLayoutParams**)&layoutParams);
@@ -221,7 +221,7 @@ ECode ViewStub::Inflate(
             wrs->GetWeakReference((IWeakReference**)&mInflatedViewRef);
 
             if (mInflateListener != NULL) {
-                mInflateListener->OnInflate(THIS_PROBE(IViewStub), view);
+                mInflateListener->OnInflate(this, view);
             }
 
             *retView = view;

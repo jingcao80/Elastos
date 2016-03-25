@@ -796,8 +796,8 @@ ECode DreamService::Attach(
     if (!mWindowless) {
         AutoPtr<IPolicyManager> pm;
         CPolicyManager::AcquireSingleton((IPolicyManager**)&pm);
-        pm->MakeNewWindow((IContext*)this, (IWindow**)&mWindow);
-        mWindow->SetCallback((IWindowCallback*)this);
+        pm->MakeNewWindow(this, (IWindow**)&mWindow);
+        mWindow->SetCallback(this);
         Boolean isRequest = FALSE;
         mWindow->RequestFeature(IWindow::FEATURE_NO_TITLE, &isRequest);
         AutoPtr<IDrawable> drawable;

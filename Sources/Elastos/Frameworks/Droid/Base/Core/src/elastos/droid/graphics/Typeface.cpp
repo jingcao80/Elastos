@@ -119,7 +119,7 @@ ECode Typeface::Equals(
     /* [out] */ Boolean* e)
 {
     VALIDATE_NOT_NULL(e);
-    if (THIS_PROBE(IInterface) == IInterface::Probe(o)) {
+    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
         *e = TRUE;
         return NOERROR;
     }

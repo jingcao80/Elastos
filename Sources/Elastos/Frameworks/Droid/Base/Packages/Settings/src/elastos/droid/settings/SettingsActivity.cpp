@@ -478,7 +478,7 @@ ECode SettingsActivity::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     Activity::OnConfigurationChanged(newConfig);
-    Index::GetInstance((IContext*)this)->Update();
+    Index::GetInstance(this)->Update();
     return NOERROR;
 }
 
@@ -1026,7 +1026,7 @@ ECode SettingsActivity::StartPreferencePanel(
             title = "";
         }
     }
-    Utils::StartWithFragment((IContext*)this, fragmentClass, args, resultTo, resultRequestCode,
+    Utils::StartWithFragment(this, fragmentClass, args, resultTo, resultRequestCode,
             titleRes, CoreUtils::Convert(title), mIsShortcut);
     return NOERROR;
 }
@@ -1048,7 +1048,7 @@ ECode SettingsActivity::StartPreferencePanelAsUser(
             title = "";
         }
     }
-    Utils::StartWithFragmentAsUser((IContext*)this, fragmentClass, args,
+    Utils::StartWithFragmentAsUser(this, fragmentClass, args,
             titleRes, CoreUtils::Convert(title), mIsShortcut, userHandle);
     return NOERROR;
 }
@@ -1106,7 +1106,7 @@ ECode SettingsActivity::SwitchToFragment(
     AutoPtr<IFragmentHelper> helper;
     CFragmentHelper::AcquireSingleton((IFragmentHelper**)&helper);
     AutoPtr<IFragment> f;
-    helper->Instantiate((IContext*)this, fragmentName, args, (IFragment**)&f);
+    helper->Instantiate(this, fragmentName, args, (IFragment**)&f);
     AutoPtr<IFragmentManager> manager;
     GetFragmentManager((IFragmentManager**)&manager);
     AutoPtr<IFragmentTransaction> transaction;

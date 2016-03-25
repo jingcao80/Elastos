@@ -1075,7 +1075,7 @@ ECode Folder::OnDropCompleted(
         mFolderIcon->OnDrop(d);
     }
 
-    if (TO_IINTERFACE(target) != THIS_PROBE(IInterface)) {
+    if (TO_IINTERFACE(target) != TO_IINTERFACE(this)) {
         Boolean res;
         mOnExitAlarm->AlarmPending(&res);
         if (res) {

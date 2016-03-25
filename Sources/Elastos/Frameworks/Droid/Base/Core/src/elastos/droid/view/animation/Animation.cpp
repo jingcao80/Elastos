@@ -840,7 +840,7 @@ void Animation::FireAnimationStart()
 {
     if (mListener != NULL) {
         if (mListenerHandler == NULL) {
-            mListener->OnAnimationStart(THIS_PROBE(IAnimation));
+            mListener->OnAnimationStart(this);
         }
         else {
             Boolean result;
@@ -853,7 +853,7 @@ void Animation::FireAnimationRepeat()
 {
     if (mListener != NULL) {
         if (mListenerHandler == NULL) {
-            mListener->OnAnimationRepeat(THIS_PROBE(IAnimation));
+            mListener->OnAnimationRepeat(this);
         }
         else {
             Boolean result;
@@ -866,7 +866,7 @@ void Animation::FireAnimationEnd()
 {
     if (mListener != NULL) {
         if (mListenerHandler == NULL) {
-            mListener->OnAnimationEnd(THIS_PROBE(IAnimation));
+            mListener->OnAnimationEnd(this);
         }
         else {
             Boolean result;

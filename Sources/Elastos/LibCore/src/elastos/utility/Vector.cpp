@@ -301,7 +301,7 @@ ECode Vector::Equals(
     *result = FALSE;
 
     synchronized (this) {
-        if (THIS_PROBE(IInterface) == object) {
+        if (TO_IINTERFACE(this) == object) {
             *result = TRUE;
             return NOERROR;
         }

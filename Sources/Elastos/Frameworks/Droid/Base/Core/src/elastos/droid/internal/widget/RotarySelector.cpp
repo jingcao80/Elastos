@@ -712,7 +712,7 @@ ECode RotarySelector::DispatchTriggerEvent(
 {
     Vibrate(VIBRATE_LONG);
     if (mOnDialTriggerListener != NULL) {
-        mOnDialTriggerListener->OnDialTrigger(THIS_PROBE(IView), whichHandle);
+        mOnDialTriggerListener->OnDialTrigger(this, whichHandle);
     }
     return NOERROR;
 }
@@ -723,7 +723,7 @@ void RotarySelector::SetGrabbedState(
     if (newState != mGrabbedState) {
         mGrabbedState = newState;
         if (mOnDialTriggerListener != NULL) {
-            mOnDialTriggerListener->OnGrabbedStateChange(THIS_PROBE(IView), mGrabbedState);
+            mOnDialTriggerListener->OnGrabbedStateChange(this, mGrabbedState);
         }
     }
 }

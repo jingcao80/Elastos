@@ -106,7 +106,7 @@ MediaSessionService::SettingsObserver::SettingsObserver(
 void MediaSessionService::SettingsObserver::Observe()
 {
     mHost->mContentResolver->RegisterContentObserver(mSecureSettingsUri,
-            FALSE, (IContentObserver*)this, IUserHandle::USER_ALL);
+            FALSE, this, IUserHandle::USER_ALL);
 }
 
 ECode MediaSessionService::SettingsObserver::OnChange(
@@ -178,7 +178,7 @@ CAR_INTERFACE_IMPL(MediaSessionService, SystemService, IWatchdogMonitor)
 ECode MediaSessionService::OnStart()
 {
     PublishBinderService(IContext::MEDIA_SESSION_SERVICE, mSessionManagerImpl);
-    Watchdog::GetInstance()->AddMonitor((IWatchdogMonitor*)this);
+    Watchdog::GetInstance()->AddMonitor(this);
     UpdateUser();
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);

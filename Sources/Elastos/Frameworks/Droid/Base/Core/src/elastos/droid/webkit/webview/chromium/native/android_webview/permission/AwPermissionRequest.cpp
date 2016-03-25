@@ -122,7 +122,7 @@ void AwPermissionRequest::NativeOnAccept(
     /* [in] */ Handle64 nativeAwPermissionRequest,
     /* [in] */ Boolean allowed)
 {
-    Elastos_AwPermissionRequest_nativeOnAccept(THIS_PROBE(IInterface), nativeAwPermissionRequest, allowed);
+    Elastos_AwPermissionRequest_nativeOnAccept(TO_IINTERFACE(this), nativeAwPermissionRequest, allowed);
 }
 //callback function definition
 

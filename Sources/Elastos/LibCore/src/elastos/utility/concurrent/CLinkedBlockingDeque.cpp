@@ -741,7 +741,7 @@ ECode CLinkedBlockingDeque::DrainTo(
 {
     VALIDATE_NOT_NULL(number);
     VALIDATE_NOT_NULL(c);
-    if (Object::Equals(c->Probe(EIID_IInterface), THIS_PROBE(IInterface)))
+    if (Object::Equals(c->Probe(EIID_IInterface), TO_IINTERFACE(this)))
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     if (maxElements <= 0) {
         *number = 0;
@@ -867,7 +867,7 @@ String CLinkedBlockingDeque::ToString()
     sb.AppendChar('[');
     for (;;) {
         AutoPtr<IInterface> e = p->mItem;
-        if (Object::Equals(e.Get(), THIS_PROBE(IInterface)))
+        if (Object::Equals(e.Get(), TO_IINTERFACE(this)))
             sb += String("(this Collection)");
         else
             sb += e;

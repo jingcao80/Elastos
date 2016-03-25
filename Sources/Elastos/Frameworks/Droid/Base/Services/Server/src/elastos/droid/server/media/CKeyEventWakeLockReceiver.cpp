@@ -42,9 +42,9 @@ void CKeyEventWakeLockReceiver::AquireWakeLockLocked()
         mHost->mMediaEventWakeLock->AcquireLock();
     }
     mRefCount++;
-    mHandler->RemoveCallbacks((IRunnable*)this);
+    mHandler->RemoveCallbacks(this);
     Boolean result;
-    mHandler->PostDelayed((IRunnable*)this, MediaSessionService::WAKELOCK_TIMEOUT, &result);
+    mHandler->PostDelayed(this, MediaSessionService::WAKELOCK_TIMEOUT, &result);
 }
 
 ECode CKeyEventWakeLockReceiver::Run()
@@ -76,7 +76,7 @@ void CKeyEventWakeLockReceiver::OnReceiveResult(
 void CKeyEventWakeLockReceiver::ReleaseWakeLockLocked()
 {
     mHost->mMediaEventWakeLock->Release();
-    mHandler->RemoveCallbacks((IRunnable*)this);
+    mHandler->RemoveCallbacks(this);
 }
 
 ECode CKeyEventWakeLockReceiver::OnSendFinished(

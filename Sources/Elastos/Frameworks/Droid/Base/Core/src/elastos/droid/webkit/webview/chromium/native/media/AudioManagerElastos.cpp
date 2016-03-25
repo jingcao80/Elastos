@@ -1413,7 +1413,7 @@ void AudioManagerElastos::NativeSetMute(
     /* [in] */ Handle64 nativeAudioManagerElastos,
     /* [in] */ Boolean muted)
 {
-    AutoPtr<IInterface> iAudioManagerElastos = THIS_PROBE(IInterface);
+    AutoPtr<IInterface> iAudioManagerElastos = TO_IINTERFACE(this);
     Elastos_AudioManagerAndroid_nativeSetMute(iAudioManagerElastos, nativeAudioManagerElastos, muted);
 }
 

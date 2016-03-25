@@ -37,13 +37,14 @@ ECode CQName::Equals(
     /* [in] */ IInterface * pObjectToTest,
     /* [out] */ Boolean * pIsEqual)
 {
+    VALIDATE_NOT_NULL(pObjectToTest)
     // Is this the same object?
-    if (pObjectToTest == (IQName*)this) {
+    IQName* tmp = IQName::Probe(pObjectToTest);
+    if (tmp == (IQName*)this) {
         *pIsEqual = TRUE;
         return NOERROR;
     }
     // Is this a QName?
-    IQName* tmp = IQName::Probe(pObjectToTest);
     if (tmp != NULL) {
         CQName* qName = (CQName*) tmp;
         *pIsEqual = mLocalPart.Equals(qName->mLocalPart) && mNamespaceURI.Equals(qName->mNamespaceURI);

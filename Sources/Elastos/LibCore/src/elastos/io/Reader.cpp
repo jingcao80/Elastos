@@ -24,7 +24,7 @@ Reader::~Reader()
 
 ECode Reader::constructor()
 {
-    mLock = THIS_PROBE(ISynchronize);
+    mLock = this;
     mIsStrongLock = FALSE;
     return NOERROR;
 }
@@ -35,7 +35,7 @@ ECode Reader::constructor(
     VALIDATE_NOT_NULL(lock)
 
     mLock = lock;
-    if (mLock && mLock != THIS_PROBE(ISynchronize)) {
+    if (mLock && mLock != this) {
         REFCOUNT_ADD(mLock)
         mIsStrongLock = TRUE;
     }

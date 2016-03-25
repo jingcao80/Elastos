@@ -324,7 +324,7 @@ ECode ByteBuffer::Put(
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
 
-    if (src == THIS_PROBE(IByteBuffer)) {
+    if (src == this) {
         // throw new IllegalArgumentException("src == this");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

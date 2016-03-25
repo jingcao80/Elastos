@@ -212,7 +212,7 @@ void AwPdfExporter::NativeExportToPdf(
     /* [in] */ Int32 fd,
     /* [in] */ ICancellationSignal* cancellationSignal)
 {
-    Elastos_AwPdfExporter_nativeExportToPdf(THIS_PROBE(IInterface), nativeAwPdfExporter, fd, TO_IINTERFACE(cancellationSignal));
+    Elastos_AwPdfExporter_nativeExportToPdf(TO_IINTERFACE(this), nativeAwPdfExporter, fd, TO_IINTERFACE(cancellationSignal));
 }
 //callback function definition
 void AwPdfExporter::SetNativeAwPdfExporter(

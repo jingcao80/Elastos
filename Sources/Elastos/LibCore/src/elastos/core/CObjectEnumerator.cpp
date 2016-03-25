@@ -77,7 +77,7 @@ ECode CObjectEnumerator::Equals(
     if (NULL == result) return E_INVALID_ARGUMENT;
 
     IObjectEnumerator * emu = IObjectEnumerator::Probe(obj);
-    *result = (emu == THIS_PROBE(IObjectEnumerator));
+    *result = (emu == (IObjectEnumerator*)this);
     return NOERROR;
 }
 
@@ -85,7 +85,7 @@ ECode CObjectEnumerator::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
     if (NULL == hashCode) return E_INVALID_ARGUMENT;
-    *hashCode = (Int32)THIS_PROBE(IObjectEnumerator);
+    *hashCode = (Int32)(IObjectEnumerator*)this;
     return NOERROR;
 }
 
@@ -94,7 +94,7 @@ ECode CObjectEnumerator::ToString(
 {
     if (NULL == info) return E_INVALID_ARGUMENT;
     String str("[IObjectEnumerator:");
-    str.AppendFormat("%p]", THIS_PROBE(IObjectEnumerator));
+    str.AppendFormat("%p]", (IObjectEnumerator*)this);
     *info = str;
     return NOERROR;
 }

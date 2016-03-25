@@ -413,7 +413,7 @@ void VideoCapture::NativeOnFrameAvailable(
     /* [in] */ Int32 length,
     /* [in] */ Int32 rotation)
 {
-    Elastos_VideoCapture_nativeOnFrameAvailable(THIS_PROBE(IInterface), nativeVideoCaptureDeviceAndroid, data,length, rotation);
+    Elastos_VideoCapture_nativeOnFrameAvailable(TO_IINTERFACE(this), nativeVideoCaptureDeviceAndroid, data,length, rotation);
 }
 
 AutoPtr<IParameters> VideoCapture::GetCameraParameters(

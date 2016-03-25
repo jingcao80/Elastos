@@ -3,11 +3,11 @@
 #include "elastos/droid/server/pm/CPackageManagerService.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Core::StringUtils;
-using Elastos::Core::ISystem;
-using Elastos::Core::CSystem;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Utility::ILogHelper;
@@ -120,14 +120,14 @@ ECode PreferredActivity::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    AutoPtr<ISystem> sys;
-    CSystem::AcquireSingleton((ISystem**)&sys);
-    Int32 hashCode;
-    sys->IdentityHashCode((IObject*)this, &hashCode);
     String s;
     mPref->mComponent->FlattenToShortString(&s);
-    *str = String("PreferredActivity{0x") + StringUtils::ToHexString(hashCode)
-            + " " + s + "}";
+    StringBuilder sb("PreferredActivity{0x");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += " ";
+    sb += s;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

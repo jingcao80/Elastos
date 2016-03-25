@@ -158,7 +158,7 @@ ECode Thread::constructor(
 
     /* add ourselves to our ThreadGroup of choice */
     ThreadGroup* tg = (ThreadGroup*)group;
-    tg->AddThread(THIS_PROBE(IThread));
+    tg->AddThread((IThread*)this);
 
 #if defined(_DEBUG)
      mIsConstructed = TRUE;
@@ -211,7 +211,7 @@ ECode Thread::Create(
 
     // add ourselves to our ThreadGroup of choice
     ThreadGroup* tg = (ThreadGroup*)group.Get();
-    tg->AddThread(THIS_PROBE(IThread));
+    tg->AddThread((IThread*)this);
 
 #if defined(_DEBUG)
      mIsConstructed = TRUE;

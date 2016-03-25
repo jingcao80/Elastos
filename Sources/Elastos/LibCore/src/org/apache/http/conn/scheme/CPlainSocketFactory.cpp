@@ -143,7 +143,7 @@ ECode CPlainSocketFactory::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = (other == this->Probe(EIID_IInterface));
+    *result = (other == TO_IINTERFACE(this));
     return NOERROR;
 }
 

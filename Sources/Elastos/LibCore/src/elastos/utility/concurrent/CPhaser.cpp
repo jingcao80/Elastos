@@ -98,7 +98,7 @@ Int32 CPhaser::DoArrive(
 {
     AutoPtr<IPhaser> root = mRoot;
     for (;;) {
-        Int64 s = Object::Equals(root, THIS_PROBE(IInterface)) ? mState : ReconcileState();
+        Int64 s = Object::Equals(root, TO_IINTERFACE(this)) ? mState : ReconcileState();
         Int32 phase = (Int32)(s >> PHASE_SHIFT);
         if (phase < 0)
             return phase;
@@ -197,7 +197,7 @@ Int64 CPhaser::ReconcileState()
 {
     AutoPtr<IPhaser> root = mRoot;
     Int64 s = mState;
-    if (!Object::Equals(root, THIS_PROBE(IInterface))) {
+    if (!Object::Equals(root, TO_IINTERFACE(this))) {
         Int32 phase, p;
         // CAS to root phase with current parties, tripping unarrived
         assert(0 && "TODO");
@@ -305,7 +305,7 @@ ECode CPhaser::ArriveAndAwaitAdvance(
     // Specialization of doArrive+awaitAdvance eliminating some reads/paths
     AutoPtr<IPhaser> root = mRoot;
     for (;;) {
-        Int64 s = Object::Equals(root, THIS_PROBE(IInterface)) ? mState : ReconcileState();
+        Int64 s = Object::Equals(root, TO_IINTERFACE(this)) ? mState : ReconcileState();
         Int32 phase = (Int32)(s >> PHASE_SHIFT);
         if (phase < 0) {
             *value = phase;
@@ -347,7 +347,7 @@ ECode CPhaser::AwaitAdvance(
 {
     VALIDATE_NOT_NULL(value);
     AutoPtr<IPhaser> root = mRoot;
-    Int64 s = Object::Equals(root, THIS_PROBE(IInterface)) ? mState : ReconcileState();
+    Int64 s = Object::Equals(root, TO_IINTERFACE(this)) ? mState : ReconcileState();
     Int32 p = (Int32)(s >> PHASE_SHIFT);
     if (phase < 0) {
         *value = phase;
@@ -368,7 +368,7 @@ ECode CPhaser::AwaitAdvanceInterruptibly(
 {
     VALIDATE_NOT_NULL(value);
     AutoPtr<IPhaser> root = mRoot;
-    Int64 s = Object::Equals(root, THIS_PROBE(IInterface)) ? mState : ReconcileState();
+    Int64 s = Object::Equals(root, TO_IINTERFACE(this)) ? mState : ReconcileState();
     Int32 p = (Int32)(s >> PHASE_SHIFT);
     if (phase < 0) {
         *value = phase;
@@ -395,7 +395,7 @@ ECode CPhaser::AwaitAdvanceInterruptibly(
     Int64 nanos;
     unit->ToNanos(timeout, &nanos);
     AutoPtr<IPhaser> root = mRoot;
-    Int64 s = Object::Equals(root, THIS_PROBE(IInterface)) ? mState : ReconcileState();
+    Int64 s = Object::Equals(root, TO_IINTERFACE(this)) ? mState : ReconcileState();
     Int32 p = (Int32)(s >> PHASE_SHIFT);
     if (phase < 0) {
         *value = phase;
@@ -694,9 +694,9 @@ ECode CPhaser::QNode::Block(
         return NOERROR;
     }
     else if (!mTimed)
-        LockSupport::Park(THIS_PROBE(IInterface));
+        LockSupport::Park(TO_IINTERFACE(this));
     else if (mNanos > 0)
-        LockSupport::ParkNanos(THIS_PROBE(IInterface), mNanos);
+        LockSupport::ParkNanos(TO_IINTERFACE(this), mNanos);
     return IsReleasable(res);
 }
 

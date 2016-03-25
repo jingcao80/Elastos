@@ -560,7 +560,7 @@ void ValueAnimator::NotifyStartListeners()
         List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
         List<AutoPtr<IAnimatorListener> >::Iterator it = tmpListeners.Begin();
         for (; it != tmpListeners.End(); it++) {
-            (*it)->OnAnimationStart(THIS_PROBE(IAnimator));
+            (*it)->OnAnimationStart(this);
         }
     }
 
@@ -585,7 +585,7 @@ void ValueAnimator::Start(
     mPaused = FALSE;
     UpdateScaledDuration(); // in case the scale factor has changed since creation time
     AutoPtr<AnimationHandler> animationHandler = GetOrCreateAnimationHandler();
-    AutoPtr<IValueAnimator> anim = THIS_PROBE(IValueAnimator);
+    AutoPtr<IValueAnimator> anim = this;
     animationHandler->mPendingAnimations.PushBack(anim);
     if (mStartDelay == 0) {
         // This sets the initial value of the animation, prior to actually starting it running
@@ -610,7 +610,7 @@ ECode ValueAnimator::Cancel()
     // to run
     AutoPtr<AnimationHandler> handler = GetOrCreateAnimationHandler();
     Boolean pendingContains = FALSE, delayContains = FALSE;
-    AutoPtr<IValueAnimator> thisAnim = THIS_PROBE(IValueAnimator);
+    AutoPtr<IValueAnimator> thisAnim = this;
     List<AutoPtr<IValueAnimator> >::Iterator pIt = Find(handler->mPendingAnimations.Begin(), handler->mPendingAnimations.End(), thisAnim);
     List<AutoPtr<IValueAnimator> >::Iterator dIt = Find(handler->mDelayedAnims.Begin(), handler->mDelayedAnims.End(), thisAnim);
     pendingContains = pIt != handler->mPendingAnimations.End();
@@ -627,7 +627,7 @@ ECode ValueAnimator::Cancel()
             List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
             List<AutoPtr<IAnimatorListener> >::Iterator it = tmpListeners.Begin();
             for (; it != tmpListeners.End(); it++) {
-                (*it)->OnAnimationCancel(THIS_PROBE(IAnimator));
+                (*it)->OnAnimationCancel(this);
             }
         }
 
@@ -641,7 +641,7 @@ ECode ValueAnimator::End()
 {
     AutoPtr<AnimationHandler> handler = GetOrCreateAnimationHandler();
     Boolean pendingContains = FALSE, aContains = FALSE;
-    AutoPtr<IValueAnimator> thisAnim = THIS_PROBE(IValueAnimator);
+    AutoPtr<IValueAnimator> thisAnim = this;
     List<AutoPtr<IValueAnimator> >::Iterator pIt = Find(handler->mPendingAnimations.Begin(), handler->mPendingAnimations.End(), thisAnim);
     List<AutoPtr<IValueAnimator> >::Iterator aIt = Find(handler->mAnimations.Begin(), handler->mAnimations.End(), thisAnim);
     pendingContains = pIt != handler->mPendingAnimations.End();
@@ -728,7 +728,7 @@ void ValueAnimator::EndAnimation(
     /* [in] */ AnimationHandler* handler)
 {
     assert(handler != NULL);
-    AutoPtr<IValueAnimator> anim = THIS_PROBE(IValueAnimator);
+    AutoPtr<IValueAnimator> anim = this;
     handler->mAnimations.Remove(anim);
     handler->mPendingAnimations.Remove(anim);
     handler->mDelayedAnims.Remove(anim);
@@ -744,7 +744,7 @@ void ValueAnimator::EndAnimation(
         List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
         Int32 numListeners = tmpListeners.GetSize();
         for (Int32 i = 0; i < numListeners; i++) {
-            tmpListeners[i]->OnAnimationEnd(THIS_PROBE(IAnimator));
+            tmpListeners[i]->OnAnimationEnd(this);
         }
     }
     mRunning = FALSE;
@@ -767,7 +767,7 @@ void ValueAnimator::StartAnimation(
     // }
 
     InitAnimation();
-    AutoPtr<IValueAnimator> anim = THIS_PROBE(IValueAnimator);
+    AutoPtr<IValueAnimator> anim = this;
     handler->mAnimations.PushBack(anim);
     if (mStartDelay > 0 && mListeners.IsEmpty() == FALSE) {
         // Listeners were already notified in start() if startDelay is 0; this is
@@ -825,7 +825,7 @@ Boolean ValueAnimator::AnimationFrame(
                     if (mListeners.IsEmpty() == FALSE) {
                         List<AutoPtr<IAnimatorListener> >::Iterator it = mListeners.Begin();
                         for (; it != mListeners.End(); ++it) {
-                            (*it)->OnAnimationRepeat(THIS_PROBE(IAnimator));
+                            (*it)->OnAnimationRepeat(this);
                         }
                     }
 
@@ -913,7 +913,7 @@ ECode ValueAnimator::AnimateValue(
     if (mUpdateListeners.IsEmpty() == FALSE) {
         List<AutoPtr<IAnimatorUpdateListener> >::Iterator it = mUpdateListeners.Begin();
         for (; it != mUpdateListeners.End(); ++it) {
-            (*it)->OnAnimationUpdate(THIS_PROBE(IValueAnimator));
+            (*it)->OnAnimationUpdate(this);
         }
     }
     return NOERROR;

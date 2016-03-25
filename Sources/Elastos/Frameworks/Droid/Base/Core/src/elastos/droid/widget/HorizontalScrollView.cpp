@@ -409,14 +409,14 @@ ECode HorizontalScrollView::ExecuteKeyEvent(
         if (IsFocused(&focused), focused) {
             AutoPtr<IView> currentFocused;
             FindFocus((IView**)&currentFocused);
-            if (currentFocused.Get() == (IView*)this->Probe(EIID_IView)) {
+            if (currentFocused.Get() == this) {
                 currentFocused = NULL;
             }
             AutoPtr<IView> nextFocused;
-            FocusFinder::GetInstance()->FindNextFocus((IViewGroup*)this->Probe(EIID_IViewGroup),
+            FocusFinder::GetInstance()->FindNextFocus(this,
                 currentFocused, IView::FOCUS_RIGHT, (IView**)&nextFocused);
 
-            if (nextFocused != NULL && nextFocused.Get() != (IView*)this->Probe(EIID_IView)) {
+            if (nextFocused != NULL && nextFocused.Get() != this) {
                 Boolean isFocus = FALSE;
                 nextFocused->RequestFocus(IView::FOCUS_RIGHT, &isFocus);
                 *result = isFocus;
@@ -1179,7 +1179,7 @@ Boolean HorizontalScrollView::ScrollAndFocus(
 
     AutoPtr<IView> newFocused = FindFocusableViewInBounds(goLeft, left, right);
     if(newFocused == NULL) {
-        newFocused = (IView*)this->Probe(EIID_IView);
+        newFocused = this;
     }
 
     if(left >= containerLeft && right <= containerRight) {
@@ -1206,9 +1206,9 @@ ECode HorizontalScrollView::ArrowScroll(
     VALIDATE_NOT_NULL(result);
     AutoPtr<IView> currentFocused;
     FindFocus((IView**)&currentFocused);
-    if(currentFocused.Get() == (IView*)this->Probe(EIID_IView)) currentFocused = NULL;
+    if(currentFocused.Get() == this) currentFocused = NULL;
     AutoPtr<IView> nextFocused;
-    FocusFinder::GetInstance()->FindNextFocus((IViewGroup*)this->Probe(EIID_IViewGroup),
+    FocusFinder::GetInstance()->FindNextFocus(this,
         currentFocused, direction, (IView**)&nextFocused);
     Int32 maxJump = 0;
     GetMaxScrollAmount(&maxJump);
@@ -1572,11 +1572,11 @@ Boolean HorizontalScrollView::OnRequestFocusInDescendants(
     AutoPtr<IView> nextFocus;
     if(previouslyFocusedRect) {
         FocusFinder::GetInstance()->FindNextFocusFromRect(
-                    (IViewGroup*)this->Probe(EIID_IViewGroup), previouslyFocusedRect, direction, (IView**)&nextFocus);
+                    this, previouslyFocusedRect, direction, (IView**)&nextFocus);
     }
     else {
         FocusFinder::GetInstance()->FindNextFocus(
-                    (IViewGroup*)this->Probe(EIID_IViewGroup), NULL, direction, (IView**)&nextFocus);
+                    this, NULL, direction, (IView**)&nextFocus);
     }
 
     if (nextFocus == NULL) {
@@ -1697,7 +1697,7 @@ void HorizontalScrollView::OnSizeChanged(
 
     AutoPtr<IView> currentFocused;
     FindFocus((IView**)&currentFocused);
-    if (NULL == currentFocused || (IView*)this->Probe(EIID_IView) == currentFocused.Get()) {
+    if (NULL == currentFocused || this == currentFocused.Get()) {
         return;
     }
 
@@ -1750,7 +1750,7 @@ ECode HorizontalScrollView::Fling(
             finalX, currentFocused);
 
         if(!newFocused) {
-            newFocused = (IView*)this->Probe(EIID_IView);
+            newFocused = this;
         }
 
         if(newFocused.Get() != currentFocused.Get()) {

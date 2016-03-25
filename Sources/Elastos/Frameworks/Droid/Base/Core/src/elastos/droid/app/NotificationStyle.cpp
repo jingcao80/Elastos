@@ -35,7 +35,7 @@ ECode NotificationStyle::SetBuilder(
     if (mBuilder.Get() != builder) {
         mBuilder = builder;
         if (mBuilder != NULL) {
-            mBuilder->SetStyle((INotificationStyle*)this);
+            mBuilder->SetStyle(this);
         }
     }
     return NOERROR;

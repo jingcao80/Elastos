@@ -32,7 +32,7 @@ PInterface CGetAccountsByTypeAndFeatureSession::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_AccountManagerServiceSession) {
-        return reinterpret_cast<PInterface>((AccountManagerServiceSession*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CGetAccountsByTypeAndFeatureSession::Probe(riid);
 }
@@ -69,7 +69,7 @@ ECode CGetAccountsByTypeAndFeatureSession::CheckAccount()
         return NOERROR;
     }
     // try {
-    ECode ec = accountAuthenticator->HasFeatures((IIAccountAuthenticatorResponse*)this,
+    ECode ec = accountAuthenticator->HasFeatures(this,
             (*mAccountsOfType)[mCurrentAccount], *mFeatures);
     if (FAILED(ec)) {
         OnError(IAccountManager::ERROR_CODE_REMOTE_EXCEPTION, String("remote exception"));

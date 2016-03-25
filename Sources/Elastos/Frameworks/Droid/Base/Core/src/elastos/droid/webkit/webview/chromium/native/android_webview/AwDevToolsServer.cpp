@@ -26,20 +26,20 @@ void AwDevToolsServer::SetRemoteDebuggingEnabled(
 
 Int64 AwDevToolsServer::NativeInitRemoteDebugging()
 {
-    return Elastos_AwDevToolsServer_nativeInitRemoteDebugging(THIS_PROBE(IInterface));
+    return Elastos_AwDevToolsServer_nativeInitRemoteDebugging(TO_IINTERFACE(this));
 }
 
 void AwDevToolsServer::NativeDestroyRemoteDebugging(
     /* [in] */ Int64 devToolsServer)
 {
-    Elastos_AwDevToolsServer_nativeDestroyRemoteDebugging(THIS_PROBE(IInterface), devToolsServer);
+    Elastos_AwDevToolsServer_nativeDestroyRemoteDebugging(TO_IINTERFACE(this), devToolsServer);
 }
 
 void AwDevToolsServer::NativeSetRemoteDebuggingEnabled(
     /* [in] */ Int64 devToolsServer,
     /* [in] */ Boolean enabled)
 {
-    Elastos_AwDevToolsServer_nativeSetRemoteDebuggingEnabled(THIS_PROBE(IInterface), devToolsServer, enabled);
+    Elastos_AwDevToolsServer_nativeSetRemoteDebuggingEnabled(TO_IINTERFACE(this), devToolsServer, enabled);
 }
 
 } // namespace AndroidWebview

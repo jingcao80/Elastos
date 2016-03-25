@@ -301,7 +301,7 @@ void PanelView::RunPeekAnimation()
         values->Set(0, mPeekHeight);
         AutoPtr<IObjectAnimatorHelper> helper;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-        helper->OfFloat(THIS_PROBE(IInterface), String("expandedHeight"),
+        helper->OfFloat(TO_IINTERFACE(this), String("expandedHeight"),
             values, (IObjectAnimator**)&mPeekAnimator);
         mPeekAnimator->SetDuration(250);
     }
@@ -386,7 +386,7 @@ void PanelView::PanelView::AnimationTick(
 
         SetExpandedHeightInternal(h);
 
-        mBar->PanelExpansionChanged(THIS_PROBE(IPanelView), mExpandedFraction);
+        mBar->PanelExpansionChanged(this, mExpandedFraction);
 
         if (mVel == 0
                 || (mClosing && mExpandedHeight == 0)
@@ -552,7 +552,7 @@ ECode PanelView::SetExpandedHeight(
     }
 
     SetExpandedHeightInternal(height);
-    mBar->PanelExpansionChanged(THIS_PROBE(IPanelView), mExpandedFraction);
+    mBar->PanelExpansionChanged(this, mExpandedFraction);
     return NOERROR;
 }
 
@@ -658,7 +658,7 @@ ECode PanelView::Expand()
 {
     // if (DEBUG) LOG("expand: " + this);
     if (IsFullyCollapsed()) {
-        mBar->StartOpeningPanel(THIS_PROBE(IPanelView));
+        mBar->StartOpeningPanel(this);
         Fling(mSelfExpandVelocityPx, /*always=*/ TRUE);
     }
     // else if (DEBUG) {

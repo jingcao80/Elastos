@@ -118,7 +118,7 @@ ECode Country::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    if (IInterface::Probe(object) == THIS_PROBE(IInterface)) {
+    if (IInterface::Probe(object) == TO_IINTERFACE(this)) {
         *result = TRUE;
         return NOERROR;
     }

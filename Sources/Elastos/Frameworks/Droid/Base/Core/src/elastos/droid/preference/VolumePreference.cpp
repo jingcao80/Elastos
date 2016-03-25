@@ -128,11 +128,11 @@ ECode VolumePreference::OnBindDialogView(
 
     AutoPtr<IPreferenceManager> manager;
     GetPreferenceManager((IPreferenceManager**)&manager);
-    manager->RegisterOnActivityStopListener((IPreferenceManagerOnActivityStopListener*)this);
+    manager->RegisterOnActivityStopListener(this);
 
     // grab focus and key events so that pressing the volume buttons in the
     // dialog doesn't also show the normal volume adjust toast.
-    view->SetOnKeyListener((IViewOnKeyListener*)this);
+    view->SetOnKeyListener(this);
     view->SetFocusableInTouchMode(TRUE);
     Boolean result;
     view->RequestFocus(&result);
@@ -205,7 +205,7 @@ void VolumePreference::Cleanup()
 {
     AutoPtr<IPreferenceManager> manager;
     GetPreferenceManager((IPreferenceManager**)&manager);
-    manager->UnregisterOnActivityStopListener((IPreferenceManagerOnActivityStopListener*)this);
+    manager->UnregisterOnActivityStopListener(this);
 
     if (mSeekBarVolumizer != NULL) {
         AutoPtr<IDialog> dialog;

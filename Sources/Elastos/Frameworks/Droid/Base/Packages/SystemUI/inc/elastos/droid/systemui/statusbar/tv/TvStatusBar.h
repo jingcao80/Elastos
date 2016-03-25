@@ -128,7 +128,7 @@ public:
 
 protected:
     // @Override
-    CARAPI_(void) UpdateNotificationRanking(
+    CARAPI UpdateNotificationRanking(
         /* [in] */ INotificationListenerServiceRankingMap* ranking);
 
     // @Override

@@ -89,7 +89,7 @@ Boolean RemoteDisplayProviderProxy::Connection::Register()
     AutoPtr<IBinder> b = IBinder::Probe(mProvider);
     AutoPtr<IProxy> proxy = (IProxy*)b->Probe(EIID_IProxy);
     if (proxy != NULL) {
-        if (FAILED(proxy->LinkToDeath((IProxyDeathRecipient*)this, 0))) {
+        if (FAILED(proxy->LinkToDeath(this, 0))) {
             ProxyDied();
             return FALSE;
         }
@@ -111,7 +111,7 @@ void RemoteDisplayProviderProxy::Connection::Dispose()
     AutoPtr<IProxy> proxy = (IProxy*)b->Probe(EIID_IProxy);
     if (proxy != NULL) {
         Boolean result;
-        proxy->UnlinkToDeath((IProxyDeathRecipient*)this, 0, &result);
+        proxy->UnlinkToDeath(this, 0, &result);
     }
     mCallback->Dispose();
 }

@@ -110,7 +110,7 @@ ECode CArrayOf::DeepEquals(
         return NOERROR;
     }
 
-    if (THIS_PROBE(IArrayOf) == other) {
+    if ((IArrayOf*)this == other) {
         *equals = TRUE;
         return NOERROR;
     }

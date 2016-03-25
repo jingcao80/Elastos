@@ -107,7 +107,7 @@ ECode WifiP2pServiceInfo::Equals(
 {
     VALIDATE_NOT_NULL(isEqual);
 
-    if (obj == this->Probe(EIID_IInterface)) {
+    if (obj == TO_IINTERFACE(this)) {
        *isEqual = TRUE;
        return NOERROR;
     }

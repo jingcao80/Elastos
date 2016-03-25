@@ -60,7 +60,7 @@ void SeekBar::OnProgressRefresh(
 
     if (mOnSeekBarChangeListener != NULL) {
         mOnSeekBarChangeListener->OnProgressChanged(
-                (ISeekBar*)this, progress, fromUser);
+                this, progress, fromUser);
     }
 }
 
@@ -77,7 +77,7 @@ void SeekBar::OnStartTrackingTouch()
     AbsSeekBar::OnStartTrackingTouch();
 
     if (mOnSeekBarChangeListener != NULL) {
-        mOnSeekBarChangeListener->OnStartTrackingTouch((ISeekBar*)this);
+        mOnSeekBarChangeListener->OnStartTrackingTouch(this);
     }
 }
 
@@ -86,7 +86,7 @@ void SeekBar::OnStopTrackingTouch()
     AbsSeekBar::OnStopTrackingTouch();
 
     if (mOnSeekBarChangeListener != NULL) {
-        mOnSeekBarChangeListener->OnStopTrackingTouch((ISeekBar*)this);
+        mOnSeekBarChangeListener->OnStopTrackingTouch(this);
     }
 }
 

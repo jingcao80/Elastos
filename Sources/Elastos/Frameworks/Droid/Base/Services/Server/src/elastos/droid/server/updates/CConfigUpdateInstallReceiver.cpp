@@ -109,7 +109,7 @@ ECode CConfigUpdateInstallReceiver::OnReceive(
     currentHash = GetCurrentHash(GetCurrentContent());
 
     AutoPtr<IThread> thread;
-    CThread::New((IRunnable*)this->Probe(EIID_IRunnable), TAG, (IThread**)&thread);
+    CThread::New(this, TAG, (IThread**)&thread);
     thread->Start();
 
     return NOERROR;

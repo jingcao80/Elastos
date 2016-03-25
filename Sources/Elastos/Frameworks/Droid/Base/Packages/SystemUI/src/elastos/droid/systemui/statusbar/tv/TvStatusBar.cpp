@@ -42,9 +42,10 @@ ECode TvStatusBar::AddNotification(
     return NOERROR;
 }
 
-void TvStatusBar::UpdateNotificationRanking(
+ECode TvStatusBar::UpdateNotificationRanking(
     /* [in] */ INotificationListenerServiceRankingMap* ranking)
 {
+    return NOERROR;
 }
 
 ECode TvStatusBar::RemoveNotification(

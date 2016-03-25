@@ -264,7 +264,7 @@ ECode CDelayQueue::DrainTo(
 
     if (c == NULL)
         return E_NULL_POINTER_EXCEPTION;
-    if (Object::Equals(c->Probe(EIID_IInterface), THIS_PROBE(IInterface)))
+    if (Object::Equals(c->Probe(EIID_IInterface), TO_IINTERFACE(this)))
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
 
     AutoPtr<IReentrantLock> lock = mLock;
@@ -293,7 +293,7 @@ ECode CDelayQueue::DrainTo(
 
     if (c == NULL)
         return E_NULL_POINTER_EXCEPTION;
-    if (Object::Equals(c->Probe(EIID_IInterface), THIS_PROBE(IInterface)))
+    if (Object::Equals(c->Probe(EIID_IInterface), TO_IINTERFACE(this)))
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     if (maxElements <= 0) {
         return NOERROR;

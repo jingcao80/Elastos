@@ -86,12 +86,7 @@ ECode SwitchBar::SavedState::ToString(
 
     StringBuilder builder;
     builder += "SwitchBar.SavedState{";
-
-    AutoPtr<ISystem> sys;
-    CSystem::AcquireSingleton((ISystem**)&sys);
-    Int32 code;
-    sys->IdentityHashCode((ILinearLayout*)this, &code);
-    builder += StringUtils::ToHexString(code);
+    builder += StringUtils::ToHexString((Int32)this);
     builder += " checked=";
     builder += mChecked;
     builder += " visible=";
@@ -168,7 +163,7 @@ ECode SwitchBar::constructor(
     AutoPtr<ILayoutInflater> inflater;
     LayoutInflater::From(context, (ILayoutInflater**)&inflater);
     AutoPtr<IView> view;
-    inflater->Inflate(R::layout::switch_bar, (IViewGroup*)this, (IView**)&view);
+    inflater->Inflate(R::layout::switch_bar, this, (IView**)&view);
 
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, MARGIN_ATTRIBUTES, (ITypedArray**)&a);

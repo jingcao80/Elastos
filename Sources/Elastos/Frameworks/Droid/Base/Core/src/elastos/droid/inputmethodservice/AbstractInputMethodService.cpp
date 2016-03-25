@@ -16,7 +16,8 @@ namespace Elastos {
 namespace Droid {
 namespace InputMethodService {
 
-CAR_INTERFACE_IMPL(AbstractInputMethodService, Service, IKeyEventCallback);
+CAR_INTERFACE_IMPL_2(AbstractInputMethodService, Service, IAbstractInputMethodService, IKeyEventCallback);
+
 AbstractInputMethodService::AbstractInputMethodService()
 {
     CDispatcherState::New((IDispatcherState**)&mDispatcherState);
@@ -45,7 +46,7 @@ ECode AbstractInputMethodService::OnBind(
     }
 
     AutoPtr<IIInputMethod> method;
-    CIInputMethodWrapper::New(THIS_PROBE(IAbstractInputMethodService), mInputMethod, (IIInputMethod**)&method);
+    CIInputMethodWrapper::New(this, mInputMethod, (IIInputMethod**)&method);
     *binder = IBinder::Probe(method);
     REFCOUNT_ADD(*binder)
     return NOERROR;

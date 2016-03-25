@@ -58,9 +58,9 @@ ECode CIInputMethodSessionWrapper::ImeInputEventReceiver::OnInputEvent(
         AutoPtr<IMotionEvent> motionEvent = IMotionEvent::Probe(event);
         Boolean isfs = FALSE;
         if (IInputEvent::Probe(motionEvent)->IsFromSource(IInputDevice::SOURCE_CLASS_TRACKBALL, &isfs), isfs) {
-            mHost->mInputMethodSession->DispatchTrackballEvent(seq, motionEvent, THIS_PROBE(ILocalInputMethodSessionEventCallback));
+            mHost->mInputMethodSession->DispatchTrackballEvent(seq, motionEvent, this);
         } else {
-            mHost->mInputMethodSession->DispatchGenericMotionEvent(seq, motionEvent, THIS_PROBE(ILocalInputMethodSessionEventCallback));
+            mHost->mInputMethodSession->DispatchGenericMotionEvent(seq, motionEvent, this);
         }
     }
     return NOERROR;
@@ -101,7 +101,7 @@ ECode CIInputMethodSessionWrapper::constructor(
     /* [in] */ IInputMethodSession* inputMethodSession,
     /* [in] */ IInputChannel* channel)
 {
-    CHandlerCaller::New(context, NULL, THIS_PROBE(IHandlerCallerCallback),
+    CHandlerCaller::New(context, NULL, this,
         TRUE /*asyncHandler*/, FALSE, (IHandlerCaller**)&mCaller);
     mInputMethodSession = inputMethodSession;
     mChannel = channel;

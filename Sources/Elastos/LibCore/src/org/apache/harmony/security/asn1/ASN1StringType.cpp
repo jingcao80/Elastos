@@ -124,7 +124,7 @@ ECode ASN1StringType::Decode(
 {
     VALIDATE_NOT_NULL(object);
     *object = NULL;
-    FAIL_RETURN(bis->ReadString((IASN1StringType*)this));
+    FAIL_RETURN(bis->ReadString(this));
 
     Boolean isVerify;
     if (bis->GetVerify(&isVerify), isVerify) {

@@ -27,6 +27,7 @@ using Elastos::Droid::View::GestureDetector;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IGestureDetector;
+using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::Accessibility::IAccessibilityManager;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IPopupWindow;
@@ -152,6 +153,22 @@ private:
             /* [in] */ Float velocityY,
             /* [out] */ Boolean* res);
 
+    private:
+        KeyboardView* mHost;
+    };
+
+    class CloseButtonClickListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CloseButtonClickListener(
+            /* [in] */ KeyboardView* host);
+
+        CARAPI OnClick(
+            /* [in] */ IView* view);
     private:
         KeyboardView* mHost;
     };

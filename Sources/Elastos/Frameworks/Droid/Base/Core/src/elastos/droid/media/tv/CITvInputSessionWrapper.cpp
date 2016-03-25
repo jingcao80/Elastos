@@ -73,7 +73,7 @@ ECode CITvInputSessionWrapper::TvInputEventReceiver::OnInputEvent(
     }
 
     Int32 handled;
-    ((TvInputServiceSession*)mImpl.Get())->DispatchInputEvent(event, THIS_PROBE(IInputEventReceiver), &handled);
+    ((TvInputServiceSession*)mImpl.Get())->DispatchInputEvent(event, this, &handled);
     if (handled != ITvInputManagerSession::DISPATCH_IN_PROGRESS) {
         FinishInputEvent(event, handled == ITvInputManagerSession::DISPATCH_HANDLED);
     }

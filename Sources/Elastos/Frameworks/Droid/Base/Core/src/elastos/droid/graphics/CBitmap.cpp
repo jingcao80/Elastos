@@ -1230,7 +1230,7 @@ ECode CBitmap::SameAs(
 {
     VALIDATE_NOT_NULL(isSame);
 
-    *isSame = (IBitmap*)this == other || (other != NULL
+    *isSame = this == other || (other != NULL
             && NativeSameAs(mNativeBitmap, ((CBitmap*)other)->mNativeBitmap));
     return NOERROR;
 }

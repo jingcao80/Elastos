@@ -303,7 +303,7 @@ ECode DeviceDisplayInfo::NativeUpdateSharedDeviceDisplayInfo(
     /* [in] */ Int32 smallestDIPWidth,
     /* [in] */ Int32 rotationDegrees)
 {
-    Elastos_DeviceDisplayInfo_nativeUpdateSharedDeviceDisplayInfo(THIS_PROBE(IInterface), displayHeight, displayWidth, physicalDisplayHeight, physicalDisplayWidth, bitsPerPixel, bitsPerComponent, dipScale, smallestDIPWidth, rotationDegrees);
+    Elastos_DeviceDisplayInfo_nativeUpdateSharedDeviceDisplayInfo(TO_IINTERFACE(this), displayHeight, displayWidth, physicalDisplayHeight, physicalDisplayWidth, bitsPerPixel, bitsPerComponent, dipScale, smallestDIPWidth, rotationDegrees);
     return NOERROR;
 }
 

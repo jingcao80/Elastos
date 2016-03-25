@@ -52,7 +52,7 @@ ECode AttributedCharacterIteratorAttribute::Equals(
 
     IAttributedCharacterIteratorAttribute* o = IAttributedCharacterIteratorAttribute::Probe(obj);
     if (o != NULL) {
-        *value = (o == THIS_PROBE(IAttributedCharacterIteratorAttribute));
+        *value = (o == this);
     }
     return NOERROR;
 }

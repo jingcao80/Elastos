@@ -220,7 +220,7 @@ ECode TwoFieldDatePicker::OnPopulateAccessibilityEvent(
     mCurrentDate->GetTimeInMillis(&millis);
     String selectedDateUtterance;
     AutoPtr<IContext> c;
-    AutoPtr<IView> view = THIS_PROBE(IView);
+    AutoPtr<IView> view = this;
     view->GetContext((IContext**)&c);
     dateUtils->FormatDateTime(c,
              millis, flags, (String*)&selectedDateUtterance);

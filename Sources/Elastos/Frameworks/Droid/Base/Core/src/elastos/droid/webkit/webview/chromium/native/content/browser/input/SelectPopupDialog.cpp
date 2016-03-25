@@ -187,7 +187,7 @@ SelectPopupDialog::SelectPopupDialog(
 
     AutoPtr<IDialogInterfaceOnCancelListener> listener = new InnerDialogInterfaceOnCancelListener(this);
     AutoPtr<IDialog> _dialog = IDialog::Probe(mListBoxPopup);
-    _dialog->SetOnCancelListener(THIS_PROBE(IDialogInterfaceOnCancelListener));
+    _dialog->SetOnCancelListener(listener);
 }
 
 Int32 SelectPopupDialog::GetSelectDialogLayout(

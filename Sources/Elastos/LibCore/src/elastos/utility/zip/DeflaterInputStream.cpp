@@ -75,7 +75,7 @@ ECode DeflaterInputStream::Read(
 {
     AutoPtr<IStreams> streams;
     CStreams::AcquireSingleton((IStreams**)&streams);
-    return streams->ReadSingleByte(THIS_PROBE(IInputStream), value);
+    return streams->ReadSingleByte(this, value);
 }
 
 ECode DeflaterInputStream::Read(
@@ -147,7 +147,7 @@ ECode DeflaterInputStream::Skip(
     byteCount = Math::Min((Int64)Math::INT32_MAX_VALUE, byteCount);
     AutoPtr<IStreams> streams;
     CStreams::AcquireSingleton((IStreams**)&streams);
-    return streams->SkipByReading(THIS_PROBE(IInputStream), byteCount, number);
+    return streams->SkipByReading(this, byteCount, number);
 }
 
 ECode DeflaterInputStream::Available(

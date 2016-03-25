@@ -403,10 +403,10 @@ ECode FutureTask::AwaitDone(
                 return NOERROR;
             }
 
-            LockSupport::ParkNanos(THIS_PROBE(IRunnableFuture), nanos);
+            LockSupport::ParkNanos(TO_IINTERFACE(this), nanos);
         }
         else {
-            LockSupport::Park(THIS_PROBE(IRunnableFuture));
+            LockSupport::Park(TO_IINTERFACE(this));
         }
     }
     return NOERROR;

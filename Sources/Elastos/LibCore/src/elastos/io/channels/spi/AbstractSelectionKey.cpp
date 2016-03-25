@@ -30,7 +30,7 @@ ECode AbstractSelectionKey::Cancel()
         ECode ecRet = GetSelector((ISelector**)&selector);
         if (NOERROR == ecRet) {
             IAbstractSelector* absSel = IAbstractSelector::Probe(selector);
-            absSel->Cancel(THIS_PROBE(ISelectionKey));
+            absSel->Cancel(this);
         }
     }
     return NOERROR;

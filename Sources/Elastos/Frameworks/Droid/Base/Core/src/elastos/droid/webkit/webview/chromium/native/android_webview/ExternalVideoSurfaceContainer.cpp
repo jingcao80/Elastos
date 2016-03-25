@@ -313,7 +313,7 @@ void ExternalVideoSurfaceContainer::NativeSurfaceCreated(
     /* [in] */ Int32 playerId,
     /* [in] */ ISurface* surface)
 {
-    Elastos_ExternalVideoSurfaceContainer_nativeSurfaceCreated(THIS_PROBE(IInterface),
+    Elastos_ExternalVideoSurfaceContainer_nativeSurfaceCreated(TO_IINTERFACE(this),
             nativeExternalVideoSurfaceContainerImpl, playerId, TO_IINTERFACE(surface));
 }
 
@@ -321,7 +321,7 @@ void ExternalVideoSurfaceContainer::NativeSurfaceDestroyed(
     /* [in] */ Handle64 nativeExternalVideoSurfaceContainerImpl,
     /* [in] */ Int32 playerId)
 {
-    Elastos_ExternalVideoSurfaceContainer_nativeSurfaceDestroyed(THIS_PROBE(IInterface),
+    Elastos_ExternalVideoSurfaceContainer_nativeSurfaceDestroyed(TO_IINTERFACE(this),
             nativeExternalVideoSurfaceContainerImpl, playerId);
 }
 //callback function definition

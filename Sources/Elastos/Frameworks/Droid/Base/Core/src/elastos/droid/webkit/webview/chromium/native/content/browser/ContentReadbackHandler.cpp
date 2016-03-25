@@ -128,13 +128,13 @@ void ContentReadbackHandler::GetCompositorBitmapAsync(
 
 Handle64 ContentReadbackHandler::NativeInit()
 {
-    return Elastos_ContentReadbackHandler_nativeInit(THIS_PROBE(IInterface));
+    return Elastos_ContentReadbackHandler_nativeInit(TO_IINTERFACE(this));
 }
 
 void ContentReadbackHandler::NativeDestroy(
     /* [in] */ Handle64 nativeContentReadbackHandler)
 {
-    Elastos_ContentReadbackHandler_nativeDestroy(THIS_PROBE(IInterface), nativeContentReadbackHandler);
+    Elastos_ContentReadbackHandler_nativeDestroy(TO_IINTERFACE(this), nativeContentReadbackHandler);
 }
 
 void ContentReadbackHandler::NativeGetContentBitmap(
@@ -148,7 +148,7 @@ void ContentReadbackHandler::NativeGetContentBitmap(
     /* [in] */ Float height,
     /* [in] */ IInterface* contentViewCore)
 {
-    Elastos_ContentReadbackHandler_nativeGetContentBitmap(THIS_PROBE(IInterface), nativeContentReadbackHandler, readback_id, scale, config, x, y, width, height, contentViewCore);
+    Elastos_ContentReadbackHandler_nativeGetContentBitmap(TO_IINTERFACE(this), nativeContentReadbackHandler, readback_id, scale, config, x, y, width, height, contentViewCore);
 }
 
 void ContentReadbackHandler::NativeGetCompositorBitmap(
@@ -156,7 +156,7 @@ void ContentReadbackHandler::NativeGetCompositorBitmap(
     /* [in] */ Int32 readback_id,
     /* [in] */ Handle64 nativeWindowAndroid)
 {
-    Elastos_ContentReadbackHandler_nativeGetCompositorBitmap(THIS_PROBE(IInterface), nativeContentReadbackHandler, readback_id, nativeWindowAndroid);
+    Elastos_ContentReadbackHandler_nativeGetCompositorBitmap(TO_IINTERFACE(this), nativeContentReadbackHandler, readback_id, nativeWindowAndroid);
 }
 
 void ContentReadbackHandler::NotifyGetBitmapFinished(

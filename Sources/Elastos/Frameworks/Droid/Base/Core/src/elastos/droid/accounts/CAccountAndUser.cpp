@@ -15,7 +15,7 @@ ECode CAccountAndUser::Equals(
     /* [out] */ Boolean *isEqual)
 {
     VALIDATE_NOT_NULL(isEqual)
-    if (THIS_PROBE(IInterface) == o) {
+    if (TO_IINTERFACE(this) == o) {
         *isEqual = TRUE;
         return NOERROR;
     }

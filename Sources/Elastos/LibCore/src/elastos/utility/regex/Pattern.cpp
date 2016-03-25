@@ -52,7 +52,7 @@ ECode Pattern::Matcher(
     *matcher = NULL;
     AutoPtr<ICharSequence> seq;
     FAIL_RETURN(CString::New(inputString, (ICharSequence**)&seq));
-    return CMatcher::New((IPattern*)this, seq, matcher);
+    return CMatcher::New(this, seq, matcher);
 }
 
 ECode Pattern::Matcher(
@@ -60,7 +60,7 @@ ECode Pattern::Matcher(
     /* [out] */ IMatcher** matcher)
 {
     VALIDATE_NOT_NULL(matcher);
-    return CMatcher::New((IPattern*)this, input, matcher);
+    return CMatcher::New(this, input, matcher);
 }
 
 ECode Pattern::Split(
@@ -97,7 +97,7 @@ ECode Pattern::Split(
 {
     AutoPtr<ISplitter> splitter;
     FAIL_RETURN(CSplitter::AcquireSingleton((ISplitter**)&splitter));
-    return splitter->Split((IPattern*)this, mPattern, input, limit, result);
+    return splitter->Split(this, mPattern, input, limit, result);
 }
 
 ECode Pattern::GetPattern(

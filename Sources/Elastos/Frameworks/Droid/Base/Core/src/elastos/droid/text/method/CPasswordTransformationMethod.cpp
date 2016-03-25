@@ -193,7 +193,7 @@ ECode CPasswordTransformationMethod::Visible::constructor(
 
 ECode CPasswordTransformationMethod::Visible::Run()
 {
-    mText->RemoveSpan(THIS_PROBE(IInterface));
+    mText->RemoveSpan(TO_IINTERFACE(this));
     return NOERROR;
 }
 
@@ -328,7 +328,7 @@ ECode CPasswordTransformationMethod::OnTextChanged(
                 RemoveVisibleSpans(sp);
 
                 if (count == 1) {
-                    AutoPtr<IPasswordTransformationMethod> tpm = (IPasswordTransformationMethod*)this->Probe(EIID_IPasswordTransformationMethod);
+                    AutoPtr<IPasswordTransformationMethod> tpm = this;
                     AutoPtr<Visible> visible = new Visible();
                     visible->constructor(sp, tpm);
                     sp->SetSpan(IPasswordTransformationMethod::Probe(visible), start, start + count, ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);

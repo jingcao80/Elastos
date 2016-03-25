@@ -71,8 +71,9 @@ ECode CMediaProjectionInfo::Equals(
     /* [out] */ Boolean * result)
 {
     VALIDATE_NOT_NULL(result)
-    if (THIS_PROBE(IMediaProjectionInfo) == obj) {
-        const AutoPtr<CMediaProjectionInfo> other = (CMediaProjectionInfo*)IMediaProjectionInfo::Probe(obj);
+    IMediaProjectionInfo* o = IMediaProjectionInfo::Probe(obj);
+    if (o == (IMediaProjectionInfo*)this) {
+        CMediaProjectionInfo* other = (CMediaProjectionInfo*)o;
         *result = mPackageName.Equals(other->mPackageName)
             && Objects::Equals(mUserHandle, other->mUserHandle);
     }

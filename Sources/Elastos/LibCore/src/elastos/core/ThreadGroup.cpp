@@ -237,7 +237,7 @@ ECode ThreadGroup::Destroy()
 
             if (mParent != NULL) {
                 ThreadGroup* g = (ThreadGroup*)mParent.Get();
-                g->RemoveThreadGroup(THIS_PROBE(IThreadGroup));
+                g->RemoveThreadGroup((IThreadGroup*)this);
             }
 
             // Now that the ThreadGroup is really destroyed it can be tagged
@@ -481,7 +481,7 @@ ECode ThreadGroup::IsParentOf(
     VALIDATE_NOT_NULL(result);
     ThreadGroup* tg;
     while (g != NULL) {
-        if (THIS_PROBE(IThreadGroup) == g) {
+        if ((IThreadGroup*)this == g) {
             *result = TRUE;
             return NOERROR;
         }
@@ -595,7 +595,7 @@ void ThreadGroup::SetParent(
 {
     if (parent != NULL) {
         ThreadGroup* tg = (ThreadGroup*)parent;
-        tg->AddThreadGroup(THIS_PROBE(IThreadGroup));
+        tg->AddThreadGroup((IThreadGroup*)this);
     }
     mParent = parent;
 }

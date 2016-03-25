@@ -317,7 +317,7 @@ void BroadcastQueue::ScheduleBroadcastsLocked()
     }
 
     AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(BROADCAST_INTENT_MSG, (IObject*)this, (IMessage**)&msg);
+    mHandler->ObtainMessage(BROADCAST_INTENT_MSG, TO_IINTERFACE(this), (IMessage**)&msg);
     Boolean result;
     mHandler->SendMessage(msg, &result);
 
@@ -1099,7 +1099,7 @@ void BroadcastQueue::SetBroadcastTimeoutLocked(
 {
     if (!mPendingBroadcastTimeoutMessage) {
         AutoPtr<IMessage> msg;
-        mHandler->ObtainMessage(BROADCAST_TIMEOUT_MSG, (IObject*)this, (IMessage**)&msg);
+        mHandler->ObtainMessage(BROADCAST_TIMEOUT_MSG, TO_IINTERFACE(this), (IMessage**)&msg);
         Boolean result;
         mHandler->SendMessageAtTime(msg, timeoutTime, &result);
 
@@ -1110,7 +1110,7 @@ void BroadcastQueue::SetBroadcastTimeoutLocked(
 void BroadcastQueue::CancelBroadcastTimeoutLocked()
 {
     if (mPendingBroadcastTimeoutMessage) {
-        mHandler->RemoveMessages(BROADCAST_TIMEOUT_MSG, (IObject*)this);
+        mHandler->RemoveMessages(BROADCAST_TIMEOUT_MSG, TO_IINTERFACE(this));
         mPendingBroadcastTimeoutMessage = FALSE;
     }
 }

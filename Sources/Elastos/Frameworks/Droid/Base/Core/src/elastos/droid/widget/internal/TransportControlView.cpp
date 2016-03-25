@@ -280,9 +280,9 @@ ECode TransportControlView::OnFinishInflate()
     mBtnPrev = (IImageView*) FindViewById(R::id::btn_prev)->Probe(EIID_IImageView);
     mBtnPlay = (IImageView*) FindViewById(R::id::btn_play)->Probe(EIID_IImageView);
     mBtnNext = (IImageView*) FindViewById(R::id::btn_next)->Probe(EIID_IImageView);
-    mBtnPrev->SetOnClickListener((IViewOnClickListener*)this->Probe(EIID_IViewOnClickListener));
-    mBtnPlay->SetOnClickListener((IViewOnClickListener*)this->Probe(EIID_IViewOnClickListener));
-    mBtnNext->SetOnClickListener((IViewOnClickListener*)this->Probe(EIID_IViewOnClickListener));
+    mBtnPrev->SetOnClickListener(this);
+    mBtnPlay->SetOnClickListener(this);
+    mBtnNext->SetOnClickListener(this);
     return NOERROR;
 }
 
@@ -484,9 +484,9 @@ void TransportControlView::UpdatePlayPauseState(
 
     Boolean res;
     if (showIfHidden && mWidgetCallbacks != NULL
-            && !(mWidgetCallbacks->IsVisible((IView*)this->Probe(EIID_IView), &res), res))
+            && !(mWidgetCallbacks->IsVisible(this, &res), res))
     {
-        mWidgetCallbacks->RequestShow((IView*)this->Probe(EIID_IView));
+        mWidgetCallbacks->RequestShow(this);
     }
     mCurrentPlayState = state;
 }
@@ -501,7 +501,7 @@ AutoPtr<IParcelable> TransportControlView::OnSaveInstanceState()
     CTransportControlViewSavedState::New(superState, (ITransportControlViewSavedState**)&ss);
 
     Boolean visible;
-    mWidgetCallbacks->IsVisible((IView*)this->Probe(EIID_IView), &visible);
+    mWidgetCallbacks->IsVisible(this, &visible);
     ((CTransportControlViewSavedState*)ss.Get())->wasShowing = mWidgetCallbacks != NULL && visible;
 
     return (IParcelable*)ss->Probe(EIID_IParcelable);
@@ -526,7 +526,7 @@ void TransportControlView::OnRestoreInstanceState(
     if (((CTransportControlViewSavedState*)ss.Get())->wasShowing
             && mWidgetCallbacks != NULL)
     {
-        mWidgetCallbacks->RequestShow(THIS_PROBE(IView));
+        mWidgetCallbacks->RequestShow(this);
     }
 }
 
@@ -550,7 +550,7 @@ ECode TransportControlView::OnClick(
         SendMediaButtonClick(keyCode);
         if (mWidgetCallbacks != NULL)
         {
-            mWidgetCallbacks->UserActivity(THIS_PROBE(IView));
+            mWidgetCallbacks->UserActivity(this);
         }
     }
 

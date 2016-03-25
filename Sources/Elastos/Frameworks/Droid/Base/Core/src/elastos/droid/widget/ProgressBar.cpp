@@ -616,7 +616,7 @@ ECode ProgressBar::SetIndeterminateDrawable(
         mIndeterminateDrawable = d;
 
         if (d != NULL) {
-            d->SetCallback(THIS_PROBE(IDrawableCallback));
+            d->SetCallback(this);
             Int32 dir = 0;
             GetLayoutDirection(&dir);
             d->SetLayoutDirection(dir);
@@ -732,7 +732,7 @@ ECode ProgressBar::SetProgressDrawable(
         mProgressDrawable = d;
 
         if (d != NULL) {
-            d->SetCallback(THIS_PROBE(IDrawableCallback));
+            d->SetCallback(this);
             Int32 dir = 0;
             GetLayoutDirection(&dir);
             d->SetLayoutDirection(dir);
@@ -1738,7 +1738,7 @@ ECode ProgressBar::OnInitializeAccessibilityNodeInfo(
 void ProgressBar::ScheduleAccessibilityEventSender()
 {
     if (mAccessibilityEventSender == NULL) {
-        AutoPtr<IWeakReferenceSource> wrs = THIS_PROBE(IWeakReferenceSource);
+        AutoPtr<IWeakReferenceSource> wrs = this;
         assert(wrs);
         AutoPtr<IWeakReference> wr;
         wrs->GetWeakReference((IWeakReference**)&wr);

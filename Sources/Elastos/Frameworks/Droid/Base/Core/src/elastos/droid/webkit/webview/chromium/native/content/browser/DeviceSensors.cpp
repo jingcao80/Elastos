@@ -647,7 +647,7 @@ void DeviceSensors::NativeGotOrientation(
     /* [in] */ Double beta,
     /* [in] */ Double gamma)
 {
-    Elastos_DeviceSensors_nativeGotOrientation(THIS_PROBE(IInterface), (Handle64)nativeSensorManagerAndroid,
+    Elastos_DeviceSensors_nativeGotOrientation(TO_IINTERFACE(this), (Handle64)nativeSensorManagerAndroid,
             alpha, beta, gamma);
 }
 
@@ -660,7 +660,7 @@ void DeviceSensors::NativeGotAcceleration(
     /* [in] */ Double y,
     /* [in] */ Double z)
 {
-    Elastos_DeviceSensors_nativeGotAcceleration(THIS_PROBE(IInterface), (Handle64)nativeSensorManagerAndroid,
+    Elastos_DeviceSensors_nativeGotAcceleration(TO_IINTERFACE(this), (Handle64)nativeSensorManagerAndroid,
             x, y, z);
 }
 
@@ -673,7 +673,7 @@ void DeviceSensors::NativeGotAccelerationIncludingGravity(
     /* [in] */ Double y,
     /* [in] */ Double z)
 {
-    Elastos_DeviceSensors_nativeGotAccelerationIncludingGravity(THIS_PROBE(IInterface), (Handle64)nativeSensorManagerAndroid, x, y, z);
+    Elastos_DeviceSensors_nativeGotAccelerationIncludingGravity(TO_IINTERFACE(this), (Handle64)nativeSensorManagerAndroid, x, y, z);
 }
 
 /**
@@ -685,7 +685,7 @@ void DeviceSensors::NativeGotRotationRate(
     /* [in] */ Double beta,
     /* [in] */ Double gamma)
 {
-    Elastos_DeviceSensors_nativeGotRotationRate(THIS_PROBE(IInterface), (Handle64)nativeSensorManagerAndroid,
+    Elastos_DeviceSensors_nativeGotRotationRate(TO_IINTERFACE(this), (Handle64)nativeSensorManagerAndroid,
             alpha, beta, gamma);
 }
 

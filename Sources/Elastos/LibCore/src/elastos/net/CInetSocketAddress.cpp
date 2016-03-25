@@ -175,7 +175,7 @@ ECode CInetSocketAddress::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (this->Probe(EIID_IInterface) == socketAddr) {
+    if (TO_IINTERFACE(this) == socketAddr) {
         *result = TRUE;
         return NOERROR;
     }

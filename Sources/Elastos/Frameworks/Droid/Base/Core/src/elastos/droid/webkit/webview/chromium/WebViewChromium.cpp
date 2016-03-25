@@ -322,7 +322,7 @@ ECode WebViewChromium::InnerContextWrapper::GetClassLoader(
 //        baseContext->GetSystemService(name, (IInterface**)&iTmp);
 //        AutoPtr<ILayoutInflater> i = ILayoutInflater::Probe(iTmp);
 
-//        AutoPtr<IContext> contextTmp = IContext::Probe((IContextWrapper*)this);
+//        AutoPtr<IContext> contextTmp = IContext::Probe(this);
 //        AutoPtr<ILayoutInflater> cloneTmp;
 //        i->CloneInContext(contextTmp, (ILayoutInflater**)&cloneTmp);
 //        *object = cloneTmp->Probe(EIID_IInterface);

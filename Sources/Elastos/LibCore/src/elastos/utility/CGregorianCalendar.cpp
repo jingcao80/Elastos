@@ -883,7 +883,7 @@ ECode CGregorianCalendar::GetActualMaximum(
             Get(YEAR, &hretmp);
             (ICalendar::Probe(clone))->Set(YEAR, hretmp);
             Boolean isBefore;
-            (ICalendar::Probe(clone))->IsBefore((ICalendar*)this->Probe(EIID_ICalendar), &isBefore);
+            (ICalendar::Probe(clone))->IsBefore(this, &isBefore);
             if (isBefore) {
                 result--;
             }

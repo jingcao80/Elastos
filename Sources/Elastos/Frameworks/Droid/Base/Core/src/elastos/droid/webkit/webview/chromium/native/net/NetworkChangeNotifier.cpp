@@ -323,7 +323,7 @@ ECode NetworkChangeNotifier::NativeNotifyConnectionTypeChanged(
     /* [in] */ Handle64 nativePtr,
     /* [in] */ Int32 newConnectionType)
 {
-    Elastos_NetworkChangeNotifier_nativeNotifyConnectionTypeChanged(THIS_PROBE(IInterface), (Handle64)nativePtr, newConnectionType);
+    Elastos_NetworkChangeNotifier_nativeNotifyConnectionTypeChanged(TO_IINTERFACE(this), (Handle64)nativePtr, newConnectionType);
     return NOERROR;
 }
 

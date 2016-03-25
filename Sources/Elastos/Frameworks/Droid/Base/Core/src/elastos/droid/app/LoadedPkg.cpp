@@ -116,7 +116,7 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
     // ClassLoader cl =  mReceiver.getClass().getClassLoader();
     // intent.setExtrasClassLoader(cl);
     // setExtrasClassLoader(cl);
-    receiver->SetPendingResult((IPendingResult*)this);
+    receiver->SetPendingResult(this);
     ECode ec = receiver->OnReceive(mHost->mContext, intent);
     if (FAILED(ec)) {
         if (mHost->mRegistered && ordered) {
@@ -351,7 +351,7 @@ LoadedPkg::ServiceDispatcher::ServiceDispatcher(
     , mDied(FALSE)
     , mForgotten(FALSE)
 {
-    CInnerConnection::New((IServiceDispatcher*)this, (IIServiceConnection**)&mIServiceConnection);
+    CInnerConnection::New(this, (IIServiceConnection**)&mIServiceConnection);
 //                mLocation = new ServiceConnectionLeaked(null);
 //                mLocation.fillInStackTrace();
 }

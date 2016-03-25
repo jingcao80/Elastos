@@ -76,7 +76,7 @@ void Shape::OnResize(
 //     /* [out] */ IInterface** other)
 // {
 //     VALIDATE_NOT_NULL(other);
-//     *other = THIS_PROBE(EIID_IInterface);
+//     *other = this;
 //     REFCOUNT_ADD(*other);
 //     return NOERROR;
 // }

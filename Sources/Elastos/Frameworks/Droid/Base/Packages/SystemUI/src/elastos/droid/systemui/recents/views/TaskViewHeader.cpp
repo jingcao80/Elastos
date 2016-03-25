@@ -463,7 +463,7 @@ ECode TaskViewHeader::OnTaskViewFocusChanged(
         AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(1);
         (*values)[0] = 15.0f;
         AutoPtr<IObjectAnimator> translation;
-        oaHelper->OfFloat((ITaskViewHeader*)this, String("translationZ"), values,
+        oaHelper->OfFloat(TO_IINTERFACE(this), String("translationZ"), values,
             (IObjectAnimator**)&translation);
         IValueAnimator::Probe(translation)->SetRepeatCount(IValueAnimator::ANIMATION_INFINITE);
         IValueAnimator::Probe(translation)->SetRepeatMode(IValueAnimator::ANIMATION_REVERSE);
@@ -500,7 +500,7 @@ ECode TaskViewHeader::OnTaskViewFocusChanged(
             AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(1);
             (*values)[0] = 0.0f;
             AutoPtr<IObjectAnimator> translation;
-            oaHelper->OfFloat((ITaskViewHeader*)this, String("translationZ"), values,
+            oaHelper->OfFloat(TO_IINTERFACE(this), String("translationZ"), values,
                 (IObjectAnimator**)&translation);
 
             mFocusAnimator = NULL;

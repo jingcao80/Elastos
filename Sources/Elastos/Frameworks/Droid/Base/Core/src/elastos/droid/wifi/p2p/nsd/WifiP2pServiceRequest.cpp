@@ -133,7 +133,7 @@ ECode WifiP2pServiceRequest::Equals(
 {
     VALIDATE_NOT_NULL(result);
 
-    if (other == THIS_PROBE(IInterface)) {
+    if (other == TO_IINTERFACE(this)) {
         *result = TRUE;
         return NOERROR;
     }

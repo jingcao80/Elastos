@@ -244,7 +244,7 @@ ECode FileChannelImpl::BasicLock(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    AutoPtr<IFileLock> pendingLock = new FileLockImpl(THIS_PROBE(IFileChannel), position, size, shared);
+    AutoPtr<IFileLock> pendingLock = new FileLockImpl(this, position, size, shared);
     AddLock(pendingLock);
 
     AutoPtr<IStructFlock> flock;

@@ -247,7 +247,7 @@ ECode CRouteTracker::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    if (other == this->Probe(EIID_IInterface)) {
+    if (other == TO_IINTERFACE(this)) {
         *result = TRUE;
         return NOERROR;
     }

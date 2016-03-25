@@ -621,7 +621,7 @@ ECode TvInputServiceSession::DispatchInputEvent(
         keyEvent->GetKeyCode(&code);
         TvInputService::IsNavigationKey(code, &isNavigationKey);
         Boolean b;
-        keyEvent->Dispatch(this, mDispatcherState, THIS_PROBE(IInterface), &b);
+        keyEvent->Dispatch(this, mDispatcherState, TO_IINTERFACE(this), &b);
         if (b) {
             *result = ITvInputManagerSession::DISPATCH_HANDLED;
             return NOERROR;

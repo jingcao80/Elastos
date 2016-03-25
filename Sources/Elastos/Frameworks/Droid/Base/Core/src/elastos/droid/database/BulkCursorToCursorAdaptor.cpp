@@ -18,7 +18,7 @@ const String BulkCursorToCursorAdaptor::TAG("BulkCursor");
 BulkCursorToCursorAdaptor::BulkCursorToCursorAdaptor()
 {
     mObserverBridge = new SelfContentObserver();
-    mObserverBridge->constructor((IAbstractCursor*)this);
+    mObserverBridge->constructor(this);
 }
 
 ECode BulkCursorToCursorAdaptor::Initialize(

@@ -1123,7 +1123,7 @@ Int32 Spinner::MeasureContentWidth(
             itemType = positionType;
             itemView = NULL;
         }
-        IAdapter::Probe(adapter)->GetView(i, itemView, (IViewGroup*)this->Probe(EIID_IViewGroup), (IView**)&itemView);
+        IAdapter::Probe(adapter)->GetView(i, itemView, this, (IView**)&itemView);
 
         AutoPtr<IViewGroupLayoutParams> lp;
         itemView->GetLayoutParams((IViewGroupLayoutParams**)&lp);
@@ -1289,7 +1289,7 @@ AutoPtr<IView> Spinner::MakeView(
     }
     child = NULL;
     // Nothing found in the recycler -- ask the adapter for a view
-    IAdapter::Probe(mAdapter)->GetView(position, NULL, THIS_PROBE(IViewGroup), (IView**)&child);
+    IAdapter::Probe(mAdapter)->GetView(position, NULL, this, (IView**)&child);
 
     // Position the view
     SetUpChild(child, addChild);

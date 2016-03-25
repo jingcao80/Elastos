@@ -134,7 +134,7 @@ ECode ClientParamsStack::Copy(
     /* [out] */ IHttpParams** httpParams)
 {
     VALIDATE_NOT_NULL(httpParams)
-    *httpParams = (IHttpParams*)this;
+    *httpParams = this;
     REFCOUNT_ADD(*httpParams)
     return NOERROR;
 }

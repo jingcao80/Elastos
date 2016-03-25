@@ -801,7 +801,7 @@ ECode CUsageStatsService::Publish(
     /* [in] */ IContext* context)
 {
     mContext = context;
-    ServiceManager::AddService(SERVICE_NAME, THIS_PROBE(IIUsageStats));
+    ServiceManager::AddService(SERVICE_NAME, this);
     return NOERROR;
 }
 

@@ -112,7 +112,7 @@ ECode ASN1Type::Encode(
     /* [out, callee] */ ArrayOf<Byte>** encode)
 {
     AutoPtr<IBerOutputStream> output;
-    CDerOutputStream::New((IASN1Type*)this, object, (IBerOutputStream**)&output);
+    CDerOutputStream::New(this, object, (IBerOutputStream**)&output);
     return output->GetEncoded(encode);
 }
 

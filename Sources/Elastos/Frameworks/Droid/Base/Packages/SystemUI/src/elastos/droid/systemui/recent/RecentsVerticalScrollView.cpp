@@ -170,9 +170,9 @@ ECode RecentsVerticalScrollView::Init(
     helper->Get(mContext, (IViewConfiguration**)&vc);
     Float pagingTouchSlop;
     vc->GetScaledPagingTouchSlop((Int32*)&pagingTouchSlop);
-    CSwipeHelper::New(ISwipeHelper::X, THIS_PROBE(ISwipeHelperCallback), densityScale, pagingTouchSlop, (ISwipeHelper**)&mSwipeHelper);
+    CSwipeHelper::New(ISwipeHelper::X, this, densityScale, pagingTouchSlop, (ISwipeHelper**)&mSwipeHelper);
 
-    mPerformanceHelper = RecentsScrollViewPerformanceHelper::Create(ctx, attrs, THIS_PROBE(IView), TRUE);
+    mPerformanceHelper = RecentsScrollViewPerformanceHelper::Create(ctx, attrs, this, TRUE);
     return NOERROR;
 }
 

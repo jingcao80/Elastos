@@ -157,7 +157,7 @@ ECode CMediaCodecInfo::MakeRegular(
         return NOERROR;
     }
     else if (size == capSize) {
-        *result = THIS_PROBE(IMediaCodecInfo);
+        *result = this;
         REFCOUNT_ADD(*result)
         return NOERROR;
     }

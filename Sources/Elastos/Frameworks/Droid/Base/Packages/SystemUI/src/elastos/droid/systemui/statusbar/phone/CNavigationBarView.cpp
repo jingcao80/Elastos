@@ -544,7 +544,7 @@ ECode CNavigationBarView::SetSlippery(
         AutoPtr<IInterface> obj;
         ctx->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&obj);
         AutoPtr<IWindowManager> wm = IWindowManager::Probe(obj);
-        IViewManager::Probe(wm)->UpdateViewLayout(THIS_PROBE(IView), IViewGroupLayoutParams::Probe(lp));
+        IViewManager::Probe(wm)->UpdateViewLayout(this, IViewGroupLayoutParams::Probe(lp));
     }
     return NOERROR;
 }

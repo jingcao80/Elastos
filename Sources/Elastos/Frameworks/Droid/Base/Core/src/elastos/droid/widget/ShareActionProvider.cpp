@@ -154,7 +154,7 @@ ECode ShareActionProvider::OnCreateActionView(
     AutoPtr<IDrawable> drawable;
     mContext->GetDrawable(id, (IDrawable**)&drawable);
     activityChooserView->SetExpandActivityOverflowButtonDrawable(drawable);
-    activityChooserView->SetProvider(THIS_PROBE(IActionProvider));
+    activityChooserView->SetProvider(this);
 
     // Set content description.
     activityChooserView->SetDefaultActionButtonContentDescription(R::string::shareactionprovider_share_with_application);

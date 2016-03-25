@@ -83,7 +83,7 @@ BluetoothPbap::BluetoothPbap(
     : mContext(context)
     , mServiceListener(listener)
 {
-    CBluetoothPbapStateChangeCallback::New((IBluetoothPbap*)this, (IIBluetoothStateChangeCallback**)&mBluetoothStateChangeCallback);
+    CBluetoothPbapStateChangeCallback::New(this, (IIBluetoothStateChangeCallback**)&mBluetoothStateChangeCallback);
     mConnection = new ServiceConnection(this);
 
     mAdapter = CBluetoothAdapter::GetDefaultAdapter();

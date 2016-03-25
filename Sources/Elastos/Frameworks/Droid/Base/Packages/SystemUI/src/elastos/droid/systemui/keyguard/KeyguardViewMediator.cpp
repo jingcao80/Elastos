@@ -684,7 +684,7 @@ void KeyguardViewMediator::Setup()
 ECode KeyguardViewMediator::Start()
 {
     Setup();
-    SystemUI::PutComponent(EIID_IKeyguardViewMediator, IInterface::Probe((IObject*)this));
+    SystemUI::PutComponent(EIID_IKeyguardViewMediator, TO_IINTERFACE(this));
     return NOERROR;
 }
 

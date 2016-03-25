@@ -206,7 +206,7 @@ ECode StackStateAnimator::AnimatorListenerAdapter8::OnAnimationEnd(
     if ((mHost->mAnimatorSet->IsEmpty(&tmp), tmp) && !mWasCancelled) {
         mHost->OnAnimationFinished();
     }
-    mHost->mAnimationListenerPool->Push(THIS_PROBE(IInterface));
+    mHost->mAnimationListenerPool->Push(TO_IINTERFACE(this));
     return NOERROR;
 }
 

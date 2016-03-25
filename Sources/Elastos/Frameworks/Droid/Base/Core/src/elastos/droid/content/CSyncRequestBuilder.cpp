@@ -212,7 +212,7 @@ ECode CSyncRequestBuilder::Build(
 
     AutoPtr<ISyncRequest> sr;
     CSyncRequest::New((ISyncRequest**)&sr);
-    ((CSyncRequest*)sr.Get())->constructor(THIS_PROBE(ISyncRequestBuilder));
+    ((CSyncRequest*)sr.Get())->constructor(this);
     *request = sr;
     REFCOUNT_ADD(*request);
     return NOERROR;

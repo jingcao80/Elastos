@@ -106,7 +106,7 @@ ECode CSession::constructor(
 
     proxy = (IProxy*)mClient->Probe(EIID_IProxy);
     if (proxy != NULL) {
-        ec = proxy->LinkToDeath((IProxyDeathRecipient*)this, 0);
+        ec = proxy->LinkToDeath(this, 0);
     }
 
 _Exit_:
@@ -718,7 +718,7 @@ void CSession::WindowAddedLocked()
         if (CWindowManagerService::SHOW_TRANSACTIONS) {
             Slogger::I(CWindowManagerService::TAG, "  NEW SURFACE SESSION %p", mSurfaceSession.Get());
         }
-        ISet::Probe(mService->mSessions)->Add((IWindowSession*)this);
+        mService->mSessions->Add((IWindowSession*)this);
         Float scale;
         mService->GetCurrentAnimatorScale(&scale);
         if (mLastReportedAnimatorScale != scale) {
@@ -737,7 +737,7 @@ void CSession::WindowRemovedLocked()
 void CSession::KillSessionLocked()
 {
     if (mNumWindow <= 0 && mClientDead) {
-        ISet::Probe(mService->mSessions)->Remove((IWindowSession*)this);
+        mService->mSessions->Remove((IWindowSession*)this);
         if (mSurfaceSession != NULL) {
             // if (WindowManagerService.localLOGV) Slog.v(
             //     WindowManagerService.TAG, "Last window removed from " + this
@@ -777,7 +777,7 @@ ECode CSession::ProxyDied()
     AutoPtr<IProxy> proxy = (IProxy*)mClient->Probe(EIID_IProxy);
     assert(proxy != NULL);
     Boolean res;
-    proxy->UnlinkToDeath((IProxyDeathRecipient*)this, 0, &res);
+    proxy->UnlinkToDeath(this, 0, &res);
     mClientDead = TRUE;
     KillSessionLocked();
 

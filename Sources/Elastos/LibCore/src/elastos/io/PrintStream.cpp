@@ -201,9 +201,9 @@ ECode PrintStream::Format(
         return E_EOF_EXCEPTION;
     }
     AutoPtr<IFormatter> res;
-    FAIL_RETURN(CFormatter::New(THIS_PROBE(IAppendable), l, (IFormatter**)&res));
+    FAIL_RETURN(CFormatter::New(this, l, (IFormatter**)&res));
     res->Format(format, args);
-    *pw = THIS_PROBE(IPrintStream);
+    *pw = this;
     REFCOUNT_ADD(*pw)
     return NOERROR;
 }

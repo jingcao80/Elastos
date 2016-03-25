@@ -107,7 +107,7 @@ ECode PopupWindow::PopupViewContainer::DispatchKeyEvent(
             AutoPtr<IDispatcherState> state;
             GetKeyDispatcherState((IDispatcherState**)&state);
             if (state != NULL) {
-                state->StartTracking(event, this->Probe(EIID_IInterface));
+                state->StartTracking(event, TO_IINTERFACE(this));
             }
             *res = TRUE;
             return NOERROR;
@@ -141,7 +141,7 @@ ECode PopupWindow::PopupViewContainer::DispatchTouchEvent(
 
     if (mHost->mTouchInterceptor != NULL) {
         Boolean result;
-        mHost->mTouchInterceptor->OnTouch(THIS_PROBE(IView), event, &result);
+        mHost->mTouchInterceptor->OnTouch(this, event, &result);
         if (result) {
             *res = TRUE;
             return NOERROR;

@@ -150,7 +150,7 @@ void AppWindowToken::UpdateReportedVisibilityLocked()
         if (nowDrawn) {
             AutoPtr<IMessage> msg;
             mService->mH->ObtainMessage(CWindowManagerService::H::REPORT_APPLICATION_TOKEN_DRAWN,
-                    (IObject*)this, (IMessage**)&msg);
+                TO_IINTERFACE(this), (IMessage**)&msg);
             Boolean result;
             mService->mH->SendMessage(msg, &result);
         }
@@ -163,7 +163,7 @@ void AppWindowToken::UpdateReportedVisibilityLocked()
         mReportedVisible = nowVisible;
         AutoPtr<IMessage> msg;
         mService->mH->ObtainMessage(CWindowManagerService::H::REPORT_APPLICATION_TOKEN_WINDOWS,
-                nowVisible ? 1 : 0, nowGone ? 1 : 0, (IObject*)this, (IMessage**)&msg);
+                nowVisible ? 1 : 0, nowGone ? 1 : 0, TO_IINTERFACE(this), (IMessage**)&msg);
         Boolean result;
         mService->mH->SendMessage(msg, &result);
     }

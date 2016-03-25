@@ -152,7 +152,7 @@ ECode LineNumberInputStream::Skip(
 {
     AutoPtr<IStreams> streams;
     CStreams::AcquireSingleton((IStreams**)&streams);
-    return streams->SkipByReading(THIS_PROBE(IInputStream), byteCount, number);
+    return streams->SkipByReading(this, byteCount, number);
 }
 
 } // namespace IO

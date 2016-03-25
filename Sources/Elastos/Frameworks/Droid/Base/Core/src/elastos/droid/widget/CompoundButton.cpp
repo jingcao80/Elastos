@@ -82,11 +82,7 @@ ECode CompoundButton::SavedState::ToString(
     StringBuilder buider;
     buider += "CompoundButton.SavedState{";
 
-    AutoPtr<ISystem> sys;
-    CSystem::AcquireSingleton((ISystem**)&sys);
-    Int32 value;
-    sys->IdentityHashCode((ICompoundButton*)this, &value);
-    buider += StringUtils::ToHexString(value);
+    buider += StringUtils::ToHexString((Int32)this);
     buider += " checked=";
     buider += mSavedStateChecked;
     buider += "}";
@@ -222,11 +218,11 @@ ECode CompoundButton::SetChecked(
         mBroadcasting = TRUE;
         if (mOnCheckedChangeListener != NULL) {
             mOnCheckedChangeListener->OnCheckedChanged(
-                THIS_PROBE(ICompoundButton), mChecked);
+                this, mChecked);
         }
         if (mOnCheckedChangeWidgetListener != NULL) {
             mOnCheckedChangeWidgetListener->OnCheckedChanged(
-                THIS_PROBE(ICompoundButton), mChecked);
+                this, mChecked);
         }
 
         mBroadcasting = FALSE;
@@ -280,7 +276,7 @@ ECode CompoundButton::SetButtonDrawable(
         mButtonDrawable = d;
 
         if (d != NULL) {
-            d->SetCallback(THIS_PROBE(IDrawableCallback));
+            d->SetCallback(this);
             Int32 direction;
             GetLayoutDirection(&direction);
             d->SetLayoutDirection(direction);

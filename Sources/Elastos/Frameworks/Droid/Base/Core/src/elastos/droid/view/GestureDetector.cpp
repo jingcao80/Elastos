@@ -222,7 +222,7 @@ ECode GestureDetector::constructor(
 {
     mInputEventConsistencyVerifier =
             InputEventConsistencyVerifier::IsInstrumentationEnabled() ?
-                    new InputEventConsistencyVerifier(THIS_PROBE(IInterface), 0) : NULL;
+                    new InputEventConsistencyVerifier(TO_IINTERFACE(this), 0) : NULL;
 
     if (handler != NULL) {
         AutoPtr<ILooper> looper;

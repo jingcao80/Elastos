@@ -458,14 +458,14 @@ ECode AnimationSet::GetTransformation(
 
     if (started && !mStarted) {
         if (mListener != NULL) {
-            mListener->OnAnimationStart((IAnimation*)this);
+            mListener->OnAnimationStart(this);
         }
         mStarted = TRUE;
     }
 
     if (ended != mEnded) {
         if (mListener != NULL) {
-            mListener->OnAnimationEnd((IAnimation*)this);
+            mListener->OnAnimationEnd(this);
         }
         mEnded = ended;
     }

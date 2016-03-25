@@ -180,7 +180,7 @@ ECode RecentApplicationsDialog::OnCreate(
         AutoPtr<ITextView> icon = (*mIcons)[i];
         if (icon) {
             IView* v = IView::Probe(icon);
-            v->SetOnClickListener(THIS_PROBE(IViewOnClickListener));
+            v->SetOnClickListener(this);
         }
     }
     return NOERROR;

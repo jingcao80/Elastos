@@ -106,13 +106,13 @@ ECode CContentProviderOperation::GetWithoutUserIdInUri(
     if (ContentProvider::UriHasUserId(mUri)) {
         AutoPtr<CContentProviderOperation> cpo;
         CContentProviderOperation::NewByFriend((CContentProviderOperation**)&cpo);
-        cpo->constructor(THIS_PROBE(IContentProviderOperation), TRUE);
+        cpo->constructor(this, TRUE);
         *op = (IContentProviderOperation*)cpo.Get();
         REFCOUNT_ADD(*op);
         return NOERROR;
     }
 
-    *op = THIS_PROBE(IContentProviderOperation);
+    *op = this;
     REFCOUNT_ADD(*op)
     return NOERROR;
 }

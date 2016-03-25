@@ -1,10 +1,11 @@
 
 #include "elastos/droid/server/pm/SharedUserSetting.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Core::StringUtils;
-using Elastos::Core::ISystem;
-using Elastos::Core::CSystem;
+using Elastos::Core::StringBuilder;
+
 
 namespace Elastos {
 namespace Droid {
@@ -30,7 +31,7 @@ PInterface SharedUserSetting::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_SharedUserSetting) {
-        return reinterpret_cast<PInterface>((SharedUserSetting*)this);;
+        return reinterpret_cast<PInterface>(this);;
     }
     return GrantedPermissions::Probe(riid);
 }
@@ -39,12 +40,13 @@ ECode SharedUserSetting::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    AutoPtr<ISystem> sys;
-    CSystem::AcquireSingleton((ISystem**)&sys);
-    Int32 hashCode;
-    sys->IdentityHashCode((IInterface*)(IObject*)this, &hashCode);
-    *str = String("SharedUserSetting{") + StringUtils::ToHexString(hashCode) + " "
-            + mName + "/" + StringUtils::ToString(mUserId) + "}";
+    StringBuilder sb("SharedUserSetting{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += " ";
+    sb += mName;
+    sb += mUserId;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

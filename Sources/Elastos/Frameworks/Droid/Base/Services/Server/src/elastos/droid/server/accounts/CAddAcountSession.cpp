@@ -26,14 +26,14 @@ PInterface CAddAcountSession::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_AccountManagerServiceSession) {
-        return reinterpret_cast<PInterface>((AccountManagerServiceSession*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CAddAcountSession::Probe(riid);
 }
 
 ECode CAddAcountSession::Run()
 {
-    return mAuthenticator->AddAccount((IIAccountAuthenticatorResponse*)this,
+    return mAuthenticator->AddAccount(this,
             mAccountType, mAuthTokenType, *mRequiredFeatures, mOptions);
 }
 

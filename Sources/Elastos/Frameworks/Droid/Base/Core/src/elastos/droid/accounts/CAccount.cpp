@@ -91,7 +91,7 @@ ECode CAccount::Equals(
     /* [out] */ Boolean *equal)
 {
     VALIDATE_NOT_NULL(equal)
-    if (THIS_PROBE(IInterface) == obj) {
+    if (TO_IINTERFACE(this) == obj) {
         *equal = TRUE;
         return NOERROR;
     }

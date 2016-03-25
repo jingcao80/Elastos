@@ -40,10 +40,10 @@ PInterface CActivityOne::MyListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IAdapterViewOnItemClickListener*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IAdapterViewOnItemClickListener) {
-        return (IAdapterViewOnItemClickListener*)this;
+        return this;
     }
 
     return NULL;
@@ -67,7 +67,7 @@ ECode CActivityOne::MyListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)(IAdapterViewOnItemClickListener*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IAdapterViewOnItemClickListener;
     }
     else {

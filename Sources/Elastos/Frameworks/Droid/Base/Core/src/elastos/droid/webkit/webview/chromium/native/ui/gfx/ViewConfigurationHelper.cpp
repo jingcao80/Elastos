@@ -308,7 +308,7 @@ ECode ViewConfigurationHelper::NativeUpdateSharedViewConfiguration(
     /* [in] */ Int32 scaledMinScalingSpan,
     /* [in] */ Int32 scaledMinScalingTouchMajor)
 {
-    Elastos_ViewConfigurationHelper_nativeUpdateSharedViewConfiguration(THIS_PROBE(IInterface),
+    Elastos_ViewConfigurationHelper_nativeUpdateSharedViewConfiguration(TO_IINTERFACE(this),
             scaledMaximumFlingVelocity, scaledMinimumFlingVelocity, scaledTouchSlop, scaledDoubleTapSlop, scaledMinScalingSpan, scaledMinScalingTouchMajor);
     return NOERROR;
 }

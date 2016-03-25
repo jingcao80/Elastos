@@ -14,6 +14,8 @@ class ECO_PUBLIC ActivityInstrumentationTestCase2
     , public IActivityInstrumentationTestCase2
 {
 public:
+    CAR_INTERFACE_DECL()
+
     /**
      * Creates an {@link ActivityInstrumentationTestCase2}.
      *
@@ -35,8 +37,6 @@ public:
      */
     ActivityInstrumentationTestCase2(
         /* [in] */ IClassInfo* activityClass);
-
-    CAR_INTERFACE_DECL()
 
     /**
      * Get the Activity under test, starting it if necessary.

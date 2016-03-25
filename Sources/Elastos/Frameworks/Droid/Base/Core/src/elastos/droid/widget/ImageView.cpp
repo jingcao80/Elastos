@@ -695,7 +695,7 @@ void ImageView::UpdateDrawable(
     }
     mDrawable = d;
     if (d != NULL) {
-        d->SetCallback(THIS_PROBE(IDrawableCallback));
+        d->SetCallback(this);
         Int32 value = 0;
         GetLayoutDirection(&value);
         d->SetLayoutDirection(value);

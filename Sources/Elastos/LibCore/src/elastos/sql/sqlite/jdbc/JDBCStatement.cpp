@@ -270,7 +270,7 @@ ECode JDBCStatement::ExecuteQuery(
         return E_SQL_EXCEPTION;
     }
     if (!updonly && tr != NULL) {
-        CJDBCResultSet::New(tr, THIS_PROBE(IJDBCStatement),(IJDBCResultSet **)&rs);
+        CJDBCResultSet::New(tr, this,(IJDBCResultSet **)&rs);
     }
 
     *resultset = IResultSet::Probe(rs);

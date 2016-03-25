@@ -152,7 +152,7 @@ ECode DhcpResults::Equals(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    if (this->Probe(EIID_IInterface) == IInterface::Probe(obj)) {
+    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) {
         *result = TRUE;
         return NOERROR;
     }

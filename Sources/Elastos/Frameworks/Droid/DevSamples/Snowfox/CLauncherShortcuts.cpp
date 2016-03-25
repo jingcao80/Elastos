@@ -138,10 +138,10 @@ go_on:
                 /* [in] */ REIID riid)
             {
                 if (riid == EIID_IInterface) {
-                    return (PInterface)(IDialogInterfaceOnClickListener*)this;
+                    return (PInterface)this;
                 }
                 else if (riid == EIID_IDialogInterfaceOnClickListener) {
-                    return (IDialogInterfaceOnClickListener*)this;
+                    return this;
                 }
 
                 return NULL;
@@ -185,10 +185,10 @@ go_on:
                 /* [in] */ REIID riid)
             {
                 if (riid == EIID_IInterface) {
-                    return (PInterface)(IDialogInterfaceOnClickListener*)this;
+                    return (PInterface)this;
                 }
                 else if (riid == EIID_IDialogInterfaceOnClickListener) {
-                    return (IDialogInterfaceOnClickListener*)this;
+                    return this;
                 }
 
                 return NULL;

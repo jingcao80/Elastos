@@ -45,7 +45,7 @@ ECode Service::ToString(
 {
     VALIDATE_NOT_NULL(info);
     StringBuilder sb("Service:(");
-    sb += (Int32)THIS_PROBE(IService);
+    sb += (Int32)this;
     sb += ")";
     sb.ToString(info);
     return NOERROR;
@@ -178,7 +178,7 @@ ECode Service::StopSelf(
     }
 
     AutoPtr<IComponentName> cn;
-    FAIL_RETURN(CComponentName::New(THIS_PROBE(IContext), mClassName, (IComponentName**)&cn));
+    FAIL_RETURN(CComponentName::New(this, mClassName, (IComponentName**)&cn));
 
     Boolean res;
     ECode ec = mActivityManager->StopServiceToken(cn, mToken, startId, &res);
@@ -199,7 +199,7 @@ ECode Service::StopSelfResult(
     }
 
     AutoPtr<IComponentName> cn;
-    FAIL_RETURN(CComponentName::New(THIS_PROBE(IContext), mClassName, (IComponentName**)&cn));
+    FAIL_RETURN(CComponentName::New(this, mClassName, (IComponentName**)&cn));
 
     ECode ec = mActivityManager->StopServiceToken(cn, mToken, startId, result);
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
@@ -222,7 +222,7 @@ ECode Service::StartForeground(
     String packageName;
     GetPackageName(&packageName);
     AutoPtr<IComponentName> cn;
-    FAIL_RETURN(CComponentName::New(THIS_PROBE(IContext), mClassName, (IComponentName**)&cn));
+    FAIL_RETURN(CComponentName::New(this, mClassName, (IComponentName**)&cn));
 
     return mActivityManager->SetServiceForeground(cn, mToken, id, notification, TRUE);
 }
@@ -233,7 +233,7 @@ ECode Service::StopForeground(
     String packageName;
     GetPackageName(&packageName);
     AutoPtr<IComponentName> cn;
-    FAIL_RETURN(CComponentName::New(THIS_PROBE(IContext), mClassName, (IComponentName**)&cn));
+    FAIL_RETURN(CComponentName::New(this, mClassName, (IComponentName**)&cn));
 
     return mActivityManager->SetServiceForeground(cn, mToken, 0, NULL, removeNotification);
 }

@@ -700,13 +700,13 @@ void StackView::InitStackView()
     mActivePointerId = INVALID_POINTER;
     CImageView::New(GetContext(), (IImageView**)&mHighlight);
     AutoPtr<IStackViewLayoutParams> hLP;
-    CStackViewLayoutParams::New((IStackView*)this->Probe(EIID_IStackView) ,mHighlight, (IStackViewLayoutParams**)&hLP);
+    CStackViewLayoutParams::New(this ,mHighlight, (IStackViewLayoutParams**)&hLP);
     mHighlight->SetLayoutParams(hLP);
     AddViewInLayout(mHighlight, -1, hLP);
 
     CImageView::New(GetContext(), (IImageView**)&mClickFeedback);
     AutoPtr<IStackViewLayoutParams> cLP;
-    CStackViewLayoutParams::New((IStackView*)this->Probe(EIID_IStackView), mClickFeedback, (IStackViewLayoutParams**)&cLP);
+    CStackViewLayoutParams::New(this, mClickFeedback, (IStackViewLayoutParams**)&cLP);
     mHighlight->SetLayoutParams(cLP);
     AddViewInLayout(mClickFeedback, -1, cLP);
     mClickFeedback->SetVisibility(IView::INVISIBLE);
@@ -1154,7 +1154,7 @@ AutoPtr<IViewGroupLayoutParams> StackView::CreateOrReuseLayoutParams(
         slp->SetVerticalOffset(0);
         slp->SetWidth(0);
     } else {
-        CStackViewLayoutParams::New((IStackView*)this->Probe(EIID_IStackView), v, (IStackViewLayoutParams**)&slp);
+        CStackViewLayoutParams::New(this, v, (IStackViewLayoutParams**)&slp);
     }
     return slp;
 }
@@ -1269,25 +1269,25 @@ PInterface StackView::StackFrame::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (IInterface*)(IFrameLayout*)this;
+        return (IInterface*)this;
     } else if (riid == EIID_IFrameLayout) {
-        return (IFrameLayout*)this;
+        return this;
     } else if (riid == EIID_IViewGroup) {
-        return (IViewGroup*)(IFrameLayout*)this;
+        return (IViewGroup*)this;
     } else if (riid == EIID_IView) {
-        return (IView*)(IViewGroup*)(IFrameLayout*)this;
+        return (IView*)(IViewGroup*)this;
     } else if (riid == EIID_IViewParent) {
-        return (IViewParent*)this;
+        return this;
     } else if (riid == EIID_IViewManager) {
-        return (IViewManager*)this;
+        return this;
     } else if (riid == EIID_IDrawableCallback) {
-        return (IDrawableCallback*)this;
+        return this;
     } else if (riid == EIID_IKeyEventCallback) {
-        return (IKeyEventCallback*)this;
+        return this;
     } else if (riid == EIID_IAccessibilityEventSource) {
-        return (IAccessibilityEventSource*)this;
+        return this;
     } else if (riid == EIID_IWeakReferenceSource) {
-        return (IWeakReferenceSource*)this;
+        return this;
     } else if (riid == EIID_View) {
         return reinterpret_cast<PInterface>((View*)(_StackFrame*)this);
     } else if (riid == EIID_ViewGroup) {
@@ -1312,23 +1312,23 @@ CARAPI StackView::StackFrame::GetInterfaceID(
     /* [in] */ IInterface *pObject,
     /* [out] */ InterfaceID *pIID)
 {
-    if (pObject == (IFrameLayout*)this) {
+    if (pObject == this) {
         *pIID = EIID_IFrameLayout;
-    } else if (pObject == (IViewGroup*)this) {
+    } else if (pObject == this) {
         *pIID = EIID_IViewGroup;
-    } else if (pObject == (IViewParent*)this) {
+    } else if (pObject == this) {
         *pIID = EIID_IViewParent;
-    } else if (pObject == (IViewManager*)this) {
+    } else if (pObject == this) {
         *pIID = EIID_IViewManager;
-    } else if (pObject == (IDrawableCallback*)this) {
+    } else if (pObject == this) {
         *pIID = EIID_IDrawableCallback;
-    } else if (pObject == (IKeyEventCallback*)this) {
+    } else if (pObject == this) {
         *pIID = EIID_IKeyEventCallback;
-    } else if (pObject == (IAccessibilityEventSource*)this) {
+    } else if (pObject == this) {
         *pIID = EIID_IAccessibilityEventSource;
-    } else if (pObject == reinterpret_cast<PInterface>((View*)this)) {
+    } else if (pObject == reinterpret_cast<PInterface>(this)) {
         *pIID = EIID_View;
-    } else if (pObject == reinterpret_cast<PInterface>((ViewGroup*)this)) {
+    } else if (pObject == reinterpret_cast<PInterface>(this)) {
         *pIID = EIID_ViewGroup;
     } else {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;

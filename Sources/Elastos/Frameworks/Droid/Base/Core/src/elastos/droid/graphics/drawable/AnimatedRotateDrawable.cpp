@@ -164,7 +164,7 @@ ECode AnimatedRotateDrawable::Start()
 ECode AnimatedRotateDrawable::Stop()
 {
     mRunning = FALSE;
-    UnscheduleSelf((IRunnable*)this->Probe(EIID_IRunnable));
+    UnscheduleSelf(this);
     return NOERROR;
 }
 
@@ -178,8 +178,8 @@ ECode AnimatedRotateDrawable::IsRunning(
 
 void AnimatedRotateDrawable::NextFrame()
 {
-    UnscheduleSelf((IRunnable*)this->Probe(EIID_IRunnable));
-    ScheduleSelf((IRunnable*)this->Probe(EIID_IRunnable),
+    UnscheduleSelf(this);
+    ScheduleSelf(this,
             SystemClock::GetUptimeMillis() + mState->mFrameDuration);
 }
 
@@ -213,7 +213,7 @@ ECode AnimatedRotateDrawable::SetVisible(
         }
     }
     else {
-        UnscheduleSelf((IRunnable*)this->Probe(EIID_IRunnable));
+        UnscheduleSelf(this);
     }
     *isDifferent = changed;
     return NOERROR;
@@ -282,7 +282,7 @@ ECode AnimatedRotateDrawable::InvalidateDrawable(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->InvalidateDrawable((IDrawable*)this->Probe(EIID_IDrawable));
+        callback->InvalidateDrawable(this);
     }
     return NOERROR;
 }
@@ -295,7 +295,7 @@ ECode AnimatedRotateDrawable::ScheduleDrawable(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->ScheduleDrawable((IDrawable*)this->Probe(EIID_IDrawable), what, when);
+        callback->ScheduleDrawable(this, what, when);
     }
     return NOERROR;
 }
@@ -307,7 +307,7 @@ ECode AnimatedRotateDrawable::UnscheduleDrawable(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->UnscheduleDrawable((IDrawable*)this->Probe(EIID_IDrawable), what);
+        callback->UnscheduleDrawable(this, what);
     }
     return NOERROR;
 }
@@ -456,7 +456,7 @@ ECode AnimatedRotateDrawable::Inflate(
     Init();
 
     if (drawable != NULL) {
-        drawable->SetCallback((IDrawableCallback*)this->Probe(EIID_IDrawableCallback));
+        drawable->SetCallback(this);
     }
     return NOERROR;
 }

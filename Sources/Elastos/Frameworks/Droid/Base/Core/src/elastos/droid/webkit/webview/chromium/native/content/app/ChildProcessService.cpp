@@ -417,7 +417,7 @@ void ChildProcessService::NativeExitChildProcess()
 
 void ChildProcessService::NativeShutdownMainThread()
 {
-    Elastos_ChildProcessService_nativeShutdownMainThread(THIS_PROBE(IInterface));
+    Elastos_ChildProcessService_nativeShutdownMainThread(TO_IINTERFACE(this));
 }
 
 void ChildProcessService::EstablishSurfaceTexturePeer(

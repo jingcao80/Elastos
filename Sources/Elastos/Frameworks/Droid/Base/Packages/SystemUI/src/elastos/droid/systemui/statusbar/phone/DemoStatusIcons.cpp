@@ -57,7 +57,7 @@ DemoStatusIcons::DemoStatusIcons(
 
     Int32 index = 0;
     p->IndexOfChild(IView::Probe(mStatusIcons), &index);
-    p->AddView(THIS_PROBE(IView), index);
+    p->AddView(this, index);
 }
 
 ECode DemoStatusIcons::DispatchDemoCommand(

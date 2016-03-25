@@ -273,7 +273,7 @@ ECode CharBuffer::Put(
 ECode CharBuffer::Put(
     /* [in] */ ICharBuffer* src)
 {
-    if (src == (ICharBuffer*)this->Probe(EIID_ICharBuffer)) {
+    if (src == this) {
         // throw new IllegalArgumentException("src == this");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -381,7 +381,7 @@ ECode CharBuffer::Read(
     VALIDATE_NOT_NULL(number)
     Int32 remaining = 0;
     GetRemaining(&remaining);
-    if (target == (ICharBuffer*)this->Probe(EIID_ICharBuffer)) {
+    if (target == this) {
         if (remaining == 0) {
             *number = -1;
             return NOERROR;

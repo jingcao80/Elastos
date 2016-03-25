@@ -289,7 +289,7 @@ void RatingBar::DispatchRatingChange(
     if (mOnRatingBarChangeListener != NULL) {
         Float rating;
         GetRating(&rating);
-        mOnRatingBarChangeListener->OnRatingChanged((IRatingBar*)this, rating, fromUser);
+        mOnRatingBarChangeListener->OnRatingChanged(this, rating, fromUser);
     }
 }
 

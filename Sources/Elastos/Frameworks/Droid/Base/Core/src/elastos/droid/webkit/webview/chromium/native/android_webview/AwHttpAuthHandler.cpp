@@ -62,13 +62,13 @@ void AwHttpAuthHandler::NativeProceed(
     /* [in] */ const String& username,
     /* [in] */ const String& password)
 {
-    Elastos_AwHttpAuthHandler_nativeProceed(THIS_PROBE(IInterface), nativeAwHttpAuthHandler, username, password);
+    Elastos_AwHttpAuthHandler_nativeProceed(TO_IINTERFACE(this), nativeAwHttpAuthHandler, username, password);
 }
 
 void AwHttpAuthHandler::NativeCancel(
     /* [in] */ Handle64 nativeAwHttpAuthHandler)
 {
-    Elastos_AwHttpAuthHandler_nativeCancel(THIS_PROBE(IInterface), nativeAwHttpAuthHandler);
+    Elastos_AwHttpAuthHandler_nativeCancel(TO_IINTERFACE(this), nativeAwHttpAuthHandler);
 }
 //callback function definition
 void AwHttpAuthHandler::HandlerDestroyed(

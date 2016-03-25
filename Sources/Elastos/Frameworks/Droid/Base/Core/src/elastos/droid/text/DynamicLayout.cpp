@@ -41,7 +41,7 @@ void DynamicLayout::ChangeWatcher::Reflow(
         layout->Reflow(s, where, before, after);
     }
     else if (s != NULL && ISpannable::Probe(s) != NULL) {
-        ISpannable::Probe(s)->RemoveSpan(THIS_PROBE(IInterface));
+        ISpannable::Probe(s)->RemoveSpan(TO_IINTERFACE(this));
     }
 }
 
@@ -336,7 +336,7 @@ ECode DynamicLayout::constructor(
 
     if (ISpannable::Probe(base) != NULL) {
         if (mWatcher == NULL) {
-            IWeakReferenceSource* wrs = THIS_PROBE(IWeakReferenceSource);
+            IWeakReferenceSource* wrs = this;
             AutoPtr<IWeakReference> wr;
             wrs->GetWeakReference((IWeakReference**)&wr);
             mWatcher = new ChangeWatcher(wr);

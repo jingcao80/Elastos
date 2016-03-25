@@ -743,14 +743,14 @@ ECode GestureOverlayView::DispatchTouchEvent(
             event->SetAction(ACTION_CANCEL);
         }
 
-        AutoPtr<IView> v = THIS_PROBE(IView);
+        AutoPtr<IView> v = this;
         v->DispatchTouchEvent(event);
 
         *isDispatched = TRUE;
         return NOERROR;
     }
 
-    AutoPtr<IView> v = THIS_PROBE(IView);
+    AutoPtr<IView> v = this;
     *isDispatched = v->DispatchTouchEvent(event);
 */
     return NOERROR;
@@ -869,7 +869,7 @@ ECode GestureOverlayView::TouchDown(
     List<IOnGestureListener *>::Iterator iter = listeners->Begin();
     while (iter != listeners->End()) {
         IOnGestureListener *listener = *iter;
-        listener->onGestureStarted(THIS_PROBE(IGestureOverlayView), event);
+        listener->onGestureStarted(this, event);
         iter++;
     }
 */
@@ -954,7 +954,7 @@ ECode GestureOverlayView::TouchMove(
                     for (Int32 i = 0; i < count; i++) {
                         if (iter != listeners->End()) {
                             IOnGesturingListener *listener = *iter;
-                            listener->OnGesturingStarted(THIS_PROBE(IGestureOverlayView));
+                            listener->OnGesturingStarted(this);
                         }
                         ++iter;
                     }
@@ -969,7 +969,7 @@ ECode GestureOverlayView::TouchMove(
         for (Int32 i = 0; i < count; i++) {
             if (iter != listeners->End()) {
                 IOnGestureListener *listener = *iter;
-                listener->OnGesture(THIS_PROBE(IGestureOverlayView), event);
+                listener->OnGesture(this, event);
             }
             ++iter;
         }
@@ -1002,7 +1002,7 @@ ECode GestureOverlayView::TouchUp(
             for (Int32 i = 0; i < count; i++) {
                 if (iter != listeners->End()) {
                     IOnGestureListener *listener = *iter;
-                    listener->OnGestureEnded(THIS_PROBE(IGestureOverlayView), event);
+                    listener->OnGestureEnded(this, event);
                 }
                 ++iter;
             }
@@ -1027,7 +1027,7 @@ ECode GestureOverlayView::TouchUp(
     for (Int32 i = 0; i < count; i++) {
         if (iter != listeners->End()) {
             IOnGesturingListener *listener = *iter;
-            listener->OnGesturingEnded(THIS_PROBE(IGestureOverlayView));
+            listener->OnGesturingEnded(this);
         }
         ++iter;
     }
@@ -1047,7 +1047,7 @@ ECode GestureOverlayView::CancelGesture(
     for (Int32 i = 0; i < count; i++) {
         if (iter != listeners->End()) {
             IOnGestureListener *listener = *iter;
-            listener->OnGestureCancelled(THIS_PROBE(IGestureOverlayView), event);
+            listener->OnGestureCancelled(this, event);
         }
         ++iter;
     }
@@ -1066,7 +1066,7 @@ ECode GestureOverlayView::FireOnGesturePerformed()
     for (Int32 i = 0; i < count; i++) {
         if (iter != actionListeners->End()) {
             AutoPtr<IOnGesturePerformedListener> actionListener = *iter;
-            actionListener->OnGesturePerformed(THIS_PROBE(IGestureOverlayView), mCurrentGesture);
+            actionListener->OnGesturePerformed(this, mCurrentGesture);
         }
         ++iter;
     }

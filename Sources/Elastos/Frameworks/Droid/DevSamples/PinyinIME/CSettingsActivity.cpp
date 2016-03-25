@@ -82,7 +82,7 @@ ECode CSettingsActivity::OnCreate(
     prefSet->FindPreference(value, (IPreference**)&mPredictionPref);
 
     prefSet->SetOnPreferenceChangeListener(
-        (IPreferenceOnPreferenceChangeListener*)this->Probe(EIID_IPreferenceOnPreferenceChangeListener));
+        this);
 
     CPinyinSettings::AcquireSingleton((ISettings**)&mSettings);
     AutoPtr<IContext> ctx;

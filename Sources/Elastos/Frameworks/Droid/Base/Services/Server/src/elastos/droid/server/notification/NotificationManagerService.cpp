@@ -1647,7 +1647,7 @@ void NotificationManagerService::ToastRecord::Dump(
     if (filter != NULL && !filter->Matches(mPkg)) return;
     StringBuilder builder;
     builder += prefix;
-    builder += (IObject*)this;
+    builder += StringUtils::ToHexString((Int32)this);
     pw->Println(builder.ToString());
 }
 
@@ -1657,13 +1657,7 @@ ECode NotificationManagerService::ToastRecord::ToString(
     VALIDATE_NOT_NULL(str);
     StringBuilder builder;
     builder += "ToastRecord{";
-
-    AutoPtr<ISystem> sys;
-    CSystem::AcquireSingleton((ISystem**)&sys);
-    Int32 code;
-    sys->IdentityHashCode((IObject*)this, &code);
-
-    builder += StringUtils::ToHexString(code);
+    builder += StringUtils::ToHexString((Int32)this);
     builder += " pkg=";
     builder += mPkg;
     builder += " callback=";
@@ -2584,7 +2578,7 @@ ECode NotificationManagerService::constructor(
     mIntentReceiver = new MyBroadcastReceiver(this);
     mBuzzBeepBlinked = new MyRunnable(this);
 
-    CNotificationManagerBinderService::New((ISystemService*)this, (IBinder**)&mService);
+    CNotificationManagerBinderService::New(this, (IBinder**)&mService);
     mInternalService = new MyNotificationManagerInternal(this);
     return NOERROR;
 }

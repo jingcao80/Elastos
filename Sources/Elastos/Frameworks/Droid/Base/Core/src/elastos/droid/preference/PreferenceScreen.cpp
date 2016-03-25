@@ -24,7 +24,8 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
-CAR_INTERFACE_IMPL_2(PreferenceScreen, PreferenceGroup, IPreferenceScreen, IAdapterViewOnItemClickListener)
+CAR_INTERFACE_IMPL_3(PreferenceScreen, PreferenceGroup, IPreferenceScreen, \
+    IAdapterViewOnItemClickListener, IDialogInterfaceOnDismissListener)
 
 PreferenceScreen::PreferenceScreen()
 {
@@ -55,7 +56,7 @@ ECode PreferenceScreen::OnCreateRootAdapter(
 {
     VALIDATE_NOT_NULL(adapter)
     AutoPtr<IPreferenceGroupAdapter> a;
-    CPreferenceGroupAdapter::New((IPreferenceGroup*)this, (IPreferenceGroupAdapter**)&a);
+    CPreferenceGroupAdapter::New(this, (IPreferenceGroupAdapter**)&a);
     *adapter = IListAdapter::Probe(a);
     REFCOUNT_ADD(*adapter)
     return NOERROR;
@@ -65,7 +66,7 @@ ECode PreferenceScreen::Bind(
     /* [in] */ IListView* listView)
 {
     AutoPtr<IAdapterView> av = IAdapterView::Probe(listView);
-    av->SetOnItemClickListener((IAdapterViewOnItemClickListener*)this);
+    av->SetOnItemClickListener(this);
     AutoPtr<IListAdapter> adapter;
     GetRootAdapter((IListAdapter**)&adapter);
     AutoPtr<IAdapter> a = IAdapter::Probe(adapter);
@@ -125,7 +126,7 @@ ECode PreferenceScreen::ShowDialog(
         dialog->SetTitle(title);
     }
     dialog->SetContentView(childPrefScreen);
-    dialog->SetOnDismissListener(THIS_PROBE(IDialogInterfaceOnDismissListener));
+    dialog->SetOnDismissListener(this);
     if (state != NULL) {
         dialog->OnRestoreInstanceState(state);
     }
@@ -175,7 +176,7 @@ ECode PreferenceScreen::OnItemClick(
         return NOERROR;
     }
     AutoPtr<IPreference> preference = IPreference::Probe(item);
-    preference->PerformClick(THIS_PROBE(IPreferenceScreen));
+    preference->PerformClick(this);
     return NOERROR;
 }
 

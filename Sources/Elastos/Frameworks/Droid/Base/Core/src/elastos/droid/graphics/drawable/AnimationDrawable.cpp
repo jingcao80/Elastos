@@ -97,7 +97,7 @@ ECode AnimationDrawable::SetVisible(
         }
     }
     else {
-        UnscheduleSelf((IRunnable*)this->Probe(EIID_IRunnable));
+        UnscheduleSelf(this);
     }
     *isDifferent = changed;
     return NOERROR;
@@ -118,7 +118,7 @@ ECode AnimationDrawable::Stop()
     mAnimating = FALSE;
     Boolean running = FALSE;
     if (IsRunning(&running), running) {
-        return UnscheduleSelf((IRunnable*)this->Probe(EIID_IRunnable));
+        return UnscheduleSelf(this);
     }
     return NOERROR;
 }
@@ -221,13 +221,13 @@ ECode AnimationDrawable::SetFrame(
     Boolean res = FALSE;
     SelectDrawable(frame, &res);
     if (unschedule || animate) {
-        FAIL_RETURN(UnscheduleSelf((IRunnable*)this->Probe(EIID_IRunnable)));
+        FAIL_RETURN(UnscheduleSelf(this));
     }
     if (animate) {
         // Unscheduling may have clobbered this value; restore it to record that we're animating
         mCurFrame = frame;
         mRunning = TRUE;
-        FAIL_RETURN(ScheduleSelf((IRunnable*)this->Probe(EIID_IRunnable),
+        FAIL_RETURN(ScheduleSelf(this,
                 SystemClock::GetUptimeMillis() + (*mAnimationState->mDurations)[frame]));
     }
     return NOERROR;
@@ -315,7 +315,7 @@ ECode AnimationDrawable::Inflate(
 
         mAnimationState->AddFrame(dr, duration);
         if (dr != NULL) {
-            dr->SetCallback((IDrawableCallback*)this->Probe(EIID_IDrawableCallback));
+            dr->SetCallback(this);
         }
     }
 

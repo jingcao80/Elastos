@@ -302,7 +302,7 @@ ECode BatteryStatsService::Publish(
     mContext = context;
     AutoPtr<IServiceManager> sm;
     CServiceManager::AcquireSingleton((IServiceManager**)&sm);
-    sm->AddService(IBatteryStats::SERVICE_NAME, THIS_PROBE(IIBatteryStats));
+    sm->AddService(IBatteryStats::SERVICE_NAME, (IIBatteryStats*)this);
     Int32 steps;
     AutoPtr<IPowerProfile> pp;
     CPowerProfile::New(mContext, (IPowerProfile**)&pp);

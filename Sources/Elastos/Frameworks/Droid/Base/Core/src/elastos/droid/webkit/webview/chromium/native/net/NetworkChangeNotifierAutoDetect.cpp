@@ -45,7 +45,7 @@ namespace Net {
             return (IInterface*)(InterfaceName*)this;      \
         }                                                  \
         else if (riid == EIID_##InterfaceName) {           \
-            return (InterfaceName*)this;                   \
+            return (IInterface*)(InterfaceName*)this;                   \
         }                                                  \
         return SupperClassName::Probe(riid);               \
     }                                                      \

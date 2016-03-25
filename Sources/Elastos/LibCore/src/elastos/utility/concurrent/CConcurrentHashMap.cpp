@@ -372,12 +372,12 @@ String CConcurrentHashMap::ToString()
         for (;;) {
             AutoPtr<IInterface> k = p->mKey;
             AutoPtr<IInterface> v = p->mVal;
-            if (Object::Equals(k, THIS_PROBE(IInterface)))
+            if (Object::Equals(k, TO_IINTERFACE(this)))
                 sb.Append("(this Map)");
             else
                 sb.Append(k);
             sb.AppendChar('=');
-            if (Object::Equals(v, THIS_PROBE(IInterface)))
+            if (Object::Equals(v, TO_IINTERFACE(this)))
                 sb.Append("(this Map)");
             else
                 sb.Append(v);
@@ -1576,7 +1576,7 @@ String CConcurrentHashMap::CollectionView::ToString()
         for (;;) {
             AutoPtr<IInterface> e;
             it->GetNext((IInterface**)&e);
-            if (Object::Equals(e, THIS_PROBE(IInterface)))
+            if (Object::Equals(e, TO_IINTERFACE(this)))
                 sb.Append("(this Collection)");
             else
                 sb.Append(e);
@@ -1597,7 +1597,7 @@ ECode CConcurrentHashMap::CollectionView::ContainsAll(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (!Object::Equals(collection->Probe(EIID_IInterface), THIS_PROBE(IInterface))) {
+    if (!Object::Equals(collection->Probe(EIID_IInterface), TO_IINTERFACE(this))) {
         AutoPtr<ArrayOf<IInterface*> > arr;
         collection->ToArray((ArrayOf<IInterface*>**)&arr);
         for (Int32 i = 0;i < arr->GetLength();i++) {
@@ -2062,7 +2062,7 @@ ECode CConcurrentHashMap::KeySetView::Equals(
 
     AutoPtr<ISet> c; Boolean bc1 = FALSE, bc2 = FALSE;
     *result = (ISet::Probe(object) != NULL) &&
-            ((c = ISet::Probe(object), Object::Equals(object, THIS_PROBE(IInterface))) ||
+            ((c = ISet::Probe(object), Object::Equals(object, TO_IINTERFACE(this))) ||
              ((ContainsAll(ICollection::Probe(c), &bc1), bc1) && (ICollection::Probe(c)->ContainsAll(this, &bc2), bc2)));
     return NOERROR;
 }
@@ -2396,7 +2396,7 @@ ECode CConcurrentHashMap::EntrySetView::Equals(
     AutoPtr<ISet> c;
     Boolean bc1, bc2;
     *result = (ISet::Probe(object) != NULL) &&
-                ((c = ISet::Probe(object), Object::Equals(object, THIS_PROBE(IInterface))) ||
+                ((c = ISet::Probe(object), Object::Equals(object, TO_IINTERFACE(this))) ||
                  ((ContainsAll(ICollection::Probe(c), &bc1), bc1) && (ICollection::Probe(c)->ContainsAll(this, &bc2), bc2)));
     return NOERROR;
 }
@@ -2701,7 +2701,7 @@ ECode CConcurrentHashMap::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (!Object::Equals(object, THIS_PROBE(IInterface))) {
+    if (!Object::Equals(object, TO_IINTERFACE(this))) {
         if (IMap::Probe(object) == NULL) {
             *result = FALSE;
             return NOERROR;

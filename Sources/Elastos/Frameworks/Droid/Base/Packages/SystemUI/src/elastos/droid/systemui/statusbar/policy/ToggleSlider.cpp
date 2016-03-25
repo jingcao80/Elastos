@@ -83,7 +83,7 @@ ECode ToggleSlider::InitImpl(
 {
     AutoPtr<IView> tmpView;
     View::Inflate(context, SystemUIR::layout::status_bar_toggle_slider,
-        THIS_PROBE(IViewGroup), (IView**)&tmpView);
+        this, (IView**)&tmpView);
 
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
@@ -96,14 +96,14 @@ ECode ToggleSlider::InitImpl(
 
     tmpView = FindViewById(SystemUIR::id::toggle);
     mToggle = ICompoundButton::Probe(tmpView.Get());
-    mToggle->SetOnCheckedChangeListener(THIS_PROBE(ICompoundButtonOnCheckedChangeListener));
+    mToggle->SetOnCheckedChangeListener(this);
     AutoPtr<IDrawable> drawable;
     res->GetDrawable(SystemUIR::drawable::status_bar_toggle_button, (IDrawable**)&drawable);
     mToggle->SetBackgroundDrawable(drawable);
 
     tmpView = FindViewById(SystemUIR::id::slider);
     mSlider = ISeekBar::Probe(tmpView.Get());
-    mSlider->SetOnSeekBarChangeListener(THIS_PROBE(ISeekBarOnSeekBarChangeListener));
+    mSlider->SetOnSeekBarChangeListener(this);
 
     tmpView = FindViewById(SystemUIR::id::label);
     mLabel = ITextView::Probe(tmpView.Get());
@@ -120,7 +120,7 @@ ECode ToggleSlider::OnAttachedToWindow()
 {
     RelativeLayout::OnAttachedToWindow();
     if (mListener != NULL) {
-        mListener->OnInit(THIS_PROBE(IToggleSlider));
+        mListener->OnInit(this);
     }
     return NOERROR;
 }
@@ -147,7 +147,7 @@ ECode ToggleSlider::OnCheckedChanged(
     if (mListener != NULL) {
         Int32 process;
         mSlider->GetProgress(&process);
-        mListener->OnChanged(THIS_PROBE(IToggleSlider), mTracking, isChecked, process);
+        mListener->OnChanged(this, mTracking, isChecked, process);
     }
     return NOERROR;
 }
@@ -158,7 +158,7 @@ ECode ToggleSlider::OnProgressChanged(
     /* [in] */ Boolean fromUser)
 {
     if (mListener != NULL) {
-        mListener->OnChanged(THIS_PROBE(IToggleSlider), mTracking,
+        mListener->OnChanged(this, mTracking,
             IsChecked(), progress);
     }
     return NOERROR;
@@ -171,7 +171,7 @@ ECode ToggleSlider::OnStartTrackingTouch(
     if (mListener != NULL) {
         Int32 process;
         mSlider->GetProgress(&process);
-        mListener->OnChanged(THIS_PROBE(IToggleSlider), mTracking, IsChecked(), process);
+        mListener->OnChanged(this, mTracking, IsChecked(), process);
     }
     ICheckable::Probe(mToggle.Get())->SetChecked(FALSE);
     return NOERROR;
@@ -184,7 +184,7 @@ ECode ToggleSlider::OnStopTrackingTouch(
     if (mListener != NULL) {
         Int32 process;
         mSlider->GetProgress(&process);
-        mListener->OnChanged(THIS_PROBE(IToggleSlider), mTracking, IsChecked(), process);
+        mListener->OnChanged(this, mTracking, IsChecked(), process);
     }
     return NOERROR;
 }

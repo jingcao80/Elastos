@@ -123,20 +123,20 @@ void AwPicture::NativeDestroy(
 Int32 AwPicture::NativeGetWidth(
     /* [in] */ Handle64 nativeAwPicture)
 {
-    return Elastos_AwPicture_nativeGetWidth(THIS_PROBE(IInterface), nativeAwPicture);
+    return Elastos_AwPicture_nativeGetWidth(TO_IINTERFACE(this), nativeAwPicture);
 }
 
 Int32 AwPicture::NativeGetHeight(
     /* [in] */ Handle64 nativeAwPicture)
 {
-    return Elastos_AwPicture_nativeGetHeight(THIS_PROBE(IInterface), nativeAwPicture);
+    return Elastos_AwPicture_nativeGetHeight(TO_IINTERFACE(this), nativeAwPicture);
 }
 
 void AwPicture::NativeDraw(
     /* [in] */ Handle64 nativeAwPicture,
     /* [in] */ ICanvas* canvas)
 {
-    Elastos_AwPicture_nativeDraw(THIS_PROBE(IInterface), nativeAwPicture, TO_IINTERFACE(canvas));
+    Elastos_AwPicture_nativeDraw(TO_IINTERFACE(this), nativeAwPicture, TO_IINTERFACE(canvas));
 }
 
 } // namespace AndroidWebview

@@ -677,6 +677,8 @@ ECode LayoutInflater::CreateView(
         prefix = "Elastos.Droid.View.Menu.";
     }
 
+    Slogger::I(TAG, " CreateView: name:%s, prefix_:%s, prefix:%s",
+        name.string(), prefix_.string(), prefix.string());
     AutoPtr<IConstructorInfo> constructor;
     AutoPtr<IClassInfo> clazz;
 

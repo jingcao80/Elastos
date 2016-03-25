@@ -124,7 +124,7 @@ void AwAutofillClient::NativeSuggestionSelected(
     /* [in] */ Handle64 nativeAwAutofillClient,
     /* [in] */ Int32 position)
 {
-    Elastos_AwAutofillClient_nativeSuggestionSelected(THIS_PROBE(IInterface), nativeAwAutofillClient, position);
+    Elastos_AwAutofillClient_nativeSuggestionSelected(TO_IINTERFACE(this), nativeAwAutofillClient, position);
 }
 //callback function definition
 void AwAutofillClient::ShowAutofillPopup(

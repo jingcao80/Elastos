@@ -267,7 +267,7 @@ void Chronometer::UpdateRunning()
 ECode Chronometer::DispatchChronometerTick()
 {
     if (mOnChronometerTickListener != NULL) {
-        mOnChronometerTickListener->OnChronometerTick((IChronometer*)this->Probe(EIID_IChronometer));
+        mOnChronometerTickListener->OnChronometerTick(this);
     }
     return NOERROR;
 }

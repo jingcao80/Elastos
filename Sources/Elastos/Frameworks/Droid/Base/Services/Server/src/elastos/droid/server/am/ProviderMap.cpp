@@ -107,7 +107,8 @@ AutoPtr<ContentProviderRecord> ProviderMap::GetProviderByClass(
     AutoPtr<ContentProviderRecord> result;
 
      // Try to find it in the global list
-    ClassRecordIterator it = mSingletonByClass.Find(name);
+    AutoPtr<IComponentName> cn(name);
+    ClassRecordIterator it = mSingletonByClass.Find(cn);
     if (it != mSingletonByClass.End()) {
         result = it->mSecond;
     }
@@ -115,7 +116,7 @@ AutoPtr<ContentProviderRecord> ProviderMap::GetProviderByClass(
         // Check the current user's list
         AutoPtr<ClassRecordHashMap> map = GetProvidersByClass(userId);
         if (map != NULL) {
-            it = map->Find(name);
+            it = map->Find(cn);
             if (it != map->End()) {
                 result = it->mSecond;
             }

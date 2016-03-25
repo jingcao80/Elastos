@@ -198,7 +198,7 @@ ECode AsyncQueryHandler::StartQuery(
     // Use the token as what so cancelOperations works properly
 
     AutoPtr<WorkerArgs> args = new WorkerArgs();
-    args->mHandler = THIS_PROBE(IHandler);
+    args->mHandler = this;
     args->mUri = uri;
     args->mProjection = projection;
     args->mSelection = selection;
@@ -226,7 +226,7 @@ ECode AsyncQueryHandler::StartInsert(
 {
     // Use the token as what so cancelOperations works properly
     AutoPtr<WorkerArgs> args = new WorkerArgs();
-    args->mHandler = THIS_PROBE(IHandler);
+    args->mHandler = this;
     args->mUri = uri;
     args->mCookie = cookie;
     args->mValues = initialValues;
@@ -247,7 +247,7 @@ ECode AsyncQueryHandler::StartUpdate(
 {
     // Use the token as what so cancelOperations works properly
     AutoPtr<WorkerArgs> args = new WorkerArgs();
-    args->mHandler = THIS_PROBE(IHandler);
+    args->mHandler = this;
     args->mUri = uri;
     args->mCookie = cookie;
     args->mValues = values;
@@ -269,7 +269,7 @@ ECode AsyncQueryHandler::StartDelete(
 {
     // Use the token as what so cancelOperations works properly
     AutoPtr<WorkerArgs> args = new WorkerArgs();
-    args->mHandler = THIS_PROBE(IHandler);
+    args->mHandler = this;
     args->mUri = uri;
     args->mCookie = cookie;
     args->mSelection = selection;

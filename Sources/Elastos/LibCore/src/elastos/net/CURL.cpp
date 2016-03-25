@@ -180,7 +180,7 @@ ECode CURL::constructor(
     // increment it to point at either character 0 or the character
     // after the colon.
 //    try {
-    ECode ec = mStreamHandler->ParseURL((IURL*)this, temp, ++index, temp.GetLength());
+    ECode ec = mStreamHandler->ParseURL(this, temp, ++index, temp.GetLength());
     if (FAILED(ec)) {
         return E_MALFORMED_URL_EXCEPTION;
     }
@@ -312,7 +312,7 @@ ECode CURL::Equals(
         return NOERROR;
     }
 
-    return mStreamHandler->Equals(THIS_PROBE(IURL), obj, result);
+    return mStreamHandler->Equals(this, obj, result);
 }
 
 void CURL::FixURL(
@@ -371,7 +371,7 @@ ECode CURL::SameFile(
     /* [out] */ Boolean* isSame)
 {
     VALIDATE_NOT_NULL(isSame);
-    return mStreamHandler->SameFile((IURL*)this, otherURL, isSame);
+    return mStreamHandler->SameFile(this, otherURL, isSame);
 }
 
 ECode CURL::GetHashCode(
@@ -379,7 +379,7 @@ ECode CURL::GetHashCode(
 {
     VALIDATE_NOT_NULL(hash)
     if (mHashCode == 0) {
-        mStreamHandler->GetHashCode((IURL*)this, &mHashCode);
+        mStreamHandler->GetHashCode(this, &mHashCode);
     }
     *hash = mHashCode;
     return NOERROR;
@@ -508,7 +508,7 @@ ECode CURL::OpenConnection(
 {
     VALIDATE_NOT_NULL(connection);
 
-    return mStreamHandler->OpenConnection((IURL*)this, connection);
+    return mStreamHandler->OpenConnection(this, connection);
 }
 
 ECode CURL::ToURI(
@@ -532,7 +532,7 @@ ECode CURL::OpenConnection(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    return mStreamHandler->OpenConnection((IURL*)this, proxy, connection);
+    return mStreamHandler->OpenConnection(this, proxy, connection);
 }
 
 ECode CURL::ToExternalForm(
@@ -544,7 +544,7 @@ ECode CURL::ToExternalForm(
         *url = String("unknown protocol(") + mProtocol + String(")://") + mHost + mFile;
         return NOERROR;
     }
-    return mStreamHandler->ToExternalForm((IURL*)this, url);
+    return mStreamHandler->ToExternalForm(this, url);
 }
 
 ECode CURL::GetFile(
@@ -644,7 +644,7 @@ ECode CURL::ToURILenient(
     }
 
     String handlerStr;
-    mStreamHandler->ToExternalForm((IURL*)this, TRUE, &handlerStr);
+    mStreamHandler->ToExternalForm(this, TRUE, &handlerStr);
     return CURI::New(handlerStr, uri);
 }
 

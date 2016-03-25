@@ -368,7 +368,7 @@ ECode HttpsConnection::OpenConnection(
     String hName;
     mHost->GetHostName(&hName);
     AutoPtr<ISslError> error;
-    AutoPtr<IHttpsConnection> iThis = (IHttpsConnection*)this->Probe(EIID_IHttpsConnection);
+    AutoPtr<IHttpsConnection> iThis = this;
     validator->DoHandshakeAndValidateServerCertificates(iThis, sslSock, hName, (ISslError**)&error);
 
     // Inform the user if there is a problem

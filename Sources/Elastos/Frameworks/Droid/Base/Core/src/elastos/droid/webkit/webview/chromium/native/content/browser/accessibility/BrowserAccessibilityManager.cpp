@@ -949,14 +949,14 @@ void BrowserAccessibilityManager::SetAccessibilityEventRangeInfo(
 Int32 BrowserAccessibilityManager::NativeGetRootId(
     /* [in] */ Handle64 nativeBrowserAccessibilityManagerAndroid)
 {
-    return Elastos_BrowserAccessibilityManager_nativeGetRootId(THIS_PROBE(IInterface), nativeBrowserAccessibilityManagerAndroid);
+    return Elastos_BrowserAccessibilityManager_nativeGetRootId(TO_IINTERFACE(this), nativeBrowserAccessibilityManagerAndroid);
 }
 
 Boolean BrowserAccessibilityManager::NativeIsNodeValid(
     /* [in] */ Handle64 nativeBrowserAccessibilityManagerAndroid,
     /* [in] */ Int32 id)
 {
-    return Elastos_BrowserAccessibilityManager_nativeIsNodeValid(THIS_PROBE(IInterface), nativeBrowserAccessibilityManagerAndroid, id);
+    return Elastos_BrowserAccessibilityManager_nativeIsNodeValid(TO_IINTERFACE(this), nativeBrowserAccessibilityManagerAndroid, id);
 }
 
 void BrowserAccessibilityManager::NativeHitTest(
@@ -964,7 +964,7 @@ void BrowserAccessibilityManager::NativeHitTest(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y)
 {
-    Elastos_BrowserAccessibilityManager_nativeHitTest(THIS_PROBE(IInterface), nativeBrowserAccessibilityManagerAndroid, x, y);
+    Elastos_BrowserAccessibilityManager_nativeHitTest(TO_IINTERFACE(this), nativeBrowserAccessibilityManagerAndroid, x, y);
 }
 
 Boolean BrowserAccessibilityManager::NativePopulateAccessibilityNodeInfo(
@@ -973,7 +973,7 @@ Boolean BrowserAccessibilityManager::NativePopulateAccessibilityNodeInfo(
     /* [in] */ Int32 id)
 {
     return Elastos_BrowserAccessibilityManager_nativePopulateAccessibilityNodeInfo(
-            THIS_PROBE(IInterface), nativeBrowserAccessibilityManagerAndroid, TO_IINTERFACE(info), id);
+            TO_IINTERFACE(this), nativeBrowserAccessibilityManagerAndroid, TO_IINTERFACE(info), id);
 }
 
 Boolean BrowserAccessibilityManager::NativePopulateAccessibilityEvent(
@@ -983,27 +983,27 @@ Boolean BrowserAccessibilityManager::NativePopulateAccessibilityEvent(
     /* [in] */ Int32 eventType)
 {
     return Elastos_BrowserAccessibilityManager_nativePopulateAccessibilityEvent(
-            THIS_PROBE(IInterface), nativeBrowserAccessibilityManagerAndroid, TO_IINTERFACE(event), id, eventType);
+            TO_IINTERFACE(this), nativeBrowserAccessibilityManagerAndroid, TO_IINTERFACE(event), id, eventType);
 }
 
 void BrowserAccessibilityManager::NativeClick(
     /* [in] */ Handle64 nativeBrowserAccessibilityManagerAndroid,
     /* [in] */ Int32 id)
 {
-    Elastos_BrowserAccessibilityManager_nativeClick(THIS_PROBE(IInterface), nativeBrowserAccessibilityManagerAndroid, id);
+    Elastos_BrowserAccessibilityManager_nativeClick(TO_IINTERFACE(this), nativeBrowserAccessibilityManagerAndroid, id);
 }
 
 void BrowserAccessibilityManager::NativeFocus(
     /* [in] */ Handle64 nativeBrowserAccessibilityManagerAndroid,
     /* [in] */ Int32 id)
 {
-    Elastos_BrowserAccessibilityManager_nativeFocus(THIS_PROBE(IInterface), nativeBrowserAccessibilityManagerAndroid, id);
+    Elastos_BrowserAccessibilityManager_nativeFocus(TO_IINTERFACE(this), nativeBrowserAccessibilityManagerAndroid, id);
 }
 
 void BrowserAccessibilityManager::NativeBlur(
     /* [in] */ Handle64 nativeBrowserAccessibilityManagerAndroid)
 {
-    Elastos_BrowserAccessibilityManager_nativeBlur(THIS_PROBE(IInterface), nativeBrowserAccessibilityManagerAndroid);
+    Elastos_BrowserAccessibilityManager_nativeBlur(TO_IINTERFACE(this), nativeBrowserAccessibilityManagerAndroid);
 }
 
 void BrowserAccessibilityManager::NativeScrollToMakeNodeVisible(
@@ -1011,7 +1011,7 @@ void BrowserAccessibilityManager::NativeScrollToMakeNodeVisible(
     /* [in] */ Int32 id)
 {
     Elastos_BrowserAccessibilityManager_nativeScrollToMakeNodeVisible(
-            THIS_PROBE(IInterface), nativeBrowserAccessibilityManagerAndroid, id);
+            TO_IINTERFACE(this), nativeBrowserAccessibilityManagerAndroid, id);
 }
 
 Int32 BrowserAccessibilityManager::NativeFindElementType(
@@ -1021,7 +1021,7 @@ Int32 BrowserAccessibilityManager::NativeFindElementType(
     /* [in] */ Boolean forwards)
 {
     return Elastos_BrowserAccessibilityManager_nativeFindElementType(
-            THIS_PROBE(IInterface), nativeBrowserAccessibilityManagerAndroid, startId, elementType, forwards);
+            TO_IINTERFACE(this), nativeBrowserAccessibilityManagerAndroid, startId, elementType, forwards);
 }
 
 AutoPtr<IInterface> BrowserAccessibilityManager::Create(

@@ -73,7 +73,7 @@ CConcurrentSkipListMap::Node::Node(
     /* [in] */ Node* next)
 {
     mKey = NULL;
-    mValue = this->Probe(EIID_IInterface);
+    mValue = TO_IINTERFACE(this);
     mNext = next;
 }
 
@@ -97,7 +97,7 @@ Boolean CConcurrentSkipListMap::Node::CasNext(
 
 Boolean CConcurrentSkipListMap::Node::IsMarker()
 {
-    Boolean b = Object::Equals(mValue.Get(), THIS_PROBE(IInterface));
+    Boolean b = Object::Equals(mValue.Get(), TO_IINTERFACE(this));
     return b;
 }
 
@@ -123,7 +123,7 @@ void CConcurrentSkipListMap::Node::HelpDelete(
      * interference among helping threads.
      */
     if (Object::Equals(f->Probe(EIID_IInterface), mNext->Probe(EIID_IInterface))
-        && Object::Equals(THIS_PROBE(IInterface), b->mNext->Probe(EIID_IInterface))) {
+        && Object::Equals(TO_IINTERFACE(this), b->mNext->Probe(EIID_IInterface))) {
         if (f == NULL || !Object::Equals(f->mValue.Get(), f->Probe(EIID_IInterface))) // not already marked
             AppendMarker(f);
         else
@@ -134,7 +134,7 @@ void CConcurrentSkipListMap::Node::HelpDelete(
 AutoPtr<IInterface> CConcurrentSkipListMap::Node::GetValidValue()
 {
     AutoPtr<IInterface> v = mValue;
-    if (Object::Equals(v, THIS_PROBE(IInterface))
+    if (Object::Equals(v, TO_IINTERFACE(this))
         || Object::Equals(v, sBASE_HEADER) )
         return NULL;
     return v;
@@ -1248,7 +1248,7 @@ ECode CConcurrentSkipListMap::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    if (Object::Equals(object, THIS_PROBE(IInterface))) {
+    if (Object::Equals(object, TO_IINTERFACE(this))) {
         *result = TRUE;
         return NOERROR;
     }
@@ -1989,7 +1989,7 @@ ECode CConcurrentSkipListMap::_KeySet::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    if (Object::Equals(object, THIS_PROBE(IInterface))) {
+    if (Object::Equals(object, TO_IINTERFACE(this))) {
         *result = TRUE;
         return NOERROR;
     }
@@ -2367,7 +2367,7 @@ ECode CConcurrentSkipListMap::_EntrySet::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    if (Object::Equals(object, THIS_PROBE(IInterface))) {
+    if (Object::Equals(object, TO_IINTERFACE(this))) {
         *result = TRUE;
         return NOERROR;
     }

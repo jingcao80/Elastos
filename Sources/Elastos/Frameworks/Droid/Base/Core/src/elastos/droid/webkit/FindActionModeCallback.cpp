@@ -130,7 +130,7 @@ void FindActionModeCallback::SetText(
     Selection::SetSelection(span, length, length);
     // Necessary each time we set the text, so that this will watch
     // changes to it.
-    span->SetSpan((IObject*)this, 0, length, ISpanned::SPAN_INCLUSIVE_INCLUSIVE);
+    span->SetSpan(TO_IINTERFACE(this), 0, length, ISpanned::SPAN_INCLUSIVE_INCLUSIVE);
     mMatchesFound = FALSE;
 }
 

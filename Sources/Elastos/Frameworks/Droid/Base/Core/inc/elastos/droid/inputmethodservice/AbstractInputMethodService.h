@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_DROID_INPUTMETHODSERVICE_ABSTRACTINPUTMETHODSERVICE_H__
 #define __ELASTOS_DROID_INPUTMETHODSERVICE_ABSTRACTINPUTMETHODSERVICE_H__
 
+#include "_Elastos.Droid.InputMethodService.h"
 #include "elastos/droid/app/Service.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include "Elastos.Droid.View.h"
@@ -20,6 +21,7 @@ namespace InputMethodService {
 
 class AbstractInputMethodService
     : public Elastos::Droid::App::Service
+    , public IAbstractInputMethodService
     , public IKeyEventCallback
 {
 public:

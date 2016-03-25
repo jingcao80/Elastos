@@ -93,22 +93,22 @@ PInterface CActivityOne::MyListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IViewOnTouchListener*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IViewOnTouchListener) {
-        return (IViewOnTouchListener*)this;
+        return this;
     }
     else if (riid == EIID_IViewOnKeyListener) {
-        return (IViewOnKeyListener*)this;
+        return this;
     }
     else if (riid == EIID_IAdapterViewOnItemClickListener) {
-        return (IAdapterViewOnItemClickListener*)this;
+        return this;
     }
     else if (riid == EIID_IViewOnClickListener) {
-        return (IViewOnClickListener*)this;
+        return this;
     }
     else if (riid == EIID_IDialogInterfaceOnClickListener) {
-        return (IDialogInterfaceOnClickListener*)this;
+        return this;
     }
 
     return NULL;
@@ -132,7 +132,7 @@ ECode CActivityOne::MyListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)(IViewOnTouchListener*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IRunnable;
     }
     else {
@@ -533,7 +533,7 @@ ECode CActivityOne::ShowAlert(
     /* [in] */ const String& info)
 {
     AutoPtr<IAlertDialogBuilder> builder;
-    CAlertDialogBuilder::New(THIS_PROBE(IContext), (IAlertDialogBuilder**)&builder);
+    CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
 
     AutoPtr<ICharSequence> cs;
     CStringWrapper::New(String("Bingo!"), (ICharSequence**)&cs);
@@ -568,7 +568,7 @@ AutoPtr<IDialog> CActivityOne::OnCreateDialog(
 {
     Slogger::D("CActivityOne", "CActivityOne::OnCreateDialog");
     AutoPtr<IAlertDialogBuilder> builder;
-    CAlertDialogBuilder::New(THIS_PROBE(IContext), (IAlertDialogBuilder**)&builder);
+    CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
 
     AutoPtr<ICharSequence> cs;
     CStringWrapper::New(String("普通对话框"), (ICharSequence**)&cs);

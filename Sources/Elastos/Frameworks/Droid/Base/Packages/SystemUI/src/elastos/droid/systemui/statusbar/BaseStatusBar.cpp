@@ -426,8 +426,7 @@ BaseStatusBar::_NotificationListenerService::Runnable4::Runnable4(
 
 ECode BaseStatusBar::_NotificationListenerService::Runnable4::Run()
 {
-    mService->mHost->UpdateNotificationRanking(mRankingMap);
-    return NOERROR;
+    return mService->mHost->UpdateNotificationRanking(mRankingMap);
 }
 
 //==============================================================================
@@ -876,7 +875,7 @@ ECode BaseStatusBar::BaseAnimatorListenerAdapter::OnAnimationEnd(
 //==============================================================================
 //                  BaseStatusBar
 //==============================================================================
-CAR_INTERFACE_IMPL_5(BaseStatusBar, SystemUI, ICommandQueueCallbacks, \
+CAR_INTERFACE_IMPL_6(BaseStatusBar, SystemUI, IBaseStatusBar, ICommandQueueCallbacks, \
         IActivatableNotificationViewOnActivatedListener, IRecentsComponentCallbacks, \
         IExpansionLogger, INotificationEnvironment);
 
@@ -1704,7 +1703,7 @@ void BaseStatusBar::UpdateSearchPanel()
 
     IViewManager::Probe(mWindowManager)->AddView(IView::Probe(mSearchPanelView),
         IViewGroupLayoutParams::Probe(lp));
-    mSearchPanelView->SetBar(THIS_PROBE(IBaseStatusBar));
+    mSearchPanelView->SetBar(this);
     if (visible) {
         mSearchPanelView->Show(TRUE, FALSE);
     }

@@ -103,7 +103,7 @@ ECode TaskViewFooter::AnimateFooterVisibility(
         AutoPtr<ArrayOf<Int32> > params = ArrayOf<Int32>::Alloc(1);
         (*params)[0] = finalHeight;
         AutoPtr<IObjectAnimator> animator;
-        oaHelper->OfInt32((IObject*)this, String("footerHeight"), params, (IObjectAnimator**)&animator);
+        oaHelper->OfInt32(TO_IINTERFACE(this), String("footerHeight"), params, (IObjectAnimator**)&animator);
         mFooterAnimator = IAnimator::Probe(animator);
         mFooterAnimator->SetDuration(duration);
         mFooterAnimator->SetInterpolator(ITimeInterpolator::Probe(mConfig->mFastOutSlowInInterpolator));

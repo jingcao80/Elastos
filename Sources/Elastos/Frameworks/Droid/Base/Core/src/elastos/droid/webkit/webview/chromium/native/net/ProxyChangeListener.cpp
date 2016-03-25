@@ -353,14 +353,14 @@ ECode ProxyChangeListener::NativeProxySettingsChangedTo(
     /* [in] */ const String& host,
     /* [in] */ Int32 port)
 {
-    Elastos_ProxyChangeListener_nativeProxySettingsChangedTo(THIS_PROBE(IInterface), (Handle64)nativePtr, host, port);
+    Elastos_ProxyChangeListener_nativeProxySettingsChangedTo(TO_IINTERFACE(this), (Handle64)nativePtr, host, port);
     return NOERROR;
 }
 
 ECode ProxyChangeListener::NativeProxySettingsChanged(
     /* [in] */ Handle64 nativePtr)
 {
-    Elastos_ProxyChangeListener_nativeProxySettingsChanged(THIS_PROBE(IInterface), (Handle64)nativePtr);
+    Elastos_ProxyChangeListener_nativeProxySettingsChanged(TO_IINTERFACE(this), (Handle64)nativePtr);
     return NOERROR;
 }
 

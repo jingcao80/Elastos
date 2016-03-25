@@ -175,7 +175,7 @@ void BatteryStatusManager::NativeGotBatteryStatus(
   /* [in] */ Double level)
 {
     Elastos_BatteryStatusManager_nativeGotBatteryStatus(
-            THIS_PROBE(IInterface), nativeBatteryStatusManager, charging, chargingTime, dischargingTime, level);
+            TO_IINTERFACE(this), nativeBatteryStatusManager, charging, chargingTime, dischargingTime, level);
 }
 
 AutoPtr<IInterface> BatteryStatusManager::GetInstance(

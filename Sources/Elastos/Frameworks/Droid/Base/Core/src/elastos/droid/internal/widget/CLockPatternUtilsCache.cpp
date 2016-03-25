@@ -28,7 +28,7 @@ AutoPtr<ILockPatternUtilsCacheCacheKey> CLockPatternUtilsCache::CacheKey::Set(
 {
     mKey = key;
     mUserId = userId;
-    return THIS_PROBE(ILockPatternUtilsCacheCacheKey);
+    return this;
 }
 
 AutoPtr<CLockPatternUtilsCache::CacheKey> CLockPatternUtilsCache::CacheKey::Copy()

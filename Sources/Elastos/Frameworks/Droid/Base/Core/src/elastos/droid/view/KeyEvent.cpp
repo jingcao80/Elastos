@@ -537,7 +537,7 @@ ECode KeyEvent::Copy(
     /* [out] */ IInputEvent** event)
 {
     VALIDATE_NOT_NULL(event);
-    AutoPtr<IInputEvent> temp = IInputEvent::Probe(Obtain((IKeyEvent*)this));
+    AutoPtr<IInputEvent> temp = IInputEvent::Probe(Obtain(this));
     *event = temp;
     REFCOUNT_ADD(*event);
     return NOERROR;
@@ -552,7 +552,7 @@ ECode KeyEvent::Recycle()
         if (gRecyclerUsed < MAX_RECYCLED) {
             gRecyclerUsed++;
             mNext = gRecyclerTop;
-            gRecyclerTop = (IKeyEvent*)this;
+            gRecyclerTop = this;
         }
     }
 

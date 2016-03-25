@@ -84,8 +84,10 @@ public:
 
         CAR_INTERFACE_DECL()
 
-        Handler()
+        Handler(
+            /* [in] */ CRootElement* host)
             : mDepth(-1)
+            , mHost(host)
         {}
 
         virtual ~Handler();
@@ -390,13 +392,13 @@ public:
         Int32 mDepth;
         AutoPtr<IElement> mCurrent;
         AutoPtr<IStringBuilder> mBodyBuilder;
+        CRootElement* mHost;
     };
 
 public:
     CAR_INTERFACE_DECL();
 
     CRootElement()
-        : mHandler(new Handler())
     {}
 
     virtual ~CRootElement();
@@ -426,84 +428,8 @@ public:
     CARAPI GetContentHandler(
         /* [out] */ IContentHandler** handler);
 
-    CARAPI GetChild(
-        /* [in] */ const String&  localName,
-        /* [out] */ IElement** result);
-
-    /**
-     * Gets the child element with the given name.
-     */
-    CARAPI GetChild(
-        /* [in] */ const String&  uri,
-        /* [in] */ const String&  localName,
-        /* [out] */ IElement** result);
-
-    /**
-     * Gets the child element with the given name. Uses an empty string as the
-     * namespace. We will throw a {@link org.xml.sax.SAXException} at parsing
-     * time if the specified child is missing. This helps you ensure that your
-     * listeners are called.
-     */
-    CARAPI RequireChild(
-        /* [in] */ const String&  localName,
-        /* [out] */ IElement** result);
-
-    /**
-     * Gets the child element with the given name. We will throw a
-     * {@link org.xml.sax.SAXException} at parsing time if the specified child
-     * is missing. This helps you ensure that your listeners are called.
-     */
-    CARAPI RequireChild(
-        /* [in] */ const String&  uri,
-        /* [in] */ const String&  localName,
-        /* [out] */ IElement** result);
-
-    /**
-     * Sets start and end element listeners at the same time.
-     */
-    CARAPI SetElementListener(
-        /* [in] */ IElementListener* elementListener);
-
-    /**
-     * Sets start and end text element listeners at the same time.
-     */
-    CARAPI SetTextElementListener(
-        /* [in] */ ITextElementListener* elementListener);
-
-    /**
-     * Sets a listener for the start of this element.
-     */
-    CARAPI SetStartElementListener(
-        /* [in] */ IStartElementListener* startElementListener);
-
-    /**
-     * Sets a listener for the end of this element.
-     */
-    CARAPI SetEndElementListener(
-        /* [in] */ IEndElementListener* endElementListener);
-
-    /**
-     * Sets a listener for the end of this text element.
-     */
-    CARAPI SetEndTextElementListener(
-        /* [in] */ IEndTextElementListener* endTextElementListener);
-
-    CARAPI ToString(
-        /* [out] */ String* str);
-
-    /**
-     * Clears flags on required children.
-     */
-    CARAPI ResetRequiredChildren();
-
-    /**
-     * Throws an exception if a required child was not present.
-     */
-    CARAPI CheckRequiredChildren(
-        /* [in] */ ILocator* locator);
-
 private:
-    const  AutoPtr<Handler> mHandler;
+    AutoPtr<Handler> mHandler;
 };
 
 } // namespace Os

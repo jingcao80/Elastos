@@ -90,7 +90,7 @@ ECode PackageItemInfo::LoadIcon(
     /* [in] */ IPackageManager* pm,
     /* [out] */ IDrawable** icon)
 {
-    return ((PackageManager*)pm)->LoadItemIcon(THIS_PROBE(IPackageItemInfo), GetApplicationInfo(), icon);
+    return ((PackageManager*)pm)->LoadItemIcon(this, GetApplicationInfo(), icon);
 }
 
 ECode PackageItemInfo::LoadBanner(

@@ -45,7 +45,7 @@ ECode JSONObject::MyObject::Equals(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = IInterface::Probe(o) == THIS_PROBE(IInterface) || o == NULL; // API specifies this broken equals implementation
+    *res = IInterface::Probe(o) == TO_IINTERFACE(this) || o == NULL; // API specifies this broken equals implementation
     return NOERROR;
 }
 

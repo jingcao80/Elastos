@@ -227,7 +227,7 @@ void HandleView::Show()
         return;
     }
     mParentPositionObserver->AddListener(mParentPositionListener);
-    mContainer->SetContentView((IView*)this);
+    mContainer->SetContentView(this);
     ShowContainer();
 
     // Hide paste view when handle is moved on screen.

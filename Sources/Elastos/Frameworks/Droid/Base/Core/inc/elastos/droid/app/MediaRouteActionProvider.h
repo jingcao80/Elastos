@@ -4,11 +4,12 @@
 
 #include "Elastos.Droid.App.h"
 #include "elastos/droid/view/ActionProvider.h"
-//#include "elastos/droid/media/CMediaRouter.h"
+#include "elastos/droid/media/MediaRouterSimpleCallback.h"
+
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Media::IMediaRouter;
-//using Elastos::Droid::Media::CMediaRouter;
+using Elastos::Droid::Media::MediaRouterSimpleCallback;
 using Elastos::Droid::Media::IMediaRouterCallback;
 using Elastos::Droid::Media::IMediaRouterRouteInfo;
 using Elastos::Droid::View::ActionProvider;
@@ -54,7 +55,7 @@ class MediaRouteActionProvider
 {
 private:
     class MediaRouterCallback
-        : public Object //CMediaRouter::SimpleCallback
+        : public MediaRouterSimpleCallback
     {
     public:
         MediaRouterCallback();

@@ -238,10 +238,10 @@ PInterface CPlayActivity::Probe(
         return (IActivity *)this;
     }
     else if (riid == EIID_IServiceConnection)  {
-        return (IServiceConnection*)this;
+        return this;
     }
     else if(EIID_IOnTickListener == riid)  {
-        return (IOnTickListener*)this;
+        return this;
     }
     else if(EIID_IOnPlayCompletionListener == riid ) {
         return (IOnPlayCompletionListener *)this;

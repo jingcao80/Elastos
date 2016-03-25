@@ -35,7 +35,7 @@ SocketChannelImpl::SocketAdapter::SocketAdapter(
     // Super(socketImpl);
     mSocketImpl = socketImpl;
     mChannel = channel;
-    SocketUtils::SetCreated(THIS_PROBE(ISocket));
+    SocketUtils::SetCreated(this);
 
     // Sync state socket state with the channel it is being created from
     if (mChannel->mIsBound) {

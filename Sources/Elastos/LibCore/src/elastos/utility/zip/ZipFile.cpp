@@ -83,7 +83,7 @@ ECode ZipFile::RAFStream::Read(
     VALIDATE_NOT_NULL(value);
     AutoPtr<IStreams> streams;
     CStreams::AcquireSingleton((IStreams**)&streams);
-    return streams->ReadSingleByte(THIS_PROBE(IInputStream), value);
+    return streams->ReadSingleByte(this, value);
 }
 
 ECode ZipFile::RAFStream::Read(

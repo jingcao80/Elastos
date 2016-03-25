@@ -852,7 +852,7 @@ ECode CActivityOptions::ForTargetActivity(
     if (mAnimationType == IActivityOptions::ANIM_SCENE_TRANSITION) {
         AutoPtr<IActivityOptions> result;
         CActivityOptions::New((IActivityOptions**)&result);
-        result->Update(THIS_PROBE(IActivityOptions));
+        result->Update(this);
         *options = result;
         REFCOUNT_ADD(*options)
     }

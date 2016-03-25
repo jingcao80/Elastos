@@ -20,10 +20,10 @@ public:
         /* [in] */ REIID riid)
     {
         if (riid == EIID_IInterface) {
-            return (IInterface*)this;
+            return this;
         }
         else if (riid == EIID_IProxyDeathRecipient) {
-            return (IProxyDeathRecipient*)this;
+            return this;
         }
         return NULL;
     }

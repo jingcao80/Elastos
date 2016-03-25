@@ -294,7 +294,7 @@ ECode CAccessibilityInteractionClient::FindAccessibilityNodeInfoByAccessibilityI
         Boolean success;
         ECode ec = connection->FindAccessibilityNodeInfoByAccessibilityId(
                 accessibilityWindowId, accessibilityNodeId, interactionId,
-                THIS_PROBE(IIAccessibilityInteractionConnectionCallback),
+                this,
                 prefetchFlags, id, &success);
         if (FAILED(ec)) {
             if (DEBUG) {
@@ -351,7 +351,7 @@ ECode CAccessibilityInteractionClient::FindAccessibilityNodeInfosByViewId(
         Boolean success;
         ECode ec = connection->FindAccessibilityNodeInfosByViewId(
                 accessibilityWindowId, accessibilityNodeId, viewId, interactionId,
-                THIS_PROBE(IIAccessibilityInteractionConnectionCallback), id, &success);
+                this, id, &success);
         if (FAILED(ec)) {
             if (DEBUG) {
                 Slogger::W(TAG, "Error while calling remote" \
@@ -405,7 +405,7 @@ ECode CAccessibilityInteractionClient::FindAccessibilityNodeInfosByText(
         Boolean success;
         ECode ec = connection->FindAccessibilityNodeInfosByText(
                 accessibilityWindowId, accessibilityNodeId, text, interactionId,
-                THIS_PROBE(IIAccessibilityInteractionConnectionCallback), id, &success);
+                this, id, &success);
         if (FAILED(ec)) {
             if (DEBUG) {
                 Slogger::W(TAG, "Error while calling remote" \
@@ -459,7 +459,7 @@ ECode CAccessibilityInteractionClient::FindFocus(
         Boolean success;
         ECode ec = connection->FindFocus(accessibilityWindowId,
                 accessibilityNodeId, focusType, interactionId,
-                THIS_PROBE(IIAccessibilityInteractionConnectionCallback), id, &success);
+                this, id, &success);
         if (FAILED(ec)) {
             if (DEBUG) {
                 Slogger::W(TAG, "Error while calling remote findAccessibilityFocus, ec=%08x", ec);
@@ -506,7 +506,7 @@ ECode CAccessibilityInteractionClient::FocusSearch(
         Boolean success;
         ECode ec = connection->FindFocus(accessibilityWindowId,
             accessibilityNodeId, direction, interactionId,
-            THIS_PROBE(IIAccessibilityInteractionConnectionCallback), id, &success);
+            this, id, &success);
         if (FAILED(ec)) {
             if (DEBUG) {
                 Slogger::W(TAG, "Error while calling remote accessibilityFocusSearch, ec=%08x", ec);
@@ -554,7 +554,7 @@ ECode CAccessibilityInteractionClient::PerformAccessibilityAction(
         Boolean success;
         ECode ec = connection->PerformAccessibilityAction(accessibilityWindowId,
             accessibilityNodeId, action, arguments, interactionId,
-            THIS_PROBE(IIAccessibilityInteractionConnectionCallback), id, &success);
+            this, id, &success);
         if (FAILED(ec)) {
             if (DEBUG) {
                 Slogger::W(TAG, "Error while calling remote performAccessibilityAction, ec =%08x", ec);
@@ -597,7 +597,7 @@ ECode CAccessibilityInteractionClient::ComputeClickPointInScreen(
         Boolean success;
         ECode ec = connection->ComputeClickPointInScreen(accessibilityWindowId,
             accessibilityNodeId, interactionId,
-            THIS_PROBE(IIAccessibilityInteractionConnectionCallback), id, &success);
+            this, id, &success);
         if (FAILED(ec)) {
             if (DEBUG) {
                 Slogger::W(TAG, "Error while calling remote ComputeClickPointInScreen, ec =%08x", ec);

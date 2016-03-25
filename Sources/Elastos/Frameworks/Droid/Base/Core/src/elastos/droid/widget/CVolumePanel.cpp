@@ -148,16 +148,16 @@ PInterface CVolumePanel::WarningDialogReceiver::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (IInterface*)(IBroadcastReceiver*)this;
+        return (IInterface*)this;
     }
     else if (riid == EIID_IObject) {
-        return (IInterface*)(IObject*)this;
+        return (IInterface*)this;
     }
     else if (riid == EIID_IBroadcastReceiver) {
-        return (IInterface*)(IBroadcastReceiver*)this;
+        return (IInterface*)this;
     }
     else if (riid == EIID_IDialogInterfaceOnDismissListener) {
-        return (IInterface*)(IDialogInterfaceOnDismissListener*)this;
+        return (IInterface*)this;
     }
     return NULL;
 }
@@ -168,13 +168,13 @@ ECode CVolumePanel::WarningDialogReceiver::GetInterfaceID(
 {
     VALIDATE_NOT_NULL(pIID);
 
-    if (pObject == (IInterface*)(IObject*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IObject;
     }
-    else if (pObject == (IInterface*)(IBroadcastReceiver*)this) {
+    else if (pObject == (IInterface*)this) {
         *pIID = EIID_IBroadcastReceiver;
     }
-    else if (pObject == (IInterface*)(IDialogInterfaceOnDismissListener*)this) {
+    else if (pObject == (IInterface*)this) {
         *pIID = EIID_IDialogInterfaceOnDismissListener;
     }
     else {
@@ -212,7 +212,7 @@ ECode CVolumePanel::WarningDialogReceiver::OnReceive(
 ECode CVolumePanel::WarningDialogReceiver::OnDismiss(
     /* [Int32] */ IDialogInterface* unused)
 {
-    mContext->UnregisterReceiver(THIS_PROBE(IBroadcastReceiver));
+    mContext->UnregisterReceiver(this);
     AutoLock lock(CVolumePanel::sConfirmSafeVolumeLock);
     CVolumePanel::sConfirmSafeVolumeDialog = NULL;
     return NOERROR;
@@ -388,7 +388,7 @@ ECode CVolumePanel::constructor(
 
     // Setup Dialog
     //
-    FAIL_RETURN(CVolumePanelDialog::New(context, R::style::Theme_Panel_Volume, THIS_PROBE(IVolumePanel),
+    FAIL_RETURN(CVolumePanelDialog::New(context, R::style::Theme_Panel_Volume, this,
         (IDialog**)&mDialog));
     assert(mDialog != NULL);
 
@@ -440,7 +440,7 @@ ECode CVolumePanel::constructor(
         mDivider->SetVisibility(IView::GONE);
     }
     else {
-        mMoreButton->SetOnClickListener(THIS_PROBE(IViewOnClickListener));
+        mMoreButton->SetOnClickListener(this);
     }
 
     Boolean masterVolumeOnly, masterVolumeKeySounds;
@@ -459,7 +459,7 @@ void CVolumePanel::ListenToRingerMode()
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IAudioManager::RINGER_MODE_CHANGED_ACTION);
 
-    AutoPtr<IBroadcastReceiver> receive = new RingerModeChangedActionReceiver(THIS_PROBE(IHandler));
+    AutoPtr<IBroadcastReceiver> receive = new RingerModeChangedActionReceiver(this);
     AutoPtr<IIntent> intent;
     mContext->RegisterReceiver(receive, filter, (IIntent**)&intent);
 }
@@ -574,7 +574,7 @@ void CVolumePanel::CreateSliders()
         plusOne = (streamType == IAudioSystem::STREAM_BLUETOOTH_SCO
             || streamType == IAudioSystem::STREAM_VOICE_CALL) ? 1 : 0;
         sc->mSeekbarView->SetMax(GetStreamMaxVolume(streamType) + plusOne);
-        sc->mSeekbarView->SetOnSeekBarChangeListener(THIS_PROBE(ISeekBarOnSeekBarChangeListener));
+        sc->mSeekbarView->SetOnSeekBarChangeListener(this);
         sc->mSeekbarView->SetTag(sc);
         mStreamControls[streamType] = sc;
     }

@@ -30,9 +30,9 @@ PInterface X509CRLEntry::Probe(
     if(riid == EIID_X509CRLEntry) {
         return reinterpret_cast<PInterface>(this);
     } else if (riid == EIID_IInterface) {
-        return (IInterface*)(IX509Extension*)this;
+        return (IInterface*)this;
     } else if (riid == EIID_IX509Extension) {
-        return (PInterface)(IX509Extension*)this;
+        return (PInterface)this;
     } else {
         return NULL;
     }

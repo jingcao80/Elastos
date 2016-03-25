@@ -305,7 +305,7 @@ ECode Handler::ObtainMessage(
     VALIDATE_NOT_NULL(msg);
     AutoPtr<IMessageHelper> helper;
     CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
-    return helper->Obtain(THIS_PROBE(IHandler), what, arg1, arg2, obj, msg);
+    return helper->Obtain(this, what, arg1, arg2, obj, msg);
 }
 
 AutoPtr<IMessage> Handler::GetPostMessage(
@@ -321,7 +321,7 @@ AutoPtr<IMessage> Handler::GetPostMessage(
     AutoPtr<IMessageHelper> helper;
     CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
     AutoPtr<IMessage> msg;
-    helper->Obtain(THIS_PROBE(IHandler), (IMessage**)&msg);
+    helper->Obtain(this, (IMessage**)&msg);
     msg->SetWhat((Int32)r);  // as Id
     msg->SetObj(token);
     msg->SetCallback(r);
@@ -394,7 +394,7 @@ ECode Handler::GetIMessenger(
     AutoLock lock(mQueueLock);
 
     if (mMessenger == NULL) {
-        CMessengerImpl::New(THIS_PROBE(IHandler), (IIMessenger**)&mMessenger);
+        CMessengerImpl::New(this, (IIMessenger**)&mMessenger);
     }
     *mgr = mMessenger;
     REFCOUNT_ADD(*mgr);
@@ -416,7 +416,7 @@ ECode Handler::SendEmptyMessageDelayed(
     AutoPtr<IMessageHelper> helper;
     CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
     AutoPtr<IMessage> msg;
-    helper->Obtain(THIS_PROBE(IHandler), (IMessage**)&msg);
+    helper->Obtain(this, (IMessage**)&msg);
     msg->SetWhat(what);
     return Handler::SendMessageDelayed(msg, delayMillis, result);
 }
@@ -429,7 +429,7 @@ ECode Handler::SendEmptyMessageAtTime(
     AutoPtr<IMessageHelper> helper;
     CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
     AutoPtr<IMessage> msg;
-    helper->Obtain(THIS_PROBE(IHandler), (IMessage**)&msg);
+    helper->Obtain(this, (IMessage**)&msg);
     msg->SetWhat(what);
     return Handler::SendMessageAtTime(msg, uptimeMillis, result);
 }
@@ -502,7 +502,7 @@ Boolean Handler::EnqueueMessage(
      }
 #endif
 
-    msg->SetTarget(THIS_PROBE(IHandler));
+    msg->SetTarget(this);
     if (mAsynchronous) {
         msg->SetAsynchronous(true);
     }
@@ -525,7 +525,7 @@ ECode Handler::HasCallbacks(
         return E_RUNTIME_EXCEPTION;
     }
 
-    return queue->HasMessages(THIS_PROBE(IHandler), action, NULL, result);
+    return queue->HasMessages(this, action, NULL, result);
 }
 
 ECode Handler::HasMessages(
@@ -566,7 +566,7 @@ ECode Handler::HasMessages(
         return E_RUNTIME_EXCEPTION;
     }
 
-    return queue->HasMessages(THIS_PROBE(IHandler), what, obj, result);
+    return queue->HasMessages(this, what, obj, result);
 }
 
 ECode Handler::RemoveMessages(
@@ -600,7 +600,7 @@ ECode Handler::RemoveMessages(
         return E_RUNTIME_EXCEPTION;
     }
 
-    return queue->RemoveMessages(THIS_PROBE(IHandler), what, obj);
+    return queue->RemoveMessages(this, what, obj);
 }
 
 /**
@@ -624,7 +624,7 @@ ECode Handler::RemoveCallbacksAndMessages(
         return E_RUNTIME_EXCEPTION;
     }
 
-    return queue->RemoveCallbacksAndMessages(THIS_PROBE(IHandler), obj);
+    return queue->RemoveCallbacksAndMessages(this, obj);
 }
 
 ECode Handler::GetMessageName(

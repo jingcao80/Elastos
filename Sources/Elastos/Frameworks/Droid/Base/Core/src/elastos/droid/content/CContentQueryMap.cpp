@@ -171,7 +171,7 @@ ECode CContentQueryMap::Requery()
     }
     FAIL_RETURN(ReadCursorIntoCache(cursor))
 
-    IObservable* observable = THIS_PROBE(IObservable);
+    IObservable* observable = this;
     FAIL_RETURN(observable->SetChanged())
     FAIL_RETURN(observable->NotifyObservers())
     return NOERROR;

@@ -22,14 +22,14 @@ PInterface CConfirmCredentialsAsUserSession::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_AccountManagerServiceSession) {
-        return reinterpret_cast<PInterface>((AccountManagerServiceSession*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CConfirmCredentialsAsUserSession::Probe(riid);
 }
 
 ECode CConfirmCredentialsAsUserSession::Run()
 {
-    return mAuthenticator->ConfirmCredentials((IIAccountAuthenticatorResponse*)this,
+    return mAuthenticator->ConfirmCredentials(this,
             mAccount, mOptions);
 }
 

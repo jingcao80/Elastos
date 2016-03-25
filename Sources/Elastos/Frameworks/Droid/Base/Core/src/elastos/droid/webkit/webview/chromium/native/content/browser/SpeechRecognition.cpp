@@ -348,28 +348,28 @@ ECode SpeechRecognition::StopRecognition()
 ECode SpeechRecognition::NativeOnAudioStart(
     /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid)
 {
-    Elastos_SpeechRecognition_nativeOnAudioStart(THIS_PROBE(IInterface), nativeSpeechRecognizerImplAndroid);
+    Elastos_SpeechRecognition_nativeOnAudioStart(TO_IINTERFACE(this), nativeSpeechRecognizerImplAndroid);
     return NOERROR;
 }
 
 ECode SpeechRecognition::NativeOnSoundStart(
     /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid)
 {
-    Elastos_SpeechRecognition_nativeOnSoundStart(THIS_PROBE(IInterface), nativeSpeechRecognizerImplAndroid);
+    Elastos_SpeechRecognition_nativeOnSoundStart(TO_IINTERFACE(this), nativeSpeechRecognizerImplAndroid);
     return NOERROR;
 }
 
 ECode SpeechRecognition::NativeOnSoundEnd(
     /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid)
 {
-    Elastos_SpeechRecognition_nativeOnSoundEnd(THIS_PROBE(IInterface), nativeSpeechRecognizerImplAndroid);
+    Elastos_SpeechRecognition_nativeOnSoundEnd(TO_IINTERFACE(this), nativeSpeechRecognizerImplAndroid);
     return NOERROR;
 }
 
 ECode SpeechRecognition::NativeOnAudioEnd(
     /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid)
 {
-    Elastos_SpeechRecognition_nativeOnAudioEnd(THIS_PROBE(IInterface), nativeSpeechRecognizerImplAndroid);
+    Elastos_SpeechRecognition_nativeOnAudioEnd(TO_IINTERFACE(this), nativeSpeechRecognizerImplAndroid);
     return NOERROR;
 }
 
@@ -379,7 +379,7 @@ ECode SpeechRecognition::NativeOnRecognitionResults(
     /* [in] */ ArrayOf<Float>* scores,
     /* [in] */ Boolean provisional)
 {
-    Elastos_SpeechRecognition_nativeOnRecognitionResults(THIS_PROBE(IInterface),
+    Elastos_SpeechRecognition_nativeOnRecognitionResults(TO_IINTERFACE(this),
             nativeSpeechRecognizerImplAndroid, results, scores, provisional);
     return NOERROR;
 }
@@ -388,7 +388,7 @@ ECode SpeechRecognition::NativeOnRecognitionError(
     /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid,
     /* [in] */ Int32 error)
 {
-    Elastos_SpeechRecognition_nativeOnRecognitionError(THIS_PROBE(IInterface),
+    Elastos_SpeechRecognition_nativeOnRecognitionError(TO_IINTERFACE(this),
             nativeSpeechRecognizerImplAndroid, error);
     return NOERROR;
 }
@@ -396,7 +396,7 @@ ECode SpeechRecognition::NativeOnRecognitionError(
 ECode SpeechRecognition::NativeOnRecognitionEnd(
     /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid)
 {
-    Elastos_SpeechRecognition_nativeOnRecognitionEnd(THIS_PROBE(IInterface),
+    Elastos_SpeechRecognition_nativeOnRecognitionEnd(TO_IINTERFACE(this),
             nativeSpeechRecognizerImplAndroid);
     return NOERROR;
 }

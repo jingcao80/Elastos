@@ -38,7 +38,7 @@ CPackageInstaller::SessionCallbackDelegate::SessionCallbackDelegate(
     /* [in] */ ILooper* looper)
     : mCallback(callback)
 {
-    CHandler::New(looper, THIS_PROBE(IHandlerCallback), FALSE, (IHandler**)&mHandler);
+    CHandler::New(looper, this, FALSE, (IHandler**)&mHandler);
 }
 
 ECode CPackageInstaller::SessionCallbackDelegate::HandleMessage(

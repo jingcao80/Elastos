@@ -132,7 +132,7 @@ ECode ColorChooserElastos::NativeOnColorChosen(
     /* [in] */ Handle64 nativeColorChooserElastos,
     /* [in] */ Int32 color)
 {
-    Elastos_ColorChooserAndroid_nativeOnColorChosen(THIS_PROBE(IInterface), nativeColorChooserElastos, color);
+    Elastos_ColorChooserAndroid_nativeOnColorChosen(TO_IINTERFACE(this), nativeColorChooserElastos, color);
     return NOERROR;
 }
 

@@ -70,7 +70,7 @@ ECode CPorterDuffColorFilter::Equals(
 {
     VALIDATE_NOT_NULL(equals);
     *equals = TRUE;
-    if (THIS_PROBE(IInterface) == IInterface::Probe(object)) {
+    if (TO_IINTERFACE(this) == IInterface::Probe(object)) {
         return NOERROR;
     }
     ClassID id1, id2;

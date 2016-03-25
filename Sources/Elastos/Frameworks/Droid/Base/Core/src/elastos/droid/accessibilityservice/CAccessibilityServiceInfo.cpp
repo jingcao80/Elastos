@@ -490,7 +490,7 @@ ECode CAccessibilityServiceInfo::Equals(
     /* [out] */ Boolean* isEqual)
 {
     VALIDATE_NOT_NULL(isEqual)
-    if (THIS_PROBE(IInterface) == IInterface::Probe(obj)) {
+    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) {
         *isEqual = TRUE;
         return NOERROR;
     }

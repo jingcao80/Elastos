@@ -23,6 +23,7 @@ class PreferenceScreen
     : public PreferenceGroup
     , public IPreferenceScreen
     , public IAdapterViewOnItemClickListener
+    , public IDialogInterfaceOnDismissListener
 {
 public:
     CAR_INTERFACE_DECL()

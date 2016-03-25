@@ -97,7 +97,7 @@ CountdownConditionProvider::CountdownConditionProvider()
     , mTime(0)
 {
     if (DEBUG) Slogger::D(TAG, "new CountdownConditionProvider()");
-    mContext = THIS_PROBE(IContext);
+    mContext = this;
     mReceiver = new Receiver(this);
 }
 

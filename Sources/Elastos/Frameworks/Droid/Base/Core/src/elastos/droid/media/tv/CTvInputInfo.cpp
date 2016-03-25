@@ -418,7 +418,7 @@ ECode CTvInputInfo::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    if (THIS_PROBE(IInterface) == IInterface::Probe(o)) {
+    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
         *result = TRUE;
         return NOERROR;
     }

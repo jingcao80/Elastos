@@ -4,10 +4,10 @@
 #include "elastos/droid/server/pm/Settings.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Core::StringUtils;
-using Elastos::Core::ISystem;
-using Elastos::Core::CSystem;
+using Elastos::Core::StringBuilder;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Utility::ILogHelper;
@@ -155,12 +155,12 @@ ECode CrossProfileIntentFilter::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    AutoPtr<ISystem> system;
-    CSystem::AcquireSingleton((ISystem**)&system);
-    Int32 hashCode;
-    system->IdentityHashCode((IObject*)this, &hashCode);
-    *str = String("CrossProfileIntentFilter{0x") + StringUtils::ToHexString(hashCode)
-            + " " + StringUtils::ToString(mTargetUserId) + "}";
+    StringBuilder sb("CrossProfileIntentFilter{0x");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += " ";
+    sb += mTargetUserId;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

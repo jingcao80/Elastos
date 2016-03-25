@@ -96,7 +96,7 @@ ECode GeofenceHardwareImpl::Reaper::ProxyDied()
         mHost->mCallbacksHandler->SendMessage(m, &result);
     }
     AutoPtr<IMessage> reaperMessage;
-    mHost->mReaperHandler->ObtainMessage(GeofenceHardwareImpl::REAPER_REMOVED, THIS_PROBE(IInterface),
+    mHost->mReaperHandler->ObtainMessage(GeofenceHardwareImpl::REAPER_REMOVED, TO_IINTERFACE(this),
             (IMessage**)&reaperMessage);
     mHost->mReaperHandler->SendMessage(reaperMessage, &result);
     return NOERROR;
@@ -143,7 +143,7 @@ ECode GeofenceHardwareImpl::Reaper::Equals(
         return NOERROR;
     }
 
-    if (THIS_PROBE(IInterface) == TO_IINTERFACE(obj)) {
+    if (TO_IINTERFACE(this) == TO_IINTERFACE(obj)) {
         *result = TRUE;
         return NOERROR;
     }

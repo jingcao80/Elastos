@@ -308,7 +308,7 @@ ECode ActionMenuItem::Invoke(
 {
     VALIDATE_NOT_NULL(res);
     Boolean tmp = FALSE;
-    if (mClickListener != NULL && (mClickListener->OnMenuItemClick((IMenuItem*)this->Probe(EIID_IMenuItem), &tmp), tmp)) {
+    if (mClickListener != NULL && (mClickListener->OnMenuItemClick(this, &tmp), tmp)) {
         *res = TRUE;
         return NOERROR;
     }

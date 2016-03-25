@@ -46,7 +46,7 @@ ECode PanelBar::AddPanel(
     /* [in] */ IPanelView* pv)
 {
     mPanels.PushBack(pv);
-    pv->SetBar(THIS_PROBE(IPanelBar));
+    pv->SetBar(this);
     return NOERROR;
 }
 
@@ -58,7 +58,7 @@ ECode PanelBar::SetPanelHolder(
         return E_NULL_POINTER_EXCEPTION;
     }
 
-    ph->SetBar(THIS_PROBE(IPanelBar));
+    ph->SetBar(this);
     mPanelHolder = ph;
     Int32 N;
     ph->GetChildCount(&N);

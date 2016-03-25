@@ -113,7 +113,7 @@ ECode MessageDigestImpl::Clone(
     VALIDATE_NOT_NULL(object)
     AutoPtr<IInterface> cloneObj;
     ICloneable::Probe(mSpiImpl)->Clone((IInterface**)&cloneObj);
-    MessageDigestSpi* spi = (MessageDigestSpi*)(IObject*)cloneObj.Get();
+    MessageDigestSpi* spi = (MessageDigestSpi*)IObject::Probe(cloneObj);
     AutoPtr<IProvider> provider;
     GetProvider((IProvider**)&provider);
     String algorithm;
@@ -334,14 +334,15 @@ ECode MessageDigest::GetDigestLength(
         *length = l;
         return NOERROR;
     }
-    if (THIS_PROBE(ICloneable) == NULL) {
-        *length = 0;
+    ICloneable* cloneObj = ICloneable::Probe(this);
+    if (cloneObj == NULL) {
         return NOERROR;
     }
-    AutoPtr<IInterface> cloneObj;
-    FAIL_RETURN(THIS_PROBE(ICloneable)->Clone((PInterface*)&cloneObj))
+
+    AutoPtr<IInterface> clone;
+    FAIL_RETURN(cloneObj->Clone((IInterface**)&clone))
     AutoPtr<ArrayOf<Byte> > hashValue;
-    IMessageDigest::Probe(cloneObj)->Digest((ArrayOf<Byte>**)&hashValue);
+    IMessageDigest::Probe(clone)->Digest((ArrayOf<Byte>**)&hashValue);
     *length = hashValue->GetLength();
     return NOERROR;
 }
@@ -368,9 +369,9 @@ ECode MessageDigest::SetAlgorithm(
 
 AutoPtr<IEngine> MessageDigest::Init_ENGINE()
 {
-    AutoPtr<CEngine> engine;
-    CEngine::NewByFriend(String("MessageDigest"), (CEngine**)&engine);
-    return engine.Get();
+    AutoPtr<IEngine> engine;
+    CEngine::New(String("MessageDigest"), (IEngine**)&engine);
+    return engine;
 }
 
 } // namespace Security

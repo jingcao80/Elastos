@@ -60,13 +60,13 @@ Boolean ContentSettings::GetJavaScriptEnabled()
 Handle64 ContentSettings::NativeInit(
     /* [in] */ Handle64 contentViewPtr)
 {
-    return Elastos_ContentSettings_nativeInit(THIS_PROBE(IInterface), contentViewPtr);
+    return Elastos_ContentSettings_nativeInit(TO_IINTERFACE(this), contentViewPtr);
 }
 
 Boolean ContentSettings::NativeGetJavaScriptEnabled(
     /* [in] */ Handle64 nativeContentSettings)
 {
-    return Elastos_ContentSettings_nativeGetJavaScriptEnabled(THIS_PROBE(IInterface), (Handle64)nativeContentSettings);
+    return Elastos_ContentSettings_nativeGetJavaScriptEnabled(TO_IINTERFACE(this), (Handle64)nativeContentSettings);
 }
 
 void ContentSettings::OnNativeContentSettingsDestroyed(

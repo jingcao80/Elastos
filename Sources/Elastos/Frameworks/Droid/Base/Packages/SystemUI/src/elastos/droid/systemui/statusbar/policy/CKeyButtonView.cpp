@@ -197,7 +197,7 @@ AutoPtr<IObjectAnimator> CKeyButtonView::AnimateToQuiescent()
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&aHelper);
 
     AutoPtr<IObjectAnimator> o;
-    aHelper->OfFloat(THIS_PROBE(IInterface), String("drawingAlpha"), param,
+    aHelper->OfFloat(TO_IINTERFACE(this), String("drawingAlpha"), param,
             (IObjectAnimator**)&o);
 
     return o;

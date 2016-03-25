@@ -127,11 +127,11 @@ ECode ThemeConfig::AppTheme::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (object == (IObject*)this) {
+    IAppTheme* o = IAppTheme::Probe(object);
+    if (o == (IAppTheme*)this) {
         *result = TRUE;
         return NOERROR;
     }
-    AutoPtr<IAppTheme> o = IAppTheme::Probe(object);
     if (o != NULL) {
         String currentOverlayPkgName = mOverlayPkgName.IsNull()? String("") : mOverlayPkgName;
         String overlayPkgName;
@@ -512,11 +512,11 @@ ECode ThemeConfig::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    if (object == (IObject*)this) {
+    IThemeConfig* o = IThemeConfig::Probe(object);
+    if (o == this) {
         *result = TRUE;
         return NOERROR;
     }
-    AutoPtr<IThemeConfig> o = IThemeConfig::Probe(object);
     if (o != NULL) {
         AutoPtr<IMap> currThemes;
         if (mThemes != NULL) {

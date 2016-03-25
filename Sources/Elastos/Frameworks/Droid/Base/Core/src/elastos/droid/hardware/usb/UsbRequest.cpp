@@ -223,7 +223,7 @@ void UsbRequest::NativeClose()
 {
     //ALOGD("close\n");
     Logger::D(UsbRequest::TAG, "close\n");
-    struct usb_request* request = Get_request_from_object((IUsbRequest*)this);
+    struct usb_request* request = Get_request_from_object(this);
     if (request) {
         usb_request_free(request);
         this->mNativeContext = 0;
@@ -235,7 +235,7 @@ Boolean UsbRequest::NativeQueueArray(
     /* [in] */ Int32 length,
     /* [in] */ Boolean out)
 {
-    struct usb_request* request = Get_request_from_object((IUsbRequest*)this);
+    struct usb_request* request = Get_request_from_object(this);
     if (!request) {
         //ALOGE("request is closed in native_queue");
         Logger::E(UsbRequest::TAG, "request is closed in native_queue");
@@ -281,7 +281,7 @@ Int32 UsbRequest::NativeDequeueArray(
     /* [in] */ Int32 length,
     /* [in] */ Boolean out)
 {
-    struct usb_request* request = Get_request_from_object((IUsbRequest*)this);
+    struct usb_request* request = Get_request_from_object(this);
 
     if (!request) {
         //ALOGE("request is closed in native_dequeue");
@@ -307,7 +307,7 @@ Boolean UsbRequest::NativeQueueDirect(
     /* [in] */ Int32 length,
     /* [in] */ Boolean out)
 {
-    struct usb_request* request = Get_request_from_object((IUsbRequest*)this);
+    struct usb_request* request = Get_request_from_object(this);
     if (!request) {
         //ALOGE("request is closed in native_queue");
         Logger::E(UsbRequest::TAG, "request is closed in native_queue");
@@ -340,7 +340,7 @@ Boolean UsbRequest::NativeQueueDirect(
 
 Int32 UsbRequest::NativeDequeueDirect()
 {
-    struct usb_request* request = Get_request_from_object((IUsbRequest*)this);
+    struct usb_request* request = Get_request_from_object(this);
     if (!request) {
         //ALOGE("request is closed in native_dequeue");
         Logger::E(UsbRequest::TAG, "request is closed in native_dequeue");
@@ -353,7 +353,7 @@ Int32 UsbRequest::NativeDequeueDirect()
 
 Boolean UsbRequest::NativeCancel()
 {
-    struct usb_request* request = Get_request_from_object((IUsbRequest*)this);
+    struct usb_request* request = Get_request_from_object(this);
     if (!request) {
         //ALOGE("request is closed in native_cancel");
         Logger::E(UsbRequest::TAG, "request is closed in native_cancel");

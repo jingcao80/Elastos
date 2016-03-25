@@ -189,7 +189,7 @@ ECode AdapterView::SelectionNotifier::Run()
         AutoPtr<IAdapter> adapter;
         ((IAdapterView*)(mHost->Probe(EIID_IAdapterView)))->GetAdapter((IAdapter**)&adapter);
         if (adapter != NULL) {
-            AutoPtr<IRunnable> r = (IRunnable*)this->Probe(EIID_IRunnable);
+            AutoPtr<IRunnable> r = this;
             Boolean resTmp;
             mHost->Post(r, &resTmp);
         }
@@ -556,7 +556,7 @@ ECode AdapterView::GetSelectedItem(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IAdapter> adapter;
-    THIS_PROBE(IAdapterView)->GetAdapter((IAdapter**)&adapter);
+    this->GetAdapter((IAdapter**)&adapter);
     Int32 selection = 0;
     GetSelectedItemPosition(&selection);
     if (adapter != NULL) {
@@ -680,7 +680,7 @@ ECode AdapterView::SetEmptyView(
     }
 
     AutoPtr<IAdapter> adapter;
-    THIS_PROBE(IAdapterView)->GetAdapter((IAdapter**)&adapter);
+    this->GetAdapter((IAdapter**)&adapter);
     Boolean empty = TRUE;
     if (adapter != NULL) {
         adapter->IsEmpty(&empty);
@@ -725,7 +725,7 @@ ECode AdapterView::SetFocusable(
     /* [in] */ Boolean focusable)
 {
     AutoPtr<IAdapter> adapter;
-    THIS_PROBE(IAdapterView)->GetAdapter((IAdapter**)&adapter);
+    this->GetAdapter((IAdapter**)&adapter);
     Boolean empty = TRUE;
     if (adapter != NULL) {
         Int32 count;
@@ -748,7 +748,7 @@ ECode AdapterView::SetFocusableInTouchMode(
     /* [in] */ Boolean focusable)
 {
     AutoPtr<IAdapter> adapter;
-    THIS_PROBE(IAdapterView)->GetAdapter((IAdapter**)&adapter);
+    this->GetAdapter((IAdapter**)&adapter);
     Boolean empty = TRUE;
     if (adapter != NULL) {
         Int32 count;
@@ -770,7 +770,7 @@ ECode AdapterView::SetFocusableInTouchMode(
 ECode AdapterView::CheckFocus()
 {
     AutoPtr<IAdapter> adapter;
-    THIS_PROBE(IAdapterView)->GetAdapter((IAdapter**)&adapter);
+    this->GetAdapter((IAdapter**)&adapter);
     Boolean empty = TRUE;
     if (adapter != NULL) {
         Int32 count;
@@ -847,7 +847,7 @@ ECode AdapterView::GetItemAtPosition(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IAdapter> adapter;
-    THIS_PROBE(IAdapterView)->GetAdapter((IAdapter**)&adapter);
+    this->GetAdapter((IAdapter**)&adapter);
     if (adapter == NULL || position < 0) {
         *result = AutoPtr<IInterface>(NULL);
     }
@@ -863,7 +863,7 @@ ECode AdapterView::GetItemIdAtPosition(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IAdapter> adapter;
-    THIS_PROBE(IAdapterView)->GetAdapter((IAdapter**)&adapter);
+    this->GetAdapter((IAdapter**)&adapter);
     if (adapter == NULL || position < 0) {
         *result = IAdapterView::INVALID_ROW_ID;
     }
@@ -990,17 +990,17 @@ void AdapterView::FireOnSelected()
         AutoPtr<IView> v;
         GetSelectedView((IView**)&v);
         AutoPtr<IAdapter> adapter;
-        THIS_PROBE(IAdapterView)->GetAdapter((IAdapter**)&adapter);
+        this->GetAdapter((IAdapter**)&adapter);
         Int64 itemId;
         adapter->GetItemId(selection, &itemId);
 
         mOnItemSelectedListener->OnItemSelected(
-            THIS_PROBE(IAdapterView),
+            this,
             v, selection, itemId);
     }
     else {
         mOnItemSelectedListener->OnNothingSelected(
-            THIS_PROBE(IAdapterView));
+            this);
     }
 }
 
@@ -1201,7 +1201,7 @@ void AdapterView::HandleDataChanged()
 Boolean AdapterView::IsScrollableForAccessibility()
 {
     AutoPtr<IAdapter> adapter;
-    THIS_PROBE(IAdapterView)->GetAdapter((IAdapter**)&adapter);
+    this->GetAdapter((IAdapter**)&adapter);
     if (adapter != NULL) {
         Int32 itemCount = 0;
         adapter->GetCount(&itemCount);
@@ -1270,7 +1270,7 @@ Int32 AdapterView::FindSyncPosition()
     // Get the item ID locally (instead of getItemIdAtPosition), so
     // we need the adapter
     AutoPtr<IAdapter> adapter;
-    THIS_PROBE(IAdapterView)->GetAdapter((IAdapter**)&adapter);
+    this->GetAdapter((IAdapter**)&adapter);
     if (adapter == NULL) {
         return IAdapterView::INVALID_POSITION;
     }
@@ -1358,7 +1358,7 @@ void AdapterView::RememberSyncState()
             AutoPtr<IView> v;
             GetChildAt(0, (IView**)&v);
             AutoPtr<IAdapter> adapter;
-            THIS_PROBE(IAdapterView)->GetAdapter((IAdapter**)&adapter);
+            this->GetAdapter((IAdapter**)&adapter);
             Int32 count;
             adapter->GetCount(&count);
 

@@ -149,7 +149,7 @@ ECode CThemeChangeRequestBuilder::SetComponent(
         CString::New(component, (ICharSequence**)&key);
         mThemeComponents->Remove(key);
     }
-    *builder = (IThemeChangeRequestBuilder*)this;
+    *builder = this;
     REFCOUNT_ADD(*builder)
     return NOERROR;
 }
@@ -173,7 +173,7 @@ ECode CThemeChangeRequestBuilder::SetAppOverlay(
             mPerAppOverlays->Remove(key);
         }
     }
-    *builder = (IThemeChangeRequestBuilder*)this;
+    *builder = this;
     REFCOUNT_ADD(*builder)
     return NOERROR;
 }
@@ -185,7 +185,7 @@ ECode CThemeChangeRequestBuilder::SetRequestType(
     VALIDATE_NOT_NULL(builder)
     // TODO
     mRequestType = requestType;// requestType != null ? requestType : RequestType.USER_REQUEST;
-    *builder = (IThemeChangeRequestBuilder*)this;
+    *builder = this;
     REFCOUNT_ADD(*builder)
     return NOERROR;
 }

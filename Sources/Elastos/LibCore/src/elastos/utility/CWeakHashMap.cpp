@@ -609,7 +609,7 @@ ECode CWeakHashMap::_Values::GetHashCode(
 {
     VALIDATE_NOT_NULL(hashCode)
 
-    *hashCode = Object::GetHashCode(this->Probe(EIID_IInterface));
+    *hashCode = Object::GetHashCode(TO_IINTERFACE(this));
     return NOERROR;
 }
 

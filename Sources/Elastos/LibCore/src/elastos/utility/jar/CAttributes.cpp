@@ -143,7 +143,7 @@ ECode CAttributes::Clone(
 {
     VALIDATE_NOT_NULL(object)
     AutoPtr<IAttributes> clone;
-    FAIL_RETURN(CAttributes::New(THIS_PROBE(IAttributes), (IAttributes**)&clone))
+    FAIL_RETURN(CAttributes::New(this, (IAttributes**)&clone))
     *object = clone;
     REFCOUNT_ADD(*object)
     return NOERROR;
@@ -162,7 +162,7 @@ ECode CAttributes::Equals(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    if (object == this->Probe(EIID_IInterface)) {
+    if (object == TO_IINTERFACE(this)) {
         *result = TRUE;
         return NOERROR;
     }

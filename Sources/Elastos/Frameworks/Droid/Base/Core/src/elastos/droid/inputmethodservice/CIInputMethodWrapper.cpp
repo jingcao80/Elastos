@@ -85,7 +85,7 @@ ECode CIInputMethodWrapper::constructor(
     if (wrs) wrs->GetWeakReference((IWeakReference**)&mInputMethod);
 
     IContext::Probe(context)->GetApplicationContext((IContext**)&mContext);
-    CHandlerCaller::New(mContext, NULL, THIS_PROBE(IHandlerCallerCallback),
+    CHandlerCaller::New(mContext, NULL, this,
         TRUE /*asyncHandler*/, FALSE, (IHandlerCaller**)&mCaller);
     AutoPtr<IApplicationInfo> appInfo;
     IContext::Probe(context)->GetApplicationInfo((IApplicationInfo**)&appInfo);

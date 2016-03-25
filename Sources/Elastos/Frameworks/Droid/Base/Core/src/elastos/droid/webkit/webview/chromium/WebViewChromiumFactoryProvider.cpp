@@ -437,7 +437,7 @@ ECode WebViewChromiumFactoryProvider::CreateWebView(
     //
     // return wvc;
 
-    IWebViewChromiumFactoryProvider* factoryProvider = (IWebViewChromiumFactoryProvider*)this;
+    IWebViewChromiumFactoryProvider* factoryProvider = this;
     AutoPtr<WebViewChromium> wvc = new WebViewChromium(factoryProvider, webView, privateAccess);
     AutoLock lock(mLock);
     if (mWebViewsToStart != NULL) {

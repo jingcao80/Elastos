@@ -172,7 +172,7 @@ ECode CX500Principal::Equals(
         return NOERROR;
     }
     InterfaceID id1, id2;
-    this->GetInterfaceID(this->Probe(EIID_IInterface), &id1);
+    this->GetInterfaceID(TO_IINTERFACE(this), &id1);
     o->GetInterfaceID(o, &id2);
     if (o == NULL || id1 == id2) {
         *result = FALSE;

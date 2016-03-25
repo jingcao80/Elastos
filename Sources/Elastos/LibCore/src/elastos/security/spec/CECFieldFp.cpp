@@ -28,7 +28,7 @@ ECode CECFieldFp::Equals(
 {
     VALIDATE_NOT_NULL(result)
     // object equals itself
-    if (THIS_PROBE(IInterface) == obj) {
+    if (TO_IINTERFACE(this) == obj) {
         *result = TRUE;
     }
     if (IECFieldFp::Probe(obj)) {

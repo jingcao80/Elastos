@@ -50,7 +50,7 @@ ECode Animator::Pause()
             for (Int32 i = 0; i < numListeners; ++i) {
                 AutoPtr<IInterface> listener;
                 tmpListeners->Get(i, (IInterface**)&listener);
-                IAnimatorPauseListener::Probe(listener)->OnAnimationPause(THIS_PROBE(IAnimator));
+                IAnimatorPauseListener::Probe(listener)->OnAnimationPause(this);
             }
         }
     }
@@ -69,7 +69,7 @@ ECode Animator::Resume()
             for (Int32 i = 0; i < numListeners; ++i) {
                 AutoPtr<IInterface> listener;
                 tmpListeners->Get(i, (IInterface**)&listener);
-                IAnimatorPauseListener::Probe(listener)->OnAnimationResume(THIS_PROBE(IAnimator));
+                IAnimatorPauseListener::Probe(listener)->OnAnimationResume(this);
             }
         }
     }

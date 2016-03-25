@@ -671,7 +671,7 @@ ECode Date::ToGMTString(
     AutoPtr<IGregorianCalendar> gc;
     FAIL_RETURN(CGregorianCalendar::New(gmtZone, (IGregorianCalendar**)&gc));
     (ICalendar::Probe(gc))->SetTimeInMillis(mMilliseconds);
-    (IDateFormat::Probe(sdf))->Format((IDate*)this, gmtStr);
+    (IDateFormat::Probe(sdf))->Format(this, gmtStr);
 
     return NOERROR;
 }
@@ -685,7 +685,7 @@ ECode Date::ToLocaleString(
     CDateFormatHelper::AcquireSingleton((IDateFormatHelper**)&helper);
     AutoPtr<IDateFormat> format;
     helper->GetDateTimeInstance((IDateFormat**)&format);
-    format->Format((IDate*)this, localeStr);
+    format->Format(this, localeStr);
 
     return NOERROR;
 }
@@ -736,7 +736,7 @@ ECode Date::ToString(
     result.AppendChar(' ');
     String displayName;
     Boolean isIn;
-    tz->InDaylightTime((IDate*)this, &isIn);
+    tz->InDaylightTime(this, &isIn);
     tz->GetDisplayName(isIn, ITimeZone::SHORT, &displayName);
     result.Append(displayName);
     result.AppendChar(' ');

@@ -190,7 +190,7 @@ Int32 ForkJoinTask::RecordExceptionalCompletion(
         AutoPtr<ISystem> system;
         Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
         Int32 h;
-        system->IdentityHashCode(THIS_PROBE(IInterface), &h);
+        system->IdentityHashCode(TO_IINTERFACE(this), &h);
         AutoPtr<IReentrantLock> lock = sExceptionTableLock;
         ILock::Probe(lock)->Lock();
 //        try {
@@ -202,7 +202,7 @@ Int32 ForkJoinTask::RecordExceptionalCompletion(
                     (*t)[i] = new ExceptionNode(this, ex, (*t)[i]);
                     break;
                 }
-                if (Object::Equals(e->Probe(EIID_IInterface), THIS_PROBE(IInterface))) // already present
+                if (Object::Equals(e->Probe(EIID_IInterface), TO_IINTERFACE(this))) // already present
                     break;
             }
 //        } finally {
@@ -244,7 +244,7 @@ void ForkJoinTask::ClearExceptionalCompletion()
     AutoPtr<ISystem> sys;
     Elastos::Core::CSystem::AcquireSingleton((ISystem**)&sys);
     Int32 h;
-    sys->IdentityHashCode(THIS_PROBE(IInterface), &h);
+    sys->IdentityHashCode(TO_IINTERFACE(this), &h);
     AutoPtr<IReentrantLock> lock = sExceptionTableLock;
     (ILock::Probe(lock))->Lock();
     // AutoPtr<ArrayOf<ExceptionNode*> > t = sExceptionTable;
@@ -275,7 +275,7 @@ AutoPtr<IThrowable> ForkJoinTask::GetThrowableException()
     AutoPtr<ISystem> sys;
     Elastos::Core::CSystem::AcquireSingleton((ISystem**)&sys);
     Int32 h;
-    sys->IdentityHashCode(THIS_PROBE(IInterface), &h);
+    sys->IdentityHashCode(TO_IINTERFACE(this), &h);
     assert(0 && "TODO");
     return NULL;
     // AutoPtr<ExceptionNode> e;

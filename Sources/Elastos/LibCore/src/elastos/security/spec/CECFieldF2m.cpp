@@ -33,7 +33,7 @@ ECode CECFieldF2m::Equals(
 {
     VALIDATE_NOT_NULL(result)
     // object equals to itself
-    if (THIS_PROBE(IInterface) == obj) {
+    if (TO_IINTERFACE(this) == obj) {
         *result = TRUE;
         return NOERROR;
     }

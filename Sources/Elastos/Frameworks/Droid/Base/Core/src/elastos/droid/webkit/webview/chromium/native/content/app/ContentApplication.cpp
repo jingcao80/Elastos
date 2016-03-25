@@ -59,7 +59,7 @@ ECode ContentApplication::InnerIdleHandler::QueueIdle(
 AutoPtr<TracingControllerElastos> ContentApplication::GetTracingController()
 {
     if (mTracingController == NULL) {
-        AutoPtr<IContext> context = THIS_PROBE(IContext);
+        AutoPtr<IContext> context = this;
         mTracingController = new TracingControllerElastos(context);
     }
     return mTracingController;
@@ -90,7 +90,7 @@ ECode ContentApplication::OnCreate()
 ECode ContentApplication::OnTerminate()
 {
     // try {
-        AutoPtr<IContext> context = THIS_PROBE(IContext);
+        AutoPtr<IContext> context = this;
         GetTracingController()->UnregisterReceiver(context);
     // } catch (SecurityException e) {
     //     // Happens if the process is isolated. Ignore.

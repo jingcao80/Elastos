@@ -70,7 +70,7 @@ ECode SimpleMonthView::MonthViewTouchHelper::SetFocusedVirtualView(
     // getAccessibilityNodeProvider(SimpleMonthView.this).performAction(
     //         virtualViewId, AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
 
-    IView* self = THIS_PROBE(IView);
+    IView* self = mOwner;
     AutoPtr<IAccessibilityNodeProvider> provider;
     self->GetAccessibilityNodeProvider((IAccessibilityNodeProvider**)&provider);
     Boolean resTmp = FALSE;
@@ -89,11 +89,11 @@ ECode SimpleMonthView::MonthViewTouchHelper::ClearFocusedVirtualView()
     //             null);
     // }
 
-    IExploreByTouchHelper* self = (IExploreByTouchHelper*)this;
+    IExploreByTouchHelper* self = this;
     Int32 focusedVirtualView = 0;
     self->GetFocusedVirtualView(&focusedVirtualView);
     if (focusedVirtualView != IExploreByTouchHelper::INVALID_ID) {
-        IView* self = THIS_PROBE(IView);
+        IView* self = mOwner;
         AutoPtr<IAccessibilityNodeProvider> provider;
         self->GetAccessibilityNodeProvider((IAccessibilityNodeProvider**)&provider);
         Boolean resTmp = FALSE;
@@ -249,7 +249,7 @@ AutoPtr<ICharSequence> SimpleMonthView::MonthViewTouchHelper::GetItemDescription
     dataFormat->Format(format, timeMillis, (ICharSequence**)&date);
 
     if (day == mOwner->mSelectedDay) {
-        IView* self = THIS_PROBE(IView);
+        IView* self = mOwner;
         AutoPtr<IContext> context;
         self->GetContext((IContext**)&context);
 

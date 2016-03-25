@@ -320,6 +320,7 @@ ECode SearchView::SearchViewTextWatcher::AfterTextChanged(
 //          SearchView::SearchViewFocusChangeListener
 //==========================================================
 CAR_INTERFACE_IMPL(SearchView::SearchViewFocusChangeListener, Object, IViewOnFocusChangeListener)
+
 SearchView::SearchViewFocusChangeListener::SearchViewFocusChangeListener(
     /* [in] */ SearchView* host)
     : mHost(host)
@@ -331,7 +332,7 @@ ECode SearchView::SearchViewFocusChangeListener::OnFocusChange(
     /* [in] */ Boolean hasFocus)
 {
     if (mHost->mOnQueryTextFocusChangeListener) {
-        mHost->mOnQueryTextFocusChangeListener->OnFocusChange((IView*)this->Probe(EIID_IView), hasFocus);
+        mHost->mOnQueryTextFocusChangeListener->OnFocusChange(mHost, hasFocus);
     }
     return NOERROR;
 }
@@ -340,6 +341,7 @@ ECode SearchView::SearchViewFocusChangeListener::OnFocusChange(
 //          SearchView::SearchViewLayoutChangeListener
 //==========================================================
 CAR_INTERFACE_IMPL(SearchView::SearchViewLayoutChangeListener, Object, IViewOnLayoutChangeListener)
+
 SearchView::SearchViewLayoutChangeListener::SearchViewLayoutChangeListener(
     /* [in] */ SearchView* host)
     : mHost(host)
@@ -432,12 +434,12 @@ ECode SearchView::constructor(
     Int32 layoutResId = 0;
     a->GetResourceId(R::styleable::SearchView_layout, R::layout::search_view, &layoutResId);
     AutoPtr<IView> view;
-    inflater->Inflate(layoutResId, (IViewGroup*)this->Probe(EIID_IViewGroup), TRUE, (IView**)&view);
+    inflater->Inflate(layoutResId, this, TRUE, (IView**)&view);
 
     view = NULL;
     FindViewById(R::id::search_src_text, (IView**)&view);
     mQueryTextView = ISearchViewSearchAutoComplete::Probe(view);
-    mQueryTextView->SetSearchView(THIS_PROBE(ISearchView));
+    mQueryTextView->SetSearchView(this);
 
     FindViewById(R::id::search_edit_frame, (IView**)&mSearchEditFrame);
     FindViewById(R::id::search_plate, (IView**)&mSearchPlate);
@@ -1430,7 +1432,7 @@ void SearchView::OnSearchClicked()
     IView::Probe(mQueryTextView)->RequestFocus(&res);
     SetImeVisibility(TRUE);
     if (mOnSearchClickListener) {
-        mOnSearchClickListener->OnClick((IView*)this->Probe(EIID_IView));
+        mOnSearchClickListener->OnClick(this);
     }
 }
 
@@ -1895,7 +1897,7 @@ ECode SearchView::_SearchAutoComplete::OnWindowFocusChanged(
         context->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&inter);
         AutoPtr<IInputMethodManager> inputManager = IInputMethodManager::Probe(inter);
         Boolean res = FALSE;
-        inputManager->ShowSoftInput((IView*)this->Probe(EIID_IView), 0, &res);
+        inputManager->ShowSoftInput(this, 0, &res);
         // If in landscape mode, then make sure that
         // the ime is in front of the dropdown.
         if (IsLandscapeMode(context)) {
@@ -1929,7 +1931,7 @@ ECode SearchView::_SearchAutoComplete::OnKeyPreIme(
             AutoPtr<IDispatcherState> state;
             GetKeyDispatcherState((IDispatcherState**)&state);
             if (state) {
-                state->StartTracking(event, this->Probe(EIID_IInterface));
+                state->StartTracking(event, TO_IINTERFACE(this));
             }
             *result = TRUE;
             return NOERROR;

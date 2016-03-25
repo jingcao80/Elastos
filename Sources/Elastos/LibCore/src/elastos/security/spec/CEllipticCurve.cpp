@@ -57,7 +57,7 @@ ECode CEllipticCurve::Equals(
     /* [out] */ Boolean *result)
 {
     VALIDATE_NOT_NULL(result)
-    if (THIS_PROBE(IInterface) == other) {
+    if (TO_IINTERFACE(this) == other) {
         *result = TRUE;
         return NOERROR;
     }

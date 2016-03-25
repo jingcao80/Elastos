@@ -27,10 +27,10 @@ PInterface CActivityOne::CMySurfaceHolderCallback::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(ISurfaceHolderCallback*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_ISurfaceHolderCallback) {
-        return (ISurfaceHolderCallback*)this;
+        return this;
     }
 
     return NULL;
@@ -54,7 +54,7 @@ ECode CActivityOne::CMySurfaceHolderCallback::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)(ISurfaceHolderCallback*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_ISurfaceHolderCallback;
     }
     else {
@@ -153,7 +153,7 @@ ECode CActivityOne::OnCreate(
     Activity::OnCreate(savedInstanceState);
     PRINT_ENTER_LEAVE("CActivityOne::OnCreate");
     //SetContentView(0x7f030000);
-    ECode ec = CSurfaceView::New((IContext*)this->Probe(EIID_IContext),
+    ECode ec = CSurfaceView::New(this,
             (ISurfaceView**)&mSurfaceView);
     assert(mSurfaceView != NULL);
 

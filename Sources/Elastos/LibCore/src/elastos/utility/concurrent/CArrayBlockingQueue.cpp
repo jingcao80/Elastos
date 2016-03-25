@@ -323,7 +323,7 @@ ECode CArrayBlockingQueue::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = object == this->Probe(EIID_IInterface);
+    *result = object == TO_IINTERFACE(this);
     return NOERROR;
 }
 
@@ -496,7 +496,7 @@ ECode CArrayBlockingQueue::ToString(
     sb += "[";
     for (Int32 i = mTakeIndex; ; i = Inc(i)) {
         AutoPtr<IInterface> e = (*mItems)[i];
-        if (e.Get() == this->Probe(EIID_IInterface)) {
+        if (e.Get() == TO_IINTERFACE(this)) {
             sb += "(this Collection)";
         }
         else {
@@ -571,7 +571,7 @@ ECode CArrayBlockingQueue::DrainTo(
 
     FAIL_RETURN(CheckNotNull(c));
 
-    if (c == THIS_PROBE(ICollection)) {
+    if (c == this) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (maxElements <= 0) {

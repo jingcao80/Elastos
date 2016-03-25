@@ -299,7 +299,7 @@ ECode CPendingIntent::Equals(
 
     AutoPtr<IPendingIntent> temp = IPendingIntent::Probe(o);
     if (temp != NULL) {
-        if(temp.Get() == (IPendingIntent*)this) {
+        if(temp.Get() == this) {
             *rst = TRUE;
             return NOERROR;
         }

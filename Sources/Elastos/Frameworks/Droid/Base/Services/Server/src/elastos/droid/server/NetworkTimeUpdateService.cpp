@@ -384,7 +384,7 @@ ECode NetworkTimeUpdateService::SettingsObserver::Observe(
     AutoPtr<ISettingsGlobal> settingsGlobal;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);
     settingsGlobal->GetUriFor(String("auto_time"), (IUri**)&uri);
-    resolver->RegisterContentObserver((IUri*)uri, FALSE, (IContentObserver*)this, 0);
+    resolver->RegisterContentObserver((IUri*)uri, FALSE, this, 0);
     return NOERROR;
 }
 

@@ -590,14 +590,14 @@ ECode SelectFileDialog::NativeOnFileSelected(
     /* [in] */ const String& filePath,
     /* [in] */ const String& displayName)
 {
-    Elastos_SelectFileDialog_nativeOnFileSelected(THIS_PROBE(IInterface), (Handle64)nativeSelectFileDialogImpl, filePath, displayName);
+    Elastos_SelectFileDialog_nativeOnFileSelected(TO_IINTERFACE(this), (Handle64)nativeSelectFileDialogImpl, filePath, displayName);
     return NOERROR;
 }
 
 ECode SelectFileDialog::NativeOnFileNotSelected(
     /* [in] */ Handle64 nativeSelectFileDialogImpl)
 {
-    Elastos_SelectFileDialog_nativeOnFileNotSelected(THIS_PROBE(IInterface), (Handle64)nativeSelectFileDialogImpl);
+    Elastos_SelectFileDialog_nativeOnFileNotSelected(TO_IINTERFACE(this), (Handle64)nativeSelectFileDialogImpl);
     return NOERROR;
 }
 

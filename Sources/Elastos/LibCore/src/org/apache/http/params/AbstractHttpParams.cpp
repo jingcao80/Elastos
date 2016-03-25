@@ -48,7 +48,7 @@ ECode AbstractHttpParams::SetInt64Parameter(
     CInteger64::New(value, (IInteger64**)&i);
     AutoPtr<IHttpParams> p;
     SetParameter(name, i, (IHttpParams**)&p);
-    *httpParams = (IHttpParams*)this;
+    *httpParams = this;
     REFCOUNT_ADD(*httpParams)
     return NOERROR;
 }
@@ -78,7 +78,7 @@ ECode AbstractHttpParams::SetInt32Parameter(
     CInteger32::New(value, (IInteger32**)&i);
     AutoPtr<IHttpParams> p;
     SetParameter(name, i, (IHttpParams**)&p);
-    *httpParams = (IHttpParams*)this;
+    *httpParams = this;
     REFCOUNT_ADD(*httpParams)
     return NOERROR;
 }
@@ -108,7 +108,7 @@ ECode AbstractHttpParams::SetDoubleParameter(
     CDouble::New(value, (IDouble**)&i);
     AutoPtr<IHttpParams> p;
     SetParameter(name, i, (IHttpParams**)&p);
-    *httpParams = (IHttpParams*)this;
+    *httpParams = this;
     REFCOUNT_ADD(*httpParams)
     return NOERROR;
 }
@@ -138,7 +138,7 @@ ECode AbstractHttpParams::SetBooleanParameter(
     CBoolean::New(value, (IBoolean**)&i);
     AutoPtr<IHttpParams> p;
     SetParameter(name, i, (IHttpParams**)&p);
-    *httpParams = (IHttpParams*)this;
+    *httpParams = this;
     REFCOUNT_ADD(*httpParams)
     return NOERROR;
 }

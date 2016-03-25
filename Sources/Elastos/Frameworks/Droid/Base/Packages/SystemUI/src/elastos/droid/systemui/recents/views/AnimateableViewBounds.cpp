@@ -85,7 +85,7 @@ void AnimateableViewBounds::AnimateClipTop(
     AutoPtr<ArrayOf<Int32> > params = ArrayOf<Int32>::Alloc(1);
     (*params)[0] = top;
     AutoPtr<IObjectAnimator> objectAnimator;
-    oaHelper->OfInt32((IObject*)this, String("clipTop"), params, (IObjectAnimator**)&objectAnimator);
+    oaHelper->OfInt32(TO_IINTERFACE(this), String("clipTop"), params, (IObjectAnimator**)&objectAnimator);
     mClipTopAnimator = IAnimator::Probe(objectAnimator);
     mClipTopAnimator->SetDuration(duration);
     mClipTopAnimator->SetInterpolator(
@@ -131,7 +131,7 @@ void AnimateableViewBounds::AnimateClipRight(
     AutoPtr<ArrayOf<Int32> > params = ArrayOf<Int32>::Alloc(1);
     (*params)[0] = right;
     AutoPtr<IObjectAnimator> objectAnimator;
-    oaHelper->OfInt32((IObject*)this, String("clipRight"), params, (IObjectAnimator**)&objectAnimator);
+    oaHelper->OfInt32(TO_IINTERFACE(this), String("clipRight"), params, (IObjectAnimator**)&objectAnimator);
     mClipRightAnimator = IAnimator::Probe(objectAnimator);
     mClipRightAnimator->SetDuration(duration);
     mClipRightAnimator->SetInterpolator(
@@ -174,7 +174,7 @@ void AnimateableViewBounds::AnimateClipBottom(
     AutoPtr<ArrayOf<Int32> > params = ArrayOf<Int32>::Alloc(1);
     (*params)[0] = bottom;
     AutoPtr<IObjectAnimator> objectAnimator;
-    oaHelper->OfInt32((IObject*)this, String("clipBottom"), params, (IObjectAnimator**)&objectAnimator);
+    oaHelper->OfInt32(TO_IINTERFACE(this), String("clipBottom"), params, (IObjectAnimator**)&objectAnimator);
     mClipBottomAnimator = IAnimator::Probe(objectAnimator);
     mClipBottomAnimator->SetDuration(duration);
     mClipBottomAnimator->SetInterpolator(

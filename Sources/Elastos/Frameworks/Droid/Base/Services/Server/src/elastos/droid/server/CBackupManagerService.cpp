@@ -421,7 +421,7 @@ PInterface CBackupManagerService::FullBackupParams::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (IInterface*)this;
+        return this;
     }
     if (riid == EIID_FullBackupParams) {
         return reinterpret_cast<PInterface>(this);
@@ -439,7 +439,7 @@ PInterface CBackupManagerService::FullRestoreParams::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (IInterface*)this;
+        return this;
     }
     if (riid == EIID_FullRestoreParams) {
         return reinterpret_cast<PInterface>(this);
@@ -1244,7 +1244,7 @@ void CBackupManagerService::PerformBackupTask::ExecuteNextState(
     mCurrentState = nextState;
     AutoPtr<IMessage> msg;
     mHost->mBackupHandler->ObtainMessage(MSG_BACKUP_RESTORE_STEP, (IMessage**)&msg);
-    msg->SetObj((IInterface*)this);
+    msg->SetObj(this);
     Boolean result;
     mHost->mBackupHandler->SendMessage(msg, &result);
 }
@@ -4259,7 +4259,7 @@ void CBackupManagerService::PerformRestoreTask::ExecuteNextState(
     mCurrentState = nextState;
     AutoPtr<IMessage> msg;
     mHost->mBackupHandler->ObtainMessage(MSG_BACKUP_RESTORE_STEP, (IMessage**)&msg);
-    msg->SetObj((IInterface*)this);
+    msg->SetObj(this);
     Boolean result;
     mHost->mBackupHandler->SendMessage(msg, &result);
 }

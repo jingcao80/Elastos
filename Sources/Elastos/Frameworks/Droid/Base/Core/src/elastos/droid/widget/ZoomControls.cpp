@@ -40,7 +40,7 @@ ECode ZoomControls::constructor(
     context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&svTemp);
     inflater = ILayoutInflater::Probe(svTemp);
     AutoPtr<IView> v;
-    inflater->Inflate(R::layout::zoom_controls, THIS_PROBE(IViewGroup), // we are the parent
+    inflater->Inflate(R::layout::zoom_controls, this, // we are the parent
             TRUE, (IView**)&v);
 
     AutoPtr<IView> view;

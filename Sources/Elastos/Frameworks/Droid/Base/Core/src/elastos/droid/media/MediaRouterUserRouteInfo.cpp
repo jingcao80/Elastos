@@ -228,7 +228,7 @@ ECode MediaRouterUserRouteInfo::SetVolume(
         AutoPtr<MediaRouterRouteGroup> group =
             (MediaRouterRouteGroup*)((((MediaRouterRouteInfo*)IMediaRouterRouteInfo::Probe(this))->mGroup).Get());
         if (group != NULL) {
-            group->MemberVolumeChanged((MediaRouterRouteInfo*)this);
+            group->MemberVolumeChanged(this);
         }
     }
     return NOERROR;

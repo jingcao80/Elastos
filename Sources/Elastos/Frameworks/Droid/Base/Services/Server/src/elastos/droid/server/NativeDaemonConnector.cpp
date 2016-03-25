@@ -255,7 +255,7 @@ NativeDaemonConnector::NativeDaemonConnector(
 
 ECode NativeDaemonConnector::Run()
 {
-    CHandler::New(mLooper, THIS_PROBE(IHandlerCallback), FALSE, (IHandler**)&mCallbackHandler);
+    CHandler::New(mLooper, this, FALSE, (IHandler**)&mCallbackHandler);
 
     while (TRUE) {
 //        try {

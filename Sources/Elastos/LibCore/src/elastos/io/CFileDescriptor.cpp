@@ -61,11 +61,11 @@ ECode CFileDescriptor::Sync()
     AutoPtr<IOs> os;
     libcore->GetOs((IOs**)&os);
     Boolean isAtty;
-    if (os->Isatty(THIS_PROBE(IFileDescriptor), &isAtty), isAtty) {
-        return os->Tcdrain(THIS_PROBE(IFileDescriptor));
+    if (os->Isatty(this, &isAtty), isAtty) {
+        return os->Tcdrain(this);
     }
     else {
-        return os->Fsync(THIS_PROBE(IFileDescriptor));
+        return os->Fsync(this);
     }
     // } catch (ErrnoException errnoException) {
     //     SyncFailedException sfe = new SyncFailedException(errnoException.getMessage());

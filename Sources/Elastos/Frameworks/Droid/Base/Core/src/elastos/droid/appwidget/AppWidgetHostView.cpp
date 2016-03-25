@@ -498,7 +498,7 @@ ECode AppWidgetHostView::UpdateAppWidget(
         // Try normal RemoteView inflation
         if (content == NULL) {
             //try {
-            remoteViews->Apply(mContext, (IViewGroup*)this->Probe(EIID_IViewGroup),
+            remoteViews->Apply(mContext, this,
                 mOnClickHandler, (IView**)&content);
                 if (LOGD) {
                     Logger::D(TAG, "had to inflate new layout");
@@ -695,7 +695,7 @@ AutoPtr<IView> AppWidgetHostView::GetDefaultView()
                 layoutId = kgLayoutId == 0 ? layoutId : kgLayoutId;
             }
         }
-        inflater->Inflate(layoutId, (IViewGroup*)this->Probe(EIID_IViewGroup), FALSE, (IView**)&defaultView);
+        inflater->Inflate(layoutId, this, FALSE, (IView**)&defaultView);
     }
     else {
         Logger::W(TAG, "can't inflate defaultView because mInfo is missing");

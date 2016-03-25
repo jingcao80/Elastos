@@ -223,7 +223,7 @@ ECode Int16Buffer::Put(
 ECode Int16Buffer::Put(
     /* [in] */ IInt16Buffer* src)
 {
-    if (src == (IInt16Buffer*)this->Probe(EIID_IInt16Buffer)) {
+    if (src == this) {
         // throw new IllegalArgumentException("src == this");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

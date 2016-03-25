@@ -70,13 +70,13 @@ ECode InterstitialPageDelegateElastos::OnNativeDestroyed()
 Handle64 InterstitialPageDelegateElastos::NativeInit(
     /* [in] */ const String& htmlContent)
 {
-    return Elastos_InterstitialPageDelegateAndroid_nativeInit(THIS_PROBE(IInterface), htmlContent);
+    return Elastos_InterstitialPageDelegateAndroid_nativeInit(TO_IINTERFACE(this), htmlContent);
 }
 
 ECode InterstitialPageDelegateElastos::NativeProceed(
     /* [in] */ Handle64 nativeInterstitialPageDelegateElastos)
 {
-    Elastos_InterstitialPageDelegateAndroid_nativeProceed(THIS_PROBE(IInterface),
+    Elastos_InterstitialPageDelegateAndroid_nativeProceed(TO_IINTERFACE(this),
             nativeInterstitialPageDelegateElastos);
     return NOERROR;
 }
@@ -84,7 +84,7 @@ ECode InterstitialPageDelegateElastos::NativeProceed(
 ECode InterstitialPageDelegateElastos::NativeDontProceed(
     /* [in] */ Handle64 nativeInterstitialPageDelegateElastos)
 {
-    Elastos_InterstitialPageDelegateAndroid_nativeDontProceed(THIS_PROBE(IInterface),
+    Elastos_InterstitialPageDelegateAndroid_nativeDontProceed(TO_IINTERFACE(this),
             nativeInterstitialPageDelegateElastos);
     return NOERROR;
 }

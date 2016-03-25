@@ -1948,7 +1948,7 @@ ECode CForkJoinPool::AwaitTermination(
 
     if (Thread::Interrupted())
         return E_INTERRUPTED_EXCEPTION;
-    if (Object::Equals(THIS_PROBE(IInterface), mCommon->Probe(EIID_IInterface))) {
+    if (Object::Equals(TO_IINTERFACE(this), mCommon->Probe(EIID_IInterface))) {
         Boolean b = FALSE;
         AwaitQuiescence(timeout, unit, &b);
         *result = FALSE;
@@ -2005,7 +2005,7 @@ ECode CForkJoinPool::AwaitQuiescence(
     AutoPtr<IThread> thread = Thread::GetCurrentThread();
     if (thread->Probe(EIID_IForkJoinWorkerThread) != NULL) {
         wt = (ForkJoinWorkerThread*)IForkJoinWorkerThread::Probe(thread);
-        if (Object::Equals(wt->mPool->Probe(EIID_IInterface), THIS_PROBE(IInterface))) {
+        if (Object::Equals(wt->mPool->Probe(EIID_IInterface), TO_IINTERFACE(this))) {
             HelpQuiescePool(wt->mWorkQueue);
             *result = TRUE;
             return NOERROR;

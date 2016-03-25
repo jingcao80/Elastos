@@ -112,7 +112,7 @@ ECode RadioGroup::CheckedStateTracker::OnCheckedChanged(
     mHost->mProtectFromCheckedChange = FALSE;
 
     Int32 id;
-    IVIEW_PROBE(buttonView)->GetId(&id);
+    IView::Probe(buttonView)->GetId(&id);
     mHost->SetCheckedId(id);
 
     return NOERROR;
@@ -134,7 +134,7 @@ ECode RadioGroup::PassThroughHierarchyChangeListener::OnChildViewAdded(
     /* [in] */ IView* child)
 {
     IRadioButton* rb = IRadioButton::Probe(child);
-    IView* hostView = IVIEW_PROBE(mHost);
+    IView* hostView = IView::Probe(mHost);
     if (parent == hostView && NULL != rb) {
         Int32 id;
         child->GetId(&id);
@@ -158,7 +158,7 @@ ECode RadioGroup::PassThroughHierarchyChangeListener::OnChildViewRemoved(
     /* [in] */ IView* child)
 {
     IRadioButton* rb = IRadioButton::Probe(child);
-    IView* hostView = IVIEW_PROBE(mHost);
+    IView* hostView = IView::Probe(mHost);
     if (parent == hostView && NULL != rb) {
         ICompoundButton::Probe(rb)->SetOnCheckedChangeWidgetListener(NULL);
     }
@@ -270,7 +270,7 @@ ECode RadioGroup::AddView(
             }
             mProtectFromCheckedChange = FALSE;
             Int32 id;
-            IVIEW_PROBE(child)->GetId(&id);
+            IView::Probe(child)->GetId(&id);
             SetCheckedId(id);
         }
     }
@@ -304,7 +304,7 @@ void RadioGroup::SetCheckedId(
 {
     mCheckedId = id;
     if (mOnCheckedChangeListener != NULL) {
-        mOnCheckedChangeListener->OnCheckedChanged(THIS_PROBE(IRadioGroup), mCheckedId);
+        mOnCheckedChangeListener->OnCheckedChanged(this, mCheckedId);
     }
 }
 

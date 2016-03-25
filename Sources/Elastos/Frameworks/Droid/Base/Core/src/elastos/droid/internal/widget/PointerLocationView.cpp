@@ -1007,7 +1007,7 @@ ECode PointerLocationView::OnAttachedToWindow()
 
     AutoPtr<IHandler> h;
     GetHandler((IHandler**)&h);
-    mIm->RegisterInputDeviceListener(THIS_PROBE(IInputDeviceListener), h);
+    mIm->RegisterInputDeviceListener(this, h);
     LogInputDevices();
     return NOERROR;
 }
@@ -1016,7 +1016,7 @@ ECode PointerLocationView::OnDetachedFromWindow()
 {
     View::OnDetachedFromWindow();
 
-    mIm->UnregisterInputDeviceListener(THIS_PROBE(IInputDeviceListener));
+    mIm->UnregisterInputDeviceListener(this);
     return NOERROR;
 }
 

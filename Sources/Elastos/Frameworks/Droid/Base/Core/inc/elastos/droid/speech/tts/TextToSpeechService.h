@@ -216,8 +216,11 @@ public:
      */
     class UtteranceSpeechItem
         : public SpeechItem
+        , public IUtteranceProgressDispatcher
     {
     public:
+        CAR_INTERFACE_DECL()
+
         UtteranceSpeechItem();
 
         UtteranceSpeechItem(

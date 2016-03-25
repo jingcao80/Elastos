@@ -58,7 +58,7 @@ ECode CMainActivity::OnCreate(
     mSamples->Add(data->Probe(EIID_IInterface));
 
     AutoPtr<IArrayAdapter> adapter;
-    CArrayAdapter::New((IContext*)this->Probe(EIID_IContext),
+    CArrayAdapter::New(this,
                 Elastos::Droid::R::layout::simple_list_item_1,
                 Elastos::Droid::R::id::text1,
                 mSamples, (IArrayAdapter**)&adapter);
@@ -90,7 +90,7 @@ Slogger::D("CMainActivity", "OnListItemClick, pos=[%d]=========2", pos);
             ClassID id;
             id.pUunm = (char*)malloc(80);
             ((CSample*)data.Get())->mActivityClass->GetId(&id);
-            CIntent::New((IContext*)this->Probe(EIID_IContext), id, (IIntent**)&intent);
+            CIntent::New(this, id, (IIntent**)&intent);
             free(id.pUunm);
 
             break;

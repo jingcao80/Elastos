@@ -55,7 +55,7 @@ void CMediaRouterService::ClientRecord::Dispose()
     if (binder != NULL) {
         AutoPtr<IProxy> proxy = (IProxy*)binder->Probe(EIID_IProxy);
         Boolean result;
-        proxy->UnlinkToDeath((IProxyDeathRecipient*)this, 0, &result);
+        proxy->UnlinkToDeath(this, 0, &result);
     }
 }
 
@@ -135,7 +135,7 @@ CMediaRouterService::UserHandler::UserHandler(
     , mClientStateUpdateScheduled(FALSE)
 {
     mWatcher = new RemoteDisplayProviderWatcher(service->mContext, (RemoteDisplayProviderWatcher::ICallback*)this,
-            (IHandler*)this, mUserRecord->mUserId);
+            this, mUserRecord->mUserId);
 }
 
 PInterface CMediaRouterService::UserHandler::Probe(
@@ -1124,7 +1124,7 @@ ECode CMediaRouterService::constructor(
     /* [in] */ IContext* context)
 {
     mContext = context;
-    Watchdog::GetInstance()->AddMonitor((IWatchdogMonitor*)this->Probe(EIID_IWatchdogMonitor));
+    Watchdog::GetInstance()->AddMonitor(this);
     return NOERROR;
 }
 

@@ -17,7 +17,7 @@ ECode SelectorProviderImpl::OpenDatagramChannel(
     VALIDATE_NOT_NULL(ppChannel)
 
     AutoPtr<DatagramChannelImpl> dci = new DatagramChannelImpl();
-    dci->constructor(THIS_PROBE(ISelectorProvider));
+    dci->constructor(this);
 
     *ppChannel = IDatagramChannel::Probe(dci);
     REFCOUNT_ADD(*ppChannel)
@@ -38,7 +38,7 @@ ECode SelectorProviderImpl::OpenSelector(
     /* [out] */ IAbstractSelector** ppSelector)
 {
     VALIDATE_NOT_NULL(ppSelector)
-    return CSelectorImpl::New(THIS_PROBE(ISelectorProvider), ppSelector);
+    return CSelectorImpl::New(this, ppSelector);
 }
 
 ECode SelectorProviderImpl::OpenServerSocketChannel(

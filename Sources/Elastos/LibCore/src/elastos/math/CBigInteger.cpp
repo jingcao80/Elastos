@@ -383,7 +383,7 @@ ECode CBigInteger::Abs(
     VALIDATE_NOT_NULL(result);
     AutoPtr<BigInt> bigInt = GetBigInt();
     if (bigInt->Sign() >= 0) {
-        *result = (IBigInteger*)this;
+        *result = this;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -402,7 +402,7 @@ ECode CBigInteger::Negate(
     AutoPtr<BigInt> bigInt = GetBigInt();
     Int32 sign = bigInt->Sign();
     if (sign == 0) {
-        *result = (IBigInteger*)this;
+        *result = this;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -423,7 +423,7 @@ ECode CBigInteger::Add(
     AutoPtr<BigInt> lhs = GetBigInt();
     AutoPtr<BigInt> rhs = ((CBigInteger*)value)->GetBigInt();
     if (rhs->Sign() == 0) {
-        *result = (IBigInteger*)this;
+        *result = this;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -448,7 +448,7 @@ ECode CBigInteger::Subtract(
     AutoPtr<BigInt> lhs = GetBigInt();
     AutoPtr<BigInt> rhs = ((CBigInteger*)value)->GetBigInt();
     if (rhs->Sign() == 0) {
-        *result = (IBigInteger*)this;
+        *result = this;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -486,7 +486,7 @@ ECode CBigInteger::ShiftLeft(
     VALIDATE_NOT_NULL(result);
 
     if (n == 0) {
-        *result = (IBigInteger*)this;
+        *result = this;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -494,7 +494,7 @@ ECode CBigInteger::ShiftLeft(
     Int32 sign;
     GetSignum(&sign);
     if (sign == 0) {
-        *result = (IBigInteger*)this;
+        *result = this;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -522,7 +522,7 @@ ECode CBigInteger::ShiftLeftOneBit(
     Int32 signum;
     GetSignum(&signum);
     if (signum == 0) {
-        *result = (IBigInteger*)this;
+        *result = this;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -613,7 +613,7 @@ ECode CBigInteger::SetBit(
         return BitLevel::FlipBit(this, n, result);
     }
     else {
-        *result = (IBigInteger*)this;
+        *result = this;
         REFCOUNT_ADD(*result);
     }
 
@@ -632,7 +632,7 @@ ECode CBigInteger::ClearBit(
         BitLevel::FlipBit(this, n, result);
     }
     else {
-        *result = (IBigInteger*)this;
+        *result = this;
         REFCOUNT_ADD(*result);
     }
 
@@ -818,7 +818,7 @@ ECode CBigInteger::Min(
     Int32 cmpResult;
     CompareTo(value, &cmpResult);
     if (cmpResult == -1) {
-        *result = (IBigInteger*)this;
+        *result = this;
         REFCOUNT_ADD(*result);
     }
     else {
@@ -840,7 +840,7 @@ ECode CBigInteger::Max(
     Int32 cmpResult;
     CompareTo(value, &cmpResult);
     if (cmpResult == 1) {
-        *result = (IBigInteger*)this;
+        *result = this;
         REFCOUNT_ADD(*result);
     }
     else {

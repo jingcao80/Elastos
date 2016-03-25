@@ -450,11 +450,6 @@ ECode NotificationRecord::ToString(
 {
     VALIDATE_NOT_NULL(str);
 
-    AutoPtr<ISystem> sys;
-    CSystem::AcquireSingleton((ISystem**)&sys);
-    Int32 HashCode;
-    sys->IdentityHashCode((INotificationRecord*)this, &HashCode);
-
     String packageName;
     mSbn->GetPackageName(&packageName);
     AutoPtr<IUserHandle> user;
@@ -472,12 +467,12 @@ ECode NotificationRecord::ToString(
 
     AutoPtr<INotification> notification;
     mSbn->GetNotification((INotification**)&notification);
-    String result2;
-    IObject::Probe(notification)->ToString(&result2);
-
-    str->AppendFormat("NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s score=%d key=%s: %s)",
-            HashCode, packageName.string(), result1.string(), id, tag.string(),
-            score, key.string(), result2.string());
+    String result2 = Object::ToString(notification);
+    String info;
+    info.AppendFormat("NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s score=%d key=%s: %s)",
+        (Int32)this, packageName.string(), result1.string(), id, tag.string(),
+        score, key.string(), result2.string());
+    *str = info;
     return NOERROR;
 }
 

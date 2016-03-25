@@ -251,7 +251,7 @@ ECode AbstractCursor::FillWindow(
     /* [in] */ Int32 position,
     /* [in] */ ICursorWindow* window)
 {
-    DatabaseUtils::CursorFillWindow((ICursor*)this->Probe(EIID_ICursor), position, window);
+    DatabaseUtils::CursorFillWindow(this, position, window);
     return NOERROR;
 }
 
@@ -459,7 +459,7 @@ ECode AbstractCursor::SetNotificationUri(
             mContentResolver->UnregisterContentObserver(mSelfObserver);
         }
         AutoPtr<SelfContentObserver> sco = new SelfContentObserver();
-        sco->constructor(THIS_PROBE(IAbstractCursor));
+        sco->constructor(this);
         mSelfObserver = sco.Get();
         mContentResolver->RegisterContentObserver(mNotifyUri, TRUE, mSelfObserver);
         mSelfObserverRegistered = TRUE;

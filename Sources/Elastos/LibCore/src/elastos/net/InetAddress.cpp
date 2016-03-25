@@ -172,7 +172,7 @@ ECode InetAddress::GetByNameOnNet(
 ECode InetAddress::GetHostAddress(
     /* [out] */ String* address)
 {
-    return CLibcore::sOs->Getnameinfo(THIS_PROBE(IInetAddress), NI_NUMERICHOST, address);
+    return CLibcore::sOs->Getnameinfo(this, NI_NUMERICHOST, address);
 }
 
 ECode InetAddress::GetHostName(
@@ -201,7 +201,7 @@ ECode InetAddress::GetCanonicalHostName(
 
     AutoPtr<IInetAddress> addr;
     if(SUCCEEDED(GetHostByAddrImpl(this, (IInetAddress**)&addr))) {
-        InetAddress* inetAddress = (InetAddress*)THIS_PROBE(IInetAddress);
+        InetAddress* inetAddress = (InetAddress*)this;
         *canonicalName = inetAddress->mHostname;
     }
     else{

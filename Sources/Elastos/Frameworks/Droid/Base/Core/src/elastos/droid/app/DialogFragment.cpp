@@ -69,7 +69,7 @@ ECode DialogFragment::Show(
     mShownByMe = TRUE;
     AutoPtr<IFragmentTransaction> ft;
     manager->BeginTransaction((IFragmentTransaction**)&ft);
-    ft->Add((IFragment*)this->Probe(EIID_IFragment), tag);
+    ft->Add(this, tag);
     Int32 id;
     ft->Commit(&id);
     return NOERROR;
@@ -82,7 +82,7 @@ ECode DialogFragment::Show(
 {
     mDismissed = FALSE;
     mShownByMe = TRUE;
-    transaction->Add((IFragment*)this->Probe(EIID_IFragment), tag);
+    transaction->Add(this, tag);
     mViewDestroyed = FALSE;
     transaction->Commit(&mBackStackId);
     *id = mBackStackId;
@@ -125,7 +125,7 @@ void DialogFragment::DismissInternal(
         AutoPtr<IFragmentManager> frMgr;
         GetFragmentManager((IFragmentManager**)&frMgr);
         frMgr->BeginTransaction((IFragmentTransaction**)&ft);
-        ft->Remove((IFragment*)this->Probe(EIID_IFragment));
+        ft->Remove(this);
         if (allowStateLoss) {
             Int32 result;
             ft->CommitAllowingStateLoss(&result);
@@ -329,8 +329,8 @@ ECode DialogFragment::OnActivityCreated(
     mDialog->SetCancelable(mCancelable);
     Boolean result;
     mDialog->TakeCancelAndDismissListeners(String("DialogFragment"),
-        (IDialogInterfaceOnCancelListener*)this->Probe(EIID_IDialogInterfaceOnCancelListener),
-        (IDialogInterfaceOnDismissListener*)this->Probe(EIID_IDialogInterfaceOnDismissListener),
+        this,
+        this,
         &result);
     if (!result) {
 //         throw new IllegalStateException(

@@ -108,26 +108,26 @@ ECode PackageMonitor::Register(
 
     AutoPtr<IIntent> intent;
     if (NULL != user) {
-        FAIL_RETURN(context->RegisterReceiverAsUser(THIS_PROBE(IBroadcastReceiver),
+        FAIL_RETURN(context->RegisterReceiverAsUser(this,
                 user, sPackageFilt, String(NULL), mRegisteredHandler, (IIntent**)&intent))
         intent = NULL;
-        FAIL_RETURN(context->RegisterReceiverAsUser(THIS_PROBE(IBroadcastReceiver),
+        FAIL_RETURN(context->RegisterReceiverAsUser(this,
                 user, sNonDataFilt, String(NULL), mRegisteredHandler, (IIntent**)&intent))
         if (externalStorage) {
             intent = NULL;
-            FAIL_RETURN(context->RegisterReceiverAsUser(THIS_PROBE(IBroadcastReceiver),
+            FAIL_RETURN(context->RegisterReceiverAsUser(this,
                     user, sExternalFilt, String(NULL), mRegisteredHandler, (IIntent**)&intent))
         }
     }
     else {
-        FAIL_RETURN(context->RegisterReceiver(THIS_PROBE(IBroadcastReceiver),
+        FAIL_RETURN(context->RegisterReceiver(this,
                 sPackageFilt, String(NULL), mRegisteredHandler, (IIntent**)&intent))
         intent = NULL;
-        FAIL_RETURN(context->RegisterReceiver(THIS_PROBE(IBroadcastReceiver),
+        FAIL_RETURN(context->RegisterReceiver(this,
                 sNonDataFilt, String(NULL), mRegisteredHandler, (IIntent**)&intent))
         if (externalStorage) {
             intent = NULL;
-            FAIL_RETURN(context->RegisterReceiver(THIS_PROBE(IBroadcastReceiver),
+            FAIL_RETURN(context->RegisterReceiver(this,
                     sExternalFilt, String(NULL), mRegisteredHandler, (IIntent**)&intent))
         }
     }
@@ -150,7 +150,7 @@ ECode PackageMonitor::Unregister()
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    FAIL_RETURN(mRegisteredContext->UnregisterReceiver(THIS_PROBE(IBroadcastReceiver)))
+    FAIL_RETURN(mRegisteredContext->UnregisterReceiver(this))
     mRegisteredContext = NULL;
     return NOERROR;
 }

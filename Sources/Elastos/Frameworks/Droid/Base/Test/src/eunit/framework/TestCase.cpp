@@ -9,6 +9,8 @@ using Elastos::Core::CString;
 namespace Eunit {
 namespace Framework {
 
+CAR_INTERFACE_IMPL_2(TestCase, Object, ITest, ITestCase)
+
 TestCase::TestCase()
 {}
 
@@ -19,86 +21,6 @@ TestCase::TestCase(
 
 ECode TestCase::Initialize()
 {
-    return NOERROR;
-}
-
-PInterface TestCase::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(ITest*)this;
-    }
-    else if (riid == EIID_IObject) {
-        return (IObject*)this;
-    }
-    else if (riid == EIID_ITest) {
-        return (ITest*)this;
-    }
-    else if (riid == EIID_ITestCase) {
-        return (ITestCase*)this;
-    }
-    return NULL;
-}
-
-UInt32 TestCase::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 TestCase::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode TestCase::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    if (NULL == pIID) return E_INVALID_ARGUMENT;
-
-    if (pObject == (IInterface *)(IObject *)this) {
-        *pIID = EIID_IObject;
-        return NOERROR;
-    }
-    else if (pObject == (IInterface *)(ITest *)this) {
-        *pIID = EIID_ITest;
-        return NOERROR;
-    }
-    else if (pObject == (IInterface *)(ITestCase *)this) {
-        *pIID = EIID_ITestCase;
-        return NOERROR;
-    }
-
-    return E_INVALID_ARGUMENT;
-}
-
-ECode TestCase::Aggregate(
-    /* [in] */ AggrType aggrType,
-    /* [in] */ PInterface pObject)
-{
-    assert(0);
-    return NOERROR;
-}
-
-ECode TestCase::GetDomain(
-    /* [out] */ PInterface *ppObject)
-{
-    assert(0);
-    return NOERROR;
-}
-
-ECode TestCase::Equals(
-    /* [in] */ IInterface* other,
-    /* [out] */ Boolean * result)
-{
-    assert(0);
-    return NOERROR;
-}
-
-ECode TestCase::GetHashCode(
-    /* [out] */ Int32* hash)
-{
-    assert(0);
     return NOERROR;
 }
 
@@ -131,7 +53,7 @@ ECode TestCase::Run(
 ECode TestCase::Run(
     /* [in] */ ITestResult* result)
 {
-    return result->Run((ITestCase*)this->Probe(EIID_ITestCase));
+    return result->Run(this);
 }
 
 ECode TestCase::IsFailed(

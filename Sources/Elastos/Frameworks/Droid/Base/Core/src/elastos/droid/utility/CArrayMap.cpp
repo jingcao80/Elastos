@@ -865,7 +865,7 @@ ECode CArrayMap::ContainsAll(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = MapCollections::ContainsAllHelper(THIS_PROBE(IMap), collection);
+    *result = MapCollections::ContainsAllHelper(this, collection);
     return NOERROR;
 }
 
@@ -906,7 +906,7 @@ ECode CArrayMap::RemoveAll(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = MapCollections::RemoveAllHelper(THIS_PROBE(IMap), collection);
+    *result = MapCollections::RemoveAllHelper(this, collection);
     return NOERROR;
 }
 
@@ -922,7 +922,7 @@ ECode CArrayMap::RetainAll(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = MapCollections::RetainAllHelper(THIS_PROBE(IMap), collection);
+    *result = MapCollections::RetainAllHelper(this, collection);
     return NOERROR;
 }
 

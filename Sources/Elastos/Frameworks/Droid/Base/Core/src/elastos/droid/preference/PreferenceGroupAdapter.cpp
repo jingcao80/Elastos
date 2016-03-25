@@ -242,7 +242,7 @@ void PreferenceGroupAdapter::FlattenPreferenceGroup(
             }
         }
 
-        preference->SetOnPreferenceChangeInternalListener((IPreferenceOnPreferenceChangeInternalListener*)this);
+        preference->SetOnPreferenceChangeInternalListener(this);
     }
 }
 

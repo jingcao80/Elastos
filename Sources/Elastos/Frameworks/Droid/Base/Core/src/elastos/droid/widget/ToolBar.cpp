@@ -2181,7 +2181,7 @@ Boolean ToolBar::ShouldLayout(
     Int32 visibility;
     return view != NULL
         && (view->GetParent((IViewParent**)&parent), IView::Probe(parent))
-        == (IView*)this->Probe(EIID_IView)
+        == this
         && (view->GetVisibility(&visibility), visibility) != IView::GONE;
 }
 

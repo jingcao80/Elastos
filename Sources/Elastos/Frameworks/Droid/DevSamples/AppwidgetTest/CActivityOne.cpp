@@ -59,19 +59,19 @@ PInterface CActivityOne::MyListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IViewOnTouchListener*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IViewOnTouchListener) {
-        return (IViewOnTouchListener*)this;
+        return this;
     }
     else if (riid == EIID_IViewOnKeyListener) {
-        return (IViewOnKeyListener*)this;
+        return this;
     }
     else if (riid == EIID_IAdapterViewOnItemClickListener) {
-        return (IAdapterViewOnItemClickListener*)this;
+        return this;
     }
     else if (riid == EIID_IViewOnClickListener) {
-        return (IViewOnClickListener*)this;
+        return this;
     }
 
     return NULL;
@@ -95,7 +95,7 @@ ECode CActivityOne::MyListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)(IViewOnTouchListener*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = EIID_IRunnable;
     }
     else {
@@ -274,7 +274,7 @@ AutoPtr<IAppWidgetHostView> CActivityOne::GetHostView(
 {
 printf("File=[%s], Func=[%s], line=[%d]. \n", __FILE__, __FUNCTION__, __LINE__);
     AutoPtr<IAppWidgetHostView> hostView;
-    m_appWidgetHost->CreateView((IContext*)this->Probe(EIID_IContext), appwidgetId,
+    m_appWidgetHost->CreateView(this, appwidgetId,
             appwidgetInfo, (IAppWidgetHostView**)&hostView);
 printf("File=[%s], Func=[%s], line=[%d]. \n", __FILE__, __FUNCTION__, __LINE__);
     assert(hostView != NULL);

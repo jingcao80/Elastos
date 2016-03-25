@@ -51,7 +51,7 @@ ECode BasicHeader::ToString(
     // no need for non-default formatting in toString()
     AutoPtr<ICharArrayBuffer> buf;
     ILineFormatter::Probe(BasicLineFormatter::DEFAULT)->FormatHeader(
-            NULL, (IHeader*)this, (ICharArrayBuffer**)&buf);
+            NULL, this, (ICharArrayBuffer**)&buf);
     return IObject::Probe(buf)->ToString(str);
 }
 

@@ -335,7 +335,7 @@ Boolean AccessibilityManagerService::Service::BindLocked()
         Boolean res;
         if (mService == NULL &&
                 (mHost->mContext->BindServiceAsUser(
-                mIntent, (IServiceConnection*)this, IContext::BIND_AUTO_CREATE,
+                mIntent, this, IContext::BIND_AUTO_CREATE,
                 handle, &res), res)) {
             userState->mBindingServices->Add(mComponentName);
         }
@@ -1169,14 +1169,14 @@ ECode AccessibilityManagerService::Service::OnServiceDisconnected(
 ECode AccessibilityManagerService::Service::LinkToOwnDeathLocked()
 {
     IProxy* proxy = (IProxy*)mService->Probe(EIID_IProxy);
-    return proxy->LinkToDeath((IProxyDeathRecipient*)this, 0);
+    return proxy->LinkToDeath(this, 0);
 }
 
 ECode AccessibilityManagerService::Service::UnlinkToOwnDeathLocked()
 {
     IProxy* proxy = (IProxy*)mService->Probe(EIID_IProxy);
     Boolean result;
-    return proxy->UnlinkToDeath((IProxyDeathRecipient*)this, 0, &result);
+    return proxy->UnlinkToDeath(this, 0, &result);
 }
 
 ECode AccessibilityManagerService::Service::ResetLocked()
@@ -3089,29 +3089,29 @@ void AccessibilityManagerService::AccessibilityContentObserver::Register(
     /* [in] */ IContentResolver* contentResolver)
 {
     contentResolver->RegisterContentObserver(mAccessibilityEnabledUri,
-            FALSE, (IContentObserver*)this, IUserHandle::USER_ALL);
+            FALSE, this, IUserHandle::USER_ALL);
     contentResolver->RegisterContentObserver(mTouchExplorationEnabledUri,
-            FALSE, (IContentObserver*)this, IUserHandle::USER_ALL);
+            FALSE, this, IUserHandle::USER_ALL);
     contentResolver->RegisterContentObserver(mDisplayMagnificationEnabledUri,
-            FALSE, (IContentObserver*)this, IUserHandle::USER_ALL);
+            FALSE, this, IUserHandle::USER_ALL);
     contentResolver->RegisterContentObserver(mEnabledAccessibilityServicesUri,
-            FALSE, (IContentObserver*)this, IUserHandle::USER_ALL);
+            FALSE, this, IUserHandle::USER_ALL);
     contentResolver->RegisterContentObserver(
             mTouchExplorationGrantedAccessibilityServicesUri,
-            FALSE, (IContentObserver*)this, IUserHandle::USER_ALL);
+            FALSE, this, IUserHandle::USER_ALL);
     contentResolver->RegisterContentObserver(mEnhancedWebAccessibilityUri,
-            FALSE, (IContentObserver*)this, IUserHandle::USER_ALL);
+            FALSE, this, IUserHandle::USER_ALL);
     contentResolver->RegisterContentObserver(
-            mDisplayInversionEnabledUri, FALSE, (IContentObserver*)this,
+            mDisplayInversionEnabledUri, FALSE, this,
             IUserHandle::USER_ALL);
     contentResolver->RegisterContentObserver(
-            mDisplayDaltonizerEnabledUri, FALSE, (IContentObserver*)this,
+            mDisplayDaltonizerEnabledUri, FALSE, this,
             IUserHandle::USER_ALL);
     contentResolver->RegisterContentObserver(
-            mDisplayDaltonizerUri, FALSE, (IContentObserver*)this,
+            mDisplayDaltonizerUri, FALSE, this,
             IUserHandle::USER_ALL);
     contentResolver->RegisterContentObserver(
-            mHighTextContrastUri, FALSE, (IContentObserver*)this,
+            mHighTextContrastUri, FALSE, this,
             IUserHandle::USER_ALL);
 }
 
@@ -4592,7 +4592,7 @@ void AccessibilityManagerService::ManageServicesLocked(
                 if (service == NULL) {
                     service = new Service();
                     service->constructor(userState->mUserId, componentName,
-                            installedService, (IIAccessibilityManager*)this);
+                            installedService, this);
                 }
                 else if (IList::Probe(userState->mBoundServices)->Contains(
                         (IIAccessibilityServiceConnection*)service, &result), result) {
@@ -4685,7 +4685,7 @@ void AccessibilityManagerService::UpdateInputFilter(
                 mHasInputFilter = TRUE;
                 if (mInputFilter == NULL) {
                     mInputFilter = new AccessibilityInputFilter();
-                    mInputFilter->constructor(mContext, (IIAccessibilityManager*)this);
+                    mInputFilter->constructor(mContext, this);
                 }
                 inputFilter = mInputFilter;
                 setInputFilter = TRUE;

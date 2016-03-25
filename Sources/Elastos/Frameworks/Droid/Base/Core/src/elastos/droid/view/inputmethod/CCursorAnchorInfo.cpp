@@ -256,7 +256,7 @@ ECode CCursorAnchorInfo::Equals(
         *result = FALSE;
         return NOERROR;
     }
-    if (THIS_PROBE(IInterface) == IInterface::Probe(obj)) {
+    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) {
         *result = TRUE;
         return NOERROR;
     }

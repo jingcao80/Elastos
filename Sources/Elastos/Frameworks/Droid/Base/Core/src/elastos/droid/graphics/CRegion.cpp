@@ -388,7 +388,7 @@ ECode CRegion::Op(
 {
     VALIDATE_NOT_NULL(result);
 
-    return Op((IRegion*)this, region, op, result);
+    return Op(this, region, op, result);
 }
 
 ECode CRegion::Op(

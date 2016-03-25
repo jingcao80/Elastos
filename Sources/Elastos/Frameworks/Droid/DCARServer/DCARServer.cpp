@@ -132,7 +132,7 @@ ECode DCARServer::Start()
     pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
 
     pthread_t thread;
-    int ret = pthread_create(&thread, &threadAddr, DCARServer::ThreadEntry, (void*)this);
+    int ret = pthread_create(&thread, &threadAddr, DCARServer::ThreadEntry, this);
     if (ret != 0) {
         return E_FAIL;
     }

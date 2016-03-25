@@ -414,16 +414,16 @@ ECode ScrollView::ExecuteKeyEvent(
         if ((IsFocused(&focused)) && keyCode != IKeyEvent::KEYCODE_BACK) {
             AutoPtr<IView> currentFocused;
             FindFocus((IView**)&currentFocused);
-            if (currentFocused.Get() == THIS_PROBE(IView)) {
+            if (currentFocused.Get() == this) {
                 currentFocused = NULL;
             }
 
             AutoPtr<FocusFinder> finder = FocusFinder::GetInstance();
             AutoPtr<IView> nextFocused;
-            finder->FindNextFocus(THIS_PROBE(IViewGroup),
+            finder->FindNextFocus(this,
                     currentFocused, IView::FOCUS_DOWN, (IView**)&nextFocused);
 
-            if (nextFocused != NULL && nextFocused.Get() != THIS_PROBE(IView)) {
+            if (nextFocused != NULL && nextFocused.Get() != this) {
                 Boolean isFocus;
                 nextFocused->RequestFocus(IView::FOCUS_DOWN, &isFocus);
                 *handled = isFocus;
@@ -1255,7 +1255,7 @@ Boolean ScrollView::ScrollAndFocus(
 
     AutoPtr<IView> newFocused = FindFocusableViewInBounds(up, top, bottom);
     if (newFocused == NULL) {
-        newFocused = THIS_PROBE(IView);
+        newFocused = this;
     }
 
     if (top >= containerTop && bottom <= containerBottom) {
@@ -1282,13 +1282,13 @@ ECode ScrollView::ArrowScroll(
     *result = FALSE;
     AutoPtr<IView> currentFocused;
     FindFocus((IView**)&currentFocused);
-    if (currentFocused.Get() == THIS_PROBE(IView)) {
+    if (currentFocused.Get() == this) {
         currentFocused = NULL;
     }
 
     AutoPtr<FocusFinder> finder = FocusFinder::GetInstance();
     AutoPtr<IView> nextFocused;
-    finder->FindNextFocus(THIS_PROBE(IViewGroup),
+    finder->FindNextFocus(this,
             currentFocused, direction, (IView**)&nextFocused);
 
     Int32 maxJump = 0;
@@ -1736,7 +1736,7 @@ Boolean ScrollView::OnRequestFocusInDescendants(
 
     AutoPtr<FocusFinder> finder = FocusFinder::GetInstance();
     AutoPtr<IView> nextFocus;
-    finder->FindNextFocusFromRect(THIS_PROBE(IViewGroup),
+    finder->FindNextFocusFromRect(this,
             previouslyFocusedRect, direction, (IView**)&nextFocus);
 
     if (nextFocus == NULL) {
@@ -1805,7 +1805,7 @@ ECode ScrollView::OnLayout(
     mIsLayoutDirty = FALSE;
     // Give a child focus if it needs it
     if (mChildToScrollTo != NULL &&
-            IsViewDescendantOf(mChildToScrollTo, THIS_PROBE(IView))) {
+            IsViewDescendantOf(mChildToScrollTo, this)) {
         ScrollToChild(mChildToScrollTo);
     }
     mChildToScrollTo = NULL;
@@ -1850,7 +1850,7 @@ void ScrollView::OnSizeChanged(
 
     AutoPtr<IView> currentFocused;
     FindFocus((IView**)&currentFocused);
-    if (NULL == currentFocused || THIS_PROBE(IView) == currentFocused.Get()) {
+    if (NULL == currentFocused || this == currentFocused.Get()) {
         return;
     }
 

@@ -97,7 +97,7 @@ PInterface GrantCredentialsPermissionActivity::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == Elastos::Droid::View::EIID_IViewOnClickListener) {
-        return (IViewOnClickListener*)this;
+        return this;
     }
     return Activity::Probe(riid);
 }
@@ -116,7 +116,7 @@ ECode GrantCredentialsPermissionActivity::GetInterfaceID(
     /* [in] */ IInterface *pObject,
     /* [out] */ InterfaceID *pIID)
 {
-    if (pObject == (IInterface*)(IViewOnClickListener*)this) {
+    if (pObject == (IInterface*)this) {
         *pIID = Elastos::Droid::View::EIID_IViewOnClickListener;
         return NOERROR;
     }
@@ -199,9 +199,9 @@ ECode GrantCredentialsPermissionActivity::OnCreate(
     AutoPtr<IButton> allowB;
     AutoPtr<IButton> denyB;
     ASSERT_SUCCEEDED(FindViewById(R::id::allow_button, (IView**)(IButton**)&allowB));
-    allowB->SetOnClickListener((IViewOnClickListener*)this);
+    allowB->SetOnClickListener(this);
     ASSERT_SUCCEEDED(FindViewById(R::id::deny_button, (IView**)(IButton**)&denyB));
-    denyB->SetOnClickListener((IViewOnClickListener*)this);
+    denyB->SetOnClickListener(this);
 
     AutoPtr<ILinearLayout> packagesListView;
     ASSERT_SUCCEEDED(FindViewById(R::id::packages_list,

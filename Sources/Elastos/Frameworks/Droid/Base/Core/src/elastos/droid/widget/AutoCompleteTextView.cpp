@@ -844,8 +844,6 @@ ECode AutoCompleteTextView::OnKeyPreIme(
         Int32 count;
         event->GetRepeatCount(&count);
 
-
-
         if (action == IKeyEvent::ACTION_DOWN && count == 0) {
             AutoPtr<IDispatcherState> state ;
             GetKeyDispatcherState((IDispatcherState**)&state);

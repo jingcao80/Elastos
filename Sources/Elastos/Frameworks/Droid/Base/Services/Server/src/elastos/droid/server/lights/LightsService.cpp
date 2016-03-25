@@ -108,7 +108,7 @@ void LightImpl::Pulse(
             mColor = 0;
 
             AutoPtr<IMessage> msg;
-            mHost->mH->ObtainMessage(1, THIS_PROBE(IInterface), (IMessage**)&msg);
+            mHost->mH->ObtainMessage(1, TO_IINTERFACE(this), (IMessage**)&msg);
             Boolean result;
             mHost->mH->SendMessageDelayed(msg, onMS, &result);
         }
@@ -296,7 +296,7 @@ ECode LightsService::constructor(
     mH = new MyHandler(this);
     mH->constructor();
 
-    CLegacyFlashlightHack::New(THIS_PROBE(ISystemService), (IIHardwareService**)&mLegacyFlashlightHack);
+    CLegacyFlashlightHack::New(this, (IIHardwareService**)&mLegacyFlashlightHack);
 
     Init_native();
 

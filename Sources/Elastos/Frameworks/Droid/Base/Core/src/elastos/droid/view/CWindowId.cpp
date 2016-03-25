@@ -51,7 +51,7 @@ ECode CWindowId::RegisterFocusObserver(
             //         "Focus observer already registered with input token");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
-        map->Put(IBinder::Probe(mToken), THIS_PROBE(IWindowId));
+        map->Put(IBinder::Probe(mToken), (IWindowId*)this);
         // try {
         mToken->RegisterFocusObserver(observer->mIObserver);
         // } catch (RemoteException e) {
@@ -108,7 +108,7 @@ ECode CWindowId::ToString(
     AutoPtr<ISystem> system;
     CSystem::AcquireSingleton((ISystem**)&system);
     Int32 code = 0;
-    system->IdentityHashCode(THIS_PROBE(IInterface), &code);
+    system->IdentityHashCode(TO_IINTERFACE(this), &code);
     sb.Append(StringUtils::ToHexString(code));
     sb.Append(": ");
     if (mToken != NULL) {

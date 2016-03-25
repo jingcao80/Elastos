@@ -1260,7 +1260,7 @@ ECode Fragment::SetUserVisibleHint(
     /* [in] */ Boolean isVisibleToUser)
 {
     if (!mUserVisibleHint && isVisibleToUser && mState < IFragment::STARTED) {
-        mFragmentManager->PerformPendingDeferredStart(THIS_PROBE(IFragment));
+        mFragmentManager->PerformPendingDeferredStart(this);
     }
     mUserVisibleHint = isVisibleToUser;
     mDeferStart = !isVisibleToUser;
@@ -1317,11 +1317,11 @@ ECode Fragment::StartActivity(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (options != NULL) {
-        mActivity->StartActivityFromFragment(THIS_PROBE(IFragment), intent, -1, options);
+        mActivity->StartActivityFromFragment(this, intent, -1, options);
     } else {
         // Note we want to go through this call for compatibility with
         // applications that may have overridden the method.
-        mActivity->StartActivityFromFragment(THIS_PROBE(IFragment), intent, -1);
+        mActivity->StartActivityFromFragment(this, intent, -1);
     }
     return NOERROR;
 }
@@ -1343,11 +1343,11 @@ ECode Fragment::StartActivityForResult(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (options != NULL) {
-        mActivity->StartActivityFromFragment(THIS_PROBE(IFragment), intent, requestCode, options);
+        mActivity->StartActivityFromFragment(this, intent, requestCode, options);
     } else {
         // Note we want to go through this call for compatibility with
         // applications that may have overridden the method.
-        mActivity->StartActivityFromFragment(THIS_PROBE(IFragment), intent, requestCode, options);
+        mActivity->StartActivityFromFragment(this, intent, requestCode, options);
     }
     return NOERROR;
 }
@@ -1670,7 +1670,7 @@ ECode Fragment::RegisterForContextMenu(
     /* [in] */ IView* view)
 {
     view->SetOnCreateContextMenuListener(
-        (IViewOnCreateContextMenuListener*)this->Probe(EIID_IViewOnCreateContextMenuListener));
+        this);
     return NOERROR;
 }
 
@@ -1963,7 +1963,7 @@ Fragment::FindFragmentByWho(
 {
     VALIDATE_NOT_NULL(f);
     if (who.Equals(mWho)) {
-        *f = (IFragment*)this;
+        *f = this;
         REFCOUNT_ADD(*f);
         return NOERROR;
     }
@@ -1982,7 +1982,7 @@ void Fragment::InstantiateChildFragmentManager()
 {
     mChildFragmentManager = new FragmentManagerImpl();
     AutoPtr<FragmentContainerLocal> fc = new FragmentContainerLocal(this);
-    mChildFragmentManager->AttachActivity(mActivity, IFragmentContainer::Probe(fc), THIS_PROBE(IFragment));
+    mChildFragmentManager->AttachActivity(mActivity, IFragmentContainer::Probe(fc), this);
 }
 
 ECode Fragment::PerformCreate(

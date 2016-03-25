@@ -53,7 +53,7 @@ ECode Insets::Equals(
 {
     VALIDATE_NOT_NULL(e);
     *e = FALSE;
-    if (THIS_PROBE(IInterface) == IInterface::Probe(o)) {
+    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
         *e = TRUE;
         return NOERROR;
     }

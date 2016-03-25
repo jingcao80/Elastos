@@ -100,7 +100,7 @@ ECode TouchCalibration::Equals(
     /* [in] */ IInterface* another,
     /* [out] */ Boolean* result)
 {
-    if (IInterface::Probe(another) == THIS_PROBE(IInterface)) {
+    if (IInterface::Probe(another) == TO_IINTERFACE(this)) {
         *result = TRUE;
         return NOERROR;
     }

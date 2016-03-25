@@ -251,7 +251,7 @@ void RippleBackground::Enter()
     AutoPtr<ArrayOf<Float> > fa = ArrayOf<Float>::Alloc(2);
     (*fa)[0] = 0;
     (*fa)[1] = 1;
-    AutoPtr<IObjectAnimator> outer = ObjectAnimator::OfFloat((IObject*)this, String("outerOpacity"), fa);
+    AutoPtr<IObjectAnimator> outer = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("outerOpacity"), fa);
     outer->SetAutoCancel(TRUE);
     IAnimator::Probe(outer)->SetDuration(outerDuration);
     IAnimator::Probe(outer)->SetInterpolator(LINEAR_INTERPOLATOR);
@@ -384,7 +384,7 @@ void RippleBackground::ExitSoftware(
         // Outer opacity continues to increase for a bit.
         AutoPtr<ArrayOf<Float> > fa = ArrayOf<Float>::Alloc(1);
         (*fa)[0] = inflectionOpacity / 255.0f;
-        outerOpacityAnim = ObjectAnimator::OfFloat((IObject*)this, String("outerOpacity"), fa);
+        outerOpacityAnim = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("outerOpacity"), fa);
         outerOpacityAnim->SetAutoCancel(TRUE);
         IAnimator::Probe(outerOpacityAnim)->SetDuration(inflectionDuration);
         IAnimator::Probe(outerOpacityAnim)->SetInterpolator(LINEAR_INTERPOLATOR);
@@ -400,7 +400,7 @@ void RippleBackground::ExitSoftware(
     } else {
         AutoPtr<ArrayOf<Float> > fa = ArrayOf<Float>::Alloc(1);
         (*fa)[0] = 0;
-        outerOpacityAnim = ObjectAnimator::OfFloat((IObject*)this, String("outerOpacity"), fa);
+        outerOpacityAnim = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("outerOpacity"), fa);
         outerOpacityAnim->SetAutoCancel(TRUE);
         IAnimator::Probe(outerOpacityAnim)->SetDuration(opacityDuration);
         IAnimator::Probe(outerOpacityAnim)->AddListener(mAnimationListener);

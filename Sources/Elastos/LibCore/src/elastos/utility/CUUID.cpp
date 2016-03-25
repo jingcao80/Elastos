@@ -283,7 +283,7 @@ ECode CUUID::CompareTo(
     }
 
     *result = 0;
-    if (other == THIS_PROBE(IInterface)) {
+    if (other == TO_IINTERFACE(this)) {
         return NOERROR;
     }
 
@@ -318,7 +318,7 @@ ECode CUUID::Equals(
     if (IUUID::Probe(other) == NULL)
         return NOERROR;
 
-    if (IUUID::Probe(other) == (IUUID*)this) {
+    if (IUUID::Probe(other) == this) {
         *result = TRUE;
         return NOERROR;
     }

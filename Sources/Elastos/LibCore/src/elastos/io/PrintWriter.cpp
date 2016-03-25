@@ -201,7 +201,7 @@ ECode PrintWriter::Format(
     }
 
     AutoPtr<IFormatter> formatter;
-    FAIL_RETURN(CFormatter::New(THIS_PROBE(IAppendable), l, (IFormatter**)&formatter))
+    FAIL_RETURN(CFormatter::New(this, l, (IFormatter**)&formatter))
     FAIL_RETURN(formatter->Format(format, args))
     if (mAutoflush) {
         Flush();

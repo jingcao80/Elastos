@@ -10,7 +10,7 @@ PInterface CMyActivityController::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_MyActivityController) {
-        return reinterpret_cast<PInterface>((MyActivityController*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CMyActivityController::Probe(riid);
 }

@@ -45,7 +45,7 @@ ECode AlphabetIndexer::constructor(
     }
     CSparseInt32Array::New(mAlphabetLength, (ISparseInt32Array**)&mAlphaMap);
     if (cursor != NULL) {
-        cursor->RegisterDataSetObserver(THIS_PROBE(IDataSetObserver));
+        cursor->RegisterDataSetObserver(this);
     }
 
     // Get a Collator for the current locale for string comparisons.
@@ -83,11 +83,11 @@ ECode AlphabetIndexer::SetCursor(
     /* [in] */ ICursor* cursor)
 {
     if (mDataCursor != NULL) {
-        mDataCursor->UnregisterDataSetObserver((IDataSetObserver*)this->Probe(EIID_IDataSetObserver));
+        mDataCursor->UnregisterDataSetObserver(this);
     }
     mDataCursor = cursor;
     if (cursor != NULL) {
-        mDataCursor->RegisterDataSetObserver((IDataSetObserver*)this->Probe(EIID_IDataSetObserver));
+        mDataCursor->RegisterDataSetObserver(this);
     }
     mAlphaMap->Clear();
     return NOERROR;

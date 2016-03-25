@@ -68,7 +68,7 @@ GpsNavigationMessageListenerTransport::GpsNavigationMessageListenerTransport()
     : LocalListenerHelper(String("GpsNavigationMessageListenerTransport"))
 {
     AutoPtr<IIGpsNavigationMessageListener> lt;
-    CGpsNavigationMessageListenerTransportListenerTransport::New((IGpsNavigationMessageListenerTransport*)this, (IIGpsNavigationMessageListener**)&lt);
+    CGpsNavigationMessageListenerTransportListenerTransport::New(this, (IIGpsNavigationMessageListener**)&lt);
     mListenerTransport = IIGpsNavigationMessageListener::Probe(lt);
 }
 

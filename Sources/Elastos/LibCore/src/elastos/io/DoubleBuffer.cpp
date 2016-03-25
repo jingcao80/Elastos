@@ -223,7 +223,7 @@ ECode DoubleBuffer::Put(
 ECode DoubleBuffer::Put(
     /* [in] */ IDoubleBuffer* src)
 {
-    if (src == (IDoubleBuffer*)this->Probe(EIID_IDoubleBuffer)) {
+    if (src == this) {
          // throw new IllegalArgumentException("src == this");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

@@ -25,7 +25,7 @@ ECode CJarOutputStream::constructor(
     AutoPtr<IZipEntry> ze;
     CZipEntry::New(IJarFile::MANIFEST_NAME, (IZipEntry**)&ze);
     FAIL_RETURN(PutNextEntry(ze))
-    FAIL_RETURN(mManifest->Write(THIS_PROBE(IOutputStream)))
+    FAIL_RETURN(mManifest->Write(this))
     CloseEntry();
     return NOERROR;
 }

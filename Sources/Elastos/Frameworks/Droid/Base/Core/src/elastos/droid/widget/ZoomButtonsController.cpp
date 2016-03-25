@@ -369,7 +369,7 @@ ECode ZoomButtonsController::SetVisible(
         mContext->RegisterReceiver(mConfigurationChangedReceiver, mConfigurationChangedFilter, (IIntent**)&rst);
 
         // Steal touches events from the owner
-        mOwnerView->SetOnTouchListener(THIS_PROBE(IViewOnTouchListener));
+        mOwnerView->SetOnTouchListener(this);
         mReleaseTouchListenerOnUp = FALSE;
 
     }
@@ -477,7 +477,7 @@ Boolean ZoomButtonsController::OnContainerKey(
                     AutoPtr<IDispatcherState> ds;
                     mOwnerView->GetKeyDispatcherState((IDispatcherState**)&ds);
                     if (ds != NULL) {
-                        ds->StartTracking(event, THIS_PROBE(IInterface));
+                        ds->StartTracking(event, TO_IINTERFACE(this));
                     }
                 }
                 return TRUE;

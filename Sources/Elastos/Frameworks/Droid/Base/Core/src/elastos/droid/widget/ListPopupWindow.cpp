@@ -145,7 +145,7 @@ ECode ListPopupWindow::ForwardingListener::constructor(
     Int32 longPressTimeout = 0;
     helper->GetLongPressTimeout(&longPressTimeout);
     mLongPressTimeout = (mTapTimeout + longPressTimeout) / 2;
-    src->AddOnAttachStateChangeListener((IViewOnAttachStateChangeListener*)this);
+    src->AddOnAttachStateChangeListener(this);
     return NOERROR;
 }
 

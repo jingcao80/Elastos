@@ -7,6 +7,7 @@
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::CViewGroupLayoutParams;
@@ -14,6 +15,7 @@ using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Core::CSystem;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -58,11 +60,7 @@ ECode AbsSpinner::SavedState::ToString(
     /* [out] */ String* str)
 {
     StringBuilder sb("AbsSpinner.SavedState{");
-    AutoPtr<ISystem> system;
-    CSystem::AcquireSingleton((ISystem**)&system);
-    Int32 hashCode;
-    system->IdentityHashCode(THIS_PROBE(IAbsSpinnerSavedState), &hashCode);
-    sb.Append(hashCode);
+    sb.Append(StringUtils::ToHexString((Int32)this));
     sb.Append(" selectedId=");
     sb.Append(mSelectedId);
     sb.Append(" position=");
@@ -252,7 +250,7 @@ void AbsSpinner::OnMeasure(
         AutoPtr<IView> view = mRecycler->Get(selectedPosition);
         if (view == NULL) {
             // Make a new one
-            IAdapter::Probe(mAdapter)->GetView(selectedPosition, NULL, THIS_PROBE(IViewGroup), (IView**)&view);
+            IAdapter::Probe(mAdapter)->GetView(selectedPosition, NULL, this, (IView**)&view);
         }
 
         if (view != NULL) {

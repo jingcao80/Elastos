@@ -249,7 +249,7 @@ ECode PlayerRecord::Destroy()
         AutoPtr<IProxy> proxy = (IProxy*)mToken->Probe(EIID_IProxy);
         assert(proxy != NULL);
         Boolean flag = FALSE;
-        proxy->UnlinkToDeath((IProxyDeathRecipient*)this, 0, &flag);
+        proxy->UnlinkToDeath(this, 0, &flag);
         mToken = NULL;
     }
     return NOERROR;
@@ -291,7 +291,7 @@ ECode PlayerRecord::constructor(
          AutoPtr<IProxy> proxy = (IProxy*)mToken->Probe(EIID_IProxy);
         assert(proxy != NULL);
         Boolean flag = FALSE;
-        proxy->LinkToDeath((IProxyDeathRecipient*)this, 0);
+        proxy->LinkToDeath(this, 0);
         if (ec == (ECode)E_REMOTE_EXCEPTION) {
             ((MediaFocusControl*)sController.Get())->UnregisterMediaButtonIntentAsync(mMediaIntent);
             return NOERROR;

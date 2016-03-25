@@ -300,7 +300,7 @@ ECode _SuggestionsAdapter::BindView(
         AutoPtr<ICharSequence> cs;
         views->mText1->GetText((ICharSequence**)&cs);
         views->mIconRefine->SetTag(cs);
-        views->mIconRefine->SetOnClickListener(THIS_PROBE(IViewOnClickListener));
+        views->mIconRefine->SetOnClickListener(this);
     }
     else {
         views->mIconRefine->SetVisibility(IView::GONE);
@@ -768,37 +768,37 @@ PInterface SuggestionsAdapter::Probe(
         /* [in] */ REIID riid)
 {
     if (riid == EIID_ISpinnerAdapter) {
-        return (ISpinnerAdapter*)this;
+        return this;
     }
     else if (riid == EIID_ICursorFilterClient) {
-        return (ICursorFilterClient*)this;
+        return this;
     }
     else if (riid == EIID_IFilterable) {
-        return (IFilterable*)this;
+        return this;
     }
     else if (riid == EIID_IViewOnClickListener) {
-        return (IViewOnClickListener*)this;
+        return this;
     }
     else if (riid == EIID_ISuggestionsAdapter) {
-        return (ISuggestionsAdapter*)this;
+        return this;
     }
     else if (riid == EIID_IResourceCursorAdapter) {
-        return (ISuggestionsAdapter*)this;
+        return this;
     }
     else if (riid == EIID_ICursorAdapter) {
-        return (ISuggestionsAdapter*)this;
+        return this;
     }
     else if (riid == EIID_IBaseAdapter) {
-        return (ISuggestionsAdapter*)this;
+        return this;
     }
     else if (riid == EIID_IListAdapter) {
-        return (ISuggestionsAdapter*)this;
+        return this;
     }
     else if (riid == EIID_IAdapter) {
-        return (ISuggestionsAdapter*)this;
+        return this;
     }
     else if (riid == EIID_IInterface) {
-        return (ISuggestionsAdapter*)this;
+        return this;
     }
     return NULL;
 }

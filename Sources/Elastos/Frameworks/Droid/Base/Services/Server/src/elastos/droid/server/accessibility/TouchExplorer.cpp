@@ -117,7 +117,7 @@ void TouchExplorer::SendHoverEnterAndMoveDelayed::Post(
     mPolicyFlags = policyFlags;
 
     Boolean result;
-    mHost->mHandler->PostDelayed((IRunnable*)this, mHost->mDetermineUserIntentTimeout, &result);
+    mHost->mHandler->PostDelayed(this, mHost->mDetermineUserIntentTimeout, &result);
 }
 
 void TouchExplorer::SendHoverEnterAndMoveDelayed::AddEvent(
@@ -230,13 +230,13 @@ void TouchExplorer::SendHoverExitDelayed::Post(
     mPolicyFlags = policyFlags;
 
     Boolean result;
-    mHost->mHandler->PostDelayed((IRunnable*)this, mHost->mDetermineUserIntentTimeout, &result);
+    mHost->mHandler->PostDelayed(this, mHost->mDetermineUserIntentTimeout, &result);
 }
 
 void TouchExplorer::SendHoverExitDelayed::Cancel()
 {
     if (IsPending()) {
-        mHost->mHandler->RemoveCallbacks((IRunnable*)this);
+        mHost->mHandler->RemoveCallbacks(this);
         Clear();
     }
 }
@@ -244,7 +244,7 @@ void TouchExplorer::SendHoverExitDelayed::Cancel()
 Boolean TouchExplorer::SendHoverExitDelayed::IsPending()
 {
     Boolean res;
-    mHost->mHandler->HasCallbacks((IRunnable*)this, &res);
+    mHost->mHandler->HasCallbacks(this, &res);
     return res;
 }
 

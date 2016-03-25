@@ -152,12 +152,12 @@ ECode JSONStringer::Value(
     }
 
     if (IJSONArray::Probe(value) != NULL) {
-        ((JSONArray*)IJSONArray::Probe(value))->WriteTo((IJSONStringer*)this);
+        ((JSONArray*)IJSONArray::Probe(value))->WriteTo(this);
         return NOERROR;
 
     }
     else if (IJSONObject::Probe(value) != NULL) {
-        ((JSONObject*)IJSONObject::Probe(value))->WriteTo((IJSONStringer*)this);
+        ((JSONObject*)IJSONObject::Probe(value))->WriteTo(this);
         return NOERROR;
     }
 

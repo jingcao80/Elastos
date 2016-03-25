@@ -121,19 +121,19 @@ PInterface RecentsPanelView::TaskDescriptionAdapter::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (IInterface*)this;
+        return this;
     }
     else if (riid == EIID_ITaskDescriptionAdapter) {
-        return (ITaskDescriptionAdapter*)this;
+        return this;
     }
     else if (riid == EIID_IBaseAdapter) {
-        return (IBaseAdapter*)this;
+        return this;
     }
     else if (riid == EIID_IListAdapter) {
-        return (IListAdapter*)this;
+        return this;
     }
     else if (riid == EIID_IAdapter) {
-        return (IAdapter*)this;
+        return this;
     }
     return NULL;
 }
@@ -153,7 +153,7 @@ ECode RecentsPanelView::TaskDescriptionAdapter::GetInterfaceID(
     /* [out] */ InterfaceID* iid)
 {
     VALIDATE_NOT_NULL(iid);
-    if (object == (IInterface*)this) {
+    if (object == this) {
         *iid = EIID_ITaskDescriptionAdapter ;
     }
     else {
@@ -798,7 +798,7 @@ ECode RecentsPanelView::OnFinishInflate()
     AutoPtr<IRecentsScrollView> scrollView = IRecentsScrollView::Probe(mRecentsContainer);
     if (scrollView != NULL) {
         scrollView->SetAdapter(mListAdapter);
-        scrollView->SetCallback(THIS_PROBE(IRecentsCallback));
+        scrollView->SetCallback(this);
     }
     else {
         // throw new IllegalArgumentException("missing Recents[Horizontal]ScrollView");
@@ -1015,7 +1015,7 @@ ECode RecentsPanelView::ClearRecentTasksList()
 {
     // Clear memory used by screenshots
     if (mRecentTaskDescriptions != NULL) {
-        mRecentTasksLoader->CancelLoadingThumbnailsAndIcons(THIS_PROBE(IRecentsPanelView));
+        mRecentTasksLoader->CancelLoadingThumbnailsAndIcons(this);
         OnTaskLoadingCancelled();
     }
     return NOERROR;

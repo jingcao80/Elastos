@@ -62,7 +62,7 @@ void CLinkedTransferQueue::Node::ForgetContents()
 Boolean CLinkedTransferQueue::Node::IsMatched()
 {
     AutoPtr<IInterface> x = mItem;
-    return (Object::Equals(x, THIS_PROBE(IInterface))) || ((x == NULL) == mIsData);
+    return (Object::Equals(x, TO_IINTERFACE(this))) || ((x == NULL) == mIsData);
 }
 
 Boolean CLinkedTransferQueue::Node::IsUnmatchedRequest()
@@ -75,14 +75,14 @@ Boolean CLinkedTransferQueue::Node::CannotPrecede(
 {
     Boolean d = mIsData;
     AutoPtr<IInterface> x;
-    return d != haveData && ((x = mItem), !Object::Equals(x, THIS_PROBE(IInterface))) && (x != NULL) == d;
+    return d != haveData && ((x = mItem), !Object::Equals(x, TO_IINTERFACE(this))) && (x != NULL) == d;
 }
 
 Boolean CLinkedTransferQueue::Node::TryMatchData()
 {
     // assert isData;
     AutoPtr<IInterface> x = mItem;
-    if (x != NULL && (!Object::Equals(x, THIS_PROBE(IInterface))) && CasItem(x, NULL)) {
+    if (x != NULL && (!Object::Equals(x, TO_IINTERFACE(this))) && CasItem(x, NULL)) {
         LockSupport::Unpark(mWaiter);
         return TRUE;
     }
@@ -282,10 +282,10 @@ AutoPtr<IInterface> CLinkedTransferQueue::AwaitMatch(
             system->GetNanoTime(&now);
             nanos = deadline - now;
              if (nanos > 0)
-                LockSupport::ParkNanos(THIS_PROBE(IInterface), nanos);
+                LockSupport::ParkNanos(TO_IINTERFACE(this), nanos);
         }
         else {
-            LockSupport::Park(THIS_PROBE(IInterface));
+            LockSupport::Park(TO_IINTERFACE(this));
         }
     }
 }
@@ -708,7 +708,7 @@ ECode CLinkedTransferQueue::DrainTo(
     VALIDATE_NOT_NULL(number);
     if (c == NULL)
         return E_NULL_POINTER_EXCEPTION;
-    if (Object::Equals(c, THIS_PROBE(IInterface)))
+    if (Object::Equals(c, TO_IINTERFACE(this)))
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     Int32 n = 0;
     for (AutoPtr<IInterface> e; (Poll((IInterface**)&e), e != NULL);) {
@@ -728,7 +728,7 @@ ECode CLinkedTransferQueue::DrainTo(
     VALIDATE_NOT_NULL(number);
     if (c == NULL)
         return E_NULL_POINTER_EXCEPTION;
-    if (Object::Equals(c, THIS_PROBE(IInterface)))
+    if (Object::Equals(c, TO_IINTERFACE(this)))
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     Int32 n = 0;
     for (AutoPtr<IInterface> e; n < maxElements && (Poll((IInterface**)&e), e != NULL);) {

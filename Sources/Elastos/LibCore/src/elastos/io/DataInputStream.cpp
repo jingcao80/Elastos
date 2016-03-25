@@ -356,7 +356,7 @@ ECode DataInputStream::DecodeUTF(
 {
     VALIDATE_NOT_NULL(str)
 
-    *str = DecodeUTF(utfSize, THIS_PROBE(IDataInput));
+    *str = DecodeUTF(utfSize, this);
     return NOERROR;
 }
 

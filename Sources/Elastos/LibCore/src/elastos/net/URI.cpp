@@ -1049,7 +1049,7 @@ ECode URI::Normalize(
     VALIDATE_NOT_NULL(uri)
 
     if (mOpaque) {
-        *uri = THIS_PROBE(IURI);
+        *uri = this;
         REFCOUNT_ADD(*uri);
         return NOERROR;
     }
@@ -1057,7 +1057,7 @@ ECode URI::Normalize(
     String normalizedPath = Normalize(mPath, FALSE);
     // if the path is already normalized, return this
     if (mPath.Equals(normalizedPath)) {
-        *uri = THIS_PROBE(IURI);
+        *uri = this;
         REFCOUNT_ADD(*uri);
         return NOERROR;
     }
@@ -1080,7 +1080,7 @@ ECode URI::ParseServerAuthority(
     if (!mServerAuthority) {
         ParseAuthority(TRUE);
     }
-    *uri = THIS_PROBE(IURI);
+    *uri = this;
     REFCOUNT_ADD(*uri);
     return NOERROR;
 }

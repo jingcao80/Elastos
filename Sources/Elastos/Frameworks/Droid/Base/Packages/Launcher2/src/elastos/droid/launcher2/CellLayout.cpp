@@ -156,7 +156,7 @@ void CellLayout::ReorderHintAnimation::Animate()
     va->AddUpdateListener(listener);
     AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter(this);
     IAnimator::Probe(va)->AddListener(adapter);
-    mHost->mShakeAnimators->Put(mChild, (IObject*)this);
+    mHost->mShakeAnimators->Put(mChild, this);
     IAnimator::Probe(va)->Start();
 }
 

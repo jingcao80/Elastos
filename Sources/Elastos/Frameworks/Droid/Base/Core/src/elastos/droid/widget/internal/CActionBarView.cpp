@@ -20,10 +20,10 @@ PInterface CActionBarView::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_View) {
-        return reinterpret_cast<PInterface>((View*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     else if (riid == EIID_ViewGroup) {
-        return reinterpret_cast<PInterface>((ViewGroup*)this);
+        return reinterpret_cast<PInterface>(this);
     }
     return _CActionBarView::Probe(riid);
 }

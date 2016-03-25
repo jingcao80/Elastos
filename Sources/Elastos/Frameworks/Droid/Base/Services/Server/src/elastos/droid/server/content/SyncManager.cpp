@@ -329,7 +329,7 @@ Boolean SyncManager::ActiveSyncContext::BindToSyncAdapter(
     AutoPtr<IUserHandle> user;
     CUserHandle::New(mSyncOperation->mTarget->mUserId, (IUserHandle**)&user);
     Boolean bindResult;
-    mHost->mContext->BindServiceAsUser(intent, (IServiceConnection*)this,
+    mHost->mContext->BindServiceAsUser(intent, this,
         IContext::BIND_AUTO_CREATE | IContext::BIND_NOT_FOREGROUND
             | IContext::BIND_ALLOW_OOM_MANAGEMENT,
         user, &bindResult);
@@ -2493,7 +2493,7 @@ SyncManager::SyncManager(
     mSyncManagerWakeLock->SetReferenceCounted(FALSE);
 
     AutoPtr<IISyncStatusObserver > oberservr;
-    CSyncStatusObserver::New((ISyncManager*)this, (IISyncStatusObserver**)&oberservr);
+    CSyncStatusObserver::New(this, (IISyncStatusObserver**)&oberservr);
     mSyncStorageEngine->AddStatusChangeListener(
         IContentResolver::SYNC_OBSERVER_TYPE_SETTINGS, oberservr);
 

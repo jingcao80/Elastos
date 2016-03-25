@@ -158,7 +158,7 @@ ECode DisplayPowerController::ScreenOnUnblocker::OnScreenOn()
 {
     AutoPtr<IMessage> msg;
     mHost->mHandler->ObtainMessage(
-        DisplayPowerController::MSG_SCREEN_ON_UNBLOCKED, THIS_PROBE(IInterface), (IMessage**)&msg);
+        DisplayPowerController::MSG_SCREEN_ON_UNBLOCKED, TO_IINTERFACE(this), (IMessage**)&msg);
     msg->SetAsynchronous(TRUE);
     Boolean bval;
     mHost->mHandler->SendMessage(msg, &bval);

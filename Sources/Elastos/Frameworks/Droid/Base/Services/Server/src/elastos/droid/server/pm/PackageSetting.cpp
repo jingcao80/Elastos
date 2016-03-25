@@ -2,10 +2,10 @@
 #include "elastos/droid/server/pm/PackageSetting.h"
 #include "elastos/droid/server/pm/SharedUserSetting.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Core::StringUtils;
-using Elastos::Core::ISystem;
-using Elastos::Core::CSystem;
+using Elastos::Core::StringBuilder;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 
 namespace Elastos {
@@ -46,7 +46,7 @@ PInterface PackageSetting::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_PackageSetting) {
-        return reinterpret_cast<PInterface>((PackageSetting*)this);;
+        return reinterpret_cast<PInterface>(this);;
     }
     return PackageSettingBase::Probe(riid);
 }
@@ -55,12 +55,14 @@ ECode PackageSetting::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    AutoPtr<ISystem> sys;
-    CSystem::AcquireSingleton((ISystem**)&sys);
-    Int32 hashCode;
-    sys->IdentityHashCode((IInterface*)(IObject*)this, &hashCode);
-    *str = String("PackageSetting{") + StringUtils::ToHexString(hashCode) + " "
-            + mName + "/" + StringUtils::ToString(mAppId) + "}";
+    StringBuilder sb("PackageSetting{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += " ";
+    sb += mName;
+    sb += "/";
+    sb += mAppId;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

@@ -92,7 +92,7 @@ ECode CEnumMap::Clone(
     // try {
     AutoPtr<CEnumMap> enumMap;
     FAIL_RETURN(CEnumMap::NewByFriend((CEnumMap**)&enumMap));
-    enumMap->Initialization((IEnumMap*)this->Probe(EIID_IEnumMap));
+    enumMap->Initialization(this);
     *object = (IEnumMap*) enumMap->Probe(EIID_IEnumMap);
     REFCOUNT_ADD(*object)
     // } catch (CloneNotSupportedException e) {
@@ -162,7 +162,7 @@ ECode CEnumMap::Equals(
 {
     VALIDATE_NOT_NULL(value)
 
-    if (this->Probe(EIID_IInterface) == other) {
+    if (TO_IINTERFACE(this) == other) {
         *value = TRUE;
         return NOERROR;
     }
@@ -640,50 +640,6 @@ ECode CEnumMap::EnumMapIterator::CheckStatus()
 //       CEnumMap::EnumMapKeySet
 //==========================================================
 
-UInt32 CEnumMap::EnumMapKeySet::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 CEnumMap::EnumMapKeySet::Release()
-{
-    return ElRefBase::Release();
-}
-
-PInterface CEnumMap::EnumMapKeySet::Probe(
-    /* [in] */ REIID riid)
-{
-    if (EIID_IInterface == riid) {
-        return (PInterface)(ISet*)this;
-    }
-    else if (EIID_IIterable == riid) {
-        return (IIterable*)(ISet*)this;
-    }
-    else if (EIID_ICollection == riid) {
-        return (ICollection*)(ISet*)this;
-    }
-    else if (EIID_ISet == riid) {
-        return (ISet*)this;
-    }
-
-    return NULL;
-}
-
-ECode CEnumMap::EnumMapKeySet::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    VALIDATE_NOT_NULL(pIID)
-
-    if (pObject == (IInterface*)(ISet*)this) {
-        *pIID = EIID_ISet;
-    }
-    else {
-        return E_INVALID_ARGUMENT;
-    }
-    return NOERROR;
-}
-
 CEnumMap::EnumMapKeySet::EnumMapKeySet(
     /*  */ CEnumMap* em)
 {
@@ -819,47 +775,6 @@ ECode CEnumMap::EnumMapKeySetType::Get(
 //       CEnumMap::EnumMapValueCollection
 //==========================================================
 
-UInt32 CEnumMap::EnumMapValueCollection::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 CEnumMap::EnumMapValueCollection::Release()
-{
-    return ElRefBase::Release();
-}
-
-PInterface CEnumMap::EnumMapValueCollection::Probe(
-    /* [in] */ REIID riid)
-{
-    if (EIID_IInterface == riid) {
-        return (PInterface)(ICollection*)this;
-    }
-    else if (EIID_IIterable == riid) {
-        return (IIterable*)(ICollection*)this;
-    }
-    else if (EIID_ICollection == riid) {
-        return (ICollection*)this;
-    }
-
-    return NULL;
-}
-
-ECode CEnumMap::EnumMapValueCollection::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    VALIDATE_NOT_NULL(pIID)
-
-    if (pObject == (IInterface*)(ICollection*)this) {
-        *pIID = EIID_ICollection;
-    }
-    else {
-        return E_INVALID_ARGUMENT;
-    }
-    return NOERROR;
-}
-
 CEnumMap::EnumMapValueCollection::EnumMapValueCollection(
     /*  */ CEnumMap* em)
 {
@@ -953,7 +868,7 @@ ECode CEnumMap::EnumMapValueCollection::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = object == this->Probe(EIID_IInterface);
+    *result = object == TO_IINTERFACE(this);
     return NOERROR;
 }
 
@@ -1041,50 +956,6 @@ ECode CEnumMap::EnumMapEntryIterator::GetNext(
 //==========================================================
 //       CEnumMap::EnumMapEntrySet
 //==========================================================
-
-UInt32 CEnumMap::EnumMapEntrySet::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 CEnumMap::EnumMapEntrySet::Release()
-{
-    return ElRefBase::Release();
-}
-
-PInterface CEnumMap::EnumMapEntrySet::Probe(
-    /* [in] */ REIID riid)
-{
-    if (EIID_IInterface == riid) {
-        return (PInterface)(ISet*)this;
-    }
-    else if (EIID_IIterable == riid) {
-        return (IIterable*)(ISet*)this;
-    }
-    else if (EIID_ICollection == riid) {
-        return (ICollection*)(ISet*)this;
-    }
-    else if (EIID_ISet == riid) {
-        return (ISet*)this;
-    }
-
-    return NULL;
-}
-
-ECode CEnumMap::EnumMapEntrySet::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    VALIDATE_NOT_NULL(pIID)
-
-    if (pObject == (IInterface*)(ISet*)this) {
-        *pIID = EIID_ISet;
-    }
-    else {
-        return E_INVALID_ARGUMENT;
-    }
-    return NOERROR;
-}
 
 CEnumMap::EnumMapEntrySet::EnumMapEntrySet(
     /*  */ CEnumMap* em)

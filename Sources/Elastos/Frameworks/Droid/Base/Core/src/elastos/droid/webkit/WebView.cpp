@@ -2231,7 +2231,7 @@ void WebView::EnsureProviderCreated()
         // As this can get called during the base class constructor chain, pass the minimum
         // number of dependencies here; the rest are deferred to init().
         AutoPtr<IWebViewPrivateAccess> pa = new PrivateAccess(this);
-        IWebView* wv = (IWebView*)this->Probe(EIID_IWebView);
+        IWebView* wv = this;
         assert(wv != NULL);
         GetFactory()->CreateWebView(wv, pa, (IWebViewProvider**)&mProvider);
     }

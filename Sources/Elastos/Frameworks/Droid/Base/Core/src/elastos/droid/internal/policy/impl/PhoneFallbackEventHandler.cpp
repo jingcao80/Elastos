@@ -150,7 +150,7 @@ ECode PhoneFallbackEventHandler::OnKeyDown(
             Int32 rc;
             event->GetRepeatCount(&rc);
             if (0 == rc) {
-                dispatcher->StartTracking(event, THIS_PROBE(IInterface));
+                dispatcher->StartTracking(event, TO_IINTERFACE(this));
             }
             else {
                 Boolean isLongPress, isTracking;
@@ -194,7 +194,7 @@ ERROR_PROCESS:
             Int32 rc;
             event->GetRepeatCount(&rc);
             if (0 == rc) {
-                dispatcher->StartTracking(event, THIS_PROBE(IInterface));
+                dispatcher->StartTracking(event, TO_IINTERFACE(this));
             }
             else {
                 Boolean isLongPress, isTracking;
@@ -229,7 +229,7 @@ ERROR_PROCESS:
             Int32 rc;
             event->GetRepeatCount(&rc);
             if (0 == rc) {
-                dispatcher->StartTracking(event, THIS_PROBE(IInterface));
+                dispatcher->StartTracking(event, TO_IINTERFACE(this));
             }
             else {
                 Boolean isLongPress, isTracking;

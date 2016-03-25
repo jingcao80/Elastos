@@ -79,7 +79,7 @@ ECode CExtractEditLayout::ExtractActionMode::Invalidate()
 {
     mMenu->StopDispatchingItemsChanged();
     Boolean tmp = FALSE;
-    mCallback->OnPrepareActionMode(THIS_PROBE(IActionMode), IMenu::Probe(mMenu), &tmp);
+    mCallback->OnPrepareActionMode(this, IMenu::Probe(mMenu), &tmp);
     return mMenu->StartDispatchingItemsChanged();
 }
 
@@ -87,7 +87,7 @@ Boolean CExtractEditLayout::ExtractActionMode::DispatchOnCreate()
 {
     mMenu->StopDispatchingItemsChanged();
     Boolean ret = FALSE;
-    mCallback->OnCreateActionMode(THIS_PROBE(IActionMode), IMenu::Probe(mMenu), &ret);
+    mCallback->OnCreateActionMode(this, IMenu::Probe(mMenu), &ret);
     mMenu->StartDispatchingItemsChanged();
     return ret;
 }
@@ -99,7 +99,7 @@ ECode CExtractEditLayout::ExtractActionMode::Finish()
         return NOERROR;
     }
 
-    mCallback->OnDestroyActionMode((IActionMode*)this->Probe(EIID_IActionMode));
+    mCallback->OnDestroyActionMode(this);
     mCallback = NULL;
 
     IView::Probe(mHost->mExtractActionButton)->SetVisibility(IView::VISIBLE);
@@ -162,7 +162,7 @@ ECode CExtractEditLayout::ExtractActionMode::OnMenuItemSelected(
     assert(result != NULL);
 
     if (mCallback != NULL) {
-        return mCallback->OnActionItemClicked((IActionMode*)this->Probe(EIID_IActionMode), item, result);
+        return mCallback->OnActionItemClicked(this, item, result);
     }
 
     *result = FALSE;

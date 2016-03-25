@@ -240,7 +240,7 @@ ECode Int64Buffer::Put(
 ECode Int64Buffer::Put(
     /* [in] */ IInt64Buffer* src)
 {
-    if (src == (IInt64Buffer*)this->Probe(EIID_IInt64Buffer)) {
+    if (src == this) {
         // throw new IllegalArgumentException("src == this");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

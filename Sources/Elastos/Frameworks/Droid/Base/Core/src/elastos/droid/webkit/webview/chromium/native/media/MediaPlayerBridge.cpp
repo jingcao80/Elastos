@@ -605,7 +605,7 @@ void MediaPlayerBridge::NativeOnDidSetDataUriDataSource(
     /* [in] */ Handle64 nativeMediaPlayerBridge,
     /* [in] */ Boolean success)
 {
-    Elastos_MediaPlayerBridge_nativeOnDidSetDataUriDataSource(THIS_PROBE(IInterface), nativeMediaPlayerBridge, success);
+    Elastos_MediaPlayerBridge_nativeOnDidSetDataUriDataSource(TO_IINTERFACE(this), nativeMediaPlayerBridge, success);
 }
 
 void MediaPlayerBridge::Destroy(

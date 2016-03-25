@@ -172,11 +172,11 @@ ECode PreferenceManager::InflateFromResource(
     SetNoCommit(TRUE);
 
     AutoPtr<IGenericInflater> inflater;
-    CPreferenceInflater::New(context, (IPreferenceManager*)this, (IGenericInflater**)&inflater);
+    CPreferenceInflater::New(context, this, (IGenericInflater**)&inflater);
     AutoPtr<IInterface> pfObj;
     inflater->Inflate(resId, rootPreferences, TRUE, (IInterface**)&pfObj);
     AutoPtr<IPreference> pf = IPreference::Probe(pfObj);
-    if (pf != NULL) pf->OnAttachedToHierarchy((IPreferenceManager*)this);
+    if (pf != NULL) pf->OnAttachedToHierarchy(this);
 
     // Unblock commits
     SetNoCommit(FALSE);
@@ -193,7 +193,7 @@ ECode PreferenceManager::CreatePreferenceScreen(
     AutoPtr<IPreferenceScreen> preferenceScreen;
     CPreferenceScreen::New(context, NULL, (IPreferenceScreen**)&preferenceScreen);
     AutoPtr<IPreference> preference = IPreference::Probe(preferenceScreen);
-    preference->OnAttachedToHierarchy((IPreferenceManager*)this);
+    preference->OnAttachedToHierarchy(this);
     *screen = preferenceScreen.Get();
     REFCOUNT_ADD(*screen)
     return NOERROR;

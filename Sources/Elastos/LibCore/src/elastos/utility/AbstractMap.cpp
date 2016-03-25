@@ -109,7 +109,7 @@ ECode AbstractMap::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (this->Probe(EIID_IInterface) == object) {
+    if (TO_IINTERFACE(this) == object) {
         *result = TRUE;
         return NOERROR;
     }
@@ -411,7 +411,7 @@ ECode AbstractMap::ToString(
         AutoPtr<IMapEntry> entry = IMapEntry::Probe(outface);
         AutoPtr<IInterface> key;
         entry->GetKey((IInterface**)&key);
-        if (key.Get() != this->Probe(EIID_IInterface)) {
+        if (key.Get() != TO_IINTERFACE(this)) {
             buffer.Append(key);
         }
         else {
@@ -420,7 +420,7 @@ ECode AbstractMap::ToString(
         buffer.AppendChar('=');
         AutoPtr<IInterface> value;
         entry->GetValue((IInterface**)&value);
-        if (value.Get() != this->Probe(EIID_IInterface)) {
+        if (value.Get() != TO_IINTERFACE(this)) {
             buffer.Append(value);
         }
         else {
@@ -519,7 +519,7 @@ ECode AbstractMap::SimpleImmutableEntry::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (this->Probe(EIID_IInterface) == object) {
+    if (TO_IINTERFACE(this) == object) {
         *result = TRUE;
         return NOERROR;
     }
@@ -616,7 +616,7 @@ ECode AbstractMap::SimpleEntry::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (this->Probe(EIID_IInterface) == object) {
+    if (TO_IINTERFACE(this) == object) {
         *result = TRUE;
         return NOERROR;
     }

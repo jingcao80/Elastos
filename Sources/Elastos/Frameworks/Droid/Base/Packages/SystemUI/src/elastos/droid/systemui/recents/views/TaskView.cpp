@@ -439,7 +439,7 @@ void TaskView::UpdateViewPropertiesToTaskTransform(
         AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(1);
         (*values)[0] = toTransform->mP;
         AutoPtr<IObjectAnimator> animator;
-        oaHelper->OfFloat((ITaskView*)this, String("taskProgress"), values,
+        oaHelper->OfFloat(TO_IINTERFACE(this), String("taskProgress"), values,
             (IObjectAnimator**)&animator);
         mTaskProgressAnimator = IAnimator::Probe(animator);
         mTaskProgressAnimator->SetDuration(duration);
@@ -710,7 +710,7 @@ void TaskView::StartLaunchTaskAnimation(
             AutoPtr<ArrayOf<Int32> > params = ArrayOf<Int32>::Alloc(1);
             (*params)[0] = 0;
             AutoPtr<IObjectAnimator> anim;
-            oaHelper->OfInt32((IObject*)this, String("dim"), params, (IObjectAnimator**)&anim);
+            oaHelper->OfInt32(TO_IINTERFACE(this), String("dim"), params, (IObjectAnimator**)&anim);
             IAnimator::Probe(anim)->SetDuration(mConfig->mTaskBarExitAnimDuration);
             IAnimator::Probe(anim)->SetInterpolator(
                 ITimeInterpolator::Probe(mConfig->mFastOutLinearInInterpolator));
@@ -938,7 +938,7 @@ void TaskView::AnimateDimToProgress(
         AutoPtr<ArrayOf<Int32> > params = ArrayOf<Int32>::Alloc(1);
         (*params)[0] = toDim;
         AutoPtr<IObjectAnimator> objAnim;
-        oaHelper->OfInt32((IObject*)this, String("dim"), params, (IObjectAnimator**)&objAnim);
+        oaHelper->OfInt32(TO_IINTERFACE(this), String("dim"), params, (IObjectAnimator**)&objAnim);
         AutoPtr<IAnimator> anim = IAnimator::Probe(objAnim);
         anim->SetStartDelay(delay);
         anim->SetDuration(duration);
@@ -1150,7 +1150,7 @@ ECode TaskView::OnClick(
     /* [in] */ IView* v)
 {
     AutoPtr<TaskView> tv = this;
-    Boolean delayViewClick = (v != (IView*)this) && (v != mActionButtonView);
+    Boolean delayViewClick = (v != this) && (v != mActionButtonView);
     if (delayViewClick) {
         // We purposely post the handler delayed to allow for the touch feedback to draw
         AutoPtr<Runnable> runnable = new OnClickRunnable(this, v);

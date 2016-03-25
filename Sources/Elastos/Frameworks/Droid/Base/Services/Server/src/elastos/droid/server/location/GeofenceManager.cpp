@@ -350,7 +350,7 @@ ECode GeofenceManager::UpdateFences()
                 request->SetFastestInterval(0);
                 AutoPtr<ILooper> looper;
                 mHandler->GetLooper((ILooper**)&looper);
-                mLocationManager->RequestLocationUpdates(request.Get(), (ILocationListener*)this, looper.Get());
+                mLocationManager->RequestLocationUpdates(request.Get(), this, looper.Get());
             }
         }
         else {
@@ -360,7 +360,7 @@ ECode GeofenceManager::UpdateFences()
                 mLocationUpdateInterval = 0;
                 mLastLocationUpdate = NULL;
 
-                mLocationManager->RemoveUpdates((IPendingIntent*)this);
+                mLocationManager->RemoveUpdates(this);
             }
         }
 

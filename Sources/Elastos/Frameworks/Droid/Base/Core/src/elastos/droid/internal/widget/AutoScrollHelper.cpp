@@ -78,7 +78,7 @@ ECode AutoScrollHelper::ScrollAnimationRunnable::Run()
     mHost->ScrollTargetBy(deltaX, deltaY);
 
     // Keep going until the scroller has permanently stopped.
-    mHost->mTarget->PostOnAnimation(THIS_PROBE(IRunnable));
+    mHost->mTarget->PostOnAnimation(this);
     return NOERROR;
 }
 

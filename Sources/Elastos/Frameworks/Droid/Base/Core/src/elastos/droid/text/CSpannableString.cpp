@@ -55,7 +55,7 @@ ECode CSpannableString::SubSequence(
     }
 
     AutoPtr<ISpannableString> sub;
-    CSpannableString::New(THIS_PROBE(ICharSequence), start, end, (ISpannableString**)&sub);
+    CSpannableString::New(this, start, end, (ISpannableString**)&sub);
     *csq = ICharSequence::Probe(sub);
     REFCOUNT_ADD(*csq);
     return NOERROR;

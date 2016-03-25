@@ -58,10 +58,10 @@ ECode CSomnambulator::OnStart()
         AutoPtr<ISandman> s;
         CSandman::AcquireSingleton((ISandman**)&s);
         if (docked) {
-            s->StartDreamWhenDockedIfAppropriate(THIS_PROBE(IContext));
+            s->StartDreamWhenDockedIfAppropriate(this);
         }
         else {
-            s->StartDreamByUserRequest(THIS_PROBE(IContext));
+            s->StartDreamByUserRequest(this);
         }
     }
     Finish();

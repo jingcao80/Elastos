@@ -97,7 +97,7 @@ ECode VoiceInteractionSessionService::OnCreate()
     AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::VOICE_INTERACTION_MANAGER_SERVICE);
     mSystemService = IIVoiceInteractionManagerService::Probe(obj);
     AutoPtr<ILooper> looper = Looper::GetMyLooper();
-    CHandlerCaller::New((IContext*)this, looper.Get(), mHandlerCallerCallback, TRUE, TRUE, (IHandlerCaller**)&mHandlerCaller);
+    CHandlerCaller::New(this, looper.Get(), mHandlerCallerCallback, TRUE, TRUE, (IHandlerCaller**)&mHandlerCaller);
     return NOERROR;
 }
 

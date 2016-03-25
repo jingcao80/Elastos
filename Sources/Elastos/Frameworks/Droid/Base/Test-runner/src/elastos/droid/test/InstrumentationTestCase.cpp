@@ -33,36 +33,7 @@ ECode InstrumentationTestCase::_RunnableInRunTest::Run()
     return *mEC;
 }
 
-
-PInterface InstrumentationTestCase::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (IInterface*)(IInstrumentationTestCase*)this;
-    }
-    else if (riid == EIID_IInstrumentationTestCase) {
-        return (IInstrumentationTestCase*)this;
-    }
-    return TestCase::Probe(riid);
-}
-
-UInt32 InstrumentationTestCase::AddRef()
-{
-    return TestCase::AddRef();
-}
-
-UInt32 InstrumentationTestCase::Release()
-{
-    return TestCase::Release();
-}
-
-ECode InstrumentationTestCase::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    assert(0);
-    return E_INVALID_ARGUMENT;
-}
+CAR_INTERFACE_IMPL(InstrumentationTestCase, TestCase, IInstrumentationTestCase)
 
 ECode InstrumentationTestCase::InjectInstrumentation(
     /* [in] */ IInstrumentation* instrumentation)
@@ -138,7 +109,7 @@ ECode InstrumentationTestCase::RunTest()
     // methods of this class but excludes the
     // inherited ones.
     AutoPtr<IClassInfo> clazz;
-    ECode ec = _CObject_ReflectClassInfo(this->Probe(EIID_IInterface), (IClassInfo**)&clazz);
+    ECode ec = _CObject_ReflectClassInfo(TO_IINTERFACE(this), (IClassInfo**)&clazz);
     if (FAILED(ec)) {
         return TestCase::Fail(String("ClassInfo not found"));
     }
@@ -156,7 +127,7 @@ ECode InstrumentationTestCase::RunTest()
     Int32 runCount = 1;
     Boolean isRepetitive = FALSE;
     AutoPtr<ITestAnnotation> annotation;
-    ec = THIS_PROBE(ITest)->GetTestAnnotation((ITestAnnotation**)&annotation);
+    ec = this->GetTestAnnotation((ITestAnnotation**)&annotation);
     // if (method.isAnnotationPresent(FlakyTest.class)) {
     //     runCount = method.getAnnotation(FlakyTest.class).tolerance();
     // } else if (method.isAnnotationPresent(RepetitiveTest.class)) {
@@ -195,7 +166,7 @@ ECode InstrumentationTestCase::RunMethod(
 
     Int32 runCount = 0;
     do {
-        ec = runMethod->Invoke(this->Probe(EIID_IInterface), NULL);
+        ec = runMethod->Invoke(TO_IINTERFACE(this), NULL);
         runCount++;
         // Report current iteration number, if test is repetitive
         if (isRepetitive) {

@@ -63,7 +63,7 @@ void MediaRouteActionProvider::MediaRouterCallback::RefreshRoute(
         provider->RefreshRoute();
     }
     else {
-        router->RemoveCallback((IMediaRouterCallback*)this);
+        router->RemoveCallback(this);
     }
 }
 

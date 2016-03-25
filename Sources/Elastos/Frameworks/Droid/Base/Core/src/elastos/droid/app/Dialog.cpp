@@ -187,12 +187,12 @@ ECode Dialog::constructor(
     CPolicyManager::AcquireSingleton((IPolicyManager**)&pm);
     pm->MakeNewWindow(mContext, (IWindow**)&mWindow);
 
-    mWindow->SetCallback(THIS_PROBE(IWindowCallback));
-    mWindow->SetOnWindowDismissedCallback(THIS_PROBE(IOnWindowDismissedCallback));
+    mWindow->SetCallback(this);
+    mWindow->SetOnWindowDismissedCallback(this);
     mWindow->SetWindowManager(mWindowManager, NULL, String(NULL));
     mWindow->SetGravity(IGravity::CENTER);
 
-    mListenersHandler = new ListenersHandler(THIS_PROBE(IDialog));
+    mListenersHandler = new ListenersHandler(this);
     CHandler::New((IHandler**)&mHandler);
     assert(mHandler != NULL);
 
@@ -735,7 +735,7 @@ ECode Dialog::DispatchKeyEvent(
     event->GetKeyCode(&keyCode);
     Boolean consumed;
     if ((mOnKeyListener != NULL) &&
-        (mOnKeyListener->OnKey(THIS_PROBE(IDialogInterface),
+        (mOnKeyListener->OnKey(this,
             keyCode, event, &consumed), consumed)) {
         *result = TRUE;
         return NOERROR;
@@ -753,7 +753,7 @@ ECode Dialog::DispatchKeyEvent(
         mDecor->GetKeyDispatcherState((IDispatcherState**)&state);
     }
 
-    event->Dispatch(THIS_PROBE(IKeyEventCallback),
+    event->Dispatch(this,
         state, TO_IINTERFACE(this), &res);
 
     *result = res;
@@ -990,7 +990,7 @@ ECode Dialog::OnCreateContextMenu(
 ECode Dialog::RegisterForContextMenu(
     /* [in] */ IView* view)
 {
-    return view->SetOnCreateContextMenuListener(THIS_PROBE(IViewOnCreateContextMenuListener));
+    return view->SetOnCreateContextMenuListener(this);
 }
 
 ECode Dialog::UnregisterForContextMenu(

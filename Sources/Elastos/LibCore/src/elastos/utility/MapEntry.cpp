@@ -24,7 +24,7 @@ ECode MapEntry::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    if ((IInterface*)(IMapEntry*)this == object->Probe(EIID_IInterface)) {
+    if (TO_IINTERFACE(this) == TO_IINTERFACE(object)) {
         *result = TRUE;
         return NOERROR;
     }

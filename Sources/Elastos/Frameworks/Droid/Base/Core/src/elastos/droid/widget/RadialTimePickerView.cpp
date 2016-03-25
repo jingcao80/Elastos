@@ -1369,7 +1369,7 @@ void RadialTimePickerView::StartHoursToMinutesAnimation()
 {
     Int32 size = 0;
     if ((mHoursToMinutesAnims->GetSize(&size), size) == 0) {
-        AutoPtr<IObjectAnimator> animator = GetRadiusDisappearAnimator(THIS_PROBE(IRadialTimePickerView),
+        AutoPtr<IObjectAnimator> animator = GetRadiusDisappearAnimator(TO_IINTERFACE(this),
                 String("animationRadiusMultiplierHours"), mInvalidateUpdateListener,
                 mTransitionMidRadiusMultiplier, mTransitionEndRadiusMultiplier);
         mHoursToMinutesAnims->Add(animator);
@@ -1388,7 +1388,7 @@ void RadialTimePickerView::StartHoursToMinutesAnimation()
                 ALPHA_SELECTOR, ALPHA_TRANSPARENT, mInvalidateUpdateListener);
         mHoursToMinutesAnims->Add(animator);
 
-        animator = GetRadiusReappearAnimator(THIS_PROBE(IRadialTimePickerView),
+        animator = GetRadiusReappearAnimator(TO_IINTERFACE(this),
                 String("animationRadiusMultiplierMinutes"), mInvalidateUpdateListener,
                 mTransitionMidRadiusMultiplier, mTransitionEndRadiusMultiplier);
         mHoursToMinutesAnims->Add(animator);
@@ -1423,7 +1423,7 @@ void RadialTimePickerView::StartMinutesToHoursAnimation()
 {
     Int32 size = 0;
     if ((mMinuteToHoursAnims->GetSize(&size), size) == 0) {
-        AutoPtr<IObjectAnimator> animator = GetRadiusDisappearAnimator(THIS_PROBE(IRadialTimePickerView),
+        AutoPtr<IObjectAnimator> animator = GetRadiusDisappearAnimator(TO_IINTERFACE(this),
                 String("animationRadiusMultiplierMinutes"), mInvalidateUpdateListener,
                 mTransitionMidRadiusMultiplier, mTransitionEndRadiusMultiplier);
         mMinuteToHoursAnims->Add(animator);
@@ -1444,7 +1444,7 @@ void RadialTimePickerView::StartMinutesToHoursAnimation()
                 ALPHA_SELECTOR, ALPHA_TRANSPARENT, mInvalidateUpdateListener);
         mMinuteToHoursAnims->Add(animator);
 
-        animator = GetRadiusReappearAnimator(THIS_PROBE(IRadialTimePickerView),
+        animator = GetRadiusReappearAnimator(TO_IINTERFACE(this),
                 String("animationRadiusMultiplierHours"), mInvalidateUpdateListener,
                 mTransitionMidRadiusMultiplier, mTransitionEndRadiusMultiplier);
         mMinuteToHoursAnims->Add(animator);

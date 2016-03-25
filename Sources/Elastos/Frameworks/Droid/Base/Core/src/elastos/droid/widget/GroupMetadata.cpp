@@ -20,10 +20,10 @@ PInterface GroupMetadata::Probe(
     /* [in] */ REIID riid)
 {
    /* if (riid == EIID_IAnimatorListener) {
-        return (IAnimatorListener*)this;
+        return this;
     }
     else if (riid == EIID_ICloneable) {
-        return (ICloneable*)this;
+        return this;
     }
 */
     return NULL;
@@ -34,10 +34,10 @@ ECode GroupMetadata::GetInterfaceID(
     /* [out] */ InterfaceID *pIID)
 {
     assert(pIID != NULL);
-   /* if (pObject == (IInterface*)(IAnimatorListener*)this) {
+   /* if (pObject == (IInterface*)this) {
         *pIID = EIID_IAnimatorListener;
     }
-    else if (pObject == (IInterface*)(ICloneable*)this) {
+    else if (pObject == (IInterface*)this) {
         *pIID = EIID_ICloneable;
     }
     else {

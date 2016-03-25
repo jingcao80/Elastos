@@ -148,7 +148,7 @@ ECode CTestMethod::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    if (this->Probe(EIID_IInterface) == obj->Probe(EIID_IInterface)) {
+    if (TO_IINTERFACE(this) == obj->Probe(EIID_IInterface)) {
         *result = TRUE;
         return NOERROR;
     }

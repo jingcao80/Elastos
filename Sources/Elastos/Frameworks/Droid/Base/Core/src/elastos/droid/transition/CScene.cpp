@@ -101,7 +101,7 @@ ECode CScene::GetSceneRoot(
 ECode CScene::Exit()
 {
     AutoPtr<IScene> s = GetCurrentScene(IView::Probe(mSceneRoot));
-    if (Object::Equals(s->Probe(EIID_IInterface), THIS_PROBE(IInterface))) {
+    if (Object::Equals(s->Probe(EIID_IInterface), TO_IINTERFACE(this))) {
         if (mExitAction != NULL) {
             mExitAction->Run();
         }

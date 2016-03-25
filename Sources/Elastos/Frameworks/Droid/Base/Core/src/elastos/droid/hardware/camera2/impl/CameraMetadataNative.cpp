@@ -143,7 +143,7 @@ ECode CameraMetadataNative::Key::Equals(
     VALIDATE_NOT_NULL(equal);
     *equal = FALSE;
 
-    if (THIS_PROBE(IInterface) == TO_IINTERFACE(obj)) {
+    if (TO_IINTERFACE(this) == TO_IINTERFACE(obj)) {
         *equal = TRUE;
         return NOERROR;
     }

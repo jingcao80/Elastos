@@ -580,7 +580,7 @@ ECode ArrayList::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (object == this->Probe(EIID_IInterface)) {
+    if (object == TO_IINTERFACE(this)) {
         *result = TRUE;
         return NOERROR;
     }

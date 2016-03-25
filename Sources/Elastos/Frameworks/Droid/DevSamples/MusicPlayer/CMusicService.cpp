@@ -162,43 +162,43 @@ PInterface CMusicService::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)(IService*)this;
+        return (PInterface)this;
     }
     else if (riid == EIID_IObject) {
-        return (IObject*)this;
+        return this;
     }
     if (riid == EIID_IService) {
-        return (IService*)this;
+        return this;
     }
     else if (riid == EIID_IContextWrapper) {
-       return (IContextWrapper*)this;
+       return this;
     }
     else if (riid == EIID_IContext) {
-       return (IContext*)this;
+       return this;
     }
     else if (riid == EIID_IComponentCallbacks2) {
-       return (IComponentCallbacks2*)this;
+       return this;
     }
     else if (riid == EIID_IWeakReferenceSource) {
-        return (IWeakReferenceSource*)this;
+        return this;
     }
     else if ( riid == EIID_IPlayController) {
         return (IPlayController *)this;
     }
     else if (riid == EIID_IBinder) {
-        return (IBinder*)this;
+        return this;
     }
     else if (riid == EIID_IService) {
-        return (IService*)this;
+        return this;
     }
     else if (EIID_IRunnable == riid) {
-        return (IRunnable*)this;
+        return this;
     }
     else if (EIID_IMediaPlayerOnCompletionListener == riid) {
-        return (IMediaPlayerOnCompletionListener*)this;
+        return this;
     }
     else if (EIID_IWeakReferenceSource == riid) {
-        return (IWeakReferenceSource*)this;
+        return this;
     }
 
     return Service::Probe(riid);
@@ -362,7 +362,7 @@ ECode CMusicService::OnBind(
     /* [out] */ IBinder** binder)
 {
     VALIDATE_NOT_NULL(binder);
-    *binder = THIS_PROBE(IBinder);
+    *binder = this;
     REFCOUNT_ADD(*binder);
 
     Logger::D("CMusicService", "OnBind() %d", *binder);

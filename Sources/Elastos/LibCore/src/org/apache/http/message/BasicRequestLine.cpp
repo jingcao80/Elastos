@@ -69,7 +69,7 @@ ECode BasicRequestLine::ToString(
     // no need for non-default formatting in toString()
     AutoPtr<ILineFormatter> formatter = ILineFormatter::Probe(BasicLineFormatter::DEFAULT);
     AutoPtr<ICharArrayBuffer> buf;
-    formatter->FormatRequestLine(NULL, (IRequestLine*)this, (ICharArrayBuffer**)&buf);
+    formatter->FormatRequestLine(NULL, this, (ICharArrayBuffer**)&buf);
     return IObject::Probe(buf)->ToString(str);
 }
 

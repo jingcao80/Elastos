@@ -72,7 +72,7 @@ PInterface UsbSettingsManager::DeviceFilter::Probe(
     /* [in]  */ REIID riid)
 {
     if ( riid == EIID_IInterface) {
-        return (IInterface*)this;
+        return this;
     }
     else if (riid == EIID_DeviceFilter) {
         return reinterpret_cast<PInterface>(this);
@@ -305,7 +305,7 @@ PInterface UsbSettingsManager::AccessoryFilter::Probe(
     /* [in]  */ REIID riid)
 {
     if ( riid == EIID_IInterface) {
-        return (IInterface*)this;
+        return this;
     }
     else if (riid == EIID_AccessoryFilter) {
         return reinterpret_cast<PInterface>(this);

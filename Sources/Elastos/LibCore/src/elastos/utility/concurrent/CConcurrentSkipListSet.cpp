@@ -221,7 +221,7 @@ ECode CConcurrentSkipListSet::Equals(
 {
     VALIDATE_NOT_NULL(result);
     // Override AbstractSet version to avoid calling size()
-    if (Object::Equals(object, THIS_PROBE(IInterface))) {
+    if (Object::Equals(object, TO_IINTERFACE(this))) {
         *result = TRUE;
         return NOERROR;
     }

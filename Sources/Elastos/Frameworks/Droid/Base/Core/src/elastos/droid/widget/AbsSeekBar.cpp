@@ -147,7 +147,7 @@ ECode AbsSeekBar::SetThumb(
     }
 
     if (thumb != NULL) {
-        thumb->SetCallback((IDrawableCallback*)this->Probe(EIID_IDrawableCallback));
+        thumb->SetCallback(this);
         Boolean res;
         if (CanResolveLayoutDirection(&res), res) {
             Int32 layoutDirection;
@@ -831,7 +831,7 @@ void AbsSeekBar::AnimateSetProgress(
     (*values)[0] = curProgress;
     (*values)[1] = (Float) progress;
 
-    mPositionAnimator = ObjectAnimator::OfFloat((IAbsSeekBar*)this,
+    mPositionAnimator = ObjectAnimator::OfFloat(TO_IINTERFACE(this),
             String("animationPosition"), values);
     IAnimator::Probe(mPositionAnimator)->SetDuration(PROGRESS_ANIMATION_DURATION);
     mPositionAnimator->SetAutoCancel(TRUE);

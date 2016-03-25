@@ -93,7 +93,7 @@ DateFormat::Field::constructor(
     mCalendarField = calendarField;
     // if (calendarField != -1 && sTable.Find(calendarField) == sTable.End()) {
     if (calendarField != -1 && sTable[calendarField] == NULL) {
-        sTable[calendarField] = (IDateFormatField*)this->Probe(EIID_IDateFormatField);
+        sTable[calendarField] = this;
     }
     return NOERROR;
 }

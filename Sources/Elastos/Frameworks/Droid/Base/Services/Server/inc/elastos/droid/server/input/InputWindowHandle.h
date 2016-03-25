@@ -9,6 +9,7 @@
 
 using Elastos::Droid::Graphics::IRegion;
 using Elastos::Droid::View::IInputChannel;
+using Elastos::Droid::View::IWindowState;
 
 namespace Elastos {
 namespace Droid {
@@ -29,7 +30,7 @@ public:
 
     InputWindowHandle(
         /* [in] */ InputApplicationHandle* inputApplicationHandle,
-        /* [in] */ IInterface* windowState,
+        /* [in] */ IWindowState* windowState,
         /* [in] */ Int32 displayId);
 
     virtual ~InputWindowHandle();
@@ -42,7 +43,7 @@ public:
     AutoPtr<InputApplicationHandle> mInputApplicationHandle;
 
     // The window manager's window state.
-    AutoPtr<IInterface> mWindowState;
+    AutoPtr<IWindowState> mWindowState;
 
     // The input channel associated with the window.
     AutoPtr<IInputChannel> mInputChannel;

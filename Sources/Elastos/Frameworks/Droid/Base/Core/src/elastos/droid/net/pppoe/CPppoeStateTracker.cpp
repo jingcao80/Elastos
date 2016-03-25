@@ -392,7 +392,7 @@ ECode CPppoeStateTracker::constructor(
 
     Slogger::I(TAG,"Successed");
     mServiceStarted = TRUE;
-    FAIL_RETURN(CPppoeMonitor::New((IPppoeStateTracker*)this, (IPppoeMonitor**)&mMonitor));
+    FAIL_RETURN(CPppoeMonitor::New(this, (IPppoeMonitor**)&mMonitor));
     mTrackerHandlerCallback = new MyHandlerCallback(this);
     return NOERROR;
 }

@@ -510,11 +510,11 @@ ECode SlidingTab::constructor(
     mDensity = ((CDisplayMetrics*)metrics.Get())->mDensity;
     if (DBG) Log(String("- Density: ") + mDensity);
 
-    mLeftSlider = new Slider(THIS_PROBE(IViewGroup),
+    mLeftSlider = new Slider(this,
         R::drawable::jog_tab_left_generic,
         R::drawable::jog_tab_bar_left_generic,
         R::drawable::jog_tab_target_gray);
-    mRightSlider = new Slider(THIS_PROBE(IViewGroup),
+    mRightSlider = new Slider(this,
         R::drawable::jog_tab_right_generic,
         R::drawable::jog_tab_bar_right_generic,
         R::drawable::jog_tab_target_gray);
@@ -946,7 +946,7 @@ void SlidingTab::DispatchTriggerEvent(
 {
 //    Vibrate(VIBRATE_LONG);
     if (mOnTriggerListener != NULL) {
-        mOnTriggerListener->OnTrigger(THIS_PROBE(IView), whichHandle);
+        mOnTriggerListener->OnTrigger(this, whichHandle);
     }
 }
 
@@ -957,7 +957,7 @@ ECode SlidingTab::OnVisibilityChanged(
     ViewGroup::OnVisibilityChanged(changedView, visibility);
     // When visibility changes and the user has a tab selected, unselect it and
     // make sure their callback gets called.
-    if (changedView == THIS_PROBE(IView) && visibility != IView::VISIBLE
+    if (changedView == this && visibility != IView::VISIBLE
             && mGrabbedState != ISlidingTabOnTriggerListener::NO_HANDLE) {
         CancelGrab();
     }
@@ -970,7 +970,7 @@ void SlidingTab::SetGrabbedState(
     if (newState != mGrabbedState) {
         mGrabbedState = newState;
         if (mOnTriggerListener != NULL) {
-            mOnTriggerListener->OnGrabbedStateChange(THIS_PROBE(IView), mGrabbedState);
+            mOnTriggerListener->OnGrabbedStateChange(this, mGrabbedState);
         }
     }
 }

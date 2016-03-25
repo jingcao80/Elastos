@@ -343,7 +343,7 @@ ECode BroadcastReceiver::ToString(
 {
     VALIDATE_NOT_NULL(info);
     String str("BroadcastReceiver:(");
-    str.AppendFormat("%p", THIS_PROBE(IBroadcastReceiver));
+    str.AppendFormat("%p", this);
     *info = str;
     return NOERROR;
 }

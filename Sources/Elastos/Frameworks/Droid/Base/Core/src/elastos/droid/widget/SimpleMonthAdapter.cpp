@@ -113,7 +113,7 @@ ECode SimpleMonthAdapter::GetView(
         //         , (IAbsListViewLayoutParams**)&params);
         IView::Probe(v)->SetLayoutParams(IViewGroupLayoutParams::Probe(params));
         IView::Probe(v)->SetClickable(TRUE);
-        v->SetOnDayClickListener(THIS_PROBE(IOnDayClickListener));
+        v->SetOnDayClickListener(this);
         if (mCalendarTextColors != NULL) {
             v->SetTextColor(mCalendarTextColors);
         }

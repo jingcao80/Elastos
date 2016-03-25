@@ -164,7 +164,7 @@ ECode ThreadSafeClientConnManager::ReleaseConnection(
         Logger::E("ThreadSafeClientConnManager", "Connection class mismatch, connection not obtained from this manager.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    if ((hca->GetPoolEntry() != NULL) && (hca->GetManager().Get() != (IClientConnectionManager*)this)) {
+    if ((hca->GetPoolEntry() != NULL) && (hca->GetManager().Get() != this)) {
         Logger::E("ThreadSafeClientConnManager", "Connection not obtained from this manager.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

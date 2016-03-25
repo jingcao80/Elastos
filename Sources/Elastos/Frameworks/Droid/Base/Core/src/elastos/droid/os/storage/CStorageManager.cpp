@@ -48,7 +48,7 @@ CStorageManager::StorageEvent::StorageEvent(
     CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
     helper->Obtain((IMessage**)&mMessage);
     mMessage->SetWhat(what);
-    mMessage->SetObj(THIS_PROBE(IInterface));
+    mMessage->SetObj(TO_IINTERFACE(this));
 }
 
 ECode CStorageManager::ObbHandler::HandleMessage(

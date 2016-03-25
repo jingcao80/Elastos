@@ -269,16 +269,17 @@ ECode Condition::Equals(
     /* [out] */ Boolean* isEquals)
 {
     VALIDATE_NOT_NULL(isEquals)
-    if (ICondition::Probe(o) == NULL) {
+    ICondition* oc = ICondition::Probe(o);
+    if (oc == NULL) {
         *isEquals = FALSE;
         return NOERROR;
     }
-    if (o == IInterface::Probe((IObject*)this)) {
+    if (oc == (ICondition*)this) {
         *isEquals = TRUE;
         return NOERROR;
     }
-    const AutoPtr<ICondition> _other = ICondition::Probe(o);
-    AutoPtr<Condition> other = (Condition*)_other.Get();
+
+    AutoPtr<Condition> other = (Condition*)oc;
     AutoPtr<IString> str1, str2, str3, str4, str5, str6;
     CString::New(other->mSummary, (IString**)&str1);
     CString::New(mSummary, (IString**)&str2);

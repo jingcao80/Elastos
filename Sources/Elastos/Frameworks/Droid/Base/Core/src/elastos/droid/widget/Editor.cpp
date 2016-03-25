@@ -1654,7 +1654,7 @@ ECode HandleView::constructor(
     mContainer->SetSplitTouchEnabled(TRUE);
     mContainer->SetClippingEnabled(FALSE);
     mContainer->SetWindowLayoutType(IWindowManagerLayoutParams::TYPE_APPLICATION_SUB_PANEL);
-    mContainer->SetContentView((IView*)this->Probe(EIID_IView));
+    mContainer->SetContentView(this);
 
     mDrawableLtr = drawableLtr;
     mDrawableRtl = drawableRtl;
@@ -4393,7 +4393,7 @@ Boolean Editor::ReportExtractedText()
                         Int32 token;
                         req->GetToken(&token);
                         imm->UpdateExtractedText(
-                                IVIEW_PROBE(mTextView),
+                                IView::Probe(mTextView),
                                 token, ims->mExtractedText);
                         ims->mChangedStart = EXTRACT_UNKNOWN;
                         ims->mChangedEnd = EXTRACT_UNKNOWN;
@@ -4786,7 +4786,7 @@ Boolean Editor::StartSelectionActionMode()
         // Show the IME to be able to replace text, except when selecting non editable text.
         AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();
         if (imm != NULL) {
-            imm->ShowSoftInput(IVIEW_PROBE(mTextView), 0, NULL);
+            imm->ShowSoftInput(IView::Probe(mTextView), 0, NULL);
         }
     }
 

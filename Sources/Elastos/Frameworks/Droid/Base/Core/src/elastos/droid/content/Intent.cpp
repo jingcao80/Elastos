@@ -299,7 +299,7 @@ ECode Intent::CloneImpl(
 ECode Intent::CloneFilter(
     /* [out] */ IIntent** intent)
 {
-    return CIntent::New(THIS_PROBE(IIntent), FALSE, intent);
+    return CIntent::New(this, FALSE, intent);
 }
 
 AutoPtr<IIntent> Intent::MakeMainActivity(
@@ -1430,7 +1430,7 @@ ECode Intent::ResolveActivity(
     }
 
     AutoPtr<IResolveInfo> info;
-    pm->ResolveActivity(THIS_PROBE(IIntent), IPackageManager::MATCH_DEFAULT_ONLY,
+    pm->ResolveActivity(this, IPackageManager::MATCH_DEFAULT_ONLY,
             (IResolveInfo**)&info);
 
     if (info != NULL) {
@@ -1465,7 +1465,7 @@ ECode Intent::ResolveActivityInfo(
     }
     else {
         AutoPtr<IResolveInfo> info;
-        pm->ResolveActivity(THIS_PROBE(IIntent), IPackageManager::MATCH_DEFAULT_ONLY | flags,
+        pm->ResolveActivity(this, IPackageManager::MATCH_DEFAULT_ONLY | flags,
                 (IResolveInfo**)&info);
         if (NULL != info) {
             FAIL_RETURN(info->GetActivityInfo((IActivityInfo**)&ai));
@@ -1492,7 +1492,7 @@ ECode Intent::ResolveSystemService(
     }
 
     AutoPtr<IList> results;
-    pm->QueryIntentServices(THIS_PROBE(IIntent), flags, (IList**)&results);
+    pm->QueryIntentServices(this, flags, (IList**)&results);
     if (results == NULL) {
         return NOERROR;
     }
@@ -1615,7 +1615,7 @@ ECode Intent::RemoveCategory(
 ECode Intent::SetSelector(
     /* [in] */ IIntent* selector)
 {
-    if (selector == THIS_PROBE(IIntent)) {
+    if (selector == this) {
         //throw new IllegalArgumentException(
         //        "Intent being set as a selector of itself");
         Slogger::E(TAG, "Intent being set as a selector of itself");

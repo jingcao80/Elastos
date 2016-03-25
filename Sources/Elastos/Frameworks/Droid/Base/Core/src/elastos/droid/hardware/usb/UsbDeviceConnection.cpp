@@ -257,7 +257,7 @@ void UsbDeviceConnection::NativeClose()
     //ALOGD("close\n");
     Logger::D(UsbDeviceConnection::TAG, "close\n");
 
-    struct usb_device* device = UsbDeviceConnection_get_device_from_object((IUsbDeviceConnection*)this);
+    struct usb_device* device = UsbDeviceConnection_get_device_from_object(this);
 
     if (!device) {
         return;
@@ -269,7 +269,7 @@ void UsbDeviceConnection::NativeClose()
 
 Int32 UsbDeviceConnection::NativeGetFd()
 {
-    struct usb_device* device = UsbDeviceConnection_get_device_from_object((IUsbDeviceConnection*)this);
+    struct usb_device* device = UsbDeviceConnection_get_device_from_object(this);
 
     if (!device) {
         //ALOGE("device is closed in native_get_fd");
@@ -306,7 +306,7 @@ Boolean UsbDeviceConnection::NativeClaimInterface(
     /* [in] */ Int32 interfaceID,
     /* [in] */ Boolean force)
 {
-    struct usb_device* device = UsbDeviceConnection_get_device_from_object((IUsbDeviceConnection*)this);
+    struct usb_device* device = UsbDeviceConnection_get_device_from_object(this);
 
     if (!device) {
         //ALOGE("device is closed in native_claim_interface");
@@ -327,7 +327,7 @@ Boolean UsbDeviceConnection::NativeClaimInterface(
 Boolean UsbDeviceConnection::NativeReleaseInterface(
     /* [in] */ Int32 interfaceID)
 {
-    struct usb_device* device = UsbDeviceConnection_get_device_from_object((IUsbDeviceConnection*)this);
+    struct usb_device* device = UsbDeviceConnection_get_device_from_object(this);
 
     if (!device) {
         //ALOGE("device is closed in native_release_interface");
@@ -348,7 +348,7 @@ Boolean UsbDeviceConnection::NativeSetInterface(
     /* [in] */ Int32 interfaceID,
     /* [in] */ Int32 alternateSetting)
 {
-    struct usb_device* device = UsbDeviceConnection_get_device_from_object((IUsbDeviceConnection*)this);
+    struct usb_device* device = UsbDeviceConnection_get_device_from_object(this);
     if (!device) {
         //ALOGE("device is closed in native_set_interface");
         Logger::D(UsbDeviceConnection::TAG, "device is closed in native_set_interface");
@@ -361,7 +361,7 @@ Boolean UsbDeviceConnection::NativeSetInterface(
 Boolean UsbDeviceConnection::NativeSetConfiguration(
     /* [in] */ Int32 configurationID)
 {
-    struct usb_device* device = UsbDeviceConnection_get_device_from_object((IUsbDeviceConnection*)this);
+    struct usb_device* device = UsbDeviceConnection_get_device_from_object(this);
     if (!device) {
         //ALOGE("device is closed in native_set_configuration");
         Logger::D(UsbDeviceConnection::TAG, "device is closed in native_set_configuration");
@@ -381,7 +381,7 @@ Int32 UsbDeviceConnection::NativeControlRequest(
     /* [in] */ Int32 length,
     /* [in] */ Int32 timeout)
 {
-    struct usb_device* device = UsbDeviceConnection_get_device_from_object((IUsbDeviceConnection*)this);
+    struct usb_device* device = UsbDeviceConnection_get_device_from_object(this);
 
     if (!device) {
         //ALOGE("device is closed in native_control_request");
@@ -404,7 +404,7 @@ Int32 UsbDeviceConnection::NativeBulkRequest(
     /* [in] */ Int32 length,
     /* [in] */ Int32 timeout)
 {
-    struct usb_device* device = UsbDeviceConnection_get_device_from_object((IUsbDeviceConnection*)this);
+    struct usb_device* device = UsbDeviceConnection_get_device_from_object(this);
 
     if (!device) {
         //ALOGE("device is closed in native_control_request");
@@ -422,7 +422,7 @@ Int32 UsbDeviceConnection::NativeBulkRequest(
 
 AutoPtr<IUsbRequest> UsbDeviceConnection::NativeRequestWait()
 {
-    struct usb_device* device = UsbDeviceConnection_get_device_from_object((IUsbDeviceConnection*)this);
+    struct usb_device* device = UsbDeviceConnection_get_device_from_object(this);
 
     if (!device) {
         //ALOGE("device is closed in native_request_wait");
@@ -441,7 +441,7 @@ AutoPtr<IUsbRequest> UsbDeviceConnection::NativeRequestWait()
 
 String UsbDeviceConnection::NativeGetSerial()
 {
-    struct usb_device* device = UsbDeviceConnection_get_device_from_object((IUsbDeviceConnection*)this);
+    struct usb_device* device = UsbDeviceConnection_get_device_from_object(this);
 
     if (!device) {
         //ALOGE("device is closed in native_request_wait");

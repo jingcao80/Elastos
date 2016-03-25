@@ -162,7 +162,7 @@ ECode CManifest::Clone(
 {
     VALIDATE_NOT_NULL(object)
     AutoPtr<IManifest> manifest;
-    CManifest::New(THIS_PROBE(IManifest), (IManifest**)&manifest);
+    CManifest::New(this, (IManifest**)&manifest);
     *object = TO_IINTERFACE(manifest);
     REFCOUNT_ADD(*object)
     return NOERROR;
@@ -171,7 +171,7 @@ ECode CManifest::Clone(
 ECode CManifest::Write(
     /* [in] */ IOutputStream* os)
 {
-    return Write(THIS_PROBE(IManifest), os);
+    return Write(this, os);
 }
 
 ECode CManifest::Read(

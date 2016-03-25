@@ -239,7 +239,7 @@ ECode MyActivityController::Run()
 {
     PrintMessageForState();
 
-    mHost->GetAm()->SetActivityController(THIS_PROBE(IIActivityController));
+    mHost->GetAm()->SetActivityController(this);
     mState = STATE_NORMAL;
 
     AutoPtr<IInputStreamReader> converter;

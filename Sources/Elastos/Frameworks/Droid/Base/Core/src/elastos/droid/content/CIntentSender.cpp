@@ -61,7 +61,7 @@ ECode CIntentSender::FinishedDispatcher::PerformReceive(
     }
     else {
         Boolean result;
-        return mHandler->Post(THIS_PROBE(IRunnable), &result);
+        return mHandler->Post(this, &result);
     }
 }
 

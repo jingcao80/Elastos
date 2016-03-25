@@ -160,7 +160,7 @@ ECode ScrollingTabContainerView::TabView::Update()
     if (custom != NULL) {
         AutoPtr<IViewParent> customParent;
         custom->GetParent((IViewParent**)&customParent);
-        if (customParent.Get() != (IViewParent*)this) {
+        if (customParent.Get() != this) {
             if (customParent != NULL)
                 IViewManager::Probe(customParent)->RemoveView(custom);
             AddView(custom);
@@ -524,7 +524,7 @@ void ScrollingTabContainerView::OnMeasure(
 Boolean ScrollingTabContainerView::IsCollapsed()
 {
     AutoPtr<IViewParent> p;
-    return mTabSpinner != NULL && (IView::Probe(mTabSpinner)->GetParent((IViewParent**)&p), p.Get() == THIS_PROBE(IViewParent));
+    return mTabSpinner != NULL && (IView::Probe(mTabSpinner)->GetParent((IViewParent**)&p), p.Get() == this);
 }
 
 ECode ScrollingTabContainerView::SetAllowCollapse(
@@ -638,7 +638,7 @@ AutoPtr<ISpinner> ScrollingTabContainerView::CreateSpinner()
         IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::MATCH_PARENT, (ILinearLayoutLayoutParams**)&lp);
 
     IView::Probe(spinner)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
-    IAdapterView::Probe(spinner)->SetOnItemClickListener(THIS_PROBE(IAdapterViewOnItemClickListener));
+    IAdapterView::Probe(spinner)->SetOnItemClickListener(this);
     return spinner;
 }
 
@@ -671,7 +671,7 @@ ECode ScrollingTabContainerView::AnimateToVisibility(
         }
         AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
         (*array)[0] = 1.f;
-        AutoPtr<IObjectAnimator> anim = CObjectAnimator::OfFloat(THIS_PROBE(IScrollingTabContainerView), String("alpha"), array);
+        AutoPtr<IObjectAnimator> anim = CObjectAnimator::OfFloat(TO_IINTERFACE(this), String("alpha"), array);
         IAnimator::Probe(anim)->SetDuration(FADE_DURATION);
         IAnimator::Probe(anim)->SetInterpolator(sAlphaInterpolator);
 
@@ -681,7 +681,7 @@ ECode ScrollingTabContainerView::AnimateToVisibility(
     else {
         AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
         (*array)[0] = 0.f;
-        AutoPtr<IObjectAnimator> anim = CObjectAnimator::OfFloat(THIS_PROBE(IScrollingTabContainerView), String("alpha"), array);
+        AutoPtr<IObjectAnimator> anim = CObjectAnimator::OfFloat(TO_IINTERFACE(this), String("alpha"), array);
         IAnimator::Probe(anim)->SetDuration(FADE_DURATION);
         IAnimator::Probe(anim)->SetInterpolator(sAlphaInterpolator);
 
@@ -735,7 +735,7 @@ AutoPtr<ITabView> ScrollingTabContainerView::CreateTabView(
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     CScrollingTabContainerTabView::New(context, tab, forAdapter,
-            THIS_PROBE(IScrollingTabContainerView), (ITabView**)&tabView);
+            this, (ITabView**)&tabView);
     if (forAdapter) {
         IView::Probe(tabView)->SetBackgroundDrawable(NULL);
 

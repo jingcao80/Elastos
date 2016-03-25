@@ -188,7 +188,7 @@ ECode SpannableStringInternal::SetSpan(
     (*mSpanData)[mSpanCount * COLUMNS + FLAGS] = flags;
     mSpanCount++;
 
-    if (THIS_PROBE(ISpannable) != NULL) {
+    if (this != NULL) {
         SendSpanAdded(what, nstart, nend);
     }
     return NOERROR;
@@ -434,7 +434,7 @@ ECode SpannableStringInternal::SendSpanAdded(
     Int32 N = recip->GetLength();
     for (Int32 i = 0; i < N; i++) {
         ISpanWatcher* span = ISpanWatcher::Probe((*recip)[i]);
-        span->OnSpanAdded(THIS_PROBE(ISpannable), what, start, end);
+        span->OnSpanAdded(ISpannable::Probe(this), what, start, end);
     }
     return NOERROR;
 }
@@ -450,7 +450,7 @@ ECode SpannableStringInternal::SendSpanRemoved(
     Int32 N = recip->GetLength();
     for (int i = 0; i < N; i++) {
         ISpanWatcher* span = ISpanWatcher::Probe((*recip)[i]);
-        span->OnSpanRemoved(THIS_PROBE(ISpannable), what, start, end);
+        span->OnSpanRemoved(ISpannable::Probe(this), what, start, end);
     }
     return NOERROR;
 }
@@ -469,7 +469,7 @@ ECode SpannableStringInternal::SendSpanChanged(
     Int32 N = recip->GetLength();
     for (int i = 0; i < N; i++) {
         ISpanWatcher* span = ISpanWatcher::Probe((*recip)[i]);
-        span->OnSpanChanged(THIS_PROBE(ISpannable), what, s, e, st, en);
+        span->OnSpanChanged(ISpannable::Probe(this), what, s, e, st, en);
     }
     return NOERROR;
 }

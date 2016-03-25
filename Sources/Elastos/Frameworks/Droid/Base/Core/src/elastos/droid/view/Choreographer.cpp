@@ -180,7 +180,7 @@ ECode Choreographer::FrameDisplayEventReceiver::OnVsync(
     AutoPtr<IMessageHelper> helper;
     CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
     AutoPtr<IMessage> msg;
-    helper->Obtain(mOwner->mHandler, (IRunnable*)this, (IMessage**)&msg);
+    helper->Obtain(mOwner->mHandler, this, (IMessage**)&msg);
     msg->SetAsynchronous(TRUE);
     Boolean result;
     mOwner->mHandler->SendMessageAtTime(msg, timestampNanos / TimeUtils::NANOS_PER_MS, &result);
