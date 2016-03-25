@@ -34,16 +34,12 @@ ResourcesKey::ResourcesKey(
     mToken = token;
 
     Int32 hash = 17;
-    hash = 31 * hash + (!mResDir.IsNull() ? 0 : mResDir.GetHashCode());
+    hash = 31 * hash + (mResDir.IsNull() ? 0 : mResDir.GetHashCode());
     hash = 31 * hash + mDisplayId;
-    hash = 31 * hash + (mOverrideConfiguration != NULL
-        ? Object::GetHashCode(mOverrideConfiguration) : 0);
+    hash = 31 * hash + Object::GetHashCode(mOverrideConfiguration);
     hash = 31 * hash + Elastos::Core::Math::FloatToInt32Bits(mScale);
     hash = 31 * hash + (mIsThemeable ? 1 : 0);
-    Int32 configHash = 0;
-    if (themeConfig != NULL) {
-        IObject::Probe(themeConfig)->GetHashCode(&configHash);
-    }
+    Int32 configHash = Object::GetHashCode(themeConfig);
     hash = 31 * hash + configHash;
     mHash = hash;
 }

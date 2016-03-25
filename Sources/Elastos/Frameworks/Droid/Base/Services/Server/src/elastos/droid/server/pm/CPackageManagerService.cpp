@@ -4645,7 +4645,8 @@ ECode CPackageManagerService::constructor(
             // }
 
             if (!mOnlyCore) {
-                mBootThemeConfig = ThemeUtils::GetBootThemeDirty();
+                Slogger::W(TAG, " >> TODO need settings providers when ThemeUtils::GetBootThemeDirty().");
+                // mBootThemeConfig = ThemeUtils::GetBootThemeDirty();
             }
 
             // Collect vendor overlay packages.

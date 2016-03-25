@@ -45,8 +45,6 @@ class SQLiteConnectionPool;
  * is the Unicode Collation Algorithm and not tailored to the current locale.
  */
 
-extern "C" const InterfaceID EIID_SQLiteDatabase;
-
 class SQLiteDatabase
     : public SQLiteClosable
     , public ISQLiteDatabase
@@ -1405,6 +1403,19 @@ private:
 
     CARAPI ThrowIfNotOpenLocked();
 
+public:
+    // Thread-local for database sessions that belong to this database.
+    // Each thread has its own database session.
+    // INVARIANT: Immutable.
+    //private final ThreadLocal<SQLiteSession> mThreadSession = new ThreadLocal<SQLiteSession>() {
+    //    @Override
+    //    protected SQLiteSession initialValue() {
+    //        return createSession();
+    //    }
+    //};
+    static pthread_key_t sKeyThreadSession;
+    static pthread_once_t sKeyOnce;
+
 private:
     const static String TAG;
 
@@ -1419,18 +1430,6 @@ private:
     // INVARIANT: Guarded by sActiveDatabases.
     static HashMap<AutoPtr<SQLiteDatabase>, AutoPtr<IInterface> > sActiveDatabases;
     static Object sActiveDatabasesLock;
-
-    // Thread-local for database sessions that belong to this database.
-    // Each thread has its own database session.
-    // INVARIANT: Immutable.
-    //private final ThreadLocal<SQLiteSession> mThreadSession = new ThreadLocal<SQLiteSession>() {
-    //    @Override
-    //    protected SQLiteSession initialValue() {
-    //        return createSession();
-    //    }
-    //};
-    pthread_key_t mKeyThreadSession;
-    Boolean mKeyThreadSessionInitialized;
 
     // The optional factory to use when creating new Cursors.  May be null.
     // INVARIANT: Immutable.

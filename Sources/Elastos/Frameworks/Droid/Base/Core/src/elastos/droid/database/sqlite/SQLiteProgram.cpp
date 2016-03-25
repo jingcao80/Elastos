@@ -37,7 +37,7 @@ ECode SQLiteProgram::Init(
     /* [in] */ ArrayOf<IInterface*>* bindArgs,
     /* [in] */ ICancellationSignal* cancellationSignalForPrepare)
 {
-    mDatabase = reinterpret_cast<SQLiteDatabase*>(db->Probe(EIID_SQLiteDatabase));
+    mDatabase = (SQLiteDatabase*)db;
     mSql = sql.Trim();
     Int32 n = DatabaseUtils::GetSqlStatementType(mSql);
 
@@ -68,8 +68,8 @@ ECode SQLiteProgram::Init(
         //throw new IllegalArgumentException("Too many bind arguments.  "
         //        + bindArgs.length + " arguments were provided but the statement needs "
         //        + mNumParameters + " arguments.");
-        Slogger::E(String("SQLiteProgram"), "Too many bind arguments.  %d arguments were provided but the statement needs %d arguments."
-                , bindArgs->GetLength(), mNumParameters);
+        Slogger::E("SQLiteProgram", "Too many bind arguments. %d arguments were provided"
+            " but the statement needs %d arguments.", bindArgs->GetLength(), mNumParameters);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 

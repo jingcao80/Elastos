@@ -4,7 +4,7 @@
 #include "elastos/droid/database/CCursorWindow.h"
 #include "elastos/droid/database/NativeCursorWindow.h"
 #include "elastos/droid/database/sqlite/SQLiteCommon.h"
-//#include "elastos/droid/content/res/CResources.h"
+#include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/R.h"
@@ -16,10 +16,12 @@
 using Elastos::Droid::R;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::Binder;
-//using Elastos::Droid::Content::Res::CResources;
+using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Core::Character;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::ICloseGuardHelper;
+using Elastos::Core::CCloseGuardHelper;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -37,8 +39,7 @@ CAR_INTERFACE_IMPL_2(CursorWindow, SQLiteClosable, ICursorWindow, IParcelable)
 Int32 CursorWindow::GetCursorWindowSize()
 {
     if (sCursorWindowSize < 0) {
-        assert(0 && "TODO");
-        AutoPtr<IResources> res; //= CResources::GetSystem();
+        AutoPtr<IResources> res = CResources::GetSystem();
         Int32 i;
         res->GetInteger(R::integer::config_cursorWindowSize, &i);
         sCursorWindowSize = i * 1024;
@@ -49,18 +50,18 @@ Int32 CursorWindow::GetCursorWindowSize()
 CursorWindow::CursorWindow()
     : mWindowPtr(0)
     , mStartPos(0)
-{}
+{
+}
 
 CursorWindow::~CursorWindow()
 {
     //try {
-    //assert(0);
-    /*if (mCloseGuard != null) {
-        mCloseGuard.warnIfOpen();
-    }*/
+    if (mCloseGuard != NULL) {
+        mCloseGuard->WarnIfOpen();
+    }
     Dispose();
     //} finally {
-    //SQLiteClosable::Finalize();
+    // SQLiteClosable::Finalize();
     //}
 }
 
@@ -584,12 +585,19 @@ Boolean CursorWindow::NativePutNull(
 
 ECode CursorWindow::constructor()
 {
+    AutoPtr<ICloseGuardHelper> helper;
+    CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
+    helper->Get((ICloseGuard**)&mCloseGuard);
     return NOERROR;
 }
 
 ECode CursorWindow::constructor(
     /* [in] */ const String& name)
 {
+    AutoPtr<ICloseGuardHelper> helper;
+    CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
+    helper->Get((ICloseGuard**)&mCloseGuard);
+
     mStartPos = 0;
     mName = !name.IsNullOrEmpty() ? name : String("<unnamed>");
 
@@ -597,8 +605,7 @@ ECode CursorWindow::constructor(
         /** The cursor window size. resource xml file specifies the value in kB.
         * convert it to bytes here by multiplying with 1024.
         */
-        assert(0 && "TODO");
-        AutoPtr<IResources> res; //= CResources::GetSystem();
+        AutoPtr<IResources> res = CResources::GetSystem();
         Int32 i;
         res->GetInteger(R::integer::config_cursorWindowSize, &i);
         sCursorWindowSize = i * 1024;
@@ -611,7 +618,7 @@ ECode CursorWindow::constructor(
         Slogger::E(STATS_TAG, "Cursor window allocation of %d kb failed. %s", (GetCursorWindowSize() / 1024), PrintStats().string());
         return E_CURSOR_WINDOW_ALLOCATION_EXCEPTION;
     }
-    //mCloseGuard.open("close");
+    mCloseGuard->Open(String("close"));
     RecordNewWindow(Binder::GetCallingPid(), mWindowPtr);
     return NOERROR;
 }

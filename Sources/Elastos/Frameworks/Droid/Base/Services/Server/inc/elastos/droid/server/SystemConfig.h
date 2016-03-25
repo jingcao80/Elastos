@@ -6,6 +6,8 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.External.h>
 #include <elastos/core/Object.h>
+#define HASH_FOR_CONTENT
+#include <elastos/droid/ext/frameworkhash.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/HashSet.h>
 
@@ -110,6 +112,8 @@ public:
 
     // These are the app package names that should not allow IME switching.
     AutoPtr< HashSet<String> > mFixedImeApps;
+
+    AutoPtr< HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > > > mSignatureAllowances;
 };
 
 } // namespace Server

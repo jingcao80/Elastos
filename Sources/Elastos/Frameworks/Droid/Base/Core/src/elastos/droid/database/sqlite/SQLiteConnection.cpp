@@ -498,6 +498,8 @@ ECode SQLiteConnection::NativeOpen(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
+
     Int32 sqliteFlags;
     if (openFlags & SQLiteConnectionNative::CREATE_IF_NECESSARY) {
         sqliteFlags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
@@ -550,8 +552,8 @@ ECode SQLiteConnection::NativeOpen(
         sqlite3_profile(db, &SqliteProfileCallback, connection);
     }
 
-    ALOGV("Opened connection %p with label '%s'", db, label.string());
-    *result = reinterpret_cast<Int32>(connection);
+    Slogger::I(TAG, "Opened connection %s: %p with label '%s'", path.string(), db, label.string());
+    *result = reinterpret_cast<Int64>(connection);
     return NOERROR;
 }
 
@@ -1325,8 +1327,13 @@ ECode SQLiteConnection::Open()
 {
     assert(mConnectionPtr == 0);
     AutoPtr<SQLiteDatabaseConfiguration> sdc = mConfiguration;
-    FAIL_RETURN(NativeOpen(mConfiguration->mPath, mConfiguration->mOpenFlags, mConfiguration->mLabel,
-            SQLiteDebug::DEBUG_SQL_STATEMENTS, SQLiteDebug::DEBUG_SQL_TIME, &mConnectionPtr));
+    ECode ec = NativeOpen(mConfiguration->mPath, mConfiguration->mOpenFlags, mConfiguration->mLabel,
+            SQLiteDebug::DEBUG_SQL_STATEMENTS, SQLiteDebug::DEBUG_SQL_TIME, &mConnectionPtr);
+    if (FAILED(ec)) {
+        Slogger::E(TAG, "Failed to open:%s, label:%s, ec=%08x",
+            mConfiguration->mPath.string(), mConfiguration->mLabel.string(), ec);
+        return ec;
+    }
     FAIL_RETURN(SetPageSize())
     FAIL_RETURN(SetForeignKeyModeFromConfiguration())
     FAIL_RETURN(SetWalModeFromConfiguration())

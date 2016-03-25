@@ -189,7 +189,6 @@ ECode ContentResolver::constructor(
     /* [in] */ IContext* context)
 {
     CRandom::New((IRandom**)&mRandom);
-
     if (context != NULL) {
         mContext = context;
     }

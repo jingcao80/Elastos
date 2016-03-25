@@ -7,6 +7,7 @@
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::Database::Sqlite::SQLiteClosable;
+using Elastos::Core::ICloseGuard;
 using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
@@ -658,7 +659,7 @@ private:
 
     String mName;
 
-    //const CloseGuard mCloseGuard = CloseGuard.get();
+    AutoPtr<ICloseGuard> mCloseGuard;
 
     static HashMap<Int64, Int32> sWindowToPidMap;
 

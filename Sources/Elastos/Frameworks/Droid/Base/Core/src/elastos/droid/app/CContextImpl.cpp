@@ -79,6 +79,7 @@
 #include "elastos/droid/R.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::R;
@@ -211,6 +212,7 @@ using Elastos::Droid::Wifi::P2p::IIWifiP2pManager;
 using Elastos::Droid::Wifi::P2p::EIID_IIWifiP2pManager;
 
 using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
 using Elastos::IO::IFileHelper;
 using Elastos::IO::CFileHelper;
 using Elastos::IO::CFile;
@@ -234,7 +236,7 @@ ECode CContextImpl::ApplicationContentResolver::constructor(
     /* [in] */ IUserHandle* user)
 {
     assert(mainThread != NULL && user != NULL);
-    ContentResolver::constructor(context);
+    FAIL_RETURN(ContentResolver::constructor(context))
     mMainThread = mainThread;
     mUser = user;
     return NOERROR;
@@ -3628,22 +3630,23 @@ ECode CContextImpl::constructor(
     AutoPtr<IResources> resources;
     mPackageInfo->GetResources(mainThread, (IResources**)&resources);
     if (resources != NULL) {
-        Boolean get = (activityToken != NULL || !themePackageName.IsNull()
-            || displayId != IDisplay::DEFAULT_DISPLAY
-            || overrideConfiguration != NULL);
-        if (!get && compatInfo != NULL) {
+        Boolean isCompat = FALSE;
+        if (compatInfo != NULL) {
+            Float as, cs;
             AutoPtr<ICompatibilityInfo> ci;
             resources->GetCompatibilityInfo((ICompatibilityInfo**)&ci);
-            Float as, cs;
-            compatInfo->GetApplicationScale(&as);
             ci->GetApplicationScale(&cs);
-
-            get = as != cs;
+            compatInfo->GetApplicationScale(&as);
+            isCompat = as != cs;
         }
+
+        Boolean get = (activityToken != NULL || !themePackageName.IsNull()
+            || displayId != IDisplay::DEFAULT_DISPLAY
+            || overrideConfiguration != NULL || isCompat);
         if (get) {
+            String resDir;
+            mPackageInfo->GetResDir(&resDir);
             if (themePackageName.IsNull()) {
-                String resDir;
-                mPackageInfo->GetResDir(&resDir);
                 AutoPtr< ArrayOf<String> > splitResDirs, overlayDirs, sharedLibraryFiles;
                 mPackageInfo->GetSplitResDirs((ArrayOf<String>**)&splitResDirs);
                 mPackageInfo->GetOverlayDirs((ArrayOf<String>**)&overlayDirs);
@@ -3656,21 +3659,25 @@ ECode CContextImpl::constructor(
                 if (mOuterContext != NULL) {
                     mOuterContext->Resolve(EIID_IContext, (IInterface**)&ctx);
                 }
+
+    Logger::I(TAG, " >> %d this:%p, IContext:%p, mResources:%p", __LINE__, this, (IContext*)this, mResources.Get());
+                resources = NULL;
                 mResourcesManager->GetTopLevelResources(
                     resDir, splitResDirs, overlayDirs, sharedLibraryFiles, displayId,
                     appDir, overrideConfiguration, compatInfo, activityToken,
                     ctx, (IResources**)&resources);
             }
             else {
-                String resDir;
-                mPackageInfo->GetResDir(&resDir);
                 String packageName;
                 mPackageInfo->GetPackageName(&packageName);
+                resources = NULL;
                 mResourcesManager->GetTopLevelThemedResources(resDir, displayId,
-                        packageName, themePackageName, compatInfo ,activityToken, (IResources**)&resources);
+                    packageName, themePackageName, compatInfo ,activityToken, (IResources**)&resources);
             }
         }
     }
+
+    Logger::I(TAG, " >> %d this:%p, IContext:%p, mResources:%p", __LINE__, this, (IContext*)this, mResources.Get());
     mResources = resources;
 
     if (container != NULL) {
@@ -3781,6 +3788,21 @@ void CContextImpl::SetFilePermissionsFromMode(
         Slogger::I(TAG, "File %s: mode=0x%x, perms=0x%x", name.string(), mode, perms);
     }
     FileUtils::SetPermissions(name, perms, -1, -1);
+}
+
+ECode CContextImpl::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("CContextImpl{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += " BasePackageName=";
+    sb += mBasePackageName;
+    sb += " OpPackageName=";
+    sb += mOpPackageName;
+    sb += "}";
+    *str = sb.ToString();
+    return NOERROR;
 }
 
 AutoPtr<IFile> CContextImpl::ValidateFilePath(

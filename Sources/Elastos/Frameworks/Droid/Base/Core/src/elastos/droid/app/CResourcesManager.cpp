@@ -2,6 +2,7 @@
 #include "elastos/droid/app/CResourcesManager.h"
 #include "elastos/droid/app/ApplicationPackageManager.h"
 #include "elastos/droid/app/CActivityThread.h"
+#include "elastos/droid/app/CContextImpl.h"
 #include "elastos/droid/content/pm/ThemeUtils.h"
 #include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/content/res/CAssetManager.h"
@@ -47,6 +48,8 @@ using Elastos::Utility::IArrayList;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::Logging::Logger;
+
+using Elastos::Droid::App::CContextImpl;
 
 
 namespace Elastos {
@@ -233,6 +236,7 @@ ECode CResourcesManager::GetTopLevelResources(
     AutoPtr<IThemeConfig> themeConfig = GetThemeConfig();
     AutoPtr<IResourcesKey> key = (IResourcesKey*)new ResourcesKey(resDir, displayId,
             overrideConfiguration, scale, isThemeable, themeConfig, token);
+
     AutoPtr<IResources> r;
     synchronized(this) {
         // Resources is app scale dependent.
@@ -243,24 +247,24 @@ ECode CResourcesManager::GetTopLevelResources(
             wr->Resolve(EIID_IInterface, (IInterface**)&resObj);
             if (resObj != NULL) {
                 r = IResources::Probe(resObj);
-
-                //if (r != NULL) Logger::I(TAG, "isUpToDate " + resDir + ": " + r.getAssets().isUpToDate());
-                AutoPtr<IAssetManager> assets;
-                r->GetAssets((IAssetManager**)&assets);
-                Boolean bval;
-                assets->IsUpToDate(&bval);
-                if (bval) {
-                    if (FALSE) {
-                        AutoPtr<ICompatibilityInfo> ci;
-                        r->GetCompatibilityInfo((ICompatibilityInfo**)&ci);
-                        Float applicationScale;
-                        ci->GetApplicationScale(&applicationScale);
-                        Logger::W(TAG, "Returning cached resources %s %s : appScale=%f",
-                            TO_CSTR(r), resDir.string(), applicationScale);
+                if (r != NULL) {
+                    AutoPtr<IAssetManager> assets;
+                    r->GetAssets((IAssetManager**)&assets);
+                    Boolean bval;
+                    assets->IsUpToDate(&bval);
+                    if (bval) {
+                        if (FALSE) {
+                            AutoPtr<ICompatibilityInfo> ci;
+                            r->GetCompatibilityInfo((ICompatibilityInfo**)&ci);
+                            Float applicationScale;
+                            ci->GetApplicationScale(&applicationScale);
+                            Logger::I(TAG, "Returning cached resources: dir:%s resource:%s, appScale=%f",
+                                resDir.string(), TO_CSTR(r), applicationScale);
+                        }
+                        *result = r;
+                        REFCOUNT_ADD(*result)
+                        return NOERROR;
                     }
-                    *result = r;
-                    REFCOUNT_ADD(*result)
-                    return NOERROR;
                 }
             }
         }
@@ -351,14 +355,16 @@ ECode CResourcesManager::GetTopLevelResources(
         config->GetThemeConfig((IThemeConfig**)&tc);
         if (tc == NULL) {
             // try {
-            AutoPtr<IContentResolver> resolver;
-            context->GetContentResolver((IContentResolver**)&resolver);
-            ECode ec = CThemeConfig::GetBootTheme(resolver, (IThemeConfig**)&tc);
-            if (FAILED(ec)) {
-                Logger::D(TAG, "ThemeConfig.getBootTheme failed, falling back to system theme");
-                tc = CThemeConfig::GetSystemTheme();
-            }
-            config->SetThemeConfig(tc);
+            Logger::W(TAG, " >> TODO needs settings provider.");
+            // AutoPtr<IContentResolver> resolver;
+            // context->GetContentResolver((IContentResolver**)&resolver);
+            // ECode ec = CThemeConfig::GetBootTheme(resolver, (IThemeConfig**)&tc);
+            // if (FAILED(ec)) {
+            //     Logger::D(TAG, "ThemeConfig.getBootTheme failed, falling back to system theme");
+            //     tc = CThemeConfig::GetSystemTheme();
+            // }
+            // config->SetThemeConfig(tc);
+
             // } catch (Exception e) {
             //     Slog.d(TAG, "ThemeConfig.getBootTheme failed, falling back to system theme", e);
             //     config.themeConfig = ThemeConfig.getSystemTheme();
@@ -383,9 +389,8 @@ ECode CResourcesManager::GetTopLevelResources(
         r->GetCompatibilityInfo((ICompatibilityInfo**)&ci);
         Float applicationScale;
         ci->GetApplicationScale(&applicationScale);
-        Logger::I(TAG, "Created app resources %s %s: %s appScale=%f",
-            resDir.string(), TO_CSTR(r),
-            TO_CSTR(c), applicationScale);
+        Logger::I(TAG, "Created app resources: dir:%s resource:%s, config:%s, appScale=%f",
+            resDir.string(), TO_CSTR(r), TO_CSTR(c), applicationScale);
     }
 
     synchronized(this) {
@@ -415,7 +420,7 @@ ECode CResourcesManager::GetTopLevelResources(
         IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(r);
         AutoPtr<IWeakReference> wr;
         wrs->GetWeakReference((IWeakReference**)&wr);
-        mActiveResources->Put(TO_IINTERFACE(key), wr.Get());
+        mActiveResources->Put(TO_IINTERFACE(key), TO_IINTERFACE(wr));
         *result = r;
         REFCOUNT_ADD(*result)
     }
@@ -965,13 +970,14 @@ void CResourcesManager::DetachThemeAssets(
 
 AutoPtr<IThemeConfig> CResourcesManager::GetThemeConfig()
 {
-    AutoPtr<IConfiguration> config;
-    GetConfiguration((IConfiguration**)&config);
-    if (config != NULL) {
-        AutoPtr<IThemeConfig> themeConfig;
-        config->GetThemeConfig((IThemeConfig**)&themeConfig);
-        return themeConfig;
-    }
+    Logger::E(TAG, " >>> TODO memory crash GetThemeConfig!!");
+    // AutoPtr<IConfiguration> config;
+    // GetConfiguration((IConfiguration**)&config);
+    // if (config != NULL) {
+    //     AutoPtr<IThemeConfig> themeConfig;
+    //     config->GetThemeConfig((IThemeConfig**)&themeConfig);
+    //     return themeConfig;
+    // }
     return NULL;
 }
 

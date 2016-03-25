@@ -184,11 +184,10 @@ void SQLiteQueryBuilder::AppendClause(
     /* [in] */ const String& name,
     /* [in] */ const String& clause)
 {
-    assert(0 && "TODO TextUtils::IsEmpty");
-    // if (!TextUtils::IsEmpty(clause)) {
-    //     s += name;
-    //     s += clause;
-    // }
+    if (!TextUtils::IsEmpty(clause)) {
+        s += name;
+        s += clause;
+    }
 }
 
 ECode SQLiteQueryBuilder::AppendColumns(

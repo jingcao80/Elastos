@@ -44,22 +44,27 @@ namespace Sqlite {
 #define SQLITE_SOFT_HEAP_LIMIT (4 * 1024 * 1024)
 #define ANDROID_TABLE "android_metadata"
 
-// 98c6f42a-1ffb-4aa9-a739-b8d8943a1eaf
-extern "C" const InterfaceID EIID_SQLiteDatabase =
-        { 0x98c6f42a, 0x1ffb, 0x4aa9, { 0xa7, 0x39, 0xb8, 0xd8, 0x94, 0x3a, 0x1a, 0xaf } };
+pthread_key_t SQLiteDatabase::sKeyThreadSession;
+pthread_once_t SQLiteDatabase::sKeyOnce = PTHREAD_ONCE_INIT;
 
-void ReleaseSqliteSessionAfter(void* param) {
+static void ReleaseSqliteSessionAfter(void* param)
+{
     SQLiteSession* sqliteSession = (SQLiteSession*)param;
     sqliteSession->Release();
     sqliteSession = NULL;
 }
 
+static void MakeKey()
+{
+    ASSERT_TRUE(pthread_key_create(&SQLiteDatabase::sKeyThreadSession, ReleaseSqliteSessionAfter) == 0);
+}
+
+CAR_INTERFACE_IMPL(SQLiteDatabase::MyFileFilter, Object, IFileFilter)
+
 SQLiteDatabase::MyFileFilter::MyFileFilter(
     /* [in] */ const String& prefix)
     : mPrefix(prefix)
 {}
-
-CAR_INTERFACE_IMPL(SQLiteDatabase::MyFileFilter, Object, IFileFilter)
 
 ECode SQLiteDatabase::MyFileFilter::Accept(
     /* [in] */ IFile* candidate,
@@ -98,8 +103,7 @@ SQLiteDatabase::SQLiteDatabase(
     /* [in] */ Int32 openFlags,
     /* [in] */ ISQLiteDatabaseCursorFactory* cursorFactory,
     /* [in] */ IDatabaseErrorHandler* errorHandler)
-    : mKeyThreadSessionInitialized(FALSE)
-    , mCursorFactory(cursorFactory)
+    : mCursorFactory(cursorFactory)
     , mHasAttachedDbsLocked(FALSE)
 {
     if (errorHandler != NULL) {
@@ -115,7 +119,6 @@ SQLiteDatabase::~SQLiteDatabase()
 {
     // try {
     Dispose(TRUE);
-    pthread_key_delete(mKeyThreadSession);
     // } finally {
     //     super.finalize();
     // }
@@ -182,14 +185,13 @@ ECode SQLiteDatabase::GetThreadSession(
     /* [out] */ SQLiteSession** session)
 {
     VALIDATE_NOT_NULL(session);
-    if (!mKeyThreadSessionInitialized) {
-        pthread_key_create(&mKeyThreadSession, ReleaseSqliteSessionAfter);
-        mKeyThreadSessionInitialized = TRUE;
-    }
-    AutoPtr<SQLiteSession> sqliteSession = (SQLiteSession*)pthread_getspecific(mKeyThreadSession);
+
+    MakeKey();
+
+    AutoPtr<SQLiteSession> sqliteSession = (SQLiteSession*)pthread_getspecific(sKeyThreadSession);
     if (sqliteSession == NULL) {
         FAIL_RETURN(CreateSession((SQLiteSession**)&sqliteSession));
-        pthread_setspecific(mKeyThreadSession, sqliteSession.Get());
+        pthread_setspecific(sKeyThreadSession, sqliteSession.Get());
         sqliteSession->AddRef();
     }
     *session = sqliteSession;
@@ -680,28 +682,27 @@ ECode SQLiteDatabase::FindEditTable(
 {
     VALIDATE_NOT_NULL(editable);
 
-    assert(0 && "TODO TextUtils::IsEmpty");
-    // if (!TextUtils::IsEmpty(tables)) {
-    //     // find the first word terminated by either a space or a comma
-    //     Int32 spacepos = tables.IndexOf(' ');
-    //     Int32 commapos = tables.IndexOf(',');
+    if (!TextUtils::IsEmpty(tables)) {
+        // find the first word terminated by either a space or a comma
+        Int32 spacepos = tables.IndexOf(' ');
+        Int32 commapos = tables.IndexOf(',');
 
-    //     if (spacepos > 0 && (spacepos < commapos || commapos < 0)) {
-    //         *editable = tables.Substring(0, spacepos);
-    //         return NOERROR;
-    //     }
-    //     else if (commapos > 0 && (commapos < spacepos || spacepos < 0) ) {
-    //         *editable = tables.Substring(0, commapos);
-    //         return NOERROR;
-    //     }
-    //     *editable = tables;
-    //     return NOERROR;
-    // }
-    // else {
-    //     // throw new IllegalStateException("Invalid tables");
-    //     Slogger::E(TAG, "Invalid tables");
-    //     return E_ILLEGAL_STATE_EXCEPTION;
-    // }
+        if (spacepos > 0 && (spacepos < commapos || commapos < 0)) {
+            *editable = tables.Substring(0, spacepos);
+            return NOERROR;
+        }
+        else if (commapos > 0 && (commapos < spacepos || spacepos < 0) ) {
+            *editable = tables.Substring(0, commapos);
+            return NOERROR;
+        }
+        *editable = tables;
+        return NOERROR;
+    }
+    else {
+        // throw new IllegalStateException("Invalid tables");
+        Slogger::E(TAG, "Invalid tables");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 

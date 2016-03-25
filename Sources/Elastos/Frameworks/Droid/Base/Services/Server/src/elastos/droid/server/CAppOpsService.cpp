@@ -276,6 +276,7 @@ CAppOpsService::Restriction::Restriction()
 
 const String CAppOpsService::TAG("CAppOpsService");
 const Boolean CAppOpsService::DEBUG = FALSE;
+const String CAppOpsService::DEFAULT_POLICY_FILE("/system/etc/appops_policy.xml");
 
 // Write at most every 30 minutes.
 const Int64 CAppOpsService::WRITE_DELAY = DEBUG ? 1000 : 30*60*1000;
@@ -336,6 +337,8 @@ ECode CAppOpsService::Publish(
     /* [in] */ IContext* context)
 {
     mContext = context;
+    Slogger::W(TAG, " >> TODO Publish ReadPolicy()");
+    //ReadPolicy();
     return ServiceManager::AddService(IContext::APP_OPS_SERVICE, TO_IINTERFACE(this));
 }
 
@@ -641,8 +644,7 @@ ECode CAppOpsService::SetMode(
                 }
 
                 // TODO: should be GetDefaultMode
-                assert(0 && "TODO:");
-                Int32 defaultMode = 0; // = GetDefaultMode(code, uid, packageName);
+                Int32 defaultMode = GetDefaultMode(code, uid, packageName);
                 if (mode == defaultMode) {
                     // If going into the default mode, prune this op
                     // if there is nothing else interesting in it.
@@ -756,9 +758,8 @@ ECode CAppOpsService::ResetAllModes()
                     Int32 defaultMode = 0;
                     aom->OpAllowsReset(curOp->mOp, &allow);
                     if (allow) {
-                        assert(0 && "TODO:");
-                        // defaultMode = GetDefaultMode(curOp->mOp, curOp->mUid,
-                        //         curOp->mPackageName);
+                        defaultMode = GetDefaultMode(curOp->mOp, curOp->mUid,
+                                curOp->mPackageName);
                     }
                     if (allow && curOp->mMode != defaultMode) {
                         curOp->mMode = defaultMode;
@@ -953,8 +954,7 @@ ECode CAppOpsService::CheckOperation(
         aom->OpToSwitch(code, &sw);
         AutoPtr<Op> op = GetOpLocked(sw, uid, packageName, FALSE);
         if (op == NULL) {
-            assert(0 && "TODO:");
-            // *result = GetDefaultMode(code, uid, packageName)
+            *result = GetDefaultMode(code, uid, packageName);
             return NOERROR;
         }
 
@@ -1405,8 +1405,7 @@ AutoPtr<CAppOpsService::Op> CAppOpsService::GetOpLocked(
         if (!edit) {
             return NULL;
         }
-        assert(0 && "TODO");
-        //  mode = GetDefaultMode(code, ops.uid, ops.packageName);
+        mode = GetDefaultMode(code, ops->mUid, ops->mPackageName);
         op = new Op(ops->mUid, ops->mPackageName, code, mode);
         ops->Put(code, TO_IINTERFACE(op));
     }
@@ -1424,7 +1423,7 @@ Boolean CAppOpsService::IsOpRestricted(
     Int32 userHandle = UserHandle::GetUserId(uid);
     AutoPtr<IInterface> obj;
     mOpRestrictions->Get(userHandle, (IInterface**)&obj);
-    AutoPtr<IArrayOf> opRestrictions;//ArrayOf<Boolean>
+    AutoPtr<IArrayOf> opRestrictions = IArrayOf::Probe(obj);//ArrayOf<Boolean>
     if (opRestrictions != NULL) {
         AutoPtr<IInterface> item;
         opRestrictions->Get(code, (IInterface**)&item);
@@ -1745,9 +1744,7 @@ ECode CAppOpsService::WriteState()
                     IAppOpsManagerOpEntry* op = IAppOpsManagerOpEntry::Probe(opObj);
                     out->WriteStartTag(nullStr, String("op"));
                     op->GetOp(&ival);
-                    assert(0 && "TODO:");
-                    // defaultMode = GetDefaultMode(op.getOp(),
-                    //                 pkg.getUid(), pkg.getPackageName());
+                    defaultMode = GetDefaultMode(ival, uid, pkgName);
                     out->WriteAttribute(nullStr, String("n"), StringUtils::ToString(ival));
                     op->GetMode(&mode);
                     if (mode != defaultMode) {
@@ -1934,8 +1931,7 @@ ECode CAppOpsService::SetUserRestrictions(
 
     AutoPtr<IInterface> obj;
     mOpRestrictions->Get(userHandle, (IInterface**)&obj);
-    AutoPtr<IArrayOf> opRestrictions;//ArrayOf<Boolean>
-
+    AutoPtr<IArrayOf> opRestrictions = IArrayOf::Probe(obj);
     if (opRestrictions == NULL) {
         CArrayOf::New(EIID_IBoolean, IAppOpsManager::_NUM_OP, (IArrayOf**)&opRestrictions);
         mOpRestrictions->Put(userHandle, opRestrictions.Get());
@@ -2085,6 +2081,38 @@ ECode CAppOpsService::ToString(
     /* [out] */ String* str)
 {
     return Object::ToString(str);
+}
+
+Boolean CAppOpsService::IsStrict(
+    /* [in] */ Int32 uid,
+    /* [in] */ Int32 code,
+    /* [in] */ const String& packageName)
+{
+    if (!mStrictEnable)
+        return FALSE;
+
+    return UserHandle::IsApp(uid);
+}
+
+Int32 CAppOpsService::GetDefaultMode(
+    /* [in] */ Int32 code,
+    /* [in] */ Int32 uid,
+    /* [in] */ const String& packageName)
+{
+    AutoPtr<IAppOpsManagerHelper> helper;
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&helper);
+    Int32 mode;
+    helper->OpToDefaultMode(code, IsStrict(code, uid, packageName), &mode);
+
+    //assert(0 && "TODO");
+    // if (AppOpsManager::IsStrictOp(code) && mPolicy != NULL) {
+    //     Int32 policyMode;
+    //     mPolicy->GetDefualtMode(code, packageName, &policyMode);
+    //     if (policyMode != IAppOpsManager::MODE_ERRORED) {
+    //         mode = policyMode;
+    //     }
+    // }
+    return mode;
 }
 
 

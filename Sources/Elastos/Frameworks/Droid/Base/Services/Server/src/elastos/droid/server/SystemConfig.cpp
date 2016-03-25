@@ -77,8 +77,7 @@ AutoPtr<HashSet<String> > SystemConfig::GetFixedImeApps()
 
 AutoPtr< HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > > > SystemConfig::GetSignatureAllowances()
 {
-    assert(0);
-    return NULL;
+    return mSignatureAllowances;
 }
 
 SystemConfig::SystemConfig()
@@ -89,6 +88,7 @@ SystemConfig::SystemConfig()
     mPermissions = new HashMap<String, AutoPtr<PermissionEntry> >();
     mAllowInPowerSave = new HashSet<String>();
     mFixedImeApps = new HashSet<String>();
+    mSignatureAllowances = new HashMap<AutoPtr<ISignature>, AutoPtr<HashSet<String> > >();
 
     AutoPtr<IEnvironment> environment;
     CEnvironment::AcquireSingleton((IEnvironment**)&environment);

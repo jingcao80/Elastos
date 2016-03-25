@@ -425,6 +425,16 @@ private:
     CARAPI CheckSystemUid(
         /* [in] */ const String& function);
 
+    Boolean IsStrict(
+        /* [in] */ Int32 uid,
+        /* [in] */ Int32 code,
+        /* [in] */ const String& packageName);
+
+    CARAPI_(Int32) GetDefaultMode(
+        /* [in] */ Int32 code,
+        /* [in] */ Int32 uid,
+        /* [in] */ const String& packageName);
+
 private:
     static const String TAG;
     static const Boolean DEBUG;
@@ -432,11 +442,16 @@ private:
     // Write at most every 30 minutes.
     static const Int64 WRITE_DELAY;
 
+    // Location of policy file.
+    static const String DEFAULT_POLICY_FILE;
+
     static AutoPtr<ArrayOf<Int32> > PRIVACY_GUARD_OP_STATES;
 
     AutoPtr<IContext> mContext;
     AutoPtr<IAtomicFile> mFile;
     AutoPtr<IHandler> mHandler;
+    Boolean mStrictEnable;
+    // AppOpsPolicy mPolicy;
 
     Boolean mWriteScheduled;
 

@@ -685,6 +685,9 @@ public:
         /* [in] */ Int32 mode,
         /* [in] */ Int32 extraPermissions);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 private:
     CARAPI_(AutoPtr<IFile>) GetPreferencesDir();
 

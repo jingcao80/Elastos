@@ -168,14 +168,14 @@ ECode Settings::NameValueCache::PutStringForUser(
     AutoPtr<IIContentProvider> cp;
     ECode ec = LazyGetProvider(cr, (IIContentProvider**)&cp);
     if (FAILED(ec)) {
-        Slogger::W(TAG, "Can't set key %s in %p", name.string(), mUri.Get());
+        Slogger::W(TAG, "Can't set key %s in %s", name.string(), TO_CSTR(mUri));
         *result = FALSE;
         return ec == (ECode)E_REMOTE_EXCEPTION ? NOERROR : ec;
     }
     assert(0 && "TODO");
     // ec = cp->Call(cr->GetPackageName(), name, arg, (IBundle**)&tmp);
     if (FAILED(ec)) {
-        Slogger::W(TAG, "Can't set key %s in %p", name.string(), mUri.Get());
+        Slogger::W(TAG, "Can't set key %s in %s", name.string(), TO_CSTR(mUri));
         *result = FALSE;
         return ec == (ECode)E_REMOTE_EXCEPTION ? NOERROR : ec;
     }
@@ -350,8 +350,9 @@ static AutoPtr<IUri> InitSystemCONTENTURI()
 }
 INIT_PROI_3 const AutoPtr<IUri> Settings::System::CONTENT_URI = InitSystemCONTENTURI();
 
-INIT_PROI_3 const AutoPtr<Settings::NameValueCache> Settings::System::sNameValueCache = new Settings::NameValueCache(ISettingsSystem::SYS_PROP_SETTING_VERSION,
-        CONTENT_URI, ISettings::CALL_METHOD_GET_SYSTEM, ISettings::CALL_METHOD_PUT_SYSTEM);
+INIT_PROI_3 const AutoPtr<Settings::NameValueCache> Settings::System::sNameValueCache = new Settings::NameValueCache(
+    ISettingsSystem::SYS_PROP_SETTING_VERSION, InitSystemCONTENTURI(),
+    ISettings::CALL_METHOD_GET_SYSTEM, ISettings::CALL_METHOD_PUT_SYSTEM);
 
 static AutoPtr<IHashSet> InitSystemMOVED_TO_SECURE()
 {
@@ -1073,7 +1074,8 @@ static AutoPtr< ArrayOf<String> > InitSecureSettingsToBackup()
 INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::Secure::SETTINGS_TO_BACKUP = InitSecureSettingsToBackup();
 
 INIT_PROI_3 const AutoPtr<Settings::NameValueCache> Settings::Secure::sNameValueCache = new Settings::NameValueCache(
-        ISettingsSecure::SYS_PROP_SETTING_VERSION, CONTENT_URI, ISettings::CALL_METHOD_GET_SECURE, ISettings::CALL_METHOD_PUT_SECURE);
+        ISettingsSecure::SYS_PROP_SETTING_VERSION, InitSecureCONTENTURI(),
+        ISettings::CALL_METHOD_GET_SECURE, ISettings::CALL_METHOD_PUT_SECURE);
 
 AutoPtr<IILockSettings> Settings::Secure::sLockSettings;
 Boolean Settings::Secure::sIsSystemProcess = FALSE;
@@ -1778,7 +1780,7 @@ static AutoPtr< ArrayOf<String> > InitGlobalSettingsToBackup()
 INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::Global::SETTINGS_TO_BACKUP = InitGlobalSettingsToBackup();
 
 INIT_PROI_3 const AutoPtr<Settings::NameValueCache> Settings::Global::sNameValueCache = new Settings::NameValueCache(
-        ISettingsGlobal::SYS_PROP_SETTING_VERSION, CONTENT_URI,
+        ISettingsGlobal::SYS_PROP_SETTING_VERSION, InitGlobalCONTENTURI(),
         ISettings::CALL_METHOD_GET_GLOBAL, ISettings::CALL_METHOD_PUT_GLOBAL);
 
 static AutoPtr<IHashSet> initGlobalMOVED_TO_SECURE()

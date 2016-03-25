@@ -44,6 +44,7 @@ BlurLayer::BlurLayer(
     helper->OpenTransaction();
     // try {
     if (CWindowManagerService::DEBUG_SURFACE_TRACE) {
+        assert(0 && "TODO");
         // mBlurSurface = new WindowStateAnimator.SurfaceTrace(service.mFxSession,
         //     "BlurSurface",
         //     16, 16, PixelFormat.OPAQUE,

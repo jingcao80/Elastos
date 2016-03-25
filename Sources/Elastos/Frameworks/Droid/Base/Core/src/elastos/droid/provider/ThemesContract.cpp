@@ -10,19 +10,42 @@ namespace Elastos {
 namespace Droid {
 namespace Provider {
 
+static AutoPtr<IUri> InitAuthrityUri()
+{
+    AutoPtr<IUri> uri;
+    Uri::Parse(String("content://") + IThemesContract::AUTHORITY, (IUri**)&uri);
+    return uri;
+}
+
 static AutoPtr<IUri> InitURI(
     /* [in] */ const char* str)
 {
+    AutoPtr<IUri> AUTHORITY_URI = InitAuthrityUri();
+
     AutoPtr<IUri> uri;
-    Uri::WithAppendedPath(ThemesContract::AUTHORITY_URI, String(str), (IUri**)&uri);
+    Uri::WithAppendedPath(AUTHORITY_URI, String(str), (IUri**)&uri);
     return uri;
 }
+
+//============================================================================
+//              ThemesContract
+//============================================================================
+
+const AutoPtr<IUri> ThemesContract::AUTHORITY_URI = InitAuthrityUri();
 
 //============================================================================
 //              ThemesContract::ThemesColumns
 //============================================================================
 
 const AutoPtr<IUri> ThemesContract::ThemesColumns::CONTENT_URI = InitURI("themes");
+
+
+//============================================================================
+//              ThemesContract::PreviewColumns
+//============================================================================
+
+const AutoPtr<IUri> ThemesContract::PreviewColumns::CONTENT_URI = InitURI("previews");
+const AutoPtr<IUri> ThemesContract::PreviewColumns::APPLIED_URI = InitURI("applied_previews");
 
 //============================================================================
 //              ThemesContract::MixnMatchColumns
@@ -44,6 +67,7 @@ static AutoPtr<ArrayOf<String> > InitROWS()
     (*rows)[8] = IThemesContractMixnMatchColumns::KEY_ALARM;
     (*rows)[9] = IThemesContractMixnMatchColumns::KEY_OVERLAYS;
     (*rows)[10] = IThemesContractMixnMatchColumns::KEY_NAVIGATION_BAR;
+    return rows;
 }
 const AutoPtr<ArrayOf<String> > ROWS = InitROWS();
 
@@ -52,7 +76,7 @@ ECode ThemesContract::MixnMatchColumns::ComponentToImageColName(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    *str = String(NULL);
+    *str = NULL;
 
     if (component.Equals(IThemesContractMixnMatchColumns::KEY_HOMESCREEN)) {
         *str = IThemesContractThemesColumns::HOMESCREEN_URI;
@@ -106,7 +130,7 @@ ECode ThemesContract::MixnMatchColumns::ComponentToMixNMatchKey(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    *str = String(NULL);
+    *str = NULL;
 
     if (component.Equals(IThemesContractThemesColumns::MODIFIES_LAUNCHER)) {
         *str = IThemesContractMixnMatchColumns::KEY_HOMESCREEN;
@@ -149,7 +173,7 @@ ECode ThemesContract::MixnMatchColumns::MixNMatchKeyToComponent(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    *str = String(NULL);
+    *str = NULL;
 
     if (mixnmatchKey.Equals(IThemesContractMixnMatchColumns::KEY_HOMESCREEN)) {
         *str = IThemesContractThemesColumns::MODIFIES_LAUNCHER;
@@ -186,27 +210,6 @@ ECode ThemesContract::MixnMatchColumns::MixNMatchKeyToComponent(
     }
     return NOERROR;
 }
-
-
-//============================================================================
-//              ThemesContract::PreviewColumns
-//============================================================================
-
-const AutoPtr<IUri> ThemesContract::PreviewColumns::CONTENT_URI = InitURI("previews");
-const AutoPtr<IUri> ThemesContract::PreviewColumns::APPLIED_URI = InitURI("applied_previews");
-
-
-//============================================================================
-//              ThemesContract
-//============================================================================
-
-static AutoPtr<IUri> InitAuthrityUri()
-{
-    AutoPtr<IUri> uri;
-    Uri::Parse(String("content://") + IThemesContract::AUTHORITY, (IUri**)&uri);
-    return uri;
-}
-const AutoPtr<IUri> ThemesContract::AUTHORITY_URI = InitAuthrityUri();
 
 } // namespace Provider
 } // namespace Droid
