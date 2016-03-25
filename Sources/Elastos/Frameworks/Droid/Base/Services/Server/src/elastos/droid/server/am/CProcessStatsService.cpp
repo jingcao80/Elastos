@@ -686,15 +686,15 @@ ECode CProcessStatsService::GetCurrentStats(
             Manifest::permission::PACKAGE_USAGE_STATS, String(NULL)));
     AutoPtr<IParcel> current;// = Parcel.obtain();
     CParcel::New((IParcel**)&current);
+    synchronized (mAm) {
+        Int64 now = SystemClock::GetUptimeMillis();
+        mProcessStats->SetTimePeriodEndRealtime(SystemClock::GetElapsedRealtime());
+        mProcessStats->SetTimePeriodEndUptime(now);
+        if (FAILED(mProcessStats->WriteToParcel(current, now)))
+            break;
+    }
     mWriteLock->Lock();
     do {
-        synchronized (mAm) {
-            Int64 now = SystemClock::GetUptimeMillis();
-            mProcessStats->SetTimePeriodEndRealtime(SystemClock::GetElapsedRealtime());
-            mProcessStats->SetTimePeriodEndUptime(now);
-            if (FAILED(mProcessStats->WriteToParcel(current, now)))
-                break;
-        }
         AutoPtr<List<String> > files = GetCommittedFiles(0, FALSE, TRUE);
         *historic = NULL;
         if (files != NULL) {
@@ -729,24 +729,24 @@ ECode CProcessStatsService::GetStatsOverTime(
     VALIDATE_NOT_NULL(pfd)
     FAIL_RETURN(mAm->mContext->EnforceCallingOrSelfPermission(
             Manifest::permission::PACKAGE_USAGE_STATS, String(NULL)));
+    AutoPtr<IParcel> current;// = Parcel.obtain();
+    CParcel::New((IParcel**)&current);
+    Int64 curTime = 0;
+    synchronized (mAm) {
+        Int64 now = SystemClock::GetUptimeMillis();
+        Int64 endRealtime = SystemClock::GetElapsedRealtime();
+        mProcessStats->SetTimePeriodEndRealtime(endRealtime);
+        mProcessStats->SetTimePeriodEndUptime(now);
+        ECode ec = mProcessStats->WriteToParcel(current, now);
+        if (FAILED(ec))
+            break;
+        Int64 startRealtime;
+        mProcessStats->GetTimePeriodStartRealtime(&startRealtime);
+        curTime = endRealtime - startRealtime;
+    }
     mWriteLock->Lock();
     ECode ec;
     do {
-        AutoPtr<IParcel> current;// = Parcel.obtain();
-        CParcel::New((IParcel**)&current);
-        Int64 curTime = 0;
-        synchronized (mAm) {
-            Int64 now = SystemClock::GetUptimeMillis();
-            Int64 endRealtime = SystemClock::GetElapsedRealtime();
-            mProcessStats->SetTimePeriodEndRealtime(endRealtime);
-            mProcessStats->SetTimePeriodEndUptime(now);
-            ec = mProcessStats->WriteToParcel(current, now);
-            if (FAILED(ec))
-                break;
-            Int64 startRealtime;
-            mProcessStats->GetTimePeriodStartRealtime(&startRealtime);
-            curTime = endRealtime - startRealtime;
-        }
         if (curTime < minTime) {
             // Need to add in older stats to reach desired time.
             AutoPtr<List<String> > files = GetCommittedFiles(0, FALSE, TRUE);

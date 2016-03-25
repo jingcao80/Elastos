@@ -195,7 +195,7 @@ public:
     // we have no limit on the number of service, visible, foreground, or other such
     // processes and the number of those processes does not count against the cached
     // process limit.
-    static const Int32 MAX_CACHED_APPS = 32;
+    static const Int32 MAX_CACHED_APPS;
 
     // We allow empty processes to stick around for at most 30 minutes.
     static const Int64 MAX_EMPTY_TIME = 30*60*1000;
@@ -280,6 +280,8 @@ private:
     AutoPtr< ArrayOf<Int32> > mOomMinFreeHigh;
     // The actual OOM killer memory levels we are using.
     AutoPtr< ArrayOf<Int32> > mOomMinFree;
+    // Optimal OOM killer memory levels for Low-Tier devices.
+    AutoPtr< ArrayOf<Int32> > mOomMinFreeLowRam;
 
     Int64 mTotalMemMb;
 

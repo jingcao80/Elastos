@@ -35,6 +35,7 @@ using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Server::Am::IUserStartedState;
 using Elastos::Droid::Server::Wm::CWindowManagerService;
@@ -612,6 +613,12 @@ public:
     Boolean mUserLeaving;
     /** Set when we have taken too long waiting to go to sleep. */
     Boolean mSleepTimeout;
+    /**
+     * Is the privacy guard currently enabled? Shared between ActivityStacks
+     */
+    String mPrivacyGuardPackageName;
+
+    AutoPtr<IPowerManager> mPm;
     /**
       * We don't want to allow the device to go to sleep while in the process
       * of launching an activity.  This is primarily to allow alarm intent

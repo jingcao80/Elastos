@@ -20,6 +20,8 @@ using Elastos::Droid::Content::Pm::EIID_IResolveInfo;
 using Elastos::Droid::Content::Pm::IComponentInfo;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::CUserHandleHelper;
@@ -51,6 +53,7 @@ const Int32 BroadcastQueue::MAX_BROADCAST_HISTORY = IsLowRamDeviceStatic() ? 10 
 const Int32 BroadcastQueue::MAX_BROADCAST_SUMMARY_HISTORY = IsLowRamDeviceStatic() ? 25 : 300;
 const Int32 BroadcastQueue::BROADCAST_INTENT_MSG = 200;//CActivityManagerService.FIRST_BROADCAST_QUEUE_MSG;
 const Int32 BroadcastQueue::BROADCAST_TIMEOUT_MSG = 201;//ActivityManagerService.FIRST_BROADCAST_QUEUE_MSG + 1;
+AutoPtr<List<String> > BroadcastQueue::mQuickbootWhiteList;
 
 ECode BroadcastQueue::BroadcastHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -279,7 +282,7 @@ void BroadcastQueue::SkipCurrentReceiverLocked(
 {
     Boolean reschedule = FALSE;
     AutoPtr<BroadcastRecord> r = app->mCurReceiver;
-    if (r != NULL) {
+    if (r != NULL && r->mQueue == this) {
         // The current broadcast is waiting for this app's receiver
         // to be finished.  Looks like that's not going to happen, so
         // let the broadcast continue.
@@ -349,7 +352,7 @@ Boolean BroadcastQueue::FinishReceiverLocked(
     }
     r->mReceiver = NULL;
     r->mIntent->SetComponent(NULL);
-    if (r->mCurApp != NULL) {
+    if (r->mCurApp != NULL && r->mCurApp->mCurReceiver.Get() == r) {
         r->mCurApp->mCurReceiver = NULL;
     }
     if (r->mCurFilter != NULL) {
@@ -594,6 +597,11 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
     }
 }
 
+AutoPtr<BroadcastRecord> BroadcastQueue::GetProcessingBroadcast()
+{
+    return mCurrentBroadcast;
+}
+
 ECode BroadcastQueue::ProcessNextBroadcast(
     /* [in] */ Boolean fromMsg)
 {
@@ -618,6 +626,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
         mParallelBroadcasts.PopFront();
         r->mDispatchTime = SystemClock::GetUptimeMillis();
         system->GetCurrentTimeMillis(&r->mDispatchClockTime);
+        mCurrentBroadcast = r;
         Int32 N;
         r->mReceivers->GetSize(&N);
         if (DEBUG_BROADCAST_LIGHT) {
@@ -636,6 +645,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
             DeliverToRegisteredReceiverLocked(r, (BroadcastFilter*)IBroadcastFilter::Probe(target), FALSE);
         }
         AddBroadcastToHistoryLocked(r);
+        mCurrentBroadcast = NULL;
         if (DEBUG_BROADCAST_LIGHT) {
             Slogger::V(TAG, "Done with parallel broadcast [%s] %s",
                 mQueueName.string(), TO_CSTR(r));
@@ -691,6 +701,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
             return NOERROR;
         }
         r = mOrderedBroadcasts.GetFront();
+        mCurrentBroadcast = r;
         assert(r != NULL);
 
         Boolean forceReceive = FALSE;
@@ -770,6 +781,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
             // ... and on to the next...
             AddBroadcastToHistoryLocked(r);
             mOrderedBroadcasts.PopFront();
+            mCurrentBroadcast = NULL;
             r = NULL;
             looped = TRUE;
             continue;
@@ -1037,11 +1049,17 @@ ECode BroadcastQueue::ProcessNextBroadcast(
         Slogger::V(TAG, "Need to start app [%s] %s for broadcast %s"
                 , mQueueName.string(), targetProcess.string(), TO_CSTR(r));
     }
+    AutoPtr<ISystemProperties> systemProperties;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&systemProperties);
+    AutoPtr<List<String> > whiteList = GetWhiteList();
+    Int32 v;
     Int32 intentFlags;
     r->mIntent->GetFlags(&intentFlags);
-    if ((r->mCurApp = mService->StartProcessLocked(targetProcess,
-            appInfo, TRUE,
-            intentFlags | IIntent::FLAG_FROM_BACKGROUND,
+    if (((systemProperties->GetInt32(String("sys.quickboot.enable"), 0, &v), v == 1) &&
+            (systemProperties->GetInt32(String("sys.quickboot.poweron"), 0, &v), v == 0) &&
+            Find(whiteList->Begin(), whiteList->End(), appPackageName) == whiteList->End())
+        || (r->mCurApp = mService->StartProcessLocked(targetProcess,
+            appInfo, TRUE, intentFlags | IIntent::FLAG_FROM_BACKGROUND,
             String("broadcast"), r->mCurComponent,
             (intentFlags & IIntent::FLAG_RECEIVER_BOOT_UPGRADE) != 0, FALSE, FALSE))
                     == NULL) {
@@ -1063,6 +1081,17 @@ ECode BroadcastQueue::ProcessNextBroadcast(
     mPendingBroadcastRecvIndex = recIdx;
 
     return NOERROR;
+}
+
+AutoPtr<List<String> > BroadcastQueue::GetWhiteList()
+{
+    if (mQuickbootWhiteList == NULL) {
+        mQuickbootWhiteList = new List<String>();
+        // allow deskclock app to be launched
+        mQuickbootWhiteList->PushBack(String("com.android.deskclock"));
+        mQuickbootWhiteList->PushBack(String("com.qapp.quickboot"));
+    }
+    return mQuickbootWhiteList;
 }
 
 void BroadcastQueue::SetBroadcastTimeoutLocked(

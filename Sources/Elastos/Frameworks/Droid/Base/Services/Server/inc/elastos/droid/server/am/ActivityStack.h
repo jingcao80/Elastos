@@ -35,6 +35,8 @@ namespace Droid {
 namespace Server {
 namespace Am {
 
+class ActivityContainer;
+
 /**
   * State and management of a single stack of activities.
   */
@@ -575,8 +577,14 @@ private:
     // If so, this stack is hidden, otherwise it is visible.
     CARAPI_(Boolean) IsStackVisible();
 
+    CARAPI_(AutoPtr<TaskRecord>) GetNextTask(
+        /* [in] */ TaskRecord* targetTask);
+
     CARAPI_(void) InsertTaskAtTop(
         /* [in] */ TaskRecord* task);
+
+    CARAPI_(void) UpdatePrivacyGuardNotificationLocked(
+        /* [in] */ ActivityRecord* next);
 
     /**
       * Helper method for #resetTaskIfNeededLocked. Processes all of the activities in a given
@@ -701,7 +709,7 @@ public:
     Int64 mFullyDrawnStartTime;
     Int32 mCurrentUser;
     /*const*/ Int32 mStackId;//TODO
-    AutoPtr<IIActivityContainer> mActivityContainer;
+    ActivityContainer* mActivityContainer; //ActivityContainer has this's reference
     /** The other stacks, in order, on the attached display. Updated at attach/detach time. */
     AutoPtr<IArrayList> mStacks;//ActivityStack
     /** The attached Display's unique identifier, or -1 if detached */

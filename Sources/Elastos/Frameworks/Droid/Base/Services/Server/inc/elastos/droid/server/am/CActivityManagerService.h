@@ -84,6 +84,7 @@ using Elastos::Droid::Content::Pm::IConfigurationInfo;
 using Elastos::Droid::Content::Pm::IIPackageDataObserver;
 using Elastos::Droid::Content::Pm::IParceledListSlice;
 using Elastos::Droid::Content::Res::ICompatibilityInfo;
+using Elastos::Droid::Content::Res::IThemeConfig;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::IPoint;
@@ -315,6 +316,38 @@ public:
 
         // @Override
         CARAPI_(AutoPtr<Object>) GetAMSLock();
+
+    private:
+        CActivityManagerService* mHost;
+    };
+
+    class ThemeChangeReceiver : public BroadcastReceiver
+    {
+    public:
+        ThemeChangeReceiver(
+            /* [in] */ CActivityManagerService* host)
+            : mHost(host)
+        {}
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        CActivityManagerService* mHost;
+    };
+
+    class ScreenStatusReceiver : public BroadcastReceiver
+    {
+    public:
+        ScreenStatusReceiver(
+            /* [in] */ CActivityManagerService* host)
+            : mHost(host)
+        {}
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
 
     private:
         CActivityManagerService* mHost;
@@ -1451,13 +1484,13 @@ public:
     CARAPI DeleteActivityContainer(
         /* [in] */ IIActivityContainer* container);
 
-    CARAPI GetActivityDisplayId(
-        /* [in] */ IBinder* activityToken,
-        /* [out] */ Int32* container);
-
     CARAPI GetEnclosingActivityContainer(
         /* [in] */ IBinder* activityToken,
         /* [out] */ IIActivityContainer** container);
+
+    CARAPI GetActivityDisplayId(
+        /* [in] */ IBinder* activityToken,
+        /* [out] */ Int32* result);
 
     CARAPI MoveTaskToStack(
         /* [in] */ Int32 taskId,
@@ -2938,6 +2971,8 @@ public:
 private:
     CARAPI Start();
 
+    CARAPI_(AutoPtr<IContext>) GetUiContext();
+
     /**
      * Initialize the application bind args. These are passed to each
      * process when the bindApplication() IPC is sent to the process. They're
@@ -3264,6 +3299,20 @@ private:
         /* [in] */ const String& longMsg,
         /* [in] */ const String& stackTrace);
 
+    CARAPI_(void) SendAppFailureBroadcast(
+        /* [in] */ const String& pkgName);
+
+    /**
+     * A possible theme crash is one that throws one of the following exceptions
+     * {@link android.content.res.Resources.NotFoundException}
+     * {@link android.view.InflateException}
+     *
+     * @param exceptionClassName
+     * @return True if exceptionClassName is one of the above exceptions
+     */
+    CARAPI_(Boolean) IsPossibleThemeCrash(
+        /* [in] */ const String& exceptionClassName);
+
     CARAPI_(Boolean) HandleAppCrashLocked(
         /* [in] */ ProcessRecord* app,
         /* [in] */ const String& shortMsg,
@@ -3527,6 +3576,10 @@ protected:
         /* [in] */ Boolean isDiff,
         /* [in] */ Boolean isPersist);
 
+    CARAPI_(void) SaveThemeResourceLocked(
+        /* [in] */ IThemeConfig* t,
+        /* [in] */ Boolean isDiff);
+
     CARAPI_(AutoPtr<BroadcastQueue>) IsReceivingBroadcast(
         /* [in] */ ProcessRecord* app);
 
@@ -3734,7 +3787,7 @@ public:
     // How many bytes to write into the dropbox log before truncating
     static const Int32 DROPBOX_MAX_SIZE = 256 * 1024;
 
-    static const String PROP_REFRESH_THEME; // = "sys.refresh_theme";
+    static const String PROP_REFRESH_THEME;
 
     // Access modes for handleIncomingUser.
     static const Int32 ALLOW_NON_FULL = 0;
@@ -4078,8 +4131,7 @@ public:
     Boolean mLaunchWarningShown;
 
     AutoPtr<IContext> mContext;
-    //todo: sSystemContext maybe not its memeber
-    static AutoPtr<IContext> sSystemContext;
+    AutoPtr<IContext> mUiContext;
 
     Int32 mFactoryTest;
 
@@ -4308,6 +4360,9 @@ public:
     static const Int32 FINISH_BOOTING_MSG;
     static const Int32 START_USER_SWITCH_MSG;
     static const Int32 SEND_LOCALE_TO_MOUNT_DAEMON_MSG;
+
+    static const Int32 POST_PRIVACY_NOTIFICATION_MSG;
+    static const Int32 CANCEL_PRIVACY_NOTIFICATION_MSG;
 
     static const Int32 FIRST_ACTIVITY_STACK_MSG = 100;
     static const Int32 FIRST_BROADCAST_QUEUE_MSG = 200;
