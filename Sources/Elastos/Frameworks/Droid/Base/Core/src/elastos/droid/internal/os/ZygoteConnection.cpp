@@ -12,6 +12,7 @@
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/graphics/Typeface.h"
 #include <Elastos.CoreLibrary.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/droid/system/Os.h>
@@ -21,6 +22,7 @@ using Elastos::Droid::Os::SELinux;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::Graphics::Typeface;
 using Elastos::IO::ICloseable;
 using Elastos::IO::IReader;
 using Elastos::IO::IOutputStream;
@@ -241,6 +243,9 @@ ECode ZygoteConnection::Arguments::ParseArgs(
         else if (arg.StartWith("--app-data-dir=")) {
             mAppDataDir = arg.Substring(arg.IndexOf('=') + 1);
         }
+        else if (arg.Equals("--refresh_theme")) {
+            mRefreshTheme = TRUE;
+        }
         else {
             break;
         }
@@ -432,6 +437,10 @@ Boolean ZygoteConnection::RunOnce(
             ec = CZygoteInit::SetCloseOnExec(serverPipeFd, TRUE);
             if (FAILED(ec))
                 break;
+        }
+
+        if (parsedArgs->mRefreshTheme) {
+            Typeface::RecreateDefaults();
         }
 
         /**

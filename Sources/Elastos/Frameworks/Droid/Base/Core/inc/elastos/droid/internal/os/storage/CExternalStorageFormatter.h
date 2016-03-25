@@ -53,13 +53,14 @@ private:
     public:
         MyThread(
             /* [in] */ CExternalStorageFormatter* owner,
-            /* [in] */ const String& extStoragePath);
+            /* [in] */ IIMountService* mountService);
 
         CARAPI Run();
 
     private:
         CExternalStorageFormatter* mOwner;
         String mExtStoragePath;
+        AutoPtr<IIMountService> mMountService;
     };
 
     class OnCancelListener
@@ -137,7 +138,9 @@ private:
 
     Boolean mFactoryReset;
     Boolean mAlwaysReset;
+    Boolean mWipeInternalStorage;
     String mReason;
+    Boolean mIsFormatSuccess;
 };
 
 } // namespace Storage

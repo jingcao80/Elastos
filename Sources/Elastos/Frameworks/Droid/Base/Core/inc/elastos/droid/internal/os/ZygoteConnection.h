@@ -146,6 +146,9 @@ public:
          * not be reliable in the case of process-sharing apps.
          */
         String mAppDataDir;
+
+        /** from --refresh_theme */
+        Boolean mRefreshTheme;
     };
 
 public:

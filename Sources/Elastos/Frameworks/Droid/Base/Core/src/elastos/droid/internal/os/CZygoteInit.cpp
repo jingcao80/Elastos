@@ -46,6 +46,8 @@ using Elastos::Droid::Opengl::IEGLDisplay;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::Thread;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::IO::CFileDescriptor;
 using Elastos::IO::IFileDescriptor;
 using Elastos::Utility::Etl::Vector;
@@ -281,7 +283,6 @@ Int32 CZygoteInit::PreloadColorStateLists(
         //     if (false) {
         //         Logger::V(TAG, " GC at " + Debug.getGlobalAllocSize());
         //     }
-        //     System.gc();
         //     runtime.runFinalizationSync();
         //     Debug.resetGlobalAllocSize();
         // }
@@ -302,6 +303,9 @@ Int32 CZygoteInit::PreloadColorStateLists(
             }
         }
     }
+    AutoPtr<ISystem> sys;
+    CSystem::AcquireSingleton((ISystem**)&sys);
+    sys->GC();
     return N;
 }
 
@@ -316,7 +320,6 @@ Int32 CZygoteInit::PreloadDrawables(
         //     if (false) {
         //         Logger::V(TAG, " GC at " + Debug.getGlobalAllocSize());
         //     }
-        //     System.gc();
         //     runtime.runFinalizationSync();
         //     Debug.resetGlobalAllocSize();
         // }
@@ -337,6 +340,9 @@ Int32 CZygoteInit::PreloadDrawables(
             }
         }
     }
+    AutoPtr<ISystem> sys;
+    CSystem::AcquireSingleton((ISystem**)&sys);
+    sys->GC();
     return N;
 }
 
@@ -431,7 +437,7 @@ ECode CZygoteInit::StartSystemServer(
     AutoPtr<ArrayOf<String> > args = ArrayOf<String>::Alloc(8);
     (*args)[0] = "--setuid=1000";
     (*args)[1] = "--setgid=1000";
-    (*args)[2] = "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1032,3001,3002,3003,3006,3007";
+    (*args)[2] = "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1032,3001,3002,3003,3006,3007";
     StringBuilder sb("--capabilities=");
     sb += capabilities;
     sb += ",";
@@ -756,6 +762,8 @@ ECode CZygoteInit::ReopenStdio(
     do {
         err = dup2(fd, STDERR_FILENO);
     } while (err < 0 && errno == EINTR);
+
+    return NOERROR;
 }
 
 ECode CZygoteInit::SetCloseOnExec(
