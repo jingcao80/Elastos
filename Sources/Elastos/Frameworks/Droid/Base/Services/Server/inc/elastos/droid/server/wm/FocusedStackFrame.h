@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_SERVER_WM_FOCUSEDSTACKFRAME_H__
 
 #include "_Elastos.Droid.Server.h"
-#include "elastos/droid/server/wm/TaskStack.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::View::ISurfaceControl;
@@ -14,6 +14,8 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wm {
+
+class TaskStack;
 
 class FocusedStackFrame : public Object
 {

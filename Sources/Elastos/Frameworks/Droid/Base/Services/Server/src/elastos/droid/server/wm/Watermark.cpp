@@ -13,6 +13,8 @@ using Elastos::Droid::Graphics::IPaintFontMetricsInt;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::View::CSurface;
 using Elastos::Droid::View::CSurfaceControl;
 
@@ -61,6 +63,18 @@ Watermark::Watermark(
         else c2 -= '0';
         builder->AppendChar((char)(255 - ((c1 * 16) + c2)));
     }
+
+    Int32 appendDisplayVersion = (CWindowManagerService::GetPropertyInt(tokens, 10,
+            ITypedValue::COMPLEX_UNIT_PX, 0, dm));
+    if (appendDisplayVersion != 0) {
+        builder->Append(" - ");
+        AutoPtr<ISystemProperties> prop;
+        CSystemProperties::AcquireSingleton((ISystemProperties**)&prop);
+        String value;
+        prop->Get(String("ro.cm.display.version"), &value);
+        builder->Append(value);
+    }
+
     builder->ToString(&mText);
     // if (false) {
     //     Log.i(WindowManagerService.TAG, "Final text: " + mText);
@@ -151,28 +165,35 @@ void Watermark::DrawIfNeeded()
         if (c != NULL) {
             c->DrawColor(0, Elastos::Droid::Graphics::PorterDuffMode_CLEAR);
 
-            Int32 deltaX = mDeltaX;
-            Int32 deltaY = mDeltaY;
+            if (mDeltaX != 0 || mDeltaY != 0) {
+                Int32 deltaX = mDeltaX;
+                Int32 deltaY = mDeltaY;
 
-            // deltaX shouldn't be close to a round fraction of our
-            // x step, or else things will line up too much.
-            Int32 div = (dw + mTextWidth) / deltaX;
-            Int32 rem = (dw + mTextWidth) - (div * deltaX);
-            Int32 qdelta = deltaX / 4;
-            if (rem < qdelta || rem > (deltaX - qdelta)) {
-                deltaX += deltaX / 3;
-            }
+                // deltaX shouldn't be close to a round fraction of our
+                // x step, or else things will line up too much.
+                Int32 div = (dw + mTextWidth) / deltaX;
+                Int32 rem = (dw + mTextWidth) - (div * deltaX);
+                Int32 qdelta = deltaX / 4;
+                if (rem < qdelta || rem > (deltaX - qdelta)) {
+                    deltaX += deltaX / 3;
+                }
 
-            Int32 y = -mTextHeight;
-            Int32 x = -mTextWidth;
-            while (y < (dh + mTextHeight)) {
-                c->DrawText(mText, x, y, mTextPaint);
-                x += deltaX;
-                if (x >= dw) {
-                    x -= (dw + mTextWidth);
-                    y += deltaY;
+                Int32 y = -mTextHeight;
+                Int32 x = -mTextWidth;
+                while (y < (dh + mTextHeight)) {
+                    c->DrawText(mText, x, y, mTextPaint);
+                    x += deltaX;
+                    if (x >= dw) {
+                        x -= (dw + mTextWidth);
+                        y += deltaY;
+                    }
                 }
             }
+            else {
+                c->DrawText(mText, dw - mTextWidth,
+                    dh - mTextHeight * 4, mTextPaint);
+            }
+
             mSurface->UnlockCanvasAndPost(c);
         }
     }

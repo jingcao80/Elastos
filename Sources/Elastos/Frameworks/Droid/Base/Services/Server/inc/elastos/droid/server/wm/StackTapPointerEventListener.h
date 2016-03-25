@@ -29,6 +29,9 @@ public:
     CARAPI OnPointerEvent(
         /* [in] */ IMotionEvent* motionEvent);
 
+    CARAPI_(void) SetTouchExcludeRegion(
+        /* [in] */ IRegion* newRegion);
+
 public:
     static const Int32 TAP_TIMEOUT_MSEC = 300;
     static const Float TAP_MOTION_SLOP_INCHES = 0.125f;

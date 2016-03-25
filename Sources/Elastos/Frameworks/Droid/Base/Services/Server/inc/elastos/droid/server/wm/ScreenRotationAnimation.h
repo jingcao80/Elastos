@@ -3,10 +3,13 @@
 
 #include "_Elastos.Droid.Server.h"
 #include "elastos/droid/server/wm/BlackFrame.h"
+#include "elastos/droid/os/Handler.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IMatrix;
 using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::ISurfaceControl;
 using Elastos::Droid::View::ISurfaceSession;
@@ -22,6 +25,28 @@ class DisplayContent;
 
 class ScreenRotationAnimation : public Object
 {
+public:
+    class H : public Handler
+    {
+    public:
+        H(
+            /* [in] */ ILooper* looper,
+            /* [in] */ ScreenRotationAnimation* host);
+
+        ECode HandleMessage(
+            /* [in] */ IMessage* msg);
+
+    public:
+        static const Int32 SCREENSHOT_FREEZE_TIMEOUT = 2;
+
+        //Set the freeze timeout value to 6sec (which is greater than
+        //APP_FREEZE_TIMEOUT value in WindowManagerService)
+        static const Int32 FREEZE_TIMEOUT_VAL = 6000;
+
+    private:
+        ScreenRotationAnimation* mHost;
+    };
+
 public:
     ScreenRotationAnimation(
         /* [in] */ IContext* context,
@@ -122,6 +147,7 @@ public:
     AutoPtr<BlackFrame> mEnteringBlackFrame;
     Int32 mWidth;
     Int32 mHeight;
+    Int32 mSnapshotRotation;
 
     Int32 mOriginalRotation;
     Int32 mOriginalWidth;
@@ -194,6 +220,8 @@ public:
     AutoPtr<ArrayOf<Float> > mTmpFloats;
 
     Int64 mHalfwayPoint;
+
+    AutoPtr<H> mHandler;
 
 private:
     Boolean mMoreRotateEnter;

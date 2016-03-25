@@ -205,10 +205,14 @@ void AppWindowToken::RemoveAllWindows()
 {
     WindowList::ReverseIterator rit = mAllAppWindows.RBegin();
     for (; rit != mAllAppWindows.REnd(); ++rit) {
+        // try {
         AutoPtr<WindowState> win = *rit;
-        if (CWindowManagerService::DEBUG_WINDOW_MOVEMENT)
-            Slogger::W(CWindowManagerService::TAG, "removeAllWindows: removing win=%p", win.Get());
+        if (CWindowManagerService::DEBUG_WINDOW_MOVEMENT) Slogger::W(CWindowManagerService::TAG,
+                "removeAllWindows: removing win=%s", TO_CSTR(win));
         win->mService->RemoveWindowLocked(win->mSession, win);
+        // } catch (IndexOutOfBoundsException e) {
+        //     Slog.e(WindowManagerService.TAG, "Error while removing window : " + e);
+        // }
     }
 }
 

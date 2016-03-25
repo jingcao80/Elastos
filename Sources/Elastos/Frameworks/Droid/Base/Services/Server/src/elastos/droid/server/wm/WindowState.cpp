@@ -267,25 +267,20 @@ WindowState::WindowState(
             }
             else {
                 WindowList::Iterator it = mAttachedWindow->mChildWindows.Begin();
+                Boolean added = FALSE;
                 for (; it != mAttachedWindow->mChildWindows.End(); ++it) {
-                    AutoPtr<WindowState> child = *it;
-                    if (mSubLayer < child->mSubLayer) {
+                    Int32 childSubLayer = (*it)->mSubLayer;
+                    if (mSubLayer < childSubLayer
+                            || (mSubLayer == childSubLayer && childSubLayer < 0)) {
+                        // We insert the child window into the list ordered by the sub-layer. For
+                        // same sub-layers, the negative one should go below others; the positive
+                        // one should go above others.
                         mAttachedWindow->mChildWindows.Insert(it, this);
+                        added = TRUE;
                         break;
-                    }
-                    else if (mSubLayer > child->mSubLayer) {
-                        continue;
-                    }
-
-                    if (mBaseLayer <= child->mBaseLayer) {
-                        mAttachedWindow->mChildWindows.Insert(it, this);
-                        break;
-                    }
-                    else {
-                        continue;
                     }
                 }
-                if (it == mAttachedWindow->mChildWindows.End()) {
+                if (!added) {
                     mAttachedWindow->mChildWindows.PushBack(this);
                 }
             }

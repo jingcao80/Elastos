@@ -1,6 +1,7 @@
 
 #include "elastos/droid/server/wm/DisplayContent.h"
 #include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/StackTapPointerEventListener.h"
 #include "elastos/droid/server/am/ActivityStackSupervisor.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
@@ -213,6 +214,7 @@ void DisplayContent::SetTouchExcludeRegion(
             mTouchExcludeRegion->Op(mTmpRect, RegionOp_DIFFERENCE, &result);
         }
     }
+    mTapDetector->SetTouchExcludeRegion(mTouchExcludeRegion);
 }
 
 void DisplayContent::SwitchUserStacks(
@@ -282,6 +284,43 @@ void DisplayContent::StopDimmingIfNeeded()
     List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
     for (; rit != mStacks.REnd(); ++rit) {
         (*rit)->StopDimmingIfNeeded();
+    }
+}
+
+Boolean DisplayContent::AnimateBlurLayers()
+{
+    Boolean result = FALSE;
+    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
+    for (; rit != mStacks.REnd(); ++rit) {
+        result |= (*rit)->AnimateBlurLayers();
+    }
+    return result;
+}
+
+void DisplayContent::ResetBlurring()
+{
+    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
+    for (; rit != mStacks.REnd(); ++rit) {
+        (*rit)->ResetBlurringTag();
+    }
+}
+
+Boolean DisplayContent::IsBlurring()
+{
+    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
+    for (; rit != mStacks.REnd(); ++rit) {
+        if ((*rit)->IsBlurring()) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+void DisplayContent::StopBlurringIfNeeded()
+{
+    List<AutoPtr<TaskStack> >::ReverseIterator rit = mStacks.RBegin();
+    for (; rit != mStacks.REnd(); ++rit) {
+        (*rit)->StopBlurringIfNeeded();
     }
 }
 

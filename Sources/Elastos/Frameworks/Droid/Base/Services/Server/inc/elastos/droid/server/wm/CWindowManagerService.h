@@ -24,11 +24,11 @@
 #include "elastos/droid/server/wm/DisplaySettings.h"
 #include "elastos/droid/server/wm/CircularDisplayMask.h"
 #include "elastos/droid/server/wm/EmulatorDisplayOverlay.h"
-#include "elastos/droid/server/wm/FocusedStackFrame.h"
 #include "elastos/droid/server/wm/AppTransition.h"
 #include "elastos/droid/server/wm/WindowBinder.h"
 #include "elastos/droid/server/wm/TaskStack.h"
 #include "elastos/droid/server/wm/TaskGroup.h"
+#include "elastos/droid/server/wm/FocusedStackFrame.h"
 #include "elastos/droid/server/wm/AccessibilityController.h"
 #include "elastos/droid/server/wm/PointerEventDispatcher.h"
 #include "elastos/droid/server/wm/KeyguardDisableHandler.h"
@@ -1135,8 +1135,8 @@ public:
      * of the target image.
      *
      * @param displayId the Display to take a screenshot of.
-     * @param width the width of the target bitmap
-     * @param height the height of the target bitmap
+     * @param width the width of the target bitmap or -1 for a full screenshot
+     * @param height the height of the target bitmap or -1 for a full screenshot
      * @param force565 if true the returned bitmap will be RGB_565, otherwise it
      *                 will be the same config as the surface
      */
@@ -1732,6 +1732,8 @@ private:
 
     CARAPI_(Boolean) CheckBootAnimationCompleteLocked();
 
+    CARAPI_(void) CheckQuickBootException();
+
     CARAPI_(void) ShowStrictModeViolation(
         /* [in] */ Int32 arg,
         /* [in] */ Int32 pid);
@@ -1908,6 +1910,15 @@ private:
     CARAPI_(void) HandleFlagDimBehind(
         /* [in] */ WindowState* w);
 
+    CARAPI_(void) HandlePrivateFlagFullyTransparent(
+        /* [in] */ WindowState* w);
+
+    CARAPI_(void) HandleFlagBlurBehind(
+        /* [in] */ WindowState* w);
+
+    CARAPI_(void) HandlePrivateFlagBlurWithMasking(
+        /* [in] */ WindowState* w);
+
     CARAPI_(void) UpdateAllDrawnLocked(
         /* [in] */ DisplayContent* displayContent);
 
@@ -2004,12 +2015,17 @@ public:
     /**
      * Dim surface layer is immediately below target window.
      */
-    static const Int32 LAYER_OFFSET_DIM = 1;
+    static const Int32 LAYER_OFFSET_DIM = 1+1;
 
     /**
      * Blur surface layer is immediately below dim layer.
      */
-    static const Int32 LAYER_OFFSET_BLUR = 2;
+    static const Int32 LAYER_OFFSET_BLUR = 2+1;
+
+    /**
+      * Blur_with_masking layer is immediately below blur layer.
+      */
+    static const Int32 LAYER_OFFSET_BLUR_WITH_MASKING = 1;
 
     /**
      * FocusedStackFrame layer is immediately above focused window.
@@ -2407,6 +2423,8 @@ private:
 
     AutoPtr<KeyguardDisableHandler> mKeyguardDisableHandler;
 
+    Int32 mSfHwRotation;
+
     Boolean mKeyguardWaitingForActivityDrawn;
 
     // This is held as long as we have the screen frozen, to give us time to
@@ -2433,6 +2451,8 @@ private:
     Boolean mInLayout;
 
     AutoPtr<WindowBinder> mWindowBinder;
+
+    Boolean mForceDisableHardwareKeyboard;
 
     friend class H;
     friend class CSession;

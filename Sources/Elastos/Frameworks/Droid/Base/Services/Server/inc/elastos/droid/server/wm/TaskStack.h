@@ -5,6 +5,7 @@
 #include "elastos/droid/server/wm/Task.h"
 #include "elastos/droid/server/wm/DimLayer.h"
 #include <elastos/utility/etl/List.h>
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Utility::Etl::List;
@@ -16,6 +17,7 @@ namespace Wm {
 
 class DisplayContent;
 class WindowStateAnimator;
+class BlurLayer;
 
 class TaskStack : public Object
 {
@@ -94,6 +96,24 @@ public:
         /* [in] */ WindowStateAnimator* winAnimator,
         /* [in] */ Int32 color);
 
+    CARAPI_(Boolean) AnimateBlurLayers();
+
+    CARAPI_(void) ResetBlurringTag();
+
+    CARAPI_(void) SetBlurringTag();
+
+    CARAPI_(Boolean) TestBlurringTag();
+
+    CARAPI_(Boolean) IsBlurring();
+
+    CARAPI_(Boolean) IsBlurring(
+        /* [in] */ WindowStateAnimator* winAnimator);
+
+    CARAPI_(void) StopBlurringIfNeeded();
+
+    CARAPI_(void) StartBlurringIfNeeded(
+        /* [in] */ WindowStateAnimator* newWinAnimator);
+
     CARAPI_(void) SwitchUser(
         /* [in] */ Int32 userId);
 
@@ -103,6 +123,9 @@ public:
         /* [out] */ String* str);
 
 private:
+    CARAPI_(Int64) GetBlurBehindFadeDuration(
+        /* [in] */ Int64 duration);
+
     CARAPI_(Int64) GetDimBehindFadeDuration(
         /* [in] */ Int64 duration);
 
@@ -123,6 +146,10 @@ public:
      * then stop any dimming. */
     Boolean mDimmingTag;
 
+    Boolean mBlurringTag;
+    AutoPtr<BlurLayer> mBlurLayer;
+    AutoPtr<WindowStateAnimator> mBlurWinAnimator;
+
     typedef List<AutoPtr<AppWindowToken> > AppTokenList;
     /** Application tokens that are exiting, but still on screen for animations. */
     AppTokenList mExitingAppTokens;
@@ -134,6 +161,8 @@ private:
     /** Amount of time in milliseconds to animate the dim surface from one value to another,
      * when no window animation is driving it. */
     static const Int32 DEFAULT_DIM_DURATION = 200;
+    static const Int32 DEFAULT_BLUR_DURATION = 50;
+    static const Float MAX_BLUR_AMOUNT = 1.0;
 
     /** The service */
     AutoPtr<CWindowManagerService> mService;
