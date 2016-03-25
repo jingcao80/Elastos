@@ -27,6 +27,8 @@ module
 
         const String EXTRA_ALWAYS_RESET = "always_reset";
 
+        const String EXTRA_WIPE_MEDIA = "wipe_media";
+
         UpdateProgressDialog(
             [in] Int32 msg);
     }

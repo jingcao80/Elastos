@@ -2,11 +2,15 @@
 #define __ELASTOS_DROID_INTERNAL_OS_BINDER_INTERNAL_H__
 
 #include "Elastos.Droid.Internal.h"
+#include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IBinder;
 using Elastos::Core::IRunnable;
 using Elastos::Utility::IArrayList;
+using Elastos::Utility::Concurrent::ICallable;
+using Elastos::Utility::Concurrent::IFuture;
+using Elastos::Utility::Concurrent::IExecutorService;
 
 namespace Elastos {
 namespace Droid {
@@ -20,6 +24,28 @@ namespace Os {
  */
 class ECO_PUBLIC BinderInternal
 {
+public:
+    /**
+     * TimerGc Callable : Wait for a certain time, and execute the BinderGc.
+     * Set the postponed count to 0.
+     */
+    class ECO_LOCAL TimerGc
+        : public Object
+        , public ICallable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TimerGc(
+            /* [in] */ Int64 timeInMillis);
+
+        CARAPI Call(
+            /* [out] */ IInterface** result);
+
+    private:
+        Int64 mWaitTime;
+    };
+
 private:
     class ECO_LOCAL GcWatcher
         : public Object
@@ -72,6 +98,35 @@ public:
     static CARAPI ForceGc(
         /* [in] */ const String& reason);
 
+    /**
+     * modifyDelayedGcParams : Call from the framework based on some special Ux event.
+     * like appLaunch.
+     *
+     * 1. If this is the first time for the trigger event, or, if there is no scheduled
+     *    task, create a new FutureTaskInstance, and set the lastGcDelayRequestTime.
+     *    This will be used by forceBinderGc later.
+     *
+     * 2. If the postponed iterations hit a maximum limit, do nothing. Let the current
+     *    task execute the gc. If not,
+     *
+     *    a. Set the start time.
+     *    b. Increment the postponed count
+     *    c. Cancel the current task and start a new one for GC_DELAY_MAX_DURATION.
+     */
+    static CARAPI ModifyDelayedGcParams();
+
+    /**
+     * Modified forceBinderGc. The brief algorithm is as follows --
+     *
+     * 1. If no futureTaskInstance has been initiated, directly force a BinderGc.
+     * 2. Check for the duration since the last request, and see if it was within the
+     *    last GC_DELAY_MAX_DURATION secs. If yes, we need to delay the GC until
+     *    GC_DELAY_MAX_DURATION.
+     * 3. If there is a task scheduled (postponedGcCount != 0), we merely prevent this GC,
+     *    and let the GC scheduled execute.
+     * 4. If no task is scheduled, we schedule one now for (GC_DELAY_MAX_DURATION - touch duration),
+     *    and update postponedGcCount.
+     */
     static CARAPI ForceBinderGc();
 
 private:
@@ -84,6 +139,25 @@ private:
     // static AutoPtr<IArrayList> sGcWatchers;// = new ArrayList<>();
     // static AutoPtr<ArrayOf<IInterface*> > sTmpWatchers;// = new Runnable[1];
     // static Int64 sLastGcTime;
+
+    /* Maximum duration a GC can be delayed. */
+    static Int32 GC_DELAY_MAX_DURATION;
+    /**
+     * Maximum number of times a GC can be delayed since the
+     * original request.
+     */
+    static Int32 POSTPONED_GC_MAX;
+
+    /**
+     * lastGcDelayRequestTime records the time-stamp of the last time
+     * a GC delay request was made.
+     */
+    static Int64 mLastGcDelayRequestTime;
+    static AutoPtr<TimerGc> mTimerGcInstance;
+    static AutoPtr<IFuture> mFutureTaskInstance;
+    static AutoPtr<IExecutorService> mExecutor;
+    static Int32 mPostponedGcCount;
+    static Object mDelayGcMonitorObject;
 };
 
 } // namespace Os

@@ -1,13 +1,24 @@
 #include "elastos/droid/internal/os/BinderInternal.h"
+#include "elastos/droid/os/SystemClock.h"
 #include <Elastos.Droid.Os.h>
 #include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/core/Thread.h>
+#include <elastos/core/AutoLock.h>
 
 #include <binder/IInterface.h>
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
 
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Core::Thread;
+using Elastos::Core::IRunnable;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Concurrent::IExecutors;
+using Elastos::Utility::Concurrent::CExecutors;
+using Elastos::Utility::Concurrent::EIID_ICallable;
+using Elastos::Utility::Concurrent::CFutureTask;
+using Elastos::Utility::Concurrent::IExecutor;
 
 namespace Elastos {
 namespace Droid {
@@ -36,6 +47,52 @@ AutoPtr<Elastos::Droid::Os::IBinder> ElastosObjectForIBinder(const android::sp<a
 // AutoPtr<ArrayOf<IInterface*> > BinderInternal::sTmpWatchers = ArrayOf<IInterface*> ::Alloc(1);
 // Int64 BinderInternal::sLastGcTime = 0;
 
+Int32 BinderInternal::GC_DELAY_MAX_DURATION = 3000;
+
+Int32 BinderInternal::POSTPONED_GC_MAX = 5;
+
+Int64 BinderInternal::mLastGcDelayRequestTime = SystemClock::GetUptimeMillis();
+AutoPtr<BinderInternal::TimerGc> BinderInternal::mTimerGcInstance = NULL ;
+AutoPtr<IFuture> BinderInternal::mFutureTaskInstance = NULL ;
+
+AutoPtr<IExecutorService> InitExecutorService()
+{
+    AutoPtr<IExecutors> hlp;
+    CExecutors::AcquireSingleton((IExecutors**)&hlp);
+    AutoPtr<IExecutorService> p;
+    hlp->NewFixedThreadPool(1, (IExecutorService**)&p);
+    return p;
+}
+
+AutoPtr<IExecutorService> BinderInternal::mExecutor = InitExecutorService();
+Int32 BinderInternal::mPostponedGcCount = 0;
+Object BinderInternal::mDelayGcMonitorObject;
+
+//===============================================================
+// BinderInternal::TimerGc::
+//===============================================================
+CAR_INTERFACE_IMPL(BinderInternal::TimerGc, Object, ICallable)
+
+BinderInternal::TimerGc::TimerGc(
+    /* [in] */ Int64 timeInMillis)
+{
+    mWaitTime = timeInMillis;
+}
+
+ECode BinderInternal::TimerGc::Call(
+    /* [out] */ IInterface** result)
+{
+    VALIDATE_NOT_NULL(result)
+    Thread::Sleep(mWaitTime);
+    BinderInternal::ForceGc(String("Binder"));
+    BinderInternal::mPostponedGcCount = 0;
+    *result = NULL;
+    return NOERROR;
+}
+
+//===============================================================
+// BinderInternal::GcWatcher::
+//===============================================================
 BinderInternal::GcWatcher::~GcWatcher()
 {
     Finalize();
@@ -57,6 +114,9 @@ ECode BinderInternal::GcWatcher::Finalize()
     return NOERROR;
 }
 
+//===============================================================
+// BinderInternal::
+//===============================================================
 ECode BinderInternal::AddGcWatcher(
     /* [in] */ IRunnable* watcher)
 {
@@ -107,8 +167,52 @@ ECode BinderInternal::ForceGc(
     return NOERROR;
 }
 
+ECode BinderInternal::ModifyDelayedGcParams()
+{
+    Int64 nowTime = SystemClock::GetUptimeMillis();
+    synchronized (mDelayGcMonitorObject) {
+        if ((mFutureTaskInstance != NULL) && (mPostponedGcCount != 0)) {
+            if (mPostponedGcCount <= POSTPONED_GC_MAX) {
+                Boolean res = FALSE;
+                mFutureTaskInstance->Cancel(TRUE, &res);
+                Boolean bCal = FALSE;
+                mFutureTaskInstance->IsCancelled(&bCal);
+                if (bCal) {
+                    mLastGcDelayRequestTime = nowTime;
+                    mPostponedGcCount++;
+                    mTimerGcInstance = new TimerGc(GC_DELAY_MAX_DURATION);
+                    CFutureTask::New(mTimerGcInstance, (IFuture**)&mFutureTaskInstance);
+                    IExecutor::Probe(mExecutor)->Execute(IRunnable::Probe(mFutureTaskInstance));
+                }
+            }
+        }
+        else {
+            mLastGcDelayRequestTime = nowTime;
+            mTimerGcInstance = new TimerGc(GC_DELAY_MAX_DURATION);
+            CFutureTask::New(mTimerGcInstance, (IFuture**)&mFutureTaskInstance);
+        }
+    }
+    return NOERROR;
+}
+
 ECode BinderInternal::ForceBinderGc()
 {
+    synchronized (mDelayGcMonitorObject) {
+        if (mFutureTaskInstance != NULL) {
+            Int64 lastGcDelayRequestDuration = (SystemClock::GetUptimeMillis() - mLastGcDelayRequestTime);
+            if (lastGcDelayRequestDuration < GC_DELAY_MAX_DURATION) {
+                if (mPostponedGcCount != 0)
+                    return NOERROR;
+                Boolean res = FALSE;
+                mFutureTaskInstance->Cancel(TRUE, &res);
+                mTimerGcInstance = new TimerGc(GC_DELAY_MAX_DURATION - lastGcDelayRequestDuration);
+                CFutureTask::New(mTimerGcInstance, (IFuture**)&mFutureTaskInstance);
+                mPostponedGcCount = 1;
+                IExecutor::Probe(mExecutor)->Execute(IRunnable::Probe(mFutureTaskInstance));
+                return NOERROR;
+            }
+        }
+    }
     return ForceGc(String("Binder"));
 }
 

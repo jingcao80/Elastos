@@ -927,6 +927,10 @@ AutoPtr<ArrayOf<Int64> > ProcessCpuTracker::GetCpuSpeedTimes(
         if (st && st->GetLength() > 1) {
             for (Int32 i = 0; i < st->GetLength(); ++i) {
                 String token = (*st)[i];
+                //skip the iteration if the index is out of bounds
+                if(speed >= tempSpeeds->GetLength()) {
+                    break;
+                }
                 (*tempSpeeds)[speed] = StringUtils::ParseInt64(token);
                 token = (*st)[++i];
                 (*tempTimes)[speed] = StringUtils::ParseInt64(token);
@@ -939,6 +943,10 @@ AutoPtr<ArrayOf<Int64> > ProcessCpuTracker::GetCpuSpeedTimes(
             }
         }
     }
+    else {
+        if(DEBUG) Slogger::I(TAG, "time_in_state file does not exist");
+    }
+
     if (out == NULL) {
         out = ArrayOf<Int64>::Alloc(speed);
         mCpuSpeeds = ArrayOf<Int64>::Alloc(speed);

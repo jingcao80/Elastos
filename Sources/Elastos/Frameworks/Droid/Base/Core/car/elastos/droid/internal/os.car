@@ -18,6 +18,9 @@ module
     merge("os/TransferPipe.car");
     merge("os/Zygote.car");
     merge("os/ZygoteInit.car");
+    merge("os/DeviceKeyHandler.car");
+    merge("os/IKillSwitch.car");
+    merge("os/IKillSwitchService.car");
 
     using interface Elastos.IO.IFile;
     using interface Elastos.Core.IComparable;
