@@ -1,7 +1,9 @@
 
 #include "elastos/droid/server/wm/StackTapPointerEventListener.h"
 #include "elastos/droid/server/wm/DisplayContent.h"
+#include <elastos/core/Math.h>
 
+using Elastos::Droid::Graphics::CRegion;
 using Elastos::Droid::View::EIID_IPointerEventListener;
 
 namespace Elastos {
@@ -22,7 +24,7 @@ StackTapPointerEventListener::StackTapPointerEventListener(
     , mService(service)
     , mDisplayContent(displayContent)
 {
-    mTouchExcludeRegion = displayContent->mTouchExcludeRegion;
+    CRegion::New((IRegion**)&mTouchExcludeRegion);
     AutoPtr<IDisplayInfo> info = displayContent->GetDisplayInfo();
     Int32 dpi;
     info->GetLogicalDensityDpi(&dpi);
@@ -46,13 +48,19 @@ ECode StackTapPointerEventListener::OnPointerEvent(
             if (mPointerId >= 0) {
                 Int32 index;
                 motionEvent->FindPointerIndex(mPointerId, &index);
+                if (index < 0) {
+                    mPointerId = -1;
+                    break;
+                }
+
                 Int64 eventTime, downTime;
                 Float x, y;
                 IInputEvent::Probe(motionEvent)->GetEventTime(&eventTime);
                 motionEvent->GetDownTime(&downTime);
                 if ((eventTime - downTime) > TAP_TIMEOUT_MSEC
-                        || (motionEvent->GetX(index, &x), (x - mDownX) > mMotionSlop)
-                        || (motionEvent->GetY(index, &y), (y - mDownY) > mMotionSlop)) {
+                        || index < 0
+                        || (motionEvent->GetX(index, &x), Elastos::Core::Math::Abs(x - mDownX) > mMotionSlop)
+                        || (motionEvent->GetY(index, &y), Elastos::Core::Math::Abs(y - mDownY) > mMotionSlop)) {
                     mPointerId = -1;
                 }
             }
@@ -69,17 +77,20 @@ ECode StackTapPointerEventListener::OnPointerEvent(
                 motionEvent->GetY(index, &ey);
                 Int32 x = (Int32)ex;
                 Int32 y = (Int32)ey;
-                Int64 eventTime, downTime;
-                IInputEvent::Probe(motionEvent)->GetEventTime(&eventTime);
-                motionEvent->GetDownTime(&downTime);
-                Boolean contains;
-                if ((eventTime - downTime) < TAP_TIMEOUT_MSEC
-                        && (x - mDownX) < mMotionSlop && (y - mDownY) < mMotionSlop
-                        && (mTouchExcludeRegion->Contains(x, y, &contains), !contains)) {
-                    AutoPtr<IMessage> msg;
-                    mService->mH->ObtainMessage(CWindowManagerService::H::TAP_OUTSIDE_STACK, x, y,
-                            (IObject*)mDisplayContent.Get(), (IMessage**)&msg);
-                    msg->SendToTarget();
+                synchronized(this) {
+                    Int64 eventTime, downTime;
+                    IInputEvent::Probe(motionEvent)->GetEventTime(&eventTime);
+                    motionEvent->GetDownTime(&downTime);
+                    Boolean contains;
+                    if ((eventTime - downTime) < TAP_TIMEOUT_MSEC
+                            && Elastos::Core::Math::Abs(x - mDownX) < mMotionSlop
+                            && Elastos::Core::Math::Abs(y - mDownY) < mMotionSlop
+                            && (mTouchExcludeRegion->Contains(x, y, &contains), !contains)) {
+                        AutoPtr<IMessage> msg;
+                        mService->mH->ObtainMessage(CWindowManagerService::H::TAP_OUTSIDE_STACK, x, y,
+                                (IObject*)mDisplayContent.Get(), (IMessage**)&msg);
+                        msg->SendToTarget();
+                    }
                 }
                 mPointerId = -1;
             }
@@ -87,6 +98,15 @@ ECode StackTapPointerEventListener::OnPointerEvent(
         }
     }
     return NOERROR;
+}
+
+void StackTapPointerEventListener::SetTouchExcludeRegion(
+    /* [in] */ IRegion* newRegion)
+{
+    synchronized (this) {
+        Boolean result;
+        mTouchExcludeRegion->Set(newRegion, &result);
+    }
 }
 
 } // Wm

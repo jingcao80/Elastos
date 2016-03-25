@@ -3,7 +3,6 @@
 
 #include "_Elastos.Droid.Server.h"
 #include "elastos/droid/server/wm/WindowState.h"
-#include "elastos/droid/server/wm/StackTapPointerEventListener.h"
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Utility::Etl::List;
@@ -20,6 +19,7 @@ namespace Wm {
 
 class TaskStack;
 class Task;
+class StackTapPointerEventListener;
 
 /**
  * Utility class for keeping track of the WindowStates and other pertinent contents of a
@@ -108,13 +108,21 @@ public:
 
     CARAPI_(void) StopDimmingIfNeeded();
 
+    CARAPI_(Boolean) AnimateBlurLayers();
+
+    CARAPI_(void) ResetBlurring();
+
+    CARAPI_(Boolean) IsBlurring();
+
+    CARAPI_(void) StopBlurringIfNeeded();
+
     CARAPI_(void) Close();
 
     CARAPI_(Boolean) IsAnimating();
 
     CARAPI_(void) CheckForDeferredActions();
 
-    // void dump(String prefix, PrintWriter pw);
+    // CARAPI_(void) dump(String prefix, PrintWriter pw);
 
     CARAPI ToString(
         /* [out] */ String* str);

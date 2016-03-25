@@ -4,6 +4,7 @@
 #include "elastos/droid/server/wm/FocusedStackFrame.h"
 #include "elastos/droid/server/wm/WindowState.h"
 #include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/TaskStack.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;

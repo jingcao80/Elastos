@@ -4,6 +4,7 @@
 #include "elastos/droid/server/wm/TaskStack.h"
 #include "elastos/droid/server/wm/CWindowManagerService.h"
 #include "elastos/droid/server/wm/DisplayContent.h"
+#include "elastos/droid/server/wm/BlurLayer.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
@@ -21,12 +22,15 @@ namespace Server {
 namespace Wm {
 
 const Int32 TaskStack::DEFAULT_DIM_DURATION;
+const Int32 TaskStack::DEFAULT_BLUR_DURATION;
+const Float TaskStack::MAX_BLUR_AMOUNT;
 
 TaskStack::TaskStack(
     /* [in] */ CWindowManagerService* service,
     /* [in] */ Int32 stackId)
     : mStackId(stackId)
     , mDimmingTag(FALSE)
+    , mBlurringTag(FALSE)
     , mDeferDetach(FALSE)
     , mService(service)
     , mFullscreen(TRUE)
@@ -89,6 +93,7 @@ Boolean TaskStack::SetBounds(
 
     mDimLayer->SetBounds(bounds);
     mAnimationBackgroundSurface->SetBounds(bounds);
+    mBlurLayer->SetBounds(bounds);
     mBounds->Set(bounds);
 
     return TRUE;
@@ -206,6 +211,7 @@ ECode TaskStack::AttachDisplayContent(
     mDisplayContent = displayContent;
     mDimLayer = new DimLayer(mService, this, displayContent);
     mAnimationBackgroundSurface = new DimLayer(mService, this, displayContent);
+    mBlurLayer = new BlurLayer(mService, this, displayContent);
     UpdateDisplayInfo();
     return NOERROR;
 }
@@ -232,6 +238,8 @@ void TaskStack::DetachDisplay()
         mService->RequestTraversalLocked();
     }
 
+    mBlurLayer->DestroySurface();
+    mBlurLayer = NULL;
     mAnimationBackgroundSurface->DestroySurface();
     mAnimationBackgroundSurface = NULL;
     mDimLayer->DestroySurface();
@@ -243,6 +251,12 @@ void TaskStack::ResetAnimationBackgroundAnimator()
 {
     mAnimationBackgroundAnimator = NULL;
     mAnimationBackgroundSurface->Hide();
+}
+
+Int64 TaskStack::GetBlurBehindFadeDuration(
+    /* [in] */ Int64 duration)
+{
+    return GetDimBehindFadeDuration(duration);
 }
 
 Int64 TaskStack::GetDimBehindFadeDuration(
@@ -371,6 +385,97 @@ void TaskStack::SetAnimationBackground(
     }
 }
 
+Boolean TaskStack::AnimateBlurLayers()
+{
+    Boolean result = FALSE;
+    Int32 blurLayer;
+    Float blurAmount;
+    if (mBlurWinAnimator == NULL) {
+        blurLayer = mBlurLayer->GetLayer();
+        blurAmount = 0;
+    }
+    else {
+        blurLayer = mBlurWinAnimator->mAnimLayer - CWindowManagerService::LAYER_OFFSET_BLUR;
+        blurAmount = MAX_BLUR_AMOUNT;
+    }
+    Float targetBlur = mBlurLayer->GetTargetBlur();
+    if (targetBlur != blurAmount) {
+        if (mBlurWinAnimator == NULL) {
+            mBlurLayer->Hide(DEFAULT_BLUR_DURATION);
+        }
+        else {
+            Int64 hint;
+            Int64 duration = (mBlurWinAnimator->mAnimating && mBlurWinAnimator->mAnimation != NULL)
+                    ? (mBlurWinAnimator->mAnimation->ComputeDurationHint(&hint), hint)
+                    : DEFAULT_BLUR_DURATION;
+            if (targetBlur > blurAmount) {
+                duration = GetBlurBehindFadeDuration(duration);
+            }
+            if (duration > DEFAULT_BLUR_DURATION)
+                duration = DEFAULT_BLUR_DURATION;
+            mBlurLayer->Show(blurLayer, blurAmount, duration);
+        }
+    }
+    else if (mBlurLayer->GetLayer() != blurLayer) {
+        mBlurLayer->SetLayer(blurLayer);
+    }
+    if (mBlurLayer->IsAnimating()) {
+        if (!mService->OkToDisplay()) {
+            // Jump to the end of the animation.
+            mBlurLayer->Show();
+        }
+        else {
+            result = mBlurLayer->StepAnimation();
+        }
+    }
+    return result;
+}
+
+void TaskStack::ResetBlurringTag()
+{
+    mBlurringTag = FALSE;
+}
+
+void TaskStack::SetBlurringTag()
+{
+    mBlurringTag = TRUE;
+}
+
+Boolean TaskStack::TestBlurringTag()
+{
+    return mBlurringTag;
+}
+
+Boolean TaskStack::IsBlurring()
+{
+    return mBlurLayer->IsBlurring();
+}
+
+Boolean TaskStack::IsBlurring(
+    /* [in] */ WindowStateAnimator* winAnimator)
+{
+    return mBlurWinAnimator.Get() == winAnimator && mBlurLayer->IsBlurring();
+}
+
+void TaskStack::StopBlurringIfNeeded()
+{
+    if (!mBlurringTag && IsBlurring()) {
+        mBlurWinAnimator = NULL;
+    }
+}
+
+void TaskStack::StartBlurringIfNeeded(
+    /* [in] */ WindowStateAnimator* newWinAnimator)
+{
+    AutoPtr<WindowStateAnimator> existingBlurWinAnimator = mBlurWinAnimator;
+    // Don't turn on for an unshown surface, or for any layer but the highest blur layer.
+    if (newWinAnimator->mSurfaceShown && (existingBlurWinAnimator == NULL
+            || !existingBlurWinAnimator->mSurfaceShown
+            || existingBlurWinAnimator->mAnimLayer < newWinAnimator->mAnimLayer)) {
+        mBlurWinAnimator = newWinAnimator;
+    }
+}
+
 void TaskStack::SwitchUser(
     /* [in] */ Int32 userId)
 {
@@ -390,6 +495,7 @@ void TaskStack::SwitchUser(
 
 void TaskStack::Close()
 {
+    mBlurLayer->mBlurSurface->Destroy();
     mDimLayer->mDimSurface->Destroy();
     mAnimationBackgroundSurface->mDimSurface->Destroy();
 }

@@ -30,6 +30,7 @@ namespace Server {
 namespace Wm {
 
 const String WindowStateAnimator::TAG("WindowStateAnimator");
+const Int32 WindowStateAnimator::BLUR_LAYER_OFFSET = CWindowManagerService::LAYER_OFFSET_BLUR_WITH_MASKING;
 const Int32 WindowStateAnimator::NO_SURFACE ;
 const Int32 WindowStateAnimator::DRAW_PENDING ;
 const Int32 WindowStateAnimator::COMMIT_DRAW_PENDING ;
@@ -61,6 +62,10 @@ WindowStateAnimator::WindowStateAnimator(
     , mWasAnimating(FALSE)
     , mAnimLayer(0)
     , mLastLayer(0)
+    , mFullyTransparent(FALSE)
+    , mLayerStack(0)
+    , mSurfaceBlurShown(FALSE)
+    , mSurfaceBlurScaleNeeded(FALSE)
     , mSurfaceResized(FALSE)
     , mSurfaceDestroyDeferred(FALSE)
     , mShownAlpha(0)
@@ -407,11 +412,21 @@ void WindowStateAnimator::Hide()
             mSurfaceShown = FALSE;
             // try {
             if (FAILED(mSurfaceControl->Hide())) {
-                Slogger::W(TAG, "Exception hiding surface in %p", mWin);
+                Slogger::W(TAG, "Exception hiding surface in %s", TO_CSTR(mWin));
             }
             // } catch (RuntimeException e) {
             //     Slog.w(TAG, "Exception hiding surface in " + mWin);
             // }
+            if (mSurfaceControlBlur != NULL) {
+                // try {
+                if (FAILED(mSurfaceControlBlur->Hide())) {
+                    Slogger::W(TAG, "Exception hiding surface blur in %s", TO_CSTR(mWin));
+                }
+                // }
+                // catch (RuntimeException e) {
+                //     Slog.w(TAG, "Exception hiding surface blur in " + mWin);
+                // }
+            }
         }
     }
 }
@@ -649,10 +664,8 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
         mSurfaceLayer = mAnimLayer;
         AutoPtr<DisplayContent> displayContent = w->GetDisplayContent();
         if (displayContent != NULL) {
-            AutoPtr<IDisplay> d = displayContent->GetDisplay();
-            Int32 stack;
-            d->GetLayerStack(&stack);
-            mSurfaceControl->SetLayerStack(stack);
+            displayContent->GetDisplay()->GetLayerStack(&mLayerStack);
+            mSurfaceControl->SetLayerStack(mLayerStack);
         }
         mSurfaceControl->SetLayer(mAnimLayer);
         mSurfaceControl->SetAlpha(0);
@@ -670,6 +683,7 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
         sch->CloseTransaction();
         if (CWindowManagerService::localLOGV) Slogger::V(
                 TAG, "Created surface %p", this);
+        UpdateBlurWithMaskingState(attrs, FALSE);
     }
     return mSurfaceControl;
 }
@@ -712,12 +726,25 @@ void WindowStateAnimator::DestroySurfaceLocked()
                     ECode ec = mPendingDestroySurface->Destroy();
                     if (FAILED(ec)) {
                         Slogger::W(TAG,
-                                "Exception thrown when destroying Window %p surface %p session : 0x%08x"
+                                "Exception thrown when destroying Window %s surface %s session %s : 0x%08x"
                                 , this, mSurfaceControl.Get(), mSession.Get(), ec);
                         goto fail;
                     }
                 }
                 mPendingDestroySurface = mSurfaceControl;
+            }
+
+            if (mSurfaceControlBlur != NULL && mPendingDestroySurfaceBlur != mSurfaceControlBlur) {
+                if (mPendingDestroySurfaceBlur != NULL) {
+                    ECode ec = mPendingDestroySurfaceBlur->Destroy();
+                    if (FAILED(ec)) {
+                        Slogger::W(TAG,
+                                "Exception thrown when destroying Window %s surface %s session %s: 0x%08x"
+                                , TO_CSTR(this), TO_CSTR(mSurfaceControl), TO_CSTR(mSession), ec);
+                        goto fail;
+                    }
+                }
+                mPendingDestroySurfaceBlur = mSurfaceControlBlur;
             }
         }
         else {
@@ -732,9 +759,18 @@ void WindowStateAnimator::DestroySurfaceLocked()
             ECode ec = mSurfaceControl->Destroy();
             if (FAILED(ec)) {
                 Slogger::W(TAG,
-                        "Exception thrown when destroying Window %p surface %p session : 0x%08x"
-                        , this, mSurfaceControl.Get(), mSession.Get(), ec);
+                        "Exception thrown when destroying Window %s surface %s session %s : 0x%08x"
+                        , TO_CSTR(this), TO_CSTR(mSurfaceControl), TO_CSTR(mSession), ec);
                 goto fail;
+            }
+            if (mSurfaceControlBlur != NULL) {
+                ec = mSurfaceControlBlur->Destroy();
+                if (FAILED(ec)) {
+                    Slogger::W(TAG,
+                            "Exception thrown when destroying Window %s surface %s session %s : 0x%08x"
+                            , TO_CSTR(this), TO_CSTR(mSurfaceControl), TO_CSTR(mSession), ec);
+                    goto fail;
+                }
             }
         }
         mAnimator->HideWallpapersLocked(mWin);
@@ -747,6 +783,7 @@ void WindowStateAnimator::DestroySurfaceLocked()
 fail:
         mSurfaceShown = FALSE;
         mSurfaceControl = NULL;
+        mSurfaceControlBlur = NULL;
         mWin->mHasSurface = FALSE;
         mDrawState = NO_SURFACE;
     }
@@ -770,6 +807,9 @@ void WindowStateAnimator::DestroyDeferredSurfaceLocked()
         //     WindowManagerService.logSurface(mWin, "DESTROY PENDING", e);
         // }
         mPendingDestroySurface->Destroy();
+        if (mPendingDestroySurfaceBlur != NULL) {
+            mPendingDestroySurfaceBlur->Destroy();
+        }
         mAnimator->HideWallpapersLocked(mWin);
     }
     // } catch (RuntimeException e) {
@@ -779,6 +819,7 @@ void WindowStateAnimator::DestroyDeferredSurfaceLocked()
     // }
     mSurfaceDestroyDeferred = FALSE;
     mPendingDestroySurface = NULL;
+    mPendingDestroySurfaceBlur = NULL;
 }
 
 void WindowStateAnimator::ComputeShownFrameLocked()
@@ -1332,6 +1373,14 @@ void WindowStateAnimator::SetSurfaceBoundariesLocked(
                 mService->ReclaimSomeSurfaceMemoryLocked(this, String("position"), TRUE);
             }
         }
+        if (mSurfaceControlBlur != NULL) {
+            if (FAILED(mSurfaceControlBlur->SetPosition(left, top))) {
+                Slogger::W(TAG, "Error positioning surface of %p pos=(%d,%d)", w.Get(), left, top);
+                if (!recoveringMemory) {
+                    mService->ReclaimSomeSurfaceMemoryLocked(this, String("position"), TRUE);
+                }
+            }
+        }
         // } catch (RuntimeException e) {
         //     Slog.w(TAG, "Error positioning surface of " + w
         //             + " pos=(" + left + "," + top + ")", e);
@@ -1356,12 +1405,27 @@ void WindowStateAnimator::SetSurfaceBoundariesLocked(
             }
             goto fail;
         }
+        if (mSurfaceControlBlur != NULL) {
+            if (FAILED(mSurfaceControl->SetSize(width, height))) {
+                Slogger::W(TAG, "Error resizing surface of %p size=(%d,%d)", w.Get(), left, top);
+                if (!recoveringMemory) {
+                    mService->ReclaimSomeSurfaceMemoryLocked(this, String("size"), TRUE);
+                }
+                goto fail;
+            }
+        }
         mAnimator->SetPendingLayoutChanges(w->GetDisplayId(),
                 IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER);
         if (w->mAttrs->GetFlags(&flags), (flags & IWindowManagerLayoutParams::FLAG_DIM_BEHIND) != 0) {
             AutoPtr<TaskStack> stack = w->GetStack();
             if (stack != NULL) {
                 stack->StartDimmingIfNeeded(this);
+            }
+        }
+        if (w->mAttrs->GetFlags(&flags), (flags & IWindowManagerLayoutParams::FLAG_BLUR_BEHIND) != 0) {
+            AutoPtr<TaskStack> stack = w->GetStack();
+            if (stack != NULL) {
+                stack->StartBlurringIfNeeded(this);
             }
         }
         // } catch (RuntimeException e) {
@@ -1453,6 +1517,14 @@ void WindowStateAnimator::PrepareSurfaceLocked(
             mSurfaceControl->SetMatrix(
                     mDsDx * w->mHScale, mDtDx * w->mVScale,
                     mDsDy * w->mHScale, mDtDy * w->mVScale);
+
+            if (mSurfaceControlBlur != NULL) {
+                mSurfaceControlBlur->SetAlpha(mShownAlpha);
+                mSurfaceControlBlur->SetLayer(mAnimLayer - BLUR_LAYER_OFFSET);
+                mSurfaceControlBlur->SetMatrix(
+                    mDsDx * w->mHScale, mDtDx * w->mVScale,
+                    mDsDy * w->mHScale, mDtDy * w->mVScale);
+            }
 
             if (mLastHidden && mDrawState == HAS_DRAWN) {
                 // if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
@@ -1574,6 +1646,14 @@ void WindowStateAnimator::SetWallpaperOffset(
             surfaceHelper->CloseTransaction();
             if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, "<<< CLOSE TRANSACTION setWallpaperOffset");
             return;
+        }
+        if (mSurfaceControlBlur != NULL) {
+            if (FAILED(mSurfaceControlBlur->SetPosition(winLeft + left, winTop + top))) {
+                Slogger::W(TAG, "Error positioning surface of %p size=(%d,%d)", mWin, left, top);
+                surfaceHelper->CloseTransaction();
+                if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, "<<< CLOSE TRANSACTION setWallpaperOffset");
+                return;
+            }
         }
         UpdateSurfaceWindowCrop(FALSE);
         // } catch (RuntimeException e) {
@@ -1726,6 +1806,15 @@ Boolean WindowStateAnimator::ShowSurfaceRobustlyLocked()
             mService->ReclaimSomeSurfaceMemoryLocked(this, String("show"), TRUE);
             return FALSE;
         }
+        if (mSurfaceControlBlur != NULL) {
+            ec = mSurfaceControlBlur->Show();
+            if (FAILED(ec)) {
+                Slogger::W(TAG, "Failure showing surface %p in %p 0x%08x",
+                        mSurfaceControl.Get(), mWin, ec);
+                mService->ReclaimSomeSurfaceMemoryLocked(this, String("show"), TRUE);
+                return FALSE;
+            }
+        }
         if (mWin->mTurnOnScreen) {
             // if (DEBUG_VISIBILITY) Slog.v(TAG,
             //         "Show surface turning screen on: " + mWin);
@@ -1826,6 +1915,117 @@ Boolean WindowStateAnimator::ApplyAnimationLocked(
     }
 
     return mAnimation != NULL;
+}
+
+void WindowStateAnimator::UpdateFullyTransparent(
+    /* [in] */ IWindowManagerLayoutParams* attrs)
+{
+    Int32 privateFlags;
+    Boolean fullyTransparent = (attrs->GetPrivateFlags(&privateFlags), (privateFlags &
+            IWindowManagerLayoutParams::PRIVATE_FLAG_FULLY_TRANSPARENT)) != 0;
+    if (fullyTransparent == mFullyTransparent) return;
+    if (mSurfaceControl == NULL) return;
+    AutoPtr<ISurfaceControlHelper> helper;
+    CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&helper);
+    helper->OpenTransaction();
+    // try {
+    if (FAILED(mSurfaceControl->SetTransparent(fullyTransparent))) {
+        Slogger::W(TAG, "Error toggling transparency. ");
+    }
+    // } catch (RuntimeException e) {
+    //     Slog.w(TAG, "Error toggling transparency. ", e);
+    // } finally {
+    //     SurfaceControl.closeTransaction();
+    //     mFullyTransparent = fullyTransparent;
+    // }
+    helper->CloseTransaction();
+    mFullyTransparent = fullyTransparent;
+}
+
+void WindowStateAnimator::UpdateBlurWithMaskingState(
+    /* [in] */ IWindowManagerLayoutParams* attrs,
+    /* [in] */ Boolean hideForced)
+{
+    Int32 privateFlags;
+    Boolean blurVisible = !hideForced && 0 != (attrs->GetPrivateFlags(&privateFlags), (privateFlags &
+            (IWindowManagerLayoutParams::PRIVATE_FLAG_BLUR_WITH_MASKING |
+                    IWindowManagerLayoutParams::PRIVATE_FLAG_BLUR_WITH_MASKING_SCALED)));
+    Boolean blurScaleNeeded = blurVisible && 0 != (attrs->GetPrivateFlags(&privateFlags), (privateFlags &
+            IWindowManagerLayoutParams::PRIVATE_FLAG_BLUR_WITH_MASKING_SCALED));
+
+    if (mSurfaceBlurShown == blurVisible && mSurfaceBlurScaleNeeded == blurScaleNeeded) return;
+    mSurfaceBlurShown = blurVisible;
+    mSurfaceBlurScaleNeeded = blurScaleNeeded;
+
+    if (!blurVisible) {
+        // we don't destroy mSurfaceControlBlur
+        if (mSurfaceControlBlur != NULL) {
+            mSurfaceControlBlur->Hide();
+        }
+        else {
+            // nothing to do
+        }
+        return;
+    }
+
+    if (mSurfaceControl == NULL) return;
+
+    if (blurVisible) {
+        if (NULL == mSurfaceControlBlur) {
+            Int32 flags = ISurfaceControl::HIDDEN | ISurfaceControl::FX_SURFACE_BLUR;
+            Int32 attrsFlags;
+            Boolean isHwAccelerated = (attrs->GetFlags(&attrsFlags), (attrsFlags &
+                    IWindowManagerLayoutParams::FLAG_HARDWARE_ACCELERATED) != 0);
+            Int32 format = IPixelFormat::TRANSLUCENT;
+            if (!isHwAccelerated) {
+                attrs->GetFormat(&format);
+            }
+            Int32 attrsFormat;
+            attrs->GetFormat(&attrsFormat);
+            AutoPtr<IPixelFormat> pixelFormat;
+            CPixelFormat::AcquireSingleton((IPixelFormat**)&pixelFormat);
+            Boolean result;
+            pixelFormat->FormatHasAlpha(attrsFormat, &result);
+            if (!result) {
+                flags |= ISurfaceControl::OPAQUE;
+            }
+
+            AutoPtr<ICharSequence> title;
+            attrs->GetTitle((ICharSequence**)&title);
+            String str;
+            title->ToString(&str);
+            mSurfaceControlBlur = NULL;
+            CSurfaceControl::New(mSession->mSurfaceSession,
+                    str + " blur", (Int32)mSurfaceW, (Int32)mSurfaceH,
+                    format, flags, (ISurfaceControl**)&mSurfaceControlBlur);
+        }
+
+        AutoPtr<ISurfaceControlHelper> helper;
+        CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&helper);
+        helper->OpenTransaction();
+        // try {
+        mSurfaceControlBlur->SetPosition(mSurfaceX, mSurfaceY);
+        mSurfaceControlBlur->SetLayerStack(mLayerStack);
+        mSurfaceControlBlur->SetLayer(mAnimLayer - BLUR_LAYER_OFFSET);
+        mSurfaceControlBlur->SetAlpha(mShownAlpha);
+        mSurfaceControlBlur->SetBlur(1.0f);
+        mSurfaceControlBlur->SetBlurMaskSurface(mSurfaceControl);
+        Int32 BLUR_MASKING_SAMPLING = 4;
+        mSurfaceControlBlur->SetBlurMaskSampling(blurScaleNeeded ? BLUR_MASKING_SAMPLING : 1);
+        Float blurMaskAlphaThreshold;
+        attrs->GetBlurMaskAlphaThreshold(&blurMaskAlphaThreshold);
+        mSurfaceControlBlur->SetBlurMaskAlphaThreshold(blurMaskAlphaThreshold);
+        // } catch (RuntimeException e) {
+        //     Slog.w(TAG, "Error creating blur surface", e);
+        // } finally {
+        //     SurfaceControl.closeTransaction();
+        // }
+        helper->CloseTransaction();
+
+        if (mSurfaceShown) {
+            mSurfaceControlBlur->Show();
+        }
+    }
 }
 
 } // Wm

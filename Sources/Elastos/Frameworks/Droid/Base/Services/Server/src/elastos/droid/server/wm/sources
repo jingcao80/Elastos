@@ -40,4 +40,4 @@ SOURCES += TaskStack.cpp
 SOURCES += Task.cpp
 SOURCES += TaskGroup.cpp
 SOURCES += CWindowId.cpp
-#SOURCES += BlurLayer.cpp
+SOURCES += BlurLayer.cpp

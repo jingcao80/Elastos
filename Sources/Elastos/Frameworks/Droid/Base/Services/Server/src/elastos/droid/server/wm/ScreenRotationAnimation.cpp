@@ -2,12 +2,15 @@
 #include "elastos/droid/server/wm/ScreenRotationAnimation.h"
 #include "elastos/droid/server/wm/CWindowManagerService.h"
 #include "elastos/droid/server/wm/DisplayContent.h"
+#include "elastos/droid/server/DisplayThread.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::View::ISurfaceControlHelper;
 using Elastos::Droid::View::CSurfaceControlHelper;
 using Elastos::Droid::View::CSurface;
@@ -18,11 +21,57 @@ using Elastos::Droid::View::Animation::IAnimationUtils;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Server::DisplayThread;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wm {
+
+//==============================================================================
+//                  ScreenRotationAnimation::H
+//==============================================================================
+
+const Int32 ScreenRotationAnimation::H::SCREENSHOT_FREEZE_TIMEOUT;
+const Int32 ScreenRotationAnimation::H::FREEZE_TIMEOUT_VAL;
+
+ScreenRotationAnimation::H::H(
+    /* [in] */ ILooper* looper,
+    /* [in] */ ScreenRotationAnimation* host)
+    : mHost(host)
+{
+    Handler::constructor(looper, NULL, TRUE /*async*/);
+}
+
+ECode ScreenRotationAnimation::H::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
+        case SCREENSHOT_FREEZE_TIMEOUT: {
+             if (mHost->mSurfaceControl != NULL && mHost->IsAnimating()) {
+                Slogger::E(ScreenRotationAnimation::TAG, "Exceeded Freeze timeout. Destroy layers");
+                mHost->Kill();
+             }
+             else if (mHost->mSurfaceControl != NULL){
+                Slogger::E(ScreenRotationAnimation::TAG, "No animation, exceeded freeze timeout. Destroy Screenshot layer");
+                mHost->mSurfaceControl->Destroy();
+                mHost->mSurfaceControl = NULL;
+             }
+             break;
+        }
+        default:
+             Slogger::E(ScreenRotationAnimation::TAG, "No Valid Message To Handle");
+        break;
+    }
+    return NOERROR;
+}
+
+
+//==============================================================================
+//                  ScreenRotationAnimation
+//==============================================================================
 
 const String ScreenRotationAnimation::TAG("ScreenRotationAnimation");
 const Boolean ScreenRotationAnimation::DEBUG_STATE;
@@ -59,6 +108,10 @@ ScreenRotationAnimation::ScreenRotationAnimation(
     , mMoreStartExit(FALSE)
     , mMoreStartFrame(FALSE)
 {
+    AutoPtr<ILooper> looper;
+    DisplayThread::Get()->GetLooper((ILooper**)&looper);
+    mHandler = new H(looper, this);
+
     CRect::New((IRect**)&mOriginalDisplayRect);
     CRect::New((IRect**)&mCurrentDisplayRect);
 
@@ -110,14 +163,33 @@ ScreenRotationAnimation::ScreenRotationAnimation(
         displayInfo->GetLogicalWidth(&originalWidth);
         displayInfo->GetLogicalHeight(&originalHeight);
     }
-    if (originalRotation == ISurface::ROTATION_90
-            || originalRotation == ISurface::ROTATION_270) {
-        mWidth = originalHeight;
-        mHeight = originalWidth;
+    // Allow for abnormal hardware orientation
+    AutoPtr<ISystemProperties> sysProp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
+    Int32 v;
+    sysProp->GetInt32(String("ro.sf.hwrotation"), 0, &v);
+    mSnapshotRotation = (4 - v / 90) % 4;
+    if (mSnapshotRotation == ISurface::ROTATION_0 || mSnapshotRotation == ISurface::ROTATION_180) {
+        if (originalRotation == ISurface::ROTATION_90
+                || originalRotation == ISurface::ROTATION_270) {
+            mWidth = originalHeight;
+            mHeight = originalWidth;
+        }
+        else {
+            mWidth = originalWidth;
+            mHeight = originalHeight;
+        }
     }
     else {
-        mWidth = originalWidth;
-        mHeight = originalHeight;
+        if (originalRotation == ISurface::ROTATION_90
+            || originalRotation == ISurface::ROTATION_270) {
+            mWidth = originalWidth;
+            mHeight = originalHeight;
+        }
+        else {
+            mWidth = originalHeight;
+            mHeight = originalWidth;
+        }
     }
 
     mOriginalRotation = originalRotation;
@@ -164,6 +236,13 @@ ScreenRotationAnimation::ScreenRotationAnimation(
     mSurfaceControl->SetAlpha(0);
     mSurfaceControl->Show();
     sur->Destroy();
+    // If screenshot layer stays for more than freeze
+    // timeout value with no updates on the screen,
+    // destroy the layer explicitly.
+    mHandler->RemoveMessages(H::SCREENSHOT_FREEZE_TIMEOUT);
+    Boolean result;
+    mHandler->SendEmptyMessageDelayed(H::SCREENSHOT_FREEZE_TIMEOUT,
+            H::FREEZE_TIMEOUT_VAL, &result);
     // } catch (OutOfResourcesException e) {
     //     Slog.w(TAG, "Unable to allocate freeze surface", e);
     // }
@@ -265,7 +344,7 @@ void ScreenRotationAnimation::SetRotationInTransaction(
     // Compute the transformation matrix that must be applied
     // to the snapshot to make it stay in the same original position
     // with the current screen rotation.
-    Int32 delta = DeltaRotation(rotation, ISurface::ROTATION_0);
+    Int32 delta = DeltaRotation(rotation, mSnapshotRotation);
     CreateRotationMatrix(delta, mWidth, mHeight, mSnapshotInitialMatrix);
 
     // if (DEBUG_STATE) Slogger::V(TAG, "**** ROTATION: " + delta);

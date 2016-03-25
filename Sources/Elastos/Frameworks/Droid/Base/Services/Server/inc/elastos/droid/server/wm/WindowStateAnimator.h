@@ -9,6 +9,7 @@ using Elastos::Droid::View::Animation::IAnimation;
 using Elastos::Droid::View::IWindowManagerPolicy;
 using Elastos::Droid::View::ISurfaceControl;
 using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::IRectF;
@@ -125,12 +126,21 @@ public:
 
     // void dump(PrintWriter pw, String prefix, boolean dumpAll);
 
+    CARAPI_(void) UpdateFullyTransparent(
+        /* [in] */ IWindowManagerLayoutParams* attrs);
+
+    CARAPI_(void) UpdateBlurWithMaskingState(
+        /* [in] */ IWindowManagerLayoutParams* attrs,
+        /* [in] */ Boolean hideForced);
+
 private:
     CARAPI_(Boolean) StepAnimation(
         /* [in] */ Int64 currentTime);
 
 public:
     static const String TAG;
+
+    static const Int32 BLUR_LAYER_OFFSET;
 
     /** This is set when there is no AutoPtr<ISurface> */
     static const Int32 NO_SURFACE = 0;
@@ -174,9 +184,16 @@ public:
     Boolean mWasAnimating;      // Were we animating going into the most recent animation step?
     Int32 mAnimLayer;
     Int32 mLastLayer;
+    Boolean mFullyTransparent; //Last value of transparency setting
 
     AutoPtr<ISurfaceControl> mSurfaceControl;
     AutoPtr<ISurfaceControl> mPendingDestroySurface;
+    Int32 mLayerStack;
+
+    AutoPtr<ISurfaceControl> mSurfaceControlBlur;
+    AutoPtr<ISurfaceControl> mPendingDestroySurfaceBlur;
+    Boolean mSurfaceBlurShown;  // last value
+    Boolean mSurfaceBlurScaleNeeded;
 
     /**
      * Set when we have changed the size of the surface, to know that

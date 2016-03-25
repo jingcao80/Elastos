@@ -171,6 +171,8 @@ private:
      * is a long initialized to Long.MIN_VALUE so that it doesn't match this value on startup. */
     Int32 mAnimTransactionSequence;
 
+    Boolean mBlurUiEnabled;
+
     friend class AnimationRunnable;
     typedef List<AutoPtr<AppWindowToken> > AppTokenList;
     typedef List<AutoPtr<WindowState> > WindowList;

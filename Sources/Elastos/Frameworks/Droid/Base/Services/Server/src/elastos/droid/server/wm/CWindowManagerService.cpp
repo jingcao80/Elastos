@@ -8,6 +8,7 @@
 #include "elastos/droid/server/wm/InputMonitor.h"
 #include "elastos/droid/server/wm/FakeWindowImpl.h"
 #include "elastos/droid/server/wm/DisplayContent.h"
+#include "elastos/droid/server/wm/StackTapPointerEventListener.h"
 #include "elastos/droid/server/Watchdog.h"
 #include "elastos/droid/server/DisplayThread.h"
 #include "elastos/droid/server/UiThread.h"
@@ -44,6 +45,7 @@ using Elastos::Droid::App::EIID_IAppOpsManagerOnOpChangedInternalListener;
 using Elastos::Droid::App::EIID_IAppOpsManagerOnOpChangedListener;
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IContentResolver;
@@ -99,6 +101,8 @@ using Elastos::Droid::Os::ISystemService;
 using Elastos::Droid::Os::CSystemService;
 using Elastos::Droid::Os::IWorkSource;
 using Elastos::Droid::Os::IStrictMode;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
 // using Elastos::Droid::Os::CTrace;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSecure;
@@ -758,6 +762,7 @@ const Int32 CWindowManagerService::TYPE_LAYER_OFFSET;
 const Int32 CWindowManagerService::WINDOW_LAYER_MULTIPLIER;
 const Int32 CWindowManagerService::LAYER_OFFSET_DIM;
 const Int32 CWindowManagerService::LAYER_OFFSET_BLUR;
+const Int32 CWindowManagerService::LAYER_OFFSET_BLUR_WITH_MASKING;
 const Int32 CWindowManagerService::LAYER_OFFSET_FOCUSED_STACK;
 const Int32 CWindowManagerService::LAYER_OFFSET_THUMBNAIL;
 const Int32 CWindowManagerService::FREEZE_LAYER;
@@ -865,12 +870,14 @@ CWindowManagerService::CWindowManagerService()
     , mInTouchMode(TRUE)
     , mCompatibleScreenScale(0)
     , mOnlyCore(FALSE)
+    , mSfHwRotation(0)
     , mKeyguardWaitingForActivityDrawn(FALSE)
     , mTransactionSequence(0)
     , mLayoutRepeatCount(0)
     , mWindowsChanged(FALSE)
     , mEventDispatchingEnabled(FALSE)
     , mInLayout(FALSE)
+    , mForceDisableHardwareKeyboard(FALSE)
 {
     mWindowMapLock = new Object();
 }
@@ -1035,6 +1042,8 @@ ECode CWindowManagerService::constructor(
 
     mAnimator = new WindowAnimator(this);
 
+    resources->GetBoolean(Elastos::Droid::R::bool_::config_forceDisableHardwareKeyboard, &mForceDisableHardwareKeyboard);
+
     AutoPtr<IWindowManagerInternal> wmInternal = new LocalService(this);
     LocalServices::AddService(EIID_IWindowManagerInternal, wmInternal);
     InitPolicy();
@@ -1052,6 +1061,13 @@ ECode CWindowManagerService::constructor(
     // } finally {
     scHelper->CloseTransaction();
     // }
+
+    // Load hardware rotation from prop
+    AutoPtr<ISystemProperties> prop;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&prop);
+    Int32 v;
+    prop->GetInt32(String("ro.sf.hwrotation"), 0, &v);
+    mSfHwRotation = v / 90;
 
     ShowCircularDisplayMaskIfNeeded();
     ShowEmulatorDisplayOverlayIfNeeded();
@@ -2426,6 +2442,18 @@ void CWindowManagerService::UpdateWallpaperOffsetLocked(
         }
         else if (changingTarget->mWallpaperDisplayOffsetY != Elastos::Core::Math::INT32_MIN_VALUE) {
             mLastWallpaperDisplayOffsetY = changingTarget->mWallpaperDisplayOffsetY;
+        }
+        if (target->mWallpaperXStep >= 0) {
+            mLastWallpaperXStep = target->mWallpaperXStep;
+        }
+        else if (changingTarget->mWallpaperXStep >= 0) {
+            mLastWallpaperXStep = changingTarget->mWallpaperXStep;
+        }
+        if (target->mWallpaperYStep >= 0) {
+            mLastWallpaperYStep = target->mWallpaperYStep;
+        }
+        else if (changingTarget->mWallpaperYStep >= 0) {
+            mLastWallpaperYStep = changingTarget->mWallpaperYStep;
         }
     }
 
@@ -4699,6 +4727,19 @@ ECode CWindowManagerService::SetFocusedApp(
         if (changed) {
             mFocusedApp = newFocus;
             mInputMonitor->SetFocusedAppLw(newFocus);
+            SetFocusedStackFrame();
+            if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> OPEN TRANSACTION setFocusedApp");
+            AutoPtr<ISurfaceControlHelper> helper;
+            CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&helper);
+            helper->OpenTransaction();
+            // try {
+            SetFocusedStackLayer();
+            // } finally {
+            //     SurfaceControl.closeTransaction();
+            //     if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> CLOSE TRANSACTION setFocusedApp");
+            // }
+            helper->CloseTransaction();
+            if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> CLOSE TRANSACTION setFocusedApp");
         }
 
         if (moveFocusNow && changed) {
@@ -5682,11 +5723,24 @@ Boolean CWindowManagerService::TmpRemoveAppWindowsLocked(
     if (windows.Begin() == windows.End()) {
         return FALSE;
     }
-
     mWindowsChanged = TRUE;
+    Int32 targetDisplayId = -1;
+    AutoPtr<IInterface> value;
+    mTaskIdToTask->Get(token->mAppWindowToken->mGroupId, (IInterface**)&value);
+    AutoPtr<Task> targetTask = (Task*)(IObject*)value.Get();
+    if (targetTask != NULL) {
+        AutoPtr<DisplayContent> targetDisplayContent = targetTask->GetDisplayContent();
+        if (targetDisplayContent != NULL) {
+            targetDisplayId = targetDisplayContent->GetDisplayId();
+        }
+    }
+
     WindowList::Iterator it = windows.Begin();
     for (; it != windows.End(); ++it) {
         AutoPtr<WindowState> win = *it;
+        if (targetDisplayId != -1 && win->GetDisplayId() != targetDisplayId) {
+            continue;
+        }
         if (DEBUG_WINDOW_MOVEMENT) Slogger::V(TAG, "Tmp removing app window %p", win.Get());
         win->GetWindowList()->Remove(win);
         List< AutoPtr<WindowState> >::ReverseIterator crit = win->mChildWindows.RBegin();
@@ -6337,9 +6391,6 @@ ECode CWindowManagerService::KeyguardGoingAway(
     return NOERROR;
 }
 
-/**
- * Get the current x offset for the wallpaper
- */
 ECode CWindowManagerService::GetLastWallpaperX(
     /* [out] */ Int32* x)
 {
@@ -6359,9 +6410,6 @@ ECode CWindowManagerService::GetLastWallpaperX(
     return NOERROR;
 }
 
-/**
- * Get the current y offset for the wallpaper
- */
 ECode CWindowManagerService::GetLastWallpaperY(
     /* [out] */ Int32* y)
 {
@@ -6387,9 +6435,6 @@ ECode CWindowManagerService::HasPermanentMenuKey(
     return mPolicy->HasPermanentMenuKey(result);
 }
 
-/**
- * Device needs a software navigation bar (because it has no hardware keys).
- */
 ECode CWindowManagerService::NeedsNavigationBar(
     /* [out] */ Boolean* result)
 {
@@ -6587,7 +6632,7 @@ ECode CWindowManagerService::UnregisterPointerEventListener(
 ECode CWindowManagerService::AddSystemUIVisibilityFlag(
     /* [in] */ Int32 flags)
 {
-    assert(0);
+    mLastStatusBarVisibility |= flags;
     return NOERROR;
 }
 
@@ -6779,7 +6824,7 @@ Boolean CWindowManagerService::CheckWaitingForWindowsLocked()
     Boolean boolValue;
     res->GetBoolean(Elastos::Droid::R::bool_::config_enableWallpaperService, &boolValue);
     Boolean wallpaperEnabled = boolValue && !mOnlyCore;
-    Boolean haveKeyguard = TRUE;
+    Boolean haveKeyguard = FALSE;
     // TODO(multidisplay): Expand to all displays?
     AutoPtr<WindowList> windows = GetDefaultWindowListLocked();
     WindowList::Iterator it = windows->Begin();
@@ -6885,6 +6930,12 @@ void CWindowManagerService::PerformEnableScreen()
     // } catch (RemoteException e) {
     // }
 
+    // start QuickBoot to check if need restore from exception
+    AutoPtr<ISystemProperties> sysProp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
+    Boolean value;
+    if (sysProp->GetBoolean(String("persist.sys.quickboot_ongoing"), FALSE, &value), value)
+        CheckQuickBootException();
     mPolicy->EnableScreenAfterBoot();
 
     // Make sure the last requested orientation has been applied.
@@ -6906,6 +6957,21 @@ Boolean CWindowManagerService::CheckBootAnimationCompleteLocked()
     }
     if (DEBUG_BOOT) Slogger::I(TAG, "checkBootAnimationComplete: Animation complete!");
     return TRUE;
+}
+
+void CWindowManagerService::CheckQuickBootException()
+{
+    AutoPtr<IIntent> intent;
+    CIntent::New(String("org.codeaurora.action.QUICKBOOT"), (IIntent**)&intent);
+    intent->PutExtra(String("mode"), 2);
+    // try {
+    AutoPtr<IUserHandleHelper> helper;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
+    AutoPtr<IUserHandle> current;
+    helper->GetCURRENT((IUserHandle**)&current);
+    mContext->StartActivityAsUser(intent, current);
+    // } catch (ActivityNotFoundException e) {
+    // }
 }
 
 void CWindowManagerService::ShowBootMessage(
@@ -7319,7 +7385,7 @@ ECode CWindowManagerService::ScreenshotApplications(
 
                 Boolean isDisplayed;
                 if (ws->mAppToken != NULL && ws->mAppToken->mToken.Get() == appToken
-                        && (ws->IsDisplayedLw(&isDisplayed), isDisplayed)) {
+                        && (ws->IsDisplayedLw(&isDisplayed), isDisplayed) && winAnim->mSurfaceShown) {
                     screenshotReady = TRUE;
                 }
             }
@@ -7373,6 +7439,12 @@ ECode CWindowManagerService::ScreenshotApplications(
             // Constrain frame to the screen size.
             frame->Intersect(0, 0, dw, dh, &result);
 
+            // use the whole frame if width and height are not constrained
+            if (width == -1 && height == -1) {
+                frame->GetWidth(&width);
+                frame->GetHeight(&height);
+            }
+
             // Tell surface flinger what part of the image to crop. Take the top
             // right part of the application, and crop the larger dimension to fit.
             AutoPtr<IRect> crop;
@@ -7396,6 +7468,8 @@ ECode CWindowManagerService::ScreenshotApplications(
             // The screenshot API does not apply the current screen rotation.
             AutoPtr<IDisplay> dis = GetDefaultDisplayContentLocked()->GetDisplay();
             dis->GetRotation(&rot);
+            // Allow for abnormal hardware orientation
+            rot = (rot + mSfHwRotation) % 4;
 
             if (rot == ISurface::ROTATION_90 || rot == ISurface::ROTATION_270) {
                 rot = (rot == ISurface::ROTATION_90) ? ISurface::ROTATION_270 : ISurface::ROTATION_90;
@@ -8535,6 +8609,7 @@ Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
         displayInfo->GetAppMetrics(mDisplayMetrics);
         mDisplayManagerInternal->SetDisplayInfoOverrideFromWindowManager(
                 displayContent->GetDisplayId(), displayInfo);
+        displayContent->mBaseDisplayRect->Set(0, 0, dw, dh);
     }
     // if (false) {
     //     Slog.i(TAG, "Set app display size: " + appWidth + " x " + appHeight);
@@ -8625,9 +8700,12 @@ Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
         }
 
         // Determine whether a hard keyboard is available and enabled.
-        Int32 keyboard;
-        config->GetKeyboard(&keyboard);
-        Boolean hardKeyboardAvailable = keyboard != IConfiguration::KEYBOARD_NOKEYS;
+        Boolean hardKeyboardAvailable = FALSE;
+        if (!mForceDisableHardwareKeyboard) {
+            Int32 keyboard;
+            config->GetKeyboard(&keyboard);
+            hardKeyboardAvailable = keyboard != IConfiguration::KEYBOARD_NOKEYS;
+        }
         if (hardKeyboardAvailable != mHardKeyboardAvailable) {
             mHardKeyboardAvailable = hardKeyboardAvailable;
             mH->RemoveMessages(H::REPORT_HARD_KEYBOARD_STATUS_CHANGE);
@@ -10387,7 +10465,7 @@ void CWindowManagerService::AssignLayersLocked(
             anyLayerChanged = TRUE;
         }
         AutoPtr<TaskStack> stack = w->GetStack();
-        if (layerChanged && stack != NULL && stack->IsDimming(winAnimator)) {
+        if (layerChanged && stack != NULL && (stack->IsDimming(winAnimator) || stack->IsBlurring(winAnimator))) {
             // Force an animation pass just to update the mDimLayer layer.
             ScheduleAnimationLocked();
         }
@@ -10598,7 +10676,7 @@ void CWindowManagerService::PerformLayoutLockedInner(
         if (!gone || !win->mHaveFrame || win->mLayoutNeeded
                 || ((win->IsConfigChanged() || win->SetInsetsChanged()) &&
                         ((win->mAttrs->GetPrivateFlags(&privateFlags), (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0) ||
-                        (win->mAppToken != NULL && win->mAppToken->mLayoutConfigChanges)))
+                        (win->mHasSurface && (win->mAppToken != NULL && win->mAppToken->mLayoutConfigChanges))))
                 || (win->mAttrs->GetType(&type), type == IWindowManagerLayoutParams::TYPE_UNIVERSE_BACKGROUND)) {
             if (!win->mLayoutAttached) {
                 if (initial) {
@@ -11316,6 +11394,44 @@ void CWindowManagerService::HandleFlagDimBehind(
     }
 }
 
+void CWindowManagerService::HandlePrivateFlagFullyTransparent(
+    /* [in] */ WindowState* w)
+{
+    AutoPtr<IWindowManagerLayoutParams> attrs = w->mAttrs;
+    w->mWinAnimator->UpdateFullyTransparent(attrs);
+}
+
+void CWindowManagerService::HandleFlagBlurBehind(
+    /* [in] */ WindowState* w)
+{
+    AutoPtr<IWindowManagerLayoutParams> attrs = w->mAttrs;
+    Int32 flags;
+    Boolean isDisplayed;
+    if ((attrs->GetFlags(&flags), (flags & IWindowManagerLayoutParams::FLAG_BLUR_BEHIND) != 0)
+            && (w->IsDisplayedLw(&isDisplayed), isDisplayed)
+            && !w->mExiting) {
+        AutoPtr<WindowStateAnimator> winAnimator = w->mWinAnimator;
+        AutoPtr<TaskStack> stack = w->GetStack();
+        if (stack == NULL) {
+            return;
+        }
+        stack->SetBlurringTag();
+        if (!stack->IsBlurring(winAnimator)) {
+            if (localLOGV) Slogger::V(TAG, "Win %s start blurring", TO_CSTR(w));
+            stack->StartBlurringIfNeeded(winAnimator);
+        }
+    }
+}
+
+void CWindowManagerService::HandlePrivateFlagBlurWithMasking(
+    /* [in] */ WindowState* w)
+{
+    AutoPtr<IWindowManagerLayoutParams> attrs = w->mAttrs;
+    Boolean isDisplayed;
+    Boolean hideForced = (w->IsDisplayedLw(&isDisplayed), !isDisplayed) || w->mExiting;
+    w->mWinAnimator->UpdateBlurWithMaskingState(attrs, hideForced);
+}
+
 void CWindowManagerService::UpdateAllDrawnLocked(
     /* [in] */ DisplayContent* displayContent)
 {
@@ -11520,6 +11636,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         mInnerFields->mObscured = FALSE;
         mInnerFields->mSyswin = FALSE;
         displayContent->ResetDimming();
+        displayContent->ResetBlurring();
 
         // Only used if default window
         Boolean someoneLosingFocus = !mLosingFocus.IsEmpty();
@@ -11548,6 +11665,13 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
             if (stack != NULL && !stack->TestDimmingTag()) {
                 HandleFlagDimBehind(w);
             }
+
+            HandlePrivateFlagFullyTransparent(w);
+
+            if (stack != NULL && !stack->TestBlurringTag()) {
+                HandleFlagBlurBehind(w);
+            }
+            HandlePrivateFlagBlurWithMasking(w);
 
             Boolean isVisible;
             if (isDefaultDisplay && obscuredChanged && (mWallpaperTarget == w)
@@ -11695,6 +11819,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
                 TRUE /* inTraversal, must call performTraversalInTrans... below */);
 
         GetDisplayContentLocked(displayId)->StopDimmingIfNeeded();
+        GetDisplayContentLocked(displayId)->StopBlurringIfNeeded();
 
         if (updateAllDrawn) {
             UpdateAllDrawnLocked(displayContent);

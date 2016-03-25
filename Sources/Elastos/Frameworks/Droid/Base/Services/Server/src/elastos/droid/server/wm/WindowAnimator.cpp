@@ -8,8 +8,10 @@
 #include "elastos/droid/os/Handler.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include "elastos/droid/R.h"
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::View::ISurfaceControlHelper;
 using Elastos::Droid::View::CSurfaceControlHelper;
@@ -62,9 +64,14 @@ WindowAnimator::WindowAnimator(
     , mKeyguardGoingAwayToNotificationShade(FALSE)
     , mKeyguardGoingAwayDisableWindowAnimations(FALSE)
     , mForceHiding(KEYGUARD_NOT_SHOWN)
+    , mAnimTransactionSequence(0)
+    , mBlurUiEnabled(FALSE)
 {
     mContext = service->mContext;
     mPolicy = service->mPolicy;
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    res->GetBoolean(Elastos::Droid::R::bool_::config_ui_blur_enabled, &mBlurUiEnabled);
     mAnimationRunnable = new AnimationRunnable(this);
 }
 
@@ -220,7 +227,7 @@ void WindowAnimator::UpdateWindowsLocked(
                     // Create a new animation to delay until keyguard is gone on its own.
                     winAnimator->mAnimation = NULL;
                     CAlphaAnimation::New(1.0f, 1.0f, (IAlphaAnimation**)&(winAnimator->mAnimation));
-                    winAnimator->mAnimation->SetDuration(KEYGUARD_ANIM_TIMEOUT_MS);
+                    winAnimator->mAnimation->SetDuration(mBlurUiEnabled ? 0 : KEYGUARD_ANIM_TIMEOUT_MS);
                     winAnimator->mAnimationIsEntrance = FALSE;
                 }
             }
@@ -293,16 +300,21 @@ void WindowAnimator::UpdateWindowsLocked(
                     mKeyguardGoingAway = FALSE;
                 }
                 if (win->IsReadyForDisplay()) {
-                    if (nowAnimating) {
-                        if (winAnimator->mAnimationIsEntrance) {
-                            mForceHiding = KEYGUARD_ANIMATING_IN;
-                        }
-                        else {
-                            mForceHiding = KEYGUARD_ANIMATING_OUT;
-                        }
+                    if (mBlurUiEnabled) {
+                        mForceHiding = KEYGUARD_NOT_SHOWN;
                     }
                     else {
-                        mForceHiding = win->IsDrawnLw() ? KEYGUARD_SHOWN : KEYGUARD_NOT_SHOWN;
+                        if (nowAnimating) {
+                            if (winAnimator->mAnimationIsEntrance) {
+                                mForceHiding = KEYGUARD_ANIMATING_IN;
+                            }
+                            else {
+                                mForceHiding = KEYGUARD_ANIMATING_OUT;
+                            }
+                        }
+                        else {
+                            mForceHiding = win->IsDrawnLw() ? KEYGUARD_SHOWN : KEYGUARD_NOT_SHOWN;
+                        }
                     }
                 }
                 // if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
@@ -423,7 +435,8 @@ void WindowAnimator::UpdateWindowsLocked(
         if (!wallpaperInUnForceHiding && wallpaper != NULL
                 && !mKeyguardGoingAwayDisableWindowAnimations) {
             AutoPtr<IAnimation> a;
-            mPolicy->CreateForceHideWallpaperExitAnimation(mKeyguardGoingAwayToNotificationShade, mKeyguardGoingAwayShowingMedia, (IAnimation**)&a);
+            mPolicy->CreateForceHideWallpaperExitAnimation(mKeyguardGoingAwayToNotificationShade,
+                    mKeyguardGoingAwayShowingMedia, (IAnimation**)&a);
             if (a != NULL) {
                 AutoPtr<WindowStateAnimator> animator = wallpaper->mWinAnimator;
                 animator->SetAnimation(a);
@@ -632,6 +645,7 @@ void WindowAnimator::AnimateLocked()
         }
 
         mAnimating |= mService->GetDisplayContentLocked(displayId)->AnimateDimLayers();
+        mAnimating |= mService->GetDisplayContentLocked(displayId)->AnimateBlurLayers();
 
         //TODO (multidisplay): Magnification is supported only for the default display.
         if (mService->mAccessibilityController != NULL
