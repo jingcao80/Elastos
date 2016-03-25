@@ -1,0 +1,112 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+    importlib("Elastos.CoreLibrary.eco");
+
+    merge("../../../../../car/elastos/apps/calculator/calculator2/calculatorEditText.car");
+    merge("../../../../../car/elastos/apps/calculator/calculator2/calculatorExpressionEvaluator.car");
+    merge("../../../../../car/elastos/apps/calculator/calculator2/calculator.car");
+    merge("../../../../../car/elastos/apps/calculator/calculator2/calculatorExpressionBuilder.car");
+    merge("../../../../../car/elastos/apps/calculator/calculator2/calculatorExpressionTokenizer.car");
+    merge("../../../../../car/elastos/apps/calculator/calculator2/calculatorPadLayout.car");
+    merge("../../../../../car/elastos/apps/calculator/calculator2/calculatorPadViewPager.car");
+
+
+    interface Elastos.Apps.Calculator.Calculator2.ICalculator;
+    interface Elastos.Apps.Calculator.Calculator2.ICalculatorEditText;
+    interface Elastos.Apps.Calculator.Calculator2.IEvaluateCallback;
+    interface Elastos.Apps.Calculator.Calculator2.IOnTextSizeChangeListener;
+    interface Elastos.Apps.Calculator.Calculator2.ICalculatorExpressionTokenizer;
+    interface Elastos.Apps.Calculator.Calculator2.ICalculatorExpressionEvaluator;
+    interface Elastos.Apps.Calculator.Calculator2.ICalculatorPadLayout;
+
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Utility.IAttributeSet;
+    using interface Elastos.Droid.View.IViewOnLongClickListener;
+    using interface Elastos.Droid.Widget.ITextView;
+
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Calculator {
+    namespace Calculator2 {
+
+    class CCalculator
+    {
+        interface IOnTextSizeChangeListener;
+        interface IEvaluateCallback;
+        interface IViewOnLongClickListener;
+        interface ICalculator;
+    }
+
+    class CCalculatorEditText
+    {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface ICalculatorEditText;
+    }
+
+    class CCalculatorExpressionBuilder
+    {
+        constructor(
+            [in] ICharSequence* text,
+            [in] ICalculatorExpressionTokenizer* tokenizer,
+            [in] Boolean isEdited);
+
+        interface ICalculatorExpressionBuilder;
+    }
+
+    class CCalculatorExpressionEvaluator
+    {
+        constructor(
+            [in] ICalculatorExpressionTokenizer* tokenizer);
+
+        interface ICalculatorExpressionEvaluator;
+    }
+
+    class CCalculatorExpressionTokenizer
+    {
+        constructor(
+            [in] IContext* context);
+
+        interface ICalculatorExpressionTokenizer;
+    }
+
+    [deprecated]
+    class CCalculatorPadLayout
+    {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface ICalculatorPadLayout;
+    }
+
+//    class CCalculatorPadViewPager
+//    {}
+
+    } // namespace Calculator2
+    } // namespace Calculator
+    } // namespace Apps
+    } // namespace Elastos
+
+}

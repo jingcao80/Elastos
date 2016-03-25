@@ -1,0 +1,43 @@
+module
+{
+    using interface Elastos.Droid.Widget.ITextView;
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Calculator {
+    namespace Calculator2 {
+
+    [local]
+    interface IOnTextSizeChangeListener
+    {
+        OnTextSizeChanged(
+            [in] ITextView* textView,
+            [in] Float oldSize);
+    }
+
+    /**
+     * @Involve
+     * interface IEditText;
+     * interface ITextView;
+     * interface IOnPreDrawListener;
+     * interface IView;
+     * interface IDrawableCallback;
+     * interface IKeyEventCallback;
+     * interface IAccessibilityEventSource;
+     */
+    [local]
+    interface ICalculatorEditText
+    {
+        SetOnTextSizeChangeListener(
+            [in] IOnTextSizeChangeListener* listener);
+
+        GetVariableTextSize(
+            [in] String text,
+            [out] Float* result);
+    }
+
+    } // namespace Calculator2
+    } // namespace Calculator
+    } // namespace Apps
+    } // namespace Elastos
+}

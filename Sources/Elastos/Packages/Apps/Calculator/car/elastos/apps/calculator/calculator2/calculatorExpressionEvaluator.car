@@ -1,0 +1,34 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Calculator {
+    namespace Calculator2 {
+
+    interface IEvaluateCallback
+    {
+        OnEvaluate(
+            [in] String expr,
+            [in] String result,
+            [in] Int32 errorResourceId);
+    }
+
+    interface ICalculatorExpressionEvaluator
+    {
+        Evaluate(
+            [in] ICharSequence* expr,
+            [in] IEvaluateCallback* cbk);
+
+        Evaluate(
+            [in] String expr,
+            [in] IEvaluateCallback* cbk);
+    }
+
+    } // namespace Calculator2
+    } // namespace Calculator
+    } // namespace Apps
+    } // namespace Elastos
+
+}

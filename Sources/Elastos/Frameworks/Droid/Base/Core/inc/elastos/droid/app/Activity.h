@@ -77,7 +77,7 @@ class ECO_PUBLIC Activity
     , public IOnWindowDismissedCallback
 {
 private:
-    class FragmentContainerLocal
+    class ECO_LOCAL FragmentContainerLocal
         : public Object
         , public IFragmentContainer
     {
@@ -3618,7 +3618,7 @@ public:
         /* [in] */ IBundle* args);
 
 private:
-    class ManagedDialog
+    class ECO_LOCAL ManagedDialog
         : public Object
     {
     public:
@@ -3626,7 +3626,7 @@ private:
         AutoPtr<IBundle> mArgs;
     };
 
-    class ManagedCursor
+    class ECO_LOCAL ManagedCursor
         : public Object
     {
     friend class Activity;
@@ -3646,14 +3646,14 @@ private:
     };
 
 private:
-    CARAPI InitializeTheme();
+    ECO_LOCAL CARAPI InitializeTheme();
 
     /**
      * Restore the state of any saved managed dialogs.
      *
      * @param savedInstanceState The bundle to restore from.
      */
-    CARAPI RestoreManagedDialogs(
+    ECO_LOCAL CARAPI RestoreManagedDialogs(
         /* [in] */ IBundle* savedInstanceState);
 
     /**
@@ -3664,15 +3664,15 @@ private:
     CARAPI SaveManagedDialogs(
         /* [in] */ IBundle* outState);
 
-    static CARAPI_(String) SavedDialogKeyFor(
+    ECO_LOCAL static CARAPI_(String) SavedDialogKeyFor(
         /* [in] */ Int32 key);
 
-    static CARAPI_(String) SavedDialogArgsKeyFor(
+    ECO_LOCAL static CARAPI_(String) SavedDialogArgsKeyFor(
         /* [in] */ Int32 key);
 
-    CARAPI InitWindowDecorActionBar();
+    ECO_LOCAL CARAPI InitWindowDecorActionBar();
 
-    CARAPI StartIntentSenderForResultInner(
+    ECO_LOCAL CARAPI StartIntentSenderForResultInner(
         /* [in] */ IIntentSender* intent,
         /* [in] */ Int32 requestCode,
         /* [in] */ IIntent* fillInIntent,
@@ -3681,15 +3681,15 @@ private:
         /* [in] */ IActivity* activity,
         /* [in] */ IBundle* options);
 
-    CARAPI EnsureSearchManager();
+    ECO_LOCAL CARAPI EnsureSearchManager();
 
-    CARAPI DumpInner(
+    ECO_LOCAL CARAPI DumpInner(
         /* [in] */ const String& prefix,
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IPrintWriter* writer,
         /* [in] */ ArrayOf<String>* args);
 
-    CARAPI DumpViewHierarchy(
+    ECO_LOCAL CARAPI DumpViewHierarchy(
         /* [in] */ const String& prefix,
         /* [in] */ IPrintWriter* writer,
         /* [in] */ IView* view);
@@ -3698,7 +3698,7 @@ private:
      * Finishes the current activity and specifies whether to remove the task associated with this
      * activity.
      */
-    CARAPI Finish(
+    ECO_LOCAL CARAPI Finish(
         /* [in] */ Boolean finishTask);
 
 
@@ -3709,7 +3709,7 @@ private:
      *
      * @return true if this is the topmost, non-finishing activity in its task.
      */
-    CARAPI IsTopOfTask(
+    ECO_LOCAL CARAPI IsTopOfTask(
         /* [out] */ Boolean* top);
 
 public:
@@ -3772,13 +3772,13 @@ protected:
 //protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
 
 private:
-    static const Boolean DEBUG_LIFECYCLE;
+    ECO_LOCAL static const Boolean DEBUG_LIFECYCLE;
 
-    static const String WINDOW_HIERARCHY_TAG;
-    static const String SAVED_DIALOG_IDS_KEY;
-    static const String SAVED_DIALOGS_TAG;
-    static const String SAVED_DIALOG_KEY_PREFIX;
-    static const String SAVED_DIALOG_ARGS_KEY_PREFIX;
+    ECO_LOCAL static const String WINDOW_HIERARCHY_TAG;
+    ECO_LOCAL static const String SAVED_DIALOG_IDS_KEY;
+    ECO_LOCAL static const String SAVED_DIALOGS_TAG;
+    ECO_LOCAL static const String SAVED_DIALOG_KEY_PREFIX;
+    ECO_LOCAL static const String SAVED_DIALOG_ARGS_KEY_PREFIX;
 
     HashMap<Int32, AutoPtr<ManagedDialog> > mManagedDialogs;
     typedef HashMap<Int32, AutoPtr<ManagedDialog> >::Iterator ManagedDialogHashMapIter;

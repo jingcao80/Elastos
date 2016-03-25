@@ -2337,7 +2337,7 @@ public:
         /* [in] */ IBundle* arguments,
         /* [out] */ Boolean* res);
 
-public: /* override */
+    /* override */
 
     virtual CARAPI SetEnabled(
         /* [in] */ Boolean enabled);
@@ -2493,7 +2493,7 @@ public: /* override */
     virtual CARAPI GetAccessibilitySelectionEnd(
         /* [out] */ Int32* res);
 
-public: /*package*/
+    /*package*/
 
     /**
      * @return the Layout that is currently being used to display the hint text.
@@ -2839,32 +2839,32 @@ protected:
         /* [in] */ Int32 defStyleRes);
 
 private:
-    CARAPI_(void) SetTypefaceFromAttrs(
+    ECO_LOCAL CARAPI_(void) SetTypefaceFromAttrs(
         /* [in] */ const String& familyName,
         /* [in] */ Int32 typefaceIndex,
         /* [in] */ Int32 styleIndex);
 
-    CARAPI_(void) SetRelativeDrawablesIfNeeded(
+    ECO_LOCAL CARAPI_(void) SetRelativeDrawablesIfNeeded(
         /* [in] */ IDrawable* start,
         /* [in] */ IDrawable* end);
 
-    CARAPI_(void) SetKeyListenerOnly(
+    ECO_LOCAL CARAPI_(void) SetKeyListenerOnly(
         /* [in] */ IKeyListener* input);
 
-    CARAPI_(void) FixFocusableAndClickableSettings();
+    ECO_LOCAL CARAPI_(void) FixFocusableAndClickableSettings();
 
-    CARAPI_(void) SetRawTextSize(
+    ECO_LOCAL CARAPI_(void) SetRawTextSize(
         /* [in] */ Float size);
 
-    CARAPI_(void) UpdateTextColors();
+    ECO_LOCAL CARAPI_(void) UpdateTextColors();
 
-    CARAPI SetText(
+    ECO_LOCAL CARAPI SetText(
         /* [in] */ ICharSequence* text,
         /* [in] */ BufferType type,
         /* [in] */ Boolean notifyBefore,
         /* [in] */ Int32 oldlen);
 
-    static CARAPI_(Boolean) IsMultilineInputType(
+    ECO_LOCAL static CARAPI_(Boolean) IsMultilineInputType(
         /* [in] */ Int32 type);
 
     /**
@@ -2882,39 +2882,39 @@ private:
      *
      * @return true if the current transformation method is of the password type.
      */
-    CARAPI_(Boolean) HasPasswordTransformationMethod();
+    ECO_LOCAL CARAPI_(Boolean) HasPasswordTransformationMethod();
 
-    CARAPI_(Boolean) IsPasswordInputType(
+    ECO_LOCAL CARAPI_(Boolean) IsPasswordInputType(
         /* [in] */ Int32 inputType);
 
-    static CARAPI_(Boolean) IsVisiblePasswordInputType(
+    ECO_LOCAL static CARAPI_(Boolean) IsVisiblePasswordInputType(
         /* [in] */ Int32 inputType);
 
-    CARAPI_(void) SetInputType(
+    ECO_LOCAL CARAPI_(void) SetInputType(
         /* [in] */ Int32 type,
         /* [in] */ Boolean direct);
 
-    CARAPI_(void) RestartMarqueeIfNeeded();
+    ECO_LOCAL CARAPI_(void) RestartMarqueeIfNeeded();
 
     /**
      * Sets the list of input filters on the specified Editable,
      * and includes mInput in the list if it is an InputFilter.
      */
-    CARAPI SetFilters(
+    ECO_LOCAL CARAPI SetFilters(
         /* [in] */ IEditable* e,
         /* [in] */ ArrayOf<Elastos::Droid::Text::IInputFilter*>* filters);
 
-    CARAPI_(Int32) GetBottomVerticalOffset(
+    ECO_LOCAL CARAPI_(Int32) GetBottomVerticalOffset(
         /* [in] */ Boolean forceNormal);
 
-    CARAPI_(void) InvalidateCursor(
+    ECO_LOCAL CARAPI_(void) InvalidateCursor(
         /* [in] */ Int32 a,
         /* [in] */ Int32 b,
         /* [in] */ Int32 c);
 
-    CARAPI_(void) RegisterForPreDraw();
+    ECO_LOCAL CARAPI_(void) RegisterForPreDraw();
 
-    CARAPI_(AutoPtr<IPath>) GetUpdatedHighlightPath();
+    ECO_LOCAL CARAPI_(AutoPtr<IPath>) GetUpdatedHighlightPath();
 
     /**
      * Returns true if pressing ENTER in this field advances focus instead
@@ -2922,30 +2922,30 @@ private:
      * but also in mail addresses and subjects which will display on multiple
      * lines but where it doesn't make sense to insert newlines.
      */
-    CARAPI_(Boolean) ShouldAdvanceFocusOnEnter();
+    ECO_LOCAL CARAPI_(Boolean) ShouldAdvanceFocusOnEnter();
 
     /**
      * Returns true if pressing TAB in this field advances focus instead
      * of inserting the character.  Insert tabs only in multi-line editors.
      */
-    CARAPI_(Boolean) ShouldAdvanceFocusOnTab();
+    ECO_LOCAL CARAPI_(Boolean) ShouldAdvanceFocusOnTab();
 
-    CARAPI_(Int32) DoKeyDown(
+    ECO_LOCAL CARAPI_(Int32) DoKeyDown(
         /* [in] */ Int32 keyCode,
         /* [in] */ IKeyEvent* event,
         /* [in] */ IKeyEvent* otherEvent);
 
-    CARAPI_(void) NullLayouts();
+    ECO_LOCAL CARAPI_(void) NullLayouts();
 
     /**
      * Make a new Layout based on the already-measured size of the view,
      * on the assumption that it was measured correctly at some point.
      */
-    CARAPI_(void) AssumeLayout();
+    ECO_LOCAL CARAPI_(void) AssumeLayout();
 
-    CARAPI_(LayoutAlignment) GetLayoutAlignment();
+    ECO_LOCAL CARAPI_(LayoutAlignment) GetLayoutAlignment();
 
-    CARAPI_(AutoPtr<ILayout>) MakeSingleLayout(
+    ECO_LOCAL CARAPI_(AutoPtr<ILayout>) MakeSingleLayout(
         /* [in] */ Int32 wantWidth,
         /* [in] */ IBoringLayoutMetrics* boring,
         /* [in] */ Int32 ellipsisWidth,
@@ -2954,15 +2954,15 @@ private:
         /* [in] */ TextUtilsTruncateAt effectiveEllipsize,
         /* [in] */ Boolean useSaved);
 
-    CARAPI_(Boolean) CompressText(
+    ECO_LOCAL CARAPI_(Boolean) CompressText(
         /* [in] */ Float width);
 
-    static CARAPI_(Int32) Desired(
+    ECO_LOCAL static CARAPI_(Int32) Desired(
         /* [in] */ ILayout* layout);
 
-    CARAPI_(Int32) GetDesiredHeight();
+    ECO_LOCAL CARAPI_(Int32) GetDesiredHeight();
 
-    CARAPI_(Int32) GetDesiredHeight(
+    ECO_LOCAL CARAPI_(Int32) GetDesiredHeight(
         /* [in] */ ILayout* layout,
         /* [in] */ Boolean cap);
 
@@ -2970,94 +2970,94 @@ private:
      * Check whether a change to the existing text layout requires a
      * new view layout.
      */
-    CARAPI_(void) CheckForResize();
+    ECO_LOCAL CARAPI_(void) CheckForResize();
 
     /**
      * Check whether entirely new text requires a new view layout
      * or merely a new text layout.
      */
-    CARAPI_(void) CheckForRelayout();
+    ECO_LOCAL CARAPI_(void) CheckForRelayout();
 
-    CARAPI_(Boolean) IsShowingHint();
+    ECO_LOCAL CARAPI_(Boolean) IsShowingHint();
 
     /**
      * Returns true if anything changed.
      */
-    CARAPI_(Boolean) BringTextIntoView();
+    ECO_LOCAL CARAPI_(Boolean) BringTextIntoView();
 
-    CARAPI_(void) GetInterestingRect(
+    ECO_LOCAL CARAPI_(void) GetInterestingRect(
         /* [in] */ IRect* r,
         /* [in] */ Int32 line);
 
-    CARAPI_(void) ConvertFromViewportToContentCoordinates(
+    ECO_LOCAL CARAPI_(void) ConvertFromViewportToContentCoordinates(
         /* [in] */ IRect* r);
 
     /**
      * Adds or remove the EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE on the mInputType.
      * @param singleLine
      */
-    CARAPI_(void) SetInputTypeSingleLine(
+    ECO_LOCAL CARAPI_(void) SetInputTypeSingleLine(
         /* [in] */ Boolean singleLine);
 
-    CARAPI ApplySingleLine(
+    ECO_LOCAL CARAPI ApplySingleLine(
         /* [in] */ Boolean singleLine,
         /* [in] */ Boolean applyTransformation,
         /* [in] */ Boolean changeMaxLines);
 
-    CARAPI_(Boolean) CanMarquee();
+    ECO_LOCAL CARAPI_(Boolean) CanMarquee();
 
-    CARAPI_(void) StartMarquee();
+    ECO_LOCAL CARAPI_(void) StartMarquee();
 
-    CARAPI_(void) StopMarquee();
+    ECO_LOCAL CARAPI_(void) StopMarquee();
 
-    CARAPI_(void) StartStopMarquee(
+    ECO_LOCAL CARAPI_(void) StartStopMarquee(
         /* [in] */ Boolean start);
 
-    CARAPI_(void) SendBeforeTextChanged(
+    ECO_LOCAL CARAPI_(void) SendBeforeTextChanged(
         /* [in] */ ICharSequence* text,
         /* [in] */ Int32 start,
         /* [in] */ Int32 before,
         /* [in] */ Int32 after);
 
     // Removes all spans that are inside or actually overlap the start..end range
-    CARAPI_(void) RemoveIntersectingNonAdjacentSpans(
+    ECO_LOCAL CARAPI_(void) RemoveIntersectingNonAdjacentSpans(
         /* [in] */ Int32 start,
         /* [in] */ Int32 end,
         /* [in] */ const InterfaceID& type);
 
-    CARAPI_(Boolean) CanSelectText();
+    ECO_LOCAL CARAPI_(Boolean) CanSelectText();
 
-    CARAPI_(void) UpdateTextServicesLocaleAsync();
+    ECO_LOCAL CARAPI_(void) UpdateTextServicesLocaleAsync();
 
-    CARAPI_(void) UpdateTextServicesLocaleLocked();
+    ECO_LOCAL CARAPI_(void) UpdateTextServicesLocaleLocked();
 
     /**
      * @return true if the user has explicitly allowed accessibility services
      * to speak passwords.
      */
-    CARAPI_(Boolean) ShouldSpeakPasswordsForAccessibility();
+    ECO_LOCAL CARAPI_(Boolean) ShouldSpeakPasswordsForAccessibility();
 
-    CARAPI_(void) Paste(
+    ECO_LOCAL CARAPI_(void) Paste(
         /* [in] */ Int32 min,
         /* [in] */ Int32 max);
 
-    CARAPI_(void) SetPrimaryClip(
+    ECO_LOCAL CARAPI_(void) SetPrimaryClip(
         /* [in] */ IClipData* clip);
 
-    CARAPI_(Int32) GetOffsetAtCoordinate(
+    ECO_LOCAL CARAPI_(Int32) GetOffsetAtCoordinate(
         /* [in] */ Int32 line,
         /* [in] */ Float x);
 
-    CARAPI_(void) CreateEditorIfNeeded();
+    ECO_LOCAL CARAPI_(void) CreateEditorIfNeeded();
 
-    CARAPI_(void) InitFields();
+    ECO_LOCAL CARAPI_(void) InitFields();
 
-    CARAPI_(Int32) GetBoxHeight(
+    ECO_LOCAL CARAPI_(Int32) GetBoxHeight(
         /* [in] */ ILayout* l);
 
-    CARAPI_(void) UnregisterForPreDraw();
+    ECO_LOCAL CARAPI_(void) UnregisterForPreDraw();
 
-    CARAPI_(AutoPtr<ILocale>) GetTextServicesLocale(
+    ECO_LOCAL CARAPI_(AutoPtr<ILocale>) GetTextServicesLocale(
         /* [in] */ Boolean allowNullLocale);
 
 public:
@@ -3094,54 +3094,54 @@ private:
 
     // Enum for the "typeface" XML parameter.
     // TODO: How can we get this from the XML instead of hardcoding it here?
-    static const Int32 SANS = 1;
-    static const Int32 SERIF = 2;
-    static const Int32 MONOSPACE = 3;
+    ECO_LOCAL static const Int32 SANS = 1;
+    ECO_LOCAL static const Int32 SERIF = 2;
+    ECO_LOCAL static const Int32 MONOSPACE = 3;
 
     // Bitfield for the "numeric" XML parameter.
     // TODO: How can we get this from the XML instead of hardcoding it here?
-    static const Int32 SIGNED = 2;
-    static const Int32 DECIMAL = 4;
+    ECO_LOCAL static const Int32 SIGNED = 2;
+    ECO_LOCAL static const Int32 DECIMAL = 4;
 
     /**
      * Draw marquee text with fading edges as usual
      */
-    static const Int32 MARQUEE_FADE_NORMAL = 0;
+    ECO_LOCAL static const Int32 MARQUEE_FADE_NORMAL = 0;
 
     /**
      * Draw marquee text as ellipsize end while inactive instead of with the fade.
      * (Useful for devices where the fade can be expensive if overdone)
      */
-    static const Int32 MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS = 1;
+    ECO_LOCAL static const Int32 MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS = 1;
 
     /**
      * Draw marquee text with fading edges because it is currently active/animating.
      */
-    static const Int32 MARQUEE_FADE_SWITCH_SHOW_FADE = 2;
+    ECO_LOCAL static const Int32 MARQUEE_FADE_SWITCH_SHOW_FADE = 2;
 
-    static const Int32 LINES = 1;
-    static const Int32 EMS = 1;
-    static const Int32 PIXELS = 2;
+    ECO_LOCAL static const Int32 LINES = 1;
+    ECO_LOCAL static const Int32 EMS = 1;
+    ECO_LOCAL static const Int32 PIXELS = 2;
 
-    static const AutoPtr<IRectF> TEMP_RECTF;// = new RectF();
-    static Object sTempRectLock;
+    ECO_LOCAL static const AutoPtr<IRectF> TEMP_RECTF;// = new RectF();
+    ECO_LOCAL static Object sTempRectLock;
 
     // XXX should be much larger
-    static const Int32 VERY_WIDE = 1024*1024;
-    static const Int32 ANIMATED_SCROLL_GAP = 250;
+    ECO_LOCAL static const Int32 VERY_WIDE = 1024*1024;
+    ECO_LOCAL static const Int32 ANIMATED_SCROLL_GAP = 250;
 
-    static AutoPtr<ArrayOf<Elastos::Droid::Text::IInputFilter*> > NO_FILTERS;// = new InputFilter[0];
-    static AutoPtr<ISpanned> EMPTY_SPANNED;// = new SpannedString("");
+    ECO_LOCAL static AutoPtr<ArrayOf<Elastos::Droid::Text::IInputFilter*> > NO_FILTERS;// = new InputFilter[0];
+    ECO_LOCAL static AutoPtr<ISpanned> EMPTY_SPANNED;// = new SpannedString("");
 
-    static const Int32 CHANGE_WATCHER_PRIORITY = 100;
+    ECO_LOCAL static const Int32 CHANGE_WATCHER_PRIORITY = 100;
 
     // New state used to change background based on whether this TextView is multiline.
-    static AutoPtr<ArrayOf<Int32> > MULTILINE_STATE_SET;// = { R.attr.state_multiline };
+    ECO_LOCAL static AutoPtr<ArrayOf<Int32> > MULTILINE_STATE_SET;// = { R.attr.state_multiline };
 
     // System wide time for last cut or copy action.
-    static Int64 LAST_CUT_OR_COPY_TIME;
+    ECO_LOCAL static Int64 LAST_CUT_OR_COPY_TIME;
 
-    static AutoPtr<IBoringLayoutMetrics> UNKNOWN_BORING;
+    ECO_LOCAL static AutoPtr<IBoringLayoutMetrics> UNKNOWN_BORING;
 
     AutoPtr<IColorStateList> mTextColor;
     AutoPtr<IColorStateList> mHintTextColor;

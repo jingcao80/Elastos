@@ -57,6 +57,7 @@ EXPORT_HEADERS += elastos/utility/etl/etl_heap.h
 EXPORT_HEADERS += elastos/utility/etl/etl_queue.h
 EXPORT_HEADERS += elastos/utility/etl/etl_blockingqueue.h
 EXPORT_HEADERS += elastos/utility/etl/HashMap.h
+EXPORT_HEADERS += elastos/utility/LinkedHashMap.h
 EXPORT_HEADERS += elastos/utility/etl/HashSet.h
 EXPORT_HEADERS += elastos/utility/etl/HashTable.h
 EXPORT_HEADERS += elastos/utility/etl/List.h

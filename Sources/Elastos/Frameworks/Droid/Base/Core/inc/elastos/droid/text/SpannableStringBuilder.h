@@ -17,7 +17,7 @@ namespace Text {
 /**
  * This is the class for text whose content and markup can both be changed.
  */
-class SpannableStringBuilder
+class ECO_PUBLIC SpannableStringBuilder
     : public Object
     , public ISpannableStringBuilder
     , public ICharSequence
@@ -55,8 +55,6 @@ public:
         /* [in] */ ICharSequence* text,
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
-
-public:
 
     static AutoPtr<ISpannableStringBuilder> ValueOf(
         /* [in] */ ICharSequence* source);
@@ -350,20 +348,20 @@ protected:
         /* [in] */ IInterface* rhs);
 
 private:
-    CARAPI ResizeFor(
+    ECO_LOCAL CARAPI ResizeFor(
         /* [in] */ Int32 size);
 
-    CARAPI_(void) MoveGapTo(
+    ECO_LOCAL CARAPI_(void) MoveGapTo(
         /* [in] */ Int32 where);
 
-    CARAPI Change(
+    ECO_LOCAL CARAPI Change(
         /* [in] */ Int32 start,
         /* [in] */ Int32 end,
         /* [in] */ ICharSequence* cs,
         /* [in] */ Int32 csStart,
         /* [in] */ Int32 csEnd);
 
-    CARAPI_(Int32) UpdatedIntervalBound(
+    ECO_LOCAL CARAPI_(Int32) UpdatedIntervalBound(
         /* [in] */ Int32 offset,
         /* [in] */ Int32 start,
         /* [in] */ Int32 nbNewChars,
@@ -371,74 +369,74 @@ private:
         /* [in] */ Boolean atEnd,
         /* [in] */ Boolean textIsRemoved);
 
-    CARAPI_(void) RemoveSpan(
+    ECO_LOCAL CARAPI_(void) RemoveSpan(
         /* [in] */ Int32 i);
 
-    static CARAPI_(Boolean) HasNonExclusiveExclusiveSpanAt(
+    ECO_LOCAL static CARAPI_(Boolean) HasNonExclusiveExclusiveSpanAt(
         /* [in] */ ICharSequence* text,
         /* [in] */ Int32 offset);
 
-    CARAPI_(void) SendToSpanWatchers(
+    ECO_LOCAL CARAPI_(void) SendToSpanWatchers(
         /* [in] */ Int32 replaceStart,
         /* [in] */ Int32 replaceEnd,
         /* [in] */ Int32 nbNewChars);
 
-    CARAPI_(void) SendBeforeTextChanged(
+    ECO_LOCAL CARAPI_(void) SendBeforeTextChanged(
         /* [in] */ ArrayOf<ITextWatcher*>* watchers,
         /* [in] */ Int32 start,
         /* [in] */ Int32 before,
         /* [in] */ Int32 after);
 
-    CARAPI_(void) SendTextChanged(
+    ECO_LOCAL CARAPI_(void) SendTextChanged(
         /* [in] */ ArrayOf<ITextWatcher*>* watchers,
         /* [in] */ Int32 start,
         /* [in] */ Int32 before,
         /* [in] */ Int32 after);
 
-    CARAPI_(void) SendAfterTextChanged(
+    ECO_LOCAL CARAPI_(void) SendAfterTextChanged(
         /* [in] */ ArrayOf<ITextWatcher*>* watchers);
 
-    CARAPI_(void) SendSpanAdded(
+    ECO_LOCAL CARAPI_(void) SendSpanAdded(
         /* [in] */ IInterface* what,
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
-    CARAPI_(void) SendSpanRemoved(
+    ECO_LOCAL CARAPI_(void) SendSpanRemoved(
         /* [in] */ IInterface* what,
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
-    CARAPI_(void) SendSpanChanged(
+    ECO_LOCAL CARAPI_(void) SendSpanChanged(
         /* [in] */ IInterface* what,
         /* [in] */ Int32 oldStart,
         /* [in] */ Int32 oldEnd,
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
-    static CARAPI_(String) Region(
+    ECO_LOCAL static CARAPI_(String) Region(
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
-    CARAPI CheckRange(
+    ECO_LOCAL CARAPI CheckRange(
         /* [in] */ const String& operation,
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
-    CARAPI SetSpan(
+    ECO_LOCAL CARAPI SetSpan(
         /* [in] */ Boolean send,
         /* [in] */ IInterface* what,
         /* [in] */ Int32 start,
         /* [in] */ Int32 end,
         /* [in] */ Int32 flags);
 
-    CARAPI CheckRange(
+    ECO_LOCAL CARAPI CheckRange(
         /* [in] */ ICharSequence* tb,
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
 private:
 
-    static AutoPtr< ArrayOf<IInputFilter*> > NO_FILTERS;
+    ECO_LOCAL static AutoPtr< ArrayOf<IInputFilter*> > NO_FILTERS;
     AutoPtr< ArrayOf<IInputFilter*> > mFilters;
 
     AutoPtr< ArrayOf<Char32> > mText;
@@ -453,22 +451,22 @@ private:
     Int32 mSpanCountBeforeAdd;
 
     // TODO These value are tightly related to the public SPAN_MARK/POINT values in {@link Spanned}
-    static const Int32 MARK = 1;
-    static const Int32 POINT = 2;
-    static const Int32 PARAGRAPH = 3;
+    ECO_LOCAL static const Int32 MARK = 1;
+    ECO_LOCAL static const Int32 POINT = 2;
+    ECO_LOCAL static const Int32 PARAGRAPH = 3;
 
-    static const Int32 START_MASK = 0xF0;
-    static const Int32 END_MASK = 0x0F;
-    static const Int32 START_SHIFT = 4;
+    ECO_LOCAL static const Int32 START_MASK = 0xF0;
+    ECO_LOCAL static const Int32 END_MASK = 0x0F;
+    ECO_LOCAL static const Int32 START_SHIFT = 4;
 
     // These bits are not (currently) used by SPANNED flags
-    static const Int32 SPAN_START_AT_START = 0x1000;
-    static const Int32 SPAN_START_AT_END = 0x2000;
-    static const Int32 SPAN_END_AT_START = 0x4000;
-    static const Int32 SPAN_END_AT_END = 0x8000;
-    static const Int32 SPAN_START_END_MASK = 0xF000;
+    ECO_LOCAL static const Int32 SPAN_START_AT_START = 0x1000;
+    ECO_LOCAL static const Int32 SPAN_START_AT_END = 0x2000;
+    ECO_LOCAL static const Int32 SPAN_END_AT_START = 0x4000;
+    ECO_LOCAL static const Int32 SPAN_END_AT_END = 0x8000;
+    ECO_LOCAL static const Int32 SPAN_START_END_MASK = 0xF000;
 
-    static AutoPtr<ICharSequence> EMPTY_CS;
+    ECO_LOCAL static AutoPtr<ICharSequence> EMPTY_CS;
 };
 
 } // namespace Text

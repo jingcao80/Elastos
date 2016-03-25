@@ -1,0 +1,46 @@
+module
+{
+    using interface Elastos.Droid.View.IView;
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Calculator {
+    namespace Calculator2 {
+
+    /**
+     * @Involve
+     * interface IActivity;
+     * interface IOnTextSizeChangeListener;
+     * interface ILayoutInflaterFactory2;
+     * interface IWindowCallback;
+     * interface IKeyEventCallback;
+     * interface IViewOnCreateContextMenuListener;
+     * interface IComponentCallbacks;
+     * interface IComponentCallbacks2;
+     * interface IOnWindowDismissedCallback;
+     * interface IContextThemeWrapper;
+     * interface IContextWrapper;
+     * interface IContext;
+     */
+    [local]
+    interface ICalculator
+    {
+        /**
+        * Constant for an invalid resource id.
+        */
+        const Int32 INVALID_RES_ID = -1;
+
+        OnButtonClick(
+            [in] IView* iview);
+    }
+
+    enum CalculatorState {
+        INPUT, EVALUATE, RESULT, ERROR
+    }
+
+    } // namespace Calculator2
+    } // namespace Calculator
+    } // namespace Apps
+    } // namespace Elastos
+
+}

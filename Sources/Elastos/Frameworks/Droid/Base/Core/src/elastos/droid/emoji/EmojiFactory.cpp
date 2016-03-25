@@ -384,18 +384,23 @@ ECode  EmojiFactory::constructor(
     return NOERROR;
 }
 
-#if 0
-vold EmojiFactory::CustomLinkedHashMap::CustomLinkedHashMap()
+EmojiFactory::CustomLinkedHashMap::CustomLinkedHashMap(
+    /* [in] */ EmojiFactory* host)
+    : mHost(host)
 {
-    mHashMap = new HashMap<Int32, AutoPre<IBitmap> >();
-    //this.HashMap(16, 0.75f);
+    LinkedHashMap::constructor(16, 0.75, TRUE);
 }
 
-Boolean EmojiFactory::CustomLinkedHashMap::removeEldestEntry(Int32 eldest)
+EmojiFactory::CustomLinkedHashMap::~CustomLinkedHashMap()
+{}
+
+Boolean EmojiFactory::CustomLinkedHashMap::RemoveEldestEntry(
+    /* [in] */ IMapEntry* eldest)
 {
-    return mHashMap->GetSize() > sCacheSize;
+    Int32 size;
+    GetSize(&size);
+    return size > mHost->sCacheSize;
 }
-#endif
 
 Int32 EmojiFactory::NativeGetMinimumAndroidPua(
     /* [in] */ Int64 nativeEmojiFactory)

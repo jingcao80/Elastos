@@ -30,7 +30,7 @@ namespace Widget {
  * {@link android.R.styleable#TextView TextView Attributes},
  * {@link android.R.styleable#View View Attributes}
  */
-class EditText
+class ECO_PUBLIC EditText
     : public TextView
     , public IEditText
 {
@@ -105,7 +105,7 @@ protected:
     CARAPI_(AutoPtr<IMovementMethod>) GetDefaultMovementMethod();
 
 private:
-    const static String EDITTEXT_NAME;
+    ECO_LOCAL const static String EDITTEXT_NAME;
 };
 
 } // namespace Widget

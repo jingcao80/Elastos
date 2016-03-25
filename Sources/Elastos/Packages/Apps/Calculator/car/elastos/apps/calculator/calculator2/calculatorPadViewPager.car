@@ -1,0 +1,15 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Calculator {
+    namespace Calculator2 {
+
+    interface ICalculatorPadViewPager
+    {}
+
+    } // namespace Calculator2
+    } // namespace Calculator
+    } // namespace Apps
+    } // namespace Elastos
+}

@@ -1,0 +1,25 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Calculator {
+    namespace Calculator2 {
+
+    /**
+     * @Involve
+     * interface IViewGroup
+     * interface IViewParent
+     * interface IViewManager
+     * interface IView
+     * interface IDrawableCallback
+     * interface IKeyEventCallback
+     * interface IAccessibilityEventSource
+     */
+    interface ICalculatorPadLayout
+    {}
+
+    } // namespace Calculator2
+    } // namespace Calculator
+    } // namespace Apps
+    } // namespace Elastos
+}

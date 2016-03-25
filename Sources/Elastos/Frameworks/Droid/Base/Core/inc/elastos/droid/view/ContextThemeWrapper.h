@@ -67,7 +67,7 @@ protected:
         /* [in] */ Boolean first);
 
 private:
-    CARAPI InitializeTheme();
+    ECO_LOCAL CARAPI InitializeTheme();
 
 private:
     Int32 mThemeResource;

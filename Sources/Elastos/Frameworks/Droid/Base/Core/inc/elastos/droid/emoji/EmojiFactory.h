@@ -5,14 +5,17 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/core/Object.h"
 #include "elastos/droid/graphics/CBitmap.h"
+#include "elastos/utility/LinkedHashMap.h"
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/Map.h>
 #include "_Elastos_Droid_Emoji_CEmojiFactory.h"
 
 using Elastos::Droid::Emoji::IEmojiFactory;
 using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Utility::IHashMap;
 using Elastos::Utility::CHashMap;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::LinkedHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -28,6 +31,24 @@ class EmojiFactory
     : public Object
     , public IEmojiFactory
 {
+private:
+    class CustomLinkedHashMap
+        : public LinkedHashMap
+    {
+    public:
+        CustomLinkedHashMap(
+            /* [in] */ EmojiFactory* host);
+
+        virtual ~CustomLinkedHashMap();
+
+    protected:
+        CARAPI_(Boolean) RemoveEldestEntry(
+            /* [in] */ IMapEntry* eldest);
+
+    private:
+        EmojiFactory* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL();
 
@@ -240,20 +261,6 @@ private:
       virtual const char *GetImageBinaryFromAndroidPua(int pua, int *size) = 0;
     */
     static char *GetImageBinaryFromAndroidPua(Int32 pua, Int32 *size);
-
-#if 0
-    class CustomLinkedHashMap
-    {
-        public:
-            CustomLinkedHashMap();
-
-            virtual ~CustomLinkedHashMap();
-        protected:
-            Boolean removeEldestEntry(IMap *eldest);
-        private:
-            AutoPtr<HashMap<Int32, AutoPtr<IBitmap> > > mHashMap;
-    };
-#endif
 };
 
 } // namespace Emoji
