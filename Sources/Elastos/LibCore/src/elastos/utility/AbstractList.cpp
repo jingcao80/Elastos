@@ -855,7 +855,7 @@ ECode AbstractList::GetSubList(
     GetSize(&size);
     if (start >= 0 && end <= size) {
         if (start <= end) {
-            if (this) {
+            if (IRandomAccess::Probe(this)) {
                 AutoPtr<SubAbstractListRandomAccess> sublistrandom = new SubAbstractListRandomAccess(this, start, end);
                 *list = IList::Probe(sublistrandom);
                 REFCOUNT_ADD(*list);

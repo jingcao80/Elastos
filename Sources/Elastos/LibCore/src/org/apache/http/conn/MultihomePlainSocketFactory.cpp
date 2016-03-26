@@ -193,7 +193,7 @@ ECode MultihomePlainSocketFactory::GetHashCode(
 {
     VALIDATE_NOT_NULL(hashCode)
     ClassID clsid;
-    (this)->GetClassID(&clsid);
+    GetClassID(&clsid);
     *hashCode = clsid.mClsid.mData1;
     return NOERROR;
 }

@@ -42,10 +42,11 @@ using Elastos::IO::ICloseable;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::CByteArrayOutputStream;
 using Elastos::IO::IByteArrayOutputStream;
-using Elastos::Core::StringUtils;
 using Elastos::Core::CSystem;
-using Elastos::Core::ISystem;
+using Elastos::Core::EIID_IComparator;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::ISystem;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Providers {
@@ -56,16 +57,14 @@ namespace Media {
 //                      MediaThumbRequest::MediaThumbRequestComparator
 //================================================================================
 
-MediaThumbRequest::MediaThumbRequestComparator::MediaThumbRequestComparator(
-    /* [in] */ IMediaThumbRequest* r1,
-    /* [in] */ IMediaThumbRequest* r2)
-    : mR1(r1)
-    , mR2(r2)
+MediaThumbRequest::MediaThumbRequestComparator::MediaThumbRequestComparator()
 {
 }
 
 MediaThumbRequest::MediaThumbRequestComparator::~MediaThumbRequestComparator()
 {}
+
+CAR_INTERFACE_IMPL(MediaThumbRequest::MediaThumbRequestComparator, Object, IComparator);
 
 ECode MediaThumbRequest::MediaThumbRequestComparator::Compare(
     /* [in] */ IInterface* _r1,
@@ -389,6 +388,16 @@ ECode MediaThumbRequest::GetCallingPid(
 {
     VALIDATE_NOT_NULL(time);
     *result = Binder::GetCallingPid();
+    return NOERROR;
+}
+
+ECode MediaThumbRequest::GetComparator(
+    /* [out] */ IComparator** result)
+{
+    VALIDATE_NOT_NULL(result);
+    AutoPtr<MediaThumbRequestComparator> trc = new MediaThumbRequestComparator();
+    *result = IComparator::Probe(trc);
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 

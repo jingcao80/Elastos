@@ -208,7 +208,7 @@ ECode CRuleBasedCollatorICU::Equals(
     *value = FALSE;
     VALIDATE_NOT_NULL(object);
 
-    AutoPtr<IInterface> res = (PInterface) TO_IINTERFACE(this);
+    AutoPtr<IInterface> res = TO_IINTERFACE(this);
     if (object == res) {
         *value = TRUE;
         return NOERROR;

@@ -114,7 +114,7 @@ extern void TokenInit();
 extern PVOID SaveTokenContext();
 extern void RestoreTokenContext(PVOID);
 
-const int c_nMaxTokenSize = 255;
+const int c_nMaxTokenSize = 511;
 const int c_nMaxTextSize = 0x8000;
 
 extern int g_nLineNumber;

@@ -29,9 +29,7 @@ private:
         , public IComparator
     {
     public:
-        MediaThumbRequestComparator(
-            /* [in] */ IMediaThumbRequest* r1,
-            /* [in] */ IMediaThumbRequest* r2);
+        MediaThumbRequestComparator();
 
         ~MediaThumbRequestComparator();
 
@@ -41,10 +39,6 @@ private:
             /* [in] */ IInterface* _r1,
             /* [in] */ IInterface* _r2,
             /* [out] */ Int32* result);
-
-    private:
-        AutoPtr<IMediaThumbRequest> mR1;
-        AutoPtr<IMediaThumbRequest> mR2;
     };
 
 public:
@@ -75,6 +69,10 @@ public:
 
     CARAPI GetCallingPid(
         /* [out] */ Int32* result);
+
+protected:
+    static CARAPI GetComparator(
+        /* [out] */ IComparator** result);
 
 public:
     AutoPtr<IContentResolver> mCr;

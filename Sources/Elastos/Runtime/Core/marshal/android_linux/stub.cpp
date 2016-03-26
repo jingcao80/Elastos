@@ -793,7 +793,10 @@ ECode CObjectStub::S_CreateObject(
         tempObj = object->Probe(pInterfaceInfo->mIID);
         if (!tempObj) {
             MARSHAL_DBGOUT(MSHDBG_ERROR,
-                    ALOGE("Create stub: no such interface.\n"));
+                    ALOGE("Create stub: no such interface:\n"));
+            MARSHAL_DBGOUT(MSHDBG_ERROR, DUMP_GUID(iid));
+            MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(" in class:\n"));
+            MARSHAL_DBGOUT(MSHDBG_ERROR, DUMP_CLSID(clsid));
             ec = E_NO_INTERFACE;
             object->Release();
             goto ErrorExit;

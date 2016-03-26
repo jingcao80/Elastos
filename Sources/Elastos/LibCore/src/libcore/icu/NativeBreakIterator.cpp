@@ -73,7 +73,7 @@ ECode NativeBreakIterator::Equals(
     VALIDATE_NOT_NULL(object)
     VALIDATE_NOT_NULL(value)
 
-    if (object == (IInterface*)TO_IINTERFACE(this)) {
+    if (object == TO_IINTERFACE(this)) {
         *value = TRUE;
         return NOERROR;
     }

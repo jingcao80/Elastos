@@ -2,7 +2,7 @@
 #define _ELASTOS_PROVIDERS_MEDIAPROVIDER_MEDIA_CRINGTONEPICKERACTIVITY_H__
 
 #include "_Elastos_Providers_MediaProvider_Media_CRingtonePickerActivity.h"
-#include "RingtonePickerActivity.h"
+#include "elastos/providers/mediaprovider/media/RingtonePickerActivity.h"
 
 namespace Elastos {
 namespace Providers {

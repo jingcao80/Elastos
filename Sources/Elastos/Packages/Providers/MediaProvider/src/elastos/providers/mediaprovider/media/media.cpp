@@ -7,6 +7,8 @@
 #include "elastos/providers/mediaprovider/media/CMtpService.h"
 #include "elastos/providers/mediaprovider/media/CRingtonePickerActivity.h"
 #include "elastos/providers/mediaprovider/media/CMediaThumbRequest.h"
+#include "elastos/providers/mediaprovider/media/CIMtpService.h"
+#include "elastos/providers/mediaprovider/media/CIMediaScannerService.h"
 
 namespace Elastos {
 namespace Providers {
@@ -22,6 +24,8 @@ CAR_OBJECT_IMPL(CMtpReceiver)
 CAR_OBJECT_IMPL(CMtpService)
 CAR_OBJECT_IMPL(CRingtonePickerActivity)
 CAR_OBJECT_IMPL(CMediaThumbRequest)
+CAR_OBJECT_IMPL(CIMtpService)
+CAR_OBJECT_IMPL(CIMediaScannerService)
 
 } // namespace Media
 } // namespace MediaProvider

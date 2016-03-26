@@ -201,7 +201,7 @@ ECode InetAddress::GetCanonicalHostName(
 
     AutoPtr<IInetAddress> addr;
     if(SUCCEEDED(GetHostByAddrImpl(this, (IInetAddress**)&addr))) {
-        InetAddress* inetAddress = (InetAddress*)this;
+        InetAddress* inetAddress = this;
         *canonicalName = inetAddress->mHostname;
     }
     else{

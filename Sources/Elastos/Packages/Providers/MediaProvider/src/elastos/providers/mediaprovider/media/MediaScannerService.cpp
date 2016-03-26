@@ -39,6 +39,7 @@ using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::Storage::IStorageManager;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Provider::CMediaStore;
 using Elastos::Droid::Provider::IMediaStore;
 using Elastos::Utility::Arrays;
@@ -60,6 +61,16 @@ const String MediaScannerService::TAG(String("MediaScannerService"));
 AutoPtr<ArrayOf<String> > MediaScannerService::mExternalStoragePaths;
 
 CAR_INTERFACE_IMPL_2(MediaScannerService, Service, IMediaScannerService, IRunnable)
+
+MediaScannerService::MediaScannerService()
+{
+    AutoPtr<MyMediaScannerService> ms = new MyMediaScannerService();
+    ms->constructor(IMediaScannerService::Probe(this));
+    mBinder = IIMediaScannerService::Probe(ms);
+}
+
+MediaScannerService::~MediaScannerService()
+{}
 
 void MediaScannerService::OpenDatabase(
     /* [in] */ const String& volumeName)
@@ -302,12 +313,20 @@ ECode MediaScannerService::OnBind(
 //---------------------------------------------------
 //      MediaScannerService::MyMediaScannerService
 //---------------------------------------------------
-MediaScannerService::MyMediaScannerService::MyMediaScannerService(
-    /* [in] */ MediaScannerService* owner)
-    : mOwner(owner)
+MediaScannerService::MyMediaScannerService::MyMediaScannerService()
 {}
 
-CAR_INTERFACE_IMPL(MediaScannerService::MyMediaScannerService, Object, IIMediaScannerService)
+MediaScannerService::MyMediaScannerService::~MyMediaScannerService()
+{}
+
+ECode MediaScannerService::MyMediaScannerService::constructor(
+    /* [in] */ IMediaScannerService* owner)
+{
+    mOwner = (MediaScannerService*)owner;
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL_2(MediaScannerService::MyMediaScannerService, Object, IIMediaScannerService, IBinder)
 
 ECode MediaScannerService::MyMediaScannerService::RequestScanFile(
     /* [in] */ const String& path,
@@ -322,8 +341,7 @@ ECode MediaScannerService::MyMediaScannerService::RequestScanFile(
     args->PutString(String("filepath"), path);
     args->PutString(String("mimetype"), mimeType);
     if (listener != NULL) {
-        AutoPtr<IInterface> obj = TO_IINTERFACE(listener);
-        AutoPtr<IBinder> bdListener = IBinder::Probe(obj);
+        AutoPtr<IBinder> bdListener = IBinder::Probe(listener);
         args->PutIBinder(String("listener"), bdListener.Get());
     }
     AutoPtr<IIntent> intent;
@@ -338,6 +356,13 @@ ECode MediaScannerService::MyMediaScannerService::ScanFile(
     /* [in] */ const String& mimeType)
 {
     return RequestScanFile(path, mimeType, NULL);
+}
+
+ECode MediaScannerService::MyMediaScannerService::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    return NOERROR;
 }
 
 //---------------------------------------------------

@@ -2,6 +2,7 @@
 #define _ELASTOS_PROVIDERS_MEDIAPROVIDER_MTPSERVICE_H__
 
 #include "_Elastos.Providers.MediaProvider.Media.h"
+#include "Elastos.Droid.Os.h"
 #include <elastos/droid/app/Service.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/droid/content/BroadcastReceiver.h>
@@ -12,9 +13,11 @@ using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IPendingResult;
 using Elastos::Droid::Mtp::IMtpDatabase;
 using Elastos::Droid::Mtp::IMtpServer;
 using Elastos::Droid::Mtp::IMtpStorage;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::Storage::IStorageEventListener;
 using Elastos::Droid::Os::Storage::IStorageManager;
@@ -33,7 +36,64 @@ class MtpService
     : public Service
     , public IMtpService
 {
+public:
+    class MyIMtpService
+        : public Object
+        , public IIMtpService
+        , public IBinder
+    {
+        friend class MtpService;
+
+    public:
+        MyIMtpService();
+
+        virtual ~MyIMtpService();
+
+        CARAPI constructor(
+            /* [in] */ IMtpService* owner);
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI SendObjectAdded(
+            /* [in] */ Int32 objectHandle);
+
+        CARAPI SendObjectRemoved(
+            /* [in] */ Int32 objectHandle);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    private:
+        MtpService* mOwner;
+    };
+
 private:
+    class MyStorageEventListener
+        : public Object
+        , public IStorageEventListener
+    {
+        friend class MtpService;
+
+    public:
+        MyStorageEventListener(
+            /* [in] */ MtpService* owner);
+
+        virtual ~MyStorageEventListener();
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI OnStorageStateChanged(
+            /* [in] */ const String& path,
+            /* [in] */ const String& oldState,
+            /* [in] */ const String& newState);
+
+        CARAPI OnUsbMassStorageConnectionChanged(
+            /* [in] */ Boolean connected);
+
+    private:
+        MtpService* mOwner;
+    };
+
     class MyRunnable
         : public Runnable
     {
@@ -59,8 +119,6 @@ private:
     public:
         MyBroadcastReceiver(
             /* [in] */ MtpService* owner);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
@@ -119,17 +177,16 @@ private:
     AutoPtr<IStorageEventListener> mStorageEventListener;
 
     AutoPtr<IMtpDatabase> mDatabase;
-    AutoPtr<IMtpServer> mServer;
+    static AutoPtr<IMtpServer> mServer;
     AutoPtr<IStorageManager> mStorageManager;
     /** Flag indicating if MTP is disabled due to keyguard */
     Boolean mMtpDisabled;
     Boolean mPtpMode;
-    HashMap<String, AutoPtr<IStorageVolume> > mVolumeMap /*= new HashMap<String, StorageVolume>()*/;
-    HashMap<String, AutoPtr<IMtpStorage> > mStorageMap /*= new HashMap<String, MtpStorage>()*/;
+    static HashMap<String, AutoPtr<IStorageVolume> > mVolumeMap;
+    static HashMap<String, AutoPtr<IMtpStorage> > mStorageMap;
     AutoPtr<ArrayOf<IStorageVolume*> > mVolumes;
 
-    // assert(0 && "TODO");
-    AutoPtr<IIMtpService> mBinder;
+    static AutoPtr<IIMtpService> mBinder;
 };
 
 } // namespace Media

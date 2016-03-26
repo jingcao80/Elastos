@@ -14,7 +14,7 @@
 #include "elastos/droid/R.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/droid/app/Activity.h>
-// #include <elastos/droid/widget/AbsListView.h>
+#include <elastos/droid/widget/AbsListView.h>
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::CActivity;
@@ -22,11 +22,13 @@ using Elastos::Droid::App::IActivity;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IContextWrapper;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Internal::App::CAlertControllerAlertParams;
 using Elastos::Droid::Internal::App::EIID_IAlertControllerAlertParamsOnPrepareListViewListener;
+using Elastos::Droid::Internal::App::IAlertActivity;
 using Elastos::Droid::Internal::App::IAlertControllerAlertParams;
 using Elastos::Droid::Internal::App::IAlertControllerAlertParamsOnPrepareListViewListener;
 using Elastos::Droid::Media::CRingtoneManagerHelper;
@@ -36,10 +38,11 @@ using Elastos::Droid::Media::IRingtoneManagerHelper;
 using Elastos::Droid::Provider::CSettingsSystem;
 using Elastos::Droid::Provider::IMediaStoreMediaColumns;
 using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::View::IContextThemeWrapper;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IViewGroup;
-// using Elastos::Droid::Widget::AbsListView;
+using Elastos::Droid::Widget::AbsListView;
 using Elastos::Droid::Widget::IAbsListView;
 using Elastos::Droid::Widget::CListView;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemSelectedListener;
@@ -56,6 +59,11 @@ namespace Media {
 //------------------------------------------------------------
 //  RingtonePickerActivity::MyDialogInterfaceOnClickListener
 //------------------------------------------------------------
+RingtonePickerActivity::MyDialogInterfaceOnClickListener::MyDialogInterfaceOnClickListener(
+    /* [in] */ RingtonePickerActivity* owner)
+    : mOwner(owner)
+{}
+
 CAR_INTERFACE_IMPL(RingtonePickerActivity::MyDialogInterfaceOnClickListener, Object, IDialogInterfaceOnClickListener)
 
 ECode RingtonePickerActivity::MyDialogInterfaceOnClickListener::OnClick(
@@ -102,12 +110,16 @@ RingtonePickerActivity::RingtonePickerActivity()
     , mHasSilentItem(FALSE)
     , mStaticItemCount(0)
     , mHasDefaultItem(FALSE)
-{}
+{
+    AutoPtr<MyDialogInterfaceOnClickListener> dic = new MyDialogInterfaceOnClickListener(this);
+    mRingtoneClickListener = IDialogInterfaceOnClickListener::Probe(dic);
+}
 
 RingtonePickerActivity::~RingtonePickerActivity()
 {}
 
-CAR_INTERFACE_IMPL_5(RingtonePickerActivity, AlertActivity, IAdapterViewOnItemSelectedListener, IRunnable, IDialogInterfaceOnClickListener, IAlertControllerAlertParamsOnPrepareListViewListener, IRingtonePickerActivity)
+CAR_INTERFACE_IMPL_5(RingtonePickerActivity,
+        AlertActivity, IAdapterViewOnItemSelectedListener, IRunnable, IDialogInterfaceOnClickListener, IAlertControllerAlertParamsOnPrepareListViewListener, IRingtonePickerActivity);
 
 ECode RingtonePickerActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
@@ -170,12 +182,10 @@ ECode RingtonePickerActivity::OnCreate(
     p->SetIsSingleChoice(TRUE);
     p->SetOnItemSelectedListener(this);
     String tmp;
-    assert(0 && "TODO/R.cpp");
-    // GetString(R::string::ok, &tmp);
+    GetString(Elastos::Droid::R::string::ok, &tmp);
     p->SetPositiveButtonText(StringUtils::ParseCharSequence(tmp).Get());
     p->SetPositiveButtonListener(this);
-    assert(0 && "TODO/R.cpp");
-    // GetString(R::string::cancel, &tmp);
+    GetString(Elastos::Droid::R::string::cancel, &tmp);
     p->SetNegativeButtonText(StringUtils::ParseCharSequence(tmp).Get());
     p->SetPositiveButtonListener(this);
     p->SetOnPrepareListViewListener(this);
@@ -185,8 +195,7 @@ ECode RingtonePickerActivity::OnCreate(
     cs = NULL;
     p->GetTitle((ICharSequence**)&cs);
     if (cs == NULL) {
-        assert(0 && "TODO/R.cpp");
-        // GetString(R::string::ringtone_picker_title, &tmp);
+        GetString(Elastos::Droid::R::string::ringtone_picker_title, &tmp);
         p->SetTitle(StringUtils::ParseCharSequence(tmp).Get());
     }
 
@@ -240,14 +249,12 @@ Int32 RingtonePickerActivity::AddStaticItem(
     AutoPtr<ILayoutInflater> lf;
     GetLayoutInflater((ILayoutInflater**)&lf);
     AutoPtr<IView> view;
-    assert(0 && "TODO/R.cpp");
-    // lf->Inflate(R::layout::select_dialog_singlechoice_material, IViewGroup::Probe(listView), FALSE, (IView**)&view);
+    lf->Inflate(Elastos::Droid::R::layout::select_dialog_singlechoice_material, IViewGroup::Probe(listView), FALSE, (IView**)&view);
     AutoPtr<ITextView> textView = ITextView::Probe(view);
     textView->SetText(textResId);
     listView->AddHeaderView(IView::Probe(textView));
     mStaticItemCount++;
-    assert(0 && "TODO");
-    // return ((AbsListView*)(IAbsListView::Probe(listView)))->GetHeaderViewsCount() - 1;
+    return ((AbsListView*)(IAbsListView::Probe(listView)))->GetHeaderViewsCount() - 1;
 }
 
 Int32 RingtonePickerActivity::AddDefaultRingtoneItem(
@@ -265,8 +272,7 @@ Int32 RingtonePickerActivity::AddDefaultRingtoneItem(
 Int32 RingtonePickerActivity::AddSilentItem(
     /* [in] */ IListView* listView)
 {
-    assert(0 && "TODO/R.cpp");
-    // return AddStaticItem(listView, R::string::ringtone_silent);
+    return AddStaticItem(listView, Elastos::Droid::R::string::ringtone_silent);
 }
 
 ECode RingtonePickerActivity::OnClick(

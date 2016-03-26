@@ -32,11 +32,11 @@ using Elastos::Droid::Mtp::CMtpDatabase;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::Storage::CStorageManager;
 using Elastos::Droid::Os::Storage::CStorageManagerHelper;
+using Elastos::Droid::Os::Storage::EIID_IStorageEventListener;
 using Elastos::Droid::Os::Storage::IStorageManager;
 using Elastos::Droid::Os::Storage::IStorageManagerHelper;
-using Elastos::Droid::Os::Storage::CStorageManager;
-// using Elastos::Providers::MediaProvider::Media::MediaProvider;
 using Elastos::Providers::MediaProvider::Media::EIID_IMtpService;
 using Elastos::IO::IFile;
 using Elastos::Utility::Logging::Slogger;
@@ -62,6 +62,52 @@ static AutoPtr<ArrayOf<String> > initPTP_DIRECTORIES()
 }
 
 const AutoPtr<ArrayOf<String> > MtpService::PTP_DIRECTORIES = initPTP_DIRECTORIES();
+AutoPtr<IMtpServer> MtpService::mServer;
+HashMap<String, AutoPtr<IStorageVolume> > MtpService::mVolumeMap;
+HashMap<String, AutoPtr<IMtpStorage> > MtpService::mStorageMap;
+AutoPtr<IIMtpService> MtpService::mBinder;
+
+//---------------------------------------------
+//          MtpService::MyStorageEventListener
+//---------------------------------------------
+MtpService::MyStorageEventListener::MyStorageEventListener(
+    /* [in] */ MtpService* owner)
+    : mOwner(owner)
+{}
+
+MtpService::MyStorageEventListener::~MyStorageEventListener()
+{}
+
+CAR_INTERFACE_IMPL(MtpService::MyStorageEventListener, Object, IStorageEventListener)
+
+ECode MtpService::MyStorageEventListener::OnStorageStateChanged(
+    /* [in] */ const String& path,
+    /* [in] */ const String& oldState,
+    /* [in] */ const String& newState)
+{
+    synchronized (mBinder) {
+        Slogger::D(TAG, "onStorageStateChanged %s %s -> %s", path.string(), oldState.string(), newState.string());
+        if (IEnvironment::MEDIA_MOUNTED.Equals(newState)) {
+            mOwner->VolumeMountedLocked(path);
+        } else if (IEnvironment::MEDIA_MOUNTED.Equals(oldState)) {
+            HashMap<String, AutoPtr<IStorageVolume> >::Iterator it = mVolumeMap.Find(path);
+            AutoPtr<IStorageVolume> volume;
+            if (it != mVolumeMap.End()) {
+                volume = it->mSecond;
+                mVolumeMap.Erase(it);
+            }
+            if (volume != NULL) {
+                mOwner->RemoveStorageLocked(volume.Get());
+            }
+        }
+    }
+}
+
+ECode MtpService::MyStorageEventListener::OnUsbMassStorageConnectionChanged(
+    /* [in] */ Boolean connected)
+{
+    return NOERROR;
+}
 
 //---------------------------------------------
 //          MtpService::MyRunnable
@@ -92,8 +138,6 @@ MtpService::MyBroadcastReceiver::MyBroadcastReceiver(
     : mOwner(owner)
 {}
 
-CAR_INTERFACE_IMPL(MtpService::MyBroadcastReceiver, BroadcastReceiver, IBroadcastReceiver)
-
 ECode MtpService::MyBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
@@ -115,12 +159,65 @@ ECode MtpService::MyBroadcastReceiver::OnReceive(
 }
 
 //---------------------------------------------
+//          MtpService::MyIMtpService
+//---------------------------------------------
+MtpService::MyIMtpService::MyIMtpService()
+{}
+
+MtpService::MyIMtpService::~MyIMtpService()
+{}
+
+ECode MtpService::MyIMtpService::constructor(
+    /* [in] */ IMtpService* owner)
+{
+    mOwner = (MtpService*)owner;
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL_2(MtpService::MyIMtpService, Object, IIMtpService, IBinder)
+
+ECode MtpService::MyIMtpService::SendObjectAdded(
+    /* [in] */ Int32 objectHandle)
+{
+    synchronized(mBinder) {
+        if (mServer != NULL) {
+            return mOwner->mServer->SendObjectAdded(objectHandle);
+        }
+    }
+}
+
+ECode MtpService::MyIMtpService::SendObjectRemoved(
+    /* [in] */ Int32 objectHandle)
+{
+    synchronized(mBinder) {
+        if (mServer != NULL) {
+            return mServer->SendObjectRemoved(objectHandle);
+        }
+    }
+
+}
+
+ECode MtpService::MyIMtpService::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    return NOERROR;
+}
+
+//---------------------------------------------
 //          MtpService
 //---------------------------------------------
 MtpService::MtpService()
 {
+    AutoPtr<MyBroadcastReceiver> br = new MyBroadcastReceiver(this);
+    mReceiver = IBroadcastReceiver::Probe(br);
+    AutoPtr<MyStorageEventListener> sel = new MyStorageEventListener(this);
+    mStorageEventListener = IStorageEventListener::Probe(sel);
     mVolumeMap = HashMap<String, AutoPtr<IStorageVolume> >();
     mStorageMap = HashMap<String, AutoPtr<IMtpStorage> >();
+    AutoPtr<MyIMtpService> is = new MyIMtpService();
+    is->constructor(IMtpService::Probe(this));
+    mBinder = IIMtpService::Probe(is);
 }
 
 MtpService::~MtpService()

@@ -66,7 +66,7 @@ ECode AbstractConnPool::EnableConnectionGC()
     CThread::New((IRunnable*)mRefWorker, (IThread**)&t); //@@@ use a thread factory
     t->SetDaemon(TRUE);
     String s;
-    (this)->ToString(&s);
+    ToString(&s);
     t->SetName(String("RefQueueWorker@") + s);
     t->Start();
     return NOERROR;

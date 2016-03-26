@@ -650,7 +650,7 @@ private:
     CARAPI_(Int32) GetDigit(
         /* [in] */ Int32 index);
 
-    static CARAPI_(ECode) ParseFromString(
+    static CARAPI ParseFromString(
         /* [in] */ CBigInteger& bi,
         /* [in] */ const String& value,
         /* [in] */ Int32 radix);

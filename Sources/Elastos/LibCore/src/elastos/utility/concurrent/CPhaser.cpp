@@ -693,10 +693,12 @@ ECode CPhaser::QNode::Block(
         *res = TRUE;
         return NOERROR;
     }
-    else if (!mTimed)
+    else if (!mTimed) {
         LockSupport::Park(TO_IINTERFACE(this));
-    else if (mNanos > 0)
+    }
+    else if (mNanos > 0) {
         LockSupport::ParkNanos(TO_IINTERFACE(this), mNanos);
+    }
     return IsReleasable(res);
 }
 

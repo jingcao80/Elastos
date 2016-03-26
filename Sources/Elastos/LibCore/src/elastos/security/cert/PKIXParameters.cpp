@@ -399,11 +399,11 @@ ECode PKIXParameters::Clone(
 {
     VALIDATE_NOT_NULL(obj)
     // do shallow copy first
-    if (this) {
+    if (IPKIXParameters::Probe(this)) {
         INNER_CLONER(IPKIXParameters, CPKIXParameters)
         return NOERROR;
     }
-    else if (this) {
+    else if (IPKIXBuilderParameters::Probe(this)) {
         INNER_CLONER(IPKIXBuilderParameters, CPKIXBuilderParameters)
         return NOERROR;
     }

@@ -15,19 +15,19 @@
 
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
- #include <elastos/utility/Arrays.h>
+#include <elastos/utility/Arrays.h>
 #include <elastos/utility/etl/HashMap.h>
-#include "elastos/droid/os/FileUtils.h"
+//#include "elastos/droid/os/FileUtils.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Net.h>
 #include <Elastos.CoreLibrary.External.h>
 #include <Elastos.CoreLibrary.Libcore.h>
-#include <Elastos.Droid.Os.h>
-#include <Elastos.Droid.Internal.h>
+//#include <Elastos.Droid.Os.h>
+//#include <Elastos.Droid.Internal.h>
 
 
-using Elastos::Droid::Os::FileUtils;
-using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
+// using Elastos::Droid::Os::FileUtils;
+// using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
 
 using Org::Kxml2::IO::IKXmlParser;
 using Org::Kxml2::IO::CKXmlParser;
@@ -52,9 +52,12 @@ public:
         /* [in] */ Int32 foo = 0)
         : mFoo(foo)
     {
-        printf(" >>> Create: Base %p", this);
+        printf(" >>> Create: Base %p\n", this);
     }
-    virtual ~Base() {}
+    virtual ~Base()
+    {
+        printf(" >>> Delete: Base %p\n", this);
+    }
 
     virtual void Print()
     {
@@ -73,12 +76,12 @@ public:
         /* [in] */ Int32 bar = 1)
         : Base(foo), mBar(bar)
     {
-        printf(", Drived %p: foo %d, bar %d\n", this, mFoo, mBar);
+        printf(" >>> Create Drived %p: foo %d, bar %d\n", this, mFoo, mBar);
     }
 
     virtual ~Drived()
     {
-        printf(" >>> Delete Drived %p...\n", this);
+        printf(" >>> Delete Drived %p\n", this);
     }
 
     virtual void Print()
@@ -719,35 +722,43 @@ void doTestBasicUsages()
     }
 
     {
-        printf("\n=======One callee=========\n");
-        AutoPtr<ArrayOf<Int32> > array;
-        GetArrayOf((ArrayOf<Int32>**)&array);
-        printf("1, RefCount: %d\n", array->GetRefCount());
+        AutoPtr<IBigInteger> i1, i2, i3, i4;
+        CBigInteger::New(1, 1, (IBigInteger**)&i1);
+
+        AutoPtr<ArrayOf<IBigInteger*> > array = ArrayOf<IBigInteger*>::Alloc(1);
+        array->Set(0, i1);
     }
 
-    {
-        printf("\n=======Two callee=========\n");
-        AutoPtr<ArrayOf<Int32> > array2 = ArrayOf<Int32>::Alloc(2);
-        AutoPtr<ArrayOf<Int32> > array;
-        GetArrayOf((ArrayOf<Int32>**)&array);
-        printf("1, RefCount: %d\n", array->GetRefCount());
+    // {
+    //     printf("\n=======One callee=========\n");
+    //     AutoPtr<ArrayOf<Int32> > array;
+    //     GetArrayOf((ArrayOf<Int32>**)&array);
+    //     printf("1, RefCount: %d\n", array->GetRefCount());
+    // }
 
-        {
-            AutoPtr<ArrayOf<Int32> > a = array;
-            printf("2, RefCount: %d\n", array->GetRefCount());
+    // {
+    //     printf("\n=======Two callee=========\n");
+    //     AutoPtr<ArrayOf<Int32> > array2 = ArrayOf<Int32>::Alloc(2);
+    //     AutoPtr<ArrayOf<Int32> > array;
+    //     GetArrayOf((ArrayOf<Int32>**)&array);
+    //     printf("1, RefCount: %d\n", array->GetRefCount());
 
-            AutoPtr<ArrayOf<Int32> > b = array;
-            printf("3, RefCount: %d\n", array->GetRefCount());
+    //     {
+    //         AutoPtr<ArrayOf<Int32> > a = array;
+    //         printf("2, RefCount: %d\n", array->GetRefCount());
 
-            AutoPtr<ArrayOf<Int32> > c = array;
-            printf("4, RefCount: %d\n", array->GetRefCount());
-        }
+    //         AutoPtr<ArrayOf<Int32> > b = array;
+    //         printf("3, RefCount: %d\n", array->GetRefCount());
 
-        printf("5, RefCount: %d\n", array->GetRefCount());
+    //         AutoPtr<ArrayOf<Int32> > c = array;
+    //         printf("4, RefCount: %d\n", array->GetRefCount());
+    //     }
 
-        array = array2;
-        printf("6, RefCount: %d\n", array->GetRefCount());
-    }
+    //     printf("5, RefCount: %d\n", array->GetRefCount());
+
+    //     array = array2;
+    //     printf("6, RefCount: %d\n", array->GetRefCount());
+    // }
 }
 
 void testArray2()
@@ -998,117 +1009,117 @@ void testReadXmlParser()
     printf("\n============================================\n");
     printf("                 testReadXmlParser \n");
 
-    String path("bluetooth.xml");
-    AutoPtr<IFile> file;
-    ECode ec = CFile::New(path, (IFile**)&file);
-    if (FAILED(ec)) {
-        printf(" > failed to create CFile %s\n", path.string());
-    }
+    // String path("bluetooth.xml");
+    // AutoPtr<IFile> file;
+    // ECode ec = CFile::New(path, (IFile**)&file);
+    // if (FAILED(ec)) {
+    //     printf(" > failed to create CFile %s\n", path.string());
+    // }
 
-    AutoPtr<IFileReader> fileReader;
-    ec = CFileReader::New(file, (IFileReader**)&fileReader);
-    if (FAILED(ec)) {
-        printf(" > failed to create CFileReader %s\n", path.string());
-    }
+    // AutoPtr<IFileReader> fileReader;
+    // ec = CFileReader::New(file, (IFileReader**)&fileReader);
+    // if (FAILED(ec)) {
+    //     printf(" > failed to create CFileReader %s\n", path.string());
+    // }
 
-    Int32 total = 0;
-    Int32 mLimit = 0;
-    AutoPtr<ArrayOf<Char32> > mBuffer = ArrayOf<Char32>::Alloc(8192);
-    IReader* mReader = IReader::Probe(fileReader);
-    ec = mReader->Read(mBuffer, mLimit, mBuffer->GetLength() - mLimit, &total);
-    if (FAILED(ec)) {
-        printf(" > failed to read from Read CFileReader %s\n", path.string());
-    }
-    else {
-        printf(" > read count %d\n", total);
-    }
+    // Int32 total = 0;
+    // Int32 mLimit = 0;
+    // AutoPtr<ArrayOf<Char32> > mBuffer = ArrayOf<Char32>::Alloc(8192);
+    // IReader* mReader = IReader::Probe(fileReader);
+    // ec = mReader->Read(mBuffer, mLimit, mBuffer->GetLength() - mLimit, &total);
+    // if (FAILED(ec)) {
+    //     printf(" > failed to read from Read CFileReader %s\n", path.string());
+    // }
+    // else {
+    //     printf(" > read count %d\n", total);
+    // }
 
-    while (total != -1) {
-        mLimit += total;
-        ec = mReader->Read(mBuffer, mLimit, mBuffer->GetLength() - mLimit, &total);
-        if (FAILED(ec)) {
-            printf(" > failed to read from Read CFileReader %s\n", path.string());
-        }
-    }
+    // while (total != -1) {
+    //     mLimit += total;
+    //     ec = mReader->Read(mBuffer, mLimit, mBuffer->GetLength() - mLimit, &total);
+    //     if (FAILED(ec)) {
+    //         printf(" > failed to read from Read CFileReader %s\n", path.string());
+    //     }
+    // }
 
-    printf(" mLimit: %d, content:\n\n", mLimit);
+    // printf(" mLimit: %d, content:\n\n", mLimit);
 
-    for (Int32 i = 0; i < mLimit; ++i) {
-        printf("%c", (*mBuffer)[i]);
-    }
+    // for (Int32 i = 0; i < mLimit; ++i) {
+    //     printf("%c", (*mBuffer)[i]);
+    // }
 
     printf("\n\n==================  END  ===================\n");
 }
 
 void testWriteXmlParser()
 {
-    printf("\n============================================\n");
-    printf("                 testWriteXmlParser \n");
+    // printf("\n============================================\n");
+    // printf("                 testWriteXmlParser \n");
 
-    String path("bluetooth.xml");
-    AutoPtr<IFile> file;
-    CFile::New(path, (IFile**)&file);
-    Boolean result;
-    if (file->Exists(&result), result) {
-        file->Delete(&result);
-        printf("Preserving older file backup.\n");
-    }
+    // String path("bluetooth.xml");
+    // AutoPtr<IFile> file;
+    // CFile::New(path, (IFile**)&file);
+    // Boolean result;
+    // if (file->Exists(&result), result) {
+    //     file->Delete(&result);
+    //     printf("Preserving older file backup.\n");
+    // }
 
-    ECode ec = NOERROR;
-    do {
-        String nullStr;
-        AutoPtr<IFileOutputStream> fstr;
-        AutoPtr<IBufferedOutputStream> str;
+    // ECode ec = NOERROR;
+    // do {
+    //     String nullStr;
+    //     AutoPtr<IFileOutputStream> fstr;
+    //     AutoPtr<IBufferedOutputStream> str;
 
-        ec = CFileOutputStream::New(file, (IFileOutputStream**)&fstr);
-        if (FAILED(ec)) break;
-        CBufferedOutputStream::New(IOutputStream::Probe(fstr), (IBufferedOutputStream**)&str);
+    //     ec = CFileOutputStream::New(file, (IFileOutputStream**)&fstr);
+    //     if (FAILED(ec)) break;
+    //     CBufferedOutputStream::New(IOutputStream::Probe(fstr), (IBufferedOutputStream**)&str);
 
-        AutoPtr<IXmlSerializer> serializer;
-        CFastXmlSerializer::New((IXmlSerializer**)&serializer);
-        ec = serializer->SetOutput(IOutputStream::Probe(str), String("utf-8"));
-        if (FAILED(ec)) break;
+    //     AutoPtr<IXmlSerializer> serializer;
+    //     CFastXmlSerializer::New((IXmlSerializer**)&serializer);
+    //     ec = serializer->SetOutput(IOutputStream::Probe(str), String("utf-8"));
+    //     if (FAILED(ec)) break;
 
-        ec = serializer->StartDocument(nullStr, TRUE);
-        if (FAILED(ec)) break;
-        ec = serializer->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE);
-        if (FAILED(ec)) break;
+    //     ec = serializer->StartDocument(nullStr, TRUE);
+    //     if (FAILED(ec)) break;
+    //     ec = serializer->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE);
+    //     if (FAILED(ec)) break;
 
-        ec = serializer->WriteStartTag(nullStr, String("packages"));
-        if (FAILED(ec)) break;
+    //     ec = serializer->WriteStartTag(nullStr, String("packages"));
+    //     if (FAILED(ec)) break;
 
-        {
-            Int32 mInternalSdkPlatform = 21;
-            Int32 mExternalSdkPlatform = 9;
-            String mFingerprint("Actions/bubble_gum_v1_0/bubble_gum_v1_0:5.0.2/LRX22G/");
-            ec = serializer->WriteStartTag(nullStr, String("last-platform-version"));
-            if (FAILED(ec)) break;
-            ec = serializer->WriteAttribute(nullStr, String("internal"), StringUtils::ToString(mInternalSdkPlatform));
-            if (FAILED(ec)) break;
-            ec = serializer->WriteAttribute(nullStr, String("external"), StringUtils::ToString(mExternalSdkPlatform));
-            if (FAILED(ec)) break;
-            ec = serializer->WriteAttribute(nullStr, String("fingerprint"), mFingerprint);
-            if (FAILED(ec)) break;
-            ec = serializer->WriteEndTag(nullStr, String("last-platform-version"));
-            if (FAILED(ec)) break;
-        }
+    //     {
+    //         Int32 mInternalSdkPlatform = 21;
+    //         Int32 mExternalSdkPlatform = 9;
+    //         String mFingerprint("Actions/bubble_gum_v1_0/bubble_gum_v1_0:5.0.2/LRX22G/");
+    //         ec = serializer->WriteStartTag(nullStr, String("last-platform-version"));
+    //         if (FAILED(ec)) break;
+    //         ec = serializer->WriteAttribute(nullStr, String("internal"), StringUtils::ToString(mInternalSdkPlatform));
+    //         if (FAILED(ec)) break;
+    //         ec = serializer->WriteAttribute(nullStr, String("external"), StringUtils::ToString(mExternalSdkPlatform));
+    //         if (FAILED(ec)) break;
+    //         ec = serializer->WriteAttribute(nullStr, String("fingerprint"), mFingerprint);
+    //         if (FAILED(ec)) break;
+    //         ec = serializer->WriteEndTag(nullStr, String("last-platform-version"));
+    //         if (FAILED(ec)) break;
+    //     }
 
-        ec = serializer->WriteEndTag(nullStr, String("packages"));
-        if (FAILED(ec)) break;
+    //     ec = serializer->WriteEndTag(nullStr, String("packages"));
+    //     if (FAILED(ec)) break;
 
-        ec = serializer->EndDocument();
-        if (FAILED(ec)) break;
+    //     ec = serializer->EndDocument();
+    //     if (FAILED(ec)) break;
 
-        IFlushable::Probe(str)->Flush();
-        FileUtils::Sync(fstr);
-        ICloseable::Probe(str)->Close();
+    //     IFlushable::Probe(str)->Flush();
+    //     FileUtils::Sync(fstr);
+    //     ICloseable::Probe(str)->Close();
 
-        printf("\n===========testWriteXmlParser done. \n");
-    } while(0);
+    //     printf("\n===========testWriteXmlParser done. \n");
+    // } while(0);
 
-    if (FAILED(ec)) {
-        printf("testWriteXmlParser failed.\n");
-    }
+    // if (FAILED(ec)) {
+    //     printf("testWriteXmlParser failed.\n");
+    // }
 }
 
 void testSplit()
@@ -1134,7 +1145,7 @@ void testQuintet()
     // doTestString();
     // doTestIInterface();
     // doTestElRefBase();
-    // doTestBasicUsages();
+    doTestBasicUsages();
 
     // testArray2();
 
@@ -1145,7 +1156,7 @@ void testQuintet()
     // testWriteXmlParser();
     // testReadXmlParser();
 
-    testSplit();
+    // testSplit();
 }
 
 int main(int argc, char *argv[])

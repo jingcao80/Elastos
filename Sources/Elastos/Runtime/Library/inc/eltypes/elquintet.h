@@ -5,7 +5,6 @@
 #ifndef __ELASTOS_RUNTIME_ELQUINTET_H__
 #define __ELASTOS_RUNTIME_ELQUINTET_H__
 
-#include <elrefbase.h>
 #include <elquintettype.h>
 #include <stdio.h>
 
@@ -47,82 +46,11 @@ extern "C" {
 
 _ELASTOS_NAMESPACE_BEGIN
 
-// NOTE1: MS CL compiler can't support function's template specialization well,
-//   so only template class works.
-// NOTE2: We shall emit a COMPILE-TIME error if user let ArrayOf
-//   to contain a
-//   non-automation type. There's an undefined variable in Type2Flag::Flag()'s
-//   default implementation, which will emit the error. Also, we must deal
-//   with illegal types at runtime.
-//
-template <class T> struct Type2Flag
-{
-    static Int32 Flag() {
-        if (SUPERSUBCLASS_EX(IInterface*, T)) {
-            return CarQuintetFlag_Type_IObject;
-        }
-        else if (SUPERSUBCLASS_EX(ElRefBase*, T)) {
-            return CarQuintetFlag_Type_RefObject;
-        }
-        else if (SUPERSUBCLASS_EX(ElLightRefBase*, T)) {
-            return CarQuintetFlag_Type_LightRefObject;
-        }
-        else {
-            return CarQuintetFlag_Type_Struct;
-        }
-    }
-};
-
-#define DECL_TYPE2FLAG_TMPL(type, flag) \
-    template <> struct Type2Flag<type> { static Int32 Flag() \
-    { return (flag); } }
-
-DECL_TYPE2FLAG_TMPL(Int8,               CarQuintetFlag_Type_Int8);
-DECL_TYPE2FLAG_TMPL(Int16,              CarQuintetFlag_Type_Int16);
-DECL_TYPE2FLAG_TMPL(Int32,              CarQuintetFlag_Type_Int32);
-DECL_TYPE2FLAG_TMPL(Int64,              CarQuintetFlag_Type_Int64);
-
-DECL_TYPE2FLAG_TMPL(Byte,               CarQuintetFlag_Type_Byte);
-DECL_TYPE2FLAG_TMPL(UInt16,             CarQuintetFlag_Type_UInt16);
-DECL_TYPE2FLAG_TMPL(UInt32,             CarQuintetFlag_Type_UInt32);
-DECL_TYPE2FLAG_TMPL(UInt64,             CarQuintetFlag_Type_UInt64);
-
-DECL_TYPE2FLAG_TMPL(Float,              CarQuintetFlag_Type_Float);
-DECL_TYPE2FLAG_TMPL(Double,             CarQuintetFlag_Type_Double);
-
-DECL_TYPE2FLAG_TMPL(String,             CarQuintetFlag_Type_String);
-
-DECL_TYPE2FLAG_TMPL(EMuid,              CarQuintetFlag_Type_EMuid);
-DECL_TYPE2FLAG_TMPL(EGuid,              CarQuintetFlag_Type_EGuid);
-DECL_TYPE2FLAG_TMPL(IInterface *,          CarQuintetFlag_Type_IObject);
-DECL_TYPE2FLAG_TMPL(ElRefBase *,        CarQuintetFlag_Type_RefObject);
-DECL_TYPE2FLAG_TMPL(ElLightRefBase *,   CarQuintetFlag_Type_LightRefObject);
-
 #define _MAX_CARQUINTET_SIZE_  (0x7FFFFFFF - sizeof(CarQuintet) - sizeof(SharedBuffer))
 #define IS_QUINTENT_FLAG(pcq, flag)     ((pcq) && ((pcq)->mFlags & (flag)))
 
 template <class T>
 class ArrayOf;
-
-
-//---------------CheckCompletedTypeOp----------------------------------------
-template <class T, Boolean isPointer>
-struct CheckCompletedTypeOp
-{
-    void operator()(void)
-    {
-    }
-};
-
-template<class T>
-struct CheckCompletedTypeOp<T, TRUE>
-{
-    void operator()(void)
-    {
-    }
-
-    AutoPtr<T> temp;
-};
 
 //---------------QuintetObjectReleaseOp----------------------------------------
 
@@ -262,11 +190,6 @@ public:
     Int32 Release() const {
         PCarQuintet pCq = (const PCarQuintet)this;
         if (IS_QUINTENT_FLAG(pCq, CarQuintetFlag_HeapAlloced)) {
-#ifdef _DEBUG
-        typedef typename TypeTraits<T>::BaredType CompletedType;
-        CheckCompletedTypeOp<CompletedType, (TypeTraits<T>::isPointer != 0)> op;
-        op();
-#endif
             QuintetObjectReleaseOp<T> releaseOp;
             SharedBuffer * buf = SharedBuffer::GetBufferFromData(pCq);
             if (IS_QUINTENT_FLAG(pCq, CarQuintetFlag_AutoRefCounted)) {
@@ -358,24 +281,25 @@ public:
 };
 
 //---------------QuintetObjectReleaseOp----------------------------------------
-template<class OrigT, class TargetT>
+template<class T>
 void ReleaseFunc(void const * buf)
 {
-    ArrayOf<OrigT>* pcq = (ArrayOf<OrigT>*)buf;
+    ArrayOf<T>* pcq = (ArrayOf<T>*)buf;
     Int32 length = pcq->GetLength();
-    OrigT* p = (OrigT*)(pcq->mBuf);
+    T* p = (T*)(pcq->mBuf);
 
     for(Int32 i = 0; i < length; ++i) {
-        TargetT* prb = (TargetT*)(*p);
-        if (prb) {
-            prb->Release();
+        if (*p) {
+            (*p)->Release();
             *p = NULL;
         }
         ++p;
     }
 }
 
-template<class T, Boolean isElRefBaseObj, Boolean isElLightRefBaseObj, Boolean isCarObj>
+// ReleaseOpImpl
+//
+template<class T, Boolean hasMemberAddRefAndRelease>
 struct ReleaseOpImpl
 {
     void operator()(void const * buf)
@@ -384,76 +308,45 @@ struct ReleaseOpImpl
 };
 
 template<class T>
-struct ReleaseOpImpl<T, TRUE, TRUE, TRUE>
+struct ReleaseOpImpl<T, TRUE>
 {
     void operator()(void const * buf)
     {
-        ReleaseFunc<T, ElRefBase>(buf);
+        ReleaseFunc<T>(buf);
+    }
+};
+
+// ReleaseOpWrapper
+//
+template<class T, Boolean isClassType, Boolean isPointer>
+struct ReleaseOpWrapper
+{
+    void operator()(void const * buf)
+    {
     }
 };
 
 template<class T>
-struct ReleaseOpImpl<T, TRUE, TRUE, FALSE>
+struct ReleaseOpWrapper<T, TRUE, TRUE>
 {
     void operator()(void const * buf)
     {
-        ReleaseFunc<T, ElRefBase>(buf);
+        typedef typename TypeTraits<T>::BaredType BaredType;
+        ReleaseOpImpl<T, HAS_MEMBER_ADDREF_AND_RELEASE(BaredType)> impl;
+        impl(buf);
     }
 };
 
-template<class T>
-struct ReleaseOpImpl<T, TRUE, FALSE, TRUE>
-{
-    void operator()(void const * buf)
-    {
-        ReleaseFunc<T, ElRefBase>(buf);
-    }
-};
-
-template<class T>
-struct ReleaseOpImpl<T, TRUE, FALSE, FALSE>
-{
-    void operator()(void const * buf)
-    {
-        ReleaseFunc<T, ElRefBase>(buf);
-    }
-};
-
-template<class T>
-struct ReleaseOpImpl<T, FALSE, TRUE, TRUE>
-{
-    void operator()(void const * buf)
-    {
-        ReleaseFunc<T, ElLightRefBase>(buf);
-    }
-};
-
-template<class T>
-struct ReleaseOpImpl<T, FALSE, TRUE, FALSE>
-{
-    void operator()(void const * buf)
-    {
-        ReleaseFunc<T, ElLightRefBase>(buf);
-    }
-};
-
-template<class T>
-struct ReleaseOpImpl<T, FALSE, FALSE, TRUE>
-{
-    void operator()(void const * buf)
-    {
-        ReleaseFunc<T, IInterface>(buf);
-    }
-};
-
+// QuintetObjectReleaseOp
+//
 template <class T>
 inline void QuintetObjectReleaseOp<T>::operator()(void const* buf)
 {
     if (NULL != buf) {
-        ReleaseOpImpl<T,
-            SUPERSUBCLASS_EX(ElRefBase*, T),
-            SUPERSUBCLASS_EX(ElLightRefBase*, T),
-            SUPERSUBCLASS_EX(IInterface*, T)> impl;
+        typedef typename TypeTraits<T>::BaredType BaredType;
+        ReleaseOpWrapper<T,
+            CheckClassType<BaredType>::isClassType,
+            TypeTraits<T>::isPointer> impl;
         impl(buf);
     }
 }
@@ -490,10 +383,10 @@ inline void QuintetObjectReleaseOp<String>::operator()(void const* buf)
 //---------------QuintetObjectCopyOp--------------------------------------------
 // Notes: ArrayOf::Copy equals System.Copy in java, not memcpy in c/c++.
 //
-template<class OrigT, class TargetT>
-Int32 CopyFunc(ArrayOf<OrigT>* dstArray, Int32 dstOffset, OrigT const* src, Int32 srcOffset, Int32 count)
+template<class T>
+Int32 CopyFunc(ArrayOf<T>* dstArray, Int32 dstOffset, T const* src, Int32 srcOffset, Int32 count)
 {
-    OrigT* dst = (OrigT*)(dstArray->mBuf);
+    T* dst = (T*)(dstArray->mBuf);
     Int32 copyCount = MIN(count, dstArray->GetLength() - dstOffset);
 
     // self-copy to the same position.
@@ -502,19 +395,19 @@ Int32 CopyFunc(ArrayOf<OrigT>* dstArray, Int32 dstOffset, OrigT const* src, Int3
         return copyCount;
     }
 
-    TargetT* prb = NULL;
+    T prb = NULL;
     dst += dstOffset;
     src += srcOffset;
 
     Boolean isOverlap = (isSelfCopy && (dstOffset > srcOffset) && (dstOffset < srcOffset + copyCount));
     if (isOverlap) {
         for (Int32 i = copyCount - 1; i >= 0; --i) {
-            prb = (TargetT*)(*(src + i));
+            prb = *(src + i);
             if (prb) {
                 prb->AddRef();
             }
 
-            prb = (TargetT*)(*(dst + i));
+            prb = *(dst + i);
             if (prb) {
                 prb->Release();
             }
@@ -524,12 +417,12 @@ Int32 CopyFunc(ArrayOf<OrigT>* dstArray, Int32 dstOffset, OrigT const* src, Int3
     }
     else {
         for (Int32 i = 0; i < copyCount; ++i) {
-            prb = (TargetT*)(*src);
+            prb = *src;
             if (prb) {
                 prb->AddRef();
             }
 
-            prb = (TargetT*)(*dst);
+            prb = *dst;
             if (prb) {
                 prb->Release();
             }
@@ -575,7 +468,9 @@ static Int32 PlainCopy(T* dst, Int32 dstOffset, T const * src, Int32 srcOffset, 
     return copyCount;
 }
 
-template<class T, Boolean isElRefBaseObj, Boolean isElLightRefBaseObj, Boolean isCarObj>
+// CopyOpImpl
+//
+template<class T, Boolean hasMemberAddRefAndRelease>
 struct CopyOpImpl
 {
     Int32 operator()(ArrayOf<T>* dst, Int32 dstOffset, T const* src, Int32 srcOffset, Int32 count)
@@ -586,68 +481,39 @@ struct CopyOpImpl
 };
 
 template<class T>
-struct CopyOpImpl<T, TRUE, TRUE, TRUE>
+struct CopyOpImpl<T, TRUE>
 {
     Int32 operator()(ArrayOf<T>* dst, Int32 offset, T const* src, Int32 srcOffset, Int32 count)
     {
-        return CopyFunc<T, ElRefBase>(dst, offset, src, srcOffset, count);
+        return CopyFunc<T>(dst, offset, src, srcOffset, count);
+    }
+};
+
+// CopyOpWrapper
+//
+template<class T, Boolean isClassType, Boolean isPointer>
+struct CopyOpWrapper
+{
+    Int32 operator()(ArrayOf<T>* dst, Int32 dstOffset, T const* src, Int32 srcOffset, Int32 count)
+    {
+        Int32 copyCount = MIN(count, dst->GetLength() - dstOffset);
+        return PlainCopy((T*)(dst->mBuf), dstOffset, src, srcOffset, copyCount);
     }
 };
 
 template<class T>
-struct CopyOpImpl<T, TRUE, TRUE, FALSE>
+struct CopyOpWrapper<T, TRUE, TRUE>
 {
     Int32 operator()(ArrayOf<T>* dst, Int32 offset, T const* src, Int32 srcOffset, Int32 count)
     {
-        return CopyFunc<T, ElRefBase>(dst, offset, src, srcOffset, count);
+        typedef typename TypeTraits<T>::BaredType BaredType;
+        CopyOpImpl<T, HAS_MEMBER_ADDREF_AND_RELEASE(BaredType)> impl;
+        return impl(dst, offset, src, srcOffset, count);
     }
 };
 
-template<class T>
-struct CopyOpImpl<T, TRUE, FALSE, TRUE>
-{
-    Int32 operator()(ArrayOf<T>* dst, Int32 offset, T const* src, Int32 srcOffset, Int32 count)
-    {
-        return CopyFunc<T, ElRefBase>(dst, offset, src, srcOffset, count);
-    }
-};
-
-template<class T>
-struct CopyOpImpl<T, TRUE, FALSE, FALSE>
-{
-    Int32 operator()(ArrayOf<T>* dst, Int32 offset, T const* src, Int32 srcOffset, Int32 count)
-    {
-        return CopyFunc<T, ElRefBase>(dst, offset, src, srcOffset, count);
-    }
-};
-
-template<class T>
-struct CopyOpImpl<T, FALSE, TRUE, TRUE>
-{
-    Int32 operator()(ArrayOf<T>* dst, Int32 offset, T const* src, Int32 srcOffset, Int32 count)
-    {
-        return CopyFunc<T, ElLightRefBase>(dst, offset, src, srcOffset, count);
-    }
-};
-
-template<class T>
-struct CopyOpImpl<T, FALSE, TRUE, FALSE>
-{
-    Int32 operator()(ArrayOf<T>* dst, Int32 offset, T const* src, Int32 srcOffset, Int32 count)
-    {
-        return CopyFunc<T, ElLightRefBase>(dst, offset, src, srcOffset, count);
-    }
-};
-
-template<class T>
-struct CopyOpImpl<T, FALSE, FALSE, TRUE>
-{
-    Int32 operator()(ArrayOf<T>* dst, Int32 offset, T const* src, Int32 srcOffset, Int32 count)
-    {
-        return CopyFunc<T, IInterface>(dst, offset, src, srcOffset, count);
-    }
-};
-
+// QuintetObjectCopyOp
+//
 template <class T>
 inline Int32 QuintetObjectCopyOp::operator()(
     ArrayOf<T>* dst, Int32 offset, T const* src, Int32 srcOffset, Int32 count)
@@ -658,10 +524,10 @@ inline Int32 QuintetObjectCopyOp::operator()(
         return -1;
     }
 
-    CopyOpImpl<T,
-        SUPERSUBCLASS_EX(ElRefBase*, T),
-        SUPERSUBCLASS_EX(ElLightRefBase*, T),
-        SUPERSUBCLASS_EX(IInterface*, T)> impl;
+    typedef typename TypeTraits<T>::BaredType BaredType;
+    CopyOpWrapper<T,
+        CheckClassType<BaredType>::isClassType,
+        TypeTraits<T>::isPointer> impl;
     return impl(dst, offset, src, srcOffset, count);
 }
 

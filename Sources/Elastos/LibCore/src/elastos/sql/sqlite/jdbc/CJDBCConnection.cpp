@@ -213,6 +213,7 @@ ECode CJDBCConnection::PrepareStatement(
     /* [in] */ const String& sql,
     /* [out] */ Elastos::Sql::IPreparedStatement ** ppPreparedStatement)
 {
+    assert(0 && "TODO");
     return CJDBCPreparedStatement::New(this, sql, (IJDBCPreparedStatement**) ppPreparedStatement);
 }
 

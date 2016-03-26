@@ -163,9 +163,9 @@ ECode LockPatternUtils::constructor(
 {
     mContext = context;
     context->GetContentResolver((IContentResolver**)&mContentResolver);
-    AutoPtr<IInterface> service;
-    context->GetSystemService(IContext::PROFILE_SERVICE, (IInterface**)&service);
 //TODO: Need IProfileManager
+    AutoPtr<IInterface> service;
+    // context->GetSystemService(IContext::PROFILE_SERVICE, (IInterface**)&service);
     // mProfileManager = IProfileManager::Probe(service);
 
     // If this is being called by the system or by an application like keyguard that

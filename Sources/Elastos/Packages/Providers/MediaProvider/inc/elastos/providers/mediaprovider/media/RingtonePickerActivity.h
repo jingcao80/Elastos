@@ -32,12 +32,12 @@ namespace MediaProvider {
 namespace Media {
 
 class RingtonePickerActivity
-    : public IAdapterViewOnItemSelectedListener
+    : public AlertActivity
+    , public IAdapterViewOnItemSelectedListener
     , public IRunnable
     , public IDialogInterfaceOnClickListener
     , public IAlertControllerAlertParamsOnPrepareListViewListener
     , public IRingtonePickerActivity
-    , public AlertActivity
 {
 private:
     class MyDialogInterfaceOnClickListener
@@ -75,11 +75,11 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     RingtonePickerActivity();
 
     virtual ~RingtonePickerActivity();
-
-    CAR_INTERFACE_DECL()
 
     CARAPI OnSaveInstanceState(
         /* [in] */ IBundle* outState);

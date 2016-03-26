@@ -5030,10 +5030,15 @@ int P_ClassCtorMethod(ClassDirEntry *pClass, BOOL isDeprecated)
     strcpy(szMethodName, "CreateObjectWith");
     int nCurLength = strlen("CreateObjectWith");
     if (pIntfDesc->mMethods[n]->mParamCount != 0) {
-        int nMeth;
+        int nMeth, tokenSize = 0;
         for (nMeth = 0; nMeth < pIntfDesc->mMethods[n]->mParamCount; nMeth++) {
             if (pIntfDesc->mMethods[n]->mParams[nMeth]->mAttribs & ParamAttrib_out) {
                 ErrorReport(CAR_E_OutParameterInCtor);
+                return Ret_AbortOnError;
+            }
+            tokenSize += strlen(pIntfDesc->mMethods[n]->mParams[nMeth]->mName);
+            if (tokenSize > c_nMaxTokenSize) {
+                ErrorReport(CAR_E_SymbolTooLong);
                 return Ret_AbortOnError;
             }
             strcat(szMethodName, pIntfDesc->mMethods[n]->mParams[nMeth]->mName);

@@ -31,16 +31,21 @@ class MediaScannerService
     , public IMediaScannerService
     , public IRunnable
 {
-private:
+public:
     class MyMediaScannerService
         : public Object
+        , public IBinder
         , public IIMediaScannerService
     {
         friend class MediaScannerService;
 
     public:
-        MyMediaScannerService(
-            /* [in] */ MediaScannerService* owner);
+        MyMediaScannerService();
+
+        virtual ~MyMediaScannerService();
+
+        CARAPI constructor(
+            /* [in] */ IMediaScannerService* owner);
 
         CAR_INTERFACE_DECL()
 
@@ -52,6 +57,9 @@ private:
         CARAPI ScanFile(
             /* [in] */ const String& path,
             /* [in] */ const String& mimeType);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         MediaScannerService* mOwner;
@@ -76,6 +84,10 @@ private:
     };
 
 public:
+    MediaScannerService();
+
+    ~MediaScannerService();
+
     CAR_INTERFACE_DECL()
 
     CARAPI OnCreate();

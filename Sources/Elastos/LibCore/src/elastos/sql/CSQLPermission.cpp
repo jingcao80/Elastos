@@ -9,19 +9,6 @@ CAR_INTERFACE_IMPL(CSQLPermission, Object, ISQLPermission);
 
 CAR_OBJECT_IMPL(CSQLPermission);
 
-// PInterface CSQLPermission::Probe(
-//     /* [in] */ REIID riid)
-// {
-//     if (riid == EIID_ISQLPermission) {
-//         return (IInterface*)this;
-//     }
-
-//     //TODO
-//     assert(0);
-//     // return BasicPermission::Probe(riid);
-//     return NOERROR;
-// }
-
 ECode CSQLPermission::constructor(
     /* [in] */ const String& name)
 {

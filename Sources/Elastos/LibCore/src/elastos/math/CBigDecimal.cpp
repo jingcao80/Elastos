@@ -2076,7 +2076,7 @@ ECode CBigDecimal::CompareTo(
                 valUnscaled = temp;
             }
 
-            IComparable* comp = thisUnscaled->Probe(EIID_IComparable);
+            IComparable* comp = (IComparable*)thisUnscaled->Probe(EIID_IComparable);
             return comp->CompareTo(valUnscaled, result);
         }
     }
@@ -2200,7 +2200,7 @@ ECode CBigDecimal::ToString(
 
     AutoPtr<IBigInteger> thisUnscaled = GetUnscaledValue();
     String intString;
-    IObject* o = thisUnscaled->Probe(EIID_IObject);
+    IObject* o = (IObject*)thisUnscaled->Probe(EIID_IObject);
     o->ToString(&intString);
     if (mScale == 0) {
         *str = String(intString);
@@ -2249,7 +2249,7 @@ ECode CBigDecimal::ToEngineeringString(
 
     AutoPtr<IBigInteger> thisUnscaled = GetUnscaledValue();
     String intString;
-    IObject* o = thisUnscaled->Probe(EIID_IObject);
+    IObject* o = (IObject*)thisUnscaled->Probe(EIID_IObject);
     o->ToString(&intString);
 
     if (mScale == 0) {
@@ -2324,7 +2324,7 @@ ECode CBigDecimal::ToPlainString(
 
     AutoPtr<IBigInteger> thisUnscaled = GetUnscaledValue();
     String intStr;
-    IObject* o = thisUnscaled->Probe(EIID_IObject);
+    IObject* o = (IObject*)thisUnscaled->Probe(EIID_IObject);
     o->ToString(&intStr);
 
     if ((mScale == 0) || ((IsZero()) && (mScale < 0))) {

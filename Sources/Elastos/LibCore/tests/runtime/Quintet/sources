@@ -5,15 +5,15 @@ TARGET_TYPE = ecx
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
-#IMPORTS = Elastos.CoreLibrary.eco
-IMPORTS = Elastos.Droid.Core.eco
+IMPORTS = Elastos.CoreLibrary.eco
+#IMPORTS = Elastos.Droid.Core.eco
 
 LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
-LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+#LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 LIBRARIES += -lstdc++ -licuuc -licui18n -lm -lcutils
 
 SOURCES = Elastos.CoreLibrary.cpp
-SOURCES += Elastos.Droid.Core.cpp
+#SOURCES += Elastos.Droid.Core.cpp
 SOURCES += test.cpp

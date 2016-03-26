@@ -23,6 +23,7 @@ SOURCES += MtpReceiver.cpp
 SOURCES += MtpService.cpp
 SOURCES += RingtonePickerActivity.cpp
 SOURCES += MediaThumbRequest.cpp
+SOURCES += CMediaThumbRequestHelper.cpp
 SOURCES += media.cpp
 
 

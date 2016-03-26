@@ -2,8 +2,10 @@
 #define _ELASTOS_PROVIDERS_MEDIAPROVIDER_MEDIA_CMEDIATHUMBREQUESTHELPER_H__
 
 #include "_Elastos_Providers_MediaProvider_Media_CMediaThumbRequestHelper.h"
-#include "elastos/providers/mediaprovider/media/MediaThumbRequest.h"
+#include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
+
+using Elastos::Core::IComparator;
 
 namespace Elastos {
 namespace Providers {
@@ -11,13 +13,13 @@ namespace MediaProvider {
 namespace Media {
 
 CarClass(CMediaThumbRequestHelper)
-    , public IMediaThumbRequestHelper
     , public Object
+    , public IMediaThumbRequestHelper
 {
 public:
-    CMediaThumbRequestHelper(
-        /* [in] */ IMediaThumbRequest* r1,
-        /* [in] */ IMediaThumbRequest* r2);
+    CMediaThumbRequestHelper();
+
+    virtual ~CMediaThumbRequestHelper();
 
     CAR_INTERFACE_DECL()
 
@@ -25,10 +27,6 @@ public:
 
     CARAPI GetComparator(
         /* [out] */ IComparator** result);
-
-private:
-    AutoPtr<IMediaThumbRequest> mR1;
-    AutoPtr<IMediaThumbRequest> mR2;
 };
 
 } // namespace Media

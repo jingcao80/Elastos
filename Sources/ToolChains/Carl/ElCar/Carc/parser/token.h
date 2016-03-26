@@ -91,7 +91,7 @@ extern CARToken GetUunm(FILE *);
 extern void * SaveTokenContext();
 extern void RestoreTokenContext(void *);
 
-const int c_nMaxTokenSize = 255;
+const int c_nMaxTokenSize = 511;
 extern int g_nLineNumber;
 extern char g_szCurrentToken[c_nMaxTokenSize + 1];
 extern int g_nCurrentTokenLen;

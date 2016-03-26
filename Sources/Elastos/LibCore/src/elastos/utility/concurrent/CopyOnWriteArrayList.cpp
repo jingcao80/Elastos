@@ -110,7 +110,7 @@ ECode CopyOnWriteArrayList::Equals(
 
     if (ICopyOnWriteArrayList::Probe(object)) {
         CopyOnWriteArrayList* o = (CopyOnWriteArrayList*)ICopyOnWriteArrayList::Probe(object);
-        *result = TO_IINTERFACE(this) == object
+        *result = TO_IINTERFACE(this) == IInterface::Probe(object)
                 || Arrays::Equals(mElements, o->mElements);
         return NOERROR;
     }
