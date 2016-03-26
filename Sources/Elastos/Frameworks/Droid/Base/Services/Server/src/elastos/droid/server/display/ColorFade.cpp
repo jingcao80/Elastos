@@ -575,8 +575,11 @@ Boolean ColorFade::CaptureScreenshotTextureAndSetViewport()
         surfaceControl->GetBuiltInDisplay(ISurfaceControl::BUILT_IN_DISPLAY_ID_MAIN,
             (IBinder**)&display);
         surfaceControl->Screenshot(display, s);
+        st->UpdateTexImage();
+        st->GetTransformMatrix(mTexMatrix);
         // } finally {
         s->ReleaseSurface();
+        st->ReleaseBuffers();
         // }
 
         st->UpdateTexImage();

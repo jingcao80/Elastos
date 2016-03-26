@@ -496,6 +496,9 @@ private:
     // The controller for the automatic brightness level.
     AutoPtr<AutomaticBrightnessController> mAutomaticBrightnessController;
 
+    // The controller for LiveDisplay
+    AutoPtr<LiveDisplayController> mLiveDisplayController;
+
     // Animators.
     AutoPtr<IObjectAnimator> mColorFadeOnAnimator;
     AutoPtr<IObjectAnimator> mColorFadeOffAnimator;

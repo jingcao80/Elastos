@@ -26,3 +26,5 @@ SOURCES += RampAnimator.cpp
 SOURCES += VirtualDisplayAdapter.cpp
 SOURCES += WifiDisplayAdapter.cpp
 SOURCES += WifiDisplayController.cpp
+SOURCES += LiveDisplayController.cpp
+SOURCES += ExtendedRemoteDisplayHelper.cpp

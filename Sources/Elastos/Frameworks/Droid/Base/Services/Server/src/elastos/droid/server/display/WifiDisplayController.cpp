@@ -8,6 +8,7 @@
 #include <Elastos.CoreLibrary.Net.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/server/display/WifiDisplayController.h"
+#include "elastos/droid/server/display/ExtendedRemoteDisplayHelper.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
 
@@ -22,9 +23,9 @@ using Elastos::Droid::Wifi::P2p::CWifiP2pWfdInfo;
 using Elastos::Droid::Wifi::P2p::EIID_IWifiP2pManagerActionListener;
 using Elastos::Droid::Wifi::P2p::EIID_IWifiP2pManagerPeerListListener;
 using Elastos::Droid::Wifi::P2p::EIID_IWifiP2pManagerGroupInfoListener;
-using Elastos::Droid::Media::IRemoteDisplayHelper;
-// using Elastos::Droid::Media::CRemoteDisplayHelper;
 using Elastos::Droid::Media::EIID_IRemoteDisplayListener;
+using Elastos::Droid::Media::IRemoteDisplayHelper;
+using Elastos::Droid::Media::CRemoteDisplayHelper;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IIntentFilter;
@@ -740,7 +741,8 @@ WifiDisplayController::RtspTimeoutRunnable::RtspTimeoutRunnable(
 ECode WifiDisplayController::RtspTimeoutRunnable::Run()
 {
     if (mHost->mConnectedDevice != NULL
-        && mHost->mRemoteDisplay != NULL && !mHost->mRemoteDisplayConnected) {
+            && (mHost->mRemoteDisplay != NULL || mHost->mExtRemoteDisplay != NULL)
+            && !mHost->mRemoteDisplayConnected) {
         String deviceName;
         mHost->mConnectedDevice->GetDeviceName(&deviceName);
         Slogger::I(TAG, "Timed out waiting for Wifi RTSP connection after %d seconds: %s",
@@ -1239,13 +1241,21 @@ void WifiDisplayController::UpdateConnection()
 
     // Step 1. Before we try to connect to a new device, tell the system we
     // have disconnected from the old one.
-    if (mRemoteDisplay != NULL && mConnectedDevice != mDesiredDevice) {
+    if ((mRemoteDisplay != NULL || mExtRemoteDisplay != NULL) &&
+            mConnectedDevice != mDesiredDevice) {
         String deviceName;
         mConnectedDevice->GetDeviceName(&deviceName);
         Slogger::I(TAG, "Stopped listening for RTSP connection on %s from Wifi display: %s",
-            mRemoteDisplayInterface.string(), deviceName.string());
+                mRemoteDisplayInterface.string(), deviceName.string());
 
-        mRemoteDisplay->Dispose();
+        if(mRemoteDisplay != NULL) {
+            mRemoteDisplay->Dispose();
+        }
+        else if(mExtRemoteDisplay != NULL) {
+            ExtendedRemoteDisplayHelper::Dispose(mExtRemoteDisplay);
+        }
+
+        mExtRemoteDisplay = NULL;
         mRemoteDisplay = NULL;
         mRemoteDisplayInterface = NULL;
         mRemoteDisplayConnected = FALSE;
@@ -1358,7 +1368,8 @@ void WifiDisplayController::UpdateConnection()
     }
 
     // Step 6. Listen for incoming RTSP connection.
-    if (mConnectedDevice != NULL && mRemoteDisplay == NULL) {
+    if (mConnectedDevice != NULL && mRemoteDisplay == NULL &&
+            mExtRemoteDisplay== NULL) {
         String deviceName;
         mConnectedDevice->GetDeviceName(&deviceName);
         AutoPtr<IInet4Address> addr = GetInterfaceAddress(mConnectedDeviceGroupInfo);
@@ -1382,12 +1393,18 @@ void WifiDisplayController::UpdateConnection()
         Slogger::I(TAG, "Listening for RTSP connection on %s"
             " from Wifi display: %s", iface.string(), deviceName.string());
 
-        AutoPtr<IRemoteDisplayHelper> remoteDisplayHelper;
-        assert(0 && "TODO");
-        // CRemoteDisplayHelper::AcquireSingleton((IRemoteDisplayHelper**)&remoteDisplayHelper);
-        AutoPtr<IRemoteDisplayListener> myRD = new MyRemoteDisplayListener(this, oldDevice);
-        mRemoteDisplay = NULL;
-        remoteDisplayHelper->Listen(iface, myRD, mHandler, (IRemoteDisplay**)&mRemoteDisplay);
+        AutoPtr<IRemoteDisplayListener> listener = new MyRemoteDisplayListener(this, oldDevice);
+
+        if(ExtendedRemoteDisplayHelper::IsAvailable()){
+            mExtRemoteDisplay = ExtendedRemoteDisplayHelper::Listen(iface,
+                    listener, mHandler, mContext);
+        }
+        else {
+            AutoPtr<IRemoteDisplayHelper> h;
+            CRemoteDisplayHelper::AcquireSingleton((IRemoteDisplayHelper**)&h);
+            mRemoteDisplay = NULL;
+            h->Listen(iface, listener, mHandler, (IRemoteDisplay**)&mRemoteDisplay);
+        }
 
         // Use extended timeout value for certification, as some tests require user inputs
         Int32 rtspTimeout = mWifiDisplayCertMode ?

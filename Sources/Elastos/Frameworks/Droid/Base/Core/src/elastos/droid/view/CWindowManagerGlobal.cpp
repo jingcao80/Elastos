@@ -20,7 +20,6 @@
 using Elastos::Droid::Animation::CValueAnimator;
 using Elastos::Droid::Animation::CValueAnimatorHelper;
 using Elastos::Droid::Animation::IValueAnimatorHelper;
-using Elastos::Droid::Animation::IValueAnimatorHelper;
 using Elastos::Droid::App::CActivityManager;
 using Elastos::Droid::Content::IComponentCallbacks2;
 using Elastos::Droid::Content::Pm::IApplicationInfo;

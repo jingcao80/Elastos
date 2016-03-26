@@ -284,6 +284,10 @@ AutoPtr<DisplayDeviceInfo> VirtualDisplayAdapter::VirtualDisplayDevice::GetDispl
 
         if ((mFlags & IDisplayManager::VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
             mInfo->mFlags |= DisplayDeviceInfo::FLAG_SECURE;
+            if ((mFlags & IDisplayManager::VIRTUAL_DISPLAY_FLAG_SUPPORTS_PROTECTED_BUFFERS)
+                    != 0) {
+                mInfo->mFlags |= DisplayDeviceInfo::FLAG_SUPPORTS_PROTECTED_BUFFERS;
+            }
         }
         if ((mFlags & IDisplayManager::VIRTUAL_DISPLAY_FLAG_PRESENTATION) != 0) {
             mInfo->mFlags |= DisplayDeviceInfo::FLAG_PRESENTATION;

@@ -636,6 +636,10 @@ private:
     // Number of connection retries remaining.
     Int32 mConnectionRetriesLeft;
 
+    // The Extended remote display that is listening on the connection.
+    // Created after the Wifi P2P network is connected.
+    AutoPtr<IInterface> mExtRemoteDisplay;
+
     // The remote display that is listening on the connection.
     // Created after the Wifi P2P network is connected.
     AutoPtr<IRemoteDisplay> mRemoteDisplay;
