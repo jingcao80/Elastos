@@ -40,25 +40,25 @@ PInterface CWifiSetting::MyListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(IViewOnTouchListener*)this;
     }
     else if (riid == EIID_IViewOnTouchListener) {
-        return this;
+        return (IViewOnTouchListener*)this;
     }
     else if (riid == EIID_IViewOnKeyListener) {
-        return this;
+        return (IViewOnKeyListener*)this;
     }
     else if (riid == EIID_IAdapterViewOnItemClickListener) {
-        return this;
+        return (IAdapterViewOnItemClickListener*)this;
     }
     else if (riid == EIID_IViewOnClickListener) {
-        return this;
+        return (IViewOnClickListener*)this;
     }
     else if (riid == EIID_IDialogInterfaceOnClickListener) {
-        return this;
+        return (IDialogInterfaceOnClickListener*)this;
     }
     else if (riid == EIID_ICompoundButtonOnCheckedChangeListener) {
-        return this;
+        return (ICompoundButtonOnCheckedChangeListener*)this;
     }
 
     return NULL;
@@ -94,22 +94,22 @@ ECode CWifiSetting::MyListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)this) {
+    if (pObject == (IInterface*)(IViewOnTouchListener*)this) {
         *pIID = EIID_IViewOnTouchListener;
     }
-    else if (pObject == (IInterface*)this) {
+    else if (pObject == (IInterface*)(IViewOnKeyListener*)this) {
         *pIID = EIID_IViewOnKeyListener;
     }
-    else if (pObject == (IInterface*)this) {
+    else if (pObject == (IInterface*)(IAdapterViewOnItemClickListener*)this) {
         *pIID = EIID_IAdapterViewOnItemClickListener;
     }
-    else if (pObject == (IInterface*)this) {
+    else if (pObject == (IInterface*)(IViewOnClickListener*)this) {
         *pIID = EIID_IViewOnClickListener;
     }
-    else if (pObject == (IInterface*)this) {
+    else if (pObject == (IInterface*)(IDialogInterfaceOnClickListener*)this) {
         *pIID = EIID_IDialogInterfaceOnClickListener;
     }
-    else if (pObject == (IInterface*)this) {
+    else if (pObject == (IInterface*)(ICompoundButtonOnCheckedChangeListener*)this) {
         *pIID = EIID_ICompoundButtonOnCheckedChangeListener;
     }
     else {

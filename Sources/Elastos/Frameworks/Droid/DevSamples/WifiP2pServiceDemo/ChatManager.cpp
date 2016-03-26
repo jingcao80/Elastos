@@ -29,7 +29,7 @@ PInterface ChatManager::Probe(
         return (PInterface)this;
     }
     else if (riid == EIID_IRunnable) {
-        return this;
+        return (IRunnable*)this;
     }
     else if (riid == EIID_ChatManager) {
         return reinterpret_cast<PInterface>(this);
@@ -56,7 +56,7 @@ ECode ChatManager::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)this) {
+    if (pObject == (IInterface*)(IRunnable*)this) {
         *pIID = EIID_IRunnable;
     }
     else {

@@ -126,13 +126,13 @@ PInterface LocalImage::Probe(
         return (PInterface)this;
     }
     else if (riid == EIID_MediaObject) {
-        return reinterpret_cast<PInterface>(this);
+        return reinterpret_cast<PInterface>((MediaObject*)this);
     }
     else if (riid == EIID_MediaItem) {
-        return reinterpret_cast<PInterface>(this);
+        return reinterpret_cast<PInterface>((MediaItem*)this);
     }
     else if (riid == EIID_LocalMediaItem) {
-        return reinterpret_cast<PInterface>(this);
+        return reinterpret_cast<PInterface>((LocalMediaItem*)this);
     }
 
     return NULL;

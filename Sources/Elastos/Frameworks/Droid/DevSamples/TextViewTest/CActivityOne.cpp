@@ -40,10 +40,10 @@ PInterface CActivityOne::MyListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(IRadioGroupOnCheckedChangeListener*)this;
     }
     else if (riid == EIID_IRadioGroupOnCheckedChangeListener) {
-        return this;
+        return (IRadioGroupOnCheckedChangeListener*)this;
     }
 
     return NULL;
@@ -67,7 +67,7 @@ ECode CActivityOne::MyListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)this) {
+    if (pObject == (IInterface*)(IRadioGroupOnCheckedChangeListener*)this) {
         *pIID = EIID_IRadioGroupOnCheckedChangeListener;
     }
     else {

@@ -52,10 +52,10 @@ PInterface CGeckoSurfaceView::MySurfaceHoderCallback::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(ISurfaceHolderCallback*)this;
     }
     else if (riid == EIID_ISurfaceHolderCallback) {
-        return this;
+        return (ISurfaceHolderCallback*)this;
     }
 
     return NULL;
@@ -78,7 +78,7 @@ ECode CGeckoSurfaceView::MySurfaceHoderCallback::GetInterfaceID(
     if (pIID == NULL) {
         return E_INVALID_ARGUMENT;
     }
-    if (pObject == (IInterface*)this) {
+    if (pObject == (IInterface*)(ISurfaceHolderCallback*)this) {
         *pIID = EIID_ISurfaceHolderCallback;
     }
     else {
@@ -255,10 +255,10 @@ PInterface CGeckoSurfaceView::MyTouchDelegate::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(ITouchDelegate*)this;
     }
     else if (riid == EIID_ITouchDelegate) {
-        return this;
+        return (ITouchDelegate*)this;
     }
 
     return NULL;
@@ -281,7 +281,7 @@ ECode CGeckoSurfaceView::MyTouchDelegate::GetInterfaceID(
     if (pIID == NULL) {
         return E_INVALID_ARGUMENT;
     }
-    if (pObject == (IInterface*)this) {
+    if (pObject == (IInterface*)(ITouchDelegate*)this) {
         *pIID = EIID_ITouchDelegate;
     }
     else {

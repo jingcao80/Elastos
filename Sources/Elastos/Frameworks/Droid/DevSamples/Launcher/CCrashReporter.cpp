@@ -69,10 +69,10 @@ public:
         /* [in] */ REIID riid)
     {
         if (riid == EIID_IInterface) {
-            return (PInterface)this;
+            return (PInterface)(IViewOnClickListener*)this;
         }
         else if (riid == EIID_IViewOnClickListener) {
-            return this;
+            return (IViewOnClickListener*)this;
         }
 
         return NULL;

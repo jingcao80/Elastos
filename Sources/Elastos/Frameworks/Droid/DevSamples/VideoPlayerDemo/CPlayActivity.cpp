@@ -33,16 +33,16 @@ PInterface CPlayActivity::PlayListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(IViewOnTouchListener*)this;
     }
     else if (riid == EIID_IViewOnTouchListener) {
-        return this;
+        return (IViewOnTouchListener*)this;
     }
     else if (riid == EIID_IViewOnKeyListener) {
-        return this;
+        return (IViewOnKeyListener*)this;
     }
     else if (riid == EIID_IMediaPlayerOnCompletionListener) {
-        returnthis;
+        return(IMediaPlayerOnCompletionListener*)this;
     }
 
     return NULL;
@@ -66,10 +66,10 @@ ECode CPlayActivity::PlayListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)this) {
+    if (pObject == (IInterface*)(IViewOnTouchListener*)this) {
         *pIID = EIID_IRunnable;
     }
-    else if (pObject == (IInterface*)this) {
+    else if (pObject == (IInterface*)(IMediaPlayerOnCompletionListener*)this) {
         *pIID = EIID_IMediaPlayerOnCompletionListener;
     }
     else {

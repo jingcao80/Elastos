@@ -32,13 +32,13 @@ PInterface DialogDetailsView::MyListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(IViewOnClickListener*)this;
     }
     else if (riid == EIID_IViewOnClickListener) {
-        return this;
+        return (IViewOnClickListener*)this;
     }
     else if (riid == EIID_IDialogInterfaceOnDismissListener) {
-        return this;
+        return (IDialogInterfaceOnDismissListener*)this;
     }
 
     return NULL;
@@ -62,10 +62,10 @@ ECode DialogDetailsView::MyListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)this) {
+    if (pObject == (IInterface*)(IViewOnClickListener*)this) {
         *pIID = EIID_IViewOnClickListener;
     }
-    else if (pObject == (IInterface*)this) {
+    else if (pObject == (IInterface*)(IDialogInterfaceOnDismissListener*)this) {
         *pIID = EIID_IDialogInterfaceOnDismissListener;
     }
     else {

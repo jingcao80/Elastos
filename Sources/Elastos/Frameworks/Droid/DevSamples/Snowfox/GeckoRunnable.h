@@ -36,10 +36,10 @@ public:
         /* [in] */ REIID riid)
     {
         if (riid == EIID_IInterface) {
-            return (PInterface)this;
+            return (PInterface)(IRunnable*)this;
         }
         else if (riid == EIID_IRunnable) {
-            return this;
+            return (IRunnable*)this;
         }
 
         return NULL;

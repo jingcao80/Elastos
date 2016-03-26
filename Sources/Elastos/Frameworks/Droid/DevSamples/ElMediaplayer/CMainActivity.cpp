@@ -76,7 +76,7 @@ ECode CMainActivity::OnCreate(
     CHandler::New((IHandler**)&mDefaultHandler);
 
     pthread_t   threadMessage;
-    pthread_create(&threadMessage, NULL, EntryRoutine, this);
+    pthread_create(&threadMessage, NULL, EntryRoutine, (void*)this);
 
     return ec;
 }

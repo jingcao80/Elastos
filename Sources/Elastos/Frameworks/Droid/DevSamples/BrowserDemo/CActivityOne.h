@@ -2,10 +2,12 @@
 #ifndef __CACTIVITYONE_H__
 #define __CACTIVITYONE_H__
 
+#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
 #include "elastos/droid/app/Activity.h"
-#include "webkit/WebViewClient.h"
-#include "webkit/WebChromeClient.h"
-#include "_CActivityOne.h"
+#include "elastos/droid/webkit/WebViewClient.h"
+#include "elastos/droid/webkit/WebChromeClient.h"
+#include "_Elastos_Droid_DevSamples_BrowserDemo_CActivityOne.h"
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::View::IViewOnClickListener;
@@ -35,15 +37,13 @@ class CActivityOne : public Activity
 {
 private:
     class InnerWebChromeClient
-        : public ElLightRefBase
-        , public WebChromeClient
-        , public IWebChromeClient
+        : public WebChromeClient
     {
     public:
         InnerWebChromeClient(
             /* [in] */ CActivityOne* owner);
 
-        CAR_INTERFACE_DECL();
+        //CAR_INTERFACE_DECL();
 
         CARAPI OnProgressChanged(
             /* [in] */ IWebView* view,
@@ -168,15 +168,13 @@ private:
     };
 
     class InnerWebViewClient
-        : public ElLightRefBase
-        , public WebViewClient
-        , public IWebViewClient
+        : public WebViewClient
     {
     public:
         InnerWebViewClient(
             /* [in] */ CActivityOne* owner);
 
-        CAR_INTERFACE_DECL();
+        //CAR_INTERFACE_DECL();
 
         CARAPI ShouldOverrideUrlLoading(
             /* [in] */ IWebView* view,
@@ -258,7 +256,7 @@ private:
     };
 
     class Btn1OnClickListener
-        : public ElLightRefBase
+        : public Object
         , public IViewOnClickListener
     {
     public:
@@ -275,7 +273,7 @@ private:
     };
 
     class Btn2OnClickListener
-        : public ElLightRefBase
+        : public Object
         , public IViewOnClickListener
     {
     public:
@@ -292,7 +290,7 @@ private:
     };
 
     class Btn3OnClickListener
-        : public ElLightRefBase
+        : public Object
         , public IViewOnClickListener
     {
     public:
@@ -309,7 +307,7 @@ private:
     };
 
     class InnerDownloadListener
-        : public ElLightRefBase
+        : public Object
         , public IDownloadListener
     {
     public:

@@ -162,43 +162,43 @@ PInterface CMusicService::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(IService*)this;
     }
     else if (riid == EIID_IObject) {
-        return this;
+        return (IObject*)this;
     }
     if (riid == EIID_IService) {
-        return this;
+        return (IService*)this;
     }
     else if (riid == EIID_IContextWrapper) {
-       return this;
+       return (IContextWrapper*)this;
     }
     else if (riid == EIID_IContext) {
-       return this;
+       return (IContext*)this;
     }
     else if (riid == EIID_IComponentCallbacks2) {
-       return this;
+       return (IComponentCallbacks2*)this;
     }
     else if (riid == EIID_IWeakReferenceSource) {
-        return this;
+        return (IWeakReferenceSource*)this;
     }
     else if ( riid == EIID_IPlayController) {
         return (IPlayController *)this;
     }
     else if (riid == EIID_IBinder) {
-        return this;
+        return (IBinder*)this;
     }
     else if (riid == EIID_IService) {
-        return this;
+        return (IService*)this;
     }
     else if (EIID_IRunnable == riid) {
-        return this;
+        return (IRunnable*)this;
     }
     else if (EIID_IMediaPlayerOnCompletionListener == riid) {
-        return this;
+        return (IMediaPlayerOnCompletionListener*)this;
     }
     else if (EIID_IWeakReferenceSource == riid) {
-        return this;
+        return (IWeakReferenceSource*)this;
     }
 
     return Service::Probe(riid);

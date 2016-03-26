@@ -85,11 +85,11 @@ PInterface CActivityOne::ActivityListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(ISeekBarOnSeekBarChangeListener*)this;
     } else  if (riid == EIID_ISeekBarOnSeekBarChangeListener) {
-        return this;
+        return (ISeekBarOnSeekBarChangeListener*)this;
     } else if (riid == EIID_IViewOnClickListener) {
-        return this;
+        return (IViewOnClickListener*)this;
     }
     return NULL;
 }
@@ -108,7 +108,7 @@ ECode CActivityOne::ActivityListener::GetInterfaceID(
     /* [in] */ IInterface *pObject,
     /* [out] */ InterfaceID *pIID)
 {
-    if (pObject == this) {
+    if (pObject == (ISeekBarOnSeekBarChangeListener*)this) {
         *pIID = EIID_ISeekBarOnSeekBarChangeListener;
     }
     else {
@@ -177,9 +177,9 @@ PInterface CActivityOne::Switcher::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(ISeekBarOnSeekBarChangeListener*)this;
     } else if (riid == EIID_IViewFactory) {
-        return this;
+        return (IViewFactory*)this;
     }
     return NULL;
 }
@@ -216,9 +216,9 @@ PInterface CActivityOne::ImageSwitcherListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(ISeekBarOnSeekBarChangeListener*)this;
     } else if (riid == EIID_IViewOnClickListener) {
-        return this;
+        return (IViewOnClickListener*)this;
     }
     return NULL;
 }
@@ -275,9 +275,9 @@ PInterface CActivityOne::TextSwitcherListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(ISeekBarOnSeekBarChangeListener*)this;
     } else if (riid == EIID_IViewOnClickListener) {
-        return this;
+        return (IViewOnClickListener*)this;
     }
     return NULL;
 }

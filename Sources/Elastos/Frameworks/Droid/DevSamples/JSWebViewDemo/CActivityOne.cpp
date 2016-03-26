@@ -79,7 +79,7 @@ ECode CActivityOne::GetInterfaceID(
         *iid = EIID_IObjectFactory;
         return NOERROR;
     }
-    if (object == (IInterface*)this) {
+    if (object == (IInterface*)(ILogger*)this) {
         *iid = EIID_ILogger;
         return NOERROR;
     }

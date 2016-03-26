@@ -23,7 +23,7 @@ public:
             return this;
         }
         else if (riid == EIID_IProxyDeathRecipient) {
-            return this;
+            return (IProxyDeathRecipient*)this;
         }
         return NULL;
     }

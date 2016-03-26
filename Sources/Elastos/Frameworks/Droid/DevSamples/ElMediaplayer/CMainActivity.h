@@ -46,10 +46,10 @@ public:
         CARAPI_(PInterface) Probe(/* [in]  */ REIID riid)
         {
             if (riid == EIID_IInterface) {
-                return (PInterface)this;
+                return (PInterface)(IOnPlaybackPositionUpdateListener*)this;
             }
             else if (riid == EIID_IOnPlaybackPositionUpdateListener) {
-                return this;
+                return (IOnPlaybackPositionUpdateListener*)this;
             }
             return NULL;
         }
@@ -76,7 +76,7 @@ public:
                 return E_INVALID_ARGUMENT;
             }
 
-            if (pObject == (IInterface*)this) {
+            if (pObject == (IInterface*)(IOnPlaybackPositionUpdateListener*)this) {
                 *pIID = EIID_IRunnable;
             }
             else {

@@ -239,10 +239,10 @@ PInterface GeckoApp::GeckoAppDialogOnClickListener::Probe(
     /* [in] */ REIID riid)
 {
      if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(IDialogInterfaceOnClickListener*)this;
     }
     else if (riid == EIID_IDialogInterfaceOnClickListener) {
-        return this;
+        return (IDialogInterfaceOnClickListener*)this;
     }
 
     return NULL;
@@ -1512,10 +1512,10 @@ public:
         /* [in] */ REIID riid)
     {
         if (riid == EIID_IInterface) {
-            return (PInterface)this;
+            return (PInterface)(IViewOnClickListener*)this;
         }
         else if (riid == EIID_IViewOnClickListener) {
-            return this;
+            return (IViewOnClickListener*)this;
         }
 
         return NULL;

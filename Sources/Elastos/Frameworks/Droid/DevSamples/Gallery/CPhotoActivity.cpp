@@ -103,19 +103,19 @@ PInterface CPhotoActivity::MyListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(IViewOnClickListener*)this;
     }
     else if (riid == EIID_IViewOnClickListener) {
-        return this;
+        return (IViewOnClickListener*)this;
     }
     else if (riid == EIID_IPopupWindowOnDismissListener) {
-        return this;
+        return (IPopupWindowOnDismissListener*)this;
     }
     else if (riid == EIID_ISeekBarOnSeekBarChangeListener) {
-        return this;
+        return (ISeekBarOnSeekBarChangeListener*)this;
     }
     else if (riid == EIID_ICloseListener) {
-        return (PInterface)this;
+        return (PInterface)(ICloseListener*)this;
     }
 
     return NULL;
@@ -139,16 +139,16 @@ ECode CPhotoActivity::MyListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)this) {
+    if (pObject == (IInterface*)(IViewOnClickListener*)this) {
         *pIID = EIID_IViewOnClickListener;
     }
-    else if (pObject == (IInterface*)this) {
+    else if (pObject == (IInterface*)(IPopupWindowOnDismissListener*)this) {
         *pIID = EIID_IPopupWindowOnDismissListener;
     }
-    else if (pObject == (IInterface*)this) {
+    else if (pObject == (IInterface*)(ISeekBarOnSeekBarChangeListener*)this) {
         *pIID = EIID_ISeekBarOnSeekBarChangeListener;
     }
-    else if (pObject == (IInterface*)this) {
+    else if (pObject == (IInterface*)(ICloseListener*)this) {
         *pIID = EIID_ICloseListener;
     }
     else {

@@ -1,15 +1,21 @@
 
 #include "CActivityOne.h"
 #include "R.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Net.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.Webkit.h"
 #include <elastos/utility/logging/Slogger.h>
 // #include "elastos/droid/net/WebAddress.h"
 
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Core::CStringWrapper;
+using BrowserDemo::R;
+using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IToast;
 using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Droid::Widget::CToastHelper;
@@ -17,10 +23,11 @@ using Elastos::Droid::Webkit::CURLUtil;
 using Elastos::Droid::Webkit::IURLUtil;
 using Elastos::Droid::Webkit::EIID_IWebViewClient;
 using Elastos::Droid::Webkit::EIID_IWebChromeClient;
-using Elastos::Droid::Webkit::IWebSettingsClassic;
+//using Elastos::Droid::Webkit::IWebSettingsClassic;
 using Elastos::Droid::Webkit::IWebSettings;
 using Elastos::Droid::Webkit::EIID_IDownloadListener;
 using Elastos::Net::IURI;
+using Elastos::Utility::Logging::Slogger;
 // using Elastos::Droid::Net::WebAddress;
 
 namespace Elastos {
@@ -121,7 +128,7 @@ CActivityOne::InnerWebChromeClient::InnerWebChromeClient(
 {
 }
 
-CAR_INTERFACE_IMPL_LIGHT(CActivityOne::InnerWebChromeClient, IWebChromeClient);
+//CAR_INTERFACE_IMPL_LIGHT(CActivityOne::InnerWebChromeClient, IWebChromeClient);
 
 ECode CActivityOne::InnerWebChromeClient::OnProgressChanged(
     /* [in] */ IWebView* view,
@@ -201,9 +208,7 @@ ECode CActivityOne::InnerWebChromeClient::OnJsAlert(
     /* [in] */ IJsResult* result,
     /* [out] */ Boolean* flag)
 {
-    VALIDATE_NOT_NULL(flag);
-    *flag = WebChromeClient::OnJsAlert(view, url, message, result);
-    return NOERROR;
+    return WebChromeClient::OnJsAlert(view, url, message, result, flag);
 }
 
 ECode CActivityOne::InnerWebChromeClient::OnJsConfirm(
@@ -213,9 +218,7 @@ ECode CActivityOne::InnerWebChromeClient::OnJsConfirm(
     /* [in] */ IJsResult* result,
     /* [out] */ Boolean* flag)
 {
-    VALIDATE_NOT_NULL(flag);
-    *flag = WebChromeClient::OnJsConfirm(view, url, message, result);
-    return NOERROR;
+    return WebChromeClient::OnJsConfirm(view, url, message, result, flag);
 }
 
 ECode CActivityOne::InnerWebChromeClient::OnJsPrompt(
@@ -226,9 +229,7 @@ ECode CActivityOne::InnerWebChromeClient::OnJsPrompt(
     /* [in] */ IJsPromptResult * result,
     /* [out] */ Boolean* flag)
 {
-    VALIDATE_NOT_NULL(flag);
-    *flag = WebChromeClient::OnJsPrompt(view, url, message, defaultValue, result);
-    return NOERROR;
+    return WebChromeClient::OnJsPrompt(view, url, message, defaultValue, result, flag);
 }
 
 ECode CActivityOne::InnerWebChromeClient::OnJsBeforeUnload(
@@ -238,9 +239,7 @@ ECode CActivityOne::InnerWebChromeClient::OnJsBeforeUnload(
     /* [in] */ IJsResult* result,
     /* [out] */ Boolean* flag)
 {
-    VALIDATE_NOT_NULL(flag);
-    *flag = WebChromeClient::OnJsBeforeUnload(view, url, message, result);
-    return NOERROR;
+    return WebChromeClient::OnJsBeforeUnload(view, url, message, result, flag);
 }
 
 ECode CActivityOne::InnerWebChromeClient::OnExceededDatabaseQuota(
@@ -278,9 +277,7 @@ ECode CActivityOne::InnerWebChromeClient::OnGeolocationPermissionsHidePrompt()
 ECode CActivityOne::InnerWebChromeClient::OnJsTimeout(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    *result = WebChromeClient::OnJsTimeout();
-    return NOERROR;
+    return WebChromeClient::OnJsTimeout(result);
 }
 
 ECode CActivityOne::InnerWebChromeClient::OnConsoleMessage(
@@ -295,29 +292,19 @@ ECode CActivityOne::InnerWebChromeClient::OnConsoleMessage(
     /* [in] */ IConsoleMessage* consoleMessage,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    *result = WebChromeClient::OnConsoleMessage(consoleMessage);
-    return NOERROR;
+    return WebChromeClient::OnConsoleMessage(consoleMessage, result);
 }
 
 ECode CActivityOne::InnerWebChromeClient::GetDefaultVideoPoster(
     /* [out] */ IBitmap** bitmap)
 {
-    VALIDATE_NOT_NULL(bitmap);
-    AutoPtr<IBitmap> b = WebChromeClient::GetDefaultVideoPoster();
-    *bitmap = b;
-    REFCOUNT_ADD(*bitmap);
-    return NOERROR;
+    return WebChromeClient::GetDefaultVideoPoster(bitmap);
 }
 
 ECode CActivityOne::InnerWebChromeClient::GetVideoLoadingProgressView(
     /* [out] */ IView** view)
 {
-    VALIDATE_NOT_NULL(view);
-    AutoPtr<IView> v = WebChromeClient::GetVideoLoadingProgressView();
-    *view = v;
-    REFCOUNT_ADD(*view);
-    return NOERROR;
+    return WebChromeClient::GetVideoLoadingProgressView(view);
 }
 
 ECode CActivityOne::InnerWebChromeClient::GetVisitedHistory(
@@ -350,7 +337,7 @@ CActivityOne::InnerWebViewClient::InnerWebViewClient(
 {
 }
 
-CAR_INTERFACE_IMPL_LIGHT(CActivityOne::InnerWebViewClient, IWebViewClient);
+//CAR_INTERFACE_IMPL_LIGHT(CActivityOne::InnerWebViewClient, IWebViewClient);
 
 ECode CActivityOne::InnerWebViewClient::ShouldOverrideUrlLoading(
     /* [in] */ IWebView* view,
@@ -358,9 +345,7 @@ ECode CActivityOne::InnerWebViewClient::ShouldOverrideUrlLoading(
     /* [out] */ Boolean* result)
 {
     //Slogger::D("BrowserDemo", "ShouldOverrideUrlLoading,URL:%s", url.string());
-    VALIDATE_NOT_NULL(result);
-    *result = WebViewClient::ShouldOverrideUrlLoading(view, url);
-    return NOERROR;
+    return WebViewClient::ShouldOverrideUrlLoading(view, url, result);
 }
 
 ECode CActivityOne::InnerWebViewClient::OnPageStarted(
@@ -393,12 +378,7 @@ ECode CActivityOne::InnerWebViewClient::ShouldInterceptRequest(
     /* [in] */ const String& url,
     /* [out] */ IWebResourceResponse** wrr)
 {
-    VALIDATE_NOT_NULL(wrr);
-    AutoPtr<IWebResourceResponse> _wrr = WebViewClient::ShouldInterceptRequest(view, url);
-    *wrr = _wrr.Get();
-    REFCOUNT_ADD(*wrr);
-//    assert(0);
-    return NOERROR;
+    return WebViewClient::ShouldInterceptRequest(view, url, wrr);
 }
 
 ECode CActivityOne::InnerWebViewClient::OnTooManyRedirects(
@@ -420,7 +400,7 @@ ECode CActivityOne::InnerWebViewClient::OnReceivedError(
     String text("sorry");
     text += description;
     AutoPtr<ICharSequence> textCS;
-    CStringWrapper::New(text, (ICharSequence**)&textCS);
+    CString::New(text, (ICharSequence**)&textCS);
     AutoPtr<IToast> toast;
     toastHelper->MakeText(mOwner, textCS, IToast::LENGTH_SHORT, (IToast**)&toast);
     return toast->Show();
@@ -458,7 +438,6 @@ ECode CActivityOne::InnerWebViewClient::OnReceivedHttpAuthRequest(
     /* [in] */ const String& realm)
 {
     WebViewClient::OnReceivedHttpAuthRequest(view, handler, host, realm);
-//    assert(0);
     return NOERROR;
 }
 
@@ -467,9 +446,7 @@ ECode CActivityOne::InnerWebViewClient::ShouldOverrideKeyEvent(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    *result = WebViewClient::ShouldOverrideKeyEvent(view, event);
-    return NOERROR;
+    return WebViewClient::ShouldOverrideKeyEvent(view, event, result);
 }
 
 ECode CActivityOne::InnerWebViewClient::OnUnhandledKeyEvent(
@@ -509,7 +486,7 @@ CActivityOne::Btn1OnClickListener::Btn1OnClickListener(
 {
 }
 
-CAR_INTERFACE_IMPL_LIGHT(CActivityOne::Btn1OnClickListener, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CActivityOne::Btn1OnClickListener, Object, IViewOnClickListener);
 
 ECode CActivityOne::Btn1OnClickListener::OnClick(
     /* [in] */ IView* v)
@@ -522,7 +499,7 @@ ECode CActivityOne::Btn1OnClickListener::OnClick(
         AutoPtr<IToastHelper> toastHelper;
         CToastHelper::AcquireSingleton((IToastHelper**)&toastHelper);
         AutoPtr<ICharSequence> textCS;
-        CStringWrapper::New(String("sorry, do not GoBack!"), (ICharSequence**)&textCS);
+        CString::New(String("sorry, do not GoBack!"), (ICharSequence**)&textCS);
         AutoPtr<IToast> toast;
         toastHelper->MakeText(mOwner, textCS, IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -540,7 +517,7 @@ CActivityOne::Btn2OnClickListener::Btn2OnClickListener(
 {
 }
 
-CAR_INTERFACE_IMPL_LIGHT(CActivityOne::Btn2OnClickListener, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CActivityOne::Btn2OnClickListener, Object, IViewOnClickListener);
 
 ECode CActivityOne::Btn2OnClickListener::OnClick(
     /* [in] */ IView* v)
@@ -553,7 +530,7 @@ ECode CActivityOne::Btn2OnClickListener::OnClick(
         AutoPtr<IToastHelper> toastHelper;
         CToastHelper::AcquireSingleton((IToastHelper**)&toastHelper);
         AutoPtr<ICharSequence> textCS;
-        CStringWrapper::New(String("sorry, do not GoForward!"), (ICharSequence**)&textCS);
+        CString::New(String("sorry, do not GoForward!"), (ICharSequence**)&textCS);
         AutoPtr<IToast> toast;
         toastHelper->MakeText(mOwner, textCS, IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
@@ -571,7 +548,7 @@ CActivityOne::Btn3OnClickListener::Btn3OnClickListener(
 {
 }
 
-CAR_INTERFACE_IMPL_LIGHT(CActivityOne::Btn3OnClickListener, IViewOnClickListener);
+CAR_INTERFACE_IMPL(CActivityOne::Btn3OnClickListener, Object, IViewOnClickListener);
 
 ECode CActivityOne::Btn3OnClickListener::OnClick(
     /* [in] */ IView* v)
@@ -579,7 +556,7 @@ ECode CActivityOne::Btn3OnClickListener::OnClick(
     AutoPtr<IEditText> et = IEditText::Probe(mOwner->FindViewById(R::id::et));
     String url;
     AutoPtr<ICharSequence> textCS;
-    et->GetText((ICharSequence**)&textCS);
+    ITextView::Probe(et)->GetText((ICharSequence**)&textCS);
     String text;
     textCS->ToString(&text);
     url = text.Trim();
@@ -594,11 +571,11 @@ ECode CActivityOne::Btn3OnClickListener::OnClick(
         AutoPtr<IToastHelper> toastHelper;
         CToastHelper::AcquireSingleton((IToastHelper**)&toastHelper);
         AutoPtr<ICharSequence> tipText;
-        CStringWrapper::New(String("sorry, url is Error!"), (ICharSequence**)&tipText);
+        CString::New(String("sorry, url is Error!"), (ICharSequence**)&tipText);
         AutoPtr<IToast> toast;
         toastHelper->MakeText(mOwner, tipText, IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
-        et->RequestFocus(&result);
+        IView::Probe(et)->RequestFocus(&result);
     }
     return NOERROR;
 }
@@ -613,7 +590,7 @@ CActivityOne::InnerDownloadListener::InnerDownloadListener(
 {
 }
 
-CAR_INTERFACE_IMPL_LIGHT(CActivityOne::InnerDownloadListener, IDownloadListener);
+CAR_INTERFACE_IMPL(CActivityOne::InnerDownloadListener, Object, IDownloadListener);
 
 ECode CActivityOne::InnerDownloadListener::OnDownloadStart(
     /* [in] */ const String& url,
@@ -647,7 +624,7 @@ ECode CActivityOne::OnCreate(
     AutoPtr<IDownloadListener> downloadListener = new InnerDownloadListener(this);
     wv->SetDownloadListener(downloadListener);
 
-    AutoPtr<IWebSettingsClassic> tSettings;
+    AutoPtr<IWebSettings> tSettings;
     wv->GetSettings((IWebSettings**)&tSettings);
     tSettings->SetJavaScriptEnabled(true);
     tSettings->SetPluginsEnabled(true);
@@ -659,13 +636,13 @@ ECode CActivityOne::OnCreate(
     AutoPtr<IButton> btn3 = IButton::Probe(FindViewById(R::id::btn3));
 
     AutoPtr<IViewOnClickListener> listener1 = new Btn1OnClickListener(this);
-    btn1->SetOnClickListener(listener1);
+    IView::Probe(btn1)->SetOnClickListener(listener1);
 
     AutoPtr<IViewOnClickListener> listener2 = new Btn2OnClickListener(this);
-    btn2->SetOnClickListener(listener2);
+    IView::Probe(btn2)->SetOnClickListener(listener2);
 
     AutoPtr<IViewOnClickListener> listener3 = new Btn3OnClickListener(this);
-    btn3->SetOnClickListener(listener3);
+    IView::Probe(btn3)->SetOnClickListener(listener3);
     return NOERROR;
 }
 

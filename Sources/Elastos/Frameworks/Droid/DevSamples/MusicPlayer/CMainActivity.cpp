@@ -492,7 +492,7 @@ PInterface CMainActivity::Probe(
         return (IActivity *)this;
     }
     else if (riid == EIID_IServiceConnection) {
-        return this;
+        return (IServiceConnection*)this;
     }
 
     return Activity::Probe(riid);

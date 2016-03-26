@@ -27,10 +27,10 @@ PInterface CActivityOne::CMySurfaceHolderCallback::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(ISurfaceHolderCallback*)this;
     }
     else if (riid == EIID_ISurfaceHolderCallback) {
-        return this;
+        return (ISurfaceHolderCallback*)this;
     }
 
     return NULL;
@@ -54,7 +54,7 @@ ECode CActivityOne::CMySurfaceHolderCallback::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)this) {
+    if (pObject == (IInterface*)(ISurfaceHolderCallback*)this) {
         *pIID = EIID_ISurfaceHolderCallback;
     }
     else {

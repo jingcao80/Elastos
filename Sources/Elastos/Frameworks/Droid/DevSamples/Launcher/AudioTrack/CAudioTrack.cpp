@@ -530,7 +530,7 @@ int CAudioTrack::native_setup(
             nativeChannelMask,
             frameCount,
             AUDIO_OUTPUT_FLAG_NONE,// flags
-            audioCallback, this,//callback, callback data (user)
+            audioCallback, (void*)this,//callback, callback data (user)
             0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
             0,// shared mem
             true,// thread can call Java
@@ -552,7 +552,7 @@ int CAudioTrack::native_setup(
             nativeChannelMask,
             frameCount,
             AUDIO_OUTPUT_FLAG_NONE,// flags
-            audioCallback, this,//callback, callback data (user));
+            audioCallback, (void*)this,//callback, callback data (user));
             0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
             lpStorage->mMemBase,// shared mem
             true,// thread can call Java

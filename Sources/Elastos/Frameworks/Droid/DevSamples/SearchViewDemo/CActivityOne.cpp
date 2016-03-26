@@ -36,10 +36,10 @@ PInterface CActivityOne::MyListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(ISearchViewOnQueryTextListener*)this;
     }
     else if (riid == EIID_ISearchViewOnQueryTextListener) {
-        return this;
+        return (ISearchViewOnQueryTextListener*)this;
     }
 
     return NULL;
@@ -63,7 +63,7 @@ ECode CActivityOne::MyListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)this) {
+    if (pObject == (IInterface*)(ISearchViewOnQueryTextListener*)this) {
         *pIID = EIID_ISearchViewOnQueryTextListener;
     }
     else {

@@ -33,13 +33,13 @@ PInterface MyListener::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(IAdapterViewOnItemSelectedListener*)this;
     }
     else if (riid == EIID_IAdapterViewOnItemSelectedListener) {
-        return this;
+        return (IAdapterViewOnItemSelectedListener*)this;
     }
     else if (riid == EIID_IViewOnClickListener) {
-        return this;
+        return (IViewOnClickListener*)this;
     }
     return NULL;
 }
@@ -62,7 +62,7 @@ ECode MyListener::GetInterfaceID(
         return E_INVALID_ARGUMENT;
     }
 
-    if (pObject == (IInterface*)this) {
+    if (pObject == (IInterface*)(IAdapterViewOnItemSelectedListener*)this) {
         *pIID = EIID_IAdapterViewOnItemSelectedListener;
     }
     else {
