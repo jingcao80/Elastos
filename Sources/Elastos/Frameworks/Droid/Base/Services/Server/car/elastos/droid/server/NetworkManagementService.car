@@ -39,6 +39,7 @@ module
         SystemReady();
     }
 
+    [local]
     interface INetworkManagementServiceHelper {
         Create(
             [in] IContext* ctx,

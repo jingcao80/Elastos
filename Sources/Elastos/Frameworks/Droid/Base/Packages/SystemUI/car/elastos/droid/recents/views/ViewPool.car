@@ -10,6 +10,7 @@ module
     namespace Views {
 
     /* An interface to the consumer of a view pool */
+    [local]
     interface IViewPoolConsumer {
 
         CreateView(

@@ -84,6 +84,7 @@ module
         OnTilesChanged();
     }
 
+    [local]
     interface IQSTileHost {
         StartSettingsActivity(
             [in] IIntent* intent);

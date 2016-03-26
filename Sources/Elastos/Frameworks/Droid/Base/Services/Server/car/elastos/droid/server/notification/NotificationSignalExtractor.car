@@ -16,6 +16,7 @@ module
      *  on the {@link NotificationRecord} object. These annotations will
      *  not be passed on to {@link android.service.notification.NotificationListenerService}s.
      */
+    [local]
     interface INotificationSignalExtractor {
         /** One-time initialization. */
         Initialize(

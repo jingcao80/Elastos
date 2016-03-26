@@ -14,6 +14,7 @@ module
     /**
      * A class to generate {@link VelocityTrackerInterface}, depending on the configuration.
      */
+    [local]
     interface IVelocityTrackerFactory {
 
         const String PLATFORM_IMPL = "platform";

@@ -18,6 +18,7 @@ module
      * See {@link android.provider.SearchIndexableResource} and {@link SearchIndexableRaw}.
      *
      */
+    [local]
     interface IIndexableSearchIndexProvider {
         /**
          * Return a list of references for indexing.

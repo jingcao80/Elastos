@@ -234,6 +234,7 @@ module
     namespace Droid {
     namespace Server {
 
+    [local]
     class CPersistentDataBlockService {
         constructor(
             [in] IContext* ctx);
@@ -241,6 +242,7 @@ module
         interface ISystemService;
     }
 
+    [local]
     class CEntropyMixer {
         constructor(
             [in] IContext* ctx);
@@ -276,6 +278,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CInputMethodManagerService {
         constructor(
             [in] IContext* ctx,
@@ -287,6 +290,7 @@ module
         interface IHandlerCallback;
     }
 
+    [local]
     class CNetworkManagementService {
         constructor(
             [in] IContext* ctx,
@@ -296,6 +300,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CNetworkScoreService {
         constructor(
             [in] IContext* ctx);
@@ -304,6 +309,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CNsdService {
         constructor(
             [in] IContext* ctx);
@@ -312,6 +318,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CSerialService {
         constructor(
             [in] IContext* ctx);
@@ -320,6 +327,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CBluetoothManagerService {
         constructor(
             [in] IContext* ctx);
@@ -336,6 +344,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CDiskStatsService {
         constructor(
             [in] IContext* ctx);
@@ -343,6 +352,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CUpdateLockService {
         constructor(
             [in] IContext* ctx);
@@ -351,6 +361,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CSamplingProfilerService {
         constructor(
             [in] IContext* ctx);
@@ -358,6 +369,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CCountryDetectorService {
         constructor(
             [in] IContext* ctx);
@@ -367,6 +379,7 @@ module
         interface IRunnable;
     }
 
+    [local]
     class CCommonTimeManagementService {
         constructor(
             [in] IContext* ctx);
@@ -382,6 +395,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CDropBoxManagerService {
         constructor(
             [in] IContext* ctx,
@@ -411,6 +425,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CConnectivityService {
         constructor(
             [in] IContext* ctx,
@@ -422,6 +437,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CTextServicesManagerService {
         constructor(
             [in] IContext* ctx);
@@ -430,6 +446,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CUiModeManagerService {
         constructor(
             [in] IContext* ctx);
@@ -437,6 +454,7 @@ module
         interface ISystemService;
     }
 
+    [local]
     class CUiModeManagerBinderService {
         constructor(
             [in] ISystemService* uiModeManagerService);
@@ -445,6 +463,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CCertBlacklister {
         constructor(
             [in] IContext* ctx);
@@ -452,6 +471,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CVibratorService {
         constructor(
             [in] IContext* ctx);
@@ -461,6 +481,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CTelephonyRegistry {
         constructor(
             [in] IContext* ctx);
@@ -469,6 +490,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CAlarmManagerBinderService {
         constructor(
             [in] ISystemService* alarmManagerService);
@@ -477,6 +499,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CConsumerIrService {
         constructor(
             [in] IContext* ctx);
@@ -496,6 +519,7 @@ module
         interface IJobService;
     }
 
+    [local]
     class CPersistentDataBlockBinderService{
         constructor(
             [in] ISystemService* persistentDataBlockService);
@@ -504,6 +528,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CBatteryService {
         constructor(
             [in] IContext* ctx);
@@ -511,6 +536,7 @@ module
         interface ISystemService;
     }
 
+    [local]
     class CBatteryBinderService {
         constructor(
             [in] ISystemService* batteryService);
@@ -518,6 +544,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CBatteryServiceBatteryListener {
         constructor(
             [in] ISystemService* batteryService);
@@ -526,6 +553,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CLockSettingsService {
 
         constructor(
@@ -535,6 +563,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CAssetAtlasService {
 
         constructor(
@@ -653,6 +682,7 @@ module
 
     namespace Wm {
 
+    [local]
     class CWindowManagerService {
         constructor(
             [in] IContext* ctx,
@@ -881,6 +911,7 @@ module
 
     } // Projection
 
+    [local]
     class CMediaRouterService {
         constructor(
             [in] IContext* ctx);
@@ -972,6 +1003,7 @@ module
     namespace Server {
     namespace Accessibility {
 
+        [local]
         class CAccessibilityManagerService {
             constructor(
                 [in] IContext* ctx);
@@ -1011,6 +1043,7 @@ module
     namespace Server {
     namespace Webkit {
 
+    [local]
     class CWebViewUpdateBinderService {
         constructor(
             [in] ISystemService* batteryService);
@@ -1030,6 +1063,7 @@ module
     namespace Server {
     namespace Pm {
 
+    [local]
     class CLauncherAppsService {
         constructor(
             [in] IContext* ctx);
@@ -1037,6 +1071,7 @@ module
         interface ISystemService;
     }
 
+    [local]
     class CPackageManagerService {
         constructor(
             [in] IContext* ctx,
@@ -1091,6 +1126,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CPackageInstallerService {
         constructor(
             [in] IContext* ctx,
@@ -1101,6 +1137,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CPackageInstallerSession {
         constructor(
             [in] Handle64 cb,
@@ -1130,6 +1167,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CUserManagerService {
         constructor(
             [in] IFile* dataDir,
@@ -1163,6 +1201,7 @@ module
     namespace Server {
     namespace StatusBar {
 
+    [local]
     class CStatusBarManagerService {
         constructor(
             [in] IContext* ctx,
@@ -1182,6 +1221,7 @@ module
     namespace Server {
     namespace Dreams {
 
+    [local]
     class CDreamManagerService {
         constructor(
             [in] IContext* ctx);
@@ -1190,6 +1230,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CDreamManagerBinderService {
         constructor(
             [in] ISystemService* dreamManagerService);
@@ -1208,6 +1249,7 @@ module
     namespace Server {
     namespace Wallpaper {
 
+        [local]
         class CWallpaperManagerService  {
             constructor(
                 [in] IContext* ctx);
@@ -1239,6 +1281,7 @@ module
     namespace Server {
     namespace Connectivity {
 
+        [local]
         class CTethering {
             constructor(
                 [in] IContext* ctx,
@@ -1258,6 +1301,7 @@ module
             interface IBinder;
         }
 
+        [local]
         class CNat464Xlat {
             constructor(
                 [in] IContext* ctx,
@@ -1282,6 +1326,7 @@ module
     /**
      * {@hide}
      */
+    [local]
     class CContentService {
         constructor(
             [in] IContext* ctx,
@@ -1340,6 +1385,7 @@ module
     namespace Server {
     namespace Display {
 
+    [local]
     class CDisplayManagerService {
         constructor(
             [in] IContext* ctx);
@@ -1347,6 +1393,7 @@ module
         interface ISystemService;
     }
 
+    [local]
     class CDisplayManagerBinderService {
         constructor(
             [in] ISystemService* displayManagerService);
@@ -1374,6 +1421,7 @@ module
     namespace Server {
     namespace Am {
 
+    [local]
     class CActivityManagerService {
         constructor(
             [in] IContext* ctx);
@@ -1577,6 +1625,7 @@ module
     namespace Server {
     namespace Clipboard {
 
+    [local]
     class CClipboardService {
         constructor(
             [in] IContext* ctx);
@@ -1595,6 +1644,7 @@ module
     namespace Server {
     namespace Net {
 
+    [local]
     class CNetworkPolicyManagerService {
         constructor(
             [in] IContext* ctx,
@@ -1617,6 +1667,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CNetworkStatsService {
         constructor(
             [in] IContext* ctx,
@@ -1645,6 +1696,7 @@ module
     namespace Server {
     namespace Lights {
 
+    [local]
     class CLegacyFlashlightHack {
         constructor(
             [in] ISystemService* service);
@@ -1679,6 +1731,7 @@ module
         interface IBinder;
     }
 
+    [local]
     class CFusedLocationHardwareSecure {
         constructor(
             [in] IIFusedLocationHardware* locationHardware,
@@ -1723,6 +1776,7 @@ module
     namespace Server {
     namespace Input {
 
+    [local]
     class CInputManagerService {
         constructor(
             [in] IContext* ctx);
@@ -1750,6 +1804,7 @@ module
     namespace Server {
     namespace Notification {
 
+    [local]
     class CNotificationManagerService {
         constructor(
             [in] IContext* ctx);
@@ -1757,6 +1812,7 @@ module
         interface ISystemService;
     }
 
+    [local]
     class CNotificationManagerBinderService {
         constructor(
             [in] ISystemService* service);
@@ -1783,6 +1839,7 @@ module
     namespace Server {
     namespace Power {
 
+    [local]
     class CPowerManagerServiceBinderService {
         constructor(
             [in] ISystemService* service);
@@ -1809,6 +1866,7 @@ module
     namespace Server {
     namespace AppWidget {
 
+    [local]
     class CAppWidgetService {
         constructor(
             [in] IContext* ctx);
@@ -1816,6 +1874,7 @@ module
         interface ISystemService;
     }
 
+    [local]
     class CAppWidgetServiceImpl {
          constructor(
              [in] IContext* ctx);
@@ -1853,6 +1912,7 @@ module
     namespace Server {
     namespace Twilight {
 
+    [local]
     class CTwilightService {
         constructor(
             [in] IContext* ctx);

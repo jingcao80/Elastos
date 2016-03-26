@@ -40,6 +40,7 @@ module
     namespace Settings {
     namespace Dashboard {
 
+    [local]
     class CDashboardTileView {
         constructor(
             [in] IContext* context);
@@ -69,6 +70,7 @@ module
     namespace Settings {
     namespace Widget {
 
+    [local]
     class CSwitchBar {
         constructor(
             [in] IContext* ctx);
@@ -152,6 +154,7 @@ module
     namespace Droid {
     namespace Settings {
 
+    [local]
     class CUserSpinnerAdapter {
         constructor(
             [in] IContext* context,

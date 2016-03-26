@@ -20,6 +20,7 @@ module
             [out] IView** view);
     }
 
+    [local]
     interface IPreviewInflaterHelper {
         WouldLaunchResolverActivity(
             [in] IContext* ctx,

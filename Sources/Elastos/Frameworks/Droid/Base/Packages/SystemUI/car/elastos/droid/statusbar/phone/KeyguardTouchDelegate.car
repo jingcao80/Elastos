@@ -44,6 +44,7 @@ module
             [in] IKeyguardTouchDelegate* keyguardTouchDelegate);
     }
 
+    [local]
     interface IKeyguardTouchDelegateHelper {
         GetInstance(
             [in] IContext* ctx,

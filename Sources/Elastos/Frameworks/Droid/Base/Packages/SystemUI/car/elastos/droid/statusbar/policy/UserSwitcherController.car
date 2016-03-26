@@ -19,6 +19,7 @@ module
      * @Involve
      * interface IBaseAdapter
      */
+    [local]
     interface IUserSwitcherControllerBaseUserAdapter {
         SwitchTo(
             [in] IUserSwitcherControllerUserRecord* record);
@@ -40,6 +41,7 @@ module
     /**
      * Keeps a list of all users on the device for user switching.
      */
+    [local]
     interface IUserSwitcherController {
         IsSimpleUserSwitcher(
             [out] Boolean* result);

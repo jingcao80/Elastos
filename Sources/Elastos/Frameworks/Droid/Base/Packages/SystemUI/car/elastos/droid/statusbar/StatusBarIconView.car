@@ -41,6 +41,7 @@ module
      * @return Drawable for this item, or null if the package or item could not
      *         be found
      */
+    [local]
     interface IStatusBarIconViewHelper {
         GetIcon(
             [in] IContext* ctx,

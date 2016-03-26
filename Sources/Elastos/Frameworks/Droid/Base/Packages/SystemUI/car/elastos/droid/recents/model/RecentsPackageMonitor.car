@@ -25,6 +25,7 @@ module
      * @Involve
      * interface IPackageMonitor
      */
+    [local]
     interface IRecentsPackageMonitor {
 
         /** Registers the broadcast receivers with the specified callbacks. */
