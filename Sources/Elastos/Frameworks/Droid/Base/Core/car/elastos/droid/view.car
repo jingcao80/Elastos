@@ -246,6 +246,7 @@ module
     namespace Droid {
     namespace View {
 
+    [local]
     class CView {
         constructor(
             [in] IContext* ctx);
@@ -271,6 +272,7 @@ module
         interface IAccessibilityEventSource;
     }
 
+    [local]
     class CTextureView {
         constructor(
             [in] IContext* ctx);
@@ -297,6 +299,7 @@ module
         interface IAccessibilityEventSource;
     }
 
+    [local]
     class CMenuInflater
     {
         constructor (
@@ -309,6 +312,7 @@ module
         interface IMenuInflater;
     }
 
+    [local]
     class CContextThemeWrapper
     {
         constructor ();
@@ -2066,7 +2070,7 @@ module
         interface IInputConnection;
     }
 
-    // [local]
+    [local]
     class CInputMethodInfo {
         constructor();
 
@@ -2181,6 +2185,7 @@ module
         interface IParcelable;
     }
 
+    [local]
     class CSpellCheckerInfo {
         constructor();
 

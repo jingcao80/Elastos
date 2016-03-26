@@ -10,6 +10,7 @@ module
     interface ITimePickerClockDelegate {
     }
 
+    [local]
     interface ITimePickerClockDelegateHelper {
     	GetAmPmStrings(
     		[in] IContext* ctx,

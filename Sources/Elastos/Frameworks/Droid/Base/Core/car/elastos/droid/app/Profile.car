@@ -48,6 +48,7 @@ module
         const Int32 ON_A2DP_DISCONNECT = 4;
     }
 
+    [local]
     interface IProfileTrigger {
         GetType(
             [out] Int32* type);
@@ -66,6 +67,7 @@ module
             [in] IContext* context);
     }
 
+    [local]
     interface IProfileTriggerHelper {
         FromXml(
             [in] IXmlPullParser* xpp,
@@ -73,6 +75,7 @@ module
             [out] IProfileTrigger** trigger);
     }
 
+    [local, parcelable]
     interface IProfile {
         GetTrigger(
             [in] Int32 type,
@@ -204,6 +207,7 @@ module
             [out] ICollection** descriptors);
     }
 
+    [local]
     interface IProfileHelper {
         FromXml(
             [in] IXmlPullParser* xpp,

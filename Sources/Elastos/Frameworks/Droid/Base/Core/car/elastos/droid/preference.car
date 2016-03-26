@@ -103,6 +103,7 @@ module
             interface IParcelable;
         }
 
+        [local]
         class CCheckBoxPreference {
             constructor(
                 [in] IContext* ctx,
@@ -140,6 +141,7 @@ module
             interface IParcelable;
         }
 
+        [local]
         class CEditTextPreference {
             constructor(
                 [in] IContext* ctx,
@@ -180,6 +182,7 @@ module
             interface IParcelable;
         }
 
+        [local]
         class CListPreference {
             constructor(
                 [in] IContext* ctx,
@@ -220,6 +223,7 @@ module
             interface IParcelable;
         }
 
+        [local]
         class CMultiCheckPreference {
             constructor(
                 [in] IContext* ctx,
@@ -260,6 +264,7 @@ module
             interface IParcelable;
         }
 
+        [local]
         class CMultiSelectListPreference {
             constructor(
                 [in] IContext* ctx,
@@ -300,6 +305,7 @@ module
             interface IParcelable;
         }
 
+        [local]
         class CSeekBarDialogPreference {
             constructor(
                 [in] IContext* ctx,
@@ -332,6 +338,7 @@ module
             interface ISeekBarDialogPreferenceHelper;
         }
 
+        [local]
         class CSeekBarVolumizer {
             constructor(
                 [in] IContext* ctx,
@@ -344,6 +351,7 @@ module
             interface IHandlerCallback;
         }
 
+        [local]
         class CSwitchPreference {
             constructor(
                 [in] IContext* ctx,
@@ -369,6 +377,7 @@ module
             interface IPreference;
         }
 
+        [local]
         class CVolumePreference {
             constructor(
                 [in] IContext* ctx,
@@ -431,6 +440,7 @@ module
             interface IGenericInflater;
         }
 
+        [local]
         class CPreferenceCategory {
             constructor(
                 [in] IContext* ctx,
@@ -483,6 +493,7 @@ module
            interface IBaseAdapter;
         }
 
+        [local]
         class CRingtonePreference {
             constructor(
                 [in] IContext* ctx,
@@ -508,6 +519,7 @@ module
             interface IPreferenceManagerOnActivityResultListener;
         }
 
+        [local]
         class CPreferenceFrameLayout {
             constructor(
                 [in] IContext* ctx,
@@ -538,9 +550,10 @@ module
             interface IAccessibilityEventSource;
         }
 
+        [local]
         class CPreferenceFrameLayoutLayoutParams {
             constructor(
-                [in] IContext* c,
+                [in] IContext* ctx,
                 [in] IAttributeSet* attrs);
 
             constructor(
@@ -552,6 +565,7 @@ module
             interface IViewGroupLayoutParams;
         }
 
+        [local]
         class CPreferenceScreen {
             constructor(
                 [in] IContext* ctx,
@@ -577,6 +591,7 @@ module
             interface IParcelable;
         }
 
+        [local]
         class CSeekBarPreference {
             constructor(
                 [in] IContext* ctx,

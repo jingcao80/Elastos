@@ -1479,6 +1479,7 @@ module
             [out] INotification** notification);
     }
 
+    [local]
     interface INotificationBuilderHelper {
         CalculateTopPadding(
             [in] IContext* ctx,

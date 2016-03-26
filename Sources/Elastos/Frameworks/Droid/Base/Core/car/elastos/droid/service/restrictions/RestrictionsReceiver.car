@@ -26,6 +26,7 @@ module
      * @Involve
      * interface IBroadcastReceiver
      */
+    [local]
     interface IRestrictionsReceiver {
         /**
          * An asynchronous permission request made by an application for an operation that requires

@@ -48,6 +48,7 @@ module
      * @Involve
      * interface IParcelable
      */
+    [local, parcelable]
     interface IPhoneAccount {
         /**
          * Flag indicating that this {@code PhoneAccount} can act as a connection manager for

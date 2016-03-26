@@ -19,6 +19,7 @@ module
         ProfileGroupMode_OVERRIDE,
     }
 
+    [local, parcelable]
     interface IProfileGroup {
         /** @hide */
         Matches(
@@ -88,6 +89,7 @@ module
             [in] IContext* context);
     }
 
+    [local]
     interface IProfileGroupHelper {
         FromXml(
             [in] IXmlPullParser* xpp,

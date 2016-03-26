@@ -15,6 +15,7 @@ module
      *
      * @hide
      */
+    [local]
     interface ISandman
     {
         /**

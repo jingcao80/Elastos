@@ -133,6 +133,7 @@ module
      * @Involved
      * no super interface ;
      */
+    [local]
     interface IRequestQueueConnectionManager {
         GetProxyHost(
             [out] IHttpHost** result);

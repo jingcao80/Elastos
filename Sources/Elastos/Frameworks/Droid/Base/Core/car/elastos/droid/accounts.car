@@ -26,7 +26,7 @@ module
     namespace Droid {
     namespace Accounts {
 
-    // [local]
+    [local]
     class CAccountManager {
         /**
          * @hide

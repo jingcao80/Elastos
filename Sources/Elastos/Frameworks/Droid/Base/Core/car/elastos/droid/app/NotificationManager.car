@@ -154,6 +154,7 @@ module
             [out] Int32* result);
     }
 
+    [local]
     interface INotificationManagerHelper {
         /** @hide */
         GetService(

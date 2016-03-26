@@ -425,7 +425,7 @@ module
         interface IAccessibilityEventSource;
     }
 
-   //  [local]
+    [local]
     class CPointerLocationView {
         constructor(
             [in] IContext* ctx);
@@ -456,7 +456,7 @@ module
         interface IAccessibilityEventSource;
     }
 
-   //  [local]
+    [local]
     class CPasswordEntryKeyboard {
         constructor(
             [in] IContext* ctx,
@@ -516,7 +516,7 @@ module
 //        interface IOnKeyboardActionListener;
     }
 
-   //  [local]
+    [local]
     class CPasswordEntryKeyboardView {
 
         constructor(
@@ -582,7 +582,7 @@ module
         interface IAccessibilityEventSource;
     }
 
-   //  [local]
+    [local]
     class CRotarySelector {
         constructor(
             [in] IContext* ctx);
@@ -895,6 +895,7 @@ module
         interface ILockPatternUtils;
     }
 
+    [local]
     class CResolverDrawerLayout {
         constructor(
             [in] IContext* context);
@@ -949,6 +950,7 @@ module
         interface ITargetDrawable;
     }
 
+    [local]
     class CGlowPadView {
 
         constructor(

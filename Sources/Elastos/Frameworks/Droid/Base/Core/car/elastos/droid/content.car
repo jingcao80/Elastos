@@ -184,6 +184,7 @@ module
     namespace Droid {
     namespace Content {
 
+        [local]
         class CLoader {
             /**
              * Stores away the application context associated with context.
@@ -596,7 +597,7 @@ module
             interface IContentObserver;
         }
 
-        [deprecated]
+        [deprecated, local]
         class CCursorLoader {
             constructor(
                 [in] IContext* ctx);
@@ -822,6 +823,7 @@ module
             interface IParcelable;
         }
 
+        [local]
         class CSyncAdaptersCache {
             constructor(
                 [in] IContext* context);
@@ -830,6 +832,7 @@ module
             interface IRegisteredServicesCache;
         }
 
+        [local]
         class CRestrictionsManager {
             constructor(
                 [in] IContext* context,

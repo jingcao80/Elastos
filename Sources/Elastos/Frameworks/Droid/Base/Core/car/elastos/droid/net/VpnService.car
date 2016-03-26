@@ -199,6 +199,7 @@ module
         OnRevoke();
     }
 
+    [local]
     interface IVpnServiceHelper {
         /**
          * Prepare to establish a VPN connection. This method returns {@code null}

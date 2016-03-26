@@ -224,7 +224,8 @@ module
    //      interface IAccessibilityEventSource;
    //  }
 
-   class CTableRow {
+    [local]
+    class CTableRow {
         constructor(
             [in] IContext* ctx);
 
@@ -241,9 +242,9 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
-   }
+    }
 
-   [local]
+    [local]
     class CTableRowLayoutParams {
         constructor();
 
@@ -275,7 +276,8 @@ module
         interface IViewGroupLayoutParams;
     }
 
-   class CTabWidget {
+    [local]
+    class CTabWidget {
         constructor(
             [in] IContext* ctx);
 
@@ -304,9 +306,10 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
-   }
+    }
 
-   class CTabHost {
+    [local]
+    class CTabHost {
         constructor(
             [in] IContext* ctx);
 
@@ -335,9 +338,10 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
-   }
+    }
 
-   class CToolBar {
+    [local]
+    class CToolBar {
         constructor(
             [in] IContext* ctx);
 
@@ -364,7 +368,7 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
-   }
+    }
 
     class CScrollBarDrawable {
         constructor();
@@ -373,6 +377,7 @@ module
         interface IDrawable;
     }
 
+    [local]
     class CQuickContactBadge {
         constructor(
             [in] IContext* ctx);
@@ -401,6 +406,7 @@ module
         interface IViewOnClickListener;
     }
 
+    [local]
     class CTextClock {
         constructor(
             [in] IContext* ctx);
@@ -429,6 +435,7 @@ module
         interface IOnPreDrawListener;
     }
 
+    [local]
     class CAutoCompleteTextView {
         constructor(
             [in] IContext* ctx);
@@ -459,6 +466,7 @@ module
         interface IOnPreDrawListener;
     }
 
+    [local]
     class CMultiAutoCompleteTextView {
         constructor(
             [in] IContext* ctx);
@@ -490,7 +498,7 @@ module
         interface IOnPreDrawListener;
     }
 
-
+    [local]
     class CCheckBox {
         constructor(
             [in] IContext* ctx);
@@ -522,6 +530,7 @@ module
         interface IOnPreDrawListener;
     }
 
+    [local]
     class CSpace {
         constructor(
             [in] IContext* ctx);
@@ -548,6 +557,7 @@ module
         interface IAccessibilityEventSource;
     }
 
+    [local]
     class CTextSwitcher {
         constructor(
             [in] IContext* ctx);
@@ -569,7 +579,7 @@ module
         interface IAccessibilityEventSource;
     }
 
-
+    [local]
     class CSlidingDrawer {
         constructor(
             [in] IContext* ctx,
@@ -677,6 +687,7 @@ module
         interface IAccessibilityEventSource;
     }
 
+    [local]
     class CActionMenuViewLayoutParams {
         constructor(
             [in] IContext* c,
@@ -1085,7 +1096,7 @@ module
         interface IParcelable;
     }
 
-   //  [local]
+    [local]
     class CDialerFilter {
         constructor(
             [in] IContext* ctx);
@@ -1110,7 +1121,7 @@ module
         interface IEdgeEffect;
     }
 
-   //  [local]
+    [local]
     class CDatePicker {
         constructor(
             [in] IContext* ctx);
@@ -1135,7 +1146,7 @@ module
         interface IAccessibilityEventSource;
     }
 
-   //  [local]
+    [local]
     class CDigitalClock {
         constructor(
             [in] IContext* ctx);
@@ -1153,7 +1164,7 @@ module
         interface IOnPreDrawListener;
     }
 
-   //  [local]
+    [local]
     class CDateTimeView {
         constructor(
             [in] IContext* ctx);
@@ -1667,7 +1678,7 @@ module
         interface IAccessibilityEventSource;
     }
 
-   //  [local]
+    [local]
     class CCheckedTextView {
         constructor(
             [in] IContext* ctx);
@@ -1723,7 +1734,7 @@ module
         interface IAccessibilityEventSource;
     }
 
-   //  [local]
+    [local]
     class CCalendarView {
         constructor(
             [in] IContext* ctx);
@@ -2222,6 +2233,7 @@ module
         interface ICursorFilterClient;
     }
 
+    [local]
     class CSimpleMonthAdapter {
         constructor(
             [in] IContext* ctx,
@@ -2291,7 +2303,7 @@ module
         interface IAccessibilityEventSource;
     }
 
-   //  [local]
+    [local]
     class CShareActionProvider {
         constructor(
             [in] IContext* ctx);
@@ -2571,7 +2583,7 @@ module
         interface IParcelable;
     }
 
-   //  [local]
+    [local]
     class CMediaController {
         constructor(
             [in] IContext* ctx);

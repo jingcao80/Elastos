@@ -600,6 +600,7 @@ module
             [out] IUri** uri);
     }
 
+    [local]
     interface IBrowserContractSettings {
 
         /**

@@ -36,6 +36,7 @@ module
     namespace Droid {
     namespace Transition {
 
+    [local]
     class CArcMotion {
 
         constructor(
@@ -46,6 +47,7 @@ module
         interface IArcMotion;
     }
 
+    [local]
     class CAutoTransition {
 
         constructor();
@@ -59,6 +61,7 @@ module
         interface ICloneable;
     }
 
+    [local]
     class CChangeBounds {
 
         constructor();
@@ -72,6 +75,7 @@ module
         interface ICloneable;
     }
 
+    [local]
     class CChangeClipBounds {
 
         constructor();
@@ -84,6 +88,7 @@ module
         interface ICloneable;
     }
 
+    [local]
     class CChangeImageTransform {
 
         constructor();
@@ -96,6 +101,7 @@ module
         interface ICloneable;
     }
 
+    [local]
     class CChangeScroll {
 
         constructor();
@@ -115,6 +121,7 @@ module
         interface ICloneable;
     }
 
+    [local]
     class CChangeTransform {
 
         constructor();
@@ -141,6 +148,7 @@ module
         interface ICloneable;
     }
 
+    [local]
     class CExplode {
 
         constructor();
@@ -154,6 +162,7 @@ module
         interface IVisibility;
     }
 
+    [local]
     class CFade {
 
         constructor();
@@ -171,6 +180,7 @@ module
         interface IFade;
     }
 
+    [local]
     class CPatternPathMotion {
 
         constructor();
@@ -186,6 +196,7 @@ module
         interface IPathMotion;
     }
 
+    [local]
     class CRecolor {
 
         constructor();
@@ -221,6 +232,7 @@ module
         interface IVisibilityPropagation;
     }
 
+    [local]
     class CSlide {
 
         constructor();
@@ -249,6 +261,7 @@ module
         interface ITransitionManager;
     }
 
+    [local]
     class CTransitionSet {
 
         constructor();

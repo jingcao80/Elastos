@@ -19,6 +19,7 @@ module
          * @Involve
          * interface IParcelable
          */
+        [local, parcelable]
         interface IStatusHints {
             GetPackageName(
                 [out] IComponentName** res);

@@ -118,6 +118,7 @@ module
 
     namespace Fingerprint {
 
+        [local]
         class CFingerprintManager {
             constructor(
                 [in] IContext* ctx,

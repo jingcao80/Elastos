@@ -10,6 +10,7 @@ module
     namespace Droid {
     namespace Net {
 
+    [local]
     interface INetworkPolicyManagerHelper {
 
         From(

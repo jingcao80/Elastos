@@ -21,6 +21,7 @@ module
      * @Involved
      * no super interface
      */
+    [local]
     interface ITrafficStats {
         /**
          * The return value to indicate that the device does not support the statistic.

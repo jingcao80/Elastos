@@ -27,12 +27,12 @@ module
             [out] Boolean* result);
     }
 
+    [local]
     interface IEnableAccessibilityControllerHelper {
         CanEnableAccessibilityViaGesture(
             [in] IContext* ctx,
             [out] Boolean* result);
     }
-
 
     } // Impl
     } // Policy

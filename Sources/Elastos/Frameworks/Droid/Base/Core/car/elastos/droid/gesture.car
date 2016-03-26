@@ -102,6 +102,7 @@ module
         interface IGestureUtils;
     }
 
+    [local]
     class CGestureOverlayView {
         constructor(
             [in] IContext* ctx);

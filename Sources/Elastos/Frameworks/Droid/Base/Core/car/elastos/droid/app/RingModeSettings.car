@@ -9,6 +9,7 @@ module
     namespace Droid {
     namespace App {
 
+    [local, parcelable]
     interface IRingModeSettings {
         GetValue(
             [out] String* value);
@@ -35,6 +36,7 @@ module
             [in] IContext* context);
     }
 
+    [local]
     interface IRingModeSettingsHelper {
         FromXml(
             [in] IXmlPullParser* xpp,

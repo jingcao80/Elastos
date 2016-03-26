@@ -9,6 +9,7 @@ module
     namespace Droid {
     namespace App {
 
+    [local, parcelable]
     interface IConnectionSettings {
         const Int32 PROFILE_CONNECTION_MOBILEDATA = 0;
         const Int32 PROFILE_CONNECTION_WIFI = 1;
@@ -46,6 +47,7 @@ module
             [in] IContext* context);
     }
 
+    [local]
     interface IConnectionSettingsHelper {
         FromXml(
             [in] IXmlPullParser* xpp,

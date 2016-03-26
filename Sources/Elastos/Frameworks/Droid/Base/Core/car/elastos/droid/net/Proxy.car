@@ -18,6 +18,7 @@ module
      * @Involved
      * no super interface
      */
+    [local]
     interface IProxy {
         /**
          * Used to notify an app that's caching the default connection proxy

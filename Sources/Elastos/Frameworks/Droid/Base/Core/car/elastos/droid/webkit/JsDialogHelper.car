@@ -15,6 +15,7 @@ module
      *
      * @hide Helper class for internal use
      */
+    [local]
     interface IJsDialogHelper {
 
         // Dialog types

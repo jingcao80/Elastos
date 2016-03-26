@@ -23,6 +23,7 @@ module
      * @Involve
      * interface IDisplayListener
      */
+    [local]
     interface IMediaRouterStatic
     {
         // Called after sStatic is initialized
@@ -159,6 +160,7 @@ module
     /**
      * Information about a media route.
      */
+    [local]
     interface IMediaRouterRouteInfo {
         /** @hide */ const Int32 STATUS_NONE = 0;
         /** @hide */ const Int32 STATUS_SCANNING = 1;
@@ -449,6 +451,7 @@ module
     /**
      * Definition of a category of routes. All routes belong to a category.
      */
+    [local]
     interface IMediaRouterRouteCategory {
         /**
          * @return the name of this route category
@@ -512,6 +515,7 @@ module
             [out] Boolean * result);
     }
 
+    [local]
     interface IMediaRouterRouteCallbackInfo
     {
         FilterRouteEvent(
@@ -535,6 +539,7 @@ module
      * @see MediaRouter#addCallback(int, Callback, int)
      * @see MediaRouter#removeCallback(Callback)
      */
+    [local]
     interface IMediaRouterCallback {
         /**
          * Called when the supplied route becomes selected as the active route
@@ -669,6 +674,7 @@ module
      *
      * @see UserRouteInfo#setVolumeCallback(VolumeCallback)
      */
+    [local]
     interface IMediaRouterVolumeCallback {
         /**
          * Called when the volume for the route should be increased or decreased.
@@ -693,6 +699,7 @@ module
 
     }
 
+    [local]
     interface IMediaRouterVolumeCallbackInfo
     {
         SetVolumeCallback(
@@ -719,6 +726,7 @@ module
      * @Involve
      * interface Elastos.Droid.Media.IMediaRouterRouteInfo
      */
+    [local]
     interface IMediaRouterUserRouteInfo {
         /**
          * Set the user-visible name of this route.
@@ -1220,6 +1228,7 @@ module
             [in] Int32 userId);
     }
 
+    [local]
     interface IMediaRouterHelper
     {
         SelectRouteStatic(

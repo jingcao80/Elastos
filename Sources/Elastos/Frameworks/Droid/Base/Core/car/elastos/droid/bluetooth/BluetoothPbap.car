@@ -28,6 +28,7 @@ module
          *
          * @hide
          */
+        [local]
         interface IBluetoothPbap {
             /** int extra for PBAP_STATE_CHANGED_ACTION */
             const String PBAP_STATE =
@@ -98,9 +99,9 @@ module
              */
             Disconnect(
                 [out] Boolean* result);
-
         }
 
+        [local]
         interface IBluetoothPbapServiceListener {
             /**
              * Called to notify the client when this proxy object has been

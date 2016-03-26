@@ -16,6 +16,7 @@ module
     namespace Droid {
     namespace App {
 
+    [local]
     interface IIconCustomizer {
         GetComposedIconDrawable(
             [in] IDrawable* icon,
@@ -134,6 +135,7 @@ module
             [out] IDrawable** drawable);
     }
 
+    [local]
     interface IIconPackHelperHelper {
         CreateIconResource(
             [in] IContext* context,

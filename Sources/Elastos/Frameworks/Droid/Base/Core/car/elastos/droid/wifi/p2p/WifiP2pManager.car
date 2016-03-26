@@ -118,6 +118,7 @@ module
      * @Involved
      * no super interface
      */
+    [local]
     interface IWifiP2pManager {
         /**
          * Broadcast intent action to indicate whether Wi-Fi p2p is enabled or disabled. An

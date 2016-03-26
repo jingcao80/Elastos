@@ -254,6 +254,7 @@ module
     namespace Droid {
     namespace Hardware {
 
+        [local]
         class CSystemSensorManager {
             constructor(
                 [in] IContext* ctx,
@@ -263,6 +264,7 @@ module
             interface ISensorManager;
         }
 
+        [local]
         class CCmHardwareManager {
             constructor(
                 [in] IContext* ctx);
@@ -270,6 +272,7 @@ module
             interface ICmHardwareManager;
         }
 
+        [local]
         class CConsumerIrManager {
             constructor(
                 [in] IContext* context);
@@ -542,6 +545,7 @@ module
             interface ICaptureRequestKey;
         }
 
+        [local]
         class CCameraManager {
             constructor();
 
@@ -1423,6 +1427,7 @@ module
             interface IDisplayPowerRequest;
         }
 
+        [local]
         class CVirtualDisplay {
             constructor(
                 [in] IDisplayManagerGlobal* global,

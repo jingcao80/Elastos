@@ -9,6 +9,7 @@ module
     namespace Droid {
     namespace App {
 
+    [local, parcelable]
     interface IBrightnessSettings {
         GetValue(
             [out] Int32* value);
@@ -33,6 +34,7 @@ module
             [in] IContext* context);
     }
 
+    [local]
     interface IBrightnessSettingsHelper {
         FromXml(
             [in] IXmlPullParser* xpp,

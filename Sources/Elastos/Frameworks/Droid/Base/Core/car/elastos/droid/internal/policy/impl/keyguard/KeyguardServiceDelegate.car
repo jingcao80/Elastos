@@ -25,6 +25,7 @@ module
      * keyguard crashes. It currently also allows runtime-selectable
      * local or remote instances of keyguard.
      */
+    [local]
     interface IKeyguardServiceDelegate {
         const String KEYGUARD_PACKAGE = "com.android.systemui";
         const String KEYGUARD_CLASS = "com.android.systemui.keyguard.KeyguardService";

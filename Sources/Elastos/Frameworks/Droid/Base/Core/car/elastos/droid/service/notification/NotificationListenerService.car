@@ -122,7 +122,7 @@ module
      *
      * interface Elastos.Droid.View.IWindowCallback
      */
-    [deprecated]
+    [deprecated, local]
     interface INotificationListenerService {
         /**
          * {@link #getCurrentInterruptionFilter() Interruption filter} constant -

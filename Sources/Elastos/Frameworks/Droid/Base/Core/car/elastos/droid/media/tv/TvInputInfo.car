@@ -23,6 +23,7 @@ module
      * @hide
      */
     // @SystemApi
+    [local]
     interface ITvInputInfoTvInputSettings {
         /**
          * Returns a set of TV input IDs which are marked as hidden by user in the settings.
@@ -84,6 +85,7 @@ module
     /**
      * This class is used to specify meta information of a TV input.
      */
+    [local, parcelable]
     interface ITvInputInfo {
         // Should be in sync with frameworks/base/core/res/res/values/attrs.xml
         /**

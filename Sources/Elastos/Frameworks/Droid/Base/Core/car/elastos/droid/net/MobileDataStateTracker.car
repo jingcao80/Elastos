@@ -22,7 +22,7 @@ module
      * interface IBaseNetworkStateTracker;
      * interface INetworkStateTracker;
      */
-    [deprecated]
+    [deprecated, local]
     interface IMobileDataStateTracker {
 
         /**

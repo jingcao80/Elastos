@@ -8,7 +8,7 @@ module
         /**
          * This abstract class is used to implement {@link BluetoothGattServer} callbacks.
          */
-        [deprecated]
+        [deprecated, local]
         interface IBluetoothGattServerCallback {
             /**
              * Callback indicating when a remote device has been connected or disconnected.

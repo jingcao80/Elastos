@@ -9,7 +9,7 @@ module
     namespace Droid {
     namespace App {
 
-    [deprecated]
+    [deprecated, local, parcelable]
     interface IStreamSettings {
         GetStreamId(
             [out] Int32* streamId);
@@ -34,6 +34,7 @@ module
             [in] IContext* context);
     }
 
+    [local]
     interface IStreamSettingsHelper {
         FromXml(
             [in] IXmlPullParser* xpp,

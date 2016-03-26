@@ -113,6 +113,7 @@ module
         }
 
         // A delegate class to map a particular invocation with a ShowListener object.
+        [local]
         class CKeyguardShowDelegate {
             constructor(
                 [in] IKeyguardServiceDelegate* hostKeyguardServiceDelegate,
@@ -123,6 +124,7 @@ module
         }
 
         //A delegate class to map a particular invocation with an OnKeyguardExitResult object.
+        [local]
         class CKeyguardExitDelegate {
             constructor(
                 [in] IKeyguardServiceDelegate* hostKeyguardServiceDelegate,
@@ -157,6 +159,7 @@ module
             interface IBarController;
         }
 
+        [local]
         class CEnableAccessibilityController {
             constructor(
                 [in] IContext* ctx,
@@ -169,6 +172,7 @@ module
             interface IEnableAccessibilityControllerHelper;
         }
 
+        [local]
         class CImmersiveModeConfirmation {
             constructor(
                 [in] IContext* ctx);
@@ -186,6 +190,7 @@ module
             interface ITimeInterpolator;
         }
 
+        [local]
         class CPhoneFallbackEventHandler {
             constructor(
                 [in] IContext* ctx);
@@ -194,6 +199,7 @@ module
             interface IFallbackEventHandler;
         }
 
+        [local]
         class CPhoneLayoutInflater {
              constructor(
                  [in] IContext* ctx);
@@ -202,6 +208,7 @@ module
             interface ILayoutInflater;
         }
 
+        [local]
         class CPhoneWindow {
             constructor(
                 [in] IContext* ctx);
@@ -243,6 +250,7 @@ module
             interface IPolicyControl;
         }
 
+        [local]
         class CRecentApplicationsBackground {
             constructor(
                 [in] IContext* ctx);
@@ -262,6 +270,7 @@ module
             interface IDrawableCallback;
         }
 
+        [local]
         class CRecentApplicationsDialog {
             constructor(
                 [in] IContext* ctx);
@@ -276,6 +285,7 @@ module
             interface IDialogInterface;
         }
 
+        [local]
         class CSystemGesturesPointerEventListener {
             constructor(
                 [in] IContext* ctx,

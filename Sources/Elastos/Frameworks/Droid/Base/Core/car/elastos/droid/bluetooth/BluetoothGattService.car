@@ -13,6 +13,7 @@ module
          * <p> Gatt Service contains a collection of {@link BluetoothGattCharacteristic},
          * as well as referenced services.
          */
+        [local]
         interface IBluetoothGattService {
             /**
              * Primary service

@@ -17,7 +17,7 @@ module
          *
          * @sa BluetoothAdapter#getProfileProxy
          */
-        [deprecated]
+        [deprecated, local]
         interface IBluetoothProfile {
             /**
              * Extra for the connection state intents of the individual profiles.
@@ -209,6 +209,7 @@ module
          * An interface for notifying BluetoothProfile IPC clients when they have
          * been connected or disconnected to the service.
          */
+        [local]
         interface IBluetoothProfileServiceListener {
             /**
              * Called to notify the client when the proxy object has been

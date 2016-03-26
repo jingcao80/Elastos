@@ -24,7 +24,7 @@ module
     namespace Droid {
     namespace Content {
 
-    [deprecated]
+    [deprecated, local, parcelable]
     interface IIntent {
         // ---------------------------------------------------------------------
         // ---------------------------------------------------------------------

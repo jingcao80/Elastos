@@ -15,6 +15,7 @@ module
      * This Interface provides glue for implementing the backend of WebView static methods which
      * cannot be implemented in-situ in the proxy class.
      */
+    [local]
     interface IWebViewFactoryProviderStatics {
 
         /**

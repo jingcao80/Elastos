@@ -1274,7 +1274,7 @@ module
             [out] Int32* result);
     }
 
-    [deprecated]
+    [deprecated, local]
     interface ITelephonyManagerHelper {
 
         GetDefault(

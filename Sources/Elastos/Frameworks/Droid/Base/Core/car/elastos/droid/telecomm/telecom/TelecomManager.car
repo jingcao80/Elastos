@@ -405,6 +405,7 @@ module
                 [in] Boolean showDialpad);
         }
 
+        [local]
         interface ITelecomManagerHelper {
             From(
                 [in] IContext* ctx,

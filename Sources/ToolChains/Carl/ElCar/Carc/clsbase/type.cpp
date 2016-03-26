@@ -144,8 +144,10 @@ BOOL IsLocalCarQuintet(const CLSModule *pModule,
             _ReturnOK (TRUE);
 
         case Type_interface:
-            if (pModule->mInterfaceDirs[pType->mIndex]->mDesc->mAttribs
-                    & InterfaceAttrib_local) _ReturnOK (TRUE);
+            if (!(pModule->mInterfaceDirs[pType->mIndex]->mDesc->mAttribs
+                    & InterfaceAttrib_parcelable) &&
+                    (pModule->mInterfaceDirs[pType->mIndex]->mDesc->mAttribs
+                    & InterfaceAttrib_local)) _ReturnOK (TRUE);
             break;
 
         default:

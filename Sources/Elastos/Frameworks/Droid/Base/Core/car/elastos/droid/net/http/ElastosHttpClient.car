@@ -108,7 +108,7 @@ module
         DisableCurlLogging();
     }
 
-    [deprecated]
+    [deprecated, local]
     interface IElastosHttpClientHelper {
         // Gzip of data shorter than this probably won't be worthwhile
         GetDEFAULT_SYNC_MIN_GZIP_BYTES(

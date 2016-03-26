@@ -404,14 +404,15 @@ module
         interface IAudioHandle;
     }
 
-   class CAudioManagerAudioFocusDispatcher {
-       constructor(
-           [in] IAudioManager* owner);
+    class CAudioManagerAudioFocusDispatcher {
+        constructor(
+            [in] IAudioManager* owner);
 
-       interface IIAudioFocusDispatcher;
-       interface IBinder;
-   }
+        interface IIAudioFocusDispatcher;
+        interface IBinder;
+    }
 
+    [local]
     class CAudioManager {
         constructor(
             [in] IContext* context);
@@ -455,6 +456,7 @@ module
         interface IAudioRoutesInfo;
     }
 
+    [local]
     class CAudioService {
         constructor();
 
@@ -537,6 +539,7 @@ module
         interface ICameraProfile;
     }
 
+    [local]
     class CClosedCaptionRenderer {
         constructor(
             [in] IContext* context);
@@ -803,6 +806,7 @@ module
         interface IMediaFileType;
     }
 
+    [local]
     class CMediaFocusControl {
         constructor(
             [in] ILooper* looper,
@@ -926,7 +930,7 @@ module
         interface IMediaRouterCallback;
     }
 
-    [deprecated]
+    [deprecated, local]
     class CSubtitleController {
 
         constructor(
@@ -944,6 +948,7 @@ module
         interface ISubtitleData;
     }
 
+    [local]
     class CWebVttRenderer {
 
         constructor(
@@ -1014,6 +1019,7 @@ module
         interface ITextTrackRegion;
     }
 
+    [local]
     class CWebVttRenderingWidget {
 
         constructor(
@@ -1082,6 +1088,7 @@ module
         interface IResampleInputStream;
     }
 
+    [local]
     class CSRTRenderer {
 
         constructor(
@@ -1275,6 +1282,7 @@ module
         interface IRemoteControlClient;
     }
 
+    [local]
     class CTtmlRenderer {
         constructor(
             [in] IContext* context);
@@ -1283,6 +1291,7 @@ module
         interface ITtmlRenderer;
     }
 
+    [local]
     class CMediaRouter {
         constructor(
             [in] IContext* context);
@@ -1299,6 +1308,7 @@ module
         interface IMediaRouterRouteInfo;
     }
 
+    [local]
     class CMediaRouterRouteGroup {
         constructor(
             [in] IMediaRouterRouteCategory* category);
@@ -1324,6 +1334,7 @@ module
         interface IMediaRouterRouteCategory;
     }
 
+    [local]
     class CMediaRouterUserRouteInfo {
         constructor(
             [in] IMediaRouterRouteCategory* category);
@@ -1345,6 +1356,7 @@ module
         interface ISoundPool;
     }
 
+    [local]
     class CMediaScanner {
         constructor(
             [in] IContext* c);
@@ -1646,6 +1658,7 @@ module
         interface IMediaBrowserSubscriptionCallback;
     }
 
+    [local]
     class CMediaBrowser {
         constructor(
             [in] IContext* ctx,
@@ -1670,6 +1683,7 @@ module
         interface IMediaProjectionCallback;
     }
 
+    [local]
     class CMediaProjection {
         constructor(
             [in] IContext* ctx,
@@ -1687,6 +1701,7 @@ module
         interface IParcelable;
     }
 
+    [local]
     class CMediaProjectionManager {
         constructor(
             [in] IContext* context);
@@ -1722,6 +1737,7 @@ module
         interface IMediaControllerTransportControls;
     }
 
+    [local]
     class CMediaController {
         constructor(
             [in] IContext* ctx,
@@ -1765,6 +1781,7 @@ module
         interface IMediaSessionCallback;
     }
 
+    [local]
     class CMediaSession {
         constructor(
             [in] IContext* ctx,
@@ -1794,6 +1811,7 @@ module
         interface IParcelable;
     }
 
+    [local]
     class CMediaSessionManager {
         constructor(
             [in] IContext* context);
@@ -1801,6 +1819,7 @@ module
         interface IMediaSessionManager;
     }
 
+    [local]
     class CMediaSessionLegacyHelper {
         constructor(
             [in] IContext* context);
@@ -2025,6 +2044,7 @@ module
         interface ITvInputManager;
     }
 
+    [local]
     class CTvView {
         constructor(
             [in] IContext* context);

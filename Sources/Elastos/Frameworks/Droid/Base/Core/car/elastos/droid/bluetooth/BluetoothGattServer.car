@@ -22,7 +22,7 @@ module
          * @Involve
          * interface IBluetoothProfile
          */
-        [deprecated]
+        [deprecated, local]
         interface IBluetoothGattServer {
             /**
              * Close this GATT server instance.

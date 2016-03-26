@@ -63,6 +63,7 @@ module
             interface IParcelable;
         }
 
+        [local]
         class CRttManager {
             constructor(
                 [in] IContext* ctx,
@@ -185,6 +186,7 @@ module
             interface IParcelable;
         }
 
+        [local]
         class CWifiScanner {
             constructor(
                 [in] IContext* ctx,

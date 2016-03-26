@@ -10,6 +10,7 @@ module
     namespace Droid {
     namespace App {
 
+    [local, parcelable]
     interface INotificationGroup {
         GetName(
             [out] String* name);
@@ -41,6 +42,7 @@ module
             [in] IContext* context);
     }
 
+    [local]
     interface INotificationGroupHelper {
         FromXml(
             [in] IXmlPullParser* xpp,

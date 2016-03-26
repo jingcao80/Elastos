@@ -14,6 +14,7 @@ module
          * @Involve
          * interface IBluetoothProfile
          */
+        [local]
         interface IBluetoothMap {
             const String ACTION_CONNECTION_STATE_CHANGED =
                 "android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED";
@@ -50,7 +51,6 @@ module
              */
             GetClient(
                 [out] IBluetoothDevice** client);
-
 
             /**
              * Returns true if the specified Bluetooth device is connected.

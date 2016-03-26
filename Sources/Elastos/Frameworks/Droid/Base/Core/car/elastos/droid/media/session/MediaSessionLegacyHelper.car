@@ -19,6 +19,7 @@ module
      *
      * @hide
      */
+    [local]
     interface IMediaSessionLegacyHelper {
 
         GetSession(
@@ -57,6 +58,7 @@ module
             [in] IPendingIntent * pi);
     }
 
+    [local]
     interface IMediaSessionLegacyHelperHelper {
         GetHelper(
             [in] IContext * context,

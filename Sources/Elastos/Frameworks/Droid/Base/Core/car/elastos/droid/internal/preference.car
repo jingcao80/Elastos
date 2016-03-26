@@ -18,6 +18,7 @@ module
     namespace Internal {
     namespace Preference {
 
+    [local]
     class CYesNoPreference {
         constructor(
             [in] IContext* ctx,

@@ -137,6 +137,7 @@ module
      * @Involve
      * interface Elastos.Security.Spec.IAlgorithmParameterSpec
      */
+    [local]
     interface IKeyPairGeneratorSpec {
     /**
      * Gets the Android context used for operations with this instance.

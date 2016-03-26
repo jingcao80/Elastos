@@ -391,6 +391,7 @@ module
             [out] IPreferenceManagerOnPreferenceTreeClickListener** listener);
     }
 
+    [local]
     interface IPreferenceManagerHelper {
         /**
              * Gets a SharedPreferences instance that points to the default file that is

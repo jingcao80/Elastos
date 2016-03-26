@@ -87,6 +87,7 @@ module
      * @Involve
      * interface Elastos.Droid.Content.IContextWrapper
      */
+    [local]
     interface IBackupAgent {
         /** @hide */
         const Int32 TYPE_EOF = 0;

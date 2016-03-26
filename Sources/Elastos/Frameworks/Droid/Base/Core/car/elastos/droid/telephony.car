@@ -534,6 +534,7 @@ module
             interface IBaseColumns;
         }
 
+        [local]
         class CTelephonyManager {
 
             constructor();

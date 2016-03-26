@@ -97,6 +97,7 @@ module
      * another level, a new SoundPool is created, sounds are loaded, and play
      * resumes.</p>
      */
+    [local]
     interface ISoundPool {
         /**
          * Load the sound from the specified path.
@@ -360,6 +361,7 @@ module
         ReleaseResources();
     }
 
+    [local]
     interface ISoundPoolDelegate
     {
         Load(
@@ -438,6 +440,7 @@ module
         ReleaseSoundPoolDelegate();
     }
 
+    [local]
     interface ISoundPoolImpl
     {
         Load(
@@ -525,6 +528,7 @@ module
      * @Involve
      * interface ISoundPoolDelegate
      */
+    [local]
     interface ISoundPoolStub
     {
         Load(
@@ -594,6 +598,7 @@ module
         ReleaseSoundPoolStub();
     }
 
+    [local]
     interface ISoundPoolBuilder {
         /**
          * Sets the maximum of number of simultaneous streams that can be played simultaneously.

@@ -216,6 +216,7 @@ module
         interface IDnsPinger;
     }
 
+    [local]
     class CEthernetManager {
         constructor(
             [in] IContext* ctx,
@@ -426,6 +427,7 @@ module
         interface INetworkConfig;
     }
 
+    [local]
     class CNetworkFactory {
         constructor(
             [in] ILooper* looper,
@@ -549,6 +551,7 @@ module
         interface INetworkRequestBuilder;
     }
 
+    [local]
     class CNetworkScoreManager {
         constructor(
             [in] IContext* context);
@@ -809,6 +812,7 @@ module
         interface ISSLCertificateSocketFactoryHelper;
     }
 
+    [local]
     class CSSLSessionCache {
         constructor(
             [in] IInterface* cache);
@@ -1058,6 +1062,7 @@ module
         interface IHttpResponseCacheHelper;
     }
 
+    [local]
     class CHttpsConnection {
         constructor(
             [in] IContext* ctx,
@@ -1110,6 +1115,7 @@ module
         interface IRequestHandleHelper;
     }
 
+    [local]
     class CRequestQueue {
         constructor(
             [in] IContext* context);
@@ -1211,6 +1217,7 @@ module
         interface IParcelable;
     }
 
+    [local]
     class CNsdManager {
         constructor(
             [in] IContext* ctx,

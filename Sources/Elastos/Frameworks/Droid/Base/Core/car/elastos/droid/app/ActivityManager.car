@@ -150,6 +150,7 @@ module
      * The AppTask allows you to manage your own application's tasks.
      * See {@link android.app.ActivityManager#getAppTasks()}
      */
+    [local]
     interface IActivityManagerAppTask {
 
         /**

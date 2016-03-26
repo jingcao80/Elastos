@@ -17,6 +17,7 @@ module
     namespace Hardware {
     namespace Display {
 
+    [local]
     interface IDisplayManagerGlobal {
         const Int32 EVENT_DISPLAY_ADDED = 1;
         const Int32 EVENT_DISPLAY_CHANGED = 2;
@@ -135,6 +136,7 @@ module
             [in] IIVirtualDisplayCallback* token);
     }
 
+    [local]
     interface IDisplayManagerGlobalHelper {
         GetInstance(
             [out] IDisplayManagerGlobal** global);

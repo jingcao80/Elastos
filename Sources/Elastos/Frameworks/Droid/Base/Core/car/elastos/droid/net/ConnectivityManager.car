@@ -21,7 +21,6 @@ module
     namespace Droid {
     namespace Net {
 
-
     /**
      * Class that answers queries about the state of network connectivity. It also
      * notifies applications when network connectivity changes. Get an instance
@@ -1426,6 +1425,7 @@ module
             [in] IConnectivityManagerNetworkCallback* networkCallback);
     }
 
+    [local]
     interface IConnectivityManagerHelper {
         /**
          * Tests if a given integer represents a valid network type.

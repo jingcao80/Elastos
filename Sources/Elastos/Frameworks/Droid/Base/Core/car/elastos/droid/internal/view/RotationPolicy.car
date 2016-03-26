@@ -17,6 +17,7 @@ module
     /**
      * Provides helper functions for configuring the display rotation policy.
      */
+    [local]
     interface IRotationPolicy {
         /**
          * Gets whether the device supports rotation. In general such a

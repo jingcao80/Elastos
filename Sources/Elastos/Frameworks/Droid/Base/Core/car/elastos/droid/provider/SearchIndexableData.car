@@ -15,7 +15,8 @@ module
      *
      * @hide
      */
-     interface ISearchIndexableData {
+    [local]
+    interface ISearchIndexableData {
         /**
          * The context for the data. Will usually allow retrieving some resources.
          *

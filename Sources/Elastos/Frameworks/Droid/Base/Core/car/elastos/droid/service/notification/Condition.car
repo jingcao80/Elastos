@@ -75,6 +75,7 @@ module
             [in] Int32 flags);
     }
 
+    [local]
     interface IConditionHelper {
         StateToString(
             [in] Int32 state,

@@ -722,6 +722,7 @@ module
      * @Involve
      * interface Elastos.Droid.Media.ISubtitleControllerListener
      */
+    [local]
     interface IMediaPlayer {
         /**
            Constant to retrieve only the new metadata since the last
@@ -1736,6 +1737,7 @@ module
             [out] Boolean* result);
     }
 
+    [local]
     interface IMediaPlayerHelper {
         /**
          * Convenience method to create a MediaPlayer for a given Uri.

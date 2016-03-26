@@ -78,7 +78,6 @@ module
         interface IBrowserContractSyncState;
     }
 
-
     singleton class CBrowserContractImageMappings
     {
         interface IBrowserContractImageMappings;
@@ -127,7 +126,7 @@ module
      *
      * @hide
      */
-    [deprecated]
+    [deprecated, local]
     class CSearchIndexableResource
     {
         /**
@@ -745,6 +744,7 @@ module
      * Suggestions</a> developer guide.</p>
      * </div>
      */
+    [local]
     class CSearchRecentSuggestions
     {
         constructor(
