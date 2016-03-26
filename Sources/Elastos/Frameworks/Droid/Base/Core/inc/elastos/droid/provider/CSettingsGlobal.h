@@ -6,6 +6,8 @@
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Net::IUri;
+using Elastos::Core::Singleton;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -29,7 +31,7 @@ public:
         /* [out] */ IUri** uri);
 
     CARAPI GetSETTINGS_TO_BACKUP(
-        /* [out] */ ArrayOf<String>** array);
+        /* [out, callee] */ ArrayOf<String>** array);
 
     CARAPI GetMULTI_SIM_USER_PREFERRED_SUBS(
         /* [out, callee] */ ArrayOf<String>** subs);
@@ -51,6 +53,14 @@ public:
         /* [out] */ String* key);
 
     /**
+     * Get the key that retrieves a bluetooth a2dp src's priority.
+     * @hide
+     */
+    CARAPI GetBluetoothA2dpSrcPriorityKey(
+        /* [in] */ const String& address,
+        /* [out] */ String* key);
+
+    /**
      * Get the key that retrieves a bluetooth a2dp sink's priority.
      * @hide
      */
@@ -65,6 +75,18 @@ public:
     CARAPI ZenModeToString(
         /* [in] */ Int32 mode,
         /* [out] */ String* key);
+
+    CARAPI PutListAsDelimitedString(
+        /* [in] */ IContentResolver* resolver,
+        /* [in] */ const String& name,
+        /* [in] */ const String& delimiter,
+        /* [in] */ IList* list);
+
+    CARAPI GetDelimitedStringAsList(
+        /* [in] */ IContentResolver* resolver,
+        /* [in] */ const String& name,
+        /* [in] */ const String& delimiter,
+        /* [out] */ IList** list);
 
     /**
      * Look up a name in the database.

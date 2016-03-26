@@ -2,11 +2,13 @@
 #define __ELASTOS_DROID_PROVIDER_CSETTINGSSECURE_H__
 
 #include "_Elastos_Droid_Provider_CSettingsSecure.h"
-#include "elastos/droid/provider/Settings.h"
 #include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Net::IUri;
+using Elastos::Core::Singleton;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -26,11 +28,17 @@ public:
         /* [in] */ const String& name,
         /* [out] */ IUri** value);
 
-    CARAPI GetContentUri(
-        /* [out] */ IUri** uri);
+    CARAPI PutListAsDelimitedString(
+        /* [in] */ IContentResolver* resolver,
+        /* [in] */ const String& name,
+        /* [in] */ const String& delimiter,
+        /* [in] */ IList* list);
 
-    CARAPI GetSettingsToBackup(
-        /* [out] */ ArrayOf<String>** array);
+    CARAPI GetDelimitedStringAsList(
+        /* [in] */ IContentResolver* resolver,
+        /* [in] */ const String& name,
+        /* [in] */ const String& delimiter,
+        /* [out] */ IList** list);
 
     /** @hide */
     CARAPI GetMovedKeys(
@@ -388,6 +396,9 @@ public:
         /* [in] */ const String& provider,
         /* [in] */ Boolean enabled,
         /* [in] */ Int32 userId);
+
+    CARAPI GetNAVIGATION_RING_TARGETS(
+        /* [out, callee] */ ArrayOf<String>** targets);
 
     CARAPI GetCLONE_TO_MANAGED_PROFILE(
         /* [out, callee] */ ArrayOf<String>** array);

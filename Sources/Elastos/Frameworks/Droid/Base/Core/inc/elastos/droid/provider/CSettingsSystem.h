@@ -2,12 +2,14 @@
 #define __ELASTOS_DROID_PROVIDER_CSETTINGSSYSTEM_H__
 
 #include "_Elastos_Droid_Provider_CSettingsSystem.h"
-#include "elastos/droid/provider/Settings.h"
 #include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Net::IUri;
+using Elastos::Core::Singleton;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -32,9 +34,18 @@ public:
         /* [out] */ IUri** uri);
 
     CARAPI GetSETTINGS_TO_BACKUP(
-        /* [out] */ ArrayOf<String>** array);
+        /* [out, callee] */ ArrayOf<String>** settings);
+
+    CARAPI GetCLONE_TO_MANAGED_PROFILE(
+        /* [out, callee] */ ArrayOf<String>** cloneToManagedProfile);
 
     CARAPI GetDEFAULT_RINGTONE_URI(
+        /* [out] */ IUri** uri);
+
+    CARAPI GetDEFAULT_RINGTONE_URI_2(
+        /* [out] */ IUri** uri);
+
+    CARAPI GetDEFAULT_RINGTONE_URI_3(
         /* [out] */ IUri** uri);
 
     CARAPI GetDEFAULT_NOTIFICATION_URI(
@@ -45,6 +56,18 @@ public:
 
     CARAPI GetVOLUME_SETTINGS(
         /* [out, callee] */ ArrayOf<String>** settings);
+
+    CARAPI PutListAsDelimitedString(
+        /* [in] */ IContentResolver* resolver,
+        /* [in] */ const String& name,
+        /* [in] */ const String& delimiter,
+        /* [in] */ IList* list);
+
+    CARAPI GetDelimitedStringAsList(
+        /* [in] */ IContentResolver* resolver,
+        /* [in] */ const String& name,
+        /* [in] */ const String& delimiter,
+        /* [out] */ IList** list);
 
     /** @hide */
     CARAPI GetMovedKeys(

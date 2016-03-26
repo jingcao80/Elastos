@@ -21,6 +21,7 @@ using Elastos::Core::ICharSequence;
 using Elastos::Core::Object;
 using Elastos::Utility::IHashMap;
 using Elastos::Utility::IHashSet;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -96,6 +97,34 @@ public:
     class System : public NameValueTable
     {
     public:
+        /**
+         * Put a delimited list as a string
+         * @param resolver to access the database with
+         * @param name to store
+         * @param delimiter to split
+         * @param list to join and store
+         * @hide
+         */
+         static CARAPI PutListAsDelimitedString(
+            /* [in] */ IContentResolver* resolver,
+            /* [in] */ const String& name,
+            /* [in] */ const String& delimiter,
+            /* [in] */ IList* list);
+
+        /**
+         * Get a delimited string returned as a list
+         * @param resolver to access the database with
+         * @param name to store
+         * @param delimiter to split the list with
+         * @return list of strings for a specific Settings.Secure item
+         * @hide
+         */
+        static CARAPI GetDelimitedStringAsList(
+            /* [in] */ IContentResolver* resolver,
+            /* [in] */ const String& name,
+            /* [in] */ const String& delimiter,
+            /* [out] */ IList** list);
+
         /** @hide */
         static CARAPI GetMovedKeys(
             /* [in] */ IHashSet* outKeySet);
@@ -103,8 +132,6 @@ public:
         /** @hide */
         static CARAPI GetNonLegacyMovedKeys(
             /* [in] */ IHashSet* outKeySet);
-
-        static const AutoPtr< ArrayOf<String> > SETTINGS_TO_BACKUP;
 
         /**
          * Look up a name in the database.
@@ -490,6 +517,30 @@ public:
         static const AutoPtr<IUri> DEFAULT_RINGTONE_URI;
 
         /**
+         * A {@link Uri} that will point to the current SIM-2 ringtone at any
+         * given time.
+         * <p>
+         * If the current default ringtone is in the DRM provider and the caller
+         * does not have permission, the exception will be a
+         * FileNotFoundException.
+         *
+         * @hide
+         */
+        static const AutoPtr<IUri> DEFAULT_RINGTONE_URI_2;
+
+        /**
+         * A {@link Uri} that will point to the current SIM-3 ringtone at any
+         * given time.
+         * <p>
+         * If the current default ringtone is in the DRM provider and the caller
+         * does not have permission, the exception will be a
+         * FileNotFoundException.
+         *
+         * @hide
+         */
+        static const AutoPtr<IUri> DEFAULT_RINGTONE_URI_3;
+
+        /**
          * A {@link Uri} that will point to the current default notification
          * sound at any given time.
          *
@@ -510,6 +561,10 @@ public:
          */
         static const AutoPtr< ArrayOf<String> > VOLUME_SETTINGS;
 
+        static const AutoPtr<ArrayOf<String> > SETTINGS_TO_BACKUP;
+
+        static const AutoPtr<ArrayOf<String> > CLONE_TO_MANAGED_PROFILE;
+
     private:
         ECO_LOCAL static const AutoPtr<NameValueCache> sNameValueCache;
         ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_SECURE;
@@ -520,6 +575,34 @@ public:
     class Secure : public NameValueTable
     {
     public:
+        /**
+         * Put a delimited list as a string
+         * @param resolver to access the database with
+         * @param name to store
+         * @param delimiter to split
+         * @param list to join and store
+         * @hide
+         */
+         static CARAPI PutListAsDelimitedString(
+            /* [in] */ IContentResolver* resolver,
+            /* [in] */ const String& name,
+            /* [in] */ const String& delimiter,
+            /* [in] */ IList* list);
+
+        /**
+         * Get a delimited string returned as a list
+         * @param resolver to access the database with
+         * @param name to store
+         * @param delimiter to split the list with
+         * @return list of strings for a specific Settings.Secure item
+         * @hide
+         */
+        static CARAPI GetDelimitedStringAsList(
+            /* [in] */ IContentResolver* resolver,
+            /* [in] */ const String& name,
+            /* [in] */ const String& delimiter,
+            /* [out] */ IList** list);
+
         /** @hide */
         static CARAPI GetMovedKeys(
             /* [in] */ IHashSet* outKeySet);
@@ -893,9 +976,11 @@ public:
          *
          * @hide
          */
-        static const AutoPtr< ArrayOf<String> > SETTINGS_TO_BACKUP;
+        static const AutoPtr<ArrayOf<String> > SETTINGS_TO_BACKUP;
 
         static const AutoPtr<ArrayOf<String> > CLONE_TO_MANAGED_PROFILE;
+
+        static const AutoPtr<ArrayOf<String> > NAVIGATION_RING_TARGETS;
 
     private:
         // Populated lazily, guarded by class object:
@@ -928,6 +1013,13 @@ public:
             /* [in] */ const String& address);
 
         /**
+         * Get the key that retrieves a bluetooth a2dp src's priority.
+         * @hide
+         */
+        static CARAPI_(String) GetBluetoothA2dpSrcPriorityKey(
+            /* [in] */ const String& address);
+
+        /**
          * Get the key that retrieves a bluetooth a2dp sink's priority.
          * @hide
          */
@@ -940,6 +1032,34 @@ public:
          */
         static CARAPI_(String) GetBluetoothInputDevicePriorityKey(
             /* [in] */ const String& address);
+
+        /**
+         * Put a delimited list as a string
+         * @param resolver to access the database with
+         * @param name to store
+         * @param delimiter to split
+         * @param list to join and store
+         * @hide
+         */
+         static CARAPI PutListAsDelimitedString(
+            /* [in] */ IContentResolver* resolver,
+            /* [in] */ const String& name,
+            /* [in] */ const String& delimiter,
+            /* [in] */ IList* list);
+
+        /**
+         * Get a delimited string returned as a list
+         * @param resolver to access the database with
+         * @param name to store
+         * @param delimiter to split the list with
+         * @return list of strings for a specific Settings.Secure item
+         * @hide
+         */
+        static CARAPI GetDelimitedStringAsList(
+            /* [in] */ IContentResolver* resolver,
+            /* [in] */ const String& name,
+            /* [in] */ const String& delimiter,
+            /* [out] */ IList** list);
 
         /**
          * Look up a name in the database.

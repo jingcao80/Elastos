@@ -30,7 +30,7 @@ ECode CSettingsGlobal::GetCONTENT_URI(
 }
 
 ECode CSettingsGlobal::GetSETTINGS_TO_BACKUP(
-    /* [out] */ ArrayOf<String>** array)
+    /* [out, callee] */ ArrayOf<String>** array)
 {
     VALIDATE_NOT_NULL(array)
     *array = Settings::Global::SETTINGS_TO_BACKUP;
@@ -65,6 +65,15 @@ ECode CSettingsGlobal::GetBluetoothA2dpSinkPriorityKey(
     return NOERROR;
 }
 
+ECode CSettingsGlobal::GetBluetoothA2dpSrcPriorityKey(
+    /* [in] */ const String& address,
+    /* [out] */ String* key)
+{
+    VALIDATE_NOT_NULL(key)
+    *key = Settings::Global::GetBluetoothA2dpSrcPriorityKey(address);
+    return NOERROR;
+}
+
 ECode CSettingsGlobal::GetBluetoothInputDevicePriorityKey(
     /* [in] */ const String& address,
     /* [out] */ String* key)
@@ -88,6 +97,24 @@ ECode CSettingsGlobal::ZenModeToString(
 {
     VALIDATE_NOT_NULL(key);
     return Settings::Global::ZenModeToString(mode, key);
+}
+
+ECode CSettingsGlobal::PutListAsDelimitedString(
+    /* [in] */ IContentResolver* resolver,
+    /* [in] */ const String& name,
+    /* [in] */ const String& delimiter,
+    /* [in] */ IList* list)
+{
+    return Settings::Global::PutListAsDelimitedString(resolver, name, delimiter, list);
+}
+
+ECode CSettingsGlobal::GetDelimitedStringAsList(
+    /* [in] */ IContentResolver* resolver,
+    /* [in] */ const String& name,
+    /* [in] */ const String& delimiter,
+    /* [out] */ IList** list)
+{
+    return Settings::Global::GetDelimitedStringAsList(resolver, name, delimiter, list);
 }
 
 ECode CSettingsGlobal::GetString(

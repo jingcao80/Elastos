@@ -19,22 +19,22 @@ ECode CSettingsSecure::GetUriFor(
     return Settings::NameValueTable::GetUriFor(u, name, uri);
 }
 
-ECode CSettingsSecure::GetContentUri(
-    /* [out] */ IUri** uri)
+ECode CSettingsSecure::PutListAsDelimitedString(
+    /* [in] */ IContentResolver* resolver,
+    /* [in] */ const String& name,
+    /* [in] */ const String& delimiter,
+    /* [in] */ IList* list)
 {
-    VALIDATE_NOT_NULL(uri)
-    *uri = Settings::Secure::CONTENT_URI;
-    REFCOUNT_ADD(*uri)
-    return NOERROR;
+    return Settings::Secure::PutListAsDelimitedString(resolver, name, delimiter, list);
 }
 
-ECode CSettingsSecure::GetSettingsToBackup(
-    /* [out] */ ArrayOf<String>** array)
+ECode CSettingsSecure::GetDelimitedStringAsList(
+    /* [in] */ IContentResolver* resolver,
+    /* [in] */ const String& name,
+    /* [in] */ const String& delimiter,
+    /* [out] */ IList** list)
 {
-    VALIDATE_NOT_NULL(array)
-    *array = Settings::Secure::SETTINGS_TO_BACKUP;
-    REFCOUNT_ADD(*array)
-    return NOERROR;
+    return Settings::Secure::GetDelimitedStringAsList(resolver, name, delimiter, list);
 }
 
 ECode CSettingsSecure::GetMovedKeys(
@@ -311,8 +311,17 @@ ECode CSettingsSecure::SetLocationProviderEnabledForUser(
     return Settings::Secure::SetLocationProviderEnabledForUser(cr, provider, enabled, userId, &ret);
 }
 
+ECode CSettingsSecure::GetNAVIGATION_RING_TARGETS(
+    /* [out, callee] */ ArrayOf<String>** targets)
+{
+    VALIDATE_NOT_NULL(targets);
+    *targets = Settings::Secure::NAVIGATION_RING_TARGETS;
+    REFCOUNT_ADD(*targets);
+    return NOERROR;
+}
+
 ECode CSettingsSecure::GetCLONE_TO_MANAGED_PROFILE(
-        /* [out, callee] */ ArrayOf<String>** array)
+    /* [out, callee] */ ArrayOf<String>** array)
 {
     VALIDATE_NOT_NULL(array);
     *array = Settings::Secure::CLONE_TO_MANAGED_PROFILE;

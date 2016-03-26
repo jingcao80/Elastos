@@ -30,10 +30,19 @@ ECode CSettingsSystem::GetCONTENT_URI(
 }
 
 ECode CSettingsSystem::GetSETTINGS_TO_BACKUP(
-    /* [out] */ ArrayOf<String>** array)
+    /* [out, callee] */ ArrayOf<String>** array)
 {
     VALIDATE_NOT_NULL(array)
     *array = Settings::System::SETTINGS_TO_BACKUP;
+    REFCOUNT_ADD(*array)
+    return NOERROR;
+}
+
+ECode CSettingsSystem::GetCLONE_TO_MANAGED_PROFILE(
+    /* [out, callee] */ ArrayOf<String>** array)
+{
+    VALIDATE_NOT_NULL(array)
+    *array = Settings::System::CLONE_TO_MANAGED_PROFILE;
     REFCOUNT_ADD(*array)
     return NOERROR;
 }
@@ -43,6 +52,24 @@ ECode CSettingsSystem::GetDEFAULT_RINGTONE_URI(
 {
     VALIDATE_NOT_NULL(uri)
     *uri = Settings::System::DEFAULT_RINGTONE_URI;
+    REFCOUNT_ADD(*uri)
+    return NOERROR;
+}
+
+ECode CSettingsSystem::GetDEFAULT_RINGTONE_URI_2(
+    /* [out] */ IUri** uri)
+{
+    VALIDATE_NOT_NULL(uri)
+    *uri = Settings::System::DEFAULT_RINGTONE_URI_2;
+    REFCOUNT_ADD(*uri)
+    return NOERROR;
+}
+
+ECode CSettingsSystem::GetDEFAULT_RINGTONE_URI_3(
+    /* [out] */ IUri** uri)
+{
+    VALIDATE_NOT_NULL(uri)
+    *uri = Settings::System::DEFAULT_RINGTONE_URI_3;
     REFCOUNT_ADD(*uri)
     return NOERROR;
 }
@@ -72,6 +99,24 @@ ECode CSettingsSystem::GetVOLUME_SETTINGS(
     *settings = Settings::System::VOLUME_SETTINGS;
     REFCOUNT_ADD(*settings)
     return NOERROR;
+}
+
+ECode CSettingsSystem::PutListAsDelimitedString(
+    /* [in] */ IContentResolver* resolver,
+    /* [in] */ const String& name,
+    /* [in] */ const String& delimiter,
+    /* [in] */ IList* list)
+{
+    return Settings::System::PutListAsDelimitedString(resolver, name, delimiter, list);
+}
+
+ECode CSettingsSystem::GetDelimitedStringAsList(
+    /* [in] */ IContentResolver* resolver,
+    /* [in] */ const String& name,
+    /* [in] */ const String& delimiter,
+    /* [out] */ IList** list)
+{
+    return Settings::System::GetDelimitedStringAsList(resolver, name, delimiter, list);
 }
 
 ECode CSettingsSystem::GetMovedKeys(
