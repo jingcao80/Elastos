@@ -326,6 +326,8 @@ DisplayPowerController::DisplayPowerController(
     mBlanker = blanker;
     mContext = context;
 
+    mLiveDisplayController = new LiveDisplayController(context, looper);
+
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     Int32 ival;
@@ -387,10 +389,10 @@ DisplayPowerController::DisplayPowerController(
             if (bottom < screenBrightnessRangeMinimum) {
                 screenBrightnessRangeMinimum = bottom;
             }
-            mAutomaticBrightnessController = new AutomaticBrightnessController(this,
-                looper, sensorManager, screenAutoBrightnessSpline,
-                lightSensorWarmUpTimeConfig, screenBrightnessRangeMinimum,
-                mScreenBrightnessRangeMaximum);
+            mAutomaticBrightnessController = new AutomaticBrightnessController(mContext, this,
+                    looper, sensorManager, screenAutoBrightnessSpline,
+                    lightSensorWarmUpTimeConfig, screenBrightnessRangeMinimum,
+                    mScreenBrightnessRangeMaximum, mLiveDisplayController);
         }
     }
 
@@ -668,12 +670,16 @@ void DisplayPowerController::UpdatePowerState()
     // Use zero brightness when screen is off.
     if (state == IDisplay::STATE_OFF) {
         brightness = IPowerManager::BRIGHTNESS_OFF;
+        // mLights->GetLight(LightsManager.LIGHT_ID_BUTTONS).setBrightness(brightness);
+        // mLights->GetLight(LightsManager.LIGHT_ID_KEYBOARD).setBrightness(brightness);
     }
 
     // Use default brightness when dozing unless overridden.
     if (brightness < 0 && (state == IDisplay::STATE_DOZE
-        || state == IDisplay::STATE_DOZE_SUSPEND)) {
+            || state == IDisplay::STATE_DOZE_SUSPEND)) {
         brightness = mScreenBrightnessDozeConfig;
+        // mLights.getLight(LightsManager.LIGHT_ID_BUTTONS).setBrightness(PowerManager.BRIGHTNESS_OFF);
+        // mLights.getLight(LightsManager.LIGHT_ID_KEYBOARD).setBrightness(PowerManager.BRIGHTNESS_OFF);
     }
 
     // Configure auto-brightness.
@@ -750,13 +756,18 @@ void DisplayPowerController::UpdatePowerState()
 
     // Animate the screen brightness when the screen is on or dozing.
     // Skip the animation when the screen is off or suspended.
-    if (state == IDisplay::STATE_ON || state == IDisplay::STATE_DOZE) {
-        AnimateScreenBrightness(brightness,
-                slowChange ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
+    if (!mPendingScreenOff) {
+        if (state == IDisplay::STATE_ON || state == IDisplay::STATE_DOZE) {
+            AnimateScreenBrightness(brightness,
+                    slowChange ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
+        }
+        else {
+            AnimateScreenBrightness(brightness, 0);
+        }
     }
-    else {
-        AnimateScreenBrightness(brightness, 0);
-    }
+
+    // Update LiveDisplay now
+    mLiveDisplayController->UpdateLiveDisplay();
 
     // Determine whether the display is ready for use in the newly requested state.
     // Note that we do not wait for the brightness ramp animation to complete before
@@ -1161,6 +1172,8 @@ void DisplayPowerController::DumpLocal(
     // if (mAutomaticBrightnessController != NULL) {
     //     mAutomaticBrightnessController.dump(pw);
     // }
+
+    // mLiveDisplayController.dump(pw);
 }
 
 String DisplayPowerController::ProximityToString(

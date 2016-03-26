@@ -1,3 +1,5 @@
+
+#include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Hardware.h>
 #include <Elastos.Droid.Utility.h>
 #include <Elastos.Droid.Text.h>
@@ -9,7 +11,9 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/Arrays.h>
+#include "elastos/droid/R.h"
 
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IPowerManagerHelper;
@@ -333,14 +337,18 @@ ECode AutomaticBrightnessController::AmbientLightRingBuffer::OffsetOf(
 //=============================================================================
 
 AutomaticBrightnessController::AutomaticBrightnessController(
+    /* [in] */ IContext* ctx,
     /* [in] */ IAutomaticBrightnessControllerCallbacks* callbacks,
     /* [in] */ ILooper* looper,
     /* [in] */ ISensorManager* sensorManager,
     /* [in] */ ISpline* autoBrightnessSpline,
     /* [in] */ Int32 lightSensorWarmUpTime,
     /* [in] */ Int32 brightnessMin,
-    /* [in] */ Int32 brightnessMax)
-    : mScreenBrightnessRangeMinimum(0)
+    /* [in] */ Int32 brightnessMax,
+    /* [in] */ LiveDisplayController* ldc)
+    : mBrighteningLightDebounceConfig(0)
+    , mDarkeningLightDebounceConfig(0)
+    , mScreenBrightnessRangeMinimum(0)
     , mScreenBrightnessRangeMaximum(0)
     , mLightSensorWarmUpTimeConfig(0)
     , mLightSensorEnabled(FALSE)
@@ -356,6 +364,10 @@ AutomaticBrightnessController::AutomaticBrightnessController(
     , mScreenAutoBrightnessAdjustment(0.0f)
     , mLastScreenAutoBrightnessGamma(1.0f)
 {
+    AutoPtr<IResources> resources;
+    ctx->GetResources((IResources**)&resources);
+    mContext = ctx;
+
     mCallbacks = callbacks;
     assert(0 && "TODO");
     // mTwilight = LocalServices::GetService(TwilightManager.class);
@@ -364,6 +376,12 @@ AutomaticBrightnessController::AutomaticBrightnessController(
     mScreenBrightnessRangeMinimum = brightnessMin;
     mScreenBrightnessRangeMaximum = brightnessMax;
     mLightSensorWarmUpTimeConfig = lightSensorWarmUpTime;
+    mLiveDisplay = ldc;
+
+    resources->GetInteger(
+            Elastos::Droid::R::integer::config_brighteningLightDebounce, (Int32*)&mBrighteningLightDebounceConfig);
+    resources->GetInteger(
+            Elastos::Droid::R::integer::config_darkeningLightDebounce, (Int32*)&mDarkeningLightDebounceConfig);
 
     mLightSensorListener = new MySensorEventListener(this);
     mTwilightListener = new MyTwilightListener(this);
@@ -546,7 +564,7 @@ Int64 AutomaticBrightnessController::NextAmbientLightBrighteningTransition(
         }
         earliestValidTime = mAmbientLightRingBuffer->GetTime(i);
     }
-    return earliestValidTime + BRIGHTENING_LIGHT_DEBOUNCE;
+    return earliestValidTime + mBrighteningLightDebounceConfig;
 }
 
 Int64 AutomaticBrightnessController::NextAmbientLightDarkeningTransition(
@@ -560,7 +578,7 @@ Int64 AutomaticBrightnessController::NextAmbientLightDarkeningTransition(
         }
         earliestValidTime = mAmbientLightRingBuffer->GetTime(i);
     }
-    return earliestValidTime + DARKENING_LIGHT_DEBOUNCE;
+    return earliestValidTime + mDarkeningLightDebounceConfig;
 }
 
 void AutomaticBrightnessController::UpdateAmbientLux()
@@ -652,6 +670,9 @@ void AutomaticBrightnessController::UpdateAutoBrightness(
             Slogger::D(TAG, "UpdateAutoBrightness: adjGamma=%f", adjGamma);
         }
     }
+
+    // Update LiveDisplay with the current lux
+    mLiveDisplay->UpdateLiveDisplay(mAmbientLux);
 
     if (USE_TWILIGHT_ADJUSTMENT) {
         assert(0 && "TODO");

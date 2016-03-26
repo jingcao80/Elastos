@@ -3386,6 +3386,14 @@ module
         const String THEME_PREV_BOOT_API_LEVEL = "theme_prev_boot_api_level";
 
         /**
+         * Stored color matrix for LiveDisplay. This is used to allow co-existence with
+         * display tuning done by DisplayAdjustmentUtils when hardware support isn't
+         * available.
+         * @hide
+         */
+        const String LIVE_DISPLAY_COLOR_MATRIX = "live_display_color_matrix";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear

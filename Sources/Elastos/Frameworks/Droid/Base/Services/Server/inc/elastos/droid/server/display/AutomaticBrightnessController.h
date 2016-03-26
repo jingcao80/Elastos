@@ -4,6 +4,7 @@
 
 #include "_Elastos.Droid.Server.h"
 #include <elastos/droid/os/Handler.h>
+#include <elastos/droid/server/display/LiveDisplayController.h>
 
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::ILooper;
@@ -133,13 +134,15 @@ private:
 
 public:
     AutomaticBrightnessController(
+        /* [in] */ IContext* ctx,
         /* [in] */ IAutomaticBrightnessControllerCallbacks* callbacks,
         /* [in] */ ILooper* looper,
         /* [in] */ ISensorManager* sensorManager,
         /* [in] */ ISpline* autoBrightnessSpline,
         /* [in] */ Int32 lightSensorWarmUpTime,
         /* [in] */ Int32 brightnessMin,
-        /* [in] */ Int32 brightnessMax);
+        /* [in] */ Int32 brightnessMax,
+        /* [in] */ LiveDisplayController* ldc);
 
     Int32 GetAutomaticScreenBrightness();
 
@@ -264,6 +267,14 @@ private:
 
     static const Int32 MSG_UPDATE_AMBIENT_LUX;
 
+    // Stability requirements in milliseconds for accepting a new brightness level.  This is used
+    // for debouncing the light sensor.  Different constants are used to debounce the light sensor
+    // when adapting to brighter or darker environments.  This parameter controls how quickly
+    // brightness changes occur in response to an observed change in light level that exceeds the
+    // hysteresis threshold.
+    Int64 mBrighteningLightDebounceConfig;
+    Int64 mDarkeningLightDebounceConfig;
+
     // Callbacks for requesting updates to the the display's power state
     AutoPtr<IAutomaticBrightnessControllerCallbacks> mCallbacks;
 
@@ -333,6 +344,11 @@ private:
 
     // The last screen auto-brightness gamma.  (For printing in dump() only.)
     Float mLastScreenAutoBrightnessGamma;
+
+    // Night mode color temperature adjustments
+    AutoPtr<LiveDisplayController> mLiveDisplay;
+
+    AutoPtr<IContext> mContext;
 
     AutoPtr<ISensorEventListener> mLightSensorListener;
     AutoPtr<ITwilightListener> mTwilightListener;
