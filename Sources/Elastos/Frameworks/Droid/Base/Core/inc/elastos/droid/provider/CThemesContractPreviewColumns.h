@@ -5,6 +5,7 @@
 #include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Net::IUri;
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace Droid {
