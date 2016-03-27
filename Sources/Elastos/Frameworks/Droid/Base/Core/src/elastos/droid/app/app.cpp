@@ -35,7 +35,9 @@
 #include "elastos/droid/app/CNativeContentView.h"
 #include "elastos/droid/app/CBuilderRemoteViews.h"
 #include "elastos/droid/app/CPresentation.h"
+#include "elastos/droid/app/CProfile.h"
 #include "elastos/droid/app/CProfileManager.h"
+#include "elastos/droid/app/CProfileTrigger.h"
 #include "elastos/droid/app/CProgressDialog.h"
 #include "elastos/droid/app/CReceiverRestrictedContext.h"
 #include "elastos/droid/app/CRemoteInputBuilder.h"
@@ -93,7 +95,9 @@ CAR_OBJECT_IMPL(CNativeContentView)
 CAR_OBJECT_IMPL(CNotificationManager)
 CAR_OBJECT_IMPL(CBuilderRemoteViews)
 CAR_OBJECT_IMPL(CPresentation)
+CAR_OBJECT_IMPL(CProfile)
 CAR_OBJECT_IMPL(CProfileManager)
+CAR_OBJECT_IMPL(CProfileTrigger)
 CAR_OBJECT_IMPL(CProgressDialog)
 CAR_OBJECT_IMPL(CReceiverRestrictedContext)
 CAR_OBJECT_IMPL(CRemoteInputBuilder)

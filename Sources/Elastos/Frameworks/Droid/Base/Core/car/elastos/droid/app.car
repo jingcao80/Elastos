@@ -155,6 +155,7 @@ module
     using interface Elastos.Core.IRunnable;
     using interface Elastos.Core.ICloneable;
     using interface Elastos.Core.IClassLoader;
+    using interface Elastos.Core.IComparable;
     using interface Elastos.Utility.IList;
     using interface Elastos.Utility.IHashMap;
     using interface Elastos.Utility.IArrayList;
@@ -989,6 +990,39 @@ module
 
     singleton class CProfileGroupHelper {
         interface IProfileGroupHelper;
+    }
+
+    class CProfile {
+        constructor(
+            [in] String name);
+
+        constructor(
+            [in] String name,
+            [in] Int32 nameResId,
+            [in] IUUID* uuid);
+
+        interface IProfile;
+        interface IParcelable;
+        interface IComparable;
+    }
+
+    singleton class CProfileHelper {
+        interface IProfileHelper;
+    }
+
+    class CProfileTrigger {
+        constructor(
+            [in] Int32 type,
+            [in] String id,
+            [in] Int32 state,
+            [in] String name);
+
+        interface IProfileTrigger;
+        interface IParcelable;
+    }
+
+    singleton class CProfileTriggerHelper {
+        interface IProfileTriggerHelper;
     }
 
     [local]
