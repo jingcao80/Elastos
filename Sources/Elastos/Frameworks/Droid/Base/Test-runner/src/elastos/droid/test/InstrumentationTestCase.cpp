@@ -127,7 +127,7 @@ ECode InstrumentationTestCase::RunTest()
     Int32 runCount = 1;
     Boolean isRepetitive = FALSE;
     AutoPtr<ITestAnnotation> annotation;
-    ec = this->GetTestAnnotation((ITestAnnotation**)&annotation);
+    ec = GetTestAnnotation((ITestAnnotation**)&annotation);
     // if (method.isAnnotationPresent(FlakyTest.class)) {
     //     runCount = method.getAnnotation(FlakyTest.class).tolerance();
     // } else if (method.isAnnotationPresent(RepetitiveTest.class)) {

@@ -156,6 +156,7 @@ $IF class.attrib is not "singleton"
         return E_OUT_OF_MEMORY;
     }
     pObj = (${class.name} *)new(pLocation) ${class.name};
+    pObj->AddRef();
 
 $   IF method.attrib is not "TrivialCtor"
     ec = pObj->constructor($^
@@ -173,7 +174,6 @@ $   Rewrite(")")
 $   END IF;
 
     *ppObj = pObj;
-    (*ppObj)->AddRef();
 
 $   IF method.attrib is not "TrivialCtor"
 Exit:
