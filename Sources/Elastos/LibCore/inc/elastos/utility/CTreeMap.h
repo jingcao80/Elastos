@@ -109,9 +109,11 @@ public:
         CARAPI Remove();
 
     protected:
-        CARAPI_(AutoPtr<Node>) StepForward();
+        CARAPI StepForward(
+            /* [out] */ Node** outnode);
 
-        CARAPI_(AutoPtr<Node>) StepBackward();
+        CARAPI StepBackward(
+            /* [out] */ Node** outnode);
 
     protected:
         AutoPtr<Node> mNext;
@@ -134,7 +136,8 @@ public:
         {
             VALIDATE_NOT_NULL(object)
 
-            AutoPtr<Node> res = MapIterator::StepBackward();
+            AutoPtr<Node> res;
+            FAIL_RETURN(MapIterator::StepBackward((Node**)&res));
             *object = res->mKey;
             REFCOUNT_ADD(*object)
             return NOERROR;
@@ -155,7 +158,8 @@ public:
         {
             VALIDATE_NOT_NULL(object)
 
-            AutoPtr<Node> res = MapIterator::StepForward();
+            AutoPtr<Node> res;
+            FAIL_RETURN(MapIterator::StepForward((Node**)&res));
             *object = res->mKey;
             REFCOUNT_ADD(*object)
             return NOERROR;
@@ -176,7 +180,8 @@ public:
         {
             VALIDATE_NOT_NULL(object)
 
-            AutoPtr<Node> res = MapIterator::StepForward();
+            AutoPtr<Node> res;
+            FAIL_RETURN(MapIterator::StepForward((Node**)&res));
             *object = IMapEntry::Probe(res);
             REFCOUNT_ADD(*object)
             return NOERROR;
@@ -499,9 +504,11 @@ public:
                 /* [in] */ Node* next,
                 /* [in] */ BoundedMap* host);
 
-            CARAPI_(AutoPtr<Node>) StepForward();
+            CARAPI StepForward(
+                /* [out] */ Node** outnode);
 
-            CARAPI_(AutoPtr<Node>) StepBackward();
+            CARAPI StepBackward(
+                /* [out] */ Node** outnode);
 
         protected:
             AutoPtr<BoundedMap> mBoundParent;

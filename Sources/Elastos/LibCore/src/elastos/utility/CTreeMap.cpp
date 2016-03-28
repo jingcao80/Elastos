@@ -392,6 +392,9 @@ ECode CTreeMap::FindByObject(
     /* [in] */ IInterface* key,
     /* [out] */ Node** node)
 {
+    VALIDATE_NOT_NULL(node)
+    *node = NULL;
+
     AutoPtr<Node> res;
     FAIL_RETURN(Find(key, EQUAL, (Node**)&res));
     *node = res;
@@ -478,6 +481,9 @@ ECode CTreeMap::RemoveInternalByKey(
     /* [in] */ IInterface* key,
     /* [out] */ Node** removement)
 {
+    VALIDATE_NOT_NULL(removement)
+    *removement = NULL;
+
     AutoPtr<Node> node;
     FAIL_RETURN(FindByObject(key, (Node**)&node));
     if (node != NULL) {
@@ -1282,34 +1288,46 @@ ECode CTreeMap::MapIterator::HasNext(
     return NOERROR;
 }
 
-AutoPtr<CTreeMap::Node> CTreeMap::MapIterator::StepForward()
+ECode CTreeMap::MapIterator::StepForward(
+    /* [out] */ Node** outnode)
 {
+    VALIDATE_NOT_NULL(outnode)
+    *outnode = NULL;
+
     if (mNext == NULL) {
         // throw new NoSuchElementException();
-        return NULL;
+        return E_NO_SUCH_ELEMENT_EXCEPTION;
     }
     if (mHost->mModCount != mExpectedModCount) {
         // throw new ConcurrentModificationException();
-        return NULL;
+        return E_CONCURRENT_MODIFICATION_EXCEPTION;
     }
     mLast = mNext;
     mNext = mNext->GetNext();
-    return mLast;
+    *outnode = mLast;
+    REFCOUNT_ADD(*outnode)
+    return NOERROR;
 }
 
-AutoPtr<CTreeMap::Node> CTreeMap::MapIterator::StepBackward()
+ECode CTreeMap::MapIterator::StepBackward(
+    /* [out] */ Node** outnode)
 {
+    VALIDATE_NOT_NULL(outnode)
+    *outnode = NULL;
+
     if (mNext == NULL) {
         // throw new NoSuchElementException();
-        return NULL;
+        return E_NO_SUCH_ELEMENT_EXCEPTION;
     }
     if (mHost->mModCount != mExpectedModCount) {
         // throw new ConcurrentModificationException();
-        return NULL;
+        return E_CONCURRENT_MODIFICATION_EXCEPTION;
     }
     mLast = mNext;
     mNext = mNext->GetPrev();
-    return mLast;
+    *outnode = mLast;
+    REFCOUNT_ADD(*outnode)
+    return NOERROR;
 }
 
 ECode CTreeMap::MapIterator::Remove()
@@ -1800,22 +1818,36 @@ CTreeMap::BoundedMap::BoundedIterator::BoundedIterator(
     mBoundParent = host;
 }
 
-AutoPtr<CTreeMap::Node> CTreeMap::BoundedMap::BoundedIterator::StepForward()
+ECode CTreeMap::BoundedMap::BoundedIterator::StepForward(
+    /* [out] */ Node** outnode)
 {
-    AutoPtr<Node> result = MapIterator::StepForward();
+    VALIDATE_NOT_NULL(outnode)
+    *outnode = NULL;
+
+    AutoPtr<Node> result;
+    FAIL_RETURN(MapIterator::StepForward((Node**)&result));
     if (mNext != NULL && !mBoundParent->IsInBounds(mNext->mKey, NO_BOUND, mBoundParent->mToBound)) {
         mNext = NULL;
     }
-    return result;
+    *outnode = result;
+    REFCOUNT_ADD(*outnode)
+    return NOERROR;
 }
 
-AutoPtr<CTreeMap::Node> CTreeMap::BoundedMap::BoundedIterator::StepBackward()
+ECode CTreeMap::BoundedMap::BoundedIterator::StepBackward(
+    /* [out] */ Node** outnode)
 {
-    AutoPtr<Node> result = MapIterator::StepBackward();
+    VALIDATE_NOT_NULL(outnode)
+    *outnode = NULL;
+
+    AutoPtr<Node> result;
+    FAIL_RETURN(MapIterator::StepBackward((Node**)&result));
     if (mNext != NULL && ! mBoundParent->IsInBounds(mNext->mKey, mBoundParent->mFromBound, NO_BOUND)) {
         mNext = NULL;
     }
-    return result;
+    *outnode = result;
+    REFCOUNT_ADD(*outnode)
+    return NOERROR;
 }
 
 //==========================================================
@@ -1832,8 +1864,16 @@ CTreeMap::BoundedMap::BoundedEntrySet::BoundedEntrySetIterator::BoundedEntrySetI
 ECode CTreeMap::BoundedMap::BoundedEntrySet::BoundedEntrySetIterator::GetNext(
     /* [out] */ IInterface** object)
 {
-    VALIDATE_NOT_NULL(object);
-    *object = mBoundParent->mAscending ? (IInterface*)(IMapEntry*)StepForward() : (IInterface*)(IMapEntry*)StepBackward();
+    VALIDATE_NOT_NULL(object)
+    *object = NULL;
+
+    AutoPtr<Node> outnode;
+    if (mBoundParent->mAscending) {
+        FAIL_RETURN(StepForward((Node**)&outnode));
+    } else {
+        FAIL_RETURN(StepBackward((Node**)&outnode));
+    }
+    *object = (IInterface*)(IMapEntry*)outnode;
     REFCOUNT_ADD(*object);
     return NOERROR;
 }
@@ -1990,8 +2030,16 @@ CTreeMap::BoundedMap::BoundedKeySet::BoundedKeySetIterator::BoundedKeySetIterato
 ECode CTreeMap::BoundedMap::BoundedKeySet::BoundedKeySetIterator::GetNext(
     /* [out] */ IInterface** object)
 {
-    VALIDATE_NOT_NULL(object);
-    *object = (mBoundParent->mAscending ? StepForward() : StepBackward())->mKey.Get();
+    VALIDATE_NOT_NULL(object)
+    *object = NULL;
+
+    AutoPtr<Node> outnode;
+    if (mBoundParent->mAscending) {
+        FAIL_RETURN(StepForward((Node**)&outnode));
+    } else {
+        FAIL_RETURN(StepBackward((Node**)&outnode));
+    }
+    *object = outnode->mKey.Get();
     REFCOUNT_ADD(*object);
     return NOERROR;
 }
@@ -2010,8 +2058,16 @@ CTreeMap::BoundedMap::BoundedKeySet::BoundedKeySetDescendingIterator::BoundedKey
 ECode CTreeMap::BoundedMap::BoundedKeySet::BoundedKeySetDescendingIterator::GetNext(
     /* [out] */ IInterface** object)
 {
-    VALIDATE_NOT_NULL(object);
-    *object = (mBoundParent->mAscending ? StepBackward() : StepForward())->mKey.Get();
+    VALIDATE_NOT_NULL(object)
+    *object = NULL;
+
+    AutoPtr<Node> outnode;
+    if (mBoundParent->mAscending) {
+        FAIL_RETURN(StepBackward((Node**)&outnode));
+    } else {
+        FAIL_RETURN(StepForward((Node**)&outnode));
+    }
+    *object = outnode->mKey.Get();
     REFCOUNT_ADD(*object);
     return NOERROR;
 }
