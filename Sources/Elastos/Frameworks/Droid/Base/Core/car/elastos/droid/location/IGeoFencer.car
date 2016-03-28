@@ -1,0 +1,31 @@
+
+module
+{
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * {@hide}
+     */
+    interface IIGeoFencer {
+        SetGeoFence(
+            [in] IBinder* who,
+            [in] IGeoFenceParams* params,
+            [out] Boolean* result);
+
+        ClearGeoFence(
+            [in] IBinder* who,
+            [in] IPendingIntent* fence);
+
+        ClearGeoFenceUser(
+            [in] Int32 uid);
+    }
+
+    }//namespace Location
+    }//namespace Droid
+    }//namespace Elastos
+}

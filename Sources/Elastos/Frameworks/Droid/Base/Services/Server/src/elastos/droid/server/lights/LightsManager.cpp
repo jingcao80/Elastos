@@ -16,7 +16,9 @@ const Int32 LightsManager::LIGHT_ID_NOTIFICATIONS = 4;
 const Int32 LightsManager::LIGHT_ID_ATTENTION = 5;
 const Int32 LightsManager::LIGHT_ID_BLUETOOTH = 6;
 const Int32 LightsManager::LIGHT_ID_WIFI = 7;
-const Int32 LightsManager::LIGHT_ID_COUNT = 8;
+const Int32 LightsManager::LIGHT_ID_CAPS = 8;
+const Int32 LightsManager::LIGHT_ID_FUNC = 9;
+const Int32 LightsManager::LIGHT_ID_COUNT = 10;
 
 LightsManager::~LightsManager()
 {

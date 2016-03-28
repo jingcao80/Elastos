@@ -119,6 +119,7 @@ AutoPtr<ILocationRequest> LocationRequest::CreateFromDeprecatedCriteria(
             switch (accuracy) {
                 case ICriteria::Criteria_POWER_HIGH:
                     quality = POWER_HIGH;
+                    break;
                 default:
                     quality = POWER_LOW;
             }

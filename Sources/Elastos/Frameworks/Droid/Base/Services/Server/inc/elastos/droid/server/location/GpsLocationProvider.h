@@ -16,6 +16,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/server/location/GpsMeasurementsProvider.h"
@@ -28,6 +29,7 @@ using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Hardware::Location::IGeofenceHardwareImpl;
 using Elastos::Droid::Internal::App::IIAppOpsService;
 using Elastos::Droid::Internal::App::IIBatteryStats;
@@ -331,6 +333,19 @@ private:
         // @Override
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
+    private:
+        GpsLocationProvider* mHost;
+    };
+
+    class DefaultApnObserver : public ContentObserver
+    {
+    public:
+        DefaultApnObserver(
+            /* [in] */ GpsLocationProvider* host);
+
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
 
     private:
         GpsLocationProvider* mHost;
@@ -715,7 +730,7 @@ private:
         /* [in] */ Int32 arg,
         /* [in] */ IInterface* obj);
 
-    CARAPI_(String) GetSelectedApn();
+    CARAPI_(String) GetDefaultApn();
 
     CARAPI_(Int32) GetApnIpType(
         /* [in] */ const String& apn);
@@ -883,19 +898,34 @@ private:
     const static Int32 LOCATION_HAS_ACCURACY = 16;
 
     // IMPORTANT - the GPS_DELETE_* symbols here must match constants in gps.h
-    const static Int32 GPS_DELETE_EPHEMERIS = 0x0001;
-    const static Int32 GPS_DELETE_ALMANAC = 0x0002;
-    const static Int32 GPS_DELETE_POSITION = 0x0004;
-    const static Int32 GPS_DELETE_TIME = 0x0008;
-    const static Int32 GPS_DELETE_IONO = 0x0010;
-    const static Int32 GPS_DELETE_UTC = 0x0020;
-    const static Int32 GPS_DELETE_HEALTH = 0x0040;
-    const static Int32 GPS_DELETE_SVDIR = 0x0080;
-    const static Int32 GPS_DELETE_SVSTEER = 0x0100;
-    const static Int32 GPS_DELETE_SADATA = 0x0200;
-    const static Int32 GPS_DELETE_RTI = 0x0400;
-    const static Int32 GPS_DELETE_CELLDB_INFO = 0x8000;
-    const static Int32 GPS_DELETE_ALL = 0xFFFF;
+    static const Int32 GPS_DELETE_EPHEMERIS = 0x00000001;
+    static const Int32 GPS_DELETE_ALMANAC = 0x00000002;
+    static const Int32 GPS_DELETE_POSITION = 0x00000004;
+    static const Int32 GPS_DELETE_TIME = 0x00000008;
+    static const Int32 GPS_DELETE_IONO = 0x00000010;
+    static const Int32 GPS_DELETE_UTC = 0x00000020;
+    static const Int32 GPS_DELETE_HEALTH = 0x00000040;
+    static const Int32 GPS_DELETE_SVDIR = 0x00000080;
+    static const Int32 GPS_DELETE_SVSTEER = 0x00000100;
+    static const Int32 GPS_DELETE_SADATA = 0x00000200;
+    static const Int32 GPS_DELETE_RTI = 0x00000400;
+    static const Int32 GPS_DELETE_CELLDB_INFO = 0x00000800;
+    static const Int32 GPS_DELETE_ALMANAC_CORR = 0x00001000;
+    static const Int32 GPS_DELETE_FREQ_BIAS_EST = 0x00002000;
+    static const Int32 GLO_DELETE_EPHEMERIS = 0x00004000;
+    static const Int32 GLO_DELETE_ALMANAC = 0x00008000;
+    static const Int32 GLO_DELETE_SVDIR = 0x00010000;
+    static const Int32 GLO_DELETE_SVSTEER = 0x00020000;
+    static const Int32 GLO_DELETE_ALMANAC_CORR = 0x00040000;
+    static const Int32 GPS_DELETE_TIME_GPS = 0x00080000;
+    static const Int32 GLO_DELETE_TIME = 0x00100000;
+    static const Int32 BDS_DELETE_SVDIR =  0X00200000;
+    static const Int32 BDS_DELETE_SVSTEER = 0X00400000;
+    static const Int32 BDS_DELETE_TIME = 0X00800000;
+    static const Int32 BDS_DELETE_ALMANAC_CORR = 0X01000000;
+    static const Int32 BDS_DELETE_EPHEMERIS = 0X02000000;
+    static const Int32 BDS_DELETE_ALMANAC = 0X04000000;
+    static const Int32 GPS_DELETE_ALL = 0xFFFFFFFF;
 
     // The GPS_CAPABILITY_* flags must match the values in gps.h
     const static Int32 GPS_CAPABILITY_SCHEDULING = 0x0000001;
@@ -1089,6 +1119,8 @@ private:
     AutoPtr<IConnectivityManager> mConnMgr;
     AutoPtr<IGpsNetInitiatedHandler> mNIHandler;
 
+    String mDefaultApn;
+
     // Wakelocks
     const static String WAKELOCK_KEY;
     AutoPtr<IPowerManagerWakeLock> mWakeLock;
@@ -1142,6 +1174,8 @@ private:
     AutoPtr<ArrayOf<Byte> > mNmeaBuffer;
 
     // static Boolean class_init_native_value;
+
+    AutoPtr<ContentObserver> mDefaultApnObserver;
 };
 
 } // namespace Location

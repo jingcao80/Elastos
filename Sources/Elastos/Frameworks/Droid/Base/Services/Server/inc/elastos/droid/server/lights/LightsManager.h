@@ -35,6 +35,8 @@ public:
     static const Int32 LIGHT_ID_ATTENTION;
     static const Int32 LIGHT_ID_BLUETOOTH;
     static const Int32 LIGHT_ID_WIFI;
+    static const Int32 LIGHT_ID_CAPS;
+    static const Int32 LIGHT_ID_FUNC;
     static const Int32 LIGHT_ID_COUNT;
 };
 

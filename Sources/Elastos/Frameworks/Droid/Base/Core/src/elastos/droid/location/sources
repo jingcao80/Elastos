@@ -14,6 +14,7 @@ SOURCES += Country.cpp
 SOURCES += CountryDetector.cpp
 SOURCES += Criteria.cpp
 SOURCES += FusedBatchOptions.cpp
+SOURCES += GeoFenceParams.cpp
 SOURCES += Geocoder.cpp
 SOURCES += CGeocoderHelper.cpp
 SOURCES += GeocoderParams.cpp

@@ -3,6 +3,7 @@
 #include "elastos/droid/location/CCountryDetector.h"
 #include "elastos/droid/location/CCriteria.h"
 #include "elastos/droid/location/CFusedBatchOptions.h"
+#include "elastos/droid/location/CGeoFenceParams.h"
 #include "elastos/droid/location/CGeocoder.h"
 #include "elastos/droid/location/CGeocoderParams.h"
 #include "elastos/droid/location/CGpsClock.h"
@@ -33,6 +34,7 @@ CAR_OBJECT_IMPL(CCountryDetector)
 
 CAR_OBJECT_IMPL(CCriteria)
 CAR_OBJECT_IMPL(CFusedBatchOptions)
+CAR_OBJECT_IMPL(CGeoFenceParams)
 CAR_OBJECT_IMPL(CGeocoder)
 
 CAR_OBJECT_IMPL(CGeocoderParams)
