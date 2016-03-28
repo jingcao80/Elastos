@@ -225,15 +225,15 @@ ECode CURL::constructor(
         return E_MALFORMED_URL_EXCEPTION;
     }
 
-    String hostNew;
-    if (!host.IsNull() && host.IndexOf(":") != -1 && host.GetChar(0) != '[') {
-        //todo: the host has been changed
-        hostNew = String("[") + host + String("]");
-    }
-
     if (protocol.IsNull()) {
 //        throw new NullPointerException("Unknown protocol: null");
         return E_NULL_POINTER_EXCEPTION;
+    }
+
+    String hostNew = host;
+    // Wrap IPv6 addresses in square brackets if they aren't already.
+    if (!host.IsNull() && host.IndexOf(":") != -1 && host.GetChar(0) != '[') {
+        hostNew = String("[") + host + String("]");
     }
 
     mProtocol = protocol;

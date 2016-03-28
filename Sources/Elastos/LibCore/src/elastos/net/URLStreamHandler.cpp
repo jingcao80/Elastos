@@ -321,11 +321,10 @@ ECode URLStreamHandler::HostsEqual(
 {
     VALIDATE_NOT_NULL(isEqual)
 
-    /*
-     * URLs with the same case-insensitive host name have equal hosts
-     */
-    String aHost = GetHost(a);
-    String bHost = GetHost(b);
+    // URLs with the same case-insensitive host name have equal hosts
+    String aHost, bHost;
+    a->GetHost(&aHost);
+    b->GetHost(&bHost);
     *isEqual = ((aHost == bHost) || (!aHost.IsNull() && aHost.EqualsIgnoreCase(bHost)));
     return NOERROR;
 }
@@ -360,19 +359,6 @@ ECode URLStreamHandler::SameFile(
     //         && hostsEqual(url1, url2)
     //         && url1.getEffectivePort() == url2.getEffectivePort();
     return NOERROR;
-}
-
-String URLStreamHandler::GetHost(
-    /* [in] */ IURL* url)
-{
-    String host;
-    url->GetHost(&host);
-    String protocol;
-    url->GetProtocol(&protocol);
-    if (protocol.Equals("file") && host.IsEmpty()) {
-        host = "localhost";
-    }
-    return host;
 }
 
 String URLStreamHandler::RelativePath(
