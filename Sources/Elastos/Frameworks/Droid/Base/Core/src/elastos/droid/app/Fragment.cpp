@@ -157,7 +157,7 @@ ECode FragmentState::Instantiate(
 
     if (mArguments != NULL) {
         AutoPtr<IClassLoader> classLoader;
-        // IContext::Probe(activity)->GetClassLoader((IClassLoader**)&classLoader);
+        IContext::Probe(activity)->GetClassLoader((IClassLoader**)&classLoader);
         mArguments->SetClassLoader(classLoader);
     }
 
@@ -165,7 +165,7 @@ ECode FragmentState::Instantiate(
 
     if (mSavedFragmentState != NULL) {
         AutoPtr<IClassLoader> classLoader;
-        // IContext::Probe(activity)->GetClassLoader((IClassLoader**)&classLoader);
+        IContext::Probe(activity)->GetClassLoader((IClassLoader**)&classLoader);
         mSavedFragmentState->SetClassLoader(classLoader);
         mInstance->SetSavedFragmentState(mSavedFragmentState);
     }
@@ -828,7 +828,7 @@ ECode Fragment::Instantiate(
     if (it == sClassMap.End()) {
 //             // Class not found in the cache, see if it's real, and try to add it
         AutoPtr<IClassLoader> classLoader;
-        // context->GetClassLoader((IClassLoader**)&classLoader);
+        context->GetClassLoader((IClassLoader**)&classLoader);
         classLoader->LoadClass(fname, (IClassInfo**)&clazz);
         // if (!Fragment.class.isAssignableFrom(clazz)) {
         //     throw new InstantiationException("Trying to instantiate a class " + fname
@@ -846,6 +846,7 @@ ECode Fragment::Instantiate(
     AutoPtr<IFragment> f = IFragment::Probe(obj);
     if (args != NULL) {
         AutoPtr<IClassLoader> cLoader;
+        assert(0 && "TODO");
 //TODO:
 //            args.setClassLoader(f.getClass().getClassLoader());
         f->SetArguments(args);

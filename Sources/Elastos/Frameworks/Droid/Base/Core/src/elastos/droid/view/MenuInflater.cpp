@@ -312,8 +312,7 @@ ECode MenuInflater::MenuState::NewInstance(
 {
     *object = NULL;
     AutoPtr<IClassLoader> cl;
-    assert(0);
-    //FAIL_RETURN(mOwner->mContext->GetClassLoader((IClassLoader**)&cl));
+    FAIL_RETURN(mOwner->mContext->GetClassLoader((IClassLoader**)&cl));
     AutoPtr<IClassInfo> clazz;
     FAIL_RETURN(cl->LoadClass(className, (IClassInfo**)&clazz));
     AutoPtr<IConstructorInfo> constructor;

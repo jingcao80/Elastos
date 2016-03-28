@@ -16,11 +16,9 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 #include "elastos/droid/view/View.h"
-#ifdef DROID_CORE
 #include "elastos/droid/os/CHandler.h"
-// #include "elastos/droid/widget/CBlinkLayout.h"
+#include "elastos/droid/widget/CBlinkLayout.h"
 #include "elastos/droid/view/CContextThemeWrapper.h"
-#endif
 
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
@@ -39,7 +37,7 @@ using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Content::Res::IXmlResourceParser;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::EIID_IHandlerCallback;
-// using Elastos::Droid::Widget::CBlinkLayout;
+using Elastos::Droid::Widget::CBlinkLayout;
 using Elastos::Droid::Widget::IFrameLayout;
 
 namespace Elastos {
@@ -940,7 +938,7 @@ ECode LayoutInflater::CreateViewFromTag(
 
     if (name.Equals(TAG_1995)) {
         // Let's party like it's 1995!
-        // CBlinkLayout::New(viewContext, attrs, view);
+        return CBlinkLayout::New(viewContext, attrs, view);
     }
 
 //    try {
@@ -1188,7 +1186,6 @@ ECode LayoutInflater::ParseInclude(
 //                    params = group.generateLayoutParams(childAttrs);
 //                } finally {
                 if (params != NULL) {
-                    PFL_EX("LayoutInflater::ParseInclude %p", params.Get());
                     view->SetLayoutParams(params.Get());
                 }
 //                }

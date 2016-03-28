@@ -559,8 +559,7 @@ ECode CInstrumentationTestRunner::OnCreate(
     context = NULL;
     GetTargetContext((IContext**)&context);
     AutoPtr<IClassLoader> loader;
-    // TODO:
-    // context->GetClassLoader((IClassLoader**)&loader);
+    context->GetClassLoader((IClassLoader**)&loader);
     AutoPtr<CTestSuiteBuilder> testSuiteBuilder;
     CTestSuiteBuilder::NewByFriend(clsName, loader, (CTestSuiteBuilder**)&testSuiteBuilder);
 
