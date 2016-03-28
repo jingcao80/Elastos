@@ -1,0 +1,22 @@
+
+module
+{
+    interface Elastos.Droid.App.IPendingIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * {@hide}
+     */
+    [oneway]
+    interface IIGeoFenceListener {
+        GeoFenceExpired(
+            [in] IPendingIntent* intent);
+    }
+
+    }//namespace Location
+    }//namespace Droid
+    }//namespace Elastos
+}

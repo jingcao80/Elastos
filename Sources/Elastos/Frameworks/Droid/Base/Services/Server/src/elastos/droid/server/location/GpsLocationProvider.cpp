@@ -635,6 +635,25 @@ ECode GpsLocationProvider::ProviderHandler::HandleMessage(
 }
 
 //===========================================
+//GpsLocationProvider::DefaultApnObserver
+//===========================================
+
+GpsLocationProvider::DefaultApnObserver::DefaultApnObserver(
+    /* [in] */ GpsLocationProvider* host)
+    : mHost(host)
+{
+    ContentObserver::constructor(host->mHandler);
+}
+
+ECode GpsLocationProvider::DefaultApnObserver::OnChange(
+    /* [in] */ Boolean selfChange)
+{
+    mHost->mDefaultApn = mHost->GetDefaultApn();
+    if (DEBUG) Logger::D(TAG, "Observer mDefaultApn=%s", mHost->mDefaultApn.string());
+    return NOERROR;
+}
+
+//===========================================
 //GpsLocationProvider::NetworkLocationListener
 //===========================================
 
@@ -731,6 +750,21 @@ const Int32 GpsLocationProvider::GPS_DELETE_SVSTEER;
 const Int32 GpsLocationProvider::GPS_DELETE_SADATA;
 const Int32 GpsLocationProvider::GPS_DELETE_RTI;
 const Int32 GpsLocationProvider::GPS_DELETE_CELLDB_INFO;
+const Int32 GpsLocationProvider::GPS_DELETE_ALMANAC_CORR;
+const Int32 GpsLocationProvider::GPS_DELETE_FREQ_BIAS_EST;
+const Int32 GpsLocationProvider::GLO_DELETE_EPHEMERIS;
+const Int32 GpsLocationProvider::GLO_DELETE_ALMANAC;
+const Int32 GpsLocationProvider::GLO_DELETE_SVDIR;
+const Int32 GpsLocationProvider::GLO_DELETE_SVSTEER;
+const Int32 GpsLocationProvider::GLO_DELETE_ALMANAC_CORR;
+const Int32 GpsLocationProvider::GPS_DELETE_TIME_GPS;
+const Int32 GpsLocationProvider::GLO_DELETE_TIME;
+const Int32 GpsLocationProvider::BDS_DELETE_SVDIR;
+const Int32 GpsLocationProvider::BDS_DELETE_SVSTEER;
+const Int32 GpsLocationProvider::BDS_DELETE_TIME;
+const Int32 GpsLocationProvider::BDS_DELETE_ALMANAC_CORR;
+const Int32 GpsLocationProvider::BDS_DELETE_EPHEMERIS;
+const Int32 GpsLocationProvider::BDS_DELETE_ALMANAC;
 const Int32 GpsLocationProvider::GPS_DELETE_ALL;
 
 // The GPS_CAPABILITY_* flags must match the values in gps.h
@@ -886,6 +920,7 @@ GpsLocationProvider::GpsLocationProvider()
     mSvAzimuths = ArrayOf<Float>::Alloc(MAX_SVS);
     mSvMasks = ArrayOf<Int32>::Alloc(3);
     mNmeaBuffer = ArrayOf<Byte>::Alloc(120);
+    mDefaultApnObserver = new DefaultApnObserver(this);
 }
 
 GpsLocationProvider::GpsLocationProvider(
@@ -1188,6 +1223,13 @@ void GpsLocationProvider::ListenForBroadcasts()
     intentFilter->AddAction(ITelephonyIntents::ACTION_SUBINFO_RECORD_UPDATED);
     intent = NULL;
     mContext->RegisterReceiver(mBroadcastReceiver, intentFilter, String(NULL), mHandler, (IIntent**)&intent);
+    AutoPtr<IUriHelper> uriHelper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
+    AutoPtr<IUri> uri;
+    uriHelper->Parse(String("content://telephony/carriers/preferapn"), (IUri**)&uri);
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    cr->RegisterContentObserver(uri, FALSE, mDefaultApnObserver);
 }
 
 ECode GpsLocationProvider::GetName(
@@ -1239,9 +1281,8 @@ void GpsLocationProvider::HandleUpdateNetworkState(
         Boolean isAvailable;
         info->IsAvailable(&isAvailable);
         Boolean networkAvailable = isAvailable && dataEnabled;
-        String defaultApn = GetSelectedApn();
-        if (defaultApn.IsNull()) {
-            defaultApn = "dummy-apn";
+        if (mDefaultApn == NULL) {
+            mDefaultApn = GetDefaultApn();
         }
 
         Boolean isConnected;
@@ -1253,7 +1294,7 @@ void GpsLocationProvider::HandleUpdateNetworkState(
         String extraInfo;
         info->GetExtraInfo(&extraInfo);
         Native_update_network_state(isConnected, type, isRoaming, networkAvailable,
-            extraInfo, defaultApn);
+            extraInfo, mDefaultApn);
     }
     Int32 type;
     info->GetType(&type);
@@ -1713,6 +1754,22 @@ Boolean GpsLocationProvider::DeleteAidingData(
         if (extras->GetBoolean(String("sadata"), &v),v) flags |= GPS_DELETE_SADATA;
         if (extras->GetBoolean(String("rti"), &v),v) flags |= GPS_DELETE_RTI;
         if (extras->GetBoolean(String("celldb-info"), &v),v) flags |= GPS_DELETE_CELLDB_INFO;
+        if (extras->GetBoolean(String("all"), &v),v) flags |= GPS_DELETE_ALL;
+        if (extras->GetBoolean(String("almanac-corr"), &v),v) flags |= GPS_DELETE_ALMANAC_CORR;
+        if (extras->GetBoolean(String("freq-bias-est"), &v),v) flags |= GPS_DELETE_FREQ_BIAS_EST;
+        if (extras->GetBoolean(String("ephemeris-GLO"), &v),v) flags |= GLO_DELETE_EPHEMERIS;
+        if (extras->GetBoolean(String("almanac-GLO"), &v),v) flags |= GLO_DELETE_ALMANAC;
+        if (extras->GetBoolean(String("svdir-GLO"), &v),v) flags |= GLO_DELETE_SVDIR;
+        if (extras->GetBoolean(String("svsteer-GLO"), &v),v) flags |= GLO_DELETE_SVSTEER;
+        if (extras->GetBoolean(String("almanac-corr-GLO"), &v),v) flags |= GLO_DELETE_ALMANAC_CORR;
+        if (extras->GetBoolean(String("time-gps"), &v),v) flags |= GPS_DELETE_TIME_GPS;
+        if (extras->GetBoolean(String("time-GLO"), &v),v) flags |= GLO_DELETE_TIME;
+        if (extras->GetBoolean(String("ephemeris-BDS"), &v),v) flags |= BDS_DELETE_EPHEMERIS;
+        if (extras->GetBoolean(String("almanac-BDS"), &v),v) flags |= BDS_DELETE_ALMANAC;
+        if (extras->GetBoolean(String("svdir-BDS"), &v),v) flags |= BDS_DELETE_SVDIR;
+        if (extras->GetBoolean(String("svsteer-BDS"), &v),v) flags |= BDS_DELETE_SVSTEER;
+        if (extras->GetBoolean(String("almanac-corr-BDS"), &v),v) flags |= BDS_DELETE_ALMANAC_CORR;
+        if (extras->GetBoolean(String("time-BDS"), &v),v) flags |= BDS_DELETE_TIME;
         if (extras->GetBoolean(String("all"), &v),v) flags |= GPS_DELETE_ALL;
     }
 
@@ -2450,7 +2507,7 @@ void GpsLocationProvider::SendMessage(
     msg->SendToTarget();
 }
 
-String GpsLocationProvider::GetSelectedApn()
+String GpsLocationProvider::GetDefaultApn()
 {
     AutoPtr<IUriHelper> uh;
     CUriHelper::AcquireSingleton((IUriHelper**)&uh);
@@ -2484,7 +2541,7 @@ String GpsLocationProvider::GetSelectedApn()
 
     // return null;
     #endif
-    return String(NULL);
+    return String("dummy-apn");
 }
 
 Int32 GpsLocationProvider::GetApnIpType(

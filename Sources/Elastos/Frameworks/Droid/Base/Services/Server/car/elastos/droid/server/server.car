@@ -168,6 +168,7 @@ module
     using interface Elastos.Droid.Internal.Telephony.IITelephonyRegistry;
     using interface Elastos.Droid.Location.IICountryDetector;
     using interface Elastos.Droid.Location.IIFusedGeofenceHardware;
+    using interface Elastos.Droid.Location.IIGeoFenceListener;
     using interface Elastos.Droid.Location.IIGpsGeofenceHardware;
     using interface Elastos.Droid.Location.IIGpsStatusProvider;
     using interface Elastos.Droid.Location.IINetInitiatedListener;
@@ -1714,6 +1715,14 @@ module
     namespace Droid {
     namespace Server {
     namespace Location {
+
+    class CGeoFenceListener {
+        constructor(
+            [in] Handle64 host);
+
+        interface IIGeoFenceListener;
+        interface IBinder;
+    }
 
     class CFusedLocationHardwareService {
         constructor(

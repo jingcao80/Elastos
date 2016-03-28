@@ -1,0 +1,46 @@
+
+module
+{
+    interface Elastos.Droid.App.IPendingIntent;
+    using interface Elastos.IO.IPrintWriter;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Location {
+
+    /**
+     * GeoFenceParams for internal use
+     * {@hide}
+     * @ Involve interface IParcelable
+     */
+    interface IGeoFenceParams {
+        GetExpiration(
+            [out] Int64* expiration);
+
+        GetIntent(
+            [out] IPendingIntent** intent);
+
+        GetCallerUid(
+            [out] Int32* uid);
+
+        GetLatitude(
+            [out] Double* latitude);
+
+        GetLongitude(
+            [out] Double* longitude);
+
+        GetRadius(
+            [out] Float* radius);
+
+        GetPackageName(
+            [out] String* packageName);
+
+        Dump(
+            [in] IPrintWriter* pw,
+            [in] String prefix);
+    }
+
+    }//namespace Location
+    }//namespace Droid
+    }//namespace Elastos
+}
