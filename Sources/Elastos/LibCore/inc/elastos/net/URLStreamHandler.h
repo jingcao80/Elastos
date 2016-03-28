@@ -89,9 +89,6 @@ public:
         /* [out] */ Boolean* isSame);
 
 private:
-    static CARAPI_(String) GetHost(
-        /* [in] */ IURL* url);
-
     static CARAPI_(String) RelativePath(
         /* [in] */ const String& base,
         /* [in] */ const String& path);
