@@ -91,12 +91,12 @@ public:
     CARAPI GetBluetoothClass(
         /* [out] */ IBluetoothClass** bluetoothClass);
 
-    //CARAPI GetTrustState(
-    //    /* [out] */ Boolean* state);
+    CARAPI GetTrustState(
+       /* [out] */ Boolean* state);
 
-    //CARAPI SetTrust(
-    //    /* [in] */ Boolean value,
-    //    /* [out] */ Boolean* result);
+    CARAPI SetTrust(
+       /* [in] */ Boolean value,
+       /* [out] */ Boolean* result);
 
     CARAPI GetUuids(
         /* [out, callee] */ ArrayOf<IParcelUuid*>** uuids);
@@ -154,6 +154,14 @@ public:
         /* [in] */ IUUID* uuid,
         /* [out] */ IBluetoothSocket** socket);
 
+    CARAPI CreateL2capSocketToServiceRecord(
+        /* [in] */ IUUID* uuid,
+        /* [out] */ IBluetoothSocket** socket);
+
+    CARAPI CreateInsecureL2capSocketToServiceRecord(
+        /* [in] */ IUUID* uuid,
+        /* [out] */ IBluetoothSocket** socket);
+
     CARAPI CreateInsecureRfcommSocketToServiceRecord(
         /* [in] */ IUUID* uuid,
         /* [out] */ IBluetoothSocket** socket);
@@ -180,6 +188,9 @@ public:
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
+
+    CARAPI GetRemoteDiRecord(
+        /* [out] */ IBluetoothRemoteDiRecord** record);
 
     static CARAPI_(AutoPtr< ArrayOf<Byte> >) ConvertPinToBytes(
         /* [in] */ const String& pin);

@@ -95,12 +95,12 @@ BluetoothHealth::BluetoothHealth(
     }
     //}
 
-    //AutoPtr<IIntent> intent;
-    //CIntent::New(String("IBluetoothHealth")/*IBluetoothHealth.class.getName()*/, (IIntent**)&intent);
-    //Boolean result;
-    //if (context->BindService(intent, mConnection, 0, &result), !result) {
-    //    Logger::E(TAG, "Could not bind to Bluetooth Headset Service");
-    //}
+    AutoPtr<IIntent> intent;
+    CIntent::New(String("android.bluetooth.IBluetoothHealth")/*IBluetoothHealth.class.getName()*/, (IIntent**)&intent);
+    Boolean result;
+    if (context->BindService(intent, mConnection, 0, &result), !result) {
+       Logger::E(TAG, "Could not bind to Bluetooth Headset Service");
+    }
     Boolean bind;
     DoBind(&bind);
 }

@@ -7,695 +7,692 @@ module
     namespace Droid {
     namespace Bluetooth {
 
+    /**
+     * Public API to control Hands Free Profile (HFP role only).
+     * <p>
+     * This class defines methods that shall be used by application to manage profile
+     * connection, calls states and calls actions.
+     * <p>
+     *
+     * @hide
+     * */
+    /**
+     * @Involve
+     * interface IBluetoothProfile
+     */
+    interface IBluetoothHeadsetClient {
         /**
-         * Public API to control Hands Free Profile (HFP role only).
-         * <p>
-         * This class defines methods that shall be used by application to manage profile
-         * connection, calls states and calls actions.
-         * <p>
+         * Intent sent whenever connection to remote changes.
          *
-         * @hide
-         * */
-        /**
-         * @Involve
-         * interface IBluetoothProfile
+         * <p>It includes two extras:
+         * <code>BluetoothProfile.EXTRA_PREVIOUS_STATE</code>
+         * and <code>BluetoothProfile.EXTRA_STATE</code>, which
+         * are mandatory.
+         * <p>There are also non mandatory feature extras:
+         * {@link #EXTRA_AG_FEATURE_3WAY_CALLING},
+         * {@link #EXTRA_AG_FEATURE_VOICE_RECOGNITION},
+         * {@link #EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT},
+         * {@link #EXTRA_AG_FEATURE_REJECT_CALL},
+         * {@link #EXTRA_AG_FEATURE_ECC},
+         * {@link #EXTRA_AG_FEATURE_RESPONSE_AND_HOLD},
+         * {@link #EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL},
+         * {@link #EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL},
+         * {@link #EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT},
+         * {@link #EXTRA_AG_FEATURE_MERGE},
+         * {@link #EXTRA_AG_FEATURE_MERGE_AND_DETACH},
+         * sent as boolean values only when <code>EXTRA_STATE</code>
+         * is set to <code>STATE_CONNECTED</code>.</p>
+         *
+         * <p>Note that features supported by AG are being sent as
+         * booleans with value <code>true</code>,
+         * and not supported ones are <strong>not</strong> being sent at all.</p>
          */
-        [local]
-        interface IBluetoothHeadsetClient {
-            /**
-             * Intent sent whenever connection to remote changes.
-             *
-             * <p>It includes two extras:
-             * <code>BluetoothProfile.EXTRA_PREVIOUS_STATE</code>
-             * and <code>BluetoothProfile.EXTRA_STATE</code>, which
-             * are mandatory.
-             * <p>There are also non mandatory feature extras:
-             * {@link #EXTRA_AG_FEATURE_3WAY_CALLING},
-             * {@link #EXTRA_AG_FEATURE_VOICE_RECOGNITION},
-             * {@link #EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT},
-             * {@link #EXTRA_AG_FEATURE_REJECT_CALL},
-             * {@link #EXTRA_AG_FEATURE_ECC},
-             * {@link #EXTRA_AG_FEATURE_RESPONSE_AND_HOLD},
-             * {@link #EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL},
-             * {@link #EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL},
-             * {@link #EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT},
-             * {@link #EXTRA_AG_FEATURE_MERGE},
-             * {@link #EXTRA_AG_FEATURE_MERGE_AND_DETACH},
-             * sent as boolean values only when <code>EXTRA_STATE</code>
-             * is set to <code>STATE_CONNECTED</code>.</p>
-             *
-             * <p>Note that features supported by AG are being sent as
-             * booleans with value <code>true</code>,
-             * and not supported ones are <strong>not</strong> being sent at all.</p>
-             */
-            const String ACTION_CONNECTION_STATE_CHANGED =
-                "android.bluetooth.headsetclient.profile.action.CONNECTION_STATE_CHANGED";
+        const String ACTION_CONNECTION_STATE_CHANGED =
+            "android.bluetooth.headsetclient.profile.action.CONNECTION_STATE_CHANGED";
 
-            /**
-             * Intent sent whenever audio state changes.
-             *
-             * <p>It includes two mandatory extras:
-             * {@link BluetoothProfile.EXTRA_STATE},
-             * {@link BluetoothProfile.EXTRA_PREVIOUS_STATE},
-             * with possible values:
-             * {@link #STATE_AUDIO_CONNECTING},
-             * {@link #STATE_AUDIO_CONNECTED},
-             * {@link #STATE_AUDIO_DISCONNECTED}</p>
-             * <p>When <code>EXTRA_STATE</code> is set
-             * to </code>STATE_AUDIO_CONNECTED</code>,
-             * it also includes {@link #EXTRA_AUDIO_WBS}
-             * indicating wide band speech support.</p>
-             */
-            const String ACTION_AUDIO_STATE_CHANGED =
-                "android.bluetooth.headsetclient.profile.action.AUDIO_STATE_CHANGED";
+        /**
+         * Intent sent whenever audio state changes.
+         *
+         * <p>It includes two mandatory extras:
+         * {@link BluetoothProfile.EXTRA_STATE},
+         * {@link BluetoothProfile.EXTRA_PREVIOUS_STATE},
+         * with possible values:
+         * {@link #STATE_AUDIO_CONNECTING},
+         * {@link #STATE_AUDIO_CONNECTED},
+         * {@link #STATE_AUDIO_DISCONNECTED}</p>
+         * <p>When <code>EXTRA_STATE</code> is set
+         * to </code>STATE_AUDIO_CONNECTED</code>,
+         * it also includes {@link #EXTRA_AUDIO_WBS}
+         * indicating wide band speech support.</p>
+         */
+        const String ACTION_AUDIO_STATE_CHANGED =
+            "android.bluetooth.headsetclient.profile.action.AUDIO_STATE_CHANGED";
 
-            /**
-             * Intent sending updates of the Audio Gateway state.
-             * Each extra is being sent only when value it
-             * represents has been changed recently on AG.
-             * <p>It can contain one or more of the following extras:
-             * {@link #EXTRA_NETWORK_STATUS},
-             * {@link #EXTRA_NETWORK_SIGNAL_STRENGTH},
-             * {@link #EXTRA_NETWORK_ROAMING},
-             * {@link #EXTRA_BATTERY_LEVEL},
-             * {@link #EXTRA_OPERATOR_NAME},
-             * {@link #EXTRA_VOICE_RECOGNITION},
-             * {@link #EXTRA_IN_BAND_RING}</p>
-             */
-            const String ACTION_AG_EVENT =
-                "android.bluetooth.headsetclient.profile.action.AG_EVENT";
+        /**
+         * Intent sending updates of the Audio Gateway state.
+         * Each extra is being sent only when value it
+         * represents has been changed recently on AG.
+         * <p>It can contain one or more of the following extras:
+         * {@link #EXTRA_NETWORK_STATUS},
+         * {@link #EXTRA_NETWORK_SIGNAL_STRENGTH},
+         * {@link #EXTRA_NETWORK_ROAMING},
+         * {@link #EXTRA_BATTERY_LEVEL},
+         * {@link #EXTRA_OPERATOR_NAME},
+         * {@link #EXTRA_VOICE_RECOGNITION},
+         * {@link #EXTRA_IN_BAND_RING}</p>
+         */
+        const String ACTION_AG_EVENT =
+            "android.bluetooth.headsetclient.profile.action.AG_EVENT";
 
-            /**
-             * Intent sent whenever state of a call changes.
-             *
-             * <p>It includes:
-             * {@link #EXTRA_CALL},
-             * with value of {@link BluetoothHeadsetClientCall} instance,
-             * representing actual call state.</p>
-             */
-            const String ACTION_CALL_CHANGED =
-                "android.bluetooth.headsetclient.profile.action.AG_CALL_CHANGED";
+        /**
+         * Intent sent whenever state of a call changes.
+         *
+         * <p>It includes:
+         * {@link #EXTRA_CALL},
+         * with value of {@link BluetoothHeadsetClientCall} instance,
+         * representing actual call state.</p>
+         */
+        const String ACTION_CALL_CHANGED =
+            "android.bluetooth.headsetclient.profile.action.AG_CALL_CHANGED";
 
-            /**
-             * Intent that notifies about the result of the last issued action.
-             * Please note that not every action results in explicit action result code being sent.
-             * Instead other notifications about new Audio Gateway state might be sent,
-             * like <code>ACTION_AG_EVENT</code> with <code>EXTRA_VOICE_RECOGNITION</code> value
-             * when for example user started voice recognition from HF unit.
-             */
-            const String ACTION_RESULT =
-                "android.bluetooth.headsetclient.profile.action.RESULT";
+        /**
+         * Intent that notifies about the result of the last issued action.
+         * Please note that not every action results in explicit action result code being sent.
+         * Instead other notifications about new Audio Gateway state might be sent,
+         * like <code>ACTION_AG_EVENT</code> with <code>EXTRA_VOICE_RECOGNITION</code> value
+         * when for example user started voice recognition from HF unit.
+         */
+        const String ACTION_RESULT =
+            "android.bluetooth.headsetclient.profile.action.RESULT";
 
-            /**
-             * Intent that notifies about the number attached to the last voice tag
-             * recorded on AG.
-             *
-             * <p>It contains:
-             * {@link #EXTRA_NUMBER},
-             * with a <code>String</code> value representing phone number.</p>
-             */
-            const String ACTION_LAST_VTAG =
-                "android.bluetooth.headsetclient.profile.action.LAST_VTAG";
+        /**
+         * Intent that notifies about the number attached to the last voice tag
+         * recorded on AG.
+         *
+         * <p>It contains:
+         * {@link #EXTRA_NUMBER},
+         * with a <code>String</code> value representing phone number.</p>
+         */
+        const String ACTION_LAST_VTAG =
+            "android.bluetooth.headsetclient.profile.action.LAST_VTAG";
 
-            const Int32 STATE_AUDIO_DISCONNECTED = 0;
-            const Int32 STATE_AUDIO_CONNECTING = 1;
-            const Int32 STATE_AUDIO_CONNECTED = 2;
+        const Int32 STATE_AUDIO_DISCONNECTED = 0;
+        const Int32 STATE_AUDIO_CONNECTING = 1;
+        const Int32 STATE_AUDIO_CONNECTED = 2;
 
-            /**
-             * Extra with information if connected audio is WBS.
-             * <p>Possible values: <code>true</code>,
-             *                     <code>false</code>.</p>
-             */
-            const String EXTRA_AUDIO_WBS =
-                "android.bluetooth.headsetclient.extra.AUDIO_WBS";
+        /**
+         * Extra with information if connected audio is WBS.
+         * <p>Possible values: <code>true</code>,
+         *                     <code>false</code>.</p>
+         */
+        const String EXTRA_AUDIO_WBS =
+            "android.bluetooth.headsetclient.extra.AUDIO_WBS";
 
-            /**
-             * Extra for AG_EVENT indicates network status.
-             * <p>Value: 0 - network unavailable,
-             *           1 - network available </p>
-             */
-            const String EXTRA_NETWORK_STATUS =
-                "android.bluetooth.headsetclient.extra.NETWORK_STATUS";
-            /**
-             * Extra for AG_EVENT intent indicates network signal strength.
-             * <p>Value: <code>Integer</code> representing signal strength.</p>
-             */
-            const String EXTRA_NETWORK_SIGNAL_STRENGTH =
-                "android.bluetooth.headsetclient.extra.NETWORK_SIGNAL_STRENGTH";
-            /**
-             * Extra for AG_EVENT intent indicates roaming state.
-             * <p>Value: 0 - no roaming
-             *           1 - active roaming</p>
-             */
-            const String EXTRA_NETWORK_ROAMING =
-                "android.bluetooth.headsetclient.extra.NETWORK_ROAMING";
-            /**
-             * Extra for AG_EVENT intent indicates the battery level.
-             * <p>Value: <code>Integer</code> representing signal strength.</p>
-             */
-            const String EXTRA_BATTERY_LEVEL =
-                "android.bluetooth.headsetclient.extra.BATTERY_LEVEL";
-            /**
-             * Extra for AG_EVENT intent indicates operator name.
-             * <p>Value: <code>String</code> representing operator name.</p>
-             */
-            const String EXTRA_OPERATOR_NAME =
-                "android.bluetooth.headsetclient.extra.OPERATOR_NAME";
-            /**
-             * Extra for AG_EVENT intent indicates voice recognition state.
-             * <p>Value:
-             *          0 - voice recognition stopped,
-             *          1 - voice recognition started.</p>
-             */
-            const String EXTRA_VOICE_RECOGNITION =
-                "android.bluetooth.headsetclient.extra.VOICE_RECOGNITION";
-            /**
-             * Extra for AG_EVENT intent indicates in band ring state.
-             * <p>Value:
-             *          0 - in band ring tone not supported, or
-             *          1 - in band ring tone supported.</p>
-             */
-            const String EXTRA_IN_BAND_RING =
-                "android.bluetooth.headsetclient.extra.IN_BAND_RING";
+        /**
+         * Extra for AG_EVENT indicates network status.
+         * <p>Value: 0 - network unavailable,
+         *           1 - network available </p>
+         */
+        const String EXTRA_NETWORK_STATUS =
+            "android.bluetooth.headsetclient.extra.NETWORK_STATUS";
+        /**
+         * Extra for AG_EVENT intent indicates network signal strength.
+         * <p>Value: <code>Integer</code> representing signal strength.</p>
+         */
+        const String EXTRA_NETWORK_SIGNAL_STRENGTH =
+            "android.bluetooth.headsetclient.extra.NETWORK_SIGNAL_STRENGTH";
+        /**
+         * Extra for AG_EVENT intent indicates roaming state.
+         * <p>Value: 0 - no roaming
+         *           1 - active roaming</p>
+         */
+        const String EXTRA_NETWORK_ROAMING =
+            "android.bluetooth.headsetclient.extra.NETWORK_ROAMING";
+        /**
+         * Extra for AG_EVENT intent indicates the battery level.
+         * <p>Value: <code>Integer</code> representing signal strength.</p>
+         */
+        const String EXTRA_BATTERY_LEVEL =
+            "android.bluetooth.headsetclient.extra.BATTERY_LEVEL";
+        /**
+         * Extra for AG_EVENT intent indicates operator name.
+         * <p>Value: <code>String</code> representing operator name.</p>
+         */
+        const String EXTRA_OPERATOR_NAME =
+            "android.bluetooth.headsetclient.extra.OPERATOR_NAME";
+        /**
+         * Extra for AG_EVENT intent indicates voice recognition state.
+         * <p>Value:
+         *          0 - voice recognition stopped,
+         *          1 - voice recognition started.</p>
+         */
+        const String EXTRA_VOICE_RECOGNITION =
+            "android.bluetooth.headsetclient.extra.VOICE_RECOGNITION";
+        /**
+         * Extra for AG_EVENT intent indicates in band ring state.
+         * <p>Value:
+         *          0 - in band ring tone not supported, or
+         *          1 - in band ring tone supported.</p>
+         */
+        const String EXTRA_IN_BAND_RING =
+            "android.bluetooth.headsetclient.extra.IN_BAND_RING";
 
-            /**
-             * Extra for AG_EVENT intent indicates subscriber info.
-             * <p>Value: <code>String</code> containing subscriber information.</p>
-             */
-            const String EXTRA_SUBSCRIBER_INFO =
-                "android.bluetooth.headsetclient.extra.SUBSCRIBER_INFO";
+        /**
+         * Extra for AG_EVENT intent indicates subscriber info.
+         * <p>Value: <code>String</code> containing subscriber information.</p>
+         */
+        const String EXTRA_SUBSCRIBER_INFO =
+            "android.bluetooth.headsetclient.extra.SUBSCRIBER_INFO";
 
-            /**
-             *  Extra for AG_CALL_CHANGED intent indicates the
-             *  {@link BluetoothHeadsetClientCall} object that has changed.
-             */
-            const String EXTRA_CALL =
-                "android.bluetooth.headsetclient.extra.CALL";
+        /**
+         *  Extra for AG_CALL_CHANGED intent indicates the
+         *  {@link BluetoothHeadsetClientCall} object that has changed.
+         */
+        const String EXTRA_CALL =
+            "android.bluetooth.headsetclient.extra.CALL";
 
-            /**
-             * Extra for ACTION_LAST_VTAG intent.
-             * <p>Value: <code>String</code> representing phone number
-             * corresponding to last voice tag recorded on AG</p>
-             */
-            const String EXTRA_NUMBER =
-                "android.bluetooth.headsetclient.extra.NUMBER";
+        /**
+         * Extra for ACTION_LAST_VTAG intent.
+         * <p>Value: <code>String</code> representing phone number
+         * corresponding to last voice tag recorded on AG</p>
+         */
+        const String EXTRA_NUMBER =
+            "android.bluetooth.headsetclient.extra.NUMBER";
 
-            /**
-             * Extra for ACTION_RESULT intent that shows the result code of
-             * last issued action.
-             * <p>Possible results:
-             * {@link #ACTION_RESULT_OK},
-             * {@link #ACTION_RESULT_ERROR},
-             * {@link #ACTION_RESULT_ERROR_NO_CARRIER},
-             * {@link #ACTION_RESULT_ERROR_BUSY},
-             * {@link #ACTION_RESULT_ERROR_NO_ANSWER},
-             * {@link #ACTION_RESULT_ERROR_DELAYED},
-             * {@link #ACTION_RESULT_ERROR_BLACKLISTED},
-             * {@link #ACTION_RESULT_ERROR_CME}</p>
-             */
-            const String EXTRA_RESULT_CODE =
-                "android.bluetooth.headsetclient.extra.RESULT_CODE";
+        /**
+         * Extra for ACTION_RESULT intent that shows the result code of
+         * last issued action.
+         * <p>Possible results:
+         * {@link #ACTION_RESULT_OK},
+         * {@link #ACTION_RESULT_ERROR},
+         * {@link #ACTION_RESULT_ERROR_NO_CARRIER},
+         * {@link #ACTION_RESULT_ERROR_BUSY},
+         * {@link #ACTION_RESULT_ERROR_NO_ANSWER},
+         * {@link #ACTION_RESULT_ERROR_DELAYED},
+         * {@link #ACTION_RESULT_ERROR_BLACKLISTED},
+         * {@link #ACTION_RESULT_ERROR_CME}</p>
+         */
+        const String EXTRA_RESULT_CODE =
+            "android.bluetooth.headsetclient.extra.RESULT_CODE";
 
-            /**
-             * Extra for ACTION_RESULT intent that shows the extended result code of
-             * last issued action.
-             * <p>Value: <code>Integer</code> - error code.</p>
-             */
-            const String EXTRA_CME_CODE =
-                "android.bluetooth.headsetclient.extra.CME_CODE";
+        /**
+         * Extra for ACTION_RESULT intent that shows the extended result code of
+         * last issued action.
+         * <p>Value: <code>Integer</code> - error code.</p>
+         */
+        const String EXTRA_CME_CODE =
+            "android.bluetooth.headsetclient.extra.CME_CODE";
 
-            /* Extras for AG_FEATURES, extras type is boolean */
-            // TODO verify if all of those are actually useful
-            /**
-             * AG feature: three way calling.
-             */
-            const String EXTRA_AG_FEATURE_3WAY_CALLING =
-                "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_3WAY_CALLING";
-            /**
-             * AG feature: voice recognition.
-             */
-            const String EXTRA_AG_FEATURE_VOICE_RECOGNITION =
-                "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_VOICE_RECOGNITION";
-            /**
-             * AG feature: fetching phone number for voice tagging procedure.
-             */
-            const String EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT =
-                "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT";
-            /**
-             * AG feature: ability to reject incoming call.
-             */
-            const String EXTRA_AG_FEATURE_REJECT_CALL =
-                "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_REJECT_CALL";
-            /**
-             * AG feature: enhanced call handling (terminate specific call, private consultation).
-             */
-            const String EXTRA_AG_FEATURE_ECC =
-                "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ECC";
-            /**
-             * AG feature: response and hold.
-             */
-            const String EXTRA_AG_FEATURE_RESPONSE_AND_HOLD =
-                "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RESPONSE_AND_HOLD";
-            /**
-             * AG call handling feature: accept held or waiting call in three way calling scenarios.
-             */
-            const String EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL =
-                "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL";
-            /**
-             * AG call handling feature: release held or waiting call in three way calling scenarios.
-             */
-            const String EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL =
-                "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL";
-            /**
-             * AG call handling feature: release active call and accept held or waiting call in three way
-             * calling scenarios.
-             */
-            const String EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT =
-                "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT";
-            /**
-             * AG call handling feature: merge two calls, held and active - multi party conference mode.
-             */
-            const String EXTRA_AG_FEATURE_MERGE =
-                "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_MERGE";
-            /**
-             * AG call handling feature: merge calls and disconnect from multi party
-             * conversation leaving peers connected to each other.
-             * Note that this feature needs to be supported by mobile network operator
-             * as it requires connection and billing transfer.
-             */
-            const String EXTRA_AG_FEATURE_MERGE_AND_DETACH =
-                "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_MERGE_AND_DETACH";
+        /* Extras for AG_FEATURES, extras type is boolean */
+        // TODO verify if all of those are actually useful
+        /**
+         * AG feature: three way calling.
+         */
+        const String EXTRA_AG_FEATURE_3WAY_CALLING =
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_3WAY_CALLING";
+        /**
+         * AG feature: voice recognition.
+         */
+        const String EXTRA_AG_FEATURE_VOICE_RECOGNITION =
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_VOICE_RECOGNITION";
+        /**
+         * AG feature: fetching phone number for voice tagging procedure.
+         */
+        const String EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT =
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT";
+        /**
+         * AG feature: ability to reject incoming call.
+         */
+        const String EXTRA_AG_FEATURE_REJECT_CALL =
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_REJECT_CALL";
+        /**
+         * AG feature: enhanced call handling (terminate specific call, private consultation).
+         */
+        const String EXTRA_AG_FEATURE_ECC =
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ECC";
+        /**
+         * AG feature: response and hold.
+         */
+        const String EXTRA_AG_FEATURE_RESPONSE_AND_HOLD =
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RESPONSE_AND_HOLD";
+        /**
+         * AG call handling feature: accept held or waiting call in three way calling scenarios.
+         */
+        const String EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL =
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL";
+        /**
+         * AG call handling feature: release held or waiting call in three way calling scenarios.
+         */
+        const String EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL =
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL";
+        /**
+         * AG call handling feature: release active call and accept held or waiting call in three way
+         * calling scenarios.
+         */
+        const String EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT =
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT";
+        /**
+         * AG call handling feature: merge two calls, held and active - multi party conference mode.
+         */
+        const String EXTRA_AG_FEATURE_MERGE =
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_MERGE";
+        /**
+         * AG call handling feature: merge calls and disconnect from multi party
+         * conversation leaving peers connected to each other.
+         * Note that this feature needs to be supported by mobile network operator
+         * as it requires connection and billing transfer.
+         */
+        const String EXTRA_AG_FEATURE_MERGE_AND_DETACH =
+            "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_MERGE_AND_DETACH";
 
-            /* Action result codes */
-            const Int32 ACTION_RESULT_OK = 0;
-            const Int32 ACTION_RESULT_ERROR = 1;
-            const Int32 ACTION_RESULT_ERROR_NO_CARRIER = 2;
-            const Int32 ACTION_RESULT_ERROR_BUSY = 3;
-            const Int32 ACTION_RESULT_ERROR_NO_ANSWER = 4;
-            const Int32 ACTION_RESULT_ERROR_DELAYED = 5;
-            const Int32 ACTION_RESULT_ERROR_BLACKLISTED = 6;
-            const Int32 ACTION_RESULT_ERROR_CME = 7;
+        /* Action result codes */
+        const Int32 ACTION_RESULT_OK = 0;
+        const Int32 ACTION_RESULT_ERROR = 1;
+        const Int32 ACTION_RESULT_ERROR_NO_CARRIER = 2;
+        const Int32 ACTION_RESULT_ERROR_BUSY = 3;
+        const Int32 ACTION_RESULT_ERROR_NO_ANSWER = 4;
+        const Int32 ACTION_RESULT_ERROR_DELAYED = 5;
+        const Int32 ACTION_RESULT_ERROR_BLACKLISTED = 6;
+        const Int32 ACTION_RESULT_ERROR_CME = 7;
 
-            /* Detailed CME error codes */
-            const Int32 CME_PHONE_FAILURE                           = 0;
-            const Int32 CME_NO_CONNECTION_TO_PHONE                  = 1;
-            const Int32 CME_OPERATION_NOT_ALLOWED                   = 3;
-            const Int32 CME_OPERATION_NOT_SUPPORTED                 = 4;
-            const Int32 CME_PHSIM_PIN_REQUIRED                      = 5;
-            const Int32 CME_PHFSIM_PIN_REQUIRED                     = 6;
-            const Int32 CME_PHFSIM_PUK_REQUIRED                     = 7;
-            const Int32 CME_SIM_NOT_INSERTED                        = 10;
-            const Int32 CME_SIM_PIN_REQUIRED                        = 11;
-            const Int32 CME_SIM_PUK_REQUIRED                        = 12;
-            const Int32 CME_SIM_FAILURE                             = 13;
-            const Int32 CME_SIM_BUSY                                = 14;
-            const Int32 CME_SIM_WRONG                               = 15;
-            const Int32 CME_INCORRECT_PASSWORD                      = 16;
-            const Int32 CME_SIM_PIN2_REQUIRED                       = 17;
-            const Int32 CME_SIM_PUK2_REQUIRED                       = 18;
-            const Int32 CME_MEMORY_FULL                             = 20;
-            const Int32 CME_INVALID_INDEX                           = 21;
-            const Int32 CME_NOT_FOUND                               = 22;
-            const Int32 CME_MEMORY_FAILURE                          = 23;
-            const Int32 CME_TEXT_STRING_TOO_LONG                    = 24;
-            const Int32 CME_INVALID_CHARACTER_IN_TEXT_STRING        = 25;
-            const Int32 CME_DIAL_STRING_TOO_LONG                    = 26;
-            const Int32 CME_INVALID_CHARACTER_IN_DIAL_STRING        = 27;
-            const Int32 CME_NO_NETWORK_SERVICE                      = 30;
-            const Int32 CME_NETWORK_TIMEOUT                         = 31;
-            const Int32 CME_EMERGENCY_SERVICE_ONLY                  = 32;
-            const Int32 CME_NO_SIMULTANOUS_VOIP_CS_CALLS            = 33;
-            const Int32 CME_NOT_SUPPORTED_FOR_VOIP                  = 34;
-            const Int32 CME_SIP_RESPONSE_CODE                       = 35;
-            const Int32 CME_NETWORK_PERSONALIZATION_PIN_REQUIRED    = 40;
-            const Int32 CME_NETWORK_PERSONALIZATION_PUK_REQUIRED    = 41;
-            const Int32 CME_NETWORK_SUBSET_PERSONALIZATION_PIN_REQUIRED   = 42;
-            const Int32 CME_NETWORK_SUBSET_PERSONALIZATION_PUK_REQUIRED   = 43;
-            const Int32 CME_SERVICE_PROVIDER_PERSONALIZATION_PIN_REQUIRED = 44;
-            const Int32 CME_SERVICE_PROVIDER_PERSONALIZATION_PUK_REQUIRED = 45;
-            const Int32 CME_CORPORATE_PERSONALIZATION_PIN_REQUIRED  = 46;
-            const Int32 CME_CORPORATE_PERSONALIZATION_PUK_REQUIRED  = 47;
-            const Int32 CME_HIDDEN_KEY_REQUIRED                     = 48;
-            const Int32 CME_EAP_NOT_SUPPORTED                       = 49;
-            const Int32 CME_INCORRECT_PARAMETERS                    = 50;
+        /* Detailed CME error codes */
+        const Int32 CME_PHONE_FAILURE                           = 0;
+        const Int32 CME_NO_CONNECTION_TO_PHONE                  = 1;
+        const Int32 CME_OPERATION_NOT_ALLOWED                   = 3;
+        const Int32 CME_OPERATION_NOT_SUPPORTED                 = 4;
+        const Int32 CME_PHSIM_PIN_REQUIRED                      = 5;
+        const Int32 CME_PHFSIM_PIN_REQUIRED                     = 6;
+        const Int32 CME_PHFSIM_PUK_REQUIRED                     = 7;
+        const Int32 CME_SIM_NOT_INSERTED                        = 10;
+        const Int32 CME_SIM_PIN_REQUIRED                        = 11;
+        const Int32 CME_SIM_PUK_REQUIRED                        = 12;
+        const Int32 CME_SIM_FAILURE                             = 13;
+        const Int32 CME_SIM_BUSY                                = 14;
+        const Int32 CME_SIM_WRONG                               = 15;
+        const Int32 CME_INCORRECT_PASSWORD                      = 16;
+        const Int32 CME_SIM_PIN2_REQUIRED                       = 17;
+        const Int32 CME_SIM_PUK2_REQUIRED                       = 18;
+        const Int32 CME_MEMORY_FULL                             = 20;
+        const Int32 CME_INVALID_INDEX                           = 21;
+        const Int32 CME_NOT_FOUND                               = 22;
+        const Int32 CME_MEMORY_FAILURE                          = 23;
+        const Int32 CME_TEXT_STRING_TOO_LONG                    = 24;
+        const Int32 CME_INVALID_CHARACTER_IN_TEXT_STRING        = 25;
+        const Int32 CME_DIAL_STRING_TOO_LONG                    = 26;
+        const Int32 CME_INVALID_CHARACTER_IN_DIAL_STRING        = 27;
+        const Int32 CME_NO_NETWORK_SERVICE                      = 30;
+        const Int32 CME_NETWORK_TIMEOUT                         = 31;
+        const Int32 CME_EMERGENCY_SERVICE_ONLY                  = 32;
+        const Int32 CME_NO_SIMULTANOUS_VOIP_CS_CALLS            = 33;
+        const Int32 CME_NOT_SUPPORTED_FOR_VOIP                  = 34;
+        const Int32 CME_SIP_RESPONSE_CODE                       = 35;
+        const Int32 CME_NETWORK_PERSONALIZATION_PIN_REQUIRED    = 40;
+        const Int32 CME_NETWORK_PERSONALIZATION_PUK_REQUIRED    = 41;
+        const Int32 CME_NETWORK_SUBSET_PERSONALIZATION_PIN_REQUIRED   = 42;
+        const Int32 CME_NETWORK_SUBSET_PERSONALIZATION_PUK_REQUIRED   = 43;
+        const Int32 CME_SERVICE_PROVIDER_PERSONALIZATION_PIN_REQUIRED = 44;
+        const Int32 CME_SERVICE_PROVIDER_PERSONALIZATION_PUK_REQUIRED = 45;
+        const Int32 CME_CORPORATE_PERSONALIZATION_PIN_REQUIRED  = 46;
+        const Int32 CME_CORPORATE_PERSONALIZATION_PUK_REQUIRED  = 47;
+        const Int32 CME_HIDDEN_KEY_REQUIRED                     = 48;
+        const Int32 CME_EAP_NOT_SUPPORTED                       = 49;
+        const Int32 CME_INCORRECT_PARAMETERS                    = 50;
 
-            /* Action policy for other calls when accepting call */
-            const Int32 CALL_ACCEPT_NONE = 0;
-            const Int32 CALL_ACCEPT_HOLD = 1;
-            const Int32 CALL_ACCEPT_TERMINATE = 2;
+        /* Action policy for other calls when accepting call */
+        const Int32 CALL_ACCEPT_NONE = 0;
+        const Int32 CALL_ACCEPT_HOLD = 1;
+        const Int32 CALL_ACCEPT_TERMINATE = 2;
 
-            Close();
+        /**
+         * Connects to remote device.
+         *
+         * Currently, the system supports only 1 connection. So, in case of the
+         * second connection, this implementation will disconnect already connected
+         * device automatically and will process the new one.
+         *
+         * @param device    a remote device we want connect to
+         * @return <code>true</code> if command has been issued successfully;
+         *          <code>false</code> otherwise;
+         *          upon completion HFP sends {@link #ACTION_CONNECTION_STATE_CHANGED}
+         *          intent.
+         */
+        Connect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Connects to remote device.
-             *
-             * Currently, the system supports only 1 connection. So, in case of the
-             * second connection, this implementation will disconnect already connected
-             * device automatically and will process the new one.
-             *
-             * @param device    a remote device we want connect to
-             * @return <code>true</code> if command has been issued successfully;
-             *          <code>false</code> otherwise;
-             *          upon completion HFP sends {@link #ACTION_CONNECTION_STATE_CHANGED}
-             *          intent.
-             */
-            Connect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        /**
+         * Disconnects remote device
+         *
+         * @param device    a remote device we want disconnect
+         * @return          <code>true</code> if command has been issued successfully;
+         *                  <code>false</code> otherwise;
+         *                  upon completion HFP sends {@link #ACTION_CONNECTION_STATE_CHANGED}
+         *                  intent.
+         */
+        Disconnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Disconnects remote device
-             *
-             * @param device    a remote device we want disconnect
-             * @return          <code>true</code> if command has been issued successfully;
-             *                  <code>false</code> otherwise;
-             *                  upon completion HFP sends {@link #ACTION_CONNECTION_STATE_CHANGED}
-             *                  intent.
-             */
-            Disconnect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        /**
+         * Set priority of the profile
+         *
+         * The device should already be paired.
+         */
+        SetPriority(
+            [in] IBluetoothDevice* device,
+            [in] Int32 priority,
+            [out] Boolean* result);
 
-            /**
-             * Set priority of the profile
-             *
-             * The device should already be paired.
-             */
-            SetPriority(
-                [in] IBluetoothDevice* device,
-                [in] Int32 priority,
-                [out] Boolean* result);
+        /**
+         * Get the priority of the profile.
+         */
+        GetPriority(
+            [in] IBluetoothDevice* device,
+            [out] Int32* result);
 
-            /**
-             * Get the priority of the profile.
-             */
-            GetPriority(
-                [in] IBluetoothDevice* device,
-                [out] Int32* result);
+        /**
+         * Starts voice recognition.
+         *
+         * @param device    remote device
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_AG_EVENT}
+         *                   intent.
+         *
+         * <p>Feature required for successful execution is being reported by:
+         * {@link #EXTRA_AG_FEATURE_VOICE_RECOGNITION}.
+         * This method invocation will fail silently when feature is not supported.</p>
+         */
+        StartVoiceRecognition(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Starts voice recognition.
-             *
-             * @param device    remote device
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_AG_EVENT}
-             *                   intent.
-             *
-             * <p>Feature required for successful execution is being reported by:
-             * {@link #EXTRA_AG_FEATURE_VOICE_RECOGNITION}.
-             * This method invocation will fail silently when feature is not supported.</p>
-             */
-            StartVoiceRecognition(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        /**
+         * Stops voice recognition.
+         *
+         * @param device    remote device
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_AG_EVENT}
+         *                   intent.
+         *
+         * <p>Feature required for successful execution is being reported by:
+         * {@link #EXTRA_AG_FEATURE_VOICE_RECOGNITION}.
+         * This method invocation will fail silently when feature is not supported.</p>
+         */
+        StopVoiceRecognition(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Stops voice recognition.
-             *
-             * @param device    remote device
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_AG_EVENT}
-             *                   intent.
-             *
-             * <p>Feature required for successful execution is being reported by:
-             * {@link #EXTRA_AG_FEATURE_VOICE_RECOGNITION}.
-             * This method invocation will fail silently when feature is not supported.</p>
-             */
-            StopVoiceRecognition(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        /**
+         * Returns list of all calls in any state.
+         *
+         * @param device    remote device
+         * @return          list of IBluetoothHeadsetClientCall; empty list if none call exists
+         */
+        GetCurrentCalls(
+            [in] IBluetoothDevice* device,
+            [out] IList** calls);
 
-            /**
-             * Returns list of all calls in any state.
-             *
-             * @param device    remote device
-             * @return          list of IBluetoothHeadsetClientCall; empty list if none call exists
-             */
-            GetCurrentCalls(
-                [in] IBluetoothDevice* device,
-                [out] IList** calls);
+        /**
+         * Returns list of current values of AG indicators.
+         *
+         * @param device    remote device
+         * @return          bundle of AG  indicators; null if device is not in
+         *                  CONNECTED state
+         */
+        GetCurrentAgEvents(
+            [in] IBluetoothDevice* device,
+            [out] IBundle** result);
 
-            /**
-             * Returns list of current values of AG indicators.
-             *
-             * @param device    remote device
-             * @return          bundle of AG  indicators; null if device is not in
-             *                  CONNECTED state
-             */
-            GetCurrentAgEvents(
-                [in] IBluetoothDevice* device,
-                [out] IBundle** result);
+        /**
+         * Accepts a call
+         *
+         * @param device    remote device
+         * @param flag      action policy while accepting a call. Possible values
+         *                   {@link #CALL_ACCEPT_NONE}, {@link #CALL_ACCEPT_HOLD},
+         *                   {@link #CALL_ACCEPT_TERMINATE}
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
+         *                   intent.
+         */
+        AcceptCall(
+            [in] IBluetoothDevice* device,
+            [in] Int32 flag,
+            [out] Boolean* result);
 
-            /**
-             * Accepts a call
-             *
-             * @param device    remote device
-             * @param flag      action policy while accepting a call. Possible values
-             *                   {@link #CALL_ACCEPT_NONE}, {@link #CALL_ACCEPT_HOLD},
-             *                   {@link #CALL_ACCEPT_TERMINATE}
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-             *                   intent.
-             */
-            AcceptCall(
-                [in] IBluetoothDevice* device,
-                [in] Int32 flag,
-                [out] Boolean* result);
+        /**
+         * Holds a call.
+         *
+         * @param device    remote device
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
+         *                   intent.
+         */
+        HoldCall(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Holds a call.
-             *
-             * @param device    remote device
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-             *                   intent.
-             */
-            HoldCall(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        /**
+         * Rejects a call.
+         *
+         * @param device    remote device
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
+         *                   intent.
+         *
+         * <p>Feature required for successful execution is being reported by:
+         * {@link #EXTRA_AG_FEATURE_REJECT_CALL}.
+         * This method invocation will fail silently when feature is not supported.</p>
+         */
+        RejectCall(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Rejects a call.
-             *
-             * @param device    remote device
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-             *                   intent.
-             *
-             * <p>Feature required for successful execution is being reported by:
-             * {@link #EXTRA_AG_FEATURE_REJECT_CALL}.
-             * This method invocation will fail silently when feature is not supported.</p>
-             */
-            RejectCall(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        /**
+         * Terminates a specified call.
+         *
+         * Works only when Extended Call Control is supported by Audio Gateway.
+         *
+         * @param device    remote device
+         * @param index     index of the call to be terminated
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
+         *                   intent.
+         *
+         * <p>Feature required for successful execution is being reported by:
+         * {@link #EXTRA_AG_FEATURE_ECC}.
+         * This method invocation will fail silently when feature is not supported.</p>
+         */
+        TerminateCall(
+            [in] IBluetoothDevice* device,
+            [in] Int32 index,
+            [out] Boolean* result);
 
-            /**
-             * Terminates a specified call.
-             *
-             * Works only when Extended Call Control is supported by Audio Gateway.
-             *
-             * @param device    remote device
-             * @param index     index of the call to be terminated
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-             *                   intent.
-             *
-             * <p>Feature required for successful execution is being reported by:
-             * {@link #EXTRA_AG_FEATURE_ECC}.
-             * This method invocation will fail silently when feature is not supported.</p>
-             */
-            TerminateCall(
-                [in] IBluetoothDevice* device,
-                [in] Int32 index,
-                [out] Boolean* result);
+        /**
+         * Enters private mode with a specified call.
+         *
+         * Works only when Extended Call Control is supported by Audio Gateway.
+         *
+         * @param device    remote device
+         * @param index     index of the call to connect in private mode
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
+         *                   intent.
+         *
+         * <p>Feature required for successful execution is being reported by:
+         * {@link #EXTRA_AG_FEATURE_ECC}.
+         * This method invocation will fail silently when feature is not supported.</p>
+         */
+        EnterPrivateMode(
+            [in] IBluetoothDevice* device,
+            [in] Int32 index,
+            [out] Boolean* result);
 
-            /**
-             * Enters private mode with a specified call.
-             *
-             * Works only when Extended Call Control is supported by Audio Gateway.
-             *
-             * @param device    remote device
-             * @param index     index of the call to connect in private mode
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-             *                   intent.
-             *
-             * <p>Feature required for successful execution is being reported by:
-             * {@link #EXTRA_AG_FEATURE_ECC}.
-             * This method invocation will fail silently when feature is not supported.</p>
-             */
-            EnterPrivateMode(
-                [in] IBluetoothDevice* device,
-                [in] Int32 index,
-                [out] Boolean* result);
+        /**
+         * Performs explicit call transfer.
+         *
+         * That means connect other calls and disconnect.
+         *
+         * @param device    remote device
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
+         *                   intent.
+         *
+         * <p>Feature required for successful execution is being reported by:
+         * {@link #EXTRA_AG_FEATURE_MERGE_AND_DETACH}.
+         * This method invocation will fail silently when feature is not supported.</p>
+         */
+        ExplicitCallTransfer(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Performs explicit call transfer.
-             *
-             * That means connect other calls and disconnect.
-             *
-             * @param device    remote device
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-             *                   intent.
-             *
-             * <p>Feature required for successful execution is being reported by:
-             * {@link #EXTRA_AG_FEATURE_MERGE_AND_DETACH}.
-             * This method invocation will fail silently when feature is not supported.</p>
-             */
-            ExplicitCallTransfer(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        /**
+         * Redials last number from Audio Gateway.
+         *
+         * @param device    remote device
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
+         *                   intent in case of success; {@link #ACTION_RESULT} is sent
+         *                   otherwise;
+         */
+        Redial(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Redials last number from Audio Gateway.
-             *
-             * @param device    remote device
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-             *                   intent in case of success; {@link #ACTION_RESULT} is sent
-             *                   otherwise;
-             */
-            Redial(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        /**
+         * Places a call with specified number.
+         *
+         * @param device    remote device
+         * @param number    valid phone number
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
+         *                   intent in case of success; {@link #ACTION_RESULT} is sent
+         *                   otherwise;
+         */
+        Dial(
+            [in] IBluetoothDevice* device,
+            [in] String number,
+            [out] Boolean* result);
 
-            /**
-             * Places a call with specified number.
-             *
-             * @param device    remote device
-             * @param number    valid phone number
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-             *                   intent in case of success; {@link #ACTION_RESULT} is sent
-             *                   otherwise;
-             */
-            Dial(
-                [in] IBluetoothDevice* device,
-                [in] String number,
-                [out] Boolean* result);
+        /**
+         * Places a call to the number under specified memory location.
+         *
+         * @param device    remote device
+         * @param location  valid memory location
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
+         *                   intent in case of success; {@link #ACTION_RESULT} is sent
+         *                   otherwise;
+         */
+        DialMemory(
+            [in] IBluetoothDevice* device,
+            [in] Int32 location,
+            [out] Boolean* result);
 
-            /**
-             * Places a call to the number under specified memory location.
-             *
-             * @param device    remote device
-             * @param location  valid memory location
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-             *                   intent in case of success; {@link #ACTION_RESULT} is sent
-             *                   otherwise;
-             */
-            DialMemory(
-                [in] IBluetoothDevice* device,
-                [in] Int32 location,
-                [out] Boolean* result);
+        /**
+         * Sends DTMF code.
+         *
+         * Possible code values : 0,1,2,3,4,5,6,7,8,9,A,B,C,D,*,#
+         *
+         * @param device    remote device
+         * @param code  ASCII code
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_RESULT} intent;
+         */
+        SendDTMF(
+            [in] IBluetoothDevice* device,
+            [in] Byte code,
+            [out] Boolean* result);
 
-            /**
-             * Sends DTMF code.
-             *
-             * Possible code values : 0,1,2,3,4,5,6,7,8,9,A,B,C,D,*,#
-             *
-             * @param device    remote device
-             * @param code  ASCII code
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_RESULT} intent;
-             */
-            SendDTMF(
-                [in] IBluetoothDevice* device,
-                [in] Byte code,
-                [out] Boolean* result);
+        /**
+         * Get a number corresponding to last voice tag recorded on AG.
+         *
+         * @param device    remote device
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_LAST_VTAG}
+         *                   or {@link #ACTION_RESULT} intent;
+         *
+         * <p>Feature required for successful execution is being reported by:
+         * {@link #EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT}.
+         * This method invocation will fail silently when feature is not supported.</p>
+         */
+        GetLastVoiceTagNumber(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Get a number corresponding to last voice tag recorded on AG.
-             *
-             * @param device    remote device
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_LAST_VTAG}
-             *                   or {@link #ACTION_RESULT} intent;
-             *
-             * <p>Feature required for successful execution is being reported by:
-             * {@link #EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT}.
-             * This method invocation will fail silently when feature is not supported.</p>
-             */
-            GetLastVoiceTagNumber(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        /**
+         * Accept the incoming connection.
+         */
+        AcceptIncomingConnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Accept the incoming connection.
-             */
-            AcceptIncomingConnect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        /**
+         * Reject the incoming connection.
+         */
+        RejectIncomingConnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Reject the incoming connection.
-             */
-            RejectIncomingConnect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        /**
+         * Returns current audio state of Audio Gateway.
+         *
+         * Note: This is an internal function and shouldn't be exposed
+         */
+        GetAudioState(
+            [in] IBluetoothDevice* device,
+            [out] Int32* resut);
 
-            /**
-             * Returns current audio state of Audio Gateway.
-             *
-             * Note: This is an internal function and shouldn't be exposed
-             */
-            GetAudioState(
-                [in] IBluetoothDevice* device,
-                [out] Int32* resut);
+        /**
+         * Initiates a connection of audio channel.
+         *
+         * It setup SCO channel with remote connected Handsfree AG device.
+         *
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED}
+         *                   intent;
+         */
+        ConnectAudio(
+            [out] Boolean* result);
 
-            /**
-             * Initiates a connection of audio channel.
-             *
-             * It setup SCO channel with remote connected Handsfree AG device.
-             *
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED}
-             *                   intent;
-             */
-            ConnectAudio(
-                [out] Boolean* result);
+        /**
+         * Disconnects audio channel.
+         *
+         * It tears down the SCO channel from remote AG device.
+         *
+         * @return          <code>true</code> if command has been issued successfully;
+         *                   <code>false</code> otherwise;
+         *                   upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED}
+         *                   intent;
+         */
+        DisconnectAudio(
+            [out] Boolean* result);
 
-            /**
-             * Disconnects audio channel.
-             *
-             * It tears down the SCO channel from remote AG device.
-             *
-             * @return          <code>true</code> if command has been issued successfully;
-             *                   <code>false</code> otherwise;
-             *                   upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED}
-             *                   intent;
-             */
-            DisconnectAudio(
-                [out] Boolean* result);
+        /**
+         * Get Audio Gateway features
+         *
+         * @param device    remote device
+         * @return          bundle of AG features; null if no service or
+         *                  AG not connected
+         */
+        GetCurrentAgFeatures(
+            [in] IBluetoothDevice* device,
+            [out] IBundle** result);
 
-            /**
-             * Get Audio Gateway features
-             *
-             * @param device    remote device
-             * @return          bundle of AG features; null if no service or
-             *                  AG not connected
-             */
-            GetCurrentAgFeatures(
-                [in] IBluetoothDevice* device,
-                [out] IBundle** result);
-
-        }
+    }
 
     } // Bluetooth
     } // Droid

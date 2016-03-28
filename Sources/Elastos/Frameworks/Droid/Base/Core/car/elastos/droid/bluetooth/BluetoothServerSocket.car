@@ -7,107 +7,106 @@ module
     namespace Droid {
     namespace Bluetooth {
 
+    /**
+     * A listening Bluetooth socket.
+     * <p>
+     * The interface for Bluetooth Sockets is similar to that of TCP sockets:
+     * Socket and ServerSocket. On the server side, use a BluetoothServerSocket
+     * to create a listening server socket. When a connection is accepted by the
+     * BluetoothServerSocket, it will return a new BluetoothSocket to manage the
+     * connection. On the client side, use a single BluetoothSocket to both
+     * initiate an outgoing connection and to manage the connection.
+     *
+     * @sa Socket
+     * @sa ServerSocket
+     * @sa BluetoothSocket
+     * @sa BluetoothServerSocket
+     * <p>
+     * The most common type of Bluetooth socket is RFCOMM, which is the type
+     * supported by the Android APIs. RFCOMM is a connection-oriented, streaming
+     * transport over Bluetooth. It is also known as the Serial Port Profile (SPP).
+     * <p>
+     * To create a listening BluetoothServerSocket that's ready for incoming
+     * connections, use BluetoothAdapter.listenUsingRfcommWithServiceRecord().
+     * Then call accept() to listen for incoming connection requests. This call
+     * will block until a connection is established, at which point, it will
+     * return a BluetoothSocket to manage the connection. Once the
+     * BluetoothSocket is acquired, it's a good idea to call close() on the
+     * BluetoothServerSocket when it's no longer needed for accepting connections
+     *. Closing the BluetoothServerSocket will not close the returned BluetoothSocket.
+     *
+     * @sa BluetoothServerSocket
+     * @sa BluetoothAdapter.listenUsingRfcommWithServiceRecord()
+     * @sa accept()
+     * @sa BluetoothServerSocket
+     * @sa close()
+     * <p>
+     * BluetoothServerSocket is thread safe. In particular, close() will always
+     * immediately abort ongoing operations and close the server socket.
+     * <p>
+     * <strong>Note</strong>: Requires the BLUETOOTH permission.
+     *
+     * @sa BLUETOOTH
+     *
+     * <h3>Developer Guides</h3>
+     * <p>
+     * For more information about using Bluetooth, read the Bluetooth developer guide.
+     *
+     * @sa BluetoothSocket
+     *
+     * @implements Elastos.Droid.Bluetooth.Elastos.IO.ICloseable
+     */
+
+    interface IBluetoothServerSocket {
 
         /**
-         * A listening Bluetooth socket.
-         * <p>
-         * The interface for Bluetooth Sockets is similar to that of TCP sockets:
-         * Socket and ServerSocket. On the server side, use a BluetoothServerSocket
-         * to create a listening server socket. When a connection is accepted by the
-         * BluetoothServerSocket, it will return a new BluetoothSocket to manage the
-         * connection. On the client side, use a single BluetoothSocket to both
-         * initiate an outgoing connection and to manage the connection.
-         *
-         * @sa Socket
-         * @sa ServerSocket
-         * @sa BluetoothSocket
-         * @sa BluetoothServerSocket
-         * <p>
-         * The most common type of Bluetooth socket is RFCOMM, which is the type
-         * supported by the Android APIs. RFCOMM is a connection-oriented, streaming
-         * transport over Bluetooth. It is also known as the Serial Port Profile (SPP).
-         * <p>
-         * To create a listening BluetoothServerSocket that's ready for incoming
-         * connections, use BluetoothAdapter.listenUsingRfcommWithServiceRecord().
-         * Then call accept() to listen for incoming connection requests. This call
-         * will block until a connection is established, at which point, it will
-         * return a BluetoothSocket to manage the connection. Once the
-         * BluetoothSocket is acquired, it's a good idea to call close() on the
-         * BluetoothServerSocket when it's no longer needed for accepting connections
-         *. Closing the BluetoothServerSocket will not close the returned BluetoothSocket.
-         *
-         * @sa BluetoothServerSocket
-         * @sa BluetoothAdapter.listenUsingRfcommWithServiceRecord()
-         * @sa accept()
-         * @sa BluetoothServerSocket
-         * @sa close()
-         * <p>
-         * BluetoothServerSocket is thread safe. In particular, close() will always
-         * immediately abort ongoing operations and close the server socket.
-         * <p>
-         * <strong>Note</strong>: Requires the BLUETOOTH permission.
-         *
-         * @sa BLUETOOTH
-         *
-         * <h3>Developer Guides</h3>
-         * <p>
-         * For more information about using Bluetooth, read the Bluetooth developer guide.
+         * Block until a connection is established.
+         * <p>Returns a connected BluetoothSocket on successful connection.
          *
          * @sa BluetoothSocket
+         * <p>Once this call returns, it can be called again to accept subsequent
+         * incoming connections.
+         * <p> #close can be used to abort this call from another thread.
+         * @return a connected BluetoothSocket
          *
-         * @implements Elastos.Droid.Bluetooth.Elastos.IO.ICloseable
+         * @sa #close
+         * @sa BluetoothSocket
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException on error | for example this call was aborted, or timeout
          */
+        Accept(
+            [out] IBluetoothSocket** socket);
 
-        interface IBluetoothServerSocket {
+        /**
+         * Block until a connection is established, with timeout.
+         * <p>Returns a connected BluetoothSocket on successful connection.
+         *
+         * @sa BluetoothSocket
+         * <p>Once this call returns, it can be called again to accept subsequent
+         * incoming connections.
+         * <p> #close can be used to abort this call from another thread.
+         * @return a connected BluetoothSocket
+         *
+         * @sa #close
+         * @sa BluetoothSocket
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException on error | for example this call was aborted, or timeout
+         */
+        Accept(
+            [in] Int32 timeout,
+            [out] IBluetoothSocket** socket);
 
-            /**
-             * Block until a connection is established.
-             * <p>Returns a connected BluetoothSocket on successful connection.
-             *
-             * @sa BluetoothSocket
-             * <p>Once this call returns, it can be called again to accept subsequent
-             * incoming connections.
-             * <p> #close can be used to abort this call from another thread.
-             * @return a connected BluetoothSocket
-             *
-             * @sa #close
-             * @sa BluetoothSocket
-             * @return ECode = NOERROR(0) if success, else as follows:
-             * Value | Meaning |
-             * :-|:------------|
-             * IOException on error | for example this call was aborted, or timeout
-             */
-            Accept(
-                [out] IBluetoothSocket** socket);
-
-            /**
-             * Block until a connection is established, with timeout.
-             * <p>Returns a connected BluetoothSocket on successful connection.
-             *
-             * @sa BluetoothSocket
-             * <p>Once this call returns, it can be called again to accept subsequent
-             * incoming connections.
-             * <p> #close can be used to abort this call from another thread.
-             * @return a connected BluetoothSocket
-             *
-             * @sa #close
-             * @sa BluetoothSocket
-             * @return ECode = NOERROR(0) if success, else as follows:
-             * Value | Meaning |
-             * :-|:------------|
-             * IOException on error | for example this call was aborted, or timeout
-             */
-            Accept(
-                [in] Int32 timeout,
-                [out] IBluetoothSocket** socket);
-
-            /**
-             * Returns the channel on which this socket is bound.
-             * @hide
-             */
-            GetChannel(
-                [out] Int32* channel);
-        }
+        /**
+         * Returns the channel on which this socket is bound.
+         * @hide
+         */
+        GetChannel(
+            [out] Int32* channel);
+    }
 
     } // Bluetooth
     } // Droid

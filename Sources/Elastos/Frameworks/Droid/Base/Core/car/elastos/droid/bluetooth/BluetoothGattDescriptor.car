@@ -6,141 +6,141 @@ module
     namespace Droid {
     namespace Bluetooth {
 
-        [deprecated]
-        interface IBluetoothGattDescriptor {
-            /**
-             * Value used to enable notification for a client configuration descriptor
-             */
-            //public static final byte[] ENABLE_NOTIFICATION_VALUE = {0x01, 0x00};
-            const Byte ENABLE_NOTIFICATION_VALUE_0 = 0x01;
-            const Byte ENABLE_NOTIFICATION_VALUE_1 = 0x00;
+    [deprecated]
+    interface IBluetoothGattDescriptor {
+        /**
+         * Value used to enable notification for a client configuration descriptor
+         */
+        //public static final byte[] ENABLE_NOTIFICATION_VALUE = {0x01, 0x00};
+        const Byte ENABLE_NOTIFICATION_VALUE_0 = 0x01;
+        const Byte ENABLE_NOTIFICATION_VALUE_1 = 0x00;
 
-            /**
-             * Value used to enable indication for a client configuration descriptor
-             */
-            //public static final byte[] ENABLE_INDICATION_VALUE = {0x02, 0x00};
-            const Byte ENABLE_INDICATION_VALUE_0 = 0x02;
-            const Byte ENABLE_INDICATION_VALUE_1 = 0x00;
+        /**
+         * Value used to enable indication for a client configuration descriptor
+         */
+        //public static final byte[] ENABLE_INDICATION_VALUE = {0x02, 0x00};
+        const Byte ENABLE_INDICATION_VALUE_0 = 0x02;
+        const Byte ENABLE_INDICATION_VALUE_1 = 0x00;
 
-            /**
-             * Value used to disable notifications or indicatinos
-             */
-            //public static final byte[] DISABLE_NOTIFICATION_VALUE = {0x00, 0x00};
-            const Byte DISABLE_NOTIFICATION_VALUE_0 = 0x00;
-            const Byte DISABLE_NOTIFICATION_VALUE_1 = 0x00;
+        /**
+         * Value used to disable notifications or indicatinos
+         */
+        //public static final byte[] DISABLE_NOTIFICATION_VALUE = {0x00, 0x00};
+        const Byte DISABLE_NOTIFICATION_VALUE_0 = 0x00;
+        const Byte DISABLE_NOTIFICATION_VALUE_1 = 0x00;
 
-            /**
-             * Descriptor read permission
-             */
-            const Int32 PERMISSION_READ = 0x01;
+        /**
+         * Descriptor read permission
+         */
+        const Int32 PERMISSION_READ = 0x01;
 
-            /**
-             * Descriptor permission: Allow encrypted read operations
-             */
-            const Int32 PERMISSION_READ_ENCRYPTED = 0x02;
+        /**
+         * Descriptor permission: Allow encrypted read operations
+         */
+        const Int32 PERMISSION_READ_ENCRYPTED = 0x02;
 
-            /**
-             * Descriptor permission: Allow reading with man-in-the-middle protection
-             */
-            const Int32 PERMISSION_READ_ENCRYPTED_MITM = 0x04;
+        /**
+         * Descriptor permission: Allow reading with man-in-the-middle protection
+         */
+        const Int32 PERMISSION_READ_ENCRYPTED_MITM = 0x04;
 
-            /**
-             * Descriptor write permission
-             */
-            const Int32 PERMISSION_WRITE = 0x10;
+        /**
+         * Descriptor write permission
+         */
+        const Int32 PERMISSION_WRITE = 0x10;
 
-            /**
-             * Descriptor permission: Allow encrypted writes
-             */
-            const Int32 PERMISSION_WRITE_ENCRYPTED = 0x20;
+        /**
+         * Descriptor permission: Allow encrypted writes
+         */
+        const Int32 PERMISSION_WRITE_ENCRYPTED = 0x20;
 
-            /**
-             * Descriptor permission: Allow encrypted writes with man-in-the-middle
-             * protection
-             */
-            const Int32 PERMISSION_WRITE_ENCRYPTED_MITM = 0x40;
+        /**
+         * Descriptor permission: Allow encrypted writes with man-in-the-middle
+         * protection
+         */
+        const Int32 PERMISSION_WRITE_ENCRYPTED_MITM = 0x40;
 
-            /**
-             * Descriptor permission: Allow signed write operations
-             */
-            const Int32 PERMISSION_WRITE_SIGNED = 0x80;
+        /**
+         * Descriptor permission: Allow signed write operations
+         */
+        const Int32 PERMISSION_WRITE_SIGNED = 0x80;
 
-            /**
-             * Descriptor permission: Allow signed write operations with
-             * man-in-the-middle protection
-             */
-            const Int32 PERMISSION_WRITE_SIGNED_MITM = 0x100;
+        /**
+         * Descriptor permission: Allow signed write operations with
+         * man-in-the-middle protection
+         */
+        const Int32 PERMISSION_WRITE_SIGNED_MITM = 0x100;
 
-            /**
-             * Returns the characteristic this descriptor belongs to.
-             * @return The characteristic.
-             */
-            GetCharacteristic(
-                [out] IBluetoothGattCharacteristic** characteristic);
+        /**
+         * Returns the characteristic this descriptor belongs to.
+         * @return The characteristic.
+         */
+        GetCharacteristic(
+            [out] IBluetoothGattCharacteristic** characteristic);
 
-            SetCharacteristic(
-                [in] IBluetoothGattCharacteristic* characteristic);
+        SetCharacteristic(
+            [in] IBluetoothGattCharacteristic* characteristic);
 
 
-            /**
-             * Returns the UUID of this descriptor.
-             *
-             * @return UUID of this descriptor
-             */
-            GetUuid(
-                [out] IUUID** uuid);
+        /**
+         * Returns the UUID of this descriptor.
+         *
+         * @return UUID of this descriptor
+         */
+        GetUuid(
+            [out] IUUID** uuid);
 
-            /**
-             * Returns the instance ID for this descriptor.
-             *
-             * <p>If a remote device offers multiple descriptors with the same UUID,
-             * the instance ID is used to distuinguish between descriptors.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @return Instance ID of this descriptor
-             * @hide
-             */
-            GetInstanceId(
-                [out] Int32* instanceId);
+        /**
+         * Returns the instance ID for this descriptor.
+         *
+         * <p>If a remote device offers multiple descriptors with the same UUID,
+         * the instance ID is used to distuinguish between descriptors.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @return Instance ID of this descriptor
+         * @hide
+         */
+        GetInstanceId(
+            [out] Int32* instanceId);
 
-            /**
-             * Returns the permissions for this descriptor.
-             *
-             * @return Permissions of this descriptor
-             */
-            GetPermissions(
-                [out] Int32* permissions);
+        /**
+         * Returns the permissions for this descriptor.
+         *
+         * @return Permissions of this descriptor
+         */
+        GetPermissions(
+            [out] Int32* permissions);
 
-            /**
-             * Returns the stored value for this descriptor
-             *
-             * <p>This function returns the stored value for this descriptor as
-             * retrieved by calling {@link BluetoothGatt#readDescriptor}. The cached
-             * value of the descriptor is updated as a result of a descriptor read
-             * operation.
-             *
-             * @return Cached value of the descriptor
-             */
-            GetValue(
-                [out, callee] ArrayOf<Byte>* value);
+        /**
+         * Returns the stored value for this descriptor
+         *
+         * <p>This function returns the stored value for this descriptor as
+         * retrieved by calling {@link BluetoothGatt#readDescriptor}. The cached
+         * value of the descriptor is updated as a result of a descriptor read
+         * operation.
+         *
+         * @return Cached value of the descriptor
+         */
+        GetValue(
+            [out, callee] ArrayOf<Byte>* value);
 
-            /**
-             * Updates the locally stored value of this descriptor.
-             *
-             * <p>This function modifies the locally stored cached value of this
-             * descriptor. To send the value to the remote device, call
-             * {@link BluetoothGatt#writeDescriptor} to send the value to the
-             * remote device.
-             *
-             * @param value New value for this descriptor
-             * @return true if the locally stored value has been set, false if the
-             *              requested value could not be stored locally.
-             */
-            SetValue(
-                [in] ArrayOf<Byte>* value,
-                [out] Boolean* result);
-        }
+        /**
+         * Updates the locally stored value of this descriptor.
+         *
+         * <p>This function modifies the locally stored cached value of this
+         * descriptor. To send the value to the remote device, call
+         * {@link BluetoothGatt#writeDescriptor} to send the value to the
+         * remote device.
+         *
+         * @param value New value for this descriptor
+         * @return true if the locally stored value has been set, false if the
+         *              requested value could not be stored locally.
+         */
+        SetValue(
+            [in] ArrayOf<Byte>* value,
+            [out] Boolean* result);
+    }
 
     } // Bluetooth
     } // Droid

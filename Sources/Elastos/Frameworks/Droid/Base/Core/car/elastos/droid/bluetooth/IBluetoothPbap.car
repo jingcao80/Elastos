@@ -7,28 +7,28 @@ module
     namespace Droid {
     namespace Bluetooth {
 
-        /**
-         * System private API for Bluetooth pbap service
-         *
-         * {@hide}
-         */
-        interface IIBluetoothPbap {
-            GetState(
-                [out] Int32* state);
+    /**
+     * System private API for Bluetooth pbap service
+     *
+     * {@hide}
+     */
+    interface IIBluetoothPbap {
+        GetState(
+            [out] Int32* state);
 
-            GetClient(
-                [out] IBluetoothDevice** client);
+        GetClient(
+            [out] IBluetoothDevice** client);
 
-            Connect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        Connect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            Disconnect();
+        Disconnect();
 
-            IsConnected(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* isConnected);
-        }
+        IsConnected(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* isConnected);
+    }
 
     } // Bluetooth
     } // Droid

@@ -43,6 +43,7 @@ module
 
         GetLockPatternSize(
             [in] Int32 userId,
+
             [out] Byte* result);
 
         SetLockPattern(

@@ -31,7 +31,7 @@ module
      *
      * {@hide}
      */
-    [local]
+     [local]
     interface ISystemService {
         /*
          * Boot Phases

@@ -5,41 +5,41 @@ module
     namespace Droid {
     namespace Bluetooth {
 
+    /**
+     * Represents the audio configuration for a Bluetooth A2DP source device.
+     *
+     * {@see BluetoothA2dpSink}
+     *
+     * {@hide}
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IBluetoothAudioConfig {
         /**
-         * Represents the audio configuration for a Bluetooth A2DP source device.
-         *
-         * {@see BluetoothA2dpSink}
-         *
-         * {@hide}
+         * Returns the sample rate in samples per second
+         * @return sample rate
          */
+        GetSampleRate(
+            [out] Int32* result);
+
         /**
-         * @Involve
-         * interface IParcelable
+         * Returns the channel configuration (either {@link android.media.AudioFormat#CHANNEL_IN_MONO}
+         * or {@link android.media.AudioFormat#CHANNEL_IN_STEREO})
+         * @return channel configuration
          */
-        interface IBluetoothAudioConfig {
-            /**
-             * Returns the sample rate in samples per second
-             * @return sample rate
-             */
-            GetSampleRate(
-                [out] Int32* result);
+        GetChannelConfig(
+            [out] Int32* result);
 
-            /**
-             * Returns the channel configuration (either {@link android.media.AudioFormat#CHANNEL_IN_MONO}
-             * or {@link android.media.AudioFormat#CHANNEL_IN_STEREO})
-             * @return channel configuration
-             */
-            GetChannelConfig(
-                [out] Int32* result);
-
-            /**
-             * Returns the channel audio format (either {@link android.media.AudioFormat#ENCODING_PCM_16BIT}
-             * or {@link android.media.AudioFormat#ENCODING_PCM_8BIT}
-             * @return audio format
-             */
-            GetAudioFormat(
-                [out] Int32* result);
-        }
+        /**
+         * Returns the channel audio format (either {@link android.media.AudioFormat#ENCODING_PCM_16BIT}
+         * or {@link android.media.AudioFormat#ENCODING_PCM_8BIT}
+         * @return audio format
+         */
+        GetAudioFormat(
+            [out] Int32* result);
+    }
 
     } // Bluetooth
     } // Droid

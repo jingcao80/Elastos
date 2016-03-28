@@ -6,60 +6,59 @@ module
     namespace Droid {
     namespace Bluetooth {
 
+    /**
+     * The Bluetooth Health Application Configuration that is used in
+     * conjunction with the BluetoothHealth class. This class represents an
+     * application configuration that the Bluetooth Health third party
+     * application will register to communicate with the remote Bluetooth health device.
+     *
+     * @sa BluetoothHealth
+     */
+
+    interface IBluetoothHealthAppConfiguration {
+        /**
+         * Return the data type associated with this application configuration.
+         *
+         * @return dataType
+         */
+        GetDataType(
+            [out] Int32* type);
 
         /**
-         * The Bluetooth Health Application Configuration that is used in
-         * conjunction with the BluetoothHealth class. This class represents an
-         * application configuration that the Bluetooth Health third party
-         * application will register to communicate with the remote Bluetooth health device.
+         * Return the name of the application configuration.
          *
-         * @sa BluetoothHealth
+         * @return String name
          */
+        GetName(
+            [out] String* name);
 
-        interface IBluetoothHealthAppConfiguration {
-            /**
-             * Return the data type associated with this application configuration.
-             *
-             * @return dataType
-             */
-            GetDataType(
-                [out] Int32* type);
+        /**
+         * Return the role associated with this application configuration.
+         *
+         * @return One of BluetoothHealth#SOURCE_ROLE or
+         *                         BluetoothHealth#SINK_ROLE
+         *
+         * @sa BluetoothHealth#SOURCE_ROLE
+         * @saBluetoothHealth#SINK_ROLE
+         */
+        GetRole(
+            [out] Int32* role);
 
-            /**
-             * Return the name of the application configuration.
-             *
-             * @return String name
-             */
-            GetName(
-                [out] String* name);
-
-            /**
-             * Return the role associated with this application configuration.
-             *
-             * @return One of BluetoothHealth#SOURCE_ROLE or
-             *                         BluetoothHealth#SINK_ROLE
-             *
-             * @sa BluetoothHealth#SOURCE_ROLE
-             * @saBluetoothHealth#SINK_ROLE
-             */
-            GetRole(
-                [out] Int32* role);
-
-            /**
-             * Return the channel type associated with this application configuration.
-             *
-             * @return One of BluetoothHealth#CHANNEL_TYPE_RELIABLE or
-             *                          BluetoothHealth#CHANNEL_TYPE_STREAMING or
-             *                         BluetoothHealth#CHANNEL_TYPE_ANY.
-             *
-             * @sa BluetoothHealth#CHANNEL_TYPE_RELIABLEr
-             * @sa BluetoothHealth#CHANNEL_TYPE_STREAMING
-             * @sa BluetoothHealth#CHANNEL_TYPE_ANY
-             * @hide
-             */
-            GetChannelType(
-                [out] Int32* type);
-        }
+        /**
+         * Return the channel type associated with this application configuration.
+         *
+         * @return One of BluetoothHealth#CHANNEL_TYPE_RELIABLE or
+         *                          BluetoothHealth#CHANNEL_TYPE_STREAMING or
+         *                         BluetoothHealth#CHANNEL_TYPE_ANY.
+         *
+         * @sa BluetoothHealth#CHANNEL_TYPE_RELIABLEr
+         * @sa BluetoothHealth#CHANNEL_TYPE_STREAMING
+         * @sa BluetoothHealth#CHANNEL_TYPE_ANY
+         * @hide
+         */
+        GetChannelType(
+            [out] Int32* type);
+    }
 
     } // Bluetooth
     } // Droid

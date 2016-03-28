@@ -107,8 +107,6 @@ public:
     /*package*/
     CARAPI Close();
 
-    CARAPI Finalize();
-
     /**
       * {@inheritDoc}
       */

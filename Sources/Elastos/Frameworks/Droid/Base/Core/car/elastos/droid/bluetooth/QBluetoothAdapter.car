@@ -1,0 +1,136 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+    interface ILeLppCallback {
+        OnWriteRssiThreshold(
+            [in] Int32 status);
+
+        OnReadRssiThreshold(
+            [in] Int32 low,
+            [in] Int32 upper,
+            [in] Int32 alert,
+            [in] Int32 status);
+
+        OnEnableRssiMonitor(
+            [in] Int32 e,
+            [in] Int32 status);
+
+        OnRssiThresholdEvent(
+            [in] Int32 evtType,
+            [in] Int32 rssi);
+
+        OnUpdateLease(
+            [out] Boolean* result);
+    }
+
+    interface ILeLppClientWrapper {
+        Register2(
+            [in] Boolean add,
+            [out] Boolean* result);
+
+        WriteRssiThreshold(
+            [in] Byte min,
+            [in] Byte max);
+
+        EnableMonitor(
+            [in] Boolean e);
+
+        ReadRssiThreshold();
+    }
+
+    /**
+     * Represents the local device BLE adapter. The {@link QBluetoothAdapter}
+     * lets you perform fundamental Bluetooth tasks,
+     *  such as register and remove LPP clients.
+     *
+     * <p>To get a {@link QBluetoothAdapter} representing this specific Bluetooth
+     * adapter, call the
+     * static {@link #getDefaultAdapter} method; when running on JELLY_BEAN_MR2 and
+     * higher. Once you have the local adapter, you can register for LPP clients
+     * and receive alerts based on proximity of the remote device
+     */
+     /** @hide */
+
+    interface IQBluetoothAdapter {
+
+        /** @hide */
+        RegisterLppClient(
+            [in] ILeLppCallback* client,
+            [in] String address,
+            [in] Boolean add,
+            [out] Boolean* result);
+
+       /**
+         * Write the rssi threshold for a connected remote device.
+         *
+         * <p>The {@link BluetoothGattCallback#onWriteRssiThreshold} callback will be
+         * invoked when the write request has been sent.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @param min    The lower limit of rssi threshold
+         * @param max    The upper limit of rssi threshold
+         * @return true, if the rssi threshold writing request has been sent tsuccessfully
+         */
+        /** @hide */
+        WriteRssiThreshold(
+            [in] ILeLppCallback* client,
+            [in] Int32 min,
+            [in] Int32 max,
+            [out] Boolean* result);
+
+                /**
+         * Enable rssi monitoring for a connected remote device.
+         *
+         * <p>The {@link BluetoothGattCallback#onEnableRssiMonitor} callback will be
+         * invoked when the rssi monitor enable/disable request has been sent.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @param enable disable/enable rssi monitor
+         * @return true, if the rssi monitoring request has been sent tsuccessfully
+         */
+         /** @hide */
+        EnableRssiMonitor(
+            [in] ILeLppCallback* client,
+            [in] Boolean e,
+            [out] Boolean* result);
+
+       /**
+         * Read the rssi threshold for a connected remote device.
+         *
+         * <p>The {@link BluetoothGattCallback#onReadRssiThreshold} callback will be
+         * invoked when the rssi threshold has been read.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @return true, if the rssi threshold has been requested successfully
+         */
+         /** @hide */
+        ReadRssiThreshold(
+            [in] ILeLppCallback* client,
+            [out] Boolean* result);
+    }
+
+    interface IQBluetoothAdapterHelper {
+        /**
+         * Get a handle to the default local QBluetooth adapter.
+         * <p>Currently Android only supports one QBluetooth adapter, but the API
+         * could be extended to support more. This will always return the default
+         * adapter.
+         * @return the default local adapter, or null if Bluetooth is not supported
+         *         on this hardware platform
+         */
+        GetDefaultAdapter(
+            [out] IQBluetoothAdapter** client);
+    }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

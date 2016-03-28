@@ -1,0 +1,38 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IIQBluetoothAdapterCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+    /**
+     * System private API for talking with the Bluetooth service.
+     *
+     * {@hide}
+     */
+    interface IIQBluetooth {
+        RegisterLeLppRssiMonitorClient(
+            [in] String address,
+            [in] IIQBluetoothAdapterCallback* client,
+            [in] Boolean add,
+            [out] Boolean* result);
+
+        WriteLeLppRssiThreshold(
+            [in] String address,
+            [in] Byte min,
+            [in] Byte max);
+
+        ReadLeLppRssiThreshold(
+            [in] String address);
+
+        EnableLeLppRssiMonitor(
+            [in] String address,
+            [in] Boolean e);
+    }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

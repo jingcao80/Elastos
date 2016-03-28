@@ -105,8 +105,6 @@ public:
     /*package*/
     CARAPI Close();
 
-    CARAPI Finalize();
-
     /**
       * Initiate connection to a profile of the remote bluetooth device.
       *
@@ -197,6 +195,55 @@ public:
     CARAPI GetAudioConfig(
         /* [in] */ IBluetoothDevice* device,
         /* [out] */ IBluetoothAudioConfig** result);
+
+
+    /**
+     * Set priority of the profile
+     *
+     * <p> The device should already be paired.
+     *  Priority can be one of {@link #PRIORITY_ON} orgetBluetoothManager
+     * {@link #PRIORITY_OFF},
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
+     *
+     * @param device Paired bluetooth device
+     * @param priority
+     * @return true if priority is set, false on error
+     * @hide
+     */
+    CARAPI SetPriority(
+        /* [in] */ IBluetoothDevice* device,
+        /* [in] */ Int32 priority,
+        /* [out] */ Boolean* result);
+
+    /**
+     * Get the priority of the profile.
+     *
+     * <p> The priority can be any of:
+     * {@link #PRIORITY_AUTO_CONNECT}, {@link #PRIORITY_OFF},
+     * {@link #PRIORITY_ON}, {@link #PRIORITY_UNDEFINED}
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param device Bluetooth device
+     * @return priority of the device
+     * @hide
+     */
+    CARAPI GetPriority(
+        /* [in] */ IBluetoothDevice* device,
+        /* [out] */ Int32* priority);
+
+    /**
+     * Check if A2DP profile is streaming music.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param device BluetoothDevice device
+     */
+    CARAPI IsA2dpPlaying(
+        /* [in] */ IBluetoothDevice* device,
+        /* [out] */ Boolean* result);
 
     /**
       * Helper for converting a state to a string.

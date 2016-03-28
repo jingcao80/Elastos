@@ -5,124 +5,115 @@ module
     namespace Droid {
     namespace Bluetooth {
 
+    /**
+     * This class provides the APIs to control the Bluetooth MAP
+     * Profile.
+     *@hide
+     */
+    /**
+     * @Involve
+     * interface IBluetoothProfile
+     */
+    interface IBluetoothMap {
+        const String ACTION_CONNECTION_STATE_CHANGED =
+            "android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED";
+
+        /** There was an error trying to obtain the state */
+        const Int32 STATE_ERROR        = -1;
+
+        const Int32 RESULT_FAILURE = 0;
+        const Int32 RESULT_SUCCESS = 1;
+        /** Connection canceled before completion. */
+        const Int32 RESULT_CANCELED = 2;
+
         /**
-         * This class provides the APIs to control the Bluetooth MAP
-         * Profile.
-         *@hide
+         * Get the current state of the BluetoothMap service.
+         * @return One of the STATE_ return codes, or STATE_ERROR if this proxy
+         *         object is currently not connected to the Map service.
          */
+        GetState(
+            [out] Int32* state);
+
         /**
-         * @Involve
-         * interface IBluetoothProfile
+         * Get the currently connected remote Bluetooth device (PCE).
+         * @return The remote Bluetooth device, or null if not in connected or
+         *         connecting state, or if this proxy object is not connected to
+         *         the Map service.
          */
-        [local]
-        interface IBluetoothMap {
-            const String ACTION_CONNECTION_STATE_CHANGED =
-                "android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED";
+        GetClient(
+            [out] IBluetoothDevice** client);
 
-            /** There was an error trying to obtain the state */
-            const Int32 STATE_ERROR        = -1;
+        /**
+         * Returns true if the specified Bluetooth device is connected.
+         * Returns false if not connected, or if this proxy object is not
+         * currently connected to the Map service.
+         */
+        IsConnected(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            const Int32 RESULT_FAILURE = 0;
-            const Int32 RESULT_SUCCESS = 1;
-            /** Connection canceled before completion. */
-            const Int32 RESULT_CANCELED = 2;
+        /**
+         * Initiate connection. Initiation of outgoing connections is not
+         * supported for MAP server.
+         */
+        Connect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Close the connection to the backing service.
-             * Other public functions of BluetoothMap will return default error
-             * results once close() has been called. Multiple invocations of close()
-             * are ok.
-             */
-            Close();
+        /**
+         * Initiate disconnect.
+         *
+         * @param device Remote Bluetooth Device
+         * @return false on error,
+         *               true otherwise
+         */
+        Disconnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Get the current state of the BluetoothMap service.
-             * @return One of the STATE_ return codes, or STATE_ERROR if this proxy
-             *         object is currently not connected to the Map service.
-             */
-            GetState(
-                [out] Int32* state);
+        /**
+         * Set priority of the profile
+         *
+         * <p> The device should already be paired.
+         *  Priority can be one of {@link #PRIORITY_ON} or
+         * {@link #PRIORITY_OFF},
+         *
+         * @param device Paired bluetooth device
+         * @param priority
+         * @return true if priority is set, false on error
+         */
+        SetPriority(
+            [in] IBluetoothDevice* device,
+            [in] Int32 priority,
+            [out] Boolean* result);
 
-            /**
-             * Get the currently connected remote Bluetooth device (PCE).
-             * @return The remote Bluetooth device, or null if not in connected or
-             *         connecting state, or if this proxy object is not connected to
-             *         the Map service.
-             */
-            GetClient(
-                [out] IBluetoothDevice** client);
+        /**
+         * Get the priority of the profile.
+         *
+         * <p> The priority can be any of:
+         * {@link #PRIORITY_AUTO_CONNECT}, {@link #PRIORITY_OFF},
+         * {@link #PRIORITY_ON}, {@link #PRIORITY_UNDEFINED}
+         *
+         * @param device Bluetooth device
+         * @return priority of the device
+         */
+        GetPriority(
+            [in] IBluetoothDevice* device,
+            [out] Int32* priority);
+    }
 
-            /**
-             * Returns true if the specified Bluetooth device is connected.
-             * Returns false if not connected, or if this proxy object is not
-             * currently connected to the Map service.
-             */
-            IsConnected(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
-
-            /**
-             * Initiate connection. Initiation of outgoing connections is not
-             * supported for MAP server.
-             */
-            Connect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
-
-            /**
-             * Initiate disconnect.
-             *
-             * @param device Remote Bluetooth Device
-             * @return false on error,
-             *               true otherwise
-             */
-            Disconnect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
-
-            /**
-             * Set priority of the profile
-             *
-             * <p> The device should already be paired.
-             *  Priority can be one of {@link #PRIORITY_ON} or
-             * {@link #PRIORITY_OFF},
-             *
-             * @param device Paired bluetooth device
-             * @param priority
-             * @return true if priority is set, false on error
-             */
-            SetPriority(
-                [in] IBluetoothDevice* device,
-                [in] Int32 priority,
-                [out] Boolean* result);
-
-            /**
-             * Get the priority of the profile.
-             *
-             * <p> The priority can be any of:
-             * {@link #PRIORITY_AUTO_CONNECT}, {@link #PRIORITY_OFF},
-             * {@link #PRIORITY_ON}, {@link #PRIORITY_UNDEFINED}
-             *
-             * @param device Bluetooth device
-             * @return priority of the device
-             */
-            GetPriority(
-                [in] IBluetoothDevice* device,
-                [out] Int32* priority);
-        }
-
-        interface IBluetoothMapHelper {
-            /**
-             * Check class bits for possible Map support.
-             * This is a simple heuristic that tries to guess if a device with the
-             * given class bits might support Map. It is not accurate for all
-             * devices. It tries to err on the side of false positives.
-             * @return True if this device might support Map.
-             */
-            DoesClassMatchSink(
-                [in] IBluetoothClass* btClass,
-                [out] Boolean* result);
-        }
+    interface IBluetoothMapHelper {
+        /**
+         * Check class bits for possible Map support.
+         * This is a simple heuristic that tries to guess if a device with the
+         * given class bits might support Map. It is not accurate for all
+         * devices. It tries to err on the side of false positives.
+         * @return True if this device might support Map.
+         */
+        DoesClassMatchSink(
+            [in] IBluetoothClass* btClass,
+            [out] Boolean* result);
+    }
 
     } // Bluetooth
     } // Droid

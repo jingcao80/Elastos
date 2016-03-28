@@ -104,6 +104,29 @@ ECode CBluetoothClass::DoesClassMatch(
                 return NOERROR;
         }
     }
+    else if (profile == IBluetoothClass::PROFILE_A2DP_SINK) {
+        // The render service class is required by the spec for HFP, so is a
+        // pretty good signal
+        Boolean hasService;
+        if (HasService(IBluetoothClassService::CAPTURE, &hasService), hasService) {
+            *isMatch = TRUE;
+            return NOERROR;
+        }
+
+        // Just in case they forgot the render service class
+        Int32 deviceClass;
+        GetDeviceClass(&deviceClass);
+        switch (deviceClass) {
+            case IBluetoothClassDevice::AUDIO_VIDEO_HIFI_AUDIO:
+            case IBluetoothClassDevice::AUDIO_VIDEO_SET_TOP_BOX:
+            case IBluetoothClassDevice::AUDIO_VIDEO_VCR:
+                *isMatch = TRUE;
+                return NOERROR;
+            default:
+                *isMatch = FALSE;
+                return NOERROR;
+        }
+    }
     else if (profile == IBluetoothClass::PROFILE_HEADSET) {
         // The render service class is required by the spec for HFP, so is a
         // pretty good signal

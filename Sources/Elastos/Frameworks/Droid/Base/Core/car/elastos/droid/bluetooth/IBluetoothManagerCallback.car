@@ -12,8 +12,7 @@ module
      *
      * {@hide}
      */
-    interface IIBluetoothManagerCallback
-    {
+    interface IIBluetoothManagerCallback {
         OnBluetoothServiceUp(
             [in] IIBluetooth* bluetoothService);
 

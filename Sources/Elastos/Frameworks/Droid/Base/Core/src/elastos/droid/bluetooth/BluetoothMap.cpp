@@ -134,7 +134,7 @@ BluetoothMap::BluetoothMap(
 
 BluetoothMap::~BluetoothMap()
 {
-    Finalize();
+    Close();
 }
 
 ECode BluetoothMap::DoBind(
@@ -402,15 +402,6 @@ ECode BluetoothMap::GetPriority(
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
     *result = PRIORITY_OFF;
     return NOERROR;
-}
-
-void BluetoothMap::Finalize()
-{
-    //try {
-    Close();
-    //} finally {
-    //    super.finalize();
-    //}
 }
 
 void BluetoothMap::Log(

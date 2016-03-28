@@ -1198,7 +1198,6 @@ AutoPtr<IIMountService> CLockSettingsService::GetMountService()
     return NULL;
 }
 
-
 }// namespace Server
 }// namespace Droid
 }// namespace Elastos

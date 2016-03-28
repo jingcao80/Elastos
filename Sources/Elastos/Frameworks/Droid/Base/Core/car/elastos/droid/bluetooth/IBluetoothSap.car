@@ -1,0 +1,37 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+    /**
+     * API for Bluetooth Sap service
+     *
+     * {@hide}
+     */
+    [deprecated]
+    interface IIBluetoothSap {
+        // Public API
+        Disconnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        GetConnectionState(
+            [in] IBluetoothDevice* device,
+            [out] Int32* state);
+
+        GetConnectedDevices(
+            [out] IList** devices);
+
+        GetDevicesMatchingConnectionStates(
+            [in] ArrayOf<Int32>* states,
+            [out] IList** devices);
+    }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

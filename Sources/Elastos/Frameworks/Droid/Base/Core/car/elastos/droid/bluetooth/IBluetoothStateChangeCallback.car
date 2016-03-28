@@ -6,16 +6,15 @@ module
     namespace Droid {
     namespace Bluetooth {
 
-        /**
-         * System private API for Bluetooth state change callback.
-         *
-         * {@hide}
-         */
-        interface IIBluetoothStateChangeCallback
-        {
-            OnBluetoothStateChange(
-                [in] Boolean on);
-        }
+    /**
+     * System private API for Bluetooth state change callback.
+     *
+     * {@hide}
+     */
+    interface IIBluetoothStateChangeCallback {
+        OnBluetoothStateChange(
+            [in] Boolean on);
+    }
 
     } // Bluetooth
     } // Droid

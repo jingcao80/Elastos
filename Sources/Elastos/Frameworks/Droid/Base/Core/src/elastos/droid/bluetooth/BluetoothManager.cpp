@@ -67,7 +67,7 @@ ECode BluetoothManager::GetConnectionState(
         connectedDevices->Get(i, (IInterface**)&obj);
         IBluetoothDevice* connectedDevice = IBluetoothDevice::Probe(obj);
         Boolean eq = FALSE;
-        if (device->Equals(connectedDevice, &eq), eq) {
+        if (IObject::Probe(device)->Equals(connectedDevice, &eq), eq) {
             *result = IBluetoothProfile::STATE_CONNECTED;
             return NOERROR;
         }

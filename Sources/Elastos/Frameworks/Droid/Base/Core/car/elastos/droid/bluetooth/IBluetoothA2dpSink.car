@@ -37,6 +37,19 @@ module
             [in] IBluetoothDevice* device,
             [out] Int32* newState);
 
+        SetPriority(
+            [in] IBluetoothDevice* device,
+            [in] Int32 priority,
+            [out] Boolean* result);
+
+        GetPriority(
+            [in] IBluetoothDevice* device,
+            [out] Int32* priority);
+
+        IsA2dpPlaying(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
         GetAudioConfig(
             [in] IBluetoothDevice* device,
             [out] IBluetoothAudioConfig** config);

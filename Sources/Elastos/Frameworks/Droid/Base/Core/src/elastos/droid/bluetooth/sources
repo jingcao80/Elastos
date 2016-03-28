@@ -25,7 +25,10 @@ SOURCES += BluetoothHeadsetClient.cpp
 SOURCES += BluetoothManager.cpp
 SOURCES += BluetoothMap.cpp
 SOURCES += BluetoothMasInstance.cpp
-
+SOURCES += BluetoothDun.cpp
+SOURCES += BluetoothSap.cpp
+SOURCES += CBluetoothSapStateChangeCallback.cpp
+SOURCES += CBluetoothRemoteDiRecord.cpp
 SOURCES += CBluetoothA2dpStateChangeCallback.cpp
 SOURCES += CBluetoothHeadsetStateChangeCallback.cpp
 SOURCES += CBluetoothHealthStateChangeCallback.cpp
@@ -34,7 +37,12 @@ SOURCES += CBluetoothPanStateChangeCallback.cpp
 SOURCES += CBluetoothPbapStateChangeCallback.cpp
 SOURCES += CBluetoothStateChangeCallbackWrapper.cpp
 SOURCES += CBluetoothHealthCallbackWrapper.cpp
-
+SOURCES += CBluetoothHidDeviceAppConfiguration.cpp
+SOURCES += CBluetoothHidDeviceAppQosSettings.cpp
+SOURCES += CBluetoothHidDeviceAppSdpSettings.cpp
+SOURCES += BluetoothHidDevice.cpp
+SOURCES += CBluetoothHidDeviceStateChangeCallback.cpp
+SOURCES += CBluetoothHidDeviceCallbackWrapper.cpp
 SOURCES += BluetoothA2dp.cpp
 SOURCES += BluetoothHeadset.cpp
 SOURCES += BluetoothUuid.cpp
@@ -47,7 +55,7 @@ SOURCES += BluetoothPan.cpp
 SOURCES += BluetoothPbap.cpp
 SOURCES += BluetoothServerSocket.cpp
 SOURCES += BluetoothSocket.cpp
-
+SOURCES += QBluetoothAdapter.cpp
 SOURCES += CBluetoothAdapterManagerCallback.cpp
 SOURCES += CBluetoothAdapter.cpp
 SOURCES += CBluetoothAdapterHelper.cpp
@@ -55,7 +63,7 @@ SOURCES += CBluetoothClass.cpp
 SOURCES += CBluetoothDeviceManagerCallback.cpp
 SOURCES += CBluetoothDevice.cpp
 SOURCES += CBluetoothHealthAppConfiguration.cpp
-
+SOURCES += CBluetoothDunStateChangeCallback.cpp
 SOURCES += CBluetoothA2dpSinkStateChangeCallback.cpp
 SOURCES += CBluetoothActivityEnergyInfo.cpp
 SOURCES += CBluetoothAudioConfig.cpp
@@ -70,6 +78,9 @@ SOURCES += CBluetoothHeadsetClientStateChangeCallback.cpp
 SOURCES += CBluetoothManager.cpp
 SOURCES += CBluetoothMapStateChangeCallback.cpp
 SOURCES += CBluetoothMasInstance.cpp
+SOURCES += CBluetoothManagerCallback.cpp
+SOURCES += CLeLppClientWrapper.cpp
+SOURCES += CQBluetoothManagerCallback.cpp
 
 ELASTOS_LIBS += le/le.lib
 

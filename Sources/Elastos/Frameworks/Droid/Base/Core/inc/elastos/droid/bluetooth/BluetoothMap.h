@@ -214,9 +214,6 @@ public:
         /* [in] */ IBluetoothDevice* device,
         /* [out] */ Int32* result);
 
-protected:
-    CARAPI_(void) Finalize();
-
 private:
     static CARAPI_(void) Log(
         /* [in] */ const String& msg);

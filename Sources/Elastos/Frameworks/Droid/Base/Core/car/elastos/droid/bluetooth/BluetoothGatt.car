@@ -8,353 +8,344 @@ module
     namespace Droid {
     namespace Bluetooth {
 
+    /**
+     * Public API for the Bluetooth GATT Profile.
+     *
+     * <p>This class provides Bluetooth GATT functionality to enable communication
+     * with Bluetooth Smart or Smart Ready devices.
+     *
+     * <p>To connect to a remote peripheral device, create a {@link BluetoothGattCallback}
+     * and call {@link BluetoothDevice#connectGatt} to get a instance of this class.
+     * GATT capable devices can be discovered using the Bluetooth device discovery or BLE
+     * scan process.
+     */
+    /**
+     * @Involve
+     * interface IBluetoothProfile
+     */
+    interface IBluetoothGatt {
+        /** A GATT operation completed successfully */
+        const Int32 GATT_SUCCESS = 0;
+
+        /** GATT read operation is not permitted */
+        const Int32 GATT_READ_NOT_PERMITTED = 0x2;
+
+        /** GATT write operation is not permitted */
+        const Int32 GATT_WRITE_NOT_PERMITTED = 0x3;
+
+        /** Insufficient authentication for a given operation */
+        const Int32 GATT_INSUFFICIENT_AUTHENTICATION = 0x5;
+
+        /** The given request is not supported */
+        const Int32 GATT_REQUEST_NOT_SUPPORTED = 0x6;
+
+        /** Insufficient encryption for a given operation */
+        const Int32 GATT_INSUFFICIENT_ENCRYPTION = 0xf;
+
+        /** A read or write operation was requested with an invalid offset */
+        const Int32 GATT_INVALID_OFFSET = 0x7;
+
+        /** A write operation exceeds the maximum length of the attribute */
+        const Int32 GATT_INVALID_ATTRIBUTE_LENGTH = 0xd;
+
+        /** A remote device connection is congested. */
+        const Int32 GATT_CONNECTION_CONGESTED = 0x8f;
+
+        /** A GATT operation failed, errors other than the above */
+        const Int32 GATT_FAILURE = 0x101;
+
         /**
-         * Public API for the Bluetooth GATT Profile.
-         *
-         * <p>This class provides Bluetooth GATT functionality to enable communication
-         * with Bluetooth Smart or Smart Ready devices.
-         *
-         * <p>To connect to a remote peripheral device, create a {@link BluetoothGattCallback}
-         * and call {@link BluetoothDevice#connectGatt} to get a instance of this class.
-         * GATT capable devices can be discovered using the Bluetooth device discovery or BLE
-         * scan process.
+         * Connection paramter update - Use the connection paramters recommended by the
+         * Bluetooth SIG. This is the default value if no connection parameter update
+         * is requested.
          */
+        const Int32 CONNECTION_PRIORITY_BALANCED = 0;
+
         /**
-         * @Involve
-         * interface IBluetoothProfile
+         * Connection paramter update - Request a high priority, low latency connection.
+         * An application should only request high priority connection paramters to transfer
+         * large amounts of data over LE quickly. Once the transfer is complete, the application
+         * should request {@link BluetoothGatt#CONNECTION_PRIORITY_BALANCED} connectoin parameters
+         * to reduce energy use.
          */
-        [local]
-        interface IBluetoothGatt {
-            /** A GATT operation completed successfully */
-            const Int32 GATT_SUCCESS = 0;
+        const Int32 CONNECTION_PRIORITY_HIGH = 1;
 
-            /** GATT read operation is not permitted */
-            const Int32 GATT_READ_NOT_PERMITTED = 0x2;
+        /** Connection paramter update - Request low power, reduced data rate connection parameters. */
+        const Int32 CONNECTION_PRIORITY_LOW_POWER = 2;
 
-            /** GATT write operation is not permitted */
-            const Int32 GATT_WRITE_NOT_PERMITTED = 0x3;
+        /**
+         * Disconnects an established connection, or cancels a connection attempt
+         * currently in progress.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         */
+        Disconnect();
 
-            /** Insufficient authentication for a given operation */
-            const Int32 GATT_INSUFFICIENT_AUTHENTICATION = 0x5;
+        /**
+         * Connect back to remote device.
+         *
+         * <p>This method is used to re-connect to a remote device after the
+         * connection has been dropped. If the device is not in range, the
+         * re-connection will be triggered once the device is back in range.
+         *
+         * @return true, if the connection attempt was initiated successfully
+         */
+        Connect(
+            [out] Boolean* result);
 
-            /** The given request is not supported */
-            const Int32 GATT_REQUEST_NOT_SUPPORTED = 0x6;
+        /**
+         * Return the remote bluetooth device this GATT client targets to
+         *
+         * @return remote bluetooth device
+         */
+        GetDevice(
+            [out] IBluetoothDevice** device);
 
-            /** Insufficient encryption for a given operation */
-            const Int32 GATT_INSUFFICIENT_ENCRYPTION = 0xf;
+        /**
+         * Discovers services offered by a remote device as well as their
+         * characteristics and descriptors.
+         *
+         * <p>This is an asynchronous operation. Once service discovery is completed,
+         * the {@link BluetoothGattCallback#onServicesDiscovered} callback is
+         * triggered. If the discovery was successful, the remote services can be
+         * retrieved using the {@link #getServices} function.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @return true, if the remote service discovery has been started
+         */
+        DiscoverServices(
+            [out] Boolean* services);
 
-            /** A read or write operation was requested with an invalid offset */
-            const Int32 GATT_INVALID_OFFSET = 0x7;
+        /**
+         * Returns a list of GATT services offered by the remote device.
+         *
+         * <p>This function requires that service discovery has been completed
+         * for the given device.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @return List of services on the remote device. Returns an empty list
+         *         if service discovery has not yet been performed.
+         * return list of IBluetoothGattService
+         */
+        GetServices(
+            [out] IList** services);
 
-            /** A write operation exceeds the maximum length of the attribute */
-            const Int32 GATT_INVALID_ATTRIBUTE_LENGTH = 0xd;
+        /**
+         * Returns a {@link BluetoothGattService}, if the requested UUID is
+         * supported by the remote device.
+         *
+         * <p>This function requires that service discovery has been completed
+         * for the given device.
+         *
+         * <p>If multiple instances of the same service (as identified by UUID)
+         * exist, the first instance of the service is returned.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @param uuid UUID of the requested service
+         * @return BluetoothGattService if supported, or null if the requested
+         *         service is not offered by the remote device.
+         */
+        GetService(
+            [in] IUUID* uuid,
+            [out] IBluetoothGattService** service);
 
-            /** A remote device connection is congested. */
-            const Int32 GATT_CONNECTION_CONGESTED = 0x8f;
-
-            /** A GATT operation failed, errors other than the above */
-            const Int32 GATT_FAILURE = 0x101;
-
-            /**
-             * Connection paramter update - Use the connection paramters recommended by the
-             * Bluetooth SIG. This is the default value if no connection parameter update
-             * is requested.
-             */
-            const Int32 CONNECTION_PRIORITY_BALANCED = 0;
-
-            /**
-             * Connection paramter update - Request a high priority, low latency connection.
-             * An application should only request high priority connection paramters to transfer
-             * large amounts of data over LE quickly. Once the transfer is complete, the application
-             * should request {@link BluetoothGatt#CONNECTION_PRIORITY_BALANCED} connectoin parameters
-             * to reduce energy use.
-             */
-            const Int32 CONNECTION_PRIORITY_HIGH = 1;
-
-            /** Connection paramter update - Request low power, reduced data rate connection parameters. */
-            const Int32 CONNECTION_PRIORITY_LOW_POWER = 2;
-
-            /**
-             * Close this Bluetooth GATT client.
-             *
-             * Application should call this method as early as possible after it is done with
-             * this GATT client.
-             */
-            Close();
-
-            /**
-             * Disconnects an established connection, or cancels a connection attempt
-             * currently in progress.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             */
-            Disconnect();
-
-            /**
-             * Connect back to remote device.
-             *
-             * <p>This method is used to re-connect to a remote device after the
-             * connection has been dropped. If the device is not in range, the
-             * re-connection will be triggered once the device is back in range.
-             *
-             * @return true, if the connection attempt was initiated successfully
-             */
-            Connect(
-                [out] Boolean* result);
-
-            /**
-             * Return the remote bluetooth device this GATT client targets to
-             *
-             * @return remote bluetooth device
-             */
-            GetDevice(
-                [out] IBluetoothDevice** device);
-
-            /**
-             * Discovers services offered by a remote device as well as their
-             * characteristics and descriptors.
-             *
-             * <p>This is an asynchronous operation. Once service discovery is completed,
-             * the {@link BluetoothGattCallback#onServicesDiscovered} callback is
-             * triggered. If the discovery was successful, the remote services can be
-             * retrieved using the {@link #getServices} function.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @return true, if the remote service discovery has been started
-             */
-            DiscoverServices(
-                [out] Boolean* services);
+        /**
+         * Reads the requested characteristic from the associated remote device.
+         *
+         * <p>This is an asynchronous operation. The result of the read operation
+         * is reported by the {@link BluetoothGattCallback#onCharacteristicRead}
+         * callback.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @param characteristic Characteristic to read from the remote device
+         * @return true, if the read operation was initiated successfully
+         */
+        ReadCharacteristic(
+            [in] IBluetoothGattCharacteristic* characteristic,
+            [out] Boolean* result);
 
             /**
-             * Returns a list of GATT services offered by the remote device.
-             *
-             * <p>This function requires that service discovery has been completed
-             * for the given device.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @return List of services on the remote device. Returns an empty list
-             *         if service discovery has not yet been performed.
-             * return list of IBluetoothGattService
-             */
-            GetServices(
-                [out] IList** services);
+         * Writes a given characteristic and its values to the associated remote device.
+         *
+         * <p>Once the write operation has been completed, the
+         * {@link BluetoothGattCallback#onCharacteristicWrite} callback is invoked,
+         * reporting the result of the operation.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @param characteristic Characteristic to write on the remote device
+         * @return true, if the write operation was initiated successfully
+         */
+        WriteCharacteristic(
+            [in] IBluetoothGattCharacteristic* characteristic,
+            [out] Boolean* result);
 
-            /**
-             * Returns a {@link BluetoothGattService}, if the requested UUID is
-             * supported by the remote device.
-             *
-             * <p>This function requires that service discovery has been completed
-             * for the given device.
-             *
-             * <p>If multiple instances of the same service (as identified by UUID)
-             * exist, the first instance of the service is returned.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @param uuid UUID of the requested service
-             * @return BluetoothGattService if supported, or null if the requested
-             *         service is not offered by the remote device.
-             */
-            GetService(
-                [in] IUUID* uuid,
-                [out] IBluetoothGattService** service);
+        /**
+         * Reads the value for a given descriptor from the associated remote device.
+         *
+         * <p>Once the read operation has been completed, the
+         * {@link BluetoothGattCallback#onDescriptorRead} callback is
+         * triggered, signaling the result of the operation.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @param descriptor Descriptor value to read from the remote device
+         * @return true, if the read operation was initiated successfully
+         */
+        ReadDescriptor(
+            [in] IBluetoothGattDescriptor* descriptor,
+            [out] Boolean* result);
 
-            /**
-             * Reads the requested characteristic from the associated remote device.
-             *
-             * <p>This is an asynchronous operation. The result of the read operation
-             * is reported by the {@link BluetoothGattCallback#onCharacteristicRead}
-             * callback.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @param characteristic Characteristic to read from the remote device
-             * @return true, if the read operation was initiated successfully
-             */
-            ReadCharacteristic(
-                [in] IBluetoothGattCharacteristic* characteristic,
-                [out] Boolean* result);
+        /**
+         * Write the value of a given descriptor to the associated remote device.
+         *
+         * <p>A {@link BluetoothGattCallback#onDescriptorWrite} callback is
+         * triggered to report the result of the write operation.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @param descriptor Descriptor to write to the associated remote device
+         * @return true, if the write operation was initiated successfully
+         */
+        WriteDescriptor(
+            [in] IBluetoothGattDescriptor* descriptor,
+            [out] Boolean* result);
 
-                /**
-             * Writes a given characteristic and its values to the associated remote device.
-             *
-             * <p>Once the write operation has been completed, the
-             * {@link BluetoothGattCallback#onCharacteristicWrite} callback is invoked,
-             * reporting the result of the operation.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @param characteristic Characteristic to write on the remote device
-             * @return true, if the write operation was initiated successfully
-             */
-            WriteCharacteristic(
-                [in] IBluetoothGattCharacteristic* characteristic,
-                [out] Boolean* result);
+        /**
+         * Initiates a reliable write transaction for a given remote device.
+         *
+         * <p>Once a reliable write transaction has been initiated, all calls
+         * to {@link #writeCharacteristic} are sent to the remote device for
+         * verification and queued up for atomic execution. The application will
+         * receive an {@link BluetoothGattCallback#onCharacteristicWrite} callback
+         * in response to every {@link #writeCharacteristic} call and is responsible
+         * for verifying if the value has been transmitted accurately.
+         *
+         * <p>After all characteristics have been queued up and verified,
+         * {@link #executeReliableWrite} will execute all writes. If a characteristic
+         * was not written correctly, calling {@link #abortReliableWrite} will
+         * cancel the current transaction without commiting any values on the
+         * remote device.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @return true, if the reliable write transaction has been initiated
+         */
+        BeginReliableWrite(
+            [out] Boolean* result);
 
-            /**
-             * Reads the value for a given descriptor from the associated remote device.
-             *
-             * <p>Once the read operation has been completed, the
-             * {@link BluetoothGattCallback#onDescriptorRead} callback is
-             * triggered, signaling the result of the operation.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @param descriptor Descriptor value to read from the remote device
-             * @return true, if the read operation was initiated successfully
-             */
-            ReadDescriptor(
-                [in] IBluetoothGattDescriptor* descriptor,
-                [out] Boolean* result);
+        /**
+         * Executes a reliable write transaction for a given remote device.
+         *
+         * <p>This function will commit all queued up characteristic write
+         * operations for a given remote device.
+         *
+         * <p>A {@link BluetoothGattCallback#onReliableWriteCompleted} callback is
+         * invoked to indicate whether the transaction has been executed correctly.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @return true, if the request to execute the transaction has been sent
+         */
+        ExecuteReliableWrite(
+            [out] Boolean* result);
 
-            /**
-             * Write the value of a given descriptor to the associated remote device.
-             *
-             * <p>A {@link BluetoothGattCallback#onDescriptorWrite} callback is
-             * triggered to report the result of the write operation.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @param descriptor Descriptor to write to the associated remote device
-             * @return true, if the write operation was initiated successfully
-             */
-            WriteDescriptor(
-                [in] IBluetoothGattDescriptor* descriptor,
-                [out] Boolean* result);
+        /**
+         * Cancels a reliable write transaction for a given device.
+         *
+         * <p>Calling this function will discard all queued characteristic write
+         * operations for a given remote device.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         */
+        AbortReliableWrite();
 
-            /**
-             * Initiates a reliable write transaction for a given remote device.
-             *
-             * <p>Once a reliable write transaction has been initiated, all calls
-             * to {@link #writeCharacteristic} are sent to the remote device for
-             * verification and queued up for atomic execution. The application will
-             * receive an {@link BluetoothGattCallback#onCharacteristicWrite} callback
-             * in response to every {@link #writeCharacteristic} call and is responsible
-             * for verifying if the value has been transmitted accurately.
-             *
-             * <p>After all characteristics have been queued up and verified,
-             * {@link #executeReliableWrite} will execute all writes. If a characteristic
-             * was not written correctly, calling {@link #abortReliableWrite} will
-             * cancel the current transaction without commiting any values on the
-             * remote device.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @return true, if the reliable write transaction has been initiated
-             */
-            BeginReliableWrite(
-                [out] Boolean* result);
+        /**
+         * @deprecated Use {@link #abortReliableWrite()}
+         */
+        AbortReliableWrite(
+            [in] IBluetoothDevice* mDevice);
 
-            /**
-             * Executes a reliable write transaction for a given remote device.
-             *
-             * <p>This function will commit all queued up characteristic write
-             * operations for a given remote device.
-             *
-             * <p>A {@link BluetoothGattCallback#onReliableWriteCompleted} callback is
-             * invoked to indicate whether the transaction has been executed correctly.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @return true, if the request to execute the transaction has been sent
-             */
-            ExecuteReliableWrite(
-                [out] Boolean* result);
+        /**
+         * Enable or disable notifications/indications for a given characteristic.
+         *
+         * <p>Once notifications are enabled for a characteristic, a
+         * {@link BluetoothGattCallback#onCharacteristicChanged} callback will be
+         * triggered if the remote device indicates that the given characteristic
+         * has changed.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @param characteristic The characteristic for which to enable notifications
+         * @param enable Set to true to enable notifications/indications
+         * @return true, if the requested notification status was set successfully
+         */
+        SetCharacteristicNotification(
+            [in] IBluetoothGattCharacteristic* characteristic,
+            [in] Boolean enabled,
+            [out] Boolean* result);
 
-            /**
-             * Cancels a reliable write transaction for a given device.
-             *
-             * <p>Calling this function will discard all queued characteristic write
-             * operations for a given remote device.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             */
-            AbortReliableWrite();
+        /**
+         * Clears the internal cache and forces a refresh of the services from the
+         * remote device.
+         * @hide
+         */
+        Refresh(
+            [out] Boolean* result);
 
-            /**
-             * @deprecated Use {@link #abortReliableWrite()}
-             */
-            AbortReliableWrite(
-                [in] IBluetoothDevice* mDevice);
+        /**
+         * Read the RSSI for a connected remote device.
+         *
+         * <p>The {@link BluetoothGattCallback#onReadRemoteRssi} callback will be
+         * invoked when the RSSI value has been read.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @return true, if the RSSI value has been requested successfully
+         */
+        ReadRemoteRssi(
+            [out] Boolean* result);
 
-            /**
-             * Enable or disable notifications/indications for a given characteristic.
-             *
-             * <p>Once notifications are enabled for a characteristic, a
-             * {@link BluetoothGattCallback#onCharacteristicChanged} callback will be
-             * triggered if the remote device indicates that the given characteristic
-             * has changed.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @param characteristic The characteristic for which to enable notifications
-             * @param enable Set to true to enable notifications/indications
-             * @return true, if the requested notification status was set successfully
-             */
-            SetCharacteristicNotification(
-                [in] IBluetoothGattCharacteristic* characteristic,
-                [in] Boolean enabled,
-                [out] Boolean* result);
+        /**
+         * Request an MTU size used for a given connection.
+         *
+         * <p>When performing a write request operation (write without response),
+         * the data sent is truncated to the MTU size. This function may be used
+         * to request a larger MTU size to be able to send more data at once.
+         *
+         * <p>A {@link BluetoothGattCallback#onMtuChanged} callback will indicate
+         * whether this operation was successful.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @return true, if the new MTU value has been requested successfully
+         */
+        RequestMtu(
+            [in] Int32 mtu,
+            [out] Boolean* result);
 
-            /**
-             * Clears the internal cache and forces a refresh of the services from the
-             * remote device.
-             * @hide
-             */
-            Refresh(
-                [out] Boolean* result);
+        /**
+         * Request a connection parameter update.
+         *
+         * <p>This function will send a connection parameter update request to the
+         * remote device.
+         *
+         * @param connectionPriority Request a specific connection priority. Must be one of
+         *          {@link BluetoothGatt#CONNECTION_PRIORITY_BALANCED},
+         *          {@link BluetoothGatt#CONNECTION_PRIORITY_HIGH}
+         *          or {@link BluetoothGatt#CONNECTION_PRIORITY_LOW_POWER}.
+         * @throws IllegalArgumentException If the parameters are outside of their
+         *                                  specified range.
+         */
+        RequestConnectionPriority(
+            [in] Int32 connectionPriority,
+            [out] Boolean* result);
 
-            /**
-             * Read the RSSI for a connected remote device.
-             *
-             * <p>The {@link BluetoothGattCallback#onReadRemoteRssi} callback will be
-             * invoked when the RSSI value has been read.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @return true, if the RSSI value has been requested successfully
-             */
-            ReadRemoteRssi(
-                [out] Boolean* result);
-
-            /**
-             * Request an MTU size used for a given connection.
-             *
-             * <p>When performing a write request operation (write without response),
-             * the data sent is truncated to the MTU size. This function may be used
-             * to request a larger MTU size to be able to send more data at once.
-             *
-             * <p>A {@link BluetoothGattCallback#onMtuChanged} callback will indicate
-             * whether this operation was successful.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @return true, if the new MTU value has been requested successfully
-             */
-            RequestMtu(
-                [in] Int32 mtu,
-                [out] Boolean* result);
-
-            /**
-             * Request a connection parameter update.
-             *
-             * <p>This function will send a connection parameter update request to the
-             * remote device.
-             *
-             * @param connectionPriority Request a specific connection priority. Must be one of
-             *          {@link BluetoothGatt#CONNECTION_PRIORITY_BALANCED},
-             *          {@link BluetoothGatt#CONNECTION_PRIORITY_HIGH}
-             *          or {@link BluetoothGatt#CONNECTION_PRIORITY_LOW_POWER}.
-             * @throws IllegalArgumentException If the parameters are outside of their
-             *                                  specified range.
-             */
-            RequestConnectionPriority(
-                [in] Int32 connectionPriority,
-                [out] Boolean* result);
-
-        }
+    }
 
     } // Bluetooth
     } // Droid

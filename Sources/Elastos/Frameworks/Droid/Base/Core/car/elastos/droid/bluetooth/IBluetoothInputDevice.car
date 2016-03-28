@@ -93,6 +93,20 @@ module
             [in] IBluetoothDevice* device,
             [in] String report,
             [out] Boolean* result);
+
+        /**
+        * @hide
+        */
+        GetIdleTime(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+        /**
+        * @hide
+        */
+        SetIdleTime(
+            [in] IBluetoothDevice* device,
+            [in] Byte idleTime,
+            [out] Boolean* result);
     }
 
     } // Bluetooth

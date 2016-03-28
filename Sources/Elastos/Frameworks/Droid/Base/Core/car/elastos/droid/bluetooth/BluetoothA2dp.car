@@ -6,277 +6,272 @@ module
     namespace Droid {
     namespace Bluetooth {
 
+    /**
+     * This class provides the public APIs to control the Bluetooth A2DP
+     * profile.
+     *
+     *<p>BluetoothA2dp is a proxy object for controlling the Bluetooth A2DP
+     * Service via IPC. Use BluetoothAdapter#getProfileProxy to get
+     * the BluetoothA2dp proxy object.
+     *
+     * @sa BluetoothAdapter#getProfileProxy
+     *
+     * <p> Android only supports one connected Bluetooth A2dp device at a time.
+     * Each method is protected with its appropriate permission.
+     *
+     * @implements Elastos.Droid.Bluetooth.Elastos.Droid.Bluetooth.IBluetoothProfile
+     */
+    /**
+     * @Involve
+     * interface IBluetoothProfile
+     */
+    interface IBluetoothA2dp {
         /**
-         * This class provides the public APIs to control the Bluetooth A2DP
+         * Intent used to broadcast the change in connection state of the A2DP
          * profile.
          *
-         *<p>BluetoothA2dp is a proxy object for controlling the Bluetooth A2DP
-         * Service via IPC. Use BluetoothAdapter#getProfileProxy to get
-         * the BluetoothA2dp proxy object.
+         * <p>This intent will have 3 extras:
+         * <ul>
+         *   <li> #EXTRA_STATE - The current state of the profile. </li>
+         *   <li> #EXTRA_PREVIOUS_STATE- The previous state of the profile.</li>
+         *   <li> BluetoothDevice#EXTRA_DEVICE - The remote device. </li>
+         * </ul>
          *
-         * @sa BluetoothAdapter#getProfileProxy
+         * <p> #EXTRA_STATE or #EXTRA_PREVIOUS_STATE can be any of
+         * #STATE_DISCONNECTED, #STATE_CONNECTING,
+         * #STATE_CONNECTED,#STATE_DISCONNECTING.
          *
-         * <p> Android only supports one connected Bluetooth A2dp device at a time.
-         * Each method is protected with its appropriate permission.
+         * <p>Requires android.Manifest.permission#BLUETOOTH permission to
+         * receive.
          *
-         * @implements Elastos.Droid.Bluetooth.Elastos.Droid.Bluetooth.IBluetoothProfile
+         * @sa #EXTRA_STATE
+         * @sa #EXTRA_PREVIOUS_STATE
+         * @sa BluetoothDevice#EXTRA_DEVICE
+         * @sa #EXTRA_STATE
+         * @sa #EXTRA_PREVIOUS_STATE
+         * @sa #STATE_DISCONNECTED
+         * @sa #STATE_CONNECTING
+         * @sa #STATE_CONNECTED
+         * @sa #STATE_DISCONNECTING
+         *
+         * <p>Requires android.Manifest.permission#BLUETOOTH permission to
+         *
+         * @sa android.Manifest.permission#BLUETOOTH
+         * @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
          */
+        const String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED";
+
+        const String ACTION_AVRCP_CONNECTION_STATE_CHANGED = "android.bluetooth.a2dp.profile.action.AVRCP_CONNECTION_STATE_CHANGED";
+
         /**
-         * @Involve
-         * interface IBluetoothProfile
+         * Intent used to broadcast the change in connection state of the A2DP
+         * profile.
+         *
+         * <p>This intent will have 3 extras:
+         * <ul>
+         *   <li> #EXTRA_STATE - The current state of the profile. </li>
+         *   <li> #EXTRA_PREVIOUS_STATE- The previous state of the profile.</li>
+         *   <li> BluetoothDevice#EXTRA_DEVICE - The remote device. </li>
+         * </ul>
+         *
+         * <p> #EXTRA_STATE or #EXTRA_PREVIOUS_STATE can be any of
+         * #STATE_DISCONNECTED, #STATE_CONNECTING,
+         * #STATE_CONNECTED,#STATE_DISCONNECTING.
+         *
+         * <p>Requires android.Manifest.permission#BLUETOOTH permission to
+         * receive.
+         *
+         * @sa #EXTRA_STATE
+         * @sa #EXTRA_PREVIOUS_STATE
+         * @sa BluetoothDevice#EXTRA_DEVICE
+         * @sa #EXTRA_STATE
+         * @sa #EXTRA_PREVIOUS_STATE
+         * @sa #STATE_DISCONNECTED
+         * @sa #STATE_CONNECTING
+         * @sa #STATE_CONNECTED
+         * @sa #STATE_DISCONNECTING
+         *
+         * <p>Requires android.Manifest.permission#BLUETOOTH permission to
+         *
+         * @sa android.Manifest.permission#BLUETOOTH
+         * @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
          */
-        interface IBluetoothA2dp {
-            /**
-             * Intent used to broadcast the change in connection state of the A2DP
-             * profile.
-             *
-             * <p>This intent will have 3 extras:
-             * <ul>
-             *   <li> #EXTRA_STATE - The current state of the profile. </li>
-             *   <li> #EXTRA_PREVIOUS_STATE- The previous state of the profile.</li>
-             *   <li> BluetoothDevice#EXTRA_DEVICE - The remote device. </li>
-             * </ul>
-             *
-             * <p> #EXTRA_STATE or #EXTRA_PREVIOUS_STATE can be any of
-             * #STATE_DISCONNECTED, #STATE_CONNECTING,
-             * #STATE_CONNECTED,#STATE_DISCONNECTING.
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH permission to
-             * receive.
-             *
-             * @sa #EXTRA_STATE
-             * @sa #EXTRA_PREVIOUS_STATE
-             * @sa BluetoothDevice#EXTRA_DEVICE
-             * @sa #EXTRA_STATE
-             * @sa #EXTRA_PREVIOUS_STATE
-             * @sa #STATE_DISCONNECTED
-             * @sa #STATE_CONNECTING
-             * @sa #STATE_CONNECTED
-             * @sa #STATE_DISCONNECTING
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH permission to
-             *
-             * @sa android.Manifest.permission#BLUETOOTH
-             * @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-             */
-            const String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED";
+        const Int32 STATE_PLAYING   =  10;
 
-            const String ACTION_AVRCP_CONNECTION_STATE_CHANGED = "android.bluetooth.a2dp.profile.action.AVRCP_CONNECTION_STATE_CHANGED";
+        /**
+         * A2DP sink device is NOT streaming music. This state can be one of
+         * #EXTRA_STATE} or #EXTRA_PREVIOUS_STATE of
+         * #ACTION_PLAYING_STATE_CHANGED intent.
+         *
+         * @sa #EXTRA_STATE
+         * @sa #EXTRA_PREVIOUS_STATE
+         * @sa #ACTION_PLAYING_STATE_CHANGED
+         */
+        const Int32 STATE_NOT_PLAYING   =  11;
 
-            /**
-             * Intent used to broadcast the change in connection state of the A2DP
-             * profile.
-             *
-             * <p>This intent will have 3 extras:
-             * <ul>
-             *   <li> #EXTRA_STATE - The current state of the profile. </li>
-             *   <li> #EXTRA_PREVIOUS_STATE- The previous state of the profile.</li>
-             *   <li> BluetoothDevice#EXTRA_DEVICE - The remote device. </li>
-             * </ul>
-             *
-             * <p> #EXTRA_STATE or #EXTRA_PREVIOUS_STATE can be any of
-             * #STATE_DISCONNECTED, #STATE_CONNECTING,
-             * #STATE_CONNECTED,#STATE_DISCONNECTING.
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH permission to
-             * receive.
-             *
-             * @sa #EXTRA_STATE
-             * @sa #EXTRA_PREVIOUS_STATE
-             * @sa BluetoothDevice#EXTRA_DEVICE
-             * @sa #EXTRA_STATE
-             * @sa #EXTRA_PREVIOUS_STATE
-             * @sa #STATE_DISCONNECTED
-             * @sa #STATE_CONNECTING
-             * @sa #STATE_CONNECTED
-             * @sa #STATE_DISCONNECTING
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH permission to
-             *
-             * @sa android.Manifest.permission#BLUETOOTH
-             * @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-             */
-            const Int32 STATE_PLAYING   =  10;
+        /**
+         * Initiate connection to a profile of the remote bluetooth device.
+         *
+         * <p> Currently, the system supports only 1 connection to the
+         * A2DP profile. The API will automatically disconnect connected
+         * devices before connecting.
+         *
+         * <p> This API returns false in scenarios like the profile on the
+         * device is already connected or Bluetooth is not turned on.
+         * When this API returns true, it is guaranteed that
+         * connection state intent for the profile will be broadcasted with
+         * the state. Users can get the connection state of the profile
+         * from this intent.
+         *
+         * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN
+         * permission.
+         *
+         * @sa android.Manifest.permission#BLUETOOTH_ADMIN
+         *
+         * @param device Remote Bluetooth Device
+         * @return false on immediate error,
+         *               true otherwise
+         * @hide
+         */
+        Connect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * A2DP sink device is NOT streaming music. This state can be one of
-             * #EXTRA_STATE} or #EXTRA_PREVIOUS_STATE of
-             * #ACTION_PLAYING_STATE_CHANGED intent.
-             *
-             * @sa #EXTRA_STATE
-             * @sa #EXTRA_PREVIOUS_STATE
-             * @sa #ACTION_PLAYING_STATE_CHANGED
-             */
-            const Int32 STATE_NOT_PLAYING   =  11;
+        /**
+         * Initiate disconnection from a profile
+         *
+         * <p> This API will return false in scenarios like the profile on the
+         * Bluetooth device is not in connected state etc. When this API returns,
+         * true, it is guaranteed that the connection state change
+         * intent will be broadcasted with the state. Users can get the
+         * disconnection state of the profile from this intent.
+         *
+         * <p> If the disconnection is initiated by a remote device, the state
+         * will transition from #STATE_CONNECTED to
+         * #STATE_DISCONNECTED. If the disconnect is initiated by the
+         * host (local) device the state will transition from
+         * #STATE_CONNECTED to state #STATE_DISCONNECTING to
+         * state #STATE_DISCONNECTED. The transition to
+         * #STATE_DISCONNECTING can be used to distinguish between the
+         * two scenarios.
+         *
+         * @sa #STATE_CONNECTED
+         * @sa #STATE_DISCONNECTED
+         * @sa #STATE_CONNECTED
+         * @sa #STATE_DISCONNECTING
+         * @sa #STATE_DISCONNECTED
+         * @sa #STATE_DISCONNECTING
+         *
+         * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN
+         * permission.
+         *
+         * @sa android.Manifest.permission#BLUETOOTH_ADMIN
+         *
+         * @param device Remote Bluetooth Device
+         * @return false on immediate error,
+         *               true otherwise
+         * @hide
+         */
+        Disconnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            /**
-             * Initiate connection to a profile of the remote bluetooth device.
-             *
-             * <p> Currently, the system supports only 1 connection to the
-             * A2DP profile. The API will automatically disconnect connected
-             * devices before connecting.
-             *
-             * <p> This API returns false in scenarios like the profile on the
-             * device is already connected or Bluetooth is not turned on.
-             * When this API returns true, it is guaranteed that
-             * connection state intent for the profile will be broadcasted with
-             * the state. Users can get the connection state of the profile
-             * from this intent.
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN
-             * permission.
-             *
-             * @sa android.Manifest.permission#BLUETOOTH_ADMIN
-             *
-             * @param device Remote Bluetooth Device
-             * @return false on immediate error,
-             *               true otherwise
-             * @hide
-             */
-            Connect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        /**
+         * Set priority of the profile
+         *
+         * <p> The device should already be paired.
+         *  Priority can be one of #PRIORITY_ON orgetBluetoothManager
+         * #PRIORITY_OFF
+         * @sa #PRIORITY_ON
+         * @sa #PRIORITY_OFF
+         *
+         * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN
+         * permission.
+         *
+         * @sa android.Manifest.permission#BLUETOOTH_ADMIN
+         *
+         * @param device Paired bluetooth device
+         * @param priority
+         * @return true if priority is set, false on error
+         * @hide
+         */
+        SetPriority(
+            [in] IBluetoothDevice* device,
+            [in] Int32 priority,
+            [out] Boolean* result);
 
-            /**
-             * Initiate disconnection from a profile
-             *
-             * <p> This API will return false in scenarios like the profile on the
-             * Bluetooth device is not in connected state etc. When this API returns,
-             * true, it is guaranteed that the connection state change
-             * intent will be broadcasted with the state. Users can get the
-             * disconnection state of the profile from this intent.
-             *
-             * <p> If the disconnection is initiated by a remote device, the state
-             * will transition from #STATE_CONNECTED to
-             * #STATE_DISCONNECTED. If the disconnect is initiated by the
-             * host (local) device the state will transition from
-             * #STATE_CONNECTED to state #STATE_DISCONNECTING to
-             * state #STATE_DISCONNECTED. The transition to
-             * #STATE_DISCONNECTING can be used to distinguish between the
-             * two scenarios.
-             *
-             * @sa #STATE_CONNECTED
-             * @sa #STATE_DISCONNECTED
-             * @sa #STATE_CONNECTED
-             * @sa #STATE_DISCONNECTING
-             * @sa #STATE_DISCONNECTED
-             * @sa #STATE_DISCONNECTING
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN
-             * permission.
-             *
-             * @sa android.Manifest.permission#BLUETOOTH_ADMIN
-             *
-             * @param device Remote Bluetooth Device
-             * @return false on immediate error,
-             *               true otherwise
-             * @hide
-             */
-            Disconnect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        /**
+         * Get the priority of the profile.
+         *
+         * <p> The priority can be any of:
+         * #PRIORITY_AUTO_CONNECT, #PRIORITY_OFF,
+         * #PRIORITY_ON, #PRIORITY_UNDEFINED}
+         *
+         * @sa #PRIORITY_AUTO_CONNECT
+         * @sa #PRIORITY_OFF
+         * @sa #PRIORITY_ON
+         * @sa #PRIORITY_UNDEFINED
+         *
+         * <p>Requires android.Manifest.permission#BLUETOOTH permission.
+         *
+         * @sa android.Manifest.permission#BLUETOOTH
+         * @param device Bluetooth device
+         * @return priority of the device
+         * @hide
+         */
+        GetPriority(
+            [in] IBluetoothDevice* device,
+            [out] Int32* priority);
 
-            /**
-             * Set priority of the profile
-             *
-             * <p> The device should already be paired.
-             *  Priority can be one of #PRIORITY_ON orgetBluetoothManager
-             * #PRIORITY_OFF
-             * @sa #PRIORITY_ON
-             * @sa #PRIORITY_OFF
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN
-             * permission.
-             *
-             * @sa android.Manifest.permission#BLUETOOTH_ADMIN
-             *
-             * @param device Paired bluetooth device
-             * @param priority
-             * @return true if priority is set, false on error
-             * @hide
-             */
-            SetPriority(
-                [in] IBluetoothDevice* device,
-                [in] Int32 priority,
-                [out] Boolean* result);
+        /**
+         * Checks if Avrcp device supports the absolute volume feature.
+         *
+         * @return true if device supports absolute volume
+         * @hide
+         */
+        IsAvrcpAbsoluteVolumeSupported(
+            [out] Boolean* isSupported);
 
-            /**
-             * Get the priority of the profile.
-             *
-             * <p> The priority can be any of:
-             * #PRIORITY_AUTO_CONNECT, #PRIORITY_OFF,
-             * #PRIORITY_ON, #PRIORITY_UNDEFINED}
-             *
-             * @sa #PRIORITY_AUTO_CONNECT
-             * @sa #PRIORITY_OFF
-             * @sa #PRIORITY_ON
-             * @sa #PRIORITY_UNDEFINED
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH permission.
-             *
-             * @sa android.Manifest.permission#BLUETOOTH
-             * @param device Bluetooth device
-             * @return priority of the device
-             * @hide
-             */
-            GetPriority(
-                [in] IBluetoothDevice* device,
-                [out] Int32* priority);
+        /**
+         * Tells remote device to adjust volume. Only if absolute volume is supported.
+         *
+         * @param direction 1 to increase volume, or -1 to decrease volume
+         * @hide
+         */
+        AdjustAvrcpAbsoluteVolume(
+            [in] Int32 direction);
 
-            /**
-             * Checks if Avrcp device supports the absolute volume feature.
-             *
-             * @return true if device supports absolute volume
-             * @hide
-             */
-            IsAvrcpAbsoluteVolumeSupported(
-                [out] Boolean* isSupported);
+        /**
+         * Tells remote device to set an absolute volume. Only if absolute volume is supported
+         *
+         * @param volume Absolute volume to be set on AVRCP side
+         * @hide
+         */
+        SetAvrcpAbsoluteVolume(
+            [in] Int32 volume);
 
-            /**
-             * Tells remote device to adjust volume. Only if absolute volume is supported.
-             *
-             * @param direction 1 to increase volume, or -1 to decrease volume
-             * @hide
-             */
-            AdjustAvrcpAbsoluteVolume(
-                [in] Int32 direction);
+        /**
+         * Check if A2DP profile is streaming music.
+         *
+         * <p>Requires android.Manifest.permission#BLUETOOTH permission.
+         *
+         * @sa android.Manifest.permission#BLUETOOTH
+         * @param device BluetoothDevice device
+         */
+        IsA2dpPlaying(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* isPlaying);
 
-            /**
-             * Tells remote device to set an absolute volume. Only if absolute volume is supported
-             *
-             * @param volume Absolute volume to be set on AVRCP side
-             * @hide
-             */
-            SetAvrcpAbsoluteVolume(
-                [in] Int32 volume);
-
-            /**
-             * Check if A2DP profile is streaming music.
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH permission.
-             *
-             * @sa android.Manifest.permission#BLUETOOTH
-             * @param device BluetoothDevice device
-             */
-            IsA2dpPlaying(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* isPlaying);
-
-            /**
-             * This function checks if the remote device is an AVCRP
-             * target and thus whether we should send volume keys
-             * changes or not.
-             * @hide
-             */
-            ShouldSendVolumeKeys(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* should);
-
-            DoBind(
-                [out] Boolean* result);
-
-            Close();
-        }
+        /**
+         * This function checks if the remote device is an AVCRP
+         * target and thus whether we should send volume keys
+         * changes or not.
+         * @hide
+         */
+        ShouldSendVolumeKeys(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* should);
+    }
 
     } // Bluetooth
     } // Droid

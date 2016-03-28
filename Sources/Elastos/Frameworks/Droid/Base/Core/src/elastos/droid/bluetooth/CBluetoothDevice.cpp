@@ -4,9 +4,13 @@
 #include "elastos/droid/bluetooth/BluetoothSocket.h"
 #include "elastos/droid/bluetooth/CBluetoothAdapter.h"
 #include "elastos/droid/bluetooth/BluetoothGatt.h"
+#include "elastos/droid/os/CParcelUuid.h"
+
 #include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Os::CParcelUuid;
+using Elastos::Droid::Os::IParcelUuid;
 using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Logger;
 
@@ -328,37 +332,6 @@ ECode CBluetoothDevice::GetBluetoothClass(
 //    } catch (RemoteException e) {Log.e(TAG, "", e);}
 }
 
-//ECode CBluetoothDevice::GetTrustState(
-//    /* [out] */ Boolean* state)
-//{
-//    //TODO(BT)
-//    /*
-//    try {
-//        return sService.getTrustState(this);
-//    } catch (RemoteException e) {
-//        Log.e(TAG, "", e);
-//    }*/
-//    VALIDATE_NOT_NULL(state)
-//    *state = FALSE;
-//    return NOERROR;
-//}
-//
-//ECode CBluetoothDevice::SetTrust(
-//    /* [in] */ Boolean value,
-//    /* [out] */ Boolean* result)
-//{
-//    //TODO(BT)
-//    /*
-//    try {
-//        return sService.setTrust(this, value);
-//    } catch (RemoteException e) {
-//        Log.e(TAG, "", e);
-//    }*/
-//    VALIDATE_NOT_NULL(result)
-//    *result = FALSE;
-//    return NOERROR;
-//}
-
 ECode CBluetoothDevice::GetUuids(
     /* [out, callee] */ ArrayOf<IParcelUuid *>** uuids)
 {
@@ -585,9 +558,13 @@ ECode CBluetoothDevice::CreateRfcommSocketToServiceRecord(
     /* [out] */ IBluetoothSocket** socket)
 {
     VALIDATE_NOT_NULL(socket)
-    assert(0);
-//    return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, -1, new ParcelUuid(uuid));
-    return E_NOT_IMPLEMENTED;
+
+    AutoPtr<IParcelUuid> pUuid;
+    CParcelUuid::New((IParcelUuid**)&pUuid);
+    *socket = new BluetoothSocket(BluetoothSocket::TYPE_RFCOMM, -1, TRUE, TRUE, this, -1, pUuid);
+    REFCOUNT_ADD(*socket)
+
+    return NOERROR;
 }
 
 ECode CBluetoothDevice::CreateInsecureRfcommSocketToServiceRecord(
@@ -595,9 +572,12 @@ ECode CBluetoothDevice::CreateInsecureRfcommSocketToServiceRecord(
     /* [out] */ IBluetoothSocket** socket)
 {
     VALIDATE_NOT_NULL(socket)
-    assert(0);
-//    return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, false, false, this, -1, new ParcelUuid(uuid));
-    return E_NOT_IMPLEMENTED;
+
+    AutoPtr<IParcelUuid> pUuid;
+    CParcelUuid::New((IParcelUuid**)&pUuid);
+    *socket = new BluetoothSocket(BluetoothSocket::TYPE_RFCOMM, -1, FALSE, FALSE, this, -1, pUuid);
+    REFCOUNT_ADD(*socket)
+    return NOERROR;
 }
 
 ECode CBluetoothDevice::CreateInsecureRfcommSocket(
@@ -605,7 +585,7 @@ ECode CBluetoothDevice::CreateInsecureRfcommSocket(
     /* [out] */ IBluetoothSocket** socket)
 {
     VALIDATE_NOT_NULL(socket)
-    AutoPtr<IBluetoothSocket> _socket = (IBluetoothSocket*)new BluetoothSocket(BluetoothSocket::TYPE_RFCOMM, -1, FALSE, FALSE, this, port, NULL);
+    AutoPtr<IBluetoothSocket> _socket = new BluetoothSocket(BluetoothSocket::TYPE_RFCOMM, -1, FALSE, FALSE, this, port, NULL);
     *socket = _socket;
     REFCOUNT_ADD(*socket)
     return NOERROR;
@@ -615,7 +595,7 @@ ECode CBluetoothDevice::CreateScoSocket(
     /* [out] */ IBluetoothSocket** socket)
 {
     VALIDATE_NOT_NULL(socket)
-    AutoPtr<IBluetoothSocket> _socket = (IBluetoothSocket*)new BluetoothSocket(BluetoothSocket::TYPE_SCO, -1, TRUE, TRUE, this, -1, NULL);
+    AutoPtr<IBluetoothSocket> _socket = new BluetoothSocket(BluetoothSocket::TYPE_SCO, -1, TRUE, TRUE, this, -1, NULL);
     *socket = _socket;
     REFCOUNT_ADD(*socket)
     return NOERROR;
@@ -695,6 +675,95 @@ ECode CBluetoothDevice::constructor(
     }
 
     mAddress = address;
+    return NOERROR;
+}
+
+ECode CBluetoothDevice::GetTrustState(
+   /* [out] */ Boolean* state)
+{
+    if (sService == NULL) {
+        Logger::E(TAG, "BT not enabled. Cannot get Remote Device Alias");
+        *state = FALSE;
+        return NOERROR;
+    }
+
+    // try {
+    if (FAILED(sService->GetRemoteTrust(this, state)))
+    {
+        Logger::E(TAG, "GetTrustState: Service GetRemoteTrust ERROR");
+    }
+    // } catch (RemoteException e) {
+        // Log.e(TAG, "", e);
+    // }
+    *state = FALSE;
+    return NOERROR;
+}
+
+ECode CBluetoothDevice::SetTrust(
+   /* [in] */ Boolean trustValue,
+   /* [out] */ Boolean* result)
+{
+    if (sService == NULL) {
+        Logger::E(TAG, "BT not enabled. Cannot get Remote Device Alias");
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    // try {
+    if (FAILED(sService->SetRemoteTrust(this, trustValue, result)))
+    {
+        Logger::E(TAG, "GetTrustState: Service SetRemoteTrust ERROR");
+    }
+    // } catch (RemoteException e) {
+        // Log.e(TAG, "", e);
+    // }
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode CBluetoothDevice::CreateL2capSocketToServiceRecord(
+    /* [in] */ IUUID* uuid,
+    /* [out] */ IBluetoothSocket** socket)
+{
+    VALIDATE_NOT_NULL(socket)
+    AutoPtr<IParcelUuid> pUuid;
+    CParcelUuid::New((IParcelUuid**)&pUuid);
+    *socket = new BluetoothSocket(BluetoothSocket::TYPE_L2CAP, -1, TRUE, TRUE, this, -1,
+            pUuid);
+    REFCOUNT_ADD(*socket)
+    return NOERROR;
+}
+
+ECode CBluetoothDevice::CreateInsecureL2capSocketToServiceRecord(
+    /* [in] */ IUUID* uuid,
+    /* [out] */ IBluetoothSocket** socket)
+{
+    VALIDATE_NOT_NULL(socket)
+    AutoPtr<IParcelUuid> pUuid;
+    CParcelUuid::New((IParcelUuid**)&pUuid);
+    *socket = new BluetoothSocket(BluetoothSocket::TYPE_L2CAP, -1, FALSE, FALSE, this, -1,
+            pUuid);
+    REFCOUNT_ADD(*socket)
+    return NOERROR;
+}
+
+ECode CBluetoothDevice::GetRemoteDiRecord(
+    /* [out] */ IBluetoothRemoteDiRecord** record)
+{
+    if (sService == NULL) {
+        Logger::E(TAG, "BT not enabled. Cannot get Remote Di record");
+        *record = NULL;
+        return NOERROR;
+    }
+
+    // try {
+    if (FAILED(sService->GetRemoteDiRecord(this, record))) {
+        Logger::E(TAG, "GetTrustState: Service GetRemoteDiRecord ERROR");
+    }
+    // } catch (RemoteException e) {
+        // Log.e(TAG, "", e);
+    // }
+    *record = NULL;
     return NOERROR;
 }
 

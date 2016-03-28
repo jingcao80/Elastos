@@ -586,6 +586,88 @@ ECode BluetoothSocket::ReadInt32(
     return bb->GetInt32(length);
 }
 
+/**
+ * setSocketOpt for the Buetooth Socket.
+ *
+ * @param optionName socket option name
+ * @param optionVal  socket option value
+ * @param optionLen  socket option length
+ * @return -1 on immediate error,
+ *               0 otherwise
+ * @hide
+ */
+ECode BluetoothSocket::SetSocketOpt(
+    /* [in] */ Int32 optionName,
+    /* [in] */ ArrayOf<Byte>* optionVal,
+    /* [in] */ Int32 optionLen,
+    /* [out] */ Int32* result)
+{
+    *result = 0;
+    if (mSocketState == CLOSED) {
+        SLOGGERE(TAG, "socket closed")
+        return E_IO_EXCEPTION;
+    }
+    AutoPtr<IBluetoothAdapter> apt = CBluetoothAdapter::GetDefaultAdapter();
+    AutoPtr<CBluetoothAdapter> aptImpl = (CBluetoothAdapter*)apt.Get();
+    AutoPtr<IIBluetooth> bluetoothProxy = aptImpl->GetBluetoothService(NULL);;
+    if (bluetoothProxy == NULL) {
+        SLOGGERD(TAG, "setSocketOpt fail, reason: bluetooth is off")
+        *result = -1;
+        return NOERROR;
+    }
+    // try {
+        if(VDBG) SLOGGERD(TAG, "setSocketOpt(), mType: %d, mPort: %d", mType, mPort)
+        if (FAILED(bluetoothProxy->SetSocketOpt(mType, mPort, optionName, optionVal, optionLen, result)))
+        {
+            SLOGGERE(TAG, "RemoteException: IIBluetooth bluetoothProxy->SetSocketOpt Error")
+            *result = -1;
+            return NOERROR;
+        }
+    // } catch (RemoteException e) {
+    // }
+    return NOERROR;
+}
+
+/**
+ * getSocketOpt for the Buetooth Socket.
+ *
+ * @param optionName socket option name
+ * @param optionVal  socket option value
+ * @return -1 on immediate error,
+ *               length of returned socket option otherwise
+ * @hide
+ */
+ECode BluetoothSocket::GetSocketOpt(
+    /* [in] */ Int32 optionName,
+    /* [in] */ ArrayOf<Byte>* optionVal,
+    /* [out] */ Int32* result)
+{
+    *result = 0;
+    if (mSocketState == CLOSED) {
+        SLOGGERE(TAG, "socket closed")
+        return E_IO_EXCEPTION;
+    }
+    AutoPtr<IBluetoothAdapter> apt = CBluetoothAdapter::GetDefaultAdapter();
+    AutoPtr<CBluetoothAdapter> aptImpl = (CBluetoothAdapter*)apt.Get();
+    AutoPtr<IIBluetooth> bluetoothProxy = aptImpl->GetBluetoothService(NULL);;
+    if (bluetoothProxy == NULL) {
+        SLOGGERD(TAG, "setSocketOpt fail, reason: bluetooth is off")
+        *result = -1;
+        return NOERROR;
+    }
+    // try {
+        if(VDBG) SLOGGERD(TAG, "GetSocketOpt(), mType: %d, mPort: %d", mType, mPort)
+        if (FAILED(bluetoothProxy->GetSocketOpt(mType, mPort, optionName, optionVal, result)))
+        {
+            SLOGGERE(TAG, "RemoteException: IIBluetooth bluetoothProxy->GetSocketOpt Error")
+            *result = -1;
+            return NOERROR;
+        }
+    // } catch (RemoteException e) {
+    // }
+    return NOERROR;
+}
+
 } // Bluetooth
 } // Droid
 } // Elastos

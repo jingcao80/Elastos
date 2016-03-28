@@ -206,6 +206,16 @@ public:
         /* [in] */ Elastos::Utility::IUUID* uuid,
         /* [out] */ IBluetoothServerSocket** socket);
 
+    CARAPI ListenUsingInsecureL2capWithServiceRecord(
+        /* [in] */ const String& name,
+        /* [in] */ Elastos::Utility::IUUID* uuid,
+        /* [out] */ IBluetoothServerSocket** socket);
+
+    CARAPI ListenUsingL2capWithServiceRecord(
+        /* [in] */ const String& name,
+        /* [in] */ Elastos::Utility::IUUID* uuid,
+        /* [out] */ IBluetoothServerSocket** socket);
+
     CARAPI ListenUsingInsecureRfcommWithServiceRecord(
         /* [in] */ const String& name,
         /* [in] */ Elastos::Utility::IUUID* uuid,
@@ -276,6 +286,13 @@ public:
 
 private:
     CARAPI CreateNewRfcommSocketAndRecord(
+        /* [in] */ const String& name,
+        /* [in] */ IUUID* uuid,
+        /* [in] */ Boolean auth,
+        /* [in] */ Boolean encrypt,
+        /* [out] */ IBluetoothServerSocket** socket);
+
+    CARAPI CreateNewL2capSocketAndRecord(
         /* [in] */ const String& name,
         /* [in] */ IUUID* uuid,
         /* [in] */ Boolean auth,

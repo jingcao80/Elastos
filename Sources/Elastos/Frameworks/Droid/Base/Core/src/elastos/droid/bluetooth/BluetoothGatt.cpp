@@ -1,5 +1,6 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
 #include "elastos/droid/bluetooth/BluetoothGatt.h"
 #include "elastos/droid/bluetooth/BluetoothGattService.h"
 #include "elastos/droid/bluetooth/BluetoothGattCharacteristic.h"
@@ -122,7 +123,7 @@ ECode BluetoothGatt::InnerBluetoothGattCallbackWrapper::OnGetService(
     srvcUuid->GetUuid((IUUID**)&uuid);
     AutoPtr<IBluetoothGattService> bgService =
         new BluetoothGattService(mOwner->mDevice, uuid, srvcInstId, srvcType);
-    mOwner->mServices->Add(TO_IINTERFACE(bgService));
+    mOwner->mServices->Add(bgService);
     return NOERROR;
 }
 
@@ -665,6 +666,10 @@ ECode BluetoothGatt::Close()
 {
     if (DBG) Logger::D(TAG, "close()");
 
+    AutoPtr<IBluetoothAdapter> adapter = CBluetoothAdapter::GetDefaultAdapter();
+    Int32 state;
+    adapter->GetState(&state);
+    if (state != IBluetoothAdapter::STATE_ON) return NOERROR;
     UnregisterApp();
     mConnState = CONN_STATE_CLOSED;
     return NOERROR;
@@ -695,7 +700,7 @@ ECode BluetoothGatt::GetService(
         svc->GetUuid((IUUID**)&u);
 
         Boolean de = FALSE, ue = FALSE;
-        if ((d->Equals(TO_IINTERFACE(device), &de), de) &&
+        if ((IObject::Probe(d)->Equals(device, &de), de) &&
             t == type &&
             id == instanceId &&
             (u->Equals(uuid, &ue), ue)) {
@@ -747,6 +752,11 @@ ECode BluetoothGatt::Disconnect()
     mDevice->GetAddress(&tAddress);
     if (DBG) Logger::D(TAG, "cancelOpen() - device: %s", tAddress.string());
     if (mService == NULL || mClientIf == 0) return NOERROR;
+
+    AutoPtr<IBluetoothAdapter> adapter = CBluetoothAdapter::GetDefaultAdapter();
+    Int32 state;
+    adapter->GetState(&state);
+    if (state != IBluetoothAdapter::STATE_ON) return NOERROR;
 
     //try {
     mService->ClientDisconnect(mClientIf, tAddress);
@@ -824,8 +834,8 @@ ECode BluetoothGatt::GetServices(
         AutoPtr<IBluetoothDevice> d;
         svc->GetDevice((IBluetoothDevice**)&d);
         Boolean eq = FALSE;
-        if (d->Equals(TO_IINTERFACE(mDevice), &eq), eq) {
-            (*result)->Add(TO_IINTERFACE(svc));
+        if (IObject::Probe(d)->Equals(mDevice, &eq), eq) {
+            (*result)->Add(svc);
         }
     }
 
@@ -849,8 +859,8 @@ ECode BluetoothGatt::GetService(
         AutoPtr<IUUID> u;
         svc->GetUuid((IUUID**)&u);
         Boolean de = FALSE, ue = FALSE;
-        if ((d->Equals(TO_IINTERFACE(mDevice), &de), de) &&
-            (u->Equals(TO_IINTERFACE(uuid), &ue), ue)) {
+        if ((IObject::Probe(d)->Equals(mDevice, &de), de) &&
+            (IObject::Probe(d)->Equals(uuid, &ue), ue)) {
             *result = svc;
             REFCOUNT_ADD(*result);
             return NOERROR;

@@ -133,6 +133,36 @@ private:
         /* [in] */ IInputStream* is,
         /* [out] */ Int32* length);
 
+    /**
+     * setSocketOpt for the Buetooth Socket.
+     *
+     * @param optionName socket option name
+     * @param optionVal  socket option value
+     * @param optionLen  socket option length
+     * @return -1 on immediate error,
+     *               0 otherwise
+     * @hide
+     */
+    CARAPI SetSocketOpt(
+        /* [in] */ Int32 optionName,
+        /* [in] */ ArrayOf<Byte>* optionVal,
+        /* [in] */ Int32 optionLen,
+        /* [out] */ Int32* result);
+
+    /**
+     * getSocketOpt for the Buetooth Socket.
+     *
+     * @param optionName socket option name
+     * @param optionVal  socket option value
+     * @return -1 on immediate error,
+     *               length of returned socket option otherwise
+     * @hide
+     */
+    CARAPI GetSocketOpt(
+        /* [in] */ Int32 optionName,
+        /* [in] */ ArrayOf<Byte>* optionVal,
+        /* [out] */ Int32* result);
+
 public:
     /** Keep TYPE_ fields in sync with BluetoothSocket.cpp */
     /*package*/ static const Int32 TYPE_RFCOMM = 1;

@@ -201,13 +201,6 @@ ECode BluetoothA2dpSink::Close()
     return NOERROR;
 }
 
-//should be replaced by destructor
-ECode BluetoothA2dpSink::Finalize()
-{
-    Close();
-    return NOERROR;
-}
-
 ECode BluetoothA2dpSink::Connect(
     /* [in] */ IBluetoothDevice* device,
     /* [out] */ Boolean* result)
@@ -328,6 +321,80 @@ ECode BluetoothA2dpSink::GetAudioConfig(
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
     *result = NULL;
+    return NOERROR;
+}
+
+ECode BluetoothA2dpSink::SetPriority(
+    /* [in] */ IBluetoothDevice* device,
+    /* [in] */ Int32 priority,
+    /* [out] */ Boolean* result)
+{
+    String str;
+    IObject::Probe(device)->ToString(&str);
+    if (VDBG) Logger::D(TAG, String("setPriority(") + str + ", " + StringUtils::ToString(priority) + ")");
+    *result = FALSE;
+    if (mService != NULL && IsEnabled()
+        && IsValidDevice(device)) {
+        if (priority != IBluetoothProfile::PRIORITY_OFF &&
+            priority != IBluetoothProfile::PRIORITY_ON){
+            return NOERROR;
+        }
+        // try {
+            if (FAILED(mService->SetPriority(device, priority, result))) {
+                Logger::E(TAG, "SetPriority: Remote invoke error");
+            }
+        // } catch (RemoteException e) {
+        //    Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+        //    *result = false;
+        //     return NOERROR;
+        // }
+    }
+    if (mService == NULL)
+        Logger::W(TAG, "Proxy not attached to service");
+    return NOERROR;
+}
+
+ECode BluetoothA2dpSink::GetPriority(
+    /* [in] */ IBluetoothDevice* device,
+    /* [out] */ Int32* priority)
+{
+    String str;
+    IObject::Probe(device)->ToString(&str);
+    if (VDBG) Logger::D(TAG, String("GetPriority(") + str);
+    if (mService != NULL && IsEnabled() && IsValidDevice(device)) {
+        // try {
+            if (FAILED(mService->GetPriority(device, priority))) {
+                Logger::E(TAG, "GetPriority: Remote invoke error");
+                *priority = IBluetoothProfile::PRIORITY_OFF;
+            }
+        // } catch (RemoteException e) {
+            // Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+            // return BluetoothProfile.PRIORITY_OFF;
+        // }
+    }
+    if (mService == NULL)
+        Logger::W(TAG, "Proxy not attached to service");
+    *priority = IBluetoothProfile::PRIORITY_OFF;
+    return NOERROR;
+}
+
+ECode BluetoothA2dpSink::IsA2dpPlaying(
+    /* [in] */ IBluetoothDevice* device,
+    /* [out] */ Boolean* result)
+{
+    *result = FALSE;
+    if (mService != NULL && IsEnabled() && IsValidDevice(device)) {
+        // try {
+            if (FAILED(mService->IsA2dpPlaying(device, result))) {
+                Logger::E(TAG, "IsA2dpPlaying: Remote invoke error");
+            }
+        // } catch (RemoteException e) {
+            // Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+            // return false;
+        // }
+    }
+    if (mService == NULL)
+        Logger::W(TAG, "Proxy not attached to service");
     return NOERROR;
 }
 

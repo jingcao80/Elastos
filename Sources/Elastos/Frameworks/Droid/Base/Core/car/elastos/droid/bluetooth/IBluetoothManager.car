@@ -5,6 +5,8 @@ module
     interface Elastos.Droid.Bluetooth.IIBluetoothGatt;
     interface Elastos.Droid.Bluetooth.IIBluetoothManagerCallback;
     interface Elastos.Droid.Bluetooth.IIBluetoothStateChangeCallback;
+    interface Elastos.Droid.Bluetooth.IIQBluetooth;
+    interface Elastos.Droid.Bluetooth.IIQBluetoothManagerCallback;
 
     namespace Elastos {
     namespace Droid {
@@ -21,8 +23,15 @@ module
             [in] IIBluetoothManagerCallback* bmCallback,
             [out] IIBluetooth** bluetooth);
 
+        RegisterQAdapter(
+            [in] IIQBluetoothManagerCallback* qbmcallback,
+            [out] IIQBluetooth** qBluetooth);
+
         UnregisterAdapter(
             [in] IIBluetoothManagerCallback* bmCallback);
+
+        UnregisterQAdapter(
+            [in] IIQBluetoothManagerCallback* qbmcallback);
 
         RegisterStateChangeCallback(
             [in] IIBluetoothStateChangeCallback* bmCallback);
@@ -36,6 +45,10 @@ module
         Enable(
             [out] Boolean* result);
 
+        Enable(
+            [in] String callingPackage,
+            [out] Boolean* result);
+
         EnableNoAutoConnect(
             [out] Boolean* result);
 
@@ -45,6 +58,9 @@ module
 
         GetBluetoothGatt(
             [out] IIBluetoothGatt** gatt);
+
+        GetQBluetooth(
+            [out] IIQBluetooth** qBluetooth);
 
         GetAddress(
             [out] String* address);

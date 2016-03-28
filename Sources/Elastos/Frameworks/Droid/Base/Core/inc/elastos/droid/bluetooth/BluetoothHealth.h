@@ -31,7 +31,7 @@ private:
         , public IServiceConnection
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ServiceConnection(
             /* [in] */ BluetoothHealth* host);
@@ -48,7 +48,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     BluetoothHealth();
 

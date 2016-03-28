@@ -5,62 +5,62 @@ module
     namespace Droid {
     namespace Bluetooth {
 
+    /**
+     * This class provides the public APIs to control the Bluetooth A2DP
+     */
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IBluetoothActivityEnergyInfo {
+        const Int32 BT_STACK_STATE_INVALID = 0;
+        const Int32 BT_STACK_STATE_STATE_ACTIVE = 1;
+        const Int32 BT_STACK_STATE_STATE_SCANNING = 2;
+        const Int32 BT_STACK_STATE_STATE_IDLE = 3;
+
         /**
-         * This class provides the public APIs to control the Bluetooth A2DP
+         * @return bt stack reported state
          */
+        GetBluetoothStackState(
+            [out] Int32* stackState);
+
         /**
-         * @Involve
-         * interface IParcelable;
+         * @return tx time in ms
          */
-        interface IBluetoothActivityEnergyInfo {
-            const Int32 BT_STACK_STATE_INVALID = 0;
-            const Int32 BT_STACK_STATE_STATE_ACTIVE = 1;
-            const Int32 BT_STACK_STATE_STATE_SCANNING = 2;
-            const Int32 BT_STACK_STATE_STATE_IDLE = 3;
+        GetControllerTxTimeMillis(
+            [out] Int32* txTimeMillis);
 
-            /**
-             * @return bt stack reported state
-             */
-            GetBluetoothStackState(
-                [out] Int32* stackState);
+        /**
+         * @return rx time in ms
+         */
+        GetControllerRxTimeMillis(
+            [out] Int32* rxTimeMillis);
 
-            /**
-             * @return tx time in ms
-             */
-            GetControllerTxTimeMillis(
-                [out] Int32* txTimeMillis);
+        /**
+         * @return idle time in ms
+         */
+        GetControllerIdleTimeMillis(
+            [out] Int32* idelTimeMillis);
 
-            /**
-             * @return rx time in ms
-             */
-            GetControllerRxTimeMillis(
-                [out] Int32* rxTimeMillis);
+        /**
+         * product of current(mA), voltage(V) and time(ms)
+         * @return energy used
+         */
+        GetControllerEnergyUsed(
+            [out] Int32* energyUsed);
 
-            /**
-             * @return idle time in ms
-             */
-            GetControllerIdleTimeMillis(
-                [out] Int32* idelTimeMillis);
+        /**
+         * @return timestamp(wall clock) of record creation
+         */
+        GetTimeStamp(
+            [out] Int64* timeStamp);
 
-            /**
-             * product of current(mA), voltage(V) and time(ms)
-             * @return energy used
-             */
-            GetControllerEnergyUsed(
-                [out] Int32* energyUsed);
-
-            /**
-             * @return timestamp(wall clock) of record creation
-             */
-            GetTimeStamp(
-                [out] Int64* timeStamp);
-
-            /**
-             * @return if the record is valid
-             */
-            IsValid(
-                [out] Boolean* isValid);
-        }
+        /**
+         * @return if the record is valid
+         */
+        IsValid(
+            [out] Boolean* isValid);
+    }
 
     } // Bluetooth
     } // Droid

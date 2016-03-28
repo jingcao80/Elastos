@@ -200,12 +200,6 @@ ECode BluetoothAvrcpController::Close()
     return NOERROR;
 }
 
-ECode BluetoothAvrcpController::Finalize()
-{
-    Close();
-    return NOERROR;
-}
-
 ECode BluetoothAvrcpController::GetConnectedDevices(
     /* [out] */ IList** result)
 {

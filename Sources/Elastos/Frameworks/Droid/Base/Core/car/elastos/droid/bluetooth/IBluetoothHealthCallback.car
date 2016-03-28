@@ -16,8 +16,7 @@ module
      * @sa BluetoothHealth
      *@hide
      */
-    interface IIBluetoothHealthCallback
-    {
+    interface IIBluetoothHealthCallback {
         OnHealthAppConfigurationStatusChange(
             [in] IBluetoothHealthAppConfiguration* config,
             [in] Int32 status);

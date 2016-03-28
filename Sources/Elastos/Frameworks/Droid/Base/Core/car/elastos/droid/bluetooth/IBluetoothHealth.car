@@ -18,8 +18,7 @@ module
      * {@hide}
      */
     [deprecated]
-    interface IIBluetoothHealth
-    {
+    interface IIBluetoothHealth {
         RegisterAppConfiguration(
             [in] IBluetoothHealthAppConfiguration* config,
             [in] IIBluetoothHealthCallback* healthCallback,

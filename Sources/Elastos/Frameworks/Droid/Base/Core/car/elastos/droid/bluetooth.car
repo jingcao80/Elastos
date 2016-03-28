@@ -68,6 +68,22 @@ module
     merge("bluetooth/IBluetoothPan.car");
     merge("bluetooth/IBluetoothPbap.car");
     merge("bluetooth/IBluetoothStateChangeCallback.car");
+    merge("bluetooth/BluetoothDun.car");
+    merge("bluetooth/BluetoothHidDevice.car");
+    merge("bluetooth/BluetoothHidDeviceAppConfiguration.car");
+    merge("bluetooth/BluetoothHidDeviceAppQosSettings.car");
+    merge("bluetooth/BluetoothHidDeviceAppSdpSettings.car");
+    merge("bluetooth/BluetoothHidDeviceCallback.car");
+    merge("bluetooth/BluetoothRemoteDiRecord.car");
+    merge("bluetooth/BluetoothSap.car");
+    merge("bluetooth/IBluetoothDun.car");
+    merge("bluetooth/IBluetoothHidDevice.car");
+    merge("bluetooth/IBluetoothHidDeviceCallback.car");
+    merge("bluetooth/IBluetoothSap.car");
+    merge("bluetooth/IQBluetooth.car");
+    merge("bluetooth/IQBluetoothAdapterCallback.car");
+    merge("bluetooth/IQBluetoothManagerCallback.car");
+    merge("bluetooth/QBluetoothAdapter.car");
 
     interface Elastos.Droid.Bluetooth.IBluetoothDevice;
     interface Elastos.Droid.Bluetooth.IIBluetoothManager;
@@ -82,6 +98,106 @@ module
     namespace Droid {
     namespace Bluetooth {
 
+         class CBluetoothHidDeviceCallbackWrapper {
+             constructor(
+                 [in] IBluetoothHidDeviceCallback* cb);
+
+             interface IIBluetoothHidDeviceCallback;
+             interface IBinder;
+         }
+
+        class CBluetoothHidDeviceAppConfiguration {
+             constructor();
+
+             constructor(
+                 [in] Int64 hash);
+
+             interface IBluetoothHidDeviceAppConfiguration;
+             interface IParcelable;
+        }
+
+        class CBluetoothHidDeviceAppQosSettings {
+            constructor();
+
+            constructor(
+                 [in] Int32 serviceType,
+                 [in] Int32 tokenRate,
+                 [in] Int32 tokenBucketSize,
+                 [in] Int32 peakBandwidth,
+                 [in] Int32 latency,
+                 [in] Int32 delayVariation);
+
+             interface IBluetoothHidDeviceAppQosSettings;
+             interface IParcelable;
+        }
+
+        [deprecated]
+        class CBluetoothHidDeviceAppSdpSettings {
+            constructor();
+
+            constructor(
+                [in] String name,
+                [in] String description,
+                [in] String provider,
+                [in] Byte c,
+                [in] ArrayOf<Byte>* descriptors);
+
+             interface IBluetoothHidDeviceAppSdpSettings;
+             interface IParcelable;
+        }
+
+         class CBluetoothDunStateChangeCallback {
+             constructor(
+                 [in] IBluetoothDun* host);
+
+             interface IIBluetoothStateChangeCallback;
+             interface IBinder;
+         }
+
+         class CBluetoothHidDeviceStateChangeCallback {
+             constructor(
+                 [in] IBluetoothHidDevice* cb);
+
+             interface IIBluetoothStateChangeCallback;
+             interface IBinder;
+         }
+
+
+         class CBluetoothSapStateChangeCallback {
+             constructor(
+                 [in] IBluetoothSap* host);
+
+             interface IIBluetoothStateChangeCallback;
+             interface IBinder;
+         }
+
+         class CLeLppClientWrapper {
+             constructor(
+                [in] IQBluetoothAdapter* adapter,
+                [in] IIQBluetooth* adapterService,
+                [in] String address,
+                [in] ILeLppCallback* cb);
+
+             interface ILeLppClientWrapper;
+             interface IIQBluetoothAdapterCallback;
+             interface IBinder;
+         }
+
+         class CBluetoothManagerCallback {
+             constructor(
+                [in] IQBluetoothAdapter* host);
+
+             interface IIBluetoothManagerCallback;
+             interface IBinder;
+         }
+
+         class CQBluetoothManagerCallback {
+             constructor(
+                [in] IQBluetoothAdapter* host);
+
+             interface IIQBluetoothManagerCallback;
+             interface IBinder;
+         }
          class CBluetoothStateChangeCallbackWrapper {
              constructor(
                  [in] IInterface* cb);
@@ -185,7 +301,6 @@ module
              interface IBinder;
          }
 
-         [local]
          class CBluetoothPbapStateChangeCallback {
              constructor(
                  [in] IBluetoothPbap* host);
@@ -210,7 +325,6 @@ module
              interface IBinder;
          }
 
-         [local]
          class CBluetoothHealthCallbackWrapper {
              constructor(
                  [in] IBluetoothHealthCallback* cb);
@@ -278,7 +392,6 @@ module
             interface IBluetoothGattDescriptor;
         }
 
-        [local]
         class CBluetoothGattCallback {
             constructor(
                 [in] IBluetoothGatt* host);
@@ -287,7 +400,6 @@ module
             interface IBinder;
         }
 
-        [local]
         class CBluetoothGattServerCallback {
              constructor(
                  [in] IBluetoothGattServer* host);
@@ -316,7 +428,6 @@ module
              interface IParcelable;
          }
 
-         [local]
          class CBluetoothHeadsetClientStateChangeCallback {
              constructor(
                  [in] IBluetoothHeadsetClient* host);
@@ -325,13 +436,27 @@ module
              interface IBinder;
          }
 
-         [local]
+        [local]
          class CBluetoothManager {
              constructor(
                 [in] IContext* ctx);
 
              interface IBluetoothManager;
          }
+
+        class CBluetoothRemoteDiRecord {
+            constructor();
+
+            constructor(
+                [in] Int32 vendorId,
+                [in] Int32 vendorIdSource,
+                [in] Int32 productId,
+                [in] Int32 productVersion,
+                [in] Int32 specificationId);
+
+            interface IBluetoothRemoteDiRecord;
+            interface IParcelable;
+        }
 
          class CBluetoothMasInstance {
              constructor(
@@ -344,7 +469,6 @@ module
              interface IParcelable;
          }
 
-         [local]
          class CBluetoothMapStateChangeCallback {
              constructor(
                  [in] IBluetoothMap* host);

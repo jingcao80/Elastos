@@ -7,152 +7,151 @@ module
     namespace Droid {
     namespace Bluetooth {
 
+    /**
+     * Represents a Bluetooth GATT Service
+     *
+     * <p> Gatt Service contains a collection of {@link BluetoothGattCharacteristic},
+     * as well as referenced services.
+     */
+    interface IBluetoothGattService {
         /**
-         * Represents a Bluetooth GATT Service
-         *
-         * <p> Gatt Service contains a collection of {@link BluetoothGattCharacteristic},
-         * as well as referenced services.
+         * Primary service
          */
-        [local]
-        interface IBluetoothGattService {
-            /**
-             * Primary service
-             */
-            const Int32 SERVICE_TYPE_PRIMARY = 0;
+        const Int32 SERVICE_TYPE_PRIMARY = 0;
 
-            /**
-             * Secondary service (included by primary services)
-             */
-            const Int32 SERVICE_TYPE_SECONDARY = 1;
+        /**
+         * Secondary service (included by primary services)
+         */
+        const Int32 SERVICE_TYPE_SECONDARY = 1;
 
-            /**
-             * Add an included service to this service.
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @param service The service to be added
-             * @return true, if the included service was added to the service
-             */
-            AddService(
-                [in] IBluetoothGattService* service,
-                [out] Boolean* result);
+        /**
+         * Add an included service to this service.
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @param service The service to be added
+         * @return true, if the included service was added to the service
+         */
+        AddService(
+            [in] IBluetoothGattService* service,
+            [out] Boolean* result);
 
-            /**
-             * Add a characteristic to this service.
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-             *
-             * @param characteristic The characteristics to be added
-             * @return true, if the characteristic was added to the service
-             */
-            AddCharacteristic(
-                [in] IBluetoothGattCharacteristic* characteristic,
-                [out] Boolean* result);
+        /**
+         * Add a characteristic to this service.
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+         *
+         * @param characteristic The characteristics to be added
+         * @return true, if the characteristic was added to the service
+         */
+        AddCharacteristic(
+            [in] IBluetoothGattCharacteristic* characteristic,
+            [out] Boolean* result);
 
-            GetCharacteristic(
-                [in] IUUID* uuid,
-                [in] Int32 instanceId,
-                [out] IBluetoothGattCharacteristic** result);
+        GetCharacteristic(
+            [in] IUUID* uuid,
+            [in] Int32 instanceId,
+            [out] IBluetoothGattCharacteristic** result);
 
-            /**
-             * Force the instance ID.
-             * This is needed for conformance testing only.
-             * @hide
-             */
-            SetInstanceId(
-                [in] Int32 instanceId);
+        /**
+         * Force the instance ID.
+         * This is needed for conformance testing only.
+         * @hide
+         */
+        SetInstanceId(
+            [in] Int32 instanceId);
 
-            GetHandles(
-                [out] Int32* result);
+        GetHandles(
+            [out] Int32* result);
 
-            /**
-             * Force the number of handles to reserve for this service.
-             * This is needed for conformance testing only.
-             * @hide
-             */
-            SetHandles(
-                [in] Int32 handles);
+        /**
+         * Force the number of handles to reserve for this service.
+         * This is needed for conformance testing only.
+         * @hide
+         */
+        SetHandles(
+            [in] Int32 handles);
 
-            AddIncludedService(
-                [in] IBluetoothGattService* includedService);
+        AddIncludedService(
+            [in] IBluetoothGattService* includedService);
 
-            GetDevice(
-                [out] IBluetoothDevice** result);
+        GetDevice(
+            [out] IBluetoothDevice** result);
 
-            /**
-             * Returns the UUID of this service
-             *
-             * @return UUID of this service
-             */
-            GetUuid(
-                [out] IUUID** uuid);
+        /**
+         * Returns the UUID of this service
+         *
+         * @return UUID of this service
+         */
+        GetUuid(
+            [out] IUUID** uuid);
 
-            /**
-             * Returns the instance ID for this service
-             *
-             * <p>If a remote device offers multiple services with the same UUID
-             * (ex. multiple battery services for different batteries), the instance
-             * ID is used to distuinguish services.
-             *
-             * @return Instance ID of this service
-             */
-            GetInstanceId(
-                [out] Int32* instanceId);
+        /**
+         * Returns the instance ID for this service
+         *
+         * <p>If a remote device offers multiple services with the same UUID
+         * (ex. multiple battery services for different batteries), the instance
+         * ID is used to distuinguish services.
+         *
+         * @return Instance ID of this service
+         */
+        GetInstanceId(
+            [out] Int32* instanceId);
 
-            /**
-             * Get the type of this service (primary/secondary)
-             */
-            GetType(
-                [out] Int32* type);
+        /**
+         * Get the type of this service (primary/secondary)
+         */
+        GetType(
+            [out] Int32* type);
 
-            /**
-             * Get the list of included GATT services for this service.
-             *
-             * @return List of included IBluetoothGattService or empty list if no included services
-             *         were discovered.
-             */
-            GetIncludedServices(
-                [out] IList** services);
+        /**
+         * Get the list of included GATT services for this service.
+         *
+         * @return List of included IBluetoothGattService or empty list if no included services
+         *         were discovered.
+         */
+        GetIncludedServices(
+            [out] IList** services);
 
-            /**
-             * Returns a list of characteristics included in this service.
-             *
-             * @return IBluetoothGattCharacteristic included in this service
-             */
-            GetCharacteristics(
-                [out] IList** characteristics);
+        /**
+         * Returns a list of characteristics included in this service.
+         *
+         * @return IBluetoothGattCharacteristic included in this service
+         */
+        GetCharacteristics(
+            [out] IList** characteristics);
 
-            /**
-             * Returns a characteristic with a given UUID out of the list of
-             * characteristics offered by this service.
-             *
-             * <p>This is a convenience function to allow access to a given characteristic
-             * without enumerating over the list returned by {@link #getCharacteristics}
-             * manually.
-             *
-             * <p>If a remote service offers multiple characteristics with the same
-             * UUID, the first instance of a characteristic with the given UUID
-             * is returned.
-             *
-             * @return GATT characteristic object or null if no characteristic with the
-             *         given UUID was found.
-             */
-            GetCharacteristic(
-                [in] IUUID* uuid,
-                [out] IBluetoothGattCharacteristic** btc);
+        /**
+         * Returns a characteristic with a given UUID out of the list of
+         * characteristics offered by this service.
+         *
+         * <p>This is a convenience function to allow access to a given characteristic
+         * without enumerating over the list returned by {@link #getCharacteristics}
+         * manually.
+         *
+         * <p>If a remote service offers multiple characteristics with the same
+         * UUID, the first instance of a characteristic with the given UUID
+         * is returned.
+         *
+         * @return GATT characteristic object or null if no characteristic with the
+         *         given UUID was found.
+         */
+        GetCharacteristic(
+            [in] IUUID* uuid,
+            [out] IBluetoothGattCharacteristic** btc);
 
-            /**
-             * Returns whether the uuid of the service should be advertised.
-             * @hide
-             */
-            IsAdvertisePreferred(
-                [out] Boolean* preferred);
+        /**
+         * Returns whether the uuid of the service should be advertised.
+         * @hide
+         */
+        IsAdvertisePreferred(
+            [out] Boolean* preferred);
 
-            /**
-             * Set whether the service uuid should be advertised.
-             * @hide
-             */
-            SetAdvertisePreferred(
-                [in] Boolean advertisePreferred);
-        }
+        /**
+         * Set whether the service uuid should be advertised.
+         * @hide
+         */
+        SetAdvertisePreferred(
+            [in] Boolean advertisePreferred);
+    }
 
     } // Bluetooth
     } // Droid

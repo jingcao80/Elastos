@@ -1,0 +1,205 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IBluetoothHidDeviceAppConfiguration;
+    interface Elastos.Droid.Bluetooth.IBluetoothHidDeviceAppQosSettings;
+    interface Elastos.Droid.Bluetooth.IBluetoothHidDeviceAppSdpSettings;
+    interface Elastos.Droid.Bluetooth.IBluetoothHidDeviceCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+    /**
+     * @hide
+     * @Involve
+     * interface IBluetoothProfile
+     */
+    [deprecated]
+    interface IBluetoothHidDevice {
+        const String ACTION_CONNECTION_STATE_CHANGED =
+            "android.bluetooth.hid.profile.action.CONNECTION_STATE_CHANGED";
+
+    /**
+     * Constants representing device subclass.
+     *
+     * @see #registerApp(String, String, String, byte, byte[],
+     *      BluetoothHidDeviceCallback)
+     */
+        const Byte SUBCLASS1_NONE = 0x00;
+
+        const Byte SUBCLASS1_KEYBOARD = 0x40;
+
+        const Byte SUBCLASS1_MOUSE = 0x80;
+
+        const Byte SUBCLASS1_COMBO = 0xC0;
+
+
+        const Byte SUBCLASS2_UNCATEGORIZED = 0x00;
+
+        const Byte SUBCLASS2_JOYSTICK = 0x01;
+
+        const Byte SUBCLASS2_GAMEPAD = 0x02;
+
+        const Byte SUBCLASS2_REMOTE_CONTROL = 0x03;
+
+        const Byte SUBCLASS2_SENSING_DEVICE = 0x04;
+
+        const Byte SUBCLASS2_DIGITIZER_TABLED = 0x05;
+
+        const Byte SUBCLASS2_CARD_READER = 0x06;
+
+
+    /**
+     * Constants representing report types.
+     *
+     * @see BluetoothHidDeviceCallback#onGetReport(byte, byte, int)
+     * @see BluetoothHidDeviceCallback#onSetReport(byte, byte, byte[])
+     * @see BluetoothHidDeviceCallback#onIntrData(byte, byte[])
+     */
+        const Byte REPORT_TYPE_INPUT = 0x01;
+
+        const Byte REPORT_TYPE_OUTPUT = 0x02;
+
+        const Byte REPORT_TYPE_FEATURE = 0x03;
+
+
+    /**
+     * Constants representing error response for Set Report.
+     *
+     * @see BluetoothHidDeviceCallback#onSetReport(byte, byte, byte[])
+     */
+        const Byte ERROR_RSP_SUCCESS = 0x00;
+
+        const Byte ERROR_RSP_NOT_READY = 0x01;
+
+        const Byte ERROR_RSP_INVALID_RPT_ID = 0x02;
+
+        const Byte ERROR_RSP_UNSUPPORTED_REQ = 0x03;
+
+        const Byte ERROR_RSP_INVALID_PARAM = 0x04;
+
+        const Byte ERROR_RSP_UNKNOWN = 0x0D;
+
+
+    /**
+     * Constants representing protocol mode used set by host. Default is always
+     * {@link #PROTOCOL_REPORT_MODE} unless notified otherwise.
+     *
+     * @see BluetoothHidDeviceCallback#onSetProtocol(byte)
+     */
+        const Byte PROTOCOL_BOOT_MODE = 0x00;
+
+        const Byte PROTOCOL_REPORT_MODE = 0x01;
+
+        /**
+         * Registers application to be used for HID device. Connections to HID
+         * Device are only possible when application is registered. Only one
+         * application can be registered at time. When no longer used, application
+         * should be unregistered using
+         * {@link #unregisterApp(BluetoothHidDeviceAppConfiguration)}.
+         *
+         * @param sdp {@link BluetoothHidDeviceAppSdpSettings} object of
+         *             HID Device SDP record.
+         * @param inQos {@link BluetoothHidDeviceAppQosSettings} object of
+         *             Incoming QoS Settings.
+         * @param outQos {@link BluetoothHidDeviceAppQosSettings} object of
+         *             Outgoing QoS Settings.
+         * @param callback {@link BluetoothHidDeviceCallback} object to which
+         *            callback messages will be sent.
+         * @return
+         */
+        RegisterApp(
+            [in] IBluetoothHidDeviceAppSdpSettings* sdp,
+            [in] IBluetoothHidDeviceAppQosSettings* inQos,
+            [in] IBluetoothHidDeviceAppQosSettings* outQos,
+            [in] IBluetoothHidDeviceCallback* pCallback,
+            [out] Boolean* result);
+
+
+        /**
+         * Unregisters application. Active connection will be disconnected and no
+         * new connections will be allowed until registered again using
+         * {@link #registerApp(String, String, String, byte, byte[], BluetoothHidDeviceCallback)}
+         *
+         * @param config {@link BluetoothHidDeviceAppConfiguration} object as
+         *            obtained from
+         *            {@link BluetoothHidDeviceCallback#onAppStatusChanged(BluetoothDevice,
+         *            BluetoothHidDeviceAppConfiguration, boolean)}
+         *
+         * @return
+         */
+        UnregisterApp(
+            [in] IBluetoothHidDeviceAppConfiguration* config,
+            [out] Boolean* result);
+
+        /**
+         * Sends report to remote host using interrupt channel.
+         *
+         * @param id Report Id, as defined in descriptor. Can be 0 in case Report Id
+         *            are not defined in descriptor.
+         * @param data Report data, not including Report Id.
+         * @return
+         */
+        SendReport(
+            [in] Int32 id,
+            [in] ArrayOf<Byte>* data,
+            [out] Boolean* result);
+
+
+        /**
+         * Sends report to remote host as reply for GET_REPORT request from
+         * {@link BluetoothHidDeviceCallback#onGetReport(byte, byte, int)}.
+         *
+         * @param type Report Type, as in request.
+         * @param id Report Id, as in request.
+         * @param data Report data, not including Report Id.
+         * @return
+         */
+        ReplyReport(
+            [in] Byte type,
+            [in] Byte id,
+            [in] ArrayOf<Byte>* data,
+            [out] Boolean* result);
+
+        /**
+         * Sends error handshake message as reply for invalid SET_REPORT request
+         * from {@link BluetoothHidDeviceCallback#onSetReport(byte, byte, byte[])}.
+         *
+         * @param error Error to be sent for SET_REPORT via HANDSHAKE.
+         * @return
+         */
+        ReportError(
+            [in] Byte error,
+            [out] Boolean* result);
+
+        /**
+         * Sends Virtual Cable Unplug to currently connected host.
+         *
+         * @return
+         */
+        Unplug(
+            [out] Boolean* result);
+
+        /**
+         * Initiates connection to host which currently has Virtual Cable
+         * established with device.
+         *
+         * @return
+         */
+        Connect(
+            [out] Boolean* result);
+
+        /**
+         * Disconnects from currently connected host.
+         *
+         * @return
+         */
+        Disconnect(
+            [out] Boolean* result);
+    }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

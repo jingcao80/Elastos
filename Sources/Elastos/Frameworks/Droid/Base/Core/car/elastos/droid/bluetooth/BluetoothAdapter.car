@@ -18,1315 +18,1375 @@ module
     namespace Droid {
     namespace Bluetooth {
 
+    /**
+     * Represents the local device Bluetooth adapter. The {@link BluetoothAdapter}
+     * lets you perform fundamental Bluetooth tasks, such as initiate
+     * device discovery, query a list of bonded (paired) devices,
+     * instantiate a {@link BluetoothDevice} using a known MAC address, and create
+     * a {@link BluetoothServerSocket} to listen for connection requests from other
+     * devices, and start a scan for Bluetooth LE devices.
+     *
+     * <p>To get a {@link BluetoothAdapter} representing the local Bluetooth
+     * adapter, when running on JELLY_BEAN_MR1 and below, call the
+     * static {@link #getDefaultAdapter} method; when running on JELLY_BEAN_MR2 and
+     * higher, retrieve it through
+     * {@link android.content.Context#getSystemService} with
+     * {@link android.content.Context#BLUETOOTH_SERVICE}.
+     * Fundamentally, this is your starting point for all
+     * Bluetooth actions. Once you have the local adapter, you can get a set of
+     * {@link BluetoothDevice} objects representing all paired devices with
+     * {@link #getBondedDevices()}; start device discovery with
+     * {@link #startDiscovery()}; or create a {@link BluetoothServerSocket} to
+     * listen for incoming connection requests with
+     * {@link #listenUsingRfcommWithServiceRecord(String,UUID)}; or start a scan for
+     * Bluetooth LE devices with {@link #startLeScan(LeScanCallback callback)}.
+     *
+     * <p class="note"><strong>Note:</strong>
+     * Most methods require the {@link android.Manifest.permission#BLUETOOTH}
+     * permission and some also require the
+     * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For more information about using Bluetooth, read the
+     * <a href="{@docRoot}guide/topics/wireless/bluetooth.html">Bluetooth</a> developer guide.</p>
+     * </div>
+     *
+     * {@see BluetoothDevice}
+     * {@see BluetoothServerSocket}
+     */
+    [deprecated, local]
+    interface IBluetoothAdapter {
         /**
-         * Represents the local device Bluetooth adapter. The {@link BluetoothAdapter}
-         * lets you perform fundamental Bluetooth tasks, such as initiate
-         * device discovery, query a list of bonded (paired) devices,
-         * instantiate a {@link BluetoothDevice} using a known MAC address, and create
-         * a {@link BluetoothServerSocket} to listen for connection requests from other
-         * devices, and start a scan for Bluetooth LE devices.
-         *
-         * <p>To get a {@link BluetoothAdapter} representing the local Bluetooth
-         * adapter, when running on JELLY_BEAN_MR1 and below, call the
-         * static {@link #getDefaultAdapter} method; when running on JELLY_BEAN_MR2 and
-         * higher, retrieve it through
-         * {@link android.content.Context#getSystemService} with
-         * {@link android.content.Context#BLUETOOTH_SERVICE}.
-         * Fundamentally, this is your starting point for all
-         * Bluetooth actions. Once you have the local adapter, you can get a set of
-         * {@link BluetoothDevice} objects representing all paired devices with
-         * {@link #getBondedDevices()}; start device discovery with
-         * {@link #startDiscovery()}; or create a {@link BluetoothServerSocket} to
-         * listen for incoming connection requests with
-         * {@link #listenUsingRfcommWithServiceRecord(String,UUID)}; or start a scan for
-         * Bluetooth LE devices with {@link #startLeScan(LeScanCallback callback)}.
-         *
-         * <p class="note"><strong>Note:</strong>
-         * Most methods require the {@link android.Manifest.permission#BLUETOOTH}
-         * permission and some also require the
-         * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
-         *
-         * <div class="special reference">
-         * <h3>Developer Guides</h3>
-         * <p>For more information about using Bluetooth, read the
-         * <a href="{@docRoot}guide/topics/wireless/bluetooth.html">Bluetooth</a> developer guide.</p>
-         * </div>
-         *
-         * {@see BluetoothDevice}
-         * {@see BluetoothServerSocket}
+         * Sentinel error value for this class. Guaranteed to not equal any other
+         * integer constant in this class. Provided as a convenience for functions
+         * that require a sentinel error value, for example:
+         * <p><code>Intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+         * BluetoothAdapter.ERROR)</code>
          */
-        [deprecated, local]
-        interface IBluetoothAdapter {
-            /**
-             * Sentinel error value for this class. Guaranteed to not equal any other
-             * integer constant in this class. Provided as a convenience for functions
-             * that require a sentinel error value, for example:
-             * <p><code>Intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
-             * BluetoothAdapter.ERROR)</code>
-             */
-            const Int32 ERROR = 0x80000000; // Integer.MIN_VALUE;
-
-            /**
-             * Broadcast Action: The state of the local Bluetooth adapter has been
-             * changed.
-             * <p>For example, Bluetooth has been turned on or off.
-             * <p>Always contains the extra fields #EXTRA_STATE and
-             * #EXTRA_PREVIOUS_STATE containing the new and old states
-             * respectively.
-             * <p>Requires android.Manifest.permission#BLUETOOTH to receive.
-             *
-             * @sa #EXTRA_STATE
-             * @sa #EXTRA_PREVIOUS_STATE
-             * @sa android.Manifest.permission#BLUETOOTH
-             */
-            //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-            const String ACTION_STATE_CHANGED = "android.bluetooth.adapter.action.STATE_CHANGED";
-
-            /**
-             * Used as an Int32 extra field in #ACTION_STATE_CHANGED
-             * intents to request the current power state. Possible values are:
-             * #STATE_OFF,
-             * #STATE_TURNING_ON,
-             * #STATE_ON,
-             * #STATE_TURNING_OFF,
-             *
-             * @sa #ACTION_STATE_CHANGED
-             * @sa #STATE_OFF
-             * @sa #STATE_TURNING_ON
-             * @sa #STATE_ON
-             * @sa #STATE_TURNING_OFF
-             */
-            const String EXTRA_STATE = "android.bluetooth.adapter.extra.STATE";
-
-            /**
-             * Used as an Int32 extra field in #ACTION_STATE_CHANGED
-             * intents to request the previous power state. Possible values are:
-             * #STATE_OFF,
-             * #STATE_TURNING_ON,
-             * #STATE_ON,
-             * #STATE_TURNING_OFF
-             *
-             * @sa #ACTION_STATE_CHANGED
-             * @sa #STATE_OFF
-             * @sa #STATE_TURNING_ON
-             * @sa #STATE_ON
-             * @sa #STATE_TURNING_OFF
-             */
-            const String EXTRA_PREVIOUS_STATE = "android.bluetooth.adapter.extra.PREVIOUS_STATE";
-
-            /**
-             * Indicates the local Bluetooth adapter is off.
-             */
-            const Int32 STATE_OFF = 10;
-
-            /**
-             * Indicates the local Bluetooth adapter is turning on. However local
-             * clients should wait for #STATE_ON before attempting to
-             * use the adapter.
-             *
-             * @sa #STATE_ON
-             */
-            const Int32 STATE_TURNING_ON = 11;
-
-            /**
-             * Indicates the local Bluetooth adapter is on, and ready for use.
-             */
-            const Int32 STATE_ON = 12;
-
-            /**
-             * Indicates the local Bluetooth adapter is turning off. Local clients
-             * should immediately attempt graceful disconnection of any remote links.
-             */
-            const Int32 STATE_TURNING_OFF = 13;
-
-            /**
-             * Activity Action: Show a system activity that requests discoverable mode.
-             * This activity will also request the user to turn on Bluetooth if it
-             * is not currently enabled.
-             * <p>Discoverable mode is equivalent to
-             * #SCAN_MODE_CONNECTABLE_DISCOVERABLE. It allows remote devices to see
-             * this Bluetooth adapter when they perform a discovery.
-             * <p>For privacy, Android is not discoverable by default.
-             * <p>The sender of this Intent can optionally use extra field
-             * #EXTRA_DISCOVERABLE_DURATION to request the duration of
-             * discoverability. Currently the default duration is 120 seconds, and
-             * maximum duration is capped at 300 seconds for each request.
-             * <p>Notification of the result of this activity is posted using the
-             * android.app.Activity#onActivityResult callback. The
-             * <code>resultCode</code>
-             * will be the duration (in seconds) of discoverability or
-             * android.app.Activity#RESULT_CANCELED if the user rejected
-             * discoverability or an error has occurred.
-             * <p>Applications can also listen for #ACTION_SCAN_MODE_CHANGED
-             * for global notification whenever the scan mode changes. For example, an
-             * application can be notified when the device has ended discoverability.
-             * @sa #SCAN_MODE_CONNECTABLE_DISCOVERABLE
-             * @sa #EXTRA_DISCOVERABLE_DURATION
-             * @sa android.app.Activity#onActivityResult
-             * @sa android.app.Activity#RESULT_CANCELED
-             * @sa #ACTION_SCAN_MODE_CHANGED
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa android.Manifest.permission#BLUETOOTH
-             */
-            //@SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-            const String ACTION_REQUEST_DISCOVERABLE = "android.bluetooth.adapter.action.REQUEST_DISCOVERABLE";
-
-            /**
-             * Used as an optional Int32 extra field in
-             * #ACTION_REQUEST_DISCOVERABLE intents to request a specific duration
-             * for discoverability in seconds. The current default is 120 seconds, and
-             * requests over 300 seconds will be capped. These values could change.
-             *
-             * @sa #ACTION_REQUEST_DISCOVERABLE
-             */
-            const String EXTRA_DISCOVERABLE_DURATION = "android.bluetooth.adapter.extra.DISCOVERABLE_DURATION";
-
-            /**
-             * Activity Action: Show a system activity that allows the user to turn on
-             * Bluetooth.
-             * <p>This system activity will return once Bluetooth has completed turning
-             * on, or the user has decided not to turn Bluetooth on.
-             * <p>Notification of the result of this activity is posted using the
-             * android.app.Activity#onActivityResult callback. The
-             * <code>resultCode</code>
-             * will be android.app.Activity#RESULT_OK if Bluetooth has been
-             * turned on or android.app.Activity#RESULT_CANCELED if the user
-             * has rejected the request or an error has occurred.
-             * <p>Applications can also listen for #ACTION_STATE_CHANGED
-             * for global notification whenever Bluetooth is turned on or off.
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa android.app.Activity#onActivityResult
-             * @sa android.app.Activity#RESULT_OK
-             * @sa android.app.Activity#RESULT_CANCELED
-             * @sa #ACTION_STATE_CHANGED
-             * @sa android.Manifest.permission#BLUETOOTH
-             */
-            //@SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-            const String ACTION_REQUEST_ENABLE = "android.bluetooth.adapter.action.REQUEST_ENABLE";
-
-            /**
-             * Broadcast Action: Indicates the Bluetooth scan mode of the local Adapter
-             * has changed.
-             * <p>Always contains the extra fields #EXTRA_SCAN_MODE and
-             * #EXTRA_PREVIOUS_SCAN_MODE containing the new and old scan modes
-             * respectively.
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa #EXTRA_SCAN_MODE
-             * @sa #EXTRA_PREVIOUS_SCAN_MODE
-             * @sa android.Manifest.permission#BLUETOOTH
-             */
-            //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-            const String ACTION_SCAN_MODE_CHANGED = "android.bluetooth.adapter.action.SCAN_MODE_CHANGED";
-
-            /**
-             * Used as an Int32 extra field in #ACTION_SCAN_MODE_CHANGED
-             * intents to request the current scan mode. Possible values are:
-             * #SCAN_MODE_NONE,
-             * #SCAN_MODE_CONNECTABLE,
-             * #SCAN_MODE_CONNECTABLE_DISCOVERABLE,
-             *
-             * @sa #ACTION_SCAN_MODE_CHANGED
-             * @sa #SCAN_MODE_NONE
-             * @sa #SCAN_MODE_CONNECTABLE
-             * @sa #SCAN_MODE_CONNECTABLE_DISCOVERABLE
-             */
-            const String EXTRA_SCAN_MODE = "android.bluetooth.adapter.extra.SCAN_MODE";
-
-            /**
-             * Used as an Int32 extra field in #ACTION_SCAN_MODE_CHANGED
-             * intents to request the previous scan mode. Possible values are:
-             * #SCAN_MODE_NONE,
-             * #SCAN_MODE_CONNECTABLE,
-             * #SCAN_MODE_CONNECTABLE_DISCOVERABLE,
-             *
-             * @sa #ACTION_SCAN_MODE_CHANGED
-             * @sa #SCAN_MODE_NONE
-             * @sa #SCAN_MODE_CONNECTABLE
-             * @sa #SCAN_MODE_CONNECTABLE_DISCOVERABLE
-             */
-            const String EXTRA_PREVIOUS_SCAN_MODE = "android.bluetooth.adapter.extra.PREVIOUS_SCAN_MODE";
-
-            /**
-             * Indicates that both inquiry scan and page scan are disabled on the local
-             * Bluetooth adapter. Therefore this device is neither discoverable
-             * nor connectable from remote Bluetooth devices.
-             */
-            const Int32 SCAN_MODE_NONE = 20;
-
-            /**
-             * Indicates that inquiry scan is disabled, but page scan is enabled on the
-             * local Bluetooth adapter. Therefore this device is not discoverable from
-             * remote Bluetooth devices, but is connectable from remote devices that
-             * have previously discovered this device.
-             */
-            const Int32 SCAN_MODE_CONNECTABLE = 21;
-
-            /**
-             * Indicates that both inquiry scan and page scan are enabled on the local
-             * Bluetooth adapter. Therefore this device is both discoverable and
-             * connectable from remote Bluetooth devices.
-             */
-            const Int32 SCAN_MODE_CONNECTABLE_DISCOVERABLE = 23;
-
-            /**
-             * Broadcast Action: The local Bluetooth adapter has started the remote
-             * device discovery process.
-             * <p>This usually involves an inquiry scan of about 12 seconds, followed
-             * by a page scan of each new device to retrieve its Bluetooth name.
-             * <p>Register for BluetoothDevice#ACTION_FOUND to be notified as
-             * remote Bluetooth devices are found.
-             * <p>Device discovery is a heavyweight procedure. New connections to
-             * remote Bluetooth devices should not be attempted while discovery is in
-             * progress, and existing connections will experience limited bandwidth
-             * and high latency. Use #cancelDiscovery() to cancel an ongoing
-             * discovery.
-             * <p>Requires android.Manifest.permission#BLUETOOTH to receive.
-             *
-             * @sa BluetoothDevice#ACTION_FOUND
-             * @sa #cancelDiscovery()
-             * @sa android.Manifest.permission#BLUETOOTH
-             */
-            //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-            const String ACTION_DISCOVERY_STARTED = "android.bluetooth.adapter.action.DISCOVERY_STARTED";
-
-            /**
-             * Broadcast Action: The local Bluetooth adapter has finished the device
-             * discovery process.
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
-             */
-            //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-            const String ACTION_DISCOVERY_FINISHED = "android.bluetooth.adapter.action.DISCOVERY_FINISHED";
-
-            /**
-             * Broadcast Action: The local Bluetooth adapter has changed its friendly
-             * Bluetooth name.
-             * <p>This name is visible to remote Bluetooth devices.
-             * <p>Always contains the extra field #EXTRA_LOCAL_NAME containing
-             * the name.
-             * <p>Requires android.Manifest.permission#BLUETOOTH to receive.
-             *
-             * @sa #EXTRA_LOCAL_NAME
-             * @sa android.Manifest.permission#BLUETOOTH
-             */
-            //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-            const String ACTION_LOCAL_NAME_CHANGED = "android.bluetooth.adapter.action.LOCAL_NAME_CHANGED";
-
-            /**
-             * Used as a String extra field in #ACTION_LOCAL_NAME_CHANGED
-             * intents to request the local Bluetooth name.
-             *
-             * @sa #ACTION_LOCAL_NAME_CHANGED
-             */
-            const String EXTRA_LOCAL_NAME = "android.bluetooth.adapter.extra.LOCAL_NAME";
-
-            /**
-             * Intent used to broadcast the change in connection state of the local
-             * Bluetooth adapter to a profile of the remote device. When the adapter is
-             * not connected to any profiles of any remote devices and it attempts a
-             * connection to a profile this intent will sent. Once connected, this intent
-             * will not be sent for any more connection attempts to any profiles of any
-             * remote device. When the adapter disconnects from the last profile its
-             * connected to of any remote device, this intent will be sent.
-             *
-             * <p> This intent is useful for applications that are only concerned about
-             * whether the local adapter is connected to any profile of any device and
-             * are not really concerned about which profile. For example, an application
-             * which displays an icon to display whether Bluetooth is connected or not
-             * can use this intent.
-             *
-             * <p>This intent will have 3 extras:
-             * #EXTRA_CONNECTION_STATE - The current connection state.
-             * #EXTRA_PREVIOUS_CONNECTION_STATE - The previous connection state.
-             * BluetoothDevice#EXTRA_DEVICE - The remote device.
-             *
-             * #EXTRA_CONNECTION_STATE or #EXTRA_PREVIOUS_CONNECTION_STATE
-             * can be any of #STATE_DISCONNECTED, #STATE_CONNECTING,
-             * #STATE_CONNECTED, #STATE_DISCONNECTING.
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH to receive.
-             *
-             * @sa #EXTRA_CONNECTION_STATE
-             * @sa #EXTRA_PREVIOUS_CONNECTION_STATE
-             * @sa BluetoothDevice#EXTRA_DEVICE
-             * @sa #EXTRA_CONNECTION_STATE
-             * @sa #EXTRA_PREVIOUS_CONNECTION_STATE
-             * @sa #STATE_DISCONNECTED
-             * @sa #STATE_CONNECTING
-             * @sa #STATE_CONNECTED
-             * @sa #STATE_DISCONNECTING
-             * @sa android.Manifest.permission#BLUETOOTH
-             */
-            //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-            const String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED";
-
-            /**
-             * Extra used by #ACTION_CONNECTION_STATE_CHANGED
-             *
-             * This extra represents the current connection state.
-             *
-             * @sa #ACTION_CONNECTION_STATE_CHANGED
-             */
-            const String EXTRA_CONNECTION_STATE = "android.bluetooth.adapter.extra.CONNECTION_STATE";
-
-            /**
-             * Extra used by #ACTION_CONNECTION_STATE_CHANGED
-             *
-             * @sa #ACTION_CONNECTION_STATE_CHANGED
-             *
-             * This extra represents the previous connection state.
-             */
-            const String EXTRA_PREVIOUS_CONNECTION_STATE = "android.bluetooth.adapter.extra.PREVIOUS_CONNECTION_STATE";
-
-            /** The profile is in disconnected state */
-            const Int32 STATE_DISCONNECTED  = 0;
-
-            /** The profile is in connecting state */
-            const Int32 STATE_CONNECTING = 1;
-
-            /** The profile is in connected state */
-            const Int32 STATE_CONNECTED     = 2;
-
-            /** The profile is in disconnecting state */
-            const Int32 STATE_DISCONNECTING = 3;
-
-            /** @hide */
-            const String BLUETOOTH_MANAGER_SERVICE = "bluetooth_manager";
-
-            /** @hide */
-            const Int32 ACTIVITY_ENERGY_INFO_CACHED = 0;
-
-            /** @hide */
-            const Int32 ACTIVITY_ENERGY_INFO_REFRESHED = 1;
-
-            /**
-             * Get a BluetoothDevice object for the given Bluetooth hardware
-             * address.
-             *
-             * @sa BluetoothDevice
-             * <p>Valid Bluetooth hardware addresses must be upper case, in a format
-             * such as "00:11:22:33:AA:BB". The helper #checkBluetoothAddress is
-             * available to validate a Bluetooth address.
-             *
-             * @sa #checkBluetoothAddress
-             * <p>A BluetoothDevice will always be returned for a valid
-             * hardware address, even if this adapter has never seen that device.
-             *
-             * @sa BluetoothDevice
-             *
-             * @param address valid Bluetooth MAC address
-             * @return ECode = NOERROR(0) if success, else as follows:
-             * Value | Meaning |
-             * :-|:------------|
-             * IllegalArgumentException | if address is invalid
-             */
-            GetRemoteDevice(
-                [in] String address,
-                [out] IBluetoothDevice** device);
-
-            /**
-             * Returns a {@link BluetoothLeAdvertiser} object for Bluetooth LE Advertising operations.
-             * Will return null if Bluetooth is turned off or if Bluetooth LE Advertising is not
-             * supported on this device.
-             * <p>
-             * Use {@link #isMultipleAdvertisementSupported()} to check whether LE Advertising is supported
-             * on this device before calling this method.
-             */
-            GetBluetoothLeAdvertiser(
-                [out] IBluetoothLeAdvertiser** btAdvertiser);
-
-            /**
-             * Returns a {@link BluetoothLeScanner} object for Bluetooth LE scan operations.
-             */
-            GetBluetoothLeScanner(
-                [out] IBluetoothLeScanner** btLeScanner);
-
-            /**
-             * enable or disable Bluetooth HCI snoop log.
-             *
-             * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
-             * permission
-             *
-             * @return true to indicate configure HCI log successfully, or false on
-             *         immediate error
-             * @hide
-             */
-            ConfigHciSnoopLog(
-                [in] Boolean enabled,
-                [out] Boolean* result);
-
-            /**
-             * Return true if the multi advertisement is supported by the chipset
-             *
-             * @return true if Multiple Advertisement feature is supported
-             */
-            IsMultipleAdvertisementSupported(
-                [out] Boolean* result);
-
-            /**
-             * Return true if offloaded filters are supported
-             *
-             * @return true if chipset supports on-chip filtering
-             */
-            IsOffloadedFilteringSupported(
-                [out] Boolean* result);
-
-            /**
-             * Return true if offloaded scan batching is supported
-             *
-             * @return true if chipset supports on-chip scan batching
-             */
-            IsOffloadedScanBatchingSupported(
-                [out] Boolean* result);
-
-            /**
-             * Return the record of {@link BluetoothActivityEnergyInfo} object that
-             * has the activity and energy info. This can be used to ascertain what
-             * the controller has been up to, since the last sample.
-             * @param updateType Type of info, cached vs refreshed.
-             *
-             * @return a record with {@link BluetoothActivityEnergyInfo} or null if
-             * report is unavailable or unsupported
-             * @hide
-             */
-            GetControllerActivityEnergyInfo(
-                [in] Int32 updateType,
-                [out] IBluetoothActivityEnergyInfo** btActivityEnergyInfo);
-
-            /**
-             * Get a BluetoothDevice object for the given Bluetooth hardware
-             * address.
-             *
-             * @sa BluetoothDevice
-             * <p>Valid Bluetooth hardware addresses must be 6 bytes. This method
-             * expects the address in network byte order (MSB first).
-             * <p>A BluetoothDevice will always be returned for a valid
-             * hardware address, even if this adapter has never seen that device.
-             *
-             * @sa BluetoothDevice
-             *
-             * @param address Bluetooth MAC address (6 bytes)
-             * @return ECode = NOERROR(0) if success, else as follows:
-             * Value | Meaning |
-             * :-|:------------|
-             * IllegalArgumentException | if address is invalid
-             */
-            GetRemoteDevice(
-                [in] ArrayOf<Byte>* address,
-                [out] IBluetoothDevice** device);
-
-            /**
-             * Return true if Bluetooth is currently enabled and ready for use.
-             * <p>Equivalent to:
-             * <code>getBluetoothState() == STATE_ON</code>
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa android.Manifest.permission#BLUETOOTH
-             * @return true if the local adapter is turned on
-             */
-            IsEnabled(
-                [out] Boolean* isEnable);
-
-            /**
-             * Get the current state of the local Bluetooth adapter.
-             * <p>Possible return values are
-             * #STATE_OFF,
-             * #STATE_TURNING_ON,
-             * #STATE_ON,
-             * #STATE_TURNING_OFF.
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa #STATE_OFF
-             * @sa #STATE_TURNING_ON
-             * @sa #STATE_ON
-             * @sa #STATE_TURNING_OFF
-             * @sa android.Manifest.permission#BLUETOOTH
-             *
-             * @return current state of Bluetooth adapter
-             */
-            GetState(
-                [out] Int32* state);
-
-            /**
-             * Turn on the local Bluetooth adapter&mdash;do not use without explicit
-             * user action to turn on Bluetooth.
-             * <p>This powers on the underlying Bluetooth hardware, and starts all
-             * Bluetooth system services.
-             * <p class="caution"><strong>Bluetooth should never be enabled without
-             * direct user consent</strong>. If you want to turn on Bluetooth in order
-             * to create a wireless connection, you should use the
-             * #ACTION_REQUEST_ENABLE Intent, which will raise a dialog that requests
-             * user permission to turn on Bluetooth. The #enable() method is
-             * provided only for applications that include a user interface for changing
-             * system settings, such as a "power manager" app.</p>
-             * <p>This is an asynchronous call: it will return immediately, and
-             * clients should listen for #ACTION_STATE_CHANGED
-             * to be notified of subsequent adapter state changes. If this call returns
-             * true, then the adapter state will immediately transition from
-             * #STATE_OFF to #STATE_TURNING_ON, and some time
-             * later transition to either #STATE_OFF or
-             * #STATE_ON. If this call returns false then there was an
-             * immediate problem that will prevent the adapter from being turned on -
-             * such as Airplane mode, or the adapter is already turned on.
-             * <p>Requires the android.Manifest.permission#BLUETOOTH_ADMIN
-             * permission
-             *
-             * @sa #ACTION_REQUEST_ENABLE
-             * @sa #enable()
-             * @sa #ACTION_STATE_CHANGED
-             * @sa #STATE_OFF
-             * @sa #STATE_TURNING_ON
-             * @sa #STATE_ON
-             * @sa android.Manifest.permission#BLUETOOTH_ADMIN
-             *
-             * @return true to indicate adapter startup has begun, or false on
-             *         immediate error
-             */
-            Enable(
-                [out] Boolean* result);
-
-            /**
-             * Turn off the local Bluetooth adapter&mdash;do not use without explicit
-             * user action to turn off Bluetooth.
-             * <p>This gracefully shuts down all Bluetooth connections, stops Bluetooth
-             * system services, and powers down the underlying Bluetooth hardware.
-             * <p class="caution"><strong>Bluetooth should never be disabled without
-             * direct user consent</strong>. The #disable() method is
-             * provided only for applications that include a user interface for changing
-             * system settings, such as a "power manager" app.</p>
-             * <p>This is an asynchronous call: it will return immediately, and
-             * clients should listen for #ACTION_STATE_CHANGED
-             * to be notified of subsequent adapter state changes. If this call returns
-             * true, then the adapter state will immediately transition from
-             * #STATE_ON to #STATE_TURNING_OFF, and some time
-             * later transition to either #STATE_OFF or
-             * #STATE_ON. If this call returns false then there was an
-             * immediate problem that will prevent the adapter from being turned off -
-             * such as the adapter already being turned off.
-             * <p>Requires the android.Manifest.permission#BLUETOOTH_ADMIN
-             * permission
-             *
-             * @sa #disable()
-             * @sa #ACTION_STATE_CHANGED
-             * @sa #STATE_ON
-             * @sa #STATE_TURNING_OFF
-             * @sa #STATE_OFF
-             * @sa android.Manifest.permission#BLUETOOTH_ADMIN
-             *
-             * @return true to indicate adapter shutdown has begun, or false on
-             *         immediate error
-             */
-            Disable(
-                [out] Boolean* result);
-
-            /**
-             * Turn off the local Bluetooth adapter and don't persist the setting.
-             *
-             * <p>Requires the android.Manifest.permission#BLUETOOTH_ADMIN
-             * permission
-             *
-             * @sa android.Manifest.permission#BLUETOOTH_ADMIN
-             *
-             * @return true to indicate adapter shutdown has begun, or false on
-             *         immediate error
-             * @hide
-             */
-            Disable(
-                [in] Boolean persist,
-                [out] Boolean* result);
-
-            /**
-             * Returns the hardware address of the local Bluetooth adapter.
-             * <p>For example, "00:11:22:AA:BB:CC".
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa android.Manifest.permission#BLUETOOTH
-             *
-             * @return Bluetooth hardware address as string
-             */
-            GetAddress(
-                [out] String* address);
-
-            /**
-             * Get the friendly Bluetooth name of the local Bluetooth adapter.
-             * <p>This name is visible to remote Bluetooth devices.
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa android.Manifest.permission#BLUETOOTH
-             *
-             * @return the Bluetooth name, or null on error
-             */
-            GetName(
-                [out] String* name);
-
-            /**
-             * Get the UUIDs supported by the local Bluetooth adapter.
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa android.Manifest.permission#BLUETOOTH
-             *
-             * @return the UUIDs supported by the local Bluetooth Adapter.
-             * @hide
-             */
-            GetUuids(
-                [out, callee] ArrayOf<IParcelUuid*>* uuids);
-
-            /**
-             * Set the friendly Bluetooth name of the local Bluetooth adapter.
-             * <p>This name is visible to remote Bluetooth devices.
-             * <p>Valid Bluetooth names are a maximum of 248 bytes using UTF-8
-             * encoding, although many remote devices can only display the first
-             * 40 characters, and some may be limited to just 20.
-             * <p>If Bluetooth state is not #STATE_ON, this API
-             * will return false. After turning on Bluetooth,
-             * wait for #ACTION_STATE_CHANGED with #STATE_ON
-             * to get the updated value.
-             * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN
-             *
-             * @sa #STATE_ON
-             * @sa #ACTION_STATE_CHANGED
-             * @sa android.Manifest.permission#BLUETOOTH_ADMIN
-             *
-             * @param name a valid Bluetooth name
-             * @return     true if the name was set, false otherwise
-             */
-            SetName(
-                [in] String name,
-                [out] Boolean* result);
-
-            /**
-             * Get the current Bluetooth scan mode of the local Bluetooth adapter.
-             * <p>The Bluetooth scan mode determines if the local adapter is
-             * connectable and/or discoverable from remote Bluetooth devices.
-             * <p>Possible values are:
-             * #SCAN_MODE_NONE,
-             * #SCAN_MODE_CONNECTABLE,
-             * #SCAN_MODE_CONNECTABLE_DISCOVERABLE.
-             * <p>If Bluetooth state is not #STATE_ON, this API
-             * will return #SCAN_MODE_NONE. After turning on Bluetooth,
-             * wait for #ACTION_STATE_CHANGED with #STATE_ON
-             * to get the updated value.
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa #SCAN_MODE_NONE
-             * @sa #SCAN_MODE_CONNECTABLE
-             * @sa #SCAN_MODE_CONNECTABLE_DISCOVERABLE
-             * @sa #STATE_ON
-             * @sa #SCAN_MODE_NONE
-             * @sa #ACTION_STATE_CHANGED
-             * @sa #STATE_ON
-             * @sa android.Manifest.permission#BLUETOOTH
-             *
-             * @return scan mode
-             */
-            GetScanMode(
-                [out] Int32* mode);
-
-            /**
-             * Set the Bluetooth scan mode of the local Bluetooth adapter.
-             * <p>The Bluetooth scan mode determines if the local adapter is
-             * connectable and/or discoverable from remote Bluetooth devices.
-             * <p>For privacy reasons, discoverable mode is automatically turned off
-             * after <code>duration</code> seconds. For example, 120 seconds should be
-             * enough for a remote device to initiate and complete its discovery
-             * process.
-             * <p>Valid scan mode values are:
-             * #SCAN_MODE_NONE,
-             * #SCAN_MODE_CONNECTABLE,
-             * #SCAN_MODE_CONNECTABLE_DISCOVERABLE.
-             * <p>If Bluetooth state is not #STATE_ON, this API
-             * will return false. After turning on Bluetooth,
-             * wait for #ACTION_STATE_CHANGED with #STATE_ON
-             * to get the updated value.
-             * <p>Requires android.Manifest.permission#WRITE_SECURE_SETTINGS
-             * <p>Applications cannot set the scan mode. They should use
-             * <code>startActivityForResult(
-             * BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
-             * </code>instead.
-             *
-             * @sa #SCAN_MODE_NONE
-             * @sa #SCAN_MODE_CONNECTABLE
-             * @sa #SCAN_MODE_CONNECTABLE_DISCOVERABLE
-             * @sa #STATE_ON
-             * @sa #SCAN_MODE_NONE
-             * @sa #ACTION_STATE_CHANGED
-             * @sa #STATE_ON
-             * @sa android.Manifest.permission#BLUETOOTH
-             *
-             * @param mode valid scan mode
-             * @param duration time in seconds to apply scan mode, only used for
-             *                 #SCAN_MODE_CONNECTABLE_DISCOVERABLE
-             *
-             * @sa #SCAN_MODE_CONNECTABLE_DISCOVERABLE
-             * @return     true if the scan mode was set, false otherwise
-             * @hide
-             */
-            SetScanMode(
-                [in] Int32 mode,
-                [in] Int32 duration,
-                [out] Boolean* result);
-
-            /** @hide */
-            SetScanMode(
-                [in] Int32 mode,
-                [out] Boolean* result);
-
-            /** @hide */
-            GetDiscoverableTimeout(
-                [out] Int32* timeout);
-
-            /** @hide */
-            SetDiscoverableTimeout(
-                [in] Int32 timeout);
-
-            /**
-             * Start the remote device discovery process.
-             * <p>The discovery process usually involves an inquiry scan of about 12
-             * seconds, followed by a page scan of each new device to retrieve its
-             * Bluetooth name.
-             * <p>This is an asynchronous call, it will return immediately. Register
-             * for #ACTION_DISCOVERY_STARTED and
-             * #ACTION_DISCOVERY_FINISHED intents to determine exactly when the
-             * discovery starts and completes. Register for
-             * BluetoothDevice#ACTION_FOUND to be notified as remote Bluetooth devices
-             * are found.
-             *
-             * @sa #ACTION_DISCOVERY_STARTED
-             * @sa #ACTION_DISCOVERY_FINISHED
-             * @sa BluetoothDevice#ACTION_FOUND
-             * <p>Device discovery is a heavyweight procedure. New connections to
-             * remote Bluetooth devices should not be attempted while discovery is in
-             * progress, and existing connections will experience limited bandwidth
-             * and high latency. Use #cancelDiscovery() to cancel an ongoing
-             * discovery. Discovery is not managed by the Activity,
-             * but is run as a system service, so an application should always call
-             * BluetoothAdapter#cancelDiscovery() even if it
-             * did not directly request a discovery, just to be sure.
-             * <p>Device discovery will only find remote devices that are currently
-             * <i>discoverable</i> (inquiry scan enabled). Many Bluetooth devices are
-             * not discoverable by default, and need to be entered into a special mode.
-             * <p>If Bluetooth state is not #STATE_ON, this API
-             * will return false. After turning on Bluetooth,
-             * wait for #ACTION_STATE_CHANGED with #STATE_ON
-             * to get the updated value.
-             * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN.
-             *
-             * @sa #cancelDiscovery()
-             * @sa BluetoothAdapter#cancelDiscovery()
-             * @sa #STATE_ON
-             * @sa #ACTION_STATE_CHANGED
-             * @sa android.Manifest.permission#BLUETOOTH_ADMIN
-             *
-             * @return true on success, false on error
-             */
-            StartDiscovery(
-                [out] Boolean* result);
-
-            /**
-             * Cancel the current device discovery process.
-             * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN.
-             * <p>Because discovery is a heavyweight procedure for the Bluetooth
-             * adapter, this method should always be called before attempting to connect
-             * to a remote device with
-             * android.bluetooth.BluetoothSocket#connect(). Discovery is not managed by
-             * the  Activity, but is run as a system service, so an application should
-             * always call cancel discovery even if it did not directly request a
-             * discovery, just to be sure.
-             * <p>If Bluetooth state is not #STATE_ON, this API
-             * will return false. After turning on Bluetooth,
-             * wait for #ACTION_STATE_CHANGED with #STATE_ON
-             * to get the updated value.
-             *
-             * @sa android.Manifest.permission#BLUETOOTH_ADMIN
-             * @sa android.bluetooth.BluetoothSocket#connect()
-             * @sa #STATE_ON
-             * @sa #ACTION_STATE_CHANGED
-             *
-             * @return true on success, false on error
-             */
-            CancelDiscovery(
-                [out] Boolean* result);
-
-            /**
-             * Return true if the local Bluetooth adapter is currently in the device
-             * discovery process.
-             * <p>Device discovery is a heavyweight procedure. New connections to
-             * remote Bluetooth devices should not be attempted while discovery is in
-             * progress, and existing connections will experience limited bandwidth
-             * and high latency. Use #cancelDiscovery() to cancel an ongoing
-             * discovery.
-             * <p>Applications can also register for #ACTION_DISCOVERY_STARTED
-             * or #ACTION_DISCOVERY_FINISHED to be notified when discovery
-             * starts or completes.
-             * <p>If Bluetooth state is not #STATE_ON, this API
-             * will return false. After turning on Bluetooth,
-             * wait for #ACTION_STATE_CHANGED with #STATE_ON
-             * to get the updated value.
-             * <p>Requires android.Manifest.permission#BLUETOOTH.
-             *
-             * @sa #cancelDiscovery()
-             * @sa #ACTION_DISCOVERY_STARTED
-             * @sa #ACTION_DISCOVERY_FINISHED
-             * @sa #STATE_ON
-             * @sa #ACTION_STATE_CHANGED
-             * @sa android.Manifest.permission#BLUETOOTH
-             *
-             * @return true if discovering
-             */
-            IsDiscovering(
-                [out] Boolean* IsDiscovering);
-
-            /**
-             * Return the set of BluetoothDevice objects that are bonded
-             * (paired) to the local adapter.
-             * <p>If Bluetooth state is not #STATE_ON, this API
-             * will return an empty set. After turning on Bluetooth,
-             * wait for #ACTION_STATE_CHANGED with #STATE_ON
-             * to get the updated value.
-             * <p>Requires android.Manifest.permission#BLUETOOTH.
-             *
-             * @return unmodifiable set of BluetoothDevice, or null on error
-             *
-             * @sa BluetoothDevice
-             * @sa #STATE_ON
-             * @sa #ACTION_STATE_CHANGED
-             * @sa android.Manifest.permission#BLUETOOTH
-             * @sa BluetoothDevice
-             */
-            //Mike TODO: wait for set interface
-            GetBondedDevices(
-                [out, callee] /*Set<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* device);
-
-            /**
-             * Get the current connection state of the local Bluetooth adapter.
-             * This can be used to check whether the local Bluetooth adapter is connected
-             * to any profile of any other remote Bluetooth Device.
-             *
-             * <p> Use this function along with #ACTION_CONNECTION_STATE_CHANGED
-             * intent to get the connection state of the adapter.
-             *
-             * @return One of #STATE_CONNECTED, #STATE_DISCONNECTED,
-             * #STATE_CONNECTING or #STATE_DISCONNECTED
-             *
-             * @sa #ACTION_CONNECTION_STATE_CHANGED
-             * @sa #STATE_CONNECTED
-             * @sa #STATE_DISCONNECTED
-             * @sa #STATE_CONNECTING
-             * @sa #STATE_DISCONNECTED
-             * @hide
-             */
-            GetConnectionState(
-                [out] Int32* state);
-
-            /**
-             * Get the current connection state of a profile.
-             * This function can be used to check whether the local Bluetooth adapter
-             * is connected to any remote device for a specific profile.
-             * Profile can be one of BluetoothProfile#HEALTH, BluetoothProfile#HEADSET,
-             * BluetoothProfile#A2DP.
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH.
-             *
-             * <p> Return value can be one of
-             * BluetoothProfile#STATE_DISCONNECTED,
-             * BluetoothProfile#STATE_CONNECTING,
-             * BluetoothProfile#STATE_CONNECTED,
-             * BluetoothProfile#STATE_DISCONNECTING
-             *
-             * @sa BluetoothProfile#HEALTH
-             * @sa BluetoothProfile#HEADSET
-             * @sa BluetoothProfile#A2DP
-             * @sa android.Manifest.permission#BLUETOOTH
-             * @sa BluetoothProfile#STATE_DISCONNECTED
-             * @sa BluetoothProfile#STATE_CONNECTING
-             * @sa BluetoothProfile#STATE_CONNECTED
-             * @sa BluetoothProfile#STATE_DISCONNECTING
-             */
-            GetProfileConnectionState(
-                [in] Int32 profile,
-                [out] Int32* state);
-
-            /**
-             * Create a listening, secure RFCOMM Bluetooth socket.
-             * <p>A remote device connecting to this socket will be authenticated and
-             * communication on this socket will be encrypted.
-             * <p>Use BluetoothServerSocket#accept to retrieve incoming
-             * connections from a listening BluetoothServerSocket.
-             * <p>Valid RFCOMM channels are in range 1 to 30.
-             * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN
-             *
-             * @sa BluetoothServerSocket#accept
-             * @sa BluetoothServerSocket
-             * @sa android.Manifest.permission#BLUETOOTH_ADMIN
-             * @param channel RFCOMM channel to listen on
-             * @return a listening RFCOMM BluetoothServerSocket
-             * @return ECode = NOERROR(0) if success, else as follows:
-             * Value | Meaning |
-             * :-|:------------|
-             * IOException on error | for example Bluetooth not available, or insufficient permissions, or channel in use.
-             * @hide
-             */
-            ListenUsingRfcommOn(
-                [in] Int32 channel,
-                [out] IBluetoothServerSocket** socket);
-
-            /**
-             * Create a listening, secure RFCOMM Bluetooth socket with Service Record.
-             * <p>A remote device connecting to this socket will be authenticated and
-             * communication on this socket will be encrypted.
-             * <p>Use BluetoothServerSocket#accept to retrieve incoming
-             * connections from a listening BluetoothServerSocket.
-             * <p>The system will assign an unused RFCOMM channel to listen on.
-             * <p>The system will also register a Service Discovery
-             * Protocol (SDP) record with the local SDP server containing the specified
-             * UUID, service name, and auto-assigned channel. Remote Bluetooth devices
-             * can use the same UUID to query our SDP server and discover which channel
-             * to connect to. This SDP record will be removed when this socket is
-             * closed, or if this application closes unexpectedly.
-             * <p>Use BluetoothDevice#createRfcommSocketToServiceRecord to
-             * connect to this socket from another device using the same UUID.
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa BluetoothServerSocket#accept
-             * @sa BluetoothServerSocket
-             * @sa BluetoothDevice#createRfcommSocketToServiceRecord
-             * @sa android.Manifest.permission#BLUETOOTH
-             * @sa UUID
-             *
-             * @param name service name for SDP record
-             * @param uuid uuid for SDP record
-             * @return a listening RFCOMM BluetoothServerSocket
-             * @return ECode = NOERROR(0) if success, else as follows:
-             * Value | Meaning |
-             * :-|:------------|
-             * IOException on error | for example Bluetooth not available, or insufficient permissions, or channel in use.
-             */
-            ListenUsingRfcommWithServiceRecord(
-                [in] String name,
-                [in] IUUID* uuid,
-                [out] IBluetoothServerSocket** socket);
-
-            /**
-             * Create a listening, insecure RFCOMM Bluetooth socket with Service Record.
-             * <p>The link key is not required to be authenticated, i.e the communication may be
-             * vulnerable to Man In the Middle attacks. For Bluetooth 2.1 devices,
-             * the link will be encrypted, as encryption is mandartory.
-             * For legacy devices (pre Bluetooth 2.1 devices) the link will not
-             * be encrypted. Use #listenUsingRfcommWithServiceRecord, if an
-             * encrypted and authenticated communication channel is desired.
-             * <p>Use BluetoothServerSocket#accept to retrieve incoming
-             * connections from a listening BluetoothServerSocket.
-             * <p>The system will assign an unused RFCOMM channel to listen on.
-             * <p>The system will also register a Service Discovery
-             * Protocol (SDP) record with the local SDP server containing the specified
-             * UUID, service name, and auto-assigned channel. Remote Bluetooth devices
-             * can use the same UUID to query our SDP server and discover which channel
-             * to connect to. This SDP record will be removed when this socket is
-             * closed, or if this application closes unexpectedly.
-             * <p>Use BluetoothDevice#createRfcommSocketToServiceRecord to
-             * connect to this socket from another device using the same UUID.
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa #listenUsingRfcommWithServiceRecord
-             * @sa BluetoothServerSocket#accept
-             * @sa BluetoothServerSocket
-             * @sa BluetoothDevice#createRfcommSocketToServiceRecord
-             * @sa UUID
-             * @sa android.Manifest.permission#BLUETOOTH
-             *
-             * @param name service name for SDP record
-             * @param uuid uuid for SDP record
-             * @return a listening RFCOMM BluetoothServerSocket
-             * @return ECode = NOERROR(0) if success, else as follows:
-             * Value | Meaning |
-             * :-|:------------|
-             * IOException on error | for example Bluetooth not available, or insufficient permissions, or channel in use.
-             */
-            ListenUsingInsecureRfcommWithServiceRecord(
-                [in] String name,
-                [in] IUUID* uuid,
-                [out] IBluetoothServerSocket** socket);
-
-             /**
-             * Create a listening, encrypted,
-             * RFCOMM Bluetooth socket with Service Record.
-             * <p>The link will be encrypted, but the link key is not required to be authenticated
-             * i.e the communication is vulnerable to Man In the Middle attacks. Use
-             * #listenUsingRfcommWithServiceRecord, to ensure an authenticated link key.
-             * <p> Use this socket if authentication of link key is not possible.
-             * For example, for Bluetooth 2.1 devices, if any of the devices does not have
-             * an input and output capability or just has the ability to display a numeric key,
-             * a secure socket connection is not possible and this socket can be used.
-             * Use #listenUsingInsecureRfcommWithServiceRecord, if encryption is not required.
-             * For Bluetooth 2.1 devices, the link will be encrypted, as encryption is mandartory.
-             * For more details, refer to the Security Model section 5.2 (vol 3) of
-             * Bluetooth Core Specification version 2.1 + EDR.
-             * <p>Use BluetoothServerSocket#accept to retrieve incoming
-             * connections from a listening BluetoothServerSocket.
-             * <p>The system will assign an unused RFCOMM channel to listen on.
-             * <p>The system will also register a Service Discovery
-             * Protocol (SDP) record with the local SDP server containing the specified
-             * UUID, service name, and auto-assigned channel. Remote Bluetooth devices
-             * can use the same UUID to query our SDP server and discover which channel
-             * to connect to. This SDP record will be removed when this socket is
-             * closed, or if this application closes unexpectedly.
-             * <p>Use BluetoothDevice#createRfcommSocketToServiceRecord to
-             * connect to this socket from another device using the same UUID.
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa #listenUsingRfcommWithServiceRecord
-             * @sa #listenUsingInsecureRfcommWithServiceRecord
-             * @sa BluetoothServerSocket#accept
-             * @sa BluetoothServerSocket
-             * @sa BluetoothDevice#createRfcommSocketToServiceRecord
-             * @sa UUID
-             * @sa android.Manifest.permission#BLUETOOTH
-             *
-             * @param name service name for SDP record
-             * @param uuid uuid for SDP record
-             * @return a listening RFCOMM BluetoothServerSocket
-             * @return ECode = NOERROR(0) if success, else as follows:
-             * Value | Meaning |
-             * :-|:------------|
-             * IOException on error | for example Bluetooth not available, or insufficient permissions, or channel in use.
-             * @hide
-             */
-            ListenUsingEncryptedRfcommWithServiceRecord(
-                [in] String name,
-                [in] IUUID* uuid,
-                [out] IBluetoothServerSocket** socket);
-
-            /**
-             * Construct an unencrypted, unauthenticated, RFCOMM server socket.
-             * Call #accept to retrieve connections to this socket.
-             * @return An RFCOMM BluetoothServerSocket
-             * @return ECode = NOERROR(0) if success, else as follows:
-             * Value | Meaning |
-             * :-|:------------|
-             * IOException On error | for example Bluetooth not available, or insufficient permissions.
-             * @hide
-             */
-            ListenUsingInsecureRfcommOn(
-                [in] Int32 port,
-                [out] IBluetoothServerSocket** socket);
-
-             /**
-             * Construct an encrypted, RFCOMM server socket.
-             * Call #accept to retrieve connections to this socket.
-             * @return An RFCOMM BluetoothServerSocket
-             * @return ECode = NOERROR(0) if success, else as follows:
-             * Value | Meaning |
-             * :-|:------------|
-             * IOException On error, | for example Bluetooth not available, or insufficient permissions.
-             * @hide
-             */
-            ListenUsingEncryptedRfcommOn(
-                [in] Int32 port,
-                [out] IBluetoothServerSocket** socket);
-
-            /**
-             * Read the local Out of Band Pairing Data
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa android.Manifest.permission#BLUETOOTH
-             *
-             * @return Pair<byte[], byte[]> of Hash and Randomizer
-             *
-             * @hide
-             */
-            //Mike TODO: Need Pair interface
-            ReadOutOfBandData(
-                [out] /*Pair<byte[], byte[]>*/ IInterface** data);
-
-            /**
-             * Get the profile proxy object associated with the profile.
-             *
-             * <p>Profile can be one of BluetoothProfile#HEALTH,  BluetoothProfile#HEADSET or
-             * BluetoothProfile#A2DP. Clients must implements
-             * BluetoothProfile.ServiceListener to get notified of
-             * the connection status and to get the proxy object.
-             *
-             * @sa BluetoothProfile#HEALTH
-             * @sa BluetoothProfile#HEADSET
-             * @sa BluetoothProfile#A2DP
-             * @sa BluetoothProfile.ServiceListener
-             *
-             * @param context Context of the application
-             * @param listener The service Listener for connection callbacks.
-             * @param profile The Bluetooth profile; either BluetoothProfile#HEALTH,
-             *                BluetoothProfile#HEADSET or  BluetoothProfile#A2DP.
-             *
-             * @sa BluetoothProfile#HEALTH
-             * @sa BluetoothProfile#HEADSET
-             * @sa BluetoothProfile#A2DP
-             * @return true on success, false on error
-             */
-            GetProfileProxy(
-                [in] IContext* ctx,
-                [in] IBluetoothProfileServiceListener* listener,
-                [in] Int32 profile,
-                [out] Boolean* result);
-
-            /**
-             * Close the connection of the profile proxy to the Service.
-             *
-             * <p> Clients should call this when they are no longer using
-             * the proxy obtained from #getProfileProxy.
-             * Profile can be one of  BluetoothProfile#HEALTH,  BluetoothProfile#HEADSET or
-             * BluetoothProfile#A2DP
-             *
-             * @sa #getProfileProxy
-             * @sa BluetoothProfile#HEALTH
-             * @sa BluetoothProfile#HEADSET
-             * @sa BluetoothProfile#A2DP
-             *
-             * @param profile
-             * @param proxy Profile proxy object
-             */
-            CloseProfileProxy(
-                [in] Int32 profile,
-                [in] IBluetoothProfile* proxy);
-
-
-            /**
-             * Enable the Bluetooth Adapter, but don't auto-connect devices
-             * and don't persist state. Only for use by system applications.
-             * @hide
-             */
-            EnableNoAutoConnect(
-                [out] Boolean* result);
-
-            /**
-             * Enable control of the Bluetooth Adapter for a single application.
-             *
-             * <p>Some applications need to use Bluetooth for short periods of time to
-             * transfer data but don't want all the associated implications like
-             * automatic connection to headsets etc.
-             *
-             * <p> Multiple applications can call this. This is reference counted and
-             * Bluetooth disabled only when no one else is using it. There will be no UI
-             * shown to the user while bluetooth is being enabled. Any user action will
-             * override this call. For example, if user wants Bluetooth on and the last
-             * user of this API wanted to disable Bluetooth, Bluetooth will not be
-             * turned off.
-             *
-             * <p> This API is only meant to be used by internal applications. Third
-             * party applications but use #enable and #disable APIs.
-             *
-             * @sa #enable
-             * @sa #disable
-             *
-             * <p> If this API returns true, it means the callback will be called.
-             * The callback will be called with the current state of Bluetooth.
-             * If the state is not what was requested, an internal error would be the
-             * reason. If Bluetooth is already on and if this function is called to turn
-             * it on, the api will return true and a callback will be called.
-             *
-             * <p>Requires android.Manifest.permission#BLUETOOTH
-             *
-             * @sa android.Manifest.permission#BLUETOOTH
-             *
-             * @param on True for on, false for off.
-             * @param callback The callback to notify changes to the state.
-             * @hide
-             */
-            ChangeApplicationBluetoothState(
-                [in] Boolean on,
-                [in] IIBluetoothStateChangeCallback* stateChangeCallback,
-                [out] Boolean* result);
-
-           /**
-            * Starts a scan for Bluetooth LE devices.
-            *
-            * <p>Results of the scan are reported using the
-            * {@link LeScanCallback#onLeScan} callback.
-            *
-            * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
-            *
-            * @param callback the callback LE scan results are delivered
-            * @return true, if the scan was started successfully
-            * @deprecated use {@link BluetoothLeScanner#startScan(List, ScanSettings, ScanCallback)}
-            *             instead.
-            */
-           //@Deprecated
-           StartLeScan(
-                [in] IBluetoothAdapterLeScanCallback* cb,
-                [out] Boolean* result);
-
-            /**
-             * Starts a scan for Bluetooth LE devices, looking for devices that
-             * advertise given services.
-             *
-             * <p>Devices which advertise all specified services are reported using the
-             * {@link LeScanCallback#onLeScan} callback.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
-             *
-             * @param serviceUuids Array of services to look for
-             * @param callback the callback LE scan results are delivered
-             * @return true, if the scan was started successfully
-             * @deprecated use {@link BluetoothLeScanner#startScan(List, ScanSettings, ScanCallback)}
-             *             instead.
-             */
-           //@Deprecated
-           StartLeScan(
-                [in] ArrayOf<IUUID*>* serviceUuids,
-                [in] IBluetoothAdapterLeScanCallback* cb,
-                [out] Boolean* result);
-
-            /**
-             * Stops an ongoing Bluetooth LE device scan.
-             *
-             * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
-             *
-             * @param callback used to identify which scan to stop
-             *        must be the same handle used to start the scan
-             * @deprecated Use {@link BluetoothLeScanner#stopScan(ScanCallback)} instead.
-             */
-            //@Deprecated
-            StopLeScan(
-                [in] IBluetoothAdapterLeScanCallback* cb);
-
-        }
-
-        [local]
-        interface IBluetoothAdapterHelper {
-            GetDefaultAdapter(
-                [out] IBluetoothAdapter** adapter);
-
-            /**
-             * Validate a String Bluetooth address, such as "00:43:A8:23:10:F0"
-             * <p>Alphabetic characters must be uppercase to be valid.
-             *
-             * @param address Bluetooth address as string
-             * @return true if the address is valid, false otherwise
-             */
-            CheckBluetoothAddress(
-                [in] String address,
-                [out] Boolean* result);
-        }
-
-        [deprecated]
-        interface IBluetoothAdapterLeScanCallback {
-            /**
-             * Callback reporting an LE device found during a device scan initiated
-             * by the {@link BluetoothAdapter#startLeScan} function.
-             *
-             * @param device Identifies the remote device
-             * @param rssi The RSSI value for the remote device as reported by the
-             *             Bluetooth hardware. 0 if no RSSI value is available.
-             * @param scanRecord The content of the advertisement record offered by
-             *                   the remote device.
-             */
-            OnLeScan(
-                [in] IBluetoothDevice* device,
-                [in] Int32 rssi,
-                [in] ArrayOf<Byte>* scanRecord);
-        }
+        const Int32 ERROR = 0x80000000; // Integer.MIN_VALUE;
+
+        /**
+         * Broadcast Action: The state of the local Bluetooth adapter has been
+         * changed.
+         * <p>For example, Bluetooth has been turned on or off.
+         * <p>Always contains the extra fields #EXTRA_STATE and
+         * #EXTRA_PREVIOUS_STATE containing the new and old states
+         * respectively.
+         * <p>Requires android.Manifest.permission#BLUETOOTH to receive.
+         *
+         * @sa #EXTRA_STATE
+         * @sa #EXTRA_PREVIOUS_STATE
+         * @sa android.Manifest.permission#BLUETOOTH
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String ACTION_STATE_CHANGED = "android.bluetooth.adapter.action.STATE_CHANGED";
+
+        /**
+         * Used as an Int32 extra field in #ACTION_STATE_CHANGED
+         * intents to request the current power state. Possible values are:
+         * #STATE_OFF,
+         * #STATE_TURNING_ON,
+         * #STATE_ON,
+         * #STATE_TURNING_OFF,
+         *
+         * @sa #ACTION_STATE_CHANGED
+         * @sa #STATE_OFF
+         * @sa #STATE_TURNING_ON
+         * @sa #STATE_ON
+         * @sa #STATE_TURNING_OFF
+         */
+        const String EXTRA_STATE = "android.bluetooth.adapter.extra.STATE";
+
+        /**
+         * Used as an Int32 extra field in #ACTION_STATE_CHANGED
+         * intents to request the previous power state. Possible values are:
+         * #STATE_OFF,
+         * #STATE_TURNING_ON,
+         * #STATE_ON,
+         * #STATE_TURNING_OFF
+         *
+         * @sa #ACTION_STATE_CHANGED
+         * @sa #STATE_OFF
+         * @sa #STATE_TURNING_ON
+         * @sa #STATE_ON
+         * @sa #STATE_TURNING_OFF
+         */
+        const String EXTRA_PREVIOUS_STATE = "android.bluetooth.adapter.extra.PREVIOUS_STATE";
+
+        /**
+         * Indicates the local Bluetooth adapter is off.
+         */
+        const Int32 STATE_OFF = 10;
+
+        /**
+         * Indicates the local Bluetooth adapter is turning on. However local
+         * clients should wait for #STATE_ON before attempting to
+         * use the adapter.
+         *
+         * @sa #STATE_ON
+         */
+        const Int32 STATE_TURNING_ON = 11;
+
+        /**
+         * Indicates the local Bluetooth adapter is on, and ready for use.
+         */
+        const Int32 STATE_ON = 12;
+
+        /**
+         * Indicates the local Bluetooth adapter is turning off. Local clients
+         * should immediately attempt graceful disconnection of any remote links.
+         */
+        const Int32 STATE_TURNING_OFF = 13;
+
+        /**
+         * Activity Action: Show a system activity that requests discoverable mode.
+         * This activity will also request the user to turn on Bluetooth if it
+         * is not currently enabled.
+         * <p>Discoverable mode is equivalent to
+         * #SCAN_MODE_CONNECTABLE_DISCOVERABLE. It allows remote devices to see
+         * this Bluetooth adapter when they perform a discovery.
+         * <p>For privacy, Android is not discoverable by default.
+         * <p>The sender of this Intent can optionally use extra field
+         * #EXTRA_DISCOVERABLE_DURATION to request the duration of
+         * discoverability. Currently the default duration is 120 seconds, and
+         * maximum duration is capped at 300 seconds for each request.
+         * <p>Notification of the result of this activity is posted using the
+         * android.app.Activity#onActivityResult callback. The
+         * <code>resultCode</code>
+         * will be the duration (in seconds) of discoverability or
+         * android.app.Activity#RESULT_CANCELED if the user rejected
+         * discoverability or an error has occurred.
+         * <p>Applications can also listen for #ACTION_SCAN_MODE_CHANGED
+         * for global notification whenever the scan mode changes. For example, an
+         * application can be notified when the device has ended discoverability.
+         * @sa #SCAN_MODE_CONNECTABLE_DISCOVERABLE
+         * @sa #EXTRA_DISCOVERABLE_DURATION
+         * @sa android.app.Activity#onActivityResult
+         * @sa android.app.Activity#RESULT_CANCELED
+         * @sa #ACTION_SCAN_MODE_CHANGED
+         *
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa android.Manifest.permission#BLUETOOTH
+         */
+        //@SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+        const String ACTION_REQUEST_DISCOVERABLE = "android.bluetooth.adapter.action.REQUEST_DISCOVERABLE";
+
+        /**
+         * Used as an optional Int32 extra field in
+         * #ACTION_REQUEST_DISCOVERABLE intents to request a specific duration
+         * for discoverability in seconds. The current default is 120 seconds, and
+         * requests over 300 seconds will be capped. These values could change.
+         *
+         * @sa #ACTION_REQUEST_DISCOVERABLE
+         */
+        const String EXTRA_DISCOVERABLE_DURATION = "android.bluetooth.adapter.extra.DISCOVERABLE_DURATION";
+
+        /**
+         * Activity Action: Show a system activity that allows the user to turn on
+         * Bluetooth.
+         * <p>This system activity will return once Bluetooth has completed turning
+         * on, or the user has decided not to turn Bluetooth on.
+         * <p>Notification of the result of this activity is posted using the
+         * android.app.Activity#onActivityResult callback. The
+         * <code>resultCode</code>
+         * will be android.app.Activity#RESULT_OK if Bluetooth has been
+         * turned on or android.app.Activity#RESULT_CANCELED if the user
+         * has rejected the request or an error has occurred.
+         * <p>Applications can also listen for #ACTION_STATE_CHANGED
+         * for global notification whenever Bluetooth is turned on or off.
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa android.app.Activity#onActivityResult
+         * @sa android.app.Activity#RESULT_OK
+         * @sa android.app.Activity#RESULT_CANCELED
+         * @sa #ACTION_STATE_CHANGED
+         * @sa android.Manifest.permission#BLUETOOTH
+         */
+        //@SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+        const String ACTION_REQUEST_ENABLE = "android.bluetooth.adapter.action.REQUEST_ENABLE";
+
+        /**
+         * Broadcast Action: Indicates the Bluetooth scan mode of the local Adapter
+         * has changed.
+         * <p>Always contains the extra fields #EXTRA_SCAN_MODE and
+         * #EXTRA_PREVIOUS_SCAN_MODE containing the new and old scan modes
+         * respectively.
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa #EXTRA_SCAN_MODE
+         * @sa #EXTRA_PREVIOUS_SCAN_MODE
+         * @sa android.Manifest.permission#BLUETOOTH
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String ACTION_SCAN_MODE_CHANGED = "android.bluetooth.adapter.action.SCAN_MODE_CHANGED";
+
+        /**
+         * Used as an Int32 extra field in #ACTION_SCAN_MODE_CHANGED
+         * intents to request the current scan mode. Possible values are:
+         * #SCAN_MODE_NONE,
+         * #SCAN_MODE_CONNECTABLE,
+         * #SCAN_MODE_CONNECTABLE_DISCOVERABLE,
+         *
+         * @sa #ACTION_SCAN_MODE_CHANGED
+         * @sa #SCAN_MODE_NONE
+         * @sa #SCAN_MODE_CONNECTABLE
+         * @sa #SCAN_MODE_CONNECTABLE_DISCOVERABLE
+         */
+        const String EXTRA_SCAN_MODE = "android.bluetooth.adapter.extra.SCAN_MODE";
+
+        /**
+         * Used as an Int32 extra field in #ACTION_SCAN_MODE_CHANGED
+         * intents to request the previous scan mode. Possible values are:
+         * #SCAN_MODE_NONE,
+         * #SCAN_MODE_CONNECTABLE,
+         * #SCAN_MODE_CONNECTABLE_DISCOVERABLE,
+         *
+         * @sa #ACTION_SCAN_MODE_CHANGED
+         * @sa #SCAN_MODE_NONE
+         * @sa #SCAN_MODE_CONNECTABLE
+         * @sa #SCAN_MODE_CONNECTABLE_DISCOVERABLE
+         */
+        const String EXTRA_PREVIOUS_SCAN_MODE = "android.bluetooth.adapter.extra.PREVIOUS_SCAN_MODE";
+
+        /**
+         * Indicates that both inquiry scan and page scan are disabled on the local
+         * Bluetooth adapter. Therefore this device is neither discoverable
+         * nor connectable from remote Bluetooth devices.
+         */
+        const Int32 SCAN_MODE_NONE = 20;
+
+        /**
+         * Indicates that inquiry scan is disabled, but page scan is enabled on the
+         * local Bluetooth adapter. Therefore this device is not discoverable from
+         * remote Bluetooth devices, but is connectable from remote devices that
+         * have previously discovered this device.
+         */
+        const Int32 SCAN_MODE_CONNECTABLE = 21;
+
+        /**
+         * Indicates that both inquiry scan and page scan are enabled on the local
+         * Bluetooth adapter. Therefore this device is both discoverable and
+         * connectable from remote Bluetooth devices.
+         */
+        const Int32 SCAN_MODE_CONNECTABLE_DISCOVERABLE = 23;
+
+        /**
+         * Broadcast Action: The local Bluetooth adapter has started the remote
+         * device discovery process.
+         * <p>This usually involves an inquiry scan of about 12 seconds, followed
+         * by a page scan of each new device to retrieve its Bluetooth name.
+         * <p>Register for BluetoothDevice#ACTION_FOUND to be notified as
+         * remote Bluetooth devices are found.
+         * <p>Device discovery is a heavyweight procedure. New connections to
+         * remote Bluetooth devices should not be attempted while discovery is in
+         * progress, and existing connections will experience limited bandwidth
+         * and high latency. Use #cancelDiscovery() to cancel an ongoing
+         * discovery.
+         * <p>Requires android.Manifest.permission#BLUETOOTH to receive.
+         *
+         * @sa BluetoothDevice#ACTION_FOUND
+         * @sa #cancelDiscovery()
+         * @sa android.Manifest.permission#BLUETOOTH
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String ACTION_DISCOVERY_STARTED = "android.bluetooth.adapter.action.DISCOVERY_STARTED";
+
+        /**
+         * Broadcast Action: The local Bluetooth adapter has finished the device
+         * discovery process.
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String ACTION_DISCOVERY_FINISHED = "android.bluetooth.adapter.action.DISCOVERY_FINISHED";
+
+        /**
+         * Broadcast Action: The local Bluetooth adapter has changed its friendly
+         * Bluetooth name.
+         * <p>This name is visible to remote Bluetooth devices.
+         * <p>Always contains the extra field #EXTRA_LOCAL_NAME containing
+         * the name.
+         * <p>Requires android.Manifest.permission#BLUETOOTH to receive.
+         *
+         * @sa #EXTRA_LOCAL_NAME
+         * @sa android.Manifest.permission#BLUETOOTH
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String ACTION_LOCAL_NAME_CHANGED = "android.bluetooth.adapter.action.LOCAL_NAME_CHANGED";
+
+        /**
+         * Used as a String extra field in #ACTION_LOCAL_NAME_CHANGED
+         * intents to request the local Bluetooth name.
+         *
+         * @sa #ACTION_LOCAL_NAME_CHANGED
+         */
+        const String EXTRA_LOCAL_NAME = "android.bluetooth.adapter.extra.LOCAL_NAME";
+
+        /**
+         * Intent used to broadcast the change in connection state of the local
+         * Bluetooth adapter to a profile of the remote device. When the adapter is
+         * not connected to any profiles of any remote devices and it attempts a
+         * connection to a profile this intent will sent. Once connected, this intent
+         * will not be sent for any more connection attempts to any profiles of any
+         * remote device. When the adapter disconnects from the last profile its
+         * connected to of any remote device, this intent will be sent.
+         *
+         * <p> This intent is useful for applications that are only concerned about
+         * whether the local adapter is connected to any profile of any device and
+         * are not really concerned about which profile. For example, an application
+         * which displays an icon to display whether Bluetooth is connected or not
+         * can use this intent.
+         *
+         * <p>This intent will have 3 extras:
+         * #EXTRA_CONNECTION_STATE - The current connection state.
+         * #EXTRA_PREVIOUS_CONNECTION_STATE - The previous connection state.
+         * BluetoothDevice#EXTRA_DEVICE - The remote device.
+         *
+         * #EXTRA_CONNECTION_STATE or #EXTRA_PREVIOUS_CONNECTION_STATE
+         * can be any of #STATE_DISCONNECTED, #STATE_CONNECTING,
+         * #STATE_CONNECTED, #STATE_DISCONNECTING.
+         *
+         * <p>Requires android.Manifest.permission#BLUETOOTH to receive.
+         *
+         * @sa #EXTRA_CONNECTION_STATE
+         * @sa #EXTRA_PREVIOUS_CONNECTION_STATE
+         * @sa BluetoothDevice#EXTRA_DEVICE
+         * @sa #EXTRA_CONNECTION_STATE
+         * @sa #EXTRA_PREVIOUS_CONNECTION_STATE
+         * @sa #STATE_DISCONNECTED
+         * @sa #STATE_CONNECTING
+         * @sa #STATE_CONNECTED
+         * @sa #STATE_DISCONNECTING
+         * @sa android.Manifest.permission#BLUETOOTH
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED";
+
+        /**
+         * Extra used by #ACTION_CONNECTION_STATE_CHANGED
+         *
+         * This extra represents the current connection state.
+         *
+         * @sa #ACTION_CONNECTION_STATE_CHANGED
+         */
+        const String EXTRA_CONNECTION_STATE = "android.bluetooth.adapter.extra.CONNECTION_STATE";
+
+        /**
+         * Extra used by #ACTION_CONNECTION_STATE_CHANGED
+         *
+         * @sa #ACTION_CONNECTION_STATE_CHANGED
+         *
+         * This extra represents the previous connection state.
+         */
+        const String EXTRA_PREVIOUS_CONNECTION_STATE = "android.bluetooth.adapter.extra.PREVIOUS_CONNECTION_STATE";
+
+        /** The profile is in disconnected state */
+        const Int32 STATE_DISCONNECTED  = 0;
+
+        /** The profile is in connecting state */
+        const Int32 STATE_CONNECTING = 1;
+
+        /** The profile is in connected state */
+        const Int32 STATE_CONNECTED     = 2;
+
+        /** The profile is in disconnecting state */
+        const Int32 STATE_DISCONNECTING = 3;
+
+        /** @hide */
+        const String BLUETOOTH_MANAGER_SERVICE = "bluetooth_manager";
+
+        /** @hide */
+        const Int32 ACTIVITY_ENERGY_INFO_CACHED = 0;
+
+        /** @hide */
+        const Int32 ACTIVITY_ENERGY_INFO_REFRESHED = 1;
+
+        /**
+         * Get a BluetoothDevice object for the given Bluetooth hardware
+         * address.
+         *
+         * @sa BluetoothDevice
+         * <p>Valid Bluetooth hardware addresses must be upper case, in a format
+         * such as "00:11:22:33:AA:BB". The helper #checkBluetoothAddress is
+         * available to validate a Bluetooth address.
+         *
+         * @sa #checkBluetoothAddress
+         * <p>A BluetoothDevice will always be returned for a valid
+         * hardware address, even if this adapter has never seen that device.
+         *
+         * @sa BluetoothDevice
+         *
+         * @param address valid Bluetooth MAC address
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if address is invalid
+         */
+        GetRemoteDevice(
+            [in] String address,
+            [out] IBluetoothDevice** device);
+
+        /**
+         * Returns a {@link BluetoothLeAdvertiser} object for Bluetooth LE Advertising operations.
+         * Will return null if Bluetooth is turned off or if Bluetooth LE Advertising is not
+         * supported on this device.
+         * <p>
+         * Use {@link #isMultipleAdvertisementSupported()} to check whether LE Advertising is supported
+         * on this device before calling this method.
+         */
+        GetBluetoothLeAdvertiser(
+            [out] IBluetoothLeAdvertiser** btAdvertiser);
+
+        /**
+         * Returns a {@link BluetoothLeScanner} object for Bluetooth LE scan operations.
+         */
+        GetBluetoothLeScanner(
+            [out] IBluetoothLeScanner** btLeScanner);
+
+        /**
+         * enable or disable Bluetooth HCI snoop log.
+         *
+         * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+         * permission
+         *
+         * @return true to indicate configure HCI log successfully, or false on
+         *         immediate error
+         * @hide
+         */
+        ConfigHciSnoopLog(
+            [in] Boolean enabled,
+            [out] Boolean* result);
+
+        /**
+         * Return true if the multi advertisement is supported by the chipset
+         *
+         * @return true if Multiple Advertisement feature is supported
+         */
+        IsMultipleAdvertisementSupported(
+            [out] Boolean* result);
+
+        /**
+         * Return true if offloaded filters are supported
+         *
+         * @return true if chipset supports on-chip filtering
+         */
+        IsOffloadedFilteringSupported(
+            [out] Boolean* result);
+
+        /**
+         * Return true if offloaded scan batching is supported
+         *
+         * @return true if chipset supports on-chip scan batching
+         */
+        IsOffloadedScanBatchingSupported(
+            [out] Boolean* result);
+
+        /**
+         * Return the record of {@link BluetoothActivityEnergyInfo} object that
+         * has the activity and energy info. This can be used to ascertain what
+         * the controller has been up to, since the last sample.
+         * @param updateType Type of info, cached vs refreshed.
+         *
+         * @return a record with {@link BluetoothActivityEnergyInfo} or null if
+         * report is unavailable or unsupported
+         * @hide
+         */
+        GetControllerActivityEnergyInfo(
+            [in] Int32 updateType,
+            [out] IBluetoothActivityEnergyInfo** btActivityEnergyInfo);
+
+        /**
+         * Get a BluetoothDevice object for the given Bluetooth hardware
+         * address.
+         *
+         * @sa BluetoothDevice
+         * <p>Valid Bluetooth hardware addresses must be 6 bytes. This method
+         * expects the address in network byte order (MSB first).
+         * <p>A BluetoothDevice will always be returned for a valid
+         * hardware address, even if this adapter has never seen that device.
+         *
+         * @sa BluetoothDevice
+         *
+         * @param address Bluetooth MAC address (6 bytes)
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IllegalArgumentException | if address is invalid
+         */
+        GetRemoteDevice(
+            [in] ArrayOf<Byte>* address,
+            [out] IBluetoothDevice** device);
+
+        /**
+         * Return true if Bluetooth is currently enabled and ready for use.
+         * <p>Equivalent to:
+         * <code>getBluetoothState() == STATE_ON</code>
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa android.Manifest.permission#BLUETOOTH
+         * @return true if the local adapter is turned on
+         */
+        IsEnabled(
+            [out] Boolean* isEnable);
+
+        /**
+         * Get the current state of the local Bluetooth adapter.
+         * <p>Possible return values are
+         * #STATE_OFF,
+         * #STATE_TURNING_ON,
+         * #STATE_ON,
+         * #STATE_TURNING_OFF.
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa #STATE_OFF
+         * @sa #STATE_TURNING_ON
+         * @sa #STATE_ON
+         * @sa #STATE_TURNING_OFF
+         * @sa android.Manifest.permission#BLUETOOTH
+         *
+         * @return current state of Bluetooth adapter
+         */
+        GetState(
+            [out] Int32* state);
+
+        /**
+         * Turn on the local Bluetooth adapter&mdash;do not use without explicit
+         * user action to turn on Bluetooth.
+         * <p>This powers on the underlying Bluetooth hardware, and starts all
+         * Bluetooth system services.
+         * <p class="caution"><strong>Bluetooth should never be enabled without
+         * direct user consent</strong>. If you want to turn on Bluetooth in order
+         * to create a wireless connection, you should use the
+         * #ACTION_REQUEST_ENABLE Intent, which will raise a dialog that requests
+         * user permission to turn on Bluetooth. The #enable() method is
+         * provided only for applications that include a user interface for changing
+         * system settings, such as a "power manager" app.</p>
+         * <p>This is an asynchronous call: it will return immediately, and
+         * clients should listen for #ACTION_STATE_CHANGED
+         * to be notified of subsequent adapter state changes. If this call returns
+         * true, then the adapter state will immediately transition from
+         * #STATE_OFF to #STATE_TURNING_ON, and some time
+         * later transition to either #STATE_OFF or
+         * #STATE_ON. If this call returns false then there was an
+         * immediate problem that will prevent the adapter from being turned on -
+         * such as Airplane mode, or the adapter is already turned on.
+         * <p>Requires the android.Manifest.permission#BLUETOOTH_ADMIN
+         * permission
+         *
+         * @sa #ACTION_REQUEST_ENABLE
+         * @sa #enable()
+         * @sa #ACTION_STATE_CHANGED
+         * @sa #STATE_OFF
+         * @sa #STATE_TURNING_ON
+         * @sa #STATE_ON
+         * @sa android.Manifest.permission#BLUETOOTH_ADMIN
+         *
+         * @return true to indicate adapter startup has begun, or false on
+         *         immediate error
+         */
+        Enable(
+            [out] Boolean* result);
+
+        /**
+         * Turn off the local Bluetooth adapter&mdash;do not use without explicit
+         * user action to turn off Bluetooth.
+         * <p>This gracefully shuts down all Bluetooth connections, stops Bluetooth
+         * system services, and powers down the underlying Bluetooth hardware.
+         * <p class="caution"><strong>Bluetooth should never be disabled without
+         * direct user consent</strong>. The #disable() method is
+         * provided only for applications that include a user interface for changing
+         * system settings, such as a "power manager" app.</p>
+         * <p>This is an asynchronous call: it will return immediately, and
+         * clients should listen for #ACTION_STATE_CHANGED
+         * to be notified of subsequent adapter state changes. If this call returns
+         * true, then the adapter state will immediately transition from
+         * #STATE_ON to #STATE_TURNING_OFF, and some time
+         * later transition to either #STATE_OFF or
+         * #STATE_ON. If this call returns false then there was an
+         * immediate problem that will prevent the adapter from being turned off -
+         * such as the adapter already being turned off.
+         * <p>Requires the android.Manifest.permission#BLUETOOTH_ADMIN
+         * permission
+         *
+         * @sa #disable()
+         * @sa #ACTION_STATE_CHANGED
+         * @sa #STATE_ON
+         * @sa #STATE_TURNING_OFF
+         * @sa #STATE_OFF
+         * @sa android.Manifest.permission#BLUETOOTH_ADMIN
+         *
+         * @return true to indicate adapter shutdown has begun, or false on
+         *         immediate error
+         */
+        Disable(
+            [out] Boolean* result);
+
+        /**
+         * Turn off the local Bluetooth adapter and don't persist the setting.
+         *
+         * <p>Requires the android.Manifest.permission#BLUETOOTH_ADMIN
+         * permission
+         *
+         * @sa android.Manifest.permission#BLUETOOTH_ADMIN
+         *
+         * @return true to indicate adapter shutdown has begun, or false on
+         *         immediate error
+         * @hide
+         */
+        Disable(
+            [in] Boolean persist,
+            [out] Boolean* result);
+
+        /**
+         * Returns the hardware address of the local Bluetooth adapter.
+         * <p>For example, "00:11:22:AA:BB:CC".
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa android.Manifest.permission#BLUETOOTH
+         *
+         * @return Bluetooth hardware address as string
+         */
+        GetAddress(
+            [out] String* address);
+
+        /**
+         * Get the friendly Bluetooth name of the local Bluetooth adapter.
+         * <p>This name is visible to remote Bluetooth devices.
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa android.Manifest.permission#BLUETOOTH
+         *
+         * @return the Bluetooth name, or null on error
+         */
+        GetName(
+            [out] String* name);
+
+        /**
+         * Get the UUIDs supported by the local Bluetooth adapter.
+         *
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa android.Manifest.permission#BLUETOOTH
+         *
+         * @return the UUIDs supported by the local Bluetooth Adapter.
+         * @hide
+         */
+        GetUuids(
+            [out, callee] ArrayOf<IParcelUuid*>* uuids);
+
+        /**
+         * Set the friendly Bluetooth name of the local Bluetooth adapter.
+         * <p>This name is visible to remote Bluetooth devices.
+         * <p>Valid Bluetooth names are a maximum of 248 bytes using UTF-8
+         * encoding, although many remote devices can only display the first
+         * 40 characters, and some may be limited to just 20.
+         * <p>If Bluetooth state is not #STATE_ON, this API
+         * will return false. After turning on Bluetooth,
+         * wait for #ACTION_STATE_CHANGED with #STATE_ON
+         * to get the updated value.
+         * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN
+         *
+         * @sa #STATE_ON
+         * @sa #ACTION_STATE_CHANGED
+         * @sa android.Manifest.permission#BLUETOOTH_ADMIN
+         *
+         * @param name a valid Bluetooth name
+         * @return     true if the name was set, false otherwise
+         */
+        SetName(
+            [in] String name,
+            [out] Boolean* result);
+
+        /**
+         * Get the current Bluetooth scan mode of the local Bluetooth adapter.
+         * <p>The Bluetooth scan mode determines if the local adapter is
+         * connectable and/or discoverable from remote Bluetooth devices.
+         * <p>Possible values are:
+         * #SCAN_MODE_NONE,
+         * #SCAN_MODE_CONNECTABLE,
+         * #SCAN_MODE_CONNECTABLE_DISCOVERABLE.
+         * <p>If Bluetooth state is not #STATE_ON, this API
+         * will return #SCAN_MODE_NONE. After turning on Bluetooth,
+         * wait for #ACTION_STATE_CHANGED with #STATE_ON
+         * to get the updated value.
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa #SCAN_MODE_NONE
+         * @sa #SCAN_MODE_CONNECTABLE
+         * @sa #SCAN_MODE_CONNECTABLE_DISCOVERABLE
+         * @sa #STATE_ON
+         * @sa #SCAN_MODE_NONE
+         * @sa #ACTION_STATE_CHANGED
+         * @sa #STATE_ON
+         * @sa android.Manifest.permission#BLUETOOTH
+         *
+         * @return scan mode
+         */
+        GetScanMode(
+            [out] Int32* mode);
+
+        /**
+         * Set the Bluetooth scan mode of the local Bluetooth adapter.
+         * <p>The Bluetooth scan mode determines if the local adapter is
+         * connectable and/or discoverable from remote Bluetooth devices.
+         * <p>For privacy reasons, discoverable mode is automatically turned off
+         * after <code>duration</code> seconds. For example, 120 seconds should be
+         * enough for a remote device to initiate and complete its discovery
+         * process.
+         * <p>Valid scan mode values are:
+         * #SCAN_MODE_NONE,
+         * #SCAN_MODE_CONNECTABLE,
+         * #SCAN_MODE_CONNECTABLE_DISCOVERABLE.
+         * <p>If Bluetooth state is not #STATE_ON, this API
+         * will return false. After turning on Bluetooth,
+         * wait for #ACTION_STATE_CHANGED with #STATE_ON
+         * to get the updated value.
+         * <p>Requires android.Manifest.permission#WRITE_SECURE_SETTINGS
+         * <p>Applications cannot set the scan mode. They should use
+         * <code>startActivityForResult(
+         * BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
+         * </code>instead.
+         *
+         * @sa #SCAN_MODE_NONE
+         * @sa #SCAN_MODE_CONNECTABLE
+         * @sa #SCAN_MODE_CONNECTABLE_DISCOVERABLE
+         * @sa #STATE_ON
+         * @sa #SCAN_MODE_NONE
+         * @sa #ACTION_STATE_CHANGED
+         * @sa #STATE_ON
+         * @sa android.Manifest.permission#BLUETOOTH
+         *
+         * @param mode valid scan mode
+         * @param duration time in seconds to apply scan mode, only used for
+         *                 #SCAN_MODE_CONNECTABLE_DISCOVERABLE
+         *
+         * @sa #SCAN_MODE_CONNECTABLE_DISCOVERABLE
+         * @return     true if the scan mode was set, false otherwise
+         * @hide
+         */
+        SetScanMode(
+            [in] Int32 mode,
+            [in] Int32 duration,
+            [out] Boolean* result);
+
+        /** @hide */
+        SetScanMode(
+            [in] Int32 mode,
+            [out] Boolean* result);
+
+        /** @hide */
+        GetDiscoverableTimeout(
+            [out] Int32* timeout);
+
+        /** @hide */
+        SetDiscoverableTimeout(
+            [in] Int32 timeout);
+
+        /**
+         * Start the remote device discovery process.
+         * <p>The discovery process usually involves an inquiry scan of about 12
+         * seconds, followed by a page scan of each new device to retrieve its
+         * Bluetooth name.
+         * <p>This is an asynchronous call, it will return immediately. Register
+         * for #ACTION_DISCOVERY_STARTED and
+         * #ACTION_DISCOVERY_FINISHED intents to determine exactly when the
+         * discovery starts and completes. Register for
+         * BluetoothDevice#ACTION_FOUND to be notified as remote Bluetooth devices
+         * are found.
+         *
+         * @sa #ACTION_DISCOVERY_STARTED
+         * @sa #ACTION_DISCOVERY_FINISHED
+         * @sa BluetoothDevice#ACTION_FOUND
+         * <p>Device discovery is a heavyweight procedure. New connections to
+         * remote Bluetooth devices should not be attempted while discovery is in
+         * progress, and existing connections will experience limited bandwidth
+         * and high latency. Use #cancelDiscovery() to cancel an ongoing
+         * discovery. Discovery is not managed by the Activity,
+         * but is run as a system service, so an application should always call
+         * BluetoothAdapter#cancelDiscovery() even if it
+         * did not directly request a discovery, just to be sure.
+         * <p>Device discovery will only find remote devices that are currently
+         * <i>discoverable</i> (inquiry scan enabled). Many Bluetooth devices are
+         * not discoverable by default, and need to be entered into a special mode.
+         * <p>If Bluetooth state is not #STATE_ON, this API
+         * will return false. After turning on Bluetooth,
+         * wait for #ACTION_STATE_CHANGED with #STATE_ON
+         * to get the updated value.
+         * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN.
+         *
+         * @sa #cancelDiscovery()
+         * @sa BluetoothAdapter#cancelDiscovery()
+         * @sa #STATE_ON
+         * @sa #ACTION_STATE_CHANGED
+         * @sa android.Manifest.permission#BLUETOOTH_ADMIN
+         *
+         * @return true on success, false on error
+         */
+        StartDiscovery(
+            [out] Boolean* result);
+
+        /**
+         * Cancel the current device discovery process.
+         * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN.
+         * <p>Because discovery is a heavyweight procedure for the Bluetooth
+         * adapter, this method should always be called before attempting to connect
+         * to a remote device with
+         * android.bluetooth.BluetoothSocket#connect(). Discovery is not managed by
+         * the  Activity, but is run as a system service, so an application should
+         * always call cancel discovery even if it did not directly request a
+         * discovery, just to be sure.
+         * <p>If Bluetooth state is not #STATE_ON, this API
+         * will return false. After turning on Bluetooth,
+         * wait for #ACTION_STATE_CHANGED with #STATE_ON
+         * to get the updated value.
+         *
+         * @sa android.Manifest.permission#BLUETOOTH_ADMIN
+         * @sa android.bluetooth.BluetoothSocket#connect()
+         * @sa #STATE_ON
+         * @sa #ACTION_STATE_CHANGED
+         *
+         * @return true on success, false on error
+         */
+        CancelDiscovery(
+            [out] Boolean* result);
+
+        /**
+         * Return true if the local Bluetooth adapter is currently in the device
+         * discovery process.
+         * <p>Device discovery is a heavyweight procedure. New connections to
+         * remote Bluetooth devices should not be attempted while discovery is in
+         * progress, and existing connections will experience limited bandwidth
+         * and high latency. Use #cancelDiscovery() to cancel an ongoing
+         * discovery.
+         * <p>Applications can also register for #ACTION_DISCOVERY_STARTED
+         * or #ACTION_DISCOVERY_FINISHED to be notified when discovery
+         * starts or completes.
+         * <p>If Bluetooth state is not #STATE_ON, this API
+         * will return false. After turning on Bluetooth,
+         * wait for #ACTION_STATE_CHANGED with #STATE_ON
+         * to get the updated value.
+         * <p>Requires android.Manifest.permission#BLUETOOTH.
+         *
+         * @sa #cancelDiscovery()
+         * @sa #ACTION_DISCOVERY_STARTED
+         * @sa #ACTION_DISCOVERY_FINISHED
+         * @sa #STATE_ON
+         * @sa #ACTION_STATE_CHANGED
+         * @sa android.Manifest.permission#BLUETOOTH
+         *
+         * @return true if discovering
+         */
+        IsDiscovering(
+            [out] Boolean* IsDiscovering);
+
+        /**
+         * Return the set of BluetoothDevice objects that are bonded
+         * (paired) to the local adapter.
+         * <p>If Bluetooth state is not #STATE_ON, this API
+         * will return an empty set. After turning on Bluetooth,
+         * wait for #ACTION_STATE_CHANGED with #STATE_ON
+         * to get the updated value.
+         * <p>Requires android.Manifest.permission#BLUETOOTH.
+         *
+         * @return unmodifiable set of BluetoothDevice, or null on error
+         *
+         * @sa BluetoothDevice
+         * @sa #STATE_ON
+         * @sa #ACTION_STATE_CHANGED
+         * @sa android.Manifest.permission#BLUETOOTH
+         * @sa BluetoothDevice
+         */
+        //Mike TODO: wait for set interface
+        GetBondedDevices(
+            [out, callee] /*Set<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* device);
+
+        /**
+         * Get the current connection state of the local Bluetooth adapter.
+         * This can be used to check whether the local Bluetooth adapter is connected
+         * to any profile of any other remote Bluetooth Device.
+         *
+         * <p> Use this function along with #ACTION_CONNECTION_STATE_CHANGED
+         * intent to get the connection state of the adapter.
+         *
+         * @return One of #STATE_CONNECTED, #STATE_DISCONNECTED,
+         * #STATE_CONNECTING or #STATE_DISCONNECTED
+         *
+         * @sa #ACTION_CONNECTION_STATE_CHANGED
+         * @sa #STATE_CONNECTED
+         * @sa #STATE_DISCONNECTED
+         * @sa #STATE_CONNECTING
+         * @sa #STATE_DISCONNECTED
+         * @hide
+         */
+        GetConnectionState(
+            [out] Int32* state);
+
+        /**
+         * Get the current connection state of a profile.
+         * This function can be used to check whether the local Bluetooth adapter
+         * is connected to any remote device for a specific profile.
+         * Profile can be one of BluetoothProfile#HEALTH, BluetoothProfile#HEADSET,
+         * BluetoothProfile#A2DP.
+         *
+         * <p>Requires android.Manifest.permission#BLUETOOTH.
+         *
+         * <p> Return value can be one of
+         * BluetoothProfile#STATE_DISCONNECTED,
+         * BluetoothProfile#STATE_CONNECTING,
+         * BluetoothProfile#STATE_CONNECTED,
+         * BluetoothProfile#STATE_DISCONNECTING
+         *
+         * @sa BluetoothProfile#HEALTH
+         * @sa BluetoothProfile#HEADSET
+         * @sa BluetoothProfile#A2DP
+         * @sa android.Manifest.permission#BLUETOOTH
+         * @sa BluetoothProfile#STATE_DISCONNECTED
+         * @sa BluetoothProfile#STATE_CONNECTING
+         * @sa BluetoothProfile#STATE_CONNECTED
+         * @sa BluetoothProfile#STATE_DISCONNECTING
+         */
+        GetProfileConnectionState(
+            [in] Int32 profile,
+            [out] Int32* state);
+
+        /**
+         * Create a listening, secure RFCOMM Bluetooth socket.
+         * <p>A remote device connecting to this socket will be authenticated and
+         * communication on this socket will be encrypted.
+         * <p>Use BluetoothServerSocket#accept to retrieve incoming
+         * connections from a listening BluetoothServerSocket.
+         * <p>Valid RFCOMM channels are in range 1 to 30.
+         * <p>Requires android.Manifest.permission#BLUETOOTH_ADMIN
+         *
+         * @sa BluetoothServerSocket#accept
+         * @sa BluetoothServerSocket
+         * @sa android.Manifest.permission#BLUETOOTH_ADMIN
+         * @param channel RFCOMM channel to listen on
+         * @return a listening RFCOMM BluetoothServerSocket
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException on error | for example Bluetooth not available, or insufficient permissions, or channel in use.
+         * @hide
+         */
+        ListenUsingRfcommOn(
+            [in] Int32 channel,
+            [out] IBluetoothServerSocket** socket);
+
+        /**
+         * Create a listening, secure RFCOMM Bluetooth socket with Service Record.
+         * <p>A remote device connecting to this socket will be authenticated and
+         * communication on this socket will be encrypted.
+         * <p>Use BluetoothServerSocket#accept to retrieve incoming
+         * connections from a listening BluetoothServerSocket.
+         * <p>The system will assign an unused RFCOMM channel to listen on.
+         * <p>The system will also register a Service Discovery
+         * Protocol (SDP) record with the local SDP server containing the specified
+         * UUID, service name, and auto-assigned channel. Remote Bluetooth devices
+         * can use the same UUID to query our SDP server and discover which channel
+         * to connect to. This SDP record will be removed when this socket is
+         * closed, or if this application closes unexpectedly.
+         * <p>Use BluetoothDevice#createRfcommSocketToServiceRecord to
+         * connect to this socket from another device using the same UUID.
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa BluetoothServerSocket#accept
+         * @sa BluetoothServerSocket
+         * @sa BluetoothDevice#createRfcommSocketToServiceRecord
+         * @sa android.Manifest.permission#BLUETOOTH
+         * @sa UUID
+         *
+         * @param name service name for SDP record
+         * @param uuid uuid for SDP record
+         * @return a listening RFCOMM BluetoothServerSocket
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException on error | for example Bluetooth not available, or insufficient permissions, or channel in use.
+         */
+        ListenUsingRfcommWithServiceRecord(
+            [in] String name,
+            [in] IUUID* uuid,
+            [out] IBluetoothServerSocket** socket);
+
+        /**
+         * Create a listening, secure L2CAP Bluetooth socket with Service Record.
+         * <p>A remote device connecting to this socket will be authenticated and
+         * communication on this socket will be encrypted.
+         * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
+         * connections from a listening {@link BluetoothServerSocket}.
+         * <p>The system will assign an unused L2CAP PSM to listen on.
+         * <p>The system will also register a Service Discovery
+         * Protocol (SDP) record with the local SDP server containing the specified
+         * UUID, service name, and auto-assigned PSM number. Remote Bluetooth devices
+         * can use the same UUID to query our SDP server and discover which PSM
+         * to connect to. This SDP record will be removed when this socket is
+         * closed, or if this application closes unexpectedly.
+         * <p>Use {@link BluetoothDevice#createL2capSocketToServiceRecord} to
+         * connect to this socket from another device using the same {@link UUID}.
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+         * @param name service name for SDP record
+         * @param uuid uuid for SDP record
+         * @return a listening L2CAP BluetoothServerSocket
+         * @throws IOException on error, for example Bluetooth not available, or
+         *                     insufficient permissions, or channel in use.
+         * @hide
+         */
+        ListenUsingL2capWithServiceRecord(
+            [in] String name,
+            [in] IUUID* uuid,
+            [out] IBluetoothServerSocket** socket);
+
+        /**
+         * Create a listening, insecure L2CAP Bluetooth socket with Service Record.
+         * <p>The link key is not required to be authenticated, i.e the communication may be
+         * vulnerable to Man In the Middle attacks. For Bluetooth 2.1 devices,
+         * the link will be encrypted, as encryption is mandartory.
+         * For legacy devices (pre Bluetooth 2.1 devices) the link will not
+         * be encrypted. Use {@link #listenUsingL2capWithServiceRecord}, if an
+         * encrypted and authenticated communication channel is desired.
+         * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
+         * connections from a listening {@link BluetoothServerSocket}.
+         * <p>The system will assign an unused L2CAP PSM to listen on.
+         * <p>The system will also register a Service Discovery
+         * Protocol (SDP) record with the local SDP server containing the specified
+         * UUID, service name, and auto-assigned PSM number. Remote Bluetooth devices
+         * can use the same UUID to query our SDP server and discover which PSM
+         * to connect to. This SDP record will be removed when this socket is
+         * closed, or if this application closes unexpectedly.
+         * <p>Use {@link BluetoothDevice#createL2capSocketToServiceRecord} to
+         * connect to this socket from another device using the same {@link UUID}.
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+         * @param name service name for SDP record
+         * @param uuid uuid for SDP record
+         * @return a listening L2CAP BluetoothServerSocket
+         * @throws IOException on error, for example Bluetooth not available, or
+         *                     insufficient permissions, or channel in use.
+         * @hide
+         */
+        ListenUsingInsecureL2capWithServiceRecord(
+            [in] String name,
+            [in] IUUID* uuid,
+            [out] IBluetoothServerSocket** socket);
+
+        /**
+         * Create a listening, insecure RFCOMM Bluetooth socket with Service Record.
+         * <p>The link key is not required to be authenticated, i.e the communication may be
+         * vulnerable to Man In the Middle attacks. For Bluetooth 2.1 devices,
+         * the link will be encrypted, as encryption is mandartory.
+         * For legacy devices (pre Bluetooth 2.1 devices) the link will not
+         * be encrypted. Use #listenUsingRfcommWithServiceRecord, if an
+         * encrypted and authenticated communication channel is desired.
+         * <p>Use BluetoothServerSocket#accept to retrieve incoming
+         * connections from a listening BluetoothServerSocket.
+         * <p>The system will assign an unused RFCOMM channel to listen on.
+         * <p>The system will also register a Service Discovery
+         * Protocol (SDP) record with the local SDP server containing the specified
+         * UUID, service name, and auto-assigned channel. Remote Bluetooth devices
+         * can use the same UUID to query our SDP server and discover which channel
+         * to connect to. This SDP record will be removed when this socket is
+         * closed, or if this application closes unexpectedly.
+         * <p>Use BluetoothDevice#createRfcommSocketToServiceRecord to
+         * connect to this socket from another device using the same UUID.
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa #listenUsingRfcommWithServiceRecord
+         * @sa BluetoothServerSocket#accept
+         * @sa BluetoothServerSocket
+         * @sa BluetoothDevice#createRfcommSocketToServiceRecord
+         * @sa UUID
+         * @sa android.Manifest.permission#BLUETOOTH
+         *
+         * @param name service name for SDP record
+         * @param uuid uuid for SDP record
+         * @return a listening RFCOMM BluetoothServerSocket
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException on error | for example Bluetooth not available, or insufficient permissions, or channel in use.
+         */
+        ListenUsingInsecureRfcommWithServiceRecord(
+            [in] String name,
+            [in] IUUID* uuid,
+            [out] IBluetoothServerSocket** socket);
+
+         /**
+         * Create a listening, encrypted,
+         * RFCOMM Bluetooth socket with Service Record.
+         * <p>The link will be encrypted, but the link key is not required to be authenticated
+         * i.e the communication is vulnerable to Man In the Middle attacks. Use
+         * #listenUsingRfcommWithServiceRecord, to ensure an authenticated link key.
+         * <p> Use this socket if authentication of link key is not possible.
+         * For example, for Bluetooth 2.1 devices, if any of the devices does not have
+         * an input and output capability or just has the ability to display a numeric key,
+         * a secure socket connection is not possible and this socket can be used.
+         * Use #listenUsingInsecureRfcommWithServiceRecord, if encryption is not required.
+         * For Bluetooth 2.1 devices, the link will be encrypted, as encryption is mandartory.
+         * For more details, refer to the Security Model section 5.2 (vol 3) of
+         * Bluetooth Core Specification version 2.1 + EDR.
+         * <p>Use BluetoothServerSocket#accept to retrieve incoming
+         * connections from a listening BluetoothServerSocket.
+         * <p>The system will assign an unused RFCOMM channel to listen on.
+         * <p>The system will also register a Service Discovery
+         * Protocol (SDP) record with the local SDP server containing the specified
+         * UUID, service name, and auto-assigned channel. Remote Bluetooth devices
+         * can use the same UUID to query our SDP server and discover which channel
+         * to connect to. This SDP record will be removed when this socket is
+         * closed, or if this application closes unexpectedly.
+         * <p>Use BluetoothDevice#createRfcommSocketToServiceRecord to
+         * connect to this socket from another device using the same UUID.
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa #listenUsingRfcommWithServiceRecord
+         * @sa #listenUsingInsecureRfcommWithServiceRecord
+         * @sa BluetoothServerSocket#accept
+         * @sa BluetoothServerSocket
+         * @sa BluetoothDevice#createRfcommSocketToServiceRecord
+         * @sa UUID
+         * @sa android.Manifest.permission#BLUETOOTH
+         *
+         * @param name service name for SDP record
+         * @param uuid uuid for SDP record
+         * @return a listening RFCOMM BluetoothServerSocket
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException on error | for example Bluetooth not available, or insufficient permissions, or channel in use.
+         * @hide
+         */
+        ListenUsingEncryptedRfcommWithServiceRecord(
+            [in] String name,
+            [in] IUUID* uuid,
+            [out] IBluetoothServerSocket** socket);
+
+        /**
+         * Construct an unencrypted, unauthenticated, RFCOMM server socket.
+         * Call #accept to retrieve connections to this socket.
+         * @return An RFCOMM BluetoothServerSocket
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException On error | for example Bluetooth not available, or insufficient permissions.
+         * @hide
+         */
+        ListenUsingInsecureRfcommOn(
+            [in] Int32 port,
+            [out] IBluetoothServerSocket** socket);
+
+         /**
+         * Construct an encrypted, RFCOMM server socket.
+         * Call #accept to retrieve connections to this socket.
+         * @return An RFCOMM BluetoothServerSocket
+         * @return ECode = NOERROR(0) if success, else as follows:
+         * Value | Meaning |
+         * :-|:------------|
+         * IOException On error, | for example Bluetooth not available, or insufficient permissions.
+         * @hide
+         */
+        ListenUsingEncryptedRfcommOn(
+            [in] Int32 port,
+            [out] IBluetoothServerSocket** socket);
+
+        /**
+         * Read the local Out of Band Pairing Data
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa android.Manifest.permission#BLUETOOTH
+         *
+         * @return Pair<byte[], byte[]> of Hash and Randomizer
+         *
+         * @hide
+         */
+        //Mike TODO: Need Pair interface
+        ReadOutOfBandData(
+            [out] /*Pair<byte[], byte[]>*/ IInterface** data);
+
+        /**
+         * Get the profile proxy object associated with the profile.
+         *
+         * <p>Profile can be one of BluetoothProfile#HEALTH,  BluetoothProfile#HEADSET or
+         * BluetoothProfile#A2DP. Clients must implements
+         * BluetoothProfile.ServiceListener to get notified of
+         * the connection status and to get the proxy object.
+         *
+         * @sa BluetoothProfile#HEALTH
+         * @sa BluetoothProfile#HEADSET
+         * @sa BluetoothProfile#A2DP
+         * @sa BluetoothProfile.ServiceListener
+         *
+         * @param context Context of the application
+         * @param listener The service Listener for connection callbacks.
+         * @param profile The Bluetooth profile; either BluetoothProfile#HEALTH,
+         *                BluetoothProfile#HEADSET or  BluetoothProfile#A2DP.
+         *
+         * @sa BluetoothProfile#HEALTH
+         * @sa BluetoothProfile#HEADSET
+         * @sa BluetoothProfile#A2DP
+         * @return true on success, false on error
+         */
+        GetProfileProxy(
+            [in] IContext* ctx,
+            [in] IBluetoothProfileServiceListener* listener,
+            [in] Int32 profile,
+            [out] Boolean* result);
+
+        /**
+         * Close the connection of the profile proxy to the Service.
+         *
+         * <p> Clients should call this when they are no longer using
+         * the proxy obtained from #getProfileProxy.
+         * Profile can be one of  BluetoothProfile#HEALTH,  BluetoothProfile#HEADSET or
+         * BluetoothProfile#A2DP
+         *
+         * @sa #getProfileProxy
+         * @sa BluetoothProfile#HEALTH
+         * @sa BluetoothProfile#HEADSET
+         * @sa BluetoothProfile#A2DP
+         *
+         * @param profile
+         * @param proxy Profile proxy object
+         */
+        CloseProfileProxy(
+            [in] Int32 profile,
+            [in] IBluetoothProfile* proxy);
+
+
+        /**
+         * Enable the Bluetooth Adapter, but don't auto-connect devices
+         * and don't persist state. Only for use by system applications.
+         * @hide
+         */
+        EnableNoAutoConnect(
+            [out] Boolean* result);
+
+        /**
+         * Enable control of the Bluetooth Adapter for a single application.
+         *
+         * <p>Some applications need to use Bluetooth for short periods of time to
+         * transfer data but don't want all the associated implications like
+         * automatic connection to headsets etc.
+         *
+         * <p> Multiple applications can call this. This is reference counted and
+         * Bluetooth disabled only when no one else is using it. There will be no UI
+         * shown to the user while bluetooth is being enabled. Any user action will
+         * override this call. For example, if user wants Bluetooth on and the last
+         * user of this API wanted to disable Bluetooth, Bluetooth will not be
+         * turned off.
+         *
+         * <p> This API is only meant to be used by internal applications. Third
+         * party applications but use #enable and #disable APIs.
+         *
+         * @sa #enable
+         * @sa #disable
+         *
+         * <p> If this API returns true, it means the callback will be called.
+         * The callback will be called with the current state of Bluetooth.
+         * If the state is not what was requested, an internal error would be the
+         * reason. If Bluetooth is already on and if this function is called to turn
+         * it on, the api will return true and a callback will be called.
+         *
+         * <p>Requires android.Manifest.permission#BLUETOOTH
+         *
+         * @sa android.Manifest.permission#BLUETOOTH
+         *
+         * @param on True for on, false for off.
+         * @param callback The callback to notify changes to the state.
+         * @hide
+         */
+        ChangeApplicationBluetoothState(
+            [in] Boolean on,
+            [in] IIBluetoothStateChangeCallback* stateChangeCallback,
+            [out] Boolean* result);
+
+       /**
+        * Starts a scan for Bluetooth LE devices.
+        *
+        * <p>Results of the scan are reported using the
+        * {@link LeScanCallback#onLeScan} callback.
+        *
+        * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+        *
+        * @param callback the callback LE scan results are delivered
+        * @return true, if the scan was started successfully
+        * @deprecated use {@link BluetoothLeScanner#startScan(List, ScanSettings, ScanCallback)}
+        *             instead.
+        */
+       //@Deprecated
+       StartLeScan(
+            [in] IBluetoothAdapterLeScanCallback* cb,
+            [out] Boolean* result);
+
+        /**
+         * Starts a scan for Bluetooth LE devices, looking for devices that
+         * advertise given services.
+         *
+         * <p>Devices which advertise all specified services are reported using the
+         * {@link LeScanCallback#onLeScan} callback.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+         *
+         * @param serviceUuids Array of services to look for
+         * @param callback the callback LE scan results are delivered
+         * @return true, if the scan was started successfully
+         * @deprecated use {@link BluetoothLeScanner#startScan(List, ScanSettings, ScanCallback)}
+         *             instead.
+         */
+       //@Deprecated
+       StartLeScan(
+            [in] ArrayOf<IUUID*>* serviceUuids,
+            [in] IBluetoothAdapterLeScanCallback* cb,
+            [out] Boolean* result);
+
+        /**
+         * Stops an ongoing Bluetooth LE device scan.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+         *
+         * @param callback used to identify which scan to stop
+         *        must be the same handle used to start the scan
+         * @deprecated Use {@link BluetoothLeScanner#stopScan(ScanCallback)} instead.
+         */
+        //@Deprecated
+        StopLeScan(
+            [in] IBluetoothAdapterLeScanCallback* cb);
+
+    }
+
+    [local]
+    interface IBluetoothAdapterHelper {
+        GetDefaultAdapter(
+            [out] IBluetoothAdapter** adapter);
+
+        /**
+         * Validate a String Bluetooth address, such as "00:43:A8:23:10:F0"
+         * <p>Alphabetic characters must be uppercase to be valid.
+         *
+         * @param address Bluetooth address as string
+         * @return true if the address is valid, false otherwise
+         */
+        CheckBluetoothAddress(
+            [in] String address,
+            [out] Boolean* result);
+    }
+
+    [deprecated]
+    interface IBluetoothAdapterLeScanCallback {
+        /**
+         * Callback reporting an LE device found during a device scan initiated
+         * by the {@link BluetoothAdapter#startLeScan} function.
+         *
+         * @param device Identifies the remote device
+         * @param rssi The RSSI value for the remote device as reported by the
+         *             Bluetooth hardware. 0 if no RSSI value is available.
+         * @param scanRecord The content of the advertisement record offered by
+         *                   the remote device.
+         */
+        OnLeScan(
+            [in] IBluetoothDevice* device,
+            [in] Int32 rssi,
+            [in] ArrayOf<Byte>* scanRecord);
+    }
 
     } // Bluetooth
     } // Droid

@@ -119,6 +119,36 @@ public:
         /* [in] */ const String& report,
         /* [out] */ Boolean* result);
 
+    /**
+     * Send Get_Idle_Time command to the connected HID input device.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+     *
+     * @param device Remote Bluetooth Device
+     * @return false on immediate error,
+     *               true otherwise
+     * @hide
+     */
+    CARAPI GetIdleTime(
+        /* [in] */ IBluetoothDevice* device,
+        /* [out] */ Boolean* result);
+
+    /**
+     * Send Set_Idle_Time command to the connected HID input device.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+     *
+     * @param device Remote Bluetooth Device
+     * @param idleTime Idle time to be set on HID Device
+     * @return false on immediate error,
+     *               true otherwise
+     * @hide
+     */
+    CARAPI SetIdleTime(
+        /* [in] */ IBluetoothDevice* device,
+        /* [in] */ Byte idleTime,
+        /* [out] */ Boolean* result);
+
 private:
     CARAPI_(Boolean) IsEnabled();
 

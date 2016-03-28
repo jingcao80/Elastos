@@ -1,0 +1,82 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+    /**
+     * @hide
+     * @Involve
+     * interface IBluetoothProfile
+     */
+    [deprecated]
+    interface IBluetoothSap {
+
+        /**
+         * Intent used to broadcast the change in connection state of the Sap
+         * profile.
+         *
+         * <p>This intent will have 3 extras:
+         * <ul>
+         *   <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
+         *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile.</li>
+         *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
+         * </ul>
+         *
+         * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
+         * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTED}.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+         * receive.
+         */
+        // @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String ACTION_CONNECTION_STATE_CHANGED =
+            "codeaurora.bluetooth.sap.profile.action.CONNECTION_STATE_CHANGED";
+
+        /**
+         * Initiate disconnection from SAP server.
+         *
+         * <p> Once the disconnection is initiated by any device either local host
+         * or remote device, the state will transition from {@link #STATE_CONNECTED}
+         * to {@link #STATE_DISCONNECTED}.
+         *
+         * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+         * permission.
+         *
+         * @param device Remote Bluetooth Device
+         * @return false on immediate error,
+         *               true otherwise
+         * @hide
+         */
+        Disconnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        /**
+         * {@inheritDoc}
+         */
+        GetConnectedDevices(
+            [out] IList** devices);
+
+        /**
+         * {@inheritDoc}
+         */
+        GetDevicesMatchingConnectionStates(
+            [in] ArrayOf<Int32>* states,
+            [out] IList** result);
+
+        /**
+         * {@inheritDoc}
+         */
+        GetConnectionState(
+            [in] IBluetoothDevice* device,
+            [out] Int32* state);
+    }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

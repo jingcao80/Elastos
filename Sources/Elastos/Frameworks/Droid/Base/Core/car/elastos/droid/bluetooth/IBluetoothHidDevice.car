@@ -1,0 +1,56 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IIBluetoothHidDeviceCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+    /**
+     * @hide
+     * @Involve
+     */
+    [deprecated]
+    interface IIBluetoothHidDevice {
+        RegisterApp(
+            [in] IBluetoothHidDeviceAppConfiguration* config,
+            [in] IBluetoothHidDeviceAppSdpSettings* sdp,
+            [in] IBluetoothHidDeviceAppQosSettings* inQos,
+            [in] IBluetoothHidDeviceAppQosSettings* outQos,
+            [in] IIBluetoothHidDeviceCallback* pCallback,
+            [out] Boolean* result);
+
+        UnregisterApp(
+            [in] IBluetoothHidDeviceAppConfiguration* config,
+            [out] Boolean* result);
+
+        SendReport(
+            [in] Int32 id,
+            [in] ArrayOf<Byte>* data,
+            [out] Boolean* result);
+
+        ReplyReport(
+            [in] Byte type,
+            [in] Byte id,
+            [in] ArrayOf<Byte>* data,
+            [out] Boolean* result);
+
+        ReportError(
+            [in] Byte error,
+            [out] Boolean* result);
+
+        Unplug(
+            [out] Boolean* result);
+
+        Connect(
+            [out] Boolean* result);
+
+        Disconnect(
+            [out] Boolean* result);
+    }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

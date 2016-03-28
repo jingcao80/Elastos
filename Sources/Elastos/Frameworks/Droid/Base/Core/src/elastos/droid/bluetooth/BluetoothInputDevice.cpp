@@ -563,6 +563,81 @@ ECode BluetoothInputDevice::SendData(
     return NOERROR;
 }
 
+
+/**
+ * Send Get_Idle_Time command to the connected HID input device.
+ *
+ * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+ *
+ * @param device Remote Bluetooth Device
+ * @return false on immediate error,
+ *               true otherwise
+ * @hide
+ */
+ECode BluetoothInputDevice::GetIdleTime(
+    /* [in] */ IBluetoothDevice* device,
+    /* [out] */ Boolean* result)
+{
+    if (device != NULL && DBG) {
+        String deviceStr;
+        IObject::Probe(device)->ToString(&deviceStr);
+        Logger::D(TAG, String("getIdletime(") + deviceStr + ")");
+    }
+    if (mService != NULL && IsEnabled() && IsValidDevice(device)) {
+        // try {
+            if (FAILED(mService->GetIdleTime(device, result))) {
+                Logger::E(TAG, "GetIdleTime: Remote invoke error: mService->GetIdleTime");
+                *result = FALSE;
+                return NOERROR;
+            }
+        // } catch (RemoteException e) {
+            // return false;
+        // }
+    }
+    if (mService == NULL)
+        Logger::W(TAG, "Proxy not attached to service");
+    *result = FALSE;
+    return NOERROR;
+}
+
+/**
+ * Send Set_Idle_Time command to the connected HID input device.
+ *
+ * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+ *
+ * @param device Remote Bluetooth Device
+ * @param idleTime Idle time to be set on HID Device
+ * @return false on immediate error,
+ *               true otherwise
+ * @hide
+ */
+ECode BluetoothInputDevice::SetIdleTime(
+    /* [in] */ IBluetoothDevice* device,
+    /* [in] */ Byte idleTime,
+    /* [out] */ Boolean* result)
+{
+    if (device != NULL && DBG) {
+        String deviceStr;
+        IObject::Probe(device)->ToString(&deviceStr);
+        Logger::D(TAG, "SetIdleTime(%s), idleTime = %d", deviceStr.string(), idleTime);
+    }
+    if (mService != NULL && IsEnabled() && IsValidDevice(device)) {
+        // try {
+            if (FAILED(mService->SetIdleTime(device, idleTime, result))) {
+                Logger::E(TAG, "GetIdleTime: Remote invoke error: mService->SetIdleTime");
+                *result = FALSE;
+                return NOERROR;
+            }
+        // } catch (RemoteException e) {
+            // return false;
+        // }
+    }
+    if (mService == NULL)
+        Logger::W(TAG, "Proxy not attached to service");
+    *result = FALSE;
+    return NOERROR;
+}
+
 } // Bluetooth
 } // Droid
 } // Elastos

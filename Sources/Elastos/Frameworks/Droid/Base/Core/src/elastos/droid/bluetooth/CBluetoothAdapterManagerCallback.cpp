@@ -46,7 +46,8 @@ ECode CBluetoothAdapterManagerCallback::OnBluetoothServiceDown()
     if (CBluetoothAdapter::VDBG) Logger::D(CBluetoothAdapter::TAG, "onBluetoothServiceDown: %p", mHost->mService.Get());
     AutoLock lock(mHost->mManagerCallbackLock);
     mHost->mService = NULL;
-    mHost->mLeScanClients->Clear();
+    if (mHost->mLeScanClients != NULL)
+        mHost->mLeScanClients->Clear();
     if (CBluetoothAdapter::sBluetoothLeAdvertiser != NULL) CBluetoothAdapter::sBluetoothLeAdvertiser->Cleanup();
     if (CBluetoothAdapter::sBluetoothLeScanner != NULL) CBluetoothAdapter::sBluetoothLeScanner->Cleanup();
     List<AutoPtr<IIBluetoothManagerCallback> >::Iterator it = mHost->mProxyServiceStateCallbacks.Begin();

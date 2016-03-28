@@ -27,6 +27,8 @@ using Elastos::Droid::Bluetooth::IIBluetoothCallback;
 using Elastos::Droid::Bluetooth::IIBluetoothManager;
 using Elastos::Droid::Bluetooth::IIBluetoothManagerCallback;
 using Elastos::Droid::Bluetooth::IIBluetoothStateChangeCallback;
+using Elastos::Droid::Bluetooth::IIQBluetooth;
+using Elastos::Droid::Bluetooth::IIQBluetoothManagerCallback;
 using Elastos::Core::IThread;
 using Elastos::Core::Thread;
 
@@ -185,6 +187,22 @@ public:
 
     CARAPI ToString(
         /* [out] */ String* str);
+
+    CARAPI RegisterQAdapter(
+        /* [in] */ IIQBluetoothManagerCallback* qbmcallback,
+        /* [out] */ IIQBluetooth** qBluetooth);
+
+
+    CARAPI UnregisterQAdapter(
+        /* [in] */ IIQBluetoothManagerCallback* qbmcallback);
+
+
+    CARAPI Enable(
+        /* [in] */ const String& callingPackage,
+        /* [out] */ Boolean* result);
+
+    CARAPI GetQBluetooth(
+        /* [out] */ IIQBluetooth** qBluetooth);
 
 private:
     CARAPI_(void) RegisterForAirplaneMode(

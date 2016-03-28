@@ -875,6 +875,7 @@ ECode CBluetoothManagerService::RegisterAdapter(
 
     AutoPtr<IMessage> msg;
     mHandler->ObtainMessage(MESSAGE_REGISTER_ADAPTER, (IMessage**)&msg);
+    msg->SetObj(callback);
     Boolean bval;
     mHandler->SendMessage(msg, &bval);
     {
@@ -896,7 +897,8 @@ ECode CBluetoothManagerService::UnregisterAdapter(
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(BLUETOOTH_PERM,
         String("Need BLUETOOTH permission")));
     AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(MESSAGE_UNREGISTER_ADAPTER, 0, 0, callback, (IMessage**)&msg);
+    mHandler->ObtainMessage(MESSAGE_UNREGISTER_ADAPTER, (IMessage**)&msg);
+    msg->SetObj(callback);
     Boolean bval;
     mHandler->SendMessage(msg, &bval);
     return NOERROR;
@@ -1433,6 +1435,63 @@ Boolean CBluetoothManagerService::CanUnbindBluetoothService()
     //     }
     // }
     return FALSE;
+}
+
+ECode CBluetoothManagerService::RegisterQAdapter(
+    /* [in] */ IIQBluetoothManagerCallback* qbmcallback,
+    /* [out] */ IIQBluetooth** qBluetooth)
+{
+    VALIDATE_NOT_NULL(qBluetooth)
+    assert(0 && "TODO");
+    // *qBluetooth = NULL;
+
+    // if (callback == NULL) {
+    //     Slogger::W(TAG, "Callback is NULL in RegisterAdapter");
+    //     return NOERROR;
+    // }
+
+    // AutoPtr<IMessage> msg;
+    // mHandler->ObtainMessage(MESSAGE_REGISTER_Q_ADAPTER, (IMessage**)&msg);
+    // msg->SetObj(qbmcallback);
+    // Boolean bval;
+    // mHandler->SendMessage(msg, &bval);
+    // {
+    //     AutoLock lock(mConnection);
+    //     *qBluetooth = mQBluetooth;
+    //     REFCOUNT_ADD(*qBluetooth);
+    // }
+    return NOERROR;
+}
+
+
+ECode CBluetoothManagerService::UnregisterQAdapter(
+    /* [in] */ IIQBluetoothManagerCallback* qbmcallback)
+{
+    assert(0 && "TODO");
+    // FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(BLUETOOTH_PERM,
+    //     String("Need BLUETOOTH permission")));
+    // AutoPtr<IMessage> msg;
+    // mHandler->ObtainMessage(MESSAGE_UNREGISTER_Q_ADAPTER, (IMessage**)&msg);
+    // msg->SetObj(qbmcallback);
+    // Boolean bval;
+    // mHandler->SendMessage(msg, &bval);
+    return NOERROR;
+}
+
+
+ECode CBluetoothManagerService::Enable(
+    /* [in] */ const String& callingPackage,
+    /* [out] */ Boolean* result)
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+ECode CBluetoothManagerService::GetQBluetooth(
+    /* [out] */ IIQBluetooth** qBluetooth)
+{
+    assert(0 && "TODO");
+    return NOERROR;
 }
 
 void CBluetoothManagerService::RecoverBluetoothServiceFromError()

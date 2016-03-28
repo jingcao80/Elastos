@@ -47,6 +47,7 @@ module
 
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Os.ILooper;
+    interface Elastos.Droid.Os.IBinder;
     interface Elastos.Droid.Wifi.P2p.IWifiP2pDevice;
     interface Elastos.Droid.Wifi.P2p.IIWifiP2pManager;
 

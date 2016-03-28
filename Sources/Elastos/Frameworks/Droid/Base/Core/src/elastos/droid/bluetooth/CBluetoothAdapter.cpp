@@ -19,6 +19,11 @@
 #include "elastos/droid/bluetooth/BluetoothMap.h"
 #include "elastos/droid/bluetooth/BluetoothPan.h"
 #include "elastos/droid/bluetooth/BluetoothSocket.h"
+#include "elastos/droid/bluetooth/BluetoothDun.h"
+#include "elastos/droid/bluetooth/BluetoothSap.h"
+#include "elastos/droid/bluetooth/BluetoothGatt.h"
+#include "elastos/droid/bluetooth/BluetoothGattServer.h"
+#include "elastos/droid/bluetooth/BluetoothHidDevice.h"
 #include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/os/CParcelUuid.h"
 #include "elastos/droid/os/ServiceManager.h"
@@ -275,7 +280,7 @@ ECode CBluetoothAdapter::Enable(
         return NOERROR;
     }
     // try {
-    return mManagerService->Enable(result);
+    return mManagerService->Enable(CActivityThread::GetCurrentPackageName(), result);
     // } catch (RemoteException e) {Log.e(TAG, "", e);}
     // return false;
 }
@@ -654,6 +659,22 @@ ECode CBluetoothAdapter::ListenUsingRfcommWithServiceRecord(
     return CreateNewRfcommSocketAndRecord(name, uuid, TRUE, TRUE, socket);
 }
 
+ECode CBluetoothAdapter::ListenUsingL2capWithServiceRecord(
+    /* [in] */ const String& name,
+    /* [in] */ IUUID* uuid,
+    /* [out] */ IBluetoothServerSocket** socket)
+{
+    return CreateNewL2capSocketAndRecord(name, uuid, TRUE, TRUE, socket);
+}
+
+ECode CBluetoothAdapter::ListenUsingInsecureL2capWithServiceRecord(
+    /* [in] */ const String& name,
+    /* [in] */ IUUID* uuid,
+    /* [out] */ IBluetoothServerSocket** socket)
+{
+    return CreateNewL2capSocketAndRecord(name, uuid, FALSE, FALSE, socket);
+}
+
 ECode CBluetoothAdapter::ListenUsingInsecureRfcommWithServiceRecord(
     /* [in] */ const String& name,
     /* [in] */ IUUID* uuid,
@@ -681,8 +702,40 @@ ECode CBluetoothAdapter::CreateNewRfcommSocketAndRecord(
     *socket = NULL;
 
     AutoPtr<IParcelUuid> parcelUuid;
+    CParcelUuid::New(uuid, (IParcelUuid**)&parcelUuid);
+
     AutoPtr<BluetoothServerSocket> serverSocket = new BluetoothServerSocket(
             BluetoothSocket::TYPE_RFCOMM, auth, encrypt, parcelUuid);
+    serverSocket->SetServiceName(name);
+    Int32 terrno = serverSocket->mSocket->BindListen();
+    if (terrno != 0) {
+        //TODO(BT): Throw the same exception error code
+        // that the previous code was using.
+        //socket.mSocket.throwErrnoNative(errno);
+        // throw new IOException("Error: " + errno);
+        Logger::E(TAG, "Error: %d", terrno);
+        return E_IO_EXCEPTION;
+    }
+    *socket = (IBluetoothServerSocket*)serverSocket;
+    REFCOUNT_ADD(*socket)
+    return NOERROR;
+}
+
+ECode CBluetoothAdapter::CreateNewL2capSocketAndRecord(
+    /* [in] */ const String& name,
+    /* [in] */ IUUID* uuid,
+    /* [in] */ Boolean auth,
+    /* [in] */ Boolean encrypt,
+    /* [out] */ IBluetoothServerSocket** socket)
+{
+    VALIDATE_NOT_NULL(socket)
+    *socket = NULL;
+
+    AutoPtr<IParcelUuid> parcelUuid;
+    CParcelUuid::New(uuid, (IParcelUuid**)&parcelUuid);
+
+    AutoPtr<BluetoothServerSocket> serverSocket = new BluetoothServerSocket(
+            BluetoothSocket::TYPE_L2CAP, auth, encrypt, parcelUuid);
     serverSocket->SetServiceName(name);
     Int32 terrno = serverSocket->mSocket->BindListen();
     if (terrno != 0) {
@@ -832,6 +885,16 @@ ECode CBluetoothAdapter::GetProfileProxy(
         *result = TRUE;
         return NOERROR;
     }
+    else if (profile == IBluetoothProfile::DUN) {
+        AutoPtr<BluetoothDun> obj = new BluetoothDun(context, listener);
+        *result = TRUE;
+        return NOERROR;
+    }
+    else if (profile == IBluetoothProfile::SAP) {
+        AutoPtr<BluetoothSap> obj = new BluetoothSap(context, listener);
+        *result = TRUE;
+        return NOERROR;
+    }
     else if (profile == IBluetoothProfile::HEALTH) {
         AutoPtr<BluetoothHealth> obj = new BluetoothHealth(context, listener);
         *result = TRUE;
@@ -844,6 +907,11 @@ ECode CBluetoothAdapter::GetProfileProxy(
     }
     else if (profile == IBluetoothProfile::HEADSET_CLIENT) {
         AutoPtr<IBluetoothHeadsetClient> headsetClient = new BluetoothHeadsetClient(context, listener);
+        *result = TRUE;
+        return NOERROR;
+    }
+    else if (profile == IBluetoothProfile::HID_DEVICE) {
+        AutoPtr<BluetoothHidDevice> headsetClient = new BluetoothHidDevice(context, listener);
         *result = TRUE;
         return NOERROR;
     }
@@ -862,16 +930,16 @@ ECode CBluetoothAdapter::CloseProfileProxy(
 
     switch (profile) {
         case IBluetoothProfile::HEADSET:
-            ((IBluetoothHeadset*)proxy)->Close();
+            ((BluetoothHeadset*)proxy)->Close();
             break;
         case IBluetoothProfile::A2DP:
-            ((IBluetoothA2dp*)proxy)->Close();
+            ((BluetoothA2dp*)proxy)->Close();
             break;
         case IBluetoothProfile::A2DP_SINK:
-            ((IBluetoothA2dpSink*)proxy)->Close();
+            ((BluetoothA2dpSink*)proxy)->Close();
             break;
         case IBluetoothProfile::AVRCP_CONTROLLER:
-            ((IBluetoothAvrcpController*)proxy)->Close();
+            ((BluetoothAvrcpController*)proxy)->Close();
             break;
         case IBluetoothProfile::INPUT_DEVICE:
             ((BluetoothInputDevice*)proxy)->Close();
@@ -879,20 +947,29 @@ ECode CBluetoothAdapter::CloseProfileProxy(
         case IBluetoothProfile::PAN:
             ((BluetoothPan*)proxy)->Close();
             break;
+        case IBluetoothProfile::DUN:
+            ((BluetoothDun*)proxy)->Close();
+            break;
+        case IBluetoothProfile::SAP:
+            ((BluetoothSap*)proxy)->Close();
+            break;
         case IBluetoothProfile::HEALTH:
-            ((IBluetoothHealth*)proxy)->Close();
+            ((BluetoothHealth*)proxy)->Close();
             break;
         case IBluetoothProfile::GATT:
-            ((IBluetoothGatt*)proxy)->Close();
+            ((BluetoothGatt*)proxy)->Close();
             break;
         case IBluetoothProfile::GATT_SERVER:
-            ((IBluetoothGattServer*)proxy)->Close();
+            ((BluetoothGattServer*)proxy)->Close();
             break;
         case IBluetoothProfile::MAP:
-            ((IBluetoothMap*)proxy)->Close();
+            ((BluetoothMap*)proxy)->Close();
             break;
         case IBluetoothProfile::HEADSET_CLIENT:
-            ((IBluetoothHeadsetClient*)proxy)->Close();
+            ((BluetoothHeadsetClient*)proxy)->Close();
+            break;
+        case IBluetoothProfile::HID_DEVICE:
+            ((BluetoothHidDevice*)proxy)->Close();
             break;
     }
 
@@ -940,6 +1017,12 @@ ECode CBluetoothAdapter::StartLeScan(
     /* [in] */ IBluetoothAdapterLeScanCallback* cb,
     /* [out] */ Boolean* result)
 {
+    Int32 state;
+    GetState(&state);
+    if (state != STATE_ON) {
+        *result = FALSE;
+        return NOERROR;
+    }
     return StartLeScan(NULL, cb, result);
 }
 
@@ -1025,6 +1108,11 @@ ECode CBluetoothAdapter::StopLeScan(
     /* [in] */ IBluetoothAdapterLeScanCallback* cb)
 {
     if (DBG) Logger::D(TAG, "stopLeScan()");
+    Int32 state;
+    GetState(&state);
+    if (state != STATE_ON) {
+        return NOERROR;
+    }
     AutoPtr<IBluetoothLeScanner> scanner;
     GetBluetoothLeScanner((IBluetoothLeScanner**)&scanner);
     if (scanner == NULL) {
