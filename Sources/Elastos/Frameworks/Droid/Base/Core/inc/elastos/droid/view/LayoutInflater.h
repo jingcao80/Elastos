@@ -211,7 +211,7 @@ protected:
      *
      * @return View The View created.
      */
-    CARAPI OnCreateView(
+    virtual CARAPI OnCreateView(
         /* [in] */ const String& name,
         /* [in] */ IAttributeSet* attrs,
         /* [out] */ IView** view);
@@ -228,7 +228,7 @@ protected:
      *
      * @return View The View created.
      */
-    CARAPI OnCreateView(
+    virtual CARAPI OnCreateView(
         /* [in] */ IView* parent,
         /* [in] */ const String& name,
         /* [in] */ IAttributeSet* attrs,
@@ -237,7 +237,7 @@ protected:
     /*
      * default visibility so the BridgeInflater can override it.
      */
-    CARAPI CreateViewFromTag(
+    virtual CARAPI CreateViewFromTag(
         /* [in] */ IView* parent,
         /* [in] */ const String& name,
         /* [in] */ IAttributeSet* attrs,
