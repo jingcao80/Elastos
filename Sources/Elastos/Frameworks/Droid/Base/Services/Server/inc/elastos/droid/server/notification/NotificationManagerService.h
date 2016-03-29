@@ -86,12 +86,14 @@ public:
     {
     public:
         SpamExecutorRunnable(
+            /* [in] */ Int32 notifId,
             /* [in] */ NotificationManagerService* host);
 
         CARAPI Run();
 
     public:
         NotificationManagerService* mHost;
+        Int32 mNotifId;
     };
 
     class BinderService
