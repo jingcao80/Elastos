@@ -58,6 +58,7 @@ using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::CMessageHelper;
 using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::IPendingIntentHelper;
 using Elastos::Droid::App::CPendingIntentHelper;
@@ -147,6 +148,7 @@ public:
     AlarmImplAlarmDriver(int fd) : AlarmImpl(&fd, 1) { }
 
     int set(int type, struct timespec *ts);
+    int clear(int type, struct timespec *ts);
     int setTime(struct timeval *tv);
     int waitForAlarm();
 };
@@ -183,6 +185,11 @@ AlarmImpl::~AlarmImpl()
 int AlarmImplAlarmDriver::set(int type, struct timespec *ts)
 {
     return ioctl(fds[0], ANDROID_ALARM_SET(type), ts);
+}
+
+int AlarmImplAlarmDriver::clear(int type, struct timespec *ts)
+{
+    return ioctl(fds[0], ANDROID_ALARM_CLEAR(type), ts);
 }
 
 int AlarmImplAlarmDriver::setTime(struct timeval *tv)
@@ -315,12 +322,17 @@ namespace Server {
 // warning message.  The time duration is in milliseconds.
 const Int64 AlarmManagerService::LATE_ALARM_THRESHOLD = 10 * 1000;
 
+const Int64 AlarmManagerService::POWER_OFF_ALARM_THRESHOLD = 120 * 1000;
+
 const Int32 AlarmManagerService::RTC_WAKEUP_MASK = 1 << IAlarmManager::RTC_WAKEUP;
 const Int32 AlarmManagerService::RTC_MASK = 1 << IAlarmManager::RTC;
 const Int32 AlarmManagerService::ELAPSED_REALTIME_WAKEUP_MASK = 1 << IAlarmManager::ELAPSED_REALTIME_WAKEUP;
 const Int32 AlarmManagerService::ELAPSED_REALTIME_MASK = 1 << IAlarmManager::ELAPSED_REALTIME;
+const Int32 AlarmManagerService::RTC_POWEROFF_WAKEUP_MASK = 1 << IAlarmManager::RTC_POWEROFF_WAKEUP;
 const Int32 AlarmManagerService::TIME_CHANGED_MASK = 1 << 16;
-const Int32 AlarmManagerService::IS_WAKEUP_MASK = AlarmManagerService::RTC_WAKEUP_MASK | AlarmManagerService::ELAPSED_REALTIME_WAKEUP_MASK;
+const Int32 AlarmManagerService::IS_WAKEUP_MASK = AlarmManagerService::RTC_WAKEUP_MASK
+                                                    | AlarmManagerService::ELAPSED_REALTIME_WAKEUP_MASK
+                                                    | AlarmManagerService::RTC_POWEROFF_WAKEUP_MASK;
 
 // Mask for testing whether a given alarm type is wakeup vs non-wakeup
 const Int32 AlarmManagerService::TYPE_NONWAKEUP_MASK = 0x1; // low bit => non-wakeup
@@ -394,7 +406,7 @@ ECode AlarmManagerService::BinderService::Set(
     }
 
     return mHost->SetImpl(type, triggerAtTime, windowLength, interval, operation,
-            FALSE, workSource, alarmClock);
+            windowLength == IAlarmManager::WINDOW_EXACT, workSource, alarmClock);
 }
 
 ECode AlarmManagerService::BinderService::SetTime(
@@ -467,7 +479,39 @@ ECode AlarmManagerService::BinderService::UpdateBlockedUids(
     /* [in] */ Int32 uid,
     /* [in] */ Boolean isBlocked)
 {
-    return E_NOT_IMPLEMENTED;
+    if (AlarmManagerService::localLOGV) {
+        Slogger::V(TAG, "UpdateBlockedUids: uid = %d isBlocked = %d", uid, isBlocked);
+    }
+
+    if (Binder::GetCallingUid() != IProcess::SYSTEM_UID) {
+        if (AlarmManagerService::localLOGV) {
+            Slogger::V(TAG, "UpdateBlockedUids is not allowed");
+        }
+        return NOERROR;
+    }
+
+    synchronized(mHost->mLock) {
+        if(isBlocked) {
+            mHost->mBlockedUids->Add(CoreUtils::Convert(uid));
+            if (mHost->CheckReleaseWakeLock()) {
+                /* all the uids for which the alarms are triggered
+                 * are either blocked or have called onSendFinished.
+                 */
+                Boolean bIsHeld = FALSE;
+                mHost->mWakeLock->IsHeld(&bIsHeld);
+                if (bIsHeld) {
+                    mHost->mWakeLock->Release();
+                    if (AlarmManagerService::localLOGV) {
+                        Slogger::V(TAG, "AM WakeLock Released Internally in updateBlockedUids");
+                    }
+                }
+            }
+        }
+        else {
+            mHost->mBlockedUids->Clear();
+        }
+    }
+    return NOERROR;
 }
 
 ECode AlarmManagerService::BinderService::Dump(
@@ -477,7 +521,7 @@ ECode AlarmManagerService::BinderService::Dump(
 {
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
-    Int32 perm;
+    Int32 perm = 0;
     context->CheckCallingOrSelfPermission(Manifest::permission::DUMP, &perm);
     if (perm != IPackageManager::PERMISSION_GRANTED) {
         pw->Print(String("Permission Denial: can't dump AlarmManager from from pid="));
@@ -564,6 +608,21 @@ AutoPtr<AlarmManagerService::Alarm> AlarmManagerService::Batch::Get(
         return (Alarm*)IObject::Probe(obj);
     }
     return NULL;
+}
+
+Int64 AlarmManagerService::Batch::GetWhenByElapsedTime(
+    /* [in] */ Int64 whenElapsed)
+{
+    Int32 size = 0;
+    mAlarms->GetSize(&size);
+    for(Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mAlarms->Get(i, (IInterface**)&obj);
+        Alarm* a = (Alarm*)IObject::Probe(obj);
+        if(a->mWhenElapsed == whenElapsed)
+            return a->mWhen;
+    }
+    return 0;
 }
 
 Boolean AlarmManagerService::Batch::CanHold(
@@ -739,7 +798,7 @@ Boolean AlarmManagerService::Batch::HasPackage(
 
 Boolean AlarmManagerService::Batch::HasWakeups()
 {
-    Int32 N;
+    Int32 N = 0;
     mAlarms->GetSize(&N);
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<IInterface> obj;
@@ -747,6 +806,22 @@ Boolean AlarmManagerService::Batch::HasWakeups()
         Alarm* a = (Alarm*)IObject::Probe(obj);
         // non-wakeup mAlarms are types 1 and 3, i.e. have the low bit set
         if ((a->mType & TYPE_NONWAKEUP_MASK) == 0) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+Boolean AlarmManagerService::Batch::IsRtcPowerOffWakeup()
+{
+    Int32 N = 0;
+    mAlarms->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        mAlarms->Get(i, (IInterface**)&obj);
+        Alarm* a = (Alarm*)IObject::Probe(obj);
+        // non-wakeup alarms are types 1 and 3, i.e. have the low bit set
+        if (a->mType == IAlarmManager::RTC_POWEROFF_WAKEUP) {
             return TRUE;
         }
     }
@@ -833,7 +908,8 @@ ECode AlarmManagerService::AlarmDispatchComparator::Compare(
     if (lhs->mWhenElapsed < rhs->mWhenElapsed) {
         *result = -1;
         return NOERROR;
-    } else if (lhs->mWhenElapsed > rhs->mWhenElapsed) {
+    }
+    else if (lhs->mWhenElapsed > rhs->mWhenElapsed) {
         *result = 1;
         return NOERROR;
     }
@@ -885,7 +961,8 @@ ECode AlarmManagerService::AlarmThread::Run()
             AutoPtr<IIntent> intent;
             CIntent::New(IIntent::ACTION_TIME_CHANGED, (IIntent**)&intent);
             intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING
-                    | IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                    | IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                    | IIntent::FLAG_RECEIVER_FOREGROUND);
             context->SendBroadcastAsUser(intent, UserHandle::ALL);
         }
 
@@ -920,8 +997,17 @@ ECode AlarmManagerService::AlarmThread::Run()
                 }
             }
 
-            Int32 size;
+            Int32 size = 0;
             Boolean hasWakeup = mHost->TriggerAlarmsLocked(triggerList, nowELAPSED, nowRTC);
+
+            AutoPtr<ISystemProperties> prop;
+            CSystemProperties::AcquireSingleton((ISystemProperties**)&prop);
+            Int32 in = 0;
+            prop->GetInt32(String("sys.quickboot.enable"), 0, &in);
+            if (in == 1) {
+                mHost->FiltQuickBootAlarms(triggerList);
+            }
+
             if (!hasWakeup && mHost->CheckAllowNonWakeupDelayLocked(nowELAPSED)) {
                 // if there are no wakeup mAlarms and the screen is off, we can
                 // delay what we have so far until the future.
@@ -980,7 +1066,7 @@ AlarmManagerService::AlarmHandler::AlarmHandler(
 ECode AlarmManagerService::AlarmHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    Int32 what;
+    Int32 what = 0;
     msg->GetWhat(&what);
 
     AutoPtr<ISystem> system;
@@ -1023,6 +1109,60 @@ ECode AlarmManagerService::AlarmHandler::HandleMessage(
 }
 
 //=======================================================================================
+// AlarmManagerService::QuickBootReceiver
+//=======================================================================================
+
+const String AlarmManagerService::QuickBootReceiver::ACTION_APP_KILL("org.codeaurora.quickboot.appkilled");
+
+AlarmManagerService::QuickBootReceiver::QuickBootReceiver(
+    /* [in] */ AlarmManagerService* host)
+    : mHost(host)
+{
+    AutoPtr<IIntentFilter> filter;
+    CIntentFilter::New((IIntentFilter**)&filter);
+    filter->AddAction(ACTION_APP_KILL);
+    AutoPtr<IContext> context;
+    mHost->GetContext((IContext**)&context);
+    AutoPtr<IIntent> intent;
+    context->RegisterReceiver(this, filter, String("android.permission.DEVICE_POWER"), NULL, (IIntent**)&intent);
+}
+
+ECode AlarmManagerService::QuickBootReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    String action;
+    intent->GetAction(&action);
+    AutoPtr<ArrayOf<String> > pkgList;
+    if (ACTION_APP_KILL.Equals(action)) {
+        intent->GetStringArrayExtra(IIntent::EXTRA_PACKAGES, (ArrayOf<String>**)&pkgList);
+        if (pkgList != NULL && (pkgList->GetLength() > 0)) {
+            for (Int32 j = 0; j < pkgList->GetLength(); j++) {
+                String pkg = (*pkgList)[j];
+                mHost->RemoveLocked(pkg);
+                Int32 size = 0;
+                mHost->mBroadcastStats->GetSize(&size);
+                for (Int32 i = size - 1; i >= 0; i--) {
+                    AutoPtr<IInterface> val;
+                    mHost->mBroadcastStats->ValueAt(i, (IInterface**)&val);
+                    AutoPtr<IArrayMap> uidStats = IArrayMap::Probe(val);
+                    AutoPtr<IInterface> res;
+                    uidStats->Remove(CoreUtils::Convert(pkg), (IInterface**)&res);
+                    if (res != NULL) {
+                        Int32 s = 0;
+                        uidStats->GetSize(&s);
+                        if (s <= 0) {
+                            mHost->mBroadcastStats->RemoveAt(i);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return NOERROR;
+}
+
+//=======================================================================================
 // AlarmManagerService::ClockReceiver
 //=======================================================================================
 AlarmManagerService::ClockReceiver::ClockReceiver(
@@ -1036,6 +1176,7 @@ ECode AlarmManagerService::ClockReceiver::constructor()
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IIntent::ACTION_TIME_TICK);
     filter->AddAction(IIntent::ACTION_DATE_CHANGED);
+    filter->AddAction(IIntent::ACTION_TIME_CHANGED);
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
     AutoPtr<IIntent> intent;
@@ -1054,6 +1195,12 @@ ECode AlarmManagerService::ClockReceiver::OnReceive(
         }
         ScheduleTimeTickEvent();
     }
+    else if (action.Equals(IIntent::ACTION_TIME_CHANGED)) {
+        if (DEBUG_BATCH) {
+            Slogger::V(TAG, "Received TIME_CHANGED alarm; reschedule date changed event.");
+        }
+        ScheduleDateChangedEvent();
+    }
     else if (action.Equals(IIntent::ACTION_DATE_CHANGED)) {
         // Since the kernel does not keep track of DST, we need to
         // reset the TZ information at the beginning of each day
@@ -1070,7 +1217,7 @@ ECode AlarmManagerService::ClockReceiver::OnReceive(
         sysProp->Get(AlarmManagerService::TIMEZONE_PROPERTY, &str);
         AutoPtr<ITimeZone> zone;
         helper->GetTimeZone(str, (ITimeZone**)&zone);
-        Int64 ms;
+        Int64 ms = 0;
         system->GetCurrentTimeMillis(&ms);
         Int32 gmtOffset;
         zone->GetOffset(ms, &gmtOffset);
@@ -1110,13 +1257,13 @@ ECode AlarmManagerService::ClockReceiver::ScheduleDateChangedEvent()
     AutoPtr<ICalendar> calendar;
     calendarHelper->GetInstance((ICalendar**)&calendar);
     calendar->SetTimeInMillis(currentTime);
-    calendar->Set(ICalendar::HOUR, 0);
+    calendar->Set(ICalendar::HOUR_OF_DAY, 0);
     calendar->Set(ICalendar::MINUTE, 0);
     calendar->Set(ICalendar::SECOND, 0);
     calendar->Set(ICalendar::MILLISECOND, 0);
     calendar->Add(ICalendar::DAY_OF_MONTH, 1);
 
-    Int64 ms;
+    Int64 ms = 0;
     calendar->GetTimeInMillis(&ms);
     AutoPtr<IWorkSource> workSource; // Let system take blame for date change events.
     return mHost->SetImpl(IAlarmManager::RTC, ms, 0, 0, mHost->mDateChangeSender, TRUE, workSource, NULL);
@@ -1287,7 +1434,8 @@ ECode AlarmManagerService::ResultReceiver::OnSendFinished(
     /* [in] */ IBundle* resultExtras)
 {
     synchronized(mHost->mLock) {
-        Int32 size;
+        Int32 uid = 0;
+        Int32 size = 0;
         mHost->mInFlight->GetSize(&size);
 
         AutoPtr<InFlight> inflight;
@@ -1296,6 +1444,7 @@ ECode AlarmManagerService::ResultReceiver::OnSendFinished(
             mHost->mInFlight->Get(i, (IInterface**)&obj);
             AutoPtr<InFlight> flight = (InFlight*)IObject::Probe(obj);
             if (flight->mPendingIntent.Get() == pi) {
+                uid = flight->mUid;
                 obj = NULL;
                 mHost->mInFlight->Remove(i, (IInterface**)&obj);
                 inflight = (InFlight*)IObject::Probe(obj);
@@ -1323,8 +1472,25 @@ ECode AlarmManagerService::ResultReceiver::OnSendFinished(
         }
 
         mHost->mBroadcastRefCount--;
+        mHost->mTriggeredUids->Remove(CoreUtils::Convert(uid));
+
+        if (mHost->CheckReleaseWakeLock()) {
+            Boolean bIsHeld = FALSE;
+            mHost->mWakeLock->IsHeld(&bIsHeld);
+            if (bIsHeld) {
+                mHost->mWakeLock->Release();
+                if (localLOGV) {
+                    Slogger::V(TAG, "AM WakeLock Released Internally onSendFinish");
+                }
+            }
+        }
+
         if (mHost->mBroadcastRefCount == 0) {
-            mHost->mWakeLock->ReleaseLock();
+            Boolean bIsHeld = FALSE;
+            mHost->mWakeLock->IsHeld(&bIsHeld);
+            if (bIsHeld) {
+                mHost->mWakeLock->ReleaseLock();
+            }
             mHost->mInFlight->GetSize(&size);
             if (size > 0) {
                 Slogger::W("AlarmManagerService",  "Finished all broadcasts with %d remaining inflights", size);
@@ -1403,7 +1569,8 @@ AlarmManagerService::Alarm::Alarm(
 {
     mType = _type;
     mWakeup = _type == IAlarmManager::ELAPSED_REALTIME_WAKEUP
-            || _type == IAlarmManager::RTC_WAKEUP;
+            || _type == IAlarmManager::RTC_WAKEUP
+            || _type == IAlarmManager::RTC_POWEROFF_WAKEUP;
     mWhen = _when;
     mWhenElapsed = _whenElapsed;
     mWindowLength = _windowLength;
@@ -1414,6 +1581,8 @@ AlarmManagerService::Alarm::Alarm(
     mWorkSource = _ws;
     mAlarmClock = _info;
     mUserId = _userId;
+    mUid = Binder::GetCallingUid();
+    mPid = Binder::GetCallingPid();
 }
 
 String AlarmManagerService::Alarm::MakeTag(
@@ -1422,7 +1591,7 @@ String AlarmManagerService::Alarm::MakeTag(
 {
     String value;
     String typeStr(type == IAlarmManager::ELAPSED_REALTIME_WAKEUP
-        || type == IAlarmManager::RTC_WAKEUP ? "*walarm*:" : "*alarm*:");
+        || type == IAlarmManager::RTC_WAKEUP || type == IAlarmManager::RTC_POWEROFF_WAKEUP ? "*walarm*:" : "*alarm*:");
     pi->GetTag(typeStr, &value);
     return value;
 }
@@ -1456,7 +1625,9 @@ ECode AlarmManagerService::Alarm::Dump(
     /* [in] */ Int64 nowELAPSED,
     /* [in] */ ISimpleDateFormat* sdf)
 {
-    Boolean isRtc = (mType == IAlarmManager::RTC || mType == IAlarmManager::RTC_WAKEUP);
+    Boolean isRtc = (mType == IAlarmManager::RTC
+                    || mType == IAlarmManager::RTC_WAKEUP
+                    || mType == IAlarmManager::RTC_POWEROFF_WAKEUP);
     pw->Print(prefix); pw->Print(String("tag=")); pw->Println(mTag);
     pw->Print(prefix); pw->Print(String("type=")); pw->Print(mType);
     pw->Print(String(" whenElapsed="));
@@ -1492,7 +1663,8 @@ ECode AlarmManagerService::InFlight::constructor(
     /* [in] */ IPendingIntent* pendingIntent,
     /* [in] */ IWorkSource* workSource,
     /* [in] */ Int32 alarmType,
-    /* [in] */ const String& tag)
+    /* [in] */ const String& tag,
+    /* [in] */ Int32 uid)
 {
     Intent::constructor();
 
@@ -1510,6 +1682,7 @@ ECode AlarmManagerService::InFlight::constructor(
     }
     mFilterStats = fs;
     mAlarmType = alarmType;
+    mUid = uid;
     return NOERROR;
 }
 
@@ -1548,7 +1721,7 @@ AlarmManagerService::BroadcastStats::BroadcastStats(
 }
 
 //=======================================================================================
-// AlarmManagerService::BinderService
+// AlarmManagerService::
 //=======================================================================================
 
 ECode AlarmManagerService::CalculateDeliveryPriorities(
@@ -1596,7 +1769,8 @@ ECode AlarmManagerService::CalculateDeliveryPriorities(
             // first alarm we've seen in the current delivery generation from this package
             packagePrio->mPriority = alarmPrio;
             packagePrio->mSeq = mCurrentSeq;
-        } else {
+        }
+        else {
             // Multiple mAlarms from this package being delivered in this generation;
             // bump the package's delivery class if it's warranted.
             // TICK < WAKEUP < NORMAL
@@ -1645,6 +1819,9 @@ ECode AlarmManagerService::constructor(
     CArrayList::New((IArrayList**)&mPendingNonWakeupAlarms);
     CArrayList::New((IArrayList**)&mInFlight);
 
+    CArrayList::New((IArrayList**)&mTriggeredUids);
+    CArrayList::New((IArrayList**)&mBlockedUids);
+
     mHandler = new AlarmHandler(this);
     mResultReceiver = new ResultReceiver(this);
 
@@ -1667,7 +1844,7 @@ Int64 AlarmManagerService::ConvertToElapsed(
     /* [in] */ Int64 when,
     /* [in] */ Int32 type)
 {
-    Boolean isRtc = (type == IAlarmManager::RTC || type == IAlarmManager::RTC_WAKEUP);
+    Boolean isRtc = (type == IAlarmManager::RTC || type == IAlarmManager::RTC_WAKEUP  || type == IAlarmManager::RTC_POWEROFF_WAKEUP);
     if (isRtc) {
         AutoPtr<ISystem> system;
         CSystem::AcquireSingleton((ISystem**)&system);
@@ -1769,7 +1946,7 @@ void AlarmManagerService::RebatchAllAlarmsLocked(
             }
             SetImplLocked(a->mType, a->mWhen, whenElapsed, a->mWindowLength, maxElapsed,
                 a->mRepeatInterval, a->mOperation, batch->mStandalone, doValidate, a->mWorkSource,
-                a->mAlarmClock, a->mUserId);
+                a->mAlarmClock, a->mUserId, FALSE);
         }
     }
 }
@@ -1777,7 +1954,7 @@ void AlarmManagerService::RebatchAllAlarmsLocked(
 ECode AlarmManagerService::OnStart()
 {
     mNativeData = Native_Init();
-    mNextWakeup = mNextNonWakeup = 0;
+    mNextWakeup = mNextRtcWakeup = mNextNonWakeup = 0;
 
     // We have to set current TimeZone info to kernel
     // because kernel doesn't keep this after reboot
@@ -1822,6 +1999,7 @@ ECode AlarmManagerService::OnStart()
     mInteractiveStateReceiver = new InteractiveStateReceiver(this);
     FAIL_RETURN(mInteractiveStateReceiver->constructor())
     mUninstallReceiver = new UninstallReceiver(this);
+    mQuickBootReceiver = new QuickBootReceiver(this);
     FAIL_RETURN(mUninstallReceiver->constructor())
 
     if (mNativeData != 0) {
@@ -1832,6 +2010,10 @@ ECode AlarmManagerService::OnStart()
     else {
         Slogger::W(TAG, "Failed to open alarm driver. Falling back to a handler.");
     }
+
+    AutoPtr<IInterface> ops;
+    context->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&ops);
+    mAppOps = IAppOpsManager::Probe(ops);
 
     PublishBinderService(IContext::ALARM_SERVICE, mService);
     return NOERROR;
@@ -1929,7 +2111,7 @@ ECode AlarmManagerService::SetImpl(
         windowLength = IAlarmManager::INTERVAL_HOUR;
     }
 
-    if (type < IAlarmManager::RTC_WAKEUP || type > IAlarmManager::ELAPSED_REALTIME) {
+    if (type < IAlarmManager::RTC_WAKEUP || type > IAlarmManager::RTC_POWEROFF_WAKEUP) {
         Slogger::E(TAG, "Invalid alarm type %d", type);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -1957,6 +2139,28 @@ ECode AlarmManagerService::SetImpl(
 
     Int32 userId = UserHandle::GetCallingUserId();
 
+    Boolean wakeupFiltered = FALSE;
+    Int32 id = 0;
+    operation->GetCreatorUid(&id);
+    String pakName;
+    operation->GetCreatorPackage(&pakName);
+    Int32 cop = 0;
+    mAppOps->CheckOpNoThrow(IAppOpsManager::OP_ALARM_WAKEUP, id, pakName, &cop);
+    if (id >= IProcess::FIRST_APPLICATION_UID &&
+        (type == IAlarmManager::RTC_WAKEUP
+            || type == IAlarmManager::ELAPSED_REALTIME_WAKEUP)
+        && cop != IAppOpsManager::MODE_ALLOWED) {
+
+        if (type == IAlarmManager::RTC_WAKEUP) {
+            type = IAlarmManager::RTC;
+        }
+        else {
+            type = IAlarmManager::ELAPSED_REALTIME;
+        }
+
+        wakeupFiltered = TRUE;
+    }
+
     synchronized(mLock) {
         // if (DEBUG_BATCH) {
         //     Slogger::V(TAG, "Set(" + operation + ") : type=" + type
@@ -1965,7 +2169,7 @@ ECode AlarmManagerService::SetImpl(
         //             + " interval=" + interval + " standalone=" + isStandalone);
         // }
         SetImplLocked(type, triggerAtTime, triggerElapsed, windowLength, maxElapsed,
-            interval, operation, isStandalone, TRUE, workSource, alarmClock, userId);
+            interval, operation, isStandalone, TRUE, workSource, alarmClock, userId, wakeupFiltered);
     }
     return NOERROR;
 }
@@ -1982,11 +2186,27 @@ void AlarmManagerService::SetImplLocked(
     /* [in] */ Boolean doValidate,
     /* [in] */ IWorkSource* workSource,
     /* [in] */ IAlarmClockInfo* alarmClock,
-    /* [in] */ Int32 userId)
+    /* [in] */ Int32 userId,
+    /* [in] */ Boolean wakeupFiltered)
 {
     AutoPtr<Alarm> a = new Alarm(type, when, whenElapsed, windowLength, maxWhen, interval,
         operation, workSource, alarmClock, userId);
-    RemoveLocked(operation);
+    // Remove this alarm if already scheduled.
+    Boolean foundExistingWakeup = RemoveWithStatusLocked(operation);
+
+    // note AppOp for accounting purposes
+    // skip if the alarm already existed
+    if (!foundExistingWakeup && wakeupFiltered) {
+        Int32 id = 0;
+        operation->GetCreatorUid(&id);
+        String pakName;
+        operation->GetCreatorPackage(&pakName);
+        Int32 res = 0;
+        mAppOps->NoteOpNoThrow(IAppOpsManager::OP_ALARM_WAKEUP,
+                id,
+                pakName,
+                &res);
+    }
 
     Int32 whichBatch = (isStandalone) ? -1 : AttemptCoalesceLocked(whenElapsed, maxWhen);
     if (whichBatch < 0) {
@@ -2267,13 +2487,29 @@ Boolean AlarmManagerService::ValidateConsistencyLocked()
 
 AutoPtr<AlarmManagerService::Batch> AlarmManagerService::FindFirstWakeupBatchLocked()
 {
-    Int32 N;
+    Int32 N = 0;
     mAlarmBatches->GetSize(&N);
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<IInterface> obj;
         mAlarmBatches->Get(i, (IInterface**)&obj);
         AutoPtr<Batch> b = (Batch*)IObject::Probe(obj);
         if (b->HasWakeups()) {
+            return b;
+        }
+    }
+    return NULL;
+}
+
+AutoPtr<AlarmManagerService::Batch> AlarmManagerService::FindFirstRtcWakeupBatchLocked()
+{
+    Int32 N = 0;
+    mAlarmBatches->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        mAlarmBatches->Get(i, (IInterface**)&obj);
+        AutoPtr<Batch> b = (Batch*)IObject::Probe(obj);
+        Int64 intervalTime  = b->mStart - SystemClock::GetElapsedRealtime();
+        if (b->IsRtcPowerOffWakeup() && intervalTime > POWER_OFF_ALARM_THRESHOLD) {
             return b;
         }
     }
@@ -2304,7 +2540,7 @@ void AlarmManagerService::UpdateNextAlarmClockLocked()
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    Int32 N;
+    Int32 N = 0;
     mAlarmBatches->GetSize(&N);
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<IInterface> obj;
@@ -2312,7 +2548,7 @@ void AlarmManagerService::UpdateNextAlarmClockLocked()
         AutoPtr<Batch> b = (Batch*)IObject::Probe(obj);
         AutoPtr<IArrayList> mAlarms = b->mAlarms;
 
-        Int32 M;
+        Int32 M = 0;
         mAlarms->GetSize(&M);
         for (Int32 j = 0; j < M; j++) {
             obj = NULL;
@@ -2337,7 +2573,7 @@ void AlarmManagerService::UpdateNextAlarmClockLocked()
     }
 
     // Update mNextAlarmForUser with new values.
-    Int32 NN;
+    Int32 NN = 0;
     nextForUser->GetSize(&NN);
     for (Int32 i = 0; i < NN; i++) {
         AutoPtr<IInterface> obj;
@@ -2355,7 +2591,7 @@ void AlarmManagerService::UpdateNextAlarmClockLocked()
     }
 
     // Remove users without any alarm clocks scheduled.
-    Int32 NNN;
+    Int32 NNN = 0;
     mNextAlarmClockForUser->GetSize(&NNN);
     for (Int32 i = NNN - 1; i >= 0; i--) {
         Int32 userId;
@@ -2468,16 +2704,25 @@ void AlarmManagerService::RescheduleKernelAlarmsLocked()
     // Schedule the next upcoming wakeup alarm.  If there is a deliverable batch
     // prior to that which contains no wakeups, we schedule that as well.
     Int64 nextNonWakeup = 0;
-    Int32 size;
+    Int32 size = 0;
     mAlarmBatches->GetSize(&size);
     if (size > 0) {
         AutoPtr<Batch> firstWakeup = FindFirstWakeupBatchLocked();
         AutoPtr<IInterface> obj;
         mAlarmBatches->Get(0, (IInterface**)&obj);
         Batch* firstBatch = (Batch*)IObject::Probe(obj);
+        AutoPtr<Batch> firstRtcWakeup = FindFirstRtcWakeupBatchLocked();
         if (firstWakeup != NULL && mNextWakeup != firstWakeup->mStart) {
             mNextWakeup = firstWakeup->mStart;
             SetLocked(IAlarmManager::ELAPSED_REALTIME_WAKEUP, firstWakeup->mStart);
+        }
+        if (firstRtcWakeup != NULL && mNextRtcWakeup != firstRtcWakeup->mStart) {
+            mNextRtcWakeup = firstRtcWakeup->mStart;
+            Int64 when = firstRtcWakeup->GetWhenByElapsedTime(mNextRtcWakeup);
+
+            if (when != 0) {
+                SetLocked(IAlarmManager::RTC_POWEROFF_WAKEUP, when);
+            }
         }
         if (firstBatch != firstWakeup) {
             nextNonWakeup = firstBatch->mStart;
@@ -2495,16 +2740,62 @@ void AlarmManagerService::RescheduleKernelAlarmsLocked()
     }
 }
 
+Boolean AlarmManagerService::CheckReleaseWakeLock()
+{
+    Int32 tSize = 0, bSize = 0;
+    mTriggeredUids->GetSize(&tSize);
+    mBlockedUids->GetSize(&bSize);
+    if (tSize == 0 || bSize == 0) {
+        return FALSE;
+    }
+
+    for (Int32 i = 0; i < tSize; i++) {
+        AutoPtr<IInterface> uid;
+        mTriggeredUids->Get(i, (IInterface**)&uid);
+        Boolean b = FALSE;
+        mBlockedUids->Contains(uid, &b);
+        if (!b) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
 void AlarmManagerService::RemoveLocked(
     /* [in] */ IPendingIntent* operation)
 {
+    RemoveWithStatusLocked(operation);
+}
+
+Boolean AlarmManagerService::RemoveWithStatusLocked(
+    /* [in] */ IPendingIntent* operation)
+{
     Boolean didRemove = FALSE;
-    Int32 size;
+    Int32 size = 0;
     mAlarmBatches->GetSize(&size);
     for (Int32 i = size - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
         mAlarmBatches->Get(i, (IInterface**)&obj);
         Batch* b = (Batch*)IObject::Probe(obj);
+        AutoPtr<IArrayList> alarmList = b->mAlarms;
+        AutoPtr<Alarm> alarm;
+        Int32 lSize = 0;
+        alarmList->GetSize(&lSize);
+        for (Int32 j = lSize - 1; j >= 0; j--) {
+            AutoPtr<IInterface> p;
+            alarmList->Get(j, (IInterface**)&p);
+            alarm = (Alarm*)IObject::Probe(p);
+            if (alarm->mType == IAlarmManager::RTC_POWEROFF_WAKEUP
+                && Object::Equals(alarm->mOperation, operation)) {
+                Int64 alarmSeconds = 0, alarmNanoseconds = 0;
+                alarmSeconds = alarm->mWhen / 1000;
+                alarmNanoseconds = (alarm->mWhen % 1000) * 1000 * 1000;
+                Slogger::W(TAG,"Clear alarm type=%d,alarmSeconds=%ld", alarm->mType,
+                    alarmSeconds);
+                Native_Clear(mNativeData, alarm->mType, alarmSeconds, alarmNanoseconds);
+                mNextRtcWakeup = 0;
+            }
+        }
         didRemove |= b->Remove(operation);
         if (b->Size() == 0) {
             mAlarmBatches->Remove(i);
@@ -2519,6 +2810,8 @@ void AlarmManagerService::RemoveLocked(
         RescheduleKernelAlarmsLocked();
         UpdateNextAlarmClockLocked();
     }
+
+    return didRemove;
 }
 
 void AlarmManagerService::RemoveLocked(
@@ -2630,7 +2923,8 @@ void AlarmManagerService::SetLocked(
         if (when < 0) {
             alarmSeconds = 0;
             alarmNanoseconds = 0;
-        } else {
+        }
+        else {
             alarmSeconds = when / 1000;
             alarmNanoseconds = (when % 1000) * 1000 * 1000;
         }
@@ -2663,7 +2957,7 @@ void AlarmManagerService::DumpAlarmList(
     sb += "  ";
     String prefixex = sb.ToString();
 
-    Int32 size;
+    Int32 size = 0;
     list->GetSize(&size);
     for (Int32 i = size - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
@@ -2686,6 +2980,7 @@ String AlarmManagerService::LabelForType(
     case IAlarmManager::RTC_WAKEUP : return String("RTC_WAKEUP");
     case IAlarmManager::ELAPSED_REALTIME : return String("ELAPSED");
     case IAlarmManager::ELAPSED_REALTIME_WAKEUP: return String("ELAPSED_WAKEUP");
+    case IAlarmManager::RTC_POWEROFF_WAKEUP : return String("RTC_POWEROFF_WAKEUP");
     default:
         break;
     }
@@ -2704,7 +2999,7 @@ void AlarmManagerService::DumpAlarmList(
     sb += "  ";
     String prefixex = sb.ToString();
 
-    Int32 size;
+    Int32 size = 0;
     list->GetSize(&size);
     for (Int32 i = size - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
@@ -2760,14 +3055,10 @@ Boolean AlarmManagerService::TriggerAlarmsLocked(
                 SetImplLocked(alarm->mType, alarm->mWhen + delta, nextElapsed, alarm->mWindowLength,
                         MaxTriggerTime(nowELAPSED, nextElapsed, alarm->mRepeatInterval),
                         alarm->mRepeatInterval, alarm->mOperation, batch->mStandalone, TRUE,
-                        alarm->mWorkSource, alarm->mAlarmClock, alarm->mUserId);
-
-                // For now we count this as a wakeup alarm, meaning it needs to be
-                // delivered immediately.  In the future we should change this, but
-                // that required delaying when we reschedule the repeat...!
-                hasWakeup = FALSE;
+                        alarm->mWorkSource, alarm->mAlarmClock, alarm->mUserId, FALSE);
             }
-            else if (alarm->mWakeup) {
+
+            if (alarm->mWakeup) {
                 hasWakeup = TRUE;
             }
 
@@ -2877,9 +3168,10 @@ void AlarmManagerService::DeliverAlarmsLocked(
     GetContext((IContext**)&context);
     ECode ec = NOERROR;
     String name;
+    Boolean bIsHeld = FALSE;
 
     mLastAlarmDeliveryTime = nowELAPSED;
-    Int32 size, ival, ival2;
+    Int32 size = 0, ival, ival2;
     triggerList->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> aObj;
@@ -2900,16 +3192,18 @@ void AlarmManagerService::DeliverAlarmsLocked(
         FAIL_GOTO(ec, _EXIT_)
 
         // we have an active broadcast so stay awake.
-        if (mBroadcastRefCount == 0) {
+        mWakeLock->IsHeld(&bIsHeld);
+        if (mBroadcastRefCount == 0 || !bIsHeld) {
             SetWakelockWorkSource(alarm->mOperation, alarm->mWorkSource, alarm->mType, alarm->mTag, TRUE);
             mWakeLock->AcquireLock();
         }
 
         inflight = new InFlight();
         inflight->constructor(this,
-                alarm->mOperation, alarm->mWorkSource, alarm->mType, alarm->mTag);
+                alarm->mOperation, alarm->mWorkSource, alarm->mType, alarm->mTag, alarm->mUid);
         mInFlight->Add(TO_IINTERFACE(inflight));
         mBroadcastRefCount++;
+        mTriggeredUids->Add(CoreUtils::Convert(alarm->mUid));
 
         bs = inflight->mBroadcastStats;
         bs->mCount++;
@@ -2932,7 +3226,8 @@ void AlarmManagerService::DeliverAlarmsLocked(
         }
 
         if (alarm->mType == IAlarmManager::ELAPSED_REALTIME_WAKEUP
-                || alarm->mType == IAlarmManager::RTC_WAKEUP) {
+                || alarm->mType == IAlarmManager::RTC_WAKEUP
+                || alarm->mType == IAlarmManager::RTC_POWEROFF_WAKEUP) {
             bs->mNumWakeup++;
             fs->mNumWakeup++;
             if (alarm->mWorkSource != NULL && (alarm->mWorkSource->GetSize(&ival), ival) > 0) {
@@ -2945,6 +3240,16 @@ void AlarmManagerService::DeliverAlarmsLocked(
             else {
                 ActivityManagerNative::NoteWakeupAlarm(alarm->mOperation, -1, String(NULL));
             }
+            // AppOps accounting
+            Int32 uid = 0;
+            alarm->mOperation->GetCreatorUid(&uid);
+            String pakName;
+            alarm->mOperation->GetCreatorPackage(&pakName);
+            Int32 res = 0;
+            mAppOps->NoteOpNoThrow(IAppOpsManager::OP_ALARM_WAKEUP,
+                    uid,
+                    pakName,
+                    &res);
         }
 
 _EXIT_:
@@ -2957,6 +3262,32 @@ _EXIT_:
         }
         else if (ec == (ECode)E_RUNTIME_EXCEPTION) {
             Slogger::W(TAG, "Failure sending alarm.");
+        }
+    }
+}
+
+void AlarmManagerService::FiltQuickBootAlarms(
+    /* [in] */ IArrayList* triggerList)
+{
+    AutoPtr<IArrayList> whiteList;
+    CArrayList::New((IArrayList**)&whiteList);
+    whiteList->Add(CoreUtils::Convert(String("android")));
+    whiteList->Add(CoreUtils::Convert(String("com.android.deskclock")));
+
+    Int32 size = 0;
+    triggerList->GetSize(&size);
+    for (Int32 i = size - 1; i >= 0; i--) {
+        AutoPtr<IInterface> p;
+        triggerList->Get(i, (IInterface**)&p);
+        AutoPtr<Alarm> alarm = (Alarm*)IObject::Probe(p);
+
+        String pak;
+        alarm->mOperation->GetTargetPackage(&pak);
+        Boolean bContain = FALSE;
+        whiteList->Contains(CoreUtils::Convert(pak), &bContain);
+        if (!bContain) {
+            triggerList->Remove(i);
+            Slogger::V(TAG, "ignore -> %s", (const char*)pak);
         }
     }
 }
@@ -3139,6 +3470,26 @@ void AlarmManagerService::Native_Set(
     if (result < 0)
     {
         ALOGE("Unable to set alarm to %lld.%09lld: %s\n",
+              static_cast<long long>(seconds),
+              static_cast<long long>(nanoseconds), strerror(errno));
+    }
+}
+
+void AlarmManagerService::Native_Clear(
+    /* [in] */ Int64 nativeData,
+    /* [in] */ Int32 type,
+    /* [in] */ Int64 seconds,
+    /* [in] */ Int64 nanoseconds)
+{
+    android::AlarmImplAlarmDriver *impl = reinterpret_cast<android::AlarmImplAlarmDriver *>(nativeData);
+    struct timespec ts;
+    ts.tv_sec = seconds;
+    ts.tv_nsec = nanoseconds;
+
+    int result = impl->clear(type, &ts);
+    if (result < 0)
+    {
+        ALOGE("Unable to clear alarm  %lld.%09lld: %s\n",
               static_cast<long long>(seconds),
               static_cast<long long>(nanoseconds), strerror(errno));
     }
