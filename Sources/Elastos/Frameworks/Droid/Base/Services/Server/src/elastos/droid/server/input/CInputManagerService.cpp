@@ -238,6 +238,85 @@ ECode CInputManagerService::InputFilterHost::ToString(
     return NOERROR;
 }
 
+//==============================================================================
+//  CInputManagerService::ChainedInputFilterHost
+//==============================================================================
+CAR_INTERFACE_IMPL_2(CInputManagerService::ChainedInputFilterHost, Object, IIInputFilterHost, IBinder);
+
+CInputManagerService::ChainedInputFilterHost::ChainedInputFilterHost(
+    /* [in] */ IIInputFilter* filter,
+    /* [in] */ ChainedInputFilterHost* next,
+    /* [in] */ CInputManagerService* host)
+    : mInputFilter(filter)
+    , mNext(next)
+    , mDisconnected(FALSE)
+    , mHost(host)
+{}
+
+CInputManagerService::ChainedInputFilterHost::~ChainedInputFilterHost()
+{}
+
+void CInputManagerService::ChainedInputFilterHost::ConnectLocked()
+{
+    // try {
+    mInputFilter->Install(IIInputFilterHost::Probe(this));
+    // } catch (RemoteException re) {
+    //     /* ignore */
+    // }
+}
+
+void CInputManagerService::ChainedInputFilterHost::DisconnectLocked()
+{
+    // try {
+    mInputFilter->Uninstall();
+    // } catch (RemoteException re) {
+    //     /* ignore */
+    // }
+    // DO NOT set mInputFilter to null here! mInputFilter is used outside of the lock!
+    mDisconnected = TRUE;
+}
+
+CARAPI CInputManagerService::ChainedInputFilterHost::SendInputEvent(
+    /* [in] */ IInputEvent* event,
+    /* [in] */ Int32 policyFlags)
+{
+    if (event == NULL) {
+        // throw new IllegalArgumentException("event must not be null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    synchronized (mHost->mInputFilterLock) {
+        if (!mDisconnected) {
+            if (mNext == NULL) {
+                mHost->NativeInjectInputEvent(event, IDisplay::DEFAULT_DISPLAY, 0, 0,
+                        IInputManager::INJECT_INPUT_EVENT_MODE_ASYNC, 0,
+                        policyFlags | IWindowManagerPolicy::FLAG_FILTERED);
+            } else {
+                // try {
+                    // We need to pass a copy into filterInputEvent as it assumes
+                    // the callee takes responsibility and recycles it - in case
+                    // multiple filters are chained, calling into the second filter
+                    // will cause event to be recycled twice
+                AutoPtr<IInputEvent> newEvent;
+                event->Copy((IInputEvent**)&newEvent);
+                mNext->mInputFilter->FilterInputEvent(newEvent, policyFlags);
+                // } catch (RemoteException e) {
+                //     /* ignore */
+                // }
+            }
+        }
+    }
+
+    return NOERROR;
+}
+
+CARAPI CInputManagerService::ChainedInputFilterHost::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    *str = "CInputManagerService::ChainedInputFilterHost";
+    return NOERROR;
+}
 
 //==============================================================================
 //  CInputManagerService::KeyboardLayoutDescriptor
@@ -383,6 +462,7 @@ ECode CInputManagerService::BroadcastReceiverInStart::OnReceive(
 {
     mOwner->UpdatePointerSpeedFromSettings();
     mOwner->UpdateShowTouchesFromSettings();
+    mOwner->UpdateVolumeKeysRotationFromSettings();
     return NOERROR;
 }
 
@@ -570,6 +650,42 @@ ECode CInputManagerService::ContentObserverInRegisterShowTouchesSettingObserver:
 }
 
 
+//------------------------------------------------------------------------------
+//  CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObserver
+//------------------------------------------------------------------------------
+CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObserver::ContentObserverInRegisterStylusIconEnabledSettingObserver(
+    /* [in] */ CInputManagerService* owner,
+    /* [in] */ IHandler* handler)
+    : mOwner(owner)
+{
+    ContentObserver::constructor(handler);
+}
+
+ECode CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObserver::OnChange(
+    /* [in] */ Boolean selfChange)
+{
+    mOwner->UpdateStylusIconEnabledFromSettings();
+    return NOERROR;
+}
+
+//------------------------------------------------------------------------------
+//  CInputManagerService::ContentObserverInRegisterVolumeKeysRotationSettingObserver
+//------------------------------------------------------------------------------
+CInputManagerService::ContentObserverInRegisterVolumeKeysRotationSettingObserver::ContentObserverInRegisterVolumeKeysRotationSettingObserver(
+    /* [in] */ CInputManagerService* owner,
+    /* [in] */ IHandler* handler)
+    : mOwner(owner)
+{
+    ContentObserver::constructor(handler);
+}
+
+ECode CInputManagerService::ContentObserverInRegisterVolumeKeysRotationSettingObserver::OnChange(
+    /* [in] */ Boolean selfChange)
+{
+    mOwner->UpdateVolumeKeysRotationFromSettings();
+    return NOERROR;
+}
+
 //==============================================================================
 //  CInputManagerService
 //==============================================================================
@@ -628,6 +744,7 @@ CInputManagerService::CInputManagerService()
     CSparseArray::New((ISparseArray**)&mInputDevicesChangedListeners);
     CArrayList::New((IArrayList**)&mTempInputDevicesChangedListenersToNotify);
     CArrayList::New((IArrayList**)&mTempFullKeyboards);
+    CArrayList::New((IArrayList**)&mInputFilterChain);
 }
 
 CInputManagerService::~CInputManagerService()
@@ -952,6 +1069,18 @@ void CInputManagerService::NativeSetShowTouches(
     mPtr->setShowTouches(enabled);
 }
 
+void CInputManagerService::NativeSetStylusIconEnabled(
+    /* [in] */ Boolean enabled)
+{
+    mPtr->setStylusIconEnabled(enabled);
+}
+
+void CInputManagerService::NativeSetVolumeKeysRotation(
+    /* [in] */ Int32 mode)
+{
+    mPtr->setVolumeKeysRotation(mode);
+}
+
 void CInputManagerService::NativeSetInteractive(
     /* [in] */ Boolean interactive)
 {
@@ -1042,6 +1171,8 @@ ECode CInputManagerService::Start()
 
     RegisterPointerSpeedSettingObserver();
     RegisterShowTouchesSettingObserver();
+    RegisterStylusIconEnabledSettingObserver();
+    RegisterVolumeKeysRotationSettingObserver();
 
     AutoPtr<IIntentFilter> intentFilter;
     CIntentFilter::New(IIntent::ACTION_USER_SWITCHED, (IIntentFilter**)&intentFilter);
@@ -1053,6 +1184,8 @@ ECode CInputManagerService::Start()
 
     UpdatePointerSpeedFromSettings();
     UpdateShowTouchesFromSettings();
+    UpdateStylusIconEnabledFromSettings();
+    UpdateVolumeKeysRotationFromSettings();
 
     return NOERROR;
 }
@@ -1324,36 +1457,99 @@ void CInputManagerService::SetInputFilter(
     /* [in] */ IIInputFilter* filter)
 {
     synchronized (mInputFilterLock) {
-        IIInputFilter* oldFilter = mInputFilter;
-        if (oldFilter == filter) {
-            return; // nothing to do
-        }
-
-        if (oldFilter != NULL) {
-            mInputFilter = NULL;
-            CInputFilterHost* ifh = (CInputFilterHost*)mInputFilterHost.Get();
-            ifh->DisconnectLocked();
+        if (mInputFilterHost != NULL) {
+            mInputFilterHost->DisconnectLocked();
+            mInputFilterChain->Remove((IIInputFilterHost*)mInputFilterHost.Get());
             mInputFilterHost = NULL;
-            //try {
-            oldFilter->Uninstall();
-            //} catch (RemoteException re) {
-                /* ignore */
-            //}
         }
 
+        Boolean isEmpty = FALSE;
         if (filter != NULL) {
-            mInputFilter = filter;
-            mInputFilterHost = NULL;
-            CInputFilterHost::New(this, (IIInputFilterHost**)&mInputFilterHost);
-            //try {
-            filter->Install(mInputFilterHost);
-            //} catch (RemoteException re) {
-                /* ignore */
-            //}
+            mInputFilterChain->IsEmpty(&isEmpty);
+            AutoPtr<ChainedInputFilterHost> head;
+            if (!isEmpty) {
+                AutoPtr<IInterface> ift;
+                mInputFilterChain->Get(0, (IInterface**)&ift);
+                head = (ChainedInputFilterHost*)IIInputFilterHost::Probe(ift);
+                if (head == NULL) return;
+            }
+            mInputFilterHost = new ChainedInputFilterHost(filter, head, this);
+            mInputFilterHost->ConnectLocked();
+            mInputFilterChain->Add(0, IIInputFilterHost::Probe(mInputFilterHost));
         }
 
-        NativeSetInputFilterEnabled(filter != NULL);
+        mInputFilterChain->IsEmpty(&isEmpty);
+        NativeSetInputFilterEnabled(!isEmpty);
     }
+}
+
+void CInputManagerService::RegisterSecondaryInputFilter(
+    /* [in] */ IIInputFilter* filter)
+{
+    synchronized (mInputFilterLock) {
+        AutoPtr<ChainedInputFilterHost> host = new ChainedInputFilterHost(filter, NULL, this);
+        Boolean isEmpty;
+        if (mInputFilterChain->IsEmpty(&isEmpty), !isEmpty) {
+            Int32 size;
+            mInputFilterChain->GetSize(&size);
+            AutoPtr<IInterface> ift;
+            mInputFilterChain->Get(size - 1, (IInterface**)&ift);
+            ChainedInputFilterHost* filterHost = (ChainedInputFilterHost*)IIInputFilter::Probe(ift);
+            if (filterHost == NULL) return;
+            filterHost->mNext = host;
+        }
+        host->ConnectLocked();
+        mInputFilterChain->Add(IIInputFilter::Probe(host));
+
+        mInputFilterChain->IsEmpty(&isEmpty);
+        NativeSetInputFilterEnabled(!isEmpty);
+    }
+}
+
+void CInputManagerService::UnregisterSecondaryInputFilter(
+    /* [in] */ IIInputFilter* filter)
+{
+    synchronized (mInputFilterLock) {
+        Int32 index = FindInputFilterIndexLocked(filter);
+        if (index >= 0) {
+            AutoPtr<IInterface> ift;
+            mInputFilterChain->Get(index, (IInterface**)&ift);
+            ChainedInputFilterHost* host = (ChainedInputFilterHost*)IIInputFilter::Probe(ift);
+            if (host == NULL) return;
+
+            host->DisconnectLocked();
+            if (index >= 1) {
+                ift = NULL;
+                mInputFilterChain->Get(index - 1, (IInterface**)&ift);
+                ChainedInputFilterHost* hostB = (ChainedInputFilterHost*)IIInputFilter::Probe(ift);
+                if (hostB == NULL) return;
+                hostB->mNext = host->mNext;
+            }
+            mInputFilterChain->Remove(index);
+        }
+
+        Boolean isEmpty;
+        mInputFilterChain->IsEmpty(&isEmpty);
+        NativeSetInputFilterEnabled(!isEmpty);
+    }
+}
+
+Int32 CInputManagerService::FindInputFilterIndexLocked(
+    /* [in] */ IIInputFilter* filter)
+{
+    Int32 size;
+    mInputFilterChain->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> ift;
+        mInputFilterChain->Get(i, (IInterface**)&ift);
+        ChainedInputFilterHost* host = (ChainedInputFilterHost*)IIInputFilter::Probe(ift);
+        if (host == NULL) continue;
+        Boolean equal;
+        if (IObject::Probe(host->mInputFilter)->Equals(filter, &equal), equal) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 //// @Override // Binder call
@@ -2322,6 +2518,69 @@ ECode CInputManagerService::TryPointerSpeed(
     return NOERROR;
 }
 
+void CInputManagerService::UpdateStylusIconEnabledFromSettings()
+{
+    Int32 enabled = GetStylusIconEnabled(0);
+    NativeSetStylusIconEnabled(enabled != 0);
+}
+
+void CInputManagerService::RegisterStylusIconEnabledSettingObserver()
+{
+    AutoPtr<ContentObserverInRegisterStylusIconEnabledSettingObserver> observer =
+            new ContentObserverInRegisterStylusIconEnabledSettingObserver(this, mHandler);
+    AutoPtr<IUri> uri;
+    Settings::System::GetUriFor(ISettingsSystem::STYLUS_ICON_ENABLED, (IUri**)&uri);
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    resolver->RegisterContentObserver(uri, FALSE, observer);
+}
+
+Int32 CInputManagerService::GetStylusIconEnabled(
+    /* [in] */ Int32 defaultValue)
+{
+    Int32 result = defaultValue;
+    // try {
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    Settings::System::GetInt32(resolver, ISettingsSystem::STYLUS_ICON_ENABLED, &result);
+    // } catch (SettingNotFoundException snfe) {
+    // }
+    return result;
+}
+
+void CInputManagerService::UpdateVolumeKeysRotationFromSettings()
+{
+    Int32 mode = GetVolumeKeysRotationSetting(0);
+    NativeSetVolumeKeysRotation(mode);
+}
+
+void CInputManagerService::RegisterVolumeKeysRotationSettingObserver()
+{
+    AutoPtr<ContentObserverInRegisterVolumeKeysRotationSettingObserver> observer =
+            new ContentObserverInRegisterVolumeKeysRotationSettingObserver(this, mHandler);
+    AutoPtr<IUri> uri;
+    Settings::System::GetUriFor(
+            ISettingsSystem::SWAP_VOLUME_KEYS_ON_ROTATION, (IUri**)&uri);
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    resolver->RegisterContentObserver(uri, FALSE, observer);
+}
+
+Int32 CInputManagerService::GetVolumeKeysRotationSetting(
+    /* [in] */ Int32 defaultValue)
+{
+    Int32 result = defaultValue;
+    // try {
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    Settings::System::GetInt32ForUser(resolver,
+            ISettingsSystem::SWAP_VOLUME_KEYS_ON_ROTATION,
+            IUserHandle::USER_CURRENT, &result);
+    // } catch (SettingNotFoundException snfe) {
+    // }
+    return result;
+}
+
 void CInputManagerService::UpdatePointerSpeedFromSettings()
 {
     Int32 speed = GetPointerSpeedSetting();
@@ -2601,12 +2860,28 @@ Boolean CInputManagerService::FilterInputEvent(
     /* [in] */ IInputEvent* event,
     /* [in] */ Int32 policyFlags)
 {
+    AutoPtr<ChainedInputFilterHost> head;
+
     synchronized (mInputFilterLock) {
-        if (mInputFilter != NULL) {
-            mInputFilter->FilterInputEvent(event, policyFlags);
-            return FALSE;
+        Boolean isEmpty;
+        if (mInputFilterChain->IsEmpty(&isEmpty), !isEmpty) {
+            AutoPtr<IInterface> ift;
+            mInputFilterChain->Get(0, (IInterface**)&ift);
+            head = (ChainedInputFilterHost*)IIInputFilterHost::Probe(ift);
         }
     }
+    // call filter input event outside of the lock.
+    // this is safe, because we know that mInputFilter never changes.
+    // we may loose a event, but this does not differ from the original implementation.
+    if (head != NULL) {
+        // try {
+        head->mInputFilter->FilterInputEvent(event, policyFlags);
+        // } catch (RemoteException e) {
+        //     /* ignore */
+        // }
+        return FALSE;
+    }
+
     event->Recycle();
     return TRUE;
 }

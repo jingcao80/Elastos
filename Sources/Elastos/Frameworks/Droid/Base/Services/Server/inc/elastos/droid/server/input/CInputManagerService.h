@@ -119,6 +119,43 @@ public:
         CInputManagerService* mHost;
     };
 
+    /**
+     * Hosting interface for input filters to call back into the input manager.
+     */
+    class ChainedInputFilterHost
+        : public Object
+        , public IIInputFilterHost
+        , public IBinder
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        ChainedInputFilterHost(
+            /* [in] */ IIInputFilter* filter,
+            /* [in] */ ChainedInputFilterHost* next,
+            /* [in] */ CInputManagerService* host);
+
+        virtual ~ChainedInputFilterHost();
+
+        CARAPI_(void) ConnectLocked();
+
+        CARAPI_(void) DisconnectLocked();
+
+        CARAPI SendInputEvent(
+            /* [in] */ IInputEvent* event,
+            /* [in] */ Int32 policyFlags);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    private:
+        friend class CInputManagerService;
+        AutoPtr<IIInputFilter> mInputFilter;
+        AutoPtr<ChainedInputFilterHost> mNext;
+        Boolean mDisconnected;
+        CInputManagerService* mHost;
+    };
+
 private:
     /**
      * Private handler for the input manager.
@@ -431,6 +468,36 @@ private:
         CInputManagerService* mOwner;
     };
 
+    class ContentObserverInRegisterStylusIconEnabledSettingObserver
+        : public ContentObserver
+    {
+    public:
+        ContentObserverInRegisterStylusIconEnabledSettingObserver(
+            /* [in] */ CInputManagerService* owner,
+            /* [in] */ IHandler* handler);
+
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    private:
+        CInputManagerService* mOwner;
+    };
+
+    class ContentObserverInRegisterVolumeKeysRotationSettingObserver
+        : public ContentObserver
+    {
+    public:
+        ContentObserverInRegisterVolumeKeysRotationSettingObserver(
+            /* [in] */ CInputManagerService* owner,
+            /* [in] */ IHandler* handler);
+
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    private:
+        CInputManagerService* mOwner;
+    };
+
 public:
     CAR_INTERFACE_DECL();
 
@@ -556,6 +623,23 @@ public:
     CARAPI_(void) SetInputFilter(
         /* [in] */ IIInputFilter* filter);
 
+    /**
+     * Registers a secondary input filter. These filters are always behind the "original"
+     * input filter. This ensures that all input events will be filtered by the
+     * {@code AccessibilityManagerService} first.
+     * <p>
+     * <b>Note:</b> Even though this implementation using AIDL interfaces, it is designed to only
+     * provide direct access. Therefore, any filter registering should reside in the
+     * system server DVM only!
+     *
+     * @param filter The input filter to register.
+     */
+    CARAPI_(void) RegisterSecondaryInputFilter(
+        /* [in] */ IIInputFilter* filter);
+
+    CARAPI_(void) UnregisterSecondaryInputFilter(
+        /* [in] */ IIInputFilter* filter);
+
     //// @Override // Binder call
     CARAPI InjectInputEvent(
         /* [in] */ IInputEvent* event,
@@ -679,6 +763,14 @@ public:
     CARAPI_(void) UpdatePointerSpeedFromSettings();
 
     CARAPI_(void) UpdateShowTouchesFromSettings();
+
+    CARAPI_(void) UpdateStylusIconEnabledFromSettings();
+
+    CARAPI_(void) RegisterStylusIconEnabledSettingObserver();
+
+    CARAPI_(void) UpdateVolumeKeysRotationFromSettings();
+
+    CARAPI_(void) RegisterVolumeKeysRotationSettingObserver();
 
     // Binder call
     // @Override
@@ -975,6 +1067,12 @@ private:
     CARAPI_(void) NativeSetShowTouches(
         /* [in] */ Boolean enabled);
 
+    CARAPI_(void) NativeSetStylusIconEnabled(
+        /* [in] */ Boolean enabled);
+
+    CARAPI_(void) NativeSetVolumeKeysRotation(
+        /* [in] */ Int32 mode);
+
     CARAPI_(void) NativeSetInteractive(
         /* [in] */ Boolean interactive);
 
@@ -997,6 +1095,15 @@ private:
     CARAPI_(String) NativeDump();
 
     CARAPI_(void) NativeMonitor();
+
+    CARAPI_(Int32) FindInputFilterIndexLocked(
+        /* [in] */ IIInputFilter* filter);
+
+    CARAPI_(Int32) GetStylusIconEnabled(
+        /* [in] */ Int32 defaultValue);
+
+    CARAPI_(Int32) GetVolumeKeysRotationSetting(
+        /* [in] */ Int32 defaultValue);
 
 public:
     const static String TAG;
@@ -1093,8 +1200,8 @@ private:
 
     // State for the currently installed input filter.
     Object mInputFilterLock;
-    AutoPtr<IIInputFilter> mInputFilter;         // guarded by mInputFilterLock
-    AutoPtr<IIInputFilterHost> mInputFilterHost;  // guarded by mInputFilterLock
+    AutoPtr<ChainedInputFilterHost> mInputFilterHost;         // guarded by mInputFilterLock
+    AutoPtr<IArrayList> mInputFilterChain;  // guarded by mInputFilterLock
 
     // Input event injection constants defined in InputDispatcher.h.
     const static Int32 INPUT_EVENT_INJECTION_SUCCEEDED = 0;

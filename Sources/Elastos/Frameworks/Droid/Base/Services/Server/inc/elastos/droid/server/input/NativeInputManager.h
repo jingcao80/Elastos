@@ -69,6 +69,12 @@ public:
     void setShowTouches(
         /* [in] */ bool enabled);
 
+    void setStylusIconEnabled(
+        /* [in] */ bool enabled);
+
+    void setVolumeKeysRotation(
+        /* [in] */ int32_t mode);
+
     void setInteractive(
         /* [in] */ bool interactive);
 
@@ -194,6 +200,12 @@ private:
 
         // Show touches feature enable/disable.
         bool mShowTouches;
+
+        // Show icon when stylus is used
+        bool mStylusIconEnabled;
+
+        // Volume keys rotation mode (0 - off, 1 - phone, 2 - tablet)
+        int32_t mVolumeKeysRotationMode;
 
         // Sprite controller singleton, created on first use.
         android::sp<android::SpriteController> mSpriteController;

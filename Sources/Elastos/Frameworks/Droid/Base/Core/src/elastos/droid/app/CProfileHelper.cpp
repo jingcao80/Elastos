@@ -15,7 +15,8 @@ ECode CProfileHelper::FromXml(
     /* [out] */ IProfile** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = Profile::FromXml(xpp, context);
+    AutoPtr<IProfile> p = Profile::FromXml(xpp, context);
+    *result = p;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

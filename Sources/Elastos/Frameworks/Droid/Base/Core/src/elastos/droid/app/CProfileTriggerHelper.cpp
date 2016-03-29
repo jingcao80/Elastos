@@ -15,7 +15,8 @@ ECode CProfileTriggerHelper::FromXml(
     /* [out] */ IProfileTrigger** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = Profile::ProfileTrigger::FromXml(xpp, context);
+    AutoPtr<IProfileTrigger> p = Profile::ProfileTrigger::FromXml(xpp, context);
+    *result = p;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

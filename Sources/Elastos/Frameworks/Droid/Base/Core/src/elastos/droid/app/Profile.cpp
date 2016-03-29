@@ -6,6 +6,8 @@
 #include "elastos/droid/app/CStreamSettings.h"
 #include "elastos/droid/app/CProfileGroup.h"
 #include "elastos/droid/app/Profile.h"
+#include "elastos/droid/app/CProfile.h"
+#include "elastos/droid/app/CProfileTrigger.h"
 #include "elastos/droid/os/CParcelUuid.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/CoreUtils.h>
@@ -44,6 +46,14 @@ namespace App {
 // Profile::ProfileTrigger
 //========================================================================
 CAR_INTERFACE_IMPL_2(Profile::ProfileTrigger, Object, IProfileTrigger, IParcelable)
+
+Profile::ProfileTrigger::ProfileTrigger()
+    : mType(0)
+    , mState(0)
+{}
+
+Profile::ProfileTrigger::~ProfileTrigger()
+{}
 
 ECode Profile::ProfileTrigger::constructor(
     /* [in] */ Int32 type,
@@ -114,7 +124,7 @@ ECode Profile::ProfileTrigger::GetXmlString(
     /* [in] */ IStringBuilder* builder,
     /* [in] */ IContext* context)
 {
-    String itemType = mType == IProfileTriggerType::WIFI 
+    String itemType = mType == IProfileTriggerType::WIFI
             ? String("wifiAP") : String("btDevice");
 
     builder->Append(String("<"));
@@ -137,7 +147,7 @@ ECode Profile::ProfileTrigger::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    *str = String("Profile::ProfileTrigger");
+    *str = "Profile::ProfileTrigger";
     return NOERROR;
 }
 
@@ -170,9 +180,9 @@ AutoPtr<IProfileTrigger> Profile::ProfileTrigger::FromXml(
         triggerName = id;
     }
 
-    AutoPtr<ProfileTrigger> trigger = new Profile::ProfileTrigger();
-    trigger->constructor(type, id, state, triggerName);
-    return (IProfileTrigger*)trigger.Get();
+    AutoPtr<IProfileTrigger> trigger;
+    CProfileTrigger::New(type, id, state, triggerName, (IProfileTrigger**)&trigger);
+    return trigger;
 }
 
 String Profile::ProfileTrigger::GetIdType(
@@ -186,7 +196,7 @@ String Profile::ProfileTrigger::GetIdType(
 //========================================================================
 
 const String Profile::TAG("Profile");
-    
+
 const Int32 Profile::CONDITIONAL_TYPE = 1;
 
 const Int32 Profile::TOGGLE_TYPE = 0;
@@ -210,6 +220,9 @@ Profile::Profile()
     CAirplaneModeSettings::New((IAirplaneModeSettings**)&mAirplaneMode);
     CBrightnessSettings::New((IBrightnessSettings**)&mBrightness);
 }
+
+Profile::~Profile()
+{}
 
 ECode Profile::constructor(
     /* [in] */ const String& name)
@@ -243,9 +256,8 @@ ECode Profile::GetTrigger(
 
     AutoPtr<IProfileTrigger> trigger;
     if (!id.IsNull()) {
-        AutoPtr<ICharSequence> key = CoreUtils::Convert(id);
         AutoPtr<IInterface> value;
-        mTriggers->Get(key.Get(), (IInterface**)&value);
+        mTriggers->Get(CoreUtils::Convert(id), (IInterface**)&value);
         trigger = IProfileTrigger::Probe(value);
     }
     if (trigger != NULL) {
@@ -261,6 +273,7 @@ ECode Profile::GetTriggersFromType(
     /* [out] */ IArrayList** triggers)
 {
     VALIDATE_NOT_NULL(triggers)
+    *triggers = NULL;
     AutoPtr<IArrayList> result;
     CArrayList::New((IArrayList**)&result);
     AutoPtr<ISet> entries;
@@ -268,15 +281,13 @@ ECode Profile::GetTriggersFromType(
     AutoPtr<IIterator> it;
     entries->GetIterator((IIterator**)&it);
     Boolean bHasNxt = FALSE;
-    IMapEntry* entry;
     while ((it->HasNext(&bHasNxt), bHasNxt)) {
         AutoPtr<IInterface> item;
         it->GetNext((IInterface**)&item);
-        entry = IMapEntry::Probe(item);
+        IMapEntry* entry = IMapEntry::Probe(item);
         AutoPtr<IInterface> vo;
         entry->GetValue((IInterface**)&vo);
         IProfileTrigger* trigger = IProfileTrigger::Probe(vo);
-        VALIDATE_NOT_NULL(trigger)
         Int32 triggerType;
         trigger->GetType(&triggerType);
         if (triggerType == type) {
@@ -296,9 +307,9 @@ ECode Profile::SetTrigger(
     /* [in] */ const String& name)
 {
     if (id.IsNull()
-            || type < IProfileTriggerType::WIFI 
+            || type < IProfileTriggerType::WIFI
             || type > IProfileTriggerType::BLUETOOTH
-            || state < IProfileTriggerState::ON_CONNECT 
+            || state < IProfileTriggerState::ON_CONNECT
             || state > IProfileTriggerState::ON_A2DP_DISCONNECT) {
         return NOERROR;
     }
@@ -312,13 +323,14 @@ ECode Profile::SetTrigger(
         if (trigger != NULL) {
             mTriggers->Remove(key);
         }
-    } 
+    }
     else if (trigger != NULL) {
         ((ProfileTrigger*)trigger)->mState = state;
-    } else {
-        AutoPtr<ProfileTrigger> pt = new ProfileTrigger();
-        pt->constructor(type, id, state, name);
-        mTriggers->Put(key, (IProfileTrigger*)pt);
+    }
+    else {
+        AutoPtr<IProfileTrigger> pt;
+        CProfileTrigger::New(type, id, state, name, (IProfileTrigger**)&pt);
+        mTriggers->Put(key, pt);
     }
 
     mDirty = TRUE;
@@ -335,7 +347,7 @@ ECode Profile::CompareTo(
 
     if (mName.Compare(((Profile*)tmp.Get())->mName) < 0) {
         *result = -1;
-    } 
+    }
     else if (mName.Compare(((Profile*)tmp.Get())->mName) > 0) {
         *result = 1;
     }
@@ -369,7 +381,6 @@ ECode Profile::RemoveProfileGroup(
     AutoPtr<IInterface> value;
     mProfileGroups->Get(uuid, (IInterface**)&value);
     IProfileGroup* group = IProfileGroup::Probe(value);
-    VALIDATE_NOT_NULL(group)
     Boolean isDefault;
     if (group->IsDefaultGroup(&isDefault), !isDefault) {
         mProfileGroups->Remove(uuid);
@@ -438,6 +449,7 @@ ECode Profile::WriteToParcel(
     mSecondaryUuids->GetSize(&size);
     AutoPtr<ArrayOf<IParcelUuid*> > uuids = ArrayOf<IParcelUuid*>::Alloc(size);
     for (Int32 i = 0; i < size; i++) {
+        uuid = NULL;
         AutoPtr<IInterface> item;
         mSecondaryUuids->Get(i, (IInterface**)&item);
         CParcelUuid::New(IUUID::Probe(item), (IParcelUuid**)&uuid);
@@ -454,11 +466,13 @@ ECode Profile::WriteToParcel(
     collection->ToArray((ArrayOf<IInterface*>**)&groups);
     dest->WriteArrayOf((Handle32)groups.Get());
 
+    collection = NULL;
     AutoPtr<ArrayOf<IInterface*> > streams;
     mStreams->GetValues((ICollection**)&collection);
     collection->ToArray((ArrayOf<IInterface*>**)&streams);
     dest->WriteArrayOf((Handle32)streams.Get());
 
+    collection = NULL;
     AutoPtr<ArrayOf<IInterface*> > connections;
     mStreams->GetValues((ICollection**)&collection);
     collection->ToArray((ArrayOf<IInterface*>**)&connections);
@@ -476,16 +490,15 @@ ECode Profile::WriteToParcel(
     AutoPtr<IIterator> it;
     entrySet->GetIterator((IIterator**)&it);
     Boolean hasNext;
-    IMapEntry* entry;
     while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> item;
         it->GetNext((IInterface**)&item);
-        entry = IMapEntry::Probe(item);
+        IMapEntry* entry = IMapEntry::Probe(item);
         AutoPtr<IInterface> ko, vo;
         entry->GetKey((IInterface**)&ko);
         entry->GetValue((IInterface**)&vo);
         dest->WriteString(Object::ToString(ko));
-        dest->WriteInterfacePtr(IProfileTrigger::Probe(item));
+        dest->WriteInterfacePtr(vo);
     }
 
     dest->WriteInt32(mExpandedDesktopMode);
@@ -518,11 +531,11 @@ ECode Profile::ReadFromParcel(
     source->ReadInt32(&value);
     mDirty = (value == 1);
 
+    array = NULL;
     source->ReadArrayOf((Handle32*)&array);
-    IProfileGroup* group;
     Boolean isDefault;
     for (Int32 i = 0; i < array->GetLength(); i++) {
-        group = IProfileGroup::Probe((*array)[i]);
+        IProfileGroup* group = IProfileGroup::Probe((*array)[i]);
         AutoPtr<IUUID> id;
         group->GetUuid((IUUID**)&id);
         mProfileGroups->Put(id, group);
@@ -532,27 +545,30 @@ ECode Profile::ReadFromParcel(
         }
     }
 
+    array = NULL;
     source->ReadArrayOf((Handle32*)&array);
-    IStreamSettings* stream;
     Int32 id;
     for (Int32 i = 0; i < array->GetLength(); i++) {
-        stream = IStreamSettings::Probe((*array)[i]);
+        IStreamSettings* stream = IStreamSettings::Probe((*array)[i]);
         stream->GetStreamId(&id);
         mStreams->Put(CoreUtils::Convert(id).Get(), stream);
     }
 
+    array = NULL;
     source->ReadArrayOf((Handle32*)&array);
-    IConnectionSettings* connection;
     for (Int32 i = 0; i < array->GetLength(); i++) {
-        connection = IConnectionSettings::Probe((*array)[i]);
+        IConnectionSettings* connection = IConnectionSettings::Probe((*array)[i]);
         connection->GetConnectionId(&id);
-        mConnections->Put(CoreUtils::Convert(id).Get(), connection);
+        mConnections->Put(CoreUtils::Convert(id), connection);
     }
 
+    obj = NULL;
     source->ReadInterfacePtr((Handle32*)&obj);
     mRingMode = IRingModeSettings::Probe(obj);
+    obj = NULL;
     source->ReadInterfacePtr((Handle32*)&obj);
     mAirplaneMode = IAirplaneModeSettings::Probe(obj);
+    obj = NULL;
     source->ReadInterfacePtr((Handle32*)&obj);
     mBrightness = IBrightnessSettings::Probe(obj);
     source->ReadInt32(&mScreenLockMode);
@@ -562,8 +578,9 @@ ECode Profile::ReadFromParcel(
     String key;
     for (Int32 i = 0; i < size; i++) {
         source->ReadString(&key);
+        obj = NULL;
         source->ReadInterfacePtr((Handle32*)&obj);
-        mTriggers->Put(CoreUtils::Convert(key).Get(), obj);
+        mTriggers->Put(CoreUtils::Convert(key), obj);
     }
 
     source->ReadInt32(&mExpandedDesktopMode);
@@ -715,10 +732,11 @@ ECode Profile::GetScreenLockMode(
 ECode Profile::SetScreenLockMode(
     /* [in] */ Int32 screenLockMode)
 {
-    if (screenLockMode < IProfileLockMode::DEFAULT 
+    if (screenLockMode < IProfileLockMode::DEFAULT
             || screenLockMode > IProfileLockMode::DISABLE) {
         mScreenLockMode = IProfileLockMode::DEFAULT;
-    } else {
+    }
+    else {
         mScreenLockMode = screenLockMode;
     }
     mDirty = TRUE;
@@ -739,7 +757,8 @@ ECode Profile::SetExpandedDesktopMode(
     if (expandedDesktopMode < IProfileExpandedDesktopMode::DEFAULT
             || expandedDesktopMode > IProfileExpandedDesktopMode::DISABLE) {
         mExpandedDesktopMode = IProfileExpandedDesktopMode::DEFAULT;
-    } else {
+    }
+    else {
         mExpandedDesktopMode = expandedDesktopMode;
     }
     mDirty = TRUE;
@@ -789,19 +808,22 @@ ECode Profile::IsDirty(
     }
     AutoPtr<ICollection> values;
     AutoPtr<IIterator> it;
-    AutoPtr<IInterface> value;
-    Boolean hasNext, isDirty;
     mProfileGroups->GetValues((ICollection**)&values);
     values->GetIterator((IIterator**)&it);
+    Boolean hasNext, isDirty;
+    AutoPtr<IInterface> value;
     while(it->HasNext(&hasNext), hasNext) {
         it->GetNext((IInterface**)&value);
         IProfileGroup::Probe(value)->IsDirty(&isDirty);
         if (isDirty) {
            *result = TRUE;
-            return NOERROR; 
+            return NOERROR;
         }
+        value = NULL;
     }
 
+    values = NULL;
+    it = NULL;
     mStreams->GetValues((ICollection**)&values);
     values->GetIterator((IIterator**)&it);
     while(it->HasNext(&hasNext), hasNext) {
@@ -809,10 +831,13 @@ ECode Profile::IsDirty(
         IStreamSettings::Probe(value)->IsDirty(&isDirty);
         if (isDirty) {
            *result = TRUE;
-            return NOERROR; 
+            return NOERROR;
         }
+        value = NULL;
     }
 
+    values = NULL;
+    it = NULL;
     mConnections->GetValues((ICollection**)&values);
     values->GetIterator((IIterator**)&it);
     while(it->HasNext(&hasNext), hasNext) {
@@ -820,24 +845,25 @@ ECode Profile::IsDirty(
         IConnectionSettings::Probe(value)->IsDirty(&isDirty);
         if (isDirty) {
            *result = TRUE;
-            return NOERROR; 
+            return NOERROR;
         }
+        value = NULL;
     }
 
     if (mRingMode->IsDirty(&isDirty), isDirty) {
         *result = TRUE;
-        return NOERROR; 
+        return NOERROR;
     }
     if (mAirplaneMode->IsDirty(&isDirty), isDirty) {
         *result = TRUE;
-        return NOERROR; 
+        return NOERROR;
     }
     if (mBrightness->IsDirty(&isDirty), isDirty) {
         *result = TRUE;
-        return NOERROR; 
+        return NOERROR;
     }
     *result = FALSE;
-    return NOERROR; 
+    return NOERROR;
 }
 
 ECode Profile::GetXmlString(
@@ -915,30 +941,40 @@ ECode Profile::GetXmlString(
     while(it->HasNext(&hasNext), hasNext) {
         it->GetNext((IInterface**)&value);
         IProfileGroup::Probe(value)->GetXmlString(builder, context);
+        value = NULL;
     }
 
+    values = NULL;
+    it = NULL;
     mStreams->GetValues((ICollection**)&values);
     values->GetIterator((IIterator**)&it);
     while(it->HasNext(&hasNext), hasNext) {
         it->GetNext((IInterface**)&value);
         IStreamSettings::Probe(value)->GetXmlString(builder, context);
+        value = NULL;
     }
 
+    values = NULL;
+    it = NULL;
     mConnections->GetValues((ICollection**)&values);
     values->GetIterator((IIterator**)&it);
     while(it->HasNext(&hasNext), hasNext) {
         it->GetNext((IInterface**)&value);
         IConnectionSettings::Probe(value)->GetXmlString(builder, context);
+        value = NULL;
     }
 
     Boolean empty;
     if (mTriggers->IsEmpty(&empty), !empty) {
         builder->Append(String("<triggers>\n"));
+        values = NULL;
+        it = NULL;
         mTriggers->GetValues((ICollection**)&values);
         values->GetIterator((IIterator**)&it);
         while(it->HasNext(&hasNext), hasNext) {
             it->GetNext((IInterface**)&value);
             IProfileTrigger::Probe(value)->GetXmlString(builder, context);
+            value = NULL;
         }
         builder->Append(String("</triggers>\n"));
     }
@@ -958,15 +994,16 @@ AutoPtr<IList> Profile::ReadSecondaryUuidsFromXml(
     String name;
     xpp->Next(&event);
     xpp->GetName(&name);
+
+    AutoPtr<IUUIDHelper> helper;
+    CUUIDHelper::AcquireSingleton((IUUIDHelper**)&helper);
     while (event != IXmlPullParser::END_TAG || !name.Equals("uuids")) {
         if (event == IXmlPullParser::START_TAG) {
             if (name.Equals("uuid")) {
                 // try {
-                AutoPtr<IUUIDHelper> helper;
                 AutoPtr<IUUID> uuid;
                 String text;
                 xpp->NextText(&text);
-                CUUIDHelper::AcquireSingleton((IUUIDHelper**)&helper);
                 ECode ec = helper->FromString(text, (IUUID**)&uuid);
                 if (ec == (ECode) E_NULL_POINTER_EXCEPTION) {
                     Logger::W(TAG, "Null Pointer - invalid UUID");
@@ -1017,13 +1054,14 @@ ECode Profile::ValidateRingtones(
 {
     AutoPtr<ICollection> values;
     AutoPtr<IIterator> it;
-    AutoPtr<IInterface> value;
-    Boolean hasNext;
     mProfileGroups->GetValues((ICollection**)&values);
     values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    AutoPtr<IInterface> value;
     while(it->HasNext(&hasNext), hasNext) {
         it->GetNext((IInterface**)&value);
         ((CProfileGroup*)IProfileGroup::Probe(value))->ValidateOverrideUris(context);
+        value = NULL;
     }
     return NOERROR;
 }
@@ -1085,8 +1123,8 @@ AutoPtr<IProfile> Profile::FromXml(
     //             );
     // }
 
-    AutoPtr<Profile> profile = new Profile();
-    profile->constructor(profileName, profileNameResId, profileUuid);
+    AutoPtr<IProfile> profile;
+    CProfile::New(profileName, profileNameResId, profileUuid, (IProfile**)&profile);
     Int32 event;
     xpp->Next(&event);
     while (event != IXmlPullParser::END_TAG) {
@@ -1116,7 +1154,7 @@ AutoPtr<IProfile> Profile::FromXml(
             }
             if (name.Equals("brightnessDescriptor")) {
                 AutoPtr<IBrightnessSettings> bd;
-                 CBrightnessSettings::FromXml(xpp, context, (IBrightnessSettings**)&bd);
+                CBrightnessSettings::FromXml(xpp, context, (IBrightnessSettings**)&bd);
                 profile->SetBrightness(bd);
             }
             if (name.Equals("screen-lock-mode")) {
@@ -1140,19 +1178,19 @@ AutoPtr<IProfile> Profile::FromXml(
                 CConnectionSettings::FromXml(xpp, context, (IConnectionSettings**)&cs);
                 Int32 id;
                 cs->GetConnectionId(&id);
-                profile->mConnections->Put(CoreUtils::Convert(id), cs);
+                ((Profile*)profile.Get())->mConnections->Put(CoreUtils::Convert(id), cs);
             }
             if (name.Equals("triggers")) {
-                ReadTriggersFromXml(xpp, context, (IProfile*)profile.Get());
+                ReadTriggersFromXml(xpp, context, profile);
             }
         }
         xpp->Next(&event);
     }
 
     /* we just loaded from XML, so nothing needs saving */
-    profile->mDirty = FALSE;
+    ((Profile*)profile.Get())->mDirty = FALSE;
 
-    return (IProfile*)profile.Get();
+    return profile;
 }
 
 ECode Profile::DoSelect(
@@ -1166,14 +1204,13 @@ ECode Profile::DoSelect(
     AutoPtr<ICollection> values;
     AutoPtr<IIterator> it;
     AutoPtr<IInterface> value;
-    Boolean hasNext;
-    Boolean isOverride;
     mStreams->GetValues((ICollection**)&values);
     values->GetIterator((IIterator**)&it);
-    IStreamSettings* sd;
+    Boolean hasNext;
+    Boolean isOverride;
     while(it->HasNext(&hasNext), hasNext) {
         it->GetNext((IInterface**)&value);
-        sd = IStreamSettings::Probe(value);
+        IStreamSettings* sd = IStreamSettings::Probe(value);
         sd->IsOverride(&isOverride);
         if (isOverride) {
             Int32 id, value;
@@ -1181,9 +1218,12 @@ ECode Profile::DoSelect(
             sd->GetValue(&value);
             am->SetStreamVolume(id, value, 0);
         }
+        value = NULL;
     }
 
     // Set connections
+    values = NULL;
+    it = NULL;
     mConnections->GetValues((ICollection**)&values);
     values->GetIterator((IIterator**)&it);
     IConnectionSettings* cs;
@@ -1194,6 +1234,7 @@ ECode Profile::DoSelect(
         if (isOverride) {
             cs->ProcessOverride(context);
         }
+        value = NULL;
     }
 
     // Set ring mode
@@ -1275,7 +1316,7 @@ ECode Profile::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    *str = String("Profile");
+    *str = "Profile";
     return NOERROR;
 }
 

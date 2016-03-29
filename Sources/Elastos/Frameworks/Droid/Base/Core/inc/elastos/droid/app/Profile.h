@@ -8,19 +8,19 @@
 #include <Elastos.CoreLibrary.External.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
-using Elastos::Core::IStringBuilder;
-using Elastos::Core::IComparable;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::App::IAirplaneModeSettings;
 using Elastos::Droid::App::IBrightnessSettings;
 using Elastos::Droid::App::IProfileGroup;
 using Elastos::Droid::App::IRingModeSettings;
 using Elastos::Droid::App::IStreamSettings;
-using Elastos::Utility::IUUID;
+using Elastos::Core::IStringBuilder;
+using Elastos::Core::IComparable;
 using Elastos::Utility::IArrayList;
-using Elastos::Utility::IList;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::IHashMap;
+using Elastos::Utility::IList;
+using Elastos::Utility::IUUID;
 
 using Org::Xmlpull::V1::IXmlPullParser;
 
@@ -43,15 +43,9 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
-        ProfileTrigger()
-            : mType(0)
-            , mState(0)
-        {
-        }
+        ProfileTrigger();
 
-        virtual ~ProfileTrigger()
-        {
-        }
+        virtual ~ProfileTrigger();
 
         CARAPI constructor(
             /* [in] */ Int32 type,
@@ -85,12 +79,12 @@ public:
             /* [out] */ String* str);
 
     public:
-        static AutoPtr<IProfileTrigger> FromXml(
+        static CARAPI_(AutoPtr<IProfileTrigger>) FromXml(
             /* [in] */ IXmlPullParser* xpp,
             /* [in] */ IContext* context);
 
     private:
-        static String GetIdType(
+        static CARAPI_(String) GetIdType(
             /* [in] */ Int32 type);
 
     private:
@@ -105,9 +99,7 @@ public:
 
     Profile();
 
-    virtual ~Profile()
-    {
-    }
+    virtual ~Profile();
 
     CARAPI constructor(
         /* [in] */ const String& name);
@@ -260,23 +252,23 @@ public:
         /* [out] */ String* str);
 
 public:
-    static AutoPtr<IProfile> FromXml(
+    static CARAPI_(AutoPtr<IProfile>) FromXml(
         /* [in] */ IXmlPullParser* xpp,
         /* [in] */ IContext* context);
 
 private:
-    static AutoPtr<IList> ReadSecondaryUuidsFromXml(
+    static CARAPI_(AutoPtr<IList>) ReadSecondaryUuidsFromXml(
         /* [in] */ IXmlPullParser* xpp,
         /* [in] */ IContext* context);
 
-    static ECode ReadTriggersFromXml(
+    static CARAPI_(ECode) ReadTriggersFromXml(
         /* [in] */ IXmlPullParser* xpp,
         /* [in] */ IContext* context,
         /* [in] */ IProfile* profile);
 
 private:
     static const String TAG; // = "Profile";
-    
+
     static const Int32 CONDITIONAL_TYPE;
 
     static const Int32 TOGGLE_TYPE;

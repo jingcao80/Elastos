@@ -150,6 +150,8 @@ NativeInputManager::NativeInputManager(
         mLocked.mPointerSpeed = 0;
         mLocked.mPointerGesturesEnabled = true;
         mLocked.mShowTouches = false;
+        mLocked.mStylusIconEnabled = false;
+        mLocked.mVolumeKeysRotationMode = 0;
     }
 
     android::sp<android::EventHub> eventHub = new android::EventHub();
@@ -257,6 +259,8 @@ void NativeInputManager::getReaderConfiguration(
         outConfig->pointerGesturesEnabled = mLocked.mPointerGesturesEnabled;
 
         outConfig->showTouches = mLocked.mShowTouches;
+        outConfig->stylusIconEnabled = mLocked.mStylusIconEnabled;
+        outConfig->volumeKeysRotationMode = mLocked.mVolumeKeysRotationMode;
 
         outConfig->setDisplayInfo(false /*external*/, mLocked.mInternalViewport);
         outConfig->setDisplayInfo(true /*external*/, mLocked.mExternalViewport);
@@ -704,6 +708,42 @@ void NativeInputManager::setShowTouches(
 
     mInputManager->getReader()->requestRefreshConfiguration(
             android::InputReaderConfiguration::CHANGE_SHOW_TOUCHES);
+}
+
+void NativeInputManager::setStylusIconEnabled(
+    /* [in] */ bool enabled)
+{
+    { // acquire lock
+        android::AutoMutex _l(mLock);
+
+        if (mLocked.mStylusIconEnabled == enabled) {
+            return;
+        }
+
+        ALOGI("Setting stylus icon enabled to %s.", enabled ? "enabled" : "disabled");
+        mLocked.mStylusIconEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader()->requestRefreshConfiguration(
+            android::InputReaderConfiguration::CHANGE_STYLUS_ICON_ENABLED);
+}
+
+void NativeInputManager::setVolumeKeysRotation(
+    /* [in] */ int32_t mode)
+{
+    { // acquire lock
+        android::AutoMutex _l(mLock);
+
+        if (mLocked.mVolumeKeysRotationMode == mode) {
+            return;
+        }
+
+        ALOGI("Volume keys: rotation mode set to %d.", mode);
+        mLocked.mVolumeKeysRotationMode = mode;
+    } // release lock
+
+    mInputManager->getReader()->requestRefreshConfiguration(
+            android::InputReaderConfiguration::CHANGE_VOLUME_KEYS_ROTATION);
 }
 
 void NativeInputManager::setInteractive(
