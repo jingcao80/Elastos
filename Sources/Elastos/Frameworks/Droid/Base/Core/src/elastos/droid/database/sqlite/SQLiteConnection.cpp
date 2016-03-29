@@ -1538,26 +1538,20 @@ ECode SQLiteConnection::SetLocaleFromConfiguration()
     FAIL_RETURN(Execute(String("BEGIN"), NULL, NULL))
     Boolean success = FALSE;
     //try {
-    ECode ec = Execute(String("DELETE FROM android_metadata"), NULL, NULL);
-    if (FAILED(ec)) {
-        return Execute(success ? String("COMMIT") : String("ROLLBACK"), NULL, NULL);
-    }
     AutoPtr<ArrayOf<IInterface*> > bindArgs = ArrayOf<IInterface*>::Alloc(1);
     AutoPtr<ICharSequence> seq;
     CString::New(newLocale, (ICharSequence**)&seq);
     bindArgs->Set(0, seq);
-    ec = Execute(String("INSERT INTO android_metadata (locale) VALUES(?)"), bindArgs, NULL);
-    if (FAILED(ec)) {
-        return Execute(success ? String("COMMIT") : String("ROLLBACK"), NULL, NULL);
-    }
-    ec = Execute(String("REINDEX LOCALIZED"), NULL, NULL);
-    if (FAILED(ec)) {
-        return Execute(success ? String("COMMIT") : String("ROLLBACK"), NULL, NULL);
-    }
+    FAIL_GOTO(Execute(String("DELETE FROM android_metadata"), NULL, NULL), Exit);
+    FAIL_GOTO(Execute(String("INSERT INTO android_metadata (locale) VALUES(?)"), bindArgs, NULL), Exit);
+    FAIL_GOTO(Execute(String("REINDEX LOCALIZED"), NULL, NULL), Exit);
     success = TRUE;
+Exit:
     //} finally {
     return Execute(success ? String("COMMIT") : String("ROLLBACK"), NULL, NULL);
     //}
+    //} catch (SQLiteDatabaseCorruptException ex) {
+        // throw ex;
     //} catch (RuntimeException ex) {
         // throw new SQLiteException("Failed to change locale for db '" + mConfiguration.label
         //             + "' to '" + newLocale + "'.", ex);

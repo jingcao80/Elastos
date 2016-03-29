@@ -3,6 +3,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos.Droid.Provider.h"
+#include "_Elastos.Droid.Net.h"
 
 using Elastos::Droid::Net::IUri;
 

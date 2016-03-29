@@ -1107,12 +1107,67 @@ module {
     }
 
     /**
+     * @hide
+     * public interface InternalContactCounts extends ContactCounts {
+     *    // Just a placeholder interface to don't break the public api, while expose ContactCounts
+     *    // for internal use
+     * }
+     */
+    interface IContactsContractInternalContactCounts {
+
+        /**
+         * Add this query parameter to a URI to get back row counts grouped by the address book
+         * index as cursor extras. For most languages it is the first letter of the sort key. This
+         * parameter does not affect the main content of the cursor.
+         *
+         * <p>
+         * <pre>
+         * Example:
+         *
+         * import android.provider.ContactsContract.Contacts;
+         *
+         * Uri uri = Contacts.CONTENT_URI.buildUpon()
+         *          .appendQueryParameter(Contacts.EXTRA_ADDRESS_BOOK_INDEX, "true")
+         *          .build();
+         * Cursor cursor = getContentResolver().query(uri,
+         *          new String[] {Contacts.DISPLAY_NAME},
+         *          null, null, null);
+         * Bundle bundle = cursor.getExtras();
+         * if (bundle.containsKey(Contacts.EXTRA_ADDRESS_BOOK_INDEX_TITLES) &&
+         *         bundle.containsKey(Contacts.EXTRA_ADDRESS_BOOK_INDEX_COUNTS)) {
+         *     String sections[] =
+         *             bundle.getStringArray(Contacts.EXTRA_ADDRESS_BOOK_INDEX_TITLES);
+         *     int counts[] = bundle.getIntArray(Contacts.EXTRA_ADDRESS_BOOK_INDEX_COUNTS);
+         * }
+         * </pre>
+         * </p>
+         */
+        const String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+
+        /**
+         * The array of address book index titles, which are returned in the
+         * same order as the data in the cursor.
+         * <p>TYPE: String[]</p>
+         *
+         * @hide
+         */
+        const String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
+
+        /**
+         * The array of group counts for the corresponding group.  Contains the same number
+         * of elements as the EXTRA_ADDRESS_BOOK_INDEX_TITLES array.
+         * <p>TYPE: int[]</p>
+         *
+         * @hide
+         */
+        const String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    }
+
+    /**
      * URI parameter and cursor extras that return counts of rows grouped by the
      * address book index, which is usually the first letter of the sort key.
      * When this parameter is supplied, the row counts are returned in the
      * cursor extras bundle.
-     *
-     * @hide
      */
     interface IContactsContractContactCounts {
 
@@ -4857,6 +4912,32 @@ module {
          */
         const String LABEL = "data3"; //IContactsContractDataColumns::DATA3;
     }
+
+    /** @hide */
+    /**
+     * @Involve
+     * interface IContactsContractDataColumnsWithJoins
+     */
+    interface IContactsContractCommonDataKindsLocalGroup
+    {
+        /** @hide */
+        const String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/local-groups";
+
+        /** @hide */
+        const String GROUP = "data1"; //IContactsContractDataColumns::DATA1;
+
+        /** @hide */
+        GetCONTENT_URI(
+            [out] IUri** uri);
+
+        /** @hide */
+        GetCONTENT_LOOKUP_URI(
+            [out] IUri** uri);
+
+        /** @hide */
+        GetCONTENT_FILTER_URI(
+            [out] IUri** uri);
+        }
 
     /**
      * A data kind representing the contact's proper name. You can use all

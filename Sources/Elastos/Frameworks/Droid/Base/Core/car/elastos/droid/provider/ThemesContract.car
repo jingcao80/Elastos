@@ -1,11 +1,16 @@
 module {
 
+    interface Elastos.Droid.Net.IUri;
+
     namespace Elastos {
     namespace Droid {
     namespace Provider {
 
     interface IThemesContract {
         const String AUTHORITY = "com.cyanogenmod.themes";
+
+        GetAUTHORITY_URI(
+            [out] IUri** uri);
     }
 
     interface IThemesContractThemesColumns {
@@ -252,6 +257,9 @@ module {
          * <P>Default: 0</P>
          */
         const String INSTALL_STATE = "install_state";
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
     }
 
     interface IThemesContractThemesColumnsInstallState {
@@ -261,6 +269,9 @@ module {
         const Int32 INSTALLED = 3;
     }
 
+    /**
+     * Key-value table which assigns a component (ex wallpaper) to a theme's package
+     */
     interface IThemesContractMixnMatchColumns {
         /**
          * The unique key for a row. See the KEY_* constants
@@ -301,6 +312,38 @@ module {
         const String KEY_RINGTONE = "mixnmatch_ringtone";
         const String KEY_OVERLAYS = "mixnmatch_overlays";
         const String KEY_NAVIGATION_BAR = "mixnmatch_navigation_bar";
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
+
+        GetROWS(
+            [out, callee] ArrayOf<String>* rows);
+
+        /**
+         * For a given key value in the MixNMatch table, return the column
+         * associated with it in the Themes Table. This is useful for URI based
+         * elements like wallpaper where the caller wishes to determine the
+         * wallpaper URI.
+         */
+        ComponentToImageColName(
+            [in] String component,
+            [out] String* imageColName);
+
+        /**
+         * A component in the themes table (IE "mods_wallpaper") has an
+         * equivalent key in mixnmatch table
+         */
+        ComponentToMixNMatchKey(
+            [in] String component,
+            [out] String* mixNMatchKey);
+
+        /**
+         * A mixnmatch key in has an
+         * equivalent value in the themes table
+         */
+        MixNMatchKeyToComponent(
+            [in] String mixnmatchKey,
+            [out] String* component);
     }
 
     interface IThemesContractPreviewColumns {
@@ -461,6 +504,17 @@ module {
          * <P>Type: BLOB (bitmap)</P>
          */
         const String LOCK_WALLPAPER_PREVIEW = "lock_wallpaper_preview";
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
+
+        /**
+         * Uri for retrieving the previews for the currently applied components.
+         * Querying the themes provider using this URI will return a cursor with a single row
+         * containing all the previews for the components that are currently applied.
+         */
+        GetAPPLIED_URI(
+            [out] IUri** uri);
     }
 
     interface IThemesContractIntent {
