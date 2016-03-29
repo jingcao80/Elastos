@@ -248,8 +248,10 @@ AutoPtr<IUri> NotificationManagerService::UPDATE_MSG_URI = InitUpdateUri();
 //===============================================================================
 
 NotificationManagerService::SpamExecutorRunnable::SpamExecutorRunnable(
+    /* [in] */ Int32 notifId,
     /* [in] */ NotificationManagerService* host)
-    : mHost(host)
+    : mNotifId(notifId)
+    , mHost(host)
 {}
 
 ECode NotificationManagerService::SpamExecutorRunnable::Run()
@@ -257,8 +259,7 @@ ECode NotificationManagerService::SpamExecutorRunnable::Run()
     AutoPtr<IUriHelper> hlp;
     CUriHelper::AcquireSingleton((IUriHelper**)&hlp);
     AutoPtr<IUri> updateUri;
-    assert(0 && "TODO");
-    // hlp->WithAppendedPath(UPDATE_MSG_URI, String::ValueOf(notifId), (IUri**)&updateUri);
+    hlp->WithAppendedPath(UPDATE_MSG_URI, StringUtils::ToString(mNotifId), (IUri**)&updateUri);
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
     AutoPtr<IContentResolver> resolver;
@@ -551,8 +552,7 @@ ECode NotificationManagerService::BinderService::SetShowNotificationForPackageOn
     /* [in] */ Int32 status)
 {
     CheckCallerIsSystem();
-    assert(0 && "TODO");
-    // mHost->mRankingHelper->SetShowNotificationForPackageOnKeyguard(pkg, uid, status);
+    mHost->mRankingHelper->SetShowNotificationForPackageOnKeyguard(pkg, uid, status);
     mHost->SavePolicyFile();
     return NOERROR;
 }
@@ -564,9 +564,7 @@ ECode NotificationManagerService::BinderService::GetShowNotificationForPackageOn
 {
     VALIDATE_NOT_NULL(result)
     EnforceSystemOrSystemUI(String("INotificationManager.getShowNotificationForPackageOnKeyguard"));
-    assert(0 && "TODO");
-    // return mHost->mRankingHelper->GetShowNotificationForPackageOnKeyguard(pkg, uid, result);
-    return NOERROR;
+    return mHost->mRankingHelper->GetShowNotificationForPackageOnKeyguard(pkg, uid, result);
 }
 
 ECode NotificationManagerService::BinderService::GetActiveNotifications(
@@ -4189,7 +4187,7 @@ Boolean NotificationManagerService::IsNotificationSpam(
     if (isSpam) {
         AutoPtr<FilterCacheInfo> info = mSpamCache->Get(notificationHash);
         Int32 notifId = info->mNotificationId;
-        AutoPtr<SpamExecutorRunnable> r = new SpamExecutorRunnable(this);
+        AutoPtr<SpamExecutorRunnable> r = new SpamExecutorRunnable(notifId, this);
         AutoPtr<IFuture> fut;
         mSpamExecutor->Submit(r, (IFuture**)&fut);
     }
