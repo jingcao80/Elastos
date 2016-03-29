@@ -667,30 +667,21 @@ String LayoutInflater::GetReflectionClassName(
     /* [in] */ const String& prefix,
     /* [in] */ const String& name)
 {
-    StringBuilder sb("L");
+    StringBuilder sb;
     if (!prefix.IsNull()) {
         sb += prefix;
     }
     sb += "C";
     sb += name;
-    sb += ";";
     return sb.ToString();
 }
 
 ECode LayoutInflater::CreateView(
     /* [in] */ const String& name,
-    /* [in] */ const String& prefix_,
+    /* [in] */ const String& prefix,
     /* [in] */ IAttributeSet* attrs,
     /* [out] */ IView** view)
 {
-    String prefix = prefix_;
-    if (name.Equals("TabletStatusBarView") || name.Equals("NotificationPanel")) {
-        prefix = "Elastos.Droid.SystemUI.StatusBar.Tablet.";
-    }
-    else if (name.Equals("ActionMenuView")) {
-        prefix = "Elastos.Droid.View.Menu.";
-    }
-
     String reflectionClassName = GetReflectionClassName(prefix, name);
 
     Slogger::I(TAG, " CreateView: name:%s, prefix:%s, reflectionClassName:%s",
@@ -827,11 +818,7 @@ ECode LayoutInflater::OnCreateView(
     /* [in] */ IAttributeSet* attrs,
     /* [out] */ IView** view)
 {
-    String ns("Elastos/Droid/Widget/");
-    if (name.Equals("ViewStub")) {
-        ns = "Elastos/Droid/View/";
-    }
-    return CreateView(name, ns, attrs, view);
+    return CreateView(name, String("Elastos.Droid.View."), attrs, view);
 }
 
 ECode LayoutInflater::OnCreateView(

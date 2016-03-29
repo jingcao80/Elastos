@@ -2165,18 +2165,6 @@ ECode CActivityThread::ScheduleContextCleanup(
     return SendMessage(H::CLEAN_UP_CONTEXT, TO_IINTERFACE(cci));
 }
 
-String CActivityThread::GetReflectionClassName(
-    /* [in] */ const String& rawClassName)
-{
-    // convert from "ABC.DEF.ClassName" to "LABC/DEF/ClassName;"
-    assert(rawClassName != NULL);
-    StringBuilder sb(128);
-    sb += "L";
-    sb += rawClassName.Replace('.', '/');
-    sb += ";";
-    return sb.ToString();
-}
-
 ECode CActivityThread::PerformLaunchActivity(
     /* [in] */ ActivityClientRecord* r,
     /* [in] */ IIntent* customIntent,
@@ -2249,12 +2237,11 @@ ECode CActivityThread::PerformLaunchActivity(
         return E_RUNTIME_EXCEPTION;
     }
 
-    String reflectionClsName = GetReflectionClassName(className);
     AutoPtr<IClassInfo> classInfo;
-    ec = moduleInfo->GetClassInfo(reflectionClsName, (IClassInfo**)&classInfo);
+    ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
         Slogger::E(TAG, "PerformLaunchActivity: Get class info of [%s] failed.",
-            reflectionClsName.string());
+            className.string());
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -2262,7 +2249,7 @@ ECode CActivityThread::PerformLaunchActivity(
     ec = classInfo->CreateObject((IInterface**)&object);
     if (FAILED(ec)) {
         Slogger::E(TAG, "PerformLaunchActivity: Create activity object [%s] failed.",
-            reflectionClsName.string());
+            className.string());
         return E_RUNTIME_EXCEPTION;
     }
     AutoPtr<IActivity> a;
@@ -2770,22 +2757,19 @@ ECode CActivityThread::HandleReceiver(
     AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
 
     AutoPtr<IBroadcastReceiver> receiver;
-    String path, reflectionClsName;
+    String path;
     //TODO: com.android.server.BootReceiver is declared in android system manifest xml file.
     // the package declared in the same xml file is "android"
     // so maybe we should change the package name in that xml file
     if (className.Equals("com.android.server.BootReceiver")
-        || className.Equals("com.android.server.MasterClearReceiver")
-    ) {
+        || className.Equals("com.android.server.MasterClearReceiver")) {
         path = "/system/lib/Elastos.Droid.Server.eco";
         Int32 lastIndex = className.LastIndexOf(".");
         if (lastIndex != -1) {
-            StringBuilder sb("LElastos/Droid/Server/C");
+            StringBuilder sb("Elastos.Droid.Server.C");
             sb += className.Substring(lastIndex + 1);
-            sb += ";";
             className = sb.ToString();
         }
-        reflectionClsName = className;
     }
     else {
         StringBuilder sb;
@@ -2794,10 +2778,8 @@ ECode CActivityThread::HandleReceiver(
         sb.Append(".eco");
         path = sb.ToString();
 
-        reflectionClsName = GetReflectionClassName(className);
-
         Slogger::D(TAG, "HandleReceiver: load object from pakcage: %s, class: %s",
-            packageName.string(), reflectionClsName.string());
+            packageName.string(), className.string());
     }
 
 
@@ -2811,15 +2793,15 @@ ECode CActivityThread::HandleReceiver(
         return ec;
     }
 
-    ec = moduleInfo->GetClassInfo(reflectionClsName, (IClassInfo**)&classInfo);
+    ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "HandleReceiver: Get class info of [%s] failed.", reflectionClsName.string());
+        Slogger::E(TAG, "HandleReceiver: Get class info of [%s] failed.", className.string());
         return ec;
     }
 
     ec = classInfo->CreateObject((IInterface**)&object);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "HandleReceiver: Create activity object [%s] failed.", reflectionClsName.string());
+        Slogger::E(TAG, "HandleReceiver: Create activity object [%s] failed.", className.string());
         return ec;
     }
 
@@ -2998,10 +2980,9 @@ ECode CActivityThread::HandleCreateBackupAgent(
             return E_RUNTIME_EXCEPTION;
         }
 
-        String reflectionClsName = GetReflectionClassName(className);
-        ec = moduleInfo->GetClassInfo(reflectionClsName, (IClassInfo**)&classInfo);
+        ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
         if (FAILED(ec)) {
-            Slogger::E(TAG, "CreateBackupAgent: Get class info of %s failed.", reflectionClsName.string());
+            Slogger::E(TAG, "CreateBackupAgent: Get class info of %s failed.", className.string());
             assert(0 && "TODO");
             return E_RUNTIME_EXCEPTION;
         }
@@ -3122,11 +3103,10 @@ ECode CActivityThread::HandleCreateService(
     }
     String className;
     IPackageItemInfo::Probe(data->mInfo)->GetName(&className);
-    String reflectionClsName = GetReflectionClassName(className);
     AutoPtr<IClassInfo> classInfo;
-    ec = moduleInfo->GetClassInfo(reflectionClsName, (IClassInfo**)&classInfo);
+    ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "HandleCreateService: Get class info of %s failed.", reflectionClsName.string());
+        Slogger::E(TAG, "HandleCreateService: Get class info of %s failed.", className.string());
         return E_RUNTIME_EXCEPTION;
     }
     AutoPtr<IInterface> object;
@@ -5394,10 +5374,9 @@ ECode CActivityThread::HandleBindApplication(
             return E_RUNTIME_EXCEPTION;
         }
 
-        String reflectionClsName = GetReflectionClassName(className);
         AutoPtr<IClassInfo> classInfo;
-        if (FAILED(moduleInfo->GetClassInfo(reflectionClsName, (IClassInfo**)&classInfo))) {
-            Slogger::E(TAG, "HandleBindApplication: Get class info of %s failed.", reflectionClsName.string());
+        if (FAILED(moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo))) {
+            Slogger::E(TAG, "HandleBindApplication: Get class info of %s failed.", className.string());
             return E_RUNTIME_EXCEPTION;
         }
         AutoPtr<IInterface> object;

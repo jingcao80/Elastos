@@ -1015,7 +1015,7 @@ ECode LoadedPkg::MakeApplication(
     String appClass;
     FAIL_RETURN(mApplicationInfo->GetClassName(&appClass));
     if (forceDefaultAppClass || (appClass.IsNull())) {
-        appClass = String("LElastos/Droid/App/CApplication;");/* "android.app.Application" */;
+        appClass = String("Elastos.Droid.App.CApplication");/* "android.app.Application" */;
 
         Slogger::I(TAG, " >> MakeApplication: mPackageName %s, appClass %s",
             mPackageName.string(), appClass.string());

@@ -90,7 +90,6 @@ ECode ClassPathPackageInfoSource::FindClasses(
     /* [in] */ ISet* subpackageNames)
 {
     String packagePrefix = packageName + ".";
-    String pathPrefix = packagePrefix.Replace('.', '/');
 
     for (Int32 i = 0; i < mClassPath->GetLength(); i++) {
         String entryName = (*mClassPath)[i];

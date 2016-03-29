@@ -4236,7 +4236,7 @@ ECode CActivityManagerService::StartProcessLocked(
     app->mInfo->GetDataDir(&dataDir);
     app->mInfo->GetTargetSdkVersion(&targetSdkVersion);
     app->mInfo->GetSeinfo(&seinfo);
-    processClass = sourcePath.EndWith(".apk") ? entryPoint : String("LElastos/Droid/App/CActivityThreadHelper;");
+    processClass = sourcePath.EndWith(".apk") ? entryPoint : String("Elastos.Droid.App.CActivityThreadHelper");
     Slogger::I(TAG, " >>> StartProcessLocked %s, ProcessName:%s, processClass: %s, dataDir: %s, seinfo: %s",
         sourcePath.string(), app->mProcessName.string(), processClass.string(),
         dataDir.string(), seinfo.string());

@@ -493,11 +493,9 @@ ECode CClassInfo::AcquireConstructorList()
         clsName += "ClassObject";
         ns = adjustNameAddr(mBase, mClassDirEntry->mNameSpace);
 
-        String relectionClsName("L");
-        relectionClsName += ns;
-        relectionClsName += "/";
+        String relectionClsName(ns);
+        relectionClsName += ".";
         relectionClsName += clsName;
-        relectionClsName += ";";
         AutoPtr<IClassInfo> classInfo;
         ec = pModuleInfo->GetClassInfo(relectionClsName, (IClassInfo**)&classInfo);
         if (FAILED(ec)) {
@@ -691,12 +689,8 @@ ECode CClassInfo::GetInterfaceInfo(
     ECode ec = AcquireInterfaceList();
     if (FAILED(ec)) return ec;
 
-    Int32 start = fullName.IndexOf('L');
-    Int32 end = fullName.IndexOf(';');
-    String strName = fullName.Substring(start >= 0 ? start + 1 : 0, end > 0 ?
-            end : fullName.GetLength()).Replace('/', '.');
-    return mInterfaceList->AcquireObjByName(strName,
-            (IInterface**)interfaceInfo);
+    assert(fullName.IndexOf(';') < 0 && fullName.IndexOf('/') < 0);
+    return mInterfaceList->AcquireObjByName(fullName, (IInterface**)interfaceInfo);
 }
 
 ECode CClassInfo::HasInterfaceInfo(

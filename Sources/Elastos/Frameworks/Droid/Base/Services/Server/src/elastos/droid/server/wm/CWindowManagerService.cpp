@@ -4213,7 +4213,7 @@ ECode CWindowManagerService::CreateTask(
     if (DEBUG_STACK) Slogger::I(TAG, "createTask: taskId=%d stackId=%d atoken=%p", taskId, stackId, atoken);
     AutoPtr<IInterface> value;
     mStackIdToStack->Get(stackId, (IInterface**)&value);
-    AutoPtr<TaskStack> stack = (TaskStack*)(IObject*)value.Get();
+    AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(value);
     if (stack == NULL) {
         Slogger::E(TAG, "addAppToken: invalid stackId=%d", stackId);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -4295,7 +4295,7 @@ ECode CWindowManagerService::AddAppToken(
 
         AutoPtr<IInterface> value;
         mTaskIdToTask->Get(taskId, (IInterface**)&value);
-        AutoPtr<Task> task = (Task*)(IObject*)value.Get();
+        AutoPtr<Task> task = (Task*)IObject::Probe(value);
         if (task == NULL) {
             CreateTask(taskId, stackId, userId, atoken, (Task**)&task);
         }
@@ -4333,13 +4333,13 @@ ECode CWindowManagerService::SetAppGroupId(
         }
         AutoPtr<IInterface> value;
         mTaskIdToTask->Get(atoken->mGroupId, (IInterface**)&value);
-        AutoPtr<Task> oldTask = (Task*)(IObject*)value.Get();
+        AutoPtr<Task> oldTask = (Task*)IObject::Probe(value);
         oldTask->RemoveAppToken(atoken);
 
         atoken->mGroupId = groupId;
         value = NULL;
         mTaskIdToTask->Get(groupId, (IInterface**)&value);
-        AutoPtr<Task> newTask = (Task*)(IObject*)value.Get();
+        AutoPtr<Task> newTask = (Task*)IObject::Probe(value);
         if (newTask == NULL) {
             CreateTask(groupId, oldTask->mStack->mStackId, oldTask->mUserId, atoken, (Task**)&newTask);
         }
@@ -4664,7 +4664,7 @@ void CWindowManagerService::SetFocusedStackFrame()
     if (mFocusedApp != NULL) {
         AutoPtr<IInterface> value;
         mTaskIdToTask->Get(mFocusedApp->mGroupId, (IInterface**)&value);
-        AutoPtr<Task> task = (Task*)(IObject*)value.Get();
+        AutoPtr<Task> task = (Task*)IObject::Probe(value);
         stack = task->mStack;
         AutoPtr<DisplayContent> displayContent = task->GetDisplayContent();
         if (displayContent != NULL) {
@@ -5588,7 +5588,7 @@ void CWindowManagerService::RemoveAppFromTaskLocked(
 
     AutoPtr<IInterface> value;
     mTaskIdToTask->Get(wtoken->mGroupId, (IInterface**)&value);
-    AutoPtr<Task> task = (Task*)(IObject*)value.Get();
+    AutoPtr<Task> task = (Task*)IObject::Probe(value);
     if (task != NULL) {
         if (!task->RemoveAppToken(wtoken)) {
             Slogger::E(TAG, "removeAppFromTaskLocked: token=%p not found.", wtoken);
@@ -5651,7 +5651,7 @@ ECode CWindowManagerService::RemoveAppToken(
             }
             AutoPtr<IInterface> value;
             mTaskIdToTask->Get(wtoken->mGroupId, (IInterface**)&value);
-            AutoPtr<TaskStack> stack = (TaskStack*)(IObject*)value.Get();
+            AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(value);
             if (delayed) {
                 // set the token aside because it has an active animation to be finished
                 if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) {
@@ -5727,7 +5727,7 @@ Boolean CWindowManagerService::TmpRemoveAppWindowsLocked(
     Int32 targetDisplayId = -1;
     AutoPtr<IInterface> value;
     mTaskIdToTask->Get(token->mAppWindowToken->mGroupId, (IInterface**)&value);
-    AutoPtr<Task> targetTask = (Task*)(IObject*)value.Get();
+    AutoPtr<Task> targetTask = (Task*)IObject::Probe(value);
     if (targetTask != NULL) {
         AutoPtr<DisplayContent> targetDisplayContent = targetTask->GetDisplayContent();
         if (targetDisplayContent != NULL) {
@@ -5760,7 +5760,7 @@ void CWindowManagerService::DumpAppTokensLocked()
     for (Int32 stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
         AutoPtr<IInterface> value;
         mStackIdToStack->ValueAt(stackNdx, (IInterface**)&value);
-        AutoPtr<TaskStack> stack = (TaskStack*)(IObject*)value.Get();
+        AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(value);
         Slogger::V(TAG, "  Stack #%d tasks from bottom to top:", stack->mStackId);
         List< AutoPtr<Task> >& tasks = stack->GetTasks();
         List<AutoPtr<Task> >::Iterator tasksIt = tasks.Begin();
@@ -5800,7 +5800,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::FindAppWindowInsert
     Int32 taskId = target->mGroupId;
     AutoPtr<IInterface> value;
     mTaskIdToTask->Get(taskId, (IInterface**)&value);
-    AutoPtr<Task> targetTask = (Task*)(IObject*)value.Get();
+    AutoPtr<Task> targetTask = (Task*)IObject::Probe(value);
     if (targetTask == NULL) {
         Slogger::W(TAG, "findAppWindowInsertionPointLocked: no Task for %p taskId=%d"
                 , target, taskId);
@@ -5984,7 +5984,7 @@ void CWindowManagerService::MoveTaskToTop(
     synchronized(mWindowMapLock) {
         AutoPtr<IInterface> value;
         mTaskIdToTask->Get(taskId, (IInterface**)&value);
-        AutoPtr<Task> task = (Task*)(IObject*)value.Get();
+        AutoPtr<Task> task = (Task*)IObject::Probe(value);
         if (task == NULL) {
             // Normal behavior, addAppToken will be called next and task will be created.
             return;
@@ -6016,7 +6016,7 @@ void CWindowManagerService::MoveTaskToBottom(
     synchronized(mWindowMapLock) {
         AutoPtr<IInterface> value;
         mTaskIdToTask->Get(taskId, (IInterface**)&value);
-        AutoPtr<Task> task = (Task*)(IObject*)value.Get();
+        AutoPtr<Task> task = (Task*)IObject::Probe(value);
         if (task == NULL) {
             Slogger::E(TAG, "moveTaskToBottom: taskId=%d not found in mTaskIdToTask", taskId);
             return;
@@ -6044,7 +6044,7 @@ void CWindowManagerService::AttachStack(
         if (displayContent != NULL) {
             AutoPtr<IInterface> value;
             mStackIdToStack->Get(stackId, (IInterface**)&value);
-            AutoPtr<TaskStack> stack = (TaskStack*)(IObject*)value.Get();
+            AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(value);
             if (stack == NULL) {
                 if (DEBUG_STACK) Slogger::D(TAG, "attachStack: stackId=%d", stackId);
                 stack = new TaskStack(this, stackId);
@@ -6080,7 +6080,7 @@ void CWindowManagerService::DetachStack(
     synchronized(mWindowMapLock) {
         AutoPtr<IInterface> value;
         mStackIdToStack->Get(stackId, (IInterface**)&value);
-        AutoPtr<TaskStack> stack = (TaskStack*)(IObject*)value.Get();
+        AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(value);
         if (stack != NULL) {
             AutoPtr<DisplayContent> displayContent = stack->GetDisplayContent();
             if (displayContent != NULL) {
@@ -6123,7 +6123,7 @@ void CWindowManagerService::RemoveTask(
     synchronized(mWindowMapLock) {
         AutoPtr<IInterface> value;
         mTaskIdToTask->Get(taskId, (IInterface**)&value);
-        AutoPtr<Task> task = (Task*)(IObject*)value.Get();
+        AutoPtr<Task> task = (Task*)IObject::Probe(value);
         if (task == NULL) {
             if (DEBUG_STACK) Slogger::I(TAG, "removeTask: could not find taskId=%d", taskId);
             return;
@@ -6141,13 +6141,13 @@ void CWindowManagerService::AddTask(
         if (DEBUG_STACK) Slogger::I(TAG, "addTask: adding taskId=%d to %d", taskId, (toTop ? "top" : "bottom"));
         AutoPtr<IInterface> value;
         mTaskIdToTask->Get(taskId, (IInterface**)&value);
-        AutoPtr<Task> task = (Task*)(IObject*)value.Get();
+        AutoPtr<Task> task = (Task*)IObject::Probe(value);
         if (task == NULL) {
             return;
         }
         AutoPtr<IInterface> stackValue;
         mStackIdToStack->Get(stackId, (IInterface**)&stackValue);
-        AutoPtr<TaskStack> stack = (TaskStack*)(IObject*)stackValue.Get();
+        AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(stackValue);
         stack->AddTask(task, toTop);
         AutoPtr<DisplayContent> displayContent = stack->GetDisplayContent();
         displayContent->mLayoutNeeded = TRUE;
@@ -6162,7 +6162,7 @@ ECode CWindowManagerService::ResizeStack(
     synchronized(mWindowMapLock) {
         AutoPtr<IInterface> stackValue;
         mStackIdToStack->Get(stackId, (IInterface**)&stackValue);
-        AutoPtr<TaskStack> stack = (TaskStack*)(IObject*)stackValue.Get();
+        AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(stackValue);
         if (stack == NULL) {
             Slogger::E(TAG, "resizeStack: stackId %d not found.", stackId);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -6182,7 +6182,7 @@ void CWindowManagerService::GetStackBounds(
 {
     AutoPtr<IInterface> stackValue;
     mStackIdToStack->Get(stackId, (IInterface**)&stackValue);
-    AutoPtr<TaskStack> stack = (TaskStack*)(IObject*)stackValue.Get();
+    AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(stackValue);
     if (stack != NULL) {
         stack->GetBounds(bounds);
         return;
@@ -9122,14 +9122,14 @@ ECode CWindowManagerService::H::HandleMessage(
         case ADD_STARTING: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AppWindowToken* wtoken = (AppWindowToken*)(IObject*)obj.Get();
+            AppWindowToken* wtoken = (AppWindowToken*)IObject::Probe(obj);
             mHost->HandleAddStarting(wtoken);
             break;
         }
         case REMOVE_STARTING: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AppWindowToken* wtoken = (AppWindowToken*)(IObject*)obj.Get();
+            AppWindowToken* wtoken = (AppWindowToken*)IObject::Probe(obj);
             mHost->HandleRemoveStarting(wtoken);
             break;
         }
@@ -9140,14 +9140,14 @@ ECode CWindowManagerService::H::HandleMessage(
         case REPORT_APPLICATION_TOKEN_DRAWN: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AppWindowToken* wtoken = (AppWindowToken*)(IObject*)obj.Get();
+            AppWindowToken* wtoken = (AppWindowToken*)IObject::Probe(obj);
             mHost->HandleReportApplicationTokenDrawn(wtoken);
             break;
         }
         case REPORT_APPLICATION_TOKEN_WINDOWS: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AppWindowToken* wtoken = (AppWindowToken*)(IObject*)obj.Get();
+            AppWindowToken* wtoken = (AppWindowToken*)IObject::Probe(obj);
             Boolean nowVisible = arg1 != 0;
             Boolean nowGone = arg2 != 0;
             mHost->HandleReportApplicationTokenWindows(nowVisible, nowGone, wtoken);
@@ -9259,7 +9259,7 @@ ECode CWindowManagerService::H::HandleMessage(
                 AutoLock lock(mHost->mWindowMapLock);
                 AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
-                AutoPtr<DisplayContent> dc = (DisplayContent*)(IObject*)obj.Get();
+                AutoPtr<DisplayContent> dc = (DisplayContent*)IObject::Probe(obj);
                 stackId = dc->StackIdFromPoint(arg1, arg2);
             }
             if (stackId >= 0) {
@@ -9665,7 +9665,7 @@ ECode CWindowManagerService::HandleAppFreezeTimeout()
         for (Int32 stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
             AutoPtr<IInterface> value;
             mStackIdToStack->ValueAt(stackNdx, (IInterface**)&value);
-            AutoPtr<TaskStack> stack = (TaskStack*)(IObject*)value.Get();
+            AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(value);
             List< AutoPtr<Task> >& tasks = stack->GetTasks();
             List<AutoPtr<Task> >::ReverseIterator rit = tasks.RBegin();
             for (; rit != tasks.REnd(); ++rit) {
@@ -11502,7 +11502,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         // Initialize state of exiting applications.
         AutoPtr<IInterface> value;
         mStackIdToStack->ValueAt(stackNdx, (IInterface**)&value);
-        AutoPtr<TaskStack> taskStack = (TaskStack*)(IObject*)value.Get();
+        AutoPtr<TaskStack> taskStack = (TaskStack*)IObject::Probe(value);
         AppTokenList exitingAppTokens = taskStack->mExitingAppTokens;
         AppTokenList::ReverseIterator tokenRit = exitingAppTokens.RBegin();
         for (; tokenRit != exitingAppTokens.REnd(); ++tokenRit) {
@@ -11973,7 +11973,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         // Initialize state of exiting applications.
         AutoPtr<IInterface> value;
         mStackIdToStack->ValueAt(stackNdx, (IInterface**)&value);
-        AutoPtr<TaskStack> taskStack = (TaskStack*)(IObject*)value.Get();
+        AutoPtr<TaskStack> taskStack = (TaskStack*)IObject::Probe(value);
         AppTokenList exitingAppTokens = taskStack->mExitingAppTokens;
         AppTokenList::ReverseIterator appTokenRit = exitingAppTokens.RBegin();
         while (appTokenRit != exitingAppTokens.REnd()) {

@@ -328,7 +328,7 @@ int main(int argc, char* argv[])
     if (zygote) {
         runtime.Start(
             String("Elastos.Droid.Core.eco"),
-            String("LElastos/Droid/Internal/Os/CZygoteInit;"),
+            String("Elastos.Droid.Internal.Os.CZygoteInit"),
             argArray);
     }
     else if (className) {
@@ -341,7 +341,7 @@ int main(int argc, char* argv[])
 
         runtime.Start(
             String("Elastos.Droid.Core.eco"),
-            String("LElastos/Droid/Internal/Os/CRuntimeInit;"),
+            String("Elastos.Droid.Internal.Os.CRuntimeInit"),
             argArray);
     }
     else {
