@@ -12,9 +12,11 @@
 #include "elastos/droid/app/CActivityNonConfigurationInstances.h"
 #include "elastos/droid/app/CActivityManagerTaskDescription.h"
 #include "elastos/droid/app/CActivityManager.h"
+#include "elastos/droid/app/ActivityTransitionState.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/os/CUserHandle.h"
+#include "elastos/droid/os/CStrictMode.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/graphics/CBitmap.h"
@@ -56,6 +58,8 @@ using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::IStrictMode;
+using Elastos::Droid::Os::CStrictMode;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::CIntent;
@@ -177,7 +181,9 @@ const String Activity::SAVED_DIALOGS_TAG("android:savedDialogs");
 const String Activity::SAVED_DIALOG_KEY_PREFIX("android:dialog_");
 const String Activity::SAVED_DIALOG_ARGS_KEY_PREFIX("android:dialog_args_");
 
-CAR_INTERFACE_IMPL_9(Activity, ContextThemeWrapper, IActivity, ILayoutInflaterFactory, ILayoutInflaterFactory2, IWindowCallback, IKeyEventCallback, IViewOnCreateContextMenuListener, IComponentCallbacks, IComponentCallbacks2, IOnWindowDismissedCallback)
+CAR_INTERFACE_IMPL_9(Activity, ContextThemeWrapper, IActivity, ILayoutInflaterFactory, \
+    ILayoutInflaterFactory2, IWindowCallback, IKeyEventCallback, IViewOnCreateContextMenuListener, \
+    IComponentCallbacks, IComponentCallbacks2, IOnWindowDismissedCallback)
 
 Activity::Activity()
     : mCalled(FALSE)
@@ -204,9 +210,6 @@ Activity::Activity()
     , mTitleReady(FALSE)
     , mDefaultKeyMode(IActivity::DEFAULT_KEYS_DISABLE)
 {
-    mFragments = new FragmentManagerImpl();
-    mContainer = new FragmentContainerLocal(this);
-    CHandler::New((IHandler**)&mHandler);
 }
 
 Activity::~Activity()
@@ -218,6 +221,22 @@ Activity::~Activity()
 
 ECode Activity::constructor()
 {
+    mFragments = new FragmentManagerImpl();
+    mContainer = new FragmentContainerLocal(this);
+
+    // assert(0 && "TODO");
+    // AutoPtr<IStrictMode> strictMode;
+    // CStrictMode::AcquireSingleton((IStrictMode**)&strictMode);
+    // strictMode->TrackActivity((IActivity*)this, (IInterface**)&mInstanceTracker);
+
+    CHandler::New((IHandler**)&mHandler);
+
+    AutoPtr<ActivityTransitionState> ats = new ActivityTransitionState();
+    ats->constructor();
+    mActivityTransitionState = ats.Get();
+    mEnterTransitionListener = SharedElementCallback::NULL_CALLBACK;
+    mExitTransitionListener = SharedElementCallback::NULL_CALLBACK;
+
     return NOERROR;
 }
 

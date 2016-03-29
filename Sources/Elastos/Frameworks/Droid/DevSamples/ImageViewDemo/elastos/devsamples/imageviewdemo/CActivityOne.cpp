@@ -91,31 +91,31 @@ ECode CActivityOne::OnCreate(
 ECode CActivityOne::OnStart()
 {
     Logger::I(DBG_TAG, " >> OnStart()");
-    return NOERROR;
+    return Activity::OnStart();
 }
 
 ECode CActivityOne::OnResume()
 {
     Logger::I(DBG_TAG, " >> OnResume()");
-    return NOERROR;
+    return Activity::OnResume();
 }
 
 ECode CActivityOne::OnPause()
 {
     Logger::I(DBG_TAG, " >> OnPause()");
-    return NOERROR;
+    return Activity::OnPause();
 }
 
 ECode CActivityOne::OnStop()
 {
     Logger::I(DBG_TAG, " >> OnStop()");
-    return NOERROR;
+    return Activity::OnStop();
 }
 
 ECode CActivityOne::OnDestroy()
 {
     Logger::I(DBG_TAG, " >> OnDestroy()");
-    return NOERROR;
+    return Activity::OnDestroy();
 }
 
 ECode CActivityOne::OnActivityResult(
@@ -124,7 +124,7 @@ ECode CActivityOne::OnActivityResult(
     /* [in] */ IIntent *data)
 {
     Logger::I(DBG_TAG, " >> OnActivityResult()");
-    return NOERROR;
+    return Activity::OnActivityResult(requestCode, resultCode, data);
 }
 
 } // namespace ImageViewDemo

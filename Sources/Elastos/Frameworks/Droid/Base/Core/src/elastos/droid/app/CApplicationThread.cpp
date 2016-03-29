@@ -62,6 +62,13 @@ CApplicationThread::CApplicationThread()
 {
 }
 
+CApplicationThread::~CApplicationThread()
+{
+    String info;
+    ToString(&info);
+    Slogger::I(TAG, "~CApplicationThread(): 0x%p : %s", info.string());
+}
+
 ECode CApplicationThread::constructor()
 {
     return NOERROR;

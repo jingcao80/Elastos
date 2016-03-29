@@ -47,6 +47,8 @@ public:
 
     CApplicationThread();
 
+    ~CApplicationThread();
+
     CARAPI constructor();
 
     CARAPI SchedulePauseActivity(

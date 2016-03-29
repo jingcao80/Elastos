@@ -321,7 +321,7 @@ ECode PhoneWindow::_DecorView::DecorViewWeakReferenceImpl::Resolve(
 //===============================================================================================
 // PhoneWindow::_DecorView
 //===============================================================================================
-CAR_INTERFACE_IMPL(PhoneWindow::_DecorView, Object, IRootViewSurfaceTaker)
+CAR_INTERFACE_IMPL(PhoneWindow::_DecorView, FrameLayout, IRootViewSurfaceTaker)
 
 PhoneWindow::_DecorView::_DecorView(
     /* [in] */ PhoneWindow* host)
@@ -2796,13 +2796,11 @@ ECode PhoneWindow::SetContentView(
     if (mContentParent == NULL) {
         InstallDecor();
     }
-    else if(!hFeature)
-    {
+    else if (!hFeature) {
         mContentParent->RemoveAllViews();
     }
 
-    if (hFeature)
-    {
+    if (hFeature) {
         AutoPtr<IScene> newScene;
         AutoPtr<ISceneHelper> sceneHelper;
         CSceneHelper::AcquireSingleton((ISceneHelper**)&sceneHelper);
@@ -2811,8 +2809,7 @@ ECode PhoneWindow::SetContentView(
         sceneHelper->GetSceneForLayout(mContentParent, layoutResID, context, (IScene**)&newScene);
         TransitionTo(newScene);
     }
-    else
-    {
+    else {
         AutoPtr<IView> root;
         mLayoutInflater->Inflate(layoutResID, mContentParent.Get(), (IView**)&root);
     }
@@ -4694,6 +4691,7 @@ ECode PhoneWindow::GenerateLayout(
     /* [in] */ DecorView* decor,
     /* [out] */ IViewGroup** viewGroup)
 {
+    assert(decor != NULL);
     VALIDATE_NOT_NULL(viewGroup);
     *viewGroup = NULL;
 
@@ -5046,10 +5044,10 @@ ECode PhoneWindow::GenerateLayout(
 
     AutoPtr<IViewGroupLayoutParams> vparams;
     CViewGroupLayoutParams::New(
-            IViewGroupLayoutParams::MATCH_PARENT,
-            IViewGroupLayoutParams::MATCH_PARENT,
-            (IViewGroupLayoutParams**)&vparams);
-    IViewGroup::Probe(decor)->AddView(in.Get(), vparams.Get());
+        IViewGroupLayoutParams::MATCH_PARENT,
+        IViewGroupLayoutParams::MATCH_PARENT,
+        (IViewGroupLayoutParams**)&vparams);
+    IViewGroup::Probe(decor)->AddView(in, vparams);
     mContentRoot = IViewGroup::Probe(in);
 
     AutoPtr<IView> tmp;

@@ -2330,7 +2330,6 @@ ECode CActivityThread::PerformLaunchActivity(
             }
         }
 
-    Slogger::I(TAG, " == 5");
         a->SetCalled(FALSE);
 
         if (r->IsPersistable()) {
@@ -2340,7 +2339,6 @@ ECode CActivityThread::PerformLaunchActivity(
             mInstrumentation->CallActivityOnCreate(a, r->mState);
         }
 
-    Slogger::I(TAG, " == 6");
         Boolean bval;
         a->IsCalled(&bval);
         if (!bval) {
@@ -2348,26 +2346,20 @@ ECode CActivityThread::PerformLaunchActivity(
             AutoPtr<IComponentName> cn;
             r->mIntent->GetComponent((IComponentName**)&cn);
             cn->ToShortString(&activityName);
-            Slogger::E(TAG, "Activity %s did not call through to super.onCreate().", activityName.string());
+            Slogger::E(TAG, "Activity %s did not call through to super::OnCreate().", activityName.string());
             return E_SUPER_NOT_CALLED_EXCEPTION;
-//            throw new SuperNotCalledException(
-//                "Activity " + r.intent.getComponent().toShortString() +
-//                " did not call through to super.onCreate()");
         }
         r->mActivity = a;
         r->mStopped = TRUE;
 
-    Slogger::I(TAG, " == 7");
-        Boolean finished;
-        r->mActivity->IsFinishing(&finished);
-        if (!finished) {
+        r->mActivity->IsFinishing(&bval);
+        if (!bval) {
             a->PerformStart();
             r->mStopped = FALSE;
         }
 
-    Slogger::I(TAG, " == 8");
-        r->mActivity->IsFinishing(&finished);
-        if (!finished) {
+        r->mActivity->IsFinishing(&bval);
+        if (!bval) {
             if (r->IsPersistable()) {
                 if (r->mState != NULL || r->mPersistentState != NULL) {
                     mInstrumentation->CallActivityOnRestoreInstanceState(a, r->mState, r->mPersistentState);
@@ -2378,38 +2370,31 @@ ECode CActivityThread::PerformLaunchActivity(
             }
         }
 
-    Slogger::I(TAG, " == 9");
-        r->mActivity->IsFinishing(&finished);
-        if (!finished) {
+        r->mActivity->IsFinishing(&bval);
+        if (!bval) {
             a->SetCalled(FALSE);
-
             if (r->IsPersistable()) {
-                if (r->mState != NULL || r->mPersistentState != NULL) {
-                    mInstrumentation->CallActivityOnPostCreate(a, r->mState, r->mPersistentState);
-                }
+                mInstrumentation->CallActivityOnPostCreate(a, r->mState, r->mPersistentState);
             }
-            else if (r->mState != NULL) {
+            else {
                 mInstrumentation->CallActivityOnPostCreate(a, r->mState);
             }
 
-    Slogger::I(TAG, " == 10");
-            Boolean called;
-            a->IsCalled(&called);
-           if (!called) {
+            a->IsCalled(&bval);
+           if (!bval) {
                 String activityName;
                 AutoPtr<IComponentName> cn;
                 r->mIntent->GetComponent((IComponentName**)&cn);
                 cn->ToShortString(&activityName);
-                Slogger::E(TAG, "Activity %s did not call through to super.onPostCreate().", activityName.string());
+                Slogger::E(TAG, "Activity %s did not call through to super::OnPostCreate().", activityName.string());
                 return E_SUPER_NOT_CALLED_EXCEPTION;
-//                throw new SuperNotCalledException(
-//                    "Activity " + r.intent.getComponent().toShortString() +
-//                    " did not call through to super.onPostCreate()");
            }
         }
     }
     r->mPaused = TRUE;
+    Slogger::I(TAG, " >>> 1");
     mActivities[r->mToken] = r;
+    Slogger::I(TAG, " >>> 2");
 
 //    } catch (SuperNotCalledException e) {
 //        throw e;

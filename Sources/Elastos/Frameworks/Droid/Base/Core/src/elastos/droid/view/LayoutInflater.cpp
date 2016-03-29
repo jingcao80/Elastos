@@ -719,18 +719,6 @@ ECode LayoutInflater::CreateView(
             }
         }
 
-        Int32 ctorCount;
-        clazz->GetConstructorCount(&ctorCount);
-        AutoPtr< ArrayOf<IConstructorInfo *> > allInfos = ArrayOf<IConstructorInfo *>::Alloc(ctorCount);
-        clazz->GetAllConstructorInfos(allInfos);
-        for (Int32 i = 0; i < allInfos->GetLength(); ++i) {
-            IConstructorInfo* ci = (*allInfos)[i];
-            String name;
-            ci->GetName(&name);
-            Int32 paramCount;
-            ci->GetParamCount(&paramCount);
-            Slogger::I(TAG, " constructor: %s, paramCount: %d", name.string(), paramCount);
-        }
         LAYOUT_INFLATOR_CATCH_EXCEPTION1(clazz->GetConstructorInfoByParamNames(
             mConstructorSignature, (IConstructorInfo**)&constructor), "GetConstructorInfoByParamNames");
         sConstructorMap->Put(csq, constructor.Get());
@@ -839,7 +827,11 @@ ECode LayoutInflater::OnCreateView(
     /* [in] */ IAttributeSet* attrs,
     /* [out] */ IView** view)
 {
-    return CreateView(name, String("Elastos/Droid/Widget/"), attrs, view);
+    String ns("Elastos/Droid/Widget/");
+    if (name.Equals("ViewStub")) {
+        ns = "Elastos/Droid/View/";
+    }
+    return CreateView(name, ns, attrs, view);
 }
 
 ECode LayoutInflater::OnCreateView(
@@ -870,41 +862,7 @@ String LayoutInflater::ConvertViewName(
 
     if (name.StartWith("com.android.internal.widget.")) {
         return Replace(name, "com.android.internal.widget.",
-            "Elastos.Droid.Widget.Internal.");
-    }
-    // else if (name.StartWith("com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout")) {
-    //     return Replace(name, "com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout",
-    //         "Elastos.Droid.SystemUI.StatusBar.Tablet.NotificationIconAreaIconLayout");
-    // }
-    else if (name.StartWith("com.android.systemui.statusbar.tablet.")) {
-        return Replace(name, "com.android.systemui.statusbar.tablet.",
-            "Elastos.Droid.SystemUI.StatusBar.Tablet.");
-    }
-    else if (name.StartWith("com.android.internal.view.menu.")) {
-        return Replace(name, "com.android.internal.view.menu.",
-            "Elastos.Droid.View.Menu.");
-    }
-    else if (name.StartWith("com.android.systemui.statusbar.phone.")) {
-        return Replace(name, "com.android.systemui.statusbar.phone.",
-            "Elastos.Droid.SystemUI.StatusBar.Phone.");
-    }
-    else if (name.StartWith("com.android.systemui.statusbar.policy.")) {
-        return Replace(name, "com.android.systemui.statusbar.policy.",
-            "Elastos.Droid.SystemUI.StatusBar.Policy.");
-    }
-    else if (name.StartWith("com.android.systemui.statusbar.")) {
-        return Replace(name, "com.android.systemui.statusbar.",
-            "Elastos.Droid.SystemUI.StatusBar.");
-    }
-    else if (name.StartWith("com.android.systemui.recent.")) {
-        return Replace(name, "com.android.systemui.recent.",
-            "Elastos.Droid.SystemUI.Recent.");
-    }
-    else if (name.StartWith("com.android.systemui.")) {
-        assert(0 && "TODO");
-    }
-    else if(name.Equals("com.android.internal.app.AlertControllerRecycleListView")) {
-        return String("Elastos.Droid.Widget.RecycleListView");
+            "Elastos.Droid.Internal.Widget.");
     }
     else if (name.StartWith("android.preference.")) {
         return Replace(name, "android.preference.",

@@ -45,6 +45,10 @@ public:
     CARAPI GetKeyDispatchingTimeout(
         /* [out] */ Int64* timeout);
 
+    CARAPI Equals(
+        /* [in] */ IInterface* other,
+        /* [out] */ Boolean* result);
+
     CARAPI ToString(
         /* [out] */ String* str);
 

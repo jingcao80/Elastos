@@ -5,11 +5,13 @@
 #include "elastos/droid/server/am/ActivityRecord.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::View::EIID_IApplicationToken;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -81,7 +83,6 @@ ECode CActivityRecordToken::KeyDispatchingTimedOut(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-
     AutoPtr<ActivityRecord> ar = GetActivityRecord();
     if (ar != NULL) {
         return ar->KeyDispatchingTimedOut(reason, result);
@@ -103,6 +104,15 @@ ECode CActivityRecordToken::GetKeyDispatchingTimeout(
 
     *timeout = 0;
     return NOERROR;
+}
+
+ECode CActivityRecordToken::Equals(
+    /* [in] */ IInterface* other,
+    /* [out] */ Boolean* result)
+{
+    Slogger::I("CActivityRecordToken", "Equals %p, this:%p",
+        IApplicationToken::Probe(other), (IApplicationToken*)this);
+    return Object::Equals(other, result);
 }
 
 ECode CActivityRecordToken::ToString(

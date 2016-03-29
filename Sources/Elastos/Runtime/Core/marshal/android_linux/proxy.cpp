@@ -570,13 +570,13 @@ ECode CInterfaceProxy::ProxyEntry(
             "Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize));
     assert(inSize >= sizeof(MarshalHeader));
 
-// #if defined(_DEBUG) || defined(_MARSHAL_DEBUG)
-//     _DumpObjectProxy(thisPtr->mOwner);
-//     ALOGD(" >>> Current Interface:");
-//     _DumpInterfaceProxy(thisPtr);
-//     ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex, argNum);
-//     ALOGD(" >>> Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize);
-// #endif
+#if defined(_DEBUG) || defined(_MARSHAL_DEBUG)
+    _DumpObjectProxy(thisPtr->mOwner);
+    ALOGD(" >>> Current Interface:");
+    _DumpInterfaceProxy(thisPtr);
+    ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex, argNum);
+    ALOGD(" >>> Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize);
+#endif
 
     inParcel = new CRemoteParcel();
     ec = thisPtr->MarshalIn(methodIndex, args, inParcel);
@@ -829,6 +829,10 @@ PInterface CObjectProxy::Probe(REIID riid)
     }
     else if (riid == EIID_IProxy) {
         return (IProxy*)this;
+    }
+    else if (riid == EIID_IWeakReferenceSource) {
+        assert(0 && "not implemented.");
+        return NULL;
     }
 
     if (riid == EIID_CALLBACK_CONNECTOR) {
