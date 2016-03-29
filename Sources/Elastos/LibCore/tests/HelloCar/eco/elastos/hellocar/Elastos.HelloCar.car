@@ -17,8 +17,8 @@ module
         constructor();                  // 显式声明无参构造函数
 
         constructor(                    // 显式声明有参构造函数
-            [in] Int32 age,
-            [in] String name);
+            [in] Int32 ctx,
+            [in] String attrs);
 
         interface IDog;                 // 接口声明
         interface IAnimal;              // 接口声明
@@ -29,8 +29,8 @@ module
         constructor();                  // 显式声明无参构造函数
 
         constructor(                    // 显式声明有参构造函数
-            [in] Int32 age,
-            [in] String name);
+            [in] Int32 ctx,
+            [in] String attrs);
 
         interface IAnimal;              // 接口声明
         interface IComparable;          // 接口声明

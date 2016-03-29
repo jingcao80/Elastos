@@ -323,8 +323,10 @@ ECode PhoneWindow::_DecorView::DecorViewWeakReferenceImpl::Resolve(
 //===============================================================================================
 CAR_INTERFACE_IMPL(PhoneWindow::_DecorView, Object, IRootViewSurfaceTaker)
 
-PhoneWindow::_DecorView::_DecorView()
-    : mFeatureId(0)
+PhoneWindow::_DecorView::_DecorView(
+    /* [in] */ PhoneWindow* host)
+    : mHost(host)
+    , mFeatureId(0)
     , mChanging(FALSE)
     , mWatchingForMenu(FALSE)
     , mDownY(0)
@@ -335,14 +337,12 @@ PhoneWindow::_DecorView::_DecorView()
 {}
 
 ECode PhoneWindow::_DecorView::constructor(
-    /* [in] */ PhoneWindow* host,
     /* [in] */ IContext* context,
     /* [in] */ Int32 featureId)
 {
-    FAIL_RETURN(FrameLayout::constructor(context))
-
-    mHost = host;
     mFeatureId = featureId;
+
+    FAIL_RETURN(FrameLayout::constructor(context))
 
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mDrawingBounds));
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mBackgroundPadding));
@@ -1840,8 +1840,10 @@ ECode PhoneWindow::_DecorView::StartActionMode(
 //===============================================================================================
 // PhoneWindow::DecorView
 //===============================================================================================
-PhoneWindow::DecorView::DecorView()
-   : mUseSelfRef(FALSE)
+PhoneWindow::DecorView::DecorView(
+   /* [in] */ PhoneWindow* host)
+   : _DecorView(host)
+   , mUseSelfRef(FALSE)
 {
 }
 
@@ -1853,12 +1855,11 @@ PhoneWindow::DecorView::~DecorView()
 }
 
 ECode PhoneWindow::DecorView::constructor(
-   /* [in] */ PhoneWindow* host,
    /* [in] */ IContext* context,
    /* [in] */ Int32 featureId,
    /* [in] */ Boolean useSelfRef)
 {
-    FAIL_RETURN(_DecorView::constructor(host, context, featureId));
+    FAIL_RETURN(_DecorView::constructor(context, featureId));
     mUseSelfRef = useSelfRef;
     return NOERROR;
 }
@@ -1868,7 +1869,6 @@ PInterface PhoneWindow::DecorView::Probe(
 {
    return _DecorView::Probe(riid);
 }
-
 
 ECode PhoneWindow::DecorView::GetInterfaceID(
    /* [in] */ IInterface *pObject,
@@ -3200,8 +3200,8 @@ Boolean PhoneWindow::InitializePanelDecor(
 {
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    st->mDecorView = new DecorView();
-    st->mDecorView->constructor(this, context, st->mFeatureId, TRUE);
+    st->mDecorView = new DecorView(this);
+    st->mDecorView->constructor(context, st->mFeatureId, TRUE);
     st->mGravity = IGravity::CENTER | IGravity::BOTTOM;
     st->SetStyle(context);
 
@@ -4685,8 +4685,8 @@ AutoPtr<PhoneWindow::DecorView> PhoneWindow::GenerateDecor()
 {
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<PhoneWindow::DecorView> decor = new DecorView();
-    decor->constructor(this, context.Get(), -1);
+    AutoPtr<PhoneWindow::DecorView> decor = new DecorView(this);
+    decor->constructor(context.Get(), -1, FALSE);
     return decor;
 }
 
@@ -5474,64 +5474,11 @@ ECode PhoneWindow::SetNavigationBarColor(
     return NOERROR;
 }
 
-
-//ECode PhoneWindow::SetCloseOnTouchOutsideIfNotSet(
-//    /* [in] */ Boolean close)
-//{
-//    return Window::SetCloseOnTouchOutsideIfNotSet(close);
-//}
-//
-//ECode PhoneWindow::Destroy()
-//{
-//    return Window::Destroy();
-//}
-//
-//ECode PhoneWindow::SetWindowManager(
-//    /* [in] */ IWindowManager* wm,
-//    /* [in] */ IBinder* appToken,
-//    /* [in] */ const String& appName,
-//    /* [in] */ Boolean hardwareAccelerated)
-//{
-//    return Window::SetWindowManager(wm, appToken, appName, hardwareAccelerated);
-//}
-//
-//ECode PhoneWindow::AdjustLayoutParamsForSubWindow(
-//    /* [in] */ IWindowManagerLayoutParams* wp)
-//{
-//    return Window::AdjustLayoutParamsForSubWindow(wp);
-//}
-//
-//ECode PhoneWindow::SetDimAmount(
-//    /* [in] */ Float amount)
-//{
-//    return Window::SetDimAmount(amount);
-//}
-//
-//ECode PhoneWindow::SetCloseOnTouchOutside(
-//    /* [in] */ Boolean close)
-//{
-//    return Window::SetCloseOnTouchOutside(close);
-//}
-//
-//ECode PhoneWindow::ShouldCloseOnTouch(
-//    /* [in] */ IContext* context,
-//    /* [in] */ IMotionEvent* event,
-//    /* [out] */ Boolean* res)
-//{
-//    return Window::ShouldCloseOnTouch(context, event, res);
-//}
-//
-//ECode PhoneWindow::SetUiOptions(
-//    /* [in] */ Int32 uiOptions,
-//    /* [in] */ Int32 mask)
-//{
-//    return Window::SetUiOptions(uiOptions, mask);
-//}
-
 void PhoneWindow::InstallDecor()
 {
     if (mDecor == NULL) {
-        mDecor = GenerateDecor();
+        AutoPtr<DecorView> dv = GenerateDecor();
+        mDecor = dv;
         mDecor->AddRef();
         mDecor->SetDescendantFocusability(ViewGroup::FOCUS_AFTER_DESCENDANTS);
         mDecor->SetIsRootNamespace(TRUE);
@@ -5690,14 +5637,6 @@ void PhoneWindow::InstallDecor()
         }
     }
 }
-
-//ECode PhoneWindow::HasFeature(
-//    /* [in] */ Int32 feature,
-//    /* [out] */ Boolean* hasFeature)
-//{
-//    assert(hasFeature != NULL);
-//    return Window::HasFeature(feature, hasFeature);
-//}
 
 ECode PhoneWindow::SetChildDrawable(
     /* [in] */ Int32 featureId,

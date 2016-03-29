@@ -32,6 +32,7 @@ ECode Animal::constructor(
 {
     mAge = age;
     mName = name;
+    PFL_EX("Animal::constructor(%d, %s)\n", age, name.string());
     return NOERROR;
 }
 

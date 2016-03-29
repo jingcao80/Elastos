@@ -1206,6 +1206,7 @@ CActivityThread::CActivityThread()
 CActivityThread::~CActivityThread()
 {
     mOnPauseListeners.Clear();
+    Slogger::I(TAG, " >> ~CActivityThread: %p", this);
 }
 
 ECode CActivityThread::constructor()
@@ -2286,7 +2287,6 @@ ECode CActivityThread::PerformLaunchActivity(
             TO_CSTR(app), appName.string(), pkg.string(), comp.string(), dir.string());
     }
 
-    Slogger::I(TAG, " == 1");
     if (a != NULL) {
         AutoPtr<IContext> appContext = CreateBaseContextForActivity(r, a);
         AutoPtr<ICharSequence> title;
@@ -2303,12 +2303,10 @@ ECode CActivityThread::PerformLaunchActivity(
             r->mLastNonConfigurationInstances, config,
             r->mVoiceInteractor);
 
-    Slogger::I(TAG, " == 2");
         if (customIntent != NULL) {
             a->SetIntent(customIntent);
         }
 
-    Slogger::I(TAG, " == 3");
         r->mLastNonConfigurationInstances = NULL;
         a->SetStartedActivity(FALSE);
         Int32 theme = 0;
@@ -2317,7 +2315,6 @@ ECode CActivityThread::PerformLaunchActivity(
             IContext::Probe(a)->SetTheme(theme);
         }
 
-    Slogger::I(TAG, " == 4");
         String debugOnKey("debug.on");
         String defaultValue("0");
         String debugOnValue;

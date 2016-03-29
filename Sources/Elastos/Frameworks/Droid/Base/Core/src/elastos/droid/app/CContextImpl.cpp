@@ -3659,10 +3659,10 @@ ECode CContextImpl::constructor(
                 mPackageInfo->GetAppDir(&appDir);
                 AutoPtr<IContext> ctx;
                 if (mOuterContext != NULL) {
+                    AddRef(); // TODO delete
                     mOuterContext->Resolve(EIID_IContext, (IInterface**)&ctx);
                 }
 
-    Logger::I(TAG, " >> %d this:%p, IContext:%p, mResources:%p", __LINE__, this, (IContext*)this, mResources.Get());
                 resources = NULL;
                 mResourcesManager->GetTopLevelResources(
                     resDir, splitResDirs, overlayDirs, sharedLibraryFiles, displayId,
@@ -3679,7 +3679,6 @@ ECode CContextImpl::constructor(
         }
     }
 
-    Logger::I(TAG, " >> %d this:%p, IContext:%p, mResources:%p", __LINE__, this, (IContext*)this, mResources.Get());
     mResources = resources;
 
     if (container != NULL) {

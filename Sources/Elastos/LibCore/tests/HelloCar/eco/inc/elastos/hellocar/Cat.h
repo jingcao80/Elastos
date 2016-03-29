@@ -11,6 +11,8 @@ class Cat
     : public Animal
 {
 public:
+    using Animal::constructor;
+
     CARAPI CanFly(                      // 覆写基类方法
         /* [out] */ Boolean* canFly);
 };

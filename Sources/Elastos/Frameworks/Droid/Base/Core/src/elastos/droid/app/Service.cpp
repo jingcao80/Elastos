@@ -70,23 +70,6 @@ ECode Service::OnApplyThemeResource(
     return theme->ApplyStyle(resid, TRUE);
 }
 
-ECode Service::InitializeTheme()
-{
-    Boolean first = mTheme == NULL;
-    if (first) {
-        AutoPtr<IResources> resources;
-        GetResources((IResources**)&resources);
-        resources->NewTheme((IResourcesTheme**)&mTheme);
-        AutoPtr<IResourcesTheme> theme;
-        ContextWrapper::GetTheme((IResourcesTheme**)&theme);
-        if (theme != NULL) {
-            mTheme->SetTo(theme);
-        }
-    }
-
-    return OnApplyThemeResource(mTheme, mThemeResource, first);
-}
-
 ECode Service::OnCreate()
 {
     return NOERROR;

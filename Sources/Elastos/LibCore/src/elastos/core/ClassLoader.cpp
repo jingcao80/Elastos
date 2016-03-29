@@ -78,7 +78,6 @@ ECode ClassLoader::LoadClass(
     /* [in] */ const String& className,
     /* [out] */ IClassInfo** klass)
 {
-    VALIDATE_NOT_NULL(klass);
     return LoadClass(className, FALSE, klass);
 }
 
@@ -87,6 +86,7 @@ ECode ClassLoader::LoadClass(
     /* [in] */ Boolean resolve,
     /* [out] */ IClassInfo** klass)
 {
+    VALIDATE_NOT_NULL(klass);
     *klass = NULL;
     AutoPtr<IClassInfo> clazz = FindLoadedClass(className);
 
@@ -171,6 +171,7 @@ ECode BootClassLoader::LoadClass(
     /* [in] */ Boolean resolve,
     /* [out] */ IClassInfo** klass)
 {
+    VALIDATE_NOT_NULL(klass)
     *klass = NULL;
     AutoPtr<IClassInfo> clazz = FindLoadedClass(className);
 

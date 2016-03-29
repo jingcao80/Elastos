@@ -1288,7 +1288,6 @@ String ProcessCpuTracker::ReadFile(
     ECode ec = CFileInputStream::New(file, (IFileInputStream**)&is);
     FAIL_GOTO(ec, _EXIT_)
     IInputStream::Probe(is)->Read(mBuffer, &len);
-    ICloseable::Probe(is)->Close();
 
     if (len > 0) {
         Int32 i;
@@ -1306,10 +1305,8 @@ String ProcessCpuTracker::ReadFile(
     //} finally {
 _EXIT_:
     if (is != NULL) {
-        //try {
         ICloseable::Probe(is)->Close();
-        //} catch (java.io.IOException e) {
-        //}
+        is = NULL;
     }
     strictMode->SetThreadPolicy(savedPolicy);
     //}

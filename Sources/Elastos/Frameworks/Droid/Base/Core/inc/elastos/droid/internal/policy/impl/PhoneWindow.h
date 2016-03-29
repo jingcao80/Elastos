@@ -248,10 +248,10 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        _DecorView();
+        _DecorView(
+            /* [in] */ PhoneWindow* host);
 
         CARAPI constructor(
-            /* [in] */ PhoneWindow* host,
             /* [in] */ IContext* context,
             /* [in] */ Int32 featureId);
 
@@ -495,12 +495,12 @@ private:
        : public _DecorView
     {
     public:
-       DecorView();
+       DecorView(
+            /* [in] */ PhoneWindow* host);
 
        ~DecorView();
 
        CARAPI constructor(
-           /* [in] */ PhoneWindow* host,
            /* [in] */ IContext* context,
            /* [in] */ Int32 featureId,
            /* [in] */ Boolean useSelfRef = FALSE);
@@ -817,17 +817,6 @@ public:
 
     virtual ~PhoneWindow();
 
-    //CARAPI_(PInterface) Probe(
-    //    /* [in] */ REIID riid);
-
-    //CARAPI_(UInt32) AddRef();
-
-    //CARAPI_(UInt32) Release();
-
-    //CARAPI GetInterfaceID(
-    //    /* [in] */ IInterface *pObject,
-    //    /* [out] */ InterfaceID *pIID);
-
     CARAPI constructor(
         /* [in] */ IContext* context);
 
@@ -843,83 +832,9 @@ public:
     CARAPI IsFloating(
         /* [out] */ Boolean* isFloating);
 
-    //CARAPI GetContext(
-    //    /* [out] */ IContext** context);
-
-    //CARAPI GetWindowStyle(
-    //    /* [out] */ ITypedArray** attrs);
-
-
-    //CARAPI GetContainer(
-    //    /* [out] */ IWindow** container);
-
-    //CARAPI IsDestroyed(
-    //    /* [out] */ Boolean* destroyed);
-
-    //CARAPI HasChildren(
-    //    /* [out] */  Boolean* hasChildren);
-
-    //CARAPI SetWindowManager(
-    //    /* [in] */ IWindowManager* wm,
-    //    /* [in] */ IBinder* appToken,
-    //    /* [in] */ const String& appName);
-
-    //CARAPI GetWindowManager(
-    //    /* [out] */ IWindowManager** wm);
-
-    //CARAPI SetCallback(
-    //    /* [in] */ IWindowCallback* cb);
-
-    //CARAPI GetCallback(
-    //    /* [out] */ IWindowCallback** cb);
-
-    //CARAPI SetLayout(
-    //    /* [in] */ Int32 width,
-    //    /* [in] */ Int32 height);
-
-    //CARAPI SetGravity(
-    //    /* [in] */ Int32 gravity);
-
-    //CARAPI SetType(
-    //    /* [in] */ Int32 type);
-
-    //CARAPI SetFormat(
-    //    /* [in] */ Int32 format);
-
-    //CARAPI SetWindowAnimations(
-    //    /* [in] */ Int32 resId);
-
-    //CARAPI SetSoftInputMode(
-    //    /* [in] */ Int32 mode);
-
-    //CARAPI AddFlags(
-    //    /* [in] */ Int32 flags);
-
-    //CARAPI ClearFlags(
-    //    /* [in] */ Int32 flags);
-
-    //CARAPI SetFlags(
-    //    /* [in] */ Int32 flags,
-    //    /* [in] */ Int32 mask);
-
-    //CARAPI SetAttributes(
-    //    /* [in] */ IWindowManagerLayoutParams* a);
-
-    //CARAPI GetAttributes(
-    //    /* [out] */ IWindowManagerLayoutParams** params);
-
     CARAPI RequestFeature(
         /* [in] */ Int32 featureId,
         /* [out] */ Boolean* result);
-
-    //CARAPI MakeActive();
-
-    //CARAPI IsActive(
-    //    /* [out] */ Boolean* isActive);
-
-    //CARAPI FindViewById(
-    //    /* [in] */ Int32 id,
-    //    /* [out] */ IView** view);
 
     CARAPI SetContentView(
         /* [in] */ Int32 layoutResID);
@@ -1148,10 +1063,6 @@ public:
     CARAPI RestoreHierarchyState(
         /* [in] */ IBundle* savedInstanceState);
 
-//    CARAPI HasFeature(
-//        /* [in] */ Int32 feature,
-//        /* [out] */ Boolean* hasFeature);
-
     CARAPI SetChildDrawable(
         /* [in] */ Int32 featureId,
         /* [in] */ IDrawable* drawable);
@@ -1170,35 +1081,6 @@ public:
 
     virtual CARAPI GetVolumeControlStream(
         /* [out] */ Int32* streamType);
-
-	//CARAPI SetCloseOnTouchOutsideIfNotSet(
-    //    /* [in] */ Boolean close);
-	//
-    //CARAPI Destroy();
-
-    //CARAPI SetWindowManager(
-    //    /* [in] */ IWindowManager* wm,
-    //    /* [in] */ IBinder* appToken,
-    //    /* [in] */ const String& appName,
-    //    /* [in] */ Boolean hardwareAccelerated);
-
-    //CARAPI AdjustLayoutParamsForSubWindow(
-    //    /* [in] */ IWindowManagerLayoutParams* wp);
-
-    //CARAPI SetDimAmount(
-    //    /* [in] */ Float amount);
-
-    //CARAPI SetCloseOnTouchOutside(
-    //    /* [in] */ Boolean close);
-
-    //CARAPI ShouldCloseOnTouch(
-    //    /* [in] */ IContext* context,
-    //    /* [in] */ IMotionEvent* event,
-    //    /* [out] */ Boolean* res);
-
-    //CARAPI SetUiOptions(
-    //    /* [in] */ Int32 uiOptions,
-    //    /* [in] */ Int32 mask);
 
     CARAPI SetUiOptions(
         /* [in] */ Int32 uiOptions);
