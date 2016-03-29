@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_DROID_SERVER_NOTIFICATION_NOTIFICATIONMANAGERSERVICE_H__
 #define __ELASTOS_DROID_SERVER_NOTIFICATION_NOTIFICATIONMANAGERSERVICE_H__
 
+#include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/server/lights/Light.h"
 #include "elastos/droid/server/notification/ConditionProviders.h"
@@ -10,11 +11,13 @@
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/os/Handler.h"
+#include "elastos/droid/utility/LruCache.h"
 
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::App::IITransientNotification;
 using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Droid::App::IKeyguardManager;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::BroadcastReceiver;
@@ -24,6 +27,7 @@ using Elastos::Droid::Content::Pm::IParceledListSlice;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Media::IAudioAttributes;
 using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Media::Session::IMediaSessionManagerOnActiveSessionsChangedListener;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::IUserHandle;
@@ -39,11 +43,15 @@ using Elastos::Droid::Service::Notification::IStatusBarNotification;
 using Elastos::Droid::Utility::IArrayMap;
 using Elastos::Droid::Utility::IArraySet;
 using Elastos::Droid::Utility::IAtomicFile;
+using Elastos::Droid::Utility::LruCache;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IArrayDeque;
 using Elastos::Utility::IHashSet;
 using Elastos::Utility::IIterator;
+using Elastos::Utility::IList;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::Concurrent::IExecutorService;
 
 namespace Elastos {
 namespace Droid {
@@ -56,6 +64,36 @@ class NotificationManagerService
     friend class ConditionProviders;
     friend class RankingHelper;
 public:
+    class NotificationLedValues
+        : public Object
+    {
+    public:
+        Int32 mColor;
+        Int32 mOnMS;
+        Int32 mOffMS;
+    };
+
+    class FilterCacheInfo
+        : public Object
+    {
+    public:
+        String mPackageName;
+        Int32 mNotificationId;
+    };
+
+    class SpamExecutorRunnable
+        : public Runnable
+    {
+    public:
+        SpamExecutorRunnable(
+            /* [in] */ NotificationManagerService* host);
+
+        CARAPI Run();
+
+    public:
+        NotificationManagerService* mHost;
+    };
+
     class BinderService
         : public Object
         , public IINotificationManager
@@ -461,6 +499,23 @@ public:
         AutoPtr<IStatusBarNotification> mValue;
     };
 
+    class MediaSessionManagerOnActiveSessionsChangedListener
+        : public Object
+        , public IMediaSessionManagerOnActiveSessionsChangedListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        MediaSessionManagerOnActiveSessionsChangedListener(
+            /* [in] */ NotificationManagerService* host);
+
+        CARAPI OnActiveSessionsChanged(
+            /* [in] */ IList* controllers);
+
+    public:
+        NotificationManagerService* mHost;
+    };
+
 protected:
     // used to define mSettingsObserver
     class SettingsObserver
@@ -486,6 +541,7 @@ protected:
     private:
         NotificationManagerService* mHost;
         AutoPtr<IUri> NOTIFICATION_LIGHT_PULSE_URI;
+        AutoPtr<IUri> ENABLED_NOTIFICATION_LISTENERS_URI;
     };
 
 private:
@@ -1031,6 +1087,15 @@ protected:
         /* [in] */ Int32 id,
         /* [in] */ Int32 userId);
 
+    CARAPI_(void) ParseNotificationPulseCustomValuesString(
+        /* [in] */ const String& customLedValuesString);
+
+    CARAPI_(AutoPtr<NotificationLedValues>) GetLedValuesForNotification(
+        /* [in] */ INotificationRecord* ledNotification);
+
+    CARAPI_(String) MapPackage(
+        /* [in] */ const String& pkg);
+
     // lock on mNotificationList
     CARAPI_(Int32) IndexOfNotificationLocked(
         /* [in] */ const String& key);
@@ -1135,6 +1200,9 @@ private:
         /* [in] */ Int32 callingPid,
         /* [in] */ const String& listenerName);
 
+    CARAPI_(Boolean) IsLedNotificationForcedOn(
+        /* [in] */ INotificationRecord* r);
+
     CARAPI_(void) UpdateNotificationPulse();
 
     static CARAPI_(Boolean) IsUidSystem(
@@ -1164,6 +1232,16 @@ private:
     CARAPI_(Boolean) IsVisibleToListener(
         /* [in] */ IStatusBarNotification* sbn,
         /* [in] */ ManagedServices::ManagedServiceInfo* listener);
+
+    CARAPI_(void) UpdateDisableDucking();
+
+    CARAPI_(Int32) GetNotificationHash(
+        /* [in] */ INotification* notification,
+        /* [in] */ const String& packageName);
+
+    CARAPI_(Boolean) IsNotificationSpam(
+        /* [in] */ INotification* notification,
+        /* [in] */ const String& basePkg);
 
 protected:
     static const String TAG;
@@ -1231,7 +1309,7 @@ protected:
     AutoPtr<IArrayList> mLights;
     AutoPtr<NotificationRecord> mLedNotification;
 
-private:
+public:
     static const Int32 DB_VERSION;
 
     static const String TAG_BODY;
@@ -1255,6 +1333,11 @@ private:
     static const Int32 REASON_LISTENER_CANCEL;
     static const Int32 REASON_LISTENER_CANCEL_ALL;
     static const Int32 REASON_GROUP_SUMMARY_CANCELED;
+    static const String IS_FILTERED_QUERY;
+
+    static AutoPtr<IUri> FILTER_MSG_URI;
+
+    static AutoPtr<IUri> UPDATE_MSG_URI;
 
     AutoPtr<IIActivityManager> mAm;
 
@@ -1273,6 +1356,9 @@ private:
     Boolean mUseAttentionLight;
     Boolean mSystemReady;
 
+    AutoPtr<LruCache<Int32, AutoPtr<FilterCacheInfo> > > mSpamCache;
+    AutoPtr<IExecutorService> mSpamExecutor;
+
     Boolean mDisableNotificationEffects;
     Int32 mCallState;
 
@@ -1286,6 +1372,11 @@ private:
     Boolean mScreenOn;
     Boolean mInCall;
     Boolean mNotificationPulseEnabled;
+    AutoPtr<IHashMap> mNotificationPulseCustomLedValues;
+    AutoPtr<IMap> mPackageNameMappings;
+
+    // for checking lockscreen status
+    AutoPtr<IKeyguardManager> mKeyguardManager;
 
     AutoPtr<IAppOpsManager> mAppOps;
 
@@ -1302,6 +1393,8 @@ private:
     AutoPtr<NotificationListeners> mListeners;
     AutoPtr<ConditionProviders> mConditionProviders;
     AutoPtr<NotificationUsageStats> mUsageStats;
+    Boolean mDisableDuckingWhileMedia;
+    Boolean mActiveMedia;
 
     AutoPtr<MyNotificationDelegate> mNotificationDelegate;
     AutoPtr<MyBroadcastReceiver> mIntentReceiver;
@@ -1309,7 +1402,9 @@ private:
     AutoPtr<ZenModeHelper> mZenModeHelper;
     AutoPtr<MyRunnable> mBuzzBeepBlinked;
     AutoPtr<IBinder> mService;
-    AutoPtr<MyNotificationManagerInternal> mInternalService;//
+    AutoPtr<MyNotificationManagerInternal> mInternalService;
+
+    AutoPtr<MediaSessionManagerOnActiveSessionsChangedListener> mSessionListener;
 };
 
 } // Notification

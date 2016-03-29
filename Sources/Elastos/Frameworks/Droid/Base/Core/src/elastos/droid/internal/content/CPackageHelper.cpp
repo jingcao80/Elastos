@@ -616,7 +616,8 @@ ECode CPackageHelper::ResolveInstallLocation(
         checkBoth = FALSE;
     }
 
-    Boolean emulated = Environment::IsExternalStorageEmulated();
+    Boolean externalIsEmulated = Environment::IsExternalStorageEmulated();
+    Boolean noemulated = Environment::IsNoEmulatedStorageExist();
     AutoPtr<IStorageManagerHelper> smHelper;
     CStorageManagerHelper::AcquireSingleton((IStorageManagerHelper**)&smHelper);
     AutoPtr<IStorageManager> storage;
@@ -631,7 +632,7 @@ ECode CPackageHelper::ResolveInstallLocation(
     }
 
     Boolean fitsOnExternal = FALSE;
-    if (!emulated && (checkBoth || prefer == RECOMMEND_INSTALL_EXTERNAL)) {
+    if (!externalIsEmulated && (checkBoth || prefer == RECOMMEND_INSTALL_EXTERNAL)) {
         AutoPtr<IUserEnvironment> ue;
         CUserEnvironment::New(IUserHandle::USER_OWNER, (IUserEnvironment**)&ue);
         AutoPtr<IFile> target;
@@ -644,13 +645,26 @@ ECode CPackageHelper::ResolveInstallLocation(
         }
     }
 
+    if (noemulated && (checkBoth || prefer == RECOMMEND_INSTALL_EXTERNAL)) {
+        AutoPtr<IUserEnvironment> ue;
+        CUserEnvironment::New(IUserHandle::USER_OWNER, (IUserEnvironment**)&ue);
+        AutoPtr<IFile> target;
+        ue->GetSecondaryStorageDirectory((IFile**)&target);
+        // External is only an option when size is known
+        if (sizeBytes > 0) {
+            Int64 size = 0;
+            storage->GetStorageBytesUntilLow(target, &size);
+            fitsOnExternal = fitsOnExternal | (sizeBytes <= size);
+        }
+    }
+
     if (prefer == RECOMMEND_INSTALL_INTERNAL) {
         if (fitsOnInternal) {
             *result = IPackageHelper::RECOMMEND_INSTALL_INTERNAL;
             return NOERROR;
         }
     }
-    else if (!emulated && prefer == RECOMMEND_INSTALL_EXTERNAL) {
+    else if (prefer == RECOMMEND_INSTALL_EXTERNAL) {
         if (fitsOnExternal) {
             *result = IPackageHelper::RECOMMEND_INSTALL_EXTERNAL;
             return NOERROR;
@@ -662,7 +676,7 @@ ECode CPackageHelper::ResolveInstallLocation(
             *result = IPackageHelper::RECOMMEND_INSTALL_INTERNAL;
             return NOERROR;
         }
-        else if (!emulated && fitsOnExternal) {
+        else if (fitsOnExternal) {
             *result = IPackageHelper::RECOMMEND_INSTALL_EXTERNAL;
             return NOERROR;
         }
@@ -673,8 +687,13 @@ ECode CPackageHelper::ResolveInstallLocation(
      * the media was unavailable. Otherwise, indicate there was insufficient
      * storage space available.
      */
-    if (!emulated && (checkBoth || prefer == RECOMMEND_INSTALL_EXTERNAL)
+    if (!externalIsEmulated && (checkBoth || prefer == RECOMMEND_INSTALL_EXTERNAL)
         && !Environment::MEDIA_MOUNTED.Equals(Environment::GetExternalStorageState())) {
+        *result = IPackageHelper::RECOMMEND_MEDIA_UNAVAILABLE;
+        return NOERROR;
+    }
+    else if (noemulated && (checkBoth || prefer == RECOMMEND_INSTALL_EXTERNAL)
+            && !Environment::MEDIA_MOUNTED.Equals(Environment::GetSecondaryStorageState())) {
         *result = IPackageHelper::RECOMMEND_MEDIA_UNAVAILABLE;
         return NOERROR;
     }

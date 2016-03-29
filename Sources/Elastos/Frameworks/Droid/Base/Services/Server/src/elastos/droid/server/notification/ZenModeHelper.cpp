@@ -508,8 +508,16 @@ void ZenModeHelper::HandleRingerModeChanged()
         mAudioManager->GetRingerMode(&ringerMode);
         Int32 newZen = -1;
         if (ringerMode == IAudioManager::RINGER_MODE_SILENT) {
-            if (mZenMode == ISettingsGlobal::ZEN_MODE_OFF) {
+            AutoPtr<IResources> resources;
+            mContext->GetResources((IResources**)&resources);
+            Boolean b = FALSE;
+            resources->GetBoolean(
+                        R::bool_::config_setZenModeWhenSilentModeOn, &b);
+            if (mZenMode == ISettingsGlobal::ZEN_MODE_OFF && !b) {
                 newZen = ISettingsGlobal::ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+            }
+            else if (mZenMode != ISettingsGlobal::ZEN_MODE_NO_INTERRUPTIONS) {
+                newZen = ISettingsGlobal::ZEN_MODE_NO_INTERRUPTIONS;
             }
         }
         else if ((ringerMode == IAudioManager::RINGER_MODE_NORMAL

@@ -79,6 +79,16 @@ public:
         /* [in] */ Int32 uid,
         /* [in] */ Int32 visibility);
 
+    CARAPI GetShowNotificationForPackageOnKeyguard(
+        /* [in] */ const String& packageName,
+        /* [in] */ Int32 uid,
+        /* [out] */ Int32* result);
+
+    CARAPI SetShowNotificationForPackageOnKeyguard(
+        /* [in] */ const String& packageName,
+        /* [in] */ Int32 uid,
+        /* [in] */ Int32 keyguard);
+
     CARAPI_(void) Dump(
         /* [in] */ IPrintWriter* pw,
         /* [in] */ const String& prefix,
@@ -112,6 +122,7 @@ private:
     static const String ATT_UID;
     static const String ATT_PRIORITY;
     static const String ATT_VISIBILITY;
+    static const String ATT_KEYGUARD;
 
     AutoPtr< ArrayOf<INotificationSignalExtractor*> > mSignalExtractors;
     AutoPtr<NotificationComparator> mPreliminaryComparator;// = new NotificationComparator();
@@ -122,6 +133,7 @@ private:
     AutoPtr<IArrayMap> mPackagePriorities;
     /* ArrayMap<String, SparseIntArray> mPackageVisibilities;*/
     AutoPtr<IArrayMap> mPackageVisibilities;
+    AutoPtr<IArrayMap> mPackageOnKeyguard;
     /* ArrayMap<String, NotificationRecord> mProxyByGroupTmp;*/
     AutoPtr<IArrayMap> mProxyByGroupTmp;
 

@@ -162,7 +162,7 @@ protected:
 private:
     AutoPtr<ISystemServiceManager> GetManager();
 
-private:
+protected:
     AutoPtr<IContext> mContext;
 };
 
