@@ -1832,14 +1832,18 @@ Float Paint::NativeMeasureText(
     }
 
     NativePaint* paint = GraphicsNative::GetNativePaint(this);
-    const Char16* textArray = String(*text).GetChar16s()->GetPayload();
     Float result = 0;
+
+    AutoPtr< ArrayOf<Char16> > textArray = ArrayOf<Char16>::Alloc(text->GetLength());
+    for (Int32 i = 0; i < text->GetLength(); ++i) {
+        (*textArray)[i] = (Char16)(*text)[i];
+    }
 
     Layout layout;
     TypefaceImpl* typeface = GraphicsNative::GetNativeTypeface(this);
-    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray, index, count, textLength);
+    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray->GetPayload(),
+        index, count, textLength);
     result = layout.getAdvance();
-    // env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
     return result;
 }
 
@@ -1860,16 +1864,15 @@ Float Paint::NativeMeasureText(
         return 0;
     }
 
-    const Char16* textArray = text.GetChar16s()->GetPayload();
     NativePaint* paint = GraphicsNative::GetNativePaint(this);
     Float width = 0;
+    AutoPtr<ArrayOf<Char16> > textArray = text.GetChar16s();
 
     Layout layout;
     TypefaceImpl* typeface = GraphicsNative::GetNativeTypeface(this);
-    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray, start, count, textLength);
+    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray->GetPayload(),
+        start, count, textLength);
     width = layout.getAdvance();
-
-    // env->ReleaseStringChars(text, textArray);
     return width;
 }
 
@@ -1882,16 +1885,15 @@ Float Paint::NativeMeasureText(
         return 0;
     }
 
-    const Char16* textArray = text.GetChar16s()->GetPayload();
     NativePaint* paint = GraphicsNative::GetNativePaint(this);
     Float width = 0;
+    AutoPtr<ArrayOf<Char16> > textArray = text.GetChar16s();
 
     Layout layout;
     TypefaceImpl* typeface = GraphicsNative::GetNativeTypeface(this);
-    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray, 0, textLength, textLength);
+    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray->GetPayload(),
+        0, textLength, textLength);
     width = layout.getAdvance();
-
-    // env->ReleaseStringChars(text, textArray);
     return width;
 }
 
@@ -1964,11 +1966,13 @@ Int32 Paint::NativeBreakText(
         return 0;
     }
 
-    const Char16* text = String(*_text).GetChar16s()->GetPayload();
-    count = breakText(*paint, typeface, text + index, count, maxWidth,
-                      bidiFlags, measuredWidth, tbd);
-    // env->ReleaseCharArrayElements(_text, const_cast<jchar*>(text),
-    //                               JNI_ABORT);
+    AutoPtr< ArrayOf<Char16> > char16Array = ArrayOf<Char16>::Alloc(_text->GetLength() - index);
+    for (Int32 i = index; i < _text->GetLength(); ++i) {
+        (*char16Array)[i] = (Char16)(*_text)[i];
+    }
+
+    count = breakText(*paint, typeface, char16Array->GetPayload(),
+        count, maxWidth, bidiFlags, measuredWidth, tbd);
     return count;
 }
 
@@ -2045,11 +2049,9 @@ Int32 Paint::NativeGetTextWidths(
 {
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    assert(0 && "TODO");
     const Char16* textArray = String(*text).GetChar16s()->GetPayload();
-    count = dotextwidths(paint, typeface, textArray + index, count, widths, bidiFlags);
-    // env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
-    //                               JNI_ABORT);
-    return count;
+    return dotextwidths(paint, typeface, textArray + index, count, widths, bidiFlags);
 }
 
 Int32 Paint::NativeGetTextWidths(
@@ -2063,10 +2065,9 @@ Int32 Paint::NativeGetTextWidths(
 {
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
-    const Char16* textArray = text.GetChar16s()->GetPayload();
-    int count = dotextwidths(paint, typeface, textArray + start, end - start, widths, bidiFlags);
-    // env->ReleaseStringChars(text, textArray);
-    return count;
+    AutoPtr<ArrayOf<Char16> > textArray = text.GetChar16s();
+    return dotextwidths(paint, typeface,
+        (Char16*)textArray->GetPayload() + start, end - start, widths, bidiFlags);
 }
 
 Int32 Paint::NativeGetTextGlyphs(
@@ -2080,7 +2081,7 @@ Int32 Paint::NativeGetTextGlyphs(
     /* [out] */ ArrayOf<Char32>* glyphs)
 {
     assert(0 && "TODO: need jni codes.");
-    return -1;
+    return 0;
 }
 
 static Float doTextRunAdvances(
@@ -2127,7 +2128,6 @@ static Float doTextRunAdvances(
     totalAdvance = layout.getAdvance();
 
     if (advances != NULL) {
-        // env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray);
         advances->Copy(advancesIndex, advancesArray, count);
     }
     return totalAdvance;
@@ -2150,7 +2150,6 @@ Float Paint::NativeGetTextRunAdvances(
     Char16* textArray = String(*text).GetChar16s()->GetPayload();
     Float result = doTextRunAdvances(paint, typeface, textArray + contextIndex,
             index - contextIndex, count, contextCount, isRtl, advances, advancesIndex);
-    // env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
     return result;
 }
 
@@ -2172,7 +2171,6 @@ Float Paint::NativeGetTextRunAdvances(
     Float result = doTextRunAdvances(paint, typeface, textArray + contextStart,
             start - contextStart, end - start, contextEnd - contextStart, isRtl,
             advances, advancesIndex);
-    // env->ReleaseStringChars(text, textArray);
     return result;
 }
 
@@ -2207,7 +2205,6 @@ Int32 Paint::NativeGetTextRunCursor(
     Char16* textArray = String(*text).GetChar16s()->GetPayload();
     Int32 result = doTextRunCursor(paint, textArray, contextStart, contextCount, dir,
             offset, cursorOpt);
-    // env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
     return result;
 }
 
@@ -2224,7 +2221,6 @@ Int32 Paint::NativeGetTextRunCursor(
     const Char16* textArray = text.GetChar16s()->GetPayload();
     Int32 result = doTextRunCursor(paint, textArray, contextStart,
             contextEnd - contextStart, dir, offset, cursorOpt);
-    // env->ReleaseStringChars(text, textArray);
     return result;
 }
 
@@ -2271,7 +2267,6 @@ void Paint::NativeGetTextPath(
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     const Char16* textArray = String(*text).GetChar16s()->GetPayload();
     getTextPath(paint, typeface, textArray + index, count, bidiFlags, x, y, path);
-    // env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
 }
 
 void Paint::NativeGetTextPath(
@@ -2290,7 +2285,6 @@ void Paint::NativeGetTextPath(
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     const Char16* textArray = text.GetChar16s()->GetPayload();
     getTextPath(paint, typeface, textArray + start, end - start, bidiFlags, x, y, path);
-    // env->ReleaseStringChars(text, textArray);
 }
 
 static void doTextBounds(
@@ -2329,7 +2323,6 @@ void Paint::NativeGetStringBounds(
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
     const Char16* textArray = text.GetChar16s()->GetPayload();
     doTextBounds(textArray + start, end - start, bounds, *paint, typeface, bidiFlags);
-    // env->ReleaseStringChars(text, textArray);
 }
 
 void Paint::NativeGetCharArrayBounds(
@@ -2345,8 +2338,6 @@ void Paint::NativeGetCharArrayBounds(
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
     const Char16* textArray = String(*text).GetChar16s()->GetPayload();
     doTextBounds(textArray + index, count, bounds, *paint, typeface, bidiFlags);
-    // env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
-    //                               JNI_ABORT);
 }
 
 void Paint::NativeFinalizer(
@@ -2400,7 +2391,7 @@ void Paint::NativeSetFontFeatureSettings(
     /* [in] */ const String& settings)
 {
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    if (!settings) {
+    if (settings.IsNull()) {
         paint->setFontFeatureSettings(std::string());
     } else {
         // ScopedUtfChars settingsChars(env, settings);

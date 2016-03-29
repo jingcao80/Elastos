@@ -2560,19 +2560,6 @@ ECode CContextImpl::GetSystemService(
         REFCOUNT_ADD(*object);
         return NOERROR;
     }
-    else if (IContext::SEARCH_SERVICE.Equals(name)) {
-        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        assert(0 && "TODO");
-    // registerService(NSD_SERVICE, new ServiceFetcher() {
-    //         @Override
-    //         public Object createService(ContextImpl ctx) {
-    //             IBinder b = ServiceManager.getService(NSD_SERVICE);
-    //             INsdManager service = INsdManager.Stub.asInterface(b);
-    //             return new NsdManager(ctx.getOuterContext(), service);
-    //         }});
-        return NOERROR;
-    }
-
     else if (IContext::POWER_SERVICE.Equals(name)) {
         AutoPtr<IInterface> service = ServiceManager::GetService(IContext::POWER_SERVICE);
         AutoPtr<IIPowerManager> powerService = IIPowerManager::Probe(service);

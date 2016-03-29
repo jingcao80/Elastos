@@ -133,17 +133,17 @@ template<> struct Hash<AutoPtr<TypeName> >                                      
                                                                                         \
 template<> struct EqualTo<TypeName *>                                                   \
 {                                                                                       \
-    size_t operator()(TypeName * x, TypeName * y) const                                 \
+    Boolean operator()(TypeName * x, TypeName * y) const                                \
     {                                                                                   \
-        return (size_t)Object::Equals(x, y);                                            \
+        return Object::Equals(x, y);                                                    \
     }                                                                                   \
 };                                                                                      \
                                                                                         \
 template<> struct EqualTo<AutoPtr<TypeName> >                                           \
 {                                                                                       \
-    size_t operator()(const AutoPtr<TypeName> & x, const AutoPtr<TypeName> & y) const   \
+    Boolean operator()(const AutoPtr<TypeName> & x, const AutoPtr<TypeName> & y) const  \
     {                                                                                   \
-        return (size_t)Object::Equals(x, y);                                            \
+        return Object::Equals(x, y);                                                    \
     }                                                                                   \
 };                                                                                      \
                                                                                         \
@@ -171,17 +171,17 @@ template<> struct Hash<AutoPtr<TypeName> >                                      
                                                                                         \
 template<> struct EqualTo<TypeName *>                                                   \
 {                                                                                       \
-    size_t operator()(TypeName * x, TypeName * y) const                                 \
+    Boolean operator()(TypeName * x, TypeName * y) const                                \
     {                                                                                   \
-        return (size_t)(x - y);                                                         \
+        return (x == y);                                                                \
     }                                                                                   \
 };                                                                                      \
                                                                                         \
 template<> struct EqualTo<AutoPtr<TypeName> >                                           \
 {                                                                                       \
-    size_t operator()(const AutoPtr<TypeName> & x, const AutoPtr<TypeName> & y) const   \
+    Boolean operator()(const AutoPtr<TypeName> & x, const AutoPtr<TypeName> & y) const  \
     {                                                                                   \
-        return (size_t)(x.Get() - y.Get());                                             \
+        return (x.Get() == y.Get());                                                    \
     }                                                                                   \
 };                                                                                      \
                                                                                         \

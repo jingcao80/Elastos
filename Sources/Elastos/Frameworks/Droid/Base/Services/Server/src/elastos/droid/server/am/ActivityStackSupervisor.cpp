@@ -2312,6 +2312,7 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
     /* [in] */ TaskRecord* inTask,
     /* [out] */ Int32* result)
 {
+    Slogger::I(TAG, " >>>>>>>>>> StartActivityLocked");
     VALIDATE_NOT_NULL(result);
     *result = IActivityManager::START_SUCCESS;
     AutoPtr<IIntent> intent = r->mIntent;
@@ -2994,6 +2995,8 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
         mService->SetFocusedActivityLocked(r);
     }
     *result = IActivityManager::START_SUCCESS;
+
+    Slogger::I(TAG, " <<<<<<<<<< StartActivityLocked");
     return NOERROR;
 }
 

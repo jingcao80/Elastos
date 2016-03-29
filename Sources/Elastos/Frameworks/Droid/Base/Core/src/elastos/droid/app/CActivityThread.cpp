@@ -2392,7 +2392,7 @@ ECode CActivityThread::PerformLaunchActivity(
 //        }
 //    }
 
-    Slogger::I(TAG, " <<< PerformLaunchActivity");
+    Slogger::I(TAG, " <<< PerformLaunchActivity : %p : %s", r->mToken.Get(), TO_CSTR(r));
     *activity = a;
     REFCOUNT_ADD(*activity);
     return NOERROR;
@@ -2601,13 +2601,7 @@ ECode CActivityThread::HandleRequestAssistContextExtras(
     CBundle::New((IBundle**)&data);
 
     RequestAssistContextExtras* cmd = (RequestAssistContextExtras*)inCmd;
-    HashMap<AutoPtr<IBinder>, AutoPtr<ActivityClientRecord> >::Iterator it;
-    it = mActivities.Find(cmd->mActivityToken);
-    AutoPtr<ActivityClientRecord> r;
-    if (it != mActivities.End()) {
-        r = it->mSecond;
-    }
-
+    AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(cmd->mActivityToken);
     if (r != NULL) {
         AutoPtr<IApplication> application;
         r->mActivity->GetApplication((IApplication**)&application);
@@ -2629,13 +2623,7 @@ ECode CActivityThread::HandleTranslucentConversionComplete(
     /* [in] */ IBinder* token,
     /* [in] */ Boolean drawComplete)
 {
-    HashMap<AutoPtr<IBinder>, AutoPtr<ActivityClientRecord> >::Iterator it;
-    it = mActivities.Find(token);
-    AutoPtr<ActivityClientRecord> r;
-    if (it != mActivities.End()) {
-        r = it->mSecond;
-    }
-
+    AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(token);
     if (r != NULL) {
         return r->mActivity->OnTranslucentConversionComplete(drawComplete);
     }
@@ -2646,12 +2634,7 @@ ECode CActivityThread::OnNewActivityOptions(
     /* [in] */ IBinder* token,
     /* [in] */ IActivityOptions* options)
 {
-    HashMap<AutoPtr<IBinder>, AutoPtr<ActivityClientRecord> >::Iterator it;
-    it = mActivities.Find(token);
-    AutoPtr<ActivityClientRecord> r;
-    if (it != mActivities.End()) {
-        r = it->mSecond;
-    }
+    AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(token);
     if (r != NULL) {
         return r->mActivity->OnNewActivityOptions(options);
     }
@@ -2661,12 +2644,7 @@ ECode CActivityThread::OnNewActivityOptions(
 ECode CActivityThread::HandleCancelVisibleBehind(
     /* [in] */ IBinder* token)
 {
-    HashMap<AutoPtr<IBinder>, AutoPtr<ActivityClientRecord> >::Iterator it;
-    it = mActivities.Find(token);
-    AutoPtr<ActivityClientRecord> r;
-    if (it != mActivities.End()) {
-        r = it->mSecond;
-    }
+    AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(token);
     if (r != NULL) {
         mSomeActivitiesChanged = TRUE;
         AutoPtr<Activity> activity = (Activity*)r->mActivity.Get();
@@ -2693,13 +2671,7 @@ ECode CActivityThread::HandleOnBackgroundVisibleBehindChanged(
     /* [in] */ IBinder* token,
     /* [in] */ Boolean visible)
 {
-    HashMap<AutoPtr<IBinder>, AutoPtr<ActivityClientRecord> >::Iterator it;
-    it = mActivities.Find(token);
-    AutoPtr<ActivityClientRecord> r;
-    if (it != mActivities.End()) {
-        r = it->mSecond;
-    }
-
+    AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(token);
     if (r != NULL) {
         return r->mActivity->OnBackgroundVisibleBehindChanged(visible);
     }
@@ -2718,13 +2690,7 @@ ECode CActivityThread::HandleInstallProvider(
 ECode CActivityThread::HandleEnterAnimationComplete(
     /* [in] */ IBinder* token)
 {
-    HashMap<AutoPtr<IBinder>, AutoPtr<ActivityClientRecord> >::Iterator it;
-    it = mActivities.Find(token);
-    AutoPtr<ActivityClientRecord> r;
-    if (it != mActivities.End()) {
-        r = it->mSecond;
-    }
-
+    AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(token);
     if (r != NULL) {
         return r->mActivity->OnEnterAnimationComplete();
     }
@@ -3383,6 +3349,7 @@ ECode CActivityThread::PerformResumeActivity(
     /* [in] */ Boolean clearHide,
     /* [out] */ IActivityClientRecord** result)
 {
+    Slogger::I(TAG, " >>> PerformResumeActivity");
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
@@ -3429,6 +3396,7 @@ ECode CActivityThread::PerformResumeActivity(
 
     *result = r;
     REFCOUNT_ADD(*result)
+    Slogger::I(TAG, " <<< PerformResumeActivity");
     return NOERROR;
 }
 
@@ -3457,6 +3425,7 @@ ECode CActivityThread::HandleResumeActivity(
     /* [in] */ Boolean isForward,
     /* [in] */ Boolean reallyResume)
 {
+    Slogger::I(TAG, " >>> HandleResumeActivity");
     // If we are getting ready to gc after going to the background, well
     // we are back active so skip it.
     UnscheduleGcIdler();
@@ -3498,7 +3467,7 @@ ECode CActivityThread::HandleResumeActivity(
             AutoPtr<IView> decor;
             r->mWindow->GetDecorView((IView**)&decor);
             decor->SetVisibility(IView::INVISIBLE);
-            AutoPtr<IViewManager> wm;
+            AutoPtr<IWindowManager> wm;
             a->GetWindowManager((IWindowManager**)&wm);
             AutoPtr<IWindowManagerLayoutParams> l;
             r->mWindow->GetAttributes((IWindowManagerLayoutParams**)&l);
@@ -3512,7 +3481,7 @@ ECode CActivityThread::HandleResumeActivity(
             a->IsVisibleFromClient(&visibleFromClient);
             if (visibleFromClient) {
                 a->SetWindowAdded(TRUE);
-                wm->AddView(decor, IViewGroupLayoutParams::Probe(l));
+                IViewManager::Probe(wm)->AddView(decor, IViewGroupLayoutParams::Probe(l));
             }
 
         // If the window has already been added, but during resume
@@ -3558,11 +3527,11 @@ ECode CActivityThread::HandleResumeActivity(
                 Boolean isVisibleFromClient;
                 r->mActivity->IsVisibleFromClient(&isVisibleFromClient);
                 if (isVisibleFromClient) {
-                    AutoPtr<IViewManager> wm;
+                    AutoPtr<IWindowManager> wm;
                     a->GetWindowManager((IWindowManager**)&wm);
                     AutoPtr<IView> decor;
                     r->mWindow->GetDecorView((IView**)&decor);
-                    wm->UpdateViewLayout(decor, IViewGroupLayoutParams::Probe(l));
+                    IViewManager::Probe(wm)->UpdateViewLayout(decor, IViewGroupLayoutParams::Probe(l));
                 }
             }
             r->mActivity->SetVisibleFromServer(TRUE);
@@ -3603,6 +3572,7 @@ ECode CActivityThread::HandleResumeActivity(
 //            } catch (RemoteException ex) {
 //            }
     }
+    Slogger::I(TAG, " <<< HandleResumeActivity");
     return NOERROR;
 }
 
@@ -4248,7 +4218,7 @@ ECode CActivityThread::PerformDestroyActivity(
 
     AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(token);
 //    Class activityClass = NULL;
-    if (localLOGV) Slogger::V(TAG, "Performing finish of %p", r.Get());
+    if (localLOGV) Slogger::V(TAG, "Performing finish of %s", TO_CSTR(r));
     if (r != NULL) {
 //        activityClass = r->mActivity->getClass();
         String activityName;
@@ -6459,9 +6429,24 @@ AutoPtr<CActivityThread::ActivityClientRecord> CActivityThread::GetActivityClien
     /* [in] */ IBinder* token)
 {
     assert(token);
-    HashMap<AutoPtr<IBinder>, AutoPtr<ActivityClientRecord> >::Iterator find
-        = mActivities.Find(token);
-    return find != mActivities.End() ? find->mSecond : NULL;
+    HashMap<AutoPtr<IBinder>, AutoPtr<ActivityClientRecord> >::Iterator it;
+    it = mActivities.Find(token);
+    if (it != mActivities.End()) {
+        return it->mSecond;
+    }
+    else {
+        Slogger::W(TAG, " >>> Failed to GetActivityClientRecord %p, current hash map: %d", token, mActivities.GetSize());
+        Int32 i = 0;
+        for (it = mActivities.Begin(); it != mActivities.End(); ++it) {
+            Slogger::I(TAG, "     > %d : %p", i++, it->mFirst.Get());
+            if (it->mFirst.Get() == token) {
+                return it->mSecond;
+            }
+        }
+    }
+
+    Slogger::W(TAG, " >>> Failed to GetActivityClientRecord %p", token);
+    return NULL;
 }
 
 } // namespace App

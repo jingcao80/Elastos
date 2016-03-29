@@ -1078,9 +1078,10 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
     if (top == NULL) {
         return;
     }
-    //if (CActivityManagerService::DEBUG_VISBILITY) Slogger::V(
-    //        TAG, "ensureActivitiesVisible behind " + top
-    //        + " configChanges=0x" + Integer.toHexString(configChanges));
+    if (CActivityManagerService::DEBUG_VISBILITY) {
+        Slogger::V(TAG, "EnsureActivitiesVisible behind %s configChanges=0x%08x",
+            TO_CSTR(top), configChanges);
+    }
 
     if (mTranslucentActivityWaiting != top) {
         mUndrawnActivitiesBelowTopTranslucent->Clear();
@@ -1134,14 +1135,16 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                     // This activity needs to be visible, but isn't even
                     // running...  get it started, but don't resume it
                     // at this point.
-                    //if (CActivityManagerService::DEBUG_VISBILITY)
-                    //  Slogger::V(TAG, "Start and freeze screen for " + r);
+                    if (CActivityManagerService::DEBUG_VISBILITY) {
+                        Slogger::V(TAG, "Start and freeze screen for %s", TO_CSTR(r));
+                    }
                     if (r.Get() != starting) {
                         r->StartFreezingScreenLocked(r->mApp, configChanges);
                     }
                     if (!r->mVisible || r->mLaunchTaskBehind) {
-                        //if (CActivityManagerService::DEBUG_VISBILITY)
-                        //  Slogger::V(TAG, "Starting and making visible: " + r);
+                        if (CActivityManagerService::DEBUG_VISBILITY) {
+                            Slogger::V(TAG, "Starting and making visible: %s", TO_CSTR(r));
+                        }
                         SetVisibile(r, TRUE);
                     }
                     if (r.Get() != starting) {
@@ -1151,8 +1154,9 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                 } else if (r->mVisible) {
                     // If this activity is already visible, then there is nothing
                     // else to do here.
-                    //if (CActivityManagerService::DEBUG_VISBILITY)
-                    //  Slogger::V(TAG, "Skipping: already visible at " + r);
+                    if (CActivityManagerService::DEBUG_VISBILITY) {
+                        Slogger::V(TAG, "Skipping: already visible at %s", TO_CSTR(r));
+                    }
                     r->StopFreezingScreenLocked(FALSE);
                     //try {
                     if (r->mReturningOptions != NULL) {
@@ -1161,15 +1165,17 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                     }
                     //} catch(RemoteException e) {
                     //}
-                } else {
+                }
+                else {
                     // This activity is not currently visible, but is running.
                     // Tell it to become visible.
                     r->mVisible = TRUE;
                     if (r->mState != ActivityState_RESUMED && r.Get() != starting) {
                         // If this activity is paused, tell it
                         // to now show its window.
-                        //if (CActivityManagerService::DEBUG_VISBILITY)
-                        //  Slogger::V(TAG, "Making visible and scheduling visibility: " + r);
+                        if (CActivityManagerService::DEBUG_VISBILITY) {
+                            Slogger::V(TAG, "Making visible and scheduling visibility: %s", TO_CSTR(r));
+                        }
                         //try {
                         if (mTranslucentActivityWaiting != NULL) {
                             r->UpdateOptionsLocked(r->mReturningOptions);
@@ -1194,12 +1200,15 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
 
                 if (r->mFullscreen) {
                     // At this point, nothing else needs to be shown
-                    //if (CActivityManagerService::DEBUG_VISBILITY)
-                    //  Slogger::V(TAG, "Fullscreen: at " + r);
+                    if (CActivityManagerService::DEBUG_VISBILITY) {
+                        Slogger::V(TAG, "Fullscreen: at %s", TO_CSTR(r));
+                    }
                     behindFullscreen = TRUE;
-                } else if (!IsHomeStack() && r->mFrontOfTask && task->IsOverHomeStack()) {
-                    //if (CActivityManagerService::DEBUG_VISBILITY)
-                    //  Slogger::V(TAG, "Showing home: at " + r);
+                }
+                else if (!IsHomeStack() && r->mFrontOfTask && task->IsOverHomeStack()) {
+                    if (CActivityManagerService::DEBUG_VISBILITY) {
+                        Slogger::V(TAG, "Showing home: at %s", TO_CSTR(r));
+                    }
                     behindFullscreen = TRUE;
                 }
             } else {
@@ -1211,16 +1220,18 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                 // Now for any activities that aren't visible to the user, make
                 // sure they no longer are keeping the screen frozen.
                 if (r->mVisible) {
-                    //if (CActivityManagerService::DEBUG_VISBILITY)
-                    //  Slogger::V(TAG, "Making invisible: " + r);
+                    if (CActivityManagerService::DEBUG_VISBILITY){
+                        Slogger::V(TAG, "Making invisible: %s", TO_CSTR(r));
+                    }
                     //try {
                     SetVisibile(r, FALSE);
                     switch (r->mState) {
                         case ActivityState_STOPPING:
                         case ActivityState_STOPPED:
                             if (r->mApp != NULL && r->mApp->mThread != NULL) {
-                                //if (CActivityManagerService::DEBUG_VISBILITY)
-                                //  Slogger::V(TAG, "Scheduling invisibility: " + r);
+                                if (CActivityManagerService::DEBUG_VISBILITY) {
+                                    Slogger::V(TAG, "Scheduling invisibility: %s", TO_CSTR(r));
+                                }
                                 r->mApp->mThread->ScheduleWindowVisibility(IBinder::Probe(r->mAppToken), FALSE);
                             }
                             break;
@@ -1314,13 +1325,11 @@ void ActivityStack::CancelInitializingActivities()
     Int32 taskSize;
     mTaskHistory->GetSize(&taskSize);
     for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
-        //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
         AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
         for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            //final ActivityRecord r = activities.get(activityNdx);
             AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
             if (aboveTop) {
                 if (r == topActivity) {
@@ -1330,8 +1339,9 @@ void ActivityStack::CancelInitializingActivities()
             }
 
             if (r->mState == ActivityState_INITIALIZING && r->mStartingWindowShown) {
-                if (CActivityManagerService::DEBUG_VISBILITY)
+                if (CActivityManagerService::DEBUG_VISBILITY) {
                     Slogger::W(TAG, "Found orphaned starting window %s", TO_CSTR(r));
+                }
                 r->mStartingWindowShown = FALSE;
                 mWindowManager->RemoveAppStartingWindow(IBinder::Probe(r->mAppToken));
             }
@@ -1360,7 +1370,7 @@ Boolean ActivityStack::ResumeTopActivityLocked(
     mInResumeTopActivity = TRUE;
     result = ResumeTopActivityInnerLocked(prev, options);
     //} finally {
-    //    mInResumeTopActivity = false;
+    mInResumeTopActivity = FALSE;
     //}
     return result;
 }
@@ -1453,7 +1463,8 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             AutoPtr<IInterface> taskobj;
             mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
             ((TaskRecord*)IObject::Probe(taskobj))->SetTaskToReturnTo(ActivityRecord::HOME_ACTIVITY_TYPE);
-        } else {
+        }
+        else {
             if (ActivityStackSupervisor::DEBUG_STATES && IsOnHomeDisplay()) {
                 Slogger::D(TAG, "resumeTopActivityLocked: Launching home next");
             }
@@ -1497,10 +1508,11 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
 
     // The activity may be waiting for stop, but that is no longer
     // appropriate for it.
-    mStackSupervisor->mStoppingActivities->Remove(TO_IINTERFACE(next));
-    mStackSupervisor->mGoingToSleepActivities->Remove(TO_IINTERFACE(next));
+    IInterface* nextObj = TO_IINTERFACE(next);
+    mStackSupervisor->mStoppingActivities->Remove(nextObj);
+    mStackSupervisor->mGoingToSleepActivities->Remove(nextObj);
     next->mSleeping = FALSE;
-    mStackSupervisor->mWaitingVisibleActivities->Remove(TO_IINTERFACE(next));
+    mStackSupervisor->mWaitingVisibleActivities->Remove(nextObj);
     next->mWaitingVisible = FALSE;
 
     if (CActivityManagerService::DEBUG_SWITCH) {
@@ -1651,7 +1663,7 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
                 Slogger::V(TAG, "Prepare close transition: prev=%s", TO_CSTR(prev));
             }
             Boolean bTemp = FALSE;
-            if (mNoAnimActivities->Contains(TO_IINTERFACE(prev), &bTemp), bTemp) {
+            if (mNoAnimActivities->Contains(nextObj, &bTemp), bTemp) {
                 anim = FALSE;
                 mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_NONE, FALSE);
             }
@@ -1671,7 +1683,7 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
                 Slogger::V(TAG, "Prepare open transition: prev=%s", TO_CSTR(prev));
             }
             Boolean bTemp;
-            if (mNoAnimActivities->Contains(TO_IINTERFACE(next), &bTemp), bTemp) {
+            if (mNoAnimActivities->Contains(nextObj, &bTemp), bTemp) {
                 anim = FALSE;
                 mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_NONE, FALSE);
             }
@@ -1696,7 +1708,7 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             Slogger::V(TAG, "Prepare open transition: no previous");
         }
         Boolean bTemp;
-        if (mNoAnimActivities->Contains(TO_IINTERFACE(next), &bTemp), bTemp) {
+        if (mNoAnimActivities->Contains(nextObj, &bTemp), bTemp) {
             anim = FALSE;
             mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_NONE, FALSE);
         }
@@ -3849,12 +3861,12 @@ void ActivityStack::LogStartActivity(
 {
     AutoPtr<IUri> data;
     r->mIntent->GetData((IUri**)&data);
-    String strData;// = data != NULL ? data->ToSafeString() : NULL;
+    String strData;
     if (data != NULL) {
         data->ToSafeString(&strData);
     }
 
-    Slogger::I(TAG, "userId:%d, taskId:%d, shortComponentName:%s, intent:%s, uri:%s",
+    Slogger::I(TAG, "StartActivity: userId:%d, taskId:%d, shortComponentName:%s, intent:%s, uri:%s",
         r->mUserId, task->mTaskId, r->mShortComponentName.string(), TO_CSTR(r->mIntent), strData.string());
 }
 

@@ -571,11 +571,11 @@ ECode CInterfaceProxy::ProxyEntry(
     assert(inSize >= sizeof(MarshalHeader));
 
 #if defined(_DEBUG) || defined(_MARSHAL_DEBUG)
-    _DumpObjectProxy(thisPtr->mOwner);
-    ALOGD(" >>> Current Interface:");
-    _DumpInterfaceProxy(thisPtr);
-    ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex, argNum);
-    ALOGD(" >>> Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize);
+    // _DumpObjectProxy(thisPtr->mOwner);
+    // ALOGD(" >>> Current Interface:");
+    // _DumpInterfaceProxy(thisPtr);
+    // ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex, argNum);
+    // ALOGD(" >>> Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize);
 #endif
 
     inParcel = new CRemoteParcel();
