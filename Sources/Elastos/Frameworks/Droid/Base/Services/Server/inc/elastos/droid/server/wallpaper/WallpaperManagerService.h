@@ -17,6 +17,8 @@
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/internal/content/PackageMonitor.h"
 #include "elastos/droid/os/FileObserver.h"
+#include <elastos/utility/etl/List.h>
+#include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::App::IWallpaperInfo;
 using Elastos::Droid::App::IIWallpaperManager;
@@ -43,6 +45,7 @@ using Elastos::Droid::Service::Wallpaper::IIWallpaperService;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::View::IIWindowManager;
 using Elastos::IO::IFile;
+using Elastos::Utility::Etl::HashMap;
 using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
@@ -121,6 +124,41 @@ protected:
     };
 
 public:
+    class KeyguardWallpaperData : public Object
+    {
+    public:
+        KeyguardWallpaperData(
+            /* [in] */ Int32 userId,
+            /* [in] */ WallpaperManagerService* host);
+
+    public:
+        Int32 mUserId;
+
+        AutoPtr<IFile> mWallpaperFile;
+
+        /**
+         * Client is currently writing a new image wallpaper.
+         */
+        Boolean mImageWallpaperPending;
+
+        /**
+         * Resource name if using a picture from the wallpaper gallery
+         */
+        String mName;
+
+        Int32 mWidth;
+        Int32 mHeight;
+
+    private:
+        /**
+         * List of callbacks registered they should each be notified when the wallpaper is changed.
+         */
+        AutoPtr<IRemoteCallbackList> mCallbacks;
+        WallpaperManagerService* mHost;
+
+        friend class WallpaperManagerService;
+    };
+
     /**
      * Observes the wallpaper for changes and notifies all IWallpaperServiceCallbacks
      * that the wallpaper has changed. The CREATE is triggered when there is no
@@ -133,6 +171,7 @@ public:
     public:
         WallpaperObserver(
             /* [in] */ WallpaperData* wallpaper,
+            /* [in] */ KeyguardWallpaperData* keyguardWallpaper,
             /* [in] */ WallpaperManagerService* host);
 
         // @Override
@@ -142,14 +181,15 @@ public:
 
     protected:
         AutoPtr<WallpaperData> mWallpaper;
+        AutoPtr<KeyguardWallpaperData> mKeyguardWallpaper;
         AutoPtr<IFile> mWallpaperDir;
         AutoPtr<IFile> mWallpaperFile;
+        AutoPtr<IFile> mKeyguardWallpaperFile;
 
     private:
         WallpaperManagerService* mHost;
     };
 
-public:
     class WallpaperConnection
         : public Object
         , public IWallpaperConnection
@@ -328,6 +368,10 @@ public:
 
     CARAPI ClearKeyguardWallpaper();
 
+    CARAPI_(void) ClearKeyguardWallpaperLocked(
+        /* [in] */ Int32 userId,
+        /* [in] */ IIRemoteCallback* reply);
+
     CARAPI HasNamedWallpaper(
         /* [in] */ const String& name,
         /* [out] */ Boolean* hasNamedWallpaper);
@@ -358,6 +402,9 @@ public:
     CARAPI GetWallpaperInfo(
         /* [out] */ IWallpaperInfo** info);
 
+    CARAPI IsKeyguardWallpaperSet(
+        /* [out] */ Boolean* result);
+
     CARAPI SetWallpaper(
         /* [in] */ const String& name,
         /* [out] */ IParcelFileDescriptor** descriptor);
@@ -370,6 +417,10 @@ public:
     CARAPI SetKeyguardWallpaper(
         /* [in] */ const String& name,
         /* [out] */ IParcelFileDescriptor** descriptor);
+
+    CARAPI_(AutoPtr<IParcelFileDescriptor>) UpdateKeyguardWallpaperBitmapLocked(
+        /* [in] */ const String& name,
+        /* [in] */ KeyguardWallpaperData* wallpaper);
 
     CARAPI SetWallpaperComponent(
         /* [in] */ IComponentName* name);
@@ -441,15 +492,24 @@ private:
     CARAPI NotifyCallbacksLocked(
         /* [in] */ WallpaperData* wallpaper);
 
+    CARAPI_(void) NotifyCallbacksLocked(
+        /* [in] */ KeyguardWallpaperData* wallpaper);
+
     CARAPI CheckPermission(
         /* [in] */ const String& permission);
 
-    static CARAPI MakeJournaledFile(
-        /* [in] */ Int32 userId,
-        /* [out] */ IJournaledFile** file);
+    static CARAPI_(AutoPtr<IJournaledFile>) MakeJournaledFile(
+        /* [in] */ Int32 userId);
+
+    static CARAPI_(AutoPtr<IJournaledFile>) MakeJournaledFile(
+        /* [in] */ const String& name,
+        /* [in] */ Int32 userId);
 
     CARAPI SaveSettingsLocked(
         /* [in] */ WallpaperData* wallpaper);
+
+    CARAPI_(void) SaveSettingsLocked(
+        /* [in] */ KeyguardWallpaperData* wallpaper);
 
     CARAPI MigrateFromOld();
 
@@ -459,6 +519,9 @@ private:
         /* [in] */ Int32 defValue);
 
     CARAPI LoadSettingsLocked(
+        /* [in] */ Int32 userId);
+
+    CARAPI_(void) LoadKeyguardSettingsLocked(
         /* [in] */ Int32 userId);
 
     CARAPI_(Int32) GetMaximumSizeDimension();
@@ -476,6 +539,8 @@ protected:
     const static Int64 MIN_WALLPAPER_CRASH_TIME = 10000;
     const static String WALLPAPER;
     const static String WALLPAPER_INFO;
+    static const String KEYGUARD_WALLPAPER;
+    static const String KEYGUARD_WALLPAPER_INFO;
 
     AutoPtr<IContext> mContext;
     AutoPtr<IIWindowManager> mIWindowManager;
@@ -490,8 +555,12 @@ protected:
     AutoPtr<IComponentName> mImageWallpaper;
 
     AutoPtr<ISparseArray> mWallpaperMap;
+    HashMap<Int32, AutoPtr<KeyguardWallpaperData> > mKeyguardWallpaperMap;
 
     Int32 mCurrentUserId;
+
+private:
+    friend class KeyguardWallpaperData;
 };
 
 } // namespace Wallpaper
