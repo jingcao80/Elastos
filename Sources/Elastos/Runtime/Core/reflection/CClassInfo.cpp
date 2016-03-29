@@ -488,17 +488,26 @@ ECode CClassInfo::AcquireConstructorList()
             return ec;
         }
 
-        String clsName;
+        String clsName, ns;
         clsName = adjustNameAddr(mBase, mClassDirEntry->mName);
         clsName += "ClassObject";
+        ns = adjustNameAddr(mBase, mClassDirEntry->mNameSpace);
 
+        String relectionClsName("L");
+        relectionClsName += ns;
+        relectionClsName += "/";
+        relectionClsName += clsName;
+        relectionClsName += ";";
         AutoPtr<IClassInfo> classInfo;
-        ec = pModuleInfo->GetClassInfo(clsName, (IClassInfo**)&classInfo);
+        ec = pModuleInfo->GetClassInfo(relectionClsName, (IClassInfo**)&classInfo);
+        if (FAILED(ec)) {
+            g_objInfoList.UnlockHashTable(EntryType_Class);
+            return ec;
+        }
+
         mCtorClassInfo = (CClassInfo*)classInfo.Get();
     }
     g_objInfoList.UnlockHashTable(EntryType_Class);
-
-    if (FAILED(ec)) return ec;
 
     mCtorList = NULL;
     return mCtorClassInfo->AcquireSpecialMethodList(

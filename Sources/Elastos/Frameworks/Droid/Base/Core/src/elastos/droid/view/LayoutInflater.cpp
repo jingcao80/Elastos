@@ -15,22 +15,12 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/widget/CBlinkLayout.h"
 #include "elastos/droid/view/CContextThemeWrapper.h"
 
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
-using Elastos::IO::ICloseable;
-using Elastos::Core::AutoLock;
-using Elastos::Core::IBoolean;
-using Elastos::Core::CBoolean;
-using Elastos::Core::StringUtils;
-using Elastos::Core::IClassLoader;
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Utility::CHashMap;
-using Elastos::Utility::IHashMap;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::ITypedArray;
@@ -39,16 +29,28 @@ using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::EIID_IHandlerCallback;
 using Elastos::Droid::Widget::CBlinkLayout;
 using Elastos::Droid::Widget::IFrameLayout;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CString;
+using Elastos::IO::ICloseable;
+using Elastos::Core::AutoLock;
+using Elastos::Core::IBoolean;
+using Elastos::Core::CBoolean;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::IClassLoader;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {
 namespace View {
 
-#define LAYOUT_INFLATOR_CATCH_EXCEPTION1(expr) \
+#define LAYOUT_INFLATOR_CATCH_EXCEPTION1(expr, whereInfo) \
     do { \
         ECode ec = expr; \
         if (ec == (Int32)E_NO_SUCH_METHOD_EXCEPTION) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION1: %s, Error: E_NO_SUCH_METHOD_EXCEPTION.", name.string()); \
+            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION1: %s when %s, Error: E_NO_SUCH_METHOD_EXCEPTION.", name.string(), whereInfo); \
             /*InflateException ie = new InflateException(attrs.getPositionDescription()*/ \
                   /*+ ": Error inflating class "*/ \
                   /*+ (prefix != null ? (prefix + name) : name));*/ \
@@ -56,12 +58,12 @@ namespace View {
             return ec; \
         } \
         else if (ec == (Int32)E_CLASS_NOT_FOUND_EXCEPTION) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION1: %s, Error: E_CLASS_NOT_FOUND_EXCEPTION.", name.string()); \
+            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION1: %s when %s, Error: E_CLASS_NOT_FOUND_EXCEPTION.", name.string(), whereInfo); \
             /* If loadClass fails, we should propagate the exception. */ \
             return ec; \
         } \
         else if (FAILED(ec)) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION1: %s, Error: %08x.", name.string(), ec); \
+            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION1: %s when %s, Error: %08x.", name.string(), whereInfo, ec); \
             /*InflateException ie = new InflateException(attrs.getPositionDescription()*/ \
                     /*+ ": Error inflating class "*/ \
                     /*+ (clazz == null ? "<unknown>" : clazz.getName()));*/ \
@@ -174,7 +176,8 @@ const String LayoutInflater::TAG_REQUEST_FOCUS("requestFocus");
  * be consistent with constructor methods of all widgets declared
  * in *.car.
  */
-String LayoutInflater::mConstructorSignature("CtxAttrs");
+String LayoutInflater::mConstructorSignature(
+    "CtxAttrs(LElastos/Droid/Content/IContext;*LElastos/Droid/Utility/IAttributeSet;*LIInterface;**)E");
 
 static AutoPtr<IHashMap> InitMap()
 {
@@ -363,8 +366,7 @@ ECode LayoutInflater::From(
     *inflater = NULL;
 
     AutoPtr<IInterface> tmp;
-    ECode ec = context->GetSystemService(
-            IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&tmp);
+    ECode ec = context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&tmp);
     if (FAILED(ec) || tmp == NULL) {
         Slogger::W(TAG, "LayoutInflater not found.");
         return E_ASSERTION_ERROR;
@@ -661,6 +663,20 @@ ECode LayoutInflater::Inflate(
     return NOERROR;
 }
 
+String LayoutInflater::GetReflectionClassName(
+    /* [in] */ const String& prefix,
+    /* [in] */ const String& name)
+{
+    StringBuilder sb("L");
+    if (!prefix.IsNull()) {
+        sb += prefix;
+    }
+    sb += "C";
+    sb += name;
+    sb += ";";
+    return sb.ToString();
+}
+
 ECode LayoutInflater::CreateView(
     /* [in] */ const String& name,
     /* [in] */ const String& prefix_,
@@ -675,8 +691,10 @@ ECode LayoutInflater::CreateView(
         prefix = "Elastos.Droid.View.Menu.";
     }
 
-    Slogger::I(TAG, " CreateView: name:%s, prefix_:%s, prefix:%s",
-        name.string(), prefix_.string(), prefix.string());
+    String reflectionClassName = GetReflectionClassName(prefix, name);
+
+    Slogger::I(TAG, " CreateView: name:%s, prefix:%s, reflectionClassName:%s",
+        name.string(), prefix.string(), reflectionClassName.string());
     AutoPtr<IConstructorInfo> constructor;
     AutoPtr<IClassInfo> clazz;
 
@@ -689,24 +707,32 @@ ECode LayoutInflater::CreateView(
     if (value == NULL) {
         // Class not found in the cache, see if it's real, and try to add it
         AutoPtr<IClassLoader> cl;
-        // LAYOUT_INFLATOR_CATCH_EXCEPTION1(mContext->GetClassLoader((IClassLoader**)&cl))
-        if (!prefix.IsNull()) {
-            LAYOUT_INFLATOR_CATCH_EXCEPTION1(cl->LoadClass(prefix + name, (IClassInfo**)&clazz));
-        }
-        else {
-            LAYOUT_INFLATOR_CATCH_EXCEPTION1(cl->LoadClass(name, (IClassInfo**)&clazz));
-        }
+        LAYOUT_INFLATOR_CATCH_EXCEPTION1(mContext->GetClassLoader((IClassLoader**)&cl), "GetClassLoader")
+        assert(cl != NULL);
+        LAYOUT_INFLATOR_CATCH_EXCEPTION1(cl->LoadClass(reflectionClassName, (IClassInfo**)&clazz), "LoadClass");
 
         if (mFilter != NULL && clazz != NULL) {
             Boolean allowed;
             mFilter->OnLoadClass(clazz, &allowed);
             if (!allowed) {
-                LAYOUT_INFLATOR_CATCH_EXCEPTION1(FailNotAllowed(name, prefix, attrs));
+                LAYOUT_INFLATOR_CATCH_EXCEPTION1(FailNotAllowed(name, prefix, attrs), "FailNotAllowed");
             }
         }
 
+        Int32 ctorCount;
+        clazz->GetConstructorCount(&ctorCount);
+        AutoPtr< ArrayOf<IConstructorInfo *> > allInfos = ArrayOf<IConstructorInfo *>::Alloc(ctorCount);
+        clazz->GetAllConstructorInfos(allInfos);
+        for (Int32 i = 0; i < allInfos->GetLength(); ++i) {
+            IConstructorInfo* ci = (*allInfos)[i];
+            String name;
+            ci->GetName(&name);
+            Int32 paramCount;
+            ci->GetParamCount(&paramCount);
+            Slogger::I(TAG, " constructor: %s, paramCount: %d", name.string(), paramCount);
+        }
         LAYOUT_INFLATOR_CATCH_EXCEPTION1(clazz->GetConstructorInfoByParamNames(
-                mConstructorSignature, (IConstructorInfo**)&constructor));
+            mConstructorSignature, (IConstructorInfo**)&constructor), "GetConstructorInfoByParamNames");
         sConstructorMap->Put(csq, constructor.Get());
     }
     else {
@@ -720,13 +746,9 @@ ECode LayoutInflater::CreateView(
             if (stateTmp == NULL) {
                 // New class -- remember whether it is allowed
                 AutoPtr<IClassLoader> cl;
-                // LAYOUT_INFLATOR_CATCH_EXCEPTION1(mContext->GetClassLoader((IClassLoader**)&cl))
-                if (!prefix.IsNull()) {
-                    LAYOUT_INFLATOR_CATCH_EXCEPTION1(cl->LoadClass(prefix + name, (IClassInfo**)&clazz));
-                }
-                else {
-                    LAYOUT_INFLATOR_CATCH_EXCEPTION1(cl->LoadClass(name, (IClassInfo**)&clazz));
-                }
+                LAYOUT_INFLATOR_CATCH_EXCEPTION1(mContext->GetClassLoader((IClassLoader**)&cl), "GetClassLoader")
+                assert(cl != NULL);
+                LAYOUT_INFLATOR_CATCH_EXCEPTION1(cl->LoadClass(reflectionClassName, (IClassInfo**)&clazz), "LoadClass");
 
                 Boolean allowed;
                 mFilter->OnLoadClass(clazz, &allowed);
@@ -736,14 +758,14 @@ ECode LayoutInflater::CreateView(
                 AutoPtr<IInterface> resultTmp;
                 mFilterMap->Put(csq, stateInterface, (IInterface**)&resultTmp);
                 if (!allowed) {
-                    LAYOUT_INFLATOR_CATCH_EXCEPTION1(FailNotAllowed(name, prefix, attrs));
+                    LAYOUT_INFLATOR_CATCH_EXCEPTION1(FailNotAllowed(name, prefix, attrs), "FailNotAllowed");
                 }
             }
             else {
                 AutoPtr<IBoolean> state = IBoolean::Probe(stateTmp);
                 state->GetValue(&allowedState);
                 if (!allowedState) {
-                    LAYOUT_INFLATOR_CATCH_EXCEPTION1(FailNotAllowed(name, prefix, attrs));
+                    LAYOUT_INFLATOR_CATCH_EXCEPTION1(FailNotAllowed(name, prefix, attrs), "FailNotAllowed");
                 }
             }
         }
@@ -752,12 +774,12 @@ ECode LayoutInflater::CreateView(
     mConstructorArgs->Set(1, attrs);
 
     AutoPtr<IArgumentList> args;
-    LAYOUT_INFLATOR_CATCH_EXCEPTION1(constructor->CreateArgumentList((IArgumentList**)&args));
-    LAYOUT_INFLATOR_CATCH_EXCEPTION1(args->SetInputArgumentOfObjectPtr(0, (*mConstructorArgs)[0]));
-    LAYOUT_INFLATOR_CATCH_EXCEPTION1(args->SetInputArgumentOfObjectPtr(1, (*mConstructorArgs)[1]));
+    LAYOUT_INFLATOR_CATCH_EXCEPTION1(constructor->CreateArgumentList((IArgumentList**)&args), "CreateArgumentList");
+    LAYOUT_INFLATOR_CATCH_EXCEPTION1(args->SetInputArgumentOfObjectPtr(0, (*mConstructorArgs)[0]), "SetInputArgumentOfObjectPtr");
+    LAYOUT_INFLATOR_CATCH_EXCEPTION1(args->SetInputArgumentOfObjectPtr(1, (*mConstructorArgs)[1]), "SetInputArgumentOfObjectPtr");
 
     AutoPtr<IInterface> obj;
-    LAYOUT_INFLATOR_CATCH_EXCEPTION1(constructor->CreateObject(args, (IInterface**)&obj));
+    LAYOUT_INFLATOR_CATCH_EXCEPTION1(constructor->CreateObject(args, (IInterface**)&obj), "CreateObject");
     *view = IView::Probe(obj);
     assert(*view != NULL);
     REFCOUNT_ADD(*view);
@@ -817,7 +839,7 @@ ECode LayoutInflater::OnCreateView(
     /* [in] */ IAttributeSet* attrs,
     /* [out] */ IView** view)
 {
-    return CreateView(name, String("Elastos.Droid.Widget."), attrs, view);
+    return CreateView(name, String("Elastos/Droid/Widget/"), attrs, view);
 }
 
 ECode LayoutInflater::OnCreateView(
@@ -902,6 +924,9 @@ ECode LayoutInflater::CreateViewFromTag(
     /* [in] */ Boolean inheritContext,
     /* [out] */ IView** view)
 {
+    VALIDATE_NOT_NULL(view)
+    *view = NULL;
+
     String name;
     if (!_name.Compare("view")) {
         attrs->GetAttributeValue(String(NULL), String("class"), &name);

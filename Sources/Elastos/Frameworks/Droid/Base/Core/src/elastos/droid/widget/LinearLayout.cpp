@@ -24,7 +24,11 @@ const Int32 LinearLayout::INDEX_TOP = 1;
 const Int32 LinearLayout::INDEX_BOTTOM = 2;
 const Int32 LinearLayout::INDEX_FILL = 3;
 
+//=========================================================================
+// LinearLayout::LayoutParams
+//=========================================================================
 CAR_INTERFACE_IMPL(LinearLayout::LayoutParams, MarginLayoutParams, ILinearLayoutLayoutParams);
+
 LinearLayout::LayoutParams::LayoutParams()
     : mWeight(0)
     , mGravity(-1)
@@ -124,8 +128,11 @@ ECode LinearLayout::LayoutParams::GetGravity(
     return NOERROR;
 }
 
-
+//=========================================================================
+// LinearLayout
+//=========================================================================
 CAR_INTERFACE_IMPL(LinearLayout, ViewGroup, ILinearLayout);
+
 LinearLayout::LinearLayout()
     : mBaselineAligned(TRUE)
     , mBaselineAlignedChildIndex(-1)

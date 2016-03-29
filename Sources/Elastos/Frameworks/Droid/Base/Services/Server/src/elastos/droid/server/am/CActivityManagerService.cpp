@@ -1165,6 +1165,10 @@ CActivityManagerService::ReportMemUsageThread::ReportMemUsageThread(
 
 ECode CActivityManagerService::ReportMemUsageThread::Run()
 {
+    Logger::I(TAG, "TODO: ReportMemUsageThread::Run(), CDebug not implemented.");
+    // assert(0 && "TODO");
+    return NOERROR;
+
     IList* memInfos = mMemInfos;
     Int32 size;
     memInfos->GetSize(&size);
@@ -1177,7 +1181,6 @@ ECode CActivityManagerService::ReportMemUsageThread::Run()
     }
     mHost->UpdateCpuStatsNow();
     AutoPtr<IDebug> debug;
-    assert(0);
     // CDebug::AcquireSingleton((IDebug**)&debug);
     {
         AutoLock lock(mHost->mProcessCpuTracker);

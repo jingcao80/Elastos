@@ -147,15 +147,6 @@ void lockTest()
     }
 }
 
-void otherTests()
-{
-    //testThread
-    //testEtl()
-    //testCoreExports();
-    //testArrays();
-    //lockTest();
-}
-
 void loadFrameworkModule()
 {
     void* module = dlopen("Elastos.Droid.Core.eco", RTLD_NOW);
@@ -171,40 +162,260 @@ void loadFrameworkModule()
     }
 }
 
+ECode ReflectionTestElastosCore()
+{
+    AutoPtr<IModuleInfo> moduleInfo;
+    AutoPtr<IClassInfo> classInfo;
+    AutoPtr<IConstructorInfo> constructorInfo;
+    AutoPtr<IInterface> object;
+    AutoPtr<IMethodInfo> methodInfo;
+    AutoPtr<IArgumentList> argumentList;
+
+    const String moduleName("/system/lib/Elastos.Droid.Core.eco");
+    const String klassName("LElastos/Droid/Widget/CLinearLayout;");
+    const String constructorSignature(
+    "CtxAttrs(LElastos/Droid/Content/IContext;*LElastos/Droid/Utility/IAttributeSet;*LIInterface;**)E");
+
+    ECode ec = _CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo);
+    if (FAILED(ec)) {
+        PFL_EX("Acquire \"%s\" module info failed!\n", moduleName.string());
+        return ec;
+    }
+
+    PFL_EX("moduleInfo: %p", moduleInfo.Get())
+    ec = moduleInfo->GetClassInfo(klassName, (IClassInfo**)&classInfo);
+    if (FAILED(ec)) {
+        PFL_EX("Acquire \"%s\" class info failed!\n", klassName.string());
+        return ec;
+    }
+    PFL_EX("classInfo: %p", classInfo.Get())
+
+    String ns;
+    ec = classInfo->GetNamespace(&ns);
+    if (FAILED(ec)) {
+        PFL_EX("GetNamespace failed!\n");
+        return ec;
+    }
+    PFL_EX("namespace: %s", ns.string())
+
+    Int32 ctorCount;
+    ec = classInfo->GetConstructorCount(&ctorCount);
+    if (FAILED(ec)) {
+        PFL_EX("GetConstructorCount failed! ec=%08x\n", ec);
+        return ec;
+    }
+    PFL_EX("classInfo: %d constructor.", ctorCount);
+
+    AutoPtr< ArrayOf<IConstructorInfo *> > allInfos = ArrayOf<IConstructorInfo *>::Alloc(ctorCount);
+    ec = classInfo->GetAllConstructorInfos(allInfos.Get());
+    if (FAILED(ec)) {
+        PFL_EX("GetAllConstructorInfos failed!\n");
+        return ec;
+    }
+
+    for (Int32 i = 0; i < allInfos->GetLength(); ++i) {
+        IConstructorInfo* ci = (*allInfos)[i];
+        String name;
+        ci->GetName(&name);
+        Int32 paramCount;
+        ci->GetParamCount(&paramCount);
+        PFL_EX(" constructor: %s, paramCount: %d", name.string(), paramCount);
+    }
+
+    ec = classInfo->GetConstructorInfoByParamNames(constructorSignature, (IConstructorInfo**)&constructorInfo);
+    if (FAILED(ec)) {
+        PFL_EX("GetConstructorInfoByParamNames failed!\n");
+        return ec;
+    }
+
+    Int32 paramCount;
+    ec = constructorInfo->GetParamCount(&paramCount);
+    if (FAILED(ec)) {
+        PFL_EX("GetParamCount failed!\n");
+        return ec;
+    }
+    PFL_EX("GetParamCount %d\n", paramCount);
+
+    ec = constructorInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        PFL_EX("CreateArgumentList failed!\n");
+        return ec;
+    }
+
+    ec = argumentList->SetInputArgumentOfObjectPtr(0, NULL);
+    if (FAILED(ec)) {
+        PFL_EX("SetInputArgumentOfObjectPtr failed!\n");
+        return ec;
+    }
+
+    ec = argumentList->SetInputArgumentOfObjectPtr(1, NULL);
+    if (FAILED(ec)) {
+        PFL_EX("SetInputArgumentOfObjectPtr failed!\n");
+        return ec;
+    }
+
+    AutoPtr<IInterface> obj;
+    constructorInfo->CreateObject(argumentList, (IInterface**)&obj);
+    if (FAILED(ec)) {
+        PFL_EX("CreateObject failed!\n");
+        return ec;
+    }
+    return NOERROR;
+}
+
+ECode ReflectionTests()
+{
+    // return ReflectionTestElastosCore();
+
+    AutoPtr<IModuleInfo> moduleInfo;
+    AutoPtr<IClassInfo> classInfo;
+    AutoPtr<IConstructorInfo> constructorInfo;
+    AutoPtr<IInterface> object;
+    AutoPtr<IMethodInfo> methodInfo;
+    AutoPtr<IArgumentList> argumentList;
+
+    const String moduleName("/system/lib/Elastos.HelloCar.eco");
+    const String klassName("LElastos/HelloCar/CCat;");
+
+    ECode ec = _CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo);
+    if (FAILED(ec)) {
+        PFL_EX("Acquire \"%s\" module info failed!\n", moduleName.string());
+        return ec;
+    }
+
+    PFL_EX("moduleInfo: %p", moduleInfo.Get())
+    ec = moduleInfo->GetClassInfo(klassName, (IClassInfo**)&classInfo);
+    if (FAILED(ec)) {
+        PFL_EX("Acquire \"%s\" class info failed!\n", klassName.string());
+        return ec;
+    }
+    PFL_EX("classInfo: %p", classInfo.Get())
+
+    String ns;
+    ec = classInfo->GetNamespace(&ns);
+    if (FAILED(ec)) {
+        PFL_EX("GetNamespace failed!\n");
+        return ec;
+    }
+    PFL_EX("namespace: %s", ns.string())
+
+    Int32 ctorCount;
+    ec = classInfo->GetConstructorCount(&ctorCount);
+    if (FAILED(ec)) {
+        PFL_EX("GetConstructorCount failed! ec=%08x\n", ec);
+        return ec;
+    }
+    PFL_EX("classInfo: %d constructor.", ctorCount);
+
+    AutoPtr< ArrayOf<IConstructorInfo *> > allInfos = ArrayOf<IConstructorInfo *>::Alloc(ctorCount);
+    ec = classInfo->GetAllConstructorInfos(allInfos.Get());
+    if (FAILED(ec)) {
+        PFL_EX("GetAllConstructorInfos failed!\n");
+        return ec;
+    }
+
+    for (Int32 i = 0; i < allInfos->GetLength(); ++i) {
+        IConstructorInfo* ci = (*allInfos)[i];
+        String name;
+        ci->GetName(&name);
+        Int32 paramCount;
+        ci->GetParamCount(&paramCount);
+        PFL_EX(" constructor: %s, paramCount: %d", name.string(), paramCount);
+    }
+
+    ec = classInfo->GetConstructorInfoByParamNames(String("CtxAttrs(I32LElastos/String;LIInterface;**)E"), (IConstructorInfo**)&constructorInfo);
+    if (FAILED(ec)) {
+        PFL_EX("GetConstructorInfoByParamNames failed!\n");
+        return ec;
+    }
+
+    Int32 paramCount;
+    ec = constructorInfo->GetParamCount(&paramCount);
+    if (FAILED(ec)) {
+        PFL_EX("GetParamCount failed!\n");
+        return ec;
+    }
+    PFL_EX("GetParamCount %d\n", paramCount);
+
+    ec = constructorInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        PFL_EX("CreateArgumentList failed!\n");
+        return ec;
+    }
+
+    ec = argumentList->SetInputArgumentOfInt32(0, 5);
+    if (FAILED(ec)) {
+        PFL_EX("SetInputArgumentOfInt32 failed!\n");
+        return ec;
+    }
+
+    String str("Kitty");
+    ec = argumentList->SetInputArgumentOfString(1, str);
+    if (FAILED(ec)) {
+        PFL_EX("SetInputArgumentOfString failed!\n");
+        return ec;
+    }
+
+    AutoPtr<IInterface> obj;
+    constructorInfo->CreateObject(argumentList, (IInterface**)&obj);
+    if (FAILED(ec)) {
+        PFL_EX("CreateObject failed!\n");
+        return ec;
+    }
+
+    IAnimal* animal = IAnimal::Probe(obj);
+    String name;
+    animal->GetName(&name);
+    PFL_EX(" >>>> animal name is %s", name.string());
+    return NOERROR;
+}
+
+void otherTests()
+{
+    //testThread
+    //testEtl()
+    //testCoreExports();
+    //testArrays();
+    //lockTest();
+    //loadFrameworkModule();
+    ReflectionTests();
+}
+
+void testHelloCar()
+{
+    Boolean canFly;
+    String name;
+
+    AutoPtr<IAnimal> cat;
+    CCat::New((IAnimal**)&cat);
+    cat->SetName(String("Kitty"));
+    cat->GetName(&name);
+    cat->CanFly(&canFly);
+    printf("%s %s!\n\n", name.string(), canFly ? "can fly" : "can not fly");
+
+    AutoPtr<IDog> dog;
+    CDog::New(2, String("HuaHua"), (IDog**)&dog);
+    dog->Bark();
+
+    IAnimal* da = IAnimal::Probe(dog);
+    da->GetName(&name);
+    da->CanFly(&canFly);
+    printf("%s %s!\n\n", name.string(), canFly ? "can fly" : "can not fly");
+
+    AutoPtr<IAnimalHelper> helper;
+    CAnimalHelper::AcquireSingleton((IAnimalHelper**)&helper);
+    helper->CanFly(cat, &canFly);
+    cat->GetName(&name);
+    printf("CAnimalHelper::CanFly : %s %s!\n\n", name.string(), canFly ? "can fly" : "can not fly");
+}
+
 int main(int argc, char *argv[])
 {
     printf("==================================\n");
     printf("=========== Hello Car ============\n");
     printf("==================================\n");
 
-    {
-        Boolean canFly;
-        String name;
-
-        AutoPtr<IAnimal> cat;
-        CCat::New((IAnimal**)&cat);
-        cat->SetName(String("Kitty"));
-        cat->GetName(&name);
-        cat->CanFly(&canFly);
-        printf("%s %s!\n\n", name.string(), canFly ? "can fly" : "can not fly");
-
-        AutoPtr<IDog> dog;
-        CDog::New(2, String("HuaHua"), (IDog**)&dog);
-        dog->Bark();
-
-        IAnimal* da = IAnimal::Probe(dog);
-        da->GetName(&name);
-        da->CanFly(&canFly);
-        printf("%s %s!\n\n", name.string(), canFly ? "can fly" : "can not fly");
-
-        AutoPtr<IAnimalHelper> helper;
-        CAnimalHelper::AcquireSingleton((IAnimalHelper**)&helper);
-        helper->CanFly(cat, &canFly);
-        cat->GetName(&name);
-        printf("CAnimalHelper::CanFly : %s %s!\n\n", name.string(), canFly ? "can fly" : "can not fly");
-    }
-
-    loadFrameworkModule();
+    // testHelloCar();
 
     // other tests
     otherTests();

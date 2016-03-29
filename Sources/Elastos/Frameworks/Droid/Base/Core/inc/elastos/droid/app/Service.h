@@ -118,9 +118,6 @@ protected:
         /* [in] */ ArrayOf<String>* args);
 
 private:
-    CARAPI InitializeTheme();
-
-private:
     // set by the thread after the constructor and before onCreate(Bundle icicle) is called.
     AutoPtr<IActivityThread> mThread;
     String mClassName;
@@ -128,10 +125,6 @@ private:
     AutoPtr<IApplication> mApplication;
     AutoPtr<IIActivityManager> mActivityManager;
     Boolean mStartCompatibility;
-
-    Int32 mThemeResource;
-    AutoPtr<IResourcesTheme> mTheme;
-    AutoPtr<ILayoutInflater> mInflater;
 };
 
 } // namespace App

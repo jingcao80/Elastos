@@ -970,14 +970,13 @@ void CResourcesManager::DetachThemeAssets(
 
 AutoPtr<IThemeConfig> CResourcesManager::GetThemeConfig()
 {
-    Logger::E(TAG, " >>> TODO memory crash GetThemeConfig!!");
-    // AutoPtr<IConfiguration> config;
-    // GetConfiguration((IConfiguration**)&config);
-    // if (config != NULL) {
-    //     AutoPtr<IThemeConfig> themeConfig;
-    //     config->GetThemeConfig((IThemeConfig**)&themeConfig);
-    //     return themeConfig;
-    // }
+    AutoPtr<IConfiguration> config;
+    GetConfiguration((IConfiguration**)&config);
+    if (config != NULL) {
+        AutoPtr<IThemeConfig> themeConfig;
+        config->GetThemeConfig((IThemeConfig**)&themeConfig);
+        return themeConfig;
+    }
     return NULL;
 }
 

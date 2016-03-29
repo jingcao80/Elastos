@@ -3646,7 +3646,6 @@ private:
     };
 
 private:
-    ECO_LOCAL CARAPI InitializeTheme();
 
     /**
      * Restore the state of any saved managed dialogs.
@@ -3738,8 +3737,7 @@ public:
     /* package */ AutoPtr<IActivityNonConfigurationInstances> mLastNonConfigurationInstances;
 
     AutoPtr<IView> mDecor;
-    // frome ContextThemeWrapper.java
-    AutoPtr<ILayoutInflater> mInflater;
+
     Boolean mWindowAdded;
     Boolean mVisibleFromServer;
     Boolean mVisibleFromClient;
@@ -3812,12 +3810,6 @@ private:
 
     Int32 mDefaultKeyMode;
     AutoPtr<ISpannableStringBuilder> mDefaultKeySsb;
-
-    // form ContextThemeWrapper.java
-    Int32 mThemeResource;
-    AutoPtr<IResourcesTheme> mTheme;
-    AutoPtr<IConfiguration> mOverrideConfiguration;
-    AutoPtr<IResources> mResources;
 
      //@SuppressWarnings("unused")
     AutoPtr<IInterface> mInstanceTracker;

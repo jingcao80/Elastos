@@ -69,7 +69,7 @@ protected:
 private:
     ECO_LOCAL CARAPI InitializeTheme();
 
-private:
+protected:
     Int32 mThemeResource;
     AutoPtr<IResourcesTheme> mTheme;
     AutoPtr<ILayoutInflater> mInflater;
