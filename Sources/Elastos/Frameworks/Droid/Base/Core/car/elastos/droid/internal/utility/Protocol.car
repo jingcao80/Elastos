@@ -54,6 +54,7 @@ module
         const Int32 BASE_NETWORK_AGENT                                      = 0x00081000;
         const Int32 BASE_NETWORK_MONITOR                                    = 0x00082000;
         const Int32 BASE_NETWORK_FACTORY                                    = 0x00083000;
+        const Int32 BASE_DDS_SCHEDULER                                      = 0x00084000;
         //TODO: define all used protocols
     }
 

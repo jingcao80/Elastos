@@ -56,6 +56,7 @@ const String RankingHelper::ATT_NAME("name");
 const String RankingHelper::ATT_UID("uid");
 const String RankingHelper::ATT_PRIORITY("priority");
 const String RankingHelper::ATT_VISIBILITY("visibility");
+const String RankingHelper::ATT_KEYGUARD("keyguard");
 
 CAR_INTERFACE_IMPL(RankingHelper, Object, IRankingConfig);
 
@@ -71,6 +72,7 @@ RankingHelper::RankingHelper(
     mRankingHandler = rankingHandler;
     CArrayMap::New((IArrayMap**)&mPackagePriorities);
     CArrayMap::New((IArrayMap**)&mPackageVisibilities);
+    CArrayMap::New((IArrayMap**)&mPackageOnKeyguard);
 
     const Int32 N = extractorNames->GetLength();
     mSignalExtractors = ArrayOf<INotificationSignalExtractor*>::Alloc(N);
@@ -185,6 +187,9 @@ ECode RankingHelper::ReadXml(
                 Int32 vis;
                 SafeInt32(parser, ATT_VISIBILITY,
                         INotificationListenerServiceRanking::VISIBILITY_NO_OVERRIDE, &vis);
+                Int32 keyguard = 0;
+                SafeInt32(parser, ATT_KEYGUARD,
+                        INotification::SHOW_ALL_NOTI_ON_KEYGUARD, &keyguard);
                 String name;
                 parser->GetAttributeValue(String(NULL), ATT_NAME, &name);
 
@@ -209,6 +214,16 @@ ECode RankingHelper::ReadXml(
                         }
                         visibilityByUid->Put(uid, vis);
                     }
+                    if (keyguard != INotification::SHOW_ALL_NOTI_ON_KEYGUARD) {
+                        AutoPtr<IInterface> obj;
+                        mPackageOnKeyguard->Get(CoreUtils::Convert(name), (IInterface**)&obj);
+                        AutoPtr<ISparseInt32Array> keyguardByUid = ISparseInt32Array::Probe(obj);
+                        if (keyguardByUid == NULL) {
+                            CSparseInt32Array::New((ISparseInt32Array**)&keyguardByUid);
+                            mPackageOnKeyguard->Put(CoreUtils::Convert(name), keyguardByUid);
+                        }
+                        keyguardByUid->Put(uid, keyguard);
+                    }
                 }
             }
         }
@@ -224,16 +239,19 @@ ECode RankingHelper::WriteXml(
     out->WriteStartTag(String(NULL), TAG_RANKING);
     out->WriteAttribute(String(NULL), ATT_VERSION, StringUtils::ToString(XML_VERSION));
 
-    Int32 size1, size2;
+    Int32 size1 = 0, size2 = 0, size3 = 0;
     mPackagePriorities->GetSize(&size1);
     mPackageVisibilities->GetSize(&size2);
+    mPackageOnKeyguard->GetSize(&size3);
     AutoPtr<ISet> packageNames;
-    CArraySet::New(size1 + size2, (ISet**)&packageNames);
-    AutoPtr<ISet> set1, set2;
+    CArraySet::New(size1 + size2 + size3, (ISet**)&packageNames);
+    AutoPtr<ISet> set1, set2, set3;
     mPackagePriorities->GetKeySet((ISet**)&set1);
     mPackageVisibilities->GetKeySet((ISet**)&set2);
+    mPackageOnKeyguard->GetKeySet((ISet**)&set3);
     packageNames->AddAll(ICollection::Probe(set1));
     packageNames->AddAll(ICollection::Probe(set2));
+    packageNames->AddAll(ICollection::Probe(set3));
     AutoPtr<ISet> packageUids;
     CArraySet::New((ISet**)&packageUids);
     AutoPtr<IIterator> iterator;
@@ -252,28 +270,40 @@ ECode RankingHelper::WriteXml(
         obj = NULL;
         mPackageVisibilities->Get(CoreUtils::Convert(packageName), (IInterface**)&obj);
         AutoPtr<ISparseInt32Array> visibilityByUid = ISparseInt32Array::Probe(obj);
+        obj = NULL;
+        mPackageOnKeyguard->Get(CoreUtils::Convert(packageName), (IInterface**)&obj);
+        AutoPtr<ISparseInt32Array> keyguardByUid = ISparseInt32Array::Probe(obj);
         if (priorityByUid != NULL) {
-            Int32 M;
+            Int32 M = 0;
             priorityByUid->GetSize(&M);
             for (Int32 j = 0; j < M; j++) {
-                Int32 key;
+                Int32 key = 0;
                 priorityByUid->KeyAt(j, &key);
                 packageUids->Add(CoreUtils::Convert(key));
             }
         }
         if (visibilityByUid != NULL) {
-            Int32 M;
+            Int32 M = 0;
             visibilityByUid->GetSize(&M);
             for (Int32 j = 0; j < M; j++) {
-                Int32 key;
+                Int32 key = 0;
                 visibilityByUid->KeyAt(j, &key);
+                packageUids->Add(CoreUtils::Convert(key));
+            }
+        }
+        if (keyguardByUid != NULL) {
+            Int32 M = 0;
+            keyguardByUid->GetSize(&M);
+            for (Int32 j = 0; j < M; j++) {
+                Int32 key = 0;
+                keyguardByUid->KeyAt(j, &key);
                 packageUids->Add(CoreUtils::Convert(key));
             }
         }
 
         AutoPtr<IIterator> it;
         packageUids->GetIterator((IIterator**)&it);
-        Boolean has;
+        Boolean has = FALSE;
         while (it->HasNext(&has), has) {
             AutoPtr<IInterface> obj;
             it->GetNext((IInterface**)&obj);
@@ -294,6 +324,13 @@ ECode RankingHelper::WriteXml(
                 visibilityByUid->Get(uid, &visibility);
                 if (visibility != INotificationListenerServiceRanking::VISIBILITY_NO_OVERRIDE) {
                     out->WriteAttribute(String(NULL), ATT_VISIBILITY, StringUtils::ToString(visibility));
+                }
+            }
+            if (keyguardByUid != NULL) {
+                Int32 keyguard = 0;
+                keyguardByUid->Get(uid, &keyguard);
+                if (keyguard != INotification::SHOW_ALL_NOTI_ON_KEYGUARD) {
+                    out->WriteAttribute(String(NULL), ATT_KEYGUARD, StringUtils::ToString(keyguard));
                 }
             }
             out->WriteAttribute(String(NULL), ATT_UID, StringUtils::ToString(uid));
@@ -561,6 +598,45 @@ ECode RankingHelper::SetPackageVisibilityOverride(
         mPackageVisibilities->Put(CoreUtils::Convert(packageName), visibilityByUid);
     }
     visibilityByUid->Put(uid, visibility);
+    UpdateConfig();
+    return NOERROR;
+}
+
+ECode RankingHelper::GetShowNotificationForPackageOnKeyguard(
+    /* [in] */ const String& packageName,
+    /* [in] */ Int32 uid,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Int32 keyguard = INotification::SHOW_ALL_NOTI_ON_KEYGUARD;
+    AutoPtr<IInterface> object;
+    mPackageOnKeyguard->Get(CoreUtils::Convert(packageName), (IInterface**)&object);
+    AutoPtr<ISparseInt32Array> keyguardByUid = ISparseInt32Array::Probe(object);
+    if (keyguardByUid != NULL) {
+        keyguardByUid->Get(uid, INotification::SHOW_ALL_NOTI_ON_KEYGUARD, &keyguard);
+    }
+    *result = keyguard;
+    return NOERROR;
+}
+
+ECode RankingHelper::SetShowNotificationForPackageOnKeyguard(
+    /* [in] */ const String& packageName,
+    /* [in] */ Int32 uid,
+    /* [in] */ Int32 keyguard)
+{
+    Int32 kg = 0;
+    GetShowNotificationForPackageOnKeyguard(packageName, uid, &kg);
+    if (keyguard == kg) {
+        return NOERROR;
+    }
+    AutoPtr<IInterface> object;
+    mPackageOnKeyguard->Get(CoreUtils::Convert(packageName), (IInterface**)&object);
+    AutoPtr<ISparseInt32Array> keyguardByUid = ISparseInt32Array::Probe(object);
+    if (keyguardByUid == NULL) {
+        CSparseInt32Array::New((ISparseInt32Array**)&keyguardByUid);
+        mPackageOnKeyguard->Put(CoreUtils::Convert(packageName), keyguardByUid);
+    }
+    keyguardByUid->Put(uid, keyguard);
     UpdateConfig();
     return NOERROR;
 }

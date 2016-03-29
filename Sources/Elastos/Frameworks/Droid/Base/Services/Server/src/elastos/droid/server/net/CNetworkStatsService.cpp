@@ -229,6 +229,10 @@ ECode CNetworkStatsService::ShutdownReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
+    Boolean fromQuickBoot = FALSE;
+    intent->GetBooleanExtra(String("from_quickboot"), FALSE, &fromQuickBoot);
+    if (fromQuickBoot) return NOERROR;
+
     // SHUTDOWN is protected broadcast.
     AutoPtr<IObject> obj = mOwner->mStatsLock;
     synchronized(obj) {
