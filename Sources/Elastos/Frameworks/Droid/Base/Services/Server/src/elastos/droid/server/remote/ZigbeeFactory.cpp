@@ -129,9 +129,9 @@ AutoPtr<IInterface> ZigbeeFactory::SocketCmd_Task::DoInBackground(
 
     if (DBG) Slogger::D(ZigbeeFactory::TAG, "DoInBackground resultType = %s, methodName = %s", resultType.string(), methodName.string());
 
-    // AutoPtr<IClassLoader> cl;
-    // mHost->mContext->GetClassLoader((IClassLoader**)&cl);
-    // assert(cl != NULL);
+    AutoPtr<IClassLoader> cl;
+    mHost->mContext->GetClassLoader((IClassLoader**)&cl);
+    assert(cl != NULL);
     String path("/system/lib/Elastos.Droid.Server.eco");
     AutoPtr<IModuleInfo> moduleInfo;
     CReflector::AcquireModuleInfo(path.string(), (IModuleInfo**)&moduleInfo);

@@ -29,16 +29,16 @@
 #include "elastos/droid/view/CWindowManagerLayoutParams.h"
 #include "elastos/droid/view/CViewConfigurationHelper.h"
 #include "elastos/droid/view/LayoutInflater.h"
-#include "elastos/droid/internal/view/StandaloneActionMode.h"
-#include "elastos/droid/internal/view/menu/CMenuDialogHelper.h"
 #include "elastos/droid/view/accessibility/CAccessibilityManager.h"
 #include "elastos/droid/view/animation/CAnimationUtils.h"
+#include "elastos/droid/internal/view/StandaloneActionMode.h"
+#include "elastos/droid/internal/view/menu/CMenuDialogHelper.h"
 #include "elastos/droid/internal/view/menu/CContextMenuBuilder.h"
 #include "elastos/droid/internal/view/menu/CMenuBuilder.h"
 #include "elastos/droid/internal/view/menu/CListMenuPresenter.h"
 #include "elastos/droid/internal/view/menu/CIconMenuPresenter.h"
+#include "elastos/droid/internal/widget/CActionBarContextView.h"
 #include "elastos/droid/widget/CPopupWindow.h"
-//#include "elastos/droid/widget/internal/CActionBarContextView.h"
 #include "elastos/droid/utility/CTypedValue.h"
 #include "elastos/droid/utility/CTypedValueHelper.h"
 #include "elastos/droid/utility/CSparseArray.h"
@@ -143,7 +143,7 @@ using Elastos::Droid::Widget::IFrameLayout;
 using Elastos::Droid::Widget::IListAdapter;
 using Elastos::Droid::Widget::EIID_IFrameLayout;
 using Elastos::Droid::Widget::CPopupWindow;
-//TODO using Elastos::Droid::Widget::Internal::CActionBarContextView;
+using Elastos::Droid::Internal::Widget::CActionBarContextView;
 using Elastos::Droid::Internal::Widget::IActionBarContainer;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::Build;
@@ -163,23 +163,15 @@ namespace Internal {
 namespace Policy {
 namespace Impl {
 
-// {45CF35EA-34D4-43a3-A1C7-2649411BAA61}
-//extern "C" const InterfaceID EIID_RootViewSurfaceTaker =
-//    {0x45cf35ea, 0x34d4, 0x43a3, {0xa1, 0xc7, 0x26, 0x49, 0x41, 0x1b, 0xaa, 0x61}};
-
-// {eb327183-9b79-488c-b888-4b96d70cc2f5}
-///extern "C" const InterfaceID EIID_PhoneWindow =
-//        {0xeb327183,0x9b79,0x488c,{0xb8,0x88,0x4b,0x96,0xd7,0x0c,0xc2,0xf5}};
-
 AutoPtr<IIWindowManager> PhoneWindow::WindowManagerHolder::sWindowManager;
 
 String PhoneWindow::TAG("PhoneWindow");
 const Boolean PhoneWindow::SWEEP_OPEN_MENU = FALSE;
 
-const String PhoneWindow::FOCUSED_ID_TAG = String("android:focusedViewId");
-const String PhoneWindow::VIEWS_TAG = String("android:views");
-const String PhoneWindow::PANELS_TAG = String("android:Panels");
-const String PhoneWindow::ACTION_BAR_TAG = String("android:ActionBar");
+const String PhoneWindow::FOCUSED_ID_TAG("android:focusedViewId");
+const String PhoneWindow::VIEWS_TAG("android:views");
+const String PhoneWindow::PANELS_TAG("android:Panels");
+const String PhoneWindow::ACTION_BAR_TAG("android:ActionBar");
 
 const Int32 PhoneWindow::DEFAULT_BACKGROUND_FADE_DURATION_MS;
 const Int32 PhoneWindow::CUSTOM_TITLE_COMPATIBLE_FEATURES = DEFAULT_FEATURES |
@@ -210,6 +202,9 @@ static AutoPtr<IPhoneWindowRotationWatcher> InitStaticWatcher()
 
 AutoPtr<IPhoneWindowRotationWatcher> PhoneWindow::sRotationWatcher = InitStaticWatcher();
 
+//===============================================================================================
+// PhoneWindow::_DecorView::ShowActionModePopupRunnable
+//===============================================================================================
 PhoneWindow::_DecorView::ShowActionModePopupRunnable::ShowActionModePopupRunnable(
     /* [in] */ _DecorView* host)
     : mHost(host)
@@ -225,6 +220,9 @@ ECode PhoneWindow::_DecorView::ShowActionModePopupRunnable::Run()
             IGravity::TOP | IGravity::FILL_HORIZONTAL, 0, 0);
 }
 
+//===============================================================================================
+// PhoneWindow::_DecorView::ActionModeCallbackWrapper
+//===============================================================================================
 CAR_INTERFACE_IMPL(PhoneWindow::_DecorView::ActionModeCallbackWrapper, Object, IActionModeCallback)
 
 PhoneWindow::_DecorView::ActionModeCallbackWrapper::ActionModeCallbackWrapper(
@@ -290,33 +288,39 @@ ECode PhoneWindow::_DecorView::ActionModeCallbackWrapper::OnDestroyActionMode(
     return NOERROR;
 }
 
-//CAR_INTERFACE_IMPL_LIGHT(PhoneWindow::_DecorView::DecorViewWeakReferenceImpl, IWeakReference)
-//
-//PhoneWindow::_DecorView::DecorViewWeakReferenceImpl::DecorViewWeakReferenceImpl(
-//    /* [in] */ IInterface* object,
-//    /* [in] */ ElRefBase::WeakRefType* ref)
-//    : mObject(object)
-//    , mRef(ref)
-//{}
-//
-//PhoneWindow::_DecorView::DecorViewWeakReferenceImpl::~DecorViewWeakReferenceImpl()
-//{
-//    if (mRef) mRef->DecWeak(this);
-//}
-//
-//ECode PhoneWindow::_DecorView::DecorViewWeakReferenceImpl::Resolve(
-//    /* [in] */ const InterfaceID& riid,
-//    /* [out] */ IInterface** objectReference)
-//{
-//    *objectReference = NULL;
-//    if (mObject && mRef && mRef->AttemptIncStrong(objectReference)) {
-//        *objectReference = mObject->Probe(riid);
-//        REFCOUNT_ADD(*objectReference);
-//        ((DecorView*)(IFrameLayout*)mObject)->_Release();
-//    }
-//    return NOERROR;
-//}
+//===============================================================================================
+// PhoneWindow::_DecorView::DecorViewWeakReferenceImpl
+//===============================================================================================
+CAR_INTERFACE_IMPL(PhoneWindow::_DecorView::DecorViewWeakReferenceImpl, Object, IWeakReference)
 
+PhoneWindow::_DecorView::DecorViewWeakReferenceImpl::DecorViewWeakReferenceImpl(
+   /* [in] */ IInterface* object,
+   /* [in] */ ElRefBase::WeakRefType* ref)
+   : mObject(object)
+   , mRef(ref)
+{}
+
+PhoneWindow::_DecorView::DecorViewWeakReferenceImpl::~DecorViewWeakReferenceImpl()
+{
+   if (mRef) mRef->DecWeak(this);
+}
+
+ECode PhoneWindow::_DecorView::DecorViewWeakReferenceImpl::Resolve(
+   /* [in] */ const InterfaceID& riid,
+   /* [out] */ IInterface** objectReference)
+{
+   *objectReference = NULL;
+   if (mObject && mRef && mRef->AttemptIncStrong(objectReference)) {
+       *objectReference = mObject->Probe(riid);
+       REFCOUNT_ADD(*objectReference);
+       ((DecorView*)(IFrameLayout::Probe(mObject)))->_Release();
+   }
+   return NOERROR;
+}
+
+//===============================================================================================
+// PhoneWindow::_DecorView
+//===============================================================================================
 CAR_INTERFACE_IMPL(PhoneWindow::_DecorView, Object, IRootViewSurfaceTaker)
 
 PhoneWindow::_DecorView::_DecorView()
@@ -1749,16 +1753,12 @@ ECode PhoneWindow::_DecorView::StartActionMode(
                 } else {
                     actionBarContext = mContext;
                 }
-                //TODO CActionBarContextView::New(actionBarContext, (IActionBarContextView**)&mActionModeView);
+                CActionBarContextView::New(actionBarContext, (IActionBarContextView**)&mActionModeView);
                 mActionModePopup = NULL;
                 CPopupWindow::New(actionBarContext, NULL,
-                        R::attr::actionModePopupWindowStyle, (IPopupWindow**)&mActionModePopup);
-
-                //mActionModePopup->SetLayoutInScreenEnabled(TRUE);
-                //mActionModePopup->SetLayoutInsetDecor(TRUE);
+                    R::attr::actionModePopupWindowStyle, (IPopupWindow**)&mActionModePopup);
                 mActionModePopup->SetWindowLayoutType(
                         IWindowManagerLayoutParams::TYPE_APPLICATION);
-
                 mActionModePopup->SetContentView(IView::Probe(mActionModeView));
                 mActionModePopup->SetWidth(IViewGroupLayoutParams::MATCH_PARENT);
 
@@ -1837,183 +1837,84 @@ ECode PhoneWindow::_DecorView::StartActionMode(
     return NOERROR;
 }
 
-//IVIEW_METHODS_IMPL(PhoneWindow::DecorView, PhoneWindow::_DecorView);
-//
-//IVIEWGROUP_METHODS_IMPL(PhoneWindow::DecorView, PhoneWindow::_DecorView);
-//
-//IVIEWPARENT_METHODS_IMPL(PhoneWindow::DecorView, PhoneWindow::_DecorView);
-//
-//IVIEWMANAGER_METHODS_IMPL(PhoneWindow::DecorView, PhoneWindow::_DecorView);
-//
-//IDRAWABLECALLBACK_METHODS_IMPL(PhoneWindow::DecorView, PhoneWindow::_DecorView);
-//
-//IKEYEVENTCALLBACK_METHODS_IMPL(PhoneWindow::DecorView, PhoneWindow::_DecorView);
-//
-//IACCESSIBILITYEVENTSOURCE_METHODS_IMPL(PhoneWindow::DecorView, PhoneWindow::_DecorView);
-//
-//PhoneWindow::DecorView::DecorView(
-//    /* [in] */ PhoneWindow* host,
-//    /* [in] */ IContext* context,
-//    /* [in] */ Int32 featureId,
-//    /* [in] */ Boolean useSelfRef) :
-//    _DecorView(host, context, featureId)
-//    , mUseSelfRef(useSelfRef)
-//{
-//}
-//
-//PhoneWindow::DecorView::~DecorView()
-//{
-//    if (!mUseSelfRef)
-//        mHost->mDecor = NULL;
-//}
-//
-//PInterface PhoneWindow::DecorView::Probe(
-//    /* [in] */ REIID riid)
-//{
-//    if (riid == EIID_IInterface) {
-//        return (IInterface*)(IFrameLayout*)this;
-//    }
-//    else if (riid == EIID_IView) {
-//        return (IView*)this;
-//    }
-//    else if (riid == EIID_IFrameLayout) {
-//        return (IFrameLayout*)this;
-//    }
-//    else if (riid == EIID_IViewGroup) {
-//        return (IViewGroup*)(IFrameLayout*)this;
-//    }
-//    else if (riid == EIID_IViewParent) {
-//        return (IViewParent*)this;
-//    }
-//    else if (riid == EIID_IViewManager) {
-//        return (IViewManager*)this;
-//    }
-//    else if (riid == EIID_IDrawableCallback) {
-//        return (IDrawableCallback*)this;
-//    }
-//    else if (riid == EIID_IKeyEventCallback) {
-//        return (IKeyEventCallback*)this;
-//    }
-//    else if (riid == EIID_IAccessibilityEventSource) {
-//        return (IAccessibilityEventSource*)this;
-//    }
-//    else if (riid == EIID_IWeakReferenceSource) {
-//        return (IWeakReferenceSource*)this;
-//    }
-//    else if (riid == EIID_View) {
-//        return reinterpret_cast<PInterface>((View*)(FrameLayout*)this);
-//    }
-//    else if (riid == EIID_ViewGroup) {
-//        return reinterpret_cast<PInterface>((ViewGroup*)(FrameLayout*)this);
-//    }
-//    else if (riid == EIID_IRootViewSurfaceTaker) {
-//        return reinterpret_cast<PInterface>((IRootViewSurfaceTaker*)this);
-//    }
-//
-//    return NULL;
-//}
-//
-//UInt32 PhoneWindow::DecorView::AddRef()
-//{
-//    if (mUseSelfRef)
-//        return ElRefBase::AddRef();
-//    else {
-//        assert(mHost != NULL);
-//        return mHost->AddRef();
-//    }
-//}
-//
-//UInt32 PhoneWindow::DecorView::Release()
-//{
-//    if (mUseSelfRef)
-//        return ElRefBase::Release();
-//    else {
-//        assert(mHost != NULL);
-//        return mHost->Release();
-//    }
-//}
-//
-//UInt32 PhoneWindow::DecorView::_AddRef()
-//{
-//    return ElRefBase::AddRef();
-//}
-//
-//UInt32 PhoneWindow::DecorView::_Release()
-//{
-//    return ElRefBase::Release();
-//}
-//
-//ECode PhoneWindow::DecorView::GetInterfaceID(
-//    /* [in] */ IInterface *pObject,
-//    /* [out] */ InterfaceID *pIID)
-//{
-//    return E_NOT_IMPLEMENTED;
-//}
-//
-//ECode PhoneWindow::DecorView::GetForegroundGravity(
-//    /* [out] */ Int32* foregroundGravity)
-//{
-//    assert(foregroundGravity != NULL);
-//    *foregroundGravity = _DecorView::GetForegroundGravity();
-//    return NOERROR;
-//}
-//
-//ECode PhoneWindow::DecorView::SetForegroundGravity(
-//    /* [in] */ Int32 foregroundGravity)
-//{
-//    return _DecorView::SetForegroundGravity(foregroundGravity);
-//}
-//
-//ECode PhoneWindow::DecorView::SetForeground(
-//    /* [in] */ IDrawable* drawable)
-//{
-//    return _DecorView::SetForeground(drawable);
-//}
-//
-//ECode PhoneWindow::DecorView::GetForeground(
-//    /* [out] */ IDrawable** foreground)
-//{
-//    VALIDATE_NOT_NULL(foreground);
-//    AutoPtr<IDrawable> d = _DecorView::GetForeground();
-//    *foreground = d.Get();
-//    REFCOUNT_ADD(*foreground);
-//
-//    return NOERROR;
-//}
-//
-//ECode PhoneWindow::DecorView::SetMeasureAllChildren(
-//    /* [in] */ Boolean measureAll)
-//{
-//    return _DecorView::SetMeasureAllChildren(measureAll);
-//}
-//
-//ECode PhoneWindow::DecorView::GetMeasureAllChildren(
-//    /* [out] */ Boolean* measureAll)
-//{
-//    assert(measureAll != NULL);
-//    *measureAll = _DecorView::GetMeasureAllChildren();
-//    return NOERROR;
-//}
-//
-//ECode PhoneWindow::DecorView::GetConsiderGoneChildrenWhenMeasuring(
-//    /* [out] */ Boolean* measureAll)
-//{
-//    VALIDATE_NOT_NULL(measureAll)
-//    *measureAll = _DecorView::GetConsiderGoneChildrenWhenMeasuring();
-//
-//    return NOERROR;
-//}
-//
-//ECode PhoneWindow::DecorView::GetWeakReference(
-//    /* [out] */ IWeakReference** weakReference)
-//{
-//    VALIDATE_NOT_NULL(weakReference)
-//    //*weakReference = new DecorViewWeakReferenceImpl(Probe(EIID_IInterface), CreateWeak(this));
-//    IWeakReferenceSource* source = IWeakReferenceSource::Probe((IWeakReferenceSource *)this);
-//    source->GetWeakReference((IWeakReference**)&weakReference);
-//    //REFCOUNT_ADD(*weakReference)
-//    return NOERROR;
-//}
+//===============================================================================================
+// PhoneWindow::DecorView
+//===============================================================================================
+PhoneWindow::DecorView::DecorView()
+   : mUseSelfRef(FALSE)
+{
+}
+
+PhoneWindow::DecorView::~DecorView()
+{
+   if (!mUseSelfRef) {
+       mHost->mDecor = NULL;
+   }
+}
+
+ECode PhoneWindow::DecorView::constructor(
+   /* [in] */ PhoneWindow* host,
+   /* [in] */ IContext* context,
+   /* [in] */ Int32 featureId,
+   /* [in] */ Boolean useSelfRef)
+{
+    FAIL_RETURN(_DecorView::constructor(host, context, featureId));
+    mUseSelfRef = useSelfRef;
+    return NOERROR;
+}
+
+PInterface PhoneWindow::DecorView::Probe(
+   /* [in] */ REIID riid)
+{
+   return _DecorView::Probe(riid);
+}
+
+
+ECode PhoneWindow::DecorView::GetInterfaceID(
+   /* [in] */ IInterface *pObject,
+   /* [out] */ InterfaceID *pIID)
+{
+   return _DecorView::GetInterfaceID(pObject, pIID);
+}
+
+UInt32 PhoneWindow::DecorView::AddRef()
+{
+   if (mUseSelfRef)
+       return ElRefBase::AddRef();
+   else {
+       assert(mHost != NULL);
+       return mHost->AddRef();
+   }
+}
+
+UInt32 PhoneWindow::DecorView::Release()
+{
+   if (mUseSelfRef)
+       return ElRefBase::Release();
+   else {
+       assert(mHost != NULL);
+       return mHost->Release();
+   }
+}
+
+UInt32 PhoneWindow::DecorView::_AddRef()
+{
+   return ElRefBase::AddRef();
+}
+
+UInt32 PhoneWindow::DecorView::_Release()
+{
+   return ElRefBase::Release();
+}
+
+ECode PhoneWindow::DecorView::GetWeakReference(
+   /* [out] */ IWeakReference** weakReference)
+{
+   VALIDATE_NOT_NULL(weakReference)
+   *weakReference = new DecorViewWeakReferenceImpl(Probe(EIID_IInterface), CreateWeak(this));
+   REFCOUNT_ADD(*weakReference)
+   return NOERROR;
+}
 
 //=====================================================================
 //              PhoneWindow::PanelFeatureState::SavedState
@@ -2703,8 +2604,6 @@ ECode PhoneWindow::InnerSwipeDismissLayoutOnSwipeProgressChangedListener1::OnSwi
 //    return mHost->OnMenuModeChange(menu);
 //}
 
-CAR_INTERFACE_IMPL_2(PhoneWindow, Window, IPhoneWindow, IMenuBuilderCallback);
-
 PhoneWindow::PhoneWindow()
     : mResourcesSetFlags(0)
     , mIconRes(0)
@@ -2741,11 +2640,6 @@ PhoneWindow::PhoneWindow()
 
 PhoneWindow::~PhoneWindow()
 {
-    AutoPtr<_DecorView> decor = mDecor;
-    if (decor != NULL)
-    {
-        decor->Release();
-    }
 }
 
 ECode PhoneWindow::constructor(
@@ -2765,36 +2659,52 @@ ECode PhoneWindow::constructor(
     return LayoutInflater::From(context, (ILayoutInflater**)&mLayoutInflater);
 }
 
-//PInterface PhoneWindow::Probe(
-//    /* [in] */ REIID riid)
-//{
-//    if(riid == EIID_IPhoneWindow) {
-//        return reinterpret_cast<PInterface>(this);
-//    }
-//    return _PhoneWindow::Probe(riid);
-//}
-//
-//UInt32 PhoneWindow::AddRef()
-//{
-//    return _PhoneWindow::AddRef();
-//}
-//
-//UInt32 PhoneWindow::Release()
-//{
-//    _DecorView* decor = mDecor;
-//    UInt32 ref = _PhoneWindow::Release();
-//    if (decor != NULL && ref == 1) {
-//        decor->_Release();
-//    }
-//    return ref;
-//}
-//
-//ECode PhoneWindow::GetInterfaceID(
-//    /* [in] */ IInterface *pObject,
-//    /* [out] */ InterfaceID *pIID)
-//{
-//    return _PhoneWindow::GetInterfaceID(pObject, pIID);
-//}
+PInterface PhoneWindow::Probe(
+   /* [in] */ REIID riid)
+{
+    if (riid == EIID_IInterface) {
+        return (IInterface*)(IPhoneWindow*)this;
+    }
+    if (riid == EIID_IPhoneWindow) {
+        return (IInterface*)(IPhoneWindow*)this;
+    }
+    else if (riid == EIID_IMenuBuilderCallback) {
+        return (IInterface*)(IMenuBuilderCallback*)this;
+    }
+    return Window::Probe(riid);
+}
+
+ECode PhoneWindow::GetInterfaceID(
+   /* [in] */ IInterface *pObject,
+   /* [out] */ InterfaceID *pIID)
+{
+    VALIDATE_NOT_NULL(pIID)
+    if (pObject == ((IInterface*)(IPhoneWindow*)this)) {
+        *pIID = EIID_IPhoneWindow;
+        return NOERROR;
+    }
+    else if (pObject == ((IInterface*)(IMenuBuilderCallback*)this)) {
+        *pIID = EIID_IMenuBuilderCallback;
+        return NOERROR;
+    }
+
+   return Window::GetInterfaceID(pObject, pIID);
+}
+
+UInt32 PhoneWindow::AddRef()
+{
+   return Window::AddRef();
+}
+
+UInt32 PhoneWindow::Release()
+{
+   DecorView* decor = mDecor;
+   UInt32 ref = Window::Release();
+   if (decor != NULL && ref == 1) {
+       decor->_Release();
+   }
+   return ref;
+}
 
 ECode PhoneWindow::SetContainer(
     /* [in] */ IWindow* container)
@@ -3290,8 +3200,8 @@ Boolean PhoneWindow::InitializePanelDecor(
 {
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    st->mDecorView = new _DecorView();
-    st->mDecorView->constructor(this, context, st->mFeatureId);//, TRUE);//TODO memory leak.
+    st->mDecorView = new DecorView();
+    st->mDecorView->constructor(this, context, st->mFeatureId, TRUE);
     st->mGravity = IGravity::CENTER | IGravity::BOTTOM;
     st->SetStyle(context);
 
@@ -4771,17 +4681,17 @@ void PhoneWindow::RestorePanelState(
      */
 }
 
-AutoPtr<PhoneWindow::_DecorView> PhoneWindow::GenerateDecor()
+AutoPtr<PhoneWindow::DecorView> PhoneWindow::GenerateDecor()
 {
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<PhoneWindow::_DecorView> decor = new _DecorView();
-    decor->constructor(this, context.Get(), -1);    //TODO memory leak.
+    AutoPtr<PhoneWindow::DecorView> decor = new DecorView();
+    decor->constructor(this, context.Get(), -1);
     return decor;
 }
 
 ECode PhoneWindow::GenerateLayout(
-    /* [in] */ _DecorView* decor,
+    /* [in] */ DecorView* decor,
     /* [out] */ IViewGroup** viewGroup)
 {
     VALIDATE_NOT_NULL(viewGroup);
@@ -5621,8 +5531,7 @@ ECode PhoneWindow::SetNavigationBarColor(
 void PhoneWindow::InstallDecor()
 {
     if (mDecor == NULL) {
-        AutoPtr<_DecorView> decor = GenerateDecor();
-        mDecor = decor;
+        mDecor = GenerateDecor();
         mDecor->AddRef();
         mDecor->SetDescendantFocusability(ViewGroup::FOCUS_AFTER_DESCENDANTS);
         mDecor->SetIsRootNamespace(TRUE);
@@ -6237,163 +6146,6 @@ ECode PhoneWindow::GetVolumeControlStream(
     *streamType = mVolumeControlStreamType;
     return NOERROR;
 }
-
-//ECode PhoneWindow::GetContext(
-//    /* [out] */ IContext** context)
-//{
-//    VALIDATE_NOT_NULL(context);
-//    return Window::GetContext(context);
-//}
-//
-//ECode PhoneWindow::GetWindowStyle(
-//    /* [out] */ ITypedArray** attrs)
-//{
-//    VALIDATE_NOT_NULL(attrs);
-//    return Window::GetWindowStyle(attrs);
-//}
-//
-//ECode PhoneWindow::GetContainer(
-//    /* [out] */ IWindow** container)
-//{
-//    VALIDATE_NOT_NULL(container);
-//    return Window::GetContainer(container);
-//}
-//
-//ECode PhoneWindow::IsDestroyed(
-//    /* [out] */ Boolean* destroyed)
-//{
-//    VALIDATE_NOT_NULL(destroyed);
-//    return Window::IsDestroyed(destroyed);
-//}
-//
-//ECode PhoneWindow::HasChildren(
-//    /* [out] */  Boolean* hasChildren)
-//{
-//    VALIDATE_NOT_NULL(hasChildren);
-//    return Window::HasChildren(hasChildren);
-//}
-//
-//ECode PhoneWindow::SetWindowManager(
-//    /* [in] */ IWindowManager* wm,
-//    /* [in] */ IBinder* appToken,
-//    /* [in] */ const String& appName)
-//{
-//    return Window::SetWindowManager(wm, appToken, appName);
-//}
-//
-//ECode PhoneWindow::GetWindowManager(
-//    /* [out] */ IWindowManager** wm)
-//{
-//    return Window::GetWindowManager(wm);
-//}
-//
-//ECode PhoneWindow::SetCallback(
-//    /* [in] */ IWindowCallback* cb)
-//{
-//    return Window::SetCallback(cb);
-//}
-//
-//ECode PhoneWindow::GetCallback(
-//    /* [out] */ IWindowCallback** cb)
-//{
-//    VALIDATE_NOT_NULL(cb);
-//    return Window::GetCallback(cb);
-//}
-//
-//ECode PhoneWindow::SetLayout(
-//    /* [in] */ Int32 width,
-//    /* [in] */ Int32 height)
-//{
-//    return Window::SetLayout(width, height);
-//}
-//
-//ECode PhoneWindow::SetGravity(
-//    /* [in] */ Int32 gravity)
-//{
-//    return Window::SetGravity(gravity);
-//}
-//
-//ECode PhoneWindow::SetType(
-//    /* [in] */ Int32 type)
-//{
-//    return Window::SetType(type);
-//}
-//
-//ECode PhoneWindow::SetFormat(
-//    /* [in] */ Int32 format)
-//{
-//    return Window::SetFormat(format);
-//}
-//
-//ECode PhoneWindow::SetWindowAnimations(
-//    /* [in] */ Int32 resId)
-//{
-//    return Window::SetWindowAnimations(resId);
-//}
-//
-//ECode PhoneWindow::SetSoftInputMode(
-//    /* [in] */ Int32 mode)
-//{
-//    return Window::SetSoftInputMode(mode);
-//}
-//
-//ECode PhoneWindow::AddFlags(
-//    /* [in] */ Int32 flags)
-//{
-//    return Window::AddFlags(flags);
-//}
-//
-//ECode PhoneWindow::ClearFlags(
-//    /* [in] */ Int32 flags)
-//{
-//    return Window::ClearFlags(flags);
-//}
-//
-//ECode PhoneWindow::SetFlags(
-//    /* [in] */ Int32 flags,
-//    /* [in] */ Int32 mask)
-//{
-//    return Window::SetFlags(flags, mask);
-//}
-//
-//ECode PhoneWindow::SetAttributes(
-//    /* [in] */ IWindowManagerLayoutParams* a)
-//{
-//    return Window::SetAttributes(a);
-//}
-//
-//ECode PhoneWindow::GetAttributes(
-//    /* [out] */ IWindowManagerLayoutParams** params)
-//{
-//    return Window::GetAttributes(params);
-//}
-
-//ECode PhoneWindow::MakeActive()
-//{
-//    return Window::MakeActive();
-//}
-//
-//ECode PhoneWindow::IsActive(
-//    /* [out] */ Boolean* isActive)
-//{
-//    VALIDATE_NOT_NULL(isActive);
-//    return Window::IsActive(isActive);
-//}
-//
-//ECode PhoneWindow::FindViewById(
-//    /* [in] */ Int32 id,
-//    /* [out] */ IView** view)
-//{
-//    VALIDATE_NOT_NULL(view);
-//
-//    return Window::FindViewById(id, view);
-//}
-
-//ECode PhoneWindow::SetBackgroundDrawableResource(
-//    /* [in] */ Int32 resid)
-//{
-//    return Window::SetBackgroundDrawableResource(resid);
-//}
 
 /**
  * Prepares the panel to either be opened or chorded. This creates the Menu

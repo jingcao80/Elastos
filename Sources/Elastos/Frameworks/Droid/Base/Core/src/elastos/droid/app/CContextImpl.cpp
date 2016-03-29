@@ -577,7 +577,9 @@ ECode CContextImpl::GetClassLoader(
     if (mPackageInfo != NULL) {
         mPackageInfo->GetClassLoader(loader);
     }
-//    else ClassLoader.getSystemClassLoader();
+    else {
+        LoadedPkg::GetSystemClassLoader(loader);
+    }
     return NOERROR;
 }
 

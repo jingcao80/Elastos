@@ -299,10 +299,7 @@ ECode FragmentManagerImpl::PutFragment(
     Int32 index;
     fragment->GetIndex(&index);
     if (index < 0) {
-//         throwException(new IllegalStateException("Fragment " + fragment
-//                 + " is not currently in the FragmentManager"));
-        Logger::E(TAG, "%s is not currently in the FragmentManager",
-            TO_CSTR(fragment));
+        Logger::E(TAG, "%s is not currently in the FragmentManager", TO_CSTR(fragment));
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     bundle->PutInt32(key, index);
@@ -347,8 +344,7 @@ ECode FragmentManagerImpl::SaveFragmentInstanceState(
     Int32 index;
     fragment->GetIndex(&index);
     if (index < 0) {
-        Logger::E(TAG, "Fragment %s is not currently in the FragmentManager",
-            TO_CSTR(fragment));
+        Logger::E(TAG, "Fragment %s is not currently in the FragmentManager", TO_CSTR(fragment));
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     Int32 fstate;
@@ -583,14 +579,12 @@ ECode FragmentManagerImpl::LoadAnimator(
     }
 
     if (transit == 0) {
-        *animator = NULL;
         return NOERROR;
     }
 
     Int32 styleIndex;
     TransitToStyleIndex(transit, enter, &styleIndex);
     if (styleIndex < 0) {
-        *animator = NULL;
         return NOERROR;
     }
 
@@ -604,7 +598,6 @@ ECode FragmentManagerImpl::LoadAnimator(
         transitionStyle = wAnimations;
     }
     if (transitionStyle == 0) {
-        *animator = NULL;
         return NOERROR;
     }
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
@@ -617,7 +610,6 @@ ECode FragmentManagerImpl::LoadAnimator(
     attrs->Recycle();
 
     if (anim == 0) {
-        *animator = NULL;
         return NOERROR;
     }
     AutoPtr<IAnimator> a;
@@ -655,8 +647,8 @@ ECode FragmentManagerImpl::MoveToState(
     f->GetState(&state);
     Boolean removing;
     f->IsRemoving(&removing);
-    if (DEBUG && FALSE) Logger::V(TAG, "MoveToState: %p oldState=%d newState=%d mRemoving=%d", f
-        , state, newState, removing /*" Callers=" + *Debug->GetCallers(5)*/);
+    if (DEBUG && FALSE) Logger::V(TAG, "MoveToState: %s oldState=%d newState=%d mRemoving=%d",
+        TO_CSTR(f), state, newState, removing /*" Callers=" + *Debug->GetCallers(5)*/);
 
     // Fragments that are not currently added will sit in the onCreate() state.
     Boolean added;
@@ -705,7 +697,7 @@ ECode FragmentManagerImpl::MoveToState(
         switch (state) {
             case IFragment::INITIALIZING:
             {
-                if (DEBUG) Logger::V(TAG, "moveto CREATED: %p", f);
+                if (DEBUG) Logger::V(TAG, "moveto CREATED: %s", TO_CSTR(f));
                 if (savedFragmentState != NULL) {
                    AutoPtr<ISparseArray> parcelableMap;
                    savedFragmentState->GetSparseParcelableArray(
@@ -747,8 +739,7 @@ ECode FragmentManagerImpl::MoveToState(
                 Boolean called;
                 f->GetCalled(&called);
                 if (!called) {
-//                     throw new SuperNotCalledException("Fragment " + f
-//                             + " did not call through to super.onAttach()");
+                    Logger::E(TAG, "Fragment %s did not call through to super::OnAttach()", TO_CSTR(f));
                     return E_SUPER_NOT_CALLED_EXCEPTION;
                 }
                 AutoPtr<IFragment> parentFragment;
@@ -784,7 +775,7 @@ ECode FragmentManagerImpl::MoveToState(
             }
             case IFragment::CREATED:
                 if (newState > IFragment::CREATED) {
-                    if (DEBUG) Logger::V(TAG, "moveto ACTIVITY_CREATED: %p", f);
+                    if (DEBUG) Logger::V(TAG, "moveto ACTIVITY_CREATED: %s", TO_CSTR(f));
                     if (!fromLayout) {
                         AutoPtr<IViewGroup> container = NULL;
                         Int32 containerId;
@@ -796,11 +787,12 @@ ECode FragmentManagerImpl::MoveToState(
                             Boolean restored;
                             f->GetRestored(&restored);
                             if (container == NULL && !restored) {
-//                                 throwException(new IllegalArgumentException(
-//                                         "No view found for id 0x"
-//                                         + Integer.toHexString(f.mContainerId) + " ("
-//                                         + f->GetResources()->GetResourceName(f.mContainerId)
-//                                         + ") for fragment " + f));
+                                AutoPtr<IResources> res;
+                                f->GetResources((IResources**)&res);
+                                String resName;
+                                res->GetResourceName(containerId, &resName);
+                                Logger::E(TAG, "No view found for id 0x%08x (%s) for fragment %s",
+                                    containerId, resName.string(), TO_CSTR(f));
                                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
                             }
                         }
@@ -841,12 +833,12 @@ ECode FragmentManagerImpl::MoveToState(
             case IFragment::ACTIVITY_CREATED:
             case IFragment::STOPPED:
                 if (newState > IFragment::STOPPED) {
-                    if (DEBUG) Logger::V(TAG, "moveto STARTED: %p", f);
+                    if (DEBUG) Logger::V(TAG, "moveto STARTED: %s", TO_CSTR(f));
                     f->PerformStart();
                 }
             case IFragment::STARTED:
                 if (newState > IFragment::STARTED) {
-                    if (DEBUG) Logger::V(TAG, "moveto RESUMED: %p", f);
+                    if (DEBUG) Logger::V(TAG, "moveto RESUMED: %s", TO_CSTR(f));
                     f->SetResumed(TRUE);
                     f->PerformResume();
                     // Get rid of this in case we saved it and never needed it.
@@ -858,19 +850,19 @@ ECode FragmentManagerImpl::MoveToState(
         switch (state) {
             case IFragment::RESUMED:
                 if (newState < IFragment::RESUMED) {
-                    if (DEBUG) Logger::V(TAG, "movefrom RESUMED: %p", f);
+                    if (DEBUG) Logger::V(TAG, "movefrom RESUMED: %s", TO_CSTR(f));
                     f->PerformPause();
                     f->SetResumed(FALSE);
                 }
             case IFragment::STARTED:
                 if (newState < IFragment::STARTED) {
-                    if (DEBUG) Logger::V(TAG, "movefrom STARTED: %p", f);
+                    if (DEBUG) Logger::V(TAG, "movefrom STARTED: %s", TO_CSTR(f));
                     f->PerformStop();
                 }
             case IFragment::STOPPED:
             case IFragment::ACTIVITY_CREATED:
                 if (newState < IFragment::ACTIVITY_CREATED) {
-                    if (DEBUG) Logger::V(TAG, "movefrom ACTIVITY_CREATED: %p", f);
+                    if (DEBUG) Logger::V(TAG, "movefrom ACTIVITY_CREATED: %s", TO_CSTR(f));
                     AutoPtr<IView> view;
                     f->GetView((IView**)&view);
                     if (view != NULL) {
@@ -934,7 +926,7 @@ ECode FragmentManagerImpl::MoveToState(
                         f->SetStateAfterAnimating(newState);
                         newState = IFragment::CREATED;
                     } else {
-                        if (DEBUG) Logger::V(TAG, "movefrom CREATED: %p", f);
+                        if (DEBUG) Logger::V(TAG, "movefrom CREATED: %s", TO_CSTR(f));
                         Boolean retaining;
                         f->GetRetaining(&retaining);
                         if (!retaining) {
@@ -1062,7 +1054,7 @@ ECode FragmentManagerImpl::MakeActive(
         f->SetIndex(idx, mParent);
         mActive[index] = f;
     }
-    if (DEBUG) Logger::V(TAG, "Allocated fragment index %p", f);
+    if (DEBUG) Logger::V(TAG, "Allocated fragment index %s", TO_CSTR(f));
     return NOERROR;
 }
 
@@ -1075,7 +1067,7 @@ ECode FragmentManagerImpl::MakeInactive(
         return NOERROR;
     }
 
-    if (DEBUG) Logger::V(TAG, "Freeing fragment index %p", f);
+    if (DEBUG) Logger::V(TAG, "Freeing fragment index %s", TO_CSTR(f));
     mActive[index] = NULL;
     mAvailIndices.PushBack(index);
     String who;
@@ -1090,7 +1082,7 @@ ECode FragmentManagerImpl::AddFragment(
     /* [in] */ IFragment* fragment,
     /* [in] */ Boolean MoveToStateNow)
 {
-    if (DEBUG) Logger::V(TAG, "add: %p", fragment);
+    if (DEBUG) Logger::V(TAG, "add: %s", TO_CSTR(fragment));
     MakeActive(fragment);
     Boolean detached;
     fragment->IsDetached(&detached);
@@ -1100,7 +1092,7 @@ ECode FragmentManagerImpl::AddFragment(
         List<AutoPtr<IFragment> >::Iterator it = Find(mAdded.Begin(), mAdded.End(), f);
         if (it != mAdded.End()) contains = TRUE;
         if (contains) {
-//             throw new IllegalStateException("Fragment already added: " + fragment);
+            Logger::E(TAG, "Fragment already added: %s", TO_CSTR(fragment));
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         mAdded.PushBack(f);
@@ -1127,7 +1119,7 @@ ECode FragmentManagerImpl::RemoveFragment(
 {
     Int32 backStackNesting;
     fragment->GetBackStackNesting(&backStackNesting);
-    if (DEBUG) Logger::V(TAG, "remove: %p nesting=", fragment, backStackNesting);
+    if (DEBUG) Logger::V(TAG, "remove: %s nesting=%d", TO_CSTR(fragment), backStackNesting);
     Boolean inbs;
     fragment->IsInBackStack(&inbs);
     Boolean inactive = !inbs;
@@ -1143,7 +1135,7 @@ ECode FragmentManagerImpl::RemoveFragment(
             List<AutoPtr<IFragment> >::Iterator it = Find(mAdded.Begin(), mAdded.End(), f);
             if (it != mAdded.End()) contains = TRUE;
             if (!contains) {
-//                 throw new IllegalStateException("Fragment not added: " + fragment);
+                Logger::E(TAG, "Fragment not added: %s", TO_CSTR(fragment));
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
         }
@@ -1170,7 +1162,7 @@ ECode FragmentManagerImpl::HideFragment(
     /* [in] */ Int32 transition,
     /* [in] */ Int32 transitionStyle)
 {
-    if (DEBUG) Logger::V(TAG, "hide: %p", fragment);
+    if (DEBUG) Logger::V(TAG, "hide: %s", TO_CSTR(fragment));
     Boolean hidden;
     fragment->IsHidden(&hidden);
     if (!hidden) {
@@ -1212,7 +1204,7 @@ ECode FragmentManagerImpl::ShowFragment(
     /* [in] */ Int32 transition,
     /* [in] */ Int32 transitionStyle)
 {
-    if (DEBUG) Logger::V(TAG, "show: %p", fragment);
+    if (DEBUG) Logger::V(TAG, "show: %s", TO_CSTR(fragment));
     Boolean hidden;
     fragment->IsHidden(&hidden);
     if (hidden) {
@@ -1221,8 +1213,7 @@ ECode FragmentManagerImpl::ShowFragment(
         fragment->GetView((IView**)&view);
         if (view != NULL) {
             AutoPtr<IAnimator> anim;
-            LoadAnimator(fragment, transition, TRUE,
-                    transitionStyle, (IAnimator**)&anim);
+            LoadAnimator(fragment, transition, TRUE, transitionStyle, (IAnimator**)&anim);
             if (anim != NULL) {
                 anim->SetTarget(view);
                 anim->Start();
@@ -1248,7 +1239,7 @@ ECode FragmentManagerImpl::DetachFragment(
     /* [in] */ Int32 transition,
     /* [in] */ Int32 transitionStyle)
 {
-    if (DEBUG) Logger::V(TAG, "detach: %p", fragment);
+    if (DEBUG) Logger::V(TAG, "detach: %s", TO_CSTR(fragment));
     Boolean detached;
     fragment->IsDetached(&detached);
     if (!detached) {
@@ -1258,7 +1249,7 @@ ECode FragmentManagerImpl::DetachFragment(
         if (added) {
             // We are not already in back stack, so need to remove the fragment.
             if (!mAdded.IsEmpty()) {
-                if (DEBUG) Logger::V(TAG, "remove from detach: %p", fragment);
+                if (DEBUG) Logger::V(TAG, "remove from detach: %s", TO_CSTR(fragment));
                 mAdded.Remove(fragment);
             }
             Boolean hasMenu;
@@ -1280,7 +1271,7 @@ ECode FragmentManagerImpl::AttachFragment(
     /* [in] */ Int32 transition,
     /* [in] */ Int32 transitionStyle)
 {
-    if (DEBUG) Logger::V(TAG, "attach: %p", fragment);
+    if (DEBUG) Logger::V(TAG, "attach: %s", TO_CSTR(fragment));
     Boolean detached;
     fragment->IsDetached(&detached);
     if (detached) {
@@ -1293,10 +1284,10 @@ ECode FragmentManagerImpl::AttachFragment(
             List<AutoPtr<IFragment> >::Iterator it = Find(mAdded.Begin(), mAdded.End(), f);
             if (it != mAdded.End()) contains = TRUE;
             if (contains) {
-//                 throw new IllegalStateException("Fragment already added: " + fragment);
+                Logger::E(TAG, "Fragment already added: %s", TO_CSTR(fragment));
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
-            if (DEBUG) Logger::V(TAG, "add from attach: %p", fragment);
+            if (DEBUG) Logger::V(TAG, "add from attach: %s", TO_CSTR(fragment));
             mAdded.PushBack(f);
             fragment->SetAdded(TRUE);
             Boolean hasMenu;
@@ -1431,7 +1422,7 @@ ECode FragmentManagerImpl::EnqueueAction(
     {
         AutoLock lock(this);
         if (mDestroyed || mActivity == NULL) {
-//             throw new IllegalStateException("Activity has been destroyed");
+            Logger::E(TAG, "Activity has been destroyed");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
 
@@ -1868,7 +1859,8 @@ ECode FragmentManagerImpl::SaveAllState(
                     Int32 tIndex = 0;
                     t->GetIndex(&tIndex);
                     if (tIndex < 0) {
-                        Logger::V(TAG, "Failure saving state: %p has target not in fragment manager: %p", f.Get(), t.Get());
+                        Logger::V(TAG, "Failure saving state: %s has target not in fragment manager: %s",
+                            TO_CSTR(f), TO_CSTR(t));
                         return E_ILLEGAL_STATE_EXCEPTION;
                     }
                     if (fs->mSavedFragmentState == NULL) {
@@ -1882,7 +1874,7 @@ ECode FragmentManagerImpl::SaveAllState(
                     f->GetTargetRequestCode(&code);
                     if (code != 0) {
                         fs->mSavedFragmentState->PutInt32(
-                                IFragmentManagerImpl::TARGET_REQUEST_CODE_STATE_TAG, code);
+                            IFragmentManagerImpl::TARGET_REQUEST_CODE_STATE_TAG, code);
                     }
                 }
 
@@ -1891,7 +1883,8 @@ ECode FragmentManagerImpl::SaveAllState(
                 f->GetSavedFragmentState((IBundle**)&fs->mSavedFragmentState);
             }
 
-            if (DEBUG) Logger::V(TAG, "Saved state of %p:", f.Get(), fs->mSavedFragmentState.Get());
+            if (DEBUG) Logger::V(TAG, "Saved state of %s: in %s",
+                TO_CSTR(f), TO_CSTR(fs->mSavedFragmentState));
         }
     }
 
@@ -1915,10 +1908,11 @@ ECode FragmentManagerImpl::SaveAllState(
                 (*ator)->GetIndex(&index);
                 (*added)[i] = index;
                 if ((*added)[i] < 0) {
-                    Logger::V(TAG, "Failure saving state: active %p has cleared index: %d", (*ator).Get(), index);
+                    Logger::V(TAG, "Failure saving state: active %s has cleared index: %d",
+                        TO_CSTR(*ator), index);
                     return E_ILLEGAL_STATE_EXCEPTION;
                 }
-                if (DEBUG) Logger::V(TAG, "saveAllState: adding fragment #%d: %p", i, (*ator).Get());
+                if (DEBUG) Logger::V(TAG, "saveAllState: adding fragment #%d: %s", i, TO_CSTR(*ator));
             }
         }
     }
@@ -1932,7 +1926,7 @@ ECode FragmentManagerImpl::SaveAllState(
             AutoPtr<IBackStackState> value;
             CBackStackState::New(this, *ator, (IBackStackState**)&value);
             backStack->Set(i, value);
-            if (DEBUG) Logger::V(TAG, "saveAllState: adding back stack #%d: %p", i, (*ator).Get());
+            if (DEBUG) Logger::V(TAG, "saveAllState: adding back stack #%d: %s", i, TO_CSTR(*ator));
         }
     }
 
@@ -1962,6 +1956,7 @@ ECode FragmentManagerImpl::RestoreAllState(
         Int32 size;
         nonConfig->GetSize(&size);
         IFragment* f;
+        IContext* ctx = IContext::Probe(mActivity);
         for (Int32 i = 0; i < size; ++i) {
             AutoPtr<IInterface> data;
             nonConfig->Get(i, (IInterface**)&data);
@@ -1979,8 +1974,7 @@ ECode FragmentManagerImpl::RestoreAllState(
             f->SetTarget(NULL);
             if (fs->mSavedFragmentState != NULL) {
                 AutoPtr<IClassLoader> classLoader;
-                assert(0 && "TODO");
-                // mActivity->GetClassLoader((IClassLoader**)&classLoader);
+                ctx->GetClassLoader((IClassLoader**)&classLoader);
                 fs->mSavedFragmentState->SetClassLoader(classLoader);
 
                 AutoPtr<ISparseArray> map;
@@ -2004,8 +1998,7 @@ ECode FragmentManagerImpl::RestoreAllState(
             AutoPtr<IFragment> f;
             fs->Instantiate(mActivity, mParent, (IFragment**)&f);
             if (DEBUG)
-                Logger::V(TAG, "restoreAllState: active #%d: %s",
-                    i , TO_CSTR(f));
+                Logger::V(TAG, "restoreAllState: active #%d: %s", i , TO_CSTR(f));
             mActive.PushBack(f);
             // Now that the fragment is instantiated (or came from being
             // retained above), clear mInstance in case we end up re-restoring
@@ -2052,7 +2045,7 @@ ECode FragmentManagerImpl::RestoreAllState(
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
             f->SetAdded(TRUE);
-            if (DEBUG) Logger::V(TAG, "restoreAllState: added #%d: %p", i, f.Get());
+            if (DEBUG) Logger::V(TAG, "restoreAllState: added #%d: %s", i, TO_CSTR(f));
 
             List<AutoPtr<IFragment> >::Iterator ator = mAdded.Begin();
             for (; ator != mAdded.End(); ++ator) {
@@ -2074,8 +2067,8 @@ ECode FragmentManagerImpl::RestoreAllState(
             AutoPtr<IBackStackRecord> bse;
             (*fms->mBackStack)[i]->Instantiate(this, (IBackStackRecord**)&bse);
             if (DEBUG) {
-                Logger::V(TAG, "restoreAllState: back stack #%d (index %d): %p",
-                    i, ((BackStackRecord*)bse.Get())->mIndex, bse.Get());
+                Logger::V(TAG, "restoreAllState: back stack #%d (index %d): %s",
+                    i, ((BackStackRecord*)bse.Get())->mIndex, TO_CSTR(bse));
                 // TODO
                 // LogWriter logw = new LogWriter(Log.VERBOSE, TAG);
                 // PrintWriter pw = new FastPrintWriter(logw, false, 1024);

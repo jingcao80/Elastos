@@ -2580,7 +2580,6 @@ ECode CActivityThread::DeliverNewIntents(
     /* [in] */ ActivityClientRecord* r,
     /* [in] */ IList* intents)
 {
-
     AutoPtr<Activity> activity = (Activity*)r->mActivity.Get();
     Int32 size;
     intents->GetSize(&size);
@@ -2588,10 +2587,9 @@ ECode CActivityThread::DeliverNewIntents(
         AutoPtr<IInterface> obj;
         intents->Get(i, (IInterface**)&obj);
         IIntent* intent = IIntent::Probe(obj);
-        assert(0 && "TODO");
-        // AutoPtr<IClassLoader> classLoader;
-        // if (activity) activity->GetClassLoader((IClassLoader**)&classLoader);
-        // intent->SetExtrasClassLoader(classLoader);
+        AutoPtr<IClassLoader> classLoader;
+        if (activity) activity->GetClassLoader((IClassLoader**)&classLoader);
+        intent->SetExtrasClassLoader(classLoader);
         intent->PrepareToEnterProcess();
 
         if (activity) activity->mFragments->NoteStateNotSaved();
@@ -3207,8 +3205,8 @@ ECode CActivityThread::HandleBindService(
     if (s != NULL) {
 //        try {
         AutoPtr<IClassLoader> classLoader;
-//        s->GetClassLoader((IClassLoader**)&classLoader);
-//        data->mIntent->SetExtrasClassLoader(classLoader);
+        IContext::Probe(s)->GetClassLoader((IClassLoader**)&classLoader);
+        data->mIntent->SetExtrasClassLoader(classLoader);
         data->mIntent->PrepareToEnterProcess();
 //        try {
         AutoPtr<IIActivityManager> activityManager = ActivityManagerNative::GetDefault();
@@ -3250,8 +3248,8 @@ ECode CActivityThread::HandleUnbindService(
     if (s != NULL) {
 //        try {
         AutoPtr<IClassLoader> classLoader;
-//        s->GetClassLoader((IClassLoader**)&classLoader);
-//        data->mIntent->SetExtrasClassLoader(classLoader);
+        IContext::Probe(s)->GetClassLoader((IClassLoader**)&classLoader);
+        data->mIntent->SetExtrasClassLoader(classLoader);
         data->mIntent->PrepareToEnterProcess();
 
 //            try {
@@ -3346,8 +3344,8 @@ ECode CActivityThread::HandleServiceArgs(
 //        try {
         if (data->mArgs != NULL) {
             AutoPtr<IClassLoader> classLoader;
-//            s->GetClassLoader((IClassLoader**)&classLoader);
-//            data->mArgs->SetExtrasClassLoader(classLoader);
+            IContext::Probe(s)->GetClassLoader((IClassLoader**)&classLoader);
+            data->mArgs->SetExtrasClassLoader(classLoader);
             data->mArgs->PrepareToEnterProcess();
         }
         Int32 res;
@@ -3388,7 +3386,7 @@ ECode CActivityThread::HandleStopService(
     }
     if (s != NULL) {
 //        try {
-       if (localLOGV) Slogger::V(TAG, "Destroying service %p", s.Get());
+       if (localLOGV) Slogger::V(TAG, "Destroying service %s", TO_CSTR(s));
         s->OnDestroy();
         AutoPtr<IContext> context;
         IContextWrapper::Probe(s)->GetBaseContext((IContext**)&context);
@@ -3432,7 +3430,7 @@ ECode CActivityThread::PerformResumeActivity(
     Boolean finished = FALSE;
     if (r != NULL) r->mActivity->IsFinishing(&finished);
     if (localLOGV) {
-        Slogger::V(TAG, "Performing resume of %p finished=%d, clearHide=%d", r.Get(), finished, clearHide);
+        Slogger::V(TAG, "Performing resume of %s finished=%d, clearHide=%d", TO_CSTR(r), finished, clearHide);
     }
     if (r != NULL && !finished) {
         if (clearHide) {
@@ -3513,10 +3511,8 @@ ECode CActivityThread::HandleResumeActivity(
 
         if (localLOGV) {
             Activity*  activity = (Activity*)r->mActivity.Get();
-            String rdes;
-            r->ToString(&rdes);
             Slogger::V(TAG, "Resume %s started activity: %d, hideForNow: %d, finished: "
-                , rdes.string(), activity->mStartedActivity
+                , TO_CSTR(r), activity->mStartedActivity
                 , r->mHideForNow, activity->mFinished);
         }
 
@@ -3590,7 +3586,7 @@ ECode CActivityThread::HandleResumeActivity(
                 r->mNewConfig = NULL;
             }
 
-            if (localLOGV) Slogger::V(TAG, "Resuming %p with isForward=%d", r, isForward);
+            if (localLOGV) Slogger::V(TAG, "Resuming %s with isForward=%d", TO_CSTR(r), isForward);
 
             AutoPtr<IWindowManagerLayoutParams> l;
             r->mWindow->GetAttributes((IWindowManagerLayoutParams**)&l);
@@ -3795,7 +3791,11 @@ ECode CActivityThread::PerformPauseActivity(
 //        RuntimeException e = new RuntimeException(
 //                "Performing pause of activity that is not resumed: "
 //                + r.intent.getComponent().toShortString());
-//        Slog.e(TAG, e.getMessage(), e);
+        AutoPtr<IComponentName> cn;
+        r->mIntent->GetComponent((IComponentName**)&cn);
+        String str;
+        cn->ToShortString(&str);
+        Slogger::E(TAG, "Performing pause of activity that is not resumed: %s", str.string());
     }
     if (finished) {
         r->mActivity->SetFinishing(TRUE);
@@ -3817,7 +3817,7 @@ ECode CActivityThread::PerformPauseActivity(
         AutoPtr<IComponentName> cn;
         r->mActivity->GetComponentName((IComponentName**)&cn);
         cn->ToShortString(&activityName);
-        Slogger::E(TAG, "Activity %s did not call through to super.onPause().", activityName.string());
+        Slogger::E(TAG, "Activity %s did not call through to super::OnPause().", activityName.string());
         return E_SUPER_NOT_CALLED_EXCEPTION;
 //        throw new SuperNotCalledException(
 //            "Activity " + r.intent.getComponent().toShortString() +
@@ -3889,10 +3889,12 @@ ECode CActivityThread::PerformStopActivityInner(
                 // if the activity isn't resumed.
                 return NOERROR;
             }
-//            RuntimeException e = new RuntimeException(
-//                    "Performing stop of activity that is not resumed: "
-//                    + r.intent.getComponent().toShortString());
-//            Slog.e(TAG, e.getMessage(), e);
+
+            AutoPtr<IComponentName> cn;
+            r->mIntent->GetComponent((IComponentName**)&cn);
+            String str;
+            cn->ToShortString(&str);
+            Slogger::E(TAG, "Performing stop of activity that is not resumed: %s", str.string());
         }
 
         if (info != NULL) {
@@ -4002,7 +4004,7 @@ ECode CActivityThread::HandleStopActivity(
     PerformStopActivityInner(r, info, show, TRUE);
 
     if (localLOGV) Slogger::V(
-            TAG, "Finishing stop of %p: show=%d win=%p", r.Get(), show, r->mWindow.Get());
+            TAG, "Finishing stop of %s: show=%d win=%p", TO_CSTR(r), show, r->mWindow.Get());
 
     UpdateVisibility(r, show);
 
@@ -4142,7 +4144,6 @@ ECode CActivityThread::OnCoreSettingsChange()
 ECode CActivityThread::HandleUpdatePackageCompatibilityInfo(
     /* [in] */ UpdateCompatibilityData* data)
 {
-    Slogger::I(TAG, " === HandleUpdatePackageCompatibilityInfo SetCompatibilityInfo");
     assert(data != NULL);
     AutoPtr<ILoadedPkg> pkg;
     PeekPackageInfo(data->mPkg, FALSE, (ILoadedPkg**)&pkg);
@@ -4176,12 +4177,12 @@ ECode CActivityThread::DeliverResults(
         if (intent != NULL) {
             AutoPtr<IClassLoader> classLoader;
             activity->GetClassLoader((IClassLoader**)&classLoader);
-            // intent->SetExtrasClassLoader(classLoader);
+            intent->SetExtrasClassLoader(classLoader);
             intent->PrepareToEnterProcess();
         }
 
         if (DEBUG_RESULTS) {
-            Slogger::V(TAG, "Delivering result to activity %p : %p", r, ri);
+            Slogger::V(TAG, "Delivering result to activity %s : %s", TO_CSTR(r), TO_CSTR(ri));
         }
 
         String resultWho;

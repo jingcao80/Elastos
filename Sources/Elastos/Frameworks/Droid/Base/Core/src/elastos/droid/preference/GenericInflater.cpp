@@ -306,7 +306,7 @@ ECode GenericInflater::CreateItem(
         AutoPtr<IClassInfo> clazz;
         // Class not found in the cache, see if it's real,
         // and try to add it
-        // ec = mContext->GetClassLoader((IClassLoader**)&cl);
+        ec = mContext->GetClassLoader((IClassLoader**)&cl);
         FAIL_GOTO(ec, fail)
         if (!prefix.IsNull()) {
             prefixName = prefix + name;

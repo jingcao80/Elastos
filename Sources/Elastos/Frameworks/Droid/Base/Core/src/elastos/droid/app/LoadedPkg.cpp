@@ -91,8 +91,8 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
         mCurIntent->GetInt32Extra(String("seq"), -1, &seq);
         String action;
         mCurIntent->GetAction(&action);
-        Slogger::I(CActivityThread::TAG, "Dispatching broadcast %s seq=%d to %p"
-                , action.string(), seq, mHost->mReceiver.Get());
+        Slogger::I(CActivityThread::TAG, "Dispatching broadcast %s seq=%d to %s"
+                , action.string(), seq, TO_CSTR(mHost->mReceiver));
         Slogger::I(CActivityThread::TAG, "  mRegistered=%d mOrderedHint=%d", mHost->mRegistered, ordered);
     }
 
@@ -113,6 +113,7 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
     // Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastReceiveReg");
     // try {
 //TODO: Need ClassLoader
+    Slogger::W(TAG, "SetPendingResult: Need ClassLoader.");
     // ClassLoader cl =  mReceiver.getClass().getClassLoader();
     // intent.setExtrasClassLoader(cl);
     // setExtrasClassLoader(cl);
@@ -720,7 +721,6 @@ ECode LoadedPkg::GetClassLoader(
         return NOERROR;
     }
 
-
     // if (mIncludeCode && !mPackageName.equals("android")) {
     //     // Avoid the binder call when the package is the current application package.
     //     // The activity manager will perform ensure that dexopt is performed before
@@ -827,16 +827,16 @@ ECode LoadedPkg::GetClassLoader(
 
     //     StrictMode.setThreadPolicy(oldPolicy);
     // } else {
-    //     if (mBaseClassLoader == null) {
-    //         mClassLoader = ClassLoader.getSystemClassLoader();
-    //     } else {
-    //         mClassLoader = mBaseClassLoader;
-    //     }
+        if (mBaseClassLoader == NULL) {
+            GetSystemClassLoader((IClassLoader**)&mClassLoader);
+        }
+        else {
+            mClassLoader = mBaseClassLoader;
+        }
     // }
-    // return mClassLoader;
 
-    GetSystemClassLoader(loader);
-    mClassLoader = *loader;
+    *loader = mClassLoader;
+    REFCOUNT_ADD(*loader)
     return NOERROR;
 }
 
@@ -849,7 +849,11 @@ ECode LoadedPkg::GetSystemClassLoader(
     String systemModule("/system/lib/Elastos.Droid.Core.eco");
     AutoPtr<IClassLoader> cl;
     ECode ec = CPathClassLoader::New(systemModule, (IClassLoader**)&cl);
-    if (FAILED(ec)) Slogger::E(TAG, "failed to load system class loaded %s", systemModule.string());
+    if (FAILED(ec)) {
+        Slogger::E(TAG, "failed to load system class loaded %s", systemModule.string());
+        return ec;
+    }
+
     *loader = cl;
     REFCOUNT_ADD(*loader);
     return NOERROR;

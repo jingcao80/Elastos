@@ -291,7 +291,7 @@ ECode WebViewChromium::InnerContextWrapper::GetClassLoader(
     AutoPtr<IContext> baseContext;
     GetBaseContext((IContext**)&baseContext);
     AutoPtr<IClassLoader> appCl;
-    //baseContext->GetClassLoader((IClassLoader**)&appCl);
+    baseContext->GetClassLoader((IClassLoader**)&appCl);
 
     AutoPtr<IClassLoader> webViewCl;
     //final ClassLoader webViewCl = this.getClass().getClassLoader();

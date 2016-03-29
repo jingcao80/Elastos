@@ -223,27 +223,27 @@ private:
             _DecorView* mHost;
         };
 
-//        class DecorViewWeakReferenceImpl
-//            : public ElLightRefBase
-//            , public IWeakReference
-//        {
-//        public:
-//            CAR_INTERFACE_DECL()
-//
-//            DecorViewWeakReferenceImpl(
-//                /* [in] */ IInterface* object,
-//                /* [in] */ ElRefBase::WeakRefType* ref);
-//
-//            ~DecorViewWeakReferenceImpl();
-//
-//            CARAPI Resolve(
-//                /* [in] */ const InterfaceID& riid,
-//                /* [out] */ IInterface** objectReference);
-//
-//        private:
-//            IInterface* mObject;
-//            ElRefBase::WeakRefType* mRef;
-//        };
+       class DecorViewWeakReferenceImpl
+           : public Object
+           , public IWeakReference
+       {
+       public:
+           CAR_INTERFACE_DECL()
+
+           DecorViewWeakReferenceImpl(
+               /* [in] */ IInterface* object,
+               /* [in] */ ElRefBase::WeakRefType* ref);
+
+           ~DecorViewWeakReferenceImpl();
+
+           CARAPI Resolve(
+               /* [in] */ const InterfaceID& riid,
+               /* [out] */ IInterface** objectReference);
+
+       private:
+           IInterface* mObject;
+           ElRefBase::WeakRefType* mRef;
+       };
 
     public:
         CAR_INTERFACE_DECL()
@@ -327,11 +327,11 @@ private:
             /* [in] */ IMotionEvent* event,
             /* [out] */ Boolean* result);
 
-		CARAPI SuperDispatchKeyShortcutEvent(
+        CARAPI SuperDispatchKeyShortcutEvent(
             /* [in] */ IKeyEvent* event,
             /* [out] */ Boolean* result);
 
-	    // @Override
+        // @Override
         CARAPI DispatchApplyWindowInsets(
             /* [in] */ IWindowInsets* insets,
             /* [out] */ IWindowInsets** result);
@@ -491,94 +491,41 @@ private:
         Int32 mDefaultOpacity;
     };
 
-    //class DecorView
-    //    : public ElRefBase
-    //    , public _DecorView
-    //    , public IFrameLayout
-    //    , public IViewParent
-    //    , public IViewManager
-    //    , public IDrawableCallback
-    //    , public IKeyEventCallback
-    //    , public IAccessibilityEventSource
-    //    , public IWeakReferenceSource
-    //{
-    //public:
-    //    DecorView(
-    //        /* [in] */ CPhoneWindow* host,
-    //        /* [in] */ IContext* context,
-    //        /* [in] */ Int32 featureId,
-    //        /* [in] */ Boolean useSelfRef = FALSE);
+    class DecorView
+       : public _DecorView
+    {
+    public:
+       DecorView();
 
-    //    ~DecorView();
+       ~DecorView();
 
-    //    CARAPI_(PInterface) Probe(
-    //        /* [in] */ REIID riid);
+       CARAPI constructor(
+           /* [in] */ PhoneWindow* host,
+           /* [in] */ IContext* context,
+           /* [in] */ Int32 featureId,
+           /* [in] */ Boolean useSelfRef = FALSE);
 
-    //    CARAPI_(UInt32) AddRef();
+       CARAPI_(PInterface) Probe(
+           /* [in] */ REIID riid);
 
-    //    CARAPI_(UInt32) Release();
+       CARAPI_(UInt32) AddRef();
 
-    //    CARAPI GetInterfaceID(
-    //        /* [in] */ IInterface *pObject,
-    //        /* [out] */ InterfaceID *pIID);
+       CARAPI_(UInt32) Release();
 
-    //    CARAPI_(UInt32) _AddRef();
+       CARAPI GetInterfaceID(
+           /* [in] */ IInterface *pObject,
+           /* [out] */ InterfaceID *pIID);
 
-    //    CARAPI_(UInt32) _Release();
+       CARAPI_(UInt32) _AddRef();
 
-    //    // =========================================================
-    //    // IView
-    //    // =========================================================
-    //    IVIEW_METHODS_DECL()
+       CARAPI_(UInt32) _Release();
 
-    //    // =========================================================
-    //    // IViewGroup
-    //    // =========================================================
-    //    IVIEWGROUP_METHODS_DECL()
+       CARAPI GetWeakReference(
+           /* [out] */ IWeakReference** weakReference);
 
-    //    // =========================================================
-    //    // IViewParent
-    //    // =========================================================
-    //    IVIEWPARENT_METHODS_DECL()
-
-    //    // =========================================================
-    //    // IViewManager
-    //    // =========================================================
-    //    IVIEWMANAGER_METHODS_DECL()
-
-    //    IDRAWABLECALLBACK_METHODS_DECL()
-
-    //    IKEYEVENTCALLBACK_METHODS_DECL()
-
-    //    IACCESSIBILITYEVENTSOURCE_METHODS_DECL()
-
-    //    CARAPI GetForegroundGravity(
-    //        /* [out] */ Int32* foregroundGravity);
-
-    //    CARAPI SetForegroundGravity(
-    //        /* [in] */ Int32 foregroundGravity);
-
-    //    CARAPI SetForeground(
-    //        /* [in] */ IDrawable* drawable);
-
-    //    CARAPI GetForeground(
-    //        /* [out] */ IDrawable** foreground);
-
-    //    CARAPI SetMeasureAllChildren(
-    //        /* [in] */ Boolean measureAll);
-
-    //    CARAPI GetMeasureAllChildren(
-    //        /* [out] */ Boolean* measureAll);
-
-    //    CARAPI GetConsiderGoneChildrenWhenMeasuring(
-    //        /* [out] */ Boolean* measureAll);
-
-    //    CARAPI GetWeakReference(
-    //        /* [out] */ IWeakReference** weakReference);
-
-    //private:
-    //    Boolean mUseSelfRef;
-    //};
+    private:
+       Boolean mUseSelfRef;
+    };
 
 public:
     class PanelFeatureState
@@ -661,7 +608,7 @@ public:
         Int32 mY;
         Int32 mWindowAnimations;
         /** Dynamic state of the panel. */
-        AutoPtr<_DecorView> mDecorView;
+        AutoPtr<DecorView> mDecorView;
         /** The panel that was returned by onCreatePanelView(). */
         AutoPtr<IView> mCreatedPanelView;
         /** The panel that we are actually showing. */
@@ -1559,10 +1506,10 @@ private:
      */
     CARAPI_(void) OpenPanelsAfterRestore();
 
-    CARAPI_(AutoPtr<_DecorView>) GenerateDecor();
+    CARAPI_(AutoPtr<DecorView>) GenerateDecor();
 
     CARAPI GenerateLayout(
-        /* [in] */ _DecorView* decor,
+        /* [in] */ DecorView* decor,
         /* [out] */ IViewGroup** viewGroup);
 
     CARAPI_(void) InstallDecor();
@@ -1747,7 +1694,7 @@ private:
     Int32 mLogoRes;
 
     // This is the top-level view of the window, containing the window decor.
-    _DecorView* mDecor;
+    DecorView* mDecor;
 
     // This is the view in which the window contents are placed. It is either
     // mDecor itself, or a child of mDecor where the contents go.
