@@ -18,7 +18,7 @@ static AutoPtr< ArrayOf<String> > sInit()
     AutoPtr< ArrayOf<String> > prefixs = ArrayOf<String>::Alloc(3);
     (*prefixs)[0] = "Elastos.Droid.Widget.";
     (*prefixs)[1] = "Elastos.Droid.Webkit.";
-    (*prefixs)[2] = "Elastos.Droid.app.";
+    (*prefixs)[2] = "Elastos.Droid.App.";
     return prefixs;
 }
 

@@ -148,7 +148,7 @@ ECode Thread::constructor(
         // throw new InternalError("group not specified");
         return E_INTERNAL_ERROR;
     }
-    ALOGD("xihaoc Thread::constructor group = %p", group);
+
     mGroup = group;
 
     mTarget = NULL;

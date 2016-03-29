@@ -67,7 +67,7 @@ AutoPtr<IClassInfo> ClassLoader::FindLoadedClass(
     /* [in] */ const String& className)
 {
     AutoPtr<IClassInfo> klass;
-    HashMap<String, IClassInfo*>::Iterator it = mClassTable.Find(DotToDescriptor(className));
+    HashMap<String, IClassInfo*>::Iterator it = mClassTable.Find(className);
     if (it != mClassTable.End()) {
         klass = it->mSecond;
     }
@@ -115,14 +115,6 @@ AutoPtr<IClassLoader> ClassLoader::GetClassLoader(
     return loader;
 }
 
-String ClassLoader::DotToDescriptor(
-    /* [in] */ const String& name)
-{
-    String descriptor = String("L") + name.Replace('.', '/') + String(";");
-    return descriptor;
-}
-
-
 //-------------------------------------------------------
 //  BootClassLoader
 //-------------------------------------------------------
@@ -158,7 +150,7 @@ ECode BootClassLoader::FindClass(
         AutoPtr<IModuleInfo> module;
         ECode ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&module);
         if (FAILED(ec) || module == NULL) continue;
-        ec = module->GetClassInfo(DotToDescriptor(className), klass);
+        ec = module->GetClassInfo(className, klass);
         if (SUCCEEDED(ec)) return NOERROR;
     }
 

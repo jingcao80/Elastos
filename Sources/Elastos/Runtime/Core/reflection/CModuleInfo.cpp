@@ -3,6 +3,7 @@
 //==========================================================================
 #include "CModuleInfo.h"
 // #include "_pubcrt.h"
+#include <utils/Log.h>
 
 CModuleInfo::CModuleInfo(
     /* [in] */ CClsModule* clsModule,
@@ -119,10 +120,11 @@ ECode CModuleInfo::GetClassInfo(
     ECode ec = AcquireClassList();
     if (FAILED(ec)) return ec;
 
-    Int32 start = fullName.IndexOf('L');
-    Int32 end = fullName.IndexOf(';');
-    String strName = fullName.Substring(start >= 0 ? start + 1 : 0, end > 0 ? end : fullName.GetLength()).Replace('/', '.');
-    return mClassList->AcquireObjByName(strName, (IInterface **)classInfo);
+    if (fullName.IndexOf(';') >= 0 || fullName.IndexOf('/') >= 0) {
+        ALOGE("GetClassInfo fullName = %s is invalid", fullName.string());
+        assert(0);
+    }
+    return mClassList->AcquireObjByName(fullName, (IInterface **)classInfo);
 }
 
 ECode CModuleInfo::GetInterfaceCount(
@@ -172,10 +174,11 @@ ECode CModuleInfo::GetInterfaceInfo(
     ECode ec = AcquireInterfaceList();
     if (FAILED(ec)) return ec;
 
-    Int32 start = fullName.IndexOf('L');
-    Int32 end = fullName.IndexOf(';');
-    String strName = fullName.Substring(start >= 0 ? start + 1 : 0, end > 0 ? end : fullName.GetLength()).Replace('/', '.');
-    return mInterfaceList->AcquireObjByName(strName, (IInterface **)interfaceInfo);
+    if (fullName.IndexOf(';') >= 0 || fullName.IndexOf('/') >= 0) {
+        ALOGE("GetInterfaceInfo fullName = %s is invalid", fullName.string());
+        assert(0);
+    }
+    return mInterfaceList->AcquireObjByName(fullName, (IInterface **)interfaceInfo);
 }
 
 ECode CModuleInfo::GetStructCount(
@@ -283,10 +286,11 @@ ECode CModuleInfo::GetEnumInfo(
     ECode ec = AcquireEnumList();
     if (FAILED(ec)) return ec;
 
-    Int32 start = fullName.IndexOf('L');
-    Int32 end = fullName.IndexOf(';');
-    String strName = fullName.Substring(start >= 0 ? start + 1 : 0, end > 0 ? end : fullName.GetLength()).Replace('/', '.');
-    return mEnumList->AcquireObjByName(strName, (IInterface **)enumInfo);
+    if (fullName.IndexOf(';') >= 0 || fullName.IndexOf('/') >= 0) {
+        ALOGE("GetEnumInfo fullName = %s is invalid", fullName.string());
+        assert(0);
+    }
+    return mEnumList->AcquireObjByName(fullName, (IInterface **)enumInfo);
 }
 
 ECode CModuleInfo::GetTypeAliasCount(

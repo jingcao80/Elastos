@@ -126,9 +126,6 @@ protected:
         /* [in] */ Boolean resolve,
         /* [out] */ IClassInfo** klass);
 
-    static CARAPI_(String) DotToDescriptor(
-        /* [in] */ const String& name);
-
 private:
     /**
      * Create the system class loader. Note this is NOT the bootstrap class

@@ -446,7 +446,7 @@ ECode CZygoteInit::StartSystemServer(
     (*args)[4] = "--runtime-init";
     (*args)[5] = "--nice-name=elsystemserver";
     (*args)[6] = "Elastos.Droid.Server.eco";
-    (*args)[7] = "LElastos/Droid/Server/CSystemServer;";
+    (*args)[7] = "Elastos.Droid.Server.CSystemServer";
 
     Int32 pid;
 //    try {

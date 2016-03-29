@@ -1356,9 +1356,6 @@ private:
     //     /* [in] */ const char* format,
     //     /* [in] */ ...);
 
-    static CARAPI_(String) GetReflectionClassName(
-        /* [in] */ const String& rawClassName);
-
 public:
 
     /** @hide */
