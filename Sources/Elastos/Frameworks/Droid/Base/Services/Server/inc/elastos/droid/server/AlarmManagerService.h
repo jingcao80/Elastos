@@ -20,6 +20,7 @@ using Elastos::Droid::App::IAlarmClockInfo;
 using Elastos::Droid::App::IIAlarmManager;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::App::IPendingIntentOnFinished;
+using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Intent;
@@ -113,6 +114,9 @@ public:
             /* [out] */IAlarmClockInfo** result);
 
         //@Override
+        /* updates the blocked uids, so if a wake lock is acquired to only fire
+         * alarm for it, it can be released.
+         */
         CARAPI UpdateBlockedUids(
             /* [in] */ Int32 uid,
             /* [in] */ Boolean isBlocked);
@@ -135,11 +139,12 @@ private:
         : public Object
     {
     public:
-        Int32 mSeq;
-        Int32 mPriority;
-
         PriorityClass(
             /* [in] */ AlarmManagerService* host);
+
+    public:
+        Int32 mSeq;
+        Int32 mPriority;
 
     private:
         AlarmManagerService* mHost;
@@ -149,35 +154,20 @@ private:
         : public Object
     {
     public:
-        Int64 mWhen;
-        Int32 mUid;
-        String mAction;
-
         WakeupEvent(
             /* [in] */ Int64 theTime,
             /* [in] */ Int32 theUid,
             /* [in] */ const String& theAction);
+
+    public:
+        Int64 mWhen;
+        Int32 mUid;
+        String mAction;
     };
 
     class Alarm
         : public Object
     {
-    public:
-        Int32 mType;
-        Boolean mWakeup;
-        AutoPtr<IPendingIntent> mOperation;
-        String mTag;
-        AutoPtr<IWorkSource> mWorkSource;
-        Int32 mCount;
-        Int64 mWhen;
-        Int64 mWindowLength;
-        Int64 mWhenElapsed;    // 'when' in the elapsed time base
-        Int64 mMaxWhen;        // also in the elapsed time base
-        Int64 mRepeatInterval;
-        AutoPtr<IAlarmClockInfo> mAlarmClock;
-        Int32 mUserId;
-        AutoPtr<PriorityClass> mPriorityClass;
-
     public:
         Alarm(
             /* [in] */ Int32 _type,
@@ -205,11 +195,34 @@ private:
             /* [in] */ Int64 nowRTC,
             /* [in] */ Int64 nowELAPSED,
             /* [in] */ ISimpleDateFormat* sdf);
+
+    public:
+        Int32 mType;
+        Boolean mWakeup;
+        AutoPtr<IPendingIntent> mOperation;
+        String mTag;
+        AutoPtr<IWorkSource> mWorkSource;
+        Int32 mCount;
+        Int64 mWhen;
+        Int64 mWindowLength;
+        Int64 mWhenElapsed;    // 'when' in the elapsed time base
+        Int64 mMaxWhen;        // also in the elapsed time base
+        Int64 mRepeatInterval;
+        AutoPtr<IAlarmClockInfo> mAlarmClock;
+        Int32 mUserId;
+        AutoPtr<PriorityClass> mPriorityClass;
+        Int32 mUid;
+        Int32 mPid;
     };
 
     class BroadcastStats
         : public Object
     {
+    public:
+        BroadcastStats(
+            /* [in] */ Int32 uid,
+            /* [in] */ const String& packageName);
+
     public:
         Int32 mUid;
         String mPackageName;
@@ -220,15 +233,16 @@ private:
         Int64 mStartTime;
         Int32 mNesting;
         AutoPtr<IArrayMap> mFilterStats;// new ArrayMap<String, FilterStats>();
-
-        BroadcastStats(
-            /* [in] */ Int32 uid,
-            /* [in] */ const String& packageName);
     };
 
     class FilterStats
         : public Object
     {
+    public:
+        FilterStats(
+            /* [in] */ BroadcastStats* broadcastStats,
+            /* [in]i */ const String& tag);
+
     public:
         AutoPtr<BroadcastStats> mBroadcastStats;
         String mTag;
@@ -238,23 +252,12 @@ private:
         Int32 mNumWakeup;
         Int64 mStartTime;
         Int32 mNesting;
-
-        FilterStats(
-            /* [in] */ BroadcastStats* broadcastStats,
-            /* [in]i */ const String& tag);
     };
 
     class InFlight
         : public Intent
     {
     public:
-        AutoPtr<IPendingIntent> mPendingIntent;
-        AutoPtr<IWorkSource> mWorkSource;
-        String mTag;
-        AutoPtr<BroadcastStats> mBroadcastStats;
-        AutoPtr<FilterStats> mFilterStats;
-        Int32 mAlarmType;
-
         InFlight();
 
         CARAPI constructor(
@@ -262,7 +265,17 @@ private:
             /* [in] */ IPendingIntent* pendingIntent,
             /* [in] */ IWorkSource* workSource,
             /* [in] */ Int32 alarmType,
-            /* [in] */ const String& tag);
+            /* [in] */ const String& tag,
+            /* [in] */ Int32 uid);
+
+    public:
+        AutoPtr<IPendingIntent> mPendingIntent;
+        AutoPtr<IWorkSource> mWorkSource;
+        String mTag;
+        AutoPtr<BroadcastStats> mBroadcastStats;
+        AutoPtr<FilterStats> mFilterStats;
+        Int32 mAlarmType;
+        Int32 mUid;
     };
 
     class Batch
@@ -280,6 +293,9 @@ private:
 
         AutoPtr<Alarm> Get(
             /* [in] */ Int32 index);
+
+        Int64 GetWhenByElapsedTime(
+            /* [in] */ Int64 whenElapsed);
 
         Boolean CanHold(
             /* [in] */ Int64 whenElapsed,
@@ -301,6 +317,8 @@ private:
             /* [in] */ const String& packageName);
 
         Boolean HasWakeups();
+
+        Boolean IsRtcPowerOffWakeup();
 
         //@Override
         CARAPI ToString(
@@ -375,6 +393,22 @@ private:
         AlarmManagerService* mHost;
     };
 
+    class QuickBootReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        QuickBootReceiver(
+            /* [in] */ AlarmManagerService* host);
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    public:
+        static const String ACTION_APP_KILL;
+        AlarmManagerService* mHost;
+    };
+
     class ClockReceiver
         : public BroadcastReceiver
     {
@@ -392,6 +426,7 @@ private:
         CARAPI ScheduleTimeTickEvent();
 
         CARAPI ScheduleDateChangedEvent();
+
     private:
         AlarmManagerService* mHost;
     };
@@ -409,6 +444,7 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
     private:
         AlarmManagerService* mHost;
     };
@@ -426,6 +462,7 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
     private:
         AlarmManagerService* mHost;
     };
@@ -446,6 +483,7 @@ private:
             /* [in] */ Int32 resultCode,
             /* [in] */ const String& resultData,
             /* [in] */ IBundle* resultExtras);
+
     private:
         AlarmManagerService* mHost;
     };
@@ -478,31 +516,31 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* context);
 
-    static Int64 ConvertToElapsed(
+    static CARAPI_(Int64) ConvertToElapsed(
         /* [in] */ Int64 when,
         /* [in] */ Int32 type);
 
     // Apply a heuristic to { recurrence interval, futurity of the trigger time } to
     // calculate the end of our nominal delivery window for the alarm.
-    static Int64 MaxTriggerTime(
+    static CARAPI_(Int64) MaxTriggerTime(
         /* [in] */ Int64 now,
         /* [in] */ Int64 triggerAtTime,
         /* [in] */ Int64 interval);
 
     // returns TRUE if the batch was added at the head
-    static Boolean AddBatchLocked(
+    static CARAPI_(Boolean) AddBatchLocked(
         /* [in] */ IArrayList* list,
         /* [in] */ Batch* newBatch);
 
     // Return the index of the matching batch, or -1 if none found.
-    Int32 AttemptCoalesceLocked(
+    CARAPI_(Int32) AttemptCoalesceLocked(
         /* [in] */ Int64 whenElapsed,
         /* [in] */ Int64 maxWhen);
 
     // The RTC clock has moved arbitrarily, so we need to recalculate all the batching
-    void RebatchAllAlarms();
+    CARAPI_(void) RebatchAllAlarms();
 
-    void RebatchAllAlarmsLocked(
+    CARAPI_(void) RebatchAllAlarmsLocked(
         /* [in] */ Boolean doValidate);
 
     //@Override
@@ -515,14 +553,13 @@ public:
         /* [out] */ String* str);
 
 private:
-
-    void SetTimeZoneImpl(
+    CARAPI_(void) SetTimeZoneImpl(
         /* [in] */ const String& tz);
 
-    void RemoveImpl(
+    CARAPI_(void) RemoveImpl(
         /* [in] */ IPendingIntent* operation);
 
-    ECode SetImpl(
+    CARAPI SetImpl(
         /* [in] */ Int32 type,
         /* [in] */ Int64 triggerAtTime,
         /* [in] */ Int64 windowLength,
@@ -532,7 +569,7 @@ private:
         /* [in] */ IWorkSource* workSource,
         /* [in] */ IAlarmClockInfo* alarmClock);
 
-    void SetImplLocked(
+    CARAPI_(void) SetImplLocked(
         /* [in] */ Int32 type,
         /* [in] */ Int64 when,
         /* [in] */ Int64 whenElapsed,
@@ -544,27 +581,30 @@ private:
         /* [in] */ Boolean doValidate,
         /* [in] */ IWorkSource* workSource,
         /* [in] */ IAlarmClockInfo* alarmClock,
-        /* [in] */ Int32 userId);
+        /* [in] */ Int32 userId,
+        /* [in] */ Boolean wakeupFiltered);
 
-    void DumpImpl(
+    CARAPI_(void) DumpImpl(
         /* [in] */ IPrintWriter* pw);
 
-    void LogBatchesLocked(
+    CARAPI_(void) LogBatchesLocked(
         /* [in] */ ISimpleDateFormat* sdf);
 
-    Boolean ValidateConsistencyLocked();
+    CARAPI_(Boolean) ValidateConsistencyLocked();
 
-    AutoPtr<Batch> FindFirstWakeupBatchLocked();
+    CARAPI_(AutoPtr<Batch>) FindFirstWakeupBatchLocked();
 
-    AutoPtr<IAlarmClockInfo> GetNextAlarmClockImpl(
+    CARAPI_(AutoPtr<Batch>) FindFirstRtcWakeupBatchLocked();
+
+    CARAPI_(AutoPtr<IAlarmClockInfo>) GetNextAlarmClockImpl(
         /* [in] */ Int32 userId);
 
     /**
      * Recomputes the next alarm clock for all users.
      */
-    void UpdateNextAlarmClockLocked();
+    CARAPI_(void) UpdateNextAlarmClockLocked();
 
-    void UpdateNextAlarmInfoForUserLocked(
+    CARAPI_(void) UpdateNextAlarmInfoForUserLocked(
         /* [in] */ Int32 userId,
         /* [in] */ IAlarmClockInfo* alarmClock);
 
@@ -576,36 +616,42 @@ private:
      *
      * @see AlarmHandler#SEND_NEXT_ALARM_CLOCK_CHANGED
      */
-    void SendNextAlarmClockChanged();
+    CARAPI_(void) SendNextAlarmClockChanged();
 
     /**
      * Formats an alarm like platform/packages/apps/DeskClock used to.
      */
-    static String FormatNextAlarm(
+    static CARAPI_(String) FormatNextAlarm(
         /* [in] */ IContext* context,
         /* [in] */ IAlarmClockInfo* info);
 
-    void RescheduleKernelAlarmsLocked();
+    CARAPI_(void) RescheduleKernelAlarmsLocked();
 
-    void RemoveLocked(
+    CARAPI_(Boolean) CheckReleaseWakeLock();
+
+    CARAPI_(void) RemoveLocked(
         /* [in] */ IPendingIntent* operation);
 
-    void RemoveLocked(
+    CARAPI_(Boolean) RemoveWithStatusLocked(
+        /* [in] */ IPendingIntent* operation);
+
+    CARAPI_(void) RemoveLocked(
         /* [in] */ const String& packageName);
 
-    void RemoveUserLocked(
+    CARAPI_(void) RemoveUserLocked(
         /* [in] */ Int32 userHandle);
 
-    void InteractiveStateChangedLocked(
+    CARAPI_(void) InteractiveStateChangedLocked(
         /* [in] */ Boolean interactive);
 
-    Boolean LookForPackageLocked(
+    CARAPI_(Boolean) LookForPackageLocked(
         /* [in] */ const String& packageName);
 
-    void SetLocked(
-        /* [in] */ Int32 type, Int64 when);
+    CARAPI_(void) SetLocked(
+        /* [in] */ Int32 type,
+        /* [in] */ Int64 when);
 
-    static void DumpAlarmList(
+    static CARAPI_(void) DumpAlarmList(
         /* [in] */ IPrintWriter* pw,
         /* [in] */ IArrayList* list,
         /* [in] */ const String& prefix,
@@ -614,10 +660,10 @@ private:
         /* [in] */ Int64 nowELAPSED,
         /* [in] */ ISimpleDateFormat* sdf);
 
-    static String LabelForType(
+    static CARAPI_(String) LabelForType(
         /* [in] */ Int32 type);
 
-    static void DumpAlarmList(
+    static CARAPI_(void) DumpAlarmList(
         /* [in] */ IPrintWriter* pw,
         /* [in] */ IArrayList* list,
         /* [in] */ const String& prefix,
@@ -625,44 +671,48 @@ private:
         /* [in] */ Int64 nowRTC,
         /* [in] */ ISimpleDateFormat* sdf);
 
-    Boolean TriggerAlarmsLocked(
+    CARAPI_(Boolean) TriggerAlarmsLocked(
         /* [in] */ IArrayList* triggerList,
         /* [in] */ Int64 nowELAPSED,
         /* [in] */ Int64 nowRTC);
 
-    void RecordWakeupAlarms(
+    CARAPI_(void) RecordWakeupAlarms(
         /* [in] */ IArrayList* batches,
         /* [in] */ Int64 nowELAPSED,
         /* [in] */ Int64 nowRTC);
 
-    Int64 CurrentNonWakeupFuzzLocked(
+    CARAPI_(Int64) CurrentNonWakeupFuzzLocked(
         /* [in] */ Int64 nowELAPSED);
 
-    Boolean CheckAllowNonWakeupDelayLocked(
+    CARAPI_(Boolean) CheckAllowNonWakeupDelayLocked(
         /* [in] */ Int64 nowELAPSED);
 
-    void DeliverAlarmsLocked(
+    CARAPI_(void) DeliverAlarmsLocked(
         /* [in] */ IArrayList* triggerList,
         /* [in] */ Int64 nowELAPSED);
+
+    CARAPI_(void) FiltQuickBootAlarms(
+        /* [in] */ IArrayList* triggerList);
 
     /**
      * Attribute blame for a WakeLock.
      * @param pi PendingIntent to attribute blame to if ws is NULL.
      * @param ws WorkSource to attribute blame.
      */
-    void SetWakelockWorkSource(
+    CARAPI_(void) SetWakelockWorkSource(
         /* [in] */ IPendingIntent* pi,
         /* [in] */ IWorkSource* ws,
         /* [in] */ Int32 type,
         /* [in] */ const String& tag,
         /* [in] */ Boolean first);
 
-    AutoPtr<BroadcastStats> GetStatsLocked(
+    CARAPI_(AutoPtr<BroadcastStats>) GetStatsLocked(
         /* [in] */ IPendingIntent* pi);
 
     Int64 Native_Init();
     void Native_Close(Int64 nativeData);
     void Native_Set(Int64 nativeData, Int32 type, Int64 seconds, Int64 nanoseconds);
+    void Native_Clear(Int64 nativeData, Int32 type, Int64 seconds, Int64 nanoseconds);
     Int32 Native_WaitForAlarm(Int64 nativeData);
     Int32 Native_SetKernelTime(Int64 nativeData, Int64 millis);
     Int32 Native_SetKernelTimezone(Int64 nativeData, Int32 minuteswest);
@@ -672,10 +722,15 @@ private:
     // warning message.  The time duration is in milliseconds.
     static const Int64 LATE_ALARM_THRESHOLD;
 
+    // The threshold for the power off alarm time can be set. The time
+    // duration is in milliseconds.
+    static const Int64 POWER_OFF_ALARM_THRESHOLD;
+
     static const Int32 RTC_WAKEUP_MASK;
     static const Int32 RTC_MASK;
     static const Int32 ELAPSED_REALTIME_WAKEUP_MASK;
     static const Int32 ELAPSED_REALTIME_MASK;
+    static const Int32 RTC_POWEROFF_WAKEUP_MASK;
     static const Int32 TIME_CHANGED_MASK;
     static const Int32 IS_WAKEUP_MASK;
 
@@ -702,8 +757,12 @@ private:
 
     Object mLock;
 
+    AutoPtr<IArrayList> mTriggeredUids;
+    AutoPtr<IArrayList> mBlockedUids;
+
     Int64 mNativeData;
     Int64 mNextWakeup;
+    Int64 mNextRtcWakeup;
     Int64 mNextNonWakeup;
     Int32 mBroadcastRefCount;
     AutoPtr<IPowerManagerWakeLock> mWakeLock;
@@ -716,6 +775,7 @@ private:
     AutoPtr<ClockReceiver> mClockReceiver;
     AutoPtr<InteractiveStateReceiver> mInteractiveStateReceiver;
     AutoPtr<UninstallReceiver> mUninstallReceiver;
+    AutoPtr<QuickBootReceiver> mQuickBootReceiver;
     AutoPtr<ResultReceiver> mResultReceiver;
     AutoPtr<IPendingIntent> mTimeTickSender;
     AutoPtr<IPendingIntent> mDateChangeSender;
@@ -734,6 +794,8 @@ private:
 
     // May only use on mHandler's thread, locking not required.
     AutoPtr<ISparseArray> mHandlerSparseAlarmClockArray;// = new SparseArray<>();
+
+    AutoPtr<IAppOpsManager> mAppOps;
 
     // Alarm delivery ordering bookkeeping
     static const Int32 PRIO_TICK;
