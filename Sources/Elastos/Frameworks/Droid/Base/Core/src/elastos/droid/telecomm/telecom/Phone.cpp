@@ -120,8 +120,8 @@ ECode Phone::InternalUpdateCall(
  }
 
 ECode Phone::InternalSetPostDialWait(
-    /* [in] */ String telecomId,
-    /* [in] */ String remaining)
+    /* [in] */ const String& telecomId,
+    /* [in] */ const String& remaining)
 {
     AutoPtr<ICharSequence> pId;
     CString::New(telecomId, (ICharSequence**)&pId);
@@ -145,7 +145,7 @@ ECode Phone::InternalAudioStateChanged(
 }
 
 ECode Phone::InternalGetCallByTelecomId(
-    /* [in] */ String telecomId,
+    /* [in] */ const String& telecomId,
     /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result)

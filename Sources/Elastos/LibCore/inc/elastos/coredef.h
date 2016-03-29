@@ -150,6 +150,43 @@ template<> struct EqualTo<AutoPtr<TypeName> >                                   
 _ETL_NAMESPACE_END
 #endif // DEFINE_OBJECT_HASH_FUNC_FOR
 
+#ifndef DEFINE_OBJECT_HASH_FUNC_USING_ADDR_FOR
+#define DEFINE_OBJECT_HASH_FUNC_USING_ADDR_FOR(TypeName)                                \
+_ETL_NAMESPACE_BEGIN                                                                    \
+template<> struct Hash<TypeName *>                                                      \
+{                                                                                       \
+    size_t operator()(TypeName * s) const                                               \
+    {                                                                                   \
+        return (size_t)s;                                                               \
+    }                                                                                   \
+};                                                                                      \
+                                                                                        \
+template<> struct Hash<AutoPtr<TypeName> >                                              \
+{                                                                                       \
+    size_t operator()(const AutoPtr<TypeName> & s) const                                \
+    {                                                                                   \
+        return (size_t)s.Get();                                                         \
+    }                                                                                   \
+};                                                                                      \
+                                                                                        \
+template<> struct EqualTo<TypeName *>                                                   \
+{                                                                                       \
+    size_t operator()(TypeName * x, TypeName * y) const                                 \
+    {                                                                                   \
+        return (size_t)(x - y);                                                         \
+    }                                                                                   \
+};                                                                                      \
+                                                                                        \
+template<> struct EqualTo<AutoPtr<TypeName> >                                           \
+{                                                                                       \
+    size_t operator()(const AutoPtr<TypeName> & x, const AutoPtr<TypeName> & y) const   \
+    {                                                                                   \
+        return (size_t)(x.Get() - y.Get());                                             \
+    }                                                                                   \
+};                                                                                      \
+                                                                                        \
+_ETL_NAMESPACE_END
+#endif // DEFINE_OBJECT_HASH_FUNC_USING_ADDR_FOR
 
 // Car interface decls and impls
 //

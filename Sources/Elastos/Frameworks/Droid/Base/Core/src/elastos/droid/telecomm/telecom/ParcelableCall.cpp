@@ -34,7 +34,7 @@ ECode ParcelableCall::constructor()
 }
 
 ECode ParcelableCall::constructor(
-    /* [in] */ String id,
+    /* [in] */ const String& id,
     /* [in] */ Int32 state,
     /* [in] */ IDisconnectCause* disconnectCause,
     /* [in] */ IList* cannedSmsResponses,
@@ -43,12 +43,12 @@ ECode ParcelableCall::constructor(
     /* [in] */ Int64 connectTimeMillis,
     /* [in] */ IUri* handle,
     /* [in] */ Int32 handlePresentation,
-    /* [in] */ String callerDisplayName,
+    /* [in] */ const String& callerDisplayName,
     /* [in] */ Int32 callerDisplayNamePresentation,
     /* [in] */ IGatewayInfo* gatewayInfo,
     /* [in] */ IPhoneAccountHandle* accountHandle,
     /* [in] */ IIVideoProvider* videoCallProvider,
-    /* [in] */ String parentCallId,
+    /* [in] */ const String& parentCallId,
     /* [in] */ IList* childCallIds,
     /* [in] */ IStatusHints* statusHints,
     /* [in] */ Int32 videoState,

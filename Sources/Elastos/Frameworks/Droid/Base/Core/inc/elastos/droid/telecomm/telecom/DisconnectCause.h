@@ -44,7 +44,7 @@ public:
      */
     CARAPI constructor(
         /* [in] */ Int32 code,
-        /* [in] */ String reason);
+        /* [in] */ const String& reason);
 
     /**
      * Creates a new DisconnectCause.
@@ -57,7 +57,7 @@ public:
         /* [in] */ Int32 code,
         /* [in] */ ICharSequence* label,
         /* [in] */ ICharSequence* description,
-        /* [in] */ String reason);
+        /* [in] */ const String& reason);
 
     /**
      * Creates a new DisconnectCause.
@@ -72,7 +72,7 @@ public:
         /* [in] */ Int32 code,
         /* [in] */ ICharSequence* label,
         /* [in] */ ICharSequence* description,
-        /* [in] */ String reason,
+        /* [in] */ const String& reason,
         /* [in] */ Int32 toneToPlay);
 
     /**

@@ -766,7 +766,7 @@ ECode SurfaceView::UpdateWindow(
                         mStableInsets, mConfiguration, mNewSurface,
                         (IRect**)&outFrame, (IRect**)&outOverscanInsets, (IRect**)&outContentInsets,
                         (IRect**)&outVisibleInsets, (IRect**)&outStableInsets,
-                        (IConfiguration**)&outConfig, (ISurface**)&outSurface, &relayoutResult);
+                        (IConfiguration**)&outConfig, &relayoutResult, (ISurface**)&outSurface);
                 mSurfaceLock.Lock();
                 mWinFrame = outFrame;
                 mContentInsets = outContentInsets;

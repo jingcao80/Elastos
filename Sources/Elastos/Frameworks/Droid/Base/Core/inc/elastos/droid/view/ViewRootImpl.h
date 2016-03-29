@@ -11,6 +11,7 @@
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/InputEventReceiver.h"
 #include "elastos/droid/os/Handler.h"
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/etl/HashSet.h>
 
 using Elastos::Droid::Animation::ILayoutTransition;
@@ -32,7 +33,7 @@ using Elastos::Droid::View::Accessibility::IAccessibilityManagerAccessibilitySta
 using Elastos::Droid::View::Accessibility::IAccessibilityManagerHighTextContrastChangeListener;
 using Elastos::Droid::Widget::IScroller;
 using Elastos::Droid::Media::IAudioManager;
-using Elastos::Core::IStringBuilder;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::IThread;
 using Elastos::Utility::IHashSet;
 using Elastos::IO::IPrintWriter;
@@ -188,14 +189,15 @@ private:
 
         CARAPI_(Boolean) ShouldSendToSynthesizer();
 
-        CARAPI_(String) ToString();
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         CARAPI_(Boolean) FlagToString(
             /* [in] */ const String& name,
             /* [in] */ Int32 flag,
             /* [in] */ Boolean hasPrevious,
-            /* [in] */ IStringBuilder* sb);
+            /* [in] */ StringBuilder& sb);
 
     public:
         static const Int32 FLAG_DELIVER_POST_IME;
@@ -635,7 +637,7 @@ private:
 
     class NativePostImeInputStage
         : public AsyncInputStage
-        , public IInputMethodManagerFinishedInputEventCallback
+        , public IInputQueueFinishedInputEventCallback
     {
     public:
         NativePostImeInputStage(
@@ -890,10 +892,15 @@ private:
         : public Object
     {
     public:
-        SyntheticKeyboardHandler();
+        SyntheticKeyboardHandler(
+            /* [in] */  ViewRootImpl* host)
+            : mHost(host)
+        {}
 
         CARAPI Process(
             /* [in] */ IKeyEvent* event);
+    private:
+        ViewRootImpl* mHost;
     };
 
     class PropertiesRunnable
@@ -1480,9 +1487,6 @@ public:
 
     CARAPI GetAccessibilityFocusedHost(
         /* [out] */ IView** res);
-
-    CARAPI GetWeakReference(
-        /* [out] */ IWeakReference** weakReference);
 
     CARAPI DetachFunctor(
         /* [in] */ Int64 functor);

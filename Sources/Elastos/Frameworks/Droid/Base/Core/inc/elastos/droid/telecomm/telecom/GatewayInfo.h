@@ -35,7 +35,7 @@ public:
 
     /** @hide */
     CARAPI constructor(
-        /* [in] */ String packageName,
+        /* [in] */ const String& packageName,
         /* [in] */ IUri* gatewayUri,
         /* [in] */ IUri* originalAddress);
 

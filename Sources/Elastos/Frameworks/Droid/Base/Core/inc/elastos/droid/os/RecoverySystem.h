@@ -103,7 +103,7 @@ public:
     /** {@hide} */
     static CARAPI RebootWipeUserData(
         /* [in] */ IContext* context,
-        /* [in] */ String reason);
+        /* [in] */ const String& reason);
 
     /** {@hide} */
     static CARAPI RebootWipeUserData(
@@ -131,7 +131,7 @@ public:
     static CARAPI RebootWipeUserData(
         /* [in] */ IContext* context,
         /* [in] */ Boolean shutdown,
-        /* [in] */ String reason,
+        /* [in] */ const String& reason,
         /* [in] */ Boolean wipeMedia);
 
     /**
@@ -144,7 +144,7 @@ public:
     /** {@hide} */
     static CARAPI RebootWipeCache(
         /* [in] */ IContext* context,
-        /* [in] */ String reason);
+        /* [in] */ const String& reason);
 
     /**
      * Called after booting to process and remove recovery-related files.
@@ -174,7 +174,7 @@ private:
      * argv, so we only need to protect against newlines and nulls.
      */
     ECO_LOCAL static String SanitizeArg(
-        /* [in] */ String arg);
+        /* [in] */ const String& arg);
 
 public:
     static const String TAG; //= "RecoverySystem";

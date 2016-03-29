@@ -624,7 +624,7 @@ ECode RemoteConnection::SetDestroyed()
 }
 
 ECode RemoteConnection::SetPostDialWait(
-    /* [in] */ String remainingDigits)
+    /* [in] */ const String& remainingDigits)
 {
     AutoPtr<IIterator> it;
     mCallbacks->GetIterator((IIterator**)&it);
@@ -725,7 +725,7 @@ ECode RemoteConnection::SetAddress(
 }
 
 ECode RemoteConnection::SetCallerDisplayName(
-    /* [in] */ String callerDisplayName,
+    /* [in] */ const String& callerDisplayName,
     /* [in] */ Int32 presentation)
 {
     mCallerDisplayName = callerDisplayName;

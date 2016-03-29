@@ -1915,8 +1915,10 @@ void PowerManagerService::ReleaseWakeLockInternal(
         }
 
         AutoPtr<IProxy> proxy = (IProxy*)wakeLock->mLock->Probe(EIID_IProxy);
-        Boolean res;
-        proxy->UnlinkToDeath(wakeLock, 0, &res);
+        if (proxy) {
+            Boolean res;
+            proxy->UnlinkToDeath(wakeLock, 0, &res);
+        }
         RemoveWakeLockLocked(wakeLock, index);
     }
 }

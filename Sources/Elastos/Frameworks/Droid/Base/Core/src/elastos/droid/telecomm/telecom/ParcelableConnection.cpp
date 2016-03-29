@@ -26,7 +26,7 @@ ECode ParcelableConnection::constructor(
     /* [in] */ Int32 capabilities,
     /* [in] */ IUri* address,
     /* [in] */ Int32 addressPresentation,
-    /* [in] */ String callerDisplayName,
+    /* [in] */ const String& callerDisplayName,
     /* [in] */ Int32 callerDisplayNamePresentation,
     /* [in] */ IIVideoProvider* videoProvider,
     /* [in] */ Int32 videoState,

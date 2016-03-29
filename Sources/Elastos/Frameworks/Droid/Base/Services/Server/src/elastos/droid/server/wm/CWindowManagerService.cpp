@@ -3446,6 +3446,8 @@ Int32 CWindowManagerService::RelayoutWindow(
     /* [out] */ IConfiguration** outConfig,
     /* [out] */ ISurface** outSurface)
 {
+    Slogger::I(TAG, " >>>>>>>> RelayoutWindow");
+
     Boolean toBeDisplayed = FALSE;
     Boolean inTouchMode;
     Boolean configChanged;

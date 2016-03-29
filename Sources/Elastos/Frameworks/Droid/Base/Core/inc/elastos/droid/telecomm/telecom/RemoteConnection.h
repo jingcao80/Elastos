@@ -409,7 +409,7 @@ public:
      * @hide
      */
     CARAPI SetPostDialWait(
-        /* [in] */ String remainingDigits);
+        /* [in] */ const String& remainingDigits);
 
     /**
      * @hide
@@ -438,7 +438,7 @@ public:
 
     /** @hide */
     CARAPI SetCallerDisplayName(
-        /* [in] */ String callerDisplayName,
+        /* [in] */ const String& callerDisplayName,
         /* [in] */ Int32 presentation);
 
     /** @hide */

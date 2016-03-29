@@ -706,7 +706,7 @@ ECode WallpaperService::Engine::UpdateSurface(
             mStableInsets, mConfiguration, mSurfaceHolder->mSurface, (IRect**)&mWinFrame,
             (IRect**)&mOverscanInsets, (IRect**)&mContentInsets, (IRect**)&mVisibleInsets,
             (IRect**)&mStableInsets,(IConfiguration**)&mConfiguration,
-            (ISurface**)(&(mSurfaceHolder->mSurface)), &_relayoutResult);
+            &_relayoutResult, (ISurface**)(&(mSurfaceHolder->mSurface)));
         const Int32 relayoutResult = _relayoutResult;
 
         if (WallpaperService::DEBUG) {

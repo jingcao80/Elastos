@@ -3659,7 +3659,6 @@ ECode CContextImpl::constructor(
                 mPackageInfo->GetAppDir(&appDir);
                 AutoPtr<IContext> ctx;
                 if (mOuterContext != NULL) {
-                    AddRef(); // TODO delete
                     mOuterContext->Resolve(EIID_IContext, (IInterface**)&ctx);
                 }
 

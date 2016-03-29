@@ -228,8 +228,8 @@ ECode CSession::Relayout(
     /* [out] */ IRect** outVisibleInsets,
     /* [out] */ IRect** outStableInsets,
     /* [out] */ IConfiguration** outConfig,
-    /* [out] */ ISurface** outSurface,
-    /* [out] */ Int32* result)
+    /* [out] */ Int32* result,
+    /* [out] */ ISurface** outSurface)
 {
     VALIDATE_NOT_NULL(outFrame)
     VALIDATE_NOT_NULL(outOverscanInsets)

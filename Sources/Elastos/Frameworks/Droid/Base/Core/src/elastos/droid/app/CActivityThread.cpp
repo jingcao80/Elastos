@@ -2170,10 +2170,10 @@ ECode CActivityThread::PerformLaunchActivity(
     /* [in] */ IIntent* customIntent,
     /* [out] */ IActivity** activity)
 {
+    Slogger::I(TAG, " >>> PerformLaunchActivity");
     VALIDATE_NOT_NULL(activity);
     *activity = NULL;
 
-    Slogger::I(TAG, " >>> PerformLaunchActivity");
     ECode ec = NOERROR;
     AutoPtr<IActivityInfo> aInfo = r->mActivityInfo;
     if (r->mPackageInfo == NULL) {
@@ -2379,9 +2379,7 @@ ECode CActivityThread::PerformLaunchActivity(
         }
     }
     r->mPaused = TRUE;
-    Slogger::I(TAG, " >>> 1");
     mActivities[r->mToken] = r;
-    Slogger::I(TAG, " >>> 2");
 
 //    } catch (SuperNotCalledException e) {
 //        throw e;

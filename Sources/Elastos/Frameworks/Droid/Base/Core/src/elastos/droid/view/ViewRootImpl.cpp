@@ -9,6 +9,7 @@
 #include "elastos/droid/view/ViewGroup.h"
 #include "elastos/droid/view/DragEvent.h"
 #include "elastos/droid/view/ViewTreeObserver.h"
+#include "elastos/droid/view/KeyCharacterMap.h"
 #include "elastos/droid/view/Choreographer.h"
 #include "elastos/droid/view/CInputChannel.h"
 #include "elastos/droid/view/CInputQueue.h"
@@ -16,6 +17,7 @@
 #include "elastos/droid/view/CMotionEvent.h"
 #include "elastos/droid/view/ThreadedRenderer.h"
 #include "elastos/droid/view/SoundEffectConstants.h"
+#include "elastos/droid/view/VelocityTracker.h"
 #include "elastos/droid/view/CKeyEvent.h"
 #include "elastos/droid/view/CSurface.h"
 #include "elastos/droid/view/CWindowInsets.h"
@@ -82,7 +84,9 @@ using Elastos::Droid::View::CInputQueue;
 using Elastos::Droid::View::ViewGroup;
 using Elastos::Droid::View::CKeyEvent;
 using Elastos::Droid::View::DragEvent;
+using Elastos::Droid::View::KeyCharacterMap;
 using Elastos::Droid::View::FocusFinder;
+using Elastos::Droid::View::VelocityTracker;
 using Elastos::Droid::View::CMotionEvent;
 using Elastos::Droid::View::CWindowInsets;
 using Elastos::Droid::View::CViewRootImplW;
@@ -118,7 +122,7 @@ using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
 
 #ifndef TRACE_IN_TERMINAL
-#define TRACE_IN_TERMINAL          0
+#define TRACE_IN_TERMINAL          1
 #endif
 
 namespace Elastos {
@@ -128,11 +132,19 @@ namespace View {
 static void LocalTrace(IView* view, const char* info)
 {
 #if TRACE_IN_TERMINAL
-    Int32 viewId;
-    view->GetId(&viewId);
-    if (viewId != 0x7f0700a2 /* content_parent */) {
-        printf("%s\n", info);
-        Logger::D("ViewRootImpl", "%s view:%08x", info, viewId);
+    Int32 id;
+    view->GetId(&id);
+    if (id != 0x7f0700a2 /* content_parent */) {
+        if (id != IView::NO_ID) {
+            AutoPtr<IResources> resources;
+            view->GetResources((IResources**)&resources);
+            String name;
+            resources->GetResourceEntryName(id, &name);
+            Logger::D("ViewRootImpl", "    %s: viewId = 0x%08x, IView* = %p, type = %s\n", info, id, view, name.string());
+        }
+        else {
+            Logger::D("ViewRootImpl", "    %s: viewId = 0x%08x, IView* = %p\n", info, id, view);
+        }
     }
 #endif
 }
@@ -625,7 +637,7 @@ void ViewRootImpl::InvalidateOnAnimationRunnable::RemoveView(
     if (mPosted && mViews.IsEmpty() && mViewRects.IsEmpty() && obj != NULL) {
         AutoPtr<IViewRootImpl> viewRoot = IViewRootImpl::Probe(obj);
         VIEWIMPL_PROBE(viewRoot)->mChoreographer->RemoveCallbacks(
-            IChoreographer::CALLBACK_ANIMATION, IRunnable::Probe(this), NULL);
+            IChoreographer::CALLBACK_ANIMATION, this, NULL);
         mPosted = FALSE;
     }
 }
@@ -1130,10 +1142,11 @@ ECode ViewRootImpl::SendWindowContentChangedAccessibilityEvent::RunOrPost(
     Int64 minEventIntevalMillis = CViewConfiguration::GetSendRecurringAccessibilityEventsInterval();
 
     if (timeSinceLastMillis >= minEventIntevalMillis) {
-        mSource->RemoveCallbacks(IRunnable::Probe(this), &result);
+        mSource->RemoveCallbacks(this, &result);
         Run();
-    } else {
-        mSource->PostDelayed(IRunnable::Probe(this), minEventIntevalMillis - timeSinceLastMillis, &result);
+    }
+    else {
+        mSource->PostDelayed(this, minEventIntevalMillis - timeSinceLastMillis, &result);
     }
     return NOERROR;
 }
@@ -1186,8 +1199,8 @@ ECode ViewRootImpl::RenderProfileRunnable::Run()
 }
 
 const char* ViewRootImpl::TAG = "ViewRootImpl";
-const Boolean ViewRootImpl::DBG = FALSE;
-const Boolean ViewRootImpl::LOCAL_LOGV = FALSE;
+const Boolean ViewRootImpl::DBG = TRUE;
+const Boolean ViewRootImpl::LOCAL_LOGV = TRUE;
 const Boolean ViewRootImpl::DEBUG_DRAW = FALSE || LOCAL_LOGV;
 const Boolean ViewRootImpl::DEBUG_LAYOUT = FALSE || LOCAL_LOGV;
 const Boolean ViewRootImpl::DEBUG_DIALOG = FALSE || LOCAL_LOGV;
@@ -3285,7 +3298,7 @@ void ViewRootImpl::PerformTraversals()
     LocalTrace(mView, "::LEAVE << ViewRootImpl::PerformTraversals()");
 }
 
-CARAPI_(void) ViewRootImpl::HandleOutOfResourcesException(
+void ViewRootImpl::HandleOutOfResourcesException(
     /* [in] */ ECode ec)
 {
     Logger::D(TAG, "OutOfResourcesException initializing HW surface", ec);
@@ -5083,6 +5096,7 @@ Int32 ViewRootImpl::RelayoutWindow(
     mView->GetMeasuredWidth(&measuredWidth);
     mView->GetMeasuredHeight(&measuredHeight);
 
+    Logger::I(TAG, " ==== Before Relayout");
     mWindowSession->Relayout(
         (IIWindow*)mWindow, mSeq, params,
         (Int32)(measuredWidth * appScale + 0.5f),
@@ -5092,7 +5106,8 @@ Int32 ViewRootImpl::RelayoutWindow(
         mPendingStableInsets, mPendingConfiguration, mSurface,
         (IRect**)&winFrame, (IRect**)&pendingOverscanInsets, (IRect**)&pendingContentInsets,
         (IRect**)&pendingVisibleInsets, (IRect**)&pendingStableInsets,
-        (IConfiguration**)&pendingConfiguration, (ISurface**)&surface, &relayoutResult);
+        (IConfiguration**)&pendingConfiguration, &relayoutResult, (ISurface**)&surface);
+    Logger::I(TAG, " ==== After Relayout");
 
     if (mWinFrame != NULL && winFrame != NULL)
         mWinFrame->Set(winFrame);
@@ -5146,28 +5161,23 @@ ECode ViewRootImpl::PlaySoundEffect(
     switch (effectId) {
         case SoundEffectConstants::CLICK:
             ec = audioManager->PlaySoundEffect(IAudioManager::FX_KEY_CLICK);
-            if (FAILED(ec))
-                goto _Exit_;
+            FAIL_GOTO(ec, _Exit_)
             return NOERROR;
         case SoundEffectConstants::NAVIGATION_DOWN:
             ec = audioManager->PlaySoundEffect(IAudioManager::FX_FOCUS_NAVIGATION_DOWN);
-            if (FAILED(ec))
-                goto _Exit_;
+            FAIL_GOTO(ec, _Exit_)
             return NOERROR;
         case SoundEffectConstants::NAVIGATION_LEFT:
             ec = audioManager->PlaySoundEffect(IAudioManager::FX_FOCUS_NAVIGATION_LEFT);
-            if (FAILED(ec))
-                goto _Exit_;
+            FAIL_GOTO(ec, _Exit_)
             return NOERROR;
         case SoundEffectConstants::NAVIGATION_RIGHT:
             ec = audioManager->PlaySoundEffect(IAudioManager::FX_FOCUS_NAVIGATION_RIGHT);
-            if (FAILED(ec))
-                goto _Exit_;
+            FAIL_GOTO(ec, _Exit_)
             return NOERROR;
         case SoundEffectConstants::NAVIGATION_UP:
             ec = audioManager->PlaySoundEffect(IAudioManager::FX_FOCUS_NAVIGATION_UP);
-            if (FAILED(ec))
-                goto _Exit_;
+            FAIL_GOTO(ec, _Exit_)
             return NOERROR;
         default:
             Logger::E(TAG, "unknown effect id %d  not defined in SoundEffectConstants.class.getCanonicalName().", effectId);
@@ -5245,8 +5255,7 @@ ECode ViewRootImpl::Dump(
         writer->Println();
     }
     mFirstInputStage->Dump(innerPrefix, writer);
-    assert(0 && "TODO");
-    //mChoreographer->Dump(prefix, writer);
+    // mChoreographer->Dump(prefix, writer);
 
     writer->Print(prefix);
     writer->Println(String("View Hierarchy:"));
@@ -5264,9 +5273,7 @@ void ViewRootImpl::DumpViewHierarchy(
         writer->Println(String("NULL"));
         return;
     }
-    String viewStr;
-    assert(0 && "TODO");
-    //view->ToString(&viewStr);
+    String viewStr = Object::ToString(view);
     writer->Println(viewStr);
     if (!IViewGroup::Probe(view)) {
         return;
@@ -6047,7 +6054,6 @@ ECode ViewRootImpl::RequestSendAccessibilityEvent(
                 AutoPtr<IAccessibilityNodeProvider> provider;
                 source->GetAccessibilityNodeProvider((IAccessibilityNodeProvider**)&provider);
                 if (provider != NULL) {
-                    assert(0);
                     Int32 virtualNodeId = CAccessibilityNodeInfo::GetVirtualDescendantId(sourceNodeId);
                     AutoPtr<IAccessibilityNodeInfo> node;
                     if (virtualNodeId == IAccessibilityNodeInfo::UNDEFINED_ITEM_ID) {
@@ -6098,8 +6104,7 @@ ECode ViewRootImpl::RequestSendAccessibilityEvent(
                     if (provider != NULL) {
                         Int64 tempId;
                         mAccessibilityFocusedVirtualView->GetSourceNodeId(&tempId);
-                        assert(0);
-                        Int32 virtualChildId; //= CAccessibilityNodeInfo::GetVirtualDescendantId(tempId);
+                        Int32 virtualChildId = CAccessibilityNodeInfo::GetVirtualDescendantId(tempId);
                         if (virtualChildId == IAccessibilityNodeInfo::UNDEFINED_ITEM_ID) {
                             provider->CreateAccessibilityNodeInfo(
                                 IAccessibilityNodeProvider::HOST_VIEW_ID, (IAccessibilityNodeInfo**)&mAccessibilityFocusedVirtualView);
@@ -6279,9 +6284,8 @@ ECode ViewRootImpl::RequestChildRectangleOnScreen(
         mTempRect->Set(rectangle);
         mTempRect->Offset(0, -mCurScrollY);
         mTempRect->Offset(mAttachInfo->mWindowLeft, mAttachInfo->mWindowTop);
-        assert(0 && "TODO");
-        /*mWindowSession->OnRectangleOnScreenRequested(
-            IBinder::Probe(mWindow.Get()), mTempRect);*/
+        mWindowSession->OnRectangleOnScreenRequested(
+            IBinder::Probe(mWindow), mTempRect);
     }
 
     return NOERROR;
@@ -6378,80 +6382,6 @@ ECode ViewRootImpl::ChangeCanvasOpacity(
     }
     return NOERROR;
 }
-
-// void ViewRootImpl::HandleInvalidateRect(
-//     /* [in] */ View::AttachInfo::InvalidateInfo* info)
-// {
-//     info->mTarget->Invalidate(info->mLeft, info->mTop, info->mRight, info->mBottom);
-//     info->ReleaseInfo();
-// }
-
-// void ViewRootImpl::HandleProcessInputEvents()
-// {
-//     mProcessInputEventsScheduled = FALSE;
-//     DoProcessInputEvents();
-// }
-
-// void ViewRootImpl::HandleResized(
-//     /* [in] */ IRect* frame,
-//     /* [in] */ IRect* contentInsets,
-//     /* [in] */ IRect* visibleInsets,
-//     /* [in] */ Boolean reportDraw,
-//     /* [in] */ IConfiguration* newConfig)
-// {
-//     if (!reportDraw) {
-//         Boolean isEqual1, isEqual2, isEqual3;
-//         mWinFrame->Equals(frame, &isEqual1);
-//         if (isEqual1
-//             && (mPendingContentInsets->Equals(contentInsets, &isEqual2), isEqual2)
-//             && (mPendingVisibleInsets->Equals(visibleInsets, &isEqual3), isEqual3)
-//             && newConfig == NULL) {
-//             return;
-//         }
-//     }
-
-//     // MSG: MSG_RESIZED_REPORT
-//     if (mAdded) {
-//         if (newConfig != NULL) {
-//             UpdateConfiguration(newConfig, FALSE);
-//         }
-
-//         mWinFrame->Set(frame);
-//         mPendingContentInsets->Set(contentInsets);
-//         mPendingVisibleInsets->Set(visibleInsets);
-
-//         if (reportDraw) {
-//             mReportNextDraw = TRUE;
-//         }
-
-//         if (mView != NULL) {
-//             ForceLayout(mView);
-//         }
-
-//         RequestLayout();
-//     }
-// }
-
-// void ViewRootImpl::HandleWindowMoved(
-//     /* [in] */ Int32 l,
-//     /* [in] */ Int32 t)
-// {
-//     if (mAdded) {
-//         Int32 w, h;
-//         mWinFrame->GetWidth(&w);
-//         mWinFrame->GetHeight(&h);
-
-//         mWinFrame->mLeft = l;
-//         mWinFrame->mRight = l + w;
-//         mWinFrame->mTop = t;
-//         mWinFrame->mBottom = t + h;
-
-//         if (mView != NULL) {
-//             ForceLayout(mView);
-//         }
-//         RequestLayout();
-//     }
-// }
 
 void ViewRootImpl::HandleWindowFocusChanged(
     /* [in] */ Boolean hasWindowFocus,
@@ -6551,24 +6481,13 @@ void ViewRootImpl::LogView(
             mView->GetResources((IResources**)&resources);
             String name;
             resources->GetResourceEntryName(id, &name);
-            printf("    %s: viewId = 0x%08x, IView* = %p, type = %s\n", info.string(), id, mView.Get(), name.string());
             Logger::D("ViewRootImpl", "    %s: viewId = 0x%08x, IView* = %p, type = %s\n", info.string(), id, mView.Get(), name.string());
         }
         else {
-            printf("    %s: viewId = 0x%08x, IView* = %p\n", info.string(), id, mView.Get());
             Logger::D("ViewRootImpl", "    %s: viewId = 0x%08x, IView* = %p\n", info.string(), id, mView.Get());
         }
     }
 #endif
-}
-
-ECode ViewRootImpl::GetWeakReference(
-    /* [out] */ IWeakReference** weakReference)
-{
-    VALIDATE_NOT_NULL(weakReference)
-    *weakReference = new WeakReferenceImpl(Probe(EIID_IInterface), CreateWeak(this));
-    REFCOUNT_ADD(*weakReference)
-    return NOERROR;
 }
 
 ////////////////////////////////////////////////////////////
@@ -6956,7 +6875,7 @@ Int32 ViewRootImpl::NativePreImeInputStage::OnProcess(
     /* [in] */ QueuedInputEvent* q)
 {
     if (mHost->mInputQueue != NULL && IKeyEvent::Probe(q->mEvent)) {
-        //mHost->mInputQueue->SendInputEvent(q->mEvent, q, TRUE, IInputQueueFinishedInputEventCallback::Probe(this));
+        mHost->mInputQueue->SendInputEvent(q->mEvent, TO_IINTERFACE(q), TRUE, this);
         return DEFER;
     }
     return FORWARD;
@@ -7020,13 +6939,11 @@ Int32 ViewRootImpl::ImeInputStage::OnProcess(
     /* [in] */ QueuedInputEvent* q)
 {
     if (mHost->mLastWasImTarget && !mHost->IsInLocalFocusMode()) {
-        assert(0);
-        AutoPtr<IInputMethodManager> imm;// = CInputMethodManager::PeekInstance();
+        AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();
         if (imm != NULL) {
             AutoPtr<IInputEvent> event = q->mEvent;
             Int32 result = 0;
-            assert(0);
-            //imm->DispatchInputEvent(event, q, IInputMethodManagerFinishedInputEventCallback::Probe(this), mHandler, &result);
+            imm->DispatchInputEvent(event, TO_IINTERFACE(q), this, mHost->mHandler, &result);
             if (result == IInputMethodManager::DISPATCH_HANDLED) {
                 return FINISH_HANDLED;
             } else if (result == IInputMethodManager::DISPATCH_NOT_HANDLED) {
@@ -7117,14 +7034,14 @@ Int32 ViewRootImpl::EarlyPostImeInputStage::ProcessPointerEvent(
 ////////////////////////////////////////////////////////////
 //          ViewRootImpl::NativePostImeInputStage
 ////////////////////////////////////////////////////////////
+CAR_INTERFACE_IMPL(ViewRootImpl::NativePostImeInputStage, AsyncInputStage, IInputQueueFinishedInputEventCallback)
+
 ViewRootImpl::NativePostImeInputStage::NativePostImeInputStage(
     /* [in] */ ViewRootImpl* host,
     /* [in] */ InputStage* next,
     /* [in] */ const String& traceCounter)
     : AsyncInputStage(host, next, traceCounter)
 {}
-
-CAR_INTERFACE_IMPL(ViewRootImpl::NativePostImeInputStage, AsyncInputStage, IInputMethodManagerFinishedInputEventCallback)
 
 ECode ViewRootImpl::NativePostImeInputStage::OnFinishedInputEvent(
     /* [in] */ IInterface* token,
@@ -7143,8 +7060,7 @@ Int32 ViewRootImpl::NativePostImeInputStage::OnProcess(
     /* [in] */ QueuedInputEvent* q)
 {
     if (mHost->mInputQueue != NULL) {
-        assert(0);
-        //mHost->mInputQueue->SendInputEvent(q->mEvent, q, FALSE, IInputMethodManagerFinishedInputEventCallback::Probe(this));
+        mHost->mInputQueue->SendInputEvent(q->mEvent, TO_IINTERFACE(q), FALSE, this);
         return DEFER;
     }
     return FORWARD;
@@ -7227,9 +7143,7 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessKeyEvent(
     event->GetRepeatCount(&repeatCount);
     Int32 keyCode;
     event->GetKeyCode(&keyCode);
-    Boolean isModifierKey;
-    assert(0);
-    //CKeyEvent::IsModifierKey(keyCode, &isModifierKey);
+    Boolean isModifierKey = CKeyEvent::IsModifierKey(keyCode);
     if (action == IKeyEvent::ACTION_DOWN
             && isCtrlPressed
             && repeatCount == 0
@@ -7314,14 +7228,14 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessKeyEvent(
                     // of previous focused into the coord system of
                     // newly focused view
                     focused->GetFocusedRect(mHost->mTempRect);
-                    if (IViewGroup::Probe(mHost->mView)) {
-                        (IViewGroup::Probe(mHost->mView))->OffsetDescendantRectToMyCoords(focused, mHost->mTempRect);
-                        (IViewGroup::Probe(mHost->mView))->OffsetRectIntoDescendantCoords(v, mHost->mTempRect);
+                    IViewGroup* vg = IViewGroup::Probe(mHost->mView);
+                    if (vg) {
+                        vg->OffsetDescendantRectToMyCoords(focused, mHost->mTempRect);
+                        vg->OffsetRectIntoDescendantCoords(v, mHost->mTempRect);
                     }
 
                     if (v->RequestFocus(direction, mHost->mTempRect, &temp), temp) {
-                        assert(0);
-                        //PlaySoundEffect(SoundEffectConstants::GetContantForFocusDirection(direction));
+                        mHost->PlaySoundEffect(SoundEffectConstants::GetContantForFocusDirection(direction));
                         return FINISH_HANDLED;
                     }
                 }
@@ -7389,13 +7303,13 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessGenericMotionEvent(
 //          ViewRootImpl::SyntheticInputStage
 ////////////////////////////////////////////////////////////
 ViewRootImpl::SyntheticInputStage::SyntheticInputStage(
-            /* [in] */ ViewRootImpl* host)
+        /* [in] */ ViewRootImpl* host)
     : InputStage(host, NULL)
 {
     mTrackball = new SyntheticTrackballHandler(host);
     mJoystick = new SyntheticJoystickHandler(host);
     mTouchNavigation = new SyntheticTouchNavigationHandler(host);
-    mKeyboard = new SyntheticKeyboardHandler();
+    mKeyboard = new SyntheticKeyboardHandler(host);
 }
 
 Int32 ViewRootImpl::SyntheticInputStage::OnProcess(
@@ -7483,11 +7397,10 @@ ECode ViewRootImpl::SyntheticTrackballHandler::Process(
             mX->Reset(2);
             mY->Reset(2);
             AutoPtr<IKeyEvent> tempEvent;
-            assert(0);
-            /*CKeyEvent::New(curTime, curTime,
+            CKeyEvent::New(curTime, curTime,
                     IKeyEvent::ACTION_DOWN, IKeyEvent::KEYCODE_DPAD_CENTER, 0, metaState,
                     IKeyCharacterMap::VIRTUAL_KEYBOARD, 0, IKeyEvent::FLAG_FALLBACK,
-                    IInputDevice::SOURCE_KEYBOARD, (IKeyEvent**)&tempEvent);*/
+                    IInputDevice::SOURCE_KEYBOARD, (IKeyEvent**)&tempEvent);
             mHost->EnqueueInputEvent(IInputEvent::Probe(tempEvent));
             break;
         }
@@ -7496,11 +7409,10 @@ ECode ViewRootImpl::SyntheticTrackballHandler::Process(
             mX->Reset(2);
             mY->Reset(2);
             AutoPtr<IKeyEvent> tempEvent;
-            assert(0);
-            /*CKeyEvent::New(curTime, curTime,
+            CKeyEvent::New(curTime, curTime,
                     IKeyEvent::ACTION_UP, IKeyEvent::KEYCODE_DPAD_CENTER, 0, metaState,
                     IKeyCharacterMap::VIRTUAL_KEYBOARD, 0, IKeyEvent::FLAG_FALLBACK,
-                    IInputDevice::SOURCE_KEYBOARD, (IKeyEvent**)&tempEvent);*/
+                    IInputDevice::SOURCE_KEYBOARD, (IKeyEvent**)&tempEvent);
             mHost->EnqueueInputEvent(IInputEvent::Probe(tempEvent));
             break;
         }
@@ -7560,11 +7472,10 @@ ECode ViewRootImpl::SyntheticTrackballHandler::Process(
             movement--;
             Int32 repeatCount = accelMovement - movement;
             AutoPtr<IKeyEvent> tempEvent;
-            assert(0);
-            /*CKeyEvent::New(curTime, curTime,
+            CKeyEvent::New(curTime, curTime,
                     IKeyEvent::ACTION_MULTIPLE, keycode, repeatCount, metaState,
                     IKeyCharacterMap::VIRTUAL_KEYBOARD, 0, IKeyEvent::FLAG_FALLBACK,
-                    IInputDevice::SOURCE_KEYBOARD, (IKeyEvent**)&tempEvent);*/
+                    IInputDevice::SOURCE_KEYBOARD, (IKeyEvent**)&tempEvent);
             mHost->EnqueueInputEvent(IInputEvent::Probe(tempEvent));
         }
         while (movement > 0) {
@@ -7573,18 +7484,16 @@ ECode ViewRootImpl::SyntheticTrackballHandler::Process(
             movement--;
             curTime = SystemClock::GetUptimeMillis();
             AutoPtr<IKeyEvent> tempEvent;
-            assert(0);
-            /*CKeyEvent::New(curTime, curTime,
+            CKeyEvent::New(curTime, curTime,
                     IKeyEvent::ACTION_DOWN, keycode, 0, metaState,
                     IKeyCharacterMap::VIRTUAL_KEYBOARD, 0, IKeyEvent::FLAG_FALLBACK,
-                    IInputDevice::SOURCE_KEYBOARD, (IKeyEvent**)&tempEvent);*/
+                    IInputDevice::SOURCE_KEYBOARD, (IKeyEvent**)&tempEvent);
             mHost->EnqueueInputEvent(IInputEvent::Probe(tempEvent));
             AutoPtr<IKeyEvent> otherEvent;
-            assert(0);
-            /*CKeyEvent::New(curTime, curTime,
+            CKeyEvent::New(curTime, curTime,
                     IKeyEvent::ACTION_UP, keycode, 0, metaState,
                     IKeyCharacterMap::VIRTUAL_KEYBOARD, 0, IKeyEvent::FLAG_FALLBACK,
-                    IInputDevice::SOURCE_KEYBOARD, (IKeyEvent**)&tempEvent);*/
+                    IInputDevice::SOURCE_KEYBOARD, (IKeyEvent**)&tempEvent);
             mHost->EnqueueInputEvent(IInputEvent::Probe(otherEvent));
         }
         mLastTime = curTime;
@@ -7639,15 +7548,15 @@ CARAPI ViewRootImpl::SyntheticJoystickHandler::HandleMessage(
             Int32 repeatCount;
             oldEvent->GetRepeatCount(&repeatCount);
             AutoPtr<IKeyEvent> e;
-            assert(0);
-            //CKeyEvent::ChangeTimeRepeat(oldEvent, SystemClock::GetUptimeMillis(), repeatCount + 1, (IKeyEvent**)&e);
+            CKeyEvent::ChangeTimeRepeat(oldEvent, SystemClock::GetUptimeMillis(),
+                repeatCount + 1, (IKeyEvent**)&e);
             if (mHost->mAttachInfo->mHasWindowFocus) {
                 mHost->EnqueueInputEvent(IInputEvent::Probe(e));
                 AutoPtr<IMessage> m;
                 ObtainMessage(what, e, (IMessage**)&m);
                 m->SetAsynchronous(TRUE);
-                assert(0);
-                //SendMessageDelayed(m, ViewConfiguration::GetKeyRepeatDelay());
+                Boolean bval;
+                SendMessageDelayed(m, CViewConfiguration::GetKeyRepeatDelay(), &bval);
             }
             break;
         }
@@ -7684,12 +7593,13 @@ void ViewRootImpl::SyntheticJoystickHandler::Update(
     /* [in] */ IMotionEvent* event,
     /* [in] */ Boolean synthesizeNewKeys)
 {
+    IInputEvent* ie = IInputEvent::Probe(event);
     Int64 time = 0;
-    IInputEvent::Probe(event)->GetEventTime(&time);
+    ie->GetEventTime(&time);
     Int32 metaState, deviceId,  source;
     event->GetMetaState(&metaState);
-    IInputEvent::Probe(event)->GetDeviceId(&deviceId);
-    IInputEvent::Probe(event)->GetSource(&source);
+    ie->GetDeviceId(&deviceId);
+    ie->GetSource(&source);
 
     Float axisValue;
     event->GetAxisValue(IMotionEvent::AXIS_HAT_X, &axisValue);
@@ -7711,12 +7621,11 @@ void ViewRootImpl::SyntheticJoystickHandler::Update(
     if (xDirection != mLastXDirection) {
         if (mLastXKeyCode != 0) {
             RemoveMessages(MSG_ENQUEUE_X_AXIS_KEY_REPEAT);
-            AutoPtr<IKeyEvent> temp;
-            assert(0);
-            /*CKeyEvent::New(time, time,
+            AutoPtr<IInputEvent> temp;
+            CKeyEvent::New(time, time,
                     IKeyEvent::ACTION_UP, mLastXKeyCode, 0, metaState,
-                    deviceId, 0, IKeyEvent::FLAG_FALLBACK, source, (IKeyEvent**)&temp);*/
-            mHost->EnqueueInputEvent(IInputEvent::Probe(temp));
+                    deviceId, 0, IKeyEvent::FLAG_FALLBACK, source, (IInputEvent**)&temp);
+            mHost->EnqueueInputEvent(temp);
             mLastXKeyCode = 0;
         }
 
@@ -7725,29 +7634,27 @@ void ViewRootImpl::SyntheticJoystickHandler::Update(
         if (xDirection != 0 && synthesizeNewKeys) {
             mLastXKeyCode = xDirection > 0
                     ? IKeyEvent::KEYCODE_DPAD_RIGHT : IKeyEvent::KEYCODE_DPAD_LEFT;
-            AutoPtr<IKeyEvent> e;
-            assert(0);
-            /*CKeyEvent::New(time, time,
+            AutoPtr<IInputEvent> e;
+            CKeyEvent::New(time, time,
                     IKeyEvent::ACTION_DOWN, mLastXKeyCode, 0, metaState,
-                    deviceId, 0, IKeyEvent::FLAG_FALLBACK, source, (IKeyEvent**)&temp);*/
-            mHost->EnqueueInputEvent(IInputEvent::Probe(e));
+                    deviceId, 0, IKeyEvent::FLAG_FALLBACK, source, (IInputEvent**)&e);
+            mHost->EnqueueInputEvent(e);
             AutoPtr<IMessage> m;
             ObtainMessage(MSG_ENQUEUE_X_AXIS_KEY_REPEAT, e, (IMessage**)&m);
             m->SetAsynchronous(TRUE);
-            assert(0);
-            //SendMessageDelayed(m, ViewConfiguration::GetKeyRepeatTimeout());
+            Boolean bval;
+            SendMessageDelayed(m, CViewConfiguration::GetKeyRepeatTimeout(), &bval);
         }
     }
 
     if (yDirection != mLastYDirection) {
         if (mLastYKeyCode != 0) {
             RemoveMessages(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT);
-            AutoPtr<IKeyEvent> temp;
-            assert(0);
-            /*CKeyEvent::New(time, time,
+            AutoPtr<IInputEvent> temp;
+            CKeyEvent::New(time, time,
                     IKeyEvent::ACTION_UP, mLastXKeyCode, 0, metaState,
-                    deviceId, 0, IKeyEvent::FLAG_FALLBACK, source, (IKeyEvent**)&temp);*/
-            mHost->EnqueueInputEvent(IInputEvent::Probe(temp));
+                    deviceId, 0, IKeyEvent::FLAG_FALLBACK, source, (IInputEvent**)&temp);
+            mHost->EnqueueInputEvent(temp);
             mLastYKeyCode = 0;
         }
 
@@ -7756,17 +7663,16 @@ void ViewRootImpl::SyntheticJoystickHandler::Update(
         if (yDirection != 0 && synthesizeNewKeys) {
             mLastYKeyCode = yDirection > 0
                     ? IKeyEvent::KEYCODE_DPAD_DOWN : IKeyEvent::KEYCODE_DPAD_UP;
-            AutoPtr<IKeyEvent> e;
-            assert(0);
-            /*CKeyEvent::New(time, time,
+            AutoPtr<IInputEvent> e;
+            CKeyEvent::New(time, time,
                     IKeyEvent::ACTION_DOWN, mLastXKeyCode, 0, metaState,
-                    deviceId, 0, IKeyEvent::FLAG_FALLBACK, source, (IKeyEvent**)&e);*/
-            mHost->EnqueueInputEvent(IInputEvent::Probe(e));
+                    deviceId, 0, IKeyEvent::FLAG_FALLBACK, source, (IInputEvent**)&e);
+            mHost->EnqueueInputEvent(e);
             AutoPtr<IMessage> m;
             ObtainMessage(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT, e, (IMessage**)&m);
             m->SetAsynchronous(TRUE);
-            assert(0);
-            //SendMessageDelayed(m, ViewConfiguration::GetKeyRepeatTimeout());
+            Boolean bval;
+            SendMessageDelayed(m, CViewConfiguration::GetKeyRepeatTimeout(), &bval);
         }
     }
 }
@@ -7826,19 +7732,20 @@ ViewRootImpl::SyntheticTouchNavigationHandler::SyntheticTouchNavigationHandler(
 ECode ViewRootImpl::SyntheticTouchNavigationHandler::Process(
     /* [in] */ IMotionEvent* event)
 {
+    IInputEvent* ie= IInputEvent::Probe(event);
     // Update the current device information.
     Int64 time = 0;
-    IInputEvent::Probe(event)->GetEventTime(&time);
+    ie->GetEventTime(&time);
     Int32 deviceId, source;
-    if (mCurrentDeviceId != (IInputEvent::Probe(event)->GetDeviceId(&deviceId), deviceId)
-        || mCurrentSource != (IInputEvent::Probe(event)->GetSource(&source), source)) {
+    if (mCurrentDeviceId != (ie->GetDeviceId(&deviceId), deviceId)
+        || mCurrentSource != (ie->GetSource(&source), source)) {
         FinishKeys(time);
         FinishTracking(time);
         mCurrentDeviceId = deviceId;
         mCurrentSource = source;
         mCurrentDeviceSupported = FALSE;
         AutoPtr<IInputDevice> device;
-        IInputEvent::Probe(event)->GetDevice((IInputDevice**)&device);
+        ie->GetDevice((IInputDevice**)&device);
         if (device != NULL) {
             // In order to support an input device, we must know certain
             // characteristics about it, such as its size and resolution.
@@ -7886,8 +7793,7 @@ ECode ViewRootImpl::SyntheticTouchNavigationHandler::Process(
             FinishKeys(time);
             FinishTracking(time);
             event->GetPointerId(0, &mActivePointerId);
-            assert(0);
-            //mVelocityTracker = VelocityTracker::Obtain();
+            mVelocityTracker = VelocityTracker::Obtain();
             mVelocityTracker->AddMovement(event);
             event->GetX(&mStartX);
             event->GetY(&mStartY);
@@ -7960,12 +7866,13 @@ ECode ViewRootImpl::SyntheticTouchNavigationHandler::Process(
 ECode ViewRootImpl::SyntheticTouchNavigationHandler::Cancel(
     /* [in] */ IMotionEvent* event)
 {
+    IInputEvent* ie = IInputEvent::Probe(event);
     Int32 id, source;
-    IInputEvent::Probe(event)->GetDeviceId(&id);
-    IInputEvent::Probe(event)->GetSource(&source);
+    ie->GetDeviceId(&id);
+    ie->GetSource(&source);
     if (mCurrentDeviceId == id && mCurrentSource == source) {
         Int64 time = 0;
-        IInputEvent::Probe(event)->GetEventTime(&time);
+        ie->GetEventTime(&time);
         FinishKeys(time);
         FinishTracking(time);
     }
@@ -8048,11 +7955,10 @@ void ViewRootImpl::SyntheticTouchNavigationHandler::SendKeyDownOrRepeat(
     // Note: Normally we would pass FLAG_LONG_PRESS when the repeat count is 1
     // but it doesn't quite make sense when simulating the events in this way.
     AutoPtr<IKeyEvent> temp;
-    assert(0);
-    /*CKeyEvent::New(mPendingKeyDownTime, time,
+    CKeyEvent::New(mPendingKeyDownTime, time,
             IKeyEvent::ACTION_DOWN, mPendingKeyCode, mPendingKeyRepeatCount,
             mPendingKeyMetaState, mCurrentDeviceId,
-            IKeyEvent::FLAG_FALLBACK, mCurrentSource, (IKeyEvent**)&temp);*/
+            IKeyEvent::FLAG_FALLBACK, mCurrentSource, (IKeyEvent**)&temp);
     mHost->EnqueueInputEvent(IInputEvent::Probe(temp));
 }
 
@@ -8062,11 +7968,10 @@ void ViewRootImpl::SyntheticTouchNavigationHandler::SendKeyUp(
     if (mPendingKeyCode != IKeyEvent::KEYCODE_UNKNOWN) {
 
         AutoPtr<IKeyEvent> temp;
-        assert(0);
-        /*CKeyEvent::New(mPendingKeyDownTime, time,
-                IKeyEvent::ACTION_UP, mPendingKeyCode, 0,
-                mPendingKeyMetaState, mCurrentDeviceId,
-                0, IKeyEvent::FLAG_FALLBACK, mCurrentSource, (IKeyEvent**)&temp);*/
+        CKeyEvent::New(mPendingKeyDownTime, time,
+            IKeyEvent::ACTION_UP, mPendingKeyCode, 0,
+            mPendingKeyMetaState, mCurrentDeviceId,
+            0, IKeyEvent::FLAG_FALLBACK, mCurrentSource, (IKeyEvent**)&temp);
 
         mHost->EnqueueInputEvent(IInputEvent::Probe(temp));
         mPendingKeyCode = IKeyEvent::KEYCODE_UNKNOWN;
@@ -8171,11 +8076,6 @@ ECode ViewRootImpl::SyntheticTouchNavigationHandler::NavigationRun::Run()
 //          ViewRootImpl::SyntheticKeyboardHandler
 ////////////////////////////////////////////////////////////////////
 
-ViewRootImpl::SyntheticKeyboardHandler::SyntheticKeyboardHandler()
-{
-
-}
-
 ECode ViewRootImpl::SyntheticKeyboardHandler::Process(
     /* [in] */ IKeyEvent* event)
 {
@@ -8195,25 +8095,23 @@ ECode ViewRootImpl::SyntheticKeyboardHandler::Process(
     AutoPtr<IFallbackAction> fallbackAction;
     kcm->GetFallbackAction(keyCode, metaState, (IFallbackAction**)&fallbackAction);
     if (fallbackAction != NULL) {
+        IInputEvent* ie = IInputEvent::Probe(event);
         Int32 flags = flag | IKeyEvent::FLAG_FALLBACK;
         Int64 downTime, eventTime;
         Int32 action, repeatCount, eviceId, scanCode, source;
         event->GetDownTime(&downTime);
-        IInputEvent::Probe(event)->GetEventTime(&eventTime);
+        ie->GetEventTime(&eventTime);
         event->GetAction(&action);
         event->GetRepeatCount(&repeatCount);
-        IInputEvent::Probe(event)->GetDeviceId(&eviceId);
+        ie->GetDeviceId(&eviceId);
         event->GetScanCode(&scanCode);
-        IInputEvent::Probe(event)->GetSource(&source);
-        assert(0);
-        /*AutoPtr<IKeyEvent> fallbackEvent = CKeyEvent::Obtain(
-                downTime, eventTime,
-                action, ((FallbackAction*)fallbackAction)->mKeyCode,
-                repeatCount, ((FallbackAction*)fallbackAction)->mMetaState,
-                eviceId, scanCode,
-                flags, source, NULL);
+        ie->GetSource(&source);
+        KeyCharacterMap::FallbackAction* fa = (KeyCharacterMap::FallbackAction*)fallbackAction.Get();
+        AutoPtr<IKeyEvent> fallbackEvent = CKeyEvent::Obtain(
+            downTime, eventTime, action, fa->mKeyCode, repeatCount, fa->mMetaState,
+            eviceId, scanCode, flags, source, String(NULL));
         fallbackAction->Recycle();
-        mHost->EnqueueInputEvent(fallbackEvent);*/
+        mHost->EnqueueInputEvent(IInputEvent::Probe(fallbackEvent));
     }
     return NOERROR;
 }
@@ -8259,8 +8157,7 @@ ECode ViewRootImpl::PropertiesRunnable::Run()
     }
 
     // detect emulator
-    assert(0);
-    //mHost->mIsEmulator = Build::HARDWARE::Contains(String("goldfish"));
+    mHost->mIsEmulator = Build::HARDWARE.Contains("goldfish");
     SystemProperties::GetBoolean(PROPERTY_EMULATOR_CIRCULAR, FALSE, &mHost->mIsCircularEmulator);
     return NOERROR;
 }
@@ -8299,50 +8196,53 @@ Boolean ViewRootImpl::QueuedInputEvent::ShouldSendToSynthesizer()
     return FALSE;
 }
 
-String ViewRootImpl::QueuedInputEvent::ToString()
+ECode ViewRootImpl::QueuedInputEvent::ToString(
+    /* [out] */ String* str)
 {
-    AutoPtr<StringBuilder> sb = new StringBuilder(String("QueuedInputEvent{flags="));
+    VALIDATE_NOT_NULL(str)
+
+    StringBuilder sb("QueuedInputEvent{flags=");
     Boolean hasPrevious = FALSE;
-    hasPrevious = FlagToString(String("DELIVER_POST_IME"), FLAG_DELIVER_POST_IME, hasPrevious, IStringBuilder::Probe(sb));
-    hasPrevious = FlagToString(String("DEFERRED"), FLAG_DEFERRED, hasPrevious, IStringBuilder::Probe(sb));
-    hasPrevious = FlagToString(String("FINISHED"), FLAG_FINISHED, hasPrevious, IStringBuilder::Probe(sb));
-    hasPrevious = FlagToString(String("FINISHED_HANDLED"), FLAG_FINISHED_HANDLED, hasPrevious, IStringBuilder::Probe(sb));
-    hasPrevious = FlagToString(String("RESYNTHESIZED"), FLAG_RESYNTHESIZED, hasPrevious, IStringBuilder::Probe(sb));
-    hasPrevious = FlagToString(String("UNHANDLED"), FLAG_UNHANDLED, hasPrevious, IStringBuilder::Probe(sb));
+    hasPrevious = FlagToString(String("DELIVER_POST_IME"), FLAG_DELIVER_POST_IME, hasPrevious, sb);
+    hasPrevious = FlagToString(String("DEFERRED"), FLAG_DEFERRED, hasPrevious, sb);
+    hasPrevious = FlagToString(String("FINISHED"), FLAG_FINISHED, hasPrevious, sb);
+    hasPrevious = FlagToString(String("FINISHED_HANDLED"), FLAG_FINISHED_HANDLED, hasPrevious, sb);
+    hasPrevious = FlagToString(String("RESYNTHESIZED"), FLAG_RESYNTHESIZED, hasPrevious, sb);
+    hasPrevious = FlagToString(String("UNHANDLED"), FLAG_UNHANDLED, hasPrevious, sb);
     if (!hasPrevious) {
-        sb->Append(String("0"));
+        sb.Append(String("0"));
     }
-    String str1, str2, str3;
+
+    sb.Append(", hasNextQueuedEvent=");
     if (mEvent != NULL) {
-        str1 = String(", hasNextQueuedEvent=") + String("TRUE");
+        sb.Append("TRUE");
     } else {
-        str1 = String(", hasNextQueuedEvent=") + String("FALSE");
+        sb.Append("FALSE");
     }
 
+    sb.Append(", hasInputEventReceiver=");
     if (mReceiver != NULL) {
-        str2 = String(", hasInputEventReceiver=") + String("TRUE");
+        sb.Append("TRUE");
     } else {
-        str2 = String(", hasInputEventReceiver=") + String("FALSE");
+        sb.Append("FALSE");
     }
-
-    str3 = String(", mEvent=") + String("}");
-    sb->Append(str1);
-    sb->Append(str2);
-    sb->Append(str3);
-    return sb->ToString();
+    sb.Append(", mEvent=");
+    sb.Append(Object::ToString(mEvent));
+    *str = sb.ToString();
+    return NOERROR;
 }
 
 Boolean ViewRootImpl::QueuedInputEvent::FlagToString(
     /* [in] */ const String& name,
     /* [in] */ Int32 flag,
     /* [in] */ Boolean hasPrevious,
-    /* [in] */ IStringBuilder* sb)
+    /* [in] */ StringBuilder& sb)
 {
     if ((mFlags & flag) != 0) {
         if (hasPrevious) {
-            sb->Append(String("|"));
+            sb.Append("|");
         }
-        sb->Append(name);
+        sb.Append(name);
         return TRUE;
     }
     return hasPrevious;

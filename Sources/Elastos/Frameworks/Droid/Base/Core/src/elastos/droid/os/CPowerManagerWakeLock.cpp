@@ -40,7 +40,6 @@ CPowerManagerWakeLock::CPowerManagerWakeLock()
     , mRefCounted(TRUE)
     , mHeld(FALSE)
 {
-    mReleaser = (IRunnable*)new ReleaseRunnable(this);
 }
 
 CPowerManagerWakeLock::~CPowerManagerWakeLock()
@@ -213,6 +212,7 @@ ECode CPowerManagerWakeLock::constructor(
     mTag = tag;
     FAIL_RETURN(CBinder::New((IBinder**)&mToken));
     mHost = (CPowerManager*)host;
+    mReleaser = (IRunnable*)new ReleaseRunnable(this);
 
     StringBuilder sb("WakeLock(");
     sb += mTag;

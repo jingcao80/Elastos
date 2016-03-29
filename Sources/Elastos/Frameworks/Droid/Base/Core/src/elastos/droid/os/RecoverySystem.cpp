@@ -76,7 +76,7 @@ namespace Os {
 
 AutoPtr<IFile> CreateFile(
     /* [in] */ IFile* parent,
-    /* [in] */ String path)
+    /* [in] */ const String& path)
 {
     AutoPtr<IFile> file;
     if (!parent) {
@@ -113,7 +113,7 @@ AutoPtr<IHashSet> RecoverySystem::GetTrustedCerts(
 
     AutoPtr<IZipFile> zip;
     CZipFile::New((IFile*)tempFile, (IZipFile**)&zip);
-    
+
     AutoPtr<ICertificateFactory> cf;
     AutoPtr<ICertificateFactoryHelper> helper;
     CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&helper);
@@ -423,7 +423,7 @@ ECode RecoverySystem::RebootWipeUserData(
 
 ECode RecoverySystem::RebootWipeUserData(
     /* [in] */ IContext* context,
-    /* [in] */ String reason)
+    /* [in] */ const String& reason)
 {
     return RebootWipeUserData(context, FALSE, reason, FALSE);
 }
@@ -440,7 +440,7 @@ ECode RecoverySystem::RebootWipeUserData(
 ECode RecoverySystem::RebootWipeUserData(
     /* [in] */ IContext* context,
     /* [in] */ Boolean shutdown,
-    /* [in] */ String reason,
+    /* [in] */ const String& reason,
     /* [in] */ Boolean wipeMedia)
 {
     AutoPtr<IUserManager> um;
@@ -508,7 +508,7 @@ ECode RecoverySystem::RebootWipeCache(
 
 ECode RecoverySystem::RebootWipeCache(
     /* [in] */ IContext* context,
-    /* [in] */ String reason)
+    /* [in] */ const String& reason)
 {
     String reasonArg;
     if (!reason.IsEmpty()) {
@@ -570,7 +570,7 @@ String RecoverySystem::HandleAftermath()
             -LOG_FILE_MAX_LENGTH, String("...\n"), &log);
     if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
         Logger::I(TAG, "No recovery log file");
-    } 
+    }
     else if (ec == (ECode)E_IO_EXCEPTION) {
         Logger::I(TAG, "Error reading recovery log %x", ec);
     }
@@ -600,11 +600,11 @@ String RecoverySystem::HandleAftermath()
 }
 
 String RecoverySystem::SanitizeArg(
-    /* [in] */ String arg)
+    /* [in] */ const String& arg)
 {
-    arg = arg.Replace('\0', '?');
-    arg = arg.Replace('\n', '?');
-    return arg;
+    String result = arg.Replace('\0', '?');;
+    result = result.Replace('\n', '?');
+    return result;
 }
 
 ECode RecoverySystem::OpenConditionBroadcastReceiver::OnReceive(

@@ -151,8 +151,8 @@ public:
         /* [out] */ IRect** outVisibleInsets,
         /* [out] */ IRect** outStableInsets,
         /* [out] */ IConfiguration** outConfig,
-        /* [out] */ ISurface** outSurface,
-        /* [out] */ Int32* result);
+        /* [out] */ Int32* result,
+        /* [out] */ ISurface** outSurface);
 
     /**
      * If a call to relayout() asked to have the surface destroy deferred,

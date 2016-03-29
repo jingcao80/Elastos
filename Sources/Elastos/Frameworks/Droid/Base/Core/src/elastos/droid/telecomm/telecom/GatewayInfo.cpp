@@ -21,7 +21,7 @@ ECode GatewayInfo::constructor()
 }
 
 ECode GatewayInfo::constructor(
-    /* [in] */ String packageName,
+    /* [in] */ const String& packageName,
     /* [in] */ IUri* gatewayUri,
     /* [in] */ IUri* originalAddress)
 {

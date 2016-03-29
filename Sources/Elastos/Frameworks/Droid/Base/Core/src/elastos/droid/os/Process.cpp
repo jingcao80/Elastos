@@ -239,7 +239,6 @@ ECode Process::GetAbiList(
     IDataInput* di = IDataInput::Probe(inputStream);
     Int32 numBytes;
     AutoPtr<ArrayOf<Byte> > bytes;
-Logger::I(TAG, " >> 1");
     ec = IWriter::Probe(writer)->Write(String("1"));
     // Each query starts with the argument count (1 in this case)
     FAIL_GOTO(ec, _EXIT_)
@@ -247,27 +246,26 @@ Logger::I(TAG, " >> 1");
     // ... followed by a new-line.
     ec = writer->NewLine();
     FAIL_GOTO(ec, _EXIT_)
-Logger::I(TAG, " >> 3");
+
     // ... followed by our only argument.
     ec = IWriter::Probe(writer)->Write(String("--query-abi-list"));
     FAIL_GOTO(ec, _EXIT_)
-Logger::I(TAG, " >> 4");
+
     ec = writer->NewLine();
     FAIL_GOTO(ec, _EXIT_)
-Logger::I(TAG, " >> 5");
+
     ec = IFlushable::Probe(writer)->Flush();
     FAIL_GOTO(ec, _EXIT_)
-Logger::I(TAG, " >> 6");
 
     // The response is a length prefixed stream of ASCII bytes.
     ec = di->ReadInt32(&numBytes);
     FAIL_GOTO(ec, _EXIT_)
-Logger::I(TAG, " >> 7");
+
     bytes = ArrayOf<Byte>::Alloc(numBytes);
-Logger::I(TAG, " >> 8");
+
     ec = di->ReadFully(bytes);
     FAIL_GOTO(ec, _EXIT_)
-Logger::I(TAG, " >> 9");
+
     // Logger::I(TAG, " GetAbiList: %d, %s", numBytes, (const char*)bytes->GetPayload());
     *result = String((const char*)bytes->GetPayload());
     return NOERROR;

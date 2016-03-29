@@ -104,8 +104,8 @@ public:
 
     /** {@hide} */
     CARAPI InternalSetPostDialWait(
-        /* [in] */ String telecomId,
-        /* [in] */ String remaining);
+        /* [in] */ const String& telecomId,
+        /* [in] */ const String& remaining);
 
     /** {@hide} */
     CARAPI InternalAudioStateChanged(
@@ -113,7 +113,7 @@ public:
 
     /** {@hide} */
     CARAPI InternalGetCallByTelecomId(
-        /* [in] */ String telecomId,
+        /* [in] */ const String& telecomId,
         /* [out] */ ICall** result);
 
     /** {@hide} */
