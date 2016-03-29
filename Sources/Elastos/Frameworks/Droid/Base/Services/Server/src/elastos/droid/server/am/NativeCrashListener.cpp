@@ -1,14 +1,14 @@
 #include "Elastos.Droid.Net.h"
-//TODO #include "elastos/net/InetUnixAddress.h"
 #include "elastos/droid/server/am/NativeCrashListener.h"
 #include "elastos/droid/system/Os.h"
 #include "elastos/droid/system/OsConstants.h"
 #include "elastos/core/AutoLock.h"
+#include "Elastos.CoreLibrary.Net.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::App::CApplicationErrorReportCrashInfo;
 using Elastos::Droid::App::IApplicationErrorReportCrashInfo;
-//TODO using Elastos::Droid::System::CStructTimevalHelper;
+using Elastos::Droid::System::CStructTimevalHelper;
 using Elastos::Droid::System::IStructTimeval;
 using Elastos::Droid::System::IStructUcred;
 using Elastos::Droid::System::IStructTimevalHelper;
@@ -22,9 +22,9 @@ using Elastos::IO::IByteArrayOutputStream;
 using Elastos::IO::IFile;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IOutputStream;
-//TODO using Elastos::Net::CInetSocketAddress;
+using Elastos::Net::CInetSocketAddress;
 using Elastos::Net::IInetSocketAddress;
-//TODO using Elastos::Net::InetUnixAddress;
+using Elastos::Net::CInetUnixAddress;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -106,18 +106,19 @@ ECode NativeCrashListener::Run()
     //try {
         AutoPtr<IFileDescriptor> serverFd;
         System::Os::Socket(OsConstants::_AF_UNIX, OsConstants::_SOCK_STREAM, 0, (IFileDescriptor**)&serverFd);
-        //TODO AutoPtr<InetUnixAddress> sockAddr = new InetUnixAddress(DEBUGGERD_SOCKET_PATH);
-        //TODO System::Os::Bind(serverFd, sockAddr, 0);
+        AutoPtr<IInetAddress> sockAddr;
+        CInetUnixAddress::New(DEBUGGERD_SOCKET_PATH, (IInetAddress**)&sockAddr);
+        System::Os::Bind(serverFd, sockAddr, 0);
         System::Os::Listen(serverFd, 1);
 
         while (TRUE) {
-            //TODO AutoPtr<IInetSocketAddress> peer;//= new InetSocketAddress();
-            //TODO CInetSocketAddress::New((IInetSocketAddress**)&peer);
+            AutoPtr<IInetSocketAddress> peer;
+            CInetSocketAddress::New((IInetSocketAddress**)&peer);
             AutoPtr<IFileDescriptor> peerFd;
             //try {
                 if (MORE_DEBUG) Slogger::V(TAG, "Waiting for debuggerd connection");
-                //TODO System::Os::Accept(serverFd, peer, (IFileDescriptor**)&peerFd);
-                if (MORE_DEBUG) Slogger::V(TAG, "Got debuggerd socket ");//TODO + peerFd);
+                System::Os::Accept(serverFd, peer, (IFileDescriptor**)&peerFd);
+                if (MORE_DEBUG) Slogger::V(TAG, "Got debuggerd socket %s", TO_CSTR(peerFd));
                 if (peerFd != NULL) {
                     // Only the superuser is allowed to talk to us over this socket
                     AutoPtr<IStructUcred> credentials;
@@ -207,7 +208,7 @@ ECode NativeCrashListener::ConsumeNativeCrashData(
 
     //try {
         AutoPtr<IStructTimevalHelper> stHelper;
-        //TODO CStructTimevalHelper::AcquireSingleton((IStructTimevalHelper**)&stHelper);
+        CStructTimevalHelper::AcquireSingleton((IStructTimevalHelper**)&stHelper);
         AutoPtr<IStructTimeval> timeout;
         stHelper->FromMillis(SOCKET_TIMEOUT_MILLIS, (IStructTimeval**)&timeout);
         System::Os::SetsockoptTimeval(fd, OsConstants::_SOL_SOCKET, OsConstants::_SO_RCVTIMEO, timeout);

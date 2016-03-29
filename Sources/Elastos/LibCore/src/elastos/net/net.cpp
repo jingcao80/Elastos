@@ -1,5 +1,6 @@
 #include "CInet4Address.h"
 #include "CInet6Address.h"
+#include "CInetUnixAddress.h"
 #include "CDatagramSocket.h"
 #include "CPlainServerSocketImpl.h"
 #include "CPlainSocketImpl.h"
@@ -14,6 +15,8 @@ namespace Net {
 CAR_OBJECT_IMPL(CInet4Address)
 
 CAR_OBJECT_IMPL(CInet6Address)
+
+CAR_OBJECT_IMPL(CInetUnixAddress)
 
 CAR_OBJECT_IMPL(CDatagramSocket)
 

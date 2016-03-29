@@ -39,13 +39,10 @@ static void* SignalCatcherThreadStart(void* arg);
  */
 static Boolean SignalCatcherStartup()
 {
-    Logger::W(TAG, " === TODO SignalCatcherStartup");
-    // Create a raw pthread; its start routine will attach to the runtime.
-    // CHECK_PTHREAD_CALL(pthread_create, (&sSignalCatcherHandle, NULL, &Run, this), "signal catcher thread");
-    // if (!Elastos::Core::NativeCreateInternalThread(&sSignalCatcherHandle,
-    //     "signal catcher thread", SignalCatcherThreadStart, NULL)) {
-    //     return FALSE;
-    // }
+    if (!Elastos::Core::NativeCreateInternalThread(&sSignalCatcherHandle,
+        "signal catcher thread", SignalCatcherThreadStart, NULL)) {
+        return FALSE;
+    }
 
     return TRUE;
 }
@@ -66,6 +63,7 @@ static Boolean SignalCatcherStartup()
 static void HandleSigQuit()
 {
     //TOOD: not implemented
+    Logger::W(TAG, "HandleSigQuit is not implemented!");
 }
 
 /*
@@ -74,6 +72,7 @@ static void HandleSigQuit()
 static void HandleSigUsr1()
 {
     //TODO: not implemented
+    Logger::W(TAG, "HandleSigUsr1 is not implemented!");
 }
 
 /*

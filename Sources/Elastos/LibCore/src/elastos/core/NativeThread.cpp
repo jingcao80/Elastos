@@ -1268,7 +1268,7 @@ ECode NativeAttachCurrentThread(
      * provides values for priority and daemon (which are normally inherited
      * from the current thread).
      */
-    ec = CThread::NewByFriend(reinterpret_cast<ThreadGroup*>(args->mGroup),
+    ec = CThread::NewByFriend(reinterpret_cast<IThreadGroup*>(args->mGroup),
             threadNameStr, os_getThreadPriorityFromSystem(), isDaemon, (CThread**)&threadObj);
     if (FAILED(ec)) {
     //     LOGE("exception thrown while constructing attached thread object\n");

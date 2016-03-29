@@ -109,6 +109,10 @@ module
         interface IStructTimeval;
     }
 
+    singleton class CStructTimevalHelper {
+        interface IStructTimevalHelper;
+    }
+
     class CStructUcred {
         constructor(
             [in] Int32 pid,

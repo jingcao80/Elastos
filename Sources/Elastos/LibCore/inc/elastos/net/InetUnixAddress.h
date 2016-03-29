@@ -17,13 +17,13 @@ public:
     /**
      * Constructs an AF_UNIX InetAddress for the given path.
      */
-    InetUnixAddress(
+    CARAPI constructor(
         /* [in] */ const String& path);
 
     /**
      * Constructs an AF_UNIX InetAddress for the given path.
      */
-    InetUnixAddress(
+    CARAPI constructor(
         /* [in] */ ArrayOf<Byte> * path);
 
     /**

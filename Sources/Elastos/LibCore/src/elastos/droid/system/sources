@@ -23,6 +23,7 @@ SOURCES += CStructPollfd.cpp
 SOURCES += CStructStat.cpp
 SOURCES += CStructStatVfs.cpp
 SOURCES += CStructTimeval.cpp
+SOURCES += CStructTimevalHelper.cpp
 SOURCES += CStructUtsname.cpp
 SOURCES += CStructGroupSourceReq.cpp
 SOURCES += OsConstants.cpp

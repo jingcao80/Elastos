@@ -148,7 +148,7 @@ ECode Thread::constructor(
         // throw new InternalError("group not specified");
         return E_INTERNAL_ERROR;
     }
-
+    ALOGD("xihaoc Thread::constructor group = %p", group);
     mGroup = group;
 
     mTarget = NULL;
@@ -1031,7 +1031,7 @@ ECode Thread::Attach(
     // }
     AutoPtr<IThreadGroup> threadGroup = NativeGetMainThreadGroup();
     argsCopy.mName = name;
-    argsCopy.mGroup = reinterpret_cast<Int32>((ThreadGroup *)threadGroup.Get());
+    argsCopy.mGroup = reinterpret_cast<Int32>(threadGroup.Get());
     ECode ec = NativeAttachCurrentThread(&argsCopy, FALSE, thread);
 
     /* restore the count */

@@ -326,6 +326,24 @@ module
         interface IInet6AddressHelper;
     }
 
+    [deprecated]
+    class CInetUnixAddress {
+        /**
+         * Constructs an AF_UNIX InetAddress for the given path.
+         */
+        constructor(
+            [in] String path);
+
+        /**
+         * Constructs an AF_UNIX InetAddress for the given path.
+         */
+        constructor(
+            [in] ArrayOf<Byte>* bytesPath);
+
+        interface IInetAddress;
+        interface ISerializable;
+    }
+
     class CInetSocketAddress {
         /**
         * @hide internal use only

@@ -1,6 +1,6 @@
 #include "NetworkUtilities.h"
 #include "cutils/log.h"
-#include "net/InetUnixAddress.h"
+#include "net/CInetUnixAddress.h"
 #include "net/InetAddress.h"
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -10,7 +10,7 @@
 #include <sys/un.h>
 
 using Elastos::Net::InetAddress;
-using Elastos::Net::InetUnixAddress;
+using Elastos::Net::CInetUnixAddress;
 
 AutoPtr<IInetAddress> SockaddrToInetAddress(
     /* [in] */ const sockaddr_storage& ss,
@@ -71,7 +71,9 @@ AutoPtr<IInetAddress> SockaddrToInetAddress(
         // Note that we get here for AF_UNIX sockets on accept(2). The unix(7) man page claims
         // that the peer's sun_path will contain the path, but in practice it doesn't, and the
         // peer length is returned as 2 (meaning only the sun_family field was set).
-        return new InetUnixAddress(byteArray);
+        AutoPtr<IInetAddress> rst;
+        CInetUnixAddress::New(byteArray, (IInetAddress**)&rst);
+        return rst;
     }
 
     AutoPtr<IInetAddress> rst;
