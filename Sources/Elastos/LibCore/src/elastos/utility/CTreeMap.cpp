@@ -2880,9 +2880,22 @@ ECode CTreeMap::BoundedMap::GetNavigableKeySet(
 {
     VALIDATE_NOT_NULL(outnav)
 
-    AutoPtr<BoundedKeySet> result = mKeySet;
-    *outnav = result != NULL ? result : (mKeySet = new BoundedKeySet(this));
-    REFCOUNT_ADD(*outnav)
+    //Using IWeakReference to avoid treemap was released ahead of time.
+    if (mKeySet != NULL) {
+        AutoPtr<IInterface> result;
+        mKeySet->Resolve(EIID_INavigableSet, (IInterface**)&result);
+        if (result != NULL) {
+            *outnav = INavigableSet::Probe(result);
+            REFCOUNT_ADD(*outnav)
+            return NOERROR;
+        }
+    }
+
+    AutoPtr<BoundedKeySet> boukeyset = new BoundedKeySet(this);
+    mKeySet = NULL;
+    boukeyset->GetWeakReference((IWeakReference**)&mKeySet);
+    *outnav = (INavigableSet*)boukeyset.Get();
+    REFCOUNT_ADD(*outnav);
     return NOERROR;
 }
 
