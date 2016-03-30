@@ -1,0 +1,48 @@
+module
+{
+    interface Elastos.Droid.App.INotification;
+    interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+    namespace Cm {
+
+    interface ISpamFilterSpamContractPackageTable {
+        const String TABLE_NAME = "packages";
+        const String ID = "_id";
+        const String PACKAGE_NAME = "package_name";
+    }
+
+    interface ISpamFilterSpamContractNotificationTable {
+        const String TABLE_NAME = "notifications";
+        const String ID = "_id";
+        const String PACKAGE_ID = "package_id";
+        const String MESSAGE_TEXT = "message_text";
+        const String COUNT = "count";
+        const String LAST_BLOCKED = "last_blocked";
+        const String NORMALIZED_TEXT = "normalized_text";
+    }
+
+    interface ISpamFilter {
+        const String AUTHORITY = "com.cyanogenmod.spam";
+
+        GetUri(
+            [out] IUri** uri);
+
+        GetNormalizedContent(
+            [in] String msg,
+            [out] String* result);
+
+        GetNotificationContent(
+            [in] INotification* notification,
+            [out] String* result);
+    }
+
+    }//namespace Cm
+    }//namespace Utility
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

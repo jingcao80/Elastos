@@ -1,0 +1,69 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+    namespace Gesture {
+
+    interface IEdgeServiceConstants {
+        /**
+         * Mask for coding positions within the flags of
+         * {@code updateEdgeGestureActivationListener()}.
+         * <p>
+         * Positions are specified by {@code EdgeGesturePosition.FLAG}.
+         */
+        const Int32 POSITION_MASK = 0x0000001f;
+
+        /**
+         * Mask for coding sensitivity within the flags of
+         * {@code updateEdgeGestureActivationListener()}.
+         * <p>
+         * Sensitivity influences the speed of the swipe, the trigger area, and trigger distance that
+         * is needed to activate the edge gesture.
+         */
+        const Int32 SENSITIVITY_MASK = 0x70000000;
+
+        /**
+         * Number of bits to shift left, to get a integer within the {@link #SENSITIVITY_MASK}.
+         */
+        const Int32 SENSITIVITY_SHIFT = 28;
+
+        /**
+         * No sensitivity specified at all, the service may choose a sensitivity level on its own.
+         */
+        const Int32 SENSITIVITY_NONE = 0;
+
+        /**
+         * Default sensitivity, picked by the edge gesture service automatically.
+         */
+        const Int32 SENSITIVITY_DEFAULT = 2;
+
+        /**
+         * Lowest valid sensitivity value.
+         */
+        const Int32 SENSITIVITY_LOWEST = 1;
+
+        /**
+         * Highest sensitivity value.
+         */
+        const Int32 SENSITIVITY_HIGHEST = 4;
+
+        /**
+         * Do not cut 10% area on th edges
+         */
+        const Int32 UNRESTRICTED = 0x10;
+
+        /**
+         * This listener does not likes enabling/disabling filter
+         * because it interrupt in motion events.
+         */
+        const Int32 LONG_LIVING = 0x20;
+    }
+
+    }//namespace Gesture
+    }//namespace Utility
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

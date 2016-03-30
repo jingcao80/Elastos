@@ -1,5 +1,18 @@
 module
 {
+    merge("utility/cm/ActionUtils.car");
+    merge("utility/cm/CmImageUtils.car");
+    merge("utility/cm/LockscreenShortcutsHelper.car");
+    merge("utility/cm/NavigationRingConstants.car");
+    merge("utility/cm/PowerMenuConstants.car");
+    merge("utility/cm/QSConstants.car");
+    merge("utility/cm/QSUtils.car");
+    merge("utility/cm/ScreenType.car");
+    merge("utility/cm/SpamFilter.car");
+
+    merge("utility/gesture/EdgeGesturePosition.car");
+    merge("utility/gesture/EdgeServiceConstants.car");
+
     merge("utility/AsyncChannel.car");
     merge("utility/AsyncService.car");
     merge("utility/BitwiseInputStream.car");
@@ -31,6 +44,7 @@ module
     merge("utility/WithFramework.car");
     merge("utility/XmlUtils.car");
 
+    interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Utility.IPrinter;
     using interface Elastos.Core.IAppendable;
     using interface Elastos.Core.ICloneable;
@@ -45,6 +59,78 @@ module
     using interface Elastos.Utility.IHashMap;
     using interface Elastos.Utility.IMap;
     using interface Org.Xmlpull.V1.IXmlSerializer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+    namespace Cm {
+
+    singleton class CActionUtils {
+        interface IActionUtils;
+    }
+
+    singleton class CCmImageUtils {
+        interface ICmImageUtils;
+    }
+
+    class CLockscreenShortcutsHelper {
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] ILockscreenShortcutsHelperOnChangeListener* listener);
+
+        interface ILockscreenShortcutsHelper;
+    }
+
+    singleton class CPowerMenuConstants {
+        interface IPowerMenuConstants;
+    }
+
+    singleton class CQSConstants {
+        interface IQSConstants;
+    }
+
+    singleton class CQSUtils {
+        interface IQSUtils;
+    }
+
+    singleton class CScreenType {
+        interface IScreenType;
+    }
+
+    singleton class CSpamFilter {
+        interface ISpamFilter;
+    }
+
+    } //namespace Cm
+    } // namespace Utility
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+    namespace Gesture {
+
+    class CEdgeGesturePosition {
+        constructor();
+
+        constructor(
+            [in] Int32 index,
+            [in] Int32 factor);
+
+        interface IEdgeGesturePosition;
+    }
+
+    } //namespace Gesture
+    } // namespace Utility
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
 
     namespace Elastos {
     namespace Droid {

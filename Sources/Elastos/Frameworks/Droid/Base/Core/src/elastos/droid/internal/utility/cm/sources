@@ -1,0 +1,24 @@
+TARGET_NAME = cm
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = ActionUtils.cpp
+SOURCES += CActionUtils.cpp
+SOURCES += CmImageUtils.cpp
+SOURCES += CCmImageUtils.cpp
+SOURCES += CLockscreenShortcutsHelper.cpp
+SOURCES += PowerMenuConstants.cpp
+SOURCES += CPowerMenuConstants.cpp
+SOURCES += CQSConstants.cpp
+SOURCES += QSUtils.cpp
+SOURCES += CQSUtils.cpp
+SOURCES += ScreenType.cpp
+SOURCES += CScreenType.cpp
+SOURCES += SpamFilter.cpp
+SOURCES += CSpamFilter.cpp

@@ -1,0 +1,58 @@
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+    namespace Cm {
+
+    interface IQSUtils {
+        GetAvailableTiles(
+            [in] IContext* context,
+            [out] IList** result);
+
+        GetDefaultTiles(
+            [in] IContext* context,
+            [out] IList** result);
+
+        GetDefaultTilesAsString(
+            [in] IContext* context,
+            [out] String* result);
+
+        DeviceSupportsLte(
+            [in] IContext* ctx,
+            [out] Boolean* result);
+
+        DeviceSupportsDdsSupported(
+            [in] IContext* context,
+            [out] Boolean* result);
+
+        DeviceSupportsMobileData(
+            [in] IContext* ctx,
+            [out] Boolean* result);
+
+        DeviceSupportsBluetooth(
+            [out] Boolean* result);
+
+        DeviceSupportsNfc(
+            [in] IContext* context,
+            [out] Boolean* result);
+
+        DeviceSupportsFlashLight(
+            [in] IContext* context,
+            [out] Boolean* result);
+
+        DeviceSupportsCompass(
+            [in] IContext* context,
+            [out] Boolean* result);
+    }
+
+    }//namespace Cm
+    }//namespace Utility
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}
