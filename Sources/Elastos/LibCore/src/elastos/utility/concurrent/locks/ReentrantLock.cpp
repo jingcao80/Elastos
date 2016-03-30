@@ -3,6 +3,8 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "ReentrantLock.h"
 #include "Thread.h"
+//#include <elastos/utility/logging/Slogger.h>
+//using Elastos::Utility::Logging::Slogger;
 
 using Elastos::Core::Thread;
 using Elastos::IO::EIID_ISerializable;
@@ -166,12 +168,10 @@ ECode ReentrantLock::constructor(
     /* [in] */ Boolean fair)
 {
     if (fair) {
-        AutoPtr<FairSync> fs = new FairSync();
-//        mSync = fs->Probe(EIID_Sync);
+        mSync = new FairSync();
     }
     else {
-        AutoPtr<NonfairSync> fs = new NonfairSync();
-//        mSync = fs->Probe(EIID_Sync);
+        mSync = new NonfairSync();
     }
     return NOERROR;
 }

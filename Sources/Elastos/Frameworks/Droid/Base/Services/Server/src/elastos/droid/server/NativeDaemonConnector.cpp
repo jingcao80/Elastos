@@ -1,5 +1,6 @@
 
 #include "elastos/droid/server/NativeDaemonConnector.h"
+#include "elastos/droid/server/FgThread.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/Build.h"
@@ -223,12 +224,17 @@ NativeDaemonConnector::NativeDaemonConnector(
     , mCallbacks(callbacks)
 {
     mResponseQueue = new ResponseQueue(responseQueueSize);
+    mWakeLock = wl;
     if (mWakeLock != NULL) {
         mWakeLock->SetReferenceCounted(TRUE);
     }
+
+    AutoPtr<FgThread> fgThread = FgThread::Get();
+    fgThread->GetLooper((ILooper**)&mLooper);
     CAtomicInteger32::New(0, (IAtomicInteger32**)&mSequenceNumber);
     TAG = logTag != NULL ? logTag : String("NativeDaemonConnector");
     // mLocalLog = new LocalLog(maxLogSize);
+
 }
 
 NativeDaemonConnector::NativeDaemonConnector(
@@ -384,9 +390,11 @@ ECode NativeDaemonConnector::ListenToSocket()
                 AutoPtr<NativeDaemonEvent> event;
                 ec = NativeDaemonEvent::ParseRawEvent(rawEvent, (NativeDaemonEvent**)&event);
                 if (FAILED(ec)) {
+                    if (LOGD) Slogger::D(TAG, "ListenToSocket line:%d", __LINE__);
                     goto _EXIT_;
                 }
                 if (event->IsClassUnsolicited()) {
+                    if (LOGD) Slogger::D(TAG, "ListenToSocket line:%d", __LINE__);
                     // TODO: migrate to sending NativeDaemonEvent instances
                     Int32 code = event->GetCode();
                     mCallbacks->OnCheckHoldWakeLock(code, &bval);
@@ -404,6 +412,7 @@ ECode NativeDaemonConnector::ListenToSocket()
                     }
                 }
                 else {
+                    if (LOGD) Slogger::D(TAG, "add receive event to responseQueue ListenToSocket line:%d", __LINE__);
                     mResponseQueue->Add(event->GetCmdNumber(), event);
                 }
 //                } catch (IllegalArgumentException e) {
@@ -420,11 +429,9 @@ ECode NativeDaemonConnector::ListenToSocket()
         }
 
         if (start == 0) {
-            if (LOGD) {
 //                const String rawEvent = new String(buffer, start, count, Charsets.UTF_8);
-                String rawEvent((char*)buffer->GetPayload() + start, count);
-                Slogger::D(TAG, "RCV incomplete <- {%s}", rawEvent.string());
-            }
+            String rawEvent((char*)buffer->GetPayload() + start, count);
+            if (LOGD) Slogger::D(TAG, "RCV incomplete <- {%s}", rawEvent.string());
         }
 
         // We should end at the amount we read. If not, compact then
@@ -564,7 +571,7 @@ ECode NativeDaemonConnector::Execute(
     AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
     AutoPtr<ICharSequence> seq;
     CString::New(arg, (ICharSequence**)&seq);
-    args->Set(0, seq->Probe(EIID_IInterface));
+    args->Set(0, TO_IINTERFACE(seq));
     return Execute(cmd, args, event);
 }
 
@@ -647,7 +654,14 @@ ECode NativeDaemonConnector::Execute(
             return E_NATIVE_DAEMON_CONNECTOR_EXCEPTION;
         }
         else {
-            AutoPtr<ArrayOf<Byte> > bytes = rawCmd.GetBytes();
+            AutoPtr<ArrayOf<Byte> > bytes_without_end = rawCmd.GetBytes();
+            Int32 length = bytes_without_end->GetLength() + 1;
+            AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(length);
+            for (Int32 i = 0; i < length - 1; ++i) {
+                    (*bytes)[i] = (*bytes_without_end)[i];
+            }
+            (*bytes)[length-1] = (Byte)('\0');
+
             ECode ec = mOutputStream->Write(bytes);
             if (FAILED(ec)) {
                 *eventsArray = ArrayOf<NativeDaemonEvent*>::Alloc(0);
@@ -667,7 +681,7 @@ ECode NativeDaemonConnector::Execute(
             Slogger::E(TAG, "timed-out waiting for response to %s.", logCmd.string());
             return E_NATIVE_DAEMON_CONNECTOR_EXCEPTION;
         }
-//      if (VDBG) log("RMV <- {" + event + "}");
+        if (VDBG) Slogger::D("RMV <- {%s}", event->GetMessage().string());
         events.PushBack(event);
     } while (event->IsClassContinue());
 

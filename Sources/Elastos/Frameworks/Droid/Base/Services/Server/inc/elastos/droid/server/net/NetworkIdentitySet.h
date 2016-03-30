@@ -24,7 +24,7 @@ namespace Net {
  * @hide
  */
 class NetworkIdentitySet
-    : public HashSet
+    : public Elastos::Utility::HashSet
 {
 public:
     CARAPI constructor();

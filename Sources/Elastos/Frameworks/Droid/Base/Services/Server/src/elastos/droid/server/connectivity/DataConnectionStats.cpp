@@ -1,10 +1,11 @@
-
 #include <Elastos.Droid.Net.h>
 #include "elastos/droid/server/connectivity/DataConnectionStats.h"
+#include "elastos/droid/server/am/CBatteryStatsService.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Telephony::EIID_IPhoneStateListener;
+using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_UNKNOWN;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_ABSENT;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PIN_REQUIRED;
@@ -14,6 +15,7 @@ using Elastos::Droid::Internal::Telephony::IccCardConstantsState_READY;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_NOT_READY;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PERM_DISABLED;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_CARD_IO_ERROR;
+using Elastos::Droid::Server::Am::CBatteryStatsService;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -73,12 +75,11 @@ DataConnectionStats::DataConnectionStats(
     /* [in] */ IContext* context)
 {
     mSimState = IccCardConstantsState_READY;
-    assert(0 && "TODO");
-    // mDataState = ITelephonyManager::DATA_DISCONNECTED;
+    mDataState = ITelephonyManager::DATA_DISCONNECTED;
     mPhoneStateListener = (IPhoneStateListener*)new MyPhoneStateListener(this);
 
     mContext = context;
-    // mBatteryStats = CBatteryStatsService::GetService();
+    mBatteryStats = CBatteryStatsService::GetService();
 }
 
 ECode DataConnectionStats::StartMonitoring()
@@ -86,11 +87,16 @@ ECode DataConnectionStats::StartMonitoring()
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
     AutoPtr<ITelephonyManager> phone = ITelephonyManager::Probe(obj);
-    phone->Listen(mPhoneStateListener,
-        IPhoneStateListener::LISTEN_SERVICE_STATE
-        | IPhoneStateListener::LISTEN_SIGNAL_STRENGTHS
-        | IPhoneStateListener::LISTEN_DATA_CONNECTION_STATE
-        | IPhoneStateListener::LISTEN_DATA_ACTIVITY);
+    if (phone != NULL) {
+        phone->Listen(mPhoneStateListener,
+                IPhoneStateListener::LISTEN_SERVICE_STATE
+                | IPhoneStateListener::LISTEN_SIGNAL_STRENGTHS
+                | IPhoneStateListener::LISTEN_DATA_CONNECTION_STATE
+                | IPhoneStateListener::LISTEN_DATA_ACTIVITY);
+    } else {
+        Logger::E(TAG, "TELEPHONY_SERVICE is not ok");
+        return E_NOT_IMPLEMENTED;
+    }
 
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);

@@ -130,7 +130,7 @@ using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::KeyStore::Security::ICredentials;
 using Elastos::Droid::KeyStore::Security::IKeyStoreHelper;
-// using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
+//TODO using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
 using Elastos::Droid::Server::Connectivity::CNat464Xlat;
 using Elastos::Droid::Server::Connectivity::NetworkAgentInfo;
 using Elastos::Droid::Server::Connectivity::NetworkMonitor;
@@ -255,7 +255,7 @@ static Boolean IsNetworkTypeValid(
 //==============================================================================
 // CConnectivityService::LegacyTypeTracker
 //==============================================================================
-const Boolean CConnectivityService::LegacyTypeTracker::DBG = TRUE;
+const Boolean CConnectivityService::LegacyTypeTracker::DBG = FALSE;
 const Boolean CConnectivityService::LegacyTypeTracker::VDBG = FALSE;
 const String CConnectivityService::LegacyTypeTracker::TAG("CConnectivityService::LegacyTypeTracker");
 
@@ -1170,10 +1170,9 @@ ECode CConnectivityService::constructor(
     assert(mNetd != NULL);
     mPolicyManager = policyManager;
     assert(mPolicyManager != NULL);
-    assert(0 && "TODO");
     AutoPtr<IKeyStoreHelper> ksHelper;
-    // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&ksHelper);
-    ksHelper->GetInstance((IKeyStore**)&mKeyStore);
+    //TODO CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&ksHelper);
+    //TODO ksHelper->GetInstance((IKeyStore**)&mKeyStore);
     AutoPtr<IInterface> service;
     mContext->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&service);
     mTelephonyManager = ITelephonyManager::Probe(service);

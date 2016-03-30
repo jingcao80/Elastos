@@ -60,6 +60,7 @@ class CNetworkPolicyManagerServiceAlertObserber;
 
 CarClass(CNetworkPolicyManagerService)
     , public Object
+    , public IBinder
     , public IINetworkPolicyManager
 {
     friend class CProcessObserver;
@@ -597,6 +598,13 @@ public:
      * Try refreshing {@link #mTime} when stale.
      */
     CARAPI_(void) MaybeRefreshTrustedTime();
+
+    CARAPI ToString(
+        /* [out] */ String* info)
+    {
+        VALIDATE_NOT_NULL(info)
+        return Object::ToString(info);
+    }
 
 protected:
     CARAPI_(void) Dump(

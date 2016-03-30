@@ -5,7 +5,7 @@
 #include <elastos/droid/ext/frameworkext.h>
 #define HASH_FOR_OS
 #include <elastos/droid/ext/frameworkhash.h>
-// #include "elastos/droid/server/NativeDaemonConnector.h"
+#include "elastos/droid/server/NativeDaemonConnector.h"
 #include <Elastos.Droid.Utility.h>
 #include <elastos/droid/R.h>
 #include <elastos/droid/database/ContentObserver.h>
@@ -40,7 +40,6 @@ using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::R;
 using Elastos::Droid::Server::INativeDaemonConnectorCallbacks;
-// using Elastos::Droid::Server::NativeDaemonConnector;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Utility::Concurrent::ICountDownLatch;
 using Elastos::Utility::Etl::HashMap;
@@ -417,8 +416,7 @@ private:
     Int32 INVALID_ID;
     Int32 mUniqueId;
 
-    // TODO: Waiting for NativeDaemonConnector
-    // AutoPtr<NativeDaemonConnector> mNativeConnector;
+    AutoPtr<NativeDaemonConnector> mNativeConnector;
     AutoPtr<ICountDownLatch> mNativeDaemonConnected;
 };
 
