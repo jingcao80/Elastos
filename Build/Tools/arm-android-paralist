@@ -191,6 +191,8 @@
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/statusbar
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/transition
+- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/utility/cm
+- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/utility/gesture
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/utility
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/view/menu
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/view

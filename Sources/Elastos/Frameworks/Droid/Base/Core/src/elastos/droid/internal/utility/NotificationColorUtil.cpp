@@ -53,7 +53,7 @@ NotificationColorUtil::NotificationColorUtil(
     context->GetResources((IResources**)&resources);
     resources->GetDimensionPixelSize(
         R::dimen::notification_large_icon_width, &mGrayscaleIconMaxSize);
-    mImageUtils = new ImageUtils();
+    mImageUtils = new Elastos::Droid::Internal::Utility::ImageUtils();
     CWeakHashMap::New((IWeakHashMap**)&mGrayscaleBitmapCache);
 }
 

@@ -88,7 +88,7 @@ private:
 
     static AutoPtr<INotificationColorUtil> sInstance;
 
-    AutoPtr<ImageUtils> mImageUtils;
+    AutoPtr<Elastos::Droid::Internal::Utility::ImageUtils> mImageUtils;
     AutoPtr<IWeakHashMap> mGrayscaleBitmapCache; //WeakHashMap<Bitmap, Pair<Boolean, Integer>>
 
     Int32 mGrayscaleIconMaxSize; // @dimen/notification_large_icon_width (64dp)

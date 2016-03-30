@@ -1,0 +1,59 @@
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Utility.IArrayList;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+    namespace Cm {
+
+    interface ILockscreenShortcutsHelperShortcuts {
+        GetIndex(
+            [out] Int32* result);
+    }
+
+    interface ILockscreenShortcutsHelperOnChangeListener {
+        OnChange();
+    }
+
+    interface ILockscreenShortcutsHelper {
+        const String DEFAULT = "default";
+        const String NONE = "none";
+
+        GetDrawablesForTargets(
+            [out] IList** result);
+
+        GetDrawableFromSystemUI(
+            [in] String name,
+            [out] IDrawable** result);
+
+        GetFriendlyNameForUri(
+            [in] ILockscreenShortcutsHelperShortcuts* shortcut,
+            [out] String* result);
+
+        IsTargetCustom(
+            [in] ILockscreenShortcutsHelperShortcuts* shortcut,
+            [out] Boolean* result);
+
+        IsTargetEmpty(
+            [in] ILockscreenShortcutsHelperShortcuts* shortcut,
+            [out] Boolean* result);
+
+        GetIntent(
+            [in] ILockscreenShortcutsHelperShortcuts* shortcut,
+            [out] IIntent** result);
+
+        SaveTargets(
+            [in] IArrayList* targets);
+    }
+
+    }//namespace Cm
+    }//namespace Utility
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

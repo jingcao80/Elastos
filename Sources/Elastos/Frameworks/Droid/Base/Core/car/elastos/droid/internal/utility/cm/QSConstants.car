@@ -1,0 +1,43 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+    namespace Cm {
+
+    interface IQSConstants {
+        const String TILE_WIFI = "wifi";
+        const String TILE_BLUETOOTH = "bt";
+        const String TILE_INVERSION = "inversion";
+        const String TILE_CELLULAR = "cell";
+        const String TILE_AIRPLANE = "airplane";
+        const String TILE_ROTATION = "rotation";
+        const String TILE_FLASHLIGHT = "flashlight";
+        const String TILE_LOCATION = "location";
+        const String TILE_CAST = "cast";
+        const String TILE_HOTSPOT = "hotspot";
+        const String TILE_NOTIFICATIONS = "notifications";
+        const String TILE_DATA = "data";
+        const String TILE_ROAMING = "roaming";
+        const String TILE_DDS = "dds";
+        const String TILE_APN = "apn";
+        const String TILE_PROFILES = "profiles";
+        const String TILE_PERFORMANCE = "performance";
+        const String TILE_ADB_NETWORK = "adb_network";
+        const String TILE_NFC = "nfc";
+        const String TILE_COMPASS = "compass";
+        const String TILE_LOCKSCREEN = "lockscreen";
+        const String TILE_LTE = "lte";
+        const String TILE_VISUALIZER = "visualizer";
+        const String TILE_SCREEN_TIMEOUT = "screen_timeout";
+        const String TILE_LIVE_DISPLAY = "live_display";
+        const String TILE_USB_TETHER = "usb_tether";
+    }
+
+    }//namespace Cm
+    }//namespace Utility
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

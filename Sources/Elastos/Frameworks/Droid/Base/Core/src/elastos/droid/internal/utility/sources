@@ -44,3 +44,6 @@ SOURCES += TypedProperties.cpp
 SOURCES += UserIcons.cpp
 SOURCES += XmlUtils.cpp
 SOURCES += Utility.cpp
+
+ELASTOS_LIBS += cm/cm.lib
+ELASTOS_LIBS += gesture/gesture.lib

@@ -1,0 +1,76 @@
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Graphics.IPoint;
+    using interface Elastos.IO.IInputStream;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+    namespace Cm {
+
+    interface ICmImageUtils {
+        /**
+         * Gets the Width and Height of the image
+         *
+         * @param inputStream The input stream of the image
+         *
+         * @return A point structure that holds the Width and Height (x and y)/*"
+         */
+        GetImageDimension(
+            [in] IInputStream* inputStream,
+            [out] IPoint** result);
+
+        /**
+         * Crops the input image and returns a new InputStream of the cropped area
+         *
+         * @param inputStream The input stream of the image
+         * @param imageWidth Width of the input image
+         * @param imageHeight Height of the input image
+         * @param inputStream Desired Width
+         * @param inputStream Desired Width
+         *
+         * @return a new InputStream of the cropped area/*"
+         */
+        CropImage(
+            [in] IInputStream* inputStream,
+            [in] Int32 imageWidth,
+            [in] Int32 imageHeight,
+            [in] Int32 outWidth,
+            [in] Int32 outHeight,
+            [out] IInputStream** result);
+
+        /**
+         * Crops the lock screen image and returns a new InputStream of the cropped area
+         *
+         * @param pkgName Name of the theme package
+         * @param context The context
+         *
+         * @return a new InputStream of the cropped image/*"
+         */
+        GetCroppedKeyguardStream(
+            [in] String pkgName,
+            [in] IContext* context,
+            [out] IInputStream** result);
+
+        /**
+         * Crops the wallpaper image and returns a new InputStream of the cropped area
+         *
+         * @param pkgName Name of the theme package
+         * @param context The context
+         *
+         * @return a new InputStream of the cropped image/*"
+         */
+        GetCroppedWallpaperStream(
+            [in] String pkgName,
+            [in] IContext* context,
+            [out] IInputStream** result);
+    }
+
+    }//namespace Cm
+    }//namespace Utility
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}

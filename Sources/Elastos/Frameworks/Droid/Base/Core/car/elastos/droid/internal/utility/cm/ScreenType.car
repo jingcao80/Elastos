@@ -1,0 +1,30 @@
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Utility {
+    namespace Cm {
+
+    interface IScreenType {
+        IsPhone(
+            [in] IContext* context,
+            [out] Boolean* result);
+
+        IsHybrid(
+            [in] IContext* context,
+            [out] Boolean* result);
+
+        IsTablet(
+            [in] IContext* context,
+            [out] Boolean* result);
+    }
+
+    }//namespace Cm
+    }//namespace Utility
+    }//namespace Internal
+    }//namespace Droid
+    }//namespace Elastos
+}
