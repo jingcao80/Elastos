@@ -60,94 +60,27 @@ ECode CURL::constructor(
     /* [in] */ const String& spec,
     /* [in] */ IURLStreamHandler* handler)
 {
+    if (spec.IsNull()) {
+        return E_MALFORMED_URL_EXCEPTION;
+    }
     if (handler != NULL) {
-//        SecurityManager sm = System.getSecurityManager();
-//        if (sm != null) {
-//            sm.checkPermission(specifyStreamHandlerPermission);
-//        }
         mStreamHandler = handler;
     }
 
-    if (spec.IsNull()) {
-//        throw new MalformedURLException();
-        return E_MALFORMED_URL_EXCEPTION;
-    }
-    String temp = spec.Trim();
+    String spectemp = spec.Trim();
 
-    // The spec includes a protocol if it includes a colon character
-    // before the first occurrence of a slash character. Note that,
-    // "protocol" is the field which holds this URLs protocol.
-//    try {
-    Int32 index = temp.IndexOf(':');
-//    } catch (NullPointerException e) {
-//        throw new MalformedURLException(e.toString());
-//    }
-    Int32 startIPv6Addr = temp.IndexOf('[');
-    if (index >= 0) {
-        if ((startIPv6Addr == -1) || (index < startIPv6Addr)) {
-            mProtocol = temp.Substring(0, index).ToLowerCase();
-            // According to RFC 2396 scheme part should match
-            // the following expression:
-            // alpha *( alpha | digit | "+" | "-" | "." )
-            Char32 c = mProtocol.GetChar(0);
-            Boolean valid = ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
-            AutoPtr<ArrayOf<Char32> > charArray = mProtocol.GetChars();
-            for (Int32 i = 1; valid && (i < charArray->GetLength()); i++) {
-                c = (*charArray)[i];
-                valid = ('a' <= c && c <= 'z') ||
-                        ('A' <= c && c <= 'Z') ||
-                        ('0' <= c && c <= '9') ||
-                        (c == '+') ||
-                        (c == '-') ||
-                        (c == '.');
-            }
-            if (!valid) {
-                mProtocol = NULL;
-                index = -1;
-            }
-            else {
-                // Ignore case in protocol names.
-                // Scheme is defined by ASCII characters.
-//                protocol = Util.toASCIILowerCase(protocol);
-            }
-        }
+    mProtocol = UrlUtils::GetSchemePrefix(spectemp);
+    Int32 schemeSpecificPartStart = !mProtocol.IsNull() ? (mProtocol.GetLength() + 1) : 0;
+
+    String s;
+    // If the context URL has a different protocol, discard it because we can't use it.
+    if (!mProtocol.IsNull() && context != NULL && (context->GetProtocol(&s), mProtocol.Equals(s))) {
+        context = NULL;
     }
 
-    if (!mProtocol.IsNull()) {
-        // If the context was specified, and it had the same protocol
-        // as the spec, then fill in the receiver's slots from the values
-        // in the context but still allow them to be over-ridden later
-        // by the values in the spec.
-        String s;
-        if (context != NULL && (context->GetProtocol(&s), mProtocol.Equals(s))) {
-            String cPath;
-            context->GetPath(&cPath);
-            if (!cPath.IsNull() && cPath.StartWith("/")) {
-                String hostName, authority, userInfo, query;
-                Int32 port;
-                context->GetHost(&hostName);
-                context->GetPort(&port);
-                context->GetAuthority(&authority);
-                context->GetUserInfo(&userInfo);
-                context->GetQuery(&query);
-                Set(mProtocol, hostName, port, authority,
-                        userInfo, cPath, query, String(NULL));
-            }
-            if (mStreamHandler == NULL) {
-                mStreamHandler = ((CURL*)context)->mStreamHandler;
-            }
-        }
-    }
-    else {
-        // If the spec did not include a protocol, then the context
-        // *must* be specified. Fill in the receiver's slots from the
-        // values in the context, but still allow them to be over-ridden
-        // by the values in the ("relative") spec.
-        if (context == NULL) {
-//            throw new MalformedURLException("Protocol not found: " + spec);
-            return E_MALFORMED_URL_EXCEPTION;
-        }
-        String protocol, hostName, authority, userInfo, path, query;
+    // Inherit from the context URL if it exists.
+    if (context != NULL) {
+        String protocol, hostName, authority, userInfo, path, query, ref;
         Int32 port;
         context->GetProtocol(&protocol);
         context->GetHost(&hostName);
@@ -156,42 +89,26 @@ ECode CURL::constructor(
         context->GetUserInfo(&userInfo);
         context->GetPath(&path);
         context->GetQuery(&query);
-        Set(protocol, hostName, port, authority, userInfo,
-                path, query, String(NULL));
+        context->GetRef(&ref);
+        Set(protocol, hostName, port, authority, userInfo, path, query, ref);
+
         if (mStreamHandler == NULL) {
             mStreamHandler = ((CURL*)context)->mStreamHandler;
         }
+    } else if (mProtocol.IsNull()) {
+        return E_MALFORMED_URL_EXCEPTION;
     }
 
-    // If the stream handler has not been determined, set it
-    // to the default for the specified protocol.
     if (mStreamHandler == NULL) {
         SetupStreamHandler();
         if (mStreamHandler == NULL) {
-//            throw new MalformedURLException("Unknown protocol: " + protocol);
             return E_MALFORMED_URL_EXCEPTION;
         }
     }
 
-    // Let the handler parse the URL. If the handler throws
-    // any exception, throw MalformedURLException instead.
-    //
-    // Note: We want "index" to be the index of the start of the scheme
-    // specific part of the URL. At this point, it will be either
-    // -1 or the index of the colon after the protocol, so we
-    // increment it to point at either character 0 or the character
-    // after the colon.
-//    try {
-    ECode ec = mStreamHandler->ParseURL(this, temp, ++index, temp.GetLength());
+    // Parse the URL. If the handler throws any exception, throw MalformedURLException instead.
+    ECode ec = mStreamHandler->ParseURL(this, spectemp, schemeSpecificPartStart, spectemp.GetLength());
     if (FAILED(ec)) {
-        return E_MALFORMED_URL_EXCEPTION;
-    }
-//    } catch (Exception e) {
-//        throw new MalformedURLException(e.toString());
-//    }
-
-    if (mPort < -1) {
-//        throw new MalformedURLException("Port out of range: " + port);
         return E_MALFORMED_URL_EXCEPTION;
     }
 
