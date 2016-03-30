@@ -225,7 +225,7 @@ ECode ServerSocket::ImplAccept(
     /* [in] */ ISocket* aSocket)
 {
     AutoLock lock(this);
-    mImpl->Accept(((CSocket*)aSocket)->mImpl);
+    FAIL_RETURN(mImpl->Accept(((CSocket*)aSocket)->mImpl));
     ((CSocket*)aSocket)->Accepted();
 
     return NOERROR;
