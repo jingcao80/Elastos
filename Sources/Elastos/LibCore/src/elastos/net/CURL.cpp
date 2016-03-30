@@ -8,6 +8,7 @@
 #include "CJarHandler.h"
 #include "CFileHandler.h"
 #include "CFtpHandler.h"
+#include "UrlUtils.h"
 
 using Elastos::IO::EIID_ISerializable;
 using Elastos::Core::EIID_IComparable;
@@ -23,6 +24,7 @@ using Libcore::Net::Url::IFileHandler;
 using Libcore::Net::Url::CFileHandler;
 using Libcore::Net::Url::IFtpHandler;
 using Libcore::Net::Url::CFtpHandler;
+using Libcore::Net::Url::UrlUtils;
 
 namespace Elastos {
 namespace Net {
@@ -83,7 +85,7 @@ ECode CURL::constructor(
     Int32 startIPv6Addr = temp.IndexOf('[');
     if (index >= 0) {
         if ((startIPv6Addr == -1) || (index < startIPv6Addr)) {
-            mProtocol = temp.Substring(0, index);
+            mProtocol = temp.Substring(0, index).ToLowerCase();
             // According to RFC 2396 scheme part should match
             // the following expression:
             // alpha *( alpha | digit | "+" | "-" | "." )
@@ -240,16 +242,18 @@ ECode CURL::constructor(
     mHost = hostNew;
     mPort = port;
 
+    String fileNew = UrlUtils::AuthoritySafePath(host, file);
+
     // Set the fields from the arguments. Handle the case where the
     // passed in "file" includes both a file and a reference part.
     Int32 index = -1;
-    index = file.IndexOf("#", file.LastIndexOf("/"));
+    index = fileNew.IndexOf("#");
     if (index >= 0) {
-        mFile = file.Substring(0, index);
-        mRef = file.Substring(index + 1);
+        mFile = fileNew.Substring(0, index);
+        mRef = fileNew.Substring(index + 1);
     }
     else {
-        mFile = file;
+        mFile = fileNew;
     }
     FixURL(FALSE);
 

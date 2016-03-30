@@ -44,7 +44,7 @@ ECode Socket::constructor()
         sFactory->CreateSocketImpl((ISocketImpl**)&mImpl);
     }
     else {
-        CPlainSocketImpl::New((IPlainSocketImpl**)&mImpl);
+        CPlainSocketImpl::New((ISocketImpl**)&mImpl);
     }
     mProxy = NULL;
 

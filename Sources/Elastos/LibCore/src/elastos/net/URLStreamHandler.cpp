@@ -212,7 +212,7 @@ ECode URLStreamHandler::ToExternalForm(
     answer.AppendChar(':');
     String authority;
     url->GetAuthority(&authority);
-    if (!authority.IsNullOrEmpty()) {
+    if (!authority.IsNull()) {
         answer += "//";
         if(escapeIllegalCharacters) {
             CURI::AUTHORITY_ENCODER->AppendPartiallyEncoded(answer, authority);
