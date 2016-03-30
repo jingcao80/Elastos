@@ -91,15 +91,19 @@ ECode CAccount::Equals(
     /* [out] */ Boolean *equal)
 {
     VALIDATE_NOT_NULL(equal)
-    if (TO_IINTERFACE(this) == obj) {
+    *equal = FALSE;
+
+    IAccount* otherObj = IAccount::Probe(obj);
+    if (NULL == otherObj) {
+        return NOERROR;
+    }
+
+    if ((IAccount*)this == otherObj) {
         *equal = TRUE;
         return NOERROR;
     }
-    if (!IAccount::Probe(obj)) {
-        *equal = FALSE;
-        return NOERROR;
-    }
-    const AutoPtr<CAccount> other = (CAccount*)IAccount::Probe(obj);
+
+    CAccount* other = (CAccount*)otherObj;
     *equal = mName.Equals(other->mName) && mType.Equals(other->mType);
     return NOERROR;
 }

@@ -1118,13 +1118,19 @@ AlarmManagerService::QuickBootReceiver::QuickBootReceiver(
     /* [in] */ AlarmManagerService* host)
     : mHost(host)
 {
+}
+
+ECode AlarmManagerService::QuickBootReceiver::constructor()
+{
+    BroadcastReceiver::constructor();
+
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(ACTION_APP_KILL);
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
     AutoPtr<IIntent> intent;
-    context->RegisterReceiver(this, filter, String("android.permission.DEVICE_POWER"), NULL, (IIntent**)&intent);
+    return context->RegisterReceiver(this, filter, String("android.permission.DEVICE_POWER"), NULL, (IIntent**)&intent);
 }
 
 ECode AlarmManagerService::QuickBootReceiver::OnReceive(
@@ -1172,6 +1178,8 @@ AlarmManagerService::ClockReceiver::ClockReceiver(
 
 ECode AlarmManagerService::ClockReceiver::constructor()
 {
+    BroadcastReceiver::constructor();
+
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IIntent::ACTION_TIME_TICK);
@@ -1279,6 +1287,8 @@ AlarmManagerService::InteractiveStateReceiver::InteractiveStateReceiver(
 
 ECode AlarmManagerService::InteractiveStateReceiver::constructor()
 {
+    BroadcastReceiver::constructor();
+
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IIntent::ACTION_SCREEN_OFF);
@@ -1314,6 +1324,8 @@ AlarmManagerService::UninstallReceiver::UninstallReceiver(
 
 ECode AlarmManagerService::UninstallReceiver::constructor()
 {
+    BroadcastReceiver::constructor();
+
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IIntent::ACTION_PACKAGE_REMOVED);
@@ -1990,6 +2002,10 @@ ECode AlarmManagerService::OnStart()
         IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT, UserHandle::ALL,
         (IPendingIntent**)&mTimeTickSender);
 
+    AutoPtr<IInterface> ops;
+    context->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&ops);
+    mAppOps = IAppOpsManager::Probe(ops);
+
     // now that we have initied the driver schedule the alarm
     mClockReceiver = new ClockReceiver(this);
     FAIL_RETURN(mClockReceiver->constructor())
@@ -2010,10 +2026,6 @@ ECode AlarmManagerService::OnStart()
     else {
         Slogger::W(TAG, "Failed to open alarm driver. Falling back to a handler.");
     }
-
-    AutoPtr<IInterface> ops;
-    context->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&ops);
-    mAppOps = IAppOpsManager::Probe(ops);
 
     PublishBinderService(IContext::ALARM_SERVICE, mService);
     return NOERROR;
@@ -2144,21 +2156,20 @@ ECode AlarmManagerService::SetImpl(
     operation->GetCreatorUid(&id);
     String pakName;
     operation->GetCreatorPackage(&pakName);
-    Int32 cop = 0;
-    mAppOps->CheckOpNoThrow(IAppOpsManager::OP_ALARM_WAKEUP, id, pakName, &cop);
     if (id >= IProcess::FIRST_APPLICATION_UID &&
-        (type == IAlarmManager::RTC_WAKEUP
-            || type == IAlarmManager::ELAPSED_REALTIME_WAKEUP)
-        && cop != IAppOpsManager::MODE_ALLOWED) {
+        (type == IAlarmManager::RTC_WAKEUP || type == IAlarmManager::ELAPSED_REALTIME_WAKEUP)) {
+        Int32 cop = 0;
+        mAppOps->CheckOpNoThrow(IAppOpsManager::OP_ALARM_WAKEUP, id, pakName, &cop);
+        if (cop != IAppOpsManager::MODE_ALLOWED) {
+            if (type == IAlarmManager::RTC_WAKEUP) {
+                type = IAlarmManager::RTC;
+            }
+            else {
+                type = IAlarmManager::ELAPSED_REALTIME;
+            }
 
-        if (type == IAlarmManager::RTC_WAKEUP) {
-            type = IAlarmManager::RTC;
+            wakeupFiltered = TRUE;
         }
-        else {
-            type = IAlarmManager::ELAPSED_REALTIME;
-        }
-
-        wakeupFiltered = TRUE;
     }
 
     synchronized(mLock) {

@@ -400,6 +400,8 @@ private:
         QuickBootReceiver(
             /* [in] */ AlarmManagerService* host);
 
+        CARAPI constructor();
+
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);

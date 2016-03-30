@@ -322,11 +322,8 @@ ECode CAppOpsService::constructor(
     ECode ec = CAtomicFile::New(storagePath, (IAtomicFile**)&mFile);
     if (FAILED(ec)) {
         Slogger::E(TAG, "constructor: failed to create CAtomicFile with path [%s], ec = %08x", TO_CSTR(storagePath), ec);
-        assert(mFile != NULL);
         return ec;
     }
-    assert(mFile != NULL);
-    FAIL_RETURN(ec);
 
     mHandler = handler;
     ReadState();
@@ -339,7 +336,7 @@ ECode CAppOpsService::Publish(
     mContext = context;
     Slogger::W(TAG, " >> TODO Publish ReadPolicy()");
     //ReadPolicy();
-    return ServiceManager::AddService(IContext::APP_OPS_SERVICE, TO_IINTERFACE(this));
+    return ServiceManager::AddService(IContext::APP_OPS_SERVICE, (IBinder*)this);
 }
 
 ECode CAppOpsService::SystemReady()
