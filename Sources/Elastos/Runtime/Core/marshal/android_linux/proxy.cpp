@@ -795,7 +795,6 @@ CObjectProxy::CObjectProxy()
     : mOrgue(NULL)
     , mInterfaces(NULL)
     , mCallbackConnector(NULL)
-    , mRef(1)
 {
 }
 
@@ -830,9 +829,11 @@ PInterface CObjectProxy::Probe(REIID riid)
     else if (riid == EIID_IProxy) {
         return (IProxy*)this;
     }
+    else if (riid == EIID_IObject) {
+        return (IObject*)this;
+    }
     else if (riid == EIID_IWeakReferenceSource) {
-        assert(0 && "not implemented.");
-        return NULL;
+        return (IWeakReferenceSource*)this;
     }
 
     if (riid == EIID_CALLBACK_CONNECTOR) {
@@ -879,49 +880,40 @@ PInterface CObjectProxy::Probe(REIID riid)
 
 UInt32 CObjectProxy::AddRef()
 {
-    Int32 lRefs = atomic_inc(&mRef);
-
-    MARSHAL_DBGOUT(MSHDBG_CREF, ALOGD(
-            "Proxy AddRef: %d\n", lRefs));
-    return (UInt32)lRefs;
+    return ElRefBase::AddRef();
 }
 
 UInt32 CObjectProxy::Release()
 {
-    Int32 lRefs = atomic_dec(&mRef);
-    if (lRefs == 0) {
-        MARSHAL_DBGOUT(MSHDBG_NORMAL, ALOGD(
-                "Proxy destructed.\n"));
+    return ElRefBase::Release();
+}
 
-        ECode ec = UnregisterImportObject(mBinder.get());
-        if (ec == S_FALSE) {
-            return 1;// other thread hold the proxy
-        }
+void CObjectProxy::OnLastStrongRef(
+    /* [in] */ const void* id)
+{
+    MARSHAL_DBGOUT(MSHDBG_NORMAL, ALOGD(
+            "Proxy OnLastStrongRef.\n"));
 
-        if (mCallbackConnector) {
-            mCallbackConnector->DisconnectCallbackSink();
-            mCallbackConnector->Release();
-            mCallbackConnector = NULL;
-        }
-
-        // when BpBinder destructed, BBinder is not released immediately.
-        // BBinder may be never released, if IPCThreadState::joinThreadPool is not called.
-        // The following codes to ensure that BBinder can be released
-        //
-        android::Parcel data, reply;
-        if (mBinder->transact(IStub::RELEASE, data, &reply) != android::NO_ERROR) {
-            MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("Call stub release failed.\n"));
-        }
-
-        delete this;
-
-        return 0;
+    ECode ec = UnregisterImportObject(mBinder.get());
+    if (ec == S_FALSE) {
+        MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGD(
+            "CObjectProxy UnregisterImportObject failed.\n"));
     }
 
-    MARSHAL_DBGOUT(MSHDBG_CREF, ALOGD(
-            "ProxyRelease: %d\n", lRefs));
+    if (mCallbackConnector) {
+        mCallbackConnector->DisconnectCallbackSink();
+        mCallbackConnector->Release();
+        mCallbackConnector = NULL;
+    }
 
-    return (UInt32)lRefs;
+    // when BpBinder destructed, BBinder is not released immediately.
+    // BBinder may be never released, if IPCThreadState::joinThreadPool is not called.
+    // The following codes to ensure that BBinder can be released
+    //
+    android::Parcel data, reply;
+    if (mBinder->transact(IStub::RELEASE, data, &reply) != android::NO_ERROR) {
+        MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("Call stub release failed.\n"));
+    }
 }
 
 ECode CObjectProxy::GetInterfaceID(
@@ -930,8 +922,14 @@ ECode CObjectProxy::GetInterfaceID(
 {
     if (NULL == iid) return E_INVALID_ARGUMENT;
 
-    if (object == (IInterface *)(IProxy *)this) {
+    if (object == (IInterface*)(IProxy*)this) {
         *iid = EIID_IProxy;
+    }
+    else if (object == (IInterface*)(IObject*)this) {
+        *iid = EIID_IObject;
+    }
+    else if (object == (IInterface*)(IWeakReferenceSource*)this) {
+        *iid = EIID_IWeakReferenceSource;
     }
     else {
         return E_INVALID_ARGUMENT;
@@ -1091,6 +1089,60 @@ ECode CObjectProxy::UnlinkToDeath(
     return NOERROR;
 }
 
+ECode CObjectProxy::Aggregate(
+    /* [in] */ AggregateType type,
+    /* [in] */ IInterface* object)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CObjectProxy::GetDomain(
+    /* [out] */ IInterface** object)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CObjectProxy::GetClassID(
+    /* [out] */ ClassID* clsid)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CObjectProxy::GetHashCode(
+    /* [out] */ Int32* hashCode)
+{
+    if (hashCode == NULL) return E_INVALID_ARGUMENT;
+    *hashCode = (Int32)this;
+    return NOERROR;
+}
+
+ECode CObjectProxy::Equals(
+    /* [in] */ IInterface* other,
+    /* [out] */ Boolean* result)
+{
+    if (result == NULL) return E_INVALID_ARGUMENT;
+    *result = (IObject*)this == IObject::Probe(other);
+    return NOERROR;
+}
+
+ECode CObjectProxy::ToString(
+    /* [out] */ String* info)
+{
+    if (info == NULL) return E_INVALID_ARGUMENT;
+    info->AppendFormat("CObjectProxy[0x%08x]", this);
+    return NOERROR;
+}
+
+ECode CObjectProxy::GetWeakReference(
+    /* [out] */ IWeakReference** weakReference)
+{
+    if (weakReference == NULL);
+        return E_INVALID_ARGUMENT;
+    *weakReference = new WeakReferenceImpl((IProxy*)this, CreateWeak(this));
+    (*weakReference)->AddRef();
+    return NOERROR;
+}
+
 ECode CObjectProxy::S_CreateObject(
     /* [in] */ REMuid rclsid,
     /* [in] */ const android::sp<android::IBinder>& binder,
@@ -1157,6 +1209,7 @@ ECode CObjectProxy::S_CreateObject(
                 ec));
         goto ErrorExit;
     }
+    proxyObj->AddRef();
 
     *proxy = (IProxy*)proxyObj;
 

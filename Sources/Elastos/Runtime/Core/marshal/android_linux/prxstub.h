@@ -8,6 +8,7 @@
 #include <CRemoteParcel.h>
 #include <semaphore.h>
 #include <pthread.h>
+#include "elrefbase.h"
 
 namespace Elastos {
 namespace IPC {
@@ -149,7 +150,11 @@ private:
     android::wp<DeathRecipientList> mDeathRecipients;
 };
 
-class CObjectProxy : public IProxy
+class CObjectProxy
+    : public ElRefBase
+    , public IProxy
+    , public IObject
+    , public IWeakReferenceSource
 {
 public:
     CObjectProxy();
@@ -162,6 +167,9 @@ public:
     CARAPI_(UInt32) AddRef();
 
     CARAPI_(UInt32) Release();
+
+    CARAPI_(void) OnLastStrongRef(
+        /* [in] */ const void* id);
 
     CARAPI GetInterfaceID(
         /* [in] */ IInterface* object,
@@ -193,6 +201,29 @@ public:
         /* [in] */ Int32 flags,
         /* [out] */ Boolean* result);
 
+    CARAPI Aggregate(
+        /* [in] */ AggregateType type,
+        /* [in] */ IInterface* object);
+
+    CARAPI GetDomain(
+        /* [out] */ IInterface** object);
+
+    CARAPI GetClassID(
+        /* [out] */ ClassID* clsid);
+
+    CARAPI GetHashCode(
+        /* [out] */ Int32* hashCode);
+
+    CARAPI Equals(
+        /* [in] */ IInterface* other,
+        /* [out] */ Boolean* result);
+
+    CARAPI ToString(
+        /* [out] */ String* info);
+
+    CARAPI GetWeakReference(
+        /* [out] */ IWeakReference** weakReference);
+
     static CARAPI S_CreateObject(
         /* [in] */ REMuid rclsid,
         /* [in] */ const android::sp<android::IBinder>& binder,
@@ -205,8 +236,6 @@ public:
     Int32                           mInterfaceNum;
     CInterfaceProxy*                mInterfaces; // sizeis(mInterfaceNum)
     ICallbackConnector*             mCallbackConnector;
-
-    Int32                           mRef;
 };
 
 typedef struct InterfaceStruct {

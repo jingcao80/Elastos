@@ -178,9 +178,9 @@ ECode FindImportObject(
     ImportObject* head = s_hashImportObjects + Hash(binder);
 
     for (ImportObject* it = head; NULL != it; it = (ImportObject*)(it->Next())) {
-        if (it->mBinder == binder) {
+        if (it->mBinder == binder&&
+            ((CObjectProxy*)it->mIProxy)->GetWeakRefs()->AttemptIncStrong(NULL)) {
             memcpy(impObj, it, sizeof(ImportObject));
-            impObj->mIProxy->AddRef();
             pthread_mutex_unlock(&g_importTableLock);
             return NOERROR;
         }
@@ -200,11 +200,6 @@ ECode UnregisterImportObject(
 
     for (ImportObject* it = head; NULL != it; it = (ImportObject*)(it->Next())) {
         if (it->mBinder == binder) {
-            if ((Int32)(((CObjectProxy *)(it->mIProxy))->mRef) != 0) {
-                pthread_mutex_unlock(&g_importTableLock);
-                return S_FALSE;
-            }
-
             if (it != head) {
                 it->Detach(prev);
                 delete it;
