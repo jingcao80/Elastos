@@ -5733,22 +5733,24 @@ ECode ViewGroup::InvalidateChild(
                 (Int32)(r + 0.5f), (Int32)(b + 0.5f));
         }
 
+        IView* viewObj;
+        View* view = NULL;
+        IViewRootImpl* vriObj;
+        ViewRootImpl* vri;
         do {
-            View* view = NULL;
-            if (IView::Probe(parent) != NULL) {
-                view = VIEW_PROBE(parent);
+            view = NULL;
+            viewObj = IView::Probe(parent);
+            if (viewObj != NULL) {
+                view = (View*)viewObj;
             }
 
             if (drawAnimation) {
                 if (view != NULL) {
                     view->mPrivateFlags |= PFLAG_DRAW_ANIMATION;
                 }
-                else if (parent != NULL) {
-                    ViewRootImpl* viewRootImpl = VIEWIMPL_PROBE(parent);
-
-                    if (viewRootImpl != NULL) {
-                        viewRootImpl->mIsAnimating = TRUE;
-                    }
+                else if ((vriObj = IViewRootImpl::Probe(parent)) != NULL) {
+                    vri = (ViewRootImpl*)vriObj;
+                    vri->mIsAnimating = TRUE;
                 }
             }
 
@@ -5877,16 +5879,22 @@ ECode ViewGroup::DamageChildDeferred(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
-    AutoPtr<IViewParent> parent;
+    AutoPtr<IViewParent> parent, temp;
+    IViewRootImpl* vriObj;
     GetParent((IViewParent**)&parent);
     while (parent != NULL) {
         if (IViewGroup::Probe(parent)) {
-           parent->GetParent((IViewParent**)&parent);
-        } else if (IViewRootImpl::Probe(parent)) {
-            VIEWIMPL_PROBE(parent)->Invalidate();
+            temp = parent;
+            parent = NULL;
+            temp->GetParent((IViewParent**)&parent);
+        }
+        else if ((vriObj = IViewRootImpl::Probe(parent)) != NULL) {
+            ViewRootImpl* vri = (ViewRootImpl*)vriObj;
+            vri->Invalidate();
             *res = TRUE;
             return NOERROR;
-        } else {
+        }
+        else {
             parent = NULL;
         }
     }
@@ -5920,9 +5928,11 @@ ECode ViewGroup::DamageChild(
             v->TransformRect(dirty);
         }
 
+        IViewGroup* vgObj;
         do {
-            if (IViewGroup::Probe(parent) != NULL) {
-                ViewGroup* parentVG = VIEWGROUP_PROBE(parent);
+            vgObj = IViewGroup::Probe(parent);
+            if (vgObj != NULL) {
+                ViewGroup* parentVG = (ViewGroup*)vgObj;
                 if (parentVG->mLayerType != IView::LAYER_TYPE_NONE) {
                     // Layered parents should be recreated, not just re-issued
                     parentVG->Invalidate();

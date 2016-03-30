@@ -615,10 +615,12 @@ ECode WindowOrientationListener::Enable()
         if (LOG) {
             Logger::D(TAG, "WindowOrientationListener enabled");
         }
-        mSensorEventListener->ResetLocked();
-        Boolean res;
-        mSensorManager->RegisterListener(mSensorEventListener, mSensor, mRate, mHandler, &res);
-        mEnabled = TRUE;
+        if (mSensorEventListener != NULL) {
+            mSensorEventListener->ResetLocked();
+            Boolean res;
+            mSensorManager->RegisterListener(mSensorEventListener, mSensor, mRate, mHandler, &res);
+            mEnabled = TRUE;
+        }
     }
     return NOERROR;
 }
@@ -634,8 +636,10 @@ ECode WindowOrientationListener::Disable()
         if (LOG) {
             Logger::D(TAG, "WindowOrientationListener disabled");
         }
-        mSensorManager->UnregisterListener(mSensorEventListener);
-        mEnabled = FALSE;
+        if (mSensorEventListener != NULL) {
+            mSensorManager->UnregisterListener(mSensorEventListener);
+            mEnabled = FALSE;
+        }
     }
     return NOERROR;
 }
@@ -652,12 +656,14 @@ ECode WindowOrientationListener::GetProposedRotation(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = -1;
     AutoLock lock(mLock);
     if (mEnabled) {
-        mSensorEventListener->GetProposedRotationLocked(result);
+        if (mSensorEventListener != NULL) {
+            mSensorEventListener->GetProposedRotationLocked(result);
+        }
         return NOERROR;
     }
-    *result = -1;
     return NOERROR;
 }
 

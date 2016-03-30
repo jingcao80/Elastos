@@ -40,9 +40,9 @@ ECode GhostView::constructor(
     VIEW_PROBE(mView)->mGhostView = IGhostView::Probe(this);
     AutoPtr<IViewParent> temp;
     mView->GetParent((IViewParent**)&temp);
-    AutoPtr<IViewGroup> parent = IViewGroup::Probe(temp);
     SetGhostedVisibility(IView::INVISIBLE);
-    VIEWGROUP_PROBE(parent)->mRecreateDisplayList = TRUE;
+    IViewGroup* parent = IViewGroup::Probe(temp);
+    ((ViewGroup*)parent)->mRecreateDisplayList = TRUE;
     AutoPtr<IRenderNode> result;
     IView::Probe(parent)->GetDisplayList((IRenderNode**)&result);
     return NOERROR;
@@ -98,9 +98,9 @@ ECode GhostView::OnDetachedFromWindow()
         VIEW_PROBE(mView)->mGhostView = NULL;
         AutoPtr<IViewParent> temp;
         mView->GetParent((IViewParent**)&temp);
-        AutoPtr<IViewGroup> parent = IViewGroup::Probe(temp);
+        IViewGroup* parent = IViewGroup::Probe(temp);
         if (parent != NULL) {
-            VIEWGROUP_PROBE(parent)->mRecreateDisplayList = TRUE;
+            ((ViewGroup*)parent)->mRecreateDisplayList = TRUE;
             AutoPtr<IRenderNode> result;
             IView::Probe(parent)->GetDisplayList((IRenderNode**)&result);
         }
@@ -150,11 +150,11 @@ ECode GhostView::AddGhost(
         AutoPtr<IView> oldParent = IView::Probe(temp);
         temp = NULL;
         oldParent->GetParent((IViewParent**)&temp);
-        AutoPtr<IViewGroup> oldGrandParent = IViewGroup::Probe(temp);
+        IViewGroup* oldGrandParent = IViewGroup::Probe(temp);
         assert(0);
         if (TRUE/*oldGrandParent != IViewGroup::Probe(overlayViewGroup)*/) {
             previousRefCount = ((GhostView*)ghostView.Get())->mReferences;
-            VIEWGROUP_PROBE(oldGrandParent)->RemoveView(oldParent);
+            ((ViewGroup*)oldGrandParent)->RemoveView(oldParent);
             ghostView = NULL;
         }
     }
@@ -215,8 +215,8 @@ void GhostView::RemoveGhost(
             AutoPtr<IViewGroup> parent = IViewGroup::Probe(temp);
             temp = NULL;
             IView::Probe(parent)->GetParent((IViewParent**)&temp);
-            AutoPtr<IViewGroup> grandParent = IViewGroup::Probe(temp);
-            VIEWGROUP_PROBE(grandParent)->RemoveView(IView::Probe(parent));
+            IViewGroup* grandParent = IViewGroup::Probe(temp);
+            ((ViewGroup*)grandParent)->RemoveView(IView::Probe(parent));
         }
     }
 }
@@ -453,21 +453,23 @@ Boolean GhostView::IsOnTop(
 {
     AutoPtr<IViewParent> temp;
     view->GetParent((IViewParent**)&temp);
-    AutoPtr<IViewGroup> parent = IViewGroup::Probe(temp);
+    IViewGroup* parent = IViewGroup::Probe(temp);
+    ViewGroup* parentVG = (ViewGroup*)parent;
 
     Int32 childrenCount;
     parent->GetChildCount(&childrenCount);
-    AutoPtr<IArrayList> preorderedList = IArrayList::Probe(VIEWGROUP_PROBE(parent)->BuildOrderedChildList());
+    AutoPtr<IList> list = parentVG->BuildOrderedChildList();
+    IArrayList* preorderedList = IArrayList::Probe(list);
 
     Boolean customOrder = preorderedList == NULL
-        && VIEWGROUP_PROBE(parent)->IsChildrenDrawingOrderEnabled();
+        && parentVG->IsChildrenDrawingOrderEnabled();
 
     // This default value shouldn't be used because both view and comparedWith
     // should be in the list. If there is an error, then just return an arbitrary
     // view is on top.
     Boolean isOnTop = TRUE;
     for (Int32 i = 0; i < childrenCount; i++) {
-        Int32 childIndex = customOrder ? VIEWGROUP_PROBE(parent)->GetChildDrawingOrder(childrenCount, i) : i;
+        Int32 childIndex = customOrder ? parentVG->GetChildDrawingOrder(childrenCount, i) : i;
         AutoPtr<IView> child;
         if (NULL == preorderedList) {
             parent->GetChildAt(childIndex, (IView**)&child);

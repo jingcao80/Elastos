@@ -1195,7 +1195,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
     AutoPtr<WindowList> windows = win->GetWindowList();
     AutoPtr<WindowList> tokenWindowList = GetTokenWindowsOnDisplay(token, displayContent);
     WindowList::Iterator tokenWindowsIt = tokenWindowList->Begin();
-    if (tokenWindowList->Begin() != tokenWindowList->End()) {
+    if (!tokenWindowList->IsEmpty()) {
         // If this application has existing windows, we
         // simply place the new window on top of them... but
         // keep the starting window on top.
@@ -1220,8 +1220,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
                 //that was created later or a window at the top of the list of
                 //windows associated with this token.
                 if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
-                    // Slogger::V(TAG, "not Base app: Adding window "
-                    //         + win + " at " + (newIdx + 1) + " of " + N);
+                    Slogger::V(TAG, "not Base app: Adding window %s", TO_CSTR(win));
                 }
                 if (newIt == windows->End()) {
                     windows->Insert(windows->Begin(), win);
@@ -1240,9 +1239,9 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
 
     // No windows from this token on this display
     if (localLOGV) {
-        // Slog.v(TAG, "Figuring out where to add app window " + client.asBinder()
-        //     + " (token=" + token + ")");
+        Slogger::V(TAG, "Figuring out where to add app window %p (token=%p)", client.Get(), token.Get());
     }
+
     // Figure out where the window should go, based on the
     // order of applications.
     AutoPtr<WindowState> pos;
@@ -1252,8 +1251,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
     List<AutoPtr<Task> >::ReverseIterator taskRit = tasks.RBegin();
     for (; taskRit != tasks.REnd(); ++taskRit) {
         AppTokenList tokens = (*taskRit)->mAppTokens;
-        tokenRit = tokens.RBegin();
-        for (; tokenRit != tokens.REnd(); ++tokenRit) {
+        for (tokenRit = tokens.RBegin(); tokenRit != tokens.REnd(); ++tokenRit) {
             AutoPtr<AppWindowToken> t = *tokenRit;
             if (t == token) {
                 ++tokenRit;
@@ -1270,12 +1268,17 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
             // is not going to the bottom and has windows on this display, we can
             // use it as an anchor for when we do reach the token.
             tokenWindowList = GetTokenWindowsOnDisplay(t, displayContent);
-            if (!t->mSendingToBottom && tokenWindowList->Begin() != tokenWindowList->End()) {
+            if (!t->mSendingToBottom && !tokenWindowList->IsEmpty()) {
                 pos = *(tokenWindowList->Begin());
             }
         }
+
         if (tokenRit != tokens.REnd()) {
             // early exit
+            break;
+        }
+
+        if (taskRit == tasks.REnd()) {
             break;
         }
     }
@@ -1292,7 +1295,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
         }
         if (atoken != NULL) {
             tokenWindowList = GetTokenWindowsOnDisplay(atoken, displayContent);
-            if (tokenWindowList->Begin() != tokenWindowList->End()) {
+            if (!tokenWindowList->IsEmpty()) {
                 AutoPtr<WindowState> bottom = *(tokenWindowList->Begin());
                 if (bottom->mSubLayer < 0) {
                     pos = bottom;
@@ -1310,7 +1313,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
         for ( ; tokenRit != tokens.REnd(); ++tokenRit) {
             AutoPtr<AppWindowToken> t = *tokenRit;
             tokenWindowList = GetTokenWindowsOnDisplay(t, displayContent);
-            if (tokenWindowList->Begin() != tokenWindowList->End()) {
+            if (!tokenWindowList->IsEmpty()) {
                 pos = *(tokenWindowList->End());
                 break;
             }
@@ -1330,7 +1333,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
             atoken = tokenIt->mSecond;
         }
         if (atoken != NULL) {
-            if (atoken->mWindows.Begin() != atoken->mWindows.End()) {
+            if (!atoken->mWindows.IsEmpty()) {
                 AutoPtr<WindowState> top = *(atoken->mWindows.End());
                 if (top->mSubLayer >= 0) {
                     pos = top;
@@ -1351,10 +1354,10 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
         }
     }
     if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
-        // Slogger::V(TAG, "Based on layer: Adding window %p at " + win + " at " + i + " of " + N);
+        Slogger::V(TAG, "Based on layer: Adding window %s", TO_CSTR(win));
     }
     windows->Insert(winIt, win);
-    mWindowsChanged = true;
+    mWindowsChanged = TRUE;
     return tokenWindowsIt;
 }
 
@@ -1371,7 +1374,7 @@ void CWindowManagerService::AddFreeWindowToListLocked(
             break;
         }
     }
-    // if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
+    // if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slogger::V(TAG,
     //         "Free window: Adding window " + win + " at " + i + " of " + windows.size());
     windows->Insert(rit.GetBase(), win);
     mWindowsChanged = TRUE;
@@ -1446,7 +1449,7 @@ void CWindowManagerService::AddWindowToListInOrderLocked(
     /* [in] */ WindowState* win,
     /* [in] */ Boolean addToToken)
 {
-    if (DEBUG_FOCUS_LIGHT) Slogger::D(TAG, "addWindowToListInOrderLocked: win=%p Callers=", win/*, Debug.getCallers(4)*/);
+    if (DEBUG_FOCUS_LIGHT) Slogger::D(TAG, "addWindowToListInOrderLocked: addToToken=%d, win=%s", addToToken, TO_CSTR(win));
     if (win->mAttachedWindow == NULL) {
         AutoPtr<WindowToken> token = win->mToken;
         List<AutoPtr<WindowState> >::Iterator tokenWindowsIt = token->mWindows.Begin();
@@ -1652,7 +1655,7 @@ void CWindowManagerService::AddInputMethodWindowToListLocked(
     List< AutoPtr<WindowState> >::Iterator posIt = FindDesiredInputMethodWindowItLocked(TRUE);
     if (posIt != windows->End()) {
         win->mTargetAppToken = mInputMethodTarget->mAppToken;
-        // if (DEBUG_WINDOW_MOVEMENT) Slog.v(
+        // if (DEBUG_WINDOW_MOVEMENT) Slogger::V(
         //         TAG, "Adding input method window " + win + " at " + pos);
         windows->Insert(posIt, win);
         mWindowsChanged = TRUE;
@@ -1750,12 +1753,12 @@ void CWindowManagerService::MoveInputMethodDialogsLocked(
     // TODO(multidisplay): IMEs are only supported on the default display.
     AutoPtr<WindowList> windows = GetDefaultWindowListLocked();
     WindowList::Iterator it = dialogs.Begin();
-    // if (DEBUG_INPUT_METHOD) Slog.v(TAG, "Removing " + N + " dialogs w/pos=" + pos);
+    // if (DEBUG_INPUT_METHOD) Slogger::V(TAG, "Removing " + N + " dialogs w/pos=" + pos);
     for (; it != dialogs.End(); ++it) {
         posIt = TmpRemoveWindowLocked(posIt, *it);
     }
     // if (DEBUG_INPUT_METHOD) {
-    //     Slog.v(TAG, "Window list w/pos=" + pos);
+    //     Slogger::V(TAG, "Window list w/pos=" + pos);
     //     logWindowList("  ");
     // }
 
@@ -1772,14 +1775,14 @@ void CWindowManagerService::MoveInputMethodDialogsLocked(
                 break;
             }
         }
-        // if (DEBUG_INPUT_METHOD) Slog.v(TAG, "Adding " + N + " dialogs at pos=" + pos);
+        // if (DEBUG_INPUT_METHOD) Slogger::V(TAG, "Adding " + N + " dialogs at pos=" + pos);
         for (it = dialogs.Begin(); it != dialogs.End(); ++it) {
             AutoPtr<WindowState> win = *it;
             win->mTargetAppToken = targetAppToken;
             posIt = ReAddWindowLocked(posIt, win);
         }
         // if (DEBUG_INPUT_METHOD) {
-        //     Slog.v(TAG, "Final window list:");
+        //     Slogger::V(TAG, "Final window list:");
         //     logWindowList(windows, "  ");
         // }
         return;
@@ -1789,7 +1792,7 @@ void CWindowManagerService::MoveInputMethodDialogsLocked(
         win->mTargetAppToken = NULL;
         ReAddWindowToListInOrderLocked(win);
 //        if (DEBUG_INPUT_METHOD) {
-//            Slog.v(TAG, "No IM target, final list:");
+//            Slogger::V(TAG, "No IM target, final list:");
 //            logWindowList("  ");
 //        }
     }
@@ -1856,18 +1859,18 @@ Boolean CWindowManagerService::MoveInputMethodWindowsIfNeededLocked(
 
         if (imWin != NULL) {
             // if (DEBUG_INPUT_METHOD) {
-            //     Slog.v(TAG, "Moving IM from " + imPos);
+            //     Slogger::V(TAG, "Moving IM from " + imPos);
             //     logWindowList(windows, "  ");
             // }
             imPosIt = TmpRemoveWindowLocked(imPosIt, imWin);
             // if (DEBUG_INPUT_METHOD) {
-            //     Slog.v(TAG, "List after removing with new pos " + imPos + ":");
+            //     Slogger::V(TAG, "List after removing with new pos " + imPos + ":");
             //     logWindowList(windows, "  ");
             // }
             imWin->mTargetAppToken = mInputMethodTarget->mAppToken;
             ReAddWindowLocked(imPosIt, imWin);
             // if (DEBUG_INPUT_METHOD) {
-            //     Slog.v(TAG, "List after moving IM to " + imPos + ":");
+            //     Slogger::V(TAG, "List after moving IM to " + imPos + ":");
             //     logWindowList(windows, "  ");
             // }
             if (mInputMethodDialogs.Begin() != mInputMethodDialogs.End()) {
@@ -1883,12 +1886,12 @@ Boolean CWindowManagerService::MoveInputMethodWindowsIfNeededLocked(
         // In this case, the input method windows go in a fixed layer,
         // because they aren't currently associated with a focus window.
         if (imWin != NULL) {
-            // if (DEBUG_INPUT_METHOD) Slog.v(TAG, "Moving IM from " + imPos);
+            // if (DEBUG_INPUT_METHOD) Slogger::V(TAG, "Moving IM from " + imPos);
             TmpRemoveWindowLocked(windows->Begin(), imWin);
             imWin->mTargetAppToken = NULL;
             ReAddWindowToListInOrderLocked(imWin);
             // if (DEBUG_INPUT_METHOD) {
-            //     Slog.v(TAG, "List with no IM target:");
+            //     Slogger::V(TAG, "List with no IM target:");
             //     logWindowList("  ");
             // }
             if (mInputMethodDialogs.Begin() != mInputMethodDialogs.End()) {
@@ -1911,7 +1914,7 @@ Boolean CWindowManagerService::MoveInputMethodWindowsIfNeededLocked(
 Boolean CWindowManagerService::IsWallpaperVisible(
     /* [in] */ WindowState* wallpaperTarget)
 {
-    // if (DEBUG_WALLPAPER) Slog.v(TAG, "Wallpaper vis: target " + wallpaperTarget + ", obscured="
+    // if (DEBUG_WALLPAPER) Slogger::V(TAG, "Wallpaper vis: target " + wallpaperTarget + ", obscured="
     //         + (wallpaperTarget != null ? Boolean.toString(wallpaperTarget.mObscured) : "??")
     //         + " anim=" + ((wallpaperTarget != null && wallpaperTarget.mAppToken != null)
     //                 ? wallpaperTarget.mAppToken.mAppAnimator.animation : null)
@@ -1995,7 +1998,7 @@ Int32 CWindowManagerService::AdjustWallpaperWindowsLocked()
     }
 
     if (foundW == NULL && windowDetachedIt != windows->End()) {
-        // if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
+        // if (DEBUG_WALLPAPER_LIGHT) Slogger::V(TAG,
         //         "Found animating detached wallpaper activity: #" + i + "=" + w);
         foundW = w;
         foundIt = windowDetachedIt;
@@ -2029,11 +2032,11 @@ Int32 CWindowManagerService::AdjustWallpaperWindowsLocked()
             if (foundAnim && oldAnim) {
                 WindowList::Iterator oldIt = Find(*windows, oldW);
                 // if (DEBUG_WALLPAPER_LIGHT) {
-                //     Slog.v(TAG, "New i: " + foundI + " old i: " + oldI);
+                //     Slogger::V(TAG, "New i: " + foundI + " old i: " + oldI);
                 // }
                 if (oldIt != windows->End()) {
                     // if (DEBUG_WALLPAPER_LIGHT) {
-                    //     Slog.v(TAG, "Animating wallpapers: old#" + oldI
+                    //     Slogger::V(TAG, "Animating wallpapers: old#" + oldI
                     //             + "=" + oldW + "; new#" + foundI
                     //             + "=" + foundW);
                     // }
@@ -2483,7 +2486,7 @@ void CWindowManagerService::DispatchWallpaperVisibility(
     if (wallpaper->mWallpaperVisible != visible) {
         wallpaper->mWallpaperVisible = visible;
         //try {
-        // if (DEBUG_VISIBILITY || DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
+        // if (DEBUG_VISIBILITY || DEBUG_WALLPAPER_LIGHT) Slogger::V(TAG,
         //         "Updating vis of wallpaper " + wallpaper
         //         + ": " + visible + " from:\n" + Debug.getCallers(4, "  "));
         wallpaper->mClient->DispatchAppVisibility(visible);
@@ -2538,6 +2541,7 @@ Int32 CWindowManagerService::AddWindow(
     /* [out] */ IRect** outContentInsets,
     /* [out] */ IInputChannel** outInputChannel)
 {
+    IBinder* binderClient = IBinder::Probe(client);
     AutoPtr< ArrayOf<Int32> > appOp = ArrayOf<Int32>::Alloc(1);
     Int32 res;
     mPolicy->CheckAddPermission(attrs, appOp, &res);
@@ -2560,18 +2564,19 @@ Int32 CWindowManagerService::AddWindow(
 
         AutoPtr<DisplayContent> displayContent = GetDisplayContentLocked(displayId);
         if (displayContent == NULL) {
-            Slogger::W(TAG, "Attempted to add window to a display that does not exist: %d.  Aborting."
-                    , displayId);
+            Slogger::W(TAG,
+                "Attempted to add window to a display that does not exist: %d.  Aborting.",
+                displayId);
             return IWindowManagerGlobal::ADD_INVALID_DISPLAY;
         }
         if (!displayContent->HasAccess(session->mUid)) {
-            Slogger::W(TAG, "Attempted to add window to a display for which the application does not have access: %d.  Aborting."
-                    , displayId);
+            Slogger::W(TAG,
+                "Attempted to add window to a display for which the application does not have access: %d.  Aborting.",
+                displayId);
             return IWindowManagerGlobal::ADD_INVALID_DISPLAY;
         }
 
-        HashMap<AutoPtr<IBinder>, AutoPtr<WindowState> >::Iterator it
-                = mWindowMap.Find(IBinder::Probe(client));
+        HashMap<AutoPtr<IBinder>, AutoPtr<WindowState> >::Iterator it = mWindowMap.Find(binderClient);
         if (it != mWindowMap.End() && it->mSecond != NULL) {
             Slogger::W(TAG, "Window %p is already added", client);
             return IWindowManagerGlobal::ADD_DUPLICATE_ADD;
@@ -2584,8 +2589,8 @@ Int32 CWindowManagerService::AddWindow(
             WindowForClientLocked(NULL, attrsToken, FALSE, (WindowState**)&attachedWindow);
             if (attachedWindow == NULL) {
                 Slogger::W(TAG,
-                        "Attempted to add window with token that is not a window: %p.  Aborting."
-                        , attrsToken.Get());
+                    "Attempted to add window with token that is not a window: %p.  Aborting.",
+                    attrsToken.Get());
                 return IWindowManagerGlobal::ADD_BAD_SUBWINDOW_TOKEN;
             }
             Int32 attachedWinType;
@@ -2593,14 +2598,15 @@ Int32 CWindowManagerService::AddWindow(
             if (attachedWinType >= IWindowManagerLayoutParams::FIRST_SUB_WINDOW
                     && attachedWinType <= IWindowManagerLayoutParams::LAST_SUB_WINDOW) {
                 Slogger::W(TAG,
-                        "Attempted to add window with token that is a sub-window: %p.  Aborting."
-                        , attrsToken.Get());
+                    "Attempted to add window with token that is a sub-window: %p.  Aborting.",
+                    attrsToken.Get());
                 return IWindowManagerGlobal::ADD_BAD_SUBWINDOW_TOKEN;
             }
         }
 
         if (type == IWindowManagerLayoutParams::TYPE_PRIVATE_PRESENTATION && !displayContent->IsPrivate()) {
-            Slogger::W(TAG, "Attempted to add private presentation window to a non-private display.  Aborting.");
+            Slogger::W(TAG,
+                "Attempted to add private presentation window to a non-private display.  Aborting.");
             return IWindowManagerGlobal::ADD_PERMISSION_DENIED;
         }
         Boolean addToken = FALSE;
@@ -2616,31 +2622,32 @@ Int32 CWindowManagerService::AddWindow(
             if (type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW
                     && type <= IWindowManagerLayoutParams::LAST_APPLICATION_WINDOW) {
                 Slogger::W(TAG,
-                        "Attempted to add application window with unknown token %p.  Aborting."
-                        , attrsToken.Get());
+                    "Attempted to add application window with unknown token %p.  Aborting.",
+                    attrsToken.Get());
                 return IWindowManagerGlobal::ADD_BAD_APP_TOKEN;
             }
             if (type == IWindowManagerLayoutParams::TYPE_INPUT_METHOD) {
                 Slogger::W(TAG,
-                        "Attempted to add input method window with unknown token %p.  Aborting."
-                        , attrsToken.Get());
+                    "Attempted to add input method window with unknown token %p.  Aborting.",
+                    attrsToken.Get());
                 return IWindowManagerGlobal::ADD_BAD_APP_TOKEN;
             }
             if (type == IWindowManagerLayoutParams::TYPE_VOICE_INTERACTION) {
-                Slogger::W(TAG, "Attempted to add voice interaction window with unknown token %p.  Aborting."
-                        , attrsToken.Get());
+                Slogger::W(TAG,
+                    "Attempted to add voice interaction window with unknown token %p.  Aborting.",
+                    attrsToken.Get());
                 return IWindowManagerGlobal::ADD_BAD_APP_TOKEN;
             }
             if (type == IWindowManagerLayoutParams::TYPE_WALLPAPER) {
                 Slogger::W(TAG,
-                        "Attempted to add wallpaper window with unknown token %p.  Aborting."
-                        , attrsToken.Get());
+                    "Attempted to add wallpaper window with unknown token %p.  Aborting.",
+                    attrsToken.Get());
                 return IWindowManagerGlobal::ADD_BAD_APP_TOKEN;
             }
             if (type == IWindowManagerLayoutParams::TYPE_DREAM) {
                 Slogger::W(TAG,
-                        "Attempted to add Dream window with unknown token %p.  Aborting."
-                        , attrsToken.Get());
+                    "Attempted to add Dream window with unknown token %p.  Aborting.",
+                    attrsToken.Get());
                 return IWindowManagerGlobal::ADD_BAD_APP_TOKEN;
             }
             token = new WindowToken(this, attrsToken, -1, FALSE);
@@ -2651,55 +2658,58 @@ Int32 CWindowManagerService::AddWindow(
             AutoPtr<AppWindowToken> atoken = token->mAppWindowToken;
             if (atoken == NULL) {
                 Slogger::W(TAG,
-                    "Attempted to add window with non-application token %p.  Aborting."
-                    , token.Get());
+                    "Attempted to add window with non-application token %p.  Aborting.",
+                    token.Get());
                 return IWindowManagerGlobal::ADD_NOT_APP_TOKEN;
             }
             else if (atoken->mRemoved) {
                 Slogger::W(TAG,
-                        "Attempted to add window with exiting application token %p.  Aborting."
-                        , token.Get());
+                    "Attempted to add window with exiting application token %p.  Aborting.",
+                    token.Get());
                 return IWindowManagerGlobal::ADD_APP_EXITING;
             }
             if (type == IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING
                     && atoken->mFirstWindowDrawn) {
                 // No need for this guy!
-                AutoPtr<ICharSequence> title;
-                attrs->GetTitle((ICharSequence**)&title);
-                String str;
-                title->ToString(&str);
-                if (localLOGV) Slogger::V(TAG,
-                        TAG, "**** NO NEED TO START: %s", str.string());
+                if (localLOGV) {
+                    AutoPtr<ICharSequence> title;
+                    attrs->GetTitle((ICharSequence**)&title);
+                    String str;
+                    title->ToString(&str);
+                    Slogger::V(TAG,TAG, "**** NO NEED TO START: %s", str.string());
+                }
                 return IWindowManagerGlobal::ADD_STARTING_NOT_NEEDED;
             }
         }
         else if (type == IWindowManagerLayoutParams::TYPE_INPUT_METHOD) {
             if (token->mWindowType != IWindowManagerLayoutParams::TYPE_INPUT_METHOD) {
                 Slogger::W(TAG,
-                        "Attempted to add input method window with bad token %p.  Aborting."
-                        , attrsToken.Get());
+                    "Attempted to add input method window with bad token %p.  Aborting.",
+                    attrsToken.Get());
                 return IWindowManagerGlobal::ADD_BAD_APP_TOKEN;
             }
         }
         else if (type == IWindowManagerLayoutParams::TYPE_VOICE_INTERACTION) {
             if (token->mWindowType != IWindowManagerLayoutParams::TYPE_VOICE_INTERACTION) {
-                Slogger::W(TAG, "Attempted to add voice interaction window with bad token %p.  Aborting."
-                        , attrsToken.Get());
+                Slogger::W(TAG,
+                    "Attempted to add voice interaction window with bad token %p.  Aborting.",
+                    attrsToken.Get());
                   return IWindowManagerGlobal::ADD_BAD_APP_TOKEN;
             }
         }
         else if (type == IWindowManagerLayoutParams::TYPE_WALLPAPER) {
             if (token->mWindowType != IWindowManagerLayoutParams::TYPE_WALLPAPER) {
                 Slogger::W(TAG,
-                        "Attempted to add wallpaper window with bad token %p.  Aborting."
-                        , attrsToken.Get());
+                    "Attempted to add wallpaper window with bad token %p.  Aborting.",
+                    attrsToken.Get());
                 return IWindowManagerGlobal::ADD_BAD_APP_TOKEN;
             }
         }
         else if (type == IWindowManagerLayoutParams::TYPE_DREAM) {
             if (token->mWindowType != IWindowManagerLayoutParams::TYPE_DREAM) {
-                Slogger::W(TAG, "Attempted to add Dream window with bad token %p.  Aborting."
-                        , attrsToken.Get());
+                Slogger::W(TAG,
+                    "Attempted to add Dream window with bad token %p.  Aborting.",
+                    attrsToken.Get());
                 return IWindowManagerGlobal::ADD_BAD_APP_TOKEN;
             }
         }
@@ -2764,7 +2774,7 @@ Int32 CWindowManagerService::AddWindow(
                 mTokenMap[attrsToken] = token;
         }
         win->Attach();
-        mWindowMap[IBinder::Probe(client)] = win;
+        mWindowMap[binderClient] = win;
         if (win->mAppOp != IAppOpsManager::OP_NONE) {
             Int32 uid;
             win->GetOwningUid(&uid);
@@ -2780,13 +2790,11 @@ Int32 CWindowManagerService::AddWindow(
                 token->mAppWindowToken != NULL) {
             token->mAppWindowToken->mStartingWindow = win;
             if (DEBUG_STARTING_WINDOW) {
-                Slogger::V (TAG, "addWindow: %p startingWindow=%p",
-                    token->mAppWindowToken, win.Get());
+                Slogger::V (TAG, "addWindow: %p startingWindow=%s", token->mAppWindowToken, TO_CSTR(win));
             }
         }
 
         Boolean imMayMove = TRUE;
-
         if (type == IWindowManagerLayoutParams::TYPE_INPUT_METHOD) {
             win->mGivenInsetsPending = TRUE;
             mInputMethodWindow = win;
@@ -2855,15 +2863,13 @@ Int32 CWindowManagerService::AddWindow(
         AssignLayersLocked(displayContent->GetWindowList());
         // Don't do layout here, the window must call
         // relayout to be displayed, so we'll do it there.
-
         if (focusChanged) {
             mInputMonitor->SetInputFocusLw(mCurrentFocus, FALSE /*updateInputWindows*/);
         }
         mInputMonitor->UpdateInputWindowsLw(FALSE /*force*/);
-
-        // if (localLOGV) Slog.v(
-        //         TAG, "New client " + client.asBinder()
-        //         + ": window=" + win);
+        if (localLOGV) {
+            Slogger::V(TAG, "New client %p: window=%s", client, TO_CSTR(win));
+        }
 
         if (win->IsVisibleOrAdding() && UpdateOrientationFromAppTokensLocked(FALSE)) {
             reportNewConfig = TRUE;
@@ -2933,7 +2939,7 @@ void CWindowManagerService::RemoveWindowLocked(
     if (win->mAttrs->GetType(&type), type == IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING) {
         if (DEBUG_STARTING_WINDOW) Slogger::D(TAG, "Starting window removed %p", win);
     }
-    // if (localLOGV || DEBUG_FOCUS || DEBUG_FOCUS_LIGHT && win==mCurrentFocus) Slog.v(
+    // if (localLOGV || DEBUG_FOCUS || DEBUG_FOCUS_LIGHT && win==mCurrentFocus) Slogger::V(
     //         TAG, "Remove " + win + " client="
     //         + Integer.toHexString(System.identityHashCode(win.mClient.asBinder()))
     //         + ", surface=" + win.mWinAnimator.mSurfaceControl + " Callers="
@@ -2943,7 +2949,7 @@ void CWindowManagerService::RemoveWindowLocked(
 
     win->DisposeInputChannel();
 
-    // if (DEBUG_APP_TRANSITIONS) Slog.v(
+    // if (DEBUG_APP_TRANSITIONS) Slogger::V(
     //         TAG, "Remove " + win + ": mSurface=" + win.mWinAnimator.mSurfaceControl
     //         + " mExiting=" + win.mExiting
     //         + " isAnimating=" + win.mWinAnimator.isAnimating()
@@ -3079,7 +3085,7 @@ void CWindowManagerService::RemoveWindowInnerLocked(
     if (atoken != NULL) {
         atoken->mAllAppWindows.Remove(win);
     }
-    // if (localLOGV) Slog.v(
+    // if (localLOGV) Slogger::V(
     //         TAG, "**** Removing window " + win + ": count="
     //         + token.windows.size());
     if (token->mWindows.Begin() == token->mWindows.End()) {
@@ -3526,7 +3532,7 @@ Int32 CWindowManagerService::RelayoutWindow(
             }
         }
 
-        // if (DEBUG_LAYOUT) Slog.v(TAG, "Relayout " + win + ": viewVisibility=" + viewVisibility
+        // if (DEBUG_LAYOUT) Slogger::V(TAG, "Relayout " + win + ": viewVisibility=" + viewVisibility
         //         + " req=" + requestedWidth + "x" + requestedHeight + " " + win.mAttrs);
 
         Int32 privateFlags;
@@ -3600,7 +3606,7 @@ Int32 CWindowManagerService::RelayoutWindow(
                     winAnimator->ApplyEnterAnimationLocked();
                 }
                 if ((winFlags & IWindowManagerLayoutParams::FLAG_TURN_SCREEN_ON) != 0) {
-                    // if (DEBUG_VISIBILITY) Slog.v(TAG,
+                    // if (DEBUG_VISIBILITY) Slogger::V(TAG,
                     //         "Relayout window turning screen on: " + win);
                     win->mTurnOnScreen = TRUE;
                 }
@@ -3773,7 +3779,7 @@ Int32 CWindowManagerService::RelayoutWindow(
         inContentInsets->Set(win->mContentInsets);
         inVisibleInsets->Set(win->mVisibleInsets);
         inStableInsets->Set(win->mStableInsets);
-        // if (localLOGV) Slog.v(
+        // if (localLOGV) Slogger::V(
         //     TAG, "Relayout given client " + client.asBinder()
         //     + ", requestedWidth=" + requestedWidth
         //     + ", requestedHeight=" + requestedHeight
@@ -3781,7 +3787,7 @@ Int32 CWindowManagerService::RelayoutWindow(
         //     + "\nRelayout returning frame=" + outFrame
         //     + ", surface=" + outSurface);
 
-        // if (localLOGV || DEBUG_FOCUS) Slog.v(
+        // if (localLOGV || DEBUG_FOCUS) Slogger::V(
         //     TAG, "Relayout of " + win + ": focusMayChange=" + focusMayChange);
 
         inTouchMode = mInTouchMode;
@@ -3794,7 +3800,7 @@ Int32 CWindowManagerService::RelayoutWindow(
         mInputMonitor->UpdateInputWindowsLw(TRUE /*force*/);
 
         // if (DEBUG_LAYOUT) {
-        //     Slog.v(TAG, "Relayout complete " + win + ": outFrame=" + outFrame.toShortString());
+        //     Slogger::V(TAG, "Relayout complete " + win + ": outFrame=" + outFrame.toShortString());
         // }
     }
 
@@ -4387,7 +4393,7 @@ Int32 CWindowManagerService::GetOrientationFromWindowsLocked()
             continue;
         }
 
-        // if (DEBUG_ORIENTATION) Slog.v(TAG, win + " forcing orientation to " + req);
+        // if (DEBUG_ORIENTATION) Slogger::V(TAG, win + " forcing orientation to " + req);
         return (mLastWindowForcedOrientation = req);
     }
     return (mLastWindowForcedOrientation = IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED);
@@ -5084,7 +5090,7 @@ ECode CWindowManagerService::SetAppStartingWindow(
             // pretend like we didn't see that.
             return NOERROR;
         }
-        // if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Translucent="
+        // if (DEBUG_STARTING_WINDOW) Slogger::V(TAG, "Translucent="
         //         + ent.array.getBoolean(
         //                 com.android.internal.R.styleable.Window_windowIsTranslucent, false)
         //         + " Floating="
@@ -5229,7 +5235,7 @@ Boolean CWindowManagerService::SetTokenVisibilityLocked(
     wtoken->mWillBeHidden = FALSE;
     if (wtoken->mHidden == visible) {
         Boolean changed = FALSE;
-        // if (DEBUG_APP_TRANSITIONS) Slog.v(
+        // if (DEBUG_APP_TRANSITIONS) Slogger::V(
         //         TAG, "Changing app " + wtoken + " hidden=" + wtoken.hidden
         //         + " performLayout=" + performLayout);
 
@@ -5312,7 +5318,7 @@ Boolean CWindowManagerService::SetTokenVisibilityLocked(
              }
         }
 
-        // if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "setTokenVisibilityLocked: " + wtoken
+        // if (DEBUG_APP_TRANSITIONS) Slogger::V(TAG, "setTokenVisibilityLocked: " + wtoken
         //         + ": hidden=" + wtoken.hidden + " hiddenRequested="
         //         + wtoken.hiddenRequested);
 
@@ -5363,7 +5369,7 @@ ECode CWindowManagerService::SetAppVisibility(
         }
 
         // if (DEBUG_APP_TRANSITIONS || DEBUG_ORIENTATION) {
-        //     Slog.v(TAG, "setAppVisibility(" + token + ", visible=" + visible + "): " + mAppTransition +
+        //     Slogger::V(TAG, "setAppVisibility(" + token + ", visible=" + visible + "): " + mAppTransition +
         //             " hidden=" + wtoken.hidden + " hiddenRequested=" +
         //             wtoken.hiddenRequested, HIDE_STACK_CRAWLS ?
         //             null : new RuntimeException("here").fillInStackTrace());
@@ -5375,7 +5381,7 @@ ECode CWindowManagerService::SetAppVisibility(
             wtoken->mHiddenRequested = !visible;
 
             if (!wtoken->mStartingDisplayed) {
-                // if (DEBUG_APP_TRANSITIONS) Slog.v(
+                // if (DEBUG_APP_TRANSITIONS) Slogger::V(
                 //         TAG, "Setting dummy animation on: " + wtoken);
                 wtoken->mAppAnimator->SetDummyAnimation();
             }
@@ -5452,7 +5458,7 @@ void CWindowManagerService::UnsetAppFreezingScreenLocked(
     /* [in] */ Boolean force)
 {
     if (wtoken->mAppAnimator->mFreezingScreen) {
-        // if (DEBUG_ORIENTATION) Slog.v(TAG, "Clear freezing of " + wtoken
+        // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Clear freezing of " + wtoken
         //         + " force=" + force);
         Boolean unfrozeWindows = FALSE;
         WindowList::Iterator it = wtoken->mAllAppWindows.Begin();
@@ -5461,7 +5467,7 @@ void CWindowManagerService::UnsetAppFreezingScreenLocked(
             if (w->mAppFreezing) {
                 w->mAppFreezing = FALSE;
                 if (w->mHasSurface && !w->mOrientationChanging) {
-                    // if (DEBUG_ORIENTATION) Slog.v(TAG, "set mOrientationChanging of " + w);
+                    // if (DEBUG_ORIENTATION) Slogger::V(TAG, "set mOrientationChanging of " + w);
                     w->mOrientationChanging = TRUE;
                     mInnerFields->mOrientationChangeComplete = FALSE;
                 }
@@ -5538,7 +5544,7 @@ ECode CWindowManagerService::StartAppFreezingScreen(
 
     synchronized(mWindowMapLock) {
         if (configChanges == 0 && OkToDisplay()) {
-            // if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping set freeze of " + token);
+            // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Skipping set freeze of " + token);
             return NOERROR;
         }
 
@@ -5574,7 +5580,7 @@ ECode CWindowManagerService::StopAppFreezingScreen(
             return NOERROR;
         }
         Int64 origId = Binder::ClearCallingIdentity();
-        // if (DEBUG_ORIENTATION) Slog.v(TAG, "Clear freezing of " + token
+        // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Clear freezing of " + token
         //         + ": hidden=" + wtoken.hidden + " freezing=" + wtoken.mAppAnimator.freezingScreen);
         UnsetAppFreezingScreenLocked(wtoken, TRUE, force);
         Binder::RestoreCallingIdentity(origId);
@@ -5708,7 +5714,7 @@ void CWindowManagerService::ScheduleRemoveStartingWindowLocked(
         return;
     }
     if (wtoken != NULL && wtoken->mStartingWindow != NULL) {
-        // if (DEBUG_STARTING_WINDOW) Slog.v(TAG, Debug.getCallers(1) +
+        // if (DEBUG_STARTING_WINDOW) Slogger::V(TAG, Debug.getCallers(1) +
         //         ": Schedule remove starting " + wtoken + (wtoken != null ?
         //         " startingWindow=" + wtoken.startingWindow : ""));
         AutoPtr<IMessage> msg;
@@ -5857,7 +5863,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::FindAppWindowInsert
                     WindowList::ReverseIterator posRit = windows->RBegin();
                     for (; posRit != windows->REnd(); ++posRit) {
                         if (*posRit == win) {
-                            // if (DEBUG_REORDER) Slog.v(TAG, "Found win @" + (pos + 1));
+                            // if (DEBUG_REORDER) Slogger::V(TAG, "Found win @" + (pos + 1));
                             return posRit.GetBase();
                         }
                     }
@@ -5869,7 +5875,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::FindAppWindowInsert
     WindowList::ReverseIterator posRit = windows->RBegin();
     for (; posRit != windows->REnd(); ++posRit) {
         if ((*posRit)->mIsWallpaper) {
-            // if (DEBUG_REORDER) Slog.v(TAG, "Found wallpaper @" + pos);
+            // if (DEBUG_REORDER) Slogger::V(TAG, "Found wallpaper @" + pos);
             return posRit.GetBase();
         }
     }
@@ -5886,19 +5892,19 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::ReAddWindowLocked(
     for (; cwIt != win->mChildWindows.End(); cwIt++) {
         AutoPtr<WindowState> cwin = *cwIt;
         if (!added && cwin->mSubLayer >= 0) {
-            // if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Re-adding child window at "
+            // if (DEBUG_WINDOW_MOVEMENT) Slogger::V(TAG, "Re-adding child window at "
             //         + index + ": " + cwin);
             win->mRebuilding = FALSE;
             windows->Insert(indexIt, win);
             added = TRUE;
         }
-        // if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Re-adding window at "
+        // if (DEBUG_WINDOW_MOVEMENT) Slogger::V(TAG, "Re-adding window at "
         //         + index + ": " + cwin);
         cwin->mRebuilding = FALSE;
         windows->Insert(indexIt, cwin);
     }
     if (!added) {
-        // if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Re-adding window at "
+        // if (DEBUG_WINDOW_MOVEMENT) Slogger::V(TAG, "Re-adding window at "
         //         + index + ": " + win);
         win->mRebuilding = FALSE;
         windows->Insert(indexIt, win);
@@ -7638,8 +7644,10 @@ void CWindowManagerService::UpdateRotationUnchecked(
     /* [in] */ Boolean alwaysSendConfiguration,
     /* [in] */ Boolean forceRelayout)
 {
-    // if(DEBUG_ORIENTATION) Slog.v(TAG, "updateRotationUnchecked("
-    //            + "alwaysSendConfiguration=" + alwaysSendConfiguration + ")");
+    if (DEBUG_ORIENTATION) {
+        Slogger::V(TAG, "updateRotationUnchecked(alwaysSendConfiguration=%d, forceRelayout=%d)",
+            alwaysSendConfiguration, forceRelayout);
+    }
 
     Int64 origId = Binder::ClearCallingIdentity();
     Boolean changed;
@@ -7665,7 +7673,7 @@ Boolean CWindowManagerService::UpdateRotationUncheckedLocked(
     if (mDeferredRotationPauseCount > 0) {
         // Rotation updates have been paused temporarily.  Defer the update until
         // updates have been resumed.
-        // if (DEBUG_ORIENTATION) Slog.v(TAG, "Deferring rotation, rotation is paused.");
+        // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Deferring rotation, rotation is paused.");
         return FALSE;
     }
 
@@ -7675,13 +7683,13 @@ Boolean CWindowManagerService::UpdateRotationUncheckedLocked(
         // Rotation updates cannot be performed while the previous rotation change
         // animation is still in progress.  Skip this update.  We will try updating
         // again after the animation is finished and the display is unfrozen.
-        // if (DEBUG_ORIENTATION) Slog.v(TAG, "Deferring rotation, animation in progress.");
+        // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Deferring rotation, animation in progress.");
         return FALSE;
     }
 
     if (!mDisplayEnabled) {
         // No point choosing a rotation if the display is not enabled.
-        // if (DEBUG_ORIENTATION) Slog.v(TAG, "Deferring rotation, display is not enabled.");
+        // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Deferring rotation, display is not enabled.");
         return FALSE;
     }
 
@@ -7699,7 +7707,7 @@ Boolean CWindowManagerService::UpdateRotationUncheckedLocked(
     Boolean altOrientation = !isCompatible;
 
     // if (DEBUG_ORIENTATION) {
-    //     Slog.v(TAG, "Application requested orientation "
+    //     Slogger::V(TAG, "Application requested orientation "
     //             + mForcedAppOrientation + ", got rotation " + rotation
     //             + " which has " + (altOrientation ? "incompatible" : "compatible")
     //             + " metrics");
@@ -7711,7 +7719,7 @@ Boolean CWindowManagerService::UpdateRotationUncheckedLocked(
     }
 
     // if (DEBUG_ORIENTATION) {
-    //     Slog.v(TAG,
+    //     Slogger::V(TAG,
     //         "Rotation changed to " + rotation + (altOrientation ? " (alt)" : "")
     //         + " from " + mRotation + (mAltOrientation ? " (alt)" : "")
     //         + ", forceApp=" + mForcedAppOrientation);
@@ -7788,7 +7796,7 @@ Boolean CWindowManagerService::UpdateRotationUncheckedLocked(
     for (rit = windows->RBegin(); rit != windows->REnd(); ++rit) {
         AutoPtr<WindowState> w = *rit;
         if (w->mHasSurface) {
-            // if (DEBUG_ORIENTATION) Slog.v(TAG, "Set mOrientationChanging of " + w);
+            // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Set mOrientationChanging of " + w);
             w->mOrientationChanging = TRUE;
             mInnerFields->mOrientationChangeComplete = FALSE;
         }
@@ -9556,7 +9564,7 @@ ECode CWindowManagerService::HandleReportApplicationTokenDrawn(
     /* [in] */ AppWindowToken* wtoken)
 {
     // try {
-    // if (DEBUG_VISIBILITY) Slog.v(
+    // if (DEBUG_VISIBILITY) Slogger::V(
     //         TAG, "Reporting drawn in " + wtoken);
     ECode ec = wtoken->mAppToken->WindowsDrawn();
     // } catch (RemoteException ex) {
@@ -9570,7 +9578,7 @@ ECode CWindowManagerService::HandleReportApplicationTokenWindows(
     /* [in] */ AppWindowToken* wtoken)
 {
     // try {
-    // if (DEBUG_VISIBILITY) Slog.v(
+    // if (DEBUG_VISIBILITY) Slogger::V(
     //         TAG, "Reporting visible in " + wtoken
     //         + " visible=" + nowVisible
     //         + " gone=" + nowGone);
@@ -10280,7 +10288,7 @@ ECode CWindowManagerService::WindowForClientLocked(
         win = it->mSecond;
     }
 
-    // if (localLOGV) Slog.v(
+    // if (localLOGV) Slogger::V(
     //         TAG, "Looking up client " + client + ": " + win);
     if (win == NULL) {
         // RuntimeException ex = new IllegalArgumentException(
@@ -10611,8 +10619,8 @@ void CWindowManagerService::PerformLayoutLockedInner(
     }
 
     // if (DEBUG_LAYOUT) {
-    //     Slog.v(TAG, "-------------------------------------");
-    //     Slog.v(TAG, "performLayout: needed="
+    //     Slogger::V(TAG, "-------------------------------------");
+    //     Slogger::V(TAG, "performLayout: needed="
     //             + displayContent.layoutNeeded + " dw=" + dw + " dh=" + dh);
     // }
 
@@ -10650,18 +10658,18 @@ void CWindowManagerService::PerformLayoutLockedInner(
         Boolean gone = (behindDream && result) || isGone;
 
         // if (DEBUG_LAYOUT && !win->mLayoutAttached) {
-        //     Slog.v(TAG, "1ST PASS " + win
+        //     Slogger::V(TAG, "1ST PASS " + win
         //             + ": gone=" + gone + " mHaveFrame=" + win.mHaveFrame
         //             + " mLayoutAttached=" + win.mLayoutAttached
         //             + " screen changed=" + win.isConfigChanged());
         //     final AppWindowToken atoken = win.mAppToken;
-        //     if (gone) Slog.v(TAG, "  GONE: mViewVisibility="
+        //     if (gone) Slogger::V(TAG, "  GONE: mViewVisibility="
         //             + win.mViewVisibility + " mRelayoutCalled="
         //             + win.mRelayoutCalled + " hidden="
         //             + win.mRootToken.hidden + " hiddenRequested="
         //             + (atoken != null && atoken.hiddenRequested)
         //             + " mAttachedHidden=" + win.mAttachedHidden);
-        //     else Slog.v(TAG, "  VIS: mViewVisibility="
+        //     else Slogger::V(TAG, "  VIS: mViewVisibility="
         //             + win.mViewVisibility + " mRelayoutCalled="
         //             + win.mRelayoutCalled + " hidden="
         //             + win.mRootToken.hidden + " hiddenRequested="
@@ -10695,7 +10703,7 @@ void CWindowManagerService::PerformLayoutLockedInner(
                 win->Prelayout();
                 mPolicy->LayoutWindowLw(win, NULL);
                 win->mLayoutSeq = seq;
-                // if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame="
+                // if (DEBUG_LAYOUT) Slogger::V(TAG, "  LAYOUT: mFrame="
                 //         + win.mFrame + " mContainingFrame="
                 //         + win.mContainingFrame + " mDisplayFrame="
                 //         + win.mDisplayFrame);
@@ -10749,7 +10757,7 @@ void CWindowManagerService::PerformLayoutLockedInner(
                 win->Prelayout();
                 mPolicy->LayoutWindowLw(win, win->mAttachedWindow);
                 win->mLayoutSeq = seq;
-                // if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame="
+                // if (DEBUG_LAYOUT) Slogger::V(TAG, "  LAYOUT: mFrame="
                 //         + win.mFrame + " mContainingFrame="
                 //         + win.mContainingFrame + " mDisplayFrame="
                 //         + win.mDisplayFrame);
@@ -11746,7 +11754,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
                     Int32 flags;
                     w->mAttrs->GetFlags(&flags);
                     if ((flags & IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER) != 0) {
-                        // if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
+                        // if (DEBUG_WALLPAPER_LIGHT) Slogger::V(TAG,
                         //         "First draw done in potential wallpaper target " + w);
                         mInnerFields->mWallpaperMayChange = TRUE;
                         displayContent->mPendingLayoutChanges |=
@@ -12517,7 +12525,7 @@ AutoPtr<WindowState> CWindowManagerService::FindFocusedWindowLocked(
     for (rit = windows->RBegin(); rit != windows->REnd(); ++rit) {
         AutoPtr<WindowState> win = *rit;
 
-        // if (localLOGV || DEBUG_FOCUS) Slog.v(
+        // if (localLOGV || DEBUG_FOCUS) Slogger::V(
         //     TAG, "Looking for focus: " + i
         //     + " = " + win
         //     + ", flags=" + win.mAttrs.flags

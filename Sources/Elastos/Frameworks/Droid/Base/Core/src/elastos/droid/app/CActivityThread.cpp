@@ -2449,6 +2449,7 @@ ECode CActivityThread::HandleLaunchActivity(
     /* [in] */ ActivityClientRecord* r,
     /* [in] */ IIntent* customIntent)
 {
+    Slogger::I(TAG, " >>> HandleLaunchActivity");
     assert(r);
     AutoPtr<IApplicationInfo> appInfo;
     IComponentInfo::Probe(r->mActivityInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
@@ -2540,6 +2541,7 @@ ECode CActivityThread::HandleLaunchActivity(
 //        }
     }
 
+    Slogger::I(TAG, " <<< HandleLaunchActivity");
     return NOERROR;
 }
 
@@ -6433,16 +6435,6 @@ AutoPtr<CActivityThread::ActivityClientRecord> CActivityThread::GetActivityClien
     it = mActivities.Find(token);
     if (it != mActivities.End()) {
         return it->mSecond;
-    }
-    else {
-        Slogger::W(TAG, " >>> Failed to GetActivityClientRecord %p, current hash map: %d", token, mActivities.GetSize());
-        Int32 i = 0;
-        for (it = mActivities.Begin(); it != mActivities.End(); ++it) {
-            Slogger::I(TAG, "     > %d : %p", i++, it->mFirst.Get());
-            if (it->mFirst.Get() == token) {
-                return it->mSecond;
-            }
-        }
     }
 
     Slogger::W(TAG, " >>> Failed to GetActivityClientRecord %p", token);

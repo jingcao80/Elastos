@@ -17,6 +17,7 @@
 #include "elastos/droid/view/CMotionEvent.h"
 #include "elastos/droid/view/ThreadedRenderer.h"
 #include "elastos/droid/view/SoundEffectConstants.h"
+#include "elastos/droid/view/InputEventConsistencyVerifier.h"
 #include "elastos/droid/view/VelocityTracker.h"
 #include "elastos/droid/view/CKeyEvent.h"
 #include "elastos/droid/view/CSurface.h"
@@ -441,7 +442,7 @@ ECode ViewRootImpl::ViewRootHandler::HandleMessage(
             break;
         }
         case ViewRootImpl::MSG_DISPATCH_SYSTEM_UI_VISIBILITY: {
-            SystemUiVisibilityInfo* info = (SystemUiVisibilityInfo*)IObject::Probe(obj);
+            ISystemUiVisibilityInfo* info = ISystemUiVisibilityInfo::Probe(obj);
             mHost->HandleDispatchSystemUiVisibilityChanged(info);
             break;
         }
@@ -525,9 +526,9 @@ ECode ViewRootImpl::WindowInputEventReceiver::OnBatchedInputEventPending()
         AutoPtr<IInterface> obj;
         mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
         if (obj) {
-            AutoPtr<ViewRootImpl> viewRoot = VIEWIMPL_PROBE(obj);
+            ViewRootImpl* viewRoot = (ViewRootImpl*)IViewRootImpl::Probe(obj);
             if (viewRoot->mUnbufferedInputDispatch) {
-                IInputEventReceiver::OnBatchedInputEventPending();
+                InputEventReceiver::OnBatchedInputEventPending();
             } else {
                 viewRoot->ScheduleConsumeBatchedInput();
             }
@@ -543,7 +544,7 @@ ECode ViewRootImpl::WindowInputEventReceiver::Dispose()
         AutoPtr<IInterface> obj;
         mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
         if (obj) {
-            AutoPtr<ViewRootImpl> viewRoot = VIEWIMPL_PROBE(obj);
+            ViewRootImpl* viewRoot = (ViewRootImpl*)IViewRootImpl::Probe(obj);
             viewRoot->UnscheduleConsumeBatchedInput();
             mHost = NULL;
         }
@@ -580,7 +581,7 @@ ECode ViewRootImpl::ConsumeBatchedInputRunnable::Run()
     mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
     if (obj) {
         Int64 timeNanos;
-        AutoPtr<ViewRootImpl> viewRoot = VIEWIMPL_PROBE(obj);
+        ViewRootImpl* viewRoot = (ViewRootImpl*)IViewRootImpl::Probe(obj);
         viewRoot->mChoreographer->GetFrameTimeNanos(&timeNanos);
         viewRoot->DoConsumeBatchedInput(timeNanos);
     }
@@ -635,8 +636,8 @@ void ViewRootImpl::InvalidateOnAnimationRunnable::RemoveView(
     AutoPtr<IInterface> obj;
     mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
     if (mPosted && mViews.IsEmpty() && mViewRects.IsEmpty() && obj != NULL) {
-        AutoPtr<IViewRootImpl> viewRoot = IViewRootImpl::Probe(obj);
-        VIEWIMPL_PROBE(viewRoot)->mChoreographer->RemoveCallbacks(
+        ViewRootImpl* viewRoot = (ViewRootImpl*)IViewRootImpl::Probe(obj);
+        viewRoot->mChoreographer->RemoveCallbacks(
             IChoreographer::CALLBACK_ANIMATION, this, NULL);
         mPosted = FALSE;
     }
@@ -698,7 +699,7 @@ void ViewRootImpl::InvalidateOnAnimationRunnable::PostIfNeededLocked()
         AutoPtr<IInterface> obj;
         mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
         if (mPosted == FALSE && obj != NULL) {
-            AutoPtr<ViewRootImpl> viewRoot = VIEWIMPL_PROBE(obj);
+            ViewRootImpl* viewRoot = (ViewRootImpl*)IViewRootImpl::Probe(obj);
             viewRoot->mChoreographer->PostCallback(
                 IChoreographer::CALLBACK_ANIMATION, this, NULL);
             mPosted = TRUE;
@@ -1162,9 +1163,9 @@ ECode ViewRootImpl::RenderProfileRunnable::MyRunnable::Run()
     AutoPtr<IInterface> obj;
     mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
     if (obj) {
-        ViewRootImpl* mViewRootImpl = VIEWIMPL_PROBE(obj);
-        mViewRootImpl->mDirty->Set(0, 0, mViewRootImpl->mWidth, mViewRootImpl->mHeight);
-        mViewRootImpl->ScheduleTraversals();
+        ViewRootImpl* viewRoot = (ViewRootImpl*)IViewRootImpl::Probe(obj);
+        viewRoot->mDirty->Set(0, 0, viewRoot->mWidth, viewRoot->mHeight);
+        viewRoot->ScheduleTraversals();
     }
 
     return NOERROR;
@@ -1183,11 +1184,11 @@ ECode ViewRootImpl::RenderProfileRunnable::Run()
     AutoPtr<IInterface> obj;
     mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
     if (obj) {
-        ViewRootImpl* mViewRootImpl = VIEWIMPL_PROBE(obj);
+        ViewRootImpl* viewRoot = (ViewRootImpl*)IViewRootImpl::Probe(obj);
         Boolean result;
-        while (mViewRootImpl->mRenderProfilingEnabled) {
+        while (viewRoot->mRenderProfilingEnabled) {
             AutoPtr<IRunnable> runnable = new MyRunnable(mWeakHost);
-            mViewRootImpl->mAttachInfo->mHandler->Post(runnable, &result);
+            viewRoot->mAttachInfo->mHandler->Post(runnable, &result);
 
             // TODO: This should use vsync when we get an API
             if (FAILED(Thread::Sleep(15))) {
@@ -1305,20 +1306,52 @@ ViewRootImpl::ViewRootImpl()
     , mWindowIsRound(FALSE)
     , mProfile(FALSE)
 {
-    mDisplayListener = new RootDisplayListener(this);
-    mConsumeBatchedInputImmediatelyRunnable = new ConsumeBatchedInputImmediatelyRunnable(this);
 }
 
 ECode ViewRootImpl::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IDisplay* display)
 {
+    CTypedValue::New((ITypedValue**)&mTmpValue);
+
+    CWindowManagerLayoutParams::New((IWindowManagerLayoutParams**)&mWindowAttributes);
+    CSurface::New((ISurface**)&mSurface);
+
+    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mPendingOverscanInsets));
+    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mPendingVisibleInsets));
+    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mPendingStableInsets));
+    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mPendingContentInsets));
+
+    mLastGivenInsets = new ViewTreeObserver::InternalInsetsInfo();
+
+    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mDispatchContentInsets));
+    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mDispatchStableInsets));
+
+    CConfiguration::New((IConfiguration**)&mLastConfiguration);
+    CConfiguration::New((IConfiguration**)&mPendingConfiguration);
+
+    CPointF::New((IPointF**)&mDragPoint);
+    CPointF::New((IPointF**)&mLastTouchPoint);
+
+    CArrayList::New((IArrayList**)&mLayoutRequesters);
+
+    if (InputEventConsistencyVerifier::IsInstrumentationEnabled()) {
+        mInputEventConsistencyVerifier = new InputEventConsistencyVerifier(
+            (IViewRootImpl*)this, 0, String("ViewRootImpl"));
+    }
+
     sContext = context;
     mWindowSession = CWindowManagerGlobal::GetWindowSession();
     mDisplay = display;
     context->GetBasePackageName(&mBasePackageName);
 
     display->GetDisplayAdjustments((IDisplayAdjustments**)&mDisplayAdjustments);
+
+    mHandler = new ViewRootHandler(this);
+    mHandler->constructor();
+
+    mDisplayListener = new RootDisplayListener(this);
+    mConsumeBatchedInputImmediatelyRunnable = new ConsumeBatchedInputImmediatelyRunnable(this);
 
     mThread = Thread::GetCurrentThread();
     /*mLocation = new WindowLeaked(null);
@@ -1329,7 +1362,7 @@ ECode ViewRootImpl::constructor(
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mTempRect));
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mVisRect));
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mWinFrame));
-    CViewRootImplW::New((Handle32)this, (IIWindow**)&mWindow);
+    CViewRootImplW::New((IViewRootImpl*)this, (IIWindow**)&mWindow);//TODO
 
     AutoPtr<IApplicationInfo> info;
     context->GetApplicationInfo((IApplicationInfo**)&info);
@@ -1461,7 +1494,7 @@ ECode ViewRootImpl::SetView(
         mFallbackEventHandler->SetView(view);
         Int32 changes;
         mWindowAttributes->CopyFrom(attrs, &changes);
-        CWindowManagerLayoutParams* temp = WINLAY_PROBE(mWindowAttributes);
+        CWindowManagerLayoutParams* temp = (CWindowManagerLayoutParams*)mWindowAttributes.Get();
         if (temp->mPackageName == NULL) {
             temp->mPackageName = mBasePackageName;
         }
@@ -1472,7 +1505,7 @@ ECode ViewRootImpl::SetView(
 
         SetAccessibilityFocus(NULL, NULL);
 
-        IRootViewSurfaceTaker* rootViewST = (IRootViewSurfaceTaker*)view->Probe(EIID_IRootViewSurfaceTaker);
+        IRootViewSurfaceTaker* rootViewST = IRootViewSurfaceTaker::Probe(view);
         if (rootViewST) {
             mSurfaceHolderCallback = NULL;
             rootViewST->WillYouTakeTheSurface(
@@ -1492,8 +1525,9 @@ ECode ViewRootImpl::SetView(
 
         AutoPtr<ICompatibilityInfo> compatibilityInfo;
         mDisplayAdjustments->GetCompatibilityInfo((ICompatibilityInfo**)&compatibilityInfo);
+        mTranslator = NULL;
         compatibilityInfo->GetTranslator((ICompatibilityInfoTranslator**)&mTranslator);
-        mDisplayAdjustments->SetActivityToken(WINLAY_PROBE(attrs)->mToken);
+        mDisplayAdjustments->SetActivityToken(temp->mToken);
 
         // If the application owns the surface, don't enable hardware acceleration
         if (mSurfaceHolder == NULL) {
@@ -1509,9 +1543,7 @@ ECode ViewRootImpl::SetView(
         }
 
         if (DEBUG_LAYOUT) {
-            String str;
-            IObject::Probe(mWindowAttributes)->ToString(&str);
-            Logger::D(TAG, "WindowLayout in setView:%s", str.string());
+            Logger::D(TAG, "WindowLayout in setView:%s", TO_CSTR(mWindowAttributes));
         }
 
         Boolean supportsScreen = TRUE;
@@ -1554,6 +1586,7 @@ ECode ViewRootImpl::SetView(
         AutoPtr<IInputChannel> tempInputChannel;
         Int32 res, hostVisibility;
         GetHostVisibility(&hostVisibility);
+
         ECode ec = mWindowSession->AddToDisplay(
             mWindow.Get(), mSeq, mWindowAttributes.Get(),
             hostVisibility, displayId, mAttachInfo->mContentInsets.Get(),
@@ -1719,7 +1752,7 @@ ECode ViewRootImpl::SetView(
 /** Whether the window is in local focus mode or not */
 Boolean ViewRootImpl::IsInLocalFocusMode()
 {
-    CWindowManagerLayoutParams* obj = WINLAY_PROBE(mWindowAttributes);
+    CWindowManagerLayoutParams* obj = (CWindowManagerLayoutParams*)mWindowAttributes.Get();
     return (obj->mFlags & IWindowManagerLayoutParams::FLAG_LOCAL_FOCUS_MODE) != 0;
 }
 
@@ -1812,7 +1845,8 @@ void ViewRootImpl::EnableHardwareAcceleration(
                 mAttachInfo->mHardwareRenderer->Destroy();
             }
 
-            Boolean translucent = WINLAY_PROBE(attrs)->mFormat != IPixelFormat::OPAQUE;
+            CWindowManagerLayoutParams* wmlp = (CWindowManagerLayoutParams*)attrs;
+            Boolean translucent = wmlp->mFormat != IPixelFormat::OPAQUE;
             mAttachInfo->mHardwareRenderer = HardwareRenderer::Create(sContext, translucent);
             if (mAttachInfo->mHardwareRenderer != NULL) {
                 AutoPtr<ICharSequence> temp;
@@ -1845,7 +1879,7 @@ ECode ViewRootImpl::SetLayoutParams(
     /* [in] */ Boolean newView)
 {
     AutoLock lock(mSyncLock);
-    CWindowManagerLayoutParams* obj = WINLAY_PROBE(mWindowAttributes);
+    CWindowManagerLayoutParams* obj = (CWindowManagerLayoutParams*)mWindowAttributes.Get();
     CRect* objRect = (CRect*)IRect::Probe(obj->mSurfaceInsets);
     Int32 oldInsetLeft = objRect->mLeft;
     Int32 oldInsetTop = objRect->mTop;
@@ -1968,7 +2002,7 @@ ECode ViewRootImpl::InvalidateWorld(
     /* [in] */ IView* view)
 {
     view->Invalidate();
-    ViewGroup* parent = VIEWGROUP_PROBE(view);
+    ViewGroup* parent = (ViewGroup*)IViewGroup::Probe(view);
     if (parent) {
         Int32 count = 0;
         parent->GetChildCount(&count);
@@ -2228,7 +2262,7 @@ Boolean ViewRootImpl::CollectViewAttributes()
         mAttachInfo->mHasSystemUiListeners = FALSE;
         VIEW_PROBE(mView)->DispatchCollectViewAttributes(mAttachInfo, 0);
         mAttachInfo->mSystemUiVisibility &= ~mAttachInfo->mDisabledSystemUiVisibility;
-        CWindowManagerLayoutParams* params = WINLAY_PROBE(mWindowAttributes);
+        CWindowManagerLayoutParams* params = (CWindowManagerLayoutParams*)mWindowAttributes.Get();
         if (mAttachInfo->mKeepScreenOn != oldScreenOn
             || mAttachInfo->mSystemUiVisibility != params->mSubtreeSystemUiVisibility
             || mAttachInfo->mHasSystemUiListeners != params->mHasSystemUiListeners) {
@@ -2246,7 +2280,7 @@ Int32 ViewRootImpl::GetImpliedSystemUiVisibility(
     /* [in] */ IWindowManagerLayoutParams* params)
 {
     Int32 vis = 0;
-    CWindowManagerLayoutParams* temp = WINLAY_PROBE(params);
+    CWindowManagerLayoutParams* temp = (CWindowManagerLayoutParams*)params;
     // Translucent decor window flags imply stable system ui visibility.
     if ((temp->mFlags & IWindowManagerLayoutParams::FLAG_TRANSLUCENT_STATUS) != 0) {
         vis |= IView::SYSTEM_UI_FLAG_LAYOUT_STABLE | IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
@@ -2273,7 +2307,7 @@ Boolean ViewRootImpl::MeasureHierarchy(
             host, desiredWindowWidth, desiredWindowHeight);
 
     Boolean goodMeasure = FALSE;
-    CWindowManagerLayoutParams* obj = WINLAY_PROBE(lp);
+    CWindowManagerLayoutParams* obj = (CWindowManagerLayoutParams*)lp;
     if (obj->mWidth == IViewGroupLayoutParams::WRAP_CONTENT) {
         // On large screens, we don't want to allow dialogs to just
         // stretch to fill the entire width of the screen to display
@@ -2411,7 +2445,7 @@ void ViewRootImpl::PerformTraversals()
     Boolean windowSizeMayChange = FALSE;
     Boolean newSurface = FALSE;
     Boolean surfaceChanged = FALSE;
-    CWindowManagerLayoutParams* lp = WINLAY_PROBE(mWindowAttributes);
+    CWindowManagerLayoutParams* lp = (CWindowManagerLayoutParams*)mWindowAttributes.Get();
 
     Int32 desiredWindowWidth = 0;
     Int32 desiredWindowHeight = 0;
@@ -3169,8 +3203,7 @@ void ViewRootImpl::PerformTraversals()
         mAttachInfo->mHasNonEmptyGivenInternalInsets = !insetsIsEmpty;
 
         // Tell the window manager.
-        Boolean equal = FALSE;
-        IObject::Probe(mLastGivenInsets)->Equals((IInterface*)insets->Probe(EIID_IInterface), &equal);
+        Boolean equal = Object::Equals(mLastGivenInsets, insets);
         if (insetsPending || !equal) {
             ((ViewTreeObserver::InternalInsetsInfo*)mLastGivenInsets.Get())->Set(insets);
 
@@ -3240,8 +3273,9 @@ void ViewRootImpl::PerformTraversals()
     mViewVisibility = viewVisibility;
 
     if (mAttachInfo->mHasWindowFocus && !IsInLocalFocusMode()) {
+        CWindowManagerLayoutParams* wmlp = (CWindowManagerLayoutParams*)mWindowAttributes.Get();
         const Boolean imTarget =
-            CWindowManagerLayoutParams::MayUseInputMethod(WINLAY_PROBE(mWindowAttributes)->mFlags);
+            CWindowManagerLayoutParams::MayUseInputMethod(wmlp->mFlags);
         if (imTarget != mLastWasImTarget) {
             mLastWasImTarget = imTarget;
             AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();
@@ -3250,8 +3284,7 @@ void ViewRootImpl::PerformTraversals()
                AutoPtr<IView> focView;
                mView->FindFocus((IView**)&focView);
                imm->OnWindowFocus(mView, focView,
-                   WINLAY_PROBE(mWindowAttributes)->mSoftInputMode,
-                   !mHasHadWindowFocus, WINLAY_PROBE(mWindowAttributes)->mFlags);
+                   wmlp->mSoftInputMode, !mHasHadWindowFocus, wmlp->mFlags);
             }
         }
     }
@@ -3837,7 +3870,7 @@ void ViewRootImpl::Draw(
 
     Int32 xOffset = 0;
     Int32 yOffset = curScrollY;
-    CWindowManagerLayoutParams* params = WINLAY_PROBE(mWindowAttributes);
+    CWindowManagerLayoutParams* params = (CWindowManagerLayoutParams*)mWindowAttributes.Get();
     AutoPtr<IRect> obj = params != NULL ? params->mSurfaceInsets : NULL;
     CRect* surfaceInsets = (CRect*)obj.Get();
     if (surfaceInsets != NULL) {
@@ -4951,8 +4984,9 @@ void ViewRootImpl::HandleDragEvent(
 }
 
 ECode ViewRootImpl::HandleDispatchSystemUiVisibilityChanged(
-    /* [in] */ SystemUiVisibilityInfo* args)
+    /* [in] */ ISystemUiVisibilityInfo* argsObj)
 {
+    SystemUiVisibilityInfo* args = (SystemUiVisibilityInfo*)argsObj;
     if (mSeq != args->mSeq) {
         // The sequence has changed, so we need to update our value and make
         // sure to do a traversal afterward so the window manager is given our
@@ -5078,12 +5112,13 @@ Int32 ViewRootImpl::RelayoutWindow(
     mPendingConfiguration->SetSeq(0);
 
     //ger::oG.d(TAG, ">>>>>> CALLING relayout");
-    if (params != NULL && mOrigWindowType != WINLAY_PROBE(params)->mType) {
+    CWindowManagerLayoutParams* wmlp = (CWindowManagerLayoutParams*)params;
+    if (params != NULL && mOrigWindowType != wmlp->mType) {
         // For compatibility with old apps, don't crash here.
         if (mTargetSdkVersion < Build::VERSION_CODES::ICE_CREAM_SANDWICH) {
            /* Slogger::W(TAG, "Window type can not be changed after "
                 "the window is added; ignoring change of 0x%08x", mView.Get());*/
-            WINLAY_PROBE(params)->mType = mOrigWindowType;
+            wmlp->mType = mOrigWindowType;
         }
     }
 
@@ -6421,8 +6456,8 @@ void ViewRootImpl::HandleWindowFocusChanged(
                 // }
             }
         }
-        mLastWasImTarget = CWindowManagerLayoutParams::MayUseInputMethod(
-                WINLAY_PROBE(mWindowAttributes)->mFlags);
+        CWindowManagerLayoutParams* wmlp = (CWindowManagerLayoutParams*)mWindowAttributes.Get();
+        mLastWasImTarget = CWindowManagerLayoutParams::MayUseInputMethod(wmlp->mFlags);
         AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();
         if (mView != NULL) {
             if (hasWindowFocus && imm != NULL && mLastWasImTarget && !IsInLocalFocusMode()) {
@@ -6441,19 +6476,17 @@ void ViewRootImpl::HandleWindowFocusChanged(
                 AutoPtr<IView> focus;
                 mView->FindFocus((IView**)&focus);
                 imm->OnWindowFocus(
-                    mView, focus, WINLAY_PROBE(mWindowAttributes)->mSoftInputMode,
-                    !mHasHadWindowFocus, WINLAY_PROBE(mWindowAttributes)->mFlags);
+                    mView, focus, wmlp->mSoftInputMode, !mHasHadWindowFocus, wmlp->mFlags);
             }
             // Clear the forward bit.  We can just do this directly, since
             // the window manager doesn't care about it.
             //
-            WINLAY_PROBE(mWindowAttributes)->mSoftInputMode &=
-                ~IWindowManagerLayoutParams::SOFT_INPUT_IS_FORWARD_NAVIGATION;
+            wmlp->mSoftInputMode &= ~IWindowManagerLayoutParams::SOFT_INPUT_IS_FORWARD_NAVIGATION;
 
             AutoPtr<IWindowManagerLayoutParams> params;
             mView->GetLayoutParams((IViewGroupLayoutParams**)&params);
-            WINLAY_PROBE(params)->mSoftInputMode &=
-                ~IWindowManagerLayoutParams::SOFT_INPUT_IS_FORWARD_NAVIGATION;
+            CWindowManagerLayoutParams* wmlp = (CWindowManagerLayoutParams*)params.Get();
+            wmlp->mSoftInputMode &= ~IWindowManagerLayoutParams::SOFT_INPUT_IS_FORWARD_NAVIGATION;
             mHasHadWindowFocus = TRUE;
         }
 

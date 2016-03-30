@@ -1,6 +1,9 @@
 #include "elastos/droid/view/CWindowManagerGlobalSessionCallback.h"
+#include "elastos/droid/animation/CValueAnimatorHelper.h"
 
 using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Animation::IValueAnimatorHelper;
+using Elastos::Droid::Animation::CValueAnimatorHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -21,15 +24,15 @@ ECode CWindowManagerGlobalSessionCallback::constructor()
 ECode CWindowManagerGlobalSessionCallback::OnAnimatorScaleChanged(
     /* [in] */ Float scale)
 {
-    assert(0);
-    //ValueAnimator::SetDurationScale(scale);
+    AutoPtr<IValueAnimatorHelper> helper;
+    CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
+    helper->SetDurationScale(scale);
     return NOERROR;
 }
 
 ECode CWindowManagerGlobalSessionCallback::ToString(
     /* [out] */ String* info)
 {
-    VALIDATE_NOT_NULL(info)
     return Object::ToString(info);
 }
 

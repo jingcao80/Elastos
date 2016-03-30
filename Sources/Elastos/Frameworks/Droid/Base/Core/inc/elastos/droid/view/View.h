@@ -79,14 +79,6 @@ class RenderNodeAnimator;
 #define VIEW_PROBE(host) ((View*)IView::Probe(host))
 #endif
 
-#ifndef VIEWGROUP_PROBE
-#define VIEWGROUP_PROBE(host) ((ViewGroup*)IViewGroup::Probe(host))
-#endif
-
-#ifndef VIEWIMPL_PROBE
-#define VIEWIMPL_PROBE(host) ((ViewRootImpl*)IViewRootImpl::Probe(host))
-#endif
-
 class ECO_PUBLIC View
     : public Object
     , public IView

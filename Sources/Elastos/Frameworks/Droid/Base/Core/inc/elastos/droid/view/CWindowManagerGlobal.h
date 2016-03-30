@@ -45,19 +45,6 @@ private:
         CWindowManagerGlobal* mOwner;
     };
 
-    class InnerWindowSessionCallbackStub
-        : public Object
-        , public IIWindowSessionCallback
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        InnerWindowSessionCallbackStub();
-
-        CARAPI OnAnimatorScaleChanged(
-            /* [in] */ Float scale);
-    };
-
 public:
     CAR_INTERFACE_DECL()
 

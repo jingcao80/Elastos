@@ -22,7 +22,7 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
-const Boolean InputEventConsistencyVerifier::IS_ENG_BUILD = String("eng").Equals(Os::Build::TYPE);
+const Boolean InputEventConsistencyVerifier::IS_ENG_BUILD = Os::Build::TYPE.Equals("eng");
 
 const String InputEventConsistencyVerifier::EVENT_TYPE_KEY("KeyEvent");
 const String InputEventConsistencyVerifier::EVENT_TYPE_TRACKBALL("TrackballEvent");
@@ -33,7 +33,13 @@ const Int32 InputEventConsistencyVerifier::RECENT_EVENTS_TO_LOG;
 Object InputEventConsistencyVerifier::KeyState::mRecycledListLock;
 AutoPtr<InputEventConsistencyVerifier::KeyState> InputEventConsistencyVerifier::KeyState::mRecycledList;
 
-CAR_INTERFACE_IMPL(InputEventConsistencyVerifier, Object, IInputEventConsistencyVerifier)
+
+InputEventConsistencyVerifier::KeyState::KeyState()
+    : mDeviceId(0)
+    , mSource(0)
+    , mKeyCode(0)
+    , mUnhandled(FALSE)
+{}
 
 AutoPtr<InputEventConsistencyVerifier::KeyState> InputEventConsistencyVerifier::KeyState::Obtain(
     /* [in] */ Int32 deviceId,
@@ -41,7 +47,7 @@ AutoPtr<InputEventConsistencyVerifier::KeyState> InputEventConsistencyVerifier::
     /* [in] */ Int32 keyCode)
 {
     AutoPtr<KeyState> state;
-    /*{
+    {
         AutoLock lock(mRecycledListLock);
         state = mRecycledList;
         if (state != NULL) {
@@ -54,7 +60,7 @@ AutoPtr<InputEventConsistencyVerifier::KeyState> InputEventConsistencyVerifier::
     state->mDeviceId = deviceId;
     state->mSource = source;
     state->mKeyCode = keyCode;
-    state->mUnhandled = FALSE;*/
+    state->mUnhandled = FALSE;
     return state;
 }
 
@@ -66,10 +72,12 @@ ECode InputEventConsistencyVerifier::KeyState::Recycle()
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(InputEventConsistencyVerifier, Object, IInputEventConsistencyVerifier)
+
 InputEventConsistencyVerifier::InputEventConsistencyVerifier(
     /* [in] */ IInterface* caller,
     /* [in] */ Int32 flags,
-    /* [in] */ const String& logTag/* = NULL*/)
+    /* [in] */ const String& logTag)
     : mCaller(caller)
     , mFlags(flags)
     , mLastEventSeq(0)
@@ -84,7 +92,7 @@ InputEventConsistencyVerifier::InputEventConsistencyVerifier(
     , mTouchEventStreamUnhandled(FALSE)
     , mHoverEntered(FALSE)
 {
-    mLogTag = (logTag.IsNull()) ? String("InputEventConsistencyVerifier") : logTag;
+    mLogTag = logTag.IsNull() ? String("InputEventConsistencyVerifier") : logTag;
 }
 
 Boolean InputEventConsistencyVerifier::IsInstrumentationEnabled()
@@ -94,7 +102,7 @@ Boolean InputEventConsistencyVerifier::IsInstrumentationEnabled()
 
 ECode InputEventConsistencyVerifier::Reset()
 {
-    /*mLastEventSeq = -1;
+    mLastEventSeq = -1;
     mLastNestingLevel = 0;
     mTrackballDown = FALSE;
     mTrackballUnhandled = FALSE;
@@ -107,7 +115,7 @@ ECode InputEventConsistencyVerifier::Reset()
         AutoPtr<KeyState> state = mKeyStateList;
         mKeyStateList = state->mNext;
         state->Recycle();
-    }*/
+    }
     return NOERROR;
 }
 
@@ -115,25 +123,25 @@ ECode InputEventConsistencyVerifier::OnInputEvent(
     /* [in] */ IInputEvent* event,
     /* [in] */ Int32 nestingLevel)
 {
-    /*if (IKeyEvent::Probe(event)) {
-        OnKeyEvent(IKeyEvent::Probe(event), nestingLevel);
+    IKeyEvent* ke = IKeyEvent::Probe(event);
+    if (ke) {
+        OnKeyEvent(ke, nestingLevel);
     }
     else {
-        AutoPtr<IMotionEvent> motionEvent = IMotionEvent::Probe(event);
+        IMotionEvent* motionEvent = IMotionEvent::Probe(event);
         Boolean isTouchEvent;
         motionEvent->IsTouchEvent(&isTouchEvent);
         Int32 source;
         if (isTouchEvent) {
             OnTouchEvent(motionEvent, nestingLevel);
         }
-        else if (((motionEvent->GetSource(&source), source)
-            & IInputDevice::SOURCE_CLASS_TRACKBALL) != 0) {
+        else if (((event->GetSource(&source), source) & IInputDevice::SOURCE_CLASS_TRACKBALL) != 0) {
             OnTrackballEvent(motionEvent, nestingLevel);
         }
         else {
             OnGenericMotionEvent(motionEvent, nestingLevel);
         }
-    }*/
+    }
 
     return NOERROR;
 }
@@ -142,7 +150,8 @@ ECode InputEventConsistencyVerifier::OnKeyEvent(
     /* [in] */ IKeyEvent* event,
     /* [in] */ Int32 nestingLevel)
 {
-    if (!StartEvent(IInputEvent::Probe(event), nestingLevel, EVENT_TYPE_KEY)) {
+    IInputEvent* ie = IInputEvent::Probe(event);
+    if (!StartEvent(ie, nestingLevel, EVENT_TYPE_KEY)) {
         return NOERROR;
     }
 
@@ -151,13 +160,10 @@ ECode InputEventConsistencyVerifier::OnKeyEvent(
         event->GetMetaState(&metaState);
         EnsureMetaStateIsNormalized(metaState);
 
-        Int32 action;
+        Int32 action, deviceId, source, keyCode;
         event->GetAction(&action);
-        Int32 deviceId;
-        IInputEvent::Probe(event)->GetDeviceId(&deviceId);
-        Int32 source;
-        IInputEvent::Probe(event)->GetSource(&source);
-        Int32 keyCode;
+        ie->GetDeviceId(&deviceId);
+        ie->GetSource(&source);
         event->GetKeyCode(&keyCode);
         switch (action) {
             case IKeyEvent::ACTION_DOWN: {
@@ -211,7 +217,8 @@ ECode InputEventConsistencyVerifier::OnTrackballEvent(
     /* [in] */ IMotionEvent* event,
     /* [in] */ Int32 nestingLevel)
 {
-    if (!StartEvent(IInputEvent::Probe(event), nestingLevel, EVENT_TYPE_TRACKBALL)) {
+    IInputEvent* ie = IInputEvent::Probe(event);
+    if (!StartEvent(ie, nestingLevel, EVENT_TYPE_TRACKBALL)) {
         return NOERROR;
     }
 
@@ -220,10 +227,9 @@ ECode InputEventConsistencyVerifier::OnTrackballEvent(
         event->GetMetaState(&metaState);
         EnsureMetaStateIsNormalized(metaState);
 
-        Int32 action;
+        Int32 action, source;
         event->GetAction(&action);
-        Int32 source;
-        IInputEvent::Probe(event)->GetSource(&source);
+        ie->GetSource(&source);
         if ((source & IInputDevice::SOURCE_CLASS_TRACKBALL) != 0) {
             switch (action) {
                 case IMotionEvent::ACTION_DOWN:
@@ -280,7 +286,8 @@ ECode InputEventConsistencyVerifier::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [in] */ Int32 nestingLevel)
 {
-    if (!StartEvent(IInputEvent::Probe(event), nestingLevel, EVENT_TYPE_TOUCH)) {
+    IInputEvent* ie = IInputEvent::Probe(event);
+    if (!StartEvent(ie, nestingLevel, EVENT_TYPE_TOUCH)) {
         return NOERROR;
     }
 
@@ -294,7 +301,7 @@ ECode InputEventConsistencyVerifier::OnTouchEvent(
         mTouchEventStreamPointers = 0;
     }
     if (mTouchEventStreamIsTainted) {
-        IInputEvent::Probe(event)->SetTainted(TRUE);
+        ie->SetTainted(TRUE);
     }
 
     //try {
@@ -303,9 +310,9 @@ ECode InputEventConsistencyVerifier::OnTouchEvent(
         EnsureMetaStateIsNormalized(metaState);
 
         Int32 deviceId;
-        IInputEvent::Probe(event)->GetDeviceId(&deviceId);
+        ie->GetDeviceId(&deviceId);
         Int32 source;
-        IInputEvent::Probe(event)->GetSource(&source);
+        ie->GetSource(&source);
 
         if (!newStream && mTouchEventStreamDeviceId != -1
             && (mTouchEventStreamDeviceId != deviceId
@@ -442,7 +449,8 @@ ECode InputEventConsistencyVerifier::OnGenericMotionEvent(
     /* [in] */ IMotionEvent* event,
     /* [in] */ Int32 nestingLevel)
 {
-    if (!StartEvent(IInputEvent::Probe(event), nestingLevel, EVENT_TYPE_GENERIC_MOTION)) {
+    IInputEvent* ie = IInputEvent::Probe(event);
+    if (!StartEvent(ie, nestingLevel, EVENT_TYPE_GENERIC_MOTION)) {
         return NOERROR;
     }
 
@@ -454,7 +462,7 @@ ECode InputEventConsistencyVerifier::OnGenericMotionEvent(
         Int32 action;
         event->GetAction(&action);
         Int32 source;
-        IInputEvent::Probe(event)->GetSource(&source);
+        ie->GetSource(&source);
         if ((source & IInputDevice::SOURCE_CLASS_POINTER) != 0) {
             switch (action) {
                 case IMotionEvent::ACTION_HOVER_ENTER:

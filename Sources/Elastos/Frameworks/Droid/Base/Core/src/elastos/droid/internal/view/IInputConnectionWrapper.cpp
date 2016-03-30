@@ -107,9 +107,19 @@ ECode IInputConnectionWrapper::constructor(
     return NOERROR;
 }
 
+ECode IInputConnectionWrapper::IsActive(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = TRUE;
+    return NOERROR;
+}
+
 Boolean IInputConnectionWrapper::IsActive()
 {
-    return TRUE;
+    Boolean bval;
+    IsActive(&bval);
+    return bval;
 }
 
 ECode IInputConnectionWrapper::GetTextAfterCursor(

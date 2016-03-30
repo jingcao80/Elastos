@@ -34,6 +34,7 @@ using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::View::EIID_IIWindowSessionCallback;
+using Elastos::Droid::View::CWindowManagerGlobalSessionCallback;
 using Elastos::Droid::View::HardwareRenderer;
 using Elastos::Droid::View::InputMethod::CInputMethodManager;
 using Elastos::Droid::View::InputMethod::IInputMethodManager;
@@ -81,24 +82,6 @@ ECode CWindowManagerGlobal::SystemPropertyUpdaterRunnable::Run()
         AutoPtr<IViewRootImpl> impl = IViewRootImpl::Probe(temp);
         impl->LoadSystemProperties();
     }
-    return NOERROR;
-}
-
-//===========================================================================
-//          CWindowManagerGlobal::InnerWindowSessionCallbackStub
-//===========================================================================
-CAR_INTERFACE_IMPL(CWindowManagerGlobal::InnerWindowSessionCallbackStub, Object, IIWindowSessionCallback)
-
-CWindowManagerGlobal::InnerWindowSessionCallbackStub::InnerWindowSessionCallbackStub()
-{
-}
-
-ECode CWindowManagerGlobal::InnerWindowSessionCallbackStub::OnAnimatorScaleChanged(
-    /* [in] */ Float scale)
-{
-    AutoPtr<IValueAnimatorHelper> helper;
-    CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
-    helper->SetDurationScale(scale);
     return NOERROR;
 }
 
@@ -161,7 +144,8 @@ AutoPtr<IWindowSession> CWindowManagerGlobal::GetWindowSession()
             imm->GetClient((IInputMethodClient**)&client);
             AutoPtr<IIInputContext> ctx;
             imm->GetInputContext((IIInputContext**)&ctx);
-            AutoPtr<IIWindowSessionCallback> cb = new CWindowManagerGlobal::InnerWindowSessionCallbackStub();
+            AutoPtr<IIWindowSessionCallback> cb;
+            CWindowManagerGlobalSessionCallback::New((IIWindowSessionCallback**)&cb);
             wm->OpenSession(cb, client, ctx, (IWindowSession**)&sWindowSession);
 
             Float animatorScale;
@@ -282,8 +266,8 @@ ECode CWindowManagerGlobal::AddView(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    CWindowManagerLayoutParams* wparams =
-        (CWindowManagerLayoutParams*)IWindowManagerLayoutParams::Probe(params);
+    IWindowManagerLayoutParams* wmlp = IWindowManagerLayoutParams::Probe(params);
+    CWindowManagerLayoutParams* wparams =(CWindowManagerLayoutParams*)wmlp;
     if (parentWindow != NULL) {
         if (wparams->mType == IWindowManagerLayoutParams::TYPE_NAVIGATION_BAR) {
             // TODO: TYPE_NAVIGATION_BAR
@@ -292,7 +276,7 @@ ECode CWindowManagerGlobal::AddView(
             wparams->SetToken(binder);
         }
         else {
-            parentWindow->AdjustLayoutParamsForSubWindow(IWindowManagerLayoutParams::Probe(wparams));
+            parentWindow->AdjustLayoutParamsForSubWindow(wmlp);
         }
     }
     else {
@@ -328,13 +312,12 @@ ECode CWindowManagerGlobal::AddView(
         FindViewLocked(view, FALSE, &index);
         if (index >= 0) {
             Boolean contains;
-            mDyingViews->Contains(IInterface::Probe(view), &contains);
+            mDyingViews->Contains(view, &contains);
             if (contains) {
                 // Don't wait for MSG_DIE to make it's way through root's queue.
                 AutoPtr<IInterface> temp;
                 mRoots->Get(index, (IInterface**)&temp);
-                AutoPtr<IViewRootImpl> impl = IViewRootImpl::Probe(temp);
-                impl->DoDie();
+                IViewRootImpl::Probe(temp)->DoDie();
             }
             else {
                 Logger::E(TAG, "View 0x%08x has already been added to the window manager.", view);
@@ -349,11 +332,11 @@ ECode CWindowManagerGlobal::AddView(
             wparams->mType <= IWindowManagerLayoutParams::LAST_SUB_WINDOW) {
             Int32 count = 0;
             mRoots->GetSize(&count);
-            for (Int32 i=0; i<count; i++) {
+            for (Int32 i = 0; i < count; i++) {
                 AutoPtr<IInterface> temp;
                 mRoots->Get(i, (IInterface**)&temp);
-                IViewRootImpl* impl = IViewRootImpl::Probe(temp);
-                if (IBinder::Probe(VIEWIMPL_PROBE(impl)->mWindow.Get()) == wparams->mToken) {
+                ViewRootImpl* impl = (ViewRootImpl*)IViewRootImpl::Probe(temp);
+                if (IBinder::Probe(impl->mWindow) == wparams->mToken) {
                     AutoPtr<IInterface> it;
                     mViews->Get(i, (IInterface**)&it);
                     panelParentView = IView::Probe(it);;
@@ -363,17 +346,19 @@ ECode CWindowManagerGlobal::AddView(
 
         AutoPtr<IContext> context;
         view->GetContext((IContext**)&context);
-        assert(0);
-        //-- abstract class: root = new ViewRootImpl(context, display);
+        AutoPtr<ViewRootImpl> vri = new ViewRootImpl();
+        vri->constructor(context, display);
+        root = (IViewRootImpl*)vri.Get();
+
         view->SetLayoutParams(params);
 
         mViews->Add(view);
         mRoots->Add(root);
-        mParams->Add(IWindowManagerLayoutParams::Probe(wparams));
+        mParams->Add(wmlp);
     }
 
     // do this last because it fires off messages to start doing things
-    ECode ec = root->SetView(view, IWindowManagerLayoutParams::Probe(wparams), panelParentView);
+    ECode ec = root->SetView(view, wmlp, panelParentView);
     if (FAILED(ec)) {
         // BadTokenException or InvalidDisplayException, clean up.
         AutoLock lock(mLock);
@@ -512,9 +497,10 @@ void CWindowManagerGlobal::RemoveViewLocked(
     root->Die(immediate, &deferred);
 
     if (view != NULL) {
-        VIEW_PROBE(view)->AssignParent(NULL);
+        View* v = (View*)view.Get();
+        v->AssignParent(NULL);
         if (deferred) {
-            mDyingViews->Add(TO_IINTERFACE(view));
+            mDyingViews->Add(view.Get());
         }
     }
 }
@@ -532,8 +518,7 @@ ECode CWindowManagerGlobal::DoRemoveView(
             mParams->Remove(index);
             AutoPtr<IInterface> temp;
             mViews->Remove(index, (IInterface**)&temp);
-            IView* view = IView::Probe(temp);
-            IList::Probe(mDyingViews)->Remove(TO_IINTERFACE(view));
+            mDyingViews->Remove(IView::Probe(temp));
         }
     }
 
@@ -749,11 +734,10 @@ String CWindowManagerGlobal::GetWindowName(
     /* [in] */ IViewRootImpl* root)
 {
     AutoPtr<ICharSequence> title;
-    VIEWIMPL_PROBE(root)->mWindowAttributes->GetTitle((ICharSequence**)&title);
+    ((ViewRootImpl*)root)->mWindowAttributes->GetTitle((ICharSequence**)&title);
     String str;
     title->ToString(&str);
-    Int32 code;
-    IObject::Probe(root)->GetHashCode(&code);
+    Int32 code = Object::GetHashCode(root);
     return str + String("/ViewRootImpl@") + StringUtils::ToString(code);
 }
 

@@ -786,7 +786,7 @@ ECode View::AccessibilityDelegate::OnRequestSendAccessibilityEvent(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    ViewGroup* group = VIEWGROUP_PROBE(host);
+    ViewGroup* group = (ViewGroup*)host;
     *res = group->OnRequestSendAccessibilityEventInternal(child, event);
     return NOERROR;
 }
@@ -915,10 +915,8 @@ View::AttachInfo::AttachInfo(
     ASSERT_SUCCEEDED(CDispatcherState::New((IDispatcherState**)&mKeyDispatchState));
     mTransparentLocation[0] = mTransparentLocation[1] = 0;
     mInvalidateChildLocation[0] = mInvalidateChildLocation[1] = 0;
-    (*mTmpTransformLocation)[0] = (*mTmpTransformLocation)[1] = 0;
+    mTmpTransformLocation = ArrayOf<Float>::Alloc(2);
     mTmpLocation = ArrayOf<Int32>::Alloc(2);
-    (*mTmpLocation)[0] = (*mTmpLocation)[1] = 0;
-
 }
 
 View::AttachInfo::~AttachInfo()
@@ -2958,9 +2956,10 @@ ECode View::ComputeClickPointInScreenForAccessibility(
     AutoPtr<IArrayList> intersections = mAttachInfo->mTmpRectList;
     intersections->Clear();
 
-    if (IViewGroup::Probe(mParent)) {
+    IViewGroup* vg = IViewGroup::Probe(mParent);
+    if (vg) {
         Boolean windowCoordinates;
-        VIEWGROUP_PROBE(mParent)->TranslateBoundsAndIntersectionsInWindowCoordinates(
+        ((ViewGroup*)vg)->TranslateBoundsAndIntersectionsInWindowCoordinates(
             this, bounds, IList::Probe(intersections), &windowCoordinates);
         if (!windowCoordinates) {
             intersections->Clear();
@@ -7322,8 +7321,9 @@ void View::SetFlags(
             CleanupDraw();
         }
 
-        if (mParent != NULL && IViewGroup::Probe(mParent) != NULL) {
-            VIEWGROUP_PROBE(mParent)->OnChildVisibilityChanged(this,
+        IViewGroup* vg = IViewGroup::Probe(mParent);
+        if (vg != NULL) {
+            ((ViewGroup*)vg)->OnChildVisibilityChanged(this,
                     (changed & VISIBILITY_MASK), newVisibility);
             VIEW_PROBE(mParent)->Invalidate(TRUE);
         }
@@ -8947,6 +8947,7 @@ ECode View::GetLayoutParams(
 {
     VALIDATE_NOT_NULL(res)
     *res = mLayoutParams;
+    REFCOUNT_ADD(*res)
     return NOERROR;
 }
 
@@ -8957,11 +8958,13 @@ ECode View::SetLayoutParams(
 //        throw new NullPointerException("params == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
+
     mLayoutParams = params;
 
     ResolveLayoutParams();
-    if (mParent != NULL && VIEWGROUP_PROBE(mParent) != NULL) {
-        VIEWGROUP_PROBE(mParent)->OnSetLayoutParams(this, params);
+    IViewGroup* vg = IViewGroup::Probe(mParent);
+    if (vg != NULL) {
+        ((ViewGroup*)vg)->OnSetLayoutParams(this, params);
     }
 
     RequestLayout();
@@ -9205,9 +9208,14 @@ Boolean View::AwakenScrollBars(
  */
 Boolean View::SkipInvalidate()
 {
-    return (mViewFlags & VISIBILITY_MASK) != IView::VISIBLE && mCurrentAnimation == NULL &&
-        (mParent == NULL || IViewGroup::Probe(mParent) == NULL ||
-        !VIEWGROUP_PROBE(mParent)->IsViewTransitioning(this));
+    if ((mViewFlags & VISIBILITY_MASK) != IView::VISIBLE && mCurrentAnimation == NULL) {
+        IViewGroup* vg = IViewGroup::Probe(mParent);
+        if (vg != NULL) {
+            return ((ViewGroup*)vg)->IsViewTransitioning(this);
+        }
+    }
+
+    return FALSE;
 }
 
 /**
@@ -9749,7 +9757,7 @@ ECode View::PostInvalidateDelayed(
         info->mTop = top;
         info->mRight = right;
         info->mBottom = bottom;
-        VIEWIMPL_PROBE(mAttachInfo->mViewRootImpl)->DispatchInvalidateRectDelayed(info, delayMilliseconds);
+        ((ViewRootImpl*)mAttachInfo->mViewRootImpl)->DispatchInvalidateRectDelayed(info, delayMilliseconds);
     }
     return NOERROR;
 }
@@ -9780,7 +9788,7 @@ ECode View::PostInvalidateOnAnimation(
         info->mTop = top;
         info->mRight = right;
         info->mBottom = bottom;
-        VIEWIMPL_PROBE(mAttachInfo->mViewRootImpl)->DispatchInvalidateRectOnAnimation(info);
+        ((ViewRootImpl*)mAttachInfo->mViewRootImpl)->DispatchInvalidateRectOnAnimation(info);
     }
 
     return NOERROR;
@@ -12383,7 +12391,7 @@ Boolean View::DrawAnimation(
     /* [in] */ Boolean scalingRequired)
 {
      AutoPtr<ITransformation> invalidationTransform;
-     ViewGroup* parent = VIEWGROUP_PROBE(parentObj);
+     ViewGroup* parent = (ViewGroup*)parentObj;
      Int32 flags = parent->mGroupFlags;
      Boolean initialized;
      a->IsInitialized(&initialized);
@@ -12465,15 +12473,16 @@ void View::SetDisplayListProperties(
         Boolean res, hasOverlappingRendering;
         HasOverlappingRendering(&hasOverlappingRendering);
         renderNode->SetHasOverlappingRendering(hasOverlappingRendering, &res);
-        if (IViewGroup::Probe(mParent)) {
+        IViewGroup* vg = IViewGroup::Probe(mParent);
+        ViewGroup* parentVG = (ViewGroup*)vg;
+        if (vg) {
             Boolean res;
             renderNode->SetClipToBounds(
-                (VIEWGROUP_PROBE(mParent)->mGroupFlags & ViewGroup::FLAG_CLIP_CHILDREN) != 0, &res);
+                (parentVG->mGroupFlags & ViewGroup::FLAG_CLIP_CHILDREN) != 0, &res);
         }
         Float alpha = 1;
-        if (IViewGroup::Probe(mParent) && (VIEWGROUP_PROBE(mParent)->mGroupFlags &
+        if (vg && (parentVG->mGroupFlags &
                 ViewGroup::FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
-            ViewGroup* parentVG = VIEWGROUP_PROBE(mParent);
             AutoPtr<ITransformation> t = parentVG->GetChildTransformation();
             if (parentVG->GetChildStaticTransformation(this, t)) {
                 Int32 transformType;
@@ -12514,7 +12523,7 @@ Boolean View::Draw(
     Boolean usingRenderNodeProperties = mAttachInfo != NULL && mAttachInfo->mHardwareAccelerated;
     Boolean more = FALSE;
     const Boolean childHasIdentityMatrix = HasIdentityMatrix();
-    ViewGroup* parent = VIEWGROUP_PROBE(parentObj);
+    ViewGroup* parent = (ViewGroup*)parentObj;
     const Int32 flags = parent->mGroupFlags;
 
     if ((flags & ViewGroup::FLAG_CLEAR_TRANSFORMATION) == ViewGroup::FLAG_CLEAR_TRANSFORMATION) {
@@ -12973,7 +12982,7 @@ ECode View::Draw(
         if (mOverlay != NULL && (mOverlay->IsEmpty(&isEmpty), !isEmpty)) {
             AutoPtr<IViewGroup> group;
             mOverlay->GetOverlayView((IViewGroup**)&group);
-            VIEWGROUP_PROBE(group)->DispatchDraw(canvas);
+            ((ViewGroup*)group.Get())->DispatchDraw(canvas);
         }
 
         return NOERROR;
@@ -13131,7 +13140,7 @@ ECode View::Draw(
     if (mOverlay != NULL && (mOverlay->IsEmpty(&mOverlayIsEmpty), !mOverlayIsEmpty)) {
         AutoPtr<IViewGroup> group;
         mOverlay->GetOverlayView((IViewGroup**)&group);
-        VIEWGROUP_PROBE(group)->DispatchDraw(canvas);
+        ((ViewGroup*)group.Get())->DispatchDraw(canvas);
     }
 
     return NOERROR;
@@ -13464,9 +13473,10 @@ ECode View::IsLayoutRequested(
 Boolean View::IsLayoutModeOptical(
     /* [in] */ IInterface* o)
 {
-    if (IViewGroup::Probe(o)) {
+    IViewGroup* vgObj = IViewGroup::Probe(o);
+    if (vgObj) {
         Boolean isLayoutModeOptical;
-        isLayoutModeOptical = VIEWGROUP_PROBE(o)->IsLayoutModeOptical();
+        isLayoutModeOptical = ((ViewGroup*)vgObj)->IsLayoutModeOptical();
         if (isLayoutModeOptical) {
             return TRUE;
         }
@@ -13749,7 +13759,7 @@ ECode View::ScheduleDrawable(
             CChoreographerHelper::AcquireSingleton((IChoreographerHelper**)&helper);
             Int64 delayTime = 0;
             helper->SubtractFrameDelay(delay, &delayTime);
-            VIEWIMPL_PROBE(mAttachInfo->mViewRootImpl)->mChoreographer->PostCallbackDelayed(
+            ((ViewRootImpl*)mAttachInfo->mViewRootImpl)->mChoreographer->PostCallbackDelayed(
                 IChoreographer::CALLBACK_ANIMATION, what, IObject::Probe(who), delayTime);
         }
         else {
@@ -13772,7 +13782,7 @@ ECode View::UnscheduleDrawable(
 {
     if (VerifyDrawable(who) && what != NULL) {
         if (mAttachInfo != NULL) {
-            VIEWIMPL_PROBE(mAttachInfo->mViewRootImpl)->mChoreographer->RemoveCallbacks(
+            ((ViewRootImpl*)mAttachInfo->mViewRootImpl)->mChoreographer->RemoveCallbacks(
                 IChoreographer::CALLBACK_ANIMATION, what, IObject::Probe(who));
         }
         ViewRootImpl::GetRunQueue()->RemoveCallbacks(what);
@@ -13794,7 +13804,7 @@ ECode View::UnscheduleDrawable(
     /* [in] */ IDrawable* who)
 {
     if (mAttachInfo != NULL && who != NULL) {
-       VIEWIMPL_PROBE(mAttachInfo->mViewRootImpl)->mChoreographer->RemoveCallbacks(
+       ((ViewRootImpl*)mAttachInfo->mViewRootImpl)->mChoreographer->RemoveCallbacks(
             IChoreographer::CALLBACK_ANIMATION, NULL, IObject::Probe(who));
     }
 
@@ -14974,13 +14984,15 @@ ECode View::TransformMatrixToGlobal(
 {
     AutoPtr<IViewParent> parent = mParent;
     Boolean res;
-    if (IView::Probe(parent)) {
-        IView* vp = IView::Probe(parent);
+    IViewRootImpl* vri;
+    IView* vp = IView::Probe(parent.Get());
+    if (vp) {
+        View* view = (View*)vp;
         vp->TransformMatrixToGlobal(m);
-        m->PreTranslate(-((View*)vp)->mScrollX, -((View*)vp)->mScrollY, &res);
-    } else if (IViewRootImpl::Probe(parent)) {
-
-        ViewRootImpl* vr =  VIEWIMPL_PROBE(parent);
+        m->PreTranslate(-view->mScrollX, -view->mScrollY, &res);
+    }
+    else if ((vri = IViewRootImpl::Probe(parent.Get())) != NULL) {
+        ViewRootImpl* vr =  (ViewRootImpl*)vri;
         vr->TransformMatrixToGlobal(m);
         m->PreTranslate(0, -vr->mCurScrollY, &res);
     }
@@ -15006,13 +15018,16 @@ ECode View::TransformMatrixToLocal(
     /* [in] */ IMatrix* m)
 {
     AutoPtr<IViewParent> parent = mParent;
+    IViewRootImpl* vriObj;
+
     Boolean res;
-    if (IView::Probe(parent)) {
-        IView* vp = IView::Probe(parent);
+    IView* vp = IView::Probe(parent);
+    if (vp) {
         vp->TransformMatrixToLocal(m);
         m->PostTranslate(((View*)vp)->mScrollX, ((View*)vp)->mScrollY, &res);
-    } else if (IViewRootImpl::Probe(parent)) {
-        ViewRootImpl* vr =  VIEWIMPL_PROBE(parent);
+    }
+    else if ((vriObj = IViewRootImpl::Probe(parent)) != NULL) {
+        ViewRootImpl* vr = (ViewRootImpl*)vriObj;
         vr->TransformMatrixToLocal(m);
         m->PostTranslate(0, vr->mCurScrollY, &res);
     }
@@ -15095,8 +15110,9 @@ ECode View::GetLocationInWindow(
     position[1] += mTop;
 
     AutoPtr<IViewParent> viewParent = mParent;
-    while (viewParent && VIEW_PROBE(viewParent) != NULL) {
-        View* view = VIEW_PROBE(viewParent);
+    IView* viewObj;
+    while (viewParent && (viewObj = IView::Probe(viewParent)) != NULL) {
+        View* view = (View*)viewObj;
 
         position[0] -= view->mScrollX;
         position[1] -= view->mScrollY;
@@ -15112,10 +15128,12 @@ ECode View::GetLocationInWindow(
         position[1] += view->mTop;
 
         viewParent = view->mParent;
-     }
-    if (IViewRootImpl::Probe(viewParent)) {
+    }
+
+    IViewRootImpl* vri = IViewRootImpl::Probe(viewParent);
+    if (vri) {
         // *cough*
-        ViewRootImpl* vr = VIEWIMPL_PROBE(viewParent);
+        ViewRootImpl* vr = (ViewRootImpl*)vri;
         position[1] -= vr->mCurScrollY;
     }
 

@@ -1070,14 +1070,14 @@ module
         interface IBinder;
     }
 
-        [local]
-        class CViewRootImplW {
-            constructor(
-                [in] Handle32 viewRoot);
+    [local]
+    class CViewRootImplW {
+        constructor(
+            [in] IViewRootImpl* viewRoot);
 
-            interface IIWindow;
-            interface IBinder;
-        }
+        interface IIWindow;
+        interface IBinder;
+    }
 
     class CWindowManagerLayoutParams {
         constructor();

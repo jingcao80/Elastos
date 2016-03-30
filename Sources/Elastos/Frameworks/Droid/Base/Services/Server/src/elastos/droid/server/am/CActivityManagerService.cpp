@@ -24920,6 +24920,9 @@ void CActivityManagerService::HandleReportMemUsageMsg(
 
 void CActivityManagerService::HandleCollectPssBgMsg()
 {
+    //assert(0 && "TODO");
+    return;
+
     Int64 start = SystemClock::GetUptimeMillis();
     AutoPtr<IMemInfoReader> memInfo;
     synchronized(this) {

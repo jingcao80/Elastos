@@ -44,12 +44,8 @@ private:
     class KeyState
         : public Object
     {
-    private:
-        KeyState()
-        {}
-
     public:
-        CAR_INTERFACE_DECL()
+        KeyState();
 
         static CARAPI_(AutoPtr<KeyState>) Obtain(
             /* [in] */ Int32 deviceId,

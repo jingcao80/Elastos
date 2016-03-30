@@ -43,10 +43,6 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
-#ifndef WINLAY_PROBE
-#define WINLAY_PROBE(obj) ((CWindowManagerLayoutParams*)IWindowManagerLayoutParams::Probe(obj))
-#endif
-
 //class Scroller;
 class CViewRootImplW;
 class CAccessibilityInteractionController;
@@ -1161,11 +1157,12 @@ private:
         /* [in] */ ArrayOf<Int32>* info);
 
 public:
+
+    CAR_INTERFACE_DECL()
+
     ViewRootImpl();
 
     virtual ~ViewRootImpl();
-
-    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* ctx,
@@ -1263,7 +1260,7 @@ public:
         /* [in] */ IView* child);
 
     CARAPI HandleDispatchSystemUiVisibilityChanged(
-        /* [in] */ SystemUiVisibilityInfo* args);
+        /* [in] */ ISystemUiVisibilityInfo* args);
 
     CARAPI HandleDispatchDoneAnimating();
 

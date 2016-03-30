@@ -3,28 +3,38 @@
 #include "elastos/droid/view/ViewRootImpl.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/os/Binder.h"
+#include <elastos/droid/Manifest.h>
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Manifest;
 using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::View::EIID_IIWindow;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace View {
 
+CAR_OBJECT_IMPL(CViewRootImplW)
+
 CAR_INTERFACE_IMPL_2(CViewRootImplW, Object, IIWindow, IBinder)
 
 ECode CViewRootImplW::constructor(
-    /* [in] */ Handle32 _viewRoot)
+    /* [in] */ IViewRootImpl* vri)
 {
-    ViewRootImpl* viewRoot = (ViewRootImpl*)_viewRoot;
+    ViewRootImpl* viewRoot = (ViewRootImpl*)vri;
     assert(viewRoot);
-    ((IWeakReferenceSource*)viewRoot->Probe(EIID_IWeakReferenceSource))->GetWeakReference((IWeakReference**)&mViewAncestor);
+    viewRoot->GetWeakReference((IWeakReference**)&mViewAncestor);
     mWindowSession = viewRoot->mWindowSession;
 
     return NOERROR;
@@ -112,35 +122,28 @@ ECode CViewRootImplW::ExecuteCommand(
     /* [in] */ const String& parameters,
     /* [in] */ IParcelFileDescriptor* descriptor)
 {
-//    final ViewRootImpl viewRoot = mViewAncestor.get();
-//    if (viewRoot != null) {
-//        final View view = viewRoot.mView;
-//        if (view != null) {
-//            if (checkCallingPermission(Elastos::Droid::Manifest::permission::DUMP) !=
-//                    PackageManager.PERMISSION_GRANTED) {
-//                throw new SecurityException("Insufficient permissions to invoke"
-//                        + " executeCommand() from pid=" + Binder.getCallingPid()
-//                        + ", uid=" + Binder.getCallingUid());
-//            }
-//
-//            OutputStream clientStream = null;
-//            try {
-//                clientStream = new ParcelFileDescriptor.AutoCloseOutputStream(out);
-//                ViewDebug.dispatchCommand(view, command, parameters, clientStream);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            } finally {
-//                if (clientStream != null) {
-//                    try {
-//                        clientStream.close();
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        }
-//    }
-    return E_NOT_IMPLEMENTED;
+    AutoPtr<IViewRootImpl> vri = GetViewRootImpl();
+    if (vri != NULL) {
+        ViewRootImpl* viewRoot = (ViewRootImpl*)vri.Get();
+        IView* view = viewRoot->mView;
+        if (view != NULL) {
+            if (CheckCallingPermission(Manifest::permission::DUMP) != IPackageManager::PERMISSION_GRANTED) {
+                Logger::E("CViewRootImplW", "Insufficient permissions to invoke executeCommand() from pid=%d, uid=%d",
+                    Binder::GetCallingPid(), Binder::GetCallingUid());
+                return E_SECURITY_EXCEPTION;
+            }
+
+            Logger::I("CViewRootImplW", "TODO ExecuteCommand");
+            // AutoPtr<IOutputStream> clientStream;
+            // CParcelFileDescriptorAutoCloseInputStream::New(out, (IOutputStream**)&clientStream);
+            // ViewDebug.dispatchCommand(view, command, parameters, clientStream);
+
+            // if (clientStream != NULL) {
+            //     ICloseable::Probe(clientStream)->Close();
+            // }
+        }
+    }
+    return NOERROR;
 }
 
 ECode CViewRootImplW::CloseSystemDialogs(
@@ -224,7 +227,10 @@ ECode CViewRootImplW::ToString(
     /* [out] */ String* description)
 {
     VALIDATE_NOT_NULL(description);
-    *description = String("CViewRootImplW");
+    StringBuilder sb("CViewRootImplW{window session=");
+    sb += StringUtils::ToHexString((Int32)mWindowSession.Get());
+    sb += "}";
+    *description = sb.ToString();
     return NOERROR;
 }
 

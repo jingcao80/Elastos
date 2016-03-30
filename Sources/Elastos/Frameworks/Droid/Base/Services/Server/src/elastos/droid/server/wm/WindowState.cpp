@@ -1536,8 +1536,7 @@ ECode WindowState::ToString(
         CString::New(pkg, (ICharSequence**)&title);
     }
     Boolean equals;
-    if (mStringNameCache.IsNull() || (IObject::Probe(mLastTitle)->Equals(title, &equals), !equals)
-            || mWasExiting != mExiting) {
+    if (mStringNameCache.IsNull() || !Object::Equals(mLastTitle, title) || mWasExiting != mExiting) {
         mLastTitle = title;
         mWasExiting = mExiting;
         StringBuilder sb("Window{");
@@ -1549,7 +1548,7 @@ ECode WindowState::ToString(
         helper->GetUserId(mSession->mUid, &uid);
         sb += uid;
         sb += " ";
-        sb.Append(mLastTitle.Get());
+        sb.Append(Object::ToString(mLastTitle));
         sb += mExiting ? " EXITING}" : "}";
         mStringNameCache = sb.ToString();
     }

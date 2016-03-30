@@ -712,11 +712,9 @@ void ActivityStack::AwakeFromSleepingLocked()
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
         AutoPtr<TaskRecord> tr = (TaskRecord*)IObject::Probe(obj);
-        //ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = tr->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            //activities.get(activityNdx).setSleeping(false);
-            (*activities)[activityNdx]->SetSleeping(FALSE);
+        List<AutoPtr<ActivityRecord> >::ReverseIterator rit = tr->mActivities->RBegin();
+        for (; rit != tr->mActivities->REnd(); ++rit) {
+            (*rit)->SetSleeping(FALSE);
         }
     }
 }
@@ -755,10 +753,9 @@ void ActivityStack::GoToSleep()
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
         AutoPtr<TaskRecord> tr = (TaskRecord*)IObject::Probe(obj);
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = tr->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            //final ActivityRecord r = activities.get(activityNdx);
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+        List<AutoPtr<ActivityRecord> >::ReverseIterator rit = tr->mActivities->RBegin();
+        for (; rit != tr->mActivities->REnd(); ++rit) {
+            AutoPtr<ActivityRecord> r = (*rit);
             if (r->mState == ActivityState_STOPPING || r->mState == ActivityState_STOPPED) {
                 r->SetSleeping(TRUE);
             }
@@ -819,6 +816,7 @@ Boolean ActivityStack::StartPausingLocked(
     /* [in] */ Boolean resuming,
     /* [in] */ Boolean dontWait)
 {
+    Slogger::I(TAG, " >>> StartPausingLocked");
     if (mPausingActivity != NULL) {
         // Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
         //         + " state=" + mPausingActivity.state);
@@ -892,6 +890,7 @@ Boolean ActivityStack::StartPausingLocked(
         mStackSupervisor->AcquireLaunchWakelock();
     }
 
+    Slogger::I(TAG, " <<< StartPausingLocked");
     if (mPausingActivity != NULL) {
         // Have the window manager pause its key dispatching until the new
         // activity has started.  If we're pausing the activity just because
@@ -909,8 +908,8 @@ Boolean ActivityStack::StartPausingLocked(
             // the pause now.
             CompletePauseLocked(FALSE);
             return FALSE;
-
-        } else {
+        }
+        else {
             // Schedule a pause timeout in case the app doesn't respond.
             // We don't give it much time because this directly impacts the
             // responsiveness seen by the user.
@@ -924,7 +923,6 @@ Boolean ActivityStack::StartPausingLocked(
                 Slogger::V(TAG, "Waiting for pause to complete...");
             return TRUE;
         }
-
     } else {
         // This activity failed to schedule the
         // pause, so just treat it as being paused now.

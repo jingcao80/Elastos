@@ -1,5 +1,5 @@
-#ifndef __ELASTOS_DROID_VIEW_CWINDOWMANAGERGLOBAL_H__
-#define __ELASTOS_DROID_VIEW_CWINDOWMANAGERGLOBAL_H__
+#ifndef __ELASTOS_DROID_VIEW_CWINDOWMANAGERGLOBAL_SESSION_CALLBACK_H__
+#define __ELASTOS_DROID_VIEW_CWINDOWMANAGERGLOBAL_SESSION_CALLBACK_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_View_CWindowManagerGlobalSessionCallback.h"
@@ -37,4 +37,4 @@ public:
 } // namepsace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_VIEW_CWINDOWMANAGERGLOBAL_H__
+#endif //__ELASTOS_DROID_VIEW_CWINDOWMANAGERGLOBAL_SESSION_CALLBACK_H__

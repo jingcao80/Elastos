@@ -58,15 +58,16 @@ private:
     };
 
 public:
-    IInputConnectionWrapper();
-
     CAR_INTERFACE_DECL()
+
+    IInputConnectionWrapper();
 
     CARAPI constructor(
         /* [in] */ ILooper* mainLooper,
         /* [in] */ IInputConnection* conn);
 
-    CARAPI_(Boolean) IsActive();
+    virtual CARAPI IsActive(
+        /* [out] */ Boolean* result);
 
     CARAPI GetTextAfterCursor(
         /* [in] */ Int32 length,
@@ -209,6 +210,8 @@ private:
         /* [in] */ Int32 what,
         /* [in] */ const String& arg1,
         /* [in] */ IInterface* arg2);
+
+    CARAPI_(Boolean) IsActive();
 
 private:
     static String TAG;

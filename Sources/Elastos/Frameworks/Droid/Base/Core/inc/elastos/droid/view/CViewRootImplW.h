@@ -16,20 +16,18 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
-#ifndef VIEWIMPL_PROBE
-#define VIEWIMPL_PROBE(host) ((ViewRootImpl*)IViewRootImpl::Probe(host))
-#endif
-
 CarClass(CViewRootImplW)
     , public Object
     , public IIWindow
     , public IBinder
 {
 public:
+    CAR_OBJECT_DECL()
+
     CAR_INTERFACE_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle32 viewRoot);
+        /* [in] */ IViewRootImpl* viewRoot);
 
     CARAPI Resized(
         /* [in] */ IRect* frame,
