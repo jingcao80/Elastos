@@ -15,7 +15,7 @@ using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Net::IConnectivityManager;
 // using Elastos::Droid::Telephony::PhoneStateListener;
 using Elastos::Droid::Telephony::IPhoneStateListener;
-using Elastos::Droid::Telephony::IServiceState;
+//using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::ISignalStrength;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Internal::App::IIBatteryStats;
@@ -49,7 +49,7 @@ private:
 
         //@Override
         CARAPI OnServiceStateChanged(
-            /* [in] */ IServiceState* state);
+            /* [in] */ Elastos::Droid::Telephony::IServiceState* state);
 
         //@Override
         CARAPI OnDataConnectionStateChanged(
@@ -94,7 +94,7 @@ private:
 
     IccCardConstantsState mSimState;
     AutoPtr<ISignalStrength> mSignalStrength;
-    AutoPtr<IServiceState> mServiceState;
+    AutoPtr<Elastos::Droid::Telephony::IServiceState> mServiceState;
     Int32 mDataState;
 
     AutoPtr<IPhoneStateListener> mPhoneStateListener;

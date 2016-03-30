@@ -57,6 +57,7 @@ namespace Net {
 
 CarClass(CNetworkStatsService)
     , public Object
+    , public IBinder
     , public IINetworkStatsService
 {
 public:
@@ -493,6 +494,12 @@ public:
         /* [in] */ IFile* systemDir,
         /* [in] */ INetworkStatsSettings* settings);
 
+    CARAPI ToString(
+        /* [out] */ String* info)
+    {
+        VALIDATE_NOT_NULL(info)
+        return Object::ToString(info);
+    }
 protected:
     CARAPI_(void) Dump(
         /* [in] */ IFileDescriptor* fd,

@@ -4,21 +4,19 @@
 
 #include <elastos/droid/ext/frameworkdef.h>
 #include "_Elastos_Droid_Server_CNetworkManagementService.h"
-// #include "elastos/droid/server/NativeDaemonConnector.h"
+#include "elastos/droid/server/NativeDaemonConnector.h"
 #include "_Elastos.Droid.Server.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Net.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.Droid.Net.h>
+#include <Elastos.Droid.Telephony.h>
 #include <elastos/core/Thread.h>
-#include <elastos/droid/net/NetworkStats.h>
 #include <elastos/droid/net/NetworkUtils.h>
-#include <elastos/droid/net/Proxy.h>
-#include <elastos/droid/net/UidRange.h>
-#include <elastos/droid/net/http/Connection.h>
 #include <elastos/droid/os/Handler.h>
 #include <elastos/droid/os/Runnable.h>
+#include "elastos/droid/telephony/PhoneStateListener.h"
 #include <elastos/utility/etl/List.h>
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Telephony.h>
@@ -65,6 +63,7 @@ using Elastos::Droid::Server::INativeDaemonConnectorCallbacks;
 using Elastos::Droid::Server::IWatchdogMonitor;
 using Elastos::Droid::Telephony::IDataConnectionRealTimeInfo;
 using Elastos::Droid::Telephony::IPhoneStateListener;
+using Elastos::Droid::Telephony::PhoneStateListener;
 using Elastos::Droid::Utility::ISparseBooleanArray;
 using Elastos::Droid::Wifi::IWifiConfiguration;
 using Elastos::Droid::Wifi::IWifiConfigurationKeyMgmt;
@@ -185,7 +184,7 @@ private:
         CARAPI OnEvent(
             /* [in] */ Int32 code,
             /* [in] */ const String& raw,
-            /* [in] */ const ArrayOf<String>& cooked,
+            /* [in] */ ArrayOf<String>* cooked,
             /* [out] */ Boolean* result);
 
     private:
@@ -193,8 +192,7 @@ private:
     };
 
     class InnerSub_PhoneStateListener
-        // : public PhoneStateListener
-        : public Object
+        : public PhoneStateListener
     {
     public:
         InnerSub_PhoneStateListener(
@@ -260,11 +258,11 @@ public:
     static CARAPI Create(
         /* [in] */ IContext* context,
         /* [in] */ const String& socket,
-        /* [out] */ INetworkManagementService** result);
+        /* [out] */ IINetworkManagementService** result);
 
     static CARAPI Create(
         /* [in] */ IContext* context,
-        /* [out] */ INetworkManagementService** result);
+        /* [out] */ IINetworkManagementService** result);
 
     CARAPI_(void) SystemReady();
 
@@ -705,7 +703,7 @@ private:
     /**
      * connector object for communicating with netd
      */
-    // AutoPtr<NativeDaemonConnector> mConnector;
+    AutoPtr<NativeDaemonConnector> mConnector;
 
     AutoPtr<IHandler> mFgHandler;
     AutoPtr<IHandler> mDaemonHandler;

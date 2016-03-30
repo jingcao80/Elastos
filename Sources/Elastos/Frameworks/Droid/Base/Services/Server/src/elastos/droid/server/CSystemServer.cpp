@@ -11,12 +11,11 @@
 #include "elastos/droid/server/CEntropyMixer.h"
 #include "elastos/droid/server/CInputMethodManagerService.h"
 #include "elastos/droid/server/CLockSettingsService.h"
-#include "elastos/droid/server/CNetworkManagementService.h"
 #include "elastos/droid/server/CPersistentDataBlockService.h"
 #include "elastos/droid/server/CTelephonyRegistry.h"
-#include "elastos/droid/server/CTextServicesManagerService.h"
 #include "elastos/droid/server/CVibratorService.h"
 #include "elastos/droid/server/CUiModeManagerService.h"
+#include "elastos/droid/server/CNsdService.h"
 
 #include "elastos/droid/server/appwidget/CAppWidgetService.h"
 #include "elastos/droid/server/clipboard/CClipboardService.h"
@@ -129,8 +128,8 @@ const String SystemServer::USB_SERVICE_CLASS(
     "com.android.server.usb.UsbService$Lifecycle");
 const String SystemServer::WIFI_SERVICE_CLASS(
     "com.android.server.wifi.WifiService");
-const String SystemServer::WIFI_P2P_SERVICE_CLASS(
-    "com.android.server.wifi.p2p.WifiP2pService");
+const String SystemServer::WIFI_P2P_SERVICE_CLASS("LElastos/Droid/Net/Wifi/P2p/CWifiP2pService;");
+    //"com.android.server.wifi.p2p.WifiP2pService";
 const String SystemServer::ETHERNET_SERVICE_CLASS(
     "com.android.server.ethernet.EthernetService");
 const String SystemServer::JOB_SCHEDULER_SERVICE_CLASS(
@@ -464,11 +463,11 @@ ECode SystemServer::StartOtherServices()
     AutoPtr<IIAlarmManager> alarm;
     // AutoPtr<CMountService> mountService;
     AutoPtr<CNetworkManagementService> networkManagement;
-    // AutoPtr<CNetworkStatsService> networkStats;
-    // AutoPtr<CNetworkPolicyManagerService> networkPolicy;
-    // AutoPtr<CConnectivityService> connectivity;
-    // AutoPtr<CNetworkScoreService> networkScore;
-    // AutoPtr<CNsdService> serviceDiscovery= NULL;
+    AutoPtr<CNetworkStatsService> networkStats;
+    AutoPtr<CNetworkPolicyManagerService> networkPolicy;
+    AutoPtr<CConnectivityService> connectivity;
+    AutoPtr<CNetworkScoreService> networkScore;
+    AutoPtr<CNsdService> serviceDiscovery;
     AutoPtr<CWindowManagerService> wm;
     // AutoPtr<CBluetoothManagerService> bluetooth;
     // AutoPtr<CUsbService> usb;
@@ -716,76 +715,95 @@ ECode SystemServer::StartOtherServices()
         }
 
         if (!disableNetwork) {
-            Slogger::I(TAG, "NetworkManagement Service todo");
-            // AutoPtr<INetworkManagementService> nms;
-            // ec = CNetworkManagementService::Create(context, (INetworkManagementService**)&nms);
-            // if (FAILED(ec)) Slogger::E(TAG, "failed to start NetworkManagement Service");
-            // networkManagement = (CNetworkManagementService*)nms.Get();
-            // ServiceManager::AddService(IContext::NETWORKMANAGEMENT_SERVICE, nms.Get());
+            AutoPtr<IINetworkManagementService> nms;
+            ec = CNetworkManagementService::Create(context, (IINetworkManagementService**)&nms);
+            if (FAILED(ec)) Slogger::E(TAG, "failed to start NetworkManagement Service");
+            networkManagement = (CNetworkManagementService*)nms.Get();
+            ec = ServiceManager::AddService(IContext::NETWORKMANAGEMENT_SERVICE, nms.Get());
+            if (FAILED(ec)) Slogger::E(TAG, "failed to Add NetworkManagement Service");
+            Slogger::I(TAG, "leliang_debug NetworkManagement service done, ec:0x%x, networkManagement:%p", ec, networkManagement.Get());
         }
 
         if (!disableNonCoreServices) {
-            Slogger::I(TAG, "Text Service Manager Service todo");
-            // ec = CTextServicesManagerService::NewByFriend(context, (CTextServicesManagerService**)&tsms);
-            // if (FAILED(ec)) Slogger::E(TAG, "failed to start Text Service Manager Service");
-            // ServiceManager::AddService(IContext::TEXT_SERVICES_MANAGER_SERVICE, TO_IINTERFACE(tsms));
+            ec = CTextServicesManagerService::NewByFriend(context, (CTextServicesManagerService**)&tsms);
+            if (FAILED(ec)) Slogger::E(TAG, "failed to start Text Service Manager Service");
+            ec = ServiceManager::AddService(IContext::TEXT_SERVICES_MANAGER_SERVICE, TO_IINTERFACE(tsms));
+            if (FAILED(ec)) Slogger::E(TAG, "failed to Add Text Service Manager Service");
+            Slogger::I(TAG, "leliang_debug Text Service Manager service done, ec:0x%x, tsms:%p", ec, tsms.Get());
         }
 
         if (!disableNetwork) {
     //         try {
-                Slogger::I(TAG, "Network Score Service todo");
-    //             networkScore = new NetworkScoreService(context);
-    //             ServiceManager::AddService(IContext::NETWORK_SCORE_SERVICE, networkScore);
+            ec = CNetworkScoreService::NewByFriend(context, (CNetworkScoreService**)&networkScore);
+            if (FAILED(ec)) Slogger::E(TAG, "failed to start Network Score Service");
+            ec = ServiceManager::AddService(IContext::NETWORK_SCORE_SERVICE, TO_IINTERFACE(networkScore));
+            if (FAILED(ec)) Slogger::E(TAG, "failed to Add Network Score Service");
+            Slogger::I(TAG, "leliang_debug Network Score service done, ec:0x%x, networkScore:%p", ec, networkScore.Get());
     //         } catch (Throwable e) {
     //             ReportWtf("starting Network Score Service", ec);
     //         }
 
     //         try {
-                Slogger::I(TAG, "NetworkStats Service todo");
-    //             networkStats = new NetworkStatsService(context, networkManagement, alarm);
-    //             ServiceManager::AddService(IContext::NETWORK_STATS_SERVICE, networkStats);
+            ec = CNetworkStatsService::NewByFriend(context, networkManagement, alarm, (CNetworkStatsService**)&networkStats);
+            if (FAILED(ec)) Slogger::E(TAG, "failed to start NetworkStatsService Service, ec:0x%x, networkStats:%p", ec, networkStats.Get());
+            ec = ServiceManager::AddService(IContext::NETWORK_STATS_SERVICE, TO_IINTERFACE(networkStats));
+            if (FAILED(ec)) Slogger::E(TAG, "failed to Add NetworkStatsService Service");
+            Slogger::I(TAG, "leliang_debug NetworkStatsService service done, ec:0x%x, networkStats:%p", ec, networkStats.Get());
+
     //         } catch (Throwable e) {
     //             ReportWtf("starting NetworkStats Service", ec);
     //         }
 
     //         try {
-                Slogger::I(TAG, "NetworkPolicy Service todo");
-    //             networkPolicy = new NetworkPolicyManagerService(
-    //                     context, mActivityManagerService,
-    //                     (IPowerManager)ServiceManager::GetService(IContext::POWER_SERVICE),
-    //                     networkStats, networkManagement);
-    //             ServiceManager::AddService(IContext::NETWORK_POLICY_SERVICE, networkPolicy);
+            ec = CNetworkPolicyManagerService::NewByFriend(
+                         context, mActivityManagerService,
+                         IIPowerManager::Probe(ServiceManager::GetService(IContext::POWER_SERVICE)),
+                         networkStats, networkManagement,
+                         (CNetworkPolicyManagerService**)&networkPolicy);
+            if (FAILED(ec)) Slogger::E(TAG, "failed to start NetworkPolicy Service, ec:0x%x, service: %p", ec, networkPolicy.Get());
+            ec = ServiceManager::AddService(IContext::NETWORK_POLICY_SERVICE, TO_IINTERFACE(networkPolicy));
+            if (FAILED(ec)) Slogger::E(TAG, "failed to Add NetworkPolicy Service");
+            Slogger::I(TAG, "leliang_debug NetworkPolicy service done, ec:0x%x, networkPolicy:%p", ec, networkPolicy.Get());
     //         } catch (Throwable e) {
     //             ReportWtf("starting NetworkPolicy Service", ec);
     //         }
 
-    //         mSystemServiceManager->StartService(WIFI_P2P_SERVICE_CLASS);
-    //         mSystemServiceManager->StartService(WIFI_SERVICE_CLASS);
-    //         mSystemServiceManager->StartService(
-    //                     "com.android.server.wifi.WifiScanningService");
+            Slogger::I(TAG, "leliang_debug CWifiP2pService not ok ????????");
+            //mSystemServiceManager->StartService(WIFI_P2P_SERVICE_CLASS);
+            Slogger::I(TAG, "leliang_debug WifiService not ok ????????");
+            //mSystemServiceManager->StartService(WIFI_SERVICE_CLASS);
+            Slogger::I(TAG, "leliang_debug WifiScanningService not ok ????????");
+            //mSystemServiceManager->StartService(
+            //             "com.android.server.wifi.WifiScanningService");
 
-    //         mSystemServiceManager->StartService("com.android.server.wifi.RttService");
+            Slogger::I(TAG, "leliang_debug RttService not ok ????????");
+            //mSystemServiceManager->StartService("com.android.server.wifi.RttService");
 
-    //         if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_ETHERNET)) {
-    //             mSystemServiceManager->StartService(ETHERNET_SERVICE_CLASS);
-    //         }
+            bval = FALSE;
+            if (mPackageManager->HasSystemFeature(IPackageManager::FEATURE_ETHERNET, &bval), bval) {
+                Slogger::I(TAG, "leliang_debug EthernetService not ok ????????");
+    //          mSystemServiceManager->StartService(ETHERNET_SERVICE_CLASS);
+            }
 
     //         try {
-                Slogger::I(TAG, "Connectivity Service todo");
-    //             connectivity = new ConnectivityService(
-    //                     context, networkManagement, networkStats, networkPolicy);
-    //             ServiceManager::AddService(IContext::CONNECTIVITY_SERVICE, connectivity);
-    //             networkStats.bindConnectivityManager(connectivity);
-    //             networkPolicy.bindConnectivityManager(connectivity);
-    //         } catch (Throwable e) {
+            ec = CConnectivityService::NewByFriend(context, networkManagement, networkStats, networkPolicy,
+                    (CConnectivityService**)&connectivity);
+            if (FAILED(ec)) Slogger::E(TAG, "failed to start Connectivity Service, ec:0x%x, service: %p", ec, connectivity.Get());
+            ec = ServiceManager::AddService(IContext::CONNECTIVITY_SERVICE, TO_IINTERFACE(connectivity));
+            if (FAILED(ec)) Slogger::E(TAG, "failed to Add Connectivity Service");
+            Slogger::I(TAG, "leliang_debug Connectivity service done, ec:0x%x, connectivity:%p", ec, connectivity.Get());
+            networkStats->BindConnectivityManager(connectivity);
+            networkPolicy->BindConnectivityManager(connectivity);
+    //      } catch (Throwable e) {
     //             ReportWtf("starting Connectivity Service", ec);
     //         }
 
     //         try {
-                Slogger::I(TAG, "Network Service Discovery Service todo");
-    //             serviceDiscovery = NsdService.create(context);
-    //             ServiceManager::AddService(
-    //                     Context.NSD_SERVICE, serviceDiscovery);
+            ec = CNsdService::Create(context, (CNsdService**)&serviceDiscovery);
+            if (FAILED(ec)) Slogger::E(TAG, "failed to start NsdService Service, ec:0x%x, service: %p", ec, serviceDiscovery.Get());
+            ec = ServiceManager::AddService(IContext::NSD_SERVICE, TO_IINTERFACE(serviceDiscovery));
+            if (FAILED(ec)) Slogger::E(TAG, "failed to Add Network Service Discovery Service");
+            Slogger::I(TAG, "leliang_debug NsdService service done, ec:0x%x, serviceDiscovery:%p", ec, serviceDiscovery.Get());
     //         } catch (Throwable e) {
     //             ReportWtf("starting Service Discovery Service", ec);
     //         }
@@ -1149,10 +1167,10 @@ ECode SystemServer::StartOtherServices()
     AutoPtr<ServiceBundle> bundle = new ServiceBundle();
     // bundle->mMountServiceF = mountService;
     bundle->mNetworkManagementF = networkManagement;
-    // bundle->mNetworkStatsF = networkStats;
-    // bundle->mNetworkPolicyF = networkPolicy;
+    bundle->mNetworkStatsF = networkStats;
+    bundle->mNetworkPolicyF = networkPolicy;
     // bundle->mConnectivityF = connectivity;
-    // bundle->mNetworkScoreF = networkScore;
+    bundle->mNetworkScoreF = networkScore;
     bundle->mWallpaperF = wallpaper;
     // bundle->mImmF = imm;
     // bundle->mLocationF = location;

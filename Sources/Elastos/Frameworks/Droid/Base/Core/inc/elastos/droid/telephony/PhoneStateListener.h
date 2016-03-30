@@ -17,7 +17,7 @@ namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-class PhoneStateListener
+class ECO_PUBLIC PhoneStateListener
     : public Object
     , public IPhoneStateListener
 {

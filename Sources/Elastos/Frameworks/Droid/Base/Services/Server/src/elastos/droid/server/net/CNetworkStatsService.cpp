@@ -1,10 +1,10 @@
 
+#include "elastos/droid/server/CNetworkManagementService.h"
 #include "elastos/droid/server/net/CNetworkStatsService.h"
 #include "elastos/droid/Manifest.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/UserHandle.h"
-// #include "elastos/droid/server/CNetworkManagementService.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Os.h>
@@ -70,6 +70,7 @@ using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::EIID_IHandlerCallback;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::IDropBoxManager;
 using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::IINetworkManagementService;
@@ -80,11 +81,11 @@ using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Provider::ISettingsGlobal;
-// using Elastos::Droid::Server::CNetworkManagementService;
+using Elastos::Droid::Server::CNetworkManagementService;
 // using Elastos::Droid::Server::CNetworkManagementSocketTaggerHelper;
 // using Elastos::Droid::Server::INetworkManagementSocketTaggerHelper;
-// using Elastos::Droid::Telephony::CTelephonyManager;
-// using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Droid::Telephony::CTelephonyManager;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 using Elastos::Droid::Telephony::ITelephonyManagerHelper;
 using Elastos::Droid::Text::Format::IDateUtils;
 using Elastos::Droid::Utility::CArrayMap;
@@ -647,7 +648,7 @@ ECode CNetworkStatsService::NetworkStatsSettingsConfig::GetDeleteAgeMillis(
 //======================================================================
 CAR_OBJECT_IMPL(CNetworkStatsService)
 
-CAR_INTERFACE_IMPL(CNetworkStatsService, Object, IINetworkStatsService)
+CAR_INTERFACE_IMPL_2(CNetworkStatsService, Object, IBinder, IINetworkStatsService)
 
 CNetworkStatsService::CNetworkStatsService()
     : mSystemReady(FALSE)
@@ -717,9 +718,7 @@ ECode CNetworkStatsService::constructor(
     mTime = time;
 
     AutoPtr<ITelephonyManagerHelper> helper;
-    // TODO: Waiting for CTelephonyManagerHelper
-    assert(0);
-    // CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
     helper->GetDefault((ITelephonyManager**)&mTeleManager);
     VALIDATE_NOT_NULL(mTeleManager);
 

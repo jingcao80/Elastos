@@ -1027,16 +1027,12 @@ ECode CNsdService::constructor(
     mContext = context;
     context->GetContentResolver((IContentResolver**)&mContentResolver);
     AutoPtr<INativeDaemonConnectorCallbacks> receiver = new NativeCallbackReceiver(this);
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mNativeConnector = new NativeDaemonConnector(receiver, String("mdns"), 10, MDNS_TAG, 25, NULL);
+    mNativeConnector = new NativeDaemonConnector(receiver, String("mdns"), 10, MDNS_TAG, 25, NULL);
     mNsdStateMachine = new NsdStateMachine(TAG, this);
     mNsdStateMachine->Start();
 
     AutoPtr<IThread> th;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // CThread::New((IRunnable*)mNativeConnector.Get(), MDNS_TAG, (IThread**)&th);
+    CThread::New((IRunnable*)mNativeConnector.Get(), MDNS_TAG, (IThread**)&th);
     th->Start();
     return NOERROR;
 }
@@ -1051,7 +1047,7 @@ ECode CNsdService::Create(
     CNsdService::NewByFriend(context, (CNsdService**)&service);
     service->mNativeDaemonConnected->Await();
     *nsdService = service.Get();
-    REFCOUNT_ADD((IBinder*)(*nsdService))
+    REFCOUNT_ADD(*nsdService)
     return NOERROR;
 }
 

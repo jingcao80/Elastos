@@ -13,6 +13,12 @@
 #include "elastos/droid/server/power/PowerManagerService.h"
 #include "elastos/droid/server/statusbar/CStatusBarManagerService.h"
 #include "elastos/droid/server/wallpaper/CWallpaperManagerService.h"
+#include "elastos/droid/server/CTextServicesManagerService.h"
+#include "elastos/droid/server/CNetworkManagementService.h"
+#include "elastos/droid/server/net/CNetworkStatsService.h"
+#include "elastos/droid/server/net/CNetworkPolicyManagerService.h"
+#include "elastos/droid/server/CConnectivityService.h"
+#include "elastos/droid/server/CNetworkScoreService.h"
 #include <elastos/core/Singleton.h>
 #include <elastos/droid/os/Runnable.h>
 
@@ -28,6 +34,8 @@ using Elastos::Droid::Server::Pm::CPackageManagerService;
 using Elastos::Droid::Server::Power::PowerManagerService;
 using Elastos::Droid::Server::StatusBar::CStatusBarManagerService;
 using Elastos::Droid::Server::Wallpaper::CWallpaperManagerService;
+using Elastos::Droid::Server::Net::CNetworkStatsService;
+using Elastos::Droid::Server::Net::CNetworkPolicyManagerService;
 using Elastos::Utility::ITimer;
 
 
@@ -36,8 +44,6 @@ namespace Droid {
 namespace Server {
 
 class CInputMethodManagerService;
-class CTextServicesManagerService;
-class CNetworkManagementService;
 
 class SystemServer
     : public Object
@@ -49,10 +55,10 @@ private:
     public:
         // AutoPtr<CMountService> mMountServiceF;
         AutoPtr<CNetworkManagementService> mNetworkManagementF;
-        // AutoPtr<CNetworkStatsService> mNetworkStatsF;
-        // AutoPtr<CNetworkPolicyManagerService> mNetworkPolicyF;
-        // AutoPtr<CConnectivityService> mConnectivityF;
-        // AutoPtr<CNetworkScoreService> mNetworkScoreF;
+        AutoPtr<CNetworkStatsService> mNetworkStatsF;
+        AutoPtr<CNetworkPolicyManagerService> mNetworkPolicyF;
+        AutoPtr<CConnectivityService> mConnectivityF;
+        AutoPtr<CNetworkScoreService> mNetworkScoreF;
         AutoPtr<CWallpaperManagerService> mWallpaperF;
         AutoPtr<CInputMethodManagerService> mImmF;
         // AutoPtr<CLocationManagerService> mLocationF;

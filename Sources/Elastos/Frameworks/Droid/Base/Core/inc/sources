@@ -121,6 +121,7 @@ EXPORT_HEADERS += elastos/droid/service/wallpaper/WallpaperService.h
 EXPORT_HEADERS += elastos/droid/service/notification/ConditionProviderService.h
 EXPORT_HEADERS += elastos/droid/service/notification/NotificationListenerService.h
 
+EXPORT_HEADERS += elastos/droid/telephony/PhoneStateListener.h
 EXPORT_HEADERS += elastos/droid/text/format/DateUtils.h
 //EXPORT_HEADERS += elastos/droid/text/method/BaseKeyListener.h
 //EXPORT_HEADERS += elastos/droid/text/method/NumberKeyListener.h

@@ -2,6 +2,7 @@
 #include "Elastos.Droid.Accounts.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
@@ -9,21 +10,21 @@
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/NtpTrustedTime.h"
 
-//#include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/provider/Settings.h"
 //#include "elastos/droid/os/SystemClock.h"
 //#include "elastos/droid/net/CSntpClient.h"
 
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
-//#include "elastos/droid/R.h"
+#include "elastos/droid/R.h"
 
 using Elastos::Utility::Logging::Logger;
 //using Elastos::Droid::R;
-// using Elastos::Droid::Content::Res::IResources;
-// using Elastos::Droid::Content::IContentResolver;
-// using Elastos::Droid::Provider::Settings;
-// using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsGlobal;
 // using Elastos::Droid::Net::ISntpClient;
 // using Elastos::Droid::Net::CSntpClient;
 //using Elastos::Droid::Os::SystemClock;
@@ -65,25 +66,25 @@ ECode NtpTrustedTime::GetInstance(
 
     AutoLock lock(mLock);
     if (sSingleton == NULL) {
-        // AutoPtr<IResources> res;
-        // context->GetResources((IResources**)&res);
+        AutoPtr<IResources> res;
+        context->GetResources((IResources**)&res);
 
-        // AutoPtr<IContentResolver> resolver;
-        // context->GetContentResolver((IContentResolver**)&resolver);
+        AutoPtr<IContentResolver> resolver;
+        context->GetContentResolver((IContentResolver**)&resolver);
 
-        // String defaultServer;
-        // res->GetString(R::string::config_ntpServer, &defaultServer);
-        // Int64 defaultTimeout;
-        // res->GetInteger(R::integer::config_ntpTimeout, (Int32*)&defaultTimeout);
+        String defaultServer;
+        res->GetString(R::string::config_ntpServer, &defaultServer);
+        Int64 defaultTimeout;
+        res->GetInteger(R::integer::config_ntpTimeout, (Int32*)&defaultTimeout);
 
-        // String secureServer;
-        // FAIL_RETURN(Settings::Global::GetString(resolver, ISettingsGlobal::NTP_SERVER, &secureServer))
-        // Int64 timeout;
-        // Settings::Global::GetInt64(
-        //         resolver, ISettingsGlobal::NTP_TIMEOUT, defaultTimeout, &timeout);
+        String secureServer;
+        FAIL_RETURN(Settings::Global::GetString(resolver, ISettingsGlobal::NTP_SERVER, &secureServer))
+        Int64 timeout;
+        Settings::Global::GetInt64(
+                resolver, ISettingsGlobal::NTP_TIMEOUT, defaultTimeout, &timeout);
 
-        // String server = secureServer != NULL ? secureServer : defaultServer;
-        // sSingleton = new NtpTrustedTime(server, timeout);
+        String server = secureServer != NULL ? secureServer : defaultServer;
+        sSingleton = new NtpTrustedTime(server, timeout);
     }
     *instance = (INtpTrustedTime*)sSingleton.Get();
     REFCOUNT_ADD(*instance);

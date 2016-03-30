@@ -679,7 +679,7 @@ const Int64 CNetworkPolicyManagerService::TIME_CACHE_MAX_AGE = IDateUtils::DAY_I
 
 CAR_OBJECT_IMPL(CNetworkPolicyManagerService)
 
-CAR_INTERFACE_IMPL(CNetworkPolicyManagerService, Object, IINetworkPolicyManager)
+CAR_INTERFACE_IMPL_2(CNetworkPolicyManagerService, Object, IBinder, IINetworkPolicyManager)
 
 CNetworkPolicyManagerService::CNetworkPolicyManagerService()
     : mScreenOn(FALSE)

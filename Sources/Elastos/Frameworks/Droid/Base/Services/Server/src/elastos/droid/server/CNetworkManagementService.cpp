@@ -22,13 +22,16 @@
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/droid/os/SystemProperties.h>
 #include <elastos/droid/server/NetworkManagementSocketTagger.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Core::CObject;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::CString;
 using Elastos::Core::CSystem;
+using Elastos::Core::CThread;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringBuffer;
@@ -63,6 +66,7 @@ using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Server::Net::LockdownVpnTracker;
 using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Droid::Utility::CSparseBooleanArray;
 using Elastos::IO::CFile;
 using Elastos::IO::IBuffer;
@@ -154,7 +158,7 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnCheckHoldWakeLock(
 ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
     /* [in] */ Int32 code,
     /* [in] */ const String& raw,
-    /* [in] */ const ArrayOf<String>& cooked,
+    /* [in] */ ArrayOf<String>* cooked,
     /* [out] */ Boolean* result)
 {
     String errorMessage;
@@ -168,27 +172,27 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
          *         "NNN Iface changed <name> <up/down>"
          *         "NNN Iface linkstatus <name> <up/down>"
          */
-        if (cooked.GetLength() < 4 || !cooked[1].Equals("Iface")) {
+        if (cooked->GetLength() < 4 || !(*cooked)[1].Equals("Iface")) {
             Logger::E(TAG, "%s", errorMessage.string());
             return E_ILLEGAL_STATE_EXCEPTION;
         }
-        if (cooked[2].Equals("added")) {
-            mHost->NotifyInterfaceAdded(cooked[3]);
+        if ((*cooked)[2].Equals("added")) {
+            mHost->NotifyInterfaceAdded((*cooked)[3]);
             *result = TRUE;
             return NOERROR;
         }
-        else if (cooked[2].Equals("removed")) {
-            mHost->NotifyInterfaceRemoved(cooked[3]);
+        else if ((*cooked)[2].Equals("removed")) {
+            mHost->NotifyInterfaceRemoved((*cooked)[3]);
             *result = TRUE;
             return NOERROR;
         }
-        else if (cooked[2].Equals("changed") && cooked.GetLength() == 5) {
-            mHost->NotifyInterfaceStatusChanged(cooked[3], cooked[4].Equals("up"));
+        else if ((*cooked)[2].Equals("changed") && cooked->GetLength() == 5) {
+            mHost->NotifyInterfaceStatusChanged((*cooked)[3], (*cooked)[4].Equals("up"));
             *result = TRUE;
             return NOERROR;
         }
-        else if (cooked[2].Equals("linkstate") && cooked.GetLength() == 5) {
-            mHost->NotifyInterfaceLinkStateChanged(cooked[3], cooked[4].Equals("up"));
+        else if ((*cooked)[2].Equals("linkstate") && cooked->GetLength() == 5) {
+            mHost->NotifyInterfaceLinkStateChanged((*cooked)[3], (*cooked)[4].Equals("up"));
             *result = TRUE;
             return NOERROR;
         }
@@ -200,12 +204,12 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
          * Bandwidth control needs some attention
          * Format: "NNN limit alert <alertName> <ifaceName>"
          */
-        if (cooked.GetLength() < 5 || !cooked[1].Equals("limit")) {
+        if (cooked->GetLength() < 5 || !(*cooked)[1].Equals("limit")) {
             Logger::E(TAG, "%s", errorMessage.string());
             return E_ILLEGAL_STATE_EXCEPTION;
         }
-        if (cooked[2].Equals("alert")) {
-            mHost->NotifyLimitReached(cooked[3], cooked[4]);
+        if ((*cooked)[2].Equals("alert")) {
+            mHost->NotifyLimitReached((*cooked)[3], (*cooked)[4]);
             *result = TRUE;
             return NOERROR;
         }
@@ -218,20 +222,20 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
          * An network interface class state changed (active/idle)
          * Format: "NNN IfaceClass <active/idle> <label>"
          */
-        if (cooked.GetLength() < 4 || !cooked[1].Equals("IfaceClass")) {
+        if (cooked->GetLength() < 4 || !(*cooked)[1].Equals("IfaceClass")) {
             Logger::E(TAG, "%s", errorMessage.string());
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         Int64 timestampNanos = 0;
-        if (cooked.GetLength() == 5) {
+        if (cooked->GetLength() == 5) {
             // try {
-            timestampNanos = StringUtils::ParseInt64(cooked[4]);
+            timestampNanos = StringUtils::ParseInt64((*cooked)[4]);
             // } catch(NumberFormatException ne) {}
         } else {
             timestampNanos = SystemClock::GetElapsedRealtimeNanos();
         }
-        Boolean isActive = cooked[2].Equals("active");
-        mHost->NotifyInterfaceClassActivity(StringUtils::ParseInt32(cooked[3]),
+        Boolean isActive = (*cooked)[2].Equals("active");
+        mHost->NotifyInterfaceClassActivity(StringUtils::ParseInt32((*cooked)[3]),
                 isActive ? IDataConnectionRealTimeInfo::DC_POWER_STATE_HIGH
                 : IDataConnectionRealTimeInfo::DC_POWER_STATE_LOW, timestampNanos, FALSE);
         *result = TRUE;
@@ -245,23 +249,23 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
          * Format: "NNN Address updated <addr> <iface> <flags> <scope>"
          *         "NNN Address removed <addr> <iface> <flags> <scope>"
          */
-        if (cooked.GetLength() < 7 || !cooked[1].Equals("Address")) {
+        if (cooked->GetLength() < 7 || !(*cooked)[1].Equals("Address")) {
             Logger::E(TAG, "%s", errorMessage.string());
             return E_ILLEGAL_STATE_EXCEPTION;
         }
 
-        String iface = cooked[4];
+        String iface = (*cooked)[4];
         AutoPtr<ILinkAddress> address;
         // try {
         ECode ec;
         do {
             Int32 flags;
-            ec = StringUtils::Parse(cooked[5], &flags);
+            ec = StringUtils::Parse((*cooked)[5], &flags);
             if (FAILED(ec)) break;
             Int32 scope;
-            ec = StringUtils::Parse(cooked[6], &scope);
+            ec = StringUtils::Parse((*cooked)[6], &scope);
             if (FAILED(ec)) break;
-            ec = CLinkAddress::New(cooked[3], flags, scope, (ILinkAddress**)&address);
+            ec = CLinkAddress::New((*cooked)[3], flags, scope, (ILinkAddress**)&address);
         } while(FALSE);
         if (FAILED(ec)) {
         // } catch(NumberFormatException e) {     // Non-numeric lifetime or scope.
@@ -279,7 +283,7 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
         // }
         }
 
-        if (cooked[2].Equals("updated")) {
+        if ((*cooked)[2].Equals("updated")) {
             mHost->NotifyAddressUpdated(iface, address);
         } else {
             mHost->NotifyAddressRemoved(iface, address);
@@ -296,11 +300,11 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
          */
         Int64 lifetime;  // Actually a 32-bit unsigned integer.
 
-        if (cooked.GetLength() == 6 &&
-            cooked[1].Equals("DnsInfo") &&
-            cooked[2].Equals("servers")) {
+        if (cooked->GetLength() == 6 &&
+            (*cooked)[1].Equals("DnsInfo") &&
+            (*cooked)[2].Equals("servers")) {
             // try {
-            ECode ec = StringUtils::Parse(cooked[4], &lifetime);
+            ECode ec = StringUtils::Parse((*cooked)[4], &lifetime);
             // } catch (NumberFormatException e) {
             if (FAILED(ec)) {
                 if ((ECode)E_NUMBER_FORMAT_EXCEPTION == ec) {
@@ -311,8 +315,8 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
             }
             // }
             AutoPtr<ArrayOf<String> > servers;
-            StringUtils::Split(cooked[5], ",", (ArrayOf<String>**)&servers);
-            mHost->NotifyInterfaceDnsServerInfo(cooked[3], lifetime, servers);
+            StringUtils::Split((*cooked)[5], ",", (ArrayOf<String>**)&servers);
+            mHost->NotifyInterfaceDnsServerInfo((*cooked)[3], lifetime, servers);
         }
         *result = TRUE;
         return NOERROR;
@@ -324,7 +328,7 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
          * A route has been updated or removed.
          * Format: "NNN Route <updated|removed> <dst> [via <gateway] [dev <iface>]"
          */
-        if (!cooked[1].Equals("Route") || cooked.GetLength() < 6) {
+        if (!(*cooked)[1].Equals("Route") || cooked->GetLength() < 6) {
             Logger::E(TAG, "%s", errorMessage.string());
             return E_ILLEGAL_STATE_EXCEPTION;
         }
@@ -332,16 +336,16 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
         String via = String(NULL);
         String dev = String(NULL);
         Boolean valid = TRUE;
-        for (Int32 i = 4; (i + 1) < cooked.GetLength() && valid; i += 2) {
-            if (cooked[i].Equals("dev")) {
+        for (Int32 i = 4; (i + 1) < cooked->GetLength() && valid; i += 2) {
+            if ((*cooked)[i].Equals("dev")) {
                 if (dev == String(NULL)) {
-                    dev = cooked[i+1];
+                    dev = (*cooked)[i+1];
                 } else {
                     valid = FALSE;  // Duplicate interface.
                 }
-            } else if (cooked[i].Equals("via")) {
+            } else if ((*cooked)[i].Equals("via")) {
                 if (via == String(NULL)) {
-                    via = cooked[i+1];
+                    via = (*cooked)[i+1];
                 } else {
                     valid = FALSE;  // Duplicate gateway.
                 }
@@ -361,12 +365,12 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
                     if (FAILED(ec = helper->ParseNumericAddress(via, (IInetAddress**)&gateway))) break;
                 }
                 AutoPtr<IIpPrefix> ipPrefix;
-                ec = CIpPrefix::New(cooked[3], (IIpPrefix**)&ipPrefix);
+                ec = CIpPrefix::New((*cooked)[3], (IIpPrefix**)&ipPrefix);
                 if (FAILED(ec)) break;
                 AutoPtr<IRouteInfo> route;
                 ec = CRouteInfo::New(ipPrefix, gateway, dev, (IRouteInfo**)&route);
                 if (FAILED(ec)) break;
-                ec = mHost->NotifyRouteChange(cooked[2], route);
+                ec = mHost->NotifyRouteChange((*cooked)[2], route);
                 if (FAILED(ec)) break;
                 *result = TRUE;
                 return NOERROR;
@@ -398,7 +402,8 @@ CNetworkManagementService::InnerSub_PhoneStateListener::InnerSub_PhoneStateListe
 ECode CNetworkManagementService::InnerSub_PhoneStateListener::OnDataConnectionRealTimeInfoChanged(
     /* [in] */ IDataConnectionRealTimeInfo* dcRtInfo)
 {
-    if (DBG) Slogger::D(TAG, "onDataConnectionRealTimeInfoChanged: %s", TO_CSTR(dcRtInfo));
+    if (CNetworkManagementService::DBG) Slogger::D(CNetworkManagementService::TAG,
+            "onDataConnectionRealTimeInfoChanged: %s", TO_CSTR(dcRtInfo));
     mHost->NotifyInterfaceClassActivity(IConnectivityManager::TYPE_MOBILE,
             Ptr(dcRtInfo)->Func(dcRtInfo->GetDcPowerState), Ptr(dcRtInfo)->Func(dcRtInfo->GetTime), TRUE);
     return NOERROR;
@@ -478,7 +483,10 @@ ECode CNetworkManagementService::constructor(
     mContext = context;
 
     // make sure this is on the same looper as our NativeDaemonConnector for sync purposes
-    CHandler::New(Ptr(IHandler::Probe(FgThread::Get()))->Func(IHandler::GetLooper), (IHandler**)&mFgHandler);
+    //CHandler::New(Ptr(IHandler::Probe(FgThread::Get()))->Func(IHandler::GetLooper), (IHandler**)&mFgHandler);
+    AutoPtr<ILooper> looper;
+    FgThread::Get()->GetLooper((ILooper**)&looper);
+    CHandler::New(looper, (IHandler**)&mFgHandler);
 
     AutoPtr<ISystemProperties> sysProp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
@@ -500,20 +508,19 @@ ECode CNetworkManagementService::constructor(
     //PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
     AutoPtr<IPowerManagerWakeLock> wl; //pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, NETD_TAG);
 
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector = new NativeDaemonConnector(
-    //         new NetdCallbackReceiver(this), socket, 10, NETD_TAG, 160, wl,
-    //         Ptr(FgThread::Get())->Func(IHandler::GetLooper));
-    // CThread::New(mConnector, NETD_TAG, (IThread**)&mThread);
+    //Waiting for NativeDaemonConnector
+    mConnector = new NativeDaemonConnector(
+             new NetdCallbackReceiver(this), socket, 10, NETD_TAG, 160, wl, looper);
 
-    CHandler::New(Ptr(IHandler::Probe(FgThread::Get()))->Func(IHandler::GetLooper), (IHandler**)&mDaemonHandler);
+    CThread::New(mConnector, NETD_TAG, (IThread**)&mThread);
 
-    // TODO: Waiting for PhoneStateListener
-    assert(0);
-    // mPhoneStateListener = new InnerSub_PhoneStateListener(this);
-    // mPhoneStateListener->constructor(ISubscriptionManager::DEFAULT_SUB_ID,
-    //         Ptr(mDaemonHandler)->Func(mDaemonHandler->GetLooper));
+    CHandler::New(looper, (IHandler**)&mDaemonHandler);
+
+    //Waiting for PhoneStateListener
+    AutoPtr<InnerSub_PhoneStateListener> psl = new InnerSub_PhoneStateListener(this);
+    psl->constructor(ISubscriptionManager::DEFAULT_SUB_ID, looper);
+    mPhoneStateListener = psl;
+
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
     AutoPtr<ITelephonyManager> tm = ITelephonyManager::Probe(obj);
@@ -530,7 +537,7 @@ ECode CNetworkManagementService::constructor(
 ECode CNetworkManagementService::Create(
     /* [in] */ IContext* context,
     /* [in] */ const String& socket,
-    /* [out] */ INetworkManagementService** result)
+    /* [out] */ IINetworkManagementService** result)
 {
     VALIDATE_NOT_NULL(result)
 
@@ -542,14 +549,14 @@ ECode CNetworkManagementService::Create(
     if (DBG) Slogger::D(TAG, "Awaiting socket connection");
     connectedSignal->Await();
     if (DBG) Slogger::D(TAG, "Connected");
-    *result = INetworkManagementService::Probe(service);
+    *result = IINetworkManagementService::Probe(service);
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 ECode CNetworkManagementService::Create(
     /* [in] */ IContext* context,
-    /* [out] */ INetworkManagementService** result)
+    /* [out] */ IINetworkManagementService** result)
 {
     return Create(context, NETD_SOCKET_NAME, result);
 }
@@ -952,9 +959,8 @@ ECode CNetworkManagementService::PrepareNativeDaemon()
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
         args->Set(0, cseq.Get());
         AutoPtr<NativeDaemonEvent> event;
-        // TODO: Waiting for NativeDaemonConnector
-        assert(0);
-        // mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
+        //Waiting for NativeDaemonConnector
+        mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
         mBandwidthControlEnabled = TRUE;
         // } catch (NativeDaemonConnectorException e) {
         //     Log.wtf(TAG, "problem enabling bandwidth controls", e);
@@ -1047,9 +1053,8 @@ ECode CNetworkManagementService::ListInterfaces(
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
     args->Set(0, cseq.Get());
     AutoPtr< ArrayOf<NativeDaemonEvent*> > events;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->ExecuteForList(String("interface"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
+    //Waiting for NativeDaemonConnector
+    mConnector->ExecuteForList(String("interface"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
     AutoPtr< ArrayOf<String> > resArray = NativeDaemonEvent::FilterMessageList(
             *events, NetdResponseCode::InterfaceListResult);
     *result = resArray;
@@ -1079,9 +1084,8 @@ ECode CNetworkManagementService::GetInterfaceConfig(
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
     args->Set(0, cseq0.Get());
     args->Set(1, cseq1.Get());
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // FAIL_RETURN(mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event));
+    //Waiting for NativeDaemonConnector
+    FAIL_RETURN(mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event));
      // } catch (NativeDaemonConnectorException e) {
      //     throw e.rethrowAsParcelableException();
      // }
@@ -1158,23 +1162,25 @@ ECode CNetworkManagementService::SetInterfaceConfig(
     args->Set(1, cseq1.Get());
     args->Set(2, cseq2.Get());
     args->Set(3, iint3.Get());
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
-    //     String("interface"), args);
+    //Waiting for NativeDaemonConnector
+    AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
+            String("interface"), args);
 
-    // AutoPtr<IIterable> flags;
-    // cfg->GetFlags((IIterable**)&flags);
-    // AutoPtr<IIterator> iter;
-    // flags->GetIterator((IIterator**)&iter);
-    // while(Ptr(iter)->Func(iter->HasNext)) {
-    //     AutoPtr<ICharSequence> flag = ICharSequence::Probe(Ptr(iter)->Func(iter->GetNext));
-    //     cmd->AppendArg(flag);
-    // }
+    AutoPtr<IIterable> flags;
+    cfg->GetFlags((IIterable**)&flags);
+    AutoPtr<IIterator> iter;
+    flags->GetIterator((IIterator**)&iter);
+    Boolean hasNext;
+    while(iter->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        AutoPtr<ICharSequence> flag = ICharSequence::Probe(obj);
+        cmd->AppendArg(flag);
+    }
 
     // try {
-    // AutoPtr<NativeDaemonEvent> event;
-    // mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
+    AutoPtr<NativeDaemonEvent> event;
+    mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1223,9 +1229,7 @@ ECode CNetworkManagementService::SetInterfaceIpv6PrivacyExtensions(
     args->Set(2, cseq2.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
+    mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1246,9 +1250,7 @@ ECode CNetworkManagementService::ClearInterfaceAddresses(
     args->Set(1, cseq1.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
+    mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1272,9 +1274,7 @@ ECode CNetworkManagementService::EnableIpv6(
     args->Set(2, cseq2.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
+    mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1298,9 +1298,7 @@ ECode CNetworkManagementService::DisableIpv6(
     args->Set(2, cseq2.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
+    mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1322,47 +1320,81 @@ ECode CNetworkManagementService::RemoveRoute(
 }
 
 ECode CNetworkManagementService::ModifyRoute(
-    /* [in] */ const String& interfaceName,
     /* [in] */ const String& action,
+    /* [in] */ const String& netId,
     /* [in] */ IRouteInfo* route)
 {
     mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
 
-    // TODO: Waiting for NativeDaemonConnector::Command
-    assert(0);
-    // AutoPtr<NativeDaemonConnector::Command> cmd;
-    // CCommand::New(String("network"), String("route"), action, netId, (NativeDaemonConnector::Command**)&cmd);
+    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
+    AutoPtr<ICharSequence> csRoute;
+    CString::New(String("route"), (ICharSequence**)&csRoute);
+    AutoPtr<ICharSequence> csAction;
+    CString::New(action, (ICharSequence**)&csAction);
+    AutoPtr<ICharSequence> csNetId;
+    CString::New(netId, (ICharSequence**)&csNetId);
+    args->Set(0, TO_IINTERFACE(csRoute));
+    args->Set(1, TO_IINTERFACE(csAction));
+    args->Set(2, TO_IINTERFACE(csNetId));
+    AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(String("network"), args);
 
     // // create triplet: interface dest-ip-addr/prefixlength gateway-ip-addr
-    // cmd->AppendArg(Ptr(route)->Func(route->GetInterface));
-    // cmd->AppendArg(Object::ToString(Ptr(route)->Func(route->GetDestination)));
+    String routeInterface;
+    route->GetInterface(&routeInterface);
+    AutoPtr<ICharSequence> csRI;
+    CString::New(routeInterface, (ICharSequence**)&csRI);
+    cmd->AppendArg(csRI);
+    AutoPtr<IIpPrefix> ipPrefix;
+    route->GetDestination((IIpPrefix**)&ipPrefix);
+    AutoPtr<ICharSequence> cs;
+    CString::New(Object::ToString(ipPrefix), (ICharSequence**)&cs);
+    cmd->AppendArg(TO_IINTERFACE(cs));
 
-    // switch (Ptr(route)->Func(route->GetType)) {
-    //     case IRouteInfo::RTN_UNICAST:
-    //         if (Ptr(route)->Func(route->HasGateway)) {
-    //             cmd->AppendArg(Ptr(route)->GetPtr(route->GetGateway)->Func(IInetAddress::GetHostAddress));
-    //         }
-    //         break;
-    //     case IRouteInfo::RTN_UNREACHABLE:
-    //         cmd->AppendArg(String("unreachable"));
-    //         break;
-    //     case IRouteInfo::RTN_THROW:
-    //         cmd->AppendArg(String("throw"));
-    //         break;
-    // }
+    Int32 type;
+    route->GetType(&type);
+    switch (type) {
+        case IRouteInfo::RTN_UNICAST:
+        {
+            Boolean hasGateway;
+            route->HasGateway(&hasGateway);
+            if (hasGateway) {
+                AutoPtr<IInetAddress> netAddress;
+                route->GetGateway((IInetAddress**)&netAddress);
+                String hostAddress;
+                netAddress->GetHostAddress(&hostAddress);
+                AutoPtr<ICharSequence> cs;
+                CString::New(hostAddress, (ICharSequence**)&cs);
+                cmd->AppendArg(TO_IINTERFACE(cs));
+            }
+            break;
+        }
+        case IRouteInfo::RTN_UNREACHABLE:
+        {
+            AutoPtr<ICharSequence> cs;
+            CString::New(String("unreachable"), (ICharSequence**)&cs);
+            cmd->AppendArg(TO_IINTERFACE(cs));
+            break;
+        }
+        case IRouteInfo::RTN_THROW:
+        {
+            AutoPtr<ICharSequence> cs;
+            CString::New(String("throw"), (ICharSequence**)&cs);
+            cmd->AppendArg(TO_IINTERFACE(cs));
+            break;
+        }
+    }
 
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // ECode ec = mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
+    ECode ec = mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
     // // } catch (NativeDaemonConnectorException e) {
-    // if (FAILED(ec)) {
-    //     if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
-    //         return E_ILLEGAL_STATE_EXCEPTION;
-    //     return ec;
+    if (FAILED(ec)) {
+         if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+             return E_ILLEGAL_STATE_EXCEPTION;
+         else
+             return ec;
     // }
-    // // }
+    }
     return NOERROR;
 }
 
@@ -1375,15 +1407,23 @@ ECode CNetworkManagementService::SetMtu(
 
     AutoPtr<NativeDaemonEvent> event;
     // try {
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // ECode ec = mConnector.execute("interface", "setmtu", iface, mtu, (NativeDaemonEvent**)&event);
-    // // } catch (NativeDaemonConnectorException e) {
-    // if (FAILED(ec)) {
-    //     if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
-    //         return E_ILLEGAL_STATE_EXCEPTION;
-    //     return ec;
-    // }
+    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
+    AutoPtr<ICharSequence> csSetmtu;
+    CString::New(String("setmtu"), (ICharSequence**)&csSetmtu);
+    args->Set(0, TO_IINTERFACE(csSetmtu));
+    AutoPtr<ICharSequence> csIface;
+    CString::New(iface, (ICharSequence**)&csIface);
+    args->Set(1, TO_IINTERFACE(csIface));
+    AutoPtr<IInteger32> iMtu = CoreUtils::Convert(mtu);
+    args->Set(2, TO_IINTERFACE(iMtu));
+
+    ECode ec = mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
+    // } catch (NativeDaemonConnectorException e) {
+    if (FAILED(ec)) {
+        if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+            return E_ILLEGAL_STATE_EXCEPTION;
+        return ec;
+    }
     // // }
     return NOERROR;
 }
@@ -1546,9 +1586,7 @@ ECode CNetworkManagementService::GetIpForwardingEnabled(
     args->Set(0, cseq0.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(String("ipfwd"), args, (NativeDaemonEvent**)&event);
+    mConnector->Execute(String("ipfwd"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1570,9 +1608,7 @@ ECode CNetworkManagementService::SetIpForwardingEnabled(
     args->Set(0, cseq0.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(String("ipfwd"), args, (NativeDaemonEvent**)&event);
+    mConnector->Execute(String("ipfwd"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1591,15 +1627,13 @@ ECode CNetworkManagementService::StartTethering(
     CString::New(String("start"), (ICharSequence**)&cseq0);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
     args->Set(0, cseq0.Get());
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
-        // String("tether"), args);
-    // for (Int32 i = 0; i < dhcpRange->GetLength(); i++) {
-    //     AutoPtr<ICharSequence> str;
-    //     CString::New((*dhcpRange)[i], (ICharSequence**)&str);
-    //     cmd->AppendArg(str);
-    // }
+    AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
+        String("tether"), args);
+    for (Int32 i = 0; i < dhcpRange->GetLength(); i++) {
+         AutoPtr<ICharSequence> str;
+         CString::New((*dhcpRange)[i], (ICharSequence**)&str);
+         cmd->AppendArg(str);
+    }
 
     // try {
     AutoPtr<NativeDaemonEvent> event;
@@ -2941,9 +2975,8 @@ ECode CNetworkManagementService::SetFirewallUidRule(
     args->Set(1, iint1.Get());
     args->Set(2, cseq2.Get());
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
+
+    mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
     return NOERROR;
 }
 
@@ -2963,14 +2996,20 @@ ECode CNetworkManagementService::StartClatd(
     mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
 
     // try {
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // ECode ec = mConnector->Execute(String("clatd"), String("start"), interfaceName);
+    AutoPtr<ICharSequence> cseq;
+    CString::New(String("start"), (ICharSequence**)&cseq);
+    AutoPtr<ICharSequence> cseqIN;
+    CString::New(interfaceName, (ICharSequence**)&cseqIN);
+    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
+    args->Set(0, cseq);
+    args->Set(1, cseqIN);
+    AutoPtr<NativeDaemonEvent> event;
+    ECode ec = mConnector->Execute(String("clatd"), args, (NativeDaemonEvent**)&event);
     // // } catch (NativeDaemonConnectorException e) {
-    // if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
-    //     return E_ILLEGAL_STATE_EXCEPTION;
-    // // }
-    // return ec;
+    if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+        return E_ILLEGAL_STATE_EXCEPTION;
+    //}
+    return ec;
 }
 
 ECode CNetworkManagementService::StopClatd()
@@ -2978,14 +3017,17 @@ ECode CNetworkManagementService::StopClatd()
     mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
 
     // try {
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // ECode ec = mConnector->Execute(String("clatd"), String("stop"));
+    AutoPtr<ICharSequence> cseq;
+    CString::New(String("stop"), (ICharSequence**)&cseq);
+    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
+    args->Set(0, cseq);
+    AutoPtr<NativeDaemonEvent> event;
+    ECode ec = mConnector->Execute(String("clatd"), args, (NativeDaemonEvent**)&event);
     // // } catch (NativeDaemonConnectorException e) {
-    // if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
-    //     return E_ILLEGAL_STATE_EXCEPTION;
+    if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+        return E_ILLEGAL_STATE_EXCEPTION;
     // // }
-    // return ec;
+    return ec;
 }
 
 ECode CNetworkManagementService::IsClatdStarted(
@@ -2995,15 +3037,17 @@ ECode CNetworkManagementService::IsClatdStarted(
 
     AutoPtr<NativeDaemonEvent> event;
     // try {
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // ECode ec = mConnector->Execute(String("clatd"), String("status"), (NativeDaemonEvent**)&event);
+    //AutoPtr<ICharSequence> cseq;
+    //CString::New(String("status"), (ICharSequence**)&cseq);
+    //AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
+    //args->Set(0, cseq);
+    ECode ec = mConnector->Execute(String("clatd"), String("status"), (NativeDaemonEvent**)&event);
     // // } catch (NativeDaemonConnectorException e) {
-    // if (FAILED(ec)) {
-    //     if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
-    //         return E_ILLEGAL_STATE_EXCEPTION;
-    //     return ec;
-    // }
+    if (FAILED(ec)) {
+        if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+            return E_ILLEGAL_STATE_EXCEPTION;
+        return ec;
+    }
     // // }
 
     event->CheckCode(NetdResponseCode::ClatdStatusResult);
@@ -3079,11 +3123,9 @@ ECode CNetworkManagementService::IsNetworkActive(
 
 ECode CNetworkManagementService::Monitor()
 {
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // if (mConnector != NULL) {
-    //     mConnector->Monitor();
-    // }
+    if (mConnector != NULL) {
+        mConnector->Monitor();
+    }
     return NOERROR;
 }
 
