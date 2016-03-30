@@ -762,7 +762,7 @@ public:
                 /* [in] */ ICollection* collection);
 
         private:
-            BoundedMap* mHost;
+            AutoPtr<BoundedMap> mHost;
         };
 
     public:
@@ -998,7 +998,7 @@ public:
         AutoPtr<IInterface> mTo;
         Bound mToBound;
         AutoPtr<BoundedEntrySet> mEntrySet;
-        AutoPtr<BoundedKeySet> mKeySet;
+        AutoPtr<IWeakReference> mKeySet;
         AutoPtr<CTreeMap> mHost;
     };
 
