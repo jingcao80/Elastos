@@ -494,7 +494,8 @@ ECode CClassInfo::AcquireConstructorList()
         ns = adjustNameAddr(mBase, mClassDirEntry->mNameSpace);
 
         String relectionClsName(ns);
-        relectionClsName += ".";
+        if (!ns.IsNullOrEmpty())
+            relectionClsName += ".";
         relectionClsName += clsName;
         AutoPtr<IClassInfo> classInfo;
         ec = pModuleInfo->GetClassInfo(relectionClsName, (IClassInfo**)&classInfo);
