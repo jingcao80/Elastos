@@ -131,7 +131,7 @@ ECode CRect::ToString(
     sb += mLeft; sb += ", ";
     sb += mTop; sb += ", ";
     sb += mRight; sb += ", ";
-    sb += mBottom; sb += ", ";
+    sb += mBottom; sb += ")";
     sb.ToString(str);
     return NOERROR;
 }

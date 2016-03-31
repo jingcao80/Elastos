@@ -1086,6 +1086,7 @@ ECode CInputMethodManagerService::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IIWindowManager* windowManager)
 {
+    Slogger::I(TAG, " >>>> constructor");
     mVisibleConnection =  new VisibleServiceConnection();
     CArrayList::New((IArrayList**)&mMethodList);
     CHashMap::New((IHashMap**)&mShortcutInputMethodsAndSubtypes);
@@ -1197,7 +1198,8 @@ ECode CInputMethodManagerService::constructor(
         BuildInputMethodListLocked(mMethodList, mMethodMap,
             !mImeSelectedOnBoot /* resetDefaultEnabledIme */);
     }
-    mSettings->EnableAllIMEsIfThereIsNoEnabledIME();
+    // mSettings->EnableAllIMEsIfThereIsNoEnabledIME();
+    Slogger::W(TAG, " >>> TODO setting provider not implemented.");
 
    if (!mImeSelectedOnBoot) {
         Slogger::W(TAG, "No IME selected. Choose the most applicable IME.");
@@ -1216,9 +1218,11 @@ ECode CInputMethodManagerService::constructor(
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IIntent::ACTION_LOCALE_CHANGED);
-    stickyIntent = NULL;
     AutoPtr<CheckReceiver> checkReceiver = new CheckReceiver();
     checkReceiver->constructor(this);
+
+    Slogger::I(TAG, " <<<< constructor");
+    stickyIntent = NULL;
     return mContext->RegisterReceiver(checkReceiver.Get(), filter, (IIntent**)&stickyIntent);
 }
 
@@ -1426,9 +1430,10 @@ ECode CInputMethodManagerService::SystemRunning(
         obj = NULL;
         mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj);
         mNotificationManager = INotificationManager::Probe(obj);
-        assert(statusBar != NULL);
         mStatusBar = (CStatusBarManagerService*)statusBar;
-        mStatusBar->SetIconVisibility(String("ime"), FALSE);
+        if (mStatusBar) {
+            mStatusBar->SetIconVisibility(String("ime"), FALSE);
+        }
         UpdateImeWindowStatusLocked();
         mRes->GetBoolean(R::bool_::show_ongoing_ime_switcher, &mShowOngoingImeSwitcherForPhones);
         if (mShowOngoingImeSwitcherForPhones) {

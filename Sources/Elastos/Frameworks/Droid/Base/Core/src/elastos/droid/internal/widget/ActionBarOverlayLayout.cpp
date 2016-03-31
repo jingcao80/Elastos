@@ -503,37 +503,7 @@ ECode ActionBarOverlayLayout::OnApplyWindowInsets(
     /* [in] */ IWindowInsets* insets,
     /* [out] */ IWindowInsets** result)
 {
-    VALIDATE_NOT_NULL(insets);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // pullChildren();
-    //
-    // final int vis = getWindowSystemUiVisibility();
-    // final boolean stable = (vis & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0;
-    // final Rect systemInsets = insets.getSystemWindowInsets();
-    //
-    // // The top and bottom action bars are always within the content area.
-    // boolean changed = applyInsets(mActionBarTop, systemInsets, true, true, false, true);
-    // if (mActionBarBottom != null) {
-    //     changed |= applyInsets(mActionBarBottom, systemInsets, true, false, true, true);
-    // }
-    //
-    // mBaseInnerInsets.set(systemInsets);
-    // computeFitSystemWindows(mBaseInnerInsets, mBaseContentInsets);
-    // if (!mLastBaseContentInsets.equals(mBaseContentInsets)) {
-    //     changed = true;
-    //     mLastBaseContentInsets.set(mBaseContentInsets);
-    // }
-    //
-    // if (changed) {
-    //     requestLayout();
-    // }
-    //
-    // // We don't do any more at this point.  To correctly compute the content/inner
-    // // insets in all cases, we need to know the measured size of the various action
-    // // bar elements.  onApplyWindowInsets() happens before the measure pass, so we can't
-    // // do that here.  Instead we will take this up in onMeasure().
-    // return WindowInsets.CONSUMED;
+    VALIDATE_NOT_NULL(result)
 
     PullChildren();
     Int32 vis = 0;

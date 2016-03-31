@@ -154,108 +154,108 @@ ECode ViewTreeObserver::Merge(
     VALIDATE_NOT_NULL(observer);
 
     ViewTreeObserver* observerObj = (ViewTreeObserver*)observer;
-    assert(NULL == observerObj);
+
     if (observerObj->mOnWindowAttachListeners != NULL) {
+        List<AutoPtr<IOnWindowAttachListener> >* other = observerObj->mOnWindowAttachListeners;
         if (mOnWindowAttachListeners != NULL) {
-            Int32 size = (Int32)observerObj->mOnWindowAttachListeners->GetSize();
-            for (Int32 idx=0; idx<size; ++idx) {
-                AutoPtr<IOnWindowAttachListener> item = (*observerObj->mOnWindowAttachListeners)[idx];
-                mOnWindowAttachListeners->PushBack(item);
+            List<AutoPtr<IOnWindowAttachListener> >::Iterator it = other->Begin();
+            for (; it != other->End(); ++it) {
+                mOnWindowAttachListeners->PushBack(*it);
             }
         }
         else {
-            mOnWindowAttachListeners = observerObj->mOnWindowAttachListeners;
+            mOnWindowAttachListeners = new List<AutoPtr<IOnWindowAttachListener> >(*other);
         }
     }
 
     if (observerObj->mOnWindowFocusListeners != NULL) {
+        List<AutoPtr<IOnWindowFocusChangeListener> >* other = observerObj->mOnWindowFocusListeners;
         if (mOnWindowFocusListeners != NULL) {
-            Int32 size = (Int32)observerObj->mOnWindowFocusListeners->GetSize();
-            for (Int32 idx=0; idx<size; ++idx) {
-                AutoPtr<IOnWindowFocusChangeListener> item = (*observerObj->mOnWindowFocusListeners)[idx];
-                mOnWindowFocusListeners->PushBack(item);
+            List<AutoPtr<IOnWindowFocusChangeListener> >::Iterator it = other->Begin();
+            for (; it != other->End(); ++it) {
+                mOnWindowFocusListeners->PushBack(*it);
             }
         }
         else {
-            mOnWindowFocusListeners = observerObj->mOnWindowFocusListeners;
+            mOnWindowFocusListeners = new List<AutoPtr<IOnWindowFocusChangeListener> >(*other);
         }
     }
 
     if (observerObj->mOnGlobalFocusListeners != NULL) {
+        List<AutoPtr<IOnGlobalFocusChangeListener> >* other = observerObj->mOnGlobalFocusListeners;
         if (mOnGlobalFocusListeners != NULL) {
-            Int32 size = (Int32)observerObj->mOnGlobalFocusListeners->GetSize();
-            for (Int32 idx=0; idx<size; ++idx) {
-                AutoPtr<IOnGlobalFocusChangeListener> item = (*observerObj->mOnGlobalFocusListeners)[idx];
-                mOnGlobalFocusListeners->PushBack(item);
+            List<AutoPtr<IOnGlobalFocusChangeListener> >::Iterator it = other->Begin();
+            for (; it != other->End(); ++it) {
+                mOnGlobalFocusListeners->PushBack(*it);
             }
         }
         else {
-            mOnGlobalFocusListeners = observerObj->mOnGlobalFocusListeners;
+            mOnGlobalFocusListeners = new List<AutoPtr<IOnGlobalFocusChangeListener> >(*other);
         }
     }
 
     if (observerObj->mOnGlobalLayoutListeners != NULL) {
+        List<AutoPtr<IOnGlobalLayoutListener> >* other = observerObj->mOnGlobalLayoutListeners;
         if (mOnGlobalLayoutListeners != NULL) {
-            Int32 size = (Int32)observerObj->mOnGlobalLayoutListeners->GetSize();
-            for (Int32 idx=0; idx<size; ++idx) {
-                AutoPtr<IOnGlobalLayoutListener> item = (*observerObj->mOnGlobalLayoutListeners)[idx];
-                mOnGlobalLayoutListeners->PushBack(item);
+            List<AutoPtr<IOnGlobalLayoutListener> >::Iterator it = other->Begin();
+            for (; it != other->End(); ++it) {
+                mOnGlobalLayoutListeners->PushBack(*it);
             }
         }
         else {
-            mOnGlobalLayoutListeners = observerObj->mOnGlobalLayoutListeners;
+            mOnGlobalLayoutListeners = new List<AutoPtr<IOnGlobalLayoutListener> >(*other);
         }
     }
 
     if (observerObj->mOnPreDrawListeners != NULL) {
+        List<AutoPtr<IOnPreDrawListener> >* other = observerObj->mOnPreDrawListeners;
         if (mOnPreDrawListeners != NULL) {
-            Int32 size = (Int32)observerObj->mOnPreDrawListeners->GetSize();
-            for (Int32 idx=0; idx<size; ++idx) {
-                AutoPtr<IOnPreDrawListener> item = (*observerObj->mOnPreDrawListeners)[idx];
-                mOnPreDrawListeners->PushBack(item);
+            List<AutoPtr<IOnPreDrawListener> >::Iterator it = other->Begin();
+            for (; it != other->End(); ++it) {
+                mOnPreDrawListeners->PushBack(*it);
             }
         }
         else {
-            mOnPreDrawListeners = observerObj->mOnPreDrawListeners;
+            mOnPreDrawListeners = new List<AutoPtr<IOnPreDrawListener> >(*other);
         }
     }
 
     if (observerObj->mOnTouchModeChangeListeners != NULL) {
+        List<AutoPtr<IOnTouchModeChangeListener> >* other = observerObj->mOnTouchModeChangeListeners;
         if (mOnTouchModeChangeListeners != NULL) {
-            Int32 size = (Int32)observerObj->mOnTouchModeChangeListeners->GetSize();
-            for (Int32 idx=0; idx<size; ++idx) {
-                AutoPtr<IOnTouchModeChangeListener> item = (*observerObj->mOnTouchModeChangeListeners)[idx];
-                mOnTouchModeChangeListeners->PushBack(item);
+            List<AutoPtr<IOnTouchModeChangeListener> >::Iterator it = other->Begin();
+            for (; it != other->End(); ++it) {
+                mOnTouchModeChangeListeners->PushBack(*it);
             }
         }
         else {
-            mOnTouchModeChangeListeners = observerObj->mOnTouchModeChangeListeners;
+            mOnTouchModeChangeListeners = new List<AutoPtr<IOnTouchModeChangeListener> >(*other);
         }
     }
 
     if (observerObj->mOnComputeInternalInsetsListeners != NULL) {
+        List<AutoPtr<IOnComputeInternalInsetsListener> >* other = observerObj->mOnComputeInternalInsetsListeners;
         if (mOnComputeInternalInsetsListeners != NULL) {
-            Int32 size = (Int32)observerObj->mOnComputeInternalInsetsListeners->GetSize();
-            for (Int32 idx=0; idx<size; ++idx) {
-                AutoPtr<IOnComputeInternalInsetsListener> item = (*observerObj->mOnComputeInternalInsetsListeners)[idx];
-                mOnComputeInternalInsetsListeners->PushBack(item);
+            List<AutoPtr<IOnComputeInternalInsetsListener> >::Iterator it = other->Begin();
+            for (; it != other->End(); ++it) {
+                mOnComputeInternalInsetsListeners->PushBack(*it);
             }
         }
         else {
-            mOnComputeInternalInsetsListeners = observerObj->mOnComputeInternalInsetsListeners;
+            mOnComputeInternalInsetsListeners = new List<AutoPtr<IOnComputeInternalInsetsListener> >(*other);
         }
     }
 
     if (observerObj->mOnScrollChangedListeners != NULL) {
+        List<AutoPtr<IOnScrollChangedListener> >* other = observerObj->mOnScrollChangedListeners;
         if (mOnScrollChangedListeners != NULL) {
-            Int32 size = (Int32)observerObj->mOnScrollChangedListeners->GetSize();
-            for (Int32 idx=0; idx<size; ++idx) {
-                AutoPtr<IOnScrollChangedListener> item = (*observerObj->mOnScrollChangedListeners)[idx];
-                mOnScrollChangedListeners->PushBack(item);
+            List<AutoPtr<IOnScrollChangedListener> >::Iterator it = other->Begin();
+            for (; it != other->End(); ++it) {
+                mOnScrollChangedListeners->PushBack(*it);
             }
         }
         else {
-            mOnScrollChangedListeners = observerObj->mOnScrollChangedListeners;
+            mOnScrollChangedListeners = new List<AutoPtr<IOnScrollChangedListener> >(*other);
         }
     }
 
@@ -270,7 +270,7 @@ ECode ViewTreeObserver::AddOnWindowAttachListener(
 
     CheckIsAlive();
     if (NULL == mOnWindowAttachListeners) {
-        mOnWindowAttachListeners = new List<IOnWindowAttachListener*>();
+        mOnWindowAttachListeners = new List<AutoPtr<IOnWindowAttachListener> >();
     }
 
     mOnWindowAttachListeners->PushBack(listener);
@@ -283,11 +283,10 @@ ECode ViewTreeObserver::RemoveOnWindowAttachListener(
     VALIDATE_NOT_NULL(victim);
 
     CheckIsAlive();
-    if (NULL == mOnWindowAttachListeners) {
-        return NOERROR;
+    if (NULL != mOnWindowAttachListeners) {
+        mOnWindowAttachListeners->Remove(victim);
     }
 
-    mOnWindowAttachListeners->Remove(victim);
     return NOERROR;
 }
 
@@ -298,7 +297,7 @@ ECode ViewTreeObserver::AddOnWindowFocusChangeListener(
 
     CheckIsAlive();
     if (NULL == mOnWindowFocusListeners) {
-        mOnWindowFocusListeners = new List<IOnWindowFocusChangeListener*>();
+        mOnWindowFocusListeners = new List<AutoPtr<IOnWindowFocusChangeListener> >();
     }
 
     mOnWindowFocusListeners->PushBack(listener);
@@ -311,11 +310,10 @@ ECode ViewTreeObserver::RemoveOnWindowFocusChangeListener(
     VALIDATE_NOT_NULL(victim);
 
     CheckIsAlive();
-    if (NULL == mOnWindowFocusListeners) {
-        return NOERROR;
+    if (NULL != mOnWindowFocusListeners) {
+        mOnWindowFocusListeners->Remove(victim);
     }
 
-    mOnWindowFocusListeners->Remove(victim);
     return NOERROR;
 }
 
@@ -326,7 +324,7 @@ ECode ViewTreeObserver::AddOnGlobalFocusChangeListener(
 
     CheckIsAlive();
     if (NULL == mOnGlobalFocusListeners) {
-        mOnGlobalFocusListeners = new List<IOnGlobalFocusChangeListener*>();
+        mOnGlobalFocusListeners = new List<AutoPtr<IOnGlobalFocusChangeListener> >();
     }
 
     mOnGlobalFocusListeners->PushBack(listener);
@@ -339,11 +337,10 @@ ECode ViewTreeObserver::RemoveOnGlobalFocusChangeListener(
     VALIDATE_NOT_NULL(victim);
 
     CheckIsAlive();
-    if (NULL == mOnGlobalFocusListeners) {
-        return NOERROR;
+    if (NULL != mOnGlobalFocusListeners) {
+        mOnGlobalFocusListeners->Remove(victim);
     }
 
-    mOnGlobalFocusListeners->Remove(victim);
     return NOERROR;
 }
 
@@ -354,7 +351,7 @@ ECode ViewTreeObserver::AddOnGlobalLayoutListener(
 
     CheckIsAlive();
     if (NULL == mOnGlobalLayoutListeners) {
-        mOnGlobalLayoutListeners = new List<IOnGlobalLayoutListener*>();
+        mOnGlobalLayoutListeners = new List<AutoPtr<IOnGlobalLayoutListener> >();
     }
 
     mOnGlobalLayoutListeners->PushBack(listener);
@@ -364,8 +361,6 @@ ECode ViewTreeObserver::AddOnGlobalLayoutListener(
 ECode ViewTreeObserver::RemoveGlobalOnLayoutListener(
     /* [in] */ IOnGlobalLayoutListener* victim)
 {
-    VALIDATE_NOT_NULL(victim);
-
     return RemoveOnGlobalLayoutListener(victim);
 }
 
@@ -375,11 +370,10 @@ ECode ViewTreeObserver::RemoveOnGlobalLayoutListener(
     VALIDATE_NOT_NULL(victim);
 
     CheckIsAlive();
-    if (NULL == mOnGlobalLayoutListeners) {
-        return NOERROR;
+    if (NULL != mOnGlobalLayoutListeners) {
+        mOnGlobalLayoutListeners->Remove(victim);
     }
 
-    mOnGlobalLayoutListeners->Remove(victim);
     return NOERROR;
 }
 
@@ -390,7 +384,7 @@ ECode ViewTreeObserver::AddOnPreDrawListener(
 
     CheckIsAlive();
     if (NULL == mOnPreDrawListeners) {
-        mOnPreDrawListeners = new List<IOnPreDrawListener*>();
+        mOnPreDrawListeners = new List<AutoPtr<IOnPreDrawListener> >();
     }
 
     mOnPreDrawListeners->PushBack(listener);
@@ -403,11 +397,10 @@ ECode ViewTreeObserver::RemoveOnPreDrawListener(
     VALIDATE_NOT_NULL(victim);
 
     CheckIsAlive();
-    if (NULL == mOnPreDrawListeners) {
-        return NOERROR;
+    if (NULL != mOnPreDrawListeners) {
+        mOnPreDrawListeners->Remove(victim);
     }
 
-    mOnPreDrawListeners->Remove(victim);
     return NOERROR;
 }
 
@@ -418,7 +411,7 @@ ECode ViewTreeObserver::AddOnDrawListener(
 
     CheckIsAlive();
     if (NULL == mOnDrawListeners) {
-        mOnDrawListeners = new List<IOnDrawListener*>();
+        mOnDrawListeners = new List<AutoPtr<IOnDrawListener> >();
     }
 
     mOnDrawListeners->PushBack(listener);
@@ -431,11 +424,10 @@ ECode ViewTreeObserver::RemoveOnDrawListener(
     VALIDATE_NOT_NULL(victim);
 
     CheckIsAlive();
-    if (NULL == mOnDrawListeners) {
-        return NOERROR;
+    if (NULL != mOnDrawListeners) {
+        mOnDrawListeners->Remove(victim);
     }
 
-    mOnDrawListeners->Remove(victim);
     return NOERROR;
 }
 
@@ -446,7 +438,7 @@ ECode ViewTreeObserver::AddOnScrollChangedListener(
 
     CheckIsAlive();
     if (NULL == mOnScrollChangedListeners) {
-        mOnScrollChangedListeners = new List<IOnScrollChangedListener*>();
+        mOnScrollChangedListeners = new List<AutoPtr<IOnScrollChangedListener> >();
     }
 
     mOnScrollChangedListeners->PushBack(listener);
@@ -459,11 +451,10 @@ ECode ViewTreeObserver::RemoveOnScrollChangedListener(
     VALIDATE_NOT_NULL(victim);
 
     CheckIsAlive();
-    if (NULL == mOnScrollChangedListeners) {
-        return NOERROR;
+    if (NULL != mOnScrollChangedListeners) {
+        mOnScrollChangedListeners->Remove(victim);
     }
 
-    mOnScrollChangedListeners->Remove(victim);
     return NOERROR;
 }
 
@@ -474,7 +465,7 @@ ECode ViewTreeObserver::AddOnTouchModeChangeListener(
 
     CheckIsAlive();
     if (NULL == mOnTouchModeChangeListeners) {
-        mOnTouchModeChangeListeners = new List<IOnTouchModeChangeListener*>();
+        mOnTouchModeChangeListeners = new List<AutoPtr<IOnTouchModeChangeListener> >();
     }
 
     mOnTouchModeChangeListeners->PushBack(listener);
@@ -487,11 +478,10 @@ ECode ViewTreeObserver::RemoveOnTouchModeChangeListener(
     VALIDATE_NOT_NULL(victim);
 
     CheckIsAlive();
-    if (NULL == mOnTouchModeChangeListeners) {
-        return NOERROR;
+    if (NULL != mOnTouchModeChangeListeners) {
+        mOnTouchModeChangeListeners->Remove(victim);
     }
 
-    mOnTouchModeChangeListeners->Remove(victim);
     return NOERROR;
 }
 
@@ -502,7 +492,7 @@ ECode ViewTreeObserver::AddOnComputeInternalInsetsListener(
 
     CheckIsAlive();
     if (NULL == mOnComputeInternalInsetsListeners) {
-        mOnComputeInternalInsetsListeners = new List<IOnComputeInternalInsetsListener*>();
+        mOnComputeInternalInsetsListeners = new List<AutoPtr<IOnComputeInternalInsetsListener> >();
     }
 
     mOnComputeInternalInsetsListeners->PushBack(listener);
@@ -515,11 +505,10 @@ ECode ViewTreeObserver::RemoveOnComputeInternalInsetsListener(
     VALIDATE_NOT_NULL(victim);
 
     CheckIsAlive();
-    if (NULL == mOnComputeInternalInsetsListeners) {
-        return NOERROR;
+    if (NULL != mOnComputeInternalInsetsListeners) {
+        mOnComputeInternalInsetsListeners->Remove(victim);
     }
 
-    mOnComputeInternalInsetsListeners->Remove(victim);
     return NOERROR;
 }
 
@@ -547,37 +536,37 @@ ECode ViewTreeObserver::IsAlive(
 ECode ViewTreeObserver::DispatchOnWindowAttachedChange(
     /* [in] */ Boolean attached)
 {
-
     // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
     // perform the dispatching. The iterator is a safe guard against listeners that
     // could mutate the list by calling the various add/remove methods. This prevents
     // the array from being modified while we iterate it.
-    AutoPtr< List<IOnWindowAttachListener*> > listeners = mOnWindowAttachListeners;
-    if (listeners != NULL && listeners->GetSize() > 0) {
-        IOnWindowAttachListener* listener = NULL;
-        for (Int32 idx=0; idx<(Int32)listeners->GetSize(); ++idx) {
-            listener = (*listeners)[idx];
-            if (attached)
-                listener->OnWindowAttached();
-            else
-                listener->OnWindowDetached();
+    if (mOnWindowAttachListeners != NULL && !mOnWindowAttachListeners->IsEmpty()) {
+        List<AutoPtr<IOnWindowAttachListener> > access(*mOnWindowAttachListeners);
+        List<AutoPtr<IOnWindowAttachListener> >::Iterator iter = access.Begin();
+        for (; iter != access.End(); ++iter) {
+            if (attached){
+                (*iter)->OnWindowAttached();
+            }
+            else {
+                (*iter)->OnWindowDetached();
+            }
         }
     }
+
     return NOERROR;
 }
 
 ECode ViewTreeObserver::DispatchOnWindowFocusChange(
     /* [in] */ Boolean hasFocus)
 {
-
-    AutoPtr< List<IOnWindowFocusChangeListener*> > listeners = mOnWindowFocusListeners;
-    if (listeners != NULL && listeners->GetSize() > 0) {
-        IOnWindowFocusChangeListener* listener = NULL;
-        for (Int32 idx=0; idx<(Int32)listeners->GetSize(); ++idx) {
-            listener = (*listeners)[idx];
-            listener->OnWindowFocusChanged(hasFocus);
+    if (mOnWindowFocusListeners != NULL && !mOnWindowFocusListeners->IsEmpty()) {
+        List<AutoPtr<IOnWindowFocusChangeListener> > access(*mOnWindowFocusListeners);
+        List<AutoPtr<IOnWindowFocusChangeListener> >::Iterator iter = access.Begin();
+        for (; iter != access.End(); ++iter) {
+            (*iter)->OnWindowFocusChanged(hasFocus);
         }
     }
+
     return NOERROR;
 }
 
@@ -588,24 +577,23 @@ ECode ViewTreeObserver::DispatchOnGlobalFocusChange(
     VALIDATE_NOT_NULL(oldFocus);
     VALIDATE_NOT_NULL(newFocus);
 
-    AutoPtr< List<IOnGlobalFocusChangeListener*> > listeners = mOnGlobalFocusListeners;
-    if (listeners != NULL && listeners->GetSize() > 0) {
-        IOnGlobalFocusChangeListener* listener = NULL;
-        for (Int32 idx=0; idx<(Int32)listeners->GetSize(); ++idx) {
-            listener = (*listeners)[idx];
-            listener->OnGlobalFocusChanged(oldFocus, newFocus);
+    if (mOnGlobalFocusListeners != NULL && !mOnGlobalFocusListeners->IsEmpty()) {
+        List<AutoPtr<IOnGlobalFocusChangeListener> > access(*mOnGlobalFocusListeners);
+        List<AutoPtr<IOnGlobalFocusChangeListener> >::Iterator iter = access.Begin();
+        for (; iter != access.End(); ++iter) {
+            (*iter)->OnGlobalFocusChanged(oldFocus, newFocus);
         }
     }
+
     return NOERROR;
 }
 
 ECode ViewTreeObserver::DispatchOnGlobalLayout()
 {
-
-    if (!mOnGlobalLayoutListeners->IsEmpty()) {
-        List<IOnGlobalLayoutListener*>::Iterator iter = mOnGlobalLayoutListeners->Begin();
-        for (; iter != mOnGlobalLayoutListeners->End(); ++iter) {
-            assert((*iter) != NULL);
+    if (mOnGlobalLayoutListeners != NULL && !mOnGlobalLayoutListeners->IsEmpty()) {
+        List<AutoPtr<IOnGlobalLayoutListener> > access(*mOnGlobalLayoutListeners);
+        List<AutoPtr<IOnGlobalLayoutListener> >::Iterator iter = access.Begin();
+        for (; iter != access.End(); ++iter) {
             (*iter)->OnGlobalLayout();
         }
     }
@@ -628,9 +616,10 @@ ECode ViewTreeObserver::DispatchOnPreDraw(
     *result = FALSE;
 
     if (mOnPreDrawListeners != NULL && !mOnPreDrawListeners->IsEmpty()) {
+        List<AutoPtr<IOnPreDrawListener> > access(*mOnPreDrawListeners);
         Boolean isPreDraw;
-        List<IOnPreDrawListener*>::Iterator iter = mOnPreDrawListeners->Begin();
-        for (; iter != mOnPreDrawListeners->End(); ++iter) {
+        List<AutoPtr<IOnPreDrawListener> >::Iterator iter = access.Begin();
+        for (; iter != access.End(); ++iter) {
             isPreDraw = FALSE;
             assert((*iter) != NULL);
             (*iter)->OnPreDraw(&isPreDraw);
@@ -642,9 +631,8 @@ ECode ViewTreeObserver::DispatchOnPreDraw(
 
 ECode ViewTreeObserver::DispatchOnDraw()
 {
-
     if (mOnDrawListeners != NULL) {
-        List<IOnDrawListener*>::Iterator iter = mOnDrawListeners->Begin();
+        List<AutoPtr<IOnDrawListener> >::Iterator iter = mOnDrawListeners->Begin();
         for (; iter != mOnDrawListeners->End(); ++iter) {
             assert((*iter) != NULL);
             (*iter)->OnDraw();
@@ -656,27 +644,29 @@ ECode ViewTreeObserver::DispatchOnDraw()
 ECode ViewTreeObserver::DispatchOnTouchModeChanged(
     /* [in] */ Boolean inTouchMode)
 {
-
-    if (mOnTouchModeChangeListeners != NULL && mOnTouchModeChangeListeners->GetSize() > 0) {
-        List<IOnTouchModeChangeListener*>::Iterator iter = mOnTouchModeChangeListeners->Begin();
-        for (; iter != mOnTouchModeChangeListeners->End(); ++iter) {
+    if (mOnTouchModeChangeListeners != NULL && !mOnTouchModeChangeListeners->IsEmpty()) {
+        List<AutoPtr<IOnTouchModeChangeListener> > access(*mOnTouchModeChangeListeners);
+        List<AutoPtr<IOnTouchModeChangeListener> >::Iterator iter = access.Begin();
+        for (; iter != access.End(); ++iter) {
             assert((*iter) != NULL);
             (*iter)->OnTouchModeChanged(inTouchMode);
         }
     }
+
     return NOERROR;
 }
 
 ECode ViewTreeObserver::DispatchOnScrollChanged()
 {
-
-    if (mOnScrollChangedListeners != NULL && mOnScrollChangedListeners->GetSize() > 0) {
-        List<IOnScrollChangedListener*>::Iterator iter = mOnScrollChangedListeners->Begin();
-        for (; iter != mOnScrollChangedListeners->End(); ++iter) {
+    if (mOnScrollChangedListeners != NULL && !mOnScrollChangedListeners->IsEmpty()) {
+        List<AutoPtr<IOnScrollChangedListener> > access(*mOnScrollChangedListeners);
+        List<AutoPtr<IOnScrollChangedListener> >::Iterator iter = access.Begin();
+        for (; iter != access.End(); ++iter) {
             assert((*iter) != NULL);
             (*iter)->OnScrollChanged();
         }
     }
+
     return NOERROR;
 
 }
@@ -685,8 +675,12 @@ ECode ViewTreeObserver::HasComputeInternalInsetsListeners(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
 
-    *result = (mOnComputeInternalInsetsListeners != NULL && mOnComputeInternalInsetsListeners->GetSize() > 0);
+    if (mOnComputeInternalInsetsListeners != NULL && !mOnComputeInternalInsetsListeners->IsEmpty()) {
+        List<AutoPtr<IOnComputeInternalInsetsListener> > access(*mOnComputeInternalInsetsListeners);
+        *result = !access.IsEmpty();
+    }
     return NOERROR;
 }
 
@@ -695,13 +689,15 @@ ECode ViewTreeObserver::DispatchOnComputeInternalInsets(
 {
     VALIDATE_NOT_NULL(inoutInfo);
 
-    if (mOnComputeInternalInsetsListeners != NULL && mOnComputeInternalInsetsListeners->GetSize() > 0) {
-        List<IOnComputeInternalInsetsListener*>::Iterator iter = mOnComputeInternalInsetsListeners->Begin();
-        for (; iter != mOnComputeInternalInsetsListeners->End(); ++iter) {
+    if (mOnComputeInternalInsetsListeners != NULL && !mOnComputeInternalInsetsListeners->IsEmpty()) {
+        List<AutoPtr<IOnComputeInternalInsetsListener> > access(*mOnComputeInternalInsetsListeners);
+        List<AutoPtr<IOnComputeInternalInsetsListener> >::Iterator iter = access.Begin();
+        for (; iter != access.End(); ++iter) {
             assert((*iter) != NULL);
             (*iter)->OnComputeInternalInsets(inoutInfo);
         }
     }
+
     return NOERROR;
 }
 

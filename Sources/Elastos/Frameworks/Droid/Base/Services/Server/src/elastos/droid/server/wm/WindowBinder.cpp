@@ -15,24 +15,21 @@ namespace Wm {
 
 WindowBinder::WindowBinder()
 {
-    android::BBinder* b = new android::BBinder();
-    b->incStrong(NULL);
-    mNativeBinder = reinterpret_cast<Int32>(b);
+    mNativeBinder = new android::BBinder();
+    mNativeBinder->incStrong(NULL);
 }
 
 WindowBinder::~WindowBinder()
 {
-    android::BBinder* b = reinterpret_cast<android::BBinder*>(mNativeBinder);
-    assert(b != NULL);
-    b->decStrong(NULL);
+    assert(mNativeBinder != NULL);
+    mNativeBinder->decStrong(NULL);
 }
 
 ECode WindowBinder::Register()
 {
-    android::BBinder* b = reinterpret_cast<android::BBinder*>(mNativeBinder);
-    assert(b != NULL);
+    assert(mNativeBinder != NULL);
     android::sp<android::IServiceManager> sm = android::defaultServiceManager();
-    int res = sm->addService(android::String16(IContext::WINDOW_SERVICE.string()), b);
+    int res = sm->addService(android::String16(IContext::WINDOW_SERVICE.string()), mNativeBinder);
     if (res != 0) {
         Slogger::E("WindowBinder", "add service window failed");
         return E_RUNTIME_EXCEPTION;

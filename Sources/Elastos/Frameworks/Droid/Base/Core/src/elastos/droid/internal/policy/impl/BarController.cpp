@@ -1,6 +1,6 @@
 #include "elastos/droid/app/CStatusBarManager.h"
 #include "elastos/droid/internal/policy/impl/BarController.h"
-#include "elastos/droid/internal/policy/impl/CPolicyControl.h"
+#include "elastos/droid/view/WindowManagerPolicyControl.h"
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/os/CServiceManager.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -14,6 +14,8 @@ using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::View::IView;
+using Elastos::Droid::View::WindowManagerPolicyControl;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Core::AutoLock;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Utility::Logging::Slogger;
@@ -161,37 +163,27 @@ ECode BarController::ApplyTranslucentFlagLw(
 {
     VALIDATE_NOT_NULL(win);
     VALIDATE_NOT_NULL(result);
-    if (mWin != NULL)
-    {
+    if (mWin != NULL) {
         AutoPtr<IWindowManagerLayoutParams> attrs;
         win->GetAttrs((IWindowManagerLayoutParams**)&attrs);
         Int32 privateFlags;
         attrs->GetPrivateFlags(&privateFlags);
-        if (win != NULL && (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR) == 0)
-        {
-            AutoPtr<IPolicyControl> policyControl;
-            CPolicyControl::AcquireSingleton((IPolicyControl**)&policyControl);
-            int fl;
-            policyControl->GetWindowFlags(win, NULL, &fl);
-            if ((fl & mTranslucentWmFlag) != 0)
-            {
+        if (win != NULL && (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR) == 0) {
+            Int32 fl = WindowManagerPolicyControl::GetWindowFlags(win, NULL);
+            if ((fl & mTranslucentWmFlag) != 0) {
                 vis |= mTranslucentFlag;
             }
-            else
-            {
+            else {
                 vis &= ~mTranslucentFlag;
             }
-            if ((fl & IWindowManagerLayoutParams::FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0)
-            {
+            if ((fl & IWindowManagerLayoutParams::FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
                 vis |= IView::SYSTEM_UI_TRANSPARENT;
             }
-            else
-            {
+            else {
                 vis &= ~IView::SYSTEM_UI_TRANSPARENT;
             }
         }
-        else
-        {
+        else {
             vis = (vis & ~mTranslucentFlag) | (oldVis & mTranslucentFlag);
             vis = (vis & ~IView::SYSTEM_UI_TRANSPARENT) | (oldVis & IView::SYSTEM_UI_TRANSPARENT);
         }

@@ -19,7 +19,6 @@ module
     merge("policy/impl/PhoneLayoutInflater.car");
     merge("policy/impl/PhoneWindow.car");
     merge("policy/impl/PhoneWindowManager.car");
-    merge("policy/impl/PolicyControl.car");
     merge("policy/impl/RecentApplicationsBackground.car");
     merge("policy/impl/RecentApplicationsDialog.car");
     merge("policy/impl/SystemGesturesPointerEventListener.car");
@@ -48,7 +47,6 @@ module
     interface Elastos.Droid.Internal.Policy.Impl.IPhoneWindow;
     interface Elastos.Droid.Internal.Policy.Impl.IPhoneWindowManager;
     interface Elastos.Droid.Internal.Policy.Impl.IPhoneWindowRotationWatcher;
-    interface Elastos.Droid.Internal.Policy.Impl.IPolicyControl;
     interface Elastos.Droid.Internal.Policy.Impl.IRecentApplicationsBackground;
     interface Elastos.Droid.Internal.Policy.Impl.IRecentApplicationsDialog;
     interface Elastos.Droid.Internal.Policy.Impl.ISystemGesturesPointerEventListener;
@@ -244,10 +242,6 @@ module
             constructor();
 
             interface IIPolicy;
-        }
-
-        singleton class CPolicyControl {
-            interface IPolicyControl;
         }
 
         [local]

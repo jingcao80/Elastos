@@ -61,7 +61,7 @@ namespace Server {
 namespace Display {
 
 const String CDisplayManagerService::TAG("CDisplayManagerService");
-const Boolean CDisplayManagerService::DEBUG = FALSE;
+const Boolean CDisplayManagerService::DEBUG = TRUE;
 const String CDisplayManagerService::FORCE_WIFI_DISPLAY_ENABLE("persist.debug.wfd.enable");
 const String CDisplayManagerService::SYSTEM_HEADLESS("persist.debug.wfd.enable");
 const Int64 CDisplayManagerService::WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT;

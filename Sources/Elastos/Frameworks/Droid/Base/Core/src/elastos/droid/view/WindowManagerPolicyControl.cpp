@@ -90,23 +90,22 @@ Int32 WindowManagerPolicyControl::GetWindowFlags(
 {
     //attrs = attrs != null ? attrs : win.getAttrs();
     AutoPtr<IWindowManagerLayoutParams> winParams = attrs;
-    if (winParams == NULL)
-    {
+    if (winParams == NULL) {
         win->GetAttrs((IWindowManagerLayoutParams**)&winParams);
     }
     Int32 flags;
     winParams->GetFlags(&flags);
     if (sImmersiveStatusFilter != NULL && sImmersiveStatusFilter->Matches(winParams)
-                && (sDefaultImmersiveStyle == ImmersiveDefaultStyles::IMMERSIVE_FULL ||
-                sDefaultImmersiveStyle == ImmersiveDefaultStyles::IMMERSIVE_STATUS))
+        && (sDefaultImmersiveStyle == ImmersiveDefaultStyles::IMMERSIVE_FULL ||
+        sDefaultImmersiveStyle == ImmersiveDefaultStyles::IMMERSIVE_STATUS))
     {
         flags |= IWindowManagerLayoutParams::FLAG_FULLSCREEN;
         flags &= ~(IWindowManagerLayoutParams::FLAG_TRANSLUCENT_STATUS
                 | IWindowManagerLayoutParams::FLAG_FORCE_NOT_FULLSCREEN);
     }
     if (sImmersiveNavigationFilter != NULL && sImmersiveNavigationFilter->Matches(winParams)
-            && (sDefaultImmersiveStyle == ImmersiveDefaultStyles::IMMERSIVE_FULL ||
-                sDefaultImmersiveStyle == ImmersiveDefaultStyles::IMMERSIVE_NAVIGATION))
+        && (sDefaultImmersiveStyle == ImmersiveDefaultStyles::IMMERSIVE_FULL ||
+            sDefaultImmersiveStyle == ImmersiveDefaultStyles::IMMERSIVE_NAVIGATION))
     {
         flags &= ~IWindowManagerLayoutParams::FLAG_TRANSLUCENT_NAVIGATION;
     }
@@ -118,8 +117,7 @@ Int32 WindowManagerPolicyControl::GetPrivateWindowFlags(
     /* [in] */ IWindowManagerLayoutParams* attrs)
 {
     AutoPtr<IWindowManagerLayoutParams> winParams = attrs;
-    if (winParams == NULL)
-    {
+    if (winParams == NULL) {
         win->GetAttrs((IWindowManagerLayoutParams**)&winParams);
     }
     Int32 privateFlags;

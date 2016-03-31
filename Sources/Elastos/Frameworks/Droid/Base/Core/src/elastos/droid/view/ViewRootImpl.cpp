@@ -270,6 +270,11 @@ ECode ViewRootImpl::ViewRootHandler::HandleMessage(
         return NOERROR;
     }
 
+    if (ViewRootImpl::LOCAL_LOGV) {
+        String msgInfo = GetMessageNameImpl(msg);
+        Slogger::I(ViewRootImpl::TAG, " >>> HandleMessage : %s.", msgInfo.string());
+    }
+
     AutoPtr<ViewRootImpl> mHost = (ViewRootImpl*)hostObj.Get();
 
     Int32 what, arg1, arg2;
@@ -469,6 +474,11 @@ ECode ViewRootImpl::ViewRootHandler::HandleMessage(
             }
             break;
         }
+    }
+
+    if (ViewRootImpl::LOCAL_LOGV) {
+        String msgInfo = GetMessageNameImpl(msg);
+        Slogger::I(ViewRootImpl::TAG, " <<< HandleMessage : %s.", msgInfo.string());
     }
     return NOERROR;
 }
@@ -1350,8 +1360,13 @@ ECode ViewRootImpl::constructor(
     mHandler = new ViewRootHandler(this);
     mHandler->constructor();
 
-    mDisplayListener = new RootDisplayListener(this);
-    mConsumeBatchedInputImmediatelyRunnable = new ConsumeBatchedInputImmediatelyRunnable(this);
+    AutoPtr<IWeakReference> weakHost;
+    GetWeakReference((IWeakReference**)&weakHost);
+    mTraversalRunnable = new TraversalRunnable(weakHost);
+    mConsumedBatchedInputRunnable = new ConsumeBatchedInputRunnable(weakHost);
+    mInvalidateOnAnimationRunnable = new InvalidateOnAnimationRunnable(weakHost);
+    mConsumeBatchedInputImmediatelyRunnable = new ConsumeBatchedInputImmediatelyRunnable(weakHost);
+    mDisplayListener = new RootDisplayListener(weakHost);
 
     mThread = Thread::GetCurrentThread();
     /*mLocation = new WindowLeaked(null);
@@ -1362,7 +1377,7 @@ ECode ViewRootImpl::constructor(
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mTempRect));
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mVisRect));
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mWinFrame));
-    CViewRootImplW::New((IViewRootImpl*)this, (IIWindow**)&mWindow);//TODO
+    CViewRootImplW::New(this, (IIWindow**)&mWindow);
 
     AutoPtr<IApplicationInfo> info;
     context->GetApplicationInfo((IApplicationInfo**)&info);
@@ -5389,8 +5404,9 @@ ECode ViewRootImpl::Die(
             DestroyHardwareRenderer();
         }
         else {
-            Logger::E(TAG, "Attempting to destroy the window while drawing!\n" /*+
-                    "  window=" + this + ", title=" + mWindowAttributes.getTitle()*/);
+            AutoPtr<ICharSequence> title;
+            mWindowAttributes->GetTitle((ICharSequence**)&title);
+            Logger::E(TAG, "Attempting to destroy the window while drawing %s!\n", TO_CSTR(title));
         }
 
         Boolean result;
@@ -5466,7 +5482,9 @@ ECode ViewRootImpl::RequestUpdateConfiguration(
 
 ECode ViewRootImpl::LoadSystemProperties()
 {
-    AutoPtr<IRunnable> run = new PropertiesRunnable(this);
+    AutoPtr<IWeakReference> wr;
+    GetWeakReference((IWeakReference**)&wr);
+    AutoPtr<IRunnable> run = new PropertiesRunnable(wr);
     Boolean temp;
     mHandler->Post(run, &temp);
     return NOERROR;
@@ -5677,13 +5695,14 @@ void ViewRootImpl::ScheduleProcessInputEvents()
 
 ECode ViewRootImpl::DoProcessInputEvents()
 {
-    while (mPendingInputEventHead == NULL) {
+    while (mPendingInputEventHead != NULL) {
         AutoPtr<QueuedInputEvent> q = mPendingInputEventHead;
         mPendingInputEventHead = q->mNext;
         if (mPendingInputEventHead == NULL) {
             mPendingInputEventTail = NULL;
         }
         q->mNext = NULL;
+
         mPendingInputEventCount -= 1;
         /*Trace::TraceCounter(Trace::TRACE_TAG_INPUT, mPendingInputEventQueueLengthCounterName,
                 mPendingInputEventCount);*/
@@ -5783,7 +5802,6 @@ ECode ViewRootImpl::DoConsumeBatchedInput(
                 // we're in a non-batching mode, so there's no need to schedule this.
                 ScheduleConsumeBatchedInput();
             }
-
         }
         DoProcessInputEvents();
     }
@@ -6529,8 +6547,8 @@ void ViewRootImpl::LogView(
 CAR_INTERFACE_IMPL(ViewRootImpl::RootDisplayListener, Object, IDisplayListener)
 
 ViewRootImpl::RootDisplayListener::RootDisplayListener(
-    /* [in] */ ViewRootImpl* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {}
 
 CARAPI ViewRootImpl::RootDisplayListener::OnDisplayAdded(
@@ -6548,24 +6566,31 @@ CARAPI ViewRootImpl::RootDisplayListener::OnDisplayRemoved(
 CARAPI ViewRootImpl::RootDisplayListener::OnDisplayChanged(
     /* [in] */ Int32 displayId)
 {
+    AutoPtr<IViewRootImpl> hostObj;
+    mWeakHost->Resolve(EIID_IViewRootImpl, (IInterface**)&hostObj);
+    if (hostObj == NULL) {
+        return NOERROR;
+    }
+
+    ViewRootImpl* host = (ViewRootImpl*)hostObj.Get();
     Int32 id;
-    mHost->mDisplay->GetDisplayId(&id);
-    if (mHost->mView != NULL && id == displayId) {
-        Int32 oldDisplayState = mHost->mAttachInfo->mDisplayState;
+    host->mDisplay->GetDisplayId(&id);
+    if (host->mView != NULL && id == displayId) {
+        Int32 oldDisplayState = host->mAttachInfo->mDisplayState;
         Int32 newDisplayState;
-        mHost->mDisplay->GetState(&newDisplayState);
+        host->mDisplay->GetState(&newDisplayState);
         if (oldDisplayState != newDisplayState) {
-            mHost->mAttachInfo->mDisplayState = newDisplayState;
+            host->mAttachInfo->mDisplayState = newDisplayState;
             if (oldDisplayState != IDisplay::STATE_UNKNOWN) {
                 Int32 oldScreenState = ToViewScreenState(oldDisplayState);
                 Int32 newScreenState = ToViewScreenState(newDisplayState);
                 if (oldScreenState != newScreenState) {
-                    VIEW_PROBE(mHost->mView)->DispatchScreenStateChanged(newScreenState);
+                    ((View*)host->mView.Get())->DispatchScreenStateChanged(newScreenState);
                 }
                 if (oldDisplayState == IDisplay::STATE_OFF) {
                     // Draw was suppressed so we need to for it to happen here.
-                    mHost->mFullRedrawNeeded = TRUE;
-                    mHost->ScheduleTraversals();
+                    host->mFullRedrawNeeded = TRUE;
+                    host->ScheduleTraversals();
                 }
             }
         }
@@ -8153,45 +8178,52 @@ ECode ViewRootImpl::SyntheticKeyboardHandler::Process(
 //          ViewRootImpl::PropertiesRunnable
 ////////////////////////////////////////////////////////////////////
 ViewRootImpl::PropertiesRunnable::PropertiesRunnable(
-    /* [in] */ ViewRootImpl* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {
 }
 
 ECode ViewRootImpl::PropertiesRunnable::Run()
 {
+    AutoPtr<IViewRootImpl> hostObj;
+    mWeakHost->Resolve(EIID_IViewRootImpl, (IInterface**)&hostObj);
+    if (hostObj == NULL) {
+        return NOERROR;
+    }
+
+    ViewRootImpl* host = (ViewRootImpl*)hostObj.Get();
     // Profiling
-    SystemProperties::GetBoolean(mHost->PROPERTY_PROFILE_RENDERING, FALSE, &mHost->mProfileRendering);
-    mHost->ProfileRendering(mHost->mAttachInfo->mHasWindowFocus);
+    SystemProperties::GetBoolean(host->PROPERTY_PROFILE_RENDERING, FALSE, &host->mProfileRendering);
+    host->ProfileRendering(host->mAttachInfo->mHasWindowFocus);
 
     // Media (used by sound effects)
-    SystemProperties::GetBoolean(PROPERTY_MEDIA_DISABLED, FALSE, &mHost->mMediaDisabled);
+    SystemProperties::GetBoolean(PROPERTY_MEDIA_DISABLED, FALSE, &host->mMediaDisabled);
 
     // Hardware rendering
-    if (mHost->mAttachInfo->mHardwareRenderer != NULL) {
+    if (host->mAttachInfo->mHardwareRenderer != NULL) {
         Boolean res;
-        mHost->mAttachInfo->mHardwareRenderer->LoadSystemProperties(&res);
+        host->mAttachInfo->mHardwareRenderer->LoadSystemProperties(&res);
         if (res) {
-            mHost->Invalidate();
+            host->Invalidate();
         }
     }
 
     // Layout debugging
     Boolean layout;
     SystemProperties::GetBoolean(IView::DEBUG_LAYOUT_PROPERTY, FALSE, &layout);
-    if (layout != mHost->mAttachInfo->mDebugLayout) {
-        mHost->mAttachInfo->mDebugLayout = layout;
+    if (layout != host->mAttachInfo->mDebugLayout) {
+        host->mAttachInfo->mDebugLayout = layout;
         Boolean hasMessages;
-        mHost->mHandler->HasMessages(MSG_INVALIDATE_WORLD, &hasMessages);
+        host->mHandler->HasMessages(MSG_INVALIDATE_WORLD, &hasMessages);
         if (!hasMessages) {
             Boolean temp;
-            mHost->mHandler->SendEmptyMessageDelayed(MSG_INVALIDATE_WORLD, 200, &temp);
+            host->mHandler->SendEmptyMessageDelayed(MSG_INVALIDATE_WORLD, 200, &temp);
         }
     }
 
     // detect emulator
-    mHost->mIsEmulator = Build::HARDWARE.Contains("goldfish");
-    SystemProperties::GetBoolean(PROPERTY_EMULATOR_CIRCULAR, FALSE, &mHost->mIsCircularEmulator);
+    host->mIsEmulator = Build::HARDWARE.Contains("goldfish");
+    SystemProperties::GetBoolean(PROPERTY_EMULATOR_CIRCULAR, FALSE, &host->mIsCircularEmulator);
     return NOERROR;
 }
 
@@ -8286,13 +8318,19 @@ Boolean ViewRootImpl::QueuedInputEvent::FlagToString(
 ////////////////////////////////////////////////////////////////////
 
 ViewRootImpl::ConsumeBatchedInputImmediatelyRunnable::ConsumeBatchedInputImmediatelyRunnable(
-    /* [in] */ ViewRootImpl* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {}
 
 ECode ViewRootImpl::ConsumeBatchedInputImmediatelyRunnable::Run()
 {
-    mHost->DoConsumeBatchedInput(-1);
+    AutoPtr<IViewRootImpl> hostObj;
+    mWeakHost->Resolve(EIID_IViewRootImpl, (IInterface**)&hostObj);
+    if (hostObj != NULL) {
+        ViewRootImpl* host = (ViewRootImpl*)hostObj.Get();
+        return host->DoConsumeBatchedInput(-1);
+    }
+
     return NOERROR;
 }
 

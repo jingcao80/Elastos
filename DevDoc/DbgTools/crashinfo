@@ -1,33 +1,17 @@
-I/DEBUG   (  236):     #01 pc 0000e600  /system/lib/Elastos.Runtime.eco (atomic_inc+24)
-I/DEBUG   (  236):     #02 pc 0275772c  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #03 pc 0275749c  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #04 pc 02757ca8  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #05 pc 0143097c  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Content::BroadcastReceiver::AddRef()+28)
-I/DEBUG   (  236):     #06 pc 012128e4  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #07 pc 013445a0  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #08 pc 01349844  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #09 pc 0126e854  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #10 pc 0126e628  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  236):     #11 pc 0020e9d4  /system/lib/Elastos.Droid.Server.eco
-I/DEBUG   (  236):     #12 pc 00213da4  /system/lib/Elastos.Droid.Server.eco
-I/DEBUG   (  236):     #13 pc 0030bf08  /system/lib/Elastos.Droid.Server.eco
-I/DEBUG   (  236):     #14 pc 00202a14  /system/lib/Elastos.Droid.Server.eco
-I/DEBUG   (  236):     #15 pc 00200bf0  /system/lib/Elastos.Droid.Server.eco
-I/DEBUG   (  236):     #16 pc 00200720  /system/lib/Elastos.Droid.Server.eco
-I/DEBUG   (  236):     #17 pc 0003d3a0  /system/lib/Elastos.Runtime.eco/home/kesalin/Elastos5/Sources/Elastos/Runtime/Library/elasys/elaatomics.cpp:37
-/home/kesalin/Elastos5/Sources/Elastos/Runtime/Library/eltypes/elrefbase/elrefbase.cpp:382
-/home/kesalin/Elastos5/Sources/Elastos/Runtime/Library/eltypes/elrefbase/elrefbase.cpp:307
-/home/kesalin/Elastos5/Sources/Elastos/Runtime/Library/eltypes/elrefbase/elrefbase.cpp:539
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/content/BroadcastReceiver.cpp:327
-/home/kesalin/Elastos5/Targets/obj/rdk/arm.gnu.android.dbg/inc/elautoptr.h:137 (discriminator 1)
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/LoadedPkg.cpp:201
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/LoadedPkg.cpp:1302 (discriminator 3)
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/CContextImpl.cpp:1986 (discriminator 1)
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/CContextImpl.cpp:1949
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/AlarmManagerService.cpp:1127
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server//src/elastos/droid/server/AlarmManagerService.cpp:2006 (discriminator 1)
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/SystemServiceManager.cpp:52
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/CSystemServer.cpp:572 (discriminator 3)
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/CSystemServer.cpp:274
-/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/CSystemServer.cpp:155 (discriminator 3)
-/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/reflection/invoke_gnuc.S:38
+I/DEBUG   (  236):     #00 pc 00047a44  /system/lib/Elastos.Runtime.eco
+I/DEBUG   (  236):     #01 pc 00043b88  /system/lib/Elastos.Runtime.eco
+I/DEBUG   (  236):     #02 pc 00042340  /system/lib/Elastos.Runtime.eco
+I/DEBUG   (  236):     #03 pc 00043284  /system/lib/Elastos.Runtime.eco
+I/DEBUG   (  236):     #04 pc 00045bd8  /system/lib/Elastos.Runtime.eco
+I/DEBUG   (  236):     #05 pc 00047fd8  /system/lib/Elastos.Runtime.eco
+I/DEBUG   (  236):     #06 pc 000487ac  /system/lib/Elastos.Runtime.eco
+I/DEBUG   (  236):     #07 pc 000477a0  /system/lib/Elastos.Runtime.eco
+I/DEBUG   (  236):     #08 pc 00047578  /system/lib/Elastos.Runtime.eco/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/proxy.cpp:274
+/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/CRemoteParcel.cpp:886
+/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/CRemoteParcel.cpp:369
+/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/CRemoteParcel.cpp:693
+/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/mshproc.cpp:442
+/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/proxy.cpp:431
+/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/proxy.cpp:620 (discriminator 3)
+/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/proxy.cpp:152
+??:0

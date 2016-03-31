@@ -4,10 +4,12 @@
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.View.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::Content::Pm::IActivityInfo;
@@ -70,10 +72,10 @@ void AppWindowToken::SendAppVisibilityToClients()
             continue;
         }
         // try {
-        // if (CWindowManagerService::DEBUG_VISIBILITY) {
-        //     Slogger::V(CWindowManagerService::TAG,
-        //         "Setting visibility of %p: %d", win, (Int32)!clientHidden));
-        // }
+        if (CWindowManagerService::DEBUG_VISIBILITY) {
+            Slogger::V(CWindowManagerService::TAG,
+                "Setting visibility of %p: %d", TO_CSTR(win), !mClientHidden);
+        }
         win->mClient->DispatchAppVisibility(!mClientHidden);
         // } catch (RemoteException e) {
         // }
@@ -91,9 +93,9 @@ void AppWindowToken::UpdateReportedVisibilityLocked()
     Int32 numDrawn = 0;
     Boolean nowGone = TRUE;
 
-    // if (CWindowManagerService::DEBUG_VISIBILITY) {
-    //     Slogger::V(CWindowManagerService::TAG, "Update reported visibility: %p", this);
-    // }
+    if (CWindowManagerService::DEBUG_VISIBILITY) {
+        Slogger::V(CWindowManagerService::TAG, "Update reported visibility: %s", TO_CSTR(this));
+    }
     List<AutoPtr<WindowState> >::Iterator it;
     for (it = mAllAppWindows.Begin(); it != mAllAppWindows.End(); ++it) {
         AutoPtr<WindowState> win = *it;
@@ -105,21 +107,17 @@ void AppWindowToken::UpdateReportedVisibilityLocked()
                 || win->mDestroying) {
             continue;
         }
-        // if (WindowManagerService.DEBUG_VISIBILITY) {
-        //     Slog.v(WindowManagerService.TAG, "Win " + win + ": isDrawn="
-        //             + win.isDrawnLw()
-        //             + ", isAnimating=" + win.mWinAnimator.isAnimating());
-        //     if (!win.isDrawnLw()) {
-        //         Slog.v(WindowManagerService.TAG, "Not displayed: s=" + win.mWinAnimator.mSurfaceControl
-        //                 + " pv=" + win.mPolicyVisibility
-        //                 + " mDrawState=" + win.mWinAnimator.mDrawState
-        //                 + " ah=" + win.mAttachedHidden
-        //                 + " th="
-        //                 + (win.mAppToken != null
-        //                         ? win.mAppToken.hiddenRequested : false)
-        //                 + " a=" + win.mWinAnimator.mAnimating);
-        //     }
-        // }
+        if (CWindowManagerService::DEBUG_VISIBILITY) {
+            Slogger::V(CWindowManagerService::TAG, "Win %s: isDrawn=%d, isAnimating=%d",
+                TO_CSTR(win), win->IsDrawnLw(), win->mWinAnimator->IsAnimating());
+            if (!win->IsDrawnLw()) {
+                Slogger::V(CWindowManagerService::TAG, "Not displayed: s=%p pv=%d mDrawState=%d ah=%d th=%d a=%d",
+                    win->mWinAnimator->mSurfaceControl.Get(), win->mPolicyVisibility,
+                    win->mWinAnimator->mDrawState, win->mAttachedHidden,
+                    (win->mAppToken != NULL ? win->mAppToken->mHiddenRequested : FALSE),
+                    win->mWinAnimator->mAnimating);
+            }
+        }
         numInteresting++;
         if (win->IsDrawnLw()) {
             numDrawn++;
@@ -144,8 +142,12 @@ void AppWindowToken::UpdateReportedVisibilityLocked()
             nowVisible = mReportedVisible;
         }
     }
-    // if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "VIS " + this + ": interesting="
-    //         + numInteresting + " visible=" + numVisible);
+
+    if (CWindowManagerService::DEBUG_VISIBILITY) {
+        Slogger::V(CWindowManagerService::TAG, "VIS %s: interesting=%d, visible=%d",
+            TO_CSTR(this), numInteresting, numVisible);
+    }
+
     if (nowDrawn != mReportedDrawn) {
         if (nowDrawn) {
             AutoPtr<IMessage> msg;
@@ -157,9 +159,9 @@ void AppWindowToken::UpdateReportedVisibilityLocked()
         mReportedDrawn = nowDrawn;
     }
     if (nowVisible != mReportedVisible) {
-        // if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(
-        //         WindowManagerService.TAG, "Visibility changed in " + this
-        //         + ": vis=" + nowVisible);
+        if (CWindowManagerService::DEBUG_VISIBILITY) {
+            Slogger::V(CWindowManagerService::TAG, "Visibility changed in %s: vis=%d", TO_CSTR(this), nowVisible);
+        }
         mReportedVisible = nowVisible;
         AutoPtr<IMessage> msg;
         mService->mH->ObtainMessage(CWindowManagerService::H::REPORT_APPLICATION_TOKEN_WINDOWS,
@@ -177,7 +179,7 @@ AutoPtr<WindowState> AppWindowToken::FindMainWindow()
         Int32 winType;
         win->mAttrs->GetType(&winType);
         if (winType == IWindowManagerLayoutParams::TYPE_BASE_APPLICATION
-                || winType == IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING) {
+            || winType == IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING) {
             return win;
         }
         ++rit;
@@ -207,8 +209,9 @@ void AppWindowToken::RemoveAllWindows()
     for (; rit != mAllAppWindows.REnd(); ++rit) {
         // try {
         AutoPtr<WindowState> win = *rit;
-        if (CWindowManagerService::DEBUG_WINDOW_MOVEMENT) Slogger::W(CWindowManagerService::TAG,
-                "removeAllWindows: removing win=%s", TO_CSTR(win));
+        if (CWindowManagerService::DEBUG_WINDOW_MOVEMENT) {
+            Slogger::W(CWindowManagerService::TAG, "removeAllWindows: removing win=%s", TO_CSTR(win));
+        }
         win->mService->RemoveWindowLocked(win->mSession, win);
         // } catch (IndexOutOfBoundsException e) {
         //     Slog.e(WindowManagerService.TAG, "Error while removing window : " + e);
@@ -223,7 +226,7 @@ ECode AppWindowToken::ToString(
     if (mStringName.IsNull()) {
         StringBuilder sb;
         sb.Append("AppWindowToken{");
-        sb.Append((Int32)this);
+        sb.Append(StringUtils::ToHexString((Int32)this));
         sb.Append(" token=");
         String info;
         mToken->ToString(&info);

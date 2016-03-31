@@ -9,6 +9,7 @@
 #include "elastos/droid/server/wm/FakeWindowImpl.h"
 #include "elastos/droid/server/wm/DisplayContent.h"
 #include "elastos/droid/server/wm/StackTapPointerEventListener.h"
+#include "elastos/droid/server/wm/WindowBinder.h"
 #include "elastos/droid/server/Watchdog.h"
 #include "elastos/droid/server/DisplayThread.h"
 #include "elastos/droid/server/UiThread.h"
@@ -36,6 +37,7 @@
 #include <binder/IServiceManager.h>
 #include <elastos/core/StringUtils.h>
 
+using Elastos::Droid::R;
 using Elastos::Droid::Animation::IValueAnimatorHelper;
 using Elastos::Droid::Animation::CValueAnimatorHelper;
 using Elastos::Droid::App::IActivityOptions;
@@ -384,7 +386,7 @@ ECode DragInputEventReceiver::OnInputEvent(
         handled = TRUE;
     }
     // } catch (Exception e) {
-    //     Slog.e(TAG, "Exception caught by drag handleMotion", e);
+    //     Slogger::E(TAG, "Exception caught by drag handleMotion", e);
     // } finally {
     FinishInputEvent(event, handled);
     // }
@@ -517,12 +519,12 @@ ECode CWindowManagerService::SecurelyOnKeyguardExitResult::OnKeyguardExitResult(
 //                  CWindowManagerService::LocalService
 //==============================================================================
 
+CAR_INTERFACE_IMPL(CWindowManagerService::LocalService, Object, IWindowManagerInternal)
+
 CWindowManagerService::LocalService::LocalService(
     /* [in] */ CWindowManagerService* host)
     : mHost(host)
 {}
-
-CAR_INTERFACE_IMPL(CWindowManagerService::LocalService, Object, IWindowManagerInternal)
 
 ECode CWindowManagerService::LocalService::RequestTraversalFromDisplayManager()
 {
@@ -750,8 +752,8 @@ const Boolean CWindowManagerService::DEBUG_WINDOW_TRACE = TRUE;
 const Boolean CWindowManagerService::DEBUG_TASK_MOVEMENT = TRUE;
 const Boolean CWindowManagerService::DEBUG_STACK = TRUE;
 const Boolean CWindowManagerService::DEBUG_DISPLAY = TRUE;
-const Boolean CWindowManagerService::SHOW_SURFACE_ALLOC = FALSE;
-const Boolean CWindowManagerService::SHOW_TRANSACTIONS = FALSE;
+const Boolean CWindowManagerService::SHOW_SURFACE_ALLOC = TRUE;
+const Boolean CWindowManagerService::SHOW_TRANSACTIONS = TRUE;
 const Boolean CWindowManagerService::SHOW_LIGHT_TRANSACTIONS = SHOW_TRANSACTIONS;
 const Boolean CWindowManagerService::HIDE_STACK_CRAWLS = TRUE;
 const Int32 CWindowManagerService::LAYOUT_REPEAT_THRESHOLD;
@@ -960,8 +962,8 @@ ECode CWindowManagerService::constructor(
     AutoPtr<IInterface> service;
     AutoPtr<IResources> resources;
     FAIL_RETURN(mContext->GetResources((IResources**)&resources))
-    resources->GetBoolean(Elastos::Droid::R::bool_::config_sf_limitedAlpha, &mLimitedAlphaCompositing);
-    resources->GetBoolean(Elastos::Droid::R::bool_::config_hasPermanentDpad, &mHasPermanentDpad);
+    resources->GetBoolean(R::bool_::config_sf_limitedAlpha, &mLimitedAlphaCompositing);
+    resources->GetBoolean(R::bool_::config_hasPermanentDpad, &mHasPermanentDpad);
     mInputManager = (CInputManagerService*)inputManager;
     service = LocalServices::GetService(EIID_IDisplayManagerInternal);
     mDisplayManagerInternal = IDisplayManagerInternal::Probe(service);
@@ -1042,7 +1044,7 @@ ECode CWindowManagerService::constructor(
 
     mAnimator = new WindowAnimator(this);
 
-    resources->GetBoolean(Elastos::Droid::R::bool_::config_forceDisableHardwareKeyboard, &mForceDisableHardwareKeyboard);
+    resources->GetBoolean(R::bool_::config_forceDisableHardwareKeyboard, &mForceDisableHardwareKeyboard);
 
     AutoPtr<IWindowManagerInternal> wmInternal = new LocalService(this);
     LocalServices::AddService(EIID_IWindowManagerInternal, wmInternal);
@@ -1071,6 +1073,10 @@ ECode CWindowManagerService::constructor(
 
     ShowCircularDisplayMaskIfNeeded();
     ShowEmulatorDisplayOverlayIfNeeded();
+
+    // for surfaceflinger to get service window
+    mWindowBinder = new WindowBinder();
+    mWindowBinder->Register();
 
     Slogger::D(TAG, " <<<<<<<<<<<<<<<<<<<<< CWindowManagerService::constructor");
     return NOERROR;
@@ -1515,7 +1521,7 @@ List< AutoPtr<WindowState> >::Iterator CWindowManagerService::FindDesiredInputMe
     for (; rit != windows->REnd(); ++rit) {
         AutoPtr<WindowState> win = *rit;
 
-        // if (DEBUG_INPUT_METHOD && willMove) Slog.i(TAG, "Checking window @" + i
+        // if (DEBUG_INPUT_METHOD && willMove) Slogger::I((TAG, "Checking window @" + i
         //         + " " + win + " fl=0x" + Integer.toHexString(w.mAttrs.flags));
         if (CanBeImeTarget(win)) {
             w = win;
@@ -1622,7 +1628,7 @@ List< AutoPtr<WindowState> >::Iterator CWindowManagerService::FindDesiredInputMe
         }
     }
 
-    // Slog.i(TAG, "Placing input method @" + (i+1));
+    // Slogger::I((TAG, "Placing input method @" + (i+1));
     if (w != NULL) {
         if (willMove) {
             // if (DEBUG_INPUT_METHOD) Slog.w(TAG, "Moving IM target from " + curTarget + " to "
@@ -2987,7 +2993,7 @@ void CWindowManagerService::RemoveWindowLocked(
         }
         if (win->mExiting || win->mWinAnimator->IsAnimating()) {
             // The exit animation is running... wait for it!
-            //Slog.i(TAG, "*** Running exit animation...");
+            //Slogger::I((TAG, "*** Running exit animation...");
             win->mExiting = TRUE;
             win->mRemoveOnExit = TRUE;
             AutoPtr<DisplayContent> displayContent = win->GetDisplayContent();
@@ -3181,18 +3187,18 @@ void CWindowManagerService::UpdateAppOpsState()
 // {
 //     String str = "  SURFACE " + msg + ": " + w;
 //     if (where != null) {
-//         Slog.i(TAG, str, where);
+//         Slogger::I((TAG, str, where);
 //     } else {
-//         Slog.i(TAG, str);
+//         Slogger::I((TAG, str);
 //     }
 // }
 
 // static void logSurface(SurfaceControl s, String title, String msg, RuntimeException where) {
 //     String str = "  SURFACE " + s + ": " + msg + " / " + title;
 //     if (where != null) {
-//         Slog.i(TAG, str, where);
+//         Slogger::I((TAG, str, where);
 //     } else {
-//         Slog.i(TAG, str);
+//         Slogger::I((TAG, str);
 //     }
 // }
 
@@ -3582,7 +3588,7 @@ Int32 CWindowManagerService::RelayoutWindow(
         // if (DEBUG_SCREEN_ON) {
         //     RuntimeException stack = new RuntimeException();
         //     stack.fillInStackTrace();
-        //     Slog.i(TAG, "Relayout " + win + ": oldVis=" + oldVisibility
+        //     Slogger::I((TAG, "Relayout " + win + ": oldVis=" + oldVisibility
         //             + " newVis=" + viewVisibility, stack);
         // }
         if (viewVisibility == IView::VISIBLE &&
@@ -3611,7 +3617,7 @@ Int32 CWindowManagerService::RelayoutWindow(
                     win->mTurnOnScreen = TRUE;
                 }
                 if (win->IsConfigChanged()) {
-                    // if (DEBUG_CONFIGURATION) Slog.i(TAG, "Window " + win
+                    // if (DEBUG_CONFIGURATION) Slogger::I((TAG, "Window " + win
                     //         + " visible with new config: " + mCurConfiguration);
                     inConfig->SetTo(mCurConfiguration);
                 }
@@ -3634,8 +3640,9 @@ Int32 CWindowManagerService::RelayoutWindow(
                     Binder::RestoreCallingIdentity(origId);
                     return 0;
                 }
-                // if (SHOW_TRANSACTIONS) Slog.i(TAG,
-                //         "  OUT SURFACE " + outSurface + ": copied");
+                // if (SHOW_TRANSACTIONS) {
+                //     Slogger::I((TAG,"  OUT SURFACE " + outSurface + ": copied");
+                // }
             }
             else {
                 // For some reason there isn't a surface.  Clear the
@@ -3682,7 +3689,7 @@ Int32 CWindowManagerService::RelayoutWindow(
         else {
             winAnimator->mEnterAnimationPending = FALSE;
             if (winAnimator->mSurfaceControl != NULL) {
-                // if (DEBUG_VISIBILITY) Slog.i(TAG, "Relayout invis " + win
+                // if (DEBUG_VISIBILITY) Slogger::I((TAG, "Relayout invis " + win
                 //         + ": mExiting=" + win.mExiting);
                 // If we are not currently running the exit animation, we
                 // need to see about starting one.
@@ -3730,7 +3737,7 @@ Int32 CWindowManagerService::RelayoutWindow(
             }
 
             inSurface->ReleaseSurface();
-            // if (DEBUG_VISIBILITY) Slog.i(TAG, "Releasing surface in: " + win);
+            // if (DEBUG_VISIBILITY) Slogger::I((TAG, "Releasing surface in: " + win);
         }
 
         if (focusMayChange) {
@@ -4697,7 +4704,7 @@ void CWindowManagerService::SetFocusedStackFrame()
     }
     // } finally {
     //     SurfaceControl.closeTransaction();
-    //     if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> CLOSE TRANSACTION setFocusedStackFrame");
+    //     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I((TAG, ">>> CLOSE TRANSACTION setFocusedStackFrame");
     // }
     helper->CloseTransaction();
     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> CLOSE TRANSACTION setFocusedStackFrame");
@@ -4744,7 +4751,7 @@ ECode CWindowManagerService::SetFocusedApp(
             SetFocusedStackLayer();
             // } finally {
             //     SurfaceControl.closeTransaction();
-            //     if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> CLOSE TRANSACTION setFocusedApp");
+            //     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I((TAG, ">>> CLOSE TRANSACTION setFocusedApp");
             // }
             helper->CloseTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> CLOSE TRANSACTION setFocusedApp");
@@ -5081,8 +5088,8 @@ ECode CWindowManagerService::SetAppStartingWindow(
     }
     if (theme != 0) {
         AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(Elastos::Droid::R::styleable::Window),
-            ArraySize(Elastos::Droid::R::styleable::Window));
+            const_cast<Int32 *>(R::styleable::Window),
+            ArraySize(R::styleable::Window));
 
         AutoPtr<Entry> ent = AttributeCache::GetInstance()->Get(pkg, theme, attrIds, mCurrentUserId);
         if (ent == NULL) {
@@ -5100,17 +5107,17 @@ ECode CWindowManagerService::SetAppStartingWindow(
         //         + ent.array.getBoolean(
         //                 com.android.internal.R.styleable.Window_windowShowWallpaper, false));
         Boolean res;
-        ent->mArray->GetBoolean(Elastos::Droid::R::styleable::Window_windowIsTranslucent,
+        ent->mArray->GetBoolean(R::styleable::Window_windowIsTranslucent,
                 FALSE, &res);
         if (res) {
             return NOERROR;
         }
-        ent->mArray->GetBoolean(Elastos::Droid::R::styleable::Window_windowIsFloating,
+        ent->mArray->GetBoolean(R::styleable::Window_windowIsFloating,
                 FALSE, &res);
         if (res) {
             return NOERROR;
         }
-        ent->mArray->GetBoolean(Elastos::Droid::R::styleable::Window_windowShowWallpaper,
+        ent->mArray->GetBoolean(R::styleable::Window_windowShowWallpaper,
                 FALSE, &res);
         if (res) {
             if (mWallpaperTarget == NULL) {
@@ -5264,7 +5271,7 @@ Boolean CWindowManagerService::SetTokenVisibilityLocked(
                 continue;
             }
 
-            // Slog.i(TAG, "Window " + win + ": vis=" + win.isVisible());
+            // Slogger::I((TAG, "Window " + win + ": vis=" + win.isVisible());
             // win.dump("  ");
             if (visible) {
                 if (!win->IsVisibleNow()) {
@@ -5505,7 +5512,7 @@ void CWindowManagerService::StartAppFreezingScreenLocked(
     //         e = new RuntimeException();
     //         e.fillInStackTrace();
     //     }
-    //     Slog.i(TAG, "Set freezing of " + wtoken.appToken
+    //     Slogger::I((TAG, "Set freezing of " + wtoken.appToken
     //             + ": hidden=" + wtoken.hidden + " freezing="
     //             + wtoken.mAppAnimator.freezingScreen, e);
     // }
@@ -6755,14 +6762,12 @@ Boolean CWindowManagerService::IsCurrentProfileLocked(
 void CWindowManagerService::EnableScreenAfterBoot()
 {
     synchronized(mWindowMapLock) {
-        // if (DEBUG_BOOT) {
-        //     RuntimeException here = new RuntimeException("here");
-        //     here.fillInStackTrace();
-        //     Slog.i(TAG, "enableScreenAfterBoot: mDisplayEnabled=" + mDisplayEnabled
-        //             + " mForceDisplayEnabled=" + mForceDisplayEnabled
-        //             + " mShowingBootMessages=" + mShowingBootMessages
-        //             + " mSystemBooted=" + mSystemBooted, here);
-        // }
+        if (DEBUG_BOOT) {
+            Slogger::I(TAG, "enableScreenAfterBoot: mDisplayEnabled=%d  mForceDisplayEnabled=%d"
+                " mShowingBootMessages=%d mSystemBooted=%d",
+                mDisplayEnabled, mForceDisplayEnabled, mShowingBootMessages, mSystemBooted);
+        }
+
         if (mSystemBooted) {
             return;
         }
@@ -6789,14 +6794,12 @@ ECode CWindowManagerService::EnableScreenIfNeeded()
 
 void CWindowManagerService::EnableScreenIfNeededLocked()
 {
-    // if (DEBUG_BOOT) {
-    //     RuntimeException here = new RuntimeException("here");
-    //     here.fillInStackTrace();
-    //     Slog.i(TAG, "enableScreenIfNeededLocked: mDisplayEnabled=" + mDisplayEnabled
-    //             + " mForceDisplayEnabled=" + mForceDisplayEnabled
-    //             + " mShowingBootMessages=" + mShowingBootMessages
-    //             + " mSystemBooted=" + mSystemBooted, here);
-    // }
+    if (DEBUG_BOOT) {
+        Slogger::I(TAG, "EnableScreenIfNeededLocked: mDisplayEnabled=%d  mForceDisplayEnabled=%d"
+            " mShowingBootMessages=%d mSystemBooted=%d",
+            mDisplayEnabled, mForceDisplayEnabled, mShowingBootMessages, mSystemBooted);
+    }
+
     if (mDisplayEnabled) {
         return;
     }
@@ -6822,24 +6825,24 @@ void CWindowManagerService::PerformBootTimeout()
 
 Boolean CWindowManagerService::CheckWaitingForWindowsLocked()
 {
-    Boolean haveBootMsg = FALSE;
-    Boolean haveApp = FALSE;
+    Boolean haveBootMsg = FALSE, haveApp =FALSE, haveKeyguard = FALSE;
     // if the wallpaper service is disabled on the device, we're never going to have
     // wallpaper, don't bother waiting for it
     Boolean haveWallpaper = FALSE;
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
     Boolean boolValue;
-    res->GetBoolean(Elastos::Droid::R::bool_::config_enableWallpaperService, &boolValue);
+    res->GetBoolean(R::bool_::config_enableWallpaperService, &boolValue);
     Boolean wallpaperEnabled = boolValue && !mOnlyCore;
-    Boolean haveKeyguard = FALSE;
+
     // TODO(multidisplay): Expand to all displays?
     AutoPtr<WindowList> windows = GetDefaultWindowListLocked();
     WindowList::Iterator it = windows->Begin();
     for (; it != windows->End(); ++it) {
         AutoPtr<WindowState> w = *it;
         Boolean isVisible;
-        if ((w->IsVisibleLw(&isVisible), isVisible) && !w->mObscured && !w->IsDrawnLw()) {
+        w->IsVisibleLw(&isVisible);
+        if (isVisible && !w->mObscured && !w->IsDrawnLw()) {
             return TRUE;
         }
         if (w->IsDrawnLw()) {
@@ -6861,9 +6864,9 @@ Boolean CWindowManagerService::CheckWaitingForWindowsLocked()
     }
 
     if (DEBUG_SCREEN_ON || DEBUG_BOOT) {
-        Slogger::I(TAG, "******** booted=%d msg=%d haveBoot=%d haveApp=%d haveWall=%d wallEnabled=%d haveKeyguard=%d"
-                , mSystemBooted, mShowingBootMessages, haveBootMsg, haveApp
-                , haveWallpaper, wallpaperEnabled, haveKeyguard);
+        Slogger::I(TAG, "******** booted=%d showBootMsg=%d haveBootMsg=%d haveApp=%d haveKeyguard=%d"
+            " wallEnabled=%d haveWall=%d", mSystemBooted, mShowingBootMessages, haveBootMsg,
+            haveApp, haveKeyguard, wallpaperEnabled, haveWallpaper);
     }
 
     // If we are turning on the screen to show the boot message,
@@ -6884,11 +6887,13 @@ Boolean CWindowManagerService::CheckWaitingForWindowsLocked()
 
 void CWindowManagerService::PerformEnableScreen()
 {
+    Slogger::I(TAG, " >>> PerformEnableScreen");
     synchronized(mWindowMapLock) {
         if (DEBUG_BOOT) {
-            Slogger::I(TAG, "performEnableScreen: mDisplayEnabled=%d mForceDisplayEnabled=%d mShowingBootMessages=%d mSystemBooted=%d mOnlyCore=%d"
-                    , mDisplayEnabled, mForceDisplayEnabled, mShowingBootMessages, mSystemBooted, mOnlyCore);
-                /*new RuntimeException("here").fillInStackTrace());*/
+            Slogger::I(TAG, "performEnableScreen: mDisplayEnabled=%d mForceDisplayEnabled=%d"
+                " mShowingBootMessages=%d mSystemBooted=%d mOnlyCore=%d mBootAnimationStopped=%d",
+                mDisplayEnabled, mForceDisplayEnabled, mShowingBootMessages,
+                mSystemBooted, mOnlyCore, mBootAnimationStopped);
         }
         if (mDisplayEnabled) {
             return;
@@ -6916,13 +6921,14 @@ void CWindowManagerService::PerformEnableScreen()
                                         data, NULL, 0);
             }
             // } catch (RemoteException ex) {
-            //     Slog.e(TAG, "Boot completed: SurfaceFlinger is dead!");
+            //     Slogger::E(TAG, "Boot completed: SurfaceFlinger is dead!");
             // }
             mBootAnimationStopped = TRUE;
         }
 
         if (!mForceDisplayEnabled && !CheckBootAnimationCompleteLocked()) {
             if (DEBUG_BOOT) Slogger::I(TAG, "performEnableScreen: Waiting for anim complete");
+            Slogger::I(TAG, " <<< PerformEnableScreen 4");
             return;
         }
 
@@ -6942,12 +6948,15 @@ void CWindowManagerService::PerformEnableScreen()
     AutoPtr<ISystemProperties> sysProp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
     Boolean value;
-    if (sysProp->GetBoolean(String("persist.sys.quickboot_ongoing"), FALSE, &value), value)
+    sysProp->GetBoolean(String("persist.sys.quickboot_ongoing"), FALSE, &value);
+    if (value) {
         CheckQuickBootException();
+    }
     mPolicy->EnableScreenAfterBoot();
 
     // Make sure the last requested orientation has been applied.
     UpdateRotationUnchecked(FALSE, FALSE);
+    Slogger::I(TAG, " <<< PerformEnableScreen");
 }
 
 Boolean CWindowManagerService::CheckBootAnimationCompleteLocked()
@@ -6992,7 +7001,7 @@ void CWindowManagerService::ShowBootMessage(
         // if (DEBUG_BOOT) {
         //     RuntimeException here = new RuntimeException("here");
         //     here.fillInStackTrace();
-        //     Slog.i(TAG, "showBootMessage: msg=" + msg + " always=" + always
+        //     Slogger::I((TAG, "showBootMessage: msg=" + msg + " always=" + always
         //             + " mAllowBootMessages=" + mAllowBootMessages
         //             + " mShowingBootMessages=" + mShowingBootMessages
         //             + " mSystemBooted=" + mSystemBooted, here);
@@ -7022,7 +7031,7 @@ void CWindowManagerService::HideBootMessagesLocked()
     // if (DEBUG_BOOT) {
     //     RuntimeException here = new RuntimeException("here");
     //     here.fillInStackTrace();
-    //     Slog.i(TAG, "hideBootMessagesLocked: mDisplayEnabled=" + mDisplayEnabled
+    //     Slogger::I((TAG, "hideBootMessagesLocked: mDisplayEnabled=" + mDisplayEnabled
     //             + " mForceDisplayEnabled=" + mForceDisplayEnabled
     //             + " mShowingBootMessages=" + mShowingBootMessages
     //             + " mSystemBooted=" + mSystemBooted, here);
@@ -7048,8 +7057,8 @@ void CWindowManagerService::ShowCircularDisplayMaskIfNeeded()
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
     Boolean value1, value2;
-    if ((res->GetBoolean(Elastos::Droid::R::bool_::config_windowIsRound, &value1), value1)
-            && (res->GetBoolean(Elastos::Droid::R::bool_::config_windowShowCircularMask, &value2), value2)) {
+    if ((res->GetBoolean(R::bool_::config_windowIsRound, &value1), value1)
+            && (res->GetBoolean(R::bool_::config_windowShowCircularMask, &value2), value2)) {
         AutoPtr<IMessage> msg;
         mH->ObtainMessage(H::SHOW_CIRCULAR_DISPLAY_MASK, (IMessage**)&msg);
         Boolean result;
@@ -7064,7 +7073,7 @@ void CWindowManagerService::ShowEmulatorDisplayOverlayIfNeeded()
     AutoPtr<ISystemProperties> sysProp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
     Boolean value1, value2;
-    if ((res->GetBoolean(Elastos::Droid::R::bool_::config_windowEnableCircularEmulatorDisplayOverlay, &value1), value1)
+    if ((res->GetBoolean(R::bool_::config_windowEnableCircularEmulatorDisplayOverlay, &value1), value1)
             && (sysProp->GetBoolean(PROPERTY_EMULATOR_CIRCULAR, FALSE, &value2), value2)
             && Build::HARDWARE.Contains(String("goldfish"))) {
         AutoPtr<IMessage> msg;
@@ -7088,7 +7097,7 @@ void CWindowManagerService::ShowCircularMask()
             AutoPtr<IResources> res;
             mContext->GetResources((IResources**)&res);
             Int32 screenOffset;
-            res->GetDimensionPixelSize(Elastos::Droid::R::dimen::circular_display_mask_offset, &screenOffset);
+            res->GetDimensionPixelSize(R::dimen::circular_display_mask_offset, &screenOffset);
 
             Int32 layer;
             mPolicy->WindowTypeToLayerLw(IWindowManagerLayoutParams::TYPE_POINTER, &layer);
@@ -7099,7 +7108,7 @@ void CWindowManagerService::ShowCircularMask()
         mCircularDisplayMask->SetVisibility(TRUE);
         // } finally {
         //     SurfaceControl.closeTransaction();
-        //     if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+        //     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I((TAG,
         //             "<<< CLOSE TRANSACTION showCircularMask");
         // }
         scHelper->CloseTransaction();
@@ -7127,7 +7136,7 @@ void CWindowManagerService::ShowEmulatorDisplayOverlay()
         mEmulatorDisplayOverlay->SetVisibility(TRUE);
         // } finally {
         //     SurfaceControl.closeTransaction();
-        //     if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+        //     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I((TAG,
         //             "<<< CLOSE TRANSACTION showEmulatorDisplayOverlay");
         // }
         scHelper->CloseTransaction();
@@ -7179,7 +7188,7 @@ void CWindowManagerService::ShowStrictModeViolation(
         }
     }
 
-    // if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+    // if (SHOW_LIGHT_TRANSACTIONS) Slogger::I((TAG,
     //         ">>> OPEN TRANSACTION showStrictModeViolation");
     AutoPtr<ISurfaceControlHelper> surfaceHelper;
     CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&surfaceHelper);
@@ -8622,7 +8631,7 @@ Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
         displayContent->mBaseDisplayRect->Set(0, 0, dw, dh);
     }
     // if (false) {
-    //     Slog.i(TAG, "Set app display size: " + appWidth + " x " + appHeight);
+    //     Slogger::I((TAG, "Set app display size: " + appWidth + " x " + appHeight);
     // }
 
     AutoPtr<IDisplayMetrics> dm = mDisplayMetrics;
@@ -8823,7 +8832,7 @@ AutoPtr<IBinder> CWindowManagerService::PrepareDragSurface(
             Int32 stack;
             display->GetLayerStack(&stack);
             surface->SetLayerStack(stack);
-            // if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DRAG "
+            // if (SHOW_TRANSACTIONS) Slogger::I((TAG, "  DRAG "
             //         + surface + ": CREATE");
             outSurface->CopyFrom(surface);
             AutoPtr<IBinder> winBinder = IBinder::Probe(window);
@@ -8846,7 +8855,7 @@ AutoPtr<IBinder> CWindowManagerService::PrepareDragSurface(
         }
     }
     // } catch (OutOfResourcesException e) {
-    //     Slog.e(TAG, "Can't allocate drag surface w=" + width + " h=" + height, e);
+    //     Slogger::E(TAG, "Can't allocate drag surface w=" + width + " h=" + height, e);
     //     if (mDragState != null) {
     //         mDragState.reset();
     //         mDragState = null;
@@ -9104,6 +9113,48 @@ CWindowManagerService::H::H(
     Handler::constructor();
 }
 
+String CWindowManagerService::H::MsgToString(
+    /* [in] */ Int32 msg)
+{
+    static HashMap<Int32, String> map;
+    map[REPORT_FOCUS_CHANGE] = "REPORT_FOCUS_CHANGE";
+    map[REPORT_LOSING_FOCUS] = "REPORT_LOSING_FOCUS";
+    map[DO_TRAVERSAL] = "DO_TRAVERSAL";
+    map[ADD_STARTING] = "ADD_STARTING";
+    map[REMOVE_STARTING] = "REMOVE_STARTING";
+    map[FINISHED_STARTING] = "FINISHED_STARTING";
+    map[REPORT_APPLICATION_TOKEN_WINDOWS] = "REPORT_APPLICATION_TOKEN_WINDOWS";
+    map[REPORT_APPLICATION_TOKEN_DRAWN] = "REPORT_APPLICATION_TOKEN_DRAWN";
+    map[WINDOW_FREEZE_TIMEOUT] = "WINDOW_FREEZE_TIMEOUT";
+    map[APP_TRANSITION_TIMEOUT] = "APP_TRANSITION_TIMEOUT";
+    map[PERSIST_ANIMATION_SCALE] = "PERSIST_ANIMATION_SCALE";
+    map[FORCE_GC] = "FORCE_GC";
+    map[ENABLE_SCREEN] = "ENABLE_SCREEN";
+    map[APP_FREEZE_TIMEOUT] = "APP_FREEZE_TIMEOUT";
+    map[SEND_NEW_CONFIGURATION] = "SEND_NEW_CONFIGURATION";
+    map[REPORT_WINDOWS_CHANGE] = "REPORT_WINDOWS_CHANGE";
+    map[DRAG_START_TIMEOUT] = "DRAG_START_TIMEOUT";
+    map[DRAG_END_TIMEOUT] = "DRAG_END_TIMEOUT";
+    map[REPORT_HARD_KEYBOARD_STATUS_CHANGE] = "REPORT_HARD_KEYBOARD_STATUS_CHANGE";
+    map[BOOT_TIMEOUT] = "BOOT_TIMEOUT";
+    map[WAITING_FOR_DRAWN_TIMEOUT] = "WAITING_FOR_DRAWN_TIMEOUT";
+    map[SHOW_STRICT_MODE_VIOLATION] = "SHOW_STRICT_MODE_VIOLATION";
+    map[DO_ANIMATION_CALLBACK] = "DO_ANIMATION_CALLBACK";
+    map[DO_DISPLAY_ADDED] = "DO_DISPLAY_ADDED";
+    map[DO_DISPLAY_REMOVED] = "DO_DISPLAY_REMOVED";
+    map[DO_DISPLAY_CHANGED] = "DO_DISPLAY_CHANGED";
+    map[CLIENT_FREEZE_TIMEOUT] = "CLIENT_FREEZE_TIMEOUT";
+    map[TAP_OUTSIDE_STACK] = "TAP_OUTSIDE_STACK";
+    map[NOTIFY_ACTIVITY_DRAWN] = "NOTIFY_ACTIVITY_DRAWN";
+    map[ALL_WINDOWS_DRAWN] = "ALL_WINDOWS_DRAWN";
+    map[NEW_ANIMATOR_SCALE] = "NEW_ANIMATOR_SCALE";
+    map[SHOW_CIRCULAR_DISPLAY_MASK] = "SHOW_CIRCULAR_DISPLAY_MASK";
+    map[SHOW_EMULATOR_DISPLAY_OVERLAY] = "SHOW_EMULATOR_DISPLAY_OVERLAY";
+    map[CHECK_IF_BOOT_ANIMATION_FINISHED] = "CHECK_IF_BOOT_ANIMATION_FINISHED";
+
+    return map[msg];
+}
+
 ECode CWindowManagerService::H::HandleMessage(
     /* [in] */ IMessage* msg)
 {
@@ -9113,7 +9164,7 @@ ECode CWindowManagerService::H::HandleMessage(
     msg->GetArg2(&arg2);
 
     if (CWindowManagerService::DEBUG_WINDOW_TRACE) {
-        Slogger::V(CWindowManagerService::TAG, "handleMessage: start what=%d", what);
+        Slogger::V(CWindowManagerService::TAG, " >>> HandleMessage %s start", MsgToString(what).string());
     }
 
     switch (what) {
@@ -9357,7 +9408,7 @@ ECode CWindowManagerService::H::HandleMessage(
     }
 
     if (CWindowManagerService::DEBUG_WINDOW_TRACE) {
-        Slogger::V(CWindowManagerService::TAG, "handleMessage: end");
+        Slogger::V(CWindowManagerService::TAG, " <<< HandleMessage %s end", MsgToString(what).string());
     }
     return NOERROR;
 }
@@ -9806,9 +9857,9 @@ ECode CWindowManagerService::InputMethodClientHasFocus(
             // TODO(multidisplay): IMEs are only supported on the default display.
             AutoPtr<WindowState> imFocus = *(--it);
             // if (DEBUG_INPUT_METHOD) {
-            //     Slog.i(TAG, "Desired input method target: " + imFocus);
-            //     Slog.i(TAG, "Current focus: " + mCurrentFocus);
-            //     Slog.i(TAG, "Last focus: " + mLastFocus);
+            //     Slogger::I((TAG, "Desired input method target: " + imFocus);
+            //     Slogger::I((TAG, "Current focus: " + mCurrentFocus);
+            //     Slogger::I((TAG, "Last focus: " + mLastFocus);
             // }
             if (imFocus != NULL) {
                 // This may be a starting window, in which case we still want
@@ -9831,11 +9882,11 @@ ECode CWindowManagerService::InputMethodClientHasFocus(
                     }
                 }
                 // if (DEBUG_INPUT_METHOD) {
-                //     Slog.i(TAG, "IM target client: " + imFocus.mSession.mClient);
+                //     Slogger::I((TAG, "IM target client: " + imFocus.mSession.mClient);
                 //     if (imFocus.mSession.mClient != null) {
-                //         Slog.i(TAG, "IM target client binder: "
+                //         Slogger::I((TAG, "IM target client binder: "
                 //                 + imFocus.mSession.mClient.asBinder());
-                //         Slog.i(TAG, "Requesting client binder: " + client.asBinder());
+                //         Slogger::I((TAG, "Requesting client binder: " + client.asBinder());
                 //     }
                 // }
                 if (imFocus->mSession->mClient != NULL &&
@@ -9967,7 +10018,7 @@ void CWindowManagerService::ReadForcedDisplaySizeAndDensityLocked(
             AutoLock lock(displayContent->mDisplaySizeLock);
             if (displayContent->mBaseDisplayWidth != width
                     || displayContent->mBaseDisplayHeight != height) {
-                // Slog.i(TAG, "FORCED DISPLAY SIZE: " + width + "x" + height);
+                // Slogger::I((TAG, "FORCED DISPLAY SIZE: " + width + "x" + height);
                 displayContent->mBaseDisplayWidth = width;
                 displayContent->mBaseDisplayHeight = height;
             }
@@ -10484,8 +10535,8 @@ void CWindowManagerService::AssignLayersLocked(
             if (wtoken != NULL) {
                 str = String(" mAppLayer=") + StringUtils::ToString(wtoken->mAppAnimator->mAnimLayerAdjustment);
             }
-            Slogger::V(TAG, "Assign layer %p: mBase=%d mLayer=%d %s =mAnimLayer="
-                    , w.Get(), w->mBaseLayer, w->mLayer, str.string(), winAnimator->mAnimLayer);
+            Slogger::V(TAG, "Assign layer %s: mBase=%d mLayer=%d %s mAnimLayer=%d",
+                TO_CSTR(w), w->mBaseLayer, w->mLayer, str.string(), winAnimator->mAnimLayer);
         }
 
         // System.out.println(
@@ -10515,11 +10566,10 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLocked()
 void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedLoop()
 {
     if (mInLayout) {
-        // if (DEBUG) {
-        //     throw new RuntimeException("Recursive call!");
-        // }
-        // Slog.w(TAG, "performLayoutAndPlaceSurfacesLocked called while in layout. Callers="
-        //         + Debug.getCallers(3));
+        Slogger::W(TAG, "performLayoutAndPlaceSurfacesLocked called while in layout.");
+        if (DEBUG) {
+            assert(0 && "Recursive call!");
+        }
         return;
     }
 
@@ -10618,11 +10668,10 @@ void CWindowManagerService::PerformLayoutLockedInner(
         (*fwIt)->Layout(dw, dh);
     }
 
-    // if (DEBUG_LAYOUT) {
-    //     Slogger::V(TAG, "-------------------------------------");
-    //     Slogger::V(TAG, "performLayout: needed="
-    //             + displayContent.layoutNeeded + " dw=" + dw + " dh=" + dh);
-    // }
+    if (DEBUG_LAYOUT) {
+        Slogger::V(TAG, "----------------------------------------------------");
+        Slogger::V(TAG, "performLayout: initial=%d needed=%d, dw=%d dh=%d", initial, displayContent->mLayoutNeeded, dw, dh);
+    }
 
     AutoPtr<WindowStateAnimator> universeBackground;
 
@@ -10657,25 +10706,14 @@ void CWindowManagerService::PerformLayoutLockedInner(
         win->IsGoneForLayoutLw(&isGone);
         Boolean gone = (behindDream && result) || isGone;
 
-        // if (DEBUG_LAYOUT && !win->mLayoutAttached) {
-        //     Slogger::V(TAG, "1ST PASS " + win
-        //             + ": gone=" + gone + " mHaveFrame=" + win.mHaveFrame
-        //             + " mLayoutAttached=" + win.mLayoutAttached
-        //             + " screen changed=" + win.isConfigChanged());
-        //     final AppWindowToken atoken = win.mAppToken;
-        //     if (gone) Slogger::V(TAG, "  GONE: mViewVisibility="
-        //             + win.mViewVisibility + " mRelayoutCalled="
-        //             + win.mRelayoutCalled + " hidden="
-        //             + win.mRootToken.hidden + " hiddenRequested="
-        //             + (atoken != null && atoken.hiddenRequested)
-        //             + " mAttachedHidden=" + win.mAttachedHidden);
-        //     else Slogger::V(TAG, "  VIS: mViewVisibility="
-        //             + win.mViewVisibility + " mRelayoutCalled="
-        //             + win.mRelayoutCalled + " hidden="
-        //             + win.mRootToken.hidden + " hiddenRequested="
-        //             + (atoken != null && atoken.hiddenRequested)
-        //             + " mAttachedHidden=" + win.mAttachedHidden);
-        // }
+        if (DEBUG_LAYOUT && !win->mLayoutAttached) {
+            Slogger::V(TAG, "1ST PASS %s: gone=%d mHaveFrame=%d mLayoutAttached=%d screen changed=%d",
+                TO_CSTR(win), gone, win->mHaveFrame, win->mLayoutAttached, win->IsConfigChanged());
+            AppWindowToken* atoken = win->mAppToken;
+            Slogger::V(TAG, "  %s:mViewVisibility=%d  mRelayoutCalled=%d hidden=%d hiddenRequested=%d mAttachedHidden=%d",
+                gone ? "GONE" : "VIS", win->mViewVisibility, win->mRelayoutCalled, win->mRootToken->mHidden,
+                (atoken != NULL && atoken->mHiddenRequested), win->mAttachedHidden);
+        }
 
         // If this view is GONE, then skip it -- keep the current
         // frame, and let the caller know so they can ignore it
@@ -10684,13 +10722,13 @@ void CWindowManagerService::PerformLayoutLockedInner(
         // just don't display").
         Int32 privateFlags, type;
         if (!gone || !win->mHaveFrame || win->mLayoutNeeded
-                || ((win->IsConfigChanged() || win->SetInsetsChanged()) &&
-                        ((win->mAttrs->GetPrivateFlags(&privateFlags), (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0) ||
-                        (win->mHasSurface && (win->mAppToken != NULL && win->mAppToken->mLayoutConfigChanges))))
-                || (win->mAttrs->GetType(&type), type == IWindowManagerLayoutParams::TYPE_UNIVERSE_BACKGROUND)) {
+            || ((win->IsConfigChanged() || win->SetInsetsChanged()) &&
+                ((win->mAttrs->GetPrivateFlags(&privateFlags), (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0) ||
+                (win->mHasSurface && (win->mAppToken != NULL && win->mAppToken->mLayoutConfigChanges))))
+            || (win->mAttrs->GetType(&type), type == IWindowManagerLayoutParams::TYPE_UNIVERSE_BACKGROUND)) {
             if (!win->mLayoutAttached) {
                 if (initial) {
-                    //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
+                    Slogger::I(TAG, "Window %s clearing mContentChanged - initial", TO_CSTR(win));
                     win->mContentChanged = FALSE;
                 }
                 if (type == IWindowManagerLayoutParams::TYPE_DREAM) {
@@ -10703,10 +10741,10 @@ void CWindowManagerService::PerformLayoutLockedInner(
                 win->Prelayout();
                 mPolicy->LayoutWindowLw(win, NULL);
                 win->mLayoutSeq = seq;
-                // if (DEBUG_LAYOUT) Slogger::V(TAG, "  LAYOUT: mFrame="
-                //         + win.mFrame + " mContainingFrame="
-                //         + win.mContainingFrame + " mDisplayFrame="
-                //         + win.mDisplayFrame);
+                if (DEBUG_LAYOUT) {
+                    Slogger::V(TAG, "  LAYOUT: mFrame=%s mContainingFrame=%s mDisplayFrame=%s",
+                        TO_CSTR(win->mFrame), TO_CSTR(win->mContainingFrame), TO_CSTR(win->mDisplayFrame));
+                }
             }
             else {
                 if (topAttached == windows->REnd()) topAttached = wRIt;
@@ -10734,8 +10772,8 @@ void CWindowManagerService::PerformLayoutLockedInner(
         AutoPtr<WindowState> win = *wRIt;
         if (win->mLayoutAttached) {
             if (DEBUG_LAYOUT) {
-                Slogger::V(TAG, "2ND PASS %p mHaveFrame=%d mViewVisibility=%d mRelayoutCalled=%d",
-                        win.Get(), win->mHaveFrame, win->mViewVisibility, win->mRelayoutCalled);
+                Slogger::V(TAG, "2ND PASS %s mHaveFrame=%d mViewVisibility=%d mRelayoutCalled=%d",
+                    TO_CSTR(win), win->mHaveFrame, win->mViewVisibility, win->mRelayoutCalled);
             }
             // If this view is GONE, then skip it -- keep the current
             // frame, and let the caller know so they can ignore it
@@ -10750,17 +10788,17 @@ void CWindowManagerService::PerformLayoutLockedInner(
             if ((win->mViewVisibility != IView::GONE && win->mRelayoutCalled)
                     || !win->mHaveFrame || win->mLayoutNeeded) {
                 if (initial) {
-                    // Slogger::I(TAG, "Window %p  clearing mContentChanged - initial", this);
+                    Slogger::I(TAG, "Window %s clearing mContentChanged - initial", TO_CSTR(win));
                     win->mContentChanged = FALSE;
                 }
                 win->mLayoutNeeded = FALSE;
                 win->Prelayout();
                 mPolicy->LayoutWindowLw(win, win->mAttachedWindow);
                 win->mLayoutSeq = seq;
-                // if (DEBUG_LAYOUT) Slogger::V(TAG, "  LAYOUT: mFrame="
-                //         + win.mFrame + " mContainingFrame="
-                //         + win.mContainingFrame + " mDisplayFrame="
-                //         + win.mDisplayFrame);
+                if (DEBUG_LAYOUT) {
+                    Slogger::V(TAG, "  LAYOUT: mFrame=%s mContainingFrame=%s mDisplayFrame=%s",
+                        TO_CSTR(win->mFrame), TO_CSTR(win->mContainingFrame), TO_CSTR(win->mDisplayFrame));
+                }
             }
         }
         else {
@@ -10825,8 +10863,8 @@ Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
 
     if (DEBUG_APP_TRANSITIONS) {
         Int32 NN = mOpeningApps.GetSize();
-        Slogger::V(TAG, "Checking %d opening apps (frozen=%d timeout=%d)..."
-                , NN, mDisplayFrozen, mAppTransition->IsTimeout());
+        Slogger::V(TAG, "Checking %d opening apps (frozen=%d timeout=%d)...",
+            NN, mDisplayFrozen, mAppTransition->IsTimeout());
     }
 
     if (!mDisplayFrozen && !mAppTransition->IsTimeout()) {
@@ -11163,7 +11201,7 @@ Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
             openingAppAnimator->mThumbnailX = mAppTransition->GetStartingX();
             openingAppAnimator->mThumbnailY = mAppTransition->GetStartingY();
             // } catch (Surface.OutOfResourcesException e) {
-            //     Slog.e(TAG, "Can't allocate thumbnail surface w=" + dirty.width()
+            //     Slogger::E(TAG, "Can't allocate thumbnail surface w=" + dirty.width()
             //             + " h=" + dirty.height(), e);
             //     topOpeningApp.mAppAnimator.clearThumbnail();
             // }
@@ -11578,7 +11616,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         do {
             repeats++;
             if (repeats > 6) {
-                // Slogger::W(TAG, "Animation repeat aborted after too many iterations");
+                Slogger::W(TAG, "Animation repeat aborted after too many iterations");
                 displayContent->mLayoutNeeded = FALSE;
                 break;
             }
@@ -11705,7 +11743,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
                 AutoPtr<IAnimationUtils> animationUtils;
                 CAnimationUtils::AcquireSingleton((IAnimationUtils**)&animationUtils);
                 animationUtils->LoadAnimation(mContext,
-                        Elastos::Droid::R::anim::window_move_from_decor, (IAnimation**)&a);
+                        R::anim::window_move_from_decor, (IAnimation**)&a);
                 winAnimator->SetAnimation(a);
                 Int32 left1, left2;
                 w->mLastFrame->GetLeft(&left1);
@@ -11727,7 +11765,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
                 // }
             }
 
-            //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
+            //Slogger::I((TAG, "Window " + this + " clearing mContentChanged - done placing");
             w->mContentChanged = FALSE;
 
             // Moved from updateWindowsAndWallpaperLocked().
@@ -12129,10 +12167,9 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
 
     ScheduleAnimationLocked();
 
-    // if (DEBUG_WINDOW_TRACE) {
-    //     Slog.e(TAG, "performLayoutAndPlaceSurfacesLockedInner exit: animating="
-    //             + mAnimator.mAnimating);
-    // }
+    if (DEBUG_WINDOW_TRACE) {
+        Slogger::V(TAG, "performLayoutAndPlaceSurfacesLockedInner exit: animating=%d", mAnimator->mAnimating);
+    }
 }
 
 Int32 CWindowManagerService::ToBrightnessOverride(
@@ -12447,8 +12484,7 @@ Boolean CWindowManagerService::UpdateFocusedWindowLocked(
         }
 
         if (DEBUG_FOCUS_LIGHT || localLOGV) {
-            Slogger::V(TAG, "Changing focus from %p to %p  Callers="
-                    , mCurrentFocus.Get(), newFocus.Get()/* + "" + Debug.getCallers(4)*/);
+            Slogger::V(TAG, "Changing focus from %s to %s", TO_CSTR(mCurrentFocus), TO_CSTR(newFocus));
         }
         AutoPtr<WindowState> oldFocus = mCurrentFocus;
         mCurrentFocus = newFocus;
@@ -12694,7 +12730,7 @@ void CWindowManagerService::StopFreezingDisplayLocked()
             mAnimator->GetScreenRotationAnimationLocked(displayId);
     if (CUSTOM_SCREEN_ROTATION && screenRotationAnimation != NULL
             && screenRotationAnimation->HasScreenshot()) {
-        // if (DEBUG_ORIENTATION) Slog.i(TAG, "**** Dismissing screen rotation animation");
+        // if (DEBUG_ORIENTATION) Slogger::I((TAG, "**** Dismissing screen rotation animation");
         // TODO(multidisplay): rotation on main screen only.
         AutoPtr<IDisplayInfo> displayInfo = displayContent->GetDisplayInfo();
         // Get rotation animation again, with new top window

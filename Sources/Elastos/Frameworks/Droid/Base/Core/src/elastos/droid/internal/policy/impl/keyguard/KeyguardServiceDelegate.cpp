@@ -148,8 +148,8 @@ ECode KeyguardServiceDelegate::InnerRunnable2::Run()
 CAR_INTERFACE_IMPL(KeyguardServiceDelegate, Object, IKeyguardServiceDelegate)
 
 // TODO: propagate changes to these to {@link KeyguardTouchDelegate}
-const String KeyguardServiceDelegate::KEYGUARD_PACKAGE("com.android.systemui");
-const String KeyguardServiceDelegate::KEYGUARD_CLASS("com.android.systemui.keyguard.KeyguardService");
+const String KeyguardServiceDelegate::KEYGUARD_PACKAGE("Elastos.Droid.SystemUI");
+const String KeyguardServiceDelegate::KEYGUARD_CLASS("Elastos.Droid.SystemUI.Keyguard.KeyguardService");
 
 const String KeyguardServiceDelegate::TAG("KeyguardServiceDelegate");
 const Boolean KeyguardServiceDelegate::DEBUG = TRUE;
@@ -193,13 +193,14 @@ ECode KeyguardServiceDelegate::BindService(
     userHandleHelper->GetOWNER((IUserHandle**)&userHandle);
     Boolean result = FALSE;
     ((Context*)context)->BindServiceAsUser(
-        intent, mKeyguardConnection,IContext::BIND_AUTO_CREATE, userHandle, &result);
+        intent, mKeyguardConnection, IContext::BIND_AUTO_CREATE, userHandle, &result);
     if (!result) {
         if (DEBUG) Logger::V(TAG, "*** Keyguard: can't bind to %s", KEYGUARD_CLASS.string());
         mKeyguardState->showing = FALSE;
         mKeyguardState->showingAndNotOccluded = FALSE;
         mKeyguardState->secure = FALSE;
-    } else {
+    }
+    else {
         if (DEBUG) Logger::V(TAG, "*** Keyguard started");
     }
     return NOERROR;

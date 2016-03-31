@@ -631,14 +631,14 @@ ECode WallpaperService::Engine::UpdateSurface(
         if (!mCreated) {
             // Retrieve watch round and outset info
             AutoPtr<IInterface> _windowService;
-            IContext::Probe(this)->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&_windowService);
+            mHost->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&_windowService);
             AutoPtr<IWindowManager> windowService = IWindowManager::Probe(_windowService);
 
             AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
                 const_cast<Int32 *>(R::styleable::Window),
                 ArraySize(R::styleable::Window));
             const AutoPtr<ITypedArray> windowStyle;
-            IContext::Probe(this)->ObtainStyledAttributes(attrIds.Get(), (ITypedArray**)&windowStyle);
+            mHost->ObtainStyledAttributes(attrIds.Get(), (ITypedArray**)&windowStyle);
             const AutoPtr<IDisplay> display;
             windowService->GetDefaultDisplay((IDisplay**)&display);
 
@@ -657,7 +657,7 @@ ECode WallpaperService::Engine::UpdateSurface(
                 mOutsetBottom = NULL;
             }
             AutoPtr<IResources> res;
-            IContext::Probe(this)->GetResources((IResources**)&res);
+            mHost->GetResources((IResources**)&res);
             res->GetBoolean(R::bool_::config_windowIsRound, &mWindowIsRound);
             windowStyle->Recycle();
 
@@ -858,7 +858,7 @@ ECode WallpaperService::Engine::UpdateSurface(
             mFinalStableInsets->Set(mDispatchedStableInsets);
             if (mOutsetBottom != NULL) {
                 AutoPtr<IResources> resources;
-                IContext::Probe(this)->GetResources((IResources**)&resources);
+                mHost->GetResources((IResources**)&resources);
                 const AutoPtr<IDisplayMetrics> metrics;
                 resources->GetDisplayMetrics((IDisplayMetrics**)&metrics);
                 Float dimension;

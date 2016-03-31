@@ -684,7 +684,7 @@ String ProcessRecord::ToString()
     }
     StringBuilder sb(128);
     sb += ("ProcessRecord{");
-    sb += StringUtils::ToString((Int32)this, 16);
+    sb += StringUtils::ToHexString((Int32)this);
     sb += (' ');
     ToShortString(sb);
     sb += ('}');

@@ -255,6 +255,8 @@ public:
         ECode HandleMessage(
             /* [in] */ IMessage* msg);
 
+        static String MsgToString(
+            /* [in] */ Int32 msg);
     public:
         static const Int32 REPORT_FOCUS_CHANGE; // = 2;
         static const Int32 REPORT_LOSING_FOCUS; // = 3;
@@ -413,10 +415,10 @@ private:
         , public IWindowManagerInternal
     {
     public:
+        CAR_INTERFACE_DECL()
+
         LocalService(
             /* [in] */ CWindowManagerService* host);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI RequestTraversalFromDisplayManager();
 

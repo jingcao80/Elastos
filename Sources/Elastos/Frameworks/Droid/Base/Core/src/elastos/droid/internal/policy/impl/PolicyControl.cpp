@@ -288,34 +288,29 @@ ECode PolicyControl::GetSystemUiVisibility(
 
 ECode PolicyControl::GetWindowFlags(
     /* [in] */ IWindowState* win,
-    /* [in] */ IWindowManagerLayoutParams* attrs,
+    /* [in] */ IWindowManagerLayoutParams* _attrs,
     /* [out] */ Int32* res)
 {
     VALIDATE_NOT_NULL(res);
-    //attrs = attrs != null ? attrs : win.getAttrs();
-    if (attrs == NULL)
-    {
-        win->GetAttrs(&attrs);
+    AutoPtr<IWindowManagerLayoutParams> attrs = _attrs;
+    if (attrs == NULL) {
+        win->GetAttrs((IWindowManagerLayoutParams**)&attrs);
     }
     Int32 flags;
     attrs->GetFlags(&flags);
-    if (sImmersiveStatusFilter != NULL)
-    {
+    if (sImmersiveStatusFilter != NULL) {
         Boolean sfRes;
         sImmersiveStatusFilter->Matches(attrs, &sfRes);
-        if (sfRes)
-        {
+        if (sfRes) {
             flags |= IWindowManagerLayoutParams::FLAG_FULLSCREEN;
             flags &= ~(IWindowManagerLayoutParams::FLAG_TRANSLUCENT_STATUS
                     | IWindowManagerLayoutParams::FLAG_FORCE_NOT_FULLSCREEN);
         }
     }
-    if (sImmersiveNavigationFilter != NULL)
-    {
+    if (sImmersiveNavigationFilter != NULL) {
         Boolean nfRes;
         sImmersiveNavigationFilter->Matches(attrs, &nfRes);
-        if (nfRes)
-        {
+        if (nfRes) {
             flags &= ~IWindowManagerLayoutParams::FLAG_TRANSLUCENT_NAVIGATION;
         }
     }
@@ -330,12 +325,10 @@ ECode PolicyControl::AdjustClearableFlags(
 {
     VALIDATE_NOT_NULL(res);
     AutoPtr<IWindowManagerLayoutParams> attrs;
-    if (win != NULL)
-    {
+    if (win != NULL) {
         win->GetAttrs((IWindowManagerLayoutParams**)&attrs);
     }
-    if (sImmersiveStatusFilter != NULL)
-    {
+    if (sImmersiveStatusFilter != NULL) {
         Boolean sfRes;
         sImmersiveStatusFilter->Matches(attrs, &sfRes);
         if (sfRes)

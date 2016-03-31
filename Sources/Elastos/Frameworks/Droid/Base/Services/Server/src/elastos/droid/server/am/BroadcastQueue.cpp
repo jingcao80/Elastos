@@ -763,13 +763,8 @@ ECode BroadcastQueue::ProcessNextBroadcast(
                 r->mResultTo = NULL;
                 if (FAILED(ec)) {
                     Slogger::W(TAG, "Failure [%s] sending broadcast result of %s, ec=0x%08x",
-                            mQueueName.string(), TO_CSTR(r->mIntent), ec);
+                        mQueueName.string(), TO_CSTR(r->mIntent), ec);
                 }
-                // } catch (RemoteException e) {
-                //     Slog.w(TAG, "Failure ["
-                //             + mQueueName + "] sending broadcast result of "
-                //             + r->mIntent, e);
-                // }
             }
 
             if (DEBUG_BROADCAST) Slogger::V(TAG, "Cancelling BROADCAST_TIMEOUT_MSG");

@@ -148,7 +148,8 @@ ECode CNotification::constructor()
     Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
     system->GetCurrentTimeMillis(&mWhen);
     mPriority = INotification::PRIORITY_DEFAULT;
-    return NOERROR;
+
+    return CBundle::New((IBundle**)&mExtras);
 }
 
 ECode CNotification::constructor(
@@ -163,6 +164,8 @@ ECode CNotification::constructor(
     mWhen = when;
     mIcon = icon;
     mTickerText = tickerText;
+    CBundle::New((IBundle**)&mExtras);
+
     AutoPtr<IPendingIntentHelper> helper;
     CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
     AutoPtr<IPendingIntent> pendingIntent;
@@ -179,7 +182,7 @@ ECode CNotification::constructor(
     mTickerText = tickerText;
     mWhen = when;
 
-    return NOERROR;
+    return CBundle::New((IBundle**)&mExtras);
 }
 
 ECode CNotification::GetWhen(

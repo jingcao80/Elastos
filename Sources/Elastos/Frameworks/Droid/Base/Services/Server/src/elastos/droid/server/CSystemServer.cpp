@@ -620,27 +620,27 @@ ECode SystemServer::StartOtherServices()
 // }
 
 
-    // // Bring up services needed for UI.
-    // if (mFactoryTestMode != FactoryTest::FACTORY_TEST_LOW_LEVEL) {
-    //     //if (!disableNonCoreServices) { // TODO: View depends on these; mock them?
-    //     if (true) {
-    //         try {
-    //             Slogger::I(TAG, "Input Method Service");
-    //             imm = new CInputMethodManagerService(context, IIWindowManager::Probe(wm));
-    //             ServiceManager::AddService(IContext::INPUT_METHOD_SERVICE, imm);
-    //         } catch (Throwable e) {
-    //             ReportWtf("starting Input Manager Service", ec);
-    //         }
+    // Bring up services needed for UI.
+    if (mFactoryTestMode != FactoryTest::FACTORY_TEST_LOW_LEVEL) {
+        //if (!disableNonCoreServices) { // TODO: View depends on these; mock them?
+        if (true) {
+            Slogger::I(TAG, "Input Method Service");
+            ec = CInputMethodManagerService::NewByFriend(context, IIWindowManager::Probe(wm),
+                (CInputMethodManagerService**)&imm);
+            if (FAILED(ec)) {
+                ReportWtf("starting Input Manager Service", ec);
+            }
+            ServiceManager::AddService(IContext::INPUT_METHOD_SERVICE, (IIInputMethodManager*)imm.Get());
 
-    //         try {
-    //             Slogger::I(TAG, "Accessibility Manager");
-    //             ServiceManager::AddService(IContext::ACCESSIBILITY_SERVICE,
-    //                     new AccessibilityManagerService(context));
-    //         } catch (Throwable e) {
-    //             ReportWtf("starting Accessibility Manager", ec);
-    //         }
-    //     }
-    // }
+            Slogger::I(TAG, "Accessibility Manager todo");
+            // AutoPtr<IIAccessibilityManager> accessManager;
+            // ec = CAccessibilityManagerService::New(context, (IIAccessibilityManager**)&accessManager);
+            // if (FAILED(ec)) {
+            //     ReportWtf("starting Accessibility Service", ec);
+            // }
+            // ServiceManager::AddService(IContext::ACCESSIBILITY_SERVICE, accessManager);
+        }
+    }
 
     ec = wm->DisplayReady();
     if (FAILED(ec)) {
@@ -1172,7 +1172,7 @@ ECode SystemServer::StartOtherServices()
     // bundle->mConnectivityF = connectivity;
     bundle->mNetworkScoreF = networkScore;
     bundle->mWallpaperF = wallpaper;
-    // bundle->mImmF = imm;
+    bundle->mImmF = imm;
     // bundle->mLocationF = location;
     // bundle->mCountryDetectorF = countryDetector;
     // bundle->mNetworkTimeUpdaterF = networkTimeUpdater;
@@ -1312,12 +1312,12 @@ ECode SystemServer::SystemReadyRunnable::Run()
         }
     }
 
-    // if (mServiceBundle->mImmF != NULL) {
-    //     ec = mServiceBundle->mImmF->SystemRunning(mServiceBundle->mStatusBarF);
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("Notifying InputMethodService running", ec);
-    //     }
-    // }
+    if (mServiceBundle->mImmF != NULL) {
+        ec = mServiceBundle->mImmF->SystemRunning(mServiceBundle->mStatusBarF);
+        if (FAILED(ec)) {
+            mHost->ReportWtf("Notifying InputMethodService running", ec);
+        }
+    }
 
     // if (mServiceBundle->mLocationF != NULL) {
     //     ec = mServiceBundle->mLocationF->SystemRunning();

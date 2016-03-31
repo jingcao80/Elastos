@@ -111,7 +111,7 @@ ECode CActivityRecordToken::ToString(
     VALIDATE_NOT_NULL(str);
     StringBuilder sb(128);
     sb += "CActivityRecordToken{";
-    sb += StringUtils::ToString(Int32(this), 16);
+    sb += StringUtils::ToHexString((Int32)this);
     sb += ", ActivityRecord:";
 
     AutoPtr<ActivityRecord> ar = GetActivityRecord();

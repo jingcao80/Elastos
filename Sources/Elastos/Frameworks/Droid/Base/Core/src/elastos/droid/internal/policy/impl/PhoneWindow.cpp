@@ -501,14 +501,16 @@ ECode PhoneWindow::_DecorView::OnWindowSystemUiVisibilityChanged(
 
 // @Override IView
 ECode PhoneWindow::_DecorView::OnApplyWindowInsets(
-    /* [in] */ IWindowInsets* insets,
+    /* [in] */ IWindowInsets* _insets,
     /* [out] */ IWindowInsets** result)
 {
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IWindowInsets> insets = _insets;
     AutoPtr<IRect> swInsets;
     insets->GetSystemWindowInsets((IRect**)&swInsets);
     mFrameOffsets->Set(swInsets);
-    insets = UpdateColorViews(insets);
-    insets = UpdateStatusGuard(insets);
+    AutoPtr<IWindowInsets> temp = UpdateColorViews(insets);
+    insets = UpdateStatusGuard(temp);
     UpdateNavigationGuard(insets);
     AutoPtr<IDrawable> drawable;
     GetForeground((IDrawable**)&drawable);
@@ -534,6 +536,8 @@ ECode PhoneWindow::_DecorView::DispatchKeyEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+
     Int32 keyCode, action;
     event->GetKeyCode(&keyCode);
     event->GetAction(&action);
@@ -782,15 +786,14 @@ ECode PhoneWindow::_DecorView::DispatchApplyWindowInsets(
         mHost->mOutsetBottom->GetDimension(metrics, &tmp);
         Int32 bottom = (Int32)tmp;
         AutoPtr<IWindowInsets> newInsets;
-        Int32 left;
+        Int32 left, top, right;
         insets->GetSystemWindowInsetLeft(&left);
-        Int32 top;
         insets->GetSystemWindowInsetTop(&top);
-        Int32 right;
         insets->GetSystemWindowInsetRight(&right);
         insets->ReplaceSystemWindowInsets(left, top, right, bottom, (IWindowInsets**)&newInsets);
         return FrameLayout::DispatchApplyWindowInsets(newInsets, result);
-    } else {
+    }
+    else {
         return FrameLayout::DispatchApplyWindowInsets(insets, result);
     }
     return NOERROR;
@@ -817,8 +820,10 @@ Boolean PhoneWindow::_DecorView::IsOutOfBounds(
 }
 
 AutoPtr<IWindowInsets> PhoneWindow::_DecorView::UpdateColorViews(
-    /* [in] */ IWindowInsets* insets)
+    /* [in] */ IWindowInsets* _insets)
 {
+    using Elastos::Core::Math;
+    AutoPtr<IWindowInsets> insets = _insets;
     AutoPtr<IWindowManagerLayoutParams> attrs;
     mHost->GetAttributes((IWindowManagerLayoutParams**)&attrs);
     Int32 sysUiVisibility;
@@ -836,13 +841,13 @@ AutoPtr<IWindowInsets> PhoneWindow::_DecorView::UpdateColorViews(
             Int32 i1, i2;
             insets->GetStableInsetTop(&i1);
             insets->GetSystemWindowInsetTop(&i2);
-            mLastTopInset = Elastos::Core::Math::Min(i1, i2);
+            mLastTopInset = Math::Min(i1, i2);
             insets->GetStableInsetBottom(&i1);
             insets->GetSystemWindowInsetBottom(&i2);
-            mLastBottomInset = Elastos::Core::Math::Min(i1, i2);
+            mLastBottomInset = Math::Min(i1, i2);
             insets->GetStableInsetRight(&i1);
             insets->GetSystemWindowInsetRight(&i2);
-            mLastRightInset = Elastos::Core::Math::Min(i1, i2);
+            mLastRightInset = Math::Min(i1, i2);
         }
         Int32 flags;
         mHost->GetAttributes((IWindowManagerLayoutParams**)&attrs);
@@ -974,9 +979,10 @@ AutoPtr<IView> PhoneWindow::_DecorView::UpdateColorViewInt(
 }
 
 AutoPtr<IWindowInsets> PhoneWindow::_DecorView::UpdateStatusGuard(
-    /* [in] */ IWindowInsets* insets)
+    /* [in] */ IWindowInsets* _insets)
 {
-    Boolean showStatusGuard = false;
+    AutoPtr<IWindowInsets> insets = _insets;
+    Boolean showStatusGuard = FALSE;
     // Show the status guard when the non-overlay contextual action bar is showing
     if (mActionModeView != NULL) {
         AutoPtr<IViewGroupLayoutParams> vglParams;
@@ -1723,7 +1729,8 @@ ECode PhoneWindow::_DecorView::StartActionMode(
 
     if (mode != NULL) {
         mActionMode = mode;
-    } else {
+    }
+    else {
         if (mActionModeView == NULL) {
             Boolean isFloating = FALSE;
             if (mHost->IsFloating(&isFloating), isFloating) {
@@ -1785,7 +1792,8 @@ ECode PhoneWindow::_DecorView::StartActionMode(
                 absActionBarView->SetContentHeight(height);
                 mActionModePopup->SetHeight(IViewGroupLayoutParams::WRAP_CONTENT);
                 mShowActionModePopup = new ShowActionModePopupRunnable(this);
-            } else {
+            }
+            else {
                 AutoPtr<IView> view;
                 FindViewById(R::id::action_mode_bar_stub, (IView**)&view);
                 AutoPtr<IViewStub> stub = IViewStub::Probe(view);

@@ -3525,6 +3525,7 @@ ECode View::IsShown(
 {
     VALIDATE_NOT_NULL(res)
     View* current = this;
+    IView* temp;
     //noinspection ConstantConditions
     do {
         if ((current->mViewFlags & VISIBILITY_MASK) != IView::VISIBLE) {
@@ -3536,11 +3537,13 @@ ECode View::IsShown(
             *res = FALSE; // We are not attached to the view root
             return NOERROR;
         }
-        if (IView::Probe(parent) == NULL) {
+
+        temp = IView::Probe(parent);
+        if (temp == NULL) {
             *res = TRUE;
             return NOERROR;
         }
-        current = VIEW_PROBE(parent);
+        current = (View*)temp;
     } while (current != NULL);
 
     *res = FALSE;
@@ -3651,7 +3654,8 @@ ECode View::OnApplyWindowInsets(
             insets->ConsumeSystemWindowInsets(res);
             return NOERROR;
         }
-    } else {
+    }
+    else {
         AutoPtr<IRect> rect;
         insets->GetSystemWindowInsets((IRect**)&rect);
         Boolean fitSystemWindowsInt;
@@ -3715,14 +3719,14 @@ ECode View::DispatchApplyWindowInsets(
     mPrivateFlags3 |= PFLAG3_APPLYING_INSETS;
     if (mListenerInfo != NULL && mListenerInfo->mOnApplyWindowInsetsListener != NULL) {
         mListenerInfo->mOnApplyWindowInsetsListener->OnApplyWindowInsets(this, insets, res);
-        return NOERROR;
-    } else {
+    }
+    else {
         OnApplyWindowInsets(insets, res);
-        return NOERROR;
     }
     //} finally {
     mPrivateFlags3 &= ~PFLAG3_APPLYING_INSETS;
     //}
+    return NOERROR;
 }
 
 /**
@@ -3778,7 +3782,8 @@ ECode View::ComputeSystemWindowInsets(
         in->GetSystemWindowInsets((IRect**)&rect);
         outLocalInsets->Set(rect);
         return in->ConsumeSystemWindowInsets(res);
-    } else {
+    }
+    else {
         outLocalInsets->Set(0, 0, 0, 0);
         *res = in;
         REFCOUNT_ADD(*res);

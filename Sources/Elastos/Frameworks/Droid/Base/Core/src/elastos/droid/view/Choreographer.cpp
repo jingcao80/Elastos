@@ -75,9 +75,10 @@ const Int32 Choreographer::MSG_DO_SCHEDULE_VSYNC;// = 1;
 const Int32 Choreographer::MSG_DO_SCHEDULE_CALLBACK;// = 2;
 
 ECode Choreographer::Token::ToString(
-            /* [out] */ String* info)
+    /* [out] */ String* info)
 {
-    *info = String("FRAME_CALLBACK_TOKEN");
+    VALIDATE_NOT_NULL(info)
+    *info = "FRAME_CALLBACK_TOKEN";
     return NOERROR;
 }
 
@@ -139,11 +140,11 @@ ECode Choreographer::FrameDisplayEventReceiver::OnVsync(
     // but that could change in the future so let's log a message to help us remember
     // that we need to fix this.
     if (builtInDisplayId != ISurfaceControl::BUILT_IN_DISPLAY_ID_MAIN) {
-//        Logger::D(Choreographer::TAG,
-//            "Received vsync from secondary display, but we don't support "
-//            "this case yet.  Choreographer needs a way to explicitly request "
-//            "vsync for a specific display to ensure it doesn't lose track "
-//            "of its scheduled vsync.");
+       Logger::D(Choreographer::TAG,
+           "Received vsync from secondary display, but we don't support "
+           "this case yet.  Choreographer needs a way to explicitly request "
+           "vsync for a specific display to ensure it doesn't lose track "
+           "of its scheduled vsync.");
         ScheduleVsync();
         return NOERROR;
     }
@@ -159,16 +160,16 @@ ECode Choreographer::FrameDisplayEventReceiver::OnVsync(
     Int64 now;
     system->GetNanoTime(&now);
     if (timestampNanos > now) {
-//        Logger::W(Choreographer::TAG,
-//            "Frame time is %f ms in the future! Check that"
-//            " graphics HAL is generating vsync timestamps using the"
-//            " correct timebase.", (timestampNanos - now) * 0.000001f);
+       Logger::W(Choreographer::TAG,
+           "Frame time is %f ms in the future! Check that"
+           " graphics HAL is generating vsync timestamps using the"
+           " correct timebase.", (timestampNanos - now) * 0.000001f);
         timestampNanos = now;
     }
 
     if (mHavePendingVsync) {
-//        Logger::W(Choreographer::TAG, "Already have a pending vsync event."
-//            "  There should only be one at a time.");
+       Logger::W(Choreographer::TAG, "Already have a pending vsync event."
+           "  There should only be one at a time.");
     }
     else {
         mHavePendingVsync = TRUE;
@@ -422,6 +423,7 @@ ECode Choreographer::PostCallbackDelayed(
 {
     if (action == NULL) {
         Logger::E(TAG, "action must not be NULL");
+        assert(0 && "PostCallbackDelayed");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (callbackType < 0 || callbackType > CALLBACK_LAST) {

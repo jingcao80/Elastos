@@ -6877,21 +6877,24 @@ ECode ViewGroup::DispatchApplyWindowInsets(
     /* [out] */ IWindowInsets** res)
 {
     VALIDATE_NOT_NULL(res)
-    View::DispatchApplyWindowInsets(insets, (IWindowInsets**)&insets);
+    AutoPtr<IWindowInsets> wi;
+    FAIL_RETURN(View::DispatchApplyWindowInsets(insets, (IWindowInsets**)&wi))
     Boolean isConsumed;
-    if ((insets->IsConsumed(&isConsumed), !isConsumed)) {
+    if ((wi->IsConsumed(&isConsumed), !isConsumed)) {
         Int32 count = 0;
         GetChildCount(&count);
         for (Int32 i = 0; i < count; i++) {
             AutoPtr<IView> temp;
             GetChildAt(i, (IView**)&temp);
-            temp->DispatchApplyWindowInsets(insets, (IWindowInsets**)&insets);
-            if ((insets->IsConsumed(&isConsumed), isConsumed)) {
+            AutoPtr<IWindowInsets> wiTemp = wi;
+            wi = NULL;
+            temp->DispatchApplyWindowInsets(wiTemp, (IWindowInsets**)&wi);
+            if ((wi->IsConsumed(&isConsumed), isConsumed)) {
                 break;
             }
         }
     }
-    *res = insets;
+    *res = wi;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }

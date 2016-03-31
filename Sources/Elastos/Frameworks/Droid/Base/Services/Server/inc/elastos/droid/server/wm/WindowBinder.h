@@ -4,6 +4,7 @@
 
 #include "_Elastos.Droid.Server.h"
 #include <elastos/core/Object.h>
+#include <binder/Binder.h>
 
 namespace Elastos {
 namespace Droid {
@@ -20,7 +21,7 @@ public:
     CARAPI Register();
 
 private:
-    Int32 mNativeBinder;
+    android::BBinder* mNativeBinder;
 };
 
 } // namespace Wm

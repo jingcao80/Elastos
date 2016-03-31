@@ -1491,7 +1491,7 @@ void WindowState::RegisterFocusObserver(
         CRemoteCallbackList::New((IRemoteCallbackList**)&mFocusCallbacks);
     }
     Boolean result;
-    mFocusCallbacks->Register((IInterface*)observer, &result);
+    mFocusCallbacks->Register(observer, &result);
 }
 
 void WindowState::UnregisterFocusObserver(
@@ -1538,17 +1538,25 @@ ECode WindowState::ToString(
     Boolean equals;
     if (mStringNameCache.IsNull() || !Object::Equals(mLastTitle, title) || mWasExiting != mExiting) {
         mLastTitle = title;
+        String info;
+        if (mLastTitle != NULL) {
+            mLastTitle->ToString(&info);
+        }
         mWasExiting = mExiting;
         StringBuilder sb("Window{");
-        sb += (Int32)this;
-        sb += " u";
+        sb += StringUtils::ToHexString((Int32)this);
+        sb += " userId=";
         AutoPtr<IUserHandleHelper> helper;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
         Int32 uid;
         helper->GetUserId(mSession->mUid, &uid);
         sb += uid;
         sb += " ";
-        sb.Append(Object::ToString(mLastTitle));
+        sb.Append(info.string());
+        // sb += " token=";
+        // sb += mToken ? mToken->mStringName : "NULL";
+        // sb += " rootToken=";
+        // sb += mRootToken ? mRootToken->mStringName : "NULL";
         sb += mExiting ? " EXITING}" : "}";
         mStringNameCache = sb.ToString();
     }

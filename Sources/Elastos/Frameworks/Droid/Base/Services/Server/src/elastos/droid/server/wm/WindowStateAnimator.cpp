@@ -547,10 +547,7 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
         AutoPtr<IRect> surfaceInsets;
         attrs->GetSurfaceInsets((IRect**)&surfaceInsets);
         Int32 sil, sir, sit, sib;
-        surfaceInsets->GetLeft(&sil);
-        surfaceInsets->GetRight(&sir);
-        surfaceInsets->GetTop(&sit);
-        surfaceInsets->GetBottom(&sib);
+        surfaceInsets->Get(&sil, &sit, &sir, &sib);
         width += sil + sir;
         height += sit + sib;
         left -= sil;
@@ -1133,10 +1130,7 @@ void WindowStateAnimator::ApplyDecorRect(
 
     // Intersect with the decor rect, offsetted by window position.
     Int32 dl, dt, dr, db;
-    decorRect->GetLeft(&dl);
-    decorRect->GetTop(&dt);
-    decorRect->GetRight(&dr);
-    decorRect->GetBottom(&db);
+    decorRect->Get(&dl, &dt, &dr, &db);
     Boolean result;
     w->mSystemDecorRect->Intersect(dl - left, dt - top,
             dr - left, db - top, &result);
@@ -1150,14 +1144,9 @@ void WindowStateAnimator::ApplyDecorRect(
     if (w->mEnforceSizeCompat && w->mInvGlobalScale != 1.0f) {
         Float scale = w->mInvGlobalScale;
         Int32 l, t, r, b;
-        w->mSystemDecorRect->GetLeft(&l);
-        w->mSystemDecorRect->GetTop(&t);
-        w->mSystemDecorRect->GetRight(&r);
-        w->mSystemDecorRect->GetBottom(&b);
-        w->mSystemDecorRect->SetLeft((Int32) (l * scale - 0.5f));
-        w->mSystemDecorRect->SetTop((Int32) (t * scale - 0.5f));
-        w->mSystemDecorRect->SetRight((Int32) ((r + 1) * scale - 0.5f));
-        w->mSystemDecorRect->SetBottom((Int32) ((+1) * scale - 0.5f));
+        w->mSystemDecorRect->Get(&l, &t, &r, &b);
+        w->mSystemDecorRect->Set((Int32) (l * scale - 0.5f), (Int32) (t * scale - 0.5f),
+            (Int32) ((r + 1) * scale - 0.5f), (Int32) ((+1) * scale - 0.5f));
     }
 }
 
@@ -1184,13 +1173,13 @@ void WindowStateAnimator::UpdateSurfaceWindowCrop(
         // On a different display there is no system decor.  Crop the window
         // by the screen boundaries.
         AutoPtr<IDisplayInfo> displayInfo = displayContent->GetDisplayInfo();
-        Int32 width, height;
+        Int32 width, height, left, top, logicalW, logicalH;
         w->mCompatFrame->GetWidth(&width);
         w->mCompatFrame->GetHeight(&height);
-        w->mSystemDecorRect->Set(0, 0, width, height);
-        Int32 left, top, logicalW, logicalH;
         w->mCompatFrame->GetLeft(&left);
         w->mCompatFrame->GetTop(&top);
+
+        w->mSystemDecorRect->Set(0, 0, width, height);
         displayInfo->GetLogicalWidth(&logicalW);
         displayInfo->GetLogicalHeight(&logicalH);
         Boolean result;
@@ -1239,24 +1228,12 @@ void WindowStateAnimator::UpdateSurfaceWindowCrop(
 
     // Expand the clip rect for surface insets.
     AutoPtr<IWindowManagerLayoutParams> attrs = w->mAttrs;
-    Int32 crl, sil;
-    clipRect->GetLeft(&crl);
     AutoPtr<IRect> surfaceInsets;
     attrs->GetSurfaceInsets((IRect**)&surfaceInsets);
-    surfaceInsets->GetLeft(&sil);
-    clipRect->SetLeft(crl - sil);
-    Int32 crt, sit;
-    clipRect->GetTop(&crt);
-    surfaceInsets->GetTop(&sit);
-    clipRect->SetTop(crt - sit);
-    Int32 crr, sir;
-    clipRect->GetRight(&crr);
-    surfaceInsets->GetRight(&sir);
-    clipRect->SetRight(crr - sir);
-    Int32 crb, sib;
-    clipRect->GetBottom(&crb);
-    surfaceInsets->GetBottom(&sib);
-    clipRect->SetBottom(crb - sib);
+    Int32 crl, crt, crr, crb, sil, sit, sir, sib;
+    surfaceInsets->Get(&sil, &sit, &sir, &sib);
+    clipRect->Get(&crl, &crt, &crr, &crb);
+    clipRect->Set(crl - sil, crt - sit, crr - sir, crb - sib);
 
     // If we have an animated clip rect, intersect it with the clip rect.
     if (mHasClipRect) {
@@ -1298,7 +1275,7 @@ void WindowStateAnimator::UpdateSurfaceWindowCrop(
         if (FAILED(mSurfaceControl->SetWindowCrop(clipRect))) {
             String str;
             clipRect->ToShortString(&str);
-            Slogger::W(TAG, "Error setting crop surface of %p crop=", w.Get(), str.string());
+            Slogger::W(TAG, "Error setting crop surface of %s crop=", TO_CSTR(w), str.string());
             if (!recoveringMemory) {
                 mService->ReclaimSomeSurfaceMemoryLocked(this, String("crop"), TRUE);
             }
@@ -1348,13 +1325,10 @@ void WindowStateAnimator::SetSurfaceBoundariesLocked(
     AutoPtr<IWindowManagerLayoutParams> attrs;
     w->GetAttrs((IWindowManagerLayoutParams**)&attrs);
     AutoPtr<IRect> surfaceInsets;
-    Int32 sil, sir;
-    surfaceInsets->GetLeft(&sil);
-    surfaceInsets->GetRight(&sir);
+    attrs->GetSurfaceInsets((IRect**)&surfaceInsets);
+    Int32 sil, sir, sit, sib;
+    surfaceInsets->Get(&sil, &sit, &sir, &sib);
     width += sil + sir;
-    Int32 sit, sib;
-    surfaceInsets->GetTop(&sit);
-    surfaceInsets->GetBottom(&sib);
     height += sit + sib;
     left -= sil;
     top -= sit;
@@ -1368,14 +1342,14 @@ void WindowStateAnimator::SetSurfaceBoundariesLocked(
         // if (CWindowManagerService::SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
         //         "POS " + left + ", " + top, null);
         if (FAILED(mSurfaceControl->SetPosition(left, top))) {
-            Slogger::W(TAG, "Error positioning surface of %p pos=(%d,%d)", w.Get(), left, top);
+            Slogger::W(TAG, "Error positioning surface of %s pos=(%d,%d)", TO_CSTR(w), left, top);
             if (!recoveringMemory) {
                 mService->ReclaimSomeSurfaceMemoryLocked(this, String("position"), TRUE);
             }
         }
         if (mSurfaceControlBlur != NULL) {
             if (FAILED(mSurfaceControlBlur->SetPosition(left, top))) {
-                Slogger::W(TAG, "Error positioning surface of %p pos=(%d,%d)", w.Get(), left, top);
+                Slogger::W(TAG, "Error positioning surface of %s pos=(%d,%d)", TO_CSTR(w), left, top);
                 if (!recoveringMemory) {
                     mService->ReclaimSomeSurfaceMemoryLocked(this, String("position"), TRUE);
                 }
@@ -1399,7 +1373,7 @@ void WindowStateAnimator::SetSurfaceBoundariesLocked(
         // if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
         //         "SIZE " + width + "x" + height, null);
         if (FAILED(mSurfaceControl->SetSize(width, height))) {
-            Slogger::W(TAG, "Error resizing surface of %p size=(%d,%d)", w.Get(), left, top);
+            Slogger::W(TAG, "Error resizing surface of %s size=(%d,%d)", TO_CSTR(w), left, top);
             if (!recoveringMemory) {
                 mService->ReclaimSomeSurfaceMemoryLocked(this, String("size"), TRUE);
             }
@@ -1407,7 +1381,7 @@ void WindowStateAnimator::SetSurfaceBoundariesLocked(
         }
         if (mSurfaceControlBlur != NULL) {
             if (FAILED(mSurfaceControl->SetSize(width, height))) {
-                Slogger::W(TAG, "Error resizing surface of %p size=(%d,%d)", w.Get(), left, top);
+                Slogger::W(TAG, "Error resizing surface of %s size=(%d,%d)", TO_CSTR(w), left, top);
                 if (!recoveringMemory) {
                     mService->ReclaimSomeSurfaceMemoryLocked(this, String("size"), TRUE);
                 }
@@ -1588,8 +1562,8 @@ void WindowStateAnimator::SetTransparentRegionHintLocked(
         Slogger::W(TAG, "setTransparentRegionHint: null mSurface after mHasSurface true");
         return;
     }
-    if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG,
-        ">>> OPEN TRANSACTION setTransparentRegion");
+    if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS)
+        Slogger::I(TAG, ">>> OPEN TRANSACTION setTransparentRegion");
     AutoPtr<ISurfaceControlHelper> surfaceHelper;
     CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&surfaceHelper);
     surfaceHelper->OpenTransaction();
@@ -1599,8 +1573,8 @@ void WindowStateAnimator::SetTransparentRegionHintLocked(
     mSurfaceControl->SetTransparentRegionHint(region);
     // } finally {
     surfaceHelper->CloseTransaction();
-    if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG,
-            "<<< CLOSE TRANSACTION setTransparentRegion");
+    if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS)
+        Slogger::I(TAG, "<<< CLOSE TRANSACTION setTransparentRegion");
     // }
 }
 
@@ -1949,7 +1923,7 @@ void WindowStateAnimator::UpdateBlurWithMaskingState(
     Int32 privateFlags;
     Boolean blurVisible = !hideForced && 0 != (attrs->GetPrivateFlags(&privateFlags), (privateFlags &
             (IWindowManagerLayoutParams::PRIVATE_FLAG_BLUR_WITH_MASKING |
-                    IWindowManagerLayoutParams::PRIVATE_FLAG_BLUR_WITH_MASKING_SCALED)));
+            IWindowManagerLayoutParams::PRIVATE_FLAG_BLUR_WITH_MASKING_SCALED)));
     Boolean blurScaleNeeded = blurVisible && 0 != (attrs->GetPrivateFlags(&privateFlags), (privateFlags &
             IWindowManagerLayoutParams::PRIVATE_FLAG_BLUR_WITH_MASKING_SCALED));
 

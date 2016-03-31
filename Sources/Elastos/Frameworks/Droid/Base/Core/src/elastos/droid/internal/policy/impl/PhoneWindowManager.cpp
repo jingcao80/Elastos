@@ -15,7 +15,6 @@
 #include "elastos/droid/internal/policy/impl/CBarController.h"
 #include "elastos/droid/internal/policy/impl/CImmersiveModeConfirmation.h"
 #include "elastos/droid/internal/policy/impl/CLogDecelerateInterpolator.h"
-#include "elastos/droid/internal/policy/impl/CPolicyControl.h"
 #include "elastos/droid/internal/policy/CPolicyManager.h"
 #include "elastos/droid/internal/policy/impl/CRecentApplicationsDialog.h"
 #include "elastos/droid/internal/policy/impl/CSystemGesturesPointerEventListener.h"
@@ -54,6 +53,7 @@
 #include "elastos/droid/view/CViewConfigurationHelper.h"
 #include "elastos/droid/view/CWindowManagerLayoutParams.h"
 #include "elastos/droid/view/WindowManagerImpl.h"
+#include "elastos/droid/view/WindowManagerPolicyControl.h"
 #include "elastos/droid/widget/CToastHelper.h"
 #include <elastos/core/StringBuffer.h>
 #include <elastos/core/StringUtils.h>
@@ -146,6 +146,7 @@ using Elastos::Droid::View::CKeyEventHelper;
 using Elastos::Droid::View::CViewConfiguration;
 using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::View::CWindowManagerLayoutParams;
+using Elastos::Droid::View::WindowManagerPolicyControl;
 using Elastos::Droid::View::EIID_IInputEventReceiverFactory;
 using Elastos::Droid::View::EIID_IOnKeyguardExitResult;
 using Elastos::Droid::View::EIID_IWindowManagerInternal;
@@ -261,12 +262,12 @@ AutoPtr<HashMap<Int32, AutoPtr<IInterface> > > PhoneWindowManager::sApplicationL
         InitApplicationLaunchKeyCategories();
 
 String PhoneWindowManager::TAG("PhoneWindowManager");
-const Boolean PhoneWindowManager::DEBUG = FALSE;
-const Boolean PhoneWindowManager::localLOGV = FALSE;
-const Boolean PhoneWindowManager::DEBUG_LAYOUT = FALSE;
-const Boolean PhoneWindowManager::DEBUG_INPUT = FALSE;
-const Boolean PhoneWindowManager::DEBUG_STARTING_WINDOW = FALSE;
-const Boolean PhoneWindowManager::DEBUG_WAKEUP = FALSE;
+const Boolean PhoneWindowManager::DEBUG = TRUE;
+const Boolean PhoneWindowManager::localLOGV = TRUE;
+const Boolean PhoneWindowManager::DEBUG_LAYOUT = TRUE;
+const Boolean PhoneWindowManager::DEBUG_INPUT = TRUE;
+const Boolean PhoneWindowManager::DEBUG_STARTING_WINDOW = TRUE;
+const Boolean PhoneWindowManager::DEBUG_WAKEUP = TRUE;
 const Boolean PhoneWindowManager::SHOW_STARTING_ANIMATIONS = TRUE;
 const Boolean PhoneWindowManager::SHOW_PROCESSES_ON_ALT_MENU = FALSE;
 
@@ -2283,9 +2284,7 @@ ECode PhoneWindowManager::UpdateSettings()
         if (mImmersiveModeConfirmation != NULL) {
             mImmersiveModeConfirmation->LoadSetting(mCurrentUserId);
         }
-        AutoPtr<IPolicyControl> pc;
-        CPolicyControl::AcquireSingleton((IPolicyControl**)&pc);
-        pc->ReloadFromSetting(mContext);
+        WindowManagerPolicyControl::ReloadFromSetting(mContext);
     }
     if (updateRotation) {
         UpdateRotation(TRUE);
@@ -3137,7 +3136,7 @@ ECode PhoneWindowManager::PrepareAddWindowLw(
             }
             mNavigationBar = win;
             mNavigationBarController->SetWindow(win);
-            //if (DEBUG_LAYOUT) Slog.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
+            if (DEBUG_LAYOUT) Slogger::I(TAG, "NAVIGATION BAR: %s", TO_CSTR(mNavigationBar));
             break;
         case IWindowManagerLayoutParams::TYPE_NAVIGATION_BAR_PANEL:
             FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
@@ -3776,7 +3775,7 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                     //             + "SEARCH+" + IKeyEvent::keyCodeToString(keyCode), ex);
                     // }
                     // } else {
-                    // Slog.i(TAG, "Dropping unregistered shortcut key combination: "
+                    // Slogger::I(TAG, "Dropping unregistered shortcut key combination: "
                     //         + "SEARCH+" + KeyEvent.keyCodeToString(keyCode));
                 }
             }
@@ -4215,13 +4214,9 @@ ECode PhoneWindowManager::GetContentInsetHintLw(
     /* [in] */ IRect* contentInset)
 {
     assert(attrs != NULL);
-    AutoPtr<IPolicyControl> pc;
-    CPolicyControl::AcquireSingleton((IPolicyControl**)&pc);
-    Int32 fl = 0;
-    pc->GetWindowFlags(NULL, attrs, &fl);
+    Int32 fl = WindowManagerPolicyControl::GetWindowFlags(NULL, attrs);
 
-    Int32 sysuiVis = 0;
-    pc->GetSystemUiVisibility(NULL, attrs, &sysuiVis);
+    Int32 sysuiVis = WindowManagerPolicyControl::GetSystemUiVisibility(NULL, attrs);
     Int32 subtreeSystemUiVisibility = 0;
     attrs->GetSubtreeSystemUiVisibility(&subtreeSystemUiVisibility);
 
@@ -4420,7 +4415,8 @@ ECode PhoneWindowManager::BeginLayoutLw(
                     // we can tell the app that it is covered by it.
                     mSystemBottom = mTmpNavigationFrame->mTop;
                 }
-            } else {
+            }
+            else {
                 // Landscape screen; nav bar goes to the right.
                 int left = displayWidth - overscanRight
                     - mNavigationBarWidthForRotation[displayRotation];
@@ -4464,8 +4460,9 @@ ECode PhoneWindowManager::BeginLayoutLw(
                 updateSysUiVisibility = TRUE;
             }
         }
-        if (DEBUG_LAYOUT) Slogger::I(TAG, "mDock rect: (%d,%d - %d,%d)",
-                    mDockLeft, mDockTop, mDockRight, mDockBottom);
+        if (DEBUG_LAYOUT) {
+            Slogger::I(TAG, "mDock rect: (%d,%d - %d,%d)", mDockLeft, mDockTop, mDockRight, mDockBottom);
+        }
 
         // decide where the status bar goes ahead of time
         if (mStatusBar != NULL) {
@@ -4507,7 +4504,7 @@ ECode PhoneWindowManager::BeginLayoutLw(
                 mContentLeft = mVoiceContentLeft = mCurLeft = mDockLeft;
                 mContentRight = mVoiceContentRight = mCurRight = mDockRight;
 
-                //if (DEBUG_LAYOUT) Slog.v(TAG, "Status bar: " +
+                //if (DEBUG_LAYOUT) Slogger::V(TAG, "Status bar: " +
                 //        String.format(
                 //            "dock=[%d,%d][%d,%d] content=[%d,%d][%d,%d] cur=[%d,%d][%d,%d]",
                 //            mDockLeft, mDockTop, mDockRight, mDockBottom,
@@ -4693,19 +4690,15 @@ ECode PhoneWindowManager::LayoutWindowLw(
             (win == mLastInputMethodTargetWindow && mLastInputMethodWindow != NULL);
     if (needsToOffsetInputMethodTarget) {
         // if (DEBUG_LAYOUT) {
-        //     Slog.i(TAG, "Offset ime target window by the last ime window state");
+        //     Slogger::I(TAG, "Offset ime target window by the last ime window state");
         // }
         OffsetInputMethodWindowLw(mLastInputMethodWindow);
     }
-    AutoPtr<IPolicyControl> pc;
-    CPolicyControl::AcquireSingleton((IPolicyControl**)&pc);
-    Int32 fl = 0;
-    pc->GetWindowFlags(win, attrs, &fl);
+    Int32 fl = WindowManagerPolicyControl::GetWindowFlags(win, attrs);
     Int32 sim = 0;
     attrs->GetSoftInputMode(&sim);
 
-    Int32 sysUiFl = 0;
-    pc->GetSystemUiVisibility(win, NULL, &sysUiFl);
+    Int32 sysUiFl = WindowManagerPolicyControl::GetSystemUiVisibility(win, NULL);
 
     AutoPtr<CRect> pf = mTmpParentFrame;
     AutoPtr<CRect> df = mTmpDisplayFrame;
@@ -4734,7 +4727,8 @@ ECode PhoneWindowManager::LayoutWindowLw(
             // If this window is attached to another, our display
             // frame is the same as the one we are attached to.
             SetAttachedWindowFrames(win, fl, adjust, attached, TRUE, pf, df, of, cf, vf);
-        } else {
+        }
+        else {
             // Give the window full screen.
             pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = mOverscanScreenLeft;
             pf->mTop = df->mTop = of->mTop = cf->mTop = mOverscanScreenTop;
@@ -4743,7 +4737,8 @@ ECode PhoneWindowManager::LayoutWindowLw(
             pf->mBottom = df->mBottom = of->mBottom = cf->mBottom
                 = mOverscanScreenTop + mOverscanScreenHeight;
         }
-    } else if (type == IWindowManagerLayoutParams::TYPE_INPUT_METHOD) {
+    }
+    else if (type == IWindowManagerLayoutParams::TYPE_INPUT_METHOD) {
         pf->mLeft = df->mLeft = of->mLeft = cf->mLeft = vf->mLeft = mDockLeft;
         pf->mTop = df->mTop = of->mTop = cf->mTop = vf->mTop = mDockTop;
         pf->mRight = df->mRight = of->mRight = cf->mRight = vf->mRight = mDockRight;
@@ -4754,7 +4749,8 @@ ECode PhoneWindowManager::LayoutWindowLw(
         // IM dock windows always go to the mBottom of the screen.
         attrs->SetGravity(IGravity::BOTTOM);
         win->GetSurfaceLayer(&mDockLayer);
-    }else if (win == mStatusBar && (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0) {
+    }
+    else if (win == mStatusBar && (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0) {
         pf->mLeft = df->mLeft = of->mLeft = mUnrestrictedScreenLeft;
         pf->mTop = df->mTop = of->mTop = mUnrestrictedScreenTop;
         pf->mRight = df->mRight = of->mRight = mUnrestrictedScreenWidth + mUnrestrictedScreenLeft;
@@ -4764,7 +4760,8 @@ ECode PhoneWindowManager::LayoutWindowLw(
         cf->mRight = vf->mRight = mStableRight;
         vf->mBottom = mStableBottom;
         cf->mBottom = mContentBottom;
-    } else {
+    }
+    else {
         // Default policy decor for the default display
         dcf->mLeft = mSystemLeft;
         dcf->mTop = mSystemTop;
@@ -4799,7 +4796,7 @@ ECode PhoneWindowManager::LayoutWindowLw(
                 == (IWindowManagerLayoutParams::FLAG_LAYOUT_IN_SCREEN | IWindowManagerLayoutParams::FLAG_LAYOUT_INSET_DECOR))
         {
             // if (DEBUG_LAYOUT)
-            //     Slog.v(TAG, "layoutWindowLw(" + attrs.getTitle()
+            //     Slogger::V(TAG, "layoutWindowLw(" + attrs.getTitle()
             //             + "): IN_SCREEN, INSET_DECOR");
             // This is the case for a normal activity window: we want it
             // to cover all of the screen space, and it can take care of
@@ -4829,7 +4826,7 @@ ECode PhoneWindowManager::LayoutWindowLw(
                         : mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
 
                     // if (DEBUG_LAYOUT)
-                    //     Slog.v(TAG, String.format(
+                    //     Slogger::V(TAG, String.format(
                     //                 "Laying out status bar window: (%d,%d - %d,%d)",
                     //                 pf.left, pf.top, pf.right, pf.bottom));
                 } else if((fl & IWindowManagerLayoutParams::FLAG_LAYOUT_IN_OVERSCAN) != 0
@@ -4919,7 +4916,7 @@ ECode PhoneWindowManager::LayoutWindowLw(
                         & (IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                             | IView::SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)) != 0) {
                 // if (DEBUG_LAYOUT)
-                //     Slog.v(TAG, "layoutWindowLw(" + attrs.getTitle() + "): IN_SCREEN");
+                //     Slogger::V(TAG, "layoutWindowLw(" + attrs.getTitle() + "): IN_SCREEN");
                 // A window that has requested to fill the entire screen just
                 // gets everything, period.
                 if (type == IWindowManagerLayoutParams::TYPE_STATUS_BAR_PANEL
@@ -4933,7 +4930,7 @@ ECode PhoneWindowManager::LayoutWindowLw(
                         ? mRestrictedScreenTop + mRestrictedScreenHeight
                         : mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
                     // if (DEBUG_LAYOUT) {
-                    //     Slog.v(TAG, String.format(
+                    //     Slogger::V(TAG, String.format(
                     //                 "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
                     //                 pf.left, pf.top, pf.right, pf.bottom));
                     // }
@@ -4945,7 +4942,7 @@ ECode PhoneWindowManager::LayoutWindowLw(
                     pf->mRight = df->mRight = of->mRight = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
                     pf->mBottom = df->mBottom = of->mBottom = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
                     // if (DEBUG_LAYOUT) {
-                    //     Slog.v(TAG, String.format(
+                    //     Slogger::V(TAG, String.format(
                     //                 "Laying out navigation bar window: (%d,%d - %d,%d)",
                     //                 pf.left, pf.top, pf.right, pf.bottom));
                     // }
@@ -5026,13 +5023,13 @@ ECode PhoneWindowManager::LayoutWindowLw(
                 }
             } else if (attached != NULL) {
                 // if (DEBUG_LAYOUT)
-                //     Slog.v(TAG, "layoutWindowLw(" + attrs.getTitle() + "): attached to " + attached);
+                //     Slogger::V(TAG, "layoutWindowLw(" + attrs.getTitle() + "): attached to " + attached);
                 // A child window should be placed inside of the same visible
                 // frame that its parent had.
                 SetAttachedWindowFrames(win, fl, adjust, attached, FALSE, pf, df, of, cf, vf);
             } else {
                 // if (DEBUG_LAYOUT)
-                //     Slog.v(TAG, "layoutWindowLw(" + attrs.getTitle() + "): normal window");
+                //     Slogger::V(TAG, "layoutWindowLw(" + attrs.getTitle() + "): normal window");
                 // Otherwise, a normal window must be placed inside the content
                 // of all screen decorations.
                 if (type == IWindowManagerLayoutParams::TYPE_STATUS_BAR_PANEL) {
@@ -5097,7 +5094,7 @@ ECode PhoneWindowManager::LayoutWindowLw(
         }
     }
 
-    // if (DEBUG_LAYOUT) Slog.v(TAG, "Compute frame " + attrs.getTitle()
+    // if (DEBUG_LAYOUT) Slogger::V(TAG, "Compute frame " + attrs.getTitle()
     //         + ": sim=#" + Integer.toHexString(sim)
     //         + " attach=" + attached + " type=" + attrs.type
     //         + String.format(" flags=0x%08x", fl)
@@ -5164,7 +5161,7 @@ void PhoneWindowManager::OffsetInputMethodWindowLw(
     if (mCurBottom > top) {
         mCurBottom = top;
     }
-    // if (DEBUG_LAYOUT) Slog.v(TAG, "Input method: mDockBottom="
+    // if (DEBUG_LAYOUT) Slogger::V(TAG, "Input method: mDockBottom="
     //         + mDockBottom + " mContentBottom="
     //         + mContentBottom + " mCurBottom=" + mCurBottom);
 }
@@ -5262,14 +5259,13 @@ ECode PhoneWindowManager::ApplyPostLayoutPolicyLw(
     /* [in] */ IWindowState* win,
     /* [in] */ IWindowManagerLayoutParams* attrs)
 {
-    // if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": isVisibleOrBehindKeyguardLw="
-    //         + win.isVisibleOrBehindKeyguardLw());
+    if (DEBUG_LAYOUT) {
+        Boolean bval;
+        win->IsVisibleOrBehindKeyguardLw(&bval);
+        Slogger::I(TAG, "Win %s: isVisibleOrBehindKeyguardLw=%d", TO_CSTR(win), bval);
+    }
     Boolean tmp = FALSE;
-
-    AutoPtr<IPolicyControl> pc;
-    CPolicyControl::AcquireSingleton((IPolicyControl**)&pc);
-    Int32 fl;
-    pc->GetWindowFlags(win, attrs, &fl);
+    Int32 fl = WindowManagerPolicyControl::GetWindowFlags(win, attrs);
     Int32 type;
     attrs->GetType(&type);
     Boolean isVisibleLw;
@@ -5283,7 +5279,8 @@ ECode PhoneWindowManager::ApplyPostLayoutPolicyLw(
 
     Int32 privateFlags;
     attrs->GetPrivateFlags(&privateFlags);
-    if (type == IWindowManagerLayoutParams::TYPE_STATUS_BAR && (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0) {
+    if (type == IWindowManagerLayoutParams::TYPE_STATUS_BAR
+        && (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0) {
         mForceStatusBarFromKeyguard = true;
     }
 
@@ -5324,24 +5321,27 @@ ECode PhoneWindowManager::ApplyPostLayoutPolicyLw(
             win->GetAppToken((IApplicationToken**)&appToken);
             if (showWhenLocked) {
                 // Remove any previous windows with the same appToken.
-                mAppsToBeHidden->Remove(TO_IINTERFACE(appToken));
-                mAppsThatDismissKeyguard->Remove(TO_IINTERFACE(appToken));
+                mAppsToBeHidden->Remove(appToken.Get());
+                mAppsThatDismissKeyguard->Remove(appToken.Get());
                 Boolean bTemp;
                 if ((mAppsToBeHidden->IsEmpty(&bTemp), bTemp) && IsKeyguardSecureIncludingHidden()) {
                     mWinShowWhenLocked = win;
                     mHideLockScreen = TRUE;
                     mForceStatusBarFromKeyguard = FALSE;
                 }
-            } else if (dismissKeyguard) {
+            }
+            else if (dismissKeyguard) {
                 if (secureKeyguard) {
-                    mAppsToBeHidden->Add(TO_IINTERFACE(appToken));
-                } else {
-                    mAppsToBeHidden->Remove(TO_IINTERFACE(appToken));
+                    mAppsToBeHidden->Add(appToken.Get());
+                }
+                else {
+                    mAppsToBeHidden->Remove(appToken.Get());
                 }
 
-                mAppsThatDismissKeyguard->Add(TO_IINTERFACE(appToken));
-            } else {
-                mAppsToBeHidden->Add(TO_IINTERFACE(appToken));
+                mAppsThatDismissKeyguard->Add(appToken.Get());
+            }
+            else {
+                mAppsToBeHidden->Add(appToken.Get());
             }
 
             Int32 x, y, width, height;
@@ -5350,19 +5350,20 @@ ECode PhoneWindowManager::ApplyPostLayoutPolicyLw(
             IViewGroupLayoutParams::Probe(attrs)->GetWidth(&width);
             IViewGroupLayoutParams::Probe(attrs)->GetHeight(&height);
             if (x == 0 && y == 0
-                    && width == IViewGroupLayoutParams::MATCH_PARENT
-                    && height == IViewGroupLayoutParams::MATCH_PARENT) {
-                //if (DEBUG_LAYOUT) Slog.v(TAG, "Fullscreen window: " + win);
+                && width == IViewGroupLayoutParams::MATCH_PARENT
+                && height == IViewGroupLayoutParams::MATCH_PARENT) {
+                if (DEBUG_LAYOUT) Slogger::V(TAG, "Fullscreen window: %s", TO_CSTR(win));
                 mTopFullscreenOpaqueWindowState = win;
                 Boolean isEmpty;
                 if (!(mAppsThatDismissKeyguard->IsEmpty(&isEmpty), isEmpty) &&
                         mDismissKeyguard == DISMISS_KEYGUARD_NONE) {
-                    //if (DEBUG_LAYOUT) Slog.v(TAG, "Setting mDismissKeyguard true by win " + win);
+                    if (DEBUG_LAYOUT) Slogger::V(TAG, "Setting mDismissKeyguard true by win %s", TO_CSTR(win));
                     mDismissKeyguard = mWinDismissingKeyguard.Get() == win ?  DISMISS_KEYGUARD_CONTINUE : DISMISS_KEYGUARD_START;
                     mWinDismissingKeyguard = win;
                     mForceStatusBarFromKeyguard = mShowingLockscreen && secureKeyguard;
-                } else if ((mAppsToBeHidden->IsEmpty(&isEmpty), isEmpty) && showWhenLocked) {
-                    //if (DEBUG_LAYOUT) Slog.v(TAG, "Setting mHideLockScreen to true by win " + win);
+                }
+                else if ((mAppsToBeHidden->IsEmpty(&isEmpty), isEmpty) && showWhenLocked) {
+                    if (DEBUG_LAYOUT) Slogger::V(TAG, "Setting mHideLockScreen to true by win %s", TO_CSTR(win));
                     mHideLockScreen = TRUE;
                     mForceStatusBarFromKeyguard = FALSE;
                 }
@@ -5371,13 +5372,11 @@ ECode PhoneWindowManager::ApplyPostLayoutPolicyLw(
                 }
             }
 
-            if (mWinShowWhenLocked != NULL)
-            {
-                AutoPtr<IApplicationToken> token1;
-                AutoPtr<IApplicationToken> token2;
+            if (mWinShowWhenLocked != NULL) {
+                AutoPtr<IApplicationToken> token1, token2;
                 mWinShowWhenLocked->GetAppToken((IApplicationToken**)&token1);
                 win->GetAppToken((IApplicationToken**)&token2);
-                if(token1.Get() != token2.Get()) {
+                if (token1.Get() != token2.Get()) {
                     Boolean result;
                     win->HideLw(FALSE, &result);
                 }
@@ -5393,23 +5392,25 @@ ECode PhoneWindowManager::FinishPostLayoutPolicyLw(
 {
     VALIDATE_NOT_NULL(result);
 
-    if (mWinShowWhenLocked != NULL
-        && mWinShowWhenLocked != mTopFullscreenOpaqueWindowState)
-    {
-        // A dialog is dismissing the keyguard. Put the wallpaper behind it and hide the
-        // fullscreen window.
-        // TODO: Make sure FLAG_SHOW_WALLPAPER is restored when dialog is dismissed. Or not.
-        AutoPtr<IWindowManagerLayoutParams> attrs;
-        mWinShowWhenLocked->GetAttrs((IWindowManagerLayoutParams**)&attrs);;
-        Int32 flags;
-        attrs->GetFlags(&flags);
-        attrs->SetFlags(flags|IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER);
-        Boolean result;
-        mTopFullscreenOpaqueWindowState->HideLw(FALSE, &result);
-        mTopFullscreenOpaqueWindowState = mWinShowWhenLocked;
+    if (mWinShowWhenLocked != NULL && mTopFullscreenOpaqueWindowState != NULL) {
+        AutoPtr<IApplicationToken> token1, token2;
+        mWinShowWhenLocked->GetAppToken((IApplicationToken**)&token1);
+        mTopFullscreenOpaqueWindowState->GetAppToken((IApplicationToken**)&token2);
+        Boolean bval;
+        if (token1 != token2 && (IsKeyguardLocked(&bval), bval)) {
+            // A dialog is dismissing the keyguard. Put the wallpaper behind it and hide the
+            // fullscreen window.
+            // TODO: Make sure FLAG_SHOW_WALLPAPER is restored when dialog is dismissed. Or not.
+            AutoPtr<IWindowManagerLayoutParams> attrs;
+            mWinShowWhenLocked->GetAttrs((IWindowManagerLayoutParams**)&attrs);;
+            Int32 flags;
+            attrs->GetFlags(&flags);
+            attrs->SetFlags(flags | IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER);
+            mTopFullscreenOpaqueWindowState->HideLw(FALSE, &bval);
+            mTopFullscreenOpaqueWindowState = mWinShowWhenLocked;
+        }
     }
 
-    assert(result != NULL);
     Int32 changes = 0;
     Boolean topIsFullscreen = FALSE;
 
@@ -5427,8 +5428,10 @@ ECode PhoneWindowManager::FinishPostLayoutPolicyLw(
     }
 
     if (mStatusBar != NULL) {
-        if (DEBUG_LAYOUT) Slogger::I(TAG, "force=%d forcefkg=%d top=%p",
-                mForceStatusBar, mForceStatusBarFromKeyguard, mTopFullscreenOpaqueWindowState.Get());
+        if (DEBUG_LAYOUT) {
+            Slogger::I(TAG, "force=%d forcefkg=%d top=%s",
+                mForceStatusBar, mForceStatusBarFromKeyguard, TO_CSTR(mTopFullscreenOpaqueWindowState));
+        }
 
         Boolean bval;
         if (mForceStatusBar || mForceStatusBarFromKeyguard) {
@@ -5446,10 +5449,7 @@ ECode PhoneWindowManager::FinishPostLayoutPolicyLw(
             }
         }
         else if (mTopFullscreenOpaqueWindowState != NULL) {
-            AutoPtr<IPolicyControl> pc;
-            CPolicyControl::AcquireSingleton((IPolicyControl**)&pc);
-            Int32 fl;
-            pc->GetWindowFlags(NULL, lp, &fl);
+            Int32 fl = WindowManagerPolicyControl::GetWindowFlags(NULL, lp);
             // if (localLOGV) {
             //     Slogger::D(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
             //             + " shown frame: " + mTopFullscreenOpaqueWindowState.getShownFrameLw());
@@ -5467,14 +5467,17 @@ ECode PhoneWindowManager::FinishPostLayoutPolicyLw(
                 if (mStatusBarController->SetBarShowingLw(TRUE, &bTemp), bTemp) {
                     changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT;
                 }
-            } else if (topIsFullscreen) {
+            }
+            else if (topIsFullscreen) {
                 if (DEBUG_LAYOUT) Slogger::V(TAG, "** HIDING status bar");
                 if (mStatusBarController->SetBarShowingLw(FALSE, &bTemp), bTemp) {
                     changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT;
-                } else {
+                }
+                else {
                     if (DEBUG_LAYOUT) Slogger::V(TAG, "Status bar already hiding");
                 }
-            } else {
+            }
+            else {
                 if (DEBUG_LAYOUT) Slogger::V(TAG, "** SHOWING status bar: top is not fullscreen");
                 if (mStatusBarController->SetBarShowingLw(TRUE, &bTemp), bTemp) {
                     changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT;
@@ -5499,41 +5502,44 @@ ECode PhoneWindowManager::FinishPostLayoutPolicyLw(
         Boolean bTemp;
         if (mDismissKeyguard != DISMISS_KEYGUARD_NONE && !(IsKeyguardSecure(&bTemp), bTemp)) {
             mKeyguardHidden = TRUE;
-            Int32 result;
-            mKeyguardDelegate->SetOccluded(TRUE, &result);
-            if (ProcessKeyguardSetHiddenResultLw(result)) {
+            Int32 ival;
+            mKeyguardDelegate->SetOccluded(TRUE, &ival);
+            if (ProcessKeyguardSetHiddenResultLw(ival)) {
                 changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT | IWindowManagerPolicy::FINISH_LAYOUT_REDO_CONFIG | IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER;
             }
             if (mKeyguardDelegate->IsShowing(&bTemp), bTemp) {
                 Boolean isSuccess = FALSE;
                 mHandler->Post(new KeyguardDelegateKeyguardDone(this), &isSuccess);
             }
-        } else if (mHideLockScreen) {
+        }
+        else if (mHideLockScreen) {
             mKeyguardHidden = TRUE;
-            Int32 result;
-            mKeyguardDelegate->SetOccluded(TRUE, &result);
-            if (ProcessKeyguardSetHiddenResultLw(result)) {
+            Int32 ival;
+            mKeyguardDelegate->SetOccluded(TRUE, &ival);
+            if (ProcessKeyguardSetHiddenResultLw(ival)) {
                 changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT | IWindowManagerPolicy::FINISH_LAYOUT_REDO_CONFIG | IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER;
             }
-        } else if (mDismissKeyguard != DISMISS_KEYGUARD_NONE) {
+        }
+        else if (mDismissKeyguard != DISMISS_KEYGUARD_NONE) {
             // This is the case of keyguard isSecure() and not mHideLockScreen.
             if (mDismissKeyguard == DISMISS_KEYGUARD_START) {
                 // Only launch the next keyguard unlock window once per window.
                 mKeyguardHidden = FALSE;
-                Int32 result;
-                mKeyguardDelegate->SetOccluded(FALSE, &result);
-                if (ProcessKeyguardSetHiddenResultLw(result)) {
+                Int32 ival;
+                mKeyguardDelegate->SetOccluded(FALSE, &ival);
+                if (ProcessKeyguardSetHiddenResultLw(ival)) {
                     changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT | IWindowManagerPolicy::FINISH_LAYOUT_REDO_CONFIG | IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER;
                 }
                 Boolean isSuccess = FALSE;
                 mHandler->Post(new KeyguardDelegateKeyguardDismiss(this), &isSuccess);
             }
-        } else {
+        }
+        else {
             mWinDismissingKeyguard = NULL;
             mKeyguardHidden = FALSE;
-            Int32 result;
-            mKeyguardDelegate->SetOccluded(FALSE, &result);
-            if (ProcessKeyguardSetHiddenResultLw(result)) {
+            Int32 ival;
+            mKeyguardDelegate->SetOccluded(FALSE, &ival);
+            if (ProcessKeyguardSetHiddenResultLw(ival)) {
                 changes |= IWindowManagerPolicy::FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_CONFIG | FINISH_LAYOUT_REDO_WALLPAPER;
             }
         }
@@ -5571,7 +5577,7 @@ ECode PhoneWindowManager::FocusChangedLw(
     /* [in] */ IWindowState* newFocus,
     /* [out] */ Int32* state)
 {
-    assert(state != NULL);
+    VALIDATE_NOT_NULL(state)
     *state = 0;
 
     mFocusedWindow = newFocus;
@@ -5602,7 +5608,8 @@ ECode PhoneWindowManager::NotifyLidSwitchChanged(
 
     if (lidOpen) {
         mPowerManager->WakeUp(SystemClock::GetUptimeMillis());
-    } else if (!mLidControlsSleep) {
+    }
+    else if (!mLidControlsSleep) {
         mPowerManager->UserActivity(SystemClock::GetUptimeMillis(), FALSE);
     }
     return NOERROR;
@@ -5712,8 +5719,8 @@ void PhoneWindowManager::TakeScreenshot()
     }
     AutoPtr<IComponentName> cn;
     CComponentName::New(String("com.android.systemui"),
-            String("com.android.systemui.screenshot.TakeScreenshotService"),
-            (IComponentName**)&cn);
+        String("com.android.systemui.screenshot.TakeScreenshotService"),
+        (IComponentName**)&cn);
 
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
@@ -5762,9 +5769,9 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
     // when the keyguard is hidden by another activity.
     Boolean bTemp;
     Boolean keyguardActive = (mKeyguardDelegate == NULL ? FALSE :
-                                         (interactive ?
-                                             (mKeyguardDelegate->IsShowingAndNotOccluded(&bTemp), bTemp) :
-                                             (mKeyguardDelegate->IsShowing(&bTemp), bTemp)));
+         (interactive ?
+             (mKeyguardDelegate->IsShowingAndNotOccluded(&bTemp), bTemp) :
+             (mKeyguardDelegate->IsShowing(&bTemp), bTemp)));
 
     // if (DEBUG_INPUT) {
     //     Log.d(TAG, "interceptKeyTq keycode=" + keyCode
@@ -6606,7 +6613,7 @@ ECode PhoneWindowManager::RotationForOrientationLw(
 {
     VALIDATE_NOT_NULL(surfaceRotation);
     // if (FALSE) {
-    //     Slog.v(TAG, "rotationForOrientationLw(orient="
+    //     Slogger::V(TAG, "rotationForOrientationLw(orient="
     //                 + orientation + ", last=" + lastRotation
     //                 + "); user=" + mUserRotation + " "
     //                 + ((mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED)
@@ -7383,10 +7390,7 @@ Int32 PhoneWindowManager::UpdateSystemUiVisibilityLw()
         return 0;
     }
 
-    AutoPtr<IPolicyControl> pc;
-    CPolicyControl::AcquireSingleton((IPolicyControl**)&pc);
-    Int32 uiVisiable = 0;
-    pc->GetSystemUiVisibility(win, NULL, &uiVisiable);
+    Int32 uiVisiable = WindowManagerPolicyControl::GetSystemUiVisibility(win, NULL);
     Int32 visibility = uiVisiable & ~mResettingSystemUiFlags;
     visibility &= ~mForceClearedSystemUiFlags;
 
@@ -7394,8 +7398,7 @@ Int32 PhoneWindowManager::UpdateSystemUiVisibilityLw()
         Int32 sl;
         win->GetSurfaceLayer(&sl);
         if (sl < mForcingShowNavBarLayer) {
-            Int32 fgs;
-            pc->AdjustClearableFlags(win, IView::SYSTEM_UI_CLEARABLE_FLAGS, &fgs);
+            Int32 fgs = WindowManagerPolicyControl::AdjustClearableFlags(win, IView::SYSTEM_UI_CLEARABLE_FLAGS);
             visibility &= ~fgs;
         }
     }
@@ -7430,8 +7433,7 @@ Int32 PhoneWindowManager::UpdateSystemBarsLw(
 {
     // apply translucent bar vis flags
     IWindowState* transWin = IsStatusBarKeyguard() && !mHideLockScreen
-        ? mStatusBar
-        : mTopFullscreenOpaqueWindowState;
+        ? mStatusBar : mTopFullscreenOpaqueWindowState;
     Int32 iTemp = 0;
     mStatusBarController->ApplyTranslucentFlagLw(transWin, vis, oldVis, &iTemp);
     vis = iTemp;
@@ -7463,23 +7465,17 @@ Int32 PhoneWindowManager::UpdateSystemBarsLw(
 
     // update status bar
     Boolean immersiveSticky = (vis & IView::SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
-    AutoPtr<IPolicyControl> pc;
-    CPolicyControl::AcquireSingleton((IPolicyControl**)&pc);
-    Int32 winFlags;
-    pc->GetWindowFlags(mTopFullscreenOpaqueWindowState, NULL, &winFlags);
-    Boolean hideStatusBarWM =
-        mTopFullscreenOpaqueWindowState != NULL &&
-        (winFlags & IWindowManagerLayoutParams::FLAG_FULLSCREEN) != 0;
-    Boolean hideStatusBarSysui =
-        (vis & IView::SYSTEM_UI_FLAG_FULLSCREEN) != 0;
-    Boolean hideNavBarSysui =
-        (vis & IView::SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
 
-    Boolean transientStatusBarAllowed =
-        mStatusBar != NULL && (
-                hideStatusBarWM
-                || (hideStatusBarSysui && immersiveSticky)
-                || statusBarHasFocus);
+    Boolean hideStatusBarWM = FALSE;
+    if (mTopFullscreenOpaqueWindowState != NULL) {
+        Int32 winFlags = WindowManagerPolicyControl::GetWindowFlags(mTopFullscreenOpaqueWindowState, NULL);
+        hideStatusBarWM = (winFlags & IWindowManagerLayoutParams::FLAG_FULLSCREEN) != 0;
+    }
+
+    Boolean hideStatusBarSysui = (vis & IView::SYSTEM_UI_FLAG_FULLSCREEN) != 0;
+    Boolean hideNavBarSysui = (vis & IView::SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
+    Boolean transientStatusBarAllowed = (mStatusBar != NULL) &&
+        (hideStatusBarWM || (hideStatusBarSysui && immersiveSticky) || statusBarHasFocus);
 
     Boolean transientNavBarAllowed =
         mNavigationBar != NULL &&
@@ -7871,9 +7867,7 @@ void PhoneWindowManager::Dump(
     mGlobalKeyManager->Dump(prefix, pw);
     mStatusBarController->Dump(pw, prefix);
     mNavigationBarController->Dump(pw, prefix);
-    AutoPtr<IPolicyControl> pc;
-    CPolicyControl::AcquireSingleton((IPolicyControl**)&pc);
-    pc->Dump(prefix, pw);
+    // WindowManagerPolicyControl::Dump(prefix, pw);
 
     if (mWakeGestureListener != NULL) {
         mWakeGestureListener->Dump(pw, prefix);

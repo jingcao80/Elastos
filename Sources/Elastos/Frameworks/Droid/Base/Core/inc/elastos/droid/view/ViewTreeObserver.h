@@ -416,20 +416,20 @@ private:
     //TODO: CopyOnWriteArrayList ----Thread-safe; List---Don't know.
 
     // Recursive listeners use CopyOnWriteArrayList
-    AutoPtr< List<IOnWindowFocusChangeListener*> > mOnWindowFocusListeners;
-    AutoPtr< List<IOnWindowAttachListener*> > mOnWindowAttachListeners;
-    AutoPtr< List<IOnGlobalFocusChangeListener*> > mOnGlobalFocusListeners;
-    AutoPtr< List<IOnTouchModeChangeListener*> > mOnTouchModeChangeListeners;
+    AutoPtr< List<AutoPtr<IOnWindowFocusChangeListener> > > mOnWindowFocusListeners;
+    AutoPtr< List<AutoPtr<IOnWindowAttachListener> > > mOnWindowAttachListeners;
+    AutoPtr< List<AutoPtr<IOnGlobalFocusChangeListener> > > mOnGlobalFocusListeners;
+    AutoPtr< List<AutoPtr<IOnTouchModeChangeListener> > > mOnTouchModeChangeListeners;
 
     // Non-recursive listeners use CopyOnWriteArray
     // Any listener invoked from ViewRootImpl.performTraversals() should not be recursive
-    AutoPtr< List<IOnGlobalLayoutListener*> > mOnGlobalLayoutListeners;
-    AutoPtr< List<IOnComputeInternalInsetsListener*> > mOnComputeInternalInsetsListeners;
-    AutoPtr< List<IOnScrollChangedListener*> > mOnScrollChangedListeners;
-    AutoPtr< List<IOnPreDrawListener*> > mOnPreDrawListeners;
+    AutoPtr< List<AutoPtr<IOnGlobalLayoutListener> > > mOnGlobalLayoutListeners;
+    AutoPtr< List<AutoPtr<IOnComputeInternalInsetsListener> > > mOnComputeInternalInsetsListeners;
+    AutoPtr< List<AutoPtr<IOnScrollChangedListener> > > mOnScrollChangedListeners;
+    AutoPtr< List<AutoPtr<IOnPreDrawListener> > > mOnPreDrawListeners;
 
     // These listeners cannot be mutated during dispatch
-    AutoPtr< List<IOnDrawListener*> > mOnDrawListeners;
+    AutoPtr< List<AutoPtr<IOnDrawListener> > > mOnDrawListeners;
 
     Boolean mAlive;
 

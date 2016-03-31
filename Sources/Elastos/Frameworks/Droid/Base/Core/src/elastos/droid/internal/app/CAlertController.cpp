@@ -150,6 +150,7 @@ ECode CAlertController::OnApplyWindowInsetsListener::OnApplyWindowInsets(
     /* [in] */ IWindowInsets* insets,
     /* [out] */ IWindowInsets** outsets)
 {
+    VALIDATE_NOT_NULL(outsets)
     AutoPtr<IView> parent;
     mHost->mWindow->FindViewById(R::id::parentPanel, (IView**)&parent);
 

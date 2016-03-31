@@ -414,7 +414,7 @@ private:
     {
     public:
         RootDisplayListener(
-            /* [in] */ ViewRootImpl* host);
+            /* [in] */ IWeakReference* host);
 
         CAR_INTERFACE_DECL()
 
@@ -432,7 +432,7 @@ private:
             /* [in] */ Int32 displayState);
 
     private:
-        ViewRootImpl* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class LayoutRunnable
@@ -904,11 +904,11 @@ private:
     {
     public:
         PropertiesRunnable(
-            /* [in] */ ViewRootImpl* host);
+            /* [in] */ IWeakReference* host);
 
         CARAPI Run();
     private:
-        ViewRootImpl* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class SyntheticInputStage
@@ -979,11 +979,11 @@ public:
     {
     public:
         ConsumeBatchedInputImmediatelyRunnable(
-            /* [in] */ ViewRootImpl* host);
+            /* [in] */ IWeakReference* host);
 
         CARAPI Run();
     private:
-        ViewRootImpl* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class HighContrastTextManager
