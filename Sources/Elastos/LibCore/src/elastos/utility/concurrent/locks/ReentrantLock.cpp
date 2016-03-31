@@ -3,8 +3,6 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "ReentrantLock.h"
 #include "Thread.h"
-//#include <elastos/utility/logging/Slogger.h>
-//using Elastos::Utility::Logging::Slogger;
 
 using Elastos::Core::Thread;
 using Elastos::IO::EIID_ISerializable;

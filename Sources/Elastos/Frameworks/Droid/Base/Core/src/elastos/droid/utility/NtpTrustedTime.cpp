@@ -83,7 +83,7 @@ ECode NtpTrustedTime::GetInstance(
         Settings::Global::GetInt64(
                 resolver, ISettingsGlobal::NTP_TIMEOUT, defaultTimeout, &timeout);
 
-        String server = secureServer != NULL ? secureServer : defaultServer;
+        String server = !secureServer.IsNull() ? secureServer : defaultServer;
         sSingleton = new NtpTrustedTime(server, timeout);
     }
     *instance = (INtpTrustedTime*)sSingleton.Get();

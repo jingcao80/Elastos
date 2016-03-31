@@ -93,7 +93,8 @@ ECode DataConnectionStats::StartMonitoring()
                 | IPhoneStateListener::LISTEN_SIGNAL_STRENGTHS
                 | IPhoneStateListener::LISTEN_DATA_CONNECTION_STATE
                 | IPhoneStateListener::LISTEN_DATA_ACTIVITY);
-    } else {
+    }
+    else {
         Logger::E(TAG, "TELEPHONY_SERVICE is not ok");
         return E_NOT_IMPLEMENTED;
     }

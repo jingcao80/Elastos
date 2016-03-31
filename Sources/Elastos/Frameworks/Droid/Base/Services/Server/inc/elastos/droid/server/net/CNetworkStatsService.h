@@ -500,6 +500,7 @@ public:
         VALIDATE_NOT_NULL(info)
         return Object::ToString(info);
     }
+
 protected:
     CARAPI_(void) Dump(
         /* [in] */ IFileDescriptor* fd,
