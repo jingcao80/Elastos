@@ -65,7 +65,6 @@ CarClass(CAppOpsService)
     , public IBinder
 {
 private:
-
     class WriteStateTask
         : public AsyncTask
     {
@@ -94,11 +93,23 @@ private:
         CAppOpsService* mHost;
     };
 
+    class ChangedRunner
+        : public Runnable
+    {
+    public:
+        ChangedRunner(
+            /* [in] */ CAppOpsService* host);
+
+        CARAPI Run();
+
+    private:
+        CAppOpsService* mHost;
+    };
+
     class Op
         : public Object
     {
     public:
-
         Op(
             /* [in] */ Int32 uid,
             /* [in] */ const String& packageName,
@@ -114,9 +125,34 @@ private:
         Int64 mTime;
         Int64 mRejectTime;
         Int32 mNesting;
+        Int32 mNoteOpCount;
+        Int32 mStartOpCount;
+        // AutoPtr<IPermissionDialogReqQueue> mDialogReqQueue;
+        AutoPtr<IArrayList> mClientTokens;
 
         Int32 mAllowedCount;
         Int32 mIgnoredCount;
+    };
+
+    class AskRunnable
+        : public Runnable
+    {
+    public:
+        // AskRunnable(
+        //     /* [in] */ Int32 code,
+        //     /* [in] */ Int32 uid,
+        //      [in]  String packageName,
+        //     /* [in] */ Op* op,
+        //     /* [in] */ PermissionDialogReq* request);
+
+        CARAPI Run();
+
+    public:
+        Int32 mCode;
+        Int32 mUid;
+        String mPackageName;
+        AutoPtr<Op> mOp;
+        // AutoPtr<PermissionDialogReq> mRequest;
     };
 
     class Ops
@@ -364,6 +400,13 @@ public:
     CARAPI ToString(
         /* [out] */ String* str);
 
+    CARAPI NotifyOperation(
+        /* [in] */ Int32 code,
+        /* [in] */ Int32 uid,
+        /* [in] */ const String& packageName,
+        /* [in] */ Int32 mode,
+        /* [in] */ Boolean remember);
+
 private:
     AutoPtr<IArrayList> CollectOps( //ArrayList><AppOpsManager.OpEntry>
         /* [in] */ Ops* pkgOps,
@@ -435,6 +478,28 @@ private:
         /* [in] */ Int32 uid,
         /* [in] */ const String& packageName);
 
+    // AutoPtr<PermissionDialogReq> AskOperationLocked(
+    //     /* [in] */ Int32 code,
+    //     /* [in] */ Int32 uid,
+    //     /* [in] */ String packageName,
+    //     /* [in] */ Op* op);
+
+    void PrintOperationLocked(
+        /* [in] */ Op* op,
+        /* [in] */ Int32 mode,
+        /* [in] */ const String& operation);
+
+    void RecordOperationLocked(
+        /* [in] */ Int32 code,
+        /* [in] */ Int32 uid,
+        /* [in] */ const String& packageName,
+        /* [in] */ Int32 mode);
+
+    void BroadcastOpIfNeeded(
+        /* [in] */ Int32 op);
+
+    void ReadPolicy();
+
 private:
     static const String TAG;
     static const Boolean DEBUG;
@@ -450,12 +515,15 @@ private:
     AutoPtr<IContext> mContext;
     AutoPtr<IAtomicFile> mFile;
     AutoPtr<IHandler> mHandler;
+    AutoPtr<ILooper> mLooper;
     Boolean mStrictEnable;
-    // AppOpsPolicy mPolicy;
+    AutoPtr<IAppOpsPolicy> mPolicy;
 
     Boolean mWriteScheduled;
 
     AutoPtr<IRunnable> mWriteRunner;
+
+    AutoPtr<IRunnable> mSuSessionChangedRunner;
 
     AutoPtr<ISparseArray> mUidOps; //SparseArray<HashMap<String, Ops>>
 
@@ -465,6 +533,7 @@ private:
     AutoPtr<IArrayMap> mPackageModeWatchers;//= new ArrayMap<String, ArrayList<Callback>>();
     AutoPtr<IArrayMap> mModeWatchers;// = new ArrayMap<IBinder, Callback>();
     AutoPtr<ISparseArray> mAudioRestrictions;// = new SparseArray<SparseArray<Restriction>>();
+    AutoPtr<ISparseArray> mLoadPrivLaterPkgs;
 
     AutoPtr<IArrayMap> mClients;// = new ArrayMap<IBinder, ClientState>();
 };

@@ -28,6 +28,7 @@ SOURCES += Manifest.cpp
 
 SOURCES += server.cpp
 SOURCES += CSystemServer.cpp
+SOURCES += AppOpsPolicy.cpp
 SOURCES += AlarmManagerService.cpp
 SOURCES += CAppOpsService.cpp
 SOURCES += CAssetAtlasService.cpp

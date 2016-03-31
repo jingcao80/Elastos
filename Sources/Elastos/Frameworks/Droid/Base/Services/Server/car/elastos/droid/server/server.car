@@ -1,6 +1,7 @@
 
 module
 {
+    merge("AppOpsPolicy.car");
     merge("Exceptions.car");
     merge("SystemServer.car");
     merge("SystemService.car");

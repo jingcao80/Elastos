@@ -9,6 +9,7 @@
 #include <elastos/droid/utility/Xml.h>
 #include <elastos/droid/utility/TimeUtils.h>
 #include <elastos/droid/internal/utility/XmlUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
@@ -23,6 +24,14 @@ using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::ILooperHelper;
+using Elastos::Droid::Os::CLooperHelper;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IIPackageManager;
 using Elastos::Droid::Content::Pm::IPackageManager;
@@ -56,6 +65,7 @@ using Elastos::Core::EIID_IBoolean;
 using Elastos::IO::ICloseable;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::IInputStream;
+using Elastos::IO::CFile;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::ICollection;
@@ -63,6 +73,7 @@ using Elastos::Utility::ISet;
 using Elastos::Utility::IMapEntry;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -107,6 +118,64 @@ ECode CAppOpsService::WriteRunner::Run()
 }
 
 //================================================================================
+// CAppOpsService::ChangedRunner
+//================================================================================
+
+CAppOpsService::ChangedRunner::ChangedRunner(
+    /* [in] */ CAppOpsService* host)
+    : mHost(host)
+{}
+
+ECode CAppOpsService::ChangedRunner::Run()
+{
+    AutoPtr<IIntent> p;
+    CIntent::New(IAppOpsManager::ACTION_SU_SESSION_CHANGED, (IIntent**)&p);
+    AutoPtr<IUserHandleHelper> hlp;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&hlp);
+    AutoPtr<IUserHandle> hd;
+    hlp->GetALL((IUserHandle**)&hd);
+    mHost->mContext->SendBroadcastAsUser(p, hd);
+    return NOERROR;
+}
+
+//================================================================================
+// CAppOpsService::AskRunnable
+//================================================================================
+
+// CAppOpsService::AskRunnable::AskRunnable(
+//     /* [in] */ Int32 code,
+//     /* [in] */ Int32 uid,
+//     /* [in] */ String packageName,
+//     /* [in] */ Op* op,
+//     /* [in] */ PermissionDialogReq* request)
+// {
+//     mCode = code;
+//     mUid = uid;
+//     mPackageName = packageName;
+//     mOp = op;
+//     mRequest = request;
+// }
+
+ECode CAppOpsService::AskRunnable::Run()
+{
+    assert(0 && "TODO");
+    // AutoPtr<IPermissionDialog> permDialog;
+    // synchronized (AppOpsService.this) {
+    //     Logger::E(TAG, "Creating dialog box");
+    //     mOp->mDialogReqQueue->Register(request);
+    //     if (mOp->mDialogReqQueue->GetDialog() == NULL) {
+    //         permDialog = new PermissionDialog(mContext,
+    //                 AppOpsService.this, code, uid, packageName);
+    //         mOp->mDialogReqQueue->SetDialog(permDialog);
+    //     }
+    // }
+    // if (permDialog != NULL) {
+    //     permDialog->Show();
+    // }
+    return NOERROR;
+}
+
+//================================================================================
 // CAppOpsService::Op
 //================================================================================
 CAppOpsService::Op::Op(
@@ -123,6 +192,8 @@ CAppOpsService::Op::Op(
     , mRejectTime(0)
     , mNesting(0)
 {
+    // mDialogReqQueue = new PermissionDialogReqQueue();
+    CArrayList::New((IArrayList**)&mClientTokens);
 }
 
 //================================================================================
@@ -250,6 +321,18 @@ ECode CAppOpsService::ClientState::ProxyDied()
         }
         mHost->mClients->Remove(mAppToken.Get());
     }
+
+    // We cannot broadcast on the synchronized block above because the broadcast might
+    // trigger another appop call that eventually arrives here from a different thread,
+    // causing a deadlock.
+    Int32 size = 0;
+    mStartedOps->GetSize(&size);
+    for (Int32 i = size - 1; i >= 0; i--) {
+        AutoPtr<IInterface> p;
+        mStartedOps->Get(i, (IInterface**)&p);
+        Op* pOp = (Op*)IObject::Probe(p);
+        mHost->BroadcastOpIfNeeded(pOp->mOp);
+    }
     return NOERROR;
 }
 
@@ -311,6 +394,8 @@ ECode CAppOpsService::constructor(
 {
     mWriteRunner = new WriteRunner(this);
 
+    mSuSessionChangedRunner = new ChangedRunner(this);
+
     CSparseArray::New((ISparseArray**)&mUidOps);
     CSparseArray::New((ISparseArray**)&mOpRestrictions);
     CSparseArray::New((ISparseArray**)&mOpModeWatchers);
@@ -326,6 +411,12 @@ ECode CAppOpsService::constructor(
     }
 
     mHandler = handler;
+    AutoPtr<ILooperHelper> hlp;
+    CLooperHelper::AcquireSingleton((ILooperHelper**)&hlp);
+    hlp->GetMyLooper((ILooper**)&mLooper);
+    AutoPtr<IAppOpsManagerHelper> mhlp;
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&mhlp);
+    mhlp->IsStrictEnable(&mStrictEnable);
     ReadState();
     return NOERROR;
 }
@@ -335,7 +426,7 @@ ECode CAppOpsService::Publish(
 {
     mContext = context;
     Slogger::W(TAG, " >> TODO Publish ReadPolicy()");
-    //ReadPolicy();
+    ReadPolicy();
     return ServiceManager::AddService(IContext::APP_OPS_SERVICE, (IBinder*)this);
 }
 
@@ -380,6 +471,66 @@ ECode CAppOpsService::SystemReady()
             if (pkgsSize <= 0) {
                 mUidOps->RemoveAt(i);
             }
+        }
+
+        AutoPtr<IActivityThreadHelper> hlp;
+        CActivityThreadHelper::AcquireSingleton((IActivityThreadHelper**)&hlp);
+        AutoPtr<IIPackageManager> packageManager;
+        hlp->GetPackageManager((IIPackageManager**)&packageManager);
+        if (mLoadPrivLaterPkgs != NULL && packageManager != NULL) {
+            Int32 size = 0;
+            mLoadPrivLaterPkgs->GetSize(&size);
+            for (Int32 i = size - 1; i >= 0; i--) {
+                Int32 uid = 0;
+                mLoadPrivLaterPkgs->KeyAt(i, &uid);
+                AutoPtr<IInterface> pPkg;
+                mLoadPrivLaterPkgs->ValueAt(i, (IInterface**)&pPkg);
+                String pkg;
+                ICharSequence::Probe(pPkg)->ToString(&pkg);
+                AutoPtr<IInterface> pUid;
+                mUidOps->Get(uid, (IInterface**)&pUid);
+                AutoPtr<IHashMap> pkgs = IHashMap::Probe(pUid);
+                if (pkgs == NULL) {
+                    continue;
+                }
+                AutoPtr<IInterface> pOps;
+                pkgs->Get(pPkg, (IInterface**)&pOps);
+                AutoPtr<Ops> ops = (Ops*)IObject::Probe(pOps);
+                if (ops == NULL) {
+                    continue;
+                }
+                // try {
+                AutoPtr<IUserHandleHelper> uhlp;
+                CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhlp);
+                Int32 id = 0;
+                uhlp->GetUserId(uid, &id);
+                AutoPtr<IApplicationInfo> appInfo;
+                packageManager->GetApplicationInfo(
+                        pkg, 0, id, (IApplicationInfo**)&appInfo);
+                Int32 flags = 0;
+                appInfo->GetFlags(&flags);
+                if (appInfo != NULL
+                        && (flags & IApplicationInfo::FLAG_PRIVILEGED) != 0) {
+                    Slogger::I(TAG, "Privileged package %s", (const char*)pkg);
+                    AutoPtr<Ops> newOps = new Ops();
+                    newOps->constructor(pkg, uid, TRUE);
+                    Int32 s = 0;
+                    ops->GetSize(&s);
+                    for (Int32 j = 0; j < s; j++) {
+                        Int32 key = 0;
+                        ops->KeyAt(j, &key);
+                        AutoPtr<IInterface> val;
+                        ops->ValueAt(j, (IInterface**)&val);
+                        newOps->Put(key, val);
+                    }
+                    pkgs->Put(CoreUtils::Convert(pkg), ISparseArray::Probe(newOps));
+                    changed = TRUE;
+                }
+                // } catch (RemoteException e) {
+                //     Slog.w(TAG, "Could not contact PackageManager", e);
+                // }
+            }
+            mLoadPrivLaterPkgs = NULL;
         }
         if (changed) {
             ScheduleWriteLocked();
@@ -1072,6 +1223,7 @@ ECode CAppOpsService::NoteOperation(
     VALIDATE_NOT_NULL(mode)
     *mode = IAppOpsManager::MODE_ERRORED;
 
+    // AutoPtr<IPermissionDialogReq> req;
     FAIL_RETURN(VerifyIncomingUid(uid))
     FAIL_RETURN(VerifyIncomingOp(code))
 
@@ -1089,6 +1241,7 @@ ECode CAppOpsService::NoteOperation(
 
         AutoPtr<Op> op = GetOpLocked(ops, code, TRUE);
         if (IsOpRestricted(uid, code, packageName)) {
+            op->mIgnoredCount++;
             *mode = IAppOpsManager::MODE_IGNORED;
             return NOERROR;
         }
@@ -1100,28 +1253,54 @@ ECode CAppOpsService::NoteOperation(
         AutoPtr<ISystem> system;
         CSystem::AcquireSingleton((ISystem**)&system);
         op->mDuration = 0;
-        Int32 switchCode;
+        Int32 switchCode = 0;
         aom->OpToSwitch(code, &switchCode);
         AutoPtr<Op> switchOp = switchCode != code ? GetOpLocked(ops, switchCode, TRUE) : op;
-        if (switchOp->mMode != IAppOpsManager::MODE_ALLOWED) {
+        if (switchOp->mMode != IAppOpsManager::MODE_ALLOWED
+            && switchOp->mMode != IAppOpsManager::MODE_ASK) {
             if (DEBUG) {
                 Slogger::D(TAG, "noteOperation: reject #%d for code %d (%d) uid %d package %s",
                     op->mMode, switchCode, code, uid, packageName.string());
             }
 
-            system->GetCurrentTimeMillis(&op->mRejectTime);
+            system->GetCurrentTimeMillis(&(op->mRejectTime));
+            op->mIgnoredCount++;
             *mode = switchOp->mMode;
             return NOERROR;
         }
-        if (DEBUG) {
-            Slogger::D(TAG, "noteOperation: allowing code %d uid %d package %s",
-                code, uid, packageName.string());
+        else if (switchOp->mMode == IAppOpsManager::MODE_ALLOWED) {
+            if (DEBUG) {
+                Logger::D(TAG, "noteOperation: allowing code %d uid %d package %s",
+                        code, uid, (const char*)packageName);
+            }
+            system->GetCurrentTimeMillis(&(op->mTime));
+            op->mRejectTime = 0;
+            op->mAllowedCount++;
+            BroadcastOpIfNeeded(code);
+            *mode = IAppOpsManager::MODE_ALLOWED;
+            return NOERROR;
         }
-        system->GetCurrentTimeMillis(&op->mTime);
-        op->mRejectTime = 0;
-        *mode = IAppOpsManager::MODE_ALLOWED;
-        return NOERROR;
+        else {
+            AutoPtr<ILooperHelper> hlp;
+            CLooperHelper::AcquireSingleton((ILooperHelper**)&hlp);
+            AutoPtr<ILooper> lp;
+            hlp->GetMyLooper((ILooper**)&lp);
+            if (lp == mLooper) {
+                Logger::E(TAG,
+                    "noteOperation: This method will deadlock if called from the main thread. (Code: %d uid: %d package: %s)",
+                    code, uid, (const char*)packageName);
+                *mode = switchOp->mMode;
+                return NOERROR;
+            }
+            op->mNoteOpCount++;
+            // req = AskOperationLocked(code, uid, packageName, switchOp);
+        }
     }
+
+    assert(0 && "TODO");
+    Int32 result = 0;// req.get();
+    BroadcastOpIfNeeded(code);
+    *mode = result;
     return NOERROR;
 }
 
@@ -1136,6 +1315,7 @@ ECode CAppOpsService::StartOperation(
     VALIDATE_NOT_NULL(mode)
     *mode = IAppOpsManager::MODE_ERRORED;
 
+    //AutoPtr<PermissionDialogReq> req;
     FAIL_RETURN(VerifyIncomingUid(uid))
     FAIL_RETURN(VerifyIncomingOp(code))
 
@@ -1158,13 +1338,15 @@ ECode CAppOpsService::StartOperation(
 
         AutoPtr<Op> op = GetOpLocked(ops, code, TRUE);
         if (IsOpRestricted(uid, code, packageName)) {
+            op->mIgnoredCount++;
             *mode = IAppOpsManager::MODE_IGNORED;
             return NOERROR;
         }
         Int32 switchCode;
         aom->OpToSwitch(code, &switchCode);
         AutoPtr<Op> switchOp = switchCode != code ? GetOpLocked(ops, switchCode, TRUE) : op;
-        if (switchOp->mMode != IAppOpsManager::MODE_ALLOWED) {
+        if (switchOp->mMode != IAppOpsManager::MODE_ALLOWED
+            && switchOp->mMode != IAppOpsManager::MODE_ASK) {
             if (DEBUG) {
                 Slogger::D(TAG, "startOperation: reject #%d for code %d (%d) uid %d package %s",
                     op->mMode, switchCode, code, uid, packageName.string());
@@ -1173,21 +1355,46 @@ ECode CAppOpsService::StartOperation(
             *mode = switchOp->mMode;
             return NOERROR;
         }
-        if (DEBUG) {
-            Slogger::D(TAG, "startOperation: allowing code %d, uid %d package %d",
-                code, uid, packageName.string());
+        else if (switchOp->mMode == IAppOpsManager::MODE_ALLOWED) {
+            if (DEBUG) {
+                Logger::D(TAG, "startOperation: allowing code %d uid %d package %s",
+                        code, uid, (const char*)packageName);
+            }
+            if (op->mNesting == 0) {
+                system->GetCurrentTimeMillis(&op->mTime);
+                op->mRejectTime = 0;
+                op->mDuration = -1;
+                op->mAllowedCount++;
+            }
+            op->mNesting++;
+            if (client->mStartedOps != NULL) {
+                client->mStartedOps->Add(ISynchronize::Probe(op));
+            }
+            BroadcastOpIfNeeded(code);
+            *mode = IAppOpsManager::MODE_ALLOWED;
+            return NOERROR;
         }
-        if (op->mNesting == 0) {
-            system->GetCurrentTimeMillis(&op->mTime);
-            op->mRejectTime = 0;
-            op->mDuration = -1;
+        else {
+            AutoPtr<ILooperHelper> hlp;
+            CLooperHelper::AcquireSingleton((ILooperHelper**)&hlp);
+            AutoPtr<ILooper> lp;
+            hlp->GetMyLooper((ILooper**)&lp);
+            if (lp == mLooper) {
+                Logger::E(TAG,
+                    "startOperation: This method will deadlock if called from the main thread. (Code: %d uid: %d package: %s)",
+                    code, uid, (const char*)packageName);
+                *mode = switchOp->mMode;
+                return NOERROR;
+            }
+            op->mStartOpCount++;
+            AutoPtr<IBinder> clientToken = client->mAppToken;
+            op->mClientTokens->Add(clientToken);
+            // req = AskOperationLocked(code, uid, packageName, switchOp);
         }
-        op->mNesting++;
-        if (client->mStartedOps != NULL) {
-            client->mStartedOps->Add(TO_IINTERFACE(op));
-        }
-        *mode = IAppOpsManager::MODE_ALLOWED;
     }
+    Int32 result;// = req.get();
+    BroadcastOpIfNeeded(code);
+    *mode = result;
     return NOERROR;
 }
 
@@ -1217,6 +1424,7 @@ ECode CAppOpsService::FinishOperation(
         }
         FinishOperationLocked(op);
     }
+    BroadcastOpIfNeeded(code);
     return NOERROR;
 }
 
@@ -1246,6 +1454,10 @@ void CAppOpsService::FinishOperationLocked(
 ECode CAppOpsService::VerifyIncomingUid(
     /* [in] */ Int32 uid)
 {
+    if (Binder::GetCallingUid() == 0) {
+        // Allow root to delegate uid operations.
+        return NOERROR;
+    }
     if (uid == Binder::GetCallingUid()) {
         return NOERROR;
     }
@@ -1279,6 +1491,11 @@ AutoPtr<CAppOpsService::Ops> CAppOpsService::GetOpsLocked(
     }
     else if (uid ==IProcess::SHELL_UID) {
         pkg = "com.android.shell";
+    }
+    else if (uid == IProcess::SYSTEM_UID) {
+        if (packageName.IsNull()) {
+            pkg = "android";
+        }
     }
     return GetOpsRawLocked(uid, pkg, edit);
 }
@@ -1394,7 +1611,7 @@ AutoPtr<CAppOpsService::Op> CAppOpsService::GetOpLocked(
     /* [in] */ Int32 code,
     /* [in] */ Boolean edit)
 {
-    Int32 mode;
+    Int32 mode = 0;
     AutoPtr<IInterface> obj;
     ops->Get(code, (IInterface**)&obj);
     AutoPtr<Op> op = (Op*)IObject::Probe(obj);
@@ -1579,26 +1796,10 @@ ECode CAppOpsService::ReadUid(
     parser->GetAttributeValue(String(NULL), String("p"), &isPrivilegedString);
     Boolean isPrivileged = FALSE;
     if (isPrivilegedString == NULL) {
-        AutoPtr<IActivityThreadHelper> ath;
-        CActivityThreadHelper::AcquireSingleton((IActivityThreadHelper**)&ath);
-        AutoPtr<IIPackageManager> packageManager;
-        ECode ec = ath->GetPackageManager((IIPackageManager**)&packageManager);
-        if (ec == (ECode)E_REMOTE_EXCEPTION) {
-            Slogger::W(TAG, "Could not contact PackageManager");
+        if (mLoadPrivLaterPkgs == NULL) {
+            CSparseArray::New((ISparseArray**)&mLoadPrivLaterPkgs);
         }
-
-        if (packageManager != NULL) {
-            AutoPtr<IApplicationInfo> appInfo;
-            packageManager->GetApplicationInfo(pkgName, 0, UserHandle::GetUserId(uid), (IApplicationInfo**)&appInfo);
-            if (appInfo != NULL) {
-                Int32 flags;
-                appInfo->GetFlags(&flags);
-                isPrivileged = (flags & IApplicationInfo::FLAG_PRIVILEGED) != 0;
-            }
-        } else {
-            // Could not load data, don't add to cache so it will be loaded later.
-            return NOERROR;
-        }
+        mLoadPrivLaterPkgs->Put(uid, CoreUtils::Convert(pkgName));
     }
     else {
         isPrivileged = StringUtils::ParseBoolean(isPrivilegedString);
@@ -1606,7 +1807,7 @@ ECode CAppOpsService::ReadUid(
 
     AutoPtr<ICharSequence> csq = CoreUtils::Convert(pkgName);
     IInterface* pkgNameObj = (IInterface*)csq.Get();
-    Int32 outerDepth, depth, mode;
+    Int32 outerDepth, depth;
     parser->GetDepth(&outerDepth);
     Int32 type;
     String nullStr;
@@ -1620,24 +1821,63 @@ ECode CAppOpsService::ReadUid(
         parser->GetName(&tagName);
         if (tagName.Equals("op")) {
             parser->GetAttributeValue(nullStr, String("n"), &str);
-            AutoPtr<Op> op = new Op(uid, pkgName, StringUtils::ParseInt32(str),
+            Int32 code = StringUtils::ParseInt32(str);
+            // use op name string if it exists
+            String codeNameStr;
+            parser->GetAttributeValue(nullStr, String("ns"), &codeNameStr);
+            if (!codeNameStr.IsNull()) {
+                // returns OP_NONE if it could not be mapped
+                AutoPtr<IAppOpsManagerHelper> aom;
+                CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+                aom->NameToOp(codeNameStr, &code);
+            }
+            // skip op codes that are out of bounds
+            if (code == IAppOpsManager::OP_NONE
+                || code >= IAppOpsManager::_NUM_OP) {
+                continue;
+            }
+            AutoPtr<Op> op = new Op(uid, pkgName, code,
                     IAppOpsManager::MODE_ERRORED);
 
-            parser->GetAttributeValue(nullStr, String("m"), &str);
-            if (str != NULL) {
-                op->mMode = StringUtils::ParseInt32(str);
+            String mode;
+            parser->GetAttributeValue(nullStr, String("m"), &mode);
+            if (!mode.IsNull()) {
+                op->mMode = StringUtils::ParseInt32(mode);
             }
+            else {
+                String sDefualtMode;
+                parser->GetAttributeValue(nullStr, String("dm"), &sDefualtMode);
+                Int32 defaultMode = 0;
+                if (!sDefualtMode.IsNull()) {
+                    defaultMode = StringUtils::ParseInt32(sDefualtMode);
+                }
+                else {
+                    defaultMode = GetDefaultMode(code, uid, pkgName);
+                }
+                op->mMode = defaultMode;
+            }
+
             parser->GetAttributeValue(nullStr, String("t"), &str);
-            if (str != NULL) {
+            if (!str.IsNull()) {
                 op->mTime = StringUtils::ParseInt64(str);
             }
             parser->GetAttributeValue(nullStr, String("r"), &str);
-            if (str != NULL) {
+            if (!str.IsNull()) {
                 op->mRejectTime = StringUtils::ParseInt64(str);
             }
             parser->GetAttributeValue(nullStr, String("d"), &str);
-            if (str != NULL) {
+            if (!str.IsNull()) {
                 op->mDuration = StringUtils::ParseInt32(str);
+            }
+            String allowed;
+            parser->GetAttributeValue(nullStr, String("ac"), &allowed);
+            if (!allowed.IsNull()) {
+                op->mAllowedCount = StringUtils::ParseInt32(allowed);
+            }
+            String ignored;
+            parser->GetAttributeValue(nullStr, String("ic"), &ignored);
+            if (!ignored.IsNull()) {
+                op->mIgnoredCount = StringUtils::ParseInt32(ignored);
             }
 
             AutoPtr<IInterface> obj;
@@ -1687,7 +1927,7 @@ ECode CAppOpsService::WriteState()
 
         String lastPkg, pkgName;
         Int64 time;
-        Int32 size, opsSize, uid, dur, ival, mode, defaultMode;
+        Int32 size, opsSize, uid, dur, ival, mode, defaultMode, allowed, ignored;
         AutoPtr<IInterface> obj;
         AutoPtr<IAppOpsManagerPackageOps> pkg;
         AutoPtr<IList> ops;
@@ -1743,9 +1983,15 @@ ECode CAppOpsService::WriteState()
                     op->GetOp(&ival);
                     defaultMode = GetDefaultMode(ival, uid, pkgName);
                     out->WriteAttribute(nullStr, String("n"), StringUtils::ToString(ival));
+                    String name;
+                    aom->OpToName(ival, &name);
+                    out->WriteAttribute(nullStr, String("ns"), name);
                     op->GetMode(&mode);
                     if (mode != defaultMode) {
                         out->WriteAttribute(nullStr, String("m"), StringUtils::ToString(mode));
+                    }
+                    else {
+                        out->WriteAttribute(nullStr, String("dm"), StringUtils::ToString(defaultMode));
                     }
 
                     op->GetTime(&time);
@@ -1761,6 +2007,16 @@ ECode CAppOpsService::WriteState()
                     if (dur != 0) {
                         out->WriteAttribute(nullStr, String("d"), StringUtils::ToString(dur));
                     }
+
+                    op->GetAllowedCount(&allowed);
+                    if (allowed != 0) {
+                        out->WriteAttribute(nullStr, String("ac"), StringUtils::ToString(allowed));
+                    }
+                    op->GetIgnoredCount(&ignored);
+                    if (ignored != 0) {
+                        out->WriteAttribute(nullStr, String("ic"), StringUtils::ToString(ignored));
+                    }
+
                     FAIL_GOTO(out->WriteEndTag(nullStr, String("op")), _ERROR_)
                 }
                 FAIL_GOTO(out->WriteEndTag(nullStr, String("uid")), _ERROR_)
@@ -2112,6 +2368,188 @@ Int32 CAppOpsService::GetDefaultMode(
     return mode;
 }
 
+// private PermissionDialogReq askOperationLocked(int code, int uid,
+//         String packageName, Op op)
+// {
+//     PermissionDialogReq request = new PermissionDialogReq();
+//     mHandler.post(new AskRunnable(code, uid, packageName, op, request));
+//     return request;
+// }
+
+void CAppOpsService::PrintOperationLocked(
+    /* [in] */ Op* op,
+    /* [in] */ Int32 mode,
+    /* [in] */ const String& operation)
+{
+    if(op != NULL) {
+        AutoPtr<IAppOpsManagerHelper> helper;
+        CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&helper);
+        Int32 switchCode = 0;
+        helper->OpToSwitch(op->mOp, &switchCode);
+        if (mode == IAppOpsManager::MODE_IGNORED) {
+            if (DEBUG) {
+                Logger::D(TAG, "%s: reject #%d for code %d (%d) uid %d package %s",
+                        (const char*)operation, mode, switchCode, op->mOp,
+                        op->mUid, (const char*)op->mPackageName);
+            }
+        }
+        else if (mode == IAppOpsManager::MODE_ALLOWED) {
+            if (DEBUG) {
+                Logger::D(TAG, "%s: allowing code %d uid %d package %s",
+                        (const char*)operation, op->mOp, op->mUid, (const char*)op->mPackageName);
+            }
+        }
+    }
+}
+
+void CAppOpsService::RecordOperationLocked(
+    /* [in] */ Int32 code,
+    /* [in] */ Int32 uid,
+    /* [in] */ const String& packageName,
+    /* [in] */ Int32 mode)
+{
+    AutoPtr<ISystem> sys;
+    CSystem::AcquireSingleton((ISystem**)&sys);
+    AutoPtr<Op> op = GetOpLocked(code, uid, packageName, FALSE);
+    if(op != NULL) {
+        if(op->mNoteOpCount != 0) {
+            PrintOperationLocked(op, mode, String("noteOperartion"));
+        }
+        if(op->mStartOpCount != 0) {
+            PrintOperationLocked(op, mode, String("startOperation"));
+        }
+        if (mode == IAppOpsManager::MODE_IGNORED) {
+            sys->GetCurrentTimeMillis(&(op->mRejectTime));
+        }
+        else if (mode == IAppOpsManager::MODE_ALLOWED) {
+            if(op->mNoteOpCount != 0) {
+                sys->GetCurrentTimeMillis(&(op->mTime));
+                op->mRejectTime = 0;
+            }
+            if(op->mStartOpCount != 0) {
+                if(op->mNesting == 0) {
+                    sys->GetCurrentTimeMillis(&(op->mTime));
+                    op->mRejectTime = 0;
+                    op->mDuration = -1;
+                }
+                op->mNesting = op->mNesting + op->mStartOpCount;
+                Int32 tokSize = 0;
+                op->mClientTokens->GetSize(&tokSize);
+                while(tokSize != 0) {
+                    AutoPtr<IInterface> clientToken;
+                    op->mClientTokens->Get(0, (IInterface**)&clientToken);
+                    // AutoPtr<IBinder> _clientToken = IBinder::Probe(clientToken);
+                    AutoPtr<IInterface> pC;
+                    mClients->Get(clientToken, (IInterface**)&pC);
+                    AutoPtr<ClientState> client = (ClientState*)IProxyDeathRecipient::Probe(pC);
+                    if (client != NULL) {
+                        if (client->mStartedOps != NULL) {
+                            client->mStartedOps->Add(ISynchronize::Probe(op));
+                        }
+                    }
+                    op->mClientTokens->Remove(0);
+                }
+            }
+        }
+        op->mClientTokens->Clear();
+        op->mStartOpCount = 0;
+        op->mNoteOpCount = 0;
+    }
+}
+
+ECode CAppOpsService::NotifyOperation(
+    /* [in] */ Int32 code,
+    /* [in] */ Int32 uid,
+    /* [in] */ const String& packageName,
+    /* [in] */ Int32 mode,
+    /* [in] */ Boolean remember)
+{
+    FAIL_RETURN(VerifyIncomingUid(uid));
+    FAIL_RETURN(VerifyIncomingOp(code));
+    AutoPtr<IAppOpsManagerHelper> helper;
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&helper);
+    AutoPtr<IArrayList> repCbs;
+    Int32 switchCode = 0;
+    helper->OpToSwitch(code, &switchCode);
+    synchronized (this) {
+        RecordOperationLocked(code, uid, packageName, mode);
+        AutoPtr<Op> op = GetOpLocked(switchCode, uid, packageName, TRUE);
+        if (op != NULL) {
+            // Send result to all waiting client
+            assert(0 && "TODO");
+            // if (op->mDialogReqQueue->GetDialog() != NULL) {
+            //     op->mDialogReqQueue->NotifyAll(mode);
+            //     op->mDialogReqQueue->SetDialog(NULL);
+            // }
+            if (remember && op->mMode != mode) {
+                op->mMode = mode;
+                AutoPtr<IInterface> pCbs;
+                mOpModeWatchers->Get(switchCode, (IInterface**)&pCbs);
+                AutoPtr<IArrayList> cbs = IArrayList::Probe(pCbs);
+                if (cbs != NULL) {
+                    if (repCbs == NULL) {
+                        CArrayList::New((IArrayList**)&repCbs);
+                    }
+                    repCbs->AddAll(ICollection::Probe(cbs));
+                }
+                pCbs = NULL;
+                mPackageModeWatchers->Get(CoreUtils::Convert(packageName), (IInterface**)&pCbs);
+                cbs = IArrayList::Probe(pCbs);
+                if (cbs != NULL) {
+                    if (repCbs == NULL) {
+                        CArrayList::New((IArrayList**)&repCbs);
+                    }
+                    repCbs->AddAll(ICollection::Probe(cbs));
+                }
+                if (mode == GetDefaultMode(op->mOp, op->mUid, op->mPackageName)) {
+                    // If going into the default mode, prune this op
+                    // if there is nothing else interesting in it.
+                    PruneOp(op, uid, packageName);
+                }
+                ScheduleWriteNowLocked();
+            }
+        }
+    }
+    if (repCbs != NULL) {
+        Int32 s = 0;
+        repCbs->GetSize(&s);
+        for (Int32 i = 0; i < s; i++) {
+            AutoPtr<IInterface> p;
+            repCbs->Get(i, (IInterface**)&p);
+            AutoPtr<Callback> pCB = (Callback*)IProxyDeathRecipient::Probe(p);
+            pCB->mCallback->OpChanged(switchCode, packageName);
+        }
+    }
+    return NOERROR;
+}
+
+void CAppOpsService::BroadcastOpIfNeeded(
+    /* [in] */ Int32 op)
+{
+    Boolean b = FALSE;
+    switch (op) {
+        case IAppOpsManager::OP_SU:
+            mHandler->Post(mSuSessionChangedRunner, &b);
+            break;
+        default:
+            break;
+    }
+}
+
+void CAppOpsService::ReadPolicy()
+{
+    if (mStrictEnable) {
+        AutoPtr<IFile> f;
+        CFile::New(DEFAULT_POLICY_FILE, (IFile**)&f);
+        assert(0 && "TODO");
+        // CAppOpsPolicy::New(f, mContext, (IAppOpsPolicy**)&mPolicy);
+        mPolicy->ReadPolicy();
+        mPolicy->DebugPoilcy();
+    }
+    else {
+        mPolicy = NULL;
+    }
+}
 
 } // Server
 } // Droid
