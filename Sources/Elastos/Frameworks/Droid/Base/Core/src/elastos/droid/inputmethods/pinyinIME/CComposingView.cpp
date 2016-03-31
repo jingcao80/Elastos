@@ -137,10 +137,7 @@ void CComposingView::DrawForPinyin(
 PInterface CComposingView::Probe(
     /* [in] */ REIID riid)
 {
-    if (riid == Elastos::Droid::View::EIID_View) {
-        return reinterpret_cast<PInterface>(this);
-    }
-    else if (riid == EIID_IComposingView) {
+    if (riid == EIID_IComposingView) {
         return (IInterface*)this;
     }
 

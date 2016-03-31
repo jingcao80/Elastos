@@ -14,9 +14,7 @@
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
-using Elastos::Droid::View::EIID_View;
 using Elastos::Droid::View::EIID_IView;
-using Elastos::Droid::View::EIID_ViewGroup;
 using Elastos::Droid::View::EIID_IViewOnTouchListener;
 using Elastos::Droid::View::CMotionEventHelper;
 using Elastos::Droid::View::IMotionEventHelper;
@@ -558,13 +556,7 @@ Boolean CSkbContainer::OnTouchEvent(
 PInterface CSkbContainer::Probe(
     /* [in] */ REIID riid)
 {
-    if (riid == EIID_View) {
-        return reinterpret_cast<PInterface>(this);
-    }
-    else if (riid == EIID_ViewGroup) {
-        return reinterpret_cast<PInterface>(this);
-    }
-    else if (riid == EIID_ISkbContainer) {
+    if (riid == EIID_ISkbContainer) {
         return (IInterface*)this;
     }
 

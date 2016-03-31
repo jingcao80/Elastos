@@ -529,10 +529,7 @@ ECode CPinyinCandidateView::SetDecodingInfo(
 PInterface CPinyinCandidateView::Probe(
     /* [in] */ REIID riid)
 {
-    if (riid == Elastos::Droid::View::EIID_View) {
-        return reinterpret_cast<PInterface>(this);
-    }
-    else if (riid == EIID_ICandidateView) {
+    if (riid == EIID_ICandidateView) {
         return (IInterface*)this;
     }
 

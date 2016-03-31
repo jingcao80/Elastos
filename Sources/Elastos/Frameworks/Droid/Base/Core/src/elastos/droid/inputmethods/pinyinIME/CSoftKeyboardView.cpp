@@ -489,10 +489,7 @@ void CSoftKeyboardView::DrawSoftKey(
 PInterface CSoftKeyboardView::Probe(
     /* [in] */ REIID riid)
 {
-    if (riid == Elastos::Droid::View::EIID_View) {
-        return reinterpret_cast<PInterface>(this);
-    }
-    else if (riid == EIID_ISoftKeyboardView) {
+    if (riid == EIID_ISoftKeyboardView) {
         return (IInterface*)this;
     }
 
