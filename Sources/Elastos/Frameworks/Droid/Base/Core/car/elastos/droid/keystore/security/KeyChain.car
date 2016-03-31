@@ -19,7 +19,7 @@ module
      * @see KeyChain#bind
      *
      * @Involve
-     * interface Elastos.Core.ICloneable
+     * interface Elastos.Core.ICloseable
      */
     interface IKeyChainConnection {
         GetService(

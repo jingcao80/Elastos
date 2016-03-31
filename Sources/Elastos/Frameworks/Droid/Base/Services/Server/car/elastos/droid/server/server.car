@@ -132,7 +132,7 @@ module
     using interface Elastos.Droid.App.IPendingIntentOnFinished;
     using interface Elastos.Droid.App.IAlertDialog;
     using interface Elastos.Droid.App.IDialog;
-    //using interface Elastos.Droid.App.Admin.IIDevicePolicyManager;
+    using interface Elastos.Droid.App.Admin.IIDevicePolicyManager;
     using interface Elastos.Droid.App.Job.IJobService;
     using interface Elastos.Droid.Bluetooth.IIBluetoothManager;
     using interface Elastos.Droid.Bluetooth.IIBluetoothCallback;
@@ -1948,23 +1948,24 @@ module
     } // namepsace Droid
     } // namespace Elastos
 
-    //namespace Elastos {
-    //namespace Droid {
-    //namespace Server {
-    //namespace DevicePolicy {
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace DevicePolicy {
 
-    //class CDevicePolicyManagerService {
-    //     constructor(
-    //         [in] IContext* ctx);
+    [local]
+    class CDevicePolicyManagerService {
+         constructor(
+             [in] IContext* ctx);
 
-    //     interface IIDevicePolicyManager;
-    //     interface IBinder;
-    //}
+         interface IIDevicePolicyManager;
+         interface IBinder;
+    }
 
-    //} // namespace DevicePolicy
-    //} // namespace Server
-    //} // namepsace Droid
-    //} // namespace Elastos
+    } // namespace DevicePolicy
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
 
     namespace Elastos {
     namespace Droid {

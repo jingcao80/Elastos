@@ -284,4 +284,18 @@ module
         interface IX509Name {}
 
     }}}} // Org.Bouncycastle.Asn1.X509
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+    namespace Admin {
+
+        interface IDevicePolicyManagerInternal {}
+
+        interface IDevicePolicyManagerInternalOnCrossProfileWidgetProvidersChangeListener {}
+
+    } // namespace Admin
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
 }

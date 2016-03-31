@@ -222,7 +222,7 @@ module
         GetScreenCaptureDisabled(
             [in] IComponentName* who,
             [in] Int32 userHandle,
-            [out] Int32* result);
+            [out] Boolean* result);
 
         SetKeyguardDisabledFeatures(
             [in] IComponentName* who,
@@ -391,7 +391,8 @@ module
 
         SetPermittedAccessibilityServices(
             [in] IComponentName* admin,
-            [in] IList* packageList);
+            [in] IList* packageList,
+            [out] Boolean* result);
 
         GetPermittedAccessibilityServices(
             [in] IComponentName* admin,

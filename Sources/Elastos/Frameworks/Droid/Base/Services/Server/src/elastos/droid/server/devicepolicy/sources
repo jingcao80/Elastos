@@ -1,0 +1,12 @@
+TARGET_NAME= devicepolicy
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = DeviceOwner.cpp
+SOURCES += CDevicePolicyManagerService.cpp

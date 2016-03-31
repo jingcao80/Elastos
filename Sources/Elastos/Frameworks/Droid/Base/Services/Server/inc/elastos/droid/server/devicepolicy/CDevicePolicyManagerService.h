@@ -1,38 +1,65 @@
 
-#ifndef __ELASTOS_DROID_SERVER_CDEVICEPOLICYMANAGERSERVICE_H__
-#define __ELASTOS_DROID_SERVER_CDEVICEPOLICYMANAGERSERVICE_H__
+#ifndef __ELASTOS_DROID_SERVER_DEVICEPOLICY_CDEVICEPOLICYMANAGERSERVICE_H__
+#define __ELASTOS_DROID_SERVER_DEVICEPOLICY_CDEVICEPOLICYMANAGERSERVICE_H__
 
-#include "_Elastos_Droid_Server_CDevicePolicyManagerService.h"
-#include "elastos/droid/ext/frameworkext.h"
-#include "util/JournaledFile.h"
-#include "elastos/droid/content/BroadcastReceiver.h"
-#include <elastos/utility/etl/List.h>
-#include <elastos/utility/logging/Logger.h>
-#include <elastos/utility/etl/HashMap.h>
+#include "_Elastos_Droid_Server_DevicePolicy_CDevicePolicyManagerService.h"
+#include "elastos/droid/server/SystemService.h"
+#include "elastos/droid/server/devicepolicy/DeviceOwner.h"
+#include <_Elastos.Droid.Core.h>
+#include <elastos/core/Object.h>
+#include <elastos/droid/content/BroadcastReceiver.h>
+#include <elastos/droid/database/ContentObserver.h>
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/droid/os/AsyncTask.h>
 
-using namespace Elastos::Utility::Logging;
-using Org::Xmlpull::V1::IXmlSerializer;
-using Org::Xmlpull::V1::IXmlPullParser;
-using Elastos::IO::IPrintWriter;
-using Elastos::IO::IFileDescriptor;
-using Elastos::Core::IRunnable;
-using Elastos::Core::EIID_IRunnable;
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Droid::Os::IPowerManagerWakeLock;
+// using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::App::Admin::IDeviceAdminInfo;
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
-using Elastos::Droid::View::IIWindowManager;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::App::Admin::IDevicePolicyManagerInternal;
+using Elastos::Droid::App::Admin::IDevicePolicyManagerInternalOnCrossProfileWidgetProvidersChangeListener;
+using Elastos::Droid::App::Admin::IIDevicePolicyManager;
+using Elastos::Droid::App::INotificationManager;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IBroadcastReceiver;
-using Elastos::Droid::Internal::Utility::JournaledFile;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::Pm::IIPackageManager;
+using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Internal::Utility::IJournaledFile;
+using Elastos::Droid::Net::IProxyInfo;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::AsyncTask;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IIPowerManager;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Droid::Os::IRemoteCallback;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Server::SystemService;
+using Elastos::Droid::Utility::ISparseArray;
+using Elastos::Droid::View::Accessibility::IAccessibilityManager;
+using Elastos::Droid::View::IIWindowManager;
+using Elastos::Core::IRunnable;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
+using Elastos::Security::Cert::IX509Certificate;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IList;
+using Elastos::Utility::ISet;
+using Org::Xmlpull::V1::IXmlPullParser;
+using Org::Xmlpull::V1::IXmlSerializer;
+using namespace Elastos::Utility::Logging;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
+namespace DevicePolicy {
 
 /**
  *Public interface for managing policies enforced on a device. Most clients of this
@@ -47,6 +74,8 @@ namespace Server {
  * @sa Administration
  */
 CarClass(CDevicePolicyManagerService)
+    , public Object
+    , public IBinder
     , public IIDevicePolicyManager
 {
 public:
@@ -64,13 +93,8 @@ public:
             /* [in] */ IIntent* intent);
 
         CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CDevicePolicyManagerService::RemoveWarningReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+            /* [out] */ String* info);
+
     private:
         AutoPtr<IRemoteCallback> mResult;
     };
@@ -89,13 +113,8 @@ public:
             /* [in] */ IIntent* intent);
 
         CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CDevicePolicyManagerService::ActiveAdminLockedReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+            /* [out] */ String* info);
+
     private:
         CDevicePolicyManagerService* mHost;
         AutoPtr<ActiveAdmin> mAdmin;
@@ -114,28 +133,22 @@ public:
             /* [in] */ IIntent* intent);
 
         CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CDevicePolicyManagerService::DevicePolicyReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
+            /* [out] */ String* info);
 
     private:
         CDevicePolicyManagerService* mHost;
     };
 
     class DevicePolicyReceiverRunnable
-        : public ElRefBase
+        : public Object
         , public IRunnable
     {
     public:
+        CAR_INTERFACE_DECL()
+
         DevicePolicyReceiverRunnable(
             /* [in] */ CDevicePolicyManagerService* host,
             /* [in] */ Int32 userHandle);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI Run();
 
@@ -145,15 +158,15 @@ public:
     };
 
     class DeviceOrUserLockedRunnable
-        : public ElRefBase
+        : public Object
         , public IRunnable
     {
     public:
+        CAR_INTERFACE_DECL()
+
         DeviceOrUserLockedRunnable(
             /* [in] */ CDevicePolicyManagerService* host,
             /* [in] */ Int32 userHandle);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI Run();
 
@@ -163,24 +176,11 @@ public:
     };
 
     class DevicePolicyData
-        : public ElRefBase
+        : public Object
     {
     public:
         DevicePolicyData(
-            /* [in] */ Int32 userHandle)
-            : mActivePasswordQuality(IDevicePolicyManager::PASSWORD_QUALITY_UNSPECIFIED)
-            , mActivePasswordLength(0)
-            , mActivePasswordUpperCase(0)
-            , mActivePasswordLowerCase(0)
-            , mActivePasswordLetters(0)
-            , mActivePasswordNumeric(0)
-            , mActivePasswordSymbols(0)
-            , mActivePasswordNonLetter(0)
-            , mFailedPasswordAttempts(0)
-            , mUserHandle(userHandle)
-            , mPasswordOwner(-1)
-            , mLastMaximumTimeToLock(-1)
-        {}
+            /* [in] */ Int32 userHandle);
 
     public:
         Int32 mActivePasswordQuality;
@@ -196,38 +196,24 @@ public:
         Int32 mUserHandle;;
         Int32 mPasswordOwner;
         Int64 mLastMaximumTimeToLock;
+        Boolean mUserSetupComplete;
 
-        HashMap<AutoPtr<IComponentName>, AutoPtr<ActiveAdmin> > mAdminMap;
-        List<AutoPtr<ActiveAdmin> > mAdminList;
+        AutoPtr<IHashMap> mAdminMap;
+        AutoPtr<IList> mAdminList;
+
+        // This is the list of component allowed to start lock task mode.
+        AutoPtr<IList> mLockTaskPackages;
+
+        AutoPtr<IComponentName> mRestrictionsProvider;
     };
 
     class ActiveAdmin
-        : public ElRefBase
+        : public Object
     {
+        friend class CDevicePolicyManagerService;
     public:
         ActiveAdmin(
-            /* [in] */ IDeviceAdminInfo* info)
-            : mInfo(info)
-            , mPasswordQuality(IDevicePolicyManager::PASSWORD_QUALITY_UNSPECIFIED)
-            , mMinimumPasswordLength(DEF_MINIMUM_PASSWORD_LENGTH)
-            , mPasswordHistoryLength(DEF_PASSWORD_HISTORY_LENGTH)
-            , mMinimumPasswordUpperCase(DEF_MINIMUM_PASSWORD_UPPER_CASE)
-            , mMinimumPasswordLowerCase(DEF_MINIMUM_PASSWORD_LOWER_CASE)
-            , mMinimumPasswordLetters(DEF_MINIMUM_PASSWORD_LETTERS)
-            , mMinimumPasswordNumeric(DEF_MINIMUM_PASSWORD_NUMERIC)
-            , mMinimumPasswordSymbols(DEF_MINIMUM_PASSWORD_SYMBOLS)
-            , mMinimumPasswordNonLetter(DEF_MINIMUM_PASSWORD_NON_LETTER)
-            , mMaximumTimeToUnlock(DEF_MAXIMUM_TIME_TO_UNLOCK)
-            , mMaximumFailedPasswordsForWipe(DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE)
-            , mPasswordExpirationTimeout(DEF_PASSWORD_EXPIRATION_TIMEOUT)
-            , mPasswordExpirationDate(DEF_PASSWORD_EXPIRATION_DATE)
-            , mDisabledKeyguardFeatures(DEF_KEYGUARD_FEATURES_DISABLED)
-            , mEncryptionRequested(FALSE)
-            , mDisableCamera(FALSE)
-            , mSpecifiesGlobalProxy(FALSE)
-            , mGlobalProxySpec(NULL)
-            , mGlobalProxyExclusionList(NULL)
-        {}
+            /* [in] */ IDeviceAdminInfo* info);
 
         CARAPI_(Int32) GetUid();
 
@@ -239,9 +225,40 @@ public:
         CARAPI_(void) ReadFromXml(
             /* [in] */ IXmlPullParser* parser);
 
+        CARAPI WritePackageListToXml(
+            /* [in] */ IXmlSerializer* out,
+            /* [in] */ const String& outerTag,
+            /* [in] */ IList* packageList);
+
         CARAPI_(void) Dump(
             /* [in] */ const String& prefix,
             /* [in] */ IPrintWriter* pw);
+
+    private:
+        CARAPI ReadPackageList(
+            /* [in] */ IXmlPullParser* parser,
+            /* [in] */ const String& tag,
+            /* [out] */ IList** result);
+
+        CARAPI ReadDisableAccountInfo(
+            /* [in] */ IXmlPullParser* parser,
+            /* [in] */ const String& tag,
+            /* [out] */ ISet** result);
+
+        CARAPI GetAllTrustAgentFeatures(
+            /* [in] */ IXmlPullParser* parser,
+            /* [in] */ const String& tag,
+            /* [out] */ IHashMap** result);
+
+        CARAPI GetTrustAgentFeatures(
+            /* [in] */ IXmlPullParser* parser,
+            /* [in] */ const String& tag,
+            /* [out] */ IList** result);
+
+        CARAPI GetCrossProfileWidgetProviders(
+            /* [in] */ IXmlPullParser* parser,
+            /* [in] */ const String& tag,
+            /* [out] */ IList** result);
 
     public:
         AutoPtr<IDeviceAdminInfo> mInfo;
@@ -289,14 +306,164 @@ public:
 
         Boolean mEncryptionRequested;
         Boolean mDisableCamera;
+        Boolean mDisableCallerId;
+        Boolean mDisableScreenCapture; // Can only be set by a device/profile owner.
+        Boolean mRequireAutoTime; // Can only be set by a device owner.
+
+        AutoPtr<ISet> mAccountTypesWithManagementDisabled;
+
+        // The list of permitted accessibility services package namesas set by a profile
+        // or device owner. Null means all accessibility services are allowed, empty means
+        // none except system services are allowed.
+        AutoPtr<IList> mPermittedAccessiblityServices;
+
+        // The list of permitted input methods package names as set by a profile or device owner.
+        // Null means all input methods are allowed, empty means none except system imes are
+        // allowed.
+        AutoPtr<IList> mPermittedInputMethods;
 
         // TODO: review implementation decisions with frameworks team
         Boolean mSpecifiesGlobalProxy;
         String mGlobalProxySpec;
         String mGlobalProxyExclusionList;
+        AutoPtr<IHashMap> mTrustAgentFeatures;
+
+        AutoPtr<IList> mCrossProfileWidgetProviders;
+
+    private:
+        static const String TAG_DISABLE_KEYGUARD_FEATURES;
+        static const String TAG_DISABLE_CAMERA;
+        static const String TAG_DISABLE_CALLER_ID;
+        static const String TAG_DISABLE_SCREEN_CAPTURE;
+        static const String TAG_DISABLE_ACCOUNT_MANAGEMENT;
+        static const String TAG_REQUIRE_AUTO_TIME;
+        static const String TAG_ACCOUNT_TYPE;
+        static const String TAG_PERMITTED_ACCESSIBILITY_SERVICES;
+        static const String TAG_ENCRYPTION_REQUESTED;
+        static const String TAG_MANAGE_TRUST_AGENT_FEATURES;
+        static const String TAG_TRUST_AGENT_FEATURE;
+        static const String TAG_TRUST_AGENT_COMPONENT;
+        static const String TAG_PASSWORD_EXPIRATION_DATE;
+        static const String TAG_PASSWORD_EXPIRATION_TIMEOUT;
+        static const String TAG_GLOBAL_PROXY_EXCLUSION_LIST;
+        static const String TAG_GLOBAL_PROXY_SPEC;
+        static const String TAG_SPECIFIES_GLOBAL_PROXY;
+        static const String TAG_PERMITTED_IMES;
+        static const String TAG_MAX_FAILED_PASSWORD_WIPE;
+        static const String TAG_MAX_TIME_TO_UNLOCK;
+        static const String TAG_MIN_PASSWORD_NONLETTER;
+        static const String TAG_MIN_PASSWORD_SYMBOLS;
+        static const String TAG_MIN_PASSWORD_NUMERIC;
+        static const String TAG_MIN_PASSWORD_LETTERS;
+        static const String TAG_MIN_PASSWORD_LOWERCASE;
+        static const String TAG_MIN_PASSWORD_UPPERCASE;
+        static const String TAG_PASSWORD_HISTORY_LENGTH;
+        static const String TAG_MIN_PASSWORD_LENGTH;
+        static const String ATTR_VALUE;
+        static const String TAG_PASSWORD_QUALITY;
+        static const String TAG_POLICIES;
+        static const String TAG_CROSS_PROFILE_WIDGET_PROVIDERS;
+        static const String TAG_PROVIDER;
+        static const String TAG_PACKAGE_LIST_ITEM;
+    };
+
+    class Lifecycle
+        : public SystemService
+    {
+    public:
+        CARAPI constructor(
+            /* [in] */ IContext* context);
+
+        // @Override
+        CARAPI OnStart();
+
+        // @Override
+        CARAPI OnBootPhase(
+            /* [in] */ Int32 phase);
+
+    private:
+        AutoPtr<CDevicePolicyManagerService> mService;
+    };
+
+private:
+    class MonitoringCertNotificationTask
+        : public AsyncTask
+    {
+    public:
+        MonitoringCertNotificationTask(
+            /* [in] */ CDevicePolicyManagerService* host);
+
+        // @Override
+        CARAPI DoInBackground(
+            /* [in] */ ArrayOf<IInterface*>* params,
+            /* [out] */ IInterface** result);
+
+    private:
+        CARAPI ManageNotification(
+            /* [in] */ IUserHandle* userHandle);
+
+    private:
+        CDevicePolicyManagerService* mHost;
+    };
+
+    class SetupContentObserver
+        : public ContentObserver
+    {
+    public:
+        SetupContentObserver(
+            /* [in] */ CDevicePolicyManagerService* host);
+
+        CARAPI constructor(
+            /* [in] */ IHandler* handler);
+
+        CARAPI Register(
+            /* [in] */ IContentResolver* resolver);
+
+        // @Override
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange,
+            /* [in] */ IUri* uri);
+
+    private:
+        AutoPtr<IUri> mUserSetupComplete;
+        CDevicePolicyManagerService* mHost;
+    };
+
+    class LocalService
+        : public Object
+        , public IDevicePolicyManagerInternal
+    {
+        friend class CDevicePolicyManagerService;
+    public:
+        CAR_INTERFACE_DECL()
+
+        LocalService(
+            /* [in] */ CDevicePolicyManagerService* host);
+
+        // @Override
+        CARAPI GetCrossProfileWidgetProviders(
+            /* [in] */ Int32 profileId,
+            /* [out] */ IList** result);
+
+        // @Override
+        CARAPI AddOnCrossProfileWidgetProvidersChangeListener(
+            /* [in] */ IDevicePolicyManagerInternalOnCrossProfileWidgetProvidersChangeListener* listener);
+
+    private:
+        CARAPI NotifyCrossProfileProvidersChanged(
+            /* [in] */ Int32 userId,
+            /* [in] */ IList* packages);
+
+    private:
+        AutoPtr<IList> mWidgetProviderListeners;
+        CDevicePolicyManagerService* mHost;
     };
 
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CDevicePolicyManagerService();
 
     ~CDevicePolicyManagerService();
@@ -314,6 +481,8 @@ public:
 
     CARAPI_(void) RemoveUserData(
         /* [in] */ Int32 userHandle);
+
+    CARAPI_(void) LoadDeviceOwner();
 
     CARAPI_(AutoPtr<ActiveAdmin>) GetActiveAdminUncheckedLocked(
         /* [in] */ IComponentName* who,
@@ -333,6 +502,18 @@ public:
         /* [in] */ const String& action,
         /* [in] */ IBroadcastReceiver* result);
 
+    /**
+     * Send an update to one specific admin, get notified when that admin returns a result.
+     */
+    CARAPI_(void) SendAdminCommandLocked(
+        /* [in] */ ActiveAdmin* admin,
+        /* [in] */ const String& action,
+        /* [in] */ IBundle* adminExtras,
+        /* [in] */ IBroadcastReceiver* result);
+
+    /**
+     * Send an update to all admins of a user that enforce a specified policy.
+     */
     CARAPI_(void) SendAdminCommandLocked(
         /* [in] */ const String& action,
         /* [in] */ Int32 reqPolicy,
@@ -382,9 +563,10 @@ public:
         /* [in] */ Int32 userHandle,
         /* [out] */ Boolean* hasGrant);
 
+    // @SuppressWarnings("unchecked")
     CARAPI GetActiveAdmins(
         /* [in] */ Int32 userHandle,
-        /* [out] */ IObjectContainer** admins);
+        /* [out] */ IList** admins);
 
     CARAPI PackageHasActiveAdmins(
         /* [in] */ const String& packageName,
@@ -438,6 +620,23 @@ public:
         /* [in] */ IComponentName* who,
         /* [in] */ Int32 userHandle,
         /* [out] */ Int64* password);
+
+    // @Override
+    CARAPI AddCrossProfileWidgetProvider(
+        /* [in] */ IComponentName* admin,
+        /* [in] */ const String& packageName,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI RemoveCrossProfileWidgetProvider(
+        /* [in] */ IComponentName* admin,
+        /* [in] */ const String& packageName,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI GetCrossProfileWidgetProviders(
+        /* [in] */ IComponentName* admin,
+        /* [out] */ IList** result);
 
     CARAPI GetPasswordExpiration(
         /* [in] */ IComponentName* who,
@@ -543,9 +742,34 @@ public:
 
     CARAPI LockNow();
 
-    CARAPI_(void) WipeDataLocked(
-        /* [in] */ Int32 flags);
+    // @Override
+    CARAPI EnforceCanManageCaCerts(
+        /* [in] */ IComponentName* who);
 
+    // @Override
+    CARAPI InstallCaCert(
+        /* [in] */ IComponentName* admin,
+        /* [in] */ ArrayOf<Byte>* certBuffer,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI UninstallCaCert(
+        /* [in] */ IComponentName* admin,
+        /* [in] */ const String& alias);
+
+    // @Override
+    CARAPI InstallKeyPair(
+        /* [in] */ IComponentName* who,
+        /* [in] */ ArrayOf<Byte>* privKey,
+        /* [in] */ ArrayOf<Byte>* cert,
+        /* [in] */ const String& alias,
+        /* [out] */ Boolean* result);
+
+    CARAPI_(void) WipeDataLocked(
+        /* [in] */ Int32 flags,
+        /* [in] */ const String& reason);
+
+    // @Override
     CARAPI WipeData(
         /* [in] */ Int32 flags,
         /* [in] */ Int32 userHandle);
@@ -583,6 +807,10 @@ public:
         /* [in] */ Int32 userHandle,
         /* [out] */ IComponentName** component);
 
+    CARAPI SetRecommendedGlobalProxy(
+        /* [in] */ IComponentName* who,
+        /* [in] */ IProxyInfo* proxyInfo);
+
     /**
      * Set the storage encryption request for a single admin.  Returns the new total request
      * status (for all admins).
@@ -608,6 +836,37 @@ public:
     CARAPI GetStorageEncryptionStatus(
         /* [in] */ Int32 userHandle,
         /* [out] */ Int32* st);
+
+    /**
+     * Set whether the screen capture is disabled for the user managed by the specified admin.
+     */
+    CARAPI SetScreenCaptureDisabled(
+        /* [in] */ IComponentName* who,
+        /* [in] */ Int32 userHandle,
+        /* [in] */ Boolean disabled);
+
+    /**
+     * Returns whether or not screen capture is disabled for a given admin, or disabled for any
+     * active admin (if given admin is null).
+     */
+    CARAPI GetScreenCaptureDisabled(
+        /* [in] */ IComponentName* who,
+        /* [in] */ Int32 userHandle,
+        /* [out] */ Boolean* result);
+
+    /**
+     * Set whether auto time is required by the specified admin (must be device owner).
+     */
+    CARAPI SetAutoTimeRequired(
+        /* [in] */ IComponentName* who,
+        /* [in] */ Int32 userHandle,
+        /* [in] */ Boolean required);
+
+    /**
+     * Returns whether or not auto time is required by the device owner.
+     */
+    ECode GetAutoTimeRequired(
+        /* [out] */ Boolean* result);
 
     /**
      * Disables all device cameras according to the specified admin.
@@ -643,6 +902,318 @@ public:
         /* [in] */ Int32 userHandle,
         /* [out] */ Int32* features);
 
+    // @Override
+    CARAPI SetDeviceOwner(
+        /* [in] */ const String& packageName,
+        /* [in] */ const String& ownerName,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI IsDeviceOwner(
+        /* [in] */ const String& packageName,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI GetDeviceOwner(
+        /* [out] */ String* result);
+
+    // @Override
+    CARAPI GetDeviceOwnerName(
+        /* [out] */ String* result);
+
+    // @Override
+    CARAPI RequireSecureKeyguard(
+        /* [in] */ Int32 userHandle,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI ClearDeviceOwner(
+        /* [in] */ const String& packageName);
+
+    // @Override
+    CARAPI SetProfileOwner(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& ownerName,
+        /* [in] */ Int32 userHandle,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI ClearProfileOwner(
+        /* [in] */ IComponentName* who);
+
+    // @Override
+    CARAPI HasUserSetupCompleted(
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI SetProfileEnabled(
+        /* [in] */ IComponentName* who);
+
+    // @Override
+    CARAPI SetProfileName(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& profileName);
+
+    // @Override
+    CARAPI GetProfileOwner(
+        /* [in] */ Int32 userHandle,
+        /* [out] */ IComponentName** result);
+
+    // @Override
+    CARAPI GetProfileOwnerName(
+        /* [in] */ Int32 userHandle,
+        /* [out] */ String* result);
+
+    // @Override
+    CARAPI AddPersistentPreferredActivity(
+        /* [in] */ IComponentName* who,
+        /* [in] */ IIntentFilter* filter,
+        /* [in] */ IComponentName* activity);
+
+    // @Override
+    CARAPI ClearPackagePersistentPreferredActivities(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& packageName);
+
+    // @Override
+    CARAPI SetApplicationRestrictions(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& packageName,
+        /* [in] */ IBundle* settings);
+
+    CARAPI SetTrustAgentFeaturesEnabled(
+        /* [in] */ IComponentName* admin,
+        /* [in] */ IComponentName* agent,
+        /* [in] */ IList* features,
+        /* [in] */ Int32 userHandle);
+
+    CARAPI GetTrustAgentFeaturesEnabled(
+        /* [in] */ IComponentName* admin,
+        /* [in] */ IComponentName* agent,
+        /* [in] */ Int32 userHandle,
+        /* [out] */ IList** result);
+
+    // @Override
+    CARAPI SetRestrictionsProvider(
+        /* [in] */ IComponentName* who,
+        /* [in] */ IComponentName* permissionProvider);
+
+    // @Override
+    CARAPI GetRestrictionsProvider(
+        /* [in] */ Int32 userHandle,
+        /* [out] */ IComponentName** result);
+
+    CARAPI AddCrossProfileIntentFilter(
+        /* [in] */ IComponentName* who,
+        /* [in] */ IIntentFilter* filter,
+        /* [in] */ Int32 flags);
+
+    CARAPI ClearCrossProfileIntentFilters(
+        /* [in] */ IComponentName* who);
+
+    // @Override
+    CARAPI SetPermittedAccessibilityServices(
+        /* [in] */ IComponentName* who,
+        /* [in] */ IList* packageList,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI GetPermittedAccessibilityServices(
+        /* [in] */ IComponentName* who,
+        /* [out] */ IList** result);
+
+    // @Override
+    CARAPI GetPermittedAccessibilityServicesForUser(
+        /* [in] */ Int32 userId,
+        /* [out] */ IList** result);
+
+    // @Override
+    CARAPI SetPermittedInputMethods(
+        /* [in] */ IComponentName* who,
+        /* [in] */ IList* packageList,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI GetPermittedInputMethods(
+        /* [in] */ IComponentName* who,
+        /* [out] */ IList** result);
+
+    // @Override
+    CARAPI GetPermittedInputMethodsForCurrentUser(
+        /* [out] */ IList** result);
+
+    // @Override
+    CARAPI CreateUser(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& name,
+        /* [out] */ IUserHandle** result);
+
+    // @Override
+    CARAPI CreateAndInitializeUser(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& name,
+        /* [in] */ const String& ownerName,
+        /* [in] */ IComponentName* profileOwnerComponent,
+        /* [in] */ IBundle* adminExtras,
+        /* [out] */ IUserHandle** result);
+
+    // @Override
+    CARAPI RemoveUser(
+        /* [in] */ IComponentName* who,
+        /* [in] */ IUserHandle* userHandle,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI SwitchUser(
+        /* [in] */ IComponentName* who,
+        /* [in] */ IUserHandle* userHandle,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI GetApplicationRestrictions(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& packageName,
+        /* [out] */ IBundle** result);
+
+    // @Override
+    CARAPI SetUserRestriction(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& key,
+        /* [in] */ Boolean enabled);
+
+    // @Override
+    CARAPI SetApplicationHidden(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& packageName,
+        /* [in] */ Boolean hidden,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI IsApplicationHidden(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& packageName,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI EnableSystemApp(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& packageName);
+
+    // @Override
+    CARAPI EnableSystemAppWithIntent(
+        /* [in] */ IComponentName* who,
+        /* [in] */ IIntent* intent,
+        /* [out] */ Int32* result);
+
+    // @Override
+    CARAPI SetAccountManagementDisabled(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& accountType,
+        /* [in] */ Boolean disabled);
+
+    // @Override
+    CARAPI GetAccountTypesWithManagementDisabled(
+        /* [out, callee] */ ArrayOf<String>** result);
+
+    // @Override
+    CARAPI GetAccountTypesWithManagementDisabledAsUser(
+        /* [in] */ Int32 userId,
+        /* [out, callee] */ ArrayOf<String>** result);
+
+    // @Override
+    CARAPI SetUninstallBlocked(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& packageName,
+        /* [in] */ Boolean uninstallBlocked);
+
+    // @Override
+    CARAPI IsUninstallBlocked(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& packageName,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI SetCrossProfileCallerIdDisabled(
+        /* [in] */ IComponentName* who,
+        /* [in] */ Boolean disabled);
+
+    // @Override
+    CARAPI GetCrossProfileCallerIdDisabled(
+        /* [in] */ IComponentName* who,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI GetCrossProfileCallerIdDisabledForUser(
+        /* [in] */ Int32 userId,
+        /* [out] */ Boolean* result);
+
+    /**
+     * Sets which packages may enter lock task mode.
+     *
+     * This function can only be called by the device owner.
+     * @param components The list of components allowed to enter lock task mode.
+     */
+    CARAPI SetLockTaskPackages(
+        /* [in] */ IComponentName* who,
+        /* [in] */ ArrayOf<String>* packages);
+
+    /**
+     * This function returns the list of components allowed to start the task lock mode.
+     */
+    CARAPI GetLockTaskPackages(
+        /* [in] */ IComponentName* who,
+        /* [out, callee] */ ArrayOf<String>** result);
+
+    /**
+     * This function lets the caller know whether the given package is allowed to start the
+     * lock task mode.
+     * @param pkg The package to check
+     */
+    CARAPI IsLockTaskPermitted(
+        /* [in] */ const String& pkg,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI NotifyLockTaskModeChanged(
+        /* [in] */ Boolean isEnabled,
+        /* [in] */ const String& pkg,
+        /* [in] */ Int32 userHandle);
+
+    // @Override
+    CARAPI SetGlobalSetting(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& setting,
+        /* [in] */ const String& value);
+
+    // @Override
+    CARAPI SetSecureSetting(
+        /* [in] */ IComponentName* who,
+        /* [in] */ const String& setting,
+        /* [in] */ const String& value);
+
+    // @Override
+    CARAPI SetMasterVolumeMuted(
+        /* [in] */ IComponentName* who,
+        /* [in] */ Boolean on);
+
+    // @Override
+    CARAPI IsMasterVolumeMuted(
+        /* [in] */ IComponentName* who,
+        /* [out] */ Boolean* result);
+
+    /**
+     * We need to update the internal state of whether a user has completed setup once. After
+     * that, we ignore any changes that reset the Settings.Secure.USER_SETUP_COMPLETE changes
+     * as we don't trust any apps that might try to reset it.
+     * <p>
+     * Unfortunately, we don't know which user's setup state was changed, so we write all of
+     * them.
+     */
+    CARAPI UpdateUserSetupComplete();
+
+    CARAPI ToString(
+        /* [in] */ String* result);
+
 protected:
     /**
      * Set an alarm for an upcoming event - expiration warning, expiration, or post-expiration
@@ -665,10 +1236,29 @@ private:
 
     CARAPI_(AutoPtr<IIWindowManager>) GetWindowManager();
 
-    static CARAPI_(AutoPtr<JournaledFile>) MakeJournaledFile(
+    CARAPI_(AutoPtr<INotificationManager>) GetNotificationManager();
+
+    /**
+     * Send an update intent to all admins of a user and its profiles. Only send to admins that
+     * enforce a specified policy.
+     */
+    CARAPI_(void) SendAdminCommandToSelfAndProfilesLocked(
+        /* [in] */ const String& action,
+        /* [in] */ Int32 reqPolicy,
         /* [in] */ Int32 userHandle);
 
-    CARAPI_(void) SaveSettingsLocked(
+    CARAPI_(void) CleanUpOldUsers();
+
+    CARAPI SetActiveAdmin(
+        /* [in] */ IComponentName* adminReceiver,
+        /* [in] */ Boolean refreshing,
+        /* [in] */ Int32 userHandle,
+        /* [in] */ IBundle* onEnableData);
+
+    static CARAPI_(AutoPtr<IJournaledFile>) MakeJournaledFile(
+        /* [in] */ Int32 userHandle);
+
+    CARAPI SaveSettingsLocked(
         /* [in] */ Int32 userHandle);
 
     CARAPI_(void) SendChangedNotification(
@@ -679,7 +1269,7 @@ private:
         /* [in] */ Int32 userHandle);
 
     CARAPI_(void) HandlePasswordExpirationNotification(
-        /* [in] */ DevicePolicyData* policy);
+        /* [in] */ Int32 userHandle);
 
     /**
      * Return a single admin's expiration date/time, or the min (soonest) for all admins.
@@ -689,16 +1279,30 @@ private:
         /* [in] */ IComponentName* who,
         /* [in] */ Int32 userHandle);
 
+    /**
+     * Returns the admin with the strictest policy on maximum failed passwords for this user and all
+     * profiles that are visible from this user. If the policy for the primary and any other profile
+     * are equal, it returns the admin for the primary profile.
+     * Returns {@code null} if none of them have that policy set.
+     */
+    CARAPI_(AutoPtr<ActiveAdmin>) GetAdminWithMinimumFailedPasswordsForWipeLocked(
+        /* [in] */ Int32 userHandle);
+
     CARAPI_(void) LockNowUnchecked();
 
     CARAPI_(Boolean) IsExtStorageEncrypted();
 
+    static CARAPI ParseCert(
+        /* [in] */ ArrayOf<Byte>* certBuffer,
+        /* [out] */ IX509Certificate** result);
+
     CARAPI_(void) WipeDeviceOrUserLocked(
         /* [in] */ Int32 flags,
-        /* [in] */ Int32 userHandle);
+        /* [in] */ Int32 userHandle,
+        /* [in] */ const String& reason);
 
     /**
-     * Called any time the device password is updated.  Resets all password expiration clocks.
+     * Called any time the device password is updated. Resets all password expiration clocks.
      */
     CARAPI_(void) UpdatePasswordExpirationsLocked(
         /* [in] */ Int32 userHandle);
@@ -721,7 +1325,8 @@ private:
      * {@link DevicePolicyManager#ENCRYPTION_STATUS_INACTIVE} or
      * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE}.
      */
-    CARAPI_(Int32) GetEncryptionStatus();
+    CARAPI GetEncryptionStatus(
+        /* [out] */ Int32* result);
 
     /**
      * Hook to low-levels:  If needed, record the new admin setting for encryption.
@@ -729,8 +1334,76 @@ private:
     CARAPI_(void) SetEncryptionRequested(
         /* [in] */ Boolean encrypt);
 
+    CARAPI UpdateScreenCaptureDisabledInWindowManager(
+        /* [in] */ Int32 userHandle,
+        /* [in] */ Boolean disabled);
+
+    // Returns the active device owner or null if there is no device owner.
+    CARAPI_(AutoPtr<ActiveAdmin>) GetDeviceOwnerAdmin();
+
+    CARAPI_(void) ClearUserRestrictions(
+        /* [in] */ IUserHandle* userHandle);
+
+    CARAPI_(Boolean) HasUserSetupCompleted(
+        /* [in] */ Int32 userHandle);
+
+    // Returns the active profile owner for this user or null if the current user has no
+    // profile owner.
+    CARAPI_(AutoPtr<ActiveAdmin>) GetProfileOwnerAdmin(
+        /* [in] */ Int32 userHandle);
+
+    /**
+     * Device owner can only be set on an unprovisioned device, unless it was initiated by "adb", in
+     * which case we allow it if no account is associated with the device.
+     */
+    CARAPI_(Boolean) AllowedToSetDeviceOwnerOnDevice();
+
+    CARAPI EnforceSystemProcess(
+        /* [in] */ const String& message);
+
+    CARAPI EnforceNotManagedProfile(
+        /* [in] */ Int32 userHandle,
+        /* [in] */ const String& message);
+
+    CARAPI_(AutoPtr<IUserInfo>) GetProfileParent(
+        /* [in] */ Int32 userHandle);
+
+    CARAPI_(Boolean) IsManagedProfile(
+        /* [in] */ Int32 userHandle);
+
+    CARAPI EnableIfNecessary(
+        /* [in] */ const String& packageName,
+        /* [in] */ Int32 userId);
+
     CARAPI EnforceCrossUserPermission(
         /* [in] */ Int32 userHandle);
+
+    /**
+     * @return true if all packages in enabledPackages are either in the list
+     * permittedList or are a system app.
+     */
+    CARAPI CheckPackagesInPermittedListOrSystem(
+        /* [in] */ IList* enabledPackages,
+        /* [in] */ IList* permittedList,
+        /* [out] */ Boolean* result);
+
+    CARAPI_(AutoPtr<IAccessibilityManager>) GetAccessibilityManagerForUser(
+        /* [in] */ Int32 userId);
+
+    CARAPI CheckCallerIsCurrentUserOrProfile(
+        /* [out] */ Boolean* result);
+
+    CARAPI IsSystemApp(
+        /* [in] */ IIPackageManager* pm,
+        /* [in] */ const String& packageName,
+        /* [in] */ Int32 userId,
+        /* [out] */ Boolean* result);
+
+    static CARAPI_(AutoPtr<ISet>) InitDEVICE_OWNER_USER_RESTRICTIONS();
+
+    static CARAPI_(AutoPtr<ISet>) InitSECURE_SETTINGS_WHITELIST();
+    static CARAPI_(AutoPtr<ISet>) InitSECURE_SETTINGS_DEVICEOWNER_WHITELIST();
+    static CARAPI_(AutoPtr<ISet>) InitGLOBAL_SETTINGS_WHITELIST();
 
 public:
     static const String ACTION_EXPIRED_PASSWORD_NOTIFICATION;
@@ -741,12 +1414,12 @@ public:
      */
     static const String SYSTEM_PROP_DISABLE_CAMERA;
 
-    Object mLock;
-
 private:
+    static const String LOG__TAG;
+
     static const String DEVICE_POLICIES_XML;
 
-    static const String TAG;
+    static const String LOCK_TASK_COMPONENTS_XML;
 
     static const Int32 REQUEST_EXPIRE_PASSWORD;
 
@@ -754,21 +1427,46 @@ private:
 
     static const Int64 EXPIRATION_GRACE_PERIOD_MS;
 
+    static const Int32 MONITORING_CERT_NOTIFICATION_ID;
+
     static const Boolean DBG;
 
-private:
+    static const String ATTR_PERMISSION_PROVIDER;
+    static const String ATTR_SETUP_COMPLETE;
+
+    static const AutoPtr<ISet> DEVICE_OWNER_USER_RESTRICTIONS;
+
+    static const AutoPtr<ISet> SECURE_SETTINGS_WHITELIST;
+    static const AutoPtr<ISet> SECURE_SETTINGS_DEVICEOWNER_WHITELIST;
+    static const AutoPtr<ISet> GLOBAL_SETTINGS_WHITELIST;
+
     AutoPtr<IContext> mContext;
+    AutoPtr<IUserManager> mUserManager;
+    AutoPtr<IPowerManagerWakeLock> mWakeLock;
+
+    AutoPtr<LocalService> mLocalService;
+
     AutoPtr<IIPowerManager> mIPowerManager;
     AutoPtr<IIWindowManager> mIWindowManager;
+    AutoPtr<INotificationManager> mNotificationManager;
 
-    AutoPtr<IPowerManagerWakeLock> mWakeLock;
+    // Stores and loads state on device and profile owners.
+    AutoPtr<DeviceOwner> mDeviceOwner;
+
+    /**
+     * Whether or not device admin feature is supported. If it isn't return defaults for all
+     * public methods.
+     */
+    Boolean mHasFeature;
+
     AutoPtr<IHandler> mHandler;
     AutoPtr<IBroadcastReceiver> mReceiver;
-    HashMap<Int32, AutoPtr<DevicePolicyData> > mUserData;
+    AutoPtr<ISparseArray> mUserData;
 };
 
+} // namespace DevicePolicy
 } // namespace Server
 } // namepsace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_SERVER_CDEVICEPOLICYMANAGERSERVICE_H__
+#endif // __ELASTOS_DROID_SERVER_DEVICEPOLICY_CDEVICEPOLICYMANAGERSERVICE_H__

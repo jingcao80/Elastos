@@ -324,6 +324,7 @@
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/clipboard
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/connectivity
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/content
+  Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/devicepolicy
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/display
 > Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/dreams
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/firewall
