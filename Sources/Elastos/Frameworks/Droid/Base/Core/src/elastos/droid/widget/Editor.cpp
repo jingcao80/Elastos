@@ -39,7 +39,7 @@
 #include "elastos/droid/widget/TextView.h"
 #include "elastos/droid/widget/CPopupWindow.h"
 #include "elastos/droid/widget/CListView.h"
-#include "elastos/droid/widget/internal/EditableInputConnection.h"
+#include "elastos/droid/internal/widget/EditableInputConnection.h"
 
 using Elastos::Core::Character;
 using Elastos::Core::EIID_IComparator;
@@ -95,6 +95,7 @@ using Elastos::Droid::Graphics::CRectF;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
 using Elastos::Droid::Internal::View::Menu::IMenuBuilder;
+using Elastos::Droid::Internal::Widget::EditableInputConnection;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::EIID_IView;
 using Elastos::Droid::View::EIID_IViewGroup;
@@ -125,7 +126,6 @@ using Elastos::Droid::View::InputMethod::CInputMethodManager;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::CListView;
 using Elastos::Droid::Widget::CSpellChecker;
-using Elastos::Droid::Widget::Internal::EditableInputConnection;
 using Elastos::Droid::InputMethodService::EIID_IExtractEditText;
 using Elastos::Droid::InputMethodService::IExtractEditText;
 

@@ -172,9 +172,6 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
-extern "C" const InterfaceID EIID_View =
-        { 0x47439045, 0x473d, 0x4d3c, { 0x87, 0x6b, 0x42, 0x42, 0x0, 0xc8, 0x9e, 0x19 } };
-
 const Boolean View::DBG = FALSE;
 const Int32 View::NOT_FOCUSABLE = 0x00000000;
 const Int32 View::FOCUSABLE = 0x00000001;
@@ -3539,7 +3536,7 @@ ECode View::IsShown(
             *res = FALSE; // We are not attached to the view root
             return NOERROR;
         }
-        if (parent->Probe(EIID_View) == NULL) {
+        if (IView::Probe(parent) == NULL) {
             *res = TRUE;
             return NOERROR;
         }

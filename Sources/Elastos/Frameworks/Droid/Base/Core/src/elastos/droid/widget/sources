@@ -8,14 +8,6 @@ include $(MAKEDIR)/../../../../../../sources.inc
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../inc/
 
-#INCLUDES += $(PREBUILD_INC)/binder
-#INCLUDES += $(PREBUILD_INC)/skia/utils
-#INCLUDES += $(PREBUILD_INC)/skia/core
-#INCLUDES += $(PREBUILD_INC)/skia/effects
-#INCLUDES += $(PREBUILD_INC)/skia/images
-#INCLUDES += $(PREBUILD_INC)/hwui
-#INCLUDES += $(PREBUILD_INC)/jpeg
-
 
 SOURCES += LinearLayout.cpp
 SOURCES += FrameLayout.cpp
@@ -33,70 +25,48 @@ SOURCES += SimpleCursorAdapter.cpp
 SOURCES += SimpleCursorTreeAdapter.cpp
 SOURCES += SimpleExpandableListAdapter.cpp
 SOURCES += SimpleMonthAdapter.cpp
-#SOURCES += CView.cpp
 SOURCES += ImageView.cpp
 SOURCES += AbsoluteLayout.cpp
-#SOURCES += CBlinkLayout.cpp
 SOURCES += CalendarView.cpp
-
-SOURCES += CCalendarView.cpp
 SOURCES += DialerFilter.cpp
-SOURCES += CDialerFilter.cpp
 SOURCES += EdgeEffect.cpp
-SOURCES += CEdgeEffect.cpp
 SOURCES += TableLayout.cpp
 SOURCES += TableRow.cpp
 SOURCES += TableRowLayoutParams.cpp
 SOURCES += ScrollBarDrawable.cpp
 SOURCES += QuickContactBadge.cpp
 SOURCES += TextClock.cpp
-#SOURCES += TextViewSavedState.cpp
-#SOURCES += CTextViewSavedState.cpp
-##SOURCES += CTextViewCommitSelectionReceiver.cpp
 SOURCES += Editor.cpp
 SOURCES += TextView.cpp
 SOURCES += AbsSeekBar.cpp
 SOURCES += RatingBar.cpp
-SOURCES += CRatingBar.cpp
 SOURCES += SeekBar.cpp
-SOURCES += CSeekBar.cpp
-#SOURCES += CTextViewHelper.cpp
 SOURCES += EditText.cpp
 SOURCES += CNumberPickerCustomEditText.cpp
 SOURCES += AutoCompleteTextView.cpp
 SOURCES += Button.cpp
 SOURCES += CompoundButton.cpp
-SOURCES += CCompoundButton.cpp
-SOURCES += CCompoundButtonSavedState.cpp
 SOURCES += CheckBox.cpp
-#SOURCES += CCheckBox.cpp
 SOURCES += RadioButton.cpp
-SOURCES += CRadioButton.cpp
 SOURCES += ToggleButton.cpp
 SOURCES += TwoLineListItem.cpp
 SOURCES += AdapterView.cpp
 SOURCES += AbsListView.cpp
-SOURCES += CAbsListViewSavedState.cpp
-SOURCES += CAbsListViewLayoutParams.cpp
-
-##SOURCES += EdgeGlow.cpp
 SOURCES += Scroller.cpp
 SOURCES += OverScroller.cpp
 SOURCES += FastScroller.cpp
 SOURCES += ListView.cpp
-SOURCES += CListView.cpp
-##SOURCES += CAlertControllerRecycleListView.cpp
 SOURCES += ScrollView.cpp
 SOURCES += HorizontalScrollView.cpp
 SOURCES += AbsSpinner.cpp
 SOURCES += Spinner.cpp
 SOURCES += Gallery.cpp
 SOURCES += PopupWindow.cpp
-SOURCES += CPopupWindow.cpp
 SOURCES += PopupMenu.cpp
+
+
 SOURCES += CPopupMenu.cpp
-#SOURCES += ProgressBarSavedState.cpp
-#SOURCES += CProgressBarSavedState.cpp
+
 SOURCES += ProgressBar.cpp
 SOURCES += TabWidget.cpp
 #SOURCES += CTabWidget.cpp
@@ -232,3 +202,13 @@ SOURCES += RemoteViewsService.cpp
 SOURCES += YearPickerView.cpp
 SOURCES += ToolBar.cpp
 SOURCES += widgets.cpp
+
+
+#SOURCES += TextViewSavedState.cpp
+#SOURCES += CTextViewSavedState.cpp
+#SOURCES += CTextViewCommitSelectionReceiver.cpp
+#SOURCES += CTextViewHelper.cpp
+#SOURCES += EdgeGlow.cpp
+#SOURCES += CAlertControllerRecycleListView.cpp
+#SOURCES += ProgressBarSavedState.cpp
+#SOURCES += CProgressBarSavedState.cpp

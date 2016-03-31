@@ -10,7 +10,7 @@ namespace Droid {
 namespace Inputmethods {
 namespace PinyinIME {
 
-String CBalloonView::SUSPENSION_POINTS = String("...");
+String CBalloonView::SUSPENSION_POINTS("...");
 CAR_OBJECT_IMPL(CBalloonView);
 CAR_INTERFACE_IMPL(CBalloonView, View, ICandidateView);
 
@@ -23,10 +23,7 @@ CBalloonView::CBalloonView()
 PInterface CBalloonView::Probe(
     /* [in] */ REIID riid)
 {
-    if (riid == Elastos::Droid::View::EIID_View) {
-        return reinterpret_cast<PInterface>(this);
-    }
-    else if (riid == EIID_IBalloonView) {
+    if (riid == EIID_IBalloonView) {
         return (IInterface*)this;
     }
 

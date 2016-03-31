@@ -7,9 +7,7 @@
 #include "elastos/droid/view/animation/CAlphaAnimation.h"
 
 using Elastos::Droid::View::EIID_IViewOnTouchListener;
-using Elastos::Droid::View::EIID_View;
 using Elastos::Droid::View::EIID_IView;
-using Elastos::Droid::View::EIID_ViewGroup;
 using Elastos::Droid::View::Animation::EIID_IAnimationListener;
 using Elastos::Droid::View::Animation::IAnimationSet;
 using Elastos::Droid::View::Animation::CAnimationSet;
@@ -423,13 +421,7 @@ void CCandidatesContainer::StopAnimation()
 PInterface CCandidatesContainer::Probe(
     /* [in] */ REIID riid)
 {
-    if (riid == EIID_View) {
-        return reinterpret_cast<PInterface>(this);
-    }
-    else if (riid == EIID_ViewGroup) {
-        return reinterpret_cast<PInterface>(this);
-    }
-    else if (riid == EIID_ICandidatesContainer) {
+    if (riid == EIID_ICandidatesContainer) {
         return reinterpret_cast<PInterface>(this);
     }
 
