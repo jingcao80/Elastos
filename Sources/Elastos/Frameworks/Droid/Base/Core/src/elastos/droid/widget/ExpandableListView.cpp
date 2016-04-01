@@ -403,7 +403,7 @@ ECode ExpandableListView::DispatchDraw(
     ListView::DispatchDraw(canvas);
 
     if ((mChildIndicator == NULL) && (mGroupIndicator == NULL)) {
-        return;
+        return NOERROR;
     }
 
     Int32 saveCount = 0;

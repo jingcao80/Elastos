@@ -388,13 +388,13 @@ ECode TabWidget::DispatchDraw(
 
     // Do nothing if there are no tabs.
     Int32 count;
-    if ((GetTabCount(&count), count) == 0) return;
+    if ((GetTabCount(&count), count) == 0) return NOERROR;
 
     // If the user specified a custom view for the tab indicators, then
     // do not draw the bottom strips.
     if (!mDrawBottomStrips) {
         // Skip drawing the bottom strips.
-        return;
+        return NOERROR;
     }
 
     AutoPtr<IView> selectedChild;
