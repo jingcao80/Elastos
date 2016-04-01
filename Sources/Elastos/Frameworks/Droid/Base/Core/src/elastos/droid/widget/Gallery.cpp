@@ -762,8 +762,11 @@ void Gallery::Layout(
 {
     IsLayoutRtl(&mIsRtl);
 
-    Int32 childrenLeft = mSpinnerPadding->mLeft;
-    Int32 childrenWidth = mRight - mLeft - mSpinnerPadding->mLeft - mSpinnerPadding->mRight;
+    Int32 left, right;
+    mSpinnerPadding->GetLeft(&left);
+    mSpinnerPadding->GetRight(&right);
+    Int32 childrenLeft = left;
+    Int32 childrenWidth = mRight - mLeft - left - right;
 
     if (mDataChanged) {
         HandleDataChanged();
@@ -1013,14 +1016,14 @@ void Gallery::SetUpChild(
 
     child->SetSelected(offset == 0);
 
+    Int32 pl, pt, pr, pb;
+    mSpinnerPadding->Get(&pl, &pt, &pr, &pb);
     Int32 h;
     lp->GetHeight(&h);
-    Int32 childHeightSpec = ViewGroup::GetChildMeasureSpec(mHeightMeasureSpec,
-            mSpinnerPadding->mTop + mSpinnerPadding->mBottom, h);
+    Int32 childHeightSpec = ViewGroup::GetChildMeasureSpec(mHeightMeasureSpec, pt + pb, h);
     Int32 w;
     lp->GetWidth(&w);
-    Int32 childWidthSpec = ViewGroup::GetChildMeasureSpec(mWidthMeasureSpec,
-            mSpinnerPadding->mLeft + mSpinnerPadding->mRight, w);
+    Int32 childWidthSpec = ViewGroup::GetChildMeasureSpec(mWidthMeasureSpec, pl + pr, w);
 
     child->Measure(childWidthSpec, childHeightSpec);
 
@@ -1066,19 +1069,20 @@ Int32 Gallery::CalculateTop(
     Int32 childHeight = duringLayout ? measuredHeight : height;
 
     Int32 childTop = 0;
-
+    Int32 t, b;
+    mSpinnerPadding->GetTop(&t);
+    mSpinnerPadding->GetBottom(&b);
     switch (mGravity) {
     case IGravity::TOP:
-        childTop = mSpinnerPadding->mTop;
+        childTop = t;
         break;
     case IGravity::CENTER_VERTICAL: {
-        Int32 availableSpace = myHeight - mSpinnerPadding->mBottom
-                - mSpinnerPadding->mTop - childHeight;
-        childTop = mSpinnerPadding->mTop + (availableSpace / 2);
+        Int32 availableSpace = myHeight - b - t - childHeight;
+        childTop = t + (availableSpace / 2);
         break;
     }
     case IGravity::BOTTOM:
-        childTop = myHeight - mSpinnerPadding->mBottom - childHeight;
+        childTop = myHeight - b - childHeight;
         break;
     }
     return childTop;

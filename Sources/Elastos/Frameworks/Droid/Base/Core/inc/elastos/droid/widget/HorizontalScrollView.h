@@ -409,7 +409,7 @@ private:
 
     Int64 mLastScroll;
 
-    AutoPtr<CRect> mTempRect;
+    AutoPtr<IRect> mTempRect;
     AutoPtr<IOverScroller> mScroller;
     AutoPtr<IEdgeEffect> mEdgeGlowLeft;
     AutoPtr<IEdgeEffect> mEdgeGlowRight;

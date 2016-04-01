@@ -1,17 +1,30 @@
-I/DEBUG   (  236):     #00 pc 00047a44  /system/lib/Elastos.Runtime.eco
-I/DEBUG   (  236):     #01 pc 00043b88  /system/lib/Elastos.Runtime.eco
-I/DEBUG   (  236):     #02 pc 00042340  /system/lib/Elastos.Runtime.eco
-I/DEBUG   (  236):     #03 pc 00043284  /system/lib/Elastos.Runtime.eco
-I/DEBUG   (  236):     #04 pc 00045bd8  /system/lib/Elastos.Runtime.eco
-I/DEBUG   (  236):     #05 pc 00047fd8  /system/lib/Elastos.Runtime.eco
-I/DEBUG   (  236):     #06 pc 000487ac  /system/lib/Elastos.Runtime.eco
-I/DEBUG   (  236):     #07 pc 000477a0  /system/lib/Elastos.Runtime.eco
-I/DEBUG   (  236):     #08 pc 00047578  /system/lib/Elastos.Runtime.eco/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/proxy.cpp:274
-/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/CRemoteParcel.cpp:886
-/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/CRemoteParcel.cpp:369
-/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/CRemoteParcel.cpp:693
-/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/mshproc.cpp:442
-/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/proxy.cpp:431
-/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/proxy.cpp:620 (discriminator 3)
-/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/marshal/android_linux/proxy.cpp:152
-??:0
+I/DEBUG   ( 2967):     #00 pc 0245ad54  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   ( 2967):     #01 pc 0245a9d8  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   ( 2967):     #02 pc 02459634  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   ( 2967):     #03 pc 02457f60  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   ( 2967):     #04 pc 02453104  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   ( 2967):     #05 pc 0244abb4  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   ( 2967):     #06 pc 0234d7cc  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   ( 2967):     #07 pc 0234f5b0  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   ( 2967):     #08 pc 0234f45c  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   ( 2967):     #09 pc 0234d6f4  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   ( 2967):     #10 pc 01f34350  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::Handler::DispatchMessage(Elastos::Droid::Os::IMessage*)+152)
+I/DEBUG   ( 2967):     #11 pc 01f365c8  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::Looper::Loop()+572)
+I/DEBUG   ( 2967):     #12 pc 01221e08  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   ( 2967):     #13 pc 0124ca2c  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   ( 2967):     #14 pc 0003d570  /system/lib/Elastos.Runtime.eco
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/view/ViewRootImpl.cpp:4003
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/view/ViewRootImpl.cpp:3938
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/view/ViewRootImpl.cpp:3715
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/view/ViewRootImpl.cpp:3304
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/view/ViewRootImpl.cpp:2239
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/view/ViewRootImpl.cpp:500
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/Choreographer.cpp:214
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/Choreographer.cpp:684
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/Choreographer.cpp:649
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/Choreographer.cpp:203
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/Handler.cpp:680
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/Looper.cpp:140
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/app/CActivityThread.cpp:6424
+/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/CActivityThreadHelper.cpp:79
+/home/kesalin/Elastos5/Sources/Elastos/Runtime/Core/reflection/invoke_gnuc.S:38

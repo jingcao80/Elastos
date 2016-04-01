@@ -862,7 +862,7 @@ View::AttachInfo::AttachInfo(
     , mHardwareAccelerated(FALSE)
     , mHardwareAccelerationRequested(FALSE)
     , mDisplayState(IDisplay::STATE_UNKNOWN)
-    , mApplicationScale(0.0f)
+    , mApplicationScale(1.0f)
     , mScalingRequired(FALSE)
     , mTurnOffWindowResizeAnim(FALSE)
     , mWindowLeft(0)
@@ -3594,17 +3594,18 @@ ECode View::FitSystemWindowsInt(
     if ((mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS) {
         mUserPaddingStart = UNDEFINED_PADDING;
         mUserPaddingEnd = UNDEFINED_PADDING;
-        AutoPtr<CRect> localInsets = (CRect*)pthread_getspecific(sKey);
+        AutoPtr<IRect> localInsets = (IRect*)pthread_getspecific(sKey);
         if (!localInsets) {
-            CRect::NewByFriend((CRect**)&localInsets);
+            CRect::New((IRect**)&localInsets);
             pthread_setspecific(sKey, localInsets.Get());
         }
 
         Boolean result = ComputeFitSystemWindows(insets, localInsets);
-        mUserPaddingLeftInitial = localInsets->mLeft;
-        mUserPaddingRightInitial = localInsets->mRight;
-        InternalSetPadding(localInsets->mLeft, localInsets->mTop,
-                localInsets->mRight, localInsets->mBottom);
+        Int32 l, t, r, b;
+        localInsets->Get(&l, &t, &r, &b);
+        mUserPaddingLeftInitial = l;
+        mUserPaddingRightInitial = r;
+        InternalSetPadding(l, t, r, b);
         *res = result;
         return NOERROR;
     }
@@ -7470,9 +7471,11 @@ void View::OnSizeChanged(
  * (but after its own view has been drawn).
  * @param canvas the canvas on which to draw the view
  */
-void View::DispatchDraw(
+ECode View::DispatchDraw(
     /* [in] */ ICanvas* canvas)
-{}
+{
+    return NOERROR;
+}
 
 /**
  * Gets the parent of this view. Note that the parent is a
@@ -10863,18 +10866,18 @@ ECode View::ResolvePadding()
         // left / right or right / left depending on the resolved layout direction.
         // If start / end padding are not defined, use the left / right ones.
         if (mBackground != NULL && (!mLeftPaddingDefined || !mRightPaddingDefined)) {
-            AutoPtr<CRect> padding = (CRect*)pthread_getspecific(sKey);
+            AutoPtr<IRect> padding = (IRect*)pthread_getspecific(sKey);
             if (padding == NULL) {
-                CRect::NewByFriend((CRect**)&padding);
+                CRect::New((IRect**)&padding);
                 pthread_setspecific(sKey, padding.Get());
             }
             Boolean res;
-            mBackground->GetPadding((IRect*)padding, &res);
+            mBackground->GetPadding(padding, &res);
             if (!mLeftPaddingDefined) {
-                mUserPaddingLeftInitial = padding->mLeft;
+                padding->GetLeft(&mUserPaddingLeftInitial);
             }
             if (!mRightPaddingDefined) {
-                mUserPaddingRightInitial = padding->mRight;
+                padding->GetRight(&mUserPaddingRightInitial);
             }
         }
         switch (resolvedLayoutDirection) {
@@ -12938,6 +12941,7 @@ Boolean View::Draw(
 ECode View::Draw(
     /* [in] */ ICanvas* canvas)
 {
+    Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------1", mID, this);
     Int32 privateFlags = mPrivateFlags;
     Boolean dirtyOpaque = (privateFlags & PFLAG_DIRTY_MASK) == PFLAG_DIRTY_OPAQUE &&
             (mAttachInfo == NULL || !mAttachInfo->mIgnoreDirtyState);
@@ -12962,20 +12966,22 @@ ECode View::Draw(
         DrawBackground(canvas);
     }
 
+    Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------2", mID, this);
+
     // skip step 2 & 5 if possible (common case)
     Int32 viewFlags = mViewFlags;
     Boolean horizontalEdges = (viewFlags & FADING_EDGE_HORIZONTAL) != 0;
     Boolean verticalEdges = (viewFlags & FADING_EDGE_VERTICAL) != 0;
     if (!verticalEdges && !horizontalEdges) {
-        //PRINT_FILE_LINE_EX("View::Draw ID = 0x%08x, this = 0x%08x----------------2", mID, this);
         // Step 3, draw the content
         if (!dirtyOpaque) {
             OnDraw(canvas);
         }
 
-        //PRINT_FILE_LINE_EX("View::Draw ID = 0x%08x, this = 0x%08x----------------3", mID, this);
+        Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------3", mID, this);
         // Step 4, draw the children
         DispatchDraw(canvas);
+        Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------4", mID, this);
 
         // Step 6, draw decorations (scrollbars)
         OnDrawScrollBars(canvas);
@@ -12987,6 +12993,7 @@ ECode View::Draw(
             ((ViewGroup*)group.Get())->DispatchDraw(canvas);
         }
 
+        Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------4 - 1", mID, this);
         return NOERROR;
     }
 
@@ -13085,10 +13092,10 @@ ECode View::Draw(
     // Step 3, draw the content
     if (!dirtyOpaque) OnDraw(canvas);
 
-    //PRINT_FILE_LINE_EX("View::Draw ID = 0x%08x, this = 0x%08x----------------5", mID, this);
+    Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------5", mID, this);
     // Step 4, draw the children
     DispatchDraw(canvas);
-    //PRINT_FILE_LINE_EX("View::Draw ID = 0x%08x, this = 0x%08x----------------6", mID, this);
+    Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------6", mID, this);
 
     // Step 5, draw the fade effect and restore layers
     AutoPtr<IPaint> p = scrollabilityCache->mPaint;
@@ -13133,10 +13140,10 @@ ECode View::Draw(
 
     canvas->RestoreToCount(saveCount);
 
-    //PRINT_FILE_LINE_EX("View::Draw ID = 0x%08x, this = 0x%08x----------------7", mID, this);
+    Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------7", mID, this);
     // Step 6, draw decorations (scrollbars)
     OnDrawScrollBars(canvas);
-    //PRINT_FILE_LINE_EX("View::Draw ID = 0x%08x, this = 0x%08x----------------8", mID, this);
+    Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------8", mID, this);
 
     Boolean mOverlayIsEmpty;
     if (mOverlay != NULL && (mOverlay->IsEmpty(&mOverlayIsEmpty), !mOverlayIsEmpty)) {
@@ -13318,17 +13325,14 @@ AutoPtr<IRenderNode> View::GetDrawableRenderNode(
 ECode View::GetOverlay(
     /* [out] */ IViewOverlay** clipBounds)
 {
+    VALIDATE_NOT_NULL(clipBounds)
     if (mOverlay == NULL) {
-        assert(0);
         CViewOverlay::New(mContext, this, (IViewOverlay**)&mOverlay);
     }
     *clipBounds = mOverlay;
     REFCOUNT_ADD(*clipBounds)
     return NOERROR;
 }
-
-
-
 
 /**
  * Override this if your view is known to always be drawn on top of a solid color background,
@@ -14207,10 +14211,9 @@ ECode View::SetBackgroundDrawable(
     }
 
     if (background != NULL) {
-        AutoPtr<CRect> padding = (CRect*)pthread_getspecific(sKey);
-
+        AutoPtr<IRect> padding = (IRect*)pthread_getspecific(sKey);
         if (padding == NULL) {
-            CRect::NewByFriend((CRect**)&padding);
+            CRect::New((IRect**)&padding);
             pthread_setspecific(sKey, padding.Get());
             padding->AddRef();
         }
@@ -14220,22 +14223,24 @@ ECode View::SetBackgroundDrawable(
         GetLayoutDirection(&layoutDirection);
         background->SetLayoutDirection(layoutDirection);
         Boolean result;
-        background->GetPadding((IRect*)padding.Get(), &result);
+        background->GetPadding(padding, &result);
         if (result) {
             ResetResolvedPadding();
             Int32 direction = 0;
             background->GetLayoutDirection(&direction);
+            Int32 l, t, r, b;
+            padding->Get(&l, &t, &r, &b);
             switch (direction) {
                 case IView::LAYOUT_DIRECTION_RTL:
-                    mUserPaddingLeftInitial = padding->mRight;
-                    mUserPaddingRightInitial = padding->mLeft;
-                    InternalSetPadding(padding->mRight, padding->mTop, padding->mLeft, padding->mBottom);
+                    mUserPaddingLeftInitial = r;
+                    mUserPaddingRightInitial = l;
+                    InternalSetPadding(r, t, l, b);
                     break;
                 case IView::LAYOUT_DIRECTION_LTR:
                 default:
-                    mUserPaddingLeftInitial = padding->mLeft;
-                    mUserPaddingRightInitial = padding->mRight;
-                    InternalSetPadding(padding->mLeft, padding->mTop, padding->mRight, padding->mBottom);
+                    mUserPaddingLeftInitial = l;
+                    mUserPaddingRightInitial = r;
+                    InternalSetPadding(l, t, r, b);
             }
 
             mLeftPaddingDefined = FALSE;

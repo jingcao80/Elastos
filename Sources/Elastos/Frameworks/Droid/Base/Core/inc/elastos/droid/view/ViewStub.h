@@ -166,7 +166,7 @@ protected:
         /* [in] */ Int32 heightMeasureSpec);
 
     //@Override
-    CARAPI_(void) DispatchDraw(
+    CARAPI DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
 private:

@@ -133,7 +133,7 @@ ECode COverlayViewGroup::InvalidateDrawable(
     return NOERROR;
 }
 
-void COverlayViewGroup::DispatchDraw(
+ECode COverlayViewGroup::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     ViewGroup::DispatchDraw(canvas);
@@ -147,6 +147,7 @@ void COverlayViewGroup::DispatchDraw(
         mDrawables->Get(i, (IInterface**)&item);
         IDrawable::Probe(item)->Draw(canvas);
     }
+    return NOERROR;
 }
 
 ECode COverlayViewGroup::OnLayout(

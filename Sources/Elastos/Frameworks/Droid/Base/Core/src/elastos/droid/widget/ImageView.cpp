@@ -44,6 +44,8 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
+static const String TAG("ImageView");
+
 const ImageViewScaleType ImageView::sScaleTypeArray[] = {
     ImageViewScaleType_MATRIX,
     ImageViewScaleType_FIT_XY,
@@ -56,6 +58,7 @@ const ImageViewScaleType ImageView::sScaleTypeArray[] = {
 };
 
 CAR_INTERFACE_IMPL(ImageView, View, IImageView);
+
 ImageView::ImageView()
     : mResource(0)
     , mScaleType(ImageViewScaleType_FIT_CENTER)
@@ -79,8 +82,6 @@ ImageView::ImageView()
     , mBaselineAlignBottom(FALSE)
     , mAdjustViewBoundsCompat(FALSE)
 {
-    ASSERT_SUCCEEDED(CRectF::NewByFriend((CRectF**)&mTempSrc));
-    ASSERT_SUCCEEDED(CRectF::NewByFriend((CRectF**)&mTempDst));
 }
 
 ECode ImageView::constructor(
@@ -114,9 +115,7 @@ ECode ImageView::constructor(
 {
     View::constructor(context, attrs, defStyleAttr, defStyleRes);
     InitImageView();
-    ASSERT_SUCCEEDED(InitFromAttributes(context, attrs, defStyleAttr, defStyleRes));
-
-    return NOERROR;
+    return InitFromAttributes(context, attrs, defStyleAttr, defStyleRes);
 }
 
 ECode ImageView::InitFromAttributes(
@@ -126,10 +125,11 @@ ECode ImageView::InitFromAttributes(
     /* [in] */ Int32 defStyleRes)
 {
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::ImageView),
-            ArraySize(R::styleable::ImageView));
+        const_cast<Int32 *>(R::styleable::ImageView),
+        ArraySize(R::styleable::ImageView));
     AutoPtr<ITypedArray> a;
-    FAIL_RETURN(context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
+    FAIL_RETURN(context->ObtainStyledAttributes(
+        attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
 
     AutoPtr<IDrawable> d;
     FAIL_RETURN(a->GetDrawable(R::styleable::ImageView_src, (IDrawable**)&d));
@@ -197,6 +197,8 @@ ECode ImageView::InitFromAttributes(
 
 void ImageView::InitImageView()
 {
+    ASSERT_SUCCEEDED(CRectF::New((IRectF**)&mTempSrc));
+    ASSERT_SUCCEEDED(CRectF::New((IRectF**)&mTempDst));
     ASSERT_SUCCEEDED(CMatrix::New((IMatrix**)&mMatrix));
     mScaleType = ImageViewScaleType_FIT_CENTER;
     AutoPtr<IApplicationInfo> info;
@@ -634,18 +636,14 @@ void ImageView::ResolveUri()
             }
         }
         else {
-            String uriDes;
-            IObject::Probe(mUri)->ToString(&uriDes);
+            String uriDes = Object::ToString(mUri);
             AutoPtr<IDrawableHelper> helper;
             CDrawableHelper::AcquireSingleton((IDrawableHelper**)&helper);
             Elastos::Droid::Graphics::Drawable::Drawable::CreateFromPath(uriDes, (IDrawable**)&d);
         }
 
         if (d == NULL) {
-            String uriDes;
-            IObject::Probe(mUri)->ToString(&uriDes);
-            Logger::W("ImageView",
-                    "resolveUri failed on bad bitmap uri: %s", uriDes.string());
+            Logger::W("ImageView", "resolveUri failed on bad bitmap uri: %s", TO_CSTR(mUri));
             // Don't try again.
             mUri = NULL;
         }
@@ -1082,6 +1080,7 @@ ECode ImageView::DrawableStateChanged()
 void ImageView::OnDraw(
     /* [in] */ ICanvas* canvas)
 {
+    Logger::D(TAG, " >>>> OnDraw");
     View::OnDraw(canvas);
 
     if (mDrawable == NULL) {
@@ -1118,6 +1117,7 @@ void ImageView::OnDraw(
         mDrawable->Draw(canvas);
         canvas->RestoreToCount(saveCount1);
     }
+    Logger::D(TAG, " <<<< OnDraw");
 }
 
 ECode ImageView::GetBaseline(
@@ -1262,9 +1262,9 @@ ECode ImageView::IsOpaque(
     Int32 opacity = 0;
     mDrawable->GetOpacity(&opacity);
     *opaque = (*opaque) || (mDrawable != NULL && mXfermode == NULL
-                && opacity == IPixelFormat::OPAQUE
-                && mAlpha * mViewAlphaScale >> 8 == 255
-                && IsFilledByImage());
+        && opacity == IPixelFormat::OPAQUE
+        && mAlpha * mViewAlphaScale >> 8 == 255
+        && IsFilledByImage());
     return NOERROR;
 }
 
@@ -1284,7 +1284,8 @@ Boolean ImageView::IsFilledByImage()
         GetWidth(&w);
         GetHeight(&h);
         return left <= 0 && top <= 0 && right >= w && bottom >= h;
-    } else if (matrix->RectStaysRect(&state), state) {
+    }
+    else if (matrix->RectStaysRect(&state), state) {
         AutoPtr<IRectF> boundsSrc = mTempSrc;
         AutoPtr<IRectF> boundsDst = mTempDst;
         boundsSrc->Set(bounds);
@@ -1296,7 +1297,8 @@ Boolean ImageView::IsFilledByImage()
         GetWidth(&w);
         GetHeight(&h);
         return left <= 0 && top <= 0 && right >= w && bottom >= h;
-    } else {
+    }
+    else {
         // If the matrix doesn't map to a rectangle, assume the worst.
         return FALSE;
     }

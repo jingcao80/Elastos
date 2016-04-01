@@ -112,7 +112,7 @@ public:
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
-    virtual CARAPI_(void) DispatchDraw(
+    virtual CARAPI DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
     virtual CARAPI OnLayout(

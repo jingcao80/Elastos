@@ -381,7 +381,7 @@ ECode TabWidget::ChildDrawableStateChanged(
     return LinearLayout::ChildDrawableStateChanged(child);
 }
 
-void TabWidget::DispatchDraw(
+ECode TabWidget::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     LinearLayout::DispatchDraw(canvas);
@@ -438,6 +438,7 @@ void TabWidget::DispatchDraw(
 
     leftStrip->Draw(canvas);
     rightStrip->Draw(canvas);
+    return NOERROR;
 }
 
 /**

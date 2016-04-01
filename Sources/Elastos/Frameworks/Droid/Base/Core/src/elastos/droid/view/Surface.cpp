@@ -48,6 +48,7 @@ using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Slogger;
 using android::sp;
 
 namespace Elastos {
@@ -170,12 +171,10 @@ ECode Surface::NativeLockCanvas(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
 
     sp<android::Surface> surface(reinterpret_cast<android::Surface *>(mNativeObject));
-
     if (!isSurfaceValid(surface) || canvas == NULL) {
-        // doThrowIAE(env);
-        *result = 0;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -184,10 +183,7 @@ ECode Surface::NativeLockCanvas(
 
     if (dirty) {
         Int32 top, bottom, left, right;
-        dirty->GetTop(&top);
-        dirty->GetBottom(&bottom);
-        dirty->GetLeft(&left);
-        dirty->GetRight(&right);
+        dirty->Get(&left, &top, &right, &bottom);
 
         dirtyRect.left   = left;
         dirtyRect.top    = top;
@@ -200,11 +196,6 @@ ECode Surface::NativeLockCanvas(
     android::status_t err = surface->lock(&outBuffer, dirtyRectPtr);
 
     if (err < 0) {
-        // const char* const exception = (err == NO_MEMORY) ?
-        //         OutOfResourcesException :
-        //         "java/lang/IllegalArgumentException";
-        // jniThrowException(env, exception, NULL);
-        *result = 0;
         if (err == android::NO_MEMORY) {
             return E_OUT_OF_RESOURCES_EXCEPTION;
         }
@@ -255,7 +246,8 @@ ECode Surface::NativeLockCanvas(
     // because the latter could be replaced while the surface is locked.
     sp<android::Surface> lockedSurface(surface);
     lockedSurface->incStrong(&sRefBaseOwner);
-    return reinterpret_cast<Int64>(lockedSurface.get());
+    *result = reinterpret_cast<Int64>(lockedSurface.get());
+    return NOERROR;
 }
 
 ECode Surface::NativeUnlockCanvasAndPost(
@@ -482,8 +474,7 @@ ECode Surface::constructor(
 
     {
         AutoLock lock(this);
-        AutoPtr<IObject> obj = IObject::Probe(surfaceTexture);
-        obj->ToString(&mName);
+        mName = Object::ToString(surfaceTexture);
         Int64 ptr;
         NativeCreateFromSurfaceTexture(surfaceTexture, &ptr);
         SetNativeObjectLocked(ptr);
@@ -635,6 +626,7 @@ ECode Surface::LockCanvas(
     /* [out] */ ICanvas** canvas)
 {
     VALIDATE_NOT_NULL(canvas);
+    *canvas = NULL;
 
     AutoLock lock(this);
     FAIL_RETURN(CheckNotReleasedLocked())
@@ -645,7 +637,6 @@ ECode Surface::LockCanvas(
         // we just refuse to re-lock the Surface.
         SLOGGERE(TAG, "Surface was already locked")
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        // throw new IllegalArgumentException("Surface was already locked");
     }
     FAIL_RETURN(NativeLockCanvas(mCanvas, dirty, &mLockedObject))
     *canvas = mCanvas;

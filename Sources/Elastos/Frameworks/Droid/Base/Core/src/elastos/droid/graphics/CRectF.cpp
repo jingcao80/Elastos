@@ -119,6 +119,7 @@ ECode CRectF::GetHashCode(
 ECode CRectF::ToString(
     /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str)
     StringBuilder sb(32);
     sb += "RectF(";
     sb += mLeft; sb += ", ";

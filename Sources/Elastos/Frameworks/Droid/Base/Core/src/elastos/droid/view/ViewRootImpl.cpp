@@ -1327,15 +1327,15 @@ ECode ViewRootImpl::constructor(
     CWindowManagerLayoutParams::New((IWindowManagerLayoutParams**)&mWindowAttributes);
     CSurface::New((ISurface**)&mSurface);
 
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mPendingOverscanInsets));
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mPendingVisibleInsets));
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mPendingStableInsets));
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mPendingContentInsets));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mPendingOverscanInsets));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mPendingVisibleInsets));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mPendingStableInsets));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mPendingContentInsets));
 
     mLastGivenInsets = new ViewTreeObserver::InternalInsetsInfo();
 
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mDispatchContentInsets));
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mDispatchStableInsets));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mDispatchContentInsets));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mDispatchStableInsets));
 
     CConfiguration::New((IConfiguration**)&mLastConfiguration);
     CConfiguration::New((IConfiguration**)&mPendingConfiguration);
@@ -1373,10 +1373,10 @@ ECode ViewRootImpl::constructor(
     mLocation.fillInStackTrace();*/
     mWidth = -1;
     mHeight = -1;
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mDirty));
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mTempRect));
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mVisRect));
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mWinFrame));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mDirty));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTempRect));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mVisRect));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mWinFrame));
     CViewRootImplW::New(this, (IIWindow**)&mWindow);
 
     AutoPtr<IApplicationInfo> info;
@@ -1384,8 +1384,8 @@ ECode ViewRootImpl::constructor(
     info->GetTargetSdkVersion(&mTargetSdkVersion);
     mViewVisibility = IView::GONE;
 
-    ASSERT_SUCCEEDED(CRegion::NewByFriend((CRegion**)&mTransparentRegion));
-    ASSERT_SUCCEEDED(CRegion::NewByFriend((CRegion**)&mPreviousTransparentRegion));
+    ASSERT_SUCCEEDED(CRegion::New((IRegion**)&mTransparentRegion));
+    ASSERT_SUCCEEDED(CRegion::New((IRegion**)&mPreviousTransparentRegion));
     mFirst = TRUE; // true for the first time the view is added
     mAdded = FALSE;
     mAttachInfo = new View::AttachInfo(mWindowSession, mWindow, display, this, mHandler, this);
@@ -1895,7 +1895,7 @@ ECode ViewRootImpl::SetLayoutParams(
 {
     AutoLock lock(mSyncLock);
     CWindowManagerLayoutParams* obj = (CWindowManagerLayoutParams*)mWindowAttributes.Get();
-    CRect* objRect = (CRect*)IRect::Probe(obj->mSurfaceInsets);
+    CRect* objRect = (CRect*)obj->mSurfaceInsets.Get();
     Int32 oldInsetLeft = objRect->mLeft;
     Int32 oldInsetTop = objRect->mTop;
     Int32 oldInsetRight = objRect->mRight;
@@ -2046,8 +2046,9 @@ ECode ViewRootImpl::InvalidateChildInParent(
 {
     FAIL_RETURN(CheckThread());
 
-    if (DEBUG_DRAW)
-        Logger::V(TAG, "Invalidate child: "/* + dirty*/);
+    if (DEBUG_DRAW) {
+        Logger::V(TAG, "Invalidate child: %s", TO_CSTR(dirty));
+    }
 
     Boolean isEmpty;
     if (dirty == NULL) {
@@ -2074,7 +2075,7 @@ ECode ViewRootImpl::InvalidateChildInParent(
         }
     }
 
-    CRect* localDirty = mDirty;
+    IRect* localDirty = mDirty;
     localDirty->IsEmpty(&isEmpty);
     Boolean contains;
     localDirty->Contains(dirty, &contains);
@@ -2089,8 +2090,7 @@ ECode ViewRootImpl::InvalidateChildInParent(
     // updates that lie outside of the visible region
     const Float appScale = mAttachInfo->mApplicationScale;
     Boolean intersected;
-    localDirty->Intersect(
-        0, 0, (Int32)(mWidth * appScale + 0.5f),
+    localDirty->Intersect(0, 0, (Int32)(mWidth * appScale + 0.5f),
         (Int32)(mHeight * appScale + 0.5f), &intersected);
     if (!intersected) {
         localDirty->SetEmpty();
@@ -2275,7 +2275,7 @@ Boolean ViewRootImpl::CollectViewAttributes()
         mAttachInfo->mKeepScreenOn = FALSE;
         mAttachInfo->mSystemUiVisibility = 0;
         mAttachInfo->mHasSystemUiListeners = FALSE;
-        VIEW_PROBE(mView)->DispatchCollectViewAttributes(mAttachInfo, 0);
+        ((View*)mView.Get())->DispatchCollectViewAttributes(mAttachInfo, 0);
         mAttachInfo->mSystemUiVisibility &= ~mAttachInfo->mDisabledSystemUiVisibility;
         CWindowManagerLayoutParams* params = (CWindowManagerLayoutParams*)mWindowAttributes.Get();
         if (mAttachInfo->mKeepScreenOn != oldScreenOn
@@ -2447,7 +2447,7 @@ void ViewRootImpl::PerformTraversals()
 
     // cache mView since it is used so much below...
     //
-    View* host = mView != NULL ? VIEW_PROBE(mView) : NULL;
+    View* host = mView != NULL ? ((View*)mView.Get()) : NULL;
 
     if (host == NULL || !mAdded) {
         LocalTrace(mView, "::LEAVE >> ViewRootImpl::PerformTraversals() : host == NULL || !mAdded.");
@@ -2495,7 +2495,6 @@ void ViewRootImpl::PerformTraversals()
 
     mWindowAttributesChangesFlag = 0;
 
-    CRect* frame = mWinFrame;
     if (mFirst) {
         mFullRedrawNeeded = TRUE;
         mLayoutRequested = TRUE;
@@ -2550,12 +2549,11 @@ void ViewRootImpl::PerformTraversals()
         Logger::I(TAG, "Screen on initialized: %d", mAttachInfo->mKeepScreenOn);
     }
     else {
-        frame->GetWidth(&desiredWindowWidth);
-        frame->GetHeight(&desiredWindowHeight);
+        mWinFrame->GetWidth(&desiredWindowWidth);
+        mWinFrame->GetHeight(&desiredWindowHeight);
         if (desiredWindowWidth != mWidth || desiredWindowHeight != mHeight) {
             if (DEBUG_ORIENTATION) {
-                Logger::V(TAG, "View 0x%08x resized to l = %d, r = %d, t = %d, b = %d"
-                    , (Int32)host, frame->mLeft, frame->mRight, frame->mTop, frame->mBottom);
+                Logger::V(TAG, "View %s resized to %s", TO_CSTR(host), TO_CSTR(mWinFrame));
             }
 
             mFullRedrawNeeded = TRUE;
@@ -2621,8 +2619,7 @@ void ViewRootImpl::PerformTraversals()
             if (!equals) {
                 mAttachInfo->mVisibleInsets->Set(mPendingVisibleInsets);
                 if (DEBUG_LAYOUT)
-                    Logger::V(TAG, "Visible insets changing to: "
-                        /*+ mAttachInfo->mVisibleInsets*/);
+                    Logger::V(TAG, "Visible insets changing to: %s", TO_CSTR(mAttachInfo->mVisibleInsets));
             }
             if (lp->mWidth == IViewGroupLayoutParams::WRAP_CONTENT
                 || lp->mHeight == IViewGroupLayoutParams::WRAP_CONTENT) {
@@ -2649,8 +2646,7 @@ void ViewRootImpl::PerformTraversals()
         }
 
         // Ask host how big it wants to be
-        windowSizeMayChange |= MeasureHierarchy(host, lp, res,
-                desiredWindowWidth, desiredWindowHeight);
+        windowSizeMayChange |= MeasureHierarchy(host, lp, res, desiredWindowWidth, desiredWindowHeight);
     }
     if (CollectViewAttributes()) {
         params = lp;
@@ -2729,8 +2725,8 @@ void ViewRootImpl::PerformTraversals()
     }
 
     Int32 frameWidth, framewHeight;
-    frame->GetWidth(&frameWidth);
-    frame->GetHeight(&framewHeight);
+    mWinFrame->GetWidth(&frameWidth);
+    mWinFrame->GetHeight(&framewHeight);
     Int32 hostWidth, hostHeight;
     Boolean windowShouldResize = layoutRequested && windowSizeMayChange
         && ((mWidth != (host->GetMeasuredWidth(&hostWidth), hostWidth)
@@ -2759,8 +2755,7 @@ void ViewRootImpl::PerformTraversals()
             // and get back to the window manager with the ultimately
             // computed insets.
             //
-            insetsPending = computesInternalInsets
-                && (mFirst || viewVisibilityChanged);
+            insetsPending = computesInternalInsets && (mFirst || viewVisibilityChanged);
         }
 
         if (mSurfaceHolder != NULL) {
@@ -2774,8 +2769,10 @@ void ViewRootImpl::PerformTraversals()
         mSurface->IsValid(&hadSurface);
 
         if (DEBUG_LAYOUT) {
-           /*Logger::I(TAG, "host=w:%d, h:%d, params=%p", host->GetMeasuredWidth(),
-                host->GetMeasuredHeight(), params);*/
+            Int32 mw, mh;
+            host->GetMeasuredWidth(&mw);
+            host->GetMeasuredHeight(&mh);
+            Logger::I(TAG, "host=w:%d, h:%d, params=%s", mw, mh, TO_CSTR(params));
         }
 
         if (mAttachInfo->mHardwareRenderer != NULL) {
@@ -2795,37 +2792,29 @@ void ViewRootImpl::PerformTraversals()
         }
 
         if (DEBUG_LAYOUT) {
-            String os, fs, cs, vs, vvs;
-            frame->ToShortString(&fs);
-            mPendingOverscanInsets->ToShortString(&os);
-            mPendingContentInsets->ToShortString(&cs);
-            mPendingVisibleInsets->ToShortString(&vs);
-            mPendingStableInsets->ToShortString(&vvs);
-            Logger::V(TAG, "relayout: frame=%s, overscan=%s, content=%s, visible=%s, visible=%s, surface=%p",
-                    fs.string(), os.string(), cs.string(), vs.string(), vvs.string(), mSurface.Get());
+            Logger::V(TAG, " >>> Relayout: frame=%s, overscan=%s, content=%s, visible=%s, Stable=%s, surface=%s",
+                TO_CSTR(mWinFrame), TO_CSTR(mPendingOverscanInsets), TO_CSTR(mPendingContentInsets),
+                TO_CSTR(mPendingVisibleInsets), TO_CSTR(mPendingStableInsets), TO_CSTR(mSurface));
         }
 
         Int32 seq;
         mPendingConfiguration->GetSeq(&seq);
         if (seq != 0) {
             if (DEBUG_CONFIGURATION) {
-                Logger::D(TAG, "Visible with new config: "
-                    /*+ mPendingConfiguration*/);
+                Logger::D(TAG, "Visible with new config: %s", TO_CSTR(mPendingConfiguration));
             }
             UpdateConfiguration(mPendingConfiguration, !mFirst);
             mPendingConfiguration->SetSeq(0);
         }
 
-        Boolean overscanInsetsChangedTemp;
+        Boolean overscanInsetsChangedTemp, visibleInsetsChangedTemp, stableInsetsChangedTemp;
         mPendingOverscanInsets->Equals(mAttachInfo->mOverscanInsets, &overscanInsetsChangedTemp);
-        Boolean overscanInsetsChanged = !overscanInsetsChangedTemp;
         mPendingContentInsets->Equals(mAttachInfo->mContentInsets, &contentInsetsChanged);
-        contentInsetsChanged = !contentInsetsChanged;
-        Boolean visibleInsetsChangedTemp;
         mPendingVisibleInsets->Equals(mAttachInfo->mVisibleInsets, &visibleInsetsChangedTemp);
-        Boolean visibleInsetsChanged = !visibleInsetsChangedTemp;
-        Boolean stableInsetsChangedTemp;
         mPendingStableInsets->Equals(mAttachInfo->mStableInsets, &stableInsetsChangedTemp);
+        contentInsetsChanged = !contentInsetsChanged;
+        Boolean overscanInsetsChanged = !overscanInsetsChangedTemp;
+        Boolean visibleInsetsChanged = !visibleInsetsChangedTemp;
         Boolean stableInsetsChanged = !stableInsetsChangedTemp;
 
         if (contentInsetsChanged) {
@@ -2895,16 +2884,14 @@ void ViewRootImpl::PerformTraversals()
             mAttachInfo->mContentInsets->Set(mPendingContentInsets);
 
             if (DEBUG_LAYOUT) {
-                Logger::D(TAG, "Content insets changing to: "
-                    /*+ mAttachInfo->mContentInsets*/);
+                Logger::D(TAG, "Content insets changing to: %s", TO_CSTR(mAttachInfo->mContentInsets));
             }
         }
 
         if (overscanInsetsChanged) {
             mAttachInfo->mOverscanInsets->Set(mPendingOverscanInsets);
             if (DEBUG_LAYOUT){
-                Logger::D(TAG, "Overscan insets changing to: "
-                    /*+ mAttachInfo.mOverscanInsets*/);
+                Logger::D(TAG, "Overscan insets changing to: %s", TO_CSTR(mAttachInfo->mOverscanInsets));
             }
             // Need to relayout with content insets.
             contentInsetsChanged = TRUE;
@@ -2912,8 +2899,7 @@ void ViewRootImpl::PerformTraversals()
         if (stableInsetsChanged) {
             mAttachInfo->mStableInsets->Set(mPendingStableInsets);
             if (DEBUG_LAYOUT) {
-                Logger::D(TAG, "Decor insets changing to: "
-                    /*+ mAttachInfo.mStableInsets*/);
+                Logger::D(TAG, "Decor insets changing to: %s", TO_CSTR(mAttachInfo->mStableInsets));
             }
             // Need to relayout with content insets.
             contentInsetsChanged = TRUE;
@@ -2932,8 +2918,7 @@ void ViewRootImpl::PerformTraversals()
             mAttachInfo->mVisibleInsets->Set(mPendingVisibleInsets);
 
             if (DEBUG_LAYOUT) {
-                Logger::D(TAG, "Visible insets changing to: "
-                    /*+ mAttachInfo->mVisibleInsets*/);
+                Logger::D(TAG, "Visible insets changing to: %s", TO_CSTR(mAttachInfo->mVisibleInsets));
             }
         }
 
@@ -2959,7 +2944,7 @@ void ViewRootImpl::PerformTraversals()
                         ECode ec = mAttachInfo->mHardwareRenderer->Initialize(mSurface, &hwInitialized);
                     //} catch (OutOfResourcesException e) {
                         if (ec == (ECode) E_OUT_OF_RESOURCES_EXCEPTION) {
-                            //HandleOutOfResourcesException(e);
+                            HandleOutOfResourcesException(ec);
                         }
 
                         return;
@@ -2996,20 +2981,18 @@ void ViewRootImpl::PerformTraversals()
         // }
 
         if (DEBUG_ORIENTATION) {
-            String fs;
-            frame->ToShortString(&fs);
-            Logger::V(TAG, "Relayout returned: frame=%s", fs.string());
+            Logger::V(TAG, "Relayout returned: frame=%s", TO_CSTR(mWinFrame));
         }
 
-        mAttachInfo->mWindowLeft = frame->mLeft;
-        mAttachInfo->mWindowTop = frame->mTop;
+        mWinFrame->GetLeft(&mAttachInfo->mWindowLeft);
+        mWinFrame->GetTop(&mAttachInfo->mWindowTop);
 
         // !!FIXME!! This next section handles the case where we did not get the
         // window size we asked for. We should avoid this by getting a maximum size from
         // the window session beforehand.
         //
-        frame->GetWidth(&mWidth);
-        frame->GetHeight(&mHeight);
+        mWinFrame->GetWidth(&mWidth);
+        mWinFrame->GetHeight(&mHeight);
         if (mSurfaceHolder != NULL) {
             // The app owns the surface; tell it about what is going on.
             Boolean isValid = FALSE;
@@ -3022,12 +3005,13 @@ void ViewRootImpl::PerformTraversals()
             mSurfaceHolder->SetSurfaceFrameSize(mWidth, mHeight);
             mSurfaceHolder->mSurfaceLock->UnLock();
             mSurface->IsValid(&isValid);
+            ISurfaceHolderCallback* shc = ISurfaceHolderCallback::Probe(mSurfaceHolderCallback);
             if (isValid) {
                 if (!hadSurface) {
                     mSurfaceHolder->UngetCallbacks();
 
                     mIsCreating = TRUE;
-                    (ISurfaceHolderCallback::Probe(mSurfaceHolderCallback))->SurfaceCreated(mSurfaceHolder);
+                    shc->SurfaceCreated(mSurfaceHolder);
                     AutoPtr< ArrayOf<ISurfaceHolderCallback*> > callbacks = mSurfaceHolder->GetCallbacks();
                     for (Int32 i = 0; i < callbacks->GetLength(); ++i) {
                         (*callbacks)[i]->SurfaceCreated(mSurfaceHolder);
@@ -3036,8 +3020,7 @@ void ViewRootImpl::PerformTraversals()
                 }
 
                 if (surfaceChanged) {
-                    (ISurfaceHolderCallback::Probe(mSurfaceHolderCallback))->SurfaceChanged(mSurfaceHolder,
-                        lp->mFormat, mWidth, mHeight);
+                    shc->SurfaceChanged(mSurfaceHolder, lp->mFormat, mWidth, mHeight);
 
                     AutoPtr< ArrayOf<ISurfaceHolderCallback*> > callbacks = mSurfaceHolder->GetCallbacks();
                     for (Int32 i = 0; i < callbacks->GetLength(); ++i) {
@@ -3049,7 +3032,7 @@ void ViewRootImpl::PerformTraversals()
             else if (hadSurface) {
                 mSurfaceHolder->UngetCallbacks();
 
-                (ISurfaceHolderCallback::Probe(mSurfaceHolderCallback))->SurfaceDestroyed(mSurfaceHolder);
+                shc->SurfaceDestroyed(mSurfaceHolder);
 
                 AutoPtr< ArrayOf<ISurfaceHolderCallback*> > callbacks = mSurfaceHolder->GetCallbacks();
                 for (Int32 i = 0; i < callbacks->GetLength(); ++i) {
@@ -3095,9 +3078,8 @@ void ViewRootImpl::PerformTraversals()
                     host->GetMeasuredWidth(&tempWidth);
                     host->GetMeasuredHeight(&tempHeight);
                     Logger::D(TAG, "Ooops, something changed!  mWidth=%d measuredWidth=%d"
-                        " measuredWidth%d mHeight=%d measuredHeight=%d coveredInsetsChanged=%d"
-                        , mWidth, tempWidth, mHeight, tempHeight
-                        , contentInsetsChanged);
+                        " mHeight=%d measuredHeight=%d coveredInsetsChanged=%d",
+                        mWidth, tempWidth, mHeight, tempHeight, contentInsetsChanged);
                 }
                 // Ask host how big it wants to be
                 PerformMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
@@ -3113,21 +3095,18 @@ void ViewRootImpl::PerformTraversals()
                 Boolean measureAgain = FALSE;
                 if (lp->mHorizontalWeight > 0.0f) {
                     width += (Int32) ((mWidth - width) * lp->mHorizontalWeight);
-                    childWidthMeasureSpec = View::MeasureSpec::MakeMeasureSpec(
-                        width, View::MeasureSpec::EXACTLY);
+                    childWidthMeasureSpec = View::MeasureSpec::MakeMeasureSpec(width, View::MeasureSpec::EXACTLY);
                     measureAgain = TRUE;
                 }
                 if (lp->mVerticalWeight > 0.0f) {
                     height += (Int32) ((mHeight - height) * lp->mVerticalWeight);
-                    childHeightMeasureSpec = View::MeasureSpec::MakeMeasureSpec(
-                        height, View::MeasureSpec::EXACTLY);
+                    childHeightMeasureSpec = View::MeasureSpec::MakeMeasureSpec(height, View::MeasureSpec::EXACTLY);
                     measureAgain = TRUE;
                 }
 
                 if (measureAgain) {
                     if (DEBUG_LAYOUT) {
-                        Logger::D(TAG, "And hey let's measure once more: width=%d"
-                            " height=%d", width, height);
+                        Logger::D(TAG, "And hey let's measure once more: width=%d height=%d", width, height);
                     }
                     PerformMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
                 }
@@ -3150,17 +3129,19 @@ void ViewRootImpl::PerformTraversals()
         // reported frame is (2, 2 - 2, 2) which implies no change but this is not
         // TRUE since we are comparing a not translated value to a translated one.
         // This scenario is rare but we may want to fix that.
-
-        Boolean windowMoved = (mAttachInfo->mWindowLeft != frame->mLeft
-                || mAttachInfo->mWindowTop != frame->mTop);
+        Int32 l, t;
+        mWinFrame->GetLeft(&l);
+        mWinFrame->GetTop(&t);
+        Boolean windowMoved = (mAttachInfo->mWindowLeft != t || mAttachInfo->mWindowTop != t);
         if (windowMoved) {
             if (mTranslator != NULL) {
-                mTranslator->TranslateRectInScreenToAppWinFrame(frame);
+                mTranslator->TranslateRectInScreenToAppWinFrame(mWinFrame);
             }
-            mAttachInfo->mWindowLeft = frame->mLeft;
-            mAttachInfo->mWindowTop = frame->mTop;
+            mAttachInfo->mWindowLeft = l;
+            mAttachInfo->mWindowTop = t;
         }
     }
+
     const Boolean didLayout = layoutRequested;
     Boolean triggerGlobalLayoutListener = didLayout
         || mAttachInfo->mRecomputeGlobalAttributes;
@@ -3183,7 +3164,6 @@ void ViewRootImpl::PerformTraversals()
             if (mTranslator != NULL) {
                 mTranslator->TranslateRegionInWindowToScreen(mTransparentRegion);
             }
-
 
             mTransparentRegion->Equals(mPreviousTransparentRegion, &isEqual);
             if (!isEqual) {
@@ -3249,14 +3229,12 @@ void ViewRootImpl::PerformTraversals()
 
     if (mFirst) {
         // handle first focus request
-        //if (DEBUG_INPUT_RESIZE) {
-        //    Logger::D(TAG, StringBuffer("First: mView.hasFocus()=")
-        //    + mView->HasFocus());
-        //}
-
         if (mView != NULL) {
             Boolean hasFocus;
             mView->HasFocus(&hasFocus);
+            if (DEBUG_INPUT_RESIZE) {
+                Logger::D(TAG, "First: mView.hasFocus()=%d", hasFocus);
+            }
             if (!hasFocus) {
                 Boolean result;
                 mView->RequestFocus(IView::FOCUS_FORWARD, &result);
@@ -3450,13 +3428,12 @@ void ViewRootImpl::PerformLayout(
     mScrollMayChange = TRUE;
     mInLayout = TRUE;
 
-    View* host = VIEW_PROBE(mView);
+    View* host = (View*)mView.Get();
     Int32 tempWidth, tempHeight;
     host->GetMeasuredWidth(&tempWidth);
     host->GetMeasuredHeight(&tempHeight);
     if (DEBUG_ORIENTATION || DEBUG_LAYOUT) {
-        /*Logger::V(TAG, "Laying out 0x%08x to (%d, %d)",
-            host, tempWidth, tempHeight);*/
+        Logger::V(TAG, "Laying out %s to (%d, %d)", TO_CSTR(host), tempWidth, tempHeight);
     }
 
     //Trace::TraceBegin(Trace::TRACE_TAG_VIEW, "layout");
@@ -3485,7 +3462,7 @@ void ViewRootImpl::PerformLayout(
                 AutoPtr<IInterface> temp;
                 validLayoutRequesters->Get(i, (IInterface**)&temp);
                 AutoPtr<IView> view = IView::Probe(temp);
-                Logger::V("View", "requestLayout() improperly called by %d during layout: running second layout pass", view.Get());
+                Logger::V(TAG, "requestLayout() improperly called by %d during layout: running second layout pass", view.Get());
                 view->RequestLayout();
             }
             AutoPtr<IContext> mViewContext;
@@ -3596,7 +3573,7 @@ ECode ViewRootImpl::RequestTransparentRegion(
     FAIL_RETURN(CheckThread());
 
     if (mView.Get() == child) {
-        VIEW_PROBE(mView)->mPrivateFlags
+        ((View*)mView.Get())->mPrivateFlags
             |= View::PFLAG_REQUEST_TRANSPARENT_REGIONS;
 
         // Need to make sure we re-evaluate the window attributes next
@@ -3763,9 +3740,7 @@ void ViewRootImpl::PerformDraw()
         if (LOCAL_LOGV) {
             AutoPtr<ICharSequence> title;
             mWindowAttributes->GetTitle((ICharSequence**)&title);
-            String str;
-            title->ToString(&str);
-            Logger::V(TAG, "FINISHED DRAWING: %s", str.string());
+            Logger::V(TAG, "FINISHED DRAWING: %s", TO_CSTR(title));
         }
         Boolean isValid;
         if (mSurfaceHolder != NULL && (mSurface->IsValid(&isValid), isValid)) {
@@ -3789,10 +3764,10 @@ void ViewRootImpl::PerformDraw()
 void ViewRootImpl::Draw(
     /* [in] */ Boolean fullRedrawNeeded)
 {
+    LocalTrace(mView, "::ENTER << ViewRootImpl::Draw()");
     ISurface* surface = mSurface;
     Boolean surfaceValid = FALSE;
-    if (surface == NULL ||
-        !(surface->IsValid(&surfaceValid), surfaceValid)) {
+    if (surface == NULL || !(surface->IsValid(&surfaceValid), surfaceValid)) {
         return;
     }
 
@@ -3853,7 +3828,7 @@ void ViewRootImpl::Draw(
         }
     }
 
-    CRect* dirty = mDirty;
+    IRect* dirty = mDirty;
     if (mSurfaceHolder != NULL) {
         // The app owns the surface, we won't draw.
         //
@@ -3872,14 +3847,14 @@ void ViewRootImpl::Draw(
         dirty->Set(0, 0, (Int32)(mWidth * appScale + 0.5f), (Int32)(mHeight * appScale + 0.5f));
     }
 
-    //if (DEBUG_ORIENTATION || DEBUG_DRAW) {
-    //    Logger::V(TAG, "Draw " + mView + "/"
-    //        + mWindowAttributes.getTitle()
-    //        + ": dirty={" + dirty->mLeft + "," + dirty->top
-    //        + "," + dirty->right + "," + dirty->bottom + "} surface="
-    //        + surface + " surface.isValid()=" + surface.isValid() + ", appScale:" +
-    //        appScale + ", width=" + mWidth + ", height=" + mHeight);
-    //}
+    if (DEBUG_ORIENTATION || DEBUG_DRAW) {
+        AutoPtr<ICharSequence> csq;
+        mWindowAttributes->GetTitle((ICharSequence**)&csq);
+        Logger::V(TAG, "Draw %s/%s: fullRedrawNeeded=%d, dirty={%s}, surface=%s, "
+            "isValid=%d, appScale=%f, width=%d, height=%d",
+            TO_CSTR(mView), TO_CSTR(csq), fullRedrawNeeded, TO_CSTR(dirty), TO_CSTR(surface),
+            surfaceValid, appScale, mWidth, mHeight);
+    }
 
     mAttachInfo->mTreeObserver->DispatchOnDraw();
 
@@ -3887,17 +3862,19 @@ void ViewRootImpl::Draw(
     Int32 yOffset = curScrollY;
     CWindowManagerLayoutParams* params = (CWindowManagerLayoutParams*)mWindowAttributes.Get();
     AutoPtr<IRect> obj = params != NULL ? params->mSurfaceInsets : NULL;
-    CRect* surfaceInsets = (CRect*)obj.Get();
-    if (surfaceInsets != NULL) {
-        xOffset -= surfaceInsets->mLeft;
-        yOffset -= surfaceInsets->mTop;
+    if (obj != NULL) {
+        Int32 l, t, r, b;
+        obj->Get(&l, &t, &r, &b);
+        xOffset -= l;
+        yOffset -= t;
 
         // Offset dirty rect for surface insets.
-        dirty->Offset(surfaceInsets->mLeft, surfaceInsets->mRight);
+        dirty->Offset(l, r);
     }
 
     Boolean isEmpty;
-    if (!(dirty->IsEmpty(&isEmpty), isEmpty) || mIsAnimating) {
+    dirty->IsEmpty(&isEmpty);
+    if (!isEmpty || mIsAnimating) {
         Boolean isEnabled;
         if (mAttachInfo->mHardwareRenderer != NULL
             && (mAttachInfo->mHardwareRenderer->IsEnabled(&isEnabled), isEnabled)) {
@@ -3922,7 +3899,8 @@ void ViewRootImpl::Draw(
 
             mBlockResizeBuffer = false;
             ((HardwareRenderer*)mAttachInfo->mHardwareRenderer.Get())->Draw(mView, mAttachInfo, this);
-        } else {
+        }
+        else {
             // If we get here with a disabled & requested hardware renderer, something went
             // wrong (an invalidate posted right before we destroyed the hardware surface
             // for instance) so we should just bail out. Locking the surface with software
@@ -3935,10 +3913,9 @@ void ViewRootImpl::Draw(
             if (mAttachInfo->mHardwareRenderer != NULL &&
                     (mAttachInfo->mHardwareRenderer->IsEnabled(&isEnabled), !isEnabled) &&
                     (mAttachInfo->mHardwareRenderer->IsRequested(&isRequested), isRequested)) {
-
                 //try {
                 ECode ec = mAttachInfo->mHardwareRenderer->InitializeIfNeeded(
-                    mWidth, mHeight, mSurface, surfaceInsets, &isEnabled);
+                    mWidth, mHeight, mSurface, obj, &isEnabled);
 
                 //} catch (OutOfResourcesException e) {
                 if (ec == (ECode) E_OUT_OF_RESOURCES_EXCEPTION) {
@@ -3952,7 +3929,9 @@ void ViewRootImpl::Draw(
                 return;
             }
 
+    Logger::I(TAG, " ViewRootImpl::Draw 8");
             if (!DrawSoftware(surface, mAttachInfo, xOffset, yOffset, scalingRequired, dirty)) {
+    Logger::I(TAG, " ViewRootImpl::Draw 9");
                 return;
             }
         }
@@ -3962,6 +3941,7 @@ void ViewRootImpl::Draw(
         mFullRedrawNeeded = TRUE;
         ScheduleTraversals();
     }
+    LocalTrace(mView, "::LEAVE << ViewRootImpl::Draw()");
 }
 
 /**
@@ -3973,33 +3953,39 @@ Boolean ViewRootImpl::DrawSoftware(
     /* [in] */ Int32 xoff,
     /* [in] */ Int32 yoff,
     /* [in] */ Boolean scalingRequired,
-    /* [in] */ CRect* dirty)
+    /* [in] */ IRect* dirty)
 {
+    LocalTrace(mView, "::ENTER << ViewRootImpl::DrawSoftware()");
     AutoPtr<ICanvas> canvas;
 
-    Int32 left = dirty->mLeft;
-    Int32 top = dirty->mTop;
-    Int32 right = dirty->mRight;
-    Int32 bottom = dirty->mBottom;
+    Int32 left, top, right, bottom, l, t, r, b;
+    dirty->Get(&left, &top, &right, &bottom);
 
+    Logger::I(TAG, " ViewRootImpl::DrawSoftware 1");
     ECode ec;
     do {
         ec = mSurface->LockCanvas(dirty, (ICanvas**)&canvas);
         if (FAILED(ec)) {
+            Logger::E(TAG, "Could not lock surface. ec=%08x", ec);
             break;
         }
         // The dirty rectangle can be modified by Surface.lockCanvas()
         //noinspection ConstantConditions
-        if (left != dirty->mLeft || top != dirty->mTop || right != dirty->mRight ||
-            bottom != dirty->mBottom) {
+        dirty->Get(&l, &t, &r, &b);
+        if (left != l || top != t || right != r || bottom != b) {
             mAttachInfo->mIgnoreDirtyState = TRUE;
         }
 
         // TODO: Do this in native
         ec = canvas->SetDensity(mDensity);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "Could not SetDensity %d. ec=%08x", mDensity, ec);
+            break;
+        }
     } while(0);
 
     if (ec == (ECode)E_OUT_OF_RESOURCES_EXCEPTION) {
+        Logger::I(TAG, " ViewRootImpl::DrawSoftware 2");
         HandleOutOfResourcesException(ec);
         return FALSE;
     }
@@ -4011,14 +3997,20 @@ Boolean ViewRootImpl::DrawSoftware(
         mLayoutRequested = TRUE;    // ask wm for a new surface next time.
         return FALSE;
     }
+    else if (FAILED(ec)) {
+        Logger::E(TAG, "Could not lock surface. ec=%08x", ec);
+        mLayoutRequested = TRUE;    // ask wm for a new surface next time.
+        assert(0);
+        return FALSE;
+    }
 
+    assert(canvas != NULL);
     if (DEBUG_ORIENTATION || DEBUG_DRAW) {
         Int32 w, h;
         canvas->GetWidth(&w);
         canvas->GetHeight(&h);
-        Logger::V(TAG, "Surface 0x%08x drawing to bitmap w=%d, h=%d",
-            surface, w, h);
-        canvas->DrawARGB(255, 255, 0, 0);
+        Logger::V(TAG, "Surface 0x%s drawing to bitmap w=%d, h=%d", TO_CSTR(surface), w, h);
+        // canvas->DrawARGB(255, 255, 0, 0);
     }
 
     // If this bitmap's format includes an alpha channel, we
@@ -4033,6 +4025,7 @@ Boolean ViewRootImpl::DrawSoftware(
     canvas->IsOpaque(&isOpaque);
     if (!isOpaque || yoff != 0 || xoff != 0) {
         if (FAILED(canvas->DrawColor(0, Elastos::Droid::Graphics::PorterDuffMode_CLEAR))) {
+        Logger::I(TAG, " ViewRootImpl::DrawSoftware 3");
             goto _DrawSoftware_;
         }
     }
@@ -4040,7 +4033,7 @@ Boolean ViewRootImpl::DrawSoftware(
     dirty->SetEmpty();
     mIsAnimating = FALSE;
     mAttachInfo->mDrawingTime = SystemClock::GetUptimeMillis();
-    VIEW_PROBE(mView)->mPrivateFlags |= View::PFLAG_DRAWN;
+    ((View*)mView.Get())->mPrivateFlags |= View::PFLAG_DRAWN;
 
     //if (DEBUG_DRAW) {
     //    AutoPtr<IContext> cxt;
@@ -4059,6 +4052,7 @@ Boolean ViewRootImpl::DrawSoftware(
     canvas->SetScreenDensity(scalingRequired ? mNoncompatDensity : 0);
     mAttachInfo->mIgnoreDirtyState = FALSE;
 
+    Logger::I(TAG, " ViewRootImpl::DrawSoftware 4");
     mView->Draw(canvas);
 
     if (!attachInfo->mSetIgnoreDirtyState) {
@@ -4078,6 +4072,7 @@ _DrawSoftware_:
         Logger::V(TAG, "Surface 0x%08x unlockCanvasAndPost", surface);
     }
 
+    LocalTrace(mView, "::LEAVE << ViewRootImpl::DrawSoftware()");
     return TRUE;
 }
 
@@ -4099,7 +4094,7 @@ ECode ViewRootImpl::GetAccessibilityFocusedDrawable(
         if (resolved) {
             Int32 resourceId;
             value->GetResourceId(&resourceId);
-            VIEW_PROBE(mView)->mContext->GetDrawable(resourceId,
+            ((View*)mView.Get())->mContext->GetDrawable(resourceId,
                 (IDrawable**)&mAttachInfo->mAccessibilityFocusDrawable);
         }
     }
@@ -4158,11 +4153,9 @@ ECode ViewRootImpl::ScrollToRectOrFocus(
             AutoPtr<IInterface> obj;
             mLastScrolledFocus->Resolve(EIID_IInterface, (IInterface**)&obj);
             lastScrolledFocus = IView::Probe(obj);
-        } else {
-            lastScrolledFocus = NULL;
         }
 
-        if ((IView*)focus->Probe(EIID_IView) != lastScrolledFocus) {
+        if (focus != lastScrolledFocus) {
             // If the focus has changed, then ignore any requests to scroll
             // to a rectangle; first we want to make sure the entire focus
             // view is visible.
@@ -4174,8 +4167,7 @@ ECode ViewRootImpl::ScrollToRectOrFocus(
         //    + " rectangle=" + rectangle + " ci=" + ci
         //    + " vi=" + vi);
 
-        if ((IView*)focus->Probe(EIID_IView) == lastScrolledFocus
-            && !mScrollMayChange && rectangle == NULL) {
+        if (focus == lastScrolledFocus && !mScrollMayChange && rectangle == NULL) {
                 //// Optimization: if the focus hasn't changed since last
                 //// time, and no layout has happened, then just leave things
                 //// as they are.
@@ -4187,6 +4179,7 @@ ECode ViewRootImpl::ScrollToRectOrFocus(
             // within the visible part of the window and, if not, apply
             // a pan so it can be seen.
             //
+            mLastScrolledFocus = NULL;
             IWeakReferenceSource* source = IWeakReferenceSource::Probe(focus);
             source->GetWeakReference((IWeakReference**)&mLastScrolledFocus);
             mScrollMayChange = FALSE;
@@ -4209,11 +4202,9 @@ ECode ViewRootImpl::ScrollToRectOrFocus(
                     //if (DEBUG_INPUT_RESIZE) Logger::V(TAG, "Focus " + focus
                     //    + ": focusRect=" + mTempRect.toShortString());
 
-                    IViewGroup* viewGroup =
-                        (IViewGroup*)mView->Probe(EIID_IViewGroup);
+                    IViewGroup* viewGroup = (IViewGroup*)mView->Probe(EIID_IViewGroup);
                     if (viewGroup) {
-                        viewGroup->OffsetDescendantRectToMyCoords(
-                            (IView*)focus->Probe(EIID_IView), (IRect*)mTempRect);
+                        viewGroup->OffsetDescendantRectToMyCoords(focus, (IRect*)mTempRect);
                     }
 
                     //if (DEBUG_INPUT_RESIZE) Logger::V(TAG,
@@ -4236,9 +4227,11 @@ ECode ViewRootImpl::ScrollToRectOrFocus(
                     //    "Focus window visible rect: "
                     //    + mTempRect.toShortString());
 
-                    Int32 height, tempHeight;
+                    Int32 height, tempHeight, t, b;
                     mView->GetHeight(&height);
                     mTempRect->GetHeight(&tempHeight);
+                    mTempRect->GetTop(&t);
+                    mTempRect->GetBottom(&b);
                     if (tempHeight > (height - vi->mTop - vi->mBottom)) {
                         // If the focus simply is not going to fit, then
                         // best is probably just to leave things as-is.
@@ -4247,15 +4240,15 @@ ECode ViewRootImpl::ScrollToRectOrFocus(
                             Logger::D(TAG, "Too tall; leaving scrollY=%d", scrollY);
                         }
                     }
-                    else if ((mTempRect->mTop-scrollY) < vi->mTop) {
-                        scrollY -= vi->mTop - (mTempRect->mTop-scrollY);
+                    else if ((t - scrollY) < vi->mTop) {
+                        scrollY -= vi->mTop - (t - scrollY);
                         if (DEBUG_INPUT_RESIZE) {
                             Logger::D(TAG, "Top covered; scrollY=%d", scrollY);
                         }
                     }
-                    else if ((mTempRect->mBottom - scrollY) >
+                    else if ((b - scrollY) >
                         (height - vi->mBottom)) {
-                        scrollY += (mTempRect->mBottom - scrollY)
+                        scrollY += (b - scrollY)
                             - (height - vi->mBottom);
 
                         if (DEBUG_INPUT_RESIZE) {
@@ -4276,7 +4269,7 @@ ECode ViewRootImpl::ScrollToRectOrFocus(
             if (mScroller == NULL) {
                 AutoPtr<IContext> ctx;
                 mView->GetContext((IContext**)&ctx);
-                CScroller::NewByFriend(ctx, (CScroller**)&mScroller);
+                CScroller::New(ctx, (IScroller**)&mScroller);
             }
             mScroller->StartScroll(0, mScrollY, 0, scrollY - mScrollY);
         }
@@ -4455,9 +4448,9 @@ ECode ViewRootImpl::RecomputeViewAttributes(
 
 ECode ViewRootImpl::DispatchDetachedFromWindow()
 {
-    if (mView != NULL && VIEW_PROBE(mView)->mAttachInfo != NULL) {
+    if (mView != NULL && ((View*)mView.Get())->mAttachInfo != NULL) {
         ((ViewTreeObserver*)mAttachInfo->mTreeObserver.Get())->DispatchOnWindowAttachedChange(FALSE);
-        VIEW_PROBE(mView)->DispatchDetachedFromWindow();
+        ((View*)mView.Get())->DispatchDetachedFromWindow();
     }
 
     mAccessibilityInteractionConnectionManager->EnsureNoConnection();
@@ -4471,7 +4464,7 @@ ECode ViewRootImpl::DispatchDetachedFromWindow()
 
     SetAccessibilityFocus(NULL, NULL);
 
-    VIEW_PROBE(mView)->AssignParent(NULL);
+    ((View*)mView.Get())->AssignParent(NULL);
     mView = NULL;
     mAttachInfo->mRootView = NULL;
 
@@ -4505,22 +4498,23 @@ ECode ViewRootImpl::DispatchDetachedFromWindow()
 }
 
 ECode ViewRootImpl::UpdateConfiguration(
-    /* [in] */ IConfiguration* config,
+    /* [in] */ IConfiguration* _config,
     /* [in] */ Boolean force)
 {
-    //if (DEBUG_CONFIGURATION) Logger::V(TAG,
-    //    "Applying new config to window "
-    //    + mWindowAttributes.getTitle()
-    //    + ": " + config);
+    AutoPtr<IConfiguration> config = _config;
+    if (DEBUG_CONFIGURATION) {
+        AutoPtr<ICharSequence> csq;
+        mWindowAttributes->GetTitle((ICharSequence**)&csq);
+        Logger::V(TAG, "Applying new config to window %s: %s", TO_CSTR(csq), TO_CSTR(config));
+    }
 
     AutoPtr<ICompatibilityInfo> ci;
     mDisplayAdjustments->GetCompatibilityInfo((ICompatibilityInfo**)&ci);
-    Boolean equal;
-    IObject::Probe(ci)->Equals(CCompatibilityInfo::DEFAULT_COMPATIBILITY_INFO, &equal);
+    Boolean equal = Object::Equals(ci, CCompatibilityInfo::DEFAULT_COMPATIBILITY_INFO);
     if (!equal) {
-        AutoPtr<IConfiguration> _config;
-        CConfiguration::New(config, (IConfiguration**)&_config);
-        config = _config;
+        AutoPtr<IConfiguration> temp;
+        CConfiguration::New(config, (IConfiguration**)&temp);
+        config = temp;
         ci->ApplyToConfiguration(mNoncompatDensity, config);
     }
 
@@ -4529,7 +4523,7 @@ ECode ViewRootImpl::UpdateConfiguration(
 
         List<AutoPtr<IComponentCallbacks> >::Iterator iter;
         for (iter = sConfigCallbacks.Begin(); iter != sConfigCallbacks.End(); ++iter) {
-            iter->Get()->OnConfigurationChanged(config);
+            (*iter)->OnConfigurationChanged(config);
         }
     }
 
@@ -4547,7 +4541,7 @@ ECode ViewRootImpl::UpdateConfiguration(
         assert(NULL != config);
 
         Int32 result = 0;
-        mLastConfiguration->Diff((CConfiguration*)config, &result);
+        mLastConfiguration->Diff((CConfiguration*)config.Get(), &result);
 
         if (force || (result != 0)) {
             Int32 lastLayoutDirection;
@@ -4580,7 +4574,6 @@ Boolean ViewRootImpl::IsViewDescendantOf(
 
     AutoPtr<IViewParent> theParent;
     child->GetParent((IViewParent**)&theParent);
-
     return IViewGroup::Probe(theParent) && IsViewDescendantOf(IView::Probe(theParent), parent);
 }
 
@@ -4631,12 +4624,6 @@ ECode ViewRootImpl::EnsureTouchMode(
     if (!IsInLocalFocusMode()) {
         mWindowSession->SetInTouchMode(inTouchMode);
     }
-
-    //try {
-    //    mWindowSession.setInTouchMode(inTouchMode);
-    //} catch (RemoteException e) {
-    //    throw new RuntimeException(e);
-    //}
 
     // handle the change
     return EnsureTouchModeLocally(inTouchMode);
@@ -4721,25 +4708,25 @@ AutoPtr<IViewGroup> ViewRootImpl::FindAncestorToTakeFocusInTouchMode(
     AutoPtr<IViewParent> parent;
     focused->GetParent((IViewParent**)&parent);
 
+    IView* view;
+    Int32 focusability;
+    Boolean bval;
     AutoPtr<IViewGroup> vgParent = IViewGroup::Probe(parent);
     while (vgParent) {
-        Int32 focusability;
+        view = IView::Probe(vgParent);
         vgParent->GetDescendantFocusability(&focusability);
-        Boolean isFocusable;
-        IView::Probe(vgParent)->IsFocusableInTouchMode(&isFocusable);
-        if (focusability == ViewGroup::FOCUS_AFTER_DESCENDANTS
-            && isFocusable) {
+        view->IsFocusableInTouchMode(&bval);
+        if (focusability == ViewGroup::FOCUS_AFTER_DESCENDANTS && bval) {
             return vgParent;
         }
 
-        Boolean isRootNamespace;
-        IView::Probe(vgParent)->IsRootNamespace(&isRootNamespace);
-        if (isRootNamespace) {
+        view->IsRootNamespace(&bval);
+        if (bval) {
             return NULL;
         }
         else {
             parent = NULL;
-            IView::Probe(vgParent)->GetParent((IViewParent**)&parent);
+            view->GetParent((IViewParent**)&parent);
             vgParent = IViewGroup::Probe(parent);
         }
     }
@@ -4797,16 +4784,15 @@ void ViewRootImpl::DeliverInputEvent(
         mInputEventConsistencyVerifier->OnInputEvent(q->mEvent, 0);
     }
 
-    InputStage* stage;
-    if (q->ShouldSendToSynthesizer()) {
-        stage = mSyntheticInputStage;
-    } else {
+    InputStage* stage = mSyntheticInputStage;
+    if (!q->ShouldSendToSynthesizer()) {
         stage = q->ShouldSkipIme() ? mFirstPostImeInputStage : mFirstInputStage;
     }
 
     if (stage != NULL) {
         stage->Deliver(q);
-    } else {
+    }
+    else {
         FinishInputEvent(q);
     }
 }
@@ -5017,7 +5003,7 @@ ECode ViewRootImpl::HandleDispatchSystemUiVisibilityChanged(
     }
 
     if (args->mLocalChanges != 0) {
-        VIEW_PROBE(mView)->UpdateLocalSystemUiVisibility(args->mLocalValue, args->mLocalChanges);
+        ((View*)mView.Get())->UpdateLocalSystemUiVisibility(args->mLocalValue, args->mLocalChanges);
     }
 
     Int32 visibility = args->mGlobalVisibility & IView::SYSTEM_UI_CLEARABLE_FLAGS;
@@ -5120,7 +5106,7 @@ Int32 ViewRootImpl::RelayoutWindow(
 
     if (params != NULL) {
         if (DBG) {
-            Logger::D(TAG, "WindowLayout in layoutWindow:" /*+ params*/);
+            Logger::D(TAG, "WindowLayout in layoutWindow: %s", TO_CSTR(params));
         }
     }
 
@@ -5146,9 +5132,8 @@ Int32 ViewRootImpl::RelayoutWindow(
     mView->GetMeasuredWidth(&measuredWidth);
     mView->GetMeasuredHeight(&measuredHeight);
 
-    Logger::I(TAG, " ==== Before Relayout");
     mWindowSession->Relayout(
-        (IIWindow*)mWindow, mSeq, params,
+        mWindow, mSeq, params,
         (Int32)(measuredWidth * appScale + 0.5f),
         (Int32)(measuredHeight * appScale + 0.5f),
         viewVisibility, insetsPending ? IWindowManagerGlobal::RELAYOUT_INSETS_PENDING : 0,
@@ -5157,7 +5142,6 @@ Int32 ViewRootImpl::RelayoutWindow(
         (IRect**)&winFrame, (IRect**)&pendingOverscanInsets, (IRect**)&pendingContentInsets,
         (IRect**)&pendingVisibleInsets, (IRect**)&pendingStableInsets,
         (IConfiguration**)&pendingConfiguration, &relayoutResult, (ISurface**)&surface);
-    Logger::I(TAG, " ==== After Relayout");
 
     if (mWinFrame != NULL && winFrame != NULL)
         mWinFrame->Set(winFrame);
@@ -6102,7 +6086,7 @@ ECode ViewRootImpl::RequestSendAccessibilityEvent(
             IAccessibilityRecord::Probe(event)->GetSourceNodeId(&sourceNodeId);
             Int32 accessibilityViewId = 0;
             CAccessibilityNodeInfo::GetAccessibilityViewId(sourceNodeId);
-            AutoPtr<IView> source = VIEW_PROBE(mView)->FindViewByAccessibilityId(accessibilityViewId);
+            AutoPtr<IView> source = ((View*)mView.Get())->FindViewByAccessibilityId(accessibilityViewId);
             if (source != NULL) {
                 AutoPtr<IAccessibilityNodeProvider> provider;
                 source->GetAccessibilityNodeProvider((IAccessibilityNodeProvider**)&provider);

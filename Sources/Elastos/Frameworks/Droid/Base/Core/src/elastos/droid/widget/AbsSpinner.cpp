@@ -78,7 +78,7 @@ AbsSpinner::AbsSpinner()
     , mSelectionRightPadding(0)
     , mSelectionBottomPadding(0)
 {
-    CRect::NewByFriend((CRect**)&mSpinnerPadding);
+    CRect::New((IRect**)&mSpinnerPadding);
     mRecycler = new RecycleBin(this);
 }
 
@@ -225,14 +225,11 @@ void AbsSpinner::OnMeasure(
     Int32 widthSize;
     Int32 heightSize;
 
-    mSpinnerPadding->mLeft = mPaddingLeft > mSelectionLeftPadding ? mPaddingLeft
-            : mSelectionLeftPadding;
-    mSpinnerPadding->mTop = mPaddingTop > mSelectionTopPadding ? mPaddingTop
-            : mSelectionTopPadding;
-    mSpinnerPadding->mRight = mPaddingRight > mSelectionRightPadding ? mPaddingRight
-            : mSelectionRightPadding;
-    mSpinnerPadding->mBottom = mPaddingBottom > mSelectionBottomPadding ? mPaddingBottom
-            : mSelectionBottomPadding;
+    Int32 l = mPaddingLeft > mSelectionLeftPadding ? mPaddingLeft : mSelectionLeftPadding;
+    Int32 t = mPaddingTop > mSelectionTopPadding ? mPaddingTop : mSelectionTopPadding;
+    Int32 r = mPaddingRight > mSelectionRightPadding ? mPaddingRight : mSelectionRightPadding;
+    Int32 b = mPaddingBottom > mSelectionBottomPadding ? mPaddingBottom : mSelectionBottomPadding;
+    mSpinnerPadding->Set(l, t, r, b);
 
     if (mDataChanged) {
         HandleDataChanged();
@@ -273,8 +270,8 @@ void AbsSpinner::OnMeasure(
             }
             MeasureChild(view, widthMeasureSpec, heightMeasureSpec);
 
-            preferredHeight = GetChildHeight(view) + mSpinnerPadding->mTop + mSpinnerPadding->mBottom;
-            preferredWidth = GetChildWidth(view) + mSpinnerPadding->mLeft + mSpinnerPadding->mRight;
+            preferredHeight = GetChildHeight(view) + t + b;
+            preferredWidth = GetChildWidth(view) + l + r;
 
             needsMeasuring = FALSE;
         }
@@ -282,9 +279,9 @@ void AbsSpinner::OnMeasure(
 
     if (needsMeasuring) {
         // No views -- just use padding
-        preferredHeight = mSpinnerPadding->mTop + mSpinnerPadding->mBottom;
+        preferredHeight = t + b;
         if (widthMode == View::MeasureSpec::UNSPECIFIED) {
-            preferredWidth = mSpinnerPadding->mLeft + mSpinnerPadding->mRight;
+            preferredWidth = l + r;
         }
     }
 

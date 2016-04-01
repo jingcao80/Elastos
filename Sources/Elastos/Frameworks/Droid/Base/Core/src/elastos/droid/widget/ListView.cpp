@@ -3300,7 +3300,7 @@ void ListView::DrawOverscrollFooter(
     canvas->Restore();
 }
 
-void ListView::DispatchDraw(
+ECode ListView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     if (mCachingStarted) {
@@ -3477,7 +3477,7 @@ void ListView::DispatchDraw(
         }
     }
 
-    AbsListView::DispatchDraw(canvas);
+    return AbsListView::DispatchDraw(canvas);
 }
 
 Boolean ListView::DrawChild(

@@ -279,7 +279,7 @@ PopupWindow::PopupWindow()
 {
     mDrawingLocation = ArrayOf<Int32>::Alloc(2);
     mScreenLocation = ArrayOf<Int32>::Alloc(2);
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mTempRect));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTempRect));
     mOnScrollChangedListener = new PopupWindowScrollChangedListener(this);
 }
 
@@ -985,7 +985,7 @@ AutoPtr<IWindowManagerLayoutParams> PopupWindow::CreatePopupLayout(
     CString::New(String("PopupWindow:") + StringUtils::ToHexString(hashCode), (ICharSequence**)&title);
     p->SetTitle(title);
 
-    return p;
+    return (IWindowManagerLayoutParams*)p.Get();
 }
 
 Int32 PopupWindow::ComputeFlags(
@@ -1091,9 +1091,9 @@ Boolean PopupWindow::FindDropDownPosition(
 
     anchor->GetLocationOnScreen(mScreenLocation);
 
-    AutoPtr<CRect> displayFrame;
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&displayFrame));
-    anchor->GetWindowVisibleDisplayFrame((IRect*)displayFrame.Get());
+    AutoPtr<IRect> displayFrame;
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&displayFrame));
+    anchor->GetWindowVisibleDisplayFrame(displayFrame);
 
     const Int32 screenY = (*mScreenLocation)[1] + anchorHeight + yoff;
 
@@ -1101,8 +1101,9 @@ Boolean PopupWindow::FindDropDownPosition(
     anchor->GetRootView((IView**)&root);
     Int32 width;
     root->GetWidth(&width);
-    if (screenY + mPopupHeight > displayFrame->mBottom
-                || p->mX + mPopupWidth - width > 0) {
+    Int32 l, t, r, b;
+    displayFrame->Get(&l, &t, &r, &b);
+    if (screenY + mPopupHeight > b|| p->mX + mPopupWidth - width > 0) {
         // if the drop down disappears at the bottom of the screen. we try to
         // scroll a parent scrollview or move the drop down back up on top of
         // the edit box
@@ -1133,8 +1134,8 @@ Boolean PopupWindow::FindDropDownPosition(
         // determine whether there is more space above or below the anchor
         anchor->GetLocationOnScreen(mScreenLocation);
 
-        onTop = (displayFrame->mBottom - (*mScreenLocation)[1] - anchorHeight - yoff) <
-                ((*mScreenLocation)[1] - yoff - displayFrame->mTop);
+        onTop = (b - (*mScreenLocation)[1] - anchorHeight - yoff) <
+                ((*mScreenLocation)[1] - yoff - t);
         if (onTop) {
             p->mGravity = IGravity::LEFT | IGravity::BOTTOM;
             Int32 rootH;
@@ -1147,14 +1148,14 @@ Boolean PopupWindow::FindDropDownPosition(
     }
 
     if (mClipToScreen) {
-        Int32 displayFrameWidth = displayFrame->mRight - displayFrame->mLeft;
+        Int32 displayFrameWidth = r - l;
 
         const Int32 right = p->mX + p->mWidth;
         if (right > displayFrameWidth) {
             p->mX -= right - displayFrameWidth;
         }
-        if (p->mX < displayFrame->mLeft) {
-            p->mX = displayFrame->mLeft;
+        if (p->mX < l) {
+            p->mX = l;
             p->mWidth = Elastos::Core::Math::Min(p->mWidth, displayFrameWidth);
         }
 
@@ -1165,7 +1166,7 @@ Boolean PopupWindow::FindDropDownPosition(
             }
         }
         else {
-            p->mY = Elastos::Core::Math::Max(p->mY, displayFrame->mTop);
+            p->mY = Elastos::Core::Math::Max(p->mY, t);
         }
     }
 
@@ -1207,15 +1208,16 @@ ECode PopupWindow::GetMaxAvailableHeight(
 
     assert(anchor != NULL);
 
-    AutoPtr<CRect> displayFrame;
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&displayFrame));
-    anchor->GetWindowVisibleDisplayFrame((IRect*)displayFrame.Get());
-
+    AutoPtr<IRect> displayFrame;
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&displayFrame));
+    anchor->GetWindowVisibleDisplayFrame(displayFrame);
     anchor->GetLocationOnScreen(mDrawingLocation);
 
     AutoPtr<ArrayOf<Int32> > anchorPos = mDrawingLocation;
+    Int32 l, t, r, b;
+    displayFrame->Get(&l, &t, &r, &b);
 
-    Int32 bottomEdge = displayFrame->mBottom;
+    Int32 bottomEdge = b;
     if (ignoreBottomDecorations) {
         AutoPtr<IContext> context;
         anchor->GetContext((IContext**)&context);
@@ -1228,7 +1230,7 @@ ECode PopupWindow::GetMaxAvailableHeight(
     Int32 height;
     anchor->GetHeight(&height);
     Int32 distanceToBottom = bottomEdge - ((*anchorPos)[1] + height) - yOffset;
-    Int32 distanceToTop = (*anchorPos)[1] - displayFrame->mTop + yOffset;
+    Int32 distanceToTop = (*anchorPos)[1] - t + yOffset;
 
     // anchorPos[1] is distance from anchor to top of screen
     Int32 returnedHeight = Elastos::Core::Math::Max(distanceToBottom, distanceToTop);
@@ -1285,8 +1287,7 @@ ECode PopupWindow::Update()
 
     AutoPtr<IViewGroupLayoutParams> p;
     mPopupView->GetLayoutParams((IViewGroupLayoutParams**)&p);
-    CWindowManagerLayoutParams* lp =
-            (CWindowManagerLayoutParams*)IWindowManagerLayoutParams::Probe(p);
+    CWindowManagerLayoutParams* lp = (CWindowManagerLayoutParams*)IWindowManagerLayoutParams::Probe(p);
 
     Boolean update = FALSE;
 
@@ -1316,8 +1317,7 @@ ECode PopupWindow::Update(
 {
     AutoPtr<IViewGroupLayoutParams> p;
     mPopupView->GetLayoutParams((IViewGroupLayoutParams**)&p);
-    CWindowManagerLayoutParams* lp =
-            (CWindowManagerLayoutParams*)IWindowManagerLayoutParams::Probe(p);
+    CWindowManagerLayoutParams* lp = (CWindowManagerLayoutParams*)IWindowManagerLayoutParams::Probe(p);
 
     return Update(lp->mX, lp->mY, width, height, FALSE);
 }
@@ -1355,8 +1355,7 @@ ECode PopupWindow::Update(
 
     AutoPtr<IViewGroupLayoutParams> p;
     mPopupView->GetLayoutParams((IViewGroupLayoutParams**)&p);
-    CWindowManagerLayoutParams* lp =
-            (CWindowManagerLayoutParams*)IWindowManagerLayoutParams::Probe(p);
+    CWindowManagerLayoutParams* lp = (CWindowManagerLayoutParams*)IWindowManagerLayoutParams::Probe(p);
 
     Boolean update = force;
 
@@ -1456,8 +1455,8 @@ void PopupWindow::Update(
 
     AutoPtr<IViewGroupLayoutParams> p;
     mPopupView->GetLayoutParams((IViewGroupLayoutParams**)&p);
-    CWindowManagerLayoutParams* lp =
-            (CWindowManagerLayoutParams*)IWindowManagerLayoutParams::Probe(p);
+    IWindowManagerLayoutParams* wmlp = IWindowManagerLayoutParams::Probe(p);
+    CWindowManagerLayoutParams* lp = (CWindowManagerLayoutParams*)wmlp;
 
     if (updateDimension) {
         if (width == -1) {
@@ -1478,12 +1477,10 @@ void PopupWindow::Update(
     Int32 y = lp->mY;
 
     if (updateLocation) {
-        UpdateAboveAnchor(FindDropDownPosition(anchor,
-                (IWindowManagerLayoutParams*)lp, xoff, yoff, gravity));
+        UpdateAboveAnchor(FindDropDownPosition(anchor, wmlp, xoff, yoff, gravity));
     }
     else {
-        UpdateAboveAnchor(FindDropDownPosition(anchor,
-                (IWindowManagerLayoutParams*)lp, mAnchorXoff, mAnchorYoff, mAnchoredGravity));
+        UpdateAboveAnchor(FindDropDownPosition(anchor, wmlp, mAnchorXoff, mAnchorYoff, mAnchoredGravity));
     }
 
     Update(lp->mX, lp->mY, width, height, x != lp->mX || y != lp->mY);
@@ -1498,8 +1495,9 @@ void PopupWindow::UnregisterForScrollChanged()
     if (anchor != NULL) {
         AutoPtr<IViewTreeObserver> vto;
         anchor->GetViewTreeObserver((IViewTreeObserver**)&vto);
-        if (vto != NULL)
+        if (vto != NULL) {
             vto->RemoveOnScrollChangedListener(mOnScrollChangedListener);
+        }
     }
     mAnchor = NULL;
 }

@@ -120,7 +120,7 @@ ScrollView::ScrollView()
     , mActivePointerId(INVALID_POINTER)
     , mNestedYOffset(0)
 {
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mTempRect));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTempRect));
 
     mScrollOffset = ArrayOf<Int32>::Alloc(2);
     mScrollConsumed = ArrayOf<Int32>::Alloc(2);
@@ -1181,9 +1181,11 @@ ECode ScrollView::PageScroll(
     Int32 height = 0;
     GetHeight(&height);
 
-    Int32 sy = 0;
+    Int32 sy = 0, top = 0;
     if (down) {
-        mTempRect->mTop = (GetScrollY(&sy), sy) + height;
+        GetScrollY(&sy);
+        top = sy + height;
+        mTempRect->SetTop(top);
         Int32 count = 0;
         GetChildCount(&count);
         if (count > 0) {
@@ -1191,21 +1193,25 @@ ECode ScrollView::PageScroll(
             GetChildAt(count - 1, (IView**)&view);
             Int32 bottom;
             view->GetBottom(&bottom);
-            if (mTempRect->mTop + height > bottom) {
-                mTempRect->mTop = bottom - height;
+            if (top + height > bottom) {
+                mTempRect->SetTop(bottom - height);
             }
         }
     }
     else {
-        mTempRect->mTop = (GetScrollY(&sy), sy) - height;
-        if (mTempRect->mTop < 0) {
-            mTempRect->mTop = 0;
+        GetScrollY(&sy);
+        top = sy - height;
+        mTempRect->SetTop(top);
+        if (top < 0) {
+            mTempRect->SetTop(0);
         }
     }
-    mTempRect->mBottom = mTempRect->mTop + height;
 
-    *result = ScrollAndFocus(direction,
-            mTempRect->mTop, mTempRect->mBottom);
+    mTempRect->GetTop(&top);
+    Int32 bottom = top + height;
+    mTempRect->SetBottom(bottom);
+
+    *result = ScrollAndFocus(direction, top, bottom);
     return NOERROR;
 }
 
@@ -1218,8 +1224,8 @@ ECode ScrollView::FullScroll(
     Int32 height = 0;
     GetHeight(&height);
 
-    mTempRect->mTop = 0;
-    mTempRect->mBottom = height;
+    mTempRect->SetTop(0);
+    mTempRect->SetBottom(height);
 
     if (down) {
         Int32 count = 0;
@@ -1227,15 +1233,18 @@ ECode ScrollView::FullScroll(
         if (count > 0) {
             AutoPtr<IView> view;
             GetChildAt(count - 1, (IView**)&view);
-            view->GetBottom(&mTempRect->mBottom);
-
-            mTempRect->mBottom += mPaddingBottom;
-            mTempRect->mTop = mTempRect->mBottom - height;
+            Int32 bottom;
+            view->GetBottom(&bottom);
+            bottom += mPaddingBottom;
+            mTempRect->SetBottom(bottom);
+            mTempRect->SetTop(bottom - height);
         }
     }
 
-    *result = ScrollAndFocus(direction,
-            mTempRect->mTop, mTempRect->mBottom);
+    Int32 top, bottom;
+    mTempRect->GetTop(&top);
+    mTempRect->GetBottom(&bottom);
+    *result = ScrollAndFocus(direction, top, bottom);
     return NOERROR;
 }
 
@@ -1370,8 +1379,10 @@ Boolean ScrollView::IsWithinDeltaOfScreen(
 
     Int32 sy = 0;
     GetScrollY(&sy);
-    return (mTempRect->mBottom + delta) >= sy
-            && (mTempRect->mTop - delta) <= (sy + height);
+    Int32 top, bottom;
+    mTempRect->GetTop(&top);
+    mTempRect->GetBottom(&bottom);
+    return (bottom + delta) >= sy && (top - delta) <= (sy + height);
 }
 
 void ScrollView::DoScrollY(

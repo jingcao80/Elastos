@@ -64,7 +64,7 @@ EdgeEffect::EdgeEffect()
     , mState(STATE_IDLE)
     , mPullDistance(0.0f)
     , mRadius(0.0f)
-    , mBaseGlowScale(0.0f)
+    , mBaseGlowScale(1.0f)
     , mDisplacement(0.5f)
     , mTargetDisplacement(0.5f)
 {

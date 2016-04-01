@@ -81,9 +81,9 @@ const Int64 StackView::MIN_TIME_BETWEEN_SCROLLS;
 
 AutoPtr<IRect> InitStatic()
 {
-    AutoPtr<CRect> temp;
-    CRect::NewByFriend((CRect**)&temp);
-    return (IRect*)temp.Get();
+    AutoPtr<IRect> temp;
+    CRect::New((IRect**)&temp);
+    return temp;
 }
 
 AutoPtr<IRect> StackView::sStackInvalidateRect = InitStatic();
@@ -848,7 +848,7 @@ void StackView::ApplyTransformForChildAtIndex(
     //do nothing
 }
 
-void StackView::DispatchDraw(
+ECode StackView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     Boolean expandClipRegion = FALSE;
@@ -888,6 +888,7 @@ void StackView::DispatchDraw(
     } else {
         AdapterViewAnimator::DispatchDraw(canvas);
     }
+    return NOERROR;
 }
 
 void StackView::OnLayout()

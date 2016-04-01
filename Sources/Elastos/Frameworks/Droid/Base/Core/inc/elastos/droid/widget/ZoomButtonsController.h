@@ -330,7 +330,7 @@ private:
     /** Whether the container has been added to the window manager. */
     Boolean mIsVisible;
 
-    AutoPtr<CRect> mTempRect;// = new Rect();
+    AutoPtr<IRect> mTempRect;// = new Rect();
     AutoPtr<ArrayOf<Int32> > mTempIntArray;// = new Int32[2];
 
     AutoPtr<IOnZoomListener> mCallback;

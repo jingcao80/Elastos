@@ -66,9 +66,9 @@ const Int32 KeyCharacterMap::CHAR_SPACE = ' ';
 
 static AutoPtr<ISparseInt32Array> InitSparse()
 {
-    AutoPtr<CSparseInt32Array> array;
-    CSparseInt32Array::NewByFriend((CSparseInt32Array**)&array);
-    return (ISparseInt32Array*)array.Get();
+    AutoPtr<ISparseInt32Array> array;
+    CSparseInt32Array::New((ISparseInt32Array**)&array);
+    return array.Get();
 }
 
 AutoPtr<ISparseInt32Array> KeyCharacterMap::sCombiningToAccent = InitSparse();

@@ -65,7 +65,7 @@ private:
         // SurfaceView.dispatchDraw implementation punches a hole in the view hierarchy.
         // Disable this by making this a no-op.
         //@Override
-        CARAPI_(void) DispatchDraw(
+        CARAPI DispatchDraw(
             /* [in] */ ICanvas* canvas);
     };
 

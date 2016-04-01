@@ -14,6 +14,7 @@
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IConfiguration;
+using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Graphics::CPoint;
 using Elastos::Droid::Utility::CDisplayMetrics;
 using Elastos::Droid::Utility::IDisplayMetrics;
@@ -147,10 +148,12 @@ ECode ViewConfiguration::constructor(
     assert(win != NULL);
     AutoPtr<IDisplay> display;
     win->GetDefaultDisplay((IDisplay**)&display);
-    AutoPtr<CPoint> size;
-    CPoint::NewByFriend((CPoint**)&size);
-    display->GetRealSize(size.Get());
-    mMaximumDrawingCacheSize = 4 * size->mX * size->mY;
+    AutoPtr<IPoint> size;
+    CPoint::New((IPoint**)&size);
+    display->GetRealSize(size);
+    Int32 rx, ry;
+    size->Get(&rx, &ry);
+    mMaximumDrawingCacheSize = 4 * rx * ry;
 
     mOverscrollDistance = (Int32)(sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
     mOverflingDistance = (Int32)(sizeAndDensity * OVERFLING_DISTANCE + 0.5f);

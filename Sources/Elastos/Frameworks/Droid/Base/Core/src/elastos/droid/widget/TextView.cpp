@@ -276,7 +276,7 @@ Drawables::Drawables()
     , mDrawablePadding(0)
     , mDrawableSaved(DRAWABLE_NONE)
 {
-    CRect::NewByFriend((CRect**)&mCompoundRect);
+    CRect::New((IRect**)&mCompoundRect);
 }
 
 Drawables::Drawables(
@@ -302,7 +302,7 @@ Drawables::Drawables(
     , mDrawablePadding(0)
     , mDrawableSaved(DRAWABLE_NONE)
 {
-    CRect::NewByFriend((CRect**)&mCompoundRect);
+    CRect::New((IRect**)&mCompoundRect);
     AutoPtr<IApplicationInfo> info;
     context->GetApplicationInfo((IApplicationInfo**)&info);
     Int32 targetSdkVersion;

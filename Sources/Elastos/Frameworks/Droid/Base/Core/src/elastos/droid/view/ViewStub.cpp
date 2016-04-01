@@ -147,9 +147,10 @@ ECode ViewStub::Draw(
     return NOERROR;
 }
 
-void ViewStub::DispatchDraw(
+ECode ViewStub::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
+    return NOERROR;
 }
 
 ECode ViewStub::SetVisibility(
@@ -184,9 +185,9 @@ ECode ViewStub::Inflate(
     AutoPtr<IViewParent> viewParent;
     GetParent((IViewParent**)&viewParent);
 
-    if (viewParent != NULL && IViewGroup::Probe(viewParent) != NULL) {
+    IViewGroup* parent = IViewGroup::Probe(viewParent);
+    if (parent != NULL) {
         if (mLayoutResource != 0) {
-            AutoPtr<IViewGroup> parent = IViewGroup::Probe(viewParent);
             AutoPtr<ILayoutInflater> factory;
             if (mInflater != NULL) {
                 factory = mInflater;

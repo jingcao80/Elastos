@@ -565,7 +565,7 @@ ECode SurfaceView::Draw(
     return View::Draw(canvas);
 }
 
-void SurfaceView::DispatchDraw(
+ECode SurfaceView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     if (mWindowType != IWindowManagerLayoutParams::TYPE_APPLICATION_PANEL) {
@@ -576,7 +576,7 @@ void SurfaceView::DispatchDraw(
         }
     }
 
-    View::DispatchDraw(canvas);
+    return View::DispatchDraw(canvas);
 }
 
 ECode SurfaceView::SetZOrderMediaOverlay(

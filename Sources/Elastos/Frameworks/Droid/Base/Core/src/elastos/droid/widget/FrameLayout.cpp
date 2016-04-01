@@ -118,8 +118,8 @@ FrameLayout::FrameLayout()
     , mForegroundGravity(IGravity::FILL)
     , mForegroundBoundsChanged(FALSE)
 {
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mSelfBounds));
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mOverlayBounds));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mSelfBounds));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mOverlayBounds));
 }
 
 ECode FrameLayout::constructor(

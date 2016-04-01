@@ -20,6 +20,7 @@ namespace View {
 
 static const size_t EVENT_BUFFER_SIZE = 100;
 static const String TAG("NativeDisplayEventReceiver");
+static const Boolean DBG = FALSE;
 
 NativeDisplayEventReceiver::NativeDisplayEventReceiver(
     /* [in] */ DisplayEventReceiver* receiverObj,
@@ -28,7 +29,7 @@ NativeDisplayEventReceiver::NativeDisplayEventReceiver(
     , mMessageQueue(messageQueue)
     , mWaitingForVsync(false)
 {
-    Logger::V(TAG, "receiver %p ~ Initializing input event receiver.", this);
+    if (DBG) Logger::V(TAG, "receiver %p ~ Initializing input event receiver.", this);
 }
 
 NativeDisplayEventReceiver::~NativeDisplayEventReceiver()
@@ -44,8 +45,8 @@ android::status_t NativeDisplayEventReceiver::initialize()
         return result;
     }
 
-    int rc = mMessageQueue->GetLooper()->addFd(mReceiver.getFd(), 0, android::Looper::EVENT_INPUT,
-            this, NULL);
+    int rc = mMessageQueue->GetLooper()->addFd(mReceiver.getFd(), 0,
+        android::Looper::EVENT_INPUT, this, NULL);
     if (rc < 0) {
         return android::UNKNOWN_ERROR;
     }
@@ -54,7 +55,7 @@ android::status_t NativeDisplayEventReceiver::initialize()
 
 void NativeDisplayEventReceiver::dispose()
 {
-    Logger::V(TAG, "receiver %p ~ Disposing display event receiver.", this);
+    if (DBG) Logger::V(TAG, "receiver %p ~ Disposing display event receiver.", this);
 
     if (!mReceiver.initCheck()) {
         mMessageQueue->GetLooper()->removeFd(mReceiver.getFd());
@@ -64,7 +65,7 @@ void NativeDisplayEventReceiver::dispose()
 android::status_t NativeDisplayEventReceiver::scheduleVsync()
 {
     if (!mWaitingForVsync) {
-        Logger::V(TAG, "receiver %p ~ Scheduling vsync.", this);
+        if (DBG) Logger::V(TAG, "receiver %p ~ Scheduling vsync.", this);
 
         // Drain all pending events.
         nsecs_t vsyncTimestamp;
@@ -100,8 +101,8 @@ int NativeDisplayEventReceiver::handleEvent(int receiveFd, int events, void* dat
     int32_t vsyncDisplayId;
     uint32_t vsyncCount;
     if (!processPendingEvents(&vsyncTimestamp, &vsyncDisplayId, &vsyncCount)) {
-        Logger::V(TAG, "receiver %p ~ Vsync pulse: timestamp=%lld, id=%d, count=%d",
-                this, vsyncTimestamp, vsyncDisplayId, vsyncCount);
+        if (DBG) Logger::V(TAG, "receiver %p ~ Vsync pulse: timestamp=%lld, id=%d, count=%d",
+            this, vsyncTimestamp, vsyncDisplayId, vsyncCount);
         mWaitingForVsync = false;
         dispatchVsync(vsyncTimestamp, vsyncDisplayId, vsyncCount);
     }
@@ -115,7 +116,7 @@ bool NativeDisplayEventReceiver::processPendingEvents(
     android::DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
     ssize_t n;
     while ((n = mReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
-        Logger::V(TAG, "receiver %p ~ Read %d events.", this, int(n));
+        if (DBG) Logger::V(TAG, "receiver %p ~ Read %d events.", this, int(n));
         for (ssize_t i = 0; i < n; i++) {
             const android::DisplayEventReceiver::Event& ev = buf[n];
             switch (ev.header.type) {
@@ -131,7 +132,7 @@ bool NativeDisplayEventReceiver::processPendingEvents(
                     dispatchHotplug(ev.header.timestamp, ev.header.id, ev.hotplug.connected);
                     break;
                 default:
-                    Logger::W(TAG, "receiver %p ~ ignoring unknown event type %#x", this, ev.header.type);
+                    if (DBG) Logger::W(TAG, "receiver %p ~ ignoring unknown event type %#x", this, ev.header.type);
                     break;
                 }
         }
@@ -145,21 +146,21 @@ bool NativeDisplayEventReceiver::processPendingEvents(
 void NativeDisplayEventReceiver::dispatchVsync(
     nsecs_t timestamp, int32_t id, uint32_t count)
 {
-    Logger::V(TAG, "receiver %p ~ Invoking vsync handler.", this);
+    if (DBG) Logger::V(TAG, "receiver %p ~ Invoking vsync handler.", this);
 
     mReceiverObjGlobal->DispatchVsync(timestamp, id, count);
 
-    Logger::V(TAG, "receiver %p ~ Returned from vsync handler.", this);
+    if (DBG) Logger::V(TAG, "receiver %p ~ Returned from vsync handler.", this);
 }
 
 void NativeDisplayEventReceiver::dispatchHotplug(
     nsecs_t timestamp, int32_t id, bool connected)
 {
-    Logger::V(TAG, "receiver %p ~ Invoking hotplug handler.", this);
+    if (DBG) Logger::V(TAG, "receiver %p ~ Invoking hotplug handler.", this);
 
     mReceiverObjGlobal->DispatchHotplug(timestamp, id, connected);
 
-    Logger::V(TAG, "receiver %p ~ Returned from hotplug handler.", this);
+    if (DBG) Logger::V(TAG, "receiver %p ~ Returned from hotplug handler.", this);
 }
 
 } // namespace View

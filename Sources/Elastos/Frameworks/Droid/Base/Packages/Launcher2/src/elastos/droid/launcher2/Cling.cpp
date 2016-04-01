@@ -220,7 +220,7 @@ ECode Cling::OnTouchEvent(
     return NOERROR;
 }
 
-void Cling::DispatchDraw(
+ECode Cling::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     if (mIsInitialized) {
@@ -362,7 +362,7 @@ void Cling::DispatchDraw(
     }
 
     // Draw the rest of the cling
-    FrameLayout::DispatchDraw(canvas);
+    return FrameLayout::DispatchDraw(canvas);
 }
 
 AutoPtr<ArrayOf<Int32> > Cling::GetPunchThroughPositions()

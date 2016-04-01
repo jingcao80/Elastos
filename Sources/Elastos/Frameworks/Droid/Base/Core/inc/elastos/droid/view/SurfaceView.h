@@ -265,7 +265,7 @@ protected:
         /* [in] */ Int32 right,
         /* [in] */ Int32 bottom);
 
-    virtual CARAPI_(void) DispatchDraw(
+    virtual CARAPI DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
 protected:

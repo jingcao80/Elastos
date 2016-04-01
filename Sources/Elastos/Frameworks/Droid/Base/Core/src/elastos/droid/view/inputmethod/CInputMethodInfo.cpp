@@ -377,12 +377,12 @@ ECode CInputMethodInfo::Init(
     String settingsActivityComponent;
     Int32 isDefaultResId = 0;
 
-    AutoPtr<IXmlResourceParser> parser;
+    AutoPtr<IXmlResourceParser> xmlParser;
     AutoPtr<IArrayList> subtypes;
     CArrayList::New((IArrayList**)&subtypes);
     //try {
-    si->LoadXmlMetaData(pm, IInputMethod::SERVICE_META_DATA, (IXmlResourceParser**)&parser);
-    if (parser == NULL) {
+    si->LoadXmlMetaData(pm, IInputMethod::SERVICE_META_DATA, (IXmlResourceParser**)&xmlParser);
+    if (xmlParser == NULL) {
         Logger::E(TAG, "No %s meta-data", (const char*)IInputMethod::SERVICE_META_DATA);
         return E_XML_PULL_PARSER_EXCEPTION;
     }
@@ -390,14 +390,15 @@ ECode CInputMethodInfo::Init(
     AutoPtr<IResources> res;
     pm->GetResourcesForApplication(si->mApplicationInfo, (IResources**)&res);
 
-    AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(IXmlPullParser::Probe(parser));
+    IXmlPullParser* parser = IXmlPullParser::Probe(xmlParser);
+    AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(parser);
 
     Int32 type = 0;
-    while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_DOCUMENT
+    while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT
             && type != IXmlPullParser::START_TAG) {
     }
     String nodeName;
-    IXmlPullParser::Probe(parser)->GetName(&nodeName);
+    parser->GetName(&nodeName);
     if (!nodeName.Equals("input-method")) {
         Logger::E(TAG, "Meta-data does not start with input-method tag");
         return E_XML_PULL_PARSER_EXCEPTION;
@@ -416,14 +417,14 @@ ECode CInputMethodInfo::Init(
     sa->Recycle();
 
     Int32 depth = 0, tmpDepth = 0;
-    IXmlPullParser::Probe(parser)->GetDepth(&depth);
+    parser->GetDepth(&depth);
     // Parse all subtypes
-    while (((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_TAG || (IXmlPullParser::Probe(parser)->GetDepth(&tmpDepth), tmpDepth) > depth)
+    while (((parser->Next(&type), type) != IXmlPullParser::END_TAG || (parser->GetDepth(&tmpDepth), tmpDepth) > depth)
             && type != IXmlPullParser::END_DOCUMENT) {
         if (type == IXmlPullParser::START_TAG) {
-            IXmlPullParser::Probe(parser)->GetName(&nodeName);
+            parser->GetName(&nodeName);
             if (!nodeName.Equals("subtype")) {
-                parser->Close();
+                xmlParser->Close();
                 Logger::E(TAG, "Meta-data in input-method does not start with subtype tag");
                 return E_XML_PULL_PARSER_EXCEPTION;
             }
@@ -487,8 +488,8 @@ ECode CInputMethodInfo::Init(
     // } finally {
     //     if (parser != null) parser.close();
     // }
-    if (parser != NULL) {
-        parser->Close();
+    if (xmlParser != NULL) {
+        xmlParser->Close();
     }
 
     Boolean bIsEmp = FALSE;

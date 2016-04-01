@@ -127,7 +127,7 @@ HorizontalScrollView::HorizontalScrollView()
     , mOverflingDistance(0)
     , mActivePointerId(INVALID_POINTER)
 {
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mTempRect));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTempRect));
 }
 
 ECode HorizontalScrollView::constructor(
@@ -1103,14 +1103,15 @@ ECode HorizontalScrollView::PageScroll(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    Boolean right = direction == IView::FOCUS_RIGHT;
+    Boolean isRight = direction == IView::FOCUS_RIGHT;
     Int32 width = 0;
     GetWidth(&width);
 
     Int32 sx = 0;
     GetScrollX(&sx);
-    if (right) {
-        mTempRect->mLeft = sx + width;
+    if (isRight) {
+        Int32 left = sx + width;
+        mTempRect->SetLeft(left);
         Int32 count = 0;
         GetChildCount(&count);
         if (count > 0) {
@@ -1118,21 +1119,25 @@ ECode HorizontalScrollView::PageScroll(
             GetChildAt(0, (IView**)&view);
             Int32 right;
             view->GetRight(&right);
-            if (mTempRect->mLeft + width > right) {
-                mTempRect->mLeft = right - width;
+            if (left + width > right) {
+                mTempRect->SetLeft(right - width);
             }
         }
     }
     else {
-        mTempRect->mLeft = sx - width;
-        if (mTempRect->mLeft < 0) {
-            mTempRect->mLeft = 0;
+        Int32 left = sx - width;
+        mTempRect->SetLeft(left);
+        if (left < 0) {
+            mTempRect->SetLeft(0);
         }
     }
-    mTempRect->mRight = mTempRect->mLeft + width;
 
-    *result = ScrollAndFocus(direction,
-            mTempRect->mLeft, mTempRect->mRight);
+    Int32 left, right;
+    mTempRect->GetLeft(&left);
+    right = left + width;
+    mTempRect->SetRight(right);
+
+    *result = ScrollAndFocus(direction, left, right);
     return NOERROR;
 }
 
@@ -1141,26 +1146,30 @@ ECode HorizontalScrollView::FullScroll(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    Boolean right = direction == IView::FOCUS_RIGHT;
+    Boolean isRight = direction == IView::FOCUS_RIGHT;
     Int32 width = 0;
     GetWidth(&width);
 
-    mTempRect->mLeft = 0;
-    mTempRect->mRight = width;
+    mTempRect->SetLeft(0);
+    mTempRect->SetRight(width);
 
-    if (right) {
+    if (isRight) {
         Int32 count = 0;
         GetChildCount(&count);
         if (count > 0) {
             AutoPtr<IView> view;
             GetChildAt(0, (IView**)&view);
-            view->GetRight(&mTempRect->mRight);
-            mTempRect->mLeft = mTempRect->mRight - width;
+            Int32 right;
+            view->GetRight(&right);
+            mTempRect->SetRight(right);
+            mTempRect->SetLeft(right - width);
         }
     }
 
-    *result = ScrollAndFocus(direction,
-            mTempRect->mLeft, mTempRect->mRight);
+    Int32 left, right;
+    mTempRect->GetLeft(&left);
+    mTempRect->GetRight(&right);
+    *result = ScrollAndFocus(direction, left, right);
     return NOERROR;
 }
 
@@ -1279,7 +1288,10 @@ Boolean HorizontalScrollView::IsWithinDeltaOfScreen(
     Int32 w = 0, sx = 0;
     GetWidth(&w);
     GetScrollX(&sx);
-    return (mTempRect->mRight + delta) >= sx && (mTempRect->mLeft - delta) <= (sx + w);
+    Int32 left, right;
+    mTempRect->GetLeft(&left);
+    mTempRect->GetRight(&right);
+    return (right + delta) >= sx && (left - delta) <= (sx + w);
 }
 
 void HorizontalScrollView::DoScrollX(

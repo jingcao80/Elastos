@@ -4686,7 +4686,7 @@ void AbsListView::PositionSelector(
     }
 }
 
-void AbsListView::DispatchDraw(
+ECode AbsListView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     Int32 saveCount = 0;
@@ -4717,6 +4717,7 @@ void AbsListView::DispatchDraw(
         canvas->RestoreToCount(saveCount);
         mGroupFlags |= ViewGroup::CLIP_TO_PADDING_MASK;
     }
+    return NOERROR;
 }
 
 Boolean AbsListView::IsPaddingOffsetRequired()

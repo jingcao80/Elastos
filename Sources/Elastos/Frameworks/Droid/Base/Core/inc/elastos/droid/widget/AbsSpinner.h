@@ -248,7 +248,7 @@ public:
     Int32 mSelectionTopPadding;
     Int32 mSelectionRightPadding;
     Int32 mSelectionBottomPadding;
-    AutoPtr<CRect> mSpinnerPadding;
+    AutoPtr<IRect> mSpinnerPadding;
 
     AutoPtr<RecycleBin> mRecycler;
 

@@ -6,15 +6,20 @@
 #include "elastos/droid/graphics/Matrix.h"
 #include "elastos/droid/graphics/GraphicsNative.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 #include <skia/core/SkMatrix.h>
 
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
+static const String TAG("Matrix");
+
 CAR_INTERFACE_IMPL(Matrix, Object, IMatrix);
+
 Matrix::~Matrix()
 {
     NativeFinalizer(mNativeInstance);
@@ -37,6 +42,7 @@ ECode Matrix::constructor(
 ECode Matrix::IsIdentity(
     /* [out] */ Boolean* isIdentity)
 {
+    VALIDATE_NOT_NULL(isIdentity)
     *isIdentity = NativeIsIdentity(mNativeInstance);
     return NOERROR;
 }
@@ -52,6 +58,7 @@ ECode Matrix::IsAffine(
 ECode Matrix::RectStaysRect(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = NativeRectStaysRect(mNativeInstance);
     return NOERROR;
 }
@@ -702,8 +709,10 @@ ECode Matrix::MapRect(
     /* [in] */ IRectF* src,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
     if (dst == NULL || src == NULL) {
-//        throw new NullPointerException();
+        Logger::E(TAG, "dst or src is NULL in MapRect.");
         return E_NULL_POINTER_EXCEPTION;
     }
     *result = NativeMapRect(mNativeInstance, dst, src);
@@ -734,6 +743,7 @@ ECode Matrix::MapRadius(
     /* [in] */ Float radius,
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = NativeMapRadius(mNativeInstance, radius);
     return NOERROR;
 }
@@ -771,8 +781,9 @@ ECode Matrix::SetValues(
 ECode Matrix::ToString(
     /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str)
     StringBuilder sb(64);
-    sb.Append(String("Matrix{"));
+    sb.Append("Matrix{");
     ToShortString((IStringBuilder*)&sb);
     sb.AppendChar('}');
     sb.ToString(str);
@@ -782,6 +793,7 @@ ECode Matrix::ToString(
 ECode Matrix::ToShortString(
     /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str)
     StringBuilder sb(64);
     ToShortString((IStringBuilder*)&sb);
     sb.ToString(str);

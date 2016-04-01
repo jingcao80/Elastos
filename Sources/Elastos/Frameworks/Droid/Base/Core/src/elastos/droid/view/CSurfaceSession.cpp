@@ -22,14 +22,13 @@ CSurfaceSession::CSurfaceSession()
 CSurfaceSession::~CSurfaceSession()
 {
     if (mNativeClient != NULL) {
-        delete mNativeClient.get();
         mNativeClient = NULL;
     }
 }
 
 ECode CSurfaceSession::Kill()
 {
-    mNativeClient->dispose();;
+    mNativeClient->dispose();
 
     return NOERROR;
 }

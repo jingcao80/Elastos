@@ -840,7 +840,7 @@ void ActivatableNotificationView::EnableAppearDrawing(
     }
 }
 
-void ActivatableNotificationView::DispatchDraw(
+ECode ActivatableNotificationView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     if (!mDrawingAppearAnimation) {
@@ -849,6 +849,7 @@ void ActivatableNotificationView::DispatchDraw(
     else {
         DrawAppearRect(canvas);
     }
+    return NOERROR;
 }
 
 void ActivatableNotificationView::DrawAppearRect(

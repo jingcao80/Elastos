@@ -1439,7 +1439,7 @@ protected:
         /* [in] */ Boolean skipChildren,
         /* [out] */ IBitmap** bitmap);
 
-    CARAPI_(void) DispatchDraw(
+    CARAPI DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
     CARAPI_(Int32) GetChildDrawingOrder(

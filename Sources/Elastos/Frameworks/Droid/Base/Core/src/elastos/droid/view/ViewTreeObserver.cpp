@@ -631,7 +631,7 @@ ECode ViewTreeObserver::DispatchOnPreDraw(
 
 ECode ViewTreeObserver::DispatchOnDraw()
 {
-    if (mOnDrawListeners != NULL) {
+    if (mOnDrawListeners != NULL && !mOnDrawListeners->IsEmpty()) {
         List<AutoPtr<IOnDrawListener> >::Iterator iter = mOnDrawListeners->Begin();
         for (; iter != mOnDrawListeners->End(); ++iter) {
             assert((*iter) != NULL);

@@ -9,7 +9,7 @@ namespace View {
 
 const String CInputBindResult::TAG("InputBindResult");
 
-CAR_INTERFACE_IMPL(CInputBindResult, Object, IInputBindResult)
+CAR_INTERFACE_IMPL_2(CInputBindResult, Object, IInputBindResult, IParcelable)
 
 CAR_OBJECT_IMPL(CInputBindResult)
 

@@ -16,6 +16,7 @@ namespace View {
 CarClass(CInputBindResult)
     , public Object
     , public IInputBindResult
+    , public IParcelable
 {
 public:
     CAR_INTERFACE_DECL()

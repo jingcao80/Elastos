@@ -484,7 +484,7 @@ protected:
         /* [in] */ IRect* bounds);
 
     //@Override
-    virtual CARAPI_(void) DispatchDraw(
+    virtual CARAPI DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
     virtual CARAPI_(void) DrawDivider(

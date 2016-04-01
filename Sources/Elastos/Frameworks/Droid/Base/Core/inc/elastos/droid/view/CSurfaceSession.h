@@ -25,9 +25,9 @@ public:
 
     CSurfaceSession();
 
-    CARAPI constructor();
-
     ~CSurfaceSession();
+
+    CARAPI constructor();
 
     /**
      * Forcibly detach native resources associated with this object.

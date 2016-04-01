@@ -251,12 +251,13 @@ ECode LayoutInflater::BlinkLayout::OnDetachedFromWindow()
     return mHandler->RemoveMessages(MESSAGE_BLINK);
 }
 
-void LayoutInflater::BlinkLayout::DispatchDraw(
+ECode LayoutInflater::BlinkLayout::DispatchDraw(
         /* [in] */ ICanvas* canvas)
 {
     if (mBlinkState) {
         FrameLayout::DispatchDraw(canvas);
     }
+    return NOERROR;
 }
 
 void LayoutInflater::BlinkLayout::MakeBlink()

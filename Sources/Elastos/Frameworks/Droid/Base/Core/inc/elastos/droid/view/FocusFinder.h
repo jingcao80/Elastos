@@ -63,8 +63,8 @@ private:
             /* [in] */ IRect* rect);
 
     private:
-        AutoPtr<CRect> mFirstRect;
-        AutoPtr<CRect> mSecondRect;
+        AutoPtr<IRect> mFirstRect;
+        AutoPtr<IRect> mSecondRect;
         AutoPtr<IViewGroup> mRoot;
         Boolean mIsLayoutRtl;
     };

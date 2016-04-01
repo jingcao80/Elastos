@@ -1010,7 +1010,7 @@ Boolean PagedView::ShouldDrawChild(
     return alpha > 0;
 }
 
-void PagedView::DispatchDraw(
+ECode PagedView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     Int32 measuredWidth;
@@ -1060,6 +1060,7 @@ void PagedView::DispatchDraw(
             canvas->Restore();
         }
     }
+    return NOERROR;
 }
 
 ECode PagedView::RequestChildRectangleOnScreen(

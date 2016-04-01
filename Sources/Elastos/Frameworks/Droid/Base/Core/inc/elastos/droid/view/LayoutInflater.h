@@ -65,7 +65,7 @@ public:
 
         CARAPI OnDetachedFromWindow();
 
-        CARAPI_(void) DispatchDraw(
+        CARAPI DispatchDraw(
                 /* [in] */ ICanvas* canvas);
 
     private:

@@ -51,8 +51,7 @@ Window::Window()
     , mCloseOnTouchOutside(FALSE)
     , mSetCloseOnTouchOutside(FALSE)
 {
-    CWindowManagerLayoutParams::NewByFriend(
-            (CWindowManagerLayoutParams**)&mWindowAttributes);
+    CWindowManagerLayoutParams::NewByFriend((CWindowManagerLayoutParams**)&mWindowAttributes);
 }
 
 Window::Window(
@@ -78,8 +77,7 @@ Window::Window(
     if (mRetainContext)
         mContext->AddRef();
 
-    CWindowManagerLayoutParams::NewByFriend(
-            (CWindowManagerLayoutParams**)&mWindowAttributes);
+    CWindowManagerLayoutParams::NewByFriend((CWindowManagerLayoutParams**)&mWindowAttributes);
 }
 
 Window::~Window()
@@ -473,6 +471,7 @@ ECode Window::SetAttributes(
 ECode Window::GetAttributes(
     /* [out] */ IWindowManagerLayoutParams** params)
 {
+    VALIDATE_NOT_NULL(params)
     *params = (IWindowManagerLayoutParams*)mWindowAttributes.Get();
     REFCOUNT_ADD(*params);
     return NOERROR;

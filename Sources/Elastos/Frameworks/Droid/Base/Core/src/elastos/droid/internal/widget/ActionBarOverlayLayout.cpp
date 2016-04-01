@@ -535,7 +535,8 @@ ECode ActionBarOverlayLayout::OnApplyWindowInsets(
     // insets in all cases, we need to know the measured size of the various action
     // bar elements.  onApplyWindowInsets() happens before the measure pass, so we can't
     // do that here.  Instead we will take this up in onMeasure().
-    *result = CWindowInsets::CONSUMED;
+    AutoPtr<IWindowInsets> rect = CWindowInsets::GetCONSUMED();
+    *result = rect;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

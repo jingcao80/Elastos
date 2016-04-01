@@ -397,7 +397,7 @@ void ExpandableListView::ResolveChildIndicator()
     }
 }
 
-void ExpandableListView::DispatchDraw(
+ECode ExpandableListView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     ListView::DispatchDraw(canvas);
@@ -510,6 +510,7 @@ void ExpandableListView::DispatchDraw(
     if (clipToPadding) {
         canvas->RestoreToCount(saveCount);
     }
+    return NOERROR;
 }
 
 AutoPtr<IDrawable> ExpandableListView::GetIndicator(

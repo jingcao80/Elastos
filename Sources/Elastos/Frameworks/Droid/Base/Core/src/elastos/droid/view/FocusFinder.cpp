@@ -44,8 +44,8 @@ CAR_INTERFACE_IMPL(FocusFinder::SequentialFocusComparator, Object, IComparator)
 
 FocusFinder::SequentialFocusComparator::SequentialFocusComparator()
 {
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mFirstRect));
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mSecondRect));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mFirstRect));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mSecondRect));
 }
 
 void FocusFinder::SequentialFocusComparator::Recycle()
@@ -81,31 +81,35 @@ ECode FocusFinder::SequentialFocusComparator::Compare(
         *rst = -1;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    GetRect(first, mFirstRect.Get());
-    GetRect(second, mSecondRect.Get());
+    GetRect(first, mFirstRect);
+    GetRect(second, mSecondRect);
 
-    if (mFirstRect->mTop < mSecondRect->mTop) {
+    Int32 fl, ft, fr, fb, sl, st, sr, sb;
+    mFirstRect->Get(&fl, &ft, &fr, &fb);
+    mSecondRect->Get(&sl, &st, &sr, &sb);
+
+    if (ft < st) {
         *rst = -1;
     }
-    else if (mFirstRect->mTop > mSecondRect->mTop) {
+    else if (ft > st) {
         *rst = 1;
     }
-    else if (mFirstRect->mLeft < mSecondRect->mLeft) {
+    else if (fl < sl) {
         *rst = mIsLayoutRtl ? 1 : -1;
     }
-    else if (mFirstRect->mLeft > mSecondRect->mLeft) {
+    else if (fl > sl) {
         *rst = mIsLayoutRtl ? -1 : 1;
     }
-    else if (mFirstRect->mBottom < mSecondRect->mBottom) {
+    else if (fb < sb) {
         *rst = -1;
     }
-    else if (mFirstRect->mBottom > mSecondRect->mBottom) {
+    else if (fb > sb) {
         *rst = 1;
     }
-    else if (mFirstRect->mRight < mSecondRect->mRight) {
+    else if (fr < sr) {
         *rst = mIsLayoutRtl ? 1 : -1;
     }
-    else if (mFirstRect->mRight > mSecondRect->mRight) {
+    else if (fr > sr) {
         *rst = mIsLayoutRtl ? -1 : 1;
     }
     else {
@@ -808,10 +812,8 @@ ECode FocusFinder::FindNearestTouchable(
     Int32 edgeSlop;
     ViewConfiguration::Get(context)->GetScaledEdgeSlop(&edgeSlop);
 
-    AutoPtr<CRect> closestBounds;
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&closestBounds));
-
-    CRect* touchableBounds = (CRect*)mOtherRect.Get();
+    AutoPtr<IRect> closestBounds;
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&closestBounds));
 
     AutoPtr<IView> closest;
     Int32 numTouchables;
@@ -820,44 +822,45 @@ ECode FocusFinder::FindNearestTouchable(
     for (Int32 i = 0; i < numTouchables; i++) {
         AutoPtr<IInterface> obj;
         touchables->Get(i, (IInterface**)&obj);
-        IView* item = (IView*)obj->Probe(EIID_IView);
+        IView* item = IView::Probe(obj);
 
         // get visible bounds of other view in same coordinate system
-        item->GetDrawingRect((IRect*)touchableBounds);
+        item->GetDrawingRect(mOtherRect);
 
-        ((ViewGroup*)root)->OffsetRectBetweenParentAndChild(item, touchableBounds, TRUE, TRUE);
+        ((ViewGroup*)root)->OffsetRectBetweenParentAndChild(item, mOtherRect, TRUE, TRUE);
 
-        if (!IsTouchCandidate(x, y, touchableBounds, direction)) {
+        if (!IsTouchCandidate(x, y, mOtherRect, direction)) {
             continue;
         }
 
         Int32 distance = Elastos::Core::Math::INT32_MAX_VALUE;
-
+        Int32 l, t, r, b;
+        mOtherRect->Get(&l, &t, &r, &b);
         switch (direction) {
         case IView::FOCUS_LEFT:
-            distance = x - touchableBounds->mRight + 1;
+            distance = x - r + 1;
             break;
         case IView::FOCUS_RIGHT:
-            distance = touchableBounds->mLeft;
+            distance = l;
             break;
         case IView::FOCUS_UP:
-            distance = y - touchableBounds->mBottom + 1;
+            distance = y - b + 1;
             break;
         case IView::FOCUS_DOWN:
-            distance = touchableBounds->mTop;
+            distance = t;
             break;
         }
 
         if (distance < edgeSlop) {
             Boolean isContains1, isContains2;
-            closestBounds->Contains(touchableBounds, &isContains1);
-            touchableBounds->Contains(closestBounds, &isContains2);
+            closestBounds->Contains(mOtherRect, &isContains1);
+            mOtherRect->Contains(closestBounds, &isContains2);
             // Give preference to innermost views
             if (closest == NULL || isContains1 ||
                 (!isContains2 && distance < minDistance)) {
                 minDistance = distance;
                 closest = item;
-                closestBounds->Set(touchableBounds);
+                closestBounds->Set(mOtherRect);
                 switch (direction) {
                 case IView::FOCUS_LEFT:
                     (*deltas)[0] = -distance;

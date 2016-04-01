@@ -2685,13 +2685,14 @@ void WebView::OnMeasure(
     viewDelegate->OnMeasure(widthMeasureSpec, heightMeasureSpec);
 }
 
-void WebView::DispatchDraw(
+ECode WebView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->PreDispatchDraw(canvas);
     AbsoluteLayout::DispatchDraw(canvas);
+    return NOERROR;
 }
 
 Boolean WebView::RequestChildRectangleOnScreen(

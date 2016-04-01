@@ -595,10 +595,10 @@ ECode CConfiguration::IsOtherSeqNewer(
     /* [out] */ Boolean* isBetter)
 {
     VALIDATE_NOT_NULL(isBetter);
+    *isBetter = FALSE;
 
     if (other == NULL) {
         // Sanity check.
-        *isBetter = FALSE;
         return NOERROR;
     }
 

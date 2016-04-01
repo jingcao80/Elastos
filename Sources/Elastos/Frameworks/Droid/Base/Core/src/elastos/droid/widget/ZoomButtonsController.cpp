@@ -184,7 +184,7 @@ ZoomButtonsController::ZoomButtonsController()
     mOwnerViewRawLocation = ArrayOf<Int32>::Alloc(2);
     mContainerRawLocation = ArrayOf<Int32>::Alloc(2);
     mTouchTargetWindowLocation = ArrayOf<Int32>::Alloc(2);
-    CRect::NewByFriend((CRect**)&mTempRect);
+    CRect::New((IRect**)&mTempRect);
     mTempIntArray = ArrayOf<Int32>::Alloc(2);
     CIntentFilter::New(IIntent::ACTION_CONFIGURATION_CHANGED, (IIntentFilter**)&mConfigurationChangedFilter);
     mConfigurationChangedReceiver = new MyBroadcastReceiver(this);

@@ -235,7 +235,7 @@ void SlidingDrawer::OnMeasure(
 }
 
 
-void SlidingDrawer::DispatchDraw(
+ECode SlidingDrawer::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     Int64 drawingTime;
@@ -272,6 +272,7 @@ void SlidingDrawer::DispatchDraw(
     } else if (mExpanded) {
         DrawChild(canvas, mContent, drawingTime);
     }
+    return NOERROR;
 }
 
 ECode SlidingDrawer::OnLayout(

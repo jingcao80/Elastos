@@ -1362,7 +1362,7 @@ void CellLayout::OnDraw(
     }
 }
 
-void CellLayout::DispatchDraw(
+ECode CellLayout::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     ViewGroup::DispatchDraw(canvas);
@@ -1374,6 +1374,7 @@ void CellLayout::DispatchDraw(
         mOverScrollForegroundDrawable->Draw(canvas);
         p->SetXfermode(NULL);
     }
+    return NOERROR;
 }
 
 void CellLayout::ShowFolderAccept(

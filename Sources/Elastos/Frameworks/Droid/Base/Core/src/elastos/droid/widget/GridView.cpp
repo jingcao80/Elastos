@@ -56,7 +56,7 @@ GridView::GridView()
     , mRequestedNumColumns(0)
     , mGravity(IGravity::START)
 {
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mTempRect));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTempRect));
 }
 
 ECode GridView::constructor(

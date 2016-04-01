@@ -1227,8 +1227,11 @@ void Spinner::Layout(
     /* [in] */ Int32 delta,
     /* [in] */ Boolean animate)
 {
-    Int32 childrenLeft = mSpinnerPadding->mLeft;
-    Int32 childrenWidth = mRight - mLeft - mSpinnerPadding->mLeft - mSpinnerPadding->mRight;
+    Int32 childrenLeft;
+    mSpinnerPadding->GetLeft(&childrenLeft);
+    Int32 right;
+    mSpinnerPadding->GetRight(&right);
+    Int32 childrenWidth = mRight - mLeft - childrenLeft - right;
 
     if (mDataChanged) {
         HandleDataChanged();
@@ -1317,14 +1320,14 @@ void Spinner::SetUpChild(
     if (mDisableChildrenWhenDisabled) {
         child->SetEnabled((IsEnabled(&value), value));
     }
+    Int32 l, t, r, b;
+    mSpinnerPadding->Get(&l, &t, &r, &b);
     Int32 h = 0;
     lp->GetHeight(&h);
-    Int32 childHeightSpec = ViewGroup::GetChildMeasureSpec(mHeightMeasureSpec,
-            mSpinnerPadding->mTop + mSpinnerPadding->mBottom, h);
+    Int32 childHeightSpec = ViewGroup::GetChildMeasureSpec(mHeightMeasureSpec, t + b, h);
     Int32 w = 0;
     lp->GetWidth(&w);
-    Int32 childWidthSpec = ViewGroup::GetChildMeasureSpec(mWidthMeasureSpec,
-            mSpinnerPadding->mLeft + mSpinnerPadding->mRight, w);
+    Int32 childWidthSpec = ViewGroup::GetChildMeasureSpec(mWidthMeasureSpec, l + r, w);
 
     child->Measure(childWidthSpec, childHeightSpec);
 
@@ -1333,8 +1336,7 @@ void Spinner::SetUpChild(
     Int32 childLeft = 0, childRight = 0;
 
     GetMeasuredHeight(&sh);
-    Int32 childTop = mSpinnerPadding->mTop + ((sh - mSpinnerPadding->mBottom -
-        mSpinnerPadding->mTop - measuredHeight) / 2);
+    Int32 childTop = t + ((sh - b - t - measuredHeight) / 2);
     Int32 childBottom = childTop + measuredHeight;
     Int32 width = 0;
     child->GetMeasuredWidth(&width);

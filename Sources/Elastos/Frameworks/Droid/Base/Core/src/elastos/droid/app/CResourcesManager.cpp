@@ -588,8 +588,7 @@ ECode CResourcesManager::ApplyConfigurationToResourcesLocked(
             Int32 s1, s2;
             mResConfiguration->GetSeq(&s1);
             config->GetSeq(&s2);
-            Logger::V(TAG, "Skipping new config: curSeq=%d, newSeq=%d",
-                s1, s2);
+            Logger::V(TAG, "Skipping new config: curSeq=%d, newSeq=%d", s1, s2);
         }
         return NOERROR;
     }

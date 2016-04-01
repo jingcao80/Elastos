@@ -574,7 +574,7 @@ ECode CInterfaceProxy::ProxyEntry(
     // _DumpObjectProxy(thisPtr->mOwner);
     // ALOGD(" >>> Current Interface:");
     // _DumpInterfaceProxy(thisPtr);
-    // ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex, argNum);
+    // ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex - 1, argNum);
     // ALOGD(" >>> Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize);
 #endif
 
@@ -599,7 +599,7 @@ ECode CInterfaceProxy::ProxyEntry(
             MARSHAL_DBGOUT(MSHDBG_ERROR, _DumpObjectProxy(thisPtr->mOwner));
             MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(" >>> Current Interface:"));
             MARSHAL_DBGOUT(MSHDBG_ERROR, _DumpInterfaceProxy(thisPtr));
-            MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("Method index:%d, argNum: %d\n", methodIndex + 4, argNum));
+            MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("Method index:%d, argNum: %d\n", methodIndex - 1, argNum));
             MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize));
             MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE("Remote invoke failed. <status: 0x%x>\n", st));
 
@@ -638,7 +638,7 @@ ECode CInterfaceProxy::ProxyEntry(
         _DumpObjectProxy(thisPtr->mOwner);
         ALOGD(" >>> Current Interface:");
         _DumpInterfaceProxy(thisPtr);
-        ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex, argNum);
+        ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex - 1, argNum);
         ALOGD(" >>> Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize);
 
         assert(0);

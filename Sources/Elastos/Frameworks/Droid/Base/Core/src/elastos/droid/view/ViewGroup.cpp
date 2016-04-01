@@ -991,7 +991,7 @@ void ViewGroup::ChildListForAccessibility::Clear()
 ViewGroup::ViewLocationHolder::ViewLocationHolder()
     : mLayoutDirection(0)
 {
-    CRect::NewByFriend((CRect**)&mLocation);
+    CRect::New((IRect**)&mLocation);
 }
 
 AutoPtr<ViewGroup::ViewLocationHolder> ViewGroup::ViewLocationHolder::Obtain(
@@ -1086,8 +1086,8 @@ void ViewGroup::ViewLocationHolder::Init(
     /* [in] */ IViewGroup* root,
     /* [in] */ IView* view)
 {
-    view->GetDrawingRect(mLocation.Get());
-    root->OffsetDescendantRectToMyCoords(view, mLocation.Get());
+    view->GetDrawingRect(mLocation);
+    root->OffsetDescendantRectToMyCoords(view, mLocation);
     assert(view != NULL);
     mView = VIEW_PROBE(view);
     (IView::Probe(root))->GetLayoutDirection(&mLayoutDirection);
@@ -4228,7 +4228,7 @@ void ViewGroup::OnDebugDraw(
     }
 }
 
-void ViewGroup::DispatchDraw(
+ECode ViewGroup::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     Boolean usingRenderNodeProperties;
@@ -4354,19 +4354,21 @@ void ViewGroup::DispatchDraw(
         Invalidate(TRUE);
     }
 
-     Boolean isDone = FALSE;
-     if(mLayoutAnimationController)
-            mLayoutAnimationController->IsDone(&isDone);
-     if ((flags & FLAG_ANIMATION_DONE) == 0 &&
-         (flags & FLAG_NOTIFY_ANIMATION_LISTENER) == 0 && isDone && !more) {
-          // We want to erase the drawing cache and notify the listener after the
-          // next frame is drawn because one extra invalidate() is caused by
-          // drawChild() after the animation is over
-          mGroupFlags |= FLAG_NOTIFY_ANIMATION_LISTENER;
-          AutoPtr<DispatchDrawRunnable> end = new DispatchDrawRunnable(this);
-          Boolean isPost;
-          Post(end, &isPost);
-      }
+    Boolean isDone = FALSE;
+    if(mLayoutAnimationController) {
+        mLayoutAnimationController->IsDone(&isDone);
+    }
+    if ((flags & FLAG_ANIMATION_DONE) == 0 &&
+        (flags & FLAG_NOTIFY_ANIMATION_LISTENER) == 0 && isDone && !more) {
+        // We want to erase the drawing cache and notify the listener after the
+        // next frame is drawn because one extra invalidate() is caused by
+        // drawChild() after the animation is over
+        mGroupFlags |= FLAG_NOTIFY_ANIMATION_LISTENER;
+        AutoPtr<DispatchDrawRunnable> end = new DispatchDrawRunnable(this);
+        Boolean isPost;
+        Post(end, &isPost);
+    }
+    return NOERROR;
 }
 
 /**

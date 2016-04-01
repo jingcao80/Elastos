@@ -38,8 +38,8 @@ CCompatibilityInfo::Translator::Translator(
 {}
 
 CCompatibilityInfo::Translator::Translator()
-    : mApplicationScale(0)
-    , mApplicationInvertedScale(0)
+    : mApplicationScale(1.0)
+    , mApplicationInvertedScale(1.0)
 {}
 
 ECode CCompatibilityInfo::Translator::TranslateRectInScreenToAppWinFrame(
@@ -228,8 +228,8 @@ CAR_OBJECT_IMPL(CCompatibilityInfo)
 
 CCompatibilityInfo::CCompatibilityInfo()
     : mApplicationDensity(0)
-    , mApplicationScale(0)
-    , mApplicationInvertedScale(0)
+    , mApplicationScale(1.0)
+    , mApplicationInvertedScale(1.0)
     , mIsThemeable(FALSE)
     , mCompatibilityFlags(0)
 {}

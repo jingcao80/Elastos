@@ -41,6 +41,13 @@ public:
         , mSendingToTop(FALSE)
     {}
 
+    CARAPI ToString(
+        /* [out] */ String* str)
+    {
+        VALIDATE_NOT_NULL(str)
+        *str = mStringName;
+        return NOERROR;
+    }
 public:
     // The window manager!
     AutoPtr<CWindowManagerService> mService;

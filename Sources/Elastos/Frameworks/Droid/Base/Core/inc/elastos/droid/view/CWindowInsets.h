@@ -385,12 +385,8 @@ public:
     CARAPI ToString(
         /* [out] */ String* str);
 
+    static AutoPtr<IWindowInsets> GetCONSUMED();
 private:
-    static CARAPI_(AutoPtr<IWindowInsets>) InitStatic1();
-
-    static CARAPI_(AutoPtr<IRect>) InitStatic2();
-
-public:
     /**
      * Since new insets may be added in the future that existing apps couldn't
      * know about, this fully empty constant shouldn't be made available to apps
@@ -399,7 +395,6 @@ public:
      */
     static AutoPtr<IWindowInsets> CONSUMED;
 
-private:
     AutoPtr<IRect> mSystemWindowInsets;
     AutoPtr<IRect> mWindowDecorInsets;
     AutoPtr<IRect> mStableInsets;

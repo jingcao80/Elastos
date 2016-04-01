@@ -31,9 +31,10 @@ ExternalVideoSurfaceContainer::NoPunchingSurfaceView::NoPunchingSurfaceView(
 // SurfaceView.dispatchDraw implementation punches a hole in the view hierarchy.
 // Disable this by making this a no-op.
 //@Override
-void ExternalVideoSurfaceContainer::NoPunchingSurfaceView::DispatchDraw(
+ECode ExternalVideoSurfaceContainer::NoPunchingSurfaceView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
+    return NOERROR;
 }
 
 //===============================================================

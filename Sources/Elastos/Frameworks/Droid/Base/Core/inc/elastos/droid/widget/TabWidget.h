@@ -163,7 +163,7 @@ public:
         /* [in] */ IView* child);
 
     //@Override
-    virtual CARAPI_(void) DispatchDraw(
+    virtual CARAPI DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
     /**

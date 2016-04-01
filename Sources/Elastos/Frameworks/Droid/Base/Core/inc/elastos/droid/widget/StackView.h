@@ -300,7 +300,7 @@ protected:
         /* [in] */ IView* child,
         /* [in] */ Int32 relativeIndex);
 
-    CARAPI_(void) DispatchDraw(
+    CARAPI DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
     CARAPI_(AutoPtr<IViewGroupLayoutParams>) CreateOrReuseLayoutParams(

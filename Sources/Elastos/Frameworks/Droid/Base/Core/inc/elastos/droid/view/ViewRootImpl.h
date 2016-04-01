@@ -1667,7 +1667,7 @@ private:
         /* [in] */ Int32 xoff,
         /* [in] */ Int32 yoff,
         /* [in] */ Boolean scalingRequired,
-        /* [in] */ CRect* dirty);
+        /* [in] */ IRect* dirty);
 
     CARAPI GetAccessibilityFocusedDrawable(
         /* [out] */ IDrawable** res);
@@ -1810,12 +1810,12 @@ public:
     Boolean mIsCreating;
     Boolean mDrawingAllowed;
 
-    AutoPtr<CRegion> mTransparentRegion;
-    AutoPtr<CRegion> mPreviousTransparentRegion;
+    AutoPtr<IRegion> mTransparentRegion;
+    AutoPtr<IRegion> mPreviousTransparentRegion;
 
     Int32 mWidth;
     Int32 mHeight;
-    AutoPtr<CRect> mDirty;    // will be a graphics.Region soon
+    AutoPtr<IRect> mDirty;    // will be a graphics.Region soon
     Boolean mIsAnimating;
 
     AutoPtr<ICompatibilityInfoTranslator> mTranslator;
@@ -1827,8 +1827,8 @@ public:
     AutoPtr<IFallbackEventHandler> mFallbackEventHandler;
     AutoPtr<IChoreographer> mChoreographer;
 
-    AutoPtr<CRect> mTempRect; // used in the transaction to not thrash the heap.
-    AutoPtr<CRect> mVisRect; // used to retrieve visible rect of focused view.
+    AutoPtr<IRect> mTempRect; // used in the transaction to not thrash the heap.
+    AutoPtr<IRect> mVisRect; // used to retrieve visible rect of focused view.
 
     Boolean mTraversalScheduled;
     Int32 mTraversalBarrier;
@@ -1873,16 +1873,16 @@ public:
     AutoPtr<IDisplayAdjustments> mDisplayAdjustments;
 
     // These are accessed by multiple threads.
-    AutoPtr<CRect> mWinFrame; // frame given by window manager.
-    AutoPtr<CRect> mPendingOverscanInsets;
-    AutoPtr<CRect> mPendingVisibleInsets;
-    AutoPtr<CRect> mPendingStableInsets;
-    AutoPtr<CRect> mPendingContentInsets;
+    AutoPtr<IRect> mWinFrame; // frame given by window manager.
+    AutoPtr<IRect> mPendingOverscanInsets;
+    AutoPtr<IRect> mPendingVisibleInsets;
+    AutoPtr<IRect> mPendingStableInsets;
+    AutoPtr<IRect> mPendingContentInsets;
 
     AutoPtr<IInternalInsetsInfo> mLastGivenInsets;
 
-    AutoPtr<CRect> mDispatchContentInsets;
-    AutoPtr<CRect> mDispatchStableInsets;
+    AutoPtr<IRect> mDispatchContentInsets;
+    AutoPtr<IRect> mDispatchStableInsets;
 
     AutoPtr<IConfiguration> mLastConfiguration;
     AutoPtr<IConfiguration> mPendingConfiguration;

@@ -38,6 +38,7 @@
 #include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::R;
+using Elastos::Droid::Manifest;
 using Elastos::Droid::Animation::IValueAnimatorHelper;
 using Elastos::Droid::Animation::CValueAnimatorHelper;
 using Elastos::Droid::App::IActivityOptions;
@@ -1192,15 +1193,15 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
 {
     AutoPtr<IIWindow> client = win->mClient;
     AutoPtr<WindowToken> token = win->mToken;
+    WindowList::Iterator tokenWindowsIt = token->mWindows.Begin();
     AutoPtr<DisplayContent> displayContent = win->GetDisplayContent();
     if (displayContent == NULL) {
         // It doesn't matter this display is going away.
-        return 0;
+        return tokenWindowsIt;
     }
 
     AutoPtr<WindowList> windows = win->GetWindowList();
     AutoPtr<WindowList> tokenWindowList = GetTokenWindowsOnDisplay(token, displayContent);
-    WindowList::Iterator tokenWindowsIt = tokenWindowList->Begin();
     if (!tokenWindowList->IsEmpty()) {
         // If this application has existing windows, we
         // simply place the new window on top of them... but
@@ -1231,7 +1232,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
                 if (newIt == windows->End()) {
                     windows->Insert(windows->Begin(), win);
                     // No window from token found on win's display.
-                    tokenWindowsIt = tokenWindowList->Begin();
+                    tokenWindowsIt = token->mWindows.Begin();
                 }
                 else {
                     windows->Insert(++newIt, win);
@@ -1245,7 +1246,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
 
     // No windows from this token on this display
     if (localLOGV) {
-        Slogger::V(TAG, "Figuring out where to add app window %p (token=%p)", client.Get(), token.Get());
+        Slogger::V(TAG, "Figuring out where to add app window %p (token=%s)", client.Get(), TO_CSTR(token));
     }
 
     // Figure out where the window should go, based on the
@@ -1295,7 +1296,8 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
     if (pos != NULL) {
         // Move behind any windows attached to this one.
         AutoPtr<WindowToken> atoken;
-        HashMap<AutoPtr<IBinder>, AutoPtr<WindowToken> >::Iterator tokenIt = mTokenMap.Find(IBinder::Probe(pos->mClient));
+        HashMap<AutoPtr<IBinder>, AutoPtr<WindowToken> >::Iterator tokenIt;
+        tokenIt = mTokenMap.Find(IBinder::Probe(pos->mClient));
         if (tokenIt != mTokenMap.End()) {
             atoken = tokenIt->mSecond;
         }
@@ -1334,7 +1336,8 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
         // Move in front of any windows attached to this
         // one.
         AutoPtr<WindowToken> atoken;
-        HashMap<AutoPtr<IBinder>, AutoPtr<WindowToken> >::Iterator tokenIt = mTokenMap.Find(IBinder::Probe(pos->mClient));
+        HashMap<AutoPtr<IBinder>, AutoPtr<WindowToken> >::Iterator tokenIt;
+        tokenIt = mTokenMap.Find(IBinder::Probe(pos->mClient));
         if (tokenIt != mTokenMap.End()) {
             atoken = tokenIt->mSecond;
         }
@@ -1417,7 +1420,7 @@ void CWindowManagerService::AddAttachedWindowToListLocked(
             // in the same sublayer.
             if (wSublayer >= sublayer) {
                 if (addToToken) {
-                    if (DEBUG_ADD_REMOVE) Slogger::V(TAG, "Adding %p to %p", win, token.Get());
+                    if (DEBUG_ADD_REMOVE) Slogger::V(TAG, "Adding %s to %s", TO_CSTR(win), TO_CSTR(token));
                     token->mWindows.Insert(it, win);
                 }
                 PlaceWindowBefore(wSublayer >= 0 ? attached : w, win);
@@ -1429,7 +1432,7 @@ void CWindowManagerService::AddAttachedWindowToListLocked(
             // in the same sublayer.
             if (wSublayer > sublayer) {
                 if (addToToken) {
-                    if (DEBUG_ADD_REMOVE) Slogger::V(TAG, "Adding %p to %p", win, token.Get());
+                    if (DEBUG_ADD_REMOVE) Slogger::V(TAG, "Adding %s to %s", TO_CSTR(win), TO_CSTR(token));
                     token->mWindows.Insert(it, win);
                 }
                 PlaceWindowBefore(w, win);
@@ -1439,7 +1442,7 @@ void CWindowManagerService::AddAttachedWindowToListLocked(
     }
     if (it == tokenWindowList->End()) {
         if (addToToken) {
-            if (DEBUG_ADD_REMOVE) Slogger::V(TAG, "Adding %p to %p", win, token.Get());
+            if (DEBUG_ADD_REMOVE) Slogger::V(TAG, "Adding %s to %s", TO_CSTR(win), TO_CSTR(token));
             token->mWindows.PushBack(win);
         }
         if (sublayer < 0) {
@@ -1466,7 +1469,8 @@ void CWindowManagerService::AddWindowToListInOrderLocked(
             AddFreeWindowToListLocked(win);
         }
         if (addToToken) {
-            if (DEBUG_ADD_REMOVE) Slogger::V(TAG, "Adding %p to %p", win, token.Get());
+            if (DEBUG_ADD_REMOVE) Slogger::V(TAG, "Adding %s to %s. token->mWindows size:%d, is begin:%d",
+                TO_CSTR(win), TO_CSTR(token), token->mWindows.GetSize(), tokenWindowsIt == token->mWindows.Begin());
             token->mWindows.Insert(tokenWindowsIt, win);
         }
     }
@@ -1487,18 +1491,19 @@ Boolean CWindowManagerService::CanBeImeTarget(
     Int32 fl = flags
             & (IWindowManagerLayoutParams::FLAG_NOT_FOCUSABLE | IWindowManagerLayoutParams::FLAG_ALT_FOCUSABLE_IM);
     if (fl == 0
-            || fl == (IWindowManagerLayoutParams::FLAG_NOT_FOCUSABLE | IWindowManagerLayoutParams::FLAG_ALT_FOCUSABLE_IM)
-            || (w->mAttrs->GetType(&type), type == IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING)) {
+        || fl == (IWindowManagerLayoutParams::FLAG_NOT_FOCUSABLE | IWindowManagerLayoutParams::FLAG_ALT_FOCUSABLE_IM)
+        || (w->mAttrs->GetType(&type), type == IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING)) {
         if (DEBUG_INPUT_METHOD) {
             Slogger::I(TAG, "isVisibleOrAdding %p: %d", w, w->IsVisibleOrAdding());
             if (!w->IsVisibleOrAdding()) {
-                Slogger::I(TAG, "  mSurface=%p relayoutCalled=%d viewVis=%d policyVis=%d policyVisAfterAnim=%d attachHid=%d exiting=%d destroying=%d",
-                        w->mWinAnimator->mSurfaceControl.Get(),
-                        w->mRelayoutCalled, w->mViewVisibility,
-                        w->mPolicyVisibility,
-                        w->mPolicyVisibilityAfterAnim,
-                        w->mAttachedHidden,
-                        w->mExiting, w->mDestroying);
+                Slogger::I(TAG, "  mSurface=%p relayoutCalled=%d viewVis=%d policyVis=%d policyVisAfterAnim=%d"
+                    " attachHid=%d exiting=%d destroying=%d",
+                    w->mWinAnimator->mSurfaceControl.Get(),
+                    w->mRelayoutCalled, w->mViewVisibility,
+                    w->mPolicyVisibility,
+                    w->mPolicyVisibilityAfterAnim,
+                    w->mAttachedHidden,
+                    w->mExiting, w->mDestroying);
                 if (w->mAppToken != NULL) {
                     Slogger::I(TAG, "  mAppToken.hiddenRequested=%d", w->mAppToken->mHiddenRequested);
                 }
@@ -1521,7 +1526,7 @@ List< AutoPtr<WindowState> >::Iterator CWindowManagerService::FindDesiredInputMe
     for (; rit != windows->REnd(); ++rit) {
         AutoPtr<WindowState> win = *rit;
 
-        // if (DEBUG_INPUT_METHOD && willMove) Slogger::I((TAG, "Checking window @" + i
+        // if (DEBUG_INPUT_METHOD && willMove) Slogger::I(TAG, "Checking window @" + i
         //         + " " + win + " fl=0x" + Integer.toHexString(w.mAttrs.flags));
         if (CanBeImeTarget(win)) {
             w = win;
@@ -1628,7 +1633,7 @@ List< AutoPtr<WindowState> >::Iterator CWindowManagerService::FindDesiredInputMe
         }
     }
 
-    // Slogger::I((TAG, "Placing input method @" + (i+1));
+    // Slogger::I(TAG, "Placing input method @" + (i+1));
     if (w != NULL) {
         if (willMove) {
             // if (DEBUG_INPUT_METHOD) Slog.w(TAG, "Moving IM target from " + curTarget + " to "
@@ -1955,7 +1960,9 @@ Int32 CWindowManagerService::AdjustWallpaperWindowsLocked()
     WindowList::Iterator topCurIt = windows->Begin();
     WindowList::Iterator windowDetachedIt = windows->End();
     WindowList::ReverseIterator rit;
+    Int32 index = windows->GetSize();
     for (rit = windows->RBegin(); rit != windows->REnd(); ++rit) {
+        --index;
         w = *rit;
         Int32 wType;
         w->mAttrs->GetType(&wType);
@@ -1976,8 +1983,10 @@ Int32 CWindowManagerService::AdjustWallpaperWindowsLocked()
                 continue;
             }
         }
-        if (DEBUG_WALLPAPER) Slogger::V(TAG, "Win # %p: isOnScreen=%d mDrawState=%d"
-                ,/* i */ w.Get(), w->IsOnScreen(), w->mWinAnimator->mDrawState);
+        if (DEBUG_WALLPAPER) {
+            Slogger::V(TAG, "Win #%d %s: isOnScreen=%d mDrawState=%d",
+                index, TO_CSTR(w), w->IsOnScreen(), w->mWinAnimator->mDrawState);
+        }
 
         // If the app is executing an animation because the keyguard is going away, keep the
         // wallpaper during the animation so it doesn't flicker out.
@@ -1986,14 +1995,14 @@ Int32 CWindowManagerService::AdjustWallpaperWindowsLocked()
                 || (w->mAppToken != NULL && w->mWinAnimator->mKeyguardGoingAwayAnimation);
         if (hasWallpaper && w->IsOnScreen()
                 && (mWallpaperTarget == w || w->IsDrawFinishedLw())) {
-            if (DEBUG_WALLPAPER) Slogger::V(TAG, "Found wallpaper target: # =%p",/* i */w.Get());
+            if (DEBUG_WALLPAPER) Slogger::V(TAG, "Found wallpaper target: #%d =%s", index, TO_CSTR(w));
             foundW = w;
             foundIt = --rit.GetBase();
             if (w == mWallpaperTarget && w->mWinAnimator->IsAnimating()) {
                 // The current wallpaper target is animating, so we'll
                 // look behind it for another possible target and figure
                 // out what is going on below.
-                if (DEBUG_WALLPAPER) Slogger::V(TAG, "Win %p: token animating, looking behind.", w.Get());
+                if (DEBUG_WALLPAPER) Slogger::V(TAG, "Win %s: token animating, looking behind.", TO_CSTR(w));
                 continue;
             }
             break;
@@ -2013,8 +2022,7 @@ Int32 CWindowManagerService::AdjustWallpaperWindowsLocked()
     if (mWallpaperTarget != foundW
             && (mLowerWallpaperTarget == NULL || mLowerWallpaperTarget != foundW)) {
         if (DEBUG_WALLPAPER_LIGHT) {
-            Slogger::V(TAG, "New wallpaper target: %p oldTarget: %p", foundW.Get(),
-                    mWallpaperTarget.Get());
+            Slogger::V(TAG, "New wallpaper target: %s oldTarget: %s", TO_CSTR(foundW), TO_CSTR(mWallpaperTarget));
         }
 
         mLowerWallpaperTarget = NULL;
@@ -2032,8 +2040,7 @@ Int32 CWindowManagerService::AdjustWallpaperWindowsLocked()
             Boolean foundAnim;
             foundW->IsAnimatingLw(&foundAnim);
             if (DEBUG_WALLPAPER_LIGHT) {
-                Slogger::V(TAG, "New animation: %d old animation: %d", foundAnim,
-                        oldAnim);
+                Slogger::V(TAG, "New animation: %d old animation: %d", foundAnim, oldAnim);
             }
             if (foundAnim && oldAnim) {
                 WindowList::Iterator oldIt = Find(*windows, oldW);
@@ -2993,7 +3000,7 @@ void CWindowManagerService::RemoveWindowLocked(
         }
         if (win->mExiting || win->mWinAnimator->IsAnimating()) {
             // The exit animation is running... wait for it!
-            //Slogger::I((TAG, "*** Running exit animation...");
+            //Slogger::I(TAG, "*** Running exit animation...");
             win->mExiting = TRUE;
             win->mRemoveOnExit = TRUE;
             AutoPtr<DisplayContent> displayContent = win->GetDisplayContent();
@@ -3187,18 +3194,18 @@ void CWindowManagerService::UpdateAppOpsState()
 // {
 //     String str = "  SURFACE " + msg + ": " + w;
 //     if (where != null) {
-//         Slogger::I((TAG, str, where);
+//         Slogger::I(TAG, str, where);
 //     } else {
-//         Slogger::I((TAG, str);
+//         Slogger::I(TAG, str);
 //     }
 // }
 
 // static void logSurface(SurfaceControl s, String title, String msg, RuntimeException where) {
 //     String str = "  SURFACE " + s + ": " + msg + " / " + title;
 //     if (where != null) {
-//         Slogger::I((TAG, str, where);
+//         Slogger::I(TAG, str, where);
 //     } else {
-//         Slogger::I((TAG, str);
+//         Slogger::I(TAG, str);
 //     }
 // }
 
@@ -3466,8 +3473,7 @@ Int32 CWindowManagerService::RelayoutWindow(
     Boolean surfaceChanged = FALSE;
     Boolean animating;
     Int32 perm;
-    mContext->CheckCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::STATUS_BAR, &perm);
+    mContext->CheckCallingOrSelfPermission(Manifest::permission::STATUS_BAR, &perm);
     Boolean hasStatusBarPermission = (perm == IPackageManager::PERMISSION_GRANTED);
 
     Int64 origId = Binder::ClearCallingIdentity();
@@ -3523,9 +3529,8 @@ Int32 CWindowManagerService::RelayoutWindow(
             attrs->GetType(&type);
             if (winType != type) {
                 Binder::RestoreCallingIdentity(origId);
-                return E_ILLEGAL_ARGUMENT_EXCEPTION;
-                // throw new IllegalArgumentException(
-                //         "Window type can not be changed after the window is added.");
+                Slogger::E(TAG, "Window type can not be changed after the window is added.");
+                return 0;
             }
             Int32 attrsFlags;
             attrs->GetFlags(&attrsFlags);
@@ -3538,8 +3543,10 @@ Int32 CWindowManagerService::RelayoutWindow(
             }
         }
 
-        // if (DEBUG_LAYOUT) Slogger::V(TAG, "Relayout " + win + ": viewVisibility=" + viewVisibility
-        //         + " req=" + requestedWidth + "x" + requestedHeight + " " + win.mAttrs);
+        if (DEBUG_LAYOUT) {
+            Slogger::V(TAG, "Relayout %s: viewVisibility=%d req=(%d X %d), %s",
+                TO_CSTR(win), viewVisibility, requestedWidth, requestedHeight, TO_CSTR(win->mAttrs));
+        }
 
         Int32 privateFlags;
         win->mAttrs->GetPrivateFlags(&privateFlags);
@@ -3585,14 +3592,10 @@ Int32 CWindowManagerService::RelayoutWindow(
         win->mRelayoutCalled = TRUE;
         Int32 oldVisibility = win->mViewVisibility;
         win->mViewVisibility = viewVisibility;
-        // if (DEBUG_SCREEN_ON) {
-        //     RuntimeException stack = new RuntimeException();
-        //     stack.fillInStackTrace();
-        //     Slogger::I((TAG, "Relayout " + win + ": oldVis=" + oldVisibility
-        //             + " newVis=" + viewVisibility, stack);
-        // }
-        if (viewVisibility == IView::VISIBLE &&
-                (win->mAppToken == NULL || !win->mAppToken->mClientHidden)) {
+        if (DEBUG_SCREEN_ON) {
+            Slogger::I(TAG, "Relayout %s: oldVis=%d newVis=%d", TO_CSTR(win), oldVisibility, viewVisibility);
+        }
+        if (viewVisibility == IView::VISIBLE && (win->mAppToken == NULL || !win->mAppToken->mClientHidden)) {
             Boolean isVisible;
             win->IsVisibleLw(&isVisible);
             toBeDisplayed = !isVisible;
@@ -3612,13 +3615,16 @@ Int32 CWindowManagerService::RelayoutWindow(
                     winAnimator->ApplyEnterAnimationLocked();
                 }
                 if ((winFlags & IWindowManagerLayoutParams::FLAG_TURN_SCREEN_ON) != 0) {
-                    // if (DEBUG_VISIBILITY) Slogger::V(TAG,
-                    //         "Relayout window turning screen on: " + win);
+                    if (DEBUG_VISIBILITY) {
+                        Slogger::V(TAG, "Relayout window turning screen on: %s", TO_CSTR(win));
+                    }
                     win->mTurnOnScreen = TRUE;
                 }
                 if (win->IsConfigChanged()) {
-                    // if (DEBUG_CONFIGURATION) Slogger::I((TAG, "Window " + win
-                    //         + " visible with new config: " + mCurConfiguration);
+                    if (DEBUG_CONFIGURATION) {
+                        Slogger::I(TAG, "Window %s visible with new config: %s",
+                            TO_CSTR(win), TO_CSTR(mCurConfiguration));
+                    }
                     inConfig->SetTo(mCurConfiguration);
                 }
             }
@@ -3633,31 +3639,26 @@ Int32 CWindowManagerService::RelayoutWindow(
                 surfaceChanged = TRUE;
             }
             AutoPtr<ISurfaceControl> surfaceControl = winAnimator->CreateSurfaceLocked();
+            ECode ec = NOERROR;
             if (surfaceControl != NULL) {
-                ECode ec = inSurface->CopyFrom(surfaceControl);
-                if (FAILED(ec)) {
-                    mInputMonitor->UpdateInputWindowsLw(TRUE /*force*/);
-                    Binder::RestoreCallingIdentity(origId);
-                    return 0;
-                }
+                ec = inSurface->CopyFrom(surfaceControl);
                 // if (SHOW_TRANSACTIONS) {
-                //     Slogger::I((TAG,"  OUT SURFACE " + outSurface + ": copied");
+                //     Slogger::I(TAG,"  OUT SURFACE " + outSurface + ": copied");
                 // }
             }
             else {
                 // For some reason there isn't a surface.  Clear the
                 // caller's object so they see the same state.
-                inSurface->ReleaseSurface();
+                ec = inSurface->ReleaseSurface();
             }
-            // catch (Exception e) {
-            //     mInputMonitor.updateInputWindowsLw(true /*force*/);
+            if (FAILED(ec)) {
+                mInputMonitor->UpdateInputWindowsLw(TRUE /*force*/);
+                Binder::RestoreCallingIdentity(origId);
+                Slogger::W(TAG, "Exception thrown when creating surface for client %p :%s",
+                    client, TO_CSTR(win));
+                return 0;
+            }
 
-            //     Slog.w(TAG, "Exception thrown when creating surface for client "
-            //              + client + " (" + win.mAttrs.getTitle() + ")",
-            //              e);
-            //     Binder::RestoreCallingIdentity(origId);
-            //     return 0;
-            // }
             if (toBeDisplayed) {
                 focusMayChange = isDefaultDisplay;
             }
@@ -3689,7 +3690,7 @@ Int32 CWindowManagerService::RelayoutWindow(
         else {
             winAnimator->mEnterAnimationPending = FALSE;
             if (winAnimator->mSurfaceControl != NULL) {
-                // if (DEBUG_VISIBILITY) Slogger::I((TAG, "Relayout invis " + win
+                // if (DEBUG_VISIBILITY) Slogger::I(TAG, "Relayout invis " + win
                 //         + ": mExiting=" + win.mExiting);
                 // If we are not currently running the exit animation, we
                 // need to see about starting one.
@@ -3737,7 +3738,7 @@ Int32 CWindowManagerService::RelayoutWindow(
             }
 
             inSurface->ReleaseSurface();
-            // if (DEBUG_VISIBILITY) Slogger::I((TAG, "Releasing surface in: " + win);
+            if (DEBUG_VISIBILITY) Slogger::I(TAG, "Releasing surface in: %s", TO_CSTR(win));
         }
 
         if (focusMayChange) {
@@ -3786,16 +3787,16 @@ Int32 CWindowManagerService::RelayoutWindow(
         inContentInsets->Set(win->mContentInsets);
         inVisibleInsets->Set(win->mVisibleInsets);
         inStableInsets->Set(win->mStableInsets);
-        // if (localLOGV) Slogger::V(
-        //     TAG, "Relayout given client " + client.asBinder()
-        //     + ", requestedWidth=" + requestedWidth
-        //     + ", requestedHeight=" + requestedHeight
-        //     + ", viewVisibility=" + viewVisibility
-        //     + "\nRelayout returning frame=" + outFrame
-        //     + ", surface=" + outSurface);
+        if (localLOGV) {
+            Slogger::V(TAG, " >>> Relayout given client %p, requestedWidth=%d, requestedHeight=%d, "
+                "viewVisibility=%d\nRelayout returning frame=%s, surface=%s",
+                client, requestedWidth, requestedHeight, viewVisibility,
+                TO_CSTR(inFrame), TO_CSTR(inSurface));
+        }
 
-        // if (localLOGV || DEBUG_FOCUS) Slogger::V(
-        //     TAG, "Relayout of " + win + ": focusMayChange=" + focusMayChange);
+        if (localLOGV || DEBUG_FOCUS) {
+            Slogger::V(TAG, "Relayout of %s: focusMayChange=%d", TO_CSTR(win), focusMayChange);
+        }
 
         inTouchMode = mInTouchMode;
         animating = mAnimator->mAnimating && win->mWinAnimator->IsAnimating();;
@@ -3806,9 +3807,9 @@ Int32 CWindowManagerService::RelayoutWindow(
 
         mInputMonitor->UpdateInputWindowsLw(TRUE /*force*/);
 
-        // if (DEBUG_LAYOUT) {
-        //     Slogger::V(TAG, "Relayout complete " + win + ": outFrame=" + outFrame.toShortString());
-        // }
+        if (DEBUG_LAYOUT) {
+            Slogger::V(TAG, " >>> Relayout complete %s: outFrame=%s", TO_CSTR(win), TO_CSTR(inFrame));
+        }
     }
 
     if (configChanged) {
@@ -4108,7 +4109,7 @@ ECode CWindowManagerService::AddWindowToken(
     /* [in] */ Int32 type)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("AddWindowToken()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -4140,7 +4141,7 @@ ECode CWindowManagerService::RemoveWindowToken(
     /* [in] */ IBinder* token)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("RemoveWindowToken()"))) {
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -4257,7 +4258,7 @@ ECode CWindowManagerService::AddAppToken(
     /* [in] */ Boolean launchTaskBehind)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("AddAppToken()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -4333,7 +4334,7 @@ ECode CWindowManagerService::SetAppGroupId(
     /* [in] */ Int32 groupId)
 {
     if (!CheckCallingPermission(
-        Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+        Manifest::permission::MANAGE_APP_TOKENS,
         String("SetAppStartingIcon()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -4489,8 +4490,7 @@ ECode CWindowManagerService::UpdateOrientationFromAppTokens(
 {
     VALIDATE_NOT_NULL(config);
 
-    if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+    if (!CheckCallingPermission(Manifest::permission::MANAGE_APP_TOKENS,
             String("UpdateOrientationFromAppTokens()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -4589,7 +4589,7 @@ ECode CWindowManagerService::SetNewConfiguration(
     /* [in] */ IConfiguration* config)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("SetNewConfiguration()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -4615,7 +4615,7 @@ ECode CWindowManagerService::SetAppOrientation(
     /* [in] */ Int32 requestedOrientation)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("SetAppOrientation()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -4704,7 +4704,7 @@ void CWindowManagerService::SetFocusedStackFrame()
     }
     // } finally {
     //     SurfaceControl.closeTransaction();
-    //     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I((TAG, ">>> CLOSE TRANSACTION setFocusedStackFrame");
+    //     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> CLOSE TRANSACTION setFocusedStackFrame");
     // }
     helper->CloseTransaction();
     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> CLOSE TRANSACTION setFocusedStackFrame");
@@ -4715,7 +4715,7 @@ ECode CWindowManagerService::SetFocusedApp(
     /* [in] */ Boolean moveFocusNow)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("SetFocusedApp()"))) {
         //throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -4751,7 +4751,7 @@ ECode CWindowManagerService::SetFocusedApp(
             SetFocusedStackLayer();
             // } finally {
             //     SurfaceControl.closeTransaction();
-            //     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I((TAG, ">>> CLOSE TRANSACTION setFocusedApp");
+            //     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> CLOSE TRANSACTION setFocusedApp");
             // }
             helper->CloseTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> CLOSE TRANSACTION setFocusedApp");
@@ -4772,7 +4772,7 @@ ECode CWindowManagerService::PrepareAppTransition(
     /* [in] */ Boolean alwaysKeepCurrent)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("PrepareAppTransition()"))) {
         //throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -4879,7 +4879,7 @@ ECode CWindowManagerService::ExecuteAppTransition()
 {
 // Slogger::D(TAG, "==== File: %s, Line: %d ====", __FILE__, __LINE__);
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("ExecuteAppTransition()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -4919,7 +4919,7 @@ ECode CWindowManagerService::SetAppStartingWindow(
     /* [in] */ Boolean createIfNeeded)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("SetAppStartingIcon()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -5170,7 +5170,7 @@ ECode CWindowManagerService::SetAppWillBeHidden(
     /* [in] */ IBinder* token)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("SetAppWillBeHidden()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -5271,7 +5271,7 @@ Boolean CWindowManagerService::SetTokenVisibilityLocked(
                 continue;
             }
 
-            // Slogger::I((TAG, "Window " + win + ": vis=" + win.isVisible());
+            // Slogger::I(TAG, "Window " + win + ": vis=" + win.isVisible());
             // win.dump("  ");
             if (visible) {
                 if (!win->IsVisibleNow()) {
@@ -5359,7 +5359,7 @@ ECode CWindowManagerService::SetAppVisibility(
     /* [in] */ Boolean visible)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("SetAppVisibility()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -5512,7 +5512,7 @@ void CWindowManagerService::StartAppFreezingScreenLocked(
     //         e = new RuntimeException();
     //         e.fillInStackTrace();
     //     }
-    //     Slogger::I((TAG, "Set freezing of " + wtoken.appToken
+    //     Slogger::I(TAG, "Set freezing of " + wtoken.appToken
     //             + ": hidden=" + wtoken.hidden + " freezing="
     //             + wtoken.mAppAnimator.freezingScreen, e);
     // }
@@ -5543,7 +5543,7 @@ ECode CWindowManagerService::StartAppFreezingScreen(
     /* [in] */ Int32 configChanges)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("StartAppFreezingScreen()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         return E_SECURITY_EXCEPTION;
@@ -5574,7 +5574,7 @@ ECode CWindowManagerService::StopAppFreezingScreen(
     /* [in] */ Boolean force)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("StopAppFreezingScreen()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -5614,10 +5614,7 @@ void CWindowManagerService::RemoveAppFromTaskLocked(
 ECode CWindowManagerService::RemoveAppToken(
     /* [in] */ IBinder* token)
 {
-    if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
-            String("RemoveAppToken()"))) {
-        // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
+    if (!CheckCallingPermission(Manifest::permission::MANAGE_APP_TOKENS, String("RemoveAppToken()"))) {
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
         return E_SECURITY_EXCEPTION;
     }
@@ -5636,9 +5633,9 @@ ECode CWindowManagerService::RemoveAppToken(
             mTokenMap.Erase(tokenIt);
         }
         if (basewtoken != NULL && (wtoken = basewtoken->mAppWindowToken) != NULL) {
-            if (DEBUG_APP_TRANSITIONS) Slogger::V(TAG, "Removing app token: %p", wtoken.Get());
+            if (DEBUG_APP_TRANSITIONS) Slogger::V(TAG, "Removing app token: %s", TO_CSTR(wtoken));
             delayed = SetTokenVisibilityLocked(wtoken, NULL, FALSE,
-                    AppTransition::TRANSIT_UNSET, TRUE, wtoken->mVoiceInteraction);
+                AppTransition::TRANSIT_UNSET, TRUE, wtoken->mVoiceInteraction);
             wtoken->mInPendingTransaction = FALSE;
             mOpeningApps.Remove(wtoken);
             wtoken->mWaitingToShow = FALSE;
@@ -5657,12 +5654,11 @@ ECode CWindowManagerService::RemoveAppToken(
                 delayed = TRUE;
             }
             if (DEBUG_APP_TRANSITIONS) {
-                Slogger::V(TAG, "Removing app %p delayed=%d animation=%p animating=%d"
-                        , wtoken.Get(), delayed, wtoken->mAppAnimator->mAnimation.Get(), wtoken->mAppAnimator->mAnimating);
+                Slogger::V(TAG, "Removing app %s delayed=%d animation=%p animating=%d",
+                    TO_CSTR(wtoken), delayed, wtoken->mAppAnimator->mAnimation.Get(), wtoken->mAppAnimator->mAnimating);
             }
             if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) {
-                Slogger::V(TAG, "removeAppToken: %p delayed=%d Callers="
-                        , wtoken.Get(), delayed/*, Debug.getCallers(4)*/);
+                Slogger::V(TAG, "removeAppToken: %s delayed=%d Callers=", TO_CSTR(wtoken), delayed/*, Debug.getCallers(4)*/);
             }
             AutoPtr<IInterface> value;
             mTaskIdToTask->Get(wtoken->mGroupId, (IInterface**)&value);
@@ -5670,7 +5666,7 @@ ECode CWindowManagerService::RemoveAppToken(
             if (delayed) {
                 // set the token aside because it has an active animation to be finished
                 if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) {
-                    Slogger::V(TAG, "removeAppToken make exiting: %p", wtoken.Get());
+                    Slogger::V(TAG, "removeAppToken make exiting: %s", TO_CSTR(wtoken));
                 }
                 stack->mExitingAppTokens.PushBack(wtoken);
                 wtoken->mDeferRemoval = FALSE;
@@ -5690,14 +5686,14 @@ ECode CWindowManagerService::RemoveAppToken(
             }
             UnsetAppFreezingScreenLocked(wtoken, TRUE, TRUE);
             if (mFocusedApp == wtoken) {
-                if (DEBUG_FOCUS_LIGHT) Slogger::V(TAG, "Removing focused app token:%p", wtoken.Get());
+                if (DEBUG_FOCUS_LIGHT) Slogger::V(TAG, "Removing focused app token:%s", TO_CSTR(wtoken));
                 mFocusedApp = NULL;
                 UpdateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, TRUE /*updateInputWindows*/);
                 mInputMonitor->SetFocusedAppLw(NULL);
             }
         }
         else {
-            Slogger::W(TAG, "Attempted to remove non-existing app token: %p", token);
+            Slogger::W(TAG, "Attempted to remove non-existing app token: %s", TO_CSTR(token));
         }
 
         if (!delayed && wtoken != NULL) {
@@ -6214,7 +6210,7 @@ ECode CWindowManagerService::StartFreezingScreen(
     /* [in] */ Int32 enterAnim)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::FREEZE_SCREEN,
+            Manifest::permission::FREEZE_SCREEN,
             String("startFreezingScreen()"))) {
         Slogger::E(TAG, "Requires FREEZE_SCREEN permission");
         return E_SECURITY_EXCEPTION;
@@ -6241,7 +6237,7 @@ ECode CWindowManagerService::StartFreezingScreen(
 ECode CWindowManagerService::StopFreezingScreen()
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::FREEZE_SCREEN,
+            Manifest::permission::FREEZE_SCREEN,
             String("stopFreezingScreen()"))) {
         Slogger::E(TAG, "Requires FREEZE_SCREEN permission");
         return E_SECURITY_EXCEPTION;
@@ -6272,7 +6268,7 @@ ECode CWindowManagerService::DisableKeyguard(
 {
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::DISABLE_KEYGUARD,
+            Manifest::permission::DISABLE_KEYGUARD,
             &perm));
     if (perm != IPackageManager::PERMISSION_GRANTED) {
         //throw new SecurityException("Requires DISABLE_KEYGUARD permission");
@@ -6306,7 +6302,7 @@ ECode CWindowManagerService::ReenableKeyguard(
 {
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::DISABLE_KEYGUARD,
+            Manifest::permission::DISABLE_KEYGUARD,
             &perm));
     if (perm != IPackageManager::PERMISSION_GRANTED) {
         //throw new SecurityException("Requires DISABLE_KEYGUARD permission");
@@ -6331,7 +6327,7 @@ ECode CWindowManagerService::ExitKeyguardSecurely(
 {
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::DISABLE_KEYGUARD, &perm));
+            Manifest::permission::DISABLE_KEYGUARD, &perm));
     if (perm != IPackageManager::PERMISSION_GRANTED) {
         //throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         return E_SECURITY_EXCEPTION;
@@ -6370,7 +6366,7 @@ ECode CWindowManagerService::DismissKeyguard()
 {
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::DISABLE_KEYGUARD, &perm));
+            Manifest::permission::DISABLE_KEYGUARD, &perm));
     if (perm != IPackageManager::PERMISSION_GRANTED) {
         //throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         Slogger::E(TAG, "Requires DISABLE_KEYGUARD permission");
@@ -6390,7 +6386,7 @@ ECode CWindowManagerService::KeyguardGoingAway(
 {
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::DISABLE_KEYGUARD, &perm));
+            Manifest::permission::DISABLE_KEYGUARD, &perm));
     if (perm != IPackageManager::PERMISSION_GRANTED) {
         //throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         Slogger::E(TAG, "Requires DISABLE_KEYGUARD permission");
@@ -6518,7 +6514,7 @@ ECode CWindowManagerService::SetAnimationScale(
     /* [in] */ Float scale)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::SET_ANIMATION_SCALE,
+            Manifest::permission::SET_ANIMATION_SCALE,
             String("SetAnimationScale()"))) {
         //throw new SecurityException("Requires SET_ANIMATION_SCALE permission");
         Slogger::E(TAG, "Requires SET_ANIMATION_SCALE permission");
@@ -6541,7 +6537,7 @@ ECode CWindowManagerService::SetAnimationScales(
     /* [in] */ ArrayOf<Float>* scales)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::SET_ANIMATION_SCALE,
+            Manifest::permission::SET_ANIMATION_SCALE,
             String("SetAnimationScale()"))) {
         //throw new SecurityException("Requires SET_ANIMATION_SCALE permission");
         Slogger::E(TAG, "Requires SET_ANIMATION_SCALE permission");
@@ -6776,7 +6772,8 @@ void CWindowManagerService::EnableScreenAfterBoot()
         // If the screen still doesn't come up after 30 seconds, give
         // up and turn it on.
         Boolean result;
-        mH->SendEmptyMessageDelayed(H::BOOT_TIMEOUT, 30*1000, &result);
+        mH->SendEmptyMessageDelayed(H::BOOT_TIMEOUT, 15 * 1000 /*30*1000*/, &result);
+        Slogger::I(TAG, "TODO set boot timeout to 30s.");
     }
 
     mPolicy->SystemBooted();
@@ -7001,7 +6998,7 @@ void CWindowManagerService::ShowBootMessage(
         // if (DEBUG_BOOT) {
         //     RuntimeException here = new RuntimeException("here");
         //     here.fillInStackTrace();
-        //     Slogger::I((TAG, "showBootMessage: msg=" + msg + " always=" + always
+        //     Slogger::I(TAG, "showBootMessage: msg=" + msg + " always=" + always
         //             + " mAllowBootMessages=" + mAllowBootMessages
         //             + " mShowingBootMessages=" + mShowingBootMessages
         //             + " mSystemBooted=" + mSystemBooted, here);
@@ -7031,7 +7028,7 @@ void CWindowManagerService::HideBootMessagesLocked()
     // if (DEBUG_BOOT) {
     //     RuntimeException here = new RuntimeException("here");
     //     here.fillInStackTrace();
-    //     Slogger::I((TAG, "hideBootMessagesLocked: mDisplayEnabled=" + mDisplayEnabled
+    //     Slogger::I(TAG, "hideBootMessagesLocked: mDisplayEnabled=" + mDisplayEnabled
     //             + " mForceDisplayEnabled=" + mForceDisplayEnabled
     //             + " mShowingBootMessages=" + mShowingBootMessages
     //             + " mSystemBooted=" + mSystemBooted, here);
@@ -7108,7 +7105,7 @@ void CWindowManagerService::ShowCircularMask()
         mCircularDisplayMask->SetVisibility(TRUE);
         // } finally {
         //     SurfaceControl.closeTransaction();
-        //     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I((TAG,
+        //     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG,
         //             "<<< CLOSE TRANSACTION showCircularMask");
         // }
         scHelper->CloseTransaction();
@@ -7136,7 +7133,7 @@ void CWindowManagerService::ShowEmulatorDisplayOverlay()
         mEmulatorDisplayOverlay->SetVisibility(TRUE);
         // } finally {
         //     SurfaceControl.closeTransaction();
-        //     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I((TAG,
+        //     if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG,
         //             "<<< CLOSE TRANSACTION showEmulatorDisplayOverlay");
         // }
         scHelper->CloseTransaction();
@@ -7188,7 +7185,7 @@ void CWindowManagerService::ShowStrictModeViolation(
         }
     }
 
-    // if (SHOW_LIGHT_TRANSACTIONS) Slogger::I((TAG,
+    // if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG,
     //         ">>> OPEN TRANSACTION showStrictModeViolation");
     AutoPtr<ISurfaceControlHelper> surfaceHelper;
     CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&surfaceHelper);
@@ -7270,7 +7267,7 @@ ECode CWindowManagerService::ScreenshotApplications(
     *bitmap = NULL;
 
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::READ_FRAME_BUFFER,
+            Manifest::permission::READ_FRAME_BUFFER,
             String("ScreenshotApplications()"))) {
         Slogger::E(TAG, "Requires READ_FRAME_BUFFER permission");
         return E_SECURITY_EXCEPTION;
@@ -7569,7 +7566,7 @@ ECode CWindowManagerService::FreezeRotation(
     /* [in] */ Int32 rotation)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::SET_ORIENTATION,
+            Manifest::permission::SET_ORIENTATION,
             String("freezeRotation()"))) {
         Slogger::E(TAG, "Requires SET_ORIENTATION permission");
         return E_SECURITY_EXCEPTION;
@@ -7601,7 +7598,7 @@ ECode CWindowManagerService::FreezeRotation(
 ECode CWindowManagerService::ThawRotation()
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::SET_ORIENTATION,
+            Manifest::permission::SET_ORIENTATION,
             String("thawRotation()"))) {
         Slogger::E(TAG, "Requires SET_ORIENTATION permission");
         return E_SECURITY_EXCEPTION;
@@ -7949,7 +7946,7 @@ ECode CWindowManagerService::StartViewServer(
     }
 
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::DUMP, String("startViewServer"))) {
+            Manifest::permission::DUMP, String("startViewServer"))) {
         *result = FALSE;
         return NOERROR;
     }
@@ -8009,7 +8006,7 @@ ECode CWindowManagerService::StopViewServer(
     }
 
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::DUMP, String("stopViewServer"))) {
+            Manifest::permission::DUMP, String("stopViewServer"))) {
         return NOERROR;
     }
 
@@ -8029,7 +8026,7 @@ ECode CWindowManagerService::IsViewServerRunning(
     }
 
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::DUMP, String("isViewServerRunning"))) {
+            Manifest::permission::DUMP, String("isViewServerRunning"))) {
         *result = FALSE;
         return NOERROR;
     }
@@ -8631,7 +8628,7 @@ Boolean CWindowManagerService::ComputeScreenConfigurationLocked(
         displayContent->mBaseDisplayRect->Set(0, 0, dw, dh);
     }
     // if (false) {
-    //     Slogger::I((TAG, "Set app display size: " + appWidth + " x " + appHeight);
+    //     Slogger::I(TAG, "Set app display size: " + appWidth + " x " + appHeight);
     // }
 
     AutoPtr<IDisplayMetrics> dm = mDisplayMetrics;
@@ -8832,7 +8829,7 @@ AutoPtr<IBinder> CWindowManagerService::PrepareDragSurface(
             Int32 stack;
             display->GetLayerStack(&stack);
             surface->SetLayerStack(stack);
-            // if (SHOW_TRANSACTIONS) Slogger::I((TAG, "  DRAG "
+            // if (SHOW_TRANSACTIONS) Slogger::I(TAG, "  DRAG "
             //         + surface + ": CREATE");
             outSurface->CopyFrom(surface);
             AutoPtr<IBinder> winBinder = IBinder::Probe(window);
@@ -8877,7 +8874,7 @@ ECode CWindowManagerService::PauseKeyDispatching(
     /* [in] */ IBinder* token)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("PauseKeyDispatching()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -8903,7 +8900,7 @@ ECode CWindowManagerService::ResumeKeyDispatching(
     /* [in] */ IBinder* token)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("ResumeKeyDispatching()"))) {
         // throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -8929,7 +8926,7 @@ ECode CWindowManagerService::SetEventDispatching(
     /* [in] */ Boolean enabled)
 {
     if (!CheckCallingPermission(
-            Elastos::Droid::Manifest::permission::MANAGE_APP_TOKENS,
+            Manifest::permission::MANAGE_APP_TOKENS,
             String("ResumeKeyDispatching()"))) {
         //throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         Slogger::E(TAG, "Requires MANAGE_APP_TOKENS permission");
@@ -9857,9 +9854,9 @@ ECode CWindowManagerService::InputMethodClientHasFocus(
             // TODO(multidisplay): IMEs are only supported on the default display.
             AutoPtr<WindowState> imFocus = *(--it);
             // if (DEBUG_INPUT_METHOD) {
-            //     Slogger::I((TAG, "Desired input method target: " + imFocus);
-            //     Slogger::I((TAG, "Current focus: " + mCurrentFocus);
-            //     Slogger::I((TAG, "Last focus: " + mLastFocus);
+            //     Slogger::I(TAG, "Desired input method target: " + imFocus);
+            //     Slogger::I(TAG, "Current focus: " + mCurrentFocus);
+            //     Slogger::I(TAG, "Last focus: " + mLastFocus);
             // }
             if (imFocus != NULL) {
                 // This may be a starting window, in which case we still want
@@ -9882,11 +9879,11 @@ ECode CWindowManagerService::InputMethodClientHasFocus(
                     }
                 }
                 // if (DEBUG_INPUT_METHOD) {
-                //     Slogger::I((TAG, "IM target client: " + imFocus.mSession.mClient);
+                //     Slogger::I(TAG, "IM target client: " + imFocus.mSession.mClient);
                 //     if (imFocus.mSession.mClient != null) {
-                //         Slogger::I((TAG, "IM target client binder: "
+                //         Slogger::I(TAG, "IM target client binder: "
                 //                 + imFocus.mSession.mClient.asBinder());
-                //         Slogger::I((TAG, "Requesting client binder: " + client.asBinder());
+                //         Slogger::I(TAG, "Requesting client binder: " + client.asBinder());
                 //     }
                 // }
                 if (imFocus->mSession->mClient != NULL &&
@@ -9958,9 +9955,9 @@ ECode CWindowManagerService::SetForcedDisplaySize(
 {
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::WRITE_SECURE_SETTINGS, &perm));
+            Manifest::permission::WRITE_SECURE_SETTINGS, &perm));
     if (perm != IPackageManager::PERMISSION_GRANTED) {
-        Slogger::E(TAG, "Must hold permission %s", Elastos::Droid::Manifest::permission::WRITE_SECURE_SETTINGS.string());
+        Slogger::E(TAG, "Must hold permission %s", Manifest::permission::WRITE_SECURE_SETTINGS.string());
         return E_SECURITY_EXCEPTION;
     }
     if (displayId != IDisplay::DEFAULT_DISPLAY) {
@@ -10018,7 +10015,7 @@ void CWindowManagerService::ReadForcedDisplaySizeAndDensityLocked(
             AutoLock lock(displayContent->mDisplaySizeLock);
             if (displayContent->mBaseDisplayWidth != width
                     || displayContent->mBaseDisplayHeight != height) {
-                // Slogger::I((TAG, "FORCED DISPLAY SIZE: " + width + "x" + height);
+                // Slogger::I(TAG, "FORCED DISPLAY SIZE: " + width + "x" + height);
                 displayContent->mBaseDisplayWidth = width;
                 displayContent->mBaseDisplayHeight = height;
             }
@@ -10068,9 +10065,9 @@ ECode CWindowManagerService::ClearForcedDisplaySize(
 {
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::WRITE_SECURE_SETTINGS, &perm));
+            Manifest::permission::WRITE_SECURE_SETTINGS, &perm));
     if (perm != IPackageManager::PERMISSION_GRANTED) {
-        Slogger::E(TAG, "Must hold permission %s", Elastos::Droid::Manifest::permission::WRITE_SECURE_SETTINGS.string());
+        Slogger::E(TAG, "Must hold permission %s", Manifest::permission::WRITE_SECURE_SETTINGS.string());
         return E_SECURITY_EXCEPTION;
     }
 
@@ -10138,9 +10135,9 @@ ECode CWindowManagerService::SetForcedDisplayDensity(
 {
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::WRITE_SECURE_SETTINGS, &perm));
+            Manifest::permission::WRITE_SECURE_SETTINGS, &perm));
     if (perm != IPackageManager::PERMISSION_GRANTED) {
-        Slogger::E(TAG, "Must hold permission %s", Elastos::Droid::Manifest::permission::WRITE_SECURE_SETTINGS.string());
+        Slogger::E(TAG, "Must hold permission %s", Manifest::permission::WRITE_SECURE_SETTINGS.string());
         return E_SECURITY_EXCEPTION;
     }
 
@@ -10185,9 +10182,9 @@ ECode CWindowManagerService::ClearForcedDisplayDensity(
 {
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::WRITE_SECURE_SETTINGS, &perm));
+            Manifest::permission::WRITE_SECURE_SETTINGS, &perm));
     if (perm != IPackageManager::PERMISSION_GRANTED) {
-        Slogger::E(TAG, "Must hold permission %s", Elastos::Droid::Manifest::permission::WRITE_SECURE_SETTINGS.string());
+        Slogger::E(TAG, "Must hold permission %s", Manifest::permission::WRITE_SECURE_SETTINGS.string());
         return E_SECURITY_EXCEPTION;
     }
 
@@ -10269,9 +10266,9 @@ ECode CWindowManagerService::SetOverscan(
 {
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::WRITE_SECURE_SETTINGS, &perm));
+            Manifest::permission::WRITE_SECURE_SETTINGS, &perm));
     if (perm != IPackageManager::PERMISSION_GRANTED) {
-        Slogger::E(TAG, "Must hold permission %s", Elastos::Droid::Manifest::permission::WRITE_SECURE_SETTINGS.string());
+        Slogger::E(TAG, "Must hold permission %s", Manifest::permission::WRITE_SECURE_SETTINGS.string());
         return E_SECURITY_EXCEPTION;
     }
     Int64 ident = Binder::ClearCallingIdentity();
@@ -11272,11 +11269,11 @@ void CWindowManagerService::UpdateResizingWindows(
         w->SetInsetsChanged();
         Boolean configChanged = w->IsConfigChanged();
         if (DEBUG_CONFIGURATION && configChanged) {
-            Slogger::V(TAG, "Win %p config changed: %p", w, mCurConfiguration.Get());
+            Slogger::V(TAG, "Win %s config changed: %s", TO_CSTR(w), TO_CSTR(mCurConfiguration));
         }
         if (localLOGV) {
-            Slogger::V(TAG, "Resizing %p: configChanged=%d last=%p frame=%p"
-                    , w, configChanged, w->mLastFrame.Get(), w->mFrame.Get());
+            Slogger::V(TAG, "Resizing %s: configChanged=%d last=%s frame=%s",
+                TO_CSTR(w), configChanged, TO_CSTR(w->mLastFrame), TO_CSTR(w->mFrame));
         }
         w->mLastFrame->Set(w->mFrame);
         if (w->mContentInsetsChanged
@@ -11288,9 +11285,10 @@ void CWindowManagerService::UpdateResizingWindows(
                 w->mContentInsets->ToShortString(&str1);
                 w->mVisibleInsets->ToShortString(&str2);
                 w->mStableInsets->ToShortString(&str3);
-                Slogger::V(TAG, "Resize reasons for w=%p:  contentInsetsChanged=%d %s visibleInsetsChanged=%d %s stableInsetsChanged=%d %s surfaceResized=%d configChanged=%d"
-                        , w, w->mContentInsetsChanged, str1.string(), w->mVisibleInsetsChanged, str2.string()
-                        , w->mStableInsetsChanged, str3.string(), winAnimator->mSurfaceResized, configChanged);
+                Slogger::V(TAG, "Resize reasons for w=%s: contentInsetsChanged=%d %s visibleInsetsChanged=%d %s"
+                    " stableInsetsChanged=%d %s surfaceResized=%d configChanged=%d",
+                    TO_CSTR(w), w->mContentInsetsChanged, str1.string(), w->mVisibleInsetsChanged, str2.string(),
+                    w->mStableInsetsChanged, str3.string(), winAnimator->mSurfaceResized, configChanged);
             }
 
             w->mLastOverscanInsets->Set(w->mOverscanInsets);
@@ -11305,8 +11303,8 @@ void CWindowManagerService::UpdateResizingWindows(
             // by the application when it has finished drawing.
             if (w->mOrientationChanging) {
                 if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || DEBUG_ORIENTATION) {
-                    Slogger::V(TAG, "Orientation start waiting for draw mDrawState=DRAW_PENDING in %p, surface %p"
-                            , w, winAnimator->mSurfaceControl.Get());
+                    Slogger::V(TAG, "Orientation start waiting for draw mDrawState=DRAW_PENDING in %s, surface %s",
+                        TO_CSTR(w), TO_CSTR(winAnimator->mSurfaceControl));
                 }
                 winAnimator->mDrawState = WindowStateAnimator::DRAW_PENDING;
                 if (w->mAppToken != NULL) {
@@ -11320,7 +11318,8 @@ void CWindowManagerService::UpdateResizingWindows(
             }
             if (it == mResizingWindows.End()) {
                 if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
-                    Slogger::V(TAG, "Resizing window %p to %dx%d", w, winAnimator->mSurfaceW, winAnimator->mSurfaceH);
+                    Slogger::V(TAG, "Resizing window %p to (%.2f x %.2f)",
+                        TO_CSTR(w), winAnimator->mSurfaceW, winAnimator->mSurfaceH);
                 }
                 mResizingWindows.PushBack(w);
             }
@@ -11328,8 +11327,8 @@ void CWindowManagerService::UpdateResizingWindows(
         else if (w->mOrientationChanging) {
             if (w->IsDrawnLw()) {
                 if (DEBUG_ORIENTATION) {
-                    Slogger::V(TAG, "Orientation not waiting for draw in %p, surface %p"
-                            , w, winAnimator->mSurfaceControl.Get());
+                    Slogger::V(TAG, "Orientation not waiting for draw in %s, surface %s",
+                        TO_CSTR(w), TO_CSTR(winAnimator->mSurfaceControl));
                 }
                 w->mOrientationChanging = FALSE;
                 w->mLastFreezeDuration = (Int32)(SystemClock::GetElapsedRealtime() - mDisplayFreezeTime);
@@ -11765,7 +11764,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
                 // }
             }
 
-            //Slogger::I((TAG, "Window " + this + " clearing mContentChanged - done placing");
+            //Slogger::I(TAG, "Window " + this + " clearing mContentChanged - done placing");
             w->mContentChanged = FALSE;
 
             // Moved from updateWindowsAndWallpaperLocked().
@@ -12730,7 +12729,7 @@ void CWindowManagerService::StopFreezingDisplayLocked()
             mAnimator->GetScreenRotationAnimationLocked(displayId);
     if (CUSTOM_SCREEN_ROTATION && screenRotationAnimation != NULL
             && screenRotationAnimation->HasScreenshot()) {
-        // if (DEBUG_ORIENTATION) Slogger::I((TAG, "**** Dismissing screen rotation animation");
+        // if (DEBUG_ORIENTATION) Slogger::I(TAG, "**** Dismissing screen rotation animation");
         // TODO(multidisplay): rotation on main screen only.
         AutoPtr<IDisplayInfo> displayInfo = displayContent->GetDisplayInfo();
         // Get rotation animation again, with new top window
@@ -12878,13 +12877,13 @@ ECode CWindowManagerService::StatusBarVisibilityChanged(
 {
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::STATUS_BAR,
+            Manifest::permission::STATUS_BAR,
             &perm));
     if (perm != IPackageManager::PERMISSION_GRANTED) {
         Slogger::E(TAG, "Caller does not hold permission android.permission.STATUS_BAR");
         return E_SECURITY_EXCEPTION;
         // throw new SecurityException("Caller does not hold permission "
-        //         + Elastos::Droid::Manifest::permission::STATUS_BAR);
+        //         + Manifest::permission::STATUS_BAR);
     }
 
     synchronized(mWindowMapLock) {
@@ -13043,7 +13042,7 @@ ECode CWindowManagerService::ClearWindowContentFrameStats(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    if (!CheckCallingPermission(Elastos::Droid::Manifest::permission::FRAME_STATS,
+    if (!CheckCallingPermission(Manifest::permission::FRAME_STATS,
             String("clearWindowContentFrameStats()"))) {
         Slogger::E(TAG, "Requires FRAME_STATS permission");
         return E_SECURITY_EXCEPTION;
@@ -13071,7 +13070,7 @@ ECode CWindowManagerService::GetWindowContentFrameStats(
     VALIDATE_NOT_NULL(_stats)
     *_stats = NULL;
 
-    if (!CheckCallingPermission(Elastos::Droid::Manifest::permission::FRAME_STATS,
+    if (!CheckCallingPermission(Manifest::permission::FRAME_STATS,
             String("getWindowContentFrameStats()"))) {
         Slogger::E(TAG, "Requires FRAME_STATS permission");
         return E_SECURITY_EXCEPTION;

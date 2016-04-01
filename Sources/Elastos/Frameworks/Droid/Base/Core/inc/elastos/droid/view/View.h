@@ -39,7 +39,6 @@ using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
-//using Elastos::Droid::View::CSurface;
 using Elastos::Droid::View::AbsSavedState;
 using Elastos::Droid::View::Animation::IAnimation;
 using Elastos::Droid::View::Animation::ITransformation;
@@ -1726,8 +1725,6 @@ public:
         AutoPtr<IView> mRootView;
 
         AutoPtr<IBinder> mPanelParentWindowToken;
-
-        //AutoPtr<CSurface> mSurface;
 
         Boolean mHardwareAccelerated;
         Boolean mHardwareAccelerationRequested;
@@ -4948,7 +4945,7 @@ protected:
         /* [in] */ Int32 oldw,
         /* [in] */ Int32 oldh);
 
-    virtual CARAPI_(void) DispatchDraw(
+    virtual CARAPI DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
     virtual CARAPI_(Boolean) AwakenScrollBars();
