@@ -646,7 +646,8 @@ static AutoPtr<IRemoteConnection> InitConn()
     return conn;
 }
 
-AutoPtr<IRemoteConnection> RemoteConnectionService::NULL_CONNECTION = InitConn();
+// TODO:
+AutoPtr<IRemoteConnection> RemoteConnectionService::NULL_CONNECTION;// = InitConn();
 
 static AutoPtr<IRemoteConference> InitConf()
 {
@@ -655,7 +656,8 @@ static AutoPtr<IRemoteConference> InitConf()
     return conf;
 }
 
-AutoPtr<IRemoteConference> RemoteConnectionService::NULL_CONFERENCE = InitConf();
+// TODO:
+AutoPtr<IRemoteConference> RemoteConnectionService::NULL_CONFERENCE;// = InitConf();
 
 CAR_INTERFACE_IMPL(RemoteConnectionService, Object, IRemoteConnectionService)
 
