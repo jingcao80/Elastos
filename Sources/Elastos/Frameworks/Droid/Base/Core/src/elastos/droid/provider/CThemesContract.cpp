@@ -16,10 +16,7 @@ ECode CThemesContract::GetAUTHORITY_URI(
     /* [out] */ IUri** uri)
 {
     VALIDATE_NOT_NULL(uri);
-
     *uri = ThemesContract::AUTHORITY_URI;
-    (*uri)->Release();
-
     REFCOUNT_ADD(*uri);
     return NOERROR;
 }

@@ -40,7 +40,7 @@ ECode LocalGroups::Group::RestoreGroup(
 
     *group = NULL;
     Int32 count = -1;
-    if (!cursor && cursor->GetCount(&count), count == 0) {
+    if (!cursor && (cursor->GetCount(&count), count == 0)) {
         return NOERROR;
     }
 

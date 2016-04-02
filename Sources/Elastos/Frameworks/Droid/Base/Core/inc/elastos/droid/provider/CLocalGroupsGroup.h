@@ -7,6 +7,7 @@
 
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::IContentResolver;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -20,6 +21,8 @@ public:
     CAR_OBJECT_DECL()
 
     CAR_INTERFACE_DECL()
+
+    CLocalGroupsGroup();
 
     CARAPI constructor();
 
@@ -56,13 +59,10 @@ public:
         /* [in] */ IContentResolver* cr,
         /* [out] */ Boolean* result);
 
-    CLocalGroupsGroup() : mId(-1), mTitle(""), mCount(0) { }
-
 private:
     Int64 mId;
     String mTitle;
     Int32 mCount;
-
 };
 
 } //Provider

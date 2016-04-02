@@ -14,9 +14,7 @@ ECode CLocalGroups::GetAUTHORITY_URI(
     /* [out] */ IUri** uri)
 {
     VALIDATE_NOT_NULL(uri);
-
     *uri = LocalGroups::AUTHORITY_URI;
-
     REFCOUNT_ADD(*uri);
     return NOERROR;
 }
@@ -25,9 +23,7 @@ ECode CLocalGroups::GetCONTENT_URI(
     /* [out] */ IUri** uri)
 {
     VALIDATE_NOT_NULL(uri);
-
     *uri = LocalGroups::CONTENT_URI;
-
     REFCOUNT_ADD(*uri);
     return NOERROR;
 }

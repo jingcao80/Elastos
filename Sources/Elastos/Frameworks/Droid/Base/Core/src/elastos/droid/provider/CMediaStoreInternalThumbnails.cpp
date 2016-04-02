@@ -285,7 +285,7 @@ ECode CMediaStoreInternalThumbnails::GetThumbnail(
             CUriHelper::AcquireSingleton((IUriHelper**)&helper);
             helper->Parse(result, (IUri**)&uri);
 
-            if (filePath == NULL) { // TODO:
+            if (filePath.IsNull()) {
                 if (c != NULL) {
                     ICloseable::Probe(c)->Close();
                     c = NULL;
@@ -300,7 +300,7 @@ ECode CMediaStoreInternalThumbnails::GetThumbnail(
                 c->GetString(1, &filePath);
                 // this DB query can return null under some synchronization issue,
                 // returning NULL bitmap in such cases.
-                if (filePath == NULL) {
+                if (filePath.IsNull()) {
                     *outBitmap = NULL;
                     return NOERROR;
                 }

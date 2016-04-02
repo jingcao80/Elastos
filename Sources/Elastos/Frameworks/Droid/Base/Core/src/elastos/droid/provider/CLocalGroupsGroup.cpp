@@ -19,6 +19,12 @@ CAR_OBJECT_IMPL(CLocalGroupsGroup)
 
 CAR_INTERFACE_IMPL(CLocalGroupsGroup, Object, ILocalGroupsGroup)
 
+CLocalGroupsGroup::CLocalGroupsGroup()
+    : mId(-1)
+    , mTitle("")
+    , mCount(0)
+{}
+
 ECode CLocalGroupsGroup::constructor()
 {
     return NOERROR;

@@ -4,10 +4,8 @@
 #include "_Elastos_Droid_Provider_CContactsContractCommonDataKindsLocalGroup.h"
 #include <elastos/core/Singleton.h>
 
-//using Elastos::Droid::Content::IContext;
-//using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Net::IUri;
-//using Elastos::Core::ICharSequence;
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace Droid {
