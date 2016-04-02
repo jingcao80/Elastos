@@ -87,6 +87,11 @@ module
 
     merge("wallpaper/WallpaperManagerService.car");
 
+    merge("wifi/p2p/WifiP2pService.car");
+    merge("wifi/RttService.car");
+    merge("wifi/WifiScanningService.car");
+    merge("wifi/WifiService.car");
+
     merge("wm/WindowManagerService.car");
 
     merge("NetworkManagementService.car");
@@ -102,6 +107,7 @@ module
     interface Elastos.Droid.Server.Wallpaper.IWallpaperConnection;
     interface Elastos.Droid.Server.Wallpaper.IWallpaperData;
     interface Elastos.Droid.Server.Wallpaper.IWallpaperManagerService;
+    interface Elastos.Droid.Server.Wifi.P2p.IWifiP2pService;
 
     using interface Elastos.Droid.AccessibilityService.IAccessibilityServiceInfo;
     using interface Elastos.Droid.AccessibilityService.IIAccessibilityServiceConnection;
@@ -2112,4 +2118,63 @@ module
     } // namespace Droid
     } // namespace Server
     } // namespace Hdmi
+
+    //namespace Elastos {
+    //namespace Droid {
+    //namespace Server {
+    //namespace Wifi {
+    //namespace P2p {
+
+    //[local]
+    //class CWifiP2pService {
+    //    constructor(
+    //        [in] IContext* ctx);
+
+    //    interface IWifiP2pService;
+    //    interface ISystemService;
+    //}
+
+    //} // namespace P2p
+    //} // namespace Wifi
+    //} // namespace Server
+    //} // namespace Droid
+    //} // namespace Elastos
+
+    //namespace Elastos {
+    //namespace Droid {
+    //namespace Server {
+    //namespace Wifi {
+
+    //[local]
+    //class CWifiScanningService {
+    //    constructor(
+    //        [in] IContext* ctx);
+
+    //    interface IWifiScanningService;
+    //    interface ISystemService;
+    //}
+
+    //[local]
+    //class CWifiService {
+    //    constructor(
+    //        [in] IContext* ctx);
+
+    //    interface IWifiService;
+    //    interface ISystemService;
+    //}
+
+    //[local]
+    //class CRttService {
+    //    constructor(
+    //        [in] IContext* ctx);
+
+    //    interface IRttService;
+    //    interface ISystemService;
+    //}
+
+    //} // namespace Wifi
+    //} // namespace Server
+    //} // namespace Droid
+    //} // namespace Elastos
+
 }

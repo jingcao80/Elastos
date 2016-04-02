@@ -8,6 +8,7 @@
 #include <elastos/core/Thread.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
+#include "elastos/core/CoreUtils.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <Elastos.Droid.Net.h>
 #include <Elastos.CoreLibrary.IO.h>
@@ -28,6 +29,7 @@ using Elastos::Droid::Net::ILocalSocket;
 using Elastos::Droid::Net::CLocalSocket;
 using Elastos::Droid::Net::CLocalSocketAddress;
 using Elastos::Droid::Net::LocalSocketAddressNamespace_RESERVED;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::IInteger32;
@@ -569,9 +571,7 @@ ECode NativeDaemonConnector::Execute(
     *event = NULL;
 
     AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    AutoPtr<ICharSequence> seq;
-    CString::New(arg, (ICharSequence**)&seq);
-    args->Set(0, TO_IINTERFACE(seq));
+    args->Set(0, CoreUtils::Convert(arg));
     return Execute(cmd, args, event);
 }
 
@@ -654,13 +654,11 @@ ECode NativeDaemonConnector::Execute(
             return E_NATIVE_DAEMON_CONNECTOR_EXCEPTION;
         }
         else {
-            AutoPtr<ArrayOf<Byte> > bytes_without_end = rawCmd.GetBytes();
-            Int32 length = bytes_without_end->GetLength() + 1;
-            AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(length);
-            for (Int32 i = 0; i < length - 1; ++i) {
-                    (*bytes)[i] = (*bytes_without_end)[i];
-            }
-            (*bytes)[length-1] = (Byte)('\0');
+            AutoPtr<ArrayOf<Byte> > bytesWithoutEnd = rawCmd.GetBytes();
+            Int32 length = bytesWithoutEnd->GetLength();
+            AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(length + 1);
+            bytes->Copy(bytesWithoutEnd, length);
+            (*bytes)[length] = (Byte)('\0');
 
             ECode ec = mOutputStream->Write(bytes);
             if (FAILED(ec)) {
@@ -674,6 +672,7 @@ ECode NativeDaemonConnector::Execute(
 
     AutoPtr<NativeDaemonEvent> event;
     do {
+        if (LOGD) Slogger::D(TAG, "Execute line:%d", __LINE__);
         event = mResponseQueue->Remove(sequenceNumber, timeout, logCmd);
         if (event == NULL) {
             *eventsArray = ArrayOf<NativeDaemonEvent*>::Alloc(0);
@@ -681,7 +680,7 @@ ECode NativeDaemonConnector::Execute(
             Slogger::E(TAG, "timed-out waiting for response to %s.", logCmd.string());
             return E_NATIVE_DAEMON_CONNECTOR_EXCEPTION;
         }
-        if (VDBG) Slogger::D("RMV <- {%s}", event->GetMessage().string());
+        if (VDBG) Slogger::D(TAG, "RMV <- {%s}, line:%d", event->GetMessage().string(), __LINE__);
         events.PushBack(event);
     } while (event->IsClassContinue());
 

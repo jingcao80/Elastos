@@ -483,7 +483,6 @@ ECode CNetworkManagementService::constructor(
     mContext = context;
 
     // make sure this is on the same looper as our NativeDaemonConnector for sync purposes
-    //CHandler::New(Ptr(IHandler::Probe(FgThread::Get()))->Func(IHandler::GetLooper), (IHandler**)&mFgHandler);
     AutoPtr<ILooper> looper;
     FgThread::Get()->GetLooper((ILooper**)&looper);
     CHandler::New(looper, (IHandler**)&mFgHandler);
@@ -954,10 +953,8 @@ ECode CNetworkManagementService::PrepareNativeDaemon()
     if (hasKernelSupport) {
         Slogger::D(TAG, "enabling bandwidth control");
         // try {
-        AutoPtr<ICharSequence> cseq;
-        CString::New(String("enable"), (ICharSequence**)&cseq);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-        args->Set(0, cseq.Get());
+        args->Set(0, CoreUtils::Convert(String("enable")));
         AutoPtr<NativeDaemonEvent> event;
         //Waiting for NativeDaemonConnector
         mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
@@ -1048,10 +1045,8 @@ ECode CNetworkManagementService::ListInterfaces(
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
      // try {
-    AutoPtr<ICharSequence> cseq;
-    CString::New(String("list"), (ICharSequence**)&cseq);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, cseq.Get());
+    args->Set(0, CoreUtils::Convert(String("list")));
     AutoPtr< ArrayOf<NativeDaemonEvent*> > events;
     //Waiting for NativeDaemonConnector
     mConnector->ExecuteForList(String("interface"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
@@ -1077,13 +1072,9 @@ ECode CNetworkManagementService::GetInterfaceConfig(
 
     AutoPtr<NativeDaemonEvent> event;
      // try {
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("getcfg"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(iface, (ICharSequence**)&cseq1);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
+    args->Set(0, CoreUtils::Convert(String("getcfg")));
+    args->Set(1, CoreUtils::Convert(iface));
     //Waiting for NativeDaemonConnector
     FAIL_RETURN(mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event));
      // } catch (NativeDaemonConnectorException e) {
@@ -1149,19 +1140,11 @@ ECode CNetworkManagementService::SetInterfaceConfig(
     Int32 prefixLength;
     linkAddr->GetPrefixLength(&prefixLength);
 
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("getcfg"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(iface, (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(hostAddr, (ICharSequence**)&cseq2);
-    AutoPtr<IInteger32> iint3;
-    CInteger32::New(prefixLength, (IInteger32**)&iint3);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
-    args->Set(3, iint3.Get());
+    args->Set(0, CoreUtils::Convert(String("getcfg")));
+    args->Set(1, CoreUtils::Convert(iface));
+    args->Set(2, CoreUtils::Convert(hostAddr));
+    args->Set(3, CoreUtils::Convert(prefixLength));
     //Waiting for NativeDaemonConnector
     AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
             String("interface"), args);
@@ -1217,16 +1200,11 @@ ECode CNetworkManagementService::SetInterfaceIpv6PrivacyExtensions(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("ipv6privacyextensions"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(iface, (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(enable ? String("enable") : String("disable"), (ICharSequence**)&cseq2);
+
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
+    args->Set(0, CoreUtils::Convert(String("ipv6privacyextensions")));
+    args->Set(1, CoreUtils::Convert(iface));
+    args->Set(2, CoreUtils::Convert(enable ? String("enable") : String("disable")));
     // try {
     AutoPtr<NativeDaemonEvent> event;
     mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
@@ -1241,13 +1219,9 @@ ECode CNetworkManagementService::ClearInterfaceAddresses(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("clearaddrs"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(iface, (ICharSequence**)&cseq1);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
+    args->Set(0, CoreUtils::Convert(String("clearaddrs")));
+    args->Set(1, CoreUtils::Convert(iface));
     // try {
     AutoPtr<NativeDaemonEvent> event;
     mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
@@ -1262,16 +1236,11 @@ ECode CNetworkManagementService::EnableIpv6(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("ipv6"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(iface, (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(String("enable"), (ICharSequence**)&cseq2);
+
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
+    args->Set(0, CoreUtils::Convert(String("ipv6")));
+    args->Set(1, CoreUtils::Convert(iface));
+    args->Set(2, CoreUtils::Convert(String("enable")));
     // try {
     AutoPtr<NativeDaemonEvent> event;
     mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
@@ -1286,16 +1255,11 @@ ECode CNetworkManagementService::DisableIpv6(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("ipv6"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(iface, (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(String("disable"), (ICharSequence**)&cseq2);
+
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
+    args->Set(0, CoreUtils::Convert(String("ipv6")));
+    args->Set(1, CoreUtils::Convert(iface));
+    args->Set(2, CoreUtils::Convert(String("disable")));
     // try {
     AutoPtr<NativeDaemonEvent> event;
     mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
@@ -1327,28 +1291,19 @@ ECode CNetworkManagementService::ModifyRoute(
     mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
 
     AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    AutoPtr<ICharSequence> csRoute;
-    CString::New(String("route"), (ICharSequence**)&csRoute);
-    AutoPtr<ICharSequence> csAction;
-    CString::New(action, (ICharSequence**)&csAction);
-    AutoPtr<ICharSequence> csNetId;
-    CString::New(netId, (ICharSequence**)&csNetId);
-    args->Set(0, TO_IINTERFACE(csRoute));
-    args->Set(1, TO_IINTERFACE(csAction));
-    args->Set(2, TO_IINTERFACE(csNetId));
+
+    args->Set(0, CoreUtils::Convert(String("route")));
+    args->Set(1, CoreUtils::Convert(action));
+    args->Set(2, CoreUtils::Convert(netId));
     AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(String("network"), args);
 
     // // create triplet: interface dest-ip-addr/prefixlength gateway-ip-addr
     String routeInterface;
     route->GetInterface(&routeInterface);
-    AutoPtr<ICharSequence> csRI;
-    CString::New(routeInterface, (ICharSequence**)&csRI);
-    cmd->AppendArg(csRI);
+    cmd->AppendArg(CoreUtils::Convert(routeInterface));
     AutoPtr<IIpPrefix> ipPrefix;
     route->GetDestination((IIpPrefix**)&ipPrefix);
-    AutoPtr<ICharSequence> cs;
-    CString::New(Object::ToString(ipPrefix), (ICharSequence**)&cs);
-    cmd->AppendArg(TO_IINTERFACE(cs));
+    cmd->AppendArg(CoreUtils::Convert(Object::ToString(ipPrefix)));
 
     Int32 type;
     route->GetType(&type);
@@ -1362,24 +1317,18 @@ ECode CNetworkManagementService::ModifyRoute(
                 route->GetGateway((IInetAddress**)&netAddress);
                 String hostAddress;
                 netAddress->GetHostAddress(&hostAddress);
-                AutoPtr<ICharSequence> cs;
-                CString::New(hostAddress, (ICharSequence**)&cs);
-                cmd->AppendArg(TO_IINTERFACE(cs));
+                cmd->AppendArg(CoreUtils::Convert(hostAddress));
             }
             break;
         }
         case IRouteInfo::RTN_UNREACHABLE:
         {
-            AutoPtr<ICharSequence> cs;
-            CString::New(String("unreachable"), (ICharSequence**)&cs);
-            cmd->AppendArg(TO_IINTERFACE(cs));
+            cmd->AppendArg(CoreUtils::Convert(String("unreachable")));
             break;
         }
         case IRouteInfo::RTN_THROW:
         {
-            AutoPtr<ICharSequence> cs;
-            CString::New(String("throw"), (ICharSequence**)&cs);
-            cmd->AppendArg(TO_IINTERFACE(cs));
+            cmd->AppendArg(CoreUtils::Convert(String("throw")));
             break;
         }
     }
@@ -1408,14 +1357,9 @@ ECode CNetworkManagementService::SetMtu(
     AutoPtr<NativeDaemonEvent> event;
     // try {
     AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    AutoPtr<ICharSequence> csSetmtu;
-    CString::New(String("setmtu"), (ICharSequence**)&csSetmtu);
-    args->Set(0, TO_IINTERFACE(csSetmtu));
-    AutoPtr<ICharSequence> csIface;
-    CString::New(iface, (ICharSequence**)&csIface);
-    args->Set(1, TO_IINTERFACE(csIface));
-    AutoPtr<IInteger32> iMtu = CoreUtils::Convert(mtu);
-    args->Set(2, TO_IINTERFACE(iMtu));
+    args->Set(0, CoreUtils::Convert(String("setmtu")));
+    args->Set(1, CoreUtils::Convert(iface));
+    args->Set(2, CoreUtils::Convert(mtu));
 
     ECode ec = mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
@@ -1580,10 +1524,8 @@ ECode CNetworkManagementService::GetIpForwardingEnabled(
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
 
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("status"), (ICharSequence**)&cseq0);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, cseq0.Get());
+    args->Set(0, CoreUtils::Convert(String("status")));
     // try {
     AutoPtr<NativeDaemonEvent> event;
     mConnector->Execute(String("ipfwd"), args, (NativeDaemonEvent**)&event);
@@ -1602,10 +1544,9 @@ ECode CNetworkManagementService::SetIpForwardingEnabled(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(enable ? String("enable") : String("disable"), (ICharSequence**)&cseq0);
+
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, cseq0.Get());
+    args->Set(0, CoreUtils::Convert(enable ? String("enable") : String("disable")));
     // try {
     AutoPtr<NativeDaemonEvent> event;
     mConnector->Execute(String("ipfwd"), args, (NativeDaemonEvent**)&event);
@@ -1623,23 +1564,17 @@ ECode CNetworkManagementService::StartTethering(
      // cmd is "tether start first_start first_stop second_start second_stop ..."
      // an odd number of addrs will fail
 
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("start"), (ICharSequence**)&cseq0);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, cseq0.Get());
+    args->Set(0, CoreUtils::Convert(String("start")));
     AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
         String("tether"), args);
     for (Int32 i = 0; i < dhcpRange->GetLength(); i++) {
-         AutoPtr<ICharSequence> str;
-         CString::New((*dhcpRange)[i], (ICharSequence**)&str);
-         cmd->AppendArg(str);
+         cmd->AppendArg(CoreUtils::Convert((*dhcpRange)[i]));
     }
 
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
+    mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1650,15 +1585,12 @@ ECode CNetworkManagementService::StopTethering()
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("stop"), (ICharSequence**)&cseq0);
+
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, cseq0.Get());
+    args->Set(0, CoreUtils::Convert(String("stop")));
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
+    mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1672,16 +1604,12 @@ ECode CNetworkManagementService::IsTetheringStarted(
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
 
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("status"), (ICharSequence**)&cseq0);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, cseq0.Get());
+    args->Set(0, CoreUtils::Convert(String("status")));
 
     AutoPtr<NativeDaemonEvent> event;
     // try {
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
+    mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1697,27 +1625,20 @@ ECode CNetworkManagementService::TetherInterface(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("interface"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(String("add"), (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(iface, (ICharSequence**)&cseq2);
+
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
+    args->Set(0, CoreUtils::Convert(String("interface")));
+    args->Set(1, CoreUtils::Convert(String("add")));
+    args->Set(2, CoreUtils::Convert(iface));
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // ECode ec = mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
+    ECode ec = mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
     // // } catch (NativeDaemonConnectorException e) {
-    // if (FAILED(ec)) {
-    //     if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
-    //         return E_ILLEGAL_STATE_EXCEPTION;
-    //     return ec;
-    // }
+    if (FAILED(ec)) {
+         if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+             return E_ILLEGAL_STATE_EXCEPTION;
+         return ec;
+    }
     // // }
     AutoPtr<IList> routes;
     CArrayList::New((IList**)&routes);
@@ -1737,27 +1658,20 @@ ECode CNetworkManagementService::UntetherInterface(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
         Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("interface"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(String("remove"), (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(iface, (ICharSequence**)&cseq2);
+
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
+    args->Set(0, CoreUtils::Convert(String("interface")));
+    args->Set(1, CoreUtils::Convert(String("remove")));
+    args->Set(2, CoreUtils::Convert(iface));
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // ECode ec = mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
+    ECode ec = mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
     // // } catch (NativeDaemonConnectorException e) {
-    // if (FAILED(ec)) {
-    //     if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
-    //         return E_ILLEGAL_STATE_EXCEPTION;
-    //     return ec;
-    // }
+    if (FAILED(ec)) {
+         if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+             return E_ILLEGAL_STATE_EXCEPTION;
+         return ec;
+    }
     // // }
     RemoveInterfaceFromLocalNetwork(iface);
     return NOERROR;
@@ -1769,18 +1683,13 @@ ECode CNetworkManagementService::ListTetheredInterfaces(
     VALIDATE_NOT_NULL(result);
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("interface"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(String("list"), (ICharSequence**)&cseq1);
+
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
+    args->Set(0, CoreUtils::Convert(String("interface")));
+    args->Set(1, CoreUtils::Convert(String("list")));
     // try {
     AutoPtr<ArrayOf<NativeDaemonEvent*> > events;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->ExecuteForList(String("tether"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
+    mConnector->ExecuteForList(String("tether"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
     AutoPtr< ArrayOf<String> > resArray = NativeDaemonEvent::FilterMessageList(*events, NetdResponseCode::TetherInterfaceListResult);
     *result = resArray;
     REFCOUNT_ADD(*result);
@@ -1798,16 +1707,10 @@ ECode CNetworkManagementService::SetDnsForwarders(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
 
     Int32 netId = (network != NULL) ? Ptr(network)->Func(network->GetNetId) : IConnectivityManager::NETID_UNSET;
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("dns"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(String("set"), (ICharSequence**)&cseq1);
-    AutoPtr<IInteger32> i32;
-    CInteger32::New(netId, (IInteger32**)&i32);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, i32.Get());
+    args->Set(0, CoreUtils::Convert(String("dns")));
+    args->Set(1, CoreUtils::Convert(String("set")));
+    args->Set(2, CoreUtils::Convert(netId));
     // TODO: Waiting for NativeDaemonConnector
     assert(0);
     // AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
@@ -1817,9 +1720,9 @@ ECode CNetworkManagementService::SetDnsForwarders(
     //     NetworkUtils::NumericToInetAddress((*dns)[i], (IInetAddress**)&inetAddr);
     //     String str;
     //     inetAddr->GetHostAddress(&str);
-    //     AutoPtr<ICharSequence> cseq;
-    //     CString::New(str, (ICharSequence**)&cseq);
-    //     cmd->AppendArg(cseq);
+    //     //AutoPtr<ICharSequence> cseq;
+    //     //CString::New(str, (ICharSequence**)&cseq);
+    //     cmd->AppendArg(CoreUtils::Convert(str));
     // }
     AutoPtr<NativeDaemonEvent> event;
     // TODO: Waiting for NativeDaemonConnector
@@ -1836,18 +1739,13 @@ ECode CNetworkManagementService::GetDnsForwarders(
 
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("dns"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(String("list"), (ICharSequence**)&cseq1);
+
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
+    args->Set(0, CoreUtils::Convert(String("dns")));
+    args->Set(1, CoreUtils::Convert(String("list")));
     // try {
     AutoPtr<ArrayOf<NativeDaemonEvent*> > events;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->ExecuteForList(String("tether"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
+    mConnector->ExecuteForList(String("tether"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
     AutoPtr< ArrayOf<String> > resArray = NativeDaemonEvent::FilterMessageList(*events, NetdResponseCode::TetherDnsFwdTgtListResult);
     *result = resArray;
     REFCOUNT_ADD(*result);
@@ -1862,16 +1760,10 @@ ECode CNetworkManagementService::ModifyNat(
     /* [in] */ const String& internalInterface,
     /* [in] */ const String& externalInterface)
 {
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(action, (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(internalInterface, (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(externalInterface, (ICharSequence**)&cseq2);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
+    args->Set(0, CoreUtils::Convert(action));
+    args->Set(1, CoreUtils::Convert(internalInterface));
+    args->Set(2, CoreUtils::Convert(externalInterface));
     // TODO: Waiting for NativeDaemonConnector
     assert(0);
     // AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
@@ -2007,29 +1899,15 @@ ECode CNetworkManagementService::AttachPppd(
     NetworkUtils::NumericToInetAddress(dns2Addr, (IInetAddress**)&inetAddr);
     inetAddr->GetHostAddress(&str4);
 
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("attach"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(tty, (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(str1, (ICharSequence**)&cseq2);
-    AutoPtr<ICharSequence> cseq3;
-    CString::New(str2, (ICharSequence**)&cseq3);
-    AutoPtr<ICharSequence> cseq4;
-    CString::New(str3, (ICharSequence**)&cseq4);
-    AutoPtr<ICharSequence> cseq5;
-    CString::New(str4, (ICharSequence**)&cseq5);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(6);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
-    args->Set(3, cseq3.Get());
-    args->Set(4, cseq4.Get());
-    args->Set(5, cseq5.Get());
+    args->Set(0, CoreUtils::Convert(String("attach")));
+    args->Set(1, CoreUtils::Convert(tty));
+    args->Set(2, CoreUtils::Convert(str1));
+    args->Set(3, CoreUtils::Convert(str2));
+    args->Set(4, CoreUtils::Convert(str3));
+    args->Set(5, CoreUtils::Convert(str4));
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(String("pppd"), args, (NativeDaemonEvent**)&event);
+    mConnector->Execute(String("pppd"), args, (NativeDaemonEvent**)&event);
     return NOERROR;
 }
 
@@ -2038,18 +1916,13 @@ ECode CNetworkManagementService::DetachPppd(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("detach"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(tty, (ICharSequence**)&cseq1);
+
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
+    args->Set(0, CoreUtils::Convert(String("detach")));
+    args->Set(1, CoreUtils::Convert(tty));
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(String("pppd"), args, (NativeDaemonEvent**)&event);
+    mConnector->Execute(String("pppd"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -2072,13 +1945,9 @@ ECode CNetworkManagementService::StartAccessPoint(
     assert(0);
     // FAIL_RETURN(mConnector->DoCommand(strcmd, responses));
     if (wifiConfig == NULL) {
-        AutoPtr<ICharSequence> cseq0;
-        CString::New(String("set"), (ICharSequence**)&cseq0);
-        AutoPtr<ICharSequence> cseq1;
-        CString::New(wlanIface, (ICharSequence**)&cseq1);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-        args->Set(0, cseq0.Get());
-        args->Set(1, cseq1.Get());
+        args->Set(0, CoreUtils::Convert(String("set")));
+        args->Set(1, CoreUtils::Convert(wlanIface));
         AutoPtr<NativeDaemonEvent> event;
         // TODO: Waiting for NativeDaemonConnector
         assert(0);
@@ -2105,10 +1974,8 @@ ECode CNetworkManagementService::StartAccessPoint(
         assert(0);
         // mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
     }
-    AutoPtr<ICharSequence> cseq;
-    CString::New(String("startap"), (ICharSequence**)&cseq);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, cseq.Get());
+    args->Set(0, CoreUtils::Convert(String("startap")));
     AutoPtr<NativeDaemonEvent> event;
     // TODO: Waiting for NativeDaemonConnector
     assert(0);
@@ -2140,21 +2007,14 @@ ECode CNetworkManagementService::WifiFirmwareReload(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("fwreload"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(wlanIface, (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(mode, (ICharSequence**)&cseq2);
+
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
+    args->Set(0, CoreUtils::Convert(String("fwreload")));
+    args->Set(1, CoreUtils::Convert(wlanIface));
+    args->Set(2, CoreUtils::Convert(mode));
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
+    mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -2166,15 +2026,12 @@ ECode CNetworkManagementService::StopAccessPoint(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("stopap"), (ICharSequence**)&cseq0);
+
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, cseq0.Get());
+    args->Set(0, CoreUtils::Convert(String("stopap")));
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    // TODO: Waiting for NativeDaemonConnector
-    assert(0);
-    // mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
+    mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
     WifiFirmwareReload(wlanIface, String("STA"));
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
@@ -2190,18 +2047,13 @@ ECode CNetworkManagementService::SetAccessPoint(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
 
      if (wifiConfig == NULL) {
-        AutoPtr<ICharSequence> cseq0;
-        CString::New(String("set"), (ICharSequence**)&cseq0);
-        AutoPtr<ICharSequence> cseq1;
-        CString::New(wlanIface, (ICharSequence**)&cseq1);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-        args->Set(0, cseq0.Get());
-        args->Set(1, cseq1.Get());
+        args->Set(0, CoreUtils::Convert(String("set")));
+        args->Set(1, CoreUtils::Convert(wlanIface));
         AutoPtr<NativeDaemonEvent> event;
-        // TODO: Waiting for NativeDaemonConnector
-        assert(0);
-        // mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
-     } else {
+        mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
+     }
+     else {
         String ssid;
         wifiConfig->GetSSID(&ssid);
         String presharedKey;
@@ -2246,19 +2098,11 @@ ECode CNetworkManagementService::AddIdleTimer(
             params->mNetworkCount++;
             return NOERROR;
         }
-        AutoPtr<ICharSequence> cseq0;
-        CString::New(String("add"), (ICharSequence**)&cseq0);
-        AutoPtr<ICharSequence> cseq1;
-        CString::New(iface, (ICharSequence**)&cseq1);
-        AutoPtr<ICharSequence> cseq2;
-        CString::New(StringUtils::ToString(timeout), (ICharSequence**)&cseq2);
-        AutoPtr<ICharSequence> cseq3;
-        CString::New(StringUtils::ToString(type), (ICharSequence**)&cseq3);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
-        args->Set(0, cseq0.Get());
-        args->Set(1, cseq1.Get());
-        args->Set(2, cseq2.Get());
-        args->Set(3, cseq3.Get());
+        args->Set(0, CoreUtils::Convert(String("add")));
+        args->Set(1, CoreUtils::Convert(iface));
+        args->Set(2, CoreUtils::Convert(StringUtils::ToString(timeout)));
+        args->Set(3, CoreUtils::Convert(StringUtils::ToString(type)));
         AutoPtr<NativeDaemonEvent> event;
         // TODO: Waiting for NativeDaemonConnector
         assert(0);
@@ -2305,10 +2149,10 @@ ECode CNetworkManagementService::RemoveIdleTimer(
         AutoPtr<ICharSequence> cseq3;
         CString::New(StringUtils::ToString(params->mType), (ICharSequence**)&cseq3);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
-        args->Set(0, cseq0.Get());
-        args->Set(1, cseq1.Get());
-        args->Set(2, cseq2.Get());
-        args->Set(3, cseq3.Get());
+        args->Set(0, CoreUtils::Convert(String("remove")));
+        args->Set(1, CoreUtils::Convert(iface));
+        args->Set(2, CoreUtils::Convert(StringUtils::ToString(params->mTimeout)));
+        args->Set(3, CoreUtils::Convert(StringUtils::ToString(params->mType)));
         AutoPtr<NativeDaemonEvent> event;
         // TODO: Waiting for NativeDaemonConnector
         assert(0);
@@ -2392,21 +2236,15 @@ ECode CNetworkManagementService::SetInterfaceQuota(
         }
 
         // TODO: support quota shared across interfaces
-        AutoPtr<ICharSequence> cseq0;
-        CString::New(String("setiquota"), (ICharSequence**)&cseq0);
-        AutoPtr<ICharSequence> cseq1;
-        CString::New(iface, (ICharSequence**)&cseq1);
-        AutoPtr<IInteger64> iint2;
-        CInteger64::New(quotaBytes, (IInteger64**)&iint2);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-        args->Set(0, cseq0.Get());
-        args->Set(1, cseq1.Get());
-        args->Set(2, iint2.Get());
+        args->Set(0, CoreUtils::Convert(String("setiquota")));
+        args->Set(1, CoreUtils::Convert(iface));
+        args->Set(2, CoreUtils::Convert(quotaBytes));
         AutoPtr<NativeDaemonEvent> event;
         // TODO: Waiting for NativeDaemonConnector
         assert(0);
         // mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
-        mActiveQuotas->Put(StringUtils::ParseCharSequence(iface), iint2);
+        mActiveQuotas->Put(StringUtils::ParseCharSequence(iface), CoreUtils::Convert(quotaBytes));
     }
     return NOERROR;
 }
@@ -2432,13 +2270,9 @@ ECode CNetworkManagementService::RemoveInterfaceQuota(
         mActiveQuotas->Remove(StringUtils::ParseCharSequence(iface));
         mActiveAlerts->Remove(StringUtils::ParseCharSequence(iface));
         // TODO: support quota shared across interfaces
-        AutoPtr<ICharSequence> cseq0;
-        CString::New(String("removeiquota"), (ICharSequence**)&cseq0);
-        AutoPtr<ICharSequence> cseq1;
-        CString::New(iface, (ICharSequence**)&cseq1);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-        args->Set(0, cseq0.Get());
-        args->Set(1, cseq1.Get());
+        args->Set(0, CoreUtils::Convert(String("removeiquota")));
+        args->Set(1, CoreUtils::Convert(iface));
         AutoPtr<NativeDaemonEvent> event;
         // TODO: Waiting for NativeDaemonConnector
         assert(0);
@@ -2475,21 +2309,15 @@ ECode CNetworkManagementService::SetInterfaceAlert(
             return E_ILLEGAL_STATE_EXCEPTION;
         }
          // TODO: support alert shared across interfaces
-        AutoPtr<ICharSequence> cseq0;
-        CString::New(String("setinterfacealert"), (ICharSequence**)&cseq0);
-        AutoPtr<ICharSequence> cseq1;
-        CString::New(iface, (ICharSequence**)&cseq1);
-        AutoPtr<IInteger64> iint2;
-        CInteger64::New(alertBytes, (IInteger64**)&iint2);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-        args->Set(0, cseq0.Get());
-        args->Set(1, cseq1.Get());
-        args->Set(2, iint2.Get());
+        args->Set(0, CoreUtils::Convert(String("setinterfacealert")));
+        args->Set(1, CoreUtils::Convert(iface));
+        args->Set(2, CoreUtils::Convert(alertBytes));
         AutoPtr<NativeDaemonEvent> event;
         // TODO: Waiting for NativeDaemonConnector
         assert(0);
         // mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
-        mActiveAlerts->Put(StringUtils::ParseCharSequence(iface), iint2);
+        mActiveAlerts->Put(StringUtils::ParseCharSequence(iface), CoreUtils::Convert(alertBytes));
     }
     return NOERROR;
 }
@@ -2514,13 +2342,9 @@ ECode CNetworkManagementService::RemoveInterfaceAlert(
         }
 
         // TODO: support alert shared across interfaces
-        AutoPtr<ICharSequence> cseq0;
-        CString::New(String("removeinterfacealert"), (ICharSequence**)&cseq0);
-        AutoPtr<ICharSequence> cseq1;
-        CString::New(iface, (ICharSequence**)&cseq1);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-        args->Set(0, cseq0.Get());
-        args->Set(1, cseq1.Get());
+        args->Set(0, CoreUtils::Convert(String("removeinterfacealert")));
+        args->Set(1, CoreUtils::Convert(iface));
         AutoPtr<NativeDaemonEvent> event;
         // TODO: Waiting for NativeDaemonConnector
         assert(0);
@@ -2541,13 +2365,9 @@ ECode CNetworkManagementService::SetGlobalAlert(
     if (!mBandwidthControlEnabled)
         return NOERROR;
 
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("setglobalalert"), (ICharSequence**)&cseq0);
-    AutoPtr<IInteger64> iint1;
-    CInteger64::New(alertBytes, (IInteger64**)&iint1);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    args->Set(0, cseq0.Get());
-    args->Set(1, iint1.Get());
+    args->Set(0, CoreUtils::Convert(String("setglobalalert")));
+    args->Set(1, CoreUtils::Convert(alertBytes));
     AutoPtr<NativeDaemonEvent> event;
     // TODO: Waiting for NativeDaemonConnector
     assert(0);
@@ -2575,17 +2395,10 @@ ECode CNetworkManagementService::SetUidNetworkRules(
             return NOERROR;
         }
 
-        AutoPtr<ICharSequence> cseq0;
-        CString::New(String("setglobalalert"), (ICharSequence**)&cseq0);
-        AutoPtr<ICharSequence> cseq1;
-        CString::New(
-                rejectOnQuotaInterfaces ? String("addnaughtyapps") : String("removenaughtyapps"), (ICharSequence**)&cseq1);
-        AutoPtr<IInteger32> iint2;
-        CInteger32::New(uid, (IInteger32**)&iint2);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-        args->Set(0, cseq0.Get());
-        args->Set(1, cseq1.Get());
-        args->Set(2, iint2.Get());
+        args->Set(0, CoreUtils::Convert(String("setglobalalert")));
+        args->Set(1, CoreUtils::Convert(rejectOnQuotaInterfaces ? String("addnaughtyapps") : String("removenaughtyapps")));
+        args->Set(2, CoreUtils::Convert(uid));
         AutoPtr<NativeDaemonEvent> event;
         // TODO: Waiting for NativeDaemonConnector
         assert(0);
@@ -2831,13 +2644,10 @@ ECode CNetworkManagementService::FlushNetworkDnsCache(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("flushnet"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(StringUtils::ToString(netId), (ICharSequence**)&cseq1);
+
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
+    args->Set(0, CoreUtils::Convert(String("flushnet")));
+    args->Set(1, CoreUtils::Convert(StringUtils::ToString(netId)));
     // try {
     AutoPtr<NativeDaemonEvent> event;
     // TODO: Waiting for NativeDaemonConnector
@@ -2854,10 +2664,8 @@ ECode CNetworkManagementService::SetFirewallEnabled(
 {
     FAIL_RETURN(EnforceSystemUid());
 
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(enabled ? String("enable") : String("disable"), (ICharSequence**)&cseq0);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, cseq0.Get());
+    args->Set(0, CoreUtils::Convert(enabled ? String("enable") : String("disable")));
     AutoPtr<NativeDaemonEvent> event;
     // TODO: Waiting for NativeDaemonConnector
     assert(0);
@@ -2885,16 +2693,10 @@ ECode CNetworkManagementService::SetFirewallInterfaceRule(
 //     Preconditions::CheckState(mFirewallEnabled);
     String rule = allow ? String("allow") : String("deny");
 
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("set_interface_rule"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(iface, (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(rule, (ICharSequence**)&cseq2);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
+    args->Set(0, CoreUtils::Convert(String("set_interface_rule")));
+    args->Set(1, CoreUtils::Convert(iface));
+    args->Set(2, CoreUtils::Convert(rule));
     AutoPtr<NativeDaemonEvent> event;
     // TODO: Waiting for NativeDaemonConnector
     assert(0);
@@ -2910,16 +2712,10 @@ ECode CNetworkManagementService::SetFirewallEgressSourceRule(
 //     Preconditions::CheckState(mFirewallEnabled);
     String rule = allow ? String("allow") : String("deny");
 
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("set_egress_source_rule"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(addr, (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(rule, (ICharSequence**)&cseq2);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
+    args->Set(0, CoreUtils::Convert(String("set_egress_source_rule")));
+    args->Set(1, CoreUtils::Convert(addr));
+    args->Set(2, CoreUtils::Convert(rule));
     AutoPtr<NativeDaemonEvent> event;
     // TODO: Waiting for NativeDaemonConnector
     assert(0);
@@ -2936,19 +2732,11 @@ ECode CNetworkManagementService::SetFirewallEgressDestRule(
 //     Preconditions::CheckState(mFirewallEnabled);
     String rule = allow ? String("allow") : String("deny");
 
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("set_egress_dest_rule"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(addr, (ICharSequence**)&cseq1);
-    AutoPtr<IInteger32> iint2;
-    CInteger32::New(port, (IInteger32**)&iint2);
-    AutoPtr<ICharSequence> cseq3;
-    CString::New(rule, (ICharSequence**)&cseq3);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, iint2.Get());
-    args->Set(3, cseq3.Get());
+    args->Set(0, CoreUtils::Convert(String("set_egress_dest_rule")));
+    args->Set(1, CoreUtils::Convert(addr));
+    args->Set(2, CoreUtils::Convert(port));
+    args->Set(3, CoreUtils::Convert(rule));
     AutoPtr<NativeDaemonEvent> event;
     // TODO: Waiting for NativeDaemonConnector
     assert(0);
@@ -2964,16 +2752,10 @@ ECode CNetworkManagementService::SetFirewallUidRule(
     // Preconditions::CheckState(mFirewallEnabled);
     String rule = allow ? String("allow") : String("deny");
 
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("set_uid_rule"), (ICharSequence**)&cseq0);
-    AutoPtr<IInteger32> iint1;
-    CInteger32::New(uid, (IInteger32**)&iint1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(rule, (ICharSequence**)&cseq2);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, cseq0.Get());
-    args->Set(1, iint1.Get());
-    args->Set(2, cseq2.Get());
+    args->Set(0, CoreUtils::Convert(String("set_uid_rule")));
+    args->Set(1, CoreUtils::Convert(uid));
+    args->Set(2, CoreUtils::Convert(rule));
     AutoPtr<NativeDaemonEvent> event;
 
     mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
@@ -2996,13 +2778,9 @@ ECode CNetworkManagementService::StartClatd(
     mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
 
     // try {
-    AutoPtr<ICharSequence> cseq;
-    CString::New(String("start"), (ICharSequence**)&cseq);
-    AutoPtr<ICharSequence> cseqIN;
-    CString::New(interfaceName, (ICharSequence**)&cseqIN);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    args->Set(0, cseq);
-    args->Set(1, cseqIN);
+    args->Set(0, CoreUtils::Convert(String("start")));
+    args->Set(1, CoreUtils::Convert(interfaceName));
     AutoPtr<NativeDaemonEvent> event;
     ECode ec = mConnector->Execute(String("clatd"), args, (NativeDaemonEvent**)&event);
     // // } catch (NativeDaemonConnectorException e) {
@@ -3017,10 +2795,8 @@ ECode CNetworkManagementService::StopClatd()
     mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
 
     // try {
-    AutoPtr<ICharSequence> cseq;
-    CString::New(String("stop"), (ICharSequence**)&cseq);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, cseq);
+    args->Set(0, CoreUtils::Convert(String("stop")));
     AutoPtr<NativeDaemonEvent> event;
     ECode ec = mConnector->Execute(String("clatd"), args, (NativeDaemonEvent**)&event);
     // // } catch (NativeDaemonConnectorException e) {

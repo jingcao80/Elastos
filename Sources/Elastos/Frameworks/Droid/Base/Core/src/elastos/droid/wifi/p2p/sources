@@ -18,6 +18,5 @@ SOURCES += CWifiP2pProvDiscEvent.cpp
 SOURCES += CWifiP2pWfdInfo.cpp
 SOURCES += CWifiP2pManager.cpp
 SOURCES += CWifiP2pManagerChannel.cpp
-#SOURCES += CWifiP2pService.cpp
 
 ELASTOS_LIBS += nsd/nsd.lib

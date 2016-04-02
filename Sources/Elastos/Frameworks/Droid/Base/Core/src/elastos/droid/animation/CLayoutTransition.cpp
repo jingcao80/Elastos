@@ -214,7 +214,7 @@ ECode CLayoutTransition::_OnPreDrawListener::OnPreDraw(
     Int32 count = mHost->mLayoutChangeListenerMap.GetSize();
     if (count > 0) {
         HashMap<AutoPtr<IView>, AutoPtr<IViewOnLayoutChangeListener> >::Iterator it = mHost->mLayoutChangeListenerMap.Begin();
-        for (; it != mHost->mLayoutChangeListenerMap.Begin(); it++) {
+        for (; it != mHost->mLayoutChangeListenerMap.End(); it++) {
             AutoPtr<IView> view = it->mFirst;
             AutoPtr<IViewOnLayoutChangeListener> listener = it->mSecond;
             view->RemoveOnLayoutChangeListener(listener);
