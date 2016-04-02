@@ -1,16 +1,15 @@
 
 DIRS += doze
-#DIRS += media
-#DIRS += recent
+DIRS += media
+DIRS += recent
 DIRS += statusbar
 DIRS += recents
 DIRS += egg
 DIRS += keyguard
 DIRS += net
-#DIRS += power
+DIRS += power
 DIRS += qs
-#DIRS += recents
 DIRS += screenshot
 DIRS += settings
 DIRS += usb
-#DIRS += volume
+DIRS += volume

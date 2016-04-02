@@ -22,7 +22,7 @@ PInterface CUpdateCredentialsSession::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_AccountManagerServiceSession) {
-        return reinterpret_cast<PInterface>(this);
+        return reinterpret_cast<PInterface>((AccountManagerServiceSession*)this);
     }
     return _CUpdateCredentialsSession::Probe(riid);
 }

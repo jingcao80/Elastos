@@ -29,6 +29,8 @@ using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::IOnGlobalFocusChangeListener;
+using Elastos::Droid::View::IViewGroupOnHierarchyChangeListener;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Core::IRunnable;
 using Elastos::IO::IBufferedWriter;
@@ -253,6 +255,9 @@ namespace Webkit {
 class WebView
     : public AbsoluteLayout
     , public IWebView
+    , public IOnGlobalFocusChangeListener
+    , public IViewGroupOnHierarchyChangeListener
+    //TODO , public ViewDebug.HierarchyHandler
 {
     friend class PrivateAccess;
     friend class FindActionModeCallback;

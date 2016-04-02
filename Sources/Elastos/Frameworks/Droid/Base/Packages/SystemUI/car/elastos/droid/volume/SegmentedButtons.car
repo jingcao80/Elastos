@@ -1,0 +1,52 @@
+
+module
+{
+    using interface Elastos.Droid.Widget.ITextView;
+    using interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Volume {
+
+    /**
+    * @Involve interface IInteractionCallback;
+    */
+
+    interface ISegmentedButtonsCallback {
+        OnSelected(
+            [in] IInterface* value);
+    }
+
+    /**
+    * @Involve interface IView;
+    * interface IViewGroup;
+    * interface IViewParent;
+    * interface IViewManager;
+    * interface IKeyEventCallback;
+    * interface IAccessibilityEventSource;
+    * interface IDrawableCallback;
+    * interface ILinearLayout;
+    */
+    interface ISegmentedButtons {
+        SetCallback(
+            [in] ISegmentedButtonsCallback* cb);
+
+        GetSelectedValue(
+            [out] IInterface** sv);
+
+        SetSelectedValue(
+            [in] IInterface* value);
+
+        AddButton(
+            [in] Int32 labelResId,
+            [in] IInterface* value);
+
+        UpdateLocale();
+    }
+
+    } // namespace Volume
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

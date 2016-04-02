@@ -1413,7 +1413,7 @@ module
     }
 
     class CInsetDrawable {
-        /*package*/ constructor();
+        constructor();
 
         constructor(
             [in] IDrawable* drawable,

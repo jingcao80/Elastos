@@ -1,3 +1,4 @@
+
 module
 {
     namespace Elastos {
@@ -5,7 +6,6 @@ module
     namespace SystemUI {
     namespace Recent {
 
-    [deprecated]
     interface IRecentsActivity {
         const String TOGGLE_RECENTS_INTENT = "com.android.systemui.recent.action.TOGGLE_RECENTS";
         const String PRELOAD_INTENT = "com.android.systemui.recent.action.PRELOAD";

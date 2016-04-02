@@ -139,7 +139,7 @@ ECode CColorMatrix::SetConcat(
 {
     AutoPtr< ArrayOf<Float> > tmp;
 
-    if (matA == this || matB == this) {
+    if (matA == (IColorMatrix*)this || matB == (IColorMatrix*)this) {
         tmp = ArrayOf<Float>::Alloc(20);
     }
     else {

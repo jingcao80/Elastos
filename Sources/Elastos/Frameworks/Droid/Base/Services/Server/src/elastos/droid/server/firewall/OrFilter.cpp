@@ -8,7 +8,14 @@ namespace Firewall {
 //------------------------------------------------------------------------------
 // OrFilter::FACTORY_FilterFactory
 //------------------------------------------------------------------------------
-IFilter* OrFilter::FACTORY_FilterFactory::NewFilter()
+
+OrFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
+    /* [in] */ const String& tag)
+{
+    FilterFactory::constructor(tag);
+}
+
+IFilter* OrFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
     AutoPtr<OrFilter> orFilter;
@@ -27,7 +34,7 @@ IFilter* OrFilter::FACTORY_FilterFactory::NewFilter()
 // OrFilter
 //=======================================================================================
 
-AutoPtr<FACTORY_FilterFactory> OrFilter::FACTORY = new FACTORY_FilterFactory(String("or"));
+const AutoPtr<OrFilter::FACTORY_FilterFactory> OrFilter::FACTORY = new OrFilter::FACTORY_FilterFactory(String("or"));
 
 ECode OrFilter::Matches(
     /* [in] */ IIntentFirewall* ifw,
@@ -36,7 +43,7 @@ ECode OrFilter::Matches(
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid,
     /* [in] */ const String& resolvedType,
-    /* [in] */ Int32 receivingUid
+    /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
     Int32 size;
@@ -49,7 +56,7 @@ ECode OrFilter::Matches(
         children->Get(i, (IInterface**)&filter);
 
         filter->Matches(ifw, resolvedComponent, intent, callerUid, callerPid,
-                resolvedType, receivingUid, &ret);
+                resolvedType, receivingUid, ret);
         if (*ret) {
             return NOERROR;
         }

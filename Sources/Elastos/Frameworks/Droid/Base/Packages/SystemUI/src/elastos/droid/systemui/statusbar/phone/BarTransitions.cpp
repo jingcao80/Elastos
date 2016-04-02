@@ -25,15 +25,15 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-const Int32 BarTransitions::MODE_OPAQUE = 0;
-const Int32 BarTransitions::MODE_SEMI_TRANSPARENT = 1;
-const Int32 BarTransitions::MODE_TRANSLUCENT = 2;
-const Int32 BarTransitions::MODE_LIGHTS_OUT = 3;
-const Int32 BarTransitions::MODE_TRANSPARENT = 4;
-const Int32 BarTransitions::MODE_WARNING = 5;
-const Int32 BarTransitions::LIGHTS_IN_DURATION = 250;
-const Int32 BarTransitions::LIGHTS_OUT_DURATION = 750;
-const Int32 BarTransitions::BACKGROUND_DURATION = 200;
+const Int32 BarTransitions::MODE_OPAQUE;
+const Int32 BarTransitions::MODE_SEMI_TRANSPARENT;
+const Int32 BarTransitions::MODE_TRANSLUCENT;
+const Int32 BarTransitions::MODE_LIGHTS_OUT;
+const Int32 BarTransitions::MODE_TRANSPARENT;
+const Int32 BarTransitions::MODE_WARNING;
+const Int32 BarTransitions::LIGHTS_IN_DURATION;
+const Int32 BarTransitions::LIGHTS_OUT_DURATION;
+const Int32 BarTransitions::BACKGROUND_DURATION;
 const Boolean BarTransitions::DEBUG = FALSE;
 const Boolean BarTransitions::DEBUG_COLORS = FALSE;
 const Boolean BarTransitions::HIGH_END = InitStatic();

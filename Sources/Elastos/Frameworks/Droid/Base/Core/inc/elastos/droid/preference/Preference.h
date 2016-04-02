@@ -42,7 +42,7 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
-class Preference
+class ECO_PUBLIC Preference
     : public Object
     , public IPreference
     , public IComparable
@@ -394,23 +394,23 @@ private:
     /**
      * Makes sure the view (and any children) get the enabled state changed.
      */
-    CARAPI_(void) SetEnabledStateOnViews(
+    ECO_LOCAL CARAPI_(void) SetEnabledStateOnViews(
         /* [in] */ IView* v,
         /* [in] */ Boolean enabled);
 
-    CARAPI RegisterDependency();
+    ECO_LOCAL CARAPI RegisterDependency();
 
-    CARAPI_(void) UnregisterDependency();
+    ECO_LOCAL CARAPI_(void) UnregisterDependency();
 
-    CARAPI RegisterDependent(
+    ECO_LOCAL CARAPI RegisterDependent(
         /* [in] */ Preference* dependent);
 
-    CARAPI_(void) UnRegisterDependent(
+    ECO_LOCAL CARAPI_(void) UnRegisterDependent(
         /* [in] */ Preference* dependent);
 
-    CARAPI DispatchSetInitialValue();
+    ECO_LOCAL CARAPI DispatchSetInitialValue();
 
-    CARAPI_(void) TryCommit(
+    ECO_LOCAL CARAPI_(void) TryCommit(
         /* [in] */ ISharedPreferencesEditor* editor);
 
 private:

@@ -16,7 +16,6 @@ module
      */
     [local]
     interface IPhoneStatusBarTransitions {
-
         Init();
 
         AnimateTransitionTo(

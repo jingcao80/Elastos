@@ -1,0 +1,15 @@
+
+TARGET_NAME= volume
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES = volume.cpp
+SOURCES += Interaction.cpp
+SOURCES += SegmentedButtons.cpp
+SOURCES += ZenToast.cpp
+SOURCES += VolumeUI.cpp
+SOURCES += ZenModePanel.cpp
+SOURCES += VolumePanel.cpp

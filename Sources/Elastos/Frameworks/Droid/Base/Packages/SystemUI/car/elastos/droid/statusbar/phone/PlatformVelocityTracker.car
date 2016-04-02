@@ -18,7 +18,6 @@ module
      * interface IVelocityTrackerInterface
      */
     interface IPlatformVelocityTracker {
-
         SetTracker(
             [in] IVelocityTracker* tracker);
     }

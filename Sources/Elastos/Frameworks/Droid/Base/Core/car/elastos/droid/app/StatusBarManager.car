@@ -83,6 +83,12 @@ module
             [in] Boolean visible);
     }
 
+    interface IStatusBarManagerHelper {
+        WindowStateToString(
+            [in] Int32 state,
+            [out] String* value);
+    }
+
     } // namespace App
     } // namespace Droid
     } // namespace Elastos

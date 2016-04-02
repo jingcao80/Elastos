@@ -1615,7 +1615,7 @@ ECode Intent::RemoveCategory(
 ECode Intent::SetSelector(
     /* [in] */ IIntent* selector)
 {
-    if (selector == this) {
+    if (selector == (IIntent*)this) {
         //throw new IllegalArgumentException(
         //        "Intent being set as a selector of itself");
         Slogger::E(TAG, "Intent being set as a selector of itself");

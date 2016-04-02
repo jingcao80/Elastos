@@ -8,6 +8,7 @@
 using Elastos::Droid::Animation::CValueAnimatorHelper;
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
 using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::IObjectAnimatorHelper;
 using Elastos::Droid::Animation::ITimeInterpolator;
@@ -39,6 +40,7 @@ ECode DragDownHelper::AnimatorListenerAdapter1::OnAnimationEnd(
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(DragDownHelper::AnimatorUpdateListener, Object, IAnimatorUpdateListener);
 DragDownHelper::AnimatorUpdateListener::AnimatorUpdateListener(
     /* [in] */ DragDownHelper* host)
     : mHost(host)

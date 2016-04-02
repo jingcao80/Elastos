@@ -144,6 +144,16 @@ module
         interface IFlushable;
     }
 
+    [deprecated]
+    class CFastImmutableArraySet {
+        constructor(
+            [in] ArrayOf<IInterface*>* contents);
+
+        interface ISet;
+        interface ICollection;
+        interface IFastImmutableArraySet;
+    }
+
     class CInt64SparseArray {
         constructor();
 

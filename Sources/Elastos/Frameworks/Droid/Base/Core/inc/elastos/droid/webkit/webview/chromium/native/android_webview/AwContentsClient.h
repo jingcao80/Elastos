@@ -298,33 +298,33 @@ protected:
     virtual CARAPI HandleJsAlert(
         /* [in] */ const String& url,
         /* [in] */ const String& message,
-        /* [in] */ JsResultReceiver* receiver);
+        /* [in] */ JsResultReceiver* receiver) = 0;
 
     virtual CARAPI_(void) HandleJsBeforeUnload(
         /* [in] */ const String& url,
         /* [in] */ const String& message,
-        /* [in] */ JsResultReceiver* receiver);
+        /* [in] */ JsResultReceiver* receiver) = 0;
 
     virtual CARAPI_(void) HandleJsConfirm(
         /* [in] */ const String& url,
         /* [in] */ const String& message,
-        /* [in] */ JsResultReceiver* receiver);
+        /* [in] */ JsResultReceiver* receiver) = 0;
 
     virtual CARAPI_(void) HandleJsPrompt(
         /* [in] */ const String& url,
         /* [in] */ const String& message,
         /* [in] */ const String& defaultValue,
-        /* [in] */ JsPromptResultReceiver* receiver);
+        /* [in] */ JsPromptResultReceiver* receiver) = 0;
 
     virtual CARAPI_(Boolean) OnCreateWindow(
         /* [in] */ Boolean isDialog,
-        /* [in] */ Boolean isUserGesture);
+        /* [in] */ Boolean isUserGesture) = 0;
 
-    virtual CARAPI OnCloseWindow();
+    virtual CARAPI OnCloseWindow() = 0;
 
-    virtual CARAPI OnRequestFocus();
+    virtual CARAPI OnRequestFocus() = 0;
 
-    virtual CARAPI_(AutoPtr<IView>) GetVideoLoadingProgressView();
+    virtual CARAPI_(AutoPtr<IView>) GetVideoLoadingProgressView() = 0;
 
 private:
     CARAPI_(void) Init(

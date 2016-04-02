@@ -1,8 +1,16 @@
 #include "elastos/droid/server/firewall/StringFilter.h"
+#include <elastos/core/Object.h>
 #include <elastos/core/StringUtils.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Utility.h>
+#include "Elastos.Droid.Content.h"
 
 using Elastos::Core::StringUtils;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Net::IUri;
+using Elastos::Utility::Regex::IMatcher;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -10,112 +18,121 @@ namespace Server {
 namespace Firewall {
 
 //------------------------------------------------------------------------------
-// StringFilter::ValueProvider
+// ValueProvider
 //------------------------------------------------------------------------------
 
-StringFilter::ValueProvider::ValueProvider(
+ValueProvider::ValueProvider(
     /* in */ const String& tag)
-    : FilterFactory(tag)
-{}
+{
+    FilterFactory::constructor(tag);
+}
 
-IFilter* StringFilter::ValueProvider::NewFilter(
+IFilter* ValueProvider::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
     AutoPtr<StringFilter> stringFilter = StringFilter::ReadFromXml(this, parser);
     REFCOUNT_ADD(stringFilter);
 
-    return (IFilter*)StringFilter;
+    return (IFilter*)stringFilter;
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::EqualsFilter
+// EqualsFilter
 //------------------------------------------------------------------------------
 
-StringFilter::EqualsFilter::EqualsFilter(
+EqualsFilter::EqualsFilter(
     /* in */ ValueProvider* valueProvider,
     /* in */ const String& attrValue)
     : StringFilter(valueProvider), mFilterValue(attrValue)
 {}
 
-Boolean StringFilter::EqualsFilter::MatchesValue(
+Boolean EqualsFilter::MatchesValue(
     /* in */ const String& value)
 {
     return value != NULL && value.Equals(mFilterValue);
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::ContainsFilter
+// ContainsFilter
 //------------------------------------------------------------------------------
 
-StringFilter::ContainsFilter::ContainsFilter(
+ContainsFilter::ContainsFilter(
     /* in */ ValueProvider* valueProvider,
     /* in */ const String& attrValue)
     : StringFilter(valueProvider), mFilterValue(attrValue)
 {}
 
-Boolean StringFilter::ContainsFilter::MatchesValue(
+Boolean ContainsFilter::MatchesValue(
     /* in */ const String& value)
 {
     return value != NULL && value.Contains(mFilterValue);
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::StartsWithFilter
+// StartsWithFilter
 //------------------------------------------------------------------------------
 
-StringFilter::StartsWithFilter::StartsWithFilter(
+StartsWithFilter::StartsWithFilter(
     /* in */ ValueProvider* valueProvider,
     /* in */ const String& attrValue)
     : StringFilter(valueProvider), mFilterValue(attrValue)
 {}
 
-Boolean StringFilter::StartsWithFilter::MatchesValue(
+Boolean StartsWithFilter::MatchesValue(
     /* in */ const String& value)
 {
-    return value != NULL && value.StartsWith(mFilterValue);
+    return value != NULL && value.StartWith(mFilterValue);
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::PatternStringFilter
+// PatternStringFilter
 //------------------------------------------------------------------------------
 
-StringFilter::PatternStringFilter::PatternStringFilter(
+PatternStringFilter::PatternStringFilter(
     /* in */ ValueProvider* valueProvider,
     /* in */ const String& attrValue)
     : StringFilter(valueProvider)
 {
-    mPattern = new PatternMatcher(attrValue, PatternMatcher::PATTERN_SIMPLE_GLOB);
+    CPatternMatcher::New(attrValue, IPatternMatcher::PATTERN_SIMPLE_GLOB, (IPatternMatcher**)&mPattern);
 }
 
-Boolean StringFilter::PatternStringFilter::MatchesValue(
+Boolean PatternStringFilter::MatchesValue(
     /* in */ const String& value)
 {
-    return value != NULL && value.StartsWith(mFilterValue);
+    Boolean b;
+
+    mPattern->Match(value, &b);
+    return value != NULL && b;
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::PatternStringFilter
+// PatternStringFilter
 //------------------------------------------------------------------------------
 
-StringFilter::RegexFilter::RegexFilter(
+RegexFilter::RegexFilter(
     /* in */ ValueProvider* valueProvider,
     /* in */ const String& attrValue)
     : StringFilter(valueProvider)
 {
-    mPattern = Pattern::Compile(attrValue);
+    Pattern::Compile(attrValue, (IPattern**)&mPattern);
 }
 
-Boolean StringFilter::RegexFilter::MatchesValue(
+Boolean RegexFilter::MatchesValue(
     /* in */ const String& value)
 {
-    return value != NULL && mPattern->Matcher(value)->Matches();
+    AutoPtr<IMatcher> matcher;
+    Boolean matched;
+
+    mPattern->Matcher(value, (IMatcher**)&matcher);
+    matcher->Matches(&matched);
+    return value != NULL && matched;
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::PatternStringFilter
+// PatternStringFilter
 //------------------------------------------------------------------------------
 
-StringFilter::IsNullFilter::IsNullFilter(
+IsNullFilter::IsNullFilter(
     /* in */ ValueProvider* valueProvider,
     /* in */ const String& attrValue)
     : StringFilter(valueProvider)
@@ -123,75 +140,75 @@ StringFilter::IsNullFilter::IsNullFilter(
      mIsNull = StringUtils::ParseBoolean(attrValue);
 }
 
-StringFilter::IsNullFilter::IsNullFilter(
+IsNullFilter::IsNullFilter(
     /* in */ ValueProvider* valueProvider,
     /* in */ Boolean isNull)
     : StringFilter(valueProvider), mIsNull(isNull)
 {}
 
 
-Boolean StringFilter::IsNullFilter::MatchesValue(
+Boolean IsNullFilter::MatchesValue(
     /* in */ const String& value)
 {
     return (value == NULL) == mIsNull;
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::COMPONENT_ValueProvider
+// COMPONENT_ValueProvider
 //------------------------------------------------------------------------------
 
-String StringFilter::COMPONENT_ValueProvider::GetValue(
+String COMPONENT_ValueProvider::GetValue(
     /* in */ IComponentName* resolvedComponent,
     /* in */ IIntent* intent,
     /* in */ const String& resolvedType)
 {
     if (resolvedComponent != NULL) {
         String str;
-        resolvedComponent.FlattenToString(&str);
+        resolvedComponent->FlattenToString(&str);
         return str;
     }
-    return NULL;
+    return String(NULL);
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::COMPONENT_NAME_ValueProvider
+// COMPONENT_NAME_ValueProvider
 //------------------------------------------------------------------------------
 
-String StringFilter::COMPONENT_NAME_ValueProvider::GetValue(
+String COMPONENT_NAME_ValueProvider::GetValue(
     /* in */ IComponentName* resolvedComponent,
     /* in */ IIntent* intent,
     /* in */ const String& resolvedType)
 {
     if (resolvedComponent != NULL) {
         String str;
-        resolvedComponent.GetClassName(&str);
+        resolvedComponent->GetClassName(&str);
         return str;
     }
-    return NULL;
+    return String(NULL);
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::COMPONENT_PACKAGE_ValueProvider
+// COMPONENT_PACKAGE_ValueProvider
 //------------------------------------------------------------------------------
 
-String StringFilter::COMPONENT_PACKAGE_ValueProvider::GetValue(
+String COMPONENT_PACKAGE_ValueProvider::GetValue(
     /* in */ IComponentName* resolvedComponent,
     /* in */ IIntent* intent,
     /* in */ const String& resolvedType)
 {
     if (resolvedComponent != NULL) {
         String str;
-        resolvedComponent.GetPackageName(&str);
+        resolvedComponent->GetPackageName(&str);
         return str;
     }
-    return NULL;
+    return String(NULL);
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::ACTION_ValueProvider
+// ACTION_ValueProvider
 //------------------------------------------------------------------------------
 
-String StringFilter::ACTION_ValueProvider::GetValue(
+String ACTION_ValueProvider::GetValue(
     /* in */ IComponentName* resolvedComponent,
     /* in */ IIntent* intent,
     /* in */ const String& resolvedType)
@@ -202,27 +219,27 @@ String StringFilter::ACTION_ValueProvider::GetValue(
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::DATA_ValueProvider
+// DATA_ValueProvider
 //------------------------------------------------------------------------------
 
-String StringFilter::DATA_ValueProvider::GetValue(
+String DATA_ValueProvider::GetValue(
     /* in */ IComponentName* resolvedComponent,
     /* in */ IIntent* intent,
     /* in */ const String& resolvedType)
 {
     AutoPtr<IUri> data;
-    intent->GetData(&data);
+    intent->GetData((IUri**)&data);
     if (data != NULL) {
         return TO_STR(data);
     }
-    return NULL;
+    return String(NULL);
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::MIME_TYPE_ValueProvider
+// MIME_TYPE_ValueProvider
 //------------------------------------------------------------------------------
 
-String StringFilter::MIME_TYPE_ValueProvider::GetValue(
+String MIME_TYPE_ValueProvider::GetValue(
     /* in */ IComponentName* resolvedComponent,
     /* in */ IIntent* intent,
     /* in */ const String& resolvedType)
@@ -231,91 +248,93 @@ String StringFilter::MIME_TYPE_ValueProvider::GetValue(
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::SCHEME_ValueProvider
+// SCHEME_ValueProvider
 //------------------------------------------------------------------------------
 
-String StringFilter::SCHEME_ValueProvider::GetValue(
+String SCHEME_ValueProvider::GetValue(
     /* in */ IComponentName* resolvedComponent,
     /* in */ IIntent* intent,
     /* in */ const String& resolvedType)
 {
     AutoPtr<IUri> data;
-    intent->GetData(&data);
+    intent->GetData((IUri**)&data);
     if (data != NULL) {
         String str;
         data->GetScheme(&str);
         return str;
     }
-    return NULL;
+    return String(NULL);
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::SSP_ValueProvider
+// SSP_ValueProvider
 //------------------------------------------------------------------------------
 
-String StringFilter::SSP_ValueProvider::GetValue(
+String SSP_ValueProvider::GetValue(
     /* in */ IComponentName* resolvedComponent,
     /* in */ IIntent* intent,
     /* in */ const String& resolvedType)
 {
     AutoPtr<IUri> data;
-    intent->GetData(&data);
+    intent->GetData((IUri**)&data);
     if (data != NULL) {
         String str;
         data->GetSchemeSpecificPart(&str);
         return str;
     }
-    return NULL;
+    return String(NULL);
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::HOST_ValueProvider
+// HOST_ValueProvider
 //------------------------------------------------------------------------------
 
-String StringFilter::HOST_ValueProvider::GetValue(
+String HOST_ValueProvider::GetValue(
     /* in */ IComponentName* resolvedComponent,
     /* in */ IIntent* intent,
     /* in */ const String& resolvedType)
 {
     AutoPtr<IUri> data;
-    intent->GetData(&data);
+    intent->GetData((IUri**)&data);
     if (data != NULL) {
         String str;
         data->GetHost(&str);
         return str;
     }
-    return NULL;
+    return String(NULL);
 }
 
 //------------------------------------------------------------------------------
-// StringFilter::PATH_ValueProvider
+// PATH_ValueProvider
 //------------------------------------------------------------------------------
 
-String StringFilter::PATH_ValueProvider::GetValue(
+String PATH_ValueProvider::GetValue(
     /* in */ IComponentName* resolvedComponent,
     /* in */ IIntent* intent,
     /* in */ const String& resolvedType)
 {
     AutoPtr<IUri> data;
-    intent->GetData(&data);
+    intent->GetData((IUri**)&data);
     if (data != NULL) {
         String str;
         data->GetPath(&str);
         return str;
     }
-    return NULL;
+    return String(NULL);
 }
 
 //=======================================================================================
 // StringFilter
 //=======================================================================================
 
-String StringFilter::ATTR_EQUALS = "equals";
-String StringFilter::ATTR_STARTS_WITH = "startsWith";
-String StringFilter::ATTR_CONTAINS = "contains";
-String StringFilter::ATTR_PATTERN = "pattern";
-String StringFilter::ATTR_REGEX = "regex";
-String StringFilter::ATTR_IS_NULL = "isNull";
+const String StringFilter::ATTR_EQUALS("equals");
+const String StringFilter::ATTR_STARTS_WITH("startsWith");
+const String StringFilter::ATTR_CONTAINS("contains");
+const String StringFilter::ATTR_PATTERN("pattern");
+const String StringFilter::ATTR_REGEX("regex");
+const String StringFilter::ATTR_IS_NULL("isNull");
+
+CAR_INTERFACE_IMPL(StringFilter, Object, IFilter);
 
 StringFilter::StringFilter(
     /* [in] */ ValueProvider* valueProvider)
@@ -358,41 +377,41 @@ StringFilter* StringFilter::GetFilter(
     /* [in] */ Int32 attributeIndex)
 {
     String attributeName;
+    String attriValue;
     parser->GetAttributeName(attributeIndex, &attributeName);
+    parser->GetAttributeValue(attributeIndex, &attriValue);
 
     switch (attributeName.GetChar(0)) {
         case 'e':
             if (!attributeName.Equals(ATTR_EQUALS)) {
                 return NULL;
             }
-            return new EqualsFilter(valueProvider, parser.getAttributeValue(attributeIndex));
+            return new EqualsFilter(valueProvider, attriValue);
         case 'i':
             if (!attributeName.Equals(ATTR_IS_NULL)) {
                 return NULL;
             }
-            return new IsNullFilter(valueProvider, parser.getAttributeValue(attributeIndex));
+            return new IsNullFilter(valueProvider, attriValue);
         case 's':
             if (!attributeName.Equals(ATTR_STARTS_WITH)) {
                 return NULL;
             }
-            return new StartsWithFilter(valueProvider,
-                    parser.getAttributeValue(attributeIndex));
+            return new StartsWithFilter(valueProvider, attriValue);
         case 'c':
             if (!attributeName.Equals(ATTR_CONTAINS)) {
                 return NULL;
             }
-            return new ContainsFilter(valueProvider, parser.getAttributeValue(attributeIndex));
+            return new ContainsFilter(valueProvider, attriValue);
         case 'p':
             if (!attributeName.Equals(ATTR_PATTERN)) {
                 return NULL;
             }
-            return new PatternStringFilter(valueProvider,
-                    parser.getAttributeValue(attributeIndex));
+            return new PatternStringFilter(valueProvider, attriValue);
         case 'r':
             if (!attributeName.Equals(ATTR_REGEX)) {
                 return NULL;
             }
-            return new RegexFilter(valueProvider, parser.getAttributeValue(attributeIndex));
+            return new RegexFilter(valueProvider, attriValue);
     }
     return NULL;
 }
@@ -404,7 +423,7 @@ ECode StringFilter::Matches(
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid,
     /* [in] */ const String& resolvedType,
-    /* [in] */ Int32 receivingUid
+    /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
     String value = mValueProvider->GetValue(resolvedComponent, intent, resolvedType);

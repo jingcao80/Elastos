@@ -5,6 +5,7 @@
 #include "elastos/droid/internal/os/CSomeArgsHelper.h"
 
 using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Internal::Os::ISomeArgs;
 using Elastos::Droid::Internal::Os::ISomeArgsHelper;
 using Elastos::Droid::Internal::Os::CSomeArgsHelper;
@@ -18,7 +19,7 @@ namespace Telecom {
 
 CAR_OBJECT_IMPL(CConnectionServiceBinder)
 
-CAR_INTERFACE_IMPL(CConnectionServiceBinder, Object, IIConnectionService)
+CAR_INTERFACE_IMPL_2(CConnectionServiceBinder, Object, IIConnectionService, IBinder)
 
 ECode CConnectionServiceBinder::constructor(
     /* [in] */ IHandler* handler)
@@ -279,6 +280,13 @@ ECode CConnectionServiceBinder::OnPostDialContinue(
     AutoPtr<IMessage> msg;
     mHandler->ObtainMessage(IConnectionService::MSG_ON_POST_DIAL_CONTINUE, args, (IMessage**)&msg);
     msg->SendToTarget();
+    return NOERROR;
+}
+
+ECode CConnectionServiceBinder::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
     return NOERROR;
 }
 

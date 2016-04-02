@@ -1,8 +1,6 @@
-#include "elastos/droid/ext/frameworkext.h"
+
 #include "elastos/droid/systemui/statusbar/phone/CPanelHolder.h"
 
-using Elastos::Droid::View::EIID_View;
-using Elastos::Droid::View::EIID_ViewGroup;
 
 namespace Elastos {
 namespace Droid {
@@ -10,56 +8,100 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-IVIEW_METHODS_IMPL(CPanelHolder, PanelHolder)
-IVIEWGROUP_METHODS_IMPL(CPanelHolder, PanelHolder)
-IVIEWPARENT_METHODS_IMPL(CPanelHolder, PanelHolder)
-IVIEWMANAGER_METHODS_IMPL(CPanelHolder, PanelHolder)
-IDRAWABLECALLBACK_METHODS_IMPL(CPanelHolder, PanelHolder)
-IKEYEVENTCALLBACK_METHODS_IMPL(CPanelHolder, PanelHolder)
-IACCESSIBILITYEVENTSOURCE_METHODS_IMPL(CPanelHolder, PanelHolder)
-IFRAMELAYOUT_METHODS_IMPL(CPanelHolder, PanelHolder)
+const Boolean CPanelHolder::DEBUG_GESTURES = TRUE;
 
-
-PInterface CPanelHolder::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_View) {
-        return reinterpret_cast<PInterface>(this);
-    }
-    else if (riid == EIID_ViewGroup) {
-        return reinterpret_cast<PInterface>(this);
-    }
-    return _CPanelHolder::Probe(riid);
-}
+CAR_OBJECT_IMPL(CPanelHolder);
+CAR_INTERFACE_IMPL(CPanelHolder, FrameLayout, IPanelHolder);
+CPanelHolder::CPanelHolder()
+    : mSelectedPanelIndex(-1)
+{}
 
 ECode CPanelHolder::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    return PanelHolder::Init(context, attrs);
+    FrameLayout::constructor(context, attrs);
+    SetChildrenDrawingOrderEnabled(TRUE);
+    return NOERROR;
+}
+
+ECode CPanelHolder::OnFinishInflate()
+{
+    FrameLayout::OnFinishInflate();
+    SetChildrenDrawingOrderEnabled(TRUE);
+    return NOERROR;
 }
 
 ECode CPanelHolder::GetPanelIndex(
     /* [in] */ IPanelView* pv,
-    /* [out] */ Int32* index)
+    /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(index);
-    *index = PanelHolder::GetPanelIndex(pv);
+    VALIDATE_NOT_NULL(result);
+    Int32 N = 0;
+    GetChildCount(&N);
+    for (Int32 i = 0; i<N; i++) {
+        AutoPtr<IView> obj;
+        GetChildAt(i, (IView**)&obj);
+        AutoPtr<IPanelView> v = IPanelView::Probe(obj);
+        if (pv == v.Get()) {
+            *result = i;
+            return NOERROR;
+        }
+    }
+    *result = -1;
     return NOERROR;
 }
 
 ECode CPanelHolder::SetSelectedPanel(
     /* [in] */ IPanelView* pv)
 {
-    return PanelHolder::SetSelectedPanel(pv);
+    GetPanelIndex(pv, &mSelectedPanelIndex);
+    return NOERROR;
+}
+
+Int32 CPanelHolder::GetChildDrawingOrder(
+    /* [in] */ Int32 childCount,
+    /* [in] */ Int32 i)
+{
+    if (mSelectedPanelIndex == -1) {
+        return i;
+    } else {
+        if (i == childCount - 1) {
+            return mSelectedPanelIndex;
+        }
+        else if (i >= mSelectedPanelIndex) {
+            return i + 1;
+        }
+        else {
+            return i;
+        }
+    }
+}
+
+ECode CPanelHolder::OnTouchEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (DEBUG_GESTURES) {
+        Int32 masked = 0;
+        event->GetActionMasked(&masked);
+        if (masked != IMotionEvent::ACTION_MOVE) {
+            assert(0 && "TODO");
+            // EventLog.writeEvent(EventLogTags.SYSUI_PANELHOLDER_TOUCH,
+            //         masked, (Int32) event.getX(), (Int32) event.getY());
+        }
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode CPanelHolder::SetBar(
     /* [in] */ IPanelBar* panelBar)
 {
-    return PanelHolder::SetBar(panelBar);
+    mBar = panelBar;
+    return NOERROR;
 }
-
 
 }// namespace Phone
 }// namespace StatusBar

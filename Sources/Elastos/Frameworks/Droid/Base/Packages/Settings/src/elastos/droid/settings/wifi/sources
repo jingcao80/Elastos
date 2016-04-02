@@ -1,0 +1,21 @@
+TARGET_NAME = wifi
+TARGET_TYPE = lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES = AccessPoint.cpp
+SOURCES += Summary.cpp
+SOURCES += WifiConfigController.cpp
+SOURCES += WifiConfigUiForSetupWizardXL.cpp
+SOURCES += WifiSettingsForSetupWizardXL.cpp
+SOURCES += WifiDialog.cpp
+SOURCES += WifiEnabler.cpp
+SOURCES += WifiPickerActivity.cpp
+SOURCES += WifiSettings.cpp
+SOURCES += WpsDialog.cpp
+SOURCES += CWpsDialogHelper.cpp
+SOURCES += WriteWifiConfigToNfcDialog.cpp

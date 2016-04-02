@@ -121,45 +121,6 @@ module
          */
         const String AVAILABLE_PHONE_ACCOUNTS = "selectPhoneAccountAccounts";
 
-        GetHandle(
-            [out] IUri** res);
-
-        GetHandlePresentation(
-            [out] Int32* res);
-
-        GetCallerDisplayName(
-            [out] String* res);
-
-        GetCallerDisplayNamePresentation(
-            [out] Int32* res);
-
-        GetAccountHandle(
-            [out] IPhoneAccountHandle** res);
-
-        GetCallCapabilities(
-            [out] Int32* res);
-
-        GetCallProperties(
-            [out] Int32* res);
-
-        GetDisconnectCause(
-            [out] IDisconnectCause** res);
-
-        GetConnectTimeMillis(
-            [out] Int64* res);
-
-        GetGatewayInfo(
-            [out] IGatewayInfo** res);
-
-        GetVideoState(
-            [out] Int32* res);
-
-        GetStatusHints(
-            [out] IStatusHints** res);
-
-        GetExtras(
-            [out] IBundle** res);
-
         GetRemainingPostDialSequence(
             [out] String* res);
 

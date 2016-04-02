@@ -1,3 +1,4 @@
+
 module
 {
     interface Elastos.Droid.View.IView;
@@ -12,7 +13,7 @@ module
         const Int32 SWIPE_LEFT = 0;
         const Int32 SWIPE_RIGHT = 1;
         const Int32 SWIPE_UP = 2;
-        const Int32 SWIPE_DOWN = 3;
+        const Int32 ALPHA_FADE_START = 3;
 
         HandleOnClick(
             [in] IView* selectedView);

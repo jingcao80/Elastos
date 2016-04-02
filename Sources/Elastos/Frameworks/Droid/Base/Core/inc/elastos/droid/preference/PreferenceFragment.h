@@ -24,13 +24,13 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
-class PreferenceFragment
+class ECO_PUBLIC PreferenceFragment
     : public Fragment
     , public IPreferenceFragment
     , public IPreferenceManagerOnPreferenceTreeClickListener
 {
 private:
-    class PreferenceFragmentHandler
+    class ECO_LOCAL PreferenceFragmentHandler
         : public Handler
     {
     public:
@@ -44,7 +44,7 @@ private:
         PreferenceFragment* mHost;
     };
 
-    class RequestFocus
+    class ECO_LOCAL RequestFocus
         : public Runnable
     {
     public:
@@ -57,7 +57,7 @@ private:
         PreferenceFragment* mHost;
     };
 
-    class PreferenceFragmentOnKeyListener
+    class ECO_LOCAL PreferenceFragmentOnKeyListener
         : public Object
         , public IViewOnKeyListener
     {
@@ -175,7 +175,7 @@ public:
      * @see PreferenceGroup#findPreference(CharSequence)
      */
     CARAPI FindPreference(
-        /*[in]*/ const String& key,
+        /*[in]*/ ICharSequence* key,
         /*[out]*/ IPreference** preference);
 
     /** @hide */
@@ -194,22 +194,22 @@ protected:
     CARAPI OnUnbindPreferences();
 
 private:
-    CARAPI RequirePreferenceManager();
+    ECO_LOCAL CARAPI RequirePreferenceManager();
 
-    CARAPI_(void) PostBindPreferences();
+    ECO_LOCAL CARAPI_(void) PostBindPreferences();
 
-    CARAPI_(void) BindPreferences();
+    ECO_LOCAL CARAPI_(void) BindPreferences();
 
-    CARAPI EnsureList();
+    ECO_LOCAL CARAPI EnsureList();
 
 private:
-    static const String PREFERENCES_TAG;
+    ECO_LOCAL static const String PREFERENCES_TAG;
     /**
      * The starting request code given out to preference framework.
      */
-    static const Int32 FIRST_REQUEST_CODE = 100;
+    ECO_LOCAL static const Int32 FIRST_REQUEST_CODE = 100;
 
-    static const Int32 MSG_BIND_PREFERENCES = 1;
+    ECO_LOCAL static const Int32 MSG_BIND_PREFERENCES = 1;
 
     AutoPtr<IPreferenceManager>  mPreferenceManager;
     AutoPtr<IListView> mList;

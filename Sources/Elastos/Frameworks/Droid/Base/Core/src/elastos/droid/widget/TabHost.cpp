@@ -618,8 +618,7 @@ ECode TabHost::OnAttachedToWindow()
     FrameLayout::OnAttachedToWindow();
     AutoPtr<IViewTreeObserver> treeObserver;
     GetViewTreeObserver((IViewTreeObserver**)&treeObserver);
-    treeObserver->AddOnTouchModeChangeListener(
-            this);
+    treeObserver->AddOnTouchModeChangeListener(this);
     return NOERROR;
 }
 
@@ -628,8 +627,7 @@ ECode TabHost::OnDetachedFromWindow()
     FrameLayout::OnDetachedFromWindow();
     AutoPtr<IViewTreeObserver> treeObserver;
     GetViewTreeObserver((IViewTreeObserver**)&treeObserver);
-    treeObserver->RemoveOnTouchModeChangeListener(
-            this);
+    treeObserver->RemoveOnTouchModeChangeListener(this);
     return NOERROR;
 }
 

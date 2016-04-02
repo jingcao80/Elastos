@@ -20,7 +20,9 @@ class FastImmutableArraySet
 public:
     CAR_INTERFACE_DECL()
 
-    FastImmutableArraySet(
+    FastImmutableArraySet();
+
+    CARAPI constructor(
         /* [in] */ ArrayOf<IInterface*>* contents);
 
     CARAPI GetIterator(

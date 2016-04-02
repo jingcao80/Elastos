@@ -136,6 +136,12 @@ module
         RemoveNotification(
             [in] String key,
             [in] INotificationListenerServiceRankingMap* ranking);
+
+        /** Jumps to the next affiliated task in the group. */
+        ShowNextAffiliatedTask();
+
+        /** Jumps to the previous affiliated task in the group. */
+        ShowPreviousAffiliatedTask();
     }
 
     } // namespace StatusBar

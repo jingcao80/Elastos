@@ -3,6 +3,7 @@
 #include "Elastos.Droid.Graphics.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/PhoneAccount.h"
+#include "elastos/droid/telecomm/telecom/CPhoneAccount.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -136,15 +137,17 @@ ECode PhoneAccount::Builder::Build(
         AddSupportedUriScheme(SCHEME_TEL);
     }
 
-    AutoPtr<PhoneAccount> res;// = new PhoneAccount(
-                                        // mAccountHandle,
-                                        // mAddress,
-                                        // mSubscriptionAddress,
-                                        // mCapabilities,
-                                        // mIconResId,
-                                        // mLabel,
-                                        // mShortDescription,
-                                        // mSupportedUriSchemes);
+    AutoPtr<IPhoneAccount> res;
+    CPhoneAccount::New(
+                    mAccountHandle,
+                    mAddress,
+                    mSubscriptionAddress,
+                    mCapabilities,
+                    mIconResId,
+                    mLabel,
+                    mShortDescription,
+                    mSupportedUriSchemes,
+                    (IPhoneAccount**)&res);
     *result = res;
     REFCOUNT_ADD(*result)
     return NOERROR;

@@ -38,10 +38,10 @@ PInterface ContentProviderNative::ContentProviderProxy::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(IIContentProvider*)this;
     }
     else if (riid == EIID_IObject) {
-        return this;
+        return (IObject*)this;
     }
     if (riid == EIID_IIContentProvider) {
         return (IIContentProvider *)this;
@@ -655,7 +655,7 @@ ECode ContentProviderNative::Equals(
 
     IContentProviderNative * o = IContentProviderNative::Probe(other);
     if (o != NULL) {
-        *result = (o == this);
+        *result = (o == (IContentProviderNative*)this);
     }
     return NOERROR;
 }

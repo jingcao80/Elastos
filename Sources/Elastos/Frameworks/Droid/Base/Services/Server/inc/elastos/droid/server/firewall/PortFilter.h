@@ -2,12 +2,15 @@
 #define __ELASTOS_DROID_Server_Firewall_PortFilter_H__
 
 #include "_Elastos.Droid.Server.h"
-#include "elastos/core/Object.h"
+#include <elastos/core/Object.h>
+#include <elastos/droid/internal/utility/XmlUtils.h>
+#include "elastos/droid/server/firewall/FilterFactory.h"
 
-using Elastos::Droid::internal.util.XmlUtils;
-using Org::Xmlpull::V1::IXmlPullParser;
-using Org::Xmlpull::V1::IXmlPullParserException;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Utility::IArrayList;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -23,7 +26,10 @@ public:
         : public FilterFactory
     {
     public:
-        CARAPI_(Filter*) NewFilter(
+        FACTORY_FilterFactory(
+            /* [in] */ const String& tag);
+
+        CARAPI_(IFilter*) NewFilter(
             /* in */ IXmlPullParser* parser);
     };
 
@@ -35,8 +41,15 @@ public:
         /* [in] */ Int32 callerUid,
         /* [in] */ Int32 callerPid,
         /* [in] */ const String& resolvedType,
-        /* [in] */ Int32 receivingUid
+        /* [in] */ Int32 receivingUid,
         /* [out] */ Boolean *ret);
+
+public:
+    CAR_INTERFACE_DECL();
+
+    PortFilter(
+        /* [in] */ Int32 lowerBound,
+        /* [in] */ Int32 upperBound);
 
 public:
     static const AutoPtr<FACTORY_FilterFactory> FACTORY;
@@ -51,11 +64,6 @@ private:
     // both bounds are inclusive
     Int32 mLowerBound;
     Int32 mUpperBound;
-
-private:
-    PortFilter(
-        /* [in] */ Int32 lowerBound,
-        /* [in] */ Int32 upperBound);
 };
 
 } // Firewall

@@ -1,38 +1,64 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_RECENT_RECENTSHORIZONTALSCROLLVIEW_H__
 #define __ELASTOS_DROID_SYSTEMUI_RECENT_RECENTSHORIZONTALSCROLLVIEW_H__
 
-#include "elastos/droid/widget/HorizontalScrollView.h"
-#include "elastos/droid/systemui/recent/RecentsScrollViewPerformanceHelper.h"
-#include <elastos/utility/etl/HashSet.h>
+#include "_SystemUI.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/systemui/recent/FadedEdgeDrawHelper.h"
+#include "elastos/droid/widget/FrameLayout.h"
+// #include "elastos/droid/widget/HorizontalScrollView.h"
 
-using Elastos::Core::IRunnable;
-using Elastos::Utility::Etl::HashSet;
+using Elastos::Droid::Animation::ILayoutTransition;
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::IDataSetObserver;
-using Elastos::Droid::View::IViewOnTouchListener;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::SystemUI::ISwipeHelper;
+using Elastos::Droid::SystemUI::ISwipeHelperCallback;
+using Elastos::Droid::SystemUI::Recent::IRecentsCallback;
+using Elastos::Droid::SystemUI::Recent::IRecentsPanelViewRecentsScrollView;
+using Elastos::Droid::SystemUI::Recent::ITaskDescriptionAdapter;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IOnGlobalLayoutListener;
+using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewOnLongClickListener;
-using Elastos::Droid::View::IOnGlobalLayoutListener;
+using Elastos::Droid::View::IViewOnTouchListener;
+using Elastos::Droid::Widget::FrameLayout;
+// using Elastos::Droid::Widget::HorizontalScrollView;
+using Elastos::Droid::Widget::IHorizontalScrollView;
 using Elastos::Droid::Widget::ILinearLayout;
-using Elastos::Droid::Widget::HorizontalScrollView;
-using Elastos::Droid::SystemUI::ISwipeHelper;
-using Elastos::Droid::SystemUI::Recent::IRecentsCallback;
-using Elastos::Droid::SystemUI::Recent::ITaskDescriptionAdapter;
+using Elastos::Core::IRunnable;
+using Elastos::Utility::IHashSet;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Recent {
 
-class RecentsHorizontalScrollView : public HorizontalScrollView
+class RecentsHorizontalScrollView
+    // : public HorizontalScrollView
+    : public FrameLayout
+    , public IHorizontalScrollView
+    , public ISwipeHelperCallback
+    , public IRecentsPanelViewRecentsScrollView
 {
 private:
     class NoOpListener
-        : public ElRefBase
+        : public Object
         , public IViewOnTouchListener
     {
     public:
         NoOpListener(
-           /* [in] */  RecentsHorizontalScrollView* host) : mHost(host)
+           /* [in] */  RecentsHorizontalScrollView* host)
+            : mHost(host)
         {}
 
         CAR_INTERFACE_DECL()
@@ -47,12 +73,13 @@ private:
     };
 
     class ClickListener
-        : public ElRefBase
+        : public Object
         , public IViewOnClickListener
     {
     public:
         ClickListener(
-           /* [in] */  RecentsHorizontalScrollView* host) : mHost(host)
+           /* [in] */  RecentsHorizontalScrollView* host)
+            : mHost(host)
         {}
 
         CAR_INTERFACE_DECL()
@@ -65,7 +92,7 @@ private:
     };
 
     class LaunchAppListener
-        : public ElRefBase
+        : public Object
         , public IViewOnClickListener
     {
     public:
@@ -87,7 +114,7 @@ private:
     };
 
     class LongClickListener
-        : public ElRefBase
+        : public Object
         , public IViewOnLongClickListener
     {
     public:
@@ -113,7 +140,7 @@ private:
     };
 
     class UpdateScroll
-        : public ElRefBase
+        : public Object
         , public IOnGlobalLayoutListener
     {
     public:
@@ -130,7 +157,7 @@ private:
     };
 
     class SizeChangedRunnable
-        : public ElRefBase
+        : public Object
         , public IRunnable
     {
     public:
@@ -147,7 +174,7 @@ private:
     };
 
     class AdapterDataSetObserver
-        : public ElRefBase
+        : public Object
         , public IDataSetObserver
     {
     public:
@@ -166,7 +193,11 @@ private:
     };
 
 public:
-    RecentsHorizontalScrollView();
+    CAR_INTERFACE_DECL()
+
+    RecentsHorizontalScrollView(
+        /* [in] */ IContext* ctx,
+        /* [in] */ IAttributeSet* attrs);
 
     CARAPI SetMinSwipeAlpha(
         /* [in] */ Float minAlpha);
@@ -181,11 +212,20 @@ public:
     CARAPI_(Boolean) OnInterceptTouchEvent(
         /* [in] */ IMotionEvent* ev);
 
-    CARAPI_(Boolean) OnTouchEvent(
-        /* [in] */ IMotionEvent* ev);
+    CARAPI OnTouchEvent(
+        /* [in] */ IMotionEvent* ev,
+        /* [out] */ Boolean* result);
 
     CARAPI_(Boolean) CanChildBeDismissed(
         /* [in] */ IView* v);
+
+    // @Override
+    CARAPI IsAntiFalsingNeeded(
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI GetFalsingThresholdFactor(
+        /* [out] */ Float* result);
 
     CARAPI DismissChild(
         /* [in] */ IView* v);
@@ -199,6 +239,17 @@ public:
     CARAPI OnDragCancelled(
         /* [in] */ IView* v);
 
+    // @Override
+    CARAPI OnChildSnappedBack(
+        /* [in] */ IView* animView);
+
+    // @Override
+    CARAPI UpdateSwipeProgress(
+        /* [in] */ IView* animView,
+        /* [in] */ Boolean dismissable,
+        /* [in] */ Float swipeProgress,
+        /* [out] */ Boolean* result);
+
     CARAPI GetChildAtPosition(
         /* [in] */ IMotionEvent* ev,
         /* [out] */ IView** view);
@@ -207,8 +258,25 @@ public:
         /* [in] */ IView* v,
         /* [out] */ IView** view);
 
-    CARAPI Draw(
-        /* [in] */ ICanvas* canvas);
+    // @Override
+    CARAPI DrawFadedEdges(
+        /* [in] */ ICanvas* canvas,
+        /* [in] */ Int32 left,
+        /* [in] */ Int32 right,
+        /* [in] */ Int32 top,
+        /* [in] */ Int32 bottom);
+
+protected:
+    // @Override
+    CARAPI_(void) OnScrollChanged(
+        /* [in] */ Int32 l,
+        /* [in] */ Int32 t,
+        /* [in] */ Int32 oldl,
+        /* [in] */ Int32 oldt);
+
+public:
+    CARAPI SetOnScrollListener(
+        /* [in] */ IRunnable* listener);
 
     CARAPI_(Int32) GetVerticalFadingEdgeLength();
 
@@ -228,10 +296,6 @@ public:
         /* [in] */ IRecentsCallback* callback);
 
 protected:
-    CARAPI Init(
-        /* [in] */ IContext* ctx,
-        /* [in] */ IAttributeSet* attrs);
-
     CARAPI OnFinishInflate();
 
     CARAPI_(void) OnConfigurationChanged(
@@ -266,9 +330,10 @@ private:
     // IRecentsCallback is it's parent's parent
     IRecentsCallback* mCallback;
     AutoPtr<ISwipeHelper> mSwipeHelper;
-    AutoPtr<RecentsScrollViewPerformanceHelper> mPerformanceHelper;
-    HashSet<AutoPtr<IView> > mRecycledViews;
+    AutoPtr<FadedEdgeDrawHelper> mFadedEdgeDrawHelper;
+    AutoPtr<IHashSet> mRecycledViews;
     Int32 mNumItemsInOneScreenful;
+    AutoPtr<IRunnable> mOnScrollListener;
 };
 
 }// namespace Recent

@@ -1,7 +1,9 @@
+
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_PANELBAR_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_PANELBAR_H__
 
-#include "elastos/droid/widget/FrameLayout.h"
+#include "_SystemUI.h"
+#include <elastos/droid/widget/FrameLayout.h>
 
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::Widget::FrameLayout;
@@ -12,13 +14,16 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-
-class PanelBar : public FrameLayout
+class PanelBar
+    : public FrameLayout
+    , public IPanelBar
 {
 public:
+    CAR_INTERFACE_DECL();
+
     PanelBar();
 
-    PanelBar(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
@@ -31,7 +36,8 @@ public:
     CARAPI SetPanelHolder(
         /* [in] */ IPanelHolder* ph);
 
-    CARAPI_(Float) GetBarHeight();
+    CARAPI GetBarHeight(
+        /* [out] */ Float* result);
 
     CARAPI_(AutoPtr<IPanelView>) SelectPanelForTouch(
         /* [in] */ IMotionEvent* touch);
@@ -42,9 +48,16 @@ public:
     CARAPI StartOpeningPanel(
         /* [in] */ IPanelView* panelView);
 
+    /**
+     * @param panel the panel which changed its expansion state
+     * @param frac the fraction from the expansion in [0, 1]
+     * @param expanded whether the panel is currently expanded; this is independent from the
+     *                 fraction as the panel also might be expanded if the fraction is 0
+     */
     CARAPI PanelExpansionChanged(
         /* [in] */ IPanelView* panelView,
-        /* [in] */ Float frac);
+        /* [in] */ Float frac,
+        /* [in] */ Boolean expanded);
 
     CARAPI CollapseAllPanels(
         /* [in] */ Boolean animate);
@@ -60,11 +73,15 @@ public:
         /* [in] */ IPanelView* panelView);
 
     CARAPI OnTrackingStopped(
-        /* [in] */ IPanelView* panelView);
+        /* [in] */ IPanelView* panelView,
+        /* [in] */ Boolean expanded);
+
+    CARAPI OnExpandingFinished();
 
     //@Override
-    virtual Boolean OnTouchEvent(
-        /* [in] */ IMotionEvent* event);
+    CARAPI OnTouchEvent(
+        /* [in] */ IMotionEvent* event,
+        /* [out] */ Boolean* result);
 
 protected:
     //@Override

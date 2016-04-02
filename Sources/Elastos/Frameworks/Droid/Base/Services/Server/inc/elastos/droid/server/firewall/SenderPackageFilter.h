@@ -2,12 +2,16 @@
 #define __ELASTOS_DROID_Server_Firewall_SenderPackageFilter_H__
 
 #include "_Elastos.Droid.Server.h"
-#include "elastos/core/Object.h"
+#include <elastos/core/Object.h>
+#include <elastos/droid/internal/utility/XmlUtils.h>
+#include "elastos/droid/server/firewall/FilterFactory.h"
 
-using Elastos::Droid::internal.util.XmlUtils;
-using Org::Xmlpull::V1::IXmlPullParser;
-using Org::Xmlpull::V1::IXmlPullParserException;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Utility::IArrayList;
+using Org::Xmlpull::V1::IXmlPullParser;
+//using Elastos::Droid::Server::Firewall::IFilter;
 
 namespace Elastos {
 namespace Droid {
@@ -16,13 +20,16 @@ namespace Firewall {
 
 class SenderPackageFilter
     : public Object
-    , public IFilter;
+    , public IFilter
 {
 public:
     class FACTORY_FilterFactory
         : public FilterFactory
     {
     public:
+        FACTORY_FilterFactory(
+            /* [in] */ const String& tag);
+
         CARAPI_(IFilter*) NewFilter(
             /* in */ IXmlPullParser* parser);
     };
@@ -36,10 +43,12 @@ public:
         /* [in] */ Int32 callerUid,
         /* [in] */ Int32 callerPid,
         /* [in] */ const String& resolvedType,
-        /* [in] */ Int32 receivingUid
+        /* [in] */ Int32 receivingUid,
         /* [out] */ Boolean *ret);
 
 public:
+    CAR_INTERFACE_DECL();
+
     SenderPackageFilter(
         /* in */ const String& packageName);
 
@@ -47,7 +56,7 @@ public:
     static const AutoPtr<FACTORY_FilterFactory> FACTORY;
 
 private:
-    static const String ATTR_TYPE;          // = "name";
+    static const String ATTR_NAME;          // = "name";
     String mPackageName;
 };
 

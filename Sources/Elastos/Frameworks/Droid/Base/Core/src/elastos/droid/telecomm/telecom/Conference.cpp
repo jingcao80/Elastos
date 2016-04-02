@@ -3,6 +3,7 @@
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/Conference.h"
+#include "elastos/droid/telecomm/telecom/CDisconnectCause.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Utility::ICollections;
@@ -17,6 +18,25 @@ namespace Elastos {
 namespace Droid {
 namespace Telecomm {
 namespace Telecom {
+
+//===============================================================
+// Conference::ConnectionListener::
+//===============================================================
+Conference::ConnectionListener::ConnectionListener(
+    /* [in] */ Conference* host)
+    : mHost(host)
+{}
+
+ECode Conference::ConnectionListener::OnDestroyed(
+    /* [in] */ IConnection* c)
+{
+    Boolean bRm = FALSE;
+    mHost->mConferenceableConnections->Remove(c, &bRm);
+    if (bRm) {
+        mHost->FireOnConferenceableConnectionsChanged();
+    }
+    return NOERROR;
+}
 
 //===============================================================
 // Conference::
@@ -35,14 +55,7 @@ Conference::Conference()
 
     mState = IConnection::STATE_NEW;
 
-    // Connection.Listener mConnectionDeathListener = new Connection.Listener() {
-    //     @Override
-    //     public void onDestroyed(Connection c) {
-    //         if (mConferenceableConnections.remove(c)) {
-    //             fireOnConferenceableConnectionsChanged();
-    //         }
-    //     }
-    // };
+    mConnectionDeathListener = new ConnectionListener(this);
 }
 
 ECode Conference::constructor(
@@ -258,7 +271,7 @@ ECode Conference::SetConferenceableConnections(
         // small amount of items here.
         Boolean bContain = FALSE;
         if (!(mConferenceableConnections->Contains(c, &bContain), bContain)) {
-            // c->AddConnectionListener(mConnectionDeathListener);
+            c->AddConnectionListener(mConnectionDeathListener);
             mConferenceableConnections->Add(c);
         }
     }
@@ -309,7 +322,8 @@ ECode Conference::Destroy()
     if (mState != IConnection::STATE_DISCONNECTED) {
         Logger::D("Conference", "setting to disconnected");
         assert(0 && "TODO");
-        AutoPtr<IDisconnectCause> dc;// = new DisconnectCause(IDisconnectCause::LOCAL);
+        AutoPtr<IDisconnectCause> dc;
+        CDisconnectCause::New(IDisconnectCause::LOCAL, (IDisconnectCause**)&dc);
         SetDisconnected(dc);
     }
 
@@ -384,7 +398,7 @@ void Conference::ClearConferenceableList()
         AutoPtr<IInterface> p;
         it->GetNext((IInterface**)&p);
         AutoPtr<IConnection> c = IConnection::Probe(p);
-        // c->RemoveConnectionListener(mConnectionDeathListener);
+        c->RemoveConnectionListener(mConnectionDeathListener);
     }
     mConferenceableConnections->Clear();
 }

@@ -1,0 +1,129 @@
+
+module
+{
+    interface Elastos.Droid.Content.Res.IConfiguration;
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.IZenModeController;
+    interface Elastos.Droid.Media.Session.IMediaController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Volume {
+
+    interface IVolumePanelCallback {
+        OnZenSettings();
+
+        OnInteraction();
+
+        OnVisible(
+            [in] Boolean visible);
+    }
+
+    interface IVolumePanelStreamControl {
+    }
+
+    /**
+    * @Involve IHandler
+    */
+    interface IVolumePanel {
+
+        OnConfigurationChanged(
+            [in] IConfiguration* newConfig);
+
+        IsMuted(
+            [in] Int32 streamType,
+            [out] Boolean* isMuted);
+
+        GetStreamMaxVolume(
+            [in] Int32 streamType,
+            [out] Int32* smv);
+
+        GetStreamVolume(
+            [in] Int32 streamType,
+            [out] Int32* sv);
+
+        SetCallback(
+            [in] IVolumePanelCallback* cb);
+
+        IsZenPanelVisible(
+            [out] Boolean* result);
+
+        UpdateStates();
+
+        PostVolumeChanged(
+            [in] Int32 streamType,
+            [in] Int32 flags);
+
+        PostRemoteVolumeChanged(
+            [in] IMediaController* controller,
+            [in] Int32 flags);
+
+        PostRemoteSliderVisibility(
+            [in] Boolean visible);
+
+        PostHasNewRemotePlaybackInfo();
+
+        PostMasterVolumeChanged(
+            [in] Int32 flags);
+
+        PostMuteChanged(
+            [in] Int32 streamType,
+            [in] Int32 flags);
+
+        PostMasterMuteChanged(
+            [in] Int32 flags);
+
+        PostDisplaySafeVolumeWarning(
+            [in] Int32 flags);
+
+        PostDismiss(
+            [in] Int64 delay);
+
+        PostLayoutDirection(
+            [in] Int32 layoutDirection);
+
+        GetZenController(
+            [out] IZenModeController** zc);
+
+        OnVolumeChanged(
+            [in] Int32 streamType,
+            [in] Int32 flags);
+
+        OnMuteChanged(
+            [in] Int32 streamType,
+            [in] Int32 flags);
+
+        OnShowVolumeChanged(
+            [in] Int32 streamType,
+            [in] Int32 flags,
+            [in] IMediaController* controller);
+
+        OnPlaySound(
+            [in] Int32 streamType,
+            [in] Int32 flags);
+
+        OnStopSounds();
+
+        OnVibrate();
+
+        OnRemoteVolumeChanged(
+            [in] IMediaController* controller,
+            [in] Int32 flags);
+
+        OnRemoteVolumeUpdateIfShown();
+
+        OnSliderVisibilityChanged(
+            [in] Int32 streamType,
+            [in] Int32 visible);
+
+        OnDisplaySafeVolumeWarning(
+            [in] Int32 flags);
+
+        OnFreeResources();
+    }
+
+    } // namespace Volume
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,45 +1,104 @@
 #include "elastos/droid/server/firewall/IntentFirewall.h"
+#include "elastos/droid/server/firewall/OrFilter.h"
+#include "elastos/droid/server/firewall/NotFilter.h"
+#include "elastos/droid/server/firewall/StringFilter.h"
+#include "elastos/droid/server/firewall/CategoryFilter.h"
+#include "elastos/droid/server/firewall/SenderFilter.h"
+#include "elastos/droid/server/firewall/SenderPackageFilter.h"
+#include "elastos/droid/server/firewall/SenderPermissionFilter.h"
+#include "elastos/droid/server/firewall/PortFilter.h"
+
+/*
 #include "elastos/droid/app/AppGlobals.h"
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/Arrays.h>
+
+using Elastos::Core::StringUtils;
+using Elastos::Droid::Os::CEnvironment;
+using Elastos::Droid::Os::IEnvironment;
+using Elastos::Droid::Utility::CArrayMap;
+using Elastos::IO::CFile;
+using Elastos::IO::IFile;
+using Elastos::Droid::Utility::CArrayMap;
+*/
+#include <cutils/log.h>
+#include <elastos/core/Object.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/droid/internal/utility/XmlUtils.h>
+#include <elastos/droid/utility/Xml.h>
+#include <Elastos.Droid.Utility.h>
+#include <Elastos.Droid.Internal.h>
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/etl/HashMap.h>
+#include <elastos/utility/etl/List.h>
+#include <elastos/utility/logging/Slogger.h>
+#include <Elastos.Droid.Os.h>
+#include "elastos/droid/app/AppGlobals.h"
+//#include "elastos/droid/os/FileObserver.h"
+
+// using Elastos::Droid::Os::CEnvironment;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Droid::App::AppGlobals;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Internal::Utility::XmlUtils;
+using Elastos::Droid::Os::CEnvironment;
+using Elastos::Droid::Os::IEnvironment;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Utility::CArrayMap;
+using Elastos::Droid::Utility::IArrayMap;
+using Elastos::Droid::Utility::Xml;
+using Elastos::IO::CFile;
+using Elastos::IO::IFile;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::List;
+using Elastos::Utility::Logging::Slogger;
+using Org::Xmlpull::V1::IXmlPullParser;
+using Elastos::Droid::Os::IFileObserver;
+using Elastos::Droid::Os::EIID_IFileObserver;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Firewall {
 
-String IntentFirewall::TAG("IntentFirewall");
+const String IntentFirewall::TAG("IntentFirewall");
 
-AutoPtr<IFile> IntentFirewall::RULES_DIR;
+const AutoPtr<IFile> IntentFirewall::RULES_DIR;
 
-Int32 IntentFirewall::LOG_PACKAGES_MAX_LENGTH = 150;
-Int32 IntentFirewall::LOG_PACKAGES_SUFFICIENT_LENGTH = 125;
+const Int32 IntentFirewall::LOG_PACKAGES_MAX_LENGTH = 150;
+const Int32 IntentFirewall::LOG_PACKAGES_SUFFICIENT_LENGTH = 125;
 
-String IntentFirewall::TAG_RULES("rules");
-String IntentFirewall::TAG_ACTIVITY("activity");
-String IntentFirewall::TAG_SERVICE("service");
-String IntentFirewall::TAG_BROADCAST("broadcast");
+const String IntentFirewall::TAG_RULES("rules");
+const String IntentFirewall::TAG_ACTIVITY("activity");
+const String IntentFirewall::TAG_SERVICE("service");
+const String IntentFirewall::TAG_BROADCAST("broadcast");
 
-Int32 IntentFirewall::TYPE_ACTIVITY = 0;
-Int32 IntentFirewall::TYPE_BROADCAST = 1;
-Int32 IntentFirewall::TYPE_SERVICE = 2;
+const Int32 IntentFirewall::TYPE_ACTIVITY = 0;
+const Int32 IntentFirewall::TYPE_BROADCAST = 1;
+const Int32 IntentFirewall::TYPE_SERVICE = 2;
 
-HashMap<String, AutoPtr<FilterFactory> > IntentFirewall::factoryMap;
-ArrayOf<AutoPtr<FilterFactory> > IntentFirewall::factories;
+AutoPtr<HashMap<String, AutoPtr<FilterFactory> > > IntentFirewall::factoryMap;
+AutoPtr<ArrayOf<FilterFactory*> > IntentFirewall::factories;
 
-AutoPtr<AMSInterface> IntentFirewall::mAms;
-AutoPtr<RuleObserver> IntentFirewall::mObserver;
-
-AutoPtr<FirewallIntentResolver> IntentFirewall::mActivityResolver;      // = new FirewallIntentResolver();
-AutoPtr<FirewallIntentResolver> IntentFirewall::mBroadcastResolver;     // = new FirewallIntentResolver();
-AutoPtr<FirewallIntentResolver> IntentFirewall::mServiceResolver;       // = new FirewallIntentResolver();
-
-IntentFirewall::initIntentFirewall()
+void IntentFirewall::initIntentFirewall()
 {
     // e.g. /data/system/ifw or /data/secure/system/ifw
 
-    AutoPtr<IFile> dir = Environment::GetSystemSecureDirectory();
-    CFile::New(dir, String("ifw"), &IntentFirewall::RULES_DIR);
+    AutoPtr<IEnvironment> env;
+    CEnvironment::AcquireSingleton((IEnvironment**)&env);
+    AutoPtr<IFile> dir;
+    env->GetSystemSecureDirectory((IFile**)&dir);
+    CFile::New((IFile*)dir, String("ifw"), (IFile**)&IntentFirewall::RULES_DIR);
 
-    factories = ArrayOf<AutoPtr<FilterFactory> >::Alloc(18);
+    factories = ArrayOf<FilterFactory*>::Alloc(18);
 
     (*factories)[0] = AndFilter::FACTORY;
     (*factories)[1] = OrFilter::FACTORY;
@@ -62,118 +121,116 @@ IntentFirewall::initIntentFirewall()
     (*factories)[16] = SenderPermissionFilter::FACTORY;
     (*factories)[17] = PortFilter::FACTORY;
 
+    /* don't initialize them here
+
     mActivityResolver = new FirewallIntentResolver();
     mBroadcastResolver = new FirewallIntentResolver();
     mServiceResolver = new FirewallIntentResolver();
+    */
 
     // load factor ~= .75
-    factoryMap = new HashMap<String, AutoPtr<FilterFactory> >(factories.GetLength() * 4 / 3);
-    for (Int32 i = 0;  i < factories.GetLength;  i++) {
+    factoryMap = new HashMap<String, AutoPtr<FilterFactory> >((*factories).GetLength() * 4 / 3);
+    for (Int32 i = 0;  i < (*factories).GetLength();  i++) {
         AutoPtr<FilterFactory> factory = (*factories)[i];
-        factoryMap->Put(factory->GetTagName(), factory);
+        (*factoryMap)[factory->GetTagName()] = factory;
     }
 }
 
 //------------------------------------------------------------------------------
-// IntentFirewall::Rule
+// Rule
 //------------------------------------------------------------------------------
 
-String IntentFirewall::Rule::TAG_INTENT_FILTER("intent-filter");
-String IntentFirewall::Rule::TAG_COMPONENT_FILTER("component-filter");
-String IntentFirewall::Rule::ATTR_NAME("name");
+const String Rule::TAG_INTENT_FILTER("intent-filter");
+const String Rule::TAG_COMPONENT_FILTER("component-filter");
+const String Rule::ATTR_NAME("name");
 
-String IntentFirewall::Rule::ATTR_BLOCK("block");
-String IntentFirewall::Rule::ATTR_LOG("log");
+const String Rule::ATTR_BLOCK("block");
+const String Rule::ATTR_LOG("log");
 
-AutoPtr<IArrayList> IntentFirewall::Rule::mIntentFilters;       // = new ArrayList<FirewallIntentFilter>(1);
-AutoPtr<IArrayList> IntentFirewall::Rule::mComponentFilters;    // = new ArrayList<ComponentName>(0);
-Boolean IntentFirewall::Rule::block;
-Boolean IntentFirewall::Rule::log;
-
-Rule* IntentFirewall::Rule::ReadFromXml(
+Rule* Rule::ReadFromXml(
     /* [in] */ IXmlPullParser* parser)
 {
     String str;
 
-    parser->GetAttributeValue(NULL, ATTR_BLOCK, &str);
+    parser->GetAttributeValue(String(NULL), ATTR_BLOCK, &str);
     block = StringUtils::ParseBoolean(str);
 
-    parser->GetAttributeValue(NULL, ATTR_LOG, &str);
+    parser->GetAttributeValue(String(NULL), ATTR_LOG, &str);
     log = StringUtils::ParseBoolean(str);
 
-    IntentFirewall::ReadFromXml(parser);
+    FilterList::ReadFromXml(parser);
     return this;
 }
 
-Int32 IntentFirewall::Rule::GetIntentFilterCount()
+Int32 Rule::GetIntentFilterCount()
 {
     Int32 size;
 
-    (*mIntentFilters)->GetSize(&size);
+    (*mIntentFilters).GetSize(&size);
     return size;
 }
 
-FirewallIntentFilter* IntentFirewall::Rule::GetIntentFilter(
+FirewallIntentFilter* Rule::GetIntentFilter(
     /* [in] */ Int32 index)
 {
     AutoPtr<FirewallIntentFilter> filter;
     AutoPtr<IInterface> obj;
 
-    (*mIntentFilters)->Get(index, (IInterface**)&obj);
+    mIntentFilters->Get(index, (IInterface**)&obj);
     filter = (FirewallIntentFilter*)IObject::Probe(obj);
     return filter;
 }
 
-Int32 IntentFirewall::Rule::GetComponentFilterCount()
+Int32 Rule::GetComponentFilterCount()
 {
     Int32 size;
 
-    (*mComponentFilters)->GetSize(&size);
+    (*mComponentFilters).GetSize(&size);
     return size;
 }
 
-AutoPtr<IComponentName> IntentFirewall::Rule::GetComponentFilter(
+AutoPtr<IComponentName> Rule::GetComponentFilter(
     /* [in] */ Int32 index)
 {
     AutoPtr<IComponentName> name;
     AutoPtr<IInterface> obj;
 
-    (*mComponentFilters)->Get(index, (IInterface**)&obj);
+    mComponentFilters->Get(index, (IInterface**)&obj);
     name = (IComponentName*)IObject::Probe(obj);
     return name;
 
 }
 
-Boolean IntentFirewall::Rule::GetBlock()
+Boolean Rule::GetBlock()
 {
     return block;
 }
 
-Boolean IntentFirewall::Rule::GetLog()
+Boolean Rule::GetLog()
 {
     return log;
 }
 
-void IntentFirewall::Rule::ReadChild(
+void Rule::ReadChild(
     /* [in] */ IXmlPullParser* parser)
 {
     String currentTag;
-
+/*
     parser->GetName(&currentTag);
 
-    if (currentTag.equals(TAG_INTENT_FILTER)) {
-        FirewallIntentFilter intentFilter = new FirewallIntentFilter(this);
-        intentFilter.readFromXml(parser);
-        mIntentFilters.add(intentFilter);
-    } else if (currentTag.equals(TAG_COMPONENT_FILTER)) {
-        String componentStr = parser.getAttributeValue(null, ATTR_NAME);
-        if (componentStr == null) {
-            throw new XmlPullParserException("Component name must be specified.",
-                    parser, null);
+    if (currentTag.Equals(TAG_INTENT_FILTER)) {
+        AutoPtr<FirewallIntentFilter> intentFilter = new FirewallIntentFilter(this);
+        intentFilter->ReadFromXml(parser);
+        mIntentFilters->add(intentFilter);
+    } else if (currentTag.Equals(TAG_COMPONENT_FILTER)) {
+        String componentStr = parser->GetAttributeValue(null, ATTR_NAME);
+        if (componentStr == NULL) {
+            //throw new XmlPullParserException("Component name must be specified.",
+            //        parser, null);
         }
 
         ComponentName componentName = ComponentName.unflattenFromString(componentStr);
-        if (componentName == null) {
+        if (componentName == NULL) {
             throw new XmlPullParserException("Invalid component name: " + componentStr);
         }
 
@@ -181,25 +238,23 @@ void IntentFirewall::Rule::ReadChild(
     } else {
         super.readChild(parser);
     }
+*/
  }
 
 
 //------------------------------------------------------------------------------
-// IntentFirewall::FirewallIntentFilter
+// FirewallIntentFilter
 //------------------------------------------------------------------------------
 
-IntentFirewall::FirewallIntentFilter::FirewallIntentFilter(
+FirewallIntentFilter::FirewallIntentFilter(
     /* [in] */ Rule* rule)
 {
     mRule = rule;
 }
 
-
 //------------------------------------------------------------------------------
 // IntentFirewall::FirewallIntentResolver
 //------------------------------------------------------------------------------
-
-AutoPtr<IArrayMap> IntentFirewall::FirewallIntentResolver::mRulesByComponent;
 
 IntentFirewall::FirewallIntentResolver::FirewallIntentResolver()
 {
@@ -210,35 +265,53 @@ ECode IntentFirewall::FirewallIntentResolver::QueryByComponent(
     /* [in] */ IComponentName* componentName,
     /* [in] */ List<Rule>* candidateRules)
 {
+/*
     Rule[] rules = mRulesByComponent.get(componentName);
     if (rules != null) {
         candidateRules.addAll(Arrays.asList(rules));
     }
+*/
+    return NOERROR;
 }
 
 ECode IntentFirewall::FirewallIntentResolver::AddComponentFilter(
     /* [in] */ IComponentName* componentName,
-    /* [in] */ Rule* rule);
+    /* [in] */ Rule* rule)
+{
+    return NOERROR;
+}
 
 //@Override
 Boolean IntentFirewall::FirewallIntentResolver::AllowFilterResult(
     /* [in] */ FirewallIntentFilter* filter,
-    /* [in] */ List<Rule>* dest);
+    /* [in] */ List<Rule>* dest)
+{
+    return TRUE;
+}
 
 //@Override
 Boolean IntentFirewall::FirewallIntentResolver::IsPackageForFilter(
     /* [in] */ const String& packageName,
-    /* [in] */ FirewallIntentFilter* filter);
+    /* [in] */ FirewallIntentFilter* filter)
+{
+    return TRUE;
+}
 
 //@Override
-AutoPtr<ArrayOf<FirewallIntentFilter> > IntentFirewall::FirewallIntentResolver::NewArray(
-    /* [in] */ Int32 size);
+AutoPtr<ArrayOf<Elastos::Droid::Server::Firewall::FirewallIntentFilter*> > IntentFirewall::FirewallIntentResolver::NewArray(
+    /* [in] */ Int32 size)
+{
+    //return NULL;
+}
 
 //@Override
 AutoPtr<Rule> IntentFirewall::FirewallIntentResolver::NewResult(
     /* [in] */ FirewallIntentFilter* filter,
     /* [in] */ Int32 match,
-    /* [in] */ Int32 userId);
+    /* [in] */ Int32 userId)
+{
+    return NULL;
+}
 
 //@Override
 void IntentFirewall::FirewallIntentResolver::SortResults(
@@ -247,6 +320,40 @@ void IntentFirewall::FirewallIntentResolver::SortResults(
     // there's no need to sort the results
     return;
 }
+
+
+//------------------------------------------------------------------------------
+// IntentFirewall::FirewallHandler
+//------------------------------------------------------------------------------
+
+IntentFirewall::FirewallHandler::FirewallHandler(
+    /* [in] */ ILooper* looper)
+{}
+
+//@Override
+ECode IntentFirewall::FirewallHandler::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    return NOERROR;
+}
+
+
+//------------------------------------------------------------------------------
+// IntentFirewall::RuleObserver
+//------------------------------------------------------------------------------
+
+IntentFirewall::RuleObserver::RuleObserver(
+    /* [in] */ IFile* monitoredDir)
+{}
+
+//@Override
+ECode IntentFirewall::RuleObserver::OnEvent(
+    /* [in] */ Int32 event,
+    /* [in] */ const String& path)
+{
+    return NOERROR;
+}
+
 
 //=======================================================================================
 // IntentFirewall
@@ -257,63 +364,83 @@ IntentFirewall::IntentFirewall(
     /* [in] */ IHandler* handler)
 {
     mAms = ams;
-    mHandler = new FirewallHandler(handler->GetLooper());
-    File rulesDir = GetRulesDir();
-    rulesDir->Mkdirs();
+    AutoPtr<ILooper> looper;
+    Boolean succeeded;
+
+    handler->GetLooper((ILooper**)&looper);
+    mHandler = new FirewallHandler(looper);
+    AutoPtr<IFile> rulesDir = GetRulesDir();
+    rulesDir->Mkdirs(&succeeded);
 
     ReadRulesDir(rulesDir);
 
     mObserver = new RuleObserver(rulesDir);
-    mObserver->StartWatching();
+    ((FileObserver*)mObserver)->StartWatching();
 }
 
-Boolean IntentFirewall::CheckStartActivity(
+ECode IntentFirewall::CheckStartActivity(
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid,
     /* [in] */ const String& resolvedType,
-    /* [in] */ IApplicationInfo* resolvedApp)
+    /* [in] */ IApplicationInfo* resolvedApp,
+    /* [out] */ Boolean *ret)
 {
-    return CheckIntent(mActivityResolver, intent->GetComponent(), TYPE_ACTIVITY, intent,
-            callerUid, callerPid, resolvedType, resolvedApp.uid);
+    AutoPtr<IComponentName> resolvedComponent;
+    intent->GetComponent((IComponentName**)&resolvedComponent);
+
+    Int32 uid;
+    resolvedApp->GetUid(&uid);
+
+    return CheckIntent(mActivityResolver, resolvedComponent, TYPE_ACTIVITY, intent,
+            callerUid, callerPid, resolvedType, uid, ret);
 }
 
-Boolean IntentFirewall::CheckService(
+ECode IntentFirewall::CheckService(
     /* [in] */ IComponentName* resolvedService,
-    /* [in] */ Intent intent,
-    /* [in] */ Int32 callerUid,
-    /* [in] */ Int32 callerPid,
-    /* [in] */ const String& resolvedType,
-    /* [in] */ IApplicationInfo* resolvedApp)
-{
-    return CheckIntent(mServiceResolver, resolvedService, TYPE_SERVICE, intent, callerUid,
-            callerPid, resolvedType, resolvedApp.uid);
-}
-
-Boolean IntentFirewall::CheckBroadcast(
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid,
     /* [in] */ const String& resolvedType,
-    /* [in] */ Int32 receivingUid)
+    /* [in] */ IApplicationInfo* resolvedApp,
+    /* [out] */ Boolean *ret)
 {
-    return CheckIntent(mBroadcastResolver, intent->GetComponent(), TYPE_BROADCAST, intent,
-            callerUid, callerPid, resolvedType, receivingUid);
+    Int32 uid;
+    resolvedApp->GetUid(&uid);
+
+    return CheckIntent(mServiceResolver, resolvedService, TYPE_SERVICE, intent, callerUid,
+            callerPid, resolvedType, uid, ret);
 }
 
-Boolean IntentFirewall::CheckIntent(
+ECode IntentFirewall::CheckBroadcast(
+    /* [in] */ IIntent* intent,
+    /* [in] */ Int32 callerUid,
+    /* [in] */ Int32 callerPid,
+    /* [in] */ const String& resolvedType,
+    /* [in] */ Int32 receivingUid,
+    /* [out] */ Boolean *ret)
+{
+    AutoPtr<IComponentName> resolvedComponent;
+    intent->GetComponent((IComponentName**)&resolvedComponent);
+
+    return CheckIntent(mBroadcastResolver, resolvedComponent, TYPE_BROADCAST, intent,
+            callerUid, callerPid, resolvedType, receivingUid, ret);
+}
+
+ECode IntentFirewall::CheckIntent(
     /* [in] */ FirewallIntentResolver* resolver,
     /* [in] */ IComponentName* resolvedComponent,
     /* [in] */ Int32 intentType,
-    /* [in] */ IIntent intent,
+    /* [in] */ IIntent* intent,
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid,
     /* [in] */ const String& resolvedType,
-    /* [in] */ Int32 receivingUid)
+    /* [in] */ Int32 receivingUid,
+    /* [out] */ Boolean *ret)
 {
-    Boolean log = FALSE;
+//    Boolean log = FALSE;
     Boolean block = FALSE;
-
+/*
     // For the first pass, find all the rules that have at least one intent-filter or
     // component-filter that matches this intent
     AutoPtr<List<Rule> > candidateRules;
@@ -343,13 +470,46 @@ Boolean IntentFirewall::CheckIntent(
     if (log) {
         LogIntent(intentType, intent, callerUid, resolvedType);
     }
-
+*/
     return !block;
+}
+
+ECode IntentFirewall::CheckComponentPermission(
+    /* [in] */ const String& permission,
+    /* [in] */ Int32 pid,
+    /* [in] */ Int32 uid,
+    /* [in] */ Int32 owningUid,
+    /* [in] */ Boolean exported,
+    /* [out] */ Boolean *ret)
+{
+//    return mAms.checkComponentPermission(permission, pid, uid, owningUid, exported) ==
+//            PackageManager.PERMISSION_GRANTED;
+    return NOERROR;
+}
+
+ECode IntentFirewall::SignaturesMatch(
+    /* [in] */ Int32 uid1,
+    /* [in] */ Int32 uid2,
+    /* [out] */ Boolean *ret)
+{
+    *ret = FALSE;
+
+    AutoPtr<IIPackageManager> pm;
+    pm = AppGlobals::GetPackageManager();
+    if (pm != NULL) {
+        Int32 result;
+        pm->CheckUidSignatures(uid1, uid2, &result);
+        if (result == IPackageManager::SIGNATURE_MATCH) {
+            *ret = TRUE;
+        }
+    }
+
+    return NOERROR;
 }
 
 void IntentFirewall::LogIntent(
     /* [in] */ Int32 intentType,
-    /* [in] */ Intent intent,
+    /* [in] */ IIntent* intent,
     /* [in] */ Int32 callerUid,
     /* [in] */ const String& resolvedType)
 {
@@ -357,32 +517,40 @@ void IntentFirewall::LogIntent(
     AutoPtr<IComponentName> cn;
     intent->GetComponent((IComponentName**)&cn);
 
-    String shortComponent = NULL;
+    String shortComponent;
     if (cn != NULL) {
         cn->FlattenToShortString(&shortComponent);
     }
 
-    String callerPackages = NULL;
+    String callerPackages;
     Int32 callerPackageCount = 0;
-    AutoPtr<IPackageManager> pm;
-    AppGlobals::GetPackageManager((IPackageManager**)&pm);
+    AutoPtr<IIPackageManager> pm;
+    pm = AppGlobals::GetPackageManager();
     if (pm != NULL) {
         AutoPtr<ArrayOf<String> > callerPackagesArray;
         pm->GetPackagesForUid(callerUid, (ArrayOf<String>**)&callerPackagesArray);
         if (callerPackagesArray != NULL) {
-            callerPackageCount = callerPackagesArray.GetLength();
-            callerPackages = JoinPackages(callerPackagesArray);
+            callerPackageCount = (*callerPackagesArray).GetLength();
+            callerPackages = JoinPackages((const ArrayOf<String>&)callerPackagesArray);
         }
     }
 
-    EventLogTags->WriteIfwIntentMatched(intentType, shortComponent, callerUid,
-            callerPackageCount, callerPackages, intent->GetAction(), resolvedType,
-            intent->GetDataString(), intent->GetFlags());
+    String action;
+    String dataString;
+    Int32 flags;
+    intent->GetAction(&action);
+    intent->GetDataString(&dataString);
+    intent->GetFlags(&flags);
+/*    EventLogTags->WriteIfwIntentMatched(intentType, shortComponent, callerUid,
+            callerPackageCount, callerPackages, action, resolvedType,
+            dataString, flags);
+*/
 }
 
 String IntentFirewall::JoinPackages(
     /* [in] */ const ArrayOf<String>& packages)
 {
+/*
     Boolean first = TRUE;
     StringBuilder sb = new StringBuilder();
     for (Int32 i = 0;  i < packages.GetLength();  i++) {
@@ -392,7 +560,7 @@ String IntentFirewall::JoinPackages(
         // but it's not critical.
         if (sb->Length() + pkg->Length() + 1 < LOG_PACKAGES_MAX_LENGTH) {
             if (!first) {
-                sb->Append(",");
+                sb->Append(',');
             } else {
                 first = FALSE;
             }
@@ -407,7 +575,8 @@ String IntentFirewall::JoinPackages(
         // interesting/unique
         return pkg->Substring(pkg->Length() - LOG_PACKAGES_MAX_LENGTH + 1) + '-';
     }
-    return NULL;
+*/
+    return String(NULL);
 }
 
 AutoPtr<IFile> IntentFirewall::GetRulesDir()
@@ -415,13 +584,13 @@ AutoPtr<IFile> IntentFirewall::GetRulesDir()
     return RULES_DIR;
 }
 
-void IntentFirewall::ReadRules(
-    /* [in] */ IFile* rulesFile,
-    /* [in] */ const ArrayOf<FirewallIntentResolver>& resolvers)
+void IntentFirewall::ReadRulesDir(
+    /* [in] */ IFile* rulesDir)
 {
+/*
     AutoPtr<ArrayOf<AutoPtr<FirewallIntentResolver> > > resolvers;
     resolvers = ArrayOf<AutoPtr<FirewallIntentResolver> >::Alloc(3);
-    for (Int32 i = 0;  i < resolvers.GetLength();  i++) {
+    for (Int32 i = 0;  i < (*resolvers).GetLength();  i++) {
         resolvers[i] = new FirewallIntentResolver();
     }
 
@@ -445,11 +614,14 @@ void IntentFirewall::ReadRules(
         mBroadcastResolver = resolvers[TYPE_BROADCAST];
         mServiceResolver = resolvers[TYPE_SERVICE];
     }
+*/
 }
 
-void IntentFirewall::ReadRulesDir(
-    /* [in] */ IFile* rulesDir)
+void IntentFirewall::ReadRules(
+    /* [in] */ IFile* rulesFile,
+    /* [in] */ const ArrayOf<FirewallIntentResolver>& resolvers)
 {
+/*
     // some temporary lists to hold the rules while we parse the xml file, so that we can
     // add the rules all at once, after we know there weren't any major structural problems
     // with the xml file
@@ -533,17 +705,26 @@ void IntentFirewall::ReadRulesDir(
             }
         }
     }
+*/
 }
 
 AutoPtr<IFilter> IntentFirewall::ParseFilter(
     /* [in] */ IXmlPullParser* parser)
 {
-   String elementName = parser->GetName();
+   String elementName;
+   parser->GetName(&elementName);
+   HashMap<String, AutoPtr<FilterFactory> >::Iterator it;
 
-    FilterFactory factory = factoryMap->Get(elementName);
+
+    AutoPtr<FilterFactory> factory;
+    it = factoryMap->Find(elementName);
+    if (it != factoryMap->End()) {
+        factory = it->mSecond;
+    }
 
     if (factory == NULL) {
-        throw new XmlPullParserException("Unknown element in filter list: " + elementName);
+        //throw new XmlPullParserException("Unknown element in filter list: " + elementName);
+        return NULL;
     }
     return factory->NewFilter(parser);
 }

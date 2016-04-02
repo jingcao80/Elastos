@@ -490,7 +490,7 @@ PInterface CSoftKeyboardView::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_ISoftKeyboardView) {
-        return (IInterface*)this;
+        return (IInterface*)(ISoftKeyboardView*)this;
     }
 
     return View::Probe(riid);

@@ -4,6 +4,7 @@
 #include <Elastos.Droid.Utility.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
+using Elastos::Droid::Utility::CFastImmutableArraySet;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Utility::ISet;
@@ -91,14 +92,20 @@ Boolean HdmiCecMessageCache::IsCacheable(
 AutoPtr<IFastImmutableArraySet> HdmiCecMessageCache::InitCACHEABLE_OPCODES()
 {
     AutoPtr<IFastImmutableArraySet> rev;
-    // TODO: Waiting for CFastImmutableArraySet
-    assert(0);
-    // = new FastImmutableArraySet<>(new Integer[] {
-    //                 Constants::MESSAGE_SET_OSD_NAME,
-    //                 Constants::MESSAGE_REPORT_PHYSICAL_ADDRESS,
-    //                 Constants::MESSAGE_DEVICE_VENDOR_ID,
-    //                 Constants::MESSAGE_CEC_VERSION,
-    //         }
+    AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(4);
+    AutoPtr<IInteger32> i32;
+    CInteger32::New(Constants::MESSAGE_SET_OSD_NAME, (IInteger32**)&i32);
+    array->Set(0, i32);
+    i32 = NULL;
+    CInteger32::New(Constants::MESSAGE_REPORT_PHYSICAL_ADDRESS, (IInteger32**)&i32);
+    array->Set(1, i32);
+    i32 = NULL;
+    CInteger32::New(Constants::MESSAGE_DEVICE_VENDOR_ID, (IInteger32**)&i32);
+    array->Set(2, i32);
+    i32 = NULL;
+    CInteger32::New(Constants::MESSAGE_CEC_VERSION, (IInteger32**)&i32);
+    array->Set(3, i32);
+    CFastImmutableArraySet::New(array, (IFastImmutableArraySet**)&rev);
     return rev;
 }
 

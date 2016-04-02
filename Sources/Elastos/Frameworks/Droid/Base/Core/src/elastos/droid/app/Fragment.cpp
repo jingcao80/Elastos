@@ -1670,8 +1670,7 @@ ECode Fragment::OnCreateContextMenu(
 ECode Fragment::RegisterForContextMenu(
     /* [in] */ IView* view)
 {
-    view->SetOnCreateContextMenuListener(
-        this);
+    view->SetOnCreateContextMenuListener(this);
     return NOERROR;
 }
 

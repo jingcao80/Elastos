@@ -272,7 +272,7 @@ module
         }
 
         interface IRemoteConnectionHelper {
-             Failure(
+            Failure(
                 [in] IDisconnectCause* disconnectCause,
                 [out] IRemoteConnection** res);
         }

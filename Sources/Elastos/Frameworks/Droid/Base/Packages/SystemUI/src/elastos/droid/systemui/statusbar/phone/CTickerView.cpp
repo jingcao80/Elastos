@@ -1,7 +1,5 @@
-#include "elastos/droid/systemui/statusbar/phone/CTickerView.h"
 
-using Elastos::Droid::View::EIID_View;
-using Elastos::Droid::View::EIID_ViewGroup;
+#include "elastos/droid/systemui/statusbar/phone/CTickerView.h"
 
 namespace Elastos {
 namespace Droid {
@@ -9,42 +7,31 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-
-IVIEW_METHODS_IMPL(CTickerView, TickerView)
-IVIEWGROUP_METHODS_IMPL(CTickerView, TickerView)
-IVIEWPARENT_METHODS_IMPL(CTickerView, TickerView)
-IVIEWMANAGER_METHODS_IMPL(CTickerView, TickerView)
-IDRAWABLECALLBACK_METHODS_IMPL(CTickerView, TickerView)
-IKEYEVENTCALLBACK_METHODS_IMPL(CTickerView, TickerView)
-IACCESSIBILITYEVENTSOURCE_METHODS_IMPL(CTickerView, TickerView)
-IFRAMELAYOUT_METHODS_IMPL(CTickerView, TickerView)
-
-
-PInterface CTickerView::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_View) {
-        return reinterpret_cast<PInterface>(this);
-    }
-    else if (riid == EIID_ViewGroup) {
-        return reinterpret_cast<PInterface>(this);
-    }
-    return _CTickerView::Probe(riid);
-}
-
+CAR_OBJECT_IMPL(CTickerView);
+CAR_INTERFACE_IMPL(CTickerView, TextSwitcher, ITickerView);
 ECode CTickerView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    return TickerView::Init(context, attrs);
+    return TextSwitcher::constructor(context, attrs);
+}
+
+void CTickerView::OnSizeChanged(
+    /* [in] */ Int32 w,
+    /* [in] */ Int32 h,
+    /* [in] */ Int32 oldw,
+    /* [in] */ Int32 oldh)
+{
+    TextSwitcher::OnSizeChanged(w, h, oldw, oldh);
+    if (mTicker != NULL) mTicker->ReflowText();
 }
 
 ECode CTickerView::SetTicker(
-        /* [in] */ ITicker* t)
+    /* [in] */ ITicker* t)
 {
-    return TickerView::SetTicker(t);
+    mTicker = t;
+    return NOERROR;
 }
-
 
 }// namespace Phone
 }// namespace StatusBar

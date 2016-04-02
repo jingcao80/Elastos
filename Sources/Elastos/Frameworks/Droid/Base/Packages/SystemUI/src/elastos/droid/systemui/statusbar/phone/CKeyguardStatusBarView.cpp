@@ -190,7 +190,7 @@ void CKeyguardStatusBarView::UpdateVisibilities()
 {
     AutoPtr<IViewParent> vp;
     IView::Probe(mMultiUserSwitch)->GetParent((IViewParent**)&vp);
-    if (vp.Get() != this && !mKeyguardUserSwitcherShowing) {
+    if (vp.Get() != (IViewParent*)this && !mKeyguardUserSwitcherShowing) {
         if (vp != NULL) {
             AutoPtr<IViewOverlay> vo;
             GetOverlay((IViewOverlay**)&vo);
@@ -198,7 +198,7 @@ void CKeyguardStatusBarView::UpdateVisibilities()
         }
         AddView(IView::Probe(mMultiUserSwitch), 0);
     }
-    else if (vp.Get() != this && mKeyguardUserSwitcherShowing) {
+    else if (vp.Get() != (IViewParent*)this && mKeyguardUserSwitcherShowing) {
         RemoveView(IView::Probe(mMultiUserSwitch));
     }
     IView::Probe(mBatteryLevel)->SetVisibility(mBatteryCharging ? IView::VISIBLE : IView::GONE);
@@ -317,7 +317,7 @@ void CKeyguardStatusBarView::AnimateNextLayoutChange()
     mSystemIconsSuperContainer->GetLeft(&systemIconsCurrentX);
     AutoPtr<IViewParent> vp;
     IView::Probe(mMultiUserSwitch)->GetParent((IViewParent**)&vp);
-    Boolean userSwitcherVisible = vp.Get() == this;
+    Boolean userSwitcherVisible = vp.Get() == (IViewParent*)this;
 
     AutoPtr<IViewTreeObserver> vto;
     GetViewTreeObserver((IViewTreeObserver**)&vto);

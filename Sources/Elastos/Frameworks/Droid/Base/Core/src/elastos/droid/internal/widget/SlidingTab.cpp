@@ -957,7 +957,7 @@ ECode SlidingTab::OnVisibilityChanged(
     ViewGroup::OnVisibilityChanged(changedView, visibility);
     // When visibility changes and the user has a tab selected, unselect it and
     // make sure their callback gets called.
-    if (changedView == this && visibility != IView::VISIBLE
+    if (changedView == (IView*)this && visibility != IView::VISIBLE
             && mGrabbedState != ISlidingTabOnTriggerListener::NO_HANDLE) {
         CancelGrab();
     }

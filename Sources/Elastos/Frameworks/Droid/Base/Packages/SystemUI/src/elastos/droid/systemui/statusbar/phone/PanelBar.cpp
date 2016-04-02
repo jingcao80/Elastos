@@ -1,7 +1,9 @@
-#include "elastos/droid/systemui/statusbar/phone/PanelBar.h"
-#include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Utility::Logging::Slogger;
+#include "elastos/droid/systemui/statusbar/phone/PanelBar.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -10,7 +12,7 @@ namespace StatusBar {
 namespace Phone {
 
 const String PanelBar::TAG("PanelBar");
-
+CAR_INTERFACE_IMPL(PanelBar, FrameLayout, IPanelBar);
 PanelBar::PanelBar()
     : mPanelExpandedFractionSum(0)
     , mState(IPanelBar::STATE_CLOSED)
@@ -18,14 +20,11 @@ PanelBar::PanelBar()
 {
 }
 
-PanelBar::PanelBar(
+ECode PanelBar::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
-    : FrameLayout(context, attrs)
-    , mPanelExpandedFractionSum(0)
-    , mState(IPanelBar::STATE_CLOSED)
-    , mTracking(FALSE)
 {
+    return FrameLayout::constructor(context, attrs);
 }
 
 ECode PanelBar::Go(
@@ -36,7 +35,6 @@ ECode PanelBar::Go(
     return NOERROR;
 }
 
-//@Override
 ECode PanelBar::OnFinishInflate()
 {
     return FrameLayout::OnFinishInflate();
@@ -54,17 +52,17 @@ ECode PanelBar::SetPanelHolder(
     /* [in] */ IPanelHolder* ph)
 {
     if (ph == NULL) {
-        Slogger::E(TAG, "SetPanelHolder: NULL PanelHolder");
+        Logger::E(TAG, "SetPanelHolder: NULL PanelHolder");
         return E_NULL_POINTER_EXCEPTION;
     }
 
     ph->SetBar(this);
     mPanelHolder = ph;
     Int32 N;
-    ph->GetChildCount(&N);
+    IViewGroup::Probe(ph)->GetChildCount(&N);
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<IView> v;
-        ph->GetChildAt(i, (IView**)&v);
+        IViewGroup::Probe(ph)->GetChildAt(i, (IView**)&v);
         IPanelView* pv = IPanelView::Probe(v.Get());
         if (pv != NULL) {
             AddPanel(pv);
@@ -73,9 +71,14 @@ ECode PanelBar::SetPanelHolder(
     return NOERROR;
 }
 
-Float PanelBar::GetBarHeight()
+ECode PanelBar::GetBarHeight(
+    /* [out] */ Float* result)
 {
-    return GetMeasuredHeight();
+    VALIDATE_NOT_NULL(result);
+    Int32 h = 0;
+    GetMeasuredHeight(&h);
+    *result = h;
+    return NOERROR;
 }
 
 AutoPtr<IPanelView> PanelBar::SelectPanelForTouch(
@@ -84,7 +87,9 @@ AutoPtr<IPanelView> PanelBar::SelectPanelForTouch(
     Int32 N = mPanels.GetSize();
     Float x;
     touch->GetX(&x);
-    Int32 index = (Int32)(N * x / GetMeasuredWidth());
+    Int32 w = 0;
+    GetMeasuredWidth(&w);
+    Int32 index = (Int32)(N * x / w);
     return mPanels[index];
 }
 
@@ -93,41 +98,64 @@ Boolean PanelBar::PanelsEnabled()
     return TRUE;
 }
 
-//@Override
-Boolean PanelBar::OnTouchEvent(
-    /* [in] */ IMotionEvent* event)
+ECode PanelBar::OnTouchEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
 {
-    // Allow subclasses to implement enable/disable semantics
-    if (!PanelsEnabled()) return FALSE;
-
-    // figure out which panel needs to be talked to here
+    VALIDATE_NOT_NULL(result);
     Int32 action;
     event->GetAction(&action);
+    // Allow subclasses to implement enable/disable semantics
+    if (!PanelsEnabled()) {
+        if (action == IMotionEvent::ACTION_DOWN) {
+            Float x = 0, y = 0;
+            event->GetX(&x);
+            event->GetY(&y);
+            Logger::V(TAG, "onTouch: all panels disabled, ignoring touch at (%d,%d)",
+                    (Int32) x, (Int32) y);
+        }
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    // figure out which panel needs to be talked to here
     if (action == IMotionEvent::ACTION_DOWN) {
         AutoPtr<IPanelView> panel = SelectPanelForTouch(event);
         if (panel == NULL) {
             // panel is not there, so we'll eat the gesture
-            // if (DEBUG) LOG("PanelBar.onTouch: no panel for x=%d, bailing", event.getX());
+            Float x = 0, y = 0;
+            event->GetX(&x);
+            event->GetY(&y);
+            Logger::V(TAG, "onTouch: no panel for touch at (%d,%d)",
+                    (Int32) x, (Int32) y);
             mTouchingPanel = NULL;
-            return TRUE;
+            *result = TRUE;
+            return NOERROR;
         }
         Boolean enabled;
-        panel->IsEnabled(&enabled);
+        IView::Probe(panel)->IsEnabled(&enabled);
         // if (DEBUG) LOG("PanelBar.onTouch: state=%d ACTION_DOWN: panel %s %s", mState, panel,
         //         (enabled ? "" : " (disabled)"));
         if (!enabled) {
             // panel is disabled, so we'll eat the gesture
+            Float x = 0, y = 0;
+            event->GetX(&x);
+            event->GetY(&y);
+            Logger::V(TAG, "onTouch: panel (%s) is disabled, ignoring touch at (%d,%d)",
+                    TO_CSTR(panel), (Int32) x, (Int32) y);
             mTouchingPanel = NULL;
-            return TRUE;
+            *result = TRUE;
+            return NOERROR;
         }
         StartOpeningPanel(panel);
     }
 
-    Boolean result = TRUE;
+    Boolean tmp = TRUE;
     if (mTouchingPanel != NULL) {
-        mTouchingPanel->OnTouchEvent(event, &result);
+        IView::Probe(mTouchingPanel)->OnTouchEvent(event, &tmp);
     }
-    return result;
+    *result = tmp;
+    return NOERROR;
 }
 
 // called from PanelView when self-expanding, too
@@ -142,7 +170,7 @@ ECode PanelBar::StartOpeningPanel(
     for (; it != mPanels.End(); ++it) {
         AutoPtr<IPanelView> pv = *it;
         if (pv.Get() != panel) {
-            pv->Collapse();
+            pv->Collapse(FALSE /* delayed */);
         }
     }
     return NOERROR;
@@ -150,24 +178,27 @@ ECode PanelBar::StartOpeningPanel(
 
 ECode PanelBar::PanelExpansionChanged(
     /* [in] */ IPanelView* panel,
-    /* [in] */ Float frac)
+    /* [in] */ Float frac,
+    /* [in] */ Boolean expanded)
 {
     Boolean fullyClosed = TRUE;
     AutoPtr<IPanelView> fullyOpenedPanel;
     // if (DEBUG) LOG("panelExpansionChanged: start state=%d panel=%s", mState, panel.getName());
     mPanelExpandedFractionSum = 0.0f;
-    Int32 visibility;
     Boolean visible;
     Float exHeight, thisFrac;
 
     List<AutoPtr<IPanelView> >::Iterator it = mPanels.Begin();
     for (; it != mPanels.End(); ++it) {
         AutoPtr<IPanelView> pv = *it;
-        pv->GetVisibility(&visibility);
-        visible = visibility == IView::VISIBLE;
+
+        Float tmp = 0;
+        visible = (pv->GetExpandedHeight(&tmp), tmp) > 0;
+        IView::Probe(pv)->SetVisibility(visible ? IView::VISIBLE : IView::GONE);
+
         // adjust any other panels that may be partially visible
         pv->GetExpandedHeight(&exHeight);
-        if (exHeight > 0.0f) {
+        if (expanded) {
             if (mState == IPanelBar::STATE_CLOSED) {
                 Go(IPanelBar::STATE_OPENING);
                 OnPanelPeeked();
@@ -179,14 +210,6 @@ ECode PanelBar::PanelExpansionChanged(
             if (panel == pv) {
                 if (thisFrac == 1.0f) fullyOpenedPanel = panel;
             }
-        }
-
-        pv->GetExpandedHeight(&exHeight);
-        if (exHeight > 0.0f) {
-            if (!visible) pv->SetVisibility(IView::VISIBLE);
-        }
-        else {
-            if (visible) pv->SetVisibility(IView::GONE);
         }
     }
 
@@ -213,14 +236,15 @@ ECode PanelBar::CollapseAllPanels(
     List<AutoPtr<IPanelView> >::Iterator it = mPanels.Begin();
     for (; it != mPanels.End(); ++it) {
         AutoPtr<IPanelView> pv = *it;
-        if (animate) pv->IsFullyCollapsed(&isFullyCollapsed);
-        if (animate && !isFullyCollapsed) {
-            pv->Collapse();
+        if (animate && (pv->IsFullyCollapsed(&isFullyCollapsed), !isFullyCollapsed)) {
+            pv->Collapse(TRUE /* delayed */);
             waiting = TRUE;
         }
         else {
+            pv->ResetViews();
             pv->SetExpandedFraction(0); // just in case
-            pv->SetVisibility(IView::GONE);
+            IView::Probe(pv)->SetVisibility(IView::GONE);
+            pv->CancelPeek();
         }
     }
 
@@ -266,17 +290,17 @@ ECode PanelBar::OnTrackingStarted(
 }
 
 ECode PanelBar::OnTrackingStopped(
-    /* [in] */ IPanelView* panel)
+    /* [in] */ IPanelView* panel,
+    /* [in] */ Boolean expanded)
 {
-    assert(panel);
-
     mTracking = FALSE;
-    Float frac;
-    panel->GetExpandedFraction(&frac);
-    PanelExpansionChanged(panel, frac);
     return NOERROR;
 }
 
+ECode PanelBar::OnExpandingFinished()
+{
+    return NOERROR;
+}
 
 }// namespace Phone
 }// namespace StatusBar

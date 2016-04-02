@@ -1,39 +1,58 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_RECENT_RECENTSVERTICALSCROLLVIEW_H__
 #define __ELASTOS_DROID_SYSTEMUI_RECENT_RECENTSVERTICALSCROLLVIEW_H__
 
+#include "_SystemUI.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/systemui/recent/FadedEdgeDrawHelper.h"
 #include "elastos/droid/widget/ScrollView.h"
-#include "elastos/droid/systemui/recent/RecentsScrollViewPerformanceHelper.h"
-#include <elastos/utility/etl/HashSet.h>
 
-using Elastos::Core::IRunnable;
-using Elastos::Utility::Etl::HashSet;
-using Elastos::Droid::View::IViewOnTouchListener;
+using Elastos::Droid::Animation::ILayoutTransition;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Database::IDataSetObserver;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::SystemUI::ISwipeHelper;
+using Elastos::Droid::SystemUI::ISwipeHelperCallback;
+using Elastos::Droid::SystemUI::Recent::IRecentsCallback;
+using Elastos::Droid::SystemUI::Recent::IRecentsPanelViewRecentsScrollView;
+using Elastos::Droid::SystemUI::Recent::ITaskDescriptionAdapter;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IOnGlobalLayoutListener;
+using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewOnLongClickListener;
-using Elastos::Droid::View::IOnGlobalLayoutListener;
-using Elastos::Droid::Database::IDataSetObserver;
-using Elastos::Droid::Widget::ScrollView;
+using Elastos::Droid::View::IViewOnTouchListener;
 using Elastos::Droid::Widget::ILinearLayout;
-using Elastos::Droid::SystemUI::ISwipeHelper;
-using Elastos::Droid::SystemUI::Recent::IRecentsCallback;
-using Elastos::Droid::SystemUI::Recent::ITaskDescriptionAdapter;
+using Elastos::Droid::Widget::ScrollView;
+using Elastos::Core::IRunnable;
+using Elastos::Utility::IHashSet;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Recent {
 
-class RecentsVerticalScrollView : public ScrollView
+class RecentsVerticalScrollView
+    : public ScrollView
+    , public ISwipeHelperCallback
+    , public IRecentsPanelViewRecentsScrollView
 {
 private:
     class NoOpListener
-        : public IViewOnTouchListener
-        , public ElRefBase
+        : public Object
+        , public IViewOnTouchListener
     {
     public:
         NoOpListener(
-           /* [in] */  RecentsVerticalScrollView* host) : mHost(host)
-        {}
+            /* [in] */  RecentsVerticalScrollView* host);
 
         CAR_INTERFACE_DECL()
 
@@ -47,13 +66,12 @@ private:
     };
 
     class ClickListener
-        : public IViewOnClickListener
-        , public ElRefBase
+        : public Object
+        , public IViewOnClickListener
     {
     public:
         ClickListener(
-           /* [in] */  RecentsVerticalScrollView* host) : mHost(host)
-        {}
+            /* [in] */  RecentsVerticalScrollView* host);
 
         CAR_INTERFACE_DECL()
 
@@ -65,16 +83,13 @@ private:
     };
 
     class LaunchAppListener
-        : public IViewOnClickListener
-        , public ElRefBase
+        : public Object
+        , public IViewOnClickListener
     {
     public:
         LaunchAppListener(
-           /* [in] */  RecentsVerticalScrollView* host,
-            /* [in] */  IView* view)
-            : mHost(host)
-            , mView(view)
-        {}
+            /* [in] */  RecentsVerticalScrollView* host,
+            /* [in] */  IView* view);
 
         CAR_INTERFACE_DECL()
 
@@ -87,18 +102,14 @@ private:
     };
 
     class LongClickListener
-        : public IViewOnLongClickListener
-        , public ElRefBase
+        : public Object
+        , public IViewOnLongClickListener
     {
     public:
         LongClickListener(
            /* [in] */  RecentsVerticalScrollView* host,
             /* [in] */  IView* view,
-            /* [in] */  IView* thumbnailView)
-            : mHost(host)
-            , mView(view)
-            , mThumbnailView(thumbnailView)
-        {}
+            /* [in] */  IView* thumbnailView);
 
         CAR_INTERFACE_DECL()
 
@@ -113,13 +124,12 @@ private:
     };
 
     class UpdateScroll
-        : public IOnGlobalLayoutListener
-        , public ElRefBase
+        : public Object
+        , public IOnGlobalLayoutListener
     {
     public:
         UpdateScroll(
-           /* [in] */  RecentsVerticalScrollView* host) : mHost(host)
-        {}
+            /* [in] */  RecentsVerticalScrollView* host);
 
         CAR_INTERFACE_DECL()
 
@@ -130,13 +140,12 @@ private:
     };
 
     class SizeChangedRunnable
-        : public IRunnable
-        , public ElRefBase
+        : public Object
+        , public IRunnable
     {
     public:
         SizeChangedRunnable(
-           /* [in] */  RecentsVerticalScrollView* host) : mHost(host)
-        {}
+            /* [in] */  RecentsVerticalScrollView* host);
 
         CAR_INTERFACE_DECL()
 
@@ -148,13 +157,12 @@ private:
 
 
     class AdapterDataSetObserver
-        : public IDataSetObserver
-        , public ElRefBase
+        : public Object
+        , public IDataSetObserver
     {
     public:
         AdapterDataSetObserver(
-           /* [in] */  RecentsVerticalScrollView* host) : mHost(host)
-        {}
+           /* [in] */  RecentsVerticalScrollView* host);
 
         CAR_INTERFACE_DECL()
 
@@ -167,7 +175,11 @@ private:
     };
 
 public:
-    RecentsVerticalScrollView();
+    CAR_INTERFACE_DECL()
+
+    RecentsVerticalScrollView(
+        /* [in] */ IContext* ctx,
+        /* [in] */ IAttributeSet* attrs);
 
     CARAPI SetMinSwipeAlpha(
         /* [in] */ Float minAlpha);
@@ -188,6 +200,14 @@ public:
     CARAPI_(Boolean) CanChildBeDismissed(
         /* [in] */ IView* v);
 
+    // @Override
+    CARAPI IsAntiFalsingNeeded(
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI GetFalsingThresholdFactor(
+        /* [out] */ Float* result);
+
     CARAPI DismissChild(
         /* [in] */ IView* v);
 
@@ -200,6 +220,17 @@ public:
     CARAPI OnDragCancelled(
         /* [in] */ IView* v);
 
+    // @Override
+    CARAPI OnChildSnappedBack(
+        /* [in] */ IView* animView);
+
+    // @Override
+    CARAPI UpdateSwipeProgress(
+        /* [in] */ IView* animView,
+        /* [in] */ Boolean dismissable,
+        /* [in] */ Float swipeProgress,
+        /* [in] */ Boolean* result);
+
     CARAPI GetChildAtPosition(
         /* [in] */ IMotionEvent* ev,
         /* [out] */ IView** view);
@@ -208,12 +239,24 @@ public:
         /* [in] */ IView* v,
         /* [out] */ IView** view);
 
-    CARAPI Draw(
-        /* [in] */ ICanvas* canvas);
+    // @Override
+    CARAPI DrawFadedEdges(
+        /* [in] */ ICanvas* canvas,
+        /* [in] */ Int32 left,
+        /* [in] */ Int32 right,
+        /* [in] */ Int32 top,
+        /* [in] */ Int32 bottom);
 
-    CARAPI_(Int32) GetVerticalFadingEdgeLength();
+    CARAPI SetOnScrollListener(
+        /* [in] */ IRunnable* listener);
 
-    CARAPI_(Int32) GetHorizontalFadingEdgeLength();
+    // @Override
+    CARAPI GetVerticalFadingEdgeLength(
+        /* [out] */ Int32* length);
+
+    // @Override
+    CARAPI GetHorizontalFadingEdgeLength(
+        /* [out] */ Int32* length);
 
     CARAPI OnAttachedToWindow();
 
@@ -227,11 +270,8 @@ public:
 
     CARAPI SetCallback(
         /* [in] */ IRecentsCallback* callback);
-protected:
-    CARAPI Init(
-        /* [in] */ IContext* ctx,
-        /* [in] */ IAttributeSet* attrs);
 
+protected:
     CARAPI OnFinishInflate();
 
     CARAPI_(void) OnConfigurationChanged(
@@ -242,6 +282,13 @@ protected:
         /* [in] */ Int32 h,
         /* [in] */ Int32 oldw,
         /* [in] */ Int32 oldh);
+
+    // @Override
+    CARAPI_(void) OnScrollChanged(
+        /* [in] */ Int32 l,
+        /* [in] */ Int32 t,
+        /* [in] */ Int32 oldl,
+        /* [in] */ Int32 oldt);
 
 private:
     CARAPI_(Int32) ScrollPositionOfMostRecent();
@@ -266,9 +313,10 @@ private:
     // IRecentsCallback is it's parent's parent
     IRecentsCallback* mCallback;
     AutoPtr<ISwipeHelper> mSwipeHelper;
-    AutoPtr<RecentsScrollViewPerformanceHelper> mPerformanceHelper;
-    HashSet<AutoPtr<IView> > mRecycledViews;
+    AutoPtr<FadedEdgeDrawHelper> mFadedEdgeDrawHelper;
+    AutoPtr<IHashSet> mRecycledViews;
     Int32 mNumItemsInOneScreenful;
+    AutoPtr<IRunnable> mOnScrollListener;
 };
 
 }// namespace Recent

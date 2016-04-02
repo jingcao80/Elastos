@@ -3725,7 +3725,7 @@ ECode AbsListView::GetFocusedRect(
     if (view != NULL) {
         AutoPtr<IViewParent> vp;
         view->GetParent((IViewParent**)&vp);
-        if (IView::Probe(vp) == this) {
+        if (IView::Probe(vp) == (IView*)this) {
             // the focused rectangle of the selected view offset into the
             // coordinate space of this view.
             view->GetFocusedRect(r);
@@ -3961,7 +3961,7 @@ void AbsListView::OnRestoreInstanceState(
 Boolean AbsListView::AcceptFilter()
 {
     AutoPtr<IAdapter> adapter;
-    this->GetAdapter((IAdapter**)&adapter);
+    GetAdapter((IAdapter**)&adapter);
     AutoPtr<IFilterable> temp = IFilterable::Probe(adapter);
     if (temp == NULL || !mTextFilterEnabled) {
         return FALSE;
@@ -4323,7 +4323,7 @@ AutoPtr<IView> AbsListView::GetAccessibilityFocusedChild(
 {
     AutoPtr<IViewParent> viewParent;
     focusedView->GetParent((IViewParent**)&viewParent);
-    while (IView::Probe(viewParent) && IView::Probe(viewParent) != this) {
+    while (IView::Probe(viewParent) && IView::Probe(viewParent) != (IView*)this) {
         focusedView = IView::Probe(viewParent);
         AutoPtr<IViewParent> tmp;
         viewParent->GetParent((IViewParent**)&tmp);
@@ -5418,7 +5418,7 @@ Boolean AbsListView::StartScrollIfNeeded(
     Boolean overscroll = mScrollY != 0;
 
     Int32 axes;
-    this->GetNestedScrollAxes(&axes);
+    GetNestedScrollAxes(&axes);
     if ((overscroll || distance > mTouchSlop) &&
             (axes & SCROLL_AXIS_VERTICAL) == 0) {
         CreateScrollingCache();
@@ -5530,7 +5530,7 @@ void AbsListView::ScrollIfNeeded(
             }
 
             AutoPtr<IView> motionView;
-            this->GetChildAt(motionIndex, (IView**)&motionView);
+            GetChildAt(motionIndex, (IView**)&motionView);
             Int32 motionViewPrevTop = 0;
             if (motionView != NULL) {
                 motionView->GetTop(&motionViewPrevTop);
@@ -5544,7 +5544,7 @@ void AbsListView::ScrollIfNeeded(
 
             // Check to see if we have bumped into the scroll limit
             motionView = NULL;
-            this->GetChildAt(motionIndex, (IView**)&motionView);
+            GetChildAt(motionIndex, (IView**)&motionView);
             if (motionView != NULL) {
                 // Check if the top of the motion view is where it is
                 // supposed to be
@@ -5905,7 +5905,7 @@ void AbsListView::OnTouchDown(
         PointToPosition(x, y, &motionPosition);
         if (!mDataChanged) {
             AutoPtr<IAdapter> adapter;
-            this->GetAdapter((IAdapter**)&adapter);
+            GetAdapter((IAdapter**)&adapter);
             Boolean isEnabled;
             IListAdapter::Probe(adapter)->IsEnabled(motionPosition, &isEnabled);
             if (mTouchMode == TOUCH_MODE_FLING) {

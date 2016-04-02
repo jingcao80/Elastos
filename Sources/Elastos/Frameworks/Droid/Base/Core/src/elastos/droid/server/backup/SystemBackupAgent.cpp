@@ -144,7 +144,7 @@ ECode SystemBackupAgent::FullWallpaperBackup(
 
     // TODO wait extends BackupAgentHelper
     // String packageName;
-    // this->GetPackageName(&packageName);
+    // GetPackageName(&packageName);
     AutoPtr<IBackupDataOutput> data;
     output->GetData((IBackupDataOutput**)&data);
     // Int32 result;

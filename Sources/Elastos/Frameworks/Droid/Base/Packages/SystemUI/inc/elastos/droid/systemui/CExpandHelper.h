@@ -3,6 +3,7 @@
 #define  __ELASTOS_DROID_SYSTEMUI_CEXPANDHELPER_H__
 
 #include "_Elastos_Droid_SystemUI_CExpandHelper.h"
+#include "elastos/droid/systemui/statusbar/FlingAnimationUtils.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/view/ScaleGestureDetector.h>
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
@@ -24,7 +25,7 @@ using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::ScaleGestureDetector;
 using Elastos::Droid::SystemUI::IExpandHelperCallback;
 using Elastos::Droid::SystemUI::StatusBar::IExpandableView;
-using Elastos::Droid::SystemUI::StatusBar::IFlingAnimationUtils;
+using Elastos::Droid::SystemUI::StatusBar::FlingAnimationUtils;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IScrollAdapter;
 
 namespace Elastos {
@@ -275,7 +276,7 @@ private:
 
     Int32 mGravity;
     IScrollAdapter* mScrollAdapter;
-    AutoPtr<IFlingAnimationUtils> mFlingAnimationUtils;
+    AutoPtr<FlingAnimationUtils> mFlingAnimationUtils;
     AutoPtr<IVelocityTracker> mVelocityTracker;
 };
 

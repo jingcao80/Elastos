@@ -54,11 +54,15 @@ ECode FastImmutableArraySet::FastIterator::Remove()
 //==============================================================
 CAR_INTERFACE_IMPL(FastImmutableArraySet, AbstractSet, IFastImmutableArraySet)
 
-FastImmutableArraySet::FastImmutableArraySet(
+FastImmutableArraySet::FastImmutableArraySet()
+{}
+
+ECode FastImmutableArraySet::constructor(
     /* [in] */ ArrayOf<IInterface*>* contents)
-    : mContents(contents)
 {
+    mContents = contents;
     assert(mContents != NULL);
+    return NOERROR;
 }
 
 ECode FastImmutableArraySet::GetIterator(

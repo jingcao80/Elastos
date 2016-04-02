@@ -144,6 +144,8 @@ module
         SetDirtyRect(
             [in] IRect* dirty);
 
+		GetNativeSurface(
+            [out] Int64* result);
     }
 
     interface ISurfaceHelper {

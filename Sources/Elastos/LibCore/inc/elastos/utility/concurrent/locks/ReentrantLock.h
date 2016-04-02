@@ -64,7 +64,8 @@ public:
     /**
      * Sync object for non-fair locks
      */
-    class NonfairSync : public Sync {
+    class NonfairSync : public Sync
+    {
     public:
         /**
          * Performs lock.  Try immediate barge, backing up to normal
@@ -80,7 +81,8 @@ public:
     /**
      * Sync object for fair locks
      */
-    class FairSync : public Sync {
+    class FairSync : public Sync
+    {
     public:
         CARAPI Lock();
 

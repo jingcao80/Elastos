@@ -1,11 +1,17 @@
 
 module
 {
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Content.Pm.IApplicationInfo;
+    using interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Server.Firewall.IFirewallIntentResolver;
+
     namespace Elastos {
     namespace Droid {
     namespace Server {
     namespace Firewall {
 
+    [deprecated]
     interface IIntentFirewall {
         /**
          * This is called from ActivityManager to check if a start activity intent should be allowed.
@@ -45,6 +51,29 @@ module
             [in] Int32 callerPid,
             [in] String resolvedType,
             [in] Int32 receivingUid,
+            [out] Boolean *ret);
+
+        /**
+         * Checks if the caller has access to a component
+         *
+         * @param permission If present, the caller must have this permission
+         * @param pid The pid of the caller
+         * @param uid The uid of the caller
+         * @param owningUid The uid of the application that owns the component
+         * @param exported Whether the component is exported
+         * @return True if the caller can access the described component
+         */
+        CheckComponentPermission(
+            [in] String permission,
+            [in] Int32 pid,
+            [in] Int32 uid,
+            [in] Int32 owningUid,
+            [in] Boolean exported,
+            [out] Boolean *ret);
+
+        SignaturesMatch(
+            [in] Int32 uid1,
+            [in] Int32 uid2,
             [out] Boolean *ret);
     }
 

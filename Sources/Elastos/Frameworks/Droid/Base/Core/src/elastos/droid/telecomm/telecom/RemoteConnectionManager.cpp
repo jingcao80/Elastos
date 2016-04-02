@@ -1,6 +1,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/RemoteConnectionManager.h"
+#include "elastos/droid/telecomm/telecom/CRemoteConnectionService.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Utility::CHashMap;
@@ -14,6 +15,7 @@ namespace Telecom {
 //===============================================================
 // RemoteConnectionManager::
 //===============================================================
+CAR_INTERFACE_IMPL(RemoteConnectionManager, Object, IRemoteConnectionManager)
 
 RemoteConnectionManager::RemoteConnectionManager()
 {
@@ -34,10 +36,10 @@ ECode RemoteConnectionManager::AddConnectionService(
     Boolean bContain = FALSE;
     if (!(mRemoteConnectionServices->ContainsKey(componentName, &bContain), bContain)) {
         AutoPtr<IRemoteConnectionService> remoteConnectionService;
-        // CRemoteConnectionService::New(
-        //         outgoingConnectionServiceRpc,
-        //         mOurConnectionServiceImpl,
-        //         (IRemoteConnectionService**)&remoteConnectionService);
+        CRemoteConnectionService::New(
+                outgoingConnectionServiceRpc,
+                mOurConnectionServiceImpl,
+                (IRemoteConnectionService**)&remoteConnectionService);
         mRemoteConnectionServices->Put(componentName, remoteConnectionService);
     }
     return NOERROR;

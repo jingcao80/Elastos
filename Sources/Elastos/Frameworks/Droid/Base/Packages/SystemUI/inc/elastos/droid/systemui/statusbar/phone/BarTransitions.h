@@ -119,16 +119,16 @@ private:
     static CARAPI_(Boolean) InitStatic();
 
 public:
-    static const Int32 MODE_OPAQUE;
-    static const Int32 MODE_SEMI_TRANSPARENT;
-    static const Int32 MODE_TRANSLUCENT;
-    static const Int32 MODE_LIGHTS_OUT;
-    static const Int32 MODE_TRANSPARENT;
-    static const Int32 MODE_WARNING;
+    static const Int32 MODE_OPAQUE = 0;
+    static const Int32 MODE_SEMI_TRANSPARENT = 1;
+    static const Int32 MODE_TRANSLUCENT = 2;
+    static const Int32 MODE_LIGHTS_OUT = 3;
+    static const Int32 MODE_TRANSPARENT = 4;
+    static const Int32 MODE_WARNING = 5;
 
-    static const Int32 LIGHTS_IN_DURATION;
-    static const Int32 LIGHTS_OUT_DURATION;
-    static const Int32 BACKGROUND_DURATION;
+    static const Int32 LIGHTS_IN_DURATION = 250;
+    static const Int32 LIGHTS_OUT_DURATION = 750;
+    static const Int32 BACKGROUND_DURATION = 200;
 
 private:
     static const Boolean DEBUG;

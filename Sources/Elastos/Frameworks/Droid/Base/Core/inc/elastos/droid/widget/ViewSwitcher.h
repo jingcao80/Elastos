@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_WIDGET_VIEWSWITCHER_H__
 #define __ELASTOS_DROID_WIDGET_VIEWSWITCHER_H__
 
-#include "elastos/droid/widget/ViewAnimator.h"
+#include <elastos/droid/widget/ViewAnimator.h>
 
 /**
  * {@link ViewAnimator} that switches between two views, and has a factory
@@ -14,7 +14,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class ViewSwitcher
+class ECO_PUBLIC ViewSwitcher
     : public ViewAnimator
     , public IViewSwitcher
 {

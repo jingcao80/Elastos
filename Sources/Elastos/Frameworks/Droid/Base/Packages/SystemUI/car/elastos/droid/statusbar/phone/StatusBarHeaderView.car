@@ -20,10 +20,16 @@ module
      * interface IRelativeLayout
      * interface IViewOnClickListener
      * interface IBatteryStateChangeCallback
-     * interface INextAlarmControllerNextAlarmChangeCallback
+     * interface INextAlarmChangeCallback
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      */
     interface IStatusBarHeaderView {
-
         SetActivityStarter(
             [in] IActivityStarter* activityStarter);
 

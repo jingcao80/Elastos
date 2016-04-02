@@ -1,5 +1,4 @@
 
-#include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Os.h"
@@ -588,9 +587,6 @@ ECode Call::InternalUpdate(
     while ((it->HasNext(&bHasNxt), bHasNxt)) {
         AutoPtr<IInterface> p;
         it->GetNext((IInterface**)&p);
-        // AutoPtr<ICharSequence> pOtherId = ICharSequence::Probe(p);
-        // String otherId;
-        // pOtherId->ToString(&otherId);
         Boolean bContain = FALSE;
         if ((callIdMap->ContainsKey(p, &bContain), bContain)) {
             AutoPtr<IInterface> val;

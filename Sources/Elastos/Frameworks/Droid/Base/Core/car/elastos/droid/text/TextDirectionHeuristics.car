@@ -31,7 +31,7 @@ module
         GetFIRSTSTRONG_RTL(
             [out] ITextDirectionHeuristic** tdh);
 
-        GetNYRTL_LTR(
+        GetANYRTL_LTR(
             [out] ITextDirectionHeuristic** tdh);
 
         GetLOCALE(

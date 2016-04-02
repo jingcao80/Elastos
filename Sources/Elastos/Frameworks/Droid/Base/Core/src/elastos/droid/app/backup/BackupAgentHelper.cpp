@@ -35,13 +35,13 @@ PInterface BackupAgentHelper::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(IBackupAgentHelper*)this;
     }
     else if (riid == EIID_IBackupAgentHelper) {
-        return this;
+        return (IBackupAgentHelper*)this;
     }
     else if (riid == EIID_BackupAgent) {
-        return reinterpret_cast<PInterface>(this);
+        return reinterpret_cast<PInterface>((BackupAgent*)this);
     }
     else if (riid == EIID_BackupAgentHelper) {
         return reinterpret_cast<PInterface>(this);

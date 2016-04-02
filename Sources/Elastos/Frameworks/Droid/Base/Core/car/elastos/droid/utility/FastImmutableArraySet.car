@@ -14,7 +14,8 @@ module
      */
     /**
      * @Involve
-     * interface IAbstractSet;
+     * interface ISet;
+     * interface ICollection;
      */
     interface IFastImmutableArraySet {
     }

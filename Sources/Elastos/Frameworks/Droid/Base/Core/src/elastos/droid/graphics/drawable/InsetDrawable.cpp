@@ -20,7 +20,7 @@ namespace Graphics {
 namespace Drawable {
 
 InsetDrawable::InsetState::InsetState(
-    /* [in] */ InsetState* orig,
+    /* [in] */ IDrawableConstantState* is,
     /* [in] */ InsetDrawable* owner,
     /* [in] */ IResources* res)
     : mChangingConfigurations(0)
@@ -31,7 +31,8 @@ InsetDrawable::InsetState::InsetState(
     , mCheckedConstantState(FALSE)
     , mCanConstantState(FALSE)
 {
-    if (orig != NULL) {
+    if (is != NULL) {
+        InsetState* orig = (InsetState*)is;
         mThemeAttrs = orig->mThemeAttrs;
         mChangingConfigurations = orig->mChangingConfigurations;
         AutoPtr<IDrawableConstantState> state;
@@ -539,7 +540,7 @@ ECode InsetDrawable::GetDrawable(
 
 ECode InsetDrawable::constructor()
 {
-    return constructor((InsetState*)NULL, (IResources*)NULL);
+    return constructor((IDrawableConstantState*)NULL, (IResources*)NULL);
 }
 
 ECode InsetDrawable::constructor(
@@ -556,7 +557,7 @@ ECode InsetDrawable::constructor(
     /* [in] */ Int32 insetRight,
     /* [in] */ Int32 insetBottom)
 {
-    FAIL_RETURN(constructor((InsetState*)NULL, (IResources*)NULL));
+    FAIL_RETURN(constructor((IDrawableConstantState*)NULL, (IResources*)NULL));
 
     mInsetState->mDrawable = drawable;
     mInsetState->mInsetLeft = insetLeft;
@@ -565,14 +566,13 @@ ECode InsetDrawable::constructor(
     mInsetState->mInsetBottom = insetBottom;
 
     if (drawable != NULL) {
-        drawable->SetCallback(
-                this);
+        drawable->SetCallback(this);
     }
     return NOERROR;
 }
 
 ECode InsetDrawable::constructor(
-    /* [in] */ InsetState* state,
+    /* [in] */ IDrawableConstantState* state,
     /* [in] */ IResources* res)
 {
     mInsetState = new InsetState(state, this, res);

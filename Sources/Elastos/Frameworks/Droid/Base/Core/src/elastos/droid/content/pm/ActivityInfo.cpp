@@ -176,7 +176,7 @@ ECode ActivityInfo::ToString(
 {
     VALIDATE_NOT_NULL(str)
     Int32 hashCode;
-    this->GetHashCode(&hashCode);
+    GetHashCode(&hashCode);
     str->AppendFormat("ActivityInfo{%s %s}", StringUtils::ToHexString(hashCode).string(), mName.string());
     return NOERROR;
 }

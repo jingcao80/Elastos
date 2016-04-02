@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_TELECOMM_TELECOM_CONFERENCE_H__
 
 #include "Elastos.Droid.Telecomm.h"
+#include "elastos/droid/telecomm/telecom/Connection.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
@@ -21,6 +22,21 @@ class Conference
     : public Object
     , public IConference
 {
+public:
+    class ConnectionListener
+        : public Connection::Listener
+    {
+    public:
+        ConnectionListener(
+            /* [in] */ Conference* host);
+
+        CARAPI OnDestroyed(
+            /* [in] */ IConnection* c);
+
+    public:
+        Conference* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -231,7 +247,6 @@ public:
     CARAPI SetAudioState(
         /* [in] */ IAudioState* state);
 
-private:
     CARAPI_(void) FireOnConferenceableConnectionsChanged();
 
     CARAPI_(void) SetState(

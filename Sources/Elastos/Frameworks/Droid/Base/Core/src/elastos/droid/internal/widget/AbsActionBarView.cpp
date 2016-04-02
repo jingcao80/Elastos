@@ -378,7 +378,7 @@ ECode AbsActionBarView::AnimateToVisibility(
     else {
        AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(1);
         (*values)[0] = 0;
-        AutoPtr<IObjectAnimator> anim = CObjectAnimator::OfFloat((IInterface*)TO_IINTERFACE(this), String("alpha"), values);
+        AutoPtr<IObjectAnimator> anim = CObjectAnimator::OfFloat(TO_IINTERFACE(this), String("alpha"), values);
         IValueAnimator::Probe(anim)->SetDuration(FADE_DURATION);
         IAnimator::Probe(anim)->SetInterpolator(sAlphaInterpolator);
         if (mSplitView != NULL && mMenuView != NULL) {

@@ -1,41 +1,40 @@
 #include "elastos/droid/systemui/recent/RecentsHorizontalScrollView.h"
 #include "elastos/droid/systemui/recent/RecentsPanelView.h"
 #include "elastos/droid/systemui/CSwipeHelper.h"
-#include "elastos/droid/view/CViewConfigurationHelper.h"
-#include "elastos/droid/systemui/SystemUIR.h"
+#include "../R.h"
 #include <elastos/core/Math.h>
 
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
-using Elastos::Core::EIID_IRunnable;
 using Elastos::Droid::Database::EIID_IDataSetObserver;
-using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Droid::SystemUI::CSwipeHelper;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::EIID_IOnGlobalLayoutListener;
+using Elastos::Droid::View::EIID_IView;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::EIID_IViewOnLongClickListener;
+using Elastos::Droid::View::EIID_IViewOnTouchListener;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
-using Elastos::Droid::View::CViewConfigurationHelper;
-using Elastos::Droid::View::EIID_IView;
 using Elastos::Droid::View::IViewManager;
-using Elastos::Droid::View::EIID_IOnGlobalLayoutListener;
-using Elastos::Droid::View::EIID_IViewOnLongClickListener;
-using Elastos::Droid::View::EIID_IViewOnClickListener;
-using Elastos::Droid::View::EIID_IViewOnTouchListener;
-using Elastos::Droid::SystemUI::SystemUIR;
-using Elastos::Droid::SystemUI::CSwipeHelper;
-using Elastos::Droid::SystemUI::Recent::RecentsPanelView;
+using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Droid::Widget::EIID_IHorizontalScrollView;
+using Elastos::Core::CString;
+using Elastos::Core::EIID_IRunnable;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::Math;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::IIterable;
+using Elastos::Utility::IIterator;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Recent {
 
-//db79c362-50f5-47cd-8852-a4e89f920c90
-// extern "C" const InterfaceID EIID_RecentsHorizontalScrollView =
-//         { 0xdb79c362, 0x50f5, 0x47cd, { 0x88, 0x52, 0xa4, 0xe8, 0x9f, 0x92, 0x0c, 0x90 } };
-
 //============================================================================================
 // RecentsHorizontalScrollView::NoOpListener
 //============================================================================================
-CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::NoOpListener, IViewOnTouchListener)
+CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::NoOpListener, Object, IViewOnTouchListener)
 
 ECode RecentsHorizontalScrollView::NoOpListener::OnTouch(
     /* [in] */ IView* v,
@@ -51,7 +50,7 @@ ECode RecentsHorizontalScrollView::NoOpListener::OnTouch(
 //============================================================================================
 // RecentsHorizontalScrollView::ClickListener
 //============================================================================================
-CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::ClickListener, IViewOnClickListener)
+CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::ClickListener, Object, IViewOnClickListener)
 
 ECode RecentsHorizontalScrollView::ClickListener::OnClick(
     /* [in] */ IView* v)
@@ -63,7 +62,7 @@ ECode RecentsHorizontalScrollView::ClickListener::OnClick(
 //============================================================================================
 // RecentsHorizontalScrollView::LaunchAppListener
 //============================================================================================
-CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::LaunchAppListener, IViewOnClickListener)
+CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::LaunchAppListener, Object, IViewOnClickListener)
 
 ECode RecentsHorizontalScrollView::LaunchAppListener::OnClick(
     /* [in] */ IView* v)
@@ -75,7 +74,7 @@ ECode RecentsHorizontalScrollView::LaunchAppListener::OnClick(
 //============================================================================================
 // RecentsHorizontalScrollView::LongClickListener
 //============================================================================================
-CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::LongClickListener, IViewOnLongClickListener)
+CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::LongClickListener, Object, IViewOnLongClickListener)
 
 ECode RecentsHorizontalScrollView::LongClickListener::OnLongClick(
     /* [in] */ IView* v,
@@ -83,7 +82,7 @@ ECode RecentsHorizontalScrollView::LongClickListener::OnLongClick(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IView> anchorView;
-    mView->FindViewById(SystemUIR::id::app_description, (IView**)&anchorView);
+    mView->FindViewById(R::id::app_description, (IView**)&anchorView);
     mHost->mCallback->HandleLongPress(mView, anchorView, mThumbnailView);
     *result = TRUE;
     return NOERROR;
@@ -93,13 +92,14 @@ ECode RecentsHorizontalScrollView::LongClickListener::OnLongClick(
 //============================================================================================
 // RecentsHorizontalScrollView::UpdateScroll
 //============================================================================================
-CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::UpdateScroll, IOnGlobalLayoutListener)
+CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::UpdateScroll, Object, IOnGlobalLayoutListener)
 
 ECode RecentsHorizontalScrollView::UpdateScroll::OnGlobalLayout()
 {
     mHost->mLastScrollPosition = mHost->ScrollPositionOfMostRecent();
     mHost->ScrollTo(mHost->mLastScrollPosition, 0);
-    AutoPtr<IViewTreeObserver> observer = mHost->GetViewTreeObserver();
+    AutoPtr<IViewTreeObserver> observer;
+    mHost->GetViewTreeObserver((IViewTreeObserver**)&observer);
     Boolean b;
     observer->IsAlive(&b);
     if (b) {
@@ -112,14 +112,14 @@ ECode RecentsHorizontalScrollView::UpdateScroll::OnGlobalLayout()
 //============================================================================================
 // RecentsHorizontalScrollView::SizeChangedRunnable
 //============================================================================================
-CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::SizeChangedRunnable, IRunnable)
+CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::SizeChangedRunnable, Object, IRunnable)
 
 ECode RecentsHorizontalScrollView::SizeChangedRunnable::Run()
 {
     // Make sure we're still not clobbering the transition-set values, since this
     // runnable launches asynchronously
     AutoPtr<ILayoutTransition> transition;
-    mHost->mLinearLayout->GetLayoutTransition((ILayoutTransition**)&transition);
+    IViewGroup::Probe(mHost->mLinearLayout)->GetLayoutTransition((ILayoutTransition**)&transition);
     Boolean b = FALSE;
     if (transition == NULL || (transition->IsRunning(&b), !b)) {
         mHost->ScrollTo(mHost->mLastScrollPosition, 0);
@@ -131,7 +131,7 @@ ECode RecentsHorizontalScrollView::SizeChangedRunnable::Run()
 //============================================================================================
 // RecentsHorizontalScrollView::AdapterDataSetObserver
 //============================================================================================
-CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::AdapterDataSetObserver, IDataSetObserver)
+CAR_INTERFACE_IMPL(RecentsHorizontalScrollView::AdapterDataSetObserver, Object, IDataSetObserver)
 
 ECode RecentsHorizontalScrollView::AdapterDataSetObserver::OnChanged()
 {
@@ -152,53 +152,47 @@ ECode RecentsHorizontalScrollView::AdapterDataSetObserver::OnInvalidated()
 const String RecentsHorizontalScrollView::TAG("RecentsPanelView"); // = RecentsPanelView.TAG;
 const Boolean RecentsHorizontalScrollView::DEBUG = FALSE; // = RecentsPanelView.DEBUG;
 
-RecentsHorizontalScrollView::RecentsHorizontalScrollView()
+// CAR_INTERFACE_IMPL_2(RecentsHorizontalScrollView, HorizontalScrollView, ISwipeHelperCallback, IRecentsPanelViewRecentsScrollView)
+CAR_INTERFACE_IMPL_3(RecentsHorizontalScrollView, FrameLayout, IHorizontalScrollView, ISwipeHelperCallback, IRecentsPanelViewRecentsScrollView)
+
+RecentsHorizontalScrollView::RecentsHorizontalScrollView(
+    /* [in] */ IContext* ctx,
+    /* [in] */ IAttributeSet* attrs)
     : mLastScrollPosition(0)
     , mCallback(NULL)
     , mNumItemsInOneScreenful(0)
-{}
-
-ECode RecentsHorizontalScrollView::Init(
-    /* [in] */ IContext* ctx,
-    /* [in] */ IAttributeSet* attrs)
 {
-    FAIL_RETURN(HorizontalScrollView::Init(ctx, attrs, 0));
-    AutoPtr<IDisplayMetrics> dm;
-    GetResources()->GetDisplayMetrics((IDisplayMetrics**)&dm);
-    Float densityScale;
-    dm->GetDensity(&densityScale);
+    //TODO
+    // HorizontalScrollView::constructor(ctx, attrs, 0);
 
-    AutoPtr<IViewConfigurationHelper> helper;
-    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
-    AutoPtr<IViewConfiguration> vc;
-    helper->Get(mContext, (IViewConfiguration**)&vc);
-    Float pagingTouchSlop;
-    vc->GetScaledPagingTouchSlop((Int32*)&pagingTouchSlop);
-    CSwipeHelper::New(ISwipeHelper::Y, this, densityScale, pagingTouchSlop, (ISwipeHelper**)&mSwipeHelper);
-    mPerformanceHelper = RecentsScrollViewPerformanceHelper::Create(ctx, attrs, this, FALSE);
-    return NOERROR;
+    CSwipeHelper::New(ISwipeHelper::Y, this, ctx, (ISwipeHelper**)&mSwipeHelper);
+
+    mFadedEdgeDrawHelper = FadedEdgeDrawHelper::Create(ctx, attrs, this, FALSE);
+    CHashSet::New((IHashSet**)&mRecycledViews);
 }
 
 ECode RecentsHorizontalScrollView::SetMinSwipeAlpha(
     /* [in] */ Float minAlpha)
 {
-    mSwipeHelper->SetMinAlpha(minAlpha);
+    mSwipeHelper->SetMinSwipeProgress(minAlpha);
     return NOERROR;
 }
 
 Int32 RecentsHorizontalScrollView::ScrollPositionOfMostRecent()
 {
     Int32 h1, h2;
-    mLinearLayout->GetWidth(&h1);
-    h2 = GetWidth();
+    IView::Probe(mLinearLayout)->GetWidth(&h1);
+    GetWidth(&h2);
     return h1 - h2;
 }
 
 void RecentsHorizontalScrollView::AddToRecycledViews(
     /* [in] */ IView* v)
 {
-    if (mRecycledViews.GetSize() < mNumItemsInOneScreenful) {
-        mRecycledViews.Insert(v);
+    Int32 size;
+    mRecycledViews->GetSize(&size);
+    if (size < mNumItemsInOneScreenful) {
+        mRecycledViews->Add(v);
     }
 }
 
@@ -208,15 +202,16 @@ ECode RecentsHorizontalScrollView::FindViewForTask(
 {
     VALIDATE_NOT_NULL(view);
     Int32 count;
-    mLinearLayout->GetChildCount(&count);
+    IViewGroup::Probe(mLinearLayout)->GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> v;
-        mLinearLayout->GetChildAt(i, (IView**)&v);
+        IViewGroup::Probe(mLinearLayout)->GetChildAt(i, (IView**)&v);
         AutoPtr<IInterface> tag;
         v->GetTag((IInterface**)&tag);
-        AutoPtr<RecentsPanelView::ViewHolder> holder = (RecentsPanelView::ViewHolder*)tag.Get();
-        Int32 pId;
-        holder->mTaskDescription->GetPersistentTaskId(&pId);
+        AutoPtr<RecentsPanelView::ViewHolder> holder = (RecentsPanelView::ViewHolder*)(IObject::Probe(tag));
+        AutoPtr<TaskDescription> td = (TaskDescription*)(holder->mTaskDescription).Get();
+
+        Int32 pId = td->mPersistentTaskId;
         if (pId == persistentTaskId) {
             *view = v;
             REFCOUNT_ADD(*view)
@@ -230,33 +225,38 @@ ECode RecentsHorizontalScrollView::FindViewForTask(
 void RecentsHorizontalScrollView::Update()
 {
     Int32 count;
-    mLinearLayout->GetChildCount(&count);
+    IViewGroup::Probe(mLinearLayout)->GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> v;
-        mLinearLayout->GetChildAt(i, (IView**)&v);
+        IViewGroup::Probe(mLinearLayout)->GetChildAt(i, (IView**)&v);
         AddToRecycledViews(v);
         mAdapter->RecycleView(v);
     }
-    AutoPtr<ILayoutTransition> transitioner = GetLayoutTransition();
+    AutoPtr<ILayoutTransition> transitioner;
+    GetLayoutTransition((ILayoutTransition**)&transitioner);
     SetLayoutTransition(NULL);
 
-    mLinearLayout->RemoveAllViews();
-    HashSet<AutoPtr<IView> >::Iterator it = mRecycledViews.Begin();
+    IViewGroup::Probe(mLinearLayout)->RemoveAllViews();
+    AutoPtr<IIterator> recycledViews;
+    IIterable::Probe(mRecycledViews)->GetIterator((IIterator**)&recycledViews);
     Int32 c;
     mAdapter->GetCount(&c);
     for (Int32 i = 0; i < c; i++) {
         AutoPtr<IView> old;
-        if (it != mRecycledViews.End()) {
-            old = *it;
-            mRecycledViews.Erase(it++);
+        Boolean hasNext;
+        if (recycledViews->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> next;
+            recycledViews->GetNext((IInterface**)&next);
+            old = IView::Probe(next);
+            recycledViews->Remove();
             old->SetVisibility(IView::VISIBLE);
         }
 
         AutoPtr<IView> view;
-        mAdapter->GetView(i, old, mLinearLayout, (IView**)&view);
+        mAdapter->GetView(i, old, IViewGroup::Probe(mLinearLayout), (IView**)&view);
 
-        if (mPerformanceHelper != NULL) {
-            mPerformanceHelper->AddViewCallback(view);
+        if (mFadedEdgeDrawHelper != NULL) {
+            mFadedEdgeDrawHelper->AddViewCallback(view);
         }
 
         AutoPtr<NoOpListener> noOpListener = new NoOpListener(this);
@@ -270,7 +270,7 @@ void RecentsHorizontalScrollView::Update()
 
         AutoPtr<IInterface> tag;
         view->GetTag((IInterface**)&tag);
-        AutoPtr<RecentsPanelView::ViewHolder> holder = (RecentsPanelView::ViewHolder*)tag.Get();
+        AutoPtr<RecentsPanelView::ViewHolder> holder = (RecentsPanelView::ViewHolder*)(IObject::Probe(tag));
         AutoPtr<IView> thumbnailView = holder->mThumbnailView;
         AutoPtr<LongClickListener> longClickListener = new LongClickListener(view, thumbnailView, this);
         thumbnailView->SetClickable(TRUE);
@@ -281,18 +281,20 @@ void RecentsHorizontalScrollView::Update()
         // (we also don't want to launch the app either, though, because the
         // app title is a small target and doesn't have great click feedback)
         AutoPtr<IView> appTitle;
-        view->FindViewById(SystemUIR::id::app_label, (IView**)&appTitle);
+        view->FindViewById(R::id::app_label, (IView**)&appTitle);
         AutoPtr<ICharSequence> cs;
         CString::New(String(""), (ICharSequence**)&cs);
         appTitle->SetContentDescription(cs);
         appTitle->SetOnTouchListener(noOpListener);
-        mLinearLayout->AddView(view);
+        IViewGroup::Probe(mLinearLayout)->AddView(view);
     }
     SetLayoutTransition(transitioner);
 
     // Scroll to end after initial layout.
     AutoPtr<UpdateScroll> updateScroll = new UpdateScroll(this);
-    GetViewTreeObserver()->AddOnGlobalLayoutListener(updateScroll);
+    AutoPtr<IViewTreeObserver> vto;
+    GetViewTreeObserver((IViewTreeObserver**)&vto);
+    vto->AddOnGlobalLayoutListener(updateScroll);
 }
 
 ECode RecentsHorizontalScrollView::RemoveViewInLayout(
@@ -304,26 +306,45 @@ ECode RecentsHorizontalScrollView::RemoveViewInLayout(
 Boolean RecentsHorizontalScrollView::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* ev)
 {
-    // if (DEBUG) Log.v(TAG, "onInterceptTouchEvent()");
+    if (DEBUG) Logger::V(TAG, "onInterceptTouchEvent()");
     Boolean b1, b2;
     mSwipeHelper->OnInterceptTouchEvent(ev, &b1);
-    b2 = HorizontalScrollView::OnInterceptTouchEvent(ev);
+    b2 = this->OnInterceptTouchEvent(ev);
     return b1 || b2;
 }
 
-Boolean RecentsHorizontalScrollView::OnTouchEvent(
-    /* [in] */ IMotionEvent* ev)
+ECode RecentsHorizontalScrollView::OnTouchEvent(
+    /* [in] */ IMotionEvent* ev,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Boolean b1, b2;
     mSwipeHelper->OnTouchEvent(ev, &b1);
-    b2 = HorizontalScrollView::OnTouchEvent(ev);
-    return b1 || b2;
+    this->OnTouchEvent(ev, &b2);
+    *result = b1 || b2;
+    return NOERROR;
 }
 
 Boolean RecentsHorizontalScrollView::CanChildBeDismissed(
     /* [in] */ IView* v)
 {
     return TRUE;
+}
+
+ECode RecentsHorizontalScrollView::IsAntiFalsingNeeded(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode RecentsHorizontalScrollView::GetFalsingThresholdFactor(
+    /* [out] */ Float* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = 1.0f;
+    return NOERROR;
 }
 
 ECode RecentsHorizontalScrollView::DismissChild(
@@ -361,6 +382,23 @@ ECode RecentsHorizontalScrollView::OnDragCancelled(
     return NOERROR;
 }
 
+ECode RecentsHorizontalScrollView::OnChildSnappedBack(
+    /* [in] */ IView* animView)
+{
+    return NOERROR;
+}
+
+ECode RecentsHorizontalScrollView::UpdateSwipeProgress(
+    /* [in] */ IView* animView,
+    /* [in] */ Boolean dismissable,
+    /* [in] */ Float swipeProgress,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    return NOERROR;
+}
+
 ECode RecentsHorizontalScrollView::GetChildAtPosition(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ IView** view)
@@ -368,19 +406,20 @@ ECode RecentsHorizontalScrollView::GetChildAtPosition(
     VALIDATE_NOT_NULL(view);
 
     Float x, y;
-    Float x1, x2, y1, y2;
+    Float x1, y1;
     ev->GetX(&x1);
-    x2 = GetScrollX();
+    Int32 x2, y2;
+    GetScrollX(&x2);
     x = x1 + x2;
     ev->GetY(&y1);
-    y2 = GetScrollY();
+    GetScrollY(&y2);
     y = y1 + y2;
 
     Int32 count;
-    mLinearLayout->GetChildCount(&count);
+    IViewGroup::Probe(mLinearLayout)->GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> item;
-        mLinearLayout->GetChildAt(i, (IView**)&item);
+        IViewGroup::Probe(mLinearLayout)->GetChildAt(i, (IView**)&item);
         Int32 left, right, top, bottom;
         item->GetLeft(&left);
         item->GetRight(&right);
@@ -402,77 +441,96 @@ ECode RecentsHorizontalScrollView::GetChildContentView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(v);
-    return v->FindViewById(SystemUIR::id::recent_item, view);
+    return v->FindViewById(R::id::recent_item, view);
 }
 
-ECode RecentsHorizontalScrollView::Draw(
-    /* [in] */ ICanvas* canvas)
+ECode RecentsHorizontalScrollView::DrawFadedEdges(
+    /* [in] */ ICanvas* canvas,
+    /* [in] */ Int32 left,
+    /* [in] */ Int32 right,
+    /* [in] */ Int32 top,
+    /* [in] */ Int32 bottom)
 {
-    HorizontalScrollView::Draw(canvas);
-
-    if (mPerformanceHelper != NULL) {
-        Int32 paddingLeft = mPaddingLeft;
-        Boolean offsetRequired = IsPaddingOffsetRequired();
-        if (offsetRequired) {
-            paddingLeft += GetLeftPaddingOffset();
-        }
-
-        Int32 left = mScrollX + paddingLeft;
-        Int32 right = left + mRight - mLeft - mPaddingRight - paddingLeft;
-        Int32 top = mScrollY + GetFadeTop(offsetRequired);
-        Int32 bottom = top + GetFadeHeight(offsetRequired);
-
-        if (offsetRequired) {
-            right += GetRightPaddingOffset();
-            bottom += GetBottomPaddingOffset();
-        }
-        mPerformanceHelper->DrawCallback(canvas,
-                left, right, top, bottom, mScrollX, mScrollY,
-                0, 0,
-                GetLeftFadingEdgeStrength(), GetRightFadingEdgeStrength());
+    if (mFadedEdgeDrawHelper != NULL) {
+        Int32 x, y, pt;
+        GetScrollX(&x);
+        GetScrollY(&y);
+        Float f1, f2;
+        f1 = GetLeftFadingEdgeStrength();
+        f2 = GetRightFadingEdgeStrength();
+        GetPaddingTop(&pt);
+        mFadedEdgeDrawHelper->DrawCallback(canvas,
+            left, right, top, bottom, x, y, 0.0f, 0.0f, f1, f2, pt);
     }
+    return NOERROR;
+}
+
+void RecentsHorizontalScrollView::OnScrollChanged(
+    /* [in] */ Int32 l,
+    /* [in] */ Int32 t,
+    /* [in] */ Int32 oldl,
+    /* [in] */ Int32 oldt)
+{
+   OnScrollChanged(l, t, oldl, oldt);
+   if (mOnScrollListener != NULL) {
+       mOnScrollListener->Run();
+   }
+}
+
+ECode RecentsHorizontalScrollView::SetOnScrollListener(
+    /* [in] */ IRunnable* listener)
+{
+    mOnScrollListener = listener;
     return NOERROR;
 }
 
 Int32 RecentsHorizontalScrollView::GetVerticalFadingEdgeLength()
 {
-    if (mPerformanceHelper != NULL) {
-        return mPerformanceHelper->GetVerticalFadingEdgeLengthCallback();
+    Int32 i;
+    if (mFadedEdgeDrawHelper != NULL) {
+        mFadedEdgeDrawHelper->GetVerticalFadingEdgeLength(&i);
     }
     else {
-        return HorizontalScrollView::GetVerticalFadingEdgeLength();
+        i = GetVerticalFadingEdgeLength();
     }
+    return i;
 }
 
 Int32 RecentsHorizontalScrollView::GetHorizontalFadingEdgeLength()
 {
-    if (mPerformanceHelper != NULL) {
-        return mPerformanceHelper->GetHorizontalFadingEdgeLengthCallback();
+    Int32 i;
+    if (mFadedEdgeDrawHelper != NULL) {
+        mFadedEdgeDrawHelper->GetHorizontalFadingEdgeLength(&i);
     }
     else {
-        return HorizontalScrollView::GetHorizontalFadingEdgeLength();
+        i = GetHorizontalFadingEdgeLength();
     }
+    return i;
 }
 
 ECode RecentsHorizontalScrollView::OnFinishInflate()
 {
-    HorizontalScrollView::OnFinishInflate();
+    OnFinishInflate();
     SetScrollbarFadingEnabled(TRUE);
-    AutoPtr<IView> v = FindViewById(SystemUIR::id::recents_linear_layout);
+    AutoPtr<IView> v;
+    FindViewById(R::id::recents_linear_layout, (IView**)&v);
     mLinearLayout = ILinearLayout::Probe(v);
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
     AutoPtr<IResources> res;
-    mContext->GetResources((IResources**)&res);
+    context->GetResources((IResources**)&res);
     Int32 leftPadding;
-    res->GetDimensionPixelOffset(SystemUIR::dimen::status_bar_recents_thumbnail_left_margin, &leftPadding);
+    res->GetDimensionPixelOffset(R::dimen::status_bar_recents_thumbnail_left_margin, &leftPadding);
     SetOverScrollEffectPadding(leftPadding, 0);
     return NOERROR;
 }
 
 ECode RecentsHorizontalScrollView::OnAttachedToWindow()
 {
-    if (mPerformanceHelper != NULL) {
-        mPerformanceHelper->OnAttachedToWindowCallback(
-                mCallback, mLinearLayout, IsHardwareAccelerated());
+    if (mFadedEdgeDrawHelper != NULL) {
+        Boolean b;
+        IsHardwareAccelerated(&b);
+        mFadedEdgeDrawHelper->OnAttachedToWindowCallback(mLinearLayout, b);
     }
     return NOERROR;
 }
@@ -480,16 +538,20 @@ ECode RecentsHorizontalScrollView::OnAttachedToWindow()
 void RecentsHorizontalScrollView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
-    HorizontalScrollView::OnConfigurationChanged(newConfig);
+    OnConfigurationChanged(newConfig);
+    AutoPtr<IResources> resources;
+    GetResources((IResources**)&resources);
     AutoPtr<IDisplayMetrics> dm;
-    GetResources()->GetDisplayMetrics((IDisplayMetrics**)&dm);
+    resources->GetDisplayMetrics((IDisplayMetrics**)&dm);
     Float densityScale;
     dm->GetDensity(&densityScale);
     mSwipeHelper->SetDensityScale(densityScale);
     AutoPtr<IViewConfigurationHelper> helper;
     CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
     AutoPtr<IViewConfiguration> vc;
-    helper->Get(mContext, (IViewConfiguration**)&vc);
+    helper->Get(context, (IViewConfiguration**)&vc);
     Float pagingTouchSlop;
     vc->GetScaledPagingTouchSlop((Int32*)&pagingTouchSlop);
     mSwipeHelper->SetPagingTouchSlop(pagingTouchSlop);
@@ -507,12 +569,12 @@ void RecentsHorizontalScrollView::OnSizeChanged(
     /* [in] */ Int32 oldw,
     /* [in] */ Int32 oldh)
 {
-    HorizontalScrollView::OnSizeChanged(w, h, oldw, oldh);
+    OnSizeChanged(w, h, oldw, oldh);
 
     // Skip this work if a transition is running; it sets the scroll values independently
     // and should not have those animated values clobbered by this logic
     AutoPtr<ILayoutTransition> transition;
-    mLinearLayout->GetLayoutTransition((ILayoutTransition**)&transition);
+    IViewGroup::Probe(mLinearLayout)->GetLayoutTransition((ILayoutTransition**)&transition);
     Boolean b = FALSE;
     if (transition != NULL && (transition->IsRunning(&b), b)) {
         return;
@@ -522,7 +584,7 @@ void RecentsHorizontalScrollView::OnSizeChanged(
     mLastScrollPosition = ScrollPositionOfMostRecent();
 
     AutoPtr<SizeChangedRunnable> run = new SizeChangedRunnable(this);
-    Post(run);
+    Post(run, &b);
 }
 
 ECode RecentsHorizontalScrollView::SetAdapter(
@@ -532,8 +594,10 @@ ECode RecentsHorizontalScrollView::SetAdapter(
     AutoPtr<AdapterDataSetObserver> observer = new AdapterDataSetObserver(this);
     mAdapter->RegisterDataSetObserver(observer);
 
+    AutoPtr<IResources> resources;
+    GetResources((IResources**)&resources);
     AutoPtr<IDisplayMetrics> dm;
-    GetResources()->GetDisplayMetrics((IDisplayMetrics**)&dm);
+    resources->GetDisplayMetrics((IDisplayMetrics**)&dm);
     Int32 widthPixels, heightPixels;
     dm->GetWidthPixels(&widthPixels);
     dm->GetHeightPixels(&heightPixels);
@@ -542,7 +606,7 @@ ECode RecentsHorizontalScrollView::SetAdapter(
     Int32 childheightMeasureSpec =
             MeasureSpec::MakeMeasureSpec(heightPixels, MeasureSpec::AT_MOST);
     AutoPtr<IView> child;
-    mAdapter->CreateView(mLinearLayout, (IView**)&child);
+    mAdapter->CreateView(IViewGroup::Probe(mLinearLayout), (IView**)&child);
     child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
     Int32 width;
     child->GetMeasuredWidth(&width);
@@ -551,7 +615,7 @@ ECode RecentsHorizontalScrollView::SetAdapter(
 
     for (Int32 i = 0; i < mNumItemsInOneScreenful - 1; i++) {
         AutoPtr<IView> child;
-        mAdapter->CreateView(mLinearLayout, (IView**)&child);
+        mAdapter->CreateView(IViewGroup::Probe(mLinearLayout), (IView**)&child);
         AddToRecycledViews(child);
     }
     return NOERROR;
@@ -566,7 +630,7 @@ ECode RecentsHorizontalScrollView::SetLayoutTransition(
     /* [in] */ ILayoutTransition* transition)
 {
     // The layout transition applies to our embedded LinearLayout
-    return mLinearLayout->SetLayoutTransition(transition);
+    return IViewGroup::Probe(mLinearLayout)->SetLayoutTransition(transition);
 }
 
 ECode RecentsHorizontalScrollView::SetCallback(

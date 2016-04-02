@@ -2,12 +2,15 @@
 #define __ELASTOS_DROID_Server_Firewall_SenderFilter_H__
 
 #include "_Elastos.Droid.Server.h"
-#include "elastos/core/Object.h"
+#include <elastos/core/Object.h>
+#include <elastos/droid/internal/utility/XmlUtils.h>
+#include "elastos/droid/server/firewall/FilterFactory.h"
 
-using Elastos::Droid::internal.util.XmlUtils;
-using Org::Xmlpull::V1::IXmlPullParser;
-using Org::Xmlpull::V1::IXmlPullParserException;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Utility::IArrayList;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -22,14 +25,20 @@ public:
         : public FilterFactory
     {
     public:
-        CARAPI_(Filter*) NewFilter(
+        FACTORY_FilterFactory(
+            /* [in] */ const String& tag);
+
+        CARAPI_(IFilter*) NewFilter(
             /* in */ IXmlPullParser* parser);
     };
 
     class SIGNATURE_Filter
-        : public Filter
+        : public Object
+        , public IFilter
     {
     public:
+        CAR_INTERFACE_DECL();
+
         //@Override
         CARAPI Matches(
             /* [in] */ IIntentFirewall* ifw,
@@ -38,14 +47,17 @@ public:
             /* [in] */ Int32 callerUid,
             /* [in] */ Int32 callerPid,
             /* [in] */ const String& resolvedType,
-            /* [in] */ Int32 receivingUid
+            /* [in] */ Int32 receivingUid,
             /* [out] */ Boolean *ret);
     };
 
     class SYSTEM_Filter
-        : public Filter
+        : public Object
+        , public IFilter
     {
     public:
+        CAR_INTERFACE_DECL();
+
         //@Override
         CARAPI Matches(
             /* [in] */ IIntentFirewall* ifw,
@@ -54,14 +66,17 @@ public:
             /* [in] */ Int32 callerUid,
             /* [in] */ Int32 callerPid,
             /* [in] */ const String& resolvedType,
-            /* [in] */ Int32 receivingUid
+            /* [in] */ Int32 receivingUid,
             /* [out] */ Boolean *ret);
     };
 
     class SYSTEM_OR_SIGNATURE_Filter
-        : public Filter
+        : public Object
+        , public IFilter
     {
     public:
+        CAR_INTERFACE_DECL();
+
         //@Override
         CARAPI Matches(
             /* [in] */ IIntentFirewall* ifw,
@@ -70,14 +85,17 @@ public:
             /* [in] */ Int32 callerUid,
             /* [in] */ Int32 callerPid,
             /* [in] */ const String& resolvedType,
-            /* [in] */ Int32 receivingUid
+            /* [in] */ Int32 receivingUid,
             /* [out] */ Boolean *ret);
     };
 
     class USER_ID_Filter
-        : public Filter
+        : public Object
+        , public IFilter
     {
     public:
+        CAR_INTERFACE_DECL();
+
         //@Override
         CARAPI Matches(
             /* [in] */ IIntentFirewall* ifw,
@@ -86,11 +104,13 @@ public:
             /* [in] */ Int32 callerUid,
             /* [in] */ Int32 callerPid,
             /* [in] */ const String& resolvedType,
-            /* [in] */ Int32 receivingUid
+            /* [in] */ Int32 receivingUid,
             /* [out] */ Boolean *ret);
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
     //@Override
     CARAPI Matches(
         /* [in] */ IIntentFirewall* ifw,
@@ -99,7 +119,7 @@ public:
         /* [in] */ Int32 callerUid,
         /* [in] */ Int32 callerPid,
         /* [in] */ const String& resolvedType,
-        /* [in] */ Int32 receivingUid
+        /* [in] */ Int32 receivingUid,
         /* [out] */ Boolean *ret);
 
 public:
@@ -108,12 +128,12 @@ public:
         /* [in] */ Int32 callerPid);
 
 public:
-    static const AutoPtr<FACTORY_FilterFactory> FACTORY = new FACTORY_FilterFactory(String("sender"));
+    static const AutoPtr<FACTORY_FilterFactory> FACTORY;
 
-    static const AutoPtr<SIGNATURE_Filter> SIGNATURE = new SIGNATURE_Filter();
-    static const AutoPtr<SYSTEM_Filter> SYSTEM = new SYSTEM_Filter();
-    static const AutoPtr<SYSTEM_OR_SIGNATURE_Filter> SYSTEM_OR_SIGNATURE = new SYSTEM_OR_SIGNATURE_Filter();
-    static const AutoPtr<USER_ID_Filter> USER_ID = new USER_ID_Filter();
+    static const AutoPtr<SIGNATURE_Filter> SIGNATURE;
+    static const AutoPtr<SYSTEM_Filter> SYSTEM;
+    static const AutoPtr<SYSTEM_OR_SIGNATURE_Filter> SYSTEM_OR_SIGNATURE;
+    static const AutoPtr<USER_ID_Filter> USER_ID;
 
 private:
     static const String ATTR_TYPE;          // = "type";

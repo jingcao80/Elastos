@@ -1,13 +1,11 @@
 TARGET_NAME = media
 TARGET_TYPE = lib
 
-C_DEFINES += -DDROID_CORE
-
-include $(MAKEDIR)/../../../../../../../sources.inc
-
-INCLUDES += ../../
+include $(MAKEDIR)/../../../../../../../../sources.inc
+INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
-
-SOURCES = CNotificationPlayer.cpp
-SOURCES += CRingtonePlayer.cpp
+SOURCES = media.cpp
+SOURCES += MediaProjectionPermissionActivity.cpp
+SOURCES += NotificationPlayer.cpp
+SOURCES += RingtonePlayer.cpp

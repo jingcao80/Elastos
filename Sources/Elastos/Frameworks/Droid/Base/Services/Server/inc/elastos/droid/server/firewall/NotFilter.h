@@ -2,12 +2,15 @@
 #define __ELASTOS_DROID_Server_Firewall_NotFilter_H__
 
 #include "_Elastos.Droid.Server.h"
-#include "elastos/core/Object.h"
+#include <elastos/core/Object.h>
+#include <elastos/droid/internal/utility/XmlUtils.h>
+#include "elastos/droid/server/firewall/FilterFactory.h"
 
-using Elastos::Droid::internal.util.XmlUtils;
-using Org::Xmlpull::V1::IXmlPullParser;
-using Org::Xmlpull::V1::IXmlPullParserException;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Utility::IArrayList;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -16,14 +19,17 @@ namespace Firewall {
 
 class NotFilter
     : public Object
-    , public Filter
+    , public IFilter
 {
 public:
     class FACTORY_FilterFactory
         : public FilterFactory
     {
     public:
-        CARAPI_(Filter*) NewFilter(
+        FACTORY_FilterFactory(
+            /* [in] */ const String& tag);
+
+        CARAPI_(IFilter*) NewFilter(
             /* in */ IXmlPullParser* parser);
     };
 
@@ -35,15 +41,17 @@ public:
         /* [in] */ Int32 callerUid,
         /* [in] */ Int32 callerPid,
         /* [in] */ const String& resolvedType,
-        /* [in] */ Int32 receivingUid
+        /* [in] */ Int32 receivingUid,
         /* [out] */ Boolean *ret);
 
 public:
-    static const AutoPtr<FACTORY_FilterFactory> FACTORY;
+    CAR_INTERFACE_DECL();
 
-private:
     NotFilter(
         /* in */ IFilter* child);
+
+public:
+    static const AutoPtr<FACTORY_FilterFactory> FACTORY;
 
 private:
     AutoPtr<IFilter> mChild;

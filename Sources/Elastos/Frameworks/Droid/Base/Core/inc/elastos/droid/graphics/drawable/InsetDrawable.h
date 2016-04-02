@@ -21,7 +21,7 @@ public:
     {
     public:
         InsetState(
-            /* [in] */ InsetState* orig,
+            /* [in] */ IDrawableConstantState* orig,
             /* [in] */ InsetDrawable* owner,
             /* [in] */ IResources* res);
 
@@ -66,6 +66,23 @@ public:
         /* [in] */ Int32 insetTop,
         /* [in] */ Int32 insetRight,
         /* [in] */ Int32 insetBottom);
+
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ IDrawable* drawable,
+        /* [in] */ Int32 inset);
+
+    CARAPI constructor(
+        /* [in] */ IDrawable* drawable,
+        /* [in] */ Int32 insetLeft,
+        /* [in] */ Int32 insetTop,
+        /* [in] */ Int32 insetRight,
+        /* [in] */ Int32 insetBottom);
+
+    CARAPI constructor(
+        /* [in] */ IDrawableConstantState* state,
+        /* [in] */ IResources* res);
 
     // @Override
     CARAPI Inflate(
@@ -188,23 +205,6 @@ public:
         /* [out] */ IDrawable** drawable);
 
 protected:
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IDrawable* drawable,
-        /* [in] */ Int32 inset);
-
-    CARAPI constructor(
-        /* [in] */ IDrawable* drawable,
-        /* [in] */ Int32 insetLeft,
-        /* [in] */ Int32 insetTop,
-        /* [in] */ Int32 insetRight,
-        /* [in] */ Int32 insetBottom);
-
-    CARAPI constructor(
-        /* [in] */ InsetState* state,
-        /* [in] */ IResources* res);
-
     //@Override
     CARAPI_(Boolean) OnStateChange(
         /* [in] */ const ArrayOf<Int32>* state);

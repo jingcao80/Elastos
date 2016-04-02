@@ -1,35 +1,33 @@
-#include "elastos/droid/systemui/statusbar/phone/Ticker.h"
-#include <elastos/core/Character.h>
-#include "elastos/droid/R.h"
-#include "elastos/droid/utility/CharSequences.h"
-#include "elastos/droid/os/CHandler.h"
-#include "elastos/droid/os/Handler.h"
-#include "elastos/droid/text/CStaticLayout.h"
-#include "elastos/droid/view/animation/CAnimationUtils.h"
-#include "elastos/droid/statusbar/CStatusBarIcon.h"
-#include "elastos/droid/systemui/statusbar/StatusBarIconView.h"
-#include "elastos/droid/systemui/SystemUIR.h"
 
-using Elastos::Core::Character;
-using Elastos::Droid::R;
+#include "elastos/droid/systemui/statusbar/phone/Ticker.h"
+#include "elastos/droid/systemui/statusbar/StatusBarIconView.h"
+#include "../../R.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Service.h"
+#include "Elastos.Droid.Text.h"
+#include <elastos/core/Character.h>
+#include <elastos/droid/R.h>
+
+using Elastos::Droid::Internal::StatusBar::CStatusBarIcon;
 using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::Utility::CharSequences;
 using Elastos::Droid::Text::ALIGN_NORMAL;
+using Elastos::Droid::Text::ILayout;
 using Elastos::Droid::Text::TextUtilsTruncateAt_START;
 using Elastos::Droid::Text::CStaticLayout;
 using Elastos::Droid::View::Animation::IAnimationUtils;
 using Elastos::Droid::View::Animation::CAnimationUtils;
+using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::ITextView;
-using Elastos::Droid::StatusBar::CStatusBarIcon;
-using Elastos::Droid::SystemUI::SystemUIR;
-using Elastos::Droid::SystemUI::StatusBar::StatusBarIconView;
+using Elastos::Droid::Widget::IViewAnimator;
+using Elastos::Droid::Widget::IViewSwitcher;
+using Elastos::Core::Character;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
-
 
 //=============================================================================
 //                Ticker::Segment
@@ -65,9 +63,9 @@ AutoPtr<IStaticLayout> Ticker::Segment::GetLayout(
     /* [in] */ ICharSequence* substr)
 {
     Int32 tw, pl, pr;
-    mHost->mTextSwitcher->GetWidth(&tw);
-    mHost->mTextSwitcher->GetPaddingLeft(&pl);
-    mHost->mTextSwitcher->GetPaddingRight(&pr);
+    IView::Probe(mHost->mTextSwitcher)->GetWidth(&tw);
+    IView::Probe(mHost->mTextSwitcher)->GetPaddingLeft(&pl);
+    IView::Probe(mHost->mTextSwitcher)->GetPaddingRight(&pr);
     Int32 w = tw - pl - pr;
     AutoPtr<IStaticLayout> layout;
     ASSERT_SUCCEEDED(CStaticLayout::New(substr, mHost->mPaint, w, ALIGN_NORMAL,
@@ -109,11 +107,11 @@ AutoPtr<ICharSequence> Ticker::Segment::GetText()
     mText->SubSequence(mCurrent, length, (ICharSequence**)&substr);
     AutoPtr<IStaticLayout> l = GetLayout(substr);
     Int32 lineCount;
-    l->GetLineCount(&lineCount);
+    ILayout::Probe(l)->GetLineCount(&lineCount);
     if (lineCount > 0) {
         Int32 start, end;
-        l->GetLineStart(0, &start);
-        l->GetLineEnd(0, &end);
+        ILayout::Probe(l)->GetLineStart(0, &start);
+        ILayout::Probe(l)->GetLineEnd(0, &end);
         mNext = mCurrent + end;
         return Rtrim(substr, start, end);
     }
@@ -146,17 +144,17 @@ AutoPtr<ICharSequence> Ticker::Segment::Advance()
     mText->SubSequence(index, len, (ICharSequence**)&substr);
     AutoPtr<IStaticLayout> l = GetLayout(substr);
     Int32 lineCount;
-    l->GetLineCount(&lineCount);
+    ILayout::Probe(l)->GetLineCount(&lineCount);
 
     Int32 i, start, end, nextStart;
     for (i = 0; i < lineCount; i++) {
-        l->GetLineStart(i, &start);
-        l->GetLineEnd(i, &end);
+        ILayout::Probe(l)->GetLineStart(i, &start);
+        ILayout::Probe(l)->GetLineEnd(i, &end);
         if (i == lineCount - 1) {
             mNext = len;
         }
         else {
-            l->GetLineStart(i + 1, &nextStart);
+            ILayout::Probe(l)->GetLineStart(i + 1, &nextStart);
             mNext = index + nextStart;
         }
 
@@ -228,73 +226,57 @@ Boolean Ticker::IsGraphicOrEmoji(
 Ticker::Ticker()
     : mIconScale(0)
 {
-    Init();
-}
-
-Ticker::Ticker(
-    /* [in] */ IContext* context,
-    /* [in] */ IView* sb)
-    : mIconScale(0)
-{
-    Init(context, sb);
-}
-
-ECode Ticker::Init()
-{
-    if (!mAdvanceTicker)
+    if (!mAdvanceTicker) {
         mAdvanceTicker = new AdvanceTickerRunnable(this);
-    if (!mHandler)
+    }
+    if (!mHandler) {
         CHandler::New((IHandler**)&mHandler);
-    return NOERROR;
+    }
 }
 
-ECode Ticker::Init(
+ECode Ticker::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IView* sb)
 {
-    assert(context != NULL);
-
-    Init();
-
     mContext = context;
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
 
     Int32 outerBounds, imageBounds;
-    res->GetDimensionPixelSize(SystemUIR::dimen::status_bar_icon_size, &outerBounds);
-    res->GetDimensionPixelSize(SystemUIR::dimen::status_bar_icon_drawing_size, &imageBounds);
+    res->GetDimensionPixelSize(R::dimen::status_bar_icon_size, &outerBounds);
+    res->GetDimensionPixelSize(R::dimen::status_bar_icon_drawing_size, &imageBounds);
     mIconScale = (Float)imageBounds / (Float)outerBounds;
 
-    sb->FindViewById(SystemUIR::id::ticker, (IView**)&mTickerView);
+    sb->FindViewById(R::id::ticker, (IView**)&mTickerView);
 
     AutoPtr<IAnimationUtils> animUtils;
     CAnimationUtils::AcquireSingleton((IAnimationUtils**)&animUtils);
 
     AutoPtr<IView> tmpView;
-    sb->FindViewById(SystemUIR::id::tickerIcon, (IView**)&tmpView);
+    sb->FindViewById(R::id::tickerIcon, (IView**)&tmpView);
     mIconSwitcher = IImageSwitcher::Probe(tmpView.Get());
 
     AutoPtr<IAnimation> pushUpIn, pushUpOut;
-    animUtils->LoadAnimation(context, R::anim::push_up_in, (IAnimation**)&pushUpIn);
-    animUtils->LoadAnimation(context, R::anim::push_up_out, (IAnimation**)&pushUpOut);
-    mIconSwitcher->SetInAnimation(pushUpIn);
-    mIconSwitcher->SetOutAnimation(pushUpOut);
-    mIconSwitcher->SetScaleX(mIconScale);
-    mIconSwitcher->SetScaleY(mIconScale);
+    animUtils->LoadAnimation(context, Elastos::Droid::R::anim::push_up_in, (IAnimation**)&pushUpIn);
+    animUtils->LoadAnimation(context, Elastos::Droid::R::anim::push_up_out, (IAnimation**)&pushUpOut);
+    IViewAnimator::Probe(mIconSwitcher)->SetInAnimation(pushUpIn);
+    IViewAnimator::Probe(mIconSwitcher)->SetOutAnimation(pushUpOut);
+    IView::Probe(mIconSwitcher)->SetScaleX(mIconScale);
+    IView::Probe(mIconSwitcher)->SetScaleY(mIconScale);
 
     tmpView = NULL;
-    sb->FindViewById(SystemUIR::id::tickerText, (IView**)&tmpView);
+    sb->FindViewById(R::id::tickerText, (IView**)&tmpView);
     mTextSwitcher = ITextSwitcher::Probe(tmpView.Get());
 
     AutoPtr<IAnimation> textPushUpIn, textPushUpOut;
-    animUtils->LoadAnimation(context, R::anim::push_up_in, (IAnimation**)&textPushUpIn);
-    animUtils->LoadAnimation(context, R::anim::push_up_out, (IAnimation**)&textPushUpOut);
-    mTextSwitcher->SetInAnimation(textPushUpIn);
-    mTextSwitcher->SetOutAnimation(textPushUpOut);
+    animUtils->LoadAnimation(context, Elastos::Droid::R::anim::push_up_in, (IAnimation**)&textPushUpIn);
+    animUtils->LoadAnimation(context, Elastos::Droid::R::anim::push_up_out, (IAnimation**)&textPushUpOut);
+    IViewAnimator::Probe(mTextSwitcher)->SetInAnimation(textPushUpIn);
+    IViewAnimator::Probe(mTextSwitcher)->SetOutAnimation(textPushUpOut);
 
     // Copy the paint style of one of the TextSwitchers children to use later for measuring
     tmpView = NULL;
-    mTextSwitcher->GetChildAt(0, (IView**)&tmpView);
+    IViewGroup::Probe(mTextSwitcher)->GetChildAt(0, (IView**)&tmpView);
     AutoPtr<ITextView> textView = ITextView::Probe(tmpView.Get());
     AutoPtr<IPaint> paint;
     textView->GetPaint((ITextPaint**)&mPaint);
@@ -308,7 +290,7 @@ ECode Ticker::AddEntry(
     Int32 id;
     n->GetId(&id);
     String pkg;
-    n->GetPkg(&pkg);
+    n->GetPackageName(&pkg);
 
     Int32 initialCount = mSegments.GetSize();
 
@@ -330,7 +312,7 @@ ECode Ticker::AddEntry(
         Int32 oid;
         String opkg;
         seg->mNotification->GetId(&oid);
-        seg->mNotification->GetPkg(&opkg);
+        seg->mNotification->GetPackageName(&opkg);
         if (pkg.Equals(opkg)) {
             AutoPtr<INotification> segn;
             seg->mNotification->GetNotification((INotification**)&segn);
@@ -341,7 +323,7 @@ ECode Ticker::AddEntry(
                 nn->GetTickerText((ICharSequence**)&segTickerText);
 
             if (icon == segIcon && iconLevel == segIconLevel
-                && CharSequences::Equals(segTickerText, tickerText)) {
+                && CharSequencesEqual(segTickerText, tickerText)) {
                 return NOERROR;
             }
         }
@@ -359,7 +341,7 @@ ECode Ticker::AddEntry(
     for (rit = mSegments.RBegin(); rit != mSegments.REnd();) {
         AutoPtr<Segment> seg = *rit;
         seg->mNotification->GetId(&curId);
-        seg->mNotification->GetPkg(&curPkg);
+        seg->mNotification->GetPackageName(&curPkg);
         if (id == curId && pkg.Equals(curPkg)) {
             rit = List<AutoPtr<Segment> >::ReverseIterator(mSegments.Erase(--(rit.GetBase())));
         }
@@ -374,12 +356,12 @@ ECode Ticker::AddEntry(
         AutoPtr<Segment> seg = mSegments[0];
         seg->mFirst = FALSE;
 
-        mIconSwitcher->SetAnimateFirstView(FALSE);
-        mIconSwitcher->Reset();
+        IViewAnimator::Probe(mIconSwitcher)->SetAnimateFirstView(FALSE);
+        IViewSwitcher::Probe(mIconSwitcher)->Reset();
         mIconSwitcher->SetImageDrawable(seg->mIcon);
 
-        mTextSwitcher->SetAnimateFirstView(FALSE);
-        mTextSwitcher->Reset();
+        IViewAnimator::Probe(mTextSwitcher)->SetAnimateFirstView(FALSE);
+        IViewSwitcher::Probe(mTextSwitcher)->Reset();
         AutoPtr<ICharSequence> seq = seg->GetText();
         mTextSwitcher->SetText(seq);
 
@@ -389,6 +371,29 @@ ECode Ticker::AddEntry(
     return NOERROR;
 }
 
+Boolean Ticker::CharSequencesEqual(
+    /* [in] */ ICharSequence* a,
+    /* [in] */ ICharSequence* b)
+{
+    Int32 al = 0, bl = 0;
+    a->GetLength(&al);
+    b->GetLength(&bl);
+    if (al != bl) {
+        return FALSE;
+    }
+
+    Int32 length = al;
+    for (Int32 i = 0; i < length; i++) {
+        Char32 ac, bc;
+        a->GetCharAt(i, &ac);
+        b->GetCharAt(i, &bc);
+        if (ac != bc) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
 ECode Ticker::RemoveEntry(
     /* [in] */ IStatusBarNotification* n)
 {
@@ -396,12 +401,12 @@ ECode Ticker::RemoveEntry(
     Int32 id, curId;
     n->GetId(&id);
     String pkg, curPkg;
-    n->GetPkg(&pkg);
+    n->GetPackageName(&pkg);
     List<AutoPtr<Segment> >::ReverseIterator rit;
     for (rit = mSegments.RBegin(); rit != mSegments.REnd();) {
         AutoPtr<Segment> seg = *rit;
         seg->mNotification->GetId(&curId);
-        seg->mNotification->GetPkg(&curPkg);
+        seg->mNotification->GetPackageName(&curPkg);
         if (id == curId && pkg.Equals(curPkg)) {
             rit = List<AutoPtr<Segment> >::ReverseIterator(mSegments.Erase(--(rit.GetBase())));
         }

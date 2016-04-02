@@ -1,7 +1,9 @@
 #include "elastos/droid/server/firewall/PortFilter.h"
 #include <elastos/core/StringUtils.h>
+#include "Elastos.Droid.Content.h"
 
 using Elastos::Core::StringUtils;
+using Elastos::Droid::Content::IIntent;
 
 namespace Elastos {
 namespace Droid {
@@ -11,6 +13,13 @@ namespace Firewall {
 //------------------------------------------------------------------------------
 // PortFilter::FACTORY_FilterFactory
 //------------------------------------------------------------------------------
+
+PortFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
+    /* [in] */ const String& tag)
+{
+    FilterFactory::constructor(tag);
+}
+
 IFilter* PortFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
@@ -18,7 +27,7 @@ IFilter* PortFilter::FACTORY_FilterFactory::NewFilter(
     Int32 upperBound = NO_BOUND;
 
     String equalsValue;
-    parser->GetAttributeValue(NULL, ATTR_EQUALS, &equalsValue);
+    parser->GetAttributeValue(String(NULL), ATTR_EQUALS, &equalsValue);
     if (equalsValue != NULL) {
         Int32 value;
         value = StringUtils::ParseInt32(equalsValue);
@@ -33,8 +42,8 @@ IFilter* PortFilter::FACTORY_FilterFactory::NewFilter(
     String lowerBoundString;
     String upperBoundString;
 
-    parser->GetAttributeValue(NULL, ATTR_MIN, &lowerBoundString);
-    parser->GetAttributeValue(NULL, ATTR_MAX, &upperBoundString);
+    parser->GetAttributeValue(String(NULL), ATTR_MIN, &lowerBoundString);
+    parser->GetAttributeValue(String(NULL), ATTR_MAX, &upperBoundString);
 
     if (lowerBoundString != NULL || upperBoundString != NULL) {
         if (equalsValue != NULL) {
@@ -71,11 +80,13 @@ IFilter* PortFilter::FACTORY_FilterFactory::NewFilter(
 // PortFilter
 //=======================================================================================
 
-AutoPtr<FACTORY_FilterFactory> PortFilter::FACTORY = new FACTORY_FilterFactory(String("port"));
-String PortFilter::ATTR_EQUALS("equals");
-String PortFilter::ATTR_MIN("min");
-String PortFilter::ATTR_MAX("max");
-Int32 PortFilter::NO_BOUND = -1;
+CAR_INTERFACE_IMPL(PortFilter, Object, IFilter);
+
+const AutoPtr<PortFilter::FACTORY_FilterFactory> PortFilter::FACTORY = new PortFilter::FACTORY_FilterFactory(String("port"));
+const String PortFilter::ATTR_EQUALS("equals");
+const String PortFilter::ATTR_MIN("min");
+const String PortFilter::ATTR_MAX("max");
+const Int32 PortFilter::NO_BOUND = -1;
 
 PortFilter::PortFilter(
     /* [in] */ Int32 lowerBound,
@@ -92,7 +103,7 @@ ECode PortFilter::Matches(
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid,
     /* [in] */ const String& resolvedType,
-    /* [in] */ Int32 receivingUid
+    /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
     Int32 port = -1;

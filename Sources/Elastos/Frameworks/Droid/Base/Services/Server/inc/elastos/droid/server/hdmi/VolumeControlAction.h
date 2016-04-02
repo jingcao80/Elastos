@@ -89,17 +89,14 @@ private:
 
     CARAPI SendVolumeKeyReleased();
 
-    CARAPI HandleReportAudioStatus(
-        /* [in] */ IHdmiCecMessage* cmd,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) HandleReportAudioStatus(
+        /* [in] */ IHdmiCecMessage* cmd);
 
-    CARAPI ShouldUpdateAudioVolume(
-        /* [in] */ Boolean mute,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) ShouldUpdateAudioVolume(
+        /* [in] */ Boolean mute);
 
-    CARAPI HandleFeatureAbort(
-        /* [in] */ IHdmiCecMessage* cmd,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) HandleFeatureAbort(
+        /* [in] */ IHdmiCecMessage* cmd);
 
 private:
     static const String TAG;

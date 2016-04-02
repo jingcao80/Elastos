@@ -1,5 +1,6 @@
 
 #include "Elastos.Droid.Os.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/widget/ScrollView.h"
 // #include "elastos/droid/os/CStrictMode.h";
 #include "elastos/droid/widget/COverScroller.h"
@@ -19,6 +20,7 @@
 #include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::IStrictMode;
 using Elastos::Droid::R;
@@ -414,7 +416,7 @@ ECode ScrollView::ExecuteKeyEvent(
         if ((IsFocused(&focused)) && keyCode != IKeyEvent::KEYCODE_BACK) {
             AutoPtr<IView> currentFocused;
             FindFocus((IView**)&currentFocused);
-            if (currentFocused.Get() == this) {
+            if (currentFocused.Get() == (IView*)this) {
                 currentFocused = NULL;
             }
 
@@ -423,7 +425,7 @@ ECode ScrollView::ExecuteKeyEvent(
             finder->FindNextFocus(this,
                     currentFocused, IView::FOCUS_DOWN, (IView**)&nextFocused);
 
-            if (nextFocused != NULL && nextFocused.Get() != this) {
+            if (nextFocused != NULL && nextFocused.Get() != (IView*)this) {
                 Boolean isFocus;
                 nextFocused->RequestFocus(IView::FOCUS_DOWN, &isFocus);
                 *handled = isFocus;
@@ -1291,7 +1293,7 @@ ECode ScrollView::ArrowScroll(
     *result = FALSE;
     AutoPtr<IView> currentFocused;
     FindFocus((IView**)&currentFocused);
-    if (currentFocused.Get() == this) {
+    if (currentFocused.Get() == (IView*)this) {
         currentFocused = NULL;
     }
 
@@ -1861,7 +1863,7 @@ void ScrollView::OnSizeChanged(
 
     AutoPtr<IView> currentFocused;
     FindFocus((IView**)&currentFocused);
-    if (NULL == currentFocused || this == currentFocused.Get()) {
+    if (NULL == currentFocused || (IView*)this == currentFocused.Get()) {
         return;
     }
 

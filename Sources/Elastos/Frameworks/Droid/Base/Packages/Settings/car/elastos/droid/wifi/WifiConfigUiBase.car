@@ -1,0 +1,60 @@
+module
+{
+    interface  Elastos.Droid.Settings.Wifi.IWifiConfigController;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.View.ILayoutInflater;
+    using interface Elastos.Droid.Widget.IButton;
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Wifi {
+    /**
+     * Foundation interface glues between Activities and UIs like
+     * {@link WifiDialog} or {@link WifiConfigUiForSetupWizardXL}.
+     */
+    [local]
+    interface IWifiConfigUiBase {
+        GetContext(
+            [out] IContext** context);
+
+        GetController(
+            [out] IWifiConfigController** controller);
+
+        GetLayoutInflater(
+            [out] ILayoutInflater** inflater);
+
+        IsEdit(
+            [out] Boolean* result);
+
+        SetTitle(
+            [in] Int32 id);
+
+        SetTitle(
+            [in] ICharSequence* title);
+
+        SetSubmitButton(
+            [in] ICharSequence* text);
+
+        SetForgetButton(
+            [in] ICharSequence* text);
+
+        SetCancelButton(
+            [in] ICharSequence* text);
+
+        GetSubmitButton(
+            [out] IButton** button);
+
+        GetForgetButton(
+            [out] IButton** button);
+
+        GetCancelButton(
+            [out] IButton** button);
+    }
+
+    } // namespace Wifi
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+}

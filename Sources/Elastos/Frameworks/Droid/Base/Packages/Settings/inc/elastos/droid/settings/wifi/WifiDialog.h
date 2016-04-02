@@ -1,111 +1,117 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_SETTINGS_WIFI_WIFIDIALOG_H__
+#define __ELASTOS_DROID_SETTINGS_WIFI_WIFIDIALOG_H__
 
-package com.android.settings.wifi;
+#include "elastos/droid/app/AlertDialog.h"
+#include "elastos/droid/settings/wifi/WifiConfigController.h"
+#include "_Settings.h"
 
-using Elastos::Droid::Settings::IR;
-
-using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::AlertDialog;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::IButton;
 
-class WifiDialog extends AlertDialog implements WifiConfigUiBase {
-    static const Int32 BUTTON_SUBMIT = DialogInterface.BUTTON_POSITIVE;
-    static const Int32 BUTTON_FORGET = DialogInterface.BUTTON_NEUTRAL;
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Wifi {
 
-    private final Boolean mEdit;
-    private final DialogInterface.OnClickListener mListener;
-    private final AccessPoint mAccessPoint;
+class WifiDialog
+    : public AlertDialog
+    , public IWifiConfigUiBase
+{
+public:
+    CAR_INTERFACE_DECL();
 
-    private View mView;
-    private WifiConfigController mController;
-    private Boolean mHideSubmitButton;
+    WifiDialog();
 
-    public WifiDialog(Context context, DialogInterface.OnClickListener listener,
-            AccessPoint accessPoint, Boolean edit, Boolean hideSubmitButton) {
-        This(context, listener, accessPoint, edit);
-        mHideSubmitButton = hideSubmitButton;
-    }
+    ~WifiDialog();
 
-    public WifiDialog(Context context, DialogInterface.OnClickListener listener,
-            AccessPoint accessPoint, Boolean edit) {
-        Super(context);
-        mEdit = edit;
-        mListener = listener;
-        mAccessPoint = accessPoint;
-        mHideSubmitButton = FALSE;
-    }
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IDialogInterfaceOnClickListener* listener,
+        /* [in] */ AccessPoint* accessPoint,
+        /* [in] */ Boolean edit,
+        /* [in] */ Boolean hideSubmitButton);
 
-    //@Override
-    public WifiConfigController GetController() {
-        return mController;
-    }
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IDialogInterfaceOnClickListener* listener,
+        /* [in] */ AccessPoint* accessPoint,
+        /* [in] */ Boolean edit);
 
     //@Override
-    protected void OnCreate(Bundle savedInstanceState) {
-        mView = GetLayoutInflater()->Inflate(R.layout.wifi_dialog, NULL);
-        SetView(mView);
-        SetInverseBackgroundForced(TRUE);
-        mController = new WifiConfigController(this, mView, mAccessPoint, mEdit);
-        super->OnCreate(savedInstanceState);
-
-        if (mHideSubmitButton) {
-            mController->HideSubmitButton();
-        } else {
-            /* During creation, the submit button can be unavailable to determine
-             * visibility. Right after creation, update button visibility */
-            mController->EnableSubmitIfAppropriate();
-        }
-    }
+    CARAPI GetController(
+        /* [out] */ IWifiConfigController** controller);
 
     //@Override
-    public Boolean IsEdit() {
-        return mEdit;
-    }
+    CARAPI IsEdit(
+        /* [out] */ Boolean* result);
 
     //@Override
-    public Button GetSubmitButton() {
-        return GetButton(BUTTON_SUBMIT);
-    }
+    CARAPI GetSubmitButton(
+        /* [out] */ IButton** button);
 
     //@Override
-    public Button GetForgetButton() {
-        return GetButton(BUTTON_FORGET);
-    }
+    CARAPI GetForgetButton(
+        /* [out] */ IButton** button);
 
     //@Override
-    public Button GetCancelButton() {
-        return GetButton(BUTTON_NEGATIVE);
-    }
+    CARAPI GetCancelButton(
+        /* [out] */ IButton** button);
 
     //@Override
-    CARAPI SetSubmitButton(CharSequence text) {
-        SetButton(BUTTON_SUBMIT, text, mListener);
-    }
+    CARAPI SetSubmitButton(
+        /* [in] */ ICharSequence* text);
 
     //@Override
-    CARAPI SetForgetButton(CharSequence text) {
-        SetButton(BUTTON_FORGET, text, mListener);
-    }
+    CARAPI SetForgetButton(
+        /* [in] */ ICharSequence* text);
 
     //@Override
-    CARAPI SetCancelButton(CharSequence text) {
-        SetButton(BUTTON_NEGATIVE, text, mListener);
-    }
-}
+    CARAPI SetCancelButton(
+        /* [in] */ ICharSequence* text);
+
+    // the under method use to fix compile error
+    //@Override
+    CARAPI GetContext(
+        /* [out] */ IContext** context);
+
+    //@Override
+    CARAPI GetLayoutInflater(
+        /* [out] */ ILayoutInflater** inflater);
+
+    //@Override
+    CARAPI SetTitle(
+        /* [in] */ Int32 id);
+
+    //@Override
+    CARAPI SetTitle(
+        /* [in] */ ICharSequence* title);
+
+protected:
+    //@Override
+    CARAPI OnCreate(
+        /* [in] */ IBundle* savedInstanceState);
+
+public:
+    static const Int32 BUTTON_SUBMIT;
+    static const Int32 BUTTON_FORGET;
+
+private:
+    Boolean mEdit;
+    AutoPtr<IDialogInterfaceOnClickListener> mListener;
+    AutoPtr<AccessPoint> mAccessPoint;
+
+    AutoPtr<IView> mView;
+    AutoPtr<WifiConfigController> mController;
+    Boolean mHideSubmitButton;
+};
+
+} // namespace Wifi
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_WIFI_WIFIDIALOG_H__

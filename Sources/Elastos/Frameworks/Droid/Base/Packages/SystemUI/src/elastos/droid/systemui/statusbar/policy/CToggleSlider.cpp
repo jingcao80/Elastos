@@ -23,10 +23,10 @@ PInterface CToggleSlider::Probe(
     /*  [in] */ REIID riid)
 {
     if (riid == EIID_View) {
-        return reinterpret_cast<PInterface>(this);
+        return reinterpret_cast<PInterface>((View*)this);
     }
     else if (riid == EIID_ViewGroup) {
-        return reinterpret_cast<PInterface>(this);
+        return reinterpret_cast<PInterface>((ViewGroup*)this);
     }
     return _CToggleSlider::Probe(riid);
 }

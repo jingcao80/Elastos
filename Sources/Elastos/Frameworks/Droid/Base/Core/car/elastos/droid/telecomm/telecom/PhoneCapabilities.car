@@ -86,6 +86,10 @@ module
         const Int32 DISCONNECT_FROM_CONFERENCE = 0x00002000;
 
         const Int32 ALL = 0x000030ff;
+
+        ToString(
+            [in] Int32 capabilities,
+            [out] String* result);
     }
 
     } // namespace Telecom

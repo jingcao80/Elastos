@@ -65,6 +65,7 @@ module
         NetworkInfoDetailedState_VERIFYING_POOR_LINK,
         /** Checking if network is a captive portal */
         NetworkInfoDetailedState_CAPTIVE_PORTAL_CHECK,
+        NetworkInfoDetailedState_NONE
     }
 
     /**
@@ -264,6 +265,21 @@ module
          */
         GetExtraInfo(
             [out] String* result);
+    }
+
+    //about NetworkInfoDetailedState
+    interface INetworkInfoHelper {
+        NetworkInfoDetailedStateFromString(
+            [in] String str,
+            [out] NetworkInfoDetailedState* state);
+
+        NetworkInfoDetailedStateToString(
+            [in] NetworkInfoDetailedState state,
+            [out] String* str);
+
+        Index(
+            [in] NetworkInfoDetailedState state,
+            [out] Int32* index);
     }
 
     } // namespace Net

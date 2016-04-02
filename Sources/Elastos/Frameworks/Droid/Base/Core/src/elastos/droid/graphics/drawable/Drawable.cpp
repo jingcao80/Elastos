@@ -253,8 +253,7 @@ ECode Drawable::ScheduleSelf(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->ScheduleDrawable(this,
-                what, when);
+        callback->ScheduleDrawable(this, what, when);
     }
     return NOERROR;
 }
@@ -265,8 +264,7 @@ ECode Drawable::UnscheduleSelf(
     AutoPtr<IDrawableCallback> callback;
     GetCallback((IDrawableCallback**)&callback);
     if (callback != NULL) {
-        callback->UnscheduleDrawable(this,
-                what);
+        callback->UnscheduleDrawable(this, what);
     }
     return NOERROR;
 }

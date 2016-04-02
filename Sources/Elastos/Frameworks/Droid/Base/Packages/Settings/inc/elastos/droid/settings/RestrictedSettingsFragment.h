@@ -1,34 +1,18 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.settings;
+#ifndef __ELASTOS_DROID_SETTINGS_RESTRICTEDSETTINGSFRAGMENT_H__
+#define __ELASTOS_DROID_SETTINGS_RESTRICTEDSETTINGSFRAGMENT_H__
 
-using Elastos::Utility::IHashSet;
+#include "elastos/droid/settings/SettingsPreferenceFragment.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
 
-using Elastos::Droid::App::IActivity;
-using Elastos::Droid::Content::IBroadcastReceiver;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IRestrictionsManager;
-using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::IPersistableBundle;
+using Elastos::Droid::Settings::SettingsPreferenceFragment;
 using Elastos::Droid::Os::IUserManager;
-using Elastos::Droid::Preference::ICheckBoxPreference;
-using Elastos::Droid::Preference::IPreference;
+
+namespace Elastos {
+namespace Droid {
+namespace Settings {
 
 /**
  * Base class for settings screens that should be pin protected when in restricted mode.
@@ -41,151 +25,110 @@ using Elastos::Droid::Preference::IPreference;
  * {@link RestrictionsManager->HasRestrictionsProvider()} returns TRUE, pass in
  * {@link RESTRICT_IF_OVERRIDABLE} to the constructor instead of a restrictions key.
  */
-public class RestrictedSettingsFragment extends SettingsPreferenceFragment {
 
-    protected static const String RESTRICT_IF_OVERRIDABLE = "restrict_if_overridable";
-
-    // No RestrictedSettingsFragment screens should use this number in startActivityForResult.
-    private static const Int32 REQUEST_PIN_CHALLENGE = 12309;
-
-    private static const String KEY_CHALLENGE_SUCCEEDED = "chsc";
-    private static const String KEY_CHALLENGE_REQUESTED = "chrq";
-
-    // If the restriction PIN is entered correctly.
-    private Boolean mChallengeSucceeded;
-    private Boolean mChallengeRequested;
-
-    private UserManager mUserManager;
-    private RestrictionsManager mRestrictionsManager;
-
-    private final String mRestrictionKey;
-
+class RestrictedSettingsFragment
+    : public SettingsPreferenceFragment
+{
+private:
     // Receiver to clear pin status when the screen is turned off.
-    private BroadcastReceiver mScreenOffReceiver = new BroadcastReceiver() {
+    class MyBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        MyBroadcastReceiver(
+            /* [in] */ RestrictedSettingsFragment* host);
+
+        ~MyBroadcastReceiver();
+
         //@Override
-        CARAPI OnReceive(Context context, Intent intent) {
-            if (!mChallengeRequested) {
-                mChallengeSucceeded = FALSE;
-                mChallengeRequested = FALSE;
-            }
-        }
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        RestrictedSettingsFragment* mHost;
     };
 
+public:
     /**
      * @param restrictionKey The restriction key to check before pin protecting
      *            this settings page. Pass in {@link RESTRICT_IF_OVERRIDABLE} if it should
      *            be protected whenever a restrictions provider is set. Pass in
      *            NULL if it should never be protected.
      */
-    public RestrictedSettingsFragment(String restrictionKey) {
-        mRestrictionKey = restrictionKey;
-    }
+    RestrictedSettingsFragment(
+        /* [in] */ const String& restrictionKey);
+
+    ~RestrictedSettingsFragment();
 
     //@Override
-    CARAPI OnCreate(Bundle icicle) {
-        super->OnCreate(icicle);
-
-        mRestrictionsManager = (RestrictionsManager) GetSystemService(Context.RESTRICTIONS_SERVICE);
-        mUserManager = (UserManager) GetSystemService(Context.USER_SERVICE);
-
-        if (icicle != NULL) {
-            mChallengeSucceeded = icicle->GetBoolean(KEY_CHALLENGE_SUCCEEDED, FALSE);
-            mChallengeRequested = icicle->GetBoolean(KEY_CHALLENGE_REQUESTED, FALSE);
-        }
-
-        IntentFilter offFilter = new IntentFilter(IIntent::ACTION_SCREEN_OFF);
-        offFilter->AddAction(IIntent::ACTION_USER_PRESENT);
-        GetActivity()->RegisterReceiver(mScreenOffReceiver, offFilter);
-    }
+    CARAPI OnCreate(
+        /* [in] */ IBundle* icicle);
 
     //@Override
-    CARAPI OnSaveInstanceState(Bundle outState) {
-        super->OnSaveInstanceState(outState);
-
-        if (GetActivity()->IsChangingConfigurations()) {
-            outState->PutBoolean(KEY_CHALLENGE_REQUESTED, mChallengeRequested);
-            outState->PutBoolean(KEY_CHALLENGE_SUCCEEDED, mChallengeSucceeded);
-        }
-    }
+    CARAPI OnSaveInstanceState(
+        /* [in] */ IBundle* outState);
 
     //@Override
-    CARAPI OnResume() {
-        super->OnResume();
-
-        if (ShouldBeProviderProtected(mRestrictionKey)) {
-            EnsurePin();
-        }
-    }
+    CARAPI OnResume();
 
     //@Override
-    CARAPI OnDestroy() {
-        GetActivity()->UnregisterReceiver(mScreenOffReceiver);
-        super->OnDestroy();
-    }
+    CARAPI OnDestroy();
 
     //@Override
-    CARAPI OnActivityResult(Int32 requestCode, Int32 resultCode, Intent data) {
-        if (requestCode == REQUEST_PIN_CHALLENGE) {
-            if (resultCode == Activity.RESULT_OK) {
-                mChallengeSucceeded = TRUE;
-                mChallengeRequested = FALSE;
-            } else {
-                mChallengeSucceeded = FALSE;
-            }
-            return;
-        }
+    CARAPI OnActivityResult(
+        /* [in] */ Int32 requestCode,
+        /* [in] */ Int32 resultCode,
+        /* [in] */ IIntent* data);
 
-        super->OnActivityResult(requestCode, resultCode, data);
-    }
-
-    private void EnsurePin() {
-        if (!mChallengeSucceeded && !mChallengeRequested
-                && mRestrictionsManager->HasRestrictionsProvider()) {
-            Intent intent = mRestrictionsManager->CreateLocalApprovalIntent();
-            if (intent != NULL) {
-                mChallengeRequested = TRUE;
-                mChallengeSucceeded = FALSE;
-                PersistableBundle request = new PersistableBundle();
-                request->PutString(RestrictionsManager.REQUEST_KEY_MESSAGE,
-                        GetResources()->GetString(R::string::restr_pin_enter_admin_pin));
-                intent->PutExtra(RestrictionsManager.EXTRA_REQUEST_BUNDLE, request);
-                StartActivityForResult(intent, REQUEST_PIN_CHALLENGE);
-            }
-        }
-    }
-
+protected:
     /**
      * Returns TRUE if this activity is restricted, but no restrictions provider has been set.
      * Used to determine if the settings UI should disable UI.
      */
-    protected Boolean IsRestrictedAndNotProviderProtected() {
-        if (mRestrictionKey == NULL || RESTRICT_IF_OVERRIDABLE->Equals(mRestrictionKey)) {
-            return FALSE;
-        }
-        return mUserManager->HasUserRestriction(mRestrictionKey)
-                && !mRestrictionsManager->HasRestrictionsProvider();
-    }
+    CARAPI_(Boolean) IsRestrictedAndNotProviderProtected();
 
-    protected Boolean HasChallengeSucceeded() {
-        return (mChallengeRequested && mChallengeSucceeded) || !mChallengeRequested;
-    }
+    CARAPI_(Boolean) HasChallengeSucceeded();
 
     /**
      * Returns TRUE if this restrictions key is locked down.
      */
-    protected Boolean ShouldBeProviderProtected(String restrictionKey) {
-        if (restrictionKey == NULL) {
-            return FALSE;
-        }
-        Boolean restricted = RESTRICT_IF_OVERRIDABLE->Equals(restrictionKey)
-                || mUserManager->HasUserRestriction(mRestrictionKey);
-        return restricted && mRestrictionsManager->HasRestrictionsProvider();
-    }
+    CARAPI_(Boolean) ShouldBeProviderProtected(
+        /* [in] */ const String& restrictionKey);
 
     /**
      * Returns whether restricted or actionable UI elements should be removed or disabled.
      */
-    protected Boolean IsUiRestricted() {
-        return IsRestrictedAndNotProviderProtected() || !HasChallengeSucceeded();
-    }
-}
+    CARAPI_(Boolean) IsUiRestricted();
+
+private:
+    CARAPI_(void) EnsurePin();
+
+protected:
+    static const String RESTRICT_IF_OVERRIDABLE;
+
+private:
+    // No RestrictedSettingsFragment screens should use this number in startActivityForResult.
+    static const Int32 REQUEST_PIN_CHALLENGE;
+
+    static const String KEY_CHALLENGE_SUCCEEDED;
+    static const String KEY_CHALLENGE_REQUESTED;
+
+    // If the restriction PIN is entered correctly.
+    Boolean mChallengeSucceeded;
+    Boolean mChallengeRequested;
+
+    AutoPtr<IUserManager> mUserManager;
+    AutoPtr<IRestrictionsManager> mRestrictionsManager;
+
+    String mRestrictionKey;
+
+    // Receiver to clear pin status when the screen is turned off.
+    AutoPtr<BroadcastReceiver> mScreenOffReceiver;
+};
+
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_RESTRICTEDSETTINGSFRAGMENT_H__

@@ -50,7 +50,7 @@ ECode CVideoProviderBinder::SetPreviewSurface(
     /* [in] */ ISurface* surface)
 {
     AutoPtr<IMessage> msg;
-    // mMessageHandler->ObtainMessage(IConnectionVideoProvider::MSG_SET_PREVIEW_SURFACE, surface, (IMessage**)&msg);
+    mMessageHandler->ObtainMessage(IConnectionVideoProvider::MSG_SET_PREVIEW_SURFACE, (IInterface*)(IParcelable*)surface, (IMessage**)&msg);
     msg->SendToTarget();
     return NOERROR;
 }
@@ -59,7 +59,7 @@ ECode CVideoProviderBinder::SetDisplaySurface(
     /* [in] */ ISurface* surface)
 {
     AutoPtr<IMessage> msg;
-    // mMessageHandler->ObtainMessage(IConnectionVideoProvider::MSG_SET_DISPLAY_SURFACE, surface, (IMessage**)&msg);
+    mMessageHandler->ObtainMessage(IConnectionVideoProvider::MSG_SET_DISPLAY_SURFACE, (IInterface*)(IParcelable*)surface, (IMessage**)&msg);
     msg->SendToTarget();
     return NOERROR;
 }

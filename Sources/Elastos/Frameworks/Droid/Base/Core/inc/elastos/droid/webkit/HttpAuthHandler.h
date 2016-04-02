@@ -19,7 +19,7 @@ namespace Webkit {
  * call either {@link #proceed} or {@link #cancel} to set the WebView's
  * response to the request.
  */
-class HttpAuthHandler
+class ECO_PUBLIC HttpAuthHandler
     : public Handler
     , public IHttpAuthHandler
 {

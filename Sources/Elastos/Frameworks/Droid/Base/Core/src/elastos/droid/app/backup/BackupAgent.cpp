@@ -555,22 +555,22 @@ PInterface BackupAgent::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(IBackupAgent*)this;
     }
     else if (riid == EIID_IObject) {
-        return this;
+        return (IObject*)this;
     }
     else if (riid == EIID_IBackupAgent) {
-        return this;
+        return (IBackupAgent*)this;
     }
     else if (riid == EIID_IContextWrapper) {
-        return this;
+        return (IContextWrapper*)this;
     }
     else if (riid == EIID_IContext) {
-        return this;
+        return (IContext*)this;
     }
     else if (riid == EIID_IWeakReferenceSource) {
-        return this;
+        return (IWeakReferenceSource*)this;
     }
     else if (riid == EIID_BackupAgent) {
         return reinterpret_cast<PInterface>(this);
@@ -641,7 +641,7 @@ ECode BackupAgent::Equals(
 
     IBackupAgent * o = IBackupAgent::Probe(other);
     if (o != NULL) {
-        *result = (o == this);
+        *result = (o == (IBackupAgent*)this);
     }
     return NOERROR;
 }

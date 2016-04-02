@@ -557,7 +557,7 @@ PInterface CSkbContainer::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_ISkbContainer) {
-        return (IInterface*)this;
+        return (IInterface*)(ISkbContainer*)this;
     }
 
     return RelativeLayout::Probe(riid);

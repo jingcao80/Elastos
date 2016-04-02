@@ -1789,6 +1789,10 @@ module
         interface IStatusBarManager;
     }
 
+	singleton class CStatusBarManagerHelper {
+        interface IStatusBarManagerHelper;
+    }
+
     class CStreamSettings {
         constructor(
             [in] Int32 streamId);

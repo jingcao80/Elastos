@@ -3,11 +3,19 @@
 
 #include "_Elastos.Droid.Server.h"
 #include "elastos/core/Object.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
 
-using Elastos::Droid::internal.util.XmlUtils;
-using Org::Xmlpull::V1::IXmlPullParser;
-using Org::Xmlpull::V1::IXmlPullParserException;
+#include "_Elastos.Droid.Server.h"
+#include <elastos/core/Object.h>
+#include <elastos/droid/internal/utility/XmlUtils.h>
+#include "elastos/droid/server/firewall/FilterList.h"
+#include "elastos/droid/server/firewall/FilterFactory.h"
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Utility::IArrayList;
+using Org::Xmlpull::V1::IXmlPullParser;
+using Elastos::Droid::Server::Firewall::IFilter;
 
 namespace Elastos {
 namespace Droid {
@@ -22,7 +30,10 @@ public:
         : public FilterFactory
     {
     public:
-        CARAPI_(Filter*) NewFilter(
+        FACTORY_FilterFactory(
+            /* [in] */ const String& tag);
+
+        CARAPI_(IFilter*) NewFilter(
             /* in */ IXmlPullParser* parser);
     };
 
@@ -34,7 +45,7 @@ public:
         /* [in] */ Int32 callerUid,
         /* [in] */ Int32 callerPid,
         /* [in] */ const String& resolvedType,
-        /* [in] */ Int32 receivingUid
+        /* [in] */ Int32 receivingUid,
         /* [out] */ Boolean *ret);
 
 public:

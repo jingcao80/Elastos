@@ -1,24 +1,26 @@
+
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_PHONE_TICKER_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_PHONE_TICKER_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include "_SystemUI.h"
+#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Object.h>
 #include <elastos/utility/etl/List.h>
-#include "elastos/droid/os/Runnable.h"
 
-using Elastos::Utility::Etl::List;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::IRunnable;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Text::IStaticLayout;
-using Elastos::Droid::Text::ITextPaint;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Service::Notification::IStatusBarNotification;
+using Elastos::Droid::Text::IStaticLayout;
+using Elastos::Droid::Text::ITextPaint;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::ITextSwitcher;
 using Elastos::Droid::Widget::IImageSwitcher;
-using Elastos::Droid::StatusBar::IStatusBarNotification;
-
+using Elastos::Core::ICharSequence;
+using Elastos::Core::IRunnable;
+using Elastos::Core::Object;
+using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {
@@ -26,10 +28,10 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-class Ticker
+class Ticker: public Object
 {
 private:
-    class Segment : public ElRefBase
+    class Segment : public Object
     {
     public:
         Segment(
@@ -68,7 +70,8 @@ private:
         AdvanceTickerRunnable(
             /* [in] */ Ticker* ticker);
 
-        virtual CARAPI Run();
+        CARAPI Run();
+
     private:
         Ticker* mHost;
     };
@@ -79,12 +82,9 @@ public:
 
     Ticker();
 
-    Ticker(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IView* sb);
-
-    virtual CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid) = 0;
 
     CARAPI AddEntry(
         /* [in] */ IStatusBarNotification* n);
@@ -102,14 +102,12 @@ public:
 
     virtual CARAPI TickerHalting() = 0;
 
-protected:
-    CARAPI Init();
-
-    CARAPI Init(
-        /* [in] */ IContext* context,
-        /* [in] */ IView* sb);
 private:
     CARAPI_(void) ScheduleAdvance();
+
+    static CARAPI_(Boolean) CharSequencesEqual(
+        /* [in] */ ICharSequence* a,
+        /* [in] */ ICharSequence* b);
 
 private:
     static const Int32 TICKER_SEGMENT_DELAY;

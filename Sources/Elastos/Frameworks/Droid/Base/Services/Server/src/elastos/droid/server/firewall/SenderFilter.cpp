@@ -1,7 +1,22 @@
 #include "elastos/droid/server/firewall/SenderFilter.h"
+#include "elastos/droid/server/firewall/IntentFirewall.h"
 #include <elastos/core/StringUtils.h>
+#include "elastos/droid/app/AppGlobals.h"
+#include <elastos/core/Object.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/droid/os/Process.h>
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Core::StringUtils;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::Pm::IIPackageManager;
+using Elastos::Droid::Os::IProcess;
+using Elastos::Droid::Os::Process;
+using Elastos::Utility::Logging::Slogger;
+using Org::Xmlpull::V1::IXmlPullParser;
+using Elastos::Droid::App::AppGlobals;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
 
 namespace Elastos {
 namespace Droid {
@@ -9,13 +24,20 @@ namespace Server {
 namespace Firewall {
 
 //------------------------------------------------------------------------------
-// PortFilter::FACTORY_FilterFactory
+// SenderFilter::FACTORY_FilterFactory
 //------------------------------------------------------------------------------
-IFilter* PortFilter::FACTORY_FilterFactory::NewFilter(
+
+SenderFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
+    /* [in] */ const String& tag)
+{
+    FilterFactory::constructor(tag);
+}
+
+IFilter* SenderFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
     String typeString;
-    parser->GetAttributeValue(null, ATTR_TYPE, &typeString);
+    parser->GetAttributeValue(String(NULL), ATTR_TYPE, &typeString);
     if (typeString == NULL) {
         //throw new XmlPullParserException("type attribute must be specified for <sender>",
         //        parser, null);
@@ -36,33 +58,39 @@ IFilter* PortFilter::FACTORY_FilterFactory::NewFilter(
 }
 
 //------------------------------------------------------------------------------
-// PortFilter::SIGNATURE_Filter
+// SenderFilter::SIGNATURE_Filter
 //------------------------------------------------------------------------------
-ECode PortFilter::SIGNATURE_Filter::Matches(
+
+CAR_INTERFACE_IMPL(SenderFilter::SIGNATURE_Filter, Object, IFilter);
+
+ECode SenderFilter::SIGNATURE_Filter::Matches(
     /* [in] */ IIntentFirewall* ifw,
     /* [in] */ IComponentName* resolvedComponent,
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid,
     /* [in] */ const String& resolvedType,
-    /* [in] */ Int32 receivingUid
+    /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
-    *ret = ifw->SignaturesMatch(callerUid, receivingUid);
+    ifw->SignaturesMatch(callerUid, receivingUid, ret);
     return NOERROR;
 }
 
 //------------------------------------------------------------------------------
-// PortFilter::SYSTEM_Filter
+// SenderFilter::SYSTEM_Filter
 //------------------------------------------------------------------------------
-ECode PortFilter::SIGNATURE_Filter::Matches(
+
+CAR_INTERFACE_IMPL(SenderFilter::SYSTEM_Filter, Object, IFilter);
+
+ECode SenderFilter::SYSTEM_Filter::Matches(
     /* [in] */ IIntentFirewall* ifw,
     /* [in] */ IComponentName* resolvedComponent,
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid,
     /* [in] */ const String& resolvedType,
-    /* [in] */ Int32 receivingUid
+    /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
     *ret = IsPrivilegedApp(callerUid, callerPid);
@@ -70,36 +98,43 @@ ECode PortFilter::SIGNATURE_Filter::Matches(
 }
 
 //------------------------------------------------------------------------------
-// PortFilter::SYSTEM_OR_SIGNATURE_Filter
+// SenderFilter::SYSTEM_OR_SIGNATURE_Filter
 //------------------------------------------------------------------------------
-ECode PortFilter::SIGNATURE_Filter::Matches(
+
+CAR_INTERFACE_IMPL(SenderFilter::SYSTEM_OR_SIGNATURE_Filter, Object, IFilter);
+
+ECode SenderFilter::SYSTEM_OR_SIGNATURE_Filter::Matches(
     /* [in] */ IIntentFirewall* ifw,
     /* [in] */ IComponentName* resolvedComponent,
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid,
     /* [in] */ const String& resolvedType,
-    /* [in] */ Int32 receivingUid
+    /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
-    *ret = (IsPrivilegedApp(callerUid, callerPid) || ifw->SignaturesMatch(callerUid, receivingUid));
+    ifw->SignaturesMatch(callerUid, receivingUid, ret);
+    *ret = (IsPrivilegedApp(callerUid, callerPid) || *ret);
     return NOERROR;
 }
 
 //------------------------------------------------------------------------------
-// PortFilter::USER_ID_Filter
+// SenderFilter::USER_ID_Filter
 //------------------------------------------------------------------------------
-ECode PortFilter::SIGNATURE_Filter::Matches(
+
+CAR_INTERFACE_IMPL(SenderFilter::USER_ID_Filter, Object, IFilter);
+
+ECode SenderFilter::USER_ID_Filter::Matches(
     /* [in] */ IIntentFirewall* ifw,
     /* [in] */ IComponentName* resolvedComponent,
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid,
     /* [in] */ const String& resolvedType,
-    /* [in] */ Int32 receivingUid
+    /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
-    *ret = ifw->CheckComponentPermission(NULL, callerPid, callerUid, receivingUid, FALSE);
+    ifw->CheckComponentPermission(String(NULL), callerPid, callerUid, receivingUid, FALSE, ret);
     return NOERROR;
 }
 
@@ -107,33 +142,40 @@ ECode PortFilter::SIGNATURE_Filter::Matches(
 // SenderFilter
 //=======================================================================================
 
-AutoPtr<FACTORY_FilterFactory> SenderFilter::FACTORY = new FACTORY_FilterFactory(String("sender"));
+const AutoPtr<SenderFilter::FACTORY_FilterFactory> SenderFilter::FACTORY = new SenderFilter::FACTORY_FilterFactory(String("sender"));
+const AutoPtr<SenderFilter::SIGNATURE_Filter> SenderFilter::SIGNATURE = new SenderFilter::SIGNATURE_Filter();
+const AutoPtr<SenderFilter::SYSTEM_Filter> SenderFilter::SYSTEM = new SenderFilter::SYSTEM_Filter();
+const AutoPtr<SenderFilter::SYSTEM_OR_SIGNATURE_Filter> SenderFilter::SYSTEM_OR_SIGNATURE = new SenderFilter::SYSTEM_OR_SIGNATURE_Filter();
+const AutoPtr<SenderFilter::USER_ID_Filter> SenderFilter::USER_ID = new SenderFilter::USER_ID_Filter();
 
-String SenderFilter::ATTR_TYPE("type");
+const String SenderFilter::ATTR_TYPE("type");
 
-String SenderFilter::VAL_SIGNATURE("signature");
-String SenderFilter::VAL_SYSTEM("system");
-String SenderFilter::VAL_SYSTEM_OR_SIGNATURE("system|signature");
-String SenderFilter::VAL_USER_ID("userId");
+const String SenderFilter::VAL_SIGNATURE("signature");
+const String SenderFilter::VAL_SYSTEM("system");
+const String SenderFilter::VAL_SYSTEM_OR_SIGNATURE("system|signature");
+const String SenderFilter::VAL_USER_ID("userId");
+
+CAR_INTERFACE_IMPL(SenderFilter, Object, IFilter);
 
 Boolean SenderFilter::IsPrivilegedApp(
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid)
 {
-    if (callerUid == Process.SYSTEM_UID || callerUid == 0 ||
-            callerPid == Process->MyPid() || callerPid == 0) {
+    if (callerUid == IProcess::SYSTEM_UID || callerUid == 0 ||
+            callerPid == Process::MyPid() || callerPid == 0) {
         return TRUE;
     }
 
-    IPackageManager pm = AppGlobals::GetPackageManager();
+    AutoPtr<IIPackageManager> pm = AppGlobals::GetPackageManager();
+
     Int32 result;
     ECode ec = pm->GetFlagsForUid(callerUid, &result);
     if (FAILED(ec)) {
-        Slogger::E(IntentFirewall.TAG, "Remote exception while retrieving uid flags");
+        Slogger::E(IntentFirewall::TAG, "Remote exception while retrieving uid flags");
         return FALSE;
     }
 
-    return (result & ApplicationInfo::FLAG_PRIVILEGED) != 0;
+    return (result & IApplicationInfo::FLAG_PRIVILEGED) != 0;
 }
 
 } // Firewall

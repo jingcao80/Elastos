@@ -1,8 +1,16 @@
 module
 {
+    interface Elastos.Droid.SystemUI.Recent.IRecentTasksLoader;
+    interface Elastos.Droid.SystemUI.Recent.ITaskDescription;
+    using interface Elastos.Droid.Animation.IAnimator;
+    using interface Elastos.Droid.Database.IDataSetObserver;
+    using interface Elastos.Droid.Graphics.ICanvas;
+    using interface Elastos.Droid.View.IMotionEvent;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.Widget.IAdapterView;
+    using interface Elastos.Core.IRunnable;
     using interface Elastos.Utility.IArrayList;
-
-    interface Elastos.Droid.View.IView;
 
     namespace Elastos {
     namespace Droid {
@@ -10,7 +18,64 @@ module
     namespace Recent {
 
     [local]
-    interface IRecentsScrollView {
+    interface ITaskDescriptionAdapter {
+        GetCount(
+            [out] Int32* count);
+
+        GetItem(
+            [in] Int32 position,
+            [out] IInterface** item);
+
+        GetItemId(
+            [in] Int32 position,
+            [out] Int64* itemId);
+
+        CreateView(
+            [in] IViewGroup* parent,
+            [out] IView** view);
+
+        GetView(
+            [in] Int32 position,
+            [in] IView* convertView,
+            [in] IViewGroup* parent,
+            [out] IView** view);
+
+        RecycleView(
+            [in] IView* v);
+
+        RegisterDataSetObserver(
+            [in] IDataSetObserver* observer);
+
+        UnregisterDataSetObserver(
+            [in] IDataSetObserver* observer);
+
+        HasStableIds(
+            [out] Boolean* hasStableIds);
+
+        GetItemViewType(
+            [in] Int32 position,
+            [out] Int32* viewType);
+
+        GetViewTypeCount(
+            [out] Int32* count);
+
+        IsEmpty(
+            [out] Boolean* isEmpty);
+
+        AreAllItemsEnabled(
+            [out] Boolean* enabled);
+
+        IsEnabled(
+            [in] Int32 position,
+            [out] Boolean* enabled);
+
+        NotifyDataSetChanged();
+
+        NotifyDataSetInvalidated();
+    }
+
+    [local]
+    interface IRecentsPanelViewRecentsScrollView {
         NumItemsInOneScreenful(
             [out] Int32* num);
 
@@ -26,16 +91,27 @@ module
         FindViewForTask(
             [in] Int32 persistentTaskId,
             [out] IView** view);
+
+        DrawFadedEdges(
+            [in] ICanvas* c,
+            [in] Int32 left,
+            [in] Int32 right,
+            [in] Int32 top,
+            [in] Int32 bottom);
+
+        SetOnScrollListener(
+            [in] IRunnable* listener);
     }
 
-    /**
-     * @Involve
-     * interface Elastos.Droid.Widget.IFrameLayout
-     */
-    [local, deprecated]
+    [local]
     interface IRecentsPanelView {
-        NumItemsInOneScreenful(
-            [out] Int32* num);
+         NumItemsInOneScreenful(
+            [out] Int32* count);
+
+        IsInContentArea(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] Boolean* result);
 
         Show(
             [in] Boolean show);
@@ -48,13 +124,28 @@ module
 
         OnUiHidden();
 
+        Dismiss();
+
         DismissAndGoBack();
+
+        OnAnimationCancel(
+            [in] IAnimator* animation);
+
+        OnAnimationEnd(
+            [in] IAnimator* animation);
+
+        OnAnimationRepeat(
+            [in] IAnimator* animation);
+
+        OnAnimationStart(
+            [in] IAnimator* animation);
+
+        DispatchHoverEvent(
+            [in] IMotionEvent* event,
+            [out] Boolean* result);
 
         IsShowing(
             [out] Boolean* result);
-
-        SetStatusBarView(
-            [in] IView* statusBarView);
 
         SetRecentTasksLoader(
             [in] IRecentTasksLoader* loader);
@@ -84,6 +175,27 @@ module
         SimulateClick(
             [in] Int32 persistentTaskId,
             [out] Boolean* result);
+
+        HandleOnClick(
+            [in] IView* view);
+
+        OnItemClick(
+            [in] IAdapterView* parent,
+            [in] IView* view,
+            [in] Int32 position,
+            [in] Int64 id);
+
+        HandleSwipe(
+            [in] IView* view);
+
+        OnInterceptTouchEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+
+        HandleLongPress(
+            [in] IView* selectedView,
+            [in] IView* anchorView,
+            [in] IView* thumbnailView);
     }
 
     } // namespace Recent

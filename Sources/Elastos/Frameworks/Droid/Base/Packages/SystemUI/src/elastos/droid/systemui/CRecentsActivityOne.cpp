@@ -119,7 +119,7 @@ PInterface CRecentsActivityOne::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IRecentsActivity) {
-        return this;
+        return (IRecentsActivity*)this;
     }
     else return Activity::Probe(riid);
 }

@@ -1,7 +1,11 @@
 
+#include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/RemoteConnection.h"
 #include "elastos/droid/telecomm/telecom/DisconnectCause.h"
+#include "elastos/droid/telecomm/telecom/CVideoCallbackServant.h"
+#include "elastos/droid/telecomm/telecom/CDisconnectCause.h"
+#include "elastos/droid/telecomm/telecom/CRemoteConnection.h"
 
 using Elastos::Core::CString;
 using Elastos::Utility::IIterator;
@@ -9,6 +13,8 @@ using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::ICollection;
+using Elastos::Utility::IMap;
+using Elastos::Utility::Concurrent::CConcurrentHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -135,17 +141,19 @@ CAR_INTERFACE_IMPL(RemoteConnection::VideoProvider, Object, IRemoteConnectionVid
 
 RemoteConnection::VideoProvider::VideoProvider()
 {
-    // mVideoCallbackServant =
-    //     new VideoCallbackServant(mVideoCallbackDelegate);
+    CVideoCallbackServant::New(mVideoCallbackDelegate, (IVideoCallbackServant**)&mVideoCallbackServant);
 
-    // mListeners = Collections.newSetFromMap(
-    //         new ConcurrentHashMap(8, 0.9f, 1));
+    AutoPtr<IMap> m;
+    CConcurrentHashMap::New(8, 0.9f, 1, (IMap**)&m);
+    assert(0 && "TODO");
+    // mListeners = Collections.newSetFromMap(m);
 }
 
 RemoteConnection::VideoProvider::VideoProvider(
     /* [in] */ IIVideoProvider* videoProviderBinder)
 {
     mVideoProviderBinder = videoProviderBinder;
+    assert(0 && "TODO");
     //mVideoProviderBinder->SetVideoCallback(mVideoCallbackServant.getStub().asBinder());
 }
 
@@ -246,8 +254,10 @@ RemoteConnection::RemoteConnection()
     , mAddressPresentation(0)
     , mCallerDisplayNamePresentation(0)
 {
-    // mCallbacks = Collections.newSetFromMap(
-    //     new ConcurrentHashMap(8, 0.9f, 1));
+    AutoPtr<IMap> m;
+    CConcurrentHashMap::New(8, 0.9f, 1, (IMap**)&m);
+    assert(0 && "TODO");
+    // mCallbacks = Collections.newSetFromMap(m);
     CArrayList::New((IList**)&mConferenceableConnections);
     AutoPtr<ICollections> cls;
     CCollections::AcquireSingleton((ICollections**)&cls);
@@ -603,7 +613,7 @@ ECode RemoteConnection::SetDestroyed()
         // Make sure that the callbacks are notified that the call is destroyed first.
         if (mState != IConnection::STATE_DISCONNECTED) {
             AutoPtr<IDisconnectCause> p;
-            // CDisconnectCause::New(IDisconnectCause::ERROR, String("Connection destroyed."), (IDisconnectCause**)&p);
+            CDisconnectCause::New(IDisconnectCause::ERROR, String("Connection destroyed."), (IDisconnectCause**)&p);
             SetDisconnected(p);
         }
 
@@ -786,7 +796,7 @@ ECode RemoteConnection::Failure(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IRemoteConnection> p;
-    // CRemoteConnection::New(disconnectCause, (IRemoteConnection**)&p);
+    CRemoteConnection::New(disconnectCause, (IRemoteConnection**)&p);
     *result = p;
     REFCOUNT_ADD(*result)
     return NOERROR;

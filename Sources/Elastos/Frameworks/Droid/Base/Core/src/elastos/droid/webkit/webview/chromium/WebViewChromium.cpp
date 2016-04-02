@@ -9,10 +9,6 @@
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/webkit/webview/chromium/R_Chromium.h"
 #include "elastos/droid/text/TextUtils.h"
-//#include "elastos/droid/utility/CBase64.h"
-//#include "elastos/droid/view/CView.h"
-//#include "elastos/droid/webkit/CWebViewFactory.h"
-//#include "elastos/droid/webkit/CWebViewHitTestResult.h"
 #include "elastos/droid/webkit/FindActionModeCallback.h"
 #include "elastos/droid/webkit/webview/chromium/native/android_webview/AwBrowserContext.h"
 #include "elastos/droid/webkit/webview/chromium/native/android_webview/AwContentsClient.h"
@@ -23,7 +19,6 @@
 #include "elastos/droid/webkit/webview/chromium/UnimplementedWebViewApi.h"
 #include "elastos/droid/webkit/webview/chromium/WebBackForwardListChromium.h"
 #include "elastos/droid/webkit/webview/chromium/WebViewChromium.h"
-//#include "elastos/droid/widget/CTextView.h"
 #include "elastos/core/CoreUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -322,7 +317,7 @@ ECode WebViewChromium::InnerContextWrapper::GetClassLoader(
 //        baseContext->GetSystemService(name, (IInterface**)&iTmp);
 //        AutoPtr<ILayoutInflater> i = ILayoutInflater::Probe(iTmp);
 
-//        AutoPtr<IContext> contextTmp = IContext::Probe(this);
+//        AutoPtr<IContext> contextTmp = this;
 //        AutoPtr<ILayoutInflater> cloneTmp;
 //        i->CloneInContext(contextTmp, (ILayoutInflater**)&cloneTmp);
 //        *object = cloneTmp->Probe(EIID_IInterface);
@@ -3023,6 +3018,7 @@ WebViewChromium::WebViewChromium(
     packageInfo->GetApplicationInfo((IApplicationInfo**)&applicationInfo1);
     String webViewAssetPath;
     applicationInfo1->GetSourceDir(&webViewAssetPath);
+    Logger::D("WebViewChromium::WebViewChromium", "leliang_debug webViewAssetPath is %s", webViewAssetPath.string());
 
     AutoPtr<IAssetManager> assetManager;
     context->GetAssets((IAssetManager**)&assetManager);
@@ -3070,6 +3066,7 @@ ECode WebViewChromium::Init(
     /* [in] */ IMap* javaScriptInterfaces,
     /* [in] */ Boolean privateBrowsing)
 {
+    Logger::D("WebViewChromium::Init", "leliang_debug enter");
     VALIDATE_NOT_NULL(javaScriptInterfaces);
     // ==================before translated======================
     // if (privateBrowsing) {
@@ -3178,8 +3175,7 @@ ECode WebViewChromium::Init(
 
     const Boolean isAccessFromFileURLsGrantedByDefault = mAppTargetSdkVersion < Build::VERSION_CODES::JELLY_BEAN;
     const Boolean areLegacyQuirksEnabled = mAppTargetSdkVersion < Build::VERSION_CODES::KITKAT;
-    assert(0);
-    //-- abstract class: mContentsClientAdapter = new WebViewContentsClientAdapter(mWebView);
+    mContentsClientAdapter = new WebViewContentsClientAdapter(mWebView);
     IView* viewTmp = IView::Probe(mWebView);
     AutoPtr<IContext> context;
     viewTmp->GetContext((IContext**)&context);

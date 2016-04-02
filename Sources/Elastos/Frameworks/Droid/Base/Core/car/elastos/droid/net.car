@@ -468,6 +468,10 @@ module
         interface INetworkInfo;
     }
 
+    singleton class CNetworkInfoHelper {
+        interface INetworkInfoHelper;
+    }
+
     class CNetworkKey {
         constructor(
             [in] IWifiKey* wifiKey);

@@ -160,7 +160,7 @@ ECode ScrollingTabContainerView::TabView::Update()
     if (custom != NULL) {
         AutoPtr<IViewParent> customParent;
         custom->GetParent((IViewParent**)&customParent);
-        if (customParent.Get() != this) {
+        if (customParent.Get() != (IViewParent*)this) {
             if (customParent != NULL)
                 IViewManager::Probe(customParent)->RemoveView(custom);
             AddView(custom);
@@ -524,7 +524,7 @@ void ScrollingTabContainerView::OnMeasure(
 Boolean ScrollingTabContainerView::IsCollapsed()
 {
     AutoPtr<IViewParent> p;
-    return mTabSpinner != NULL && (IView::Probe(mTabSpinner)->GetParent((IViewParent**)&p), p.Get() == this);
+    return mTabSpinner != NULL && (IView::Probe(mTabSpinner)->GetParent((IViewParent**)&p), p.Get() == (IViewParent*)this);
 }
 
 ECode ScrollingTabContainerView::SetAllowCollapse(

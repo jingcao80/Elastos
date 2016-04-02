@@ -45,11 +45,6 @@ module
         Start();
 
         UpdateBatteryWarningLevels();
-
-        Dump(
-            [in] IFileDescriptor* fd,
-            [in] IPrintWriter* pw,
-            [in] ArrayOf<String>* args);
     }
 
     } // namespace Power

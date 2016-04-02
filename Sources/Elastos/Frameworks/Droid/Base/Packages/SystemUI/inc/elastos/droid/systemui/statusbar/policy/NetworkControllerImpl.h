@@ -47,6 +47,7 @@ namespace Policy {
 /** Platform implementation of the network controller. **/
 class NetworkControllerImpl
     : public BroadcastReceiver
+    , public INetworkControllerImpl
     , public INetworkController
     , public IDemoMode
 {

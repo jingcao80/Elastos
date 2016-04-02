@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_WIDGET_VIEWANIMATOR_H__
 #define __ELASTOS_DROID_WIDGET_VIEWANIMATOR_H__
 
-#include "elastos/droid/widget/FrameLayout.h"
+#include <elastos/droid/widget/FrameLayout.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Utility::IAttributeSet;
@@ -25,7 +25,7 @@ namespace Widget {
  * @attr ref android.R.styleable#ViewAnimator_outAnimation
  * @attr ref android.R.styleable#ViewAnimator_animateFirstView
  */
-class ViewAnimator
+class ECO_PUBLIC ViewAnimator
     : public FrameLayout
     , public IViewAnimator
 {

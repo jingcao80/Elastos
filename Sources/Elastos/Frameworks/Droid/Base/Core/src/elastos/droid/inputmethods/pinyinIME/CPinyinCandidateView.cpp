@@ -530,7 +530,7 @@ PInterface CPinyinCandidateView::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_ICandidateView) {
-        return (IInterface*)this;
+        return (IInterface*)(ICandidateView*)this;
     }
 
     return View::Probe(riid);

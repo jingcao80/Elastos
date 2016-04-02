@@ -1,5 +1,7 @@
 
 DIRS += dashboard
 DIRS += drawable
+DIRS += inputmethod
 DIRS += search
 DIRS += widget
+DIRS += wifi

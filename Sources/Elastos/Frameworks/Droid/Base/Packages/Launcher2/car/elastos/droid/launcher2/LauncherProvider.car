@@ -1,0 +1,26 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IComponentCallbacks2
+     * interface IContentProvider
+     */
+    interface ILauncherProvider {
+        const String AUTHORITY = "com.android.launcher2.settings";
+
+        const String TABLE_FAVORITES = "favorites";
+        const String PARAMETER_NOTIFY = "notify";
+        const String DB_CREATED_BUT_DEFAULT_WORKSPACE_NOT_LOADED =
+                "DB_CREATED_BUT_DEFAULT_WORKSPACE_NOT_LOADED";
+        const String DEFAULT_WORKSPACE_RESOURCE_ID =
+                "DEFAULT_WORKSPACE_RESOURCE_ID";
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

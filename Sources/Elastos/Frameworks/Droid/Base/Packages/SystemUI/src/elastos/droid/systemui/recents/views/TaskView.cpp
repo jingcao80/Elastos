@@ -1150,7 +1150,7 @@ ECode TaskView::OnClick(
     /* [in] */ IView* v)
 {
     AutoPtr<TaskView> tv = this;
-    Boolean delayViewClick = (v != this) && (v != mActionButtonView);
+    Boolean delayViewClick = (v != (IView*)this) && (v != mActionButtonView);
     if (delayViewClick) {
         // We purposely post the handler delayed to allow for the touch feedback to draw
         AutoPtr<Runnable> runnable = new OnClickRunnable(this, v);

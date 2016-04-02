@@ -16,11 +16,11 @@ module
             [in] Int32 pid,
             [in] Int32 uid,
             [in] Int32 owningUid,
-            [in] Boolean exported
-            [out] Int32 ret);
+            [in] Boolean exported,
+            [out] Int32* ret);
 
         GetAMSLock(
-            [out] IInterface *ret);
+            [out] IInterface** ret);
     }
 
     } // Firewall

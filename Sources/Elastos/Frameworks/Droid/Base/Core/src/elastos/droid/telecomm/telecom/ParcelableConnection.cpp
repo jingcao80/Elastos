@@ -1,6 +1,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/ParcelableConnection.h"
+#include "elastos/droid/telecomm/telecom/CPhoneCapabilities.h"
 #include <elastos/core/StringBuilder.h>
 
 using Elastos::Core::StringBuilder;
@@ -181,9 +182,12 @@ ECode ParcelableConnection::ToString(
     sb.Append(", state:");
     sb.Append(mState);
     sb.Append(", capabilities:");
-    //sb.Append(PhoneCapabilities.toString(mCapabilities))
-    *result = sb.ToString();
-    return NOERROR;
+    AutoPtr<IPhoneCapabilities> pc;
+    CPhoneCapabilities::AcquireSingleton((IPhoneCapabilities**)&pc);
+    String str;
+    pc->ToString(mCapabilities, &str);
+    sb.Append(str);
+    return sb.ToString(result);
 }
 
 ECode ParcelableConnection::ReadFromParcel(
@@ -202,6 +206,7 @@ ECode ParcelableConnection::WriteToParcel(
     destination->WriteInt32(mAddressPresentation);
     destination->WriteString(mCallerDisplayName);
     destination->WriteInt32(mCallerDisplayNamePresentation);
+    assert(0 && "TODO");
     // destination.writeStrongBinder(
     //         mVideoProvider != null ? mVideoProvider.asBinder() : null);
     destination->WriteInt32(mVideoState);

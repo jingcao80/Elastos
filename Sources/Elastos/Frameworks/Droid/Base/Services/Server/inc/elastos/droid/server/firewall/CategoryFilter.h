@@ -3,10 +3,12 @@
 
 #include "_Elastos.Droid.Server.h"
 #include "elastos/core/Object.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
+#include "elastos/droid/server/firewall/FilterFactory.h"
+#include <Elastos.Droid.Content.h>
 
-using Elastos::Droid::internal.util.XmlUtils;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Org::Xmlpull::V1::IXmlPullParser;
-using Org::Xmlpull::V1::IXmlPullParserException;
 using Elastos::Utility::IArrayList;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
@@ -23,9 +25,14 @@ class CategoryFilter
     , public IFilter
 {
 public:
-    class FACTORY_FilterFactory {
-        // throws IOException, XmlPullParserException;
-        CARAPI_(Filter*) NewFilter(
+    class FACTORY_FilterFactory
+        : public FilterFactory
+    {
+    public:
+        FACTORY_FilterFactory(
+            /* [in] */ const String& tag);
+
+        CARAPI_(IFilter*) NewFilter(
             /* in */ IXmlPullParser* parser);
     };
 
@@ -37,15 +44,17 @@ public:
         /* [in] */ Int32 callerUid,
         /* [in] */ Int32 callerPid,
         /* [in] */ const String& resolvedType,
-        /* [in] */ Int32 receivingUid
+        /* [in] */ Int32 receivingUid,
         /* [out] */ Boolean *ret);
 
-public:
-    static const AutoPtr<FACTORY_FilterFactory> FACTORY = new FACTORY_FilterFactory(String("category"));
-
 private:
+    CAR_INTERFACE_DECL();
+
     CategoryFilter(
         /* in */ const String& categoryName);
+
+public:
+    static const AutoPtr<FACTORY_FilterFactory> FACTORY;
 
 private:
     static const String ATTR_NAME;      // = "name";

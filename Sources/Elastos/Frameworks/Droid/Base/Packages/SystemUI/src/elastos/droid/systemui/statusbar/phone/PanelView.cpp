@@ -1,19 +1,29 @@
-#include "elastos/droid/systemui/statusbar/phone/PanelView.h"
-#include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/Math.h>
-#include "elastos/droid/systemui/SystemUIR.h"
-#include "elastos/droid/animation/CTimeAnimator.h"
-#include "elastos/droid/animation/CObjectAnimatorHelper.h"
 
-using Elastos::Core::Math;
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::Animation::EIID_ITimeListener;
-using Elastos::Droid::Animation::IObjectAnimatorHelper;
-using Elastos::Droid::Animation::CTimeAnimator;
-using Elastos::Droid::Animation::ITimeAnimator;
+#include "elastos/droid/systemui/statusbar/phone/PanelView.h"
+#include "elastos/droid/systemui/statusbar/phone/VelocityTrackerFactory.h"
+#include "elastos/droid/systemui/doze/DozeLog.h"
+#include "../../R.h"
+#include <elastos/droid/R.h>
+#include <elastos/droid/view/animation/AnimationUtils.h>
+#include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
+
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
-using Elastos::Droid::View::EIID_IViewOnTouchListener;
-using Elastos::Droid::SystemUI::SystemUIR;
+using Elastos::Droid::Animation::CValueAnimatorHelper;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Animation::IValueAnimatorHelper;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::SystemUI::Doze::DozeLog;
+using Elastos::Droid::View::Animation::AnimationUtils;
+using Elastos::Droid::View::Animation::CBounceInterpolator;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::EIID_IOnGlobalLayoutListener;
+using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Core::IFloat;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -21,616 +31,920 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-//======================================================================
-//            PanelView::TimeListener
-//======================================================================
-
-CAR_INTERFACE_IMPL(PanelView::TimeListener, ITimeListener)
-
-PanelView::TimeListener::TimeListener(
+PanelView::PeekRunnable::PeekRunnable(
     /* [in] */ PanelView* host)
     : mHost(host)
-{
-}
+{}
 
-ECode PanelView::TimeListener::OnTimeUpdate(
-    /* [in] */ ITimeAnimator* animation,
-    /* [in] */ Int64 totalTime,
-    /* [in] */ Int64 deltaTime)
+ECode PanelView::PeekRunnable::Run()
 {
-    mHost->AnimationTick(deltaTime);
+    mHost->mPeekPending = FALSE;
+    mHost->RunPeekAnimation();
     return NOERROR;
 }
 
-//======================================================================
-//            PanelView::StopAnimatorRunnable
-//======================================================================
-PanelView::StopAnimatorRunnable::StopAnimatorRunnable(
+PanelView::FlingCollapseRunnable::FlingCollapseRunnable(
     /* [in] */ PanelView* host)
     : mHost(host)
+{}
+
+ECode PanelView::FlingCollapseRunnable::Run()
 {
+    mHost->Fling(0, FALSE /* expand */);
+    return NOERROR;
 }
 
-ECode PanelView::StopAnimatorRunnable::Run()
+PanelView::PostCollapseRunnable::PostCollapseRunnable(
+    /* [in] */ PanelView* host)
+    : mHost(host)
+{}
+
+ECode PanelView::PostCollapseRunnable::Run()
 {
-    if (mHost->mTimeAnimator != NULL) {
-        Boolean isStarted;
-        mHost->mTimeAnimator->IsStarted(&isStarted);
-        if (isStarted) {
-            mHost->mTimeAnimator->End();
-            mHost->mRubberbanding = FALSE;
-            mHost->mClosing = FALSE;
-        }
+    mHost->Collapse(FALSE /* delayed */);
+    return NOERROR;
+}
+
+PanelView::AnimatorListenerAdapter1::ListenerRunnable::ListenerRunnable(
+    /* [in] */ PanelView* host)
+    : mHost(host)
+{}
+
+ECode PanelView::AnimatorListenerAdapter1::ListenerRunnable::Run()
+{
+    mHost->Collapse(FALSE /* delayed */);
+    return NOERROR;
+}
+
+PanelView::AnimatorListenerAdapter1::AnimatorListenerAdapter1(
+    /* [in] */ PanelView* host)
+    : mHost(host)
+    , mCancelled(FALSE)
+{}
+
+ECode PanelView::AnimatorListenerAdapter1::OnAnimationCancel(
+    /* [in] */ IAnimator* animation)
+{
+    mCancelled = TRUE;
+    return NOERROR;
+}
+
+ECode PanelView::AnimatorListenerAdapter1::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    mHost->mPeekAnimator = NULL;
+    if (mHost->mCollapseAfterPeek && !mCancelled) {
+        AutoPtr<ListenerRunnable> listener = new ListenerRunnable(mHost);
+        mHost->PostOnAnimation(listener);
+    }
+    mHost->mCollapseAfterPeek = FALSE;
+    return NOERROR;
+}
+
+PanelView::AnimatorListenerAdapter2::AnimatorListenerAdapter2(
+    /* [in] */ PanelView* host,
+    /* [in] */ Boolean clearAllExpandHack)
+    : mHost(host)
+    , mCancelled(FALSE)
+    , mClearAllExpandHack(clearAllExpandHack)
+{}
+
+ECode PanelView::AnimatorListenerAdapter2::OnAnimationCancel(
+    /* [in] */ IAnimator* animation)
+{
+    mCancelled = TRUE;
+    return NOERROR;
+}
+
+ECode PanelView::AnimatorListenerAdapter2::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    if (mClearAllExpandHack && !mCancelled) {
+        mHost->SetExpandedHeightInternal(mHost->GetMaxPanelHeight());
+    }
+    mHost->mHeightAnimator = NULL;
+    if (!mCancelled) {
+        mHost->NotifyExpandingFinished();
     }
     return NOERROR;
 }
 
-//======================================================================
-//            PanelView::ViewOnTouchListener
-//======================================================================
-//
-CAR_INTERFACE_IMPL(PanelView::ViewOnTouchListener, IViewOnTouchListener)
-
-PanelView::ViewOnTouchListener::ViewOnTouchListener(
+CAR_INTERFACE_IMPL(PanelView::OnGlobalLayoutListener, Object, IOnGlobalLayoutListener);
+PanelView::OnGlobalLayoutListener::OnGlobalLayoutListener(
     /* [in] */ PanelView* host)
     : mHost(host)
+{}
+
+ECode PanelView::OnGlobalLayoutListener::OnGlobalLayout()
 {
-}
-
-ECode PanelView::ViewOnTouchListener::OnTouch(
-    /* [in] */ IView* v,
-    /* [in] */ IMotionEvent* event,
-    /* [out] */ Boolean* result)
-{
-    using Elastos::Core::Math;
-
-    VALIDATE_NOT_NULL(result);
-
-    Float rawY, y;
-    event->GetY(&y);
-    event->GetRawY(&rawY);
-    Int32 action;
-    event->GetAction(&action);
-
-    // if (DEBUG) LOG("handle.onTouch: a=%s y=%.1f rawY=%.1f off=%.1f",
-    //         MotionEvent.actionToString(event.getAction()),
-    //         y, rawY, mTouchOffset);
-
-    mHost->GetLocationOnScreen(&mHost->mAbsPos[0], &mHost->mAbsPos[1]);
-
-    switch (action) {
-        case IMotionEvent::ACTION_DOWN:
-            mHost->mTracking = TRUE;
-            mHost->mHandleView->SetPressed(TRUE);
-            mHost->PostInvalidate(); // catch the press state change
-            mHost->mInitialTouchY = y;
-            mHost->mVelocityTracker = VelocityTracker::Obtain();
-            mHost->TrackMovement(event);
-            mHost->mTimeAnimator->Cancel(); // end any outstanding animations
-            mHost->mBar->OnTrackingStarted((IPanelView*)(mHost->Probe(EIID_IPanelView)));
-            mHost->mTouchOffset = (rawY - mHost->mAbsPos[1]) - mHost->GetExpandedHeight();
-            if (mHost->mExpandedHeight == 0) {
-                mHost->mJustPeeked = TRUE;
-                mHost->RunPeekAnimation();
-            }
-            break;
-
-        case IMotionEvent::ACTION_MOVE: {
-            Float h = rawY - mHost->mAbsPos[1] - mHost->mTouchOffset;
-            if (h > mHost->mPeekHeight) {
-                if (mHost->mPeekAnimator != NULL) {
-                    Boolean isRunning;
-                    mHost->mPeekAnimator->IsRunning(&isRunning);
-                    if (isRunning)
-                           mHost->mPeekAnimator->Cancel();
-                }
-                mHost->mJustPeeked = FALSE;
-            }
-
-            if (!mHost->mJustPeeked) {
-                mHost->SetExpandedHeightInternal(h);
-                mHost->mBar->PanelExpansionChanged(
-                    (IPanelView*)(mHost->Probe(EIID_IPanelView)),
-                    mHost->mExpandedFraction);
-            }
-
-            mHost->TrackMovement(event);
-            }
-            break;
-
-        case IMotionEvent::ACTION_UP:
-        case IMotionEvent::ACTION_CANCEL:
-            mHost->mFinalTouchY = y;
-            mHost->mTracking = FALSE;
-            mHost->mHandleView->SetPressed(FALSE);
-            mHost->PostInvalidate(); // catch the press state change
-            mHost->mBar->OnTrackingStopped((IPanelView*)(mHost->Probe(EIID_IPanelView)));
-            mHost->TrackMovement(event);
-
-            Float vel = 0, yVel = 0, xVel = 0;
-            Boolean negative = FALSE;
-
-            if (mHost->mVelocityTracker != NULL) {
-                // the velocitytracker might be NULL if we got a bad input stream
-                mHost->mVelocityTracker->ComputeCurrentVelocity(1000);
-
-                mHost->mVelocityTracker->GetYVelocity(&yVel);
-                negative = yVel < 0;
-
-                mHost->mVelocityTracker->GetXVelocity(&xVel);
-                if (xVel < 0) {
-                    xVel = -xVel;
-                }
-                if (xVel > mHost->mFlingGestureMaxXVelocityPx) {
-                    xVel = mHost->mFlingGestureMaxXVelocityPx; // limit how much we care about the x axis
-                }
-
-                vel = (Float)Math::Hypot(yVel, xVel);
-                if (vel > mHost->mFlingGestureMaxOutputVelocityPx) {
-                    vel = mHost->mFlingGestureMaxOutputVelocityPx;
-                }
-
-                mHost->mVelocityTracker->Recycle();
-                mHost->mVelocityTracker = NULL;
-            }
-
-            // if you've barely moved your finger, we treat the velocity as 0
-            // preventing spurious flings due to touch screen jitter
-            Float deltaY = Math::Abs(mHost->mFinalTouchY - mHost->mInitialTouchY);
-            if (deltaY < mHost->mFlingGestureMinDistPx || vel < mHost->mFlingExpandMinVelocityPx) {
-                vel = 0;
-            }
-
-            if (negative) {
-                vel = -vel;
-            }
-
-            // if (DEBUG)
-            //     LOG("gesture: dy=%f vel=(%f,%f) vlinear=%f", deltaY, xVel, yVel, vel);
-
-            mHost->Fling(vel, TRUE);
-
-            break;
+    AutoPtr<IStatusBarWindowView> sbwv;
+    mHost->mStatusBar->GetStatusBarWindow((IStatusBarWindowView**)&sbwv);
+    Int32 sh = 0, bh = 0;
+    IView::Probe(sbwv)->GetHeight(&sh);
+    mHost->mStatusBar->GetStatusBarHeight(&bh);
+    if (sh != bh) {
+        AutoPtr<IViewTreeObserver> vto;
+        mHost->GetViewTreeObserver((IViewTreeObserver**)&vto);
+        vto->RemoveOnGlobalLayoutListener(this);
+        mHost->SetExpandedFraction(1.f);
+        mHost->mInstantExpanding = FALSE;
     }
-
-    *result = TRUE;
     return NOERROR;
 }
 
-//======================================================================
-//            PanelView
-//======================================================================
-const String PanelView::TAG("PanelView");
+PanelView::Runnable1::Runnable1(
+    /* [in] */ PanelView* host)
+    : mHost(host)
+{}
 
-PanelView::PanelView()
-    : mInitialTouchY(0)
-    , mFinalTouchY(0)
-    , mRubberbandingEnabled(TRUE)
-    , mSelfExpandVelocityPx(0)
-    , mSelfCollapseVelocityPx(0)
-    , mFlingExpandMinVelocityPx(0)
-    , mFlingCollapseMinVelocityPx(0)
-    , mCollapseMinDisplayFraction(0)
-    , mExpandMinDisplayFraction(0)
-    , mFlingGestureMaxXVelocityPx(0)
-    , mFlingGestureMinDistPx(0)
-    , mExpandAccelPx(0)
-    , mCollapseAccelPx(0)
-    , mFlingGestureMaxOutputVelocityPx(0)
-    , mCollapseBrakingDistancePx(200)
-    , mExpandBrakingDistancePx(150)
-    , mBrakingSpeedPx(150)
-    , mPeekHeight(0)
-    , mTouchOffset(0)
-    , mExpandedFraction(0)
-    , mExpandedHeight(0)
-    , mJustPeeked(FALSE)
-    , mClosing(FALSE)
-    , mRubberbanding(FALSE)
-    , mTracking(FALSE)
-    , mVel(0)
-    , mAccel(0)
+ECode PanelView::Runnable1::Run()
 {
-    mAbsPos[0] = mAbsPos[1] = 0;
-
-    mStopAnimator = new StopAnimatorRunnable(this);
-    mAnimationCallback = new TimeListener(this);
-
-    CTimeAnimator::New((ITimeAnimator**)&mTimeAnimator);
-    mTimeAnimator->SetTimeListener(mAnimationCallback);
-}
-
-PanelView::PanelView(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-    : FrameLayout(context, attrs)
-    , mInitialTouchY(0)
-    , mFinalTouchY(0)
-    , mRubberbandingEnabled(TRUE)
-    , mSelfExpandVelocityPx(0)
-    , mSelfCollapseVelocityPx(0)
-    , mFlingExpandMinVelocityPx(0)
-    , mFlingCollapseMinVelocityPx(0)
-    , mCollapseMinDisplayFraction(0)
-    , mExpandMinDisplayFraction(0)
-    , mFlingGestureMaxXVelocityPx(0)
-    , mFlingGestureMinDistPx(0)
-    , mExpandAccelPx(0)
-    , mCollapseAccelPx(0)
-    , mFlingGestureMaxOutputVelocityPx(0)
-    , mCollapseBrakingDistancePx(200)
-    , mExpandBrakingDistancePx(150)
-    , mBrakingSpeedPx(150)
-    , mPeekHeight(0)
-    , mTouchOffset(0)
-    , mExpandedFraction(0)
-    , mExpandedHeight(0)
-    , mJustPeeked(FALSE)
-    , mClosing(FALSE)
-    , mRubberbanding(FALSE)
-    , mTracking(FALSE)
-    , mVel(0)
-    , mAccel(0)
-{
-    mAbsPos[0] = mAbsPos[1] = 0;
-
-    mStopAnimator = new StopAnimatorRunnable(this);
-    mAnimationCallback = new TimeListener(this);
-
-    CTimeAnimator::New((ITimeAnimator**)&mTimeAnimator);
-    mTimeAnimator->SetTimeListener(mAnimationCallback);
-}
-
-ECode PanelView::SetRubberbandingEnabled(
-    /* [in] */ Boolean enabled)
-{
-    mRubberbandingEnabled = enabled;
+    mHost->NotifyExpandingFinished();
+    mHost->mStatusBar->OnHintFinished();
+    mHost->mHintAnimationRunning = FALSE;
     return NOERROR;
+}
+
+PanelView::AnimatorListenerAdapter3::AnimatorListenerAdapter3(
+    /* [in] */ PanelView* host,
+    /* [in] */ IRunnable* onAnimationFinished)
+    : mHost(host)
+    , mCancelled(FALSE)
+    , mOnAnimationFinished(onAnimationFinished)
+{}
+
+ECode PanelView::AnimatorListenerAdapter3::OnAnimationCancel(
+    /* [in] */ IAnimator* animation)
+{
+    mCancelled = TRUE;
+    return NOERROR;
+}
+
+ECode PanelView::AnimatorListenerAdapter3::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    if (mCancelled) {
+        mHost->mHeightAnimator = NULL;
+        mOnAnimationFinished->Run();
+    }
+    else {
+        mHost->StartUnlockHintAnimationPhase2(mOnAnimationFinished);
+    }
+    return NOERROR;
+}
+
+PanelView::Runnable2::Runnable2(
+    /* [in] */ PanelView* host)
+    : mHost(host)
+{}
+
+ECode PanelView::Runnable2::Run()
+{
+    AutoPtr<IView> view;
+    mHost->mKeyguardBottomArea->GetIndicationView((IView**)&view);
+
+    AutoPtr<IViewPropertyAnimator> vpa;
+    view->Animate((IViewPropertyAnimator**)&vpa);
+
+    vpa->Y(mHost->mOriginalIndicationY);
+    vpa->SetDuration(450);
+    vpa->SetInterpolator(ITimeInterpolator::Probe(mHost->mBounceInterpolator));
+    vpa->Start();
+    return NOERROR;
+}
+
+PanelView::AnimatorListenerAdapter4::AnimatorListenerAdapter4(
+    /* [in] */ PanelView* host,
+    /* [in] */ IRunnable* onAnimationFinished)
+    : mHost(host)
+    , mOnAnimationFinished(onAnimationFinished)
+{}
+
+ECode PanelView::AnimatorListenerAdapter4::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    mHost->mHeightAnimator = NULL;
+    mOnAnimationFinished->Run();
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(PanelView::AnimatorUpdateListener, Object, IAnimatorUpdateListener);
+PanelView::AnimatorUpdateListener::AnimatorUpdateListener(
+    /* [in] */ PanelView* host)
+    : mHost(host)
+{}
+
+ECode PanelView::AnimatorUpdateListener::OnAnimationUpdate(
+    /* [in] */ IValueAnimator* animation)
+{
+    AutoPtr<IInterface> obj;
+    animation->GetAnimatedValue((IInterface**)&obj);
+    Float fv = 0;
+    IFloat::Probe(obj)->GetValue(&fv);
+    mHost->SetExpandedHeightInternal(fv);
+    return NOERROR;
+}
+
+
+const Boolean PanelView::DEBUG = IPanelBar::DEBUG;
+const String PanelView::TAG("PanelView.class.getSimpleName()");
+CAR_INTERFACE_IMPL(PanelView, FrameLayout, IPanelView);
+void PanelView::OnExpandingFinished()
+{
+    mClosing = FALSE;
+    mBar->OnExpandingFinished();
+}
+
+void PanelView::OnExpandingStarted()
+{
+}
+
+void PanelView::NotifyExpandingStarted()
+{
+    if (!mExpanding) {
+        mExpanding = TRUE;
+        OnExpandingStarted();
+    }
+}
+
+void PanelView::NotifyExpandingFinished()
+{
+    if (mExpanding) {
+        mExpanding = FALSE;
+        OnExpandingFinished();
+    }
+}
+
+void PanelView::SchedulePeek()
+{
+    mPeekPending = TRUE;
+    AutoPtr<IViewConfigurationHelper> helper;
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
+    Int32 timeout = 0;
+    helper->GetTapTimeout(&timeout);
+    PostOnAnimationDelayed(mPeekRunnable, timeout);
+    NotifyBarPanelExpansionChanged();
 }
 
 void PanelView::RunPeekAnimation()
 {
-    // if (DEBUG) LOG("peek to height=%.1f", mPeekHeight);
-    Boolean isStarted;
-    mTimeAnimator->IsStarted(&isStarted);
-    if (isStarted) {
+    mPeekHeight = GetPeekHeight();
+    if (DEBUG) Logger::V(TAG, "%speek to height=%.1f", (mViewName != NULL ? (mViewName + String(": ")).string() : "") , mPeekHeight);
+    if (mHeightAnimator != NULL) {
         return;
     }
-    if (mPeekAnimator == NULL) {
-        AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(1);
-        values->Set(0, mPeekHeight);
-        AutoPtr<IObjectAnimatorHelper> helper;
-        CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-        helper->OfFloat(TO_IINTERFACE(this), String("expandedHeight"),
-            values, (IObjectAnimator**)&mPeekAnimator);
-        mPeekAnimator->SetDuration(250);
-    }
-    mPeekAnimator->Start();
+
+    AutoPtr<IObjectAnimatorHelper> helper;
+    CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
+
+    AutoPtr<ArrayOf<Float> > fvs = ArrayOf<Float>::Alloc(1);
+    (*fvs)[0] = mPeekHeight;
+    helper->OfFloat(TO_IINTERFACE(this), String("expandedHeight"), fvs, (IObjectAnimator**)&mPeekAnimator);
+    IAnimator::Probe(mPeekAnimator)->SetDuration(250);
+    IAnimator::Probe(mPeekAnimator)->SetInterpolator(ITimeInterpolator::Probe(mLinearOutSlowInInterpolator));
+    AutoPtr<AnimatorListenerAdapter1> listener = new AnimatorListenerAdapter1(this);
+    IAnimator::Probe(mPeekAnimator)->AddListener(listener);
+    NotifyExpandingStarted();
+    IAnimator::Probe(mPeekAnimator)->Start();
+    mJustPeeked = TRUE;
 }
 
-void PanelView::PanelView::AnimationTick(
-    /* [in] */ Int64 dtms)
+PanelView::PanelView()
+    : mExpandedHeight(0)
+    , mTracking(FALSE)
+    , mTouchSlop(0)
+    , mHintAnimationRunning(FALSE)
+    , mPeekHeight(0)
+    , mHintDistance(0)
+    , mEdgeTapAreaWidth(0)
+    , mInitialOffsetOnTouch(0)
+    , mExpandedFraction(0)
+    , mPanelClosedOnDown(FALSE)
+    , mHasLayoutedSinceDown(FALSE)
+    , mUpdateFlingVelocity(0)
+    , mUpdateFlingOnLayout(FALSE)
+    , mPeekTouching(FALSE)
+    , mJustPeeked(FALSE)
+    , mClosing(FALSE)
+    , mTouchSlopExceeded(FALSE)
+    , mTrackingPointer(0)
+    , mOverExpandedBeforeFling(FALSE)
+    , mOriginalIndicationY(0)
+    , mTouchAboveFalsingThreshold(FALSE)
+    , mUnlockFalsingThreshold(0)
+    , mInstantExpanding(FALSE)
+    , mInitialTouchY(0)
+    , mInitialTouchX(0)
+    , mTouchDisabled(FALSE)
+    , mPeekPending(FALSE)
+    , mCollapseAfterPeek(FALSE)
+    , mExpanding(FALSE)
+    , mGestureWaitForTouchSlop(FALSE)
 {
-    Boolean isStarted;
-    mTimeAnimator->IsStarted(&isStarted);
-    if (!isStarted) {
-        // XXX HAX to work around bug in TimeAnimator.end() not resetting its last time
-        mTimeAnimator = NULL;
-        CTimeAnimator::New((ITimeAnimator**)&mTimeAnimator);
-        mTimeAnimator->SetTimeListener(mAnimationCallback);
+    mFlingCollapseRunnable = new FlingCollapseRunnable(this);
+    mPeekRunnable = new PeekRunnable(this);
+    mPostCollapseRunnable = new PostCollapseRunnable(this);
+}
 
-        if (mPeekAnimator != NULL) mPeekAnimator->Cancel();
+ECode PanelView::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs)
+{
+    FrameLayout::constructor(context, attrs);
+    mFlingAnimationUtils = new FlingAnimationUtils(context, 0.6f);
+    AnimationUtils::LoadInterpolator(context, Elastos::Droid::R::interpolator::fast_out_slow_in,
+            (IInterpolator**)&mFastOutSlowInInterpolator);
+    AnimationUtils::LoadInterpolator(context, Elastos::Droid::R::interpolator::linear_out_slow_in,
+            (IInterpolator**)&mLinearOutSlowInInterpolator);
 
-        mTimeAnimator->Start();
-
-        mRubberbanding = mRubberbandingEnabled // is it enabled at all?
-                && mExpandedHeight > GetFullHeight() // are we past the end?
-                && mVel >= -mFlingGestureMinDistPx; // was this not possibly a "close" gesture?
-        if (mRubberbanding) {
-            mClosing = TRUE;
-        }
-        else if (mVel == 0) {
-            // if the panel is less than halfway open, close it
-            mClosing = (mFinalTouchY / GetFullHeight()) < 0.5f;
-        }
-        else {
-            mClosing = mExpandedHeight > 0 && mVel < 0;
-        }
-    }
-    else if (dtms > 0) {
-        Float dt = dtms * 0.001f;                  // ms -> s
-        // if (DEBUG) LOG("tick: v=%.2fpx/s dt=%.4fs", mVel, dt);
-        // if (DEBUG) LOG("tick: before: h=%d", (int) mExpandedHeight);
-
-        Float fh = GetFullHeight();
-        Boolean braking = FALSE;
-        if (IPanelView::BRAKES) {
-            if (mClosing) {
-                braking = mExpandedHeight <= mCollapseBrakingDistancePx;
-                mAccel = braking ? 10 * mCollapseAccelPx : -mCollapseAccelPx;
-            }
-            else {
-                braking = mExpandedHeight >= (fh-mExpandBrakingDistancePx);
-                mAccel = braking ? 10 * (-mExpandAccelPx) : mExpandAccelPx;
-            }
-        }
-        else {
-            mAccel = mClosing ? -mCollapseAccelPx : mExpandAccelPx;
-        }
-
-        mVel += mAccel * dt;
-
-        if (braking) {
-            if (mClosing && mVel > -mBrakingSpeedPx) {
-                mVel = -mBrakingSpeedPx;
-            }
-            else if (!mClosing && mVel < mBrakingSpeedPx) {
-                mVel = mBrakingSpeedPx;
-            }
-        }
-        else {
-            if (mClosing && mVel > -mFlingCollapseMinVelocityPx) {
-                mVel = -mFlingCollapseMinVelocityPx;
-            } else if (!mClosing && mVel > mFlingGestureMaxOutputVelocityPx) {
-                mVel = mFlingGestureMaxOutputVelocityPx;
-            }
-        }
-
-        Float h = mExpandedHeight + mVel * dt;
-
-        if (mRubberbanding && h < fh) {
-            h = fh;
-        }
-
-        // if (DEBUG) LOG("tick: new h=%d closing=%s", (int) h, mClosing?"TRUE":"FALSE");
-
-        SetExpandedHeightInternal(h);
-
-        mBar->PanelExpansionChanged(this, mExpandedFraction);
-
-        if (mVel == 0
-                || (mClosing && mExpandedHeight == 0)
-                || ((mRubberbanding || !mClosing) && mExpandedHeight == fh)) {
-            Post(mStopAnimator);
-        }
-    }
+    CBounceInterpolator::New((IInterpolator**)&mBounceInterpolator);
+    return NOERROR;
 }
 
 void PanelView::LoadDimens()
 {
-    AutoPtr<IContext> context = GetContext();
+    AutoPtr<IContext> ctx;
+    GetContext((IContext**)&ctx);
     AutoPtr<IResources> res;
-    context->GetResources((IResources**)&res);
+    ctx->GetResources((IResources**)&res);
 
-    res->GetDimension(SystemUIR::dimen::self_expand_velocity, &mSelfExpandVelocityPx);
-    res->GetDimension(SystemUIR::dimen::self_collapse_velocity, &mSelfCollapseVelocityPx);
-    res->GetDimension(SystemUIR::dimen::fling_expand_min_velocity, &mFlingExpandMinVelocityPx);
-    res->GetDimension(SystemUIR::dimen::fling_collapse_min_velocity, &mFlingCollapseMinVelocityPx);
-    res->GetDimension(SystemUIR::dimen::fling_gesture_min_dist, &mFlingGestureMinDistPx);
-
-    res->GetFraction(SystemUIR::dimen::collapse_min_display_fraction, 1, 1, &mCollapseMinDisplayFraction);
-    res->GetFraction(SystemUIR::dimen::expand_min_display_fraction, 1, 1, &mExpandMinDisplayFraction);
-
-    res->GetDimension(SystemUIR::dimen::expand_accel, &mExpandAccelPx);
-    res->GetDimension(SystemUIR::dimen::collapse_accel, &mCollapseAccelPx);
-    res->GetDimension(SystemUIR::dimen::fling_gesture_max_x_velocity, &mFlingGestureMaxXVelocityPx);
-    res->GetDimension(SystemUIR::dimen::fling_gesture_max_output_velocity, &mFlingGestureMaxOutputVelocityPx);
-    res->GetDimension(SystemUIR::dimen::peek_height, &mPeekHeight);
-
-    mPeekHeight += GetPaddingBottom(); // our window might have a dropshadow
-    if (mHandleView != NULL) {
-        Int32 top;
-        mHandleView->GetPaddingTop(&top); // the handle might have a topshadow
-        mPeekHeight -= top;
-    }
+    AutoPtr<IViewConfigurationHelper> helper;
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
+    AutoPtr<IViewConfiguration> configuration;
+    helper->Get(ctx, (IViewConfiguration**)&configuration);
+    configuration->GetScaledTouchSlop(&mTouchSlop);
+    res->GetDimension(R::dimen::hint_move_distance, &mHintDistance);
+    res->GetDimensionPixelSize(R::dimen::edge_tap_area_width, &mEdgeTapAreaWidth);
+    res->GetDimensionPixelSize(R::dimen::unlock_falsing_threshold, &mUnlockFalsingThreshold);
 }
 
 void PanelView::TrackMovement(
     /* [in] */ IMotionEvent* event)
 {
-    Float rx, ry, x, y;
-    event->GetRawX(&rx);
-    event->GetRawY(&ry);
-    event->GetX(&x);
-    event->GetY(&y);
     // Add movement to velocity tracker using raw screen X and Y coordinates instead
     // of window coordinates because the window frame may be moving at the same time.
-    Float deltaX = rx - x;
-    Float deltaY = ry - y;
+    Float fv1 = 0, fv2 = 0;
+    Float deltaX = (event->GetRawX(&fv1), fv1) - (event->GetX(&fv2), fv2);
+    Float deltaY = (event->GetRawY(&fv1), fv1) - (event->GetY(&fv2), fv2);
     event->OffsetLocation(deltaX, deltaY);
-    if (mVelocityTracker != NULL)
-        mVelocityTracker->AddMovement(event);
+    if (mVelocityTracker != NULL) mVelocityTracker->AddMovement(event);
     event->OffsetLocation(-deltaX, -deltaY);
 }
 
-// Pass all touches along to the handle, allowing the user to
-// drag the panel closed from its interior
-//@Override
-Boolean PanelView::OnTouchEvent(
-    /* [in] */ IMotionEvent* event)
+ECode PanelView::SetTouchDisabled(
+    /* [in] */ Boolean disabled)
 {
-    Boolean result;
-    mHandleView->DispatchTouchEvent(event, &result);
-    return result;
+    mTouchDisabled = disabled;
+    return NOERROR;
 }
 
-//@Override
+ECode PanelView::OnTouchEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (mInstantExpanding || mTouchDisabled) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    /*
+     * We capture touch events here and update the expand height here in case according to
+     * the users fingers. This also handles multi-touch.
+     *
+     * If the user just clicks shortly, we give him a quick peek of the shade.
+     *
+     * Flinging is also enabled in order to open or close the shade.
+     */
+
+    Int32 pointerIndex = 0;
+    event->FindPointerIndex(mTrackingPointer, &pointerIndex);
+    if (pointerIndex < 0) {
+        pointerIndex = 0;
+        event->GetPointerId(pointerIndex, &mTrackingPointer);
+    }
+    Float fv1 = 0, fv2 = 0;
+    Float y = (event->GetY(pointerIndex, &fv1), fv1);
+    Float x = (event->GetX(pointerIndex, &fv1), fv1);
+
+    Int32 value = 0, masked = 0;
+    if ((event->GetActionMasked(&masked), masked) == IMotionEvent::ACTION_DOWN) {
+        mGestureWaitForTouchSlop = mExpandedHeight == 0.f;
+    }
+    Boolean waitForTouchSlop = HasConflictingGestures() || mGestureWaitForTouchSlop;
+
+    switch (masked) {
+        case IMotionEvent::ACTION_DOWN:
+            mInitialTouchY = y;
+            mInitialTouchX = x;
+            mInitialOffsetOnTouch = mExpandedHeight;
+            mTouchSlopExceeded = FALSE;
+            mJustPeeked = FALSE;
+            mPanelClosedOnDown = mExpandedHeight == 0.0f;
+            mHasLayoutedSinceDown = FALSE;
+            mUpdateFlingOnLayout = FALSE;
+            mPeekTouching = mPanelClosedOnDown;
+            mTouchAboveFalsingThreshold = FALSE;
+            if (mVelocityTracker == NULL) {
+                InitVelocityTracker();
+            }
+            TrackMovement(event);
+            if (!waitForTouchSlop || (mHeightAnimator != NULL && !mHintAnimationRunning) ||
+                    mPeekPending || mPeekAnimator != NULL) {
+                if (mHeightAnimator != NULL) {
+                    IAnimator::Probe(mHeightAnimator)->Cancel(); // end any outstanding animations
+                }
+                CancelPeek();
+                mTouchSlopExceeded = (mHeightAnimator != NULL && !mHintAnimationRunning)
+                        || mPeekPending || mPeekAnimator != NULL;
+                OnTrackingStarted();
+            }
+            if (mExpandedHeight == 0) {
+                SchedulePeek();
+            }
+            break;
+
+        case IMotionEvent::ACTION_POINTER_UP: {
+            event->GetActionIndex(&value);
+            Int32 upPointer = 0;
+            event->GetPointerId(value, &upPointer);
+            if (mTrackingPointer == upPointer) {
+                // gesture is ongoing, find a new pointer to track
+                const Int32 newIndex = (event->GetPointerId(0, &value), value) != upPointer ? 0 : 1;
+                const Float newY = (event->GetY(newIndex, &fv1), fv1);
+                const Float newX = (event->GetX(newIndex, &fv1), fv1);
+                event->GetPointerId(newIndex, &mTrackingPointer);
+                mInitialOffsetOnTouch = mExpandedHeight;
+                mInitialTouchY = newY;
+                mInitialTouchX = newX;
+            }
+            break;
+        }
+
+        case IMotionEvent::ACTION_MOVE: {
+            Float h = y - mInitialTouchY;
+
+            // If the panel was collapsed when touching, we only need to check for the
+            // y-component of the gesture, as we have no conflicting horizontal gesture.
+            if (Elastos::Core::Math::Abs(h) > mTouchSlop
+                    && (Elastos::Core::Math::Abs(h) > Elastos::Core::Math::Abs(x - mInitialTouchX)
+                            || mInitialOffsetOnTouch == 0.f)) {
+                mTouchSlopExceeded = TRUE;
+                if (waitForTouchSlop && !mTracking) {
+                    if (!mJustPeeked) {
+                        mInitialOffsetOnTouch = mExpandedHeight;
+                        mInitialTouchX = x;
+                        mInitialTouchY = y;
+                        h = 0;
+                    }
+                    if (mHeightAnimator != NULL) {
+                        IAnimator::Probe(mHeightAnimator)->Cancel(); // end any outstanding animations
+                    }
+                    Boolean tmp = FALSE;
+                    RemoveCallbacks(mPeekRunnable, &tmp);
+                    mPeekPending = FALSE;
+                    OnTrackingStarted();
+                }
+            }
+            const Float newHeight = Elastos::Core::Math::Max((Float)0, h + mInitialOffsetOnTouch);
+            if (newHeight > mPeekHeight) {
+                if (mPeekAnimator != NULL) {
+                    IAnimator::Probe(mPeekAnimator)->Cancel();
+                }
+                mJustPeeked = FALSE;
+            }
+            if (-h >= GetFalsingThreshold()) {
+                mTouchAboveFalsingThreshold = TRUE;
+            }
+            if (!mJustPeeked && (!waitForTouchSlop || mTracking) && !IsTrackingBlocked()) {
+                SetExpandedHeightInternal(newHeight);
+            }
+
+            TrackMovement(event);
+            break;
+        }
+
+        case IMotionEvent::ACTION_UP:
+        case IMotionEvent::ACTION_CANCEL: {
+            mTrackingPointer = -1;
+            TrackMovement(event);
+            if ((mTracking && mTouchSlopExceeded)
+                    || Elastos::Core::Math::Abs(x - mInitialTouchX) > mTouchSlop
+                    || Elastos::Core::Math::Abs(y - mInitialTouchY) > mTouchSlop
+                    || masked == IMotionEvent::ACTION_CANCEL) {
+                Float vel = 0.f;
+                Float vectorVel = 0.f;
+                if (mVelocityTracker != NULL) {
+                    mVelocityTracker->ComputeCurrentVelocity(1000);
+                    mVelocityTracker->GetYVelocity(&vel);
+                    mVelocityTracker->GetXVelocity(&fv1);
+                    mVelocityTracker->GetYVelocity(&fv2);
+                    vectorVel = (Float) Elastos::Core::Math::Hypot(fv1, fv2);
+                }
+                Boolean expand = FlingExpands(vel, vectorVel);
+                OnTrackingStopped(expand);
+                Boolean t1 = FALSE, t2 = FALSE;
+                DozeLog::TraceFling(expand, mTouchAboveFalsingThreshold,
+                        (mStatusBar->IsFalsingThresholdNeeded(&t1), t1),
+                        (mStatusBar->IsScreenOnComingFromTouch(&t2), t2));
+                Fling(vel, expand);
+                mUpdateFlingOnLayout = expand && mPanelClosedOnDown && !mHasLayoutedSinceDown;
+                if (mUpdateFlingOnLayout) {
+                    mUpdateFlingVelocity = vel;
+                }
+            }
+            else {
+                Boolean expands = OnEmptySpaceClick(mInitialTouchX);
+                OnTrackingStopped(expands);
+            }
+
+            if (mVelocityTracker != NULL) {
+                mVelocityTracker->Recycle();
+                mVelocityTracker = NULL;
+            }
+            mPeekTouching = FALSE;
+            break;
+        }
+    }
+    *result = !waitForTouchSlop || mTracking;
+    return NOERROR;
+}
+
+Int32 PanelView::GetFalsingThreshold()
+{
+    Boolean tmp = FALSE;
+    mStatusBar->IsScreenOnComingFromTouch(&tmp);
+    Float factor = tmp ? 1.5f : 1.0f;
+    return (Int32) (mUnlockFalsingThreshold * factor);
+}
+
+void PanelView::OnTrackingStopped(
+    /* [in] */ Boolean expand)
+{
+    mTracking = FALSE;
+    mBar->OnTrackingStopped(this, expand);
+}
+
+void PanelView::OnTrackingStarted()
+{
+    mClosing = FALSE;
+    mTracking = TRUE;
+    mCollapseAfterPeek = FALSE;
+    mBar->OnTrackingStarted(this);
+    NotifyExpandingStarted();
+}
+
+ECode PanelView::OnInterceptTouchEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (mInstantExpanding) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    /*
+     * If the user drags anywhere inside the panel we intercept it if he moves his finger
+     * upwards. This allows closing the shade from anywhere inside the panel.
+     *
+     * We only do this if the current content is scrolled to the bottom,
+     * i.e IsScrolledToBottom() is TRUE and therefore there is no conflicting scrolling gesture
+     * possible.
+     */
+    Int32 pointerIndex = 0;
+    event->FindPointerIndex(mTrackingPointer, &pointerIndex);
+    if (pointerIndex < 0) {
+        pointerIndex = 0;
+        event->GetPointerId(pointerIndex, &mTrackingPointer);
+    }
+    Float x = 0;
+    event->GetX(pointerIndex, &x);
+    Float y = 0;
+    event->GetY(pointerIndex, &y);
+    Boolean scrolledToBottom = IsScrolledToBottom();
+
+    Int32 masked = 0;
+    event->GetActionMasked(&masked);
+    switch (masked) {
+        case IMotionEvent::ACTION_DOWN:
+            mStatusBar->UserActivity();
+            if ((mHeightAnimator != NULL && !mHintAnimationRunning) ||
+                    mPeekPending || mPeekAnimator != NULL) {
+                if (mHeightAnimator != NULL) {
+                    IAnimator::Probe(mHeightAnimator)->Cancel(); // end any outstanding animations
+                }
+                CancelPeek();
+                mTouchSlopExceeded = TRUE;
+                *result = TRUE;
+                return NOERROR;
+            }
+            mInitialTouchY = y;
+            mInitialTouchX = x;
+            mTouchSlopExceeded = FALSE;
+            mJustPeeked = FALSE;
+            mPanelClosedOnDown = mExpandedHeight == 0.0f;
+            mHasLayoutedSinceDown = FALSE;
+            mUpdateFlingOnLayout = FALSE;
+            mTouchAboveFalsingThreshold = FALSE;
+            InitVelocityTracker();
+            TrackMovement(event);
+            break;
+        case IMotionEvent::ACTION_POINTER_UP: {
+            Int32 v = 0;
+            event->GetActionIndex(&v);
+            Int32 upPointer = 0;
+            event->GetPointerId(v, &upPointer);
+            if (mTrackingPointer == upPointer) {
+                // gesture is ongoing, find a new pointer to track
+                event->GetPointerId(0, &v);
+                const Int32 newIndex = v != upPointer ? 0 : 1;
+                event->GetPointerId(newIndex, &mTrackingPointer);
+                event->GetX(newIndex, &mInitialTouchX);
+                event->GetY(newIndex, &mInitialTouchY);
+            }
+            break;
+        }
+
+        case IMotionEvent::ACTION_MOVE: {
+            const Float h = y - mInitialTouchY;
+            TrackMovement(event);
+            if (scrolledToBottom) {
+                if (h < -mTouchSlop && h < - Elastos::Core::Math::Abs(x - mInitialTouchX)) {
+                    if (mHeightAnimator != NULL) {
+                        IAnimator::Probe(mHeightAnimator)->Cancel();
+                    }
+                    mInitialOffsetOnTouch = mExpandedHeight;
+                    mInitialTouchY = y;
+                    mInitialTouchX = x;
+                    mTracking = TRUE;
+                    mTouchSlopExceeded = TRUE;
+                    OnTrackingStarted();
+                    *result = TRUE;
+                    return NOERROR;
+                }
+            }
+            break;
+        }
+        case IMotionEvent::ACTION_CANCEL:
+        case IMotionEvent::ACTION_UP:
+            break;
+    }
+    *result = FALSE;
+    return NOERROR;
+}
+
+void PanelView::InitVelocityTracker()
+{
+    if (mVelocityTracker != NULL) {
+        mVelocityTracker->Recycle();
+    }
+    AutoPtr<IContext> ctx;
+    GetContext((IContext**)&ctx);
+    mVelocityTracker = VelocityTrackerFactory::Obtain(ctx);
+}
+
+Boolean PanelView::IsScrolledToBottom()
+{
+    return TRUE;
+}
+
+Float PanelView::GetContentHeight()
+{
+    return mExpandedHeight;
+}
+
 ECode PanelView::OnFinishInflate()
 {
-       FrameLayout::OnFinishInflate();
-       //TODO mHandleView = FindViewById(R.id.handle);
-
+    FrameLayout::OnFinishInflate();
     LoadDimens();
-
-    // if (DEBUG) LOG("handle view: " + mHandleView);
-    if (mHandleView != NULL) {
-        AutoPtr<IViewOnTouchListener> listener = new ViewOnTouchListener(this);
-        mHandleView->SetOnTouchListener(listener);
-    }
     return NOERROR;
 }
 
-ECode PanelView::Fling(
+void PanelView::OnConfigurationChanged(
+    /* [in] */ IConfiguration* newConfig)
+{
+    FrameLayout::OnConfigurationChanged(newConfig);
+    LoadDimens();
+}
+
+Boolean PanelView::FlingExpands(
     /* [in] */ Float vel,
-    /* [in] */ Boolean always)
+    /* [in] */ Float vectorVel)
 {
-    // if (DEBUG) LOG("fling: vel=%.3f, this=%s", vel, this);
-    mVel = vel;
-
-    if (always || mVel != 0) {
-        AnimationTick(0); // begin the animation
+    if (IsBelowFalsingThreshold()) {
+        return TRUE;
     }
-    return NOERROR;
+    if (Elastos::Core::Math::Abs(vectorVel) < mFlingAnimationUtils->GetMinVelocityPxPerSecond()) {
+        Float fv = 0;
+        GetExpandedFraction(&fv);
+        return fv > 0.5f;
+    }
+
+    return vel > 0;
 }
 
-//@Override
-ECode PanelView::OnAttachedToWindow()
+Boolean PanelView::IsBelowFalsingThreshold()
 {
-    FrameLayout::OnAttachedToWindow();
-    AutoPtr<IResources> res = GetResources();
-    res->GetResourceName(GetId(), &mViewName);
-    return NOERROR;
+    Boolean tmp = FALSE;
+    return !mTouchAboveFalsingThreshold && (mStatusBar->IsFalsingThresholdNeeded(&tmp), tmp);
 }
 
-String PanelView::GetName()
+void PanelView::Fling(
+    /* [in] */ Float vel,
+    /* [in] */ Boolean expand)
 {
-    return mViewName;
-}
+    CancelPeek();
+    Float target = expand ? GetMaxPanelHeight() : 0.0f;
 
-//@Override
-void PanelView::OnViewAdded(
-    /* [in] */ IView* child)
-{
-    // if (DEBUG) LOG("onViewAdded: " + child);
-}
+    // Hack to make the expand transition look nice when clear all button is visible - we make
+    // the animation only to the last notification, and then jump to the maximum panel height so
+    // clear all just fades in and the decelerating motion is towards the last notification.
+    const Boolean clearAllExpandHack = expand && FullyExpandedClearAllVisible()
+            && mExpandedHeight < GetMaxPanelHeight() - GetClearAllHeight()
+            && !IsClearAllVisible();
+    if (clearAllExpandHack) {
+        target = GetMaxPanelHeight() - GetClearAllHeight();
+    }
+    if (target == mExpandedHeight || (GetOverExpansionAmount() > 0.f && expand)) {
+        NotifyExpandingFinished();
+        return;
+    }
+    mOverExpandedBeforeFling = GetOverExpansionAmount() > 0.f;
+    AutoPtr<IValueAnimator> animator = CreateHeightAnimator(target);
 
-AutoPtr<IView> PanelView::GetHandle()
-{
-    return mHandleView;
-}
+    Int32 h = 0;
+    GetHeight(&h);
+    if (expand) {
+        Boolean belowFalsingThreshold = IsBelowFalsingThreshold();
+        if (belowFalsingThreshold) {
+            vel = 0;
+        }
+        mFlingAnimationUtils->Apply(IAnimator::Probe(animator), mExpandedHeight, target, vel, h);
+        if (belowFalsingThreshold) {
+            IAnimator::Probe(animator)->SetDuration(350);
+        }
+    }
+    else {
+        mFlingAnimationUtils->ApplyDismissing(IAnimator::Probe(animator), mExpandedHeight, target, vel, h);
 
-// Rubberbands the panel to hold its contents.
-//@Override
-void PanelView::OnMeasure(
-    /* [in] */ Int32 widthMeasureSpec,
-    /* [in] */  Int32 heightMeasureSpec)
-{
-    FrameLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
-
-    // if (DEBUG) LOG("onMeasure(%d, %d) -> (%d, %d)",
-    //         widthMeasureSpec, heightMeasureSpec, getMeasuredWidth(), getMeasuredHeight());
-
-    // Did one of our children change size?
-    Int32 newHeight = GetMeasuredHeight();
-    if (newHeight != mFullHeight) {
-        mFullHeight = newHeight;
-        Boolean isStarted = FALSE;
-        if (!mTracking && !mRubberbanding)
-            mTimeAnimator->IsStarted(&isStarted);
-        // If the user isn't actively poking us, let's rubberband to the content
-        if (!mTracking && !mRubberbanding && !isStarted
-                && mExpandedHeight > 0 && mExpandedHeight != mFullHeight) {
-            mExpandedHeight = mFullHeight;
+        // Make it shorter if we run a canned animation
+        if (vel == 0) {
+            Int64 d = 0;
+            animator->GetDuration(&d);
+            IAnimator::Probe(animator)->SetDuration((Int64)
+                    (d * GetCannedFlingDurationFactor()));
         }
     }
 
-    heightMeasureSpec = MeasureSpec::MakeMeasureSpec(
-                (Int32) mExpandedHeight, MeasureSpec::AT_MOST); // MeasureSpec.getMode(heightMeasureSpec));
-    SetMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
+    AutoPtr<AnimatorListenerAdapter2> listener = new AnimatorListenerAdapter2(this, clearAllExpandHack);
+    IAnimator::Probe(animator)->AddListener(listener);
+    mHeightAnimator = animator;
+    IAnimator::Probe(animator)->Start();
 }
 
+ECode PanelView::OnAttachedToWindow()
+{
+    FrameLayout::OnAttachedToWindow();
+    AutoPtr<IResources> res;
+    GetResources((IResources**)&res);
+    Int32 id = 0;
+    GetId(&id);
+    res->GetResourceName(id, &mViewName);
+    return NOERROR;
+}
+
+ECode PanelView::GetName(
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(name);
+    *name = mViewName;
+    return NOERROR;
+}
 
 ECode PanelView::SetExpandedHeight(
     /* [in] */ Float height)
 {
-    // if (DEBUG) LOG("setExpandedHeight(%.1f)", height);
-    mRubberbanding = FALSE;
-    Boolean isRunning;
-    mTimeAnimator->IsRunning(&isRunning);
-    if (isRunning) {
-        Post(mStopAnimator);
-    }
-
-    SetExpandedHeightInternal(height);
-    mBar->PanelExpansionChanged(this, mExpandedFraction);
+    if (DEBUG) Logger::V(TAG, "%ssetExpandedHeight(%.1f)", (mViewName != NULL ? (mViewName + String(": ")).string() : "")
+        , height);
+    SetExpandedHeightInternal(height + GetOverExpansionPixels());
     return NOERROR;
 }
 
-//@Override
-void PanelView::OnLayout (
+ECode PanelView::OnLayout (
     /* [in] */ Boolean changed,
     /* [in] */ Int32 left,
     /* [in] */ Int32 top,
     /* [in] */ Int32 right,
     /* [in] */ Int32 bottom)
 {
-    // if (DEBUG) LOG("onLayout: changed=%s, bottom=%d eh=%d fh=%d", changed?"T":"f", bottom, (int)mExpandedHeight, mFullHeight);
     FrameLayout::OnLayout(changed, left, top, right, bottom);
+    RequestPanelHeightUpdate();
+    mHasLayoutedSinceDown = TRUE;
+    if (mUpdateFlingOnLayout) {
+        AbortAnimations();
+        Fling(mUpdateFlingVelocity, TRUE);
+        mUpdateFlingOnLayout = FALSE;
+    }
+    return NOERROR;
+}
+
+void PanelView::RequestPanelHeightUpdate()
+{
+    Float currentMaxPanelHeight = GetMaxPanelHeight();
+
+    // If the user isn't actively poking us, let's update the height
+    if ((!mTracking || IsTrackingBlocked())
+            && mHeightAnimator == NULL
+            && mExpandedHeight > 0
+            && currentMaxPanelHeight != mExpandedHeight
+            && !mPeekPending
+            && mPeekAnimator == NULL
+            && !mPeekTouching) {
+        SetExpandedHeight(currentMaxPanelHeight);
+    }
 }
 
 ECode PanelView::SetExpandedHeightInternal(
     /* [in] */ Float h)
 {
-    using Elastos::Core::Math;
-    Float fh = GetFullHeight();
-    if (fh == 0) {
-        // Hmm, full height hasn't been computed yet
+    Float fhWithoutOverExpansion = GetMaxPanelHeight() - GetOverExpansionAmount();
+    if (mHeightAnimator == NULL) {
+        Float overExpansionPixels = Elastos::Core::Math::Max((Float)0, h - fhWithoutOverExpansion);
+        if (GetOverExpansionPixels() != overExpansionPixels && mTracking) {
+            SetOverExpansion(overExpansionPixels, TRUE /* isPixels */);
+        }
+        mExpandedHeight = Elastos::Core::Math::Min(h, fhWithoutOverExpansion) + GetOverExpansionAmount();
+    }
+    else {
+        mExpandedHeight = h;
+        if (mOverExpandedBeforeFling) {
+            SetOverExpansion(Elastos::Core::Math::Max((Float)0, h - fhWithoutOverExpansion), FALSE /* isPixels */);
+        }
     }
 
-    if (h < 0) h = 0;
-    if (!(mRubberbandingEnabled && (mTracking || mRubberbanding)) && h > fh) h = fh;
-    mExpandedHeight = h;
-
-    // if (DEBUG) LOG("setExpansion: height=%.1f fh=%.1f tracking=%s rubber=%s", h, fh, mTracking?"T":"f", mRubberbanding?"T":"f");
-
-    RequestLayout();
-//        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
-//        lp.height = (int) mExpandedHeight;
-//        setLayoutParams(lp);
-
-    mExpandedFraction = Math::Min(1.0f, (fh == 0) ? 0 : h / fh);
+    mExpandedHeight = Elastos::Core::Math::Max((Float)0, mExpandedHeight);
+    OnHeightUpdated(mExpandedHeight);
+    mExpandedFraction = Elastos::Core::Math::Min(1.f, fhWithoutOverExpansion == 0
+            ? 0
+            : mExpandedHeight / fhWithoutOverExpansion);
+    NotifyBarPanelExpansionChanged();
     return NOERROR;
-}
-
-Float PanelView::GetFullHeight()
-{
-    if (mFullHeight <= 0) {
-        // if (DEBUG) LOG("Forcing measure() since fullHeight=" + mFullHeight);
-        Measure(MeasureSpec::MakeMeasureSpec(IViewGroupLayoutParams::WRAP_CONTENT, MeasureSpec::EXACTLY),
-                MeasureSpec::MakeMeasureSpec(IViewGroupLayoutParams::WRAP_CONTENT, MeasureSpec::EXACTLY));
-    }
-    return mFullHeight;
 }
 
 ECode PanelView::SetExpandedFraction(
     /* [in] */ Float frac)
 {
-    return SetExpandedHeight(GetFullHeight() * frac);
+    SetExpandedHeight(GetMaxPanelHeight() * frac);
+    return NOERROR;
 }
 
-Float PanelView::GetExpandedHeight()
+ECode PanelView::GetExpandedHeight(
+    /* [out] */ Float* result)
 {
-    return mExpandedHeight;
+    VALIDATE_NOT_NULL(result);
+    *result = mExpandedHeight;
+    return NOERROR;
 }
 
-Float PanelView::GetExpandedFraction()
+ECode PanelView::GetExpandedFraction(
+    /* [out] */ Float* result)
 {
-    return mExpandedFraction;
+    VALIDATE_NOT_NULL(result);
+    *result = mExpandedFraction;
+    return NOERROR;
 }
 
-Boolean PanelView::IsFullyExpanded()
+ECode PanelView::IsFullyExpanded(
+    /* [out] */ Boolean* result)
 {
-    return mExpandedHeight >= GetFullHeight();
+    VALIDATE_NOT_NULL(result);
+    *result = mExpandedHeight >= GetMaxPanelHeight();
+    return NOERROR;
 }
 
-Boolean PanelView::IsFullyCollapsed()
+ECode PanelView::IsFullyCollapsed(
+    /* [out] */ Boolean* result)
 {
-    return mExpandedHeight <= 0;
+    VALIDATE_NOT_NULL(result);
+    *result = mExpandedHeight <= 0;
+    return NOERROR;
 }
 
-Boolean PanelView::IsCollapsing()
+ECode PanelView::IsCollapsing(
+    /* [out] */ Boolean* result)
 {
-    return mClosing;
+    VALIDATE_NOT_NULL(result);
+    *result = mClosing;
+    return NOERROR;
+}
+
+ECode PanelView::IsTracking(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mTracking;
+    return NOERROR;
 }
 
 ECode PanelView::SetBar(
@@ -640,30 +954,262 @@ ECode PanelView::SetBar(
     return NOERROR;
 }
 
-ECode PanelView::Collapse()
+ECode PanelView::Collapse(
+    /* [in] */ Boolean delayed)
 {
-    // TODO: abort animation or ongoing touch
-    // if (DEBUG) LOG("collapse: " + this);
-    if (!IsFullyCollapsed()) {
-        mTimeAnimator->Cancel();
+    if (DEBUG) Logger::V(TAG, "%scollapse: %s", (mViewName != NULL ? (mViewName + String(": ")).string() : "")
+            , TO_CSTR(this));
+
+    Boolean tmp = FALSE;
+    if (mPeekPending || mPeekAnimator != NULL) {
+        mCollapseAfterPeek = TRUE;
+        if (mPeekPending) {
+
+            // We know that the whole gesture is just a peek triggered by a simple click, so
+            // better start it now.
+            Boolean tmp = FALSE;
+            RemoveCallbacks(mPeekRunnable, &tmp);
+            mPeekRunnable->Run();
+        }
+    }
+    else if ((IsFullyCollapsed(&tmp), !tmp) && !mTracking && !mClosing) {
+        if (mHeightAnimator != NULL) {
+            IAnimator::Probe(mHeightAnimator)->Cancel();
+        }
         mClosing = TRUE;
-        // collapse() should never be a rubberband, even if an animation is already running
-        mRubberbanding = FALSE;
-        Fling(-mSelfCollapseVelocityPx, /*always=*/ TRUE);
+        NotifyExpandingStarted();
+        if (delayed) {
+            PostDelayed(mFlingCollapseRunnable, 120, &tmp);
+        }
+        else {
+            Fling(0, FALSE /* expand */);
+        }
     }
     return NOERROR;
 }
 
 ECode PanelView::Expand()
 {
-    // if (DEBUG) LOG("expand: " + this);
-    if (IsFullyCollapsed()) {
+    if (DEBUG) Logger::V(TAG, "%sexpand: %s", (mViewName != NULL ? (mViewName + String(": ")).string() : ""), TO_CSTR(this));
+    Boolean tmp = FALSE;
+    if (IsFullyCollapsed(&tmp), tmp) {
         mBar->StartOpeningPanel(this);
-        Fling(mSelfExpandVelocityPx, /*always=*/ TRUE);
+        NotifyExpandingStarted();
+        Fling(0, TRUE /* expand */);
     }
-    // else if (DEBUG) {
-    //     if (DEBUG) LOG("skipping expansion: is expanded");
-    // }
+    else if (DEBUG) {
+        if (DEBUG) Logger::V(TAG, "skipping expansion: is expanded");
+    }
+    return NOERROR;
+}
+
+ECode PanelView::CancelPeek()
+{
+    if (mPeekAnimator != NULL) {
+        IAnimator::Probe(mPeekAnimator)->Cancel();
+    }
+    Boolean tmp = FALSE;
+    RemoveCallbacks(mPeekRunnable, &tmp);
+    mPeekPending = FALSE;
+
+    // When peeking, we already tell mBar that we expanded ourselves. Make sure that we also
+    // notify mBar that we might have closed ourselves.
+    NotifyBarPanelExpansionChanged();
+    return NOERROR;
+}
+
+ECode PanelView::InstantExpand()
+{
+    mInstantExpanding = TRUE;
+    mUpdateFlingOnLayout = FALSE;
+    AbortAnimations();
+    CancelPeek();
+    if (mTracking) {
+        OnTrackingStopped(TRUE /* expands */); // The panel is expanded after this call.
+    }
+    if (mExpanding) {
+        NotifyExpandingFinished();
+    }
+    SetVisibility(IView::VISIBLE);
+
+    // Wait for window manager to pickup the change, so we know the maximum height of the panel
+    // then.
+    AutoPtr<IViewTreeObserver> vto;
+    GetViewTreeObserver((IViewTreeObserver**)&vto);
+    AutoPtr<OnGlobalLayoutListener> listener = new OnGlobalLayoutListener(this);
+    vto->AddOnGlobalLayoutListener(listener);
+
+    // Make sure a layout really happens.
+    RequestLayout();
+    return NOERROR;
+}
+
+ECode PanelView::InstantCollapse()
+{
+    AbortAnimations();
+    SetExpandedFraction(0.f);
+    if (mExpanding) {
+        NotifyExpandingFinished();
+    }
+    return NOERROR;
+}
+
+void PanelView::AbortAnimations()
+{
+    CancelPeek();
+    if (mHeightAnimator != NULL) {
+        IAnimator::Probe(mHeightAnimator)->Cancel();
+    }
+    Boolean tmp = FALSE;
+    RemoveCallbacks(mPostCollapseRunnable, &tmp);
+    RemoveCallbacks(mFlingCollapseRunnable, &tmp);
+}
+
+void PanelView::StartUnlockHintAnimation()
+{
+    // We don't need to hint the user if an animation is already running or the user is changing
+    // the expansion.
+    if (mHeightAnimator != NULL || mTracking) {
+        return;
+    }
+    CancelPeek();
+    NotifyExpandingStarted();
+    AutoPtr<Runnable1> run = new Runnable1(this);
+    StartUnlockHintAnimationPhase1(run);
+    mStatusBar->OnUnlockHintStarted();
+    mHintAnimationRunning = TRUE;
+}
+
+void PanelView::StartUnlockHintAnimationPhase1(
+    /* [in] */ IRunnable* onAnimationFinished)
+{
+    Float target = Elastos::Core::Math::Max((Float)0, GetMaxPanelHeight() - mHintDistance);
+    AutoPtr<IValueAnimator> animator = CreateHeightAnimator(target);
+    IAnimator::Probe(animator)->SetDuration(250);
+    IAnimator::Probe(animator)->SetInterpolator(ITimeInterpolator::Probe(mFastOutSlowInInterpolator));
+    AutoPtr<AnimatorListenerAdapter3> listener = new AnimatorListenerAdapter3(this, onAnimationFinished);
+    IAnimator::Probe(animator)->AddListener(listener);
+    IAnimator::Probe(animator)->Start();
+    mHeightAnimator = animator;
+    AutoPtr<IView> view;
+    mKeyguardBottomArea->GetIndicationView((IView**)&view);
+    view->GetY(&mOriginalIndicationY);
+
+    AutoPtr<IViewPropertyAnimator> vpa;
+    view->Animate((IViewPropertyAnimator**)&vpa);
+    vpa->Y(mOriginalIndicationY - mHintDistance);
+    vpa->SetDuration(250);
+    vpa->SetInterpolator(ITimeInterpolator::Probe(mFastOutSlowInInterpolator));
+    AutoPtr<Runnable2> run = new Runnable2(this);
+    vpa->WithEndAction(run);
+    vpa->Start();
+}
+
+void PanelView::StartUnlockHintAnimationPhase2(
+    /* [in] */ IRunnable* onAnimationFinished)
+{
+    AutoPtr<IValueAnimator> animator = CreateHeightAnimator(GetMaxPanelHeight());
+    IAnimator::Probe(animator)->SetDuration(450);
+    IAnimator::Probe(animator)->SetInterpolator(ITimeInterpolator::Probe(mBounceInterpolator));
+    AutoPtr<AnimatorListenerAdapter4> listener = new AnimatorListenerAdapter4(this, onAnimationFinished);
+    IAnimator::Probe(animator)->AddListener(listener);
+    IAnimator::Probe(animator)->Start();
+    mHeightAnimator = animator;
+}
+
+AutoPtr<IValueAnimator> PanelView::CreateHeightAnimator(
+    /* [in] */ Float targetHeight)
+{
+    AutoPtr<IValueAnimatorHelper> helper;
+    CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
+    AutoPtr<IValueAnimator> animator;
+    AutoPtr<ArrayOf<Float> > fvs = ArrayOf<Float>::Alloc(2);
+    (*fvs)[0] = mExpandedHeight;
+    (*fvs)[1] = targetHeight;
+    helper->OfFloat(fvs, (IValueAnimator**)&animator);
+    AutoPtr<AnimatorUpdateListener> listener = new AnimatorUpdateListener(this);
+    animator->AddUpdateListener(listener);
+    return animator;
+}
+
+void PanelView::NotifyBarPanelExpansionChanged()
+{
+    mBar->PanelExpansionChanged(this, mExpandedFraction, mExpandedFraction > 0.f || mPeekPending
+            || mPeekAnimator != NULL);
+}
+
+Boolean PanelView::OnEmptySpaceClick(
+    /* [in] */ Float x)
+{
+    if (mHintAnimationRunning) {
+        return TRUE;
+    }
+
+    Int32 state = 0, w = 0;
+    if (x < mEdgeTapAreaWidth
+            && (mStatusBar->GetBarState(&state), state) == IStatusBarState::KEYGUARD) {
+        OnEdgeClicked(FALSE /* right */);
+        return TRUE;
+    }
+    else if (x > (GetWidth(&w), w) - mEdgeTapAreaWidth
+            && (mStatusBar->GetBarState(&state), state) == IStatusBarState::KEYGUARD) {
+        OnEdgeClicked(TRUE /* right */);
+        return TRUE;
+    }
+
+    return OnMiddleClicked();
+}
+
+Boolean PanelView::OnMiddleClicked()
+{
+    Int32 state = 0;
+    mStatusBar->GetBarState(&state);
+    switch (state) {
+        case IStatusBarState::KEYGUARD:
+            if (!IsDozing()) {
+                StartUnlockHintAnimation();
+            }
+            return TRUE;
+        case IStatusBarState::SHADE_LOCKED:
+            mStatusBar->GoToKeyguard();
+            return TRUE;
+        case IStatusBarState::SHADE: {
+            // This gets called in the middle of the touch handling, where the state is still
+            // that we are tracking the panel. Collapse the panel after this is done.
+            Boolean tmp = FALSE;
+            Post(mPostCollapseRunnable, &tmp);
+            return FALSE;
+        }
+        default:
+            return TRUE;
+    }
+}
+
+ECode PanelView::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    Float eh = 0;
+    GetExpandedHeight(&eh);
+    Boolean tmp = FALSE;
+    String format;
+    format.AppendFormat("[PanelView(%s): expandedHeight=%f maxPanelHeight=%d closing=%s" \
+             " tracking=%s justPeeked=%s peekAnim=%s%s timeAnim=%s%s touchDisabled=%s]"
+            , /*this.getClass().getSimpleName()*/"TODO: PanelView"
+            , eh
+            , GetMaxPanelHeight()
+            , mClosing ? "T" : "f"
+            , mTracking ? "T" : "f"
+            , mJustPeeked ? "T" : "f"
+            , TO_CSTR(mPeekAnimator)
+            , ((mPeekAnimator != NULL && (IAnimator::Probe(mPeekAnimator)->IsStarted(&tmp), tmp))? " (started)" : "")
+            , TO_CSTR(mHeightAnimator)
+            , ((mHeightAnimator != NULL && (IAnimator::Probe(mHeightAnimator)->IsStarted(&tmp), tmp)) ? " (started)" : "")
+            , mTouchDisabled ? "T" : "f"
+    );
+
+    pw->Println(format);
     return NOERROR;
 }
 

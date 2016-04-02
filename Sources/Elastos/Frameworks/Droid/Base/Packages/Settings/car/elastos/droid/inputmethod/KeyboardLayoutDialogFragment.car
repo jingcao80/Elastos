@@ -1,0 +1,19 @@
+module
+{
+     using interface Elastos.Droid.Hardware.Input.IInputDeviceIdentifier;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Inputmethod {
+
+    interface IOnSetupKeyboardLayoutsListener {
+        OnSetupKeyboardLayouts(
+            [in] IInputDeviceIdentifier* mInputDeviceIdentifier);
+    }
+
+    } // namespace Inputmethod
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+}

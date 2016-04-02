@@ -37,7 +37,7 @@ using Elastos::Droid::Content::IComponentCallbacks2;
 using Elastos::Droid::Content::ISharedPreferencesEditor;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::CLooperHelper;
-//using Elastos::Droid::Os::CStrictMode;
+using Elastos::Droid::Os::CStrictMode;
 using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::ILooperHelper;
@@ -247,6 +247,7 @@ WebViewChromiumFactoryProvider::WebViewChromiumFactoryProvider()
 
 ECode WebViewChromiumFactoryProvider::constructor()
 {
+    Logger::D("WebViewChromiumFactoryProvider::constructor", "leliang_debug enter");
     ThreadUtils::SetWillOverrideUiThread();
     // Load chromium library.
     //Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "AwBrowserProcess.loadLibrary()");
@@ -254,9 +255,10 @@ ECode WebViewChromiumFactoryProvider::constructor()
     //Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
     // Load glue-layer support library.
 
-    AutoPtr<ISystem> system;
-    CSystem::AcquireSingleton((ISystem**)&system);
-    system->LoadLibrary(String("webviewchromium_plat_support"));
+    //the below 3 lines is not needed which use to bind JNI methods for DrawGLFunctor/GraphicsUtils
+    //AutoPtr<ISystem> system;
+    //CSystem::AcquireSingleton((ISystem**)&system);
+    //system->LoadLibrary(String("webviewchromium_plat_support"));
 
     // TODO: temporary try/catch while framework builds catch up with WebView builds.
     // Remove this.
@@ -425,6 +427,7 @@ ECode WebViewChromiumFactoryProvider::CreateWebView(
     /* [in] */ IWebViewPrivateAccess* privateAccess,
     /* [out] */ IWebViewProvider** result)
 {
+    Logger::E("WebViewChromiumFactoryProvider::CreateWebView", "leliang_debug enter");
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
     // WebViewChromium wvc = new WebViewChromium(this, webView, privateAccess);
@@ -682,8 +685,7 @@ ECode WebViewChromiumFactoryProvider::EnsureChromiumStartedLocked(
     //     }
     // }
 
-    assert(0);
-    assert(1/*Thread::HoldsLock(mLock)*/);
+    //assert(1/*Thread::HoldsLock(mLock)*/);
 
     if (mStarted) {  // Early-out for the common case.
         return NOERROR;
@@ -812,8 +814,7 @@ ECode WebViewChromiumFactoryProvider::StartChromiumLocked()
     // mWebViewsToStart.clear();
     // mWebViewsToStart = null;
 
-    assert(0);
-    assert(1/*Thread::HoldsLock(mLock)*/ && ThreadUtils::RunningOnUiThread());
+    //assert(1/*Thread::HoldsLock(mLock)*/ && ThreadUtils::RunningOnUiThread());
 
     // The post-condition of this method is everything is ready, so notify now to cover all
     // return paths. (Other threads will not wake-up until we release |mLock|, whatever).
@@ -826,7 +827,7 @@ ECode WebViewChromiumFactoryProvider::StartChromiumLocked()
     if (Build::IS_DEBUGGABLE) {
         // Suppress the StrictMode violation as this codepath is only hit on debugglable builds.
         AutoPtr<IStrictMode> strictMode;
-        //CStrictMode::AcquireSingleton((IStrictMode**)&strictMode);
+        CStrictMode::AcquireSingleton((IStrictMode**)&strictMode);
         AutoPtr<IStrictModeThreadPolicy> oldPolicy;
         strictMode->AllowThreadDiskReads((IStrictModeThreadPolicy**)&oldPolicy);
         CommandLine::InitFromFile(COMMAND_LINE_FILE);

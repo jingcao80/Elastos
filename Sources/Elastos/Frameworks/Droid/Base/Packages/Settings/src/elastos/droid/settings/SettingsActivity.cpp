@@ -41,9 +41,9 @@ using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Content::Res::IXmlResourceParser;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Droid::Internal::Utility::XmlUtils;
-// using Elastos::Droid::NFC::INfcAdapter;
-// using Elastos::Droid::NFC::CNfcAdapterHelper;
-// using Elastos::Droid::NFC::INfcAdapterHelper;
+// using Elastos::Droid::Nfc::INfcAdapter;
+// using Elastos::Droid::Nfc::CNfcAdapterHelper;
+using Elastos::Droid::Nfc::INfcAdapterHelper;
 using Elastos::Droid::Os::IINetworkManagementService;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::IUserManager;
@@ -326,7 +326,7 @@ ECode SettingsActivity::OnResumeOnSharedPreferenceChangeListener::OnSharedPrefer
 //                  SettingsActivity
 //===============================================================================
 
-CAR_INTERFACE_IMPL_7(SettingsActivity, Activity, IPreferenceManagerOnPreferenceTreeClickListener,
+CAR_INTERFACE_IMPL_8(SettingsActivity, Activity, ISettingsActivity, IPreferenceManagerOnPreferenceTreeClickListener,
         IPreferenceFragmentOnPreferenceStartFragmentCallback, IButtonBarHandler,
         IFragmentManagerOnBackStackChangedListener, ISearchViewOnQueryTextListener,
         ISearchViewOnCloseListener, IOnActionExpandListener);

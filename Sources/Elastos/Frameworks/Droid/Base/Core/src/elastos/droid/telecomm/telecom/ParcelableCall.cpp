@@ -1,6 +1,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/ParcelableCall.h"
+#include "elastos/droid/telecomm/telecom/CVideoCallImpl.h"
 
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
@@ -194,8 +195,7 @@ ECode ParcelableCall::GetVideoCall(
 {
     VALIDATE_NOT_NULL(result)
     if (mVideoCall == NULL && mVideoCallProvider != NULL) {
-        assert(0 && "TODO");
-        // mVideoCall = new VideoCallImpl(mVideoCallProvider);
+        CVideoCallImpl::New(mVideoCallProvider, (IInCallServiceVideoCall**)&mVideoCall);
     }
 
     *result = mVideoCall;

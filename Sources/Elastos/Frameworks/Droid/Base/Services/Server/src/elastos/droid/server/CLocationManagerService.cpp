@@ -253,10 +253,10 @@ PInterface CLocationManagerService::LocationContentObserver::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(IContentObserver*)this;
     }
     else if (riid == EIID_IContentObserver) {
-        return this;
+        return (IContentObserver*)this;
     }
 
     return NULL;
@@ -321,11 +321,11 @@ PInterface CLocationManagerService::Receiver::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (PInterface)this;
+        return (PInterface)(IProxyDeathRecipient*)this;
     } else if(riid == EIID_IProxyDeathRecipient) {
-        return this;
+        return (IProxyDeathRecipient*)this;
     } else if (riid == EIID_IPendingIntentOnFinished) {
-        return this;
+        return (IPendingIntentOnFinished*)this;
     }
     return NULL;
 }

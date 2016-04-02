@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Net.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/ConnectionServiceAdapterServant.h"
+#include "elastos/droid/telecomm/telecom/CConnectionServiceAdapterStub.h"
 
 using Elastos::Droid::Os::EIID_IHandler;
 using Elastos::Droid::Net::IUri;
@@ -288,7 +289,7 @@ CAR_INTERFACE_IMPL(ConnectionServiceAdapterServant, Object, IConnectionServiceAd
 ConnectionServiceAdapterServant::ConnectionServiceAdapterServant()
 {
     mHandler = new MyHandler(this);
-    // mStub = new IConnectionServiceAdapter.Stub();
+    CConnectionServiceAdapterStub::New(mHandler, (IIConnectionServiceAdapter**)&mStub);
 }
 
 ECode ConnectionServiceAdapterServant::constructor(

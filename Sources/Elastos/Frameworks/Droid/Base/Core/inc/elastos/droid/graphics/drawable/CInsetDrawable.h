@@ -10,27 +10,11 @@ namespace Droid {
 namespace Graphics {
 namespace Drawable {
 
-CarClass(CInsetDrawable), public InsetDrawable
+CarClass(CInsetDrawable)
+    , public InsetDrawable
 {
 public:
-    CAR_OBJECT_DECL();
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IDrawable* drawable,
-        /* [in] */ Int32 inset);
-
-    CARAPI constructor(
-        /* [in] */ IDrawable* drawable,
-        /* [in] */ Int32 insetLeft,
-        /* [in] */ Int32 insetTop,
-        /* [in] */ Int32 insetRight,
-        /* [in] */ Int32 insetBottom);
-
-    CARAPI constructor(
-        /* [in] */ IDrawableConstantState* state,
-        /* [in] */ IResources* res);
+    CAR_OBJECT_DECL()
 };
 
 } // namespace Drawable

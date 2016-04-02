@@ -20,6 +20,7 @@ module
      * @Involve
      * interface IBluetoothProfile
      */
+    [local]
     interface IBluetoothHeadsetClient {
         /**
          * Intent sent whenever connection to remote changes.

@@ -806,19 +806,19 @@ module
 
         /** @hide */
         GetIpAssignment(
-            [out] IpConfigurationIpAssignment** result);
+            [out] IpConfigurationIpAssignment* result);
 
         /** @hide */
         SetIpAssignment(
-            [in] IpConfigurationIpAssignment* ipAssignment);
+            [in] IpConfigurationIpAssignment ipAssignment);
 
         /** @hide */
         GetProxySettings(
-            [out] IpConfigurationProxySettings** result);
+            [out] IpConfigurationProxySettings* result);
 
         /** @hide */
         SetProxySettings(
-            [in] IpConfigurationProxySettings* proxySettings);
+            [in] IpConfigurationProxySettings proxySettings);
 
         /** @hide */
         GetHttpProxy(
@@ -830,7 +830,7 @@ module
 
         /** @hide */
         SetProxy(
-            [in] IpConfigurationProxySettings* settings,
+            [in] IpConfigurationProxySettings settings,
             [in] IProxyInfo* proxy);
     }
 

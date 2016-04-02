@@ -152,7 +152,7 @@ ECode CAccessibilityNodeInfoAccessibilityAction::Equals(
         return NOERROR;
     }
 
-    if (IObject::Probe(other) == this) {
+    if (IObject::Probe(other) == (IObject*)this) {
         *result = TRUE;
         return NOERROR;
     }

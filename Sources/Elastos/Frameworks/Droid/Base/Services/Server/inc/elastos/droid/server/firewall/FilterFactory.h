@@ -35,4 +35,6 @@ private:
 } // Droid
 } // Elastos
 
+DEFINE_CONVERSION_FOR(Elastos::Droid::Server::Firewall::FilterFactory, IInterface)
+
 #endif // __ELASTOS_DROID_Server_Firewall_FilterFactory_H__

@@ -6,6 +6,7 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Telecomm::Internal::EIID_IRemoteServiceCallback;
+using Elastos::Droid::Telecomm::Internal::IIConnectionService;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Utility::Logging::Logger;
 
@@ -33,13 +34,15 @@ ECode CRemoteServiceCallback::ResultRunnable::Run()
     Int32 cnSize = 0, svSize = 0;
     mComponentNames->GetSize(&cnSize);
     mServices->GetSize(&svSize);
-    for (Int32 i = 0; i < cnSize && i < svSize; i++) {
-        assert(0 && "TODO");
-        // mRemoteConnectionManager.addConnectionService(
-        //         mComponentNames.get(i),
-        //         IConnectionService.Stub.asInterface(mServices.get(i)));
-    }
     AutoPtr<ConnectionService> _host = (ConnectionService*)(mHost->mHost.Get());
+    for (Int32 i = 0; i < cnSize && i < svSize; i++) {
+        AutoPtr<IInterface> iName, iServ;
+        mComponentNames->Get(i, (IInterface**)&iName);
+        mServices->Get(i, (IInterface**)&iServ);
+        _host->mRemoteConnectionManager->AddConnectionService(
+                IComponentName::Probe(iName),
+                IIConnectionService::Probe(iServ));
+    }
     _host->OnAccountsInitialized();
     Logger::D("CRemoteServiceCallback", "remote connection services found: %p", mServices.Get());
     return NOERROR;

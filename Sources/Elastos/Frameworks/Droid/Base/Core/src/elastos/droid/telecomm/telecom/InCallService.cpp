@@ -2,11 +2,12 @@
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/InCallService.h"
-//#include "elastos/droid/telecomm/telecom/InCallAdapter.h"
+#include "elastos/droid/telecomm/telecom/CInCallAdapter.h"
+#include "elastos/droid/telecomm/telecom/CPhone.h"
+#include "elastos/droid/telecomm/telecom/CInCallServiceBinder.h"
 
 using Elastos::Droid::Telecomm::Internal::IIInCallAdapter;
 using Elastos::Droid::Telecomm::Internal::IIInCallService;
-//using Elastos::Droid::Telecomm::Telecom::InCallAdapter;
 using Elastos::Droid::Internal::Os::ISomeArgs;
 
 namespace Elastos {
@@ -46,9 +47,9 @@ ECode InCallService::MyHandler::HandleMessage(
     switch (what) {
         case MSG_SET_IN_CALL_ADAPTER: {
             AutoPtr<IIInCallAdapter> pObj = IIInCallAdapter::Probe(obj);
-            AutoPtr<IInCallAdapter> pCallAdapter;// = new InCallAdapter(pObj);
-            assert(0 && "TODO");
-            // CPhone::New(pCallAdapter, (IPhone**)&(mHost->mPhone));
+            AutoPtr<IInCallAdapter> pCallAdapter;
+            CInCallAdapter::New(pObj, (IInCallAdapter**)&pCallAdapter);
+            CPhone::New(pCallAdapter, (IPhone**)&(mHost->mPhone));
             mHost->OnPhoneCreated(mHost->mPhone);
             break;
         }
@@ -110,7 +111,7 @@ ECode InCallService::OnBind(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IIInCallService> p;
-    // CInCallServiceBinder::New((IIInCallService**)&p);
+    CInCallServiceBinder::New(mHandler, (IIInCallService**)&p);
     *result = IBinder::Probe(p);
     REFCOUNT_ADD(*result)
     return NOERROR;

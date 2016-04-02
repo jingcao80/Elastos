@@ -1270,25 +1270,25 @@ PInterface StackView::StackFrame::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IInterface) {
-        return (IInterface*)this;
+        return (IInterface*)(IFrameLayout*)this;
     } else if (riid == EIID_IFrameLayout) {
-        return this;
+        return (IFrameLayout*)this;
     } else if (riid == EIID_IViewGroup) {
         return (IViewGroup*)this;
     } else if (riid == EIID_IView) {
-        return (IView*)(IViewGroup*)this;
+        return (IView*)this;
     } else if (riid == EIID_IViewParent) {
-        return this;
+        return (IViewParent*)this;
     } else if (riid == EIID_IViewManager) {
-        return this;
+        return (IViewManager*)this;
     } else if (riid == EIID_IDrawableCallback) {
-        return this;
+        return (IDrawableCallback*)this;
     } else if (riid == EIID_IKeyEventCallback) {
-        return this;
+        return (IKeyEventCallback*)this;
     } else if (riid == EIID_IAccessibilityEventSource) {
-        return this;
+        return (IAccessibilityEventSource*)this;
     } else if (riid == EIID_IWeakReferenceSource) {
-        return this;
+        return (IWeakReferenceSource*)this;
     } else if (riid == EIID_View) {
         return reinterpret_cast<PInterface>((View*)(_StackFrame*)this);
     } else if (riid == EIID_ViewGroup) {
@@ -1313,23 +1313,23 @@ CARAPI StackView::StackFrame::GetInterfaceID(
     /* [in] */ IInterface *pObject,
     /* [out] */ InterfaceID *pIID)
 {
-    if (pObject == this) {
+    if (pObject == (IFrameLayout*)this) {
         *pIID = EIID_IFrameLayout;
-    } else if (pObject == this) {
+    } else if (pObject == (IViewGroup*)this) {
         *pIID = EIID_IViewGroup;
-    } else if (pObject == this) {
+    } else if (pObject == (IViewParent*)this) {
         *pIID = EIID_IViewParent;
-    } else if (pObject == this) {
+    } else if (pObject == (IViewManager*)this) {
         *pIID = EIID_IViewManager;
-    } else if (pObject == this) {
+    } else if (pObject == (IDrawableCallback*)this) {
         *pIID = EIID_IDrawableCallback;
-    } else if (pObject == this) {
+    } else if (pObject == (IKeyEventCallback*)this) {
         *pIID = EIID_IKeyEventCallback;
-    } else if (pObject == this) {
+    } else if (pObject == (IAccessibilityEventSource*)this) {
         *pIID = EIID_IAccessibilityEventSource;
-    } else if (pObject == reinterpret_cast<PInterface>(this)) {
+    } else if (pObject == reinterpret_cast<PInterface>((View*)this)) {
         *pIID = EIID_View;
-    } else if (pObject == reinterpret_cast<PInterface>(this)) {
+    } else if (pObject == reinterpret_cast<PInterface>((ViewGroup*)this)) {
         *pIID = EIID_ViewGroup;
     } else {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;

@@ -24,10 +24,10 @@ PInterface PositionMetadata::Probe(
     /* [in] */ REIID riid)
 {
    /* if (riid == EIID_IAnimatorListener) {
-        return this;
+        return (IAnimatorListener*)this;
     }
     else if (riid == EIID_ICloneable) {
-        return this;
+        return (ICloneable*)this;
     }
 */
     return NULL;
@@ -38,10 +38,10 @@ ECode PositionMetadata::GetInterfaceID(
     /* [out] */ InterfaceID *pIID)
 {
     assert(pIID != NULL);
-   /* if (pObject == (IInterface*)this) {
+   /* if (pObject == (IInterface*)(IAnimatorListener*)this) {
         *pIID = EIID_IAnimatorListener;
     }
-    else if (pObject == (IInterface*)this) {
+    else if (pObject == (IInterface*)(ICloneable*)this) {
         *pIID = EIID_ICloneable;
     }
     else {

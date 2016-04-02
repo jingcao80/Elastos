@@ -2218,7 +2218,7 @@ ECode CNotificationStackScrollLayout::ChangeViewPosition(
     Int32 currentIndex = 0;
     IndexOfChild(child, &currentIndex);
     AutoPtr<IViewParent> vp;
-    if (child != NULL && (child->GetParent((IViewParent**)&vp), vp.Get()) == this
+    if (child != NULL && (child->GetParent((IViewParent**)&vp), vp.Get()) == (IViewParent*)this
             && currentIndex != newIndex) {
         mChangePositionInProgress = TRUE;
         RemoveView(child);

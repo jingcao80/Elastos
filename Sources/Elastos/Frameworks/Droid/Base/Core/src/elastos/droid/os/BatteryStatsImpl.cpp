@@ -247,7 +247,7 @@ void BatteryStatsImpl::Counter::Detach()
 {
     List<AutoPtr<IUnpluggable> >::Iterator it = mUnpluggables->Begin();
     for (; it != mUnpluggables->End(); ++it) {
-        if ((*it).Get() == this) {
+        if ((*it).Get() == (IUnpluggable*)this) {
             mUnpluggables->Erase(it);
             break;
         }
@@ -380,7 +380,7 @@ void BatteryStatsImpl::Timer::Detach()
 {
     List<AutoPtr<IUnpluggable> >::Iterator it = mUnpluggables->Begin();
     for (; it != mUnpluggables->End(); ++it) {
-        if ((*it).Get() == this) {
+        if ((*it).Get() == (IUnpluggable*)this) {
             mUnpluggables->Erase(it);
             break;
         }
@@ -1195,7 +1195,7 @@ void BatteryStatsImpl::Uid::Proc::Detach()
 {
     List<AutoPtr<IUnpluggable> >::Iterator it = mHost->mHost->mUnpluggables.Begin();
     for (; it != mHost->mHost->mUnpluggables.End(); ++it) {
-        if ((*it).Get() == this) {
+        if ((*it).Get() == (IUnpluggable*)this) {
             mHost->mHost->mUnpluggables.Erase(it);
             break;
         }
@@ -1560,7 +1560,7 @@ void BatteryStatsImpl::Uid::Pkg::Serv::Detach()
 {
     List<AutoPtr<IUnpluggable> >::Iterator it = mHost->mHost->mHost->mUnpluggables.Begin();
     for (; it != mHost->mHost->mHost->mUnpluggables.End(); ++it) {
-        if ((*it).Get() == this) {
+        if ((*it).Get() == (IUnpluggable*)this) {
             mHost->mHost->mHost->mUnpluggables.Erase(it);
             break;
         }
@@ -1789,7 +1789,7 @@ void BatteryStatsImpl::Uid::Pkg::Detach()
 {
     List<AutoPtr<IUnpluggable> >::Iterator it = mHost->mHost->mUnpluggables.Begin();
     for (; it != mHost->mHost->mUnpluggables.End(); ++it) {
-        if ((*it).Get() == this) {
+        if ((*it).Get() == (IUnpluggable*)this) {
             mHost->mHost->mUnpluggables.Erase(it);
             break;
         }

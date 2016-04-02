@@ -12,6 +12,7 @@ module
      *
      * @sa BluetoothHealth
      */
+    [local]
     interface IBluetoothHealthCallback {
         /**
          * Callback to inform change in registration state of the health

@@ -1,0 +1,24 @@
+module
+{
+    using interface Elastos.Droid.App.IDialog;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+
+    /**
+     * Letting the class, assumed to be Fragment, create a Dialog on it. Should be useful
+     * you want to utilize some capability in {@link SettingsPreferenceFragment} but don't want
+     * the class inherit the class itself (See {@link ProxySelector} for example).
+     */
+    [local]
+    interface IDialogCreatable {
+        OnCreateDialog(
+            [in] Int32 dialogId,
+            [out] IDialog** dialog);
+    }
+
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+}

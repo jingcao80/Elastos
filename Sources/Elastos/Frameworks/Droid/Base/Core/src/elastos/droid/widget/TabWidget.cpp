@@ -653,7 +653,7 @@ ECode TabWidget::OnFocusChange(
     /* [in] */ Boolean hasFocus)
 {
     Int32 count;
-    if (v == this && hasFocus
+    if (v == (IView*)this && hasFocus
         && (GetTabCount(&count), count) > 0 && ( mSelectedTab!= -1) ) {
         AutoPtr<IView> tabView;
         GetChildTabViewAt(mSelectedTab, (IView**)&tabView);

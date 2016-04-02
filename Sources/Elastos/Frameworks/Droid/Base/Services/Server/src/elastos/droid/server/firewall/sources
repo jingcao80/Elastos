@@ -1,0 +1,24 @@
+TARGET_NAME= firewall
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc/
+
+#PREBUILD_INC = ./Build/Prebuilt/Linux/usr/include
+
+C_DEFINES += -DDROID_SERVER
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+SOURCES = AndFilter.cpp
+SOURCES += CategoryFilter.cpp
+SOURCES += FilterFactory.cpp
+SOURCES += FilterList.cpp
+SOURCES += IntentFirewall.cpp
+SOURCES += NotFilter.cpp
+SOURCES += OrFilter.cpp
+SOURCES += PortFilter.cpp
+SOURCES += SenderFilter.cpp
+SOURCES += SenderPackageFilter.cpp
+SOURCES += SenderPermissionFilter.cpp
+SOURCES += StringFilter.cpp

@@ -1,267 +1,185 @@
+#ifndef __ELASTOS_DROID_SETTINGS_WIFI_WRITEWIFICONFIGTONFCDIALOG_H__
+#define __ELASTOS_DROID_SETTINGS_WIFI_WRITEWIFICONFIGTONFCDIALOG_H__
 
+#include "Elastos.Droid.Widget.h"
+#include "elastos/droid/app/AlertDialog.h"
+#include "elastos/droid/settings/wifi/AccessPoint.h"
 
-package com.android.settings.wifi;
-
-using Elastos::Droid::App::IActivity;
-using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::AlertDialog;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IDialogInterface;
-using Elastos::Droid::Net::Wifi::IWifiManager;
-using Elastos::Droid::Nfc::INdefMessage;
-using Elastos::Droid::Nfc::INdefRecord;
-using Elastos::Droid::Nfc::INfcAdapter;
 using Elastos::Droid::Nfc::ITag;
-using Elastos::Droid::Nfc::Tech::INdef;
-using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Nfc::INfcAdapterReaderCallback;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::IPowerManager;
-using Elastos::Droid::Text::IEditable;
-using Elastos::Droid::Text::IInputType;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Text::ITextWatcher;
-using Elastos::Droid::Utility::ILog;
-using Elastos::Droid::View::IGravity;
-using Elastos::Droid::View::IView;
-using Elastos::Droid::View::Inputmethod::IInputMethodManager;
-using Elastos::Droid::Widget::IButton;
-using Elastos::Droid::Widget::ICheckBox;
+using Elastos::Droid::Text::INoCopySpan;
+using Elastos::Droid::Text::IEditable;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::InputMethod::IInputMethodManager;
+using Elastos::Droid::Widget::ICompoundButtonOnCheckedChangeListener;
 using Elastos::Droid::Widget::ICompoundButton;
-using Elastos::Droid::Widget::ILinearLayout;
+using Elastos::Droid::Widget::ICheckBox;
 using Elastos::Droid::Widget::IProgressBar;
-using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Wifi::IWifiManager;
 
-using Elastos::Droid::Settings::IR;
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Wifi {
 
+class WriteWifiConfigToNfcDialog
+    : public AlertDialog
+    , public ITextWatcher
+    , public INoCopySpan
+    , public IViewOnClickListener
+    , public ICompoundButtonOnCheckedChangeListener
+{
+public:
+    class MyRunnable
+        : public Runnable
+    {
+    public:
+        MyRunnable(
+            /* [in] */ WriteWifiConfigToNfcDialog* host,
+            /* [in] */ Int32 id);
 
-class WriteWifiConfigToNfcDialog extends AlertDialog
-        implements TextWatcher, View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+        ~MyRunnable();
 
-    private static const String NFC_TOKEN_MIME_TYPE = "application/vnd.wfa.wsc";
+        //@Override
+        CARAPI Run();
 
-    private static const String TAG = WriteWifiConfigToNfcDialog.class->GetName()->ToString();
-    private static const String PASSWORD_FORMAT = "102700%s%s";
-    private static const Int32 HEX_RADIX = 16;
-    private static const Char32[] hexArray = "0123456789ABCDEF".ToCharArray();
+    private:
+        WriteWifiConfigToNfcDialog* mHost;
+        Int32 mId;
+    };
 
-    private final PowerManager.WakeLock mWakeLock;
+    class NfcAdapterReaderCallback
+        : public Object
+        , public INfcAdapterReaderCallback
+    {
+    public:
+        CAR_INTERFACE_DECL();
 
-    private AccessPoint mAccessPoint;
-    private View mView;
-    private Button mSubmitButton;
-    private Button mCancelButton;
-    private Handler mOnTextChangedHandler;
-    private TextView mPasswordView;
-    private TextView mLabelView;
-    private CheckBox mPasswordCheckBox;
-    private ProgressBar mProgressBar;
-    private WifiManager mWifiManager;
-    private String mWpsNfcConfigurationToken;
-    private Context mContext;
+        NfcAdapterReaderCallback(
+            /* [in] */ WriteWifiConfigToNfcDialog* host);
 
-    WriteWifiConfigToNfcDialog(Context context, AccessPoint accessPoint,
-            WifiManager wifiManager) {
-        Super(context);
+        ~NfcAdapterReaderCallback();
 
-        mContext = context;
-        mWakeLock = ((PowerManager) context->GetSystemService(Context.POWER_SERVICE))
-                .NewWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WriteWifiConfigToNfcDialog:wakeLock");
-        mAccessPoint = accessPoint;
-        mOnTextChangedHandler = new Handler();
-        mWifiManager = wifiManager;
-    }
+        //@Override
+        CARAPI OnTagDiscovered(
+            /* [in] */ ITag* tag);
 
-    //@Override
-    CARAPI OnCreate(Bundle savedInstanceState) {
-        mView = GetLayoutInflater()->Inflate(R.layout.write_wifi_config_to_nfc, NULL);
+    private:
+        WriteWifiConfigToNfcDialog* mHost;
+    };
 
-        SetView(mView);
-        SetInverseBackgroundForced(TRUE);
-        SetTitle(R::string::setup_wifi_nfc_tag);
-        SetCancelable(TRUE);
-        SetButton(DialogInterface.BUTTON_NEUTRAL,
-                mContext->GetResources()->GetString(R::string::write_tag), (OnClickListener) NULL);
-        SetButton(DialogInterface.BUTTON_NEGATIVE,
-                mContext->GetResources()->GetString(R::string::cancel),
-                (OnClickListener) NULL);
+    class SetViewTextRunnable
+        : public Runnable
+    {
+    public:
+        SetViewTextRunnable(
+            /* [in] */ ITextView* textView,
+            /* [in] */ Int32 resid);
 
-        mPasswordView = (TextView) mView->FindViewById(R.id.password);
-        mLabelView = (TextView) mView->FindViewById(R.id.password_label);
-        mPasswordView->AddTextChangedListener(this);
-        mPasswordCheckBox = (CheckBox) mView->FindViewById(R.id.show_password);
-        mPasswordCheckBox->SetOnCheckedChangeListener(this);
-        mProgressBar = (ProgressBar) mView->FindViewById(R.id.progress_bar);
+        ~SetViewTextRunnable();
 
-        super->OnCreate(savedInstanceState);
+        //@Override
+        CARAPI Run();
 
-        mSubmitButton = GetButton(DialogInterface.BUTTON_NEUTRAL);
-        mSubmitButton->SetOnClickListener(this);
-        mSubmitButton->SetEnabled(FALSE);
+    private:
+        AutoPtr<ITextView> mTextView;
+        Int32 mResid;
+    };
 
-        mCancelButton = GetButton(DialogInterface.BUTTON_NEGATIVE);
-    }
+public:
+    CAR_INTERFACE_DECL();
 
-    //@Override
-    CARAPI OnClick(View v) {
-        mWakeLock->Acquire();
+    WriteWifiConfigToNfcDialog();
 
-        String password = mPasswordView->GetText()->ToString();
-        String wpsNfcConfigurationToken
-                = mWifiManager->GetWpsNfcConfigurationToken(mAccessPoint.networkId);
-        String passwordHex = ByteArrayToHexString(password->GetBytes());
+    ~WriteWifiConfigToNfcDialog();
 
-        String passwordLength = password->Length() >= HEX_RADIX
-                ? Integer->ToString(password->Length(), HEX_RADIX)
-                : "0" + Character->ForDigit(password->Length(), HEX_RADIX);
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ AccessPoint* accessPoint,
+        /* [in] */ IWifiManager* wifiManager);
 
-        passwordHex = String->Format(PASSWORD_FORMAT, passwordLength, passwordHex).ToUpperCase();
-
-        if (wpsNfcConfigurationToken->Contains(passwordHex)) {
-            mWpsNfcConfigurationToken = wpsNfcConfigurationToken;
-
-            Activity activity = GetOwnerActivity();
-            NfcAdapter nfcAdapter = NfcAdapter->GetDefaultAdapter(activity);
-
-            nfcAdapter->EnableReaderMode(activity, new NfcAdapter->ReaderCallback() {
-                //@Override
-                CARAPI OnTagDiscovered(Tag tag) {
-                    HandleWriteNfcEvent(tag);
-                }
-            }, NfcAdapter.FLAG_READER_NFC_A |
-                    NfcAdapter.FLAG_READER_NFC_B |
-                    NfcAdapter.FLAG_READER_NFC_BARCODE |
-                    NfcAdapter.FLAG_READER_NFC_F |
-                    NfcAdapter.FLAG_READER_NFC_V,
-                    NULL);
-
-            mPasswordView->SetVisibility(View.GONE);
-            mPasswordCheckBox->SetVisibility(View.GONE);
-            mSubmitButton->SetVisibility(View.GONE);
-            InputMethodManager imm = (InputMethodManager)
-                    GetOwnerActivity()->GetSystemService(Context.INPUT_METHOD_SERVICE);
-            imm->HideSoftInputFromWindow(mPasswordView->GetWindowToken(), 0);
-
-            mLabelView->SetText(R::string::status_awaiting_tap);
-
-            mView->FindViewById(R.id.password_layout).SetTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            mProgressBar->SetVisibility(View.VISIBLE);
-        } else {
-            mLabelView->SetText(R::string::status_invalid_password);
-        }
-    }
-
-    private void HandleWriteNfcEvent(Tag tag) {
-        Ndef ndef = Ndef->Get(tag);
-
-        if (ndef != NULL) {
-            if (ndef->IsWritable()) {
-                NdefRecord record = NdefRecord->CreateMime(
-                        NFC_TOKEN_MIME_TYPE,
-                        HexStringToByteArray(mWpsNfcConfigurationToken));
-                try {
-                    ndef->Connect();
-                    ndef->WriteNdefMessage(new NdefMessage(record));
-                    GetOwnerActivity()->RunOnUiThread(new Runnable() {
-                        //@Override
-                        CARAPI Run() {
-                            mProgressBar->SetVisibility(View.GONE);
-                        }
-                    });
-                    SetViewText(mLabelView, R::string::status_write_success);
-                    SetViewText(mCancelButton, R::string::done_label);
-                } catch (IOException e) {
-                    SetViewText(mLabelView, R::string::status_failed_to_write);
-                    Logger::E(TAG, "Unable to write Wi-Fi config to NFC tag.", e);
-                    return;
-                } catch (FormatException e) {
-                    SetViewText(mLabelView, R::string::status_failed_to_write);
-                    Logger::E(TAG, "Unable to write Wi-Fi config to NFC tag.", e);
-                    return;
-                }
-            } else {
-                SetViewText(mLabelView, R::string::status_tag_not_writable);
-                Logger::E(TAG, "Tag is not writable");
-            }
-        } else {
-            SetViewText(mLabelView, R::string::status_tag_not_writable);
-            Logger::E(TAG, "Tag does not support NDEF");
-        }
-    }
+    // //@Override
+    CARAPI OnCreate(
+        /* [in] */ IBundle* savedInstanceState);
 
     //@Override
-    CARAPI Dismiss() {
-        if (mWakeLock->IsHeld()) {
-            mWakeLock->Release();
-        }
-
-        super->Dismiss();
-    }
+    CARAPI OnClick(
+        /* [in] */ IView* v);
 
     //@Override
-    CARAPI OnTextChanged(CharSequence s, Int32 start, Int32 before, Int32 count) {
-        mOnTextChangedHandler->Post(new Runnable() {
-            //@Override
-            CARAPI Run() {
-                EnableSubmitIfAppropriate();
-            }
-        });
-    }
-
-    private void EnableSubmitIfAppropriate() {
-
-        if (mPasswordView != NULL) {
-            if (mAccessPoint.security == AccessPoint.SECURITY_WEP) {
-                mSubmitButton->SetEnabled(mPasswordView->Length() > 0);
-            } else if (mAccessPoint.security == AccessPoint.SECURITY_PSK) {
-                mSubmitButton->SetEnabled(mPasswordView->Length() >= 8);
-            }
-        } else {
-            mSubmitButton->SetEnabled(FALSE);
-        }
-
-    }
-
-    private void SetViewText(final TextView view, final Int32 resid) {
-        GetOwnerActivity()->RunOnUiThread(new Runnable() {
-            //@Override
-            CARAPI Run() {
-                view->SetText(resid);
-            }
-        });
-    }
+    CARAPI Dismiss();
 
     //@Override
-    CARAPI OnCheckedChanged(CompoundButton buttonView, Boolean isChecked) {
-        mPasswordView->SetInputType(
-                InputType.TYPE_CLASS_TEXT |
-                (isChecked
-                        ? InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-                        : InputType.TYPE_TEXT_VARIATION_PASSWORD));
-    }
-
-    private static Byte[] HexStringToByteArray(String s) {
-        Int32 len = s->Length();
-        Byte[] data = new Byte[len / 2];
-
-        for (Int32 i = 0; i < len; i += 2) {
-            data[i / 2] = (Byte) ((Character->Digit(s->CharAt(i), HEX_RADIX) << 4)
-                    + Character->Digit(s->CharAt(i + 1), HEX_RADIX));
-        }
-
-        return data;
-    }
-
-    private static String ByteArrayToHexString(Byte[] bytes) {
-        Char32[] hexChars = new Char32[bytes.length * 2];
-        for ( Int32 j = 0; j < bytes.length; j++ ) {
-            Int32 v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        return new String(hexChars);
-    }
+    CARAPI OnTextChanged(
+        /* [in] */ ICharSequence* s,
+        /* [in] */ Int32 start,
+        /* [in] */ Int32 before,
+        /* [in] */ Int32 count);
 
     //@Override
-    CARAPI BeforeTextChanged(CharSequence s, Int32 start, Int32 count, Int32 after) {}
+    CARAPI OnCheckedChanged(
+        /* [in] */ ICompoundButton* buttonView,
+        /* [in] */ Boolean isChecked);
 
     //@Override
-    CARAPI AfterTextChanged(Editable s) {}
-}
+    CARAPI BeforeTextChanged(
+        /* [in] */ ICharSequence* s,
+        /* [in] */ Int32 start,
+        /* [in] */ Int32 count,
+        /* [in] */ Int32 after);
+
+    //@Override
+    CARAPI AfterTextChanged(
+        /* [in] */ IEditable* s);
+
+private:
+    CARAPI_(void) HandleWriteNfcEvent(
+        /* [in] */ ITag* tag);
+
+    CARAPI_(void) EnableSubmitIfAppropriate();
+
+    CARAPI_(void) SetViewText(
+        /* [in] */ ITextView* view,
+        /* [in] */ Int32 resid);
+
+    static CARAPI_(AutoPtr< ArrayOf<Byte> >) HexStringToByteArray(
+        /* [in] */ const String& s);
+
+    static CARAPI_(String) ByteArrayToHexString(
+        /* [in] */ ArrayOf<Byte>* bytes);
+
+private:
+    static const String NFC_TOKEN_MIME_TYPE;
+
+    static const String TAG;
+    static const String PASSWORD_FORMAT;
+    static const Int32 HEX_RADIX;
+    static const AutoPtr< ArrayOf<Char32> > hexArray;
+
+    AutoPtr<IPowerManagerWakeLock> mWakeLock;
+
+    AutoPtr<AccessPoint> mAccessPoint;
+    AutoPtr<IView> mView;
+    AutoPtr<IButton> mSubmitButton;
+    AutoPtr<IButton> mCancelButton;
+    AutoPtr<IHandler> mOnTextChangedHandler;
+    AutoPtr<ITextView> mPasswordView;
+    AutoPtr<ITextView> mLabelView;
+    AutoPtr<ICheckBox> mPasswordCheckBox;
+    AutoPtr<IProgressBar> mProgressBar;
+    AutoPtr<IWifiManager> mWifiManager;
+    String mWpsNfcConfigurationToken;
+    AutoPtr<IContext> mContext;
+};
+
+} // namespace Wifi
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_WIFI_WRITEWIFICONFIGTONFCDIALOG_H__

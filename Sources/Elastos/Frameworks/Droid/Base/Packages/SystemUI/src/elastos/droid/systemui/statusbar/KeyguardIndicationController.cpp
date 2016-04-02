@@ -64,6 +64,7 @@ ECode KeyguardIndicationController::ControllerHandler::HandleMessage(
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(KeyguardIndicationController, Object, IKeyguardIndicationController);
 KeyguardIndicationController::KeyguardIndicationController(
     /* [in] */ IContext* context,
     /* [in] */ IKeyguardIndicationTextView* textView)
@@ -87,7 +88,7 @@ KeyguardIndicationController::KeyguardIndicationController(
     context->RegisterReceiverAsUser(mReceiver, user, filter, String(NULL), NULL, (IIntent**)&i);
 }
 
-void KeyguardIndicationController::SetVisible(
+ECode KeyguardIndicationController::SetVisible(
     /* [in] */ Boolean visible)
 {
     mVisible = visible;
@@ -96,25 +97,28 @@ void KeyguardIndicationController::SetVisible(
         HideTransientIndication();
         UpdateIndication();
     }
+    return NOERROR;
 }
 
-void KeyguardIndicationController::SetRestingIndication(
+ECode KeyguardIndicationController::SetRestingIndication(
     /* [in] */ const String& restingIndication)
 {
     mRestingIndication = restingIndication;
     UpdateIndication();
+    return NOERROR;
 }
 
-void KeyguardIndicationController::HideTransientIndicationDelayed(
+ECode KeyguardIndicationController::HideTransientIndicationDelayed(
     /* [in] */ Int64 delayMs)
 {
     AutoPtr<IMessage> msg;
     mHandler->ObtainMessage(MSG_HIDE_TRANSIENT, (IMessage**)&msg);
     Boolean tmp = 0;
     mHandler->SendMessageDelayed(msg, delayMs, &tmp);
+    return NOERROR;
 }
 
-void KeyguardIndicationController::ShowTransientIndication(
+ECode KeyguardIndicationController::ShowTransientIndication(
     /* [in] */ Int32 transientIndication)
 {
     AutoPtr<IResources> res;
@@ -122,23 +126,26 @@ void KeyguardIndicationController::ShowTransientIndication(
     String str;
     res->GetString(transientIndication, &str);
     ShowTransientIndication(str);
+    return NOERROR;
 }
 
-void KeyguardIndicationController::ShowTransientIndication(
+ECode KeyguardIndicationController::ShowTransientIndication(
     /* [in] */ const String& transientIndication)
 {
     mTransientIndication = transientIndication;
     mHandler->RemoveMessages(MSG_HIDE_TRANSIENT);
     UpdateIndication();
+    return NOERROR;
 }
 
-void KeyguardIndicationController::HideTransientIndication()
+ECode KeyguardIndicationController::HideTransientIndication()
 {
     if (mTransientIndication != NULL) {
         mTransientIndication = NULL;
         mHandler->RemoveMessages(MSG_HIDE_TRANSIENT);
         UpdateIndication();
     }
+    return NOERROR;
 }
 
 void KeyguardIndicationController::UpdateIndication()

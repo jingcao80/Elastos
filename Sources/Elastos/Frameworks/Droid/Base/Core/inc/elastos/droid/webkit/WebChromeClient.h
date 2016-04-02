@@ -14,7 +14,7 @@ namespace Elastos {
 namespace Droid {
 namespace Webkit {
 
-class WebChromeClient
+class ECO_PUBLIC WebChromeClient
     : public Object
     , public IWebChromeClient
 {

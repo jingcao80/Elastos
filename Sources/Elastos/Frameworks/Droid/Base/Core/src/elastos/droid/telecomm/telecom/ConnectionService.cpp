@@ -7,6 +7,14 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/ConnectionService.h"
 #include "elastos/droid/telecomm/telecom/Connection.h"
+#include "elastos/droid/telecomm/telecom/CPhoneCapabilities.h"
+#include "elastos/droid/telecomm/telecom/CRemoteConnectionManager.h"
+#include "elastos/droid/telecomm/telecom/CConnectionServiceAdapter.h"
+#include "elastos/droid/telecomm/telecom/CConnectionServiceBinder.h"
+#include "elastos/droid/telecomm/telecom/CConnectionHelper.h"
+#include "elastos/droid/telecomm/telecom/CRemoteServiceCallback.h"
+#include "elastos/droid/telecomm/telecom/CParcelableConference.h"
+#include "elastos/droid/telecomm/telecom/CDisconnectCause.h"
 #include "elastos/droid/os/CLooperHelper.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -380,9 +388,12 @@ ECode ConnectionService::ConferenceListener::OnCapabilitiesChanged(
     AutoPtr<ICharSequence> pId = ICharSequence::Probe(p);
     String id;
     pId->ToString(&id);
-    assert(0 && "TODO");
-    // Logger::D("ConnectionService", "call capabilities: conference: %s",
-    //         PhoneCapabilities.toString(capabilities));
+    AutoPtr<IPhoneCapabilities> pc;
+    CPhoneCapabilities::AcquireSingleton((IPhoneCapabilities**)&pc);
+    String strCap;
+    pc->ToString(capabilities, &strCap);
+    Logger::D("ConnectionService", "call capabilities: conference: %s",
+            (const char*)strCap);
     mHost->mAdapter->SetCallCapabilities(id, capabilities);
     return NOERROR;
 }
@@ -532,9 +543,12 @@ ECode ConnectionService::ConnectionListener::OnCallCapabilitiesChanged(
     AutoPtr<ICharSequence> pId = ICharSequence::Probe(p);
     String id;
     pId->ToString(&id);
-    assert(0 && "TODO");
-    // Logger::D("ConnectionService", "capabilities: parcelableconnection: %s",
-    //         PhoneCapabilities::ToString(capabilities));
+    AutoPtr<IPhoneCapabilities> pc;
+    CPhoneCapabilities::AcquireSingleton((IPhoneCapabilities**)&pc);
+    String strCap;
+    pc->ToString(capabilities, &strCap);
+    Logger::D("ConnectionService", "capabilities: parcelableconnection: %s",
+            (const char*)strCap);
     mHost->mAdapter->SetCallCapabilities(id, capabilities);
     return NOERROR;
 }
@@ -628,13 +642,12 @@ ConnectionService::ConnectionService()
     CConcurrentHashMap::New((IMap**)&mIdByConnection);
     CConcurrentHashMap::New((IMap**)&mConferenceById);
     CConcurrentHashMap::New((IMap**)&mIdByConference);
-    // mRemoteConnectionManager =
-    //         new RemoteConnectionManager(this);
+    CRemoteConnectionManager::New(this, (IRemoteConnectionManager**)&mRemoteConnectionManager);
     CArrayList::New((IList**)&mPreInitializationConnectionRequests);
-    assert(0 && "TODO");
-    // mAdapter = new ConnectionServiceAdapter();
 
-    // mBinder = new ConnectionServiceBinder();
+    CConnectionServiceAdapter::New((IConnectionServiceAdapter**)&mAdapter);
+
+    CConnectionServiceBinder::New(mHandler, (IBinder**)&mBinder);
 
     AutoPtr<ILooperHelper> hlp;
     CLooperHelper::AcquireSingleton((ILooperHelper**)&hlp);
@@ -691,9 +704,11 @@ void ConnectionService::CreateConnection(
     }
     Logger::D("ConnectionService", "createConnection, connection: %p", connection.Get());
     if (connection == NULL) {
-        assert(0 && "TODO");
-        // connection = Connection.createFailedConnection(
-        //         new DisconnectCause(IDisconnectCause::ERROR));
+        AutoPtr<IDisconnectCause> dc;
+        CDisconnectCause::New(IDisconnectCause::ERROR, (IDisconnectCause**)&dc);
+        AutoPtr<IConnectionHelper> hlp;
+        CConnectionHelper::AcquireSingleton((IConnectionHelper**)&hlp);
+        hlp->CreateFailedConnection(dc, (IConnection**)&connection);
     }
 
     Int32 state = 0;
@@ -717,11 +732,14 @@ void ConnectionService::CreateConnection(
     Connection::ToLogSafePhoneNumber(number, &strNum);
     String strState;
     Connection::StateToString(state, &strState);
-    assert(0 && "TODO");
-    // Logger::V("ConnectionService", "createConnection, number: %s, state: %s, capabilities: %s",
-    //         (const char*)strNum,
-    //         (const char*)strState,
-    //         PhoneCapabilities::ToString(capabilities));
+    AutoPtr<IPhoneCapabilities> pc;
+    CPhoneCapabilities::AcquireSingleton((IPhoneCapabilities**)&pc);
+    String strCap;
+    pc->ToString(capabilities, &strCap);
+    Logger::V("ConnectionService", "createConnection, number: %s, state: %s, capabilities: %s",
+            (const char*)strNum,
+            (const char*)strState,
+            (const char*)strCap);
 
     Logger::D("ConnectionService", "createConnection, calling handleCreateConnectionSuccessful %s", (const char*)callId);
     Int32 presentation = 0;
@@ -989,8 +1007,9 @@ void ConnectionService::OnAdapterAttached()
         return;
     }
 
-    assert(0 && "TODO");
-    // mAdapter->QueryRemoteConnectionServices(new RemoteServiceCallback.Stub());
+    AutoPtr<IRemoteServiceCallback> cb;
+    CRemoteServiceCallback::New((IRemoteServiceCallback**)&cb);
+    mAdapter->QueryRemoteConnectionServices(cb);
 }
 
 ECode ConnectionService::CreateRemoteIncomingConnection(
@@ -1050,12 +1069,13 @@ ECode ConnectionService::AddConference(
         conference->GetState(&state);
         Int32 capabilities = 0;
         conference->GetCapabilities(&capabilities);
-        assert(0 && "TODO");
-        AutoPtr<IParcelableConference> parcelableConference;// = new ParcelableConference(
-                // handle,
-                // state,
-                // capabilities,
-                // connectionIds);
+        AutoPtr<IParcelableConference> parcelableConference;
+        CParcelableConference::New(
+                            handle,
+                            state,
+                            capabilities,
+                            connectionIds,
+                            (IParcelableConference**)&parcelableConference);
         mAdapter->AddConferenceCall(id, parcelableConference);
 
         // Go through any child calls and set the parent.

@@ -14,7 +14,7 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
-class TwoStatePreference
+class ECO_PUBLIC TwoStatePreference
     : public Preference
     , public ITwoStatePreference
 {

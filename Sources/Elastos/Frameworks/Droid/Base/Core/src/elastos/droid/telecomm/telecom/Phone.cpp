@@ -2,6 +2,7 @@
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/Phone.h"
+#include "elastos/droid/telecomm/telecom/CCall.h"
 #include "elastos/droid/utility/CArrayMap.h"
 
 using Elastos::Droid::Utility::CArrayMap;
@@ -76,9 +77,10 @@ ECode Phone::constructor(
 ECode Phone::InternalAddCall(
     /* [in] */ IParcelableCall* parcelableCall)
 {
-    AutoPtr<ICall> call;// = new Call(this, parcelableCall.getId(), mInCallAdapter);
     String id;
     parcelableCall->GetId(&id);
+    AutoPtr<ICall> call;
+    CCall::New(this, id, mInCallAdapter, (ICall**)&call);
     AutoPtr<ICharSequence> pId;
     CString::New(id, (ICharSequence**)&pId);
     mCallByTelecomCallId->Put(pId, call);

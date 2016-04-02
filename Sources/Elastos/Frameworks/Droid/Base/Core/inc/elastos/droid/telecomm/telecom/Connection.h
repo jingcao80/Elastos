@@ -201,7 +201,7 @@ public:
 
     private:
         AutoPtr<VideoProviderHandler> mMessageHandler;
-        // AutoPtr<IVideoProviderBinder> mBinder;
+        AutoPtr<IIVideoProvider> mBinder;
         AutoPtr<IIVideoCallback> mVideoCallback;
     };
 

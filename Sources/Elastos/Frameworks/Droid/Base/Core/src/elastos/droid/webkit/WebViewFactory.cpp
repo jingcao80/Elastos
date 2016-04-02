@@ -156,7 +156,7 @@ AutoPtr<IWebViewFactoryProvider> WebViewFactory::GetProvider()
                     return NULL;
                 }
                 sProviderInstance = IWebViewFactoryProvider::Probe(object);
-                if (DEBUG) Logger::V(LOGTAG, "Loaded provider: %p", sProviderInstance.Get());
+                if (DEBUG) Logger::V(LOGTAG, "Loaded provider: 0x%p", sProviderInstance.Get());
             //} catch (Exception e) {
             //    Log.e(LOGTAG, "error instantiating provider", e);
             //    throw new AndroidRuntimeException(e);

@@ -450,20 +450,20 @@ public:
         /* [in] */ IProxyInfo* httpProxy);
 
     CARAPI SetProxy(
-        /* [in] */ IpConfigurationProxySettings* settings,
+        /* [in] */ IpConfigurationProxySettings settings,
         /* [in] */ IProxyInfo* proxy);
 
     CARAPI GetIpAssignment(
-        /* [out] */ IpConfigurationIpAssignment** ipAssignment);
+        /* [out] */ IpConfigurationIpAssignment* ipAssignment);
 
     CARAPI SetIpAssignment(
-        /* [in] */ IpConfigurationIpAssignment* ipAssignment);
+        /* [in] */ IpConfigurationIpAssignment ipAssignment);
 
     CARAPI GetProxySettings(
-        /* [out] */ IpConfigurationProxySettings** proxySettings);
+        /* [out] */ IpConfigurationProxySettings* proxySettings);
 
     CARAPI SetProxySettings(
-        /* [in] */ IpConfigurationProxySettings* proxySettings);
+        /* [in] */ IpConfigurationProxySettings proxySettings);
 
     CARAPI GetLinkProperties(
         /* [out] */ ILinkProperties** linkProperties);

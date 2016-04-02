@@ -15,6 +15,7 @@ module
     interface Elastos.Droid.Graphics.IOutline;
     interface Elastos.Droid.Graphics.IRegion;
     interface Elastos.Droid.Graphics.IBitmap;
+    interface Elastos.Droid.Graphics.IXfermode;
     interface Elastos.Droid.Content.Res.IResources;
     interface Elastos.Droid.Utility.IAttributeSet;
     interface Elastos.Droid.Utility.ITypedValue;
@@ -622,6 +623,12 @@ module
          */
         SetChangingConfigurations(
             [in] Int32 configs);
+
+        /**
+         * @hide Consider for future API inclusion
+         */
+        SetXfermode(
+            [in] IXfermode* mode);
 
         /**
          * Specify an optional colorFilter for the drawable. Pass null to remove

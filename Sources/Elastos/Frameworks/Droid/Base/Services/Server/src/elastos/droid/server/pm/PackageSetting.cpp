@@ -46,7 +46,7 @@ PInterface PackageSetting::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == EIID_PackageSetting) {
-        return reinterpret_cast<PInterface>(this);;
+        return reinterpret_cast<PInterface>(this);
     }
     return PackageSettingBase::Probe(riid);
 }

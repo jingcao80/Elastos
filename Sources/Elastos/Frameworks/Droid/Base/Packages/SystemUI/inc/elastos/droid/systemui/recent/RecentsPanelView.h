@@ -1,52 +1,71 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_RECENT_RECENTSPANELVIEW_H__
 #define __ELASTOS_DROID_SYSTEMUI_RECENT_RECENTSPANELVIEW_H__
 
+#include "_SystemUI.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/os/Runnable.h"
+#include "elastos/droid/systemui/recent/TaskDescription.h"
 #include "elastos/droid/widget/FrameLayout.h"
 #include "elastos/droid/widget/BaseAdapter.h"
 
-
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::Animation::ILayoutTransition;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Database::IDataSetObserver;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::SystemUI::Recent::IRecentsCallback;
+using Elastos::Droid::SystemUI::Recent::IRecentsPanelViewRecentsScrollView;
+using Elastos::Droid::SystemUI::Recent::IRecentTasksLoader;
+using Elastos::Droid::SystemUI::StatusBar::IIStatusBarPanel;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
-using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IViewOnLongClickListener;
-using Elastos::Droid::View::IMenuItem;
-using Elastos::Droid::View::ILayoutInflater;
-using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Widget::BaseAdapter;
-using Elastos::Droid::Widget::IImageView;
-using Elastos::Droid::Widget::ITextView;
-using Elastos::Droid::Widget::IPopupMenu;
 using Elastos::Droid::Widget::FrameLayout;
 using Elastos::Droid::Widget::IAdapterView;
+using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::IPopupMenu;
 using Elastos::Droid::Widget::IPopupMenuOnDismissListener;
 using Elastos::Droid::Widget::IPopupMenuOnMenuItemClickListener;
-using Elastos::Droid::Animation::IAnimator;
-using Elastos::Droid::Animation::ILayoutTransition;
-using Elastos::Droid::SystemUI::Recent::IStatusBarTouchProxy;
-using Elastos::Droid::SystemUI::Recent::IRecentTasksLoader;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Recent {
 
-extern const InterfaceID EIID_ViewHolder;
-
-class RecentsPanelView : public FrameLayout
+class RecentsPanelView
+    : public FrameLayout
+    , public IAdapterViewOnItemClickListener
+    , public IRecentsCallback
+    , public IIStatusBarPanel
+    , public IAnimatorListener
+    , public IRecentsPanelView
 {
 public:
     class ViewHolder
-        : public ElLightRefBase
-        , public IInterface
+        : public Object
     {
-    public:
-        CAR_INTERFACE_DECL()
-
     public:
         AutoPtr<IView> mThumbnailView;
         AutoPtr<IImageView> mThumbnailViewImage;
-        AutoPtr<IBitmap> mThumbnailViewImageBitmap;
+        AutoPtr<IDrawable> mThumbnailViewDrawable;
         AutoPtr<IImageView> mIconView;
         AutoPtr<ITextView> mLabelView;
         AutoPtr<ITextView> mDescriptionView;
@@ -56,8 +75,7 @@ public:
     };
 
     class TaskDescriptionAdapter
-        : public ElRefBase
-        , public BaseAdapter
+        : public BaseAdapter
         , public ITaskDescriptionAdapter
     {
     public:
@@ -66,8 +84,6 @@ public:
         TaskDescriptionAdapter(
             /* [in] */ IContext* context,
             /* [in] */ RecentsPanelView* host);
-
-        ~TaskDescriptionAdapter();
 
         CARAPI_(Int32) GetCount();
 
@@ -143,13 +159,12 @@ public:
 
 private:
     class OnLongClickDelegate
-        : public ElRefBase
+        : public Object
         , public IViewOnLongClickListener
     {
     public:
         OnLongClickDelegate(
-            /* [in] */ IView* other) : mOtherView(other)
-        {}
+            /* [in] */ IView* other);
 
         CAR_INTERFACE_DECL()
 
@@ -158,20 +173,17 @@ private:
             /* [out] */ Boolean* result);
 
     public:
-        IView* mOtherView;
+        AutoPtr<IView> mOtherView;
     };
 
     class OnMenuItemClickListener
-        : public ElRefBase
+        : public Object
         , public IPopupMenuOnMenuItemClickListener
     {
     public:
         OnMenuItemClickListener(
             /* [in] */ RecentsPanelView* host,
-            /* [in] */ IView* selectedView)
-            : mHost(host)
-            , mSelectedView(selectedView)
-        {}
+            /* [in] */ IView* selectedView);
 
         CAR_INTERFACE_DECL()
 
@@ -185,16 +197,13 @@ private:
     };
 
     class OnDismissListener
-        : public ElRefBase
+        : public Object
         , public IPopupMenuOnDismissListener
     {
     public:
         OnDismissListener(
             /* [in] */ RecentsPanelView* host,
-            /* [in] */ IView* thumbnailView)
-            : mHost(host)
-            , mThumbnailView(thumbnailView)
-        {}
+            /* [in] */ IView* thumbnailView);
 
         CAR_INTERFACE_DECL()
 
@@ -206,24 +215,45 @@ private:
         IView* mThumbnailView;
     };
 
-public:
-    RecentsPanelView();
+    class OnScrollListenerRunnable
+        : public Runnable
+    {
+    public:
+        OnScrollListenerRunnable(
+            /* [in] */ RecentsPanelView* host);
 
-    ~RecentsPanelView();
+        CARAPI Run();
+
+    private:
+        RecentsPanelView* mHost;
+    };
+
+public:
+    CAR_INTERFACE_DECL()
+
+    RecentsPanelView(
+        /* [in] */ IContext* ctx,
+        /* [in] */ IAttributeSet* attrs);
+
+    RecentsPanelView(
+        /* [in] */ IContext* ctx,
+        /* [in] */ IAttributeSet* attrs,
+        /* [in] */ Int32 defStyle);
 
     CARAPI NumItemsInOneScreenful(
         /* [out] */ Int32* count);
 
-    CARAPI_(Boolean) IsInContentArea(
+    CARAPI IsInContentArea(
         /* [in] */ Int32 x,
-        /* [in] */ Int32 y);
+        /* [in] */ Int32 y,
+        /* [out] */ Boolean* result);
 
     CARAPI Show(
         /* [in] */ Boolean show);
 
     CARAPI Show(
         /* [in] */ Boolean show,
-        /* [in] */ IObjectContainer* recentTaskDescriptions,
+        /* [in] */ IArrayList* recentTaskDescriptions,
         /* [in] */ Boolean firstScreenful,
         /* [in] */ Boolean waitingForWindowAnimation);
 
@@ -249,13 +279,16 @@ public:
     CARAPI OnAnimationStart(
         /* [in] */ IAnimator* animation);
 
-    CARAPI_(Boolean) DispatchHoverEvent(
-        /* [in] */ IMotionEvent* event);
+    CARAPI DispatchHoverEvent(
+        /* [in] */ IMotionEvent* event,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) IsShowing();
-
-    CARAPI SetStatusBarView(
-        /* [in] */ IView* statusBarView);
+    /**
+     * Whether the panel is showing, or, if it's animating, whether it will be
+     * when the animation is done.
+     */
+    CARAPI IsShowing(
+        /* [out] */ Boolean* result);
 
     CARAPI SetRecentTasksLoader(
         /* [in] */ IRecentTasksLoader* loader);
@@ -279,11 +312,12 @@ public:
     CARAPI RefreshRecentTasksList();
 
     CARAPI OnTasksLoaded(
-        /* [in] */ IObjectContainer* tasks,
+        /* [in] */ IArrayList* tasks,
         /* [in] */ Boolean firstScreenful);
 
-    CARAPI_(Boolean) SimulateClick(
-        /* [in] */ Int32 persistentTaskId);
+    CARAPI SimulateClick(
+        /* [in] */ Int32 persistentTaskId,
+        /* [out] */ Boolean* result);
 
     CARAPI HandleOnClick(
         /* [in] */ IView* view);
@@ -297,8 +331,9 @@ public:
     CARAPI HandleSwipe(
         /* [in] */ IView* view);
 
-    CARAPI_(Boolean) OnInterceptTouchEvent(
-        /* [in] */ IMotionEvent* ev);
+    CARAPI OnInterceptTouchEvent(
+        /* [in] */ IMotionEvent* ev,
+        /* [out] */ Boolean* result);
 
     CARAPI HandleLongPress(
         /* [in] */ IView* selectedView,
@@ -306,16 +341,13 @@ public:
         /* [in] */ IView* thumbnailView);
 
 protected:
-    CARAPI Init(
-        /* [in] */ IContext* ctx,
-        /* [in] */ IAttributeSet* attrs);
-
-    CARAPI Init(
-        /* [in] */ IContext* ctx,
-        /* [in] */ IAttributeSet* attrs,
-        /* [in] */ Int32 defStyle);
-
     CARAPI OnFinishInflate();
+
+    CARAPI OnAttachedToWindow();
+
+    // @Override
+    CARAPI DispatchDraw(
+        /* [in] */ ICanvas* canvas);
 
 private:
     CARAPI_(Boolean) PointInside(
@@ -339,20 +371,21 @@ private:
 
     CARAPI_(void) UpdateThumbnail(
         /* [in] */ ViewHolder* h,
-        /* [in] */ IBitmap* thumbnail,
+        /* [in] */ IDrawable* thumbnail,
         /* [in] */ Boolean show,
         /* [in] */ Boolean anim);
 
     CARAPI_(void) AnimateInIconOfFirstTask();
 
     CARAPI_(void) RefreshRecentTasksList(
-        /* [in] */ IObjectContainer* recentTasksList,
+        /* [in] */ IArrayList* recentTasksList,
         /* [in] */ Boolean firstScreenful);
 
     CARAPI_(void) UpdateUiElements();
 
     CARAPI_(void) StartApplicationDetailsActivity(
-        /* [in] */ const String& packageName);
+        /* [in] */ const String& packageName,
+        /* [in] */ Int32 userId);
 
 public:
     static const String TAG;
@@ -360,8 +393,7 @@ public:
     AutoPtr<IPopupMenu> mPopup;
     AutoPtr<IView> mRecentsScrim;
     AutoPtr<IView> mRecentsNoApps;
-    AutoPtr<IViewGroup> mRecentsContainer;
-    AutoPtr<IStatusBarTouchProxy> mStatusBarTouchProxy;
+    AutoPtr<IRecentsPanelViewRecentsScrollView> mRecentsContainer;
 
     Boolean mShowing;
     Boolean mWaitingToShow;
@@ -369,10 +401,11 @@ public:
     Boolean mAnimateIconOfFirstTask;
     Boolean mWaitingForWindowAnimation;
     Int64 mWindowAnimationStartTime;
+    Boolean mCallUiHiddenBeforeNextReload;
 
     AutoPtr<IRecentTasksLoader> mRecentTasksLoader;
-    AutoPtr< List<AutoPtr<ITaskDescription> > > mRecentTaskDescriptions;
-    AutoPtr<ITaskDescriptionAdapter> mListAdapter;
+    AutoPtr<IList> mRecentTaskDescriptions;
+    AutoPtr<TaskDescriptionAdapter> mListAdapter;
     Int32 mThumbnailWidth;
     Boolean mFitThumbnailToXY;
     Int32 mRecentItemLayoutId;
@@ -383,5 +416,7 @@ public:
 }// namespace SystemUI
 }// namespace Droid
 }// namespace Elastos
+
+DEFINE_CONVERSION_FOR(Elastos::Droid::SystemUI::Recent::RecentsPanelView::ViewHolder, IInterface)
 
 #endif //__ELASTOS_DROID_SYSTEMUI_RECENT_RECENTSPANELVIEW_H__

@@ -188,7 +188,7 @@ ECode SpannableStringInternal::SetSpan(
     (*mSpanData)[mSpanCount * COLUMNS + FLAGS] = flags;
     mSpanCount++;
 
-    if (this != NULL) {
+    if (this->Probe(EIID_ISpannable) != NULL) {
         SendSpanAdded(what, nstart, nend);
     }
     return NOERROR;

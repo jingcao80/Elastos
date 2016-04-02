@@ -322,6 +322,7 @@
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/content
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/display
 > Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/dreams
+  Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/firewall
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/input
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/hdmi
 > Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/lights
@@ -357,8 +358,12 @@
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/doze
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/egg
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/keyguard
-  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/usb
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/media
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/net
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/power
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recent
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/usb
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/volume
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents/misc
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/settings
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/screenshot
@@ -375,8 +380,10 @@
 > Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings Settings.car
   Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/dashboard
   Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/drawable
+  Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/inputmethod
   Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/search
   Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/widget
+  Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/wifi
 > Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings
   Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider SettingsProvider.car
 > Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider

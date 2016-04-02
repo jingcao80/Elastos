@@ -8,16 +8,25 @@ namespace Firewall {
 //------------------------------------------------------------------------------
 // AndFilter::FACTORY_FilterFactory
 //------------------------------------------------------------------------------
-IFilter* AndFilter::FACTORY_FilterFactory::NewFilter()
+
+AndFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
+    /* [in] */ const String& tag)
+{
+    FilterFactory::constructor(tag);
+}
+
+IFilter* AndFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
-    return new AndFilter()->ReadFromXml(parser);
+    AutoPtr<AndFilter> filter = new AndFilter();
+    return (IFilter*)(filter->ReadFromXml(parser));
 }
 
 //=======================================================================================
 // AndFilter
 //=======================================================================================
-AutoPtr<FACTORY_FilterFactory> AndFilter::FACTORY = new FACTORY_FilterFactory(String("and"));
+
+const AutoPtr<AndFilter::FACTORY_FilterFactory> AndFilter::FACTORY = new AndFilter::FACTORY_FilterFactory(String("and"));
 
 ECode AndFilter::Matches(
     /* [in] */ IIntentFirewall* ifw,
@@ -26,7 +35,7 @@ ECode AndFilter::Matches(
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid,
     /* [in] */ const String& resolvedType,
-    /* [in] */ Int32 receivingUid
+    /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
     Int32 size;
@@ -39,7 +48,7 @@ ECode AndFilter::Matches(
         children->Get(i, (IInterface**)&filter);
 
         filter->Matches(ifw, resolvedComponent, intent, callerUid, callerPid,
-                resolvedType, receivingUid, &ret);
+                resolvedType, receivingUid, ret);
         if (! *ret) {
             return NOERROR;
         }

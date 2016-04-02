@@ -1,516 +1,325 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_SETTINGS_SETTINGSPREFERENCEFRAGMENT_H__
+#define __ELASTOS_DROID_SETTINGS_SETTINGSPREFERENCEFRAGMENT_H__
 
-package com.android.settings;
+#include "elastos/droid/app/DialogFragment.h"
+#include "elastos/droid/preference/PreferenceFragment.h"
+#include "_Settings.h"
 
-using Elastos::Droid::App::IActivity;
-using Elastos::Droid::App::IDialog;
-using Elastos::Droid::App::IDialogFragment;
+using Elastos::Droid::App::DialogFragment;
 using Elastos::Droid::App::IFragment;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
-using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Preference::IPreference;
-using Elastos::Droid::Preference::IPreferenceActivity;
-using Elastos::Droid::Preference::IPreferenceFragment;
-using Elastos::Droid::Preference::IPreferenceGroupAdapter;
-using Elastos::Droid::Text::ITextUtils;
-using Elastos::Droid::Utility::ILog;
-using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::Preference::PreferenceFragment;
 using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::IMenuInflater;
-using Elastos::Droid::View::IMenuItem;
-using Elastos::Droid::View::IView;
-using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::IListAdapter;
 using Elastos::Droid::Widget::IListView;
 
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+
 /**
  * Base class for Settings fragments, with some helper functions and dialog management.
  */
-public class SettingsPreferenceFragment extends PreferenceFragment implements DialogCreatable {
+class SettingsPreferenceFragment
+    : public PreferenceFragment
+    , public ISettingsPreferenceFragment
+    , public IDialogCreatable
+{
+public:
+    class SettingsDialogFragment
+        : public DialogFragment
+    {
+        friend class SettingsPreferenceFragment;
+    public:
+        SettingsDialogFragment();
 
-    private static const String TAG = "SettingsPreferenceFragment";
+        ~SettingsDialogFragment();
 
-    private static const Int32 MENU_HELP = Menu.FIRST + 100;
-    private static const Int32 DELAY_HIGHLIGHT_DURATION_MILLIS = 600;
+        CARAPI constructor();
 
-    private static const String SAVE_HIGHLIGHTED_KEY = "android:preference_highlighted";
-
-    private SettingsDialogFragment mDialogFragment;
-
-    private String mHelpUrl;
-
-    // Cache the content resolver for async callbacks
-    private ContentResolver mContentResolver;
-
-    private String mPreferenceKey;
-    private Boolean mPreferenceHighlighted = FALSE;
-    private Drawable mHighlightDrawable;
-
-    private ListAdapter mCurrentRootAdapter;
-    private Boolean mIsDataSetObserverRegistered = FALSE;
-    private DataSetObserver mDataSetObserver = new DataSetObserver() {
-        //@Override
-        CARAPI OnChanged() {
-            HighlightPreferenceIfNeeded();
-        }
+        CARAPI constructor(
+            /* [in] */ IDialogCreatable* fragment,
+            /* [in] */ Int32 dialogId);
 
         //@Override
-        CARAPI OnInvalidated() {
-            HighlightPreferenceIfNeeded();
-        }
+        CARAPI OnSaveInstanceState(
+            /* [in] */ IBundle* outState);
+
+        //@Override
+        CARAPI OnStart();
+
+        //@Override
+        CARAPI OnCreateDialog(
+            /* [in] */ IBundle* savedInstanceState,
+            /* [out] */ IDialog** dialog);
+
+        //@Override
+        CARAPI OnCancel(
+            /* [in] */ IDialogInterface* dialog);
+
+        //@Override
+        CARAPI OnDismiss(
+            /* [in] */ IDialogInterface* dialog);
+
+        CARAPI_(Int32) GetDialogId();
+
+        //@Override
+        CARAPI OnDetach();
+
+    private:
+        static const String KEY_DIALOG_ID;
+        static const String KEY_PARENT_FRAGMENT_ID;
+
+        Int32 mDialogId;
+
+        AutoPtr<IFragment> mParentFragment;
+
+        AutoPtr<IDialogInterfaceOnCancelListener> mOnCancelListener;
+        AutoPtr<IDialogInterfaceOnDismissListener> mOnDismissListener;
     };
 
-    private ViewGroup mPinnedHeaderFrameLayout;
+private:
+    class InitDataSetObserver
+    {
+    public:
+        InitDataSetObserver(
+            /* [in] */ SettingsPreferenceFragment* host);
+
+        ~InitDataSetObserver();
+
+        //@Override
+        CARAPI OnChanged();
+
+        //@Override
+        CARAPI OnInvalidated();
+
+    private:
+        SettingsPreferenceFragment* mHost;
+    };
+
+    class RunnableInHighlightPreference
+        : public Runnable
+    {
+    public:
+        RunnableInHighlightPreference(
+            /* [in] */ IListView* listView,
+            /* [in] */ Int32 position,
+            /* [in] */ IDrawable* highlight);
+
+        ~RunnableInHighlightPreference();
+
+        //@Override
+        CARAPI Run();
+
+    private:
+        AutoPtr<IListView> mListView;
+        Int32 mPosition;
+        AutoPtr<IDrawable> mHighlight;
+    };
+
+    class RunnableInHighlightPreference2
+        : public Runnable
+    {
+    public:
+        RunnableInHighlightPreference2(
+            /* [in] */ IListView* listView,
+            /* [in] */ Int32 position,
+            /* [in] */ IDrawable* highlight);
+
+        ~RunnableInHighlightPreference2();
+
+        //@Override
+        CARAPI Run();
+
+    private:
+        AutoPtr<IListView> mListView;
+        Int32 mPosition;
+        AutoPtr<IDrawable> mHighlight;
+    };
+
+public:
+    CAR_INTERFACE_DECL();
+
+    SettingsPreferenceFragment();
+
+    ~SettingsPreferenceFragment();
 
     //@Override
-    CARAPI OnCreate(Bundle icicle) {
-        super->OnCreate(icicle);
-
-        if (icicle != NULL) {
-            mPreferenceHighlighted = icicle->GetBoolean(SAVE_HIGHLIGHTED_KEY);
-        }
-
-        // Prepare help url and enable menu if necessary
-        Int32 helpResource = GetHelpResource();
-        if (helpResource != 0) {
-            mHelpUrl = GetResources()->GetString(helpResource);
-        }
-    }
+    CARAPI OnCreate(
+        /* [in] */ IBundle* icicle);
 
     //@Override
-    public View OnCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-        final View root = super->OnCreateView(inflater, container, savedInstanceState);
-        mPinnedHeaderFrameLayout = (ViewGroup) root->FindViewById(R.id.pinned_header);
-        return root;
-    }
+    CARAPI OnCreateView(
+        /* [in] */ ILayoutInflater* inflater,
+        /* [in] */ IViewGroup* container,
+        /* [in] */ IBundle* savedInstanceState,
+        /* [out] */ IView** view);
 
-    CARAPI SetPinnedHeaderView(View pinnedHeader) {
-        mPinnedHeaderFrameLayout->AddView(pinnedHeader);
-        mPinnedHeaderFrameLayout->SetVisibility(View.VISIBLE);
-    }
+    CARAPI SetPinnedHeaderView(
+        /* [in] */ IView* pinnedHeader);
 
-    CARAPI ClearPinnedHeaderView() {
-        mPinnedHeaderFrameLayout->RemoveAllViews();
-        mPinnedHeaderFrameLayout->SetVisibility(View.GONE);
-    }
+    CARAPI ClearPinnedHeaderView();
 
     //@Override
-    CARAPI OnSaveInstanceState(Bundle outState) {
-        super->OnSaveInstanceState(outState);
-
-        outState->PutBoolean(SAVE_HIGHLIGHTED_KEY, mPreferenceHighlighted);
-    }
+    CARAPI OnSaveInstanceState(
+        /* [in] */ IBundle* outState);
 
     //@Override
-    CARAPI OnActivityCreated(Bundle savedInstanceState) {
-        super->OnActivityCreated(savedInstanceState);
-        if (!TextUtils->IsEmpty(mHelpUrl)) {
-            SetHasOptionsMenu(TRUE);
-        }
-    }
+    CARAPI OnActivityCreated(
+        /* [in] */ IBundle* savedInstanceState);
 
     //@Override
-    CARAPI OnResume() {
-        super->OnResume();
-
-        final Bundle args = GetArguments();
-        if (args != NULL) {
-            mPreferenceKey = args->GetString(SettingsActivity.EXTRA_FRAGMENT_ARG_KEY);
-            HighlightPreferenceIfNeeded();
-        }
-    }
+    CARAPI OnResume();
 
     //@Override
-    protected void OnBindPreferences() {
-        RegisterObserverIfNeeded();
-    }
+    CARAPI OnStop();
+
+    CARAPI RegisterObserverIfNeeded();
+
+    CARAPI UnregisterObserverIfNeeded();
+
+    CARAPI HighlightPreferenceIfNeeded();
 
     //@Override
-    protected void OnUnbindPreferences() {
-        UnregisterObserverIfNeeded();
-    }
-
-    //@Override
-    CARAPI OnStop() {
-        super->OnStop();
-
-        UnregisterObserverIfNeeded();
-    }
-
-    CARAPI RegisterObserverIfNeeded() {
-        if (!mIsDataSetObserverRegistered) {
-            if (mCurrentRootAdapter != NULL) {
-                mCurrentRootAdapter->UnregisterDataSetObserver(mDataSetObserver);
-            }
-            mCurrentRootAdapter = GetPreferenceScreen()->GetRootAdapter();
-            mCurrentRootAdapter->RegisterDataSetObserver(mDataSetObserver);
-            mIsDataSetObserverRegistered = TRUE;
-        }
-    }
-
-    CARAPI UnregisterObserverIfNeeded() {
-        if (mIsDataSetObserverRegistered) {
-            if (mCurrentRootAdapter != NULL) {
-                mCurrentRootAdapter->UnregisterDataSetObserver(mDataSetObserver);
-                mCurrentRootAdapter = NULL;
-            }
-            mIsDataSetObserverRegistered = FALSE;
-        }
-    }
-
-    CARAPI HighlightPreferenceIfNeeded() {
-        if (IsAdded() && !mPreferenceHighlighted &&!TextUtils->IsEmpty(mPreferenceKey)) {
-            HighlightPreference(mPreferenceKey);
-        }
-    }
-
-    private Drawable GetHighlightDrawable() {
-        if (mHighlightDrawable == NULL) {
-            mHighlightDrawable = GetActivity()->GetDrawable(R.drawable.preference_highlight);
-        }
-        return mHighlightDrawable;
-    }
-
-    /**
-     * Return a valid ListView position or -1 if none is found
-     */
-    private Int32 CanUseListViewForHighLighting(String key) {
-        if (!HasListView()) {
-            return -1;
-        }
-
-        ListView listView = GetListView();
-        ListAdapter adapter = listView->GetAdapter();
-
-        if (adapter != NULL && adapter instanceof PreferenceGroupAdapter) {
-            return FindListPositionFromKey(adapter, key);
-        }
-
-        return -1;
-    }
-
-    private void HighlightPreference(String key) {
-        final Drawable highlight = GetHighlightDrawable();
-
-        final Int32 position = CanUseListViewForHighLighting(key);
-        if (position >= 0) {
-            mPreferenceHighlighted = TRUE;
-
-            final ListView listView = GetListView();
-            final ListAdapter adapter = listView->GetAdapter();
-
-            ((PreferenceGroupAdapter) adapter).SetHighlightedDrawable(highlight);
-            ((PreferenceGroupAdapter) adapter).SetHighlighted(position);
-
-            listView->Post(new Runnable() {
-                //@Override
-                CARAPI Run() {
-                    listView->SetSelection(position);
-                    listView->PostDelayed(new Runnable() {
-                        //@Override
-                        CARAPI Run() {
-                            final Int32 index = position - listView->GetFirstVisiblePosition();
-                            if (index >= 0 && index < listView->GetChildCount()) {
-                                final View v = listView->GetChildAt(index);
-                                final Int32 centerX = v->GetWidth() / 2;
-                                final Int32 centerY = v->GetHeight() / 2;
-                                highlight->SetHotspot(centerX, centerY);
-                                v->SetPressed(TRUE);
-                                v->SetPressed(FALSE);
-                            }
-                        }
-                    }, DELAY_HIGHLIGHT_DURATION_MILLIS);
-                }
-            });
-        }
-    }
-
-    private Int32 FindListPositionFromKey(ListAdapter adapter, String key) {
-        final Int32 count = adapter->GetCount();
-        for (Int32 n = 0; n < count; n++) {
-            final Object item = adapter->GetItem(n);
-            if (item instanceof Preference) {
-                Preference preference = (Preference) item;
-                final String preferenceKey = preference->GetKey();
-                if (preferenceKey != NULL && preferenceKey->Equals(key)) {
-                    return n;
-                }
-            }
-        }
-        return -1;
-    }
-
-    protected void RemovePreference(String key) {
-        Preference pref = FindPreference(key);
-        if (pref != NULL) {
-            GetPreferenceScreen()->RemovePreference(pref);
-        }
-    }
-
-    /**
-     * Override this if you want to show a help item in the menu, by returning the resource id.
-     * @return the resource id for the help url
-     */
-    protected Int32 GetHelpResource() {
-        return 0;
-    }
-
-    //@Override
-    CARAPI OnCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if (mHelpUrl != NULL && GetActivity() != NULL) {
-            MenuItem helpItem = menu->Add(0, MENU_HELP, 0, R::string::help_label);
-            HelpUtils->PrepareHelpMenuItem(GetActivity(), helpItem, mHelpUrl);
-        }
-    }
+    CARAPI OnCreateOptionsMenu(
+        /* [in] */ IMenu* menu,
+        /* [in] */ IMenuInflater* inflater);
 
     /*
      * The name is intentionally made different from Activity#Finish(), so that
      * users won't misunderstand its meaning.
      */
-    public final void FinishFragment() {
-        GetActivity()->OnBackPressed();
-    }
+    CARAPI_(void) FinishFragment();
+
+    //@Override
+    CARAPI OnDetach();
+
+    CARAPI OnCreateDialog(
+        /* [in] */ Int32 dialogId,
+        /* [out] */ IDialog** dialog);
+
+    CARAPI OnDialogShowing();
+
+    CARAPI Finish();
+
+    CARAPI_(Boolean) StartFragment(
+        /* [in] */ IFragment* caller,
+        /* [in] */ const String& fragmentClass,
+        /* [in] */ Int32 titleRes,
+        /* [in] */ Int32 requestCode,
+        /* [in] */ IBundle* extras);
+
+protected:
+    //@Override
+    CARAPI OnBindPreferences();
+
+    //@Override
+    CARAPI OnUnbindPreferences();
+
+    CARAPI_(void) RemovePreference(
+        /* [in] */ const String& key);
+
+    /**
+     * Override this if you want to show a help item in the menu, by returning the resource id.
+     * @return the resource id for the help url
+     */
+    CARAPI_(Int32) GetHelpResource();
 
     // Some helpers for functions used by the settings fragments when they were activities
 
     /**
      * Returns the ContentResolver from the owning Activity.
      */
-    protected ContentResolver GetContentResolver() {
-        Context context = GetActivity();
-        if (context != NULL) {
-            mContentResolver = context->GetContentResolver();
-        }
-        return mContentResolver;
-    }
+    CARAPI_(AutoPtr<IContentResolver>) GetContentResolver();
 
     /**
      * Returns the specified system service from the owning Activity.
      */
-    protected Object GetSystemService(final String name) {
-        return GetActivity()->GetSystemService(name);
-    }
-
+    CARAPI_(AutoPtr<IInterface>) GetSystemService(
+        /* [in] */ const String& name);
     /**
      * Returns the PackageManager from the owning Activity.
      */
-    protected PackageManager GetPackageManager() {
-        return GetActivity()->GetPackageManager();
-    }
-
-    //@Override
-    CARAPI OnDetach() {
-        if (IsRemoving()) {
-            if (mDialogFragment != NULL) {
-                mDialogFragment->Dismiss();
-                mDialogFragment = NULL;
-            }
-        }
-        super->OnDetach();
-    }
+    CARAPI_(AutoPtr<IPackageManager>) GetPackageManager();
 
     // Dialog management
 
-    protected void ShowDialog(Int32 dialogId) {
-        if (mDialogFragment != NULL) {
-            Logger::E(TAG, "Old dialog fragment not NULL!");
-        }
-        mDialogFragment = new SettingsDialogFragment(this, dialogId);
-        mDialogFragment->Show(GetChildFragmentManager(), Integer->ToString(dialogId));
-    }
+    CARAPI_(void) ShowDialog(
+        /* [in] */ Int32 dialogId);
 
-    public Dialog OnCreateDialog(Int32 dialogId) {
-        return NULL;
-    }
-
-    protected void RemoveDialog(Int32 dialogId) {
-        // mDialogFragment may not be visible yet in parent fragment's OnResume().
-        // To be able to dismiss dialog at that time, don't check
-        // mDialogFragment->IsVisible().
-        if (mDialogFragment != NULL && mDialogFragment->GetDialogId() == dialogId) {
-            mDialogFragment->Dismiss();
-        }
-        mDialogFragment = NULL;
-    }
+    CARAPI_(void) RemoveDialog(
+        /* [in] */ Int32 dialogId);
 
     /**
      * Sets the OnCancelListener of the dialog shown. This method can only be
      * called after ShowDialog(Int32) and before RemoveDialog(Int32). The method
      * does nothing otherwise.
      */
-    protected void SetOnCancelListener(DialogInterface.OnCancelListener listener) {
-        if (mDialogFragment != NULL) {
-            mDialogFragment.mOnCancelListener = listener;
-        }
-    }
+    CARAPI_(void) SetOnCancelListener(
+        /* [in] */ IDialogInterfaceOnCancelListener* listener);
 
     /**
      * Sets the OnDismissListener of the dialog shown. This method can only be
      * called after ShowDialog(Int32) and before RemoveDialog(Int32). The method
      * does nothing otherwise.
      */
-    protected void SetOnDismissListener(DialogInterface.OnDismissListener listener) {
-        if (mDialogFragment != NULL) {
-            mDialogFragment.mOnDismissListener = listener;
-        }
-    }
+    CARAPI_(void) SetOnDismissListener(
+        /* [in] */ IDialogInterfaceOnDismissListener* listener);
 
-    CARAPI OnDialogShowing() {
-        // override in subclass to attach a dismiss listener, for instance
-    }
+    CARAPI_(Boolean) HasNextButton();
 
-    public static class SettingsDialogFragment extends DialogFragment {
-        private static const String KEY_DIALOG_ID = "key_dialog_id";
-        private static const String KEY_PARENT_FRAGMENT_ID = "key_parent_fragment_id";
+    CARAPI_(AutoPtr<IButton>) GetNextButton();
 
-        private Int32 mDialogId;
+private:
+    CARAPI_(AutoPtr<IDrawable>) GetHighlightDrawable();
 
-        private Fragment mParentFragment;
+    /**
+     * Return a valid ListView position or -1 if none is found
+     */
+    CARAPI_(Int32) CanUseListViewForHighLighting(
+        /* [in] */ const String& key);
 
-        private DialogInterface.OnCancelListener mOnCancelListener;
-        private DialogInterface.OnDismissListener mOnDismissListener;
+    CARAPI_(void) HighlightPreference(
+        /* [in] */ const String& key);
 
-        public SettingsDialogFragment() {
-            /* do nothing */
-        }
+    CARAPI_(Int32) FindListPositionFromKey(
+        /* [in] */ IListAdapter* adapter,
+        /* [in] */ const String& key);
 
-        public SettingsDialogFragment(DialogCreatable fragment, Int32 dialogId) {
-            mDialogId = dialogId;
-            if (!(fragment instanceof Fragment)) {
-                throw new IllegalArgumentException("fragment argument must be an instance of "
-                        + Fragment.class->GetName());
-            }
-            mParentFragment = (Fragment) fragment;
-        }
+private:
+    static const String TAG;
 
-        //@Override
-        CARAPI OnSaveInstanceState(Bundle outState) {
-            super->OnSaveInstanceState(outState);
-            if (mParentFragment != NULL) {
-                outState->PutInt(KEY_DIALOG_ID, mDialogId);
-                outState->PutInt(KEY_PARENT_FRAGMENT_ID, mParentFragment->GetId());
-            }
-        }
+    static const Int32 MENU_HELP;
+    static const Int32 DELAY_HIGHLIGHT_DURATION_MILLIS;
 
-        //@Override
-        CARAPI OnStart() {
-            super->OnStart();
+    static const String SAVE_HIGHLIGHTED_KEY;
 
-            if (mParentFragment != NULL && mParentFragment instanceof SettingsPreferenceFragment) {
-                ((SettingsPreferenceFragment) mParentFragment).OnDialogShowing();
-            }
-        }
+    AutoPtr<SettingsDialogFragment> mDialogFragment;
 
-        //@Override
-        public Dialog OnCreateDialog(Bundle savedInstanceState) {
-            if (savedInstanceState != NULL) {
-                mDialogId = savedInstanceState->GetInt(KEY_DIALOG_ID, 0);
-                mParentFragment = GetParentFragment();
-                Int32 mParentFragmentId = savedInstanceState->GetInt(KEY_PARENT_FRAGMENT_ID, -1);
-                if (mParentFragment == NULL) {
-                    mParentFragment = GetFragmentManager()->FindFragmentById(mParentFragmentId);
-                }
-                if (!(mParentFragment instanceof DialogCreatable)) {
-                    throw new IllegalArgumentException(
-                            (mParentFragment != NULL
-                                    ? mParentFragment->GetClass()->GetName()
-                                    : mParentFragmentId)
-                                    + " must implement "
-                                    + DialogCreatable.class->GetName());
-                }
-                // This dialog fragment could be created from non-SettingsPreferenceFragment
-                if (mParentFragment instanceof SettingsPreferenceFragment) {
-                    // restore mDialogFragment in mParentFragment
-                    ((SettingsPreferenceFragment) mParentFragment).mDialogFragment = this;
-                }
-            }
-            return ((DialogCreatable) mParentFragment).OnCreateDialog(mDialogId);
-        }
+    String mHelpUrl;
 
-        //@Override
-        CARAPI OnCancel(DialogInterface dialog) {
-            super->OnCancel(dialog);
-            if (mOnCancelListener != NULL) {
-                mOnCancelListener->OnCancel(dialog);
-            }
-        }
+    // Cache the content resolver for async callbacks
+    AutoPtr<IContentResolver> mContentResolver;
 
-        //@Override
-        CARAPI OnDismiss(DialogInterface dialog) {
-            super->OnDismiss(dialog);
-            if (mOnDismissListener != NULL) {
-                mOnDismissListener->OnDismiss(dialog);
-            }
-        }
+    String mPreferenceKey;
+    Boolean mPreferenceHighlighted;
+    AutoPtr<IDrawable> mHighlightDrawable;
 
-        public Int32 GetDialogId() {
-            return mDialogId;
-        }
+    AutoPtr<IListAdapter> mCurrentRootAdapter;
+    Boolean mIsDataSetObserverRegistered;
+    AutoPtr<IDataSetObserver> mDataSetObserver;
 
-        //@Override
-        CARAPI OnDetach() {
-            super->OnDetach();
+    AutoPtr<IViewGroup> mPinnedHeaderFrameLayout;
+};
 
-            // This dialog fragment could be created from non-SettingsPreferenceFragment
-            if (mParentFragment instanceof SettingsPreferenceFragment) {
-                // in case the dialog is not explicitly removed by RemoveDialog()
-                if (((SettingsPreferenceFragment) mParentFragment).mDialogFragment == this) {
-                    ((SettingsPreferenceFragment) mParentFragment).mDialogFragment = NULL;
-                }
-            }
-        }
-    }
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
 
-    protected Boolean HasNextButton() {
-        return ((ButtonBarHandler)GetActivity()).HasNextButton();
-    }
-
-    protected Button GetNextButton() {
-        return ((ButtonBarHandler)GetActivity()).GetNextButton();
-    }
-
-    CARAPI Finish() {
-        GetActivity()->OnBackPressed();
-    }
-
-    public Boolean StartFragment(Fragment caller, String fragmentClass, Int32 titleRes,
-            Int32 requestCode, Bundle extras) {
-        final Activity activity = GetActivity();
-        if (activity instanceof SettingsActivity) {
-            SettingsActivity sa = (SettingsActivity) activity;
-            sa->StartPreferencePanel(fragmentClass, extras, titleRes, NULL, caller, requestCode);
-            return TRUE;
-        } else if (activity instanceof PreferenceActivity) {
-            PreferenceActivity sa = (PreferenceActivity) activity;
-            sa->StartPreferencePanel(fragmentClass, extras, titleRes, NULL, caller, requestCode);
-            return TRUE;
-        } else {
-            Logger::W(TAG,
-                    "Parent isn't SettingsActivity nor PreferenceActivity, thus there's no way to "
-                    + "launch the given Fragment (name: " + fragmentClass
-                    + ", requestCode: " + requestCode + ")");
-            return FALSE;
-        }
-    }
-}
+#endif //__ELASTOS_DROID_SETTINGS_SETTINGSPREFERENCEFRAGMENT_H__

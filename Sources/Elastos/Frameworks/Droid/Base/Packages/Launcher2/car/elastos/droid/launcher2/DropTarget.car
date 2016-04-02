@@ -4,9 +4,11 @@ module
     namespace Droid {
     namespace Launcher2 {
 
-    interface IDragObject {
+    interface IDropTargetDragObject {
 
     }
+
+    interface IDropTargetDragEnforcer
 
     /**
      * Interface defining an object that can receive a drag.

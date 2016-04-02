@@ -2180,7 +2180,7 @@ ECode CWifiConfiguration::SetHttpProxy(
 }
 
 ECode CWifiConfiguration::SetProxy(
-    /* [in] */ IpConfigurationProxySettings* settings,
+    /* [in] */ IpConfigurationProxySettings settings,
     /* [in] */ IProxyInfo* proxy)
 {
     assert(0);
@@ -2191,7 +2191,7 @@ ECode CWifiConfiguration::SetProxy(
 }
 
 ECode CWifiConfiguration::GetIpAssignment(
-    /* [out] */ IpConfigurationIpAssignment** ipAssignment)
+    /* [out] */ IpConfigurationIpAssignment* ipAssignment)
 {
     VALIDATE_NOT_NULL(ipAssignment);
     assert(0);
@@ -2202,7 +2202,7 @@ ECode CWifiConfiguration::GetIpAssignment(
 }
 
 ECode CWifiConfiguration::SetIpAssignment(
-    /* [in] */ IpConfigurationIpAssignment* ipAssignment)
+    /* [in] */ IpConfigurationIpAssignment ipAssignment)
 {
     assert(0);
     // TODO
@@ -2212,7 +2212,7 @@ ECode CWifiConfiguration::SetIpAssignment(
 }
 
 ECode CWifiConfiguration::GetProxySettings(
-    /* [out] */ IpConfigurationProxySettings** proxySettings)
+    /* [out] */ IpConfigurationProxySettings* proxySettings)
 {
     VALIDATE_NOT_NULL(proxySettings);
     assert(0);
@@ -2223,7 +2223,7 @@ ECode CWifiConfiguration::GetProxySettings(
 }
 
 ECode CWifiConfiguration::SetProxySettings(
-    /* [in] */ IpConfigurationProxySettings* proxySettings)
+    /* [in] */ IpConfigurationProxySettings proxySettings)
 {
     assert(0);
     // TODO

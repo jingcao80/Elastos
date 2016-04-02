@@ -60,6 +60,7 @@ namespace Settings {
 
 class SettingsActivity
     : public Activity
+    , public ISettingsActivity
     , public IPreferenceManagerOnPreferenceTreeClickListener
     , public IPreferenceFragmentOnPreferenceStartFragmentCallback
     , public IButtonBarHandler

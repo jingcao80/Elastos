@@ -1,11 +1,12 @@
+
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_CPANELHOLDER_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_CPANELHOLDER_H__
 
 #include "_Elastos_Droid_SystemUI_StatusBar_Phone_CPanelHolder.h"
+#include <elastos/droid/widget/FrameLayout.h>
 
-
-
-#include "elastos/droid/systemui/statusbar/phone/PanelHolder.h"
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::Widget::FrameLayout;
 
 namespace Elastos {
 namespace Droid {
@@ -13,20 +14,16 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CarClass(CPanelHolder), public PanelHolder
+CarClass(CPanelHolder)
+    , public FrameLayout
+    , public IPanelHolder
 {
 public:
-    IVIEW_METHODS_DECL()
-    IVIEWGROUP_METHODS_DECL()
-    IVIEWPARENT_METHODS_DECL()
-    IVIEWMANAGER_METHODS_DECL()
-    IDRAWABLECALLBACK_METHODS_DECL()
-    IKEYEVENTCALLBACK_METHODS_DECL()
-    IACCESSIBILITYEVENTSOURCE_METHODS_DECL()
-    IFRAMELAYOUT_METHODS_DECL()
+    CAR_OBJECT_DECL();
 
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
+    CAR_INTERFACE_DECL();
+
+    CPanelHolder();
 
     CARAPI constructor(
         /* [in] */ IContext* context,
@@ -34,15 +31,35 @@ public:
 
     CARAPI GetPanelIndex(
         /* [in] */ IPanelView* pv,
-        /* [out] */ Int32* index);
+        /* [out] */ Int32* result);
 
     CARAPI SetSelectedPanel(
         /* [in] */ IPanelView* pv);
 
+    // @Override
+    CARAPI OnTouchEvent(
+        /* [in] */ IMotionEvent* event,
+        /* [out] */ Boolean* result);
+
     CARAPI SetBar(
         /* [in] */ IPanelBar* panelBar);
-};
 
+protected:
+    // @Override
+    CARAPI_(Int32) GetChildDrawingOrder(
+        /* [in] */ Int32 childCount,
+        /* [in] */ Int32 i);
+
+    // @Override
+    CARAPI OnFinishInflate();
+
+public:
+    static const Boolean DEBUG_GESTURES;
+
+private:
+    Int32 mSelectedPanelIndex;
+    AutoPtr<IPanelBar> mBar;
+};
 
 }// namespace Phone
 }// namespace StatusBar

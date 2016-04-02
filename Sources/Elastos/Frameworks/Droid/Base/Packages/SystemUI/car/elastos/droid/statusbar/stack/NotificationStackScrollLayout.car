@@ -393,6 +393,8 @@ module
             [in] IPhoneStatusBar* phoneStatusBar);
 
         OnGoToKeyguard();
+
+        RemoveLongPressCallback();
     }
 
     } // namespace Stack

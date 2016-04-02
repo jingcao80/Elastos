@@ -18,6 +18,12 @@ using Elastos::Droid::Utility::ISparseInt32Array;
 using Elastos::Droid::View::ISurface;
 using Elastos::Utility::IQueue;
 
+namespace android {
+
+class JTvInputHal;
+
+} // namespace android
+
 namespace Elastos {
 namespace Droid {
 namespace Server {
@@ -30,6 +36,8 @@ class TvInputHal
     : public Object
     , public IHandlerCallback
 {
+    friend class android::JTvInputHal;
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -59,7 +67,8 @@ public:
         /* [out] */ Boolean* result);
 
 private:
-    CARAPI_(Int64) NativeOpen();
+    CARAPI_(Int64) NativeOpen(
+        /* [in] */ TvInputHal* thiz);
 
     static CARAPI_(Int32) NativeAddStream(
         /* [in] */ Int64 ptr,

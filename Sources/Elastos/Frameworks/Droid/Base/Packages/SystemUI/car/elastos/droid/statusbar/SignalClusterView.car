@@ -14,7 +14,7 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.Widget.ILinearLayout
-     * interface NetworkControllerImpl.ISignalCluster
+     * interface INetworkControllerImplSignalCluster
      * interface ISecurityControllerCallback
      */
     interface ISignalClusterView {

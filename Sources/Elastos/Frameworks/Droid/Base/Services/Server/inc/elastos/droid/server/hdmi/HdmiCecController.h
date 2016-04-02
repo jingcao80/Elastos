@@ -22,6 +22,12 @@ using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Utility::IList;
 
+namespace android {
+
+class HdmiCecEventHandler;
+
+} // namespace android
+
 namespace Elastos {
 namespace Droid {
 namespace Server {
@@ -43,6 +49,8 @@ class HdmiControlService;
 class HdmiCecController
     : public Object
 {
+    friend class android::HdmiCecEventHandler;
+
 private:
     class RemoteDevicePredicate
         : public Object

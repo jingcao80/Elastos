@@ -26,6 +26,7 @@ module
     * @Involve
     * interface IBluetoothProfile
     */
+    [local]
     interface IBluetoothHeadset {
         /**
          * Intent used to broadcast the change in the Audio Connection state of the

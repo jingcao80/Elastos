@@ -605,6 +605,11 @@ public:
         /* [in] */ Boolean userAction,
         /* [in] */ Boolean expanded);
 
+    /**
+     * @return The number of notifications we show on Keyguard.
+     */
+    virtual CARAPI_(Int32) GetMaxKeyguardNotifications() = 0;
+
 protected:
     // UI-specific methods
     /**
@@ -616,62 +621,62 @@ protected:
     virtual CARAPI_(void) RefreshLayout(
         /* [in] */ Int32 layoutDirection) = 0;
 
-    CARAPI_(void) NotifyUserAboutHiddenNotifications();
+    virtual CARAPI_(void) NotifyUserAboutHiddenNotifications();
 
     /**
      * Takes the necessary steps to prepare the status bar for starting an activity, then starts it.
      * @param action A dismiss action that is called if it's safe to start the activity.
      * @param afterKeyguardGone Whether the action should be executed after the Keyguard is gone.
      */
-    CARAPI_(void) DismissKeyguardThenExecute(
+    virtual CARAPI_(void) DismissKeyguardThenExecute(
         /* [in] */ IOnDismissAction* action,
         /* [in] */ Boolean afterKeyguardGone);
 
     // @Override
-    CARAPI OnConfigurationChanged(
+    virtual CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
-    CARAPI_(AutoPtr<IView>) UpdateNotificationVetoButton(
+    virtual CARAPI_(AutoPtr<IView>) UpdateNotificationVetoButton(
         /* [in] */ IView* row,
         /* [in] */ IStatusBarNotification* n);
 
-    CARAPI_(void) ApplyColorsAndBackgrounds(
+    virtual CARAPI_(void) ApplyColorsAndBackgrounds(
         /* [in] */ IStatusBarNotification* sbn,
         /* [in] */ INotificationDataEntry* entry);
 
-    CARAPI_(AutoPtr<ISwipeHelperLongPressListener>) GetNotificationLongClicker();
+    virtual CARAPI_(AutoPtr<ISwipeHelperLongPressListener>) GetNotificationLongClicker();
 
     virtual CARAPI_(AutoPtr<IWindowManagerLayoutParams>) GetSearchLayoutParams(
         /* [in] */ IViewGroupLayoutParams* layoutParams) = 0;
 
-    CARAPI_(void) UpdateSearchPanel();
+    virtual CARAPI_(void) UpdateSearchPanel();
 
-    CARAPI_(AutoPtr<H>) CreateHandler();
+    virtual CARAPI_(AutoPtr<H>) CreateHandler();
 
     virtual CARAPI_(AutoPtr<IView>) GetStatusBarView() = 0;
 
     /** Proxy for RecentsComponent */
-    CARAPI_(void) ShowRecents(
+    virtual CARAPI_(void) ShowRecents(
         /* [in] */ Boolean triggeredFromAltTab);
 
-    CARAPI_(void) HideRecents(
+    virtual CARAPI_(void) HideRecents(
         /* [in] */ Boolean triggeredFromAltTab,
         /* [in] */ Boolean triggeredFromHomeKey);
 
-    CARAPI_(void) ToggleRecents();
+    virtual CARAPI_(void) ToggleRecents();
 
-    CARAPI_(void) PreloadRecents();
+    virtual CARAPI_(void) PreloadRecents();
 
-    CARAPI_(void) CancelPreloadingRecents();
+    virtual CARAPI_(void) CancelPreloadingRecents();
 
-    CARAPI_(void) ShowRecentsNextAffiliatedTask();
+    virtual CARAPI_(void) ShowRecentsNextAffiliatedTask();
 
-    CARAPI_(void) ShowRecentsPreviousAffiliatedTask();
+    virtual CARAPI_(void) ShowRecentsPreviousAffiliatedTask();
 
-    CARAPI_(void) WorkAroundBadLayerDrawableOpacity(
+    virtual CARAPI_(void) WorkAroundBadLayerDrawableOpacity(
         /* [in] */ IView* v);
 
-    CARAPI_(Boolean) InflateViewsForHeadsUp(
+    virtual CARAPI_(Boolean) InflateViewsForHeadsUp(
         /* [in] */ INotificationDataEntry* entry,
         /* [in] */ IViewGroup* parent);
 
@@ -682,35 +687,30 @@ protected:
      * turned off.  If any other notifications happen, the lights will turn back on.  Steve says
      * this is what he wants. (see bug 1131461)
      */
-    CARAPI_(void) VisibilityChanged(
+    virtual CARAPI_(void) VisibilityChanged(
         /* [in] */ Boolean visible);
 
-    CARAPI_(AutoPtr<IStatusBarNotification>) RemoveNotificationViews(
+    virtual CARAPI_(AutoPtr<IStatusBarNotification>) RemoveNotificationViews(
         /* [in] */ const String& key,
         /* [in] */ INotificationListenerServiceRankingMap* ranking);
 
-    CARAPI_(AutoPtr<INotificationDataEntry>) CreateNotificationViews(
+    virtual CARAPI_(AutoPtr<INotificationDataEntry>) CreateNotificationViews(
         /* [in] */ IStatusBarNotification* sbn);
 
-    CARAPI_(void) AddNotificationViews(
+    virtual CARAPI_(void) AddNotificationViews(
         /* [in] */ INotificationDataEntry* entry,
         /* [in] */ INotificationListenerServiceRankingMap* ranking);
 
     /**
-     * @return The number of notifications we show on Keyguard.
-     */
-    virtual CARAPI_(Int32) GetMaxKeyguardNotifications() = 0;
-
-    /**
      * Updates expanded, dimmed and locked states of notification rows.
      */
-    CARAPI_(void) UpdateRowStates();
+    virtual CARAPI_(void) UpdateRowStates();
 
-    CARAPI_(void) SetZenMode(
+    virtual CARAPI_(void) SetZenMode(
         /* [in] */ Int32 mode);
 
     // extended in PhoneStatusBar
-    CARAPI_(void) SetShowLockscreenNotifications(
+    virtual CARAPI_(void) SetShowLockscreenNotifications(
         /* [in] */ Boolean show);
 
     virtual CARAPI_(void) HaltTicker() = 0;
@@ -731,17 +731,17 @@ protected:
     virtual CARAPI UpdateNotificationRanking(
         /* [in] */ INotificationListenerServiceRankingMap* ranking) = 0;
 
-    CARAPI_(void) NotifyHeadsUpScreenOn(
+    virtual CARAPI_(void) NotifyHeadsUpScreenOn(
         /* [in] */ Boolean screenOn);
 
-    CARAPI_(Boolean) ShouldInterrupt(
+    virtual CARAPI_(Boolean) ShouldInterrupt(
         /* [in] */ IStatusBarNotification* sbn);
 
     /**
      * @return a PackageManger for userId or if userId is < 0 (USER_ALL etc) then
      *         return PackageManager for mContext
      */
-    CARAPI_(AutoPtr<IPackageManager>) GetPackageManagerForUser(
+    virtual CARAPI_(AutoPtr<IPackageManager>) GetPackageManagerForUser(
         /* [in] */ Int32 userId);
 
 private:
@@ -808,18 +808,18 @@ public:
     static const Int32 EXPANDED_FULL_OPEN;
 
 protected:
-    static const Int32 MSG_SHOW_RECENT_APPS;
-    static const Int32 MSG_HIDE_RECENT_APPS;
-    static const Int32 MSG_TOGGLE_RECENTS_APPS;
-    static const Int32 MSG_PRELOAD_RECENT_APPS;
-    static const Int32 MSG_CANCEL_PRELOAD_RECENT_APPS;
-    static const Int32 MSG_SHOW_NEXT_AFFILIATED_TASK;
-    static const Int32 MSG_SHOW_PREV_AFFILIATED_TASK;
-    static const Int32 MSG_CLOSE_SEARCH_PANEL;
-    static const Int32 MSG_SHOW_HEADS_UP;
-    static const Int32 MSG_HIDE_HEADS_UP;
-    static const Int32 MSG_ESCALATE_HEADS_UP;
-    static const Int32 MSG_DECAY_HEADS_UP;
+    static const Int32 MSG_SHOW_RECENT_APPS = 1019;
+    static const Int32 MSG_HIDE_RECENT_APPS = 1020;
+    static const Int32 MSG_TOGGLE_RECENTS_APPS = 1021;
+    static const Int32 MSG_PRELOAD_RECENT_APPS = 1022;
+    static const Int32 MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
+    static const Int32 MSG_SHOW_NEXT_AFFILIATED_TASK = 1024;
+    static const Int32 MSG_SHOW_PREV_AFFILIATED_TASK = 1025;
+    static const Int32 MSG_CLOSE_SEARCH_PANEL = 1027;
+    static const Int32 MSG_SHOW_HEADS_UP = 1028;
+    static const Int32 MSG_HIDE_HEADS_UP = 1029;
+    static const Int32 MSG_ESCALATE_HEADS_UP = 1030;
+    static const Int32 MSG_DECAY_HEADS_UP = 1031;
 
     static const Boolean ENABLE_HEADS_UP;
     // scores above this threshold should be displayed in heads up mode.
@@ -881,6 +881,7 @@ protected:
     AutoPtr<IEmptyShadeView> mEmptyShadeView;
 
     AutoPtr<IContentObserver> mSettingsObserver;
+    AutoPtr<IViewOnTouchListener> mRecentsPreloadOnTouchListener;
 
 private:
     static const Int32 HIDDEN_NOTIFICATION_ID;
@@ -903,7 +904,6 @@ private:
     AutoPtr<IRemoteViewsOnClickHandler> mOnClickHandler;
     AutoPtr<IBroadcastReceiver> mBroadcastReceiver;
     AutoPtr<INotificationListenerService> mNotificationListener;
-    AutoPtr<IViewOnTouchListener> mRecentsPreloadOnTouchListener;
 };
 
 } // namespace StatusBar

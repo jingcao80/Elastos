@@ -1,12 +1,17 @@
 
+#include "elastos/droid/server/hdmi/Constants.h"
+#include "elastos/droid/server/hdmi/HdmiCecKeycode.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDeviceTv.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessageBuilder.h"
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include "elastos/droid/server/hdmi/HdmiLogger.h"
 #include "elastos/droid/server/hdmi/VolumeControlAction.h"
 #include <Elastos.CoreLibrary.Utility.h>
-#include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include <Elastos.CoreLibrary.h>
+#include <Elastos.Droid.Media.h>
 
-// import static com.android.server.hdmi.Constants::IRT_MS;
-// import static com.android.server.hdmi.Constants::MESSAGE_FEATURE_ABORT;
-// import static com.android.server.hdmi.Constants::MESSAGE_REPORT_AUDIO_STATUS;
-// import static com.android.server.hdmi.Constants::MESSAGE_USER_CONTROL_PRESSED;
+using Elastos::Core::CSystem;
+using Elastos::Core::ISystem;
 
 namespace Elastos {
 namespace Droid {
@@ -35,10 +40,8 @@ ECode VolumeControlAction::ScaleToCecVolume(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return (volume * MAX_VOLUME) / scale;
-#endif
+    *result = (volume * MAX_VOLUME) / scale;
+    return NOERROR;
 }
 
 ECode VolumeControlAction::ScaleToCustomVolume(
@@ -48,11 +51,8 @@ ECode VolumeControlAction::ScaleToCustomVolume(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return (cecVolume * scale) / MAX_VOLUME;
-
-#endif
+    *result = (cecVolume * scale) / MAX_VOLUME;
+    return NOERROR;
 }
 
 ECode VolumeControlAction::constructor(
@@ -60,24 +60,22 @@ ECode VolumeControlAction::constructor(
     /* [in] */ Int32 avrAddress,
     /* [in] */ Boolean isVolumeUp)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super::constructor(source);
-        mAvrAddress = avrAddress;
-        mIsVolumeUp = isVolumeUp;
-        mLastAvrVolume = UNKNOWN_AVR_VOLUME;
-        mSentKeyPressed = FALSE;
+    HdmiCecFeatureAction::constructor(source);
+    mAvrAddress = avrAddress;
+    mIsVolumeUp = isVolumeUp;
+    mLastAvrVolume = UNKNOWN_AVR_VOLUME;
+    mSentKeyPressed = FALSE;
 
-        UpdateLastKeyUpdateTime();
-#endif
+    UpdateLastKeyUpdateTime();
+    return NOERROR;
 }
 
 ECode VolumeControlAction::UpdateLastKeyUpdateTime()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mLastKeyUpdateTime = System->CurrentTimeMillis();
-#endif
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetCurrentTimeMillis(&mLastKeyUpdateTime);
+    return NOERROR;
 }
 
 ECode VolumeControlAction::Start(
@@ -85,61 +83,54 @@ ECode VolumeControlAction::Start(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mState = STATE_WAIT_FOR_NEXT_VOLUME_PRESS;
-        SendVolumeKeyPressed();
-        ResetTimer();
-        *result = TRUE;
-        return NOERROR;
-#endif
+    mState = STATE_WAIT_FOR_NEXT_VOLUME_PRESS;
+    SendVolumeKeyPressed();
+    ResetTimer();
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode VolumeControlAction::SendVolumeKeyPressed()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Int32 srcAddr;
-        GetSourceAddress(&srcAddr);
-        SendCommand(HdmiCecMessageBuilder::BuildUserControlPressed(srcAddr, mAvrAddress,
-                mIsVolumeUp ? HdmiCecKeycode::CEC_KEYCODE_VOLUME_UP
-                        : HdmiCecKeycode::CEC_KEYCODE_VOLUME_DOWN));
-        mSentKeyPressed = TRUE;
-#endif
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    AutoPtr<IHdmiCecMessage> cmd;
+    HdmiCecMessageBuilder::BuildUserControlPressed(srcAddr, mAvrAddress,
+            mIsVolumeUp ? HdmiCecKeycode::CEC_KEYCODE_VOLUME_UP
+                    : HdmiCecKeycode::CEC_KEYCODE_VOLUME_DOWN, (IHdmiCecMessage**)&cmd);
+    SendCommand(cmd);
+    mSentKeyPressed = TRUE;
+    return NOERROR;
 }
 
 ECode VolumeControlAction::ResetTimer()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mActionTimer->ClearTimerMessage();
-        AddTimer(STATE_WAIT_FOR_NEXT_VOLUME_PRESS, IRT_MS);
-#endif
+    mActionTimer->ClearTimerMessage();
+    AddTimer(STATE_WAIT_FOR_NEXT_VOLUME_PRESS, Constants::IRT_MS);
+    return NOERROR;
 }
 
 ECode VolumeControlAction::HandleVolumeChange(
     /* [in] */ Boolean isVolumeUp)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mIsVolumeUp != isVolumeUp) {
-            HdmiLogger::Debug("Volume Key Status Changed[old:%b new:%b]", mIsVolumeUp, isVolumeUp);
-            SendVolumeKeyReleased();
-            mIsVolumeUp = isVolumeUp;
-        }
-        UpdateLastKeyUpdateTime();
-#endif
+    if (mIsVolumeUp != isVolumeUp) {
+        HdmiLogger::Debug("Volume Key Status Changed[old:%s new:%s]", mIsVolumeUp ? "true" : "false", isVolumeUp ? "true" : "false");
+        SendVolumeKeyReleased();
+        mIsVolumeUp = isVolumeUp;
+    }
+    UpdateLastKeyUpdateTime();
+    return NOERROR;
 }
 
 ECode VolumeControlAction::SendVolumeKeyReleased()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Int32 srcAddr;
-        GetSourceAddress(&srcAddr);
-        SendCommand(HdmiCecMessageBuilder::BuildUserControlReleased(srcAddr, mAvrAddress));
-        mSentKeyPressed = FALSE;
-#endif
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    AutoPtr<IHdmiCecMessage> cmd;
+    HdmiCecMessageBuilder::BuildUserControlReleased(srcAddr, mAvrAddress, (IHdmiCecMessage**)&cmd);
+    SendCommand(cmd);
+    mSentKeyPressed = FALSE;
+    return NOERROR;
 }
 
 ECode VolumeControlAction::ProcessCommand(
@@ -148,137 +139,123 @@ ECode VolumeControlAction::ProcessCommand(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Int32 srcAddr;
-        cmd->GetSource(&srcAddr);
-        if (mState != STATE_WAIT_FOR_NEXT_VOLUME_PRESS || srcAddr != mAvrAddress) {
-            *result = FALSE;
-            return NOERROR;
-        }
-
-        Int32 opcode;
-        cmd->GetOpcode(&opcode);
-        switch (opcode) {
-            case MESSAGE_REPORT_AUDIO_STATUS:
-                return HandleReportAudioStatus(cmd);
-            case MESSAGE_FEATURE_ABORT:
-                return HandleFeatureAbort(cmd);
-            default:
-                *result = FALSE;
-                return NOERROR;
-        }
-#endif
-}
-
-ECode VolumeControlAction::HandleReportAudioStatus(
-    /* [in] */ IHdmiCecMessage* cmd,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        AutoPtr<ArrayOf<Byte> > params;
-        cmd->GetParams((ArrayOf<Byte>**)&params);
-        Boolean mute = ((*params)[0] & 0x80) == 0x80;
-        Int32 volume = (*params)[0] & 0x7F;
-        mLastAvrVolume = volume;
-        if (ShouldUpdateAudioVolume(mute)) {
-            HdmiLogger::Debug("Force volume change[mute:%b, volume=%d]", mute, volume);
-            AutoPtr<IHdmiCecLocalDeviceTv> tv;
-            Tv((IHdmiCecLocalDeviceTv**)&tv);
-            ((HdmiCecLocalDeviceTv*) tv.Get())->SetAudioStatus(mute, volume);
-        }
-        *result = TRUE;
-        return NOERROR;
-#endif
-}
-
-ECode VolumeControlAction::ShouldUpdateAudioVolume(
-    /* [in] */ Boolean mute,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // Do nothing if in mute.
-        if (mute) {
-            *result = TRUE;
-            return NOERROR;
-        }
-
-        // Update audio status if current volume position is edge of volume bar,
-        // i.e max or min volume.
-        AutoPtr<IHdmiCecLocalDeviceTv> tv;
-        Tv((IHdmiCecLocalDeviceTv**)&tv);
-        AudioManager audioManager = ((HdmiCecLocalDeviceTv*) tv.Get())->GetService()->GetAudioManager();
-        Int32 currentVolume = audioManager->GetStreamVolume(AudioManager::STREAM_MUSIC);
-        if (mIsVolumeUp) {
-            Int32 maxVolume = audioManager->GetStreamMaxVolume(AudioManager::STREAM_MUSIC);
-            return currentVolume == maxVolume;
-        } else {
-            return currentVolume == 0;
-        }
-#endif
-}
-
-ECode VolumeControlAction::HandleFeatureAbort(
-    /* [in] */ IHdmiCecMessage* cmd,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        AutoPtr<ArrayOf<Byte> > originalOpcode;
-        cmd->GetParams((ArrayOf<Byte>**)&originalOpcode);
-        // Since it sends <User Control Released> only when it finishes this action,
-        // it takes care of <User Control Pressed> only here.
-        if (originalOpcode == MESSAGE_USER_CONTROL_PRESSED) {
-            Finish();
-            *result = TRUE;
-            return NOERROR;
-        }
+    Int32 srcAddr;
+    cmd->GetSource(&srcAddr);
+    if (mState != STATE_WAIT_FOR_NEXT_VOLUME_PRESS || srcAddr != mAvrAddress) {
         *result = FALSE;
         return NOERROR;
-#endif
+    }
+
+    Int32 opcode;
+    cmd->GetOpcode(&opcode);
+    if (opcode == Constants::MESSAGE_REPORT_AUDIO_STATUS) {
+        *result = HandleReportAudioStatus(cmd);
+        return NOERROR;
+    }
+    else if (opcode == Constants::MESSAGE_FEATURE_ABORT) {
+        *result = HandleFeatureAbort(cmd);
+        return NOERROR;
+    }
+    else {
+        *result = FALSE;
+        return NOERROR;
+    }
+    return NOERROR;
+}
+
+Boolean VolumeControlAction::HandleReportAudioStatus(
+    /* [in] */ IHdmiCecMessage* cmd)
+{
+    AutoPtr<ArrayOf<Byte> > params;
+    cmd->GetParams((ArrayOf<Byte>**)&params);
+    Boolean mute = ((*params)[0] & 0x80) == 0x80;
+    Int32 volume = (*params)[0] & 0x7F;
+    mLastAvrVolume = volume;
+    if (ShouldUpdateAudioVolume(mute)) {
+        HdmiLogger::Debug("Force volume change[mute:%s, volume=%d]", mute ? "true" : "false", volume);
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        ((HdmiCecLocalDeviceTv*) tv.Get())->SetAudioStatus(mute, volume);
+    }
+    return TRUE;
+}
+
+Boolean VolumeControlAction::ShouldUpdateAudioVolume(
+    /* [in] */ Boolean mute)
+{
+    // Do nothing if in mute.
+    if (mute) {
+        return TRUE;
+    }
+
+    // Update audio status if current volume position is edge of volume bar,
+    // i.e max or min volume.
+    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+    Tv((IHdmiCecLocalDeviceTv**)&tv);
+    AutoPtr<IHdmiControlService> service;
+    ((HdmiCecLocalDeviceTv*) tv.Get())->GetService((IHdmiControlService**)&service);
+    AutoPtr<IAudioManager> audioManager;
+    ((HdmiControlService*) service.Get())->GetAudioManager((IAudioManager**)&audioManager);
+    Int32 currentVolume;
+    audioManager->GetStreamVolume(IAudioManager::STREAM_MUSIC, &currentVolume);
+    if (mIsVolumeUp) {
+        Int32 maxVolume;
+        audioManager->GetStreamMaxVolume(IAudioManager::STREAM_MUSIC, &maxVolume);
+        return currentVolume == maxVolume;
+    } else {
+        return currentVolume == 0;
+    }
+    return FALSE;
+}
+
+Boolean VolumeControlAction::HandleFeatureAbort(
+    /* [in] */ IHdmiCecMessage* cmd)
+{
+    AutoPtr<ArrayOf<Byte> > originalOpcodes;
+    cmd->GetParams((ArrayOf<Byte>**)&originalOpcodes);
+    Int32 originalOpcode = (*originalOpcodes)[0] & 0xFF;
+    // Since it sends <User Control Released> only when it finishes this action,
+    // it takes care of <User Control Pressed> only here.
+    if (originalOpcode == Constants::MESSAGE_USER_CONTROL_PRESSED) {
+        Finish();
+        return TRUE;
+    }
+    return FALSE;
 }
 
 ECode VolumeControlAction::Clear()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super->Clear();
-        if (mSentKeyPressed) {
-            SendVolumeKeyReleased();
-        }
-        if (mLastAvrVolume != UNKNOWN_AVR_VOLUME) {
-            AutoPtr<IHdmiCecLocalDeviceTv> tv;
-            Tv((IHdmiCecLocalDeviceTv**)&tv);
-            ((HdmiCecLocalDeviceTv*) tv.Get())->SetAudioStatus(FALSE, mLastAvrVolume);
-            mLastAvrVolume = UNKNOWN_AVR_VOLUME;
-        }
-#endif
+    HdmiCecFeatureAction::Clear();
+    if (mSentKeyPressed) {
+        SendVolumeKeyReleased();
+    }
+    if (mLastAvrVolume != UNKNOWN_AVR_VOLUME) {
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        ((HdmiCecLocalDeviceTv*) tv.Get())->SetAudioStatus(FALSE, mLastAvrVolume);
+        mLastAvrVolume = UNKNOWN_AVR_VOLUME;
+    }
+    return NOERROR;
 }
 
 ECode VolumeControlAction::HandleTimerEvent(
     /* [in] */ Int32 state)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (state != STATE_WAIT_FOR_NEXT_VOLUME_PRESS) {
-            return NOERROR;
-        }
+    if (state != STATE_WAIT_FOR_NEXT_VOLUME_PRESS) {
+        return NOERROR;
+    }
 
-        if (System->CurrentTimeMillis() - mLastKeyUpdateTime >= IRT_MS) {
-            Finish();
-        } else {
-            SendVolumeKeyPressed();
-            ResetTimer();
-        }
-#endif
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    Int64 curTimeMillis;
+    system->GetCurrentTimeMillis(&curTimeMillis);
+    if (curTimeMillis - mLastKeyUpdateTime >= Constants::IRT_MS) {
+        Finish();
+    } else {
+        SendVolumeKeyPressed();
+        ResetTimer();
+    }
+    return NOERROR;
 }
 
 } // namespace Hdmi

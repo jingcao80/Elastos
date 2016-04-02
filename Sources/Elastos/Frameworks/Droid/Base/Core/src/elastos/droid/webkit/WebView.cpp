@@ -23,6 +23,8 @@ using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::IStrictMode;
 using Elastos::Droid::Os::CStrictMode;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Droid::View::EIID_IOnGlobalFocusChangeListener;
+using Elastos::Droid::View::EIID_IViewGroupOnHierarchyChangeListener;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
@@ -325,7 +327,7 @@ volatile Boolean WebView::sEnforceThreadChecking = FALSE;
 
 Object WebView::sLock;
 
-CAR_INTERFACE_IMPL(WebView, Object, IWebView);
+CAR_INTERFACE_IMPL_3(WebView, Object, IWebView, IOnGlobalFocusChangeListener, IViewGroupOnHierarchyChangeListener);
 
 WebView::WebView()
 {
@@ -374,18 +376,11 @@ ECode WebView::constructor(
 ECode WebView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
-    /* [in] */ Int32 defStyle,
+    /* [in] */ Int32 defStyleAttr,
     /* [in] */ IMap* javaScriptInterfaces,
     /* [in] */ Boolean privateBrowsing)
 {
-    if (context == NULL) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-    FAIL_RETURN(AbsoluteLayout::constructor(context, attrs, defStyle));
-    FAIL_RETURN(CheckThread());
-
-    EnsureProviderCreated();
-    return mProvider->Init(javaScriptInterfaces, privateBrowsing);
+    return constructor(context, attrs, defStyleAttr, 0, javaScriptInterfaces, privateBrowsing);
 }
 
 ECode WebView::constructor(
@@ -2233,7 +2228,9 @@ void WebView::EnsureProviderCreated()
         AutoPtr<IWebViewPrivateAccess> pa = new PrivateAccess(this);
         IWebView* wv = this;
         assert(wv != NULL);
-        GetFactory()->CreateWebView(wv, pa, (IWebViewProvider**)&mProvider);
+        AutoPtr<IWebViewFactoryProvider> factory = GetFactory();
+        if (factory != NULL)
+            factory->CreateWebView(wv, pa, (IWebViewProvider**)&mProvider);
     }
 }
 

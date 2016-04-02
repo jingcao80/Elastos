@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_WIDGET_TEXTSWITCHER_H__
 #define __ELASTOS_DROID_WIDGET_TEXTSWITCHER_H__
 
-#include "elastos/droid/widget/ViewSwitcher.h"
+#include <elastos/droid/widget/ViewSwitcher.h>
 
 namespace Elastos {
 namespace Droid {
@@ -16,7 +16,7 @@ namespace Widget {
  * {@link #setText(CharSequence)} is called, TextSwitcher animates the current text
  * out and animates the new text in.
  */
-class TextSwitcher
+class ECO_PUBLIC TextSwitcher
     : public ViewSwitcher
     , public ITextSwitcher
 {
@@ -83,4 +83,4 @@ public:
 }// namespace Droid
 }// namespace Widget
 
-#endif
+#endif // __ELASTOS_DROID_WIDGET_TEXTSWITCHER_H__

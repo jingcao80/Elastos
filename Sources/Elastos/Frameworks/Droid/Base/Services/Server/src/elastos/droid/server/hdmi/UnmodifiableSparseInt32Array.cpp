@@ -12,36 +12,21 @@ const String UnmodifiableSparseInt32Array::TAG("ImmutableSparseInt32Array");
 ECode UnmodifiableSparseInt32Array::constructor(
     /* [in] */ ISparseInt32Array* array)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mArray = array;
-
-#endif
+    mArray = array;
+    return NOERROR;
 }
 
 ECode UnmodifiableSparseInt32Array::GetSize(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mArray->GetSize(result);
-#endif
+    return mArray->GetSize(result);
 }
 
 ECode UnmodifiableSparseInt32Array::Get(
     /* [in] */ Int32 key,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        AutoPtr<IInterface> obj;
-        mArray->Get(key, (IInterface**)&obj);
-        return I::Probe(obj);
-#endif
+    return mArray->Get(key, result);
 }
 
 ECode UnmodifiableSparseInt32Array::Get(
@@ -49,59 +34,34 @@ ECode UnmodifiableSparseInt32Array::Get(
     /* [in] */ Int32 valueIfKeyNotFound,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mArray->Get(key, valueIfKeyNotFound);
-#endif
+    return mArray->Get(key, valueIfKeyNotFound, result);
 }
 
 ECode UnmodifiableSparseInt32Array::KeyAt(
     /* [in] */ Int32 index,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mArray->KeyAt(index);
-#endif
+    return mArray->KeyAt(index, result);
 }
 
 ECode UnmodifiableSparseInt32Array::ValueAt(
     /* [in] */ Int32 index,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mArray->ValueAt(index);
-#endif
+    return mArray->ValueAt(index, result);
 }
 
 ECode UnmodifiableSparseInt32Array::IndexOfValue(
     /* [in] */ Int32 value,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mArray->IndexOfValue(value);
-#endif
+    return mArray->IndexOfValue(value, result);
 }
 
 ECode UnmodifiableSparseInt32Array::ToString(
     /* [out] */ String* result)
 {
-    VALIDATE_NOT_NULL(result)
-
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mArray->ToString();
-#endif
+    return IObject::Probe(mArray)->ToString(result);
 }
 
 } // namespace Hdmi

@@ -161,6 +161,7 @@ SOURCES += Service.cpp
 SOURCES += SharedElementCallback.cpp
 SOURCES += SharedPreferencesImpl.cpp
 SOURCES += CStatusBarManager.cpp
+SOURCES += CStatusBarManagerHelper.cpp
 SOURCES += TabActivity.cpp
 SOURCES += CTaskStackBuilder.cpp
 SOURCES += CTaskStackBuilderHelper.cpp

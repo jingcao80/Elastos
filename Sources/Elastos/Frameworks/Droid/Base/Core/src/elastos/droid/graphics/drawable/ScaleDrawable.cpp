@@ -425,8 +425,7 @@ ECode ScaleDrawable::constructor(
     mScaleState->mScaleHeight = scaleHeight;
 
     if (drawable != NULL) {
-        drawable->SetCallback(
-                this);
+        drawable->SetCallback(this);
     }
     return NOERROR;
 }

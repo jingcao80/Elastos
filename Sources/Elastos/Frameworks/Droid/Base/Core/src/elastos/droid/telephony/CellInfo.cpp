@@ -107,7 +107,7 @@ ECode CellInfo::Equals(
         *result = FALSE;
         return NOERROR;
     }
-    if (this == ICellInfo::Probe(other)) {
+    if ((ICellInfo*)this == ICellInfo::Probe(other)) {
         *result = TRUE;
         return NOERROR;
     }

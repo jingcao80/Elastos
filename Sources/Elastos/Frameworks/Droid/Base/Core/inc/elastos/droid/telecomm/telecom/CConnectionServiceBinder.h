@@ -6,6 +6,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Telecomm::Internal::IIConnectionServiceAdapter;
 using Elastos::Droid::Telecomm::Internal::IIConnectionService;
 using Elastos::Core::Object;
@@ -18,6 +19,7 @@ namespace Telecom {
 CarClass(CConnectionServiceBinder)
     , public Object
     , public IIConnectionService
+    , public IBinder
 {
 public:
     CAR_OBJECT_DECL()
@@ -89,6 +91,9 @@ public:
     CARAPI OnPostDialContinue(
         /* [in] */ const String& callId,
         /* [in] */ Boolean proceed);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 public:
     AutoPtr<IHandler> mHandler;

@@ -8,6 +8,7 @@ INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 SOURCES = DynamicIndexableContentMonitor.cpp
+SOURCES += BaseSearchIndexProvider.cpp
 SOURCES += Index.cpp
 SOURCES += IndexDatabaseHelper.cpp
 SOURCES += Ranking.cpp

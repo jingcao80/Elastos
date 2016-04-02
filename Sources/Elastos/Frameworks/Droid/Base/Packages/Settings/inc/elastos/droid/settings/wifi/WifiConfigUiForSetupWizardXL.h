@@ -1,54 +1,52 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_SETTINGS_WIFI_WIFICONFIGUIFORSETUPWIZARDXL_H__
+#define __ELASTOS_DROID_SETTINGS_WIFI_WIFICONFIGUIFORSETUPWIZARDXL_H__
 
-package com.android.settings.wifi;
+#include "elastos/droid/settings/wifi/WifiSettingsForSetupWizardXL.h"
+#include "elastos/droid/settings/wifi/AccessPoint.h"
+#include "elastos/droid/settings/wifi/WifiConfigController.h"
 
-using Elastos::Droid::Settings::IR;
-
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Utility::ILog;
 using Elastos::Droid::View::ILayoutInflater;
-using Elastos::Droid::View::IView;
-using Elastos::Droid::View::View::IOnFocusChangeListener;
+using Elastos::Droid::View::IViewOnFocusChangeListener;
 using Elastos::Droid::View::IViewGroup;
-using Elastos::Droid::View::Inputmethod::IInputMethodManager;
-using Elastos::Droid::Widget::IButton;
-using Elastos::Droid::Widget::IEditText;
+
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Wifi {
 
 /**
  * Shows simplified UI for configuring a wifi network. Used only in SetupWizard for XLarge
  * screen.
  */
-public class WifiConfigUiForSetupWizardXL implements WifiConfigUiBase, OnFocusChangeListener {
-    private static const String TAG = "SetupWizard";
+class WifiConfigUiForSetupWizardXL
+    : public Object
+    , public IWifiConfigUiForSetupWizardXL
+    , public IWifiConfigUiBase
+    , public IViewOnFocusChangeListener
+{
+private:
+    class FocusRunnable
+        : public Runnable
+    {
+    public:
+        FocusRunnable(
+            /* [in] */ IView* viewToBeFocused,
+            /* [in] */ WifiConfigUiForSetupWizardXL* host);
 
-    private Button mConnectButton;
-    private Button mCancelButton;
+        ~FocusRunnable();
 
-    private final WifiSettingsForSetupWizardXL mActivity;
-    private View mView;
-    private WifiConfigController mController;
-    private AccessPoint mAccessPoint;
-    private Boolean mEdit;
-    private Handler mHandler = new Handler();
+        //@Override
+        CARAPI Run();
 
-    private final InputMethodManager mInputMethodManager;
+    public:
+        AutoPtr<IView> mViewToBeFocused;
 
-    private LayoutInflater mInflater;
+    private:
+        WifiConfigUiForSetupWizardXL* mHost;
+    };
+
+public:
+    CAR_INTERFACE_DECL();
 
     /**
      * @param activity Activity which creates this object.
@@ -57,154 +55,98 @@ public class WifiConfigUiForSetupWizardXL implements WifiConfigUiBase, OnFocusCh
      * @param accessPoint target AccessPoint to be configured.
      * @param edit
      */
-    public WifiConfigUiForSetupWizardXL(
-            WifiSettingsForSetupWizardXL activity, ViewGroup parent,
-            AccessPoint accessPoint, Boolean edit) {
-        mActivity = activity;
-        mConnectButton = (Button)activity->FindViewById(R.id.wifi_setup_connect);
-        mCancelButton = (Button)activity->FindViewById(R.id.wifi_setup_cancel);
-        mAccessPoint = accessPoint;
-        mEdit = edit;
-        mInflater = (LayoutInflater)activity->GetSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    WifiConfigUiForSetupWizardXL(
+        /* [in] */ WifiSettingsForSetupWizardXL* activity,
+        /* [in] */ IViewGroup* parent,
+        /* [in] */ AccessPoint* accessPoint,
+        /* [in] */ Boolean edit);
 
-        mView = mInflater->Inflate(R.layout.wifi_config_ui_for_setup_wizard, parent, TRUE);
-        mController = new WifiConfigController(this, mView, mAccessPoint, edit);
-
-        mInputMethodManager = (InputMethodManager)
-                activity->GetSystemService(Context.INPUT_METHOD_SERVICE);
-
-        if (mView->FindViewById(R.id.security_fields).GetVisibility() == View.VISIBLE) {
-            RequestFocusAndShowKeyboard(R.id.password);
-        } else if (mView->FindViewById(R.id.type_ssid).GetVisibility() == View.VISIBLE) {
-            // Add Network flow.
-            RequestFocusAndShowKeyboard(R.id.ssid);
-        }
-    }
+    ~WifiConfigUiForSetupWizardXL();
 
     /**
      * @param editViewId must be EditView
      */
-    CARAPI RequestFocusAndShowKeyboard(Int32 editViewId) {
-        // Set Focus to password View.
-        final View viewToBeFocused = mView->FindViewById(editViewId);
-        if (viewToBeFocused == NULL) {
-            Logger::W(TAG, "password field to be focused not found.");
-        } else if (!(viewToBeFocused instanceof EditText)) {
-            Logger::W(TAG, "password field is not EditText");
-        } else {
-            if (viewToBeFocused->IsFocused()) {
-                Logger::I(TAG, "Already focused");
-                if (!mInputMethodManager->ShowSoftInput(viewToBeFocused, 0)) {
-                    Logger::W(TAG, "Failed to show SoftInput");
-                }
-            } else {
-                // After acquiring the focus, we show software keyboard.
-                viewToBeFocused->SetOnFocusChangeListener(this);
-                final Boolean requestFocusResult = viewToBeFocused->RequestFocus();
-                Logger::I(TAG, String->Format("Focus request: %s",
-                        (requestFocusResult ? "successful" : "failed")));
-                if (!requestFocusResult) {
-                    viewToBeFocused->SetOnFocusChangeListener(NULL);
-                }
-            }
-        }
-    }
+    CARAPI RequestFocusAndShowKeyboard(
+        /* [in] */ Int32 editViewId);
 
-    public View GetView() {
-        return mView;
-    }
+    CARAPI_(AutoPtr<IView>) GetView();
 
-    public AccessPoint GetAccessPoint() {
-        return mAccessPoint;
-    }
+    CARAPI_(AutoPtr<AccessPoint>) GetAccessPoint();
 
     //@Override
-    public WifiConfigController GetController() {
-        return mController;
-    }
+    CARAPI GetController(
+        /* [out] */ IWifiConfigController** controller);
 
     //@Override
-    public Boolean IsEdit() {
-        return mEdit;
-    }
+    CARAPI IsEdit(
+        /* [out] */ Boolean* res);
 
     //@Override
-    public LayoutInflater GetLayoutInflater() {
-        return mInflater;
-    }
+    CARAPI GetLayoutInflater(
+        /* [out] */ ILayoutInflater** inflater);
 
     //@Override
-    public Button GetSubmitButton() {
-        return mConnectButton;
-    }
+    CARAPI GetSubmitButton(
+        /* [out] */ IButton** button);
 
     //@Override
-    public Button GetForgetButton() {
-        return NULL;
-    }
+    CARAPI GetForgetButton(
+        /* [out] */ IButton** button);
 
     //@Override
-    public Button GetCancelButton() {
-        return mCancelButton;
-    }
+    CARAPI GetCancelButton(
+        /* [out] */ IButton** button);
 
     //@Override
-    CARAPI SetSubmitButton(CharSequence text) {
-        mConnectButton->SetVisibility(View.VISIBLE);
-        mConnectButton->SetText(text);
-    }
+    CARAPI SetSubmitButton(
+        /* [in] */ ICharSequence* text);
 
     //@Override
-    CARAPI SetForgetButton(CharSequence text) {
-        // In XL setup screen, we won't show Forget button for simplifying the UI.
-    }
+    CARAPI SetForgetButton(
+        /* [in] */ ICharSequence* text);
 
     //@Override
-    CARAPI SetCancelButton(CharSequence text) {
-        mCancelButton->SetVisibility(View.VISIBLE);
-        // We don't want "cancel" label given from caller.
-        // mCancelButton->SetText(text);
-    }
+    CARAPI SetCancelButton(
+        /* [in] */ ICharSequence* text);
 
     //@Override
-    public Context GetContext() {
-        return mActivity;
-    }
+    CARAPI GetContext(
+        /* [out] */ IContext** context);
 
     //@Override
-    CARAPI SetTitle(Int32 id) {
-        Logger::D(TAG, "Ignoring setTitle");
-    }
+    CARAPI SetTitle(
+        /* [in] */ Int32 id);
 
     //@Override
-    CARAPI SetTitle(CharSequence title) {
-        Logger::D(TAG, "Ignoring setTitle");
-    }
-
-    private class FocusRunnable implements Runnable {
-        final View mViewToBeFocused;
-        public FocusRunnable(View viewToBeFocused) {
-            mViewToBeFocused = viewToBeFocused;
-        }
-
-        //@Override
-        CARAPI Run() {
-            // mInputMethodManager->FocusIn(mViewToBeFocused);
-            final Boolean showSoftInputResult =
-                    mInputMethodManager->ShowSoftInput(mViewToBeFocused, 0);
-            if (showSoftInputResult) {
-                mActivity->SetPaddingVisibility(View.GONE);
-            } else {
-                Logger::W(TAG, "Failed to show software keyboard ");
-            }
-        }
-    }
+    CARAPI SetTitle(
+        /* [in] */ ICharSequence* title);
 
     //@Override
-    CARAPI OnFocusChange(View view, Boolean hasFocus) {
-        view->SetOnFocusChangeListener(NULL);
-        if (hasFocus) {
-            mHandler->Post(new FocusRunnable(view));
-        }
-    }
-}
+    CARAPI OnFocusChange(
+        /* [in] */ IView* view,
+        /* [in] */ Boolean hasFocus);
+
+private:
+    static const String TAG;
+
+    AutoPtr<IButton> mConnectButton;
+    AutoPtr<IButton> mCancelButton;
+
+    AutoPtr<WifiSettingsForSetupWizardXL> mActivity;
+    AutoPtr<IView> mView;
+    AutoPtr<WifiConfigController> mController;
+    AutoPtr<AccessPoint> mAccessPoint;
+    Boolean mEdit;
+    AutoPtr<IHandler> mHandler;
+
+    AutoPtr<IInputMethodManager> mInputMethodManager;
+
+    AutoPtr<ILayoutInflater> mInflater;
+};
+
+} // namespace Wifi
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_WIFI_WIFICONFIGUIFORSETUPWIZARDXL_H__

@@ -2,6 +2,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/ParcelableConference.h"
 #include "elastos/droid/telecomm/telecom/Connection.h"
+#include "elastos/droid/telecomm/telecom/CPhoneCapabilities.h"
 #include <elastos/core/StringBuffer.h>
 
 using Elastos::Core::StringBuffer;
@@ -46,7 +47,11 @@ ECode ParcelableConference::ToString(
     Connection::StateToString(mState, &ss);
     sb.Append(ss);
     sb.Append(", capabilities: ");
-    // sb.Append(PhoneCapabilities.toString(mCapabilities));
+    AutoPtr<IPhoneCapabilities> pc;
+    CPhoneCapabilities::AcquireSingleton((IPhoneCapabilities**)&pc);
+    String str;
+    pc->ToString(mCapabilities, &str);
+    sb.Append(str);
     sb.Append(", children: ");
     sb.Append(mConnectionIds);
     *result = sb.ToString();

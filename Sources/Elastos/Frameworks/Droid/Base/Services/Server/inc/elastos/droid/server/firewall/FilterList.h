@@ -3,10 +3,10 @@
 
 #include "_Elastos.Droid.Server.h"
 #include "elastos/core/Object.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
 
-using Elastos::Droid::internal.util.XmlUtils;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Org::Xmlpull::V1::IXmlPullParser;
-using Org::Xmlpull::V1::IXmlPullParserException;
 using Elastos::Utility::IArrayList;
 using Elastos::Droid::Server::Firewall::IFilter;
 
@@ -20,6 +20,8 @@ class FilterList
     , public IFilter
 {
 public:
+    CAR_INTERFACE_DECL();
+
     // throws IOException, XmlPullParserException
     CARAPI_(FilterList*) ReadFromXml(
         /* in */ IXmlPullParser* parser);
@@ -29,7 +31,7 @@ public:
         /* in */ IXmlPullParser* parser);
 
 protected:
-    AutoPtr<IArrayList<IFilter> > children;
+    AutoPtr<IArrayList> children;
 
 };
 

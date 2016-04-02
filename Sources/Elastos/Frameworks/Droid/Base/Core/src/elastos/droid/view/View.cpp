@@ -1926,8 +1926,7 @@ ECode View::ShowContextMenu(
     VALIDATE_NOT_NULL(res)
     AutoPtr<IViewParent> parent;
     GetParent((IViewParent**)&parent);
-    parent->ShowContextMenuForChild(
-        this, res);
+    parent->ShowContextMenuForChild(this, res);
 
     return NOERROR;
 }
@@ -2035,9 +2034,7 @@ ECode View::HandleFocusGainInternal(
         }
 
         if (mParent != NULL) {
-            mParent->RequestChildFocus(
-                this,
-                this);
+            mParent->RequestChildFocus(this, this);
         }
 
         if (mAttachInfo) {
@@ -7307,7 +7304,7 @@ void View::SetFlags(
             AutoPtr<IView> rootView;
             GetRootView((IView**)&rootView);
             // root view becoming invisible shouldn't clear focus and accessibility focus
-            if (this != rootView) {
+            if ((IView*)this != rootView) {
                 Boolean hasFocus;
                 if (HasFocus(&hasFocus), hasFocus) ClearFocus();
                 ClearAccessibilityFocus();
@@ -13172,7 +13169,7 @@ void View::DrawAccessibilityFocus(
     GetViewRootImpl((IViewRootImpl**)&viewRoot);
     AutoPtr<IView> leftHandle;
     if (viewRoot == NULL ||
-        (viewRoot->GetAccessibilityFocusedHost((IView**)&viewRoot), IView::Probe(viewRoot)) != this) {
+        (viewRoot->GetAccessibilityFocusedHost((IView**)&viewRoot), IView::Probe(viewRoot)) != (IView*)this) {
         return;
     }
 
@@ -15733,7 +15730,7 @@ ECode View::RequestLayout()
         }
     }
 
-    if (mAttachInfo != NULL && this == mAttachInfo->mViewRequestingLayout) {
+    if (mAttachInfo != NULL && (IView*)this == mAttachInfo->mViewRequestingLayout) {
         mAttachInfo->mViewRequestingLayout = NULL;
     }
 

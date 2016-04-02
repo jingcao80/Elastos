@@ -12,7 +12,6 @@ module
      * interface ITextSwitcher
      */
     interface ITickerView {
-
         SetTicker(
             [in] ITicker* t);
     }

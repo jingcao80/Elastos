@@ -13,6 +13,13 @@ SOURCES = Settings.car
 SOURCES += R.cpp
 SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += AirplaneModeEnabler.cpp
+SOURCES += DateTimeSettings.cpp
+SOURCES += HelpUtils.cpp
+SOURCES += RestrictedSettingsFragment.cpp
+SOURCES += SettingsPreferenceFragment.cpp
+SOURCES += ProxySelector.cpp
+SOURCES += WirelessSettings.cpp
 SOURCES += SettingsActivity.cpp
 SOURCES += DevelopmentSettings.cpp
 SOURCES += HomeSettings.cpp
@@ -24,8 +31,10 @@ SOURCES += SubSettings.cpp
 
 ELASTOS_LIBS += dashboard/dashboard.lib
 ELASTOS_LIBS += drawable/drawable.lib
+ELASTOS_LIBS += inputmethod/inputmethod.lib
 ELASTOS_LIBS += search/search.lib
 ELASTOS_LIBS += widget/widget.lib
+ELASTOS_LIBS += wifi/wifi.lib
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

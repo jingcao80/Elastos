@@ -2,11 +2,9 @@
 #ifndef __ELASTOS_DROID_WIDGET_SCROLLVIEW_H__
 #define __ELASTOS_DROID_WIDGET_SCROLLVIEW_H__
 
-#include "elastos/droid/widget/FrameLayout.h"
-#include "elastos/droid/view/VelocityTracker.h"
-#include "elastos/droid/graphics/CRect.h"
+#include <elastos/droid/widget/FrameLayout.h>
+#include <elastos/droid/view/VelocityTracker.h>
 
-using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Os::IStrictModeSpan;
 using Elastos::Droid::View::VelocityTracker;
 using Elastos::Droid::View::IKeyEvent;
@@ -18,7 +16,7 @@ namespace Widget {
 
 class OverScroller;
 
-class ScrollView
+class ECO_PUBLIC ScrollView
     : public FrameLayout
     , public IScrollView
 {
@@ -415,7 +413,7 @@ private:
         /* [in] */ IView* child,
         /* [in] */ IView* parent);
 
-    static CARAPI_(Int32) Clamp(
+    ECO_LOCAL static CARAPI_(Int32) Clamp(
         /* [in] */ Int32 n,
         /* [in] */ Int32 my,
         /* [in] */ Int32 child);
@@ -441,7 +439,7 @@ private:
      * Sentinel value for no current active pointer.
      * Used by {@link #mActivePointerId}.
      */
-    static const Int32 INVALID_POINTER = -1;
+    ECO_LOCAL static const Int32 INVALID_POINTER = -1;
 
 private:
     Int64 mLastScroll;

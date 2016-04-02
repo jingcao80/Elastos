@@ -1,12 +1,11 @@
+
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_CTICKERVIEW_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_CTICKERVIEW_H__
 
 #include "_Elastos_Droid_SystemUI_StatusBar_Phone_CTickerView.h"
+#include <elastos/droid/widget/TextSwitcher.h>
 
-
-
-
-#include "elastos/droid/systemui/statusbar/phone/TickerView.h"
+using Elastos::Droid::Widget::TextSwitcher;
 
 namespace Elastos {
 namespace Droid {
@@ -14,20 +13,14 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CarClass(CTickerView), public TickerView
+CarClass(CTickerView)
+    , public TextSwitcher
+    , public ITickerView
 {
 public:
-    IVIEW_METHODS_DECL()
-    IVIEWGROUP_METHODS_DECL()
-    IVIEWPARENT_METHODS_DECL()
-    IVIEWMANAGER_METHODS_DECL()
-    IDRAWABLECALLBACK_METHODS_DECL()
-    IKEYEVENTCALLBACK_METHODS_DECL()
-    IACCESSIBILITYEVENTSOURCE_METHODS_DECL()
-    IFRAMELAYOUT_METHODS_DECL()
+    CAR_OBJECT_DECL();
 
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
+    CAR_INTERFACE_DECL();
 
     CARAPI constructor(
         /* [in] */ IContext* context,
@@ -35,6 +28,17 @@ public:
 
     CARAPI SetTicker(
         /* [in] */ ITicker* t);
+
+protected:
+    // @Override
+    CARAPI_(void) OnSizeChanged(
+        /* [in] */ Int32 w,
+        /* [in] */ Int32 h,
+        /* [in] */ Int32 oldw,
+        /* [in] */ Int32 oldh);
+
+private:
+    AutoPtr<ITicker> mTicker;
 };
 
 }// namespace Phone

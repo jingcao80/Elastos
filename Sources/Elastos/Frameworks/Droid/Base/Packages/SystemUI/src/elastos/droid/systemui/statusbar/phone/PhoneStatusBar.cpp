@@ -1,12 +1,108 @@
+
 #include "elastos/droid/systemui/statusbar/phone/PhoneStatusBar.h"
-#include "elastos/droid/provider/Settings.h"
-#include "elastos/droid/systemui/statusbar/policy/Prefs.h"
+#include "elastos/droid/systemui/statusbar/phone/CNotificationPanelView.h"
+#include "elastos/droid/systemui/statusbar/phone/BarTransitions.h"
+#include "elastos/droid/systemui/statusbar/phone/CStatusBarWindowView.h"
+#include "elastos/droid/systemui/statusbar/phone/QSTileHost.h"
+#include "elastos/droid/systemui/statusbar/policy/AccessibilityController.h"
+#include "elastos/droid/systemui/statusbar/policy/PreviewInflater.h"
+#include "elastos/droid/systemui/statusbar/stack/StackScrollState.h"
+#include "elastos/droid/systemui/statusbar/CStatusBarIconView.h"
+#include "elastos/droid/systemui/doze/DozeLog.h"
+#include "elastos/droid/systemui/FontSizeUtils.h"
+#include "../../R.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.InputMethodService.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Text.h"
+#include <elastos/droid/app/ActivityManagerNative.h>
+#include <elastos/droid/R.h>
+#include <elastos/droid/os/SystemClock.h>
+#include <elastos/droid/provider/Settings.h>
+#include <elastos/droid/view/LayoutInflater.h>
+#include <elastos/droid/view/animation/AnimationUtils.h>
+#include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
-
-using Elastos::Droid::Provide::Settings;
-using Elastos::Droid::Content::ISharedPreferencesEditor;
-using Elastos::Droid::SystemUI::StatusBar::Policy::Prefs;
-
+using Elastos::Droid::App::ActivityManagerNative;
+using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::App::CStatusBarManagerHelper;
+using Elastos::Droid::App::IActivityManagerHelper;
+using Elastos::Droid::App::IStatusBarManagerHelper;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Graphics::CPoint;
+using Elastos::Droid::Graphics::CPorterDuffXfermode;
+using Elastos::Droid::Graphics::IPixelFormat;
+using Elastos::Droid::Graphics::IXfermode;
+using Elastos::Droid::Graphics::PorterDuffMode_SRC;
+using Elastos::Droid::Graphics::PorterDuffMode_SRC_OVER;
+using Elastos::Droid::Graphics::Drawable::CColorDrawable;
+using Elastos::Droid::InputMethodService::IInputMethodService;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::IVibrator;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Media::CAudioAttributesBuilder;
+using Elastos::Droid::Media::IAudioAttributesBuilder;
+using Elastos::Droid::Media::Session::CMediaController;
+using Elastos::Droid::Media::Session::IMediaSessionToken;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::SystemUI::FontSizeUtils;
+using Elastos::Droid::SystemUI::Doze::DozeLog;
+using Elastos::Droid::SystemUI::Doze::EIID_IDozeHost;
+using Elastos::Droid::SystemUI::Keyguard::EIID_IKeyguardViewMediator;
+using Elastos::Droid::SystemUI::Keyguard::IKeyguardViewMediator;
+using Elastos::Droid::SystemUI::Qs::EIID_IQSTileHostCallback;
+using Elastos::Droid::SystemUI::StatusBar::Policy::AccessibilityController;
+using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_IBatteryStateChangeCallback;
+using Elastos::Droid::SystemUI::StatusBar::Policy::IKeyButtonView;
+using Elastos::Droid::SystemUI::StatusBar::Policy::INetworkControllerImplSignalCluster;
+using Elastos::Droid::SystemUI::StatusBar::Policy::PreviewInflater;
+using Elastos::Droid::SystemUI::StatusBar::Stack::EIID_IOnChildLocationsChangedListener;
+using Elastos::Droid::SystemUI::StatusBar::Stack::StackScrollState;
+using Elastos::Droid::SystemUI::Volume::EIID_IVolumeComponent;
+using Elastos::Droid::Utility::CArraySet;
+using Elastos::Droid::Utility::CDisplayMetrics;
+using Elastos::Droid::Utility::IArraySet;
+using Elastos::Droid::View::Animation::AnimationUtils;
+using Elastos::Droid::View::Animation::CAccelerateDecelerateInterpolator;
+using Elastos::Droid::View::Animation::CAccelerateInterpolator;
+using Elastos::Droid::View::Animation::CDecelerateInterpolator;
+using Elastos::Droid::View::Animation::CLinearInterpolator;
+using Elastos::Droid::View::Animation::CPathInterpolator;
+using Elastos::Droid::View::Animation::EIID_IAnimationAnimationListener;
+using Elastos::Droid::View::CWindowManagerLayoutParams;
+using Elastos::Droid::View::CMotionEventHelper;
+using Elastos::Droid::View::EIID_IOnPreDrawListener;
+using Elastos::Droid::View::EIID_IViewOnFocusChangeListener;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::EIID_IViewOnLongClickListener;
+using Elastos::Droid::View::EIID_IViewOnTouchListener;
+using Elastos::Droid::View::IGravity;
+using Elastos::Droid::View::IMotionEventHelper;
+using Elastos::Droid::View::IViewManager;
+using Elastos::Droid::View::IViewParent;
+using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::Widget::CLinearLayoutLayoutParams;
+using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
+using Elastos::Droid::Widget::ILinearLayoutLayoutParams;
+using Elastos::Core::CString;
+using Elastos::Core::CSystem;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::ISystem;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::ICollections;
+using Elastos::Utility::IIterator;
 
 namespace Elastos {
 namespace Droid {
@@ -14,264 +110,396 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-//================================================================================
-//              PhoneStatusBar::MakeIconsInvisibleAnimatorListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::MakeIconsInvisibleAnimatorListener, IAnimatorListener);
+const String PhoneStatusBar::TAG("PhoneStatusBar");
+const Boolean PhoneStatusBar::DEBUG = BaseStatusBar::DEBUG;
+const Boolean PhoneStatusBar::SPEW = FALSE;
+const Boolean PhoneStatusBar::DUMPTRUCK = TRUE; // extra dumpsys info
+const Boolean PhoneStatusBar::DEBUG_GESTURES = FALSE;
+const Boolean PhoneStatusBar::DEBUG_MEDIA = FALSE;
+const Boolean PhoneStatusBar::DEBUG_MEDIA_FAKE_ARTWORK = FALSE;
+const Boolean PhoneStatusBar::DEBUG_WINDOW_STATE = FALSE;
+const Boolean PhoneStatusBar::CHATTY = DEBUG;
+const String PhoneStatusBar::ACTION_STATUSBAR_START("com.android.internal.policy.statusbar.START");
+const Boolean PhoneStatusBar::SHOW_LOCKSCREEN_MEDIA_ARTWORK = TRUE;
+const Int32 PhoneStatusBar::FADE_KEYGUARD_START_DELAY = 100;
+const Int32 PhoneStatusBar::FADE_KEYGUARD_DURATION = 300;
+Boolean PhoneStatusBar::sInit = InitStatic();
+AutoPtr<IInterpolator> PhoneStatusBar::ALPHA_IN;
+AutoPtr<IInterpolator> PhoneStatusBar::ALPHA_OUT;
+const Int32 PhoneStatusBar::MSG_OPEN_NOTIFICATION_PANEL = 1000;
+const Int32 PhoneStatusBar::MSG_CLOSE_PANELS = 1001;
+const Int32 PhoneStatusBar::MSG_OPEN_SETTINGS_PANEL = 1002;
+const Boolean PhoneStatusBar::CLOSE_PANEL_WHEN_EMPTIED = TRUE;
+const Int32 PhoneStatusBar::NOTIFICATION_PRIORITY_MULTIPLIER = 10;
+const Int32 PhoneStatusBar::HIDE_ICONS_BELOW_SCORE = INotification::PRIORITY_LOW * NOTIFICATION_PRIORITY_MULTIPLIER;
+const Int32 PhoneStatusBar::STATUS_OR_NAV_TRANSIENT = IView::STATUS_BAR_TRANSIENT | IView::NAVIGATION_BAR_TRANSIENT;
+const Int64 PhoneStatusBar::AUTOHIDE_TIMEOUT_MS = 3000;
+const Int32 PhoneStatusBar::VISIBILITY_REPORT_MIN_DELAY_MS = 500;
+const Int32 PhoneStatusBar::HINT_RESET_DELAY_MS = 1200;
+const Int32 PhoneStatusBar::LOCK_TO_APP_GESTURE_TOLERENCE = 200;
+AutoPtr<IAudioAttributes> PhoneStatusBar::VIBRATION_ATTRIBUTES;
+const Int32 PhoneStatusBar::VISIBLE_LOCATIONS = StackScrollState::ViewState::LOCATION_FIRST_CARD
+            | StackScrollState::ViewState::LOCATION_TOP_STACK_PEEKING
+            | StackScrollState::ViewState::LOCATION_MAIN_AREA
+            | StackScrollState::ViewState::LOCATION_BOTTOM_STACK_PEEKING;
 
-PhoneStatusBar::MakeIconsInvisibleAnimatorListener::MakeIconsInvisibleAnimatorListener(
-    /* [in] */ PhoneStatusBar* host)
-    : mHost(host)
-{
-}
-
-ECode PhoneStatusBar::MakeIconsInvisibleAnimatorListener::OnAnimationEnd(
-    /* [in] */ IAnimator* animation)
-{
-    Int32 alpha;
-    mHost->mStatusBarContents->GetAlpha(&alpha);
-    // double-check to avoid races
-    if (alpha == 0) {
-        // if (DEBUG) Slog.d(TAG, "makeIconsInvisible");
-        mHost->mStatusBarContents->SetVisibility(IView::INVISIBLE);
-    }
-    return NOERROR;
-}
-
-//================================================================================
-//              PhoneStatusBar::UserSetupObserver
-//================================================================================
 PhoneStatusBar::UserSetupObserver::UserSetupObserver(
-    /* [in] */ IHandler* handler,
-    /* [in] */ PhoneStatusBar* host)
+    /* [in] */ PhoneStatusBar* host,
+    /* [in] */ IHandler* handler)
     : mHost(host)
 {
+    ContentObserver::constructor(handler);
 }
 
 ECode PhoneStatusBar::UserSetupObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
-    AutoPtr<IContentResolver> resolver;
-    mHost->mContext->GetContentResolver((IContentResolver**)&resolver);
-    Int32 setUpComplete;
-    Settings::Secure::GetInt32ForUser(
-            resolver,
+    AutoPtr<IContentResolver> cr;
+    mHost->mContext->GetContentResolver((IContentResolver**)&cr);
+    Int32 v = 0;
+    Elastos::Droid::Provider::Settings::Secure::GetInt32ForUser(cr,
             ISettingsSecure::USER_SETUP_COMPLETE,
             0 /*default */,
-            mHost->mCurrentUserId, &setUpComplete);
-    Boolean userSetup = 0 != complete;
-    // if (MULTIUSER_DEBUG) Slog.d(TAG, String.format("User setup changed: " +
-    //         "selfChange=%s userSetup=%s mUserSetup=%s",
-    //         selfChange, userSetup, mUserSetup));
-    if (mHost->mSettingsButton != NULL && !mHost->mHasSettingsPanel) {
-        mHost->mSettingsButton->SetVisibility(userSetup ? IView::VISIBLE : IView::INVISIBLE);
-    }
-    if (mHost->mSettingsPanel != NULL) {
-        mHost->mSettingsPanel->SetEnabled(userSetup);
-    }
+            mHost->mCurrentUserId, &v);
+    const Boolean userSetup = 0 != v;
+    if (MULTIUSER_DEBUG) Logger::D(TAG, "User setup changed: selfChange=%d userSetup=%d mUserSetup=%d",
+            selfChange, userSetup, mHost->mUserSetup);
+
     if (userSetup != mHost->mUserSetup) {
         mHost->mUserSetup = userSetup;
-        if (!mHost->mUserSetup && mHost->mStatusBarView != NULL)
+        if (!mHost->mUserSetup && mHost->mStatusBarView != NULL) {
             mHost->AnimateCollapseQuickSettings();
-    }
-    return NOERROR;
-}
-
-//================================================================================
-//              PhoneStatusBar::StatusBarWindowTouchListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::StatusBarWindowTouchListener, IViewOnTouchListener)
-
-PhoneStatusBar::StatusBarWindowTouchListener::StatusBarWindowTouchListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-{}
-
-ECode PhoneStatusBar::StatusBarWindowTouchListener::OnTouch(
-    /* [in] */ IView* v,
-    /* [in] */ IMotionEvent* event,
-    /* [out] */ Boolean* result)
-{
-    Int32 action;
-    event->GetAction(&action);
-    if (action == IMotionEvent::ACTION_DOWN) {
-        if (mHost->mExpandedVisible && !mHost->mAnimating) {
-            mHost->AnimateCollapsePanels();
         }
     }
-    return mHost->mStatusBarWindow->OnTouchEvent(event);
-}
-
-//================================================================================
-//              PhoneStatusBar::HeaderTouchListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::HeaderTouchListener, IViewOnTouchListener)
-
-PhoneStatusBar::HeaderTouchListener::HeaderTouchListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-{}
-
-ECode PhoneStatusBar::HeaderTouchListener::OnTouch(
-    /* [in] */ IView* v,
-    /* [in] */ IMotionEvent* event,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result);
-    *result = TRUE; // e eats everything
     return NOERROR;
 }
 
-//================================================================================
-//              PhoneStatusBar::EmergencyCallLabelClickListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::EmergencyCallLabelClickListener, IViewOnClickListener)
+PhoneStatusBar::HeadsUpObserver::HeadsUpObserver(
+    /* [in] */ PhoneStatusBar* host,
+    /* [in] */ IHandler* handler)
+    : mHost(host)
+{
+    ContentObserver::constructor(handler);
+}
 
-PhoneStatusBar::EmergencyCallLabelClickListener::EmergencyCallLabelClickListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
+ECode PhoneStatusBar::HeadsUpObserver::OnChange(
+    /* [in] */ Boolean selfChange)
+{
+    Boolean wasUsing = mHost->mUseHeadsUp;
+    AutoPtr<IContentResolver> cr;
+    mHost->mContext->GetContentResolver((IContentResolver**)&cr);
+    Int32 v = 0;
+    Elastos::Droid::Provider::Settings::Global::GetInt32(
+            cr, ISettingsGlobal::HEADS_UP_NOTIFICATIONS_ENABLED,
+            ISettingsGlobal::HEADS_UP_OFF, &v);
+    mHost->mUseHeadsUp = ENABLE_HEADS_UP && !mHost->mDisableNotificationAlerts
+            && ISettingsGlobal::HEADS_UP_OFF != v;
+
+    Elastos::Droid::Provider::Settings::Global::GetInt32(
+            cr, SETTING_HEADS_UP_TICKER, 0, &v);
+    mHost->mHeadsUpTicker = mHost->mUseHeadsUp && 0 != v;
+    Logger::D(TAG, "heads up is %s", (mHost->mUseHeadsUp ? "enabled" : "disabled"));
+    if (wasUsing != mHost->mUseHeadsUp) {
+        if (!mHost->mUseHeadsUp) {
+            Logger::D(TAG, "dismissing any existing heads up notification on disable event");
+            mHost->SetHeadsUpVisibility(FALSE);
+            mHost->mHeadsUpNotificationView->ReleaseResources();
+            mHost->RemoveHeadsUpView();
+        }
+        else {
+            mHost->AddHeadsUpView();
+        }
+    }
+    return NOERROR;
+}
+
+PhoneStatusBar::Autohide::Autohide(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
 {}
 
-ECode PhoneStatusBar::EmergencyCallLabelClickListener::OnClick(
+ECode PhoneStatusBar::Autohide::Run()
+{
+    Int32 requested = mHost->mSystemUiVisibility & ~STATUS_OR_NAV_TRANSIENT;
+    if (mHost->mSystemUiVisibility != requested) {
+        mHost->NotifyUiVisibilityChanged(requested);
+    }
+    return NOERROR;
+}
+
+PhoneStatusBar::MediaListener::MediaListener(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::MediaListener::OnPlaybackStateChanged(
+    /* [in] */ IPlaybackState* state)
+{
+    MediaControllerCallback::OnPlaybackStateChanged(state);
+    if (DEBUG_MEDIA) Logger::V(TAG, "DEBUG_MEDIA: onPlaybackStateChanged: %s", TO_CSTR(state));
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::MediaListener::OnMetadataChanged(
+    /* [in] */ IMediaMetadata* metadata)
+{
+    MediaControllerCallback::OnMetadataChanged(metadata);
+    if (DEBUG_MEDIA) Logger::V(TAG, "DEBUG_MEDIA: onMetadataChanged: %s", TO_CSTR(metadata));
+    mHost->mMediaMetadata = metadata;
+    mHost->UpdateMediaMetaData(TRUE);
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(PhoneStatusBar::OnChildLocationsChangedListener, Object, IOnChildLocationsChangedListener);
+PhoneStatusBar::OnChildLocationsChangedListener::OnChildLocationsChangedListener(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::OnChildLocationsChangedListener::OnChildLocationsChanged(
+    /* [in] */ INotificationStackScrollLayout* stackScrollLayout)
+{
+    mHost->UserActivity();
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(PhoneStatusBar::NotificationLocationsChangedListener, Object, IOnChildLocationsChangedListener);
+PhoneStatusBar::NotificationLocationsChangedListener::NotificationLocationsChangedListener(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::NotificationLocationsChangedListener::OnChildLocationsChanged(
+    /* [in] */ INotificationStackScrollLayout* stackScrollLayout)
+{
+    Boolean tmp = FALSE;
+    if (mHost->mHandler->HasCallbacks(mHost->mVisibilityReporter, &tmp), tmp) {
+        // Visibilities will be reported when the existing
+        // callback is executed.
+        return NOERROR;
+    }
+    // Calculate when we're allowed to run the visibility
+    // reporter. Note that this timestamp might already have
+    // passed. That's OK, the callback will just be executed
+    // ASAP.
+    Int64 nextReportUptimeMs = mHost->mLastVisibilityReportUptimeMs + VISIBILITY_REPORT_MIN_DELAY_MS;
+    mHost->mHandler->PostAtTime(mHost->mVisibilityReporter, nextReportUptimeMs, &tmp);
+    return NOERROR;
+}
+
+PhoneStatusBar::VisibilityReporter::VisibilityReporter(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{
+    CArrayList::New((IArrayList**)&mTmpNewlyVisibleNotifications);
+    CArrayList::New((IArrayList**)&mTmpCurrentlyVisibleNotifications);
+}
+
+ECode PhoneStatusBar::VisibilityReporter::Run()
+{
+    mHost->mLastVisibilityReportUptimeMs = SystemClock::GetUptimeMillis();
+
+    // 1. Loop over mNotificationData entries:
+    //   A. Keep list of visible notifications.
+    //   B. Keep list of previously hidden, now visible notifications.
+    // 2. Compute no-longer visible notifications by removing currently
+    //    visible notifications from the set of previously visible
+    //    notifications.
+    // 3. Report newly visible and no-longer visible notifications.
+    // 4. Keep currently visible notifications for next report.
+    AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+    mHost->mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
+    Int32 N = 0;
+    activeNotifications->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        activeNotifications->Get(i, (IInterface**)&obj);
+        AutoPtr<INotificationDataEntry> entry = INotificationDataEntry::Probe(obj);
+        AutoPtr<IStatusBarNotification> notification;
+        entry->GetNotification((IStatusBarNotification**)&notification);
+        String key;
+        notification->GetKey(&key);
+        Boolean previouslyVisible = FALSE;
+        AutoPtr<ICharSequence> k;
+        CString::New(key, (ICharSequence**)&k);
+        mHost->mCurrentlyVisibleNotifications->Contains(k, &previouslyVisible);
+
+        AutoPtr<IExpandableNotificationRow> row;
+        entry->GetRow((IExpandableNotificationRow**)&row);
+        Int32 v = 0;
+        mHost->mStackScroller->GetChildLocation(IView::Probe(row), &v);
+        Boolean currentlyVisible = (v & VISIBLE_LOCATIONS) != 0;
+        if (currentlyVisible) {
+            // Build new set of visible notifications.
+            mTmpCurrentlyVisibleNotifications->Add(k);
+        }
+        if (!previouslyVisible && currentlyVisible) {
+            mTmpNewlyVisibleNotifications->Add(k);
+        }
+    }
+    AutoPtr<IArraySet/*<String*/> noLongerVisibleNotifications = mHost->mCurrentlyVisibleNotifications;
+    noLongerVisibleNotifications->RemoveAll(ICollection::Probe(mTmpCurrentlyVisibleNotifications));
+
+    mHost->LogNotificationVisibilityChanges(ICollection::Probe(mTmpNewlyVisibleNotifications)
+            , ICollection::Probe(noLongerVisibleNotifications));
+
+    mHost->mCurrentlyVisibleNotifications->Clear();
+    mHost->mCurrentlyVisibleNotifications->AddAll(ICollection::Probe(mTmpCurrentlyVisibleNotifications));
+
+    mTmpNewlyVisibleNotifications->Clear();
+    mTmpCurrentlyVisibleNotifications->Clear();
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(PhoneStatusBar::OverflowClickListener, Object, IViewOnClickListener);
+PhoneStatusBar::OverflowClickListener::OverflowClickListener(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::OverflowClickListener::OnClick(
     /* [in] */ IView* v)
 {
+    mHost->GoToLockedShade(NULL);
     return NOERROR;
 }
 
-//================================================================================
-//              PhoneStatusBar::EmergencyCallLabelLayoutChangeListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::EmergencyCallLabelLayoutChangeListener, IViewOnLayoutChangeListener)
-
-PhoneStatusBar::EmergencyCallLabelLayoutChangeListener::EmergencyCallLabelLayoutChangeListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-{}
-
-ECode PhoneStatusBar::EmergencyCallLabelLayoutChangeListener::OnLayoutChange(
-    /* [in] */ IView* v,
-    /* [in] */ Int32 left,
-    /* [in] */ Int32 top,
-    /* [in] */ Int32 right,
-    /* [in] */ Int32 bottom,
-    /* [in] */ Int32 oldLeft,
-    /* [in] */ Int32 oldTop,
-    /* [in] */ Int32 oldRight,
-    /* [in] */ Int32 oldBottom)
-{
-    mHost->UpdateCarrierLabelVisibility(FALSE);
-    return NOERROR;
-}
-
-//================================================================================
-//              PhoneStatusBar::PileSizeChangedListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::PileSizeChangedListener, IOnSizeChangedListener)
-
-PhoneStatusBar::PileSizeChangedListener::PileSizeChangedListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-{}
-
-ECode PhoneStatusBar::PileSizeChangedListener::OnSizeChanged(
-    /* [in] */ IView* v,
-    /* [in] */ Int32 w,
-    /* [in] */ Int32 h,
-    /* [in] */ Int32 oldw,
-    /* [in] */ Int32 oldh)
-{
-    mHost->UpdateCarrierLabelVisibility(FALSE);
-}
-
-//================================================================================
-//              PhoneStatusBar::RecentsClickListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::RecentsClickListener, IViewOnClickListener)
-
+CAR_INTERFACE_IMPL(PhoneStatusBar::RecentsClickListener, Object, IViewOnClickListener);
 PhoneStatusBar::RecentsClickListener::RecentsClickListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
 {}
 
 ECode PhoneStatusBar::RecentsClickListener::OnClick(
     /* [in] */ IView* v)
 {
+    mHost->AwakenDreams();
     mHost->ToggleRecentApps();
     return NOERROR;
 }
 
-//================================================================================
-//              PhoneStatusBar::RotSettingClickListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::RotSettingClickListener, IViewOnClickListener)
-
-PhoneStatusBar::RotSettingClickListener::RotSettingClickListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
+CAR_INTERFACE_IMPL(PhoneStatusBar::LongPressBackRecentsListener, Object, IViewOnLongClickListener);
+PhoneStatusBar::LongPressBackRecentsListener::LongPressBackRecentsListener(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
 {}
 
-ECode PhoneStatusBar::RotSettingClickListenerOnTouch(
+ECode PhoneStatusBar::LongPressBackRecentsListener::OnLongClick(
     /* [in] */ IView* v,
-    /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
-    AutoPtr<IImageView> rotBtn;
-    mHost->mNavigationBarView->GetRotationSettingButton((IImageView**)&rotBtn);
-    if (irot >= 0){
-        irot = (irot + 1)%4;
-        rotBtn->SetBackgroundDrawable((*mHost->mRotsrc)[irot]);
-        mHost->SendRotBroadcast();
-    }
+    VALIDATE_NOT_NULL(result);
+    mHost->HandleLongPressBackRecents(v);
+    *result = TRUE;
+    return NOERROR;
 }
 
-//================================================================================
-//              PhoneStatusBar::HomeSearchActionListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::HomeSearchActionListener, IViewOnTouchListener)
-
-PhoneStatusBar::HomeSearchActionListener::HomeSearchActionListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
+PhoneStatusBar::ShowSearchPanelRunnable::ShowSearchPanelRunnable(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
 {}
 
-ECode PhoneStatusBar::HomeSearchActionListener::OnTouch(
+ECode PhoneStatusBar::ShowSearchPanelRunnable::Run()
+{
+    mHost->ShowSearchPanel();
+    mHost->AwakenDreams();
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(PhoneStatusBar::HomeActionListener, Object, IViewOnTouchListener);
+PhoneStatusBar::HomeActionListener::HomeActionListener(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::HomeActionListener::OnTouch(
     /* [in] */ IView* v,
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // TODO
-    // Int23 action;
-    // event->GetAction(&action);
-    // switch(action) {
-    //     case IMotionEvent::ACTION_DOWN:
-    //         if (!mHost->ShouldDisableNavbarGestures()) {
-    //             mHost->mHandler->removeCallbacks(mHost->mShowSearchPanel);
-    //             mHost->mHandler->postDelayed(mHost->mShowSearchPanel, mHost->mShowSearchHoldoff);
-    //         }
-    //     break;
+    Int32 action = 0;
+    event->GetAction(&action);
+    switch(action) {
+        case IMotionEvent::ACTION_DOWN:
+        if (!mHost->ShouldDisableNavbarGestures()) {
+            mHost->mHandler->RemoveCallbacks(mHost->mShowSearchPanel);
+            Boolean tmp = FALSE;
+            mHost->mHandler->PostDelayed(mHost->mShowSearchPanel, mHost->mShowSearchHoldoff, &tmp);
+        }
+    break;
 
-    //     case IMotionEvent::ACTION_UP:
-    //     case IMotionEvent::ACTION_CANCEL:
-    //         mHost->mHandler->RemoveCallbacks(mHost->mShowSearchPanel);
-    //         mHost->AwakenDreams();
-    //     break;
-    // }
+    case IMotionEvent::ACTION_UP:
+    case IMotionEvent::ACTION_CANCEL:
+        mHost->mHandler->RemoveCallbacks(mHost->mShowSearchPanel);
+        mHost->AwakenDreams();
+    break;
+    }
     *result = FALSE;
     return NOERROR;
 }
 
-//================================================================================
-//              PhoneStatusBar::ViewOnFocusChangeListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::ViewOnFocusChangeListener, IViewOnFocusChangeListener)
-
-PhoneStatusBar::ViewOnFocusChangeListener::ViewOnFocusChangeListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
+PhoneStatusBar::HideBackdropFront::HideBackdropFront(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
 {}
 
-ECode PhoneStatusBar::ViewOnFocusChangeListenerOnFocusChange(
+ECode PhoneStatusBar::HideBackdropFront::Run()
+{
+    if (DEBUG_MEDIA) {
+        Logger::V(TAG, "DEBUG_MEDIA: removing fade layer");
+    }
+    IView::Probe(mHost->mBackdropFront)->SetVisibility(IView::INVISIBLE);
+    AutoPtr<IViewPropertyAnimator> vp;
+    IView::Probe(mHost->mBackdropFront)->Animate((IViewPropertyAnimator**)&vp);
+    vp->Cancel();
+    mHost->mBackdropFront->SetImageDrawable(NULL);
+    return NOERROR;
+}
+
+PhoneStatusBar::H::H(
+    /* [in] */ PhoneStatusBar* host)
+    : BaseStatusBar::H(host)
+    , mHost(host)
+{}
+
+ECode PhoneStatusBar::H::HandleMessage(
+    /* [in] */ IMessage* m)
+{
+    BaseStatusBar::H::HandleMessage(m);
+    Int32 what = 0;
+    m->GetWhat(&what);
+    switch (what) {
+        case MSG_OPEN_NOTIFICATION_PANEL:
+            mHost->AnimateExpandNotificationsPanel();
+            break;
+        case MSG_OPEN_SETTINGS_PANEL:
+            mHost->AnimateExpandSettingsPanel();
+            break;
+        case MSG_CLOSE_PANELS:
+            mHost->AnimateCollapsePanels();
+            break;
+        case BaseStatusBar::MSG_SHOW_HEADS_UP:
+            mHost->SetHeadsUpVisibility(TRUE);
+            break;
+        case BaseStatusBar::MSG_DECAY_HEADS_UP:
+            mHost->mHeadsUpNotificationView->ReleaseResources();
+            mHost->SetHeadsUpVisibility(FALSE);
+            break;
+        case BaseStatusBar::MSG_HIDE_HEADS_UP:
+            mHost->mHeadsUpNotificationView->ReleaseResources();
+            mHost->SetHeadsUpVisibility(FALSE);
+            break;
+        case BaseStatusBar::MSG_ESCALATE_HEADS_UP:
+            mHost->EscalateHeadsUp();
+            mHost->SetHeadsUpVisibility(FALSE);
+            break;
+    }
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(PhoneStatusBar::FocusChangeListener, Object, IViewOnFocusChangeListener);
+ECode PhoneStatusBar::FocusChangeListener::OnFocusChange(
     /* [in] */ IView* v,
     /* [in] */ Boolean hasFocus)
 {
@@ -281,503 +509,993 @@ ECode PhoneStatusBar::ViewOnFocusChangeListenerOnFocusChange(
     return NOERROR;
 }
 
-//================================================================================
-//              PhoneStatusBar::ExpandedInvisibleRunnable
-//================================================================================
-PhoneStatusBar::ExpandedInvisibleRunnable::ExpandedInvisibleRunnable(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
+PhoneStatusBar::AnimateCollapsePanelsRunnable::AnimateCollapsePanelsRunnable(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
 {}
 
-ECode PhoneStatusBar::ExpandedInvisibleRunnable::Run()
+ECode PhoneStatusBar::AnimateCollapsePanelsRunnable::Run()
 {
-    mHost->MakeExpandedInvisible();
+    mHost->AnimateCollapsePanels();
     return NOERROR;
 }
 
-//================================================================================
-//              PhoneStatusBar::ClingRunnable
-//================================================================================
-PhoneStatusBar::ClingRunnable::ClingRunnable(
-    /* [in] */ IViewStub* viewStub,
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-    , mViewStub(viewStub)
+PhoneStatusBar::CheckBarModesRunnable::CheckBarModesRunnable(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
 {}
 
-ECode PhoneStatusBar::ClingRunnable::Run()
+ECode PhoneStatusBar::CheckBarModesRunnable::Run()
 {
-    AutoPtr<IView> tmpView;
-    mViewStub->Inflate((IView**)&tmpView);
-    mHost->mCling = IViewGroup::Probe(tmpView.Get());
-
-    AutoPtr<IViewOnTouchListener> touchListener = new ClingTouchListener(this);
-    AutoPtr<IViewOnClickListener> clickListener = new ClingClickListener(this);
-    mHost->mCling->SetOnTouchListener(touchListener);
-    AutoPtr<IView> okView;
-    mHost->mCling->FindViewById(R::id::ok, (IView**)&okView);
-    okView->SetOnClickListener(clickListener);
-
-    mHost->mCling->SetAlpha(0.0f);
-    mHost->mCling->SetVisibility(IView::VISIBLE);
-    AutoPtr<IViewPropertyAnimator> animator;
-    mHost->mCling->Animate((IViewPropertyAnimator**)&animator);
-    animator->Alpha(1.0f);
-
-    mHost->mClingShown = TRUE;
-    AutoPtr<ISharedPreferencesEditor> editor = Prefs::Edit(mContext);
-    editor->PutBoolean(Prefs::SHOWN_QUICK_SETTINGS_HELP, TRUE);
-    editor->Apply();
-
-    mHost->MakeExpandedVisible(TRUE); // enforce visibility in case the shade is still animating closed
-    mHost->AnimateExpandNotificationsPanel();
-
-    mHost->mSuppressStatusBarDrags = FALSE;
+    mHost->CheckBarModes();
     return NOERROR;
 }
 
-//================================================================================
-//              PhoneStatusBar::ClingClickListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::ClingClickListener, IViewOnClickListener)
-
-PhoneStatusBar::ClingClickListener::ClingClickListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-{}
-
-ECode PhoneStatusBar::ClingClickListener::OnClick(
-    /* [in] */ IView* v)
-{
-    mHost->HideCling();
-    return NOERROR;
-}
-
-//================================================================================
-//              PhoneStatusBar::ClingTouchListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::ClingTouchListener, IViewOnTouchListener)
-
-PhoneStatusBar::ClingTouchListener::ClingTouchListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-{}
-
-ECode PhoneStatusBar::ClingTouchListener::OnTouch(
-    /* [in] */ IView* v,
-    /* [in] */ IMotionEvent* event,
-    /* [out] */ Boolean* result)
-{
-    return TRUE; // e eats everything
-}
-
-//================================================================================
-//              PhoneStatusBar::ClearButtonClickRunnable
-//================================================================================
-PhoneStatusBar::ClearButtonClickRunnable::ClearButtonClickRunnable(
-    /* [in] */ List<AutoPtr<IView> >& snapshot,
-    /* [in] */ PhoneStatusBar* bar)
-    : mSnapshot(snapshot)
-    , mHost(bar)
-{
-}
-
-ECode PhoneStatusBar::ClearButtonClickRunnable::Run()
-{
-    // Decrease the delay for every row we animate to give the sense of
-    // accelerating the swipes
-    Int32 ROW_DELAY_DECREMENT = 10;
-    Int32 currentDelay = 140;
-    Int32 totalDelay = 0;
-
-    // Set the shade-animating state to avoid doing other work during
-    // all of these animations. In particular, avoid layout and
-    // redrawing when collapsing the shade.
-    mHost->mPile->SetViewRemoval(FALSE);
-
-    mHost->mPostCollapseCleanup = new CollapseCleanupRunnable(mHost);
-
-    AutoPtr<IView> sampleView = mSnapshot[0];
-    Int32 width;
-    sampleView->GetWidth(&width);
-    Int32 velocity = width * 8; // 1000/8 = 125 ms duration
-
-    Boolean result;
-    List<AutoPtr<IView> >::Iterator it;
-    for (it = mSnapshot.Begin(); it != mSnapshot.End(); ++it) {
-        AutoPtr<IView> view = *it;
-        AutoPtr<IRunnable> runnable = new DismissRowAnimatedRunnable(view, velocity, mHost);
-        mHost->mHandler->PostDelayed(runnable, totalDelay, &result);
-        currentDelay = Math::Max(50, currentDelay - ROW_DELAY_DECREMENT);
-        totalDelay += currentDelay;
-    }
-
-    // Delay the collapse animation until after all swipe animations have
-    // finished. Provide some buffer because there may be some extra delay
-    // before actually starting each swipe animation. Ideally, we'd
-    // synchronize the end of those animations with the start of the collaps
-    // exactly.
-    AutoPtr<IRunnable> runnable = new DelayCollapseAnimationRunnable(mHost);
-    mHost->mHandler->PostDelayed(runnable, totalDelay + 225, &result);
-    return NOERROR;
-}
-
-//================================================================================
-//              PhoneStatusBar::CollapseCleanupRunnable
-//================================================================================
-PhoneStatusBar::CollapseCleanupRunnable::CollapseCleanupRunnable(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-{
-}
-
-ECode PhoneStatusBar::CollapseCleanupRunnable::Run()
-{
-    // if (DEBUG) {
-    //     Slog.v(TAG, "running post-collapse cleanup");
-    // }
-    // try {
-        mHost->mPile->SetViewRemoval(TRUE);
-        mHost->mBarService->OnClearAllNotifications();
-    // } catch (Exception ex) { }
-    return NOERROR;
-}
-
-//================================================================================
-//              PhoneStatusBar::DismissRowAnimatedRunnable
-//================================================================================
-PhoneStatusBar::DismissRowAnimatedRunnable::DismissRowAnimatedRunnable(
-    /* [in] */ IView* view,
-    /* [in] */ Int32 velocity,
-    /* [in] */ PhoneStatusBar* bar)
-    : mView(view)
-    , mVelocity(velocity)
-    , mHost(bar)
-{
-}
-
-ECode PhoneStatusBar::DismissRowAnimatedRunnable::Run()
-{
-    mHost->mPile->DismissRowAnimated(view, velocity);
-    return NOERROR;
-}
-
-//================================================================================
-//              PhoneStatusBar::DelayCollapseAnimationRunnable
-//================================================================================
-PhoneStatusBar::DelayCollapseAnimationRunnable::DelayCollapseAnimationRunnable(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-{
-}
-
-ECode PhoneStatusBar::DelayCollapseAnimationRunnable::Run()
-{
-    mHost->AnimateCollapsePanels(ICommandQueue::FLAG_EXCLUDE_NONE);
-    return NOERROR;
-}
-
-//================================================================================
-//              PhoneStatusBar::ClearButtonClickListener
-//================================================================================
-
-CAR_INTERFACE_IMPL(PhoneStatusBar::ClearButtonClickListener, IViewOnClickListener)
-
-PhoneStatusBar::ClearButtonClickListener::ClearButtonClickListener(
-    /* [in] */ PhoneStatusBar* bar)
-    :  mHost(bar)
-{}
-
-ECode PhoneStatusBar::ClearButtonClickListener::OnClick(
-    /* [in] */ IView* v)
-{
-    // animate-swipe all dismissable notifications, then animate the shade closed
-    Int32 numChildren;
-    mHost->mPile->GetChildCount(&numChildren);
-
-    Int32 scrollTop;
-    mHost->mScrollView->GetScrollY(&scrollTop);
-    Int32 scrollBottom;
-    mHost->mScrollView->GetHeight(&scrollBottom)
-    scrollBottom += scrollTop;
-
-    Int32 bottom, top;
-    Boolean canBeDismissed;
-    List<AutoPtr<IView> > snapshot(numChildren);
-    for (Int32 i = 0; i< numChildren; i++) {
-        AutoPtr<IView> child;
-        mHost->mPile->GetChildAt(i, (IView**)&child);
-        mHost->mPile->CanChildBeDismissed(child, &canBeDismissed);
-        if (canBeDismissed) {
-            child->GetBottom(&bottom);
-            child->GetTop(&top);
-
-            if (bottom > scrollTop && top < scrollBottom) {
-                snapshot->Add(child);
-            }
-        }
-    }
-
-    if (snapshot->IsEmpty()) {
-        mHost->AnimateCollapsePanels(ICommandQueue::FLAG_EXCLUDE_NONE);
-        return NOERROR;
-    }
-
-    AutoPtr<IRunnable> runnable = new ClearButtonClickRunnable(snapshot, mHost);
-    AutoPtr<IThread> thread;
-    CThread::New(runnable, (IThread**)&thread);
-    thread->Start();
-}
-
-//================================================================================
-//              PhoneStatusBar::SettingsButtonClickListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::SettingsButtonClickListener, IViewOnClickListener)
-
-PhoneStatusBar::SettingsButtonClickListener::SettingsButtonClickListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-{}
-
-ECode PhoneStatusBar::SettingsButtonClickListener::OnClick(
-    /* [in] */ IView* v)
-{
-    if (mHasSettingsPanel) {
-        mHost->AnimateExpandSettingsPanel();
-    }
-    else {
-        AutoPtr<IIntent> intent;
-        CIntent::New(ISettings::ACTION_SETTINGS, TRUE, (IIntent**)&intent);
-        mHost->StartActivityDismissingKeyguard(intent);
-    }
-}
-
-//================================================================================
-//              PhoneStatusBar::ClockClickListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::ClockClickListener, IViewOnClickListener)
-
-PhoneStatusBar::ClockClickListener::ClockClickListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-{}
-
-ECode PhoneStatusBar::ClockClickListener::OnClick(
-    /* [in] */ IView* v)
-{
-    AutoPtr<IIntent> intent;
-    CIntent::New(ISettings::ACTION_QUICK_CLOCK, TRUE, (IIntent**)&intent);
-    mHost->StartActivityDismissingKeyguard(intent); // have fun, everyone
-    return NOERROR;
-}
-
-//================================================================================
-//              PhoneStatusBar::NotificationButtonListener
-//================================================================================
-CAR_INTERFACE_IMPL(PhoneStatusBar::NotificationButtonListener, IViewOnClickListener)
-
-PhoneStatusBar::NotificationButtonListener::NotificationButtonListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-{}
-
-ECode PhoneStatusBar::NotificationButtonListener::OnClick(
-    /* [in] */ IView* v)
-{
-    mHost->AnimateExpandNotificationsPanel();
-    return NOERROR;
-}
-
-//================================================================================
-//              PhoneStatusBar::PhoneStatusBarBroadcastReceiver
-//================================================================================
-PhoneStatusBar::PhoneStatusBarBroadcastReceiver::PhoneStatusBarBroadcastReceiver(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-{}
-
-ECode PhoneStatusBar::PhoneStatusBarBroadcastReceiver::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    assert(intent != NULL);
-
-    // if (DEBUG) Slog.v(TAG, "onReceive: " + intent);
-    String action;
-    intent->GetAction(&action);
-    if (IIntent::ACTION_CLOSE_SYSTEM_DIALOGS.Equals(action)) {
-        Int32 flags = ICommandQueue::FLAG_EXCLUDE_NONE;
-        if (IIntent::ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
-            String reason;
-            intent->GetStringExtra("reason", &reason);
-            if (!reason.IsNull() && reason.Equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
-                flags |= ICommandQueue::FLAG_EXCLUDE_RECENTS_PANEL;
-            }
-        }
-        mHost->AnimateCollapsePanels(flags);
-    }
-    else if (IIntent::ACTION_SCREEN_OFF.equals(action)) {
-        // no waiting!
-        mHost->MakeExpandedInvisible();
-        mHost->NotifyNavigationBarScreenOn(FALSE);
-    }
-    else if (IIntent::ACTION_CONFIGURATION_CHANGED.Equals(action)) {
-        // if (DEBUG) {
-        //     Slog.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
-        // }
-        mHost->mDisplay->GetSize(mCurrentDisplaySize);
-
-        mHost->UpdateResources();
-        mHost->RepositionNavigationBar();
-        mHost->UpdateExpandedViewPos(EXPANDED_LEAVE_ALONE);
-        mHost->UpdateShowSearchHoldoff();
-    }
-    else if (IIntent::ACTION_SCREEN_ON.equals(action)) {
-        // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
-        mHost->RepositionNavigationBar();
-        mHost->NotifyNavigationBarScreenOn(TRUE);
-    }
-    else if (PhoneStatusBar::setRotShow.Equals(action)){
-        AutoPtr<IImageView> rotBtn;
-        mNavigationBarView->GetRotationSettingButton((IImageView**)&rotBtn);
-        Int32 rot;
-        intent->GetIntExtra(setRotStr, -1, &rot);
-        if (rotBtn != NULL && rot >= -1){
-            Boolean isShown;
-            rotBtn->IsShown(&isShown);
-            if (rot == 0 && (isShown == FALSE)){
-                rotBtn->SetBackgroundDrawable((*mHost->mRotsrc)[0]);
-                rotBtn->SetVisibility(IView::VISIBLE);
-                irot = 0;
-            }
-            else if (rot == -1 && isShown){
-                rotBtn->SetVisibility(IView::GONE);
-                irot = -1;
-                mHost->SendRotBroadcast();
-            }
-        }
-    }
-    return NOERROR;
-}
-
-//================================================================================
-//              PhoneStatusBar::MyTicker
-//================================================================================
 PhoneStatusBar::MyTicker::MyTicker(
+    /* [in] */ PhoneStatusBar* host,
     /* [in] */ IContext* context,
-    /* [in] */ IView* sb,
-    /* [in] */ PhoneStatusBar* bar)
-    : Ticker(context, sb)
-    , mHost(bar)
+    /* [in] */ IView* sb)
+    : mHost(host)
 {
+    Ticker::constructor(context, sb);
+    if (!mHost->mTickerEnabled) {
+        Logger::W(TAG, "MyTicker instantiated with mTickerEnabled=FALSE");
+    }
 }
 
-//@Override
 ECode PhoneStatusBar::MyTicker::TickerStarting()
 {
+    if (!mHost->mTickerEnabled) return NOERROR;
     mHost->mTicking = TRUE;
-    mHost->mStatusBarContents->SetVisibility(IView::GONE);
+    IView::Probe(mHost->mStatusBarContents)->SetVisibility(IView::GONE);
     mHost->mTickerView->SetVisibility(IView::VISIBLE);
-    AutoPtr<IAnimation> animation = mHost->LoadAnim(R::anim::push_up_in, NULL);
-    mHost->mTickerView->StartAnimation(animation);
-    animation = mHost->LoadAnim(R::anim::push_up_out, NULL);
-    mHost->mStatusBarContents->StartAnimation(animation);
+    mHost->mTickerView->StartAnimation(mHost->LoadAnim(Elastos::Droid::R::anim::push_up_in, NULL));
+    IView::Probe(mHost->mStatusBarContents)->StartAnimation(
+            mHost->LoadAnim(Elastos::Droid::R::anim::push_up_out, NULL));
+    return NOERROR;
 }
 
-//@Override
 ECode PhoneStatusBar::MyTicker::TickerDone()
 {
-    mHost->mStatusBarContents->SetVisibility(IView::VISIBLE);
+    if (!mHost->mTickerEnabled) return NOERROR;
+    IView::Probe(mHost->mStatusBarContents)->SetVisibility(IView::VISIBLE);
     mHost->mTickerView->SetVisibility(IView::GONE);
-    AutoPtr<IAnimation> animation = mHost->LoadAnim(R::anim::push_down_in, NULL);
-    mHost->mStatusBarContents->StartAnimation(animation);
-    animation = mHost->LoadAnim(R::anim::push_down_out, NULL);
-    mHost->mTickerView->StartAnimation(animation);
+    IView::Probe(mHost->mStatusBarContents)->StartAnimation(
+            mHost->LoadAnim(Elastos::Droid::R::anim::push_down_in, NULL));
+    mHost->mTickerView->StartAnimation(mHost->LoadAnim(Elastos::Droid::R::anim::push_down_out,
+                mHost->mTickingDoneListener));
+    return NOERROR;
 }
 
-//@Override
 ECode PhoneStatusBar::MyTicker::TickerHalting()
 {
-    StatusBarContents->SetVisibility(IView::VISIBLE);
+    if (!mHost->mTickerEnabled) return NOERROR;
+    Int32 v = 0;
+    if ((IView::Probe(mHost->mStatusBarContents)->GetVisibility(&v), v) != IView::VISIBLE) {
+        IView::Probe(mHost->mStatusBarContents)->SetVisibility(IView::VISIBLE);
+        IView::Probe(mHost->mStatusBarContents)->StartAnimation(
+                mHost->LoadAnim(Elastos::Droid::R::anim::fade_in, NULL));
+    }
     mHost->mTickerView->SetVisibility(IView::GONE);
-    AutoPtr<IAnimation> animation = mHost->LoadAnim(R::anim::fade_in, NULL);
-    mHost->mStatusBarContents->StartAnimation(animation);
     // we do not animate the ticker away at this point, just get rid of it (b/6992707)
-}
-
-//================================================================================
-//              PhoneStatusBar::TickingDoneListener
-//================================================================================
-PhoneStatusBar::MyTicker::TickingDoneListener(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
-{
-}
-
-ECode PhoneStatusBar::MyTicker::OnAnimationStart(
-    /* [in] */ IAnimation* animation)
-{
     return NOERROR;
 }
 
-ECode PhoneStatusBar::MyTicker::OnAnimationRepeat(
-    /* [in] */ IAnimation* animation)
-{
-    return NOERROR;
-}
+CAR_INTERFACE_IMPL(PhoneStatusBar::TickingDoneListener, Object, IAnimationAnimationListener);
+PhoneStatusBar::TickingDoneListener::TickingDoneListener(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
 
-ECode PhoneStatusBar::MyTicker::OnAnimationEnd(
+ECode PhoneStatusBar::TickingDoneListener::OnAnimationEnd(
     /* [in] */ IAnimation* animation)
 {
     mHost->mTicking = FALSE;
     return NOERROR;
 }
 
-//================================================================================
-//              PhoneStatusBar::ShowSearchPanelRunnable
-//================================================================================
-PhoneStatusBar::ShowSearchPanelRunnable::ShowSearchPanelRunnable(
-    /* [in] */ PhoneStatusBar* bar)
-    : mHost(bar)
+ECode PhoneStatusBar::TickingDoneListener::OnAnimationRepeat(
+    /* [in] */ IAnimation* animation)
 {
-}
-
-ECode PhoneStatusBar::ShowSearchPanelRunnable::Run()
-{
-    mHost->ShowSearchPanel();
-    mHost->AwakenDreams();
     return NOERROR;
 }
 
-//================================================================================
-//              PhoneStatusBar
-//================================================================================
-//@Override
+ECode PhoneStatusBar::TickingDoneListener::OnAnimationStart(
+    /* [in] */ IAnimation* animation)
+{
+    return NOERROR;
+}
+
+PhoneStatusBar::InnerReceiver::InnerReceiver(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::InnerReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    if (DEBUG) Logger::V(TAG, "onReceive: %s", TO_CSTR(intent));
+    String action;
+    intent->GetAction(&action);
+    if (IIntent::ACTION_CLOSE_SYSTEM_DIALOGS.Equals(action)) {
+        Int32 flags = ICommandQueue::FLAG_EXCLUDE_NONE;
+        String reason;
+        intent->GetStringExtra(String("reason"), &reason);
+        if (reason != NULL && reason.Equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
+            flags |= ICommandQueue::FLAG_EXCLUDE_RECENTS_PANEL;
+        }
+        mHost->AnimateCollapsePanels(flags);
+    }
+    else if (IIntent::ACTION_SCREEN_OFF.Equals(action)) {
+        mHost->mScreenOn = FALSE;
+        mHost->NotifyNavigationBarScreenOn(FALSE);
+        mHost->NotifyHeadsUpScreenOn(FALSE);
+        mHost->FinishBarAnimations();
+        mHost->StopNotificationLogging();
+        mHost->ResetUserExpandedStates();
+    }
+    else if (IIntent::ACTION_SCREEN_ON.Equals(action)) {
+        mHost->mScreenOn = TRUE;
+        // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
+        mHost->RepositionNavigationBar();
+        mHost->NotifyNavigationBarScreenOn(TRUE);
+        mHost->StartNotificationLoggingIfScreenOnAndVisible();
+    }
+    else if (ACTION_DEMO.Equals(action)) {
+        AutoPtr<IBundle> bundle;
+        intent->GetExtras((IBundle**)&bundle);
+        if (bundle != NULL) {
+            String str;
+            bundle->GetString(String("command"), String(""), &str);
+            String command = str.Trim().ToLowerCase();
+            if (command.GetLength() > 0) {
+                if (FAILED(mHost->DispatchDemoCommand(command, bundle))) {
+                    Logger::W(TAG, "Error running demo command, intent=%s", TO_CSTR(intent));
+                }
+            }
+        }
+    }
+    else if (String("fake_artwork").Equals(action)) {
+        if (DEBUG_MEDIA_FAKE_ARTWORK) {
+            mHost->UpdateMediaMetaData(TRUE);
+        }
+    }
+    return NOERROR;
+}
+
+PhoneStatusBar::StartTracing::StartTracing(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::StartTracing::Run()
+{
+    mHost->Vibrate();
+    SystemClock::Sleep(250);
+    Logger::D(TAG, "startTracing");
+    assert(0 && "TODO");
+    // android.os.Debug.StartMethodTracing("/data/statusbar-traces/trace");
+    Boolean tmp = FALSE;
+    mHost->mHandler->PostDelayed(mHost->mStopTracing, 10000, &tmp);
+    return NOERROR;
+}
+
+PhoneStatusBar::StopTracing::StopTracing(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::StopTracing::Run()
+{
+    assert(0 && "TODO");
+    // android.os.Debug.stopMethodTracing();
+    Logger::D(TAG, "stopTracing");
+    mHost->Vibrate();
+    return NOERROR;
+}
+
+PhoneStatusBar::FastColorDrawable::FastColorDrawable(
+    /* [in] */ Int32 color)
+{
+    mColor = 0xff000000 | color;
+}
+
+ECode PhoneStatusBar::FastColorDrawable::Draw(
+    /* [in] */ ICanvas* canvas)
+{
+    canvas->DrawColor(mColor, PorterDuffMode_SRC);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::FastColorDrawable::SetAlpha(
+    /* [in] */ Int32 alpha)
+{
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::FastColorDrawable::SetColorFilter(
+    /* [in] */ IColorFilter* cf)
+{
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::FastColorDrawable::GetOpacity(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = IPixelFormat::OPAQUE;
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::FastColorDrawable::SetBounds(
+    /* [in] */ Int32 left,
+    /* [in] */ Int32 top,
+    /* [in] */ Int32 right,
+    /* [in] */ Int32 bottom)
+{
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::FastColorDrawable::SetBounds(
+    /* [in] */ IRect* bounds)
+{
+    return NOERROR;
+}
+
+PhoneStatusBar::ShadeUpdates::ShadeUpdates(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{
+    CArraySet::New((IArraySet**)&mVisibleNotifications);
+    CArraySet::New((IArraySet**)&mNewVisibleNotifications);
+}
+
+ECode PhoneStatusBar::ShadeUpdates::Check()
+{
+    mNewVisibleNotifications->Clear();
+    AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+    mHost->mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
+    Int32 size = 0, v = 0;
+    activeNotifications->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        activeNotifications->Get(i, (IInterface**)&obj);
+        AutoPtr<INotificationDataEntry> entry = INotificationDataEntry::Probe(obj);
+
+        AutoPtr<IExpandableNotificationRow> row;
+        entry->GetRow((IExpandableNotificationRow**)&row);
+        const Boolean visible = row != NULL
+                && (IView::Probe(row)->GetVisibility(&v), v) == IView::VISIBLE;
+        if (visible) {
+            AutoPtr<IStatusBarNotification> notification;
+            entry->GetNotification((IStatusBarNotification**)&notification);
+            Int64 t = 0;
+            notification->GetPostTime(&t);
+            String key;
+            entry->GetKey(&key);
+            AutoPtr<ICharSequence> k;
+            CString::New(key + StringUtils::ToString(t), (ICharSequence**)&k);
+            mNewVisibleNotifications->Add(k);
+        }
+    }
+    Boolean updates = FALSE;
+    mVisibleNotifications->ContainsAll(ICollection::Probe(mNewVisibleNotifications), &updates);
+    updates = !updates;
+    mVisibleNotifications->Clear();
+    mVisibleNotifications->AddAll(mNewVisibleNotifications);
+
+    // We have new notifications
+    if (updates && mHost->mDozeServiceHost != NULL) {
+        mHost->mDozeServiceHost->FireNewNotifications();
+    }
+    return NOERROR;
+}
+
+
+const Int32 PhoneStatusBar::DozeServiceHost::DozeServiceHostHandler::MSG_START_DOZING = 1;
+const Int32 PhoneStatusBar::DozeServiceHost::DozeServiceHostHandler::MSG_PULSE_WHILE_DOZING = 2;
+const Int32 PhoneStatusBar::DozeServiceHost::DozeServiceHostHandler::MSG_STOP_DOZING = 3;
+PhoneStatusBar::DozeServiceHost::DozeServiceHostHandler::DozeServiceHostHandler(
+    /* [in] */ DozeServiceHost* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::DozeServiceHost::DozeServiceHostHandler::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    switch (what) {
+        case MSG_START_DOZING: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            mHost->HandleStartDozing(IRunnable::Probe(obj));
+            break;
+        }
+        case MSG_PULSE_WHILE_DOZING: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            mHost->HandlePulseWhileDozing(IDozeHostPulseCallback::Probe(obj));
+            break;
+        }
+        case MSG_STOP_DOZING:
+            mHost->HandleStopDozing();
+            break;
+    }
+    return NOERROR;
+}
+
+
+const Int64 PhoneStatusBar::DozeServiceHost::PROCESSING_TIME = 500;
+CAR_INTERFACE_IMPL(PhoneStatusBar::DozeServiceHost, Object, IDozeHost);
+PhoneStatusBar::DozeServiceHost::DozeServiceHost(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{
+    CArrayList::New((IArrayList**)&mCallbacks);
+    mHandler = new DozeServiceHostHandler(this);
+}
+
+ECode PhoneStatusBar::DozeServiceHost::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    Int32 size = 0;
+    mCallbacks->GetSize(&size);
+    *str = String("PSB.DozeServiceHost[mCallbacks=") + StringUtils::ToString(size) + String("]");
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::DozeServiceHost::FirePowerSaveChanged(
+    /* [in] */ Boolean active)
+{
+    AutoPtr<IIterator> ator;
+    mCallbacks->GetIterator((IIterator**)&ator);
+    Boolean has = FALSE;
+    while (ator->HasNext(&has), has) {
+        AutoPtr<IInterface> callback;
+        ator->GetNext((IInterface**)&callback);
+        IDozeHostCallback::Probe(callback)->OnPowerSaveChanged(active);
+    }
+
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::DozeServiceHost::FireBuzzBeepBlinked()
+{
+    AutoPtr<IIterator> ator;
+    mCallbacks->GetIterator((IIterator**)&ator);
+    Boolean has = FALSE;
+    while (ator->HasNext(&has), has) {
+        AutoPtr<IInterface> callback;
+        ator->GetNext((IInterface**)&callback);
+        IDozeHostCallback::Probe(callback)->OnBuzzBeepBlinked();
+    }
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::DozeServiceHost::FireNotificationLight(
+    /* [in] */ Boolean on)
+{
+    AutoPtr<IIterator> ator;
+    mCallbacks->GetIterator((IIterator**)&ator);
+    Boolean has = FALSE;
+    while (ator->HasNext(&has), has) {
+        AutoPtr<IInterface> callback;
+        ator->GetNext((IInterface**)&callback);
+        IDozeHostCallback::Probe(callback)->OnNotificationLight(on);
+    }
+
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::DozeServiceHost::FireNewNotifications()
+{
+    AutoPtr<IIterator> ator;
+    mCallbacks->GetIterator((IIterator**)&ator);
+    Boolean has = FALSE;
+    while (ator->HasNext(&has), has) {
+        AutoPtr<IInterface> callback;
+        ator->GetNext((IInterface**)&callback);
+        IDozeHostCallback::Probe(callback)->OnNewNotifications();
+    }
+
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::DozeServiceHost::AddCallback(
+    /* [in] */ /*@NonNull*/ IDozeHostCallback* callback)
+{
+    mCallbacks->Add(callback);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::DozeServiceHost::RemoveCallback(
+    /* [in] */ /*@NonNull*/ IDozeHostCallback* callback)
+{
+    mCallbacks->Remove(callback);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::DozeServiceHost::StartDozing(
+    /* [in] */ /*@NonNull*/ IRunnable* ready)
+{
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(DozeServiceHostHandler::MSG_START_DOZING, ready, (IMessage**)&msg);
+    msg->SendToTarget();
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::DozeServiceHost::PulseWhileDozing(
+    /* [in] */ /*@NonNull*/ IDozeHostPulseCallback* callback)
+{
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(DozeServiceHostHandler::MSG_PULSE_WHILE_DOZING, callback, (IMessage**)&msg);
+    msg->SendToTarget();
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::DozeServiceHost::StopDozing()
+{
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(DozeServiceHostHandler::MSG_STOP_DOZING, (IMessage**)&msg);
+    msg->SendToTarget();
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::DozeServiceHost::IsPowerSaveActive(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Boolean tmp = FALSE;
+    *result = mHost->mBatteryController != NULL && (mHost->mBatteryController->IsPowerSave(&tmp), tmp);
+    return NOERROR;
+}
+
+void PhoneStatusBar::DozeServiceHost::HandleStartDozing(
+    /* [in] */ /*@NonNull*/ IRunnable* ready)
+{
+    if (!mHost->mDozing) {
+        mHost->mDozing = TRUE;
+        DozeLog::TraceDozing(mHost->mContext, mHost->mDozing);
+        mHost->UpdateDozingState();
+    }
+    ready->Run();
+}
+
+void PhoneStatusBar::DozeServiceHost::HandlePulseWhileDozing(
+    /* [in] */ /*@NonNull*/ IDozeHostPulseCallback* callback)
+{
+    mHost->mScrimController->Pulse(callback);
+}
+
+void PhoneStatusBar::DozeServiceHost::HandleStopDozing()
+{
+    if (mHost->mDozing) {
+        mHost->mDozing = FALSE;
+        DozeLog::TraceDozing(mHost->mContext, mHost->mDozing);
+        mHost->UpdateDozingState();
+    }
+}
+
+CAR_INTERFACE_IMPL(PhoneStatusBar::OnTouchListener1, Object, IViewOnTouchListener);
+PhoneStatusBar::OnTouchListener1::OnTouchListener1(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::OnTouchListener1::OnTouch(
+    /* [in] */ IView* v,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    mHost->CheckUserAutohide(v, event);
+    Int32 action;
+    if ((event->GetAction(&action), action) == IMotionEvent::ACTION_DOWN) {
+        if (mHost->mExpandedVisible) {
+            mHost->AnimateCollapsePanels();
+        }
+    }
+    return IView::Probe(mHost->mStatusBarWindow)->OnTouchEvent(event, result);
+}
+
+CAR_INTERFACE_IMPL(PhoneStatusBar::VerticalChangedListener, Object, IOnVerticalChangedListener);
+PhoneStatusBar::VerticalChangedListener::VerticalChangedListener(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::VerticalChangedListener::OnVerticalChanged(
+    /* [in] */ Boolean isVertical)
+{
+    if (mHost->mSearchPanelView != NULL) {
+        mHost->mSearchPanelView->SetHorizontal(isVertical);
+    }
+    mHost->mNotificationPanel->SetQsScrimEnabled(!isVertical);
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(PhoneStatusBar::OnTouchListener2, Object, IViewOnTouchListener);
+PhoneStatusBar::OnTouchListener2::OnTouchListener2(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::OnTouchListener2::OnTouch(
+    /* [in] */ IView* v,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    mHost->CheckUserAutohide(v, event);
+    *result = FALSE;
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(PhoneStatusBar::OnClickListener1, Object, IViewOnClickListener);
+PhoneStatusBar::OnClickListener1::OnClickListener1(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::OnClickListener1::OnClick(
+    /* [in] */ IView* v)
+{
+    mHost->ClearAllNotifications();
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(PhoneStatusBar::BatteryStateChangeCallback, Object, IBatteryStateChangeCallback);
+PhoneStatusBar::BatteryStateChangeCallback::BatteryStateChangeCallback(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::BatteryStateChangeCallback::OnPowerSaveChanged()
+{
+    Boolean tmp = FALSE;
+    mHost->mHandler->Post(mHost->mCheckBarModes, &tmp);
+    if (mHost->mDozeServiceHost != NULL) {
+        mHost->mBatteryController->IsPowerSave(&tmp);
+        mHost->mDozeServiceHost->FirePowerSaveChanged(tmp);
+    }
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::BatteryStateChangeCallback::OnBatteryLevelChanged(
+    /* [in] */ Int32 level,
+    /* [in] */ Boolean pluggedIn,
+    /* [in] */ Boolean charging)
+{
+    // noop
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(PhoneStatusBar::HostCallback, Object, IQSTileHostCallback);
+PhoneStatusBar::HostCallback::HostCallback(
+    /* [in] */ PhoneStatusBar* host,
+    /* [in] */ IQSTileHost* qsh)
+    : mHost(host)
+    , mQsh(qsh)
+{}
+
+ECode PhoneStatusBar::HostCallback::OnTilesChanged()
+{
+    AutoPtr<ICollection> c;
+    mQsh->GetTiles((ICollection**)&c);
+    mHost->mQSPanel->SetTiles(c);
+    return NOERROR;
+}
+
+PhoneStatusBar::Runnable1::Runnable1(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::Runnable1::Run()
+{
+    mHost->mBarService->OnClearAllNotifications(mHost->mCurrentUserId);
+    return NOERROR;
+}
+
+PhoneStatusBar::Runnable2::Runnable2(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::Runnable2::Run()
+{
+    AutoPtr<Runnable3> run = new Runnable3(mHost);
+    Boolean tmp = FALSE;
+    IView::Probe(mHost->mStackScroller)->Post(run, &tmp);
+    mHost->AnimateCollapsePanels(ICommandQueue::FLAG_EXCLUDE_NONE);
+    return NOERROR;
+}
+
+PhoneStatusBar::Runnable3::Runnable3(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::Runnable3::Run()
+{
+    mHost->mStackScroller->SetDismissAllInProgress(FALSE);
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(PhoneStatusBar::OnPreDrawListener, Object, IOnPreDrawListener);
+PhoneStatusBar::OnPreDrawListener::OnPreDrawListener(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::OnPreDrawListener::OnPreDraw(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (mHost->mDrawCount == 1) {
+        AutoPtr<IViewTreeObserver> vto;
+        IView::Probe(mHost->mStatusBarView)->GetViewTreeObserver((IViewTreeObserver**)&vto);
+        vto->RemoveOnPreDrawListener(this);
+        assert(0 && "TODO");
+        // HardwareCanvas.SetProperty("extraRasterBucket",
+        //         Float.toString(StackScrollAlgorithm.DIMMED_SCALE));
+        // HardwareCanvas.setProperty("extraRasterBucket", Float.toString(
+        //         mHost->mContext.getResources().getDimensionPixelSize(
+        //                 R.dimen.qs_time_collapsed_size)
+        //         / mHost->mContext.getResources().getDimensionPixelSize(
+        //                 R.dimen.qs_time_expanded_size)));
+    }
+    mHost->mDrawCount++;
+    *result = TRUE;
+    return NOERROR;
+}
+
+PhoneStatusBar::Runnable4::Runnable4(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::Runnable4::Run()
+{
+    mHost->UpdateNotificationShade();
+    return NOERROR;
+}
+
+PhoneStatusBar::AnimatorListenerAdapter1::AnimatorListenerAdapter1(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::AnimatorListenerAdapter1::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    if (!mHost->mCarrierLabelVisible) { // race
+        IView::Probe(mHost->mCarrierLabel)->SetVisibility(IView::INVISIBLE);
+        IView::Probe(mHost->mCarrierLabel)->SetAlpha(0.f);
+    }
+    return NOERROR;
+}
+
+PhoneStatusBar::AnimatorListenerAdapter2::AnimatorListenerAdapter2(
+    /* [in] */ IView* view)
+    : mView(view)
+{}
+
+ECode PhoneStatusBar::AnimatorListenerAdapter2::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    mView->SetVisibility(IView::GONE);
+    return NOERROR;
+}
+
+PhoneStatusBar::Runnable5::Runnable5(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::Runnable5::Run()
+{
+    IView::Probe(mHost->mBackdrop)->SetVisibility(IView::GONE);
+    AutoPtr<IViewPropertyAnimator> vpa;
+    IView::Probe(mHost->mBackdropFront)->Animate((IViewPropertyAnimator**)&vpa);
+    vpa->Cancel();
+
+    vpa = NULL;
+    IView::Probe(mHost->mBackdropBack)->Animate((IViewPropertyAnimator**)&vpa);
+    vpa->Cancel();
+    Boolean tmp = FALSE;
+    mHost->mHandler->Post(mHost->mHideBackdropFront, &tmp);
+    return NOERROR;
+}
+
+PhoneStatusBar::Runnable6::Runnable6(
+    /* [in] */ IView* view)
+    : mView(view)
+{}
+
+ECode PhoneStatusBar::Runnable6::Run()
+{
+    mView->SetVisibility(IView::INVISIBLE);
+    return NOERROR;
+}
+
+PhoneStatusBar::AnimatorListenerAdapter3::AnimatorListenerAdapter3(
+    /* [in] */ IView* view,
+    /* [in] */ IViewPropertyAnimator* a,
+    /* [in] */ Int32 vis)
+    : mView(view)
+    , mA(a)
+    , mVis(vis)
+{}
+
+ECode PhoneStatusBar::AnimatorListenerAdapter3::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    mView->SetVisibility(mVis);
+    mA->SetListener(NULL); // oneshot
+    return NOERROR;
+}
+
+PhoneStatusBar::AnimatorListenerAdapter4::AnimatorListenerAdapter4(
+    /* [in] */ IView* view,
+    /* [in] */ Int32 vis)
+    : mView(view)
+    , mVis(vis)
+{}
+
+ECode PhoneStatusBar::AnimatorListenerAdapter4::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    mView->SetVisibility(mVis);
+    return NOERROR;
+}
+
+PhoneStatusBar::Runnable7::Runnable7(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::Runnable7::Run()
+{
+    IView::Probe(mHost->mStatusBarView)->GetLocationOnScreen(mHost->mAbsPos);
+    Int32 w = 0, h = 0;
+    mHost->GetStatusBarHeight(&h);
+    IView::Probe(mHost->mStatusBarView)->GetWidth(&w);
+    Logger::D(TAG, "mStatusBarView: ----- (%d, %d)%dx%d"
+        , (*(mHost->mAbsPos))[0], (*(mHost->mAbsPos))[1], w, h);
+    // mHost->mStatusBarView.debug();
+    return NOERROR;
+}
+
+PhoneStatusBar::Runnable8::Runnable8(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::Runnable8::Run()
+{
+    mHost->mStatusBarKeyguardViewManager->Dismiss();
+    return NOERROR;
+}
+
+PhoneStatusBar::Runnable9::Runnable9(
+    /* [in] */ PhoneStatusBar* host,
+    /* [in] */ IIntent* intent)
+    : mHost(host)
+    , mIntent(intent)
+{}
+
+ECode PhoneStatusBar::Runnable9::Run()
+{
+    mHost->HandleStartSettingsActivity(mIntent, TRUE /*onlyProvisioned*/);
+    return NOERROR;
+}
+
+PhoneStatusBar::Runnable10::Runnable10(
+    /* [in] */ PhoneStatusBar* host)
+    : mHost(host)
+{}
+
+ECode PhoneStatusBar::Runnable10::Run()
+{
+    IView::Probe(mHost->mNotificationPanel)->SetAlpha(1);
+    if (mHost->mLaunchTransitionEndRunnable != NULL) {
+        mHost->mLaunchTransitionEndRunnable->Run();
+    }
+    mHost->mLaunchTransitionEndRunnable = NULL;
+    mHost->mLaunchTransitionFadingAway = FALSE;
+    return NOERROR;
+}
+
+PhoneStatusBar::Runnable11::Runnable11(
+    /* [in] */ PhoneStatusBar* host,
+    /* [in] */ IRunnable* beforeFading)
+    : mHost(host)
+    , mBeforeFading(beforeFading)
+{}
+
+ECode PhoneStatusBar::Runnable11::Run()
+{
+    mHost->mLaunchTransitionFadingAway = TRUE;
+    if (mBeforeFading != NULL) {
+        mBeforeFading->Run();
+    }
+    IView::Probe(mHost->mNotificationPanel)->SetAlpha(1);
+    AutoPtr<IViewPropertyAnimator> vpa;
+    IView::Probe(mHost->mNotificationPanel)->Animate((IViewPropertyAnimator**)&vpa);
+    vpa->Alpha(0);
+    vpa->SetStartDelay(FADE_KEYGUARD_START_DELAY);
+    vpa->SetDuration(FADE_KEYGUARD_DURATION);
+    vpa->WithLayer();
+
+    AutoPtr<Runnable10> run = new Runnable10(mHost);
+    vpa->WithEndAction(run);
+    return NOERROR;
+}
+
+
+CAR_INTERFACE_IMPL_4(PhoneStatusBar, BaseStatusBar, IPhoneStatusBar, IDemoMode, IDragDownCallback, IActivityStarter);
+PhoneStatusBar::PhoneStatusBar()
+    : mNaturalBarHeight(-1)
+    , mIconSize(-1)
+    , mIconHPadding(-1)
+    , mStatusBarWindowState(IStatusBarManager::WINDOW_STATE_SHOWING)
+    , mScreenOnComingFromTouch(FALSE)
+    , mPixelFormat(0)
+    , mNotificationPanelGravity(0)
+    , mNotificationPanelMarginBottomPx(0)
+    , mNotificationPanelMinHeightFrac(0)
+    , mLeaveOpenOnKeyguardHide(FALSE)
+    , mKeyguardFadingAway(FALSE)
+    , mKeyguardFadingAwayDelay(0)
+    , mKeyguardFadingAwayDuration(0)
+    , mKeyguardMaxNotificationCount(0)
+    , mCarrierLabelVisible(FALSE)
+    , mCarrierLabelHeight(0)
+    , mStatusBarHeaderHeight(0)
+    , mShowCarrierInPanel(FALSE)
+    , mExpandedVisible(FALSE)
+    , mNavigationBarWindowState(IStatusBarManager::WINDOW_STATE_SHOWING)
+    , mTrackingPosition(0)
+    , mTickerEnabled(FALSE)
+    , mTicking(FALSE)
+    , mEdgeBorder(0)
+    , mTracking(FALSE)
+    , mDisabled(0)
+    , mSystemUiVisibility(IView::SYSTEM_UI_FLAG_VISIBLE)
+    , mNavigationIconHints(0)
+    , mUserSetup(FALSE)
+    , mInteractingWindows(0)
+    , mAutohideSuspended(FALSE)
+    , mStatusBarMode(0)
+    , mNavigationBarMode(0)
+    , mScreenOn(FALSE)
+    , mScreenOnFromKeyguard(FALSE)
+    , mVisible(FALSE)
+    , mWaitingForKeyguardExit(FALSE)
+    , mDozing(FALSE)
+    , mScrimSrcModeEnabled(FALSE)
+    , mDisabledUnmodified(0)
+    , mLastVisibilityReportUptimeMs(0)
+    , mDrawCount(0)
+    , mLaunchTransitionFadingAway(FALSE)
+    , mLastLockToAppLongPress(0)
+    , mShowSearchHoldoff(0)
+    , FLIP_DURATION_OUT(125)
+    , FLIP_DURATION_IN(225)
+    , FLIP_DURATION(FLIP_DURATION_IN + FLIP_DURATION_OUT)
+    , mDemoModeAllowed(FALSE)
+    , mDemoMode(FALSE)
+{
+    CPoint::New((IPoint**)&mCurrentDisplaySize);
+    mPositionTmp = ArrayOf<Int32>::Alloc(2);
+    mAbsPos = ArrayOf<Int32>::Alloc(2);
+    CArrayList::New((IArrayList**)&mPostCollapseRunnables);
+    CDisplayMetrics::New((IDisplayMetrics**)&mDisplayMetrics);
+    mGestureRec = DEBUG_GESTURES
+            ? new GestureRecorder(String("/sdcard/statusbar_gestures.dat"))
+            : NULL;
+    AutoPtr<IHandler> handler;
+    CHandler::New((IHandler**)&handler);
+    mUserSetupObserver = new UserSetupObserver(this, handler);
+    mHeadsUpObserver = new HeadsUpObserver(this, mHandler);
+    mAutohide = new Autohide(this);
+    CLinearInterpolator::New((IInterpolator**)&mLinearInterpolator);
+    CAccelerateDecelerateInterpolator::New((IInterpolator**)&mBackdropInterpolator);
+    CPorterDuffXfermode::New(PorterDuffMode_SRC, (IPorterDuffXfermode**)&mSrcXferMode);
+    CPorterDuffXfermode::New(PorterDuffMode_SRC_OVER, (IPorterDuffXfermode**)&mSrcOverXferMode);
+    mMediaListener = new MediaListener(this);
+    mOnChildLocationsChangedListener = new OnChildLocationsChangedListener(this);
+    CArraySet::New((IArraySet**)&mCurrentlyVisibleNotifications);
+    mShadeUpdates = new ShadeUpdates(this);
+    mNotificationLocationsChangedListener = new NotificationLocationsChangedListener(this);
+    mVisibilityReporter = new VisibilityReporter(this);
+    mOverflowClickListener = new OverflowClickListener(this);
+    mRecentsClickListener = new RecentsClickListener(this);
+    mLongPressBackRecentsListener = new LongPressBackRecentsListener(this);
+    mShowSearchPanel = new ShowSearchPanelRunnable(this);
+    mHomeActionListener = new HomeActionListener(this);
+    mHideBackdropFront = new HideBackdropFront(this);
+    mFocusChangeListener = new FocusChangeListener();
+    mAnimateCollapsePanels = new AnimateCollapsePanelsRunnable(this);
+    CAccelerateInterpolator::New((ITimeInterpolator**)&mAccelerateInterpolator);
+    CDecelerateInterpolator::New((ITimeInterpolator**)&mDecelerateInterpolator);
+    mCheckBarModes = new CheckBarModesRunnable(this);
+    mTickingDoneListener = new TickingDoneListener(this);
+    mBroadcastReceiver = new InnerReceiver(this);
+    mStartTracing = new StartTracing(this);
+    mStopTracing = new StopTracing(this);
+}
+
+Boolean PhoneStatusBar::InitStatic()
+{
+    CPathInterpolator::New(0.4f, 0.f, 1.f, 1.f, (IInterpolator**)&ALPHA_IN);
+    CPathInterpolator::New(0.f, 0.f, 0.8f, 1.f, (IInterpolator**)&ALPHA_OUT);
+
+    AutoPtr<IAudioAttributesBuilder> builder;
+    CAudioAttributesBuilder::New((IAudioAttributesBuilder**)&builder);
+    builder->SetContentType(IAudioAttributes::CONTENT_TYPE_SONIFICATION);
+    builder->SetUsage(IAudioAttributes::USAGE_ASSISTANCE_SONIFICATION);
+    builder->Build((IAudioAttributes**)&VIBRATION_ATTRIBUTES);
+    return TRUE;
+}
+
 ECode PhoneStatusBar::Start()
 {
-    AutoPtr<IInterface> tmpObj;
-    ASSERT_SUCCEEDED(context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&tmpObj));
-    AutoPtr<IWindowManager> wm = IWindowManager::Probe(tmpObj.Get());
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&obj);
+    IWindowManager::Probe(obj)->GetDefaultDisplay((IDisplay**)&mDisplay);
+    UpdateDisplaySize();
 
-    mDisplay = NULL;
-    wm->GetDefaultDisplay((IDisplay**)&mDisplay);
-
-    tmpObj = NULL;
-    ServiceManager::CheckService(DreamService.DREAM_SERVICE, (IInterface**)&tmpObj);
-    mDreamManager = IIDreamManager::Probe(tmpObj.Get());
-
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    res->GetBoolean(R::bool_::config_status_bar_scrim_behind_use_src, &mScrimSrcModeEnabled);
     BaseStatusBar::Start(); // calls createAndAddWindows()
+
+    obj = NULL;
+    mContext->GetSystemService(IContext::MEDIA_SESSION_SERVICE, (IInterface**)&obj);
+    mMediaSessionManager = IMediaSessionManager::Probe(obj);
+    // TODO: use MediaSessionManager.SessionListener to hook us up to future updates
+    // in session state
 
     AddNavigationBar();
 
-    if (ENABLE_INTRUDERS) AddIntruderView();
-
     // Lastly, call to the icon policy to install/update all the icons.
-    mIconPolicy = NULL;
-    CPhoneStatusBarPolicy::New(mContext, (IPhoneStatusBarPolicy**)&mIconPolicy);
+    mIconPolicy = new PhoneStatusBarPolicy(mContext, mCastController);
+    mSettingsObserver->OnChange(FALSE); // set up
+
+    mHeadsUpObserver->OnChange(TRUE); // set up
+    if (ENABLE_HEADS_UP) {
+        AutoPtr<IContentResolver> cr;
+        mContext->GetContentResolver((IContentResolver**)&cr);
+        AutoPtr<IUri> uri;
+        Elastos::Droid::Provider::Settings::Global::GetUriFor(
+                ISettingsGlobal::HEADS_UP_NOTIFICATIONS_ENABLED, (IUri**)&uri);
+        cr->RegisterContentObserver(uri, TRUE, mHeadsUpObserver);
+
+        uri = NULL;
+        Elastos::Droid::Provider::Settings::Global::GetUriFor(SETTING_HEADS_UP_TICKER, (IUri**)&uri);
+        cr->RegisterContentObserver(uri, TRUE, mHeadsUpObserver);
+    }
+    mUnlockMethodCache = UnlockMethodCache::GetInstance(mContext);
+    StartKeyguard();
+
+    mDozeServiceHost = new DozeServiceHost(this);
+    PutComponent(EIID_IDozeHost, mDozeServiceHost->Probe(EIID_IInterface));
+    PutComponent(EIID_IPhoneStatusBar, TO_IINTERFACE(this));
+
+    SetControllerUsers();
+
+    NotifyUserAboutHiddenNotifications();
+    return NOERROR;
 }
 
-AutoPtr<IPhoneStatusBarView> MakeStatusBarView()
+// ================================================================================
+// Constructing the view
+// ================================================================================
+AutoPtr<IPhoneStatusBarView> PhoneStatusBar::MakeStatusBarView()
 {
     AutoPtr<IContext> context = mContext;
 
@@ -785,234 +1503,268 @@ AutoPtr<IPhoneStatusBarView> MakeStatusBarView()
     context->GetResources((IResources**)&res);
 
     UpdateDisplaySize(); // populates mDisplayMetrics
-    LoadDimens();
+    UpdateResources();
 
-    res->GetDimensionPixelSize(R::dimen::status_bar_icon_size, &mIconSize);
+    res->GetDimensionPixelSize(Elastos::Droid::R::dimen::status_bar_icon_size, &mIconSize);
 
-    AutoPtr<IView> tmpView;
-    View::Inflate(context, R::layout::super_status_bar, NULL, (IView**)&tmpView);
-    mStatusBarWindow = IStatusBarWindowView::Probe(tmpView.Get());
-    assert(mStatusBarWindow != NULL);
+    AutoPtr<IView> view;
+    Elastos::Droid::View::View::Inflate(context, R::layout::super_status_bar, NULL, (IView**)&view);
+    mStatusBarWindow = IStatusBarWindowView::Probe(view);
     ((CStatusBarWindowView*)mStatusBarWindow.Get())->mService = this;
-    AutoPtr<IViewOnTouchListener> touchListener = new StatusBarWindowTouchListener(this);
-    mStatusBarWindow->SetOnTouchListener(touchListener);
 
-    tmpView = NULL;
-    mStatusBarWindow->FindViewById(R.id.status_bar, (IView**)&tmpView);
-    assert(mStatusBarView != NULL);
-    mStatusBarView = IPhoneStatusBarView::Probe(tmpView.Get());
+    AutoPtr<OnTouchListener1> listener = new OnTouchListener1(this);
+    IView::Probe(mStatusBarWindow)->SetOnTouchListener(listener);
+
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::status_bar, (IView**)&view);
+    mStatusBarView = IPhoneStatusBarView::Probe(view);
     mStatusBarView->SetBar(this);
 
-    tmpView = NULL;
-    mStatusBarWindow->FindViewById(R.id.panel_holder, (IView**)&tmpView);
-    AutoPtr<IPanelHolder> holder = IPanelHolder::Probe(tmpView.Get());
-    mStatusBarView->SetPanelHolder(holder);
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::panel_holder, (IView**)&view);
+    AutoPtr<IPanelHolder> holder = IPanelHolder::Probe(view);
+    IPanelBar::Probe(mStatusBarView)->SetPanelHolder(holder);
 
-    tmpView = NULL;
-    mStatusBarWindow->FindViewById(R.id.notification_panel, (IView**)&tmpView);
-    mNotificationPanel = INotificationPanelView::Probe(tmpView.Get());
-    assert(mNotificationPanel != NULL);
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::notification_panel, (IView**)&view);
+    mNotificationPanel = INotificationPanelView::Probe(view);
     mNotificationPanel->SetStatusBar(this);
-    AutoPtr<IViewGroupLayoutParams> vglp;
-    mNotificationPanel.getLayoutParams((IViewGroupLayoutParams**)&vglp);
-    Int32 width;
-    vglp->GetWidth(&width);
-    mNotificationPanelIsFullScreenWidth = width == IViewGroupLayoutParams::MATCH_PARENT);
 
-    // make the header non-responsive to clicks
-    AutoPtr<IViewOnClickListener> headerTouchListener = new HeaderTouchListener(this);
-    tmpView = NULL;
-    mNotificationPanel->FindViewById(R.id.header, &tmpView);
-    tmpView->SetOnTouchListener(headerTouchListener);
+    AutoPtr<IActivityManagerHelper> helper;
+    CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
+    Boolean tmp = FALSE;
+    if (helper->IsHighEndGfx(&tmp), !tmp) {
+        IView::Probe(mStatusBarWindow)->SetBackground(NULL);
 
-    if (!CActivityManager::IsHighEndGfx()) {
-        mStatusBarWindow->SetBackground(NULL);
-        Int32 color;
-        res->GetColor(SystemUIR::color::notification_panel_solid_background, &color);
-        AutoPtr<IFastColorDrawable> fastColor;
-        CFastColorDrawable::New(color, (IFastColorDrawable**)&fastColor);
-        mNotificationPanel->SetBackground(IDrawable::Probe(fastColor.Get()));
+        Int32 c = 0;
+        res->GetColor(R::color::notification_panel_solid_background, &c);
+        AutoPtr<IDrawable> d = new FastColorDrawable(c);
+        IView::Probe(mNotificationPanel)->SetBackground(d);
     }
-    if (ENABLE_INTRUDERS) {
-        tmpView = NULL;
-        View::Inflate(context, R.layout.intruder_alert, NULL, (IView**)&tmpView);
-        mIntruderAlertView = IIntruderAlertView::Probe(tmpView.Get());
-        assert(mIntruderAlertView != NULL);
-        mIntruderAlertView->SetVisibility(IView::GONE);
-        mIntruderAlertView->SetBar(this);
+    if (ENABLE_HEADS_UP) {
+        view = NULL;
+        Elastos::Droid::View::View::Inflate(context, R::layout::heads_up, NULL, (IView**)&view);
+        mHeadsUpNotificationView = IHeadsUpNotificationView::Probe(view);
+        IView::Probe(mHeadsUpNotificationView)->SetVisibility(IView::GONE);
+        mHeadsUpNotificationView->SetBar(this);
     }
     if (MULTIUSER_DEBUG) {
-        tmpView = NULL;
-        mNotificationPanel->FindViewById(R.id.header_debug_info, (IView**)&tmpView);
-        mNotificationPanelDebugText = ITextView::Probe(tmpView.Get());
-        mNotificationPanelDebugText->SetVisibility(IView::VISIBLE);
+        view = NULL;
+        IView::Probe(mNotificationPanel)->FindViewById(R::id::header_debug_info, (IView**)&view);
+        mNotificationPanelDebugText = ITextView::Probe(view);
+        IView::Probe(mNotificationPanelDebugText)->SetVisibility(IView::VISIBLE);
     }
 
     UpdateShowSearchHoldoff();
 
-    // try {
-        Boolean showNav;
+    {
+        Boolean showNav = FALSE;
         mWindowManagerService->HasNavigationBar(&showNav);
-        // if (DEBUG) Slog.v(TAG, "hasNavigationBar=" + showNav);
+        if (DEBUG) Logger::V(TAG, "hasNavigationBar=%d", showNav);
         if (showNav) {
-            tmpView = NULL;
-            View::Inflate(context, SystemUIR::layout::navigation_bar, NULL, (IView**)&tmpView);
-            mNavigationBarView = INavigationBarView::Probe(tmpView.Get());
+            view = NULL;
+            Elastos::Droid::View::View::Inflate(context, R::layout::navigation_bar, NULL, (IView**)&view);
+            mNavigationBarView = INavigationBarView::Probe(view);
 
             mNavigationBarView->SetDisabledFlags(mDisabled);
             mNavigationBarView->SetBar(this);
+
+            AutoPtr<VerticalChangedListener> cl = new VerticalChangedListener(this);
+            mNavigationBarView->SetOnVerticalChangedListener(cl);
+
+            AutoPtr<OnTouchListener2> tl = new OnTouchListener2(this);
+            IView::Probe(mNavigationBarView)->SetOnTouchListener(tl);
         }
-    // } catch (RemoteException ex) {
-    //     // no window manager? good luck with that
-    // }
+    } /*catch (RemoteException ex) {
+        // no window manager? good luck with that
+    }*/
 
     // figure out which pixel-format to use for the status bar.
     mPixelFormat = IPixelFormat::OPAQUE;
 
-    tmpView = NULL;
-    mStatusBarView->FindViewById(R.id.system_icon_area, (IView**)&tmpView));
-    mSystemIconArea = ILinearLayout::Probe(tmpView.Get());
+    view = NULL;
+    IView::Probe(mStatusBarView)->FindViewById(R::id::system_icon_area, (IView**)&view);
+    mSystemIconArea = ILinearLayout::Probe(view);
+    view = NULL;
+    IView::Probe(mStatusBarView)->FindViewById(R::id::system_icons, (IView**)&view);
+    mSystemIcons = ILinearLayout::Probe(view);
+    view = NULL;
+    IView::Probe(mStatusBarView)->FindViewById(R::id::statusIcons, (IView**)&view);
+    mStatusIcons = ILinearLayout::Probe(view);
+    IView::Probe(mStatusBarView)->FindViewById(R::id::notification_icon_area_inner, (IView**)&mNotificationIconArea);
 
-    tmpView = NULL;
-    mStatusBarView->FindViewById(R.id.statusIcons, (IView**)&tmpView));
-    mStatusIcons = ILinearLayout::Probe(tmpView.Get());
-
-    tmpView = NULL;
-    mStatusBarView->FindViewById(R.id.notificationIcons, (IView**)&tmpView));
-    mNotificationIcons = ILinearLayout::Probe(tmpView.Get());
+    view = NULL;
+    IView::Probe(mStatusBarView)->FindViewById(R::id::notificationIcons, (IView**)&view);
+    mNotificationIcons = IIconMerger::Probe(view);
+    IView::Probe(mStatusBarView)->FindViewById(R::id::moreIcon, (IView**)&mMoreIcon);
     mNotificationIcons->SetOverflowIndicator(mMoreIcon);
 
-    tmpView = NULL;
-    mStatusBarView->FindViewById(R.id.status_bar_contents, (IView**)&tmpView));
-    mStatusBarContents = ILinearLayout::Probe(tmpView.Get());
+    view = NULL;
+    IView::Probe(mStatusBarView)->FindViewById(R::id::status_bar_contents, (IView**)&view);
+    mStatusBarContents = ILinearLayout::Probe(view);
 
-    mTickerView = NULL;
-    mStatusBarView->FindViewById(R.id.ticker, (IView**)&mTickerView);
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::notification_stack_scroller, (IView**)&view);
+    mStackScroller = INotificationStackScrollLayout::Probe(view);
+    mStackScroller->SetLongPressListener(GetNotificationLongClicker());
+    mStackScroller->SetPhoneStatusBar(this);
 
-    tmpView = NULL;
-    mStatusBarWindow->FindViewById(R.id.latestItems, (IView**)&tmpView));
-    mPile = INotificationRowLayout::Probe(tmpView.Get());
-    mPile->SetLayoutTransitionsEnabled(FALSE);
-    AutoPtr<IViewOnLongClickListener> longClickListener = GetNotificationLongClicker();
-    mPile->SetLongPressListener(longClickListener);
-    mExpandedContents = mPile; // was: expanded->FindViewById(R.id.notificationLinearLayout);
+    AutoPtr<ILayoutInflater> inflater;
+    LayoutInflater::From(mContext, (ILayoutInflater**)&inflater);
 
-    mNotificationPanelHeader = NULL;
-    mStatusBarWindow->FindViewById(R.id.header, (IView**)&mNotificationPanelHeader);
+    view = NULL;
+    inflater->Inflate(R::layout::status_bar_notification_keyguard_overflow
+            , IViewGroup::Probe(mStackScroller), FALSE, (IView**)&view);
+    mKeyguardIconOverflowContainer = INotificationOverflowContainer::Probe(view);
+    IActivatableNotificationView::Probe(mKeyguardIconOverflowContainer)->SetOnActivatedListener(this);
+    IView::Probe(mKeyguardIconOverflowContainer)->SetOnClickListener(mOverflowClickListener);
+    IViewGroup::Probe(mStackScroller)->AddView(IView::Probe(mKeyguardIconOverflowContainer));
 
-    mClearButton = NULL;
-    mStatusBarWindow->FindViewById(R.id.clear_all_button, (IView**)&mClearButton);
-    mClearButton->SetOnClickListener(mClearButtonListener);
-    mClearButton->SetAlpha(0.0f);
-    mClearButton->SetVisibility(IView::INVISIBLE);
-    mClearButton->SetEnabled(FALSE);
+    view = NULL;
+    inflater->Inflate(R::layout::status_bar_notification_speed_bump,
+            IViewGroup::Probe(mStackScroller), FALSE, (IView**)&view);
+    AutoPtr<ISpeedBumpView> speedBump = ISpeedBumpView::Probe(view);
+    mStackScroller->SetSpeedBumpView(speedBump);
 
-    tmpView = NULL;
-    mStatusBarWindow->FindViewById(R::id::date, (IView**)&tmpView);
-    mDateView = IDateView::Probe(tmpView.Get());
+    view = NULL;
+    inflater->Inflate(R::layout::status_bar_no_notifications,
+            IViewGroup::Probe(mStackScroller), FALSE, (IView**)&view);
+    mEmptyShadeView = IEmptyShadeView::Probe(view);
+    mStackScroller->SetEmptyShadeView(mEmptyShadeView);
 
-    res->GetBoolean(SystemUIR::bool_::config_hasSettingsPanel, &mHasSettingsPanel);
-    res->GetBoolean(SystemUIR::bool_::config_hasFlipSettingsPanel, &mHasFlipSettings);
+    view = NULL;
+    inflater->Inflate(R::layout::status_bar_notification_dismiss_all,
+            IViewGroup::Probe(mStackScroller), FALSE, (IView**)&view);
+    mDismissView = IDismissView::Probe(view);
 
-    mDateTimeView = mNotificationPanelHeader->FindViewById(R::id::datetime);
-    if (mHasFlipSettings) {
-        mDateTimeView->SetOnClickListener(mClockClickListener);
-        mDateTimeView->SetEnabled(TRUE);
-    }
+    AutoPtr<OnClickListener1> cl1 = new OnClickListener1(this);
+    mDismissView->SetOnButtonClickListener(cl1);
+    mStackScroller->SetDismissView(mDismissView);
+    mExpandedContents = IView::Probe(mStackScroller);
 
-    mSettingsButton = NULL;
-    StatusBarWindow->FindViewById(R.id.settings_button, (IView**)&mSettingsButton);
-    if (mSettingsButton != NULL) {
-        mSettingsButton->SetOnClickListener(mSettingsButtonListener);
-        if (mHasSettingsPanel) {
-            Boolean hasFWN;
-            if (mStatusBarView->HasFullWidthNotifications(&hasFWN), hasFWN) {
-                // the settings panel is hiding behind this button
-                mSettingsButton->SetImageResource(SystemUIR::drawable::ic_notify_quicksettings);
-                mSettingsButton->SetVisibility(IView::VISIBLE);
-            }
-            else {
-                // there is a settings panel, but it's on the other side of the (large) screen
-                AutoPtr<IView> buttonHolder;
-               mStatusBarWindow->FindViewById(R.id.settings_button_holder, (IView**)&buttonHolder);
-                if (buttonHolder != NULL) {
-                    buttonHolder->SetVisibility(IView::GONE);
-                }
-            }
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::backdrop, (IView**)&view);
+    mBackdrop = IBackDropView::Probe(view);
+
+    view = NULL;
+    IView::Probe(mBackdrop)->FindViewById(R::id::backdrop_front, (IView**)&view);
+    mBackdropFront = IImageView::Probe(view);
+
+    view = NULL;
+    IView::Probe(mBackdrop)->FindViewById(R::id::backdrop_back, (IView**)&view);
+    mBackdropBack = IImageView::Probe(view);
+
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::scrim_behind, (IView**)&view);
+    AutoPtr<IScrimView> scrimBehind = IScrimView::Probe(view);
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::scrim_in_front, (IView**)&view);
+    AutoPtr<IScrimView> scrimInFront = IScrimView::Probe(view);
+    mScrimController = new ScrimController(scrimBehind, scrimInFront, mScrimSrcModeEnabled);
+    mScrimController->SetBackDropView(mBackdrop);
+    mStatusBarView->SetScrimController(mScrimController);
+
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::header, (IView**)&view);
+    mHeader = IStatusBarHeaderView::Probe(view);
+    mHeader->SetActivityStarter(this);
+
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::keyguard_header, (IView**)&view);
+    mKeyguardStatusBar = IKeyguardStatusBarView::Probe(view);
+
+    view = NULL;
+    IView::Probe(mKeyguardStatusBar)->FindViewById(R::id::statusIcons, (IView**)&view);
+    mStatusIconsKeyguard = ILinearLayout::Probe(view);
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::keyguard_status_view, (IView**)&mKeyguardStatusView);
+
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::keyguard_bottom_area, (IView**)&view);
+    mKeyguardBottomArea = IKeyguardBottomAreaView::Probe(view);
+    mKeyguardBottomArea->SetActivityStarter(this);
+
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::keyguard_indication_text, (IView**)&view);
+    mKeyguardIndicationController = new KeyguardIndicationController(mContext,
+            IKeyguardIndicationTextView::Probe(view));
+    mKeyguardBottomArea->SetKeyguardIndicationController(mKeyguardIndicationController);
+
+    res->GetBoolean(R::bool_::enable_ticker, &mTickerEnabled);
+    if (mTickerEnabled) {
+        view = NULL;
+        IView::Probe(mStatusBarView)->FindViewById(R::id::ticker_stub, (IView**)&view);
+        AutoPtr<IViewStub> tickerStub = IViewStub::Probe(view);
+        if (tickerStub != NULL) {
+            tickerStub->Inflate((IView**)&mTickerView);
+            mTicker = new MyTicker(this, context, IView::Probe(mStatusBarView));
+
+            view = NULL;
+            IView::Probe(mStatusBarView)->FindViewById(R::id::tickerText, (IView**)&view);
+            AutoPtr<ITickerView> tickerView = ITickerView::Probe(view);
+            tickerView->SetTicker((ITicker*)mTicker->Probe(EIID_ITicker));
         }
-        else {
-            // no settings panel, go straight to settings
-            mSettingsButton->SetVisibility(IView::VISIBLE);
-            mSettingsButton->SetImageResource(SystemUIR::drawable::ic_notify_settings);
-        }
-    }
-    if (mHasFlipSettings) {
-        tmpView = NULL;
-        mStatusBarWindow->FindViewById(R.id.notification_button, (IView**)&tmpView);
-        mNotificationButton = IImageView::Probe(tmpView.Get());
-        if (mNotificationButton != NULL) {
-            mNotificationButton->SetOnClickListener(mNotificationButtonListener);
-        }
     }
 
-    tmpView = NULL;
-    mStatusBarWindow->FindViewById(R.id.scroll, (IView**)&tmpView);
-    mScrollView = IScrollView::Probe(tmpView.Get());
-    mScrollView->SetVerticalScrollBarEnabled(FALSE); // less drawing during pulldowns
-    if (!mNotificationPanelIsFullScreenWidth) {
-        mScrollView->SetSystemUiVisibility(
-            IView::STATUS_BAR_DISABLE_NOTIFICATION_TICKER |
-            IView::STATUS_BAR_DISABLE_NOTIFICATION_ICONS |
-            IView::STATUS_BAR_DISABLE_CLOCK);
-    }
-
-    mTicker = new MyTicker(context, mStatusBarView);
-
-    tmpView = NULL;
-    mStatusBarView->FindViewById(SystemUIR::id::tickerText, (IView**)&tmpView);
-    AutoPtr<ITickerView> tickerView = ITickerView::Probe(tmpView.Get());
-    tickerView->SetTicker(mTicker);
-
-    res->GetDimensionPixelSize(SystemUIR::dimen::status_bar_edge_ignore, &mEdgeBorder);
+    res->GetDimensionPixelSize(R::dimen::status_bar_edge_ignore, &mEdgeBorder);
 
     // set the inital view visibility
     SetAreThereNotifications();
 
     // Other icons
-    // mLocationController = new LocationController(mContext); // will post a notification
-    // mBatteryController = new BatteryController(mContext);
-    // mBatteryController.addIconView((ImageView)mStatusBarView->FindViewById(R.id.battery));
-    // mNetworkController = new NetworkController(mContext);
-    // mBluetoothController = new BluetoothController(mContext);
-    tmpView = NULL;
-    mStatusBarView->FindViewById(SystemUIR::id::signal_cluster, (IView**)&tmpView);
-    AutoPtr<ISignalClusterView> signalCluster = ISignalClusterView::Probe(tmpView.Get());
+    mLocationController = new LocationControllerImpl(mContext); // will post a notification
+    mBatteryController = new BatteryController(mContext);
 
-    mNetworkController->AddSignalCluster(signalCluster);
+    AutoPtr<BatteryStateChangeCallback> bcc = new BatteryStateChangeCallback(this);
+    mBatteryController->AddStateChangedCallback(bcc);
+    mNetworkController = new NetworkControllerImpl(mContext);
+    mHotspotController = new HotspotControllerImpl(mContext);
+    mBluetoothController = new BluetoothControllerImpl(mContext);
+    mSecurityController = new SecurityControllerImpl(mContext);
+    if (res->GetBoolean(R::bool_::config_showRotationLock, &tmp), tmp) {
+        mRotationLockController = new RotationLockControllerImpl(mContext);
+    }
+    mUserInfoController = new UserInfoController(mContext);
+    mVolumeComponent = IVolumeComponent::Probe(GetComponent(EIID_IVolumeComponent/*.class*/));
+    mVolumeComponent->GetZenController((IZenModeController**)&mZenModeController);
+    mCastController = new CastControllerImpl(mContext);
+
+    view = NULL;
+    IView::Probe(mStatusBarView)->FindViewById(R::id::signal_cluster, (IView**)&view);
+    AutoPtr<ISignalClusterView> signalCluster = ISignalClusterView::Probe(view);
+
+    view = NULL;
+    IView::Probe(mKeyguardStatusBar)->FindViewById(R::id::signal_cluster, (IView**)&view);
+    AutoPtr<ISignalClusterView> signalClusterKeyguard = ISignalClusterView::Probe(view);
+
+    view = NULL;
+    IView::Probe(mHeader)->FindViewById(R::id::signal_cluster, (IView**)&view);
+    AutoPtr<ISignalClusterView> signalClusterQs = ISignalClusterView::Probe(view);
+    mNetworkController->AddSignalCluster(INetworkControllerImplSignalCluster::Probe(signalCluster));
+    mNetworkController->AddSignalCluster(INetworkControllerImplSignalCluster::Probe(signalClusterKeyguard));
+    mNetworkController->AddSignalCluster(INetworkControllerImplSignalCluster::Probe(signalClusterQs));
+    signalCluster->SetSecurityController(mSecurityController);
     signalCluster->SetNetworkController(mNetworkController);
-
-    tmpView = NULL;
-    mStatusBarWindow->FindViewById(R::id::emergency_calls_only, (IView**)&tmpView);
-    mEmergencyCallLabel = ITextView::Probe(tmpView.Get());
-    if (mEmergencyCallLabel != NULL) {
-        mNetworkController->AddEmergencyLabelView(mEmergencyCallLabel);
-        AutoPtr<IViewOnClickListener> eclClickListener = new EmergencyCallLabelClickListener(this);
-        mEmergencyCallLabel->SetOnClickListener(eclClickListener);
+    signalClusterKeyguard->SetSecurityController(mSecurityController);
+    signalClusterKeyguard->SetNetworkController(mNetworkController);
+    signalClusterQs->SetSecurityController(mSecurityController);
+    signalClusterQs->SetNetworkController(mNetworkController);
+    Boolean isAPhone = FALSE;
+    mNetworkController->HasVoiceCallingFeature(&isAPhone);
+    if (isAPhone) {
+        mNetworkController->AddEmergencyLabelView(mHeader);
     }
 
-    tmpView = NULL;
-    mStatusBarWindow->FindViewById(R::id::carrier_label, (IView**)&tmpView);
-    mCarrierLabel = ITextView::Probe(tmpView.Get());
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::carrier_label, (IView**)&view);
+    mCarrierLabel = ITextView::Probe(view);
     mShowCarrierInPanel = (mCarrierLabel != NULL);
-    // if (DEBUG) Slog.v(TAG, "carrierlabel=" + mCarrierLabel + " show=" + mShowCarrierInPanel);
+    if (DEBUG) Logger::V(TAG, "carrierlabel=%s show=%d", TO_CSTR(mCarrierLabel), mShowCarrierInPanel);
     if (mShowCarrierInPanel) {
-        mCarrierLabel->SetVisibility(mCarrierLabelVisible ? IView::VISIBLE : IView::INVISIBLE);
+        IView::Probe(mCarrierLabel)->SetVisibility(mCarrierLabelVisible ? IView::VISIBLE : IView::INVISIBLE);
 
         // for mobile devices, we always show mobile connection info here (SPN/PLMN)
         // for other devices, we show whatever network is connected
-        Boolean hasMobileDataFeature;
-        mNetworkController->HasMobileDataFeature(&hasMobileDataFeature);
-        if (hasMobileDataFeature) {
+        if (mNetworkController->HasMobileDataFeature(&tmp), tmp) {
             mNetworkController->AddMobileLabelView(mCarrierLabel);
         }
         else {
@@ -1020,318 +1772,472 @@ AutoPtr<IPhoneStatusBarView> MakeStatusBarView()
         }
 
         // set up the dynamic hide/show of the label
-        mPile->SetOnSizeChangedListener(new OnSizeChangedListener() {
-            @Override
-            public void onSizeChanged(View view, Int32 w, Int32 h, Int32 oldw, Int32 oldh) {
-                updateCarrierLabelVisibility(FALSE);
-            }
-        });
+        // TODO: uncomment, handle this for the Stack scroller aswell
+//                ((NotificationRowLayout) mStackScroller)
+// .setOnSizeChangedListener(new OnSizeChangedListener() {
+//                @Override
+//                public void onSizeChanged(View view, Int32 w, Int32 h, Int32 oldw, Int32 oldh) {
+//                    UpdateCarrierLabelVisibility(FALSE);
     }
 
-    // Quick Settings (where available, some restrictions apply)
-    if (mHasSettingsPanel) {
-        // first, figure out where quick settings should be inflated
-        View settings_stub;
-        if (mHasFlipSettings) {
-            // a version of quick settings that flips around behind the notifications
-            settings_stub = mStatusBarWindow->FindViewById(R.id.flip_settings_stub);
-            if (settings_stub != NULL) {
-                mFlipSettingsView = ((ViewStub)settings_stub).inflate();
-                mFlipSettingsView->SetVisibility(IView::GONE);
-                mFlipSettingsView->SetVerticalScrollBarEnabled(FALSE);
-            }
-        } else {
-            // full quick settings panel
-            settings_stub = mStatusBarWindow->FindViewById(R.id.quick_settings_stub);
-            if (settings_stub != NULL) {
-                mSettingsPanel = (SettingsPanelView) ((ViewStub)settings_stub).inflate();
-            } else {
-                mSettingsPanel = (SettingsPanelView) mStatusBarWindow->FindViewById(R.id->Settings_panel);
-            }
+    mFlashlightController = new FlashlightController(mContext);
+    mKeyguardBottomArea->SetFlashlightController(mFlashlightController);
+    mKeyguardBottomArea->SetPhoneStatusBar(this);
+    mAccessibilityController = new AccessibilityController(mContext);
+    mKeyguardBottomArea->SetAccessibilityController(mAccessibilityController);
+    mNextAlarmController = new NextAlarmController(mContext);
+    mKeyguardMonitor = new KeyguardMonitor();
+    mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor);
 
-            if (mSettingsPanel != NULL) {
-                if (!ActivityManager.isHighEndGfx()) {
-                    mSettingsPanel->SetBackground(new FastColorDrawable(context.getResources().getColor(
-                            R.color.notification_panel_solid_background)));
-                }
-            }
-        }
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::keyguard_user_switcher, (IView**)&view);
+    mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext, IViewStub::Probe(view),
+            mKeyguardStatusBar, mNotificationPanel, mUserSwitcherController);
 
-        // wherever you find it, Quick Settings needs a container to survive
-        mSettingsContainer = (QuickSettingsContainerView)
-                mStatusBarWindow->FindViewById(R.id.quick_settings_container);
-        if (mSettingsContainer != NULL) {
-            mQS = new QuickSettings(mContext, mSettingsContainer);
-            if (!mNotificationPanelIsFullScreenWidth) {
-                mSettingsContainer->SetSystemUiVisibility(
-                        IView::STATUS_BAR_DISABLE_NOTIFICATION_TICKER
-                        | IView::STATUS_BAR_DISABLE_SYSTEM_INFO);
-            }
-            if (mSettingsPanel != NULL) {
-                mSettingsPanel->SetQuickSettings(mQS);
-            }
-            mQS->SetService(this);
-            mQS->SetBar(mStatusBarView);
-            mQS->Setup(mNetworkController, mBluetoothController, mBatteryController,
-                    mLocationController);
-        } else {
-            mQS = NULL; // fly away, be free
-        }
+    // Set up the quick settings tile panel
+    view = NULL;
+    IView::Probe(mStatusBarWindow)->FindViewById(R::id::quick_settings_panel, (IView**)&view);
+    mQSPanel = IQSPanel::Probe(view);
+    if (mQSPanel != NULL) {
+        AutoPtr<IQSTileHost> qsh = new QSTileHost(mContext, this,
+                mBluetoothController, mLocationController, mRotationLockController,
+                mNetworkController, mZenModeController, mHotspotController,
+                mCastController, mFlashlightController,
+                mUserSwitcherController, mKeyguardMonitor,
+                mSecurityController);
+        mQSPanel->SetHost((IPhoneQSTileHost*)qsh->Probe(EIID_IPhoneQSTileHost));
+
+        AutoPtr<ICollection> c;
+        qsh->GetTiles((ICollection**)&c);
+        mQSPanel->SetTiles(c);
+        mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
+        mQSPanel->SetBrightnessMirror(mBrightnessMirrorController);
+        mHeader->SetQSPanel(mQSPanel);
+
+        AutoPtr<HostCallback> hc = new HostCallback(this, qsh);
+        qsh->SetCallback(hc);
     }
 
-    mClingShown = ! (DEBUG_CLINGS
-        || !Prefs.read(mContext)->GetBoolean(Prefs.SHOWN_QUICK_SETTINGS_HELP, FALSE));
+    // User info. Trigger first load.
+    mHeader->SetUserInfoController(mUserInfoController);
+    mKeyguardStatusBar->SetUserInfoController(mUserInfoController);
+    mUserInfoController->ReloadUserInfo();
 
-    if (!ENABLE_NOTIFICATION_PANEL_CLING || ActivityManager.isRunningInTestHarness()) {
-        mClingShown = TRUE;
-    }
+    mHeader->SetBatteryController(mBatteryController);
 
-//        ImageView wimaxRSSI =
-//                (ImageView)sb->FindViewById(R.id.wimax_signal);
-//        if (wimaxRSSI != NULL) {
-//            mNetworkController.addWimaxIconView(wimaxRSSI);
-//        }
+    view = NULL;
+    IView::Probe(mStatusBarView)->FindViewById(R::id::battery, (IView**)&view);
+    IBatteryMeterView::Probe(view)->SetBatteryController(mBatteryController);
+    mKeyguardStatusBar->SetBatteryController(mBatteryController);
+    mHeader->SetNextAlarmController(mNextAlarmController);
+
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
+
+    AutoPtr<IIntent> i;
+    CIntent::New((pm->IsScreenOn(&tmp), tmp) ? IIntent::ACTION_SCREEN_ON : IIntent::ACTION_SCREEN_OFF
+            , (IIntent**)&i);
+    mBroadcastReceiver->OnReceive(mContext, i);
 
     // receive broadcasts
-    IntentFilter filter = new IntentFilter();
-    filter.addAction(IIntent::ACTION_CONFIGURATION_CHANGED);
-    filter.addAction(IIntent::ACTION_CLOSE_SYSTEM_DIALOGS);
-    filter.addAction(IIntent::ACTION_SCREEN_OFF);
-    filter.addAction(IIntent::ACTION_SCREEN_ON);
-    filter.addAction(PhoneStatusBar::setRotShow);
-    context.registerReceiver(mBroadcastReceiver, filter);
+    AutoPtr<IIntentFilter> filter;
+    CIntentFilter::New((IIntentFilter**)&filter);
+    filter->AddAction(IIntent::ACTION_CLOSE_SYSTEM_DIALOGS);
+    filter->AddAction(IIntent::ACTION_SCREEN_OFF);
+    filter->AddAction(IIntent::ACTION_SCREEN_ON);
+    if (DEBUG_MEDIA_FAKE_ARTWORK) {
+        filter->AddAction(String("fake_artwork"));
+    }
+    filter->AddAction(ACTION_DEMO);
+    i = NULL;
+    context->RegisterReceiver(mBroadcastReceiver, filter, (IIntent**)&i);
 
     // listen for USER_SETUP_COMPLETE setting (per-user)
-    resetUserSetupObserver();
+    ResetUserSetupObserver();
 
-    rotsrc[0]=res.getDrawable(R.drawable.ic_sysbar_rotate0);
-    rotsrc[1]=res.getDrawable(R.drawable.ic_sysbar_rotate90);
-    rotsrc[2]=res.getDrawable(R.drawable.ic_sysbar_rotate180);
-    rotsrc[3]=res.getDrawable(R.drawable.ic_sysbar_rotate270);
+    StartGlyphRasterizeHack();
     return mStatusBarView;
 }
 
-//@Override
-AutoPtr<IView> GetStatusBarView()
+void PhoneStatusBar::ClearAllNotifications()
 {
-    return mStatusBarView;
+    // animate-swipe all dismissable notifications, then animate the shade closed
+    Int32 numChildren = 0;
+    IViewGroup::Probe(mStackScroller)->GetChildCount(&numChildren);
+
+    Boolean tmp = FALSE;
+    AutoPtr<IArrayList/*<View*/> viewsToHide;
+    CArrayList::New(numChildren, (IArrayList**)&viewsToHide);
+    for (Int32 i = 0; i < numChildren; i++) {
+        AutoPtr<IView> child;
+        IViewGroup::Probe(mStackScroller)->GetChildAt(i, (IView**)&child);
+        if (mStackScroller->CanChildBeDismissed(child, &tmp), tmp) {
+            Int32 v = 0;
+            if ((child->GetVisibility(&v), v) == IView::VISIBLE) {
+                viewsToHide->Add(child);
+            }
+        }
+    }
+
+    if (viewsToHide->IsEmpty(&tmp), tmp) {
+        AnimateCollapsePanels(ICommandQueue::FLAG_EXCLUDE_NONE);
+        return;
+    }
+
+    AutoPtr<Runnable1> run = new Runnable1(this);
+    AddPostCollapseAction(run);
+
+    PerformDismissAllAnimations(viewsToHide);
 }
 
-//@Override
-AutoPtr<IWindowManagerLayoutParams> GetRecentsLayoutParams(
+void PhoneStatusBar::PerformDismissAllAnimations(
+    /* [in] */ IArrayList/*<View>*/* hideAnimatedList)
+{
+    AutoPtr<Runnable2> animationFinishAction = new Runnable2(this);
+
+    // let's disable our normal animations
+    mStackScroller->SetDismissAllInProgress(TRUE);
+
+    // Decrease the delay for every row we animate to give the sense of
+    // accelerating the swipes
+    Int32 rowDelayDecrement = 10;
+    Int32 currentDelay = 140;
+    Int32 totalDelay = 0;
+    Int32 numItems = 0;
+    hideAnimatedList->GetSize(&numItems);
+    for (Int32 i = 0; i < numItems; i++) {
+        AutoPtr<IInterface> obj;
+        hideAnimatedList->Get(i, (IInterface**)&obj);
+        AutoPtr<IView> view = IView::Probe(obj);
+        AutoPtr<IRunnable> endRunnable;
+        if (i == numItems - 1) {
+            endRunnable = animationFinishAction;
+        }
+        mStackScroller->DismissViewAnimated(view, endRunnable, totalDelay, 260);
+        currentDelay = Elastos::Core::Math::Max(50, currentDelay - rowDelayDecrement);
+        totalDelay += currentDelay;
+    }
+}
+
+/**
+ * Hack to improve glyph rasterization for scaled text views.
+ */
+void PhoneStatusBar::StartGlyphRasterizeHack()
+{
+    AutoPtr<IViewTreeObserver> vto;
+    IView::Probe(mStatusBarView)->GetViewTreeObserver((IViewTreeObserver**)&vto);
+
+    AutoPtr<OnPreDrawListener> dl = new OnPreDrawListener(this);
+    vto->AddOnPreDrawListener(dl);
+}
+
+void PhoneStatusBar::SetZenMode(
+    /* [in] */ Int32 mode)
+{
+    BaseStatusBar::SetZenMode(mode);
+    if (mIconPolicy != NULL) {
+        mIconPolicy->SetZenMode(mode);
+    }
+}
+
+void PhoneStatusBar::StartKeyguard()
+{
+    AutoPtr<IKeyguardViewMediator> keyguardViewMediator =
+        IKeyguardViewMediator::Probe(GetComponent(EIID_IKeyguardViewMediator));
+    keyguardViewMediator->RegisterStatusBar(this,
+            IViewGroup::Probe(mStatusBarWindow), mStatusBarWindowManager, mScrimController,
+            (IStatusBarKeyguardViewManager**)&mStatusBarKeyguardViewManager);
+    keyguardViewMediator->GetViewMediatorCallback((IViewMediatorCallback**)&mKeyguardViewMediatorCallback);
+}
+
+AutoPtr<IView> PhoneStatusBar::GetStatusBarView()
+{
+    return IView::Probe(mStatusBarView);
+}
+
+ECode PhoneStatusBar::GetStatusBarWindow(
+    /* [out] */ IStatusBarWindowView** view)
+{
+    VALIDATE_NOT_NULL(view);
+    *view = mStatusBarWindow;
+    REFCOUNT_ADD(*view);
+    return NOERROR;
+}
+
+AutoPtr<IWindowManagerLayoutParams> PhoneStatusBar::GetSearchLayoutParams(
     /* [in] */ IViewGroupLayoutParams* layoutParams)
 {
     Boolean opaque = FALSE;
-    WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-            layoutParams.width,
-            layoutParams.height,
-            WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-            | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-            | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-            (opaque ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT));
-    if (ActivityManager.isHighEndGfx()) {
-        lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-    } else {
-        lp.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
-        lp.dimAmount = 0.75f;
+    AutoPtr<IWindowManagerLayoutParams> lp;
+    CWindowManagerLayoutParams::New(
+            IViewGroupLayoutParams::MATCH_PARENT,
+            IViewGroupLayoutParams::MATCH_PARENT,
+            IWindowManagerLayoutParams::TYPE_NAVIGATION_BAR_PANEL,
+            IWindowManagerLayoutParams::FLAG_LAYOUT_IN_SCREEN
+            | IWindowManagerLayoutParams::FLAG_ALT_FOCUSABLE_IM
+            | IWindowManagerLayoutParams::FLAG_SPLIT_TOUCH,
+            (opaque ? IPixelFormat::OPAQUE : IPixelFormat::TRANSLUCENT),
+            (IWindowManagerLayoutParams**)&lp);
+
+    AutoPtr<IActivityManagerHelper> helper;
+    CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
+    Boolean tmp = FALSE;
+    if (helper->IsHighEndGfx(&tmp), tmp) {
+        Int32 flags = 0;
+        lp->GetFlags(&flags);
+        lp->SetFlags(flags | IWindowManagerLayoutParams::FLAG_HARDWARE_ACCELERATED);
     }
-    lp.gravity = IGravity::BOTTOM | IGravity::LEFT;
-    lp->SetTitle("RecentsPanel");
-    lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
-    lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
-    | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+    lp->SetGravity(IGravity::BOTTOM | IGravity::START);
+
+    AutoPtr<ICharSequence> t;
+    CString::New(String("SearchPanel"), (ICharSequence**)&t);
+    lp->SetTitle(t);
+    lp->SetSoftInputMode(IWindowManagerLayoutParams::SOFT_INPUT_STATE_UNCHANGED
+        | IWindowManagerLayoutParams::SOFT_INPUT_ADJUST_NOTHING);
     return lp;
 }
 
-//@Override
-AutoPtr<IWindowManagerLayoutParams> GetSearchLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* layoutParams)
+void PhoneStatusBar::UpdateSearchPanel()
 {
-    Boolean opaque = FALSE;
-    WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-            LayoutParams.MATCH_PARENT,
-            LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
-            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-            | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-            | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-            (opaque ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT));
-    if (ActivityManager.isHighEndGfx()) {
-        lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+    BaseStatusBar::UpdateSearchPanel();
+    if (mNavigationBarView != NULL) {
+        mNavigationBarView->SetDelegateView(IView::Probe(mSearchPanelView));
     }
-    lp.gravity = IGravity::BOTTOM | IGravity::LEFT;
-    lp->SetTitle("SearchPanel");
-    // TODO: Define custom animation for Search panel
-    lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
-    lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
-    | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
-    return lp;
 }
 
-//@Override
 ECode PhoneStatusBar::ShowSearchPanel()
 {
-    super.showSearchPanel();
-    mHandler.removeCallbacks(mShowSearchPanel);
+    BaseStatusBar::ShowSearchPanel();
+    mHandler->RemoveCallbacks(mShowSearchPanel);
 
     // we want to freeze the sysui state wherever it is
-    mSearchPanelView->SetSystemUiVisibility(mSystemUiVisibility);
+    IView::Probe(mSearchPanelView)->SetSystemUiVisibility(mSystemUiVisibility);
 
-    WindowManager.LayoutParams lp =
-        (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
-    lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-    mWindowManager.updateViewLayout(mNavigationBarView, lp);
+    if (mNavigationBarView != NULL) {
+        AutoPtr<IViewGroupLayoutParams> vp;
+        IView::Probe(mNavigationBarView)->GetLayoutParams((IViewGroupLayoutParams**)&vp);
+        AutoPtr<IWindowManagerLayoutParams> lp = IWindowManagerLayoutParams::Probe(vp);
+
+        Int32 flags = 0;
+        lp->GetFlags(&flags);
+        lp->SetFlags(flags & ~IWindowManagerLayoutParams::FLAG_NOT_TOUCH_MODAL);
+        IViewManager::Probe(mWindowManager)->UpdateViewLayout(IView::Probe(mNavigationBarView)
+                , IViewGroupLayoutParams::Probe(lp));
+    }
+    return NOERROR;
 }
 
-//@Override
 ECode PhoneStatusBar::HideSearchPanel()
 {
-    super.hideSearchPanel();
-    WindowManager.LayoutParams lp =
-        (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
-    lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-    mWindowManager.updateViewLayout(mNavigationBarView, lp);
-}
+    BaseStatusBar::HideSearchPanel();
+    if (mNavigationBarView != NULL) {
+        AutoPtr<IViewGroupLayoutParams> vp;
+        IView::Probe(mNavigationBarView)->GetLayoutParams((IViewGroupLayoutParams**)&vp);
+        AutoPtr<IWindowManagerLayoutParams> lp = IWindowManagerLayoutParams::Probe(vp);
 
-//@Override
-ECode PhoneStatusBar::UpdateSearchPanel()
-{
-    super.updateSearchPanel();
-    mSearchPanelView->SetStatusBarView(mNavigationBarView);
-    mNavigationBarView->SetDelegateView(mSearchPanelView);
-}
-
-Int32 PhoneStatusBar::GetStatusBarGravity()
-{
-    return IGravity::TOP | IGravity::FILL_HORIZONTAL;
-}
-
-Int32 GetStatusBarHeight()
-{
-    if (mNaturalBarHeight < 0) {
-        Resources res = mContext.getResources();
-        mNaturalBarHeight =
-                res.getDimensionPixelSize(R::dimen::status_bar_height);
+        Int32 flags = 0;
+        lp->GetFlags(&flags);
+        lp->SetFlags(flags | IWindowManagerLayoutParams::FLAG_NOT_TOUCH_MODAL);
+        IViewManager::Probe(mWindowManager)->UpdateViewLayout(IView::Probe(mNavigationBarView)
+                , IViewGroupLayoutParams::Probe(lp));
     }
-    return mNaturalBarHeight;
+    return NOERROR;
 }
 
-void PhoneStatusBar::SendRotBroadcast()
+ECode PhoneStatusBar::GetStatusBarHeight(
+    /* [out] */ Int32* result)
 {
-    Intent intent=new Intent(setRotVal);
-    intent.putExtra(setRotStr, irot);
-    mContext.sendBroadcast(intent);
-    Log.d("rot","sendbroadcast  PhoneStatusBar");
+    VALIDATE_NOT_NULL(result);
+    if (mNaturalBarHeight < 0) {
+        AutoPtr<IResources> res;
+        mContext->GetResources((IResources**)&res);
+        res->GetDimensionPixelSize(Elastos::Droid::R::dimen::status_bar_height, &mNaturalBarHeight);
+    }
+    *result = mNaturalBarHeight;
+    return NOERROR;
 }
 
 void PhoneStatusBar::AwakenDreams()
 {
     if (mDreamManager != NULL) {
-        try {
-            mDreamManager.awaken();
-        } catch (RemoteException e) {
-            // fine, stay asleep then
-        }
+        mDreamManager->Awaken();
     }
 }
 
 void PhoneStatusBar::PrepareNavigationBarView()
 {
-    mNavigationBarView.reorient();
+    mNavigationBarView->Reorient();
 
-    mNavigationBarView.getRecentsButton()->SetOnClickListener(mRecentsClickListener);
-    mNavigationBarView.getRecentsButton()->SetOnTouchListener(mRecentsPreloadOnTouchListener);
-    mNavigationBarView.getRotationSettingButton()->SetOnClickListener(mRotSettingClickListener);
-    mNavigationBarView.getHomeButton()->SetOnTouchListener(mHomeSearchActionListener);
-    mNavigationBarView.getSearchLight()->SetOnTouchListener(mHomeSearchActionListener);
-    updateSearchPanel();
+    AutoPtr<IView> view;
+    mNavigationBarView->GetRecentsButton((IView**)&view);
+    view->SetOnClickListener(mRecentsClickListener);
+    view->SetOnTouchListener(mRecentsPreloadOnTouchListener);
+    view->SetLongClickable(TRUE);
+    view->SetOnLongClickListener(mLongPressBackRecentsListener);
+
+    view = NULL;
+    mNavigationBarView->GetBackButton((IView**)&view);
+    view->SetLongClickable(TRUE);
+    view->SetOnLongClickListener(mLongPressBackRecentsListener);
+
+    view = NULL;
+    mNavigationBarView->GetHomeButton((IView**)&view);
+    view->SetOnTouchListener(mHomeActionListener);
+    UpdateSearchPanel();
 }
 
 // For small-screen devices (read: phones) that lack hardware navigation buttons
 void PhoneStatusBar::AddNavigationBar()
 {
-    if (DEBUG) Slog.v(TAG, "addNavigationBar: about to add " + mNavigationBarView);
+    if (DEBUG) Logger::V(TAG, "AddNavigationBar: about to add %s", TO_CSTR(mNavigationBarView));
     if (mNavigationBarView == NULL) return;
 
-    prepareNavigationBarView();
+    PrepareNavigationBarView();
 
-    mWindowManager.addView(mNavigationBarView, getNavigationBarLayoutParams());
+    AutoPtr<IWindowManagerLayoutParams> wp = GetNavigationBarLayoutParams();
+    IViewManager::Probe(mWindowManager)->AddView(IView::Probe(mNavigationBarView),
+        IViewGroupLayoutParams::Probe(wp));
 }
 
 void PhoneStatusBar::RepositionNavigationBar()
 {
-    if (mNavigationBarView == NULL) return;
+    Boolean tmp = FALSE;
+    if (mNavigationBarView == NULL || (IView::Probe(mNavigationBarView)->IsAttachedToWindow(&tmp), !tmp)) return;
 
-    prepareNavigationBarView();
+    PrepareNavigationBarView();
 
-    mWindowManager.updateViewLayout(mNavigationBarView, getNavigationBarLayoutParams());
+    AutoPtr<IWindowManagerLayoutParams> wp = GetNavigationBarLayoutParams();
+    IViewManager::Probe(mWindowManager)->UpdateViewLayout(IView::Probe(mNavigationBarView), IViewGroupLayoutParams::Probe(wp));
 }
 
 void PhoneStatusBar::NotifyNavigationBarScreenOn(
     /* [in] */ Boolean screenOn)
 {
     if (mNavigationBarView == NULL) return;
-    mNavigationBarView.notifyScreenOn(screenOn);
+    mNavigationBarView->NotifyScreenOn(screenOn);
 }
 
-AutoPtr<IWindowManagerLayoutParams> GetNavigationBarLayoutParams()
+AutoPtr<IWindowManagerLayoutParams> PhoneStatusBar::GetNavigationBarLayoutParams()
 {
-    WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-            LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
+    AutoPtr<IWindowManagerLayoutParams> lp;
+    CWindowManagerLayoutParams::New(
+            IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::MATCH_PARENT,
+            IWindowManagerLayoutParams::TYPE_NAVIGATION_BAR,
                 0
-                | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-            PixelFormat.OPAQUE);
+                | IWindowManagerLayoutParams::FLAG_TOUCHABLE_WHEN_WAKING
+                | IWindowManagerLayoutParams::FLAG_NOT_FOCUSABLE
+                | IWindowManagerLayoutParams::FLAG_NOT_TOUCH_MODAL
+                | IWindowManagerLayoutParams::FLAG_WATCH_OUTSIDE_TOUCH
+                | IWindowManagerLayoutParams::FLAG_SPLIT_TOUCH,
+            IPixelFormat::TRANSLUCENT, (IWindowManagerLayoutParams**)&lp);
     // this will allow the navbar to run in an overlay on devices that support this
-    if (ActivityManager.isHighEndGfx()) {
-        lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+    AutoPtr<IActivityManagerHelper> helper;
+    CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
+    Boolean tmp = FALSE;
+    if (helper->IsHighEndGfx(&tmp), !tmp) {
+        Int32 flags = 0;
+        lp->GetFlags(&flags);
+        lp->SetFlags(flags | IWindowManagerLayoutParams::FLAG_HARDWARE_ACCELERATED);
     }
 
-    lp->SetTitle("NavigationBar");
-    lp.windowAnimations = 0;
+    AutoPtr<ICharSequence> t;
+    CString::New(String("NavigationBar"), (ICharSequence**)&t);
+    lp->SetTitle(t);
+    lp->SetWindowAnimations(0);
     return lp;
 }
 
-void PhoneStatusBar::AddIntruderView()
+void PhoneStatusBar::AddHeadsUpView()
 {
-    WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL, // above the status bar!
-            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-            PixelFormat.TRANSLUCENT);
-    lp.gravity = IGravity::TOP | IGravity::FILL_HORIZONTAL;
-    //lp.y += height * 1.5; // FIXME
-    lp->SetTitle("IntruderAlert");
-    lp.packageName = mContext.getPackageName();
-    lp.windowAnimations = R.style.Animation_StatusBar_IntruderAlert;
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    Int32 headsUpHeight = 0;
+    res->GetDimensionPixelSize(R::dimen::heads_up_window_height, &headsUpHeight);
+    AutoPtr<IWindowManagerLayoutParams> lp;
+    CWindowManagerLayoutParams::New(
+            IViewGroupLayoutParams::MATCH_PARENT, headsUpHeight,
+            IWindowManagerLayoutParams::TYPE_STATUS_BAR_PANEL, // above the status bar!
+            IWindowManagerLayoutParams::FLAG_LAYOUT_IN_SCREEN
+                | IWindowManagerLayoutParams::FLAG_LAYOUT_NO_LIMITS
+                | IWindowManagerLayoutParams::FLAG_NOT_TOUCH_MODAL
+                | IWindowManagerLayoutParams::FLAG_NOT_FOCUSABLE
+                | IWindowManagerLayoutParams::FLAG_ALT_FOCUSABLE_IM
+                | IWindowManagerLayoutParams::FLAG_SPLIT_TOUCH,
+            IPixelFormat::TRANSLUCENT, (IWindowManagerLayoutParams**)&lp);
 
-    mWindowManager.addView(mIntruderAlertView, lp);
+
+    Int32 flags = 0;
+    lp->GetFlags(&flags);
+    lp->SetFlags(flags | IWindowManagerLayoutParams::FLAG_HARDWARE_ACCELERATED);
+    lp->SetGravity(IGravity::TOP);
+
+    AutoPtr<ICharSequence> t;
+    CString::New(String("Heads Up"), (ICharSequence**)&t);
+    lp->SetTitle(t);
+
+    String name;
+    mContext->GetPackageName(&name);
+    lp->SetPackageName(name);
+    lp->SetWindowAnimations(R::style::Animation_StatusBar_HeadsUp);
+
+    IViewManager::Probe(mWindowManager)->AddView(IView::Probe(mHeadsUpNotificationView),
+            IViewGroupLayoutParams::Probe(lp));
 }
 
-// CommandQueueCallbacks interfaces
-//
+void PhoneStatusBar::RemoveHeadsUpView()
+{
+    IViewManager::Probe(mWindowManager)->RemoveView(IView::Probe(mHeadsUpNotificationView));
+}
+
+ECode PhoneStatusBar::RefreshAllStatusBarIcons()
+{
+    RefreshAllIconsForLayout(mStatusIcons);
+    RefreshAllIconsForLayout(mStatusIconsKeyguard);
+    RefreshAllIconsForLayout(ILinearLayout::Probe(mNotificationIcons));
+    return NOERROR;
+}
+
+void PhoneStatusBar::RefreshAllIconsForLayout(
+    /* [in] */ ILinearLayout* ll)
+{
+    Int32 count = 0;
+    IViewGroup::Probe(ll)->GetChildCount(&count);
+    for (Int32 n = 0; n < count; n++) {
+        AutoPtr<IView> child;
+        IViewGroup::Probe(ll)->GetChildAt(n, (IView**)&child);
+        if (IStatusBarIconView::Probe(child)) {
+            IStatusBarIconView::Probe(child)->UpdateDrawable();
+        }
+    }
+}
+
 ECode PhoneStatusBar::AddIcon(
     /* [in] */ const String& slot,
     /* [in] */ Int32 index,
     /* [in] */ Int32 viewIndex,
     /* [in] */ IStatusBarIcon* icon)
 {
-    if (SPEW) Slog.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
-            + " icon=" + icon);
-    StatusBarIconView view = new StatusBarIconView(mContext, slot, NULL);
-    view->Set(icon);
-    mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconSize, mIconSize));
+    if (SPEW) Logger::D(TAG, "addIcon slot=%s index=%d viewIndex=%d icon=%s",
+            slot.string(), index, viewIndex, TO_CSTR(icon));
+    AutoPtr<IStatusBarIconView> view;
+    CStatusBarIconView::New(mContext, slot, NULL, (IStatusBarIconView**)&view);
+    Boolean tmp = FALSE;
+    view->Set(icon, &tmp);
+    AutoPtr<IViewGroupLayoutParams> vp;
+    CLinearLayoutLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT, mIconSize,
+            (IViewGroupLayoutParams**)&vp);
+    IViewGroup::Probe(mStatusIcons)->AddView(IView::Probe(view), viewIndex, vp);
+
+    view = NULL;
+    CStatusBarIconView::New(mContext, slot, NULL, (IStatusBarIconView**)&view);
+    view->Set(icon, &tmp);
+
+    vp = NULL;
+    CLinearLayoutLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT, mIconSize,
+            (IViewGroupLayoutParams**)&vp);
+    IViewGroup::Probe(mStatusIconsKeyguard)->AddView(IView::Probe(view), viewIndex, vp);
+    return NOERROR;
 }
 
 ECode PhoneStatusBar::UpdateIcon(
@@ -1341,10 +2247,20 @@ ECode PhoneStatusBar::UpdateIcon(
     /* [in] */ IStatusBarIcon* old,
     /* [in] */ IStatusBarIcon* icon)
 {
-    if (SPEW) Slog.d(TAG, "updateIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
-            + " old=" + old + " icon=" + icon);
-    StatusBarIconView view = (StatusBarIconView)mStatusIcons.getChildAt(viewIndex);
-    view->Set(icon);
+    if (SPEW) Logger::D(TAG, "updateIcon slot=%s index=%d viewIndex=%d old=%s icon=%s",
+             slot.string(), index, viewIndex, TO_CSTR(old), TO_CSTR(icon));
+
+    AutoPtr<IView> v;
+    IViewGroup::Probe(mStatusIcons)->GetChildAt(viewIndex, (IView**)&v);
+    AutoPtr<IStatusBarIconView> view = IStatusBarIconView::Probe(v);
+    Boolean tmp = FALSE;
+    view->Set(icon, &tmp);
+
+    v = NULL;
+    IViewGroup::Probe(mStatusIconsKeyguard)->GetChildAt(viewIndex, (IView**)&v);
+    view = IStatusBarIconView::Probe(v);
+    view->Set(icon, &tmp);
+    return NOERROR;
 }
 
 ECode PhoneStatusBar::RemoveIcon(
@@ -1352,921 +2268,1487 @@ ECode PhoneStatusBar::RemoveIcon(
     /* [in] */ Int32 index,
     /* [in] */ Int32 viewIndex)
 {
-    if (SPEW) Slog.d(TAG, "removeIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex);
-    mStatusIcons.removeViewAt(viewIndex);
+    if (SPEW) Logger::D(TAG, "removeIcon slot=%s index=%d viewIndex=%d", slot.string(), index, viewIndex);
+    IViewGroup::Probe(mStatusIcons)->RemoveViewAt(viewIndex);
+    IViewGroup::Probe(mStatusIconsKeyguard)->RemoveViewAt(viewIndex);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::GetCurrentUserHandle(
+    /* [out] */ IUserHandle** uh)
+{
+    VALIDATE_NOT_NULL(uh);
+    return CUserHandle::New(mCurrentUserId, uh);
 }
 
 ECode PhoneStatusBar::AddNotification(
-    /* [in] */ IBinder* key,
-    /* [in] */ IStatusBarNotification* notification)
+    /* [in] */ IStatusBarNotification* notification,
+    /* [in] */ INotificationListenerServiceRankingMap* ranking)
 {
-    if (DEBUG) Slog.d(TAG, "addNotification score=" + notification.score);
-    StatusBarIconView iconView = addNotificationViews(key, notification);
-    if (iconView == NULL) return;
+    if (DEBUG) {
+        String key;
+        notification->GetKey(&key);
+        Logger::D(TAG, "addNotification key=%s", key.string());
+    }
+    if (mUseHeadsUp && ShouldInterrupt(notification)) {
+        if (DEBUG) Logger::D(TAG, "launching notification in heads up mode");
+        AutoPtr<INotificationDataEntry> interruptionCandidate = new NotificationData::Entry(notification, NULL);
+        AutoPtr<IViewGroup> holder;
+        mHeadsUpNotificationView->GetHolder((IViewGroup**)&holder);
+        if (InflateViewsForHeadsUp(interruptionCandidate, holder)) {
+            // 1. Populate mHeadsUpNotificationView
+            Boolean tmp = FALSE;
+            mHeadsUpNotificationView->ShowNotification(interruptionCandidate, &tmp);
 
-    Boolean immersive = FALSE;
-    try {
-        immersive = ActivityManagerNative.getDefault().isTopActivityImmersive();
-        if (DEBUG) {
-            Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
+            // do not show the notification in the shade, yet.
+            return NOERROR;
         }
-    } catch (RemoteException ex) {
     }
 
-    /*
-     * DISABLED due to missing API
-    if (ENABLE_INTRUDERS && (
-               // TODO(dsandler): Only if the screen is on
-            notification.notification.intruderView != NULL)) {
-        Slog.d(TAG, "Presenting high-priority notification");
-        // special new transient ticker mode
-        // 1. Populate mIntruderAlertView
+    AutoPtr<INotificationDataEntry> shadeEntry = CreateNotificationViews(notification);
+    if (shadeEntry == NULL) {
+        return NOERROR;
+    }
 
-        if (notification.notification.intruderView == NULL) {
-            Slog.e(TAG, notification.notification.toString() + " wanted to intrude but intruderView was NULL");
-            return;
-        }
-
-        // bind the click event to the content area
-        PendingIntent contentIntent = notification.notification.contentIntent;
-        View.OnClickListener listener = (contentIntent != NULL)
-                ? new NotificationClicker(contentIntent,
-                        notification.pkg, notification.tag, notification.id)
-                : NULL;
-
-        mIntruderAlertView.applyIntruderContent(notification.notification.intruderView, listener);
-
-        mCurrentlyIntrudingNotification = notification;
-
-        // 2. Animate mIntruderAlertView in
-        mHandler.sendEmptyMessage(MSG_SHOW_INTRUDER);
-
-        // 3. Set alarm to age the notification off (TODO)
-        mHandler.removeMessages(MSG_HIDE_INTRUDER);
-        if (INTRUDER_ALERT_DECAY_MS > 0) {
-            mHandler.sendEmptyMessageDelayed(MSG_HIDE_INTRUDER, INTRUDER_ALERT_DECAY_MS);
-        }
-    } else
-     */
-
-    if (notification.notification.fullScreenIntent != NULL) {
+    AutoPtr<INotification> n;
+    notification->GetNotification((INotification**)&n);
+    AutoPtr<IPendingIntent> pi;
+    n->GetFullScreenIntent((IPendingIntent**)&pi);
+    if (pi != NULL) {
         // Stop screensaver if the notification has a full-screen intent.
         // (like an incoming phone call)
-        awakenDreams();
+        AwakenDreams();
 
         // not immersive & a full-screen alert should be shown
-        if (DEBUG) Slog.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
-        try {
-            notification.notification.fullScreenIntent.send();
-        } catch (PendingIntent.CanceledException e) {
-        }
-    } else {
+        if (DEBUG) Logger::D(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
+        // try {
+        pi->Send();
+        // } catch (PendingIntent.CanceledException e) {
+        // }
+    }
+    else {
         // usual case: status bar visible & not immersive
 
-        // show the ticker if there isn't an intruder too
-        if (mCurrentlyIntrudingNotification == NULL) {
-            tick(NULL, notification, TRUE);
+        // show the ticker if there isn't already a heads up
+        AutoPtr<INotificationDataEntry> e;
+        mHeadsUpNotificationView->GetEntry((INotificationDataEntry**)&e);
+        if (e == NULL) {
+            Tick(notification, TRUE);
         }
     }
-
+    AddNotificationViews(shadeEntry, ranking);
     // Recalculate the position of the sliding windows and the titles.
-    setAreThereNotifications();
-    updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+    SetAreThereNotifications();
+    UpdateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::DisplayNotificationFromHeadsUp(
+    /* [in] */ IStatusBarNotification* notification)
+{
+    AutoPtr<INotificationDataEntry> shadeEntry = CreateNotificationViews(notification);
+    if (shadeEntry == NULL) {
+        return NOERROR;
+    }
+    shadeEntry->SetInterruption();
+
+    AddNotificationViews(shadeEntry, NULL);
+    // Recalculate the position of the sliding windows and the titles.
+    SetAreThereNotifications();
+    UpdateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::ResetHeadsUpDecayTimer()
+{
+    mHandler->RemoveMessages(MSG_DECAY_HEADS_UP);
+    Boolean tmp = FALSE;
+    if (mUseHeadsUp && mHeadsUpNotificationDecay > 0
+            && (mHeadsUpNotificationView->IsClearable(&tmp), tmp)) {
+        mHandler->SendEmptyMessageDelayed(MSG_DECAY_HEADS_UP, mHeadsUpNotificationDecay, &tmp);
+    }
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::ScheduleHeadsUpOpen()
+{
+    Boolean tmp = FALSE;
+    mHandler->SendEmptyMessage(MSG_SHOW_HEADS_UP, &tmp);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::ScheduleHeadsUpClose()
+{
+    Boolean tmp = FALSE;
+    mHandler->SendEmptyMessage(MSG_HIDE_HEADS_UP, &tmp);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::ScheduleHeadsUpEscalation()
+{
+    Boolean tmp = FALSE;
+    mHandler->SendEmptyMessage(MSG_ESCALATE_HEADS_UP, &tmp);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::UpdateNotificationRanking(
+    /* [in] */ INotificationListenerServiceRankingMap* ranking)
+{
+    mNotificationData->UpdateRanking(ranking);
+    UpdateNotifications();
+    return NOERROR;
 }
 
 ECode PhoneStatusBar::RemoveNotification(
-    /* [in] */ IBinder* key)
+    /* [in] */ const String& key,
+    /* [in] */ INotificationListenerServiceRankingMap* ranking)
 {
-    StatusBarNotification old = removeNotificationViews(key);
-    if (SPEW) Slog.d(TAG, "removeNotification key=" + key + " old=" + old);
+    if (ENABLE_HEADS_UP) {
+        AutoPtr<INotificationDataEntry> e;
+        mHeadsUpNotificationView->GetEntry((INotificationDataEntry**)&e);
+        if (e != NULL) {
+            AutoPtr<IStatusBarNotification> n;
+            e->GetNotification((IStatusBarNotification**)&n);
+            String k;
+            if (key.Equals((n->GetKey(&k), k))) {
+                mHeadsUpNotificationView->Clear();
+            }
+        }
+    }
+
+    AutoPtr<IStatusBarNotification> old = RemoveNotificationViews(key, ranking);
+    if (SPEW) Logger::D(TAG, "removeNotification key=%s old=%s", key.string(), TO_CSTR(old));
 
     if (old != NULL) {
         // Cancel the ticker if it's still running
-        mTicker.removeEntry(old);
+        if (mTickerEnabled) {
+            mTicker->RemoveEntry(old);
+        }
 
         // Recalculate the position of the sliding windows and the titles.
-        updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+        UpdateExpandedViewPos(EXPANDED_LEAVE_ALONE);
 
-        if (ENABLE_INTRUDERS && old == mCurrentlyIntrudingNotification) {
-            mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
-        }
-
-        if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0 && !mAnimating) {
-            animateCollapsePanels();
+        Boolean tmp = FALSE;
+        if (CLOSE_PANEL_WHEN_EMPTIED && (HasActiveNotifications(&tmp), !tmp)
+                && (IPanelView::Probe(mNotificationPanel)->IsTracking(&tmp), !tmp)
+                && (mNotificationPanel->IsQsExpanded(&tmp), !tmp)) {
+            if (mState == IStatusBarState::SHADE) {
+                AnimateCollapsePanels();
+            }
+            else if (mState == IStatusBarState::SHADE_LOCKED) {
+                GoToKeyguard();
+            }
         }
     }
-
-    setAreThereNotifications();
+    SetAreThereNotifications();
+    return NOERROR;
 }
 
+void PhoneStatusBar::RefreshLayout(
+    /* [in] */ Int32 layoutDirection)
+{
+    if (mNavigationBarView != NULL) {
+        IView::Probe(mNavigationBarView)->SetLayoutDirection(layoutDirection);
+    }
+    RefreshAllStatusBarIcons();
+}
 
 void PhoneStatusBar::UpdateShowSearchHoldoff()
 {
-    mShowSearchHoldoff = mContext.getResources().getInteger(
-        R.integer.config_show_search_delay);
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    res->GetInteger(R::integer::config_show_search_delay, &mShowSearchHoldoff);
 }
 
-void PhoneStatusBar::LoadNotificationShade()
+void PhoneStatusBar::UpdateNotificationShade()
 {
-    if (mPile == NULL) return;
+    if (mStackScroller == NULL) return;
 
-    Int32 N = mNotificationData.size();
-
-    ArrayList<View> toShow = new ArrayList<View>();
-
-    Boolean provisioned = isDeviceProvisioned();
-    // If the device hasn't been through Setup, we only show system notifications
-    for (Int32 i=0; i<N; i++) {
-        Entry ent = mNotificationData.get(N-i-1);
-        if (!(provisioned || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
-        if (!notificationIsForCurrentUser(ent.notification)) continue;
-        toShow.add(ent.row);
+    // Do not modify the notifications during collapse.
+    Boolean tmp = FALSE;
+    if (IsCollapsing(&tmp), tmp) {
+        AutoPtr<Runnable4> run = new Runnable4(this);
+        AddPostCollapseAction(run);
+        return;
     }
 
-    ArrayList<View> toRemove = new ArrayList<View>();
-    for (Int32 i=0; i<mPile.getChildCount(); i++) {
-        View child = mPile.getChildAt(i);
-        if (!toShow.contains(child)) {
-            toRemove.add(child);
+    AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+    mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
+    Int32 size = 0;
+    activeNotifications->GetSize(&size);
+    AutoPtr<IArrayList/*<IExpandableNotificationRow*/> toShow;
+    CArrayList::New(size, (IArrayList**)&toShow);
+    Int32 N = size;
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        activeNotifications->Get(i, (IInterface**)&obj);
+        AutoPtr<INotificationDataEntry> ent = INotificationDataEntry::Probe(obj);
+
+        AutoPtr<IStatusBarNotification> notification;
+        ent->GetNotification((IStatusBarNotification**)&notification);
+        AutoPtr<INotification> n;
+        notification->GetNotification((INotification**)&n);
+        Int32 vis = 0;
+        n->GetVisibility(&vis);
+
+        // Display public version of the notification if we need to redact.
+        Int32 id = 0;
+        notification->GetUserId(&id);
+        Boolean hideSensitive = FALSE;
+        UserAllowsPrivateNotificationsInPublic(id, &hideSensitive);
+        hideSensitive = !hideSensitive;
+        Boolean sensitiveNote = vis == INotification::VISIBILITY_PRIVATE;
+        String key;
+        notification->GetKey(&key);
+        Boolean sensitivePackage = PackageHasVisibilityOverride(key);
+        Boolean sensitive = (sensitiveNote && hideSensitive) || sensitivePackage;
+        Boolean showingPublic = sensitive && (IsLockscreenPublicMode(&tmp), tmp);
+
+        AutoPtr<IExpandableNotificationRow> row;
+        ent->GetRow((IExpandableNotificationRow**)&row);
+        row->SetSensitive(sensitive);
+
+        Boolean autoRedacted = FALSE, legacy = FALSE;
+        ent->GetAutoRedacted(&autoRedacted);
+        ent->GetLegacy(&legacy);
+        if (autoRedacted && legacy) {
+            // TODO: Also fade this? Or, maybe easier (and better), provide a dark redacted form
+            // for legacy auto redacted notifications.
+            if (showingPublic) {
+                IActivatableNotificationView::Probe(row)->SetShowingLegacyBackground(FALSE);
+            }
+            else {
+                IActivatableNotificationView::Probe(row)->SetShowingLegacyBackground(TRUE);
+            }
+        }
+        toShow->Add(row);
+    }
+
+    AutoPtr<IArrayList/*<View*/> toRemove;
+    CArrayList::New((IArrayList**)&toRemove);
+    Int32 count = 0;
+    IViewGroup::Probe(mStackScroller)->GetChildCount(&count);
+    for (Int32 i = 0; i< count; i++) {
+        AutoPtr<IView> child;
+        IViewGroup::Probe(mStackScroller)->GetChildAt(i, (IView**)&child);
+        if ((toShow->Contains(child, &tmp), !tmp) && IExpandableNotificationRow::Probe(child)) {
+            toRemove->Add(child);
         }
     }
 
-    for (View remove : toRemove) {
-        mPile.removeView(remove);
+    AutoPtr<IIterator> ator;
+    toRemove->GetIterator((IIterator**)&ator);
+    Boolean has = FALSE;
+    while (ator->HasNext(&has), has) {
+        AutoPtr<IInterface> remove;
+        ator->GetNext((IInterface**)&remove);
+        IViewGroup::Probe(mStackScroller)->RemoveView(IView::Probe(remove));
     }
 
-    for (Int32 i=0; i<toShow.size(); i++) {
-        View v = toShow.get(i);
-        if (v.getParent() == NULL) {
-            mPile.addView(v, i);
+    toShow->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        toShow->Get(i, (IInterface**)&obj);
+        AutoPtr<IView> v = IView::Probe(obj);
+        AutoPtr<IViewParent> vp;
+        v->GetParent((IViewParent**)&vp);
+        if (vp == NULL) {
+            IViewGroup::Probe(mStackScroller)->AddView(v);
         }
     }
 
-    if (mSettingsButton != NULL) {
-        mSettingsButton->SetEnabled(isDeviceProvisioned());
+    // So after all this work notifications still aren't sorted correctly.
+    // Let's do that now by advancing through toShow and mStackScroller in
+    // lock-step, making sure mStackScroller matches what we see in toShow.
+    Int32 j = 0;
+    IViewGroup::Probe(mStackScroller)->GetChildCount(&count);
+    for (Int32 i = 0; i < count; i++) {
+        AutoPtr<IView> child;
+        IViewGroup::Probe(mStackScroller)->GetChildAt(i, (IView**)&child);
+        if (IExpandableNotificationRow::Probe(child) == NULL) {
+            // We don't care about non-notification views.
+            continue;
+        }
+
+        AutoPtr<IInterface> obj;
+        toShow->Get(j, (IInterface**)&obj);
+        if (child.Get() == IView::Probe(obj)) {
+            // Everything is well, advance both lists.
+            j++;
+            continue;
+        }
+
+        // Oops, wrong notification at this position. Put the right one
+        // here and advance both lists.
+        mStackScroller->ChangeViewPosition(IView::Probe(obj), i);
+        j++;
     }
+    UpdateRowStates();
+    UpdateSpeedbump();
+    UpdateClearAll();
+    UpdateEmptyShadeView();
+
+    // Disable QS if device not provisioned.
+    // If the user switcher is simple then disable QS during setup because
+    // the user intends to use the lock screen user switcher, QS in not needed.
+    Boolean is = FALSE;
+    mNotificationPanel->SetQsExpansionEnabled((IsDeviceProvisioned(&tmp), tmp)
+            && ((mUserSwitcherController->IsSimpleUserSwitcher(&is), !is) || mUserSetup));
+    mShadeUpdates->Check();
 }
 
-//@Override
-ECode PhoneStatusBar::UpdateNotificationIcons()
+Boolean PhoneStatusBar::PackageHasVisibilityOverride(
+    /* [in] */ const String& key)
 {
+    Int32 v = 0;
+    mNotificationData->GetVisibilityOverride(key, &v);
+    return v != INotificationListenerServiceRanking::VISIBILITY_NO_OVERRIDE;
+}
+
+void PhoneStatusBar::UpdateClearAll()
+{
+    Boolean has = FALSE;
+    Boolean showDismissView = mState != IStatusBarState::KEYGUARD
+            && (mNotificationData->HasActiveClearableNotifications(&has), has);
+    mStackScroller->UpdateDismissView(showDismissView);
+}
+
+void PhoneStatusBar::UpdateEmptyShadeView()
+{
+    Boolean showEmptyShade = FALSE;
+
+    if (mState != IStatusBarState::KEYGUARD) {
+        AutoPtr<IArrayList> list;
+        mNotificationData->GetActiveNotifications((IArrayList**)&list);
+        Int32 size = 0;
+        list->GetSize(&size);
+        showEmptyShade = size == 0;
+    }
+    mNotificationPanel->SetShadeEmpty(showEmptyShade);
+}
+
+void PhoneStatusBar::UpdateSpeedbump()
+{
+    Int32 speedbumpIndex = -1;
+    Int32 currentIndex = 0;
+    AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+    mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
+    Int32 N = 0;
+    activeNotifications->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        activeNotifications->Get(i, (IInterface**)&obj);
+        AutoPtr<INotificationDataEntry> entry = INotificationDataEntry::Probe(obj);
+
+        AutoPtr<IExpandableNotificationRow> row;
+        entry->GetRow((IExpandableNotificationRow**)&row);
+        Int32 v = 0;
+        if ((IView::Probe(row)->GetVisibility(&v), v) != IView::GONE) {
+            String key;
+            entry->GetKey(&key);
+            Boolean tmp = FALSE;
+            if (mNotificationData->IsAmbient(key, &tmp), tmp) {
+                speedbumpIndex = currentIndex;
+                break;
+            }
+        }
+        currentIndex++;
+    }
+    mStackScroller->UpdateSpeedBumpIndex(speedbumpIndex);
+}
+
+void PhoneStatusBar::UpdateNotifications()
+{
+    // TODO: Move this into updateNotificationIcons()?
     if (mNotificationIcons == NULL) return;
 
-    loadNotificationShade();
+    mNotificationData->FilterAndSort();
 
-    LinearLayout.LayoutParams params
-        = new LinearLayout.LayoutParams(mIconSize + 2*mIconHPadding, mNaturalBarHeight);
+    UpdateNotificationShade();
+    UpdateNotificationIcons();
+}
 
-    Int32 N = mNotificationData.size();
+void PhoneStatusBar::UpdateNotificationIcons()
+{
+    AutoPtr<ILinearLayoutLayoutParams> params;
+    CLinearLayoutLayoutParams::New(mIconSize + 2 * mIconHPadding, mNaturalBarHeight
+            , (ILinearLayoutLayoutParams**)&params);
+
+    AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+    mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
+    Int32 N = 0;
+    activeNotifications->GetSize(&N);
+    AutoPtr<IArrayList/*<StatusBarIconView*/> toShow;
+    CArrayList::New(N, (IArrayList**)&toShow);
+
+    // Filter out notifications with low scores.
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        activeNotifications->Get(i, (IInterface**)&obj);
+        AutoPtr<INotificationDataEntry> ent = INotificationDataEntry::Probe(obj);
+        AutoPtr<IStatusBarNotification> notification;
+        ent->GetNotification((IStatusBarNotification**)&notification);
+        Int32 score = 0;
+        notification->GetScore(&score);
+        if (score < HIDE_ICONS_BELOW_SCORE &&
+                NotificationData::ShowNotificationEvenIfUnprovisioned(notification)) {
+            continue;
+        }
+
+        AutoPtr<IStatusBarIconView> icon;
+        ent->GetIcon((IStatusBarIconView**)&icon);
+        toShow->Add(icon);
+    }
 
     if (DEBUG) {
-        Slog.d(TAG, "refreshing icons: " + N + " notifications, mNotificationIcons=" + mNotificationIcons);
+        Int32 size = 0;
+        toShow->GetSize(&size);
+        Logger::D(TAG, "refreshing icons: %d notifications, mNotificationIcons=%s", size, TO_CSTR(mNotificationIcons));
     }
 
-    ArrayList<View> toShow = new ArrayList<View>();
-
-    Boolean provisioned = isDeviceProvisioned();
-    // If the device hasn't been through Setup, we only show system notifications
-    for (Int32 i=0; i<N; i++) {
-        Entry ent = mNotificationData.get(N-i-1);
-        if (!((provisioned && ent.notification.score >= HIDE_ICONS_BELOW_SCORE)
-                || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
-        if (!notificationIsForCurrentUser(ent.notification)) continue;
-        toShow.add(ent.icon);
-    }
-
-    ArrayList<View> toRemove = new ArrayList<View>();
-    for (Int32 i=0; i<mNotificationIcons.getChildCount(); i++) {
-        View child = mNotificationIcons.getChildAt(i);
-        if (!toShow.contains(child)) {
-            toRemove.add(child);
+    AutoPtr<IArrayList/*<View*/> toRemove;
+    CArrayList::New((IArrayList**)&toRemove);
+    Int32 count = 0;
+    IViewGroup::Probe(mNotificationIcons)->GetChildCount(&count);
+    for (Int32 i = 0; i < count; i++) {
+        AutoPtr<IView> child;
+        IViewGroup::Probe(mNotificationIcons)->GetChildAt(i, (IView**)&child);
+        Boolean tmp = FALSE;
+        if (toShow->Contains(child, &tmp), !tmp) {
+            toRemove->Add(child);
         }
     }
 
-    for (View remove : toRemove) {
-        mNotificationIcons.removeView(remove);
+    Int32 toRemoveCount = 0;
+    toRemove->GetSize(&toRemoveCount);
+    for (Int32 i = 0; i < toRemoveCount; i++) {
+        AutoPtr<IInterface> obj;
+        toRemove->Get(i, (IInterface**)&obj);
+        IViewGroup::Probe(mNotificationIcons)->RemoveView(IView::Probe(obj));
     }
 
-    for (Int32 i=0; i<toShow.size(); i++) {
-        View v = toShow.get(i);
-        if (v.getParent() == NULL) {
-            mNotificationIcons.addView(v, i, params);
+    toShow->GetSize(&count);
+    for (Int32 i = 0; i < count; i++) {
+        AutoPtr<IInterface> obj;
+        toShow->Get(i, (IInterface**)&obj);
+        AutoPtr<IView> v = IView::Probe(obj);
+        AutoPtr<IViewParent> vp;
+        v->GetParent((IViewParent**)&vp);
+        if (vp == NULL) {
+            IViewGroup::Probe(mNotificationIcons)->AddView(v, i, IViewGroupLayoutParams::Probe(params));
         }
+    }
+
+    // Resort notification icons
+    Int32 childCount = 0;
+    IViewGroup::Probe(mNotificationIcons)->GetChildCount(&childCount);
+    for (Int32 i = 0; i < childCount; i++) {
+        AutoPtr<IView> actual;
+        IViewGroup::Probe(mNotificationIcons)->GetChildAt(i, (IView**)&actual);
+
+        AutoPtr<IInterface> obj;
+        toShow->Get(i, (IInterface**)&obj);
+        AutoPtr<IStatusBarIconView> expected = IStatusBarIconView::Probe(obj);
+        if (actual.Get() == IView::Probe(expected)) {
+            continue;
+        }
+        IViewGroup::Probe(mNotificationIcons)->RemoveView(IView::Probe(expected));
+        IViewGroup::Probe(mNotificationIcons)->AddView(IView::Probe(expected), i);
     }
 }
 
-void PhoneStatusBar::UpdateCarrierLabelVisibility(Boolean force)
+void PhoneStatusBar::UpdateRowStates()
 {
+    BaseStatusBar::UpdateRowStates();
+    mNotificationPanel->NotifyVisibleChildrenChanged();
+}
+
+void PhoneStatusBar::UpdateCarrierLabelVisibility(
+    /* [in] */ Boolean force)
+{
+    // TODO: Handle this for the notification stack scroller as well
     if (!mShowCarrierInPanel) return;
     // The idea here is to only show the carrier label when there is enough room to see it,
     // i.e. when there aren't enough notifications to fill the panel.
-    if (DEBUG) {
-        Slog.d(TAG, String.format("pileh=%d scrollh=%d carrierh=%d",
-                mPile.getHeight(), mScrollView.getHeight(), mCarrierLabelHeight));
+    Int32 height = 0;
+    IView::Probe(mStackScroller)->GetHeight(&height);
+    if (SPEW) {
+        Logger::D(TAG, "stackScrollerh=%d scrollh=%d carrierh=%d",
+                height, height, mCarrierLabelHeight);
     }
 
-    Boolean emergencyCallsShownElsewhere = mEmergencyCallLabel != NULL;
-    Boolean makeVisible =
-        !(emergencyCallsShownElsewhere && mNetworkController.isEmergencyOnly())
-        && mPile.getHeight() < (mNotificationPanel.getHeight() - mCarrierLabelHeight - mNotificationHeaderHeight)
-        && mScrollView.getVisibility() == IView::VISIBLE;
+    // Emergency calls only is shown in the expanded header now.
+    Int32 v = 0, v2 = 0;
+    const Boolean emergencyCallsShownElsewhere = TRUE;
+    Boolean tmp = FALSE;
+    const Boolean makeVisible =
+        !(emergencyCallsShownElsewhere && (mNetworkController->IsEmergencyOnly(&tmp), tmp))
+        && height < ((IView::Probe(mNotificationPanel)->GetHeight(&v), v)
+                - mCarrierLabelHeight - mStatusBarHeaderHeight)
+        && (IView::Probe(mStackScroller)->GetVisibility(&v2), v2) == IView::VISIBLE
+        && mState != IStatusBarState::KEYGUARD;
 
     if (force || mCarrierLabelVisible != makeVisible) {
         mCarrierLabelVisible = makeVisible;
         if (DEBUG) {
-            Slog.d(TAG, "making carrier label " + (makeVisible?"visible":"invisible"));
+            Logger::D(TAG, "making carrier label %s", (makeVisible ? "visible" : "invisible"));
         }
-        mCarrierLabel.animate().cancel();
+
+        AutoPtr<IViewPropertyAnimator> vpa;
+        IView::Probe(mCarrierLabel)->Animate((IViewPropertyAnimator**)&vpa);
+        vpa->Cancel();
         if (makeVisible) {
-            mCarrierLabel->SetVisibility(IView::VISIBLE);
+            IView::Probe(mCarrierLabel)->SetVisibility(IView::VISIBLE);
         }
-        mCarrierLabel.animate()
-            .alpha(makeVisible ? 1.0f : 0.0f)
-            //->SetStartDelay(makeVisible ? 500 : 0)
-            //->SetDuration(makeVisible ? 750 : 100)
-            ->SetDuration(150)
-            ->SetListener(makeVisible ? NULL : new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (!mCarrierLabelVisible) { // race
-                        mCarrierLabel->SetVisibility(IView::INVISIBLE);
-                        mCarrierLabel->SetAlpha(0.0f);
-                    }
-                }
-            })
-            ->Start();
+
+        vpa = NULL;
+        IView::Probe(mCarrierLabel)->Animate((IViewPropertyAnimator**)&vpa);
+        vpa->Alpha(makeVisible ? 1.f : 0.f);
+        //.setStartDelay(makeVisible ? 500 : 0)
+        //.setDuration(makeVisible ? 750 : 100)
+        vpa->SetDuration(150);
+        AutoPtr<AnimatorListenerAdapter1> listener = new AnimatorListenerAdapter1(this);
+        vpa->SetListener(makeVisible ? NULL : listener);
+        vpa->Start();
     }
 }
 
-//@Override
-ECode PhoneStatusBar::SetAreThereNotifications()
+void PhoneStatusBar::SetAreThereNotifications()
 {
-    Boolean any = mNotificationData.size() > 0;
-
-    Boolean clearable = any && mNotificationData.hasClearableItems();
-
-    if (DEBUG) {
-        Slog.d(TAG, "setAreThereNotifications: N=" + mNotificationData.size()
-                + " any=" + any + " clearable=" + clearable);
+    Boolean tmp = FALSE;
+    if (SPEW) {
+        Boolean clearable = (HasActiveNotifications(&tmp), tmp) &&
+                (mNotificationData->HasActiveClearableNotifications(&tmp), tmp);
+        AutoPtr<IArrayList> activeNotifications;
+        mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
+        Int32 size = 0;
+        activeNotifications->GetSize(&size);
+        Logger::D(TAG, "SetAreThereNotifications: N=%d any=%d clearable=%d", size,
+                (HasActiveNotifications(&tmp), tmp), clearable);
     }
 
-    if (mHasFlipSettings
-            && mFlipSettingsView != NULL
-            && mFlipSettingsView.getVisibility() == IView::VISIBLE
-            && mScrollView.getVisibility() != IView::VISIBLE) {
-        // the flip settings panel is unequivocally showing; we should not be shown
-        mClearButton->SetVisibility(IView::INVISIBLE);
-    } else if (mClearButton.isShown()) {
-        if (clearable != (mClearButton.getAlpha() == 1.0.0f)) {
-            ObjectAnimator clearAnimation = ObjectAnimator.ofFloat(
-                    mClearButton, "alpha", clearable ? 1.0.0f : 0.0.0f)->SetDuration(250);
-            clearAnimation.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (mClearButton.getAlpha() <= 0.0.0f) {
-                        mClearButton->SetVisibility(IView::INVISIBLE);
-                    }
-                }
+    AutoPtr<IView> nlo;
+    IView::Probe(mStatusBarView)->FindViewById(R::id::notification_lights_out, (IView**)&nlo);
+    Boolean showDot = (HasActiveNotifications(&tmp), tmp) && !AreLightsOn();
 
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    if (mClearButton.getAlpha() <= 0.0.0f) {
-                        mClearButton->SetVisibility(IView::VISIBLE);
-                    }
-                }
-            });
-            clearAnimation->Start();
-        }
-    } else {
-        mClearButton->SetAlpha(clearable ? 1.0.0f : 0.0.0f);
-        mClearButton->SetVisibility(clearable ? IView::VISIBLE : IView::INVISIBLE);
-    }
-    mClearButton->SetEnabled(clearable);
-
-    View nlo = mStatusBarView->FindViewById(R.id.notification_lights_out);
-    Boolean showDot = (any&&!areLightsOn());
-    if (showDot != (nlo.getAlpha() == 1.0.0f)) {
+    Float v = 0;
+    if (showDot != ((nlo->GetAlpha(&v), v) == 1.0f)) {
         if (showDot) {
-            nlo->SetAlpha(0.0f);
+            nlo->SetAlpha(0.f);
             nlo->SetVisibility(IView::VISIBLE);
         }
-        nlo.animate()
-            .alpha(showDot?1:0)
-            ->SetDuration(showDot?750:250)
-            ->SetInterpolator(new AccelerateInterpolator(2.0.0f))
-            ->SetListener(showDot ? NULL : new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator _a) {
-                    nlo->SetVisibility(IView::GONE);
-                }
-            })
-            ->Start();
+
+        AutoPtr<IViewPropertyAnimator> vpa;
+        nlo->Animate((IViewPropertyAnimator**)&vpa);
+        vpa->Alpha(showDot ? 1 : 0);
+        vpa->SetDuration(showDot ? 750 : 250);
+        AutoPtr<ITimeInterpolator> ti;
+        CAccelerateInterpolator::New(2.0f, (ITimeInterpolator**)&ti);
+        vpa->SetInterpolator(ti);
+
+        AutoPtr<AnimatorListenerAdapter2> listener = new AnimatorListenerAdapter2(nlo);
+        vpa->SetListener(showDot ? NULL : listener);
+        vpa->Start();
     }
 
-    updateCarrierLabelVisibility(FALSE);
+    FindAndUpdateMediaNotifications();
+
+    UpdateCarrierLabelVisibility(FALSE);
+}
+
+ECode PhoneStatusBar::FindAndUpdateMediaNotifications()
+{
+    Boolean metaDataChanged = FALSE;
+
+    synchronized (mNotificationData) {
+        AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+        mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
+        Int32 N = 0;
+        activeNotifications->GetSize(&N);
+        AutoPtr<INotificationDataEntry> mediaNotification;
+        AutoPtr<IMediaController> controller;
+        for (Int32 i = 0; i < N; i++) {
+            AutoPtr<IInterface> obj;
+            activeNotifications->Get(i, (IInterface**)&obj);
+            AutoPtr<INotificationDataEntry> entry = INotificationDataEntry::Probe(obj);
+            Boolean tmp = FALSE;
+            if (IsMediaNotification(entry, &tmp), tmp) {
+                AutoPtr<IStatusBarNotification> notification;
+                entry->GetNotification((IStatusBarNotification**)&notification);
+                AutoPtr<INotification> n;
+                notification->GetNotification((INotification**)&n);
+                AutoPtr<IBundle> extras;
+                n->GetExtras((IBundle**)&extras);
+                AutoPtr<IParcelable> p;
+                extras->GetParcelable(INotification::EXTRA_MEDIA_SESSION, (IParcelable**)&p);
+                AutoPtr<IMediaSessionToken> token = IMediaSessionToken::Probe(p);
+                if (token != NULL) {
+                    CMediaController::New(mContext, token, (IMediaController**)&controller);
+                    if (controller != NULL) {
+                        // we've got a live one, here
+                        mediaNotification = entry;
+                    }
+                }
+            }
+        }
+
+        if (mediaNotification == NULL) {
+            // Still nothing? OK, let's just look for live media sessions and see if they match
+            // one of our notifications. This will catch apps that aren't (yet!) using media
+            // notifications.
+            if (mMediaSessionManager != NULL) {
+                AutoPtr<IList/*<MediaController*/> sessions;
+                mMediaSessionManager->GetActiveSessionsForUser(
+                        NULL, IUserHandle::USER_ALL, (IList**)&sessions);
+
+                AutoPtr<IIterator> ator;
+                sessions->GetIterator((IIterator**)&ator);
+                Boolean has = FALSE;
+                while (ator->HasNext(&has), has) {
+                    AutoPtr<IInterface> obj;
+                    ator->GetNext((IInterface**)&obj);
+                    AutoPtr<IMediaController> aController = IMediaController::Probe(obj);
+
+                    if (aController == NULL) continue;
+                    AutoPtr<IPlaybackState> state;
+                    aController->GetPlaybackState((IPlaybackState**)&state);
+                    if (state == NULL) continue;
+
+                    Int32 s = 0;
+                    switch (state->GetState(&s), s) {
+                        case IPlaybackState::STATE_STOPPED:
+                        case IPlaybackState::STATE_ERROR:
+                            continue;
+                        default: {
+                            // now to see if we have one like this
+                            String pkg;
+                            aController->GetPackageName(&pkg);
+
+                            for (Int32 i = 0; i < N; i++) {
+                                AutoPtr<IInterface> o;
+                                activeNotifications->Get(i, (IInterface**)&o);
+                                AutoPtr<INotificationDataEntry> entry = INotificationDataEntry::Probe(o);
+                                AutoPtr<IStatusBarNotification> notification;
+                                entry->GetNotification((IStatusBarNotification**)&notification);
+
+                                String v;
+                                notification->GetPackageName(&v);
+                                if (v.Equals(pkg)) {
+                                    notification->GetKey(&v);
+                                    if (DEBUG_MEDIA) {
+                                        Logger::V(TAG, "DEBUG_MEDIA: found controller matching %s"
+                                            , v.string());
+                                    }
+                                    controller = aController;
+                                    mediaNotification = entry;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!SameSessions(mMediaController, controller)) {
+            // We have a new media session
+            if (mMediaController != NULL) {
+                // something old was playing
+                Logger::V(TAG, "DEBUG_MEDIA: Disconnecting from old controller: %s", TO_CSTR(mMediaController));
+                mMediaController->UnregisterCallback(mMediaListener);
+            }
+            mMediaController = controller;
+
+            if (mMediaController != NULL) {
+                mMediaController->RegisterCallback(mMediaListener);
+                mMediaController->GetMetadata((IMediaMetadata**)&mMediaMetadata);
+                if (DEBUG_MEDIA) {
+                    Logger::V(TAG, "DEBUG_MEDIA: insert listener, receive metadata: %s", TO_CSTR(mMediaMetadata));
+                }
+
+                String notificationKey;
+                if (mediaNotification != NULL) {
+                    AutoPtr<IStatusBarNotification> notification;
+                    mediaNotification->GetNotification((IStatusBarNotification**)&notification);
+                    notification->GetKey(&notificationKey);
+                }
+
+                if (notificationKey == NULL || !notificationKey.Equals(mMediaNotificationKey)) {
+                    // we have a new notification!
+                    if (DEBUG_MEDIA) {
+                        Logger::V(TAG, "DEBUG_MEDIA: Found new media notification: key=%s controller=%s"
+                                , notificationKey.string(), TO_CSTR(controller));
+                    }
+                    mMediaNotificationKey = notificationKey;
+                }
+            }
+            else {
+                mMediaMetadata = NULL;
+                mMediaNotificationKey = NULL;
+            }
+
+            metaDataChanged = TRUE;
+        }
+        else {
+            // Media session unchanged
+            if (DEBUG_MEDIA) {
+                Logger::V(TAG, "DEBUG_MEDIA: Continuing media notification: key=%s", mMediaNotificationKey.string());
+            }
+        }
+    }
+
+    UpdateMediaMetaData(metaDataChanged);
+    return NOERROR;
+}
+
+Boolean PhoneStatusBar::SameSessions(
+    /* [in] */ IMediaController* a,
+    /* [in] */ IMediaController* b)
+{
+    if (a == b) return TRUE;
+    if (a == NULL) return FALSE;
+    Boolean tmp = FALSE;
+    a->ControlsSameSession(b, &tmp);
+    return tmp;
+}
+
+/**
+ * Refresh or remove lockscreen artwork from media metadata.
+ */
+ECode PhoneStatusBar::UpdateMediaMetaData(
+    /* [in] */ Boolean metaDataChanged)
+{
+    if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) return NOERROR;
+
+    if (mBackdrop == NULL) return NOERROR; // called too early
+
+    if (DEBUG_MEDIA) {
+        Logger::V(TAG, "DEBUG_MEDIA: updating album art for notification %s metadata=%s metaDataChanged=%d state=%d"
+            , mMediaNotificationKey.string(), TO_CSTR(mMediaMetadata), metaDataChanged, mState);
+    }
+
+    AutoPtr<IBitmap> artworkBitmap;
+    if (mMediaMetadata != NULL) {
+        mMediaMetadata->GetBitmap(IMediaMetadata::METADATA_KEY_ART, (IBitmap**)&artworkBitmap);
+        if (artworkBitmap == NULL) {
+            mMediaMetadata->GetBitmap(IMediaMetadata::METADATA_KEY_ALBUM_ART, (IBitmap**)&artworkBitmap);
+            // might still be NULL
+        }
+    }
+
+    const Boolean hasArtwork = artworkBitmap != NULL;
+
+    if ((hasArtwork || DEBUG_MEDIA_FAKE_ARTWORK)
+            && (mState == IStatusBarState::KEYGUARD || mState == IStatusBarState::SHADE_LOCKED)) {
+        // time to show some art!
+        Int32 v = 0;
+        if ((IView::Probe(mBackdrop)->GetVisibility(&v), v) != IView::VISIBLE) {
+            IView::Probe(mBackdrop)->SetVisibility(IView::VISIBLE);
+
+            AutoPtr<IViewPropertyAnimator> vta;
+            IView::Probe(mBackdrop)->Animate((IViewPropertyAnimator**)&vta);
+            vta->Alpha(1.f);
+            metaDataChanged = TRUE;
+            if (DEBUG_MEDIA) {
+                Logger::V(TAG, "DEBUG_MEDIA: Fading in album artwork");
+            }
+        }
+        if (metaDataChanged) {
+            AutoPtr<IDrawable> drawable;
+            mBackdropBack->GetDrawable((IDrawable**)&drawable);
+            if (drawable != NULL) {
+                mBackdropFront->SetImageDrawable(drawable);
+                if (mScrimSrcModeEnabled) {
+                    AutoPtr<IDrawable> d;
+                    mBackdropFront->GetDrawable((IDrawable**)&d);
+                    d->Mutate();
+                    d->SetXfermode(IXfermode::Probe(mSrcOverXferMode));
+                }
+                mBackdropFront->SetAlpha(1.f);
+                IView::Probe(mBackdropFront)->SetVisibility(IView::VISIBLE);
+            }
+            else {
+                IView::Probe(mBackdropFront)->SetVisibility(IView::INVISIBLE);
+            }
+
+            if (DEBUG_MEDIA_FAKE_ARTWORK) {
+                const Int32 c = 0xFF000000 | (Int32)(Elastos::Core::Math::Random() * 0xFFFFFF);
+                Logger::V(TAG, "DEBUG_MEDIA: setting new color: 0x%08x", c);
+                IView::Probe(mBackdropBack)->SetBackgroundColor(0xFFFFFFFF);
+                AutoPtr<IDrawable> dr;
+                CColorDrawable::New(c, (IDrawable**)&dr);
+                mBackdropBack->SetImageDrawable(dr);
+            }
+            else {
+                mBackdropBack->SetImageBitmap(artworkBitmap);
+            }
+            if (mScrimSrcModeEnabled) {
+                drawable->Mutate();
+                drawable->SetXfermode(IXfermode::Probe(mSrcXferMode));
+            }
+
+            if ((IView::Probe(mBackdropFront)->GetVisibility(&v), v) == IView::VISIBLE) {
+                AutoPtr<IDrawable> d;
+                mBackdropFront->GetDrawable((IDrawable**)&d);
+                if (DEBUG_MEDIA) {
+                    Logger::V(TAG, "DEBUG_MEDIA: Crossfading album artwork from %s to %s"
+                            , TO_CSTR(d), TO_CSTR(drawable));
+                }
+
+                AutoPtr<IViewPropertyAnimator> vpa;
+                IView::Probe(mBackdropFront)->Animate((IViewPropertyAnimator**)&vpa);
+                vpa->SetDuration(250);
+                vpa->Alpha(0.f);
+                vpa->WithEndAction(mHideBackdropFront);
+            }
+        }
+    }
+    else {
+        // need to hide the album art, either because we are unlocked or because
+        // the metadata isn't there to support it
+        Int32 v = 0;
+        if ((IView::Probe(mBackdrop)->GetVisibility(&v), v) != IView::GONE) {
+            if (DEBUG_MEDIA) {
+                Logger::V(TAG, "DEBUG_MEDIA: Fading out album artwork");
+            }
+            AutoPtr<IViewPropertyAnimator> vpa;
+            IView::Probe(mBackdrop)->Animate((IViewPropertyAnimator**)&vpa);
+            vpa->Alpha(0.f);
+            vpa->SetInterpolator(ITimeInterpolator::Probe(mBackdropInterpolator));
+            vpa->SetDuration(300);
+            vpa->SetStartDelay(0);
+            AutoPtr<Runnable5> run = new Runnable5(this);
+            vpa->WithEndAction(run);
+            if (mKeyguardFadingAway) {
+                vpa = NULL;
+                IView::Probe(mBackdrop)->Animate((IViewPropertyAnimator**)&vpa);
+                // Make it disappear faster, as the focus should be on the activity behind.
+                vpa->SetDuration(mKeyguardFadingAwayDuration / 2);
+                vpa->SetStartDelay(mKeyguardFadingAwayDelay);
+                vpa->SetInterpolator(ITimeInterpolator::Probe(mLinearInterpolator));
+                vpa->Start();
+            }
+        }
+    }
+    return NOERROR;
 }
 
 ECode PhoneStatusBar::ShowClock(
     /* [in] */ Boolean show)
 {
-    if (mStatusBarView == NULL) return;
-    View clock = mStatusBarView->FindViewById(R.id.clock);
+    if (mStatusBarView == NULL) return NOERROR;
+    AutoPtr<IView> clock;
+    IView::Probe(mStatusBarView)->FindViewById(R::id::clock, (IView**)&clock);
     if (clock != NULL) {
         clock->SetVisibility(show ? IView::VISIBLE : IView::GONE);
     }
+    return NOERROR;
+}
+
+Int32 PhoneStatusBar::AdjustDisableFlags(
+    /* [in] */ Int32 state)
+{
+    if (!mLaunchTransitionFadingAway
+            && (mExpandedVisible || mBouncerShowing || mWaitingForKeyguardExit)) {
+        state |= IStatusBarManager::DISABLE_NOTIFICATION_ICONS;
+        state |= IStatusBarManager::DISABLE_SYSTEM_INFO;
+    }
+    return state;
 }
 
 /**
  * State is one or more of the DISABLE constants from StatusBarManager.
  */
 ECode PhoneStatusBar::Disable(
-    /* [in] */ Int32 state)
+    /* [in] */ Int32 state,
+    /* [in] */ Boolean animate)
 {
-    Int32 old = mDisabled;
-    Int32 diff = state ^ old;
+    mDisabledUnmodified = state;
+    state = AdjustDisableFlags(state);
+    const Int32 old = mDisabled;
+    const Int32 diff = state ^ old;
     mDisabled = state;
 
     if (DEBUG) {
-        Slog.d(TAG, String.format("disable: 0x%08x -> 0x%08x (diff: 0x%08x)",
-            old, state, diff));
+        Logger::D(TAG, "disable: 0x%08x -> 0x%08x (diff: 0x%08x)", old, state, diff);
     }
 
-    StringBuilder flagdbg = new StringBuilder();
-    flagdbg.append("disable: < ");
-    flagdbg.append(((state & StatusBarManager.DISABLE_EXPAND) != 0) ? "EXPAND" : "expand");
-    flagdbg.append(((diff  & StatusBarManager.DISABLE_EXPAND) != 0) ? "* " : " ");
-    flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) ? "ICONS" : "icons");
-    flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) ? "* " : " ");
-    flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "ALERTS" : "alerts");
-    flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "* " : " ");
-    flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) ? "TICKER" : "ticker");
-    flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) ? "* " : " ");
-    flagdbg.append(((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "SYSTEM_INFO" : "system_info");
-    flagdbg.append(((diff  & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "* " : " ");
-    flagdbg.append(((state & StatusBarManager.DISABLE_BACK) != 0) ? "BACK" : "back");
-    flagdbg.append(((diff  & StatusBarManager.DISABLE_BACK) != 0) ? "* " : " ");
-    flagdbg.append(((state & StatusBarManager.DISABLE_HOME) != 0) ? "HOME" : "home");
-    flagdbg.append(((diff  & StatusBarManager.DISABLE_HOME) != 0) ? "* " : " ");
-    flagdbg.append(((state & StatusBarManager.DISABLE_RECENT) != 0) ? "RECENT" : "recent");
-    flagdbg.append(((diff  & StatusBarManager.DISABLE_RECENT) != 0) ? "* " : " ");
-    flagdbg.append(((state & StatusBarManager.DISABLE_CLOCK) != 0) ? "CLOCK" : "clock");
-    flagdbg.append(((diff  & StatusBarManager.DISABLE_CLOCK) != 0) ? "* " : " ");
-    flagdbg.append(((state & StatusBarManager.DISABLE_SEARCH) != 0) ? "SEARCH" : "search");
-    flagdbg.append(((diff  & StatusBarManager.DISABLE_SEARCH) != 0) ? "* " : " ");
-    flagdbg.append(">");
-    Slog.d(TAG, flagdbg.toString());
+    StringBuilder flagdbg;
+    flagdbg.Append("disable: < ");
+    flagdbg.Append(((state & IStatusBarManager::DISABLE_EXPAND) != 0) ? "EXPAND" : "expand");
+    flagdbg.Append(((diff  & IStatusBarManager::DISABLE_EXPAND) != 0) ? "* " : " ");
+    flagdbg.Append(((state & IStatusBarManager::DISABLE_NOTIFICATION_ICONS) != 0) ? "ICONS" : "icons");
+    flagdbg.Append(((diff  & IStatusBarManager::DISABLE_NOTIFICATION_ICONS) != 0) ? "* " : " ");
+    flagdbg.Append(((state & IStatusBarManager::DISABLE_NOTIFICATION_ALERTS) != 0) ? "ALERTS" : "alerts");
+    flagdbg.Append(((diff  & IStatusBarManager::DISABLE_NOTIFICATION_ALERTS) != 0) ? "* " : " ");
+    flagdbg.Append(((state & IStatusBarManager::DISABLE_SYSTEM_INFO) != 0) ? "SYSTEM_INFO" : "system_info");
+    flagdbg.Append(((diff  & IStatusBarManager::DISABLE_SYSTEM_INFO) != 0) ? "* " : " ");
+    flagdbg.Append(((state & IStatusBarManager::DISABLE_BACK) != 0) ? "BACK" : "back");
+    flagdbg.Append(((diff  & IStatusBarManager::DISABLE_BACK) != 0) ? "* " : " ");
+    flagdbg.Append(((state & IStatusBarManager::DISABLE_HOME) != 0) ? "HOME" : "home");
+    flagdbg.Append(((diff  & IStatusBarManager::DISABLE_HOME) != 0) ? "* " : " ");
+    flagdbg.Append(((state & IStatusBarManager::DISABLE_RECENT) != 0) ? "RECENT" : "recent");
+    flagdbg.Append(((diff  & IStatusBarManager::DISABLE_RECENT) != 0) ? "* " : " ");
+    flagdbg.Append(((state & IStatusBarManager::DISABLE_CLOCK) != 0) ? "CLOCK" : "clock");
+    flagdbg.Append(((diff  & IStatusBarManager::DISABLE_CLOCK) != 0) ? "* " : " ");
+    flagdbg.Append(((state & IStatusBarManager::DISABLE_SEARCH) != 0) ? "SEARCH" : "search");
+    flagdbg.Append(((diff  & IStatusBarManager::DISABLE_SEARCH) != 0) ? "* " : " ");
+    flagdbg.Append(">");
+    Logger::D(TAG, "%s", flagdbg.ToString().string());
 
-    if ((diff & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
-        mSystemIconArea.animate().cancel();
-        if ((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
-            mSystemIconArea.animate()
-                .alpha(0.0f)
-                .translationY(mNaturalBarHeight*0.5f)
-                ->SetDuration(175)
-                ->SetInterpolator(new DecelerateInterpolator(1.5f))
-                ->SetListener(mMakeIconsInvisible)
-                ->Start();
-        } else {
-            mSystemIconArea->SetVisibility(IView::VISIBLE);
-            mSystemIconArea.animate()
-                .alpha(1.0f)
-                .translationY(0)
-                ->SetStartDelay(0)
-                ->SetInterpolator(new DecelerateInterpolator(1.5f))
-                ->SetDuration(175)
-                ->Start();
+    if ((diff & IStatusBarManager::DISABLE_SYSTEM_INFO) != 0) {
+        AutoPtr<IViewPropertyAnimator> vpa;
+        IView::Probe(mSystemIconArea)->Animate((IViewPropertyAnimator**)&vpa);
+        vpa->Cancel();
+        if ((state & IStatusBarManager::DISABLE_SYSTEM_INFO) != 0) {
+            AnimateStatusBarHide(IView::Probe(mSystemIconArea), animate);
+        }
+        else {
+            AnimateStatusBarShow(IView::Probe(mSystemIconArea), animate);
         }
     }
 
-    if ((diff & StatusBarManager.DISABLE_CLOCK) != 0) {
-        Boolean show = (state & StatusBarManager.DISABLE_CLOCK) == 0;
-        showClock(show);
+    if ((diff & IStatusBarManager::DISABLE_CLOCK) != 0) {
+        Boolean show = (state & IStatusBarManager::DISABLE_CLOCK) == 0;
+        ShowClock(show);
     }
-    if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
-        if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
-            animateCollapsePanels();
+    if ((diff & IStatusBarManager::DISABLE_EXPAND) != 0) {
+        if ((state & IStatusBarManager::DISABLE_EXPAND) != 0) {
+            AnimateCollapsePanels();
         }
     }
 
-    if ((diff & (StatusBarManager.DISABLE_HOME
-                    | StatusBarManager.DISABLE_RECENT
-                    | StatusBarManager.DISABLE_BACK
-                    | StatusBarManager.DISABLE_SEARCH)) != 0) {
+    if ((diff & (IStatusBarManager::DISABLE_HOME
+                    | IStatusBarManager::DISABLE_RECENT
+                    | IStatusBarManager::DISABLE_BACK
+                    | IStatusBarManager::DISABLE_SEARCH)) != 0) {
         // the nav bar will take care of these
         if (mNavigationBarView != NULL) mNavigationBarView->SetDisabledFlags(state);
 
-        if ((state & StatusBarManager.DISABLE_RECENT) != 0) {
+        if ((state & IStatusBarManager::DISABLE_RECENT) != 0) {
             // close recents if it's visible
-            mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
-            mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
+            mHandler->RemoveMessages(MSG_HIDE_RECENT_APPS);
+            Boolean tmp = FALSE;
+            mHandler->SendEmptyMessage(MSG_HIDE_RECENT_APPS, &tmp);
         }
     }
 
-    if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-        if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
+    if ((diff & IStatusBarManager::DISABLE_NOTIFICATION_ICONS) != 0) {
+        if ((state & IStatusBarManager::DISABLE_NOTIFICATION_ICONS) != 0) {
             if (mTicking) {
-                haltTicker();
+                HaltTicker();
             }
-
-            mNotificationIcons.animate()
-                .alpha(0.0f)
-                .translationY(mNaturalBarHeight*0.5f)
-                ->SetDuration(175)
-                ->SetInterpolator(new DecelerateInterpolator(1.5f))
-                ->SetListener(mMakeIconsInvisible)
-                ->Start();
-        } else {
-            mNotificationIcons->SetVisibility(IView::VISIBLE);
-            mNotificationIcons.animate()
-                .alpha(1.0f)
-                .translationY(0)
-                ->SetStartDelay(0)
-                ->SetInterpolator(new DecelerateInterpolator(1.5f))
-                ->SetDuration(175)
-                ->Start();
+            AnimateStatusBarHide(mNotificationIconArea, animate);
         }
-    } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
-        if (mTicking && (state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
-            haltTicker();
+        else {
+            AnimateStatusBarShow(mNotificationIconArea, animate);
         }
     }
+
+    if ((diff & IStatusBarManager::DISABLE_NOTIFICATION_ALERTS) != 0) {
+        mDisableNotificationAlerts =
+                (state & IStatusBarManager::DISABLE_NOTIFICATION_ALERTS) != 0;
+        mHeadsUpObserver->OnChange(TRUE);
+    }
+    return NOERROR;
 }
 
-AutoPtr<IHandler> GetHandler()
+/**
+ * Animates {@code v}, a view that is part of the status bar, out.
+ */
+void PhoneStatusBar::AnimateStatusBarHide(
+    /* [in] */ IView* v,
+    /* [in] */ Boolean animate)
 {
-    return mHandler;
-}
-
-void PhoneStatusBar::MakeExpandedVisible(
-    /* [in] */ Boolean revealAfterDraw)
-{
-    if (SPEW) Slog.d(TAG, "Make expanded visible: expanded visible=" + mExpandedVisible);
-    if (mExpandedVisible) {
+    AutoPtr<IViewPropertyAnimator> vpa;
+    v->Animate((IViewPropertyAnimator**)&vpa);
+    vpa->Cancel();
+    if (!animate) {
+        v->SetAlpha(0.f);
+        v->SetVisibility(IView::INVISIBLE);
         return;
     }
 
+    vpa = NULL;
+    v->Animate((IViewPropertyAnimator**)&vpa);
+    vpa->Alpha(0.f);
+    vpa->SetDuration(160);
+    vpa->SetStartDelay(0);
+    vpa->SetInterpolator(ITimeInterpolator::Probe(ALPHA_OUT));
+    AutoPtr<Runnable6> run = new Runnable6(v);
+    vpa->WithEndAction(run);
+}
+
+/**
+ * Animates {@code v}, a view that is part of the status bar, in.
+ */
+void PhoneStatusBar::AnimateStatusBarShow(
+    /* [in] */ IView* v,
+    /* [in] */ Boolean animate)
+{
+    AutoPtr<IViewPropertyAnimator> vpa;
+    v->Animate((IViewPropertyAnimator**)&vpa);
+    vpa->Cancel();
+    v->SetVisibility(IView::VISIBLE);
+    if (!animate) {
+        v->SetAlpha(1.f);
+        return;
+    }
+
+    vpa = NULL;
+    v->Animate((IViewPropertyAnimator**)&vpa);
+    vpa->Alpha(1.f);
+    vpa->SetDuration(320);
+    vpa->SetInterpolator(ITimeInterpolator::Probe(ALPHA_IN));
+    vpa->SetStartDelay(50);
+
+    // We need to clean up any pending end action from AnimateStatusBarHide if we call
+    // both hide and show in the same frame before the animation actually gets started.
+    // cancel() doesn't really remove the end action.
+    vpa->WithEndAction(NULL);
+
+    // Synchronize the motion with the Keyguard fading if necessary.
+    if (mKeyguardFadingAway) {
+        vpa = NULL;
+        v->Animate((IViewPropertyAnimator**)&vpa);
+        vpa->SetDuration(mKeyguardFadingAwayDuration);
+        vpa->SetInterpolator(ITimeInterpolator::Probe(mLinearOutSlowIn));
+        vpa->SetStartDelay(mKeyguardFadingAwayDelay);
+        vpa->Start();
+    }
+}
+
+AutoPtr<BaseStatusBar::H> PhoneStatusBar::CreateHandler()
+{
+    return new PhoneStatusBar::H(this);
+}
+
+ECode PhoneStatusBar::StartActivity(
+    /* [in] */ IIntent* intent,
+    /* [in] */ Boolean dismissShade)
+{
+    StartActivityDismissingKeyguard(intent, FALSE, dismissShade);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::GetScrimController(
+    /* [out] */ IScrimController** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mScrimController;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::SetQsExpanded(
+    /* [in] */ Boolean expanded)
+{
+    mStatusBarWindowManager->SetQsExpanded(expanded);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::IsGoingToNotificationShade(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mLeaveOpenOnKeyguardHide;
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::IsQsExpanded(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    return mNotificationPanel->IsQsExpanded(result);
+}
+
+ECode PhoneStatusBar::IsScreenOnComingFromTouch(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mScreenOnComingFromTouch;
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::IsFalsingThresholdNeeded(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Int32 v = 0;
+    Boolean onKeyguard = (GetBarState(&v), v) == IStatusBarState::KEYGUARD;
+    Boolean isMethodInsecure = mUnlockMethodCache->IsMethodInsecure();
+    *result = onKeyguard && (isMethodInsecure || mDozing || mScreenOnComingFromTouch);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::IsDozing(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mDozing;
+    return NOERROR;
+}
+
+// @Override  // NotificationData.Environment
+ECode PhoneStatusBar::GetCurrentMediaNotificationKey(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mMediaNotificationKey;
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::IsScrimSrcModeEnabled(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mScrimSrcModeEnabled;
+    return NOERROR;
+}
+
+/**  if the interrupting notification had a fullscreen intent, fire it now.  */
+void PhoneStatusBar::EscalateHeadsUp()
+{
+    AutoPtr<INotificationDataEntry> entry;
+    mHeadsUpNotificationView->GetEntry((INotificationDataEntry**)&entry);
+    if (entry != NULL) {
+        AutoPtr<IStatusBarNotification> sbn;
+        entry->GetNotification((IStatusBarNotification**)&sbn);
+        mHeadsUpNotificationView->ReleaseResources();
+        AutoPtr<INotification> notification;
+        sbn->GetNotification((INotification**)&notification);
+        AutoPtr<IPendingIntent> fullScreenIntent;
+        notification->GetFullScreenIntent((IPendingIntent**)&fullScreenIntent);
+        if (fullScreenIntent != NULL) {
+            if (DEBUG) {
+                Logger::D(TAG, "converting a heads up to fullScreen");
+            }
+            // try {
+            fullScreenIntent->Send();
+            // } catch (PendingIntent.CanceledException e) {
+            // }
+        }
+    }
+}
+
+Boolean PhoneStatusBar::PanelsEnabled()
+{
+    return (mDisabled & IStatusBarManager::DISABLE_EXPAND) == 0;
+}
+
+ECode PhoneStatusBar::MakeExpandedVisible(
+    /* [in] */ Boolean force)
+{
+    if (SPEW) Logger::D(TAG, "Make expanded visible: expanded visible=%d", mExpandedVisible);
+    if (!force && (mExpandedVisible || !PanelsEnabled())) {
+        return NOERROR;
+    }
+
     mExpandedVisible = TRUE;
-    mPile->SetLayoutTransitionsEnabled(TRUE);
-    if (mNavigationBarView != NULL)
+    if (mNavigationBarView != NULL) {
         mNavigationBarView->SetSlippery(TRUE);
+    }
 
-    updateCarrierLabelVisibility(TRUE);
+    UpdateCarrierLabelVisibility(TRUE);
 
-    updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+    UpdateExpandedViewPos(EXPANDED_LEAVE_ALONE);
 
     // Expand the window to encompass the full screen in anticipation of the drag.
     // This is only possible to do atomically because the status bar is at the top of the screen!
-    WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
-    lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-    lp.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-    lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-    mWindowManager.updateViewLayout(mStatusBarWindow, lp);
+    mStatusBarWindowManager->SetStatusBarExpanded(TRUE);
+    IView::Probe(mStatusBarView)->SetFocusable(FALSE);
 
-    // Updating the window layout will force an expensive traversal/redraw.
-    // Kick off the reveal animation after this is complete to avoid animation latency.
-    if (revealAfterDraw) {
-//            mHandler.post(mStartRevealAnimation);
-    }
-
-    visibilityChanged(TRUE);
-}
-
-ECode PhoneStatusBar::AnimateExpandNotificationsPanel()
-{
-
+    VisibilityChanged(TRUE);
+    mWaitingForKeyguardExit = FALSE;
+    Disable(mDisabledUnmodified, !force /* animate */);
+    SetInteracting(IStatusBarManager::WINDOW_STATUS_BAR, TRUE);
+    return NOERROR;
 }
 
 ECode PhoneStatusBar::AnimateCollapsePanels()
 {
-    animateCollapsePanels(ICommandQueue::FLAG_EXCLUDE_NONE);
+    AnimateCollapsePanels(ICommandQueue::FLAG_EXCLUDE_NONE);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::PostAnimateCollapsePanels()
+{
+    Boolean tmp = FALSE;
+    mHandler->Post(mAnimateCollapsePanels, &tmp);
+    return NOERROR;
 }
 
 ECode PhoneStatusBar::AnimateCollapsePanels(
     /* [in] */ Int32 flags)
 {
+    AnimateCollapsePanels(flags, FALSE /* force */);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::AnimateCollapsePanels(
+    /* [in] */ Int32 flags,
+    /* [in] */ Boolean force)
+{
+    if (!force &&
+            (mState == IStatusBarState::KEYGUARD || mState == IStatusBarState::SHADE_LOCKED)) {
+        RunPostCollapseRunnables();
+        return NOERROR;
+    }
     if (SPEW) {
-        Slog.d(TAG, "animateCollapse():"
-                + " mExpandedVisible=" + mExpandedVisible
-                + " mAnimating=" + mAnimating
-                + " mAnimatingReveal=" + mAnimatingReveal
-                + " mAnimY=" + mAnimY
-                + " mAnimVel=" + mAnimVel
-                + " flags=" + flags);
+        Logger::D(TAG, "animateCollapse(): mExpandedVisible=%d flags=%d" , mExpandedVisible, flags);
     }
 
+    Boolean tmp = FALSE;
     if ((flags & ICommandQueue::FLAG_EXCLUDE_RECENTS_PANEL) == 0) {
-        mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
-        mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
+        if (mHandler->HasMessages(MSG_HIDE_RECENT_APPS, &tmp), !tmp) {
+            mHandler->RemoveMessages(MSG_HIDE_RECENT_APPS);
+            mHandler->SendEmptyMessage(MSG_HIDE_RECENT_APPS, &tmp);
+        }
     }
 
     if ((flags & ICommandQueue::FLAG_EXCLUDE_SEARCH_PANEL) == 0) {
-        mHandler.removeMessages(MSG_CLOSE_SEARCH_PANEL);
-        mHandler.sendEmptyMessage(MSG_CLOSE_SEARCH_PANEL);
+        mHandler->RemoveMessages(MSG_CLOSE_SEARCH_PANEL);
+        mHandler->SendEmptyMessage(MSG_CLOSE_SEARCH_PANEL, &tmp);
     }
 
-    mStatusBarWindow.cancelExpandHelper();
-    mStatusBarView.collapseAllPanels(TRUE);
+    if (mStatusBarWindow != NULL) {
+        // release focus immediately to kick off focus change transition
+        mStatusBarWindowManager->SetStatusBarFocusable(FALSE);
+
+        mStatusBarWindow->CancelExpandHelper();
+        IPanelBar::Probe(mStatusBarView)->CollapseAllPanels(TRUE);
+    }
+    return NOERROR;
 }
 
-
-AutoPtr<IViewPropertyAnimator> SetVisibilityWhenDone()
+void PhoneStatusBar::RunPostCollapseRunnables()
 {
-    a->SetListener(new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            v->SetVisibility(vis);
-            a->SetListener(NULL); // oneshot
-        }
-    });
-    return a;
+    Int32 size = 0;
+    mPostCollapseRunnables->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mPostCollapseRunnables->Get(i, (IInterface**)&obj);
+        IRunnable::Probe(obj)->Run();
+    }
+    mPostCollapseRunnables->Clear();
 }
 
-AutoPtr<IAnimator> SetVisibilityWhenDone()
+ECode PhoneStatusBar::SetVisibilityWhenDone(
+    /* [in] */ IViewPropertyAnimator* a,
+    /* [in] */ IView* v,
+    /* [in] */ Int32 vis,
+    /* [out] */ IViewPropertyAnimator** result)
 {
-    a.addListener(new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            v->SetVisibility(vis);
-        }
-    });
-    return a;
+    VALIDATE_NOT_NULL(result);
+    AutoPtr<AnimatorListenerAdapter3> al = new AnimatorListenerAdapter3(v, a, vis);
+    a->SetListener(al);
+    *result = a;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
-AutoPtr<IAnimator> Interpolator(
+ECode PhoneStatusBar::SetVisibilityWhenDone(
+    /* [in] */ IAnimator* a,
+    /* [in] */ IView* v,
+    /* [in] */ Int32 vis,
+    /* [out] */ IAnimator** result)
+{
+    VALIDATE_NOT_NULL(result);
+    AutoPtr<AnimatorListenerAdapter4> al = new AnimatorListenerAdapter4(v, vis);
+    a->AddListener(al);
+    *result = a;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::Interpolator(
     /* [in] */ ITimeInterpolator* ti,
-    /* [in] */ IAnimator* a)
+    /* [in] */ IAnimator* a,
+    /* [out] */ IAnimator** result)
 {
-    // a->SetInterpolator(ti);
-    // return a;
+    VALIDATE_NOT_NULL(result);
+    a->SetInterpolator(ti);
+    *result = a;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
-AutoPtr<IAnimator> StartDelay(
+ECode PhoneStatusBar::StartDelay(
     /* [in] */ Int32 d,
-    /* [in] */ IAnimator* a)
+    /* [in] */ IAnimator* a,
+    /* [out] */ IAnimator** result)
 {
-    // a->SetStartDelay(d);
-    // return a;
+    VALIDATE_NOT_NULL(result);
+    a->SetStartDelay(d);
+    *result = a;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
-AutoPtr<IAnimator> Start(
-    /* [in] */ IAnimator* a)
+ECode PhoneStatusBar::Start(
+    /* [in] */ IAnimator* a,
+    /* [out] */ IAnimator** result)
 {
-    // a->Start();
-    // return a;
+    VALIDATE_NOT_NULL(result);
+    a->Start();
+    *result = a;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
-ECode PhoneStatusBar::animateExpandNotificationsPanel()
+ECode PhoneStatusBar::AnimateExpandNotificationsPanel()
 {
-    if (SPEW) Slog.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
-    if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
-        return ;
+    if (SPEW) Logger::D(TAG, "animateExpand: mExpandedVisible=%d", mExpandedVisible);
+    if (!PanelsEnabled()) {
+        return NOERROR;
     }
 
-    mNotificationPanel.expand();
-    if (mHasFlipSettings && mScrollView.getVisibility() != IView::VISIBLE) {
-        flipToNotifications();
-    }
+    IPanelView::Probe(mNotificationPanel)->Expand();
 
-    if (FALSE) postStartTracing();
-}
-
-ECode PhoneStatusBar::FlipToNotifications()
-{
-    if (mFlipSettingsViewAnim != NULL) mFlipSettingsViewAnim.cancel();
-    if (mScrollViewAnim != NULL) mScrollViewAnim.cancel();
-    if (mSettingsButtonAnim != NULL) mSettingsButtonAnim.cancel();
-    if (mNotificationButtonAnim != NULL) mNotificationButtonAnim.cancel();
-    if (mClearButtonAnim != NULL) mClearButtonAnim.cancel();
-
-    mScrollView->SetVisibility(IView::VISIBLE);
-    mScrollViewAnim = start(
-        startDelay(FLIP_DURATION_OUT,
-            interpolator(mDecelerateInterpolator,
-                ObjectAnimator.ofFloat(mScrollView, View.SCALE_X, 0.0f, 1.0f)
-                    ->SetDuration(FLIP_DURATION_IN)
-                )));
-    mFlipSettingsViewAnim = start(
-        setVisibilityWhenDone(
-            interpolator(mAccelerateInterpolator,
-                    ObjectAnimator.ofFloat(mFlipSettingsView, View.SCALE_X, 1.0f, 0.0f)
-                    )
-                ->SetDuration(FLIP_DURATION_OUT),
-            mFlipSettingsView, IView::INVISIBLE));
-    mNotificationButtonAnim = start(
-        setVisibilityWhenDone(
-            ObjectAnimator.ofFloat(mNotificationButton, View.ALPHA, 0.0f)
-                ->SetDuration(FLIP_DURATION),
-            mNotificationButton, IView::INVISIBLE));
-    mSettingsButton->SetVisibility(IView::VISIBLE);
-    mSettingsButtonAnim = start(
-        ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA, 1.0f)
-            ->SetDuration(FLIP_DURATION));
-    mClearButton->SetVisibility(IView::VISIBLE);
-    mClearButton->SetAlpha(0.0f);
-    setAreThereNotifications(); // this will show/hide the button as necessary
-    mNotificationPanel.postDelayed(new Runnable() {
-        public void run() {
-            updateCarrierLabelVisibility(FALSE);
-        }
-    }, FLIP_DURATION - 150);
+    if (FALSE) PostStartTracing();
+    return NOERROR;
 }
 
 ECode PhoneStatusBar::AnimateExpandSettingsPanel()
 {
-    if (SPEW) Slog.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
-    if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
-        return;
+    if (SPEW) Logger::D(TAG, "animateExpand: mExpandedVisible=%d", mExpandedVisible);
+    if (!PanelsEnabled()) {
+        return NOERROR;
     }
 
-    if (mHasFlipSettings) {
-        mNotificationPanel.expand();
-        if (mFlipSettingsView.getVisibility() != IView::VISIBLE) {
-            flipToSettings();
-        }
-    } else if (mSettingsPanel != NULL) {
-        mSettingsPanel.expand();
-    }
+    // Settings are not available in setup
+    if (!mUserSetup) return NOERROR;
 
-    if (FALSE) postStartTracing();
-}
+    IPanelView::Probe(mNotificationPanel)->Expand();
+    mNotificationPanel->OpenQs();
 
-
-ECode PhoneStatusBar::SwitchToSettings()
-{
-    mFlipSettingsView->SetScaleX(1.0f);
-    mFlipSettingsView->SetVisibility(IView::VISIBLE);
-    mSettingsButton->SetVisibility(IView::GONE);
-    mScrollView->SetVisibility(IView::GONE);
-    mScrollView->SetScaleX(0.0f);
-    mNotificationButton->SetVisibility(IView::VISIBLE);
-    mNotificationButton->SetAlpha(1.0f);
-    mClearButton->SetVisibility(IView::GONE);
-}
-
-ECode PhoneStatusBar::FlipToSettings()
-{
-    if (mFlipSettingsViewAnim != NULL) mFlipSettingsViewAnim.cancel();
-    if (mScrollViewAnim != NULL) mScrollViewAnim.cancel();
-    if (mSettingsButtonAnim != NULL) mSettingsButtonAnim.cancel();
-    if (mNotificationButtonAnim != NULL) mNotificationButtonAnim.cancel();
-    if (mClearButtonAnim != NULL) mClearButtonAnim.cancel();
-
-    mFlipSettingsView->SetVisibility(IView::VISIBLE);
-    mFlipSettingsView->SetScaleX(0.0f);
-    mFlipSettingsViewAnim = start(
-        startDelay(FLIP_DURATION_OUT,
-            interpolator(mDecelerateInterpolator,
-                ObjectAnimator.ofFloat(mFlipSettingsView, View.SCALE_X, 0.0f, 1.0f)
-                    ->SetDuration(FLIP_DURATION_IN)
-                )));
-    mScrollViewAnim = start(
-        setVisibilityWhenDone(
-            interpolator(mAccelerateInterpolator,
-                    ObjectAnimator.ofFloat(mScrollView, View.SCALE_X, 1.0f, 0.0f)
-                    )
-                ->SetDuration(FLIP_DURATION_OUT),
-            mScrollView, IView::INVISIBLE));
-    mSettingsButtonAnim = start(
-        setVisibilityWhenDone(
-            ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA, 0.0f)
-                ->SetDuration(FLIP_DURATION),
-                mScrollView, IView::INVISIBLE));
-    mNotificationButton->SetVisibility(IView::VISIBLE);
-    mNotificationButtonAnim = start(
-        ObjectAnimator.ofFloat(mNotificationButton, View.ALPHA, 1.0f)
-            ->SetDuration(FLIP_DURATION));
-    mClearButtonAnim = start(
-        setVisibilityWhenDone(
-            ObjectAnimator.ofFloat(mClearButton, View.ALPHA, 0.0f)
-            ->SetDuration(FLIP_DURATION),
-            mClearButton, IView::INVISIBLE));
-    mNotificationPanel.postDelayed(new Runnable() {
-        public void run() {
-            updateCarrierLabelVisibility(FALSE);
-        }
-    }, FLIP_DURATION - 150);
-}
-
-ECode PhoneStatusBar::FlipPanels()
-{
-    if (mHasFlipSettings) {
-        if (mFlipSettingsView.getVisibility() != IView::VISIBLE) {
-            flipToSettings();
-        } else {
-            flipToNotifications();
-        }
-    }
+    if (FALSE) PostStartTracing();
+    return NOERROR;
 }
 
 ECode PhoneStatusBar::AnimateCollapseQuickSettings()
 {
-    mStatusBarView.collapseAllPanels(TRUE);
+    if (mState == IStatusBarState::SHADE) {
+        IPanelBar::Probe(mStatusBarView)->CollapseAllPanels(TRUE);
+    }
+    return NOERROR;
 }
 
-void PhoneStatusBar::MakeExpandedInvisibleSoon()
+ECode PhoneStatusBar::MakeExpandedInvisible()
 {
-    mHandler.postDelayed(new Runnable() { public void run() { makeExpandedInvisible(); }}, 50);
-}
+    if (SPEW) Logger::D(TAG, "makeExpandedInvisible: mExpandedVisible=%d mExpandedVisible=%d"
+            , mExpandedVisible , mExpandedVisible);
 
-void PhoneStatusBar::MakeExpandedInvisible()
-{
-    if (SPEW) Slog.d(TAG, "makeExpandedInvisible: mExpandedVisible=" + mExpandedVisible
-            + " mExpandedVisible=" + mExpandedVisible);
-
-    if (!mExpandedVisible) {
-        return;
+    if (!mExpandedVisible || mStatusBarWindow == NULL) {
+        return NOERROR;
     }
 
     // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
-    mStatusBarView.collapseAllPanels(/*animate=*/ FALSE);
+    IPanelBar::Probe(mStatusBarView)->CollapseAllPanels(/*animate=*/ FALSE);
 
-    if (mHasFlipSettings) {
-        // reset things to their proper state
-        if (mFlipSettingsViewAnim != NULL) mFlipSettingsViewAnim.cancel();
-        if (mScrollViewAnim != NULL) mScrollViewAnim.cancel();
-        if (mSettingsButtonAnim != NULL) mSettingsButtonAnim.cancel();
-        if (mNotificationButtonAnim != NULL) mNotificationButtonAnim.cancel();
-        if (mClearButtonAnim != NULL) mClearButtonAnim.cancel();
-
-        mScrollView->SetScaleX(1.0f);
-        mScrollView->SetVisibility(IView::VISIBLE);
-        mSettingsButton->SetAlpha(1.0f);
-        mSettingsButton->SetVisibility(IView::VISIBLE);
-        mNotificationPanel->SetVisibility(IView::GONE);
-        mFlipSettingsView->SetVisibility(IView::GONE);
-        mNotificationButton->SetVisibility(IView::GONE);
-        setAreThereNotifications(); // show the clear button
+    // reset things to their proper state
+    if (mScrollViewAnim != NULL) {
+        mScrollViewAnim->Cancel();
     }
+
+    if (mClearButtonAnim != NULL) {
+        mClearButtonAnim->Cancel();
+    }
+
+    IView::Probe(mStackScroller)->SetVisibility(IView::VISIBLE);
+    IView::Probe(mNotificationPanel)->SetVisibility(IView::GONE);
+
+    mNotificationPanel->CloseQs();
 
     mExpandedVisible = FALSE;
-    mPile->SetLayoutTransitionsEnabled(FALSE);
-    if (mNavigationBarView != NULL)
+    if (mNavigationBarView != NULL) {
         mNavigationBarView->SetSlippery(FALSE);
-    visibilityChanged(FALSE);
+    }
+    VisibilityChanged(FALSE);
 
     // Shrink the window to the size of the status bar only
-    WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
-    lp.height = getStatusBarHeight();
-    lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-    lp.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-    mWindowManager.updateViewLayout(mStatusBarWindow, lp);
-
-    if ((mDisabled & StatusBarManager.DISABLE_NOTIFICATION_ICONS) == 0) {
-        setNotificationIconVisibility(TRUE, R::anim::fade_in);
-    }
+    mStatusBarWindowManager->SetStatusBarExpanded(FALSE);
+    IView::Probe(mStatusBarView)->SetFocusable(TRUE);
 
     // Close any "App info" popups that might have snuck on-screen
-    dismissPopups();
+    DismissPopups();
 
-    if (mPostCollapseCleanup != NULL) {
-        mPostCollapseCleanup->Run();
-        mPostCollapseCleanup = NULL;
-    }
+    RunPostCollapseRunnables();
+    SetInteracting(IStatusBarManager::WINDOW_STATUS_BAR, FALSE);
+    ShowBouncer();
+    Disable(mDisabledUnmodified, TRUE /* animate */);
+    return NOERROR;
 }
 
-void PhoneStatusBar::SetPileLayers(
-    /* [in] */ Int32 layerType)
+ECode PhoneStatusBar::InterceptTouchEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
 {
-    Int32 count = mPile.getChildCount();
-
-    switch (layerType) {
-        case View.LAYER_TYPE_NONE:
-            for (Int32 i = 0; i < count; i++) {
-                mPile.getChildAt(i)->SetLayerType(layerType, NULL);
-            }
-            break;
-        case View.LAYER_TYPE_HARDWARE:
-            Int32[] location = new Int32[2];
-            mNotificationPanel.getLocationInWindow(location);
-
-            Int32 left = location[0];
-            Int32 top = location[1];
-            Int32 right = left + mNotificationPanel.getWidth();
-            Int32 bottom = top + getExpandedViewMaxHeight();
-
-            Rect childBounds = new Rect();
-
-            for (Int32 i = 0; i < count; i++) {
-                View view = mPile.getChildAt(i);
-                view.getLocationInWindow(location);
-
-                childBounds->Set(location[0], location[1],
-                        location[0] + view.getWidth(), location[1] + view.getHeight());
-
-                if (childBounds.intersects(left, top, right, bottom)) {
-                    view->SetLayerType(layerType, NULL);
-                }
-            }
-
-            break;
-    }
-}
-
-
-Boolean IsClinging()
-{
-    return mCling != NULL && mCling.getVisibility() == IView::VISIBLE;
-}
-
-ECode PhoneStatusBar::HideCling()
-{
-    if (isClinging()) {
-        mCling.animate().alpha(0.0f)->SetDuration(250)->Start();
-        mCling->SetVisibility(IView::GONE);
-        mSuppressStatusBarDrags = FALSE;
-    }
-}
-
-ECode PhoneStatusBar::ShowCling()
-{
-    // lazily inflate this to accommodate orientation change
-    ViewStub stub = (ViewStub) mStatusBarWindow->FindViewById(R.id.status_bar_cling_stub);
-    if (stub == NULL) {
-        mClingShown = TRUE;
-        return; // no clings on this device
-    }
-
-    mSuppressStatusBarDrags = TRUE;
-
-    mHandler.postDelayed(new Runnable() {
-        @Override
-        public void run() {
-            mCling = (ViewGroup) stub.inflate();
-
-            mCling->SetOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public Boolean onTouch(View v, MotionEvent event) {
-                    return TRUE; // e eats everything
-                }});
-            mCling->FindViewById(R.id.ok)->SetOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    hideCling();
-                }});
-
-            mCling->SetAlpha(0.0f);
-            mCling->SetVisibility(IView::VISIBLE);
-            mCling.animate().alpha(1.0f);
-
-            mClingShown = TRUE;
-            SharedPreferences.Editor editor = Prefs.edit(mContext);
-            editor.putBoolean(Prefs.SHOWN_QUICK_SETTINGS_HELP, TRUE);
-            editor.apply();
-
-            makeExpandedVisible(TRUE); // enforce visibility in case the shade is still animating closed
-            animateExpandNotificationsPanel();
-
-            mSuppressStatusBarDrags = FALSE;
+    VALIDATE_NOT_NULL(result);
+    if (DEBUG_GESTURES) {
+        Int32 masked = 0;
+        event->GetActionMasked(&masked);
+        if (masked != IMotionEvent::ACTION_MOVE) {
+            assert(0 && "TODO");
+            // EventLog.writeEvent(EventLogTags.SYSUI_STATUSBAR_TOUCH,
+            //         event.getActionMasked(), (Int32) event.getX(), (Int32) event.getY(), mDisabled);
         }
-    }, 500);
 
-    animateExpandNotificationsPanel();
-}
+    }
 
-Boolean PhoneStatusBar::InterceptTouchEvent(
-    /* [in] */ IMotionEvent* event)
-{
     if (SPEW) {
-        Slog.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
-            + mDisabled + " mTracking=" + mTracking);
-    } else if (CHATTY) {
-        if (event.getAction() != IMotionEvent::ACTION_MOVE) {
-            Slog.d(TAG, String.format(
-                        "panel: %s at (%f, %f) mDisabled=0x%08x",
-                        MotionEvent.actionToString(event.getAction()),
-                        event.getRawX(), event.getRawY(), mDisabled));
+        Float fv = 0;
+        event->GetRawY(&fv);
+        Logger::D(TAG, "Touch: rawY=%f event=%s mDisabled=%d mTracking=%d"
+            , fv, TO_CSTR(event), mDisabled, mTracking);
+    }
+    else if (CHATTY) {
+        Int32 action;
+        event->GetAction(&action);
+        if (action != IMotionEvent::ACTION_MOVE) {
+            AutoPtr<IMotionEventHelper> helper;
+            CMotionEventHelper::AcquireSingleton((IMotionEventHelper**)&helper);
+            String str;
+            helper->ActionToString(action, &str);
+            Float x = 0, y = 0;
+            event->GetRawX(&x);
+            event->GetRawY(&y);
+            Logger::D(TAG, "panel: %s at (%f, %f) mDisabled=0x%08x",
+                        str.string(), x, y, mDisabled);
         }
     }
 
     if (DEBUG_GESTURES) {
-        mGestureRec.add(event);
+        mGestureRec->Add(event);
     }
 
-    // Cling (first-run help) handling.
-    // The cling is supposed to show the first time you drag, or even tap, the status bar.
-    // It should show the notification panel, then fade in after half a second, giving you
-    // an explanation of what just happened, as well as teach you how to access quick
-    // settings (another drag). The user can dismiss the cling by clicking OK or by
-    // dragging quick settings into view.
-    Int32 act = event.getActionMasked();
-    if (mSuppressStatusBarDrags) {
-        return TRUE;
-    } else if (act == IMotionEvent::ACTION_UP && !mClingShown) {
-        showCling();
-    } else {
-        hideCling();
+    if (mStatusBarWindowState == IStatusBarManager::WINDOW_STATE_SHOWING) {
+        Int32 action;
+        event->GetAction(&action);
+        Boolean upOrCancel =
+                action == IMotionEvent::ACTION_UP ||
+                action == IMotionEvent::ACTION_CANCEL;
+        if (upOrCancel && !mExpandedVisible) {
+            SetInteracting(IStatusBarManager::WINDOW_STATUS_BAR, FALSE);
+        }
+        else {
+            SetInteracting(IStatusBarManager::WINDOW_STATUS_BAR, TRUE);
+        }
     }
-
-    return FALSE;
+    *result = FALSE;
+    return NOERROR;
 }
 
-// GestureRecorder getGestureRecorder()
-// {
-//  return mGestureRec;
-// }
+ECode PhoneStatusBar::GetGestureRecorder(
+    /* [out] */ IGestureRecorder** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = (IGestureRecorder*)mGestureRec->Probe(EIID_IGestureRecorder);
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
 
-//@Override // CommandQueue
-ECode PhoneStatusBar::SetNavigationIconHints(
+void PhoneStatusBar::SetNavigationIconHints(
     /* [in] */ Int32 hints)
 {
     if (hints == mNavigationIconHints) return;
@@ -2276,447 +3758,1904 @@ ECode PhoneStatusBar::SetNavigationIconHints(
     if (mNavigationBarView != NULL) {
         mNavigationBarView->SetNavigationIconHints(hints);
     }
+    CheckBarModes();
 }
 
-//@Override // CommandQueue
+// @Override // CommandQueue
+ECode PhoneStatusBar::SetWindowState(
+    /* [in] */ Int32 window,
+    /* [in] */ Int32 state)
+{
+    Boolean showing = state == IStatusBarManager::WINDOW_STATE_SHOWING;
+    if (mStatusBarWindow != NULL
+            && window == IStatusBarManager::WINDOW_STATUS_BAR
+            && mStatusBarWindowState != state) {
+        mStatusBarWindowState = state;
+        if (DEBUG_WINDOW_STATE) {
+            AutoPtr<IStatusBarManagerHelper> helper;
+            CStatusBarManagerHelper::AcquireSingleton((IStatusBarManagerHelper**)&helper);
+            String value;
+            helper->WindowStateToString(state, &value);
+            Logger::D(TAG, "Status bar %s", value.string());
+        }
+        if (!showing && mState == IStatusBarState::SHADE) {
+            IPanelBar::Probe(mStatusBarView)->CollapseAllPanels(FALSE);
+        }
+    }
+    if (mNavigationBarView != NULL
+            && window == IStatusBarManager::WINDOW_NAVIGATION_BAR
+            && mNavigationBarWindowState != state) {
+        mNavigationBarWindowState = state;
+        if (DEBUG_WINDOW_STATE) {
+            AutoPtr<IStatusBarManagerHelper> helper;
+            CStatusBarManagerHelper::AcquireSingleton((IStatusBarManagerHelper**)&helper);
+            String value;
+            helper->WindowStateToString(state, &value);
+            Logger::D(TAG, "Navigation bar %s", value.string());
+        }
+    }
+    return NOERROR;
+}
+
+// @Override // CommandQueue
+ECode PhoneStatusBar::BuzzBeepBlinked()
+{
+    if (mDozeServiceHost != NULL) {
+        mDozeServiceHost->FireBuzzBeepBlinked();
+    }
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::NotificationLightOff()
+{
+    if (mDozeServiceHost != NULL) {
+        mDozeServiceHost->FireNotificationLight(FALSE);
+    }
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::NotificationLightPulse(
+    /* [in] */ Int32 argb,
+    /* [in] */ Int32 onMillis,
+    /* [in] */ Int32 offMillis)
+{
+    if (mDozeServiceHost != NULL) {
+        mDozeServiceHost->FireNotificationLight(TRUE);
+    }
+    return NOERROR;
+}
+
+// @Override // CommandQueue
 ECode PhoneStatusBar::SetSystemUiVisibility(
     /* [in] */ Int32 vis,
     /* [in] */ Int32 mask)
 {
-    Int32 oldVal = mSystemUiVisibility;
-    Int32 newVal = (oldVal&~mask) | (vis&mask);
-    Int32 diff = newVal ^ oldVal;
-
+    const Int32 oldVal = mSystemUiVisibility;
+    const Int32 newVal = (oldVal&~mask) | (vis&mask);
+    const Int32 diff = newVal ^ oldVal;
+    if (DEBUG) Logger::D(TAG, "setSystemUiVisibility vis=%s mask=%s oldVal=%s newVal=%s diff=%s",
+            StringUtils::ToHexString(vis).string(), StringUtils::ToHexString(mask).string(),
+            StringUtils::ToHexString(oldVal).string(), StringUtils::ToHexString(newVal).string(),
+            StringUtils::ToHexString(diff).string());
     if (diff != 0) {
+        // we never set the recents bit via this method, so save the prior state to prevent
+        // clobbering the bit below
+        const Boolean wasRecentsVisible = (mSystemUiVisibility & IView::RECENT_APPS_VISIBLE) > 0;
+
         mSystemUiVisibility = newVal;
 
-        if (0 != (diff & View.SYSTEM_UI_FLAG_LOW_PROFILE)) {
-            Boolean lightsOut = (0 != (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE));
+        // update low profile
+        if ((diff & IView::SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
+            const Boolean lightsOut = (vis & IView::SYSTEM_UI_FLAG_LOW_PROFILE) != 0;
             if (lightsOut) {
-                animateCollapsePanels();
+                AnimateCollapsePanels();
                 if (mTicking) {
-                    haltTicker();
+                    HaltTicker();
                 }
             }
 
-            if (mNavigationBarView != NULL) {
-                mNavigationBarView->SetLowProfile(lightsOut);
-            }
-
-            setStatusBarLowProfile(lightsOut);
+            SetAreThereNotifications();
         }
 
-        notifyUiVisibilityChanged();
+        // update status bar mode
+        AutoPtr<IBarTransitions> bt;
+        mStatusBarView->GetBarTransitions((IBarTransitions**)&bt);
+        const Int32 sbMode = ComputeBarMode(oldVal, newVal, bt,
+                IView::STATUS_BAR_TRANSIENT, IView::STATUS_BAR_TRANSLUCENT);
+
+        // update navigation bar mode
+        bt = NULL;
+        const Int32 nbMode = mNavigationBarView == NULL ? -1 : ComputeBarMode(
+                oldVal, newVal, (mNavigationBarView->GetBarTransitions((IBarTransitions**)&bt), bt),
+                IView::NAVIGATION_BAR_TRANSIENT, IView::NAVIGATION_BAR_TRANSLUCENT);
+        const Boolean sbModeChanged = sbMode != -1;
+        const Boolean nbModeChanged = nbMode != -1;
+        Boolean checkBarModes = FALSE;
+        if (sbModeChanged && sbMode != mStatusBarMode) {
+            mStatusBarMode = sbMode;
+            checkBarModes = TRUE;
+        }
+        if (nbModeChanged && nbMode != mNavigationBarMode) {
+            mNavigationBarMode = nbMode;
+            checkBarModes = TRUE;
+        }
+        if (checkBarModes) {
+            CheckBarModes();
+        }
+        if (sbModeChanged || nbModeChanged) {
+            // update transient bar autohide
+            if (mStatusBarMode == BarTransitions::MODE_SEMI_TRANSPARENT
+                || mNavigationBarMode == BarTransitions::MODE_SEMI_TRANSPARENT) {
+                ScheduleAutohide();
+            }
+            else {
+                CancelAutohide();
+            }
+        }
+
+        // ready to unhide
+        if ((vis & IView::STATUS_BAR_UNHIDE) != 0) {
+            mSystemUiVisibility &= ~IView::STATUS_BAR_UNHIDE;
+        }
+        if ((vis & IView::NAVIGATION_BAR_UNHIDE) != 0) {
+            mSystemUiVisibility &= ~IView::NAVIGATION_BAR_UNHIDE;
+        }
+
+        // restore the recents bit
+        if (wasRecentsVisible) {
+            mSystemUiVisibility |= IView::RECENT_APPS_VISIBLE;
+        }
+
+        // send updated sysui visibility to window manager
+        NotifyUiVisibilityChanged(mSystemUiVisibility);
+    }
+    return NOERROR;
+}
+
+Int32 PhoneStatusBar::ComputeBarMode(
+    /* [in] */ Int32 oldVis,
+    /* [in] */ Int32 newVis,
+    /* [in] */ IBarTransitions* transitions,
+    /* [in] */ Int32 transientFlag,
+    /* [in] */ Int32 translucentFlag)
+{
+    const Int32 oldMode = BarMode(oldVis, transientFlag, translucentFlag);
+    const Int32 newMode = BarMode(newVis, transientFlag, translucentFlag);
+    if (oldMode == newMode) {
+        return -1; // no mode change
+    }
+    return newMode;
+}
+
+Int32 PhoneStatusBar::BarMode(
+    /* [in] */ Int32 vis,
+    /* [in] */ Int32 transientFlag,
+    /* [in] */ Int32 translucentFlag)
+{
+    return (vis & transientFlag) != 0 ? BarTransitions::MODE_SEMI_TRANSPARENT
+            : (vis & translucentFlag) != 0 ? BarTransitions::MODE_TRANSLUCENT
+            : (vis & IView::SYSTEM_UI_TRANSPARENT) != 0 ? BarTransitions::MODE_TRANSPARENT
+            : (vis & IView::SYSTEM_UI_FLAG_LOW_PROFILE) != 0 ? BarTransitions::MODE_LIGHTS_OUT
+            : BarTransitions::MODE_OPAQUE;
+}
+
+void PhoneStatusBar::CheckBarModes()
+{
+    if (mDemoMode) return;
+    AutoPtr<IBarTransitions> bt;
+    mStatusBarView->GetBarTransitions((IBarTransitions**)&bt);
+    CheckBarMode(mStatusBarMode, mStatusBarWindowState, bt);
+    if (mNavigationBarView != NULL) {
+        bt = NULL;
+        mNavigationBarView->GetBarTransitions((IBarTransitions**)&bt);
+        CheckBarMode(mNavigationBarMode, mNavigationBarWindowState, bt);
     }
 }
 
-void PhoneStatusBar::SetStatusBarLowProfile(
-    /* [in] */ Boolean lightsOut)
+void PhoneStatusBar::CheckBarMode(
+    /* [in] */ Int32 mode,
+    /* [in] */ Int32 windowState,
+    /* [in] */ IBarTransitions* transitions)
 {
-    if (mLightsOutAnimation == NULL) {
-        View notifications = mStatusBarView->FindViewById(R.id.notification_icon_area);
-        View systemIcons = mStatusBarView->FindViewById(R.id.statusIcons);
-        View signal = mStatusBarView->FindViewById(R.id.signal_cluster);
-        View battery = mStatusBarView->FindViewById(R.id.battery);
-        View clock = mStatusBarView->FindViewById(R.id.clock);
+    Boolean powerSave = FALSE;
+    mBatteryController->IsPowerSave(&powerSave);
+    const Boolean anim = mScreenOn && windowState != IStatusBarManager::WINDOW_STATE_HIDDEN && !powerSave;
 
-        AnimatorSet lightsOutAnim = new AnimatorSet();
-        lightsOutAnim.playTogether(
-                ObjectAnimator.ofFloat(notifications, View.ALPHA, 0),
-                ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 0),
-                ObjectAnimator.ofFloat(signal, View.ALPHA, 0),
-                ObjectAnimator.ofFloat(battery, View.ALPHA, 0.5f),
-                ObjectAnimator.ofFloat(clock, View.ALPHA, 0.5f)
-            );
-        lightsOutAnim->SetDuration(750);
-
-        AnimatorSet lightsOnAnim = new AnimatorSet();
-        lightsOnAnim.playTogether(
-                ObjectAnimator.ofFloat(notifications, View.ALPHA, 1),
-                ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 1),
-                ObjectAnimator.ofFloat(signal, View.ALPHA, 1),
-                ObjectAnimator.ofFloat(battery, View.ALPHA, 1),
-                ObjectAnimator.ofFloat(clock, View.ALPHA, 1)
-            );
-        lightsOnAnim->SetDuration(250);
-
-        mLightsOutAnimation = lightsOutAnim;
-        mLightsOnAnimation = lightsOnAnim;
+    Int32 v = 0;
+    if (powerSave && (GetBarState(&v), v) == IStatusBarState::SHADE) {
+        mode = BarTransitions::MODE_WARNING;
     }
+    transitions->TransitionTo(mode, anim);
+}
 
-    mLightsOutAnimation.cancel();
-    mLightsOnAnimation.cancel();
+void PhoneStatusBar::FinishBarAnimations()
+{
+    AutoPtr<IBarTransitions> bt;
+    mStatusBarView->GetBarTransitions((IBarTransitions**)&bt);
+    bt->FinishAnimations();
+    if (mNavigationBarView != NULL) {
+        bt = NULL;
+        mNavigationBarView->GetBarTransitions((IBarTransitions**)&bt);
+        bt->FinishAnimations();
+    }
+}
 
-    Animator a = lightsOut ? mLightsOutAnimation : mLightsOnAnimation;
-    a->Start();
+ECode PhoneStatusBar::SetInteracting(
+    /* [in] */ Int32 barWindow,
+    /* [in] */ Boolean interacting)
+{
+    mInteractingWindows = interacting
+            ? (mInteractingWindows | barWindow)
+            : (mInteractingWindows & ~barWindow);
+    if (mInteractingWindows != 0) {
+        SuspendAutohide();
+    }
+    else {
+        ResumeSuspendedAutohide();
+    }
+    CheckBarModes();
+    return NOERROR;
+}
 
-    setAreThereNotifications();
+void PhoneStatusBar::ResumeSuspendedAutohide()
+{
+    if (mAutohideSuspended) {
+        ScheduleAutohide();
+        Boolean tmp = FALSE;
+        mHandler->PostDelayed(mCheckBarModes, 500, &tmp); // longer than home -> launcher
+    }
+}
+
+void PhoneStatusBar::SuspendAutohide()
+{
+    mHandler->RemoveCallbacks(mAutohide);
+    mHandler->RemoveCallbacks(mCheckBarModes);
+    mAutohideSuspended = (mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT) != 0;
+}
+
+void PhoneStatusBar::CancelAutohide()
+{
+    mAutohideSuspended = FALSE;
+    mHandler->RemoveCallbacks(mAutohide);
+}
+
+void PhoneStatusBar::ScheduleAutohide()
+{
+    CancelAutohide();
+    Boolean tmp = FALSE;
+    mHandler->PostDelayed(mAutohide, AUTOHIDE_TIMEOUT_MS, &tmp);
+}
+
+void PhoneStatusBar::CheckUserAutohide(
+    /* [in] */ IView* v,
+    /* [in] */ IMotionEvent* event)
+{
+    Int32 value = 0;
+    Float x = 0, y = 0;
+    if ((mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT) != 0  // a transient bar is revealed
+            && (event->GetAction(&value), value) == IMotionEvent::ACTION_OUTSIDE // touch outside the source bar
+            && (event->GetX(&x), x) == 0 && (event->GetY(&y), y) == 0  // a touch outside both bars
+            ) {
+        UserAutohide();
+    }
+}
+
+void PhoneStatusBar::UserAutohide()
+{
+    CancelAutohide();
+    Boolean tmp = FALSE;
+    mHandler->PostDelayed(mAutohide, 350, &tmp); // longer than app gesture -> flag clear
 }
 
 Boolean PhoneStatusBar::AreLightsOn()
 {
-    return 0 == (mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
+    return 0 == (mSystemUiVisibility & IView::SYSTEM_UI_FLAG_LOW_PROFILE);
 }
 
 ECode PhoneStatusBar::SetLightsOn(
     /* [in] */ Boolean on)
 {
-    Log.v(TAG, "setLightsOn(" + on + ")");
+    Logger::V(TAG, "setLightsOn(%d)", on);
     if (on) {
-        setSystemUiVisibility(0, View.SYSTEM_UI_FLAG_LOW_PROFILE);
-    } else {
-        setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE, View.SYSTEM_UI_FLAG_LOW_PROFILE);
+        SetSystemUiVisibility(0, IView::SYSTEM_UI_FLAG_LOW_PROFILE);
     }
+    else {
+        SetSystemUiVisibility(IView::SYSTEM_UI_FLAG_LOW_PROFILE, IView::SYSTEM_UI_FLAG_LOW_PROFILE);
+    }
+    return NOERROR;
 }
 
-void PhoneStatusBar::NotifyUiVisibilityChanged()
+void PhoneStatusBar::NotifyUiVisibilityChanged(
+    /* [in] */ Int32 vis)
 {
-    try {
-        mWindowManagerService.statusBarVisibilityChanged(mSystemUiVisibility);
-    } catch (RemoteException ex) {
-    }
+    // try {
+    mWindowManagerService->StatusBarVisibilityChanged(vis);
+    // } catch (RemoteException ex) {
+    // }
 }
 
 ECode PhoneStatusBar::TopAppWindowChanged(
     /* [in] */ Boolean showMenu)
 {
     if (DEBUG) {
-        Slog.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
+        Logger::D(TAG, "%s the MENU button", (showMenu ? "showing" : "hiding"));
     }
     if (mNavigationBarView != NULL) {
         mNavigationBarView->SetMenuVisibility(showMenu);
     }
 
     // See above re: lights-out policy for legacy apps.
-    if (showMenu) setLightsOn(TRUE);
+    if (showMenu) SetLightsOn(TRUE);
+    return NOERROR;
 }
 
 ECode PhoneStatusBar::SetImeWindowStatus(
     /* [in] */ IBinder* token,
     /* [in] */ Int32 vis,
-    /* [in] */ Int32 backDisposition)
+    /* [in] */ Int32 backDisposition,
+    /* [in] */ Boolean showImeSwitcher)
 {
-    Boolean altBack = (backDisposition == InputMethodService.BACK_DISPOSITION_WILL_DISMISS)
-        || ((vis & InputMethodService.IME_VISIBLE) != 0);
+    Boolean imeShown = (vis & IInputMethodService::IME_VISIBLE) != 0;
+    Int32 flags = mNavigationIconHints;
+    if ((backDisposition == IInputMethodService::BACK_DISPOSITION_WILL_DISMISS) || imeShown) {
+        flags |= IStatusBarManager::NAVIGATION_HINT_BACK_ALT;
+    }
+    else {
+        flags &= ~IStatusBarManager::NAVIGATION_HINT_BACK_ALT;
+    }
+    if (showImeSwitcher) {
+        flags |= IStatusBarManager::NAVIGATION_HINT_IME_SHOWN;
+    }
+    else {
+        flags &= ~IStatusBarManager::NAVIGATION_HINT_IME_SHOWN;
+    }
 
-    mCommandQueue->SetNavigationIconHints(
-            altBack ? (mNavigationIconHints | StatusBarManager.NAVIGATION_HINT_BACK_ALT)
-                    : (mNavigationIconHints & ~StatusBarManager.NAVIGATION_HINT_BACK_ALT));
-    if (mQS != NULL) mQS->SetImeWindowStatus(vis > 0);
-}
-
-ECode PhoneStatusBar::SetHardKeyboardStatus(
-    /* [in] */ Boolean available,
-    /* [in] */ Boolean enabled)
-{
+    SetNavigationIconHints(flags);
     return NOERROR;
 }
 
-//@Override
-ECode PhoneStatusBar::Tick(
-    /* [in] */ IBinder* key,
+void PhoneStatusBar::Tick(
     /* [in] */ IStatusBarNotification* n,
     /* [in] */ Boolean firstTime)
 {
+    if (!mTickerEnabled) return;
+
     // no ticking in lights-out mode
-    if (!areLightsOn()) return;
+    if (!AreLightsOn()) return;
 
     // no ticking in Setup
-    if (!isDeviceProvisioned()) return;
+    Boolean tmp = FALSE;
+    if (IsDeviceProvisioned(&tmp), !tmp) return;
 
     // not for you
-    if (!notificationIsForCurrentUser(n)) return;
+    if (IsNotificationForCurrentProfiles(n, &tmp), !tmp) return;
 
     // Show the ticker if one is requested. Also don't do this
     // until status bar window is attached to the window manager,
     // because...  well, what's the point otherwise?  And trying to
     // run a ticker without being attached will crash!
-    if (n.notification.tickerText != NULL && mStatusBarWindow.getWindowToken() != NULL) {
-        if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
-                        | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
-            mTicker.addEntry(n);
+    AutoPtr<INotification> notification;
+    n->GetNotification((INotification**)&notification);
+    AutoPtr<ICharSequence> tickerText;
+    notification->GetTickerText((ICharSequence**)&tickerText);
+    AutoPtr<IBinder> d;
+    if (tickerText != NULL && mStatusBarWindow != NULL
+            && (IView::Probe(mStatusBarWindow)->GetWindowToken((IBinder**)&d), d) != NULL) {
+        if (0 == (mDisabled & (IStatusBarManager::DISABLE_NOTIFICATION_ICONS
+                | IStatusBarManager::DISABLE_NOTIFICATION_TICKER))) {
+            mTicker->AddEntry(n);
         }
     }
 }
 
-AutoPtr<IAnimation> LoadAnim(
+AutoPtr<IAnimation> PhoneStatusBar::LoadAnim(
     /* [in] */ Int32 id,
     /* [in] */ IAnimationAnimationListener* listener)
 {
-    Animation anim = AnimationUtils.loadAnimation(mContext, id);
+    AutoPtr<IAnimation> anim;
+    AnimationUtils::LoadAnimation(mContext, id, (IAnimation**)&anim);
     if (listener != NULL) {
         anim->SetAnimationListener(listener);
     }
     return anim;
 }
 
-String ViewInfo(
-    /* [in] */ IView* v)
+String PhoneStatusBar::ViewInfo(
+    /* [in] */ IView* view)
 {
-    return "[(" + v.getLeft() + "," + v.getTop() + ")(" + v.getRight() + "," + v.getBottom()
-            + ") " + v.getWidth() + "x" + v.getHeight() + "]";
+    Int32 v = 0;
+    StringBuilder sb;
+    sb.Append("[(");
+    view->GetLeft(&v);
+    sb.Append(v);
+    sb.Append(",");
+    view->GetTop(&v);
+    sb.Append(v);
+    sb.Append(")(");
+    view->GetRight(&v);
+    sb.Append(v);
+    sb.Append(",");
+    view->GetBottom(&v);
+    sb.Append(v);
+    sb.Append(")");
+    view->GetWidth(&v);
+    sb.Append(v);
+    sb.Append("x");
+    view->GetHeight(&v);
+    sb.Append(v);
+    sb.Append("]");
+    return sb.ToString();
 }
 
-//@Override
-ECode PhoneStatusBar::CreateAndAddWindows()
+ECode PhoneStatusBar::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
 {
-    addStatusBarWindow();
+    synchronized (mQueueLock) {
+        pw->Println(String("Current Status Bar state:"));
+        pw->Println(String("  mExpandedVisible=") + StringUtils::ToString(mExpandedVisible)
+                + ", mTrackingPosition=" + StringUtils::ToString(mTrackingPosition));
+        pw->Println(String("  mTickerEnabled=") + StringUtils::ToString(mTickerEnabled));
+        if (mTickerEnabled) {
+            pw->Println(String("  mTicking=") + StringUtils::ToString(mTicking));
+            pw->Println(String("  mTickerView: ") + ViewInfo(mTickerView));
+        }
+        pw->Println(String("  mTracking=") + StringUtils::ToString(mTracking));
+        pw->Println(String("  mDisplayMetrics=") + TO_STR(mDisplayMetrics));
+        pw->Println(String("  mStackScroller: ") + ViewInfo(IView::Probe(mStackScroller)));
+
+
+        Int32 x = 0, y = 0;
+        IView::Probe(mStackScroller)->GetScrollX(&x);
+        IView::Probe(mStackScroller)->GetScrollY(&y);
+        pw->Println(String("  mStackScroller: ") + ViewInfo(IView::Probe(mStackScroller))
+                + " scroll " + StringUtils::ToString(x)
+                + "," + StringUtils::ToString(y));
+    }
+
+    pw->Print(String("  mInteractingWindows="));
+    pw->Println(mInteractingWindows);
+    pw->Print(String("  mStatusBarWindowState="));
+
+    AutoPtr<IStatusBarManagerHelper> helper;
+    CStatusBarManagerHelper::AcquireSingleton((IStatusBarManagerHelper**)&helper);
+    String value;
+    helper->WindowStateToString(mStatusBarWindowState, &value);
+    pw->Println(value);
+    pw->Print(String("  mStatusBarMode="));
+    pw->Println(BarTransitions::ModeToString(mStatusBarMode));
+    pw->Print(String("  mDozing="));
+    pw->Println(mDozing);
+    pw->Print(String("  mZenMode="));
+    Elastos::Droid::Provider::Settings::Global::ZenModeToString(mZenMode, &value);
+    pw->Println(value);
+    pw->Print(String("  mUseHeadsUp="));
+    pw->Println(mUseHeadsUp);
+    pw->Print(String("  interrupting package: "));
+
+    AutoPtr<INotificationDataEntry> entry;
+    mHeadsUpNotificationView->GetEntry((INotificationDataEntry**)&entry);
+    pw->Println(HunStateToString(entry));
+
+    AutoPtr<IBarTransitions> bt;
+    mStatusBarView->GetBarTransitions((IBarTransitions**)&bt);
+    DumpBarTransitions(pw, String("mStatusBarView"), bt);
+    if (mNavigationBarView != NULL) {
+        pw->Print(String("  mNavigationBarWindowState="));
+        helper->WindowStateToString(mStatusBarWindowState, &value);
+        pw->Println(value);
+        pw->Print(String("  mNavigationBarMode="));
+        pw->Println(BarTransitions::ModeToString(mNavigationBarMode));
+
+        bt = NULL;
+        mNavigationBarView->GetBarTransitions((IBarTransitions**)&bt);
+        DumpBarTransitions(pw, String("mNavigationBarView"), bt);
+    }
+
+    pw->Print(String("  mNavigationBarView="));
+    if (mNavigationBarView == NULL) {
+        pw->Println(String("NULL"));
+    }
+    else {
+        mNavigationBarView->Dump(fd, pw, args);
+    }
+
+    pw->Print(String("  mMediaSessionManager="));
+    pw->Println(mMediaSessionManager);
+    pw->Print(String("  mMediaNotificationKey="));
+    pw->Println(mMediaNotificationKey);
+    pw->Print(String("  mMediaController="));
+    pw->Print(mMediaController);
+    if (mMediaController != NULL) {
+        AutoPtr<IPlaybackState> state;
+        mMediaController->GetPlaybackState((IPlaybackState**)&state);
+        pw->Print(String(" state=") + TO_STR(state));
+    }
+    pw->Println();
+    pw->Print(String("  mMediaMetadata="));
+    pw->Print(mMediaMetadata);
+    if (mMediaMetadata != NULL) {
+        AutoPtr<ICharSequence> c;
+        mMediaMetadata->GetText(IMediaMetadata::METADATA_KEY_TITLE, (ICharSequence**)&c);
+        pw->Print(String(" title=") + TO_STR(c));
+    }
+    pw->Println();
+
+    pw->Println(String("  Panels: "));
+    if (mNotificationPanel != NULL) {
+        AutoPtr<IViewGroupLayoutParams> vp;
+        IView::Probe(mNotificationPanel)->GetLayoutParams((IViewGroupLayoutParams**)&vp);
+        pw->Println(String("    mNotificationPanel=") +
+            TO_STR(mNotificationPanel) + " params="
+            + TO_STR(vp) /*mNotificationPanel->GetLayoutParams().Debug("")*/);
+        pw->Print(String("      "));
+        ((CNotificationPanelView*)mNotificationPanel.Get())->Dump(fd, pw, args);
+    }
+
+    DozeLog::Dump(pw);
+
+    if (DUMPTRUCK) {
+        synchronized (mNotificationData) {
+            mNotificationData->Dump(pw, String("  "));
+        }
+
+        Int32 N = 0;
+        IViewGroup::Probe(mStatusIcons)->GetChildCount(&N);
+        pw->Println(String("  system icons: ") + StringUtils::ToString(N));
+        for (Int32 i = 0; i < N; i++) {
+            AutoPtr<IView> child;
+            IViewGroup::Probe(mStatusIcons)->GetChildAt(i, (IView**)&child);
+            AutoPtr<IStatusBarIconView> ic = IStatusBarIconView::Probe(child);
+            pw->Println(String("    [") + StringUtils::ToString(i) + "] icon=" + TO_STR(ic));
+        }
+
+        if (FALSE) {
+            pw->Println(String("see the logcat for a dump of the views we have created."));
+            // must happen on ui thread
+            AutoPtr<Runnable7> run = new Runnable7(this);
+            Boolean tmp = FALSE;
+            mHandler->Post(run, &tmp);
+        }
+    }
+
+    if (DEBUG_GESTURES) {
+        pw->Print(String("  status bar gestures: "));
+        mGestureRec->Dump(fd, pw, args);
+    }
+
+    if (mNetworkController != NULL) {
+        mNetworkController->Dump(fd, pw, args);
+    }
+    if (mBluetoothController != NULL) {
+        mBluetoothController->Dump(fd, pw, args);
+    }
+    if (mCastController != NULL) {
+        mCastController->Dump(fd, pw, args);
+    }
+    if (mUserSwitcherController != NULL) {
+        mUserSwitcherController->Dump(fd, pw, args);
+    }
+    if (mBatteryController != NULL) {
+        mBatteryController->Dump(fd, pw, args);
+    }
+    if (mNextAlarmController != NULL) {
+        mNextAlarmController->Dump(fd, pw, args);
+    }
+    if (mSecurityController != NULL) {
+        mSecurityController->Dump(fd, pw, args);
+    }
+    return NOERROR;
+}
+
+String PhoneStatusBar::HunStateToString(
+    /* [in] */ INotificationDataEntry* entry)
+{
+    if (entry == NULL) return String("NULL");
+
+    AutoPtr<IStatusBarNotification> notification;
+    entry->GetNotification((IStatusBarNotification**)&notification);
+    if (notification == NULL) return String("corrupt");
+
+    String name;
+    notification->GetPackageName(&name);
+    return name;
+}
+
+void PhoneStatusBar::DumpBarTransitions(
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ const String& var,
+    /* [in] */ IBarTransitions* transitions)
+{
+    pw->Print(String("  "));
+    pw->Print(var);
+    pw->Print(String(".BarTransitions.mMode="));
+    Int32 mode = 0;
+    transitions->GetMode(&mode);
+    pw->Println(BarTransitions::ModeToString(mode));
+}
+
+void PhoneStatusBar::CreateAndAddWindows()
+{
+    AddStatusBarWindow();
 }
 
 void PhoneStatusBar::AddStatusBarWindow()
 {
-    // Put up the view
-    Int32 height = getStatusBarHeight();
-
-    // Now that the status bar window encompasses the sliding panel and its
-    // translucent backdrop, the entire thing is made TRANSLUCENT and is
-    // hardware-accelerated.
-    WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            height,
-            WindowManager.LayoutParams.TYPE_STATUS_BAR,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-            PixelFormat.TRANSLUCENT);
-
-    lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-
-    lp.gravity = getStatusBarGravity();
-    lp->SetTitle("StatusBar");
-    lp.packageName = mContext.getPackageName();
-
-    makeStatusBarView();
-    mWindowManager.addView(mStatusBarWindow, lp);
-}
-
-void PhoneStatusBar::SetNotificationIconVisibility(
-    /* [in] */ Boolean visible,
-    /* [in] */ Int32 anim)
-{
-    Int32 old = mNotificationIcons.getVisibility();
-    Int32 v = visible ? IView::VISIBLE : IView::INVISIBLE;
-    if (old != v) {
-        mNotificationIcons->SetVisibility(v);
-        mNotificationIcons->StartAnimation(loadAnim(anim, NULL));
-    }
-}
-
-void PhoneStatusBar::UpdateExpandedInvisiblePosition()
-{
-    mTrackingPosition = -mDisplayMetrics.heightPixels;
+    MakeStatusBarView();
+    mStatusBarWindowManager = new StatusBarWindowManager(mContext);
+    Int32 h = 0;
+    GetStatusBarHeight(&h);
+    mStatusBarWindowManager->Add(IView::Probe(mStatusBarWindow), h);
 }
 
 Float PhoneStatusBar::Saturate(
     /* [in] */ Float a)
 {
-    return a < 0.0f ? 0.0f : (a > 1.0f ? 1.0f : a);
+    return a < 0.f ? 0.f : (a > 1.f ? 1.f : a);
 }
 
-//@Override
-Int32 PhoneStatusBar::GetExpandedViewMaxHeight()
-{
-    return mDisplayMetrics.heightPixels - mNotificationPanelMarginBottomPx;
-}
-
-//@Override
-ECode PhoneStatusBar::UpdateExpandedViewPos(
+void PhoneStatusBar::UpdateExpandedViewPos(
     /* [in] */ Int32 thingy)
 {
-    if (DEBUG) Slog.v(TAG, "updateExpandedViewPos");
+    if (SPEW) Logger::V(TAG, "UpdateExpandedViewPos");
 
     // on larger devices, the notification panel is propped open a bit
-    mNotificationPanel->SetMinimumHeight(
-            (Int32)(mNotificationPanelMinHeightFrac * mCurrentDisplaySize.y));
+    Int32 y = 0;
+    mCurrentDisplaySize->GetY(&y);
+    IView::Probe(mNotificationPanel)->SetMinimumHeight((Int32)(mNotificationPanelMinHeightFrac * y));
 
-    FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mNotificationPanel.getLayoutParams();
-    lp.gravity = mNotificationPanelGravity;
-    lp.leftMargin = mNotificationPanelMarginPx;
-    mNotificationPanel->SetLayoutParams(lp);
+    AutoPtr<IViewGroupLayoutParams> vp;
+    IView::Probe(mNotificationPanel)->GetLayoutParams((IViewGroupLayoutParams**)&vp);
+    AutoPtr<IFrameLayoutLayoutParams> lp = IFrameLayoutLayoutParams::Probe(vp);
+    lp->SetGravity(mNotificationPanelGravity);
+    IView::Probe(mNotificationPanel)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
 
-    if (mSettingsPanel != NULL) {
-        lp = (FrameLayout.LayoutParams) mSettingsPanel.getLayoutParams();
-        lp.gravity = mSettingsPanelGravity;
-        lp.rightMargin = mNotificationPanelMarginPx;
-        mSettingsPanel->SetLayoutParams(lp);
-    }
-
-    updateCarrierLabelVisibility(FALSE);
+    UpdateCarrierLabelVisibility(FALSE);
 }
 
 // called by makeStatusbar and also by PhoneStatusBarView
-void PhoneStatusBar::UpdateDisplaySize()
+ECode PhoneStatusBar::UpdateDisplaySize()
 {
-    mDisplay.getMetrics(mDisplayMetrics);
+    mDisplay->GetMetrics(mDisplayMetrics);
+    mDisplay->GetSize(mCurrentDisplaySize);
     if (DEBUG_GESTURES) {
-        mGestureRec.tag("display",
-                String.format("%dx%d", mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
+        String format;
+        Int32 widthPixels = 0, heightPixels = 0;
+        mDisplayMetrics->GetWidthPixels(&widthPixels);
+        mDisplayMetrics->GetHeightPixels(&heightPixels);
+        format.AppendFormat("%dx%d", widthPixels, heightPixels);
+        mGestureRec->Tag(String("display"), format);
     }
+    return NOERROR;
 }
 
 ECode PhoneStatusBar::StartActivityDismissingKeyguard(
     /* [in] */ IIntent* intent,
-    /* [in] */ Boolean onlyProvisioned)
+    /* [in] */ Boolean onlyProvisioned,
+    /* [in] */ Boolean dismissShade)
 {
-    if (onlyProvisioned && !isDeviceProvisioned()) return;
-    try {
-        // Dismiss the lock screen when Settings starts.
-        ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-    } catch (RemoteException e) {
-    }
-    intent->SetFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    mContext->StartActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-    animateCollapsePanels();
+    Boolean tmp = FALSE;
+    if (onlyProvisioned && (IsDeviceProvisioned(&tmp), !tmp)) return NOERROR;
+
+    // const Boolean afterKeyguardGone = PreviewInflater::WouldLaunchResolverActivity(
+    //         mContext, intent, mCurrentUserId);
+    Boolean keyguardShowing = FALSE;
+    mStatusBarKeyguardViewManager->IsShowing(&keyguardShowing);
+    assert(0 && "TODO");
+    // DismissKeyguardThenExecute(new OnDismissAction() {
+    //     @Override
+    //     public Boolean onDismiss() {
+    //         AsyncTask.execute(new Runnable() {
+    //             public void run() {
+    //                 try {
+    //                     if (keyguardShowing && !afterKeyguardGone) {
+    //                         ActivityManagerNative.getDefault()
+    //                                 .keyguardWaitingForActivityDrawn();
+    //                     }
+    //                     intent.setFlags(
+    //                             Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    //                     mContext.startActivityAsUser(
+    //                             intent, new UserHandle(UserHandle.USER_CURRENT));
+    //                     overrideActivityPendingAppTransition(
+    //                             keyguardShowing && !afterKeyguardGone);
+    //                 } catch (RemoteException e) {
+    //                 }
+    //             }
+    //         });
+    //         if (dismissShade) {
+    //             AnimateCollapsePanels(ICommandQueue::FLAG_EXCLUDE_NONE, TRUE /* force */);
+    //         }
+    //         return TRUE;
+    //     }
+    // }, afterKeyguardGone);
+    return NOERROR;
 }
 
-//@Override
+void PhoneStatusBar::ResetUserExpandedStates()
+{
+    AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+    mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
+    Int32 notificationCount = 0;
+    activeNotifications->GetSize(&notificationCount);
+    for (Int32 i = 0; i < notificationCount; i++) {
+        AutoPtr<IInterface> obj;
+        activeNotifications->Get(i, (IInterface**)&obj);
+        AutoPtr<INotificationDataEntry> entry = INotificationDataEntry::Probe(obj);
+
+        AutoPtr<IExpandableNotificationRow> row;
+        entry->GetRow((IExpandableNotificationRow**)&row);
+        if (row != NULL) {
+            row->ResetUserExpansion();
+        }
+    }
+}
+
+void PhoneStatusBar::DismissKeyguardThenExecute(
+    /* [in] */ IOnDismissAction* action,
+    /* [in] */ Boolean afterKeyguardGone)
+{
+    Boolean tmp = FALSE;
+    if (mStatusBarKeyguardViewManager->IsShowing(&tmp), tmp) {
+        if (UnlockMethodCache::GetInstance(mContext)->IsMethodInsecure()
+                && (mNotificationPanel->IsLaunchTransitionRunning(&tmp), tmp) && !afterKeyguardGone) {
+            assert(0 && "TODO");
+            // action->OnDismiss();
+            AutoPtr<Runnable8> run = new Runnable8(this);
+            mNotificationPanel->SetLaunchTransitionEndRunnable(run);
+        }
+        else {
+            mStatusBarKeyguardViewManager->DismissWithAction(action, afterKeyguardGone);
+        }
+    }
+    else {
+        assert(0 && "TODO");
+        // action->OnDismiss();
+    }
+}
+
+// SystemUIService notifies SystemBars of configuration changes, which then calls down here
+// @Override
+ECode PhoneStatusBar::OnConfigurationChanged(
+    /* [in] */ IConfiguration* newConfig)
+{
+    BaseStatusBar::OnConfigurationChanged(newConfig); // calls refreshLayout
+
+    if (DEBUG) {
+        AutoPtr<IResources> res;
+        mContext->GetResources((IResources**)&res);
+        AutoPtr<IConfiguration> config;
+        res->GetConfiguration((IConfiguration**)&config);
+        Logger::V(TAG, "configuration changed: %s", TO_CSTR(config));
+    }
+    UpdateDisplaySize(); // populates mDisplayMetrics
+
+    UpdateResources();
+    UpdateClockSize();
+    RepositionNavigationBar();
+    UpdateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+    UpdateShowSearchHoldoff();
+    UpdateRowStates();
+    return NOERROR;
+}
+
 ECode PhoneStatusBar::UserSwitched(
     /* [in] */ Int32 newUserId)
 {
-    if (MULTIUSER_DEBUG) mNotificationPanelDebugText->SetText("USER " + newUserId);
-    animateCollapsePanels();
-    updateNotificationIcons();
-    resetUserSetupObserver();
+    if (MULTIUSER_DEBUG) {
+        AutoPtr<ICharSequence> t;
+        CString::New(String("USER ") + StringUtils::ToString(newUserId), (ICharSequence**)&t);
+        mNotificationPanelDebugText->SetText(t);
+    }
+
+    AnimateCollapsePanels();
+    UpdateNotifications();
+    ResetUserSetupObserver();
+    SetControllerUsers();
+    return NOERROR;
+}
+
+void PhoneStatusBar::SetControllerUsers()
+{
+    if (mZenModeController != NULL) {
+        mZenModeController->SetUserId(mCurrentUserId);
+    }
 }
 
 void PhoneStatusBar::ResetUserSetupObserver()
 {
-    mContext.getContentResolver().unregisterContentObserver(mUserSetupObserver);
-    mUserSetupObserver.onChange(FALSE);
-    mContext.getContentResolver().registerContentObserver(
-            Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE), TRUE,
-            mUserSetupObserver,
-            mCurrentUserId);
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    cr->UnregisterContentObserver(mUserSetupObserver);
+    mUserSetupObserver->OnChange(FALSE);
+
+    AutoPtr<IUri> uri;
+    Elastos::Droid::Provider::Settings::Global::GetUriFor(
+        ISettingsSecure::USER_SETUP_COMPLETE, (IUri**)&uri);
+    cr->RegisterContentObserver(uri, TRUE, mUserSetupObserver, mCurrentUserId);
 }
 
-void PhoneStatusBar::SetIntruderAlertVisibility(
+void PhoneStatusBar::SetHeadsUpVisibility(
     /* [in] */ Boolean vis)
 {
-    if (!ENABLE_INTRUDERS) return;
-    if (DEBUG) {
-        Slog.v(TAG, (vis ? "showing" : "hiding") + " intruder alert window");
-    }
-    mIntruderAlertView->SetVisibility(vis ? IView::VISIBLE : IView::GONE);
+    if (!ENABLE_HEADS_UP) return;
+    if (DEBUG) Logger::V(TAG, "%s heads up window", (vis ? "showing" : "hiding"));
+    assert(0 && "TODO");
+    // EventLog.writeEvent(EventLogTags.SYSUI_HEADS_UP_STATUS,
+    //         vis ? mHeadsUpNotificationView.getKey() : "",
+    //         vis ? 1 : 0);
+    IView::Probe(mHeadsUpNotificationView)->SetVisibility(vis ? IView::VISIBLE : IView::GONE);
 }
 
-ECode PhoneStatusBar::DismissIntruder()
+ECode PhoneStatusBar::OnHeadsUpDismissed()
 {
-    if (mCurrentlyIntrudingNotification == NULL) return;
-
-    try {
-        mBarService.onNotificationClear(
-                mCurrentlyIntrudingNotification.pkg,
-                mCurrentlyIntrudingNotification.tag,
-                mCurrentlyIntrudingNotification.id);
-    } catch (android.os.RemoteException ex) {
-        // oh well
-    }
+    mHeadsUpNotificationView->Dismiss();
+    return NOERROR;
 }
 
-void PhoneStatusBar::UpdateResources()
+/**
+ * Reload some of our resources when the configuration changes.
+ *
+ * We don't reload everything when the configuration changes -- we probably
+ * should, but getting that smooth is tough.  Someday we'll fix that.  In the
+ * meantime, just update the things that we know change.
+ */
+ECode PhoneStatusBar::UpdateResources()
 {
-    Context context = mContext;
-    Resources res = context.getResources();
-
-    if (mClearButton instanceof TextView) {
-        ((TextView)mClearButton)->SetText(context.getText(R.string.status_bar_clear_all_button));
+    // Update the quick setting tiles
+    if (mQSPanel != NULL) {
+        mQSPanel->UpdateResources();
     }
 
-    // Update the QuickSettings container
-    if (mQS != NULL) mQS.updateResources();
+    LoadDimens();
+    AnimationUtils::LoadInterpolator(mContext
+        , Elastos::Droid::R::interpolator::linear_out_slow_in, (IInterpolator**)&mLinearOutSlowIn);
 
-    loadDimens();
+    if (mNotificationPanel != NULL) {
+        mNotificationPanel->UpdateResources();
+    }
+    if (mHeadsUpNotificationView != NULL) {
+        mHeadsUpNotificationView->UpdateResources();
+    }
+    if (mBrightnessMirrorController != NULL) {
+        mBrightnessMirrorController->UpdateResources();
+    }
+    return NOERROR;
+}
+
+void PhoneStatusBar::UpdateClockSize()
+{
+    if (mStatusBarView == NULL) return;
+    AutoPtr<IView> view;
+    IView::Probe(mStatusBarView)->FindViewById(R::id::clock, (IView**)&view);
+    AutoPtr<ITextView> clock = ITextView::Probe(view);
+    if (clock != NULL) {
+        FontSizeUtils::UpdateFontSize(clock, R::dimen::status_bar_clock_size);
+    }
 }
 
 void PhoneStatusBar::LoadDimens()
 {
-    Resources res = mContext.getResources();
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
 
-    mNaturalBarHeight = res.getDimensionPixelSize(
-            R::dimen::status_bar_height);
+    res->GetDimensionPixelSize(Elastos::Droid::R::dimen::status_bar_height, &mNaturalBarHeight);
 
-    Int32 newIconSize = res.getDimensionPixelSize(
-        R::dimen::status_bar_icon_size);
-    Int32 newIconHPadding = res.getDimensionPixelSize(
-        R.dimen.status_bar_icon_padding);
+    Int32 newIconSize = 0;
+    res->GetDimensionPixelSize(Elastos::Droid::R::dimen::status_bar_icon_size, &newIconSize);
+    Int32 newIconHPadding = 0;
+    res->GetDimensionPixelSize(R::dimen::status_bar_icon_padding, &newIconHPadding);
 
     if (newIconHPadding != mIconHPadding || newIconSize != mIconSize) {
-//            Slog.d(TAG, "size=" + newIconSize + " padding=" + newIconHPadding);
+//            Logger::D(TAG, "size=" + newIconSize + " padding=" + newIconHPadding);
         mIconHPadding = newIconHPadding;
         mIconSize = newIconSize;
         //reloadAllNotificationIcons(); // reload the tray
     }
 
-    mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
+    res->GetDimensionPixelSize(R::dimen::status_bar_edge_ignore, &mEdgeBorder);
 
-    mSelfExpandVelocityPx = res.getDimension(R.dimen.self_expand_velocity);
-    mSelfCollapseVelocityPx = res.getDimension(R.dimen.self_collapse_velocity);
-    mFlingExpandMinVelocityPx = res.getDimension(R.dimen.fling_expand_min_velocity);
-    mFlingCollapseMinVelocityPx = res.getDimension(R.dimen.fling_collapse_min_velocity);
-
-    mCollapseMinDisplayFraction = res.getFraction(R.dimen.collapse_min_display_fraction, 1, 1);
-    mExpandMinDisplayFraction = res.getFraction(R.dimen.expand_min_display_fraction, 1, 1);
-
-    mExpandAccelPx = res.getDimension(R.dimen.expand_accel);
-    mCollapseAccelPx = res.getDimension(R.dimen.collapse_accel);
-
-    mFlingGestureMaxXVelocityPx = res.getDimension(R.dimen.fling_gesture_max_x_velocity);
-
-    mFlingGestureMaxOutputVelocityPx = res.getDimension(R.dimen.fling_gesture_max_output_velocity);
-
-    mNotificationPanelMarginBottomPx
-        = (Int32) res.getDimension(R.dimen.notification_panel_margin_bottom);
-    mNotificationPanelMarginPx
-        = (Int32) res.getDimension(R.dimen.notification_panel_margin_left);
-    mNotificationPanelGravity = res.getInteger(R.integer.notification_panel_layout_gravity);
+    res->GetInteger(R::integer::notification_panel_layout_gravity, &mNotificationPanelGravity);
     if (mNotificationPanelGravity <= 0) {
-        mNotificationPanelGravity = IGravity::LEFT | IGravity::TOP;
-    }
-    mSettingsPanelGravity = res.getInteger(R.integer.settings_panel_layout_gravity);
-    if (mSettingsPanelGravity <= 0) {
-        mSettingsPanelGravity = IGravity::RIGHT | IGravity::TOP;
+        mNotificationPanelGravity = IGravity::START | IGravity::TOP;
     }
 
-    mCarrierLabelHeight = res.getDimensionPixelSize(R.dimen.carrier_label_height);
-    mNotificationHeaderHeight = res.getDimensionPixelSize(R.dimen.notification_panel_header_height);
+    res->GetDimensionPixelSize(R::dimen::carrier_label_height, &mCarrierLabelHeight);
+    res->GetDimensionPixelSize(R::dimen::status_bar_header_height, &mStatusBarHeaderHeight);
 
-    mNotificationPanelMinHeightFrac = res.getFraction(R.dimen.notification_panel_min_height_frac, 1, 1);
-    if (mNotificationPanelMinHeightFrac < 0.0f || mNotificationPanelMinHeightFrac > 1.0f) {
-        mNotificationPanelMinHeightFrac = 0.0f;
+    res->GetFraction(R::dimen::notification_panel_min_height_frac, 1, 1, &mNotificationPanelMinHeightFrac);
+    if (mNotificationPanelMinHeightFrac < 0.f || mNotificationPanelMinHeightFrac > 1.f) {
+        mNotificationPanelMinHeightFrac = 0.f;
     }
 
-    if (FALSE) Slog.v(TAG, "updateResources");
+    res->GetInteger(R::integer::heads_up_notification_decay, &mHeadsUpNotificationDecay);
+    res->GetDimensionPixelSize(R::dimen::notification_min_height, &mRowMinHeight);
+    res->GetDimensionPixelSize(R::dimen::notification_max_height, &mRowMaxHeight);
+
+    res->GetInteger(R::integer::keyguard_max_notification_count, &mKeyguardMaxNotificationCount);
+
+    if (DEBUG) Logger::V(TAG, "UpdateResources");
+}
+
+// Visibility reporting
+void PhoneStatusBar::VisibilityChanged(
+    /* [in] */ Boolean visible)
+{
+    mVisible = visible;
+    if (visible) {
+        StartNotificationLoggingIfScreenOnAndVisible();
+    } else {
+        StopNotificationLogging();
+    }
+    BaseStatusBar::VisibilityChanged(visible);
+}
+
+void PhoneStatusBar::StopNotificationLogging()
+{
+    // Report all notifications as invisible and turn down the
+    // reporter.
+    Boolean tmp = FALSE;
+    if (mCurrentlyVisibleNotifications->IsEmpty(&tmp), !tmp) {
+        AutoPtr<ICollections> helper;
+        CCollections::AcquireSingleton((ICollections**)&helper);
+        AutoPtr<IList> list;
+        helper->GetEmptyList((IList**)&list);
+        LogNotificationVisibilityChanges(ICollection::Probe(list)
+                , ICollection::Probe(mCurrentlyVisibleNotifications));
+        mCurrentlyVisibleNotifications->Clear();
+    }
+    mHandler->RemoveCallbacks(mVisibilityReporter);
+    mStackScroller->SetChildLocationsChangedListener(NULL);
+}
+
+void PhoneStatusBar::StartNotificationLoggingIfScreenOnAndVisible()
+{
+    if (mVisible && mScreenOn) {
+        mStackScroller->SetChildLocationsChangedListener(mNotificationLocationsChangedListener);
+        // Some transitions like mScreenOn=FALSE -> mScreenOn=TRUE don't
+        // cause the scroller to emit child location events. Hence generate
+        // one ourselves to guarantee that we're reporting visible
+        // notifications.
+        // (Note that in cases where the scroller does emit events, this
+        // additional event doesn't break anything.)
+        mNotificationLocationsChangedListener->OnChildLocationsChanged(mStackScroller);
+    }
+}
+
+void PhoneStatusBar::LogNotificationVisibilityChanges(
+    /* [in] */ ICollection/*<String>*/* newlyVisible,
+    /* [in] */ ICollection/*<String>*/* noLongerVisible)
+{
+    Boolean tmp = FALSE;
+    if ((newlyVisible->IsEmpty(&tmp), tmp) && (noLongerVisible->IsEmpty(&tmp), tmp)) {
+        return;
+    }
+    Int32 size1 = 0, size2 = 0;
+    newlyVisible->GetSize(&size1);
+    noLongerVisible->GetSize(&size2);
+
+    AutoPtr<ArrayOf<IInterface*> > obs1 = ArrayOf<IInterface*>::Alloc(size1);
+    AutoPtr<ArrayOf<IInterface*> > obs2 = ArrayOf<IInterface*>::Alloc(size2);
+
+    AutoPtr<ArrayOf<IInterface*> > newlyVisibleAr;
+    newlyVisible->ToArray(obs1, (ArrayOf<IInterface*>**)&newlyVisibleAr);
+
+    AutoPtr<ArrayOf<IInterface*> > noLongerVisibleAr;
+    noLongerVisible->ToArray(obs2, (ArrayOf<IInterface*>**)&noLongerVisibleAr);
+    // try {
+    AutoPtr<ArrayOf<String> > newly = ArrayOf<String>::Alloc(newlyVisibleAr->GetLength());
+    String v;
+    for (Int32 i = 0; i < newlyVisibleAr->GetLength(); i++) {
+        AutoPtr<ICharSequence> obj = ICharSequence::Probe((*newlyVisibleAr)[i]);
+        obj->ToString(&v);
+        (*newly)[i] = v;
+    }
+
+    AutoPtr<ArrayOf<String> > noLonger = ArrayOf<String>::Alloc(noLongerVisibleAr->GetLength());
+    for (Int32 i = 0; i < noLongerVisibleAr->GetLength(); i++) {
+        AutoPtr<ICharSequence> obj = ICharSequence::Probe((*noLongerVisibleAr)[i]);
+        obj->ToString(&v);
+        (*noLonger)[i] = v;
+    }
+    mBarService->OnNotificationVisibilityChanged(newly, noLonger);
+    // } catch (RemoteException e) {
+    //     // Ignore.
+    // }
 }
 
 //
 // tracing
 //
-void PhoneStatusBar::PostStartTracing()
+ECode PhoneStatusBar::PostStartTracing()
 {
-mHandler.postDelayed(mStartTracing, 3000);
+    Boolean tmp = FALSE;
+    mHandler->PostDelayed(mStartTracing, 3000, &tmp);
+    return NOERROR;
 }
 
-void PhoneStatusBar::Vibrate()
+ECode PhoneStatusBar::Vibrate()
 {
-    android.os.Vibrator vib = (android.os.Vibrator)mContext.getSystemService(
-            Context.VIBRATOR_SERVICE);
-    vib.vibrate(250);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&obj);
+    AutoPtr<IVibrator> vib = IVibrator::Probe(obj);
+    vib->Vibrate(250, VIBRATION_ATTRIBUTES);
+    return NOERROR;
 }
 
-//@Override
 void PhoneStatusBar::HaltTicker()
 {
-    mTicker.halt();
+    if (mTickerEnabled) {
+        mTicker->Halt();
+    }
 }
 
-//@Override
 Boolean PhoneStatusBar::ShouldDisableNavbarGestures()
 {
-    return !isDeviceProvisioned()
+    Boolean tmp = FALSE;
+    return (IsDeviceProvisioned(&tmp), !tmp)
             || mExpandedVisible
-            || (mDisabled & StatusBarManager.DISABLE_SEARCH) != 0;
+            || (mDisabled & IStatusBarManager::DISABLE_SEARCH) != 0;
 }
 
+ECode PhoneStatusBar::PostStartSettingsActivity(
+    /* [in] */ IIntent* intent,
+    /* [in] */ Int32 delay)
+{
+    AutoPtr<Runnable9> run = new Runnable9(this, intent);
+    Boolean tmp = FALSE;
+    mHandler->PostDelayed(run, delay, &tmp);
+    return NOERROR;
+}
+
+void PhoneStatusBar::HandleStartSettingsActivity(
+    /* [in] */ IIntent* intent,
+    /* [in] */ Boolean onlyProvisioned)
+{
+    StartActivityDismissingKeyguard(intent, onlyProvisioned, TRUE /* dismissShade */);
+}
+
+ECode PhoneStatusBar::Destroy()
+{
+    BaseStatusBar::Destroy();
+    if (mStatusBarWindow != NULL) {
+        mWindowManager->RemoveViewImmediate(IView::Probe(mStatusBarWindow));
+        mStatusBarWindow = NULL;
+    }
+    if (mNavigationBarView != NULL) {
+        mWindowManager->RemoveViewImmediate(IView::Probe(mNavigationBarView));
+        mNavigationBarView = NULL;
+    }
+    mContext->UnregisterReceiver(mBroadcastReceiver);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::DispatchDemoCommand(
+    /* [in] */ const String& command,
+    /* [in] */ IBundle* args)
+{
+    if (!mDemoModeAllowed) {
+        AutoPtr<IContentResolver> cr;
+        mContext->GetContentResolver((IContentResolver**)&cr);
+        Int32 v = 0;
+        Elastos::Droid::Provider::Settings::Global::GetInt32(cr, String("sysui_demo_allowed"), 0, &v);
+        mDemoModeAllowed = v != 0;
+    }
+    if (!mDemoModeAllowed) return NOERROR;
+    if (command.Equals(COMMAND_ENTER)) {
+        mDemoMode = TRUE;
+    }
+    else if (command.Equals(COMMAND_EXIT)) {
+        mDemoMode = FALSE;
+        CheckBarModes();
+    }
+    else if (!mDemoMode) {
+        // automatically enter demo mode on first demo command
+        AutoPtr<IBundle> b;
+        CBundle::New((IBundle**)&b);
+        DispatchDemoCommand(COMMAND_ENTER, b);
+    }
+    Boolean modeChange = command.Equals(COMMAND_ENTER) || command.Equals(COMMAND_EXIT);
+    if (modeChange || command.Equals(COMMAND_CLOCK)) {
+        DispatchDemoCommandToView(command, args, R::id::clock);
+    }
+    if (modeChange || command.Equals(COMMAND_BATTERY)) {
+        DispatchDemoCommandToView(command, args, R::id::battery);
+    }
+    if (modeChange || command.Equals(COMMAND_STATUS)) {
+        if (mDemoStatusIcons == NULL) {
+            mDemoStatusIcons = new DemoStatusIcons(mStatusIcons, mIconSize);
+        }
+        mDemoStatusIcons->DispatchDemoCommand(command, args);
+    }
+    if (mNetworkController != NULL && (modeChange || command.Equals(COMMAND_NETWORK))) {
+        mNetworkController->DispatchDemoCommand(command, args);
+    }
+    if (modeChange || command.Equals(COMMAND_NOTIFICATIONS)) {
+        AutoPtr<IView> notifications;
+        if (mStatusBarView != NULL) {
+            IView::Probe(mStatusBarView)->FindViewById(R::id::notification_icon_area, (IView**)&notifications);
+        }
+        if (notifications != NULL) {
+            String visible;
+            args->GetString(String("visible"), &visible);
+            Int32 vis = mDemoMode && String("FALSE").Equals(visible) ? IView::INVISIBLE : IView::VISIBLE;
+            notifications->SetVisibility(vis);
+        }
+    }
+    if (command.Equals(COMMAND_BARS)) {
+        String mode;
+        args->GetString(String("mode"), &mode);
+        Int32 barMode = String("opaque").Equals(mode) ? BarTransitions::MODE_OPAQUE :
+                String("translucent").Equals(mode) ? BarTransitions::MODE_TRANSLUCENT :
+                String("semi-transparent").Equals(mode) ? BarTransitions::MODE_SEMI_TRANSPARENT :
+                String("transparent").Equals(mode) ? BarTransitions::MODE_TRANSPARENT :
+                String("warning").Equals(mode) ? BarTransitions::MODE_WARNING :
+                -1;
+        if (barMode != -1) {
+            Boolean animate = TRUE;
+            if (mStatusBarView != NULL) {
+                AutoPtr<IBarTransitions> bt;
+                mStatusBarView->GetBarTransitions((IBarTransitions**)&bt);
+                bt->TransitionTo(barMode, animate);
+            }
+            if (mNavigationBarView != NULL) {
+                AutoPtr<IBarTransitions> bt;
+                mNavigationBarView->GetBarTransitions((IBarTransitions**)&bt);
+                bt->TransitionTo(barMode, animate);
+            }
+        }
+    }
+    return NOERROR;
+}
+
+void PhoneStatusBar::DispatchDemoCommandToView(
+    /* [in] */ const String& command,
+    /* [in] */ IBundle* args,
+    /* [in] */ Int32 id)
+{
+    if (mStatusBarView == NULL) return;
+    AutoPtr<IView> v;
+    IView::Probe(mStatusBarView)->FindViewById(id, (IView**)&v);
+    if (IDemoMode::Probe(v)) {
+        IDemoMode::Probe(v)->DispatchDemoCommand(command, args);
+    }
+}
+
+/**
+ * @return The {@link StatusBarState} the status bar is in.
+ */
+ECode PhoneStatusBar::GetBarState(
+    /* [out] */ Int32* state)
+{
+    VALIDATE_NOT_NULL(state);
+    *state = mState;
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::ShowKeyguard()
+{
+    if (mLaunchTransitionFadingAway) {
+        AutoPtr<IViewPropertyAnimator> vpa;
+        IView::Probe(mNotificationPanel)->Animate((IViewPropertyAnimator**)&vpa);
+        vpa->Cancel();
+        IView::Probe(mNotificationPanel)->SetAlpha(1.f);
+        if (mLaunchTransitionEndRunnable != NULL) {
+            mLaunchTransitionEndRunnable->Run();
+        }
+        mLaunchTransitionEndRunnable = NULL;
+        mLaunchTransitionFadingAway = FALSE;
+    }
+    SetBarState(IStatusBarState::KEYGUARD);
+    UpdateKeyguardState(FALSE /* goingToFullShade */, FALSE /* fromShadeLocked */);
+    if (!mScreenOnFromKeyguard) {
+
+        // If the screen is off already, we need to disable touch events because these might
+        // collapse the panel after we expanded it, and thus we would end up with a blank
+        // Keyguard.
+        IPanelView::Probe(mNotificationPanel)->SetTouchDisabled(TRUE);
+    }
+    InstantExpandNotificationsPanel();
+    mLeaveOpenOnKeyguardHide = FALSE;
+    if (mDraggedDownRow != NULL) {
+        mDraggedDownRow->SetUserLocked(FALSE);
+        IExpandableView::Probe(mDraggedDownRow)->NotifyHeightChanged();
+        mDraggedDownRow = NULL;
+    }
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::IsCollapsing(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    return IPanelView::Probe(mNotificationPanel)->IsCollapsing(result);
+}
+
+ECode PhoneStatusBar::AddPostCollapseAction(
+    /* [in] */ IRunnable* r)
+{
+    mPostCollapseRunnables->Add(r);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::IsInLaunchTransition(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Boolean s1 = FALSE, s2 = FALSE;
+    *result = (mNotificationPanel->IsLaunchTransitionRunning(&s1), s1)
+            || (mNotificationPanel->IsLaunchTransitionFinished(&s2), s2);
+    return NOERROR;
+}
+
+/**
+ * Fades the content of the keyguard away after the launch transition is done.
+ *
+ * @param beforeFading the runnable to be run when the circle is fully expanded and the fading
+ *                     starts
+ * @param endRunnable the runnable to be run when the transition is done
+ */
+ECode PhoneStatusBar::FadeKeyguardAfterLaunchTransition(
+    /* [in] */ IRunnable* beforeFading,
+    /* [in] */ IRunnable* endRunnable)
+{
+    mLaunchTransitionEndRunnable = endRunnable;
+    AutoPtr<Runnable11> hideRunnable = new Runnable11(this, beforeFading);
+    Boolean tmp = FALSE;
+    if (mNotificationPanel->IsLaunchTransitionRunning(&tmp), tmp) {
+        mNotificationPanel->SetLaunchTransitionEndRunnable(hideRunnable);
+    }
+    else {
+        hideRunnable->Run();
+    }
+    return NOERROR;
+}
+
+/**
+ * @return TRUE if we would like to stay in the shade, FALSE if it should go away entirely
+ */
+ECode PhoneStatusBar::HideKeyguard(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Boolean staying = mLeaveOpenOnKeyguardHide;
+    SetBarState(IStatusBarState::SHADE);
+    if (mLeaveOpenOnKeyguardHide) {
+        mLeaveOpenOnKeyguardHide = FALSE;
+        Int64 v = 0;
+        CalculateGoingToFullShadeDelay(&v);
+        mNotificationPanel->AnimateToFullShade(v);
+        if (mDraggedDownRow != NULL) {
+            mDraggedDownRow->SetUserLocked(FALSE);
+            mDraggedDownRow = NULL;
+        }
+    }
+    else {
+        InstantCollapseNotificationPanel();
+    }
+    UpdateKeyguardState(staying, FALSE /* fromShadeLocked */);
+    *result = staying;
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::CalculateGoingToFullShadeDelay(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mKeyguardFadingAwayDelay + mKeyguardFadingAwayDuration;
+    return NOERROR;
+}
+
+/**
+ * Notifies the status bar the Keyguard is fading away with the specified timings.
+ *
+ * @param delay the animation delay in miliseconds
+ * @param fadeoutDuration the duration of the exit animation, in milliseconds
+ */
+ECode PhoneStatusBar::SetKeyguardFadingAway(
+    /* [in] */ Int64 delay,
+    /* [in] */ Int64 fadeoutDuration)
+{
+    mKeyguardFadingAway = TRUE;
+    mKeyguardFadingAwayDelay = delay;
+    mKeyguardFadingAwayDuration = fadeoutDuration;
+    mWaitingForKeyguardExit = FALSE;
+    Disable(mDisabledUnmodified, TRUE /* animate */);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::IsKeyguardFadingAway(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mKeyguardFadingAway;
+    return NOERROR;
+}
+
+/**
+ * Notifies that the Keyguard fading away animation is done.
+ */
+ECode PhoneStatusBar::FinishKeyguardFadingAway()
+{
+    mKeyguardFadingAway = FALSE;
+    return NOERROR;
+}
+
+void PhoneStatusBar::UpdatePublicMode()
+{
+    Boolean s1 = FALSE, s2 = FALSE, s3 = FALSE;
+    SetLockscreenPublicMode(
+            ((mStatusBarKeyguardViewManager->IsShowing(&s1), s1) ||
+                    (mStatusBarKeyguardViewManager->IsOccluded(&s2), s2))
+            && (mStatusBarKeyguardViewManager->IsSecure(&s3), s3));
+}
+
+void PhoneStatusBar::UpdateKeyguardState(
+    /* [in] */ Boolean goingToFullShade,
+    /* [in] */ Boolean fromShadeLocked)
+{
+    if (mState == IStatusBarState::KEYGUARD) {
+        mKeyguardIndicationController->SetVisible(TRUE);
+        IPanelView::Probe(mNotificationPanel)->ResetViews();
+        mKeyguardUserSwitcher->SetKeyguard(TRUE, fromShadeLocked);
+    }
+    else {
+        mKeyguardIndicationController->SetVisible(FALSE);
+        mKeyguardUserSwitcher->SetKeyguard(FALSE,
+                goingToFullShade || mState == IStatusBarState::SHADE_LOCKED || fromShadeLocked);
+    }
+    if (mState == IStatusBarState::KEYGUARD || mState == IStatusBarState::SHADE_LOCKED) {
+        mScrimController->SetKeyguardShowing(TRUE);
+    }
+    else {
+        mScrimController->SetKeyguardShowing(FALSE);
+    }
+    mNotificationPanel->SetBarState(mState, mKeyguardFadingAway, goingToFullShade);
+    UpdateDozingState();
+    UpdatePublicMode();
+    UpdateStackScrollerState(goingToFullShade);
+    UpdateNotifications();
+    CheckBarModes();
+    UpdateCarrierLabelVisibility(FALSE);
+    UpdateMediaMetaData(FALSE);
+    Boolean s1 = FALSE, s2 = FALSE;
+    mStatusBarKeyguardViewManager->IsShowing(&s1);
+    mStatusBarKeyguardViewManager->IsSecure(&s2);
+    mKeyguardMonitor->NotifyKeyguardState(s1, s2);
+}
+
+void PhoneStatusBar::UpdateDozingState()
+{
+    if (mState != IStatusBarState::KEYGUARD
+        && ((CNotificationPanelView*)mNotificationPanel.Get())->IsDozing()) {
+        return;
+    }
+    mNotificationPanel->SetDozing(mDozing);
+    if (mDozing) {
+        IView::Probe(mKeyguardBottomArea)->SetVisibility(IView::INVISIBLE);
+        mStackScroller->SetDark(TRUE, FALSE /*animate*/);
+    }
+    else {
+        IView::Probe(mKeyguardBottomArea)->SetVisibility(IView::VISIBLE);
+        mStackScroller->SetDark(FALSE, FALSE /*animate*/);
+    }
+    mScrimController->SetDozing(mDozing);
+}
+
+ECode PhoneStatusBar::UpdateStackScrollerState(
+    /* [in] */ Boolean goingToFullShade)
+{
+    if (mStackScroller == NULL) return NOERROR;
+    Boolean onKeyguard = mState == IStatusBarState::KEYGUARD;
+    Boolean tmp = FALSE;
+    IsLockscreenPublicMode(&tmp);
+    mStackScroller->SetHideSensitive(tmp, goingToFullShade);
+    mStackScroller->SetDimmed(onKeyguard, FALSE /* animate */);
+    mStackScroller->SetExpandingEnabled(!onKeyguard);
+    AutoPtr<IActivatableNotificationView> activatedChild;
+    mStackScroller->GetActivatedChild((IActivatableNotificationView**)&activatedChild);
+    mStackScroller->SetActivatedChild(NULL);
+    if (activatedChild != NULL) {
+        activatedChild->MakeInactive(FALSE /* animate */);
+    }
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::UserActivity()
+{
+    if (mState == IStatusBarState::KEYGUARD) {
+        assert(0 && "TODO");
+        // mKeyguardViewMediatorCallback->UserActivity();
+    }
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::InterceptMediaKey(
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Boolean tmp = FALSE;
+    *result = mState == IStatusBarState::KEYGUARD
+            && (mStatusBarKeyguardViewManager->InterceptMediaKey(event, &tmp), tmp);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnMenuPressed(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Boolean tmp = FALSE;
+    *result = mState == IStatusBarState::KEYGUARD && (mStatusBarKeyguardViewManager->OnMenuPressed(&tmp), tmp);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnBackPressed(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Boolean tmp = FALSE;
+    if (mStatusBarKeyguardViewManager->OnBackPressed(&tmp), tmp) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    if (mNotificationPanel->IsQsExpanded(&tmp), tmp) {
+        if (mNotificationPanel->IsQsDetailShowing(&tmp), tmp) {
+            mNotificationPanel->CloseQsDetail();
+        }
+        else {
+            mNotificationPanel->AnimateCloseQs();
+        }
+        *result = TRUE;
+        return NOERROR;
+    }
+    if (mState != IStatusBarState::KEYGUARD && mState != IStatusBarState::SHADE_LOCKED) {
+        AnimateCollapsePanels();
+        *result = TRUE;
+        return NOERROR;
+    }
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnSpacePressed(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (mScreenOn && (mState == IStatusBarState::KEYGUARD || mState == IStatusBarState::SHADE_LOCKED)) {
+        AnimateCollapsePanels(0 /* flags */, TRUE /* force */);
+        *result = TRUE;
+        return NOERROR;
+    }
+    *result = FALSE;
+    return NOERROR;
+}
+
+void PhoneStatusBar::ShowBouncer()
+{
+    if (mState == IStatusBarState::KEYGUARD || mState == IStatusBarState::SHADE_LOCKED) {
+        mStatusBarKeyguardViewManager->IsShowing(&mWaitingForKeyguardExit);
+        mStatusBarKeyguardViewManager->Dismiss();
+    }
+}
+
+void PhoneStatusBar::InstantExpandNotificationsPanel()
+{
+    // Make our window larger and the panel expanded.
+    MakeExpandedVisible(TRUE);
+    IPanelView::Probe(mNotificationPanel)->InstantExpand();
+}
+
+void PhoneStatusBar::InstantCollapseNotificationPanel()
+{
+    IPanelView::Probe(mNotificationPanel)->InstantCollapse();
+}
+
+ECode PhoneStatusBar::OnActivated(
+    /* [in] */ IActivatableNotificationView* view)
+{
+    mKeyguardIndicationController->ShowTransientIndication(R::string::notification_tap_again);
+    AutoPtr<IActivatableNotificationView> previousView;
+    mStackScroller->GetActivatedChild((IActivatableNotificationView**)&previousView);
+    if (previousView != NULL) {
+        previousView->MakeInactive(TRUE /* animate */);
+    }
+    mStackScroller->SetActivatedChild(view);
+    return NOERROR;
+}
+
+/**
+ * @param state The {@link StatusBarState} to set.
+ */
+ECode PhoneStatusBar::SetBarState(
+    /* [in] */ Int32 state)
+{
+    mState = state;
+    mStatusBarWindowManager->SetStatusBarState(state);
+    return NOERROR;
+}
+
+// @Override
+ECode PhoneStatusBar::OnActivationReset(
+    /* [in] */ IActivatableNotificationView* view)
+{
+    AutoPtr<IActivatableNotificationView> v;
+    mStackScroller->GetActivatedChild((IActivatableNotificationView**)&v);
+    if (view == v.Get()) {
+        mKeyguardIndicationController->HideTransientIndication();
+        mStackScroller->SetActivatedChild(NULL);
+    }
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnTrackingStarted()
+{
+    RunPostCollapseRunnables();
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnUnlockHintStarted()
+{
+    mKeyguardIndicationController->ShowTransientIndication(R::string::keyguard_unlock);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnHintFinished()
+{
+    // Delay the reset a bit so the user can read the text.
+    mKeyguardIndicationController->HideTransientIndicationDelayed(HINT_RESET_DELAY_MS);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnCameraHintStarted()
+{
+    mKeyguardIndicationController->ShowTransientIndication(R::string::camera_hint);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnPhoneHintStarted()
+{
+    mKeyguardIndicationController->ShowTransientIndication(R::string::phone_hint);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnTrackingStopped(
+    /* [in] */ Boolean expand)
+{
+    if (mState == IStatusBarState::KEYGUARD || mState == IStatusBarState::SHADE_LOCKED) {
+        if (!expand && !mUnlockMethodCache->IsMethodInsecure()) {
+            ShowBouncer();
+        }
+    }
+    return NOERROR;
+}
+
+Int32 PhoneStatusBar::GetMaxKeyguardNotifications()
+{
+    return mKeyguardMaxNotificationCount;
+}
+
+ECode PhoneStatusBar::GetNavigationBarView(
+    /* [out] */ INavigationBarView** view)
+{
+    VALIDATE_NOT_NULL(view);
+    *view = mNavigationBarView;
+    REFCOUNT_ADD(*view);
+    return NOERROR;
+}
+
+// ---------------------- DragDownHelper.OnDragDownListener ------------------------------------
+ECode PhoneStatusBar::OnDraggedDown(
+    /* [in] */ IView* startingChild,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Boolean tmp = FALSE;
+    if (HasActiveNotifications(&tmp), tmp) {
+        // We have notifications, go to locked shade.
+        GoToLockedShade(startingChild);
+        *result = TRUE;
+        return NOERROR;
+    }
+
+    // No notifications - abort gesture.
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnDragDownReset()
+{
+    mStackScroller->SetDimmed(TRUE /* dimmed */, TRUE /* animated */);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnThresholdReached()
+{
+    mStackScroller->SetDimmed(FALSE /* dimmed */, TRUE /* animate */);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnTouchSlopExceeded()
+{
+    mStackScroller->RemoveLongPressCallback();
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::SetEmptyDragAmount(
+    /* [in] */ Float amount)
+{
+    mNotificationPanel->SetEmptyDragAmount(amount);
+    return NOERROR;
+}
+
+/**
+ * If secure with redaction: Show bouncer, go to unlocked shade.
+ *
+ * <p>If secure without redaction or no security: Go to {@link StatusBarState#SHADE_LOCKED}.</p>
+ *
+ * @param expandView The view to expand after going to the shade.
+ */
+ECode PhoneStatusBar::GoToLockedShade(
+    /* [in] */ IView* expandView)
+{
+    AutoPtr<IExpandableNotificationRow> row;
+    if (IExpandableNotificationRow::Probe(expandView)) {
+        row = IExpandableNotificationRow::Probe(expandView);
+        row->SetUserExpanded(TRUE);
+    }
+    Boolean tmp = FALSE;
+    UserAllowsPrivateNotificationsInPublic(mCurrentUserId, &tmp);
+    Boolean fullShadeNeedsBouncer = !tmp || !mShowLockscreenNotifications;
+    if ((IsLockscreenPublicMode(&tmp), tmp) && fullShadeNeedsBouncer) {
+        mLeaveOpenOnKeyguardHide = TRUE;
+        ShowBouncer();
+        mDraggedDownRow = row;
+    }
+    else {
+        mNotificationPanel->AnimateToFullShade(0 /* delay */);
+        SetBarState(IStatusBarState::SHADE_LOCKED);
+        UpdateKeyguardState(FALSE /* goingToFullShade */, FALSE /* fromShadeLocked */);
+        if (row != NULL) {
+            row->SetUserLocked(FALSE);
+        }
+    }
+    return NOERROR;
+}
+
+/**
+ * Goes back to the keyguard after hanging around in {@link StatusBarState#SHADE_LOCKED}.
+ */
+ECode PhoneStatusBar::GoToKeyguard()
+{
+    if (mState == IStatusBarState::SHADE_LOCKED) {
+        mStackScroller->OnGoToKeyguard();
+        SetBarState(IStatusBarState::KEYGUARD);
+        UpdateKeyguardState(FALSE /* goingToFullShade */, TRUE /* fromShadeLocked*/);
+    }
+    return NOERROR;
+}
+
+/**
+ * @return a ViewGroup that spans the entire panel which contains the quick settings
+ */
+ECode PhoneStatusBar::GetQuickSettingsOverlayParent(
+    /* [out] */ IViewGroup** parent)
+{
+    VALIDATE_NOT_NULL(parent);
+    *parent = IViewGroup::Probe(mNotificationPanel);
+    REFCOUNT_ADD(*parent);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::GetKeyguardFadingAwayDelay(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mKeyguardFadingAwayDelay;
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::GetKeyguardFadingAwayDuration(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mKeyguardFadingAwayDuration;
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::GetSystemIcons(
+    /* [out] */ ILinearLayout** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mSystemIcons;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::GetSystemIconArea(
+    /* [out] */ ILinearLayout** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mSystemIconArea;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+// @Override
+ECode PhoneStatusBar::SetBouncerShowing(
+    /* [in] */ Boolean bouncerShowing)
+{
+    BaseStatusBar::SetBouncerShowing(bouncerShowing);
+    Disable(mDisabledUnmodified, TRUE /* animate */);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnScreenTurnedOff()
+{
+    mScreenOnFromKeyguard = FALSE;
+    mScreenOnComingFromTouch = FALSE;
+    mStackScroller->SetAnimationsEnabled(FALSE);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::OnScreenTurnedOn()
+{
+    mScreenOnFromKeyguard = TRUE;
+    mStackScroller->SetAnimationsEnabled(TRUE);
+    mNotificationPanel->OnScreenTurnedOn();
+    IPanelView::Probe(mNotificationPanel)->SetTouchDisabled(FALSE);
+    return NOERROR;
+}
+
+/**
+ * This handles Int64-press of both back and recents.  They are
+ * handled together to capture them both being Int64-pressed
+ * at the same time to exit screen pinning (lock task).
+ *
+ * When accessibility mode is on, only a Int64-press from recents
+ * is required to exit.
+ *
+ * In all other circumstances we try to pass through Int64-press events
+ * for Back, so that apps can still use it.  Which can be from two things.
+ * 1) Not currently in screen pinning (lock task).
+ * 2) Back is Int64-pressed without recents.
+ */
+void PhoneStatusBar::HandleLongPressBackRecents(
+    /* [in] */ IView* v)
+{
+    ECode ec = NOERROR;
+    do {
+        Boolean sendBackLongPress = FALSE;
+        AutoPtr<IIActivityManager> activityManager = ActivityManagerNative::GetDefault();
+        Boolean isAccessiblityEnabled = FALSE;
+        mAccessibilityManager->IsEnabled(&isAccessiblityEnabled);
+        Boolean tmp = FALSE;
+        Int32 id = 0;
+        ec = activityManager->IsInLockTaskMode(&tmp);
+        if (FAILED(ec)) {
+            break;
+        }
+        if (tmp && !isAccessiblityEnabled) {
+            AutoPtr<ISystem> system;
+            CSystem::AcquireSingleton((ISystem**)&system);
+            Int64 time = 0;
+            system->GetCurrentTimeMillis(&time);
+            // If we recently Int64-pressed the other button then they were
+            // Int64-pressed 'together'
+            if ((time - mLastLockToAppLongPress) < LOCK_TO_APP_GESTURE_TOLERENCE) {
+                ec = activityManager->StopLockTaskModeOnCurrent();
+                if (FAILED(ec)) {
+                    break;
+                }
+            }
+            else if ((v->GetId(&id), id) == R::id::back) {
+                AutoPtr<IView> view;
+                mNavigationBarView->GetRecentsButton((IView**)&view);
+                view->IsPressed(&tmp);
+                if (!tmp) {
+                    // If we aren't pressing recents right now then they presses
+                    // won't be together, so send the standard Int64-press action.
+                    sendBackLongPress = TRUE;
+                }
+            }
+            mLastLockToAppLongPress = time;
+        }
+        else {
+            // If this is back still need to handle sending the Int64-press event.
+            if ((v->GetId(&id), id) == R::id::back) {
+                sendBackLongPress = TRUE;
+            }
+            else if (isAccessiblityEnabled && (activityManager->IsInLockTaskMode(&tmp), tmp)) {
+                // When in accessibility mode a Int64 press that is recents (not back)
+                // should stop lock task.
+                ec = activityManager->StopLockTaskModeOnCurrent();
+                if (FAILED(ec)) {
+                    break;
+                }
+            }
+        }
+        if (sendBackLongPress) {
+            AutoPtr<IKeyButtonView> keyButtonView = IKeyButtonView::Probe(v);
+            keyButtonView->SendEvent(IKeyEvent::ACTION_DOWN, IKeyEvent::FLAG_LONG_PRESS);
+            IView::Probe(keyButtonView)->SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_LONG_CLICKED);
+        }
+    } while (0);
+
+    if (FAILED(ec)) {
+        Logger::D(TAG, "Unable to reach activity manager");
+    }
+}
+
+// Recents
+void PhoneStatusBar::ShowRecents(
+    /* [in] */ Boolean triggeredFromAltTab)
+{
+    // Set the recents visibility flag
+    mSystemUiVisibility |= IView::RECENT_APPS_VISIBLE;
+    NotifyUiVisibilityChanged(mSystemUiVisibility);
+    BaseStatusBar::ShowRecents(triggeredFromAltTab);
+}
+
+void PhoneStatusBar::HideRecents(
+    /* [in] */ Boolean triggeredFromAltTab,
+    /* [in] */ Boolean triggeredFromHomeKey)
+{
+    // Unset the recents visibility flag
+    mSystemUiVisibility &= ~IView::RECENT_APPS_VISIBLE;
+    NotifyUiVisibilityChanged(mSystemUiVisibility);
+    BaseStatusBar::HideRecents(triggeredFromAltTab, triggeredFromHomeKey);
+}
+
+void PhoneStatusBar::ToggleRecents()
+{
+    // Toggle the recents visibility flag
+    mSystemUiVisibility ^= IView::RECENT_APPS_VISIBLE;
+    NotifyUiVisibilityChanged(mSystemUiVisibility);
+    BaseStatusBar::ToggleRecents();
+}
+
+ECode PhoneStatusBar::OnVisibilityChanged(
+    /* [in] */ Boolean visible)
+{
+    // Update the recents visibility flag
+    if (visible) {
+        mSystemUiVisibility |= IView::RECENT_APPS_VISIBLE;
+    }
+    else {
+        mSystemUiVisibility &= ~IView::RECENT_APPS_VISIBLE;
+    }
+    NotifyUiVisibilityChanged(mSystemUiVisibility);
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::HasActiveNotifications(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    AutoPtr<IArrayList/*<INotificationDataEntry*/> list;
+    mNotificationData->GetActiveNotifications((IArrayList**)&list);
+    Boolean tmp = FALSE;
+    list->IsEmpty(&tmp);
+    *result = !tmp;
+    return NOERROR;
+}
+
+ECode PhoneStatusBar::WakeUpIfDozing(
+    /* [in] */ Int64 time,
+    /* [in] */ Boolean fromTouch)
+{
+    Boolean tmp = FALSE;
+    if (mDozing && (mScrimController->IsPulsing(&tmp), tmp)) {
+        AutoPtr<IInterface> obj;
+        mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+        AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
+        pm->WakeUp(time);
+        if (fromTouch) {
+            mScreenOnComingFromTouch = TRUE;
+        }
+    }
+    return NOERROR;
+}
 
 }// namespace Phone
 }// namespace StatusBar

@@ -2604,8 +2604,7 @@ ECode CMediaPlayer::AddTimedTextSource(
     // A MediaPlayer created by a VideoView should already have its mSubtitleController set.
     if (mSubtitleController == NULL) {
         CSubtitleController::New(context, mTimeProvider,
-                this,
-                (ISubtitleController**)&mSubtitleController);
+                this, (ISubtitleController**)&mSubtitleController);
 
         AutoPtr<MyAnchor> anchor = new MyAnchor(this);
         mSubtitleController->SetAnchor(anchor);

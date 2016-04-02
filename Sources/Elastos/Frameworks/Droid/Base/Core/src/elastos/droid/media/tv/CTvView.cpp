@@ -560,7 +560,7 @@ ECode CTvView::Reset()
             AutoPtr<ITvView> cs;
             sMainTvView->Resolve(EIID_ITvView, (IInterface**)&cs);
             if (cs != NULL) {
-                if (this == cs) {
+                if ((ITvView*)this == cs) {
                     sMainTvView = NULL_TV_VIEW;
                 }
             }
@@ -787,7 +787,7 @@ ECode CTvView::DispatchWindowFocusChanged(
             AutoPtr<ITvView> cs;
             sMainTvView->Resolve(EIID_ITvView, (IInterface**)&cs);
             if (cs != NULL) {
-                if (hasFocus && this == cs && mSession != NULL) {
+                if (hasFocus && (ITvView*)this == cs && mSession != NULL) {
                     mSession->SetMain();
                 }
             }

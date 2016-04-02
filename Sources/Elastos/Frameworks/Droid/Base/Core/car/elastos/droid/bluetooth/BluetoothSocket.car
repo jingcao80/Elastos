@@ -84,7 +84,7 @@ module
      * @involve interface ICloseable
      * @involve interface IFlushable
      */
-    [deprecated]
+    [deprecated, local]
     interface IBluetoothSocket {
         /** @hide */
         const Int32 MAX_RFCOMM_CHANNEL = 30;

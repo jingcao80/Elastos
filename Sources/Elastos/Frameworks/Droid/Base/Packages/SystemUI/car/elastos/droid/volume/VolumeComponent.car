@@ -1,0 +1,20 @@
+
+module
+{
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.IZenModeController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Volume {
+
+    interface IVolumeComponent {
+        GetZenController(
+            [out] IZenModeController** zc);
+    }
+
+    } // namespace Volume
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -329,9 +329,7 @@ ECode DialogFragment::OnActivityCreated(
     mDialog->SetCancelable(mCancelable);
     Boolean result;
     mDialog->TakeCancelAndDismissListeners(String("DialogFragment"),
-        this,
-        this,
-        &result);
+        this, this, &result);
     if (!result) {
 //         throw new IllegalStateException(
 //                 "You can not set Dialog's OnCancelListener or OnDismissListener");

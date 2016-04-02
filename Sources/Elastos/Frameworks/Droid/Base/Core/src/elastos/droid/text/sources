@@ -48,6 +48,7 @@ SOURCES += CSpannedString.cpp
 SOURCES += CSpannedStringHelper.cpp
 SOURCES += StaticLayout.cpp
 SOURCES += TextDirectionHeuristics.cpp
+SOURCES += CTextDirectionHeuristics.cpp
 SOURCES += TextLine.cpp
 SOURCES += TextPaint.cpp
 SOURCES += TextUtils.cpp

@@ -1064,6 +1064,10 @@ module
         interface IPaint;
     }
 
+    singleton class CTextDirectionHeuristics {
+        interface ITextDirectionHeuristics;
+    }
+
     singleton class CTextUtils {
         interface ITextUtils;
     }

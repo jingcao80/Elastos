@@ -1,0 +1,49 @@
+
+module
+{
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.IZenModeController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Volume {
+
+    interface IZenModePanelCallback {
+        OnMoreSettings();
+
+        OnInteraction();
+
+        OnExpanded(
+            [in] Boolean expanded);
+    }
+
+    /**
+    * @Involve interface IView;
+    * interface IViewGroup;
+    * interface IViewParent;
+    * interface IViewManager;
+    * interface IKeyEventCallback;
+    * interface IAccessibilityEventSource;
+    * interface IDrawableCallback;
+    * interface ILinearLayout;
+    */
+    interface IZenModePanel {
+        SetHidden(
+            [in] Boolean h);
+
+        Init(
+            [in] IZenModeController* controller);
+
+        UpdateLocale();
+
+        SetCallback(
+            [in] IZenModePanelCallback* cb);
+
+        ShowSilentHint();
+    }
+
+    } // namespace Volume
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

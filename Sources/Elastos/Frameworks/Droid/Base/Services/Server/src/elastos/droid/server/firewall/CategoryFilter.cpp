@@ -5,17 +5,22 @@ namespace Droid {
 namespace Server {
 namespace Firewall {
 
-static const String CategoryFilter::ATTR_NAME("name");
-
 //------------------------------------------------------------------------------
 // CategoryFilter::FACTORY_FilterFactory
 //------------------------------------------------------------------------------
-IFilter* CategoryFilter::FACTORY_FilterFactory::NewFilter()
+
+CategoryFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
+    /* [in] */ const String& tag)
+{
+    FilterFactory::constructor(tag);
+}
+
+IFilter* CategoryFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
     String categoryName;
 
-    ECode ec = parser->GetAttributeValue(NULL, CategoryFilter::ATTR_NAME, &categoryName);
+    ECode ec = parser->GetAttributeValue(String(NULL), CategoryFilter::ATTR_NAME, &categoryName);
 
     if (FAILED(ec) || categoryName == NULL) {
         //throw new XmlPullParserException("Category name must be specified.",
@@ -29,6 +34,11 @@ IFilter* CategoryFilter::FACTORY_FilterFactory::NewFilter()
 // CategoryFilter
 //=======================================================================================
 
+const String CategoryFilter::ATTR_NAME("name");
+const AutoPtr<CategoryFilter::FACTORY_FilterFactory> CategoryFilter::FACTORY = new CategoryFilter::FACTORY_FilterFactory(String("category"));
+
+CAR_INTERFACE_IMPL(CategoryFilter, Object, IFilter);
+
 CategoryFilter::CategoryFilter(
     /* in */ const String& categoryName)
     : mCategoryName(categoryName)
@@ -41,7 +51,7 @@ ECode CategoryFilter::Matches(
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid,
     /* [in] */ const String& resolvedType,
-    /* [in] */ Int32 receivingUid
+    /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
     AutoPtr<ArrayOf<String> > categories;
@@ -51,7 +61,7 @@ ECode CategoryFilter::Matches(
         *ret = FALSE;
         return NOERROR;
     }
-    *ret = (*categories)->Contains(mCategoryName);
+    *ret = (*categories).Contains(mCategoryName);
 
     return NOERROR;
 }

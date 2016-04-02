@@ -12,6 +12,13 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <libcore/utility/EmptyArray.h>
 
+#include <cstring>
+#include <hardware/hdmi_cec.h>
+#include <sys/param.h>
+#include <utils/Looper.h>
+#include <utils/RefBase.h>
+#include "elastos/droid/os/NativeMessageQueue.h"
+
 using Elastos::Core::CBoolean;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IBoolean;
@@ -19,6 +26,8 @@ using Elastos::Droid::Internal::Utility::EIID_IPredicate;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::MessageQueue;
+using Elastos::Droid::Os::NativeMessageQueue;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Utility::ISlog;
 using Elastos::IO::IPrintWriter;
@@ -29,6 +38,334 @@ using Elastos::Utility::ILinkedList;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 using Libcore::Utility::EmptyArray;
+
+namespace android {
+
+class HdmiCecController {
+public:
+    HdmiCecController(hdmi_cec_device_t* device, Elastos::Droid::Server::Hdmi::HdmiCecController* callbacksObj,
+            const sp<Looper>& looper);
+
+    void init();
+
+    // Send message to other device. Note that it runs in IO thread.
+    int sendMessage(const cec_message_t& message);
+    // Add a logical address to device.
+    int addLogicalAddress(cec_logical_address_t address);
+    // Clear all logical address registered to the device.
+    void clearLogicaladdress();
+    // Get physical address of device.
+    int getPhysicalAddress();
+    // Get CEC version from driver.
+    int getVersion();
+    // Get vendor id used for vendor command.
+    uint32_t getVendorId();
+    // Get Port information on all the HDMI ports.
+    AutoPtr<ArrayOf<IHdmiPortInfo*> > getPortInfos();
+    // Set a flag and its value.
+    void setOption(int flag, int value);
+    // Set audio return channel status.
+    void setAudioReturnChannel(bool flag);
+    // Whether to hdmi device is connected to the given port.
+    bool isConnected(int port);
+
+    AutoPtr<Elastos::Droid::Server::Hdmi::HdmiCecController> getCallbacksObj() const {
+        return mCallbacksObj;
+    }
+
+private:
+    static const int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
+    static void onReceived(const hdmi_event_t* event, void* arg);
+
+    hdmi_cec_device_t* mDevice;
+    Elastos::Droid::Server::Hdmi::HdmiCecController* mCallbacksObj;
+    sp<Looper> mLooper;
+};
+
+// RefBase wrapper for hdmi_event_t. As hdmi_event_t coming from HAL
+// may keep its own lifetime, we need to copy it in order to delegate
+// it to service thread.
+class CecEventWrapper : public LightRefBase<CecEventWrapper> {
+public:
+    CecEventWrapper(const hdmi_event_t& event) {
+        // Copy message.
+        switch (event.type) {
+        case HDMI_EVENT_CEC_MESSAGE:
+            mEvent.cec.initiator = event.cec.initiator;
+            mEvent.cec.destination = event.cec.destination;
+            mEvent.cec.length = event.cec.length;
+            std::memcpy(mEvent.cec.body, event.cec.body, event.cec.length);
+            break;
+        case HDMI_EVENT_HOT_PLUG:
+            mEvent.hotplug.connected = event.hotplug.connected;
+            mEvent.hotplug.port_id = event.hotplug.port_id;
+            break;
+        default:
+            // TODO: add more type whenever new type is introduced.
+            break;
+        }
+    }
+
+    const cec_message_t& cec() const {
+        return mEvent.cec;
+    }
+
+    const hotplug_event_t& hotplug() const {
+        return mEvent.hotplug;
+    }
+
+    virtual ~CecEventWrapper() {}
+
+private:
+    hdmi_event_t mEvent;
+};
+
+// Handler class to delegate incoming message to service thread.
+class HdmiCecEventHandler : public MessageHandler {
+public:
+    HdmiCecEventHandler(HdmiCecController* controller, const sp<CecEventWrapper>& event)
+        : mController(controller),
+          mEventWrapper(event) {
+    }
+
+    virtual ~HdmiCecEventHandler() {}
+
+    void handleMessage(const Message& message) {
+        switch (message.what) {
+        case HDMI_EVENT_CEC_MESSAGE:
+            propagateCecCommand(mEventWrapper->cec());
+            break;
+        case HDMI_EVENT_HOT_PLUG:
+            propagateHotplugEvent(mEventWrapper->hotplug());
+            break;
+        default:
+            // TODO: add more type whenever new type is introduced.
+            break;
+        }
+    }
+
+private:
+    // Propagate the message up to Java layer.
+    void propagateCecCommand(const cec_message_t& message) {
+        Int32 srcAddr = message.initiator;
+        Int32 dstAddr = message.destination;
+        AutoPtr<ArrayOf<Byte> > body = ArrayOf<Byte>::Alloc(message.length);
+        const Byte* bodyPtr = reinterpret_cast<const Byte *>(message.body);
+        for (uint i = 0; i < message.length; ++i)
+            (*body)[i] = bodyPtr[i];
+
+        mController->getCallbacksObj()->HandleIncomingCecCommand(srcAddr,
+                dstAddr, body);
+
+        checkAndClearExceptionFromCallback(__FUNCTION__);
+    }
+
+    void propagateHotplugEvent(const hotplug_event_t& event) {
+        // Note that this method should be called in service thread.
+        Int32 port = event.port_id;
+        Boolean connected = (Boolean) event.connected;
+        mController->getCallbacksObj()->HandleHotplug(port, connected);
+
+        checkAndClearExceptionFromCallback(__FUNCTION__);
+    }
+
+    // static
+    static void checkAndClearExceptionFromCallback(const char* methodName) {
+    }
+
+    HdmiCecController* mController;
+    sp<CecEventWrapper> mEventWrapper;
+};
+
+HdmiCecController::HdmiCecController(hdmi_cec_device_t* device,
+        Elastos::Droid::Server::Hdmi::HdmiCecController* callbacksObj, const sp<Looper>& looper) :
+    mDevice(device),
+    mCallbacksObj(callbacksObj),
+    mLooper(looper) {
+}
+
+void HdmiCecController::init() {
+    mDevice->register_event_callback(mDevice, HdmiCecController::onReceived, this);
+}
+
+int HdmiCecController::sendMessage(const cec_message_t& message) {
+    // TODO: propagate send_message's return value.
+    return mDevice->send_message(mDevice, &message);
+}
+
+int HdmiCecController::addLogicalAddress(cec_logical_address_t address) {
+    return mDevice->add_logical_address(mDevice, address);
+}
+
+void HdmiCecController::clearLogicaladdress() {
+    mDevice->clear_logical_address(mDevice);
+}
+
+int HdmiCecController::getPhysicalAddress() {
+    uint16_t addr;
+    if (!mDevice->get_physical_address(mDevice, &addr)) {
+        return addr;
+    }
+    return INVALID_PHYSICAL_ADDRESS;
+}
+
+int HdmiCecController::getVersion() {
+    int version = 0;
+    mDevice->get_version(mDevice, &version);
+    return version;
+}
+
+uint32_t HdmiCecController::getVendorId() {
+    uint32_t vendorId = 0;
+    mDevice->get_vendor_id(mDevice, &vendorId);
+    return vendorId;
+}
+
+AutoPtr<ArrayOf<IHdmiPortInfo*> > HdmiCecController::getPortInfos() {
+    hdmi_port_info* ports;
+    int numPorts;
+    mDevice->get_port_info(mDevice, &ports, &numPorts);
+    AutoPtr<ArrayOf<IHdmiPortInfo*> > res = ArrayOf<IHdmiPortInfo*>::Alloc(numPorts);
+
+    // MHL support field will be obtained from MHL HAL. Leave it to false.
+    Boolean mhlSupported = (Boolean) 0;
+    for (int i = 0; i < numPorts; ++i) {
+        hdmi_port_info* info = &ports[i];
+        Boolean cecSupported = (Boolean) info->cec_supported;
+        Boolean arcSupported = (Boolean) info->arc_supported;
+        AutoPtr<IHdmiPortInfo> infoObj;
+        // TODO: Waiting for CHdmiPortInfo
+        assert(0);
+        // CHdmiPortInfo::New(info->port_id, info->type,
+        //         info->physical_address, cecSupported, mhlSupported, arcSupported, (IHdmiPortInfo**)&infoObj);
+        res->Set(i, infoObj);
+
+    }
+    return res;
+}
+
+void HdmiCecController::setOption(int flag, int value) {
+    mDevice->set_option(mDevice, flag, value);
+}
+
+// Set audio return channel status.
+void HdmiCecController::setAudioReturnChannel(bool enabled) {
+    mDevice->set_audio_return_channel(mDevice, enabled ? 1 : 0);
+}
+
+// Whether to hdmi device is connected to the given port.
+bool HdmiCecController::isConnected(int port) {
+    return mDevice->is_connected(mDevice, port) == HDMI_CONNECTED;
+}
+
+// static
+void HdmiCecController::onReceived(const hdmi_event_t* event, void* arg) {
+    HdmiCecController* controller = static_cast<HdmiCecController*>(arg);
+    if (controller == NULL) {
+        return;
+    }
+
+    sp<CecEventWrapper> spEvent(new CecEventWrapper(*event));
+    sp<HdmiCecEventHandler> handler(new HdmiCecEventHandler(controller, spEvent));
+    controller->mLooper->sendMessage(handler, event->type);
+}
+
+//------------------------------------------------------------------------------
+static Int64 nativeInit(Elastos::Droid::Server::Hdmi::HdmiCecController* callbacksObj,
+        IMessageQueue* messageQueueObj) {
+    int err;
+    hw_module_t* module;
+    err = hw_get_module(HDMI_CEC_HARDWARE_MODULE_ID,
+            const_cast<const hw_module_t **>(&module));
+    if (err != 0) {
+        ALOGE("Error acquiring hardware module: %d", err);
+        return 0;
+    }
+
+    hw_device_t* device;
+    err = module->methods->open(module, HDMI_CEC_HARDWARE_INTERFACE, &device);
+    if (err != 0) {
+        ALOGE("Error opening hardware module: %d", err);
+        return 0;
+    }
+
+    Handle64 ptr;
+    messageQueueObj->GetNativeMessageQueue(&ptr);
+    AutoPtr<MessageQueue> messageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
+
+    HdmiCecController* controller = new HdmiCecController(
+            reinterpret_cast<hdmi_cec_device*>(device),
+            callbacksObj,
+            messageQueue->GetLooper());
+    controller->init();
+
+    return reinterpret_cast<Int64>(controller);
+}
+
+static Int32 nativeSendCecCommand(Int64 controllerPtr,
+        Int32 srcAddr, Int32 dstAddr, AutoPtr<ArrayOf<Byte> > body) {
+    cec_message_t message;
+    message.initiator = static_cast<cec_logical_address_t>(srcAddr);
+    message.destination = static_cast<cec_logical_address_t>(dstAddr);
+
+    int len = body->GetLength();
+    message.length = MIN(len, CEC_MESSAGE_BODY_MAX_LENGTH);
+    // ScopedByteArrayRO bodyPtr(env, body);
+    std::memcpy(message.body, body->GetPayload(), len);
+
+    HdmiCecController* controller =
+            reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->sendMessage(message);
+}
+
+static Int32 nativeAddLogicalAddress(Int64 controllerPtr,
+        Int32 logicalAddress) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->addLogicalAddress(static_cast<cec_logical_address_t>(logicalAddress));
+}
+
+static void nativeClearLogicalAddress(Int64 controllerPtr) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
+    controller->clearLogicaladdress();
+}
+
+static Int32 nativeGetPhysicalAddress(Int64 controllerPtr) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->getPhysicalAddress();
+}
+
+static Int32 nativeGetVersion(Int64 controllerPtr) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->getVersion();
+}
+
+static Int32 nativeGetVendorId(Int64 controllerPtr) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->getVendorId();
+}
+
+static AutoPtr<ArrayOf<IHdmiPortInfo*> > nativeGetPortInfos(Int64 controllerPtr) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->getPortInfos();
+}
+
+static void nativeSetOption(Int64 controllerPtr, Int32 flag, Int32 value) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
+    controller->setOption(flag, value);
+}
+
+static void nativeSetAudioReturnChannel(Int64 controllerPtr,
+        Boolean enabled) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
+    controller->setAudioReturnChannel(enabled == TRUE);
+}
+
+static Boolean nativeIsConnected(Int64 controllerPtr, Int32 port) {
+    HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
+    return controller->isConnected(port) ? TRUE : FALSE ;
+}
+
+} // namespace android
 
 namespace Elastos {
 namespace Droid {
@@ -772,9 +1109,8 @@ ECode HdmiCecController::NativeInit(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-#endif
+    *result = android::nativeInit(handler, messageQueue);
+    return NOERROR;
 }
 
 ECode HdmiCecController::NativeSendCecCommand(
@@ -786,9 +1122,8 @@ ECode HdmiCecController::NativeSendCecCommand(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-#endif
+    *result = android::nativeSendCecCommand(controllerPtr, srcAddress, dstAddress, body);
+    return NOERROR;
 }
 
 ECode HdmiCecController::NativeAddLogicalAddress(
@@ -798,17 +1133,15 @@ ECode HdmiCecController::NativeAddLogicalAddress(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-#endif
+    *result = android::nativeAddLogicalAddress(controllerPtr, logicalAddress);
+    return NOERROR;
 }
 
 ECode HdmiCecController::NativeClearLogicalAddress(
     /* [in] */ Int64 controllerPtr)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-#endif
+    android::nativeClearLogicalAddress(controllerPtr);
+    return NOERROR;
 }
 
 ECode HdmiCecController::NativeGetPhysicalAddress(
@@ -817,9 +1150,8 @@ ECode HdmiCecController::NativeGetPhysicalAddress(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-#endif
+    *result = android::nativeGetPhysicalAddress(controllerPtr);
+    return NOERROR;
 }
 
 ECode HdmiCecController::NativeGetVersion(
@@ -828,9 +1160,8 @@ ECode HdmiCecController::NativeGetVersion(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-#endif
+    *result = android::nativeGetVersion(controllerPtr);
+    return NOERROR;
 }
 
 ECode HdmiCecController::NativeGetVendorId(
@@ -839,18 +1170,18 @@ ECode HdmiCecController::NativeGetVendorId(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-#endif
+    *result = android::nativeGetVendorId(controllerPtr);
+    return NOERROR;
 }
 
 ECode HdmiCecController::NativeGetPortInfos(
     /* [in] */ Int64 controllerPtr,
     /* [out, callee] */ ArrayOf<IHdmiPortInfo*>** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-#endif
+    VALIDATE_NOT_NULL(result)
+
+    *result = android::nativeGetPortInfos(controllerPtr);
+    return NOERROR;
 }
 
 ECode HdmiCecController::NativeSetOption(
@@ -858,18 +1189,16 @@ ECode HdmiCecController::NativeSetOption(
     /* [in] */ Int32 flag,
     /* [in] */ Int32 value)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-#endif
+    android::nativeSetOption(controllerPtr, flag, value);
+    return NOERROR;
 }
 
 ECode HdmiCecController::NativeSetAudioReturnChannel(
     /* [in] */ Int64 controllerPtr,
     /* [in] */ Boolean flag)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-#endif
+    android::nativeSetAudioReturnChannel(controllerPtr, flag);
+    return NOERROR;
 }
 
 ECode HdmiCecController::NativeIsConnected(
@@ -879,9 +1208,8 @@ ECode HdmiCecController::NativeIsConnected(
 {
     VALIDATE_NOT_NULL(result)
 
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-#endif
+    *result = android::nativeIsConnected(controllerPtr, port);
+    return NOERROR;
 }
 
 } // namespace Hdmi

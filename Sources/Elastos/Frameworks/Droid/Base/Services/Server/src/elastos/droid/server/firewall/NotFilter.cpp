@@ -1,4 +1,5 @@
 #include "elastos/droid/server/firewall/NotFilter.h"
+#include "elastos/droid/server/firewall/IntentFirewall.h"
 
 namespace Elastos {
 namespace Droid {
@@ -8,21 +9,29 @@ namespace Firewall {
 //------------------------------------------------------------------------------
 // NotFilter::FACTORY_FilterFactory
 //------------------------------------------------------------------------------
-IFilter* NotFilter::FACTORY_FilterFactory::NewFilter()
+
+NotFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
+    /* [in] */ const String& tag)
+{
+    FilterFactory::constructor(tag);
+}
+
+IFilter* NotFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
-    AutoPtr<Filter> child;  // = NULL
+    AutoPtr<IFilter> child;  // = NULL
     Int32 outerDepth;
     parser->GetDepth(&outerDepth);
 
     while (XmlUtils::NextElementWithin(parser, outerDepth)) {
-        AutoPtr<Filter> filter = IntentFirewall::ParseFilter(parser);
+        AutoPtr<IFilter> filter = IntentFirewall::ParseFilter(parser);
         if (child == NULL) {
             child = filter;
         } else {
             //throw new XmlPullParserException(
             //        "<not> tag can only contain a single child filter.", parser, null);
-            return E_XML_PULL_PARSER_EXCEPTION;
+            //return E_XML_PULL_PARSER_EXCEPTION;
+            return NULL;
         }
     }
     AutoPtr<NotFilter> notFilter = new NotFilter(child);
@@ -35,7 +44,9 @@ IFilter* NotFilter::FACTORY_FilterFactory::NewFilter()
 // NotFilter
 //=======================================================================================
 
-AutoPtr<FACTORY_FilterFactory> NotFilter::FACTORY = new FACTORY_FilterFactory(String("not"));
+CAR_INTERFACE_IMPL(NotFilter, Object, IFilter);
+
+const AutoPtr<NotFilter::FACTORY_FilterFactory> NotFilter::FACTORY = new NotFilter::FACTORY_FilterFactory(String("not"));
 
 NotFilter::NotFilter(
     /* in */ IFilter* child)
@@ -49,11 +60,12 @@ ECode NotFilter::Matches(
     /* [in] */ Int32 callerUid,
     /* [in] */ Int32 callerPid,
     /* [in] */ const String& resolvedType,
-    /* [in] */ Int32 receivingUid
+    /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
-    *ret = !mChild->Matches(ifw, resolvedComponent, intent, callerUid, callerPid, resolvedType,
-                receivingUid);
+    mChild->Matches(ifw, resolvedComponent, intent, callerUid, callerPid, resolvedType,
+                receivingUid, ret);
+    *ret = !*ret;
     return NOERROR;
 }
 

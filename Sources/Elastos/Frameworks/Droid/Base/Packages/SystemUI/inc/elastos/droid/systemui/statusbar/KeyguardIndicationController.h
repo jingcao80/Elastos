@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_CBACKDROPVIEW_H__
-#define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_CBACKDROPVIEW_H__
+#ifndef  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_KEYGUARDINDICATIONCONTROLLER_H__
+#define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_KEYGUARDINDICATIONCONTROLLER_H__
 
 #include "_SystemUI.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
@@ -23,7 +23,9 @@ namespace StatusBar {
 /**
  * Controls the little text indicator on the keyguard.
  */
-class KeyguardIndicationController: public Object
+class KeyguardIndicationController
+    : public Object
+    , public IKeyguardIndicationController
 {
 private:
     class ControllerBroadcastReceiver: public BroadcastReceiver
@@ -56,41 +58,43 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
     KeyguardIndicationController(
         /* [in] */ IContext* context,
         /* [in] */ IKeyguardIndicationTextView* textView);
 
-    CARAPI_(void) SetVisible(
+    CARAPI SetVisible(
         /* [in] */ Boolean visible);
 
     /**
      * Sets the indication that is shown if nothing else is showing.
      */
-    CARAPI_(void) SetRestingIndication(
+    CARAPI SetRestingIndication(
         /* [in] */ const String& restingIndication);
 
     /**
      * Hides transient indication in {@param delayMs}.
      */
-    CARAPI_(void) HideTransientIndicationDelayed(
+    CARAPI HideTransientIndicationDelayed(
         /* [in] */ Int64 delayMs);
 
     /**
      * Shows {@param transientIndication} until it is hidden by {@link #hideTransientIndication}.
      */
-    CARAPI_(void) ShowTransientIndication(
+    CARAPI ShowTransientIndication(
         /* [in] */ Int32 transientIndication);
 
     /**
      * Shows {@param transientIndication} until it is hidden by {@link #hideTransientIndication}.
      */
-    CARAPI_(void) ShowTransientIndication(
+    CARAPI ShowTransientIndication(
         /* [in] */ const String& transientIndication);
 
     /**
      * Hides transient indication.
      */
-    CARAPI_(void) HideTransientIndication();
+    CARAPI HideTransientIndication();
 
 private:
     CARAPI_(void) UpdateIndication();
@@ -134,4 +138,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_SYSTEMUI_STATUSBAR_CBACKDROPVIEW_H__
+#endif // __ELASTOS_DROID_SYSTEMUI_STATUSBAR_KEYGUARDINDICATIONCONTROLLER_H__

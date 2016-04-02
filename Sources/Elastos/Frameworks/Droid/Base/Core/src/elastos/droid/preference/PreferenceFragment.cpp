@@ -175,8 +175,7 @@ ECode PreferenceFragment::OnActivityCreated(
 ECode PreferenceFragment::OnStart()
 {
     Fragment::OnStart();
-    mPreferenceManager->SetOnPreferenceTreeClickListener(
-            this);
+    mPreferenceManager->SetOnPreferenceTreeClickListener(this);
     return NOERROR;
 }
 
@@ -308,7 +307,7 @@ ECode PreferenceFragment::OnPreferenceTreeClick(
 }
 
 ECode PreferenceFragment::FindPreference(
-    /*[in]*/ const String& key,
+    /*[in]*/ ICharSequence* key,
     /*[out]*/ IPreference** preference)
 {
     VALIDATE_NOT_NULL(preference)
@@ -316,9 +315,8 @@ ECode PreferenceFragment::FindPreference(
         *preference = NULL;
         return NOERROR;
     }
-    AutoPtr<ICharSequence> cs;
-    CString::New(key, (ICharSequence**)&cs);
-    return mPreferenceManager->FindPreference(cs, preference);
+
+    return mPreferenceManager->FindPreference(key, preference);
 }
 
 ECode PreferenceFragment::RequirePreferenceManager()

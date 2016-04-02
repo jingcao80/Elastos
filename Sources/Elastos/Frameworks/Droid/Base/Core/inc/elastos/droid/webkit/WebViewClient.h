@@ -18,7 +18,7 @@ namespace Webkit {
 
 class HttpAuthHandler;
 
-class WebViewClient
+class ECO_PUBLIC WebViewClient
     : public Object
     , public IWebViewClient
 {

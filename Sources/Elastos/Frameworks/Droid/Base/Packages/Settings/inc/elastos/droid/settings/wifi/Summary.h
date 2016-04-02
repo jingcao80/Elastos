@@ -1,39 +1,32 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_SETTINGS_WIFI_SUMMARY_H__
+#define __ELASTOS_DROID_SETTINGS_WIFI_SUMMARY_H__
 
-package com.android.settings.wifi;
-
-using Elastos::Droid::Settings::IR;
+#include "elastos/droid/ext/frameworkext.h"
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Net::NetworkInfo::IDetailedState;
+using Elastos::Droid::Net::NetworkInfoDetailedState;
 
-class Summary {
-    static String Get(Context context, String ssid, DetailedState state) {
-        String[] formats = context->GetResources()->GetStringArray((ssid == NULL)
-                ? R.array.wifi_status : R.array.wifi_status_with_ssid);
-        Int32 index = state->Ordinal();
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Wifi {
 
-        if (index >= formats.length || formats[index].Length() == 0) {
-            return NULL;
-        }
-        return String->Format(formats[index], ssid);
-    }
+class Summary
+{
+public:
+    static CARAPI_(String) Get(
+        /* [in] */ IContext* context,
+        /* [in] */ const String& ssid,
+        /* [in] */ NetworkInfoDetailedState state);
 
-    static String Get(Context context, DetailedState state) {
-        return Get(context, NULL, state);
-    }
-}
+    static CARAPI_(String) Get(
+        /* [in] */ IContext* context,
+        /* [in] */ NetworkInfoDetailedState state);
+};
+
+} // namespace Wifi
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_WIFI_SUMMARY_H__

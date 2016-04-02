@@ -37,9 +37,9 @@ ECode ToggleSeekBar::OnTouchEvent(
 {
     VALIDATE_NOT_NULL(result)
     Boolean isEnabled;
-    this->IsEnabled(&isEnabled);
+    IsEnabled(&isEnabled);
     if (!isEnabled) {
-        this->SetEnabled(TRUE);
+        SetEnabled(TRUE);
     }
     return AbsSeekBar::OnTouchEvent(event, result);
 }

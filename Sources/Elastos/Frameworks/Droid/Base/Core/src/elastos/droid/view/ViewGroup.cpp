@@ -1149,7 +1149,7 @@ ECode ViewGroup::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    View::constructor(context, attrs, defStyleAttr, defStyleRes);
+    FAIL_RETURN(View::constructor(context, attrs, defStyleAttr, defStyleRes))
     InitViewGroup();
     InitFromAttributes(context, attrs, defStyleAttr, defStyleRes);
     return NOERROR;
@@ -4900,7 +4900,7 @@ ECode ViewGroup::UpdateViewLayout(
     }
     AutoPtr<IViewParent> parent;
     view->GetParent((IViewParent**)&parent);
-    if (parent.Get() != this) {
+    if (parent.Get() != (IViewParent*)this) {
 //        throw new IllegalArgumentException("Given view not a child of " + this);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -6757,7 +6757,7 @@ ECode ViewGroup::StartViewTransition(
     /* [in] */ IView* view)
 {
     View* v = VIEW_PROBE(view);
-    if (v->mParent == this) {
+    if (v->mParent == (IViewParent*)this) {
         mTransitioningViews.PushBack(view);
     }
 

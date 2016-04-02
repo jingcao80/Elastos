@@ -328,7 +328,6 @@ private:
     };
 
 private:
-
     static Int32 IsRtlText(
         /* [in] */ Int32 directionality);
 

@@ -5,6 +5,8 @@
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/Connection.h"
+#include "elastos/droid/telecomm/telecom/CVideoProviderBinder.h"
+#include "elastos/droid/telecomm/telecom/CDisconnectCause.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -208,15 +210,14 @@ CAR_INTERFACE_IMPL(Connection::VideoProvider, Object, IConnectionVideoProvider)
 Connection::VideoProvider::VideoProvider()
 {
     mMessageHandler = new VideoProviderHandler(this);
-    // mBinder = new VideoProvider.VideoProviderBinder();
+    CVideoProviderBinder::New(mMessageHandler, (IIVideoProvider**)&mBinder);
 }
 
 ECode Connection::VideoProvider::GetInterface(
     /* [out] */ IIVideoProvider** result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0 && "TODO");
-    // *result = mBinder;
+    *result = mBinder;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -291,7 +292,8 @@ ECode Connection::MyListener::OnDestroyed(
     /* [in] */ IConnection* c)
 {
     Boolean bRm = FALSE;
-    if ((mHost->mConferenceableConnections->Remove(c, &bRm), bRm)) {
+    mHost->mConferenceableConnections->Remove(c, &bRm);
+    if (bRm) {
         mHost->FireOnConferenceableConnectionsChanged();
     }
     return NOERROR;
@@ -881,8 +883,7 @@ ECode Connection::OnAnswer(
 
 ECode Connection::OnAnswer()
 {
-    assert(0 && "TODO");
-    //OnAnswer(IVideoProfile::VideoState::AUDIO_ONLY);
+    OnAnswer(IVideoProfileVideoState::AUDIO_ONLY);
     return NOERROR;
 }
 
@@ -976,8 +977,8 @@ ECode Connection::CreateCanceledConnection(
     /* [out] */ IConnection** result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0 && "TODO");
-    AutoPtr<IDisconnectCause> dc;// = new DisconnectCause(IDisconnectCause::CANCELED);
+    AutoPtr<IDisconnectCause> dc;
+    CDisconnectCause::New(IDisconnectCause::CANCELED, (IDisconnectCause**)&dc);
     AutoPtr<FailureSignalingConnection> p = new FailureSignalingConnection(dc);
     *result = IConnection::Probe(p);
     REFCOUNT_ADD(*result)

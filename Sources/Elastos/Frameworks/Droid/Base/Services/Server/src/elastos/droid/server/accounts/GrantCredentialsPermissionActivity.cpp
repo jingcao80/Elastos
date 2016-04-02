@@ -97,7 +97,7 @@ PInterface GrantCredentialsPermissionActivity::Probe(
     /* [in]  */ REIID riid)
 {
     if (riid == Elastos::Droid::View::EIID_IViewOnClickListener) {
-        return this;
+        return (IViewOnClickListener*)this;
     }
     return Activity::Probe(riid);
 }
@@ -116,7 +116,7 @@ ECode GrantCredentialsPermissionActivity::GetInterfaceID(
     /* [in] */ IInterface *pObject,
     /* [out] */ InterfaceID *pIID)
 {
-    if (pObject == (IInterface*)this) {
+    if (pObject == (IInterface*)(IViewOnClickListener*)this) {
         *pIID = Elastos::Droid::View::EIID_IViewOnClickListener;
         return NOERROR;
     }

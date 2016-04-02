@@ -451,7 +451,7 @@ ECode NativeActivity::HideIme(
 class NativeCode : public ANativeActivity {
 public:
     NativeCode(void* _dlhandle, ANativeActivity_createFunc* _createFunc) {
-        memset(this, 0, sizeof(ANativeActivity));
+        memset((ANativeActivity*)this, 0, sizeof(ANativeActivity));
         memset(&callbacks, 0, sizeof(callbacks));
         dlhandle = _dlhandle;
         createActivityFunc = _createFunc;

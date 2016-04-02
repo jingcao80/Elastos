@@ -13,7 +13,6 @@ module
      * strictly doesn't need to.
      */
     interface IPhoneStatusBarPolicy {
-
         SetZenMode(
             [in] Int32 zen);
     }

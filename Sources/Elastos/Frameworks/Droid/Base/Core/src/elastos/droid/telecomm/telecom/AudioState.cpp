@@ -3,7 +3,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/AudioState.h"
 #include <elastos/core/StringBuffer.h>
-//#include <elastos/utility/CLocaleHelper.h>
 
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;

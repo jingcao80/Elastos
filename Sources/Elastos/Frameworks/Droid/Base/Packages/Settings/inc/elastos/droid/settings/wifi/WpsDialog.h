@@ -1,277 +1,243 @@
-/*
- * Copyright (C) 2012 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.android.settings.wifi;
+#ifndef __ELASTOS_DROID_SETTINGS_WIFI_WPSDIALOG_H__
+#define __ELASTOS_DROID_SETTINGS_WIFI_WPSDIALOG_H__
 
-using Elastos::Droid::App::IAlertDialog;
-using Elastos::Droid::Content::IBroadcastReceiver;
+#include "Elastos.Droid.Wifi.h"
+#include "Elastos.Droid.Widget.h"
+#include "elastos/droid/app/AlertDialog.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "_Settings.h"
+
+using Elastos::Droid::App::AlertDialog;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Net::INetworkInfo;
-using Elastos::Droid::Net::NetworkInfo::IDetailedState;
-using Elastos::Droid::Net::Wifi::IWifiInfo;
-using Elastos::Droid::Net::Wifi::IWifiManager;
-using Elastos::Droid::Net::Wifi::IWpsInfo;
+using Elastos::Droid::Net::NetworkInfoDetailedState;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::IProgressBar;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Wifi::IWifiManagerWpsCallback;
+using Elastos::Droid::Wifi::IWifiInfo;
+using Elastos::Droid::Wifi::IWifiManager;
+using Elastos::Droid::Wifi::IWpsInfo;
 
-using Elastos::Utility::ITimer;
-using Elastos::Utility::ITimerTask;
+// using Elastos::Utility::ITimer;
+// using Elastos::Utility::ITimerTask;
 
-using Elastos::Droid::Settings::IR;
-
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Wifi {
 
 /**
  * Dialog to show WPS progress.
  */
-public class WpsDialog extends AlertDialog {
+class WpsDialog
+    : public AlertDialog
+{
+private:
+    class WpsListener
+        : public Object
+        , public IWifiManagerWpsCallback
+    {
+    public:
+        CAR_INTERFACE_DECL();
 
-    private static const String TAG = "WpsDialog";
-    private static const String DIALOG_STATE = "android:dialogState";
-    private static const String DIALOG_MSG_STRING = "android:dialogMsg";
+        WpsListener(
+            /* [in] */ WpsDialog* host);
 
-    private View mView;
-    private TextView mTextView;
-    private ProgressBar mTimeoutBar;
-    private ProgressBar mProgressBar;
-    private Button mButton;
-    private Timer mTimer;
+        ~WpsListener();
 
-    private static const Int32 WPS_TIMEOUT_S = 120;
+        CARAPI OnStarted(
+            /* [in] */ const String& pin);
 
-    private WifiManager mWifiManager;
-    private WifiManager.WpsCallback mWpsListener;
-    private Int32 mWpsSetup;
+        CARAPI OnSucceeded();
 
-    private final IntentFilter mFilter;
-    private BroadcastReceiver mReceiver;
+        CARAPI OnFailed(
+            /* [in] */ Int32 reason);
 
-    private Context mContext;
-    private Handler mHandler = new Handler();
-    private String mMsgString = "";
+    private:
+        WpsDialog* mHost;
+    };
 
-    private enum DialogState {
-        WPS_INIT,
-        WPS_START,
-        WPS_COMPLETE,
-        CONNECTED, //WPS + IP config is done
-        WPS_FAILED
-    }
-    DialogState mDialogState = DialogState.WPS_INIT;
+    class InitBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        InitBroadcastReceiver(
+            /* [in] */ WpsDialog* host);
 
-    public WpsDialog(Context context, Int32 wpsSetup) {
-        Super(context);
-        mContext = context;
-        mWpsSetup = wpsSetup;
+        ~InitBroadcastReceiver();
 
-        class WpsListener extends WifiManager.WpsCallback {
+        //@Override
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
 
-            CARAPI OnStarted(String pin) {
-                if (pin != NULL) {
-                    UpdateDialog(DialogState.WPS_START, String->Format(
-                            mContext->GetString(R::string::wifi_wps_onstart_pin), pin));
-                } else {
-                    UpdateDialog(DialogState.WPS_START, mContext->GetString(
-                            R::string::wifi_wps_onstart_pbc));
-                }
-            }
+    private:
+        WpsDialog* mHost;
+    };
 
-            CARAPI OnSucceeded() {
-                UpdateDialog(DialogState.WPS_COMPLETE,
-                        mContext->GetString(R::string::wifi_wps_complete));
-            }
+    class UpdateDialogRunnable
+        : public Runnable
+    {
+    public:
+        UpdateDialogRunnable(
+            /* [in] */ WpsDialog* host,
+            /* [in] */ WpsDialogState state,
+            /* [in] */ const String& msg);
 
-            CARAPI OnFailed(Int32 reason) {
-                String msg;
-                switch (reason) {
-                    case WifiManager.WPS_OVERLAP_ERROR:
-                        msg = mContext->GetString(R::string::wifi_wps_failed_overlap);
-                        break;
-                    case WifiManager.WPS_WEP_PROHIBITED:
-                        msg = mContext->GetString(R::string::wifi_wps_failed_wep);
-                        break;
-                    case WifiManager.WPS_TKIP_ONLY_PROHIBITED:
-                        msg = mContext->GetString(R::string::wifi_wps_failed_tkip);
-                        break;
-                    case WifiManager.IN_PROGRESS:
-                        msg = mContext->GetString(R::string::wifi_wps_in_progress);
-                        break;
-                    default:
-                        msg = mContext->GetString(R::string::wifi_wps_failed_generic);
-                        break;
-                }
-                UpdateDialog(DialogState.WPS_FAILED, msg);
-            }
-        }
+        ~UpdateDialogRunnable();
 
-        mWpsListener = new WpsListener();
+        //@Override
+        CARAPI Run();
 
+    private:
+        WpsDialog* mHost;
+        WpsDialogState mState;
+        String mMsg;
+    };
 
-        mFilter = new IntentFilter();
-        mFilter->AddAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        mReceiver = new BroadcastReceiver() {
-            //@Override
-            CARAPI OnReceive(Context context, Intent intent) {
-                HandleEvent(context, intent);
-            }
-        };
-        SetCanceledOnTouchOutside(FALSE);
-    }
+public:
+    WpsDialog(
+        /* [in] */ IContext* context,
+        /* [in] */ Int32 wpsSetup);
 
-    //@Override
-    public Bundle onSaveInstanceState () {
-        Bundle bundle  = super->OnSaveInstanceState();
-        bundle->PutString(DIALOG_STATE, mDialogState->ToString());
-        bundle->PutString(DIALOG_MSG_STRING, mMsgString->ToString());
-        return bundle;
-    }
+    ~WpsDialog();
 
-    //@Override
-    CARAPI OnRestoreInstanceState(Bundle savedInstanceState) {
-        if (savedInstanceState != NULL) {
-            super->OnRestoreInstanceState(savedInstanceState);
-            DialogState dialogState = mDialogState->ValueOf(savedInstanceState->GetString(DIALOG_STATE));
-            String msg = savedInstanceState->GetString(DIALOG_MSG_STRING);
-            UpdateDialog(dialogState, msg);
-        }
-    }
+    // //@Override
+    // public Bundle OnSaveInstanceState () {
+    //     Bundle bundle  = super->OnSaveInstanceState();
+    //     bundle->PutString(DIALOG_STATE, mDialogState->ToString());
+    //     bundle->PutString(DIALOG_MSG_STRING, mMsgString->ToString());
+    //     return bundle;
+    // }
 
-    //@Override
-    protected void OnCreate(Bundle savedInstanceState) {
-        mView = GetLayoutInflater()->Inflate(R.layout.wifi_wps_dialog, NULL);
+    // //@Override
+    // CARAPI OnRestoreInstanceState(Bundle savedInstanceState) {
+    //     if (savedInstanceState != NULL) {
+    //         super->OnRestoreInstanceState(savedInstanceState);
+    //         WpsDialogState dialogState = mDialogState->ValueOf(savedInstanceState->GetString(DIALOG_STATE));
+    //         String msg = savedInstanceState->GetString(DIALOG_MSG_STRING);
+    //         UpdateDialog(dialogState, msg);
+    //     }
+    // }
 
-        mTextView = (TextView) mView->FindViewById(R.id.wps_dialog_txt);
-        mTextView->SetText(R::string::wifi_wps_setup_msg);
+    // //@Override
+    // protected void OnCreate(Bundle savedInstanceState) {
+    //     mView = GetLayoutInflater()->Inflate(R::layout::wifi_wps_dialog, NULL);
 
-        mTimeoutBar = ((ProgressBar) mView->FindViewById(R.id.wps_timeout_bar));
-        mTimeoutBar->SetMax(WPS_TIMEOUT_S);
-        mTimeoutBar->SetProgress(0);
+    //     mTextView = (TextView) mView->FindViewById(R::id::wps_dialog_txt);
+    //     mTextView->SetText(R::string::wifi_wps_setup_msg);
 
-        mProgressBar = ((ProgressBar) mView->FindViewById(R.id.wps_progress_bar));
-        mProgressBar->SetVisibility(View.GONE);
+    //     mTimeoutBar = ((ProgressBar) mView->FindViewById(R::id::wps_timeout_bar));
+    //     mTimeoutBar->SetMax(WPS_TIMEOUT_S);
+    //     mTimeoutBar->SetProgress(0);
 
-        mButton = ((Button) mView->FindViewById(R.id.wps_dialog_btn));
-        mButton->SetText(R::string::wifi_cancel);
-        mButton->SetOnClickListener(new View->OnClickListener() {
-            //@Override
-            CARAPI OnClick(View v) {
-                Dismiss();
-            }
-        });
+    //     mProgressBar = ((ProgressBar) mView->FindViewById(R::id::wps_progress_bar));
+    //     mProgressBar->SetVisibility(IView::GONE);
 
-        mWifiManager = (WifiManager) mContext->GetSystemService(Context.WIFI_SERVICE);
+    //     mButton = ((Button) mView->FindViewById(R::id::wps_dialog_btn));
+    //     mButton->SetText(R::string::wifi_cancel);
+    //     mButton->SetOnClickListener(new View->OnClickListener() {
+    //         //@Override
+    //         CARAPI OnClick(View v) {
+    //             Dismiss();
+    //         }
+    //     });
 
-        SetView(mView);
-        super->OnCreate(savedInstanceState);
-    }
+    //     mWifiManager = (WifiManager) mContext->GetSystemService(IContext::WIFI_SERVICE);
 
-    //@Override
-    protected void OnStart() {
-        /*
-         * increment timeout bar per second.
-         */
-        mTimer = new Timer(FALSE);
-        mTimer->Schedule(new TimerTask() {
-            //@Override
-            CARAPI Run() {
-                mHandler->Post(new Runnable() {
+    //     SetView(mView);
+    //     super->OnCreate(savedInstanceState);
+    // }
 
-                    //@Override
-                    CARAPI Run() {
-                        mTimeoutBar->IncrementProgressBy(1);
-                    }
-                });
-            }
-        }, 1000, 1000);
+    // //@Override
+    // protected void OnStart() {
+    //     /*
+    //      * increment timeout bar per second.
+    //      */
+    //     mTimer = new Timer(FALSE);
+    //     mTimer->Schedule(new TimerTask() {
+    //         //@Override
+    //         CARAPI Run() {
+    //             mHandler->Post(new Runnable() {
 
-        mContext->RegisterReceiver(mReceiver, mFilter);
+    //                 //@Override
+    //                 CARAPI Run() {
+    //                     mTimeoutBar->IncrementProgressBy(1);
+    //                 }
+    //             });
+    //         }
+    //     }, 1000, 1000);
 
-        WpsInfo wpsConfig = new WpsInfo();
-        wpsConfig.setup = mWpsSetup;
-        mWifiManager->StartWps(wpsConfig, mWpsListener);
-    }
+    //     mContext->RegisterReceiver((IBroadcastReceiver*)mReceiver, mFilter);
 
-    //@Override
-    protected void OnStop() {
-        if (mDialogState != DialogState.WPS_COMPLETE) {
-            mWifiManager->CancelWps(NULL);
-        }
+    //     WpsInfo wpsConfig = new WpsInfo();
+    //     wpsConfig.setup = mWpsSetup;
+    //     mWifiManager->StartWps(wpsConfig, mWpsListener);
+    // }
 
-        if (mReceiver != NULL) {
-            mContext->UnregisterReceiver(mReceiver);
-            mReceiver = NULL;
-        }
+    // //@Override
+    // protected void OnStop() {
+    //     if (mDialogState != WpsDialogState_WPS_COMPLETE) {
+    //         mWifiManager->CancelWps(NULL);
+    //     }
 
-        if (mTimer != NULL) {
-            mTimer->Cancel();
-        }
-    }
+    //     if (mReceiver != NULL) {
+    //         mContext->UnregisterReceiver((IBroadcastReceiver*)mReceiver);
+    //         mReceiver = NULL;
+    //     }
 
-    private void UpdateDialog(final DialogState state, final String msg) {
-        if (mDialogState->Ordinal() >= state->Ordinal()) {
-            //ignore.
-            return;
-        }
-        mDialogState = state;
-        mMsgString = msg;
+    //     if (mTimer != NULL) {
+    //         mTimer->Cancel();
+    //     }
+    // }
 
-        mHandler->Post(new Runnable() {
-                //@Override
-                CARAPI Run() {
-                    Switch(state) {
-                        case WPS_COMPLETE:
-                            mTimeoutBar->SetVisibility(View.GONE);
-                            mProgressBar->SetVisibility(View.VISIBLE);
-                            break;
-                        case CONNECTED:
-                        case WPS_FAILED:
-                            mButton->SetText(mContext->GetString(R::string::dlg_ok));
-                            mTimeoutBar->SetVisibility(View.GONE);
-                            mProgressBar->SetVisibility(View.GONE);
-                            if (mReceiver != NULL) {
-                                mContext->UnregisterReceiver(mReceiver);
-                                mReceiver = NULL;
-                            }
-                            break;
-                    }
-                    mTextView->SetText(msg);
-                }
-            });
-   }
+private:
+    CARAPI_(void) UpdateDialog(
+        /* [in] */ WpsDialogState state,
+        /* [in] */ const String& msg);
 
-    private void HandleEvent(Context context, Intent intent) {
-        String action = intent->GetAction();
-        if (WifiManager.NETWORK_STATE_CHANGED_ACTION->Equals(action)) {
-            NetworkInfo info = (NetworkInfo) intent->GetParcelableExtra(
-                    WifiManager.EXTRA_NETWORK_INFO);
-            final NetworkInfo.DetailedState state = info->GetDetailedState();
-            if (state == DetailedState.CONNECTED &&
-                    mDialogState == DialogState.WPS_COMPLETE) {
-                WifiInfo wifiInfo = mWifiManager->GetConnectionInfo();
-                if (wifiInfo != NULL) {
-                    String msg = String->Format(mContext->GetString(
-                            R::string::wifi_wps_connected), wifiInfo->GetSSID());
-                    UpdateDialog(DialogState.CONNECTED, msg);
-                }
-            }
-        }
-    }
+    CARAPI_(void) HandleEvent(
+        /* [in] */ IContext* context,
+        /* [in] */ IIntent* intent);
 
-}
+private:
+    static const String TAG;
+    static const String DIALOG_STATE;
+    static const String DIALOG_MSG_STRING;
+
+    // View mView;
+    AutoPtr<ITextView> mTextView;
+    AutoPtr<IProgressBar> mTimeoutBar;
+    AutoPtr<IProgressBar> mProgressBar;
+    AutoPtr<IButton> mButton;
+    // Timer mTimer;
+
+    static const Int32 WPS_TIMEOUT_S;
+
+    AutoPtr<IWifiManager> mWifiManager;
+    AutoPtr<IWifiManagerWpsCallback> mWpsListener;
+    Int32 mWpsSetup;
+
+    AutoPtr<IIntentFilter> mFilter;
+    AutoPtr<BroadcastReceiver> mReceiver;
+
+    AutoPtr<IContext> mContext;
+    AutoPtr<IHandler> mHandler;
+    String mMsgString;
+
+    WpsDialogState mDialogState;
+};
+
+} // namespace Wifi
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_WIFI_WPSDIALOG_H__

@@ -138,7 +138,7 @@ PInterface CComposingView::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_IComposingView) {
-        return (IInterface*)this;
+        return (IInterface*)(IComposingView*)this;
     }
 
     return View::Probe(riid);

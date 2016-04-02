@@ -28,3 +28,4 @@ SOURCES += CPlaybackStateCustomAction.cpp
 SOURCES += CPlaybackStateCustomActionBuilder.cpp
 SOURCES += CPlaybackState.cpp
 SOURCES += CPlaybackStateHelper.cpp
+SOURCES += MediaControllerCallback.cpp

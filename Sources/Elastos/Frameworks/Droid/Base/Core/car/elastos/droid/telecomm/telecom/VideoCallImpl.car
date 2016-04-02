@@ -20,33 +20,6 @@ module
          * interface IInCallServiceVideoCall
          */
         interface IVideoCallImpl {
-            SetVideoCallListener(
-                [in] IVideoCallListener* videoCallListener);
-
-            SetCamera(
-                [in] String cameraId);
-
-            SetPreviewSurface(
-                [in] ISurface* surface);
-
-            SetDisplaySurface(
-                [in] ISurface* surface);
-
-            SetDeviceOrientation(
-                [in] Int32 rotation);
-
-            SetZoom(
-                [in] Float value);
-
-            SendSessionModifyResponse(
-                [in] IVideoProfile* responseProfile);
-
-            RequestCameraCapabilities();
-
-            RequestCallDataUsage();
-
-            SetPauseImage(
-                [in] String uri);
         }
 
     } // namespace Telecom

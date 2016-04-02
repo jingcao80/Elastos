@@ -1,6 +1,8 @@
 #ifndef __ELASTOS_DROID_TELECOMM_TELECOM_CONNECTIONREQUEST_H__
 #define __ELASTOS_DROID_TELECOMM_TELECOM_CONNECTIONREQUEST_H__
 
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Telecomm.h"
 #include <elastos/core/Object.h>
 

@@ -6,29 +6,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <Elastos.Droid.View.h>
 
-using Elastos::Core::CObject;
-using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::Os::EIID_IHandlerCallback;
-using Elastos::Droid::Utility::CSparseArray;
-using Elastos::Droid::Utility::CSparseInt32Array;
-using Elastos::Utility::CLinkedList;
-using Elastos::Utility::Logging::Slogger;
-
-namespace Elastos {
-namespace Droid {
-namespace Server {
-namespace Tv {
-
-//=============================================================================
-// native
-//=============================================================================
-#if 0 // edit later
-#define LOG_TAG "TvInputHal"
-//#define LOG_NDEBUG 0
-#include "android_runtime/AndroidRuntime.h"
-#include "android_runtime/android_view_Surface.h"
-#include "JNIHelp.h"
 #include "jni.h"
 #include <gui/Surface.h>
 #include <utils/Errors.h>
@@ -37,40 +16,24 @@ namespace Tv {
 #include <utils/NativeHandle.h>
 #include <hardware/tv_input.h>
 
-static struct {
-    jmethodID deviceAvailable;
-    jmethodID deviceUnavailable;
-    jmethodID streamConfigsChanged;
-    jmethodID firstFrameCaptured;
-} gTvInputHalClassInfo;
+using Elastos::Core::CArrayOf;
+using Elastos::Core::CObject;
+using Elastos::Droid::Media::Tv::CTvInputHardwareInfoBuilder;
+using Elastos::Droid::Media::Tv::CTvStreamConfigBuilder;
+using Elastos::Droid::Media::Tv::EIID_ITvStreamConfig;
+using Elastos::Droid::Media::Tv::ITvInputHardwareInfoBuilder;
+using Elastos::Droid::Media::Tv::ITvStreamConfigBuilder;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::EIID_IHandlerCallback;
+using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Droid::Utility::CSparseInt32Array;
+using Elastos::Utility::CLinkedList;
+using Elastos::Utility::Logging::Slogger;
 
-static struct {
-    jclass clazz;
-} gTvStreamConfigClassInfo;
-
-static struct {
-    jclass clazz;
-
-    jmethodID constructor;
-    jmethodID streamId;
-    jmethodID type;
-    jmethodID maxWidth;
-    jmethodID maxHeight;
-    jmethodID generation;
-    jmethodID build;
-} gTvStreamConfigBuilderClassInfo;
-
-static struct {
-    jclass clazz;
-
-    jmethodID constructor;
-    jmethodID deviceId;
-    jmethodID type;
-    jmethodID hdmiPortId;
-    jmethodID audioType;
-    jmethodID audioAddress;
-    jmethodID build;
-} gTvInputHardwareInfoBuilderClassInfo;
+//=============================================================================
+// native
+//=============================================================================
+namespace android {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -117,7 +80,7 @@ BufferProducerThread::BufferProducerThread(
     memcpy(&mStream, stream, sizeof(mStream));
 }
 
-status_t BufferProducerThread::readyToRun() {
+Int32 BufferProducerThread::readyToRun() {
     sp<ANativeWindow> anw(mSurface);
     status_t err = native_window_set_usage(anw.get(), mStream.buffer_producer.usage);
     if (err != NO_ERROR) {
@@ -238,7 +201,7 @@ class JTvInputHal {
 public:
     ~JTvInputHal();
 
-    static JTvInputHal* createInstance(JNIEnv* env, jobject thiz);
+    static JTvInputHal* createInstance(Elastos::Droid::Server::Tv::TvInputHal* thiz);
 
     int addStream(int deviceId, int streamId, const sp<Surface>& surface);
     int removeStream(int deviceId, int streamId);
@@ -259,7 +222,7 @@ private:
         sp<BufferProducerThread> mThread;
     };
 
-    JTvInputHal(JNIEnv* env, jobject thiz, tv_input_device_t* dev);
+    JTvInputHal(Elastos::Droid::Server::Tv::TvInputHal* thiz, tv_input_device_t* dev);
 
     static void notify(
             tv_input_device_t* dev, tv_input_event_t* event, void* data);
@@ -270,15 +233,15 @@ private:
     void onCaptured(int deviceId, int streamId, uint32_t seq, bool succeeded);
 
     Mutex mLock;
-    jweak mThiz;
+    Elastos::Droid::Server::Tv::TvInputHal* mThiz;
     tv_input_device_t* mDevice;
     tv_input_callback_ops_t mCallback;
 
     KeyedVector<int, KeyedVector<int, Connection> > mConnections;
 };
 
-JTvInputHal::JTvInputHal(JNIEnv* env, jobject thiz, tv_input_device_t* device) {
-    mThiz = env->NewWeakGlobalRef(thiz);
+JTvInputHal::JTvInputHal(Elastos::Droid::Server::Tv::TvInputHal* thiz, tv_input_device_t* device) {
+    mThiz = thiz;
     mDevice = device;
     mCallback.notify = &JTvInputHal::notify;
 
@@ -288,12 +251,10 @@ JTvInputHal::JTvInputHal(JNIEnv* env, jobject thiz, tv_input_device_t* device) {
 JTvInputHal::~JTvInputHal() {
     mDevice->common.close((hw_device_t*)mDevice);
 
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
-    env->DeleteWeakGlobalRef(mThiz);
     mThiz = NULL;
 }
 
-JTvInputHal* JTvInputHal::createInstance(JNIEnv* env, jobject thiz) {
+JTvInputHal* JTvInputHal::createInstance(Elastos::Droid::Server::Tv::TvInputHal* thiz) {
     tv_input_module_t* module = NULL;
     status_t err = hw_get_module(TV_INPUT_HARDWARE_MODULE_ID,
             (hw_module_t const**)&module);
@@ -314,7 +275,7 @@ JTvInputHal* JTvInputHal::createInstance(JNIEnv* env, jobject thiz) {
         return 0;
     }
 
-    return new JTvInputHal(env, thiz, device);
+    return new JTvInputHal(thiz, device);
 }
 
 int JTvInputHal::addStream(int deviceId, int streamId, const sp<Surface>& surface) {
@@ -465,37 +426,24 @@ void JTvInputHal::onDeviceAvailable(const tv_input_device_info_t& info) {
         Mutex::Autolock autoLock(&mLock);
         mConnections.add(info.device_id, KeyedVector<int, Connection>());
     }
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    jobject builder = env->NewObject(
-            gTvInputHardwareInfoBuilderClassInfo.clazz,
-            gTvInputHardwareInfoBuilderClassInfo.constructor);
-    env->CallObjectMethod(
-            builder, gTvInputHardwareInfoBuilderClassInfo.deviceId, info.device_id);
-    env->CallObjectMethod(
-            builder, gTvInputHardwareInfoBuilderClassInfo.type, info.type);
+    AutoPtr<ITvInputHardwareInfoBuilder> builder;
+    CTvInputHardwareInfoBuilder::New((ITvInputHardwareInfoBuilder**)&builder);
+    builder->DeviceId(info.device_id);
+    builder->Type(info.type);
     if (info.type == TV_INPUT_TYPE_HDMI) {
-        env->CallObjectMethod(
-                builder, gTvInputHardwareInfoBuilderClassInfo.hdmiPortId, info.hdmi.port_id);
+        builder->HdmiPortId(info.hdmi.port_id);
     }
-    env->CallObjectMethod(
-            builder, gTvInputHardwareInfoBuilderClassInfo.audioType, info.audio_type);
+    builder->AudioType(info.audio_type);
     if (info.audio_type != AUDIO_DEVICE_NONE) {
-        jstring audioAddress = env->NewStringUTF(info.audio_address);
-        env->CallObjectMethod(
-                builder, gTvInputHardwareInfoBuilderClassInfo.audioAddress, audioAddress);
-        env->DeleteLocalRef(audioAddress);
+        String audioAddress(info.audio_address);
+        builder->AudioAddress(audioAddress);
     }
 
-    jobject infoObject = env->CallObjectMethod(builder, gTvInputHardwareInfoBuilderClassInfo.build);
+    AutoPtr<ITvInputHardwareInfo> infoObject;
+    builder->Build((ITvInputHardwareInfo**)&infoObject);
 
-    env->CallVoidMethod(
-            mThiz,
-            gTvInputHalClassInfo.deviceAvailable,
-            infoObject);
-
-    env->DeleteLocalRef(builder);
-    env->DeleteLocalRef(infoObject);
+    mThiz->DeviceAvailableFromNative(infoObject);
 }
 
 void JTvInputHal::onDeviceUnavailable(int deviceId) {
@@ -508,11 +456,7 @@ void JTvInputHal::onDeviceUnavailable(int deviceId) {
         connections.clear();
         mConnections.removeItem(deviceId);
     }
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
-    env->CallVoidMethod(
-            mThiz,
-            gTvInputHalClassInfo.deviceUnavailable,
-            deviceId);
+    mThiz->DeviceUnavailableFromNative(deviceId);
 }
 
 void JTvInputHal::onStreamConfigurationsChanged(int deviceId) {
@@ -524,11 +468,7 @@ void JTvInputHal::onStreamConfigurationsChanged(int deviceId) {
         }
         connections.clear();
     }
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
-    env->CallVoidMethod(
-            mThiz,
-            gTvInputHalClassInfo.streamConfigsChanged,
-            deviceId);
+    mThiz->StreamConfigsChangedFromNative(deviceId);
 }
 
 void JTvInputHal::onCaptured(int deviceId, int streamId, uint32_t seq, bool succeeded) {
@@ -545,15 +485,73 @@ void JTvInputHal::onCaptured(int deviceId, int streamId, uint32_t seq, bool succ
     }
     thread->onCaptured(seq, succeeded);
     if (seq == 0) {
-        JNIEnv* env = AndroidRuntime::getJNIEnv();
-        env->CallVoidMethod(
-                mThiz,
-                gTvInputHalClassInfo.firstFrameCaptured,
-                deviceId,
-                streamId);
+        mThiz->FirstFrameCapturedFromNative(deviceId, streamId);
     }
 }
-#endif // if 0
+
+////////////////////////////////////////////////////////////////////////////////
+
+static jlong nativeOpen(Elastos::Droid::Server::Tv::TvInputHal* thiz) {
+    return (jlong)JTvInputHal::createInstance(thiz);
+}
+
+sp<Surface> android_view_Surface_getSurface(ISurface* surfaceObj) {
+    Int64 nativeSurface;
+    surfaceObj->GetNativeSurface(&nativeSurface);
+    sp<Surface> sur = reinterpret_cast<Surface *>(nativeSurface);
+    return sur;
+}
+
+static int nativeAddStream(jlong ptr, jint deviceId, jint streamId, ISurface* jsurface) {
+    JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
+    if (!jsurface) {
+        return BAD_VALUE;
+    }
+    sp<Surface> surface(android_view_Surface_getSurface(jsurface));
+    return tvInputHal->addStream(deviceId, streamId, surface);
+}
+
+static int nativeRemoveStream(jlong ptr, jint deviceId, jint streamId) {
+    JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
+    return tvInputHal->removeStream(deviceId, streamId);
+}
+
+static AutoPtr<IArrayOf> nativeGetStreamConfigs(jlong ptr, jint deviceId, jint generation) {
+    JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
+    int numConfigs = 0;
+    const tv_stream_config_t* configs = tvInputHal->getStreamConfigs(deviceId, &numConfigs);
+
+    AutoPtr<IArrayOf> result;
+    CArrayOf::New(EIID_ITvStreamConfig, numConfigs, (IArrayOf**)&result);
+    for (int i = 0; i < numConfigs; ++i) {
+        AutoPtr<ITvStreamConfigBuilder> builder;
+        CTvStreamConfigBuilder::New((ITvStreamConfigBuilder**)&builder);
+        builder->StreamId(configs[i].stream_id);
+        builder->Type(configs[i].type);
+        builder->MaxWidth(configs[i].max_video_width);
+        builder->MaxHeight(configs[i].max_video_height);
+        builder->Generation(generation);
+
+        AutoPtr<ITvStreamConfig> config;
+        builder->Build((ITvStreamConfig**)&config);
+
+        result->Set(i, config);
+    }
+    return result;
+}
+
+static void nativeClose(jlong ptr) {
+    JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
+    delete tvInputHal;
+}
+
+} // namespace android
+
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Tv {
+
 //=============================================================================
 // TvInputHal
 //=============================================================================
@@ -580,98 +578,43 @@ TvInputHal::TvInputHal()
     CLinkedList::New((IQueue**)&mPendingMessageQueue);
 }
 
-// jlong nativeOpen(JNIEnv* env, jobject thiz)
-Int64 TvInputHal::NativeOpen()
+Int64 TvInputHal::NativeOpen(
+    /* [in] */ TvInputHal* thiz)
 {
-    return 0l;
-#if 0 // TODO: Translate codes below
-    return (jlong)JTvInputHal::createInstance(env, thiz);
-#endif
+    return android::nativeOpen(thiz);
 }
 
-// int nativeAddStream(JNIEnv* env, jclass clazz,
-//         jlong ptr, jint deviceId, jint streamId, jobject jsurface)
 Int32 TvInputHal::NativeAddStream(
     /* [in] */ Int64 ptr,
     /* [in] */ Int32 deviceId,
     /* [in] */ Int32 streamId,
     /* [in] */ ISurface* surface)
 {
-    return 0;
-#if 0 // TODO: Translate codes below
-    JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
-    if (!jsurface) {
-        return BAD_VALUE;
-    }
-    sp<Surface> surface(android_view_Surface_getSurface(env, jsurface));
-    return tvInputHal->addStream(deviceId, streamId, surface);
-#endif
+    return android::nativeAddStream(ptr, deviceId, streamId, surface);
 }
 
-// int nativeRemoveStream(JNIEnv* env, jclass clazz,
-//         jlong ptr, jint deviceId, jint streamId)
 Int32 TvInputHal::NativeRemoveStream(
     /* [in] */ Int64 ptr,
     /* [in] */ Int32 deviceId,
     /* [in] */ Int32 streamId)
 {
-    return 0;
-#if 0 // TODO: Translate codes below
-    JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
-    return tvInputHal->removeStream(deviceId, streamId);
-#endif
+    return android::nativeRemoveStream(ptr, deviceId, streamId);
 }
 
-// jobjectArray nativeGetStreamConfigs(JNIEnv* env, jclass clazz,
-//         jlong ptr, jint deviceId, jint generation)
 AutoPtr<IArrayOf> TvInputHal::NativeGetStreamConfigs(
     /* [in] */ Int64 ptr,
     /* [in] */ Int32 deviceId,
     /* [in] */ Int32 generation)
 {
-    AutoPtr<IArrayOf> rev;
-    return rev;
-#if 0 // TODO: Translate codes below
-    JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
-    int numConfigs = 0;
-    const tv_stream_config_t* configs = tvInputHal->getStreamConfigs(deviceId, &numConfigs);
-
-    jobjectArray result = env->NewObjectArray(numConfigs, gTvStreamConfigClassInfo.clazz, NULL);
-    for (int i = 0; i < numConfigs; ++i) {
-        jobject builder = env->NewObject(
-                gTvStreamConfigBuilderClassInfo.clazz,
-                gTvStreamConfigBuilderClassInfo.constructor);
-        env->CallObjectMethod(
-                builder, gTvStreamConfigBuilderClassInfo.streamId, configs[i].stream_id);
-        env->CallObjectMethod(
-                builder, gTvStreamConfigBuilderClassInfo.type, configs[i].type);
-        env->CallObjectMethod(
-                builder, gTvStreamConfigBuilderClassInfo.maxWidth, configs[i].max_video_width);
-        env->CallObjectMethod(
-                builder, gTvStreamConfigBuilderClassInfo.maxHeight, configs[i].max_video_height);
-        env->CallObjectMethod(
-                builder, gTvStreamConfigBuilderClassInfo.generation, generation);
-
-        jobject config = env->CallObjectMethod(builder, gTvStreamConfigBuilderClassInfo.build);
-
-        env->SetObjectArrayElement(result, i, config);
-
-        env->DeleteLocalRef(config);
-        env->DeleteLocalRef(builder);
-    }
-    return result;
-#endif
+    return android::nativeGetStreamConfigs(ptr, deviceId, generation);
 }
 
 // void nativeClose(JNIEnv* env, jclass clazz, jlong ptr)
 ECode TvInputHal::NativeClose(
     /* [in] */ Int64 ptr)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-    JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
-    delete tvInputHal;
-#endif
+    android::nativeClose(ptr);
+    return NOERROR;
 }
 
 ECode TvInputHal::constructor(
@@ -685,7 +628,7 @@ ECode TvInputHal::constructor(
 ECode TvInputHal::Init()
 {
     synchronized(mLock) {
-        mPtr = NativeOpen();
+        mPtr = NativeOpen(this);
     }
     return NOERROR;
 }

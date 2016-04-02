@@ -3,6 +3,10 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/RemoteConnectionService.h"
 #include "elastos/droid/telecomm/telecom/RemoteConnection.h"
+#include "elastos/droid/telecomm/telecom/CRemoteConference.h"
+#include "elastos/droid/telecomm/telecom/CRemoteConnection.h"
+#include "elastos/droid/telecomm/telecom/CConnectionRequest.h"
+#include "elastos/droid/telecomm/telecom/CConnectionServiceAdapterServant.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::IBundle;
@@ -296,8 +300,8 @@ ECode RemoteConnectionService::MyConnectionServiceAdapter::AddConferenceCall(
     /* [in] */ IParcelableConference* parcel)
 {
     AutoPtr<IRemoteConference> conference;
-    // CRemoteConference::New(callId,
-    //         mOutgoingConnectionServiceRpc, (IRemoteConference**)&conference);
+    CRemoteConference::New(callId,
+            mHost->mOutgoingConnectionServiceRpc, (IRemoteConference**)&conference);
 
     AutoPtr<IList> l;
     parcel->GetConnectionIds((IList**)&l);
@@ -638,7 +642,7 @@ ECode RemoteConnectionService::RemoteConnectionCallback::OnConferenceChanged(
 static AutoPtr<IRemoteConnection> InitConn()
 {
     AutoPtr<IRemoteConnection> conn;
-    // CRemoteConnection::New(String("NULL"), NULL, NULL, (IRemoteConnection**)&conn);
+    CRemoteConnection::New(String("NULL"), NULL, NULL, (IRemoteConnection**)&conn);
     return conn;
 }
 
@@ -647,17 +651,19 @@ AutoPtr<IRemoteConnection> RemoteConnectionService::NULL_CONNECTION = InitConn()
 static AutoPtr<IRemoteConference> InitConf()
 {
     AutoPtr<IRemoteConference> conf;
-    // CRemoteConference::New(String("NULL"), NULL, (IRemoteConference**)&conf);
+    CRemoteConference::New(String("NULL"), NULL, (IRemoteConference**)&conf);
     return conf;
 }
 
 AutoPtr<IRemoteConference> RemoteConnectionService::NULL_CONFERENCE = InitConf();
 
+CAR_INTERFACE_IMPL(RemoteConnectionService, Object, IRemoteConnectionService)
+
 RemoteConnectionService::RemoteConnectionService()
 {
     mServantDelegate = new MyConnectionServiceAdapter(this);
 
-    // CConnectionServiceAdapterServant::New(mServantDelegate, (IConnectionServiceAdapterServant**)&mServant);
+    CConnectionServiceAdapterServant::New(mServantDelegate, (IConnectionServiceAdapterServant**)&mServant);
 
     mDeathRecipient = new ProxyDeathRecipient(this);
 
@@ -681,6 +687,7 @@ ECode RemoteConnectionService::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
+    assert(0 && "TODO");
     // return "[RemoteCS - " + mOutgoingConnectionServiceRpc.asBinder().toString() + "]";
     return NOERROR;
 }
@@ -708,12 +715,12 @@ ECode RemoteConnectionService::CreateRemoteConnection(
     Int32 state = 0;
     request->GetVideoState(&state);
     AutoPtr<IConnectionRequest> newRequest;
-    // CConnectionRequest::New(
-    //         handle,
-    //         uri,
-    //         bundle,
-    //         state,
-    //         (IConnectionRequest**)&newRequest);
+    CConnectionRequest::New(
+            handle,
+            uri,
+            bundle,
+            state,
+            (IConnectionRequest**)&newRequest);
     // try {
     Boolean bEmp = FALSE;
     if ((mConnectionById->IsEmpty(&bEmp), bEmp)) {
@@ -722,7 +729,7 @@ ECode RemoteConnectionService::CreateRemoteConnection(
         mOutgoingConnectionServiceRpc->AddConnectionServiceAdapter(stub);
     }
     AutoPtr<IRemoteConnection> connection;
-    // CRemoteConnection::New(id, mOutgoingConnectionServiceRpc, newRequest, (IRemoteConnection**)&connection);
+    CRemoteConnection::New(id, mOutgoingConnectionServiceRpc, newRequest, (IRemoteConnection**)&connection);
     mPendingConnections->Add(connection);
     mConnectionById->Put(uid, connection);
     mOutgoingConnectionServiceRpc->CreateConnection(

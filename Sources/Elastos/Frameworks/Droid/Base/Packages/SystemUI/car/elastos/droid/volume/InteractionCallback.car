@@ -1,0 +1,20 @@
+
+module
+{
+    using interface Elastos.Droid.Widget.ITextView;
+    using interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Volume {
+
+    interface IInteractionCallback {
+        OnInteraction();
+    }
+
+    } // namespace Volume
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

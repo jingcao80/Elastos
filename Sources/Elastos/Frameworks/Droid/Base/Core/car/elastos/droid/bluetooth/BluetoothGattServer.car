@@ -22,7 +22,7 @@ module
      * @Involve
      * interface IBluetoothProfile
      */
-    [deprecated]
+    [deprecated, local]
     interface IBluetoothGattServer {
         /**
          * Initiate a connection to a Bluetooth GATT capable device.

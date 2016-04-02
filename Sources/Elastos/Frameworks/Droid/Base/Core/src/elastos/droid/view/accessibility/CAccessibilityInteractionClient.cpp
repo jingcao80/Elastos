@@ -294,8 +294,7 @@ ECode CAccessibilityInteractionClient::FindAccessibilityNodeInfoByAccessibilityI
         Boolean success;
         ECode ec = connection->FindAccessibilityNodeInfoByAccessibilityId(
                 accessibilityWindowId, accessibilityNodeId, interactionId,
-                this,
-                prefetchFlags, id, &success);
+                this, prefetchFlags, id, &success);
         if (FAILED(ec)) {
             if (DEBUG) {
                 Slogger::W(TAG, "Error while calling remote" \

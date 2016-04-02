@@ -768,37 +768,37 @@ PInterface SuggestionsAdapter::Probe(
         /* [in] */ REIID riid)
 {
     if (riid == EIID_ISpinnerAdapter) {
-        return this;
+        return (ISpinnerAdapter*)this;
     }
     else if (riid == EIID_ICursorFilterClient) {
-        return this;
+        return (ICursorFilterClient*)this;
     }
     else if (riid == EIID_IFilterable) {
-        return this;
+        return (IFilterable*)this;
     }
     else if (riid == EIID_IViewOnClickListener) {
-        return this;
+        return (IViewOnClickListener*)this;
     }
     else if (riid == EIID_ISuggestionsAdapter) {
-        return this;
+        return (ISuggestionsAdapter*)this;
     }
     else if (riid == EIID_IResourceCursorAdapter) {
-        return this;
+        return (IResourceCursorAdapter*)this;
     }
     else if (riid == EIID_ICursorAdapter) {
-        return this;
+        return (ICursorAdapter*)this;
     }
     else if (riid == EIID_IBaseAdapter) {
-        return this;
+        return (IBaseAdapter*)this;
     }
     else if (riid == EIID_IListAdapter) {
-        return this;
+        return (IListAdapter*)this;
     }
     else if (riid == EIID_IAdapter) {
-        return this;
+        return (IAdapter*)this;
     }
     else if (riid == EIID_IInterface) {
-        return this;
+        return (ISuggestionsAdapter*)this;
     }
     return NULL;
 }

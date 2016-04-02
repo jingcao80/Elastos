@@ -25,7 +25,7 @@ PInterface CGetAuthTokenLabelSession::Probe(
     /* [in] */ REIID riid)
 {
     if (riid == EIID_AccountManagerServiceSession) {
-        return reinterpret_cast<PInterface>(this);
+        return reinterpret_cast<PInterface>((AccountManagerServiceSession*)this);
     }
     return _CGetAuthTokenLabelSession::Probe(riid);
 }

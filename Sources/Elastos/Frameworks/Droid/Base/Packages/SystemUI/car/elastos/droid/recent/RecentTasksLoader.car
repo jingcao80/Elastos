@@ -1,33 +1,35 @@
 module
 {
+    interface Elastos.Droid.SystemUI.Recent.IRecentsPanelView;
+    interface Elastos.Droid.SystemUI.Recent.ITaskDescription;
+    using interface Elastos.Droid.Content.IComponentName;
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Content.Res.IResources;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.View.IMotionEvent;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Core.ICharSequence;
     using interface Elastos.Utility.IArrayList;
-
-    interface Elastos.Droid.Graphics.IBitmap;
-    interface Elastos.Droid.Content.IContext;
 
     namespace Elastos {
     namespace Droid {
     namespace SystemUI {
     namespace Recent {
 
-    interface IRecentsPanelView;
-    interface ITaskDescription;
-
-    /**
-     * @Involve
-     * interface Elastos.Droid.View.IViewOnTouchListener
-     */
     [local, deprecated]
     interface IRecentTasksLoader {
         SetRecentsPanel(
             [in] IRecentsPanelView* newRecentsPanel,
             [in] IRecentsPanelView* caller);
 
+        GetRecentsPanel(
+            [out] IRecentsPanelView** rp);
+
         GetDefaultThumbnail(
-            [out] IBitmap** bitmap);
+            [out] IDrawable** drawable);
 
         GetDefaultIcon(
-            [out] IBitmap** bitmap);
+            [out] IDrawable** drawable);
 
         GetLoadedTasks(
             [out] IArrayList** tasks);
@@ -36,6 +38,31 @@ module
             [in] ITaskDescription* td);
 
         IsFirstScreenful(
+            [out] Boolean* result);
+
+        CreateTaskDescription(
+            [in] Int32 taskId,
+            [in] Int32 persistentTaskId,
+            [in] IIntent* baseIntent,
+            [in] IComponentName* origActivity,
+            [in] ICharSequence* description,
+            [in] Int32 userId,
+            [out] ITaskDescription** td);
+
+        LoadThumbnailAndIcon(
+            [in] ITaskDescription* td);
+
+        GetFullResDefaultActivityIcon(
+            [in] IDrawable** drawable);
+
+        GetFullResIcon(
+            [in] IResources* resources,
+            [in] Int32 iconId,
+            [out] IDrawable** drawable);
+
+        OnTouch(
+            [in] IView* v,
+            [in] IMotionEvent* ev,
             [out] Boolean* result);
 
         PreloadRecentTasksList();
@@ -59,13 +86,6 @@ module
 
         LoadTasksInBackground(
             [in] Boolean zeroeth);
-    }
-
-    [local, deprecated]
-    interface IRecentTasksLoaderHelper {
-        GetInstance(
-            [in] IContext* ctx,
-            [out] IRecentTasksLoader** loader);
     }
 
     } // namespace Recent

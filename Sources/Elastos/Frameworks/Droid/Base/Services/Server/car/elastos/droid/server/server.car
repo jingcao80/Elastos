@@ -36,6 +36,11 @@ module
     merge("display/OverlayDisplayWindow.car");
     merge("display/RampAnimator.car");
 
+    merge("firewall/AMSInterface.car");
+    merge("firewall/IntentFirewall.car");
+    merge("firewall/Filter.car");
+    merge("firewall/FirewallIntentResolver.car");
+
     merge("hdmi/DeviceDiscoveryAction.car");
     merge("hdmi/EmptyInterfaces.car");
     merge("hdmi/HdmiCecController.car");

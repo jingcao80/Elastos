@@ -23,6 +23,7 @@ module
      * @Involve
      * interface IBluetoothProfile
      */
+    [local]
     interface IBluetoothGatt {
         /** A GATT operation completed successfully */
         const Int32 GATT_SUCCESS = 0;

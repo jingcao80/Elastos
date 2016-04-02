@@ -25,6 +25,12 @@ String FilterFactory::GetTagName()
     return mTag;
 }
 
+IFilter* FilterFactory::NewFilter(
+    /* in */ IXmlPullParser* parser)
+{
+    return NULL;
+}
+
 } // Firewall
 } // Server
 } // Droid

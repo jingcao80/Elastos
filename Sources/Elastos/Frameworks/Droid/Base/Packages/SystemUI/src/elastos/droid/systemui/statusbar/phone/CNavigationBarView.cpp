@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CNavigationBarView.h"
+#include "elastos/droid/systemui/statusbar/phone/NavigationBarViewTaskSwitchHelper.h"
 #include "../../R.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.App.h"
@@ -214,8 +215,7 @@ ECode CNavigationBarView::constructor(
     mVertical = FALSE;
     mShowMenu = FALSE;
     mDelegateHelper = new DelegateViewHelper(this);
-    assert(0 && "TODO");
-    // mTaskSwitchHelper = new NavigationBarViewTaskSwitchHelper(context);
+    mTaskSwitchHelper = new NavigationBarViewTaskSwitchHelper(context);
 
     GetIcons(res);
 

@@ -301,6 +301,7 @@ module
              interface IBinder;
          }
 
+         [local]
          class CBluetoothPbapStateChangeCallback {
              constructor(
                  [in] IBluetoothPbap* host);
@@ -325,6 +326,7 @@ module
              interface IBinder;
          }
 
+         [local]
          class CBluetoothHealthCallbackWrapper {
              constructor(
                  [in] IBluetoothHealthCallback* cb);
@@ -392,6 +394,7 @@ module
             interface IBluetoothGattDescriptor;
         }
 
+        [local]
         class CBluetoothGattCallback {
             constructor(
                 [in] IBluetoothGatt* host);
@@ -400,6 +403,7 @@ module
             interface IBinder;
         }
 
+        [local]
         class CBluetoothGattServerCallback {
              constructor(
                  [in] IBluetoothGattServer* host);
@@ -428,6 +432,7 @@ module
              interface IParcelable;
          }
 
+         [local]
          class CBluetoothHeadsetClientStateChangeCallback {
              constructor(
                  [in] IBluetoothHeadsetClient* host);
@@ -469,6 +474,7 @@ module
              interface IParcelable;
          }
 
+         [local]
          class CBluetoothMapStateChangeCallback {
              constructor(
                  [in] IBluetoothMap* host);

@@ -4329,7 +4329,7 @@ Boolean PhoneWindow::OnKeyDown(
             if (featureId < 0) break;
             // Currently don't do anything with long press.
             if (dispatcher != NULL) {
-                dispatcher->StartTracking(event, (IInterface*)TO_IINTERFACE(this));
+                dispatcher->StartTracking(event, TO_IINTERFACE(this));
             }
             return TRUE;
         }

@@ -67,6 +67,8 @@ const String AwBrowserProcess::TAG("AwBrowserProcess");
 void AwBrowserProcess::LoadLibrary()
 {
     PathUtils::SetPrivateDataDirectorySuffix(PRIVATE_DATA_DIRECTORY_SUFFIX);
+    //in Java below code use to bind the JNI methods,
+    //in Elastos the "native method" will be resolved by dynamic loader
     /*
     try {
         LibraryLoader.loadNow();
@@ -74,8 +76,7 @@ void AwBrowserProcess::LoadLibrary()
         throw new RuntimeException("Cannot load WebView", e);
     }
     */
-    Logger::E(TAG, "AwBrowserProcess::LoadLibrary, why load library...?");
-    assert(0);
+    Logger::D(TAG, "AwBrowserProcess::LoadLibrary, In Java use to bind JNI methods, is not needed in Elastos");
 }
 
 /**
