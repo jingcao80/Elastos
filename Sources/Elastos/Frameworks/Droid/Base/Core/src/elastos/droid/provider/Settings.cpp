@@ -574,7 +574,7 @@ static String sSystemSettingsToBackup[] = {
 static AutoPtr<ArrayOf<String> > InitSystemSettingsToBackup()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(
-        sSystemSettingsToBackup, sizeof(sSystemSettingsToBackup) / sizeof(String));
+        sSystemSettingsToBackup, ArraySize(sSystemSettingsToBackup));
     return array;
 }
 
@@ -591,7 +591,7 @@ static String sSystemCLONE_TO_MANAGED_PROFILE[] = {
 static AutoPtr<ArrayOf<String> > initSystemCLONE_TO_MANAGED_PROFILE()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(
-        sSystemCLONE_TO_MANAGED_PROFILE, sizeof(sSystemCLONE_TO_MANAGED_PROFILE) / sizeof(String));
+        sSystemCLONE_TO_MANAGED_PROFILE, ArraySize(sSystemCLONE_TO_MANAGED_PROFILE));
     return array;
 }
 
@@ -1179,7 +1179,7 @@ static String sSecureSettingsToBackup[] = {
 static AutoPtr<ArrayOf<String> > InitSecureSettingsToBackup()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(
-        sSecureSettingsToBackup, sizeof(sSecureSettingsToBackup) / sizeof(String));
+        sSecureSettingsToBackup, ArraySize(sSecureSettingsToBackup));
     return array;
 }
 INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::Secure::SETTINGS_TO_BACKUP = InitSecureSettingsToBackup();
@@ -1364,7 +1364,7 @@ static String sNavigationRingTargets[] = {
 static AutoPtr<ArrayOf<String> > initNAVIGATION_RING_TARGETS()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(
-        sNavigationRingTargets, sizeof(sNavigationRingTargets) / sizeof(String));
+        sNavigationRingTargets, ArraySize(sNavigationRingTargets));
     return array;
 }
 
@@ -1954,7 +1954,7 @@ static String sGlobalSettingsToBackup[] = {
 static AutoPtr<ArrayOf<String> > InitGlobalSettingsToBackup()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(
-        sGlobalSettingsToBackup, sizeof(sGlobalSettingsToBackup) / sizeof(String));
+        sGlobalSettingsToBackup, ArraySize(sGlobalSettingsToBackup));
     return array;
 }
 
