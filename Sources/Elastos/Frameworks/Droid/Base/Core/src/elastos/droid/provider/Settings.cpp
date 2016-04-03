@@ -403,9 +403,10 @@ static AutoPtr<IHashSet> InitSystemMOVED_TO_SECURE()
     hs->Add(CoreUtils::Convert(ISettingsSecure::QS_TILES));
     hs->Add(CoreUtils::Convert(ISettingsSecure::QS_USE_MAIN_TILES));
     hs->Add(CoreUtils::Convert(ISettingsSecure::QS_SHOW_BRIGHTNESS_SLIDER));
-    for (Int32 i = 0; i < Settings::Secure::NAVIGATION_RING_TARGETS->GetLength(); i++) {
-        hs->Add(CoreUtils::Convert((*Settings::Secure::NAVIGATION_RING_TARGETS)[i]));
-    }
+    // TODO:
+    // for (Int32 i = 0; i < Settings::Secure::NAVIGATION_RING_TARGETS->GetLength(); i++) {
+    //     hs->Add(CoreUtils::Convert((*Settings::Secure::NAVIGATION_RING_TARGETS)[i]));
+    // }
     hs->Add(CoreUtils::Convert(ISettingsSecure::DEV_FORCE_SHOW_NAVBAR));
     hs->Add(CoreUtils::Convert(ISettingsSecure::KEYBOARD_BRIGHTNESS));
     hs->Add(CoreUtils::Convert(ISettingsSecure::BUTTON_BRIGHTNESS));

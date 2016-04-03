@@ -515,8 +515,8 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
             flags |= ISurfaceControl::SECURE;
         }
 
-        Int32 width;
-        Int32 height;
+        Int32 width = 0;
+        Int32 height = 0;
         if (attrs->GetFlags(&attrsflags), (attrsflags & IWindowManagerLayoutParams::FLAG_SCALED) != 0) {
             // for a scaled surface, we always want the requested
             // size.

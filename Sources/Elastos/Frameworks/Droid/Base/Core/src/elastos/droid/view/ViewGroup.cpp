@@ -4319,7 +4319,7 @@ ECode ViewGroup::DispatchDraw(
         }
         AutoPtr<IAnimation> animation;
         if ((VIEW_PROBE(child)->mViewFlags & VISIBILITY_MASK) == IView::VISIBLE
-            || (child->GetAnimation((IAnimation**)&animation), animation) != NULL) {
+            || (child->GetAnimation((IAnimation**)&animation), animation != NULL)) {
             more |= DrawChild(canvas, child, drawingTime);
         }
     }

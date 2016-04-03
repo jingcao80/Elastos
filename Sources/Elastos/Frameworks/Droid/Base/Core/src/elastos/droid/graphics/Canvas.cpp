@@ -125,7 +125,7 @@ Canvas::~Canvas()
 ECode Canvas::constructor()
 {
     Boolean is = FALSE;
-    if (!(IsHardwareAccelerated(&is), is)) {
+    if (IsHardwareAccelerated(&is), !is) {
         // 0 means no native bitmap
         mNativeCanvasWrapper = InitRaster(0);
     }
@@ -1864,10 +1864,11 @@ void Canvas::NativeSkew(
 }
 
 void Canvas::NativeConcat(
-    /* [in] */ Int64 canvas,
-    /* [in] */ Int64 matrix)
+    /* [in] */ Int64 canvasHandle,
+    /* [in] */ Int64 matrixHandle)
 {
-    ((SkCanvas*)canvas)->concat(*(SkMatrix*)matrix);
+    const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
+    get_canvas(canvasHandle)->concat(*matrix);
 }
 
 void Canvas::NativeSetMatrix(
