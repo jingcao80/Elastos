@@ -71,6 +71,7 @@ using Elastos::Droid::Os::CBinder;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::EIID_IHandlerCallback;
 using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettings;
 using Elastos::Droid::Text::TextUtils;
@@ -309,6 +310,13 @@ ECode CInputMethodManagerService::SettingsObserver::constructor(
     assert(uri != NULL);
     resolver->RegisterContentObserver(uri, FALSE, co);
 
+    uri = NULL;
+    Settings::System::GetUriFor(ISettingsSystem::STATUS_BAR_IME_SWITCHER, (IUri**)&uri);
+    assert(uri != NULL);
+    AutoPtr<UpdateFromSettingsLockObserver> observer = new UpdateFromSettingsLockObserver();
+    observer->constructor(mHandler, mHost);
+    resolver->RegisterContentObserver(uri, FALSE, observer);
+
     return NOERROR;
 }
 
@@ -335,6 +343,28 @@ ECode CInputMethodManagerService::SettingsObserver::OnChange(
     }
 
     return NOERROR;
+}
+
+//============================================================================
+// CInputMethodManagerService::UpdateFromSettingsLockObserver
+//============================================================================
+CInputMethodManagerService::UpdateFromSettingsLockObserver::UpdateFromSettingsLockObserver()
+{}
+
+ECode CInputMethodManagerService::UpdateFromSettingsLockObserver::constructor(
+    /* [in] */ IHandler* handler,
+    /* [in] */ CInputMethodManagerService* host)
+{
+    FAIL_RETURN(ContentObserver::constructor(handler))
+    mHost = host;
+    return NOERROR;
+}
+
+ECode CInputMethodManagerService::UpdateFromSettingsLockObserver::OnChange(
+    /* [in] */ Boolean selfChange,
+    /* [in] */ IUri* uri)
+{
+    mHost->UpdateFromSettingsLocked(TRUE);
 }
 
 //============================================================================
@@ -1435,7 +1465,6 @@ ECode CInputMethodManagerService::SystemRunning(
             mStatusBar->SetIconVisibility(String("ime"), FALSE);
         }
         UpdateImeWindowStatusLocked();
-        mRes->GetBoolean(R::bool_::show_ongoing_ime_switcher, &mShowOngoingImeSwitcherForPhones);
         if (mShowOngoingImeSwitcherForPhones) {
            mWindowManagerService->SetOnHardKeyboardStatusChangeListener(mHardKeyboardListener);
         }
@@ -1900,7 +1929,14 @@ ECode CInputMethodManagerService::StartInputUncheckedLocked(
         }
     }
 
-    return StartInputInnerLocked(result);
+    ECode ec = StartInputInnerLocked(result);
+    if (ec == (ECode)E_RUNTIME_EXCEPTION) {
+        Slogger::W(TAG, "Unexpected exception");
+        *result = NULL;
+        return ec;
+    }
+
+    return NOERROR;
 }
 
 ECode CInputMethodManagerService::StartInputInnerLocked(
@@ -2602,6 +2638,19 @@ void CInputMethodManagerService::UpdateInputMethodsFromSettingsLocked(
         mCurMethodId = NULL;
         UnbindCurrentMethodLocked(TRUE, FALSE);
     }
+
+    // code to disable the CM Phone IME switcher with config_show_cmIMESwitcher set = false
+    // try {
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    Int32 switcher;
+    Settings::System::GetInt32(resolver,
+            ISettingsSystem::STATUS_BAR_IME_SWITCHER, &switcher);
+    mShowOngoingImeSwitcherForPhones = switcher == 1;
+    // } catch (SettingNotFoundException e) {
+    //     mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
+    //     com.android.internal.R.bool.config_show_cmIMESwitcher);
+    // }
 
     // Here is not the perfect place to reset the switching controller. Ideally
     // mSwitchingController and mSettings should be able to share the same state.

@@ -15,6 +15,7 @@ SOURCES = InputApplicationHandle.cpp
 SOURCES += InputWindowHandle.cpp
 SOURCES += PersistentDataStore.cpp
 SOURCES += CInputFilterHost.cpp
+SOURCES += CChainedInputFilterHost.cpp
 SOURCES += CInputManagerService.cpp
 SOURCES += NativeInputManager.cpp
 SOURCES += NativeInputApplicationHandle.cpp

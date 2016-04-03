@@ -811,15 +811,14 @@ ECode Profile::IsDirty(
     mProfileGroups->GetValues((ICollection**)&values);
     values->GetIterator((IIterator**)&it);
     Boolean hasNext, isDirty;
-    AutoPtr<IInterface> value;
     while(it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> value;
         it->GetNext((IInterface**)&value);
         IProfileGroup::Probe(value)->IsDirty(&isDirty);
         if (isDirty) {
            *result = TRUE;
             return NOERROR;
         }
-        value = NULL;
     }
 
     values = NULL;
@@ -827,13 +826,13 @@ ECode Profile::IsDirty(
     mStreams->GetValues((ICollection**)&values);
     values->GetIterator((IIterator**)&it);
     while(it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> value;
         it->GetNext((IInterface**)&value);
         IStreamSettings::Probe(value)->IsDirty(&isDirty);
         if (isDirty) {
            *result = TRUE;
             return NOERROR;
         }
-        value = NULL;
     }
 
     values = NULL;
@@ -841,13 +840,13 @@ ECode Profile::IsDirty(
     mConnections->GetValues((ICollection**)&values);
     values->GetIterator((IIterator**)&it);
     while(it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> value;
         it->GetNext((IInterface**)&value);
         IConnectionSettings::Probe(value)->IsDirty(&isDirty);
         if (isDirty) {
            *result = TRUE;
             return NOERROR;
         }
-        value = NULL;
     }
 
     if (mRingMode->IsDirty(&isDirty), isDirty) {
@@ -1057,11 +1056,10 @@ ECode Profile::ValidateRingtones(
     mProfileGroups->GetValues((ICollection**)&values);
     values->GetIterator((IIterator**)&it);
     Boolean hasNext;
-    AutoPtr<IInterface> value;
     while(it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> value;
         it->GetNext((IInterface**)&value);
         ((CProfileGroup*)IProfileGroup::Probe(value))->ValidateOverrideUris(context);
-        value = NULL;
     }
     return NOERROR;
 }

@@ -189,18 +189,22 @@ AutoPtr<NativeDaemonEvent> NativeDaemonConnector::ResponseQueue::Remove(
 void NativeDaemonConnector::ResponseQueue::Dump(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ IPrintWriter* pw,
-    /* [in] */ ArrayOf<IInterface*>* args)
+    /* [in] */ ArrayOf<String>* args)
 {
-//    pw->Println(String("Pending requests:"));
-//    {
-//        AutoLock lock(mPendingCmdsLock);
-//
-//        List< AutoPtr<PendingCmd> >::Iterator iter;
-//        for (iter = mPendingCmds.Begin(); iter != mPendingCmds.End(); ++iter) {
-//            AutoPtr<PendingCmd> pendingCmd = *iter;
-//            pw->Println("  Cmd " + pendingCmd->cmdNum + " - " + pendingCmd->request);
-//        }
-//    }
+    pw->Println(String("Pending requests:"));
+    {
+        AutoLock lock(mPendingCmdsLock);
+
+        List< AutoPtr<PendingCmd> >::Iterator iter;
+        for (iter = mPendingCmds.Begin(); iter != mPendingCmds.End(); ++iter) {
+           AutoPtr<PendingCmd> pendingCmd = *iter;
+           String str("  Cmd ");
+           str += pendingCmd->mCmdNum;
+           str += " - ";
+           str += pendingCmd->mLogCmd;
+           pw->Println(str);
+        }
+    }
 }
 
 //==============================================================================
@@ -752,16 +756,16 @@ void NativeDaemonConnector::Monitor()
     // TODO
     // Watchdog.Monitor
 }
-//
-//void NativeDaemonConnector::Dump(
-///* [in] */ AutoPtr<IFileDescriptor> fd,
-///* [in] */ AutoPtr<IPrintWriter> pw,
-///* [in] */ ArrayOf<String> args)
-//{
-////    mLocalLog.dump(fd, pw, args);
-//    pw->Println();
-//    mResponseQueue->Dump(fd, pw, args);
-//}
+
+void NativeDaemonConnector::Dump(
+/* [in] */ IFileDescriptor* fd,
+/* [in] */ IPrintWriter* pw,
+/* [in] */ ArrayOf<String>* args)
+{
+//    mLocalLog.dump(fd, pw, args);
+    pw->Println();
+    mResponseQueue->Dump(fd, pw, args);
+}
 //
 //void NativeDaemonConnector::Log(
 ///* [in] */ const String& logstring)

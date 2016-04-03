@@ -20,6 +20,7 @@
 #include "elastos/droid/utility/Xml.h"
 #include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/view/NativeInputChannel.h"
+#include "elastos/droid/server/input/CChainedInputFilterHost.h"
 #include "elastos/droid/server/input/CInputFilterHost.h"
 #include "elastos/droid/server/input/NativeInputWindowHandle.h"
 #include "elastos/droid/server/input/CInputManagerService.h"
@@ -243,23 +244,29 @@ ECode CInputManagerService::InputFilterHost::ToString(
 //==============================================================================
 CAR_INTERFACE_IMPL_2(CInputManagerService::ChainedInputFilterHost, Object, IIInputFilterHost, IBinder);
 
-CInputManagerService::ChainedInputFilterHost::ChainedInputFilterHost(
-    /* [in] */ IIInputFilter* filter,
-    /* [in] */ ChainedInputFilterHost* next,
-    /* [in] */ CInputManagerService* host)
-    : mInputFilter(filter)
-    , mNext(next)
-    , mDisconnected(FALSE)
-    , mHost(host)
+CInputManagerService::ChainedInputFilterHost::ChainedInputFilterHost()
+    : mDisconnected(FALSE)
+    , mHost(NULL)
 {}
 
 CInputManagerService::ChainedInputFilterHost::~ChainedInputFilterHost()
 {}
 
+ECode CInputManagerService::ChainedInputFilterHost::constructor(
+    /* [in] */ IIInputFilter* filter,
+    /* [in] */ IIInputFilterHost* next,
+    /* [in] */ IIInputManager* host)
+{
+    mInputFilter = filter;
+    mNext = (ChainedInputFilterHost*)next;
+    mHost = (CInputManagerService*)host;
+    return NOERROR;
+}
+
 void CInputManagerService::ChainedInputFilterHost::ConnectLocked()
 {
     // try {
-    mInputFilter->Install(IIInputFilterHost::Probe(this));
+    mInputFilter->Install(this);
     // } catch (RemoteException re) {
     //     /* ignore */
     // }
@@ -276,7 +283,7 @@ void CInputManagerService::ChainedInputFilterHost::DisconnectLocked()
     mDisconnected = TRUE;
 }
 
-CARAPI CInputManagerService::ChainedInputFilterHost::SendInputEvent(
+ECode CInputManagerService::ChainedInputFilterHost::SendInputEvent(
     /* [in] */ IInputEvent* event,
     /* [in] */ Int32 policyFlags)
 {
@@ -310,7 +317,7 @@ CARAPI CInputManagerService::ChainedInputFilterHost::SendInputEvent(
     return NOERROR;
 }
 
-CARAPI CInputManagerService::ChainedInputFilterHost::ToString(
+ECode CInputManagerService::ChainedInputFilterHost::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
@@ -1458,7 +1465,7 @@ void CInputManagerService::SetInputFilter(
 {
     synchronized (mInputFilterLock) {
         if (mInputFilterHost != NULL) {
-            mInputFilterHost->DisconnectLocked();
+            ((ChainedInputFilterHost*)mInputFilterHost.Get())->DisconnectLocked();
             mInputFilterChain->Remove((IIInputFilterHost*)mInputFilterHost.Get());
             mInputFilterHost = NULL;
         }
@@ -1466,16 +1473,16 @@ void CInputManagerService::SetInputFilter(
         Boolean isEmpty = FALSE;
         if (filter != NULL) {
             mInputFilterChain->IsEmpty(&isEmpty);
-            AutoPtr<ChainedInputFilterHost> head;
+            AutoPtr<IIInputFilterHost> head;
             if (!isEmpty) {
                 AutoPtr<IInterface> ift;
                 mInputFilterChain->Get(0, (IInterface**)&ift);
-                head = (ChainedInputFilterHost*)IIInputFilterHost::Probe(ift);
+                head = IIInputFilterHost::Probe(ift);
                 if (head == NULL) return;
             }
-            mInputFilterHost = new ChainedInputFilterHost(filter, head, this);
-            mInputFilterHost->ConnectLocked();
-            mInputFilterChain->Add(0, IIInputFilterHost::Probe(mInputFilterHost));
+            CChainedInputFilterHost::New(filter, head, this, (IIInputFilterHost**)&mInputFilterHost);
+            ((ChainedInputFilterHost*)mInputFilterHost.Get())->ConnectLocked();
+            mInputFilterChain->Add(0, mInputFilterHost);
         }
 
         mInputFilterChain->IsEmpty(&isEmpty);
@@ -1487,19 +1494,20 @@ void CInputManagerService::RegisterSecondaryInputFilter(
     /* [in] */ IIInputFilter* filter)
 {
     synchronized (mInputFilterLock) {
-        AutoPtr<ChainedInputFilterHost> host = new ChainedInputFilterHost(filter, NULL, this);
+        AutoPtr<IIInputFilterHost> host;
+        CChainedInputFilterHost::New(filter, NULL, this, (IIInputFilterHost**)&host);
         Boolean isEmpty;
         if (mInputFilterChain->IsEmpty(&isEmpty), !isEmpty) {
             Int32 size;
             mInputFilterChain->GetSize(&size);
             AutoPtr<IInterface> ift;
             mInputFilterChain->Get(size - 1, (IInterface**)&ift);
-            ChainedInputFilterHost* filterHost = (ChainedInputFilterHost*)IIInputFilter::Probe(ift);
+            IIInputFilterHost* filterHost = IIInputFilterHost::Probe(ift);
             if (filterHost == NULL) return;
-            filterHost->mNext = host;
+            ((ChainedInputFilterHost*)filterHost)->mNext = (ChainedInputFilterHost*)host.Get();
         }
-        host->ConnectLocked();
-        mInputFilterChain->Add(IIInputFilter::Probe(host));
+        ((ChainedInputFilterHost*)host.Get())->ConnectLocked();
+        mInputFilterChain->Add(host);
 
         mInputFilterChain->IsEmpty(&isEmpty);
         NativeSetInputFilterEnabled(!isEmpty);
@@ -1514,16 +1522,16 @@ void CInputManagerService::UnregisterSecondaryInputFilter(
         if (index >= 0) {
             AutoPtr<IInterface> ift;
             mInputFilterChain->Get(index, (IInterface**)&ift);
-            ChainedInputFilterHost* host = (ChainedInputFilterHost*)IIInputFilter::Probe(ift);
+            IIInputFilterHost* host = IIInputFilterHost::Probe(ift);
             if (host == NULL) return;
 
-            host->DisconnectLocked();
+            ((ChainedInputFilterHost*)host)->DisconnectLocked();
             if (index >= 1) {
                 ift = NULL;
                 mInputFilterChain->Get(index - 1, (IInterface**)&ift);
-                ChainedInputFilterHost* hostB = (ChainedInputFilterHost*)IIInputFilter::Probe(ift);
+                IIInputFilterHost* hostB = IIInputFilterHost::Probe(ift);
                 if (hostB == NULL) return;
-                hostB->mNext = host->mNext;
+                ((ChainedInputFilterHost*)hostB)->mNext = ((ChainedInputFilterHost*)host)->mNext;
             }
             mInputFilterChain->Remove(index);
         }
@@ -1542,10 +1550,10 @@ Int32 CInputManagerService::FindInputFilterIndexLocked(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> ift;
         mInputFilterChain->Get(i, (IInterface**)&ift);
-        ChainedInputFilterHost* host = (ChainedInputFilterHost*)IIInputFilter::Probe(ift);
+        IIInputFilterHost* host = IIInputFilterHost::Probe(ift);
         if (host == NULL) continue;
         Boolean equal;
-        if (IObject::Probe(host->mInputFilter)->Equals(filter, &equal), equal) {
+        if (IObject::Probe(((ChainedInputFilterHost*)host)->mInputFilter)->Equals(filter, &equal), equal) {
             return i;
         }
     }
@@ -2860,14 +2868,14 @@ Boolean CInputManagerService::FilterInputEvent(
     /* [in] */ IInputEvent* event,
     /* [in] */ Int32 policyFlags)
 {
-    AutoPtr<ChainedInputFilterHost> head;
+    AutoPtr<IIInputFilterHost> head;
 
     synchronized (mInputFilterLock) {
         Boolean isEmpty;
         if (mInputFilterChain->IsEmpty(&isEmpty), !isEmpty) {
             AutoPtr<IInterface> ift;
             mInputFilterChain->Get(0, (IInterface**)&ift);
-            head = (ChainedInputFilterHost*)IIInputFilterHost::Probe(ift);
+            head = IIInputFilterHost::Probe(ift);
         }
     }
     // call filter input event outside of the lock.
@@ -2875,7 +2883,7 @@ Boolean CInputManagerService::FilterInputEvent(
     // we may loose a event, but this does not differ from the original implementation.
     if (head != NULL) {
         // try {
-        head->mInputFilter->FilterInputEvent(event, policyFlags);
+        ((ChainedInputFilterHost*)head.Get())->mInputFilter->FilterInputEvent(event, policyFlags);
         // } catch (RemoteException e) {
         //     /* ignore */
         // }

@@ -130,12 +130,14 @@ public:
     public:
         CAR_INTERFACE_DECL();
 
-        ChainedInputFilterHost(
-            /* [in] */ IIInputFilter* filter,
-            /* [in] */ ChainedInputFilterHost* next,
-            /* [in] */ CInputManagerService* host);
+        ChainedInputFilterHost();
 
         virtual ~ChainedInputFilterHost();
+
+        CARAPI constructor(
+            /* [in] */ IIInputFilter* filter,
+            /* [in] */ IIInputFilterHost* next,
+            /* [in] */ IIInputManager* host);
 
         CARAPI_(void) ConnectLocked();
 
@@ -1200,7 +1202,7 @@ private:
 
     // State for the currently installed input filter.
     Object mInputFilterLock;
-    AutoPtr<ChainedInputFilterHost> mInputFilterHost;         // guarded by mInputFilterLock
+    AutoPtr<IIInputFilterHost> mInputFilterHost;         // guarded by mInputFilterLock
     AutoPtr<IArrayList> mInputFilterChain;  // guarded by mInputFilterLock
 
     // Input event injection constants defined in InputDispatcher.h.

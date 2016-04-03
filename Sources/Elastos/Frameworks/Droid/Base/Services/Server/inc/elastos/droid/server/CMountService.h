@@ -2,46 +2,56 @@
 #ifndef __ELASTOS_DROID_SERVER_CMOUNTSERVICE_H__
 #define __ELASTOS_DROID_SERVER_CMOUNTSERVICE_H__
 
+#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include "_Elastos_Droid_Server_CMountService.h"
-#include "NativeDaemonConnector.h"
+#include "elastos/droid/server/NativeDaemonConnector.h"
 #include "elastos/droid/server/pm/CPackageManagerService.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include "elastos/droid/os/Handler.h"
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/HashSet.h>
 #include <elastos/utility/etl/List.h>
+#include <Elastos.Droid.Internal.h>
 
-
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Utility::Etl::List;
-using Elastos::Core::IInteger32;
-using Elastos::Utility::Concurrent::ICountDownLatch;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::Res::IObbInfo;
-using Elastos::Droid::Internal::App::IMediaContainerService;
+using Elastos::Droid::Internal::App::IIMediaContainerService;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IHandlerThread;
-using Elastos::Droid::Os::HandlerBase;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::Storage::IIObbActionListener;
+using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Os::Storage::IIMountShutdownObserver;
 using Elastos::Droid::Os::Storage::IIMountServiceListener;
 using Elastos::Droid::Os::Storage::IStorageVolume;
 using Elastos::Droid::Server::Pm::CPackageManagerService;
+using Elastos::Droid::Server::INativeDaemonConnectorCallbacks;
+using Elastos::Core::IInteger32;
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::List;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::Concurrent::ICountDownLatch;
+using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
 CarClass(CMountService)
+    , public Object
+    , public IIMountService
+    , public INativeDaemonConnectorCallbacks
+    , public IWatchdogMonitor
 {
 public:
-    class MountServiceHandler : public HandlerBase
+    class MountServiceHandler : public Handler
     {
     public:
         MountServiceHandler(
@@ -55,7 +65,7 @@ public:
         CMountService* mHost;
     };
 
-    class ObbActionHandler : public HandlerBase
+    class ObbActionHandler : public Handler
     {
     public:
         ObbActionHandler(
@@ -100,6 +110,7 @@ public:
         static const Int32 VolumeListResult               = 110;
         static const Int32 AsecListResult                 = 111;
         static const Int32 StorageUsersListResult         = 112;
+        static const Int32 CryptfsGetfieldResult          = 113;
 
         /*
          * 200 series - Requestion action has been successfully completed.
@@ -123,13 +134,20 @@ public:
          * 600 series - Unsolicited broadcasts.
          */
         static const Int32 VolumeStateChange              = 605;
+        static const Int32 VolumeUuidChange               = 613;
+        static const Int32 VolumeUserLabelChange          = 614;
         static const Int32 VolumeDiskInserted             = 630;
         static const Int32 VolumeDiskRemoved              = 631;
         static const Int32 VolumeBadRemoval               = 632;
+
+        /*
+         * 700 series - fstrim
+         */
+        static const Int32 FstrimCompleted                = 700;
     };
 
     class ObbState
-        : public ElRefBase
+        : public Object
         , public IProxyDeathRecipient
     {
     public:
@@ -151,7 +169,8 @@ public:
 
         CARAPI Unlink();
 
-        CARAPI_(String) ToString();
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     public:
         String mRawPath;
@@ -171,7 +190,7 @@ public:
     };
 
     class DefaultContainerConnection
-        : public ElRefBase
+        : public Object
         , public IServiceConnection
     {
     public:
@@ -187,17 +206,16 @@ public:
         CARAPI OnServiceDisconnected(
             /* [in] */ IComponentName* name);
 
+        CARAPI ToString(
+            /* [out] */ String* str);
     private:
         CMountService* mHost;
     };
 
     class UnmountCallBack
-        : public ElRefBase
-        , public IInterface
+        : public Object
     {
     public:
-        CAR_INTERFACE_DECL()
-
         UnmountCallBack(
             /* [in] */ const String& path,
             /* [in] */ Boolean force,
@@ -208,6 +226,8 @@ public:
 
         virtual CARAPI_(void) HandleFinished();
 
+        CARAPI ToString(
+            /* [out] */ String* str);
     public:
         String mPath;
         Boolean mForce;
@@ -227,8 +247,32 @@ public:
 
         CARAPI_(void) HandleFinished();
 
+        CARAPI ToString(
+            /* [out] */ String* str);
     private:
         String mMethod;
+    };
+
+    class MountShutdownLatch
+        : public Object
+    {
+    public:
+        MountShutdownLatch(
+            /* [in] */ IIMountShutdownObserver* observer,
+            /* [in] */ Int32 count,
+            /* [in] */ CMountService* host);
+
+        virtual ~MountShutdownLatch() {}
+
+        CARAPI_(void) CountDown();
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    private:
+        AutoPtr<IIMountShutdownObserver> mObserver;
+        AutoPtr<IAtomicInteger32> mCount;
+        CMountService* mHost;
     };
 
     class ShutdownCallBack : public UnmountCallBack
@@ -236,23 +280,22 @@ public:
     public:
         ShutdownCallBack(
             /* [in] */ const String& path,
-            /* [in] */ IIMountShutdownObserver* observer,
+            /* [in] */ MountShutdownLatch* mountShutdownLatch,
             /* [in] */ CMountService* host);
 
 
         CARAPI_(void) HandleFinished();
 
+        CARAPI ToString(
+            /* [out] */ String* str);
     private:
-        AutoPtr<IIMountShutdownObserver> mObserver;
+        AutoPtr<MountShutdownLatch> mMountShutdownLatch;
     };
 
     class ObbAction
-        : public ElRefBase
-        , public IInterface
+        : public Object
     {
     public:
-        CAR_INTERFACE_DECL()
-
         ObbAction(
             /* [in] */ ObbState* obbState,
             /* [in] */ CMountService* host);
@@ -266,7 +309,8 @@ public:
 
         virtual CARAPI_(void) HandleError() = 0;
 
-        virtual CARAPI_(String) ToString() = 0;
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     protected:
         virtual CARAPI GetObbInfo(
@@ -297,7 +341,8 @@ public:
 
         CARAPI_(void) HandleError();
 
-        CARAPI_(String) ToString();
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         String mKey;
@@ -316,7 +361,8 @@ public:
 
         CARAPI_(void) HandleError();
 
-        CARAPI_(String) ToString();
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         Boolean mForceUnmount;
@@ -324,7 +370,7 @@ public:
 
 private:
     class MountServiceBinderListener
-        : public ElRefBase
+        : public Object
         , public IProxyDeathRecipient
     {
     public:
@@ -336,6 +382,8 @@ private:
 
         CARAPI ProxyDied();
 
+        CARAPI ToString(
+            /* [out] */ String* str);
     public:
         AutoPtr<IIMountServiceListener> mListener;
         CMountService* mHost;
@@ -393,13 +441,14 @@ private:
     {
     public:
         UsbMassStorageThread(
-            /* [in] */ const String& path,
+            /* [in] */ IArrayList* volumes,
             /* [in] */ CMountService* host);
 
         virtual CARAPI Run();
 
     private:
         String mPath;
+        AutoPtr<IArrayList> mVolumes;
         CMountService* mHost;
     };
 
@@ -437,7 +486,7 @@ private:
     };
 
     class DecryptStorageRunnable
-        : public ElRefBase
+        : public Object
         , public IRunnable
     {
     public:
@@ -448,16 +497,30 @@ private:
 
         CARAPI Run();
 
+        CARAPI ToString(
+            /* [out] */ String* str);
     private:
         CMountService* mHost;
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CMountService();
 
     ~CMountService();
 
     CARAPI_(void) WaitForAsecScan();
+
+    // Binder entry point for kicking off an immediate fstrim
+    // @Override
+    CARAPI RunMaintenance();
+
+    // @Override
+    CARAPI LastMaintenance(
+        /* [out] */ Int64* timestamp);
 
     /**
      * Callback from NativeDaemonConnector
@@ -467,10 +530,17 @@ public:
     /**
      * Callback from NativeDaemonConnector
      */
+    CARAPI OnCheckHoldWakeLock(
+        /* [in] */ Int32 code,
+        /* [out] */ Boolean* result);
+
+    /**
+     * Callback from NativeDaemonConnector
+     */
     CARAPI OnEvent(
         /* [in] */ Int32 code,
         /* [in] */ const String& raw,
-        /* [in] */ const ArrayOf<String>& cooked,
+        /* [in] */ ArrayOf<String>* cooked,
         /* [out] */ Boolean* result);
 
     CARAPI_(void) SystemReady();
@@ -529,6 +599,12 @@ public:
         /* [in] */ Boolean external,
         /* [out] */ Int32* result);
 
+    CARAPI ResizeSecureContainer(
+        /* [in] */ const String& id,
+        /* [in] */ Int32 sizeMb,
+        /* [in] */ const String& key,
+        /* [out] */ Int32* result);
+
     CARAPI FinalizeSecureContainer(
         /* [in] */ const String& id,
         /* [out] */ Int32* result);
@@ -548,6 +624,7 @@ public:
         /* [in] */ const String& id,
         /* [in] */ const String& key,
         /* [in] */ Int32 ownerUid,
+        /* [in] */ Boolean readOnly,
         /* [out] */ Int32* result);
 
     CARAPI UnmountSecureContainer(
@@ -603,15 +680,52 @@ public:
         /* [out] */ Int32* result);
 
     CARAPI EncryptStorage(
+        /* [in] */ Int32 type,
         /* [in] */ const String& password,
         /* [out] */ Int32* result);
 
     CARAPI ChangeEncryptionPassword(
+        /* [in] */ Int32 type,
         /* [in] */ const String& password,
         /* [out] */ Int32* result);
 
     CARAPI VerifyEncryptionPassword(
         /* [in] */ const String& password,
+        /* [out] */ Int32* result);
+
+    /**
+     * Get the type of encryption used to encrypt the master key.
+     * @return The type, one of the CRYPT_TYPE_XXX consts from StorageManager.
+     */
+    CARAPI GetPasswordType(
+        /* [out] */ Int32* result);
+
+    /**
+     * Set a field in the crypto header.
+     * @param field field to set
+     * @param contents contents to set in field
+     */
+    CARAPI SetField(
+        /* [in] */ const String& field,
+        /* [in] */ const String& contents);
+
+    /**
+     * Gets a field from the crypto header.
+     * @param field field to get
+     * @return contents of field
+     */
+    CARAPI GetField(
+        /* [in] */ const String& field,
+        /* [out] */ String* result);
+
+    CARAPI GetPassword(
+        /* [out] */ String* result);
+
+    CARAPI ClearPassword();
+
+    CARAPI Mkdirs(
+        /* [in] */ const String& callingPkg,
+        /* [in] */ const String& path,
         /* [out] */ Int32* result);
 
     CARAPI GetVolumeList(
@@ -627,8 +741,29 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* context);
 
+    /**
+     * Translate the given path from an app-visible path to a vold-visible path,
+     * but only if it's under the given whitelisted paths.
+     *
+     * @param path a canonicalized app-visible path.
+     * @param appPaths list of app-visible paths that are allowed.
+     * @param voldPaths list of vold-visible paths directly corresponding to the
+     *            allowed app-visible paths argument.
+     * @return a vold-visible path representing the original path, or
+     *         {@code null} if the given path didn't have an app-to-vold
+     *         mapping.
+     */
+    // @VisibleForTesting
+    static CARAPI_(String) MaybeTranslatePathForVold(
+        /* [in] */ const String& path,
+        /* [in] */ ArrayOf<IFile*>* appPaths,
+        /* [in] */ ArrayOf<IFile*>* voldPaths);
+
 protected:
-    // protected void dump(FileDescriptor fd, PrintWriter pw, String[] args)
+   CARAPI_(void) Dump(
+        /* [in] */ IFileDescriptor* fd,
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ ArrayOf<String>* args);
 
 private:
     // for MountServiceHandler
@@ -645,7 +780,12 @@ private:
     CARAPI_(void) WaitForLatch(
         /* [in] */ ICountDownLatch* latch);
 
+    CARAPI_(Boolean) IsReady();
+
     CARAPI_(void) HandleSystemReady();
+
+    CARAPI_(void) RunIdleMaintenance(
+        /* [in] */ IRunnable* callback);
 
     CARAPI DoShareUnshareVolume(
         /* [in] */ const String& path,
@@ -655,6 +795,11 @@ private:
     CARAPI_(void) UpdatePublicVolumeState(
         /* [in] */ IStorageVolume* volume,
         /* [in] */ const String& state);
+
+    CARAPI_(void) DisbaleEnableUMSAfterStorageChanged(
+        /* [in] */ const String& state);
+
+    CARAPI_(void) CopyLocaleFromMountService();
 
     CARAPI_(void) NotifyVolumeStateChange(
         /* [in] */ const String& label,
@@ -691,6 +836,12 @@ private:
     CARAPI ValidatePermission(
         /* [in] */ const String& perm);
 
+    CARAPI_(Boolean) HasUserRestriction(
+        /* [in] */ const String& restriction);
+
+    CARAPI_(void) ValidateUserRestriction(
+        /* [in] */ const String& restriction);
+
     CARAPI ReadStorageListLocked();
 
     /**
@@ -708,10 +859,14 @@ private:
 
     CARAPI_(AutoPtr<IStorageVolume>) GetPrimaryPhysicalVolume();
 
+    CARAPI_(Boolean) HasUmsVolume();
+
     CARAPI_(Boolean) GetUmsEnabling();
 
     CARAPI_(void) SetUmsEnabling(
         /* [in] */ Boolean enable);
+
+    CARAPI_(AutoPtr<IArrayList>) GetShareableVolumes();
 
     CARAPI_(void) WarnOnNotMounted();
 
@@ -730,7 +885,7 @@ private:
         /* [in] */ ObbAction* action);
 
     CARAPI_(void) HandleObbMcsBound(
-        /* [in] */ IMediaContainerService* service);
+        /* [in] */ IIMediaContainerService* service);
 
     CARAPI_(void) HandleObbMcsReconnect();
 
@@ -742,6 +897,12 @@ private:
     CARAPI_(Boolean) ConnectToService();
 
     CARAPI_(void) DisconnectService();
+
+public:
+    /** List of crypto types.
+      * These must match CRYPT_TYPE_XXX in cryptfs.h AND their
+      * corresponding commands in CommandListener.cpp */
+    static const String CRYPTO_TYPES[];
 
 private:
     static const Boolean LOCAL_LOGD;
@@ -781,6 +942,7 @@ private:
     static const Int32 H_UNMOUNT_PM_DONE = 2;
     static const Int32 H_UNMOUNT_MS = 3;
     static const Int32 H_SYSTEM_READY = 4;
+    static const Int32 H_FSTRIM = 5;
 
     static const Int32 RETRY_UNMOUNT_DELAY = 30; // in ms
     static const Int32 MAX_UNMOUNT_RETRIES = 4;
@@ -803,11 +965,11 @@ private:
 
     /** Map from path to {@link StorageVolume} */
     // @GuardedBy("mVolumesLock")
-    HashMap<String, AutoPtr<IStorageVolume> > mVolumesByPath;
+    AutoPtr<IHashMap> mVolumesByPath;
 
     /** Map from path to state */
     // @GuardedBy("mVolumesLock")
-    HashMap<String, String> mVolumeStates;
+    AutoPtr<IHashMap> mVolumeStates;
     Object mVolumeStatesLock;
 
     volatile Boolean mSystemReady;
@@ -826,19 +988,18 @@ private:
      * Private hash of currently mounted secure containers.
      * Used as a lock in methods to manipulate secure containers.
      */
-    HashSet<String> mAsecMountSet;
+    AutoPtr<IHashSet> mAsecMountSet;
     Object mAsecMountSetLock;
 
     /**
      * Mounted OBB tracking information. Used to track the current state of all
      * OBBs.
      */
-    typedef List< AutoPtr<ObbState> > ObbStateList;
-    HashMap<AutoPtr<IBinder>, AutoPtr<ObbStateList> > mObbMounts;
+    AutoPtr<IHashMap> mObbMounts;
     Object mObbMountsLock;
 
     /** Map from raw paths to {@link ObbState}. */
-    HashMap<String, AutoPtr<ObbState> > mObbPathToStateMap;
+    AutoPtr<IHashMap> mObbPathToStateMap;
     Object mObbPathToStateMapLock;
 
     // OBB Action Handler
@@ -853,7 +1014,12 @@ private:
     AutoPtr<DefaultContainerConnection> mDefContainerConn;
 
     // Used in the ObbActionHandler
-    AutoPtr<IMediaContainerService> mContainerService;
+    AutoPtr<IIMediaContainerService> mContainerService;
+
+    // Last fstrim operation tracking
+    static const String LAST_FSTRIM_FILE; // = "last-fstrim";
+    AutoPtr<IFile> mLastMaintenanceFile;
+    Int64 mLastMaintenance;
 
     AutoPtr<IHandlerThread> mHandlerThread;
     AutoPtr<IHandler> mHandler;

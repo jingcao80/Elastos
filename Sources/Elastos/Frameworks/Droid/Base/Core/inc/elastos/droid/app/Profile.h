@@ -261,7 +261,7 @@ private:
         /* [in] */ IXmlPullParser* xpp,
         /* [in] */ IContext* context);
 
-    static CARAPI_(ECode) ReadTriggersFromXml(
+    static CARAPI ReadTriggersFromXml(
         /* [in] */ IXmlPullParser* xpp,
         /* [in] */ IContext* context,
         /* [in] */ IProfile* profile);

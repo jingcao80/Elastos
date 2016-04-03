@@ -137,7 +137,7 @@ private:
         CARAPI_(void) Dump(
             /* [in] */ IFileDescriptor* fd,
             /* [in] */ IPrintWriter* pw,
-            /* [in] */ ArrayOf<IInterface*>* args);
+            /* [in] */ ArrayOf<String>* args);
 
     private:
         List< AutoPtr<PendingCmd> > mPendingCmds;
@@ -206,10 +206,10 @@ public:
 
     CARAPI_(void) Monitor();
 
-//    CARAPI_(void) Dump(
-//        /* [in] */ IFileDescriptor* fd,
-//        /* [in] */ IPrintWriter* pw,
-//        /* [in] */ ArrayOf<String>* args);
+    CARAPI_(void) Dump(
+        /* [in] */ IFileDescriptor* fd,
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ ArrayOf<String>* args);
 
 private:
     CARAPI ListenToSocket();

@@ -206,6 +206,24 @@ private:
         CInputMethodManagerService* mHost;
     };
 
+    class UpdateFromSettingsLockObserver
+        : public ContentObserver
+    {
+    public:
+        UpdateFromSettingsLockObserver();
+
+        CARAPI constructor(
+            /* [in] */ IHandler* handler,
+            /* [in] */ CInputMethodManagerService* host);
+
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange,
+            /* [in] */ IUri* uri);
+
+    private:
+        CInputMethodManagerService* mHost;
+    };
+
     class ImmsBroadcastReceiver
         : public BroadcastReceiver
     {

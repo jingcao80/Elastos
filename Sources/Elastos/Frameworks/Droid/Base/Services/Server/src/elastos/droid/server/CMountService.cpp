@@ -1,39 +1,39 @@
 
-#include "CMountService.h"
+#include "elastos/droid/app/ActivityManagerNative.h"
+#include "elastos/droid/server/CMountService.h"
 #include "elastos/droid/os/Binder.h"
+#include "elastos/droid/os/Environment.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/storage/StorageResultCode.h"
-#include "pm/CPackageManagerService.h"
-#include "util/Xml.h"
-#include "util/XmlUtils.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/server/pm/CPackageManagerService.h"
+#include "elastos/droid/server/CMountServiceIdler.h"
+#include "elastos/droid/server/Watchdog.h"
 #include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/utility/Xml.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/Manifest.h"
-#include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/StringUtils.h>
+#include "elastos/utility/logging/Slogger.h"
+#include "elastos/core/CoreUtils.h"
+#include "elastos/core/StringUtils.h"
+#include <Elastos.CoreLibrary.Text.h>
+#include <Elastos.Droid.Hardware.h>
+#include <Elastos.Droid.Os.h>
 #include <unistd.h>
 
-using Elastos::Core::CString;
-using Elastos::Core::CInteger32;
-using Elastos::Core::EIID_IRunnable;
-using Elastos::Core::ISystem;
-using Elastos::Core::CSystem;
-using Elastos::Core::StringUtils;
-using Elastos::Core::EIID_IThread;
-using Elastos::IO::CFile;
-using Elastos::Core::CObjectContainer;
-using Elastos::Utility::Concurrent::CCountDownLatch;
-using Elastos::Utility::Logging::Slogger;
-using Org::Xmlpull::V1::IXmlPullParser;
+using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::Pm::IIPackageManager;
 using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Content::Res::IConfiguration;
+using Elastos::Droid::Content::Res::CConfiguration;
 using Elastos::Droid::Content::Res::IObbScanner;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IXmlResourceParser;
@@ -42,26 +42,87 @@ using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::IEnvironment;
+using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::CEnvironment;
+using Elastos::Droid::Os::CHandlerThread;
 using Elastos::Droid::Os::IUserEnvironment;
 using Elastos::Droid::Os::CUserEnvironment;
+using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::Storage::EIID_IIMountService;
+using Elastos::Droid::Os::Storage::IIMountService;
+using Elastos::Droid::Os::Storage::IStorageManager;
 using Elastos::Droid::Os::Storage::CStorageVolume;
 using Elastos::Droid::Os::Storage::IStorageVolumeHelper;
 using Elastos::Droid::Os::Storage::CStorageVolumeHelper;
 using Elastos::Droid::Os::Storage::StorageResultCode;
 using Elastos::Droid::Os::Storage::IOnObbStateChangeListener;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Hardware::Usb::IUsbManager;
+using Elastos::Droid::Hardware::Usb::CUsbManager;
 using Elastos::Droid::Server::Pm::CPackageManagerService;
 using Elastos::Droid::Server::Pm::CUserManagerService;
+using Elastos::Droid::Server::CMountServiceIdler;
+using Elastos::Droid::Server::Watchdog;
+using Elastos::Droid::Server::IWatchdogMonitor;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Utility::Xml;
-using Elastos::Droid::Utility::XmlUtils;
-using Elastos::Droid::Internal::App::EIID_IMediaContainerService;
+using Elastos::Droid::Internal::Utility::IIndentingPrintWriter;
+using Elastos::Droid::Internal::Utility::CIndentingPrintWriter;
+using Elastos::Droid::Internal::Utility::XmlUtils;
+using Elastos::Droid::Internal::App::EIID_IIMediaContainerService;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::CString;
+using Elastos::Core::CInteger32;
+using Elastos::Core::EIID_IRunnable;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Core::StringUtils;
+using Elastos::Core::EIID_IThread;
+using Elastos::Core::IThread;
+using Elastos::Core::CThread;
+using Elastos::IO::ICloseable;
+using Elastos::IO::CFile;
+using Elastos::IO::IFileOutputStream;
+using Elastos::IO::CFileOutputStream;
+using Elastos::IO::IWriter;
+using Elastos::Math::IBigInteger;
+using Elastos::Math::CBigInteger;
+using Elastos::Security::Spec::IKeySpec;
+using Elastos::Text::IDateFormat;
+using Elastos::Text::ISimpleDateFormat;
+using Elastos::Text::CSimpleDateFormat;
+using Elastos::Utility::Concurrent::CCountDownLatch;
+using Elastos::Utility::Concurrent::ITimeUnit;
+using Elastos::Utility::Concurrent::ITimeUnitHelper;
+using Elastos::Utility::Concurrent::CTimeUnitHelper;
+using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
+using Elastos::Utility::Concurrent::ITimeUnitHelper;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::IDate;
+using Elastos::Utility::CDate;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::ILocale;
+using Elastos::Utility::ILocaleHelper;
+using Elastos::Utility::CLocaleHelper;
+using Elastos::Utility::ILinkedList;
+using Elastos::Utility::CLinkedList;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::Logging::Slogger;
+// using Elastosx::Crypto::CPBEKeySpec;
+// using Elastosx::Crypto::ISecretKey;
+// using Elastosx::Crypto::ISecretKeyFactory;
+// using Elastosx::Crypto::CSecretKeyFactory;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -99,12 +160,14 @@ const Int32 CMountService::H_UNMOUNT_PM_UPDATE;
 const Int32 CMountService::H_UNMOUNT_PM_DONE;
 const Int32 CMountService::H_UNMOUNT_MS;
 const Int32 CMountService::H_SYSTEM_READY;
+const Int32 CMountService::H_FSTRIM;
 
 const Int32 CMountService::OBB_RUN_ACTION;
 const Int32 CMountService::OBB_MCS_BOUND;
 const Int32 CMountService::OBB_MCS_UNBIND;
 const Int32 CMountService::OBB_MCS_RECONNECT;
 const Int32 CMountService::OBB_FLUSH_MOUNT_STATE;
+const String CMountService::LAST_FSTRIM_FILE("last-fstrim");
 
 //=================================================================
 // CMountService::MountServiceHandler
@@ -112,7 +175,7 @@ const Int32 CMountService::OBB_FLUSH_MOUNT_STATE;
 CMountService::MountServiceHandler::MountServiceHandler(
     /* [in] */ ILooper* l,
     /* [in] */ CMountService* service)
-    : HandlerBase(l)
+    : Handler(l)
     , mHost(service)
 {}
 
@@ -125,7 +188,7 @@ ECode CMountService::MountServiceHandler::HandleMessage(
         case CMountService::H_UNMOUNT_PM_UPDATE: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            UnmountCallBack* cb = (UnmountCallBack*)obj.Get();
+            UnmountCallBack* cb = (UnmountCallBack*)IObject::Probe(obj.Get());
             mHost->HandleUnmountPmUpdate(cb);
             break;
         }
@@ -136,12 +199,50 @@ ECode CMountService::MountServiceHandler::HandleMessage(
         case CMountService::H_UNMOUNT_MS: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            UnmountCallBack* cb = (UnmountCallBack*)obj.Get();
+            UnmountCallBack* cb = (UnmountCallBack*)IObject::Probe(obj.Get());
             mHost->HandleUnmountMs(cb);
             break;
         }
         case CMountService::H_SYSTEM_READY: {
             mHost->HandleSystemReady();
+            break;
+        }
+        case H_FSTRIM: {
+            mHost->WaitForReady();
+            Slogger::I(CMountService::TAG, "Running fstrim idle maintenance");
+
+            // Remember when we kicked it off
+            // try {
+            AutoPtr<ISystem> system;
+            CSystem::AcquireSingleton((ISystem**)&system);
+            system->GetCurrentTimeMillis(&mHost->mLastMaintenance);
+            Boolean succeeded;
+            ECode ec = mHost->mLastMaintenanceFile->SetLastModified(
+                    mHost->mLastMaintenance, &succeeded);
+            if (FAILED(ec)) {
+                Slogger::E(CMountService::TAG, "Unable to record last fstrim!");
+            }
+            // } catch (Exception e) {
+            //     Slog.e(TAG, "Unable to record last fstrim!");
+            // }
+
+            // try {
+            // This method must be run on the main (handler) thread,
+            // so it is safe to directly call into vold.
+            AutoPtr<NativeDaemonEvent> event;
+            mHost->mConnector->Execute(String("fstrim"),
+                    String("dotrim"), (NativeDaemonEvent**)&event);
+            // EventLogTags.writeFstrimStart(SystemClock::GetElapsedRealtime());
+            // } catch (NativeDaemonConnectorException ndce) {
+            //     Slog.e(TAG, "Failed to run fstrim!");
+            // }
+
+            // invoke the completion callback, if any
+            AutoPtr<IInterface> callback;
+            msg->GetObj((IInterface**)&callback);
+            if (callback != NULL) {
+                IRunnable::Probe(callback)->Run();
+            }
             break;
         }
     }
@@ -154,7 +255,7 @@ ECode CMountService::MountServiceHandler::HandleMessage(
 CMountService::ObbActionHandler::ObbActionHandler(
     /* [in] */ ILooper* l,
     /* [in] */ CMountService* service)
-    : HandlerBase(l)
+    : Handler(l)
     , mHost(service)
 {}
 
@@ -167,14 +268,14 @@ ECode CMountService::ObbActionHandler::HandleMessage(
         case CMountService::OBB_RUN_ACTION: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ObbAction* action = (ObbAction*)obj.Get();
+            ObbAction* action = (ObbAction*)IObject::Probe(obj.Get());
             mHost->HandleObbRunAction(action);
             break;
         }
         case CMountService::OBB_MCS_BOUND: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            IMediaContainerService* service = IMediaContainerService::Probe(obj);
+            IIMediaContainerService* service = IIMediaContainerService::Probe(obj);
             mHost->HandleObbMcsBound(service);
             break;
         }
@@ -223,7 +324,7 @@ CMountService::ObbState::ObbState(
     mOwnerGid = UserHandle::GetSharedAppGid(callingUid);
 }
 
-CAR_INTERFACE_IMPL(CMountService::ObbState, IProxyDeathRecipient)
+CAR_INTERFACE_IMPL(CMountService::ObbState, Object, IProxyDeathRecipient)
 
 AutoPtr<IBinder> CMountService::ObbState::GetBinder()
 {
@@ -235,7 +336,7 @@ ECode CMountService::ObbState::ProxyDied()
     AutoPtr<ObbAction> action = new UnmountObbAction(this, TRUE, mHost);
     AutoPtr<IMessage> msg;
     mHost->mObbActionHandler->ObtainMessage(CMountService::OBB_RUN_ACTION, (IMessage**)&msg);
-    msg->SetObj(action);
+    msg->SetObj((IObject*)action.Get());
     Boolean result;
     return mHost->mObbActionHandler->SendMessage(msg, &result);
 }
@@ -257,8 +358,10 @@ ECode CMountService::ObbState::Unlink()
     return NOERROR;
 }
 
-String CMountService::ObbState::ToString()
+ECode CMountService::ObbState::ToString(
+    /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str);
     StringBuilder sb("ObbState{");
     sb.Append("rawPath=");
     sb.Append(mRawPath);
@@ -271,20 +374,24 @@ String CMountService::ObbState::ToString()
     sb.Append(",ownerGid=");
     sb.Append(mOwnerGid);
     sb.Append(",token=");
-    sb.AppendObject(mToken);
+    sb.Append(mToken);
     sb.Append(",binder=");
-    sb.AppendObject(GetBinder());
+    sb.Append(GetBinder());
     sb.Append("}");
-    return sb.ToString();
+    *str = sb.ToString();
+    return NOERROR;
 }
 
 
+//=================================================================
+// CMountService::DefaultContainerConnection
+//=================================================================
 CMountService::DefaultContainerConnection::DefaultContainerConnection(
     /* [in] */ CMountService* host)
     : mHost(host)
 {}
 
-CAR_INTERFACE_IMPL(CMountService::DefaultContainerConnection, IServiceConnection);
+CAR_INTERFACE_IMPL(CMountService::DefaultContainerConnection, Object, IServiceConnection);
 
 ECode CMountService::DefaultContainerConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
@@ -293,7 +400,7 @@ ECode CMountService::DefaultContainerConnection::OnServiceConnected(
     if (DEBUG_OBB)
         Slogger::I(CMountService::TAG, "onServiceConnected");
 
-    AutoPtr<IMediaContainerService> imcs = IMediaContainerService::Probe(service);
+    AutoPtr<IIMediaContainerService> imcs = IIMediaContainerService::Probe(service);
     AutoPtr<IMessage> msg;
     mHost->mObbActionHandler->ObtainMessage(CMountService::OBB_MCS_BOUND, (IMessage**)&msg);
     msg->SetObj(imcs);
@@ -309,9 +416,17 @@ ECode CMountService::DefaultContainerConnection::OnServiceDisconnected(
     return NOERROR;
 }
 
+ECode CMountService::DefaultContainerConnection::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CMountService::DefaultContainerConnection";
+    return NOERROR;
+}
 
-CAR_INTERFACE_IMPL(CMountService::UnmountCallBack, IInterface)
-
+//============================================================================
+// CMountService::UnmountCallBack
+//============================================================================
 CMountService::UnmountCallBack::UnmountCallBack(
     /* [in] */ const String& path,
     /* [in] */ Boolean force,
@@ -331,7 +446,17 @@ void CMountService::UnmountCallBack::HandleFinished()
     mHost->DoUnmountVolume(mPath, TRUE, mRemoveEncryption);
 }
 
+ECode CMountService::UnmountCallBack::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CMountService::UnmountCallBack";
+    return NOERROR;
+}
 
+//============================================================================
+// CMountService::UmsEnableCallBack
+//============================================================================
 CMountService::UmsEnableCallBack::UmsEnableCallBack(
     /* [in] */ const String& path,
     /* [in] */ const String& method,
@@ -347,22 +472,66 @@ void CMountService::UmsEnableCallBack::HandleFinished()
     mHost->DoShareUnshareVolume(mPath, mMethod, TRUE);
 }
 
+ECode CMountService::UmsEnableCallBack::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CMountService::UmsEnableCallBack";
+    return NOERROR;
+}
 
+//============================================================================
+// CMountService::ShutdownCallBack
+//============================================================================
 CMountService::ShutdownCallBack::ShutdownCallBack(
     /* [in] */ const String& path,
-    /* [in] */ IIMountShutdownObserver* observer,
+    /* [in] */ MountShutdownLatch* mountShutdownLatch,
     /* [in] */ CMountService* host)
     : UnmountCallBack(path, TRUE, FALSE, host)
-    , mObserver(observer)
+    , mMountShutdownLatch(mountShutdownLatch)
 {}
 
 void CMountService::ShutdownCallBack::HandleFinished()
 {
     Int32 ret = mHost->DoUnmountVolume(mPath, TRUE, mRemoveEncryption);
-    if (mObserver != NULL) {
+    Slogger::I(TAG, "Unmount completed: %s, result code:%d", mPath.string(), ret);
+    mMountShutdownLatch->CountDown();
+}
+
+ECode CMountService::ShutdownCallBack::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CMountService::ShutdownCallBack";
+    return NOERROR;
+}
+
+//============================================================================
+// CMountService::MountShutdownLatch
+//============================================================================
+CMountService::MountShutdownLatch::MountShutdownLatch(
+        /* [in] */ IIMountShutdownObserver* observer,
+        /* [in] */ Int32 count,
+        /* [in] */ CMountService* host)
+    : mObserver(observer)
+    , mHost(host)
+{
+    CAtomicInteger32::New(count, (IAtomicInteger32**)&mCount);
+}
+
+void CMountService::MountShutdownLatch::CountDown()
+{
+    Boolean sendShutdown = FALSE;
+    Int32 value;
+    mCount->DecrementAndGet(&value);
+    if (value == 0) {
+        sendShutdown = TRUE;
+    }
+    if (sendShutdown && mObserver != NULL) {
         // try {
-        if (FAILED(mObserver->OnShutDownComplete(ret))) {
-            Slogger::W(CMountService::TAG, "RemoteException when shutting down");
+        ECode ec = mObserver->OnShutDownComplete(StorageResultCode::OperationSucceeded);
+        if (FAILED(ec)) {
+            Slogger::W(TAG, "RemoteException when shutting down");
         }
         // } catch (RemoteException e) {
         //     Slog.w(TAG, "RemoteException when shutting down");
@@ -370,7 +539,17 @@ void CMountService::ShutdownCallBack::HandleFinished()
     }
 }
 
+ECode CMountService::MountShutdownLatch::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CMountService::MountShutdownLatch";
+    return NOERROR;
+}
 
+//============================================================================
+// CMountService::UserBroadcastReceiver
+//============================================================================
 CMountService::UserBroadcastReceiver::UserBroadcastReceiver(
     /* [in] */ CMountService* host)
     : mHost(host)
@@ -416,6 +595,9 @@ ECode CMountService::UserBroadcastReceiver::OnReceive(
 }
 
 
+//============================================================================
+// CMountService::UsbBroadcastReceiver
+//============================================================================
 CMountService::UsbBroadcastReceiver::UsbBroadcastReceiver(
     /* [in] */ CMountService* host)
     : mHost(host)
@@ -425,16 +607,32 @@ ECode CMountService::UsbBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
+    AutoPtr<IUsbManager> manager;
+    CUsbManager::New(NULL, NULL, (IUsbManager**)&manager);
+    String usbMode;
+    manager->GetDefaultFunction(&usbMode);
+    Boolean isUmsMode = IUsbManager::USB_FUNCTION_MASS_STORAGE.Equals(usbMode);
     Boolean usbConnected;
     intent->GetBooleanExtra(IUsbManager::USB_CONNECTED, FALSE, &usbConnected);
     Boolean usbMassStorage;
     intent->GetBooleanExtra(IUsbManager::USB_FUNCTION_MASS_STORAGE, FALSE, &usbMassStorage);
     Boolean available = usbConnected && usbMassStorage;
+    //only take UMS mode as available when property is true
+    Boolean value;
+    AutoPtr<ISystemProperties> sysProp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
+    sysProp->GetBoolean(String("persist.sys.ums"), TRUE, &value);
+    if (value) {
+        available = available && isUmsMode;
+    }
     mHost->NotifyShareAvailabilityChange(available);
     return NOERROR;
 }
 
 
+//============================================================================
+// CMountService::MountServiceBinderListener
+//============================================================================
 CMountService::MountServiceBinderListener::MountServiceBinderListener(
     /* [in] */ IIMountServiceListener* listener,
     /* [in] */ CMountService* host)
@@ -442,7 +640,7 @@ CMountService::MountServiceBinderListener::MountServiceBinderListener(
     , mHost(host)
 {}
 
-CAR_INTERFACE_IMPL(CMountService::MountServiceBinderListener, IProxyDeathRecipient)
+CAR_INTERFACE_IMPL(CMountService::MountServiceBinderListener, Object, IProxyDeathRecipient)
 
 ECode CMountService::MountServiceBinderListener::ProxyDied()
 {
@@ -458,7 +656,17 @@ ECode CMountService::MountServiceBinderListener::ProxyDied()
     return NOERROR;
 }
 
+ECode CMountService::MountServiceBinderListener::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CMountService::MountServiceBinderListener";
+    return NOERROR;
+}
 
+//============================================================================
+// CMountService::OnDaemonConnectedThread
+//============================================================================
 CMountService::OnDaemonConnectedThread::OnDaemonConnectedThread(
     /* [in] */ const String& threadName,
     /* [in] */ CMountService* host)
@@ -479,12 +687,11 @@ ECode CMountService::OnDaemonConnectedThread::Run()
     AutoPtr<IStorageVolume> volume;
 
     // try {
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    AutoPtr<ICharSequence> cs;
-    CString::New(String("list"), (ICharSequence**)&cs);
-    args->Set(0, cs);
+    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
+    args->Set(0, CoreUtils::Convert("list"));
     AutoPtr< ArrayOf<NativeDaemonEvent*> > events;
-    ECode ec = mHost->mConnector->ExecuteForList(String("volume"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
+    ECode ec = mHost->mConnector->ExecuteForList(String("volume"),
+            args, (ArrayOf<NativeDaemonEvent*>**)&events);
     if (FAILED(ec)) {
         Slogger::E(TAG, "Error processing initial volume state 0x%08x", ec);
         AutoPtr<IStorageVolume> primary = mHost->GetPrimaryPhysicalVolume();
@@ -508,10 +715,9 @@ ECode CMountService::OnDaemonConnectedThread::Run()
 
         {
             AutoLock lock(mHost->mVolumesLock);
-            HashMap<String, AutoPtr<IStorageVolume> >::Iterator it = mHost->mVolumesByPath.Find(path);
-            if (it != mHost->mVolumesByPath.End()) {
-                volume = it->mSecond;
-            }
+            AutoPtr<IInterface> value;
+            mHost->mVolumesByPath->Get(CoreUtils::Convert(path), (IInterface**)&value);
+            volume = IStorageVolume::Probe(value);
         }
 
         st = StringUtils::ParseInt32((*tok)[2]);
@@ -557,6 +763,16 @@ _EXIT_:
      */
     mHost->mConnectedSignal->CountDown();
 
+    // On an encrypted device we can't see system properties yet, so pull
+    // the system locale out of the mount service.
+    AutoPtr<ISystemProperties> sysProp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
+    String result;
+    sysProp->Get(String("vold.encrypt_progress"), &result);
+    if (result.Equals("")) {
+        mHost->CopyLocaleFromMountService();
+    }
+
     // Let package manager load internal ASECs.
     mHost->mPms->ScanAvailableAsecs();
 
@@ -566,6 +782,9 @@ _EXIT_:
     return NOERROR;
 }
 
+//============================================================================
+// CMountService::OnEventThread
+//============================================================================
 CMountService::OnEventThread::OnEventThread(
     /* [in] */ const String& path,
     /* [in] */ CMountService* host)
@@ -590,10 +809,13 @@ ECode CMountService::OnEventThread::Run()
 }
 
 
+//============================================================================
+// CMountService::UsbMassStorageThread
+//============================================================================
 CMountService::UsbMassStorageThread::UsbMassStorageThread(
-    /* [in] */ const String& path,
+    /* [in] */ IArrayList* volumes,
     /* [in] */ CMountService* host)
-    : mPath(path)
+    : mVolumes(volumes)
     , mHost(host)
 {
     Thread::constructor();
@@ -604,10 +826,24 @@ ECode CMountService::UsbMassStorageThread::Run()
     // try {
     Int32 rc = 0;
     Slogger::W(TAG, "Disabling UMS after cable disconnect");
-    mHost->DoShareUnshareVolume(mPath, String("ums"), FALSE);
-    if ((rc = mHost->DoMountVolume(mPath)) != StorageResultCode::OperationSucceeded) {
-        Slogger::E(TAG, "Failed to remount {%s} on UMS enabled-disconnect (%d)", mPath.string(), rc);
+    AutoPtr<IIterator> it;
+    mVolumes->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    String state;
+    while(it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> value;
+        it->GetNext((IInterface**)&value);
+        String path = CoreUtils::Unbox(ICharSequence::Probe(value));
+        mHost->GetVolumeState(path, &state);
+        if (state.Equals(IEnvironment::MEDIA_SHARED)) {
+            mHost->DoShareUnshareVolume(path, String("ums"), FALSE);
+            rc = mHost->DoMountVolume(mPath);
+            if (rc != StorageResultCode::OperationSucceeded) {
+                Slogger::E(TAG, "Failed to remount {%s} on UMS enabled-disconnect (%d)", mPath.string(), rc);
+            }
+        }
     }
+
     // } catch (Exception ex) {
     //     Slog.w(TAG, "Failed to mount media on UMS enabled-disconnect", ex);
     // }
@@ -615,9 +851,10 @@ ECode CMountService::UsbMassStorageThread::Run()
     return NOERROR;
 }
 
+//============================================================================
+// CMountService::ObbAction
+//============================================================================
 const Int32 CMountService::ObbAction::MAX_RETRIES;
-
-CAR_INTERFACE_IMPL(CMountService::ObbAction, IInterface)
 
 CMountService::ObbAction::ObbAction(
     /* [in] */ ObbState* obbState,
@@ -631,8 +868,11 @@ void CMountService::ObbAction::Execute(
     /* [in] */ IHandler* handler)
 {
     // try {
-    if (DEBUG_OBB)
-        Slogger::I(TAG, "Starting to execute action: %s", ToString().string());
+    if (DEBUG_OBB) {
+        String str;
+        ToString(&str);
+        Slogger::I(TAG, "Starting to execute action: %s", str.string());
+    }
     mRetries++;
     if (mRetries > MAX_RETRIES) {
         Slogger::W(TAG, "Failed to invoke remote methods on default container service. Giving up");
@@ -718,7 +958,17 @@ ECode CMountService::ObbAction::SendNewStatusOrIgnore(
     return NOERROR;
 }
 
+ECode CMountService::ObbAction::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CMountService::ObbAction";
+    return NOERROR;
+}
 
+//============================================================================
+// CMountService::MountObbAction
+//============================================================================
 CMountService::MountObbAction::MountObbAction(
     /* [in] */ ObbState* obbState,
     /* [in] */ const String& key,
@@ -749,8 +999,8 @@ ECode CMountService::MountObbAction::HandleExecute()
     Boolean isMounted;
     {
         AutoLock lock(mHost->mObbMountsLock);
-        HashMap<String, AutoPtr<ObbState> >::Iterator iter = mHost->mObbPathToStateMap.Find(mObbState->mRawPath);
-        isMounted = iter != mHost->mObbPathToStateMap.End();
+        mHost->mObbPathToStateMap->ContainsKey(
+                CoreUtils::Convert(mObbState->mRawPath), &isMounted);
     }
     if (isMounted) {
         Slogger::W(TAG, "Attempt to mount OBB which is already mounted: ", (const char*)fileName);
@@ -764,13 +1014,33 @@ ECode CMountService::MountObbAction::HandleExecute()
     else {
         assert(0);
         // try {
-        // SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+//         AutoPtr<ISecretKeyFactory> factory;
+//         FAILE_GOTO(CSecretKeyFactory::GetInstance(
+//                 String("PBKDF2WithHmacSHA1"), (ISecretKeyFactory**)&factory), next);
+//         AutoPtr<ArrayOf<Byte> > salt;
+//         FAILE_GOTO(obbInfo->GetSalt((ArrayOf<Byte>**)&salt)), next);
+//         AutoPtr<IKeySpec> ks;
+//         FAILE_GOTO(CPBEKeySpec::New(mKey.GetChars(), salt,
+//                 PBKDF2_HASH_ROUNDS, CRYPTO_ALGORITHM_KEY_SIZE, (IKeySpec**)&ks), next);
 
-        // KeySpec ks = new PBEKeySpec(mKey.toCharArray(), obbInfo.salt,
-        //         PBKDF2_HASH_ROUNDS, CRYPTO_ALGORITHM_KEY_SIZE);
-        // SecretKey key = factory.generateSecret(ks);
-        // BigInteger bi = new BigInteger(key.getEncoded());
-        // hashedKey = bi.toString(16);
+//         AutoPtr<ISecretKey> key;
+//         FAILE_GOTO(factory->GenerateSecret(ks, (ISecretKey**)&key), next);
+//         AutoPtr<ArrayOf<Byte> > encoded;
+//         FAILE_GOTO(IKey::Probe(key)->GetEncoded((ArrayOf<Byte>**)&encoded), next);
+//         AutoPtr<IBigInteger> bi;
+//         FAILE_GOTO(CBigInteger::New(encoded, (IBigInteger**)&bi), next);
+//         bi->ToString(16, &hashedKey);
+// next:
+//         if (ec == (ECode)E_NO_SUCH_ALGORITHM_EXCEPTION) {
+//             Slogger::E(TAG, "Could not load PBKDF2 algorithm");
+//             SendNewStatusOrIgnore(OnObbStateChangeListener::ERROR_INTERNAL);
+//             return ec;
+//         }
+//         else if (ec == (ECode)E_INVALID_KEY_SPEC_EXCEPTION) {
+//             Slogger::E(TAG, "Invalid key spec when loading PBKDF2 algorithm");
+//             SendNewStatusOrIgnore(OnObbStateChangeListener::ERROR_INTERNAL);
+//             return ec;
+//         }
         // } catch (NoSuchAlgorithmException e) {
         //     Slog.e(TAG, "Could not load PBKDF2 algorithm", e);
         //     sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_INTERNAL);
@@ -785,15 +1055,10 @@ ECode CMountService::MountObbAction::HandleExecute()
     Int32 rc = StorageResultCode::OperationSucceeded;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
-    AutoPtr<ICharSequence> cs1, cs2, cs3, cs4;
-    CString::New(String("mount"), (ICharSequence**)&cs1);
-    args->Set(0, cs1);
-    CString::New(mObbState->mVoldPath, (ICharSequence**)&cs2);
-    args->Set(1, cs2);
-    CString::New(hashedKey, (ICharSequence**)&cs3);
-    args->Set(2, cs3);
-    CString::New(StringUtils::Int32ToString(mObbState->mOwnerGid), (ICharSequence**)&cs4);
-    args->Set(3, cs4);
+    args->Set(0, CoreUtils::Convert("mount"));
+    args->Set(1, CoreUtils::Convert(mObbState->mVoldPath));
+    args->Set(2, CoreUtils::Convert(hashedKey));
+    args->Set(3, CoreUtils::Convert(mObbState->mOwnerGid));
     AutoPtr<NativeDaemonEvent> event;
     if (FAILED(mHost->mConnector->Execute(String("obb"), args, (NativeDaemonEvent**)&event))) {
         Int32 code = 0;
@@ -834,16 +1099,24 @@ void CMountService::MountObbAction::HandleError()
     SendNewStatusOrIgnore(IOnObbStateChangeListener::ERROR_INTERNAL);
 }
 
-String CMountService::MountObbAction::ToString()
+ECode CMountService::MountObbAction::ToString(
+    /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str);
     StringBuilder sb;
     sb.Append("MountObbAction{");
-    sb.Append(mObbState->ToString());
+    String obb;
+    mObbState->ToString(&obb);
+    sb.Append(obb);
     sb.AppendChar('}');
-    return sb.ToString();
+    *str = sb.ToString();
+    return NOERROR;
 }
 
 
+//============================================================================
+// CMountService::UnmountObbAction
+//============================================================================
 CMountService::UnmountObbAction::UnmountObbAction(
     /* [in] */ ObbState* obbState,
     /* [in] */ Boolean force,
@@ -863,10 +1136,10 @@ ECode CMountService::UnmountObbAction::HandleExecute()
     AutoPtr<ObbState> existingState;
     {
         AutoLock lock(mHost->mObbMountsLock);
-        HashMap<String, AutoPtr<ObbState> >::Iterator iter = mHost->mObbPathToStateMap.Find(mObbState->mRawPath);
-        if(iter != mHost->mObbPathToStateMap.End()) {
-            existingState = iter->mSecond;
-        }
+        AutoPtr<IInterface> value;
+        mHost->mObbPathToStateMap->Get(
+                CoreUtils::Convert(mObbState->mRawPath), (IInterface**)&value);
+        existingState = (ObbState*)IObject::Probe(value);
     }
 
     if (existingState == NULL) {
@@ -882,11 +1155,8 @@ ECode CMountService::UnmountObbAction::HandleExecute()
     Int32 rc = StorageResultCode::OperationSucceeded;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1, cs2;
-    CString::New(String("unmount"), (ICharSequence**)&cs1);
-    args->Set(0, cs1);
-    CString::New(mObbState->mVoldPath, (ICharSequence**)&cs2);
-    args->Set(1, cs2);
+    args->Set(0, CoreUtils::Convert("unmount"));
+    args->Set(1, CoreUtils::Convert(mObbState->mVoldPath));
     AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(String("obb"), args);
     if (mForceUnmount) {
         AutoPtr<ICharSequence> cs;
@@ -941,16 +1211,61 @@ void CMountService::UnmountObbAction::HandleError()
     SendNewStatusOrIgnore(IOnObbStateChangeListener::ERROR_INTERNAL);
 }
 
-String CMountService::UnmountObbAction::ToString()
+ECode CMountService::UnmountObbAction::ToString(
+    /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str);
     StringBuilder sb("UnmountObbAction{");
-    sb.Append(mObbState->ToString());
+    String obb;
+    mObbState->ToString(&obb);
+    sb.Append(obb);
     sb.Append(",force=");
-    sb.AppendBoolean(mForceUnmount);
+    sb.Append(mForceUnmount);
     sb.AppendChar('}');
-    return sb.ToString();
+    *str = sb.ToString();
+    return NOERROR;
 }
 
+
+//============================================================================
+// CMountService::DecryptStorageRunnable
+//============================================================================
+CMountService::DecryptStorageRunnable::DecryptStorageRunnable(
+    /* [in] */ CMountService* host)
+    : mHost(host)
+{}
+
+CAR_INTERFACE_IMPL(CMountService::DecryptStorageRunnable, Object, IRunnable)
+
+ECode CMountService::DecryptStorageRunnable::Run()
+{
+    // try {
+    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
+    AutoPtr<ICharSequence> cs;
+    CString::New(String("restart"), (ICharSequence**)&cs);
+    args->Set(0, cs);
+    AutoPtr<NativeDaemonEvent> event;
+    if (FAILED(mHost->mConnector->Execute(String("cryptfs"), args, (NativeDaemonEvent**)&event))) {
+        Slogger::E(TAG, "problem executing in background");
+    }
+    // } catch (NativeDaemonConnectorException e) {
+    //     Slog.e(TAG, "problem executing in background", e);
+    // }
+    return NOERROR;
+}
+
+
+ECode CMountService::DecryptStorageRunnable::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CMountService::DecryptStorageRunnable";
+    return NOERROR;
+}
+
+//============================================================================
+// CMountService
+//============================================================================
 static AutoPtr<IComponentName> InitDefaultComponet()
 {
     AutoPtr<IComponentName> cn;
@@ -961,6 +1276,13 @@ static AutoPtr<IComponentName> InitDefaultComponet()
 
     return cn;
 }
+
+const String CMountService::CRYPTO_TYPES[] = {
+    String("password"),
+    String("default"),
+    String("pattern"),
+    String("pin")
+};
 
 const Boolean CMountService::LOCAL_LOGD = FALSE;
 const Boolean CMountService::DEBUG_UNMOUNT = FALSE;
@@ -978,6 +1300,10 @@ const Int32 CMountService::MAX_UNMOUNT_RETRIES;
 const String CMountService::TAG_STORAGE_LIST("StorageList");
 const String CMountService::TAG_STORAGE("storage");
 
+CAR_INTERFACE_IMPL_3(CMountService, Object, IIMountService, INativeDaemonConnectorCallbacks, IWatchdogMonitor);
+
+CAR_OBJECT_IMPL(CMountService)
+
 CMountService::CMountService()
     : mSystemReady(FALSE)
     , mUmsEnabling(FALSE)
@@ -986,8 +1312,13 @@ CMountService::CMountService()
     , mUpdatingStatus(FALSE)
     , mBound(FALSE)
 {
+    CHashMap::New((IHashMap**)&mVolumesByPath);
+    CHashMap::New((IHashMap**)&mVolumeStates);
     ASSERT_SUCCEEDED(CCountDownLatch::New(1, (ICountDownLatch**)&mConnectedSignal));
     ASSERT_SUCCEEDED(CCountDownLatch::New(1, (ICountDownLatch**)&mAsecsScanned));
+    CHashSet::New((IHashSet**)&mAsecMountSet);
+    CHashMap::New((IHashMap**)&mObbMounts);
+    CHashMap::New((IHashMap**)&mObbPathToStateMap);
 
     mDefContainerConn = new DefaultContainerConnection(this);
 
@@ -997,13 +1328,7 @@ CMountService::CMountService()
 
 CMountService::~CMountService()
 {
-    mObbMounts.Clear();
-
-    mVolumesByPath.Clear();
-    mVolumeStates.Clear();
     mListeners.Clear();
-    mAsecMountSet.Clear();
-    mObbPathToStateMap.Clear();
     mForceUnmounts.Clear();
     mActions.Clear();
 }
@@ -1087,7 +1412,7 @@ void CMountService::HandleUnmountPmDone()
 
             AutoPtr<IMessage> msg;
             mHandler->ObtainMessage(H_UNMOUNT_MS, (IMessage**)&msg);
-            msg->SetObj(ucb);
+            msg->SetObj((IObject*)ucb.Get());
             Boolean result;
             mHandler->SendMessage(msg, &result);
         }
@@ -1118,13 +1443,14 @@ void CMountService::WaitForReady()
 void CMountService::WaitForLatch(
     /* [in] */ ICountDownLatch* latch)
 {
-    PFL_EX("TODO: WaitForLatch need CCountDownLatch::AwaitEx")
-    return;
-
     for (;;) {
         // try {
         Boolean res = FALSE;
-        latch->Await(5000, NULL/*TimeUnit::MILLISECONDS*/, &res);
+        AutoPtr<ITimeUnitHelper> helper;
+        CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper);
+        AutoPtr<ITimeUnit> MILLISECONDS;
+        helper->GetMILLISECONDS((ITimeUnit**)&MILLISECONDS);
+        latch->Await(5000, MILLISECONDS, &res);
         if (res) {
             return;
         }
@@ -1139,23 +1465,49 @@ void CMountService::WaitForLatch(
     }
 }
 
+Boolean CMountService::IsReady()
+{
+    // try {
+    Boolean result;
+    AutoPtr<ITimeUnitHelper> helper;
+    CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper);
+    AutoPtr<ITimeUnit> MILLISECONDS;
+    helper->GetMILLISECONDS((ITimeUnit**)&MILLISECONDS);
+    ECode ec = mConnectedSignal->Await(0, MILLISECONDS, &result);
+    if (FAILED(ec)) {
+        return FALSE;
+    }
+    return result;
+    // } catch (InterruptedException e) {
+    //     return false;
+    // }
+}
+
 void CMountService::HandleSystemReady()
 {
     // Snapshot current volume states since it's not safe to call into vold
     // while holding locks.
-    HashMap<String, String> snapshot(30);
+    AutoPtr<IHashMap> snapshot;
     {
         AutoLock lock(mVolumesLock);
-        HashMap<String, String>::Iterator it = mVolumeStates.Begin();
-        for(; it != mVolumeStates.End(); ++it) {
-            snapshot[it->mFirst] = it->mSecond;
-        }
+        CHashMap::New(IMap::Probe(mVolumeStates), (IHashMap**)&snapshot);
     }
 
-    HashMap<String, String>::Iterator iter = snapshot.Begin();
-    for (; iter != snapshot.End(); ++iter) {
-        String path = iter->mFirst;
-        String state = iter->mSecond;
+    AutoPtr<ISet> entrySet;
+    snapshot->GetEntrySet((ISet**)&entrySet);
+    AutoPtr<IIterator> it;
+    entrySet->GetIterator((IIterator**)&it);
+
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> value;
+        it->GetNext((IInterface**)&value);
+        IMapEntry* entry = IMapEntry::Probe(value);
+        AutoPtr<IInterface> k, v;
+        entry->GetKey((IInterface**)&k);
+        entry->GetValue((IInterface**)&v);
+        String path = CoreUtils::Unbox(ICharSequence::Probe(k));
+        String state = CoreUtils::Unbox(ICharSequence::Probe(v));
 
         if (state.Equals(IEnvironment::MEDIA_UNMOUNTED)) {
             Int32 rc = DoMountVolume(path);
@@ -1194,6 +1546,35 @@ void CMountService::HandleSystemReady()
         SendUmsIntent(TRUE);
         mSendUmsConnectedOnBoot = FALSE;
     }
+
+    /*
+     * Start scheduling nominally-daily fstrim operations
+     */
+    CMountServiceIdler::ScheduleIdlePass(mContext);
+}
+
+void CMountService::RunIdleMaintenance(
+    /* [in] */ IRunnable* callback)
+{
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(H_FSTRIM, callback, (IMessage**)&msg);
+    Boolean result;
+    mHandler->SendMessage(msg, &result);
+}
+
+ECode CMountService::RunMaintenance()
+{
+    ValidatePermission(Elastos::Droid::Manifest::permission::MOUNT_UNMOUNT_FILESYSTEMS);
+    RunIdleMaintenance(NULL);
+    return NOERROR;
+}
+
+ECode CMountService::LastMaintenance(
+    /* [out] */ Int64* timestamp)
+{
+    VALIDATE_NOT_NULL(timestamp);
+    *timestamp = mLastMaintenance;
+    return NOERROR;
 }
 
 ECode CMountService::DoShareUnshareVolume(
@@ -1208,13 +1589,9 @@ ECode CMountService::DoShareUnshareVolume(
     }
 
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    AutoPtr<ICharSequence> cs1, cs2, cs3;
-    CString::New(enable ? String("share") : String("unshare"), (ICharSequence**)&cs1);
-    args->Set(0, (IInterface*)cs1);
-    CString::New(path, (ICharSequence**)&cs2);
-    args->Set(1, (IInterface*)cs2);
-    CString::New(method, (ICharSequence**)&cs3);
-    args->Set(2, (IInterface*)cs3);
+    args->Set(0, CoreUtils::Convert(enable ? "share" : "unshare"));
+    args->Set(1, CoreUtils::Convert(path));
+    args->Set(2, CoreUtils::Convert(method));
     AutoPtr<NativeDaemonEvent> event;
     ECode ec = mConnector->Execute(String("volume"), args, (NativeDaemonEvent**)&event);
     if (ec == (ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION) {
@@ -1234,12 +1611,10 @@ void CMountService::UpdatePublicVolumeState(
     String oldState;
     {
         AutoLock lock(mVolumesLock);
-
-        HashMap<String, String>::Iterator iter = mVolumeStates.Find(path);
-        if(iter != mVolumeStates.End()) {
-            oldState = iter->mSecond;
-        }
-        mVolumeStates[path] = state;
+        AutoPtr<IInterface> value;
+        mVolumeStates->Put(CoreUtils::Convert(path),
+                CoreUtils::Convert(state), (IInterface**)&value);
+        oldState = CoreUtils::Unbox(ICharSequence::Probe(value));
     }
 
     if (state.Equals(oldState)) {
@@ -1250,29 +1625,24 @@ void CMountService::UpdatePublicVolumeState(
 
     Slogger::D(TAG, "volume state changed for %s (%s -> %s)", path.string(), oldState.string(), state.string());
 
-    // Tell PackageManager about changes to primary volume state, but only
-    // when not emulated.
-    Boolean result1, result2;
-    if ((volume->IsPrimary(&result1), result1) && (volume->IsEmulated(&result2), !result2)) {
-        if (IEnvironment::MEDIA_UNMOUNTED.Equals(state)) {
-            mPms->UpdateExternalMediaStatus(FALSE, FALSE);
+    // Tell PackageManager about changes, not only to primary volume,
+    // to all the non-emulated storage volumes
+    if (IEnvironment::MEDIA_UNMOUNTED.Equals(state)) {
+        mPms->UpdateExternalMediaStatus(FALSE, FALSE);
 
-            /*
-             * Some OBBs might have been unmounted when this volume was
-             * unmounted, so send a message to the handler to let it know to
-             * remove those from the list of mounted OBBS.
-             */
-            AutoPtr<ICharSequence> seq;
-            CString::New(path, (ICharSequence**)&seq);
-            AutoPtr<IMessage> msg;
-            mObbActionHandler->ObtainMessage(OBB_FLUSH_MOUNT_STATE, (IMessage**)&msg);
-            msg->SetObj(seq);
-            Boolean result;
-            mObbActionHandler->SendMessage(msg, &result);
-        }
-        else if (IEnvironment::MEDIA_MOUNTED.Equals(state)) {
-            mPms->UpdateExternalMediaStatus(TRUE, FALSE);
-        }
+        /*
+         * Some OBBs might have been unmounted when this volume was
+         * unmounted, so send a message to the handler to let it know to
+         * remove those from the list of mounted OBBS.
+         */
+        AutoPtr<IMessage> msg;
+        mObbActionHandler->ObtainMessage(OBB_FLUSH_MOUNT_STATE, (IMessage**)&msg);
+        msg->SetObj(CoreUtils::Convert(path));
+        Boolean result;
+        mObbActionHandler->SendMessage(msg, &result);
+    }
+    else if (IEnvironment::MEDIA_MOUNTED.Equals(state)) {
+        mPms->UpdateExternalMediaStatus(TRUE, FALSE);
     }
 
     AutoLock lock(mListenersLock);
@@ -1296,6 +1666,72 @@ void CMountService::UpdatePublicVolumeState(
         //     Slog.e(TAG, "Listener failed", ex);
         // }
     }
+    DisbaleEnableUMSAfterStorageChanged(state);
+}
+
+void CMountService::DisbaleEnableUMSAfterStorageChanged(
+    /* [in] */ const String& state)
+{
+    Boolean value;
+    AutoPtr<ISystemProperties> sysProp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
+    sysProp->GetBoolean(String("persist.sys.ums"), TRUE, &value);
+    if (!value) {
+        //Do nothing if property is false
+        return;
+    }
+
+    if (state.Equals(IEnvironment::MEDIA_SHARED)) {
+        if (!mUmsAvailable) {
+            SetUsbMassStorageEnabled(FALSE);
+        }
+    }
+    else if (state.Equals(IEnvironment::MEDIA_MOUNTED) && mUmsAvailable) {
+        SetUsbMassStorageEnabled(TRUE);
+    }
+}
+
+void CMountService::CopyLocaleFromMountService()
+{
+    String systemLocale;
+    // try {
+    if (FAILED(GetField(IStorageManager::SYSTEM_LOCALE_KEY, &systemLocale))) {
+        return;
+    }
+    // } catch (RemoteException e) {
+    //     return;
+    // }
+    if (TextUtils::IsEmpty(systemLocale)) {
+        return;
+    }
+
+    Slogger::D(TAG, "Got locale %s from mount service", systemLocale.string());
+    AutoPtr<ILocaleHelper> helper;
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
+    AutoPtr<ILocale> locale;
+    helper->ForLanguageTag(systemLocale, (ILocale**)&locale);
+    AutoPtr<IConfiguration> config;
+    CConfiguration::New((IConfiguration**)&config);
+    config->SetLocale(locale);
+    // try {
+    ECode ec = ActivityManagerNative::GetDefault()->UpdateConfiguration(config);
+    if (FAILED(ec)) {
+        Slogger::E(TAG, "Error setting system locale from mount service %x", ec);
+    }
+    // } catch (RemoteException e) {
+    //     Slog.e(TAG, "Error setting system locale from mount service", e);
+    // }
+
+    // Temporary workaround for http://b/17945169.
+    Slogger::D(TAG, "Setting system properties to %s from mount service", systemLocale.string());
+    AutoPtr<ISystemProperties> sysProp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
+    String language;
+    locale->GetLanguage(&language);
+    sysProp->Set(String("persist.sys.language"), language);
+    String country;
+    locale->GetCountry(&country);
+    sysProp->Set(String("persist.sys.country"), country);
 }
 
 ECode CMountService::OnDaemonConnected()
@@ -1308,10 +1744,19 @@ ECode CMountService::OnDaemonConnected()
     return t->Start();
 }
 
+ECode CMountService::OnCheckHoldWakeLock(
+    /* [in] */ Int32 code,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+    return NOERROR;
+}
+
 ECode CMountService::OnEvent(
     /* [in] */ Int32 code,
     /* [in] */ const String& raw,
-    /* [in] */ const ArrayOf<String>& cooked,
+    /* [in] */ ArrayOf<String>* cooked,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -1319,14 +1764,14 @@ ECode CMountService::OnEvent(
     if (DEBUG_EVENTS) {
         StringBuilder builder("OnEvent::");
         builder.Append(" raw= ");
-        builder.AppendString(raw);
-        //if (cooked != NULL) {
-        builder.Append(" cooked = " );
-        for (Int32 i = 0; i < cooked.GetLength(); i++) {
-                builder.Append(" ");
-                builder.AppendString(cooked[i]);
+        builder.Append(raw);
+        if (cooked != NULL) {
+            builder.Append(" cooked = " );
+            for (Int32 i = 0; i < cooked->GetLength(); i++) {
+                    builder.Append(" ");
+                    builder.Append((*cooked)[i]);
+            }
         }
-        //}
         Slogger::I(TAG, builder.ToString());
     }
 
@@ -1336,9 +1781,33 @@ ECode CMountService::OnEvent(
          * Format: "NNN Volume <label> <path> state changed
          * from <old_#> (<old_str>) to <new_#> (<new_str>)"
          */
-        NotifyVolumeStateChange(cooked[2], cooked[3],
-            StringUtils::ParseInt32(cooked[7]),
-            StringUtils::ParseInt32(cooked[10]));
+        NotifyVolumeStateChange((*cooked)[2], (*cooked)[3],
+            StringUtils::ParseInt32((*cooked)[7]),
+            StringUtils::ParseInt32((*cooked)[10]));
+    }
+    else if (code == VoldResponseCode::VolumeUuidChange) {
+        // Format: nnn <label> <path> <label>
+        String path = (*cooked)[2];
+        String uuid = (cooked->GetLength() > 3) ? (*cooked)[3] : String(NULL);
+
+        AutoPtr<IInterface> value;
+        mVolumesByPath->Get(CoreUtils::Convert(path), (IInterface**)&value);
+        IStorageVolume* vol = IStorageVolume::Probe(value);
+        if (vol != NULL) {
+            vol->SetUuid(uuid);
+        }
+    }
+    else if (code == VoldResponseCode::VolumeUserLabelChange) {
+        // Format: nnn <label> <path> <label>
+        String path = (*cooked)[2];
+        String userLabel = (cooked->GetLength() > 3) ? (*cooked)[3] : String(NULL);
+
+        AutoPtr<IInterface> value;
+        mVolumesByPath->Get(CoreUtils::Convert(path), (IInterface**)&value);
+        IStorageVolume* vol = IStorageVolume::Probe(value);
+        if (vol != NULL) {
+            vol->SetUserLabel(userLabel);
+        }
     }
     else if ((code == VoldResponseCode::VolumeDiskInserted) ||
             (code == VoldResponseCode::VolumeDiskRemoved) ||
@@ -1347,13 +1816,13 @@ ECode CMountService::OnEvent(
         // FMT: NNN Volume <label> <mountpoint> disk removed (<major>:<minor>)
         // FMT: NNN Volume <label> <mountpoint> bad removal (<major>:<minor>)
         String action;
-        String label = cooked[2];
-        String path = cooked[3];
+        String label = (*cooked)[2];
+        String path = (*cooked)[3];
         Int32 major = -1;
         Int32 minor = -1;
 
         // try {
-        String devComp = cooked[6].Substring(1, cooked[6].GetLength()-1);
+        String devComp = (*cooked)[6].Substring(1, (*cooked)[6].GetLength()-1);
         AutoPtr< ArrayOf<String> > devTok;
         if (SUCCEEDED(StringUtils::Split(devComp, String(":"), (ArrayOf<String>**)&devTok))) {
             major = StringUtils::ParseInt32((*devTok)[0]);
@@ -1370,13 +1839,23 @@ ECode CMountService::OnEvent(
         String state;
         {
             AutoLock lock(mVolumesLock);
-            volume = mVolumesByPath[path];
-            state = mVolumeStates[path];
+            AutoPtr<IInterface> value;
+            mVolumesByPath->Get(CoreUtils::Convert(path), (IInterface**)&value);
+            volume = IStorageVolume::Probe(value);
+            value = NULL;
+            mVolumeStates->Get(CoreUtils::Convert(path), (IInterface**)&value);
+            state = CoreUtils::Unbox(ICharSequence::Probe(value));
         }
 
         if (code == VoldResponseCode::VolumeDiskInserted) {
-            AutoPtr<OnEventThread> thread = new OnEventThread(path, this);
-            thread->Start();
+            Boolean connected;
+            IsUsbMassStorageConnected(&connected);
+            Boolean allowMassStorage;
+            volume->AllowMassStorage(&allowMassStorage);
+            if(!(connected && allowMassStorage)) {
+                AutoPtr<OnEventThread> thread = new OnEventThread(path, this);
+                thread->Start();
+            }
         }
         else if (code == VoldResponseCode::VolumeDiskRemoved) {
             /*
@@ -1408,7 +1887,7 @@ ECode CMountService::OnEvent(
             }
             /* Send the media unmounted event first */
             UpdatePublicVolumeState(volume, IEnvironment::MEDIA_UNMOUNTED);
-            action = IIntent::ACTION_MEDIA_UNMOUNTED;
+            SendStorageIntent(IIntent::ACTION_MEDIA_UNMOUNTED, volume, UserHandle::ALL);
 
             if (DEBUG_EVENTS) {
                 Slogger::I(TAG, "Sending media bad removal");
@@ -1441,7 +1920,9 @@ void CMountService::NotifyVolumeStateChange(
     AutoPtr<IStorageVolume> volume;
     String state;
     {
-        volume = mVolumesByPath[path];
+        AutoPtr<IInterface> value;
+        mVolumesByPath->Get(CoreUtils::Convert(path), (IInterface**)&value);
+        volume = IStorageVolume::Probe(value);
         GetVolumeState(path, &state);
     }
 
@@ -1477,6 +1958,13 @@ void CMountService::NotifyVolumeStateChange(
             }
             UpdatePublicVolumeState(volume, IEnvironment::MEDIA_UNMOUNTED);
             action = IIntent::ACTION_MEDIA_UNMOUNTED;
+        }
+        Boolean connected;
+        IsUsbMassStorageConnected(&connected);
+        Boolean allowMassStorage;
+        volume->AllowMassStorage(&allowMassStorage);
+        if(connected && allowMassStorage) {
+            DoShareUnshareVolume(path, String("ums"), TRUE);
         }
     }
     else if (newState == VolumeState::Pending) {
@@ -1535,17 +2023,23 @@ Int32 CMountService::DoMountVolume(
     AutoPtr<IStorageVolume> volume;
    {
         AutoLock lock(mVolumesLock);
-        volume = mVolumesByPath[path];
+        AutoPtr<IInterface> value;
+        mVolumesByPath->Get(CoreUtils::Convert(path), (IInterface**)&value);
+        volume = IStorageVolume::Probe(value);
+    }
+
+    Boolean isEmulated;
+    volume->IsEmulated(&isEmulated);
+    if (!isEmulated && HasUserRestriction(IUserManager::DISALLOW_MOUNT_PHYSICAL_MEDIA)) {
+        Slogger::W(TAG, "User has restriction DISALLOW_MOUNT_PHYSICAL_MEDIA; cannot mount volume.");
+        return StorageResultCode::OperationFailedInternalError;
     }
 
     if (DEBUG_EVENTS) Slogger::I(TAG, "doMountVolume: Mouting %s", path.string());
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1, cs2;
-    CString::New(String("mount"), (ICharSequence**)&cs1);
-    args->Set(0, (IInterface*)cs1);
-    CString::New(path, (ICharSequence**)&cs2);
-    args->Set(1, (IInterface*)cs2);
+    args->Set(0, CoreUtils::Convert("mount"));
+    args->Set(1, CoreUtils::Convert(path));
     AutoPtr<NativeDaemonEvent> event;
     if (FAILED(mConnector->Execute(String("volume"), args, (NativeDaemonEvent**)&event))) {
         /*
@@ -1656,22 +2150,14 @@ Int32 CMountService::DoUnmountVolume(
 
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1, cs2;
-    CString::New(String("unmount"), (ICharSequence**)&cs1);
-    args->Set(0, (IInterface*)cs1);
-    CString::New(path, (ICharSequence**)&cs2);
-    args->Set(1, (IInterface*)cs2);
-
+    args->Set(0, CoreUtils::Convert("unmount"));
+    args->Set(1, CoreUtils::Convert(path));
     AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(String("volume"), args);
     if (removeEncryption) {
-        AutoPtr<ICharSequence> cs;
-        CString::New(String("force_and_revert"), (ICharSequence**)&cs);
-        cmd->AppendArg(cs);
+        cmd->AppendArg(CoreUtils::Convert("force_and_revert"));
     }
     else if (force) {
-        AutoPtr<ICharSequence> cs;
-        CString::New(String("force"), (ICharSequence**)&cs);
-        cmd->AppendArg(cs);
+        cmd->AppendArg(CoreUtils::Convert("force"));
     }
     AutoPtr<NativeDaemonEvent> event;
     ECode ec = mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
@@ -1696,7 +2182,7 @@ Int32 CMountService::DoUnmountVolume(
     // We unmounted the volume. None of the asec containers are available now.
     {
         AutoLock lock(mAsecMountSetLock);
-        mAsecMountSet.Clear();
+        mAsecMountSet->Clear();
     }
 
     return StorageResultCode::OperationSucceeded;
@@ -1719,11 +2205,8 @@ Int32 CMountService::DoFormatVolume(
 {
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1, cs2;
-    CString::New(String("format"), (ICharSequence**)&cs1);
-    args->Set(0, (IInterface*)cs1);
-    CString::New(path, (ICharSequence**)&cs2);
-    args->Set(1, (IInterface*)cs2);
+    args->Set(0, CoreUtils::Convert("format"));
+    args->Set(1, CoreUtils::Convert(path));
     AutoPtr<NativeDaemonEvent> event;
     if (FAILED(mConnector->Execute(String("volume"), args, (NativeDaemonEvent**)&event))) {
         Int32 code = 0;
@@ -1760,13 +2243,9 @@ Boolean CMountService::DoGetVolumeShared(
     AutoPtr<NativeDaemonEvent> event;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    AutoPtr<ICharSequence> cs1, cs2, cs3;
-    CString::New(String("shared"), (ICharSequence**)&cs1);
-    args->Set(0, (IInterface*)cs1);
-    CString::New(path, (ICharSequence**)&cs2);
-    args->Set(1, (IInterface*)cs2);
-    CString::New(method, (ICharSequence**)&cs3);
-    args->Set(2, (IInterface*)cs3);
+    args->Set(0, CoreUtils::Convert("shared"));
+    args->Set(1, CoreUtils::Convert(path));
+    args->Set(2, CoreUtils::Convert(method));
     if (FAILED(mConnector->Execute(String("volume"), args, (NativeDaemonEvent**)&event))) {
         Slogger::E(TAG, "Failed to read response to volume shared %s %s", path.string(), method.string());
         return FALSE;
@@ -1823,18 +2302,30 @@ void CMountService::NotifyShareAvailabilityChange(
         mSendUmsConnectedOnBoot = avail;
     }
 
-    AutoPtr<IStorageVolume> primary = GetPrimaryPhysicalVolume();
-    if (avail == FALSE && primary != NULL) {
-        String volState, path;
-        primary->GetPath(&path);
-        GetVolumeState(path, &volState);
-        if (IEnvironment::MEDIA_SHARED.Equals(volState)) {
-            /*
-             * USB mass storage disconnected while enabled
-             */
-            AutoPtr<UsbMassStorageThread> thread = new UsbMassStorageThread(path, this);
-            thread->Start();
+    AutoPtr<IArrayList> volumes = GetShareableVolumes();
+    AutoPtr<IIterator> it;
+    volumes->GetIterator((IIterator**)&it);
+    Boolean mediaShared = FALSE;
+    Boolean hasNext;
+    String state;
+    while(it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> value;
+        it->GetNext((IInterface**)&value);
+        GetVolumeState(CoreUtils::Unbox(ICharSequence::Probe(value)), &state);
+        if (state.Equals(IEnvironment::MEDIA_SHARED)) {
+            mediaShared = TRUE;
         }
+    }
+
+    if (!avail && mediaShared) {
+        /*
+         * USB mass storage disconnected while enabled
+         */
+        AutoPtr<UsbMassStorageThread> thread = new UsbMassStorageThread(volumes, this);
+        thread->Start();
+    }
+    else if (avail && !mediaShared) {
+        SetUsbMassStorageEnabled(TRUE);
     }
 }
 
@@ -1851,7 +2342,7 @@ void CMountService::SendStorageIntent(
     CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     ASSERT_SUCCEEDED(helper->Parse(String("file://") + path, (IUri**)&uri));
     ASSERT_SUCCEEDED(CIntent::New(action, uri, (IIntent**)&intent));
-    intent->PutExtra(String("storage_volume")/*CStorageVolume::EXTRA_STORAGE_VOLUME*/, IParcelable::Probe(volume));
+    intent->PutExtra(IStorageVolume::EXTRA_STORAGE_VOLUME, IParcelable::Probe(volume));
 
     Slogger::D(TAG, "sendStorageIntent %p to %p", intent.Get(), user);
     mContext->SendBroadcastAsUser(intent, user);
@@ -1878,10 +2369,30 @@ ECode CMountService::ValidatePermission(
     return NOERROR;
 }
 
+Boolean CMountService::HasUserRestriction(
+    /* [in] */ const String& restriction)
+{
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&service);
+    IUserManager* um = IUserManager::Probe(service);
+    Boolean result;
+    um->HasUserRestriction(restriction, Binder::GetCallingUserHandle(), &result);
+    return result;
+}
+
+void CMountService::ValidateUserRestriction(
+    /* [in] */ const String& restriction)
+{
+    if (HasUserRestriction(restriction)) {
+        Slogger::E(TAG, "User has restriction %s", restriction.string());
+        // throw new SecurityException("User has restriction " + restriction);
+    }
+}
+
 ECode CMountService::ReadStorageListLocked()
 {
     mVolumes.Clear();
-    mVolumeStates.Clear();
+    mVolumeStates->Clear();
 
     AutoPtr<IResources> resources;
     ASSERT_SUCCEEDED(mContext->GetResources((IResources**)&resources));
@@ -1889,8 +2400,7 @@ ECode CMountService::ReadStorageListLocked()
     Int32 id = R::xml::storage_list;
     AutoPtr<IXmlResourceParser> parser;
     resources->GetXml(id, (IXmlResourceParser**)&parser);
-    AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(parser);
-    AutoPtr<CUserManagerService> userManager = CUserManagerService::GetInstance();
+    AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(IXmlPullParser::Probe(parser));
 
     // try {
     ECode ec = XmlUtils::BeginDocument(IXmlPullParser::Probe(parser), TAG_STORAGE_LIST);
@@ -1906,7 +2416,7 @@ ECode CMountService::ReadStorageListLocked()
         }
 
         String element;
-        parser->GetName(&element);
+        IXmlPullParser::Probe(parser)->GetName(&element);
         if (element.IsNull()) break;
 
         if (TAG_STORAGE.Equals(element)) {
@@ -1950,16 +2460,17 @@ ECode CMountService::ReadStorageListLocked()
                         TRUE, mtpReserve, FALSE, maxFileSize, NULL,
                         (IStorageVolume**)&mEmulatedTemplate);
 
-                AutoPtr<IObjectContainer> objectContainer;
-                userManager->GetUsers(FALSE, (IObjectContainer**)&objectContainer);
-                AutoPtr<IObjectEnumerator> objectEmulator;
-                objectContainer->GetObjectEnumerator((IObjectEnumerator**)&objectEmulator);
+                AutoPtr<CUserManagerService> userManager = CUserManagerService::GetInstance();
+                AutoPtr<IList> users;
+                userManager->GetUsers(FALSE, (IList**)&users);
+                AutoPtr<IIterator> it;
+                users->GetIterator((IIterator**)&it);
                 Boolean hasNext;
-                while(objectEmulator->MoveNext(&hasNext), hasNext) {
-                    AutoPtr<IUserInfo> info;
-                    objectEmulator->Current((IInterface**)&info);
+                while(it->HasNext(&hasNext), hasNext) {
+                    AutoPtr<IInterface> info;
+                    it->GetNext((IInterface**)&info);
                     AutoPtr<IUserHandle> userHandle;
-                    info->GetUserHandle((IUserHandle**)&userHandle);
+                    IUserInfo::Probe(info)->GetUserHandle((IUserHandle**)&userHandle);
                     CreateEmulatedVolumeForUserLocked(userHandle);
                 }
                 //for (UserInfo user : userManager.getUsers(FALSE)) {
@@ -1978,6 +2489,13 @@ ECode CMountService::ReadStorageListLocked()
                             emulated, mtpReserve, allowMassStorage, maxFileSize,
                             NULL, (IStorageVolume**)&volume);
                     AddVolumeLocked(volume);
+
+                    // Until we hear otherwise, treat as unmounted
+                    String volumePath;
+                    volume->GetPath(&volumePath);
+                    mVolumeStates->Put(CoreUtils::Convert(volumePath),
+                            CoreUtils::Convert(IEnvironment::MEDIA_UNMOUNTED));
+                    volume->SetState(IEnvironment::MEDIA_UNMOUNTED);
                 }
             }
             a->Recycle();
@@ -2036,28 +2554,33 @@ void CMountService::CreateEmulatedVolumeForUserLocked(
         // Place stub status for early callers to find
         String volPath;
         volume->GetPath(&volPath);
-        mVolumeStates[volPath] = IEnvironment::MEDIA_MOUNTED;
+        mVolumeStates->Put(CoreUtils::Convert(volPath),
+                CoreUtils::Convert(IEnvironment::MEDIA_MOUNTED));
+        volume->SetState(IEnvironment::MEDIA_MOUNTED);
     }
 }
 
 ECode CMountService::AddVolumeLocked(
     /* [in] */ IStorageVolume* volume)
 {
-    assert(volume != NULL);
     Slogger::D(TAG, "addVolumeLocked() %p", volume);
 
     mVolumes.PushBack(volume);
 
     String volPath;
     volume->GetPath(&volPath);
-    AutoPtr<IStorageVolume> existing = mVolumesByPath[volPath];
+    AutoPtr<IInterface> value;
+    mVolumesByPath->Put(CoreUtils::Convert(volPath), volume, (IInterface**)&value);
+    volume = IStorageVolume::Probe(value);
+    IStorageVolume* existing = IStorageVolume::Probe(value);
     if (existing != NULL) {
-        Slogger::E(TAG, "Volume at %s already exists: %p", volPath.string(), existing.Get());
+        String str;
+        IObject::Probe(existing)->ToString(&str);
+        Slogger::E(TAG, "Volume at %s already exists: %p", volPath.string(), str.string());
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException(
         //         "Volume at " + volume.getPath() + " already exists: " + existing);
     }
-    mVolumesByPath[volPath] = volume;
     return NOERROR;
 }
 
@@ -2068,8 +2591,8 @@ void CMountService::RemoveVolumeLocked(
     mVolumes.Remove(volume);
     String volPath;
     volume->GetPath(&volPath);
-    mVolumesByPath.Erase(volPath);
-    mVolumeStates.Erase(volPath);
+    mVolumesByPath->Remove(CoreUtils::Convert(volPath));
+    mVolumeStates->Remove(CoreUtils::Convert(volPath));
 }
 
 AutoPtr<IStorageVolume> CMountService::GetPrimaryPhysicalVolume()
@@ -2085,6 +2608,20 @@ AutoPtr<IStorageVolume> CMountService::GetPrimaryPhysicalVolume()
         }
     }
     return NULL;
+}
+
+Boolean CMountService::HasUmsVolume()
+{
+    AutoPtr<ArrayOf<IStorageVolume*> > storageVolumes;
+    GetVolumeList((ArrayOf<IStorageVolume*>**)&storageVolumes);
+    Boolean allowMassStorage;
+    for(Int32 i = 0; i < storageVolumes->GetLength(); i++) {
+        (*storageVolumes)[i]->AllowMassStorage(&allowMassStorage);
+        if (allowMassStorage) {
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 void CMountService::SystemReady()
@@ -2139,10 +2676,23 @@ ECode CMountService::Shutdown(
 
     Slogger::I(TAG, "Shutting down");
     AutoLock lock(mVolumesLock);
-    HashMap<String, String>::Iterator iter = mVolumeStates.Begin();
-    for (; iter != mVolumeStates.End(); ++iter) {
-        String path = iter->mFirst;
-        String state = iter->mSecond;
+    // Get all volumes to be unmounted.
+    Int32 size;
+    mVolumeStates->GetSize(&size);
+    AutoPtr<MountShutdownLatch> mountShutdownLatch = new MountShutdownLatch(observer, size, this);
+
+    AutoPtr<ISet> keySet;
+    mVolumeStates->GetKeySet((ISet**)&keySet);
+    AutoPtr<IIterator> it;
+    keySet->GetIterator((IIterator**)&it);
+
+    Boolean hasNext;
+    while(it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> key, value;
+        it->GetNext((IInterface**)&key);
+        String path = CoreUtils::Unbox(ICharSequence::Probe(key));
+        mVolumeStates->Get(key, (IInterface**)&value);
+        String state = CoreUtils::Unbox(ICharSequence::Probe(value));
 
         if (state.Equals(IEnvironment::MEDIA_SHARED)) {
             /*
@@ -2183,27 +2733,22 @@ ECode CMountService::Shutdown(
 
         if (state.Equals(IEnvironment::MEDIA_MOUNTED)) {
             // Post a unmount message.
-            AutoPtr<ShutdownCallBack> ucb = new ShutdownCallBack(path, observer, this);
+            AutoPtr<ShutdownCallBack> ucb = new ShutdownCallBack(path, mountShutdownLatch, this);
 
             AutoPtr<IMessage> msg;
             mHandler->ObtainMessage(H_UNMOUNT_PM_UPDATE, (IMessage**)&msg);
-            msg->SetObj(ucb);
+            msg->SetObj((IObject*)ucb.Get());
             Boolean result;
             mHandler->SendMessage(msg, &result);
         }
         else if (observer != NULL) {
             /*
-             * Observer is waiting for onShutDownComplete when we are done.
-             * Since nothing will be done send notification directly so shutdown
-             * sequence can continue.
+             * Count down, since nothing will be done. The observer will be
+             * notified when we are done so shutdown sequence can continue.
              */
-            // try {
-            if (FAILED(observer->OnShutDownComplete(StorageResultCode::OperationSucceeded))) {
-                Slogger::W(TAG, "RemoteException when shutting down");
-            }
-            // } catch (RemoteException e) {
-            //     Slog.w(TAG, "RemoteException when shutting down");
-            // }
+            mountShutdownLatch->CountDown();
+            Slogger::I(TAG, "Unmount completed: %s, result code: %d",
+                    path.string(), StorageResultCode::OperationSucceeded);
         }
     }
     return NOERROR;
@@ -2220,6 +2765,27 @@ void CMountService::SetUmsEnabling(
 {
     AutoLock lock(mListenersLock);
     mUmsEnabling = enable;
+}
+
+AutoPtr<IArrayList> CMountService::GetShareableVolumes()
+{
+    // Sharable volumes have android:allowMassStorage="true" in storage_list.xml
+    AutoPtr<IArrayList> volumesToMount;
+    CArrayList::New((IArrayList**)&volumesToMount);
+    synchronized (mVolumesLock) {
+        List< AutoPtr<IStorageVolume> >::Iterator it = mVolumes.Begin();
+        for (; it != mVolumes.End(); ++it) {
+            AutoPtr<IStorageVolume> volume = *it;
+            Boolean allowMassStorage;
+            volume->AllowMassStorage(&allowMassStorage);
+            if (allowMassStorage) {
+                String path;
+                volume->GetPath(&path);
+                volumesToMount->Add(CoreUtils::Convert(path));
+            }
+        }
+    }
+    return volumesToMount;
 }
 
 ECode CMountService::IsUsbMassStorageConnected(
@@ -2241,28 +2807,22 @@ ECode CMountService::SetUsbMassStorageEnabled(
     /* [in] */ Boolean enable)
 {
     WaitForReady();
-    FAIL_RETURN(ValidatePermission(Elastos::Droid::Manifest::permission::MOUNT_UNMOUNT_FILESYSTEMS));
-
-    // AutoPtr<IStorageVolume> primary = GetPrimaryPhysicalVolume();
-    // if (primary == NULL) {
-    //  return NOERROR;
-    // }
+    ValidatePermission(Elastos::Droid::Manifest::permission::MOUNT_UNMOUNT_FILESYSTEMS);
+    ValidateUserRestriction(IUserManager::DISALLOW_USB_FILE_TRANSFER);
 
     // TODO: Add support for multiple share methods
-    List< AutoPtr<IStorageVolume> >::Iterator it = mVolumes.Begin();
-    for (; it != mVolumes.End(); ++it) {
+    AutoPtr<IArrayList> volumes = GetShareableVolumes();
+    AutoPtr<IIterator> it;
+    volumes->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while(it->HasNext(&hasNext), hasNext) {
         /*
          * If the volume is mounted and we're enabling then unmount it
          */
-        //String path = Environment.getExternalStorageDirectory().getPath();
-        AutoPtr<IStorageVolume> volume = *it;
-        Boolean allowMassStorage;
-        volume->AllowMassStorage(&allowMassStorage);
-        if (!allowMassStorage)
-            continue;
-
-        String path, vs;
-        volume->GetPath(&path);
+        AutoPtr<IInterface> value;
+        it->GetNext((IInterface**)&value);
+        String path = CoreUtils::Unbox(ICharSequence::Probe(value));
+        String vs;
         GetVolumeState(path, &vs);
         String method("ums");
         if (enable && vs.Equals(IEnvironment::MEDIA_MOUNTED)) {
@@ -2271,7 +2831,7 @@ ECode CMountService::SetUsbMassStorageEnabled(
             AutoPtr<UmsEnableCallBack> umscb = new UmsEnableCallBack(path, method, TRUE, this);
             AutoPtr<IMessage> msg;
             mHandler->ObtainMessage(H_UNMOUNT_PM_UPDATE, (IMessage**)&msg);
-            msg->SetObj(umscb);
+            msg->SetObj((IObject*)umscb.Get());
             Boolean result;
             mHandler->SendMessage(msg, &result);
 
@@ -2304,25 +2864,20 @@ ECode CMountService::IsUsbMassStorageEnabled(
     VALIDATE_NOT_NULL(enabled);
     WaitForReady();
 
-    /*final StorageVolume primary = getPrimaryPhysicalVolume();
-    if (primary != null) {
-        return doGetVolumeShared(primary.getPath(), "ums");
-    } else {
-        return false;
-    }*/
-    //we should scan all volumes to make sure the massStorage is enable
-    List< AutoPtr<IStorageVolume> >::Iterator it = mVolumes.Begin();
-    for (; it != mVolumes.End(); ++it) {
-        AutoPtr<IStorageVolume> volume = *it;
-        Boolean allowMassStorage;
-        volume->AllowMassStorage(&allowMassStorage);
-        String path;
-        volume->GetPath(&path);
-        if(allowMassStorage && DoGetVolumeShared(path, String("ums"))) {
+    AutoPtr<IArrayList> volumes = GetShareableVolumes();
+    AutoPtr<IIterator> it;
+    volumes->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while(it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> value;
+        it->GetNext((IInterface**)&value);
+        if (DoGetVolumeShared(CoreUtils::Unbox(ICharSequence::Probe(value)), String("ums"))) {
             *enabled = TRUE;
             return NOERROR;
         }
     }
+
+    // no volume is shared
     *enabled = FALSE;
     return NOERROR;
 }
@@ -2334,11 +2889,9 @@ ECode CMountService::GetVolumeState(
     VALIDATE_NOT_NULL(s);
     AutoLock lock(mVolumesLock);
 
-    String state;
-    HashMap<String, String>::Iterator iter = mVolumeStates.Find(mountPoint);
-    if (iter != mVolumeStates.End()) {
-        state = iter->mSecond;
-    }
+    AutoPtr<IInterface> value;
+    mVolumeStates->Get(CoreUtils::Convert(mountPoint), (IInterface**)&value);
+    String state = CoreUtils::Unbox(ICharSequence::Probe(value));
     if (state.IsNull()) {
         Slogger::W(TAG, "GetVolumeState(%s): Unknown volume", mountPoint.string());
         // don't throw on dynamically created usb mount paths. eg /mnt/sda1
@@ -2371,7 +2924,7 @@ ECode CMountService::MountVolume(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    FAIL_RETURN(ValidatePermission(Elastos::Droid::Manifest::permission::MOUNT_UNMOUNT_FILESYSTEMS));
+    ValidatePermission(Elastos::Droid::Manifest::permission::MOUNT_UNMOUNT_FILESYSTEMS);
 
     WaitForReady();
     *result = DoMountVolume(mountPoint);
@@ -2383,7 +2936,7 @@ ECode CMountService::UnmountVolume(
     /* [in] */ Boolean force,
     /* [in] */ Boolean removeEncryption)
 {
-    FAIL_RETURN(ValidatePermission(Elastos::Droid::Manifest::permission::MOUNT_UNMOUNT_FILESYSTEMS));
+    ValidatePermission(Elastos::Droid::Manifest::permission::MOUNT_UNMOUNT_FILESYSTEMS);
     WaitForReady();
 
     String volState;
@@ -2402,7 +2955,7 @@ ECode CMountService::UnmountVolume(
     AutoPtr<UnmountCallBack> ucb = new UnmountCallBack(mountPoint, force, removeEncryption, this);
     AutoPtr<IMessage> msg;
     mHandler->ObtainMessage(H_UNMOUNT_PM_UPDATE, (IMessage**)&msg);
-    msg->SetObj(ucb);
+    msg->SetObj((IObject*)ucb.Get());
     Boolean result;
     return mHandler->SendMessage(msg, &result);
 }
@@ -2412,7 +2965,7 @@ ECode CMountService::FormatVolume(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    FAIL_RETURN(ValidatePermission(Elastos::Droid::Manifest::permission::MOUNT_FORMAT_FILESYSTEMS));
+    ValidatePermission(Elastos::Droid::Manifest::permission::MOUNT_FORMAT_FILESYSTEMS);
     WaitForReady();
 
     *result = DoFormatVolume(mountPoint);
@@ -2424,15 +2977,12 @@ ECode CMountService::GetStorageUsers(
     /* [out, callee] */ ArrayOf<Int32>** pids)
 {
     VALIDATE_NOT_NULL(pids);
-    FAIL_RETURN(ValidatePermission(Elastos::Droid::Manifest::permission::MOUNT_UNMOUNT_FILESYSTEMS));
+    ValidatePermission(Elastos::Droid::Manifest::permission::MOUNT_UNMOUNT_FILESYSTEMS);
     WaitForReady();
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1, cs2;
-    CString::New(String("users"), (ICharSequence**)&cs1);
-    args->Set(0, (IInterface*)cs1);
-    CString::New(path, (ICharSequence**)&cs2);
-    args->Set(1, (IInterface*)cs2);
+    args->Set(0, CoreUtils::Convert("users"));
+    args->Set(1, CoreUtils::Convert(path));
     AutoPtr< ArrayOf<NativeDaemonEvent*> > events;
     if (FAILED(mConnector->ExecuteForList(String("storage"), args,
             (ArrayOf<NativeDaemonEvent*>**)&events))) {
@@ -2484,15 +3034,13 @@ ECode CMountService::GetSecureContainerList(
     /* [out, callee] */ ArrayOf<String>** pids)
 {
     VALIDATE_NOT_NULL(pids);
-    FAIL_RETURN(ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_ACCESS));
+    ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_ACCESS);
     WaitForReady();
     WarnOnNotMounted();
 
     // try {
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    AutoPtr<ICharSequence> cs;
-    CString::New(String("list"), (ICharSequence**)&cs);
-    args->Set(0, (IInterface*)cs);
+    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
+    args->Set(0, CoreUtils::Convert("list"));
     AutoPtr< ArrayOf<NativeDaemonEvent*> > events;
     if (FAILED(mConnector->ExecuteForList(String("asec"), args,
             (ArrayOf<NativeDaemonEvent*>**)&events))) {
@@ -2519,28 +3067,20 @@ ECode CMountService::CreateSecureContainer(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    FAIL_RETURN(ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_CREATE));
+    ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_CREATE);
     WaitForReady();
     WarnOnNotMounted();
 
     Int32 rc = StorageResultCode::OperationSucceeded;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(7);
-    AutoPtr<ICharSequence> cs1, cs2, cs3, cs4, cs5, cs6, cs7;
-    CString::New(String("create"), (ICharSequence**)&cs1);
-    args->Set(0, (IInterface*)cs1);
-    CString::New(id, (ICharSequence**)&cs2);
-    args->Set(1, (IInterface*)cs2);
-    CString::New(StringUtils::Int32ToString(sizeMb), (ICharSequence**)&cs3);
-    args->Set(2, (IInterface*)cs3);
-    CString::New(fstype, (ICharSequence**)&cs4);
-    args->Set(3, (IInterface*)cs4);
-    CString::New(key, (ICharSequence**)&cs5);
-    args->Set(4, (IInterface*)cs5);
-    CString::New(StringUtils::Int32ToString(ownerUid), (ICharSequence**)&cs6);
-    args->Set(5, (IInterface*)cs6);
-    CString::New(external ? String("1") : String("0"), (ICharSequence**)&cs7);
-    args->Set(6, (IInterface*)cs7);
+    args->Set(0, CoreUtils::Convert("create"));
+    args->Set(1, CoreUtils::Convert(id));
+    args->Set(2, CoreUtils::Convert(sizeMb));
+    args->Set(3, CoreUtils::Convert(fstype));
+    args->Set(4, CoreUtils::Convert(key));
+    args->Set(5, CoreUtils::Convert(ownerUid));
+    args->Set(6, CoreUtils::Convert(external ? "1" : "0"));
     AutoPtr<NativeDaemonEvent> event;
     if(FAILED(mConnector->Execute(String("asec"), args, (NativeDaemonEvent**)&event))) {
         rc = StorageResultCode::OperationFailedInternalError;
@@ -2551,9 +3091,39 @@ ECode CMountService::CreateSecureContainer(
 
     if (rc == StorageResultCode::OperationSucceeded) {
         AutoLock lock(mAsecMountSetLock);
-        mAsecMountSet.Insert(id);
+        mAsecMountSet->Add(CoreUtils::Convert(id));
     }
     *result = rc;
+    return NOERROR;
+}
+
+ECode CMountService::ResizeSecureContainer(
+    /* [in] */ const String& id,
+    /* [in] */ Int32 sizeMb,
+    /* [in] */ const String& key,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_CREATE);
+    WaitForReady();
+    WarnOnNotMounted();
+
+    // try {
+    AutoPtr<NativeDaemonEvent> event;
+    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
+    args->Set(0, CoreUtils::Convert("resize"));
+    args->Set(1, CoreUtils::Convert(id));
+    args->Set(2, CoreUtils::Convert(sizeMb));
+    args->Set(3, CoreUtils::Convert(key));
+    ECode ec = mConnector->Execute(String("asec"), args, (NativeDaemonEvent**)&event);
+    if (FAILED(ec)) {
+        *result = StorageResultCode::OperationFailedInternalError;
+        return ec;
+    }
+    // } catch (NativeDaemonConnectorException e) {
+    //     rc = StorageResultCode.OperationFailedInternalError;
+    // }
+    *result = StorageResultCode::OperationSucceeded;
     return NOERROR;
 }
 
@@ -2568,11 +3138,8 @@ ECode CMountService::FinalizeSecureContainer(
     Int32 rc = StorageResultCode::OperationSucceeded;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1, cs2;
-    CString::New(String("finalize"), (ICharSequence**)&cs1);
-    args->Set(0, (IInterface*)cs1);
-    CString::New(id, (ICharSequence**)&cs2);
-    args->Set(1, (IInterface*)cs2);
+    args->Set(0, CoreUtils::Convert("finalize"));
+    args->Set(1, CoreUtils::Convert(id));
     AutoPtr<NativeDaemonEvent> event;
     if (FAILED(mConnector->Execute(String("asec"), args, (NativeDaemonEvent**)&event))) {
         rc = StorageResultCode::OperationFailedInternalError;
@@ -2601,15 +3168,10 @@ ECode CMountService::FixPermissionsSecureContainer(
     Int32 rc = StorageResultCode::OperationSucceeded;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
-    AutoPtr<ICharSequence> cs1, cs2, cs3, cs4;
-    CString::New(String("fixperms"), (ICharSequence**)&cs1);
-    args->Set(0, (IInterface*)cs1);
-    CString::New(id, (ICharSequence**)&cs2);
-    args->Set(1, (IInterface*)cs2);
-    CString::New(String("fixperms"), (ICharSequence**)&cs3);
-    args->Set(2, (IInterface*)cs3);
-    CString::New(filename, (ICharSequence**)&cs4);
-    args->Set(3, (IInterface*)cs4);
+    args->Set(0, CoreUtils::Convert("fixperms"));
+    args->Set(1, CoreUtils::Convert(id));
+    args->Set(2, CoreUtils::Convert(gid));
+    args->Set(3, CoreUtils::Convert(filename));
     AutoPtr<NativeDaemonEvent> event;
     if (FAILED(mConnector->Execute(String("asec"), args, (NativeDaemonEvent**)&event))) {
         rc = StorageResultCode::OperationFailedInternalError;
@@ -2631,7 +3193,7 @@ ECode CMountService::DestroySecureContainer(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    FAIL_RETURN(ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_DESTROY));
+    ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_DESTROY);
     WaitForReady();
     WarnOnNotMounted();
 
@@ -2646,16 +3208,11 @@ ECode CMountService::DestroySecureContainer(
     Int32 rc = StorageResultCode::OperationSucceeded;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1, cs2;
-    CString::New(String("destroy"), (ICharSequence**)&cs1);
-    args->Set(0, (IInterface*)cs1);
-    CString::New(id, (ICharSequence**)&cs2);
-    args->Set(1, (IInterface*)cs2);
+    args->Set(0, CoreUtils::Convert("destroy"));
+    args->Set(1, CoreUtils::Convert(id));
     AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(String("asec"), args);
     if (force) {
-        AutoPtr<ICharSequence> cs;
-        CString::New(String("force"), (ICharSequence**)&cs);
-        cmd->AppendArg((IInterface*)cs);
+        cmd->AppendArg(CoreUtils::Convert("force"));
     }
     AutoPtr<NativeDaemonEvent> event;
     if (FAILED(mConnector->Execute(cmd, (NativeDaemonEvent**)&event))) {
@@ -2681,9 +3238,10 @@ ECode CMountService::DestroySecureContainer(
 
     if (rc == StorageResultCode::OperationSucceeded) {
         AutoLock lock(mAsecMountSetLock);
-        HashSet<String>::Iterator iter = mAsecMountSet.Find(id);
-        if (iter != mAsecMountSet.End()) {
-            mAsecMountSet.Erase(iter);
+        Boolean contains;
+        mAsecMountSet->Contains(CoreUtils::Convert(id), &contains);
+        if (contains) {
+            mAsecMountSet->Remove(CoreUtils::Convert(id));
         }
     }
     *result = rc;
@@ -2694,17 +3252,18 @@ ECode CMountService::MountSecureContainer(
     /* [in] */ const String& id,
     /* [in] */ const String& key,
     /* [in] */ Int32 ownerUid,
+    /* [in] */ Boolean readOnly,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    FAIL_RETURN(ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_MOUNT_UNMOUNT));
+    ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_MOUNT_UNMOUNT);
     WaitForReady();
     WarnOnNotMounted();
 
     {
         AutoLock lock(mAsecMountSetLock);
-        HashSet<String>::Iterator iter = mAsecMountSet.Find(id);
-        if (iter != mAsecMountSet.End()) {
+        Boolean contains;
+        if (mAsecMountSet->Contains(CoreUtils::Convert(id), &contains), contains) {
             *result = StorageResultCode::OperationFailedStorageMounted;
             return NOERROR;
         }
@@ -2712,16 +3271,12 @@ ECode CMountService::MountSecureContainer(
 
     Int32 rc = StorageResultCode::OperationSucceeded;
     // try {
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
-    AutoPtr<ICharSequence> cs1, cs2, cs3, cs4;
-    CString::New(String("mount"), (ICharSequence**)&cs1);
-    args->Set(0, cs1);
-    CString::New(id, (ICharSequence**)&cs2);
-    args->Set(1, cs2);
-    CString::New(key, (ICharSequence**)&cs3);
-    args->Set(2, cs3);
-    CString::New(StringUtils::Int32ToString(ownerUid), (ICharSequence**)&cs4);
-    args->Set(3, cs4);
+    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(5);
+    args->Set(0, CoreUtils::Convert("mount"));
+    args->Set(1, CoreUtils::Convert(id));
+    args->Set(2, CoreUtils::Convert(key));
+    args->Set(3, CoreUtils::Convert(ownerUid));
+    args->Set(4, CoreUtils::Convert(readOnly ? "ro" : "rw"));
     AutoPtr<NativeDaemonEvent> event;
     if (FAILED(mConnector->Execute(String("asec"), args, (NativeDaemonEvent**)&event))) {
         Int32 code = 0;
@@ -2733,7 +3288,7 @@ ECode CMountService::MountSecureContainer(
         }
     }
     // } catch (NativeDaemonConnectorException e) {
-    //     Int32 code = e.getCode();
+    //     int code = e.getCode();
     //     if (code != VoldResponseCode.OpFailedStorageBusy) {
     //         rc = StorageResultCode.OperationFailedInternalError;
     //     }
@@ -2741,7 +3296,7 @@ ECode CMountService::MountSecureContainer(
 
     if (rc == StorageResultCode::OperationSucceeded) {
         AutoLock lock(mAsecMountSetLock);
-        mAsecMountSet.Insert(id);
+        mAsecMountSet->Add(CoreUtils::Convert(id));
     }
     *result = rc;
     return NOERROR;
@@ -2753,15 +3308,15 @@ ECode CMountService::UnmountSecureContainer(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    FAIL_RETURN(ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_MOUNT_UNMOUNT));
+    ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_MOUNT_UNMOUNT);
     WaitForReady();
     WarnOnNotMounted();
 
-    HashSet<String>::Iterator iter;
     {
         AutoLock lock(mAsecMountSetLock);
-        iter = mAsecMountSet.Find(id);
-        if (iter == mAsecMountSet.End()) {
+        Boolean contains;
+        mAsecMountSet->Contains(CoreUtils::Convert(id), &contains);
+        if (contains) {
             *result = StorageResultCode::OperationFailedStorageNotMounted;
             return NOERROR;
         }
@@ -2778,16 +3333,11 @@ ECode CMountService::UnmountSecureContainer(
     Int32 rc = StorageResultCode::OperationSucceeded;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1, cs2;
-    CString::New(String("unmount"), (ICharSequence**)&cs1);
-    args->Set(0, cs1);
-    CString::New(id, (ICharSequence**)&cs2);
-    args->Set(1, cs2);
+    args->Set(0, CoreUtils::Convert("unmount"));
+    args->Set(1, CoreUtils::Convert(id));
     AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(String("asec"), args);
     if (force) {
-        AutoPtr<ICharSequence> cs;
-        CString::New(String("force"), (ICharSequence**)&cs);
-        cmd->AppendArg(cs);
+        cmd->AppendArg(CoreUtils::Convert("force"));
     }
     AutoPtr<NativeDaemonEvent> event;
     if (FAILED(mConnector->Execute(cmd, (NativeDaemonEvent**)&event))) {
@@ -2813,7 +3363,7 @@ ECode CMountService::UnmountSecureContainer(
 
     if (rc == StorageResultCode::OperationSucceeded) {
         AutoLock lock(mAsecMountSetLock);
-        mAsecMountSet.Erase(iter);
+        mAsecMountSet->Remove(CoreUtils::Convert(id));
     }
     *result = rc;
     return NOERROR;
@@ -2824,13 +3374,12 @@ ECode CMountService::IsSecureContainerMounted(
     /* [out] */ Boolean* mounted)
 {
     VALIDATE_NOT_NULL(mounted);
-    FAIL_RETURN(ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_ACCESS));
+    ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_ACCESS);
     WaitForReady();
     WarnOnNotMounted();
 
     AutoLock lock(mAsecMountSetLock);
-    HashSet<String>::Iterator iter = mAsecMountSet.Find(String(id));
-    *mounted = iter != mAsecMountSet.End();
+    mAsecMountSet->Contains(CoreUtils::Convert(id), mounted);
     return NOERROR;
 }
 
@@ -2840,7 +3389,7 @@ ECode CMountService::RenameSecureContainer(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    FAIL_RETURN(ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_RENAME));
+    ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_RENAME);
     WaitForReady();
     WarnOnNotMounted();
 
@@ -2850,8 +3399,10 @@ ECode CMountService::RenameSecureContainer(
          * Because a mounted container has active internal state which cannot be
          * changed while active, we must ensure both ids are not currently mounted.
          */
-        if (mAsecMountSet.Find(oldId) != mAsecMountSet.End()
-                || mAsecMountSet.Find(newId) != mAsecMountSet.End() ) {
+        Boolean contaisOld, containsNew;
+        mAsecMountSet->Contains(CoreUtils::Convert(oldId), &contaisOld);
+        mAsecMountSet->Contains(CoreUtils::Convert(newId), &containsNew);
+        if (contaisOld || containsNew) {
             *result = StorageResultCode::OperationFailedStorageMounted;
             return NOERROR;
         }
@@ -2860,13 +3411,9 @@ ECode CMountService::RenameSecureContainer(
     Int32 rc = StorageResultCode::OperationSucceeded;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    AutoPtr<ICharSequence> cs1, cs2, cs3;
-    CString::New(String("rename"), (ICharSequence**)&cs1);
-    args->Set(0, cs1);
-    CString::New(oldId, (ICharSequence**)&cs2);
-    args->Set(1, cs2);
-    CString::New(newId, (ICharSequence**)&cs3);
-    args->Set(2, cs3);
+    args->Set(0, CoreUtils::Convert("rename"));
+    args->Set(1, CoreUtils::Convert(oldId));
+    args->Set(2, CoreUtils::Convert(newId));
     AutoPtr<NativeDaemonEvent> event;
     if (FAILED(mConnector->Execute(String("asec"), args, (NativeDaemonEvent**)&event))) {
         rc = StorageResultCode::OperationFailedInternalError;
@@ -2883,18 +3430,15 @@ ECode CMountService::GetSecureContainerPath(
     /* [out] */ String* path)
 {
     VALIDATE_NOT_NULL(path);
-    FAIL_RETURN(ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_ACCESS));
+    ValidatePermission(Elastos::Droid::Manifest::permission::ASEC_ACCESS);
     WaitForReady();
     WarnOnNotMounted();
 
     AutoPtr<NativeDaemonEvent> event;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1, cs2;
-    CString::New(String("path"), (ICharSequence**)&cs1);
-    args->Set(0, cs1);
-    CString::New(id, (ICharSequence**)&cs2);
-    args->Set(1, cs2);
+    args->Set(0, CoreUtils::Convert("path"));
+    args->Set(1, CoreUtils::Convert(id));
     if (FAILED(mConnector->Execute(String("asec"), args, (NativeDaemonEvent**)&event))) {
         Int32 code = 0;
         if (event != NULL) {
@@ -2937,11 +3481,8 @@ ECode CMountService::GetSecureContainerFilesystemPath(
     AutoPtr<NativeDaemonEvent> event;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1, cs2;
-    CString::New(String("fspath"), (ICharSequence**)&cs1);
-    args->Set(0, cs1);
-    CString::New(id, (ICharSequence**)&cs2);
-    args->Set(1, cs2);
+    args->Set(0, CoreUtils::Convert("fspath"));
+    args->Set(1, CoreUtils::Convert(id));
     if (FAILED(mConnector->Execute(String("asec"), args, (NativeDaemonEvent**)&event))) {
         Int32 code = 0;
         if (event != NULL) {
@@ -2993,7 +3534,8 @@ Boolean CMountService::IsUidOwnerOfPackageOrSystem(
     mPms->GetPackageUid(packageName, UserHandle::GetUserId(callerUid), &packageUid);
 
     if (DEBUG_OBB) {
-        Slogger::D(TAG, "packageName = %s, packageUid = %d, callerUid = %d", packageName.string(), packageUid, callerUid);
+        Slogger::D(TAG, "packageName = %s, packageUid = %d, callerUid = %d",
+                packageName.string(), packageUid, callerUid);
     }
     return callerUid == packageUid;
 }
@@ -3015,10 +3557,9 @@ ECode CMountService::GetMountedObbPath(
     AutoPtr<ObbState> state;
     {
         AutoLock lock(mObbPathToStateMapLock);
-        HashMap<String, AutoPtr<ObbState> >::Iterator it = mObbPathToStateMap.Find(rawPath);
-        if (it != mObbPathToStateMap.End()) {
-            state = it->mSecond;
-        }
+        AutoPtr<IInterface> value;
+        mObbPathToStateMap->Get(CoreUtils::Convert(rawPath), (IInterface**)&value);
+        state = (ObbState*)IObject::Probe(value);
     }
     if (state == NULL) {
         Slogger::W(TAG, "Failed to find OBB mounted at %s", rawPath.string());
@@ -3029,11 +3570,8 @@ ECode CMountService::GetMountedObbPath(
     AutoPtr<NativeDaemonEvent> event;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1, cs2;
-    CString::New(String("path"), (ICharSequence**)&cs1);
-    args->Set(0, cs1);
-    CString::New(state->mVoldPath, (ICharSequence**)&cs2);
-    args->Set(1, cs2);
+    args->Set(0, CoreUtils::Convert("path"));
+    args->Set(1, CoreUtils::Convert(state->mVoldPath));
     if (FAILED(mConnector->Execute(String("obb"), args, (NativeDaemonEvent**)&event))) {
         Int32 code = 0;
         if (event != NULL) {
@@ -3074,8 +3612,7 @@ ECode CMountService::IsObbMounted(
         // throw new NullPointerException(String.valueOf(errorMessage));
     }
     AutoLock lock(mObbMountsLock);
-    HashMap<String, AutoPtr<ObbState> >::Iterator iter = mObbPathToStateMap.Find(rawPath);
-    *mounted = iter != mObbPathToStateMap.End();
+    mObbPathToStateMap->ContainsKey(CoreUtils::Convert(rawPath), mounted);
     return NOERROR;
 }
 
@@ -3101,12 +3638,15 @@ ECode CMountService::MountObb(
 
     AutoPtr<IMessage> msg;
     mObbActionHandler->ObtainMessage(OBB_RUN_ACTION, (IMessage**)&msg);
-    msg->SetObj(action);
+    msg->SetObj((IObject*)action.Get());
     Boolean result;
     mObbActionHandler->SendMessage(msg, &result);
 
-    if (DEBUG_OBB)
-        Slogger::I(TAG, "Send to OBB handler: %s", (const char*)action->ToString());
+    if (DEBUG_OBB) {
+        String str;
+        action->ToString(&str);
+        Slogger::I(TAG, "Send to OBB handler: %s", str.string());
+    }
     return NOERROR;
 }
 
@@ -3126,7 +3666,9 @@ ECode CMountService::UnmountObb(
     AutoPtr<ObbState> existingState;
     {
         AutoLock lock(mObbPathToStateMapLock);
-        existingState = mObbPathToStateMap[rawPath];
+        AutoPtr<IInterface> value;
+        mObbPathToStateMap->Get(CoreUtils::Convert(rawPath), (IInterface**)&value);
+        existingState = (ObbState*)IObject::Probe(value);
     }
 
     if (existingState != NULL) {
@@ -3138,12 +3680,15 @@ ECode CMountService::UnmountObb(
 
         AutoPtr<IMessage> msg;
         mObbActionHandler->ObtainMessage(OBB_RUN_ACTION, (IMessage**)&msg);
-        msg->SetObj(action);
+        msg->SetObj((IObject*)action.Get());
         Boolean result;
         mObbActionHandler->SendMessage(msg, &result);
 
-        if (DEBUG_OBB)
-            Slogger::I(TAG, "Send to OBB handler: %s", action->ToString().string());
+        if (DEBUG_OBB) {
+            String str;
+            action->ToString(&str);
+            Slogger::I(TAG, "Send to OBB handler: %s", str.string());
+        }
     }
     else {
         Slogger::W(TAG, "Unknown OBB mount at %s", rawPath.string());
@@ -3156,19 +3701,17 @@ ECode CMountService::GetEncryptionState(
 {
     VALIDATE_NOT_NULL(result);
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CRYPT_KEEPER , String("no permission to access the crypt keeper")));
+            Elastos::Droid::Manifest::permission::CRYPT_KEEPER ,
+            String("no permission to access the crypt keeper")));
 
     WaitForReady();
 
     AutoPtr<NativeDaemonEvent> event;
     // try {
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    AutoPtr<ICharSequence> cs;
-    CString::New(String("cryptocomplete"), (ICharSequence**)&cs);
-    args->Set(0, cs);
-    if (FAILED(mConnector->Execute(String("cryptfs"), args, (NativeDaemonEvent**)&event))) {
+    if (FAILED(mConnector->Execute(String("cryptfs"),
+            String("cryptocomplete"), (NativeDaemonEvent**)&event))) {
         Slogger::W(TAG, "Error in communicating with cryptfs in validating");
-        return ENCRYPTION_STATE_ERROR_UNKNOWN;
+        return IIMountService::ENCRYPTION_STATE_ERROR_UNKNOWN;
     }
     *result = StringUtils::ParseInt32(event->GetMessage());
     // } catch (NumberFormatException e) {
@@ -3183,48 +3726,21 @@ ECode CMountService::GetEncryptionState(
     return NOERROR;
 }
 
-
-CMountService::DecryptStorageRunnable::DecryptStorageRunnable(
-    /* [in] */ CMountService* host)
-    : mHost(host)
-{}
-
-CAR_INTERFACE_IMPL(CMountService::DecryptStorageRunnable, IRunnable)
-
-ECode CMountService::DecryptStorageRunnable::Run()
-{
-    // try {
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    AutoPtr<ICharSequence> cs;
-    CString::New(String("restart"), (ICharSequence**)&cs);
-    args->Set(0, cs);
-    AutoPtr<NativeDaemonEvent> event;
-    if (FAILED(mHost->mConnector->Execute(String("cryptfs"), args, (NativeDaemonEvent**)&event))) {
-        Slogger::E(TAG, "problem executing in background");
-    }
-    // } catch (NativeDaemonConnectorException e) {
-    //     Slog.e(TAG, "problem executing in background", e);
-    // }
-    return NOERROR;
-}
-
-
 ECode CMountService::DecryptStorage(
     /* [in] */ const String& password,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
 
-    AutoPtr<ICharSequence> cs;
-    CString::New(password, (ICharSequence**)&cs);
-    if (TextUtils::IsEmpty(cs)) {
+    if (TextUtils::IsEmpty(password)) {
         Slogger::E(TAG, "password cannot be empty");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
         // throw new IllegalArgumentException("password cannot be empty");
     }
 
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CRYPT_KEEPER, String("no permission to access the crypt keeper")));
+            Elastos::Droid::Manifest::permission::CRYPT_KEEPER,
+            String("no permission to access the crypt keeper")));
 
     WaitForReady();
 
@@ -3235,10 +3751,8 @@ ECode CMountService::DecryptStorage(
     AutoPtr<NativeDaemonEvent> event;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1;
-    CString::New(String("checkpw"), (ICharSequence**)&cs1);
-    args->Set(0, cs1);
-    args->Set(1, cs);
+    args->Set(0, CoreUtils::Convert("checkpw"));
+    args->Set(1, CoreUtils::Convert(password));
     if (FAILED(mConnector->Execute(String("cryptfs"), args, (NativeDaemonEvent**)&event))) {
         // Decryption failed
         if (event != NULL) {
@@ -3267,21 +3781,22 @@ ECode CMountService::DecryptStorage(
 }
 
 ECode CMountService::EncryptStorage(
+    /* [in] */ Int32 type,
     /* [in] */ const String& password,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
 
-    AutoPtr<ICharSequence> cs;
-    CString::New(password, (ICharSequence**)&cs);
-    if (TextUtils::IsEmpty(cs)) {
+    if (TextUtils::IsEmpty(password)
+            && type != IStorageManager::CRYPT_TYPE_DEFAULT) {
         Slogger::E(TAG, "password cannot be empty");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
         // throw new IllegalArgumentException("password cannot be empty");
     }
 
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CRYPT_KEEPER, String("no permission to access the crypt keeper")));
+            Elastos::Droid::Manifest::permission::CRYPT_KEEPER,
+            String("no permission to access the crypt keeper")));
 
     WaitForReady();
 
@@ -3290,13 +3805,11 @@ ECode CMountService::EncryptStorage(
     }
 
     // try {
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    AutoPtr<ICharSequence> cs1, cs2;
-    CString::New(String("enablecrypto"), (ICharSequence**)&cs1);
-    args->Set(0, cs1);
-    CString::New(String("inplace"), (ICharSequence**)&cs2);
-    args->Set(1, cs2);
-    args->Set(2, cs);
+    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
+    args->Set(0, CoreUtils::Convert("enablecrypto"));
+    args->Set(1, CoreUtils::Convert("inplace"));
+    args->Set(2, CoreUtils::Convert(CRYPTO_TYPES[type]));
+    args->Set(3, CoreUtils::Convert(password));
     AutoPtr<NativeDaemonEvent> event;
     if (FAILED(mConnector->Execute(String("cryptfs"), args, (NativeDaemonEvent**)&event))) {
         if (event != NULL) {
@@ -3315,21 +3828,15 @@ ECode CMountService::EncryptStorage(
 }
 
 ECode CMountService::ChangeEncryptionPassword(
+    /* [in] */ Int32 type,
     /* [in] */ const String& password,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
 
-    AutoPtr<ICharSequence> cs;
-    CString::New(password, (ICharSequence**)&cs);
-    if (TextUtils::IsEmpty(cs)) {
-        Slogger::E(TAG, "password cannot be empty");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        // throw new IllegalArgumentException("password cannot be empty");
-    }
-
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CRYPT_KEEPER, String("no permission to access the crypt keeper")));
+            Elastos::Droid::Manifest::permission::CRYPT_KEEPER,
+            String("no permission to access the crypt keeper")));
 
     WaitForReady();
 
@@ -3339,11 +3846,10 @@ ECode CMountService::ChangeEncryptionPassword(
 
     AutoPtr<NativeDaemonEvent> event;
     // try {
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1;
-    CString::New(String("changepw"), (ICharSequence**)&cs1);
-    args->Set(0, cs1);
-    args->Set(1, cs);
+    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
+    args->Set(0, CoreUtils::Convert("changepw"));
+    args->Set(1, CoreUtils::Convert(CRYPTO_TYPES[type]));
+    args->Set(2, CoreUtils::Convert(password));
     if (FAILED(mConnector->Execute(String("cryptfs"), args, (NativeDaemonEvent**)&event))) {
         // Encryption failed
         if (event != NULL) {
@@ -3373,11 +3879,10 @@ ECode CMountService::VerifyEncryptionPassword(
     }
 
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CRYPT_KEEPER, String("no permission to access the crypt keeper")));
+            Elastos::Droid::Manifest::permission::CRYPT_KEEPER,
+            String("no permission to access the crypt keeper")));
 
-    AutoPtr<ICharSequence> cs;
-    CString::New(password, (ICharSequence**)&cs);
-    if (TextUtils::IsEmpty(cs)) {
+    if (TextUtils::IsEmpty(password)) {
         Slogger::E(TAG, "password cannot be empty");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
         // throw new IllegalArgumentException("password cannot be empty");
@@ -3392,10 +3897,8 @@ ECode CMountService::VerifyEncryptionPassword(
     AutoPtr<NativeDaemonEvent> event;
     // try {
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs1;
-    CString::New(String("verifypw"), (ICharSequence**)&cs1);
-    args->Set(0, cs1);
-    args->Set(1, cs);
+    args->Set(0, CoreUtils::Convert("verifypw"));
+    args->Set(1, CoreUtils::Convert(password));
     if (FAILED(mConnector->Execute(String("cryptfs"), args, (NativeDaemonEvent**)&event))) {
         // Encryption failed
         if (event != NULL) {
@@ -3412,6 +3915,262 @@ ECode CMountService::VerifyEncryptionPassword(
     //     // Encryption failed
     //     return e.getCode();
     // }
+}
+
+ECode CMountService::GetPasswordType(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    WaitForReady();
+
+    AutoPtr<NativeDaemonEvent> event;
+    // try {
+    FAIL_RETURN(mConnector->Execute(String("cryptfs"),
+            String("getpwtype"), (NativeDaemonEvent**)&event));
+    Int32 length = ArraySize(CRYPTO_TYPES);
+    for (Int32 i = 0; i < length; ++i) {
+        if (CRYPTO_TYPES[i].Equals(event->GetMessage()))
+            return i;
+    }
+    Slogger::E(TAG, "unexpected return from cryptfs");
+    return E_ILLEGAL_STATE_EXCEPTION;
+
+        // throw new IllegalStateException("unexpected return from cryptfs");
+    // } catch (NativeDaemonConnectorException e) {
+    //     throw e.rethrowAsParcelableException();
+    // }
+}
+
+ECode CMountService::SetField(
+    /* [in] */ const String& field,
+    /* [in] */ const String& contents)
+{
+    WaitForReady();
+
+    AutoPtr<NativeDaemonEvent> event;
+    // try {
+    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
+    args->Set(0, CoreUtils::Convert("setfield"));
+    args->Set(1, CoreUtils::Convert(field));
+    args->Set(2, CoreUtils::Convert(contents));
+    return mConnector->Execute(String("cryptfs"), args, (NativeDaemonEvent**)&event);
+    // } catch (NativeDaemonConnectorException e) {
+    //     throw e.rethrowAsParcelableException();
+    // }
+}
+
+ECode CMountService::GetField(
+    /* [in] */ const String& field,
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    WaitForReady();
+
+    AutoPtr<NativeDaemonEvent> event;
+    // try {
+    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
+    args->Set(0, CoreUtils::Convert("setfield"));
+    args->Set(1, CoreUtils::Convert(field));
+    FAIL_RETURN(mConnector->Execute(String("cryptfs"), args, (NativeDaemonEvent**)&event));
+
+    AutoPtr<ArrayOf<NativeDaemonEvent*> > list = ArrayOf<NativeDaemonEvent*>::Alloc(1);
+    list->Set(0, event);
+    AutoPtr<ArrayOf<String> > contents = NativeDaemonEvent::FilterMessageList(
+            *list, VoldResponseCode::CryptfsGetfieldResult);
+    String str;
+    for (Int32 i = 0; i < contents->GetLength(); i++) {
+        str += (*contents)[i];
+    }
+    *result = str;
+    return NOERROR;
+    // } catch (NativeDaemonConnectorException e) {
+    //     throw e.rethrowAsParcelableException();
+    // }
+}
+
+ECode CMountService::GetPassword(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (!IsReady()) {
+        *result = NULL;
+        return NOERROR;
+    }
+
+    AutoPtr<NativeDaemonEvent> event;
+    // try {
+    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
+    args->Set(0, CoreUtils::Convert("getpw"));
+    FAIL_RETURN(mConnector->Execute(String("cryptfs"), args, (NativeDaemonEvent**)&event));
+    *result = event->GetMessage();
+    return NOERROR;
+    // } catch (NativeDaemonConnectorException e) {
+    //     throw e.rethrowAsParcelableException();
+    // }
+}
+
+ECode CMountService::ClearPassword()
+{
+    if (!IsReady()) {
+        return NOERROR;
+    }
+
+    AutoPtr<NativeDaemonEvent> event;
+    // try {
+    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
+    args->Set(0, CoreUtils::Convert("clearpw"));
+    return mConnector->Execute(String("cryptfs"), args, (NativeDaemonEvent**)&event);
+    // } catch (NativeDaemonConnectorException e) {
+    //     throw e.rethrowAsParcelableException();
+    // }
+}
+
+ECode CMountService::Mkdirs(
+    /* [in] */ const String& callingPkg,
+    /* [in] */ const String& path,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+
+    const Int32 userId = UserHandle::GetUserId(Binder::GetCallingUid());
+    AutoPtr<IUserEnvironment> userEnv;
+    CUserEnvironment::New(userId, (IUserEnvironment**)&userEnv);
+
+    // Validate that reported package name belongs to caller
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&service);
+    IAppOpsManager* appOps = IAppOpsManager::Probe(service);
+    appOps->CheckPackage(Binder::GetCallingUid(), callingPkg);
+
+    // try {
+    AutoPtr<IFile> file;
+    ECode ec = CFile::New(path, (IFile**)&file);
+    if (FAILED(ec)) {
+        *result = -1;
+        return ec;
+    }
+    String appPath;
+    ec = file->GetCanonicalPath(&appPath);
+    if (FAILED(ec)) {
+        *result = -1;
+        return ec;
+    }
+    // } catch (IOException e) {
+    //     Slog.e(TAG, "Failed to resolve " + appPath + ": " + e);
+    //     return -1;
+    // }
+
+    if (!appPath.EndWith("/")) {
+        appPath += "/";
+    }
+
+    // Try translating the app path into a vold path, but require that it
+    // belong to the calling package.
+    AutoPtr<ArrayOf<IFile*> > dirs;
+    userEnv->BuildExternalStorageAppDataDirs(callingPkg, (ArrayOf<IFile*>**)&dirs);
+    AutoPtr<ArrayOf<IFile*> > dirsForVold;
+    userEnv->BuildExternalStorageAppDataDirsForVold(
+            callingPkg, (ArrayOf<IFile*>**)&dirsForVold);
+    String voldPath = MaybeTranslatePathForVold(appPath, dirs, dirsForVold);
+    if (!voldPath.IsNull()) {
+        // try {
+        AutoPtr<NativeDaemonEvent> event;
+        AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
+        args->Set(0, CoreUtils::Convert("mkdirs"));
+        args->Set(1, CoreUtils::Convert(voldPath));
+        ec = mConnector->Execute(String("volume"), args, (NativeDaemonEvent**)&event);
+        if (FAILED(ec)) {
+            *result = ec;
+            return ec;
+        }
+        *result = 0;
+        return NOERROR;
+        // } catch (NativeDaemonConnectorException e) {
+        //     return e.getCode();
+        // }
+    }
+
+    dirs = NULL;
+    dirsForVold = NULL;
+    userEnv->BuildExternalStorageAppObbDirs(callingPkg, (ArrayOf<IFile*>**)&dirs);
+    userEnv->BuildExternalStorageAppObbDirsForVold(
+            callingPkg, (ArrayOf<IFile*>**)&dirsForVold);
+    voldPath = MaybeTranslatePathForVold(appPath, dirs, dirsForVold);
+    if (!voldPath.IsNull()) {
+        // try {
+        AutoPtr<NativeDaemonEvent> event;
+        AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
+        args->Set(0, CoreUtils::Convert("mkdirs"));
+        args->Set(1, CoreUtils::Convert(voldPath));
+        ec = mConnector->Execute(String("volume"), args, (NativeDaemonEvent**)&event);
+        if (FAILED(ec)) {
+            *result = ec;
+            return ec;
+        }
+        *result = 0;
+        return NOERROR;
+        // } catch (NativeDaemonConnectorException e) {
+        //     return e.getCode();
+        // }
+    }
+
+    dirs = NULL;
+    dirsForVold = NULL;
+    userEnv->BuildExternalStorageAppMediaDirs(callingPkg, (ArrayOf<IFile*>**)&dirs);
+    userEnv->BuildExternalStorageAppMediaDirsForVold(
+            callingPkg, (ArrayOf<IFile*>**)&dirsForVold);
+    voldPath = MaybeTranslatePathForVold(appPath, dirs, dirsForVold);
+    if (!voldPath.IsNull()) {
+        // try {
+        AutoPtr<NativeDaemonEvent> event;
+        AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
+        args->Set(0, CoreUtils::Convert("mkdirs"));
+        args->Set(1, CoreUtils::Convert(voldPath));
+        ec = mConnector->Execute(String("volume"), args, (NativeDaemonEvent**)&event);
+        if (FAILED(ec)) {
+            *result = ec;
+            return ec;
+        }
+        *result = 0;
+        return NOERROR;
+        // } catch (NativeDaemonConnectorException e) {
+        //     return e.getCode();
+        // }
+    }
+
+    Slogger::E(TAG, "Invalid mkdirs path: %s", appPath.string());
+    return E_SECURITY_EXCEPTION;
+    // throw new SecurityException("Invalid mkdirs path: " + appPath);
+}
+
+String CMountService::MaybeTranslatePathForVold(
+    /* [in] */ const String& path,
+    /* [in] */ ArrayOf<IFile*>* appPaths,
+    /* [in] */ ArrayOf<IFile*>* voldPaths)
+{
+    if (appPaths->GetLength() != voldPaths->GetLength()) {
+        Slogger::E(TAG, "Paths must be 1:1 mapping");
+        return String(NULL);
+        // throw new IllegalStateException("Paths must be 1:1 mapping");
+    }
+
+    for (Int32 i = 0; i < appPaths->GetLength(); i++) {
+        String appPath;
+        (*appPaths)[i]->GetAbsolutePath(&appPath);
+        appPath += "/";
+        if (path.StartWith(appPath)) {
+            String newPath;
+            AutoPtr<IFile> file;
+            CFile::New((*voldPaths)[i], path.Substring(appPath.GetLength()), (IFile**)&file);
+            file->GetAbsolutePath(&newPath);
+            if (!newPath.EndWith("/")) {
+                newPath += "/";
+            }
+            return newPath;
+        }
+    }
+
+    return String(NULL);
 }
 
 ECode CMountService::GetVolumeList(
@@ -3435,9 +4194,17 @@ ECode CMountService::GetVolumeList(
         AutoPtr<IUserHandle> owner;
         volume->GetOwner((IUserHandle**)&owner);
         Int32 getIdentifierId;
-        Boolean ownerMatch = owner == NULL || (owner->GetIdentifier(&getIdentifierId), getIdentifierId == callingUserId);
+        Boolean ownerMatch = owner == NULL
+                || (owner->GetIdentifier(&getIdentifierId), getIdentifierId == callingUserId);
         if (accessAll || ownerMatch) {
-            filtered.PushBack(volume);
+            Boolean isEmulated;
+            volume->IsEmulated(&isEmulated);
+            if (!accessAll && isEmulated) {
+                filtered.Insert(0, volume);
+            }
+            else {
+                filtered.PushBack(volume);
+            }
         }
     }
 
@@ -3456,28 +4223,29 @@ ECode CMountService::AddObbStateLocked(
     /* [in] */ ObbState* obbState)
 {
     AutoPtr<IBinder> binder = obbState->GetBinder();
-    AutoPtr<ObbStateList> obbStates;
-    HashMap<AutoPtr<IBinder>, AutoPtr<ObbStateList> >::Iterator iter = mObbMounts.Find(binder);
-    if(iter != mObbMounts.End()) {
-        obbStates = iter->mSecond;
-    }
+    AutoPtr<IInterface> value;
+    mObbMounts->Get(binder, (IInterface**)&value);
+    AutoPtr<IList> obbStates = IList::Probe(value);
 
     if (obbStates == NULL) {
-        obbStates = new List<AutoPtr<ObbState> >();
-        mObbMounts[binder] = obbStates;
+        CArrayList::New((IList**)&obbStates);
+        mObbMounts->Put(binder, obbStates);
     }
     else {
-        List<AutoPtr<ObbState> >::Iterator iter = obbStates->Begin();
-        for(; iter != obbStates->End(); iter++) {
-            AutoPtr<ObbState> o = *iter;
-            if(o->mRawPath.Equals(obbState->mRawPath)) {
+        AutoPtr<IIterator> it;
+        obbStates->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while(it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> o;
+            it->GetNext((IInterface**)&o);
+            if(((ObbState*)IObject::Probe(o))->mRawPath.Equals(obbState->mRawPath)) {
                 Slogger::E(TAG, "Attempt to add ObbState twice. This indicates an error in the MountService logic.");
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
         }
     }
 
-    obbStates->PushBack(obbState);
+    obbStates->Add((IObject*)obbState);
     // try {
     ECode ec = obbState->Link();
     if (FAILED(ec)) {
@@ -3485,9 +4253,10 @@ ECode CMountService::AddObbStateLocked(
          * The binder died before we could link it, so clean up our state
          * and return failure.
          */
-        obbStates->Remove(obbState);
-        if (obbStates->Begin() == obbStates->End()) {
-            mObbMounts.Erase(binder);
+        obbStates->Remove((IObject*)obbState);
+        Boolean isEmpty;
+        if (obbStates->IsEmpty(&isEmpty), isEmpty) {
+            mObbMounts->Remove(binder);
         }
 
         // Rethrow the error so mountObb can get it
@@ -3506,7 +4275,8 @@ ECode CMountService::AddObbStateLocked(
     //     // Rethrow the error so mountObb can get it
     //     throw e;
     // }
-    mObbPathToStateMap[obbState->mRawPath] = obbState;
+    mObbPathToStateMap->Put(
+            CoreUtils::Convert(obbState->mRawPath), (IObject*)obbState);
     return NOERROR;
 }
 
@@ -3514,29 +4284,31 @@ void CMountService::RemoveObbStateLocked(
     /* [in] */ ObbState* obbState)
 {
     AutoPtr<IBinder> binder = obbState->GetBinder();
-    AutoPtr<ObbStateList> obbStates;
-    HashMap<AutoPtr<IBinder>, AutoPtr<ObbStateList> >::Iterator iter = mObbMounts.Find(binder);
-    if(iter != mObbMounts.End()) {
-        obbStates = iter->mSecond;
-    }
+    AutoPtr<IInterface> value;
+    mObbMounts->Get(binder, (IInterface**)&value);
+    IList* obbStates = IList::Probe(value);
 
     if (obbStates != NULL) {
         AutoPtr<ObbState> temp = obbState;
-        obbStates->Remove(obbState);
+        obbStates->Remove((IObject*)obbState);
         temp->Unlink();
-        if (obbStates->Begin() == obbStates->End()) {
-            mObbMounts.Erase(binder);
+        Boolean isEmpty;
+        if (obbStates->IsEmpty(&isEmpty), isEmpty) {
+            mObbMounts->Remove(binder);
         }
     }
 
-    mObbPathToStateMap.Erase(obbState->mRawPath);
+    mObbPathToStateMap->Remove(CoreUtils::Convert(obbState->mRawPath));
 }
 
 void CMountService::HandleObbRunAction(
     /* [in] */ ObbAction* action)
 {
-    if (DEBUG_OBB)
-        Slogger::I(TAG, "OBB_RUN_ACTION: %s", action->ToString().string());
+    if (DEBUG_OBB) {
+        String obb;
+        action->ToString(&obb);
+        Slogger::I(TAG, "OBB_RUN_ACTION: %s", obb.string());
+    }
 
     // If a bind was already initiated we don't really
     // need to do anything. The pending install
@@ -3555,7 +4327,7 @@ void CMountService::HandleObbRunAction(
 }
 
 void CMountService::HandleObbMcsBound(
-    /* [in] */ IMediaContainerService* service)
+    /* [in] */ IIMediaContainerService* service)
 {
     if (DEBUG_OBB)
         Slogger::I(TAG, "OBB_MCS_BOUND");
@@ -3634,11 +4406,18 @@ void CMountService::HandleObbFlushMountState(
         Slogger::I(TAG, "Flushing all OBB state for path %s", (const char*)path);
 
     AutoLock lock(mObbMountsLock);
-    List<AutoPtr<ObbState> > obbStatesToRemove;
+    AutoPtr<ILinkedList> obbStatesToRemove;
+    CLinkedList::New((ILinkedList**)&obbStatesToRemove);
 
-    HashMap<String, AutoPtr<ObbState> >::Iterator it = mObbPathToStateMap.Begin();
-    while (it != mObbPathToStateMap.End()) {
-        AutoPtr<ObbState> state = it->mSecond;
+    AutoPtr<ICollection> collection;
+    mObbPathToStateMap->GetValues((ICollection**)&collection);
+    AutoPtr<IIterator> it;
+    collection->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> value;
+        it->GetNext((IInterface**)&value);
+        ObbState* state = (ObbState*)IObject::Probe(value);
 
         /*
          * If this entry's source file is in the volume path
@@ -3646,16 +4425,18 @@ void CMountService::HandleObbFlushMountState(
          * longer valid.
          */
         if (state->mCanonicalPath.StartWith(path)) {
-            obbStatesToRemove.PushBack(state);
+            obbStatesToRemove->Add((IObject*)state);
         }
-        ++it;
     }
 
-    List<AutoPtr<ObbState> >::Iterator it2 = obbStatesToRemove.Begin();
-    for (; it2 != obbStatesToRemove.End(); ++it2) {
-        AutoPtr<ObbState> obbState = *it2;
+    it = NULL;
+    obbStatesToRemove->GetIterator((IIterator**)&it);
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> value;
+        it->GetNext((IInterface**)&value);
+        ObbState* obbState = (ObbState*)IObject::Probe(value);
         if (DEBUG_OBB)
-            Slogger::I(TAG, "Removing state for %s", (const char*)obbState->mRawPath);
+            Slogger::I(TAG, "Removing state for %s", obbState->mRawPath.string());
 
         RemoveObbStateLocked(obbState);
 
@@ -3700,6 +4481,8 @@ String CMountService::BuildObbPath(
     /* [in] */ Boolean forVold)
 {
     // TODO: allow caller to provide Environment for full testing
+    // TODO: extend to support OBB mounts on secondary external storage
+
     // Only adjust paths when storage is emulated
     AutoPtr<IEnvironment> env;
     CEnvironment::AcquireSingleton((IEnvironment**)&env);
@@ -3718,12 +4501,12 @@ String CMountService::BuildObbPath(
     AutoPtr<IFile> fp;
     userEnv->GetExternalStorageDirectory((IFile**)&fp);
     String externalPath;
-    fp->ToString(&externalPath);
+    fp->GetAbsolutePath(&externalPath);
     // /storage/emulated_legacy
     fp = NULL;
     env->GetLegacyExternalStorageDirectory((IFile**)&fp);
     String legacyExternalPath;
-    fp->ToString(&legacyExternalPath);
+    fp->GetAbsolutePath(&legacyExternalPath);
 
     if (path.StartWith(externalPath)) {
         path = path.Substring(externalPath.GetLength() + 1);
@@ -3740,23 +4523,24 @@ String CMountService::BuildObbPath(
     if (path.StartWith(obbPath)) {
         path = path.Substring(obbPath.GetLength() + 1);
 
+        AutoPtr<IUserEnvironment> ownerEnv;
+        CUserEnvironment::New(IUserHandle::USER_OWNER, (IUserEnvironment**)&ownerEnv);
         if (forVold) {
-            AutoPtr<IFile> file, obbSource;
-            env->GetEmulatedStorageObbSource((IFile**)&obbSource);
-            CFile::New(obbSource, path, (IFile**)&file);
+            AutoPtr<ArrayOf<IFile*> > dirs;
+            ownerEnv->BuildExternalStorageAndroidObbDirsForVold((ArrayOf<IFile*>**)&dirs);
+            AutoPtr<IFile> file;
+            CFile::New((*dirs)[0], path, (IFile**)&file);
             String result;
-            file->ToString(&result);
+            file->GetAbsolutePath(&result);
             return result;
         }
         else {
-            AutoPtr<IUserEnvironment> ownerEnv;
-            CUserEnvironment::New(IUserHandle::USER_OWNER, (IUserEnvironment**)&ownerEnv);
+            AutoPtr<ArrayOf<IFile*> > dirs;
+            ownerEnv->BuildExternalStorageAndroidObbDirs((ArrayOf<IFile*>**)&dirs);
             AutoPtr<IFile> file;
-            AutoPtr<IFile> dir;
-            userEnv->GetExternalStorageObbDirectory((IFile**)&dir);
-            CFile::New(dir, path, (IFile**)&file);
+            CFile::New((*dirs)[0], path, (IFile**)&file);
             String result;
-            file->ToString(&result);
+            file->GetAbsolutePath(&result);
             return result;
         }
     }
@@ -3767,7 +4551,7 @@ String CMountService::BuildObbPath(
         env->GetEmulatedStorageSource(userId, (IFile**)&storageSource);
         CFile::New(storageSource, path, (IFile**)&file);
         String result;
-        file->ToString(&result);
+        file->GetAbsolutePath(&result);
         return result;
     }
     else {
@@ -3777,65 +4561,112 @@ String CMountService::BuildObbPath(
         userEnv->GetExternalStorageDirectory((IFile**)&dir);
         CFile::New(dir, path, (IFile**)&file);
         String result;
-        file->ToString(&result);
+        file->GetAbsolutePath(&result);
         return result;
     }
 }
 
-// void CMountService::Dump(
-//     /* [in] */ IFileDescriptor* fd,
-//     /* [in] */ IPrintWriter* pw,
-//     /* [in] */ ArrayOf<String>* args)
-// {
-//     if (mContext->CheckCallingOrSelfPermission(Elastos::Droid::Manifest::permission::DUMP) != PackageManager::PERMISSION_GRANTED) {
-//         pw->Println("Permission Denial: can't dump ActivityManager from from pid="
-//                 + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-//                 + " without permission " + Elastos::Droid::Manifest::permission::DUMP);
-//         return;
-//     }
+void CMountService::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* writer,
+    /* [in] */ ArrayOf<String>* args)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::DUMP, TAG);
+    AutoPtr<IIndentingPrintWriter> ipw;
+    CIndentingPrintWriter::New(IWriter::Probe(writer),
+            String("  "), 160, (IIndentingPrintWriter**)&ipw);
+    IPrintWriter* pw = IPrintWriter::Probe(ipw);
 
-//     {
-//         AutoLock lock(mObbMountsLock);
-//         pw->Println("  mObbMounts:");
+    {
+        AutoLock lock(mObbMountsLock);
+        pw->Println(String("  mObbMounts:"));
+        ipw->IncreaseIndent();
+        AutoPtr<ISet> entrySet;
+        mObbMounts->GetEntrySet((ISet**)&entrySet);
+        AutoPtr<IIterator> it;
+        entrySet->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while(it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> item;
+            it->GetNext((IInterface**)&item);
+            IMapEntry* entry = IMapEntry::Probe(item);
+            AutoPtr<IInterface> key, value;
+            entry->GetKey((IInterface**)&key);
+            pw->Print(key);
+            pw->Println(String(":"));
+            ipw->IncreaseIndent();
+            entry->GetValue((IInterface**)&value);
+            IList* obbStates = IList::Probe(value);
+            AutoPtr<IIterator> listIt;
+            obbStates->GetIterator((IIterator**)&listIt);
+            while(listIt->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> obbState;
+                listIt->GetNext((IInterface**)&obbState);
+                pw->Println(obbState);
+            }
+            ipw->DecreaseIndent();
+        }
+        ipw->DecreaseIndent();
 
-//         final Iterator<Entry<IBinder, List<ObbState>>> binders = mObbMounts.entrySet().iterator();
-//         while (binders.hasNext()) {
-//             AutoPtr<Entry<IBinder*, List<ObbState*> > > e = binders.next();
-//             pw->Print("    Key="); pw->Println(e.getKey().toString());
-//             AutoPtr<List<ObbState*> > obbStates = e.getValue();
-//             for (final ObbState obbState : obbStates) {
-//                 pw->Print("      "); pw->Println(obbState.toString());
-//             }
-//         }
+        pw->Println();
+        pw->Println(String("mObbPathToStateMap:"));
+        entrySet = NULL;
+        it = NULL;
+        mObbPathToStateMap->GetEntrySet((ISet**)&entrySet);
+        entrySet->GetIterator((IIterator**)&it);
+        while(it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> item;
+            it->GetNext((IInterface**)&item);
+            IMapEntry* entry = IMapEntry::Probe(item);
+            AutoPtr<IInterface> key, value;
+            entry->GetKey((IInterface**)&key);
+            pw->Println(key);
+            entry->GetValue((IInterface**)&value);
+            pw->Print(String(" -> "));
+            pw->Println(value);
+        }
+        ipw->DecreaseIndent();
+    }
 
-//         pw->Println("");
-//         pw->Println("  mObbPathToStateMap:");
-//         final Iterator<Entry<String, ObbState>> maps = mObbPathToStateMap.entrySet().iterator();
-//         while (maps.hasNext()) {
-//             AutoPtr<Entry<String, ObbState*> > e = maps.next();
-//             pw->Print("    "); pw->Print(e.getKey());
-//             pw->Print(" -> "); pw->Println(e.getValue().toString());
-//         }
-//     }
+    {
+        AutoLock lock(mVolumesLock);
+        pw->Println();
+        pw->Println(String("mVolumes:"));
+        ipw->IncreaseIndent();
+        List<AutoPtr<IStorageVolume> >::Iterator iter;
+        for (iter = mVolumes.Begin(); iter != mVolumes.End(); ++iter) {
+            IStorageVolume* v = *iter;
+            pw->Print(v);
+            ipw->IncreaseIndent();
+            String str("Current state: ");
+            String path;
+            v->GetPath(&path);
 
-//     pw->Println("");
+            AutoPtr<IInterface> value;
+            mVolumeStates->Get(CoreUtils::Convert(path), (IInterface**)&value);
+            str += CoreUtils::Unbox(ICharSequence::Probe(value));
+            pw->Println(str);
+            ipw->DecreaseIndent();
+        }
+    }
 
-//     {
-//         AutoLock lock(mVolumesLock);
-//         pw->Println("  mVolumes:");
+    pw->Println();
+    pw->Println(String("mConnection:"));
+    ipw->IncreaseIndent();
+    mConnector->Dump(fd, pw, args);
+    ipw->DecreaseIndent();
 
-//         List<IStorageVolume*>::Iterator iter;
-//         for (iter = mVolumes.Begin(); iter != mVolumes.End(); ++iter) {
-//             IStorageVolume* v = *iter;
-//             pw->Print("    ");
-//             pw->Println(v->ToString());
-//         }
-//     }
+    AutoPtr<ISimpleDateFormat> sdf;
+    CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm:ss"), (ISimpleDateFormat**)&sdf);
 
-//     pw->Println();
-//     pw->Println("  mConnection:");
-//     mConnector->Dump(fd, pw, args);
-// }
+    pw->Println();
+    pw->Print(String("Last maintenance: "));
+    AutoPtr<IDate> date;
+    CDate::New(mLastMaintenance, (IDate**)&date);
+    String dateformat;
+    IDateFormat::Probe(sdf)->Format(date, &dateformat);
+    pw->Println(dateformat);
+}
 
 ECode CMountService::Monitor()
 {
@@ -3859,7 +4690,7 @@ ECode CMountService::constructor(
     mPms = (CPackageManagerService*)IIPackageManager::Probe(ServiceManager::GetService(String("package")));
 
     CHandlerThread::New(String("MountService"), (IHandlerThread**)&mHandlerThread);
-    mHandlerThread->Start();
+    IThread::Probe(mHandlerThread)->Start();
     AutoPtr<ILooper> looper;
     mHandlerThread->GetLooper((ILooper**)&looper);
     mHandler = new MountServiceHandler(looper, this);
@@ -3873,50 +4704,62 @@ ECode CMountService::constructor(
     mContext->RegisterReceiver(
             mUserReceiver, userFilter, String(NULL), mHandler, (IIntent**)&resIntent);
 
-    // Watch for USB changes on primary volume
-    // AutoPtr<IStorageVolume> primary = GetPrimaryPhysicalVolume();
-    // Boolean allowMassStorage = FALSE;
-    // if (primary != NULL && (primary->AllowMassStorage(&allowMassStorage), allowMassStorage)) {
-    //     AutoPtr<IIntentFilter> filter;
-    //     CIntentFilter::New(IUsbManager::ACTION_USB_STATE, (IIntentFilter**)&filter);
-    //     resIntent = NULL;
-    //     mContext->RegisterReceiver(
-    //             mUsbReceiver, filter, String(NULL), mHandler, (IIntent**)&resIntent);
-    // }
-
-    // if volume support mass storage,we should listen to the states of usb
-
-    List< AutoPtr<IStorageVolume> >::Iterator it = mVolumes.Begin();
-    for (; it != mVolumes.End(); ++it) {
-        AutoPtr<IStorageVolume> volume = *it;
-        Boolean allow, isEmu;
-        if ((volume->AllowMassStorage(&allow), allow) && (volume->IsEmulated(&isEmu), !isEmu)) {
-            String nullStr;
-            AutoPtr<IIntentFilter> filter;
-            CIntentFilter::New(IUsbManager::ACTION_USB_STATE, (IIntentFilter**)&filter);
-            AutoPtr<IIntent> resultIntent;
-            mContext->RegisterReceiver(
-                    mUsbReceiver, filter, String(NULL), mHandler, (IIntent**)&resultIntent);
-            break;
-        }
+    Boolean value;
+    AutoPtr<ISystemProperties> sysProp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
+    sysProp->GetBoolean(String("persist.sys.ums"), TRUE, &value);
+    if (HasUmsVolume() || value) {
+        AutoPtr<IIntentFilter> filter;
+        CIntentFilter::New(IUsbManager::ACTION_USB_STATE, (IIntentFilter**)&filter);
+        resIntent = NULL;
+        mContext->RegisterReceiver(
+                mUsbReceiver, filter, String(NULL), mHandler, (IIntent**)&resIntent);
     }
 
     // Add OBB Action Handler to MountService thread.
     mObbActionHandler = new ObbActionHandler(looper, this);
+
+    // Initialize the last-fstrim tracking if necessary
+    AutoPtr<IFile> dataDir = Environment::GetDataDirectory();
+    AutoPtr<IFile> systemDir;
+    CFile::New(dataDir, String("system"), (IFile**)&systemDir);
+    CFile::New(systemDir, LAST_FSTRIM_FILE, (IFile**)&mLastMaintenanceFile);
+    Boolean exist;
+    if (mLastMaintenanceFile->Exists(&exist), !exist) {
+        // Not setting mLastMaintenance here means that we will force an
+        // fstrim during reboot following the OTA that installs this code.
+        // try {
+        AutoPtr<IFileOutputStream> outs;
+        CFileOutputStream::New(mLastMaintenanceFile, (IFileOutputStream**)&outs);
+        ECode ec = ICloseable::Probe(outs)->Close();
+        if (ec == (ECode)E_IO_EXCEPTION) {
+            String path;
+            mLastMaintenanceFile->GetPath(&path);
+            Slogger::E(TAG, "Unable to create fstrim record %s", path.string());
+        }
+        // } catch (IOException e) {
+        //     Slog.e(TAG, "Unable to create fstrim record " + mLastMaintenanceFile.getPath());
+        // }
+    }
+    else {
+        mLastMaintenanceFile->GetLastModified(&mLastMaintenance);
+    }
 
     /*
      * Create the connection to vold with a maximum queue of twice the
      * amount of containers we'd ever expect to have. This keeps an
      * "asec list" from blocking a thread repeatedly.
      */
-    mConnector = new NativeDaemonConnector(this, String("vold"), MAX_CONTAINERS * 2, VOLD_TAG, 25);
+    mConnector = new NativeDaemonConnector((INativeDaemonConnectorCallbacks*)this,
+            String("vold"), MAX_CONTAINERS * 2, VOLD_TAG, 25, NULL);
     AutoPtr<IThread> thread;
     FAIL_RETURN(CThread::New(mConnector, VOLD_TAG, (IThread**)&thread));
     thread->Start();
+
     // Add ourself to the Watchdog monitors if enabled.
-    // if (WATCHDOG_ENABLE) {
-    //     Watchdog.getInstance().addMonitor(this);
-    // }
+    if (WATCHDOG_ENABLE) {
+        Watchdog::GetInstance()->AddMonitor(IWatchdogMonitor::Probe(this));
+    }
 
     return NOERROR;
 }

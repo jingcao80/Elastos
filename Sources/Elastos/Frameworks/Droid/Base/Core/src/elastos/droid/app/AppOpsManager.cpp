@@ -307,7 +307,7 @@ ECode AppOpsManager::OnOpChangedInternalListener::ToString(
 const String AppOpsManager::TAG("AppOpsManager");
 Object AppOpsManager::sClassLock;
 AutoPtr<IBinder> AppOpsManager::sToken;
-const Int32 AppOpsManager::sOpLength = 48;
+const Int32 AppOpsManager::sOpLength = 62;
 
 String AppOpsManager::OPSTR_GPS("android:gps");
 String AppOpsManager::OPSTR_VIBRATE("android:vibrate");

@@ -212,6 +212,7 @@ module
     using interface Elastos.Droid.Os.IIBatteryPropertiesListener;
     using interface Elastos.Droid.Os.IResultReceiver;
     using interface Elastos.Droid.Os.IIRemoteCallback;
+    using interface Elastos.Droid.Os.Storage.IIMountService;
     using interface Elastos.Droid.Os.Storage.IIMountShutdownObserver;
     using interface Elastos.Droid.Server.IWidgetBackupProvider;
     using interface Elastos.Droid.Service.Dreams.IIDreamManager;
@@ -222,6 +223,7 @@ module
     using interface Elastos.Droid.Utility.ITrustedTime;
     using interface Elastos.Droid.View.Accessibility.IIAccessibilityManager;
     using interface Elastos.Droid.View.IApplicationToken;
+    using interface Elastos.Droid.View.IIInputFilter;
     using interface Elastos.Droid.View.IIInputFilterHost;
     using interface Elastos.Droid.View.IInputChannel;
     using interface Elastos.Droid.View.IIWindowManager;
@@ -726,14 +728,15 @@ module
 
     } // Wm
 
+    [local]
+    class CMountService {
+        constructor(
+            [in] IContext* ctx);
 
-//     class CMountService {
-//         constructor(
-//             [in] IContext* ctx);
-
-//         interface IIMountService;
-//         interface INativeDaemonConnectorCallbacks;
-//     }
+        interface IIMountService;
+        interface INativeDaemonConnectorCallbacks;
+        interface IWatchdogMonitor;
+    }
 
 //     class CRecognitionManagerService {
 //         constructor(
@@ -1805,6 +1808,16 @@ module
     class CInputFilterHost {
         constructor(
             [in] IIInputManager* parent);
+
+        interface IIInputFilterHost;
+        interface IBinder;
+    }
+
+    class CChainedInputFilterHost {
+        constructor(
+            [in] IIInputFilter* filter,
+            [in] IIInputFilterHost* next,
+            [in] IIInputManager* host);
 
         interface IIInputFilterHost;
         interface IBinder;
