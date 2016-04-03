@@ -109,6 +109,16 @@ public:
         /* [out] */ IOutputStream** result);
 
     /**
+     * Set the flag to close the fd whcih was opened
+     * externally
+     *
+     * @return none
+     * @throws IOException if socket has been closed
+     * @hide
+     */
+    CARAPI CloseExternalFd();
+
+    /**
      * Closes the socket.
      *
      * @throws IOException

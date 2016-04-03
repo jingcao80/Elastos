@@ -557,6 +557,7 @@ ECode MobileDataStateTracker::GetTcpBufferSizesPropName(
     //     networkTypeStr = "iden";
     //     break;
     // case ITelephonyManager::NETWORK_TYPE_LTE:
+    // case ITelephonyManager::NETWORK_TYPE_IWLAN:
     //     networkTypeStr = "lte";
     //     break;
     // case ITelephonyManager::NETWORK_TYPE_EHRPD:

@@ -418,6 +418,7 @@ static Int32 socket_write_all(
 
 LocalSocketImpl::LocalSocketImpl()
     : mFdCreatedInternally(FALSE)
+    , mFdCreatedExternally(FALSE)
 {}
 
 LocalSocketImpl::~LocalSocketImpl()
@@ -956,7 +957,7 @@ ECode LocalSocketImpl::Create(
 ECode LocalSocketImpl::Close()
 {
     synchronized(this) {
-        if ((mFd == NULL) || (mFdCreatedInternally == FALSE)) {
+        if ((mFd == NULL) || ((mFdCreatedInternally == FALSE) && (mFdCreatedExternally == FALSE))) {
             mFd = NULL;
             return NOERROR;
         }
@@ -1072,6 +1073,17 @@ ECode LocalSocketImpl::GetOutputStream(
         *os = IOutputStream::Probe(mFos);
         REFCOUNT_ADD(*os)
     }
+    return NOERROR;
+}
+
+ECode LocalSocketImpl::CloseExternalFd()
+{
+    if (mFd == NULL) {
+        Logger::E("LocalSocketImpl", "socket not created");
+        return E_IO_EXCEPTION;
+    }
+
+    mFdCreatedExternally = TRUE;
     return NOERROR;
 }
 

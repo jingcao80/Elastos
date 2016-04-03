@@ -3,12 +3,14 @@
 #define __ELASTOS_DROID_NET_NETWORKFACTORY_H__
 
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Utility::IAsyncChannel;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Utility::ISparseArray;
@@ -145,6 +147,9 @@ private:
     CARAPI EvalRequests();
 
     static CARAPI_(AutoPtr<ISparseArray>) CreateSparseArray();
+
+protected:
+    AutoPtr<IAsyncChannel> mAsyncChannel;
 
 private:
     static const Boolean DBG;

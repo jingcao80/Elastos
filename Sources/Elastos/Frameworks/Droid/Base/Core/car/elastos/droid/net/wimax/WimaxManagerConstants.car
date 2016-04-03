@@ -31,7 +31,7 @@ module
          * The lookup key for an int that indicates whether Wimax is enabled,
          * disabled, enabling, disabling, or unknown.
          */
-        const String EXTRA_WIMAX_STATUS = "wimax_status";
+        const String EXTRA_4G_STATE = "4g_state";
 
         /**
          * Broadcast intent action indicating that Wimax state has been changed
@@ -53,7 +53,6 @@ module
          * initializing, initialized, unknown and ready.
          */
         const String EXTRA_WIMAX_STATE = "WimaxState";
-        const String EXTRA_4G_STATE = "4g_state";
         const String EXTRA_WIMAX_STATE_INT = "WimaxStateInt";
 
         /**
@@ -73,9 +72,19 @@ module
         const Int32 NET_4G_STATE_DISABLED = 1;
 
         /**
+         * Indicatates Wimax is disabling.
+         */
+        const Int32 NET_4G_STATE_DISABLING = 0;
+
+        /**
          * Indicatates Wimax is enabled.
          */
         const Int32 NET_4G_STATE_ENABLED = 3;
+
+        /**
+         * Indicatates Wimax is enabling.
+         */
+        const Int32 NET_4G_STATE_ENABLING = 2;
 
         /**
          * Indicatates Wimax status is known.
@@ -106,6 +115,12 @@ module
          * Indicatates wimax state is disconnected.
          */
         const Int32 WIMAX_STATE_DISCONNECTED = 9;
+
+        /**
+         * Constants for HTC/SQN WiMAX implementation
+         */
+        const String WIMAX_ENABLED_CHANGED_ACTION = "com.htc.net.wimax.WIMAX_ENABLED_CHANGED";
+        const String CURRENT_WIMAX_ENABLED_STATE  = "curWimaxEnabledState";
     }
 
     } // namespace Wimax

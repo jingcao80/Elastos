@@ -87,6 +87,14 @@ module
             [in] Int64 tsNanos);
 
         /**
+         * Message is received from network interface.
+         *
+         * @param message The message
+         */
+        InterfaceMessageRecevied(
+            [in] String message);
+
+        /**
          * Information about available DNS servers has been received.
          *
          * @param iface The interface on which the information was received.

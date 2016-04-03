@@ -89,9 +89,6 @@ module
             [in] Int32 networkType,
             [in] Boolean enabled);
 
-        GetTetherConnectedSta(
-            [out] IList** result);
-
         Tether(
             [in] String iface,
             [out] Int32* result);
@@ -131,6 +128,9 @@ module
         SetUsbTethering(
             [in] Boolean bEnable,
             [out] Int32* result);
+
+        GetTetherConnectedSta(
+            [out] IList** wifiDevices);
 
         ReportInetCondition(
             [in] Int32 networkType,

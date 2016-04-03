@@ -196,6 +196,15 @@ public:
         /* [out] */ IOutputStream** result);
 
     /**
+     * Set the flag to close the fd which was opened
+     * externally.
+     *
+     * @return none
+     * @throws IOException if socket has been closed
+     */
+    CARAPI CloseExternalFd();
+
+    /**
      * Returns the number of bytes available for reading without blocking.
      *
      * @return >= 0 count bytes available
@@ -382,6 +391,8 @@ private:
 
     /** whether fd is created internally */
     Boolean mFdCreatedInternally;
+
+    Boolean mFdCreatedExternally;
 
     friend class SocketInputStream;
 };

@@ -21,6 +21,7 @@ using Elastos::Droid::Utility::IArrayMap;
 using Elastos::Net::IInetAddress;
 using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
 using Elastos::Utility::IHashMap;
+using Elastos::Utility::IList;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -391,6 +392,28 @@ public:
         /* [out] */ Int32* result);
 
     /**
+     * Tells the underlying networking system that the caller wants to
+     * begin using the named feature. The interpretation of {@code feature}
+     * is completely up to each networking implementation.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     * @param networkType specifies which network the request pertains to
+     * @param feature the name of the feature to be used
+     * @param subId the subscription the network is requested
+     * @return an integer value representing the outcome of the request.
+     * The interpretation of this value is specific to each networking
+     * implementation+feature combination, except that the value {@code -1}
+     * always indicates failure.
+     *
+     * @hide
+     */
+    CARAPI StartUsingNetworkFeatureForSubscription(
+        /* [in] */ Int32 networkType,
+        /* [in] */ const String& feature,
+        /* [in] */ const String& subId,
+        /* [out] */ Int32* result);
+
+    /**
      * Tells the underlying networking system that the caller is finished
      * using the named feature. The interpretation of {@code feature}
      * is completely up to each networking implementation.
@@ -408,6 +431,28 @@ public:
     CARAPI StopUsingNetworkFeature(
         /* [in] */ Int32 networkType,
         /* [in] */ const String& feature,
+        /* [out] */ Int32* result);
+
+    /**
+     * Tells the underlying networking system that the caller is finished
+     * using the named feature. The interpretation of {@code feature}
+     * is completely up to each networking implementation.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     * @param networkType specifies which network the request pertains to
+     * @param feature the name of the feature that is no longer needed
+     * @param subId the subscription the network is requested
+     * @return an integer value representing the outcome of the request.
+     * The interpretation of this value is specific to each networking
+     * implementation+feature combination, except that the value {@code -1}
+     * always indicates failure.
+     *
+     * @hide
+     */
+    CARAPI StopUsingNetworkFeatureForSubscription(
+        /* [in] */ Int32 networkType,
+        /* [in] */ const String& feature,
+        /* [in] */ const String& subId,
         /* [out] */ Int32* result);
 
     /**
@@ -687,6 +732,15 @@ public:
     CARAPI SetUsbTethering(
         /* [in] */ Boolean enabled,
         /* [out] */ Int32* result);
+
+    /**
+     * Get the list of Stations connected to Hotspot.
+     *
+     * @return a list of {@link WifiDevice} objects.
+     * {@hide}
+     */
+    CARAPI GetTetherConnectedSta(
+        /* [out] */ IList** wifiDevices);
 
     /**
      * Get a more detailed error code after a Tethering or Untethering

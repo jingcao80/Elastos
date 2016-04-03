@@ -409,70 +409,143 @@ ECode CConnectivityManager::StartUsingNetworkFeature(
     AutoPtr<INetworkCapabilities> netCap;
     FAIL_RETURN(NetworkCapabilitiesForFeature(networkType, feature, (INetworkCapabilities**)&netCap))
     if (NULL == netCap) {
-        Logger::D(TAG, (String("Can't satisfy startUsingNetworkFeature for ") + StringUtils::ToString(networkType) + ", " + feature).string());
+        Logger::D(TAG, "Can't satisfy startUsingNetworkFeature for %d, %s", networkType, feature.string());
         *result = IPhoneConstants::APN_REQUEST_FAILED;
         return NOERROR;
     }
 
-    AutoPtr<INetworkRequest> request = NULL;
+    AutoPtr<INetworkRequest> request;
     synchronized(sLegacyRequests) {
-        if(LEGACY_DBG) {
+        if (LEGACY_DBG) {
             String s;
             IObject::Probe(netCap)->ToString(&s);
             Int32 code;
             IObject::Probe(netCap)->GetHashCode(&code);
-            Logger::D(TAG, (String("Looking for legacyRequest for netCap with hash: ") + s + " (" + StringUtils::ToString(code) + ")").string());
+            Logger::D(TAG, "Looking for legacyRequest for netCap with hash: %s (%d)", s.string(), code);
             Logger::D(TAG, "sLegacyRequests has:");
             AutoPtr<ISet> keySet;
             FAIL_RETURN(sLegacyRequests->GetKeySet((ISet**)&keySet))
             AutoPtr<IIterator> it;
             FAIL_RETURN(keySet->GetIterator((IIterator**)&it))
-            Boolean hasNext = TRUE;
+            Boolean hasNext = FALSE;
             AutoPtr<INetworkCapabilities> nc;
-            AutoPtr<IInterface> tmp;
-            while(it->HasNext(&hasNext), hasNext)
-            {
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> tmp;
                 it->GetNext((IInterface**)&tmp);
                 nc = INetworkCapabilities::Probe(tmp);
                 IObject::Probe(nc)->GetHashCode(&code);
                 IObject::Probe(nc)->ToString(&s);
-                Logger::D(TAG, (String("  ") + s + " (" + StringUtils::ToString(code) + ")").string());
+                Logger::D(TAG, "  %s (%d)", s.string(), code);
             }
         }
 
         AutoPtr<IInterface> l;
         sLegacyRequests->Get(netCap, (IInterface**)&l);
-        if(l != NULL) {
-            LegacyRequest* lr = (LegacyRequest*) IObject::Probe(l.Get());
+        if (l != NULL) {
+            LegacyRequest* lr = (LegacyRequest*)IObject::Probe(l);
             String s;
             IObject::Probe(lr->mNetworkRequest)->ToString(&s);
-            Logger::D(TAG, (String("renewing startUsingNetworkFeature request ") + s).string());
-            FAIL_RETURN(RenewRequestLocked((LegacyRequest*)IObject::Probe(l.Get())))
+            Logger::D(TAG, "renewing startUsingNetworkFeature request %s", s.string());
+            FAIL_RETURN(RenewRequestLocked(lr));
             if (lr->mCurrentNetwork != NULL) {
                 *result = IPhoneConstants::APN_ALREADY_ACTIVE;
-                return NOERROR;
             }
             else {
                *result = IPhoneConstants::APN_REQUEST_STARTED;
-                return NOERROR;
             }
-
-            FAIL_RETURN(RequestNetworkForFeatureLocked(netCap, (INetworkRequest**)&request))
+            return NOERROR;
         }
+
+        FAIL_RETURN(RequestNetworkForFeatureLocked(netCap, (INetworkRequest**)&request))
     }
 
     if (request != NULL) {
         String s;
         IObject::Probe(request)->ToString(&s);
-        Logger::D(TAG, (String("starting startUsingNetworkFeature for request ") + s).string());
+        Logger::D(TAG, "starting startUsingNetworkFeature for request %s", s.string());
         *result = IPhoneConstants::APN_REQUEST_STARTED;
-        return NOERROR;
     }
     else {
         Logger::D(TAG, " request Failed");
         *result = IPhoneConstants::APN_REQUEST_FAILED;
+    }
+    return NOERROR;
+}
+
+ECode CConnectivityManager::StartUsingNetworkFeatureForSubscription(
+    /* [in] */ Int32 networkType,
+    /* [in] */ const String& feature,
+    /* [in] */ const String& subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = IPhoneConstants::APN_REQUEST_FAILED;
+
+    Logger::D(TAG, "startUsingNetworkFeatureForSubscription: for %d feature = %s subId = %s", networkType, feature.string(), subId.string());
+    AutoPtr<INetworkCapabilities> netCap;
+    FAIL_RETURN(NetworkCapabilitiesForFeature(networkType, feature, (INetworkCapabilities**)&netCap));
+    if (NULL == netCap) {
+        Logger::D(TAG, "Can't satisfy startUsingNetworkFeature for %d, %s", networkType, feature.string());
         return NOERROR;
     }
+
+    netCap->SetNetworkSpecifier(subId);
+    AutoPtr<INetworkRequest> request;
+    synchronized(sLegacyRequests) {
+        if (LEGACY_DBG) {
+            String s;
+            IObject::Probe(netCap)->ToString(&s);
+            Int32 code;
+            IObject::Probe(netCap)->GetHashCode(&code);
+            Logger::D(TAG, "Looking for legacyRequest for netCap with hash: %s (&d)", s.string(), code);
+            Logger::D(TAG, "sLegacyRequests has:");
+            AutoPtr<ISet> keySet;
+            FAIL_RETURN(sLegacyRequests->GetKeySet((ISet**)&keySet));
+            AutoPtr<IIterator> it;
+            FAIL_RETURN(keySet->GetIterator((IIterator**)&it));
+            Boolean hasNext = FALSE;
+            AutoPtr<INetworkCapabilities> nc;
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> tmp;
+                it->GetNext((IInterface**)&tmp);
+                nc = INetworkCapabilities::Probe(tmp);
+                IObject::Probe(nc)->GetHashCode(&code);
+                IObject::Probe(nc)->ToString(&s);
+                Logger::D(TAG, "  %s (%d)", s.string(), code);
+            }
+        }
+
+        AutoPtr<IInterface> l;
+        sLegacyRequests->Get(netCap, (IInterface**)&l);
+        if (l != NULL) {
+            LegacyRequest* lr = (LegacyRequest*)IObject::Probe(l);
+            String s;
+            IObject::Probe(lr->mNetworkRequest)->ToString(&s);
+            Logger::D(TAG, "renewing startUsingNetworkFeature request %s", s.string());
+            FAIL_RETURN(RenewRequestLocked(lr));
+            if (lr->mCurrentNetwork != NULL) {
+                *result = IPhoneConstants::APN_ALREADY_ACTIVE;
+            }
+            else {
+                *result = IPhoneConstants::APN_REQUEST_STARTED;
+            }
+            return NOERROR;
+        }
+
+        FAIL_RETURN(RequestNetworkForFeatureLocked(netCap, (INetworkRequest**)&request));
+    }
+
+    if (request != NULL) {
+        String s;
+        IObject::Probe(request)->ToString(&s);
+        Logger::D(TAG, "starting startUsingNetworkFeature for request %s", s.string());
+        *result = IPhoneConstants::APN_REQUEST_STARTED;
+    }
+    else {
+        Logger::D(TAG, " request Failed");
+        *result = IPhoneConstants::APN_REQUEST_FAILED;
+    }
+    return NOERROR;
 }
 
 ECode CConnectivityManager::StopUsingNetworkFeature(
@@ -486,7 +559,7 @@ ECode CConnectivityManager::StopUsingNetworkFeature(
     AutoPtr<INetworkCapabilities> netCap;
     FAIL_RETURN(NetworkCapabilitiesForFeature(networkType, feature, (INetworkCapabilities**)&netCap))
     if (NULL == netCap) {
-        Logger::D(TAG, (String("Can't satisfy stopUsingNetworkFeature for ") + StringUtils::ToString(networkType) + ", " + feature).string());
+        Logger::D(TAG, "Can't satisfy stopUsingNetworkFeature for %d, %s", networkType, feature.string());
         *result = -1;
         return NOERROR;
     }
@@ -494,7 +567,35 @@ ECode CConnectivityManager::StopUsingNetworkFeature(
     AutoPtr<IConnectivityManagerNetworkCallback> networkCallback;
     FAIL_RETURN(RemoveRequestForFeature(netCap, (IConnectivityManagerNetworkCallback**)&networkCallback))
     if (networkCallback != NULL) {
-        Logger::D(TAG, (String("stopUsingNetworkFeature for ") + StringUtils::ToString(networkType) + ", " + feature).string());
+        Logger::D(TAG, "stopUsingNetworkFeature for %d, %s", networkType, feature.string());
+        FAIL_RETURN(UnregisterNetworkCallback(networkCallback))
+    }
+    *result = 1;
+    return NOERROR;
+}
+
+ECode CConnectivityManager::StopUsingNetworkFeatureForSubscription(
+    /* [in] */ Int32 networkType,
+    /* [in] */ const String& feature,
+    /* [in] */ const String& subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = -1;
+
+    Logger::D(TAG, "stopUsingNetworkFeatureForSubscription: for %d feature = %s subId = %s", networkType, feature.string(), subId.string());
+    AutoPtr<INetworkCapabilities> netCap;
+    FAIL_RETURN(NetworkCapabilitiesForFeature(networkType, feature, (INetworkCapabilities**)&netCap));
+    if (NULL == netCap) {
+        Logger::D(TAG, "Can't satisfy stopUsingNetworkFeature for %d, %s", networkType, feature.string());
+        return NOERROR;
+    }
+
+    netCap->SetNetworkSpecifier(subId);
+    AutoPtr<IConnectivityManagerNetworkCallback> networkCallback;
+    FAIL_RETURN(RemoveRequestForFeature(netCap, (IConnectivityManagerNetworkCallback**)&networkCallback));
+    if (networkCallback != NULL) {
+        Logger::D(TAG, "stopUsingNetworkFeature for %d, %s", networkType, feature.string());
         FAIL_RETURN(UnregisterNetworkCallback(networkCallback))
     }
     *result = 1;
@@ -1274,6 +1375,23 @@ ECode CConnectivityManager::SetUsbTethering(
         return NOERROR;
     }
     return ec;
+}
+
+ECode CConnectivityManager::GetTetherConnectedSta(
+    /* [out] */ IList** wifiDevices)
+{
+    VALIDATE_NOT_NULL(wifiDevices);
+    *wifiDevices = NULL;
+
+    AutoPtr<IList> list;
+    ECode ec = mService->GetTetherConnectedSta((IList**)&list);
+    if (FAILED(ec)) {
+        return (ECode)E_REMOTE_EXCEPTION == ec ? NOERROR : ec;
+    }
+
+    *wifiDevices = list;
+    REFCOUNT_ADD(*wifiDevices);
+    return NOERROR;
 }
 
 ECode CConnectivityManager::GetLastTetherError(

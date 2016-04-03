@@ -302,6 +302,19 @@ private:
         /* [in] */ IClientConnectionManager* ccm,
         /* [in] */ IHttpParams* params);
 
+    CARAPI_(Boolean) IsMmsRequest();
+
+    CARAPI_(Boolean) CheckMmsOps();
+
+    CARAPI_(String) GetMethod(
+        /* [in] */ IHttpUriRequest* request);
+
+    CARAPI_(String) GetMethod(
+        /* [in] */ IHttpRequest* request);
+
+    CARAPI_(Boolean) CheckMmsSendPermission(
+        /* [in] */ const String& method);
+
     /**
      * Generates a cURL command equivalent to the given request.
      */

@@ -158,6 +158,12 @@ ECode LocalSocket::GetOutputStream(
     return ((LocalSocketImpl*)mImpl.Get())->GetOutputStream(os);
 }
 
+ECode LocalSocket::CloseExternalFd()
+{
+    FAIL_RETURN(ImplCreateIfNeeded())
+    return ((LocalSocketImpl*)mImpl.Get())->CloseExternalFd();
+}
+
 ECode LocalSocket::Close()
 {
     FAIL_RETURN(ImplCreateIfNeeded())

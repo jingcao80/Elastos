@@ -2,6 +2,8 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Net.h>
 #include <Elastos.CoreLibrary.Utility.Zip.h>
+#include "elastos/droid/app/AppOpsManager.h"
+#include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/net/http/ElastosHttpClient.h"
 #include "elastos/droid/internal/http/HttpDateTime.h"
 #include "elastos/droid/net/CSSLSessionCache.h"
@@ -9,6 +11,7 @@
 #include "elastos/droid/net/http/CElastosHttpClient.h"
 #include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/Uri.h"
+#include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/Looper.h"
@@ -16,11 +19,14 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::App::CActivityThread;
+using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Http::HttpDateTime;
 using Elastos::Droid::Net::ISSLCertificateSocketFactory;
 using Elastos::Droid::Net::ISSLSessionCache;
+using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::ILooper;
@@ -70,6 +76,7 @@ using Org::Apache::Http::IHttpMessage;
 using Org::Apache::Http::IHttpRequest;
 using Org::Apache::Http::IHttpRequestInterceptor;
 using Org::Apache::Http::IHttpResponse;
+using Org::Apache::Http::IRequestLine;
 using Org::Apache::Http::Impl::Client::EIID_IRequestWrapper;
 using Org::Apache::Http::Impl::Client::IDefaultHttpClient;
 using Org::Apache::Http::Impl::Client::IRequestWrapper;
@@ -79,6 +86,7 @@ using Org::Apache::Http::Params::CBasicHttpParams;
 using Org::Apache::Http::Params::CHttpConnectionParams;
 using Org::Apache::Http::Params::CHttpProtocolParams;
 using Org::Apache::Http::Params::IBasicHttpParams;
+using Org::Apache::Http::Params::ICoreProtocolPNames;
 using Org::Apache::Http::Params::IHttpConnectionParams;
 using Org::Apache::Http::Params::IHttpParams;
 using Org::Apache::Http::Params::IHttpProtocolParams;
@@ -368,6 +376,9 @@ ECode ElastosHttpClient::Execute(
     /* [in] */ IHttpUriRequest* request,
     /* [out] */ IHttpResponse** result)
 {
+    if (!CheckMmsSendPermission(GetMethod(request))) {
+        return E_IO_EXCEPTION;
+    }
     return mDelegate->Execute(request, result);
 }
 
@@ -376,6 +387,9 @@ ECode ElastosHttpClient::Execute(
     /* [in] */ IHttpContext* context,
     /* [out] */ IHttpResponse** result)
 {
+    if (!CheckMmsSendPermission(GetMethod(request))) {
+        return E_IO_EXCEPTION;
+    }
     return mDelegate->Execute(request, context, result);
 }
 
@@ -384,6 +398,9 @@ ECode ElastosHttpClient::Execute(
     /* [in] */ IHttpRequest* request,
     /* [out] */ IHttpResponse** result)
 {
+    if (!CheckMmsSendPermission(GetMethod(request))) {
+        return E_IO_EXCEPTION;
+    }
     return mDelegate->Execute(target, request, result);
 }
 
@@ -393,6 +410,9 @@ ECode ElastosHttpClient::Execute(
     /* [in] */ IHttpContext* context,
     /* [out] */ IHttpResponse** result)
 {
+    if (!CheckMmsSendPermission(GetMethod(request))) {
+        return E_IO_EXCEPTION;
+    }
     return mDelegate->Execute(target, request, context, result);
 }
 
@@ -401,6 +421,9 @@ ECode ElastosHttpClient::Execute(
     /* [in] */ IResponseHandler* responseHandler,
     /* [out] */ IInterface** result)
 {
+    if (!CheckMmsSendPermission(GetMethod(request))) {
+        return E_IO_EXCEPTION;
+    }
     return mDelegate->Execute(request, responseHandler, result);
 }
 
@@ -410,6 +433,9 @@ ECode ElastosHttpClient::Execute(
     /* [in] */ IHttpContext* context,
     /* [out] */ IInterface** result)
 {
+    if (!CheckMmsSendPermission(GetMethod(request))) {
+        return E_IO_EXCEPTION;
+    }
     return mDelegate->Execute(request, responseHandler, context, result);
 }
 
@@ -419,6 +445,9 @@ ECode ElastosHttpClient::Execute(
     /* [in] */ IResponseHandler* responseHandler,
     /* [out] */ IInterface** result)
 {
+    if (!CheckMmsSendPermission(GetMethod(request))) {
+        return E_IO_EXCEPTION;
+    }
     return mDelegate->Execute(target, request, responseHandler, result);
 }
 
@@ -429,6 +458,9 @@ ECode ElastosHttpClient::Execute(
     /* [in] */ IHttpContext* context,
     /* [out] */ IInterface** result)
 {
+    if (!CheckMmsSendPermission(GetMethod(request))) {
+        return E_IO_EXCEPTION;
+    }
     return mDelegate->Execute(target, request, responseHandler, context, result);
 }
 
@@ -502,6 +534,72 @@ ECode ElastosHttpClient::DisableCurlLogging()
     }
 
     return NOERROR;
+}
+
+Boolean ElastosHttpClient::IsMmsRequest()
+{
+    AutoPtr<IHttpParams> httpParams;
+    AutoPtr<IInterface> ua;
+    if ((mDelegate->GetParams((IHttpParams**)&httpParams), httpParams == NULL)
+        || (httpParams->GetParameter(ICoreProtocolPNames::USER_AGENT, (IInterface**)&ua), ua == NULL)) {
+        return FALSE;
+    }
+
+    String uaInfo;
+    if (IObject::Probe(ua)->ToString(&uaInfo), uaInfo.Contains("Android-Mms")) {
+        return TRUE;
+    }
+
+    return FALSE;
+ }
+
+Boolean ElastosHttpClient::CheckMmsOps()
+{
+    AutoPtr<IInterface> service;
+    IContext::Probe(CActivityThread::GetCurrentApplication())->GetSystemService(
+        IContext::APP_OPS_SERVICE, (IInterface**)&service);
+    AutoPtr<IAppOpsManager> appOps = IAppOpsManager::Probe(service);
+    Int32 callingUid = Binder::GetCallingUid();
+    String callingPackage = CActivityThread::GetCurrentPackageName();
+
+    Int32 result;
+    if (appOps->NoteOp(IAppOpsManager::OP_SEND_MMS, callingUid, callingPackage, &result), result != IAppOpsManager::MODE_ALLOWED) {
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+String ElastosHttpClient::GetMethod(
+    /* [in] */ IHttpUriRequest* request)
+{
+    if (request) {
+        String method;
+        request->GetMethod(&method);
+        return method;
+    }
+    return String(NULL);
+}
+
+String ElastosHttpClient::GetMethod(
+    /* [in] */ IHttpRequest* request)
+{
+    AutoPtr<IRequestLine> line;
+    if (request && (request->GetRequestLine((IRequestLine**)&line), line != NULL)) {
+        String method;
+        line->GetMethod(&method);
+        return method;
+    }
+    return String(NULL);
+}
+
+Boolean ElastosHttpClient::CheckMmsSendPermission(
+    /* [in] */ const String& method)
+{
+    if (IsMmsRequest() && method.Equals("POST")) {
+        return CheckMmsOps();
+    }
+    return TRUE;
 }
 
 String ElastosHttpClient::ToCurl(

@@ -217,7 +217,7 @@ ECode NetworkIdentity::BuildNetworkIdentity(
         AutoPtr<ITelephonyManager> telephony = ITelephonyManager::Probe(service);
         // TODO: Waiting for TelephonyManager
         assert(0);
-        // telephony->IsNetworkRoaming(&roaming);
+        // telephony->IsNetworkRoaming(SubscriptionManager.getDefaultDataSubId(), &roaming);
         String sId;
         state->GetSubscriberId(&sId);
         if (!sId.IsNull()) {
@@ -225,7 +225,7 @@ ECode NetworkIdentity::BuildNetworkIdentity(
         } else {
             // TODO: Waiting for TelephonyManager
             assert(0);
-            // telephony->GetSubscriberId(&subscriberId);
+            // telephony->GetSubscriberId(SubscriptionManager.getDefaultDataSubId(), &subscriberId);
         }
     } else if (type == IConnectivityManager::TYPE_WIFI) {
         String netId;

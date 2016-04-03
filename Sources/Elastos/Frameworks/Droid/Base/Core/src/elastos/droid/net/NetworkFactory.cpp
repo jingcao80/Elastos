@@ -1,5 +1,5 @@
 
-#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/utility/CAsyncChannel.h"
 #include "elastos/droid/net/NetworkFactory.h"
 #include "elastos/droid/net/CNetwork.h"
 #include "elastos/droid/net/CNetworkCapabilities.h"
@@ -12,6 +12,7 @@
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Utility::IProtocol;
+using Elastos::Droid::Internal::Utility::CAsyncChannel;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Os::CMessenger;
 using Elastos::Droid::Os::Handler;
@@ -94,6 +95,32 @@ ECode NetworkFactory::HandleMessage(
     Int32 arg1;
     msg->GetArg1(&arg1);
     switch (what) {
+        case IAsyncChannel::CMD_CHANNEL_FULL_CONNECTION: {
+            if (mAsyncChannel != NULL) {
+                Log("asyncchannel is connected");
+            }
+            else {
+                AutoPtr<IMessenger> replyTo;
+                msg->GetReplyTo((IMessenger**)&replyTo);
+                AutoPtr<IAsyncChannel> ac;
+                CAsyncChannel::New((IAsyncChannel**)&ac);
+                ac->Connected(NULL, this, replyTo);
+                ac->ReplyToMessage(msg, IAsyncChannel::CMD_CHANNEL_FULLY_CONNECTED,
+                        IAsyncChannel::STATUS_SUCCESSFUL);
+                mAsyncChannel = ac;
+            }
+            break;
+        }
+        case IAsyncChannel::CMD_CHANNEL_DISCONNECT: {
+            if (mAsyncChannel != NULL) {
+                mAsyncChannel->Disconnect();
+            }
+            break;
+        }
+        case IAsyncChannel::CMD_CHANNEL_DISCONNECTED: {
+            mAsyncChannel = NULL;
+            break;
+        }
         case CMD_REQUEST_NETWORK: {
             HandleAddRequest(INetworkRequest::Probe(obj), arg1);
             break;

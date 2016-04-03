@@ -86,6 +86,13 @@ ECode BaseNetworkObserver::LimitReached(
     return NOERROR;
 }
 
+ECode BaseNetworkObserver::InterfaceMessageRecevied(
+    /* [in] */ const String& message)
+{
+    // default no-op
+    return NOERROR;
+}
+
 ECode BaseNetworkObserver::InterfaceDnsServerInfo(
     /* [in] */ const String& iface,
     /* [in] */ Int64 lifetime,

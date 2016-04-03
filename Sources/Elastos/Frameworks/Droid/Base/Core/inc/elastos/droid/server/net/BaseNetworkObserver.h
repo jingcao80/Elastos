@@ -77,6 +77,10 @@ public:
         /* [in] */ const String& iface);
 
     //@Override
+    CARAPI InterfaceMessageRecevied(
+        /* [in] */ const String& message);
+
+    //@Override
     CARAPI InterfaceDnsServerInfo(
         /* [in] */ const String& iface,
         /* [in] */ Int64 lifetime,
