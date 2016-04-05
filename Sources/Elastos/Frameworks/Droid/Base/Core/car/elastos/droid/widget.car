@@ -204,26 +204,6 @@ module
     namespace Droid {
     namespace Widget {
 
-   //  [local]
-   //  class CView {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs,
-   //          [in] Int32 defStyle);
-
-   //      interface IView;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
     [local]
     class CTableRow {
         constructor(
@@ -757,22 +737,6 @@ module
         interface IAccessibilityEventSource;
     }
 
-   //  [local]
-   //  class CTextSwitcher {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface ITextSwitcher;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
     [local]
     class CFrameLayoutLayoutParams {
         constructor(
@@ -1010,52 +974,6 @@ module
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
     }
-
-   //  [local]
-   //  class CTableRowLayoutParams {
-   //      constructor();
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      constructor(
-   //          [in] Int32 width,
-   //          [in] Int32 height);
-
-   //      constructor(
-   //          [in] Int32 width,
-   //          [in] Int32 height,
-   //          [in] Float initWeight);
-
-   //      constructor(
-   //          [in] Int32 column);
-
-   //      constructor(
-   //          [in] IViewGroupLayoutParams* source);
-
-   //      constructor(
-   //          [in] IViewGroupMarginLayoutParams* marginSource);
-
-   //      interface ITableRowLayoutParams;
-   //  }
-
-   //  [local]
-   //  class CTableRow {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface ITableRow;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
 
     [local]
     class CImageView {
@@ -1297,28 +1215,6 @@ module
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
     }
-
-   //  [local]
-   //  class CCheckBox {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs,
-   //          [in] Int32 defStyle);
-
-   //      interface ICheckBox;
-   //      interface ICheckable;
-   //      interface IOnPreDrawListener;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
 
     [local]
     class CCompoundButton {
@@ -1899,20 +1795,6 @@ module
         interface IViewOnTouchListener;
     }
 
-   //  class CTextViewSavedState {
-   //      constructor(
-   //          [in] IParcelable* superState);
-
-   //      constructor();
-
-   //      interface ITextViewSavedState;
-   //      interface IParcelable;
-   //  }
-
-   //  singleton class CTextViewHelper {
-   //      interface ITextViewHelper;
-   //  }
-
     [local]
     class CTextView {
         constructor(
@@ -1941,10 +1823,23 @@ module
         interface IAccessibilityEventSource;
     }
 
+   //  singleton class CTextViewHelper {
+   //      interface ITextViewHelper;
+   //  }
+
+   //  class CTextViewSavedState {
+   //      constructor(
+   //          [in] IParcelable* superState);
+
+   //      constructor();
+
+   //      interface ITextViewSavedState;
+   //      interface IParcelable;
+   //  }
+
     singleton class CActivityChooserModelHelper {
         interface IActivityChooserModelHelper;
     }
-
 
     [local]
     class CEditText {
@@ -2333,47 +2228,6 @@ module
         interface IToastHelper;
     }
 
-   //  [local]
-   //  class CTabWidget {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs,
-   //          [in] Int32 defStyle);
-
-   //      interface ITabWidget;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //      interface IViewOnFocusChangeListener;
-   //  }
-
-   //  [local]
-   //  class CTabHost {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface ITabHost;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //      interface IOnTouchModeChangeListener;
-   //  }
-
     [local]
     class CVideoView {
         constructor(
@@ -2607,29 +2461,6 @@ module
         interface IAccessibilityEventSource;
     }
 
-   //  [local]
-   //  class CMultiAutoCompleteTextView {
-
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs,
-   //          [in] Int32 defStyle);
-
-   //      interface IMultiAutoCompleteTextView;
-   //      interface IFilterListener;
-   //      interface IOnPreDrawListener;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
     [local]
     class CNumberPicker {
         constructor(
@@ -2710,26 +2541,6 @@ module
         interface IMenuBuilderCallback;
         interface IMenuPresenterCallback;
     }
-
-   //  [local]
-   //  class CSpace {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs,
-   //          [in] Int32 defStyle);
-
-   //      interface ISpace;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
 
     [local]
     class CRemoteViews {
@@ -2812,13 +2623,6 @@ module
         interface IIRemoteViewsFactory;
         interface IBinder;
     }
-
-   //  class CRemoteViewsBitmapCache {
-   //      constructor();
-
-   //      interface IRemoteViewsBitmapCache;
-   //      interface IParcelable;
-   //  }
 
     [local]
     class CSpinner {
@@ -3126,25 +2930,6 @@ module
         interface IFilterable;
     }
 
-   //  [local]
-   //  class CSlidingDrawer {
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs,
-   //          [in] Int32 defStyle);
-
-   //      interface ISlidingDrawer;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
     [local]
     class CAdapterView {
         constructor(
@@ -3285,495 +3070,4 @@ module
     } // namespace Widget
     } // namespace Droid
     } // namespace Elastos
-
-
-   //  //==========================================================================
-
-   //  namespace Elastos {
-   //  namespace Droid {
-   //  namespace Widget {
-   //  namespace Internal {
-
-   //  [local]
-   //  class CDialogTitle {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs,
-   //          [in] Int32 defStyle);
-
-   //      interface IDialogTitle;
-   //      interface IOnPreDrawListener;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //  [local]
-   //  class CScrollingTabContainerView {
-
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      interface IScrollingTabContainerView;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //      interface IAdapterViewOnItemClickListener;
-   //  }
-
-   //  [local]
-   //  singleton class CSmileys {
-
-   //      interface ISmileys;
-   //  }
-
-   //  [local]
-   //  class CDigitalClock2 {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface IDigitalClock;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //  [local]
-   //  class CSlidingTab {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface ISlidingTab;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //  [local]
-   //  class CWaveView {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface IWaveView;
-   //      interface IAnimatorUpdateListener;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //  [local]
-   //  class CFaceUnlockView {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface IFaceUnlockView;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //  [local]
-   //  class CPointerLocationView {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      interface IPointerLocationView;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //  [local]
-   //  class CLinearLayoutWithDefaultTouchRecepient {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface ILinearLayoutWithDefaultTouchRecepient;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //  [local]
-   //  class CPasswordEntryKeyboard {
-   //       constructor(
-   //          [in] IContext* ctx,
-   //          [in] Int32 xmlLayoutResId);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] Int32 xmlLayoutResId,
-   //          [in] Int32 width,
-   //          [in] Int32 height);
-
-   //       constructor(
-   //          [in] IContext* ctx,
-   //          [in] Int32 xmlLayoutResId,
-   //          [in] Int32 modeId,
-   //          [in] Int32 width,
-   //          [in] Int32 height);
-
-   //       constructor(
-   //          [in] IContext* ctx,
-   //          [in] Int32 xmlLayoutResId,
-   //          [in] Int32 modeId);
-
-   //       constructor(
-   //          [in] IContext* ctx,
-   //          [in] Int32 layoutTemplateResId,
-   //          [in] ICharSequence* characters,
-   //          [in] Int32 columns,
-   //          [in] Int32 horizontalPadding);
-
-   //      interface IPasswordEntryKeyboard;
-   //  }
-
-   //  [local, deprecated]
-   //  class CPasswordEntryKeyboardHelper {
-
-   //       constructor(
-   //          [in] IContext* ctx,
-   //          [in] IKeyboardView* keyboardView,
-   //          [in] IView* targetView);
-
-   //       constructor(
-   //          [in] IContext* ctx,
-   //          [in] IKeyboardView* keyboardView,
-   //          [in] IView* targetView,
-   //          [in] Boolean useFullScreenWidth);
-
-   //       constructor(
-   //          [in] IContext* ctx,
-   //          [in] IKeyboardView* keyboardView,
-   //          [in] IView* targetView,
-   //          [in] Boolean useFullScreenWidth,
-   //          [in] ArrayOf<Int32>* layouts);
-
-   //      interface IPasswordEntryKeyboardHelper;
-   //      interface IOnKeyboardActionListener;
-   //  }
-
-   //  [local]
-   //  class CPasswordEntryKeyboardView {
-
-   //       constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //       constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs,
-   //          [in] Int32 defStyle);
-
-   //      interface IPasswordEntryKeyboardView;
-   //      interface IViewOnClickListener;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //  [local]
-   //  class CDrawableHolder {
-
-   //      constructor(
-   //          [in] IBitmapDrawable* drawable);
-
-   //      constructor(
-   //          [in] IBitmapDrawable* drawable,
-   //          [in] Float x,
-   //          [in] Float y);
-
-   //      interface IDrawableHolder;
-   //      interface IAnimatorListener;
-   //  }
-
-   //  [local]
-   //  class CEditableInputConnection {
-
-   //      constructor(
-   //          [in] ITextView* textview);
-
-   //      interface IEditableInputConnection;
-   //  }
-
-   //  [local]
-   //  class CWeightedLinearLayout {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface IWeightedLinearLayout;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //  [local]
-   //  class CRotarySelector {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface IRotarySelector;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //  [local]
-   //  class CTransportControlView {
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface ITransportControlView;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //      interface ILockScreenWidgetInterface;
-   //      interface IViewOnClickListener;
-   //  }
-
-   //  class CTransportControlViewSavedState {
-   //      constructor();
-
-   //      constructor(
-   //          [in] IParcelable* superState);
-
-   //      interface IParcelable;
-   //      interface ITransportControlViewSavedState;
-   //  }
-
-   //  [local]
-   //  class CActionBarContextView {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs,
-   //          [in] Int32 defStyle);
-
-   //      interface IActionBarContextView;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //      interface IAnimatorListener;
-   //  }
-
-   //  [local]
-   //  class CTextProgressBar {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs,
-   //          [in] Int32 defStyle);
-
-   //      interface ITextProgressBar;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //      interface IOnChronometerTickListener;
-   //  }
-
-   //      [local]
-   //  class CActionBarView {
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface IActionBarView;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //      [local]
-   //  class CActionBarOverlayLayout {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface IActionBarOverlayLayout;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //      [local]
-   //  class CActionBarContainer {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface IActionBarContainer;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-
-   //  [local]
-   //  class CSizeAdaptiveLayoutLayoutParams {
-   //      /**
-   //       * Constructs a new LayoutParams with default values as defined in {@link LayoutParams}.
-   //       */
-   //      constructor();
-
-   //      constructor(
-   //          [in] Int32 width,
-   //          [in] Int32 height);
-
-   //      /**
-   //       * Creates a new set of layout parameters with the specified width, height
-   //       * and valid height bounds.
-   //       *
-   //       * @param width the width, either {@link #MATCH_PARENT},
-   //       *        {@link #WRAP_CONTENT} or a fixed size in pixels
-   //       * @param height the height, either {@link #MATCH_PARENT},
-   //       *        {@link #WRAP_CONTENT} or a fixed size in pixels
-   //       * @param minHeight the minimum height of this child
-   //       * @param maxHeight the maximum height of this child
-   //       *        or {@link #UNBOUNDED} if the child can grow forever
-   //       */
-   //      constructor(
-   //          [in] Int32 width,
-   //          [in] Int32 height,
-   //          [in] Int32 x,
-   //          [in] Int32 y);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      constructor(
-   //          [in] IViewGroupLayoutParams* source);
-
-   //      interface ISizeAdaptiveLayoutLayoutParams;
-   //  }
-
-   //  [local]
-   //  class CSizeAdaptiveLayout {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs,
-   //          [in] Int32 defStyle);
-
-   //      interface ISizeAdaptiveLayout;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //  [local]
-   //  class CActionBarViewHomeView {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAttributeSet* attrs);
-
-   //      interface IActionBarViewHomeView;
-   //      interface IViewParent;
-   //      interface IViewManager;
-   //      interface IDrawableCallback;
-   //      interface IKeyEventCallback;
-   //      interface IAccessibilityEventSource;
-   //  }
-
-   //  [local]
-   //  class CLockPatternUtils {
-   //      constructor(
-   //          [in] IContext* ctx);
-
-   //      interface ILockPatternUtils;
-   //  }
-
-   //  } // namespace Internal
-   //  } // namespace Widget
-   //  } // namespace Droid
-   //  } // namespace Elastos
 }
