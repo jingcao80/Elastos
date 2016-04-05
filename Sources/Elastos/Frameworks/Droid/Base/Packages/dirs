@@ -2,4 +2,3 @@
 DIRS = SystemUI
 #DIRS += DefaultContainerService
 DIRS += SettingsProvider
-DIRS = Launcher2

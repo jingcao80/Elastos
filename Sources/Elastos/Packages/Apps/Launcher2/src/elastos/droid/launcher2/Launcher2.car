@@ -92,6 +92,7 @@ module
     namespace Droid {
     namespace Launcher2 {
 
+    [local]
     class CAccessibleTabView {
         constructor(
             [in] IContext* context);
@@ -114,6 +115,7 @@ module
         interface IAccessibleTabView;
     }
 
+    [local]
     class CBubbleTextView {
         constructor(
             [in] IContext* context);
@@ -136,6 +138,7 @@ module
         interface IBubbleTextView;
     }
 
+    [local]
     class CCling {
         constructor(
             [in] IContext* context);
@@ -160,6 +163,7 @@ module
         interface ICling;
     }
 
+    [local]
     class CDragLayer {
         constructor();
 
@@ -179,6 +183,7 @@ module
         interface IDragLayer;
     }
 
+    [local]
     class CDrawableStateProxyView {
         constructor(
             [in] IContext* context);
@@ -202,6 +207,7 @@ module
         interface ILinearLayout;
     }
 
+    [local]
     class CDeleteDropTarget {
         constructor();
 
@@ -226,6 +232,7 @@ module
         interface IDeleteDropTarget;
     }
 
+    [local]
     class CFolderEditText {
         constructor();
 
@@ -251,6 +258,7 @@ module
         interface IFolderEditText;
     }
 
+    [local]
     class CFolderIcon {
         constructor();
 
@@ -276,6 +284,7 @@ module
         interface IFolderIconHelper;
     }
 
+    [local]
     class CFocusOnlyTabWidget {
         constructor();
 
@@ -304,6 +313,7 @@ module
         interface IFocusOnlyTabWidget;
     }
 
+    [local]
     class CHolographicImageView {
         constructor();
 
@@ -327,6 +337,7 @@ module
         interface IHolographicImageView;
     }
 
+    [local]
     class CHolographicLinearLayout {
         constructor();
 
@@ -353,6 +364,7 @@ module
         interface IHolographicLinearLayout;
     }
 
+    [local]
     class CHotseat {
         constructor();
 
@@ -379,6 +391,7 @@ module
         interface IHotseat;
     }
 
+    [local]
     class CInfoDropTarget {
         constructor();
 
@@ -422,6 +435,7 @@ module
         interface ILauncherProviderHelper;
     }
 
+    [local]
     class CPagedViewWidget {
         constructor(
             [in] IContext* context);
@@ -454,6 +468,7 @@ module
         interface IPagedViewWidgetHelper;
     }
 
+    [local]
     class CPagedViewWidgetImageView {
         constructor(
             [in] IContext* context,
@@ -472,6 +487,7 @@ module
         interface IPreloadReceiver;
     }
 
+    [local]
     class CPagedViewIcon {
         constructor();
 
@@ -495,6 +511,7 @@ module
         interface IPagedViewIcon;
     }
 
+    [local]
     class CSearchDropTargetBar {
         constructor(
             [in] IContext* context,

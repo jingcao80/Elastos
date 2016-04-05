@@ -32,6 +32,7 @@ module
         const String SHORTCUT_MIMETYPE = "com.android.launcher/shortcut";
     }
 
+    [local]
     interface IInstallShortcutReceiverHelper {
         EnableInstallQueue();
 

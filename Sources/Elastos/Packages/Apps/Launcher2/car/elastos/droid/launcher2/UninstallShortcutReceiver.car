@@ -12,6 +12,7 @@ module
     interface IUninstallShortcutReceiver {
     }
 
+    [local]
     interface IUninstallShortcutReceiverHelper {
         EnableUninstallQueue();
 
