@@ -1,0 +1,3 @@
+
+DIRS += DownloadProvider
+DIRS += MediaProvider

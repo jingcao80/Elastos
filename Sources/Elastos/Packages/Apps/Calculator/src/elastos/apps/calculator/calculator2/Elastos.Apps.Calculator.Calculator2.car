@@ -40,6 +40,7 @@ module
         interface ICalculator;
     }
 
+    [local]
     class CCalculatorEditText
     {
         constructor(
@@ -75,6 +76,7 @@ module
         interface ICalculatorExpressionEvaluator;
     }
 
+    [local]
     class CCalculatorExpressionTokenizer
     {
         constructor(
@@ -83,7 +85,7 @@ module
         interface ICalculatorExpressionTokenizer;
     }
 
-    [deprecated]
+    [local]
     class CCalculatorPadLayout
     {
         constructor(

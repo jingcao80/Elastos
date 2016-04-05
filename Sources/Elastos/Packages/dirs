@@ -1,0 +1,3 @@
+
+DIRS += Apps
+DIRS += Providers

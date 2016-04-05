@@ -3,7 +3,7 @@ TARGET_TYPE= eco
 
 EXPORT_ALL_SYMBOLS = 1
 
-include $(MAKEDIR)/../../../../../../../sources.inc
+#include $(MAKEDIR)/../../../../../../../sources.inc
 INCLUDES += $(MAKEDIR)/../../../../inc/
 
 CAR_FLAGS += -n -u

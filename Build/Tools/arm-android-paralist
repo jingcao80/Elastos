@@ -2,6 +2,7 @@
 # -: run job without fork
 # <: merge then fork new job
 # >: merge then run job without fork
+
 # ==== build CAR Runtime ====
 - Elastos/Runtime/PortingLayer/crt0
 - Elastos/Runtime/Core/inc
@@ -26,6 +27,7 @@
   Elastos/Runtime/Core/elapi
 > Elastos/Runtime/Core/eladll/dll
 - Elastos/Runtime/Core/eladll/lib
+
 # ==== buid LibCore ====
 > Elastos/LibCore/inc
 - Elastos/LibCore/src/corelibrary Elastos.CoreLibrary.car
@@ -123,6 +125,7 @@
   Elastos/LibCore/src/org/w3c/dom
   Elastos/LibCore/src/org/json
 > Elastos/LibCore/src/corelibrary
+
 # ==== buid External ====
   Elastos/External/conscrypt/src/org/conscrypt
 
@@ -130,6 +133,7 @@
 > Elastos/Frameworks/Droid/ServiceManager
 - Elastos/Frameworks/Droid/DroidRuntime/lib
 > Elastos/Frameworks/Droid/DroidRuntime
+
 # ==== buid Framework Core ====
 - Elastos/Frameworks/Droid/Base/Core/inc
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid Elastos.Droid.Core.car
@@ -347,12 +351,15 @@
 > Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/wm
 > Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server
 > Elastos/Frameworks/Droid/Base/Services/Server/
+
 # ==== buid App_process ====
 > Elastos/Frameworks/Droid/App_process Elastos.Droid.Core.eco
 > Elastos/Frameworks/Droid/App_process
+
 # ==== buid Framework JavaProxy ====
 > Elastos/Frameworks/Droid/JavaProxy/src/elastos/droid/javaproxy Elastos.Droid.JavaProxy.car
 > Elastos/Frameworks/Droid/JavaProxy/src/elastos/droid/javaproxy
+
 # ==== buid SystemUI ====
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui SystemUI.car
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/doze
@@ -377,16 +384,11 @@
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/tv
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui
-> Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings Settings.car
-  Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/dashboard
-  Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/drawable
-  Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/inputmethod
-  Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/search
-  Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/widget
-  Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings/wifi
-> Elastos/Frameworks/Droid/Base/Packages/Settings/src/elastos/droid/settings
+
+# ==== build SettingsProvider ====
   Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider SettingsProvider.car
 > Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider
+
 #  Elastos/Frameworks/Droid/DevSamples/SoftKeyboard
 #- Elastos/Frameworks/Droid/DevSamples/PinyinIME/share
 #> Elastos/Frameworks/Droid/DevSamples/PinyinIME
@@ -406,6 +408,8 @@
 #> Elastos/Frameworks/Droid/DevSamples/Gallery
 #  Elastos/Frameworks/Droid/DevSamples/AccountsAndSyncSettings
 #> Elastos/Frameworks/Droid/DevSamples
+
+# ==== build Commands ====
 #> Elastos/Frameworks/Droid/Commands/Monkey Elastos.Droid.Core.eco
 #- Elastos/Frameworks/Droid/Commands/Monkey Elastos.Droid.Commands.Monkey.car
 #- Elastos/Frameworks/Droid/Commands/Monkey/src
@@ -415,8 +419,11 @@
 #- Elastos/Frameworks/Droid/Commands/Am/src
 #> Elastos/Frameworks/Droid/Commands/Am
 #> Elastos/Frameworks/Droid/Commands
+
+# ==== build DCAR ====
 - Elastos/Frameworks/Droid/DCARServer
 - Elastos/Frameworks/Droid/DCARServiceManager
+
 # ==== buid Framework Test ====
   Elastos/Frameworks/Droid/Base/Test/inc
 > Elastos/Frameworks/Droid/Base/Test/src/eunit Eunit.car
@@ -436,4 +443,16 @@
 #> Elastos/Frameworks/Droid/Base/Test-runner/lib Elastos.Droid.Test.eco
 #> Elastos/Frameworks/Droid/Base/Test-runner/lib
 > Elastos/Frameworks/Droid/Base/Test-runner
+
+# ==== build Packages/Apps/Settings ====
+> Elastos/Packages/Apps/Settings/src/elastos/droid/settings Settings.car
+  Elastos/Packages/Apps/Settings/src/elastos/droid/settings/dashboard
+  Elastos/Packages/Apps/Settings/src/elastos/droid/settings/drawable
+  Elastos/Packages/Apps/Settings/src/elastos/droid/settings/inputmethod
+  Elastos/Packages/Apps/Settings/src/elastos/droid/settings/search
+  Elastos/Packages/Apps/Settings/src/elastos/droid/settings/voice
+  Elastos/Packages/Apps/Settings/src/elastos/droid/settings/widget
+  Elastos/Packages/Apps/Settings/src/elastos/droid/settings/wifi
+> Elastos/Packages/Apps/Settings/src/elastos/droid/settings
+
 > Elastos
