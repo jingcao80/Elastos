@@ -2132,7 +2132,7 @@ void Canvas::NativeDrawBitmap(
     /* [in] */ Int32 screenDensity,
     /* [in] */ Int32 bitmapDensity)
 {
-    Logger::I("Canvas", "NativeDrawBitmap: left:%f, top:%f, canvasDensity:%d, screenDensity=%d, bitmapDensit=%d",
+    Logger::I("Canvas", "NativeDrawBitmap: left:%.2f, top:%.2f, canvasDensity:%d, screenDensity=%d, bitmapDensit=%d",
         left, top, canvasDensity, screenDensity, bitmapDensity);
     NativeCanvas* canvas = get_canvas(canvasHandle);
     const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
@@ -2184,12 +2184,13 @@ void Canvas::NativeDrawBitmap(
     /* [in] */ Int32 bitmapDensity)
 {
     Logger::I("Canvas", "NativeDrawBitmap: "
-        "srcLeft:%f, srcTop:%f, srcRight:%f, srcBottom:%f"
-        "dstLeft:%f, dstTop:%f, dstRight:%f, dstBottom:%f"
-        "screenDensity=%d, bitmapDensit=%d",
+        "srcLeft:%.2f, srcTop:%.2f, srcRight:%.2f, srcBottom:%.2f"
+        " dstLeft:%.2f, dstTop:%.2f, dstRight:%.2f, dstBottom:%.2f"
+        " screenDensity=%d, bitmapDensit=%d",
         srcLeft, srcTop, srcRight, srcBottom,
         dstLeft, dstTop, dstRight, dstBottom,
         screenDensity, bitmapDensity);
+
     NativeCanvas* canvas = get_canvas(canvasHandle);
     const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);

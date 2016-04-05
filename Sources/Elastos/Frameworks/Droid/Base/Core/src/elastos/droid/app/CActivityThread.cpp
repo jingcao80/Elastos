@@ -254,9 +254,7 @@ ECode CActivityThread::Idler::QueueIdle(
                 a->mActivity->IsFinishing(&finished);
 
             if (localLOGV) {
-                String str;
-                a->ToString(&str);
-                Slogger::V(TAG, "Reporting idle of %s finished=", str.string(), finished);
+                Slogger::V(TAG, "Reporting idle of %s finished=", TO_CSTR(a), finished);
             }
 
             if (finished) {
@@ -3551,7 +3549,8 @@ ECode CActivityThread::HandleResumeActivity(
             if (localLOGV)  {
                 Slogger::V(TAG, "Scheduling idle handler for %s", TO_CSTR(r));
             }
-            Looper::GetMyQueue()->AddIdleHandler(new Idler(this));
+            AutoPtr<IIdleHandler> ih = new Idler(this);
+            Looper::GetMyQueue()->AddIdleHandler(ih);
         }
         r->mOnlyLocalRequest = FALSE;
 

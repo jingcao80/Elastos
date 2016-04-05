@@ -499,11 +499,11 @@ ECode BitmapDrawable::Draw(
         if (tmx == -1 && tmy == -1) {
             paint->SetShader(NULL);
         } else {
-            AutoPtr<IBitmapShader> s;
+            AutoPtr<IShader> s;
             CBitmapShader::New(bitmap,
                     tmx == -1 ? ShaderTileMode_CLAMP : tmx,
-                    tmy == -1 ? ShaderTileMode_CLAMP : tmy, (IBitmapShader**)&s);
-            state->mPaint->SetShader(IShader::Probe(s));
+                    tmy == -1 ? ShaderTileMode_CLAMP : tmy, (IShader**)&s);
+            state->mPaint->SetShader(s);
         }
 
         state->mRebuildShader = FALSE;
@@ -514,7 +514,9 @@ ECode BitmapDrawable::Draw(
         AutoPtr<IPaint> p;
         GetPaint((IPaint**)&p);
         p->GetAlpha(&restoreAlpha);
-        p->SetAlpha((Int32) (restoreAlpha * state->mBaseAlpha + 0.5));
+        Int32 newAlpha = (Int32) (restoreAlpha * state->mBaseAlpha + 0.5);
+        p->SetAlpha(newAlpha);
+        Logger::I("BitmapDrawable", "mBaseAlpha:%d, alpha:%d", state->mBaseAlpha, newAlpha);
     } else {
         restoreAlpha = -1;
     }

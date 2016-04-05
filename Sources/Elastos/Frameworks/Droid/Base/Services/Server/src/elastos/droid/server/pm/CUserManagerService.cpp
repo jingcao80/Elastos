@@ -2453,7 +2453,6 @@ ECode CUserManagerService::GetUserHandle(
 
 void CUserManagerService::UpdateUserIdsLocked()
 {
-    Logger::I(TAG, " > UpdateUserIdsLocked ...");
     List<Int32> list;
     Boolean partial;
     HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it;
@@ -2467,10 +2466,8 @@ void CUserManagerService::UpdateUserIdsLocked()
     Int32 i = 0;
     List<Int32>::Iterator lit;
     for (lit = list.Begin(); lit != list.End(); ++lit) {
-        Logger::I(TAG, "  user id index %d : %d", i , *lit);
         (*newUsers)[i++] = *lit;
     }
-    Logger::I(TAG, " > UpdateUserIdsLocked size %d", list.GetSize());
     mUserIds = newUsers;
 }
 

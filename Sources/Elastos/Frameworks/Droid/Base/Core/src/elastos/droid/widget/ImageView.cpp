@@ -1095,15 +1095,17 @@ void ImageView::OnDraw(
     }
 
     if (mDrawMatrix == NULL && mPaddingTop == 0 && mPaddingLeft == 0) {
-        Logger::D(TAG, " >> 1");
+        Logger::I(TAG, " >> OnDraw 1");
+        canvas->DrawARGB(255, 0, 0, 255);//debug
         mDrawable->Draw(canvas);
+        canvas->DrawARGB(255, 255, 0, 0);//debug
     }
     else {
+        Logger::I(TAG, " >> OnDraw 2: %s, mScrollX:%d, mScrollY:%d",
+            TO_CSTR(mCropToPadding), mScrollX, mScrollY);
         Int32 saveCount1, saveCount2;
         canvas->GetSaveCount(&saveCount1);
         canvas->Save(&saveCount2);
-        Logger::D(TAG, " >> 2, saveCount1:%d, saveCount2:%d, mCropToPadding:%d, scrollX:%d, scrollY:%d",
-            saveCount1, saveCount2, mCropToPadding, mScrollX, mScrollY);
         if (mCropToPadding) {
             Boolean IsNonEmpty;
             const Int32 scrollX = mScrollX;
@@ -1119,7 +1121,9 @@ void ImageView::OnDraw(
         if (mDrawMatrix != NULL) {
             canvas->Concat(mDrawMatrix);
         }
+        canvas->DrawARGB(255, 0, 0, 255);//debug
         mDrawable->Draw(canvas);
+        canvas->DrawARGB(255, 255, 0, 0);//debug
         canvas->RestoreToCount(saveCount1);
     }
     Logger::D(TAG, " <<<< OnDraw");
