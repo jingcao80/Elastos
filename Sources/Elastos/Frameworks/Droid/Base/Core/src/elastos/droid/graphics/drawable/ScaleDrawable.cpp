@@ -84,10 +84,11 @@ Boolean ScaleDrawable::ScaleState::CanConstantState()
 }
 
 CAR_INTERFACE_IMPL_2(ScaleDrawable, Drawable, IScaleDrawable, IDrawableCallback);
+
 ScaleDrawable::ScaleDrawable()
     : mMutated(FALSE)
 {
-    CRect::NewByFriend((CRect**)&mTmpRect);
+    CRect::New((IRect**)&mTmpRect);
 }
 
 ScaleDrawable::ScaleDrawable(
@@ -97,7 +98,7 @@ ScaleDrawable::ScaleDrawable(
     /* [in] */ Float scaleHeight)
     : mMutated(FALSE)
 {
-    CRect::NewByFriend((CRect**)&mTmpRect);
+    CRect::New((IRect**)&mTmpRect);
     ASSERT_SUCCEEDED(constructor(drawable, gravity, scaleWidth, scaleHeight));
 }
 
@@ -336,7 +337,7 @@ Boolean ScaleDrawable::OnLevelChange(
 void ScaleDrawable::OnBoundsChange(
     /* [in] */ IRect* bounds)
 {
-    CRect* r = mTmpRect;
+    CRect* r = (CRect*)mTmpRect.Get();
     Boolean min = mScaleState->mUseIntrinsicSizeAsMin;
     Int32 level = 0;
     GetLevel(&level);

@@ -214,15 +214,16 @@ ECode Typeface::Create(
         }
     }
 
-    AutoPtr<CTypeface> tmpType;
-    CTypeface::NewByFriend(NativeCreateFromTypeface(ni, style), (CTypeface**)&tmpType);
-    *typeface = (ITypeface*)tmpType.Get();
+    AutoPtr<ITypeface> tmpType;
+    CTypeface::New(NativeCreateFromTypeface(ni, style), (ITypeface**)&tmpType);
+    *typeface = tmpType;
     REFCOUNT_ADD(*typeface);
+
     if (styles == NULL) {
         styles = new TypefaceMap(4);
         sTypefaceCache[ni] = styles;
     }
-    (*styles)[style] = *typeface;
+    (*styles)[style] = tmpType;
 
     return NOERROR;
 }

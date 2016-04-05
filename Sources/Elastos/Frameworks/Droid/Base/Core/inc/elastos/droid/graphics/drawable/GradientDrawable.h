@@ -482,7 +482,7 @@ private:
     Int32 mAlpha;  // modified by the caller
 
     AutoPtr<IPath> mPath;
-    AutoPtr<CRectF> mRect;
+    AutoPtr<IRectF> mRect;
 
     AutoPtr<IPaint> mLayerPaint;    // internal, used if we use saveLayer()
     Boolean mGradientIsDirty;   // internal state

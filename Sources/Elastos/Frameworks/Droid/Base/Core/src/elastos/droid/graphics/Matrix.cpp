@@ -22,20 +22,20 @@ CAR_INTERFACE_IMPL(Matrix, Object, IMatrix);
 
 Matrix::~Matrix()
 {
-    NativeFinalizer(mNativeInstance);
+    NativeFinalizer(mNativeMatrix);
 }
 
 ECode Matrix::constructor()
 {
-    mNativeInstance = NativeCreate(0);
+    mNativeMatrix = NativeCreate(0);
     return NOERROR;
 }
 
 ECode Matrix::constructor(
     /* [in] */ IMatrix* src)
 {
-    Int64 nSrc = src != NULL ? ((Matrix*)src)->mNativeInstance : 0;
-    mNativeInstance = NativeCreate(nSrc);
+    Int64 nSrc = src != NULL ? ((Matrix*)src)->mNativeMatrix : 0;
+    mNativeMatrix = NativeCreate(nSrc);
     return NOERROR;
 }
 
@@ -43,7 +43,7 @@ ECode Matrix::IsIdentity(
     /* [out] */ Boolean* isIdentity)
 {
     VALIDATE_NOT_NULL(isIdentity)
-    *isIdentity = NativeIsIdentity(mNativeInstance);
+    *isIdentity = NativeIsIdentity(mNativeMatrix);
     return NOERROR;
 }
 
@@ -51,7 +51,7 @@ ECode Matrix::IsAffine(
     /* [out] */ Boolean* affine)
 {
     VALIDATE_NOT_NULL(affine);
-    *affine = NativeIsAffine(mNativeInstance);
+    *affine = NativeIsAffine(mNativeMatrix);
     return NOERROR;
 }
 
@@ -59,7 +59,7 @@ ECode Matrix::RectStaysRect(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = NativeRectStaysRect(mNativeInstance);
+    *result = NativeRectStaysRect(mNativeMatrix);
     return NOERROR;
 }
 
@@ -74,7 +74,7 @@ ECode Matrix::Set(
         Reset();
     }
     else {
-        NativeSet(mNativeInstance, ((Matrix*)src)->mNativeInstance);
+        NativeSet(mNativeMatrix, ((Matrix*)src)->mNativeMatrix);
     }
     return NOERROR;
 }
@@ -91,7 +91,7 @@ ECode Matrix::Equals(
         *isEqual = FALSE;
         return NOERROR;
     }
-    *isEqual = NativeEquals(mNativeInstance, ((Matrix*)IMatrix::Probe(obj))->mNativeInstance);
+    *isEqual = NativeEquals(mNativeMatrix, ((Matrix*)IMatrix::Probe(obj))->mNativeMatrix);
     return NOERROR;
 }
 
@@ -110,7 +110,7 @@ ECode Matrix::GetHashCode(
 /** Set the matrix to identity */
 ECode Matrix::Reset()
 {
-    NativeReset(mNativeInstance);
+    NativeReset(mNativeMatrix);
     return NOERROR;
 }
 
@@ -119,7 +119,7 @@ ECode Matrix::SetTranslate(
     /* [in] */ Float dx,
     /* [in] */ Float dy)
 {
-    NativeSetTranslate(mNativeInstance, dx, dy);
+    NativeSetTranslate(mNativeMatrix, dx, dy);
     return NOERROR;
 }
 
@@ -134,7 +134,7 @@ ECode Matrix::SetScale(
     /* [in] */ Float px,
     /* [in] */ Float py)
 {
-    NativeSetScale(mNativeInstance, sx, sy, px, py);
+    NativeSetScale(mNativeMatrix, sx, sy, px, py);
     return NOERROR;
 }
 
@@ -143,7 +143,7 @@ ECode Matrix::SetScale(
     /* [in] */ Float sx,
     /* [in] */ Float sy)
 {
-    NativeSetScale(mNativeInstance, sx, sy);
+    NativeSetScale(mNativeMatrix, sx, sy);
     return NOERROR;
 }
 
@@ -157,7 +157,7 @@ ECode Matrix::SetRotate(
     /* [in] */ Float px,
     /* [in] */ Float py)
 {
-    NativeSetRotate(mNativeInstance, degrees, px, py);
+    NativeSetRotate(mNativeMatrix, degrees, px, py);
     return NOERROR;
 }
 
@@ -167,7 +167,7 @@ ECode Matrix::SetRotate(
 ECode Matrix::SetRotate(
     /* [in] */ Float degrees)
 {
-    NativeSetRotate(mNativeInstance, degrees);
+    NativeSetRotate(mNativeMatrix, degrees);
     return NOERROR;
 }
 
@@ -182,7 +182,7 @@ ECode Matrix::SetSinCos(
     /* [in] */ Float px,
     /* [in] */ Float py)
 {
-    NativeSetSinCos(mNativeInstance, sinValue, cosValue, px, py);
+    NativeSetSinCos(mNativeMatrix, sinValue, cosValue, px, py);
     return NOERROR;
 }
 
@@ -191,7 +191,7 @@ ECode Matrix::SetSinCos(
     /* [in] */ Float sinValue,
     /* [in] */ Float cosValue)
 {
-    NativeSetSinCos(mNativeInstance, sinValue, cosValue);
+    NativeSetSinCos(mNativeMatrix, sinValue, cosValue);
     return NOERROR;
 }
 
@@ -206,7 +206,7 @@ ECode Matrix::SetSkew(
     /* [in] */ Float px,
     /* [in] */ Float py)
 {
-    NativeSetSkew(mNativeInstance, kx, ky, px, py);
+    NativeSetSkew(mNativeMatrix, kx, ky, px, py);
     return NOERROR;
 }
 
@@ -215,7 +215,7 @@ ECode Matrix::SetSkew(
     /* [in] */ Float kx,
     /* [in] */ Float ky)
 {
-    NativeSetSkew(mNativeInstance, kx, ky);
+    NativeSetSkew(mNativeMatrix, kx, ky);
     return NOERROR;
 }
 
@@ -230,9 +230,9 @@ ECode Matrix::SetConcat(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativeSetConcat(mNativeInstance,
-            ((Matrix*)a)->mNativeInstance,
-            ((Matrix*)b)->mNativeInstance);
+    NativeSetConcat(mNativeMatrix,
+            ((Matrix*)a)->mNativeMatrix,
+            ((Matrix*)b)->mNativeMatrix);
     *result = TRUE;
     return NOERROR;
 }
@@ -247,7 +247,7 @@ ECode Matrix::PreTranslate(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePreTranslate(mNativeInstance, dx, dy);
+    NativePreTranslate(mNativeMatrix, dx, dy);
     *result = TRUE;
     return NOERROR;
 }
@@ -264,7 +264,7 @@ ECode Matrix::PreScale(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePreScale(mNativeInstance, sx, sy, px, py);
+    NativePreScale(mNativeMatrix, sx, sy, px, py);
     *result = TRUE;
     return NOERROR;
 }
@@ -279,7 +279,7 @@ ECode Matrix::PreScale(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePreScale(mNativeInstance, sx, sy);
+    NativePreScale(mNativeMatrix, sx, sy);
     *result = TRUE;
     return NOERROR;
 }
@@ -295,7 +295,7 @@ ECode Matrix::PreRotate(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePreRotate(mNativeInstance, degrees, px, py);
+    NativePreRotate(mNativeMatrix, degrees, px, py);
     *result = TRUE;
     return NOERROR;
 }
@@ -309,7 +309,7 @@ ECode Matrix::PreRotate(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePreRotate(mNativeInstance, degrees);
+    NativePreRotate(mNativeMatrix, degrees);
     *result = TRUE;
     return NOERROR;
 }
@@ -326,7 +326,7 @@ ECode Matrix::PreSkew(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePreSkew(mNativeInstance, kx, ky, px, py);
+    NativePreSkew(mNativeMatrix, kx, ky, px, py);
     *result = TRUE;
     return NOERROR;
 }
@@ -341,7 +341,7 @@ ECode Matrix::PreSkew(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePreSkew(mNativeInstance, kx, ky);
+    NativePreSkew(mNativeMatrix, kx, ky);
     *result = TRUE;
     return NOERROR;
 }
@@ -355,7 +355,7 @@ ECode Matrix::PreConcat(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePreConcat(mNativeInstance, ((Matrix*)other)->mNativeInstance);
+    NativePreConcat(mNativeMatrix, ((Matrix*)other)->mNativeMatrix);
     *result = TRUE;
     return NOERROR;
 }
@@ -370,7 +370,7 @@ ECode Matrix::PostTranslate(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePostTranslate(mNativeInstance, dx, dy);
+    NativePostTranslate(mNativeMatrix, dx, dy);
     *result = TRUE;
     return NOERROR;
 }
@@ -387,7 +387,7 @@ ECode Matrix::PostScale(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePostScale(mNativeInstance, sx, sy, px, py);
+    NativePostScale(mNativeMatrix, sx, sy, px, py);
     *result = TRUE;
     return NOERROR;
 }
@@ -402,7 +402,7 @@ ECode Matrix::PostScale(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePostScale(mNativeInstance, sx, sy);
+    NativePostScale(mNativeMatrix, sx, sy);
     *result = TRUE;
     return NOERROR;
 }
@@ -418,7 +418,7 @@ ECode Matrix::PostRotate(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePostRotate(mNativeInstance, degrees, px, py);
+    NativePostRotate(mNativeMatrix, degrees, px, py);
     *result = TRUE;
     return NOERROR;
 }
@@ -432,7 +432,7 @@ ECode Matrix::PostRotate(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePostRotate(mNativeInstance, degrees);
+    NativePostRotate(mNativeMatrix, degrees);
     *result = TRUE;
     return NOERROR;
 }
@@ -449,7 +449,7 @@ ECode Matrix::PostSkew(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePostSkew(mNativeInstance, kx, ky, px, py);
+    NativePostSkew(mNativeMatrix, kx, ky, px, py);
     *result = TRUE;
     return NOERROR;
 }
@@ -464,7 +464,7 @@ ECode Matrix::PostSkew(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePostSkew(mNativeInstance, kx, ky);
+    NativePostSkew(mNativeMatrix, kx, ky);
     *result = TRUE;
     return NOERROR;
 }
@@ -478,7 +478,7 @@ ECode Matrix::PostConcat(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePostConcat(mNativeInstance, ((Matrix*)other)->mNativeInstance);
+    NativePostConcat(mNativeMatrix, ((Matrix*)other)->mNativeMatrix);
     *result = TRUE;
     return NOERROR;
 }
@@ -503,7 +503,7 @@ ECode Matrix::SetRectToRect(
 //        throw new NullPointerException();
         return E_NULL_POINTER_EXCEPTION;
     }
-    *result = NativeSetRectToRect(mNativeInstance, src, dst,
+    *result = NativeSetRectToRect(mNativeMatrix, src, dst,
             (SkMatrix::ScaleToFit)stf);
     return NOERROR;
 }
@@ -555,7 +555,7 @@ ECode Matrix::SetPolyToPoly(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     FAIL_RETURN(CheckPointArrays(src, srcIndex, dst, dstIndex, pointCount));
-    *result = NativeSetPolyToPoly(mNativeInstance, src, srcIndex,
+    *result = NativeSetPolyToPoly(mNativeMatrix, src, srcIndex,
                                   dst, dstIndex, pointCount);
     return NOERROR;
 }
@@ -569,7 +569,7 @@ ECode Matrix::Invert(
     /* [in] */ IMatrix* inverse,
     /* [out] */ Boolean* result)
 {
-    *result = NativeInvert(mNativeInstance, ((Matrix*)inverse)->mNativeInstance);
+    *result = NativeInvert(mNativeMatrix, ((Matrix*)inverse)->mNativeMatrix);
     return NOERROR;
 }
 
@@ -592,7 +592,7 @@ ECode Matrix::MapPoints(
     /* [in] */ Int32 pointCount)
 {
     FAIL_RETURN(CheckPointArrays(src, srcIndex, dst, dstIndex, pointCount));
-    NativeMapPoints(mNativeInstance, dst, dstIndex, src, srcIndex,
+    NativeMapPoints(mNativeMatrix, dst, dstIndex, src, srcIndex,
                     pointCount, TRUE);
     return NOERROR;
 }
@@ -620,7 +620,7 @@ ECode Matrix::MapVectors(
     /* [in] */ Int32 vectorCount)
 {
     FAIL_RETURN(CheckPointArrays(src, srcIndex, dst, dstIndex, vectorCount));
-    NativeMapPoints(mNativeInstance, dst, dstIndex, src, srcIndex,
+    NativeMapPoints(mNativeMatrix, dst, dstIndex, src, srcIndex,
                     vectorCount, FALSE);
     return NOERROR;
 }
@@ -715,7 +715,7 @@ ECode Matrix::MapRect(
         Logger::E(TAG, "dst or src is NULL in MapRect.");
         return E_NULL_POINTER_EXCEPTION;
     }
-    *result = NativeMapRect(mNativeInstance, dst, src);
+    *result = NativeMapRect(mNativeMatrix, dst, src);
     return NOERROR;
 }
 
@@ -744,7 +744,7 @@ ECode Matrix::MapRadius(
     /* [out] */ Float* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = NativeMapRadius(mNativeInstance, radius);
+    *result = NativeMapRadius(mNativeMatrix, radius);
     return NOERROR;
 }
 
@@ -757,7 +757,7 @@ ECode Matrix::GetValues(
 //        throw new ArrayIndexOutOfBoundsException();
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
-    NativeGetValues(mNativeInstance, values);
+    NativeGetValues(mNativeMatrix, values);
     return NOERROR;
 }
 
@@ -774,7 +774,7 @@ ECode Matrix::SetValues(
 //        throw new ArrayIndexOutOfBoundsException();
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
-    NativeSetValues(mNativeInstance, values);
+    NativeSetValues(mNativeMatrix, values);
     return NOERROR;
 }
 
@@ -1314,11 +1314,6 @@ void Matrix::NativeFinalizer(
 {
     SkMatrix* obj = reinterpret_cast<SkMatrix*>(nObj);
     delete obj;
-}
-
-Int64 Matrix::Ni()
-{
-    return mNativeInstance;
 }
 
 Boolean Matrix::NativeIsAffine(

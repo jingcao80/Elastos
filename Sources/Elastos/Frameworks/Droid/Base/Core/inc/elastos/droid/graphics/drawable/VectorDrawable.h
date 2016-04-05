@@ -163,8 +163,6 @@ private:
             /* [in] */ Int32 h,
             /* [in] */ IColorFilter* filter);
 
-        static CARAPI_(AutoPtr<IMatrix>) InitStatic();
-
     public:
         /* Right now the internal data structure is organized as a tree.
          * Each node can be a group node, or a path.

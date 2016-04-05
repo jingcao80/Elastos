@@ -46,7 +46,9 @@ ECode CPicture::RecordingCanvas::DrawPicture(
 const Int32 CPicture::WORKING_STREAM_STORAGE = 16 * 1024;
 
 CAR_OBJECT_IMPL(CPicture);
+
 CAR_INTERFACE_IMPL(CPicture, Object, IPicture);
+
 CPicture::CPicture()
     : mNativePicture(0)
 {}
@@ -130,7 +132,7 @@ ECode CPicture::Draw(
     if (mRecordingCanvas != NULL) {
         EndRecording();
     }
-    NativeDraw(((Canvas*)canvas)->mNativeCanvasWrapper,
+    NativeDraw(((Canvas*)canvas)->mNativeCanvas,
             mNativePicture);
     return NOERROR;
 }

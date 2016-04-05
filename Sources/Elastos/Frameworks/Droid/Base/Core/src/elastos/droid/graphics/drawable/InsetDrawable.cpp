@@ -97,10 +97,11 @@ Boolean InsetDrawable::InsetState::CanConstantState()
 }
 
 CAR_INTERFACE_IMPL_2(InsetDrawable, Drawable, IInsetDrawable, IDrawableCallback);
+
 InsetDrawable::InsetDrawable()
     : mMutated(FALSE)
 {
-    CRect::NewByFriend((CRect**)&mTmpRect);
+    CRect::New((IRect**)&mTmpRect);
 }
 
 InsetDrawable::InsetDrawable(
@@ -108,7 +109,7 @@ InsetDrawable::InsetDrawable(
     /* [in] */ Int32 inset)
     : mMutated(FALSE)
 {
-    CRect::NewByFriend((CRect**)&mTmpRect);
+    CRect::New((IRect**)&mTmpRect);
     ASSERT_SUCCEEDED(constructor(drawable, inset, inset, inset, inset));
 }
 
@@ -120,7 +121,7 @@ InsetDrawable::InsetDrawable(
     /* [in] */ Int32 insetBottom)
     : mMutated(FALSE)
 {
-    CRect::NewByFriend((CRect**)&mTmpRect);
+    CRect::New((IRect**)&mTmpRect);
     ASSERT_SUCCEEDED(constructor(drawable, insetLeft, insetTop, insetRight, insetBottom));
 }
 
@@ -129,7 +130,7 @@ InsetDrawable::InsetDrawable(
     /* [in] */ IResources* res)
     : mMutated(FALSE)
 {
-    CRect::NewByFriend((CRect**)&mTmpRect);
+    CRect::New((IRect**)&mTmpRect);
     mInsetState = new InsetState(state, this, res);
 }
 

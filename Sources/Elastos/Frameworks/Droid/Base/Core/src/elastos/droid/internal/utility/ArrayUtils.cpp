@@ -12,6 +12,32 @@ namespace Droid {
 namespace Internal {
 namespace Utility {
 
+AutoPtr<ArrayOf<Char16> > ArrayUtils::ToChar16Array(
+    /* [in] */ ArrayOf<Char32>* char32Array)
+{
+    return ToChar16Array(char32Array, 0, char32Array ? char32Array->GetLength() : 0);
+}
+
+AutoPtr<ArrayOf<Char16> > ArrayUtils::ToChar16Array(
+    /* [in] */ ArrayOf<Char32>* char32Array,
+    /* [in] */ Int32 index,
+    /* [in] */ Int32 count)
+{
+    if (char32Array == NULL) {
+        return NULL;
+    }
+
+    assert(index >= 0 && index < char32Array->GetLength()
+        && count >= 0 && count <= char32Array->GetLength()
+        && index + count <= char32Array->GetLength());
+
+    AutoPtr<ArrayOf<Char16> > char16Array = ArrayOf<Char16>::Alloc(count);
+    for (Int32 i = 0; i < count; ++i) {
+        char16Array->Set(i, (*char32Array)[index + i]);
+    }
+    return char16Array;
+}
+
 AutoPtr<ArrayOf<Byte> > ArrayUtils::NewUnpaddedByteArray(
     /* [in] */ Int32 minLen)
 {

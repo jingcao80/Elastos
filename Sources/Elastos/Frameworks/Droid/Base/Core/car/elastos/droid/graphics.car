@@ -231,7 +231,7 @@ module
             [in] IBitmap* bitmap);
 
         constructor(
-            [in] Int32 nativeCanvas);
+            [in] Int64 nativeCanvas);
 
         interface ICanvas;
     }

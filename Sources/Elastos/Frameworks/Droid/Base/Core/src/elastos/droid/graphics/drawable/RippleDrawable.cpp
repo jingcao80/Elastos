@@ -72,28 +72,22 @@ ECode RippleDrawable::RippleState::NewDrawable(
 }
 
 /////////////////////// RippleDrawable //////////////
-const Int32 RippleDrawable::RADIUS_AUTO = -1;
-Boolean RippleDrawable::sInit = InitStatic();
-AutoPtr<IPorterDuffXfermode> RippleDrawable::DST_IN;
-AutoPtr<IPorterDuffXfermode> RippleDrawable::SRC_ATOP;
-AutoPtr<IPorterDuffXfermode> RippleDrawable::SRC_OVER;
-const Int32 RippleDrawable::MAX_RIPPLES = 10;
-
-Boolean RippleDrawable::InitStatic()
+static AutoPtr<IPorterDuffXfermode> InitPorterDuffXfermode(
+    /* [in] */ PorterDuffMode mode)
 {
-    AutoPtr<CPorterDuffXfermode> pdx;
-    CPorterDuffXfermode::NewByFriend(PorterDuffMode_DST_IN, (CPorterDuffXfermode**)&pdx);
-    DST_IN = (IPorterDuffXfermode*)pdx.Get();
-    pdx = NULL;
-    CPorterDuffXfermode::NewByFriend(PorterDuffMode_SRC_ATOP, (CPorterDuffXfermode**)&pdx);
-    SRC_ATOP = (IPorterDuffXfermode*)pdx.Get();
-    pdx = NULL;
-    CPorterDuffXfermode::NewByFriend(PorterDuffMode_SRC_OVER, (CPorterDuffXfermode**)&pdx);
-    SRC_OVER = (IPorterDuffXfermode*)pdx.Get();
-    return TRUE;
+    AutoPtr<IPorterDuffXfermode> pdx;
+    CPorterDuffXfermode::New(mode, (IPorterDuffXfermode**)&pdx);
+    return pdx;
 }
 
+const Int32 RippleDrawable::RADIUS_AUTO = -1;
+AutoPtr<IPorterDuffXfermode> RippleDrawable::DST_IN = InitPorterDuffXfermode(PorterDuffMode_DST_IN);
+AutoPtr<IPorterDuffXfermode> RippleDrawable::SRC_ATOP = InitPorterDuffXfermode(PorterDuffMode_SRC_ATOP);
+AutoPtr<IPorterDuffXfermode> RippleDrawable::SRC_OVER = InitPorterDuffXfermode(PorterDuffMode_SRC_OVER);
+const Int32 RippleDrawable::MAX_RIPPLES = 10;
+
 CAR_INTERFACE_IMPL(RippleDrawable, LayerDrawable, IRippleDrawable);
+
 RippleDrawable::RippleDrawable()
     : mBackgroundActive(FALSE)
     , mRippleActive(FALSE)

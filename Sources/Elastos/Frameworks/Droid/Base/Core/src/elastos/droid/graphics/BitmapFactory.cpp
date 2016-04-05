@@ -606,9 +606,8 @@ static AutoPtr<IBitmap> DoDecode(
     SkBitmap* outputBitmap = NULL;
     UInt32 existingBufferSize = 0;
     if (bmpObj != NULL) {
-        Handle64 bmp;
-        bmpObj->GetNativeBitmap(&bmp);
-        outputBitmap = (SkBitmap*) bmp;
+        Handle64 nativeBitmatp = ((CBitmap*)bmpObj.Get())->mNativeBitmap;
+        outputBitmap = reinterpret_cast<SkBitmap*>(nativeBitmatp);
         if (outputBitmap->isImmutable()) {
             Logger::W("BitmapFactory", String("Unable to reuse an immutable bitmap as an image decoder target."));
             bmpObj = NULL;

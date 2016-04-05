@@ -34,7 +34,7 @@ CRegionIterator::~CRegionIterator()
 ECode CRegionIterator::constructor(
     /* [in] */ IRegion* region)
 {
-    mNativeIter = NativeConstructor(((CRegion*)region)->Ni());
+    mNativeIter = NativeConstructor(((CRegion*)region)->mNativeRegion);
     return NOERROR;
 }
 

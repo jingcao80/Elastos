@@ -3,8 +3,8 @@
 #define __ELASTOS_DROID_GRAPHICS_CANVAS_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/graphics/CBitmap.h"
 #include <elastos/core/Object.h>
+#include <Elastos.Droid.Graphics.h>
 
 using Elastos::Core::ICharSequence;
 using Elastosx::Microedition::Khronos::Opengles::IGL;
@@ -22,8 +22,6 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-extern const InterfaceID EIID_Canvas;
-
 class Canvas
     : public Object
     , public ICanvas
@@ -38,7 +36,14 @@ public:
 
     virtual ~Canvas();
 
-public:
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ IBitmap* bitmap);
+
+    CARAPI constructor(
+        /* [in] */ Int64 nativeCanvas);
+
     CARAPI IsRecordingFor(
         /* [in] */ IInterface* it,
         /* [out] */ Boolean* res);
@@ -655,13 +660,6 @@ public:
         /* [in] */ IInterface* o);
 
 protected:
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IBitmap* bitmap);
-
-    CARAPI constructor(
-        /* [in] */ Int64 nativeCanvas);
 
     virtual CARAPI_(AutoPtr<IGL>) GetGL();
 
@@ -1035,14 +1033,14 @@ private:
     CARAPI Dispose();
 
 public:
-    Int64 mNativeCanvasWrapper;
+    Int64 mNativeCanvas;
 
     Int32 mDensity;
 
     Int32 mScreenDensity;
 
 private:
-    AutoPtr<CBitmap> mBitmap;
+    AutoPtr<IBitmap> mBitmap;
 
     // optional field set by the caller
     AutoPtr<IDrawFilter> mDrawFilter;

@@ -298,7 +298,7 @@ GradientDrawable::GradientDrawable(
 {
     CPaint::New(IPaint::ANTI_ALIAS_FLAG, (IPaint**)&mFillPaint);
     CPath::New((IPath**)&mPath);
-    CRectF::NewByFriend((CRectF**)&mRect);
+    CRectF::New((IRectF**)&mRect);
     AutoPtr<GradientState> state = new GradientState(orientation, colors);
     constructor(state, NULL);
 }
@@ -547,12 +547,12 @@ ECode GradientDrawable::Draw(
         mLayerPaint->SetAlpha(mAlpha);
         mLayerPaint->SetColorFilter(mColorFilter);
 
-        Float rad;
+        Float rad, l, t, r, b;
         mStrokePaint->GetStrokeWidth(&rad);
+        mRect->Get(&l, &t, &r, &b);
         Int32 count;
-        canvas->SaveLayer(mRect->mLeft - rad, mRect->mTop - rad,
-                mRect->mRight + rad, mRect->mBottom + rad,
-                mLayerPaint, ICanvas::HAS_ALPHA_LAYER_SAVE_FLAG, &count);
+        canvas->SaveLayer(l - rad, t - rad, r + rad, b + rad,
+            mLayerPaint, ICanvas::HAS_ALPHA_LAYER_SAVE_FLAG, &count);
 
         // don't perform the filter in our individual paints
         // since the layer will do it for us
@@ -621,7 +621,7 @@ ECode GradientDrawable::Draw(
             }
             break;
         case IGradientDrawable::LINE: {
-            CRectF* r = mRect;
+            CRectF* r = (CRectF*)mRect.Get();
             Float y;
             r->GetCenterY(&y);
             if (haveStroke) {
@@ -672,7 +672,7 @@ AutoPtr<IPath> GradientDrawable::BuildRing(
     Float sweep = st->mUseLevelForShape ? (360.0f * level / 10000.0f) : 360.0f;
 
     AutoPtr<IRectF> bounds;
-    CRectF::New((IRectF*)mRect.Get(), (IRectF**)&bounds);
+    CRectF::New(mRect, (IRectF**)&bounds);
 
     Float w, h, x, y;
     bounds->GetWidth(&w);
@@ -912,7 +912,7 @@ Boolean GradientDrawable::EnsureValidRect()
 
         ArrayOf<Int32>* colors = st->mColors;
         if (colors != NULL) {
-            CRectF* r = mRect;
+            CRectF* r = (CRectF*)mRect.Get();
             Float x0, x1, y0, y1;
 
             if (st->mGradient == IGradientDrawable::LINEAR_GRADIENT) {

@@ -491,8 +491,6 @@ public:
     virtual CARAPI ToShortString(
         /* [in] */ IStringBuilder* sb);
 
-    /*package*/ CARAPI_(Int64) Ni();
-
     CARAPI constructor();
 
     CARAPI constructor(
@@ -720,7 +718,7 @@ private:
         /* [in] */ Int64 nObj);
 
 public:
-    Int64 mNativeInstance;
+    Int64 mNativeMatrix;
 };
 
 } // namespace Graphics

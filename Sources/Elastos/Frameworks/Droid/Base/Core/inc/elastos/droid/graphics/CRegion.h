@@ -328,8 +328,6 @@ public:
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
 
-    /*package*/ CARAPI_(Handle64) Ni();
-
 private:
     static CARAPI_(Boolean) NativeEquals(
         /* [in] */ Handle64 region1,

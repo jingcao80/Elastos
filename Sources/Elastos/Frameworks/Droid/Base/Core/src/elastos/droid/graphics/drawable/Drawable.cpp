@@ -91,14 +91,16 @@ ECode Drawable::ConstantState::CanApplyTheme(
 
 AutoPtr<IRect> Init_ZERO_BOUNDS_RECT()
 {
-    AutoPtr<CRect> rect;
-    CRect::NewByFriend((CRect**)&rect);
-    return (IRect*)rect.Get();
+    AutoPtr<IRect> rect;
+    CRect::New((IRect**)&rect);
+    return rect;
 }
 
 CAR_INTERFACE_IMPL(Drawable, Object, IDrawable);
+
 AutoPtr<IRect> Drawable::ZERO_BOUNDS_RECT = Init_ZERO_BOUNDS_RECT();
 const PorterDuffMode Drawable::DEFAULT_TINT_MODE = PorterDuffMode_SRC_IN;
+
 Drawable::Drawable()
     : mStateSet(const_cast<ArrayOf<Int32>*>(StateSet::WILD_CARD.Get()))
     , mLevel(0)

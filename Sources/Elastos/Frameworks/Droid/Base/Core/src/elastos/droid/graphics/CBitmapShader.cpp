@@ -12,7 +12,9 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CBitmapShader);
+
 CAR_INTERFACE_IMPL(CBitmapShader, Shader, IBitmapShader);
+
 ECode CBitmapShader::constructor(
     /* [in] */ IBitmap* bitmap,
     /* [in] */ ShaderTileMode tileX,
@@ -21,8 +23,8 @@ ECode CBitmapShader::constructor(
     mBitmap = bitmap;
     mTileX = tileX;
     mTileY = tileY;
-    Int64 b = ((CBitmap*)bitmap)->Ni();
-    Init(NativeCreate(b, (Int32)tileX, (Int32)tileY));
+    Handle64 nativeBitmatp = ((CBitmap*)bitmap)->mNativeBitmap;
+    Init(NativeCreate(nativeBitmatp, (Int32)tileX, (Int32)tileY));
     return NOERROR;
 }
 

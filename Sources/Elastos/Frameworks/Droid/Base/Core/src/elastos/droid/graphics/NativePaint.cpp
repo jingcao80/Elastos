@@ -7,19 +7,29 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-NativePaint::NativePaint() : SkPaint(),
-        mLetterSpacing(0), mFontFeatureSettings(), mTextLocale(), mFontVariant(VARIANT_DEFAULT) {
+NativePaint::NativePaint()
+    : SkPaint()
+    , mLetterSpacing(0)
+    , mFontFeatureSettings()
+    , mTextLocale()
+    , mFontVariant(VARIANT_DEFAULT)
+{
 }
 
-NativePaint::NativePaint(const NativePaint& paint) : SkPaint(paint),
-        mLetterSpacing(paint.mLetterSpacing), mFontFeatureSettings(paint.mFontFeatureSettings),
-        mTextLocale(paint.mTextLocale), mFontVariant(paint.mFontVariant) {
+NativePaint::NativePaint(const NativePaint& paint)
+    : SkPaint(paint)
+    , mLetterSpacing(paint.mLetterSpacing)
+    , mFontFeatureSettings(paint.mFontFeatureSettings)
+    , mTextLocale(paint.mTextLocale)
+    , mFontVariant(paint.mFontVariant)
+{
 }
 
 NativePaint::~NativePaint() {
 }
 
-NativePaint& NativePaint::operator=(const NativePaint& other) {
+NativePaint& NativePaint::operator=(const NativePaint& other)
+{
     SkPaint::operator=(other);
     mLetterSpacing = other.mLetterSpacing;
     mFontFeatureSettings = other.mFontFeatureSettings;
@@ -28,7 +38,8 @@ NativePaint& NativePaint::operator=(const NativePaint& other) {
     return *this;
 }
 
-bool operator==(const NativePaint& a, const NativePaint& b) {
+bool operator==(const NativePaint& a, const NativePaint& b)
+{
     return static_cast<const SkPaint&>(a) == static_cast<const SkPaint&>(b)
             && a.mLetterSpacing == b.mLetterSpacing
             && a.mFontFeatureSettings == b.mFontFeatureSettings

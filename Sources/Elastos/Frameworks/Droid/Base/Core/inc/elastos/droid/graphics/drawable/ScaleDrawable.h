@@ -185,7 +185,7 @@ private:
 private:
     AutoPtr<ScaleState> mScaleState;
     Boolean mMutated;
-    AutoPtr<CRect> mTmpRect;
+    AutoPtr<IRect> mTmpRect;
 };
 
 } // namespace Drawable

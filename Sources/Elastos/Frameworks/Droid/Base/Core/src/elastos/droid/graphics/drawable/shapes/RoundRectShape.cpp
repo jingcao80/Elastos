@@ -14,32 +14,9 @@ namespace Drawable {
 namespace Shapes {
 
 CAR_INTERFACE_IMPL(RoundRectShape, RectShape, IRoundRectShape);
+
 RoundRectShape::RoundRectShape()
 {}
-
-RoundRectShape::RoundRectShape(
-    /* [in] */ ArrayOf<Float>* outerRadii,
-    /* [in] */ IRectF* inset,
-    /* [in] */ ArrayOf<Float>* innerRadii)
-{
-    if (outerRadii != NULL && outerRadii->GetLength() < 8) {
-        // throw new ArrayIndexOutOfBoundsException(
-        //                             "outer radii must have >= 8 values");
-        assert(0);
-    }
-    if (innerRadii != NULL && innerRadii->GetLength() < 8) {
-        // throw new ArrayIndexOutOfBoundsException(
-        //                             "inner radii must have >= 8 values");
-        assert(0);
-    }
-    mOuterRadii = outerRadii;
-    mInnerRadii = innerRadii;
-
-    if (inset != NULL) {
-        CRectF::New((IRectF**)&mInnerRect);
-    }
-    CPath::New((IPath**)&mPath);
-}
 
 ECode RoundRectShape::constructor(
     /* [in] */ ArrayOf<Float>* outerRadii,
@@ -57,10 +34,11 @@ ECode RoundRectShape::constructor(
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
     mOuterRadii = outerRadii;
+    mInset = inset;
     mInnerRadii = innerRadii;
 
     if (inset != NULL) {
-        CRectF::NewByFriend((CRectF**)&mInnerRect);
+        CRectF::New((IRectF**)&mInnerRect);
     }
     CPath::New((IPath**)&mPath);
     return NOERROR;
@@ -140,8 +118,8 @@ ECode RoundRectShape::CloneImpl(
     RectShape::CloneImpl(IRectShape::Probe(other));
     other->mOuterRadii = mOuterRadii != NULL ? mOuterRadii->Clone() : NULL;
     other->mInnerRadii = mInnerRadii != NULL ? mInnerRadii->Clone() : NULL;
-    CRectF::New((IRectF*)mInset.Get(), (IRectF**)&other->mInset);
-    CRectF::New((IRectF*)mInnerRect.Get(), (IRectF**)&other->mInnerRect);
+    CRectF::New(mInset, (IRectF**)&other->mInset);
+    CRectF::New(mInnerRect, (IRectF**)&other->mInnerRect);
     return CPath::New(mPath, (IPath**)&other->mPath);
 }
 

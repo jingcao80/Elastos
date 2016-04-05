@@ -21,23 +21,6 @@ TextPaint::~TextPaint()
 {
 }
 
-ECode TextPaint::constructor()
-{
-    return Paint::constructor();
-}
-
-ECode TextPaint::constructor(
-    /* [in] */ Int32 flags)
-{
-    return Paint::constructor(flags);
-}
-
-ECode TextPaint::constructor(
-    /* [in] */ IPaint* p)
-{
-    return Paint::constructor(p);
-}
-
 // Special value 0 means no background paint
 ECode TextPaint::SetBgColor(
     /* [in] */ Int32 bgColor)
@@ -167,14 +150,14 @@ ECode TextPaint::Set(
     IPaint* p = IPaint::Probe(tp);
     Paint::Set(p);
 
-    // tp->GetBgColor(&mBgColor);
-    // tp->GetBaselineShift(&mBaselineShift);
-    // tp->GetLinkColor(&mLinkColor);
-    // mDrawableState = NULL;
-    // tp->GetDrawableState((ArrayOf<Int32>**)&mDrawableState);
-    // tp->GetDensity(&mDensity);
-    // tp->GetUnderlineColor(&mUnderlineColor);
-    // tp->GetUnderlineThickness(&mUnderlineThickness);
+    tp->GetBgColor(&mBgColor);
+    tp->GetBaselineShift(&mBaselineShift);
+    tp->GetLinkColor(&mLinkColor);
+    mDrawableState = NULL;
+    tp->GetDrawableState((ArrayOf<Int32>**)&mDrawableState);
+    tp->GetDensity(&mDensity);
+    tp->GetUnderlineColor(&mUnderlineColor);
+    tp->GetUnderlineThickness(&mUnderlineThickness);
 
     return NOERROR;
 }

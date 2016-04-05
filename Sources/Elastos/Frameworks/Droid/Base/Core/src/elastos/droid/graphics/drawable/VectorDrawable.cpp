@@ -227,7 +227,16 @@ ECode VectorDrawable::VectorDrawableState::GetChangingConfigurations(
 }
 
 ///////////////////////////////////// VPathRenderer ////////////////////////////
-AutoPtr<IMatrix> VectorDrawable::VPathRenderer::IDENTITY_MATRIX = InitStatic();
+
+static AutoPtr<IMatrix> InitDENTITY_MATRIX()
+{
+    AutoPtr<IMatrix> matrix;
+    CMatrix::New((IMatrix**)&matrix);
+    return matrix;
+}
+
+AutoPtr<IMatrix> VectorDrawable::VPathRenderer::IDENTITY_MATRIX = InitDENTITY_MATRIX();
+
 VectorDrawable::VPathRenderer::VPathRenderer()
     : mChangingConfigurations(0)
     , mBaseWidth(0)
@@ -241,13 +250,6 @@ VectorDrawable::VPathRenderer::VPathRenderer()
     mRootGroup = new VGroup();
     CPath::New((IPath**)&mPath);
     CPath::New((IPath**)&mRenderPath);
-}
-
-AutoPtr<IMatrix> VectorDrawable::VPathRenderer::InitStatic()
-{
-    AutoPtr<CMatrix> matrix;
-    CMatrix::NewByFriend((CMatrix**)&matrix);
-    return (IMatrix*)matrix.Get();
 }
 
 void VectorDrawable::VPathRenderer::SetRootAlpha(

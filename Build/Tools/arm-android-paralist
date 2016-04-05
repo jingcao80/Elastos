@@ -368,7 +368,7 @@
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/media
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/net
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/power
-  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recent
+> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recent
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/usb
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/volume
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents/misc
@@ -378,10 +378,10 @@
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents/views
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents/model
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents
-  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/policy
-  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/phone
-  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/stack
-  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/tv
+> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/policy
+> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/phone
+> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/stack
+> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/tv
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui
 

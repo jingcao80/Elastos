@@ -406,7 +406,7 @@ ECode GLES20Canvas::SetMatrix(
     /* [in] */ IMatrix* matrix)
 {
     Matrix* m = (Matrix*)matrix;
-    nSetMatrix(mRenderer, m == NULL ? 0 : m->mNativeInstance);
+    nSetMatrix(mRenderer, m == NULL ? 0 : m->mNativeMatrix);
     return NOERROR;
 }
 
@@ -414,7 +414,7 @@ ECode GLES20Canvas::GetMatrix(
     /* [in] */ IMatrix* matrix)
 {
     Matrix* m = (Matrix*)matrix;
-    nGetMatrix(mRenderer, m->mNativeInstance);
+    nGetMatrix(mRenderer, m->mNativeMatrix);
     return NOERROR;
 }
 
@@ -422,7 +422,7 @@ ECode GLES20Canvas::Concat(
     /* [in] */ IMatrix* matrix)
 {
     Matrix* m = (Matrix*)matrix;
-    if (matrix != NULL) nConcatMatrix(mRenderer, m->mNativeInstance);
+    if (matrix != NULL) nConcatMatrix(mRenderer, m->mNativeMatrix);
     return NOERROR;
 }
 
@@ -664,7 +664,7 @@ ECode GLES20Canvas::DrawBitmap(
     CBitmap* nBitmap = (CBitmap*)bitmap;
     Matrix* m = (Matrix*)matrix;
     nDrawBitmap(mRenderer, nBitmap->mNativeBitmap, nBitmap->mBuffer,
-            m->mNativeInstance, nativePaint);
+            m->mNativeMatrix, nativePaint);
     return NOERROR;
 }
 

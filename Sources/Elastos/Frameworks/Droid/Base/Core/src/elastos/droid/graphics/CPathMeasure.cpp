@@ -21,7 +21,9 @@ struct PathMeasurePair
 };
 
 CAR_OBJECT_IMPL(CPathMeasure);
+
 CAR_INTERFACE_IMPL(CPathMeasure, Object, IPathMeasure);
+
 CPathMeasure::~CPathMeasure()
 {
     NativeDestroy(mNativeInstance);
@@ -41,7 +43,7 @@ ECode CPathMeasure::constructor(
     // The native implementation does not copy the path, prevent it from being GC'd
     mPath = path;
     mNativeInstance = NativeCreate(
-                        path != NULL ? ((CPath*)path)->Ni() : 0,
+                        path != NULL ? ((CPath*)path)->mNativePath : 0,
                         forceClosed);
     return NOERROR;
 }
@@ -53,7 +55,7 @@ ECode CPathMeasure::SetPath(
     mPath = path;
     NativeSetPath(
             mNativeInstance,
-            path != NULL ? ((CPath*)path)->Ni() : 0,
+            path != NULL ? ((CPath*)path)->mNativePath : 0,
             forceClosed);
     return NOERROR;
 }
@@ -92,8 +94,7 @@ ECode CPathMeasure::GetMatrix(
 {
     VALIDATE_NOT_NULL(result);
 
-    *result = NativeGetMatrix(mNativeInstance, distance,
-            ((Matrix*)matrix)->Ni(), flags);
+    *result = NativeGetMatrix(mNativeInstance, distance, ((Matrix*)matrix)->mNativeMatrix, flags);
     return NOERROR;
 }
 
@@ -108,7 +109,7 @@ ECode CPathMeasure::GetSegment(
 
     ((CPath*)dst)->mIsSimplePath = FALSE;
     *result = NativeGetSegment(mNativeInstance, startD, stopD,
-            ((CPath*)dst)->Ni(), startWithMoveTo);
+            ((CPath*)dst)->mNativePath, startWithMoveTo);
     return NOERROR;
 }
 

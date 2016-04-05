@@ -519,15 +519,15 @@ ECode CBitmap::CreateBitmap(
 
     Int32 neww = width;
     Int32 newh = height;
-    AutoPtr<CCanvas> canvas;
-    FAIL_RETURN(CCanvas::NewByFriend((CCanvas**)&canvas));
+    AutoPtr<ICanvas> canvas;
+    FAIL_RETURN(CCanvas::New((ICanvas**)&canvas));
     AutoPtr<IBitmap> bmp;
-    AutoPtr<CPaint> paint;
+    AutoPtr<IPaint> paint;
 
-    AutoPtr<CRect> srcR;
-    FAIL_RETURN(CRect::NewByFriend(x, y, x + width, y + height, (CRect**)&srcR));
-    AutoPtr<CRectF> dstR;
-    FAIL_RETURN(CRectF::NewByFriend(0, 0, width, height, (CRectF**)&dstR));
+    AutoPtr<IRect> srcR;
+    FAIL_RETURN(CRect::New(x, y, x + width, y + height, (IRect**)&srcR));
+    AutoPtr<IRectF> dstR;
+    FAIL_RETURN(CRectF::New(0, 0, width, height, (IRectF**)&dstR));
 
     BitmapConfig newConfig = BitmapConfig_ARGB_8888;
     BitmapConfig config;
@@ -561,10 +561,10 @@ ECode CBitmap::CreateBitmap(
         m->RectStaysRect(&isStays);
         Boolean transformed = !isStays;
 
-        AutoPtr<CRectF> deviceR;
-        FAIL_RETURN(CRectF::NewByFriend((CRectF**)&deviceR));
+        AutoPtr<IRectF> deviceR;
+        FAIL_RETURN(CRectF::New((IRectF**)&deviceR));
         Boolean result = FALSE;
-        FAIL_RETURN(m->MapRect((IRectF*)deviceR.Get(), (IRectF*)dstR.Get(), &result));
+        FAIL_RETURN(m->MapRect(deviceR, dstR, &result));
 
         Float w = 0, h = 0;
         deviceR->GetWidth(&w);
@@ -577,10 +577,13 @@ ECode CBitmap::CreateBitmap(
         FAIL_RETURN(CreateBitmap(neww, newh, transformed ? BitmapConfig_ARGB_8888 : newConfig,
                 transformed || hasAlpha, (IBitmap**)&bmp));
 
-        canvas->Translate(-deviceR->mLeft, -deviceR->mTop);
+        Float left, top;
+        deviceR->GetLeft(&left);
+        deviceR->GetTop(&top);
+        canvas->Translate(-left, -top);
         canvas->Concat(m);
 
-        FAIL_RETURN(CPaint::NewByFriend((CPaint**)&paint));
+        FAIL_RETURN(CPaint::New((IPaint**)&paint));
         paint->SetFilterBitmap(filter);
         if (transformed) {
             paint->SetAntiAlias(TRUE);
@@ -598,11 +601,10 @@ ECode CBitmap::CreateBitmap(
     bmp->SetPremultiplied(((CBitmap*)source)->mRequestPremultiplied);
 
     canvas->SetBitmap(bmp);
-    FAIL_RETURN(canvas->DrawBitmap(source,
-        (IRect*)srcR.Get(), (IRectF*)dstR.Get(), (IPaint*)paint.Get()));
+    FAIL_RETURN(canvas->DrawBitmap(source, srcR, dstR, paint));
     canvas->SetBitmap(NULL);
 
-    *bitmap = (IBitmap*)bmp.Get();
+    *bitmap = (IBitmap*)bmp;
     REFCOUNT_ADD(*bitmap);
     return NOERROR;
 }
@@ -2247,11 +2249,6 @@ Boolean CBitmap::NativeSameAs(
         }
     }
     return TRUE;
-}
-
-Int64 CBitmap::Ni()
-{
-    return mNativeBitmap;
 }
 
 } // namespace Graphics

@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/drawable/ClipDrawable.h"
 #include "elastos/droid/graphics/drawable/CClipDrawable.h"
 #include "elastos/droid/view/CGravity.h"
@@ -96,7 +97,7 @@ Boolean ClipDrawable::ClipState::CanConstantState()
 CAR_INTERFACE_IMPL_2(ClipDrawable, Drawable, IClipDrawable, IDrawableCallback)
 ClipDrawable::ClipDrawable()
 {
-    CRect::NewByFriend((CRect**)&mTmpRect);
+    CRect::New((IRect**)&mTmpRect);
 }
 
 ClipDrawable::ClipDrawable(
@@ -104,7 +105,7 @@ ClipDrawable::ClipDrawable(
     /* [in] */ Int32 gravity,
     /* [in] */ Int32 orientation)
 {
-    CRect::NewByFriend((CRect**)&mTmpRect);
+    CRect::New((IRect**)&mTmpRect);
     ASSERT_SUCCEEDED(constructor(drawable, gravity, orientation));
 }
 
@@ -308,7 +309,7 @@ ECode ClipDrawable::Draw(
         return NOERROR;
     }
 
-    IRect* r = (IRect*)mTmpRect.Get();
+    IRect* r = mTmpRect;
     AutoPtr<IRect> bounds;
     GetBounds((IRect**)&bounds);
     Int32 level = 0;
@@ -382,7 +383,7 @@ ClipDrawable::ClipDrawable(
     /* [in] */ ClipState* state,
     /* [in] */ IResources* res)
 {
-    CRect::NewByFriend((CRect**)&mTmpRect);
+    CRect::New((IRect**)&mTmpRect);
     ASSERT_SUCCEEDED(constructor(state, res));
 }
 

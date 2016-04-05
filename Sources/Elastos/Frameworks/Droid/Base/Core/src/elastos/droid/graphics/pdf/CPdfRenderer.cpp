@@ -140,7 +140,7 @@ ECode CPdfRenderer::Page::Render(
     Int32 contentRight = (dest != NULL) ? dest->mRight : width;
     Int32 contentBottom = (dest != NULL) ? dest->mBottom : height;
 
-    Int64 transformPtr = (transform != NULL) ? ((Matrix*)transform)->mNativeInstance : 0;
+    Int64 transformPtr = (transform != NULL) ? ((Matrix*)transform)->mNativeMatrix : 0;
 
     NativeRenderPage(mHost->mNativeDocument, mNativePage, ((CBitmap*)destination)->mNativeBitmap, contentLeft,
             contentTop, contentRight, contentBottom, transformPtr, renderMode);

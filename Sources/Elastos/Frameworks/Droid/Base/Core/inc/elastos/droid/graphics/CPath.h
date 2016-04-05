@@ -580,8 +580,6 @@ public:
     CARAPI Transform(
         /* [in] */ IMatrix* matrix);
 
-    /*package*/ CARAPI_(Int64) Ni();
-
     /**
      * Approximate the <code>Path</code> with a series of line segments.
      * This returns float[] with the array containing point components.
@@ -611,11 +609,6 @@ private:
         /* [in] */ Float right,
         /* [in] */ Float bottom,
         /* [in] */ PathDirection dir);
-
-    static CARAPI_(Int64) Init1();
-
-    static CARAPI_(Int64) Init2(
-        /* [in] */ Int64 nPath);
 
     static CARAPI_(void) NativeReset(
         /* [in] */ Int64 nPath);

@@ -458,7 +458,7 @@ Boolean GraphicBuffer::nLockCanvas(
 
     SkRect clipRect;
     clipRect.set(rect.left, rect.top, rect.right, rect.bottom);
-    SkCanvas* nativeCanvas = reinterpret_cast<NativeCanvas*>(impl->mNativeCanvasWrapper)->getSkCanvas();
+    SkCanvas* nativeCanvas = reinterpret_cast<NativeCanvas*>(impl->mNativeCanvas)->getSkCanvas();
     nativeCanvas->clipRect(clipRect);
 
     if (dirtyRect) {

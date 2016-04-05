@@ -126,7 +126,7 @@ ECode CRegion::SetPath(
 {
     VALIDATE_NOT_NULL(result);
 
-    *result = NativeSetPath(mNativeRegion, ((CPath*)path)->Ni(), ((CRegion*)clip)->mNativeRegion);
+    *result = NativeSetPath(mNativeRegion, ((CPath*)path)->mNativePath, ((CRegion*)clip)->mNativeRegion);
     return NOERROR;
 }
 
@@ -187,7 +187,7 @@ ECode CRegion::GetBoundaryPath(
     VALIDATE_NOT_NULL(path);
 
     CPath::New(path);
-    NativeGetBoundaryPath(mNativeRegion, ((CPath*)*path)->Ni());
+    NativeGetBoundaryPath(mNativeRegion, ((CPath*)*path)->mNativePath);
     return NOERROR;
 }
 
@@ -201,7 +201,7 @@ ECode CRegion::GetBoundaryPath(
 {
     VALIDATE_NOT_NULL(result);
 
-    *result = NativeGetBoundaryPath(mNativeRegion, ((CPath*)path)->Ni());
+    *result = NativeGetBoundaryPath(mNativeRegion, ((CPath*)path)->mNativePath);
     return NOERROR;
 }
 
@@ -505,11 +505,6 @@ ECode CRegion::WriteToParcel(
         return E_RUNTIME_EXCEPTION;
     }
     return NOERROR;
-}
-
-Handle64 CRegion::Ni()
-{
-    return mNativeRegion;
 }
 
 Boolean CRegion::NativeEquals(

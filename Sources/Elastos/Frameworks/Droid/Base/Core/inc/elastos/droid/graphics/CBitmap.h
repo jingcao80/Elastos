@@ -728,8 +728,6 @@ public:
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
 
-    CARAPI_(Int64) Ni();
-
     // static AutoPtr<IInterface> CreateBitmap(
     //     /* [in] */ Int32 nativeBitmap,
     //     /* [in] */ ArrayOf<Byte>* buffer,
@@ -979,7 +977,7 @@ public:
      *
      * @hide
      */
-    Int64 mNativeBitmap;
+    Handle64 mNativeBitmap;
 
     /**
      * Backing buffer for the Bitmap.

@@ -18,6 +18,7 @@
 #include "elastos/droid/graphics/MinikinSkia.h"
 #include "elastos/droid/graphics/MinikinUtils.h"
 #include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/internal/utility/ArrayUtils.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/Character.h>
 #include <elastos/utility/logging/Logger.h>
@@ -34,6 +35,7 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::ISpannedString;
 using Elastos::Droid::Text::ISpannableString;
 using Elastos::Droid::Text::IGraphicsOperations;
+using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Core::Character;
 using Elastos::Core::IString;
 using Elastos::Utility::Logging::Logger;
@@ -120,6 +122,7 @@ const Int32 Paint::BIDI_FLAG_MASK = 0x7;
 const Int32 Paint::CURSOR_OPT_MAX_VALUE = IPaint::CURSOR_AT;
 
 CAR_INTERFACE_IMPL(Paint, Object, IPaint);
+
 Paint::Paint()
     : mNativePaint(0)
     , mNativeTypeface(0)
@@ -199,7 +202,7 @@ ECode Paint::Reset()
 ECode Paint::Set(
     /* [in] */ IPaint* src)
 {
-    assert(src != NULL);
+    VALIDATE_NOT_NULL(src)
     Paint* src_ = (Paint*)src;
     if (this != src_) {
         assert(src_ != NULL);
@@ -218,10 +221,9 @@ void Paint::SetClassVariablesFrom(
     mPathEffect = paint->mPathEffect;
     mRasterizer = paint->mRasterizer;
 
+    mShader = NULL;
     if (paint->mShader != NULL) {
         ((Shader*)paint->mShader.Get())->Copy((IShader**)&mShader);
-    } else {
-        mShader = NULL;
     }
 
     mTypeface = paint->mTypeface;
@@ -255,6 +257,7 @@ ECode Paint::SetCompatibilityScaling(
 ECode Paint::GetBidiFlags(
     /* [out] */ Int32* flags)
 {
+    VALIDATE_NOT_NULL(flags)
     *flags = mBidiFlags;
     return NOERROR;
 }
@@ -265,6 +268,7 @@ ECode Paint::SetBidiFlags(
     // only flag value is the 3-bit BIDI control setting
     flags &= BIDI_FLAG_MASK;
     if (flags > BIDI_MAX_FLAG_VALUE) {
+        Logger::E(TAG, "IllegalArgumentException unknown bidi flag: %d", flags);
         // throw new IllegalArgumentException("unknown bidi flag: " + flags);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -275,6 +279,7 @@ ECode Paint::SetBidiFlags(
 ECode Paint::GetFlags(
     /* [out] */ Int32* flags)
 {
+    VALIDATE_NOT_NULL(flags)
     *flags = ((SkPaint*)mNativePaint)->getFlags();
     return NOERROR;
 }
@@ -289,6 +294,7 @@ ECode Paint::SetFlags(
 ECode Paint::GetHinting(
     /* [out] */ Int32* mode)
 {
+    VALIDATE_NOT_NULL(mode)
     *mode = ((SkPaint*)mNativePaint)->getHinting() == SkPaint::kNo_Hinting ? 0 : 1;
     return NOERROR;
 }
@@ -303,6 +309,7 @@ ECode Paint::SetHinting(
 ECode Paint::IsAntiAlias(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 flags;
     GetFlags(&flags);
     *result = (flags & IPaint::ANTI_ALIAS_FLAG) != 0;
@@ -319,6 +326,7 @@ ECode Paint::SetAntiAlias(
 ECode Paint::IsDither(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 flags;
     GetFlags(&flags);
     *result = (flags & IPaint::DITHER_FLAG) != 0;
@@ -335,6 +343,7 @@ ECode Paint::SetDither(
 ECode Paint::IsLinearText(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 flags;
     GetFlags(&flags);
     *result = (flags & IPaint::LINEAR_TEXT_FLAG) != 0;
@@ -351,6 +360,7 @@ ECode Paint::SetLinearText(
 ECode Paint::IsSubpixelText(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 flags;
     GetFlags(&flags);
     *result = (flags & IPaint::SUBPIXEL_TEXT_FLAG) != 0;
@@ -367,6 +377,7 @@ ECode Paint::SetSubpixelText(
 ECode Paint::IsUnderlineText(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 flags;
     GetFlags(&flags);
     *result = (flags & IPaint::UNDERLINE_TEXT_FLAG) != 0;
@@ -383,6 +394,7 @@ ECode Paint::SetUnderlineText(
 ECode Paint::IsStrikeThruText(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 flags;
     GetFlags(&flags);
     *result = (flags & IPaint::STRIKE_THRU_TEXT_FLAG) != 0;
@@ -399,6 +411,7 @@ ECode Paint::SetStrikeThruText(
 ECode Paint::IsFakeBoldText(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 flags;
     GetFlags(&flags);
     *result = (flags & IPaint::FAKE_BOLD_TEXT_FLAG) != 0;
@@ -415,6 +428,7 @@ ECode Paint::SetFakeBoldText(
 ECode Paint::IsFilterBitmap(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 flags;
     GetFlags(&flags);
     *result = (flags & IPaint::FILTER_BITMAP_FLAG) != 0;
@@ -431,6 +445,7 @@ ECode Paint::SetFilterBitmap(
 ECode Paint::GetStyle(
     /* [out] */ PaintStyle* style)
 {
+    VALIDATE_NOT_NULL(style)
     *style = sStyleArray[NativeGetStyle(mNativePaint)];
     return NOERROR;
 }
@@ -445,6 +460,7 @@ ECode Paint::SetStyle(
 ECode Paint::GetColor(
     /* [out] */ Int32* color)
 {
+    VALIDATE_NOT_NULL(color)
     *color = ((SkPaint*)mNativePaint)->getColor();
     return NOERROR;
 }
@@ -459,6 +475,7 @@ ECode Paint::SetColor(
 ECode Paint::GetAlpha(
     /* [out] */ Int32* alpha)
 {
+    VALIDATE_NOT_NULL(alpha)
     *alpha = ((SkPaint*)mNativePaint)->getAlpha();
     return NOERROR;
 }
@@ -511,6 +528,7 @@ ECode Paint::SetStrokeMiter(
 ECode Paint::GetStrokeCap(
     /* [out] */ PaintCap* cap)
 {
+    VALIDATE_NOT_NULL(cap)
     *cap = sCapArray[NativeGetStrokeCap(mNativePaint)];
     return NOERROR;
 }
@@ -525,6 +543,7 @@ ECode Paint::SetStrokeCap(
 ECode Paint::GetStrokeJoin(
     /* [out] */ PaintJoin* join)
 {
+    VALIDATE_NOT_NULL(join)
     *join = sJoinArray[NativeGetStrokeJoin(mNativePaint)];
     return NOERROR;
 }
@@ -541,13 +560,15 @@ ECode Paint::GetFillPath(
     /* [in] */ IPath* dst,
     /* [out] */ Boolean* result)
 {
-    *result = NativeGetFillPath(mNativePaint, ((CPath*)src)->Ni(), ((CPath*)dst)->Ni());
+    VALIDATE_NOT_NULL(result)
+    *result = NativeGetFillPath(mNativePaint, ((CPath*)src)->mNativePath, ((CPath*)dst)->mNativePath);
     return NOERROR;
 }
 
 ECode Paint::GetShader(
     /* [out] */ IShader** shader)
 {
+    VALIDATE_NOT_NULL(shader)
     *shader = mShader;
     REFCOUNT_ADD(*shader);
     return NOERROR;
@@ -570,6 +591,7 @@ ECode Paint::SetShader(
 ECode Paint::GetColorFilter(
     /* [out] */ IColorFilter** filter)
 {
+    VALIDATE_NOT_NULL(filter)
     *filter = mColorFilter;
     REFCOUNT_ADD(*filter);
     return NOERROR;
@@ -592,6 +614,7 @@ ECode Paint::SetColorFilter(
 ECode Paint::GetXfermode(
     /* [out] */ IXfermode** xfermode)
 {
+    VALIDATE_NOT_NULL(xfermode)
     *xfermode = mXfermode;
     REFCOUNT_ADD(*xfermode);
     return NOERROR;
@@ -614,6 +637,7 @@ ECode Paint::SetXfermode(
 ECode Paint::GetPathEffect(
     /* [out] */ IPathEffect** effect)
 {
+    VALIDATE_NOT_NULL(effect)
     *effect = mPathEffect;
     REFCOUNT_ADD(*effect);
     return NOERROR;
@@ -636,6 +660,7 @@ ECode Paint::SetPathEffect(
 ECode Paint::GetMaskFilter(
     /* [out] */ IMaskFilter** maskfilter)
 {
+    VALIDATE_NOT_NULL(maskfilter)
     *maskfilter = mMaskFilter;
     REFCOUNT_ADD(*maskfilter)
     return NOERROR;
@@ -658,6 +683,7 @@ ECode Paint::SetMaskFilter(
 ECode Paint::GetTypeface(
     /* [out] */ ITypeface** typeface)
 {
+    VALIDATE_NOT_NULL(typeface)
     *typeface = mTypeface;
     REFCOUNT_ADD(*typeface);
     return NOERROR;
@@ -679,6 +705,7 @@ ECode Paint::SetTypeface(
 ECode Paint::GetRasterizer(
     /* [out] */ IRasterizer** rasterizer)
 {
+    VALIDATE_NOT_NULL(rasterizer)
     *rasterizer = mRasterizer;
     REFCOUNT_ADD(*rasterizer);
     return NOERROR;
@@ -724,6 +751,7 @@ ECode Paint::HasShadowLayer(
 ECode Paint::GetTextAlign(
     /* [out] */ PaintAlign* align)
 {
+    VALIDATE_NOT_NULL(align)
     *align = sAlignArray[NativeGetTextAlign(mNativePaint)];
     return NOERROR;
 }
@@ -738,6 +766,7 @@ ECode Paint::SetTextAlign(
 ECode Paint::GetTextLocale(
     /* [out] */ ILocale** locale)
 {
+    VALIDATE_NOT_NULL(locale)
     *locale = mLocale;
     REFCOUNT_ADD(*locale);
     return NOERROR;
@@ -807,6 +836,7 @@ ECode Paint::SetTextScaleX(
 ECode Paint::GetTextSkewX(
     /* [out] */ Float* skewX)
 {
+    VALIDATE_NOT_NULL(skewX)
     *skewX = SkScalarToFloat(((SkPaint*)mNativePaint)->getTextSkewX());
     return NOERROR;
 }
@@ -860,6 +890,7 @@ ECode Paint::SetFontFeatureSettings(
 ECode Paint::Ascent(
     /* [out] */ Float* distance)
 {
+    VALIDATE_NOT_NULL(distance)
     SkPaint::FontMetrics metrics;
     ((SkPaint*)mNativePaint)->getFontMetrics(&metrics);
     *distance = SkScalarToFloat(metrics.fAscent);
@@ -869,6 +900,7 @@ ECode Paint::Ascent(
 ECode Paint::Descent(
     /* [out] */ Float* distance)
 {
+    VALIDATE_NOT_NULL(distance)
     SkPaint::FontMetrics metrics;
     ((SkPaint*)mNativePaint)->getFontMetrics(&metrics);
     *distance = SkScalarToFloat(metrics.fDescent);
@@ -879,6 +911,7 @@ ECode Paint::GetFontMetrics(
     /* [in] */ IPaintFontMetrics* metrics,
     /* [out] */ Float* spacing)
 {
+    VALIDATE_NOT_NULL(spacing)
     SkPaint::FontMetrics metrics_;
     SkScalar spacing_ = ((SkPaint*)mNativePaint)->getFontMetrics(&metrics_);
 
@@ -963,6 +996,7 @@ ECode Paint::GetFontMetricsInt(
 ECode Paint::GetFontMetricsInt(
     /* [out] */ IPaintFontMetricsInt** fmi)
 {
+    VALIDATE_NOT_NULL(fmi)
     CPaintFontMetricsInt::New(fmi);
     Int32 spacing;
     return GetFontMetricsInt(*fmi, &spacing);
@@ -980,6 +1014,8 @@ ECode Paint::MeasureText(
     /* [in] */ Int32 count,
     /* [out] */ Float* width)
 {
+    VALIDATE_NOT_NULL(width)
+    *width = 0;
     if ((index | count) < 0 || index + count > text->GetLength()) {
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
@@ -1007,6 +1043,8 @@ ECode Paint::MeasureText(
     /* [in] */ Int32 end,
     /* [out] */ Float* width)
 {
+    VALIDATE_NOT_NULL(width)
+    *width = 0;
     if (text.IsNull()) {
         Logger::E(TAG, "text cannot be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1037,6 +1075,8 @@ ECode Paint::MeasureText(
     /* [in] */ const String& text,
     /* [out] */ Float* width)
 {
+    VALIDATE_NOT_NULL(width)
+    *width = 0;
     if (text.IsNull()) {
         Logger::E(TAG, "text cannot be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1066,6 +1106,8 @@ ECode Paint::MeasureText(
     /* [in] */ Int32 end,
     /* [out] */ Float* width)
 {
+    VALIDATE_NOT_NULL(width)
+    *width = 0;
     if (text == NULL) {
         Logger::E(TAG, "text cannot be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1106,6 +1148,8 @@ ECode Paint::BreakText(
     /* [in] */ ArrayOf<Float>* measuredWidth,
     /* [out] */ Int32* number)
 {
+    VALIDATE_NOT_NULL(number)
+    *number = 0;
     if (index < 0 || text->GetLength() - index < Elastos::Core::Math::Abs(count)) {
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
@@ -1139,6 +1183,8 @@ ECode Paint::BreakText(
     /* [in] */ ArrayOf<Float>* measuredWidth,
     /* [out] */ Int32* number)
 {
+    VALIDATE_NOT_NULL(number)
+    *number = 0;
     if (text == NULL) {
         Logger::E(TAG, "text cannot be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1181,6 +1227,8 @@ ECode Paint::BreakText(
     /* [in] */ ArrayOf<Float>* measuredWidth,
     /* [out] */ Int32* number)
 {
+    VALIDATE_NOT_NULL(number)
+    *number = 0;
     if (text.IsNull()) {
         Logger::E(TAG, "text cannot be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1213,6 +1261,8 @@ ECode Paint::GetTextWidths(
     /* [out] */ ArrayOf<Float>* widths,
     /* [out] */ Int32* number)
 {
+    VALIDATE_NOT_NULL(number)
+    *number = 0;
     if ((index | count) < 0 || index + count > text->GetLength()
             || count > widths->GetLength()) {
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
@@ -1246,6 +1296,8 @@ ECode Paint::GetTextWidths(
     /* [in] */ ArrayOf<Float>* widths,
     /* [out] */ Int32* number)
 {
+    VALIDATE_NOT_NULL(number)
+    *number = 0;
     if (text == NULL) {
         Logger::E(TAG, "text cannot be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1289,6 +1341,8 @@ ECode Paint::GetTextWidths(
     /* [in] */ ArrayOf<Float>* widths,
     /* [out] */ Int32* number)
 {
+    VALIDATE_NOT_NULL(number)
+    *number = 0;
     if (text.IsNull()) {
         Logger::E(TAG, "text cannot be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1339,6 +1393,8 @@ ECode Paint::GetTextRunAdvances(
     /* [in] */ Int32 advancesIndex,
     /* [out] */ Float* advance)
 {
+    VALIDATE_NOT_NULL(advance)
+    *advance = 0;
     if ((index | count | contextIndex | contextCount | advancesIndex
             | (index - contextIndex) | (contextCount - count)
             | ((contextIndex + contextCount) - (index + count))
@@ -1384,6 +1440,8 @@ ECode Paint::GetTextRunAdvances(
     /* [in] */ Int32 advancesIndex,
     /* [out] */ Float* advance)
 {
+    VALIDATE_NOT_NULL(advance)
+    *advance = 0;
     if (text == NULL) {
         Logger::E(TAG, "text cannot be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1437,6 +1495,8 @@ ECode Paint::GetTextRunAdvances(
     /* [in] */ Int32 advancesIndex,
     /* [out] */ Float* advance)
 {
+    VALIDATE_NOT_NULL(advance)
+    *advance = 0;
     if (text.IsNull()) {
         Logger::E(TAG, "text cannot be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1486,6 +1546,8 @@ ECode Paint::GetTextRunCursor(
     /* [in] */ Int32 cursorOpt,
     /* [out] */ Int32* position)
 {
+    VALIDATE_NOT_NULL(position)
+    *position = 0;
     Int32 contextEnd = contextStart + contextLength;
     if (((contextStart | contextEnd | offset | (contextEnd - contextStart)
         | (offset - contextStart) | (contextEnd - offset)
@@ -1508,6 +1570,8 @@ ECode Paint::GetTextRunCursor(
     /* [in] */ Int32 cursorOpt,
     /* [out] */ Int32* position)
 {
+    VALIDATE_NOT_NULL(position)
+    *position = 0;
    if (IString::Probe(text) || ISpannedString::Probe(text) || ISpannableString::Probe(text)) {
         String str;
         text->ToString(&str);
@@ -1536,6 +1600,8 @@ ECode Paint::GetTextRunCursor(
     /* [in] */ Int32 cursorOpt,
     /* [out] */ Int32* position)
 {
+    VALIDATE_NOT_NULL(position)
+    *position = 0;
     if (((contextStart | contextEnd | offset | (contextEnd - contextStart)
             | (offset - contextStart) | (contextEnd - offset)
             | (text.GetLength() - contextEnd) | cursorOpt) < 0)
@@ -1559,7 +1625,7 @@ ECode Paint::GetTextPath(
     if ((index | count) < 0 || index + count > text->GetLength()) {
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
-    NativeGetTextPath(mNativePaint, mNativeTypeface, mBidiFlags, text, index, count, x, y, ((CPath*)path)->Ni());
+    NativeGetTextPath(mNativePaint, mNativeTypeface, mBidiFlags, text, index, count, x, y, ((CPath*)path)->mNativePath);
     return NOERROR;
 }
 
@@ -1574,7 +1640,7 @@ ECode Paint::GetTextPath(
     if ((start | end | (end - start) | (text.GetLength() - end)) < 0) {
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
-    NativeGetTextPath(mNativePaint, mNativeTypeface, mBidiFlags, text, start, end, x, y, ((CPath*)path)->Ni());
+    NativeGetTextPath(mNativePaint, mNativeTypeface, mBidiFlags, text, start, end, x, y, ((CPath*)path)->mNativePath);
     return NOERROR;
 }
 
@@ -1834,10 +1900,7 @@ Float Paint::NativeMeasureText(
     NativePaint* paint = GraphicsNative::GetNativePaint(this);
     Float result = 0;
 
-    AutoPtr< ArrayOf<Char16> > textArray = ArrayOf<Char16>::Alloc(text->GetLength());
-    for (Int32 i = 0; i < text->GetLength(); ++i) {
-        (*textArray)[i] = (Char16)(*text)[i];
-    }
+    AutoPtr< ArrayOf<Char16> > textArray = ArrayUtils::ToChar16Array(text);
 
     Layout layout;
     TypefaceImpl* typeface = GraphicsNative::GetNativeTypeface(this);
@@ -1941,7 +2004,7 @@ static int breakText(
 Int32 Paint::NativeBreakText(
     /* [in] */ Int64 paintHandle,
     /* [in] */ Int64 typefaceHandle,
-    /* [in] */ ArrayOf<Char32>* _text,
+    /* [in] */ ArrayOf<Char32>* text,
     /* [in] */ Int32 index,
     /* [in] */ Int32 count,
     /* [in] */ Float maxWidth,
@@ -1960,16 +2023,13 @@ Int32 Paint::NativeBreakText(
         tbd = NativePaint::kForward_TextBufferDirection;
     }
 
-    if ((index < 0) || (index + count > _text->GetLength())) {
+    if ((index < 0) || (index + count > text->GetLength())) {
         // doThrowAIOOBE(env);
         assert(0);
         return 0;
     }
 
-    AutoPtr< ArrayOf<Char16> > char16Array = ArrayOf<Char16>::Alloc(_text->GetLength() - index);
-    for (Int32 i = index; i < _text->GetLength(); ++i) {
-        (*char16Array)[i] = (Char16)(*_text)[i];
-    }
+    AutoPtr< ArrayOf<Char16> > char16Array = ArrayUtils::ToChar16Array(text, index, count);
 
     count = breakText(*paint, typeface, char16Array->GetPayload(),
         count, maxWidth, bidiFlags, measuredWidth, tbd);
@@ -1993,8 +2053,9 @@ Int32 Paint::NativeBreakText(
                                     NativePaint::kBackward_TextBufferDirection;
 
     int count = text.GetLength();
-    const Char16* ta = text.GetChar16s()->GetPayload();
-    count = breakText(*paint, typeface, ta, count, maxWidth, bidiFlags, measuredWidth, tbd);
+    AutoPtr< ArrayOf<Char16> > char16Array = text.GetChar16s();
+    count = breakText(*paint, typeface, char16Array->GetPayload(),
+        count, maxWidth, bidiFlags, measuredWidth, tbd);
     // env->ReleaseStringChars(jtext, text);
     return count;
 }
@@ -2049,9 +2110,8 @@ Int32 Paint::NativeGetTextWidths(
 {
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
-    assert(0 && "TODO");
-    const Char16* textArray = String(*text).GetChar16s()->GetPayload();
-    return dotextwidths(paint, typeface, textArray + index, count, widths, bidiFlags);
+    AutoPtr<ArrayOf<Char16> > char16Array = ArrayUtils::ToChar16Array(text);
+    return dotextwidths(paint, typeface, char16Array->GetPayload() + index, count, widths, bidiFlags);
 }
 
 Int32 Paint::NativeGetTextWidths(
@@ -2067,7 +2127,7 @@ Int32 Paint::NativeGetTextWidths(
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
     AutoPtr<ArrayOf<Char16> > textArray = text.GetChar16s();
     return dotextwidths(paint, typeface,
-        (Char16*)textArray->GetPayload() + start, end - start, widths, bidiFlags);
+        textArray->GetPayload() + start, end - start, widths, bidiFlags);
 }
 
 Int32 Paint::NativeGetTextGlyphs(
@@ -2147,9 +2207,9 @@ Float Paint::NativeGetTextRunAdvances(
 {
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
-    Char16* textArray = String(*text).GetChar16s()->GetPayload();
-    Float result = doTextRunAdvances(paint, typeface, textArray + contextIndex,
-            index - contextIndex, count, contextCount, isRtl, advances, advancesIndex);
+    AutoPtr< ArrayOf<Char16> > char16Array = ArrayUtils::ToChar16Array(text);
+    Float result = doTextRunAdvances(paint, typeface, char16Array->GetPayload() + contextIndex,
+        index - contextIndex, count, contextCount, isRtl, advances, advancesIndex);
     return result;
 }
 
@@ -2167,10 +2227,11 @@ Float Paint::NativeGetTextRunAdvances(
 {
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
-    const Char16* textArray = text.GetChar16s()->GetPayload();
-    Float result = doTextRunAdvances(paint, typeface, textArray + contextStart,
-            start - contextStart, end - start, contextEnd - contextStart, isRtl,
-            advances, advancesIndex);
+
+    AutoPtr< ArrayOf<Char16> > char16Array = text.GetChar16s();
+    Float result = doTextRunAdvances(paint, typeface, char16Array->GetPayload() + contextStart,
+        start - contextStart, end - start, contextEnd - contextStart, isRtl,
+        advances, advancesIndex);
     return result;
 }
 
@@ -2202,9 +2263,9 @@ Int32 Paint::NativeGetTextRunCursor(
     /* [in] */ Int32 cursorOpt)
 {
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    Char16* textArray = String(*text).GetChar16s()->GetPayload();
-    Int32 result = doTextRunCursor(paint, textArray, contextStart, contextCount, dir,
-            offset, cursorOpt);
+    AutoPtr< ArrayOf<Char16> > char16Array = ArrayUtils::ToChar16Array(text);
+    Int32 result = doTextRunCursor(paint, char16Array->GetPayload(),
+        contextStart, contextCount, dir, offset, cursorOpt);
     return result;
 }
 
@@ -2218,8 +2279,8 @@ Int32 Paint::NativeGetTextRunCursor(
     /* [in] */ Int32 cursorOpt)
 {
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    const Char16* textArray = text.GetChar16s()->GetPayload();
-    Int32 result = doTextRunCursor(paint, textArray, contextStart,
+    AutoPtr< ArrayOf<Char16> > char16Array = text.GetChar16s();
+    Int32 result = doTextRunCursor(paint, char16Array->GetPayload(), contextStart,
             contextEnd - contextStart, dir, offset, cursorOpt);
     return result;
 }
@@ -2265,8 +2326,8 @@ void Paint::NativeGetTextPath(
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
-    const Char16* textArray = String(*text).GetChar16s()->GetPayload();
-    getTextPath(paint, typeface, textArray + index, count, bidiFlags, x, y, path);
+    AutoPtr< ArrayOf<Char16> > char16Array = ArrayUtils::ToChar16Array(text);
+    getTextPath(paint, typeface, char16Array->GetPayload() + index, count, bidiFlags, x, y, path);
 }
 
 void Paint::NativeGetTextPath(
@@ -2283,15 +2344,15 @@ void Paint::NativeGetTextPath(
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
-    const Char16* textArray = text.GetChar16s()->GetPayload();
-    getTextPath(paint, typeface, textArray + start, end - start, bidiFlags, x, y, path);
+    AutoPtr< ArrayOf<Char16> > char16Array = text.GetChar16s();
+    getTextPath(paint, typeface, char16Array->GetPayload() + start, end - start, bidiFlags, x, y, path);
 }
 
 static void doTextBounds(
-    /* [in] */ const Char16* text,
+    /* [in] */ ArrayOf<Char16>* text,
     /* [in] */ Int32 count,
     /* [in] */ IRect* bounds,
-    /* [in] */ const NativePaint& paint,
+    /* [in] */ NativePaint* paint,
     /* [in] */ TypefaceImpl* typeface,
     /* [in] */ Int32 bidiFlags)
 {
@@ -2299,7 +2360,8 @@ static void doTextBounds(
     SkIRect ir;
 
     Layout layout;
-    MinikinUtils::doLayout(&layout, &paint, bidiFlags, typeface, text, 0, count, count);
+    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface,
+        text->GetPayload(), 0, count, count);
     MinikinRect rect;
     layout.getBounds(&rect);
     r.fLeft = rect.mLeft;
@@ -2319,10 +2381,10 @@ void Paint::NativeGetStringBounds(
     /* [in] */ Int32 bidiFlags,
     /* [in] */ IRect* bounds)
 {
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
-    const Char16* textArray = text.GetChar16s()->GetPayload();
-    doTextBounds(textArray + start, end - start, bounds, *paint, typeface, bidiFlags);
+    AutoPtr< ArrayOf<Char16> > char16Array = text.GetChar16s(start, end);
+    doTextBounds(char16Array, char16Array->GetLength(), bounds, paint, typeface, bidiFlags);
 }
 
 void Paint::NativeGetCharArrayBounds(
@@ -2334,10 +2396,10 @@ void Paint::NativeGetCharArrayBounds(
     /* [in] */ Int32 bidiFlags,
     /* [in] */ IRect* bounds)
 {
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
-    const Char16* textArray = String(*text).GetChar16s()->GetPayload();
-    doTextBounds(textArray + index, count, bounds, *paint, typeface, bidiFlags);
+    AutoPtr< ArrayOf<Char16> > char16Array = ArrayUtils::ToChar16Array(text, index, count);
+    doTextBounds(char16Array, char16Array->GetLength(), bounds, paint, typeface, bidiFlags);
 }
 
 void Paint::NativeFinalizer(

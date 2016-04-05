@@ -20,6 +20,7 @@
 #include "elastos/droid/graphics/NativePaint.h"
 #include "elastos/droid/graphics/NativeCanvas.h"
 #include "elastos/droid/graphics/MinikinUtils.h"
+#include "elastos/droid/internal/utility/ArrayUtils.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 #include <skia/core/SkCanvas.h>
@@ -38,6 +39,7 @@
 #include <minikin/Layout.h>
 #include <minikin/MinikinFont.h>
 
+using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Utility::Logging::Logger;
 using android::Layout;
 
@@ -45,6 +47,9 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
+//=======================================================================
+// DrawTextOnPathFunctor
+//=======================================================================
 class DrawTextOnPathFunctor {
 public:
     DrawTextOnPathFunctor(const Layout& layout, NativeCanvas* canvas, float hOffset,
@@ -70,6 +75,9 @@ private:
     const SkPath& path;
 };
 
+//=======================================================================
+// DrawTextFunctor
+//=======================================================================
 class DrawTextFunctor {
 public:
     DrawTextFunctor(const Layout& layout, NativeCanvas* canvas, uint16_t* glyphs, float* pos,
@@ -107,8 +115,11 @@ private:
     MinikinRect& bounds;
 };
 
+//=======================================================================
+// Canvas
+//=======================================================================
+CAR_INTERFACE_IMPL(Canvas, Object, ICanvas)
 
-CAR_INTERFACE_IMPL(Canvas, Object, ICanvas);
 Canvas::Canvas()
     : mDensity(IBitmap::DENSITY_NONE)
     , mScreenDensity(IBitmap::DENSITY_NONE)
@@ -117,7 +128,7 @@ Canvas::Canvas()
 
 Canvas::~Canvas()
 {
-    // If the constructor threw an exception before setting mNativeCanvasWrapper, the native finalizer
+    // If the constructor threw an exception before setting mNativeCanvas, the native finalizer
     // must not be invoked.
     Dispose();
 }
@@ -127,7 +138,7 @@ ECode Canvas::constructor()
     Boolean is = FALSE;
     if (IsHardwareAccelerated(&is), !is) {
         // 0 means no native bitmap
-        mNativeCanvasWrapper = InitRaster(0);
+        mNativeCanvas = InitRaster(0);
     }
     return NOERROR;
 }
@@ -141,9 +152,10 @@ ECode Canvas::constructor(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     FAIL_RETURN(ThrowIfCannotDraw(bitmap));
-    mNativeCanvasWrapper = InitRaster(((CBitmap*)bitmap)->Ni());
-    mBitmap = (CBitmap*)bitmap;
-    mDensity = ((CBitmap*)bitmap)->mDensity;
+    Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
+    mNativeCanvas = InitRaster(nativeBitmap);
+    mBitmap = bitmap;
+    mBitmap->GetDensity(&mDensity);
     return NOERROR;
 }
 
@@ -153,7 +165,7 @@ ECode Canvas::constructor(
     if (nativeCanvas == 0) {
         return E_ILLEGAL_STATE_EXCEPTION;
     }
-    mNativeCanvasWrapper = nativeCanvas;
+    mNativeCanvas = nativeCanvas;
     mDensity = CBitmap::GetDefaultDensity();
     return NOERROR;
 }
@@ -166,8 +178,7 @@ AutoPtr<IGL> Canvas::GetGL()
 ECode Canvas::IsHardwareAccelerated(
     /* [out] */ Boolean* isAccelerated)
 {
-    assert(isAccelerated != NULL);
-
+    VALIDATE_NOT_NULL(isAccelerated)
     *isAccelerated = FALSE;
     return NOERROR;
 }
@@ -186,35 +197,37 @@ ECode Canvas::SetBitmap(
 {
     Boolean result;
     if (IsHardwareAccelerated(&result), result) {
-//        throw new RuntimeException("Can't set a bitmap device on a HW accelerated canvas");
+        Logger::E("Canvas", "RuntimeException: Can't set a bitmap device on a HW accelerated canvas");
         return E_RUNTIME_EXCEPTION;
     }
 
 
     if (bitmap == NULL) {
-        NativeSetBitmap(mNativeCanvasWrapper, 0, FALSE);
+        NativeSetBitmap(mNativeCanvas, 0, FALSE);
         mDensity = IBitmap::DENSITY_NONE;
-    } else {
+    }
+    else {
         Boolean isMutable;
         bitmap->IsMutable(&isMutable);
         if (!isMutable) {
-            // throw new IllegalStateException();
+            Logger::E("Canvas", "IllegalStateException");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         FAIL_RETURN(ThrowIfCannotDraw(bitmap));
 
-        NativeSetBitmap(mNativeCanvasWrapper, ((CBitmap*)bitmap)->Ni(), TRUE);
+        Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
+        NativeSetBitmap(mNativeCanvas, nativeBitmap, TRUE);
         mDensity = ((CBitmap*)bitmap)->mDensity;
     }
 
-    mBitmap = (CBitmap*)bitmap;
+    mBitmap = bitmap;
     return NOERROR;
 }
 
 ECode Canvas::SetNativeBitmap(
     /* [in] */ Int64 bitmapHandle)
 {
-    NativeSetBitmap(mNativeCanvasWrapper, bitmapHandle, FALSE);
+    NativeSetBitmap(mNativeCanvas, bitmapHandle, FALSE);
     return NOERROR;
 }
 
@@ -257,9 +270,8 @@ ECode Canvas::InsertInorderBarrier()
 ECode Canvas::IsOpaque(
     /* [out] */ Boolean* isOpaque)
 {
-    assert(isOpaque != NULL);
-
-    *isOpaque = NativeIsOpaque(mNativeCanvasWrapper);
+    VALIDATE_NOT_NULL(isOpaque)
+    *isOpaque = NativeIsOpaque(mNativeCanvas);
     return NOERROR;
 }
 
@@ -271,9 +283,8 @@ ECode Canvas::IsOpaque(
 ECode Canvas::GetWidth(
     /* [out] */ Int32* width)
 {
-    assert(width != NULL);
-
-    *width = NativeGetWidth(mNativeCanvasWrapper);
+    VALIDATE_NOT_NULL(width)
+    *width = NativeGetWidth(mNativeCanvas);
     return NOERROR;
 }
 
@@ -285,9 +296,8 @@ ECode Canvas::GetWidth(
 ECode Canvas::GetHeight(
     /* [out] */ Int32* height)
 {
-    assert(height != NULL);
-
-    *height = NativeGetHeight(mNativeCanvasWrapper);
+    VALIDATE_NOT_NULL(height)
+    *height = NativeGetHeight(mNativeCanvas);
     return NOERROR;
 }
 
@@ -305,8 +315,7 @@ ECode Canvas::GetHeight(
 ECode Canvas::GetDensity(
     /* [out] */ Int32* density)
 {
-    assert(density != NULL);
-
+    VALIDATE_NOT_NULL(density)
     *density = mDensity;
     return NOERROR;
 }
@@ -350,6 +359,7 @@ ECode Canvas::SetScreenDensity(
 ECode Canvas::GetMaximumBitmapWidth(
     /* [out] */ Int32* width)
 {
+    VALIDATE_NOT_NULL(width)
     *width = MAXMIMUM_BITMAP_SIZE;
     return NOERROR;
 }
@@ -364,6 +374,7 @@ ECode Canvas::GetMaximumBitmapWidth(
 ECode Canvas::GetMaximumBitmapHeight(
     /* [out] */ Int32* height)
 {
+    VALIDATE_NOT_NULL(height)
     *height = MAXMIMUM_BITMAP_SIZE;
     return NOERROR;
 }
@@ -380,9 +391,8 @@ ECode Canvas::GetMaximumBitmapHeight(
 ECode Canvas::Save(
     /* [out] */ Int32* count)
 {
-    assert(count != NULL);
-
-    *count = NativeSave(mNativeCanvasWrapper, MATRIX_SAVE_FLAG | CLIP_SAVE_FLAG);;
+    VALIDATE_NOT_NULL(count)
+    *count = NativeSave(mNativeCanvas, MATRIX_SAVE_FLAG | CLIP_SAVE_FLAG);;
     return NOERROR;
 }
 
@@ -401,9 +411,8 @@ ECode Canvas::Save(
     /* [in] */ Int32 saveFlags,
     /* [out] */ Int32* count)
 {
-    assert(count != NULL);
-
-    *count = NativeSave(mNativeCanvasWrapper, saveFlags);
+    VALIDATE_NOT_NULL(count)
+    *count = NativeSave(mNativeCanvas, saveFlags);
     return NOERROR;
 }
 
@@ -446,9 +455,9 @@ ECode Canvas::SaveLayer(
     /* [in] */ Int32 saveFlags,
     /* [out] */ Int32* count)
 {
-    assert(count != NULL);
+    VALIDATE_NOT_NULL(count)
 
-    *count = NativeSaveLayer(mNativeCanvasWrapper, left, top, right, bottom,
+    *count = NativeSaveLayer(mNativeCanvas, left, top, right, bottom,
             paint != NULL ? ((Paint*)paint)->mNativePaint : 0,
             saveFlags);
     return NOERROR;
@@ -471,7 +480,7 @@ ECode Canvas::SaveLayerAlpha(
     /* [in] */ Int32 saveFlags,
     /* [out] */ Int32* count)
 {
-    assert(count != NULL);
+    VALIDATE_NOT_NULL(count)
 
     AutoPtr<IRectF> bounds = _bounds;
     if (bounds == NULL) {
@@ -501,10 +510,10 @@ ECode Canvas::SaveLayerAlpha(
     /* [in] */ Int32 saveFlags,
     /* [out] */ Int32* count)
 {
-    assert(count != NULL);
+    VALIDATE_NOT_NULL(count)
 
     alpha = Elastos::Core::Math::Min(255, Elastos::Core::Math::Max(0, alpha));
-    *count = NativeSaveLayerAlpha(mNativeCanvasWrapper, left, top, right, bottom,
+    *count = NativeSaveLayerAlpha(mNativeCanvas, left, top, right, bottom,
                                  alpha, saveFlags);
     return NOERROR;
 }
@@ -522,23 +531,22 @@ ECode Canvas::SaveLayerAlpha(
 
 ECode Canvas::Restore()
 {
-    NativeRestore(mNativeCanvasWrapper);
+    NativeRestore(mNativeCanvas);
     return NOERROR;
 }
 
 ECode Canvas::GetSaveCount(
     /* [out] */ Int32* count)
 {
-    assert(count != NULL);
-
-    *count = NativeGetSaveCount(mNativeCanvasWrapper);
+    VALIDATE_NOT_NULL(count)
+    *count = NativeGetSaveCount(mNativeCanvas);
     return NOERROR;
 }
 
 ECode Canvas::RestoreToCount(
     /* [in] */ Int32 saveCount)
 {
-    NativeRestoreToCount(mNativeCanvasWrapper, saveCount);
+    NativeRestoreToCount(mNativeCanvas, saveCount);
     return NOERROR;
 }
 
@@ -546,7 +554,7 @@ ECode Canvas::Translate(
     /* [in] */ Float dx,
     /* [in] */ Float dy)
 {
-    NativeTranslate(mNativeCanvasWrapper, dx, dy);
+    NativeTranslate(mNativeCanvas, dx, dy);
     return NOERROR;
 }
 
@@ -554,7 +562,7 @@ ECode Canvas::Scale(
     /* [in] */ Float sx,
     /* [in] */ Float sy)
 {
-    NativeScale(mNativeCanvasWrapper, sx, sy);
+    NativeScale(mNativeCanvas, sx, sy);
     return NOERROR;
 }
 
@@ -573,7 +581,7 @@ ECode Canvas::Scale(
 ECode Canvas::Rotate(
     /* [in] */ Float degrees)
 {
-    NativeRotate(mNativeCanvasWrapper, degrees);
+    NativeRotate(mNativeCanvas, degrees);
     return NOERROR;
 }
 
@@ -592,7 +600,7 @@ ECode Canvas::Skew(
     /* [in] */ Float sx,
     /* [in] */ Float sy)
 {
-    NativeSkew(mNativeCanvasWrapper, sx, sy);
+    NativeSkew(mNativeCanvas, sx, sy);
     return NOERROR;
 }
 
@@ -600,8 +608,8 @@ ECode Canvas::Concat(
     /* [in] */ IMatrix* matrix)
 {
     if (matrix != NULL) {
-        Int32 nativeMatrix = ((Matrix*)matrix)->mNativeInstance;
-        NativeConcat(mNativeCanvasWrapper, nativeMatrix);
+        Int64 nativeMatrix = ((Matrix*)matrix)->mNativeMatrix;
+        NativeConcat(mNativeCanvas, nativeMatrix);
     }
     return NOERROR;
 }
@@ -609,28 +617,28 @@ ECode Canvas::Concat(
 ECode Canvas::SetMatrix(
     /* [in] */ IMatrix* matrix)
 {
-    Int32 nativeMatrix = 0;
+    Int64 nativeMatrix = 0;
     if (matrix != NULL) {
-        nativeMatrix = ((Matrix*)matrix)->mNativeInstance;
+        nativeMatrix = ((Matrix*)matrix)->mNativeMatrix;
     }
-    NativeSetMatrix(mNativeCanvasWrapper, nativeMatrix);
+    NativeSetMatrix(mNativeCanvas, nativeMatrix);
     return NOERROR;
 }
 
 ECode Canvas::GetMatrix(
     /* [in, out] */ IMatrix* ctm)
 {
-    assert(ctm != NULL);
+    VALIDATE_NOT_NULL(ctm)
 
-    Int32 nativeMatrix = ((Matrix*)ctm)->mNativeInstance;
-    NativeGetCTM(mNativeCanvasWrapper, nativeMatrix);
+    Int64 nativeMatrix = ((Matrix*)ctm)->mNativeMatrix;
+    NativeGetCTM(mNativeCanvas, nativeMatrix);
     return NOERROR;
 }
 
 ECode Canvas::GetMatrix(
     /* [out] */ IMatrix** metrix)
 {
-    assert(metrix != NULL);
+    VALIDATE_NOT_NULL(metrix)
 
     FAIL_RETURN(CMatrix::New(metrix));
     return GetMatrix(*metrix);
@@ -641,12 +649,12 @@ ECode Canvas::ClipRect(
     /* [in] */ RegionOp op,
     /* [out] */ Boolean* isNotEmpty)
 {
-    assert(isNotEmpty != NULL);
+    VALIDATE_NOT_NULL(isNotEmpty)
     assert(rect != NULL);
 
     CRectF* rect_ = (CRectF*)rect;
-    *isNotEmpty = NativeClipRect(mNativeCanvasWrapper,
-            rect_->mLeft, rect_->mTop, rect_->mRight, rect_->mBottom, op);
+    *isNotEmpty = NativeClipRect(mNativeCanvas,
+        rect_->mLeft, rect_->mTop, rect_->mRight, rect_->mBottom, op);
     return NOERROR;
 }
 
@@ -655,12 +663,12 @@ ECode Canvas::ClipRect(
     /* [in] */ RegionOp op,
     /* [out] */ Boolean* isNotEmpty)
 {
-    assert(isNotEmpty != NULL);
+    VALIDATE_NOT_NULL(isNotEmpty)
     assert(rect != NULL);
 
     CRect* rect_ = (CRect*)rect;
-    *isNotEmpty = NativeClipRect(mNativeCanvasWrapper,
-            rect_->mLeft, rect_->mTop, rect_->mRight, rect_->mBottom, op);
+    *isNotEmpty = NativeClipRect(mNativeCanvas,
+        rect_->mLeft, rect_->mTop, rect_->mRight, rect_->mBottom, op);
     return NOERROR;
 }
 
@@ -672,8 +680,8 @@ ECode Canvas::ClipRect(
     assert(rect != NULL);
 
     CRectF* rect_ = (CRectF*)rect;
-    *isNotEmpty = NativeClipRect(mNativeCanvasWrapper, rect_->mLeft, rect_->mTop, rect_->mRight, rect_->mBottom,
-            RegionOp_INTERSECT);
+    *isNotEmpty = NativeClipRect(mNativeCanvas,
+        rect_->mLeft, rect_->mTop, rect_->mRight, rect_->mBottom, RegionOp_INTERSECT);
     return NOERROR;
 }
 
@@ -685,8 +693,8 @@ ECode Canvas::ClipRect(
     assert(rect != NULL);
 
     CRect* rect_ = (CRect*)rect;
-    *isNotEmpty = NativeClipRect(mNativeCanvasWrapper, rect_->mLeft, rect_->mTop, rect_->mRight, rect_->mBottom,
-            RegionOp_INTERSECT);
+    *isNotEmpty = NativeClipRect(mNativeCanvas,
+        rect_->mLeft, rect_->mTop, rect_->mRight, rect_->mBottom, RegionOp_INTERSECT);
     return NOERROR;
 }
 
@@ -700,7 +708,7 @@ ECode Canvas::ClipRect(
 {
     VALIDATE_NOT_NULL(isNotEmpty);
 
-    *isNotEmpty = NativeClipRect(mNativeCanvasWrapper, left, top, right, bottom, op);
+    *isNotEmpty = NativeClipRect(mNativeCanvas, left, top, right, bottom, op);
     return NOERROR;
 }
 
@@ -713,8 +721,8 @@ ECode Canvas::ClipRect(
 {
     VALIDATE_NOT_NULL(isNotEmpty);
 
-    *isNotEmpty = NativeClipRect(mNativeCanvasWrapper, left, top, right, bottom,
-            RegionOp_INTERSECT);
+    *isNotEmpty = NativeClipRect(mNativeCanvas, left, top, right, bottom,
+        RegionOp_INTERSECT);
     return NOERROR;
 }
 
@@ -727,8 +735,8 @@ ECode Canvas::ClipRect(
 {
     VALIDATE_NOT_NULL(isNotEmpty);
 
-    *isNotEmpty = NativeClipRect(mNativeCanvasWrapper, left, top, right, bottom,
-            RegionOp_INTERSECT);
+    *isNotEmpty = NativeClipRect(mNativeCanvas, left, top, right, bottom,
+        RegionOp_INTERSECT);
     return NOERROR;
 }
 
@@ -740,8 +748,8 @@ ECode Canvas::ClipPath(
     VALIDATE_NOT_NULL(isNotEmpty);
     assert(path != NULL);
 
-    Int32 nativePath = ((CPath*)path)->Ni();
-    *isNotEmpty = NativeClipPath(mNativeCanvasWrapper, nativePath, op);
+    Int64 nativePath = ((CPath*)path)->mNativePath;
+    *isNotEmpty = NativeClipPath(mNativeCanvas, nativePath, op);
     return NOERROR;
 }
 
@@ -757,11 +765,11 @@ ECode Canvas::ClipRegion(
     /* [in] */ RegionOp op,
     /* [out] */ Boolean* isNotEmpty)
 {
-    assert(isNotEmpty != NULL);
+    VALIDATE_NOT_NULL(isNotEmpty)
     assert(region != NULL);
 
-    Int32 nativeRegion = ((CRegion*)region)->Ni();
-    *isNotEmpty = NativeClipRegion(mNativeCanvasWrapper, nativeRegion, op);
+    Int64 nativeRegion = ((CRegion*)region)->mNativeRegion;
+    *isNotEmpty = NativeClipRegion(mNativeCanvas, nativeRegion, op);
     return NOERROR;
 }
 
@@ -775,7 +783,7 @@ ECode Canvas::ClipRegion(
 ECode Canvas::GetDrawFilter(
     /* [out] */ IDrawFilter** filter)
 {
-    assert(filter != NULL);
+    VALIDATE_NOT_NULL(filter)
 
     *filter = mDrawFilter;
     REFCOUNT_ADD(*filter);
@@ -785,12 +793,12 @@ ECode Canvas::GetDrawFilter(
 ECode Canvas::SetDrawFilter(
     /* [in] */ IDrawFilter* filter)
 {
-    Int32 nativeFilter = 0;
+    Int64 nativeFilter = 0;
     if (filter != NULL) {
         nativeFilter = ((DrawFilter*)filter)->mNativeInstance;
     }
     mDrawFilter = filter;
-    NativeSetDrawFilter(mNativeCanvasWrapper, nativeFilter);
+    NativeSetDrawFilter(mNativeCanvas, nativeFilter);
     return NOERROR;
 }
 
@@ -802,7 +810,7 @@ ECode Canvas::QuickReject(
     VALIDATE_NOT_NULL(isNotIntersect);
 
     CRectF* rect_ = (CRectF*)rect;
-    *isNotIntersect = NativeQuickReject(mNativeCanvasWrapper,
+    *isNotIntersect = NativeQuickReject(mNativeCanvas,
         rect_->mLeft, rect_->mTop, rect_->mRight, rect_->mBottom);
     return NOERROR;
 }
@@ -815,8 +823,8 @@ ECode Canvas::QuickReject(
     VALIDATE_NOT_NULL(isNotIntersect);
     assert(path != NULL);
 
-    Int32 nativePath = ((CPath*)path)->Ni();
-    *isNotIntersect = NativeQuickReject(mNativeCanvasWrapper, nativePath);
+    Int64 nativePath = ((CPath*)path)->mNativePath;
+    *isNotIntersect = NativeQuickReject(mNativeCanvas, nativePath);
     return NOERROR;
 }
 
@@ -828,9 +836,9 @@ ECode Canvas::QuickReject(
     /* [in] */ CanvasEdgeType type,
     /* [out] */ Boolean* isNotIntersect)
 {
-    assert(isNotIntersect != NULL);
+    VALIDATE_NOT_NULL(isNotIntersect)
 
-    *isNotIntersect = NativeQuickReject(mNativeCanvasWrapper, left, top, right, bottom);
+    *isNotIntersect = NativeQuickReject(mNativeCanvas, left, top, right, bottom);
     return NOERROR;
 }
 
@@ -838,16 +846,16 @@ ECode Canvas::GetClipBounds(
     /* [in] */ IRect* bounds,
     /* [out] */ Boolean* isNotEmpty)
 {
-    assert(isNotEmpty != NULL);
+    VALIDATE_NOT_NULL(isNotEmpty)
 
-    *isNotEmpty = NativeGetClipBounds(mNativeCanvasWrapper, bounds);
+    *isNotEmpty = NativeGetClipBounds(mNativeCanvas, bounds);
     return NOERROR;
 }
 
 ECode Canvas::GetClipBounds(
     /* [out] */ IRect** bounds)
 {
-    assert(bounds != NULL);
+    VALIDATE_NOT_NULL(bounds)
 
     FAIL_RETURN(CRect::New(bounds));
     Boolean isNotEmpty;
@@ -874,7 +882,7 @@ ECode Canvas::DrawARGB(
 ECode Canvas::DrawColor(
     /* [in] */ Int32 color)
 {
-    NativeDrawColor(mNativeCanvasWrapper, color, PorterDuffMode_SRC_OVER);
+    NativeDrawColor(mNativeCanvas, color, PorterDuffMode_SRC_OVER);
     return NOERROR;
 }
 
@@ -882,7 +890,7 @@ ECode Canvas::DrawColor(
     /* [in] */ Int32 color,
     /* [in] */ PorterDuffMode mode)
 {
-    NativeDrawColor(mNativeCanvasWrapper, color, mode);
+    NativeDrawColor(mNativeCanvas, color, mode);
     return NOERROR;
 }
 
@@ -891,7 +899,7 @@ ECode Canvas::DrawPaint(
 {
     assert(paint != NULL);
 
-    NativeDrawPaint(mNativeCanvasWrapper, ((Paint*)paint)->mNativePaint);
+    NativeDrawPaint(mNativeCanvas, ((Paint*)paint)->mNativePaint);
     return NOERROR;
 }
 
@@ -901,7 +909,7 @@ ECode Canvas::DrawPoints(
     /* [in] */ Int32 count,
     /* [in] */ IPaint* paint)
 {
-    NativeDrawPoints(mNativeCanvasWrapper, pts, offset, count, ((Paint*)paint)->mNativePaint);
+    NativeDrawPoints(mNativeCanvas, pts, offset, count, ((Paint*)paint)->mNativePaint);
     return NOERROR;
 }
 
@@ -918,7 +926,7 @@ ECode Canvas::DrawPoint(
     /* [in] */ IPaint* paint)
 {
     assert(paint != NULL);
-    NativeDrawPoint(mNativeCanvasWrapper, x, y, ((Paint*)paint)->mNativePaint);
+    NativeDrawPoint(mNativeCanvas, x, y, ((Paint*)paint)->mNativePaint);
     return NOERROR;
 }
 
@@ -930,8 +938,8 @@ ECode Canvas::DrawLine(
     /* [in] */ IPaint* paint)
 {
     assert(paint != NULL);
-    Int32 nativePaint = ((Paint*)paint)->mNativePaint;
-    NativeDrawLine(mNativeCanvasWrapper, startX, startY, stopX, stopY, nativePaint);
+    Int64 nativePaint = ((Paint*)paint)->mNativePaint;
+    NativeDrawLine(mNativeCanvas, startX, startY, stopX, stopY, nativePaint);
     return NOERROR;
 }
 
@@ -941,7 +949,7 @@ ECode Canvas::DrawLines(
     /* [in] */ Int32 count,
     /* [in] */ IPaint* paint)
 {
-    NativeDrawLines(mNativeCanvasWrapper, pts, offset, count, ((Paint*)paint)->mNativePaint);
+    NativeDrawLines(mNativeCanvas, pts, offset, count, ((Paint*)paint)->mNativePaint);
     return NOERROR;
 }
 
@@ -959,7 +967,7 @@ ECode Canvas::DrawRect(
     assert(paint != NULL);
 
     CRectF* rect_ = (CRectF*)rect;
-    NativeDrawRect(mNativeCanvasWrapper,
+    NativeDrawRect(mNativeCanvas,
             rect_->mLeft, rect_->mTop, rect_->mRight, rect_->mBottom, ((Paint*)paint)->mNativePaint);
     return NOERROR;
 }
@@ -983,8 +991,8 @@ ECode Canvas::DrawRect(
 {
     assert(paint != NULL);
 
-    Int32 nativePaint = ((Paint*)paint)->mNativePaint;
-    NativeDrawRect(mNativeCanvasWrapper, left, top, right, bottom, nativePaint);
+    Int64 nativePaint = ((Paint*)paint)->mNativePaint;
+    NativeDrawRect(mNativeCanvas, left, top, right, bottom, nativePaint);
     return NOERROR;
 }
 
@@ -1010,7 +1018,7 @@ ECode Canvas::DrawOval(
     /* [in] */ Float bottom,
     /* [in] */ /*@NonNull*/ IPaint* paint)
 {
-    NativeDrawOval(mNativeCanvasWrapper, left, top, right, bottom, ((Paint*)paint)->mNativePaint);
+    NativeDrawOval(mNativeCanvas, left, top, right, bottom, ((Paint*)paint)->mNativePaint);
     return NOERROR;
 }
 
@@ -1022,8 +1030,8 @@ ECode Canvas::DrawCircle(
 {
     assert(paint != NULL);
 
-    Int32 nativePaint = ((Paint*)paint)->mNativePaint;
-    NativeDrawCircle(mNativeCanvasWrapper, cx, cy, radius, nativePaint);
+    Int64 nativePaint = ((Paint*)paint)->mNativePaint;
+    NativeDrawCircle(mNativeCanvas, cx, cy, radius, nativePaint);
     return NOERROR;
 }
 
@@ -1050,7 +1058,7 @@ ECode Canvas::DrawArc(
     /* [in] */ /*@NonNull*/ IPaint* paint)
 {
     assert(paint != NULL);
-    NativeDrawArc(mNativeCanvasWrapper, left, top, right, bottom, startAngle, sweepAngle,
+    NativeDrawArc(mNativeCanvas, left, top, right, bottom, startAngle, sweepAngle,
             useCenter, ((Paint*)paint)->mNativePaint);
     return NOERROR;
 }
@@ -1076,7 +1084,7 @@ ECode Canvas::DrawRoundRect(
     /* [in] */ Float ry,
     /* [in] */ /*@NonNull*/ IPaint* paint)
 {
-    NativeDrawRoundRect(mNativeCanvasWrapper, left, top, right, bottom, rx, ry, ((Paint*)paint)->mNativePaint);
+    NativeDrawRoundRect(mNativeCanvas, left, top, right, bottom, rx, ry, ((Paint*)paint)->mNativePaint);
     return NOERROR;
 }
 
@@ -1087,9 +1095,9 @@ ECode Canvas::DrawPath(
     assert(path != NULL);
     assert(paint != NULL);
 
-    Int32 nativePath = ((CPath*)path)->Ni();
-    Int32 nativePaint = ((Paint*)paint)->mNativePaint;
-    NativeDrawPath(mNativeCanvasWrapper, nativePath, nativePaint);
+    Int64 nativePath = ((CPath*)path)->mNativePath;
+    Int64 nativePaint = ((Paint*)paint)->mNativePaint;
+    NativeDrawPath(mNativeCanvas, nativePath, nativePaint);
     return NOERROR;
 }
 
@@ -1101,8 +1109,7 @@ ECode Canvas::ThrowIfCannotDraw(
     Boolean isRecycled;
     bitmap->IsRecycled(&isRecycled);
     if (isRecycled) {
-//        throw new RuntimeException(
-//                    "Canvas: trying to use a recycled bitmap " + bitmap);
+        Logger::E("Canvas", "RuntimeException: trying to use a recycled bitmap %s", TO_CSTR(bitmap));
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -1111,8 +1118,7 @@ ECode Canvas::ThrowIfCannotDraw(
     if (!(bitmap->IsPremultiplied(&bv), bv)
         && (bitmap->GetConfig(&config), config) == BitmapConfig_ARGB_8888 &&
             (bitmap->HasAlpha(&bv), bv)) {
-        // throw new RuntimeException("Canvas: trying to use a non-premultiplied bitmap "
-        //         + bitmap);
+        Logger::E("Canvas", "RuntimeException: trying to use a non-premultiplied bitmap %s", TO_CSTR(bitmap));
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -1147,14 +1153,12 @@ ECode Canvas::DrawBitmap(
     assert(bitmap != NULL);
 
     FAIL_RETURN(ThrowIfCannotDraw(bitmap));
-    Int32 nativeBitmap = ((CBitmap*)bitmap)->Ni();
-    Int32 nativePaint = 0;
-    if (paint != NULL) {
-        nativePaint = ((Paint*)paint)->mNativePaint;
-    }
-    NativeDrawBitmap(mNativeCanvasWrapper, nativeBitmap, left, top,
-            nativePaint, mDensity, mScreenDensity,
-            ((CBitmap*)bitmap)->mDensity);
+    Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
+    Int32 density;
+    bitmap->GetDensity(&density);
+    Int64 nativePaint = paint ? (((Paint*)paint)->mNativePaint) : 0;
+    NativeDrawBitmap(mNativeCanvas, nativeBitmap, left, top,
+        nativePaint, mDensity, mScreenDensity, density);
     return NOERROR;
 }
 
@@ -1181,7 +1185,8 @@ ECode Canvas::DrawBitmap(
       right = iv;
       bitmap->GetHeight(&iv);
       bottom = iv;
-    } else {
+    }
+    else {
       src->GetLeft(&iv);
       left = iv;
       src->GetRight(&iv);
@@ -1195,7 +1200,8 @@ ECode Canvas::DrawBitmap(
     CRectF* _dst = (CRectF*)dst;
     Int32 density = 0;
     bitmap->GetDensity(&density);
-    NativeDrawBitmap(mNativeCanvasWrapper, ((CBitmap*)bitmap)->Ni(), left, top, right, bottom,
+    Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
+    NativeDrawBitmap(mNativeCanvas, nativeBitmap, left, top, right, bottom,
           _dst->mLeft, _dst->mTop, _dst->mRight, _dst->mBottom, nativePaint, mScreenDensity,
           density);
     return NOERROR;
@@ -1231,7 +1237,8 @@ ECode Canvas::DrawBitmap(
     CRect* _dst = (CRect*)dst;
     Int32 density = 0;
     bitmap->GetDensity(&density);
-    NativeDrawBitmap(mNativeCanvasWrapper, ((CBitmap*)bitmap)->Ni(), left, top, right, bottom,
+    Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
+    NativeDrawBitmap(mNativeCanvas, nativeBitmap, left, top, right, bottom,
         _dst->mLeft, _dst->mTop, _dst->mRight, _dst->mBottom, nativePaint, mScreenDensity,
         density);
     return NOERROR;
@@ -1272,12 +1279,9 @@ ECode Canvas::DrawBitmap(
     if (width == 0 || height == 0) {
         return NOERROR;
     }
-    Int32 nativePaint = 0;
-    if (paint != NULL) {
-        nativePaint = ((Paint*)paint)->mNativePaint;
-    }
+    Int64 nativePaint = paint ? ((Paint*)paint)->mNativePaint : 0;
     // punch down to native for the actual draw
-    NativeDrawBitmap(mNativeCanvasWrapper, colors, offset, stride, x, y, width,
+    NativeDrawBitmap(mNativeCanvas, colors, offset, stride, x, y, width,
             height, hasAlpha, nativePaint);
     return NOERROR;
 }
@@ -1306,13 +1310,10 @@ ECode Canvas::DrawBitmap(
     assert(bitmap != NULL);
     assert(matrix != NULL);
 
-    Int32 nativeBitmap = ((CBitmap*)bitmap)->Ni();
-    Int32 nativeMatrix = ((CMatrix*)matrix)->Ni();
-    Int32 nativePaint = 0;
-    if (paint != NULL) {
-        nativePaint = ((Paint*)paint)->mNativePaint;
-    }
-    NativeDrawBitmapMatrix(mNativeCanvasWrapper, nativeBitmap, nativeMatrix, nativePaint);
+    Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
+    Int64 nativeMatrix = ((CMatrix*)matrix)->mNativeMatrix;
+    Int64 nativePaint = paint ? (((Paint*)paint)->mNativePaint) : 0;
+    NativeDrawBitmapMatrix(mNativeCanvas, nativeBitmap, nativeMatrix, nativePaint);
     return NOERROR;
 }
 
@@ -1354,12 +1355,9 @@ ECode Canvas::DrawBitmapMesh(
         // no mul by 2, since we need only 1 color per vertex
         FAIL_RETURN(CheckRange(colors->GetLength(), colorOffset, count));
     }
-    Int32 nativeBitmap = ((CBitmap*)bitmap)->Ni();
-    Int32 nativePaint = 0;
-    if (paint != NULL) {
-        nativePaint = ((Paint*)paint)->mNativePaint;
-    }
-    NativeDrawBitmapMesh(mNativeCanvasWrapper, nativeBitmap, meshWidth, meshHeight,
+    Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
+    Int64 nativePaint = paint ? (((Paint*)paint)->mNativePaint) : 0;
+    NativeDrawBitmapMesh(mNativeCanvas, nativeBitmap, meshWidth, meshHeight,
             verts, vertOffset, colors, colorOffset, nativePaint);
     return NOERROR;
 }
@@ -1391,7 +1389,7 @@ ECode Canvas::DrawVertices(
         FAIL_RETURN(CheckRange(indices->GetLength(), indexOffset, indexCount));
     }
 
-    NativeDrawVertices(mNativeCanvasWrapper, mode,
+    NativeDrawVertices(mNativeCanvas, mode,
             vertexCount, verts, vertOffset, texs, texOffset, colors,
             colorOffset, indices, indexOffset, indexCount, ((Paint*)paint)->mNativePaint);
     return NOERROR;
@@ -1413,7 +1411,7 @@ ECode Canvas::DrawText(
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
-    NativeDrawText(mNativeCanvasWrapper, text, index, count, x, y,
+    NativeDrawText(mNativeCanvas, text, index, count, x, y,
             ((Paint*)paint)->mBidiFlags, ((Paint*)paint)->mNativePaint, ((Paint*)paint)->mNativeTypeface);
     return NOERROR;
 }
@@ -1431,7 +1429,7 @@ ECode Canvas::DrawText(
     }
 
     assert(paint != NULL && "Paint cannot be null.");
-    NativeDrawText(mNativeCanvasWrapper, text, 0, text.GetLength(), x, y,
+    NativeDrawText(mNativeCanvas, text, 0, text.GetLength(), x, y,
             ((Paint*)paint)->mBidiFlags, ((Paint*)paint)->mNativePaint, ((Paint*)paint)->mNativeTypeface);
     return NOERROR;
 }
@@ -1455,7 +1453,7 @@ ECode Canvas::DrawText(
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
-    NativeDrawText(mNativeCanvasWrapper, text, start, end, x, y,
+    NativeDrawText(mNativeCanvas, text, start, end, x, y,
             ((Paint*)paint)->mBidiFlags, ((Paint*)paint)->mNativePaint, ((Paint*)paint)->mNativeTypeface);
     return NOERROR;
 }
@@ -1471,7 +1469,7 @@ ECode Canvas::DrawText(
     assert(0 && "TODO");
     // if (text instanceof String || text instanceof SpannedString ||
     //     text instanceof SpannableString) {
-    //     native_drawText(mNativeCanvasWrapper, text.toString(), start, end, x, y,
+    //     native_drawText(mNativeCanvas, text.toString(), start, end, x, y,
     //             paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
     // } else if (text instanceof GraphicsOperations) {
     //     ((GraphicsOperations) text).drawText(this, start, end, x, y,
@@ -1479,7 +1477,7 @@ ECode Canvas::DrawText(
     // } else {
     //     char[] buf = TemporaryBuffer.obtain(end - start);
     //     TextUtils.getChars(text, start, end, buf, 0);
-    //     native_drawText(mNativeCanvasWrapper, buf, 0, end - start, x, y,
+    //     native_drawText(mNativeCanvas, buf, 0, end - start, x, y,
     //             paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
     //     TemporaryBuffer.recycle(buf);
     // }
@@ -1512,7 +1510,7 @@ ECode Canvas::DrawTextRun(
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
-    NativeDrawTextRun(mNativeCanvasWrapper, text, index, count,
+    NativeDrawTextRun(mNativeCanvas, text, index, count,
         contextIndex, contextCount, x, y, isRtl, ((Paint*)paint)->mNativePaint, ((Paint*)paint)->mNativeTypeface);
      return NOERROR;
 }
@@ -1545,7 +1543,7 @@ ECode Canvas::DrawTextRun(
     assert(0 && "TODO");
     // if (text instanceof String || text instanceof SpannedString ||
     //         text instanceof SpannableString) {
-    //     native_drawTextRun(mNativeCanvasWrapper, text.toString(), start, end,
+    //     native_drawTextRun(mNativeCanvas, text.toString(), start, end,
     //             contextStart, contextEnd, x, y, isRtl, paint.mNativePaint, paint.mNativeTypeface);
     // } else if (text instanceof GraphicsOperations) {
     //     ((GraphicsOperations) text).drawTextRun(this, start, end,
@@ -1555,7 +1553,7 @@ ECode Canvas::DrawTextRun(
     //     int len = end - start;
     //     char[] buf = TemporaryBuffer.obtain(contextLen);
     //     TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
-    //     native_drawTextRun(mNativeCanvasWrapper, buf, start - contextStart, len,
+    //     native_drawTextRun(mNativeCanvas, buf, start - contextStart, len,
     //             0, contextLen, x, y, isRtl, paint.mNativePaint, paint.mNativeTypeface);
     //     TemporaryBuffer.recycle(buf);
     // }
@@ -1563,7 +1561,7 @@ ECode Canvas::DrawTextRun(
 //    PRINT_FILE_LINE_EX("TODO");
     String str;
     text->ToString(&str);
-    NativeDrawTextRun(mNativeCanvasWrapper, str, start, end,
+    NativeDrawTextRun(mNativeCanvas, str, start, end,
                 contextStart, contextEnd, x, y, isRtl, ((Paint*)paint)->mNativePaint, ((Paint*)paint)->mNativeTypeface);
      return NOERROR;
 }
@@ -1614,9 +1612,9 @@ ECode Canvas::DrawTextOnPath(
 //        throw new ArrayIndexOutOfBoundsException();
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
-    Int32 nativePath = ((CPath*)path)->Ni();
-    Int32 nativePaint = ((Paint*)paint)->mNativePaint;
-    NativeDrawTextOnPath(mNativeCanvasWrapper, text, index, count,
+    Int64 nativePath = ((CPath*)path)->mNativePath;
+    Int64 nativePaint = ((Paint*)paint)->mNativePaint;
+    NativeDrawTextOnPath(mNativeCanvas, text, index, count,
             nativePath, hOffset, vOffset, ((Paint*)paint)->mBidiFlags, nativePaint, ((Paint*)paint)->mNativeTypeface);
     return NOERROR;
 }
@@ -1632,9 +1630,9 @@ ECode Canvas::DrawTextOnPath(
     assert(paint != NULL);
 
     if (!text.IsNullOrEmpty()) {
-        Int32 nativePath = ((CPath*)path)->Ni();
-        Int32 nativePaint = ((Paint*)paint)->mNativePaint;
-        NativeDrawTextOnPath(mNativeCanvasWrapper, text, nativePath,
+        Int64 nativePath = ((CPath*)path)->mNativePath;
+        Int64 nativePaint = ((Paint*)paint)->mNativePaint;
+        NativeDrawTextOnPath(mNativeCanvas, text, nativePath,
                 hOffset, vOffset, ((Paint*)paint)->mBidiFlags, nativePaint, ((Paint*)paint)->mNativeTypeface);
     }
     return NOERROR;
@@ -1700,9 +1698,9 @@ ECode Canvas::ReleaseResources() {
 
 ECode Canvas::Dispose()
 {
-    if (mNativeCanvasWrapper != 0) {
-        NativeFinalizer(mNativeCanvasWrapper);
-        mNativeCanvasWrapper = 0;
+    if (mNativeCanvas != 0) {
+        NativeFinalizer(mNativeCanvas);
+        mNativeCanvas = 0;
     }
     return NOERROR;
 }
@@ -1719,7 +1717,7 @@ void Canvas::FreeTextLayoutCaches()
 
 Int64 Canvas::GetNativeCanvasWrapper()
 {
-    return mNativeCanvasWrapper;
+    return mNativeCanvas;
 }
 
 Boolean Canvas::IsRecordingFor(
@@ -2134,6 +2132,8 @@ void Canvas::NativeDrawBitmap(
     /* [in] */ Int32 screenDensity,
     /* [in] */ Int32 bitmapDensity)
 {
+    Logger::I("Canvas", "NativeDrawBitmap: left:%f, top:%f, canvasDensity:%d, screenDensity=%d, bitmapDensit=%d",
+        left, top, canvasDensity, screenDensity, bitmapDensity);
     NativeCanvas* canvas = get_canvas(canvasHandle);
     const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
@@ -2146,10 +2146,12 @@ void Canvas::NativeDrawBitmap(
             }
             filteredPaint.setFilterLevel(NativePaint::kLow_FilterLevel);
             canvas->drawBitmap(*bitmap, left, top, &filteredPaint);
-        } else {
+        }
+        else {
             canvas->drawBitmap(*bitmap, left, top, paint);
         }
-    } else {
+    }
+    else {
         canvas->save(SkCanvas::kMatrixClip_SaveFlag);
         SkScalar scale = canvasDensity / (float)bitmapDensity;
         canvas->translate(left, top);
@@ -2181,6 +2183,13 @@ void Canvas::NativeDrawBitmap(
     /* [in] */ Int32 screenDensity,
     /* [in] */ Int32 bitmapDensity)
 {
+    Logger::I("Canvas", "NativeDrawBitmap: "
+        "srcLeft:%f, srcTop:%f, srcRight:%f, srcBottom:%f"
+        "dstLeft:%f, dstTop:%f, dstRight:%f, dstBottom:%f"
+        "screenDensity=%d, bitmapDensit=%d",
+        srcLeft, srcTop, srcRight, srcBottom,
+        dstLeft, dstTop, dstRight, dstBottom,
+        screenDensity, bitmapDensity);
     NativeCanvas* canvas = get_canvas(canvasHandle);
     const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
@@ -2380,9 +2389,10 @@ void Canvas::NativeDrawText(
 {
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
-    AutoPtr<ArrayOf<Char16> > chars = String(*text).GetChar16s();
+
+    AutoPtr<ArrayOf<Char16> > chars = ArrayUtils::ToChar16Array(text);
     drawText(get_canvas(canvasHandle), chars->GetPayload() + index, 0, count, count, x, y,
-                                       bidiFlags, *paint, typeface);
+        bidiFlags, *paint, typeface);
 }
 
 void Canvas::NativeDrawText(
@@ -2401,7 +2411,7 @@ void Canvas::NativeDrawText(
     const int count = end - start;
     const AutoPtr<ArrayOf<Char16> > chars = text.GetChar16s();
     drawText(get_canvas(canvasHandle), chars->GetPayload() + start, 0, count, count, x, y,
-                                       bidiFlags, *paint, typeface);
+        bidiFlags, *paint, typeface);
     // env->ReleaseStringChars(text, jchars);
 }
 
@@ -2424,9 +2434,9 @@ void Canvas::NativeDrawTextRun(
     int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
     Int32 count = end - start;
     Int32 contextCount = contextEnd - contextStart;
-    const AutoPtr<ArrayOf<Char16> > chars = text.GetChar16s();
-    drawText(get_canvas(canvasHandle), chars->GetPayload() + contextStart, start - contextStart, count,
-                                       contextCount, x, y, bidiFlags, *paint, typeface);
+    AutoPtr<ArrayOf<Char16> > chars = text.GetChar16s();
+    drawText(get_canvas(canvasHandle), chars->GetPayload() + contextStart,
+        start - contextStart, count, contextCount, x, y, bidiFlags, *paint, typeface);
     // env->ReleaseStringChars(text, jchars);
 }
 
@@ -2447,9 +2457,9 @@ void Canvas::NativeDrawTextRun(
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
 
     const int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
-    AutoPtr<ArrayOf<Char16> > chars = String(*text).GetChar16s();
-    drawText(get_canvas(canvasHandle), chars->GetPayload() + contextIndex, index - contextIndex, count,
-                                       contextCount, x, y, bidiFlags, *paint, typeface);
+    AutoPtr<ArrayOf<Char16> > chars = ArrayUtils::ToChar16Array(text);
+    drawText(get_canvas(canvasHandle), chars->GetPayload() + contextIndex,
+        index - contextIndex, count, contextCount, x, y, bidiFlags, *paint, typeface);
     // env->ReleaseCharArrayElements(text, jchars, JNI_ABORT);
 }
 
@@ -2486,10 +2496,9 @@ void Canvas::NativeDrawTextOnPath(
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
 
-    AutoPtr<ArrayOf<Char16> > chars = String(*text).GetChar16s();
-
-    drawTextOnPath(get_canvas(canvasHandle), chars->GetPayload() + index, count, bidiFlags, *path,
-                   hOffset, vOffset, *paint, typeface);
+    AutoPtr<ArrayOf<Char16> > chars = ArrayUtils::ToChar16Array(text, index, count);
+    drawTextOnPath(get_canvas(canvasHandle), chars->GetPayload(), count, bidiFlags, *path,
+        hOffset, vOffset, *paint, typeface);
 
     // env->ReleaseCharArrayElements(text, jchars, 0);
 }
@@ -2512,7 +2521,7 @@ void Canvas::NativeDrawTextOnPath(
     int count = text.GetLength();
 
     drawTextOnPath(get_canvas(canvasHandle), chars->GetPayload(), count, bidiFlags, *path,
-                   hOffset, vOffset, *paint, typeface);
+        hOffset, vOffset, *paint, typeface);
 
     // env->ReleaseStringChars(text, jchars);
 }
@@ -2534,7 +2543,7 @@ ECode Canvas::GetNativeCanvas(
     /* [out] */ Int64* nativeCanvas)
 {
     VALIDATE_NOT_NULL(nativeCanvas);
-    *nativeCanvas = mNativeCanvasWrapper;
+    *nativeCanvas = mNativeCanvas;
     return NOERROR;
 }
 

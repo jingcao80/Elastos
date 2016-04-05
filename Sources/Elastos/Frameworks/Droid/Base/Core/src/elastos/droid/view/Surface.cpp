@@ -228,7 +228,7 @@ ECode Surface::NativeLockCanvas(
     canvasImp->SetNativeBitmap(reinterpret_cast<Int64>(&bitmap));
 
     if (dirtyRectPtr) {
-        SkCanvas* nativeCanvas = reinterpret_cast<NativeCanvas*>(canvasImp->mNativeCanvasWrapper)->getSkCanvas();
+        SkCanvas* nativeCanvas = reinterpret_cast<NativeCanvas*>(canvasImp->mNativeCanvas)->getSkCanvas();
         assert(nativeCanvas != NULL);
         nativeCanvas->clipRect(SkRect::Make(reinterpret_cast<const SkIRect&>(dirtyRect)));
     }

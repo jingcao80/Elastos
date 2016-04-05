@@ -177,9 +177,8 @@ Int32  CFaceDetector::fft_detect(
     // u32 height = mHeight;
 
     // // get to the native bitmap
-    // Handle32 bitmap;
-    // bitmap->GetNativeBitmap(&bitmap);
-    // SkBitmap const * nativeBitmap = (SkBitmap const *)bitmap;
+    // Handle64 nativeBitmatp = ((CBitmap*)bitmap)->mNativeBitmap;
+    // SkBitmap const * nativeBitmap = (SkBitmap const *)nativeBitmatp;
 
     // // convert the image to B/W
     // uint8_t* dst = (uint8_t*)mBWBuffer.GetPayLoad();

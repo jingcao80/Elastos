@@ -19,7 +19,7 @@ ECode CPathDashPathEffect::constructor(
     /* [in] */ PathDashPathEffectStyle style)
 {
     mNativeInstance = NativeCreate(
-                        ((CPath*)shape)->Ni(),
+                        ((CPath*)shape)->mNativePath,
                         advance,
                         phase,
                         style);

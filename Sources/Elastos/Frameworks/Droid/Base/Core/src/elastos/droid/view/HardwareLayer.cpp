@@ -137,7 +137,7 @@ ECode HardwareLayer::SetTransform(
     Int64 ptr;
     mFinalizer->Get(&ptr);
     Matrix* m = (Matrix*)matrix;
-    nSetTransform(ptr, m->mNativeInstance);
+    nSetTransform(ptr, m->mNativeMatrix);
     return mRenderer->PushLayerUpdate(this);
 }
 

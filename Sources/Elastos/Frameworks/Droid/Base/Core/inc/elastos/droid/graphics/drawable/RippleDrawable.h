@@ -337,8 +337,6 @@ private:
 
     CARAPI_(void) InitializeFromState();
 
-    static CARAPI_(Boolean) InitStatic();
-
 public:
     /**
      * Constant for automatically determining the maximum ripple radius.
@@ -349,7 +347,6 @@ public:
     static const Int32 RADIUS_AUTO;
 
 private:
-    static Boolean sInit;
     static AutoPtr<IPorterDuffXfermode> DST_IN;
     static AutoPtr<IPorterDuffXfermode> SRC_ATOP;
     static AutoPtr<IPorterDuffXfermode> SRC_OVER;

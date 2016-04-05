@@ -10,7 +10,9 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CAvoidXfermode);
+
 CAR_INTERFACE_IMPL(CAvoidXfermode, Xfermode, IAvoidXfermode);
+
 ECode CAvoidXfermode::constructor(
     /* [in] */ Int32 opColor,
     /* [in] */ Int32 tolerance,

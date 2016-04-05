@@ -23,6 +23,8 @@ class RoundRectShape
 public:
     CAR_INTERFACE_DECL();
 
+    RoundRectShape();
+
     /**
      * RoundRectShape constructor.
      * Specifies an outer (round)rect and an optional inner (round)rect.
@@ -42,7 +44,7 @@ public:
      *                   pass null.
      *                   If inset parameter is null, this parameter is ignored.
      */
-    RoundRectShape(
+    CARAPI constructor(
         /* [in] */ ArrayOf<Float>* outerRadii,
         /* [in] */ IRectF* inset,
         /* [in] */ ArrayOf<Float>* innerRadii);
@@ -57,12 +59,6 @@ public:
         /* [in] */ IOutline* outline);
 
 protected:
-    RoundRectShape();
-
-    CARAPI constructor(
-        /* [in] */ ArrayOf<Float>* outerRadii,
-        /* [in] */ IRectF* inset,
-        /* [in] */ ArrayOf<Float>* innerRadii);
 
     //@Override
     CARAPI_(void) OnResize(

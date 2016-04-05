@@ -2840,7 +2840,7 @@ void MotionEvent::NativeTransform(
     /* [in] */ Int64 nativePtr,
     /* [in] */ IMatrix* matrixObj)
 {
-    SkMatrix* matrix = (SkMatrix*)((CMatrix*)matrixObj)->Ni();
+    SkMatrix* matrix = (SkMatrix*)((CMatrix*)matrixObj)->mNativeMatrix;
     android::MotionEvent* event = reinterpret_cast<android::MotionEvent*>(nativePtr);
 
     float m[9];

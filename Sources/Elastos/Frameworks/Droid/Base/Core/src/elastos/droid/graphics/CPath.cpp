@@ -42,7 +42,7 @@ CPath::~CPath()
 
 ECode CPath::constructor()
 {
-    mNativePath = Init1();
+    mNativePath = reinterpret_cast<Int64>(new SkPath());
     return NOERROR;
 }
 
@@ -56,8 +56,11 @@ ECode CPath::constructor(
         if (((CPath*)src)->mRects != NULL) {
             CRegion::New(((CPath*)src)->mRects, (IRegion**)&mRects);
         }
+
+        SkPath* val = reinterpret_cast<SkPath*>(valNative);
+        mNativePath = reinterpret_cast<Int64>(new SkPath(*val));
     }
-    mNativePath = Init2(valNative);
+
     return NOERROR;
 }
 
@@ -721,7 +724,7 @@ ECode CPath::AddPath(
 {
     if (!((CPath*)src)->mIsSimplePath) mIsSimplePath = FALSE;
     NativeAddPath(mNativePath, ((CPath*)src)->mNativePath,
-            ((Matrix*)matrix)->mNativeInstance);
+            ((Matrix*)matrix)->mNativeMatrix);
     return NOERROR;
 }
 
@@ -794,7 +797,7 @@ ECode CPath::Transform(
         ((CPath*)dst)->mIsSimplePath = FALSE;
         dstNative = ((CPath*)dst)->mNativePath;
     }
-    NativeTransform(mNativePath, ((Matrix*)matrix)->mNativeInstance, dstNative);
+    NativeTransform(mNativePath, ((Matrix*)matrix)->mNativeMatrix, dstNative);
     return NOERROR;
 }
 
@@ -807,13 +810,8 @@ ECode CPath::Transform(
     /* [in] */ IMatrix* matrix)
 {
     mIsSimplePath = FALSE;
-    NativeTransform(mNativePath, ((Matrix*)matrix)->mNativeInstance);
+    NativeTransform(mNativePath, ((Matrix*)matrix)->mNativeMatrix);
     return NOERROR;
-}
-
-Int64 CPath::Ni()
-{
-    return mNativePath;
 }
 
 ECode CPath::Approximate(
@@ -825,18 +823,6 @@ ECode CPath::Approximate(
     *array = a;
     REFCOUNT_ADD(*array);
     return NOERROR;
-}
-
-Int64 CPath::Init1()
-{
-    return reinterpret_cast<Int64>(new SkPath());
-}
-
-Int64 CPath::Init2(
-    /* [in] */ Int64 valHandle)
-{
-    SkPath* val = reinterpret_cast<SkPath*>(valHandle);
-    return reinterpret_cast<Int64>(new SkPath(*val));
 }
 
 void CPath::NativeReset(

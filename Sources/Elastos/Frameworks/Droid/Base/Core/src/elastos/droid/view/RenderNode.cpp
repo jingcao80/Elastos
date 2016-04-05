@@ -123,14 +123,14 @@ ECode RenderNode::HasIdentityMatrix(
 ECode RenderNode::GetMatrix(
     /* [in] */ IMatrix* outMatrix)
 {
-    nGetTransformMatrix(mNativeRenderNode, ((Matrix*)outMatrix)->mNativeInstance);
+    nGetTransformMatrix(mNativeRenderNode, ((Matrix*)outMatrix)->mNativeMatrix);
     return NOERROR;
 }
 
 ECode RenderNode::GetInverseMatrix(
     /* [in] */ IMatrix* outMatrix)
 {
-    nGetInverseTransformMatrix(mNativeRenderNode, ((Matrix*)outMatrix)->mNativeInstance);
+    nGetInverseTransformMatrix(mNativeRenderNode, ((Matrix*)outMatrix)->mNativeMatrix);
     return NOERROR;
 }
 
@@ -301,7 +301,7 @@ ECode RenderNode::SetStaticMatrix(
     /* [in] */ IMatrix* matrix,
     /* [out] */ Boolean* result)
 {
-    *result = nSetStaticMatrix(mNativeRenderNode, ((Matrix*)matrix)->mNativeInstance);
+    *result = nSetStaticMatrix(mNativeRenderNode, ((Matrix*)matrix)->mNativeMatrix);
     return NOERROR;
 }
 
@@ -318,7 +318,7 @@ ECode RenderNode::SetAnimationMatrix(
     /* [out] */ Boolean* result)
 {
     *result = nSetAnimationMatrix(mNativeRenderNode,
-            (matrix != NULL) ? ((Matrix*)matrix)->mNativeInstance : 0);
+            (matrix != NULL) ? ((Matrix*)matrix)->mNativeMatrix : 0);
     return NOERROR;
 }
 

@@ -1080,7 +1080,10 @@ ECode ImageView::DrawableStateChanged()
 void ImageView::OnDraw(
     /* [in] */ ICanvas* canvas)
 {
-    Logger::D(TAG, " >>>> OnDraw");
+    Logger::D(TAG, " >>>> OnDraw mDrawableWidth:%d, mDrawableHeight:%d, "
+        "mPaddingLeft:%d mPaddingTop:%d, mPaddingRight:%d, mPaddingBottom:%d, mDrawMatrix:%s",
+        mDrawableWidth, mDrawableHeight, mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom,
+        TO_CSTR(mDrawMatrix));
     View::OnDraw(canvas);
 
     if (mDrawable == NULL) {
@@ -1092,13 +1095,15 @@ void ImageView::OnDraw(
     }
 
     if (mDrawMatrix == NULL && mPaddingTop == 0 && mPaddingLeft == 0) {
+        Logger::D(TAG, " >> 1");
         mDrawable->Draw(canvas);
     }
     else {
         Int32 saveCount1, saveCount2;
         canvas->GetSaveCount(&saveCount1);
         canvas->Save(&saveCount2);
-
+        Logger::D(TAG, " >> 2, saveCount1:%d, saveCount2:%d, mCropToPadding:%d, scrollX:%d, scrollY:%d",
+            saveCount1, saveCount2, mCropToPadding, mScrollX, mScrollY);
         if (mCropToPadding) {
             Boolean IsNonEmpty;
             const Int32 scrollX = mScrollX;

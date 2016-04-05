@@ -13,14 +13,6 @@ CarClass(CCanvas), public Canvas
 {
 public:
     CAR_OBJECT_DECL();
-
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IBitmap* bitmap);
-
-    CARAPI constructor(
-        /* [in] */ Int32 nativeCanvas);
 };
 
 } // namespace Graphics

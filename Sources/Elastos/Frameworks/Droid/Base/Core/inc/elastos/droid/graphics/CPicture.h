@@ -6,6 +6,7 @@
 #include "elastos/droid/graphics/Canvas.h"
 
 using Elastos::IO::IInputStream;
+using Elastos::IO::IOutputStream;
 
 namespace Elastos {
 namespace Droid {

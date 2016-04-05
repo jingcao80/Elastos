@@ -7,6 +7,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::ICloseGuard;
+using Elastos::IO::IOutputStream;
 using Elastos::Utility::IList;
 
 namespace Elastos {

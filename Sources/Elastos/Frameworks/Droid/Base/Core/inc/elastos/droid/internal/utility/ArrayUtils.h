@@ -14,6 +14,14 @@ namespace Utility {
 class ECO_PUBLIC ArrayUtils
 {
 public:
+    static CARAPI_(AutoPtr<ArrayOf<Char16> >) ToChar16Array(
+        /* [in] */ ArrayOf<Char32>* char32Array);
+
+    static CARAPI_(AutoPtr<ArrayOf<Char16> >) ToChar16Array(
+        /* [in] */ ArrayOf<Char32>* char32Array,
+        /* [in] */ Int32 index,
+        /* [in] */ Int32 count);
+
     static CARAPI_(AutoPtr<ArrayOf<Byte> >) NewUnpaddedByteArray(
         /* [in] */ Int32 minLen);
 

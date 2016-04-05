@@ -109,7 +109,7 @@ ECode NinePatch::constructor(
 {
     mBitmap = bitmap;
     mSrcName = srcName;
-    mNativeChunk = ValidateNinePatchChunk(((CBitmap*)mBitmap.Get())->Ni(), chunk);
+    mNativeChunk = ValidateNinePatchChunk(((CBitmap*)mBitmap.Get())->mNativeBitmap, chunk);
     return NOERROR;
 }
 
@@ -188,7 +188,7 @@ void NinePatch::DrawSoftware(
     /* [in] */ IRectF* location,
     /* [in] */ IPaint* paint)
 {
-    NativeDraw(((Canvas*)canvas)->GetNativeCanvasWrapper(), location, ((CBitmap*)mBitmap.Get())->Ni(), mNativeChunk,
+    NativeDraw(((Canvas*)canvas)->GetNativeCanvasWrapper(), location, ((CBitmap*)mBitmap.Get())->mNativeBitmap, mNativeChunk,
             paint != NULL ? ((Paint*)paint)->mNativePaint : 0, ((Canvas*)canvas)->mDensity, ((CBitmap*)mBitmap.Get())->mDensity);
 }
 
@@ -197,7 +197,7 @@ void NinePatch::DrawSoftware(
     /* [in] */ IRect* location,
     /* [in] */ IPaint* paint)
 {
-    NativeDraw(((Canvas*)canvas)->GetNativeCanvasWrapper(), location, ((CBitmap*)mBitmap.Get())->Ni(), mNativeChunk,
+    NativeDraw(((Canvas*)canvas)->GetNativeCanvasWrapper(), location, ((CBitmap*)mBitmap.Get())->mNativeBitmap, mNativeChunk,
             paint != NULL ? ((Paint*)paint)->mNativePaint  : 0, ((Canvas*)canvas)->mDensity, ((CBitmap*)mBitmap.Get())->mDensity);
 }
 
@@ -234,7 +234,7 @@ ECode NinePatch::GetTransparentRegion(
     /* [out] */ IRegion** region)
 {
     VALIDATE_NOT_NULL(region);
-    Int64 r = NativeGetTransparentRegion(((CBitmap*)mBitmap.Get())->Ni(), mNativeChunk, bounds);
+    Int64 r = NativeGetTransparentRegion(((CBitmap*)mBitmap.Get())->mNativeBitmap, mNativeChunk, bounds);
     if (r != 0) {
         return CRegion::New(r, (IRegion**)&region);
     }

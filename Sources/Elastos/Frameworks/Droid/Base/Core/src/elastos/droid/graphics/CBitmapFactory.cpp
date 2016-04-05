@@ -10,7 +10,9 @@ namespace Graphics {
 
 ////////////////////////////////////////////////////////////////////////////////
 CAR_SINGLETON_IMPL(CBitmapFactory);
+
 CAR_INTERFACE_IMPL(CBitmapFactory, Singleton, IBitmapFactory);
+
 ECode CBitmapFactory::DecodeFile(
     /* [in] */ const String& pathName,
     /* [in] */ IBitmapFactoryOptions* opts,
