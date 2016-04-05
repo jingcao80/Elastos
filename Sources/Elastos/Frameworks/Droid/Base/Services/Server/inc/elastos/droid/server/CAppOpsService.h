@@ -351,10 +351,10 @@ public:
         /* [in] */ Int32 uid,
         /* [in] */ const String& packageName);
 
-    void FinishOperationLocked(
+    CARAPI_(void) FinishOperationLocked(
         /* [in] */ Op* op);
 
-    void ReadState();
+    CARAPI_(void) ReadState();
 
     CARAPI ReadPackage(
         /* [in] */ IXmlPullParser* parser);
@@ -408,22 +408,22 @@ public:
         /* [in] */ Boolean remember);
 
 private:
-    AutoPtr<IArrayList> CollectOps( //ArrayList><AppOpsManager.OpEntry>
+    CARAPI_(AutoPtr<IArrayList>) CollectOps( //ArrayList><AppOpsManager.OpEntry>
         /* [in] */ Ops* pkgOps,
         /* [in] */ ArrayOf<Int32>* ops);
 
-    void PruneOp(
+    CARAPI_(void) PruneOp(
         /* [in] */ Op* op,
         /* [in] */ Int32 uid,
         /* [in] */ const String& packageName);
 
-    static AutoPtr<IHashMap> AddCallbacks(
+    static CARAPI_(AutoPtr<IHashMap>) AddCallbacks(
         /* [in] */ IHashMap* callbacks, //HashMap<Callback, ArrayList<Pair<String, Integer>>>
         /* [in] */ const String& packageName,
         /* [in] */ Int32 op,
         /* [in] */ IArrayList* cbs);  //ArrayList<Callback>
 
-    Int32 CheckRestrictionLocked(
+    CARAPI_(Int32) CheckRestrictionLocked(
         /* [in] */ Int32 code,
         /* [in] */ Int32 usage,
         /* [in] */ Int32 uid,
@@ -435,32 +435,32 @@ private:
     CARAPI VerifyIncomingOp(
         /* [in] */ Int32 op);
 
-    AutoPtr<Ops> GetOpsLocked(
+    CARAPI_(AutoPtr<Ops>) GetOpsLocked(
         /* [in] */ Int32 uid,
         /* [in] */ const String& packageName,
         /* [in] */ Boolean edit);
 
-    AutoPtr<Ops> GetOpsRawLocked(
+    CARAPI_(AutoPtr<Ops>) GetOpsRawLocked(
         /* [in] */ Int32 uid,
         /* [in] */ const String& packageName,
         /* [in] */ Boolean edit);
 
-    void ScheduleWriteLocked();
+    CARAPI_(void) ScheduleWriteLocked();
 
-    void ScheduleWriteNowLocked();
+    CARAPI_(void) ScheduleWriteNowLocked();
 
-    AutoPtr<Op> GetOpLocked(
+    CARAPI_(AutoPtr<Op>) GetOpLocked(
         /* [in] */ Int32 code,
         /* [in] */ Int32 uid,
         /* [in] */ const String& packageName,
         /* [in] */ Boolean edit);
 
-    AutoPtr<Op> GetOpLocked(
+    CARAPI_(AutoPtr<Op>) GetOpLocked(
         /* [in] */ Ops* ops,
         /* [in] */ Int32 code,
         /* [in] */ Boolean edit);
 
-    Boolean IsOpRestricted(
+    CARAPI_(Boolean) IsOpRestricted(
         /* [in] */ Int32 uid,
         /* [in] */ Int32 code,
         /* [in] */ const String& packageName);
@@ -468,7 +468,7 @@ private:
     CARAPI CheckSystemUid(
         /* [in] */ const String& function);
 
-    Boolean IsStrict(
+    CARAPI_(Boolean) IsStrict(
         /* [in] */ Int32 uid,
         /* [in] */ Int32 code,
         /* [in] */ const String& packageName);
@@ -484,21 +484,21 @@ private:
     //     /* [in] */ String packageName,
     //     /* [in] */ Op* op);
 
-    void PrintOperationLocked(
+    CARAPI_(void) PrintOperationLocked(
         /* [in] */ Op* op,
         /* [in] */ Int32 mode,
         /* [in] */ const String& operation);
 
-    void RecordOperationLocked(
+    CARAPI_(void) RecordOperationLocked(
         /* [in] */ Int32 code,
         /* [in] */ Int32 uid,
         /* [in] */ const String& packageName,
         /* [in] */ Int32 mode);
 
-    void BroadcastOpIfNeeded(
+    CARAPI_(void) BroadcastOpIfNeeded(
         /* [in] */ Int32 op);
 
-    void ReadPolicy();
+    CARAPI_(void) ReadPolicy();
 
 private:
     static const String TAG;
@@ -537,8 +537,6 @@ private:
 
     AutoPtr<IArrayMap> mClients;// = new ArrayMap<IBinder, ClientState>();
 };
-
-
 
 } // Server
 } // Droid

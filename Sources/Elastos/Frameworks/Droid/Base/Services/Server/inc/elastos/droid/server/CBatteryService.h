@@ -144,9 +144,6 @@ private:
     private:
         AutoPtr<Light> mBatteryLight;
 
-        Int32 mBatteryLowARGB;
-        Int32 mBatteryMediumARGB;
-        Int32 mBatteryFullARGB;
         Int32 mBatteryLedOn;
         Int32 mBatteryLedOff;
 
@@ -306,6 +303,27 @@ private:
         CBatteryService* mHost;
     };
 
+    class SettingsObserver
+        : public ContentObserver
+    {
+    public:
+        SettingsObserver(
+            /* [in] */ CBatteryService* host);
+
+        CARAPI constructor(
+            /* [in] */ IHandler* handler);
+
+        CARAPI Observe();
+
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+        CARAPI Update();
+
+    public:
+        CBatteryService* mHost;
+    };
+
 public:
     CAR_OBJECT_DECL()
 
@@ -353,6 +371,8 @@ private:
     CARAPI DumpInternal(
         /* [in] */ IPrintWriter* pw,
         /* [in] */ ArrayOf<String>* args);
+
+    CARAPI_(void) UpdateLedPulse();
 
 private:
     static const String TAG;
@@ -409,6 +429,13 @@ private:
     Boolean mUpdatesStopped;
 
     AutoPtr<Led> mLed;
+    // Disable LED until SettingsObserver can be started
+    Boolean mLightEnabled;
+    Boolean mLedPulseEnabled;
+    Int32 mBatteryLowARGB;
+    Int32 mBatteryMediumARGB;
+    Int32 mBatteryFullARGB;
+    Boolean mMultiColorLed;
 
     Boolean mSentLowBatteryBroadcast;
 

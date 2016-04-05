@@ -736,6 +736,15 @@ AutoPtr<CAssetAtlasService::Configuration> CAssetAtlasService::ComputeBestConfig
         }
     }
 
+    Int32 rSize = 0;
+    results->GetSize(&rSize);
+    if (rSize == 0) {
+        if (DEBUG_ATLAS) {
+            Logger::W(LOG_TAG, "No atlas configuration found!");
+        }
+        return NULL;
+    }
+
     // Maximize the number of packed bitmaps, minimize the texture size
     AutoPtr<IComparator> wrCmp = new WorkerResultComparator();
     collections->Sort(results, wrCmp);
