@@ -1101,8 +1101,8 @@ void ImageView::OnDraw(
         canvas->DrawARGB(255, 255, 0, 0);//debug
     }
     else {
-        Logger::I(TAG, " >> OnDraw 2: %s, mScrollX:%d, mScrollY:%d",
-            TO_CSTR(mCropToPadding), mScrollX, mScrollY);
+        Logger::I(TAG, " >> OnDraw 2: %d, mScrollX:%d, mScrollY:%d",
+            mCropToPadding, mScrollX, mScrollY);
         Int32 saveCount1, saveCount2;
         canvas->GetSaveCount(&saveCount1);
         canvas->Save(&saveCount2);
