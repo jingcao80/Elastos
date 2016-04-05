@@ -10,8 +10,8 @@ CAR_SINGLETON_IMPL(CTimePickerClockDelegateHelper)
 CAR_INTERFACE_IMPL(CTimePickerClockDelegateHelper, Singleton, ITimePickerClockDelegateHelper)
 
 ECode CTimePickerClockDelegateHelper::GetAmPmStrings(
-	/* [in] */ IContext* context,
-	/* [out, callee] */ ArrayOf<String>** result)
+    /* [in] */ IContext* context,
+    /* [out, callee] */ ArrayOf<String>** result)
 {
     VALIDATE_NOT_NULL(result);
     *result = TimePickerClockDelegate::GetAmPmStrings(context);
@@ -22,4 +22,3 @@ ECode CTimePickerClockDelegateHelper::GetAmPmStrings(
 } // namespace Widget
 } // namespace Droid
 } // namespace Elastos
-

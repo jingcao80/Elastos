@@ -4,7 +4,7 @@
 #include "elastos/droid/text/method/BaseKeyListener.h"
 #include <elastos/core/Object.h>
 
-using Elastos::Droid::View::IInputFilter;
+using Elastos::Droid::Text::IInputFilter;
 using Elastos::Droid::Text::ISpanned;
 using Elastos::Droid::Text::IEditable;
 using Elastos::Droid::Text::ISpannable;
