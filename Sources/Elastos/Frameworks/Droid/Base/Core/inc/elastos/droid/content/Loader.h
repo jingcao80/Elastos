@@ -39,7 +39,7 @@ namespace Content {
  *
  * @param <D> The result returned when the load is complete
  */
-class Loader
+class ECO_PUBLIC Loader
     : public Object
     , public ILoader
 {

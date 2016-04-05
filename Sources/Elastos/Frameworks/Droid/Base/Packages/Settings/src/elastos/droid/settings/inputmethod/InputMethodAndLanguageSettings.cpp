@@ -4,11 +4,12 @@
 #include "elastos/droid/settings/inputmethod/InputMethodSettingValuesWrapper.h"
 #include "elastos/droid/settings/inputmethod/InputMethodAndSubtypeUtil.h"
 #include "elastos/droid/settings/inputmethod/InputMethodPreference.h"
-// #include "elastos/droid/settings/inputmethod/KeyboardLayoutDialogFragment.h"
+#include "elastos/droid/settings/inputmethod/KeyboardLayoutDialogFragment.h"
+#include "elastos/droid/settings/inputmethod/KeyboardLayoutPickerFragment.h"
 #include "elastos/droid/settings/inputmethod/UserDictionaryList.h"
 #include "elastos/droid/settings/search/SearchIndexableRaw.h"
 #include "elastos/droid/settings/SettingsActivity.h"
-// #include "elastos/droid/settings/VoiceInputOutputSettings.h"
+#include "elastos/droid/settings/VoiceInputOutputSettings.h"
 #include "elastos/droid/settings/Utils.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "_Settings.h"
@@ -51,8 +52,6 @@ using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Settings::SettingsActivity;
 using Elastos::Droid::Settings::Utils;
-// using Elastos::Droid::Settings::VoiceInputOutputSettings;
-using Elastos::Droid::Settings::Inputmethod::InputMethodPreference;
 using Elastos::Droid::Settings::Search::SearchIndexableRaw;
 using Elastos::Droid::Settings::Search::ISearchIndexableRaw;
 using Elastos::Droid::Settings::Search::EIID_IIndexableSearchIndexProvider;
@@ -596,9 +595,8 @@ ECode InputMethodAndLanguageSettings::OnCreate(
         UpdateInputMethodSelectorSummary(LoadInputMethodSelectorVisibility());
     }
 
-    assert(0 && "TODO");
-    // AutoPtr<VoiceInputOutputSettings> vios = new VoiceInputOutputSettings(this);
-    // vios->OnCreate();
+    AutoPtr<VoiceInputOutputSettings> vios = new VoiceInputOutputSettings(this);
+    vios->OnCreate();
 
     // Get references to dynamically constructed categories.
     AutoPtr<IPreference> pre;
@@ -1258,15 +1256,14 @@ void InputMethodAndLanguageSettings::UpdateHardKeyboards()
 void InputMethodAndLanguageSettings::ShowKeyboardLayoutDialog(
     /* [in] */ IInputDeviceIdentifier* inputDeviceIdentifier)
 {
-    assert(0 && "TODO");
-    // AutoPtr<KeyboardLayoutDialogFragment> fragment = new KeyboardLayoutDialogFragment(
-    //         inputDeviceIdentifier);
-    // fragment->SetTargetFragment(this, 0);
-    // AutoPtr<IActivity> activity;
-    // GetActivity((IActivity**)&activity);
-    // AutoPtr<IFragmentManager> fraManager;
-    // activity->GetFragmentManager((IFragmentManager**)&fraManager);
-    // fragment->Show(fraManager, String("keyboardLayout"));
+    AutoPtr<KeyboardLayoutDialogFragment> fragment = new KeyboardLayoutDialogFragment(
+            inputDeviceIdentifier);
+    fragment->SetTargetFragment(this, 0);
+    AutoPtr<IActivity> activity;
+    GetActivity((IActivity**)&activity);
+    AutoPtr<IFragmentManager> fraManager;
+    activity->GetFragmentManager((IFragmentManager**)&fraManager);
+    fragment->Show(fraManager, String("keyboardLayout"));
 }
 
 ECode InputMethodAndLanguageSettings::OnSetupKeyboardLayouts(
@@ -1278,8 +1275,8 @@ ECode InputMethodAndLanguageSettings::OnSetupKeyboardLayouts(
     GetActivity((IActivity**)&activity);
     assert(0 && "TODO");
     // intent->SetClass(IContext::Probe(activity), KeyboardLayoutPickerActivity.class);
-    // intent->PutExtra(KeyboardLayoutPickerFragment::EXTRA_INPUT_DEVICE_IDENTIFIER,
-            // inputDeviceIdentifier);
+    intent->PutExtra(KeyboardLayoutPickerFragment::EXTRA_INPUT_DEVICE_IDENTIFIER,
+            IParcelable::Probe(inputDeviceIdentifier));
     mIntentWaitingForResult = intent;
     StartActivityForResult(intent, 0);
     return NOERROR;
@@ -1294,10 +1291,9 @@ ECode InputMethodAndLanguageSettings::OnActivityResult(
 
     if (mIntentWaitingForResult != NULL) {
         AutoPtr<IParcelable> parcel;
-        assert(0 && "TODO");
-        // mIntentWaitingForResult->GetParcelableExtra(
-        //         KeyboardLayoutPickerFragment::EXTRA_INPUT_DEVICE_IDENTIFIER,
-        //         (IParcelable**)&parcel);
+        mIntentWaitingForResult->GetParcelableExtra(
+                KeyboardLayoutPickerFragment::EXTRA_INPUT_DEVICE_IDENTIFIER,
+                (IParcelable**)&parcel);
         AutoPtr<IInputDeviceIdentifier> inputDeviceIdentifier =
                 IInputDeviceIdentifier::Probe(parcel);
         mIntentWaitingForResult = NULL;

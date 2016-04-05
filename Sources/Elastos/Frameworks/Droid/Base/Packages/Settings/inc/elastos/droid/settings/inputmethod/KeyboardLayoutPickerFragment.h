@@ -1,156 +1,189 @@
-/*
- * Copyright (C) 2012 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.settings.inputmethod;
+#ifndef __ELASTOS_DROID_SETTINGS_INPUTMETHOD_KEYBOARDLAYOUTPICKERFRAGMENT_H__
+#define __ELASTOS_DROID_SETTINGS_INPUTMETHOD_KEYBOARDLAYOUTPICKERFRAGMENT_H__
 
-using Elastos::Droid::Settings::IR;
-using Elastos::Droid::Settings::ISettingsPreferenceFragment;
+#include "Elastos.Droid.Hardware.h"
+#include "elastos/droid/settings/SettingsPreferenceFragment.h"
 
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Hardware::Input::IInputDeviceIdentifier;
-using Elastos::Droid::Hardware::Input::IInputManager;
-using Elastos::Droid::Hardware::Input::InputManager::IInputDeviceListener;
-using Elastos::Droid::Hardware::Input::IKeyboardLayout;
+using Elastos::Droid::Settings::SettingsPreferenceFragment;
+// using Elastos::Droid::Content::IContext;
+// using Elastos::Droid::Hardware::Input::IInputDeviceIdentifier;
+// using Elastos::Droid::Hardware::Input::IInputManager;
+using Elastos::Droid::Hardware::Input::IInputDeviceListener;
+// using Elastos::Droid::Hardware::Input::IKeyboardLayout;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Preference::ICheckBoxPreference;
+// using Elastos::Droid::Preference::ICheckBoxPreference;
 using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::Preference::IPreferenceScreen;
-using Elastos::Droid::View::IInputDevice;
+// using Elastos::Droid::View::IInputDevice;
+// using Elastos::Utility::IArrays;
+// using Elastos::Utility::IHashMap;
+// using Elastos::Utility::IMap;
 
-using Elastos::Utility::IArrays;
-using Elastos::Utility::IHashMap;
-using Elastos::Utility::IMap;
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Inputmethod {
 
-public class KeyboardLayoutPickerFragment extends SettingsPreferenceFragment
-        implements InputDeviceListener {
-    private InputDeviceIdentifier mInputDeviceIdentifier;
-    private Int32 mInputDeviceId = -1;
-    private InputManager mIm;
-    private KeyboardLayout[] mKeyboardLayouts;
-    private HashMap<CheckBoxPreference, KeyboardLayout> mPreferenceMap =
-            new HashMap<CheckBoxPreference, KeyboardLayout>();
+class KeyboardLayoutPickerFragment
+    : public SettingsPreferenceFragment
+    , public IInputDeviceListener
+{
+public:
+    CAR_INTERFACE_DECL();
 
+    //@Override
+    CARAPI OnCreate(
+        /* [in] */ IBundle* icicle)
+    {
+        SettingsPreferenceFragment::OnCreate(icicle);
+
+        assert(0 && "TODO");
+        // mInputDeviceIdentifier = GetActivity()->GetIntent().GetParcelableExtra(
+        //         EXTRA_INPUT_DEVICE_IDENTIFIER);
+        // if (mInputDeviceIdentifier == NULL) {
+        //     GetActivity()->Finish();
+        // }
+
+        // mIm = (InputManager)GetSystemService(Context.INPUT_SERVICE);
+        // mKeyboardLayouts = mIm->GetKeyboardLayouts();
+        // Arrays->Sort(mKeyboardLayouts);
+        // SetPreferenceScreen(CreatePreferenceHierarchy());
+        return NOERROR;
+    }
+
+    //@Override
+    CARAPI OnResume()
+    {
+        SettingsPreferenceFragment::OnResume();
+
+        assert(0 && "TODO");
+        // mIm->RegisterInputDeviceListener(this, NULL);
+
+        // InputDevice inputDevice =
+        //         mIm->GetInputDeviceByDescriptor(mInputDeviceIdentifier->GetDescriptor());
+        // if (inputDevice == NULL) {
+        //     GetActivity()->Finish();
+        //     return;
+        // }
+        // mInputDeviceId = inputDevice->GetId();
+
+        // UpdateCheckedState();
+        return NOERROR;
+    }
+
+    //@Override
+    CARAPI OnPause()
+    {
+        // mIm->UnregisterInputDeviceListener(this);
+        // mInputDeviceId = -1;
+
+        SettingsPreferenceFragment::OnPause();
+        assert(0 && "TODO");
+        return NOERROR;
+    }
+
+    //@Override
+    CARAPI OnPreferenceTreeClick(
+        /* [in] */ IPreferenceScreen* preferenceScreen,
+        /* [in] */ IPreference* preference,
+        /* [out] */ Boolean* result)
+    {
+        VALIDATE_NOT_NULL(result);
+        assert(0 && "TODO");
+        // if (preference instanceof CheckBoxPreference) {
+        //     CheckBoxPreference checkboxPref = (CheckBoxPreference)preference;
+        //     KeyboardLayout layout = mPreferenceMap->Get(checkboxPref);
+        //     if (layout != NULL) {
+        //         Boolean checked = checkboxPref->IsChecked();
+        //         if (checked) {
+        //             mIm->AddKeyboardLayoutForInputDevice(mInputDeviceIdentifier,
+        //                     layout->GetDescriptor());
+        //         }
+        //         else {
+        //             mIm->RemoveKeyboardLayoutForInputDevice(mInputDeviceIdentifier,
+        //                     layout->GetDescriptor());
+        //         }
+        //         return TRUE;
+        //     }
+        // }
+        // return SettingsPreferenceFragment::OnPreferenceTreeClick(preferenceScreen, preference);
+        return NOERROR;
+    }
+
+    //@Override
+    CARAPI OnInputDeviceAdded(
+        /* [in] */ Int32 deviceId)
+    {
+        return NOERROR;
+    }
+
+    //@Override
+    CARAPI OnInputDeviceChanged(
+        /* [in] */ Int32 deviceId)
+    {
+        assert(0 && "TODO");
+        return NOERROR;
+        // if (mInputDeviceId >= 0 && deviceId == mInputDeviceId) {
+        //     UpdateCheckedState();
+        // }
+    }
+
+    //@Override
+    CARAPI OnInputDeviceRemoved(
+        /* [in] */ Int32 deviceId)
+    {
+        assert(0 && "TODO");
+        return NOERROR;
+        // if (mInputDeviceId >= 0 && deviceId == mInputDeviceId) {
+        //     GetActivity()->Finish();
+        // }
+    }
+
+    // private PreferenceScreen CreatePreferenceHierarchy() {
+    //     PreferenceScreen root = GetPreferenceManager()->CreatePreferenceScreen(GetActivity());
+    //     Context context = GetActivity();
+
+    //     for (KeyboardLayout layout : mKeyboardLayouts) {
+    //         CheckBoxPreference pref = new CheckBoxPreference(context);
+    //         pref->SetTitle(layout->GetLabel());
+    //         pref->SetSummary(layout->GetCollection());
+    //         root->AddPreference(pref);
+    //         mPreferenceMap->Put(pref, layout);
+    //     }
+    //     return root;
+    // }
+
+    // private void UpdateCheckedState() {
+    //     String[] enabledKeyboardLayouts = mIm->GetKeyboardLayoutsForInputDevice(
+    //             mInputDeviceIdentifier);
+    //     Arrays->Sort(enabledKeyboardLayouts);
+
+    //     for (Map.Entry<CheckBoxPreference, KeyboardLayout> entry : mPreferenceMap->EntrySet()) {
+    //         entry->GetKey()->SetChecked(Arrays->BinarySearch(enabledKeyboardLayouts,
+    //                 entry->GetValue()->GetDescriptor()) >= 0);
+    //     }
+    // }
+
+public:
     /**
      * Intent extra: The input device descriptor of the keyboard whose keyboard
      * layout is to be changed.
      */
-    public static const String EXTRA_INPUT_DEVICE_IDENTIFIER = "input_device_identifier";
+    static const String EXTRA_INPUT_DEVICE_IDENTIFIER;
 
-    //@Override
-    CARAPI OnCreate(Bundle icicle) {
-        super->OnCreate(icicle);
+private:
+    // private InputDeviceIdentifier mInputDeviceIdentifier;
+    // private Int32 mInputDeviceId = -1;
+    // private InputManager mIm;
+    // private KeyboardLayout[] mKeyboardLayouts;
+    // private HashMap<CheckBoxPreference, KeyboardLayout> mPreferenceMap =
+    //         new HashMap<CheckBoxPreference, KeyboardLayout>();
+};
 
-        mInputDeviceIdentifier = GetActivity()->GetIntent().GetParcelableExtra(
-                EXTRA_INPUT_DEVICE_IDENTIFIER);
-        if (mInputDeviceIdentifier == NULL) {
-            GetActivity()->Finish();
-        }
+} // namespace Inputmethod
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
 
-        mIm = (InputManager)GetSystemService(Context.INPUT_SERVICE);
-        mKeyboardLayouts = mIm->GetKeyboardLayouts();
-        Arrays->Sort(mKeyboardLayouts);
-        SetPreferenceScreen(CreatePreferenceHierarchy());
-    }
-
-    //@Override
-    CARAPI OnResume() {
-        super->OnResume();
-
-        mIm->RegisterInputDeviceListener(this, NULL);
-
-        InputDevice inputDevice =
-                mIm->GetInputDeviceByDescriptor(mInputDeviceIdentifier->GetDescriptor());
-        if (inputDevice == NULL) {
-            GetActivity()->Finish();
-            return;
-        }
-        mInputDeviceId = inputDevice->GetId();
-
-        UpdateCheckedState();
-    }
-
-    //@Override
-    CARAPI OnPause() {
-        mIm->UnregisterInputDeviceListener(this);
-        mInputDeviceId = -1;
-
-        super->OnPause();
-    }
-
-    //@Override
-    public Boolean OnPreferenceTreeClick(PreferenceScreen preferenceScreen,
-            Preference preference) {
-        if (preference instanceof CheckBoxPreference) {
-            CheckBoxPreference checkboxPref = (CheckBoxPreference)preference;
-            KeyboardLayout layout = mPreferenceMap->Get(checkboxPref);
-            if (layout != NULL) {
-                Boolean checked = checkboxPref->IsChecked();
-                if (checked) {
-                    mIm->AddKeyboardLayoutForInputDevice(mInputDeviceIdentifier,
-                            layout->GetDescriptor());
-                } else {
-                    mIm->RemoveKeyboardLayoutForInputDevice(mInputDeviceIdentifier,
-                            layout->GetDescriptor());
-                }
-                return TRUE;
-            }
-        }
-        return super->OnPreferenceTreeClick(preferenceScreen, preference);
-    }
-
-    //@Override
-    CARAPI OnInputDeviceAdded(Int32 deviceId) {
-    }
-
-    //@Override
-    CARAPI OnInputDeviceChanged(Int32 deviceId) {
-        if (mInputDeviceId >= 0 && deviceId == mInputDeviceId) {
-            UpdateCheckedState();
-        }
-    }
-
-    //@Override
-    CARAPI OnInputDeviceRemoved(Int32 deviceId) {
-        if (mInputDeviceId >= 0 && deviceId == mInputDeviceId) {
-            GetActivity()->Finish();
-        }
-    }
-
-    private PreferenceScreen CreatePreferenceHierarchy() {
-        PreferenceScreen root = GetPreferenceManager()->CreatePreferenceScreen(GetActivity());
-        Context context = GetActivity();
-
-        for (KeyboardLayout layout : mKeyboardLayouts) {
-            CheckBoxPreference pref = new CheckBoxPreference(context);
-            pref->SetTitle(layout->GetLabel());
-            pref->SetSummary(layout->GetCollection());
-            root->AddPreference(pref);
-            mPreferenceMap->Put(pref, layout);
-        }
-        return root;
-    }
-
-    private void UpdateCheckedState() {
-        String[] enabledKeyboardLayouts = mIm->GetKeyboardLayoutsForInputDevice(
-                mInputDeviceIdentifier);
-        Arrays->Sort(enabledKeyboardLayouts);
-
-        for (Map.Entry<CheckBoxPreference, KeyboardLayout> entry : mPreferenceMap->EntrySet()) {
-            entry->GetKey()->SetChecked(Arrays->BinarySearch(enabledKeyboardLayouts,
-                    entry->GetValue()->GetDescriptor()) >= 0);
-        }
-    }
-}
+#endif //__ELASTOS_DROID_SETTINGS_INPUTMETHOD_KEYBOARDLAYOUTPICKERFRAGMENT_H__

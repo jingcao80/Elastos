@@ -29,7 +29,7 @@ private:
      * a prefix. Each item that does not start with the supplied prefix
      * is removed from the list.</p>
      */
-    class ArrayFilter
+    class ECO_LOCAL ArrayFilter
         : public Filter
     {
     public:
@@ -192,7 +192,7 @@ protected:
         /* [in] */ IList* objects = NULL);
 
 private:
-    CARAPI_(AutoPtr<IView>) CreateViewFromResource(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) CreateViewFromResource(
         /* [in] */ Int32 position,
         /* [in] */ IView* convertView,
         /* [in] */ IViewGroup* parent,

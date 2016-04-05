@@ -3,5 +3,6 @@ DIRS += dashboard
 DIRS += drawable
 DIRS += inputmethod
 DIRS += search
+DIRS += voice
 DIRS += widget
 DIRS += wifi

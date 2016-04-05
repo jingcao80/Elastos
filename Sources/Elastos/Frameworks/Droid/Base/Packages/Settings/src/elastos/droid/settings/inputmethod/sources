@@ -7,8 +7,10 @@ include $(MAKEDIR)/../../../../../../../../sources.inc
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
-SOURCES += InputMethodSettingValuesWrapper.cpp
-SOURCES += InputMethodAndSubtypeUtil.cpp
-SOURCES += UserDictionaryList.cpp
-SOURCES += InputMethodPreference.cpp
 SOURCES += InputMethodAndLanguageSettings.cpp
+SOURCES += InputMethodAndSubtypeUtil.cpp
+SOURCES += InputMethodPreference.cpp
+SOURCES += InputMethodSettingValuesWrapper.cpp
+SOURCES += KeyboardLayoutDialogFragment.cpp
+SOURCES += KeyboardLayoutPickerFragment.cpp
+SOURCES += UserDictionaryList.cpp

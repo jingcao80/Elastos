@@ -16,12 +16,12 @@ namespace Elastos {
 namespace Droid {
 namespace Content {
 
-class AsyncTaskLoader
+class ECO_PUBLIC AsyncTaskLoader
     : public Loader
     , public IAsyncTaskLoader
 {
 private:
-    class LoadTask
+    class ECO_LOCAL LoadTask
         : public AsyncTask
         , public IRunnable
     {
@@ -204,8 +204,8 @@ protected:
         /* [in] */ IInterface* data);
 
 private:
-    static const String TAG;
-    static const Boolean DEBUG;
+    ECO_LOCAL static const String TAG;
+    ECO_LOCAL static const Boolean DEBUG;
 
 private:
     AutoPtr<IExecutor> mExecutor;

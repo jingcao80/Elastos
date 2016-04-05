@@ -12,7 +12,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class Filter
+class ECO_PUBLIC Filter
     : public Object
     , public IFilter
 {
@@ -60,7 +60,7 @@ private:
      * <p>Holds the arguments of a filtering request as well as the results
      * of the request.</p>
      */
-    class RequestArguments
+    class ECO_LOCAL RequestArguments
         : public Object
     {
     public:
@@ -84,7 +84,7 @@ private:
      * <p>Handles the results of a filtering operation. The results are
      * handled in the UI thread.</p>
      */
-    class RequestHandler
+    class ECO_LOCAL RequestHandler
         : public Handler
     {
     public:
@@ -109,7 +109,7 @@ private:
         Filter* mHost;
     };
 
-    class ResultsHandler
+    class ECO_LOCAL ResultsHandler
         : public Handler
     {
     public:
@@ -183,19 +183,19 @@ protected:
         /* [in] */ IFilterResults* results) = 0;
 
 private:
-    CARAPI HandleFilterMessage(
+    ECO_LOCAL CARAPI HandleFilterMessage(
         /* [in] */ RequestArguments* args);
 
-    CARAPI HandleFinishMessage();
+    ECO_LOCAL CARAPI HandleFinishMessage();
 
-    CARAPI HandleResultsMessage(
+    ECO_LOCAL CARAPI HandleResultsMessage(
         /* [in] */ RequestArguments* args);
 
 private:
-    static const String TAG;
-    static const String THREAD_NAME;
-    static const Int32 FILTER_TOKEN;
-    static const Int32 FINISH_TOKEN;
+    ECO_LOCAL static const String TAG;
+    ECO_LOCAL static const String THREAD_NAME;
+    ECO_LOCAL static const Int32 FILTER_TOKEN;
+    ECO_LOCAL static const Int32 FINISH_TOKEN;
 
     AutoPtr<IHandler> mThreadHandler;
     AutoPtr<IHandler> mResultHandler;

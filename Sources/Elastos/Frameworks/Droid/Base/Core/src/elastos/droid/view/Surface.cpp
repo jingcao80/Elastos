@@ -194,7 +194,6 @@ ECode Surface::NativeLockCanvas(
 
     ANativeWindow_Buffer outBuffer;
     android::status_t err = surface->lock(&outBuffer, dirtyRectPtr);
-
     if (err < 0) {
         if (err == android::NO_MEMORY) {
             return E_OUT_OF_RESOURCES_EXCEPTION;
