@@ -2514,7 +2514,7 @@ ECode Database::Stmt_prepare(
     v = (hvm*)malloc(sizeof (hvm) + len16);
     if (!v) {
         sqlite3_finalize((sqlite3_stmt *) svm);
-        return E_NULL_POINTER_EXCEPTION;
+        return E_OUT_OF_MEMORY;
     }
     v->next = h->vms;
     h->vms = v;
@@ -2542,7 +2542,7 @@ ECode Database::Stmt_prepare(
     ((CStmt *)stmt.Get())->mHandle = (Int64)v;
     return NOERROR;
 #else
-    throwex(env, "unsupported");
+    return E_SQL_FEATURE_NOT_SUPPORTED_EXCEPTION;
 #endif
 }
 

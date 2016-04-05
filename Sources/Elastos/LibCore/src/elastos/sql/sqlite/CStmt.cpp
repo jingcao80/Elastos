@@ -37,13 +37,14 @@ ECode CStmt::Prepare(
     if (v && v->h && v->h->sqlite) {
     if (!v->tail) {
         *value = FALSE;
+        return NOERROR;
     }
 #if HAVE_SQLITE3_PREPARE16_V2
     ret = sqlite3_prepare16_v2((sqlite3 *) v->h->sqlite,
                    v->tail, -1, (sqlite3_stmt **) &svm,
                    (const void **) &tail);
 #else
-    ret = sqlite3_prepare16((sqlite3 *) v->h->sqlite,
+    ret = sqlite3_prepare((sqlite3 *) v->h->sqlite,
                 v->tail, -1, (sqlite3_stmt **) &svm,
                 (const void **) &tail);
 #endif
@@ -64,7 +65,7 @@ ECode CStmt::Prepare(
     if (!svm) {
         v->tail = 0;
         *value = FALSE;
-        return E_NULL_POINTER_EXCEPTION;
+        return NOERROR;
     }
     v->vm = svm;
     v->tail = (char *) tail;

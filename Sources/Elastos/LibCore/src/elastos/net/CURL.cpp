@@ -74,7 +74,7 @@ ECode CURL::constructor(
 
     String s;
     // If the context URL has a different protocol, discard it because we can't use it.
-    if (!mProtocol.IsNull() && context != NULL && (context->GetProtocol(&s), mProtocol.Equals(s))) {
+    if (!mProtocol.IsNull() && context != NULL && (context->GetProtocol(&s), !mProtocol.Equals(s))) {
         context = NULL;
     }
 
