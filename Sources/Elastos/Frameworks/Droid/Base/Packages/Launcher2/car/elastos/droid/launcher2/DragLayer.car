@@ -1,8 +1,54 @@
 module
 {
+    using interface Elastos.Droid.Animation.IAnimatorUpdateListener;
+    using interface Elastos.Droid.Animation.ITimeInterpolator;
+    using interface Elastos.Droid.Graphics.IRect;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.Animation.IInterpolator;
+    using interface Elastos.Core.IRunnable;
+
+    interface Elastos.Droid.Launcher2.ILauncher;
+    interface Elastos.Droid.Launcher2.IDragController;
+    interface Elastos.Droid.Launcher2.ILauncherAppWidgetHostView;
+    interface Elastos.Droid.Launcher2.IItemInfo;
+    interface Elastos.Droid.Launcher2.ICellLayout;
+    interface Elastos.Droid.Launcher2.IDragView;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewGroupMarginLayoutParams
+     * interface Elastos.Droid.View.IViewGroupLayoutParams
+     * interface IFrameLayoutLayoutParams
+     */
+    interface IDragLayerLayoutParams {
+        SetWidth(
+            [in] Int32 width);
+
+        GetWidth(
+            [out] Int32* value);
+
+        SetHeight(
+            [in] Int32 height);
+
+        GetHeight(
+            [out] Int32* value);
+
+        SetX(
+            [in] Int32 x);
+
+        GetX(
+            [out] Int32* value);
+
+        SetY(
+            [in] Int32 y);
+
+        GetY(
+            [out] Int32* value);
+    }
 
     /**
      * @Involve
@@ -14,12 +60,165 @@ module
      * interface Elastos.Droid.View.IKeyEventCallback
      * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
      * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface IFrameLayout
      * interface IViewGroupOnHierarchyChangeListener
      */
+    [deprecated, local]
     interface IDragLayer {
         const Int32 ANIMATION_END_DISAPPEAR = 0;
         const Int32 ANIMATION_END_FADE_OUT = 1;
         const Int32 ANIMATION_END_REMAIN_VISIBLE = 2;
+
+        Setup(
+            [in] ILauncher* launcher,
+            [in] IDragController* controller);
+
+        /**
+         * Determine the rect of the descendant in this DragLayer's coordinates
+         *
+         * @param descendant The descendant whose coordinates we want to find.
+         * @param r The rect into which to place the results.
+         * @return The factor by which this descendant is scaled relative to this DragLayer.
+         */
+        GetDescendantRectRelativeToSelf(
+            [in] IView* descendant,
+            [in] IRect* r,
+            [out] Float* result);
+
+        GetLocationInDragLayer(
+            [in] IView* child,
+            [in] ArrayOf<Int32>* loc,
+            [out] Float* result);
+
+        /**
+         * Given a coordinate relative to the descendant, find the coordinate in this DragLayer's
+         * coordinates.
+         *
+         * @param descendant The descendant to which the passed coordinate is relative.
+         * @param coord The coordinate that we want mapped.
+         * @return The factor by which this descendant is scaled relative to this DragLayer. Caution
+         *         this scale factor is assumed to be equal in X and Y, and so if at any point this
+         *         assumption fails, we will need to return a pair of scale factors.
+         */
+        GetDescendantCoordRelativeToSelf(
+            [in] IView* descendant,
+            [in] ArrayOf<Int32>* coord,
+            [out] Float* result);
+
+        GetViewRectRelativeToSelf(
+            [in] IView* v,
+            [in] IRect* r);
+
+        ClearAllResizeFrames();
+
+        HasResizeFrames(
+            [out] Boolean* result);
+
+        IsWidgetBeingResized(
+            [out] Boolean* result);
+
+        AddResizeFrame(
+            [in] IItemInfo* itemInfo,
+            [in] ILauncherAppWidgetHostView* widget,
+            [in] ICellLayout* cellLayout);
+
+        AnimateViewIntoPosition(
+            [in] IDragView* dragView,
+            [in] IView* child);
+
+        AnimateViewIntoPosition(
+            [in] IDragView* dragView,
+            [in] ArrayOf<Int32>* pos,
+            [in] Float alpha,
+            [in] Float scaleX,
+            [in] Float scaleY,
+            [in] Int32 animationEndStyle,
+            [in] IRunnable* onFinishRunnable,
+            [in] Int32 duration);
+
+        AnimateViewIntoPosition(
+            [in] IDragView* dragView,
+            [in] IView* child,
+            [in] IRunnable* onFinishAnimationRunnable);
+
+        AnimateViewIntoPosition(
+            [in] IDragView* dragView,
+            [in] IView* child,
+            [in] Int32 duration,
+            [in] IRunnable* onFinishAnimationRunnable,
+            [in] IView* anchorView);
+
+        AnimateViewIntoPosition(
+            [in] IDragView* view,
+            [in] Int32 fromX,
+            [in] Int32 fromY,
+            [in] Int32 toX,
+            [in] Int32 toY,
+            [in] Float finalAlpha,
+            [in] Float initScaleX,
+            [in] Float initScaleY,
+            [in] Float finalScaleX,
+            [in] Float finalScaleY,
+            [in] IRunnable* onCompleteRunnable,
+            [in] Int32 animationEndStyle,
+            [in] Int32 duration,
+            [in] IView* anchorView);
+
+        /**
+         * This method animates a view at the end of a drag and drop animation.
+         *
+         * @param view The view to be animated. This view is drawn directly into DragLayer, and so
+         *        doesn't need to be a child of DragLayer.
+         * @param from The initial location of the view. Only the left and top parameters are used.
+         * @param to The final location of the view. Only the left and top parameters are used. This
+         *        location doesn't account for scaling, and so should be centered about the desired
+         *        final location (including scaling).
+         * @param finalAlpha The final alpha of the view, in case we want it to fade as it animates.
+         * @param finalScale The final scale of the view. The view is scaled about its center.
+         * @param duration The duration of the animation.
+         * @param motionInterpolator The interpolator to use for the location of the view.
+         * @param alphaInterpolator The interpolator to use for the alpha of the view.
+         * @param onCompleteRunnable Optional runnable to run on animation completion.
+         * @param fadeOut Whether or not to fade out the view once the animation completes. If true,
+         *        the runnable will execute after the view is faded out.
+         * @param anchorView If not null, this represents the view which the animated view stays
+         *        anchored to in case scrolling is currently taking place. Note: currently this is
+         *        only used for the X dimension for the case of the workspace.
+         */
+        AnimateView(
+            [in] IDragView* view,
+            [in] IRect* from,
+            [in] IRect* to,
+            [in] Float finalAlpha,
+            [in] Float initScaleX,
+            [in] Float initScaleY,
+            [in] Float finalScaleX,
+            [in] Float finalScaleY,
+            [in] Int32 duration,
+            [in] IInterpolator* motionInterpolator,
+            [in] IInterpolator* alphaInterpolator,
+            [in] IRunnable* onCompleteRunnable,
+            [in] Int32 animationEndStyle,
+            [in] IView* anchorView);
+
+        AnimateView(
+            [in] IDragView* view,
+            [in] IAnimatorUpdateListener* updateCb,
+            [in] Int32 duration,
+            [in] ITimeInterpolator* interpolator,
+            [in] IRunnable* onCompleteRunnable,
+            [in] Int32 animationEndStyle,
+            [in] IView* anchorView);
+
+        ClearAnimatedView();
+
+        GetAnimatedView(
+            [out] IView** view);
+
+        OnEnterScrollArea(
+            [in] Int32 direction);
+
+        OnExitScrollArea();
     }
 
     } // namespace Launcher2

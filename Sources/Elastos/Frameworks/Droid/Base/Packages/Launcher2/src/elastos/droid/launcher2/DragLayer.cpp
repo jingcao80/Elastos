@@ -2,183 +2,40 @@
 #include "elastos/droid/launcher2/DragLayer.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/core/Math.h>
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Core::CoreUtils;
+using Elastos::Droid::Animation::CValueAnimator;
+using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::View::EIID_IViewGroupOnHierarchyChangeListener;
+using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Droid::View::Animation::CDecelerateInterpolator;
+using Elastos::Droid::View::Accessibility::IAccessibilityManager;
+using Elastos::Droid::View::Accessibility::IAccessibilityEventHelper;
+using Elastos::Droid::View::Accessibility::CAccessibilityEventHelper;
+using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::IFloat;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-CAR_INTERFACE_IMPL(DragLayer::MyAnimatorUpdateListener, Object, IAnimatorUpdateListener);
-
-MyAnimatorUpdateListener(
-    /* [in] */ IDragView* view,
-    /* [in] */ IInterpolator* alphaInterpolator,
-    /* [in] */ IInterpolator* motionInterpolator,
-    /* [in] */ Float initScaleX,
-    /* [in] */ Float initScaleY,
-    /* [in] */ Float dropViewScale,
-    /* [in] */ Float finalScaleX,
-    /* [in] */ Float finalScaleY,
-    /* [in] */ Float finalAlpha,
-    /* [in] */ Float initAlpha,
-    /* [in] */ IRect* from,
-    /* [in] */ IRect* to,
-    /* [in] */ LayoutParams* host)
-    : mView(view)
-    , mAlphaInterpolator(alphaInterpolator)
-    , mMotionInterpolator(motionInterpolator)
-    , mInitScaleX(initScaleX)
-    , mInitScaleY(initScaleY)
-    , mDropViewScale(dropViewScale)
-    , mFinalScaleX(finalScaleX)
-    , mFinalScaleY(finalScaleY)
-    , mFinalAlpha(finalAlpha)
-    , mInitAlpha(initAlpha)
-    , mFrom(from)
-    , mTo(to)
-    , mHost(host)
-{
-}
-
-ECode DragLayer::MyAnimatorUpdateListener::OnAnimationUpdate(
-    /* [in] */ IValueAnimator* animation)
-{
-    AutoPtr<IInterface> obj;
-    animation->GetAnimatedValue((IInterface**)&obj);
-    AutoPtr<IFloat> fValue = IFloat::Probe(obj);
-    Float percent;
-    fValue->GetValue(&percent);
-    Int32 width;
-    mView->GetMeasuredWidth(&width);
-    Int32 height;
-    mView->GetMeasuredHeight(&height);
-
-    Float alphaPercent;
-    if (mAlphaInterpolator == NULL) {
-        alphaPercent = percent;
-    }
-    else {
-        ITimeInterpolator::Probe(mAlphaInterpolator)->GetInterpolation(percent, &alphaPercent);
-    }
-
-    Float motionPercent;
-    if (mMotionInterpolator == NULL) {
-        motionPercent = percent;
-    }
-    else {
-        ITimeInterpolator::Probe(mMotionInterpolator)->GetInterpolation(percent, &motionPercent);
-    }
-
-    Float initialScaleX = mInitScaleX * mDropViewScale;
-    Float initialScaleY = mInitScaleY * mDropViewScale;
-    Float scaleX = mFinalScaleX * percent + initialScaleX * (1 - percent);
-    Float scaleY = mFinalScaleY * percent + initialScaleY * (1 - percent);
-    Float alpha = mFinalAlpha * alphaPercent + mInitAlpha * (1 - alphaPercent);
-
-    Int32 fromleft;
-    mFrom->GetLeft(fromleft);
-    Float fromLeft = fromleft + (initialScaleX - 1f) * width / 2;
-    Int32 fromtop;
-    mFrom->GetTop(&fromtop);
-    Float fromTop = fromtop + (initialScaleY - 1f) * height / 2;
-
-    Int32 toleft;
-    mTo->GetLeft(&toleft);
-    Int32 x = (Int32)(fromLeft + Math::Round(((toleft - fromLeft) * motionPercent)));
-    Int32 totop;
-    mTo->GetTop(&totop);
-    Int32 y = (Int32)(fromTop + Math::Round(((totop - fromTop) * motionPercent)));
-
-    Int32 sx;
-    mHost->mDropView->GetScrollX(&sx);
-    Int32 sx2;
-    mHost->mAnchorView->GetScrollX(&sx2);
-    Int32 xPos = x - sx + (mHost->mAnchorView != NULL
-            ? (mHost->mAnchorViewInitialScrollX - sx2) : 0);
-    Int32 sy;
-    mHost->mDropView->GetScrollY(&sy);
-    Int32 yPos = y - sy;
-
-    mHost->mDropView->SetTranslationX(xPos);
-    mHost->mDropView->SetTranslationY(yPos);
-    mHost->mDropView->SetScaleX(scaleX);
-    mHost->mDropView->SetScaleY(scaleY);
-    return mHost->mDropView->SetAlpha(alpha);
-}
-
-ECode DragLayer::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
-    /* [in] */ IRunnable* onCompleteRunnable,
-    /* [in] */ Int32 animationEndStyle,
-    /* [in] */ LayoutParams* host)
-    : mOnCompleteRunnable(onCompleteRunnable)
-    , mAnimationEndStyle(animationEndStyle)
-    , mHost(host)
-{
-}
-
-ECode DragLayer::MyAnimatorListenerAdapter::OnAnimationEnd(
-    /* [in] */ IAnimator* animation)
-{
-    if (mOnCompleteRunnable != NULL) {
-        mOnCompleteRunnable->Run();
-    }
-    switch (mAnimationEndStyle) {
-        case ANIMATION_END_DISAPPEAR:
-            mHost->ClearAnimatedView();
-            break;
-        case ANIMATION_END_FADE_OUT:
-            mHost->FadeOutDragView();
-            break;
-        case ANIMATION_END_REMAIN_VISIBLE:
-            break;
-    }
-    return NOERROR;
-}
-
-CAR_INTERFACE_IMPL(DragLayer::MyAnimatorUpdateListener2, Object, IAnimatorUpdateListener);
-
-DragLayer::MyAnimatorUpdateListener2::MyAnimatorUpdateListener2(
-    /* [in] */ LayoutParams* host)
-    : mHost(host)
-{
-}
-
-ECode DragLayer::MyAnimatorUpdateListener2::OnAnimationUpdate(
-    /* [in] */ IValueAnimator* animation)
-{
-    AutoPtr<IInterface> obj;
-    animation->GetAnimatedValue((IInterface**)&obj);
-    AutoPtr<IFloat> fValue = IFloat::Probe(obj);
-    Float percent;
-    fValue->GetValue(&percent);
-
-    Float alpha = 1 - percent;
-    return mHost->mDropView->SetAlpha(alpha);
-}
-
-DragLayer::MyAnimatorListenerAdapter2::MyAnimatorListenerAdapter2(
-    /* [in] */ LayoutParams* host)
-    : mHost(host)
-{
-}
-
-DragLayer::MyAnimatorListenerAdapter2::OnAnimationEnd(
-    /* [in] */ IAnimator* animation)
-{
-    if (mHost->mDropView != NULL) {
-        mHost->mDragController->OnDeferredEndDrag(mDropView);
-    }
-    mHost->mDropView = NULL;
-    return mHost->Invalidate();
-}
+CAR_INTERFACE_IMPL(DragLayer::LayoutParams, FrameLayout::LayoutParams,
+        IDragLayerLayoutParams);
 
 DragLayer::LayoutParams::LayoutParams(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
-    : FrameLayout::LayoutParams(width, height);
-    , mX(0)
+    : mX(0)
     , mY(0)
     , mCustomPosition(FALSE)
 {
+    FrameLayout::LayoutParams::constructor(width, height);
 }
 
 ECode DragLayer::LayoutParams::SetWidth(
@@ -245,6 +102,172 @@ ECode DragLayer::LayoutParams::GetY(
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(DragLayer::MyAnimatorUpdateListener, Object, IAnimatorUpdateListener);
+
+DragLayer::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
+    /* [in] */ IDragView* view,
+    /* [in] */ IInterpolator* alphaInterpolator,
+    /* [in] */ IInterpolator* motionInterpolator,
+    /* [in] */ Float initScaleX,
+    /* [in] */ Float initScaleY,
+    /* [in] */ Float dropViewScale,
+    /* [in] */ Float finalScaleX,
+    /* [in] */ Float finalScaleY,
+    /* [in] */ Float finalAlpha,
+    /* [in] */ Float initAlpha,
+    /* [in] */ IRect* from,
+    /* [in] */ IRect* to,
+    /* [in] */ DragLayer* host)
+    : mView(view)
+    , mAlphaInterpolator(alphaInterpolator)
+    , mMotionInterpolator(motionInterpolator)
+    , mInitScaleX(initScaleX)
+    , mInitScaleY(initScaleY)
+    , mDropViewScale(dropViewScale)
+    , mFinalScaleX(finalScaleX)
+    , mFinalScaleY(finalScaleY)
+    , mFinalAlpha(finalAlpha)
+    , mInitAlpha(initAlpha)
+    , mFrom(from)
+    , mTo(to)
+    , mHost(host)
+{
+}
+
+ECode DragLayer::MyAnimatorUpdateListener::OnAnimationUpdate(
+    /* [in] */ IValueAnimator* animation)
+{
+    AutoPtr<IInterface> obj;
+    animation->GetAnimatedValue((IInterface**)&obj);
+    AutoPtr<IFloat> fValue = IFloat::Probe(obj);
+    Float percent;
+    fValue->GetValue(&percent);
+    Int32 width;
+    IView::Probe(mView)->GetMeasuredWidth(&width);
+    Int32 height;
+    IView::Probe(mView)->GetMeasuredHeight(&height);
+
+    Float alphaPercent;
+    if (mAlphaInterpolator == NULL) {
+        alphaPercent = percent;
+    }
+    else {
+        ITimeInterpolator::Probe(mAlphaInterpolator)->GetInterpolation(percent, &alphaPercent);
+    }
+
+    Float motionPercent;
+    if (mMotionInterpolator == NULL) {
+        motionPercent = percent;
+    }
+    else {
+        ITimeInterpolator::Probe(mMotionInterpolator)->GetInterpolation(percent, &motionPercent);
+    }
+
+    Float initialScaleX = mInitScaleX * mDropViewScale;
+    Float initialScaleY = mInitScaleY * mDropViewScale;
+    Float scaleX = mFinalScaleX * percent + initialScaleX * (1 - percent);
+    Float scaleY = mFinalScaleY * percent + initialScaleY * (1 - percent);
+    Float alpha = mFinalAlpha * alphaPercent + mInitAlpha * (1 - alphaPercent);
+
+    Int32 fromleft;
+    mFrom->GetLeft(&fromleft);
+    Float fromLeft = fromleft + (initialScaleX - 1.0f) * width / 2;
+    Int32 fromtop;
+    mFrom->GetTop(&fromtop);
+    Float fromTop = fromtop + (initialScaleY - 1.0f) * height / 2;
+
+    Int32 toleft;
+    mTo->GetLeft(&toleft);
+    Int32 x = (Int32)(fromLeft + Elastos::Core::Math::Round(((toleft - fromLeft) *
+            motionPercent)));
+    Int32 totop;
+    mTo->GetTop(&totop);
+    Int32 y = (Int32)(fromTop + Elastos::Core::Math::Round(((totop - fromTop) * motionPercent)));
+
+    Int32 sx;
+    IView::Probe(mHost->mDropView)->GetScrollX(&sx);
+    Int32 sx2;
+    mHost->mAnchorView->GetScrollX(&sx2);
+    Int32 xPos = x - sx + (mHost->mAnchorView != NULL
+            ? (mHost->mAnchorViewInitialScrollX - sx2) : 0);
+    Int32 sy;
+    IView::Probe(mHost->mDropView)->GetScrollY(&sy);
+    Int32 yPos = y - sy;
+
+    IView::Probe(mHost->mDropView)->SetTranslationX(xPos);
+    IView::Probe(mHost->mDropView)->SetTranslationY(yPos);
+    IView::Probe(mHost->mDropView)->SetScaleX(scaleX);
+    IView::Probe(mHost->mDropView)->SetScaleY(scaleY);
+    return IView::Probe(mHost->mDropView)->SetAlpha(alpha);
+}
+
+DragLayer::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
+    /* [in] */ IRunnable* onCompleteRunnable,
+    /* [in] */ Int32 animationEndStyle,
+    /* [in] */ DragLayer* host)
+    : mOnCompleteRunnable(onCompleteRunnable)
+    , mAnimationEndStyle(animationEndStyle)
+    , mHost(host)
+{
+}
+
+ECode DragLayer::MyAnimatorListenerAdapter::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    if (mOnCompleteRunnable != NULL) {
+        mOnCompleteRunnable->Run();
+    }
+    switch (mAnimationEndStyle) {
+        case ANIMATION_END_DISAPPEAR:
+            mHost->ClearAnimatedView();
+            break;
+        case ANIMATION_END_FADE_OUT:
+            mHost->FadeOutDragView();
+            break;
+        case ANIMATION_END_REMAIN_VISIBLE:
+            break;
+    }
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(DragLayer::MyAnimatorUpdateListener2, Object,
+        IAnimatorUpdateListener);
+
+DragLayer::MyAnimatorUpdateListener2::MyAnimatorUpdateListener2(
+    /* [in] */ DragLayer* host)
+    : mHost(host)
+{
+}
+
+ECode DragLayer::MyAnimatorUpdateListener2::OnAnimationUpdate(
+    /* [in] */ IValueAnimator* animation)
+{
+    AutoPtr<IInterface> obj;
+    animation->GetAnimatedValue((IInterface**)&obj);
+    AutoPtr<IFloat> fValue = IFloat::Probe(obj);
+    Float percent;
+    fValue->GetValue(&percent);
+
+    Float alpha = 1 - percent;
+    return IView::Probe(mHost->mDropView)->SetAlpha(alpha);
+}
+
+DragLayer::MyAnimatorListenerAdapter2::MyAnimatorListenerAdapter2(
+    /* [in] */ DragLayer* host)
+    : mHost(host)
+{
+}
+
+ECode DragLayer::MyAnimatorListenerAdapter2::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    if (mHost->mDropView != NULL) {
+        mHost->mDragController->OnDeferredEndDrag(mHost->mDropView);
+    }
+    mHost->mDropView = NULL;
+    return mHost->Invalidate();
+}
+
 DragLayer::MyRunnable::MyRunnable(
     /* [in] */ IView* child,
     /* [in] */ IRunnable* onFinishAnimationRunnable)
@@ -262,7 +285,8 @@ ECode DragLayer::MyRunnable::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL_2(DragLayer, FrameLayout, IDragLayer, IViewGroupOnHierarchyChangeListener);
+CAR_INTERFACE_IMPL_2(DragLayer, FrameLayout, IDragLayer,
+        IViewGroupOnHierarchyChangeListener);
 
 DragLayer::DragLayer()
 {
@@ -273,10 +297,15 @@ DragLayer::DragLayer()
     CDecelerateInterpolator::New(1.5f, (ITimeInterpolator**)&mCubicEaseOutInterpolator);
     mAnchorViewInitialScrollX = 0;
     mHoverPointClosesFolder = FALSE;
-    CRect::New((Rect**)&mHitRect);
+    CRect::New((IRect**)&mHitRect);
     mWorkspaceIndex = -1;
     mQsbIndex = -1;
     mInScrollArea = FALSE;
+}
+
+ECode DragLayer::constructor()
+{
+    return NOERROR;
 }
 
 ECode DragLayer::constructor(
@@ -329,8 +358,10 @@ Boolean DragLayer::IsEventOverFolderTextRegion(
     /* [in] */ IMotionEvent* ev)
 {
     AutoPtr<IView> view;
-    folder->GetEditTextRegion((IView**)&view);
-    GetDescendantRectRelativeToSelf(view, mHitRect);
+    assert(0 && "need class folder");
+    //folder->GetEditTextRegion((IView**)&view);
+    Float tmp;
+    GetDescendantRectRelativeToSelf(view, mHitRect, &tmp);
     Float x;
     ev->GetX(&x);
     Float y;
@@ -347,12 +378,12 @@ Boolean DragLayer::IsEventOverFolder(
     /* [in] */ IFolder* folder,
     /* [in] */ IMotionEvent* ev)
 {
-    GetDescendantRectRelativeToSelf(folder, mHitRect);
+    Float tmp;
+    GetDescendantRectRelativeToSelf(IView::Probe(folder), mHitRect, &tmp);
     Float x;
     ev->GetX(&x);
     Float y;
     ev->GetY(&y);
-    Boolean res;
     Boolean res;
     mHitRect->Contains((Int32)x, (Int32)y, &res);
     if (res) {
@@ -367,19 +398,19 @@ Boolean DragLayer::HandleTouchDown(
 {
     AutoPtr<IRect> hitRect;
     CRect::New((IRect**)&hitRect);
-    Float x;
-    ev->GetX(&x);
-    Int32 x = (Int32)x);
-    Float y;
-    ev->GetY(&y);
-    Int32 y = (Int32)y;
+    Float _x;
+    ev->GetX(&_x);
+    Int32 x = (Int32)_x;
+    Float _y;
+    ev->GetY(&_y);
+    Int32 y = (Int32)_y;
 
     Int32 size;
     mResizeFrames->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mResizeFrames->Get(i, (IInterface**)&obj);
-        AutoPtr<IAppWidgetResizeFrame> child = IAppWidgetResizeFrame::Probe(obj);
+        AutoPtr<AppWidgetResizeFrame> child = (AppWidgetResizeFrame*)IObject::Probe(obj);
 
         child->GetHitRect(hitRect);
         Boolean res;
@@ -390,8 +421,7 @@ Boolean DragLayer::HandleTouchDown(
             Int32 top;
             child->GetTop(&top);
             Boolean tmp;
-            child->BeginResizeIfPointInRegion(x - left, y - top, &tmp);
-            if (tmp) {
+            if (child->BeginResizeIfPointInRegion(x - left, y - top, &tmp), tmp) {
                 mCurrentResizeFrame = child;
                 mXDown = x;
                 mYDown = y;
@@ -402,25 +432,31 @@ Boolean DragLayer::HandleTouchDown(
     }
 
     AutoPtr<IWorkspace> workspace;
-    mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    assert(0 && "need class mLauncher");
+    //mLauncher->GetWorkspace((IWorkspace**)&workspace);
     AutoPtr<IFolder> currentFolder;
-    workspace->GetOpenFolder((IFolder**)&currentFolder);
+    assert(0 && "need class workspace");
+    //workspace->GetOpenFolder((IFolder**)&currentFolder);
     if (currentFolder != NULL) {
         Boolean res;
-        mLauncher->IsFolderClingVisible(&res);
+        assert(0 && "need class mLauncher");
+        //mLauncher->IsFolderClingVisible(&res);
         if (!res  && intercept) {
             Int32 res2;
-            currentFolder->IsEditingName(&res2);
+            assert(0 && "need class Folder");
+            //currentFolder->IsEditingName(&res2);
             if (res2) {
-                if (!IsEventOverFoIderTextRegion(currentFolder, ev)) {
-                    currentFolder->DismissEditingName();
+                if (!IsEventOverFolderTextRegion(currentFolder, ev)) {
+                    assert(0 && "need class Folder");
+                    //currentFolder->DismissEditingName();
                     return TRUE;
                 }
             }
-
-            GetDescendantRectRelativeToSelf(currentFolder, hitRect);
+            Float tmp;
+            GetDescendantRectRelativeToSelf(IView::Probe(currentFolder), hitRect, &tmp);
             if (!IsEventOverFolder(currentFolder, ev)) {
-                mLauncher->CloseFolder();
+                assert(0 && "need class mLauncher");
+                //mLauncher->CloseFolder();
                 return TRUE;
             }
         }
@@ -458,14 +494,16 @@ ECode DragLayer::OnInterceptHoverEvent(
     }
 
     AutoPtr<IWorkspace> workspace;
-    mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    assert(0 && "need class mLauncher");
+    //mLauncher->GetWorkspace((IWorkspace**)&workspace);
     if (workspace == NULL) {
         *result = FALSE;
         return NOERROR;
     }
 
     AutoPtr<IFolder> currentFolder;
-    workspace->GetOpenFolder((IFolder**)&currentFolder);
+    assert(0 && "need class workspace");
+    //workspace->GetOpenFolder((IFolder**)&currentFolder);
     if (currentFolder == NULL) {
         *result = FALSE;
         return NOERROR;
@@ -489,7 +527,8 @@ ECode DragLayer::OnInterceptHoverEvent(
                     isOverFolder = IsEventOverFolder(currentFolder, ev);
                     if (!isOverFolder) {
                         Boolean tmp;
-                        currentFolder->IsEditingName(&tmp);
+                        assert(0 && "need class Folder");
+                        //currentFolder->IsEditingName(&tmp);
                         SendTapOutsideFolderAccessibilityEvent(tmp);
                         mHoverPointClosesFolder = TRUE;
                         *result = TRUE;
@@ -508,7 +547,8 @@ ECode DragLayer::OnInterceptHoverEvent(
                     isOverFolder = IsEventOverFolder(currentFolder, ev);
                     if (!isOverFolder && !mHoverPointClosesFolder) {
                         Boolean tmp;
-                        currentFolder->IsEditingName(&tmp);
+                        assert(0 && "need class Folder");
+                        //currentFolder->IsEditingName(&tmp);
                         SendTapOutsideFolderAccessibilityEvent(tmp);
                         mHoverPointClosesFolder = TRUE;
                         *result = TRUE;
@@ -544,8 +584,12 @@ void DragLayer::SendTapOutsideFolderAccessibilityEvent(
         Int32 stringId = isEditingName ?
                 Elastos::Droid::Launcher2::R::string::folder_tap_to_rename :
                 Elastos::Droid::Launcher2::R::string::folder_tap_to_close;
+
+
+        AutoPtr<IAccessibilityEventHelper> helper;
+        CAccessibilityEventHelper::AcquireSingleton((IAccessibilityEventHelper**)&helper);
         AutoPtr<IAccessibilityEvent> event;
-        AccessibilityEvent::Obtain(IAccessibilityEvent::TYPE_VIEW_FOCUSED, (IAccessibilityEvent)&event);
+        helper->Obtain(IAccessibilityEvent::TYPE_VIEW_FOCUSED, (IAccessibilityEvent**)&event);
         OnInitializeAccessibilityEvent(event);
 
         AutoPtr<IContext> _context;
@@ -554,7 +598,7 @@ void DragLayer::SendTapOutsideFolderAccessibilityEvent(
         _context->GetString(stringId, &str);
         AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
         AutoPtr<IList> list;
-        event->GetText((IList**)&list);
+        IAccessibilityRecord::Probe(event)->GetText((IList**)&list);
         list->Add(TO_IINTERFACE(cchar));
         accessibilityManager->SendAccessibilityEvent(event);
     }
@@ -568,9 +612,11 @@ ECode DragLayer::OnRequestSendAccessibilityEvent(
     VALIDATE_NOT_NULL(result);
 
     AutoPtr<IWorkspace> workspace;
-    mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    assert(0 && "need class mLauncher");
+    //mLauncher->GetWorkspace((IWorkspace**)&workspace);
     AutoPtr<IFolder> currentFolder;
-    workspace->GetOpenFolder((IFolder**)&currentFolder);
+    assert(0 && "need class workspace");
+    //workspace->GetOpenFolder((IFolder**)&currentFolder);
     if (currentFolder != NULL) {
         if (TO_IINTERFACE(child) == TO_IINTERFACE(currentFolder)) {
             return FrameLayout::OnRequestSendAccessibilityEvent(child, event, result);
@@ -587,9 +633,11 @@ ECode DragLayer::AddChildrenForAccessibility(
     /* [in] */ IArrayList* childrenForAccessibility)
 {
     AutoPtr<IWorkspace> workspace;
-    mLauncher->GetWorkspace((IWorkspace**)&workspace);
+    assert(0 && "need class mLauncher");
+    //mLauncher->GetWorkspace((IWorkspace**)&workspace);
     AutoPtr<IFolder> currentFolder;
-    workspace->GetOpenFolder((IFolder**)&currentFolder);
+    assert(0 && "need class workspace");
+    //workspace->GetOpenFolder((IFolder**)&currentFolder);
     if (currentFolder != NULL) {
         // Only add the folder as a child for accessibility when it is open
         return childrenForAccessibility->Add(TO_IINTERFACE(currentFolder));
@@ -622,12 +670,12 @@ ECode DragLayer::OnTouchEvent(
     Int32 action;
     ev->GetAction(&action);
 
-    Float x;
-    ev->GetX(&x);
-    Int32 x = (Int32)x);
-    Float y;
-    ev->GetY(&y);
-    Int32 y = (Int32)y;
+    Float _x;
+    ev->GetX(&_x);
+    Int32 x = (Int32)_x;
+    Float _y;
+    ev->GetY(&_y);
+    Int32 y = (Int32)_y;
 
     if (action == IMotionEvent::ACTION_DOWN) {
         if (action == IMotionEvent::ACTION_DOWN) {
@@ -739,8 +787,8 @@ ECode DragLayer::GetDescendantCoordRelativeToSelf(
         (*pt)[1] += top - sy;
         view->GetParent((IViewParent**)&viewParent);
     }
-    (*coord)[0] = (Int32)Math::Round((*pt)[0]);
-    (*coord)[1] = (Int32)Math::Round((*pt)[1]);
+    (*coord)[0] = (Int32)Elastos::Core::Math::Round((*pt)[0]);
+    (*coord)[1] = (Int32)Elastos::Core::Math::Round((*pt)[1]);
     *result = scale;
     return NOERROR;
 }
@@ -793,20 +841,15 @@ ECode DragLayer::OnLayout(
         AutoPtr<IViewGroupLayoutParams> param;
         child->GetLayoutParams((IViewGroupLayoutParams**)&param);
         AutoPtr<IFrameLayoutLayoutParams> flp = IFrameLayoutLayoutParams::Probe(param);
-        if (ILayoutParams::Probe(flp) != NULL) {
-            AutoPtr<ILayoutParams> lp = ILayoutParams::Probe(flp);
-            Boolean res;
-            lp->GetCustomPosition(&res);
-            if (res) {
-                Int32 x;
-                lp->GetX(&x);
-                Int32 y;
-                lp->GetY(&y);
+        if (IDragLayerLayoutParams::Probe(flp) != NULL) {
+            AutoPtr<IDragLayerLayoutParams> lp = IDragLayerLayoutParams::Probe(flp);
+            AutoPtr<DragLayer::LayoutParams> _lp = (DragLayer::LayoutParams*)lp.Get();
+            if (_lp->mCustomPosition) {
                 Int32 width;
                 lp->GetWidth(&width);
                 Int32 height;
                 lp->GetHeight(&height);
-                child->Layout(x, y, x + width, y + height);
+                child->Layout(_lp->mX, _lp->mY, _lp->mX + width, _lp->mY + height);
             }
         }
     }
@@ -821,10 +864,10 @@ ECode DragLayer::ClearAllResizeFrames()
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             mResizeFrames->Get(i, (IInterface**)&obj);
-            AutoPtr<IAppWidgetResizeFrame> frame = IAppWidgetResizeFrame:: Probe(obj);
+            AutoPtr<IAppWidgetResizeFrame> frame = IAppWidgetResizeFrame::Probe(obj);
 
             frame->CommitResize();
-            RemoveView(frame);
+            RemoveView(IView::Probe(frame));
         }
         mResizeFrames->Clear();
     }
@@ -858,8 +901,8 @@ ECode DragLayer::AddResizeFrame(
 {
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<AppWidgetResizeFrame> resizeFrame = new AppWidgetResizeFrame(context,
-            widget, cellLayout, this);
+    AutoPtr<AppWidgetResizeFrame> resizeFrame = new AppWidgetResizeFrame();
+    resizeFrame->constructor(context, widget, cellLayout, this);
 
     AutoPtr<LayoutParams> lp = new LayoutParams(-1, -1);
     lp->mCustomPosition = TRUE;
@@ -889,7 +932,7 @@ ECode DragLayer::AnimateViewIntoPosition(
 {
     AutoPtr<IRect> r;
     CRect::New((IRect**)&r);
-    GetViewRectRelativeToSelf(dragView, r);
+    GetViewRectRelativeToSelf(IView::Probe(dragView), r);
     Int32 fromX;
     r->GetLeft(&fromX);
     Int32 fromY;
@@ -927,18 +970,20 @@ ECode DragLayer::AnimateViewIntoPosition(
 
     AutoPtr<IRect> r;
     CRect::New((IRect**)&r);
-    GetViewRectRelativeToSelf(dragView, r);
+    GetViewRectRelativeToSelf(IView::Probe(dragView), r);
 
     AutoPtr<ArrayOf<Int32> > coord = ArrayOf<Int32>::Alloc(2);
     Float childScale;
     child->GetScaleX(&childScale);
     Int32 x;
-    lp->GetX(&x);
+    assert(0 && "need class lp");
+    //lp->GetX(&x);
     Int32 width;
     child->GetMeasuredWidth(&width);
     (*coord)[0] = x + (Int32)(width * (1 - childScale) / 2);
     Int32 y;
-    lp->GetY(&y);
+    assert(0 && "need class lp");
+    //lp->GetY(&y);
     Int32 height;
     child->GetMeasuredHeight(&height);
     (*coord)[1] = y + (Int32)(height * (1 - childScale) / 2);
@@ -961,40 +1006,40 @@ ECode DragLayer::AnimateViewIntoPosition(
         // we have to offset the position by the scaled size.  Once we do that, we can center
         // the drag view about the scaled child view.
         Int32 ptop;
-        tv->GetPaddingTop(&ptop);
-        toY += Math::Round(scale * ptop);
+        IView::Probe(tv)->GetPaddingTop(&ptop);
+        toY += Elastos::Core::Math::Round(scale * ptop);
         Int32 mheight;
-        dragView->GetMeasuredHeight(&mheight);
+        IView::Probe(dragView)->GetMeasuredHeight(&mheight);
         toY -= mheight * (1 - scale) / 2;
         Int32 mwidth;
-        dragView->GetMeasuredWidth(&mwidth);
+        IView::Probe(dragView)->GetMeasuredWidth(&mwidth);
         Int32 mwidth2;
         child->GetMeasuredWidth(&mwidth2);
-        toX -= (mwidth - Math::Round(scale * mwidth2)) / 2;
+        toX -= (mwidth - Elastos::Core::Math::Round(scale * mwidth2)) / 2;
     }
     else if (IFolderIcon::Probe(child) != NULL) {
         // Account for holographic blur padding on the drag view
         toY -= scale * IWorkspace::DRAG_BITMAP_PADDING / 2;
         Int32 mheight;
-        dragView->GetMeasuredHeight(&mheight);
+        IView::Probe(dragView)->GetMeasuredHeight(&mheight);
         toY -= (1 - scale) * mheight / 2;
         // Center in the x coordinate about the target's drawable
         Int32 mwidth;
-        dragView->GetMeasuredWidth(&mwidth);
+        IView::Probe(dragView)->GetMeasuredWidth(&mwidth);
         Int32 mwidth2;
         child->GetMeasuredWidth(&mwidth2);
-        toX -= (mwidth - Math::Round(scale * mwidth2)) / 2;
+        toX -= (mwidth - Elastos::Core::Math::Round(scale * mwidth2)) / 2;
     } else {
         Int32 height;
-        dragView->GetHeight(&height);
+        IView::Probe(dragView)->GetHeight(&height);
         Int32 mheigth;
         child->GetMeasuredHeight(&mheigth);
-        toY -= (Math::Round(scale * (height - mheigth))) / 2;
+        toY -= (Elastos::Core::Math::Round(scale * (height - mheigth))) / 2;
         Int32 mwidth;
-        dragView->GetMeasuredWidth(&mwidth);
+        IView::Probe(dragView)->GetMeasuredWidth(&mwidth);
         Int32 mwidth2;
         child->GetMeasuredWidth(&mwidth2);
-        toX -= (Math::Round(scale * (mwidth - mwidth2))) / 2;
+        toX -= (Elastos::Core::Math::Round(scale * (mwidth - mwidth2))) / 2;
     }
 
     Int32 fromX;
@@ -1024,9 +1069,9 @@ ECode DragLayer::AnimateViewIntoPosition(
     /* [in] */ IView* anchorView)
 {
     Int32 width;
-    view->GetMeasuredWidth(&width);
+    IView::Probe(view)->GetMeasuredWidth(&width);
     Int32 height;
-    view->GetMeasuredHeight(&height);
+    IView::Probe(view)->GetMeasuredHeight(&height);
     AutoPtr<IRect> from;
     CRect::New(fromX, fromY, fromX + width, fromY + height, (IRect**)&from);
 
@@ -1061,9 +1106,9 @@ ECode DragLayer::AnimateView(
     Int32 totop;
     to->GetTop(&totop);
     Int32 fromtop;
-    from->GetTop(*fromtop);
-    Float dist = (Float)Math::Sqrt(Math::Pow(toleft - fromleft, 2) +
-            Math.pow(totop - fromtop, 2));
+    from->GetTop(&fromtop);
+    Float dist = (Float)Elastos::Core::Math::Sqrt(Elastos::Core::Math::Pow(toleft - fromleft, 2) +
+            Elastos::Core::Math::Pow(totop - fromtop, 2));
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
     Int32 value;
@@ -1077,14 +1122,14 @@ ECode DragLayer::AnimateView(
                 Elastos::Droid::Launcher2::R::integer::config_dropAnimMaxDuration,
                 &duration);
         if (dist < maxDist) {
-            Int32 polation;
-            mCubicEaseOutInterpolator->GetInterpolation(dist / maxDist);
+            Float polation;
+            mCubicEaseOutInterpolator->GetInterpolation(dist / maxDist, &polation);
             duration *= polation;
         }
         Int32 _duration;
         res->GetInteger(Elastos::Droid::Launcher2::R::integer::config_dropAnimMinDuration,
-                &_duration)
-        duration = Math::Max(duration, _duration);
+                &_duration);
+        duration = Elastos::Core::Math::Max(duration, _duration);
     }
 
     // Fall back to cubic ease out interpolator for the animation if none is specified
@@ -1095,11 +1140,11 @@ ECode DragLayer::AnimateView(
 
     // Animate the view
     Float initAlpha;
-    view->GetAlpha(&initAlpha);
+    IView::Probe(view)->GetAlpha(&initAlpha);
     Float dropViewScale;
-    view->GetScaleX(&dropViewScale);
+    IView::Probe(view)->GetScaleX(&dropViewScale);
 
-    AutoPtr<IAnimatorUpdateListener> updateCb new MyAnimatorUpdateListener(view,
+    AutoPtr<IAnimatorUpdateListener> updateCb = new MyAnimatorUpdateListener(view,
             alphaInterpolator, motionInterpolator, initScaleX, initScaleY, dropViewScale,
             finalScaleX, finalScaleY, finalAlpha, initAlpha,
             from, to, this);
@@ -1117,8 +1162,8 @@ ECode DragLayer::AnimateView(
     /* [in] */ IView* anchorView)
 {
     // Clean up the previous animations
-    if (mDropAnim != NULL) mDropAnim->Cancel();
-    if (mFadeOutAnim != NULL) mFadeOutAnim->Cancel();
+    if (mDropAnim != NULL) IAnimator::Probe(mDropAnim)->Cancel();
+    if (mFadeOutAnim != NULL) IAnimator::Probe(mFadeOutAnim)->Cancel();
 
     // Show the drop view if it was previously hidden
     mDropView = view;
@@ -1133,20 +1178,23 @@ ECode DragLayer::AnimateView(
 
     // Create and start the animation
     CValueAnimator::New((IValueAnimator**)&mDropAnim);
-    mDropAnim->SetInterpolator(interpolator);
+    IAnimator::Probe(mDropAnim)->SetInterpolator(interpolator);
     mDropAnim->SetDuration(duration);
-    mDropAnim->SetFloatValues(0f, 1f);
+    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+    (*array)[0] = 0.0f;
+    (*array)[1] = 1.0f;
+    mDropAnim->SetFloatValues(array);
     mDropAnim->AddUpdateListener(updateCb);
-    AutoPtr<IAnimatorListener> lisener = MyAnimatorListenerAdapter(
+    AutoPtr<IAnimatorListener> lisener = new MyAnimatorListenerAdapter(
             onCompleteRunnable, animationEndStyle, this);
-    mDropAnim->AddListener(lisener);
-    return mDropAnim->Start();
+    IAnimator::Probe(mDropAnim)->AddListener(lisener);
+    return IAnimator::Probe(mDropAnim)->Start();
 }
 
 ECode DragLayer::ClearAnimatedView()
 {
     if (mDropAnim != NULL) {
-        mDropAnim->Cancel();
+        IAnimator::Probe(mDropAnim)->Cancel();
     }
     if (mDropView != NULL) {
         mDragController->OnDeferredEndDrag(mDropView);
@@ -1160,7 +1208,7 @@ ECode DragLayer::GetAnimatedView(
 {
     VALIDATE_NOT_NULL(view);
 
-    *view = mDropView;
+    *view = IView::Probe(mDropView);
     REFCOUNT_ADD(*view);
     return NOERROR;
 }
@@ -1169,37 +1217,43 @@ void DragLayer::FadeOutDragView()
 {
     CValueAnimator::New((IValueAnimator**)&mFadeOutAnim);
     mFadeOutAnim->SetDuration(150);
-    mFadeOutAnim->SetFloatValues(0f, 1f);
+    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+    (*array)[0] = 0.0f;
+    (*array)[1] = 1.0f;
+    mFadeOutAnim->SetFloatValues(array);
     mFadeOutAnim->RemoveAllUpdateListeners();
     AutoPtr<IAnimatorUpdateListener> lisener = new MyAnimatorUpdateListener2(this);
     mFadeOutAnim->AddUpdateListener(lisener);
     AutoPtr<IAnimatorListener> adapter = new MyAnimatorListenerAdapter2(this);
-    mFadeOutAnim->AddListener(adapter);
-    mFadeOutAnim->Start();
+    IAnimator::Probe(mFadeOutAnim)->AddListener(adapter);
+    IAnimator::Probe(mFadeOutAnim)->Start();
 }
 
 ECode DragLayer::OnChildViewAdded(
     /* [in] */ IView* parent,
     /* [in] */ IView* child)
 {
-    return UpdateChildIndices();
+    UpdateChildIndices();
+    return NOERROR;
 }
 
 ECode DragLayer::OnChildViewRemoved(
     /* [in] */ IView* parent,
     /* [in] */ IView* child)
 {
-    return UpdateChildIndices();
+    UpdateChildIndices();
+    return NOERROR;
 }
 
 void DragLayer::UpdateChildIndices()
 {
     if (mLauncher != NULL) {
         AutoPtr<IWorkspace> workspace;
-        mLauncher->GetWorkspace((IWorkspace**)&workspace);
-        IndexOfChild(workspace, &mWorkspaceIndex);
+        assert(0 && "need class mLauncher");
+        //mLauncher->GetWorkspace((IWorkspace**)&workspace);
+        IndexOfChild(IView::Probe(workspace), &mWorkspaceIndex);
         AutoPtr<ISearchDropTargetBar> bar;
-        IndexOfChild(bar, &mQsbIndex);
+        IndexOfChild(IView::Probe(bar), &mQsbIndex);
     }
 }
 
@@ -1257,37 +1311,46 @@ Boolean DragLayer::IsLayoutDirectionRtl()
     return (direction == LAYOUT_DIRECTION_RTL);
 }
 
-ECode DragLayer::DispatchDraw(
+void DragLayer::DispatchDraw(
         /* [in] */ ICanvas* canvas)
 {
     FrameLayout::DispatchDraw(canvas);
 
     Boolean res;
-    LauncherApplication::IsScreenLarge(&res);
+    assert(0 && "need class LauncherApplication");
+    //LauncherApplication::IsScreenLarge(&res);
     if (mInScrollArea && !res) {
         AutoPtr<IWorkspace> workspace;
-        mLauncher->GetWorkspace((IWorkspace**)&workspace);
+        assert(0 && "need class mLauncher");
+        //mLauncher->GetWorkspace((IWorkspace**)&workspace);
         Int32 width;
-        workspace->GetWidth(&width);
+        assert(0 && "need class workspace");
+        //workspace->GetWidth(&width);
         AutoPtr<IRect> childRect;
         CRect::New((IRect**)&childRect);
         AutoPtr<IView> view;
-        workspace->GetChildAt(0, (IView**)&view);
-        GetDescendantRectRelativeToSelf(view, childRect);
+        assert(0 && "need class workspace");
+        //workspace->GetChildAt(0, (IView**)&view);
+        Float value;
+        GetDescendantRectRelativeToSelf(view, childRect, &value);
 
         Int32 page;
-        workspace->GetNextPage(&page);
+        assert(0 && "need class workspace");
+        //workspace->GetNextPage(&page);
         Boolean isRtl = IsLayoutDirectionRtl();
         AutoPtr<IView> tmp;
-        workspace->GetChildAt(isRtl ? page + 1 : page - 1, (IView**)&tmp);
+        assert(0 && "need class workspace");
+        //workspace->GetChildAt(isRtl ? page + 1 : page - 1, (IView**)&tmp);
         AutoPtr<ICellLayout> leftPage = ICellLayout::Probe(tmp);
         AutoPtr<IView> tmp2;
-        workspace->GetChildAt(isRtl ? page - 1 : page + 1, (IView**)&tmp2);
+        assert(0 && "need class workspace");
+        //workspace->GetChildAt(isRtl ? page - 1 : page + 1, (IView**)&tmp2);
         AutoPtr<ICellLayout> rightPage = ICellLayout::Probe(tmp2);
 
         if (leftPage != NULL) {
             Boolean res;
-            leftPage->GetIsDragOverlapping(&res);
+            assert(0 && "need class ICellLayout");
+            //leftPage->GetIsDragOverlapping(&res);
             if (res) {
                 Int32 top;
                 childRect->GetTop(&top);
@@ -1301,7 +1364,8 @@ ECode DragLayer::DispatchDraw(
         }
         else if (rightPage != NULL) {
             Boolean res;
-            rightPage->GetIsDragOverlapping(&res);
+            assert(0 && "need class ICellLayout");
+            //rightPage->GetIsDragOverlapping(&res);
             if (res) {
                 Int32 _width;
                 mRightHoverDrawable->GetIntrinsicWidth(&_width);
@@ -1314,7 +1378,6 @@ ECode DragLayer::DispatchDraw(
             }
         }
     }
-    return NOERROR;
 }
 
 } // namespace Launcher2

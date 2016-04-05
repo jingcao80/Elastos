@@ -2,32 +2,549 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
 
-    merge("../../..//../car/elastos/droid/launcher2/WallpaperChooserDialogFragment.car");
+    merge("../../../../car/elastos/droid/launcher2/Alarm.car");
+    merge("../../../../car/elastos/droid/launcher2/AccessibleTabView.car");
+    merge("../../../../car/elastos/droid/launcher2/ApplicationInfo.car");
+    merge("../../../../car/elastos/droid/launcher2/AppsCustomizePagedView.car");
+    merge("../../../../car/elastos/droid/launcher2/AppWidgetResizeFrame.car");
+    merge("../../../../car/elastos/droid/launcher2/BubbleTextView.car");
+    merge("../../../../car/elastos/droid/launcher2/ButtonDropTarget.car");
+    merge("../../../../car/elastos/droid/launcher2/Cling.car");
+    merge("../../../../car/elastos/droid/launcher2/CellLayout.car");
+    merge("../../../../car/elastos/droid/launcher2/DeferredHandler.car");
+    merge("../../../../car/elastos/droid/launcher2/DeleteDropTarget.car");
+    merge("../../../../car/elastos/droid/launcher2/DragController.car");
+    merge("../../../../car/elastos/droid/launcher2/DragLayer.car");
+    merge("../../../../car/elastos/droid/launcher2/DragSource.car");
+    merge("../../../../car/elastos/droid/launcher2/DragScroller.car");
+    merge("../../../../car/elastos/droid/launcher2/DropTarget.car");
+    merge("../../../../car/elastos/droid/launcher2/DragView.car");
+    merge("../../../../car/elastos/droid/launcher2/HolographicImageView.car");
+    merge("../../../../car/elastos/droid/launcher2/HolographicLinearLayout.car");
+    merge("../../../../car/elastos/droid/launcher2/Hotseat.car");
+    merge("../../../../car/elastos/droid/launcher2/ItemInfo.car");
+    merge("../../../../car/elastos/droid/launcher2/IconCache.car");
+    merge("../../../../car/elastos/droid/launcher2/InfoDropTarget.car");
+    merge("../../../../car/elastos/droid/launcher2/InstallShortcutReceiver.car");
+    merge("../../../../car/elastos/droid/launcher2/InstallWidgetReceiver.car");
+    merge("../../../../car/elastos/droid/launcher2/Folder.car");
+    merge("../../../../car/elastos/droid/launcher2/FolderIcon.car");
+    merge("../../../../car/elastos/droid/launcher2/FolderInfo.car");
+    merge("../../../../car/elastos/droid/launcher2/FolderEditText.car");
+    merge("../../../../car/elastos/droid/launcher2/FocusOnlyTabWidget.car");
+    merge("../../../../car/elastos/droid/launcher2/FastBitmapDrawable.car");
+    merge("../../../../car/elastos/droid/launcher2/Launcher.car");
+    merge("../../../../car/elastos/droid/launcher2/LauncherModel.car");
+    merge("../../../../car/elastos/droid/launcher2/LauncherAppWidgetInfo.car");
+    merge("../../../../car/elastos/droid/launcher2/LauncherProvider.car");
+    merge("../../../../car/elastos/droid/launcher2/LauncherApplication.car");
+    merge("../../../../car/elastos/droid/launcher2/LauncherSettings.car");
+    merge("../../../../car/elastos/droid/launcher2/LauncherAppWidgetHostView.car");
+    merge("../../../../car/elastos/droid/launcher2/LauncherAppWidgetHost.car");
+    merge("../../../../car/elastos/droid/launcher2/PagedView.car");
+    merge("../../../../car/elastos/droid/launcher2/PagedViewWidget.car");
+    merge("../../../../car/elastos/droid/launcher2/PagedViewWidgetImageView.car");
+    merge("../../../../car/elastos/droid/launcher2/PendingAddItemInfo.car");
+    merge("../../../../car/elastos/droid/launcher2/PreloadReceiver.car");
+    merge("../../../../car/elastos/droid/launcher2/PagedViewIconCache.car");
+    merge("../../../../car/elastos/droid/launcher2/PagedViewIcon.car");
+    merge("../../../../car/elastos/droid/launcher2/PagedViewCellLayout.car");
+    merge("../../../../car/elastos/droid/launcher2/PagedViewGridLayout.car");
+    merge("../../../../car/elastos/droid/launcher2/PagedViewCellLayoutChildren.car");
+    merge("../../../../car/elastos/droid/launcher2/ShortcutInfo.car");
+    merge("../../../../car/elastos/droid/launcher2/SearchDropTargetBar.car");
+    merge("../../../../car/elastos/droid/launcher2/ShortcutAndWidgetContainer.car");
+    merge("../../../../car/elastos/droid/launcher2/WidgetPreviewLoader.car");
+    merge("../../../../car/elastos/droid/launcher2/WallpaperChooserDialogFragment.car");
+    merge("../../../../car/elastos/droid/launcher2/Workspace.car");
+    merge("../../../../car/elastos/droid/launcher2/UninstallShortcutReceiver.car");
 
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IFragment;
     using interface Elastos.Droid.App.IDialogFragment;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContentProvider;
+    using interface Elastos.Droid.Content.IBroadcastReceiver;
     using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
     using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Utility.IAttributeSet;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.View.IViewParent;
+    using interface Elastos.Droid.View.IViewManager;
+    using interface Elastos.Droid.View.IOnPreDrawListener;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    using interface Elastos.Droid.View.IViewGroupOnHierarchyChangeListener;
+    using interface Elastos.Droid.View.IViewOnFocusChangeListener;
+    using interface Elastos.Droid.Widget.ITextView;
+    using interface Elastos.Droid.Widget.IImageView;
+    using interface Elastos.Droid.Widget.ILinearLayout;
+    using interface Elastos.Droid.Widget.IFrameLayout;
+    using interface Elastos.Droid.Widget.ITabWidget;
+    using interface Elastos.Droid.Widget.IEditText;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
 
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
 
+    class CAccessibleTabView {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IOnPreDrawListener;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ITextView;
+        interface IAccessibleTabView;
+    }
+
+    class CBubbleTextView {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IOnPreDrawListener;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ITextView;
+        interface IBubbleTextView;
+    }
+
+    class CCling {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IFrameLayout;
+        interface ICling;
+    }
+
+    class CDragLayer {
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IFrameLayout;
+        interface IViewGroupOnHierarchyChangeListener;
+        interface IDragLayer;
+    }
+
+    class CDrawableStateProxyView {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ILinearLayout;
+    }
+
+    class CDeleteDropTarget {
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IOnPreDrawListener;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IDropTarget;
+        interface IDragControllerDragListener;
+        interface ITextView;
+        interface IButtonDropTarget;
+        interface IDeleteDropTarget;
+    }
+
+    class CFolderEditText {
+        constructor();
+
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface ITextView;
+        interface IOnPreDrawListener;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IEditText;
+        interface IFolderEditText;
+    }
+
+    class CFolderIcon {
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ILinearLayout;
+        interface IFolderListener;
+    }
+
+    singleton class CFolderIconHelper {
+        interface IFolderIconHelper;
+    }
+
+    class CFocusOnlyTabWidget {
+        constructor();
+
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface ILinearLayout;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IViewOnFocusChangeListener;
+        interface ITabWidget;
+        interface IFocusOnlyTabWidget;
+    }
+
+    class CHolographicImageView {
+        constructor();
+
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IImageView;
+        interface IHolographicImageView;
+    }
+
+    class CHolographicLinearLayout {
+        constructor();
+
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ILinearLayout;
+        interface IHolographicLinearLayout;
+    }
+
+    class CHotseat {
+        constructor();
+
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IFrameLayout;
+        interface IHotseat;
+    }
+
+    class CInfoDropTarget {
+        constructor();
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IOnPreDrawListener;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IDropTarget;
+        interface IDragControllerDragListener;
+        interface ITextView;
+        interface IButtonDropTarget;
+        interface IInfoDropTarget;
+    }
+
+    class CInstallShortcutReceiver {
+        interface IBroadcastReceiver;
+        interface IInstallShortcutReceiver;
+    }
+
+    singleton class CInstallShortcutReceiverHelper {
+        interface IInstallShortcutReceiverHelper;
+    }
+
+    class CLauncherProvider {
+        interface IComponentCallbacks2;
+        interface IContentProvider;
+        interface ILauncherProvider;
+    }
+
+    singleton class CLauncherProviderHelper {
+        interface ILauncherProviderHelper;
+    }
+
+    class CPagedViewWidget {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ILinearLayout;
+        interface IPagedViewWidget;
+    }
+
+    class CPackageChangedReceiver {
+        interface IBroadcastReceiver;
+    }
+
+    singleton class CPagedViewWidgetHelper {
+        interface IPagedViewWidgetHelper;
+    }
+
+    class CPagedViewWidgetImageView {
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IImageView;
+        interface IPagedViewWidgetImageView;
+    }
+
+    class CPreloadReceiver {
+        interface IBroadcastReceiver;
+        interface IPreloadReceiver;
+    }
+
+    class CPagedViewIcon {
+        constructor();
+
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IOnPreDrawListener;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IPagedViewIcon;
+    }
+
+    class CSearchDropTargetBar {
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IDragControllerDragListener;
+        interface ISearchDropTargetBar;
+    }
+
     class CWallpaperChooser {
         interface IActivity;
     }
 
+    class CUninstallShortcutReceiver {
+        interface IBroadcastReceiver;
+        interface IUninstallShortcutReceiver;
+    }
+
+    singleton class CUninstallShortcutReceiverHelper {
+        interface IUninstallShortcutReceiverHelper;
+    }
+
+    class CUserInitializeReceiver {
+        interface IBroadcastReceiver;
+    }
+
     class CWallpaperChooserDialogFragment {
-        interface IWallpaperChooserDialogFragment;
         interface IFragment;
         interface IDialogInterfaceOnCancelListener;
         interface IDialogInterfaceOnDismissListener;
         interface IDialogFragment;
         interface IAdapterViewOnItemSelectedListener;
         interface IAdapterViewOnItemClickListener;
+        interface IWallpaperChooserDialogFragment;
+    }
+
+    singleton class CWallpaperChooserDialogFragmentHelper {
+        interface IWallpaperChooserDialogFragmentHelper;
     }
 
     } //namespace Launcher2

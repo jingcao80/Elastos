@@ -1,7 +1,27 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEWWIDGET_H__
 #define  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEWWIDGET_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/widget/LinearLayout.h"
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::App::IFastBitmapDrawable;
+using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::Widget::LinearLayout;
+using Elastos::Droid::Os::Runnable;
 
 namespace Elastos {
 namespace Droid {
@@ -30,8 +50,6 @@ public:
 
     PagedViewWidget();
 
-    virtual ~PagedViewWidget() {}
-
     CARAPI constructor(
         /* [in] */ IContext* context);
 
@@ -42,12 +60,12 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs,
-        /* [in] */ Int32* defStyle);
+        /* [in] */ Int32 defStyle);
 
-    CARAPI static SetDeletePreviewsWhenDetachedFromWindow(
+    static CARAPI SetDeletePreviewsWhenDetachedFromWindow(
         /* [in] */ Boolean value);
 
-    CARAPI static SetRecyclePreviewsWhenDetachedFromWindow(
+    static CARAPI SetRecyclePreviewsWhenDetachedFromWindow(
         /* [in] */ Boolean value);
 
     CARAPI ApplyFromAppWidgetProviderInfo(
@@ -69,7 +87,7 @@ public:
         /* [in] */ Int32 index);
 
     CARAPI SetShortPressListener(
-        /* [in] */ IShortPressListener* listener);
+        /* [in] */ IPagedViewWidgetShortPressListener* listener);
 
     static CARAPI ResetShortPressTarget();
 
@@ -86,7 +104,7 @@ protected:
     CARAPI OnDetachedFromWindow();
 
 private:
-    CARAPI_(void) CheckForShortPress();
+    CARAPI_(void) MyCheckForShortPress();
 
     /**
      * Remove the longpress detection timer.
@@ -98,8 +116,8 @@ private:
 protected:
     static const String TAG;
 
-    AutoPtr<CheckForShortPress> mPendingCheckForShortPress;
-    AutoPtr<IShortPressListener> mShortPressListener;
+    AutoPtr<PagedViewWidget::CheckForShortPress> mPendingCheckForShortPress;
+    AutoPtr<IPagedViewWidgetShortPressListener> mShortPressListener;
     Boolean mShortPressTriggered;
     static AutoPtr<IPagedViewWidget> sShortpressTarget;
     Boolean mIsAppWidget;

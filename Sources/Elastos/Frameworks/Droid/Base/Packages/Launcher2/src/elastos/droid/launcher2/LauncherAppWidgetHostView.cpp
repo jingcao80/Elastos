@@ -7,16 +7,24 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-LauncherAppWidgetHostView::LauncherAppWidgetHostView(
-    /* [in] */ IContext* context)
+CAR_INTERFACE_IMPL(LauncherAppWidgetHostView, AppWidgetHostView,
+        ILauncherAppWidgetHostView);
+
+LauncherAppWidgetHostView::LauncherAppWidgetHostView()
     : mPreviousOrientation(0)
-    , AppWidgetHostView(context)
-    , mContext(context)
 {
+}
+
+ECode LauncherAppWidgetHostView::constructor(
+    /* [in] */ IContext* context)
+{
+    AppWidgetHostView::constructor(context);
+    mContext = context;
     mLongPressHelper = new CheckLongPressHelper(this);
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
     mInflater = ILayoutInflater::Probe(obj);
+    return NOERROR;
 }
 
 ECode LauncherAppWidgetHostView::GetErrorView(
@@ -66,18 +74,16 @@ ECode LauncherAppWidgetHostView::OnInterceptTouchEvent(
     VALIDATE_NOT_NULL(result);
 
     // Consume any touch events for ourselves after longpress is triggered
-    Boolean res;
-    mLongPressHelper->HasPerformedLongPress(&res);
-    if (res) {
+    if (mLongPressHelper->HasPerformedLongPress()) {
         mLongPressHelper->CancelLongPress();
-        result = TRUE;
+        *result = TRUE;
         return NOERROR;
     }
 
     // Watch for longpress events at this level to make sure
     // users can always pick up this widget
     Int32 action;
-    ev->GetAction(&action)
+    ev->GetAction(&action);
     switch (action) {
         case IMotionEvent::ACTION_DOWN: {
             mLongPressHelper->PostCheckForLongPress();
@@ -99,7 +105,8 @@ ECode LauncherAppWidgetHostView::CancelLongPress()
 {
     AppWidgetHostView::CancelLongPress();
 
-    return mLongPressHelper->CancelLongPress();
+    mLongPressHelper->CancelLongPress();
+    return NOERROR;
 }
 
 ECode LauncherAppWidgetHostView::GetDescendantFocusability(

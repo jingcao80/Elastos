@@ -1,7 +1,17 @@
-#ifndef  __ELASTOS_DROID_LAUNCHER2_APPLICATIOMINFO_H__
-#define  __ELASTOS_DROID_LAUNCHER2_APPLICATIOMINFO_H__
+#ifndef  __ELASTOS_DROID_LAUNCHER2_BUTTONDROPTARGET_H__
+#define  __ELASTOS_DROID_LAUNCHER2_BUTTONDROPTARGET_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/widget/TextView.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Utility.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Graphics::IPointF;
+using Elastos::Droid::Widget::TextView;
 
 namespace Elastos {
 namespace Droid {
@@ -12,74 +22,84 @@ namespace Launcher2 {
  */
 class ButtonDropTarget
     : public TextView
+    , public IButtonDropTarget
     , public IDropTarget
     , public IDragControllerDragListener
 {
 public:
-    ButtonDropTarget(
+    CAR_INTERFACE_DECL();
+
+    ButtonDropTarget();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
-    ButtonDropTarget(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs,
         /* [in] */ Int32 defStyle);
 
-    CARAPI_(void) SetLauncher(
+    CARAPI SetLauncher(
         /* [in] */ ILauncher* launcher);
 
-    CARAPI_(Boolean) AcceptDrop(
-        /* [in] */ DragObject* d);
+    CARAPI AcceptDrop(
+        /* [in] */ IDropTargetDragObject* d,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(void) SetSearchDropTargetBar(
+    CARAPI SetSearchDropTargetBar(
         /* [in] */ ISearchDropTargetBar* searchDropTargetBar);
 
-    CARAPI_(void) OnDrop(
-        /* [in] */ DragObject* d);
+    CARAPI OnDrop(
+        /* [in] */ IDropTargetDragObject* d);
 
-    CARAPI_(void) OnFlingToDelete(
-        /* [in] */ DragObject* d,
+    CARAPI OnFlingToDelete(
+        /* [in] */ IDropTargetDragObject* d,
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ IPointF* vec);
 
-    CARAPI_(void) OnDragEnter(
-        /* [in] */ DragObject* d);
+    CARAPI OnDragEnter(
+        /* [in] */ IDropTargetDragObject* d);
 
-    CARAPI_(void) OnDragOver(
-        /* [in] */ DragObject* d);
+    CARAPI OnDragOver(
+        /* [in] */ IDropTargetDragObject* d);
 
-    CARAPI_(void) OnDragExit(
-        /* [in] */ DragObject* d);
+    CARAPI OnDragExit(
+        /* [in] */ IDropTargetDragObject* d);
 
-    CARAPI_(void) OnDragStart(
+    CARAPI OnDragStart(
         /* [in] */ IDragSource* source,
         /* [in] */ IInterface* info,
         /* [in] */ Int32 dragAction);
 
-    CARAPI_(Boolean) IsDropEnabled();
+    CARAPI IsDropEnabled(
+        /* [out] */ Boolean* result);
 
-    CARAPI_(void) OnDragEnd();
+    CARAPI OnDragEnd();
 
     //@Override
-    CARAPI_(void) GetHitRect(
+    CARAPI GetHitRect(
         /* [in] */ IRect* outRect);
 
-    CARAPI_(AutoPtr<IRect>) GetIconRect(
+    CARAPI GetIconRect(
         /* [in] */ Int32 viewWidth,
         /* [in] */ Int32 viewHeight,
         /* [in] */ Int32 drawableWidth,
-        /* [in] */ Int32 drawableHeight);
+        /* [in] */ Int32 drawableHeight,
+        /* [out] */ IRect** rect);
 
     //@Override
-    CARAPI_(AutoPtr<DropTarget>) GetDropTargetDelegate(
-        /* [in] */ DragObject* d);
+    CARAPI GetDropTargetDelegate(
+        /* [in] */ IDropTargetDragObject* d,
+        /* [out] */ IDropTarget** target);
 
-    CARAPI_(void) GetLocationInDragLayer(
+    CARAPI GetLocationInDragLayer(
         /* [in] */ ArrayOf<Int32>* loc);
 
 protected:
-    CARAPI_(AutoPtr<IDrawable>) GetCurrentDrawable();
+    CARAPI GetCurrentDrawable(
+        /* [out] */ IDrawable** drawable);
 
 private:
     CARAPI_(Boolean) IsRtl();
@@ -106,4 +126,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_LAUNCHER2_APPLICATIOMINFO_H__
+#endif // __ELASTOS_DROID_LAUNCHER2_BUTTONDROPTARGET_H__

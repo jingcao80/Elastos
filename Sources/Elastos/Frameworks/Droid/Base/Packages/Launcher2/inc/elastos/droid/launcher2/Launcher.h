@@ -1677,11 +1677,6 @@ private:
     static const String TAG;
     static const Boolean LOGD;
 
-    static const Boolean PROFILE_STARTUP;
-    static const Boolean DEBUG_WIDGETS;
-    static const Boolean DEBUG_STRICT_MODE;
-    static const Boolean DEBUG_RESUME_TIME;
-
     static const Int32 MENU_GROUP_WALLPAPER;
     static const Int32 MENU_WALLPAPER_SETTINGS;
     static const Int32 MENU_MANAGE_APPS;
@@ -1697,19 +1692,7 @@ private:
 
     static const Int32 REQUEST_BIND_APPWIDGET;
 
-    static const String EXTRA_SHORTCUT_DUPLICATE;
-
-    static const Int32 SCREEN_COUNT;
-    static const Int32 DEFAULT_SCREEN;
-
     static const String PREFERENCES;
-    // To turn on these properties, type
-    // adb shell setprop log.tag.PROPERTY_NAME [VERBOSE | SUPPRESS]
-    static const String FORCE_ENABLE_ROTATION_PROPERTY;
-    static const String DUMP_STATE_PROPERTY;
-
-    // The Intent extra that defines whether to ignore the launch animation
-    static const String INTENT_EXTRA_IGNORE_LAUNCH_ANIMATION;
 
     // Type: int
     static const String RUNTIME_STATE_CURRENT_SCREEN;
@@ -1751,7 +1734,6 @@ private:
     AutoPtr<IAnimatorSet> mStateAnimation;
     AutoPtr<IAnimatorSet> mDividerAnimator;
 
-    static const Int32 APPWIDGET_HOST_ID;
     static const Int32 EXIT_SPRINGLOADED_MODE_SHORT_TIMEOUT;
     static const Int32 EXIT_SPRINGLOADED_MODE_LONG_TIMEOUT;
     static const Int32 SHOW_CLING_DURATION;

@@ -1,5 +1,7 @@
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
@@ -28,6 +30,16 @@ module
 
         // A mime-type representing shortcut data
         const String SHORTCUT_MIMETYPE = "com.android.launcher/shortcut";
+    }
+
+    interface IInstallShortcutReceiverHelper {
+        EnableInstallQueue();
+
+        DisableAndFlushInstallQueue(
+            [in] IContext* context);
+
+        FlushInstallQueue(
+            [in] IContext* context);
     }
 
 

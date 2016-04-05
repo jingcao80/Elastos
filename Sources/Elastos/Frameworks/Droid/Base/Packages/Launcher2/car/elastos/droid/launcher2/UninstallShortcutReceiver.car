@@ -1,0 +1,25 @@
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /*
+    * @invoke interface IBroadcastReceiver
+    */
+    interface IUninstallShortcutReceiver {
+    }
+
+    interface IUninstallShortcutReceiverHelper {
+        EnableUninstallQueue();
+
+        DisableAndFlushUninstallQueue(
+            [in] IContext* context);
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,5 +1,9 @@
 module
 {
+    using interface Elastos.Droid.View.IView;
+
+    interface Elastos.Droid.Launcher2.IDropTargetDragObject;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
@@ -8,6 +12,7 @@ module
      * Interface defining an object that can originate a drag.
      *
      */
+    [local]
     interface IDragSource {
         /**
          * @return whether items dragged from this source supports
@@ -27,7 +32,7 @@ module
          * DropTarget.
          */
         OnDropCompleted(
-            [in] View target,
+            [in] IView* target,
             [in] IDropTargetDragObject* d,
             [in] Boolean isFlingToDelete,
             [in] Boolean success);

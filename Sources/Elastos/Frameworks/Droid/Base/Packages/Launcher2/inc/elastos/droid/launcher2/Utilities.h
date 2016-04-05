@@ -2,7 +2,19 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_UTILITIES_H__
 #define  __ELASTOS_DROID_LAUNCHER2_UTILITIES_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::IPaint;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {

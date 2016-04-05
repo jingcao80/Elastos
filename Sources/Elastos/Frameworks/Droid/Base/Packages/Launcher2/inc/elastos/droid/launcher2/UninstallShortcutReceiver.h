@@ -1,7 +1,23 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_UNINSTALLSHORTCUTRECEIVER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_UNINSTALLSHORTCUTRECEIVER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include <elastos/core/Object.h>
+#include <elastos/core/Thread.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::ISharedPreferences;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Core::Object;
+using Elastos::Core::Thread;
+using Elastos::Utility::ISet;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -33,20 +49,20 @@ private:
         CARAPI Run();
 
     private:
-        ISet* mSavedNewApps;
-        ISharedPreferences* mSharedPrefs;
+        AutoPtr<ISet> mSavedNewApps;
+        AutoPtr<ISharedPreferences> mSharedPrefs;
     };
 
 public:
     CAR_INTERFACE_DECL();
 
-    CARAP OnReceive(
+    CARAPI OnReceive(
         /* [in] */ IContext* context,
         /* [in] */ IIntent* data);
 
-    static CARAP EnableUninstallQueue();
+    static CARAPI EnableUninstallQueue();
 
-    static CARAP DisableAndFlushUninstallQueue(
+    static CARAPI DisableAndFlushUninstallQueue(
         /* [in] */ IContext* context);
 
 private:

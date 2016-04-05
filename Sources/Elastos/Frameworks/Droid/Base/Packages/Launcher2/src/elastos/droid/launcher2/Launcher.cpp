@@ -219,6 +219,7 @@ Launcher::MyHandler::MyHandler(
     /* [in] */ Launcher* host)
     : mHost(host)
 {
+    Handler::constructor();
 }
 
 ECode Launcher::MyHandler::HandleMessage(
@@ -864,11 +865,6 @@ ECode Launcher::MyRunnable22::Run()
 const String Launcher::TAG("Launcher");
 const Boolean Launcher::LOGD = FALSE;
 
-const Boolean Launcher::PROFILE_STARTUP = FALSE;
-const Boolean Launcher::DEBUG_WIDGETS = FALSE;
-const Boolean Launcher::DEBUG_STRICT_MODE = FALSE;
-const Boolean Launcher::DEBUG_RESUME_TIME = FALSE;
-
 const Int32 Launcher::MENU_GROUP_WALLPAPER = 1;
 const Int32 Launcher::MENU_WALLPAPER_SETTINGS = IMenu::FIRST + 1;
 const Int32 Launcher::MENU_MANAGE_APPS = MENU_WALLPAPER_SETTINGS + 1;
@@ -884,17 +880,7 @@ const Int32 Launcher::REQUEST_PICK_WALLPAPER = 10;
 
 const Int32 Launcher::REQUEST_BIND_APPWIDGET = 11;
 
-const String Launcher::EXTRA_SHORTCUT_DUPLICATE("duplicate");
-
-const Int32 Launcher::SCREEN_COUNT = 5;
-const Int32 Launcher::DEFAULT_SCREEN = 2;
-
 const String Launcher::PREFERENCES("launcher.preferences");
-const String Launcher::FORCE_ENABLE_ROTATION_PROPERTY("launcher_force_rotate");
-const String Launcher::DUMP_STATE_PROPERTY("launcher_dump_state");
-
-const String Launcher::INTENT_EXTRA_IGNORE_LAUNCH_ANIMATION(
-        "com.android.launcher.intent.extra.shortcut.INGORE_LAUNCH_ANIMATION");
 
 const String Launcher::RUNTIME_STATE_CURRENT_SCREEN("launcher.current_screen");
 const String Launcher::RUNTIME_STATE("launcher.state");
@@ -915,7 +901,6 @@ const String Launcher::TOOLBAR_SEARCH_ICON_METADATA_NAME(
 const String Launcher::TOOLBAR_VOICE_SEARCH_ICON_METADATA_NAME(
         "com.android.launcher.toolbar_voice_search_icon");
 
-const Int32 Launcher::APPWIDGET_HOST_ID = 1024;
 const Int32 Launcher::EXIT_SPRINGLOADED_MODE_SHORT_TIMEOUT = 300;
 const Int32 Launcher::EXIT_SPRINGLOADED_MODE_LONG_TIMEOUT = 600;
 const Int32 Launcher::SHOW_CLING_DURATION = 550;

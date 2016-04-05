@@ -1,0 +1,13 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    interface IKey {
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,7 +1,25 @@
 
 #include "elastos/droid/launcher2/WallpaperChooserDialogFragment.h"
+#include "elastos/droid/launcher2/CWallpaperChooserDialogFragment.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/core/Math.h>
+#include "Elastos.CoreLibrary.Core.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::App::IWallpaperManager;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Graphics::CMatrix;
+using Elastos::Droid::Graphics::IPixelFormat;
+using Elastos::Droid::Graphics::Drawable::IBitmapDrawable;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::EIID_IAdapterViewOnItemSelectedListener;
+using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IInteger32;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -23,11 +41,10 @@ CARAPI WallpaperChooserDialogFragment::MyOnClickListener::OnClick(
     return mHost->SelectWallpaper(position);
 }
 
-CAR_INTERFACE_IMPL_3(WallpaperChooserDialogFragment::ImageAdapter, BaseAdapter, IListAdapter
-        , ISpinnerAdapter, IAdapter);
-
 WallpaperChooserDialogFragment::ImageAdapter::ImageAdapter(
+    /* [in] */ WallpaperChooserDialogFragment* host,
     /* [in] */ IActivity* activity)
+    : mHost(host)
 {
     activity->GetLayoutInflater((ILayoutInflater**)&mLayoutInflater);
 }
@@ -37,7 +54,7 @@ ECode WallpaperChooserDialogFragment::ImageAdapter::GetCount(
 {
     VALIDATE_NOT_NULL(count);
 
-    return mThumbs->GetSize(count);
+    return mHost->mThumbs->GetSize(count);
 }
 
 ECode WallpaperChooserDialogFragment::ImageAdapter::GetItem(
@@ -86,7 +103,7 @@ ECode WallpaperChooserDialogFragment::ImageAdapter::GetView(
     AutoPtr<IImageView> image = IImageView::Probe(tmp);
 
     AutoPtr<IInterface> obj;
-    mThumbs->Get(position, (IInterface**)&obj);
+    mHost->mThumbs->Get(position, (IInterface**)&obj);
     AutoPtr<IInteger32> intObj = IInteger32::Probe(obj);
     Int32 thumbRes;
     intObj->GetValue(&thumbRes);
@@ -107,6 +124,12 @@ ECode WallpaperChooserDialogFragment::ImageAdapter::GetView(
     return NOERROR;
 }
 
+WallpaperChooserDialogFragment::WallpaperLoader::WallpaperLoader(
+    /* [in] */ WallpaperChooserDialogFragment* host)
+    : mHost(host)
+{
+}
+
 ECode WallpaperChooserDialogFragment::WallpaperLoader::DoInBackground(
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
@@ -125,16 +148,16 @@ ECode WallpaperChooserDialogFragment::WallpaperLoader::DoInBackground(
     intObj->GetValue(&value);
 
     AutoPtr<IResources> resources;
-    ECode ec = GetResources((IResources**)&resources);
+    ECode ec = mHost->GetResources((IResources**)&resources);
     if (ec == (ECode)E_OUT_OF_MEMORY_ERROR) {
-        Slogger::W(TAG, "Out of memory trying to load wallpaper res=%08x", value);
+        Slogger::W("WallpaperChooserDialogFragment", "Out of memory trying to load wallpaper res=%08x", value);
         *result = NULL;
         return NOERROR;
     }
     AutoPtr<IDrawable> d;
     ec = resources->GetDrawable(value, (IDrawable**)&d);
     if (ec == (ECode)E_OUT_OF_MEMORY_ERROR) {
-        Slogger::W(TAG, "Out of memory trying to load wallpaper res=%08x", value);
+        Slogger::W("WallpaperChooserDialogFragment", "Out of memory trying to load wallpaper res=%08x", value);
         *result = NULL;
         return NOERROR;
     }
@@ -143,7 +166,7 @@ ECode WallpaperChooserDialogFragment::WallpaperLoader::DoInBackground(
         AutoPtr<IBitmap> bitmap;
         ec = IBitmapDrawable::Probe(d)->GetBitmap((IBitmap**)&bitmap);
         if (ec == (ECode)E_OUT_OF_MEMORY_ERROR) {
-            Slogger::W(TAG, "Out of memory trying to load wallpaper res=%08x", value);
+            Slogger::W("WallpaperChooserDialogFragment", "Out of memory trying to load wallpaper res=%08x", value);
             *result = NULL;
             return NOERROR;
         }
@@ -155,7 +178,7 @@ ECode WallpaperChooserDialogFragment::WallpaperLoader::DoInBackground(
     return NOERROR;
     //} catch (OutOfMemoryError e) {
     // if (ec == (ECode)E_OUT_OF_MEMORY_ERROR) {
-    //     Slogger::W(TAG, "Out of memory trying to load wallpaper res=%08x", value);
+    //     Slogger::W("WallpaperChooserDialogFragment", "Out of memory trying to load wallpaper res=%08x", value);
     //     *result = NULL;
     //     return NOERROR;
     // }
@@ -173,15 +196,15 @@ ECode WallpaperChooserDialogFragment::WallpaperLoader::OnPostExecute(
 
     if (!IsCancelled()) {
         AutoPtr<IView> v;
-        GetView((IView**)&v);
+        mHost->GetView((IView**)&v);
         if (v != NULL) {
-            mWallpaperDrawable->SetBitmap(b);
+            mHost->mWallpaperDrawable->SetBitmap(b);
             v->PostInvalidate();
         }
         else {
-            mWallpaperDrawable->SetBitmap(NULL);
+            mHost->mWallpaperDrawable->SetBitmap(NULL);
         }
-        mLoader = NULL;
+        mHost->mLoader = NULL;
     }
     else {
        b->Recycle();
@@ -239,7 +262,8 @@ ECode WallpaperChooserDialogFragment::WallpaperDrawable::Draw(
 
         CMatrix::New((IMatrix**)&mMatrix);
         mMatrix->SetScale(scale, scale);
-        mMatrix->PostTranslate((Int32) dx, (Int32) dy);
+        Boolean res;
+        mMatrix->PostTranslate((Int32)dx, (Int32)dy, &res);
     }
 
     return canvas->DrawBitmap(mBitmap, mMatrix, NULL);
@@ -281,14 +305,14 @@ WallpaperChooserDialogFragment::WallpaperChooserDialogFragment()
 }
 
 ECode WallpaperChooserDialogFragment::NewInstance(
-    /* [out] */ IWallpaperChooserDialogFragment** fragment);
+    /* [out] */ IWallpaperChooserDialogFragment** fragment)
 {
     VALIDATE_NOT_NULL(fragment);
     *fragment = NULL;
 
     AutoPtr<IWallpaperChooserDialogFragment> _fragment;
     CWallpaperChooserDialogFragment::New((IWallpaperChooserDialogFragment**)&_fragment);
-    _fragment->SetCancelable(TRUE);
+    IDialogFragment::Probe(_fragment)->SetCancelable(TRUE);
     *fragment = _fragment;
     REFCOUNT_ADD(*fragment);
     return NOERROR;
@@ -297,7 +321,7 @@ ECode WallpaperChooserDialogFragment::NewInstance(
 }
 
 ECode WallpaperChooserDialogFragment::OnCreate(
-     /* [in] */ IBundle* savedInstanceState);
+     /* [in] */ IBundle* savedInstanceState)
 {
     DialogFragment::OnCreate(savedInstanceState);
     if (savedInstanceState != NULL) {
@@ -323,10 +347,11 @@ ECode WallpaperChooserDialogFragment::OnSaveInstanceState(
 void WallpaperChooserDialogFragment::CancelLoader()
 {
     if (mLoader != NULL) {
-        Int32 status;
-        mLoader->GetStatus(&status);
-        if (status != IWallpaperLoader::Status::FINISHED) {
-            mLoader->Cancel(TRUE);
+        AsyncTask::Status status = mLoader->GetStatus();
+        if (status != AsyncTask::FINISHED) {
+            assert(0);
+            //java : mLoader.cancel(true);
+            mLoader->Cancel();
             mLoader = NULL;
         }
     }
@@ -341,7 +366,7 @@ ECode WallpaperChooserDialogFragment::OnDetach()
     return NOERROR;
 }
 
-ECode WallpaperChooserDialogFragment::OnDestroy();
+ECode WallpaperChooserDialogFragment::OnDestroy()
 {
     DialogFragment::OnDestroy();
 
@@ -402,11 +427,11 @@ ECode WallpaperChooserDialogFragment::OnCreateView(
         view->FindViewById(Elastos::Droid::Launcher2::R::id::gallery, (IView**)&tmp);
         AutoPtr<IGallery> gallery = IGallery::Probe(tmp);
         gallery->SetCallbackDuringFling(FALSE);
-        gallery->SetOnItemSelectedListener(this);
+        IAdapterView::Probe(gallery)->SetOnItemSelectedListener(this);
 
         AutoPtr<IActivity> activity;
         GetActivity((IActivity**)&activity);
-        AutoPtr<ImageAdapter> adapter = new ImageAdapter(activity);
+        AutoPtr<ImageAdapter> adapter = new ImageAdapter(this, activity);
         IAdapterView::Probe(gallery)->SetAdapter(adapter);
 
         AutoPtr<IView> setButton;
@@ -428,11 +453,11 @@ ECode WallpaperChooserDialogFragment::SelectWallpaper(
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     AutoPtr<IInterface> obj;
-    activity->GetSystemService(IContext::WALLPAPER_SERVICE, (IInterface**)&obj);
+    IContext::Probe(activity)->GetSystemService(IContext::WALLPAPER_SERVICE, (IInterface**)&obj);
     AutoPtr<IWallpaperManager> wpm = IWallpaperManager::Probe(obj);
 
     AutoPtr<IInterface> tmp;
-    mImages->Get(position, (IInterface**)&tmp)
+    mImages->Get(position, (IInterface**)&tmp);
     AutoPtr<IInteger32> intObj = IInteger32::Probe(tmp);
     Int32 value;
     intObj->GetValue(&value);
@@ -444,7 +469,7 @@ ECode WallpaperChooserDialogFragment::SelectWallpaper(
     activity2->Finish();
     //} catch (IOException e) {
     if (ec == (ECode)E_IO_EXCEPTION) {
-        Slogger::E(TAG, "Failed to set wallpaper: %d",e);
+        Slogger::E(TAG, "Failed to set wallpaper: %d", ec);
     }
     //}
     return NOERROR;
@@ -466,17 +491,16 @@ ECode WallpaperChooserDialogFragment::OnItemSelected(
     /* [in] */ Int64 id)
 {
     if (mLoader != NULL) {
-        Int32 status;
-        mLoader->GetStatus(&status);
-        if (status != IWallpaperLoader::Status::FINISHED) {
+        AsyncTask::Status status = mLoader->GetStatus();
+        if (status != AsyncTask::FINISHED) {
             mLoader->Cancel();
         }
     }
-    mLoader = new WallpaperLoader();
-    AutoPtr<ArrayOf<IInterface*> > params = ArrayOf<IInterface*>::Allco(1);
+    mLoader = new WallpaperLoader(this);
+    AutoPtr<ArrayOf<IInterface*> > params = ArrayOf<IInterface*>::Alloc(1);
     AutoPtr<IInteger32> obj = CoreUtils::Convert(position);
     params->Set(0, TO_IINTERFACE(obj));
-    return AsyncTask::Probe(mLoader)->Execute(params);
+    return mLoader->Execute(params);
 }
 
 ECode WallpaperChooserDialogFragment::OnNothingSelected(
@@ -513,8 +537,8 @@ void WallpaperChooserDialogFragment::AddWallpapers(
     resources->GetStringArray(list, (ArrayOf<String>**)&extras);
 
     for (Int32 i = 0; i < extras->GetLength(); i++) {
-        String extra = (extras)[i];
-        In32t res;
+        String extra = (*extras)[i];
+        Int32 res;
         resources->GetIdentifier(extra, String("drawable"), packageName, &res);
         if (res != 0) {
             Int32 thumbRes;
@@ -531,7 +555,6 @@ void WallpaperChooserDialogFragment::AddWallpapers(
     }
     return;
 }
-
 
 } // namespace Launcher2
 } // namespace Droid

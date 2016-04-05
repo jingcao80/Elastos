@@ -1,78 +1,85 @@
 
 #include "elastos/droid/launcher2/PagedViewCellLayout.h"
+#include "elastos/droid/launcher2/PagedViewCellLayoutChildren.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/utility/logging/Slogger.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/Math.h>
+
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+CAR_INTERFACE_IMPL(PagedViewCellLayout::LayoutParams, ViewGroup::MarginLayoutParams,
+        IPagedViewCellLayoutLayoutParams);
+
 PagedViewCellLayout::LayoutParams::LayoutParams()
-    : MarginLayoutParams(IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::MATCH_PARENT)
-    , mCellX(0)
+    : mCellX(0)
     , mCellY(0)
-    , mCellHSpan(1)
-    , mCellVSpan(1)
+    , mCellHSpan(0)
+    , mCellVSpan(0)
     , mIsDragging(FALSE)
     , mX(0)
     , mY(0)
 {
 }
 
-PagedViewCellLayout::LayoutParams::LayoutParams(
+PagedViewCellLayout::LayoutParams::constructor()
+{
+    MarginLayoutParams::constructor(IViewGroupLayoutParams::MATCH_PARENT,
+            IViewGroupLayoutParams::MATCH_PARENT);
+    mCellHSpan = 1;
+    mCellVSpan = 1;
+    return NOERROR;
+}
+
+PagedViewCellLayout::LayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
-    : MarginLayoutParams(c, attrs)
-    , mCellX(0)
-    , mCellY(0)
-    , mCellHSpan(1)
-    , mCellVSpan(1)
-    , mIsDragging(FALSE)
-    , mX(0)
-    , mY(0)
 {
+    MarginLayoutParams::constructor(c, attrs);
+    mCellHSpan = 1;
+    mCellVSpan = 1;
+    return NOERROR;
 }
 
-PagedViewCellLayout::LayoutParams::LayoutParams(
+PagedViewCellLayout::LayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
-    : MarginLayoutParams(source)
-    , mCellX(0)
-    , mCellY(0)
-    , mCellHSpan(1)
-    , mCellVSpan(1)
-    , mIsDragging(FALSE)
-    , mX(0)
-    , mY(0)
 {
+    MarginLayoutParams::constructor(source);
+    mCellHSpan = 1;
+    mCellVSpan = 1;
+    return NOERROR;
 }
 
-PagedViewCellLayout::LayoutParams::LayoutParams(
+PagedViewCellLayout::LayoutParams::constructor(
     /* [in] */ LayoutParams* source)
-    : MarginLayoutParams(source);
-    , mCellX(source->mCellX)
-    , mCellY(source->mCellY)
-    , mCellHSpan(source->mCellHSpan)
-    , mCellVSpan(source->mCellVSpan)
-    , mIsDragging(FALSE)
-    , mX(0)
-    , mY(0)
 {
+    MarginLayoutParams::constructor(IViewGroupMarginLayoutParams::Probe(source));
+    mCellX = source->mCellX;
+    mCellY = source->mCellY;
+    mCellHSpan = source->mCellHSpan;
+    mCellVSpan = source->mCellVSpan;
+    return NOERROR;
 }
 
-PagedViewCellLayout::LayoutParams::LayoutParams(
+PagedViewCellLayout::LayoutParams::constructor(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY,
     /* [in] */ Int32 cellHSpan,
     /* [in] */ Int32 cellVSpan)
-    : MarginLayoutParams(IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::MATCH_PARENT);
-    , mCellX(cellX)
-    , mCellY(cellY)
-    , mCellHSpan(cellHSpan)
-    , mCellVSpan(cellVSpan)
-    , mIsDragging(FALSE)
-    , mX(0)
-    , mY(0)
 {
+    MarginLayoutParams::constructor(IViewGroupLayoutParams::MATCH_PARENT,
+            IViewGroupLayoutParams::MATCH_PARENT);
+    mCellX = cellX;
+    mCellY = cellY;
+    mCellHSpan = cellHSpan;
+    mCellVSpan = cellVSpan;
+    return NOERROR;
 }
 
 ECode PagedViewCellLayout::LayoutParams::Setup(
@@ -83,25 +90,26 @@ ECode PagedViewCellLayout::LayoutParams::Setup(
     /* [in] */ Int32 hStartPadding,
     /* [in] */ Int32 vStartPadding)
 {
-    const Int32 myCellHSpan = cellHSpan;
-    const Int32 myCellVSpan = cellVSpan;
-    const Int32 myCellX = cellX;
-    const Int32 myCellY = cellY;
+    const Int32 myCellHSpan = mCellHSpan;
+    const Int32 myCellVSpan = mCellVSpan;
+    const Int32 myCellX = mCellX;
+    const Int32 myCellY = mCellY;
 
     mWidth = myCellHSpan * cellWidth + ((myCellHSpan - 1) * widthGap) -
-            leftMargin - rightMargin;
+            mLeftMargin - mRightMargin;
     mHeight = myCellVSpan * cellHeight + ((myCellVSpan - 1) * heightGap) -
-            topMargin - bottomMargin;
+            mTopMargin - mBottomMargin;
 
     Boolean res;
-    LauncherApplication::IsScreenLarge(&res);
+    assert(0 && "need class LauncherApplication");
+    //LauncherApplication::IsScreenLarge(&res);
     if (res) {
-        mX = hStartPadding + myCellX * (cellWidth + widthGap) + leftMargin;
-        mY = vStartPadding + myCellY * (cellHeight + heightGap) + topMargin;
+        mX = hStartPadding + myCellX * (cellWidth + widthGap) + mLeftMargin;
+        mY = vStartPadding + myCellY * (cellHeight + heightGap) + mTopMargin;
     }
     else {
-        mX = myCellX * (cellWidth + widthGap) + leftMargin;
-        mY = myCellY * (cellHeight + heightGap) + topMargin;
+        mX = myCellX * (cellWidth + widthGap) + mLeftMargin;
+        mY = myCellY * (cellHeight + heightGap) + mTopMargin;
     }
     return NOERROR;
 }
@@ -126,7 +134,7 @@ ECode PagedViewCellLayout::LayoutParams::SetTag(
 ECode PagedViewCellLayout::LayoutParams::ToString(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(tag);
+    VALIDATE_NOT_NULL(str);
 
     StringBuilder sb;
     sb += "(";
@@ -145,25 +153,40 @@ const String PagedViewCellLayout::TAG("PagedViewCellLayout");
 
 CAR_INTERFACE_IMPL_2(PagedViewCellLayout, ViewGroup, IPagedViewCellLayout, IPage);
 
-PagedViewCellLayout::PagedViewCellLayout(
-    /* [in] */ IContext* context)
+PagedViewCellLayout::PagedViewCellLayout()
+    : mCellCountX(0)
+    , mCellCountY(0)
+    , mOriginalCellWidth(0)
+    , mOriginalCellHeight(0)
+    , mCellWidth(0)
+    , mCellHeight(0)
+    , mOriginalWidthGap(0)
+    , mOriginalHeightGap(0)
+    , mWidthGap(0)
+    , mHeightGap(0)
+    , mMaxGap(0)
 {
-    PagedViewCellLayout(context, NULL);
 }
 
-PagedViewCellLayout::PagedViewCellLayout(
+ECode PagedViewCellLayout::constructor(
+    /* [in] */ IContext* context)
+{
+    return constructor(context, NULL);
+}
+
+ECode PagedViewCellLayout::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    PagedViewCellLayout(context, attrs, 0);
+    return constructor(context, attrs, 0);
 }
 
-PagedViewCellLayout::PagedViewCellLayout(
+ECode PagedViewCellLayout::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
-    : ViewGroup(context, attrs, defStyle)
 {
+    ViewGroup::constructor(context, attrs, defStyle);
     SetAlwaysDrawnWithCacheEnabled(FALSE);
 
     // setup default cell parameters
@@ -178,18 +201,19 @@ PagedViewCellLayout::PagedViewCellLayout(
             Elastos::Droid::Launcher2::R::dimen::apps_customize_cell_height,
             &mCellHeight);
     mOriginalCellHeight = mCellHeight;
-    LauncherModel::GetCellCountX(&mCellCountX);
-    LauncherModel::GetCellCountY(&mCellCountY);
+    assert(0 && "need class LauncherModel");
+    //LauncherModel::GetCellCountX(&mCellCountX);
+    //LauncherModel::GetCellCountY(&mCellCountY);
     mOriginalWidthGap = mOriginalHeightGap = mWidthGap = mHeightGap = -1;
     resources->GetDimensionPixelSize(
         Elastos::Droid::Launcher2::R::dimen::apps_customize_max_gap,
         &mMaxGap);
 
-    CPagedViewCellLayoutChildren::New(context, (IPagedViewCellLayoutChildren**)&mChildren);
+    mChildren = new PagedViewCellLayoutChildren(context);
     mChildren->SetCellDimensions(mCellWidth, mCellHeight);
     mChildren->SetGap(mWidthGap, mHeightGap);
 
-    AddView(mChildren);
+    AddView(IView::Probe(mChildren));
 }
 
 PagedViewCellLayout::GetCellWidth(
@@ -218,7 +242,7 @@ ECode PagedViewCellLayout::CancelLongPress()
     Int32 count;
     GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
-        AUtoPtr<IView> child;
+        AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
         child->CancelLongPress();
     }
@@ -234,7 +258,7 @@ ECode PagedViewCellLayout::AddViewToCellLayout(
 {
     VALIDATE_NOT_NULL(result);
 
-    AUtoPtr<PagedViewCellLayout::LayoutParams> lp = params;
+    AutoPtr<PagedViewCellLayout::LayoutParams> lp = params;
 
     // Generate an id for each view, this assumes we have at most 256x256 cells
     // per workspace screen
@@ -246,7 +270,8 @@ ECode PagedViewCellLayout::AddViewToCellLayout(
         if (lp->mCellVSpan < 0) lp->mCellVSpan = mCellCountY;
 
         child->SetId(childId);
-        mChildren->AddView(child, index, lp);
+        IViewGroup::Probe(mChildren)->AddView(child, index,
+                IViewGroupLayoutParams::Probe(lp));
 
         *result = TRUE;
         return NOERROR;
@@ -257,22 +282,23 @@ ECode PagedViewCellLayout::AddViewToCellLayout(
 
 ECode PagedViewCellLayout::RemoveAllViewsOnPage()
 {
-    mChildren->RemoveAllViews();
+    IViewGroup::Probe(mChildren)->RemoveAllViews();
     return SetLayerType(LAYER_TYPE_NONE, NULL);
 }
 
 ECode PagedViewCellLayout::RemoveViewOnPageAt(
     /* [in] */ Int32 index)
 {
-    return mChildren->RemoveViewAt(index);
+    return IViewGroup::Probe(mChildren)->RemoveViewAt(index);
 }
 
 ECode PagedViewCellLayout::ResetChildrenOnKeyListeners()
 {
     Int32 childCount;
-    mChildren->GetChildCount(&childCount);
+    IViewGroup::Probe(mChildren)->GetChildCount(&childCount);
     for (Int32 j = 0; j < childCount; ++j) {
-        AutoPtr<IView> view = mChildren->GetChildAt(j);
+        AutoPtr<IView> view;
+        IViewGroup::Probe(mChildren)->GetChildAt(j, (IView**)&view);
         view->SetOnKeyListener(NULL);
     }
     return NOERROR;
@@ -283,7 +309,7 @@ ECode PagedViewCellLayout::GetPageChildCount(
 {
     VALIDATE_NOT_NULL(count);
 
-    return mChildren->GetChildCount(count);
+    return IViewGroup::Probe(mChildren)->GetChildCount(count);
 }
 
 ECode PagedViewCellLayout::GetChildrenLayout(
@@ -302,7 +328,7 @@ ECode PagedViewCellLayout::GetChildOnPageAt(
 {
     VALIDATE_NOT_NULL(view);
 
-    return mChildren->GetChildAt(i, view);
+    return IViewGroup::Probe(mChildren)->GetChildAt(i, view);
 }
 
 ECode PagedViewCellLayout::IndexOfChildOnPage(
@@ -311,7 +337,7 @@ ECode PagedViewCellLayout::IndexOfChildOnPage(
 {
     VALIDATE_NOT_NULL(index);
 
-    return mChildren->IndexOfChild(v, index);
+    return IViewGroup::Probe(mChildren)->IndexOfChild(v, index);
 }
 
 ECode PagedViewCellLayout::GetCellCountX(
@@ -332,25 +358,21 @@ ECode PagedViewCellLayout::GetCellCountY(
     return NOERROR;
 }
 
-ECode PagedViewCellLayout::OnMeasure(
+void PagedViewCellLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    Int32 widthSpecMode;
-    View::MeasureSpec::GetMode(widthMeasureSpec, &widthSpecMode);
-    Int32 widthSpecSize;
-    View::MeasureSpec->GetSize(widthMeasureSpec, &widthSpecSize);
+    Int32 widthSpecMode = View::MeasureSpec::GetMode(widthMeasureSpec);
+    Int32 widthSpecSize = View::MeasureSpec::GetSize(widthMeasureSpec);
 
-    Int32 heightSpecMode;
-    View::MeasureSpec->GetMode(heightMeasureSpec, &heightSpecMode);
-    Int32 heightSpecSize;
-    View::MeasureSpec->GetSize(heightMeasureSpec, &heightSpecSize);
+    Int32 heightSpecMode = View::MeasureSpec::GetMode(heightMeasureSpec);
+    Int32 heightSpecSize = View::MeasureSpec::GetSize(heightMeasureSpec);
 
     if (widthSpecMode == View::MeasureSpec::UNSPECIFIED ||
             heightSpecMode == View::MeasureSpec::UNSPECIFIED) {
         //throw new RuntimeException("CellLayout cannot have UNSPECIFIED dimensions");
         Slogger::E(TAG, "CellLayout cannot have UNSPECIFIED dimensions");
-        return E_RUNTIME_EXCEPTION;
+        //return E_RUNTIME_EXCEPTION;
     }
 
     Int32 numWidthGaps = mCellCountX - 1;
@@ -369,8 +391,10 @@ ECode PagedViewCellLayout::OnMeasure(
         Int32 vSpace = heightSpecSize - top - bottom;
         Int32 hFreeSpace = hSpace - (mCellCountX * mOriginalCellWidth);
         Int32 vFreeSpace = vSpace - (mCellCountY * mOriginalCellHeight);
-        mWidthGap = Math::Min(mMaxGap, numWidthGaps > 0 ? (hFreeSpace / numWidthGaps) : 0);
-        mHeightGap = Math::Min(mMaxGap,numHeightGaps > 0 ? (vFreeSpace / numHeightGaps) : 0);
+        mWidthGap = Elastos::Core::Math::Min(mMaxGap, numWidthGaps > 0 ?
+                (hFreeSpace / numWidthGaps) : 0);
+        mHeightGap = Elastos::Core::Math::Min(mMaxGap,numHeightGaps > 0 ?
+                (vFreeSpace / numHeightGaps) : 0);
 
         mChildren->SetGap(mWidthGap, mHeightGap);
     }
@@ -408,19 +432,19 @@ ECode PagedViewCellLayout::OnMeasure(
         Int32 right;
         GetPaddingRight(&right);
         Int32 childWidthMeasureSpec =
-                View::MeasureSpec::makeMeasureSpec(newWidth - left -
+                View::MeasureSpec::MakeMeasureSpec(newWidth - left -
                 right, View::MeasureSpec::EXACTLY);
         Int32 top;
         GetPaddingTop(&top);
         Int32 bottom;
         GetPaddingBottom(&bottom);
         Int32 childheightMeasureSpec =
-                View::MeasureSpec::makeMeasureSpec(newHeight - top -
+                View::MeasureSpec::MakeMeasureSpec(newHeight - top -
                 bottom, View::MeasureSpec::EXACTLY);
         child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
     }
 
-    return SetMeasuredDimension(newWidth, newHeight);
+    SetMeasuredDimension(newWidth, newHeight);
 }
 
 ECode PagedViewCellLayout::GetContentWidth(
@@ -444,7 +468,8 @@ ECode PagedViewCellLayout::GetContentHeight(
     VALIDATE_NOT_NULL(height);
 
     if (mCellCountY > 0) {
-        *height = mCellCountY * mCellHeight + (mCellCountY - 1) * Math::Max(0, mHeightGap);
+        *height = mCellCountY * mCellHeight + (mCellCountY - 1) *
+                Elastos::Core::Math::Max(0, mHeightGap);
         return NOERROR;
     }
     *height = 0;
@@ -457,7 +482,8 @@ ECode PagedViewCellLayout::GetWidthBeforeFirstLayout(
     VALIDATE_NOT_NULL(width);
 
     if (mCellCountX > 0) {
-        *width = mCellCountX * mCellWidth + (mCellCountX - 1) * Math::Max(0, mWidthGap);
+        *width = mCellCountX * mCellWidth + (mCellCountX - 1) *
+                Elastos::Core::Math::Max(0, mWidthGap);
         return NOERROR;
     }
     *width = 0;
@@ -495,8 +521,8 @@ ECode PagedViewCellLayout::OnTouchEvent(
 {
     VALIDATE_NOT_NULL(result);
 
-    Boolean result;
-    ViewGroup::OnTouchEvent(event, &result);
+    Boolean res;
+    ViewGroup::OnTouchEvent(event, &res);
     Int32 count;
     GetPageChildCount(&count);
     if (count > 0) {
@@ -509,18 +535,18 @@ ECode PagedViewCellLayout::OnTouchEvent(
         GetPageChildCount(&count);
         Int32 countX;
         GetCellCountX(&countX);
-        Int32 numRows = (Int32)Math::Ceil((Float)count / countX);
+        Int32 numRows = (Int32)Elastos::Core::Math::Ceil((Float)count / countX);
         Int32 countY;
         GetCellCountY(&countY);
         if (numRows < countY) {
             // Add a little bit of buffer if there is room for another row
             bottom += mCellHeight / 2;
         }
-        Int32 y;
+        Float y;
         event->GetY(&y);
-        result = result || (y < bottom);
+        res = res || (y < bottom);
     }
-    *result = result;
+    *result = res;
     return NOERROR;
 }
 
@@ -533,7 +559,9 @@ ECode PagedViewCellLayout::EnableCenteredContent(
 ECode PagedViewCellLayout::SetChildrenDrawingCacheEnabled(
     /* [in] */ Boolean enabled)
 {
-    return mChildren->SetChildrenDrawingCacheEnabled(enabled);
+    PagedViewCellLayoutChildren* _child = (PagedViewCellLayoutChildren*)mChildren.Get();
+    _child->SetChildrenDrawingCacheEnabled(enabled);
+    return NOERROR;
 }
 
 ECode PagedViewCellLayout::SetCellCount(
@@ -563,7 +591,7 @@ ECode PagedViewCellLayout::GetCellCountForDimensions(
 
     // Always assume we're working with the smallest span to make sure we
     // reserve enough space in both orientations
-    Int32 smallerSize = Math::Min(mCellWidth, mCellHeight);
+    Int32 smallerSize = Elastos::Core::Math::Min(mCellWidth, mCellHeight);
 
     // Always round up to next largest cell
     Int32 spanX = (width + smallerSize) / smallerSize;
@@ -592,7 +620,7 @@ ECode PagedViewCellLayout::EstimateCellHSpan(
     /* [in] */ Int32 width,
     /* [out] */ Int32* span)
 {
-    VALIDATE_NOT_NULL(dimensions);
+    VALIDATE_NOT_NULL(span);
 
     // We don't show the next/previous pages any more, so we use the full width, minus the
     // padding
@@ -603,7 +631,7 @@ ECode PagedViewCellLayout::EstimateCellHSpan(
     Int32 availWidth = width - (left + right);
 
     // We know that we have to fit N cells with N-1 width gaps, so we just juggle to solve for N
-    Int32 n = Math::Max(1, (availWidth + mWidthGap) / (mCellWidth + mWidthGap));
+    Int32 n = Elastos::Core::Math::Max(1, (availWidth + mWidthGap) / (mCellWidth + mWidthGap));
 
     // We don't do anything fancy to determine if we squeeze another row in.
     *span = n;
@@ -625,7 +653,7 @@ ECode PagedViewCellLayout::EstimateCellVSpan(
     Int32 availHeight = height - (top + bottom);
 
     // We know that we have to fit N cells with N-1 height gaps, so we juggle to solve for N
-    Int32 n = Math::Max(1, (availHeight + mHeightGap) / (mCellHeight + mHeightGap));
+    Int32 n = Elastos::Core::Math::Max(1, (availHeight + mHeightGap) / (mCellHeight + mHeightGap));
 
     // We don't do anything fancy to determine if we squeeze another row in.
     *span = n;
@@ -660,9 +688,9 @@ ECode PagedViewCellLayout::CalculateCellCount(
 {
     Int32 span;
     EstimateCellHSpan(width, &span);
-    mCellCountX = Math::Min(maxCellCountX, span);
-    estimateCellVSpan(height, &span)
-    mCellCountY = Math::Min(maxCellCountY, span);
+    mCellCountX = Elastos::Core::Math::Min(maxCellCountX, span);
+    EstimateCellVSpan(height, &span);
+    mCellCountY = Elastos::Core::Math::Min(maxCellCountY, span);
     return RequestLayout();
 }
 
@@ -696,8 +724,10 @@ ECode PagedViewCellLayout::GenerateLayoutParams(
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<IViewGroupLayoutParams> p = new PagedViewCellLayout::LayoutParams(context, attrs);
-    *param = p;
+    AutoPtr<PagedViewCellLayout::LayoutParams> p =
+            new PagedViewCellLayout::LayoutParams();
+    p->constructor(context, attrs);
+    *param = (IViewGroupLayoutParams*)p.Get();
     REFCOUNT_ADD(*param);
     return NOERROR;
 }
@@ -718,8 +748,10 @@ ECode PagedViewCellLayout::GenerateLayoutParams(
 {
     VALIDATE_NOT_NULL(params);
 
-    AutoPtr<IViewGroupLayoutParams> _p = new PagedViewCellLayout::LayoutParams(p);
-    *params = _p;
+    AutoPtr<PagedViewCellLayout::LayoutParams> _p =
+            new PagedViewCellLayout::LayoutParams();
+    _p->constructor(p);
+    *params = (IViewGroupLayoutParams*)_p.Get();
     REFCOUNT_ADD(*params);
     return NOERROR;
 }

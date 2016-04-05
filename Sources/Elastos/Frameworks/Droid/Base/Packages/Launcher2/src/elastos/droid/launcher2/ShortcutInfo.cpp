@@ -1,24 +1,44 @@
 
 #include "elastos/droid/launcher2/ShortcutInfo.h"
+#include "elastos/droid/launcher2/ApplicationInfo.h"
 #include "Elastos.Droid.Service.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include <elastos/utility/logging/Slogger.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
 #include "R.h"
+
+using Elastos::Droid::Content::IIntentShortcutIconResource;
+using Elastos::Droid::Content::CIntentShortcutIconResource;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+CAR_INTERFACE_IMPL(ShortcutInfo, ItemInfo, IShortcutInfo);
+
 ShortcutInfo::ShortcutInfo()
     : mCustomIcon(FALSE)
     , mUsingFallbackIcon(FALSE)
 {
-    mItemType = LauncherSettings::BaseLauncherColumns::ITEM_TYPE_SHORTCUT;
 }
 
-ShortcutInfo::ShortcutInfo(
-    /* [in] */ ShortcutInfo* info)
-    : ItemInfo(info)
-    , mUsingFallbackIcon(FALSE)
+ECode ShortcutInfo::constructor()
 {
+    mItemType = ILauncherSettingsBaseLauncherColumns::ITEM_TYPE_SHORTCUT;
+    return NOERROR;
+}
+
+ECode ShortcutInfo::constructor(
+    /* [in] */ ShortcutInfo* info)
+{
+    ItemInfo::constructor(info);
     String _title;
     info->mTitle->ToString(&_title);
     mTitle = CoreUtils::Convert(_title);
@@ -33,20 +53,21 @@ ShortcutInfo::ShortcutInfo(
         info->mIconResource->GetResourceName(&resourceName);
         mIconResource->SetResourceName(resourceName);
     }
-    mIcon = info.mIcon; // TODO: should make a copy here.  maybe we don't need this ctor at all
+    mIcon = info->mIcon; // TODO: should make a copy here.  maybe we don't need this ctor at all
     mCustomIcon = info->mCustomIcon;
+    return NOERROR;
 }
 
-ShortcutInfo::ShortcutInfo(
-    /* [in] */ IApplicationInfo* info)
-    : ItemInfo(info)
-    , mUsingFallbackIcon(FALSE)
+ECode ShortcutInfo::constructor(
+    /* [in] */ ApplicationInfo* info)
 {
+    ItemInfo::constructor(info);
     String _title;
     info->mTitle->ToString(&_title);
     mTitle = CoreUtils::Convert(_title);
     CIntent::New(info->mIntent, (IIntent**)&mIntent);
     mCustomIcon = FALSE;
+    return NOERROR;
 }
 
 void ShortcutInfo::SetIcon(
@@ -87,7 +108,7 @@ void ShortcutInfo::SetActivity(
     AutoPtr<IBundle> extras;
     intent->GetExtras((IBundle**)&extras);
     mIntent->PutExtras(extras);
-    mItemType = LauncherSettings::BaseLauncherColumns::ITEM_TYPE_APPLICATION;
+    mItemType = ILauncherSettingsBaseLauncherColumns::ITEM_TYPE_APPLICATION;
     UpdateUser(mIntent);
     return;
 }
@@ -99,12 +120,12 @@ void ShortcutInfo::OnAddToDatabase(
     ItemInfo::OnAddToDatabase(context, values);
     String titleStr;
     if (mTitle != NULL) {
-        title->ToString(&titleStr);
+        mTitle->ToString(&titleStr);
     }
     else {
         titleStr = NULL;
     }
-    values->Put(LauncherSettings::BaseLauncherColumns:TITLE, titleStr);
+    values->Put(ILauncherSettingsBaseLauncherColumns::TITLE, titleStr);
 
     String uri;
     if (mIntent != NULL) {
@@ -113,27 +134,27 @@ void ShortcutInfo::OnAddToDatabase(
     else {
         uri = NULL;
     }
-    values->Put(LauncherSettings::BaseLauncherColumns::INTENT, uri);
+    values->Put(ILauncherSettingsBaseLauncherColumns::INTENT, uri);
 
     if (mCustomIcon) {
-        values->Put(LauncherSettings::BaseLauncherColumns::ICON_TYPE,
-                LauncherSettings::BaseLauncherColumns::ICON_TYPE_BITMAP);
+        values->Put(ILauncherSettingsBaseLauncherColumns::ICON_TYPE,
+                ILauncherSettingsBaseLauncherColumns::ICON_TYPE_BITMAP);
         WriteBitmap(values, mIcon);
     }
     else {
         if (!mUsingFallbackIcon) {
             WriteBitmap(values, mIcon);
         }
-        values->Put(LauncherSettings::BaseLauncherColumns::ICON_TYPE,
-                LauncherSettings::BaseLauncherColumns::ICON_TYPE_RESOURCE);
+        values->Put(ILauncherSettingsBaseLauncherColumns::ICON_TYPE,
+                ILauncherSettingsBaseLauncherColumns::ICON_TYPE_RESOURCE);
         if (mIconResource != NULL) {
             String pname;
             mIconResource->GetPackageName(&pname);
-            values->Put(LauncherSettings::BaseLauncherColumns::ICON_PACKAGE,
+            values->Put(ILauncherSettingsBaseLauncherColumns::ICON_PACKAGE,
                     pname);
             String resourceName;
             mIconResource->GetResourceName(&resourceName);
-            values->Put(LauncherSettings::BaseLauncherColumns::ICON_RESOURCE,
+            values->Put(ILauncherSettingsBaseLauncherColumns::ICON_RESOURCE,
                     resourceName);
         }
     }
@@ -146,14 +167,14 @@ ECode ShortcutInfo::ToString(
     VALIDATE_NOT_NULL(str);
 
     StringBuilder sb;
-    sb +="ShortcutInfo(title=";
+    sb += "ShortcutInfo(title=";
     String title;
     mTitle->ToString(&title);
     sb += title;
     sb += "intent=";
-    String str;
-    mIntent->ToString(&str);
-    sb += str;
+    String tmp;
+    mIntent->ToString(&tmp);
+    sb += tmp;
     sb += "id=";
     sb += mId;
     sb += " type=";
@@ -168,10 +189,16 @@ ECode ShortcutInfo::ToString(
     sb += mCellY;
     sb += " spanX=";
     sb += mSpanX;
-    sb += " spanY="
+    sb += " spanY=";
     sb += mSpanY;
     sb += " dropPos=";
-    sb += mDropPos;
+
+    sb += "(";
+    for (Int32 i = 0; i < mDropPos->GetLength(); i++) {
+        sb += (*mDropPos)[i];
+    }
+    sb += ")";
+
     sb += ")";
 
     return sb.ToString(str);

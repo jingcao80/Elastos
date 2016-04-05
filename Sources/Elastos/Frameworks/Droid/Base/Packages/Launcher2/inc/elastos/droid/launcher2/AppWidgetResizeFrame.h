@@ -1,7 +1,27 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_APPWIDGETRESIZEFRAME_H__
 #define  __ELASTOS_DROID_LAUNCHER2_APPWIDGETRESIZEFRAME_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/widget/FrameLayout.h"
+#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Widget.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::AppWidget::IAppWidgetHostView;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Widget::FrameLayout;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -9,6 +29,7 @@ namespace Launcher2 {
 
 class AppWidgetResizeFrame
     : public FrameLayout
+    , public IAppWidgetResizeFrame
 {
 private:
     class MyRunnable
@@ -21,35 +42,40 @@ private:
         CARAPI Run();
 
     private:
-        AppWidgetResizeFrame* mHost;
+        AutoPtr<AppWidgetResizeFrame> mHost;
     };
 
-    class MyIAnimatorUpdateListener
+    class MyAnimatorUpdateListener
         : public Object
         , public IAnimatorUpdateListener
     {
     public:
         CAR_INTERFACE_DECL();
 
-        MyIAnimatorUpdateListener(
+        MyAnimatorUpdateListener(
             /* [in] */ AppWidgetResizeFrame* host);
 
         CARAPI OnAnimationUpdate(
             /* [in] */ IValueAnimator* animation);
     private:
-        AppWidgetResizeFrame* mHost;
+        AutoPtr<AppWidgetResizeFrame> mHost;
     };
 
 public:
-    AppWidgetResizeFrame(
+    CAR_INTERFACE_DECL();
+
+    AppWidgetResizeFrame();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
-        /* [in] */ LauncherAppWidgetHostView* widgetView,
+        /* [in] */ ILauncherAppWidgetHostView* widgetView,
         /* [in] */ ICellLayout* cellLayout,
         /* [in] */ IDragLayer* dragLayer);
 
-    CARAPI_(Boolean) BeginResizeIfPointInRegion(
+    CARAPI BeginResizeIfPointInRegion(
         /* [in] */ Int32 x,
-        /* [in] */ Int32 y);
+        /* [in] */ Int32 y,
+        /* [out] */ Boolean* result);
 
     /**
      *  Here we bound the deltas such that the frame cannot be stretched beyond the extents
@@ -105,18 +131,13 @@ public:
     AutoPtr<ArrayOf<Int32> > mDirectionVector;
     AutoPtr<ArrayOf<Int32> > mLastDirectionVector;
 
-    const Int32 SNAP_DURATION = 150;
-    const Int32 BACKGROUND_PADDING = 24;
-    const Float DIMMED_HANDLE_ALPHA = 0f;
-    const Float RESIZE_THRESHOLD = 0.66f;
-
-    static const Int32 LEFT;
-    static const Int32 TOP;
-    static const Int32 RIGHT;
-    static const Int32 BOTTOM;
+    const Int32 SNAP_DURATION;
+    const Int32 BACKGROUND_PADDING;
+    const Float DIMMED_HANDLE_ALPHA;
+    const Float RESIZE_THRESHOLD;
 
 private:
-    AutoPtr<LauncherAppWidgetHostView> mWidgetView;
+    AutoPtr<ILauncherAppWidgetHostView> mWidgetView;
     AutoPtr<ICellLayout> mCellLayout;
     AutoPtr<IDragLayer> mDragLayer;
     AutoPtr<IWorkspace> mWorkspace;

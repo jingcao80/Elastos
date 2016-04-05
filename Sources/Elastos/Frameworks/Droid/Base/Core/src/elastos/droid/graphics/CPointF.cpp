@@ -84,6 +84,20 @@ ECode CPointF::GetY(
     return NOERROR;
 }
 
+ECode CPointF::SetX(
+    /* [in] */ Float x)
+{
+    mX = x;
+    return NOERROR;
+}
+
+ECode CPointF::SetY(
+    /* [in] */ Float y)
+{
+    mY = y;
+    return NOERROR;
+}
+
 ECode CPointF::Negate()
 {
     mX = -mX;

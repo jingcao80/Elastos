@@ -1,7 +1,29 @@
 
 #include "elastos/droid/launcher2/AppWidgetResizeFrame.h"
+#include "elastos/droid/launcher2/LauncherAnimUtils.h"
+#include "elastos/droid/appwidget/AppWidgetHostView.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/core/Math.h>
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
+
+using Elastos::Droid::AppWidget::AppWidgetHostView;
+using Elastos::Droid::AppWidget::IAppWidgetHostView;
+using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IPropertyValuesHolder;
+using Elastos::Droid::Animation::CPropertyValuesHolderHelper;
+using Elastos::Droid::Animation::IPropertyValuesHolderHelper;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Widget::CFrameLayoutLayoutParams;
+using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
+using Elastos::Droid::Widget::CImageView;
+using Elastos::Droid::View::IGravity;
+using Elastos::Droid::Utility::IDisplayMetrics;
 
 namespace Elastos {
 namespace Droid {
@@ -18,25 +40,20 @@ ECode AppWidgetResizeFrame::MyRunnable::Run()
     return mHost->SnapToWidget(TRUE);
 }
 
-CAR_INTERFACE_IMPL(AppWidgetResizeFrame::MyIAnimatorUpdateListener,
+CAR_INTERFACE_IMPL(AppWidgetResizeFrame::MyAnimatorUpdateListener,
         Object, IAnimatorUpdateListener);
 
-AppWidgetResizeFrame::MyIAnimatorUpdateListener::MyIAnimatorUpdateListener(
+AppWidgetResizeFrame::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
     /* [in] */ AppWidgetResizeFrame* host)
     : mHost(host)
 {
 }
 
-ECode AppWidgetResizeFrame::MyIAnimatorUpdateListener::OnAnimationUpdate(
+ECode AppWidgetResizeFrame::MyAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     return mHost->RequestLayout();
 }
-
-const Int32 AppWidgetResizeFrame::LEFT = 0;
-const Int32 AppWidgetResizeFrame::TOP = 1;
-const Int32 AppWidgetResizeFrame::RIGHT = 2;
-const Int32 AppWidgetResizeFrame::BOTTOM = 3;
 
 static AutoPtr<IRect> InitTmpRect()
 {
@@ -47,56 +64,77 @@ static AutoPtr<IRect> InitTmpRect()
 
 AutoPtr<IRect> mTmpRect = InitTmpRect();
 
-AppWidgetResizeFrame::AppWidgetResizeFrame(
-    /* [in] */ IContext* context,
-    /* [in] */ LauncherAppWidgetHostView* widgetView,
-    /* [in] */ ICellLayout* cellLayout,
-    /* [in] */ IDragLayer* dragLayer)
-    : FrameLayout(context)
+CAR_INTERFACE_IMPL(AppWidgetResizeFrame, FrameLayout,
+        IAppWidgetResizeFrame);
+
+AppWidgetResizeFrame::AppWidgetResizeFrame()
+    : SNAP_DURATION(150)
+    , BACKGROUND_PADDING(24)
+    , DIMMED_HANDLE_ALPHA(0.0f)
+    , RESIZE_THRESHOLD(0.66f)
+
+    , mLeftBorderActive(FALSE)
+    , mRightBorderActive(FALSE)
+    , mTopBorderActive(FALSE)
+    , mBottomBorderActive(FALSE)
+
+    , mWidgetPaddingLeft(0)
+    , mWidgetPaddingRight(0)
+    , mWidgetPaddingTop(0)
+    , mWidgetPaddingBottom(0)
+
+    , mBaselineWidth(0)
+    , mBaselineHeight(0)
+    , mBaselineX(0)
+    , mBaselineY(0)
+    , mResizeMode(0)
+
+    , mRunningHInc(0)
+    , mRunningVInc(0)
+    , mMinHSpan(0)
+    , mMinVSpan(0)
+    , mDeltaX(0)
+    , mDeltaY(0)
+    , mDeltaXAddOn(0)
+    , mDeltaYAddOn(0)
+
+    , mBackgroundPadding(0)
+    , mTouchTargetWidth(0)
+
+    , mTopTouchRegionAdjustment(0)
+    , mBottomTouchRegionAdjustment(0)
 {
     mDirectionVector = ArrayOf<Int32>::Alloc(2);
     mLastDirectionVector = ArrayOf<Int32>::Alloc(2);
+}
 
-    mLeftBorderActive = FALSE;
-    mRightBorderActive = FALSE;
-    mTopBorderActive = FALSE;
-    mBottomBorderActive = FALSE;
-
-    mBaselineWidth = 0;
-    mBaselineHeight = 0;
-    mBaselineX = 0;
-    mBaselineY = 0;
-    mResizeMode = 0;
-
-    mRunningHInc = 0;
-    mRunningVInc = 0;
-    mMinHSpan = 0;
-    mMinVSpan = 0;
-    mDeltaX = 0;
-    mDeltaY = 0;
-    mDeltaXAddOn = 0;
-    mDeltaYAddOn = 0;
-
-    mTopTouchRegionAdjustment = 0;
-    mBottomTouchRegionAdjustment = 0;
-
+ECode AppWidgetResizeFrame::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ ILauncherAppWidgetHostView* widgetView,
+    /* [in] */ ICellLayout* cellLayout,
+    /* [in] */ IDragLayer* dragLayer)
+{
+    FrameLayout::constructor(context);
 
     mLauncher = ILauncher::Probe(context);
     mCellLayout = cellLayout;
     mWidgetView = widgetView;
-    AutoPtr<IAppWidgetProviderInfo> info;
-    widgetView->GetAppWidgetInfo((IAppWidgetProviderInfo**)&info);
-    info->GetResizeMode(&mResizeMode);
+    AutoPtr<IAppWidgetProviderInfo> info1;
+    IAppWidgetHostView::Probe(widgetView)->GetAppWidgetInfo(
+            (IAppWidgetProviderInfo**)&info1);
+    info1->GetResizeMode(&mResizeMode);
     mDragLayer = dragLayer;
     AutoPtr<IView> view;
-    dragLayer->FindViewById(Elastos::Droid::Launcher2::R::id::workspace,
-            (IView**)&view);
+    IView::Probe(dragLayer)->FindViewById(
+            Elastos::Droid::Launcher2::R::id::workspace, (IView**)&view);
     mWorkspace = IWorkspace::Probe(view);
 
-    AutoPtr<IAppWidgetProviderInfo> info;
-    widgetView->GetAppWidgetInfo((IAppWidgetProviderInfo**)&info);
+    AutoPtr<IAppWidgetProviderInfo> info2;
+    IAppWidgetHostView::Probe(widgetView)->GetAppWidgetInfo(
+            (IAppWidgetProviderInfo**)&info2);
     AutoPtr<ArrayOf<Int32> > result;
-    Launcher::GetMinSpanForWidget(mLauncher, info, (ArrayOf<Int32>**)&result);
+    assert(0 && "need class Launcher");
+    //Launcher::GetMinSpanForWidget(mLauncher, info2, (ArrayOf<Int32>**)&result);
     mMinHSpan = (*result)[0];
     mMinVSpan = (*result)[1];
 
@@ -104,15 +142,15 @@ AppWidgetResizeFrame::AppWidgetResizeFrame(
             ::drawable::widget_resize_frame_holo);
     SetPadding(0, 0, 0, 0);
 
-    AutoPtr<IFrameLayoutLayoutParams> lp;
     CImageView::New(context, (IImageView**)&mLeftHandle);
     mLeftHandle->SetImageResource(Elastos::Droid::Launcher2::R
             ::drawable::widget_resize_handle_left);
+    AutoPtr<IFrameLayoutLayoutParams> lp;
     CFrameLayoutLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT,
             IViewGroupLayoutParams::WRAP_CONTENT,
             IGravity::START | IGravity::CENTER_VERTICAL,
             (IFrameLayoutLayoutParams**)&lp);
-    AddView(mLeftHandle, lp);
+    AddView(IView::Probe(mLeftHandle), IViewGroupLayoutParams::Probe(lp));
 
     CImageView::New(context, (IImageView**)&mRightHandle);
     mRightHandle->SetImageResource(Elastos::Droid::Launcher2::R
@@ -121,7 +159,7 @@ AppWidgetResizeFrame::AppWidgetResizeFrame(
     CFrameLayoutLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT,
             IViewGroupLayoutParams::WRAP_CONTENT,
             IGravity::END | IGravity::CENTER_VERTICAL, (IFrameLayoutLayoutParams**)&lp);
-    AddView(mRightHandle, lp);
+    AddView(IView::Probe(mRightHandle), IViewGroupLayoutParams::Probe(lp));
 
     CImageView::New(context, (IImageView**)&mTopHandle);
     mTopHandle->SetImageResource(Elastos::Droid::Launcher2::R
@@ -131,7 +169,7 @@ AppWidgetResizeFrame::AppWidgetResizeFrame(
             IViewGroupLayoutParams::WRAP_CONTENT,
             IGravity::CENTER_HORIZONTAL | IGravity::TOP,
             (IFrameLayoutLayoutParams**)&lp);
-    AddView(mTopHandle, lp);
+    AddView(IView::Probe(mTopHandle), IViewGroupLayoutParams::Probe(lp));
 
     CImageView::New(context, (IImageView**)&mBottomHandle);
     mBottomHandle->SetImageResource(Elastos::Droid::Launcher2::R
@@ -141,50 +179,55 @@ AppWidgetResizeFrame::AppWidgetResizeFrame(
             IViewGroupLayoutParams::WRAP_CONTENT,
             IGravity::CENTER_HORIZONTAL | IGravity::BOTTOM,
             (IFrameLayoutLayoutParams**)&lp);
-    AddView(mBottomHandle, lp);
+    AddView(IView::Probe(mBottomHandle), IViewGroupLayoutParams::Probe(lp));
 
-    AutoPtr<IAppWidgetProviderInfo> info;
-    widgetView->GetAppWidgetInfo((IAppWidgetProviderInfo**)&info);
+    AutoPtr<IAppWidgetProviderInfo> info3;
+    IAppWidgetHostView::Probe(widgetView)->GetAppWidgetInfo(
+            (IAppWidgetProviderInfo**)&info3);
     AutoPtr<IComponentName> name;
-    info->GetProvider((IComponentName**)&name);;
-    AutoPtr<IRect> p;
-    AppWidgetHostView::GetDefaultPaddingForWidget(context,
-            name, NULL, (IRect**)&p);
+    info3->GetProvider((IComponentName**)&name);;
+    AutoPtr<IRect> p = AppWidgetHostView::GetDefaultPaddingForWidget(
+            context, name, NULL);
     p->GetLeft(&mWidgetPaddingLeft);
     p->GetTop(&mWidgetPaddingTop);
     p->GetRight(&mWidgetPaddingRight);
     p->GetBottom(&mWidgetPaddingBottom);
 
     if (mResizeMode == IAppWidgetProviderInfo::RESIZE_HORIZONTAL) {
-        mTopHandle->SetVisibility(GONE);
-        mBottomHandle->SetVisibility(GONE);
+        IView::Probe(mTopHandle)->SetVisibility(GONE);
+        IView::Probe(mBottomHandle)->SetVisibility(GONE);
     }
     else if (mResizeMode == IAppWidgetProviderInfo::RESIZE_VERTICAL) {
-        mLeftHandle->SetVisibility(GONE);
-        mRightHandle->SetVisibility(GONE);
+        IView::Probe(mLeftHandle)->SetVisibility(GONE);
+        IView::Probe(mRightHandle)->SetVisibility(GONE);
     }
 
     AutoPtr<IResources> resources;
-    mLauncher->GetResources((IResources**)&resources);
+    IContext::Probe(mLauncher)->GetResources((IResources**)&resources);
     AutoPtr<IDisplayMetrics> metrics;
     resources->GetDisplayMetrics((IDisplayMetrics**)&metrics);
     Float density;
     metrics->GetDensity(&density);
-    mBackgroundPadding = (Int32) Math::Ceil(density * BACKGROUND_PADDING);
+    mBackgroundPadding = (Int32)Elastos::Core::Math::Ceil(density * BACKGROUND_PADDING);
     mTouchTargetWidth = 2 * mBackgroundPadding;
 
     // When we create the resize frame, we first mark all cells as unoccupied. The appropriate
     // cells (same if not resized, or different) will be marked as occupied when the resize
     // frame is dismissed.
-    mCellLayout->MarkCellsAsUnoccupiedForView(mWidgetView);
+    assert(0 && "need class mCellLayout");
+    //return mCellLayout->MarkCellsAsUnoccupiedForView(mWidgetView);
+    return NOERROR;
 }
 
-Boolean AppWidgetResizeFrame::BeginResizeIfPointInRegion(
+ECode AppWidgetResizeFrame::BeginResizeIfPointInRegion(
     /* [in] */ Int32 x,
-    /* [in] */ Int32 y)
+    /* [in] */ Int32 y,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
+
     Boolean horizontalActive = (mResizeMode &
-            AppWidgetProviderInfIo::RESIZE_HORIZONTAL) != 0;
+            IAppWidgetProviderInfo::RESIZE_HORIZONTAL) != 0;
     Boolean verticalActive = (mResizeMode &
             IAppWidgetProviderInfo::RESIZE_VERTICAL) != 0;
 
@@ -213,7 +256,8 @@ Boolean AppWidgetResizeFrame::BeginResizeIfPointInRegion(
         mTopHandle->SetAlpha(mTopBorderActive ? 1.0f : DIMMED_HANDLE_ALPHA);
         mBottomHandle->SetAlpha(mBottomBorderActive ? 1.0f : DIMMED_HANDLE_ALPHA);
     }
-    return anyBordersActive;
+    *result = anyBordersActive;
+    return NOERROR;
 }
 
 ECode AppWidgetResizeFrame::UpdateDeltas(
@@ -221,25 +265,25 @@ ECode AppWidgetResizeFrame::UpdateDeltas(
     /* [in] */ Int32 deltaY)
 {
     if (mLeftBorderActive) {
-        mDeltaX = Math::Max(-mBaselineX, deltaX);
-        mDeltaX = Math::Min(mBaselineWidth - 2 * mTouchTargetWidth, mDeltaX);
+        mDeltaX = Elastos::Core::Math::Max(-mBaselineX, deltaX);
+        mDeltaX = Elastos::Core::Math::Min(mBaselineWidth - 2 * mTouchTargetWidth, mDeltaX);
     }
     else if (mRightBorderActive) {
         Int32 width;
-        mDragLayer->GetWidth(&width);
-        mDeltaX = Math::Min(width - (mBaselineX + mBaselineWidth), deltaX);
-        mDeltaX = Math::Max(-mBaselineWidth + 2 * mTouchTargetWidth, mDeltaX);
+        IView::Probe(mDragLayer)->GetWidth(&width);
+        mDeltaX = Elastos::Core::Math::Min(width - (mBaselineX + mBaselineWidth), deltaX);
+        mDeltaX = Elastos::Core::Math::Max(-mBaselineWidth + 2 * mTouchTargetWidth, mDeltaX);
     }
 
     if (mTopBorderActive) {
-        mDeltaY = Math::Max(-mBaselineY, deltaY);
-        mDeltaY = Math::Min(mBaselineHeight - 2 * mTouchTargetWidth, mDeltaY);
+        mDeltaY = Elastos::Core::Math::Max(-mBaselineY, deltaY);
+        mDeltaY = Elastos::Core::Math::Min(mBaselineHeight - 2 * mTouchTargetWidth, mDeltaY);
     }
     else if (mBottomBorderActive) {
         Int32 height;
-        mDragLayer->GetHeight(&height);
-        mDeltaY = Math::Min(height - (mBaselineY + mBaselineHeight), deltaY);
-        mDeltaY = Math::Max(-mBaselineHeight + 2 * mTouchTargetWidth, mDeltaY);
+        IView::Probe(mDragLayer)->GetHeight(&height);
+        mDeltaY = Elastos::Core::Math::Min(height - (mBaselineY + mBaselineHeight), deltaY);
+        mDeltaY = Elastos::Core::Math::Max(-mBaselineHeight + 2 * mTouchTargetWidth, mDeltaY);
     }
     return NOERROR;
 }
@@ -259,23 +303,25 @@ ECode AppWidgetResizeFrame::VisualizeResizeForDelta(
     UpdateDeltas(deltaX, deltaY);
     AutoPtr<IViewGroupLayoutParams> res;
     GetLayoutParams((IViewGroupLayoutParams**)&res);
-    AutoPtr<IDragLayerLayoutParams> lp = IDragLayerLayoutParams::Probe(res);
+    assert(0 && "need class CDragLayer::LayoutParams");
+    // AutoPtr<CDragLayer::LayoutParams> lp =
+    //         (CDragLayer::LayoutParams*)IDragLayerLayoutParams::Probe(res);
 
-    if (mLeftBorderActive) {
-        lp->SetX(mBaselineX + mDeltaX);
-        lp->SetWidth(mBaselineWidth - mDeltaX);
-    }
-    else if (mRightBorderActive) {
-        lp->SetWidth(mBaselineWidth + mDeltaX);
-    }
+    // if (mLeftBorderActive) {
+    //     lp->SetX(mBaselineX + mDeltaX);
+    //     lp->SetWidth(mBaselineWidth - mDeltaX);
+    // }
+    // else if (mRightBorderActive) {
+    //     lp->SetWidth(mBaselineWidth + mDeltaX);
+    // }
 
-    if (mTopBorderActive) {
-        lp->SetY(mBaselineY + mDeltaY);
-        lp->SetHeight(mBaselineHeight - mDeltaY);
-    }
-    else if (mBottomBorderActive) {
-        lp->SetHeight(mBaselineHeight + mDeltaY);
-    }
+    // if (mTopBorderActive) {
+    //     lp->SetY(mBaselineY + mDeltaY);
+    //     lp->SetHeight(mBaselineHeight - mDeltaY);
+    // }
+    // else if (mBottomBorderActive) {
+    //     lp->SetHeight(mBaselineHeight + mDeltaY);
+    // }
 
     ResizeWidgetIfNeeded(onDismiss);
     return RequestLayout();
@@ -285,14 +331,18 @@ ECode AppWidgetResizeFrame::ResizeWidgetIfNeeded(
     /* [in] */ Boolean onDismiss)
 {
     Int32 width;
-    mCellLayout->GetCellWidth(&width);
+    assert(0 && "need class celllayout");
+    //mCellLayout->GetCellWidth(&width);
     Int32 wgap;
-    mCellLayout->GetWidthGap(&wgap);
+    assert(0 && "need class celllayout");
+    //mCellLayout->GetWidthGap(&wgap);
     Int32 xThreshold = width + wgap;
     Int32 height;
-    mCellLayout->GetCellHeight(&height);
+    assert(0 && "need class celllayout");
+    //mCellLayout->GetCellHeight(&height);
     Int32 hgap;
-    mCellLayout->GetHeightGap(&hgap);
+    assert(0 && "need class celllayout");
+    //mCellLayout->GetHeightGap(&hgap);
     Int32 yThreshold = height + hgap;
 
     Int32 deltaX = mDeltaX + mDeltaXAddOn;
@@ -307,110 +357,115 @@ ECode AppWidgetResizeFrame::ResizeWidgetIfNeeded(
     Int32 cellYInc = 0;
 
     Int32 countX;
-    mCellLayout->GetCountX(&countX);
+    assert(0 && "need class celllayout");
+    //mCellLayout->GetCountX(&countX);
     Int32 countY;
-    mCellLayout->GetCountY(&countY);
+    assert(0 && "need class celllayout");
+    //mCellLayout->GetCountY(&countY);
 
-    if (Math::Abs(hSpanIncF) > RESIZE_THRESHOLD) {
-        hSpanInc = Math::Round(hSpanIncF);
+    if (Elastos::Core::Math::Abs(hSpanIncF) > RESIZE_THRESHOLD) {
+        hSpanInc = Elastos::Core::Math::Round(hSpanIncF);
     }
-    if (Math::Abs(vSpanIncF) > RESIZE_THRESHOLD) {
-        vSpanInc = Math::Round(vSpanIncF);
+    if (Elastos::Core::Math::Abs(vSpanIncF) > RESIZE_THRESHOLD) {
+        vSpanInc = Elastos::Core::Math::Round(vSpanIncF);
     }
 
     if (!onDismiss && (hSpanInc == 0 && vSpanInc == 0)) return NOERROR;
 
     AutoPtr<IViewGroupLayoutParams> res;
-    mWidgetView->GetLayoutParams((IViewGroupLayoutParams**)&res);
-    AutoPtr<ICellLayoutLayoutParams> lp = ICellLayoutLayoutParams::Probe(res);
-    CellLayout::LayoutParams* _lp = (CellLayout::LayoutParams*)lp;
+    IView::Probe(mWidgetView)->GetLayoutParams((IViewGroupLayoutParams**)&res);
+    assert(0 && "need class CellLayout::LayoutParams");
+    // AutoPtr<ICellLayoutLayoutParams> lp = ICellLayoutLayoutParams::Probe(res);
+    // CellLayout::LayoutParams* _lp = (CellLayout::LayoutParams*)lp;
 
-    Int32 spanX = _lp->mCellHSpan;
-    Int32 spanY = _lp->mCellVSpan;
-    Int32 cellX = _lp->mUseTmpCoords ? _lp->mTmpCellX : _lp->mCellX;
-    Int32 cellY = _lp->mUseTmpCoords ? _lp->mTmpCellY : _lp->mCellY;
+    // Int32 spanX = _lp->mCellHSpan;
+    // Int32 spanY = _lp->mCellVSpan;
+    // Int32 cellX = _lp->mUseTmpCoords ? _lp->mTmpCellX : _lp->mCellX;
+    // Int32 cellY = _lp->mUseTmpCoords ? _lp->mTmpCellY : _lp->mCellY;
 
-    Int32 hSpanDelta = 0;
-    Int32 vSpanDelta = 0;
+    // Int32 hSpanDelta = 0;
+    // Int32 vSpanDelta = 0;
 
-    // For each border, we bound the resizing based on the minimum width, and the maximum
-    // expandability.
-    if (mLeftBorderActive) {
-        cellXInc = Math::Max(-cellX, hSpanInc);
-        cellXInc = Math::Min(_lp->mCellHSpan - mMinHSpan, cellXInc);
-        hSpanInc *= -1;
-        hSpanInc = Math::Min(cellX, hSpanInc);
-        hSpanInc = Math::Max(-(_lp->mCellHSpan - mMinHSpan), hSpanInc);
-        hSpanDelta = -hSpanInc;
+    // // For each border, we bound the resizing based on the minimum width, and the maximum
+    // // expandability.
+    // if (mLeftBorderActive) {
+    //     cellXInc = Elastos::Core::Math::Max(-cellX, hSpanInc);
+    //     cellXInc = Elastos::Core::Math::Min(_lp->mCellHSpan - mMinHSpan, cellXInc);
+    //     hSpanInc *= -1;
+    //     hSpanInc = Elastos::Core::Math::Min(cellX, hSpanInc);
+    //     hSpanInc = Elastos::Core::Math::Max(-(_lp->mCellHSpan - mMinHSpan), hSpanInc);
+    //     hSpanDelta = -hSpanInc;
 
-    }
-    else if (mRightBorderActive) {
-        hSpanInc = Math::Min(countX - (cellX + spanX), hSpanInc);
-        hSpanInc = Math::Max(-(_lp->mCellHSpan - mMinHSpan), hSpanInc);
-        hSpanDelta = hSpanInc;
-    }
+    // }
+    // else if (mRightBorderActive) {
+    //     hSpanInc = Elastos::Core::Math::Min(countX - (cellX + spanX), hSpanInc);
+    //     hSpanInc = Elastos::Core::Math::Max(-(_lp->mCellHSpan - mMinHSpan), hSpanInc);
+    //     hSpanDelta = hSpanInc;
+    // }
 
-    if (mTopBorderActive) {
-        cellYInc = Math::Max(-cellY, vSpanInc);
-        cellYInc = Math::Min(_lp->mCellVSpan - mMinVSpan, cellYInc);
-        vSpanInc *= -1;
-        vSpanInc = Math::Min(cellY, vSpanInc);
-        vSpanInc = Math::Max(-(_lp->mCellVSpan - mMinVSpan), vSpanInc);
-        vSpanDelta = -vSpanInc;
-    }
-    else if (mBottomBorderActive) {
-        vSpanInc = Math::Min(countY - (cellY + spanY), vSpanInc);
-        vSpanInc = Math::Max(-(_lp->mCellVSpan - mMinVSpan), vSpanInc);
-        vSpanDelta = vSpanInc;
-    }
+    // if (mTopBorderActive) {
+    //     cellYInc = Elastos::Core::Math::Max(-cellY, vSpanInc);
+    //     cellYInc = Elastos::Core::Math::Min(_lp->mCellVSpan - mMinVSpan, cellYInc);
+    //     vSpanInc *= -1;
+    //     vSpanInc = Elastos::Core::Math::Min(cellY, vSpanInc);
+    //     vSpanInc = Elastos::Core::Math::Max(-(_lp->mCellVSpan - mMinVSpan), vSpanInc);
+    //     vSpanDelta = -vSpanInc;
+    // }
+    // else if (mBottomBorderActive) {
+    //     vSpanInc = Elastos::Core::Math::Min(countY - (cellY + spanY), vSpanInc);
+    //     vSpanInc = Elastos::Core::Math::Max(-(_lp->mCellVSpan - mMinVSpan), vSpanInc);
+    //     vSpanDelta = vSpanInc;
+    // }
 
-    (*mDirectionVector)[0] = 0;
-    (*mDirectionVector)[1] = 0;
-    // Update the widget's dimensions and position according to the deltas computed above
-    if (mLeftBorderActive || mRightBorderActive) {
-        spanX += hSpanInc;
-        cellX += cellXInc;
-        if (hSpanDelta != 0) {
-            (*mDirectionVector)[0] = mLeftBorderActive ? -1 : 1;
-        }
-    }
+    // (*mDirectionVector)[0] = 0;
+    // (*mDirectionVector)[1] = 0;
+    // // Update the widget's dimensions and position according to the deltas computed above
+    // if (mLeftBorderActive || mRightBorderActive) {
+    //     spanX += hSpanInc;
+    //     cellX += cellXInc;
+    //     if (hSpanDelta != 0) {
+    //         (*mDirectionVector)[0] = mLeftBorderActive ? -1 : 1;
+    //     }
+    // }
 
-    if (mTopBorderActive || mBottomBorderActive) {
-        spanY += vSpanInc;
-        cellY += cellYInc;
-        if (vSpanDelta != 0) {
-            (*mDirectionVector)[1] = mTopBorderActive ? -1 : 1;
-        }
-    }
+    // if (mTopBorderActive || mBottomBorderActive) {
+    //     spanY += vSpanInc;
+    //     cellY += cellYInc;
+    //     if (vSpanDelta != 0) {
+    //         (*mDirectionVector)[1] = mTopBorderActive ? -1 : 1;
+    //     }
+    // }
 
-    if (!onDismiss && vSpanDelta == 0 && hSpanDelta == 0) return NOERROR;
+    // if (!onDismiss && vSpanDelta == 0 && hSpanDelta == 0) return NOERROR;
 
-    // We always want the final commit to match the feedback, so we make sure to use the
-    // last used direction vector when committing the resize / reorder.
-    if (onDismiss) {
-        (*mDirectionVector)[0] = (*mLastDirectionVector)[0];
-        (*mDirectionVector)[1] = (*mLastDirectionVector)[1];
-    }
-    else {
-        (*mLastDirectionVector)[0] = (*mDirectionVector)[0];
-        (*mLastDirectionVector)[1] = (*mDirectionVector)[1];
-    }
+    // // We always want the final commit to match the feedback, so we make sure to use the
+    // // last used direction vector when committing the resize / reorder.
+    // if (onDismiss) {
+    //     (*mDirectionVector)[0] = (*mLastDirectionVector)[0];
+    //     (*mDirectionVector)[1] = (*mLastDirectionVector)[1];
+    // }
+    // else {
+    //     (*mLastDirectionVector)[0] = (*mDirectionVector)[0];
+    //     (*mLastDirectionVector)[1] = (*mDirectionVector)[1];
+    // }
 
     Boolean tmp;
-    mCellLayout->CreateAreaForResize(cellX, cellY, spanX, spanY, mWidgetView,
-            mDirectionVector, onDismiss, &tmp)
+    assert(0 && "need class celllayout");
+    // mCellLayout->CreateAreaForResize(cellX, cellY, spanX, spanY, mWidgetView,
+    //         mDirectionVector, onDismiss, &tmp)
     if (tmp) {
-        _lp->mTmpCellX = cellX;
-        _lp->mTmpCellY = cellY;
-        _lp->mCellHSpan = spanX;
-        _lp->mCellVSpan = spanY;
-        mRunningVInc += vSpanDelta;
-        mRunningHInc += hSpanDelta;
-        if (!onDismiss) {
-            UpdateWidgetSizeRanges(mWidgetView, mLauncher, spanX, spanY);
-        }
+        assert(0 && "need class CellLayout::LayoutParams");
+        // _lp->mTmpCellX = cellX;
+        // _lp->mTmpCellY = cellY;
+        // _lp->mCellHSpan = spanX;
+        // _lp->mCellVSpan = spanY;
+        // mRunningVInc += vSpanDelta;
+        // mRunningHInc += hSpanDelta;
+        // if (!onDismiss) {
+        //     UpdateWidgetSizeRanges(mWidgetView, mLauncher, spanX, spanY);
+        // }
     }
-    return mWidgetView->RequestLayout();
+    return IView::Probe(mWidgetView)->RequestLayout();
 }
 
 ECode AppWidgetResizeFrame::UpdateWidgetSizeRanges(
@@ -439,16 +494,18 @@ AutoPtr<IRect> AppWidgetResizeFrame::GetWidgetSizeRanges(
     /* [in] */ IRect* rect)
 {
     if (rect == NULL) {
-        new CRect::New((IRect**)&rect);
+        CRect::New((IRect**)&rect);
     }
     AutoPtr<IRect> landMetrics;
-    Workspace::GetCellLayoutMetrics(launcher, ICellLayout::LANDSCAPE,
-            (IRect**)&landMetrics);
+    assert(0 && "need class Workspace");
+    // Workspace::GetCellLayoutMetrics(launcher, ICellLayout::LANDSCAPE,
+    //         (IRect**)&landMetrics);
     AutoPtr<IRect> portMetrics;
-    Workspace::GetCellLayoutMetrics(launcher, ICellLayout::PORTRAIT,
-            (IRect**)&portMetrics);
+    assert(0 && "need class Workspace");
+    // Workspace::GetCellLayoutMetrics(launcher, ICellLayout::PORTRAIT,
+    //         (IRect**)&portMetrics);
     AutoPtr<IResources> resources;
-    launcher->GetResources((IResources**)&resources);
+    IContext::Probe(launcher)->GetResources((IResources**)&resources);
     AutoPtr<IDisplayMetrics> metrics;
     resources->GetDisplayMetrics((IDisplayMetrics**)&metrics);
     Float density;
@@ -462,7 +519,7 @@ AutoPtr<IRect> AppWidgetResizeFrame::GetWidgetSizeRanges(
     Int32 widthGap;
     landMetrics->GetRight(&widthGap);
     Int32 heightGap;
-    landMetrics->Bottom(&heightGap);
+    landMetrics->GetBottom(&heightGap);
     Int32 landWidth = (Int32)((spanX * cellWidth + (spanX - 1) * widthGap) / density);
     Int32 landHeight = (Int32)((spanY * cellHeight + (spanY - 1) * heightGap) / density);
 
@@ -486,15 +543,19 @@ ECode AppWidgetResizeFrame::CommitResize()
 ECode AppWidgetResizeFrame::OnTouchUp()
 {
     Int32 width;
-    mCellLayout->GetCellWidth(&width);
+    assert(0 && "need class CellLayout");
+    //mCellLayout->GetCellWidth(&width);
     Int32 wgap;
-    mCellLayout->GetWidthGap(&wgap);
+    assert(0 && "need class CellLayout");
+    //mCellLayout->GetWidthGap(&wgap);
     Int32 xThreshold = width + wgap;
     Int32 height;
-    mCellLayout->GetCellHeight(&height);
+    assert(0 && "need class CellLayout");
+    //mCellLayout->GetCellHeight(&height);
     Int32 hgap;
-    mCellLayout->GetHeightGap(&hgap);
-    Int32 yThreshold = height + GetHeightGap;
+    assert(0 && "need class CellLayout");
+    //mCellLayout->GetHeightGap(&hgap);
+    Int32 yThreshold = height + hgap;
 
     mDeltaXAddOn = mRunningHInc * xThreshold;
     mDeltaYAddOn = mRunningVInc * yThreshold;
@@ -514,41 +575,45 @@ ECode AppWidgetResizeFrame::SnapToWidget(
     AutoPtr<IDragLayerLayoutParams> lp = IDragLayerLayoutParams::Probe(res);
 
     Int32 left;
-    mCellLayout->GetLeft(&left);
+    assert(0 && "need class CellLayout");
+    //mCellLayout->GetLeft(&left);
     Int32 pleft;
-    mCellLayout->GetPaddingLeft(&pleft);
+    assert(0 && "need class CellLayout");
+    //mCellLayout->GetPaddingLeft(&pleft);
     Int32 pleft2;
-    mDragLayer->GetPaddingLeft(&pleft2);
+    IView::Probe(mDragLayer)->GetPaddingLeft(&pleft2);
     Int32 x;
-    mWorkspace->GetScrollX(&x);
+    IView::Probe(mWorkspace)->GetScrollX(&x);
     Int32 xOffset = left + pleft
             + pleft2 - x;
 
     Int32 top;
-    mCellLayout->GetTop(&top);
+    assert(0 && "need class CellLayout");
+    //mCellLayout->GetTop(&top);
     Int32 ptop;
-    mCellLayout->GetPaddingTop(&ptop);
+    assert(0 && "need class CellLayout");
+    //mCellLayout->GetPaddingTop(&ptop);
     Int32 ptop2;
-    mDragLayer->GetPaddingTop(&ptop2);
+    IView::Probe(mDragLayer)->GetPaddingTop(&ptop2);
     Int32 y;
-    mWorkspace->GetScrollY(&y);
+    IView::Probe(mWorkspace)->GetScrollY(&y);
     Int32 yOffset = top + ptop
             + ptop2 - y;
 
     Int32 width2;
-    mWidgetView->GetWidth(&width2);
+    IView::Probe(mWidgetView)->GetWidth(&width2);
     Int32 newWidth = width2 + 2 * mBackgroundPadding - mWidgetPaddingLeft -
             mWidgetPaddingRight;
     Int32 height2;
-    mWidgetView->GetHeight(&height2);
+    IView::Probe(mWidgetView)->GetHeight(&height2);
     Int32 newHeight = height2 + 2 * mBackgroundPadding - mWidgetPaddingTop -
             mWidgetPaddingBottom;
 
     Int32 left2;
-    mWidgetView->GetLeft(&left2);
+    IView::Probe(mWidgetView)->GetLeft(&left2);
     Int32 newX = left2 - mBackgroundPadding + xOffset + mWidgetPaddingLeft;
     Int32 top2;
-    mWidgetView->GetTop(&top2);
+    IView::Probe(mWidgetView)->GetTop(&top2);
     Int32 newY = top2 - mBackgroundPadding + yOffset + mWidgetPaddingTop;
 
     // We need to make sure the frame's touchable regions lie fully within the bounds of the
@@ -562,7 +627,7 @@ ECode AppWidgetResizeFrame::SnapToWidget(
         mTopTouchRegionAdjustment = 0;
     }
     Int32 height;
-    mDragLayer->GetHeight(&height);
+    IView::Probe(mDragLayer)->GetHeight(&height);
     if (newY + newHeight > height) {
         // In this case we shift the touch region up to end at the bottom of the DragLayer
         mBottomTouchRegionAdjustment = -(newY + newHeight - height);
@@ -615,7 +680,7 @@ ECode AppWidgetResizeFrame::SnapToWidget(
         lp->GetX(&_y);
         (*values4)[0] = _y;
         (*values4)[1] = newY;
-        AutoPtr<IPropertyValuesHolder> x;
+        AutoPtr<IPropertyValuesHolder> y;
         helper->OfInt32(String("y"), values4, (IPropertyValuesHolder**)&y);
 
         AutoPtr<ArrayOf<IPropertyValuesHolder*> > arrays =
@@ -639,23 +704,36 @@ ECode AppWidgetResizeFrame::SnapToWidget(
         AutoPtr<IObjectAnimator> bottomOa = LauncherAnimUtils::OfFloat(
                 IView::Probe(mBottomHandle), String("alpha"), values5);
 
-        AutoPtr<IAnimatorUpdateListener> listener = new MyIAnimatorUpdateListener(this);
-        oa->AddUpdateListener(listener);
+        AutoPtr<IAnimatorUpdateListener> listener = new MyAnimatorUpdateListener(this);
+        IValueAnimator::Probe(oa)->AddUpdateListener(listener);
 
-        AutoPtr<IAnimatorSet> set;
-        LauncherAnimUtils::CreateAnimatorSet((IAnimatorSet**)&set);
+        AutoPtr<IAnimatorSet> set = LauncherAnimUtils::CreateAnimatorSet();
         if (mResizeMode == IAppWidgetProviderInfo::RESIZE_VERTICAL) {
-            set->PlayTogether(oa, topOa, bottomOa);
+            AutoPtr<ArrayOf<IAnimator*> > array = ArrayOf<IAnimator*>::Alloc(3);
+            array->Set(0, IAnimator::Probe(oa));
+            array->Set(1, IAnimator::Probe(topOa));
+            array->Set(2, IAnimator::Probe(bottomOa));
+            set->PlayTogether(array);
         }
         else if (mResizeMode == IAppWidgetProviderInfo::RESIZE_HORIZONTAL) {
-            set->PlayTogether(oa, leftOa, rightOa);
+            AutoPtr<ArrayOf<IAnimator*> > array = ArrayOf<IAnimator*>::Alloc(3);
+            array->Set(0, IAnimator::Probe(oa));
+            array->Set(1, IAnimator::Probe(leftOa));
+            array->Set(2, IAnimator::Probe(rightOa));
+            set->PlayTogether(array);
         }
         else {
-            set->PlayTogether(oa, leftOa, rightOa, topOa, bottomOa);
+            AutoPtr<ArrayOf<IAnimator*> > array = ArrayOf<IAnimator*>::Alloc(5);
+            array->Set(0, IAnimator::Probe(oa));
+            array->Set(1, IAnimator::Probe(leftOa));
+            array->Set(2, IAnimator::Probe(rightOa));
+            array->Set(3, IAnimator::Probe(topOa));
+            array->Set(4, IAnimator::Probe(bottomOa));
+            set->PlayTogether(array);
         }
 
-        set->SetDuration(SNAP_DURATION);
-        set->Start();
+        IAnimator::Probe(set)->SetDuration(SNAP_DURATION);
+        IAnimator::Probe(set)->Start();
     }
     return NOERROR;
 }

@@ -1,0 +1,58 @@
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Launcher2.IShortcutInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface Elastos.Droid.View.IContextThemeWrapper
+     * interface ILayoutInflaterFactory
+     * interface ILayoutInflaterFactory2
+     * interface IWindowCallback
+     * interface IKeyEventCallback
+     * interface IViewOnCreateContextMenuListener
+     * interface IComponentCallbacks
+     * interface IComponentCallbacks2
+     * interface IOnWindowDismissedCallback
+     * interface IViewOnClickListener
+     * interface IOnLongClickListener
+     * interface ILauncherModelCallbacks
+     * interface IViewOnTouchListener
+     */
+    interface ILauncher {
+        const Boolean PROFILE_STARTUP = FALSE;
+        const Boolean DEBUG_WIDGETS = FALSE;
+        const Boolean DEBUG_STRICT_MODE = FALSE;
+        const Boolean DEBUG_RESUME_TIME = FALSE;
+
+        const String EXTRA_SHORTCUT_DUPLICATE = "duplicate";
+
+        const Int32 SCREEN_COUNT = 5;
+        const Int32 DEFAULT_SCREEN = 2;
+
+        // To turn on these properties, type
+        // adb shell setprop log.tag.PROPERTY_NAME [VERBOSE | SUPPRESS]
+        const String FORCE_ENABLE_ROTATION_PROPERTY = "launcher_force_rotate";
+        const String DUMP_STATE_PROPERTY = "launcher_dump_state";
+
+        // The Intent extra that defines whether to ignore the launch animation
+        const String INTENT_EXTRA_IGNORE_LAUNCH_ANIMATION =
+                "com.android.launcher.intent.extra.shortcut.INGORE_LAUNCH_ANIMATION";
+
+        const Int32 APPWIDGET_HOST_ID = 1024;
+
+
+        //~~~~~~~~~~~~~
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,103 @@
+module
+{
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.Graphics.IRect;
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Launcher2.IShortcutInfo;
+    interface Elastos.Droid.Launcher2.IDragView;
+    interface Elastos.Droid.Launcher2.IDropTarget;
+    interface Elastos.Droid.Launcher2.IDropTargetDragObject;
+    interface Elastos.Droid.Launcher2.ILauncher;
+    interface Elastos.Droid.Launcher2.IFolderInfo;
+    interface Elastos.Droid.Launcher2.IIconCache;
+    interface Elastos.Droid.Launcher2.IFolder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    [local]
+    interface IFolderIcon {
+        IsDropEnabled(
+            [out] Boolean* result);
+
+        GetFolder(
+            [out] IFolder** folder);
+
+        GetFolderInfo(
+            [out] IFolderInfo** info);
+
+        AcceptDrop(
+            [in] IInterface* dragInfo,
+            [out] Boolean* result);
+
+        AddItem(
+            [in] IShortcutInfo* item);
+
+        OnDragEnter(
+            [in] IInterface* dragInfo);
+
+        OnDragOver(
+            [in] IInterface* dragInfo);
+
+        PerformCreateAnimation(
+            [in] IShortcutInfo* destInfo,
+            [in] IView* destView,
+            [in] IShortcutInfo* srcInfo,
+            [in] IDragView* srcView,
+            [in] IRect* dstRect,
+            [in] Float scaleRelativeToDragLayer,
+            [in] IRunnable* postAnimationRunnable);
+
+        PerformDestroyAnimation(
+            [in] IView* finalView,
+            [in] IRunnable* onCompleteRunnable);
+
+        OnDragExit(
+            [in] IInterface* dragInfo);
+
+        OnDragExit();
+
+        OnDrop(
+            [in] IDropTargetDragObject* d);
+
+        GetDropTargetDelegate(
+            [in] IDropTargetDragObject* d,
+            [out] IDropTarget** target);
+
+        SetTextVisible(
+            [in] Boolean visible);
+
+        GetTextVisible(
+            [out] Boolean* result);
+
+        OnItemsChanged();
+
+        OnAdd(
+            [in] IShortcutInfo* item);
+
+        OnRemove(
+            [in] IShortcutInfo* item);
+
+        OnTitleChanged(
+            [in] ICharSequence* title);
+    }
+
+    [local]
+    interface IFolderIconHelper {
+        FromXml(
+            [in] Int32 resId,
+            [in] ILauncher* launcher,
+            [in] IViewGroup* group,
+            [in] IFolderInfo* folderInfo,
+            [in] IIconCache* iconCache,
+            [out] IFolderIcon** icon);
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

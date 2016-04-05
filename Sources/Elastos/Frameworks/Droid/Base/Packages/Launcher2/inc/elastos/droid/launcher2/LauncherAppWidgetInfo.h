@@ -1,7 +1,15 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_LAUNCHERAPPWIDGETINFO_H__
 #define  __ELASTOS_DROID_LAUNCHER2_LAUNCHERAPPWIDGETINFO_H__
 
+#include "_Launcher2.h"
+#include "elastos/droid/launcher2/ItemInfo.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::AppWidget::IAppWidgetHostView;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IComponentName;
 
 namespace Elastos {
 namespace Droid {
@@ -14,7 +22,9 @@ class LauncherAppWidgetInfo
 public:
     CAR_INTERFACE_DECL();
 
-    LauncherAppWidgetInfo(
+    LauncherAppWidgetInfo();
+
+    CARAPI constructor(
         /* [in] */ Int32 appWidgetId,
         /* [in] */ IComponentName* providerName);
 
@@ -69,8 +79,6 @@ public:
 
 private:
     Boolean mHasNotifiedInitialWidgetSizeChanged;
-
-
 };
 
 } // namespace Launcher2

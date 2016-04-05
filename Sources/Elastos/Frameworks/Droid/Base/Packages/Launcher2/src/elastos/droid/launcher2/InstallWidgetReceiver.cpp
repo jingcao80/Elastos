@@ -1,25 +1,29 @@
 
 #include "elastos/droid/launcher2/InstallWidgetReceiver.h"
+#include "elastos/droid/launcher2/PendingAddItemInfo.h"
+#include "elastos/droid/launcher2/LauncherSettings.h"
+#include "elastos/droid/view/LayoutInflater.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Core::CoreUtils;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::EIID_IListAdapter;
+using Elastos::Droid::Widget::EIID_IAdapter;
+using Elastos::Core::IInteger32;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
-
-const String InstallWidgetReceiver::ACTION_INSTALL_WIDGET(
-        "com.android.launcher.action.INSTALL_WIDGET");
-const String InstallWidgetReceiver::ACTION_SUPPORTS_CLIPDATA_MIMETYPE(
-        "com.android.launcher.action.SUPPORTS_CLIPDATA_MIMETYPE");
-
-// Currently not exposed.  Put into Intent when we want to make it public.
-// TEMP: Should we call this "EXTRA_APPWIDGET_PROVIDER"?
-const String InstallWidgetReceiver::EXTRA_APPWIDGET_COMPONENT(
-    "com.android.launcher.extra.widget.COMPONENT");
-const String InstallWidgetReceiver::EXTRA_APPWIDGET_CONFIGURATION_DATA_MIME_TYPE(
-    "com.android.launcher.extra.widget.CONFIGURATION_DATA_MIME_TYPE");
-const String InstallWidgetReceiver::EXTRA_APPWIDGET_CONFIGURATION_DATA(
-    "com.android.launcher.extra.widget.CONFIGURATION_DATA");
 
 InstallWidgetReceiver::WidgetMimeTypeHandlerData::WidgetMimeTypeHandlerData(
     /* [in] */ IResolveInfo* rInfo,
@@ -40,7 +44,7 @@ InstallWidgetReceiver::WidgetListAdapter::WidgetListAdapter(
     /* [in] */ ICellLayout* target,
     /* [in] */ Int32 targetScreen,
     /* [in] */ ArrayOf<Int32>* targetPos)
-    :,mLauncher(l)
+    : mLauncher(l)
     , mMimeType(mimeType)
     , mClipData(data)
     , mActivities(list)
@@ -50,19 +54,19 @@ InstallWidgetReceiver::WidgetListAdapter::WidgetListAdapter(
 {
 }
 
-CARAPI InstallWidgetReceiver::WidgetListAdapter::RegisterDataSetObserver(
+ECode InstallWidgetReceiver::WidgetListAdapter::RegisterDataSetObserver(
     /* [in] */ IDataSetObserver* observer)
 {
     return NOERROR;
 }
 
-CARAPI InstallWidgetReceiver::WidgetListAdapter::UnregisterDataSetObserver(
+ECode InstallWidgetReceiver::WidgetListAdapter::UnregisterDataSetObserver(
     /* [in] */ IDataSetObserver* observer)
 {
     return NOERROR;
 }
 
-CARAPI InstallWidgetReceiver::WidgetListAdapter::GetCount(
+ECode InstallWidgetReceiver::WidgetListAdapter::GetCount(
     /* [out] */ Int32* count)
 {
     VALIDATE_NOT_NULL(count);
@@ -70,7 +74,7 @@ CARAPI InstallWidgetReceiver::WidgetListAdapter::GetCount(
     return mActivities->GetSize(count);
 }
 
-CARAPI InstallWidgetReceiver::WidgetListAdapter::GetItem(
+ECode InstallWidgetReceiver::WidgetListAdapter::GetItem(
     /* [in] */ Int32 position,
     /* [out] */ IInterface** item)
 {
@@ -80,17 +84,17 @@ CARAPI InstallWidgetReceiver::WidgetListAdapter::GetItem(
     return NOERROR;
 }
 
-CARAPI InstallWidgetReceiver::WidgetListAdapter::GetItemId(
+ECode InstallWidgetReceiver::WidgetListAdapter::GetItemId(
     /* [in] */ Int32 position,
     /* [out] */ Int64* itemId)
 {
     VALIDATE_NOT_NULL(itemId);
 
-    *itemId = mPosition;
+    *itemId = position;
     return NOERROR;
 }
 
-CARAPI InstallWidgetReceiver::WidgetListAdapter::HasStableIds(
+ECode InstallWidgetReceiver::WidgetListAdapter::HasStableIds(
     /* [out] */ Boolean* hasStableIds)
 {
     VALIDATE_NOT_NULL(hasStableIds);
@@ -99,7 +103,7 @@ CARAPI InstallWidgetReceiver::WidgetListAdapter::HasStableIds(
     return NOERROR;
 }
 
-CARAPI InstallWidgetReceiver::WidgetListAdapter::GetView(
+ECode InstallWidgetReceiver::WidgetListAdapter::GetView(
     /* [in] */ Int32 position,
     /* [in] */ IView* convertView,
     /* [in] */ IViewGroup* parent,
@@ -109,7 +113,7 @@ CARAPI InstallWidgetReceiver::WidgetListAdapter::GetView(
     *view = NULL;
 
     AutoPtr<IContext> context;
-    parent->GetContext((IContext**)&context);
+    IView::Probe(parent)->GetContext((IContext**)&context);
     AutoPtr<IPackageManager> packageManager;
     context->GetPackageManager((IPackageManager**)&packageManager);
 
@@ -146,22 +150,32 @@ CARAPI InstallWidgetReceiver::WidgetListAdapter::GetView(
     widgetInfo->GetMinWidth(&width);
     Int32 height;
     widgetInfo->GetMinHeight(&height);
-    mTargetLayout->RectToCell(width, height, widgetSpan);
+    assert(0 && "need class ICellLayout");
+    //mTargetLayout->RectToCell(width, height, widgetSpan);
 
     AutoPtr<IView> _view2;
     convertView->FindViewById(Elastos::Droid::Launcher2::R::id::provider, (IView**)&_view2);
     AutoPtr<ITextView> t = ITextView::Probe(_view2);
+
+    AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(3);
+    array->Set(0, TO_IINTERFACE(component));
+    AutoPtr<IInteger32> intObj1 = CoreUtils::Convert((*widgetSpan)[0]);
+    array->Set(1, TO_IINTERFACE(intObj1));
+    AutoPtr<IInteger32> intObj2 = CoreUtils::Convert((*widgetSpan)[1]);
+    array->Set(2, TO_IINTERFACE(intObj2));
     String format;
-    context->GetString(Elastos::Droid::Launcher2::R::string::external_drop_widget_pick_format,
-            component, (*widgetSpan)[0], (*widgetSpan)[1])
-    t->SetText(format);
+    context->GetString(
+            Elastos::Droid::Launcher2::R::string::external_drop_widget_pick_format,
+            array, &format);
+    assert(0 && "SetText");
+    //t->SetText(format);
 
     *view = convertView;
     REFCOUNT_ADD(*view);
     return NOERROR;
 }
 
-CARAPI InstallWidgetReceiver::WidgetListAdapter::GetItemViewType(
+ECode InstallWidgetReceiver::WidgetListAdapter::GetItemViewType(
     /* [in] */ Int32 position,
     /* [out] */ Int32* viewType)
 {
@@ -171,7 +185,7 @@ CARAPI InstallWidgetReceiver::WidgetListAdapter::GetItemViewType(
     return NOERROR;
 }
 
-CARAPI InstallWidgetReceiver::WidgetListAdapter::GetViewTypeCount(
+ECode InstallWidgetReceiver::WidgetListAdapter::GetViewTypeCount(
     /* [out] */ Int32* count)
 {
     VALIDATE_NOT_NULL(count);
@@ -180,7 +194,7 @@ CARAPI InstallWidgetReceiver::WidgetListAdapter::GetViewTypeCount(
     return NOERROR;
 }
 
-CARAPI InstallWidgetReceiver::WidgetListAdapter::IsEmpty(
+ECode InstallWidgetReceiver::WidgetListAdapter::IsEmpty(
     /* [out] */ Boolean* isEmpty)
 {
     VALIDATE_NOT_NULL(isEmpty);
@@ -188,7 +202,7 @@ CARAPI InstallWidgetReceiver::WidgetListAdapter::IsEmpty(
     return mActivities->IsEmpty(isEmpty);
 }
 
-CARAPI InstallWidgetReceiver::WidgetListAdapter::AreAllItemsEnabled(
+ECode InstallWidgetReceiver::WidgetListAdapter::AreAllItemsEnabled(
     /* [out] */ Boolean* enabled)
 {
     VALIDATE_NOT_NULL(enabled);
@@ -197,7 +211,7 @@ CARAPI InstallWidgetReceiver::WidgetListAdapter::AreAllItemsEnabled(
     return NOERROR;
 }
 
-CARAPI InstallWidgetReceiver::WidgetListAdapter::IsEnabled(
+ECode InstallWidgetReceiver::WidgetListAdapter::IsEnabled(
     /* [in] */ Int32 position,
     /* [out] */ Boolean* enabled)
 {
@@ -207,7 +221,7 @@ CARAPI InstallWidgetReceiver::WidgetListAdapter::IsEnabled(
     return NOERROR;
 }
 
-CARAPI InstallWidgetReceiver::WidgetListAdapter::OnClick(
+ECode InstallWidgetReceiver::WidgetListAdapter::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
 {
@@ -216,10 +230,12 @@ CARAPI InstallWidgetReceiver::WidgetListAdapter::OnClick(
     AutoPtr<WidgetMimeTypeHandlerData> data = (WidgetMimeTypeHandlerData*)IObject::Probe(obj);
     AutoPtr<IAppWidgetProviderInfo> widgetInfo = data->mWidgetInfo;
 
-    AutoPtr<PendingAddWidgetInfo> createInfo = new PendingAddWidgetInfo(widgetInfo, mMimeType,
-            mClipData);
-    return mLauncher->AddAppWidgetFromDrop(createInfo, LauncherSettings::Favorites::CONTAINER_DESKTOP,
-            mTargetLayoutScreen, NULL, NULL, mTargetLayoutPos);
+    AutoPtr<PendingAddWidgetInfo> createInfo = new PendingAddWidgetInfo();
+    createInfo->constructor(widgetInfo, mMimeType, IParcelable::Probe(mClipData));
+    assert(0 && "need class mLauncher");
+    // return mLauncher->AddAppWidgetFromDrop(createInfo, LauncherSettings::Favorites::CONTAINER_DESKTOP,
+    //         mTargetLayoutScreen, NULL, NULL, mTargetLayoutPos);
+    return NOERROR;
 }
 
 } // namespace Launcher2

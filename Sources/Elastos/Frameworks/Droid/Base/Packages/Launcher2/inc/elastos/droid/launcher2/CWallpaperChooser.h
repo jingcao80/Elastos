@@ -2,7 +2,7 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CWALLPAPERCHOOSER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CWALLPAPERCHOOSER_H__
 
-#include "_Elastos_Droid_Packages_Launcher2_CWallpaperChooser.h"
+#include "_Elastos_Droid_Launcher2_CWallpaperChooser.h"
 #include <elastos/droid/app/Activity.h>
 
 using Elastos::Droid::App::Activity;
@@ -18,7 +18,8 @@ public:
     CAR_OBJECT_DECL();
 
     // @Override
-    CARAPI OnCreate();
+    CARAPI OnCreate(
+        /* [in] */ IBundle* icicle);
 
 private:
     // @SuppressWarnings("unused")

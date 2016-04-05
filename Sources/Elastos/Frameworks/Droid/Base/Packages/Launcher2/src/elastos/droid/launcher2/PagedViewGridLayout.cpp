@@ -2,6 +2,7 @@
 #include "elastos/droid/launcher2/PagedViewGridLayout.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/core/Math.h>
 
 namespace Elastos {
 namespace Droid {
@@ -10,32 +11,40 @@ namespace Launcher2 {
 PagedViewGridLayout::LayoutParams::LayoutParams(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
-    : FrameLayout::LayoutParams(width, height);
 {
+    FrameLayout::LayoutParams::constructor(width, height);
 }
 
 const String PagedViewGridLayout::TAG("PagedViewGridLayout");
 
-CAR_INTERFACE_IMPL(PagedViewGridLayout, GridLayout, IPage);
+CAR_INTERFACE_IMPL_2(PagedViewGridLayout, GridLayout, IPagedViewGridLayout, IPage);
 
 PagedViewGridLayout::PagedViewGridLayout(
     /* [in] */ IContext* context,
     /* [in] */ Int32 cellCountX,
     /* [in] */ Int32 cellCountY)
-    : GridLayout(context, NULL, 0);
-    , mCellCountX(cellCountX)
+    : mCellCountX(cellCountX)
     , mCellCountY(cellCountY)
 {
+    GridLayout::constructor(context, NULL, 0);
 }
 
-Int32 PagedViewGridLayout::GetCellCountX()
+ECode PagedViewGridLayout::GetCellCountX(
+    /* [out] */ Int32* x)
 {
-    return mCellCountX;
+    VALIDATE_NOT_NULL(x);
+
+    *x = mCellCountX;
+    return NOERROR;
 }
 
-Int32 PagedViewGridLayout::GetCellCountY()
+ECode PagedViewGridLayout::GetCellCountY(
+    /* [out] */ Int32* y)
 {
-    return mCellCountY;
+    VALIDATE_NOT_NULL(y);
+
+    *y = mCellCountY;
+    return NOERROR;
 }
 
 ECode PagedViewGridLayout::ResetChildrenOnKeyListeners()
@@ -50,7 +59,7 @@ ECode PagedViewGridLayout::ResetChildrenOnKeyListeners()
     return NOERROR;
 }
 
-ECode PagedViewGridLayout::OnMeasure(
+void PagedViewGridLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -58,13 +67,11 @@ ECode PagedViewGridLayout::OnMeasure(
     // offset of each page to scroll to before it updates the actual size of each page
     // (which can change depending on the content if the contents aren't a fixed size).
     // We work around this by having a minimum size on each widget page).
-    Int32 width;
-    GetSuggestedMinimumWidth(&width);
-    Int32 size;
-    MeasureSpec::GetSize(widthMeasureSpec, &size);
-    Int32 widthSpecSize = Math::Min(width, size);
-    Int32 widthSpecMode = MeasureSpec::EXACTLY;
-    return GridLayout::OnMeasure(MeasureSpec::MakeMeasureSpec(widthSpecSize, widthSpecMode),
+    Int32 width = GetSuggestedMinimumWidth();
+    Int32 size = View::MeasureSpec::GetSize(widthMeasureSpec);
+    Int32 widthSpecSize = Elastos::Core::Math::Min(width, size);
+    Int32 widthSpecMode = View::MeasureSpec::EXACTLY;
+    GridLayout::OnMeasure(View::MeasureSpec::MakeMeasureSpec(widthSpecSize, widthSpecMode),
             heightMeasureSpec);
 }
 
@@ -110,7 +117,7 @@ ECode PagedViewGridLayout::OnTouchEvent(
         GetChildOnPageAt(count - 1, (IView**)&child);
         Int32 bottom;
         child->GetBottom(&bottom);
-        Int32 y;
+        Float y;
         event->GetY(&y);
         _result = _result || (y < bottom);
     }

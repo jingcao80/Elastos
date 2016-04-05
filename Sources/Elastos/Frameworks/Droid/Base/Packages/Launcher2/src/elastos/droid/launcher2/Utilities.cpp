@@ -1,6 +1,43 @@
 #include "elastos/droid/launcher2/Utilities.h"
 #include "Elastos.Droid.Service.h"
+#include "Elastos.Droid.Utility.h"
+#include <elastos/utility/logging/Slogger.h>
+#include <elastos/core/AutoLock.h>
+#include <Elastos.CoreLibrary.Core.h>
+#include <Elastos.CoreLibrary.Utility.h>
 #include "R.h"
+
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
+using Elastos::Droid::Graphics::PorterDuffMode_CLEAR;
+using Elastos::Droid::Graphics::BlurMaskFilterBlur_NORMAL;
+using Elastos::Droid::Graphics::CCanvas;
+using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CColorMatrix;
+using Elastos::Droid::Graphics::IColorMatrix;
+using Elastos::Droid::Graphics::IColorFilter;
+using Elastos::Droid::Graphics::IMaskFilter;
+using Elastos::Droid::Graphics::IDrawFilter;
+using Elastos::Droid::Graphics::CBitmapHelper;
+using Elastos::Droid::Graphics::IBitmapHelper;
+using Elastos::Droid::Graphics::IBlurMaskFilter;
+using Elastos::Droid::Graphics::CBlurMaskFilter;
+using Elastos::Droid::Graphics::CPaintFlagsDrawFilter;
+using Elastos::Droid::Graphics::IPaintFlagsDrawFilter;
+using Elastos::Droid::Graphics::IColorMatrixColorFilter;
+using Elastos::Droid::Graphics::CColorMatrixColorFilter;
+using Elastos::Droid::Graphics::Drawable::IBitmapDrawable;
+using Elastos::Droid::Graphics::Drawable::CBitmapDrawable;
+using Elastos::Droid::Graphics::Drawable::IPaintDrawable;
+using Elastos::Droid::Graphics::Drawable::IShapeDrawable;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::IRandom;
+using Elastos::Utility::CRandom;
+
 
 namespace Elastos {
 namespace Droid {
@@ -19,6 +56,7 @@ AutoPtr<IPaint> Utilities::sGlowColorFocusedPaint;
 AutoPtr<IPaint> Utilities::sDisabledPaint;
 AutoPtr<IRect> Utilities::sOldBounds;
 AutoPtr<ICanvas> Utilities::sCanvas;
+Object Utilities::sCanvasLock;
 
 AutoPtr<ArrayOf<Int32> > Utilities::sColors;
 
@@ -32,8 +70,8 @@ Boolean Utilities::InitStaticBlock()
     CCanvas::New((ICanvas**)&sCanvas);
 
     AutoPtr<IPaintFlagsDrawFilter> filter;
-    CPaintFlagsDrawFilter::New(Paint.DITHER_FLAG, Paint.FILTER_BITMAP_FLAG, (IPaintFlagsDrawFilter**)&filter);
-    sCanvas->SetDrawFilter(filter);
+    CPaintFlagsDrawFilter::New(IPaint::DITHER_FLAG, IPaint::FILTER_BITMAP_FLAG, (IPaintFlagsDrawFilter**)&filter);
+    sCanvas->SetDrawFilter(IDrawFilter::Probe(filter));
 
     sColors = ArrayOf<Int32>::Alloc(3);
     (*sColors)[0] = 0xffff0000;
@@ -61,7 +99,9 @@ AutoPtr<IBitmap> Utilities::CreateIconBitmap(
     if (sourceWidth > textureWidth && sourceHeight > textureHeight) {
         // Icon is bigger than it should be; clip it (solves the GB->ICS migration case)
         AutoPtr<IBitmap> bitmap;
-        Bitmap::CreateBitmap(icon,
+        AutoPtr<IBitmapHelper> helper;
+        CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
+        helper->CreateBitmap(icon,
                 (sourceWidth - textureWidth) / 2,
                 (sourceHeight - textureHeight) / 2,
                 textureWidth, textureHeight, (IBitmap**)&bitmap);
@@ -96,8 +136,8 @@ AutoPtr<IBitmap> Utilities::CreateIconBitmap(
 
         if (IPaintDrawable::Probe(icon) != NULL) {
             AutoPtr<IPaintDrawable> painter = IPaintDrawable::Probe(icon);
-            painter->SetIntrinsicWidth(width);
-            painter->SetIntrinsicHeight(height);
+            IShapeDrawable::Probe(painter)->SetIntrinsicWidth(width);
+            IShapeDrawable::Probe(painter)->SetIntrinsicHeight(height);
         }
         else if (IBitmapDrawable::Probe(icon) != NULL) {
             // Ensure the bitmap has a density.
@@ -142,8 +182,10 @@ AutoPtr<IBitmap> Utilities::CreateIconBitmap(
         Int32 textureHeight = sIconTextureHeight;
 
         AutoPtr<IBitmap> bitmap;
-        Bitmap::CreateBitmap(textureWidth, textureHeight,
-                Bitmap.Config.ARGB_8888, (IBitmap**)&bitmap);
+        AutoPtr<IBitmapHelper> helper;
+        CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
+        helper->CreateBitmap(textureWidth, textureHeight,
+                BitmapConfig_ARGB_8888, (IBitmap**)&bitmap);
         const AutoPtr<ICanvas> canvas = sCanvas;
         canvas->SetBitmap(bitmap);
 
@@ -172,6 +214,7 @@ AutoPtr<IBitmap> Utilities::CreateIconBitmap(
 
         return bitmap;
     }
+    return NULL;
 }
 
 ECode Utilities::DrawSelectedAllAppsBitmap(
@@ -191,11 +234,11 @@ ECode Utilities::DrawSelectedAllAppsBitmap(
             return E_RUNTIME_EXCEPTION;
         }
 
-        dest->DrawColor(0, PorterDuff.Mode.CLEAR);
+        dest->DrawColor(0, PorterDuffMode_CLEAR);
 
         AutoPtr<ArrayOf<Int32> >  xy = ArrayOf<Int32>::Alloc(2);
         AutoPtr<IBitmap> mask;
-        src->ExtractAlpha(sBlurPaint, xy);
+        src->ExtractAlpha(sBlurPaint, xy, (IBitmap**)&mask);
 
         Int32 width;
         src->GetWidth(&width);
@@ -223,7 +266,7 @@ AutoPtr<IBitmap> Utilities::ResampleIconBitmap(
         Int32 width;
         bitmap->GetWidth(&width);
         Int32 height;
-        bitmap->getHeight(&height);
+        bitmap->GetHeight(&height);
         if (width == sIconWidth && height == sIconHeight) {
             return bitmap;
         }
@@ -232,7 +275,7 @@ AutoPtr<IBitmap> Utilities::ResampleIconBitmap(
             context->GetResources((IResources**)&resources);
             AutoPtr<IBitmapDrawable> drawble;
             CBitmapDrawable::New(resources, bitmap, (IBitmapDrawable**)&drawble);
-            return CreateIconBitmap(drawble, context);
+            return CreateIconBitmap(IBitmap::Probe(drawble), context);
         }
     }
     return NULL;
@@ -252,14 +295,14 @@ AutoPtr<IBitmap> Utilities::DrawDisabledBitmap(
         Int32 height;
         bitmap->GetHeight(&height);
         AutoPtr<IBitmap> disabled;
-        Bitmap::CreateBitmap(width, height, Bitmap.Config.ARGB_8888, (IBitmap**)&disabled);
+        AutoPtr<IBitmapHelper> helper;
+        CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
+        helper->CreateBitmap(width, height, BitmapConfig_ARGB_8888,
+                (IBitmap**)&disabled);
         AutoPtr<ICanvas> canvas = sCanvas;
         canvas->SetBitmap(disabled);
-
         canvas->DrawBitmap(bitmap, 0.0f, 0.0f, sDisabledPaint);
-
-        canvas->SetBitmap(null);
-
+        canvas->SetBitmap(NULL);
         return disabled;
     }
     return NULL;
@@ -281,8 +324,8 @@ void Utilities::InitStatics(
     sIconTextureWidth = sIconTextureHeight = sIconWidth;
 
     AutoPtr<IBlurMaskFilter> filter;
-    CBlurMaskFilter::New(5 * density, BlurMaskFilter.Blur.NORMAL, (IBlurMaskFilter**)&filter);
-    sBlurPaint->SetMaskFilter(filter);
+    CBlurMaskFilter::New(5 * density, BlurMaskFilterBlur_NORMAL, (IBlurMaskFilter**)&filter);
+    sBlurPaint->SetMaskFilter(IMaskFilter::Probe(filter));
     sGlowColorPressedPaint->SetColor(0xffffc300);
     sGlowColorFocusedPaint->SetColor(0xffff8e00);
 
@@ -291,7 +334,7 @@ void Utilities::InitStatics(
     cm->SetSaturation(0.2f);
     AutoPtr<IColorMatrixColorFilter> colorFilter;
     CColorMatrixColorFilter::New(cm, (IColorMatrixColorFilter**)&colorFilter);
-    sDisabledPaint->SetColorFilter(colorFilter);
+    sDisabledPaint->SetColorFilter(IColorFilter::Probe(colorFilter));
     sDisabledPaint->SetAlpha(0x88);
     return;
 }

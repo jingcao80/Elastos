@@ -1,0 +1,43 @@
+
+module
+{
+    interface Elastos.Droid.Launcher2.IApplicationInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    interface IPagedViewIcon;
+
+    /** A simple callback interface to allow a PagedViewIcon to notify when it has been pressed */
+    interface IPagedViewIconPressedCallback {
+        IconPressed(
+            [in] IPagedViewIcon* icon);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IView
+     *
+     * interface Elastos.Droid.View.OnPreDrawListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    interface IPagedViewIcon {
+        ApplyFromApplicationInfo(
+            [in] IApplicationInfo* info,
+            [in] Boolean scaleUp,
+            [in] IPagedViewIconPressedCallback* cb);
+
+        LockDrawableState();
+
+        ResetDrawableState();
+
+        DrawableStateChanged();
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

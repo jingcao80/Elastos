@@ -2,10 +2,9 @@
 #ifndef __ELASTOS_DROID_LAUNCHER2_CWALLPAPERCHOOSERDIALOGFRAGMENTHELPER_H__
 #define __ELASTOS_DROID_LAUNCHER2_CWALLPAPERCHOOSERDIALOGFRAGMENTHELPER_H__
 
+#include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CWallpaperChooserDialogFragmentHelper.h"
 #include <elastos/core/Singleton.h>
-
-using Elastos::Droid::Packages::Launcher2::IWallpaperChooserDialogFragment;
 
 namespace Elastos {
 namespace Droid {
@@ -16,9 +15,9 @@ CarClass(CWallpaperChooserDialogFragmentHelper)
     , public IWallpaperChooserDialogFragmentHelper
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
 
     CARAPI NewInstance(
         /* [out] */ IWallpaperChooserDialogFragment** fragment);

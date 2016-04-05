@@ -2,6 +2,14 @@
 #include "elastos/droid/launcher2/PagedViewCellLayoutChildren.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include "Elastos.Droid.Graphics.h"
+#include <elastos/utility/logging/Slogger.h>
+#include <elastos/core/Math.h>
+
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::View::IViewGroupLayoutParams;
 
 namespace Elastos {
 namespace Droid {
@@ -13,13 +21,13 @@ CAR_INTERFACE_IMPL(PagedViewCellLayoutChildren, ViewGroup, IPagedViewCellLayoutC
 
 PagedViewCellLayoutChildren::PagedViewCellLayoutChildren(
     /* [in] */ IContext* context)
-    : ViewGroup(context)
-    , mCenterContent(FALSE)
+    : mCenterContent(FALSE)
     , mCellWidth(0)
     , mCellHeight(0)
     , mWidthGap(0)
     , mHeightGap(0)
 {
+    ViewGroup::constructor(context);
 }
 
 ECode PagedViewCellLayoutChildren::CancelLongPress()
@@ -64,30 +72,26 @@ ECode PagedViewCellLayoutChildren::RequestChildFocus(
         AutoPtr<IRect> r;
         CRect::New((IRect**)&r);
         child->GetDrawingRect(r);
-        RequestRectangleOnScreen(r);
+        Boolean res;
+        RequestRectangleOnScreen(r, &res);
     }
     return NOERROR;
 }
 
-ECode PagedViewCellLayoutChildren::OnMeasure(
+void PagedViewCellLayoutChildren::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    Int32 widthSpecMode;
-    MeasureSpec::GetMode(widthMeasureSpec, &widthSpecMode);
-    Int32 widthSpecSize;
-    MeasureSpec::GetSize(widthMeasureSpec, &widthSpecSize);
+    Int32 widthSpecMode = View::MeasureSpec::GetMode(widthMeasureSpec);
+    Int32 widthSpecSize = View::MeasureSpec::GetSize(widthMeasureSpec);
 
-    Int32 heightSpecMode;
-    MeasureSpec::GetMode(heightMeasureSpec, &heightSpecMode);
-    Int32 heightSpecSize;
-    MeasureSpec::GetSize(heightMeasureSpec, &heightSpecSize);
+    Int32 heightSpecMode = View::MeasureSpec::GetMode(heightMeasureSpec);
+    Int32 heightSpecSize = View::MeasureSpec::GetSize(heightMeasureSpec);
 
-    if (widthSpecMode == MeasureSpec::UNSPECIFIED || heightSpecMode == MeasureSpec::UNSPECIFIED) {
+    if (widthSpecMode == View::MeasureSpec::UNSPECIFIED || heightSpecMode == View::MeasureSpec::UNSPECIFIED) {
         //throw new RuntimeException("CellLayout cannot have UNSPECIFIED dimensions");
         Slogger::E(TAG, "CellLayout cannot have UNSPECIFIED dimensions");
-        return E_RUNTIME_EXCEPTION;
-
+        return;
     }
 
     Int32 count;
@@ -97,24 +101,24 @@ ECode PagedViewCellLayoutChildren::OnMeasure(
         GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        AutoPtr<PagedViewCellLayout::LayoutParams> lp =
-            (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
+        assert(0 && "need class PagedViewCellLayout");
+        // AutoPtr<PagedViewCellLayout::LayoutParams> lp =
+        //     (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
         Int32 left;
-        getPaddingLeft(&left);
+        GetPaddingLeft(&left);
         Int32 top;
         GetPaddingTop(&top);
-        lp->Setup(mCellWidth, mCellHeight, mWidthGap, mHeightGap,
-                left, top);
+        assert(0 && "need class PagedViewCellLayout");
+        // lp->Setup(mCellWidth, mCellHeight, mWidthGap, mHeightGap,
+        //         left, top);
 
-        Int32 childWidthMeasureSpec;
-        MeasureSpec::MakeMeasureSpec(lp->mWidth, MeasureSpec::EXACTLY, &childWidthMeasureSpec);
-        Int32 childheightMeasureSpec;
-        MeasureSpec::MakeMeasureSpec(lp->mHeight, MeasureSpec::EXACTLY, &childheightMeasureSpec);
+        // Int32 childWidthMeasureSpec = View::MeasureSpec::MakeMeasureSpec(lp->mWidth, View::MeasureSpec::EXACTLY);
+        // Int32 childheightMeasureSpec = View::MeasureSpec::MakeMeasureSpec(lp->mHeight, View::MeasureSpec::EXACTLY);
 
-        child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
+        // child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
     }
 
-    return SetMeasuredDimension(widthSpecSize, heightSpecSize);
+    SetMeasuredDimension(widthSpecSize, heightSpecSize);
 }
 
 ECode PagedViewCellLayoutChildren::OnLayout(
@@ -131,7 +135,7 @@ ECode PagedViewCellLayoutChildren::OnLayout(
     if (mCenterContent && count > 0) {
         // determine the max width of all the rows and center accordingly
         Int32 maxRowX = 0;
-        Int32 minRowX = Integer::MAX_VALUE;
+        Int32 minRowX = Elastos::Core::Math::INT32_MAX_VALUE;
         for (Int32 i = 0; i < count; i++) {
             AutoPtr<IView> child;
             GetChildAt(i, (IView**)&child);
@@ -140,10 +144,11 @@ ECode PagedViewCellLayoutChildren::OnLayout(
             if (visibility != GONE) {
                 AutoPtr<IViewGroupLayoutParams> params;
                 child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-                AutoPtr<PagedViewCellLayout::LayoutParams> lp =
-                        (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
-                minRowX = Math::Min(minRowX, lp->mX);
-                maxRowX = Math::Max(maxRowX, lp->mX + lp->mWidth);
+                assert(0 && "need class PagedViewCellLayout");
+                // AutoPtr<PagedViewCellLayout::LayoutParams> lp =
+                //         (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
+                // minRowX = Elastos::Core::Math::Min(minRowX, lp->mX);
+                // maxRowX = Elastos::Core::Math::Max(maxRowX, lp->mX + lp->mWidth);
             }
         }
         Int32 maxRowWidth = maxRowX - minRowX;
@@ -160,12 +165,13 @@ ECode PagedViewCellLayoutChildren::OnLayout(
         if (visibility != GONE) {
             AutoPtr<IViewGroupLayoutParams> params;
             child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-            AutoPtr<PagedViewCellLayout::LayoutParams> lp =
-                    (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
+            assert(0 && "need class PagedViewCellLayout");
+            // AutoPtr<PagedViewCellLayout::LayoutParams> lp =
+            //         (PagedViewCellLayout::LayoutParams*)IObject::Probe(params);
 
-            Int32 childLeft = offsetX + lp->mX;
-            Int32 childTop = lp->mY;
-            child->Layout(childLeft, childTop, childLeft + lp->mWidth, childTop + lp->mHeight);
+            // Int32 childLeft = offsetX + lp->mX;
+            // Int32 childTop = lp->mY;
+            // child->Layout(childLeft, childTop, childLeft + lp->mWidth, childTop + lp->mHeight);
         }
     }
     return NOERROR;
@@ -178,7 +184,7 @@ ECode PagedViewCellLayoutChildren::EnableCenteredContent(
     return NOERROR;
 }
 
-ECode PagedViewCellLayoutChildren::SetChildrenDrawingCacheEnabled(
+void PagedViewCellLayoutChildren::SetChildrenDrawingCacheEnabled(
     /* [in] */ Boolean enabled)
 {
     Int32 count;
@@ -189,12 +195,11 @@ ECode PagedViewCellLayoutChildren::SetChildrenDrawingCacheEnabled(
         view->SetDrawingCacheEnabled(enabled);
         // Update the drawing caches
         Boolean res;
-        view->isHardwareAccelerated(&res);
+        view->IsHardwareAccelerated(&res);
         if (!res) {
             view->BuildDrawingCache(TRUE);
         }
     }
-    return NOERROR;
 }
 
 } // namespace Launcher2

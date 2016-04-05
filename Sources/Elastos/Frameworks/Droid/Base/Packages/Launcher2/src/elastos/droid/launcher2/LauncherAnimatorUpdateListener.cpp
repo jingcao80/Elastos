@@ -2,12 +2,16 @@
 #include "elastos/droid/launcher2/LauncherAnimatorUpdateListener.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include "Elastos.CoreLibrary.Core.h"
+
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Core::IFloat;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-CAR_INTERFACE_IMPL(LauncherAnimatorUpdateListener, object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(LauncherAnimatorUpdateListener, Object, IAnimatorUpdateListener);
 
 ECode LauncherAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
@@ -17,7 +21,7 @@ ECode LauncherAnimatorUpdateListener::OnAnimationUpdate(
     AutoPtr<IFloat> fObj = IFloat::Probe(obj);
     Float b;
     fObj->GetValue(&b);
-    Float a = 1f - b;
+    Float a = 1.0f - b;
     return OnAnimationUpdate(a, b);
 }
 

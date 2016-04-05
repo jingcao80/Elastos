@@ -18,6 +18,9 @@ module
     interface ICellLayout {
     }
 
+    interface ICellLayoutHelper {
+    }
+
     /**
      * @Involve
      * interface IViewGroupLayoutParams

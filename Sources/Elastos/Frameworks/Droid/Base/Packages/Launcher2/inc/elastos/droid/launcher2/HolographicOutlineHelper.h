@@ -1,7 +1,16 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_HOLOGRAPHICOUTLINEHELPER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_HOLOGRAPHICOUTLINEHELPER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Graphics.h"
+
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::IPaint;
+using Elastos::Droid::Graphics::IBlurMaskFilter;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -12,11 +21,6 @@ class HolographicOutlineHelper
 {
 public:
     HolographicOutlineHelper();
-
-    //@Override
-    CARAPI OnReceive(
-        /* [in] */ IContext* context,
-        /* [in] */ IIntent* intent);
 
     /**
      * Returns the interpolated holographic highlight alpha for the effect we want when scrolling
@@ -76,11 +80,11 @@ public:
         /* [in] */ Int32 outlineColor);
 
 private:
-    CARAPI_(Boolean) InitStaticBlock();
+    static CARAPI_(Boolean) InitStaticBlock();
 
 public:
-    static const Int32 MAX_OUTER_BLUR_RADIUS;
-    static const Int32 MIN_OUTER_BLUR_RADIUS;
+    static /*const*/ Int32 MAX_OUTER_BLUR_RADIUS;
+    static /*const*/ Int32 MIN_OUTER_BLUR_RADIUS;
 
 private:
     AutoPtr<IPaint> mHolographicPaint;

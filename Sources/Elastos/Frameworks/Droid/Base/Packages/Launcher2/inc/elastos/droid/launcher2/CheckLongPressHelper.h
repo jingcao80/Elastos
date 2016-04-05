@@ -1,7 +1,16 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CHECKLONGPRESSHELPER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CHECKLONGPRESSHELPER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "elastos/droid/os/Runnable.h"
+
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::View::IView;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -21,7 +30,7 @@ public:
         CARAPI Run();
 
     private:
-        CheckLongPressHelper* mHost;
+        AutoPtr<CheckLongPressHelper> mHost;
     };
 
 public:

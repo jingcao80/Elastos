@@ -1,7 +1,23 @@
 
-#include "elastos/droid/launcher2/PackageChangedReceiver.h"
+#include "elastos/droid/launcher2/BubbleTextView.h"
+#include "elastos/droid/launcher2/ShortcutInfo.h"
+#include "elastos/droid/launcher2/FastBitmapDrawable.h"
 #include "Elastos.Droid.Service.h"
+#include "elastos/droid/R.h"
 #include "R.h"
+
+using Elastos::Droid::Graphics::IPaint;
+using Elastos::Droid::Graphics::CBitmapHelper;
+using Elastos::Droid::Graphics::IBitmapHelper;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CBitmap;
+using Elastos::Droid::Graphics::CCanvas;
+using Elastos::Droid::Graphics::RegionOp_REPLACE;
+using Elastos::Droid::Graphics::RegionOp_INTERSECT;
+using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IViewParent;
+using Elastos::Droid::View::IViewGroup;
 
 namespace Elastos {
 namespace Droid {
@@ -51,13 +67,13 @@ ECode BubbleTextView::constructor(
 ECode BubbleTextView::Init()
 {
     mLongPressHelper = new CheckLongPressHelper(this);
-    GetBackground(&mBackground);
+    GetBackground((IDrawable**)&mBackground);
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
-    res->GetColor(android.R.color.white, &mFocusedOutlineColor);
+    res->GetColor(Elastos::Droid::R::color::white, &mFocusedOutlineColor);
     mFocusedGlowColor = mPressedOutlineColor =
             mPressedGlowColor = mFocusedOutlineColor;
 
@@ -67,18 +83,18 @@ ECode BubbleTextView::Init()
 
 ECode BubbleTextView::ApplyFromShortcutInfo(
     /* [in] */ IShortcutInfo* info,
-    /* [in] */ IconCache* iconCache)
+    /* [in] */ IIconCache* iconCache)
 {
-    AutoPtr<IBitmap> b;
-    info->GetIcon(iconCache, (IBitmap**)&b);
+    ShortcutInfo* _info = (ShortcutInfo*)info;
+    IconCache* _iconCache = (IconCache*)iconCache;
+    AutoPtr<IBitmap> b = _info->GetIcon(_iconCache);
 
-    AutoPtr<ShortcutInfo> _info = (ShortcutInfo*)info;
-    SetCompoundDrawablesWithIntrinsicBounds(NULL,
-            new FastBitmapDrawable(b),
-            NULL, NULL);
+    AutoPtr<FastBitmapDrawable> fastBitmapDrawable = new FastBitmapDrawable();
+    fastBitmapDrawable->constructor(b);
+    SetCompoundDrawablesWithIntrinsicBounds(NULL, IDrawable::Probe(fastBitmapDrawable), NULL, NULL);
     SetText(_info->mTitle);
     if (_info->mContentDescription != NULL) {
-        setContentDescription(_info->mContentDescription);
+        SetContentDescription(_info->mContentDescription);
     }
     return SetTag(TO_IINTERFACE(info));
 }
@@ -118,9 +134,7 @@ ECode BubbleTextView::VerifyDrawable(
         return NOERROR;
     }
 
-    Boolean res;
-    TextView::VerifyDrawable(who, &res);
-    *result = res;
+    *result = TextView::VerifyDrawable(who);;
     return NOERROR;
 }
 
@@ -129,7 +143,8 @@ ECode BubbleTextView::SetTag(
 {
     if (tag != NULL) {
         AutoPtr<IItemInfo> info = IItemInfo::Probe(tag);
-        LauncherModel::CheckItemInfo(info);
+        assert(0 && "need class LauncherModel");
+        //LauncherModel::CheckItemInfo(info);
     }
     return TextView::SetTag(tag);
 }
@@ -153,7 +168,7 @@ ECode BubbleTextView::DrawableStateChanged()
             mPressedOrFocusedBackground = NULL;
         }
         Boolean tmp;
-        isFocused(&tmp);
+        IsFocused(&tmp);
         if (tmp) {
             AutoPtr<ILayout> layout;
             GetLayout((ILayout**)&layout);
@@ -178,7 +193,7 @@ ECode BubbleTextView::DrawableStateChanged()
     AutoPtr<IDrawable> d = mBackground;
     if (d != NULL) {
         Boolean res;
-        d->IsStateful(res);
+        d->IsStateful(&res);
         if (res) {
             AutoPtr<ArrayOf<Int32> > state;
             GetDrawableState((ArrayOf<Int32>**)&state);
@@ -202,14 +217,15 @@ void BubbleTextView::DrawWithPadding(
     AutoPtr<ILayout> layout;
     GetLayout((ILayout**)&layout);
     Int32 pos;
-    layout0>GetLineTop(0, &pos);
+    layout->GetLineTop(0, &pos);
     Int32 bottom = top - (Int32)IBubbleTextView::PADDING_V + pos;
     clipRect->SetBottom(bottom);
 
     // Draw the View into the bitmap.
     // The translate of scrollX and scrollY is necessary when drawing TextViews, because
     // they set scrollX and scrollY to large values to achieve centered text
-    destCanvas->Save();
+    Int32 tmp;
+    destCanvas->Save(&tmp);
     Float x;
     GetScaleX(&x);
     Float y;
@@ -224,9 +240,10 @@ void BubbleTextView::DrawWithPadding(
     Int32 sy;
     GetScrollY(&sy);
     destCanvas->Translate(-sx + padding / 2, -sy + padding / 2);
-    destCanvas->ClipRect(clipRect, Op.REPLACE);
+    Boolean res;
+    destCanvas->ClipRect(clipRect, RegionOp_REPLACE, &res);
     Draw(destCanvas);
-    return destCanvas->Restore();
+    destCanvas->Restore();
 }
 
 AutoPtr<IBitmap> BubbleTextView::CreateGlowingOutline(
@@ -240,10 +257,12 @@ AutoPtr<IBitmap> BubbleTextView::CreateGlowingOutline(
     GetWidth(&width);
     Int32 height;
     GetHeight(&height);
+
+    AutoPtr<IBitmapHelper> helper;
+    CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
     AutoPtr<IBitmap> b;
-    Bitmap::CreateBitmap(
-            width + padding, height + padding,
-            Bitmap::Config::ARGB_8888, (IBitmap**)&b);
+    helper->CreateBitmap(width + padding, height + padding,
+            BitmapConfig_ARGB_8888, (IBitmap**)&b);
 
     canvas->SetBitmap(b);
     DrawWithPadding(canvas, padding);
@@ -325,15 +344,16 @@ ECode BubbleTextView::SetCellLayoutPressedOrFocusedIcon()
 {
     AutoPtr<IViewParent> res;
     GetParent((IViewParent**)&res);
-    if (IShortcutAndWidgetContainer::Probe(res) ! = NULL) {
+    if (IShortcutAndWidgetContainer::Probe(res) != NULL) {
         AutoPtr<IShortcutAndWidgetContainer> parent =
                 IShortcutAndWidgetContainer::Probe(res);
         if (parent != NULL) {
             AutoPtr<IViewParent> tmp;
-            IViewGroup::Probe(parent)->GetParent((IViewParent**)&tmp);
-            AutoPtr<ICellLayout> layout = ICellLayout::Probe(tmp);
-            layout->SetPressedOrFocusedIcon((mPressedOrFocusedBackground != NULL) ?
-                    this : NULL);
+            IView::Probe(parent)->GetParent((IViewParent**)&tmp);
+            assert(0 && "need class CellLayout");
+            // AutoPtr<ICellLayout> layout = ICellLayout::Probe(tmp);
+            // layout->SetPressedOrFocusedIcon((mPressedOrFocusedBackground != NULL) ?
+            //         this : NULL);
         }
     }
     return NOERROR;
@@ -358,7 +378,7 @@ ECode BubbleTextView::GetPressedOrFocusedBackground(
 ECode BubbleTextView::GetPressedOrFocusedBackgroundPadding(
     /* [out] */ Int32* res)
 {
-    VALIDATE_NOT_NULL(map);
+    VALIDATE_NOT_NULL(res);
 
     *res = HolographicOutlineHelper::MAX_OUTER_BLUR_RADIUS / 2;
     return NOERROR;
@@ -403,11 +423,11 @@ ECode BubbleTextView::Draw(
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
     Int32 _colors;
-    res->getColor(android.R.color.transparent, &_colors);
+    res->GetColor(Elastos::Droid::R::color::transparent, &_colors);
     if (colors == _colors) {
         AutoPtr<ITextPaint> paint;
         GetPaint((ITextPaint**)&paint);
-        paint->ClearShadowLayer();
+        IPaint::Probe(paint)->ClearShadowLayer();
         TextView::Draw(canvas);
         return NOERROR;
     }
@@ -415,10 +435,11 @@ ECode BubbleTextView::Draw(
     // We enhance the shadow by drawing the shadow twice
     AutoPtr<ITextPaint> paint;
     GetPaint((ITextPaint**)&paint);
-    paint->SetShadowLayer(SHADOW_LARGE_RADIUS, 0.0f, SHADOW_Y_OFFSET,
+    IPaint::Probe(paint)->SetShadowLayer(SHADOW_LARGE_RADIUS, 0.0f, SHADOW_Y_OFFSET,
             SHADOW_LARGE_COLOUR);
     TextView::Draw(canvas);
-    canvas->Save(ICanvas::CLIP_SAVE_FLAG);
+    Int32 result;
+    canvas->Save(ICanvas::CLIP_SAVE_FLAG, &result);
 
     Int32 scrollX;
     GetScrollX(&scrollX);
@@ -430,13 +451,14 @@ ECode BubbleTextView::Draw(
     GetWidth(&width);
     Int32 height;
     GetHeight(&height);
+    Boolean tmp;
     canvas->ClipRect(scrollX, scrollY + top,
             scrollX + width,
-            scrollY + height, IRegion::Op::INTERSECT);
+            scrollY + height, RegionOp_INTERSECT, &tmp);
 
     AutoPtr<ITextPaint> paint2;
     GetPaint((ITextPaint**)&paint2);
-    paint2->SetShadowLayer(SHADOW_SMALL_RADIUS, 0.0f, 0.0f,
+    IPaint::Probe(paint2)->SetShadowLayer(SHADOW_SMALL_RADIUS, 0.0f, 0.0f,
             SHADOW_SMALL_COLOUR);
     TextView::Draw(canvas);
     return canvas->Restore();
@@ -478,7 +500,8 @@ ECode BubbleTextView::CancelLongPress()
 {
     TextView::CancelLongPress();
 
-    return mLongPressHelper->CancelLongPress();
+    mLongPressHelper->CancelLongPress();
+    return NOERROR;
 }
 
 } // namespace Launcher2

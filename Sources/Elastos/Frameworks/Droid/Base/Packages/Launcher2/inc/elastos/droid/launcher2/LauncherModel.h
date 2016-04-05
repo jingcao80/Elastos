@@ -1,7 +1,52 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_LAUNCHERMODEL_H__
 #define  __ELASTOS_DROID_LAUNCHER2_LAUNCHERMODEL_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/launcher2/DeferredHandler.h"
+#include "elastos/droid/launcher2/AllAppsList.h"
+#include "elastos/droid/launcher2/IconCache.h"
+#include "elastos/droid/launcher2/ItemInfo.h"
+#include "elastos/droid/launcher2/FolderInfo.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.CoreLibrary.Core.h"
+//#include "Elastos.CoreLibrary.Lang.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.CoreLibrary.Text.h"
+#include "elastos/droid/os/Runnable.h"
+
+using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::Pm::ILauncherApps;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Pm::ILauncherAppsCallback;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::IHandlerThread;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
+using Elastos::Core::IComparator;
+//using Elastos::Lang::Ref::IWeakReference;
+using Elastos::Utility::IList;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IArrayList;
+using Elastos::Text::ICollator;
 
 namespace Elastos {
 namespace Droid {
@@ -82,14 +127,12 @@ private:
     {
     public:
         MyRunnable2(
-            /* [in] */ LauncherModel* host,
             /* [in] */ Int64 itemId,
             /* [in] */ ItemInfo* item);
 
         CARAPI Run();
 
     private:
-        AutoPtr<LauncherModel> mHost;
         Int64 mItemId;
         AutoPtr<ItemInfo> mItem;
     };
@@ -99,7 +142,6 @@ private:
     {
     public:
         MyRunnable3(
-            /* [in] */ LauncherModel* host,
             /* [in] */ IContentResolver* cr,
             /* [in] */ IUri* uri,
             /* [in] */ IContentValues* values,
@@ -109,7 +151,6 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<LauncherModel> mHost;
         AutoPtr<IContentResolver> mCr;
         AutoPtr<IUri> mUri;
         AutoPtr<IContentValues> mValues;
@@ -135,8 +176,7 @@ private:
     {
     public:
         MyRunnable5(
-            /* [in] */ LauncherModel* host,
-            /* [in] */ IContentResolver* cr;
+            /* [in] */ IContentResolver* cr,
             /* [in] */ Boolean notify,
             /* [in] */ IContentValues* values,
             /* [in] */ ItemInfo* item);
@@ -144,9 +184,8 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<LauncherModel> mHost;
         AutoPtr<IContentResolver> mCr;
-        Boolean mNotify,
+        Boolean mNotify;
         AutoPtr<IContentValues> mValues;
         AutoPtr<ItemInfo> mItem;
     };
@@ -156,19 +195,15 @@ private:
     {
     public:
         MyRunnable6(
-            /* [in] */ LauncherModel* host,
-            /* [in] */ IContentResolver* cr;
+            /* [in] */ IContentResolver* cr,
             /* [in] */ IUri* uriToDelete,
-            /* [in] */ IContentValues* values,
             /* [in] */ ItemInfo* item);
 
         CARAPI Run();
 
     private:
-        AutoPtr<LauncherModel> mHost;
         AutoPtr<IContentResolver> mCr;
-        AutoPtr<IUri> mUriToDelete,
-        AutoPtr<IContentValues> mValues;
+        AutoPtr<IUri> mUriToDelete;
         AutoPtr<ItemInfo> mItem;
     };
 
@@ -177,14 +212,12 @@ private:
     {
     public:
         MyRunnable7(
-            /* [in] */ LauncherModel* host,
-            /* [in] */ IContentResolver* cr;
+            /* [in] */ IContentResolver* cr,
             /* [in] */ FolderInfo* info);
 
         CARAPI Run();
 
     private:
-        AutoPtr<LauncherModel> mHost;
         AutoPtr<IContentResolver> mCr;
         AutoPtr<FolderInfo> mInfo;
     };
@@ -229,190 +262,13 @@ private:
         AutoPtr<LauncherModel> mHost;
     };
 
-    class MyRunnable8
-        : public Runnable
-    {
-    public:
-        MyRunnable8(
-            /* [in] */ LoaderTask* host);
-
-        CARAPI Run();
-
-    private:
-        AutoPtr<LoaderTask> mHost;
-    };
-
-    class MyComparator
-        : public Object
-        , public IComparator
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        //@Override
-        CARAPI Compare(
-            /* [in] */ IInterface* lhs,
-            /* [in] */ IInterface* rhs,
-            /* [out] */ Int32* result);
-    };
-
-    class MyComparator2
-        : public Object
-        , public IComparator
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        //@Override
-        CARAPI Compare(
-            /* [in] */ IInterface* lhs,
-            /* [in] */ IInterface* rhs,
-            /* [out] */ Int32* result);
-    };
-
-    class MyRunnable9
-        : public Runnable
-    {
-    public:
-        MyRunnable9(
-            /* [in] */ LoaderTask* host,
-            /* [in] */ ILauncherModelCallbacks* oldCallbacks,
-            /* [in] */ IArrayList* workspaceItems,
-            /* [in] */ Int32 start,
-            /* [in] */ Int32 chunkSize);
-
-        CARAPI Run();
-
-    private:
-        AutoPtr<LoaderTask> mHost;
-        AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
-        AutoPtr<IArrayList> mWorkspaceItems;
-        Int32 mStart;
-        Int32 mChunkSize;
-    };
-
-    class MyRunnable10
-        : public Runnable
-    {
-    public:
-        MyRunnable10(
-            /* [in] */ LoaderTask* host,
-            /* [in] */ ILauncherModelCallbacks* oldCallbacks,
-            /* [in] */ IHashMap* folders);
-
-        CARAPI Run();
-
-    private:
-        AutoPtr<LoaderTask> mHost;
-        AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
-        AutoPtr<IHashMap> mFolders;
-    };
-
-    class MyRunnable11
-        : public Runnable
-    {
-    public:
-        MyRunnable11(
-            /* [in] */ LoaderTask* host,
-            /* [in] */ ILauncherModelCallbacks* oldCallbacks,
-            /* [in] */ ILauncherAppWidgetInfo* widget);
-
-        CARAPI Run();
-
-    private:
-        AutoPtr<LoaderTask> mHost;
-        AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
-        AutoPtr<ILauncherAppWidgetInfo> mWidget;
-    };
-
-    class MyRunnable12
-        : public Runnable
-    {
-    public:
-        MyRunnable12(
-            /* [in] */ LoaderTask* host,
-            /* [in] */ ILauncherModelCallbacks* oldCallbacks);
-
-        CARAPI Run();
-
-    private:
-        AutoPtr<LoaderTask> mHost;
-        AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
-    };
-
-    class MyRunnable13
-        : public Runnable
-    {
-    public:
-        MyRunnable13(
-            /* [in] */ LoaderTask* host,
-            /* [in] */ ILauncherModelCallbacks* oldCallbacks,
-            /* [in] */ Int32 currentScreen);
-
-        CARAPI Run();
-
-    private:
-        AutoPtr<LoaderTask> mHost;
-        AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
-        Int32 mCurrentScreen;
-    };
-
-    class MyRunnable14
-        : public Runnable
-    {
-    public:
-        MyRunnable14(
-            /* [in] */ LoaderTask* host,
-            /* [in] */ ILauncherModelCallbacks* oldCallbacks);
-
-        CARAPI Run();
-
-    private:
-        AutoPtr<LoaderTask> mHost;
-        AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
-    };
-
-    class MyRunnable15
-        : public Runnable
-    {
-    public:
-        MyRunnable15(
-            /* [in] */ LoaderTask* host,
-            /* [in] */ ILauncherModelCallbacks* oldCallbacks,
-            /* [in] */ IArrayList* list);
-
-        CARAPI Run();
-
-    private:
-        AutoPtr<LoaderTask> mHost;
-        AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
-        AutoPtr<IArrayList> mList;
-    };
-
-    class MyRunnable16
-        : public Runnable
-    {
-    public:
-        MyRunnable16(
-            /* [in] */ ILauncherModelCallbacks* _callbacks,
-            /* [in] */ Boolean firstProfile,
-            /* [in] */ IArrayList* added);
-
-        CARAPI Run();
-
-    private:
-        AutoPtr<ILauncherModelCallbacks> mCallbacks;
-        Boolean mFirstProfile;
-        AutoPtr<IArrayList> mAdded;
-    };
-
     class MyRunnable17
         : public Runnable
     {
     public:
         MyRunnable17(
             /* [in] */ IWeakReference* _callbacks,
-            /* [in] */ ILauncherModelCallbacks* modelCallbacks;
+            /* [in] */ ILauncherModelCallbacks* modelCallbacks,
             /* [in] */ IArrayList* addedFinal);
 
         CARAPI Run();
@@ -429,7 +285,7 @@ private:
     public:
         MyRunnable18(
             /* [in] */ IWeakReference* _callbacks,
-            /* [in] */ ILauncherModelCallbacks* modelCallbacks;
+            /* [in] */ ILauncherModelCallbacks* modelCallbacks,
             /* [in] */ IArrayList* modifiedFinal);
 
         CARAPI Run();
@@ -446,7 +302,7 @@ private:
     public:
         MyRunnable19(
             /* [in] */ IWeakReference* _callbacks,
-            /* [in] */ ILauncherModelCallbacks* modelCallbacks;
+            /* [in] */ ILauncherModelCallbacks* modelCallbacks,
             /* [in] */ IArrayList* removedPackageNames,
             /* [in] */ IArrayList* removedApps,
             /* [in] */ Boolean permanent,
@@ -469,7 +325,7 @@ private:
     public:
         MyRunnable20(
             /* [in] */ IWeakReference* _callbacks,
-            /* [in] */ ILauncherModelCallbacks* modelCallbacks;
+            /* [in] */ ILauncherModelCallbacks* modelCallbacks,
             /* [in] */ IArrayList* widgetsAndShortcuts);
 
         CARAPI Run();
@@ -490,10 +346,189 @@ private:
         : public Object
         , public IRunnable
     {
+    private:
+        class MyRunnable8
+            : public Runnable
+        {
+        public:
+            MyRunnable8(
+                /* [in] */ LoaderTask* host);
+
+            CARAPI Run();
+
+        private:
+            AutoPtr<LoaderTask> mHost;
+        };
+
+        class MyComparator
+            : public Object
+            , public IComparator
+        {
+        public:
+            CAR_INTERFACE_DECL();
+
+            //@Override
+            CARAPI Compare(
+                /* [in] */ IInterface* lhs,
+                /* [in] */ IInterface* rhs,
+                /* [out] */ Int32* result);
+        };
+
+        class MyComparator2
+            : public Object
+            , public IComparator
+        {
+        public:
+            CAR_INTERFACE_DECL();
+
+            //@Override
+            CARAPI Compare(
+                /* [in] */ IInterface* lhs,
+                /* [in] */ IInterface* rhs,
+                /* [out] */ Int32* result);
+        };
+
+        class MyRunnable9
+            : public Runnable
+        {
+        public:
+            MyRunnable9(
+                /* [in] */ LoaderTask* host,
+                /* [in] */ ILauncherModelCallbacks* oldCallbacks,
+                /* [in] */ IArrayList* workspaceItems,
+                /* [in] */ Int32 start,
+                /* [in] */ Int32 chunkSize);
+
+            CARAPI Run();
+
+        private:
+            AutoPtr<LoaderTask> mHost;
+            AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
+            AutoPtr<IArrayList> mWorkspaceItems;
+            Int32 mStart;
+            Int32 mChunkSize;
+        };
+
+        class MyRunnable10
+            : public Runnable
+        {
+        public:
+            MyRunnable10(
+                /* [in] */ LoaderTask* host,
+                /* [in] */ ILauncherModelCallbacks* oldCallbacks,
+                /* [in] */ IHashMap* folders);
+
+            CARAPI Run();
+
+        private:
+            AutoPtr<LoaderTask> mHost;
+            AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
+            AutoPtr<IHashMap> mFolders;
+        };
+
+        class MyRunnable11
+            : public Runnable
+        {
+        public:
+            MyRunnable11(
+                /* [in] */ LoaderTask* host,
+                /* [in] */ ILauncherModelCallbacks* oldCallbacks,
+                /* [in] */ ILauncherAppWidgetInfo* widget);
+
+            CARAPI Run();
+
+        private:
+            AutoPtr<LoaderTask> mHost;
+            AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
+            AutoPtr<ILauncherAppWidgetInfo> mWidget;
+        };
+
+        class MyRunnable12
+            : public Runnable
+        {
+        public:
+            MyRunnable12(
+                /* [in] */ LoaderTask* host,
+                /* [in] */ ILauncherModelCallbacks* oldCallbacks);
+
+            CARAPI Run();
+
+        private:
+            AutoPtr<LoaderTask> mHost;
+            AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
+        };
+
+        class MyRunnable13
+            : public Runnable
+        {
+        public:
+            MyRunnable13(
+                /* [in] */ LoaderTask* host,
+                /* [in] */ ILauncherModelCallbacks* oldCallbacks,
+                /* [in] */ Int32 currentScreen);
+
+            CARAPI Run();
+
+        private:
+            AutoPtr<LoaderTask> mHost;
+            AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
+            Int32 mCurrentScreen;
+        };
+
+        class MyRunnable14
+            : public Runnable
+        {
+        public:
+            MyRunnable14(
+                /* [in] */ LoaderTask* host,
+                /* [in] */ ILauncherModelCallbacks* oldCallbacks);
+
+            CARAPI Run();
+
+        private:
+            AutoPtr<LoaderTask> mHost;
+            AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
+        };
+
+        class MyRunnable15
+            : public Runnable
+        {
+        public:
+            MyRunnable15(
+                /* [in] */ LoaderTask* host,
+                /* [in] */ ILauncherModelCallbacks* oldCallbacks,
+                /* [in] */ IArrayList* list);
+
+            CARAPI Run();
+
+        private:
+            AutoPtr<LoaderTask> mHost;
+            AutoPtr<ILauncherModelCallbacks> mOldCallbacks;
+            AutoPtr<IArrayList> mList;
+        };
+
+        class MyRunnable16
+            : public Runnable
+        {
+        public:
+            MyRunnable16(
+                /* [in] */ ILauncherModelCallbacks* _callbacks,
+                /* [in] */ Boolean firstProfile,
+                /* [in] */ IArrayList* added);
+
+            CARAPI Run();
+
+        private:
+            AutoPtr<ILauncherModelCallbacks> mCallbacks;
+            Boolean mFirstProfile;
+            AutoPtr<IArrayList> mAdded;
+        };
+
     public:
         CAR_INTERFACE_DECL();
 
         LoaderTask(
+            /* [in] */ LauncherModel* host,
             /* [in] */ IContext* context,
             /* [in] */ Boolean isLaunching);
 
@@ -583,6 +618,7 @@ private:
         CARAPI_(void) LoadAllAppsByBatch();
 
     private:
+        AutoPtr<LauncherModel> mHost;
         AutoPtr<IContext> mContext;
         Boolean mIsLaunching;
         Boolean mIsLoadingAndBindingWorkspace;
@@ -600,6 +636,7 @@ private:
         CAR_INTERFACE_DECL();
 
         PackageUpdatedTask(
+            /* [in] */ LauncherModel* host,
             /* [in] */ Int32 op,
             /* [in] */ ArrayOf<String>* packages,
             /* [in] */ IUserHandle* user);
@@ -607,6 +644,7 @@ private:
         CARAPI Run();
 
     public:
+        AutoPtr<LauncherModel> mHost;
         Int32 mOp;
         AutoPtr<ArrayOf<String> > mPackages;
         AutoPtr<IUserHandle> mUser;
@@ -658,6 +696,7 @@ private:
         AutoPtr<ICollator> mCollator;
     };
 
+public:
     class MyComparator5
         : public Object
         , public IComparator
@@ -830,8 +869,8 @@ public:
     /**
      * Set this as the current Launcher activity object for the loader.
      */
-    CARAPI Initialize(
-        /* [in] */ ILauncherModelCallback* _callbacks);
+    // CARAPI Initialize(
+    //     /* [in] */ ILauncherModelCallbacks* _callbacks);
 
     CARAPI GetLauncherAppsCallback(
         /* [out] */ ILauncherAppsCallback** _callback);
@@ -978,7 +1017,7 @@ public:
     CARAPI DumpState();
 
 private:
-    CARAPI_(Boolean) InitStaticBlock();
+    static CARAPI_(Boolean) InitStaticBlock();
 
     /** Runs the specified runnable immediately if called from the main thread, otherwise it is
      * posted on the main thread handler. */
@@ -1037,7 +1076,7 @@ private:
 
     AutoPtr<ILauncherApplication> mApp;
     Object mLock;
-    AutoPtr<IDeferredHandler> mHandler;
+    AutoPtr<DeferredHandler> mHandler;
     AutoPtr<LoaderTask> mLoaderTask;
     Boolean mIsLoaderTaskRunning;
     /* volatile */ Boolean mFlushingWorkerThread;

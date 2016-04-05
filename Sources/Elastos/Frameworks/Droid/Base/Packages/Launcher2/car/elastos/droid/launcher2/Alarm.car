@@ -4,7 +4,12 @@ module
     namespace Droid {
     namespace Launcher2 {
 
-    interface IAlarmOnAlarmListener;
+    interface IAlarm;
+
+    interface IAlarmOnAlarmListener {
+        OnAlarm(
+            [in] IAlarm* alarm);
+    }
 
     /*
      * @invoke
@@ -21,12 +26,6 @@ module
 
         AlarmPending(
             [out] Boolean* result);
-    }
-
-    interface IAlarmOnAlarmListener {
-        OnAlarm(
-            [in] IAlarm* alarm);
-
     }
 
     } // namespace Launcher2

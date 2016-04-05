@@ -34,7 +34,7 @@ namespace Widget {
  * @attr ref android.R.styleable#TabWidget_tabStripRight
  */
 
-class TabWidget
+class ECO_PUBLIC TabWidget
     : public LinearLayout //implements OnFocusChangeListener
     , public ITabWidget
     , public IViewOnFocusChangeListener

@@ -1,4 +1,5 @@
 
+#include "elastos/droid/launcher2/CWallpaperChooserDialogFragmentHelper.h"
 #include "elastos/droid/launcher2/WallpaperChooserDialogFragment.h"
 
 namespace Elastos {
@@ -10,7 +11,7 @@ CAR_INTERFACE_IMPL(CWallpaperChooserDialogFragmentHelper, Singleton, IWallpaperC
 CAR_SINGLETON_IMPL(CWallpaperChooserDialogFragmentHelper)
 
 ECode CWallpaperChooserDialogFragmentHelper::NewInstance(
-    /* [out] */ IWallpaperChooserDialogFragment** fragment);
+    /* [out] */ IWallpaperChooserDialogFragment** fragment)
 {
     VALIDATE_NOT_NULL(fragment);
 

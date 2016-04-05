@@ -2,14 +2,27 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_CELLLAYOUT_H__
 #define  __ELASTOS_DROID_LAUNCHER2_CELLLAYOUT_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/launcher2/BubbleTextView.h"
 #include "elastos/droid/launcher2/DropTarget.h"
 #include "elastos/droid/launcher2/FolderIcon.h"
 #include "elastos/droid/launcher2/ShortcutAndWidgetContainer.h"
+#include "elastos/droid/launcher2/InterruptibleInOutAnimator.h"
+#include "elastos/droid/launcher2/ItemInfo.h"
+#include "elastos/droid/launcher2/DropTarget.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
 #include <elastos/droid/view/ViewGroup.h>
 #include <elastos/droid/view/animation/LayoutAnimationController.h>
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
+using Elastos::Core::Object;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::ITimeInterpolator;
@@ -28,13 +41,15 @@ using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewOnTouchListener;
 using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::ViewGroup;
 using Elastos::Droid::View::Animation::IAnimation;
 using Elastos::Droid::View::Animation::LayoutAnimationController;
+using Elastos::Core::IComparator;
 using Elastos::Utility::IArrayList;
-using Elastos::Utility::Arrays;
+//using Elastos::Utility::Arrays;
 using Elastos::Utility::ICollections;
-using Elastos::Utility::IComparator;
 using Elastos::Utility::IHashMap;
 using Elastos::Utility::IStack;
 
@@ -49,7 +64,8 @@ class CellLayout
 public:
     // Class which represents the reorder hint animations. These animations show that an item is
     // in a temporary state, and hint at where the item will return to.
-    class ReorderHintAnimation : public Object
+    class ReorderHintAnimation
+        : public Object
     {
     private:
         class AnimatorUpdateListener
@@ -71,8 +87,7 @@ public:
         };
 
         class MyAnimatorListenerAdapter
-            : public Object
-            , public AnimatorListenerAdapter
+            : public AnimatorListenerAdapter
         {
         public:
             MyAnimatorListenerAdapter(
@@ -119,7 +134,8 @@ public:
         CellLayout* mHost;
     };
 
-    class CellLayoutAnimationController : public LayoutAnimationController
+    class CellLayoutAnimationController
+        : public LayoutAnimationController
     {
     public:
         CellLayoutAnimationController(
@@ -288,12 +304,11 @@ private:
         Int32 mThisIndex;
     };
 
-    class MyAnimatorListenerAdapter
-        : public Object
-        , public AnimatorListenerAdapter
+    class MyAnimatorListenerAdapter2
+        : public AnimatorListenerAdapter
     {
     public:
-        MyAnimatorListenerAdapter(
+        MyAnimatorListenerAdapter2(
             /* [in] */ InterruptibleInOutAnimator* anim);
 
         // @Override
@@ -333,12 +348,11 @@ private:
         AutoPtr<IView> mChild;
     };
 
-    class MyAnimatorListenerAdapter2
-        : public Object
-        , public AnimatorListenerAdapter
+    class MyAnimatorListenerAdapter3
+        : public AnimatorListenerAdapter
     {
     public:
-        MyAnimatorListenerAdapter2(
+        MyAnimatorListenerAdapter3(
             /* [in] */ CellLayout* mHost,
             /* [in] */ LayoutParams* lp,
             /* [in] */ IView* child);
@@ -354,6 +368,7 @@ private:
         Boolean mCancelled;
     };
 
+    class ItemConfiguration;
 
     /**
      * This helper class defines a cluster of views. It helps with defining complex edges
@@ -449,6 +464,8 @@ private:
         AutoPtr<PositionComparator> mComparator;
     };
 
+    class CellAndSpan;
+
     class ItemConfiguration : public Object
     {
     public:
@@ -518,13 +535,15 @@ public:
         /* [in] */ IAttributeSet* attrs,
         /* [in] */ Int32 defStyle);
 
-    static CARAPI_(Int32) WidthInPortrait(
+    static CARAPI WidthInPortrait(
         /* [in] */ IResources* r,
-        /* [in] */ Int32 numCells);
+        /* [in] */ Int32 numCells,
+        /* [out] */ Int32* outWidth);
 
-    static CARAPI_(Int32) HeightInLandscape(
+    static CARAPI HeightInLandscape(
         /* [in] */ IResources* r,
-        /* [in] */ Int32 numCells);
+        /* [in] */ Int32 numCells,
+        /* [out] */ Int32* outHeight);
 
     CARAPI_(void) EnableHardwareLayers();
 
@@ -737,7 +756,7 @@ public:
     CARAPI_(AutoPtr<IRect>) GetContentRect(
         /* [in] */ IRect* r);
 
-    static CARAPI_(void) GetMetrics(
+    static CARAPI GetMetrics(
         /* [in] */ IRect* metrics,
         /* [in] */ IResources* res,
         /* [in] */ Int32 measureWidth,
@@ -1149,11 +1168,12 @@ public:
         /* [in] */ Int32 height,
         /* [in] */ ArrayOf<Int32>* result);
 
-    static CARAPI_(AutoPtr<ArrayOf<Int32> >) RectToCell(
+    static CARAPI RectToCell(
         /* [in] */ IResources* resources,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height,
-        /* [in] */ ArrayOf<Int32>* result);
+        /* [in] */ ArrayOf<Int32>* result,
+        /* [out, callee] */ ArrayOf<Int32>** outArray);
 
     CARAPI_(AutoPtr<ArrayOf<Int32> >) CellSpansToSize(
         /* [in] */ Int32 hSpans,
@@ -1179,13 +1199,14 @@ public:
         /* [in] */ Int32 spanX,
         /* [in] */ Int32 spanY);
 
-    static CARAPI_(Boolean) FindVacantCell(
+    static CARAPI FindVacantCell(
         /* [in] */ ArrayOf<Int32>* vacant,
         /* [in] */ Int32 spanX,
         /* [in] */ Int32 spanY,
         /* [in] */ Int32 xCount,
         /* [in] */ Int32 yCount,
-        /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied);
+        /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied,
+        /* [out] */ Boolean* result);
 
     CARAPI_(void) OnMove(
         /* [in] */ IView* view,
@@ -1235,7 +1256,7 @@ protected:
         /* [in] */ ICanvas* canvas);
 
     // @Override
-    CARAPI DispatchDraw(
+    CARAPI_(void) DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
     // @Override
@@ -1462,7 +1483,7 @@ private:
     static const AutoPtr<IPorterDuffXfermode> sAddBlendMode;
     static const AutoPtr<IPaint> sPaint;
 
-    Launcher* mLauncher;
+    AutoPtr<ILauncher> mLauncher;
     Int32 mCellWidth;
     Int32 mCellHeight;
 
@@ -1541,7 +1562,7 @@ private:
     AutoPtr<IArrayList> mIntersectingViews; // item is view
     AutoPtr<IRect> mOccupiedRect;
     AutoPtr<ArrayOf<Int32> > mDirectionVector;
-    AutoPtr<DropTarget::DragEnforcer> mDragEnforcer;
+    AutoPtr<DragEnforcer> mDragEnforcer;
     AutoPtr<IRect> mTemp;
     AutoPtr<IStack> mTempRectStack;
 };

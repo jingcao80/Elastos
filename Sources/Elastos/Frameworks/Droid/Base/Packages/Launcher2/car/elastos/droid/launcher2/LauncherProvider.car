@@ -1,5 +1,7 @@
 module
 {
+    using interface Elastos.Droid.Net.IUri;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
@@ -18,6 +20,33 @@ module
                 "DB_CREATED_BUT_DEFAULT_WORKSPACE_NOT_LOADED";
         const String DEFAULT_WORKSPACE_RESOURCE_ID =
                 "DEFAULT_WORKSPACE_RESOURCE_ID";
+
+        GetCONTENT_APPWIDGET_RESET_URI(
+            [out] IUri** uri);
+
+        GenerateNewId(
+            [out] Int64* id);
+
+        /**
+         * @param workspaceResId that can be 0 to use default or non-zero for specific resource
+         */
+        LoadDefaultFavoritesIfNecessary(
+            [in] Int32 origWorkspaceResId,
+            [in] Boolean overridePrevious);
+
+        DeleteDatabase();
+    }
+
+    [deprecated]
+    interface ILauncherProviderHelper {
+        /**
+         * Build a query string that will match any row where the column matches
+         * anything in the values list.
+         */
+        BuildOrWhereString(
+            [in] String column,
+            [in] ArrayOf<Int32>* values,
+            [out] String* result);
     }
 
     } // namespace Launcher2

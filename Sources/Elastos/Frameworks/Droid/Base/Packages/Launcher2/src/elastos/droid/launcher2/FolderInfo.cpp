@@ -1,22 +1,32 @@
 
 #include "elastos/droid/launcher2/FolderInfo.h"
+#include "elastos/droid/launcher2/LauncherSettings.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+CAR_INTERFACE_IMPL(FolderInfo, ItemInfo, IFolderInfo);
+
 FolderInfo::FolderInfo()
     : mOpened(FALSE)
+{
+}
+
+ECode FolderInfo::constructor()
 {
     CArrayList::New((IArrayList**)&mContents);
     CArrayList::New((IArrayList**)&mListeners);
     mItemType = LauncherSettings::Favorites::ITEM_TYPE_FOLDER;
+    return NOERROR;
 }
 
 ECode FolderInfo::Add(
-    /* [in] */ IShortcutInfo* item)
+    /* [in] */ ShortcutInfo* item)
 {
     mContents->Add(TO_IINTERFACE(item));
     Int32 size;
@@ -31,7 +41,7 @@ ECode FolderInfo::Add(
 }
 
 ECode FolderInfo::Remove(
-    /* [in] */ IShortcutInfo* item)
+    /* [in] */ ShortcutInfo* item)
 {
     mContents->Remove(TO_IINTERFACE(item));
     Int32 size;
@@ -40,7 +50,7 @@ ECode FolderInfo::Remove(
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
         AutoPtr<IFolderListener> listener = IFolderListener::Probe(obj);
-        listener->onRemove(item);
+        listener->OnRemove(item);
     }
     return ItemsChanged();
 }
@@ -80,9 +90,9 @@ ECode FolderInfo::RemoveListener(
     /* [in] */ IFolderListener* listener)
 {
     Boolean res;
-    listeners->Contains(TO_IINTERFACE(listener), &res);
+    mListeners->Contains(TO_IINTERFACE(listener), &res);
     if (res) {
-        listeners->Remove(TO_IINTERFACE(listener));
+        mListeners->Remove(TO_IINTERFACE(listener));
     }
     return NOERROR;
 }

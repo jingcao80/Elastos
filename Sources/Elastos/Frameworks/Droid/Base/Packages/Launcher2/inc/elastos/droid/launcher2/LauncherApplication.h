@@ -25,7 +25,7 @@ private:
             /* [in] */ Boolean selfChange);
 
     private:
-        LauncherApplication* mHost;
+        AutoPtr<LauncherApplication> mHost;
     };
 
 public:

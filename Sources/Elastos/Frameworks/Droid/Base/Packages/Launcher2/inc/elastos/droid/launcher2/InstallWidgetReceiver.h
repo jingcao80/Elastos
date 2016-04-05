@@ -1,7 +1,29 @@
 #ifndef  __ELASTOS_DROID__LAUNCHER2_INSTALLWIDGETRECEIVER_H__
 #define  __ELASTOS_DROID__LAUNCHER2_INSTALLWIDGETRECEIVER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Content::IClipData;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Database::IDataSetObserver;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::Widget::IAdapter;
+using Elastos::Droid::Widget::IListAdapter;
+using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
+using Elastos::Core::Object;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -121,16 +143,6 @@ public:
         Int32 mTargetLayoutScreen;
         AutoPtr<ArrayOf<Int32> > mTargetLayoutPos;
     };
-
-public:
-    static const String ACTION_INSTALL_WIDGET;
-    static const String ACTION_SUPPORTS_CLIPDATA_MIMETYPE;
-
-    // Currently not exposed.  Put into Intent when we want to make it public.
-    // TEMP: Should we call this "EXTRA_APPWIDGET_PROVIDER"?
-    static const String EXTRA_APPWIDGET_COMPONENT;
-    static const String EXTRA_APPWIDGET_CONFIGURATION_DATA_MIME_TYPE;
-    static const String EXTRA_APPWIDGET_CONFIGURATION_DATA;
 };
 
 } // namespace Launcher2

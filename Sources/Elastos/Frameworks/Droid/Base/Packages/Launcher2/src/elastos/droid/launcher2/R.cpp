@@ -2,7 +2,7 @@
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
-
+ 
 const int R::anim::fade_in_fast;
 const int R::anim::fade_out_fast;
 const int R::array::extra_wallpapers;

@@ -1,7 +1,37 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_LAUNCHERPROVIDER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_LAUNCHERPROVIDER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/content/ContentProvider.h"
+#include "elastos/droid/database/sqlite/SQLiteOpenHelper.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include <Elastos.CoreLibrary.External.h>
+
+using Elastos::Droid::AppWidget::IAppWidgetHost;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::ContentProvider;
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Content::Res::IXmlResourceParser;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Database::Sqlite::ISQLiteDatabase;
+using Elastos::Droid::Database::Sqlite::SQLiteOpenHelper;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Core::Object;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -11,12 +41,33 @@ class LauncherProvider
     : public ContentProvider
     , public ILauncherProvider
 {
+public:
+    class SqlArguments
+        : public Object
+    {
+    public:
+        SqlArguments(
+            /* [in] */ IUri* url,
+            /* [in] */ const String& where,
+            /* [in] */ ArrayOf<String>* args);
+
+        SqlArguments(
+            /* [in] */ IUri* url);
+
+    public:
+        String mTable;
+        String mWhere;
+        AutoPtr<ArrayOf<String> > mArgs;
+    };
+
 private:
     class DatabaseHelper
         : public SQLiteOpenHelper
     {
     public:
-        DatabaseHelper(
+        DatabaseHelper();
+
+        CARAPI constructor(
             /* [in] */ IContext* context);
 
         //@Override
@@ -38,6 +89,7 @@ private:
             /* [out] */ Int64* id);
 
     private:
+        friend class LauncherProvider;
         /**
          * Send notification that we've deleted the {@link AppWidgetHost},
          * probably as part of the initial database creation. The receiver may
@@ -169,25 +221,6 @@ private:
     };
 
 public:
-    class SqlArguments
-        : public Object
-    {
-    public:
-        SqlArguments(
-            /* [in] */ IUri* url,
-            /* [in] */ const String& where,
-            /* [in] */ ArrayOf<String>* args);
-
-        SqlArguments(
-            /* [in] */ IUri* url);
-
-    public:
-        String mTable;
-        String mWhere;
-        AutoPtr<ArrayOf<String> > mArgs;
-    };
-
-public:
     CAR_INTERFACE_DECL();
 
     CARAPI GetCONTENT_APPWIDGET_RESET_URI(
@@ -205,9 +238,9 @@ public:
     //@Override
     CARAPI Query(
         /* [in] */ IUri* uri,
-        /* [in] */ ARRAYoF<String>* projection,
+        /* [in] */ ArrayOf<String>* projection,
         /* [in] */ const String& selection,
-        /* [in] */ ARRAYoF<String>* selectionArgs,
+        /* [in] */ ArrayOf<String>* selectionArgs,
         /* [in] */ const String& sortOrder,
         /* [out] */ ICursor** cursor);
 
@@ -215,7 +248,7 @@ public:
     CARAPI Insert(
         /* [in] */ IUri* uri,
         /* [in] */ IContentValues* initialValues,
-        /* [out] */ IUri** uri);
+        /* [out] */ IUri** outuri);
 
     //@Override
     CARAPI BulkInsert(
@@ -232,7 +265,7 @@ public:
 
     //@Override
     CARAPI Update(
-        /* [in] */ IUri uri,
+        /* [in] */ IUri* uri,
         /* [in] */ IContentValues* values,
         /* [in] */ const String& selection,
         /* [in] */ ArrayOf<String>* selectionArgs,
@@ -261,7 +294,7 @@ public:
 
 private:
     static CARAPI DbInsertAndCheck(
-        /* [in] */ IDatabaseHelper* helper,
+        /* [in] */ DatabaseHelper* helper,
         /* [in] */ ISQLiteDatabase* db,
         /* [in] */ const String& table,
         /* [in] */ const String& nullColumnHack,

@@ -1,5 +1,10 @@
 module
 {
+    using interface Elastos.Droid.View.ILayoutInflater;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.Os.IBundle;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
@@ -13,9 +18,16 @@ module
      * interface IAdapterViewOnItemSelectedListener
      * interface IAdapterViewOnItemClickListener
     */
+    [local]
     interface IWallpaperChooserDialogFragment {
+        OnCreateView(
+            [in] ILayoutInflater* inflater,
+            [in] IViewGroup* container,
+            [in] IBundle* savedInstanceState,
+            [out] IView** view);
     }
 
+    [local]
     interface IWallpaperChooserDialogFragmentHelper {
         NewInstance(
             [out] IWallpaperChooserDialogFragment** fragment);

@@ -3,11 +3,13 @@
 #include "Elastos.Droid.Service.h"
 #include "R.h"
 
+using Elastos::Droid::View::IViewParent;
+
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-ECode CheckLongPressHelper::CheckForLongPress::CheckForLongPress(
+CheckLongPressHelper::CheckForLongPress::CheckForLongPress(
     /* [in] */ CheckLongPressHelper* host)
     : mHost(host)
 {
@@ -23,10 +25,10 @@ ECode CheckLongPressHelper::CheckForLongPress::Run()
         if (res) {
             if (!mHost->mHasPerformedLongPress) {
                 Boolean tmp;
-                mView->PerformLongClick(&tmp);
+                mHost->mView->PerformLongClick(&tmp);
                 if (tmp) {
-                    mView->SetPressed(FALSE);
-                    mHasPerformedLongPress = TRUE;
+                    mHost->mView->SetPressed(FALSE);
+                    mHost->mHasPerformedLongPress = TRUE;
                 }
             }
         }
@@ -36,8 +38,8 @@ ECode CheckLongPressHelper::CheckForLongPress::Run()
 
 CheckLongPressHelper::CheckLongPressHelper(
     /* [in] */ IView* v)
-    : mHasPerformedLongPress(FALSE)
-    , mView(v)
+    : mView(v)
+    , mHasPerformedLongPress(FALSE)
 {
 }
 
@@ -46,16 +48,20 @@ ECode CheckLongPressHelper::PostCheckForLongPress()
     mHasPerformedLongPress = FALSE;
 
     if (mPendingCheckForLongPress == NULL) {
-        mPendingCheckForLongPress = new CheckForLongPress();
+        mPendingCheckForLongPress = new CheckForLongPress(this);
     }
-    return mView->PostDelayed(mPendingCheckForLongPress, LauncherApplication::GetLongPressTimeout());
+    //Boolean res;
+    assert(0 && "need class LauncherApplication");
+    //return mView->PostDelayed(mPendingCheckForLongPress, LauncherApplication::GetLongPressTimeout(), &res);
+    return NOERROR;
 }
 
 void CheckLongPressHelper::CancelLongPress()
 {
     mHasPerformedLongPress = FALSE;
     if (mPendingCheckForLongPress != NULL) {
-        mView->RemoveCallbacks(mPendingCheckForLongPress);
+        Boolean res;
+        mView->RemoveCallbacks(mPendingCheckForLongPress, &res);
         mPendingCheckForLongPress = NULL;
     }
     return;

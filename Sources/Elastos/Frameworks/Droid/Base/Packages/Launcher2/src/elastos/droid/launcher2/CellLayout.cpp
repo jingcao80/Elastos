@@ -1,10 +1,13 @@
 
 #include "elastos/droid/launcher2/CellLayout.h"
+#include "elastos/droid/launcher2/LauncherAnimUtils.h"
+#include "elastos/droid/launcher2/LauncherModel.h"
 #include <elastos/utility/Arrays.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/droid/R.h>
 #include "R.h"
+
 
 using Elastos::Droid::Animation::IAnimatorSet;
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
@@ -21,13 +24,16 @@ using Elastos::Droid::Graphics::Drawable::INinePatchDrawable;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::Animation::IAnimation;
 using Elastos::Droid::View::Animation::CDecelerateInterpolator;
+using Elastos::Core::IFloat;
+using Elastos::Core::ICloneable;
+using Elastos::Core::EIID_IComparator;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::ICollections;
-using Elastos::Utility::EIID_IComparator;
 using Elastos::Utility::CHashMap;
+using Elastos::Utility::ISet;
 using Elastos::Utility::CStack;
 using Elastos::Utility::Logging::Logger;
 
@@ -71,7 +77,7 @@ ECode CellLayout::ReorderHintAnimation::MyAnimatorListenerAdapter::OnAnimationRe
     // We make sure to end only after a full period
     mHost->mInitDeltaX = 0.0f;
     mHost->mInitDeltaY = 0.0f;
-    mHost->mInitScale = mHost->GetChildrenScale();
+    mHost->mInitScale = mHost->mHost->GetChildrenScale();
     return NOERROR;
 }
 
@@ -88,12 +94,12 @@ CellLayout::ReorderHintAnimation::ReorderHintAnimation(
     /* [in] */ CellLayout* host)
     : mHost(host)
 {
-    RegionToCenterPoint(cellX0, cellY0, spanX, spanY, mTmpPoint);
-    const Int32 x0 = (*mTmpPoint)[0];
-    const Int32 y0 = (*mTmpPoint)[1];
-    RegionToCenterPoint(cellX1, cellY1, spanX, spanY, mTmpPoint);
-    const Int32 x1 = (*mTmpPoint)[0];
-    const Int32 y1 = (*mTmpPoint)[1];
+    mHost->RegionToCenterPoint(cellX0, cellY0, spanX, spanY, mHost->mTmpPoint);
+    const Int32 x0 = (*(mHost->mTmpPoint))[0];
+    const Int32 y0 = (*(mHost->mTmpPoint))[1];
+    mHost->RegionToCenterPoint(cellX1, cellY1, spanX, spanY, mHost->mTmpPoint);
+    const Int32 x1 = (*(mHost->mTmpPoint))[0];
+    const Int32 y1 = (*(mHost->mTmpPoint))[1];
     const Int32 dX = x1 - x0;
     const Int32 dY = y1 - y0;
     mFinalDeltaX = 0.0f;
@@ -102,24 +108,24 @@ CellLayout::ReorderHintAnimation::ReorderHintAnimation(
     }
     else {
         if (dY == 0) {
-            mFinalDeltaX = - Elastos::Core::Math::Signum(dX) * mReorderHintAnimationMagnitude;
+            mFinalDeltaX = - Elastos::Core::Math::Signum(dX) * mHost->mReorderHintAnimationMagnitude;
         }
         else if (dX == 0) {
-            mFinalDeltaY = - Elastos::Core::Math::Signum(dY) * mReorderHintAnimationMagnitude;
+            mFinalDeltaY = - Elastos::Core::Math::Signum(dY) * mHost->mReorderHintAnimationMagnitude;
         }
         else {
             Double angle = Elastos::Core::Math::Atan( (Float) (dY) / dX);
             mFinalDeltaX = (Int32) (- Elastos::Core::Math::Signum(dX) *
-                    Elastos::Core::Math::Abs(Elastos::Core::Math::Cos(angle) * mReorderHintAnimationMagnitude));
+                    Elastos::Core::Math::Abs(Elastos::Core::Math::Cos(angle) * mHost->mReorderHintAnimationMagnitude));
             mFinalDeltaY = (Int32) (- Elastos::Core::Math::Signum(dY) *
-                    Elastos::Core::Math::Abs(Elastos::Core::Math::Sin(angle) * mReorderHintAnimationMagnitude));
+                    Elastos::Core::Math::Abs(Elastos::Core::Math::Sin(angle) * mHost->mReorderHintAnimationMagnitude));
         }
     }
     child->GetTranslationX(&mInitDeltaX);
     child->GetTranslationY(&mInitDeltaY);
     Int32 width;
     child->GetWidth(&width);
-    mFinalScale = GetChildrenScale() - 4.0f / width;
+    mFinalScale = mHost->GetChildrenScale() - 4.0f / width;
     child->GetScaleX(&mInitScale);
     mChild = child;
 }
@@ -177,17 +183,17 @@ void CellLayout::ReorderHintAnimation::CompleteAnimationImmediately()
     mA = IAnimator::Probe(s);
     AutoPtr<ArrayOf<IAnimator*> > items = ArrayOf<IAnimator*>::Alloc(4);
     AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
-    (*array)[0] = GetChildrenScale();
+    (*array)[0] = mHost->GetChildrenScale();
     AutoPtr<IValueAnimator> va = LauncherAnimUtils::OfFloat(mChild, String("scaleX"), array);
-    (*items)[0] = va;
+    items->Set(0, IAnimator::Probe(va));
     va = LauncherAnimUtils::OfFloat(mChild, String("scaleY"), array);
-    (*items)[1] = va;
+    items->Set(1, IAnimator::Probe(va));
     array = ArrayOf<Float>::Alloc(1);
     (*array)[0] = 0.0f;
     va = LauncherAnimUtils::OfFloat(mChild, String("translationX"), array);
-    (*items)[2] = va;
+    items->Set(2, IAnimator::Probe(va));
     va = LauncherAnimUtils::OfFloat(mChild, String("translationY"), array);
-    (*items)[3] = va;
+    items->Set(3, IAnimator::Probe(va));
     s->PlayTogether(items);
     mA->SetDuration(REORDER_ANIMATION_DURATION);
     AutoPtr<ITimeInterpolator> interpolator;
@@ -248,7 +254,7 @@ ECode CellLayout::LayoutParams::constructor(
 ECode CellLayout::LayoutParams::constructor(
     /* [in] */ LayoutParams* source)
 {
-    MarginLayoutParams::constructor(source);
+    MarginLayoutParams::constructor(IViewGroupMarginLayoutParams::Probe(source));
     mCellX = source->mCellX;
     mCellY = source->mCellY;
     mCellHSpan = source->mCellHSpan;
@@ -267,6 +273,7 @@ ECode CellLayout::LayoutParams::constructor(
     mCellY = cellY;
     mCellHSpan = cellHSpan;
     mCellVSpan = cellVSpan;
+    return NOERROR;
 }
 
 void CellLayout::LayoutParams::Setup(
@@ -367,8 +374,7 @@ ECode CellLayout::AnimatorUpdateListener::OnAnimationUpdate(
         if (debug) {
             AutoPtr<IInterface> val;
             animation->GetAnimatedValue((IInterface**)&val);
-            Boolean isStopped;
-            mAnim->IsStopped(&isStopped);
+            Boolean isStopped = mAnim->IsStopped();
             Logger::D(TAG, "anim %d update: %s, isStopped %d",
                 mThisIndex, TO_CSTR(val), isStopped);
         }
@@ -378,23 +384,24 @@ ECode CellLayout::AnimatorUpdateListener::OnAnimationUpdate(
     else {
         AutoPtr<IInterface> val;
         animation->GetAnimatedValue((IInterface**)&val);
-        IFloat(val)->GetValue(&(*mHost->mDragOutlineAlphas)[mThisIndex]);
+        IFloat::Probe(val)->GetValue(&(*mHost->mDragOutlineAlphas)[mThisIndex]);
         mHost->Invalidate((*mHost->mDragOutlines)[mThisIndex]);
     }
+    return NOERROR;
 }
 
-CellLayout::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
+CellLayout::MyAnimatorListenerAdapter2::MyAnimatorListenerAdapter2(
     /* [in] */ InterruptibleInOutAnimator* anim)
     : mAnim(anim)
 {}
 
-ECode CellLayout::MyAnimatorListenerAdapter::OnAnimationEnd(
+ECode CellLayout::MyAnimatorListenerAdapter2::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     AutoPtr<IInterface> val;
     IValueAnimator::Probe(animation)->GetAnimatedValue((IInterface**)&val);
     Float value;
-    IFloat(val)->GetValue(&value);
+    IFloat::Probe(val)->GetValue(&value);
     if (value == 0.0f) {
         mAnim->SetTag(NULL);
     }
@@ -424,24 +431,24 @@ ECode CellLayout::AnimatorUpdateListener2::OnAnimationUpdate(
     AutoPtr<IInterface> val;
     animation->GetAnimatedValue((IInterface**)&val);
     Float r;
-    IFloat(val)->GetValue(&r);
+    IFloat::Probe(val)->GetValue(&r);
     mLp->mX = (Int32) ((1 - r) * mOldX + r * mNewX);
     mLp->mY = (Int32) ((1 - r) * mOldY + r * mNewY);
     mChild->RequestLayout();
     return NOERROR;
 }
 
-CellLayout::MyAnimatorListenerAdapter2::MyAnimatorListenerAdapter2(
-    /* [in] */ CellLayout* mHost,
+CellLayout::MyAnimatorListenerAdapter3::MyAnimatorListenerAdapter3(
+    /* [in] */ CellLayout* host,
     /* [in] */ LayoutParams* lp,
     /* [in] */ IView* child)
     : mHost(host)
-    : mLp(lp)
+    , mLp(lp)
     , mChild(child)
     , mCancelled(FALSE)
 {}
 
-ECode CellLayout::MyAnimatorListenerAdapter2::OnAnimationEnd(
+ECode CellLayout::MyAnimatorListenerAdapter3::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     // If the animation was cancelled, it means that another animation
@@ -508,7 +515,9 @@ CellLayout::ViewCluster::ViewCluster(
     mRightEdge = ArrayOf<Int32>::Alloc(mHost->mCountY);
     mTopEdge = ArrayOf<Int32>::Alloc(mHost->mCountX);
     mBottomEdge = ArrayOf<Int32>::Alloc(mHost->mCountX);
-    views->Clone((IArrayList**)&mViews);
+    AutoPtr<IInterface> obj;
+    ICloneable::Probe(views)->Clone((IInterface**)&obj);
+    mViews = IArrayList::Probe(obj);
     mComparator = new PositionComparator(this);
     ResetEdges();
 }
@@ -543,6 +552,7 @@ void CellLayout::ViewCluster::ComputeEdge(
         CellAndSpan* cs = (CellAndSpan*)IObject::Probe(value);
         switch (which) {
             case LEFT:
+            {
                 Int32 left = cs->mX;
                 for (Int32 j = cs->mY; j < cs->mY + cs->mSpanY; j++) {
                     if (left < (*edge)[j] || (*edge)[j] < 0) {
@@ -550,7 +560,9 @@ void CellLayout::ViewCluster::ComputeEdge(
                     }
                 }
                 break;
+            }
             case RIGHT:
+            {
                 Int32 right = cs->mX + cs->mSpanX;
                 for (Int32 j = cs->mY; j < cs->mY + cs->mSpanY; j++) {
                     if (right > (*edge)[j]) {
@@ -558,7 +570,9 @@ void CellLayout::ViewCluster::ComputeEdge(
                     }
                 }
                 break;
+            }
             case TOP:
+            {
                 Int32 top = cs->mY;
                 for (Int32 j = cs->mX; j < cs->mX + cs->mSpanX; j++) {
                     if (top < (*edge)[j] || (*edge)[j] < 0) {
@@ -566,7 +580,9 @@ void CellLayout::ViewCluster::ComputeEdge(
                     }
                 }
                 break;
+            }
             case BOTTOM:
+            {
                 Int32 bottom = cs->mY + cs->mSpanY;
                 for (Int32 j = cs->mX; j < cs->mX + cs->mSpanX; j++) {
                     if (bottom > (*edge)[j]) {
@@ -574,6 +590,7 @@ void CellLayout::ViewCluster::ComputeEdge(
                     }
                 }
                 break;
+            }
         }
     }
 }
@@ -674,7 +691,7 @@ AutoPtr<IRect> CellLayout::ViewCluster::GetBoundingRect()
                 first = FALSE;
             }
             else {
-                mBoundingRect.union(c->mX, c->mY, c->mX + c->mSpanX, c->mY + c->mSpanY);
+                mBoundingRect->Union(c->mX, c->mY, c->mX + c->mSpanX, c->mY + c->mSpanY);
             }
         }
     }
@@ -735,7 +752,7 @@ void CellLayout::ViewCluster::SortConfigurationForEdgePush(
     mComparator->mWhichEdge = edge;
     AutoPtr<ICollections> collections;
     CCollections::AcquireSingleton((ICollections**)&collections);
-    collections->Sort(mConfig->mSortedViews, comparator);
+    collections->Sort(IList::Probe(mConfig->mSortedViews), IComparator::Probe(mComparator));
 }
 
 CellLayout::ItemConfiguration::ItemConfiguration()
@@ -856,7 +873,7 @@ static AutoPtr<IPorterDuffXfermode> InitAddBlendMode()
 {
     AutoPtr<IPorterDuffXfermode> mode;
     CPorterDuffXfermode::New(PorterDuffMode_ADD, (IPorterDuffXfermode**)&mode);
-    return mode
+    return mode;
 }
 const AutoPtr<IPorterDuffXfermode> CellLayout::sAddBlendMode = InitAddBlendMode();
 
@@ -864,7 +881,7 @@ static AutoPtr<IPaint> InitPaint()
 {
     AutoPtr<IPaint> paint;
     CPaint::New((IPaint**)&paint);
-    return paint
+    return paint;
 }
 const AutoPtr<IPaint> CellLayout::sPaint = InitPaint();
 
@@ -938,16 +955,20 @@ ECode CellLayout::constructor(
     /* [in] */ Int32 defStyle)
 {
     FAIL_RETURN(ViewGroup::constructor(context, attrs, defStyle));
-    mDragEnforcer = new DropTarget::DragEnforcer(context);
+    mDragEnforcer = new DragEnforcer();
+    mDragEnforcer->constructor(context);
 
     // A ViewGroup usually does not draw, but CellLayout needs to draw a rectangle to show
     // the user where a dragged item will land when dropped.
     SetWillNotDraw(FALSE);
     SetClipToPadding(FALSE);
-    mLauncher = (Launcher*)context;
+    mLauncher = ILauncher::Probe(context);
 
+    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
+            const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::CellLayout),
+            ArraySize(Elastos::Droid::Launcher2::R::styleable::CellLayout));
     AutoPtr<ITypedArray> a;
-    context->ObtainStyledAttributes(attrs, R::styleable::CellLayout, defStyle, 0, (ITypedArray**)&a);
+    context->ObtainStyledAttributes(attrs, attrIds, defStyle, 0, (ITypedArray**)&a);
 
     a->GetDimensionPixelSize(R::styleable::CellLayout_cellWidth, 10, &mCellWidth);
     a->GetDimensionPixelSize(R::styleable::CellLayout_cellHeight, 10, &mCellHeight);
@@ -956,8 +977,8 @@ ECode CellLayout::constructor(
     a->GetDimensionPixelSize(R::styleable::CellLayout_heightGap, 0, &mOriginalHeightGap);
     mHeightGap = mOriginalHeightGap;
     a->GetDimensionPixelSize(R::styleable::CellLayout_maxGap, 0, &mMaxGap);
-    mCountX = LauncherModel::GetCellCountX();
-    mCountY = LauncherModel::GetCellCountY();
+    LauncherModel::GetCellCountX(&mCountX);
+    LauncherModel::GetCellCountY(&mCountY);
     mOccupied = ArrayOf<ArrayOf<Boolean>* >::Alloc(mCountX);
     for (Int32 i = 0; i < mCountX; i++) {
         AutoPtr<ArrayOf<Boolean> > item = ArrayOf<Boolean>::Alloc(mCountY);
@@ -1022,7 +1043,7 @@ ECode CellLayout::constructor(
         anim->GetAnimator()->AddUpdateListener(listener);
         // The animation holds a reference to the drag outline bitmap as long is it's
         // running. This way the bitmap can be GCed when the animations are complete.
-        AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter(anim);
+        AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter2(anim);
         anim->GetAnimator()->AddListener(adapter);
         (*mDragOutlineAnims)[i] = anim;
     }
@@ -1038,10 +1059,13 @@ ECode CellLayout::constructor(
     return NOERROR;
 }
 
-Int32 CellLayout::WidthInPortrait(
+ECode CellLayout::WidthInPortrait(
     /* [in] */ IResources* r,
-    /* [in] */ Int32 numCells)
+    /* [in] */ Int32 numCells,
+    /* [out] */ Int32* outWidth)
 {
+    VALIDATE_NOT_NULL(outWidth);
+
     // We use this method from Workspace to figure out how many rows/columns Launcher should
     // have. We ignore the left/right padding on CellLayout because it turns out in our design
     // the padding extends outside the visible screen size, but it looked fine anyway.
@@ -1052,13 +1076,17 @@ Int32 CellLayout::WidthInPortrait(
     r->GetDimensionPixelSize(R::dimen::workspace_height_gap, &hgap);
     Int32 minGap = Elastos::Core::Math::Min(wgap, hgap);
 
-    return  minGap * (numCells - 1) + cellWidth * numCells;
+    *outWidth =  minGap * (numCells - 1) + cellWidth * numCells;
+    return NOERROR;
 }
 
-Int32 CellLayout::HeightInLandscape(
+ECode CellLayout::HeightInLandscape(
     /* [in] */ IResources* r,
-    /* [in] */ Int32 numCells)
+    /* [in] */ Int32 numCells,
+    /* [out] */ Int32* outHeight)
 {
+    VALIDATE_NOT_NULL(outHeight);
+
     // We use this method from Workspace to figure out how many rows/columns Launcher should
     // have. We ignore the left/right padding on CellLayout because it turns out in our design
     // the padding extends outside the visible screen size, but it looked fine anyway.
@@ -1069,7 +1097,8 @@ Int32 CellLayout::HeightInLandscape(
     r->GetDimensionPixelSize(R::dimen::workspace_height_gap, &hgap);
     Int32 minGap = Elastos::Core::Math::Min(wgap, hgap);
 
-    return minGap * (numCells - 1) + cellHeight * numCells;
+    *outHeight = minGap * (numCells - 1) + cellHeight * numCells;
+    return NOERROR;
 }
 
 void CellLayout::EnableHardwareLayers()
@@ -1362,7 +1391,7 @@ void CellLayout::OnDraw(
     }
 }
 
-ECode CellLayout::DispatchDraw(
+void CellLayout::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     ViewGroup::DispatchDraw(canvas);
@@ -1374,7 +1403,6 @@ ECode CellLayout::DispatchDraw(
         mOverScrollForegroundDrawable->Draw(canvas);
         p->SetXfermode(NULL);
     }
-    return NOERROR;
 }
 
 void CellLayout::ShowFolderAccept(
@@ -1856,7 +1884,7 @@ AutoPtr<IRect> CellLayout::GetContentRect(
     return r;
 }
 
-void CellLayout::GetMetrics(
+ECode CellLayout::GetMetrics(
     /* [in] */ IRect* metrics,
     /* [in] */ IResources* res,
     /* [in] */ Int32 measureWidth,
@@ -1909,7 +1937,7 @@ void CellLayout::GetMetrics(
         widthGap = Elastos::Core::Math::Min(maxGap, numWidthGaps > 0 ? (hFreeSpace / numWidthGaps) : 0);
         heightGap = Elastos::Core::Math::Min(maxGap, numHeightGaps > 0 ? (vFreeSpace / numHeightGaps) : 0);
     }
-    metrics->Set(cellWidth, cellHeight, widthGap, heightGap);
+    return metrics->Set(cellWidth, cellHeight, widthGap, heightGap);
 }
 
 void CellLayout::OnMeasure(
@@ -2152,7 +2180,7 @@ Boolean CellLayout::AnimateChildToPosition(
         AutoPtr<IAnimatorUpdateListener> listener = new AnimatorUpdateListener2(
             lp, oldX, oldY, newX, newY, child);
         va->AddUpdateListener(listener);
-        AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter2(this, lp, child);
+        AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter3(this, lp, child);
         IAnimator::Probe(va)->AddListener(adapter);
         IAnimator::Probe(va)->SetStartDelay(delay);
         IAnimator::Probe(va)->Start();
@@ -2370,8 +2398,8 @@ AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
     // For items with a spanX / spanY > 1, the passed in point (pixelX, pixelY) corresponds
     // to the center of the item, but we are searching based on the top-left cell, so
     // we translate the point over to correspond to the top-left.
-    pixelX -= (mCellWidth + mWidthGap) * (spanX - 1) / 2f;
-    pixelY -= (mCellHeight + mHeightGap) * (spanY - 1) / 2f;
+    pixelX -= (mCellWidth + mWidthGap) * (spanX - 1) / 2.0f;
+    pixelY -= (mCellHeight + mHeightGap) * (spanY - 1) / 2.0f;
 
     // Keep track of best-scoring drop area
     AutoPtr<ArrayOf<Int32> > bestXY = result != NULL ? result : ArrayOf<Int32>::Alloc(2);
@@ -3794,12 +3822,15 @@ AutoPtr<ArrayOf<Int32> > CellLayout::RectToCell(
     return RectToCell(res, width, height, result);
 }
 
-AutoPtr<ArrayOf<Int32> > CellLayout::RectToCell(
+ECode CellLayout::RectToCell(
     /* [in] */ IResources* resources,
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
-    /* [in] */ ArrayOf<Int32>* result)
+    /* [in] */ ArrayOf<Int32>* result,
+    /* [out, callee] */ ArrayOf<Int32>** outArray)
 {
+    VALIDATE_NOT_NULL(outArray);
+
     // Always assume we're working with the smallest span to make sure we
     // reserve enough space in both orientations.
     Int32 actualWidth = resources->GetDimensionPixelSize(R::dimen::workspace_cell_width);
@@ -3814,11 +3845,15 @@ AutoPtr<ArrayOf<Int32> > CellLayout::RectToCell(
         AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(2);
         (*array)[0] = spanX;
         (*array)[1] = spanY;
-        return array;
+        *outArray = array;
+        REFCOUNT_ADD(*outArray);
+        return NOERROR;
     }
     (*result)[0] = spanX;
     (*result)[1] = spanY;
-    return result;
+    *outArray = result;
+    REFCOUNT_ADD(*outArray);
+    return NOERROR;
 }
 
 AutoPtr<ArrayOf<Int32> > CellLayout::CellSpansToSize(
@@ -3862,17 +3897,22 @@ Boolean CellLayout::GetVacantCell(
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY)
 {
-    return FindVacantCell(vacant, spanX, spanY, mCountX, mCountY, mOccupied);
+    Boolean res;
+    FindVacantCell(vacant, spanX, spanY, mCountX, mCountY, mOccupied, &res);
+    return res;
 }
 
-Boolean CellLayout::FindVacantCell(
+ECode CellLayout::FindVacantCell(
     /* [in] */ ArrayOf<Int32>* vacant,
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY,
     /* [in] */ Int32 xCount,
     /* [in] */ Int32 yCount,
-    /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied)
+    /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
+
     for (Int32 y = 0; y < yCount; y++) {
         for (Int32 x = 0; x < xCount; x++) {
             Boolean available = !(*(*occupied)[x])[y];
@@ -3891,12 +3931,14 @@ Boolean CellLayout::FindVacantCell(
             if (available) {
                 (*vacant)[0] = x;
                 (*vacant)[1] = y;
-                return TRUE;
+                *result = TRUE;
+                return NOERROR;
             }
         }
     }
 
-    return FALSE;
+    *result = FALSE;
+    return NOERROR;
 }
 
 void CellLayout::ClearOccupiedCells()

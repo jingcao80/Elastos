@@ -1,161 +1,189 @@
 
 #include "elastos/droid/launcher2/ButtonDropTarget.h"
+#include "elastos/droid/launcher2/DropTarget.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Launcher2::DragObject;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-CAR_INTERFACE_IMPL_2(ButtonDropTarget, TextView, IDropTarget, IDragControllerDragListener);
+CAR_INTERFACE_IMPL_3(ButtonDropTarget, TextView, IButtonDropTarget,
+        IDropTarget, IDragControllerDragListener);
 
-ButtonDropTarget::ButtonDropTarget(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
+ButtonDropTarget::ButtonDropTarget()
     : mTransitionDuration(0)
     , mActive(FALSE)
     , mHoverColor(0)
     , mBottomDragPadding(0)
 {
-    ButtonDropTarget(context, attrs, 0);
 }
 
-ButtonDropTarget::ButtonDropTarget(
+ECode ButtonDropTarget::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs)
+{
+    return constructor(context, attrs, 0);
+}
+
+ECode ButtonDropTarget::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
-    : mTransitionDuration(0)
-    , mActive(FALSE)
-    , mHoverColor(0)
-    , mBottomDragPadding(0)
-    , TextView(context, attrs, defStyle)
 {
+    TextView::constructor(context, attrs, defStyle);
     AutoPtr<IResources> r;
     GetResources((IResources**)&r);
     r->GetInteger(Elastos::Droid::Launcher2::R::integer::
             config_dropTargetBgTransitionDuration, &mTransitionDuration);
-    r->GetDimensionPixelSize(Elastos::Droid::Launcher2::R::dimen::
+    return r->GetDimensionPixelSize(Elastos::Droid::Launcher2::R::dimen::
             drop_target_drag_padding, &mBottomDragPadding);
 }
 
-void ButtonDropTarget::SetLauncher(
+ECode ButtonDropTarget::SetLauncher(
     /* [in] */ ILauncher* launcher)
 {
     mLauncher = launcher;
-    return;
+    return NOERROR;
 }
 
-Boolean ButtonDropTarget::AcceptDrop(
-    /* [in] */ DragObject* d)
+ECode ButtonDropTarget::AcceptDrop(
+    /* [in] */ IDropTargetDragObject* d,
+    /* [out] */ Boolean* result)
 {
-    return FALSE;
+    VALIDATE_NOT_NULL(result);
+
+    *result = FALSE;
+    return  NOERROR;
 }
 
-void ButtonDropTarget::SetSearchDropTargetBar(
+ECode ButtonDropTarget::SetSearchDropTargetBar(
     /* [in] */ ISearchDropTargetBar* searchDropTargetBar)
 {
     mSearchDropTargetBar = searchDropTargetBar;
-    return;
+    return NOERROR;
 }
 
-AutoPtr<IDrawable> ButtonDropTarget::GetCurrentDrawable()
+ECode ButtonDropTarget::GetCurrentDrawable(
+    /* [out] */ IDrawable** drawable)
 {
-    Drawable[] drawables = getCompoundDrawablesRelative();
-    for (int i = 0; i < drawables.length; ++i) {
-        if (drawables[i] != null) {
-            return drawables[i];
+    VALIDATE_NOT_NULL(drawable);
+
+    AutoPtr<ArrayOf<IDrawable*> > drawables;
+    GetCompoundDrawablesRelative((ArrayOf<IDrawable*>**)&drawables);
+    for (Int32 i = 0; i < drawables->GetLength(); ++i) {
+        if ((*drawables)[i] != NULL) {
+            *drawable = (*drawables)[i];
+            REFCOUNT_ADD(*drawable);
+            return NOERROR;
         }
     }
-    return null;
+    *drawable = NULL;
+    return NOERROR;
 }
 
-void ButtonDropTarget::OnDrop(
-    /* [in] */ DragObject* d)
+ECode ButtonDropTarget::OnDrop(
+    /* [in] */ IDropTargetDragObject* d)
 {
-    return;
+    return NOERROR;
 }
 
-void ButtonDropTarget::OnFlingToDelete(
-    /* [in] */ DragObject* d,
+ECode ButtonDropTarget::OnFlingToDelete(
+    /* [in] */ IDropTargetDragObject* d,
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
     /* [in] */ IPointF* vec)
 {
     // Do nothing
-    return;
+    return NOERROR;
 }
 
-void ButtonDropTarget::OnDragEnter(
-    /* [in] */ DragObject* d)
+ECode ButtonDropTarget::OnDragEnter(
+    /* [in] */ IDropTargetDragObject* d)
 {
-    d->mDragView->SetColor(mHoverColor);
-    return;
+    DragObject* _d = (DragObject*)d;
+    return _d->mDragView->SetColor(mHoverColor);
 }
 
-void ButtonDropTarget::OnDragOver(
-    /* [in] */ DragObject* d)
+ECode ButtonDropTarget::OnDragOver(
+    /* [in] */ IDropTargetDragObject* d)
 {
     // Do nothing
-    return;
+    return NOERROR;
 }
 
-void ButtonDropTarget::OnDragExit(
-    /* [in] */ DragObject* d)
+ECode ButtonDropTarget::OnDragExit(
+    /* [in] */ IDropTargetDragObject* d)
 {
-    d->mDragView->SetColor(0);
+    DragObject* _d = (DragObject*)d;
+    return _d->mDragView->SetColor(0);
 }
 
-void ButtonDropTarget::OnDragStart(
+ECode ButtonDropTarget::OnDragStart(
     /* [in] */ IDragSource* source,
     /* [in] */ IInterface* info,
     /* [in] */ Int32 dragAction)
 {
     // Do nothing
-    return;
+    return NOERROR;
 }
 
-Boolean ButtonDropTarget::IsDropEnabled()
+ECode ButtonDropTarget::IsDropEnabled(
+    /* [out] */ Boolean* result)
 {
-    return mActive;
+    VALIDATE_NOT_NULL(result);
+
+    *result = mActive;
+    return NOERROR;
 }
 
-void ButtonDropTarget::OnDragEnd()
+ECode ButtonDropTarget::OnDragEnd()
 {
     // Do nothing
-    return;
+    return NOERROR;
 }
 
-void ButtonDropTarget::GetHitRect(
+ECode ButtonDropTarget::GetHitRect(
     /* [in] */ IRect* outRect)
 {
     TextView::GetHitRect(outRect);
-    outRect.bottom += mBottomDragPadding;
 
     Int32 bottom;
     outRect->GetBottom(&bottom);
     bottom += mBottomDragPadding;
     outRect->SetBottom(bottom);
-    return;
+    return NOERROR;
 }
 
 Boolean ButtonDropTarget::IsRtl()
 {
-    return (GetLayoutDirection() == IView::LAYOUT_DIRECTION_RTL);
+    Int32 tmp;
+    GetLayoutDirection(&tmp);
+    return tmp == IView::LAYOUT_DIRECTION_RTL;
 }
 
-AutoPtr<IRect> ButtonDropTarget::GetIconRect(
+ECode ButtonDropTarget::GetIconRect(
     /* [in] */ Int32 viewWidth,
     /* [in] */ Int32 viewHeight,
     /* [in] */ Int32 drawableWidth,
-    /* [in] */ Int32 drawableHeight)
+    /* [in] */ Int32 drawableHeight,
+    /* [out] */ IRect** rect)
 {
-    AutoPtr<IDragLayer> dragLayer;
-    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    VALIDATE_NOT_NULL(rect);
+
+    assert(0 && "need class DragLayer");
+    // AutoPtr<IDragLayer> dragLayer;
+    // mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
 
     // Find the rect to animate to (the view is center aligned)
     AutoPtr<IRect> to;
     CRect::New((IRect**)&to);
-    dragLayer->GetViewRectRelativeToSelf(this, to);
+    assert(0 && "need class DragLayer");
+    // dragLayer->GetViewRectRelativeToSelf(this, to);
 
     const Int32 width = drawableWidth;
     const Int32 height = drawableHeight;
@@ -166,19 +194,25 @@ AutoPtr<IRect> ButtonDropTarget::GetIconRect(
     if (IsRtl()) {
         Int32 tmp;
         to->GetRight(&tmp);
-        right = tmp - GetPaddingRight();
+        Int32 res;
+        GetPaddingRight(&res);
+        right = tmp - res;
         left = right - width;
     }
     else {
         Int32 tmp;
         to->GetLeft(&tmp);
-        left = tmp + GetPaddingLeft();
+        Int32 res;
+        GetPaddingLeft(&res);
+        left = tmp + res;
         right = left + width;
     }
 
     Int32 tmp;
     to->GetTop(&tmp);
-    const Int32 top = tmp + (GetMeasuredHeight() - height) / 2;
+    Int32 res;
+    GetMeasuredHeight(&res);
+    const Int32 top = tmp + (res - height) / 2;
     const Int32 bottom = top +  height;
 
     to->Set(left, top, right, bottom);
@@ -188,21 +222,29 @@ AutoPtr<IRect> ButtonDropTarget::GetIconRect(
     const Int32 yOffset = (Int32) -(viewHeight - height) / 2;
     to->Offset(xOffset, yOffset);
 
-    return to;
+    *rect = to;
+    REFCOUNT_ADD(*rect);
+    return NOERROR;
 }
 
-AutoPtr<DropTarget> ButtonDropTarget::GetDropTargetDelegate(
-    /* [in] */ DragObject* d)
+ECode ButtonDropTarget::GetDropTargetDelegate(
+    /* [in] */ IDropTargetDragObject* d,
+    /* [out] */ IDropTarget** target)
 {
-    return NULL;
+    VALIDATE_NOT_NULL(target);;
+
+    *target = NULL;
+    return NOERROR;
 }
 
-void ButtonDropTarget::GetLocationInDragLayer(
+ECode ButtonDropTarget::GetLocationInDragLayer(
     /* [in] */ ArrayOf<Int32>* loc)
 {
-    AutoPtr<IDragLayer> layer;
-    mLauncher->GetDragLayer((IDragLayer**)&layer);
-    layer->GetLocationInDragLayer(this, loc);
+    assert(0 && "need class DragLayer");
+    // AutoPtr<IDragLayer> layer;
+    // mLauncher->GetDragLayer((IDragLayer**)&layer);
+    // return layer->GetLocationInDragLayer(this, loc);
+    return NOERROR;
 }
 
 } // namespace Launcher2

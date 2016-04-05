@@ -2,10 +2,20 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEW_H__
 #define  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEW_H__
 
+#include "_Launcher2.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
 #include <elastos/droid/os/Runnable.h>
+#include "elastos/droid/view/View.h"
 #include <elastos/droid/view/ViewGroup.h>
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Core::Object;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::ITimeInterpolator;
@@ -13,9 +23,13 @@ using Elastos::Droid::Animation::IValueAnimator;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IVelocityTracker;
 using Elastos::Droid::View::IView;
+using Elastos::Droid::View::View;
+using Elastos::Droid::View::ViewGroup;
+using Elastos::Droid::View::IViewOnLongClickListener;
 using Elastos::Droid::View::IViewGroupOnHierarchyChangeListener;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::View::Accessibility::IAccessibilityNodeInfo;
@@ -36,7 +50,8 @@ class PagedView
     , public IPagedView
 {
 public:
-    class SavedState : public BaseSavedState
+    class SavedState
+        : public View::BaseSavedState
     {
     public:
         SavedState();
@@ -97,11 +112,14 @@ private:
             /* [out] */ Boolean* res);
     };
 
-    class HideScrollingIndicatorRunnable : public Runnable
+    class HideScrollingIndicatorRunnable
+        : public Runnable
     {
     public:
         HideScrollingIndicatorRunnable(
-            /* [in] */ PagedView* mHost);
+            /* [in] */ PagedView* host)
+            : mHost(host)
+        {}
 
         // @Override
         CARAPI Run();
@@ -110,11 +128,15 @@ private:
         PagedView* mHost;
     };
 
-    class MyAnimatorListenerAdapter : public AnimatorListenerAdapter
+    class MyAnimatorListenerAdapter
+        : public AnimatorListenerAdapter
     {
     public:
         MyAnimatorListenerAdapter(
-            /* [in] */ PagedView* host);
+            /* [in] */ PagedView* host)
+            : mCancelled(FALSE)
+            , mHost(host)
+        {}
 
         // @Override
         CARAPI OnAnimationCancel(
@@ -432,7 +454,7 @@ protected:
         /* [in] */ IView* child);
 
     // @Override
-    CARAPI DispatchDraw(
+    CARAPI_(void) DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
     // @Override
@@ -646,7 +668,7 @@ protected:
     // parameter that adjusts the layout to be optimized for pages with that scale factor
     Float mLayoutScale;
 
-    Int32 mActivePointerId = INVALID_POINTER;
+    Int32 mActivePointerId;
 
     AutoPtr<IArrayList> mDirtyPageContent; // item is Boolean
 

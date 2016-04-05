@@ -1,0 +1,37 @@
+module
+{
+    interface Elastos.Droid.Launcher2.ILauncher;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     *
+     * interface IFrameLayout
+     */
+    [deprecated]
+    interface ICling {
+        CCling_Init(
+            [in] ILauncher* l,
+            [in] ArrayOf<Int32>* positionData);
+
+        Cleanup();
+
+        GetDrawIdentifier(
+            [out] String* str);
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

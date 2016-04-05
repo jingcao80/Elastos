@@ -1,0 +1,56 @@
+module
+{
+    interface Elastos.Droid.Launcher2.ILauncher;
+    interface Elastos.Droid.Launcher2.ICellLayout;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     *
+     * interface IFrameLayout
+     */
+    [local]
+    interface IHotseat {
+        Setup(
+            [in] ILauncher* launcher);
+
+        GetLayout(
+            [out] ICellLayout** cout);
+
+        /* Get the orientation invariant order of the item in the hotseat for persistence. */
+        GetOrderInHotseat(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] Int32* result);
+
+        /* Get the orientation specific coordinates given an invariant order in the hotseat. */
+        GetCellXFromOrder(
+            [in] Int32 rank,
+            [out] Int32* result);
+
+        GetCellYFromOrder(
+            [in] Int32 rank,
+            [out] Int32* result);
+
+        IsAllAppsButtonRank(
+            [in] Int32 rank,
+            [out] Boolean* result);
+
+        ResetLayout();
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

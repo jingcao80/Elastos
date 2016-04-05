@@ -1,7 +1,18 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_HANDLEVIEW_H__
 #define  __ELASTOS_DROID_LAUNCHER2_HANDLEVIEW_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/widget/ImageView.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::Widget::ImageView;
 
 namespace Elastos {
 namespace Droid {
@@ -9,11 +20,8 @@ namespace Launcher2 {
 
 class HandleView
     : public ImageView
-    , public IHandleView
 {
 public:
-    CAR_INTERFACE_DECL();
-
     HandleView();
 
     virtual ~HandleView() {}

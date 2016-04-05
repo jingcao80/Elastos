@@ -1,7 +1,23 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEWICONCACHE_H__
 #define  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEWICONCACHE_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Core::Object;
+using Elastos::Utility::IList;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -14,22 +30,27 @@ class PagedViewIconCache
     : public Object
 {
 public:
-    enum Type;
-
     class Key
         : public Object
-        : public IKey
+        , public IKey
     {
+    public:
+        enum Type {
+            ApplicationInfoKey,
+            AppWidgetProviderInfoKey,
+            ResolveInfoKey
+        };
+
     public:
         CAR_INTERFACE_DECL();
 
-        Key(
+        CARAPI constructor(
             /* [in] */ IApplicationInfo* info);
 
-        Key(
+        CARAPI constructor(
             /* [in] */ IResolveInfo* info);
 
-        Key(
+        CARAPI constructor(
             /* [in] */ IAppWidgetProviderInfo* info);
 
         CARAPI_(Boolean) IsKeyType(
@@ -46,13 +67,6 @@ public:
 
     private:
         CARAPI_(AutoPtr<IComponentName>) GetComponentName();
-
-    public:
-        enum Type {
-            ApplicationInfoKey,
-            AppWidgetProviderInfoKey,
-            ResolveInfoKey
-        }
 
     private:
         AutoPtr<IComponentName> mComponentName;

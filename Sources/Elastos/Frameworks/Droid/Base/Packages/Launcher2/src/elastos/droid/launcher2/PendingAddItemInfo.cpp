@@ -1,16 +1,25 @@
 
 #include "elastos/droid/launcher2/PendingAddItemInfo.h"
+#include "elastos/droid/launcher2/LauncherSettings.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/core/StringBuilder.h>
+#include "Elastos.CoreLibrary.Core.h"
+
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::ICloneable;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-PendingAddShortcutInfo::PendingAddShortcutInfo(
+ECode PendingAddShortcutInfo::constructor(
     /* [in] */ IActivityInfo* activityInfo)
-    : mShortcutActivityInfo(activityInfo)
+
 {
+    mShortcutActivityInfo = activityInfo;
+    return NOERROR;
 }
 
 ECode PendingAddShortcutInfo::ToString(
@@ -19,12 +28,19 @@ ECode PendingAddShortcutInfo::ToString(
     VALIDATE_NOT_NULL(str);
 
     String name;
-    mShortcutActivityInfo->GetPackageName(&name);
-    *str = String("Shortcut: ") + name;
-    return NOERROR;
+    IPackageItemInfo::Probe(mShortcutActivityInfo)->GetPackageName(&name);
+    StringBuilder sb;
+    sb += "Shortcut: ";
+    sb += name;
+    return sb.ToString(str);
 }
 
-PendingAddWidgetInfo::PendingAddWidgetInfo(
+PendingAddWidgetInfo::PendingAddWidgetInfo()
+    : mMimeType(NULL)
+{
+}
+
+ECode PendingAddWidgetInfo::constructor(
     /* [in] */ IAppWidgetProviderInfo* i,
     /* [in] */ const String& dataMimeType,
     /* [in] */ IParcelable* data)
@@ -36,9 +52,10 @@ PendingAddWidgetInfo::PendingAddWidgetInfo(
         mMimeType = dataMimeType;
         mConfigurationData = data;
     }
+    return NOERROR;
 }
 
-PendingAddWidgetInfo::PendingAddWidgetInfo(
+ECode PendingAddWidgetInfo::constructor(
     /* [in] */ PendingAddWidgetInfo* copy)
 {
     mInfo = copy->mInfo;
@@ -56,9 +73,10 @@ PendingAddWidgetInfo::PendingAddWidgetInfo(
     }
     else{
         AutoPtr<IInterface> obj;
-        copy->mBindOptions->Clone((IInterface**)&obj);
+        ICloneable::Probe(copy->mBindOptions)->Clone((IInterface**)&obj);
         mBindOptions = IBundle::Probe(obj);
     }
+    return NOERROR;
 }
 
 ECode PendingAddWidgetInfo::ToString(

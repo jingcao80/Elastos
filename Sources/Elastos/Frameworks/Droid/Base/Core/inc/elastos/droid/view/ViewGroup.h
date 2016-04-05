@@ -36,7 +36,6 @@ class ECO_PUBLIC ViewGroup
     friend class COverlayViewGroup;
 
 public:
-
     class LayoutParams
         : public Object
         , public IViewGroupLayoutParams

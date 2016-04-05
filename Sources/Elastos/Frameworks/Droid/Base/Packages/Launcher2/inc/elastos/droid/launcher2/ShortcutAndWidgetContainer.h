@@ -1,7 +1,19 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_SHORTCUTANDWIDGETCONTAINER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_SHORTCUTANDWIDGETCONTAINER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/view/ViewGroup.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::App::IWallpaperManager;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::ViewGroup;
 
 namespace Elastos {
 namespace Droid {
@@ -26,12 +38,13 @@ public:
         /* [in] */ Int32 heightGap,
         /* [in] */ Int32 countX);
 
-    CARAPI_(AutoPtr<IView>) GetChildAt(
+    CARAPI GetChildAt(
         /* [in] */ Int32 x,
-        /* [in] */ Int32 y);
+        /* [in] */ Int32 y,
+        /* [out] */ IView** view);
 
-    CARAPI SetupLp(
-        /* [in] */ CellLayout::LayoutParams* lp);
+    //CARAPI SetupLp(
+    //    /* [in] */ CellLayout::LayoutParams* lp);
 
     // Set whether or not to invert the layout horizontally if the layout is in RTL mode.
     CARAPI SetInvertIfRtl(
@@ -40,10 +53,12 @@ public:
     CARAPI MeasureChild(
         /* [in] */ IView* child);
 
-    CARAPI_(Boolean) IsLayoutRtl();
+    CARAPI IsLayoutRtl(
+        /* [out] */ Boolean* result);
 
     //@Override
-    CARAPI_(Boolean) ShouldDelayChildPressedState();
+    CARAPI ShouldDelayChildPressedState(
+        /* [out] */ Boolean* result);
 
     //@Override
     CARAPI RequestChildFocus(
@@ -54,12 +69,12 @@ public:
     CARAPI CancelLongPress();
 
 protected:
-     //@Override
-    CARAPI DispatchDraw(
+    //@Override
+    CARAPI_(void) DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
     //@Override
-    CARAPI OnMeasure(
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
@@ -72,11 +87,11 @@ protected:
         /* [in] */ Int32 b);
 
     //@Override
-    CARAPI SetChildrenDrawingCacheEnabled(
+    CARAPI_(void) SetChildrenDrawingCacheEnabled(
         /* [in] */ Boolean enabled);
 
     //@Override
-    CARAPI SetChildrenDrawnWithCacheEnabled(
+    CARAPI_(void) SetChildrenDrawnWithCacheEnabled(
         /* [in] */ Boolean enabled);
 
 private:

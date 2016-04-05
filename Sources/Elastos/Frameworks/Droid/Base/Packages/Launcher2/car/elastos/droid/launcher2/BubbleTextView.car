@@ -1,10 +1,13 @@
 module
 {
+    using interface Elastos.Droid.Graphics.IBitmap;
+
+    interface Elastos.Droid.Launcher2.IShortcutInfo;
+    interface Elastos.Droid.Launcher2.IIconCache;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
-
-    interface IAlarmOnAlarmListener;
 
     /*
      * @invoke
@@ -16,14 +19,31 @@ module
      * interface ITextView
     */
     interface IBubbleTextView {
-        const Float CORNER_RADIUS = 4.0f;
-        const Float SHADOW_LARGE_RADIUS = 4.0f;
-        const Float SHADOW_SMALL_RADIUS = 1.75f;
-        const Float SHADOW_Y_OFFSET = 2.0f;
+        const Float CORNER_RADIUS = 4.0;
+        const Float SHADOW_LARGE_RADIUS = 4.0;
+        const Float SHADOW_SMALL_RADIUS = 1.75;
+        const Float SHADOW_Y_OFFSET = 2.0;
         const Int32 SHADOW_LARGE_COLOUR = 0xDD000000;
         const Int32 SHADOW_SMALL_COLOUR = 0xCC000000;
-        const Float PADDING_H = 8.0f;
-        const Float PADDING_V = 3.0f;
+        const Float PADDING_H = 8.0;
+        const Float PADDING_V = 3.0;
+
+        ApplyFromShortcutInfo(
+            [in] IShortcutInfo* info,
+            [in] IIconCache* iconCache);
+
+        SetStayPressed(
+            [in] Boolean stayPressed);
+
+        SetCellLayoutPressedOrFocusedIcon();
+
+        ClearPressedOrFocusedBackground();
+
+        GetPressedOrFocusedBackground(
+            [out] IBitmap** map);
+
+        GetPressedOrFocusedBackgroundPadding(
+            [out] Int32* res);
     }
 
     } // namespace Launcher2

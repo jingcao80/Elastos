@@ -1,7 +1,30 @@
 
 #include "elastos/droid/launcher2/IconCache.h"
+#include "elastos/droid/launcher2/Utilities.h"
+#include "elastos/droid/os/Process.h"
+#include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Service.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/Math.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/AutoLock.h>
 #include "R.h"
+
+using Elastos::Droid::App::IActivityManager;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Res::IResourcesHelper;
+using Elastos::Droid::Content::Res::CResourcesHelper;
+using Elastos::Droid::Content::Pm::IComponentInfo;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Content::Pm::ILauncherApps;
+using Elastos::Droid::Graphics::CBitmapHelper;
+using Elastos::Droid::Graphics::IBitmapHelper;
+using Elastos::Droid::Graphics::CCanvas;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
+using Elastos::Droid::Os::Process;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::CHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -34,12 +57,12 @@ ECode IconCache::CacheKey::Equals(
 {
     VALIDATE_NOT_NULL(equal);
 
-    CacheKey* other = (CacheKey*)IObject::Probe(o);
-    Boolean res;
-    IObject::Probe(other->mComponentName)->Equals(componentName, &res);
+    CacheKey* other = (CacheKey*)IObject::Probe(obj);
+    Boolean res1;
+    IObject::Probe(other->mComponentName)->Equals(mComponentName, &res1);
     Boolean res2;
-    IObject::Probe(other->mUser)->Equals(user, &res2);
-    *equal = user && res2;
+    IObject::Probe(other->mUser)->Equals(mUser, &res2);
+    *equal = res1 && res2;
     return NOERROR;
 }
 
@@ -47,20 +70,28 @@ const String IconCache::TAG("Launcher.IconCache");
 
 const Int32 IconCache::INITIAL_ICON_CACHE_CAPACITY = 50;
 
-IconCache::IconCache(
+CAR_INTERFACE_IMPL(IconCache, Object, IIconCache);
+
+IconCache::IconCache()
+    : mIconDpi(0)
+{
+}
+
+ECode IconCache::constructor(
     /* [in] */ ILauncherApplication* context)
 {
     CHashMap::New(INITIAL_ICON_CACHE_CAPACITY, (IHashMap**)&mCache);
 
     AutoPtr<IInterface> obj;
-    context->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&obj);
+    IContext::Probe(context)->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&obj);
     AutoPtr<IActivityManager> activityManager = IActivityManager::Probe(obj);
 
     mContext = context;
-    context->GetPackageManager((IPackageManager**)&mPackageManager);
+    IContext::Probe(context)->GetPackageManager((IPackageManager**)&mPackageManager);
     activityManager->GetLauncherLargeIconDensity(&mIconDpi);
     // need to set mIconDpi before getting default icon
     mDefaultIcon = MakeDefaultIcon();
+    return NOERROR;
 }
 
 AutoPtr<IDrawable> IconCache::GetFullResDefaultActivityIcon()
@@ -72,7 +103,7 @@ AutoPtr<IDrawable> IconCache::GetFullResDefaultActivityIcon()
     AutoPtr<IUserHandle> user;
     Process::MyUserHandle((IUserHandle**)&user);
     return GetFullResIcon(resources,
-            Elastos::Droid::Launcher2::R::mipmap::sym_def_app_icon, user);
+            Elastos::Droid::R::mipmap::sym_def_app_icon, user);
 }
 
 AutoPtr<IDrawable> IconCache::GetFullResIcon(
@@ -137,8 +168,8 @@ AutoPtr<IDrawable> IconCache::GetFullResIcon(
 {
     AutoPtr<IResources> resources;
     //try {
-    AutoPtr<IApplicationInfo> ainfo;
-    IComponentInfo::Probe(info)->GetApplicationInfo((IApplicationInfo**)&ainfo);
+    AutoPtr<Elastos::Droid::Content::Pm::IApplicationInfo> ainfo;
+    IComponentInfo::Probe(info)->GetApplicationInfo((Elastos::Droid::Content::Pm::IApplicationInfo**)&ainfo);
     ECode ec = mPackageManager->GetResourcesForApplication(ainfo, (IResources**)&resources);
     //} catch (PackageManager.NameNotFoundException e) {
     if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
@@ -147,7 +178,7 @@ AutoPtr<IDrawable> IconCache::GetFullResIcon(
     //}
     if (resources != NULL) {
         Int32 iconId;
-        info->GetIconResource(7iconId);
+        IComponentInfo::Probe(info)->GetIconResource(&iconId);
         if (iconId != 0) {
             return GetFullResIcon(resources, iconId, user);
         }
@@ -163,9 +194,11 @@ AutoPtr<IBitmap> IconCache::MakeDefaultIcon()
     d->GetIntrinsicWidth(&width);
     Int32 height;
     d->GetIntrinsicHeight(&height);
-    Bitmap::CreateBitmap(Math::Max(width, 1),
-            Math::Max(height, 1),
-            Bitmap::Config::ARGB_8888, (IBitmap**)&b);
+    AutoPtr<IBitmapHelper> helper;
+    CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
+    helper->CreateBitmap(Elastos::Core::Math::Max(width, 1),
+            Elastos::Core::Math::Max(height, 1),
+            BitmapConfig_ARGB_8888, (IBitmap**)&b);
     AutoPtr<ICanvas> c;
     CCanvas::New(b, (ICanvas**)&c);
     Int32 width2;
@@ -201,15 +234,16 @@ void IconCache::GetTitleAndIcon(
     /* [in] */ IHashMap* labelCache)
 {
     synchronized(mCacheLock) {
-        ApplicationInfo* _info = (ApplicationInfo*)application;
-        AutoPtr<IUserHandle> handle;
-        info->GetUser((IUserHandle**)&handle);
-        AutoPtr<CacheEntry> entry = CacheLocked(ApplicationInfo->mComponentName, info, labelCache,
-                handle);
+        assert(0 && "need class ApplicationInfo");
+        // ApplicationInfo* _info = (ApplicationInfo*)application;
+        // AutoPtr<IUserHandle> handle;
+        // info->GetUser((IUserHandle**)&handle);
+        // AutoPtr<CacheEntry> entry = CacheLocked(ApplicationInfo->mComponentName, info, labelCache,
+        //         handle);
 
-        _info->mIitle = entry->mTitle;
-        _info->mIconBitmap = entry->mIcon;
-        _info->mContentDescription = entry->mContentDescription;
+        // _info->mIitle = entry->mTitle;
+        // _info->mIconBitmap = entry->mIcon;
+        // _info->mContentDescription = entry->mContentDescription;
     }
     return;
 }
@@ -220,7 +254,7 @@ AutoPtr<IBitmap> IconCache::GetIcon(
 {
     synchronized(mCacheLock) {
         AutoPtr<IInterface> obj;
-        mContext->GetSystemService(IContext::LAUNCHER_APPS_SERVICE, (IInterface**)&obj);
+        IContext::Probe(mContext)->GetSystemService(IContext::LAUNCHER_APPS_SERVICE, (IInterface**)&obj);
         AutoPtr<ILauncherApps> launcherApps = ILauncherApps::Probe(obj);
         AutoPtr<ILauncherActivityInfo> launcherActInfo;
         launcherApps->ResolveActivity(intent, user, (ILauncherActivityInfo**)&launcherActInfo);
@@ -249,7 +283,7 @@ AutoPtr<IBitmap> IconCache::GetIcon(
 
         AutoPtr<IUserHandle> handle;
         info->GetUser((IUserHandle**)&handle);
-        AutoPtr<CacheEntry> entry = cacheLocked(component, info, labelCache, handle);
+        AutoPtr<CacheEntry> entry = CacheLocked(component, info, labelCache, handle);
         return entry->mIcon;
     }
     return NULL;
@@ -258,10 +292,10 @@ AutoPtr<IBitmap> IconCache::GetIcon(
 Boolean IconCache::IsDefaultIcon(
     /* [in] */ IBitmap* icon)
 {
-    return mDefaultIcon == icon;
+    return TO_IINTERFACE(mDefaultIcon) == TO_IINTERFACE(icon);
 }
 
-AutoPtr<CacheEntry> IconCache::CacheLocked(
+AutoPtr<IconCache::CacheEntry> IconCache::CacheLocked(
     /* [in] */ IComponentName* componentName,
     /* [in] */ ILauncherActivityInfo* info,
     /* [in] */ IHashMap* labelCache,
@@ -270,9 +304,9 @@ AutoPtr<CacheEntry> IconCache::CacheLocked(
     AutoPtr<CacheKey> cacheKey = new CacheKey(componentName, user);
     AutoPtr<IInterface> obj;
     mCache->Get(TO_IINTERFACE(cacheKey), (IInterface**)&obj);
-    AutoPtr<CacheEntry> entry = (CacheEntry*)IObject::Probe(obj);
+    AutoPtr<IconCache::CacheEntry> entry = (IconCache::CacheEntry*)IObject::Probe(obj);
     if (entry == NULL) {
-        entry = new CacheEntry();
+        entry = new IconCache::CacheEntry();
 
         mCache->Put(TO_IINTERFACE(cacheKey), TO_IINTERFACE(entry));
 
@@ -284,7 +318,7 @@ AutoPtr<CacheEntry> IconCache::CacheLocked(
             if (res) {
                 AutoPtr<IInterface> obj;
                 labelCache->Get(TO_IINTERFACE(key), (IInterface**)&obj);
-                AutoPtr<CharSequence> cchar = CharSequence::Probe(obj);
+                AutoPtr<ICharSequence> cchar = ICharSequence::Probe(obj);
                 cchar->ToString(&(entry->mTitle));
             }
         }
@@ -302,10 +336,11 @@ AutoPtr<CacheEntry> IconCache::CacheLocked(
             info->GetComponentName((IComponentName**)&name);
             name->GetShortClassName(&(entry->mTitle));
         }
-        mPackageManager->GetUserBadgedLabel(entry->mTitle, user, (ICharSequence**)&(entry->mContentDescription));
+        AutoPtr<ICharSequence> label = CoreUtils::Convert(entry->mTitle);;
+        mPackageManager->GetUserBadgedLabel(label, user, (ICharSequence**)&(entry->mContentDescription));
         AutoPtr<IDrawable> drawable;
         info->GetBadgedIcon(mIconDpi, (IDrawable**)&drawable);
-        entry->mIcon = Utilities::CreateIconBitmap(drawable, mContext);
+        entry->mIcon = Utilities::CreateIconBitmap(drawable, IContext::Probe(mContext));
     }
     return entry;
 }

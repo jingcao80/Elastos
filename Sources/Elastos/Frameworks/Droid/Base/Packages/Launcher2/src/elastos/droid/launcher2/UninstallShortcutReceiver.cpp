@@ -1,7 +1,31 @@
 
 #include "elastos/droid/launcher2/UninstallShortcutReceiver.h"
+#include "elastos/droid/launcher2/LauncherSettings.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Core::CoreUtils;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::ISharedPreferencesEditor;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IIntentHelper;
+using Elastos::Droid::Content::CIntentHelper;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::StringBuilder;
+using Elastos::IO::ICloseable;;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::CHashSet;
 
 namespace Elastos {
 namespace Droid {
@@ -26,15 +50,16 @@ ECode UninstallShortcutReceiver::MyThread::Run()
     synchronized(mSavedNewApps) {
         AutoPtr<ISharedPreferencesEditor> editor;
         mSharedPrefs->Edit((ISharedPreferencesEditor**)&editor);
-        editor->PutStringSet(InstallShortcutReceiver::NEW_APPS_LIST_KEY,
+        editor->PutStringSet(IInstallShortcutReceiver::NEW_APPS_LIST_KEY,
                 mSavedNewApps);
         Boolean res;
         mSavedNewApps->IsEmpty(&res);
         if (res) {
             // Reset the page index if there are no more items
-            editor->PutInt32(InstallShortcutReceiver::NEW_APPS_PAGE_KEY, -1);
+            editor->PutInt32(IInstallShortcutReceiver::NEW_APPS_PAGE_KEY, -1);
         }
-        return editor->Commit();
+        Boolean succeded;
+        return editor->Commit(&succeded);
     }
     return NOERROR;
 }
@@ -58,9 +83,7 @@ ECode UninstallShortcutReceiver::OnReceive(
 {
     String action;
     data->GetAction(&action);
-    Boolean res;
-    ACTION_UNINSTALL_SHORTCUT.Equals(action, &res);
-    if (!res) {
+    if (!ACTION_UNINSTALL_SHORTCUT.Equals(action)) {
         return NOERROR;
     }
 
@@ -102,11 +125,12 @@ void UninstallShortcutReceiver::ProcessUninstallShortcut(
     /* [in] */ PendingUninstallShortcutInfo* pendingInfo)
 {
     String spKey;
-    LauncherApplication::GetSharedPreferencesKey(&spKey);
+    assert(0 && "need class LauncherApplication");
+    //LauncherApplication::GetSharedPreferencesKey(&spKey);
     AutoPtr<ISharedPreferences> sharedPrefs;
-    context->GetSharedPreferences(spKey, IContext::MODE_PRIVATE);
+    context->GetSharedPreferences(spKey, IContext::MODE_PRIVATE, (ISharedPreferences**)&sharedPrefs);
 
-    AutoPtr<IIntent> data = pendingInfo->mDdata;
+    AutoPtr<IIntent> data = pendingInfo->mData;
 
     AutoPtr<IContext> ctx;
     context->GetApplicationContext((IContext**)&ctx);
@@ -121,32 +145,33 @@ void UninstallShortcutReceiver::RemoveShortcut(
     /* [in] */ IIntent* data,
     /* [in] */ ISharedPreferences* sharedPrefs)
 {
-    AutoPtr<IIntent> intent;
-    data->GetParcelableExtra(IIntent::EXTRA_SHORTCUT_INTENT, (IIntent**)&intent);
+    AutoPtr<IParcelable> parcelable;
+    data->GetParcelableExtra(IIntent::EXTRA_SHORTCUT_INTENT, (IParcelable**)&parcelable);
+    AutoPtr<IIntent> intent = IIntent::Probe(parcelable);
     String name;
     data->GetStringExtra(IIntent::EXTRA_SHORTCUT_NAME, &name);
     Boolean duplicate;
-    data->GetBooleanExtra(iLauncher::EXTRA_SHORTCUT_DUPLICATE, TRUE, &duplicate);
+    data->GetBooleanExtra(ILauncher::EXTRA_SHORTCUT_DUPLICATE, TRUE, &duplicate);
 
     if (intent != NULL && name != NULL) {
         AutoPtr<IContentResolver> cr;
         context->GetContentResolver((IContentResolver**)&cr);
         AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
-        (*array)[0] = ILauncherSettings::Favorites::_ID;
-        (*array)[1] = ILauncherSettings::Favorites::INTENT
+        (*array)[0] = IBaseColumns::ID;
+        (*array)[1] = LauncherSettings::Favorites::INTENT;
         StringBuilder sb;
-        sb += ILauncherSettings::Favorites::TITLE;
+        sb += LauncherSettings::Favorites::TITLE;
         sb += "=?";
         AutoPtr<ArrayOf<String> > names = ArrayOf<String>::Alloc(1);
         (*names)[0] = name;
         AutoPtr<ICursor> c;
-        cr->Query(ILauncherSettings::Favorites::CONTENT_URI,
-            array, sb.ToString(), names, NULL);
+        cr->Query(LauncherSettings::Favorites::CONTENT_URI,
+            array, sb.ToString(), names, String(NULL), (ICursor**)&c);
 
         Int32 intentIndex;
-        c->GetColumnIndexOrThrow(ILauncherSettings::Favorites::INTENT, &intentIndex);
+        c->GetColumnIndexOrThrow(LauncherSettings::Favorites::INTENT, &intentIndex);
         Int32 idIndex;
-        c->GetColumnIndexOrThrow(ILauncherSettings::Favorites::_ID, &idIndex);
+        c->GetColumnIndexOrThrow(IBaseColumns::ID, &idIndex);
 
         Boolean changed = FALSE;
 
@@ -156,8 +181,11 @@ void UninstallShortcutReceiver::RemoveShortcut(
             //try {
             String index;
             c->GetString(intentIndex, &index);
+            AutoPtr<IIntentHelper> helper;
+            CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
             AutoPtr<IIntent> tmp;
-            Intent::ParseUri(index, 0, (IIntent**)&tmp);
+            helper->ParseUri(index, 0, (IIntent**)&tmp);
+
             Boolean res;
             intent->FilterEquals(tmp, &res);
             if (res) {
@@ -165,7 +193,8 @@ void UninstallShortcutReceiver::RemoveShortcut(
                 c->GetInt64(idIndex, &id);
                 AutoPtr<IUri> uri;
                 LauncherSettings::Favorites::GetContentUri(id, FALSE, (IUri**)&uri);
-                cr->Delete(uri, NULL, NULL);
+                Int32 num;
+                cr->Delete(uri, String(NULL), NULL, &num);
                 changed = TRUE;
                 if (!duplicate) {
                     break;
@@ -178,16 +207,24 @@ void UninstallShortcutReceiver::RemoveShortcut(
             //}
         }
         //} finally {
-            c->Close();
+            ICloseable::Probe(c)->Close();
         //}
 
         if (changed) {
-            cr->NotifyChange(ILauncherSettings::Favorites::CONTENT_URI, NULL);
+            cr->NotifyChange(LauncherSettings::Favorites::CONTENT_URI, NULL);
+
+            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(name);
+            AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+            array->Set(0, TO_IINTERFACE(cchar));
             String str;
-            context->GetString(R.string.shortcut_uninstalled, name, &str);
+            context->GetString(
+                    Elastos::Droid::Launcher2::R::string::shortcut_uninstalled, array, &str);
+
+            AutoPtr<IToastHelper> helper;
+            CToastHelper::AcquireSingleton((IToastHelper**)&helper);
             AutoPtr<IToast> toast;
-            Toast::MakeText(context, str, IToast::LENGTH_SHORT, (IToast**)&toast);
-            toast->Show();
+            AutoPtr<ICharSequence> cs = CoreUtils::Convert(str);
+            helper->MakeText(context, cs, IToast::LENGTH_SHORT, (IToast**)&toast);
         }
 
         // Remove any items due to be animated
@@ -199,7 +236,7 @@ void UninstallShortcutReceiver::RemoveShortcut(
             do {
                 String str;
                 intent->ToUri(0, &str);
-                AutoPtr<ICharSequence> cchar = CoreUtil::Convert(str);
+                AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
                 newApps->Remove(TO_IINTERFACE(cchar), &appRemoved);
             } while (appRemoved);
         }

@@ -1,14 +1,18 @@
 
 #include "elastos/droid/launcher2/PagedView.h"
+#include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 #include "R.h"
+#include "Elastos.CoreLibrary.Core.h"
 
 using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::IInputDevice;
+using Elastos::Droid::View::IInputEvent;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::CVelocityTrackerHelper;
 using Elastos::Droid::View::IVelocityTrackerHelper;
@@ -17,6 +21,7 @@ using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewParent;
+using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::EIID_IViewGroupOnHierarchyChangeListener;
 using Elastos::Droid::View::Accessibility::CAccessibilityEventHelper;
 using Elastos::Droid::View::Accessibility::IAccessibilityEventHelper;
@@ -24,6 +29,8 @@ using Elastos::Droid::View::Accessibility::IAccessibilityManager;
 using Elastos::Droid::View::Animation::EIID_IInterpolator;
 using Elastos::Droid::Widget::CScroller;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
@@ -32,11 +39,6 @@ namespace Droid {
 namespace Launcher2 {
 
 CAR_INTERFACE_IMPL(PagedView::OnHierarchyChangeListener, Object, IViewGroupOnHierarchyChangeListener)
-
-PagedView::OnHierarchyChangeListener::OnHierarchyChangeListener(
-    /* [in] */ PagedView* host)
-    : mHost(host)
-{}
 
 ECode PagedView::OnHierarchyChangeListener::OnChildViewAdded(
     /* [in] */ IView* parent,
@@ -52,7 +54,7 @@ ECode PagedView::OnHierarchyChangeListener::OnChildViewRemoved(
     return mHost->OnChildViewRemoved(parent, child);
 }
 
-CAR_INTERFACE_IMPL(PagedView::ScrollInterpolator, Object, IInterpolator, ITimeInterpolator)
+CAR_INTERFACE_IMPL_2(PagedView::ScrollInterpolator, Object, IInterpolator, ITimeInterpolator)
 
 PagedView::ScrollInterpolator::ScrollInterpolator()
 {
@@ -100,22 +102,11 @@ ECode PagedView::SavedState::ReadFromParcel(
     return source->ReadInt32(&mCurrentPage);
 }
 
-PagedView::HideScrollingIndicatorRunnable::HideScrollingIndicatorRunnable(
-    /* [in] */ PagedView* mHost)
-    : mHost(host)
-{}
-
 ECode PagedView::HideScrollingIndicatorRunnable::Run()
 {
     mHost->HideScrollingIndicator(FALSE);
     return NOERROR;
 }
-
-PagedView::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
-    /* [in] */ PagedView* host)
-    : mCancelled(FALSE)
-    , mHost(host)
-{}
 
 ECode PagedView::MyAnimatorListenerAdapter::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
@@ -128,8 +119,9 @@ ECode PagedView::MyAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     if (!mCancelled) {
-        mHost->mScrollIndicator->SetVisibility(IView::INVISIBLE);
+        return mHost->mScrollIndicator->SetVisibility(IView::INVISIBLE);
     }
+    return NOERROR;
 }
 
 const Int32 PagedView::AUTOMATIC_PAGE_SPACING;
@@ -143,7 +135,7 @@ const Int32 PagedView::TOUCH_STATE_SCROLLING;
 const Int32 PagedView::TOUCH_STATE_PREV_PAGE;
 const Int32 PagedView::TOUCH_STATE_NEXT_PAGE;
 const Float PagedView::ALPHA_QUANTIZE_LEVEL;
-const Int32 PagedView::INVALID_POINTER1;
+const Int32 PagedView::INVALID_POINTER;
 const Int32 PagedView::sScrollIndicatorFadeInDuration;
 const Int32 PagedView::sScrollIndicatorFadeOutDuration;
 const Int32 PagedView::sScrollIndicatorFlashDuration;
@@ -222,14 +214,14 @@ PagedView::PagedView()
 ECode PagedView::constructor(
     /* [in] */ IContext* context)
 {
-    return ViewGroup::Constructor(context, NULL);
+    return ViewGroup::constructor(context, NULL);
 }
 
 ECode PagedView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    return ViewGroup::Constructor(context, attrs, 0);
+    return ViewGroup::constructor(context, attrs, 0);
 }
 
 ECode PagedView::constructor(
@@ -237,11 +229,13 @@ ECode PagedView::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
-    FAIL_RETURN(ViewGroup::Constructor(context, attrs, defStyle));
+    FAIL_RETURN(ViewGroup::constructor(context, attrs, defStyle));
 
+    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
+            const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::PagedView),
+            ArraySize(Elastos::Droid::Launcher2::R::styleable::PagedView));
     AutoPtr<ITypedArray> a;
-    context->ObtainStyledAttributes(attrs, R::styleable::PagedView,
-        defStyle, 0, (ITypedArray**)&a);
+    context->ObtainStyledAttributes(attrs, attrIds, defStyle, 0, (ITypedArray**)&a);
     Int32 size;
     a->GetDimensionPixelSize(R::styleable::PagedView_pageSpacing, 0, &size);
     SetPageSpacing(size);
@@ -340,9 +334,7 @@ Int32 PagedView::GetNextPage()
 
 Int32 PagedView::GetPageCount()
 {
-    Int32 count;
-    GetPageCount(&count);
-    return count;
+    return GetPageCount();
 }
 
 AutoPtr<IView> PagedView::GetPageAt(
@@ -399,7 +391,7 @@ ECode PagedView::SetCurrentPage(
     // don't introduce any checks like mCurrentPage == currentPage here-- if we change the
     // the default
     if (GetPageCount() == 0) {
-        return;
+        return NOERROR;
     }
 
 
@@ -788,14 +780,15 @@ ECode PagedView::OnLayout(
     /* [in] */ Int32 bottom)
 {
     if (!mIsDataReady) {
-        return;
+        return NOERROR;
     }
 
     if (DEBUG) Logger::D(TAG, "PagedView::onLayout()");
-    Int32 top, bottom;
-    GetPaddingTop(&top);
-    GetPaddingBottom(&bottom);
-    Int32 verticalPadding = top + bottom;
+    Int32 pTop;
+    Int32 pBottom;
+    GetPaddingTop(&pTop);
+    GetPaddingBottom(&pBottom);
+    Int32 verticalPadding = pTop + pBottom;
     Int32 childCount = GetPageCount();
     Boolean isRtl = IsLayoutRtl();
 
@@ -812,7 +805,7 @@ ECode PagedView::OnLayout(
             Int32 childHeight;
             child->GetMeasuredHeight(&childHeight);
             Int32 childTop;
-            getPaddingTop(&childTop);
+            GetPaddingTop(&childTop);
             if (mCenterPagesVertically) {
                 Int32 measuredHeight;
                 GetMeasuredHeight(&measuredHeight);
@@ -886,7 +879,7 @@ ECode PagedView::InvalidateCachedOffsets()
         mChildOffsets = NULL;
         mChildRelativeOffsets = NULL;
         mChildOffsetsWithLayoutScale = NULL;
-        return;
+        return NOERROR;
     }
 
     mChildOffsets = ArrayOf<Int32>::Alloc(count);
@@ -975,7 +968,10 @@ ECode PagedView::GetVisiblePages(
         Int32 endIndex = isRtl ? 0 : pageCount - 1;
         Int32 delta = isRtl ? -1 : 1;
         AutoPtr<IView> currPage = GetPageAt(leftScreen);
-        Int32 scrollX, width, left right;
+        Int32 scrollX;
+        Int32 width;
+        Int32 left;
+        Int32 right;
         GetScrollX(&scrollX);
         Float x;
         while (leftScreen != endIndex &&
@@ -1005,12 +1001,12 @@ ECode PagedView::GetVisiblePages(
 Boolean PagedView::ShouldDrawChild(
     /* [in] */ IView* child)
 {
-    Int32 alpha;
+    Float alpha;
     child->GetAlpha(&alpha);
     return alpha > 0;
 }
 
-ECode PagedView::DispatchDraw(
+void PagedView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     Int32 measuredWidth;
@@ -1038,7 +1034,8 @@ ECode PagedView::DispatchDraw(
             Int64 drawingTime;
             GetDrawingTime(&drawingTime);
             // Clip to the bounds
-            canvas->Save();
+            Int32 tmp;
+            canvas->Save(&tmp);
             Int32 scrollX, scrollY;
             GetScrollX(&scrollX);
             GetScrollY(&scrollY);
@@ -1047,7 +1044,8 @@ ECode PagedView::DispatchDraw(
             GetTop(&t);
             GetRight(&r);
             GetBottom(&b);
-            canvas->ClipRect(scrollX, scrollY, scrollX + r - l, scrollY + b - t);
+            Boolean res;
+            canvas->ClipRect(scrollX, scrollY, scrollX + r - l, scrollY + b - t, &res);
 
             for (Int32 i = GetPageCount() - 1; i >= 0; i--) {
                 AutoPtr<IView> v = GetPageAt(i);
@@ -1060,7 +1058,6 @@ ECode PagedView::DispatchDraw(
             canvas->Restore();
         }
     }
-    return NOERROR;
 }
 
 ECode PagedView::RequestChildRectangleOnScreen(
@@ -1096,7 +1093,9 @@ Boolean PagedView::OnRequestFocusInDescendants(
     }
     AutoPtr<IView> v = GetPageAt(focusablePage);
     if (v != NULL) {
-        return v->RequestFocus(direction, previouslyFocusedRect);
+        Boolean res;
+        v->RequestFocus(direction, previouslyFocusedRect, &res);
+        return res;
     }
     return FALSE;
 }
@@ -1291,10 +1290,11 @@ ECode PagedView::OnInterceptTouchEvent(
              * otherwise don't.  mScroller->IsFinished should be FALSE when
              * being flinged.
              */
-            Int32 finalX, currX;
+            Int32 finalX;
+            Int32 currX;
             mScroller->GetFinalX(&finalX);
             mScroller->GetCurrX(&currX);
-            Int32 xDist = Elastos::Core::Math::Abs(finaX - currX);
+            Int32 xDist = Elastos::Core::Math::Abs(finalX - currX);
             Boolean isFinished;
             mScroller->IsFinished(&isFinished);
             Boolean finishedScrolling = (isFinished || xDist < mTouchSlop);
@@ -1384,7 +1384,9 @@ ECode PagedView::DetermineScrollingStart(
             mTotalMotionX += Elastos::Core::Math::Abs(mLastMotionX - x);
             mLastMotionX = x;
             mLastMotionXRemainder = 0;
-            GetScrollX(&mTouchX);
+            Int32 _x;
+            GetScrollX(&_x);
+            mTouchX = _x;
             AutoPtr<ISystem> system;
             CSystem::AcquireSingleton((ISystem**)&system);
             Int64 nanoTime;
@@ -1545,7 +1547,7 @@ ECode PagedView::OnTouchEvent(
         }
 
         // Remember where the motion event started
-        ev->GetX(&mLastMotionX)
+        ev->GetX(&mLastMotionX);
         mDownMotionX = mLastMotionX;
         mLastMotionXRemainder = 0;
         mTotalMotionX = 0;
@@ -1704,7 +1706,7 @@ ECode PagedView::OnGenericMotionEvent(
 {
     VALIDATE_NOT_NULL(res);
     Int32 source;
-    event->GetSource(&source);
+    IInputEvent::Probe(event)->GetSource(&source);
     if ((source & IInputDevice::SOURCE_CLASS_POINTER) != 0) {
         Int32 action;
         event->GetAction(&action);
@@ -1748,7 +1750,7 @@ void PagedView::AcquireVelocityTrackerAndAddMovement(
     if (mVelocityTracker == NULL) {
         AutoPtr<IVelocityTrackerHelper> vtHelper;
         CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&vtHelper);
-        vtHelper->Obtain((IVelocityTrackerHelper**)&mVelocityTracker);
+        vtHelper->Obtain((IVelocityTracker**)&mVelocityTracker);
     }
     mVelocityTracker->AddMovement(ev);
 }
@@ -1766,7 +1768,7 @@ void PagedView::OnSecondaryPointerUp(
 {
     Int32 action;
     ev->GetAction(&action);
-    Int32 pointerIndex = action & IMotionEvent::ACTION_POINTER_INDEX_MASK) >>
+    Int32 pointerIndex = (action & IMotionEvent::ACTION_POINTER_INDEX_MASK) >>
             IMotionEvent::ACTION_POINTER_INDEX_SHIFT;
     Int32 pointerId;
     ev->GetPointerId(pointerIndex, &pointerId);
@@ -1800,7 +1802,8 @@ ECode PagedView::RequestChildFocus(
     Int32 index;
     IndexOfChild(child, &index);
     Int32 page = IndexToPage(index);
-    if (page >= 0 && page != GetCurrentPage() && !IsInTouchMode()) {
+    Boolean res;
+    if (page >= 0 && page != GetCurrentPage() && (IsInTouchMode(&res), !res)) {
         SnapToPage(page);
     }
     return NOERROR;
@@ -1905,7 +1908,7 @@ ECode PagedView::SnapToPageWithVelocity(
     // snap duration. This is a function of the actual distance that needs to be traveled;
     // we keep this value close to half screen size in order to reduce the variance in snap
     // duration as a function of the distance the page needs to travel.
-    Float distanceRatio = Elastos::Core::Math::Min(1,0f, 1.0f * Elastos::Core::Math::Abs(delta) / (2 * halfScreenSize));
+    Float distanceRatio = Elastos::Core::Math::Min(1.0f, 1.0f * Elastos::Core::Math::Abs(delta) / (2 * halfScreenSize));
     Float distance = halfScreenSize + halfScreenSize *
             DistanceInfluenceForSnapDuration(distanceRatio);
 
@@ -2161,6 +2164,7 @@ ECode PagedView::InvalidatePageData(
         LoadAssociatedPages(mCurrentPage, immediateAndOnly);
         RequestLayout();
     }
+    return NOERROR;
 }
 
 AutoPtr<IView> PagedView::GetScrollingIndicator()
@@ -2190,10 +2194,10 @@ Boolean PagedView::IsScrollingIndicatorEnabled()
 ECode PagedView::FlashScrollingIndicator(
     /* [in] */ Boolean animated)
 {
-    RemoveCallbacks(hideScrollingIndicatorRunnable);
-    ShowScrollingIndicator(!animated);
     Boolean res;
-    return PostDelayed(hideScrollingIndicatorRunnable, sScrollIndicatorFlashDuration, &res);
+    RemoveCallbacks(mHideScrollingIndicatorRunnable, &res);
+    ShowScrollingIndicator(!animated);
+    return PostDelayed(mHideScrollingIndicatorRunnable, sScrollIndicatorFlashDuration, &res);
 }
 
 ECode PagedView::ShowScrollingIndicator(
@@ -2201,8 +2205,8 @@ ECode PagedView::ShowScrollingIndicator(
 {
     mShouldShowScrollIndicator = TRUE;
     mShouldShowScrollIndicatorImmediately = TRUE;
-    if (GetPageCount() <= 1) return;
-    if (!IsScrollingIndicatorEnabled()) return;
+    if (GetPageCount() <= 1) return NOERROR;
+    if (!IsScrollingIndicatorEnabled()) return NOERROR;
 
     mShouldShowScrollIndicator = FALSE;
     GetScrollingIndicator();
@@ -2215,10 +2219,10 @@ ECode PagedView::ShowScrollingIndicator(
             mScrollIndicator->SetAlpha(1.0f);
         }
         else {
-            AutoPtr<ArrayOf<Int32> > params = ArrayOf<Int32>::Alloc(1);
+            AutoPtr<ArrayOf<Float> > params = ArrayOf<Float>::Alloc(1);
             (*params)[0] = 1.0f;
-            mScrollIndicatorAnimator = LauncherAnimUtils::OfFloat(
-                mScrollIndicator, String("alpha"), params);
+            mScrollIndicatorAnimator = IValueAnimator::Probe(LauncherAnimUtils::OfFloat(
+                mScrollIndicator, String("alpha"), params));
             mScrollIndicatorAnimator->SetDuration(sScrollIndicatorFadeInDuration);
             IAnimator::Probe(mScrollIndicatorAnimator)->Start();
         }
@@ -2237,8 +2241,8 @@ ECode PagedView::CancelScrollingIndicatorAnimations()
 ECode PagedView::HideScrollingIndicator(
     /* [in] */ Boolean immediately)
 {
-    if (GetPageCount() <= 1) return;
-    if (!IsScrollingIndicatorEnabled()) return;
+    if (GetPageCount() <= 1) return NOERROR;
+    if (!IsScrollingIndicatorEnabled()) return NOERROR;
 
     GetScrollingIndicator();
     if (mScrollIndicator != NULL) {
@@ -2250,10 +2254,10 @@ ECode PagedView::HideScrollingIndicator(
             mScrollIndicator->SetAlpha(0.0f);
         }
         else {
-            AutoPtr<ArrayOf<Int32> > params = ArrayOf<Int32>::Alloc(1);
+            AutoPtr<ArrayOf<Float> > params = ArrayOf<Float>::Alloc(1);
             (*params)[0] = 0.0f;
-            mScrollIndicatorAnimator = LauncherAnimUtils::OfFloat(
-                mScrollIndicator, String("alpha"), params);
+            mScrollIndicatorAnimator = IValueAnimator::Probe(LauncherAnimUtils::OfFloat(
+                mScrollIndicator, String("alpha"), params));
             mScrollIndicatorAnimator->SetDuration(sScrollIndicatorFadeOutDuration);
             AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter(this);
             IAnimator::Probe(mScrollIndicatorAnimator)->AddListener(adapter);
@@ -2292,7 +2296,8 @@ void PagedView::UpdateScrollingIndicatorPosition()
     if (!IsScrollingIndicatorEnabled()) return;
     if (mScrollIndicator == NULL) return;
     Int32 numPages = GetPageCount();
-    Int32 pageWidth = GetMeasuredWidth();
+    Int32 pageWidth;
+    GetMeasuredWidth(&pageWidth);
     Int32 trackWidth = pageWidth - mScrollIndicatorPaddingLeft - mScrollIndicatorPaddingRight;
     Int32 measuredWidth, left, right;
     mScrollIndicator->GetMeasuredWidth(&measuredWidth);
@@ -2303,7 +2308,7 @@ void PagedView::UpdateScrollingIndicatorPosition()
     Int32 scrollX;
     GetScrollX(&scrollX);
     Float scrollPos = isRtl ? mMaxScrollX - scrollX : scrollX;
-    Float offset = Elastos::Core::Math::Max(0f, Elastos::Core::Math::Min(1.0f, (Float) scrollPos / mMaxScrollX));
+    Float offset = Elastos::Core::Math::Max(0.0f, Elastos::Core::Math::Min(1.0f, (Float) scrollPos / mMaxScrollX));
     if (isRtl) {
         offset = 1.0f - offset;
     }
@@ -2313,7 +2318,7 @@ void PagedView::UpdateScrollingIndicatorPosition()
         if (measuredWidth != indicatorSpace) {
             AutoPtr<IViewGroupLayoutParams> lp;
             mScrollIndicator->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-            lp->SetWidth(&indicatorSpace);
+            lp->SetWidth(indicatorSpace);
             mScrollIndicator->RequestLayout();
         }
     }
@@ -2353,13 +2358,13 @@ ECode PagedView::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
     ViewGroup::OnInitializeAccessibilityEvent(event);
-    event->SetScrollable(TRUE);
+    IAccessibilityRecord::Probe(event)->SetScrollable(TRUE);
     Int32 type;
     event->GetEventType(&type);
     if (type == IAccessibilityEvent::TYPE_VIEW_SCROLLED) {
-        event->SetFromIndex(mCurrentPage);
-        event->SetToIndex(mCurrentPage);
-        event->SetItemCount(GetPageCount());
+        IAccessibilityRecord::Probe(event)->SetFromIndex(mCurrentPage);
+        IAccessibilityRecord::Probe(event)->SetToIndex(mCurrentPage);
+        IAccessibilityRecord::Probe(event)->SetItemCount(GetPageCount());
     }
     return NOERROR;
 }
@@ -2370,7 +2375,10 @@ ECode PagedView::PerformAccessibilityAction(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    if (ViewGroup::PerformAccessibilityAction(action, arguments)) {
+
+    Boolean tmp;
+    ViewGroup::PerformAccessibilityAction(action, arguments, &tmp);
+    if (tmp) {
         return TRUE;
     }
     switch (action) {
@@ -2397,7 +2405,7 @@ String PagedView::GetCurrentPageDescription()
     String format;
     context->GetString(R::string::default_scroll_format, &format);
     String str;
-    str->AppendFormat(format, GetNextPage() + 1, GetPageCount());
+    str.AppendFormat(format, GetNextPage() + 1, GetPageCount());
     return str;
 }
 

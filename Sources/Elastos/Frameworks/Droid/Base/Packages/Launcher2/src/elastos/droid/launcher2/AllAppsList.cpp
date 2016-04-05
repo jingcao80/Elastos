@@ -3,6 +3,9 @@
 #include "Elastos.Droid.Service.h"
 #include "R.h"
 
+using Elastos::Droid::Content::Pm::ILauncherApps;
+using Elastos::Utility::CArrayList;
+
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
@@ -27,9 +30,8 @@ ECode AllAppsList::Add(
     if (FindActivity(mData, info->mComponentName, info->mUser)) {
         return NOERROR;
     }
-    mData->Add(info);
-    mAdded->Add(info);
-    return NOERROR;
+    mData->Add(TO_IINTERFACE(info));
+    return mAdded->Add(TO_IINTERFACE(info));
 }
 
 ECode AllAppsList::Clear()
@@ -57,7 +59,7 @@ ECode AllAppsList::Get(
     VALIDATE_NOT_NULL(info);
 
     AutoPtr<IInterface> obj;
-    data->Get(index, (IInterface**)&obj);
+    mData->Get(index, (IInterface**)&obj);
     *info = (ApplicationInfo*)IObject::Probe(obj);
     REFCOUNT_ADD(*info);
     return NOERROR;
@@ -80,7 +82,8 @@ ECode AllAppsList::AddPackage(
         AutoPtr<IInterface> tmp;
         matches->Get(i, (IInterface**)&tmp);
         AutoPtr<ILauncherActivityInfo> info = ILauncherActivityInfo::Probe(tmp);
-        AutoPtr<ApplicationInfo> ainfo = new ApplicationInfo(info, user, mIconCache, NULL);
+        AutoPtr<ApplicationInfo> ainfo = new ApplicationInfo();
+        ainfo->constructor(info, user, mIconCache, NULL);
         Add(ainfo);
     }
     return NOERROR;
@@ -90,7 +93,7 @@ ECode AllAppsList::RemovePackage(
     /* [in] */ const String& packageName,
     /* [in] */ IUserHandle* user)
 {
-    AutoPtr<IList> data = mData;
+    AutoPtr<IList> data = IList::Probe(mData);
     Int32 size;
     data->GetSize(&size);
     for (Int32 i = size - 1; i >= 0; i--) {
@@ -106,16 +109,15 @@ ECode AllAppsList::RemovePackage(
         if (res) {
             String name;
             component->GetPackageName(&name);
-            Boolean tmp;
-            packageName.Equals(name, &tmp);
-            if (tmp) {
-                removed->Add(info);
+            if (packageName.Equals(name)) {
+                mRemoved->Add(TO_IINTERFACE(info));
                 data->Remove(i);
             }
         }
     }
     // This is more aggressive than it needs to be.
-    return mIconCache->Flush();
+    mIconCache->Flush();
+    return NOERROR;
 }
 
 ECode AllAppsList::UpdatePackage(
@@ -130,7 +132,7 @@ ECode AllAppsList::UpdatePackage(
     launcherApps->GetActivityList(packageName, user, (IList**)&matches);
 
     Int32 size;
-    matches->Gize(size);
+    matches->GetSize(&size);
     if (size > 0) {
         // Find disabled/removed activities and remove them from data and add them
         // to the removed list.
@@ -148,11 +150,9 @@ ECode AllAppsList::UpdatePackage(
             if (res) {
                 String pname;
                 component->GetPackageName(&pname);
-                Boolean tmp;
-                packageName.Equals(pname, &tmp);
-                if (tmp)) {
+                if (packageName.Equals(pname)) {
                     if (!FindActivity(matches, component, user)) {
-                        mRemoved->Add(applicationInfo);
+                        mRemoved->Add(TO_IINTERFACE(applicationInfo));
                         mIconCache->Remove(component);
                         mData->Remove(i);
                     }
@@ -166,8 +166,8 @@ ECode AllAppsList::UpdatePackage(
         matches->GetSize(&count);
         for (Int32 i = 0; i < count; i++) {
             AutoPtr<IInterface> obj;
-            mMatches->Get(i, (IInterface**)&obj);
-            AutoPtr<ILauncherActivityInfo> info = ILauncherActivityInfo::Preobe(obj);
+            matches->Get(i, (IInterface**)&obj);
+            AutoPtr<ILauncherActivityInfo> info = ILauncherActivityInfo::Probe(obj);
 
             AutoPtr<IComponentName> name;
             info->GetComponentName((IComponentName**)&name);
@@ -180,13 +180,14 @@ ECode AllAppsList::UpdatePackage(
                     cname,
                     user);
             if (applicationInfo == NULL) {
-                AutoPtr<ApplicationInfo> tmp = new ApplicationInfo(info, user, mIconCache, NULL);
+                AutoPtr<ApplicationInfo> tmp = new ApplicationInfo();
+                tmp->constructor(info, user, mIconCache, NULL);
                 Add(tmp);
             }
             else {
                 mIconCache->Remove(applicationInfo->mComponentName);
                 mIconCache->GetTitleAndIcon(applicationInfo, info, NULL);
-                modified->Add(applicationInfo);
+                mModified->Add(TO_IINTERFACE(applicationInfo));
             }
         }
     }
@@ -206,10 +207,8 @@ ECode AllAppsList::UpdatePackage(
             if (res) {
                 String pname;
                 component->GetPackageName(&pname);
-                Boolean tmp;
-                packageName.Equals(pname, &tmp);
-                if (tmp) {
-                    mRemoved->Add(applicationInfo);
+                if (packageName.Equals(pname)) {
+                    mRemoved->Add(TO_IINTERFACE(applicationInfo));
                     mIconCache->Remove(component);
                     mData->Remove(i);
                 }
@@ -239,7 +238,7 @@ Boolean AllAppsList::FindActivity(
             AutoPtr<IComponentName> name;
             info->GetComponentName((IComponentName**)&name);
             Boolean tmp;
-            name->Equals(component, &tmp);
+            IObject::Probe(name)->Equals(component, &tmp);
             if (tmp) {
                 return TRUE;
             }
@@ -263,10 +262,8 @@ Boolean AllAppsList::FindActivity(
         Boolean res;
         info->mUser->Equals(user, &res);
         if (res) {
-            AutoPtr<IComponentName> name;
-            info->GetComponentName((IComponentName**)&name);
             Boolean tmp;
-            name->Equals(component, &tmp);
+            IObject::Probe(info->mComponentName)->Equals(component, &tmp);
             if (tmp) {
                 return TRUE;
             }
@@ -295,14 +292,10 @@ AutoPtr<ApplicationInfo> AllAppsList::FindApplicationInfoLocked(
         if (res) {
             String pname;
             component->GetPackageName(&pname);
-            Boolean tmp;
-            packageName.Equals(pname, &tmp);
-            if (tmp) {
+            if (packageName.Equals(pname)) {
                 String cname;
                 component->GetClassName(&cname);
-                Boolean result;
-                className.Equals(cname, &result);
-                if (result) {
+                if (className.Equals(cname)) {
                     return info;
                 }
             }

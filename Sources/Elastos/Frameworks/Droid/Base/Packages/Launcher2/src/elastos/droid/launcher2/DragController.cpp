@@ -1,7 +1,38 @@
 
 #include "elastos/droid/launcher2/DragController.h"
+#include "elastos/droid/launcher2/DragView.h"
+#include "elastos/droid/launcher2/ShortcutInfo.h"
+#include "elastos/droid/launcher2/ApplicationInfo.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include "Elastos.Droid.Utility.h"
+#include <elastos/utility/logging/Slogger.h>
+#include <elastos/core/Math.h>
+
+using Elastos::Droid::Launcher2::DragView;
+using Elastos::Droid::Launcher2::ShortcutInfo;
+using Elastos::Droid::Launcher2::ApplicationInfo;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CPoint;
+using Elastos::Droid::Graphics::CBitmapHelper;
+using Elastos::Droid::Graphics::IBitmapHelper;
+using Elastos::Droid::Graphics::CPointF;
+using Elastos::Droid::Graphics::IPointF;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::CVelocityTrackerHelper;
+using Elastos::Droid::View::IVelocityTrackerHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Utility::CArrayList;
+
 
 namespace Elastos {
 namespace Droid {
@@ -25,16 +56,19 @@ ECode DragController::ScrollRunnable::Run()
         }
         mHost->mScrollState = SCROLL_OUTSIDE_ZONE;
         mHost->mDistanceSinceScroll = 0;
-        mHost->mDragScroller->OnExitScrollArea();
+        Boolean tmp;
+        mHost->mDragScroller->OnExitScrollArea(&tmp);
         AutoPtr<IDragLayer> dragLayer;
-        mHost->mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
-        dragLayer->OnExitScrollArea();
+        assert(0 && "need class mLauncher");
+        //mHost->mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+        assert(0 && "need class mLauncher");
+        //dragLayer->OnExitScrollArea();
 
         Boolean res;
         mHost->IsDragging(&res);
         if (res) {
             // Check the scroll again so that we can requeue the scroller if necessary
-            mHost->CheckScrollState((*mLastTouch)[0], (*mLastTouch)[1]);
+            mHost->CheckScrollState((*(mHost->mLastTouch))[0], (*(mHost->mLastTouch))[1]);
         }
     }
     return NOERROR;
@@ -53,12 +87,12 @@ const Int32 DragController::SCROLL_DELAY = 500;
 const Int32 DragController::RESCROLL_DELAY = 750;
 const Int32 DragController::VIBRATE_DURATION = 15;
 
-const Boolean DragController::PROFILE_DRAWING_DURING_DRAG = false;
+const Boolean DragController::PROFILE_DRAWING_DURING_DRAG = FALSE;
 
 const Int32 DragController::SCROLL_OUTSIDE_ZONE = 0;
 const Int32 DragController::SCROLL_WAITING_IN_ZONE = 1;
 
-const Float DragController::MAX_FLING_DEGREES = 35f;
+const Float DragController::MAX_FLING_DEGREES = 35.0f;
 
 CAR_INTERFACE_IMPL(DragController, Object, IDragController);
 
@@ -73,7 +107,7 @@ DragController::DragController()
     CArrayList::New((IArrayList**)&mDropTargets);
     CArrayList::New((IArrayList**)&mListeners);
     mScrollState = SCROLL_OUTSIDE_ZONE;
-    mScrollRunnable = new ScrollRunnable();
+    mScrollRunnable = new ScrollRunnable(this);
     mLastTouch = ArrayOf<Int32>::Alloc(2);
     mLastTouchUpTime = -1;
     mDistanceSinceScroll = 0;
@@ -86,15 +120,21 @@ ECode DragController::constructor(
     /* [in] */ ILauncher* launcher)
 {
     AutoPtr<IResources> r;
-    launcher->GetResources((IResources**)&r);
+    assert(0 && "need class mLauncher");
+    //launcher->GetResources((IResources**)&r);
     mLauncher = launcher;
-    CHandler::New((Handler**)&mHandler);
+    CHandler::New((IHandler**)&mHandler);
     r->GetDimensionPixelSize(
             Elastos::Droid::Launcher2::R::dimen::scroll_zone,
             &mScrollZone);
-    VelocityTracker::Obtain((IVelocityTracker**)&mVelocityTracker);
+
+    AutoPtr<IVelocityTrackerHelper> helper;
+    CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&helper);
+    helper->Obtain((IVelocityTracker**)&mVelocityTracker);
+
     AutoPtr<IInterface> obj;
-    launcher->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&obj);
+    assert(0 && "need class mLauncher");
+    //launcher->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&obj);
     mVibrator = IVibrator::Probe(obj);
 
     AutoPtr<IDisplayMetrics> metrics;
@@ -130,8 +170,9 @@ ECode DragController::StartDrag(
 {
     AutoPtr<ArrayOf<Int32> > loc = mCoordinatesTemp;
     AutoPtr<IDragLayer> dragLayer;
-    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
-    dragLayer->GetLocationInDragLayer(v, loc);
+    assert(0 && "need class mLauncher");
+    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    //dragLayer->GetLocationInDragLayer(v, loc);
     Int32 viewExtraPaddingLeft;
     Int32 viewExtraPaddingTop;
     if (extraPadding != NULL) {
@@ -176,24 +217,26 @@ ECode DragController::StartDrag(
     /* [in] */ IRect* dragRegion,
     /* [in] */ Float initialDragViewScale)
 {
-    if (PROFILE_DRAWING_DURING_DRAG) {
-        Debug::StartMethodTracing(String("Launcher"));
-    }
+    // if (PROFILE_DRAWING_DURING_DRAG) {
+    //     Debug::StartMethodTracing(String("Launcher"));
+    // }
 
     // Hide soft keyboard, if visible
     if (mInputMethodManager == NULL) {
         AutoPtr<IInterface> obj;
-        mLauncher->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
+        assert(0 && "need class mLauncher");
+        //mLauncher->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
         mInputMethodManager = IInputMethodManager::Probe(obj);
     }
-    mInputMethodManager->HideSoftInputFromWindow(mWindowToken, 0);
+    Boolean res;
+    mInputMethodManager->HideSoftInputFromWindow(mWindowToken, 0, &res);
 
     Int32 size;
     mListeners->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
-        AutoPtr<IDragListener> listener = IDragListener::Probe(obj);
+        AutoPtr<IDragControllerDragListener> listener = IDragControllerDragListener::Probe(obj);
 
         listener->OnDragStart(source, dragInfo, dragAction);
     }
@@ -201,14 +244,14 @@ ECode DragController::StartDrag(
     Int32 registrationX = mMotionDownX - dragLayerX;
     Int32 registrationY = mMotionDownY - dragLayerY;
 
-    Int23 left;
+    Int32 left;
     Int32 dragRegionLeft = dragRegion == NULL ? 0 : (dragRegion->GetLeft(&left), left);
     Int32 top;
     Int32 dragRegionTop = dragRegion == NULL ? 0 : (dragRegion->GetTop(&top), top);
 
     mDragging = TRUE;
 
-    mDragObject = new DropTarget::DragObject();
+    mDragObject = new DragObject();
 
     mDragObject->mDragComplete = FALSE;
     mDragObject->mXOffset = mMotionDownX - (dragLayerX + dragRegionLeft);
@@ -222,9 +265,10 @@ ECode DragController::StartDrag(
     b->GetWidth(&width);
     Int32 height;
     b->GetHeight(&height);
-    AutoPtr<IDragView> dragView;
-    CDragView::New(mLauncher, b, registrationX,
-            registrationY, 0, 0, width, height, initialDragViewScale, (IDragView**)&dragView);
+    AutoPtr<DragView> dragView;
+    dragView = new DragView();
+    dragView->constructor(mLauncher, b, registrationX,
+            registrationY, 0, 0, width, height, initialDragViewScale);
     mDragObject->mDragView = dragView;
 
     if (dragOffset != NULL) {
@@ -234,12 +278,13 @@ ECode DragController::StartDrag(
     }
     if (dragRegion != NULL) {
         AutoPtr<IRect> r;
-        CRect::New(dragRegion, (IRect**)&r)
+        CRect::New(dragRegion, (IRect**)&r);
         dragView->SetDragRegion(r);
     }
 
     dragView->Show(mMotionDownX, mMotionDownY);
-    return HandleMoveEvent(mMotionDownX, mMotionDownY);
+    HandleMoveEvent(mMotionDownX, mMotionDownY);
+    return NOERROR;
 }
 
 ECode DragController::GetViewBitmap(
@@ -258,7 +303,7 @@ ECode DragController::GetViewBitmap(
     // Reset the drawing cache background color to fully transparent
     // for the duration of this operation
     Int32 color;
-    v->GetDrawingCacheBackgroundColor();
+    v->GetDrawingCacheBackgroundColor(&color);
     v->SetDrawingCacheBackgroundColor(0);
     Float alpha;
     v->GetAlpha(&alpha);
@@ -277,8 +322,10 @@ ECode DragController::GetViewBitmap(
         return NOERROR;
     }
 
+    AutoPtr<IBitmapHelper> helper;
+    CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
     AutoPtr<IBitmap> bitmap;
-    Bitmap::CreateBitmap(cacheBitmap, (IBitmap**)&bitmap);
+    helper->CreateBitmap(cacheBitmap, (IBitmap**)&bitmap);
 
     // Restore the view
     v->DestroyDrawingCache();
@@ -321,7 +368,8 @@ ECode DragController::CancelDrag()
         mDragObject->mDragComplete = TRUE;
         mDragObject->mDragSource->OnDropCompleted(NULL, mDragObject, FALSE, FALSE);
     }
-    return EndDrag();
+    EndDrag();
+    return NOERROR;
 }
 
 ECode DragController::OnAppsRemoved(
@@ -342,15 +390,13 @@ ECode DragController::OnAppsRemoved(
 
                 // Added null checks to prevent NPE we've seen in the wild
                 if (dragInfo != NULL) {
-                    AutoPtr<IIntent> intent;
-                    dragInfo->GetIntent((IIntent**)&intent);
-                    if (intent != NULL) {
+                    ShortcutInfo* _dragInfo = (ShortcutInfo*)dragInfo.Get();
+                    ApplicationInfo* _info = (ApplicationInfo*)info.Get();
+                    if (_dragInfo->mIntent != NULL) {
                         AutoPtr<IComponentName> componentName;
-                        intent->GetComponent((IComponentName**)&componentName);
-                        AutoPtr<IComponentName> componentName2;
-                        info->GetComponentName((IComponentName**)&componentName2);
+                        _dragInfo->mIntent->GetComponent((IComponentName**)&componentName);
                         Boolean isSameComponent;
-                        componentName->Equals(componentName2, &isSameComponent);
+                        IObject::Probe(componentName)->Equals(_info->mComponentName, &isSameComponent);
                         if (isSameComponent) {
                             return CancelDrag();
                         }
@@ -383,7 +429,7 @@ void DragController::EndDrag()
             for (Int32 i = 0; i < size; i++) {
                 AutoPtr<IInterface> obj;
                 mListeners->Get(i, (IInterface**)&obj);
-                AutoPtr<IDragListener> listener = IDragListener::Probe(obj);
+                AutoPtr<IDragControllerDragListener> listener = IDragControllerDragListener::Probe(obj);
                 listener->OnDragEnd();
             }
         }
@@ -403,15 +449,17 @@ ECode DragController::OnDeferredEndDrag(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mListeners->Get(i, (IInterface**)&obj);
-        AutoPtr<IDragListener> listener = IDragListener::Probe(obj);
+        AutoPtr<IDragControllerDragListener> listener = IDragControllerDragListener::Probe(obj);
         listener->OnDragEnd();
     }
+    return NOERROR;
 }
 
 ECode DragController::OnDeferredEndFling(
-    /* [in] */ DragObject* d)
+    /* [in] */ IDropTargetDragObject* d)
 {
-    return d->mDragSource->OnFlingToDeleteCompleted();
+    DragObject* _d = (DragObject*)d;
+    return _d->mDragSource->OnFlingToDeleteCompleted();
 }
 
 AutoPtr<ArrayOf<Int32> > DragController::GetClampedDragLayerPos(
@@ -419,18 +467,21 @@ AutoPtr<ArrayOf<Int32> > DragController::GetClampedDragLayerPos(
     /* [in] */ Float y)
 {
     AutoPtr<IDragLayer> dragLayer;
-    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
-    dragLayer->GetLocalVisibleRect(mDragLayerRect);
+    assert(0 && "need class mLauncher");
+    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    //dragLayer->GetLocalVisibleRect(mDragLayerRect);
     Int32 left;
     mDragLayerRect->GetLeft(&left);
     Int32 right;
     mDragLayerRect->GetRight(&right);
-    (*mTmpPoint)[0] = (Int32)Math::Max(leftleft, Math::Min(x, right - 1));
+    (*mTmpPoint)[0] = (Int32)Elastos::Core::Math::Max((Float)left,
+            Elastos::Core::Math::Min(x, (Float)(right - 1)));
     Int32 top;
     mDragLayerRect->GetTop(&top);
     Int32 bottom;
     mDragLayerRect->GetBottom(&bottom);
-    (*mTmpPoint)[1] = (Int32)Math::Max(top, Math::Min(y, bottom - 1));
+    (*mTmpPoint)[1] = (Int32)Elastos::Core::Math::Max((Float)top,
+            Elastos::Core::Math::Min(y, (Float)(bottom - 1)));
     return mTmpPoint;
 }
 
@@ -441,7 +492,9 @@ ECode DragController::GetLastGestureUpTime(
     *time = 0;
 
     if (mDragging) {
-        *time = System::GetCurrentTimeMillis();
+        AutoPtr<ISystem> system;
+        CSystem::AcquireSingleton((ISystem**)&system);
+        system->GetCurrentTimeMillis(time);
         return NOERROR;
     }
     else {
@@ -475,9 +528,9 @@ ECode DragController::OnInterceptTouchEvent(
 
     Int32 action;
     ev->GetAction(&action);
-    Int32 x;
+    Float x;
     ev->GetX(&x);
-    Int32 y;
+    Float y;
     ev->GetY(&y);
     AutoPtr<ArrayOf<Int32> > dragLayerPos = GetClampedDragLayerPos(x, y);
     Int32 dragLayerX = (*dragLayerPos)[0];
@@ -490,10 +543,13 @@ ECode DragController::OnInterceptTouchEvent(
             // Remember location of down touch
             mMotionDownX = dragLayerX;
             mMotionDownY = dragLayerY;
-            mLastDropTarget = null;
+            mLastDropTarget = NULL;
             break;
         case IMotionEvent::ACTION_UP:
-            mLastTouchUpTime = System::GetCurrentTimeMillis();
+        {
+            AutoPtr<ISystem> system;
+            CSystem::AcquireSingleton((ISystem**)&system);
+            system->GetCurrentTimeMillis(&mLastTouchUpTime);
             if (mDragging) {
                 AutoPtr<IPointF> vec = IsFlingingToDelete(mDragObject->mDragSource);
                 if (vec != NULL) {
@@ -505,6 +561,7 @@ ECode DragController::OnInterceptTouchEvent(
             }
             EndDrag();
             break;
+        }
         case IMotionEvent::ACTION_CANCEL:
             CancelDrag();
             break;
@@ -540,10 +597,12 @@ void DragController::ClearScrollRunnable()
     if (mScrollState == SCROLL_WAITING_IN_ZONE) {
         mScrollState = SCROLL_OUTSIDE_ZONE;
         mScrollRunnable->SetDirection(SCROLL_RIGHT);
-        mDragScroller->OnExitScrollArea();
+        Boolean res;
+        mDragScroller->OnExitScrollArea(&res);
         AutoPtr<IDragLayer> dragLayer;
-        mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
-        dragLayer->OnExitScrollArea();
+        assert(0 && "need class dragLayer");
+        //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+        //dragLayer->OnExitScrollArea();
     }
 }
 
@@ -562,7 +621,8 @@ void DragController::HandleMoveEvent(
 
     // Check if we are hovering over the scroll areas
     mDistanceSinceScroll +=
-        Math::Sqrt(Math::Pow((*mLastTouch)[0] - x, 2) + Math::Pow((*mLastTouch)[1] - y, 2));
+            Elastos::Core::Math::Sqrt(Elastos::Core::Math::Pow((*mLastTouch)[0] - x, 2) +
+            Elastos::Core::Math::Pow((*mLastTouch)[1] - y, 2));
     (*mLastTouch)[0] = x;
     (*mLastTouch)[1] = y;
     CheckScrollState(x, y);
@@ -587,7 +647,7 @@ void DragController::CheckTouchMove(
             dropTarget = delegate;
         }
 
-        if (mLastDropTarget != dropTarget) {
+        if (TO_IINTERFACE(mLastDropTarget) != TO_IINTERFACE(dropTarget)) {
             if (mLastDropTarget != NULL) {
                 mLastDropTarget->OnDragExit(mDragObject);
             }
@@ -607,16 +667,20 @@ void DragController::CheckScrollState(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y)
 {
+    AutoPtr<IViewConfigurationHelper> helper;
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
     AutoPtr<IViewConfiguration> viewConfig;
-    ViewConfiguration::Get(IContext::Prone(mLauncher), (IViewConfiguration**)&viewConfig);
+    helper->Get(IContext::Probe(mLauncher), (IViewConfiguration**)&viewConfig);
     Int32 slop;
     viewConfig->GetScaledWindowTouchSlop(&slop);
     Int32 delay = mDistanceSinceScroll < slop ? RESCROLL_DELAY : SCROLL_DELAY;
     AutoPtr<IDragLayer> dragLayer;
-    mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+    assert(0 && "need class mLauncher");
+    //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
 
     Int32 direction;
-    dragLayer->GetLayoutDirection(&direction);
+    assert(0 && "need class dragLayer");
+    //dragLayer->GetLayoutDirection(&direction);
     Boolean isRtl = (direction == IView::LAYOUT_DIRECTION_RTL);
     Int32 forwardDirection = isRtl ? SCROLL_RIGHT : SCROLL_LEFT;
     Int32 backwardsDirection = isRtl ? SCROLL_LEFT : SCROLL_RIGHT;
@@ -628,9 +692,11 @@ void DragController::CheckScrollState(
             Boolean res;
             mDragScroller->OnEnterScrollArea(x, y, forwardDirection, &res);
             if (res) {
-                dragLayer->OnEnterScrollArea(forwardDirection);
+                assert(0 && "need class dragLayer");
+                //dragLayer->OnEnterScrollArea(forwardDirection);
                 mScrollRunnable->SetDirection(forwardDirection);
-                mHandler->PostDelayed(mScrollRunnable, delay);
+                Boolean tmp;
+                mHandler->PostDelayed(mScrollRunnable, delay, &tmp);
             }
         }
     }
@@ -640,9 +706,11 @@ void DragController::CheckScrollState(
             Boolean res;
             mDragScroller->OnEnterScrollArea(x, y, backwardsDirection, &res);
             if (res) {
-                dragLayer->OnEnterScrollArea(backwardsDirection);
+                assert(0 && "need class dragLayer");
+                //dragLayer->OnEnterScrollArea(backwardsDirection);
                 mScrollRunnable->SetDirection(backwardsDirection);
-                mHandler->PostDelayed(mScrollRunnable, delay);
+                Boolean tmp;
+                mHandler->PostDelayed(mScrollRunnable, delay, &tmp);
             }
         }
     }
@@ -667,9 +735,9 @@ ECode DragController::OnTouchEvent(
 
     Int32 action;
     ev->GetAction(&action);
-    Int32 x;
+    Float x;
     ev->GetX(&x);
-    Int32 y;
+    Float y;
     ev->GetY(&y);
     AutoPtr<ArrayOf<Int32> > dragLayerPos = GetClampedDragLayerPos(x, y);
     Int32 dragLayerX = (*dragLayerPos)[0];
@@ -686,7 +754,8 @@ ECode DragController::OnTouchEvent(
             if ((dragLayerX < mScrollZone) ||
                     (dragLayerX > (mScrollView->GetWidth(&width), width) - mScrollZone)) {
                 mScrollState = SCROLL_WAITING_IN_ZONE;
-                mHandler->PostDelayed(mScrollRunnable, SCROLL_DELAY);
+                Boolean tmp;
+                mHandler->PostDelayed(mScrollRunnable, SCROLL_DELAY, &tmp);
             }
             else {
                 mScrollState = SCROLL_OUTSIDE_ZONE;
@@ -729,38 +798,40 @@ AutoPtr<IPointF> DragController::IsFlingingToDelete(
     source->SupportsFlingToDelete(&res);
     if (!res) return NULL;
 
+    AutoPtr<IViewConfigurationHelper> helper;
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
     AutoPtr<IViewConfiguration> config;
-    ViewConfiguration::Get(mLauncher, (IViewConfiguration**)&config);
+    helper->Get(IContext::Probe(mLauncher), (IViewConfiguration**)&config);
     Int32 maximumFlingVelocity;
     config->GetScaledMaximumFlingVelocity(&maximumFlingVelocity);
     mVelocityTracker->ComputeCurrentVelocity(1000, maximumFlingVelocity);
 
-    Int32 yvelocity;
+    Float yvelocity;
     mVelocityTracker->GetYVelocity(&yvelocity);
-    if (velocity < mFlingToDeleteThresholdVelocity) {
+    if (yvelocity < mFlingToDeleteThresholdVelocity) {
         // Do a quick dot product test to ensure that we are flinging upwards
-        Int32 xvelocity;
+        Float xvelocity;
         mVelocityTracker->GetXVelocity(&xvelocity);
         AutoPtr<IPointF> vel;
         CPointF::New(xvelocity, yvelocity, (IPointF**)&vel);
         AutoPtr<IPointF> upVec;
-        CPointF::New(0f, -1f, (IPointF**)&upVec);
+        CPointF::New(0.0f, -1.0f, (IPointF**)&upVec);
 
-        Int32 vx;
+        Float vx;
         vel->GetX(&vx);
-        Int32 vy;
+        Float vy;
         vel->GetY(&vy);
-        Int32 ux;
+        Float ux;
         upVec->GetX(&ux);
-        Int32 uy;
+        Float uy;
         upVec->GetY(&uy);
-        Int32 vlength;
-        vel->GetLength(&vlength);
-        Int32 ulength;
-        upVec->GetLength(&ulength);
-        Float theta = (Float)Math::Acos(((vx * ux) + (vy * uy)) /
+        Float vlength;
+        vel->Length(&vlength);
+        Float ulength;
+        upVec->Length(&ulength);
+        Float theta = (Float)Elastos::Core::Math::Acos(((vx * ux) + (vy * uy)) /
                 (vlength * ulength));
-        if (theta <= Math::ToRadians(MAX_FLING_DEGREES)) {
+        if (theta <= Elastos::Core::Math::ToRadians(MAX_FLING_DEGREES)) {
             return vel;
         }
     }
@@ -821,6 +892,8 @@ void DragController::Drop(
             accepted = TRUE;
         }
     }
+    assert(0 && "dropTarget is not a view");
+    //mDragObject->mDragSource->OnDropCompleted((View) dropTarget, mDragObject, FALSE, accepted);
 }
 
 AutoPtr<IDropTarget> DragController::FindDropTarget(
@@ -850,7 +923,7 @@ AutoPtr<IDropTarget> DragController::FindDropTarget(
         target->GetLeft(&left);
         Int32 top;
         target->GetTop(&top);
-        r->Offset(dropCoordinates[0] - left, dropCoordinates[1] - top);
+        r->Offset((*dropCoordinates)[0] - left, (*dropCoordinates)[1] - top);
 
         mDragObject->mX = x;
         mDragObject->mY = y;
@@ -889,13 +962,13 @@ ECode DragController::SetWindowToken(
 }
 
 ECode DragController::AddDragListener(
-    /* [in] */ IDragListener* l)
+    /* [in] */ IDragControllerDragListener* l)
 {
     return mListeners->Add(l);
 }
 
 ECode DragController::RemoveDragListener(
-    /* [in] */ IDragListener* l)
+    /* [in] */ IDragControllerDragListener* l)
 {
     return mListeners->Remove(l);
 }
@@ -923,7 +996,9 @@ void DragController::AcquireVelocityTrackerAndAddMovement(
     /* [in] */ IMotionEvent* ev)
 {
     if (mVelocityTracker == NULL) {
-        VelocityTracker::Obtain((IVelocityTracker**)&mVelocityTracker);
+        AutoPtr<IVelocityTrackerHelper> helper;
+        CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&helper);
+        helper->Obtain((IVelocityTracker**)&mVelocityTracker);
     }
     mVelocityTracker->AddMovement(ev);
 }

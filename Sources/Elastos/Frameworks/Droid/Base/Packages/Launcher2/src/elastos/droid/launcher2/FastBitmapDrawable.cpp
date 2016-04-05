@@ -3,11 +3,24 @@
 #include "Elastos.Droid.Service.h"
 #include "R.h"
 
+using Elastos::Droid::Graphics::IPixelFormat;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::CPaint;
+
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-FastBitmapDrawable::FastBitmapDrawable(
+CAR_INTERFACE_IMPL(FastBitmapDrawable, Drawable, IFastBitmapDrawable);
+
+FastBitmapDrawable::FastBitmapDrawable()
+    : mAlpha(0)
+    , mWidth(0)
+    , mHeight(0)
+{
+}
+
+ECode FastBitmapDrawable::constructor(
     /* [in] */ IBitmap* b)
 {
     CPaint::New(IPaint::FILTER_BITMAP_FLAG, (IPaint**)&mPaint);
@@ -16,11 +29,12 @@ FastBitmapDrawable::FastBitmapDrawable(
     mBitmap = b;
     if (b != NULL) {
         mBitmap->GetWidth(&mWidth);
-        mBitmap->GetHeight(7mHeight);
+        mBitmap->GetHeight(&mHeight);
     }
     else {
         mWidth = mHeight = 0;
     }
+    return NOERROR;
 }
 
 ECode FastBitmapDrawable::Draw(
@@ -43,7 +57,7 @@ ECode FastBitmapDrawable::GetOpacity(
 {
     VALIDATE_NOT_NULL(opacity);
 
-    *opacity = IPixelFormat:TRANSLUCENT;
+    *opacity = IPixelFormat::TRANSLUCENT;
     return NOERROR;
 }
 
@@ -111,11 +125,12 @@ ECode FastBitmapDrawable::SetBitmap(
     mBitmap = b;
     if (b != NULL) {
         mBitmap->GetWidth(&mWidth);
-        mBitmap->GetHeight(7mHeight);
+        mBitmap->GetHeight(&mHeight);
     }
     else {
         mWidth = mHeight = 0;
     }
+    return NOERROR;
 }
 
 ECode FastBitmapDrawable::GetBitmap(

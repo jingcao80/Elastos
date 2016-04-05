@@ -1,0 +1,43 @@
+module
+{
+    using interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.View.ILinearLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.View.IViewOnFocusChangeListener
+     *
+     * interface ITabWidget
+     */
+    [local]
+    interface IFocusOnlyTabWidget {
+        GetSelectedTab(
+            [out] IView** tab);
+
+        GetChildTabIndex(
+            [in] IView* v,
+            [out] Int32* index);
+
+        SetCurrentTabToFocusedTab();
+
+        SuperOnFocusChange(
+            [in] IView* v,
+            [in] Boolean hasFocus);
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

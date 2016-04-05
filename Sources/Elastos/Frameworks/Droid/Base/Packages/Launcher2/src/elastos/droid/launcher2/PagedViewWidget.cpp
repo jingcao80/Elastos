@@ -2,6 +2,13 @@
 #include "elastos/droid/launcher2/PagedViewWidget.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/core/Math.h>
+ #include <elastos/core/CoreUtils.h>
+
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -22,7 +29,7 @@ ECode PagedViewWidget::CheckForShortPress::Run()
         mHost->mShortPressListener->OnShortPress(mHost);
         mHost->sShortpressTarget = mHost;
     }
-    mShortPressTriggered = TRUE;
+    mHost->mShortPressTriggered = TRUE;
     return NOERROR;
 }
 
@@ -57,7 +64,7 @@ ECode PagedViewWidget::constructor(
 ECode PagedViewWidget::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
-    /* [in] */ Int32* defStyle)
+    /* [in] */ Int32 defStyle)
 {
     LinearLayout::constructor(context, attrs, defStyle);
 
@@ -65,8 +72,8 @@ ECode PagedViewWidget::constructor(
     context->GetResources((IResources**)&r);
     r->GetString(Elastos::Droid::Launcher2::R::string::widget_dims_format, &mDimensionsFormatString);
 
-    SetWillNotDraw(false);
-    return SetClipToPadding(false);
+    SetWillNotDraw(FALSE);
+    return SetClipToPadding(FALSE);
 }
 
 ECode PagedViewWidget::OnFinishInflate()
@@ -78,19 +85,19 @@ ECode PagedViewWidget::OnFinishInflate()
     AutoPtr<IImageView> image = IImageView::Probe(view);
 
     Int32 left;
-    image->GetPaddingLeft(&left);
+    IView::Probe(image)->GetPaddingLeft(&left);
     mOriginalImagePadding->SetLeft(left);
 
     Int32 top;
-    image->GetPaddingTop(&top);
+    IView::Probe(image)->GetPaddingTop(&top);
     mOriginalImagePadding->SetTop(top);
 
     Int32 right;
-    image->GetPaddingRight(&right);
+    IView::Probe(image)->GetPaddingRight(&right);
     mOriginalImagePadding->SetRight(right);
 
     Int32 bottom;
-    image->GetPaddingBottom(&bottom);
+    IView::Probe(image)->GetPaddingBottom(&bottom);
     return mOriginalImagePadding->SetBottom(bottom);
 }
 
@@ -122,10 +129,11 @@ ECode PagedViewWidget::OnDetachedFromWindow()
             AutoPtr<IFastBitmapDrawable> preview = IFastBitmapDrawable::Probe(drawable);
 
             AutoPtr<IBitmap> map;
-            IDrawable::Probe(preview)->GetBitmap((IBitmap**)&bp);
+            preview->GetBitmap((IBitmap**)&map);
             if (sRecyclePreviewsWhenDetachedFromWindow &&
                     mInfo != NULL && preview != NULL && map != NULL) {
-                mWidgetPreviewLoader->RecycleBitmap(mInfo, map);
+                assert(0 && "need class IWidgetPreviewLoader");
+                //mWidgetPreviewLoader->RecycleBitmap(mInfo, map);
             }
             image->SetImageDrawable(NULL);
         }
@@ -156,21 +164,27 @@ ECode PagedViewWidget::ApplyFromAppWidgetProviderInfo(
     GetContext((IContext**)&res);
     AutoPtr<IPackageManager> packageManager;
     res->GetPackageManager((IPackageManager**)&packageManager);
-    String result;
-    info->LoadLabel(packageManager, &result);
-    name->SetText(result);
+    String label;
+    info->LoadLabel(packageManager, &label);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(label);
+    name->SetText(cchar);
 
     AutoPtr<IView> view3;
     FindViewById(Elastos::Droid::Launcher2::R::id::widget_dims, (IView**)&view3);
     AutoPtr<ITextView> dims = ITextView::Probe(view3);
     if (dims != NULL) {
         Int32 x;
-        LauncherModel::GetCellCountX(&x);
-        Int32 hSpan = Math::Min((*cellSpan)[0], x);
+        assert(0 && "need class LauncherModel");
+        //LauncherModel::GetCellCountX(&x);
+        Int32 hSpan = Elastos::Core::Math::Min((*cellSpan)[0], x);
         Int32 y;
-        LauncherModel::GetCellCountY(&y);
-        Int32 vSpan = Math::Min((*cellSpan)[1], y);
-        dims->SetText(String.format(mDimensionsFormatString, hSpan, vSpan));
+        assert(0 && "need class LauncherModel");
+        //LauncherModel::GetCellCountY(&y);
+        Int32 vSpan = Elastos::Core::Math::Min((*cellSpan)[1], y);
+        String tmpStr;
+        tmpStr.AppendFormat(mDimensionsFormatString, hSpan, vSpan);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(tmpStr);
+        dims->SetText(cchar);
     }
     mWidgetPreviewLoader = loader;
     return NOERROR;
@@ -195,7 +209,10 @@ ECode PagedViewWidget::ApplyFromResolveInfo(
     FindViewById(Elastos::Droid::Launcher2::R::id::widget_dims, (IView**)&view2);
     AutoPtr<ITextView> dims = ITextView::Probe(view2);
     if (dims != NULL) {
-        dims->SetText(String.format(mDimensionsFormatString, 1, 1));
+        String tmpStr;
+        tmpStr.AppendFormat(mDimensionsFormatString, 1, 1);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(tmpStr);
+        dims->SetText(cchar);
     }
     mWidgetPreviewLoader = loader;
     return NOERROR;
@@ -211,14 +228,14 @@ ECode PagedViewWidget::GetPreviewSize(
     AutoPtr<IImageView> i = IImageView::Probe(view);
     AutoPtr<ArrayOf<Int32> > maxSize = ArrayOf<Int32>::Alloc(2);
     Int32 width;
-    i->GetWidth(&width);
+    IView::Probe(i)->GetWidth(&width);
     Int32 left;
     mOriginalImagePadding->GetLeft(&left);
     Int32 right;
     mOriginalImagePadding->GetRight(&right);
     (*maxSize)[0] = width - left - right;
     Int32 height;
-    i->GetHeight(&height);
+    IView::Probe(i)->GetHeight(&height);
     Int32 top;
     mOriginalImagePadding->GetTop(&top);
     (*maxSize)[1] = height - top;
@@ -236,12 +253,13 @@ ECode PagedViewWidget::ApplyPreview(
     AutoPtr<IPagedViewWidgetImageView> image = IPagedViewWidgetImageView::Probe(view);
     if (preview != NULL) {
         image->SetAllowRequestLayout(FALSE);
-        image->SetImageDrawable(preview);
+        IImageView::Probe(image)->SetImageDrawable(IDrawable::Probe(preview));
         if (mIsAppWidget) {
             // center horizontally
-            AutoPtr<ArrayOf<Int32> > imageSize = GetPreviewSize();
+            AutoPtr<ArrayOf<Int32> > imageSize;
+            GetPreviewSize((ArrayOf<Int32>**)&imageSize);
             Int32 width;
-            preview->GetIntrinsicWidth(&width);
+            IDrawable::Probe(preview)->GetIntrinsicWidth(&width);
             Int32 centerAmount = ((*imageSize)[0] - width) / 2;
             Int32 left;
             mOriginalImagePadding->GetLeft(&left);
@@ -251,39 +269,41 @@ ECode PagedViewWidget::ApplyPreview(
             mOriginalImagePadding->GetTop(&top);
             Int32 bottom;
             mOriginalImagePadding->GetBottom(&bottom);
-            image->SetPadding(left + centerAmount,
+            IView::Probe(image)->SetPadding(left + centerAmount,
                     top,
                     right,
                     bottom);
         }
-        image->SetAlpha(1f);
+        IImageView::Probe(image)->SetAlpha(1.0f);
         image->SetAllowRequestLayout(TRUE);
     }
     return NOERROR;
 }
 
 ECode PagedViewWidget::SetShortPressListener(
-    /* [in] */ IShortPressListener* listener)
+    /* [in] */ IPagedViewWidgetShortPressListener* listener)
 {
     mShortPressListener = listener;
     return NOERROR;
 }
 
-void PagedViewWidget::CheckForShortPress()
+void PagedViewWidget::MyCheckForShortPress()
 {
     if (sShortpressTarget != NULL) {
         return;
     }
     if (mPendingCheckForShortPress == NULL) {
-        mPendingCheckForShortPress = new CheckForShortPress();
+        mPendingCheckForShortPress = new CheckForShortPress(this);
     }
-    PostDelayed(mPendingCheckForShortPress, 120);
+    Boolean tmp;
+    PostDelayed(mPendingCheckForShortPress, 120, &tmp);
 }
 
 void PagedViewWidget::RemoveShortPressCallback()
 {
     if (mPendingCheckForShortPress != NULL) {
-        RemoveCallbacks(mPendingCheckForShortPress);
+        Boolean res;
+        RemoveCallbacks(mPendingCheckForShortPress, &res);
     }
 }
 
@@ -292,7 +312,7 @@ void PagedViewWidget::CleanUpShortPress()
     RemoveShortPressCallback();
     if (mShortPressTriggered) {
         if (mShortPressListener != NULL) {
-            mShortPressListener->CleanUpShortPress(PagedViewWidget.this);
+            mShortPressListener->CleanUpShortPress(this);
         }
         mShortPressTriggered = FALSE;
     }
@@ -301,6 +321,7 @@ void PagedViewWidget::CleanUpShortPress()
 ECode PagedViewWidget::ResetShortPressTarget()
 {
     sShortpressTarget = NULL;
+    return NOERROR;
 }
 
 ECode PagedViewWidget::OnTouchEvent(
@@ -309,21 +330,22 @@ ECode PagedViewWidget::OnTouchEvent(
 {
     VALIDATE_NOT_NULL(res);
 
-    LinearLayout::OnTouchEvent(event);
+    Boolean tmp;
+    LinearLayout::OnTouchEvent(event, &tmp);
 
     Int32 action;
     event->GetAction(&action);
     switch (action) {
-        case MotionEvent::ACTION_UP:
+        case IMotionEvent::ACTION_UP:
             CleanUpShortPress();
             break;
-        case MotionEvent::ACTION_DOWN:
-            CheckForShortPress();
+        case IMotionEvent::ACTION_DOWN:
+            MyCheckForShortPress();
             break;
-        case MotionEvent::ACTION_CANCEL:
+        case IMotionEvent::ACTION_CANCEL:
             CleanUpShortPress();
             break;
-        case MotionEvent::ACTION_MOVE:
+        case IMotionEvent::ACTION_MOVE:
             break;
     }
 

@@ -4010,7 +4010,7 @@ Boolean ViewRootImpl::DrawSoftware(
         canvas->GetWidth(&w);
         canvas->GetHeight(&h);
         Logger::V(TAG, "Surface 0x%s drawing to bitmap w=%d, h=%d", TO_CSTR(surface), w, h);
-        canvas->DrawARGB(255, 255, 0, 0);
+        // canvas->DrawARGB(255, 255, 0, 0);
     }
 
     // If this bitmap's format includes an alpha channel, we

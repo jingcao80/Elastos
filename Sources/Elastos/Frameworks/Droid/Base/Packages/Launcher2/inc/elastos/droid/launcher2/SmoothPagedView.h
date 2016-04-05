@@ -1,6 +1,7 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_SMOOTHPAGEDVIEW_H__
 #define  __ELASTOS_DROID_LAUNCHER2_SMOOTHPAGEDVIEW_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 
 namespace Elastos {

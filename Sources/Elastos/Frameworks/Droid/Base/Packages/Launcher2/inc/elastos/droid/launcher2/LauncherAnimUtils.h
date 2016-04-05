@@ -1,7 +1,26 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_LAUNCHERANIMUTILS_H__
 #define  __ELASTOS_DROID_LAUNCHER2_LAUNCHERANIMUTILS_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/os/Runnable.h"
+
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::Animation::IAnimatorSet;
+using Elastos::Droid::Animation::IPropertyValuesHolder;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IOnDrawListener;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Object;
+using Elastos::Utility::IHashSet;
 
 namespace Elastos {
 namespace Droid {
@@ -45,8 +64,8 @@ private:
 
     private:
         Boolean mStarted;
-        IAnimator* mAnimator;
-        IView* mView;
+        AutoPtr<IAnimator> mAnimator;
+        AutoPtr<IView> mView;
     };
 
     class MyRunnable
@@ -60,8 +79,8 @@ private:
         CARAPI Run();
 
     private:
-        IView* mView;
-        IOnDrawListener* mListener;
+        AutoPtr<IView> mView;
+        AutoPtr<IOnDrawListener> mListener;
     };
 
 public:
@@ -89,12 +108,12 @@ public:
 
     static CARAPI_(AutoPtr<IObjectAnimator>) OfPropertyValuesHolder(
         /* [in] */ IView* target,
-        /* [in] */ ArrayOf<IPropertyValuesHolder>* values);
+        /* [in] */ ArrayOf<IPropertyValuesHolder*>* values);
 
     static CARAPI_(AutoPtr<IObjectAnimator>) OfPropertyValuesHolder(
         /* [in] */ IInterface* target,
         /* [in] */ IView* view,
-        /* [in] */ ArrayOf<IPropertyValuesHolder>* values);
+        /* [in] */ ArrayOf<IPropertyValuesHolder*>* values);
 
 private:
     static CARAPI_(Boolean) InitStaticBlock();

@@ -1,7 +1,13 @@
 
 #include "elastos/droid/launcher2/LauncherViewPropertyAnimator.h"
+#include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Animation::EIID_IAnimatorListener;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -22,7 +28,7 @@ LauncherViewPropertyAnimator::LauncherViewPropertyAnimator(
     , mDuration(0)
     , mRunning(FALSE)
 {
-    CArrayList::New((ArrayList**)&mListeners);
+    CArrayList::New((IArrayList**)&mListeners);
 }
 
 ECode LauncherViewPropertyAnimator::AddListener(
@@ -56,16 +62,16 @@ ECode LauncherViewPropertyAnimator::End()
 ECode LauncherViewPropertyAnimator::GetDuration(
     /* [out] */Int64* duration)
 {
-    VALIDATR_NOT_NULL(duration);
+    VALIDATE_NOT_NULL(duration);
 
     *duration = mDuration;
     return NOERROR;
 }
 
 ECode LauncherViewPropertyAnimator::GetListeners(
-    /* [out, callee] */ ArrayOf<IAnimatorListener*>** listeners)
+    /* [out, callee] */ IArrayList** listeners)
 {
-    VALIDATR_NOT_NULL(listeners);
+    VALIDATE_NOT_NULL(listeners);
 
     *listeners = mListeners;
     REFCOUNT_ADD(*listeners);
@@ -75,7 +81,7 @@ ECode LauncherViewPropertyAnimator::GetListeners(
 ECode LauncherViewPropertyAnimator::GetStartDelay(
     /* [out] */ Int64* delay)
 {
-    VALIDATR_NOT_NULL(delay);
+    VALIDATE_NOT_NULL(delay);
 
     *delay = mStartDelay;
     return NOERROR;
@@ -147,7 +153,7 @@ ECode LauncherViewPropertyAnimator::OnAnimationStart(
 ECode LauncherViewPropertyAnimator::IsRunning(
     /* [out] */ Boolean* running)
 {
-    VALIDATR_NOT_NULL(running);
+    VALIDATE_NOT_NULL(running);
 
     *running = mRunning;
     return NOERROR;
@@ -156,7 +162,7 @@ ECode LauncherViewPropertyAnimator::IsRunning(
 ECode LauncherViewPropertyAnimator::IsStarted(
     /* [out] */ Boolean* started)
 {
-    VALIDATR_NOT_NULL(started);
+    VALIDATE_NOT_NULL(started);
 
     *started = mViewPropertyAnimator != NULL;
     return NOERROR;
@@ -176,7 +182,8 @@ ECode LauncherViewPropertyAnimator::RemoveListener(
 ECode LauncherViewPropertyAnimator::SetDuration(
     /* [in] */ Int64 duration)
 {
-    mPropertiesToSet->Add(Properties::DURATION);
+    assert(0);
+    //mPropertiesToSet->Add(Properties::DURATION);
     mDuration = duration;
     return NOERROR;
 }
@@ -184,7 +191,8 @@ ECode LauncherViewPropertyAnimator::SetDuration(
 ECode LauncherViewPropertyAnimator::SetInterpolator(
     /* [in] */ ITimeInterpolator* value)
 {
-    mPropertiesToSet->Add(Properties::INTERPOLATOR);
+    assert(0);
+    //mPropertiesToSet->Add(Properties::INTERPOLATOR);
     mInterpolator = value;
     return NOERROR;
 }
@@ -192,7 +200,8 @@ ECode LauncherViewPropertyAnimator::SetInterpolator(
 ECode LauncherViewPropertyAnimator::SetStartDelay(
     /* [in] */ Int64 startDelay)
 {
-    mPropertiesToSet->Add(Properties::START_DELAY);
+    assert(0);
+    //mPropertiesToSet->Add(Properties::START_DELAY);
     mStartDelay = startDelay;
     return NOERROR;
 }
@@ -224,42 +233,45 @@ ECode LauncherViewPropertyAnimator::Start()
     mFirstFrameHelper = new FirstFrameAnimatorHelper(mViewPropertyAnimator, mTarget);
 
     Boolean res;
-    if (mPropertiesToSet->Contains(Properties::TRANSLATION_X, &res), res) {
-        mViewPropertyAnimator->TranslationX(mTranslationX);
-    }
-    if (mPropertiesToSet->Contains(Properties::TRANSLATION_Y, &res), res) {
-        mViewPropertyAnimator->TranslationY(mTranslationY);
-    }
-    if (mPropertiesToSet->Contains(Properties::SCALE_X, &res), res) {
-        mViewPropertyAnimator->ScaleX(mScaleX);
-    }
-    if (mPropertiesToSet->Contains(Properties::ROTATION_Y, &res), res) {
-        mViewPropertyAnimator->RotationY(mRotationY);
-    }
-    if (mPropertiesToSet->Contains(Properties::SCALE_Y, &res), res) {
-        mViewPropertyAnimator->ScaleY(mScaleY);
-    }
-    if (mPropertiesToSet->Contains(Properties::ALPHA, &res), res) {
-        mViewPropertyAnimator->Alpha(mAlpha);
-    }
-    if (mPropertiesToSet->Contains(Properties::START_DELAY, &res), res) {
-        mViewPropertyAnimator->SetStartDelay(mStartDelay);
-    }
-    if (mPropertiesToSet->Contains(Properties::DURATION, &res), res) {
-        mViewPropertyAnimator->SetDuration(mDuration);
-    }
-    if (mPropertiesToSet->Contains(Properties::INTERPOLATOR, &res), res) {
-        mViewPropertyAnimator->SetInterpolator(mInterpolator);
-    }
+    assert(0);
+    // if (mPropertiesToSet->Contains(Properties::TRANSLATION_X, &res), res) {
+    //     mViewPropertyAnimator->TranslationX(mTranslationX);
+    // }
+    // if (mPropertiesToSet->Contains(Properties::TRANSLATION_Y, &res), res) {
+    //     mViewPropertyAnimator->TranslationY(mTranslationY);
+    // }
+    // if (mPropertiesToSet->Contains(Properties::SCALE_X, &res), res) {
+    //     mViewPropertyAnimator->ScaleX(mScaleX);
+    // }
+    // if (mPropertiesToSet->Contains(Properties::ROTATION_Y, &res), res) {
+    //     mViewPropertyAnimator->RotationY(mRotationY);
+    // }
+    // if (mPropertiesToSet->Contains(Properties::SCALE_Y, &res), res) {
+    //     mViewPropertyAnimator->ScaleY(mScaleY);
+    // }
+    // if (mPropertiesToSet->Contains(Properties::ALPHA, &res), res) {
+    //     mViewPropertyAnimator->Alpha(mAlpha);
+    // }
+    // if (mPropertiesToSet->Contains(Properties::START_DELAY, &res), res) {
+    //     mViewPropertyAnimator->SetStartDelay(mStartDelay);
+    // }
+    // if (mPropertiesToSet->Contains(Properties::DURATION, &res), res) {
+    //     mViewPropertyAnimator->SetDuration(mDuration);
+    // }
+    // if (mPropertiesToSet->Contains(Properties::INTERPOLATOR, &res), res) {
+    //     mViewPropertyAnimator->SetInterpolator(mInterpolator);
+    // }
     mViewPropertyAnimator->SetListener(this);
     mViewPropertyAnimator->Start();
-    return LauncherAnimUtils->CancelOnDestroyActivity(this);
+    LauncherAnimUtils::CancelOnDestroyActivity(IAnimator::Probe(this));
+    return NOERROR;
 }
 
 ECode LauncherViewPropertyAnimator::TranslationX(
     /* [in] */ Float value)
 {
-    mPropertiesToSet->Add(Properties::TRANSLATION_X);
+    assert(0);
+    //mPropertiesToSet->Add(Properties::TRANSLATION_X);
     mTranslationX = value;
     return NOERROR;
 }
@@ -267,7 +279,8 @@ ECode LauncherViewPropertyAnimator::TranslationX(
 ECode LauncherViewPropertyAnimator::TranslationY(
     /* [in] */ Float value)
 {
-    mPropertiesToSet->Add(Properties::TRANSLATION_Y);
+    assert(0);
+    //mPropertiesToSet->Add(Properties::TRANSLATION_Y);
     mTranslationY = value;
     return NOERROR;
 }
@@ -275,7 +288,8 @@ ECode LauncherViewPropertyAnimator::TranslationY(
 ECode LauncherViewPropertyAnimator::ScaleX(
     /* [in] */ Float value)
 {
-    mPropertiesToSet->Add(Properties::SCALE_X);
+    assert(0);
+    //mPropertiesToSet->Add(Properties::SCALE_X);
     mScaleX = value;
     return NOERROR;
 }
@@ -283,7 +297,8 @@ ECode LauncherViewPropertyAnimator::ScaleX(
 ECode LauncherViewPropertyAnimator::ScaleY(
     /* [in] */ Float value)
 {
-    mPropertiesToSet->Add(Properties::SCALE_Y);
+    assert(0);
+    //mPropertiesToSet->Add(Properties::SCALE_Y);
     mScaleY = value;
     return NOERROR;
 }
@@ -291,7 +306,8 @@ ECode LauncherViewPropertyAnimator::ScaleY(
 ECode LauncherViewPropertyAnimator::RotationY(
     /* [in] */ Float value)
 {
-    mPropertiesToSet->Add(Properties::ROTATION_Y);
+    assert(0);
+    //mPropertiesToSet->Add(Properties::ROTATION_Y);
     mRotationY = value;
     return NOERROR;
 }
@@ -299,7 +315,8 @@ ECode LauncherViewPropertyAnimator::RotationY(
 ECode LauncherViewPropertyAnimator::Alpha(
     /* [in] */ Float value)
 {
-    mPropertiesToSet->Add(Properties::ALPHA);
+    assert(0);
+    //mPropertiesToSet->Add(Properties::ALPHA);
     mAlpha = value;
     return NOERROR;
 }

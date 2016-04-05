@@ -1,15 +1,28 @@
 
 #include "elastos/droid/launcher2/ItemInfo.h"
 #include "Elastos.Droid.Service.h"
+#include "elastos/droid/os/Process.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
+
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::Graphics::BitmapCompressFormat_PNG;
+using Elastos::Core::StringBuilder;
+using Elastos::IO::ICloseable;
+using Elastos::IO::IFlushable;
+using Elastos::IO::IOutputStream;
+using Elastos::IO::IByteArrayOutputStream;
+using Elastos::IO::CByteArrayOutputStream;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-const String ItemInfo:EXTRA_PROFILE("profile");
-
-const Int32 ItemInfo:NO_ID = -1;
+CAR_INTERFACE_IMPL(ItemInfo, Object, IItemInfo);
 
 ItemInfo::ItemInfo()
    : mId(NO_ID)
@@ -24,22 +37,15 @@ ItemInfo::ItemInfo()
    , mMinSpanY(1)
    , mRequiresDbUpdate(FALSE)
 {
-    Process::MyUserHandle(IUserHandle**)&mUser);
 }
 
-ItemInfo::ItemInfo(
+ECode ItemInfo::constructor()
+{
+    return Process::MyUserHandle((IUserHandle**)&mUser);
+}
+
+ECode ItemInfo::constructor(
     /* [in] */ ItemInfo* info)
-    : mId(NO_ID)
-    , mItemType(0)
-    , mContainer(NO_ID)
-    , mScreen(-1)
-    , mCellX(-1)
-    , mCellY(-1)
-    , mSpanX(1)
-    , mSpanY(1)
-    , mMinSpanX(1)
-    , mMinSpanY(1)
-    , mRequiresDbUpdate(FALSE)
 {
     mId = info->mId;
     mCellX = info->mCellX;
@@ -52,7 +58,9 @@ ItemInfo::ItemInfo(
     mUser = info->mUser;
     mContentDescription = info->mContentDescription;
     // tempdebug:
-    LauncherModel::CheckItemInfo(this);
+    assert(0 && "need class LauncherModel");
+    //return LauncherModel::CheckItemInfo(this);
+    return NOERROR;
 }
 
 String ItemInfo::GetPackageName(
@@ -63,7 +71,7 @@ String ItemInfo::GetPackageName(
         intent->GetPackage(&packageName);
         if (packageName.IsNull()) {
             AutoPtr<IComponentName> componentName;
-            intent->GetComponent(IComponentName**)&componentName);
+            intent->GetComponent((IComponentName**)&componentName);
             if (componentName != NULL) {
                 componentName->GetPackageName(&packageName);
             }
@@ -72,7 +80,7 @@ String ItemInfo::GetPackageName(
             return packageName;
         }
     }
-    return "";
+    return String("");
 }
 
 void ItemInfo::UpdateUser(
@@ -94,20 +102,22 @@ void ItemInfo::OnAddToDatabase(
     /* [in] */ IContext* context,
     /* [in] */ IContentValues* values)
 {
-    values->Put(LauncherSettings::BaseLauncherColumns::ITEM_TYPE, mItemType);
-    values->Put(LauncherSettings::Favorites::CONTAINER, mContainer);
-    values->Put(LauncherSettings::Favorites::SCREEN, mScreen);
-    values->Put(LauncherSettings::Favorites::CELLX, mCellX);
-    values->Put(LauncherSettings::Favorites::CELLY, mCellY);
-    values->Put(LauncherSettings::Favorites::SPANX, mSpanX);
-    values->Put(LauncherSettings::Favorites::SPANY, mSpanY);
+    assert(0 && "need class LauncherSettings");
+    // values->Put(LauncherSettings::BaseLauncherColumns::ITEM_TYPE, mItemType);
+    // values->Put(LauncherSettings::Favorites::CONTAINER, mContainer);
+    // values->Put(LauncherSettings::Favorites::SCREEN, mScreen);
+    // values->Put(LauncherSettings::Favorites::CELLX, mCellX);
+    // values->Put(LauncherSettings::Favorites::CELLY, mCellY);
+    // values->Put(LauncherSettings::Favorites::SPANX, mSpanX);
+    // values->Put(LauncherSettings::Favorites::SPANY, mSpanY);
 
     AutoPtr<IInterface> object;
-    GetSystemService(IContext::USER_SERVICE, (IInterface**)&object);
+    context->GetSystemService(IContext::USER_SERVICE, (IInterface**)&object);
     AutoPtr<IUserManager> manager = IUserManager::Probe(object);
     Int64 serialNumber;
-    manager->GetSerialNumberForUser(user, &serialNumber);
-    values->Put(LauncherSettings::Favorites::PROFILE_ID, serialNumber);
+    manager->GetSerialNumberForUser(mUser, &serialNumber);
+    assert(0 && "need class LauncherSettings");
+    //values->Put(LauncherSettings::Favorites::PROFILE_ID, serialNumber);
     return;
 }
 
@@ -116,8 +126,9 @@ void ItemInfo::UpdateValuesWithCoordinates(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY)
 {
-    values->Put(LauncherSettings::Favorites::CELLX, cellX);
-    values->Put(LauncherSettings::Favorites::CELLY, cellY);
+    assert(0 && "need class LauncherSettings");
+    // values->Put(LauncherSettings::Favorites::CELLX, cellX);
+    // values->Put(LauncherSettings::Favorites::CELLY, cellY);
     return;
 }
 
@@ -134,26 +145,22 @@ AutoPtr<ArrayOf<Byte> > ItemInfo::FlattenBitmap(
     AutoPtr<IByteArrayOutputStream> out;
     CByteArrayOutputStream::New(size, (IByteArrayOutputStream**)&out);
     //try {
-    bitmap->Compress(Bitmap::CompressFormat::PNG, 100, out);
-    ECode ec = out->Flush();
-    if (ec == (ECode)E_IO_EXCEPTION;) {
-        Slogger::W("Favorite", "Could not write icon");
-        return NULL;
-    }
-    ec = out->Close();
-    if (ec == (ECode)E_IO_EXCEPTION;) {
-        Slogger::W("Favorite", "Could not write icon");
-        return NULL;
-    }
+    Boolean isSucceeded;
+    bitmap->Compress(BitmapCompressFormat_PNG, 100, IOutputStream::Probe(out), &isSucceeded);
+    ECode ec;
     AutoPtr<ArrayOf<Byte> > array;
-    out->ToByteArray((ArrayOf<Byte>**)&array);
+    FAIL_GOTO(ec = IFlushable::Probe(out)->Flush(), ERROR)
+    FAIL_GOTO(ec = ICloseable::Probe(out)->Close(), ERROR)
+    FAIL_GOTO(ec = out->ToByteArray((ArrayOf<Byte>**)&array), ERROR)
     return array;
     //} catch (IOException e) {
-    // if (ec == (ECode)E_IO_EXCEPTION;) {
-    //     Slogger::W("Favorite", "Could not write icon");
-    //     return NULL;
-    // }
+ERROR:
+    if (ec == (ECode)E_IO_EXCEPTION) {
+        Slogger::W("Favorite", "Could not write icon");
+        return NULL;
+    }
     //}
+    return NULL;
 }
 
 void ItemInfo::WriteBitmap(
@@ -162,9 +169,9 @@ void ItemInfo::WriteBitmap(
 {
     if (bitmap != NULL) {
         AutoPtr<ArrayOf<Byte> > data = FlattenBitmap(bitmap);
-        values->Put(LauncherSettings::Favorites::ICON, data);
+        assert(0 && "need class LauncherSettings");
+        //values->Put(LauncherSettings::Favorites::ICON, data);
     }
-    return;
 }
 
 void ItemInfo::Unbind()
@@ -194,11 +201,17 @@ ECode ItemInfo::ToString(
     sb += mSpanX;
     sb += " spanY=";
     sb += mSpanY;
+
     sb += " dropPos=";
-    sb += mDropPos;
+    sb += "(";
+    for (Int32 i = 0; i < mDropPos->GetLength(); i++) {
+        sb += (*mDropPos)[i];
+    }
+    sb += ")";
+
     sb += " user=";
-    sb += mUser;
-    sb += ")"
+    sb += TO_STR(mUser);
+    sb += ")";
     return sb.ToString(str);
 }
 

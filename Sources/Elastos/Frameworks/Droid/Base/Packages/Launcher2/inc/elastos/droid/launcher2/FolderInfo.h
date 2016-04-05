@@ -1,7 +1,18 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_FOLDERINFO_H__
 #define  __ELASTOS_DROID_LAUNCHER2_FOLDERINFO_H__
 
+#include "_Launcher2.h"
+#include "elastos/droid/launcher2/ShortcutInfo.h"
+#include "elastos/droid/launcher2/ItemInfo.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Core::ICharSequence;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -12,9 +23,14 @@ namespace Launcher2 {
  */
 class FolderInfo
     : public ItemInfo
+    , public IFolderInfo
 {
 public:
+    CAR_INTERFACE_DECL();
+
     FolderInfo();
+
+    CARAPI constructor();
 
     /**
      * Add an app or shortcut
@@ -22,7 +38,7 @@ public:
      * @param item
      */
     CARAPI Add(
-        /* [in] */ IShortcutInfo* item);
+        /* [in] */ ShortcutInfo* item);
 
     /**
      * Remove an app or shortcut. Does not change the DB.
@@ -30,7 +46,7 @@ public:
      * @param item
      */
     CARAPI Remove(
-        /* [in] */ IShortcutInfo* item);
+        /* [in] */ ShortcutInfo* item);
 
     CARAPI SetTitle(
         /* [in] */ ICharSequence* title);

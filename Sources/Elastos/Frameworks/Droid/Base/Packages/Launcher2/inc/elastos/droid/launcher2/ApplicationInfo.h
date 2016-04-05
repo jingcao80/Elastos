@@ -1,31 +1,49 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_APPLICATIOMINFO_H__
 #define  __ELASTOS_DROID_LAUNCHER2_APPLICATIOMINFO_H__
 
+#include "_Launcher2.h"
+#include "elastos/droid/launcher2/ItemInfo.h"
+#include "elastos/droid/launcher2/IconCache.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Content::Pm::ILauncherActivityInfo;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+class ShortcutInfo;
 /**
  * Represents an app in AllAppsView.
  */
 class ApplicationInfo
     : public ItemInfo
+    , public IApplicationInfo
 {
 public:
+    CAR_INTERFACE_DECL();
+
     ApplicationInfo();
+
+    CARAPI constructor();
 
     /**
      * Must not hold the Context.
      */
-    ApplicationInfo(
+    CARAPI constructor(
         /* [in] */ ILauncherActivityInfo* info,
         /* [in] */ IUserHandle* user,
         /* [in] */ IconCache* iconCache,
         /* [in] */ IHashMap* labelCache);
 
-    ApplicationInfo(
+    CARAPI constructor(
         /* [in] */ ApplicationInfo* info);
 
     /**
@@ -71,7 +89,7 @@ public:
     static const Int32 DOWNLOADED_FLAG;
     static const Int32 UPDATED_SYSTEM_APP_FLAG;
 
-    Int32 mFlags = 0;
+    Int32 mFlags;
 
 private:
     static const String TAG;

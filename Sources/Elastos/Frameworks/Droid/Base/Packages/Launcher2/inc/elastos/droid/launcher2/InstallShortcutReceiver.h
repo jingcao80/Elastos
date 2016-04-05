@@ -1,7 +1,28 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_INSATLLSHORTCUTRECEIVER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_INSATLLSHORTCUTRECEIVER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include <elastos/core/Object.h>
+#include <elastos/core/Thread.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Content::ISharedPreferencesEditor;
+using Elastos::Droid::Content::ISharedPreferences;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IIntentShortcutIconResource;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Core::Object;
+using Elastos::Core::Thread;
+using Elastos::Utility::IArrayList;
+
 
 namespace Elastos {
 namespace Droid {
@@ -38,15 +59,15 @@ private:
             /* [in] */ InstallShortcutReceiver* host,
             /* [in] */ ISharedPreferences* sharedPrefs,
             /* [in] */ Int32 screen,
-            /* [in] */ IIntent* intent)
+            /* [in] */ IIntent* intent);
 
         CARAPI Run();
 
     private:
-        InstallShortcutReceiver* mHost;
-        ISharedPreferences* mSharedPrefs;
+        AutoPtr<InstallShortcutReceiver> mHost;
+        AutoPtr<ISharedPreferences> mSharedPrefs;
         Int32 mScreen;
-        IIntent* mIntent;
+        AutoPtr<IIntent> mIntent;
     };
 
 public:
@@ -78,7 +99,7 @@ private:
         /* [in] */ PendingInstallShortcutInfo* info);
 
     static CARAPI_(AutoPtr<IArrayList>) GetAndClearInstallQueue(
-        /* [in] */ ISharedPreferences sharedPrefs);
+        /* [in] */ ISharedPreferences* sharedPrefs);
 
     static CARAPI_(void) ProcessInstallShortcut(
         /* [in] */ IContext* context,
@@ -99,7 +120,7 @@ private:
         /* [in] */ IContext* context,
         /* [in] */ IArrayList* items,
         /* [in] */ ArrayOf<Int32>* xy,
-        /* [in] */ Int32 screen)
+        /* [in] */ Int32 screen);
 
 private:
     static const Int32 INSTALL_SHORTCUT_SUCCESSFUL;

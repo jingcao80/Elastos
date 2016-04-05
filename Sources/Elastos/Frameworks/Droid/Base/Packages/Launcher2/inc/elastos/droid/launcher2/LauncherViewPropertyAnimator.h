@@ -1,7 +1,20 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_LAUNCHERVIEWPROPERTYANIMATOR_H__
 #define  __ELASTOS_DROID_LAUNCHER2_LAUNCHERVIEWPROPERTYANIMATOR_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/animation/Animator.h"
+#include "elastos/droid/launcher2/FirstFrameAnimatorHelper.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.CoreLibrary.Utility.h"
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Droid::Animation::Animator;
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -36,7 +49,7 @@ public:
 
     //@Override
     CARAPI GetListeners(
-        /* [out, callee] */ ArrayOf<IAnimatorListener*>** listeners);
+        /* [out, callee] */ IArrayList** listeners);
 
     //@Override
     CARAPI GetStartDelay(
@@ -127,8 +140,8 @@ public:
             START_DELAY,
             DURATION,
             INTERPOLATOR
-    }
-    AutoPtr<IEnumSet> mPropertiesToSet = EnumSet.noneOf(Properties.class);
+    };
+    //AutoPtr<IEnumSet> mPropertiesToSet = EnumSet.noneOf(Properties.class);
     AutoPtr<IViewPropertyAnimator> mViewPropertyAnimator;
     AutoPtr<IView> mTarget;
 

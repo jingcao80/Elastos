@@ -1,0 +1,41 @@
+module
+{
+    using interface Elastos.Core.IRunnable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     *
+     * interface IPage
+     */
+    interface IPagedViewGridLayout {
+        GetCellCountX(
+            [out] Int32* x);
+
+        GetCellCountY(
+            [out] Int32* y);
+
+        /**
+         * Clears all the key listeners for the individual widgets.
+         */
+        ResetChildrenOnKeyListeners();
+
+        SetOnLayoutListener(
+            [in] IRunnable* r);
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

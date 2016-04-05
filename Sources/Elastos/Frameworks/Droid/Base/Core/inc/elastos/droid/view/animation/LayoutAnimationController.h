@@ -15,7 +15,7 @@ namespace Droid {
 namespace View {
 namespace Animation {
 
-class LayoutAnimationController
+class ECO_PUBLIC LayoutAnimationController
     : public Object
     , public ILayoutAnimationController
 {

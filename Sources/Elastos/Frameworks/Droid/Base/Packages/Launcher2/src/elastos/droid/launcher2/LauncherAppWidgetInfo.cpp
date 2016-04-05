@@ -1,7 +1,11 @@
 
 #include "elastos/droid/launcher2/LauncherAppWidgetInfo.h"
+#include "elastos/droid/launcher2/LauncherSettings.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -11,13 +15,17 @@ const Int32 LauncherAppWidgetInfo::NO_ID = -1;
 
 CAR_INTERFACE_IMPL(LauncherAppWidgetInfo, ItemInfo, ILauncherAppWidgetInfo);
 
-LauncherAppWidgetInfo::LauncherAppWidgetInfo(
-    /* [in] */ Int32 appWidgetId,
-    /* [in] */ IComponentName* providerName)
+LauncherAppWidgetInfo::LauncherAppWidgetInfo()
     : mAppWidgetId(NO_ID)
     , mMinWidth(-1)
     , mMinHeight(-1)
     , mHasNotifiedInitialWidgetSizeChanged(FALSE)
+{
+}
+
+ECode LauncherAppWidgetInfo::constructor(
+    /* [in] */ Int32 appWidgetId,
+    /* [in] */ IComponentName* providerName)
 {
     mItemType = LauncherSettings::Favorites::ITEM_TYPE_APPWIDGET;
     mAppWidgetId = appWidgetId;
@@ -27,6 +35,7 @@ LauncherAppWidgetInfo::LauncherAppWidgetInfo(
     // to indicate that they should be calculated based on the layout and minWidth/minHeight
     mSpanX = -1;
     mSpanY = -1;
+    return NOERROR;
 }
 
 ECode LauncherAppWidgetInfo::OnAddToDatabase(
@@ -49,7 +58,8 @@ ECode LauncherAppWidgetInfo::OnBindAppWidget(
 ECode LauncherAppWidgetInfo::NotifyWidgetSizeChanged(
     /* [in] */ ILauncher* launcher)
 {
-    AppWidgetResizeFrame->updateWidgetSizeRanges(mHostView, launcher, mSpanX, mSpanY);
+    assert(0 && "need class AppWidgetResizeFrame");
+    //AppWidgetResizeFrame::UpdateWidgetSizeRanges(mHostView, launcher, mSpanX, mSpanY);
     mHasNotifiedInitialWidgetSizeChanged = TRUE;
     return NOERROR;
 }

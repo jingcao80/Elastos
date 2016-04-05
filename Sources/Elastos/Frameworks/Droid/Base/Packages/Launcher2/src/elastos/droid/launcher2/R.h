@@ -5,8 +5,8 @@
  * should not be modified by hand.
  */
 
-#ifndef __Elastos_Droid_Packages_Launcher2_R_H__
-#define __Elastos_Droid_Packages_Launcher2_R_H__
+#ifndef __Elastos_Droid_Launcher2_R_H__
+#define __Elastos_Droid_Launcher2_R_H__
 #include <elatypes.h>
 namespace Elastos {
 namespace Droid {
@@ -21,12 +21,12 @@ class ECO_PUBLIC R {
         /**  If you want additional bitmap drawable resources to appear in the
              wallpaper picker, add them to this list. For each foo.jpg be sure
              to include a foo_small.jpg to be used as a thumbnail in the
-             scrolling gallery widget.
+             scrolling gallery widget. 
          */
         public: static const int wallpapers = 0x7f0b0001;
     };
     public: class attr {
-        /**  The number of horizontal cells in the CellLayout
+        /**  The number of horizontal cells in the CellLayout 
          <p>Must be an integer value, such as "<code>100</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -35,7 +35,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int cellCountX = 0x7f010004;
-        /**  The number of vertical cells in the CellLayout
+        /**  The number of vertical cells in the CellLayout 
          <p>Must be an integer value, such as "<code>100</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -44,7 +44,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int cellCountY = 0x7f010005;
-        /**  The height of a single cell
+        /**  The height of a single cell 
          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
 Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
 in (inches), mm (millimeters).
@@ -55,7 +55,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int cellHeight = 0x7f010007;
-        /**  The width of a single cell
+        /**  The width of a single cell 
          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
 Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
 in (inches), mm (millimeters).
@@ -74,7 +74,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int className = 0x7f010020;
-        /**  The x index of the item to be focused in the cling
+        /**  The x index of the item to be focused in the cling 
          <p>Must be an integer value, such as "<code>100</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -83,7 +83,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int clingFocusedX = 0x7f01001e;
-        /**  The y index of the item to be focused in the cling
+        /**  The y index of the item to be focused in the cling 
          <p>Must be an integer value, such as "<code>100</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -100,7 +100,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int container = 0x7f010022;
-        /**  The first screen the workspace should display.
+        /**  The first screen the workspace should display. 
          <p>Must be an integer value, such as "<code>100</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -109,7 +109,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int defaultScreen = 0x7f010003;
-        /**  Orientation of a widget.
+        /**  Orientation of a widget. 
          <p>Must be one of the following constant values.</p>
 <table>
 <colgroup align="left" />
@@ -121,7 +121,7 @@ containing a value of this type.
 </table>
          */
         public: static const int direction = 0x7f010000;
-        /**  Used to identify how to draw the cling bg
+        /**  Used to identify how to draw the cling bg 
          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -152,7 +152,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int key = 0x7f01002b;
-        /**  Max number of cells of applications horizontally
+        /**  Max number of cells of applications horizontally 
          <p>Must be an integer value, such as "<code>100</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -161,7 +161,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int maxAppCellCountX = 0x7f010018;
-        /**  Max number of cells of applications vertically
+        /**  Max number of cells of applications vertically 
          <p>Must be an integer value, such as "<code>100</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -170,7 +170,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int maxAppCellCountY = 0x7f010019;
-        /**  The max gap size for each dimension
+        /**  The max gap size for each dimension 
          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
 Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
 in (inches), mm (millimeters).
@@ -229,7 +229,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int pageLayoutPaddingRight = 0x7f010014;
-        /**  The padding of the pages that are dynamically created per page
+        /**  The padding of the pages that are dynamically created per page 
          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
 Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
 in (inches), mm (millimeters).
@@ -240,7 +240,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int pageLayoutPaddingTop = 0x7f010011;
-        /**  A spacing override for the icons within a page
+        /**  A spacing override for the icons within a page 
          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
 Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
 in (inches), mm (millimeters).
@@ -251,7 +251,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int pageLayoutWidthGap = 0x7f01000f;
-        /**  The space between adjacent pages of the PagedView.
+        /**  The space between adjacent pages of the PagedView. 
          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
 Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
 in (inches), mm (millimeters).
@@ -270,7 +270,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int screen = 0x7f010023;
-        /**  The padding for the scroll indicator area
+        /**  The padding for the scroll indicator area 
          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
 Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
 in (inches), mm (millimeters).
@@ -291,7 +291,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int scrollIndicatorPaddingRight = 0x7f010017;
-        /**  The source view to generate and apply the drawable states to/from
+        /**  The source view to generate and apply the drawable states to/from 
          <p>Must be an integer value, such as "<code>100</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -300,7 +300,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int sourceImageViewId = 0x7f01000e;
-        /**  The source view to delegate touch presses events to.
+        /**  The source view to delegate touch presses events to. 
          <p>Must be an integer value, such as "<code>100</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -325,7 +325,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int spanY = 0x7f010027;
-        /**  The color of the stroke outline
+        /**  The color of the stroke outline 
          <p>Must be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
 "<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
 <p>This may also be a reference to a resource (in the form
@@ -335,7 +335,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int strokeColor = 0x7f01000b;
-        /**  The color of the text
+        /**  The color of the text 
          <p>Must be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
 "<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
 <p>This may also be a reference to a resource (in the form
@@ -345,7 +345,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int strokeTextColor = 0x7f01000c;
-        /**  The width of the stroke
+        /**  The width of the stroke 
          <p>Must be a floating point value, such as "<code>1.2</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -374,7 +374,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int value = 0x7f01002c;
-        /**  Vertical spacing between widgets
+        /**  Vertical spacing between widgets 
          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
 Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
 in (inches), mm (millimeters).
@@ -385,7 +385,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int widgetCellHeightGap = 0x7f01001b;
-        /**  Horizontal spacing between widgets and wallpapers
+        /**  Horizontal spacing between widgets and wallpapers 
          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
 Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
 in (inches), mm (millimeters).
@@ -396,7 +396,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int widgetCellWidthGap = 0x7f01001a;
-        /**  Number of widgets horizontally
+        /**  Number of widgets horizontally 
          <p>Must be an integer value, such as "<code>100</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -405,7 +405,7 @@ theme attribute (in the form
 containing a value of this type.
          */
         public: static const int widgetCountX = 0x7f01001c;
-        /**  Number of widgets vertically
+        /**  Number of widgets vertically 
          <p>Must be an integer value, such as "<code>100</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -416,7 +416,7 @@ containing a value of this type.
         public: static const int widgetCountY = 0x7f01001d;
         /**  An override for the width and height gap to allow users to specify
              a specific size for the page using spacing instead of resolving the
-             spacing from the width of the page
+             spacing from the width of the page 
          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
 Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
 in (inches), mm (millimeters).
@@ -447,27 +447,27 @@ containing a value of this type.
     public: class bool_ {
         public: static const int allow_rotation = 0x7f080002;
         public: static const int config_largeHeap = 0x7f080000;
-        /**  Whether or not to use custom clings if a custom workspace layout is passed in
- Whether or not to use custom clings if a custom workspace layout is passed in
+        /**  Whether or not to use custom clings if a custom workspace layout is passed in 
+ Whether or not to use custom clings if a custom workspace layout is passed in 
          */
         public: static const int config_useCustomClings = 0x7f080005;
-        /**  Workspace
- Whether or not the drop targets drop down as opposed to fade in
- Workspace
- Whether or not the drop targets drop down as opposed to fade in
- Workspace
- Whether or not the drop targets drop down as opposed to fade in
+        /**  Workspace 
+ Whether or not the drop targets drop down as opposed to fade in 
+ Workspace 
+ Whether or not the drop targets drop down as opposed to fade in 
+ Workspace 
+ Whether or not the drop targets drop down as opposed to fade in 
          */
         public: static const int config_useDropTargetDownTransition = 0x7f080003;
-        /**  Whether or not to fade the side pages
- Whether or not to fade the side pages
- Workspace
- Whether or not to fade the side pages
- Whether or not to fade the side pages
+        /**  Whether or not to fade the side pages 
+ Whether or not to fade the side pages 
+ Workspace 
+ Whether or not to fade the side pages 
+ Whether or not to fade the side pages 
          */
         public: static const int config_workspaceFadeAdjacentScreens = 0x7f080004;
-        /**  Hotseat
- Hotseat
+        /**  Hotseat 
+ Hotseat 
          */
         public: static const int hotseat_transpose_layout_with_orientation = 0x7f080006;
         public: static const int is_large_screen = 0x7f080001;
@@ -476,7 +476,7 @@ containing a value of this type.
         public: static const int appwidget_error_color = 0x7f070003;
         public: static const int bubble_dark_background = 0x7f070002;
         /**  The color tints to apply to the text and drag view when hovering
-         over the delete target or the info target
+         over the delete target or the info target 
          */
         public: static const int delete_target_hover_tint = 0x7f070000;
         public: static const int info_target_hover_tint = 0x7f070001;
@@ -493,19 +493,19 @@ containing a value of this type.
         public: static const int app_widget_preview_label_margin_left = 0x7f0a0039;
         public: static const int app_widget_preview_label_margin_right = 0x7f0a003a;
         public: static const int app_widget_preview_label_margin_top = 0x7f0a0038;
-        /**  Padding applied to AppWidget previews
+        /**  Padding applied to AppWidget previews 
          */
         public: static const int app_widget_preview_padding_left = 0x7f0a0035;
         public: static const int app_widget_preview_padding_right = 0x7f0a0036;
         public: static const int app_widget_preview_padding_top = 0x7f0a0037;
-        /**  The width can be 76dp because we don't have B padding
+        /**  The width can be 76dp because we don't have B padding 
          */
         public: static const int apps_customize_cell_height = 0x7f0a0024;
-        /**  The width can be 72dp because we don't have L/R padding
- AppsCustomize
- AppsCustomize
- AppsCustomize
- AppsCustomize
+        /**  The width can be 72dp because we don't have L/R padding 
+ AppsCustomize 
+ AppsCustomize 
+ AppsCustomize 
+ AppsCustomize 
          */
         public: static const int apps_customize_cell_width = 0x7f0a0023;
         public: static const int apps_customize_max_gap = 0x7f0a0025;
@@ -513,54 +513,54 @@ containing a value of this type.
         public: static const int apps_customize_pageLayoutPaddingBottom = 0x7f0a0068;
         public: static const int apps_customize_pageLayoutPaddingLeft = 0x7f0a0069;
         public: static const int apps_customize_pageLayoutPaddingRight = 0x7f0a006a;
-        /**  AppsCustomize
+        /**  AppsCustomize 
          */
         public: static const int apps_customize_pageLayoutPaddingTop = 0x7f0a0067;
-        /**  AppsCustomize
- AppsCustomize
- AppsCustomize
+        /**  AppsCustomize 
+ AppsCustomize 
+ AppsCustomize 
          */
         public: static const int apps_customize_pageLayoutWidthGap = 0x7f0a0065;
         /**  The height of the tab bar - if this changes, we should update the
-         external icon width/height above to compensate
+         external icon width/height above to compensate 
          */
         public: static const int apps_customize_tab_bar_height = 0x7f0a0020;
         public: static const int apps_customize_tab_bar_margin_top = 0x7f0a0021;
         public: static const int apps_customize_widget_cell_height_gap = 0x7f0a0027;
         public: static const int apps_customize_widget_cell_width_gap = 0x7f0a0026;
-        /**  height of the bottom row of controls
- height of the bottom row of controls
- height of the bottom row of controls
- Hotseat
+        /**  height of the bottom row of controls 
+ height of the bottom row of controls 
+ height of the bottom row of controls 
+ Hotseat 
          */
         public: static const int button_bar_height = 0x7f0a002a;
         /**  Because portal animations go beyond the bounds of an icon, we need
-         to make the dock layout slightly larger than the button_bar_height
+         to make the dock layout slightly larger than the button_bar_height 
          */
         public: static const int button_bar_height_bottom_padding = 0x7f0a002c;
         public: static const int button_bar_height_plus_padding = 0x7f0a002f;
         /**  Because portal animations go beyond the bounds of an icon, we need
-         to make the dock layout slightly larger than the button_bar_height
+         to make the dock layout slightly larger than the button_bar_height 
  Because portal animations go beyond the bounds of an icon, we need
-         to make the dock layout slightly larger than the button_bar_height
+         to make the dock layout slightly larger than the button_bar_height 
          */
         public: static const int button_bar_height_top_padding = 0x7f0a002b;
-        /**  Hotseat
+        /**  Hotseat 
          */
         public: static const int button_bar_width_left_padding = 0x7f0a002d;
         public: static const int button_bar_width_right_padding = 0x7f0a002e;
         public: static const int cell_layout_bottom_padding = 0x7f0a005f;
         public: static const int cell_layout_bottom_padding_land = 0x7f0a004b;
         public: static const int cell_layout_bottom_padding_port = 0x7f0a004a;
-        /**  Workspace
+        /**  Workspace 
  Block spacing on each side of the screen.  And also padding
-         for the portals to look right.
+         for the portals to look right. 
  Block spacing on each side of the screen.  And also padding
-         for the portals to look right.
+         for the portals to look right. 
          */
         public: static const int cell_layout_left_padding = 0x7f0a005c;
         public: static const int cell_layout_left_padding_land = 0x7f0a0045;
-        /**  CellLayout padding
+        /**  CellLayout padding 
  CellLayout padding land / port
  CellLayout padding land / port
          */
@@ -571,126 +571,126 @@ containing a value of this type.
         public: static const int cell_layout_top_padding = 0x7f0a005e;
         public: static const int cell_layout_top_padding_land = 0x7f0a0049;
         public: static const int cell_layout_top_padding_port = 0x7f0a0048;
-        /**  Cling
+        /**  Cling 
          */
         public: static const int clingPunchThroughGraphicCenterRadius = 0x7f0a0000;
-        /**  The offset for the text in the cling
- Cling
- The offset for the text in the cling
- Cling
- The offset for the text in the cling
+        /**  The offset for the text in the cling 
+ Cling 
+ The offset for the text in the cling 
+ Cling 
+ The offset for the text in the cling 
          */
         public: static const int cling_text_block_offset_x = 0x7f0a0002;
         public: static const int cling_text_block_offset_y = 0x7f0a0003;
         /**  When dragging items on the workspace, the number of dps by which the position of
-     the drag view should be offset from the position of the original view.
+     the drag view should be offset from the position of the original view. 
  When dragging items on the workspace, the number of dps by which the position of
-     the drag view should be offset from the position of the original view.
+     the drag view should be offset from the position of the original view. 
          */
         public: static const int dragViewOffsetX = 0x7f0a0032;
         public: static const int dragViewOffsetY = 0x7f0a0033;
         /**   When dragging an item, how much bigger (fixed dps) the dragged view
-          should be. If 0, it will not be scaled at all.
+          should be. If 0, it will not be scaled at all. 
          */
         public: static const int dragViewScale = 0x7f0a0034;
-        /**  Drag padding to add to the bottom of drop targets
- Drag padding to add to the bottom of drop targets
+        /**  Drag padding to add to the bottom of drop targets 
+ Drag padding to add to the bottom of drop targets 
          */
         public: static const int drop_target_drag_padding = 0x7f0a0030;
-        /**  Clings
- Clings
+        /**  Clings 
+ Clings 
          */
         public: static const int folderClingMarginTop = 0x7f0a0001;
         public: static const int folder_cell_height = 0x7f0a000c;
-        /**  Folders
- The size of the image which sits behind the preview of the folder contents
+        /**  Folders 
+ The size of the image which sits behind the preview of the folder contents 
          */
         public: static const int folder_cell_width = 0x7f0a000b;
         public: static const int folder_height_gap = 0x7f0a0042;
         public: static const int folder_icon_padding_top = 0x7f0a000d;
         public: static const int folder_name_padding = 0x7f0a0040;
         public: static const int folder_padding = 0x7f0a0043;
-        /**  The amount that the preview contents are inset from the preview background
+        /**  The amount that the preview contents are inset from the preview background 
          */
         public: static const int folder_preview_padding = 0x7f0a003f;
-        /**  Folders
- The size of the image which sits behind the preview of the folder contents
- Folders
- The size of the image which sits behind the preview of the folder contents
- Folders
- The size of the image which sits behind the preview of the folder contents
+        /**  Folders 
+ The size of the image which sits behind the preview of the folder contents 
+ Folders 
+ The size of the image which sits behind the preview of the folder contents 
+ Folders 
+ The size of the image which sits behind the preview of the folder contents 
          */
         public: static const int folder_preview_size = 0x7f0a003e;
         public: static const int folder_width_gap = 0x7f0a0041;
         public: static const int hotseat_cell_height = 0x7f0a0013;
-        /**  Workspace
- Hotseat
+        /**  Workspace 
+ Hotseat 
          */
         public: static const int hotseat_cell_width = 0x7f0a0012;
         public: static const int hotseat_height_gap = 0x7f0a0015;
-        /**  Hotseat
- Hotseat
+        /**  Hotseat 
+ Hotseat 
          */
         public: static const int hotseat_width_gap = 0x7f0a0014;
         public: static const int profile_badge_margin = 0x7f0a0029;
-        /**  Sizes for managed profile badges
+        /**  Sizes for managed profile badges 
          */
         public: static const int profile_badge_size = 0x7f0a0028;
-        /**  QSB
- QSB
- Workspace
+        /**  QSB 
+ QSB 
+ Workspace 
          */
         public: static const int qsb_bar_height = 0x7f0a0006;
-        /**  Workspace
+        /**  Workspace 
  qsb_bar_height_inset represents qsb_bar_height minus the padding
-         that we put on each page for allowing folders to draw out of bounds
- QSB
+         that we put on each page for allowing folders to draw out of bounds 
+ QSB 
  qsb_bar_height_inset represents qsb_bar_height minus the padding
-         that we put on each page for allowing folders to draw out of bounds
- Workspace
+         that we put on each page for allowing folders to draw out of bounds 
+ Workspace 
  qsb_bar_height_inset represents qsb_bar_height minus the padding
-         that we put on each page for allowing folders to draw out of bounds
+         that we put on each page for allowing folders to draw out of bounds 
  qsb_bar_height_inset represents qsb_bar_height minus the padding
-         that we put on each page for allowing folders to draw out of bounds
+         that we put on each page for allowing folders to draw out of bounds 
          */
         public: static const int qsb_bar_height_inset = 0x7f0a0005;
         public: static const int qsb_padding_left = 0x7f0a0007;
         public: static const int qsb_padding_right = 0x7f0a0008;
-        /**  We offset the proxy to overlap with the voice icon
- We offset the proxy to overlap with the voice icon
+        /**  We offset the proxy to overlap with the voice icon 
+ We offset the proxy to overlap with the voice icon 
          */
         public: static const int qsb_voice_proxy_padding_right = 0x7f0a006f;
         public: static const int reveal_radius = 0x7f0a0004;
-        /**  Dragging
+        /**  Dragging 
  the area at the edge of the screen that makes the workspace go left
-         or right while you're dragging.
- Workspace
+         or right while you're dragging. 
+ Workspace 
  the area at the edge of the screen that makes the workspace go left
-         or right while you're dragging.
+         or right while you're dragging. 
  the area at the edge of the screen that makes the workspace go left
-         or right while you're dragging.
+         or right while you're dragging. 
          */
         public: static const int scroll_zone = 0x7f0a0031;
-        /**  44dp high for the optical bounds
+        /**  44dp high for the optical bounds 
          */
         public: static const int search_bar_height = 0x7f0a0009;
-        /**  Padding applied to shortcut previews
+        /**  Padding applied to shortcut previews 
          */
         public: static const int shortcut_preview_padding_left = 0x7f0a003b;
         public: static const int shortcut_preview_padding_right = 0x7f0a003c;
         public: static const int shortcut_preview_padding_top = 0x7f0a003d;
         public: static const int toolbar_button_horizontal_padding = 0x7f0a001d;
-        /**  QSB
- QSB
- QSB
+        /**  QSB 
+ QSB 
+ QSB 
          */
         public: static const int toolbar_button_vertical_padding = 0x7f0a001c;
         public: static const int toolbar_external_icon_height = 0x7f0a001f;
-        /**  External toolbar icon size (for bounds)
+        /**  External toolbar icon size (for bounds) 
          */
         public: static const int toolbar_external_icon_width = 0x7f0a001e;
         public: static const int wallpaper_chooser_grid_height = 0x7f0a0072;
-        /**  dimensions for the wallpaper picker wallpaper thumbnail width
+        /**  dimensions for the wallpaper picker wallpaper thumbnail width 
          */
         public: static const int wallpaper_chooser_grid_width = 0x7f0a0071;
         public: static const int workspace_bottom_padding = 0x7f0a0063;
@@ -699,47 +699,47 @@ containing a value of this type.
         public: static const int workspace_cell_height = 0x7f0a006c;
         public: static const int workspace_cell_height_land = 0x7f0a0056;
         public: static const int workspace_cell_height_port = 0x7f0a0057;
-        /**  Workspace cell size
- Workspace cell size
+        /**  Workspace cell size 
+ Workspace cell size 
          */
         public: static const int workspace_cell_width = 0x7f0a006b;
-        /**  Workspace cell size
- Workspace cell size
- Workspace cell size
+        /**  Workspace cell size 
+ Workspace cell size 
+ Workspace cell size 
          */
         public: static const int workspace_cell_width_land = 0x7f0a0054;
         public: static const int workspace_cell_width_port = 0x7f0a0055;
         public: static const int workspace_divider_padding_bottom = 0x7f0a0011;
-        /**  Workspace
- Divider width set to match the qsb width
+        /**  Workspace 
+ Divider width set to match the qsb width 
          */
         public: static const int workspace_divider_padding_left = 0x7f0a000e;
         public: static const int workspace_divider_padding_right = 0x7f0a000f;
-        /**  Workspace
- Workspace
+        /**  Workspace 
+ Workspace 
          */
         public: static const int workspace_divider_padding_top = 0x7f0a0010;
-        /**  Divider width set to match the qsb width
+        /**  Divider width set to match the qsb width 
          */
         public: static const int workspace_divider_width = 0x7f0a0073;
         public: static const int workspace_height_gap = 0x7f0a006e;
         public: static const int workspace_height_gap_land = 0x7f0a005a;
         public: static const int workspace_height_gap_port = 0x7f0a005b;
         public: static const int workspace_icon_text_size = 0x7f0a0017;
-        /**  Workspace padding
- Workspace padding
+        /**  Workspace padding 
+ Workspace padding 
          */
         public: static const int workspace_left_padding = 0x7f0a0060;
         public: static const int workspace_left_padding_land = 0x7f0a004d;
-        /**  Workspace padding
- Workspace padding
+        /**  Workspace padding 
+ Workspace padding 
          */
         public: static const int workspace_left_padding_port = 0x7f0a004c;
         public: static const int workspace_max_gap = 0x7f0a000a;
         public: static const int workspace_overscroll_drawable_padding = 0x7f0a0016;
         /**  We really want the page spacing to be the max of either the button bar
-     height or the qsb bar height
- Workspace
+     height or the qsb bar height 
+ Workspace 
          */
         public: static const int workspace_page_spacing = 0x7f0a0064;
         public: static const int workspace_right_padding = 0x7f0a0061;
@@ -888,107 +888,107 @@ containing a value of this type.
     public: class integer {
         public: static const int apps_customize_cling_focused_x = 0x7f090024;
         public: static const int apps_customize_cling_focused_y = 0x7f090025;
-        /**  AllApps/Customize/AppsCustomize
- AppsCustomize
+        /**  AllApps/Customize/AppsCustomize 
+ AppsCustomize 
          */
         public: static const int apps_customize_maxCellCountX = 0x7f090022;
         public: static const int apps_customize_maxCellCountY = 0x7f090023;
         /**  We can also afford to have a slightly wider portrait layout in
-         xlarge
+         xlarge 
          */
         public: static const int apps_customize_widget_cell_count_x = 0x7f090026;
         public: static const int apps_customize_widget_cell_count_y = 0x7f090027;
         public: static const int cell_count_x = 0x7f09001d;
         public: static const int cell_count_y = 0x7f09001e;
-        /**  Batch loading for loading in LauncherModel
+        /**  Batch loading for loading in LauncherModel 
          */
         public: static const int config_allAppsBatchLoadDelay = 0x7f09000e;
         public: static const int config_allAppsBatchSize = 0x7f09000f;
         /**  The slope, in percent, of the drag movement needed to drag an item out of
-         AppsCustomize (y / x * 100%)
+         AppsCustomize (y / x * 100%)  
          */
         public: static const int config_appsCustomizeDragSlopeThreshold = 0x7f09000d;
         public: static const int config_appsCustomizeFadeInTime = 0x7f090007;
         public: static const int config_appsCustomizeFadeOutTime = 0x7f090008;
-        /**  AllApps/Customize/AppsCustomize
- The alpha of the AppsCustomize bg in spring loaded mode
+        /**  AllApps/Customize/AppsCustomize 
+ The alpha of the AppsCustomize bg in spring loaded mode 
          */
         public: static const int config_appsCustomizeSpringLoadedBgAlpha = 0x7f090001;
         public: static const int config_appsCustomizeWorkspaceAnimationStagger = 0x7f09000a;
         public: static const int config_appsCustomizeWorkspaceShrinkTime = 0x7f090009;
         /**  Fade/zoom in/out duration & scale in the AllApps transition.
-         Note: This should be less than the workspaceShrinkTime as they happen together.
+         Note: This should be less than the workspaceShrinkTime as they happen together. 
          */
         public: static const int config_appsCustomizeZoomInTime = 0x7f090004;
         public: static const int config_appsCustomizeZoomOutTime = 0x7f090005;
         public: static const int config_appsCustomizeZoomScaleFactor = 0x7f090006;
-        /**  Camera distance for the overscroll effect
- Camera distance for the overscroll effect. We use a higher value here because the
+        /**  Camera distance for the overscroll effect 
+ Camera distance for the overscroll effect. We use a higher value here because the 
          workspace screens run nearly flush to the edge of the screen
- Camera distance for the overscroll effect
+ Camera distance for the overscroll effect 
          */
         public: static const int config_cameraDistance = 0x7f090019;
-        /**  Properties controlling the workspace fade-out during dragging
+        /**  Properties controlling the workspace fade-out during dragging 
          */
         public: static const int config_dragFadeOutAlpha = 0x7f090017;
         public: static const int config_dragFadeOutDuration = 0x7f090018;
         /**  The duration (in ms) of the fade animation on the object outlines, used when
-         we are dragging objects around on the home screen.
+         we are dragging objects around on the home screen. 
          */
         public: static const int config_dragOutlineFadeTime = 0x7f090011;
-        /**  The alpha value at which to show the most recent drop visualization outline.
+        /**  The alpha value at which to show the most recent drop visualization outline. 
          */
         public: static const int config_dragOutlineMaxAlpha = 0x7f090012;
-        /**  The distance at which the animation should take the max duration
+        /**  The distance at which the animation should take the max duration 
          */
         public: static const int config_dropAnimMaxDist = 0x7f090016;
         public: static const int config_dropAnimMaxDuration = 0x7f090014;
         /**  Parameters controlling the animation for when an item is dropped on the home screen,
-         and it animates from its old position to the new one.
+         and it animates from its old position to the new one. 
          */
         public: static const int config_dropAnimMinDuration = 0x7f090013;
-        /**  The transition duration for the background of the drop targets
+        /**  The transition duration for the background of the drop targets 
          */
         public: static const int config_dropTargetBgTransitionDuration = 0x7f090010;
-        /**  DragController
- DragController
+        /**  DragController 
+ DragController 
          */
         public: static const int config_flingToDeleteMinVelocity = 0x7f090000;
-        /**  The duration of the UserFolder opening and closing animation
+        /**  The duration of the UserFolder opening and closing animation 
          */
         public: static const int config_folderAnimDuration = 0x7f090015;
-        /**  Tab transition animation duration
+        /**  Tab transition animation duration 
          */
         public: static const int config_tabTransitionDuration = 0x7f09000c;
         public: static const int config_workspaceAppsCustomizeAnimationStagger = 0x7f09000b;
-        /**  Out of 100, the percent to shrink the workspace during spring loaded mode.
- AllApps/Customize/AppsCustomize
- Out of 100, the percent to shrink the workspace during spring loaded mode.
+        /**  Out of 100, the percent to shrink the workspace during spring loaded mode. 
+ AllApps/Customize/AppsCustomize 
+ Out of 100, the percent to shrink the workspace during spring loaded mode. 
          */
         public: static const int config_workspaceSpringLoadShrinkPercentage = 0x7f090003;
         public: static const int config_workspaceUnshrinkTime = 0x7f090002;
         /**  Folder max bounds and max number of items. Note: folder_max_count_x * folder_max_count_y
-         >= folder_max_num_items. When these are set to -1, they are automatically determined.
+         >= folder_max_num_items. When these are set to -1, they are automatically determined. 
  Folder max bounds and max number of items.
-         Note: folder_max_count_x * folder_max_count_y >= folder_max_num_items.
- Folders
+         Note: folder_max_count_x * folder_max_count_y >= folder_max_num_items. 
+ Folders 
  Folder max bounds and max number of items. Note: folder_max_count_x * folder_max_count_y
-        >= folder_max_num_items. When these are set to -1, they are automatically determined.
- Folders
+        >= folder_max_num_items. When these are set to -1, they are automatically determined. 
+ Folders 
  Folder max bounds and max number of items. Note: folder_max_count_x * folder_max_count_y
-        >= folder_max_num_items. When these are set to -1, they are automatically determined.
- Folders
+        >= folder_max_num_items. When these are set to -1, they are automatically determined. 
+ Folders 
  Folder max bounds and max number of items. Note: folder_max_count_x * folder_max_count_y
-        >= folder_max_num_items. When these are set to -1, they are automatically determined.
+        >= folder_max_num_items. When these are set to -1, they are automatically determined. 
          */
         public: static const int folder_max_count_x = 0x7f09001a;
         public: static const int folder_max_count_y = 0x7f09001b;
         public: static const int folder_max_num_items = 0x7f09001c;
         public: static const int hotseat_all_apps_index = 0x7f090020;
         public: static const int hotseat_cell_count = 0x7f09001f;
-        /**  must be between 0 and 100
- Hotseat
- must be between 0 and 100
+        /**  must be between 0 and 100 
+ Hotseat 
+ must be between 0 and 100 
          */
         public: static const int hotseat_item_scale_percentage = 0x7f090021;
     };
@@ -1029,93 +1029,93 @@ containing a value of this type.
         public: static const int ic_launcher_wallpaper = 0x7f030002;
     };
     public: class string {
-        /**  Accessibility: AllApps button
+        /**  Accessibility: AllApps button 
          */
         public: static const int accessibility_all_apps_button = 0x7f0c002a;
-        /**  Accessibility: Delete button
+        /**  Accessibility: Delete button 
          */
         public: static const int accessibility_delete_button = 0x7f0c002b;
-        /**  Accessibility: Search button
+        /**  Accessibility: Search button 
          */
         public: static const int accessibility_search_button = 0x7f0c0028;
-        /**  Accessibility: Voice Search button
+        /**  Accessibility: Voice Search button 
          */
         public: static const int accessibility_voice_search_button = 0x7f0c0029;
         /**  Displayed when user selects a shortcut for an app that was uninstalled [CHAR_LIMIT=none]
          */
         public: static const int activity_not_found = 0x7f0c0007;
-        /**  All applications label
+        /**  All applications label 
          */
         public: static const int all_apps_button_label = 0x7f0c0021;
-        /**  The description of how to pick up and add an item to the workspace [CHAR_LIMIT=none]
+        /**  The description of how to pick up and add an item to the workspace [CHAR_LIMIT=none] 
          */
         public: static const int all_apps_cling_add_item = 0x7f0c0050;
-        /**  The title text for the All Apps cling [CHAR_LIMIT=none]
+        /**  The title text for the All Apps cling [CHAR_LIMIT=none] 
          */
         public: static const int all_apps_cling_title = 0x7f0c004f;
         /**  Label for button in all applications label to go back home (to the workspace / desktop)
-         for accessibilty (spoken when the button gets focus).
+         for accessibilty (spoken when the button gets focus). 
          */
         public: static const int all_apps_home_button_label = 0x7f0c0022;
-        /**  Application name
+        /**  Application name 
          */
         public: static const int application_name = 0x7f0c0000;
-        /**  The format string for AppsCustomize Apps page scroll text [CHAR_LIMIT=none]
+        /**  The format string for AppsCustomize Apps page scroll text [CHAR_LIMIT=none] 
          */
         public: static const int apps_customize_apps_scroll_format = 0x7f0c004a;
-        /**  The format string for AppsCustomize Apps page scroll text [CHAR_LIMIT=none]
+        /**  The format string for AppsCustomize Apps page scroll text [CHAR_LIMIT=none] 
          */
         public: static const int apps_customize_widgets_scroll_format = 0x7f0c004b;
-        /**  Appears in the CAB when an app is selected in All Apps or Customize mode. [CHAR_LIMIT=50]
+        /**  Appears in the CAB when an app is selected in All Apps or Customize mode. [CHAR_LIMIT=50] 
          */
         public: static const int cab_app_selection_text = 0x7f0c0037;
-        /**  Appears in the CAB when a folder is selected in Customize mode. [CHAR_LIMIT=50]
+        /**  Appears in the CAB when a folder is selected in Customize mode. [CHAR_LIMIT=50] 
          */
         public: static const int cab_folder_selection_text = 0x7f0c0039;
         /**  Describes the button for getting details/info about currently selected application.
-         Text is not displayed, but provided for accessibility. [CHAR_LIMIT=none]
+         Text is not displayed, but provided for accessibility. [CHAR_LIMIT=none] 
          */
         public: static const int cab_menu_app_info = 0x7f0c0036;
         /**  Describes the button for uninstalling the currently selected application.
-         Text is not displayed, but provided for accessibility. [CHAR_LIMIT=none]
+         Text is not displayed, but provided for accessibility. [CHAR_LIMIT=none] 
          */
         public: static const int cab_menu_delete_app = 0x7f0c0035;
-        /**  Appears in the CAB when a shortcut is selected in Customize mode. [CHAR_LIMIT=50]
+        /**  Appears in the CAB when a shortcut is selected in Customize mode. [CHAR_LIMIT=50] 
          */
         public: static const int cab_shortcut_selection_text = 0x7f0c003a;
-        /**  Appears in the CAB when a widget is selected in Customize mode. [CHAR_LIMIT=50]
+        /**  Appears in the CAB when a widget is selected in Customize mode. [CHAR_LIMIT=50] 
          */
         public: static const int cab_widget_selection_text = 0x7f0c0038;
-        /**  Buttons in Rename folder dialog box
+        /**  Buttons in Rename folder dialog box 
          */
         public: static const int cancel_action = 0x7f0c0012;
-        /**  Title of dialog that appears after user selects Wallpaper from menu
+        /**  Title of dialog that appears after user selects Wallpaper from menu 
          */
         public: static const int chooser_wallpaper = 0x7f0c0004;
-        /**  The text on the button to dismiss a cling [CHAR_LIMIT=none]
+        /**  The text on the button to dismiss a cling [CHAR_LIMIT=none] 
          */
         public: static const int cling_dismiss = 0x7f0c0054;
-        /**  Error message when user has filled all their home screens
+        /**  Error message when user has filled all their home screens 
          */
         public: static const int completely_out_of_space = 0x7f0c0018;
-        /**  Dummy string [CHAR_LIMIT=60]
+        /**  Dummy string [CHAR_LIMIT=60] 
          */
         public: static const int custom_workspace_cling_description_1 = 0x7f0c005d;
-        /**  Dummy string [CHAR_LIMIT=60]
+        /**  Dummy string [CHAR_LIMIT=60] 
          */
         public: static const int custom_workspace_cling_description_2 = 0x7f0c005f;
-        /**  Strings used in device overlays
- Clings
- Dummy string [CHAR_LIMIT=40]
+        /**  Strings used in device overlays 
+ Clings 
+ Dummy string [CHAR_LIMIT=40] 
          */
         public: static const int custom_workspace_cling_title_1 = 0x7f0c005c;
-        /**  Dummy string [CHAR_LIMIT=40]
+        /**  Dummy string [CHAR_LIMIT=40] 
          */
         public: static const int custom_workspace_cling_title_2 = 0x7f0c005e;
-        /**  The format string for default page scroll text [CHAR_LIMIT=none]
+        /**  The format string for default page scroll text [CHAR_LIMIT=none] 
          */
         public: static const int default_scroll_format = 0x7f0c0048;
-        /**  Label for delete drop target. [CHAR_LIMIT=30]
+        /**  Label for delete drop target. [CHAR_LIMIT=30] 
          */
         public: static const int delete_target_label = 0x7f0c0025;
         /**  Label for uninstall drop target. [CHAR_LIMIT=30]
@@ -1126,243 +1126,243 @@ containing a value of this type.
          */
         public: static const int delete_zone_label_all_apps = 0x7f0c0024;
         /**  Label for trash icon in All Apps, when an updated system app is selected. The update will
-         be uninstalled. [CHAR_LIMIT=30]
+         be uninstalled. [CHAR_LIMIT=30] 
          */
         public: static const int delete_zone_label_all_apps_system_app = 0x7f0c002c;
         /**  Label for trash icon on workspace. Meant to communicate the idea of removing the
-         icon/widget from the home screen, but not permanently. [CHAR_LIMIT=30]
+         icon/widget from the home screen, but not permanently. [CHAR_LIMIT=30] 
          */
         public: static const int delete_zone_label_workspace = 0x7f0c0023;
-        /**  Title of the Android Dreams (screensaver) module
+        /**  Title of the Android Dreams (screensaver) module 
          */
         public: static const int dream_name = 0x7f0c0045;
-        /**  Error message on dummy custom cling layout [DO NOT TRANSLATE]
+        /**  Error message on dummy custom cling layout [DO NOT TRANSLATE] 
          */
         public: static const int dummy_custom_cling_error_message = 0x7f0c0055;
         /**  External-drop widget error string.  This is the error that is shown
          when you drag and item into the homescreen and it is unable to fit,
-         or an error is encountered. [CHAR_LIMIT=50]
+         or an error is encountered. [CHAR_LIMIT=50] 
          */
         public: static const int external_drop_widget_error = 0x7f0c000d;
-        /**  External-drop widget pick label format string [CHAR_LIMIT=25]
+        /**  External-drop widget pick label format string [CHAR_LIMIT=25] 
          */
         public: static const int external_drop_widget_pick_format = 0x7f0c000c;
         /**  External-drop widget pick title.  This is shown as the title of the
          dialog which allows you to pick which widgets to handle a particular
-         drop if there are multiple choices. [CHAR_LIMIT=35]
+         drop if there are multiple choices. [CHAR_LIMIT=35] 
          */
         public: static const int external_drop_widget_pick_title = 0x7f0c000e;
-        /**  The description of how to create a folder [CHAR_LIMIT=none]
+        /**  The description of how to create a folder [CHAR_LIMIT=none] 
          */
         public: static const int folder_cling_create_folder = 0x7f0c0053;
-        /**  The description of how to move an app [CHAR_LIMIT=none]
+        /**  The description of how to move an app [CHAR_LIMIT=none] 
          */
         public: static const int folder_cling_move_item = 0x7f0c0052;
-        /**  The title text for the Folder cling [CHAR_LIMIT=none]
+        /**  The title text for the Folder cling [CHAR_LIMIT=none] 
          */
         public: static const int folder_cling_title = 0x7f0c0051;
-        /**  Indication that folder closed
+        /**  Indication that folder closed 
          */
         public: static const int folder_closed = 0x7f0c0059;
-        /**  Default folder title
+        /**  Default folder title 
          */
         public: static const int folder_hint_text = 0x7f0c0046;
-        /**  Default folder name
+        /**  Default folder name 
          */
         public: static const int folder_name = 0x7f0c0003;
-        /**  Folder name format
+        /**  Folder name format 
          */
         public: static const int folder_name_format = 0x7f0c005b;
-        /**  Folder accessibility
- The format string for when a folder is opened, speaks the dimensions
+        /**  Folder accessibility 
+ The format string for when a folder is opened, speaks the dimensions 
          */
         public: static const int folder_opened = 0x7f0c0056;
-        /**  Folder renamed format
+        /**  Folder renamed format 
          */
         public: static const int folder_renamed = 0x7f0c005a;
-        /**  Instruction that clicking outside will close folder
+        /**  Instruction that clicking outside will close folder 
          */
         public: static const int folder_tap_to_close = 0x7f0c0057;
-        /**  Instruction that clicking outside will commit folder rename
+        /**  Instruction that clicking outside will commit folder rename 
          */
         public: static const int folder_tap_to_rename = 0x7f0c0058;
-        /**  Text to show user in place of a gadget when we can't display it properly
+        /**  Text to show user in place of a gadget when we can't display it properly 
          */
         public: static const int gadget_error_text = 0x7f0c0043;
-        /**  Options in "Add to Home" dialog box; Title of the group containing the list of all apps
+        /**  Options in "Add to Home" dialog box; Title of the group containing the list of all apps 
          */
         public: static const int group_applications = 0x7f0c0014;
         /**  Options in "Add to Home" dialog box; Title of the group containing the list of all shortcut
-s
+s 
          */
         public: static const int group_shortcuts = 0x7f0c0015;
         /**  Options in "Add to Home" dialog box; Title of the group containing the list of apps that can set the wallpaper
          */
         public: static const int group_wallpapers = 0x7f0c0017;
-        /**  Options in "Add to Home" dialog box; Title of the group containing the list of all widgets/gadgets
+        /**  Options in "Add to Home" dialog box; Title of the group containing the list of all widgets/gadgets 
          */
         public: static const int group_widgets = 0x7f0c0016;
-        /**  URL pointing to help text. If empty, no link to help will be created [DO NOT TRANSLATE]
+        /**  URL pointing to help text. If empty, no link to help will be created [DO NOT TRANSLATE] 
          */
         public: static const int help_url = 0x7f0c0034;
-        /**  Accessibility-facing application name
+        /**  Accessibility-facing application name 
          */
         public: static const int home = 0x7f0c0001;
-        /**  Error message when user has filled the hotseat
+        /**  Error message when user has filled the hotseat 
          */
         public: static const int hotseat_out_of_space = 0x7f0c001a;
-        /**  Label for the info icon. [CHAR_LIMIT=30]
+        /**  Label for the info icon. [CHAR_LIMIT=30] 
          */
         public: static const int info_target_label = 0x7f0c0027;
-        /**  Error message when user tries to drop an invalid item on the hotseat
+        /**  Error message when user tries to drop an invalid item on the hotseat 
          */
         public: static const int invalid_hotseat_item = 0x7f0c001b;
-        /**  AppsCustomize pane
- Message to tell the user to press and hold on a widget to add it [CHAR_LIMIT=50]
+        /**  AppsCustomize pane 
+ Message to tell the user to press and hold on a widget to add it [CHAR_LIMIT=50] 
          */
         public: static const int long_press_widget_to_add = 0x7f0c0009;
-        /**  Market button text.  The market button text is removed in Launcher.java
-         in the Phone UI. [CHAR LIMIT=32]
+        /**  Market button text.  The market button text is removed in Launcher.java 
+         in the Phone UI. [CHAR LIMIT=32] 
          */
         public: static const int market = 0x7f0c000a;
-        /**  Verb, menu item used to add an item on the desktop
+        /**  Verb, menu item used to add an item on the desktop 
          */
         public: static const int menu_add = 0x7f0c002d;
-        /**  Noun, menu item used to show help. [CHAR_LIMIT=none]
+        /**  Noun, menu item used to show help. [CHAR_LIMIT=none] 
          */
         public: static const int menu_help = 0x7f0c0033;
-        /**  Title of dialog box
+        /**  Title of dialog box 
          */
         public: static const int menu_item_add_item = 0x7f0c0013;
-        /**  Menu item used to manage installed applications
+        /**  Menu item used to manage installed applications 
          */
         public: static const int menu_manage_apps = 0x7f0c002e;
-        /**  Noun, menu item used to bring down the notifications shade
+        /**  Noun, menu item used to bring down the notifications shade 
          */
         public: static const int menu_notifications = 0x7f0c0031;
-        /**  Verb, menu item used to initiate global search
+        /**  Verb, menu item used to initiate global search 
          */
         public: static const int menu_search = 0x7f0c0030;
-        /**  Noun, menu item used to show the system settings
+        /**  Noun, menu item used to show the system settings 
          */
         public: static const int menu_settings = 0x7f0c0032;
-        /**  Noun, menu item used to set the desktop's wallpaper
+        /**  Noun, menu item used to set the desktop's wallpaper 
          */
         public: static const int menu_wallpaper = 0x7f0c002f;
-        /**  Error message when user has filled a home screen
+        /**  Error message when user has filled a home screen 
          */
         public: static const int out_of_space = 0x7f0c0019;
-        /**  Permission description
+        /**  Permission description 
          */
         public: static const int permdesc_install_shortcut = 0x7f0c003c;
-        /**  Permission description
+        /**  Permission description 
          */
         public: static const int permdesc_read_settings = 0x7f0c0040;
-        /**  Permission description
+        /**  Permission description 
          */
         public: static const int permdesc_uninstall_shortcut = 0x7f0c003e;
-        /**  Permission description
+        /**  Permission description 
          */
         public: static const int permdesc_write_settings = 0x7f0c0042;
-        /**  Permission short label
+        /**  Permission short label 
          */
         public: static const int permlab_install_shortcut = 0x7f0c003b;
-        /**  Permission short label
+        /**  Permission short label 
          */
         public: static const int permlab_read_settings = 0x7f0c003f;
-        /**  Permission short label
+        /**  Permission short label 
          */
         public: static const int permlab_uninstall_shortcut = 0x7f0c003d;
-        /**  Permission short label
+        /**  Permission short label 
          */
         public: static const int permlab_write_settings = 0x7f0c0041;
-        /**  Option in "Select wallpaper from" dialog box
+        /**  Option in "Select wallpaper from" dialog box 
          */
         public: static const int pick_wallpaper = 0x7f0c0006;
-        /**  Buttons in Rename folder dialog box
+        /**  Buttons in Rename folder dialog box 
          */
         public: static const int rename_action = 0x7f0c0011;
-        /**  Label of Folder name field in Rename folder dialog box
+        /**  Label of Folder name field in Rename folder dialog box 
          */
         public: static const int rename_folder_label = 0x7f0c000f;
-        /**  Title of dialog box
+        /**  Title of dialog box 
          */
         public: static const int rename_folder_title = 0x7f0c0010;
-        /**  Message displayed when an external application attemps to create a shortcut that already exists
+        /**  Message displayed when an external application attemps to create a shortcut that already exists 
          */
         public: static const int shortcut_duplicate = 0x7f0c001e;
-        /**  Message displayed when a shortcut is created by an external application
+        /**  Message displayed when a shortcut is created by an external application 
          */
         public: static const int shortcut_installed = 0x7f0c001c;
-        /**  Message displayed when a shortcut is uninstalled by an external application
+        /**  Message displayed when a shortcut is uninstalled by an external application 
          */
         public: static const int shortcut_uninstalled = 0x7f0c001d;
-        /**  Title of dialog when user is selecting an application to add to homescreen
+        /**  Title of dialog when user is selecting an application to add to homescreen 
          */
         public: static const int title_select_application = 0x7f0c0020;
-        /**  Title of dialog when user is selecting shortcut to add to homescreen
+        /**  Title of dialog when user is selecting shortcut to add to homescreen 
          */
         public: static const int title_select_shortcut = 0x7f0c001f;
-        /**  Name for all applications running as this uid.
+        /**  Name for all applications running as this uid. 
          */
         public: static const int uid_name = 0x7f0c0002;
-        /**  Text to inform the user that they can't uninstall a system application
+        /**  Text to inform the user that they can't uninstall a system application 
          */
         public: static const int uninstall_system_app_text = 0x7f0c0044;
-        /**  Button label on Wallpaper Gallery screen; user selects this button to set a specific wallpaper
+        /**  Button label on Wallpaper Gallery screen; user selects this button to set a specific wallpaper 
          */
         public: static const int wallpaper_instructions = 0x7f0c0005;
-        /**  The format string for the dimensions of a widget in the drawer
- There is a special version of this format string for Farsi
+        /**  The format string for the dimensions of a widget in the drawer 
+ There is a special version of this format string for Farsi 
          */
         public: static const int widget_dims_format = 0x7f0c000b;
-        /**   Labels for the tabs in the customize drawer
+        /**   Labels for the tabs in the customize drawer 
          */
         public: static const int widgets_tab_label = 0x7f0c0008;
-        /**  The description of how to use the workspace [CHAR_LIMIT=none]
+        /**  The description of how to use the workspace [CHAR_LIMIT=none] 
          */
         public: static const int workspace_cling_move_item = 0x7f0c004d;
-        /**  The description of how to open all apps from the workspace [CHAR_LIMIT=none]
+        /**  The description of how to open all apps from the workspace [CHAR_LIMIT=none] 
          */
         public: static const int workspace_cling_open_all_apps = 0x7f0c004e;
-        /**  Clings
- The title text for the workspace cling [CHAR_LIMIT=none]
+        /**  Clings 
+ The title text for the workspace cling [CHAR_LIMIT=none] 
          */
         public: static const int workspace_cling_title = 0x7f0c004c;
-        /**  The format string for Workspace descriptions [CHAR_LIMIT=none]
+        /**  The format string for Workspace descriptions [CHAR_LIMIT=none] 
          */
         public: static const int workspace_description_format = 0x7f0c0047;
-        /**  The format string for Workspace page scroll text [CHAR_LIMIT=none]
+        /**  The format string for Workspace page scroll text [CHAR_LIMIT=none] 
          */
         public: static const int workspace_scroll_format = 0x7f0c0049;
     };
     public: class style {
-        /**  Clings
+        /**  Clings 
          */
         public: static const int ClingButton = 0x7f0d0002;
         public: static const int ClingText = 0x7f0d0004;
         public: static const int ClingTitleText = 0x7f0d0003;
         public: static const int CustomClingText = 0x7f0d0015;
-        /**  Overridden in device overlays
+        /**  Overridden in device overlays 
          */
         public: static const int CustomClingTitleText = 0x7f0d0014;
         public: static const int DropTargetButton = 0x7f0d0010;
         public: static const int DropTargetButtonContainer = 0x7f0d000f;
         public: static const int MarketButton = 0x7f0d0013;
-        /**  Search Bar
- Workspace
- QSB Search / Drop Target bar
+        /**  Search Bar 
+ Workspace 
+ QSB Search / Drop Target bar 
          */
         public: static const int QSBBar = 0x7f0d000c;
-        /**  Workspace
+        /**  Workspace 
          */
         public: static const int SearchButton = 0x7f0d000e;
         public: static const int SearchDropTargetBar = 0x7f0d000d;
         public: static const int TabIndicator = 0x7f0d0011;
-        /**  Overridden in values-land
- AppsCustomize
- AppsCustomize
- AppsCustomize
+        /**  Overridden in values-land 
+ AppsCustomize 
+ AppsCustomize 
+ AppsCustomize 
          */
         public: static const int TabIndicator_AppsCustomize = 0x7f0d0012;
         public: static const int Theme = 0x7f0d0001;
@@ -1371,7 +1371,7 @@ s
         public: static const int WorkspaceIcon_Landscape = 0x7f0d0007;
         public: static const int WorkspaceIcon_Landscape_AppsCustomize = 0x7f0d000b;
         public: static const int WorkspaceIcon_Landscape_Folder = 0x7f0d0009;
-        /**  Workspace
+        /**  Workspace 
          */
         public: static const int WorkspaceIcon_Portrait = 0x7f0d0006;
         public: static const int WorkspaceIcon_Portrait_AppsCustomize = 0x7f0d000a;
@@ -1384,7 +1384,7 @@ s
     };
     public: class styleable {
         /**  AppsCustomizePagedView specific attributes.  These attributes are used to
-         customize an AppsCustomizePagedView in xml files.
+         customize an AppsCustomizePagedView in xml files. 
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -1412,7 +1412,7 @@ s
         /**
           <p>
           @attr description
-           The x index of the item to be focused in the cling
+           The x index of the item to be focused in the cling 
 
 
           <p>Must be an integer value, such as "<code>100</code>".
@@ -1428,7 +1428,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The y index of the item to be focused in the cling
+           The y index of the item to be focused in the cling 
 
 
           <p>Must be an integer value, such as "<code>100</code>".
@@ -1444,7 +1444,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           Max number of cells of applications horizontally
+           Max number of cells of applications horizontally 
 
 
           <p>Must be an integer value, such as "<code>100</code>".
@@ -1460,7 +1460,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           Max number of cells of applications vertically
+           Max number of cells of applications vertically 
 
 
           <p>Must be an integer value, such as "<code>100</code>".
@@ -1476,7 +1476,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           Vertical spacing between widgets
+           Vertical spacing between widgets 
 
 
           <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
@@ -1494,7 +1494,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           Horizontal spacing between widgets and wallpapers
+           Horizontal spacing between widgets and wallpapers 
 
 
           <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
@@ -1512,7 +1512,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           Number of widgets horizontally
+           Number of widgets horizontally 
 
 
           <p>Must be an integer value, such as "<code>100</code>".
@@ -1528,7 +1528,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           Number of widgets vertically
+           Number of widgets vertically 
 
 
           <p>Must be an integer value, such as "<code>100</code>".
@@ -1542,7 +1542,7 @@ containing a value of this type.
         */
         public: static const int AppsCustomizePagedView_widgetCountY = 5;
         /**  CellLayout specific attributes. These attributes are used to customize
-         a CellLayout view in XML files.
+         a CellLayout view in XML files. 
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -1566,7 +1566,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The height of a single cell
+           The height of a single cell 
 
 
           <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
@@ -1584,7 +1584,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The width of a single cell
+           The width of a single cell 
 
 
           <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
@@ -1618,7 +1618,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The max gap size for each dimension
+           The max gap size for each dimension 
 
 
           <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
@@ -1638,7 +1638,7 @@ containing a value of this type.
           @attr description
            An override for the width and height gap to allow users to specify
              a specific size for the page using spacing instead of resolving the
-             spacing from the width of the page
+             spacing from the width of the page 
 
 
           <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
@@ -1654,7 +1654,7 @@ containing a value of this type.
         */
         public: static const int CellLayout_widthGap = 2;
         /**  Cling specific attributes. These attributes are used to customize
-         the cling in XML files.
+         the cling in XML files. 
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -1668,7 +1668,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           Used to identify how to draw the cling bg
+           Used to identify how to draw the cling bg 
 
 
           <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
@@ -1684,11 +1684,11 @@ containing a value of this type.
         /** Attributes that can be used with a CustomClingText.
          */
         public: static const int CustomClingText[0];
-        /**  Only used in the device overlays
+        /**  Only used in the device overlays 
          */
         public: static const int CustomClingTitleText[0];
         /**  DrawableStateProxyView specific attributes. These attributes are used to customize
-         a DrawableStateProxyView view in XML files.
+         a DrawableStateProxyView view in XML files. 
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -1702,7 +1702,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The source view to delegate touch presses events to.
+           The source view to delegate touch presses events to. 
 
 
           <p>Must be an integer value, such as "<code>100</code>".
@@ -1756,7 +1756,7 @@ containing a value of this type.
           @attr name android:value
         */
         public: static const int Extra_value = 1;
-        /**  XML attributes used by default_workspace.xml
+        /**  XML attributes used by default_workspace.xml 
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -1934,7 +1934,7 @@ containing a value of this type.
         */
         public: static const int Favorite_y = 5;
         /**  HandleView specific attributes. These attributes are used to customize
-         a HandleView view in XML files.
+         a HandleView view in XML files. 
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -1948,7 +1948,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           Orientation of the handle.
+           Orientation of the handle. 
 
 
           <p>Must be one of the following constant values.</p>
@@ -1964,7 +1964,7 @@ containing a value of this type.
           @attr name android:direction
         */
         public: static const int HandleView_direction = 0;
-        /**  HolographicLinearLayout specific attributes.
+        /**  HolographicLinearLayout specific attributes. 
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -1978,7 +1978,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The source view to generate and apply the drawable states to/from
+           The source view to generate and apply the drawable states to/from 
 
 
           <p>Must be an integer value, such as "<code>100</code>".
@@ -1992,7 +1992,7 @@ containing a value of this type.
         */
         public: static const int HolographicLinearLayout_sourceImageViewId = 0;
         /**  Hotseat specific attributes. These attributes are used to customize
-         the hotseat in XML files.
+         the hotseat in XML files. 
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -2008,7 +2008,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The number of horizontal cells in the CellLayout
+           The number of horizontal cells in the CellLayout 
 
 
           <p>Must be an integer value, such as "<code>100</code>".
@@ -2024,7 +2024,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The number of vertical cells in the CellLayout
+           The number of vertical cells in the CellLayout 
 
 
           <p>Must be an integer value, such as "<code>100</code>".
@@ -2038,7 +2038,7 @@ containing a value of this type.
         */
         public: static const int Hotseat_cellCountY = 1;
         /**  PagedView specific attributes. These attributes are used to customize
-         a PagedView view in XML files.
+         a PagedView view in XML files. 
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -2132,7 +2132,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The padding of the pages that are dynamically created per page
+           The padding of the pages that are dynamically created per page 
 
 
           <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
@@ -2150,7 +2150,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           A spacing override for the icons within a page
+           A spacing override for the icons within a page 
 
 
           <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
@@ -2168,7 +2168,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The space between adjacent pages of the PagedView.
+           The space between adjacent pages of the PagedView. 
 
 
           <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
@@ -2186,7 +2186,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The padding for the scroll indicator area
+           The padding for the scroll indicator area 
 
 
           <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
@@ -2217,7 +2217,7 @@ containing a value of this type.
           @attr name android:scrollIndicatorPaddingRight
         */
         public: static const int PagedView_scrollIndicatorPaddingRight = 8;
-        /**  StrokedTextView specific attributes.
+        /**  StrokedTextView specific attributes. 
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -2235,7 +2235,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The color of the stroke outline
+           The color of the stroke outline 
 
 
           <p>Must be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
@@ -2252,7 +2252,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The color of the text
+           The color of the text 
 
 
           <p>Must be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
@@ -2269,7 +2269,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The width of the stroke
+           The width of the stroke 
 
 
           <p>Must be a floating point value, such as "<code>1.2</code>".
@@ -2283,7 +2283,7 @@ containing a value of this type.
         */
         public: static const int StrokedTextView_strokeWidth = 2;
         /**  Workspace specific attributes. These attributes are used to customize
-         the workspace in XML files.
+         the workspace in XML files. 
            <p>Includes the following attributes:</p>
            <table>
            <colgroup align="left" />
@@ -2301,7 +2301,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The number of horizontal cells in the CellLayout
+           The number of horizontal cells in the CellLayout 
 
 
           <p>Must be an integer value, such as "<code>100</code>".
@@ -2317,7 +2317,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The number of vertical cells in the CellLayout
+           The number of vertical cells in the CellLayout 
 
 
           <p>Must be an integer value, such as "<code>100</code>".
@@ -2333,7 +2333,7 @@ containing a value of this type.
         /**
           <p>
           @attr description
-           The first screen the workspace should display.
+           The first screen the workspace should display. 
 
 
           <p>Must be an integer value, such as "<code>100</code>".
@@ -2352,4 +2352,4 @@ containing a value of this type.
 };
 };
 
-#endif // __Elastos_Droid_Packages_Launcher2_R_H__
+#endif // __Elastos_Droid_Launcher2_R_H__

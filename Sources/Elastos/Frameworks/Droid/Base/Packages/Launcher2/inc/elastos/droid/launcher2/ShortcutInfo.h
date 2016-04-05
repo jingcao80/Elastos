@@ -1,27 +1,46 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_SHORTCUTINFO_H__
 #define  __ELASTOS_DROID_LAUNCHER2_SHORTCUTINFO_H__
 
+#include "_Launcher2.h"
+#include "elastos/droid/launcher2/ItemInfo.h"
+#include "elastos/droid/launcher2/IconCache.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::IIntentShortcutIconResource;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+class ApplicationInfo;
 /**
  * Represents a launchable icon on the workspaces and in folders.
  */
 class ShortcutInfo
     : public ItemInfo
+    , public IShortcutInfo
 {
 public:
+    CAR_INTERFACE_DECL();
+
     ShortcutInfo();
 
-    ShortcutInfo(
+    CARAPI constructor();
+
+    CARAPI constructor(
         /* [in] */ ShortcutInfo* info);
 
     /** TODO: Remove this.  It's only called by ApplicationInfo.makeShortcut. */
-    ShortcutInfo(
-        /* [in] */ IApplicationInfo* info);
+    CARAPI constructor(
+        /* [in] */ ApplicationInfo* info);
 
     CARAPI_(void) SetIcon(
         /* [in] */ IBitmap* b);

@@ -1,7 +1,17 @@
 
 #include "elastos/droid/launcher2/PagedViewIconCache.h"
+#include "elastos/droid/launcher2/ApplicationInfo.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+
+using Elastos::Droid::Content::Pm::IServiceInfo;
+using Elastos::Droid::Content::Pm::IComponentInfo;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Utility::ISet;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::ICollection;
 
 namespace Elastos {
 namespace Droid {
@@ -9,26 +19,28 @@ namespace Launcher2 {
 
 CAR_INTERFACE_IMPL(PagedViewIconCache::Key, Object, IKey);
 
-PagedViewIconCache::Key::Key(
+ECode PagedViewIconCache::Key::constructor(
     /* [in] */ IApplicationInfo* info)
 {
-    info->GetComponentName((IComponentName**)&mComponentName);
-    mType = Type::ApplicationInfoKey;
+    ApplicationInfo* _info = (ApplicationInfo*)info;
+    mComponentName = _info->mComponentName;
+    mType = ApplicationInfoKey;
+    return NOERROR;
 }
 
-PagedViewIconCache::Key::Key(
+ECode PagedViewIconCache::Key::constructor(
     /* [in] */ IResolveInfo* info)
 {
     AutoPtr<IActivityInfo> activityInfo;
     info->GetActivityInfo((IActivityInfo**)&activityInfo);
     AutoPtr<IComponentInfo> ci;
     if (activityInfo != NULL) {
-        ci = activityInfo;
+        ci = IComponentInfo::Probe(activityInfo);
     }
     else {
         AutoPtr<IServiceInfo> serviceInfo;
-        GetServiceInfo((IServiceInfo**)&serviceInfo);
-        ci = serviceInfo;
+        info->GetServiceInfo((IServiceInfo**)&serviceInfo);
+        ci = IComponentInfo::Probe(serviceInfo);
     }
 
     String pname;
@@ -36,14 +48,16 @@ PagedViewIconCache::Key::Key(
     String name;
     IPackageItemInfo::Probe(ci)->GetName(&name);
     CComponentName::New(pname, name, (IComponentName**)&mComponentName);
-    mType = Type::ResolveInfoKey;
+    mType = ResolveInfoKey;
+    return NOERROR;
 }
 
-PagedViewIconCache::Key::Key(
+ECode PagedViewIconCache::Key::constructor(
     /* [in] */ IAppWidgetProviderInfo* info)
 {
     info->GetProvider((IComponentName**)&mComponentName);
-    mType = Type::AppWidgetProviderInfoKey;
+    mType = AppWidgetProviderInfoKey;
+    return NOERROR;
 }
 
 AutoPtr<IComponentName> PagedViewIconCache::Key::GetComponentName()
@@ -58,17 +72,17 @@ Boolean PagedViewIconCache::Key::IsKeyType(
 }
 
 ECode PagedViewIconCache::Key::Equals(
-    /* [in] */ IInterface* obj,
+    /* [in] */ IInterface* o,
     /* [out] */ Boolean* isEqual)
 {
     VALIDATE_NOT_NULL(isEqual);
 
     if (IKey::Probe(o) != NULL) {
         AutoPtr<IKey> k = IKey::Probe(o);
-        PagedViewIconCache::Key* key = (PagedViewIconCache::Key*)k;
-        return mComponentName->Equals(key->mComponentName, isEqual);
+        PagedViewIconCache::Key* key = (PagedViewIconCache::Key*)k.Get();
+        return IObject::Probe(mComponentName)->Equals(key->mComponentName, isEqual);
     }
-    return Object::Equals(o);
+    return Object::Equals(o, isEqual);
 }
 
 ECode PagedViewIconCache::Key::GetHashCode(
@@ -77,7 +91,7 @@ ECode PagedViewIconCache::Key::GetHashCode(
     VALIDATE_NOT_NULL(code);
 
     AutoPtr<IComponentName> name = GetComponentName();
-    return name->GetHashCode(code);
+    return IObject::Probe(name)->GetHashCode(code);
 }
 
 PagedViewIconCache::PagedViewIconCache()
@@ -110,18 +124,16 @@ ECode PagedViewIconCache::RetainAll(
     AutoPtr<ISet> keySet;
     mIconOutlineCache->GetKeySet((ISet**)&keySet);
     AutoPtr<IHashSet> keysToRemove;
-    CHashSet::New(keySet, (IHashSet**)&keysToRemove);
-    keysToRemove->RemoveAll(keysToKeep);
+    CHashSet::New(ICollection::Probe(keySet), (IHashSet**)&keysToRemove);
+    keysToRemove->RemoveAll(ICollection::Probe(keysToKeep));
 
     AutoPtr<ArrayOf<IInterface*> > array;
     keysToRemove->ToArray((ArrayOf<IInterface*>**)&array);
     for (Int32 i = 0; i < array->GetLength(); i++) {
         AutoPtr<IInterface> obj = (*array)[i];
         AutoPtr<IKey> key = IKey::Probe(obj);
-
-        Boolean res;
-        key->IsKeyType(t, &res);
-        if (res) {
+        PagedViewIconCache::Key* _key = (PagedViewIconCache::Key*)key.Get();
+        if (_key->IsKeyType(t)) {
             AutoPtr<IInterface> value;
             mIconOutlineCache->Get(TO_IINTERFACE(key), (IInterface**)&value);
             AutoPtr<IBitmap> map = IBitmap::Probe(value);
@@ -136,7 +148,7 @@ ECode PagedViewIconCache::RetainAll(
 ECode PagedViewIconCache::RetainAllApps(
     /* [in] */ IArrayList* keys)
 {
-    AutoPtr<HashSet> keysSet;
+    AutoPtr<IHashSet> keysSet;
     CHashSet::New((IHashSet**)&keysSet);
 
     Int32 size;
@@ -145,17 +157,18 @@ ECode PagedViewIconCache::RetainAllApps(
         AutoPtr<IInterface> obj;
         keys->Get(i, (IInterface**)&obj);
         AutoPtr<IApplicationInfo> info = IApplicationInfo::Probe(obj);
-        AutoPtr<IKey> key = new PagedViewIconCache::Key(info);
+        AutoPtr<Key> key = new PagedViewIconCache::Key();
+        key->constructor(info);
         keysSet->Add(TO_IINTERFACE(key));
 
     }
-    return RetainAll(keysSet, Key::Type::ApplicationInfoKey);
+    return RetainAll(keysSet, Key::ApplicationInfoKey);
 }
 
 ECode PagedViewIconCache::RetainAllShortcuts(
     /* [in] */ IList* keys)
 {
-    AutoPtr<HashSet> keysSet;
+    AutoPtr<IHashSet> keysSet;
     CHashSet::New((IHashSet**)&keysSet);
 
     Int32 size;
@@ -164,17 +177,18 @@ ECode PagedViewIconCache::RetainAllShortcuts(
         AutoPtr<IInterface> obj;
         keys->Get(i, (IInterface**)&obj);
         AutoPtr<IResolveInfo> info = IResolveInfo::Probe(obj);
-        AutoPtr<IKey> key = new PagedViewIconCache::Key(info);
+        AutoPtr<Key> key = new PagedViewIconCache::Key();
+        key->constructor(info);
         keysSet->Add(TO_IINTERFACE(key));
 
     }
-    return RetainAll(keysSet, Key::Type::ResolveInfoKey);
+    return RetainAll(keysSet, Key::ResolveInfoKey);
 }
 
 ECode PagedViewIconCache::RetainAllAppWidgets(
     /* [in] */ IList* keys)
 {
-    AutoPtr<HashSet> keysSet;
+    AutoPtr<IHashSet> keysSet;
     CHashSet::New((IHashSet**)&keysSet);
 
     Int32 size;
@@ -183,18 +197,19 @@ ECode PagedViewIconCache::RetainAllAppWidgets(
         AutoPtr<IInterface> obj;
         keys->Get(i, (IInterface**)&obj);
         AutoPtr<IAppWidgetProviderInfo> info = IAppWidgetProviderInfo::Probe(obj);
-        AutoPtr<IKey> key = new PagedViewIconCache::Key(info);
+        AutoPtr<Key> key = new PagedViewIconCache::Key();
+        key->constructor(info);
         keysSet->Add(TO_IINTERFACE(key));
 
     }
-    return RetainAll(keysSet, Key::Type::AppWidgetProviderInfoKey);
+    return RetainAll(keysSet, Key::AppWidgetProviderInfoKey);
 }
 
 ECode PagedViewIconCache::AddOutline(
     /* [in] */ IKey* key,
     /* [in] */ IBitmap* b)
 {
-    mIconOutlineCache->Put(TO_IINTERFACE(key), TO_IINTERFACE(b));
+    return mIconOutlineCache->Put(TO_IINTERFACE(key), TO_IINTERFACE(b));
 }
 
 ECode PagedViewIconCache::RemoveOutline(

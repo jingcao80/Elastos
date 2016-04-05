@@ -1,7 +1,22 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_ITEMINFO_H__
 #define  __ELASTOS_DROID_LAUNCHER2_ITEMINFO_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Os.h"
+#include <Elastos.CoreLibrary.Core.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -12,11 +27,16 @@ namespace Launcher2 {
  */
 class ItemInfo
     : public Object
+    , public IItemInfo
 {
 public:
+    CAR_INTERFACE_DECL();
+
     ItemInfo();
 
-    ItemInfo(
+    CARAPI constructor();
+
+    CARAPI constructor(
         /* [in] */ ItemInfo* info);
 
     /** Returns the package name that the intent will resolve to, or an empty string if
@@ -64,13 +84,6 @@ protected:
         /* [in] */ IIntent* intent);
 
 public:
-    /**
-     * Intent extra to store the profile. Format: UserHandle
-     */
-    static const String EXTRA_PROFILE;
-
-    static const Int32 NO_ID;
-
     /**
      * The id in the settings database for this item
      */

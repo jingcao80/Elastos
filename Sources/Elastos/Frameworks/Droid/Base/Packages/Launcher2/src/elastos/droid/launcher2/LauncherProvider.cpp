@@ -1,7 +1,72 @@
 
 #include "elastos/droid/launcher2/LauncherProvider.h"
+#include "elastos/droid/launcher2/LauncherSettings.h"
+#include "elastos/droid/launcher2/Utilities.h"
+#include "elastos/droid/launcher2/ItemInfo.h"
+#include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/StringUtils.h>
+#include "elastos/droid/utility/Xml.h"
+#include "elastos/droid/os/Process.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/utility/logging/Slogger.h>
+#include <elastos/core/StringBuilder.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/AutoLock.h>
+
+using Elastos::Core::CoreUtils;
+using Elastos::Droid::App::ISearchManager;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntentHelper;
+using Elastos::Droid::Content::CIntentHelper;
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Content::CContentValues;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::ISharedPreferences;
+using Elastos::Droid::Content::ISharedPreferencesEditor;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Pm::IActivityInfo;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Content::CContentUris;
+using Elastos::Droid::Content::IContentUris;
+using Elastos::Droid::Database::Sqlite::ISQLiteStatement;
+using Elastos::Droid::Database::Sqlite::ISQLiteProgram;
+using Elastos::Droid::Database::Sqlite::ISQLiteQueryBuilder;
+using Elastos::Droid::Database::Sqlite::CSQLiteQueryBuilder;
+using Elastos::Droid::Database::Sqlite::ISQLiteDatabaseHelper;
+using Elastos::Droid::Database::Sqlite::CSQLiteDatabaseHelper;
+using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
+using Elastos::Droid::AppWidget::CAppWidgetHost;
+using Elastos::Droid::AppWidget::IAppWidgetManager;
+using Elastos::Droid::AppWidget::CAppWidgetManagerHelper;
+using Elastos::Droid::AppWidget::IAppWidgetManagerHelper;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::IBitmapFactory;
+using Elastos::Droid::Graphics::CBitmapFactory;
+using Elastos::Droid::Provider::ISettings;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::Xml;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::IList;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IArrayList;
+using Elastos::Core::StringUtils;
+using Elastos::Core::IInteger64;
+using Elastos::IO::CFile;
+using Elastos::IO::IFile;
 
 namespace Elastos {
 namespace Droid {
@@ -16,12 +81,16 @@ const String LauncherProvider::DatabaseHelper::TAG_SHORTCUT("shortcut");
 const String LauncherProvider::DatabaseHelper::TAG_FOLDER("folder");
 const String LauncherProvider::DatabaseHelper::TAG_EXTRA("extra");
 
-LauncherProvider::DatabaseHelper::DatabaseHelper(
-    /* [in] */ IContext* context)
-    : SQLiteOpenHelper(context, DATABASE_NAME, NULL, DATABASE_VERSION)
-    , mContext(context)
-    , mMaxId(-1)
+LauncherProvider::DatabaseHelper::DatabaseHelper()
+    : mMaxId(-1)
 {
+}
+
+ECode LauncherProvider::DatabaseHelper::constructor(
+    /* [in] */ IContext* context)
+{
+    SQLiteOpenHelper::constructor(context, DATABASE_NAME, NULL, DATABASE_VERSION);
+    mContext = context;
     CAppWidgetHost::New(context, ILauncher::APPWIDGET_HOST_ID, (IAppWidgetHost**)&mAppWidgetHost);
 
     // In the case where neither onCreate nor onUpgrade gets called, we read the maxId from
@@ -29,8 +98,9 @@ LauncherProvider::DatabaseHelper::DatabaseHelper(
     if (mMaxId == -1) {
         AutoPtr<ISQLiteDatabase> db;
         GetWritableDatabase((ISQLiteDatabase**)&db);
-        mMaxId = InitializeMaxId(db);
+        InitializeMaxId(db, &mMaxId);
     }
+    return NOERROR;
 }
 
 ECode LauncherProvider::DatabaseHelper::SendAppWidgetResetNotify()
@@ -43,7 +113,7 @@ ECode LauncherProvider::DatabaseHelper::SendAppWidgetResetNotify()
 ECode LauncherProvider::DatabaseHelper::OnCreate(
     /* [in] */ ISQLiteDatabase* db)
 {
-    if (LOGD) Slogger::D(TAG, "creating new launcher database");
+    if (LOGD) Slogger::D(LauncherProvider::TAG, "creating new launcher database");
 
     mMaxId = 1;
     AutoPtr<IInterface> obj;
@@ -99,13 +169,15 @@ ECode LauncherProvider::DatabaseHelper::OnCreate(
 ECode LauncherProvider::DatabaseHelper::SetFlagToLoadDefaultWorkspaceLater()
 {
     String spKey;
-    LauncherApplication::GetSharedPreferencesKey(&spKey);
+    assert(0);
+    //LauncherApplication::GetSharedPreferencesKey(&spKey);
     AutoPtr<ISharedPreferences> sp;
     mContext->GetSharedPreferences(spKey, IContext::MODE_PRIVATE, (ISharedPreferences**)&sp);
     AutoPtr<ISharedPreferencesEditor> editor;
     sp->Edit((ISharedPreferencesEditor**)&editor);
     editor->PutBoolean(DB_CREATED_BUT_DEFAULT_WORKSPACE_NOT_LOADED, TRUE);
-    return editor->Commit();
+    Boolean res;
+    return editor->Commit(&res);
 }
 
 ECode LauncherProvider::DatabaseHelper::ConvertDatabase(
@@ -114,27 +186,32 @@ ECode LauncherProvider::DatabaseHelper::ConvertDatabase(
 {
     VALIDATE_NOT_NULL(result);
 
-    if (LOGD) Slogger::D(TAG, "converting database from an older format, but not onUpgrade");
+    if (LOGD) Slogger::D(LauncherProvider::TAG, "converting database"
+            " from an older format, but not onUpgrade");
     Boolean converted = FALSE;
 
     StringBuilder sb;
     sb += "content://";
     sb += ISettings::AUTHORITY;
     sb += "/old_favorites?notify=true";
-    AutoPtr<IUri> uri = Uri::Parse(sb.ToString());
+
+    AutoPtr<IUriHelper> uriHelper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
+    AutoPtr<IUri> uri;
+    uriHelper->Parse(sb.ToString(), (IUri**)&uri);
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);
     AutoPtr<ICursor> cursor;
 
     //try {
-    cursor = resolver->Query(uri, NULL, NULL, NULL, NULL, (ICursor**)&cursor);
+    resolver->Query(uri, NULL, String(NULL), NULL, String(NULL), (ICursor**)&cursor);
     //} catch (Exception e) {
         // Ignore
     //}
 
     // We already have a favorites database in the old provider
     if (cursor != NULL) {
-        Boolean count;
+        Int32 count;
         cursor->GetCount(&count);
         if (count > 0) {
             //try {
@@ -142,17 +219,19 @@ ECode LauncherProvider::DatabaseHelper::ConvertDatabase(
             CopyFromCursor(db, cursor, &num);
             converted = num > 0;
             //} finally {
-            cursor->Close();
+            ICloseable::Probe(cursor)->Close();
             //}
             if (converted) {
-                resolver->Delete(uri, NULL, NULL);
+                Int32 value;
+                resolver->Delete(uri, String(NULL), NULL, &value);
             }
         }
     }
 
     if (converted) {
         // Convert widgets from this import into widgets
-        if (LOGD) Slogger::D(TAG, "converted and now triggering widget upgrade");
+        if (LOGD) Slogger::D(LauncherProvider::TAG, "converted and now"
+                " triggering widget upgrade");
         ConvertWidgets(db);
     }
 
@@ -169,33 +248,33 @@ ECode LauncherProvider::DatabaseHelper::CopyFromCursor(
     *num = 0;
 
     Int32 idIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::_ID);
+    c->GetColumnIndexOrThrow(IBaseColumns::ID, &idIndex);
     Int32 intentIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::INTENT);
+    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::INTENT, &intentIndex);
     Int32 titleIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::TITLE);
+    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::TITLE, &titleIndex);
     Int32 iconTypeIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::ICON_TYPE);
+    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::ICON_TYPE, &iconTypeIndex);
     Int32 iconIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::ICON);
+    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::ICON, &iconIndex);
     Int32 iconPackageIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::ICON_PACKAGE);
+    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::ICON_PACKAGE, &iconPackageIndex);
     Int32 iconResourceIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::ICON_RESOURCE);
+    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::ICON_RESOURCE, &iconResourceIndex);
     Int32 containerIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::CONTAINER);
+    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::CONTAINER, &containerIndex);
     Int32 itemTypeIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::ITEM_TYPE);
+    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::ITEM_TYPE, &itemTypeIndex);
     Int32 screenIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::SCREEN);
+    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::SCREEN, &screenIndex);
     Int32 cellXIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::CELLX);
+    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::CELLX, &cellXIndex);
     Int32 cellYIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::CELLY);
+    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::CELLY, &cellYIndex);
     Int32 uriIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::URI);
+    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::URI, &uriIndex);
     Int32 displayModeIndex;
-    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::DISPLAY_MODE);
+    c->GetColumnIndexOrThrow(LauncherSettings::Favorites::DISPLAY_MODE, &displayModeIndex);
 
     Int32 count;
     c->GetCount(&count);
@@ -210,7 +289,7 @@ ECode LauncherProvider::DatabaseHelper::CopyFromCursor(
 
         Int64 columnValue;
         c->GetInt64(idIndex, &columnValue);
-        values->Put(LauncherSettings::Favorites::_ID, columnValue);
+        values->Put(IBaseColumns::ID, columnValue);
 
         String str1;
         c->GetString(intentIndex, &str1);
@@ -274,7 +353,7 @@ ECode LauncherProvider::DatabaseHelper::CopyFromCursor(
     Int32 numValues = rows->GetLength();
     for (i = 0; i < numValues; i++) {
         Int64 res;
-        ECode ec = DbInsertAndCheck(this, db, TABLE_FAVORITES, NULL, (*rows)[i], &res);
+        ECode ec = DbInsertAndCheck(this, db, TABLE_FAVORITES, String(NULL), (*rows)[i], &res);
         if (ec != NOERROR) {
             return db->EndTransaction();
         }
@@ -300,7 +379,7 @@ ECode LauncherProvider::DatabaseHelper::OnUpgrade(
     /* [in] */ Int32 oldVersion,
     /* [in] */ Int32 newVersion)
 {
-    if (LOGD) Slogger::D(TAG, "onUpgrade triggered");
+    if (LOGD) Slogger::D(LauncherProvider::TAG, "onUpgrade triggered");
 
     Int32 version = oldVersion;
     if (version < 3) {
@@ -311,12 +390,12 @@ ECode LauncherProvider::DatabaseHelper::OnUpgrade(
         String str("ALTER TABLE favorites ADD COLUMN appWidgetId INTEGER NOT NULL DEFAULT -1;");
         ECode ec = db->ExecSQL(str);
         if (ec == (ECode)E_SQL_EXCEPTION) {
-            Slogger::E(TAG, ex.getMessage(), ex);
+            Slogger::E(LauncherProvider::TAG, "ex.getMessage(), ex");
             return db->EndTransaction();
         }
         ec = db->SetTransactionSuccessful();
         if (ec == (ECode)E_SQL_EXCEPTION) {
-            Slogger::E(TAG, ex.getMessage(), ex);
+            Slogger::E(LauncherProvider::TAG, "ex.getMessage(), ex");
             return db->EndTransaction();
         }
         version = 3;
@@ -351,12 +430,12 @@ ECode LauncherProvider::DatabaseHelper::OnUpgrade(
         //try {
         ECode ec = db->ExecSQL(String("UPDATE favorites SET screen=(screen + 1);"));
         if (ec == (ECode)E_SQL_EXCEPTION) {
-            Slogger::E(TAG, ex.getMessage(), ex);
+            Slogger::E(LauncherProvider::TAG, "ex.getMessage(), ex");
             return db->EndTransaction();
         }
         ec = db->SetTransactionSuccessful();
         if (ec == (ECode)E_SQL_EXCEPTION) {
-            Slogger::E(TAG, ex.getMessage(), ex);
+            Slogger::E(LauncherProvider::TAG, "ex.getMessage(), ex");
             return db->EndTransaction();
         }
         //} catch (SQLException ex) {
@@ -369,7 +448,7 @@ ECode LauncherProvider::DatabaseHelper::OnUpgrade(
         // We added the fast track.
         Boolean res;
         UpdateContactsShortcuts(db, &res);
-        if (ures) {
+        if (res) {
             version = 6;
         }
     }
@@ -396,8 +475,9 @@ ECode LauncherProvider::DatabaseHelper::OnUpgrade(
         }
 
         // Add default hotseat icons
+        Int32 tmp;
         LoadFavorites(db,
-                Elastos::Droid::Launcher2::R::xml::update_workspace);
+                Elastos::Droid::Launcher2::R::xml::update_workspace, &tmp);
         version = 9;
     }
 
@@ -408,7 +488,8 @@ ECode LauncherProvider::DatabaseHelper::OnUpgrade(
         // Contact shortcuts need a different set of flags to be launched now
         // The updateContactsShortcuts change is idempotent, so we can keep using it like
         // back in the Donut days
-        UpdateContactsShortcuts(db);
+        Boolean res;
+        UpdateContactsShortcuts(db, &res);
         version = 12;
     }
 
@@ -422,7 +503,7 @@ ECode LauncherProvider::DatabaseHelper::OnUpgrade(
     }
 
     if (version != DATABASE_VERSION) {
-        Slogger::W(TAG, "Destroying all old data.");
+        Slogger::W(LauncherProvider::TAG, "Destroying all old data.");
         StringBuilder sb;
         sb += "DROP TABLE IF EXISTS ";
         sb += TABLE_FAVORITES;
@@ -455,16 +536,16 @@ ECode LauncherProvider::DatabaseHelper::AddProfileColumn(
     sb += "ALTER TABLE favorites ";
     sb += "ADD COLUMN profileId INTEGER DEFAULT ";
     sb += userSerialNumber;
-    sb += ";"
+    sb += ";";
     ECode ec = db->ExecSQL(sb.ToString());
     if (ec == (ECode)E_SQL_EXCEPTION) {
-        Slogger::E(TAG, ex.getMessage(), ex);
+        Slogger::E(LauncherProvider::TAG, "ex.getMessage(), ex");
         *result = FALSE;
         return db->EndTransaction();
     }
     ec = db->SetTransactionSuccessful();
     if (ec == (ECode)E_SQL_EXCEPTION) {
-        Slogger::E(TAG, ex.getMessage(), ex);
+        Slogger::E(LauncherProvider::TAG, "ex.getMessage(), ex");
         *result = FALSE;
         return db->EndTransaction();
     }
@@ -486,9 +567,9 @@ ECode LauncherProvider::DatabaseHelper::UpdateContactsShortcuts(
     *result = FALSE;
 
     AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(1);
-    (*array)[0] = IFavorites::ITEM_TYPE_SHORTCUT;
+    (*array)[0] = ILauncherSettingsBaseLauncherColumns::ITEM_TYPE_SHORTCUT;
     String selectWhere;
-    BuildOrWhereString(IFavorites::ITEM_TYPE, array, &selectWhere);
+    BuildOrWhereString(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE, array, &selectWhere);
 
     AutoPtr<ICursor> c;
     String actionQuickContact("com.android.contacts.action.QUICK_CONTACT");
@@ -496,15 +577,15 @@ ECode LauncherProvider::DatabaseHelper::UpdateContactsShortcuts(
     //try {
     // Select and iterate through each matching widget
     AutoPtr<ArrayOf<String> > stringArray = ArrayOf<String>::Alloc(2);
-    (*stringArray)[0] = IFavorites::_ID;
-    (*stringArray)[1] = IFavorites::INTENT;
+    (*stringArray)[0] = IBaseColumns::ID;
+    (*stringArray)[1] = ILauncherSettingsBaseLauncherColumns::INTENT;
     ECode ec = db->Query(TABLE_FAVORITES, stringArray,
-            selectWhere, NULL, NULL, NULL, NULL, (ICursor**)&c);
+            selectWhere, NULL, String(NULL), String(NULL), String(NULL), (ICursor**)&c);
     if (ec == (ECode)E_SQL_EXCEPTION) {
-        Slogger::W(TAG, "Problem while upgrading contacts", ex);
+        Slogger::W(LauncherProvider::TAG, "Problem while upgrading contacts%d", ec);
         db->EndTransaction();
         if (c != NULL) {
-            c->Close();
+            ICloseable::Probe(c)->Close();
         }
         *result = FALSE;
         return NOERROR;
@@ -517,12 +598,12 @@ ECode LauncherProvider::DatabaseHelper::UpdateContactsShortcuts(
 
     Int32 count;
     c->GetCount(&count);
-    if (LOGD) Slogger::D(TAG, "found upgrade cursor count=%d", count);
+    if (LOGD) Slogger::D(LauncherProvider::TAG, "found upgrade cursor count=%d", count);
 
     Int32 idIndex;
-    c->GetColumnIndex(IFavorites::_ID, &idIndex);
+    c->GetColumnIndex(IBaseColumns::ID, &idIndex);
     Int32 intentIndex;
-    c->GetColumnIndex(IFavorites::INTENT);
+    c->GetColumnIndex(ILauncherSettingsBaseLauncherColumns::INTENT, &intentIndex);
 
     Boolean res;
     while (c->MoveToNext(&res), res) {
@@ -532,23 +613,23 @@ ECode LauncherProvider::DatabaseHelper::UpdateContactsShortcuts(
         c->GetString(intentIndex, &intentUri);
         if (!intentUri.IsNull()) {
             //try {
+            AutoPtr<IIntentHelper> helper;
+            CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
             AutoPtr<IIntent> intent;
-            Intent::ParseUri(intentUri, 0, (IIntent**)&intent);
-            Slogger::D("Home", intent.toString());
+            helper->ParseUri(intentUri, 0, (IIntent**)&intent);
+            String str;
+            intent->ToString(&str);
+            Slogger::D("Home", str);
             AutoPtr<IUri> uri;
             intent->GetData((IUri**)&uri);
             if (uri != NULL) {
                 String data;
-                uri->ToString(&data);
-                Boolean res1, res2, res3, res4;
+                IObject::Probe(uri)->ToString(&data);
                 String action;
                 intent->GetAction(&action);
-                action.Equals(IIntent::ACTION_VIEW, &res1);
-                actionQuickContact.Equals(action, &res2);
-                data.StartsWith(String("content://contacts/people/"), &res3);
-                data.StartsWith(String("content://com.android.contacts/contacts/lookup/"),
-                        &res4);
-                if ((res1 || res2) && (res3 || res4)) {
+                if ((action.Equals(IIntent::ACTION_VIEW) || actionQuickContact.Equals(action))
+                            && (data.StartWith(String("content://contacts/people/"))
+                            || data.StartWith(String("content://com.android.contacts/contacts/lookup/")))) {
                     AutoPtr<IIntent> newIntent;
                     CIntent::New(actionQuickContact, (IIntent**)&newIntent);
                     // When starting from the launcher, start in a new, cleared task
@@ -574,16 +655,17 @@ ECode LauncherProvider::DatabaseHelper::UpdateContactsShortcuts(
                     values->Put(LauncherSettings::Favorites::INTENT, str);
 
                     StringBuilder sb;
-                    sb += IFavorites::_ID;
+                    sb += IBaseColumns::ID;
                     sb += "=";
-                    sb += favoriteId
+                    sb += favoriteId;
                     String updateWhere = sb.ToString();
-                    ec = db->Update(TABLE_FAVORITES, values, updateWhere, NULL);
+                    Int32 tmp;
+                    ec = db->Update(TABLE_FAVORITES, values, updateWhere, NULL, &tmp);
                     if (ec == (ECode)E_SQL_EXCEPTION) {
-                        Slogger::W(TAG, "Problem while upgrading contacts", ex);
+                        Slogger::W(LauncherProvider::TAG, "Problem while upgrading contacts %d", ec);
                         db->EndTransaction();
                         if (c != NULL) {
-                            c->Close();
+                            ICloseable::Probe(c)->Close();
                         }
                         *result = FALSE;
                         return NOERROR;
@@ -605,7 +687,7 @@ ECode LauncherProvider::DatabaseHelper::UpdateContactsShortcuts(
     // } finally {
     db->EndTransaction();
     if (c != NULL) {
-        c->Close();
+        ICloseable::Probe(c)->Close();
     }
     //}
 
@@ -616,84 +698,90 @@ ECode LauncherProvider::DatabaseHelper::UpdateContactsShortcuts(
 ECode LauncherProvider::DatabaseHelper::NormalizeIcons(
     /* [in] */ ISQLiteDatabase* db)
 {
-    Slogger::D(TAG, "normalizing icons");
+    Slogger::D(LauncherProvider::TAG, "normalizing icons");
+    assert(0);
+//     db->BeginTransaction();
+//     AutoPtr<ICursor> c;
+//     AutoPtr<ISQLiteStatement> update;
+//     //try {
+//     Boolean logged = FALSE;
+//     ECode ec = db->CompileStatement(String("UPDATE favorites SET icon=? WHERE _id=?"),
+//             (ISQLiteStatement**)&update);
+//     if (ec == (ECode)E_SQL_EXCEPTION) {
+//         Slogger::W(LauncherProvider::TAG,
+//                 "Problem while allocating appWidgetIds for existing widgets %d", ec);
+//         goto FINALLY;
+//     }
 
-    db->BeginTransaction();
-    AutoPtr<ICursor> c;
-    AutoPtr<ISQLiteStatement> update;
-    //try {
-    Boolean logged = FALSE;
-    ECode ec = db->CompileStatement(String("UPDATE favorites SET icon=? WHERE _id=?"),
-            (ISQLiteStatement**)&update);
-    if (ec == (ECode)E_SQL_EXCEPTION) {
-        Slogger::W(TAG, "Problem while allocating appWidgetIds for existing widgets", ex);
-        goto FINALLY;
-    }
+//     StringBuilder sb;
+//     sb += "SELECT _id, icon FROM favorites WHERE iconType=";
+//     sb += ILauncherSettingsBaseLauncherColumns::ICON_TYPE_BITMAP;
+//     ec = db->RawQuery(sb.ToString(), NULL, (ICursor**)&c);
+//     if (ec == (ECode)E_SQL_EXCEPTION) {
+//         Slogger::W(LauncherProvider::TAG,
+//                 "Problem while allocating appWidgetIds for existing widgets %d", ec);
+//         goto FINALLY;
+//     }
 
-    StringBuilder sb;
-    sb += "SELECT _id, icon FROM favorites WHERE iconType=";
-    sb += IFavorites::ICON_TYPE_BITMAP;
-    ec = db->RawQuery(sb.ToString(), NULL, (ICursor**)&c);
-    if (ec == (ECode)E_SQL_EXCEPTION) {
-        Slogger::W(TAG, "Problem while allocating appWidgetIds for existing widgets", ex);
-        goto FINALLY;
-    }
+//     Int32 idIndex;
+//     c->GetColumnIndexOrThrow(IBaseColumns::ID, &idIndex);
+//     Int32 iconIndex;
+//     c->GetColumnIndexOrThrow(ILauncherSettingsBaseLauncherColumns::ICON, &iconIndex);
 
-    Int32 idIndex;
-    c->GetColumnIndexOrThrow(IFavorites::_ID, &idIndex);
-    Int32 iconIndex;
-    c->GetColumnIndexOrThrow(IFavorites::ICON, &iconIndex);
+//     Boolean res;
+//     while (c->MoveToNext(&res), res) {
+//         Int64 id;
+//         c->GetInt64(idIndex, &id);
+//         AutoPtr<ArrayOf<Byte> > data;
+//         c->GetBlob(iconIndex, (ArrayOf<Byte>**)&data);
+//         //try {
+//         AutoPtr<IBitmapFactory> factory;
+//         CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
+//         AutoPtr<IBitmap> _bitmap;
+//         AutoPtr<IBitmap> bitmap;
+//         FAIL_GOTO(factory->DecodeByteArray(data, 0, data->GetLength(),
+//                 (IBitmap**)&_bitmap), ERROR)
 
-    Boolean res;
-    while (c->MoveToNext(&res), res) {
-        Int64 id;
-        c->GetInt64(idIndex, &id);
-        AutoPtr<ArrayOf<Byte> > data;
-        c->GetBlob(iconIndex, (ArrayOf<Byte>**)&data);
-        //try {
-        AutoPtr<IBitmap> _bitmap;
-        FAIL_GOTO(BitmapFactory::DecodeByteArray(data, 0, data->GetLength(),
-                (IBitmap**)&_bitmap), ERROR)
-        AutoPtr<IBitmap> bitmap;
-        FAIL_GOTO(Utilities::ResampleIconBitmap(_bitmap, mContext,
-                (IBitmap**)&bitmap), ERROR)
-        if (bitmap != NULL) {
-            FAIL_GOTO(update->BindInt64(1, id), ERROR)
-            FAIL_GOTO(ItemInfo::FlattenBitmap(bitmap, (ArrayOf<Byte>**)&data), ERROR)
-            if (data != NULL) {
-                FAIL_GOTO(update->BindBlob(2, data), ERROR)
-                FAIL_GOTO(update->Execute(), ERROR)
-            }
-            FAIL_GOTO(bitmap->Recycle(), ERROR)
-        }
-        //} catch (Exception e) {
-ERROR:
-            if (!logged) {
-                Slogger::E(TAG, "Failed normalizing icon " + id, e);
-            } else {
-                Slogger::E(TAG, "Also failed normalizing icon " + id);
-            }
-            logged = true;
-            goto FINALLY;
-        //}
-    }
-    ec = db->SetTransactionSuccessful();
-    if (ec == (ECode)E_SQL_EXCEPTION) {
-        Slogger::W(TAG, "Problem while allocating appWidgetIds for existing widgets", ex);
-        goto FINALLY;
-    }
-    //} catch (SQLException ex) {
-        //Slogger::W(TAG, "Problem while allocating appWidgetIds for existing widgets", ex);
-    //} finally {
-FINALLY:
-    db->EndTransaction();
-    if (update != NULL) {
-        update->Close();
-    }
-    if (c != NULL) {
-        c->Close();
-    }
-    //}
+//         bitmap = Utilities::ResampleIconBitmap(_bitmap, mContext);
+//         if (bitmap != NULL) {
+//             FAIL_GOTO(ISQLiteProgram::Probe(update)->BindInt64(1, id), ERROR)
+//             data = ItemInfo::FlattenBitmap(bitmap);
+//             if (data != NULL) {
+//                 FAIL_GOTO(ISQLiteProgram::Probe(update)->BindBlob(2, *data), ERROR)
+//                 FAIL_GOTO(update->Execute(), ERROR)
+//             }
+//             FAIL_GOTO(bitmap->Recycle(), ERROR)
+//         }
+//         //} catch (Exception e) {
+// ERROR:
+//             if (!logged) {
+//                 Slogger::E(LauncherProvider::TAG, "Failed normalizing icon " /*+ id, e*/);
+//             } else {
+//                 Slogger::E(LauncherProvider::TAG, "Also failed normalizing icon "/* + id*/);
+//             }
+//             logged = true;
+//             goto FINALLY;
+//         //}
+//     }
+//     ec = db->SetTransactionSuccessful();
+//     if (ec == (ECode)E_SQL_EXCEPTION) {
+//         Slogger::W(LauncherProvider::TAG,
+//                 "Problem while allocating appWidgetIds for existing widgets %d", ec);
+//         goto FINALLY;
+//     }
+//     //} catch (SQLException ex) {
+//         //Slogger::W(TAG, "Problem while allocating appWidgetIds for existing widgets", ex);
+//     //} finally {
+// FINALLY:
+//     db->EndTransaction();
+//     if (update != NULL) {
+//         update->Close();
+//     }
+//     if (c != NULL) {
+//         ICloseable::Probe(c)->Close();
+//     }
+//     //}
+//     return NOERROR;
     return NOERROR;
 }
 
@@ -704,7 +792,7 @@ ECode LauncherProvider::DatabaseHelper::GenerateNewId(
 
     if (mMaxId < 0) {
         //throw new RuntimeException("Error: max id was not initialized");
-        Slogger::E("LauncherProvider::DatabaseHelper",
+        Slogger::E(LauncherProvider::TAG,
                 "Error: max id was not initialized");
         return E_RUNTIME_EXCEPTION;
     }
@@ -731,12 +819,12 @@ ECode LauncherProvider::DatabaseHelper::InitializeMaxId(
         c->GetInt64(maxIdIndex, &id);
     }
     if (c != NULL) {
-        c->Close();
+        ICloseable::Probe(c)->Close();
     }
 
     if (id == -1) {
         //throw new RuntimeException("Error: could not query max id");
-        Slogger::E("LauncherProvider::DatabaseHelper",
+        Slogger::E(LauncherProvider::TAG,
                 "Error: could not query max id");
         return E_RUNTIME_EXCEPTION;
     }
@@ -748,120 +836,130 @@ ECode LauncherProvider::DatabaseHelper::InitializeMaxId(
 ECode LauncherProvider::DatabaseHelper::ConvertWidgets(
     /* [in] */ ISQLiteDatabase* db)
 {
-    AutoPtr<IAppWidgetManager> appWidgetManager;
-    AppWidgetManager::GetInstance(mContext, (IAppWidgetManager**)&appWidgetManager);
+    assert(0);
+    return NOERROR;
+//     AutoPtr<IAppWidgetManagerHelper> helper;
+//     CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper);
+//     AutoPtr<IAppWidgetManager> appWidgetManager;
+//     helper->GetInstance(mContext, (IAppWidgetManager**)&appWidgetManager);
 
-    AutoPtr<ArrayOf<Int32> > bindSources = ArrayOf<Int32>::Alloc(3);
-    (*bindSources)[0] = IFavorites::ITEM_TYPE_WIDGET_CLOCK;
-    (*bindSources)[1] = IFavorites::ITEM_TYPE_WIDGET_PHOTO_FRAME;
-    (*bindSources)[2] = IFavorites::ITEM_TYPE_WIDGET_SEARCH;
+//     AutoPtr<ArrayOf<Int32> > bindSources = ArrayOf<Int32>::Alloc(3);
+//     (*bindSources)[0] = LauncherSettings::Favorites::ITEM_TYPE_WIDGET_CLOCK;
+//     (*bindSources)[1] = LauncherSettings::Favorites::ITEM_TYPE_WIDGET_PHOTO_FRAME;
+//     (*bindSources)[2] = LauncherSettings::Favorites::ITEM_TYPE_WIDGET_SEARCH;
 
-    String selectWhere;
-    BuildOrWhereString(IFavorites::ITEM_TYPE, bindSources, &selectWhere);
+//     String selectWhere;
+//     BuildOrWhereString(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE, bindSources, &selectWhere);
 
-    AutoPtr<ICursor> c;
+//     AutoPtr<ICursor> c;
 
-    db->BeginTransaction();
-    //try {
-    // Select and iterate through each matching widget
-    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
-    (*array)[0] = IFavorites::_ID;
-    (*array)[1] = IFavorites::ITEM_TYPE;
-    ECode ec = db->Query(TABLE_FAVORITES, array,
-            selectWhere, NULL, NULL, NULL, NULL, (ICursor**)&c);
-    if (ec == (ECode)E_SQL_EXCEPTION) {
-        Slogger::W(TAG, "Problem while allocating appWidgetIds for existing widgets");
-        goto FINALLY;
-    }
+//     db->BeginTransaction();
+//     //try {
+//     // Select and iterate through each matching widget
+//     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
+//     (*array)[0] = IBaseColumns::ID;
+//     (*array)[1] = ILauncherSettingsBaseLauncherColumns::ITEM_TYPE;
+//     ECode ec = db->Query(TABLE_FAVORITES, array,
+//             selectWhere, NULL, String(NULL), String(NULL), String(NULL), (ICursor**)&c);
+//     if (ec == (ECode)E_SQL_EXCEPTION) {
+//         Slogger::W(LauncherProvider::TAG, "Problem while allocating appWidgetIds for existing widgets");
+//         goto FINALLY;
+//     }
 
-    if (LOGD) Slogger::D(TAG, "found upgrade cursor count=" + c.getCount());
+//     if (LOGD) Slogger::D(LauncherProvider::TAG, "found upgrade cursor count=" /*+ c.getCount()*/);
 
-    AutoPtr<IContentValues> values;
-    CContentValues::New((IContentValues**)&values);
-    Boolean res;
-    while (c != null && (c->MoveToNext(&res), res)) {
-        Int64 favoriteId;
-        c->GetInt64(0, &favoriteId);
-        Int32 favoriteType;
-        c->GetInt32(1, &favoriteType);
+//     AutoPtr<IContentValues> values;
+//     CContentValues::New((IContentValues**)&values);
+//     Boolean res;
+//     while (c != NULL && (c->MoveToNext(&res), res)) {
+//         Int64 favoriteId;
+//         c->GetInt64(0, &favoriteId);
+//         Int32 favoriteType;
+//         c->GetInt32(1, &favoriteType);
 
-        // Allocate and update database with new appWidgetId
-        //try {
-        Int32 appWidgetId;
-        mAppWidgetHost->AllocateAppWidgetId(&appWidgetId);
+//         // Allocate and update database with new appWidgetId
+//         //try {
+//         Int32 appWidgetId;
+//         mAppWidgetHost->AllocateAppWidgetId(&appWidgetId);
 
-        if (LOGD) {
-            Slogger::D(TAG, "allocated appWidgetId=" + appWidgetId
-                    + " for favoriteId=" + favoriteId);
-        }
-        values->Clear();
-        values->Put(IFavorites::ITEM_TYPE, IFavorites::ITEM_TYPE_APPWIDGET);
-        values->Put(IFavorites::APPWIDGET_ID, appWidgetId);
+//         if (LOGD) {
+//             assert(0);
+//             // Slogger::D(LauncherProvider::TAG, "allocated appWidgetId=" + appWidgetId
+//             //         + " for favoriteId=" + favoriteId);
+//         }
+//         values->Clear();
+//         values->Put(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE,
+//                 LauncherSettings::Favorites::ITEM_TYPE_APPWIDGET);
+//         values->Put(LauncherSettings::Favorites::APPWIDGET_ID, appWidgetId);
 
-        // Original widgets might not have valid spans when upgrading
-        if (favoriteType == IFavorites::ITEM_TYPE_WIDGET_SEARCH) {
-            values->Put(LauncherSettings::Favorites::SPANX, 4);
-            values->Put(LauncherSettings::Favorites::SPANY, 1);
-        }
-        else {
-            values->Put(LauncherSettings::Favorites::SPANX, 2);
-            values->Put(LauncherSettings::Favorites::SPANY, 2);
-        }
+//         // Original widgets might not have valid spans when upgrading
+//         if (favoriteType == LauncherSettings::Favorites::ITEM_TYPE_WIDGET_SEARCH) {
+//             values->Put(LauncherSettings::Favorites::SPANX, 4);
+//             values->Put(LauncherSettings::Favorites::SPANY, 1);
+//         }
+//         else {
+//             values->Put(LauncherSettings::Favorites::SPANX, 2);
+//             values->Put(LauncherSettings::Favorites::SPANY, 2);
+//         }
 
-        StringBuilder sb;
-        sb += IFavorites::_ID;
-        sb += "=";
-        sb += favoriteId;
-        String updateWhere;
-        sb.ToString(&updateWhere);
-        ec = db->Update(TABLE_FAVORITES, values, updateWhere, NULL);
-        if (ec == (ECode)E_SQL_EXCEPTION) {
-            Slogger::W(TAG, "Problem while allocating appWidgetIds for existing widgets");
-            goto FINALLY;
-        }
+//         StringBuilder sb;
+//         sb += IBaseColumns::ID;
+//         sb += "=";
+//         sb += favoriteId;
+//         String updateWhere;
+//         sb.ToString(&updateWhere);
+//         Int32 tmp;
+//         ec = db->Update(TABLE_FAVORITES, values, updateWhere, NULL, &tmp);
+//         if (ec == (ECode)E_SQL_EXCEPTION) {
+//             Slogger::W(LauncherProvider::TAG, "Problem while allocating appWidgetIds for existing widgets");
+//             goto FINALLY;
+//         }
 
-        if (favoriteType == IFavorites::ITEM_TYPE_WIDGET_CLOCK) {
-            // TODO: check return value
-            AutoPtr<IComponentName> name;
-            CComponentName::New(String("com.android.alarmclock"),
-                    String("com.android.alarmclock.AnalogAppWidgetProvider"),
-                    (IComponentName**)&name);
-            appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, name);
-        }
-        else if (favoriteType == IFavorites::ITEM_TYPE_WIDGET_PHOTO_FRAME) {
-            // TODO: check return value
-            AutoPtr<IComponentName> name;
-            CComponentName::New(String("com.android.camera"),
-                    String("com.android.camera.PhotoAppWidgetProvider"),
-                    (IComponentName**)&name);
-            appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, name);
-        }
-        else if (favoriteType == IFavorites::ITEM_TYPE_WIDGET_SEARCH) {
-            // TODO: check return value
-            AutoPtr<IComponentName> name;
-            GetSearchWidgetProvider((IComponentName**)&name)
-            appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, name);
-        }
-        assert(0);
-        //} catch (RuntimeException ex) {
-            Slogger::E(TAG, "Problem allocating appWidgetId", ex);
-        //}
-    }
+//         if (favoriteType == LauncherSettings::Favorites::ITEM_TYPE_WIDGET_CLOCK) {
+//             // TODO: check return value
+//             AutoPtr<IComponentName> name;
+//             CComponentName::New(String("com.android.alarmclock"),
+//                     String("com.android.alarmclock.AnalogAppWidgetProvider"),
+//                     (IComponentName**)&name);
+//             Boolean res;
+//             appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, name, &res);
+//         }
+//         else if (favoriteType == LauncherSettings::Favorites::ITEM_TYPE_WIDGET_PHOTO_FRAME) {
+//             // TODO: check return value
+//             AutoPtr<IComponentName> name;
+//             CComponentName::New(String("com.android.camera"),
+//                     String("com.android.camera.PhotoAppWidgetProvider"),
+//                     (IComponentName**)&name);
+//             Boolean res;
+//             appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, name, &res);
+//         }
+//         else if (favoriteType == LauncherSettings::Favorites::ITEM_TYPE_WIDGET_SEARCH) {
+//             // TODO: check return value
+//             AutoPtr<IComponentName> name;
+//             GetSearchWidgetProvider((IComponentName**)&name);
+//             Boolean res;
+//             appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, name, &res);
+//         }
+//         assert(0);
+//         //} catch (RuntimeException ex) {
+//             Slogger::E(LauncherProvider::TAG, "Problem allocating appWidgetId");
+//         //}
+//     }
 
-    ec = db->SetTransactionSuccessful();
-    if (ec == (ECode)E_SQL_EXCEPTION) {
-        Slogger::W(TAG, "Problem while allocating appWidgetIds for existing widgets");
-        goto FINALLY;
-    }
-    //} catch (SQLException ex) {
-    //    Log.w(TAG, "Problem while allocating appWidgetIds for existing widgets", ex);
-    //} finally {
-FINALLY:
-    db->EndTransaction();
-    if (c != NULL) {
-        c->Close();
-    }
-    //}
+//     ec = db->SetTransactionSuccessful();
+//     if (ec == (ECode)E_SQL_EXCEPTION) {
+//         Slogger::W(LauncherProvider::TAG, "Problem while allocating appWidgetIds for existing widgets");
+//         goto FINALLY;
+//     }
+//     //} catch (SQLException ex) {
+//     //    Log.w(TAG, "Problem while allocating appWidgetIds for existing widgets", ex);
+//     //} finally {
+// FINALLY:
+//     db->EndTransaction();
+//     if (c != NULL) {
+//         ICloseable::Probe(c)->Close();
+//     }
+//     //}
 }
 
 ECode LauncherProvider::DatabaseHelper::BeginDocument(
@@ -876,21 +974,21 @@ ECode LauncherProvider::DatabaseHelper::BeginDocument(
 
     if (type != IXmlPullParser::START_TAG) {
         //throw new XmlPullParserException("No start tag found");
-        Slogger::E("LauncherProvider::DatabaseHelper", "No start tag found");
+        Slogger::E(LauncherProvider::TAG, "No start tag found");
         return E_XML_PULL_PARSER_EXCEPTION;
     }
 
     String name;
     parser->GetName(&name);
-    Boolean res;
-    name.Equals(firstElementName, &res);
-    if (!res) {
+    if (!name.Equals(firstElementName)) {
         // throw new XmlPullParserException("Unexpected start tag: found " + parser.getName() +
         //         ", expected " + firstElementName);
-        Slogger::E("LauncherProvider::DatabaseHelper", "Unexpected start tag: found " + parser.getName() +
-                ", expected " + firstElementName);
+        assert(0);
+        // Slogger::E("LauncherProvider::DatabaseHelper", "Unexpected start tag: found " + parser.getName() +
+        //         ", expected " + firstElementName);
         return E_XML_PULL_PARSER_EXCEPTION;
     }
+    return NOERROR;
 }
 
 ECode LauncherProvider::DatabaseHelper::LoadFavorites(
@@ -919,19 +1017,18 @@ ECode LauncherProvider::DatabaseHelper::LoadFavorites(
     //try {
     AutoPtr<IXmlResourceParser> parser;
     ECode ec = NOERROR;
-    FAIL_GOTO(ec = resources->GetXml(workspaceResourceId,
-            (IXmlResourceParser**)&parser), ERROR);
-    AutoPtr<IAttributeSet> attrs;
-    FAIL_GOTO(ec = Xml::AsAttributeSet(parser, (IAttributeSet**)&attrs), ERROR);
-    BeginDocument(parser, TAG_FAVORITES);
+    ec = resources->GetXml(workspaceResourceId,
+            (IXmlResourceParser**)&parser);
+    AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(IXmlPullParser::Probe(parser));
+    BeginDocument(IXmlPullParser::Probe(parser), TAG_FAVORITES);
 
     Int32 depth;
-    parser->GetDepth(&depth);
+    IXmlPullParser::Probe(parser)->GetDepth(&depth);
 
     Int32 type;
     Int32 _depth;
-    while (((parser->Next(&type), type) != IXmlPullParser::END_TAG ||
-            (parser->GetDepth(&_depth), _depth) > depth) &&
+    while (((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_TAG ||
+            (IXmlPullParser::Probe(parser)->GetDepth(&_depth), _depth) > depth) &&
             type != IXmlPullParser::END_DOCUMENT) {
 
         if (type != IXmlPullParser::START_TAG) {
@@ -940,22 +1037,23 @@ ECode LauncherProvider::DatabaseHelper::LoadFavorites(
 
         Boolean added = FALSE;
         String name;
-        parser->GetName(&name);
+        IXmlPullParser::Probe(parser)->GetName(&name);
 
+        AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
+            const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::Favorite),
+            ArraySize(Elastos::Droid::Launcher2::R::styleable::Favorite));
         AutoPtr<ITypedArray> a;
-        mContext->ObtainStyledAttributes(attrs,
-                Elastos::Droid::Launcher2::R::styleable::Favorite,
-                (ITypedArray**)&a);
+        mContext->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 
         Int64 container = LauncherSettings::Favorites::CONTAINER_DESKTOP;
         Boolean res;
         a->HasValue(Elastos::Droid::Launcher2::R::styleable::Favorite_container,
-                &res)
+                &res);
         if (res) {
             String str;
             a->GetString(Elastos::Droid::Launcher2::R::styleable::Favorite_container,
                     &str);
-            container = Long.valueOf(str);
+            container = StringUtils::ParseInt64(str);
         }
 
         String screen;
@@ -970,9 +1068,9 @@ ECode LauncherProvider::DatabaseHelper::LoadFavorites(
         // hotseat. This screen can't be at position 0 because AllApps is in the
         // zeroth position.
         if (container == LauncherSettings::Favorites::CONTAINER_HOTSEAT
-                && Integer.valueOf(screen) == allAppsButtonRank) {
+                && StringUtils::ParseInt32(screen) == allAppsButtonRank) {
             //throw new RuntimeException("Invalid screen position for hotseat item");
-            Slogger::E(TAG, "Invalid screen position for hotseat item");
+            Slogger::E(LauncherProvider::TAG, "Invalid screen position for hotseat item");
             return E_RUNTIME_EXCEPTION;
         }
 
@@ -982,27 +1080,26 @@ ECode LauncherProvider::DatabaseHelper::LoadFavorites(
         values->Put(LauncherSettings::Favorites::CELLX, x);
         values->Put(LauncherSettings::Favorites::CELLY, y);
 
-        Boolean tmp;
-        if (TAG_FAVORITE.Equals(name, &tmp), tmp) {
+        if (TAG_FAVORITE.Equals(name)) {
             Int64 id;
             AddAppShortcut(db, values, a, packageManager, intent, &id);
             added = id >= 0;
         }
-        else if (TAG_SEARCH.Equals(name, &tmp), tmp) {
+        else if (TAG_SEARCH.Equals(name)) {
             AddSearchWidget(db, values, &added);
         }
-        else if (TAG_CLOCK.Equals(name, &tmp), tmp) {
+        else if (TAG_CLOCK.Equals(name)) {
             AddClockWidget(db, values, &added);
         }
-        else if (TAG_APPWIDGET.Equals(name, &tmp), tmp) {
+        else if (TAG_APPWIDGET.Equals(name)) {
             AddAppWidget(parser, attrs, type, db, values, a, packageManager, &added);
         }
-        else if (TAG_SHORTCUT.Equals(name, &tmp), tmp) {
+        else if (TAG_SHORTCUT.Equals(name)) {
             Int64 id;
             AddUriShortcut(db, values, a, &id);
             added = id >= 0;
         }
-        else if (TAG_FOLDER.Equals(name, &tmp), tmp) {
+        else if (TAG_FOLDER.Equals(name)) {
             String title;
             Int32 titleResId;
             a->GetResourceId(Elastos::Droid::Launcher2::R::styleable::Favorite_title, -1,
@@ -1025,44 +1122,46 @@ ECode LauncherProvider::DatabaseHelper::LoadFavorites(
             CArrayList::New((IArrayList**)&folderItems);
 
             Int32 folderDepth;
-            parser->GetDepth(&folderDepth);
+            IXmlPullParser::Probe(parser)->GetDepth(&folderDepth);
             Int32 dep;
-            while ((parser->Next(&type), type) != IXmlPullParser::END_TAG ||
-                    (parser->GetDepth(&dep), dep) > folderDepth) {
+            while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_TAG ||
+                    (IXmlPullParser::Probe(parser)->GetDepth(&dep), dep) > folderDepth) {
                 if (type != IXmlPullParser::START_TAG) {
                     continue;
                 }
                 String folder_item_name;
-                parser->GetName(&folder_item_name);
+                IXmlPullParser::Probe(parser)->GetName(&folder_item_name);
 
+                AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
+                        const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::Favorite),
+                        ArraySize(Elastos::Droid::Launcher2::R::styleable::Favorite));
                 AutoPtr<ITypedArray> ar;
-                mContext->ObtainStyledAttributes(attrs,
-                        Elastos::Droid::Launcher2::R::styleable::Favorite,
-                        (ITypedArray**)&ar);
+                mContext->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&ar);
                 values->Clear();
                 values->Put(LauncherSettings::Favorites::CONTAINER, folderId);
 
-                Boolean res;
-                if ((TAG_FAVORITE.Equals(folder_item_name, &res), res)
+                if ((TAG_FAVORITE.Equals(folder_item_name))
                         && folderId >= 0) {
                     Int64 id;
                     AddAppShortcut(db, values, ar, packageManager, intent, &id);
                     if (id >= 0) {
-                        folderItems->Add(id);
+                        AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
+                        folderItems->Add(TO_IINTERFACE(obj));
                     }
                 }
-                else if ((TAG_SHORTCUT.Equals(folder_item_name, &res), res)
+                else if ((TAG_SHORTCUT.Equals(folder_item_name))
                         && folderId >= 0) {
                     Int64 id;
                     AddUriShortcut(db, values, ar, &id);
                     if (id >= 0) {
-                        folderItems->Add(id);
+                        AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
+                        folderItems->Add(TO_IINTERFACE(obj));
                     }
                 }
                 else {
                     // throw new RuntimeException("Folders can " +
                     //         "contain only shortcuts");
-                    Slogger::E(TAG, "Folders can contain only shortcuts");
+                    Slogger::E(LauncherProvider::TAG, "Folders can contain only shortcuts");
                     return E_RUNTIME_EXCEPTION;
                 }
                 ar->Recycle();
@@ -1076,7 +1175,12 @@ ECode LauncherProvider::DatabaseHelper::LoadFavorites(
                 // We just delete the folder and any items that made it
                 DeleteId(db, folderId);
                 if (size > 0) {
-                    DeleteId(db, folderItems.get(0));
+                    AutoPtr<IInterface> obj;
+                    folderItems->Get(0, (IInterface**)&obj);
+                    AutoPtr<IInteger64> value = IInteger64::Probe(obj);
+                    Int64 id;
+                    value->GetValue(&id);
+                    DeleteId(db, id);
                 }
                 added = FALSE;
             }
@@ -1088,18 +1192,18 @@ ECode LauncherProvider::DatabaseHelper::LoadFavorites(
     return NOERROR;
 
     assert(0);
-ERROR:
+//ERROR:
     //} catch (XmlPullParserException e) {
     if (ec == (ECode)E_XML_PULL_PARSER_EXCEPTION) {
-        Slogger::W(TAG, "Got exception parsing favorites.", e);
+        Slogger::W(LauncherProvider::TAG, "Got exception parsing favorites. %d", ec);
     }
     //} catch (IOException e) {
     if (ec == (ECode)E_IO_EXCEPTION) {
-        Slogger::W(TAG, "Got exception parsing favorites.", e);
+        Slogger::W(LauncherProvider::TAG, "Got exception parsing favorites. %d", ec);
     }
     //} catch (RuntimeException e) {
     if (ec == (ECode)E_RUNTIME_EXCEPTION) {
-        Slogger::W(TAG, "Got exception parsing favorites.", e);
+        Slogger::W(LauncherProvider::TAG, "Got exception parsing favorites. %d", ec);
     }
     //}
     *result = i;
@@ -1121,11 +1225,11 @@ ECode LauncherProvider::DatabaseHelper::AddAppShortcut(
     AutoPtr<IActivityInfo> info;
     String packageName;
     a->GetString(
-        Elastos::Droid::Launcher2::::R::styleable::Favorite_packageName,
+        Elastos::Droid::Launcher2::R::styleable::Favorite_packageName,
         &packageName);
     String className;
     a->GetString(
-        Elastos::Droid::Launcher2::::R::styleable::Favorite_className,
+        Elastos::Droid::Launcher2::R::styleable::Favorite_className,
         &className);
     //try {
         AutoPtr<IComponentName> cn;
@@ -1137,9 +1241,8 @@ ECode LauncherProvider::DatabaseHelper::AddAppShortcut(
             AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
             (*array)[0] = packageName;
             AutoPtr<ArrayOf<String> > packages;
-            packageManager->CurrentToCanonicalPackageNames(array,
-                    (ArrayOf<String>**)&packages);
-            CComponentName::New((*packages)[0], className, (IComponentName**)&cn;
+            packageManager->CurrentToCanonicalPackageNames(*array, (ArrayOf<String>**)&packages);
+            CComponentName::New((*packages)[0], className, (IComponentName**)&cn);
             packageManager->GetActivityInfo(cn, 0, (IActivityInfo**)&info);
         }
         //}
@@ -1148,22 +1251,23 @@ ECode LauncherProvider::DatabaseHelper::AddAppShortcut(
         intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK |
                 IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         String str;
-        intent->ToURI(0, &str);
-        values->Put(IFavorites::INTENT, str);
+        intent->ToUri(0, &str);
+        values->Put(ILauncherSettingsBaseLauncherColumns::INTENT, str);
 
         AutoPtr<ICharSequence> label;
         IPackageItemInfo::Probe(info)->LoadLabel(packageManager, (ICharSequence**)&label);
         String str2;
         label->ToString(&str2);
-        values->Put(IFavorites::TITLE, str2);
-        values->Put(IFavorites::ITEM_TYPE, IFavorites::ITEM_TYPE_APPLICATION);
-        values->Put(IFavorites::SPANX, 1);
-        values->Put(IFavorites::SPANY, 1);
-        Int32 _id;
+        values->Put(ILauncherSettingsBaseLauncherColumns::TITLE, str2);
+        values->Put(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE,
+                ILauncherSettingsBaseLauncherColumns::ITEM_TYPE_APPLICATION);
+        values->Put(LauncherSettings::Favorites::SPANX, 1);
+        values->Put(LauncherSettings::Favorites::SPANY, 1);
+        Int64 _id;
         GenerateNewId(&_id);
-        values->Put(IFavorites::_ID, _id);
+        values->Put(IBaseColumns::ID, _id);
         Int64 num;
-        DbInsertAndCheck(this, db, TABLE_FAVORITES, null, values, &num);
+        DbInsertAndCheck(this, db, TABLE_FAVORITES, String(NULL), values, &num);
         if (num < 0) {
             *result = -1;
             return NOERROR;
@@ -1171,8 +1275,8 @@ ECode LauncherProvider::DatabaseHelper::AddAppShortcut(
     //}
     assert(0);
     //catch (PackageManager.NameNotFoundException e) {
-        Slogger:::W(TAG, "Unable to add favorite: " + packageName +
-                "/" + className, e);
+        // Slogger:::W(TAG, "Unable to add favorite: " + packageName +
+        //         "/" + className, e);
     //}
     *result = id;
     return NOERROR;
@@ -1185,14 +1289,15 @@ ECode LauncherProvider::DatabaseHelper::AddFolder(
 {
     VALIDATE_NOT_NULL(result);
 
-    values->Put(IFavorites::ITEM_TYPE, IFavorites::ITEM_TYPE_FOLDER);
-    values->Put(IFavorites::SPANX, 1);
-    values->Put(IFavorites::SPANY, 1);
+    values->Put(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE,
+            LauncherSettings::Favorites::ITEM_TYPE_FOLDER);
+    values->Put(LauncherSettings::Favorites::SPANX, 1);
+    values->Put(LauncherSettings::Favorites::SPANY, 1);
     Int64 id;
     GenerateNewId(&id);
-    values->Put(IFavorites::_ID, id);
+    values->Put(IBaseColumns::ID, id);
     Int64 num;
-    DbInsertAndCheck(this, db, TABLE_FAVORITES, NULL, values, &num);
+    DbInsertAndCheck(this, db, TABLE_FAVORITES, String(NULL), values, &num);
     if (num <= 0) {
         *result = -1;
         return NOERROR;
@@ -1209,7 +1314,7 @@ ECode LauncherProvider::DatabaseHelper::GetSearchWidgetProvider(
     VALIDATE_NOT_NULL(name);
 
     AutoPtr<IInterface> obj;
-    mContext->GetSystemService(Context.SEARCH_SERVICE, (IInterface**)&obj);
+    mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
     AutoPtr<ISearchManager> searchManager = ISearchManager::Probe(obj);
     AutoPtr<IComponentName> searchComponent;
     searchManager->GetGlobalSearchActivity((IComponentName**)&searchComponent);
@@ -1218,7 +1323,7 @@ ECode LauncherProvider::DatabaseHelper::GetSearchWidgetProvider(
         return NOERROR;
     }
     String packageName;
-    searchComponent->GetPackageName(&packageName)
+    searchComponent->GetPackageName(&packageName);
     return GetProviderInPackage(packageName, name);
 }
 
@@ -1228,8 +1333,10 @@ ECode LauncherProvider::DatabaseHelper::GetProviderInPackage(
 {
     VALIDATE_NOT_NULL(name);
 
+    AutoPtr<IAppWidgetManagerHelper> helper;
+    CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper);
     AutoPtr<IAppWidgetManager> appWidgetManager;
-    AppWidgetManager::GetInstance(mContext, (IAppWidgetManager**)&appWidgetManager);
+    helper->GetInstance(mContext, (IAppWidgetManager**)&appWidgetManager);
     AutoPtr<IList> providers;
     appWidgetManager->GetInstalledProviders((IList**)&providers);
     if (providers == NULL) {
@@ -1243,13 +1350,11 @@ ECode LauncherProvider::DatabaseHelper::GetProviderInPackage(
         providers->Get(i, (IInterface**)&obj);
         AutoPtr<IAppWidgetProviderInfo> info = IAppWidgetProviderInfo::Probe(obj);
         AutoPtr<IComponentName> provider;
-        info.GetProvider((IComponentName**)&provider);
+        info->GetProvider((IComponentName**)&provider);
         if (provider != NULL) {
-            String packageName;
-            provider->GetPackageName(&packageName);
-            Boolean res;
-            packageName.Equals(packageName, &res);
-            if (res) {
+            String _packageName;
+            provider->GetPackageName(&_packageName);
+            if (_packageName.Equals(packageName)) {
                 *name = provider;
                 return NOERROR;
             }
@@ -1316,18 +1421,20 @@ ECode LauncherProvider::DatabaseHelper::AddAppWidget(
     AutoPtr<IComponentName> cn;
     CComponentName::New(packageName, className, (IComponentName**)&cn);
     //try {
-    ECode ec = packageManager->GetReceiverInfo(cn, 0);
+    AutoPtr<IActivityInfo> tmp;
+    ECode ec = packageManager->GetReceiverInfo(cn, 0, (IActivityInfo**)&tmp);
     //} catch (Exception e) {
     if (ec != NOERROR) {
         AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
         (*array)[0] = packageName;
         AutoPtr<ArrayOf<String> > packages;
-        packageManager->CurrentToCanonicalPackageNames(array,
+        packageManager->CurrentToCanonicalPackageNames(*array,
                 (ArrayOf<String>**)&packages);
         CComponentName::New((*packages)[0], className, (IComponentName**)&cn);
 
         //try {
-        if(FAILED(packageManager->GetReceiverInfo(cn, 0))) {
+        AutoPtr<IActivityInfo> tmp2;
+        if(FAILED(packageManager->GetReceiverInfo(cn, 0, (IActivityInfo**)&tmp2))) {
             hasPackage = FALSE;
         }
         //} catch (Exception e1) {
@@ -1348,23 +1455,22 @@ ECode LauncherProvider::DatabaseHelper::AddAppWidget(
         AutoPtr<IBundle> extras;
         CBundle::New((IBundle**)&extras);
         Int32 widgetDepth;
-        parser->GetDepth(&widgetDepth);
+        IXmlPullParser::Probe(parser)->GetDepth(&widgetDepth);
         Int32 dep;
-        while ((parser-<Next(&type), type) != IXmlPullParser::END_TAG ||
-                (parser->GetDepth(&dep), dep) > widgetDepth) {
+        while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_TAG ||
+                (IXmlPullParser::Probe(parser)->GetDepth(&dep), dep) > widgetDepth) {
             if (type != IXmlPullParser::START_TAG) {
                 continue;
             }
 
+            AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
+                    const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::Extra),
+                    ArraySize(Elastos::Droid::Launcher2::R::styleable::Extra));
             AutoPtr<ITypedArray> ar;
-            mContext->ObtainStyledAttributes(attrs,
-                    Elastos::Droid::Launcher2::R::styleable::Extra,
-                    (ITypedArray**)&ar);
+            mContext->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&ar);
             String name;
-            parser->GetName(&name);
-            Boolean res;
-            TAG_EXTRA.Equals(name, res);
-            if (res) {
+            IXmlPullParser::Probe(parser)->GetName(&name);
+            if (TAG_EXTRA.Equals(name)) {
                 String key;
                 ar->GetString(Elastos::Droid::Launcher2::R::styleable::Extra_key,
                         &key);
@@ -1376,15 +1482,13 @@ ECode LauncherProvider::DatabaseHelper::AddAppWidget(
                 }
                 else {
                     //throw new RuntimeException("Widget extras must have a key and value");
-                    Slogger::E("LauncherProvider",
-                        "Widget extras must have a key and value");
+                    Slogger::E(LauncherProvider::TAG, "Widget extras must have a key and value");
                     return E_RUNTIME_EXCEPTION;
                 }
             }
             else {
                 //throw new RuntimeException("Widgets can contain only extras");
-                Slogger::E("LauncherProvider",
-                    "Widgets can contain only extras");
+                Slogger::E(LauncherProvider::TAG, "Widgets can contain only extras");
                 return E_RUNTIME_EXCEPTION;
             }
             ar->Recycle();
@@ -1410,31 +1514,36 @@ ECode LauncherProvider::DatabaseHelper::AddAppWidget(
     *result = FALSE;
 
     Boolean allocatedAppWidgets = FALSE;
+
+    AutoPtr<IAppWidgetManagerHelper> helper;
+    CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper);
     AutoPtr<IAppWidgetManager> appWidgetManager;
-    AppWidgetManager->GetInstance(mContext, (IAppWidgetManager**)&appWidgetManager);
+    helper->GetInstance(mContext, (IAppWidgetManager**)&appWidgetManager);
 
     //try {
     Int32 appWidgetId;
     ECode ec = mAppWidgetHost->AllocateAppWidgetId(&appWidgetId);
     if (ec == (ECode)E_RUNTIME_EXCEPTION) goto ERROR;
 
-    values->Put(IFavorites::ITEM_TYPE, IFavorites::ITEM_TYPE_APPWIDGET);
-    values->Put(IFavorites::SPANX, spanX);
-    values->Put(IFavorites::SPANY, spanY);
-    values->Put(IFavorites::APPWIDGET_ID, appWidgetId);
-    Int32 _id;
+    values->Put(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE,
+            LauncherSettings::Favorites::ITEM_TYPE_APPWIDGET);
+    values->Put(LauncherSettings::Favorites::SPANX, spanX);
+    values->Put(LauncherSettings::Favorites::SPANY, spanY);
+    values->Put(LauncherSettings::Favorites::APPWIDGET_ID, appWidgetId);
+    Int64 _id;
     GenerateNewId(&_id);
-    values->Put(IFavorites::_ID, _id);
-    DbInsertAndCheck(this, db, TABLE_FAVORITES, NULL, values);
+    values->Put(IBaseColumns::ID, _id);
+    Int64 tmp;
+    DbInsertAndCheck(this, db, TABLE_FAVORITES, String(NULL), values, &tmp);
 
     allocatedAppWidgets = TRUE;
 
     // TODO: need to check return value
-    ec = appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, cn);
+    Boolean res;
+    ec = appWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId, cn, &res);
     if (ec == (ECode)E_RUNTIME_EXCEPTION) goto ERROR;
 
     // Send a broadcast to configure the widget
-    Boolean res;
     if (extras != NULL && (extras->IsEmpty(&res), !res)) {
         AutoPtr<IIntent> intent;
         CIntent::New(ACTION_APPWIDGET_DEFAULT_WORKSPACE_CONFIGURE,
@@ -1453,7 +1562,7 @@ ECode LauncherProvider::DatabaseHelper::AddAppWidget(
 
 ERROR:
     //} catch (RuntimeException ex) {
-        Slogger::E(TAG, "Problem allocating appWidgetId", ex);
+        Slogger::E(LauncherProvider::TAG, "Problem allocating appWidgetId %d", ec);
     //}
 
     *result = allocatedAppWidgets;
@@ -1487,17 +1596,19 @@ ECode LauncherProvider::DatabaseHelper::AddUriShortcut(
     a->GetString(
         Elastos::Droid::Launcher2::R::styleable::Favorite_uri,
         &uri);
-    ECode ec = Intent::ParseUri(uri, 0, (IIntent**)&intent);
+    AutoPtr<IIntentHelper> helper;
+    CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
+    ECode ec = helper->ParseUri(uri, 0, (IIntent**)&intent);
     //} catch (URISyntaxException e) {
     if (ec == (ECode)E_URI_SYNTAX_EXCEPTION) {
-        Slogger::W(TAG, "Shortcut has malformed uri: " + uri);
+        Slogger::W(LauncherProvider::TAG, "Shortcut has malformed uri: "/* + uri*/);
         *result = -1; // Oh well
         return NOERROR;
     }
     //}
 
     if (iconResId == 0 || titleResId == 0) {
-        Slogger::W(TAG, "Shortcut is missing title or icon resource ID");
+        Slogger::W(LauncherProvider::TAG, "Shortcut is missing title or icon resource ID");
         *result = -1;
         return NOERROR;
     }
@@ -1507,24 +1618,26 @@ ECode LauncherProvider::DatabaseHelper::AddUriShortcut(
     intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
     String str;
     intent->ToUri(0, &str);
-    values->Put(IFavorites::INTENT, str);
+    values->Put(ILauncherSettingsBaseLauncherColumns::INTENT, str);
     String str2;
     r->GetString(titleResId, &str2);
-    values->Put(IFavorites::TITLE, str2);
-    values->Put(IFavorites::ITEM_TYPE, IFavorites::ITEM_TYPE_SHORTCUT);
-    values->Put(IFavorites::SPANX, 1);
-    values->Put(IFavorites::SPANY, 1);
-    values->Put(IFavorites::ICON_TYPE, IFavorites::ICON_TYPE_RESOURCE);
+    values->Put(ILauncherSettingsBaseLauncherColumns::TITLE, str2);
+    values->Put(ILauncherSettingsBaseLauncherColumns::ITEM_TYPE,
+            ILauncherSettingsBaseLauncherColumns::ITEM_TYPE_SHORTCUT);
+    values->Put(LauncherSettings::Favorites::SPANX, 1);
+    values->Put(LauncherSettings::Favorites::SPANY, 1);
+    values->Put(ILauncherSettingsBaseLauncherColumns::ICON_TYPE,
+            ILauncherSettingsBaseLauncherColumns::ICON_TYPE_RESOURCE);
     String packageName;
     mContext->GetPackageName(&packageName);
-    values->Put(IFavorites::ICON_PACKAGE, packageName);
+    values->Put(ILauncherSettingsBaseLauncherColumns::ICON_PACKAGE, packageName);
     String resourceName;
     r->GetResourceName(iconResId, &resourceName);
-    values->Put(IFavorites::ICON_RESOURCE, resourceName);
-    values->Put(IFavorites::_ID, id);
+    values->Put(ILauncherSettingsBaseLauncherColumns::ICON_RESOURCE, resourceName);
+    values->Put(IBaseColumns::ID, id);
 
     Int64 num;
-    DbInsertAndCheck(this, db, TABLE_FAVORITES, NULL, values, &num);
+    DbInsertAndCheck(this, db, TABLE_FAVORITES, String(NULL), values, &num);
     if (num < 0) {
         *result = -1;
         return NOERROR;
@@ -1538,7 +1651,7 @@ LauncherProvider::SqlArguments::SqlArguments(
     /* [in] */ const String& where,
     /* [in] */ ArrayOf<String>* args)
 {
-    Authority<IList> pathSegments;
+    AutoPtr<IList> pathSegments;
     url->GetPathSegments((IList**)&pathSegments);
     Int32 size;
     pathSegments->GetSize(&size);
@@ -1552,19 +1665,24 @@ LauncherProvider::SqlArguments::SqlArguments(
     }
     else if (size != 2) {
         // throw new IllegalArgumentException("Invalid URI: " + url);
-        Slogger::E("LauncherProvider::SqlArguments", "Invalid URI: ");
+        Slogger::E(LauncherProvider::TAG, "Invalid URI: ");
     }
     else if (!TextUtils::IsEmpty(where)) {
         // throw new UnsupportedOperationException("WHERE clause not supported: " + url);
-        Slogger::E("LauncherProvider::SqlArguments", "WHERE clause not supported: ");
+        Slogger::E(LauncherProvider::TAG, "WHERE clause not supported: ");
     }
     else {
         AutoPtr<IInterface> obj;
         pathSegments->Get(0, (IInterface**)&obj);
         AutoPtr<ICharSequence> cchar = ICharSequence::Probe(obj);
         cchar->ToString(&mTable);
+
+        AutoPtr<IContentUris> helper;
+        CContentUris::AcquireSingleton((IContentUris**)&helper);
+        AutoPtr<IUri> uri;
         Int64 id;
-        ContentUris::ParseId(url, &id);
+        helper->ParseId(url, &id);
+
         StringBuilder sb;
         sb += "_id=";
         sb += id;
@@ -1576,7 +1694,7 @@ LauncherProvider::SqlArguments::SqlArguments(
 LauncherProvider::SqlArguments::SqlArguments(
     /* [in] */ IUri* url)
 {
-    Authority<IList> pathSegments;
+    AutoPtr<IList> pathSegments;
     url->GetPathSegments((IList**)&pathSegments);
     Int32 size;
     pathSegments->GetSize(&size);
@@ -1590,15 +1708,30 @@ LauncherProvider::SqlArguments::SqlArguments(
     }
     else {
         //throw new IllegalArgumentException("Invalid URI: " + url);
-        Slogger::E("LauncherProvider::SqlArguments", "Invalid URI: ");
+        Slogger::E(LauncherProvider::TAG, "Invalid URI: ");
     }
 }
 
-AutoPtr<IUri> LauncherProvider::CONTENT_APPWIDGET_RESET_URI =
-        Uri::Parse(String("content://") + ILauncherProvider::AUTHORITY + String("/appWidgetReset"));
+static AutoPtr<IUri> initCONTENT_APPWIDGET_RESET_URI()
+{
+    AutoPtr<IUri> uri;
+
+    StringBuilder sb;
+    sb += "content://";
+    sb += ILauncherProvider::AUTHORITY;
+    sb += "/appWidgetReset";
+
+    AutoPtr<IUriHelper> uriHelper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
+    uriHelper->Parse(sb.ToString(), (IUri**)&uri);
+
+    return uri;
+}
+
+const AutoPtr<IUri> LauncherProvider::CONTENT_APPWIDGET_RESET_URI = initCONTENT_APPWIDGET_RESET_URI();
 
 const String LauncherProvider::TAG("Launcher.LauncherProvider");
-const Boolean LauncherProvider::LOGD = FASLE;
+const Boolean LauncherProvider::LOGD = FALSE;
 
 const String LauncherProvider::DATABASE_NAME("launcher.db");
 
@@ -1626,8 +1759,10 @@ ECode LauncherProvider::OnCreate(
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    CDatabaseHelper::AcquireSingleton((IDatabaseHelper**)&mOpenHelper);
-    ILauncherApplication::Probe(context)->SetLauncherProvider(this);
+    mOpenHelper = new DatabaseHelper();
+    mOpenHelper->constructor(context);
+    assert(0);
+    //ILauncherApplication::Probe(context)->SetLauncherProvider(this);
     *result = TRUE;
     return NOERROR;
 }
@@ -1638,7 +1773,7 @@ ECode LauncherProvider::GetType(
 {
     VALIDATE_NOT_NULL(type);
 
-    AutoPtr<SqlArguments> args = new SqlArguments(uri, NULL, NULL);
+    AutoPtr<SqlArguments> args = new SqlArguments(uri, String(NULL), NULL);
     if (TextUtils::IsEmpty(args->mWhere)) {
         StringBuilder sb;
         sb += "vnd.android.cursor.dir/";
@@ -1655,13 +1790,13 @@ ECode LauncherProvider::GetType(
 
 ECode LauncherProvider::Query(
     /* [in] */ IUri* uri,
-    /* [in] */ ARRAYoF<String>* projection,
+    /* [in] */ ArrayOf<String>* projection,
     /* [in] */ const String& selection,
-    /* [in] */ ARRAYoF<String>* selectionArgs,
+    /* [in] */ ArrayOf<String>* selectionArgs,
     /* [in] */ const String& sortOrder,
     /* [out] */ ICursor** cursor)
 {
-    VALIDATE_NOT_NULL(type);
+    VALIDATE_NOT_NULL(cursor);
 
     AutoPtr<SqlArguments> args = new SqlArguments(uri, selection, selectionArgs);
     AutoPtr<ISQLiteQueryBuilder> qb;
@@ -1671,7 +1806,8 @@ ECode LauncherProvider::Query(
     AutoPtr<ISQLiteDatabase> db;
     mOpenHelper->GetWritableDatabase((ISQLiteDatabase**)&db);
     AutoPtr<ICursor> result;
-    qb->Query(db, projection, args->mWhere, args->mArgs, NULL, NULL, sortOrder, (ICursor**)&result);
+    qb->Query(db, projection, args->mWhere, args->mArgs, String(NULL), String(NULL),
+            sortOrder, (ICursor**)&result);
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
@@ -1684,7 +1820,7 @@ ECode LauncherProvider::Query(
 }
 
 ECode LauncherProvider::DbInsertAndCheck(
-    /* [in] */ IDatabaseHelper* helper,
+    /* [in] */ DatabaseHelper* helper,
     /* [in] */ ISQLiteDatabase* db,
     /* [in] */ const String& table,
     /* [in] */ const String& nullColumnHack,
@@ -1695,10 +1831,10 @@ ECode LauncherProvider::DbInsertAndCheck(
     *result = 0;
 
     Boolean res;
-    values->ContainsKey(LauncherSettings::Favorites::_ID, &res);
+    values->ContainsKey(IBaseColumns::ID, &res);
     if (!res) {
         //throw new RuntimeException("Error: attempting to add item without specifying an id")
-        Slogger::E("LauncherProvider", "Error: attempting to add item without specifying an id");
+        Slogger::E(TAG, "Error: attempting to add item without specifying an id");
         return E_RUNTIME_EXCEPTION;
     }
     return db->Insert(table, nullColumnHack, values, result);
@@ -1708,9 +1844,11 @@ ECode LauncherProvider::DeleteId(
     /* [in] */ ISQLiteDatabase* db,
     /* [in] */ Int64 id)
 {
-    AutoPtr<IUri> uri = LauncherSettings::Favorites::GetContentUri(id, FALSE);
-    AutoPtr<SqlArguments> args = new SqlArguments(uri, NULL, NULL);
-    return db->Delete(args->mTable, args->mWhere, args->mArgs);
+    AutoPtr<IUri> uri;
+    LauncherSettings::Favorites::GetContentUri(id, FALSE, (IUri**)&uri);
+    AutoPtr<SqlArguments> args = new SqlArguments(uri, String(NULL), NULL);
+    Int32 tmp;
+    return db->Delete(args->mTable, args->mWhere, args->mArgs, &tmp);
 }
 
 ECode LauncherProvider::Insert(
@@ -1725,16 +1863,19 @@ ECode LauncherProvider::Insert(
     AutoPtr<ISQLiteDatabase> db;
     mOpenHelper->GetWritableDatabase((ISQLiteDatabase**)&db);
     Int64 rowId;
-    DbInsertAndCheck(mOpenHelper, db, args->mTable, NULL, initialValues, &rowId);
+    DbInsertAndCheck(mOpenHelper, db, args->mTable, String(NULL), initialValues, &rowId);
     if (rowId <= 0) {
         *outuri = NULL;
         return NOERROR;
     }
 
-    uri = ContentUris::WithAppendedId(uri, rowId);
-    SendNotify(uri);
+    AutoPtr<IContentUris> helper;
+    CContentUris::AcquireSingleton((IContentUris**)&helper);
+    AutoPtr<IUri> newUri;
+    helper->WithAppendedId(uri, rowId, (IUri**)&newUri);
+    SendNotify(newUri);
 
-    *outuri = uri;
+    *outuri = newUri;
     REFCOUNT_ADD(*outuri);
     return NOERROR;
 }
@@ -1756,7 +1897,7 @@ ECode LauncherProvider::BulkInsert(
     Int32 numValues = values->GetLength();
     for (Int32 i = 0; i < numValues; i++) {
         Int64 rowId;
-        FAIL_GOTO(DbInsertAndCheck(mOpenHelper, db, args->mTable, NULL,
+        FAIL_GOTO(DbInsertAndCheck(mOpenHelper, db, args->mTable, String(NULL),
                 (*values)[i], &rowId), FINALLY)
         if (rowId < 0) {
             *result = 0;
@@ -1796,7 +1937,7 @@ ECode LauncherProvider::Delete(
 }
 
 ECode LauncherProvider::Update(
-    /* [in] */ IUri uri,
+    /* [in] */ IUri* uri,
     /* [in] */ IContentValues* values,
     /* [in] */ const String& selection,
     /* [in] */ ArrayOf<String>* selectionArgs,
@@ -1822,8 +1963,7 @@ void LauncherProvider::SendNotify(
 {
     String notify;
     uri->GetQueryParameter(PARAMETER_NOTIFY, &notify);
-    Boolean res;
-    if (notify.IsNull() || (notify.Equals(String( "true"), &res), res)) {
+    if (notify.IsNull() || (notify.Equals(String( "true")))) {
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         AutoPtr<IContentResolver> resolver;
@@ -1835,7 +1975,7 @@ void LauncherProvider::SendNotify(
 ECode LauncherProvider::GenerateNewId(
     /* [out] */ Int64* id)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(id);
 
     return mOpenHelper->GenerateNewId(id);
 }
@@ -1846,7 +1986,8 @@ ECode LauncherProvider::LoadDefaultFavoritesIfNecessary(
 {
     synchronized(this) {
         String spKey;
-        LauncherApplication::GetSharedPreferencesKey(&spKey);
+        assert(0);
+        //LauncherApplication::GetSharedPreferencesKey(&spKey);
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         AutoPtr<ISharedPreferences> sp;
@@ -1877,8 +2018,10 @@ ECode LauncherProvider::LoadDefaultFavoritesIfNecessary(
             }
             AutoPtr<ISQLiteDatabase> db;
             mOpenHelper->GetWritableDatabase((ISQLiteDatabase**)&db);
-            mOpenHelper->LoadFavorites(db, workspaceResId);
-            editor->Commit();
+            Int32 tmp;
+            mOpenHelper->LoadFavorites(db, workspaceResId, &tmp);
+            Boolean res;
+            editor->Commit(&res);
         }
     }
     return NOERROR;
@@ -1897,11 +2040,15 @@ ECode LauncherProvider::DeleteDatabase()
     Boolean res;
     dbFile->Exists(&res);
     if (res) {
-        SQLiteDatabase::DeleteDatabase(dbFile);
+        AutoPtr<ISQLiteDatabaseHelper> helper;
+        CSQLiteDatabaseHelper::AcquireSingleton((ISQLiteDatabaseHelper**)&helper);
+        Boolean result;
+        helper->DeleteDatabase(dbFile, &result);
     }
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    mOpenHelper = new DatabaseHelper(context);
+    mOpenHelper = new DatabaseHelper();
+    mOpenHelper->constructor(context);
     return NOERROR;
 }
 
@@ -1921,7 +2068,8 @@ ECode LauncherProvider::BuildOrWhereString(
             selectWhere += " OR ";
         }
     }
-    return selectWhere.ToString(&result);
+    *result = selectWhere.ToString();
+    return NOERROR;
 }
 
 } // namespace Launcher2

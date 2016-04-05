@@ -1,7 +1,13 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_DROPTARGET_H__
 #define  __ELASTOS_DROID_LAUNCHER2_DROPTARGET_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -9,7 +15,7 @@ namespace Launcher2 {
 
 class DragObject
     : public Object
-    , public IDragObject
+    , public IDropTargetDragObject
 {
 public:
     CAR_INTERFACE_DECL();
@@ -56,7 +62,11 @@ class DragEnforcer
     , public IDragControllerDragListener
 {
 public:
-    DragEnforcer(
+    CAR_INTERFACE_DECL();
+
+    DragEnforcer();
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     CARAPI OnDragEnter();

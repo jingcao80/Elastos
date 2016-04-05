@@ -2,14 +2,17 @@
 #include "elastos/droid/launcher2/HandleView.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Core::CoreUtils;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
 const Int32 HandleView::ORIENTATION_HORIZONTAL = 1;
-
-CAR_INTERFACE_IMPL(HandleView, ImageView, IHandleView);
 
 HandleView::HandleView()
     : mOrientation(ORIENTATION_HORIZONTAL)
@@ -36,16 +39,19 @@ ECode HandleView::constructor(
 {
     ImageView::constructor(context, attrs, defStyle);
 
+    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
+            const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::HandleView),
+            ArraySize(Elastos::Droid::Launcher2::R::styleable::HandleView));
     AutoPtr<ITypedArray> a;
-    context->ObtainStyledAttributes(attrs,
-            Elastos::Droid::Launcher2::R::styleable::HandleView, defStyle, 0, (ITypedArray**)&a);
+    context->ObtainStyledAttributes(attrs, attrIds, defStyle, 0, (ITypedArray**)&a);
     a->GetInt32(Elastos::Droid::Launcher2::R::styleable::HandleView_direction,
             ORIENTATION_HORIZONTAL, &mOrientation);
     a->Recycle();
 
     String str;
-    context->GetString(Elastos::Droid::Launcher2::R::string::all_apps_button_label, &str)
-    return SetContentDescription();
+    context->GetString(Elastos::Droid::Launcher2::R::string::all_apps_button_label, &str);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+    return SetContentDescription(cchar);
 }
 
 ECode HandleView::FocusSearch(
@@ -57,17 +63,19 @@ ECode HandleView::FocusSearch(
     AutoPtr<IView> newFocus;
     ImageView::FocusSearch(direction, (IView**)&newFocus);
     Boolean res;
-    mLauncher->IsAllAppsVisible(&res);
+    assert(0 && "need class Launcher");
+    //mLauncher->IsAllAppsVisible(&res);
     if (newFocus == NULL && !res) {
         AutoPtr<IWorkspace> workspace;
-        mLauncher->GetWorkspace((IWorkspace**)&workspace);
-        workspace->DispatchUnhandledMove(NULL, direction);
-        if (mOrientation == ORIENTATION_HORIZONTAL && direction == FOCUS_DOWN) {
-            *view = IView::Probe(this);
-        }
-        else {
-            *view = IView::Probe(workspace);
-        }
+        assert(0 && "need class Workspace");
+        // mLauncher->GetWorkspace((IWorkspace**)&workspace);
+        // workspace->DispatchUnhandledMove(NULL, direction);
+        // if (mOrientation == ORIENTATION_HORIZONTAL && direction == FOCUS_DOWN) {
+        //     *view = IView::Probe(this);
+        // }
+        // else {
+        //     *view = IView::Probe(workspace);
+        // }
         REFCOUNT_ADD(*view);
         return NOERROR;
     }
@@ -85,7 +93,8 @@ ECode HandleView::OnTouchEvent(
     Int32 action;
     ev->GetAction(&action);
     Boolean res;
-    mLauncher->IsAllAppsVisible(&res)
+    assert(0 && "need class Launcher");
+    //mLauncher->IsAllAppsVisible(&res)
     if (action == IMotionEvent::ACTION_DOWN && res) {
         *result = FALSE;
         return NOERROR;

@@ -4,10 +4,25 @@ module
     namespace Droid {
     namespace Launcher2 {
 
-    /*
-     * @invoke
-     * interface I~~~~~~~~~
-    */
+    /**
+     * @Involve
+     * interface IViewGroup;
+     * interface IView;
+     * interface IDrawableCallback;
+     * interface IKeyEventCallback;
+     * interface IAccessibilityEventSource;
+     * interface IViewParent;
+     * interface IViewManager;
+     * interface IPagedView
+     *
+     * interface IDropTarget
+     * interface IDragSource
+     * interface IDragScroller
+     * interface IViewOnTouchListener,
+     * interface IDragControllerDragListener
+     * interface ILauncherTransitionable,
+     * interface IViewGroupOnHierarchyChangeListener
+     */
     interface IWorkspace {
         const Int32 DRAG_BITMAP_PADDING = 2;
 

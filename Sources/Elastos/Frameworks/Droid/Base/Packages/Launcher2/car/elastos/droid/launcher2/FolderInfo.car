@@ -1,8 +1,18 @@
 module
 {
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.Launcher2.IShortcutInfo;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
+
+    /*
+    * @invoke interface IItemInfo
+    */
+    interface IFolderInfo {
+    }
 
     interface IFolderListener {
         OnAdd(

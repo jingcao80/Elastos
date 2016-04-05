@@ -1,7 +1,42 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_FOLDERICON_H__
 #define  __ELASTOS_DROID_LAUNCHER2_FOLDERICON_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/widget/LinearLayout.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include "elastos/droid/launcher2/CheckLongPressHelper.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Widget::LinearLayout;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
+using Elastos::Core::ICharSequence;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -15,6 +50,73 @@ public:
     class FolderRingAnimator
         : public Object
     {
+    private:
+        class MyAnimatorUpdateListener
+            : public Object
+            , public IAnimatorUpdateListener
+        {
+        public:
+            CAR_INTERFACE_DECL();
+
+            MyAnimatorUpdateListener(
+                /* [in] */ FolderIcon::FolderRingAnimator* host,
+                /* [in] */ Int32 previewSize);
+
+            CARAPI OnAnimationUpdate(
+                /* [in] */ IValueAnimator* animation);
+
+        private:
+            AutoPtr<FolderIcon::FolderRingAnimator> mHost;
+            Int32 mPreviewSize;
+        };
+
+        class MyAnimatorListenerAdapter
+            : public AnimatorListenerAdapter
+        {
+        public:
+            MyAnimatorListenerAdapter(
+                /* [in] */ FolderIcon::FolderRingAnimator* host);
+
+            CARAPI OnAnimationStart(
+                /* [in] */ IAnimator* animation);
+
+        private:
+            AutoPtr<FolderIcon::FolderRingAnimator> mHost;
+        };
+
+        class MyAnimatorUpdateListener2
+            : public Object
+            , public IAnimatorUpdateListener
+        {
+        public:
+            CAR_INTERFACE_DECL();
+
+            MyAnimatorUpdateListener2(
+                /* [in] */ FolderIcon::FolderRingAnimator* host,
+                /* [in] */ Int32 previewSize);
+
+            CARAPI OnAnimationUpdate(
+                /* [in] */ IValueAnimator* animation);
+
+        private:
+            AutoPtr<FolderIcon::FolderRingAnimator> mHost;
+            Int32 mPreviewSize;
+        };
+
+        class MyAnimatorListenerAdapter2
+            : public AnimatorListenerAdapter
+        {
+        public:
+            MyAnimatorListenerAdapter2(
+                /* [in] */ FolderIcon::FolderRingAnimator* host);
+
+            CARAPI onAnimationEnd(
+                /* [in] */ IAnimator* animation);
+
+        private:
+            AutoPtr<FolderIcon::FolderRingAnimator> mHost;
+        };
+
     public:
         FolderRingAnimator(
             /* [in] */ ILauncher* launcher,
@@ -62,6 +164,8 @@ public:
         AutoPtr<IValueAnimator> mNeutralAnimator;
     };
 
+    class MyAnimatorUpdateListener3;
+
     class PreviewItemDrawingParams
         : public Object
     {
@@ -73,78 +177,14 @@ public:
             /* [in] */ Int32 overlayAlpha);
 
     private:
+        friend class FolderIcon::MyAnimatorUpdateListener3;
+        friend class FolderIcon;
+
         Float mTransX;
         Float mTransY;
         Float mScale;
         Int32 mOverlayAlpha;
         AutoPtr<IDrawable> mDrawable;
-    };
-
-private:
-    class MyAnimatorUpdateListener
-        : public Object
-        , public IAnimatorUpdateListener
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        MyAnimatorUpdateListener(
-            /* [in] */ FolderIcon::FolderRingAnimator* host,
-            /* [in] */ Int32 previewSize);
-
-        CARAPI OnAnimationUpdate(
-            /* [in] */ IValueAnimator* animation);
-
-    private:
-        AutoPtr<FolderIcon::FolderRingAnimator> mHost;
-        Int32 mPreviewSize;
-    };
-
-    class MyAnimatorListenerAdapter
-        : public AnimatorListenerAdapter
-    {
-    public:
-        MyAnimatorListenerAdapter(
-            /* [in] */ FolderIcon::FolderRingAnimator* host);
-
-        CARAPI OnAnimationStart(
-            /* [in] */ IAnimator* animation);
-
-    private:
-        AutoPtr<FolderIcon::FolderRingAnimator> mHost;
-    };
-
-    class MyAnimatorUpdateListener2
-        : public Object
-        , public IAnimatorUpdateListener
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        MyAnimatorUpdateListener2(
-            /* [in] */ FolderIcon::FolderRingAnimator* host,
-            /* [in] */ Int32 previewSize);
-
-        CARAPI OnAnimationUpdate(
-            /* [in] */ IValueAnimator* animation);
-
-    private:
-        AutoPtr<FolderIcon::FolderRingAnimator> mHost;
-        Int32 mPreviewSize;
-    };
-
-    class MyAnimatorListenerAdapter2
-        : public AnimatorListenerAdapter
-    {
-    public:
-        MyAnimatorListenerAdapter2(
-            /* [in] */ FolderIcon::FolderRingAnimator* host);
-
-        CARAPI onAnimationEnd(
-            /* [in] */ IAnimator* animation);
-
-    private:
-        AutoPtr<FolderIcon::FolderRingAnimator> mHost;
     };
 
     class MyRunnable
@@ -213,6 +253,8 @@ public:
 
     FolderIcon();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
@@ -269,10 +311,10 @@ public:
     CARAPI OnDragExit();
 
     CARAPI OnDrop(
-        /* [in] */ IDragObject* d);
+        /* [in] */ IDropTargetDragObject* d);
 
     CARAPI GetDropTargetDelegate(
-        /* [in] */ IDragObject* d,
+        /* [in] */ IDropTargetDragObject* d,
         /* [out] */ IDropTarget** target);
 
     CARAPI SetTextVisible(
@@ -306,7 +348,7 @@ protected:
         /* [out] */ IParcelable** p);
 
     //@Override
-    CARAPI DispatchDraw(
+    CARAPI_(void) DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
 private:
@@ -322,7 +364,7 @@ private:
         /* [in] */ Float scaleRelativeToDragLayer,
         /* [in] */ Int32 index,
         /* [in] */ IRunnable* postAnimationRunnable,
-        /* [in] */ IDragObject* d);
+        /* [in] */ IDropTargetDragObject* d);
 
     CARAPI_(void) ComputePreviewDrawingParams(
         /* [in] */ Int32 drawableSize,
@@ -383,7 +425,7 @@ private:
     AutoPtr<IImageView> mPreviewBackground;
     AutoPtr<IBubbleTextView> mFolderName;
 
-    AutoPtr<IFolderRingAnimator> mFolderRingAnimator;
+    AutoPtr<FolderRingAnimator> mFolderRingAnimator;
 
     // These variables are all associated with the drawing of the preview; they are stored
     // as member variables for shared usage and to avoid computation on each frame
@@ -391,7 +433,7 @@ private:
     Float mBaselineIconScale;
     Int32 mBaselineIconSize;
     Int32 mAvailableSpaceInPreview;
-    Int32 mTotalWidth = -1;
+    Int32 mTotalWidth;
     Int32 mPreviewOffsetX;
     Int32 mPreviewOffsetY;
     Float mMaxPerspectiveShift;

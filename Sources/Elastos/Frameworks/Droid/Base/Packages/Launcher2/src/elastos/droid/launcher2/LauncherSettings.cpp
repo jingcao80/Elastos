@@ -1,41 +1,64 @@
 
-#include "elastos/droid/launcher2/UninstallShortcutReceiver.h"
+#include "elastos/droid/launcher2/LauncherSettings.h"
 #include "Elastos.Droid.Service.h"
+#include <elastos/core/StringBuilder.h>
 #include "R.h"
+
+using Elastos::Droid::Provider::EIID_IBaseColumns;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-CAR_INTERFACE_IMPL(LauncherSettings::Favorites, Object, IBaseLauncherColumns);
+CAR_INTERFACE_IMPL_2(LauncherSettings::Favorites, Object, ILauncherSettingsBaseLauncherColumns,
+        IBaseColumns);
 
-void LauncherSettings::Favorites::InitStaticBlock()
+static AutoPtr<IUri> InitCONTENT_URI()
 {
     StringBuilder sb;
-    sb += "content://";
-    sb += LauncherProvider::AUTHORITY;
-    sb += "/";
-    sb += LauncherProvider::TABLE_FAVORITES;
-    sb += "?";
-    sb += LauncherProvider::PARAMETER_NOTIFY;
-    sb += "=true";
-    Uri::Parse(sb.ToString(), (IUri**)&CONTENT_URI);
+    assert(0 && "need class LauncherProvider");
+    // sb += "content://";
+    // sb += LauncherProvider::AUTHORITY;
+    // sb += "/";
+    // sb += LauncherProvider::TABLE_FAVORITES;
+    // sb += "?";
+    // sb += LauncherProvider::PARAMETER_NOTIFY;
+    // sb += "=true";
 
-    StringBuilder sb2;
-    sb2 += "content://";
-    sb2 += LauncherProvider::AUTHORITY;
-    sb2 += "/";
-    sb2 += LauncherProvider::TABLE_FAVORITES;
-    sb2 += "?";
-    sb2 += LauncherProvider::PARAMETER_NOTIFY;
-    sb2 += "=false";
-    Uri::Parse(sb2.ToString(), (IUri**)&CONTENT_URI_NO_NOTIFICATION);
+    AutoPtr<IUriHelper> uriHelper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
+    AutoPtr<IUri> tmp;
+    uriHelper->Parse(sb.ToString(), (IUri**)&tmp);
+    return tmp;
 }
 
-const String LauncherSettings::Favorites::CONTAINER("container");
+AutoPtr<IUri> LauncherSettings::Favorites::CONTENT_URI = InitCONTENT_URI();
 
-const Int32 LauncherSettings::Favorites::CONTAINER_DESKTOP = -100;
-const Int32 LauncherSettings::Favorites::CONTAINER_HOTSEAT = -101;
+static AutoPtr<IUri> InitCONTENT_URI_NO_NOTIFICATION()
+{
+    StringBuilder sb;
+    assert(0 && "need class LauncherProvider");
+    // sb += "content://";
+    // sb += LauncherProvider::AUTHORITY;
+    // sb += "/";
+    // sb += LauncherProvider::TABLE_FAVORITES;
+    // sb += "?";
+    // sb += LauncherProvider::PARAMETER_NOTIFY;
+    // sb += "=false";
+
+    AutoPtr<IUriHelper> uriHelper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
+    AutoPtr<IUri> tmp;
+    uriHelper->Parse(sb.ToString(), (IUri**)&tmp);
+    return tmp;
+}
+
+AutoPtr<IUri> LauncherSettings::Favorites::CONTENT_URI_NO_NOTIFICATION = InitCONTENT_URI_NO_NOTIFICATION();
+
+const String LauncherSettings::Favorites::CONTAINER("container");
 
 const String LauncherSettings::Favorites::SCREEN("screen");
 
@@ -49,11 +72,7 @@ const String LauncherSettings::Favorites::SPANY("spanY");
 
 const String LauncherSettings::Favorites::PROFILE_ID("profileId");
 
-const Int32 LauncherSettings::Favorites::ITEM_TYPE_FOLDER = 2;
-
 const Int32 LauncherSettings::Favorites::ITEM_TYPE_LIVE_FOLDER = 3;
-
-const Int32 LauncherSettings::Favorites::ITEM_TYPE_APPWIDGET = 4;
 
 const Int32 LauncherSettings::Favorites::ITEM_TYPE_WIDGET_CLOCK = 1000;
 
@@ -78,17 +97,21 @@ LauncherSettings::Favorites::GetContentUri(
     *uri = NULL;
 
     StringBuilder sb;
-    sb += "content://";
-    sb += LauncherProvider::AUTHORITY;
-    sb += "/";
-    sb += LauncherProvider::TABLE_FAVORITES;
-    sb += "/";
-    sb += id;
-    sb += "?";
-    sb += LauncherProvider::PARAMETER_NOTIFY;
-    sb += "=";
-    sb += notify;
-    return Uri::Parse(sb.ToString(), uri);
+    assert(0 && "need class LauncherProvider");
+    // sb += "content://";
+    // sb += LauncherProvider::AUTHORITY;
+    // sb += "/";
+    // sb += LauncherProvider::TABLE_FAVORITES;
+    // sb += "/";
+    // sb += id;
+    // sb += "?";
+    // sb += LauncherProvider::PARAMETER_NOTIFY;
+    // sb += "=";
+    // sb += notify;
+    AutoPtr<IUriHelper> uriHelper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
+    AutoPtr<IUri> tmp;
+    return uriHelper->Parse(sb.ToString(), (IUri**)&uri);
 }
 
 } // namespace Launcher2

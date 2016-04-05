@@ -1,7 +1,34 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_DRAGCONTROLLER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_DRAGCONTROLLER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/launcher2/DropTarget.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Launcher2::DragObject;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::InputMethod::IInputMethodManager;
+using Elastos::Droid::View::IVelocityTracker;
+using Elastos::Droid::Graphics::IPoint;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::IPointF;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IVibrator;
+using Elastos::Core::Object;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -26,7 +53,7 @@ private:
 
     private:
         Int32 mDirection;
-        DragController* mHost;
+        AutoPtr<DragController> mHost;
     };
 
 public:
@@ -131,7 +158,7 @@ public:
         /* [in] */ IDragView* dragView);
 
     CARAPI OnDeferredEndFling(
-        /* [in] */ DragObject* d);
+        /* [in] */ IDropTargetDragObject* d);
 
     CARAPI GetLastGestureUpTime(
         /* [out] */ Int64* time);
@@ -175,13 +202,13 @@ public:
      * Sets the drag listner which will be notified when a drag starts or ends.
      */
     CARAPI AddDragListener(
-        /* [in] */ IDragListener* l);
+        /* [in] */ IDragControllerDragListener* l);
 
     /**
      * Remove a previously installed drag listener.
      */
     CARAPI RemoveDragListener(
-        /* [in] */ IDragListener* l);
+        /* [in] */ IDragControllerDragListener* l);
 
     /**
      * Add a DropTarget to the list of potential places to receive drop events.
@@ -283,7 +310,7 @@ private:
 
     // temporaries to avoid gc thrash
     AutoPtr<IRect> mRectTemp;
-    AutoPtr<ArrayOf<Int32> > mCoordinatesTem;
+    AutoPtr<ArrayOf<Int32> > mCoordinatesTemp;
 
     /** Whether or not we're dragging. */
     Boolean mDragging;

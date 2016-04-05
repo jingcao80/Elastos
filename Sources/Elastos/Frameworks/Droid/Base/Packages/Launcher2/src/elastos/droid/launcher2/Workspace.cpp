@@ -1082,7 +1082,7 @@ ECode Workspace::GetScrollMode(
 {
     VALIDATE_NOT_NULL(mode);
 
-    *mode = ISmoothPagedView::X_LARGE_MODE;
+    *mode = SmoothPagedView::X_LARGE_MODE;
     return NOERROR;
 }
 

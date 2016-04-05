@@ -1,7 +1,16 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_LAUNCHERAPPWIDGETHOST_H__
 #define  __ELASTOS_DROID_LAUNCHER2_LAUNCHERAPPWIDGETHOST_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/appwidget/AppWidgetHost.h"
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::AppWidget::AppWidgetHost;
+using Elastos::Droid::AppWidget::IAppWidgetHostView;
+using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
 
 namespace Elastos {
 namespace Droid {
@@ -14,8 +23,11 @@ namespace Launcher2 {
  */
 class LauncherAppWidgetHost
     : public AppWidgetHost
+    , public ILauncherAppWidgetHost
 {
 public:
+    CAR_INTERFACE_DECL();
+
     LauncherAppWidgetHost(
         /* [in] */ ILauncher* launcher,
         /* [in] */ Int32 hostId);
@@ -30,7 +42,7 @@ protected:
         /* [in] */ Int32 appWidgetId,
         /* [in] */ IAppWidgetProviderInfo* appWidget);
 
-    CARAPI_(void) OnProvidersChanged();
+    CARAPI OnProvidersChanged();
 
 public:
     AutoPtr<ILauncher> mLauncher;

@@ -1,7 +1,28 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_ICONCACHE_H__
 #define  __ELASTOS_DROID_LAUNCHER2_ICONCACHE_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Os.h"
+#include <Elastos.CoreLibrary.Core.h>
+#include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Pm::IActivityInfo;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Pm::ILauncherActivityInfo;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Core::Object;
+using Elastos::Core::ICharSequence;
+using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -12,6 +33,7 @@ namespace Launcher2 {
  */
 class IconCache
     : public Object
+    , public IIconCache
 {
 private:
     class CacheEntry
@@ -46,7 +68,11 @@ private:
     };
 
 public:
-    IconCache(
+    CAR_INTERFACE_DECL();
+
+    IconCache();
+
+    CARAPI constructor(
         /* [in] */ ILauncherApplication* context);
 
     CARAPI_(AutoPtr<IDrawable>) GetFullResDefaultActivityIcon();
@@ -112,9 +138,9 @@ private:
 
 private:
     //@SuppressWarnings("unused")
-    static const String TAG = "Launcher.IconCache";
+    static const String TAG;
 
-    static const Int32 INITIAL_ICON_CACHE_CAPACITY = 50;
+    static const Int32 INITIAL_ICON_CACHE_CAPACITY;
 
     AutoPtr<IBitmap> mDefaultIcon;
     AutoPtr<ILauncherApplication> mContext;

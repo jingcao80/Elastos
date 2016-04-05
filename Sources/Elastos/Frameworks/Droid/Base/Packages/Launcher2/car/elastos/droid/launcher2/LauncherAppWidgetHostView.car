@@ -1,0 +1,34 @@
+module
+{
+    using interface Elastos.Droid.View.IMotionEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IFrameLayout
+     * interface Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     *
+     * interface IAppWidgetHostView
+     */
+    interface ILauncherAppWidgetHostView {
+        OrientationChangedSincedInflation(
+            [out] Boolean* result);
+
+        OnInterceptTouchEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

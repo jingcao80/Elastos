@@ -1,7 +1,15 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_ALARM_H__
 #define  __ELASTOS_DROID_LAUNCHER2_ALARM_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Os::IHandler;
+using Elastos::Core::IRunnable;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -45,9 +53,8 @@ private:
     Boolean mWaitingForCallback;
 
     AutoPtr<IHandler> mHandler;
-    AutoPtr<IOnAlarmListener> mAlarmListener;
+    AutoPtr<IAlarmOnAlarmListener> mAlarmListener;
     Boolean mAlarmPending;
-
 };
 
 } // namespace Launcher2

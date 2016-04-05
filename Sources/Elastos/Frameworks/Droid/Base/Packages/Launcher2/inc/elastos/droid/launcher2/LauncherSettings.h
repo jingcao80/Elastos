@@ -1,7 +1,14 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_LAUNCHERSETTINGS_H__
 #define  __ELASTOS_DROID_LAUNCHER2_LAUNCHERSETTINGS_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Net.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Provider::IBaseColumns;
+using Elastos::Droid::Net::IUri;
 
 namespace Elastos {
 namespace Droid {
@@ -18,9 +25,12 @@ public:
      */
     class Favorites
         : public Object
-        , public IBaseLauncherColumns
+        , public ILauncherSettingsBaseLauncherColumns
+        , public IBaseColumns
     {
     public:
+        CAR_INTERFACE_DECL();
+
         /**
          * The content:// style URL for a given row, identified by its id.
          *
@@ -33,9 +43,6 @@ public:
             /* [in] */ Int64 id,
             /* [in] */ Boolean notify,
             /* [out] */ IUri** uri);
-
-    private:
-        CARAPI_(void) InitStaticBlock();
 
     public:
         /**
@@ -58,8 +65,8 @@ public:
         /**
          * The icon is a resource identified by a package name and an integer id.
          */
-        static const Int32 CONTAINER_DESKTOP;
-        static const Int32 CONTAINER_HOTSEAT;
+        static const Int32 CONTAINER_DESKTOP = -100;
+        static const Int32 CONTAINER_HOTSEAT = -101;
 
         /**
          * The screen holding the favorite (if container is CONTAINER_DESKTOP)
@@ -104,7 +111,7 @@ public:
         /**
          * The favorite is a user created folder
          */
-        static const Int32 ITEM_TYPE_FOLDER;
+        static const Int32 ITEM_TYPE_FOLDER = 2;
 
         /**
         * The favorite is a live folder
@@ -118,7 +125,7 @@ public:
         /**
          * The favorite is a widget
          */
-        static const Int32 ITEM_TYPE_APPWIDGET;
+        static const Int32 ITEM_TYPE_APPWIDGET = 4;
 
         /**
          * The favorite is a clock

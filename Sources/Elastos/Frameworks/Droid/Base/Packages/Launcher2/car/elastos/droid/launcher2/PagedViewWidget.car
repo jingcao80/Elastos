@@ -1,0 +1,72 @@
+module
+{
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.AppWidget.IAppWidgetProviderInfo;
+    using interface Elastos.Droid.Content.Pm.IPackageManager;
+    using interface Elastos.Droid.Content.Pm.IResolveInfo;
+
+    interface Elastos.Droid.Launcher2.IWidgetPreviewLoader;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    [local]
+    interface IPagedViewWidgetShortPressListener {
+        OnShortPress(
+            [in] IView* v);
+
+        CleanUpShortPress(
+            [in] IView* v);
+    }
+
+    /*
+    * @invoke
+    * interface Elastos.Droid.View.IView
+    * interface Elastos.Droid.View.IViewGroup
+    *
+    * interface Elastos.Droid.View.IViewParent
+    * interface Elastos.Droid.View.IViewManager
+    * interface Elastos.Droid.View.IKeyEventCallback
+    * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+    * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+    * interface ILinearLayout
+    */
+    [deprecated, local]
+    interface IPagedViewWidget {
+        ApplyFromAppWidgetProviderInfo(
+            [in] IAppWidgetProviderInfo* info,
+            [in] Int32 maxWidth,
+            [in] ArrayOf<Int32>* cellSpan,
+            [in] IWidgetPreviewLoader* loader);
+
+        ApplyFromResolveInfo(
+            [in] IPackageManager* pm,
+            [in] IResolveInfo* info,
+            [in] IWidgetPreviewLoader* loader);
+
+        GetPreviewSize(
+            [out, callee] ArrayOf<Int32>* size);
+
+        ApplyPreview(
+            [in] IFastBitmapDrawable* preview,
+            [in] Int32 index);
+
+        SetShortPressListener(
+            [in] IPagedViewWidgetShortPressListener* listener);
+    }
+
+    interface IPagedViewWidgetHelper {
+        SetDeletePreviewsWhenDetachedFromWindow(
+            [in] Boolean value);
+
+        SetRecyclePreviewsWhenDetachedFromWindow(
+            [in] Boolean value);
+
+        ResetShortPressTarget();
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

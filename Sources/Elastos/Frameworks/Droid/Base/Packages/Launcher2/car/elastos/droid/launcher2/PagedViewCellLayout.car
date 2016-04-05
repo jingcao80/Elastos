@@ -1,13 +1,19 @@
 module
 {
+    using interface Elastos.Droid.View.IView;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
 
-    interface IPagedViewCellLayout {
-     ~~~~~~~~~
+    interface IPagedViewCellLayoutLayoutParams {
     }
 
+    interface IPagedViewCellLayout {
+        //~~~~~~~~~
+    }
+
+    [local]
     interface IPage {
         GetPageChildCount(
             [out] Int32* count);

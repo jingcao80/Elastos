@@ -30,7 +30,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class GridLayout
+class ECO_PUBLIC GridLayout
     : public ViewGroup
     , public IGridLayout
 {

@@ -2,6 +2,23 @@
 #include "elastos/droid/launcher2/DeferredHandler.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/core/AutoLock.h>
+#include "Elastos.Droid.Utility.h"
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Droid::Os::EIID_IIdleHandler;
+using Elastos::Droid::Os::CLooperHelper;
+using Elastos::Droid::Os::ILooperHelper;
+using Elastos::Droid::Utility::IPair;
+using Elastos::Droid::Utility::CPair;
+using Elastos::Core::EIID_IRunnable;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::IList;
+using Elastos::Utility::CLinkedList;
+using Elastos::Utility::IListIterator;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::ICollection;
 
 namespace Elastos {
 namespace Droid {
@@ -13,6 +30,7 @@ DeferredHandler::Impl::Impl(
     /* [in] */ DeferredHandler* host)
     : mHost(host)
 {
+    Handler::constructor();
 }
 
 ECode DeferredHandler::Impl::HandleMessage(
@@ -20,21 +38,21 @@ ECode DeferredHandler::Impl::HandleMessage(
 {
     AutoPtr<IPair> p;
     AutoPtr<IRunnable> r;
-    synchronized (mQueueLock) {
+    synchronized(mHost->mQueueLock) {
         Int32 size;
-        mQueue->GetSize(&size);
+        IList::Probe(mHost->mQueue)->GetSize(&size);
         if (size == 0) {
             return NOERROR;
         }
         AutoPtr<IInterface> object;
-        mQueue->RemoveFirst((IInterface**)&object);
+        mHost->mQueue->RemoveFirst((IInterface**)&object);
         p = IPair::Probe(object);
         AutoPtr<IInterface> tmp;
         p->GetFirst((IInterface**)&tmp);
         r = IRunnable::Probe(tmp);
     }
     r->Run();
-    synchronized (mQueueLock) {
+    synchronized(mHost->mQueueLock) {
         mHost->ScheduleNextLocked();
     }
     return NOERROR;
@@ -50,7 +68,7 @@ ECode DeferredHandler::Impl::QueueIdle(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(DeferredHandler::IIdleRunnablempl, Runnable, IIdleRunnable);
+CAR_INTERFACE_IMPL(DeferredHandler::IdleRunnable, Runnable, IIdleRunnable);
 
 DeferredHandler::IdleRunnable::IdleRunnable(
     /* [in] */ IRunnable* r)
@@ -66,8 +84,11 @@ ECode DeferredHandler::IdleRunnable::Run()
 DeferredHandler::DeferredHandler()
 {
     CLinkedList::New((ILinkedList**)&mQueue);
-    AutoPtr<IMessageQueue> mMessageQueue = Looper::GetMyQueue();
-    AutoPTR<Impl> mHandler = new Impl(this);
+    AutoPtr<ILooperHelper> looperHelper;
+    CLooperHelper::AcquireSingleton((ILooperHelper**)&looperHelper);
+    AutoPtr<IMessageQueue> mMessageQueue;
+    looperHelper->GetMyQueue((IMessageQueue**)&mMessageQueue);
+    AutoPtr<Impl> mHandler = new Impl(this);
 }
 
 ECode DeferredHandler::Post(
@@ -81,7 +102,7 @@ ECode DeferredHandler::Post(
     /* [in] */ Int32 type)
 {
     synchronized(mQueueLock) {
-        AutoPtr<IInteger32> obj = CoreUtil::Convert(type);
+        AutoPtr<IInteger32> obj = CoreUtils::Convert(type);
         AutoPtr<IPair> pair;
         CPair::New(TO_IINTERFACE(runnable), TO_IINTERFACE(obj), (IPair**)&pair);
         mQueue->Add(TO_IINTERFACE(pair));
@@ -114,6 +135,7 @@ ECode DeferredHandler::CancelRunnable(
     synchronized(mQueueLock) {
         while (mQueue->Remove(TO_IINTERFACE(runnable))) { }
     }
+    return NOERROR;
 }
 
 ECode DeferredHandler::CancelAllRunnablesOfType(
@@ -136,7 +158,7 @@ ECode DeferredHandler::CancelAllRunnablesOfType(
             Int32 value;
             intObj->GetValue(&value);
             if (value == type) {
-                iter->Remove();
+                IIterator::Probe(iter)->Remove();
             }
         }
     }
@@ -148,6 +170,7 @@ ECode DeferredHandler::Cancel()
     synchronized(mQueueLock) {
         mQueue->Clear();
     }
+    return NOERROR;
 }
 
 ECode DeferredHandler::Flush()
@@ -155,7 +178,7 @@ ECode DeferredHandler::Flush()
     AutoPtr<ILinkedList> queue;
     CLinkedList::New((ILinkedList**)&queue);
     synchronized(mQueueLock) {
-        queue->AddAll(mQueue);
+        queue->AddAll(ICollection::Probe(mQueue));
         mQueue->Clear();
     }
 
@@ -186,11 +209,12 @@ ECode DeferredHandler::ScheduleNextLocked()
         AutoPtr<IInterface> tmp;
         p->GetFirst((IInterface**)&tmp);
         AutoPtr<IRunnable> peek = IRunnable::Probe(tmp);
-        if (IIdleRunnable::Probe() != NULL) {
+        if (IIdleRunnable::Probe(peek) != NULL) {
             return mMessageQueue->AddIdleHandler(mHandler);
         }
         else {
-            return mHandler->SendEmptyMessage(1);
+            Boolean res;
+            return mHandler->SendEmptyMessage(1, &res);
         }
     }
     return NOERROR;

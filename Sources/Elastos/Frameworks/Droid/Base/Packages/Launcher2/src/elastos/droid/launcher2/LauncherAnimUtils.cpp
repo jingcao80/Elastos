@@ -1,7 +1,17 @@
 
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
+#include "elastos/droid/launcher2/FirstFrameAnimatorHelper.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+
+using Elastos::Droid::Animation::EIID_IAnimatorListener;
+using Elastos::Droid::Animation::CAnimatorSet;
+using Elastos::Droid::Animation::CValueAnimator;
+using Elastos::Droid::Animation::CObjectAnimator;
+using Elastos::Droid::View::EIID_IOnDrawListener;
+using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::ICollection;
 
 namespace Elastos {
 namespace Droid {
@@ -41,7 +51,7 @@ LauncherAnimUtils::MyRunnable::MyRunnable(
 {
 }
 
-ECodeLauncherAnimUtils::MyRunnable::Run()
+ECode LauncherAnimUtils::MyRunnable::Run()
 {
     AutoPtr<IViewTreeObserver> observer;
     mView->GetViewTreeObserver((IViewTreeObserver**)&observer);
@@ -67,7 +77,7 @@ ECode LauncherAnimUtils::MyOnDrawListener::OnDraw()
     }
     mStarted = TRUE;
     // Use this as a signal that the animation was cancelled
-    Int32 duration;
+    Int64 duration;
     mAnimator->GetDuration(&duration);
     if (duration == 0) {
         return NOERROR;
@@ -76,8 +86,12 @@ ECode LauncherAnimUtils::MyOnDrawListener::OnDraw()
 
     AutoPtr<IOnDrawListener> listener = this;
     AutoPtr<MyRunnable> run = new MyRunnable(mView, listener);
-    return mView->Post(run);
+    Boolean res;
+    return mView->Post(run, &res);
 }
+
+AutoPtr<IHashSet> LauncherAnimUtils::sAnimators;
+AutoPtr<IAnimatorListener> LauncherAnimUtils::sEndAnimListener;
 
 Boolean LauncherAnimUtils::InitStaticBlock()
 {
@@ -86,7 +100,7 @@ Boolean LauncherAnimUtils::InitStaticBlock()
     return TRUE;
 }
 
-static Boolean LauncherAnimUtils::mInitStaticBlock = InitStaticBlock();
+Boolean LauncherAnimUtils::mInitStaticBlock = InitStaticBlock();
 
 void LauncherAnimUtils::CancelOnDestroyActivity(
     /* [in] */ IAnimator* a)
@@ -108,14 +122,12 @@ void LauncherAnimUtils::StartAnimationAfterNextDraw(
 void LauncherAnimUtils::OnDestroyActivity()
 {
     AutoPtr<IHashSet> animators;
-    CHashSet::New(sAnimators, (IHashSet**)&animators);
+    CHashSet::New(ICollection::Probe(sAnimators), (IHashSet**)&animators);
 
-    Int32 size;
-    animators->GetSize(&size);
-    for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IInterface> obj;
-        animators->Get(i, (IInterface**)&obj);
-        AutoPtr<IAnimator> a = IAnimator::Probe(obj);
+    AutoPtr<ArrayOf<IInterface*> > array;
+    animators->ToArray((ArrayOf<IInterface*>**)&array);
+    for (Int32 i = 0; i < array->GetLength(); i++) {
+        AutoPtr<IAnimator> a = IAnimator::Probe((*array)[i]);
 
         Boolean res;
         a->IsRunning(&res);
@@ -132,7 +144,7 @@ AutoPtr<IAnimatorSet> LauncherAnimUtils::CreateAnimatorSet()
 {
     AutoPtr<IAnimatorSet> anim;
     CAnimatorSet::New((IAnimatorSet**)&anim);
-    CancelOnDestroyActivity(anim);
+    CancelOnDestroyActivity(IAnimator::Probe(anim));
     return anim;
 }
 
@@ -143,7 +155,7 @@ AutoPtr<IValueAnimator> LauncherAnimUtils::OfFloat(
     AutoPtr<IValueAnimator> anim;
     CValueAnimator::New((IValueAnimator**)&anim);
     anim->SetFloatValues(values);
-    CancelOnDestroyActivity(anim);
+    CancelOnDestroyActivity(IAnimator::Probe(anim));
     return anim;
 }
 
@@ -154,38 +166,38 @@ AutoPtr<IObjectAnimator> LauncherAnimUtils::OfFloat(
 {
     AutoPtr<IObjectAnimator> anim;
     CObjectAnimator::New((IObjectAnimator**)&anim);
-    anim->SetTarget(target);
+    IAnimator::Probe(anim)->SetTarget(target);
     anim->SetPropertyName(propertyName);
-    anim->SetFloatValues(values);
-    CancelOnDestroyActivity(anim);
-    AutoPtr<FirstFrameAnimatorHelper> helper = new FirstFrameAnimatorHelper(anim, target);;
+    IValueAnimator::Probe(anim)->SetFloatValues(values);
+    CancelOnDestroyActivity(IAnimator::Probe(anim));
+    AutoPtr<FirstFrameAnimatorHelper> helper = new FirstFrameAnimatorHelper(IValueAnimator::Probe(anim), target);;
     return anim;
 }
 
 AutoPtr<IObjectAnimator> LauncherAnimUtils::OfPropertyValuesHolder(
     /* [in] */ IView* target,
-    /* [in] */ ArrayOf<IPropertyValuesHolder>* values)
+    /* [in] */ ArrayOf<IPropertyValuesHolder*>* values)
 {
     AutoPtr<IObjectAnimator> anim;
-    CObjectAnimator::New(IObjectAnimator**)&anim);
-    anim->SetTarget(target);
-    anim->SetValues(values);
-    CancelOnDestroyActivity(anim);
-    AutoPtr<FirstFrameAnimatorHelper> helper = new FirstFrameAnimatorHelper(anim, target);
+    CObjectAnimator::New((IObjectAnimator**)&anim);
+    IAnimator::Probe(anim)->SetTarget(target);
+    IValueAnimator::Probe(anim)->SetValues(values);
+    CancelOnDestroyActivity(IAnimator::Probe(anim));
+    AutoPtr<FirstFrameAnimatorHelper> helper = new FirstFrameAnimatorHelper(IValueAnimator::Probe(anim), target);
     return anim;
 }
 
 AutoPtr<IObjectAnimator> LauncherAnimUtils::OfPropertyValuesHolder(
     /* [in] */ IInterface* target,
     /* [in] */ IView* view,
-    /* [in] */ ArrayOf<IPropertyValuesHolder>* values)
+    /* [in] */ ArrayOf<IPropertyValuesHolder*>* values)
 {
     AutoPtr<IObjectAnimator> anim;
     CObjectAnimator::New((IObjectAnimator**)&anim);
-    anim->SetTarget(target);
-    anim->SetValues(values);
-    CancelOnDestroyActivity(anim);
-    AutoPtr<FirstFrameAnimatorHelper> helper = new FirstFrameAnimatorHelper(anim, view);
+    IAnimator::Probe(anim)->SetTarget(target);
+    IValueAnimator::Probe(anim)->SetValues(values);
+    CancelOnDestroyActivity(IAnimator::Probe(anim));
+    AutoPtr<FirstFrameAnimatorHelper> helper = new FirstFrameAnimatorHelper(IValueAnimator::Probe(anim), view);
     return anim;
 }
 

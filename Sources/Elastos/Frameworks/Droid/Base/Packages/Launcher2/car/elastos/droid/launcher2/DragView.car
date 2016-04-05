@@ -1,0 +1,91 @@
+module
+{
+    using interface Elastos.Droid.Graphics.IPoint;
+    using interface Elastos.Droid.Graphics.IRect;
+    using interface Elastos.Droid.Graphics.IBitmap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     */
+    interface IDragView {
+        GetOffsetY(
+            [out] Float* y);
+
+        GetDragRegionLeft(
+            [out] Int32* left);
+
+        GetDragRegionTop(
+            [out] Int32* top);
+
+        GetDragRegionWidth(
+            [out] Int32* width);
+
+        GetDragRegionHeight(
+            [out] Int32* height);
+
+        SetDragVisualizeOffset(
+            [in] IPoint* p);
+
+        GetDragVisualizeOffset(
+            [out] IPoint** point);
+
+        SetDragRegion(
+            [in] IRect* r);
+
+        GetDragRegion(
+            [out] IRect** rect);
+
+        GetInitialScale(
+            [out] Float* scale);
+
+        UpdateInitialScaleToCurrentScale();
+
+        SetCrossFadeBitmap(
+            [in] IBitmap* crossFadeBitmap);
+
+        CrossFade(
+            [in] Int32 duration);
+
+        SetColor(
+            [in] Int32 color);
+
+        HasDrawn(
+            [out] Boolean* result);
+
+        /**
+         * Create a window containing this view and show it.
+         *
+         * @param windowToken obtained from v.getWindowToken() from one of your views
+         * @param touchX the x coordinate the user touched in DragLayer coordinates
+         * @param touchY the y coordinate the user touched in DragLayer coordinates
+         */
+        Show(
+            [in] Int32 touchX,
+            [in] Int32 touchY);
+
+        CancelAnimation();
+
+        ResetLayoutParams();
+
+        /**
+         * Move the window containing this view.
+         *
+         * @param touchX the x coordinate the user touched in DragLayer coordinates
+         * @param touchY the y coordinate the user touched in DragLayer coordinates
+         */
+        Move(
+            [in] Int32 touchX,
+            [in] Int32 touchY);
+
+        Remove();
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,7 +1,45 @@
 
-#include "elastos/droid/launcher2/PackageChangedReceiver.h"
+#include "elastos/droid/launcher2/InstallShortcutReceiver.h"
+#include "elastos/droid/launcher2/LauncherSettings.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include "Elastos.CoreLibrary.External.h"
+#include "elastos/droid/launcher2/ItemInfo.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Droid::Content::Pm::IActivityInfo;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::CIntentShortcutIconResource;
+using Elastos::Droid::Content::IIntentShortcutIconResource;
+using Elastos::Droid::Graphics::IBitmapFactory;
+using Elastos::Droid::Graphics::CBitmapFactory;
+using Elastos::Droid::Content::IIntentHelper;
+using Elastos::Droid::Content::CIntentHelper;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::ICharSequence;
+using Elastos::Utility::ISet;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::IIterator;
+using Org::Json::CJSONStringer;
+using Org::Json::IJSONStringer;
+using Org::Json::CJSONTokener;
+using Org::Json::IJSONTokener;
+using Org::Json::CJSONObject;
+using Org::Json::IJSONObject;
+using Elastos::Droid::Utility::CBase64;
+using Elastos::Droid::Utility::IBase64;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -12,10 +50,9 @@ InstallShortcutReceiver::PendingInstallShortcutInfo::PendingInstallShortcutInfo(
     /* [in] */ const String& shortcutName,
     /* [in] */ IIntent* shortcutIntent)
     : mData(rawData)
-    , mName(shortcutName)
     , mLaunchIntent(shortcutIntent)
+    , mName(shortcutName)
 {
-
 }
 
 InstallShortcutReceiver::MyThread::MyThread(
@@ -24,12 +61,12 @@ InstallShortcutReceiver::MyThread::MyThread(
     /* [in] */ ISharedPreferences* sharedPrefs,
     /* [in] */ Int32 screen,
     /* [in] */ IIntent* intent)
-    : Thread(name)
-    , mHost(host)
+    : mHost(host)
     , mSharedPrefs(sharedPrefs)
     , mScreen(screen)
     , mIntent(intent)
 {
+    Thread::constructor(name);
 }
 
 ECode InstallShortcutReceiver::MyThread::Run()
@@ -38,19 +75,20 @@ ECode InstallShortcutReceiver::MyThread::Run()
         // If the new app is going to fall into the same page as before,
         // then just continue adding to the current page
         Int32 newAppsScreen;
-        sharedPrefs->GetInt32(InstallShortcutReceiver::NEW_APPS_PAGE_KEY,
+        mSharedPrefs->GetInt32(InstallShortcutReceiver::NEW_APPS_PAGE_KEY,
                 mScreen, &newAppsScreen);
         AutoPtr<ISharedPreferencesEditor> editor;
-        sharedPrefs->Edit((ISharedPreferencesEditor**)&editor);
+        mSharedPrefs->Edit((ISharedPreferencesEditor**)&editor);
         if (newAppsScreen == -1 || newAppsScreen == mScreen) {
             String str;
             mIntent->ToUri(0, &str);
-            mHost->AddToStringSet(sharedPrefs,
+            mHost->AddToStringSet(mSharedPrefs,
                 editor, InstallShortcutReceiver::NEW_APPS_LIST_KEY,
                 str);
         }
         editor->PutInt32(InstallShortcutReceiver::NEW_APPS_PAGE_KEY, mScreen);
-        editor->Commit();
+        Boolean res;
+        editor->Commit(&res);
     }
     return NOERROR;
 }
@@ -94,56 +132,52 @@ ECode InstallShortcutReceiver::AddToInstallQueue(
         //try {
         AutoPtr<IJSONStringer> json;
         CJSONStringer::New((IJSONStringer**)&json);
+        assert(0 && "yi chang");
         ECode ec = json->Object();
-        if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
         ec = json->Key(DATA_INTENT_KEY);
-        if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
         String str;
-        ec = json->Value(info->mData->ToUri(0, &str), str);
-        if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
+        info->mData->ToUri(0, &str);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+        ec = json->Value(TO_IINTERFACE(cchar));
         ec = json->Key(LAUNCH_INTENT_KEY);
-        if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
-        ec = json->Value(info->mLaunchIntent->ToUri(0, &str), str);
-        if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
+        String str2;
+        info->mLaunchIntent->ToUri(0, &str2);
+        AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(str2);
+        ec = json->Value(TO_IINTERFACE(cchar2));
         ec = json->Key(NAME_KEY);
-        if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
-        ec = json->Value(info->mName);
-        if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
+        AutoPtr<ICharSequence> cchar3 = CoreUtils::Convert(info->mName);
+        ec = json->Value(TO_IINTERFACE(cchar3));
         if (info->mIcon != NULL) {
-            AutoPtr<ArrayOf<Byte> > iconByteArray;
-            ItemInfo::FlattenBitmap(info->mIcon, (ArrayOf<Byte>**)&iconByteArray);
+            AutoPtr<ArrayOf<Byte> > iconByteArray = ItemInfo::FlattenBitmap(info->mIcon);
             ec = json->Key(ICON_KEY);
-            if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
             AutoPtr<IBase64> base64;
             CBase64::AcquireSingleton((IBase64**)&base64);
             String str;
             base64->EncodeToString(iconByteArray, 0, iconByteArray->GetLength(),
                     IBase64::DEFAULT, &str);
-            ec = json->Value(str);
-            if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
+            AutoPtr<ICharSequence> obj = CoreUtils::Convert(str);
+            ec = json->Value(obj);
         }
         if (info->mIconResource != NULL) {
             ec = json->Key(ICON_RESOURCE_NAME_KEY);
-            if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
             String resourceName;
             info->mIconResource->GetResourceName(&resourceName);
-            ec = json->Value(resourceName);
-            if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
+            AutoPtr<ICharSequence> obj = CoreUtils::Convert(resourceName);
+            ec = json->Value(obj);
             ec = json->Key(ICON_RESOURCE_PACKAGE_NAME_KEY);
-            if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
             String packageName;
             info->mIconResource->GetPackageName(&packageName);
-            ec = json->Value(packageName);
-            if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
+            AutoPtr<ICharSequence> obj2 = CoreUtils::Convert(packageName);
+            ec = json->Value(obj2);
         }
         ec = json->EndObject();
-        if (ec == (ECode)E_JSON_EXCEPTION) goto EXIT;
         AutoPtr<ISharedPreferencesEditor> editor;
         sharedPrefs->Edit((ISharedPreferencesEditor**)&editor);
         String res;
         IObject::Probe(json)->ToString(&res);
         AddToStringSet(sharedPrefs, editor, APPS_PENDING_INSTALL, res);
-        editor->Commit();
+        Boolean tmp;
+        editor->Commit(&tmp);
         //} catch (org.json.JSONException e) {
 EXIT:
         Slogger::D("InstallShortcutReceiver", "Exception when adding shortcut: %d", ec);
@@ -159,19 +193,19 @@ AutoPtr<IArrayList> InstallShortcutReceiver::GetAndClearInstallQueue(
         AutoPtr<ISet> strings;
         sharedPrefs->GetStringSet(APPS_PENDING_INSTALL, NULL, (ISet**)&strings);
         if (strings == NULL) {
-            AutoPtr<ArrayList> list;
-            CArrayList::New((ArrayList**)&list);
+            AutoPtr<IArrayList> list;
+            CArrayList::New((IArrayList**)&list);
             return list;
         }
-        AutoPtr<ArrayList> infos;
-        CArrayList::New((ArrayList**)&infos);
+        AutoPtr<IArrayList> infos;
+        CArrayList::New((IArrayList**)&infos);
 
         AutoPtr<ArrayOf<IInterface*> > array;
         strings->ToArray((ArrayOf<IInterface*>**)&array);
         for (Int32 i = 0; i < array->GetLength(); i++) {
             AutoPtr<ICharSequence> cobj = ICharSequence::Probe((*array)[i]);
             String json;
-            cobj->ToString(json);
+            cobj->ToString(&json);
 
             //try {
             AutoPtr<IJSONTokener> tokener;
@@ -183,15 +217,17 @@ AutoPtr<IArrayList> InstallShortcutReceiver::GetAndClearInstallQueue(
             String key;
             object->GetString(DATA_INTENT_KEY, &key);
             AutoPtr<IIntent> data;
-            Intent::ParseUri(key, 0, (IIntent**)&data);
+            AutoPtr<IIntentHelper> helper;
+            CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
+            helper->ParseUri(key, 0, (IIntent**)&data);
 
             String key2;
             object->GetString(LAUNCH_INTENT_KEY, &key2);
             AutoPtr<IIntent> launchIntent;
-            Intent::ParseUri(key2, 0, (IIntent**)&launchIntent);
+            helper->ParseUri(key2, 0, (IIntent**)&launchIntent);
 
             String name;
-            object->GetString(NAME_KEYm, &name);
+            object->GetString(NAME_KEY, &name);
             String iconBase64;
             object->OptString(ICON_KEY, &iconBase64);
             String iconResourceName;
@@ -199,28 +235,30 @@ AutoPtr<IArrayList> InstallShortcutReceiver::GetAndClearInstallQueue(
             String iconResourcePackageName;
             object->OptString(ICON_RESOURCE_PACKAGE_NAME_KEY, &iconResourcePackageName);
 
-            if (iconBase64 != NULL && !iconBase64.isEmpty()) {
+            if (iconBase64 != NULL && !iconBase64.IsEmpty()) {
                 AutoPtr<IBase64> base64;
                 CBase64::AcquireSingleton((IBase64**)&base64);
                 AutoPtr<ArrayOf<Byte> > iconArray;
                 base64->Decode(iconBase64, IBase64::DEFAULT, (ArrayOf<Byte>**)&iconArray);
 
+                AutoPtr<IBitmapFactory> factory;
+                CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
                 AutoPtr<IBitmap> b;
-                BitmapFactory::DecodeByteArray(iconArray, 0,
-                        iconArray->GetLength(), (IBitmap**)&b);
-                data->PutExtra(IIntent::EXTRA_SHORTCUT_ICON, b);
+                factory->DecodeByteArray(iconArray, 0, iconArray->GetLength(), (IBitmap**)&b);
+
+                data->PutExtra(IIntent::EXTRA_SHORTCUT_ICON, IParcelable::Probe(b));
             }
-            else if (iconResourceName != NULL && !iconResourceName.isEmpty()) {
+            else if (iconResourceName != NULL && !iconResourceName.IsEmpty()) {
                 AutoPtr<IIntentShortcutIconResource> iconResource;
                 CIntentShortcutIconResource::New((IIntentShortcutIconResource**)&iconResource);
                 iconResource->SetResourceName(iconResourceName);
                 iconResource->SetPackageName(iconResourcePackageName);
-                data->PutExtra(IIntent::EXTRA_SHORTCUT_ICON_RESOURCE, iconResource);
+                data->PutExtra(IIntent::EXTRA_SHORTCUT_ICON_RESOURCE, IParcelable::Probe(iconResource));
             }
-            data->PutExtra(IIntent::EXTRA_SHORTCUT_INTENT, launchIntent);
+            data->PutExtra(IIntent::EXTRA_SHORTCUT_INTENT, IParcelable::Probe(launchIntent));
             AutoPtr<PendingInstallShortcutInfo> info =
                     new PendingInstallShortcutInfo(data, name, launchIntent);
-            infos->Add(info);
+            infos->Add(TO_IINTERFACE(info));
             // } catch (org.json.JSONException e) {
             //     Log.d("InstallShortcutReceiver", "Exception reading shortcut to add: " + e);
             // } catch (java.net.URISyntaxException e) {
@@ -231,7 +269,7 @@ AutoPtr<IArrayList> InstallShortcutReceiver::GetAndClearInstallQueue(
         AutoPtr<ISharedPreferencesEditor> edit;
         sharedPrefs->Edit((ISharedPreferencesEditor**)&edit);
         AutoPtr<ISet> set;
-        HashSet::New((ISet**)&set);
+        CHashSet::New((ISet**)&set);
         edit->PutStringSet(APPS_PENDING_INSTALL, set);
         Boolean res;
         edit->Commit(&res);
@@ -241,18 +279,17 @@ AutoPtr<IArrayList> InstallShortcutReceiver::GetAndClearInstallQueue(
 
 ECode InstallShortcutReceiver::OnReceive(
     /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
+    /* [in] */ IIntent* data)
 {
     String action;
-    mData->GetAction(&action);
-    Boolean res;
-    ACTION_INSTALL_SHORTCUT.Equals(action, &res);
-    if (!res) {
+    data->GetAction(&action);
+    if (!ACTION_INSTALL_SHORTCUT.Equals(action)) {
         return NOERROR;
     }
 
-    AutoPtr<IIntent> intent;
-    data->GetParcelableExtra(IIntent::EXTRA_SHORTCUT_INTENT, (IIntent**)&intent);
+    AutoPtr<IParcelable> p;
+    data->GetParcelableExtra(IIntent::EXTRA_SHORTCUT_INTENT, (IParcelable**)&p);
+    AutoPtr<IIntent> intent = IIntent::Probe(p);
     if (intent == NULL) {
         return NOERROR;
     }
@@ -264,32 +301,37 @@ ECode InstallShortcutReceiver::OnReceive(
         //try {
         AutoPtr<IPackageManager> pm;
         ECode ec = context->GetPackageManager((IPackageManager**)&pm);
-        if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) return;
+        if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) return NOERROR;
         AutoPtr<IComponentName> componentName;
         ec = intent->GetComponent((IComponentName**)&componentName);
-        if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) return;
+        if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) return NOERROR;
         AutoPtr<IActivityInfo> info;
         ec = pm->GetActivityInfo(componentName, 0, (IActivityInfo**)&info);
-        if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) return;
+        if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) return NOERROR;
         AutoPtr<ICharSequence> label;
-        ec = info->LoadLabel(pm, (ICharSequence**)&label);
-        if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) return;
+        ec = IPackageItemInfo::Probe(info)->LoadLabel(pm, (ICharSequence**)&label);
+        if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) return NOERROR;
         label->ToString(&name);
         //} catch (PackageManager.NameNotFoundException nnfe) {
         //    return;
         //}
     }
-    AutoPtr<IBitmap> icon;
-    data->GetParcelableExtra(IIntent::EXTRA_SHORTCUT_ICON, (IBitmap**)&icon);
-    AutoPtr<IIntentShortcutIconResource> iconResource;
+    AutoPtr<IParcelable> p2;
+    data->GetParcelableExtra(IIntent::EXTRA_SHORTCUT_ICON, (IParcelable**)&p2);
+    AutoPtr<IBitmap> icon = IBitmap::Probe(p2);
+
+    AutoPtr<IParcelable> p3;
     data->GetParcelableExtra(IIntent::EXTRA_SHORTCUT_ICON_RESOURCE,
-            (IIntentShortcutIconResource*8)&iconResource);
+            (IParcelable**)&p3);
+    AutoPtr<IIntentShortcutIconResource> iconResource = IIntentShortcutIconResource::Probe(p3);
 
     // Queue the item up for adding if launcher has not loaded properly yet
     Int32 x;
-    LauncherModel::GetCellCountX(&x);
+    assert(0 && "need class launchermodel");
+    //LauncherModel::GetCellCountX(&x);
     Int32 y;
-    LauncherModel::GetCellCountY(&y);
+    assert(0 && "need class launchermodel");
+    //LauncherModel::GetCellCountY(&y);
     Boolean launcherNotLoaded = x <= 0 || y <= 0;
 
     AutoPtr<PendingInstallShortcutInfo> info =
@@ -298,7 +340,8 @@ ECode InstallShortcutReceiver::OnReceive(
     info->mIconResource = iconResource;
     if (mUseInstallQueue || launcherNotLoaded) {
         String spKey;
-        LauncherApplication::GetSharedPreferencesKey(&spKey);
+        assert(0 && "need class LauncherApplication");
+        //LauncherApplication::GetSharedPreferencesKey(&spKey);
         AutoPtr<ISharedPreferences> sp;
         context->GetSharedPreferences(spKey, IContext::MODE_PRIVATE,
                 (ISharedPreferences**)&sp);
@@ -327,7 +370,8 @@ ECode InstallShortcutReceiver::FlushInstallQueue(
     /* [in] */ IContext* context)
 {
     String spKey;
-    LauncherApplication::GetSharedPreferencesKey(&spKey);
+    assert(0 && "need class LauncherApplication");
+    //LauncherApplication::GetSharedPreferencesKey(&spKey);
     AutoPtr<ISharedPreferences> sp;
     context->GetSharedPreferences(spKey, IContext::MODE_PRIVATE,
             (ISharedPreferences**)&sp);
@@ -336,7 +380,7 @@ ECode InstallShortcutReceiver::FlushInstallQueue(
     AutoPtr<IIterator> iter;
     installQueue->GetIterator((IIterator**)&iter);
     Boolean res;
-    while (iter->HasNext(res), res) {
+    while (iter->HasNext(&res), res) {
         AutoPtr<IInterface> obj;
         iter->GetNext((IInterface**)&obj);
         PendingInstallShortcutInfo* info = (PendingInstallShortcutInfo*)IObject::Probe(obj);
@@ -350,7 +394,8 @@ void InstallShortcutReceiver::ProcessInstallShortcut(
     /* [in] */ PendingInstallShortcutInfo* pendingInfo)
 {
     String spKey;
-    LauncherApplication::GetSharedPreferencesKey(&spKey);
+    assert(0 && "need class LauncherApplication");
+    //LauncherApplication::GetSharedPreferencesKey(&spKey);
     AutoPtr<ISharedPreferences> sp;
     context->GetSharedPreferences(spKey, IContext::MODE_PRIVATE,
             (ISharedPreferences**)&sp);
@@ -370,19 +415,22 @@ void InstallShortcutReceiver::ProcessInstallShortcut(
         // Flush the LauncherModel worker thread, so that if we just did another
         // processInstallShortcut, we give it time for its shortcut to get added to the
         // database (getItemsInLocalCoordinates reads the database)
-        AutoPtr<LauncherModel> modle;
-        app->GetModel((*LauncherModel*)&modle);
-        modle->FlushWorkerThread();
+        AutoPtr<ILauncherModel> modle;
+        assert(0 && "need class ILauncherApplication");
+        //app->GetModel((ILauncherModel**)&modle);
+        //modle->FlushWorkerThread();
         AutoPtr<IArrayList> items;
-        LauncherModel::GetItemsInLocalCoordinates(context, (IArrayList**)&items);
+        assert(0 && "need class LauncherModel");
+        //LauncherModel::GetItemsInLocalCoordinates(context, (IArrayList**)&items);
         Boolean exists;
-        LauncherModel::ShortcutExists(context, name, intent, &exists);
+        assert(0 && "need class LauncherModel");
+        //LauncherModel::ShortcutExists(context, name, intent, &exists);
 
         // Try adding to the workspace screens incrementally, starting at the default or center
         // screen and alternating between +1, -1, +2, -2, etc. (using ~ ceil(i/2f)*(-1)^(i-1))
         const Int32 screen = ILauncher::DEFAULT_SCREEN;
         for (Int32 i = 0; i < (2 * ILauncher::SCREEN_COUNT) + 1 && !found; ++i) {
-            Int32 si = screen + (Int32)((i / 2f) + 0.5f) * ((i % 2 == 1) ? 1 : -1);
+            Int32 si = screen + (Int32)((i / 2.0f) + 0.5f) * ((i % 2 == 1) ? 1 : -1);
             if (0 <= si && si < ILauncher::SCREEN_COUNT) {
                 found = InstallShortcut(context, data, items, name, intent, si, exists, sp,
                         result);
@@ -400,19 +448,23 @@ void InstallShortcutReceiver::ProcessInstallShortcut(
 
             AutoPtr<IToastHelper> helper;
             CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+            AutoPtr<ICharSequence> text = CoreUtils::Convert(str);
             AutoPtr<IToast> toast;
-            helper->MakeText(context, str,
+            helper->MakeText(context, text,
                     IToast::LENGTH_SHORT, (IToast**)&toast);
             toast->Show();
         }
         else if ((*result)[0] == INSTALL_SHORTCUT_IS_DUPLICATE) {
+            AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(name);
+            array->Set(0, TO_IINTERFACE(cchar));
             String str;
-            context->GetString(Elastos::Droid::Launcher2::R::
-                    string::shortcut_duplicate, name, &str);
+            context->GetString(Elastos::Droid::Launcher2::R::string::shortcut_duplicate, array, &str);
             AutoPtr<IToastHelper> helper;
             CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+            AutoPtr<ICharSequence> text = CoreUtils::Convert(str);
             AutoPtr<IToast> toast;
-            helper->MakeText(context, str,
+            helper->MakeText(context, text,
                     IToast::LENGTH_SHORT, (IToast**)&toast);
             toast->Show();
         }
@@ -439,16 +491,15 @@ Boolean InstallShortcutReceiver::InstallShortcut(
                 intent->SetAction(IIntent::ACTION_VIEW);
             }
             else {
-                Boolean res1;
                 String action;
                 intent->GetAction(&action);
-                action.Equals(IIntent::ACTION_MAIN, res1);
-                if (res1) {
+                if (action.Equals(IIntent::ACTION_MAIN)) {
                     AutoPtr<ArrayOf<String> > categories;
                     intent->GetCategories((ArrayOf<String>**)&categories);
                     if (categories != NULL) {
                         Boolean res2;
-                        categories->Contains(IIntent::CATEGORY_LAUNCHER, &res2);
+                        assert(0 && "Contains");
+                        //categories->Contains(IIntent::CATEGORY_LAUNCHER, &res2);
                         if (res2) {
                             intent->AddFlags(
                                     IIntent::FLAG_ACTIVITY_NEW_TASK |
@@ -463,20 +514,23 @@ Boolean InstallShortcutReceiver::InstallShortcut(
             Boolean duplicate;
             data->GetBooleanExtra(ILauncher::EXTRA_SHORTCUT_DUPLICATE, TRUE, &duplicate);
             if (duplicate || !shortcutExists) {
-                AutoPtr<MyThread> t = new MyThread(String("setNewAppsThread"),
-                    this, sharedPrefs, screen, intent);
-                t->Start();
+                assert(0 && "MyThread this");
+                // AutoPtr<MyThread> t = new MyThread(String("setNewAppsThread"),
+                //     this, sharedPrefs, screen, intent);
+                // t->Start();
 
                 // Update the Launcher db
                 AutoPtr<IContext> ctx;
                 context->GetApplicationContext((IContext**)&ctx);
                 AutoPtr<ILauncherApplication> app = ILauncherApplication::Probe(ctx);
-                AutoPtr<LauncherModel> model;
-                app->GetModel((LauncherModel**)&model);
+                AutoPtr<ILauncherModel> model;
+                assert(0 && "GetModel");
+                ///p->GetModel((ILauncherModel**)&model);
                 AutoPtr<IShortcutInfo> info;
-                model->AddShortcut(context, data,
-                        ILauncherSettings::Favorites::CONTAINER_DESKTOP, screen,
-                        (*tmpCoordinates)[0], (*tmpCoordinates)[1], TRUE, (IShortcutInfo**)&info);
+                assert(0 && "model");
+                // model->AddShortcut(context, data,
+                //         LauncherSettings::Favorites::CONTAINER_DESKTOP, screen,
+                //         (*tmpCoordinates)[0], (*tmpCoordinates)[1], TRUE, (IShortcutInfo**)&info);
                 if (info == NULL) {
                     return FALSE;
                 }
@@ -502,9 +556,11 @@ Boolean InstallShortcutReceiver::FindEmptyCell(
     /* [in] */ Int32 screen)
 {
     Int32 xCount;
-    LauncherModel::GetCellCountX(&xCount);
+    assert(0 && "LauncherModel");
+    //LauncherModel::GetCellCountX(&xCount);
     Int32 yCount;
-    LauncherModel::GetCellCountY(&yCount);
+    assert(0 && "LauncherModel");
+    //LauncherModel::GetCellCountY(&yCount);
     AutoPtr<ArrayOf<AutoPtr<ArrayOf<Boolean> > > > occupied = ArrayOf<AutoPtr<ArrayOf<Boolean> > >::Alloc(xCount);
     for (Int32 i = 0; i < xCount; i++) {
         (*occupied)[i] = ArrayOf<Boolean>::Alloc(yCount);
@@ -518,8 +574,8 @@ Boolean InstallShortcutReceiver::FindEmptyCell(
         AutoPtr<IInterface> obj;
         items->Get(i, (IInterface**)&obj);
         item = IItemInfo::Probe(obj);
-        ItemInfo* _info = (ItemInfo*)item
-        if (_info->mContainer == ILauncherSettings::Favorites::CONTAINER_DESKTOP) {
+        ItemInfo* _info = (ItemInfo*)item.Get();
+        if (_info->mContainer == LauncherSettings::Favorites::CONTAINER_DESKTOP) {
             if (_info->mScreen == screen) {
                 cellX = _info->mCellX;
                 cellY = _info->mCellY;
@@ -527,14 +583,15 @@ Boolean InstallShortcutReceiver::FindEmptyCell(
                 spanY = _info->mSpanY;
                 for (Int32 x = cellX; 0 <= x && x < cellX + spanX && x < xCount; x++) {
                     for (Int32 y = cellY; 0 <= y && y < cellY + spanY && y < yCount; y++) {
-                        (*occupied)[x][y] = TRUE;
+                        (*((*occupied)[x]))[y] = TRUE;
                     }
                 }
             }
         }
     }
-
-    return CellLayout::FindVacantCell(xy, 1, 1, xCount, yCount, occupied);
+    assert(0 && "CellLayout");
+    //return CellLayout::FindVacantCell(xy, 1, 1, xCount, yCount, occupied);
+    return FALSE;
 }
 
 } // namespace Launcher2

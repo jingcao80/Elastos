@@ -2,13 +2,30 @@
 #include "elastos/droid/launcher2/HolographicOutlineHelper.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/core/Math.h>
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Droid::Graphics::IMaskFilter;
+using Elastos::Droid::Graphics::IXfermode;
+using Elastos::Droid::Graphics::CBitmap;
+using Elastos::Droid::Graphics::CCanvas;
+using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CBlurMaskFilter;
+using Elastos::Droid::Graphics::CPorterDuffXfermode;
+using Elastos::Droid::Graphics::IPorterDuffXfermode;;
+using Elastos::Droid::Graphics::BlurMaskFilterBlur_NORMAL;
+using Elastos::Droid::Graphics::BlurMaskFilterBlur_OUTER;
+using Elastos::Droid::Graphics::PorterDuffMode_DST_OUT;
+using Elastos::Droid::Graphics::PorterDuffMode_SRC_OUT;
+using Elastos::Droid::Graphics::PorterDuffMode_CLEAR;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-const Int32 HolographicOutlineHelper::MAX_OUTER_BLUR_RADIUS;
-const Int32 HolographicOutlineHelper::MIN_OUTER_BLUR_RADIUS;
+/*const*/ Int32 HolographicOutlineHelper::MAX_OUTER_BLUR_RADIUS;
+/*const*/ Int32 HolographicOutlineHelper::MIN_OUTER_BLUR_RADIUS;
 
 AutoPtr<IBlurMaskFilter> HolographicOutlineHelper::sExtraThickOuterBlurMaskFilter;
 AutoPtr<IBlurMaskFilter> HolographicOutlineHelper::sThickOuterBlurMaskFilter;
@@ -22,27 +39,28 @@ const Int32 HolographicOutlineHelper::THICK = 0;
 const Int32 HolographicOutlineHelper::MEDIUM = 1;
 const Int32 HolographicOutlineHelper::EXTRA_THICK = 2;
 
-static Boolean HolographicOutlineHelper::InitStaticBlock()
+Boolean HolographicOutlineHelper::InitStaticBlock()
 {
     Float scale;
-    LauncherApplication::GetScreenDensity(&scale);
+    assert(0 && "need class LauncherApplication");
+    //LauncherApplication::GetScreenDensity(&scale);
 
     MIN_OUTER_BLUR_RADIUS = (Int32)(scale * 1.0f);
     MAX_OUTER_BLUR_RADIUS = (Int32)(scale * 12.0f);
 
-    CBlurMaskFilter::New(scale * 12.0f, BlurMaskFilterBlur::OUTER,
+    CBlurMaskFilter::New(scale * 12.0f, BlurMaskFilterBlur_OUTER,
             (IBlurMaskFilter**)&sExtraThickOuterBlurMaskFilter);
-    CBlurMaskFilter::New(scale * 6.0f, BlurMaskFilterBlur::OUTER,
+    CBlurMaskFilter::New(scale * 6.0f, BlurMaskFilterBlur_OUTER,
             (IBlurMaskFilter**)&sThickOuterBlurMaskFilter);
-    CBlurMaskFilter::New(scale * 2.0f, BlurMaskFilterBlur::OUTER,
+    CBlurMaskFilter::New(scale * 2.0f, BlurMaskFilterBlur_OUTER,
             (IBlurMaskFilter**)&sMediumOuterBlurMaskFilter);
-    CBlurMaskFilter::New(scale * 1.0f, BlurMaskFilterBlur::OUTER,
+    CBlurMaskFilter::New(scale * 1.0f, BlurMaskFilterBlur_OUTER,
             (IBlurMaskFilter**)&sThinOuterBlurMaskFilter);
-    CBlurMaskFilter::New(scale * 6.0f, BlurMaskFilterBlur::NORMAL,
+    CBlurMaskFilter::New(scale * 6.0f, BlurMaskFilterBlur_NORMAL,
             (IBlurMaskFilter**)&sExtraThickInnerBlurMaskFilter);
-    CBlurMaskFilter::New(scale * 4.0f, BlurMaskFilterBlur::NORMAL,
+    CBlurMaskFilter::New(scale * 4.0f, BlurMaskFilterBlur_NORMAL,
             (IBlurMaskFilter**)&sThickInnerBlurMaskFilter);
-    CBlurMaskFilter::New(scale * 2.0f, BlurMaskFilterBlur::NORMAL,
+    CBlurMaskFilter::New(scale * 2.0f, BlurMaskFilterBlur_NORMAL,
             (IBlurMaskFilter**)&sMediumInnerBlurMaskFilter);
 
     return TRUE;
@@ -61,8 +79,8 @@ HolographicOutlineHelper::HolographicOutlineHelper()
     mBlurPaint->SetFilterBitmap(TRUE);
     mBlurPaint->SetAntiAlias(TRUE);
     AutoPtr<IPorterDuffXfermode> mode;
-    CPorterDuffXfermode::New(IPorterDuff::Mode::DST_OUT, (IPorterDuffXfermode**)&mode);
-    mErasePaint->SetXfermode(mode);
+    CPorterDuffXfermode::New(PorterDuffMode_DST_OUT, (IPorterDuffXfermode**)&mode);
+    mErasePaint->SetXfermode(IXfermode::Probe(mode));
     mErasePaint->SetFilterBitmap(TRUE);
     mErasePaint->SetAntiAlias(TRUE);
 }
@@ -71,7 +89,7 @@ Float HolographicOutlineHelper::HighlightAlphaInterpolator(
     /* [in] */ Float r)
 {
     Float maxAlpha = 0.6f;
-    return (Float)Math::Pow(maxAlpha * (1.0f - r), 1.5f);
+    return (Float)Elastos::Core::Math::Pow(maxAlpha * (1.0f - r), 1.5f);
 }
 
 Float HolographicOutlineHelper::ViewAlphaInterpolator(
@@ -79,7 +97,7 @@ Float HolographicOutlineHelper::ViewAlphaInterpolator(
 {
     const Float pivot = 0.95f;
     if (r < pivot) {
-        return (Float)Math::Pow(r / pivot, 1.5f);
+        return (Float)Elastos::Core::Math::Pow(r / pivot, 1.5f);
     }
     else {
         return 1.0f;
@@ -112,10 +130,11 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
         srcDst->GetWidth(&width);
         Int32 height;
         srcDst->GetHeight(&height);
-        AutoPtr<ArrayOf<Int32> > srcBuffer = new ArrayOf<Int32>::Alloc(width * height);
+        AutoPtr<ArrayOf<Int32> > srcBuffer = ArrayOf<Int32>::Alloc(width * height);
         srcDst->GetPixels(srcBuffer, 0, width, 0, 0, width, height);
         for (Int32 i = 0; i < srcBuffer->GetLength(); i++) {
-            const Int32 alpha = (*srcBuffer)[i] >>> 24;
+            assert(0 && "java >>> ?= c++ >>");
+            const Int32 alpha = (*srcBuffer)[i] >> 24;
             if (alpha < 188) {
                 (*srcBuffer)[i] = 0;
             }
@@ -142,15 +161,15 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
             Slogger::E("HolographicOutlineHelper", "Invalid blur thickness");
             return E_RUNTIME_EXCEPTION;
     }
-    mBlurPaint->SetMaskFilter(outerBlurMaskFilter);
+    mBlurPaint->SetMaskFilter(IMaskFilter::Probe(outerBlurMaskFilter));
     AutoPtr<ArrayOf<Int32> > outerBlurOffset = ArrayOf<Int32>::Alloc(2);
     AutoPtr<IBitmap> thickOuterBlur;
     glowShape->ExtractAlpha(mBlurPaint, outerBlurOffset, (IBitmap**)&thickOuterBlur);
     if (thickness == EXTRA_THICK) {
-        mBlurPaint->SetMaskFilter(sMediumOuterBlurMaskFilter);
+        mBlurPaint->SetMaskFilter(IMaskFilter::Probe(sMediumOuterBlurMaskFilter));
     }
     else {
-        mBlurPaint->SetMaskFilter(sThinOuterBlurMaskFilter);
+        mBlurPaint->SetMaskFilter(IMaskFilter::Probe(sThinOuterBlurMaskFilter));
     }
 
     AutoPtr<ArrayOf<Int32> > brightOutlineOffset = ArrayOf<Int32>::Alloc(2);
@@ -159,7 +178,7 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
 
     // calculate the inner blur
     srcDstCanvas->SetBitmap(glowShape);
-    srcDstCanvas->DrawColor(0xFF000000, IPorterDuffMode::SRC_OUT);
+    srcDstCanvas->DrawColor(0xFF000000, PorterDuffMode_SRC_OUT);
     AutoPtr<IBlurMaskFilter> innerBlurMaskFilter;
     switch (thickness) {
         case EXTRA_THICK:
@@ -176,7 +195,7 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
             Slogger::E("HolographicOutlineHelper", "Invalid blur thickness");
             return E_RUNTIME_EXCEPTION;
     }
-    mBlurPaint->SetMaskFilter(innerBlurMaskFilter);
+    mBlurPaint->SetMaskFilter(IMaskFilter::Probe(innerBlurMaskFilter));
     AutoPtr<ArrayOf<Int32> > thickInnerBlurOffset = ArrayOf<Int32>::Alloc(2);
     AutoPtr<IBitmap> thickInnerBlur;
     glowShape->ExtractAlpha(mBlurPaint, thickInnerBlurOffset, (IBitmap**)&thickInnerBlur);
@@ -196,7 +215,7 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
 
     // draw the inner and outer blur
     srcDstCanvas->SetBitmap(srcDst);
-    srcDstCanvas->DrawColor(0, PorterDuff.Mode.CLEAR);
+    srcDstCanvas->DrawColor(0, PorterDuffMode_CLEAR);
     mHolographicPaint->SetColor(color);
     srcDstCanvas->DrawBitmap(thickInnerBlur, (*thickInnerBlurOffset)[0], (*thickInnerBlurOffset)[1],
             mHolographicPaint);
@@ -209,7 +228,7 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
             mHolographicPaint);
 
     // cleanup
-    srcDstCanvas->SetBitmap(null);
+    srcDstCanvas->SetBitmap(NULL);
     brightOutline->Recycle();
     thickOuterBlur->Recycle();
     thickInnerBlur->Recycle();

@@ -1,7 +1,18 @@
 
-#include "elastos/droid/launcher2/PackageChangedReceiver.h"
+#include "elastos/droid/launcher2/FirstFrameAnimatorHelper.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include <elastos/utility/logging/Slogger.h>
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Droid::View::EIID_IOnDrawListener;
+using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -9,21 +20,25 @@ namespace Launcher2 {
 
 CAR_INTERFACE_IMPL(FirstFrameAnimatorHelper::MyOnDrawListener, Object, IOnDrawListener);
 
-FirstFrameAnimatorHelper::MyOnDrawListener::MyOnDrawListener(
-    /* [in] */ FirstFrameAnimatorHelper* host)
-    : mHost(host)
+FirstFrameAnimatorHelper::MyOnDrawListener::MyOnDrawListener()
 {
-    mTime = System::GetCurrentTimeMillis();
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetCurrentTimeMillis(&mTime);
 }
 
 ECode FirstFrameAnimatorHelper::MyOnDrawListener::OnDraw()
 {
-    mHost->sGlobalFrameCounter++;
-    if (mHost->DEBUG) {
-        Int64 newTime = System::GetCurrentTimeMillis();
+    FirstFrameAnimatorHelper::sGlobalFrameCounter++;
+    if (FirstFrameAnimatorHelper::DEBUG) {
+        AutoPtr<ISystem> system;
+        CSystem::AcquireSingleton((ISystem**)&system);
+        Int64 newTime;
+        system->GetCurrentTimeMillis(&newTime);
         Slogger::D("FirstFrameAnimatorHelper", "TICK %ld", (newTime - mTime));
         mTime = newTime;
     }
+    return NOERROR;
 }
 
 FirstFrameAnimatorHelper::MyRunnable::MyRunnable(
@@ -43,11 +58,11 @@ const Boolean FirstFrameAnimatorHelper::DEBUG = FALSE ;
 const Int32 FirstFrameAnimatorHelper::MAX_DELAY = 1000;
 const Int32 FirstFrameAnimatorHelper::IDEAL_FRAME_DURATION = 16;
 
-AutoPtr<IViewTreeObserverOnDrawListener> FirstFrameAnimatorHelper::sGlobalDrawListener;
+AutoPtr<IOnDrawListener> FirstFrameAnimatorHelper::sGlobalDrawListener;
 Int64 FirstFrameAnimatorHelper::sGlobalFrameCounter;
 Boolean FirstFrameAnimatorHelper::sVisible;
 
-CAR_INTERFACE_IMPL(FirstFrameAnimatorHelper, AnimatorListenerAdapter, IValueAnimatorAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(FirstFrameAnimatorHelper, AnimatorListenerAdapter, IAnimatorUpdateListener);
 
 FirstFrameAnimatorHelper::FirstFrameAnimatorHelper(
     /* [in] */ IValueAnimator* animator,
@@ -82,7 +97,7 @@ ECode FirstFrameAnimatorHelper::OnAnimationStart(
 }
 
 ECode FirstFrameAnimatorHelper::SetIsVisible(
-    /* [in] */ boolean visible)
+    /* [in] */ Boolean visible)
 {
     sVisible = visible;
     return NOERROR;
@@ -96,7 +111,7 @@ ECode FirstFrameAnimatorHelper::InitializeDrawListener(
         view->GetViewTreeObserver((IViewTreeObserver**)&observer);
         observer->RemoveOnDrawListener(sGlobalDrawListener);
     }
-    sGlobalDrawListener = new MyOnDrawListener(this);
+    sGlobalDrawListener = new MyOnDrawListener();
     AutoPtr<IViewTreeObserver> observer;
     view->GetViewTreeObserver((IViewTreeObserver**)&observer);
     observer->AddOnDrawListener(sGlobalDrawListener);
@@ -107,14 +122,16 @@ ECode FirstFrameAnimatorHelper::InitializeDrawListener(
 ECode FirstFrameAnimatorHelper::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
-    Int64 currentTime = System::GetCurrentTimeMillis();
+    Int64 currentTime;
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetCurrentTimeMillis(&currentTime);
     if (mStartTime == -1) {
         mStartFrame = sGlobalFrameCounter;
         mStartTime = currentTime;
     }
 
-    if (!mHandlingOnAnimationUpdate &&
-        sVisible &&
+    if (!mHandlingOnAnimationUpdate && sVisible) {
         // If the current play time exceeds the duration, the animation
         // will get finished, even if we call setCurrentPlayTime -- therefore
         // don't adjust the animation in that case
@@ -190,10 +207,11 @@ ECode FirstFrameAnimatorHelper::Print(
     sb += " ";
     sb += flatFraction;
     sb += " ";
-    sb += this;
-    sb += " "
+    sb += TO_STR(this);
+    sb += " ";
     sb += animation;
     Slogger::D("FirstFrameAnimatorHelper", sb.ToString());
+    return NOERROR;
 }
 
 } // namespace Launcher2

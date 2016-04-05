@@ -1,19 +1,20 @@
 module
 {
+    using interface Elastos.Droid.Graphics.IPointF;
+    using interface Elastos.Droid.Graphics.IRect;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
 
     interface IDropTargetDragObject {
-
     }
-
-    interface IDropTargetDragEnforcer
 
     /**
      * Interface defining an object that can receive a drag.
      *
      */
+    [deprecated]
     interface IDropTarget {
         const String TAG = "DropTarget";
 
@@ -40,16 +41,16 @@ module
          *
          */
         OnDrop(
-            [in] IDragObject* dragObject);
+            [in] IDropTargetDragObject* dragObject);
 
         OnDragEnter(
-            [in] IDragObject* dragObject);
+            [in] IDropTargetDragObject* dragObject);
 
         OnDragOver(
-            [in] IDragObject* dragObject);
+            [in] IDropTargetDragObject* dragObject);
 
         OnDragExit(
-            [in] IDragObject* dragObject);
+            [in] IDropTargetDragObject* dragObject);
 
         /**
          * Handle an object being dropped as a result of flinging to delete and will be called in place
@@ -57,7 +58,7 @@ module
          * fling-to-delete target.
          */
         OnFlingToDelete(
-            [in] IDragObject* dragObject,
+            [in] IDropTargetDragObject* dragObject,
             [in] Int32 x,
             [in] Int32 y,
             [in] IPointF* vec);
@@ -80,7 +81,7 @@ module
          * @return The DropTarget to delegate to, or null to not delegate to another object.
          */
         GetDropTargetDelegate(
-            [in] IDragObject* dragObject,
+            [in] IDropTargetDragObject* dragObject,
             [out] IDropTarget** result);
 
         /**
@@ -99,8 +100,8 @@ module
          * @return True if the drop will be accepted, false otherwise.
          */
         AcceptDrop(
-            [in] IDragObject* dragObject,
-            [out] Boolean** result);
+            [in] IDropTargetDragObject* dragObject,
+            [out] Boolean* result);
 
         // These methods are implemented in Views
         GetHitRect(
@@ -110,10 +111,10 @@ module
             [in] ArrayOf<Int32>* loc);
 
         GetLeft(
-            [out] Int32 left);
+            [out] Int32* left);
 
         GetTop(
-            [out] Int32 top);
+            [out] Int32* top);
     }
 
     } // namespace Launcher2

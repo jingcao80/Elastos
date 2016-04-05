@@ -1,7 +1,14 @@
 
 #include "elastos/droid/launcher2/ShortcutAndWidgetContainer.h"
+#include "elastos/droid/view/View.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+
+using Elastos::Droid::App::CWallpaperManagerHelper;
+using Elastos::Droid::App::IWallpaperManagerHelper;
+using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::View::IViewGroupLayoutParams;
 
 namespace Elastos {
 namespace Droid {
@@ -12,8 +19,7 @@ const String ShortcutAndWidgetContainer::TAG("CellLayoutChildren");
 CAR_INTERFACE_IMPL(ShortcutAndWidgetContainer, ViewGroup,
         IShortcutAndWidgetContainer);
 
-ShortcutAndWidgetContainer::ShortcutAndWidgetContainer(
-        /* [in] */ IContext* context)
+ShortcutAndWidgetContainer::ShortcutAndWidgetContainer()
     : mCellWidth(0)
     , mCellHeight(0)
     , mWidthGap(0)
@@ -28,7 +34,10 @@ ECode ShortcutAndWidgetContainer::constructor(
         /* [in] */ IContext* context)
 {
     ViewGroup::constructor(context);
-    return WallpaperManager::GetInstance(context, (IWallpaperManager**)&mWallpaperManager);
+
+    AutoPtr<IWallpaperManagerHelper> helper;
+    CWallpaperManagerHelper::AcquireSingleton((IWallpaperManagerHelper**)&helper);
+    return helper->GetInstance(context, (IWallpaperManager**)&mWallpaperManager);
 }
 
 ECode ShortcutAndWidgetContainer::SetCellDimensions(
@@ -46,28 +55,35 @@ ECode ShortcutAndWidgetContainer::SetCellDimensions(
     return NOERROR;
 }
 
-AutoPtr<IView> ShortcutAndWidgetContainer::GetChildAt(
+ECode ShortcutAndWidgetContainer::GetChildAt(
     /* [in] */ Int32 x,
-    /* [in] */ Int32 y)
+    /* [in] */ Int32 y,
+    /* [out] */ IView** view)
 {
+    VALIDATE_NOT_NULL(view);
+
     Int32 count;
     GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
-        GetChildAt(i, (IView**)&child);
+        ViewGroup::GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Prober(params);
+        assert(0 && "need class CellLayout");
+        // AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Prober(params);
 
-        if ((lp->mCellX <= x) && (x < lp->mCellX + lp->mCellHSpan) &&
-                (lp->mCellY <= y) && (y < lp->mCellY + lp->mCellVSpan)) {
-            return child;
-        }
+        // if ((lp->mCellX <= x) && (x < lp->mCellX + lp->mCellHSpan) &&
+        //         (lp->mCellY <= y) && (y < lp->mCellY + lp->mCellVSpan)) {
+        //     *view = child;
+        //     REFCOUNT_ADD(*view);
+        //     return NOERROR;
+        // }
     }
-    return NULL;
+    *view = NULL;
+    return NOERROR;
 }
 
-ECode ShortcutAndWidgetContainer::DispatchDraw(
+void ShortcutAndWidgetContainer::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     //@SuppressWarnings("all") // suppress dead code warning
@@ -81,18 +97,19 @@ ECode ShortcutAndWidgetContainer::DispatchDraw(
         GetChildCount(&count);
         for (Int32 i = count - 1; i >= 0; i--) {
             AutoPtr<IView> child;
-            GetChildAt(i, (IView**)&child);
+            ViewGroup::GetChildAt(i, (IView**)&child);
             AutoPtr<IViewGroupLayoutParams> params;
             child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-            AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Prober(params);
+            assert(0 && "need class CellLayout");
+            // AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Prober(params);
 
-            canvas->DrawRect(lp->mX, lp->mY, lp->mX + lp->mWidth, lp->mY + lp->mHeight, p);
+            // canvas->DrawRect(lp->mX, lp->mY, lp->mX + lp->mWidth, lp->mY + lp->mHeight, p);
         }
     }
-    return ViewGroup::DispatchDraw(canvas);
+    ViewGroup::DispatchDraw(canvas);
 }
 
-ECode ShortcutAndWidgetContainer::OnMeasure(
+void ShortcutAndWidgetContainer::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -100,22 +117,20 @@ ECode ShortcutAndWidgetContainer::OnMeasure(
     GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
-        GetChildAt(i, (IView**)&child);
+        ViewGroup::GetChildAt(i, (IView**)&child);
         MeasureChild(child);
     }
-    Int32 widthSpecSize;
-    MeasureSpec::GetSize(widthMeasureSpec, &widthSpecSize);
-    Int32 heightSpecSize;
-    MeasureSpec::getSize(heightMeasureSpec, &heightSpecSize);
-    return SetMeasuredDimension(widthSpecSize, heightSpecSize);
+    Int32 widthSpecSize = View::MeasureSpec::GetSize(widthMeasureSpec);
+    Int32 heightSpecSize = View::MeasureSpec::GetSize(heightMeasureSpec);
+    SetMeasuredDimension(widthSpecSize, heightSpecSize);
 }
 
-ECode ShortcutAndWidgetContainer::SetupLp(
-    /* [in] */ CellLayout::LayoutParams* lp)
-{
-    return lp->Setup(mCellWidth, mCellHeight, mWidthGap, mHeightGap, InvertLayoutHorizontally(),
-            mCountX);
-}
+// ECode ShortcutAndWidgetContainer::SetupLp(
+//     /* [in] */ CellLayout::LayoutParams* lp)
+// {
+//     return lp->Setup(mCellWidth, mCellHeight, mWidthGap, mHeightGap, InvertLayoutHorizontally(),
+//             mCountX);
+// }
 
 ECode ShortcutAndWidgetContainer::SetInvertIfRtl(
     /* [in] */ Boolean invert)
@@ -131,26 +146,34 @@ ECode ShortcutAndWidgetContainer::MeasureChild(
     const Int32 cellHeight = mCellHeight;
     AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-    AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Prober(params);
+    assert(0 && "need class CellLayout");
+    // AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Prober(params);
 
-    lp->Setup(cellWidth, cellHeight, mWidthGap, mHeightGap, InvertLayoutHorizontally(), mCountX);
-    Int32 childWidthMeasureSpec;
-    MeasureSpec::MakeMeasureSpec(lp->mWidth, MeasureSpec::EXACTLY, &childWidthMeasureSpec);
-    Int32 childheightMeasureSpec;
-    MeasureSpec->MakeMeasureSpec(lp->mHeight, MeasureSpec::EXACTLY, &childheightMeasureSpec);
-    return child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
+    // lp->Setup(cellWidth, cellHeight, mWidthGap, mHeightGap, InvertLayoutHorizontally(), mCountX);
+    // Int32 childWidthMeasureSpec;
+    // MeasureSpec::MakeMeasureSpec(lp->mWidth, MeasureSpec::EXACTLY, &childWidthMeasureSpec);
+    // Int32 childheightMeasureSpec;
+    // MeasureSpec->MakeMeasureSpec(lp->mHeight, MeasureSpec::EXACTLY, &childheightMeasureSpec);
+    // return child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
+    return NOERROR;
 }
 
 Boolean ShortcutAndWidgetContainer::InvertLayoutHorizontally()
 {
-    return mInvertIfRtl && IsLayoutRtl();
+    Boolean res;
+    IsLayoutRtl(&res);
+    return mInvertIfRtl && res;
 }
 
-Boolean ShortcutAndWidgetContainer::IsLayoutRtl()
+ECode ShortcutAndWidgetContainer::IsLayoutRtl(
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
+
     Int32 direction;
     GetLayoutDirection(&direction);
-    return direction == LAYOUT_DIRECTION_RTL;
+    *result = direction == LAYOUT_DIRECTION_RTL;
+    return NOERROR;
 }
 
 ECode ShortcutAndWidgetContainer::OnLayout(
@@ -164,38 +187,43 @@ ECode ShortcutAndWidgetContainer::OnLayout(
     GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
-        GetChildAt(i, (IView**)&child);
+        ViewGroup::GetChildAt(i, (IView**)&child);
         Int32 visibility;
         child->GetVisibility(&visibility);
         if (visibility != GONE) {
             AutoPtr<IViewGroupLayoutParams> params;
             child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-            AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Prober(params);
+            assert(0 && "need class CellLayout");
+            // AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)IObject::Prober(params);
 
-            Int32 childLeft = lp->mX;
-            Int32 childTop = lp->mY;
-            child->Layout(childLeft, childTop, childLeft + lp->mWidth, childTop + lp->mHeight);
+            // Int32 childLeft = lp->mX;
+            // Int32 childTop = lp->mY;
+            // child->Layout(childLeft, childTop, childLeft + lp->mWidth, childTop + lp->mHeight);
 
-            if (lp->mDropped) {
-                lp->mDropped = FALSE;
+            // if (lp->mDropped) {
+            //     lp->mDropped = FALSE;
 
-                AutoPtr<ArrayOf<Int32> > cellXY = mTmpCellXY;
-                GetLocationOnScreen(cellXY);
-                AutoPTR<IBinder> token;
-                getWindowToken((IBinder**)&token);
-                mWallpaperManager->SendWallpaperCommand(token,
-                        WallpaperManager::COMMAND_DROP,
-                        (*cellXY)[0] + childLeft + lp->mWidth / 2,
-                        (*cellXY)[1] + childTop + lp->mHeight / 2, 0, NULL);
-            }
+            //     AutoPtr<ArrayOf<Int32> > cellXY = mTmpCellXY;
+            //     GetLocationOnScreen(cellXY);
+            //     AutoPTR<IBinder> token;
+            //     getWindowToken((IBinder**)&token);
+            //     mWallpaperManager->SendWallpaperCommand(token,
+            //             WallpaperManager::COMMAND_DROP,
+            //             (*cellXY)[0] + childLeft + lp->mWidth / 2,
+            //             (*cellXY)[1] + childTop + lp->mHeight / 2, 0, NULL);
+            // }
         }
     }
     return NOERROR;
 }
 
-Boolean ShortcutAndWidgetContainer::ShouldDelayChildPressedState()
+ECode ShortcutAndWidgetContainer::ShouldDelayChildPressedState(
+    /* [out] */ Boolean* result)
 {
-    return FALSE;
+    VALIDATE_NOT_NULL(result);
+
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode ShortcutAndWidgetContainer::RequestChildFocus(
@@ -207,7 +235,8 @@ ECode ShortcutAndWidgetContainer::RequestChildFocus(
         AutoPtr<IRect> r;
         CRect::New((IRect**)&r);
         child->GetDrawingRect(r);
-        return RequestRectangleOnScreen(r);
+        Boolean res;
+        return RequestRectangleOnScreen(r, &res);
     }
     return NOERROR;
 }
@@ -221,35 +250,34 @@ ECode ShortcutAndWidgetContainer::CancelLongPress()
     GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
-        GetChildAt(i, (IView**)&child);
+        ViewGroup::GetChildAt(i, (IView**)&child);
         return child->CancelLongPress();
     }
     return NOERROR;
 }
 
-ECode ShortcutAndWidgetContainer::SetChildrenDrawingCacheEnabled(
+void ShortcutAndWidgetContainer::SetChildrenDrawingCacheEnabled(
     /* [in] */ Boolean enabled)
 {
     Int32 count;
     GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> view;
-        getChildAt(i, (IView**)&view);
+        ViewGroup::GetChildAt(i, (IView**)&view);
         view->SetDrawingCacheEnabled(enabled);
         // Update the drawing caches
         Boolean res;
         view->IsHardwareAccelerated(&res);
         if (!res && enabled) {
-            return view->BuildDrawingCache(TRUE);
+            view->BuildDrawingCache(TRUE);
         }
     }
-    return NOERROR;
 }
 
-ECode ShortcutAndWidgetContainer::SetChildrenDrawnWithCacheEnabled(
+void ShortcutAndWidgetContainer::SetChildrenDrawnWithCacheEnabled(
     /* [in] */ Boolean enabled)
 {
-    return ViewGroup::SetChildrenDrawnWithCacheEnabled(enabled);
+    ViewGroup::SetChildrenDrawnWithCacheEnabled(enabled);
 }
 
 } // namespace Launcher2

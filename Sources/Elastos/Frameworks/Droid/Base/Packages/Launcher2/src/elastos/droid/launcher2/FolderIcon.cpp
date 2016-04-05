@@ -1,11 +1,129 @@
 
 #include "elastos/droid/launcher2/FolderIcon.h"
+#include "elastos/droid/launcher2/LauncherAnimUtils.h"
+#include "elastos/droid/launcher2/LauncherSettings.h"
+#include "elastos/droid/launcher2/DropTarget.h"
+#include "elastos/droid/launcher2/ApplicationInfo.h"
+#include "elastos/droid/launcher2/FolderInfo.h"
+#include "elastos/droid/view/LayoutInflater.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/utility/logging/Slogger.h>
+#include "Elastos.Droid.App.h"
+#include <elastos/core/Math.h>
+
+using Elastos::Droid::App::IActivity;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CColor;
+using Elastos::Droid::Graphics::IColor;
+using Elastos::Droid::Graphics::PorterDuffMode_SRC_ATOP;
+using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Droid::View::Animation::CDecelerateInterpolator;
+using Elastos::Droid::View::Animation::IDecelerateInterpolator;
+using Elastos::Droid::View::Animation::CAccelerateInterpolator;
+using Elastos::Droid::View::Animation::IAccelerateInterpolator;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::IFloat;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
+
+CAR_INTERFACE_IMPL(FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener, Object,
+        IAnimatorUpdateListener);
+
+FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
+    /* [in] */ FolderIcon::FolderRingAnimator* host,
+    /* [in] */ Int32 previewSize)
+    : mHost(host)
+    , mPreviewSize(previewSize)
+{
+}
+
+ECode FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener::OnAnimationUpdate(
+    /* [in] */ IValueAnimator* animation)
+{
+    AutoPtr<IInterface> value;
+    animation->GetAnimatedValue((IInterface**)&value);
+    AutoPtr<IFloat> obj = IFloat::Probe(value);
+    Float percent;
+    obj->GetValue(&percent);
+    mHost->mOuterRingSize = (1 + percent * OUTER_RING_GROWTH_FACTOR) * mPreviewSize;
+    mHost->mInnerRingSize = (1 + percent * INNER_RING_GROWTH_FACTOR) * mPreviewSize;
+    if (mHost->mCellLayout != NULL) {
+        assert(0 && "need class mCellLayout");
+        //mHost->mCellLayout->Invalidate();
+    }
+    return NOERROR;
+}
+
+FolderIcon::FolderRingAnimator::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
+    /* [in] */ FolderIcon::FolderRingAnimator* host)
+    : mHost(host)
+{
+}
+
+ECode FolderIcon::FolderRingAnimator::MyAnimatorListenerAdapter::OnAnimationStart(
+    /* [in] */ IAnimator* animation)
+{
+    if (mHost->mFolderIcon != NULL) {
+        return IView::Probe(mHost->mFolderIcon->mPreviewBackground)->SetVisibility(INVISIBLE);
+    }
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener2, Object,
+        IAnimatorUpdateListener);
+
+FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener2::MyAnimatorUpdateListener2(
+    /* [in] */ FolderIcon::FolderRingAnimator* host,
+    /* [in] */ Int32 previewSize)
+    : mHost(host)
+    , mPreviewSize(previewSize)
+{
+}
+
+ECode FolderIcon::FolderRingAnimator::MyAnimatorUpdateListener2::OnAnimationUpdate(
+    /* [in] */ IValueAnimator* animation)
+{
+    AutoPtr<IInterface> value;
+    animation->GetAnimatedValue((IInterface**)&value);
+    AutoPtr<IFloat> obj = IFloat::Probe(value);
+    Float percent;
+    obj->GetValue(&percent);
+
+    mHost->mOuterRingSize = (1 + (1 - percent) * OUTER_RING_GROWTH_FACTOR) * mPreviewSize;
+    mHost->mInnerRingSize = (1 + (1 - percent) * INNER_RING_GROWTH_FACTOR) * mPreviewSize;
+    if (mHost->mCellLayout != NULL) {
+        assert(0 && "need class mCellLayout");
+        //mHost->mCellLayout->Invalidate();
+    }
+    return NOERROR;
+}
+
+FolderIcon::FolderRingAnimator::MyAnimatorListenerAdapter2::MyAnimatorListenerAdapter2(
+    /* [in] */ FolderIcon::FolderRingAnimator* host)
+    : mHost(host)
+{
+}
+
+ECode FolderIcon::FolderRingAnimator::MyAnimatorListenerAdapter2::onAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    if (mHost->mCellLayout != NULL) {
+        assert(0 && "need class mCellLayout");
+        //mHost->mCellLayout->HideFolderAccept(mHost);
+    }
+    if (mHost->mFolderIcon != NULL) {
+        IView::Probe(mHost->mFolderIcon->mPreviewBackground)->SetVisibility(VISIBLE);
+    }
+}
 
 AutoPtr<IDrawable> FolderIcon::FolderRingAnimator::sSharedOuterRingDrawable;
 AutoPtr<IDrawable> FolderIcon::FolderRingAnimator::sSharedInnerRingDrawable;
@@ -15,12 +133,12 @@ Int32 FolderIcon::FolderRingAnimator::sPreviewPadding = -1;
 FolderIcon::FolderRingAnimator::FolderRingAnimator(
     /* [in] */ ILauncher* launcher,
     /* [in] */ FolderIcon* folderIcon)
-    : mOuterRingSize(0f)
-    ,mInnerRingSize(0f)
+    : mOuterRingSize(0.0f)
+    , mInnerRingSize(0.0f)
 {
     mFolderIcon = folderIcon;
     AutoPtr<IResources> res;
-    launcher->GetResources((IResources**)&res);
+    IContext::Probe(launcher)->GetResources((IResources**)&res);
     res->GetDrawable(
             Elastos::Droid::Launcher2::R::drawable::portal_ring_outer_holo,
             (IDrawable**)&mOuterRingDrawable);
@@ -51,42 +169,42 @@ FolderIcon::FolderRingAnimator::FolderRingAnimator(
 ECode FolderIcon::FolderRingAnimator::AnimateToAcceptState()
 {
     if (mNeutralAnimator != NULL) {
-        mNeutralAnimator->Cancel();
+        IAnimator::Probe(mNeutralAnimator)->Cancel();
     }
     AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
-    (*array)[0] = 0f;
-    (*array)[1] = 1f;
-    mAcceptAnimator = LauncherAnimUtils::OfFloat(mCellLayout, array);
+    (*array)[0] = 0.0f;
+    (*array)[1] = 1.0f;
+    mAcceptAnimator = LauncherAnimUtils::OfFloat(IView::Probe(mCellLayout), array);
     mAcceptAnimator->SetDuration(CONSUMPTION_ANIMATION_DURATION);
 
     Int32 previewSize = sPreviewSize;
-    AutoPtr<IAnimatorUpdateListener> listener = new MyAnimatorUpdateListener(previewSize);
+    AutoPtr<IAnimatorUpdateListener> listener = new MyAnimatorUpdateListener(this, previewSize);
     mAcceptAnimator->AddUpdateListener(listener);
     AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter(this);
-    mAcceptAnimator->AddListener(listener2);
-    return mAcceptAnimator->Start();
+    IAnimator::Probe(mAcceptAnimator)->AddListener(listener2);
+    return IAnimator::Probe(mAcceptAnimator)->Start();
 }
 
 ECode FolderIcon::FolderRingAnimator::AnimateToNaturalState()
 {
     if (mAcceptAnimator != NULL) {
-        mAcceptAnimator->Cancel();
+        IAnimator::Probe(mAcceptAnimator)->Cancel();
     }
     AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
-    (*array)[0] = 0f;
-    (*array)[1] = 1f;
-    mNeutralAnimator = LauncherAnimUtils::OfFloat(mCellLayout, array);
+    (*array)[0] = 0.0f;
+    (*array)[1] = 1.0f;
+    mNeutralAnimator = LauncherAnimUtils::OfFloat(IView::Probe(mCellLayout), array);
     mNeutralAnimator->SetDuration(CONSUMPTION_ANIMATION_DURATION);
 
     Int32 previewSize = sPreviewSize;
     AutoPtr<IAnimatorUpdateListener> listener = new MyAnimatorUpdateListener2(this, previewSize);
     mNeutralAnimator->AddUpdateListener(listener);
     AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter2(this);
-    mNeutralAnimator->AddListener(listener2);
-    return mNeutralAnimator->Start();
+    IAnimator::Probe(mNeutralAnimator)->AddListener(listener2);
+    return IAnimator::Probe(mNeutralAnimator)->Start();
 }
 
-ECode FolderIcon::FolderRingAnimator::IconGetCell(
+ECode FolderIcon::FolderRingAnimator::GetCell(
     /* [in] */ ArrayOf<Int32>* loc)
 {
     (*loc)[0] = mCellX;
@@ -94,7 +212,7 @@ ECode FolderIcon::FolderRingAnimator::IconGetCell(
     return NOERROR;
 }
 
-ECode FolderIcon::FolderRingAnimator::IconSetCell(
+ECode FolderIcon::FolderRingAnimator::SetCell(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y)
 {
@@ -103,14 +221,14 @@ ECode FolderIcon::FolderRingAnimator::IconSetCell(
     return NOERROR;
 }
 
-ECode FolderIcon::FolderRingAnimator::IconSetCellLayout(
+ECode FolderIcon::FolderRingAnimator::SetCellLayout(
     /* [in] */ ICellLayout* layout)
 {
     mCellLayout = layout;
     return NOERROR;
 }
 
-ECode FolderIcon::FolderRingAnimator::IconGetOuterRingSize(
+ECode FolderIcon::FolderRingAnimator::GetOuterRingSize(
     /* [out] */ Float* size)
 {
     VALIDATE_NOT_NULL(size);
@@ -119,7 +237,7 @@ ECode FolderIcon::FolderRingAnimator::IconGetOuterRingSize(
     return NOERROR;
 }
 
-ECode FolderIcon::FolderRingAnimator::IconGetInnerRingSize(
+ECode FolderIcon::FolderRingAnimator::GetInnerRingSize(
     /* [out] */ Float* size)
 {
     VALIDATE_NOT_NULL(size);
@@ -140,91 +258,6 @@ FolderIcon::PreviewItemDrawingParams::PreviewItemDrawingParams(
 {
 }
 
-CAR_INTERFACE_IMPL(FolderIcon::MyAnimatorUpdateListener, Object, IAnimatorUpdateListener);
-
-FolderIcon::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
-    /* [in] */ FolderIcon::FolderRingAnimator* host,
-    /* [in] */ Int32 previewSize)
-    : mHost(host)
-    , mPreviewSize(previewSize)
-{
-}
-
-ECode FolderIcon::MyAnimatorUpdateListener::OnAnimationUpdate(
-    /* [in] */ IValueAnimator* animation)
-{
-    AutoPtr<IInterface> value;
-    animation->GetAnimatedValue((IInterface**)&value);
-    AutoPtr<IFloat> obj = IFloat::Probe(value);
-    Float percent;
-    obj->GetValue(&percent);
-    mHost->mOuterRingSize = (1 + percent * OUTER_RING_GROWTH_FACTOR) * mPreviewSize;
-    mHost->mInnerRingSize = (1 + percent * INNER_RING_GROWTH_FACTOR) * mPreviewSize;
-    if (mHost->mCellLayout != NULL) {
-        mHost->mCellLayout->Invalidate();
-    }
-    return NOERROR;
-}
-
-FolderIcon::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
-    /* [in] */ FolderIcon::FolderRingAnimator* host)
-    : mHost(host)
-{
-}
-
-ECode FolderIcon::MyAnimatorListenerAdapter::OnAnimationStart(
-    /* [in] */ IAnimator* animation)
-{
-    if (mHost->mFolderIcon != NULL) {
-        return mHost->mFolderIcon->mPreviewBackground->SetVisibility(INVISIBLE);
-    }
-    return NOERROR;
-}
-
-CAR_INTERFACE_IMPL(FolderIcon::MyAnimatorUpdateListener2, Object, IAnimatorUpdateListener);
-
-FolderIcon::MyAnimatorUpdateListener2::MyAnimatorUpdateListener2(
-    /* [in] */ FolderIcon::FolderRingAnimator* host,
-    /* [in] */ Int32 previewSize)
-    : mHost(host)
-    , mPreviewSize(previewSize)
-{
-}
-
-ECode FolderIcon::MyAnimatorUpdateListener2::OnAnimationUpdate(
-    /* [in] */ IValueAnimator* animation)
-{
-    AutoPtr<IInterface> value;
-    animation->GetAnimatedValue((IInterface**)&value);
-    AutoPtr<IFloat> obj = IFloat::Probe(value);
-    Float percent;
-    obj->GetValue(&percent);
-
-    mHost->mOuterRingSize = (1 + (1 - percent) * OUTER_RING_GROWTH_FACTOR) * mPreviewSize;
-    mHost->mInnerRingSize = (1 + (1 - percent) * INNER_RING_GROWTH_FACTOR) * mPreviewSize;
-    if (mHost->mCellLayout != NULL) {
-        mHost->mCellLayout->Invalidate();
-    }
-    return NOERROR;
-}
-
-FolderIcon::MyAnimatorListenerAdapter2::MyAnimatorListenerAdapter2(
-    /* [in] */ FolderIcon::FolderRingAnimator* host)
-    : mHost(host)
-{
-}
-
-Ecode FolderIcon::MyAnimatorListenerAdapter2::onAnimationEnd(
-    /* [in] */ IAnimator* animation)
-{
-    if (mHost->mCellLayout != NULL) {
-        mHost->mCellLayout->HideFolderAccept(mHost);
-    }
-    if (mHost->mFolderIcon != NULL) {
-        mHost->mFolderIcon->mPreviewBackground->SetVisibility(VISIBLE);
-    }
-}
-
 FolderIcon::MyRunnable::MyRunnable(
     /* [in] */ FolderIcon* host,
     /* [in] */  IShortcutInfo* item)
@@ -236,7 +269,8 @@ FolderIcon::MyRunnable::MyRunnable(
 ECode FolderIcon::MyRunnable::Run()
 {
     mHost->mHiddenItems->Remove(mItem);
-    mHost->mFolder->ShowItem(mItem);
+    assert(0 && "need class mFolder");
+    //mHost->mFolder->ShowItem(mItem);
     return mHost->Invalidate();
 }
 
@@ -268,7 +302,7 @@ ECode FolderIcon::MyAnimatorUpdateListener3::OnAnimationUpdate(
     value->GetValue(&progress);
     if (mReverse) {
         progress = 1 - progress;
-        mHost->mPreviewBackground->SetAlpha(progress);
+        IView::Probe(mHost->mPreviewBackground)->SetAlpha(progress);
     }
 
     mHost->mAnimParams->mTransX = mTransX0 + progress * (mFinalParams->mTransX - mTransX0);
@@ -289,6 +323,7 @@ ECode FolderIcon::MyAnimatorListenerAdapter3::OnAnimationStart(
     /* [in] */ IAnimator* animation)
 {
     mHost->mAnimating = TRUE;
+    return NOERROR;
 }
 
 ECode FolderIcon::MyAnimatorListenerAdapter3::OnAnimationEnd(
@@ -328,13 +363,13 @@ CAR_INTERFACE_IMPL(FolderIcon, LinearLayout, IFolderListener);
 
 FolderIcon::FolderIcon()
     : mIntrinsicIconSize(0)
-    , mBaselineIconScale(0f)
+    , mBaselineIconScale(0.0f)
     , mBaselineIconSize(0)
     , mAvailableSpaceInPreview(0)
     , mTotalWidth(-1)
     , mPreviewOffsetX(0)
     , mPreviewOffsetY(0)
-    , mMaxPerspectiveShift(0f)
+    , mMaxPerspectiveShift(0.0f)
     , mAnimating(FALSE)
 {
     mParams = new PreviewItemDrawingParams(0, 0, 0, 0);
@@ -375,14 +410,15 @@ ECode FolderIcon::IsDropEnabled(
     AutoPtr<IViewGroup> cellLayoutChildren = IViewGroup::Probe(parent);
 
     AutoPtr<IViewParent> parent2;
-    cellLayoutChildren->GetParent(&parent2);
+    IView::Probe(cellLayoutChildren)->GetParent((IViewParent**)&parent2);
     AutoPtr<IViewGroup> cellLayout = IViewGroup::Probe(parent2);
 
     AutoPtr<IViewParent> parent3;
-    cellLayout->GetParent(&parent3);
+    IView::Probe(cellLayout)->GetParent((IViewParent**)&parent3);
     AutoPtr<IWorkspace> workspace = IWorkspace::Probe(parent3);
     Boolean res;
-    !workspace->IsSmall(&res);
+    assert(0 && "need class workspace");
+    //workspace->IsSmall(&res);
     *result = !res;
     return NOERROR;
 }
@@ -403,49 +439,50 @@ ECode FolderIcon::FromXml(
         // throw new IllegalStateException("DROP_IN_ANIMATION_DURATION must be greater than " +
         //         "INITIAL_ITEM_ANIMATION_DURATION, as sequencing of adding first two items " +
         //         "is dependent on this");
-        Slogger::E("FolderIcon", "DROP_IN_ANIMATION_DURATION must be greater than " +
-                "INITIAL_ITEM_ANIMATION_DURATION, as sequencing of adding first two items " +
+        Slogger::E("FolderIcon", "DROP_IN_ANIMATION_DURATION must be greater than "
+                "INITIAL_ITEM_ANIMATION_DURATION, as sequencing of adding first two items "
                 "is dependent on this");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    AutoPtr<ILayoutInflater> inflate;
-    From(IContext::Probe(launcher), (ILayoutInflater**)&inflater);
+    AutoPtr<ILayoutInflater> inflater;
+    LayoutInflater::From(IContext::Probe(launcher), (ILayoutInflater**)&inflater);
     AutoPtr<IView> view;
     inflater->Inflate(resId, group, FALSE, (IView**)&view);
     AutoPtr<IFolderIcon> icon = IFolderIcon::Probe(view);
 
-    FolderIcon* _icon = (FolderIcon*)icon;
+    FolderIcon* _icon = (FolderIcon*)icon.Get();
     FolderInfo* _folderInfo = (FolderInfo*)folderInfo;
     AutoPtr<IView> view2;
-    icon->FindViewById(
+    IView::Probe(icon)->FindViewById(
             Elastos::Droid::Launcher2::R::id::folder_icon_name, (IView**)&view2);
     _icon->mFolderName = IBubbleTextView::Probe(view2);
-    _icon->mFolderName->SetText(_folderInfo->mTitle);
+    ITextView::Probe(_icon->mFolderName)->SetText(_folderInfo->mTitle);
     AutoPtr<IView> view3;
-    icon->FindViewById(
+    IView::Probe(icon)->FindViewById(
             Elastos::Droid::Launcher2::R::id::preview_background, (IView**)&view3);
     _icon->mPreviewBackground = IImageView::Probe(view3);
 
-    icon->SetTag(folderInfo);
-    icon->SetOnClickListener(launcher);
+    IView::Probe(icon)->SetTag(TO_IINTERFACE(folderInfo));
+    IView::Probe(icon)->SetOnClickListener(IViewOnClickListener::Probe(launcher));
     _icon->mInfo = folderInfo;
     _icon->mLauncher = launcher;
 
     String str;
-    launcher->GetString(
-            Elastos::Droid::Launcher2::R::string::folder_name_format, &str)
-    icon->SetContentDescription(String::Format(str, folderInfo.title));
-    AutoPtr<IFolder> folder = Folder::FromXml(launcher);
-    AutoPtr<IDragController> controller;
-    launcher->GetDragController((IDragController**)&controller);
-    folder->SetDragController(controller);
-    folder->SetFolderIcon(icon);
-    folder->Bind(folderInfo);
-    _icon->mFolder = folder;
+    IContext::Probe(launcher)->GetString(
+            Elastos::Droid::Launcher2::R::string::folder_name_format, &str);
+    assert(0 && "String::Format");
+    //icon->SetContentDescription(String::Format(str, folderInfo.title));
+    // AutoPtr<IFolder> folder = Folder::FromXml(launcher);
+    // AutoPtr<IDragController> controller;
+    // launcher->GetDragController((IDragController**)&controller);
+    // folder->SetDragController(controller);
+    // folder->SetFolderIcon(icon);
+    // folder->Bind(folderInfo);
+    // _icon->mFolder = folder;
 
-    _icon->mFolderRingAnimator = new FolderRingAnimator(launcher, icon);
-    folderInfo->AddListener(icon);
+    _icon->mFolderRingAnimator = new FolderRingAnimator(launcher, (FolderIcon*)icon.Get());
+    ((FolderInfo*)folderInfo)->AddListener(IFolderListener::Probe(icon));
 
     *outicon = icon;
     REFCOUNT_ADD(*outicon);
@@ -458,7 +495,10 @@ ECode FolderIcon::OnSaveInstanceState(
     VALIDATE_NOT_NULL(p);
 
     sStaticValuesDirty = TRUE;
-    return LinearLayout::OnSaveInstanceState();
+    AutoPtr<IParcelable> _p = LinearLayout::OnSaveInstanceState();
+    *p = _p;
+    REFCOUNT_ADD(*p);
+    return NOERROR;
 }
 
 ECode FolderIcon::GetFolder(
@@ -487,10 +527,12 @@ Boolean FolderIcon::WillAcceptItem(
     ItemInfo* _item = (ItemInfo*)item;
     Int32 itemType = _item->mItemType;
     Boolean res;
-    return ((itemType == LauncherSettings::Favorites::ITEM_TYPE_APPLICATION ||
-            itemType == LauncherSettings::Favorites::ITEM_TYPE_SHORTCUT) &&
-            (mFolder->IsFull(&res), !res) && TO_IINTERFACE(item) != TO_IINTERFACE(mInfo)
-            && !mInfo.opened);
+    assert(0);
+    // return ((itemType == LauncherSettings::Favorites::ITEM_TYPE_APPLICATION ||
+    //         itemType == LauncherSettings::Favorites::ITEM_TYPE_SHORTCUT) &&
+    //         (mFolder->IsFull(&res), !res) && TO_IINTERFACE(item) != TO_IINTERFACE(mInfo)
+    //         && !mInfo.opened);
+    return NOERROR;
 }
 
 ECode FolderIcon::AcceptDrop(
@@ -501,39 +543,46 @@ ECode FolderIcon::AcceptDrop(
 
     AutoPtr<IItemInfo> item = IItemInfo::Probe(dragInfo);
     Boolean res;
-    *result = (mFolder->IsDestroyed(&res), !res) && WillAcceptItem(item);
+    assert(0);
+    // *result = (mFolder->IsDestroyed(&res), !res) && WillAcceptItem(item);
     return NOERROR;
 }
 
 ECode FolderIcon::AddItem(
     /* [in] */ IShortcutInfo* item)
 {
-    mInfo->Add(TO_IINTERFACE(item));
+    ((FolderInfo*)mInfo.Get())->Add((ShortcutInfo*)item);
+    return NOERROR;
 }
 
 ECode FolderIcon::OnDragEnter(
     /* [in] */ IInterface* dragInfo)
 {
     Boolean res;
-    mFolder->IsDestroyed(&res);
+    assert(0);
+    //mFolder->IsDestroyed(&res);
     if (res || !WillAcceptItem(IItemInfo::Probe(dragInfo))) {
         return NOERROR;
     }
     AutoPtr<IViewGroupLayoutParams> params;
     GetLayoutParams((IViewGroupLayoutParams**)&params);
 
-    AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)
-            ICellLayoutLayoutParams::Probe(params);
+    assert(0);
+    // AutoPtr<CellLayout::LayoutParams> lp = (CellLayout::LayoutParams*)
+    //         ICellLayoutLayoutParams::Probe(params);
 
     AutoPtr<IViewParent> parent1;
     GetParent((IViewParent**)&parent1);
     AutoPtr<IViewParent> parent2;
     parent1->GetParent((IViewParent**)&parent2);
     AutoPtr<ICellLayout> layout = ICellLayout::Probe(parent2);
-    mFolderRingAnimator->SetCell(lp->mCellX, lp->mCellY);
+    assert(0);
+    //mFolderRingAnimator->SetCell(lp->mCellX, lp->mCellY);
     mFolderRingAnimator->SetCellLayout(layout);
     mFolderRingAnimator->AnimateToAcceptState();
-    return layout->ShowFolderAccept(mFolderRingAnimator);
+    assert(0);
+    //return layout->ShowFolderAccept(mFolderRingAnimator);
+    return NOERROR;
 }
 
 ECode FolderIcon::OnDragOver(
@@ -567,8 +616,9 @@ ECode FolderIcon::PerformCreateAnimation(
     AddItem(destInfo);
 
     // This will animate the dragView (srcView) into the new folder
-    return OnDrop(srcInfo, srcView, dstRect, scaleRelativeToDragLayer, 1,
+    OnDrop(srcInfo, srcView, dstRect, scaleRelativeToDragLayer, 1,
             postAnimationRunnable, NULL);
+    return NOERROR;
 }
 
 ECode FolderIcon::PerformDestroyAnimation(
@@ -586,8 +636,9 @@ ECode FolderIcon::PerformDestroyAnimation(
 
     // This will animate the first item from it's position as an icon into its
     // position as the first item in the preview
-    return AnimateFirstItem(animateDrawable, FINAL_ITEM_ANIMATION_DURATION, TRUE,
+    AnimateFirstItem(animateDrawable, FINAL_ITEM_ANIMATION_DURATION, TRUE,
             onCompleteRunnable);
+    return NOERROR;
 }
 
 ECode FolderIcon::OnDragExit(
@@ -608,7 +659,7 @@ void FolderIcon::OnDrop(
     /* [in] */  Float scaleRelativeToDragLayer,
     /* [in] */  Int32 index,
     /* [in] */  IRunnable* postAnimationRunnable,
-    /* [in] */  IDragObject* d)
+    /* [in] */  IDropTargetDragObject* d)
 {
     ShortcutInfo* _item = (ShortcutInfo*)item;
     _item->mCellX = -1;
@@ -619,15 +670,17 @@ void FolderIcon::OnDrop(
     // will not have a view to animate
     if (animateView != NULL) {
         AutoPtr<IDragLayer> dragLayer;
-        mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
+        assert(0);
+        //mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
         AutoPtr<IRect> from;
         CRect::New((IRect**)&from);
-        dragLayer->GetViewRectRelativeToSelf(animateView, from);
+        dragLayer->GetViewRectRelativeToSelf(IView::Probe(animateView), from);
         AutoPtr<IRect> to = finalRect;
         if (to == NULL) {
             CRect::New((IRect**)&to);
             AutoPtr<IWorkspace> workspace;
-            mLauncher->GetWorkspace((IWorkspace**)&workspace);
+            assert(0);
+            //mLauncher->GetWorkspace((IWorkspace**)&workspace);
 
             // Set cellLayout and this to it's final state to compute final animation locations
             AutoPtr<IViewParent> parent1;
@@ -635,7 +688,8 @@ void FolderIcon::OnDrop(
             AutoPtr<IViewParent> parent2;
             parent1->GetParent((IViewParent**)&parent2);
 
-            workspace->SetFinalTransitionTransform(ICellLayout::Probe(parent2));
+            assert(0);
+            //workspace->SetFinalTransitionTransform(ICellLayout::Probe(parent2));
             Float scaleX;
             GetScaleX(&scaleX);
             Float scaleY;
@@ -646,23 +700,23 @@ void FolderIcon::OnDrop(
             // Finished computing final animation locations, restore current state
             SetScaleX(scaleX);
             SetScaleY(scaleY);
-            workspace->ResetTransitionTransform(ICellLayout::Probe(parent2));
+            assert(0);
+            //workspace->ResetTransitionTransform(ICellLayout::Probe(parent2));
         }
 
-        AutoPtr<AutoPtr<Int32> > center = AutoPtr<Int32>::Alloc(2);
-        Float scale;
-        GetLocalCenterForIndex(index, center, &scale);
-        (*center)[0] = (Int32)Math::Round(scaleRelativeToDragLayer * (*center)[0]);
-        (*center)[1] = (Int32)Math::Round(scaleRelativeToDragLayer * (*center)[1]);
+        AutoPtr<ArrayOf<Int32> > center = ArrayOf<Int32>::Alloc(2);
+        Float scale = GetLocalCenterForIndex(index, center);
+        (*center)[0] = (Int32)Elastos::Core::Math::Round(scaleRelativeToDragLayer * (*center)[0]);
+        (*center)[1] = (Int32)Elastos::Core::Math::Round(scaleRelativeToDragLayer * (*center)[1]);
 
         Int32 width;
-        animateView->GetMeasuredWidth(&width);
+        IView::Probe(animateView)->GetMeasuredWidth(&width);
         Int32 height;
-        animateView->GetMeasuredHeight(&height);
+        IView::Probe(animateView)->GetMeasuredHeight(&height);
         to->Offset((*center)[0] - width / 2,
                 (*center)[1] - height / 2);
 
-        Float finalAlpha = index < NUM_ITEMS_IN_PREVIEW ? 0.5f : 0f;
+        Float finalAlpha = index < NUM_ITEMS_IN_PREVIEW ? 0.5f : 0.0f;
 
         Float finalScale = scale * scaleRelativeToDragLayer;
 
@@ -671,12 +725,13 @@ void FolderIcon::OnDrop(
         AutoPtr<IAccelerateInterpolator> polator2;
         CAccelerateInterpolator::New(2, (IAccelerateInterpolator**)&polator2);
         dragLayer->AnimateView(animateView, from, to, finalAlpha,
-                1, 1, finalScale, finalScale, DROP_IN_ANIMATION_DURATION,
-                polator, polator2,
+                1.0, 1.0, finalScale, finalScale, DROP_IN_ANIMATION_DURATION,
+                IInterpolator::Probe(polator), IInterpolator::Probe(polator2),
                 postAnimationRunnable, IDragLayer::ANIMATION_END_DISAPPEAR, NULL);
         AddItem(item);
         mHiddenItems->Add(TO_IINTERFACE(item));
-        mFolder->HideItem(item);
+        assert(0);
+        //mFolder->HideItem(item);
         AutoPtr<IRunnable> r = new MyRunnable(this, item);
         Boolean res;
         PostDelayed(r, DROP_IN_ANIMATION_DURATION, &res);
@@ -687,21 +742,28 @@ void FolderIcon::OnDrop(
 }
 
 ECode FolderIcon::OnDrop(
-    /* [in] */ IDragObject* d)
+    /* [in] */ IDropTargetDragObject* d)
 {
+    DragObject* _d = (DragObject*)d;
     AutoPtr<IShortcutInfo> item;
-    if (d.dragInfo instanceof ApplicationInfo) {
+    if (IApplicationInfo::Probe(_d->mDragInfo) != NULL) {
         // Came from all apps -- make a copy
-        item = ((ApplicationInfo) d.dragInfo).makeShortcut();
+        ApplicationInfo* info = (ApplicationInfo*)IApplicationInfo::Probe(_d->mDragInfo);
+        item = info->MakeShortcut();
     } else {
-        item = (ShortcutInfo) d.dragInfo;
+        item = IShortcutInfo::Probe(_d->mDragInfo);
     }
-    mFolder.notifyDrop();
-    onDrop(item, d.dragView, null, 1.0f, mInfo.contents.size(), d.postAnimationRunnable, d);
+    assert(0);
+    //mFolder->NotifyDrop();
+    FolderInfo* info = (FolderInfo*)mInfo.Get();
+    Int32 size;
+    info->mContents->GetSize(&size);
+    OnDrop(item, _d->mDragView, NULL, 1.0f, size, _d->mPostAnimationRunnable, d);
+    return NOERROR;
 }
 
 ECode FolderIcon::GetDropTargetDelegate(
-    /* [in] */ IDragObject* d,
+    /* [in] */ IDropTargetDragObject* d,
     /* [out] */ IDropTarget** target)
 {
     VALIDATE_NOT_NULL(target);
@@ -750,21 +812,21 @@ Float FolderIcon::GetLocalCenterForIndex(
     /* [in] */ Int32 index,
     /* [in] */ ArrayOf<Int32>* center)
 {
-    mParams = ComputePreviewItemDrawingParams(Math::Min(NUM_ITEMS_IN_PREVIEW, index), mParams);
+    mParams = ComputePreviewItemDrawingParams(Elastos::Core::Math::Min(NUM_ITEMS_IN_PREVIEW, index), mParams);
 
     mParams->mTransX += mPreviewOffsetX;
     mParams->mTransY += mPreviewOffsetY;
     Float offsetX = mParams->mTransX + (mParams->mScale * mIntrinsicIconSize) / 2;
     Float offsetY = mParams->mTransY + (mParams->mScale * mIntrinsicIconSize) / 2;
 
-    (*center)[0] = (Int32)Math::Round(offsetX);
-    (*center)[1] = (Int32)Math::Round(offsetY);
-    return mParams->Scale;
+    (*center)[0] = (Int32)Elastos::Core::Math::Round(offsetX);
+    (*center)[1] = (Int32)Elastos::Core::Math::Round(offsetY);
+    return mParams->mScale;
 }
 
-AutoPtr<PreviewItemDrawingParams> FolderIcon::ComputePreviewItemDrawingParams(
+AutoPtr<FolderIcon::PreviewItemDrawingParams> FolderIcon::ComputePreviewItemDrawingParams(
     /* [in] */ Int32 index,
-    /* [in] */ PreviewItemDrawingParams* params)
+    /* [in] */ FolderIcon::PreviewItemDrawingParams* params)
 {
     index = NUM_ITEMS_IN_PREVIEW - index - 1;
     Float r = (index * 1.0f) / (NUM_ITEMS_IN_PREVIEW - 1);
@@ -782,7 +844,7 @@ AutoPtr<PreviewItemDrawingParams> FolderIcon::ComputePreviewItemDrawingParams(
     const Int32 overlayAlpha = (Int32)(80 * (1 - r));
 
     if (params == NULL) {
-        params = new PreviewItemDrawingParams(transX, transY, totalScale, overlayAlpha);
+        params = new FolderIcon::PreviewItemDrawingParams(transX, transY, totalScale, overlayAlpha);
     }
     else {
         params->mTransX = transX;
@@ -795,9 +857,10 @@ AutoPtr<PreviewItemDrawingParams> FolderIcon::ComputePreviewItemDrawingParams(
 
 void FolderIcon::DrawPreviewItem(
     /* [in] */ ICanvas* canvas,
-    /* [in] */ PreviewItemDrawingParams* params)
+    /* [in] */ FolderIcon::PreviewItemDrawingParams* params)
 {
-    canvas->Save();
+    Int32 tmp;
+    canvas->Save(&tmp);
     canvas->Translate(params->mTransX + mPreviewOffsetX, params->mTransY + mPreviewOffsetY);
     canvas->Scale(params->mScale, params->mScale);
     AutoPtr<IDrawable> d = params->mDrawable;
@@ -808,8 +871,8 @@ void FolderIcon::DrawPreviewItem(
         AutoPtr<IColor> color;
         CColor::AcquireSingleton((IColor**)&color);
         Int32 argb;
-        color->argb(params->mOverlayAlpha, 0, 0, 0, &argb);
-        d->SetColorFilter(argb, PorterDuffMode::SRC_ATOP);
+        color->Argb(params->mOverlayAlpha, 0, 0, 0, &argb);
+        d->SetColorFilter(argb, PorterDuffMode_SRC_ATOP);
         d->Draw(canvas);
         d->ClearColorFilter();
         d->SetFilterBitmap(FALSE);
@@ -817,18 +880,20 @@ void FolderIcon::DrawPreviewItem(
     canvas->Restore();
 }
 
-Ecode FolderIcon::DispatchDraw(
+void FolderIcon::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     LinearLayout::DispatchDraw(canvas);
 
-    if (mFolder == NULL) return NOERROR;
+    if (mFolder == NULL) return;
     Int32 count;
-    mFolder->GetItemCount(&count);
-    if (count == 0 && !mAnimating) return NOERROR;
+    assert(0);
+    //mFolder->GetItemCount(&count);
+    if (count == 0 && !mAnimating) return;
 
     AutoPtr<IArrayList> items;
-    mFolder->GetItemsInReadingOrder((IArrayList**)&items);
+    assert(0);
+    //mFolder->GetItemsInReadingOrder((IArrayList**)&items);
     AutoPtr<IDrawable> d;
     AutoPtr<ITextView> v;
 
@@ -849,7 +914,7 @@ Ecode FolderIcon::DispatchDraw(
 
     Int32 size;
     items->GetSize(&size);
-    Int32 nItemsInPreview = Math::Min(size, NUM_ITEMS_IN_PREVIEW);
+    Int32 nItemsInPreview = Elastos::Core::Math::Min(size, NUM_ITEMS_IN_PREVIEW);
     if (!mAnimating) {
         for (Int32 i = nItemsInPreview - 1; i >= 0; i--) {
             AutoPtr<IInterface> obj;
@@ -857,7 +922,7 @@ Ecode FolderIcon::DispatchDraw(
             v = ITextView::Probe(obj);
 
             AutoPtr<IInterface> tag;
-            v->GetTag((IInterface**)&tag);
+            IView::Probe(v)->GetTag((IInterface**)&tag);
             Boolean res;
             mHiddenItems->Contains(tag, &res);
             if (!res) {
@@ -874,7 +939,6 @@ Ecode FolderIcon::DispatchDraw(
     else {
         DrawPreviewItem(canvas, mAnimParams);
     }
-    return NOERROR;
 }
 
 void FolderIcon::AnimateFirstItem(
@@ -894,8 +958,8 @@ void FolderIcon::AnimateFirstItem(
     Float transY0 = (mAvailableSpaceInPreview - height) / 2;
     mAnimParams->mDrawable = d;
 
-    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::New(2);
-    (*array)[0] = 0f;
+    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+    (*array)[0] = 0.0f;
     (*array)[1] = 1.0f;
     AutoPtr<IValueAnimator> va = LauncherAnimUtils::OfFloat(this, array);
 
@@ -904,19 +968,19 @@ void FolderIcon::AnimateFirstItem(
     va->AddUpdateListener(listener);
 
     AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter3(this, onCompleteRunnable);
-    va->AddListener(listener2);
+    IAnimator::Probe(va)->AddListener(listener2);
     va->SetDuration(duration);
-    va->Start();
+    IAnimator::Probe(va)->Start();
 }
 
 ECode FolderIcon::SetTextVisible(
     /* [in] */ Boolean visible)
 {
     if (visible) {
-        return mFolderName->SetVisibility(VISIBLE);
+        return IView::Probe(mFolderName)->SetVisibility(VISIBLE);
     }
     else {
-        return mFolderName->SetVisibility(INVISIBLE);
+        return IView::Probe(mFolderName)->SetVisibility(INVISIBLE);
     }
     return NOERROR;
 }
@@ -927,7 +991,7 @@ ECode FolderIcon::GetTextVisible(
     VALIDATE_NOT_NULL(result);
 
     Int32 visibility;
-    mFolderName->GetVisibility(&visibility);
+    IView::Probe(mFolderName)->GetVisibility(&visibility);
     *result = visibility == VISIBLE;
     return NOERROR;
 }
@@ -957,14 +1021,17 @@ ECode FolderIcon::OnTitleChanged(
 {
     String str;
     title->ToString(&str);
-    mFolderName->SetText(str);
+    assert(0);
+    //ITextView::Probe(mFolderName)->SetText(str);
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     String format;
     context->GetString(
             Elastos::Droid::Launcher2::R::string::folder_name_format, &format);
-    return SetContentDescription(String::Format(format, title));
+    assert(0);
+    //return SetContentDescription(String::Format(format, title));
+    return NOERROR;
 }
 
 ECode FolderIcon::OnTouchEvent(
@@ -997,7 +1064,8 @@ ECode FolderIcon::CancelLongPress()
 {
     LinearLayout::CancelLongPress();
 
-    return mLongPressHelper->CancelLongPress();
+    mLongPressHelper->CancelLongPress();
+    return NOERROR;
 }
 
 } // namespace Launcher2

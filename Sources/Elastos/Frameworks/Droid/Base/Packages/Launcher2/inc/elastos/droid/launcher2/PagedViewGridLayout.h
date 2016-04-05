@@ -1,7 +1,21 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEWGRIDLAYOUT_H__
 #define  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEWGRIDLAYOUT_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/widget/FrameLayout.h"
+#include "elastos/droid/widget/GridLayout.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Widget::GridLayout;
+using Elastos::Droid::Widget::FrameLayout;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -9,6 +23,7 @@ namespace Launcher2 {
 
 class PagedViewGridLayout
     : public GridLayout
+    , public IPagedViewGridLayout
     , public IPage
 {
 public:
@@ -29,9 +44,11 @@ public:
         /* [in] */ Int32 cellCountX,
         /* [in] */ Int32 cellCountY);
 
-    CARAPI_(Int32) GetCellCountX();
+    CARAPI GetCellCountX(
+        /* [out] */ Int32* x);
 
-    CARAPI_(Int32) GetCellCountY();
+    CARAPI GetCellCountY(
+        /* [out] */ Int32* y);
 
     /**
      * Clears all the key listeners for the individual widgets.
@@ -68,13 +85,15 @@ public:
         /* [out] */ Int32* index);
 
 protected:
-    CARAPI OnMeasure(
+    //@Override
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
     //@Override
     CARAPI OnDetachedFromWindow();
 
+    //@Override
     CARAPI OnLayout(
         /* [in] */ Boolean changed,
         /* [in] */ Int32 left,

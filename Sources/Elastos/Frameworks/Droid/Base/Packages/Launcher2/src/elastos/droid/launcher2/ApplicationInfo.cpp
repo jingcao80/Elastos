@@ -1,48 +1,63 @@
 
 #include "elastos/droid/launcher2/ApplicationInfo.h"
+#include "elastos/droid/launcher2/ShortcutInfo.h"
 #include "Elastos.Droid.Service.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Slogger.h>
 #include "R.h"
+
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-static const Int32 ApplicationInfo::DOWNLOADED_FLAG = 1;
-static const Int32 ApplicationInfo::UPDATED_SYSTEM_APP_FLAG = 2;
+const Int32 ApplicationInfo::DOWNLOADED_FLAG = 1;
+const Int32 ApplicationInfo::UPDATED_SYSTEM_APP_FLAG = 2;
 
-static const String ApplicationInfo::TAG("Launcher2.ApplicationInfo");
+const String ApplicationInfo::TAG("Launcher2.ApplicationInfo");
+
+CAR_INTERFACE_IMPL(ApplicationInfo, ItemInfo, IApplicationInfo);
 
 ApplicationInfo::ApplicationInfo()
     : mFirstInstallTime(0)
     , mFlags(0)
 {
-    mItemType = LauncherSettings::BaseLauncherColumns::ITEM_TYPE_SHORTCUT;
 }
 
-ApplicationInfo::ApplicationInfo(
+ECode ApplicationInfo::constructor()
+{
+    mItemType = ILauncherSettingsBaseLauncherColumns::ITEM_TYPE_SHORTCUT;
+    return NOERROR;
+}
+
+ApplicationInfo::constructor(
     /* [in] */ ILauncherActivityInfo* info,
     /* [in] */ IUserHandle* user,
     /* [in] */ IconCache* iconCache,
     /* [in] */ IHashMap* labelCache)
-    : mFirstInstallTime(0)
-    , mFlags(0)
 {
     info->GetComponentName((IComponentName**)&mComponentName);
     mContainer = ItemInfo::NO_ID;
-    SetActivity(componentName,
+    SetActivity(mComponentName,
             IIntent::FLAG_ACTIVITY_NEW_TASK | IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
 
-    AutoPtr<IApplicationInfo> ainpo;
-    GetApplicationInfo((IApplicationInfo**)&ainpo);
-    Int32 appFlags = ainpo.flags;
+    AutoPtr<Elastos::Droid::Content::Pm::IApplicationInfo> ainpo;
+    info->GetApplicationInfo((Elastos::Droid::Content::Pm::IApplicationInfo**)&ainpo);
+    Int32 appFlags;
     ainpo->GetFlags(&appFlags);
-    if ((appFlags & IApplicationInfo::FLAG_SYSTEM) == 0) {
-        flags |= DOWNLOADED_FLAG;
+    if ((appFlags & Elastos::Droid::Content::Pm::IApplicationInfo::FLAG_SYSTEM) == 0) {
+        mFlags |= DOWNLOADED_FLAG;
     }
-    if ((appFlags & IApplicationInfo::FLAG_UPDATED_SYSTEM_APP) != 0) {
-        flags |= UPDATED_SYSTEM_APP_FLAG;
+    if ((appFlags & Elastos::Droid::Content::Pm::IApplicationInfo::FLAG_UPDATED_SYSTEM_APP) != 0) {
+        mFlags |= UPDATED_SYSTEM_APP_FLAG;
     }
-    mFirstInstallTime;
     info->GetFirstInstallTime(&mFirstInstallTime);
     iconCache->GetTitleAndIcon(this, info, labelCache);
     CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&mIntent);
@@ -50,34 +65,34 @@ ApplicationInfo::ApplicationInfo(
     AutoPtr<IComponentName> name;
     info->GetComponentName((IComponentName**)&name);
     mIntent->SetComponent(name);
-    mIntent->PutExtra(EXTRA_PROFILE, user);
+    mIntent->PutExtra(EXTRA_PROFILE, IParcelable::Probe(user));
     UpdateUser(mIntent);
+    return NOERROR;
 }
 
-ApplicationInfo::ApplicationInfo(
+ApplicationInfo::constructor(
     /* [in] */ ApplicationInfo* info)
-    : mFirstInstallTime(0)
-    , mFlags(0)
-    , ItemInfo(info);
 {
-    AutoPtr<IComponentName> name;
-    info->GetComponentName((IComponentName**)&name);
-    mComponentName = name;
-    info->mTitle->ToString(&mTitle);
-    CIntent::New(info->mIntent, (Intent**)&mIntent);
+    ItemInfo::constructor(info);
+    mComponentName = info->mComponentName;
+    String tmp;
+    info->mTitle->ToString(&tmp);
+    mTitle = CoreUtils::Convert(tmp);
+    CIntent::New(info->mIntent, (IIntent**)&mIntent);
     mFlags = info->mFlags;
     mFirstInstallTime = info->mFirstInstallTime;
+    return NOERROR;
 }
 
 ECode ApplicationInfo::SetActivity(
     /* [in] */ IComponentName* className,
     /* [in] */ Int32 launchFlags)
 {
-    CIntent::New(IIntent::ACTION_MAIN, (Intent**)&mIntent);
+    CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&mIntent);
     mIntent->AddCategory(IIntent::CATEGORY_LAUNCHER);
     mIntent->SetComponent(className);
     mIntent->SetFlags(launchFlags);
-    mItemType = LauncherSettings::BaseLauncherColumns::ITEM_TYPE_APPLICATION;
+    mItemType = ILauncherSettingsBaseLauncherColumns::ITEM_TYPE_APPLICATION;
     return NOERROR;
 }
 
@@ -117,7 +132,7 @@ void ApplicationInfo::DumpApplicationInfoList(
         String tmp;
         info->mTitle->ToString(&tmp);
         String tmp2;
-        info->mIconBitmap->ToString(&tmp2);
+        IObject::Probe(info->mIconBitmap)->ToString(&tmp2);
         Slogger::D(tag, "   title=\"%s\" iconBitmap=%s firstInstallTime=%d",
                 tmp.string(), tmp2.string(), info->mFirstInstallTime);
     }
@@ -126,7 +141,8 @@ void ApplicationInfo::DumpApplicationInfoList(
 
 AutoPtr<ShortcutInfo> ApplicationInfo::MakeShortcut()
 {
-    AutoPtr<ShortcutInfo> info = new ShortcutInfo(this);
+    AutoPtr<ShortcutInfo> info = new ShortcutInfo();
+    info->constructor(this);
     return info;
 }
 

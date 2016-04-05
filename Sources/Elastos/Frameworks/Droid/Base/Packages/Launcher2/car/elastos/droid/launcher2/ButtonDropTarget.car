@@ -1,0 +1,86 @@
+module
+{
+    using interface Elastos.Droid.Graphics.IPointF;
+    using interface Elastos.Droid.Graphics.IRect;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
+
+    interface Elastos.Droid.Launcher2.ILauncher;
+    interface Elastos.Droid.Launcher2.IDropTargetDragObject;
+    interface Elastos.Droid.Launcher2.ISearchDropTargetBar;
+    interface Elastos.Droid.Launcher2.IDragSource;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IView
+     *
+     * interface Elastos.Droid.View.OnPreDrawListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     *
+     * interface IDropTarget
+     * interface IDragControllerDragListener
+     * interface ITextView
+     */
+    [deprecated]
+    interface IButtonDropTarget {
+        SetLauncher(
+            [in] ILauncher* launcher);
+
+        AcceptDrop(
+            [in] IDropTargetDragObject* d,
+            [out] Boolean* result);
+
+        SetSearchDropTargetBar(
+            [in] ISearchDropTargetBar* searchDropTargetBar);
+
+        OnDrop(
+            [in] IDropTargetDragObject* d);
+
+        OnFlingToDelete(
+            [in] IDropTargetDragObject* d,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] IPointF* vec);
+
+        OnDragEnter(
+            [in] IDropTargetDragObject* d);
+
+        OnDragOver(
+            [in] IDropTargetDragObject* d);
+
+        OnDragExit(
+            [in] IDropTargetDragObject* d);
+
+        OnDragStart(
+            [in] IDragSource* source,
+            [in] IInterface* info,
+            [in] Int32 dragAction);
+
+        IsDropEnabled(
+            [out] Boolean* result);
+
+        OnDragEnd();
+
+        GetIconRect(
+            [in] Int32 viewWidth,
+            [in] Int32 viewHeight,
+            [in] Int32 drawableWidth,
+            [in] Int32 drawableHeight,
+            [out] IRect** rect);
+
+        GetLocationInDragLayer(
+            [in] ArrayOf<Int32>* loc);
+
+        GetCurrentDrawable(
+            [out] IDrawable** drawable);
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

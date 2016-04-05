@@ -1,7 +1,12 @@
 
 #include "elastos/droid/launcher2/InterruptibleInOutAnimator.h"
 #include "Elastos.Droid.Service.h"
+#include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include "R.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include <elastos/core/Math.h>
+
+ using Elastos::Core::IFloat;
 
 namespace Elastos {
 namespace Droid {
@@ -35,7 +40,10 @@ InterruptibleInOutAnimator::InterruptibleInOutAnimator(
     , mFirstRun(TRUE)
     , mDirection(STOPPED)
 {
-    mAnimator = LauncherAnimUtils::OfFloat(view, fromValue, toValue);
+    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+    (*array)[0] = fromValue;
+    (*array)[1] = toValue;
+    mAnimator = LauncherAnimUtils::OfFloat(view, array);
     mAnimator->SetDuration(duration);
     mOriginalDuration = duration;
     mOriginalFromValue = fromValue;
@@ -71,24 +79,28 @@ ECode InterruptibleInOutAnimator::Animate(
 
     // Ensure we don't calculate a non-sensical duration
     Int64 duration = mOriginalDuration - currentPlayTime;
-    mAnimator->SetDuration(Math::Max(0, Math::Min(duration, mOriginalDuration)));
+    mAnimator->SetDuration(Elastos::Core::Math::Max(0L,
+            Elastos::Core::Math::Min(duration, mOriginalDuration)));
 
-    mAnimator->SetFloatValues(startValue, toValue);
-    mAnimator->Start();
+    AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
+    (*array)[0] = startValue;
+    (*array)[1] = toValue;
+    mAnimator->SetFloatValues(array);
+    IAnimator::Probe(mAnimator)->Start();
     mFirstRun = FALSE;
     return NOERROR;
 }
 
 ECode InterruptibleInOutAnimator::Cancel()
 {
-    mAnimator->Cancel();
+    IAnimator::Probe(mAnimator)->Cancel();
     mDirection = STOPPED;
     return NOERROR;
 }
 
 ECode InterruptibleInOutAnimator::End()
 {
-    mAnimator->End();
+    IAnimator::Probe(mAnimator)->End();
     mDirection = STOPPED;
     return NOERROR;
 }

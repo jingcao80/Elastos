@@ -1,13 +1,26 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_FOCUSHELPER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_FOCUSHELPER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IViewOnKeyListener;
+using Elastos::Droid::Widget::ITabHost;
+using Elastos::Core::Object;
+using Elastos::Core::IComparator;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
-
-class FocusHelper;
 
 /**
  * A keyboard listener we set on all the workspace icons.

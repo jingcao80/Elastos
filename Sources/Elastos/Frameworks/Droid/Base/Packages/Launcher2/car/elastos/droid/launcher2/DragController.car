@@ -1,5 +1,21 @@
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Graphics.IBitmap;
+    using interface Elastos.Droid.Graphics.IPoint;
+    using interface Elastos.Droid.Graphics.IRect;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IKeyEvent;
+    using interface Elastos.Droid.View.IMotionEvent;
+    using interface Elastos.Droid.Os.IBinder;
+    using interface Elastos.Utility.IArrayList;
+
+    interface Elastos.Droid.Launcher2.IDragSource;
+    interface Elastos.Droid.Launcher2.IDragView;
+    interface Elastos.Droid.Launcher2.IDragScroller;
+    interface Elastos.Droid.Launcher2.IDropTargetDragObject;
+    interface Elastos.Droid.Launcher2.IDropTarget;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
@@ -7,7 +23,7 @@ module
     /**
      * Interface to receive notifications when a drag starts or stops
      */
-    interface IDragListener {
+    interface IDragControllerDragListener {
         /**
          * A drag has begun
          *
@@ -27,6 +43,7 @@ module
         OnDragEnd();
     }
 
+    [local]
     interface IDragController {
         /** Indicates the drag is a move.  */
         const Int32 DRAG_ACTION_MOVE = 0;
@@ -37,6 +54,174 @@ module
         const Int32 SCROLL_NONE = -1;
         const Int32 SCROLL_LEFT = 0;
         const Int32 SCROLL_RIGHT = 1;
+
+        Dragging(
+            [out] Boolean* result);
+
+        /**
+         * Starts a drag.
+         *
+         * @param v The view that is being dragged
+         * @param bmp The bitmap that represents the view being dragged
+         * @param source An object representing where the drag originated
+         * @param dragInfo The data associated with the object that is being dragged
+         * @param dragAction The drag action: either {@link #DRAG_ACTION_MOVE} or
+         *        {@link #DRAG_ACTION_COPY}
+         * @param dragRegion Coordinates within the bitmap b for the position of item being dragged.
+         *          Makes dragging feel more precise, e.g. you can clip out a transparent border
+         */
+        StartDrag(
+            [in] IView* v,
+            [in] IBitmap* bmp,
+            [in] IDragSource* source,
+            [in] IInterface* dragInfo,
+            [in] Int32 dragAction,
+            [in] IPoint* extraPadding,
+            [in] Float initialDragViewScale);
+
+        /**
+         * Starts a drag.
+         *
+         * @param b The bitmap to display as the drag image.  It will be re-scaled to the
+         *          enlarged size.
+         * @param dragLayerX The x position in the DragLayer of the left-top of the bitmap.
+         * @param dragLayerY The y position in the DragLayer of the left-top of the bitmap.
+         * @param source An object representing where the drag originated
+         * @param dragInfo The data associated with the object that is being dragged
+         * @param dragAction The drag action: either {@link #DRAG_ACTION_MOVE} or
+         *        {@link #DRAG_ACTION_COPY}
+         * @param dragRegion Coordinates within the bitmap b for the position of item being dragged.
+         *          Makes dragging feel more precise, e.g. you can clip out a transparent border
+         */
+        StartDrag(
+            [in] IBitmap* b,
+            [in] Int32 dragLayerX,
+            [in] Int32 dragLayerY,
+            [in] IDragSource* source,
+            [in] IInterface* dragInfo,
+            [in] Int32 dragAction,
+            [in] IPoint* dragOffset,
+            [in] IRect* dragRegion,
+            [in] Float initialDragViewScale);
+
+        /**
+         * Draw the view into a bitmap.
+         */
+        GetViewBitmap(
+            [in] IView* v,
+            [out] IBitmap** map);
+
+        /**
+         * Call this from a drag source view like this:
+         *
+         * <pre>
+         *  @Override
+         *  public boolean dispatchKeyEvent(KeyEvent event) {
+         *      return mDragController.dispatchKeyEvent(this, event)
+         *              || super.dispatchKeyEvent(event);
+         * </pre>
+         */
+        DispatchKeyEvent(
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+
+        IsDragging(
+            [out] Boolean* result);
+
+        /**
+         * Stop dragging without dropping.
+         */
+        CancelDrag();
+
+        OnAppsRemoved(
+            [in] IArrayList* appInfos,
+            [in] IContext* context);
+
+        /**
+         * This only gets called as a result of drag view cleanup being deferred in endDrag();
+         */
+        OnDeferredEndDrag(
+            [in] IDragView* dragView);
+
+        OnDeferredEndFling(
+            [in] IDropTargetDragObject* d);
+
+        GetLastGestureUpTime(
+            [out] Int64* time);
+
+        ResetLastGestureUpTime();
+
+        /**
+         * Call this from a drag source view.
+         */
+        OnInterceptTouchEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+
+        /**
+         * Sets the view that should handle move events.
+         */
+        SetMoveTarget(
+            [in] IView* view);
+
+        DispatchUnhandledMove(
+            [in] IView* focused,
+            [in] Int32 direction,
+            [out] Boolean* result);
+
+        ForceTouchMove();
+
+        /**
+         * Call this from a drag source view.
+         */
+        OnTouchEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+
+        SetDragScoller(
+            [in] IDragScroller* scroller);
+
+        SetWindowToken(
+            [in] IBinder* token);
+
+        /**
+         * Sets the drag listner which will be notified when a drag starts or ends.
+         */
+        AddDragListener(
+            [in] IDragControllerDragListener* l);
+
+        /**
+         * Remove a previously installed drag listener.
+         */
+        RemoveDragListener(
+            [in] IDragControllerDragListener* l);
+
+        /**
+         * Add a DropTarget to the list of potential places to receive drop events.
+         */
+        AddDropTarget(
+            [in] IDropTarget* target);
+
+        /**
+         * Don't send drop events to <em>target</em> any more.
+         */
+        RemoveDropTarget(
+            [in] IDropTarget* target);
+
+        /**
+         * Sets the current fling-to-delete drop target.
+         */
+        SetFlingToDeleteDropTarget(
+            [in] IDropTarget* target);
+
+        /**
+         * Set which view scrolls for touch events near the edge of the screen.
+         */
+        SetScrollView(
+            [in] IView* v);
+
+        GetDragView(
+            [out] IDragView** view);
     }
 
     } // namespace Launcher2

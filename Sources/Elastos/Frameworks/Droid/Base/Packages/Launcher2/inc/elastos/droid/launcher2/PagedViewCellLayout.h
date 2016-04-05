@@ -1,7 +1,16 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEWCELLLAYOUT_H__
 #define  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEWCELLLAYOUT_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/view/ViewGroup.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::ViewGroup;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::Utility::IAttributeSet;
 
 namespace Elastos {
 namespace Droid {
@@ -19,22 +28,27 @@ class PagedViewCellLayout
 {
 public:
     class LayoutParams
-        : public MarginLayoutParams
+        : public ViewGroup::MarginLayoutParams
+        , public IPagedViewCellLayoutLayoutParams
     {
     public:
+        CAR_INTERFACE_DECL();
+
         LayoutParams();
 
-        LayoutParams(
+        CARAPI constructor();
+
+        CARAPI constructor(
             /* [in] */ IContext* c,
             /* [in] */ IAttributeSet* attrs);
 
-        LayoutParams(
+        CARAPI constructor(
             /* [in] */ IViewGroupLayoutParams* source);
 
-        LayoutParams(
+        CARAPI constructor(
             /* [in] */ LayoutParams* source);
 
-        LayoutParams(
+        CARAPI constructor(
             /* [in] */ Int32 cellX,
             /* [in] */ Int32 cellY,
             /* [in] */ Int32 cellHSpan,
@@ -102,14 +116,16 @@ public:
 public:
     CAR_INTERFACE_DECL();
 
-    PagedViewCellLayout(
+    PagedViewCellLayout();
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
-    PagedViewCellLayout(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
-    PagedViewCellLayout(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs,
         /* [in] */ Int32 defStyle);
@@ -249,7 +265,7 @@ public:
         /* [out] */ IViewGroupLayoutParams** param);
 
 protected:
-    CARAPI OnMeasure(
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

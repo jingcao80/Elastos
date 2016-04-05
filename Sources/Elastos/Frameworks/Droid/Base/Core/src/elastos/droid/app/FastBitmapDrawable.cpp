@@ -12,7 +12,7 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-CAR_INTERFACE_IMPL(FastBitmapDrawable, Elastos::Droid::Graphics::Drawable::Drawable, IFastBitmapDrawable)
+CAR_INTERFACE_IMPL(FastBitmapDrawable, Drawable, IFastBitmapDrawable)
 
 FastBitmapDrawable::FastBitmapDrawable()
     : mWidth(0)

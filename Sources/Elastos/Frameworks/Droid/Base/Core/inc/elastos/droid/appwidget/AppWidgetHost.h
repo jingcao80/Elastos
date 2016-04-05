@@ -2,11 +2,11 @@
 #ifndef __ELASTOS_DROID_APPWIDGET_APPWIDGETHOST_H__
 #define __ELASTOS_DROID_APPWIDGET_APPWIDGETHOST_H__
 
-#include <Elastos.Droid.App.h>
-#include <Elastos.Droid.AppWidget.h>
-#include <Elastos.Droid.Internal.h>
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Handler.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Internal.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/droid/os/Handler.h>
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::AppWidget::IAppWidgetHostView;
@@ -29,7 +29,7 @@ namespace AppWidget {
  * AppWidgetHost provides the interaction with the AppWidget service for apps,
  * like the home screen, that want to embed AppWidgets in their UI.
  */
-class AppWidgetHost
+class ECO_PUBLIC AppWidgetHost
     : public Object
     , public IAppWidgetHost
 {
@@ -69,8 +69,9 @@ public:
     private:
         AppWidgetHost* mHost;
     };
+
 private:
-    class UpdateHandler : public Handler
+    class ECO_LOCAL UpdateHandler : public Handler
     {
     public:
         UpdateHandler(

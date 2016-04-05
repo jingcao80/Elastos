@@ -1,7 +1,23 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_FIRSTFRAMEANIMATORHELPER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_FIRSTFRAMEANIMATORHELPER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::View::IOnDrawListener;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Core::Object;
+using Elastos::Droid::Os::Runnable;
 
 namespace Elastos {
 namespace Droid {
@@ -15,7 +31,7 @@ namespace Launcher2 {
 
 class FirstFrameAnimatorHelper
     : public AnimatorListenerAdapter
-    , public IValueAnimatorAnimatorUpdateListener
+    , public IAnimatorUpdateListener
 {
 private:
     class MyOnDrawListener
@@ -25,14 +41,13 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
-        MyOnDrawListener(
-            /* [in] */ FirstFrameAnimatorHelper* host);
+        MyOnDrawListener();
 
         CARAPI OnDraw();
 
     private:
         Int64 mTime;
-        FirstFrameAnimatorHelper* mHost;
+        AutoPtr<FirstFrameAnimatorHelper> mHost;
     };
 
     class MyRunnable
@@ -47,8 +62,8 @@ private:
         CARAPI Run();
 
     private:
-        IValueAnimator* mAnimation;
-        FirstFrameAnimatorHelper* mHost;
+        AutoPtr<IValueAnimator> mAnimation;
+        AutoPtr<FirstFrameAnimatorHelper> mHost;
     };
 
 public:
@@ -67,7 +82,7 @@ public:
         /* [in] */ IAnimator* animation);
 
     CARAPI static SetIsVisible(
-        /* [in] */ boolean visible);
+        /* [in] */ Boolean visible);
 
     CARAPI static InitializeDrawListener(
         /* [in] */ IView* view);
@@ -88,7 +103,7 @@ private:
     Boolean mHandlingOnAnimationUpdate;
     Boolean mAdjustedSecondFrameTime;
 
-    static AutoPtr<IViewTreeObserverOnDrawListener> sGlobalDrawListener;
+    static AutoPtr<IOnDrawListener> sGlobalDrawListener;
     static Int64 sGlobalFrameCounter;
     static Boolean sVisible;
 };

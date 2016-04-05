@@ -1,14 +1,20 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_SPRINGLOADEDDRAGCONTROLLER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_SPRINGLOADEDDRAGCONTROLLER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::ISharedPreferencesEditor;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
 class SpringLoadedDragController
-    : public OnAlarmListener
+    : public Object
+    , public IAlarmOnAlarmListener
 {
 public:
     SpringLoadedDragController(
@@ -26,9 +32,9 @@ public:
 
 public:
     // how long the user must hover over a mini-screen before it unshrinks
-    const Int64 ENTER_SPRING_LOAD_HOVER_TIME;
-    const Int64 ENTER_SPRING_LOAD_CANCEL_HOVER_TIME;
-    const Int64 EXIT_SPRING_LOAD_HOVER_TIME;
+    const Int64 ENTER_SPRING_LOAD_HOVER_TIME = 500;
+    const Int64 ENTER_SPRING_LOAD_CANCEL_HOVER_TIME = 950;
+    const Int64 EXIT_SPRING_LOAD_HOVER_TIME = 200;
 
     AutoPtr<IAlarm> mAlarm;
 

@@ -2,13 +2,45 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_WALLPAPERCHOOSERDIALOGFRAGMENT_H__
 #define  __ELASTOS_DROID_LAUNCHER2_WALLPAPERCHOOSERDIALOGFRAGMENT_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/droid/app/DialogFragment.h>
 #include <elastos/droid/widget/BaseAdapter.h>
 #include <elastos/droid/os/AsyncTask.h>
 #include <elastos/droid/graphics/drawable/Drawable.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/Object.h>
+#include "Elastos.CoreLibrary.Utility.h"
 
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::IDialog;
 using Elastos::Droid::App::DialogFragment;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Graphics::Drawable::Drawable;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::IColorFilter;
+using Elastos::Droid::Graphics::IMatrix;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::Os::AsyncTask;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Widget::IGallery;
+using Elastos::Droid::Widget::IAdapter;
+using Elastos::Droid::Widget::BaseAdapter;
+using Elastos::Droid::Widget::IAdapterView;
+using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
+using Elastos::Droid::Widget::IAdapterViewOnItemSelectedListener;
+using Elastos::Core::Object;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -36,20 +68,18 @@ private:
             /* [in] */ IView* v);
 
     private:
-        WallpaperChooserDialogFragment* mHost;
-        IGallery* mGallery;
+        AutoPtr<WallpaperChooserDialogFragment> mHost;
+        AutoPtr<IGallery> mGallery;
     };
 
     class ImageAdapter
         : public BaseAdapter
-        , public IListAdapter
-        , public ISpinnerAdapter
-        , public IAdapter
     {
     public:
         CAR_INTERFACE_DECL();
 
         ImageAdapter(
+            /* [in] */ WallpaperChooserDialogFragment* host,
             /* [in] */ IActivity* activity);
 
         CARAPI GetCount(
@@ -70,6 +100,7 @@ private:
             /* [out] */ IView** view);
 
     private:
+        AutoPtr<WallpaperChooserDialogFragment> mHost;
         AutoPtr<ILayoutInflater> mLayoutInflater;
     };
 
@@ -77,9 +108,10 @@ private:
         : public AsyncTask
     {
     public:
-        WallpaperLoader() {}
+        WallpaperLoader(
+            /* [in] */ WallpaperChooserDialogFragment* host);
 
-    protected:
+    //protected:
         //@Override
         CARAPI DoInBackground(
             /* [in] */ ArrayOf<IInterface*>* params,
@@ -90,6 +122,9 @@ private:
             /* [in] */ IInterface* result);
 
         CARAPI_(void) Cancel();
+
+    private:
+        AutoPtr<WallpaperChooserDialogFragment> mHost;
     };
 
     /**
@@ -132,8 +167,6 @@ public:
     CAR_INTERFACE_DECL();
 
     WallpaperChooserDialogFragment();
-
-    virtual ~WallpaperChooserDialogFragment() {}
 
     static CARAPI NewInstance(
         /* [out] */ IWallpaperChooserDialogFragment** fragment);

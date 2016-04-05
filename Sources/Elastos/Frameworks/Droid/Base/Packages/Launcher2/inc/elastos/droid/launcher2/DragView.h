@@ -1,14 +1,33 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_DRAGVIEW_H__
 #define  __ELASTOS_DROID_LAUNCHER2_DRAGVIEW_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/view/View.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Core.h"
+
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::IPoint;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::View::View;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
 class DragView
-    : public View
+    : public Elastos::Droid::View::View
+    , public IDragView
 {
 private:
     class MyListener
@@ -19,14 +38,22 @@ private:
         CAR_INTERFACE_DECL();
 
         MyListener(
-            /* [in] */ DragView* host);
+            /* [in] */ DragView* host,
+            /* [in] */ Float offsetX,
+            /* [in] */ Float offsetY,
+            /* [in] */ Float initialScale,
+            /* [in] */ Float scale);
 
         //Override
         CARAPI OnAnimationUpdate(
             /* [in] */ IValueAnimator* animation);
 
     private:
-        DragView* mHost;
+        AutoPtr<DragView> mHost;
+        Float mOffsetX;
+        Float mOffsetY;
+        Float mInitialScale;
+        Float mScale;
     };
 
     class MyListener2
@@ -44,11 +71,11 @@ private:
             /* [in] */ IValueAnimator* animation);
 
     private:
-        DragView* mHost;
+        AutoPtr<DragView> mHost;
     };
 
     class MyRunnable
-        : public  Runnable
+        : public Runnable
     {
     public:
         MyRunnable(
@@ -57,10 +84,14 @@ private:
         CARAPI Run();
 
     private:
-        DragView* mHost;
+        AutoPtr<DragView> mHost;
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
+    DragView();
+
     /**
      * Construct the drag view.
      * <p>
@@ -72,7 +103,7 @@ public:
      * @param registrationX The x coordinate of the registration point.
      * @param registrationY The y coordinate of the registration point.
      */
-    DragView(
+    CARAPI constructor(
         /* [in] */ ILauncher* launcher,
         /* [in] */ IBitmap* bitmap,
         /* [in] */ Int32 registrationX,
@@ -83,27 +114,35 @@ public:
         /* [in] */ Int32 height,
         /* [in] */ Float initialScale);
 
-    CARAPI_(Float) GetOffsetY();
+    CARAPI GetOffsetY(
+        /* [out] */ Float* y);
 
-    CARAPI_(Int32) GetDragRegionLeft();
+    CARAPI GetDragRegionLeft(
+        /* [out] */ Int32* left);
 
-    CARAPI_(Int32) GetDragRegionTop();
+    CARAPI GetDragRegionTop(
+        /* [out] */ Int32* top);
 
-    CARAPI_(Int32) GetDragRegionWidth();
+    CARAPI GetDragRegionWidth(
+        /* [out] */ Int32* width);
 
-    CARAPI_(Int32) GetDragRegionHeight();
+    CARAPI GetDragRegionHeight(
+        /* [out] */ Int32* height);
 
     CARAPI SetDragVisualizeOffset(
         /* [in] */ IPoint* p);
 
-    CARAPI_(AutoPtr<IPoint>) GetDragVisualizeOffset();
+    CARAPI GetDragVisualizeOffset(
+        /* [out] */ IPoint** point);
 
     CARAPI SetDragRegion(
         /* [in] */ IRect* r);
 
-    CARAPI_(AutoPtr<IRect>) GetDragRegion();
+    CARAPI GetDragRegion(
+        /* [out] */ IRect** rect);
 
-    CARAPI_(Float) GetInitialScale();
+    CARAPI GetInitialScale(
+        /* [out] */ Float* scale);
 
     CARAPI UpdateInitialScaleToCurrentScale();
 
@@ -116,7 +155,8 @@ public:
     CARAPI SetColor(
         /* [in] */ Int32 color);
 
-    CARAPI_(Boolean) HasDrawn();
+    CARAPI HasDrawn(
+        /* [out] */ Boolean* result);
 
     //@Override
     CARAPI SetAlpha(
@@ -151,12 +191,12 @@ public:
 
 protected:
     //@Override
-    CARAPI_(void) OnMeasure(
+     CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
     //@Override
-    CARAPI_(void) OnDrawScrollBars(
+     CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
 private:

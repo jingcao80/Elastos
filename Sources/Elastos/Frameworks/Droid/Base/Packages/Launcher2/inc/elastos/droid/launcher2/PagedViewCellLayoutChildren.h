@@ -1,7 +1,15 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEWCELLLAYOUTCHILDREN_H__
 #define  __ELASTOS_DROID_LAUNCHER2_PAGEDVIEWCELLLAYOUTCHILDREN_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/view/ViewGroup.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::ViewGroup;
+using Elastos::Droid::View::IView;
 
 namespace Elastos {
 namespace Droid {
@@ -42,8 +50,10 @@ public:
         /* [in] */ Boolean enabled);
 
 protected:
+    friend class PagedViewCellLayout;
+
     //@Override
-    CARAPI OnMeasure(
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
@@ -56,7 +66,7 @@ protected:
         /* [in] */ Int32 b);
 
     //@Override
-    CARAPI SetChildrenDrawingCacheEnabled(
+    CARAPI_(void) SetChildrenDrawingCacheEnabled(
         /* [in] */ Boolean enabled);
 
 protected:

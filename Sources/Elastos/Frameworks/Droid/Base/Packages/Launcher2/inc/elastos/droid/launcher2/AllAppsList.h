@@ -1,7 +1,22 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_ALLAPPSLIST_H__
 #define  __ELASTOS_DROID_LAUNCHER2_ALLAPPSLIST_H__
 
+#include "_Launcher2.h"
+#include "elastos/droid/launcher2/IconCache.h"
+#include "elastos/droid/launcher2/ApplicationInfo.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Core::Object;
+using Elastos::Utility::IList;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -90,7 +105,7 @@ private:
         /* [in] */ IUserHandle* user);
 
 public:
-    static const Int32 DEFAULT_APPLICATIONS_NUMBER = 42;
+    static const Int32 DEFAULT_APPLICATIONS_NUMBER;
 
     /** The list off all apps. */
     AutoPtr<IArrayList> mData;

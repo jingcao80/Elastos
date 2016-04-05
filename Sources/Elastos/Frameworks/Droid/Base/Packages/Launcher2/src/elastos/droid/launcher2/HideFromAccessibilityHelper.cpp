@@ -1,7 +1,16 @@
 
-#include "elastos/droid/launcher2/PackageChangedReceiver.h"
+#include "elastos/droid/launcher2/HideFromAccessibilityHelper.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::CHashMap;
+using Elastos::Droid::View::EIID_IViewGroupOnHierarchyChangeListener;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IViewGroupOnHierarchyChangeListener;
+using Elastos::Droid::View::IViewParent;
+using Elastos::Core::IInteger32;
 
 namespace Elastos {
 namespace Droid {
@@ -11,7 +20,7 @@ CAR_INTERFACE_IMPL(HideFromAccessibilityHelper, Object, IViewGroupOnHierarchyCha
 
 HideFromAccessibilityHelper::HideFromAccessibilityHelper()
     : mHide(FALSE)
-    , mOnlyAllApps(FALSE))
+    , mOnlyAllApps(FALSE)
 {
     CHashMap::New((IHashMap**)&mPreviousValues);
 }
@@ -79,8 +88,8 @@ void HideFromAccessibilityHelper::RestoreImportantForAccessibilityHelper(
 
         // We assume if a class implements OnHierarchyChangeListener, it listens
         // to changes to any of its children (happens to be the case in Launcher)
-        if (IOnHierarchyChangeListener::Probe(vg) != NULL) {
-            vg->SetOnHierarchyChangeListener(IOnHierarchyChangeListener::Probe(vg));
+        if (IViewGroupOnHierarchyChangeListener::Probe(vg) != NULL) {
+            vg->SetOnHierarchyChangeListener(IViewGroupOnHierarchyChangeListener::Probe(vg));
         }
         else {
             vg->SetOnHierarchyChangeListener(NULL);
@@ -114,13 +123,16 @@ ECode HideFromAccessibilityHelper::OnChildViewRemoved(
     if (mHide && IncludeView(child)) {
         RestoreImportantForAccessibilityHelper(child);
     }
+    return NOERROR;
 }
 
 Boolean HideFromAccessibilityHelper::IncludeView(
     /* [in] */ IView* v)
 {
-    return !HasAncestorOfType(v, ECLSID_CCling) &&
-                (!mOnlyAllApps || HasAncestorOfType(v, ECLSID_CAppsCustomizeTabHost));
+    assert(0 && "need class AppsCustomizeTabHost");
+    // return !HasAncestorOfType(v, ECLSID_CCling) &&
+    //             (!mOnlyAllApps || HasAncestorOfType(v, ECLSID_CAppsCustomizeTabHost));
+    return FALSE;
 }
 
 Boolean HideFromAccessibilityHelper::HasAncestorOfType(

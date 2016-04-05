@@ -20,7 +20,7 @@ class AnimatorSet;
  * This is the superclass for classes which provide basic support for animations which can be
  * started, ended, and have <code>AnimatorListeners</code> added to them.
  */
-class Animator
+class ECO_PUBLIC Animator
     : public Object
     , public ICloneable
     , public IAnimator

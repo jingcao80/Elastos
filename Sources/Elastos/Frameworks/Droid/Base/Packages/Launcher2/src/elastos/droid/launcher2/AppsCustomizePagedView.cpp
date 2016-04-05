@@ -1206,7 +1206,7 @@ void AppsCustomizePagedView::EndDragging(
     AutoPtr<IWorkspace> workspace;
     mLauncher->GetWorkspace((IWorkspace**)&workspace);
     if (isFlingToDelete || !success || (TO_IINTERFACE(target) !=
-            TO_IINTERFACE(workspace) && !(IDeleteDropTarget::Probe(target) != NULL))) {
+            TO_IINTERFACE(workspace) && IDeleteDropTarget::Probe(target) != NULL)) {
         // Exit spring loaded mode if we have not successfully dropped or have not handled the
         // drop in Workspace
         mLauncher->ExitSpringLoadedDragMode();

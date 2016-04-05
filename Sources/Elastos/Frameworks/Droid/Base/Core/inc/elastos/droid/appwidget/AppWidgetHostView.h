@@ -19,7 +19,7 @@ namespace Elastos {
 namespace Droid {
 namespace AppWidget {
 
-class AppWidgetHostView
+class ECO_PUBLIC AppWidgetHostView
     : public FrameLayout
     , public IAppWidgetHostView
 {

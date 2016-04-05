@@ -1,0 +1,29 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /**
+    * @Involve
+    * interface Elastos.Droid.View.IView
+    *
+    * interface Elastos.Droid.View.IKeyEventCallback
+    * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+    * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+    * interface IImageView
+    */
+    interface IPagedViewWidgetImageView {
+        RequestLayout();
+
+        GetAllowRequestLayout(
+            [out] Boolean* result);
+
+        SetAllowRequestLayout(
+            [in] Boolean result);
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

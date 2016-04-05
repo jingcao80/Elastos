@@ -55,6 +55,12 @@ public:
     CARAPI GetY(
         /* [out] */ Float* x);
 
+    CARAPI SetX(
+        /* [in] */ Float x);
+
+    CARAPI SetY(
+        /* [in] */ Float y);
+
     CARAPI Negate();
 
     CARAPI Offset(

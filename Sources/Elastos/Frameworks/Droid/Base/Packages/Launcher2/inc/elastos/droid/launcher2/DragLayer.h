@@ -1,7 +1,42 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_DRAGLAYER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_DRAGLAYER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/widget/FrameLayout.h"
+#include "elastos/droid/launcher2/AppWidgetResizeFrame.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Widget::FrameLayout;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
+using Elastos::Droid::View::IViewGroupOnHierarchyChangeListener;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
+using Elastos::Utility::IArrayList;
+
 
 namespace Elastos {
 namespace Droid {
@@ -12,103 +47,14 @@ class DragLayer
     , public IDragLayer
     , public IViewGroupOnHierarchyChangeListener
 {
-private:
-    class MyAnimatorUpdateListener:
-        : public Object
-        , public IAnimatorUpdateListener
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        MyAnimatorUpdateListener(
-            /* [in] */ IDragView* view,
-            /* [in] */ IInterpolator* alphaInterpolator,
-            /* [in] */ IInterpolator* motionInterpolator,
-            /* [in] */ Float initScaleX,
-            /* [in] */ Float initScaleY,
-            /* [in] */ Float dropViewScale,
-            /* [in] */ Float finalScaleX,
-            /* [in] */ Float finalScaleY,
-            /* [in] */ Float finalAlpha,
-            /* [in] */ Float initAlpha,
-            /* [in] */ IRect* from,
-            /* [in] */ IRect* to,
-            /* [in] */ LayoutParams* host);
-
-        CARAPI OnAnimationUpdate(
-            /* [in] */ IValueAnimator* animation);
-
-    private:
-        AutoPtr<IDragView> mView;
-        AutoPtr<IInterpolator> mAlphaInterpolator;
-        AutoPtr<IInterpolator> mMotionInterpolator;
-        Float mInitScaleX;
-        Float mInitScaleY;
-        Float mDropViewScale;
-        Float mFinalScaleX;
-        Float mFinalScaleY;
-        Float mFinalAlpha;
-        Float mInitAlpha;
-        AutoPtr<IRect> mFrom;
-        AutoPtr<IRect> mTo;
-        AutoPtr<LayoutParams> mHost;
-    };
-
-    class MyAnimatorListenerAdapter
-        : public AnimatorListenerAdapter
-    {
-    public:
-        MyAnimatorListenerAdapter(
-            /* [in] */ IRunnable* onCompleteRunnable,
-            /* [in] */ Int32 animationEndStyle,
-            /* [in] */ LayoutParams* host);
-
-        CARAPI OnAnimationEnd(
-            /* [in] */ IAnimator* animation);
-
-    private:
-        AutoPtr<IIRunnable> mOnCompleteRunnable;
-        Int32 mAnimationEndStyle;
-        AutoPtr<ILayoutParams> mHost;
-    };
-
-    class MyAnimatorUpdateListener2
-        : public Object
-        , public IAnimatorUpdateListener
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        MyAnimatorUpdateListener2(
-            /* [in] */ LayoutParams* host);
-
-        CARAPI OnAnimationUpdate(
-            /* [in] */ IValueAnimator* animation);
-
-    private:
-        AutoPtr<ILayoutParams> mHost;
-    };
-
-    class MyAnimatorListenerAdapter2
-        : public AnimatorListenerAdapter
-    {
-    public:
-        MyAnimatorListenerAdapter2(
-            /* [in] */ LayoutParams* host);
-
-        CARAPI OnAnimationEnd(
-            /* [in] */ IAnimator* animation);
-
-    private:
-        AutoPtr<ILayoutParams> mHost;
-    };
-
 public:
     class LayoutParams
         : public FrameLayout::LayoutParams
-        , public ILayoutParams
+        , public IDragLayerLayoutParams
     {
     public:
+        CAR_INTERFACE_DECL();
+
         /**
          * {@inheritDoc}
          */
@@ -141,11 +87,102 @@ public:
             /* [out] */ Int32* value);
 
     public:
-        Int32 mX, mY;
+        Int32 mX;
+        Int32 mY;
         Boolean mCustomPosition;
     };
 
 private:
+    class MyAnimatorUpdateListener
+        : public Object
+        , public IAnimatorUpdateListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        MyAnimatorUpdateListener(
+            /* [in] */ IDragView* view,
+            /* [in] */ IInterpolator* alphaInterpolator,
+            /* [in] */ IInterpolator* motionInterpolator,
+            /* [in] */ Float initScaleX,
+            /* [in] */ Float initScaleY,
+            /* [in] */ Float dropViewScale,
+            /* [in] */ Float finalScaleX,
+            /* [in] */ Float finalScaleY,
+            /* [in] */ Float finalAlpha,
+            /* [in] */ Float initAlpha,
+            /* [in] */ IRect* from,
+            /* [in] */ IRect* to,
+            /* [in] */ DragLayer* host);
+
+        CARAPI OnAnimationUpdate(
+            /* [in] */ IValueAnimator* animation);
+
+    private:
+        AutoPtr<IDragView> mView;
+        AutoPtr<IInterpolator> mAlphaInterpolator;
+        AutoPtr<IInterpolator> mMotionInterpolator;
+        Float mInitScaleX;
+        Float mInitScaleY;
+        Float mDropViewScale;
+        Float mFinalScaleX;
+        Float mFinalScaleY;
+        Float mFinalAlpha;
+        Float mInitAlpha;
+        AutoPtr<IRect> mFrom;
+        AutoPtr<IRect> mTo;
+        AutoPtr<DragLayer> mHost;
+    };
+
+    class MyAnimatorListenerAdapter
+        : public AnimatorListenerAdapter
+    {
+    public:
+        MyAnimatorListenerAdapter(
+            /* [in] */ IRunnable* onCompleteRunnable,
+            /* [in] */ Int32 animationEndStyle,
+            /* [in] */ DragLayer* host);
+
+        CARAPI OnAnimationEnd(
+            /* [in] */ IAnimator* animation);
+
+    private:
+        AutoPtr<IRunnable> mOnCompleteRunnable;
+        Int32 mAnimationEndStyle;
+        AutoPtr<DragLayer> mHost;
+    };
+
+    class MyAnimatorUpdateListener2
+        : public Object
+        , public IAnimatorUpdateListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        MyAnimatorUpdateListener2(
+            /* [in] */ DragLayer* host);
+
+        CARAPI OnAnimationUpdate(
+            /* [in] */ IValueAnimator* animation);
+
+    private:
+        AutoPtr<DragLayer> mHost;
+    };
+
+    class MyAnimatorListenerAdapter2
+        : public AnimatorListenerAdapter
+    {
+    public:
+        MyAnimatorListenerAdapter2(
+            /* [in] */ DragLayer* host);
+
+        CARAPI OnAnimationEnd(
+            /* [in] */ IAnimator* animation);
+
+    private:
+        AutoPtr<DragLayer> mHost;
+    };
+
     class MyRunnable
         : public Runnable
     {
@@ -165,6 +202,8 @@ public:
     CAR_INTERFACE_DECL();
 
     DragLayer();
+
+    CARAPI constructor();
 
     /**
      * Used to create a new DragLayer from XML.
@@ -379,6 +418,7 @@ public:
     CARAPI OnExitScrollArea();
 
 protected:
+    //@Override
     CARAPI OnLayout(
         /* [in] */ Boolean changed,
         /* [in] */ Int32 l,
@@ -393,7 +433,7 @@ protected:
         /* [out] */ Int32* order);
 
     //@Override
-    CARAPI DispatchDraw(
+    CARAPI_(void) DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
 private:
@@ -425,12 +465,13 @@ private:
     AutoPtr<IDragController> mDragController;
     AutoPtr<ArrayOf<Int32> > mTmpXY;
 
-    Int32 mXDown, mYDown;
+    Int32 mXDown;
+    Int32 mYDown;
     AutoPtr<ILauncher> mLauncher;
 
     // Variables relating to resizing widgets
     AutoPtr<IArrayList> mResizeFrames;
-    AutoPtr<IAppWidgetResizeFrame> mCurrentResizeFrame;
+    AutoPtr<AppWidgetResizeFrame> mCurrentResizeFrame;
 
     // Variables relating to animation of views after drop
     AutoPtr<IValueAnimator> mDropAnim;

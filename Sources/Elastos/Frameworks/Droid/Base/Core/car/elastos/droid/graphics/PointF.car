@@ -65,6 +65,12 @@ module
 
         GetY(
             [out] Float* y);
+
+        SetX(
+            [in] Float x);
+
+        SetY(
+            [in] Float y);
     }
 
     interface IPointFHelper {

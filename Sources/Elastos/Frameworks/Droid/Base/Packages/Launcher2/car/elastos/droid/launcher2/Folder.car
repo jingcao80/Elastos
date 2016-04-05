@@ -9,11 +9,7 @@ module
     /*
      * @invoke
      * interface IRunnable
-
-
-
-
-     ^^^^^^
+     *~~~~~~~~~~~~
     */
     interface IFolder {
         const Int32 STATE_NONE = -1;
