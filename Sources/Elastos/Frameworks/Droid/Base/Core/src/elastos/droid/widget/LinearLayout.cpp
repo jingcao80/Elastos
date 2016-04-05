@@ -310,6 +310,8 @@ ECode LinearLayout::GetDividerWidth(
 void LinearLayout::OnDraw(
     /* [in] */ ICanvas* canvas)
 {
+    Logger::I("LinearLayout", "LinearLayout OnDraw: %p", this);
+
     if (mDivider == NULL) {
         return;
     }

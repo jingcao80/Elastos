@@ -677,6 +677,8 @@ ECode FrameLayout::Draw(
     ViewGroup::Draw(canvas);
 
     if (mForeground != NULL) {
+        Logger::I("FrameLayout", "FrameLayout Draw mForeground: %s, mForegroundBoundsChanged:%d",
+            TO_CSTR(mForeground), mForegroundBoundsChanged);
         AutoPtr<IDrawable> foreground = mForeground;
 
         if (mForegroundBoundsChanged) {

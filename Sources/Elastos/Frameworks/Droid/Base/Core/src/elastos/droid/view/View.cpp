@@ -12939,6 +12939,8 @@ ECode View::Draw(
     /* [in] */ ICanvas* canvas)
 {
     Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------1", mID, this);
+
+    using Elastos::Core::Math;
     Int32 privateFlags = mPrivateFlags;
     Boolean dirtyOpaque = (privateFlags & PFLAG_DIRTY_MASK) == PFLAG_DIRTY_OPAQUE &&
             (mAttachInfo == NULL || !mAttachInfo->mIgnoreDirtyState);
@@ -12974,21 +12976,22 @@ ECode View::Draw(
         if (!dirtyOpaque) {
             OnDraw(canvas);
         }
-
         Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------3", mID, this);
+
         // Step 4, draw the children
         DispatchDraw(canvas);
+
         Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------4", mID, this);
 
-        // Step 6, draw decorations (scrollbars)
-        OnDrawScrollBars(canvas);
+        // // Step 6, draw decorations (scrollbars)
+        // OnDrawScrollBars(canvas);
 
-        Boolean isEmpty;
-        if (mOverlay != NULL && (mOverlay->IsEmpty(&isEmpty), !isEmpty)) {
-            AutoPtr<IViewGroup> group;
-            mOverlay->GetOverlayView((IViewGroup**)&group);
-            ((ViewGroup*)group.Get())->DispatchDraw(canvas);
-        }
+        // Boolean isEmpty;
+        // if (mOverlay != NULL && (mOverlay->IsEmpty(&isEmpty), !isEmpty)) {
+        //     AutoPtr<IViewGroup> group;
+        //     mOverlay->GetOverlayView((IViewGroup**)&group);
+        //     ((ViewGroup*)group.Get())->DispatchDraw(canvas);
+        // }
 
         Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------4 - 1", mID, this);
         return NOERROR;
@@ -13045,16 +13048,16 @@ ECode View::Draw(
     }
 
     if (verticalEdges) {
-        topFadeStrength = Elastos::Core::Math::Max(0.0f, Elastos::Core::Math::Min(1.0f, GetTopFadingEdgeStrength()));
+        topFadeStrength = Math::Max(0.0f, Math::Min(1.0f, GetTopFadingEdgeStrength()));
         drawTop = topFadeStrength * fadeHeight > 1.0f;
-        bottomFadeStrength = Elastos::Core::Math::Max(0.0f, Elastos::Core::Math::Min(1.0f, GetBottomFadingEdgeStrength()));
+        bottomFadeStrength = Math::Max(0.0f, Math::Min(1.0f, GetBottomFadingEdgeStrength()));
         drawBottom = bottomFadeStrength * fadeHeight > 1.0f;
     }
 
     if (horizontalEdges) {
-        leftFadeStrength = Elastos::Core::Math::Max(0.0f, Elastos::Core::Math::Min(1.0f, GetLeftFadingEdgeStrength()));
+        leftFadeStrength = Math::Max(0.0f, Math::Min(1.0f, GetLeftFadingEdgeStrength()));
         drawLeft = leftFadeStrength * fadeHeight > 1.0f;
-        rightFadeStrength = Elastos::Core::Math::Max(0.0f, Elastos::Core::Math::Min(1.0f, GetRightFadingEdgeStrength()));
+        rightFadeStrength = Math::Max(0.0f, Math::Min(1.0f, GetRightFadingEdgeStrength()));
         drawRight = rightFadeStrength * fadeHeight > 1.0f;
     }
 
@@ -13227,8 +13230,8 @@ void View::DrawBackground(
 
     // Attempt to use a display list if requested.
     Boolean isHardwareAccelerated;
-    if ((canvas->IsHardwareAccelerated(&isHardwareAccelerated), isHardwareAccelerated) && mAttachInfo != NULL
-            && mAttachInfo->mHardwareRenderer != NULL) {
+    canvas->IsHardwareAccelerated(&isHardwareAccelerated);
+    if (isHardwareAccelerated && mAttachInfo != NULL && mAttachInfo->mHardwareRenderer != NULL) {
         mBackgroundRenderNode = GetDrawableRenderNode(background, mBackgroundRenderNode);
 
         AutoPtr<IRenderNode> displayList = mBackgroundRenderNode;
@@ -13244,7 +13247,8 @@ void View::DrawBackground(
     Int32 scrollY = mScrollY;
     if ((scrollX | scrollY) == 0) {
         background->Draw(canvas);
-    } else {
+    }
+    else {
         canvas->Translate(scrollX, scrollY);
         background->Draw(canvas);
         canvas->Translate(-scrollX, -scrollY);
@@ -13274,8 +13278,9 @@ void View::SetBackgroundDisplayListProperties(
  */
 AutoPtr<IRenderNode> View::GetDrawableRenderNode(
     /* [in] */ IDrawable* drawable,
-    /* [in] */ IRenderNode* renderNode)
+    /* [in] */ IRenderNode* inRenderNode)
 {
+    AutoPtr<IRenderNode> renderNode = inRenderNode;
     if (renderNode == NULL) {
         AutoPtr<IClassInfo> cInfo = PropertyValuesHolder::TransformClassInfo(drawable);
         String name;

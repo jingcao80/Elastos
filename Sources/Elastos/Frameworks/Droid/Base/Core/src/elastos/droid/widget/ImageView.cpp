@@ -526,11 +526,10 @@ ECode ImageView::GetImageMatrix(
 }
 
 ECode ImageView::SetImageMatrix(
-    /* [in] */ IMatrix* matrix)
+    /* [in] */ IMatrix* inMatrix)
 {
     Boolean isIdentity;
-    Boolean isEqual;
-
+    AutoPtr<IMatrix> matrix = inMatrix;
     // collaps null and identity to just null
     if (matrix != NULL) {
         matrix->IsIdentity(&isIdentity);
@@ -539,11 +538,9 @@ ECode ImageView::SetImageMatrix(
         }
     }
 
-    mMatrix->IsIdentity(&isIdentity);
-    IObject::Probe(mMatrix)->Equals(matrix, &isEqual);
     // don't invalidate unless we're actually changing our matrix
-    if ((matrix == NULL && !isIdentity) ||
-            (matrix != NULL && !isEqual)) {
+    if ((matrix == NULL && (mMatrix->IsIdentity(&isIdentity), !isIdentity))
+        || (matrix != NULL && !Object::Equals(mMatrix, matrix))) {
         mMatrix->Set(matrix);
         ConfigureBounds();
         Invalidate();
@@ -1094,38 +1091,41 @@ void ImageView::OnDraw(
         return;     // nothing to draw (empty bounds)
     }
 
-    if (mDrawMatrix == NULL && mPaddingTop == 0 && mPaddingLeft == 0) {
-        Logger::I(TAG, " >> OnDraw 1");
-        canvas->DrawARGB(255, 0, 0, 255);//debug
-        mDrawable->Draw(canvas);
-        canvas->DrawARGB(255, 255, 0, 0);//debug
-    }
-    else {
-        Logger::I(TAG, " >> OnDraw 2: %d, mScrollX:%d, mScrollY:%d",
-            mCropToPadding, mScrollX, mScrollY);
-        Int32 saveCount1, saveCount2;
-        canvas->GetSaveCount(&saveCount1);
-        canvas->Save(&saveCount2);
-        if (mCropToPadding) {
-            Boolean IsNonEmpty;
-            const Int32 scrollX = mScrollX;
-            const Int32 scrollY = mScrollY;
-            canvas->ClipRect(scrollX + mPaddingLeft, scrollY + mPaddingTop,
-                    scrollX + mRight - mLeft - mPaddingRight,
-                    scrollY + mBottom - mTop - mPaddingBottom,
-                    &IsNonEmpty);
-        }
+    Logger::I(TAG, " >> OnDraw 1: %s", TO_CSTR(mDrawable));
+    canvas->DrawARGB(255, 255, 0, 0);//debug
 
-        canvas->Translate(mPaddingLeft, mPaddingTop);
+    // mDrawable->Draw(canvas);
 
-        if (mDrawMatrix != NULL) {
-            canvas->Concat(mDrawMatrix);
-        }
-        canvas->DrawARGB(255, 0, 0, 255);//debug
-        mDrawable->Draw(canvas);
-        canvas->DrawARGB(255, 255, 0, 0);//debug
-        canvas->RestoreToCount(saveCount1);
-    }
+    // if (mDrawMatrix == NULL && mPaddingTop == 0 && mPaddingLeft == 0) {
+    //     mDrawable->Draw(canvas);
+    // }
+    // else {
+    //     Logger::I(TAG, " >> OnDraw 2: mCropToPadding:%d, mScrollX:%d, mScrollY:%d, "
+    //         " rect:(%d, %d, %d, %d)",
+    //         mCropToPadding, mScrollX, mScrollY,
+    //         mLeft, mTop, mRight, mBottom);
+    //     Int32 saveCount1, saveCount2;
+    //     canvas->GetSaveCount(&saveCount1);
+    //     canvas->Save(&saveCount2);
+    //     if (mCropToPadding) {
+    //         Boolean IsNonEmpty;
+    //         const Int32 scrollX = mScrollX;
+    //         const Int32 scrollY = mScrollY;
+    //         canvas->ClipRect(scrollX + mPaddingLeft, scrollY + mPaddingTop,
+    //                 scrollX + mRight - mLeft - mPaddingRight,
+    //                 scrollY + mBottom - mTop - mPaddingBottom,
+    //                 &IsNonEmpty);
+    //     }
+
+    //     canvas->Translate(mPaddingLeft, mPaddingTop);
+    //     if (mDrawMatrix != NULL) {
+    //         canvas->Concat(mDrawMatrix);
+    //     }
+
+    //     mDrawable->Draw(canvas);
+    //     canvas->RestoreToCount(saveCount1);
+    // }
+
     Logger::D(TAG, " <<<< OnDraw");
 }
 

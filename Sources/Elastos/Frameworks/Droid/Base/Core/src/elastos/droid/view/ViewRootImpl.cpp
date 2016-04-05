@@ -3961,7 +3961,6 @@ Boolean ViewRootImpl::DrawSoftware(
     Int32 left, top, right, bottom, l, t, r, b;
     dirty->Get(&left, &top, &right, &bottom);
 
-    Logger::I(TAG, " ViewRootImpl::DrawSoftware 1");
     ECode ec;
     do {
         ec = mSurface->LockCanvas(dirty, (ICanvas**)&canvas);
@@ -3984,8 +3983,9 @@ Boolean ViewRootImpl::DrawSoftware(
         }
     } while(0);
 
+    Logger::I(TAG, " ViewRootImpl::DrawSoftware 1 dirty:%s", TO_CSTR(dirty));
+
     if (ec == (ECode)E_OUT_OF_RESOURCES_EXCEPTION) {
-        Logger::I(TAG, " ViewRootImpl::DrawSoftware 2");
         HandleOutOfResourcesException(ec);
         return FALSE;
     }
@@ -4025,7 +4025,6 @@ Boolean ViewRootImpl::DrawSoftware(
     canvas->IsOpaque(&isOpaque);
     if (!isOpaque || yoff != 0 || xoff != 0) {
         if (FAILED(canvas->DrawColor(0, Elastos::Droid::Graphics::PorterDuffMode_CLEAR))) {
-        Logger::I(TAG, " ViewRootImpl::DrawSoftware 3");
             goto _DrawSoftware_;
         }
     }
@@ -4052,7 +4051,7 @@ Boolean ViewRootImpl::DrawSoftware(
     canvas->SetScreenDensity(scalingRequired ? mNoncompatDensity : 0);
     mAttachInfo->mIgnoreDirtyState = FALSE;
 
-    Logger::I(TAG, " ViewRootImpl::DrawSoftware 4");
+    Logger::I(TAG, " ViewRootImpl::DrawSoftware 4 xoff:%d, yoff:%d", xoff, yoff);
     mView->Draw(canvas);
 
     if (!attachInfo->mSetIgnoreDirtyState) {
@@ -4066,10 +4065,6 @@ _DrawSoftware_:
         mLayoutRequested = TRUE;    // ask wm for a new surface next time.
         //noinspection ReturnInsideFinallyBlock
         return FALSE;
-    }
-
-    if (LOCAL_LOGV) {
-        Logger::V(TAG, "Surface 0x%08x unlockCanvasAndPost", surface);
     }
 
     LocalTrace(mView, "::LEAVE << ViewRootImpl::DrawSoftware()");

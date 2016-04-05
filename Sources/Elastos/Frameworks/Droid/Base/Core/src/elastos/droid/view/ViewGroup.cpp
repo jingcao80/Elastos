@@ -1548,7 +1548,7 @@ ECode ViewGroup::TranslateBoundsAndIntersectionsInWindowCoordinates(
     }
 
     // Compensate for the child transformation.
-    Boolean hasIdentityMatrix = (VIEW_PROBE(child))->HasIdentityMatrix();
+    Boolean hasIdentityMatrix = ((View*)child)->HasIdentityMatrix();
     if (!hasIdentityMatrix) {
         AutoPtr<IMatrix> matrix;
         child->GetMatrix((IMatrix**)&matrix);
@@ -1567,7 +1567,7 @@ ECode ViewGroup::TranslateBoundsAndIntersectionsInWindowCoordinates(
     }
 
     // Translate the bounds from child to parent coordinates.
-    View* temp = VIEW_PROBE(child);
+    View* temp = ((View*)child);
     Int32 dx = temp->mLeft - mScrollX;
     Int32 dy = temp->mTop - mScrollY;
     bounds->Offset(dx, dy);
@@ -2146,7 +2146,7 @@ ECode ViewGroup::BringChildToFront(
     if (index >= 0) {
         RemoveFromArray(index);
         AddInArray(child, mChildrenCount);
-        VIEW_PROBE(child)->mParent = this;
+        ((View*)child)->mParent = this;
         RequestLayout();
         Invalidate();
     }
@@ -2352,7 +2352,7 @@ AutoPtr<IView> ViewGroup::FindFrontmostDroppableChildAt(
 {
     for (Int32 i = mChildrenCount - 1; i >= 0; i--) {
         AutoPtr<IView> child = (*mChildren)[i];
-        if (!VIEW_PROBE(child)->CanAcceptDrag()) {
+        if (!((View*)child.Get())->CanAcceptDrag()) {
             continue;
         }
 
@@ -2378,7 +2378,7 @@ Boolean ViewGroup::NotifyChildOfDrag(
 
     if (iter == mDragNotifiedChildren.End()) {
         mDragNotifiedChildren.PushBack(child);
-        View* _child = VIEW_PROBE(child);
+        View* _child = ((View*)child);
          _child->DispatchDragEvent(mCurrentDrag, &canAccept);
         if (canAccept && !_child->CanAcceptDrag()) {
             _child->mPrivateFlags2 |= PFLAG2_DRAG_CAN_ACCEPT;
@@ -4293,6 +4293,8 @@ ECode ViewGroup::DispatchDraw(
 
     }
 
+    Slogger::I("ViewGroup", "DispatchDraw: %s, clipToPadding:%d", TO_CSTR(this), clipToPadding);
+
     // We will draw our child's animation, let's reset the flag
     mPrivateFlags &= ~PFLAG_DRAW_ANIMATION;
     mGroupFlags &= ~FLAG_INVALIDATE_REQUIRED;
@@ -4312,14 +4314,16 @@ ECode ViewGroup::DispatchDraw(
         AutoPtr<IView> child;
         if (preorderedList == NULL) {
             child = (*children)[childIndex];
-        } else {
+        }
+        else {
             AutoPtr<IInterface> temp;
             preorderedList->Get(childIndex, (IInterface**)&temp);
             child = IView::Probe(temp);
         }
         AutoPtr<IAnimation> animation;
-        if ((VIEW_PROBE(child)->mViewFlags & VISIBILITY_MASK) == IView::VISIBLE
+        if ((((View*)child.Get())->mViewFlags & VISIBILITY_MASK) == IView::VISIBLE
             || (child->GetAnimation((IAnimation**)&animation), animation != NULL)) {
+            Slogger::I("ViewGroup", "  > DrawChild: %s", TO_CSTR(child));
             more |= DrawChild(canvas, child, drawingTime);
         }
     }
@@ -4355,7 +4359,7 @@ ECode ViewGroup::DispatchDraw(
     }
 
     Boolean isDone = FALSE;
-    if(mLayoutAnimationController) {
+    if (mLayoutAnimationController) {
         mLayoutAnimationController->IsDone(&isDone);
     }
     if ((flags & FLAG_ANIMATION_DONE) == 0 &&
@@ -4368,6 +4372,7 @@ ECode ViewGroup::DispatchDraw(
         Boolean isPost;
         Post(end, &isPost);
     }
+
     return NOERROR;
 }
 
@@ -4554,7 +4559,7 @@ Boolean ViewGroup::DrawChild(
     /* [in] */ IView* child,
     /* [in] */ Int64 drawingTime)
 {
-    return VIEW_PROBE(child)->Draw(canvas, this, drawingTime);
+    return ((View*)child)->Draw(canvas, this, drawingTime);
 }
 
 /**
@@ -4973,7 +4978,7 @@ Boolean ViewGroup::AddViewInLayout(
     /* [in] */ IViewGroupLayoutParams* params,
     /* [in] */ Boolean preventRequestLayout)
 {
-    View* v = VIEW_PROBE(child);
+    View* v = ((View*)child);
     v->mParent = NULL;
     AddViewInner(child, index, params, preventRequestLayout);
     v->mPrivateFlags = (v->mPrivateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
@@ -4984,7 +4989,7 @@ Boolean ViewGroup::AddViewInLayout(
 void ViewGroup::CleanupLayoutState(
     /* [in] */ IView* child)
 {
-    View* v = VIEW_PROBE(child);
+    View* v = ((View*)child);
     v->mPrivateFlags &= ~View::PFLAG_FORCE_LAYOUT;
 }
 
@@ -5003,7 +5008,7 @@ ECode ViewGroup::AddViewInner(
     }
 
     AutoPtr<IViewGroupLayoutParams> params = _params;
-    View* v = VIEW_PROBE(child);
+    View* v = ((View*)child);
     AutoPtr<IViewParent> parent;
     v->GetParent((IViewParent**)&parent);
     if (parent != NULL) {
@@ -5563,7 +5568,7 @@ void ViewGroup::RemoveDetachedView(
     CancelTouchTarget(child);
     CancelHoverTarget(child);
 
-    View* _child = VIEW_PROBE(child);
+    View* _child = ((View*)child);
     assert(_child != NULL);
 
     Boolean contains = FALSE;
@@ -5595,7 +5600,7 @@ void ViewGroup::AttachViewToParent(
     /* [in] */ IViewGroupLayoutParams* params)
 {
     assert(child != NULL);
-    View* v = VIEW_PROBE(child);
+    View* v = ((View*)child);
 
     v->mLayoutParams = params;
 
@@ -5660,7 +5665,7 @@ ECode ViewGroup::InvalidateChild(
     /* [in] */ IRect* dirty)
 {
     assert(child != NULL);
-    View* v = VIEW_PROBE(child);
+    View* v = ((View*)child);
 
     AutoPtr<IViewParent> parent = this;
 
@@ -5917,7 +5922,7 @@ ECode ViewGroup::DamageChild(
     AutoPtr<IViewParent> parent = this;
 
     AttachInfo* attachInfo = mAttachInfo;
-    View* v = VIEW_PROBE(child);
+    View* v = ((View*)child);
     if (attachInfo != NULL) {
 
         Int32 left = v->mLeft;
@@ -6116,7 +6121,7 @@ ECode ViewGroup::GetChildVisibleRect(
     rect->Set(r);
 
     assert(child != NULL && result != NULL);
-    View* _child = VIEW_PROBE(child);
+    View* _child = ((View*)child);
     if (!_child->HasIdentityMatrix()) {
         AutoPtr<IMatrix> tempMatrix;
         _child->GetMatrix((IMatrix**)&tempMatrix);
@@ -6865,7 +6870,7 @@ ECode ViewGroup::RequestTransparentRegion(
     /* [in] */ IView* child)
 {
     if (child != NULL) {
-        View* v = VIEW_PROBE(child);
+        View* v = ((View*)child);
         v->mPrivateFlags |= View::PFLAG_REQUEST_TRANSPARENT_REGIONS;
         if (mParent != NULL) {
             mParent->RequestTransparentRegion(IView::Probe(this));
