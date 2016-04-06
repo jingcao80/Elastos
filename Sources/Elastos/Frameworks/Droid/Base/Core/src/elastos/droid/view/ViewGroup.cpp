@@ -4232,27 +4232,26 @@ ECode ViewGroup::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     Boolean usingRenderNodeProperties;
-    canvas->IsRecordingFor((IInterface*)mRenderNode->Probe(EIID_IInterface), &usingRenderNodeProperties);
+    canvas->IsRecordingFor(TO_IINTERFACE(mRenderNode), &usingRenderNodeProperties);
     Int32 childrenCount = mChildrenCount;
     AutoPtr<ArrayOf<IView*> > children = mChildren;
     Int32 flags = mGroupFlags;
 
+    Boolean bval;
     if ((flags & FLAG_RUN_ANIMATION) != 0 && CanAnimate()) {
-        const Boolean cache = (mGroupFlags & FLAG_ANIMATION_CACHE) == FLAG_ANIMATION_CACHE;
-        Boolean temp;
-        IsHardwareAccelerated(&temp);
-        Boolean buildCache = !temp;
+        Boolean cache = (mGroupFlags & FLAG_ANIMATION_CACHE) == FLAG_ANIMATION_CACHE;
+        IsHardwareAccelerated(&bval);
+        Boolean buildCache = !bval;
 
         for (Int32 i = 0; i < childrenCount; i++) {
-            View* child = VIEW_PROBE((*children)[i]);
+            View* child = (View*)(*children)[i];
             if ((child->mViewFlags & VISIBILITY_MASK) == IView::VISIBLE) {
                 AutoPtr<IViewGroupLayoutParams> params;
                 child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-                AttachLayoutAnimationParameters(IView::Probe(child), params, i, childrenCount);
-                BindLayoutAnimation(IView::Probe(child));
+                AttachLayoutAnimationParameters((*children)[i], params, i, childrenCount);
+                BindLayoutAnimation((*children)[i]);
                 if (cache) {
                     child->SetDrawingCacheEnabled(TRUE);
-
                     if (buildCache) {
                         child->BuildDrawingCache(TRUE);
                     }
@@ -4260,9 +4259,8 @@ ECode ViewGroup::DispatchDraw(
             }
         }
 
-        Boolean willOverlap;
-        mLayoutAnimationController->WillOverlap(&willOverlap);
-        if (willOverlap) {
+        mLayoutAnimationController->WillOverlap(&bval);
+        if (bval) {
             mGroupFlags |= FLAG_OPTIMIZE_INVALIDATE;
         }
 
@@ -4286,14 +4284,10 @@ ECode ViewGroup::DispatchDraw(
     const Boolean clipToPadding = (flags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK;
     if (clipToPadding) {
         canvas->Save(&clipSaveCount);
-        Boolean isNonEmpty;
         canvas->ClipRect(mScrollX + mPaddingLeft, mScrollY + mPaddingTop,
                 mScrollX + mRight - mLeft - mPaddingRight,
-                mScrollY + mBottom - mTop - mPaddingBottom, &isNonEmpty);
-
+                mScrollY + mBottom - mTop - mPaddingBottom, &bval);
     }
-
-    Slogger::I("ViewGroup", "DispatchDraw: %s, clipToPadding:%d", TO_CSTR(this), clipToPadding);
 
     // We will draw our child's animation, let's reset the flag
     mPrivateFlags &= ~PFLAG_DRAW_ANIMATION;
@@ -4306,8 +4300,7 @@ ECode ViewGroup::DispatchDraw(
     if (usingRenderNodeProperties) canvas->InsertReorderBarrier();
     // Only use the preordered list if not HW accelerated, since the HW pipeline will do the
     // draw reordering internally
-    AutoPtr<IList> preorderedList = usingRenderNodeProperties
-            ? NULL : BuildOrderedChildList();
+    AutoPtr<IList> preorderedList = usingRenderNodeProperties ? NULL : BuildOrderedChildList();
     Boolean customOrder = preorderedList == NULL && IsChildrenDrawingOrderEnabled();
     for (Int32 i = 0; i < childrenCount; i++) {
         Int32 childIndex = customOrder ? GetChildDrawingOrder(childrenCount, i) : i;
@@ -4322,8 +4315,7 @@ ECode ViewGroup::DispatchDraw(
         }
         AutoPtr<IAnimation> animation;
         if ((((View*)child.Get())->mViewFlags & VISIBILITY_MASK) == IView::VISIBLE
-            || (child->GetAnimation((IAnimation**)&animation), animation != NULL)) {
-            Slogger::I("ViewGroup", "  > DrawChild: %s", TO_CSTR(child));
+            || (child->GetAnimation((IAnimation**)&animation), animation) != NULL) {
             more |= DrawChild(canvas, child, drawingTime);
         }
     }
@@ -4369,8 +4361,7 @@ ECode ViewGroup::DispatchDraw(
         // drawChild() after the animation is over
         mGroupFlags |= FLAG_NOTIFY_ANIMATION_LISTENER;
         AutoPtr<DispatchDrawRunnable> end = new DispatchDrawRunnable(this);
-        Boolean isPost;
-        Post(end, &isPost);
+        Post(end, &bval);
     }
 
     return NOERROR;
@@ -5312,7 +5303,7 @@ void ViewGroup::RemoveViewInternal(
         mTransition->RemoveChild(this, view);
     }
 
-    View* v = VIEW_PROBE(view);
+    View* v = (View*)view;
     Boolean clearChildFocus = FALSE;
     if (view == mFocused) {
         v->UnFocus(NULL);
@@ -5509,17 +5500,11 @@ ECode ViewGroup::RemoveAllViewsInLayout()
         CancelTouchTarget(view);
         CancelHoverTarget(view);
 
+        List<AutoPtr<IView> >::Iterator ator =
+            Find(mTransitioningViews.Begin(), mTransitioningViews.End(), view);
+        Boolean contains = (ator != mTransitioningViews.End());
 
-        Boolean contains = FALSE;
-        List<AutoPtr<IView> >::Iterator ator = mTransitioningViews.Begin();
-        for (; ator != mTransitioningViews.End(); ++ator) {
-            if (ator->Get() == view) {
-                contains = TRUE;
-                break;
-            }
-        }
-
-        View* v = VIEW_PROBE(view);
+        View* v = (View*)view.Get();
         AutoPtr<IAnimation> animation;
         if ((v->GetAnimation((IAnimation**)&animation), animation) != NULL || contains) {
             AddDisappearingView(view);
@@ -6851,7 +6836,7 @@ ECode ViewGroup::GatherTransparentRegion(
     View::GatherTransparentRegion(region, res);
     Boolean noneOfTheChildrenAreTransparent = TRUE;
     for (Int32 i = 0; i < mChildrenCount; i++) {
-        View* v = VIEW_PROBE((*mChildren)[i]);
+        View* v = (View*)(*mChildren)[i];
         AutoPtr<IAnimation> animation;
         if ((v->mViewFlags & VISIBILITY_MASK) == IView::VISIBLE
             || (v->GetAnimation((IAnimation**)&animation), animation) != NULL) {

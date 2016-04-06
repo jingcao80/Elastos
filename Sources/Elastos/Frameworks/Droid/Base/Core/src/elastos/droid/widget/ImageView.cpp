@@ -350,10 +350,10 @@ ECode ImageView::SetImageResource(
 ECode ImageView::SetImageURI(
     /* [in] */ IUri* uri)
 {
-    Boolean isEqual;
-    if (mResource != 0 || (mUri.Get() != uri &&
-            (uri == NULL || mUri == NULL ||
-            (IObject::Probe(uri)->Equals(mUri, &isEqual), !isEqual)))) {
+    if (mResource != 0
+        || (mUri.Get() != uri
+            && (uri == NULL || mUri == NULL || !Object::Equals(mUri, uri)))
+    ) {
         UpdateDrawable(NULL);
         mResource = 0;
         mUri = uri;
@@ -703,10 +703,9 @@ void ImageView::UpdateDrawable(
         }
 
         GetVisibility(&value);
-        Boolean isDifferent = FALSE;
-        d->SetVisible(value == IView::VISIBLE, TRUE, &isDifferent);
-        Boolean changed;
-        d->SetLevel(mLevel, &changed);
+        Boolean bval;
+        d->SetVisible(value == IView::VISIBLE, TRUE, &bval);
+        d->SetLevel(mLevel, &bval);
         d->GetIntrinsicWidth(&mDrawableWidth);
         d->GetIntrinsicHeight(&mDrawableHeight);
         ApplyImageTint();
@@ -939,8 +938,7 @@ void ImageView::ConfigureBounds()
     Int32 vwidth = (GetWidth(&tmp), tmp) - mPaddingLeft - mPaddingRight;
     Int32 vheight = (GetHeight(&tmp), tmp) - mPaddingTop - mPaddingBottom;
 
-    Boolean fits = (dwidth < 0 || vwidth == dwidth) &&
-                   (dheight < 0 || vheight == dheight);
+    Boolean fits = (dwidth < 0 || vwidth == dwidth) && (dheight < 0 || vheight == dheight);
 
     if (dwidth <= 0 || dheight <= 0 || ImageViewScaleType_FIT_XY == mScaleType) {
         /* If the drawable has no intrinsic size, or we're told to
@@ -1013,7 +1011,7 @@ void ImageView::ConfigureBounds()
             dy = (Int32)((vheight - dheight * scale) * 0.5f + 0.5f);
 
             mDrawMatrix->SetScale(scale, scale);
-            mDrawMatrix->PostTranslate(dx, dy, &result);
+            mDrawMatrix->PostTranslate(dx, dy, &result);;
         }
         else {
             // Generate the required transform.
@@ -1021,8 +1019,7 @@ void ImageView::ConfigureBounds()
             mTempDst->Set(0, 0, vwidth, vheight);
 
             mDrawMatrix = mMatrix;
-            mDrawMatrix->SetRectToRect(mTempSrc, mTempDst,
-                    ScaleTypeToScaleToFit(mScaleType), &result);
+            mDrawMatrix->SetRectToRect(mTempSrc, mTempDst, ScaleTypeToScaleToFit(mScaleType), &result);
         }
     }
 }
@@ -1077,10 +1074,6 @@ ECode ImageView::DrawableStateChanged()
 void ImageView::OnDraw(
     /* [in] */ ICanvas* canvas)
 {
-    Logger::D(TAG, " >>>> OnDraw mDrawableWidth:%d, mDrawableHeight:%d, "
-        "mPaddingLeft:%d mPaddingTop:%d, mPaddingRight:%d, mPaddingBottom:%d, mDrawMatrix:%s",
-        mDrawableWidth, mDrawableHeight, mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom,
-        TO_CSTR(mDrawMatrix));
     View::OnDraw(canvas);
 
     if (mDrawable == NULL) {
@@ -1091,42 +1084,31 @@ void ImageView::OnDraw(
         return;     // nothing to draw (empty bounds)
     }
 
-    Logger::I(TAG, " >> OnDraw 1: %s", TO_CSTR(mDrawable));
-    canvas->DrawARGB(255, 255, 0, 0);//debug
+    if (mDrawMatrix == NULL && mPaddingTop == 0 && mPaddingLeft == 0) {
+        mDrawable->Draw(canvas);
+    }
+    else {
+        Int32 saveCount1, saveCount2;
+        canvas->GetSaveCount(&saveCount1);
+        canvas->Save(&saveCount2);
+        if (mCropToPadding) {
+            Boolean isNonEmpty;
+            const Int32 scrollX = mScrollX;
+            const Int32 scrollY = mScrollY;
+            canvas->ClipRect(scrollX + mPaddingLeft, scrollY + mPaddingTop,
+                    scrollX + mRight - mLeft - mPaddingRight,
+                    scrollY + mBottom - mTop - mPaddingBottom,
+                    &isNonEmpty);
+        }
 
-    // mDrawable->Draw(canvas);
+        canvas->Translate(mPaddingLeft, mPaddingTop);
+        if (mDrawMatrix != NULL) {
+            canvas->Concat(mDrawMatrix);
+        }
 
-    // if (mDrawMatrix == NULL && mPaddingTop == 0 && mPaddingLeft == 0) {
-    //     mDrawable->Draw(canvas);
-    // }
-    // else {
-    //     Logger::I(TAG, " >> OnDraw 2: mCropToPadding:%d, mScrollX:%d, mScrollY:%d, "
-    //         " rect:(%d, %d, %d, %d)",
-    //         mCropToPadding, mScrollX, mScrollY,
-    //         mLeft, mTop, mRight, mBottom);
-    //     Int32 saveCount1, saveCount2;
-    //     canvas->GetSaveCount(&saveCount1);
-    //     canvas->Save(&saveCount2);
-    //     if (mCropToPadding) {
-    //         Boolean IsNonEmpty;
-    //         const Int32 scrollX = mScrollX;
-    //         const Int32 scrollY = mScrollY;
-    //         canvas->ClipRect(scrollX + mPaddingLeft, scrollY + mPaddingTop,
-    //                 scrollX + mRight - mLeft - mPaddingRight,
-    //                 scrollY + mBottom - mTop - mPaddingBottom,
-    //                 &IsNonEmpty);
-    //     }
-
-    //     canvas->Translate(mPaddingLeft, mPaddingTop);
-    //     if (mDrawMatrix != NULL) {
-    //         canvas->Concat(mDrawMatrix);
-    //     }
-
-    //     mDrawable->Draw(canvas);
-    //     canvas->RestoreToCount(saveCount1);
-    // }
-
-    Logger::D(TAG, " <<<< OnDraw");
+        mDrawable->Draw(canvas);
+        canvas->RestoreToCount(saveCount1);
+    }
 }
 
 ECode ImageView::GetBaseline(

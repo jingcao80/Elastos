@@ -93,6 +93,7 @@ using Elastos::Droid::Graphics::IPathMeasure;
 using Elastos::Droid::Graphics::CPathMeasure;
 using Elastos::Droid::Graphics::IPorterDuffXfermode;
 using Elastos::Droid::Graphics::CPorterDuffXfermode;
+using Elastos::Droid::Graphics::PorterDuffMode_NONE;
 using Elastos::Droid::Graphics::Insets;
 using Elastos::Droid::Graphics::Drawable::Drawable;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
@@ -102,6 +103,7 @@ using Elastos::Droid::Graphics::Drawable::CColorDrawable;
 using Elastos::Droid::Graphics::Drawable::IColorDrawable;
 using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
+using Elastos::Droid::Graphics::CanvasEdgeType_BW;
 using Elastos::Droid::Internal::Utility::EIID_IPredicate;
 using Elastos::Droid::Internal::View::Menu::IMenuBuilder;
 using Elastos::Droid::Internal::View::Menu::IMenuBuilder;
@@ -251,6 +253,7 @@ const Int32 View::ScrollabilityCache::ON;
 const Int32 View::ScrollabilityCache::FADING;
 
 const char* View::VIEW_LOG_TAG = "View";
+static const String TAG("View");
 
 AutoPtr<ArrayOf<Int32> > View::EMPTY_STATE_SET;
 AutoPtr<ArrayOf<Int32> > View::ENABLED_STATE_SET;
@@ -3137,7 +3140,9 @@ ECode View::GetAccessibilityWindowId(
 ECode View::GetContentDescription(
     /* [out] */ ICharSequence** res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = mContentDescription;
+    REFCOUNT_ADD(*res)
     return NOERROR;
 }
 
@@ -4696,9 +4701,11 @@ ECode View::GetFocusables(
     /* [out] */ IArrayList** views)
 {
     VALIDATE_NOT_NULL(views)
-    AutoPtr<IArrayList> temp;
-    CArrayList::New(24, (IArrayList**)&temp);
-    AddFocusables(*views, direction);
+    AutoPtr<IArrayList> result;
+    CArrayList::New(24, (IArrayList**)&result);
+    AddFocusables(result, direction);
+    *views = result;
+    REFCOUNT_ADD(*views);
     return NOERROR;
 }
 
@@ -4799,10 +4806,12 @@ ECode View::GetTouchables(
     /* [out] */ IArrayList** views)
 {
     VALIDATE_NOT_NULL(views)
-    AutoPtr<IArrayList> temp;
-    CArrayList::New(24, (IArrayList**)&temp);
+    AutoPtr<IArrayList> result;
+    CArrayList::New((IArrayList**)&result);
 
-    AddTouchables(*views);
+    AddTouchables(result);
+    *views = result;
+    REFCOUNT_ADD(*views)
     return NOERROR;
 }
 
@@ -5241,8 +5250,9 @@ ECode View::GetParentForAccessibility(
     /* [out] */ IViewParent** res)
 {
     VALIDATE_NOT_NULL(res)
-    if (IView::Probe(mParent) != NULL) {
-        View* parentView = VIEW_PROBE(mParent);
+    IView* vp = IView::Probe(mParent);
+    if (vp != NULL) {
+        View* parentView = (View*)vp;
         Boolean includeForAccessibility;
         if (parentView->IncludeForAccessibility(&includeForAccessibility), includeForAccessibility) {
             *res = mParent;
@@ -5560,7 +5570,6 @@ Boolean View::TraverseAtGranularity(
 ECode View::GetIterableTextForAccessibility(
     /* [out] */ ICharSequence** res)
 {
-    VALIDATE_NOT_NULL(res)
     return GetContentDescription(res);
 }
 
@@ -6318,8 +6327,7 @@ ECode View::GetWindowVisibleDisplayFrame(
 {
     assert(outRect != NULL);
 
-    if (mAttachInfo != NULL)
-    {
+    if (mAttachInfo != NULL) {
         AutoPtr<IRect> r;
         FAIL_RETURN(mAttachInfo->mSession->GetDisplayFrame(
                 mAttachInfo->mWindow.Get(), (IRect**)&r));
@@ -7666,7 +7674,6 @@ ECode View::GetInverseMatrix(
     VALIDATE_NOT_NULL(res)
     EnsureTransformationInfo();
     if (mTransformationInfo->mInverseMatrix == NULL) {
-
         CMatrix::New((IMatrix**)&(mTransformationInfo->mInverseMatrix));
     }
     AutoPtr<IMatrix> matrix = mTransformationInfo->mInverseMatrix;
@@ -8006,7 +8013,9 @@ Float View::GetFinalAlpha()
 ECode View::GetTransitionAlpha(
     /* [out] */ Float* alpha)
 {
-    return mTransformationInfo != NULL ? mTransformationInfo->mTransitionAlpha : 1;
+    VALIDATE_NOT_NULL(alpha)
+    *alpha = mTransformationInfo != NULL ? mTransformationInfo->mTransitionAlpha : 1;
+    return NOERROR;
 }
 
 /**
@@ -8334,7 +8343,6 @@ ECode View::SetZ(
 ECode View::GetElevation(
     /* [out] */ Float* elevation)
 {
-    VALIDATE_NOT_NULL(elevation)
     return mRenderNode->GetElevation(elevation);
 }
 
@@ -8362,7 +8370,6 @@ ECode View::SetElevation(
 ECode View::GetTranslationX(
     /* [out] */ Float* translationX)
 {
-    VALIDATE_NOT_NULL(translationX)
     return mRenderNode->GetTranslationX(translationX);
 }
 
@@ -8388,7 +8395,6 @@ ECode View::SetTranslationX(
 ECode View::GetTranslationY(
     /* [out] */ Float* translationY)
 {
-    VALIDATE_NOT_NULL(translationY)
     return  mRenderNode->GetTranslationY(translationY);
 }
 
@@ -8417,7 +8423,6 @@ ECode View::SetTranslationY(
 ECode View::GetTranslationZ(
     /* [out] */ Float* translationZ)
 {
-    VALIDATE_NOT_NULL(translationZ)
     return mRenderNode->GetTranslationZ(translationZ);
 }
 
@@ -8791,7 +8796,6 @@ ECode View::GetGlobalVisibleRect(
     /* [in, out] */ IRect* outRect,
     /* [out] */ Boolean* res)
 {
-    VALIDATE_NOT_NULL(res)
     return GetGlobalVisibleRect(outRect, NULL, res);
 }
 
@@ -9537,6 +9541,7 @@ ECode View::GetHandler(
     VALIDATE_NOT_NULL(res)
     if (mAttachInfo != NULL) {
         *res = mAttachInfo->mHandler;
+        REFCOUNT_ADD(*res)
         return NOERROR;
     }
     *res = NULL;
@@ -10625,8 +10630,7 @@ ECode View::OnAttachedToWindow()
     RebuildOutline();
     Boolean isFocused;
     if (IsFocused(&isFocused), isFocused) {
-        assert(0);
-        AutoPtr<IInputMethodManager> imm;// = CInputMethodManager::PeekInstance();
+        AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();
         imm->FocusIn(this);
     }
     return NOERROR;
@@ -11000,18 +11004,21 @@ ECode View::GetWindowId(
     /* [out] */ IWindowId** id)
 {
     VALIDATE_NOT_NULL(id)
+    *id = NULL;
+
     if (mAttachInfo == NULL) {
-        *id = NULL;
         return NOERROR;
     }
     if (mAttachInfo->mWindowId == NULL) {
         //try {
+        mAttachInfo->mIWindowId = NULL;
         FAIL_RETURN(mAttachInfo->mSession->GetWindowId(mAttachInfo->mWindowToken, (IIWindowId**)&mAttachInfo->mIWindowId))
         CWindowId::New(mAttachInfo->mIWindowId, (IWindowId**)&mAttachInfo->mWindowId);
         //} catch (RemoteException e) {
         //}
     }
     *id = mAttachInfo->mWindowId;
+    REFCOUNT_ADD(*id)
     return NOERROR;
 }
 
@@ -11029,6 +11036,8 @@ ECode View::GetApplicationWindowToken(
     /* [out] */ IBinder** res)
 {
     VALIDATE_NOT_NULL(res)
+    *res = NULL;
+
     AttachInfo* ai = mAttachInfo;
     if (ai != NULL) {
         AutoPtr<IBinder> appWindowToken = ai->mPanelParentWindowToken;
@@ -11039,7 +11048,6 @@ ECode View::GetApplicationWindowToken(
         REFCOUNT_ADD(*res)
         return NOERROR;
     }
-    *res = NULL;
     return NOERROR;
 }
 
@@ -11047,11 +11055,11 @@ ECode View::GetDisplay(
     /* [out] */ IDisplay** res)
 {
     VALIDATE_NOT_NULL(res)
+    *res = NULL;
+
     if (mAttachInfo != NULL) {
         *res = mAttachInfo->mDisplay;
         REFCOUNT_ADD(*res)
-    } else {
-        *res = NULL;
     }
     return NOERROR;
 }
@@ -11065,11 +11073,10 @@ ECode View::GetWindowSession(
     /* [out] */ IWindowSession** res)
 {
     VALIDATE_NOT_NULL(res)
+    *res = NULL;
     if (mAttachInfo != NULL) {
         *res = mAttachInfo->mSession;
         REFCOUNT_ADD(*res)
-    } else {
-        *res = NULL;
     }
     return NOERROR;
 }
@@ -11727,7 +11734,7 @@ ECode View::GetHardwareRenderer(
     if (mAttachInfo != NULL) {
         *res = mAttachInfo->mHardwareRenderer;
         REFCOUNT_ADD(*res)
-    return NOERROR;
+        return NOERROR;
     }
     *res = NULL;
     return NOERROR;
@@ -11766,7 +11773,6 @@ void View::ResetDisplayList()
 ECode View::GetDrawingCache(
     /* [out] */ IBitmap** res)
 {
-    VALIDATE_NOT_NULL(res)
     return GetDrawingCache(FALSE, res);
 }
 
@@ -12378,10 +12384,10 @@ ECode View::GetClipBounds(
     /* [out] */ IRect** clipBounds)
 {
     VALIDATE_NOT_NULL(clipBounds)
+    *clipBounds = NULL;
+
     if (mClipBounds) {
-        CRect::New(clipBounds);
-    } else {
-        *clipBounds = NULL;
+        CRect::New(mClipBounds, clipBounds);
     }
     return NOERROR;
 }
@@ -12491,8 +12497,7 @@ void View::SetDisplayListProperties(
                 t->GetTransformationType(&transformType);
                 if (transformType != ITransformation::TYPE_IDENTITY) {
                     if ((transformType & ITransformation::TYPE_ALPHA) != 0) {
-                        assert(0 && "TODO");
-                        //t>GetAlpha(&alpha);
+                        t->GetAlpha(&alpha);
                     }
                     if ((transformType & ITransformation::TYPE_MATRIX) != 0) {
                         AutoPtr<IMatrix> temp;
@@ -12511,7 +12516,8 @@ void View::SetDisplayListProperties(
                 }
             }
             renderNode->SetAlpha(alpha, &res);
-        } else if (alpha < 1) {
+        }
+        else if (alpha < 1) {
             renderNode->SetAlpha(alpha, &res);
         }
     }
@@ -12591,11 +12597,13 @@ Boolean View::Draw(
     mPrivateFlags |= PFLAG_DRAWN;
 
     Boolean isNotIntersect = FALSE;
-    if (!concatMatrix && (flags & (ViewGroup::FLAG_SUPPORT_STATIC_TRANSFORMATIONS |
-        ViewGroup::FLAG_CLIP_CHILDREN)) == ViewGroup::FLAG_CLIP_CHILDREN &&
-        (canvas->QuickReject(mLeft, mTop, mRight, mBottom,
-            Elastos::Droid::Graphics::CanvasEdgeType_BW, &isNotIntersect),
-        isNotIntersect) && (mPrivateFlags & PFLAG_DRAW_ANIMATION) == 0) {
+    if (!concatMatrix
+        && (flags & (ViewGroup::FLAG_SUPPORT_STATIC_TRANSFORMATIONS | ViewGroup::FLAG_CLIP_CHILDREN))
+            == ViewGroup::FLAG_CLIP_CHILDREN
+        && (canvas->QuickReject(mLeft, mTop, mRight, mBottom,
+            CanvasEdgeType_BW, &isNotIntersect), isNotIntersect)
+        && (mPrivateFlags & PFLAG_DRAW_ANIMATION) == 0)
+    {
         mPrivateFlags2 |= PFLAG2_VIEW_QUICK_REJECTED;
         return more;
     }
@@ -12649,7 +12657,7 @@ Boolean View::Draw(
         GetDisplayList((IRenderNode**)&renderNode);
         assert(renderNode != NULL);
         Boolean valid = FALSE;
-        if (!(renderNode->IsValid(&valid), valid)) {
+        if (renderNode->IsValid(&valid), !valid) {
             // Uncommon, but possible. If a view is removed from the hierarchy during the call
             // to getDisplayList(), the display list will be marked invalid and we should not
             // try to use it again.
@@ -12675,12 +12683,21 @@ Boolean View::Draw(
     if (!usingRenderNodeProperties || transformToApply != NULL) {
         canvas->Save(&restoreTo);
     }
+
+    // Logger::I(TAG, " >>> Draw %s in parent %s: sx:sy(%d, %d), rect (%d, %d, %d, %d), pading (%d, %d, %d, %d)",
+    //     TO_CSTR(this), TO_CSTR(parent), sx, sy, mLeft, mTop, mRight, mBottom,
+    //     mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom);
+
     if (offsetForScroll) {
         canvas->Translate(mLeft - sx, mTop - sy);
+        // Logger::I(TAG, " >>> Draw %s in parent %s: Translate 1: (%d, %d)",
+        //     TO_CSTR(this), TO_CSTR(parent), mLeft - sx, mTop - sy);
     }
     else {
         if (!usingRenderNodeProperties) {
             canvas->Translate(mLeft, mTop);
+            // Logger::I(TAG, " >>> Draw %s in parent %s: Translate 2: (%d, %d)",
+            //     TO_CSTR(this), TO_CSTR(parent), mLeft, mTop);
         }
         if (scalingRequired) {
             if (usingRenderNodeProperties) {
@@ -12692,10 +12709,15 @@ Boolean View::Draw(
             canvas->Scale(scale, scale);
         }
     }
+
     Float tempAlpha, transitionAlpha;
     GetAlpha(&tempAlpha);
     GetTransitionAlpha(&transitionAlpha);
-    Float alpha = usingRenderNodeProperties ? 1 : (tempAlpha * transitionAlpha);
+
+    Float alpha = 1;
+    if (!usingRenderNodeProperties) {
+        alpha = (tempAlpha * transitionAlpha);
+    }
     if (transformToApply != NULL || alpha < 1 || !HasIdentityMatrix() ||
             (mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_ALPHA) == PFLAG3_VIEW_IS_ANIMATING_ALPHA) {
         if (transformToApply != NULL || !childHasIdentityMatrix) {
@@ -12763,11 +12785,8 @@ Boolean View::Draw(
                         layerFlags |= ICanvas::CLIP_TO_LAYER_SAVE_FLAG;
                     }
                     if (usingRenderNodeProperties) {
-                        Float tempAlpha, transformAlpha;
-                        GetAlpha(&tempAlpha);
-                        GetTransitionAlpha(&transformAlpha);
                         Boolean res;
-                        renderNode->SetAlpha(alpha * tempAlpha * transformAlpha, &res);
+                        renderNode->SetAlpha(alpha * tempAlpha * transitionAlpha, &res);
                     }
                     else  if (layerType == IView::LAYER_TYPE_NONE) {
                         const Int32 scrollX = hasDisplayList ? 0 : sx;
@@ -12814,15 +12833,16 @@ Boolean View::Draw(
         if (mClipBounds != NULL) {
             // clip bounds ignore scroll
             Boolean res;
-            canvas->ClipRect((IRect*)mClipBounds, &res);
+            canvas->ClipRect(mClipBounds, &res);
         }
     }
 
     if (!usingRenderNodeProperties && hasDisplayList) {
+        renderNode = NULL;
         GetDisplayList((IRenderNode**)&renderNode);
         assert(renderNode != NULL);
         Boolean valid = FALSE;
-        if (!(renderNode->IsValid(&valid), valid)) {
+        if (renderNode->IsValid(&valid), !valid) {
             // Uncommon, but possible. If a view is removed from the hierarchy during the call
             // to getDisplayList(), the display list will be marked invalid and we should not
             // try to use it again.
@@ -12864,7 +12884,7 @@ Boolean View::Draw(
                     if (mOverlay != NULL && (mOverlay->IsEmpty(&isEmpty), !isEmpty)) {
                         AutoPtr<IViewGroup> group;
                         mOverlay->GetOverlayView((IViewGroup**)&group);
-                        (IView::Probe(group))->Draw(canvas);
+                        ((ViewGroup*)group.Get())->Draw(canvas);
                     }
                 }
                 else {
@@ -12907,7 +12927,7 @@ Boolean View::Draw(
 
     if (a != NULL && !more) {
         Boolean after = FALSE;
-        if (!hardwareAccelerated && !(a->GetFillAfter(&after), after)) {
+        if (!hardwareAccelerated && (a->GetFillAfter(&after), !after)) {
             OnSetAlpha(255);
         }
         parent->FinishAnimatingView(this, a);
@@ -12916,7 +12936,8 @@ Boolean View::Draw(
     if (more && hardwareAccelerated) {
         Boolean has = FALSE;
         assert(a != NULL);
-        if ((a->HasAlpha(&has), has) && (mPrivateFlags & PFLAG_ALPHA_SET) == PFLAG_ALPHA_SET) {
+        a->HasAlpha(&has);
+        if (has && (mPrivateFlags & PFLAG_ALPHA_SET) == PFLAG_ALPHA_SET) {
             // alpha animations should cause the child to recreate its display list
             Invalidate(TRUE);
         }
@@ -12938,8 +12959,6 @@ Boolean View::Draw(
 ECode View::Draw(
     /* [in] */ ICanvas* canvas)
 {
-    Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------1", mID, this);
-
     using Elastos::Core::Math;
     Int32 privateFlags = mPrivateFlags;
     Boolean dirtyOpaque = (privateFlags & PFLAG_DIRTY_MASK) == PFLAG_DIRTY_OPAQUE &&
@@ -12965,8 +12984,6 @@ ECode View::Draw(
         DrawBackground(canvas);
     }
 
-    Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------2", mID, this);
-
     // skip step 2 & 5 if possible (common case)
     Int32 viewFlags = mViewFlags;
     Boolean horizontalEdges = (viewFlags & FADING_EDGE_HORIZONTAL) != 0;
@@ -12976,24 +12993,20 @@ ECode View::Draw(
         if (!dirtyOpaque) {
             OnDraw(canvas);
         }
-        Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------3", mID, this);
 
         // Step 4, draw the children
         DispatchDraw(canvas);
 
-        Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------4", mID, this);
+        // Step 6, draw decorations (scrollbars)
+        OnDrawScrollBars(canvas);
 
-        // // Step 6, draw decorations (scrollbars)
-        // OnDrawScrollBars(canvas);
+        Boolean isEmpty;
+        if (mOverlay != NULL && (mOverlay->IsEmpty(&isEmpty), !isEmpty)) {
+            AutoPtr<IViewGroup> group;
+            mOverlay->GetOverlayView((IViewGroup**)&group);
+            ((ViewGroup*)group.Get())->DispatchDraw(canvas);
+        }
 
-        // Boolean isEmpty;
-        // if (mOverlay != NULL && (mOverlay->IsEmpty(&isEmpty), !isEmpty)) {
-        //     AutoPtr<IViewGroup> group;
-        //     mOverlay->GetOverlayView((IViewGroup**)&group);
-        //     ((ViewGroup*)group.Get())->DispatchDraw(canvas);
-        // }
-
-        Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------4 - 1", mID, this);
         return NOERROR;
     }
 
@@ -13092,10 +13105,8 @@ ECode View::Draw(
     // Step 3, draw the content
     if (!dirtyOpaque) OnDraw(canvas);
 
-    Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------5", mID, this);
     // Step 4, draw the children
     DispatchDraw(canvas);
-    Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------6", mID, this);
 
     // Step 5, draw the fade effect and restore layers
     AutoPtr<IPaint> p = scrollabilityCache->mPaint;
@@ -13140,10 +13151,8 @@ ECode View::Draw(
 
     canvas->RestoreToCount(saveCount);
 
-    Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------7", mID, this);
     // Step 6, draw decorations (scrollbars)
     OnDrawScrollBars(canvas);
-    Logger::I(VIEW_LOG_TAG, "View::Draw ID = 0x%08x, this = 0x%08x----------------8", mID, this);
 
     Boolean mOverlayIsEmpty;
     if (mOverlay != NULL && (mOverlay->IsEmpty(&mOverlayIsEmpty), !mOverlayIsEmpty)) {
@@ -13621,16 +13630,14 @@ Boolean View::SetFrame(
     /* [in] */ Int32 right,
     /* [in] */ Int32 bottom)
 {
-    //printf("ID=0x%08x, 0x%08x, View::SetFrame\n", mID, this);
     Boolean changed = FALSE;
 
     if (DBG) {
-        Logger::D(VIEW_LOG_TAG, "this = 0x%08x View.setFrame(%d, %d, %d, %d)",
-            left, top, right, bottom);
+        Logger::I(TAG, "this = %s View.setFrame(%d, %d, %d, %d)",
+            TO_CSTR(this), left, top, right, bottom);
     }
 
     if (mLeft != left || mRight != right || mTop != top || mBottom != bottom) {
-        //printf("left = %d, right = %d, top = %d, bottom = %d\n", left, right, top, bottom);
         changed = TRUE;
 
         // Remember our drawn bit
@@ -13691,8 +13698,9 @@ ECode View::SizeChange(
     if (mOverlay != NULL) {
         AutoPtr<IViewGroup> group;
         mOverlay->GetOverlayView((IViewGroup**)&group);
-        (IView::Probe(group))->SetRight(newWidth);
-        (IView::Probe(group))->SetBottom(newHeight);
+        IView* view = IView::Probe(group);
+        view->SetRight(newWidth);
+        view->SetBottom(newHeight);
     }
     mPrivateFlags3 |= PFLAG3_OUTLINE_INVALID;
     return NOERROR;
@@ -14376,11 +14384,11 @@ ECode View::GetBackgroundTintList(
     /* [out] */ IColorStateList** res)
 {
     VALIDATE_NOT_NULL(res);
+    *res = NULL;
+
     if (mBackgroundTint) {
         *res = mBackgroundTint->mTintList;
         REFCOUNT_ADD(*res)
-    } else {
-        *res = NULL;
     }
     return NOERROR;
 }
@@ -14425,7 +14433,7 @@ ECode View::GetBackgroundTintMode(
     if (mBackgroundTint) {
         *res = mBackgroundTint->mTintMode;
     } else {
-        *res = (PorterDuffMode)NULL;
+        *res = PorterDuffMode_NONE;
     }
     return NOERROR;
 }
@@ -14651,25 +14659,29 @@ ECode View::GetPaddingBottom(
 ECode View::GetPaddingLeft(
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
+
     Boolean isPaddingResolved;
     IsPaddingResolved(&isPaddingResolved);
     if (!isPaddingResolved) {
         ResolvePadding();
     }
 
-    VALIDATE_NOT_NULL(res)
     *res = mPaddingLeft;
     return NOERROR;
 }
 
 ECode View::GetPaddingStart(
-    /* [out] */ Int32* res) {
+    /* [out] */ Int32* res)
+{
+    VALIDATE_NOT_NULL(res)
+
     Boolean isPaddingResolved;
     IsPaddingResolved(&isPaddingResolved);
     if (!isPaddingResolved) {
         ResolvePadding();
     }
-    VALIDATE_NOT_NULL(res)
+
     Int32 layoutDirection;
     GetLayoutDirection(&layoutDirection);
     *res = (layoutDirection == IView::LAYOUT_DIRECTION_RTL) ?
@@ -14687,13 +14699,14 @@ ECode View::GetPaddingStart(
 ECode View::GetPaddingRight(
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
+
     Boolean isPaddingResolved;
     IsPaddingResolved(&isPaddingResolved);
     if (!isPaddingResolved) {
         ResolvePadding();
     }
 
-    VALIDATE_NOT_NULL(res)
     *res = mPaddingRight;
     return NOERROR;
 }
@@ -14701,13 +14714,14 @@ ECode View::GetPaddingRight(
 ECode View::GetPaddingEnd(
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
+
     Boolean isPaddingResolved;
     IsPaddingResolved(&isPaddingResolved);
     if (!isPaddingResolved) {
         ResolvePadding();
     }
 
-    VALIDATE_NOT_NULL(res)
     Int32 layoutDirection;
     GetLayoutDirection(&layoutDirection);
     *res = (layoutDirection == IView::LAYOUT_DIRECTION_RTL) ?
@@ -14910,14 +14924,16 @@ ECode View::GetRootView(
         }
     }
 
-    AutoPtr<IView> me;
+    AutoPtr<IView> me, vp;
     AutoPtr<IViewParent> parent;
     me = this;
     me->GetParent((IViewParent**)&parent);
-    while (parent != NULL && parent->Probe(EIID_IView) != NULL) {
-        me = IView::Probe(parent);
+    vp = IView::Probe(parent);
+    while (vp != NULL) {
+        me = vp;
         parent = NULL;
         me->GetParent((IViewParent**)&parent);
+        vp = IView::Probe(parent);
     }
 
     *res = me;
@@ -14945,8 +14961,7 @@ ECode View::ToGlobalMotionEvent(
     }
 
     AutoPtr<IMatrix> m = info->mTmpMatrix;
-    assert(0 && "TODO");
-    //m->Set(IMatrix::IDENTITY_MATRIX);
+    m->Set(CMatrix::IDENTITY_MATRIX);
     TransformMatrixToGlobal(m);
     ev->Transform(m);
     *res = TRUE;
@@ -14973,8 +14988,7 @@ ECode View::ToLocalMotionEvent(
     }
 
     AutoPtr<IMatrix> m = info->mTmpMatrix;
-    assert(0 && "TODO");
-    //m->Set(Matrix::IDENTITY_MATRIX);
+    m->Set(CMatrix::IDENTITY_MATRIX);
     TransformMatrixToLocal(m);
     ev->Transform(m);
     *res = TRUE;
@@ -15669,7 +15683,7 @@ ECode View::Debug()
 ECode View::GetBaseline(
     /* [out] */ Int32* baseline)
 {
-    assert(baseline);
+    VALIDATE_NOT_NULL(baseline)
     *baseline = -1;
 
     return NOERROR;
@@ -17204,9 +17218,8 @@ ECode View::GetVerticalScrollFactor(
         Boolean res = FALSE;
         theme->ResolveAttribute(R::attr::listPreferredItemHeight, outValue, TRUE, &res);
         if (!res) {
-            assert(0);
-            // throw new IllegalStateException(
-            //         "Expected theme to define listPreferredItemHeight.");
+            Logger::E(TAG, "Expected theme to define listPreferredItemHeight.");
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
         AutoPtr<IResources> resource;
@@ -17225,7 +17238,6 @@ ECode View::GetVerticalScrollFactor(
 ECode View::GetHorizontalScrollFactor(
     /* [out] */ Float* scroll)
 {
-    VALIDATE_NOT_NULL(scroll)
     // TODO: Should use something else.
     return GetVerticalScrollFactor(scroll);
 }
@@ -18220,7 +18232,7 @@ ECode View::constructor(
                 a->GetInt32(R::styleable::View_backgroundTintMode, -1, &temp);
                 AutoPtr<IDrawableHelper> helper;
                 CDrawableHelper::AcquireSingleton((IDrawableHelper**)&helper);
-                helper->ParseTintMode(temp, (PorterDuffMode)NULL, &(mBackgroundTint->mTintMode));
+                helper->ParseTintMode(temp, PorterDuffMode_NONE, &(mBackgroundTint->mTintMode));
                 mBackgroundTint->mHasTintMode = TRUE;
                 break;
             }

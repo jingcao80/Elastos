@@ -647,8 +647,9 @@ void AppWidgetHostView::PrepareView(
     /* [in] */ IView* view)
 {
     // Take requested dimensions from child, but apply default gravity.
-    AutoPtr<IFrameLayoutLayoutParams> requested;
-    view->GetLayoutParams((IViewGroupLayoutParams**)&requested);
+    AutoPtr<IViewGroupLayoutParams> vglp;
+    view->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+    AutoPtr<IFrameLayoutLayoutParams> requested = IFrameLayoutLayoutParams::Probe(vglp);
     if (requested == NULL) {
         CFrameLayoutLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT,
                 IViewGroupLayoutParams::MATCH_PARENT, (IFrameLayoutLayoutParams**)&requested);

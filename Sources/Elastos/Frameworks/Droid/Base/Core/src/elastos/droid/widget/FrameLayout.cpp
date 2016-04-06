@@ -22,8 +22,10 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
+static const String TAG("FrameLayout");
 
-CAR_INTERFACE_IMPL(FrameLayout::LayoutParams, ViewGroup::MarginLayoutParams, IFrameLayoutLayoutParams);
+CAR_INTERFACE_IMPL(FrameLayout::LayoutParams, ViewGroup::MarginLayoutParams, IFrameLayoutLayoutParams)
+
 FrameLayout::LayoutParams::LayoutParams()
     : mGravity(-1)
 {}
@@ -605,10 +607,12 @@ void FrameLayout::LayoutChildren(
 
         child->GetVisibility(&visibility);
         if (visibility != IView::GONE) {
-            AutoPtr<IFrameLayoutLayoutParams> lp;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+            AutoPtr<IViewGroupLayoutParams> vglp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+            IFrameLayoutLayoutParams* lp = IFrameLayoutLayoutParams::Probe(vglp);
+            IViewGroupMarginLayoutParams* vgmlp = IViewGroupMarginLayoutParams::Probe(vglp);
             Int32 ml, mt, mr, mb;
-            IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&ml, &mt, &mr, &mb);
+            vgmlp->GetMargins(&ml, &mt, &mr, &mb);
 
             Int32 gravity;
             lp->GetGravity(&gravity);
@@ -627,33 +631,32 @@ void FrameLayout::LayoutChildren(
             Int32 verticalGravity = gravity & IGravity::VERTICAL_GRAVITY_MASK;
 
             switch (absoluteGravity & IGravity::HORIZONTAL_GRAVITY_MASK) {
-                    case IGravity::CENTER_HORIZONTAL:
-                        childLeft = parentLeft + (parentRight - parentLeft - width) / 2 +
-                            ml - mr;
+                case IGravity::CENTER_HORIZONTAL:
+                    childLeft = parentLeft + (parentRight - parentLeft - width) / 2 +
+                        ml - mr;
+                    break;
+                case IGravity::RIGHT:
+                    if (!forceLeftGravity) {
+                        childLeft = parentRight - width - mr;
                         break;
-                    case IGravity::RIGHT:
-                        if (!forceLeftGravity) {
-                            childLeft = parentRight - width - mr;
-                            break;
-                        }
-                    case IGravity::LEFT:
-                    default:
-                        childLeft = parentLeft + ml;
+                    }
+                case IGravity::LEFT:
+                default:
+                    childLeft = parentLeft + ml;
             }
 
             switch (verticalGravity) {
-                    case IGravity::TOP:
-                        childTop = parentTop + mt;
-                        break;
-                    case IGravity::CENTER_VERTICAL:
-                        childTop = parentTop + (parentBottom - parentTop - height) / 2 +
-                            mt - mb;
-                        break;
-                    case IGravity::BOTTOM:
-                        childTop = parentBottom - height - mb;
-                        break;
-                    default:
-                        childTop = parentTop + mt;
+                case IGravity::TOP:
+                    childTop = parentTop + mt;
+                    break;
+                case IGravity::CENTER_VERTICAL:
+                    childTop = parentTop + (parentBottom - parentTop - height) / 2 + mt - mb;
+                    break;
+                case IGravity::BOTTOM:
+                    childTop = parentBottom - height - mb;
+                    break;
+                default:
+                    childTop = parentTop + mt;
             }
 
             child->Layout(childLeft, childTop, childLeft + width, childTop + height);
@@ -677,23 +680,21 @@ ECode FrameLayout::Draw(
     ViewGroup::Draw(canvas);
 
     if (mForeground != NULL) {
-        Logger::I("FrameLayout", "FrameLayout Draw mForeground: %s, mForegroundBoundsChanged:%d",
-            TO_CSTR(mForeground), mForegroundBoundsChanged);
         AutoPtr<IDrawable> foreground = mForeground;
 
         if (mForegroundBoundsChanged) {
             mForegroundBoundsChanged = FALSE;
-            AutoPtr<IRect> selfBounds = (IRect*)mSelfBounds.Get();
-            AutoPtr<IRect> overlayBounds = (IRect*)mOverlayBounds.Get();
+            IRect* selfBounds = mSelfBounds;
+            IRect* overlayBounds = mOverlayBounds;
 
             Int32 w = mRight - mLeft;
             Int32 h = mBottom - mTop;
 
             if (mForegroundInPadding) {
                 selfBounds->Set(0, 0, w, h);
-            } else {
-                selfBounds->Set(mPaddingLeft, mPaddingTop, w - mPaddingRight,
-                        h - mPaddingBottom);
+            }
+            else {
+                selfBounds->Set(mPaddingLeft, mPaddingTop, w - mPaddingRight, h - mPaddingBottom);
             }
 
             Int32 layoutDirection = 0;
@@ -703,8 +704,7 @@ ECode FrameLayout::Draw(
             foreground->GetIntrinsicWidth(&iWidth);
             foreground->GetIntrinsicHeight(&iHeight);
             Gravity::Apply(mForegroundGravity, iWidth, iHeight,
-                selfBounds, overlayBounds,
-                layoutDirection);
+                selfBounds, overlayBounds, layoutDirection);
             foreground->SetBounds(overlayBounds);
         }
 

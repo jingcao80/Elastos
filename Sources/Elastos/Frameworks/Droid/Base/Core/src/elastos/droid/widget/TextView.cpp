@@ -8565,7 +8565,7 @@ ECode TextView::Debug(
     } else {
         output += "mText=NULL";
     }
-    Log::d(VIEW_LOG_TAG, output);
+    Log::d("TextView", output);
     return NOERROR;*/
     return NOERROR;
 }

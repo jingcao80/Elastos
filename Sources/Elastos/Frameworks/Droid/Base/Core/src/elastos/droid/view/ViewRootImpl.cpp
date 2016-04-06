@@ -2046,9 +2046,9 @@ ECode ViewRootImpl::InvalidateChildInParent(
 {
     FAIL_RETURN(CheckThread());
 
-    if (DEBUG_DRAW) {
-        Logger::V(TAG, "Invalidate child: %s", TO_CSTR(dirty));
-    }
+    // if (DEBUG_DRAW) {
+    //     Logger::V(TAG, "Invalidate child: %s", TO_CSTR(dirty));
+    // }
 
     Boolean isEmpty;
     if (dirty == NULL) {
@@ -3462,7 +3462,7 @@ void ViewRootImpl::PerformLayout(
                 AutoPtr<IInterface> temp;
                 validLayoutRequesters->Get(i, (IInterface**)&temp);
                 AutoPtr<IView> view = IView::Probe(temp);
-                Logger::V(TAG, "requestLayout() improperly called by %d during layout: running second layout pass", view.Get());
+                Logger::V(TAG, "requestLayout() improperly called by %s during layout: running second layout pass", TO_CSTR(temp));
                 view->RequestLayout();
             }
             AutoPtr<IContext> mViewContext;
@@ -3929,9 +3929,7 @@ void ViewRootImpl::Draw(
                 return;
             }
 
-    Logger::I(TAG, " ViewRootImpl::Draw 8");
             if (!DrawSoftware(surface, mAttachInfo, xOffset, yOffset, scalingRequired, dirty)) {
-    Logger::I(TAG, " ViewRootImpl::Draw 9");
                 return;
             }
         }
@@ -3982,8 +3980,6 @@ Boolean ViewRootImpl::DrawSoftware(
             break;
         }
     } while(0);
-
-    Logger::I(TAG, " ViewRootImpl::DrawSoftware 1 dirty:%s", TO_CSTR(dirty));
 
     if (ec == (ECode)E_OUT_OF_RESOURCES_EXCEPTION) {
         HandleOutOfResourcesException(ec);
@@ -4051,7 +4047,7 @@ Boolean ViewRootImpl::DrawSoftware(
     canvas->SetScreenDensity(scalingRequired ? mNoncompatDensity : 0);
     mAttachInfo->mIgnoreDirtyState = FALSE;
 
-    Logger::I(TAG, " ViewRootImpl::DrawSoftware 4 xoff:%d, yoff:%d", xoff, yoff);
+    Logger::I(TAG, " ViewRootImpl::DrawSoftware xoff:%d, yoff:%d", xoff, yoff);
     mView->Draw(canvas);
 
     if (!attachInfo->mSetIgnoreDirtyState) {

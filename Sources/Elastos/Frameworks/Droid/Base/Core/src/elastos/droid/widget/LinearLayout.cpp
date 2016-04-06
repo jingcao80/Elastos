@@ -18,6 +18,8 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
+static const String TAG("LinearLayout");
+
 const Int32 LinearLayout::VERTICAL_GRAVITY_COUNT = 4;
 const Int32 LinearLayout::INDEX_CENTER_VERTICAL = 0;
 const Int32 LinearLayout::INDEX_TOP = 1;
@@ -310,15 +312,14 @@ ECode LinearLayout::GetDividerWidth(
 void LinearLayout::OnDraw(
     /* [in] */ ICanvas* canvas)
 {
-    Logger::I("LinearLayout", "LinearLayout OnDraw: %p", this);
-
     if (mDivider == NULL) {
         return;
     }
 
     if (mOrientation == ILinearLayout::VERTICAL) {
         DrawDividersVertical(canvas);
-    } else {
+    }
+    else {
         DrawDividersHorizontal(canvas);
     }
 }
@@ -355,12 +356,12 @@ void LinearLayout::DrawDividersVertical(
         if (child == NULL) {
             Int32 h = 0, b = 0;
             bottom = (GetHeight(&h), h) - (GetPaddingBottom(&b), b) - mDividerHeight;
-        } else {
+        }
+        else {
             AutoPtr<ILinearLayoutLayoutParams> lp;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-            Int32 ml, mt, mr, mb;
-            IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&ml, &mt, &mr, &mb);
-
+            Int32 mb;
+            IViewGroupMarginLayoutParams::Probe(lp)->GetBottomMargin(&mb);
             child->GetBottom(&bottom);
             bottom = bottom + mb;
         }
@@ -410,11 +411,13 @@ void LinearLayout::DrawDividersHorizontal(
         if (child == NULL) {
             if (isLayoutRtl) {
                 GetPaddingLeft(&position);
-            } else {
+            }
+            else {
                 Int32 w = 0, r = 0;
                 position = (GetWidth(&w), w) - (GetPaddingRight(&r), r) - mDividerWidth;
             }
-        } else {
+        }
+        else {
             AutoPtr<ILinearLayoutLayoutParams> lp;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
             Int32 ml, mt, mr, mb;

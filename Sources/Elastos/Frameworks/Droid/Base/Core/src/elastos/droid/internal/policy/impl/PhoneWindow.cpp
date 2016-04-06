@@ -3252,7 +3252,9 @@ void PhoneWindow::OnOptionsPanelRotationChanged()
 
     AutoPtr<IWindowManagerLayoutParams> lp;
     if (st->mDecorView != NULL) {
-        st->mDecorView->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+        AutoPtr<IViewGroupLayoutParams> vglp;
+        st->mDecorView->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+        lp = IWindowManagerLayoutParams::Probe(vglp);
     }
 
     if (lp != NULL) {
