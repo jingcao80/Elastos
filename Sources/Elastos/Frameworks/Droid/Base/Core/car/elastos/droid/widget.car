@@ -115,7 +115,6 @@ module
     merge("widget/ShareActionProvider.car");
     merge("widget/RecycleListView.car");
     merge("widget/SearchViewSearchAutoComplete.car");
-    merge("widget/VolumePanel.car");
     merge("widget/RemoteViewsAdapterServiceConnection.car");
     merge("widget/ActionMenuView.car");
     merge("widget/OnDateChangedListener.car");
@@ -141,15 +140,23 @@ module
     interface Elastos.Droid.App.IITransientNotification;
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
     interface Elastos.Droid.Content.Pm.IApplicationInfo;
     interface Elastos.Droid.Database.ICursor;
     interface Elastos.Droid.Database.IDataSetObserver;
     interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
     interface Elastos.Droid.Graphics.Drawable.IDrawable;
-    interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
+    interface Elastos.Droid.Internal.View.Menu.IMenuPresenterCallback;
+    interface Elastos.Droid.Internal.View.Menu.IMenuBuilderCallback;
+    interface Elastos.Droid.Internal.View.Menu.IMenuPresenter;
+    interface Elastos.Droid.Internal.View.Menu.IBaseMenuPresenter;
+    interface Elastos.Droid.Internal.View.Menu.IMenuBuilderItemInvoker;
+    interface Elastos.Droid.Internal.View.Menu.IMenuView;
+    interface Elastos.Droid.Internal.Widget.IIRemoteViewsFactory;
     interface Elastos.Droid.Media.ISubtitleControllerAnchor;
     interface Elastos.Droid.Os.IBinder;
     interface Elastos.Droid.Os.IHandlerCallback;
+    interface Elastos.Droid.Text.ITextWatcher;
     interface Elastos.Droid.Text.INoCopySpan;
     interface Elastos.Droid.Utility.IAttributeSet;
     interface Elastos.Droid.View.IActionProvider;
@@ -162,7 +169,6 @@ module
     interface Elastos.Droid.View.IViewParent;
     interface Elastos.Droid.View.IViewManager;
     interface Elastos.Droid.View.IKeyEventCallback;
-    interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
     interface Elastos.Droid.View.IViewBaseSavedState;
     interface Elastos.Droid.View.IOnPreDrawListener;
     interface Elastos.Droid.View.IGestureDetectorOnGestureListener;
@@ -172,33 +178,26 @@ module
     interface Elastos.Droid.View.IViewOnTouchListener;
     interface Elastos.Droid.View.IViewOnLongClickListener;
     interface Elastos.Droid.View.ISurfaceView;
-    interface Elastos.Droid.Internal.View.Menu.IMenuPresenterCallback;
-    interface Elastos.Droid.Internal.View.Menu.IMenuBuilderCallback;
     interface Elastos.Droid.View.IOnGlobalLayoutListener;
     interface Elastos.Droid.View.ICollapsibleActionView;
-    interface Elastos.Droid.Text.ITextWatcher;
+    interface Elastos.Droid.View.IViewGroupMarginLayoutParams;
+    interface Elastos.Droid.View.ISubUiVisibilityListener;
+    interface Elastos.Droid.View.ILayoutInflaterFilter;
+    interface Elastos.Droid.View.IBlinkLayout;
+    interface Elastos.Droid.View.IViewOnFocusChangeListener;
+    interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    interface Elastos.Droid.View.Animation.IInterpolator;
+    interface Elastos.Droid.View.TextService.ISpellCheckerSessionListener;
     interface Elastos.Droid.Widget.ILinearLayoutLayoutParams;
     interface Elastos.Droid.Widget.IAdapterView;
     interface Elastos.Droid.Widget.IAdapterViewAnimator;
     interface Elastos.Droid.Widget.IAdapterViewFlipper;
-    interface Elastos.Droid.Internal.View.Menu.IMenuPresenter;
-    interface Elastos.Droid.Internal.View.Menu.IBaseMenuPresenter;
-    interface Elastos.Droid.Internal.View.Menu.IMenuBuilderItemInvoker;
-    interface Elastos.Droid.Internal.View.Menu.IMenuView;
-    interface Elastos.Droid.Internal.Widget.IIRemoteViewsFactory;
-
     interface Elastos.Droid.Widget.ISimpleMonthView;
     interface Elastos.Droid.Widget.IExpandableListAdapter;
     interface Elastos.Droid.Widget.IExpandableListConnector;
     interface Elastos.Droid.Widget.IExpandableListPosition;
     interface Elastos.Droid.Widget.IExpandableListPositionHelper;
     interface Elastos.Droid.Widget.IListPopupWindow;
-    interface Elastos.Droid.View.IViewGroupMarginLayoutParams;
-    interface Elastos.Droid.View.Animation.IInterpolator;
-    interface Elastos.Droid.View.ISubUiVisibilityListener;
-    interface Elastos.Droid.View.ILayoutInflaterFilter;
-    interface Elastos.Droid.View.IBlinkLayout;
-    interface Elastos.Droid.View.IViewOnFocusChangeListener;
 
     namespace Elastos {
     namespace Droid {
@@ -592,10 +591,7 @@ module
             [in] ITextView* ctx);
 
         interface ISpellChecker;
-        interface IView;
-        interface IDrawableCallback;
-        interface IKeyEventCallback;
-        interface IAccessibilityEventSource;
+        interface ISpellCheckerSessionListener;
     }
 
     [local]
@@ -1823,19 +1819,17 @@ module
         interface IAccessibilityEventSource;
     }
 
-   //  singleton class CTextViewHelper {
-   //      interface ITextViewHelper;
-   //  }
+    class CTextViewSavedState {
+        constructor(
+            [in] IParcelable* superState);
 
-   //  class CTextViewSavedState {
-   //      constructor(
-   //          [in] IParcelable* superState);
+        constructor();
 
-   //      constructor();
-
-   //      interface ITextViewSavedState;
-   //      interface IParcelable;
-   //  }
+        interface ITextViewSavedState;
+        interface IViewBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
+    }
 
     singleton class CActivityChooserModelHelper {
         interface IActivityChooserModelHelper;
@@ -2012,14 +2006,6 @@ module
 
         interface IExpandableListConnector;
     }
-
-   //  singleton class CPositionMetadataHelper {
-   //      interface IPositionMetadataHelper;
-   //  }
-
-   //  singleton class CGroupMetadataHelper {
-   //      interface IGroupMetadataHelper;
-   //  }
 
     [local]
     class CCursorFilter {
@@ -2787,31 +2773,6 @@ module
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
     }
-
-   //  [local]
-   //  class CVolumePanel {
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] IAudioService* realOwner);
-
-   //      interface IVolumePanel;
-   //      interface IViewOnClickListener;
-   //      interface IHandler;
-   //      interface ISeekBarOnSeekBarChangeListener;
-   //  }
-
-   //  [local]
-   //  class CVolumePanelDialog {
-   //      constructor(
-   //          [in] IContext* ctx,
-   //          [in] Int32 theme,
-   //          [in] IVolumePanel* panel);
-
-   //      interface IDialog;
-   //      interface IWindowCallback;
-   //      interface IViewOnCreateContextMenuListener;
-   //      interface IKeyEventCallback;
-   //  }
 
     [local]
     class CAdapterViewAnimator {

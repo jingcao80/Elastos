@@ -1897,6 +1897,19 @@ module
             [out] ILocale** locale);
 
         /**
+         * This is a temporary method. Future versions may support multi-locale text.
+         * Caveat: This method may not return the latest spell checker locale, but this should be
+         * acceptable and it's more important to make this method asynchronous.
+         *
+         * @return The locale that should be used for a spell checker in this TextView,
+         * based on the current spell checker settings, the current IME's locale, or the system default
+         * locale.
+         * @hide
+         */
+        GetSpellCheckerLocale(
+            [out] ILocale** locale);
+
+        /**
          * This method is used by the ArrowKeyMovementMethod to jump from one word to the other.
          * Made available to achieve a consistent behavior.
          * @hide
@@ -2004,27 +2017,6 @@ module
             [in] Int32 start,
             [in] Int32 end,
             [in] Boolean invalidateCursor);
-    }
-
-    [local]
-    interface ITextViewHelper {
-
-        GetTextColors(
-            [in] IContext* ctx,
-            [in] ITypedArray* attrs,
-            [out] IColorStateList** color);
-
-        /**
-         * Returns the default color from the TextView_textColor attribute
-         * from the AttributeSet, if set, or the default color from the
-         * TextAppearance_textColor from the TextView_textAppearance attribute,
-         * if TextView_textColor was not set directly.
-         */
-        GetTextColor(
-            [in] IContext* ctx,
-            [in] ITypedArray* attrs,
-            [in] Int32 def,
-            [out] Int32* color);
     }
 
     } // namespace Widget

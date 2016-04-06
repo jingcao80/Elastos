@@ -47,7 +47,6 @@ module
     interface IDragLocalState {
     }
 
-
     interface IEditor {
 
         SetError(

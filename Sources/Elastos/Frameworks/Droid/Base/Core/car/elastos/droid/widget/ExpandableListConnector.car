@@ -12,20 +12,12 @@ module {
      * position to either a) group position for groups, or b) child position for
      * children
      */
-    interface IGroupMetadata {
-        CompareTo(
-            [in] IGroupMetadata* another,
-            [out] Int32* pos);
-    }
-
-    interface IGroupMetadataHelper {
-        Obtain(
-            [in] Int32 flPos,
-            [in] Int32 lastChildFlPos,
-            [in] Int32 gPos,
-            [in] Int64 gId,
-            [out] IGroupMetadata** groupMetadata);
-    }
+    /**
+     * @Involve
+     * interface IParcelable
+     * interface Elastos.Core.IComparable
+     */
+    interface IGroupMetadata {}
 
     interface IPositionMetadata {
         Recycle();
@@ -38,17 +30,6 @@ module {
          */
         IsExpanded(
             [out] Boolean* expanded);
-    }
-
-    interface IPositionMetadataHelper {
-        Obtain(
-            [in] Int32 flatListPos,
-            [in] Int32 type,
-            [in] Int32 groupPos,
-            [in] Int32 childPos,
-            [in] IGroupMetadata* groupMetadata,
-            [in] Int32 groupInsertIndex,
-            [out] IPositionMetadata** positionMetadata);
     }
 
     /**

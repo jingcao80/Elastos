@@ -47,7 +47,6 @@ using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::View::IKeyEvent;
-using Elastos::Droid::Widget::IVolumePanel;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;

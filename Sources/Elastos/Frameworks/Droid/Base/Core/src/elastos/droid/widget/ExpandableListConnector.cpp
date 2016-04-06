@@ -25,9 +25,16 @@ namespace Widget {
 //                ExpandableListConnector::GroupMetadata
 //=====================================================================
 const Int32 ExpandableListConnector::GroupMetadata::REFRESH;
-AutoPtr<IParcelable> ExpandableListConnector::GroupMetadata::CREATOR = ExpandableListConnector::GroupMetadata::InitCreator();
 
-CAR_INTERFACE_IMPL_2(ExpandableListConnector::GroupMetadata, Object, IParcelable, IComparable)
+CAR_INTERFACE_IMPL_3(ExpandableListConnector::GroupMetadata, Object,
+        IGroupMetadata, IParcelable, IComparable)
+
+ExpandableListConnector::GroupMetadata::GroupMetadata()
+    : mFlPos(0)
+    , mLastChildFlPos(0)
+    , mGPos(0)
+    , mGId(0)
+{}
 
 AutoPtr<ExpandableListConnector::GroupMetadata> ExpandableListConnector::GroupMetadata::Obtain(
     /* [in] */ Int32 flPos,
@@ -49,7 +56,7 @@ ECode ExpandableListConnector::GroupMetadata::CompareTo(
 {
     VALIDATE_NOT_NULL(result)
 
-    IObject* objTmp = IObject::Probe(another);
+    IGroupMetadata* objTmp = IGroupMetadata::Probe(another);
     GroupMetadata* anotherTmp = (GroupMetadata*)objTmp;
     if(anotherTmp == NULL) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -58,58 +65,28 @@ ECode ExpandableListConnector::GroupMetadata::CompareTo(
     return NOERROR;
 }
 
-ECode ExpandableListConnector::GroupMetadata::DescribeContents(
-    /* [out] */ Int32* result)
-{
-    VALIDATE_NOT_NULL(result)
-
-    *result = 0;
-    return NOERROR;
-}
-
 ECode ExpandableListConnector::GroupMetadata::WriteToParcel(
-    /* [in] */ IParcel* dest,
-    /* [in] */ Int32 flags)
+    /* [in] */ IParcel* dest)
 {
     VALIDATE_NOT_NULL(dest)
-	
+
     dest->WriteInt32(mFlPos);
     dest->WriteInt32(mLastChildFlPos);
-    dest->WriteInt32(this->mGPos);
+    dest->WriteInt32(mGPos);
     dest->WriteInt64(mGId);
     return NOERROR;
 }
 
-// overwrite CAR func for compile
 ECode ExpandableListConnector::GroupMetadata::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    VALIDATE_NOT_NULL(source);
-    assert(0);
+    VALIDATE_NOT_NULL(source)
+
+    source->ReadInt32(&mFlPos);
+    source->ReadInt32(&mLastChildFlPos);
+    source->ReadInt32(&mGPos);
+    source->ReadInt64(&mGId);
     return NOERROR;
-}
-
-// overwrite CAR func for compile
-ECode ExpandableListConnector::GroupMetadata::WriteToParcel(
-    /* [in] */ IParcel* source)
-{
-    VALIDATE_NOT_NULL(source);
-    assert(0);
-    return NOERROR;
-}
-
-ExpandableListConnector::GroupMetadata::GroupMetadata()
-    : mFlPos(0)
-    , mLastChildFlPos(0)
-    , mGPos(0)
-    , mGId(0)
-{
-}
-
-AutoPtr<IParcelable> ExpandableListConnector::GroupMetadata::InitCreator()
-{
-    AutoPtr<IParcelable> result = new ExpandableListConnector::InnerParcelableCreator();
-    return result;
 }
 
 //=====================================================================
@@ -152,7 +129,7 @@ ECode ExpandableListConnector::PositionMetadata::IsExpanded(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-	
+
     *result = mGroupMetadata != NULL;
     return NOERROR;
 }
@@ -235,65 +212,6 @@ ECode ExpandableListConnector::MyDataSetObserver::OnInvalidated()
 }
 
 //=====================================================================
-//           ExpandableListConnector::InnerParcelableCreator
-//=====================================================================
-CAR_INTERFACE_IMPL(ExpandableListConnector::InnerParcelableCreator, Object, IParcelable)
-
-ExpandableListConnector::InnerParcelableCreator::InnerParcelableCreator()
-{
-}
-
-ECode ExpandableListConnector::InnerParcelableCreator::CreateFromParcel(
-    /* [in] */ IParcel* in,
-    /* [out] */ GroupMetadata** result)
-{
-    VALIDATE_NOT_NULL(in)
-    VALIDATE_NOT_NULL(result)
-
-    Int32 flPos, lastChildFlPos, pos;
-    Int64 id;
-    in->ReadInt32(&flPos);
-    in->ReadInt32(&lastChildFlPos);
-    in->ReadInt32(&pos);
-    in->ReadInt64(&id);
-    *result = GroupMetadata::Obtain(flPos, lastChildFlPos, pos, id);
-    REFCOUNT_ADD(*result);
-    return NOERROR;
-}
-
-ECode ExpandableListConnector::InnerParcelableCreator::NewArray(
-    /* [in] */ Int32 size,
-    /* [out] */ ArrayOf<GroupMetadata*>** result)
-{
-    VALIDATE_NOT_NULL(result)
-
-    *result = ArrayOf<GroupMetadata*>::Alloc(size);
-    for (Int32 idx=0; idx<size; ++idx) {
-        (**result)[idx] = GroupMetadata::Obtain(0, 0, 0, 0);
-    }
-    REFCOUNT_ADD(*result);
-    return NOERROR;
-}
-
-// overwrite CAR func for compile
-ECode ExpandableListConnector::InnerParcelableCreator::ReadFromParcel(
-    /* [in] */ IParcel* source)
-{
-    VALIDATE_NOT_NULL(source)
-	
-    return NOERROR;
-}
-
-// overwrite CAR func for compile
-ECode ExpandableListConnector::InnerParcelableCreator::WriteToParcel(
-    /* [in] */ IParcel* source)
-{
-    VALIDATE_NOT_NULL(source)
-	
-    return NOERROR;
-}
-
-//=====================================================================
 //                       ExpandableListConnector
 //=====================================================================
 CAR_INTERFACE_IMPL_2(ExpandableListConnector, BaseAdapter, IExpandableListConnector, IFilterable)
@@ -331,7 +249,7 @@ ECode ExpandableListConnector::GetUnflattenedPos(
     /* [out] */ IPositionMetadata** result)
 {
     VALIDATE_NOT_NULL(result)
-	
+
     AutoPtr<IList> egml = mExpGroupMetadataList;
     Int32 numExpGroups = 0;
     egml->GetSize(&numExpGroups);
@@ -746,7 +664,7 @@ ECode ExpandableListConnector::ExpandGroup(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-	
+
     AutoPtr<ExpandableListPosition> elGroupPos = ExpandableListPosition::Obtain(IExpandableListPosition::GROUP, groupPos, -1, -1);
     AutoPtr<IPositionMetadata> pm;
     GetFlattenedPos(elGroupPos, (IPositionMetadata**)&pm);
@@ -848,7 +766,7 @@ ECode ExpandableListConnector::GetAdapter(
     /* [out] */ IExpandableListAdapter** result)
 {
     VALIDATE_NOT_NULL(result)
-	
+
     *result = mExpandableListAdapter;
     REFCOUNT_ADD(*result);
     return NOERROR;

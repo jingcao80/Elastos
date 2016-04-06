@@ -10,15 +10,15 @@
 
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Text::IEditable;
-using Elastos::Droid::Text::Style::ISpellCheckSpan;
 using Elastos::Droid::Text::Method::IWordIterator;
+using Elastos::Droid::Text::Style::ISpellCheckSpan;
+using Elastos::Droid::Text::Style::ISuggestionSpan;
 using Elastos::Droid::Utility::LruCache;
 using Elastos::Droid::View::TextService::ISuggestionsInfo;
 using Elastos::Droid::View::TextService::ISentenceSuggestionsInfo;
 using Elastos::Droid::View::TextService::ISpellCheckerSession;
 using Elastos::Droid::View::TextService::ITextServicesManager;
 using Elastos::Droid::View::TextService::ISpellCheckerSessionListener;
-using Elastos::Droid::Text::Style::ISuggestionSpan;
 
 using Elastos::Core::Object;
 using Elastos::Utility::ILocale;
@@ -27,13 +27,63 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
+class SpellChecker;
+
+class SpellParser
+    : public Object
+{
+public:
+    SpellParser(
+        /* [in] */ SpellChecker* host);
+
+    CARAPI_(void) Parse(
+        /* [in] */ Int32 start,
+        /* [in] */ Int32 end);
+
+    CARAPI_(Boolean) IsFinished();
+
+    CARAPI_(void) Stop();
+
+    CARAPI_(void) Parse();
+
+private:
+    CARAPI_(void) SetRangeSpan(
+        /* [in] */ IEditable* editable,
+        /* [in] */ Int32 start,
+        /* [in] */ Int32 end);
+
+    CARAPI_(void) RemoveRangeSpan (
+        /* [in] */ IEditable* editable);
+
+    CARAPI_(void) RemoveSpansAt(
+        /* [in] */ IEditable* editable,
+        /* [in] */ Int32 offset,
+        /* [in] */ ArrayOf<IInterface*>* spans);
+    //private <T> void removeSpansAt(Editable editable, int offset, T[] spans)
+private:
+    AutoPtr<IObject> mRange;
+    SpellChecker* mHost;
+};
+
+} // namespace Widget
+} // namespace Droid
+} // namespace Elastos
+
+DEFINE_CONVERSION_FOR(Elastos::Droid::Widget::SpellParser, IInterface)
+
+namespace Elastos {
+namespace Droid {
+namespace Widget {
+
 class SpellChecker
     : public Object
     , public ISpellChecker
+    , public ISpellCheckerSessionListener
 {
+    friend class SpellParser;
 private:
     class SpellCheckerRunnable
-     : public Runnable
+        : public Runnable
     {
     public:
         SpellCheckerRunnable(
@@ -41,61 +91,6 @@ private:
 
         CARAPI Run();
 
-    private:
-        SpellChecker* mHost;
-    };
-
-    class SpellParser
-        : public ElRefBase
-    {
-    public:
-        SpellParser(
-            /* [in] */ SpellChecker* host);
-
-        CARAPI_(void) Parse(
-            /* [in] */ Int32 start,
-            /* [in] */ Int32 end);
-
-        CARAPI_(Boolean) IsFinished();
-
-        CARAPI_(void) Stop();
-
-        CARAPI_(void) Parse();
-
-    private:
-        CARAPI_(void) SetRangeSpan(
-            /* [in] */ IEditable* editable,
-            /* [in] */ Int32 start,
-            /* [in] */ Int32 end);
-
-        CARAPI_(void) RemoveRangeSpan (
-            /* [in] */ IEditable* editable);
-
-        CARAPI_(void) RemoveSpansAt(
-            /* [in] */ IEditable* editable,
-            /* [in] */ Int32 offset,
-            /* [in] */ ArrayOf<IInterface*>* spans);
-        //private <T> void removeSpansAt(Editable editable, int offset, T[] spans)
-    private:
-        AutoPtr<IObject> mRange;
-        SpellChecker* mHost;
-    };
-
-    class MySpellCheckerSessionListener
-        : public Object
-        , public ISpellCheckerSessionListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        MySpellCheckerSessionListener(
-            /* [in] */ SpellChecker* host);
-
-        CARAPI OnGetSuggestions(
-            /* [in] */ ArrayOf<ISuggestionsInfo*>* results);
-
-        CARAPI OnGetSentenceSuggestions(
-            /* [in] */ ArrayOf<ISentenceSuggestionsInfo*>* results);
     private:
         SpellChecker* mHost;
     };
@@ -119,7 +114,20 @@ public:
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
+    // @Override
+    CARAPI OnGetSuggestions(
+        /* [in] */ ArrayOf<ISuggestionsInfo*>* results);
 
+    // @Override
+    CARAPI OnGetSentenceSuggestions(
+        /* [in] */ ArrayOf<ISentenceSuggestionsInfo*>* results);
+
+    static CARAPI_(Boolean) HaveWordBoundariesChanged(
+        /* [in] */ IEditable* editable,
+        /* [in] */ Int32 start,
+        /* [in] */ Int32 end,
+        /* [in] */ Int32 spanStart,
+        /* [in] */ Int32 spanEnd);
 
 private:
     CARAPI_(void) ResetSession();
@@ -186,4 +194,3 @@ private:
 } // namespace Elastos
 
 #endif //__ELASTOS_DROID_WIDGET_SPELLCHECKER_H__
-

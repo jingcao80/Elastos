@@ -106,6 +106,7 @@
 #include "elastos/droid/widget/CTextClock.h"
 #include "elastos/droid/widget/CTextSwitcher.h"
 #include "elastos/droid/widget/CTextView.h"
+#include "elastos/droid/widget/CTextViewSavedState.h"
 #include "elastos/droid/widget/CTimePicker.h"
 #include "elastos/droid/widget/CTimePickerClockDelegate.h"
 #include "elastos/droid/widget/CTimePickerSpinnerDelegate.h"
@@ -225,15 +226,16 @@ CAR_OBJECT_IMPL(CSpellChecker)
 CAR_OBJECT_IMPL(CSpinner)
 CAR_OBJECT_IMPL(CSpinnerSavedState)
 CAR_OBJECT_IMPL(CSwitch)
+CAR_OBJECT_IMPL(CTabHost)
 CAR_OBJECT_IMPL(CTableLayout)
 CAR_OBJECT_IMPL(CTableLayoutLayoutParams)
 CAR_OBJECT_IMPL(CTableRow)
 CAR_OBJECT_IMPL(CTableRowLayoutParams)
-CAR_OBJECT_IMPL(CTabHost)
 CAR_OBJECT_IMPL(CTabWidget)
 CAR_OBJECT_IMPL(CTextClock)
 CAR_OBJECT_IMPL(CTextSwitcher)
 CAR_OBJECT_IMPL(CTextView)
+CAR_OBJECT_IMPL(CTextViewSavedState)
 CAR_OBJECT_IMPL(CTimePicker)
 CAR_OBJECT_IMPL(CTimePickerClockDelegate)
 CAR_OBJECT_IMPL(CTimePickerSpinnerDelegate)

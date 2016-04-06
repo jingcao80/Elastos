@@ -7,6 +7,10 @@ module
     namespace Droid {
     namespace Widget {
 
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.TextService.ISpellCheckerSessionListener
+     */
     interface ISpellChecker {
         CloseSession();
 

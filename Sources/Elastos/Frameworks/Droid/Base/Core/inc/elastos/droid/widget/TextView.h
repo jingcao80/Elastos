@@ -73,7 +73,7 @@ protected:
 };
 
 //==============================================================================
-//              EditorRunnable
+//              CompressTextRunnable
 //==============================================================================
 class CompressTextRunnable
     : public Runnable
@@ -443,6 +443,65 @@ class ECO_PUBLIC TextView
     , public ITextView
     , public IOnPreDrawListener
 {
+public:
+    /**
+     * User interface state that is stored by TextView for implementing
+     * {@link View#onSaveInstanceState}.
+     */
+    class SavedState
+        : public View::BaseSavedState
+        , public ITextViewSavedState
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        SavedState();
+
+        ~SavedState();
+
+        CARAPI constructor();
+
+        CARAPI constructor(
+            /* [in] */ IParcelable* superState);
+
+        // @Override
+        CARAPI WriteToParcel(
+            /* [in] */ IParcel* out);
+
+        // @Override
+        CARAPI ReadFromParcel(
+            /* [in] */ IParcel* in);
+
+        // @Override
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    public:
+        Int32 mSelStart;
+        Int32 mSelEnd;
+        AutoPtr<ICharSequence> mText;
+        Boolean mFrozenWithFocus;
+        AutoPtr<ICharSequence> mError;
+    };
+
+private:
+    class ECO_LOCAL OnRestoreInstanceStateRunnable
+        : public Runnable
+    {
+    public:
+        OnRestoreInstanceStateRunnable(
+            /* [in] */ TextView* host,
+            /* [in] */ ICharSequence* error);
+
+        ~OnRestoreInstanceStateRunnable();
+
+        CARAPI Run();
+
+    private:
+        TextView* mHost;
+        AutoPtr<ICharSequence> mError;
+    };
+
 public:
     TextView();
 
@@ -2329,7 +2388,17 @@ public:
     CARAPI GetHorizontalOffsetForDrawables(
         /* [out] */ Int32* offset);
 
-    virtual CARAPI GetSpellCheckerLocale(
+    /**
+     * This is a temporary method. Future versions may support multi-locale text.
+     * Caveat: This method may not return the latest spell checker locale, but this should be
+     * acceptable and it's more important to make this method asynchronous.
+     *
+     * @return The locale that should be used for a spell checker in this TextView,
+     * based on the current spell checker settings, the current IME's locale, or the system default
+     * locale.
+     * @hide
+     */
+    CARAPI GetSpellCheckerLocale(
         /* [out] */ ILocale** local);
 
     CARAPI PerformAccessibilityAction(

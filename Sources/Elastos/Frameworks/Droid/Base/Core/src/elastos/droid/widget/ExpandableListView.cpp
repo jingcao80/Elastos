@@ -4,9 +4,10 @@
 #include "elastos/droid/widget/CExpandableListContextMenuInfo.h"
 #include "elastos/droid/widget/CExpandableListViewSavedState.h"
 #include "elastos/droid/widget/CExpandableListConnector.h"
+#include "elastos/droid/widget/ExpandableListConnector.h"
 #include "elastos/droid/widget/ExpandableListPosition.h"
-#include "elastos/droid/widget/GroupMetadata.h"
-#include "elastos/droid/widget/PositionMetadata.h"
+// #include "elastos/droid/widget/GroupMetadata.h"
+// #include "elastos/droid/widget/PositionMetadata.h"
 #include "elastos/droid/view/SoundEffectConstants.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/os/Build.h"
@@ -15,10 +16,11 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::SoundEffectConstants;
-using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Widget::ExpandableListConnector;
 using Elastos::Droid::R;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::CArrayList;
@@ -457,7 +459,7 @@ ECode ExpandableListView::DispatchDraw(
         Int32 width;
         GetWidth(&width);
 
-        AutoPtr<ExpandableListPosition> elpos = (ExpandableListPosition*)(((PositionMetadata*)pos.Get())->mPosition.Get());
+        AutoPtr<ExpandableListPosition> elpos = (ExpandableListPosition*)(((ExpandableListConnector::PositionMetadata*)pos.Get())->mPosition.Get());
         AutoPtr<CRect> rect = (CRect*)indicatorRect.Get();
         if (elpos->mType != lastItemType) {
             if (elpos->mType == ExpandableListPosition::CHILD) {
@@ -517,7 +519,7 @@ AutoPtr<IDrawable> ExpandableListView::GetIndicator(
     /* [in] */ IPositionMetadata* pos)
 {
     AutoPtr<IDrawable> indicator = NULL;
-    AutoPtr<ExpandableListPosition> elpos = (ExpandableListPosition*)(((PositionMetadata*)pos)->mPosition.Get());
+    AutoPtr<ExpandableListPosition> elpos = (ExpandableListPosition*)(((ExpandableListConnector::PositionMetadata*)pos)->mPosition.Get());
     if (elpos->mType == ExpandableListPosition::GROUP) {
         indicator = mGroupIndicator;
 
@@ -526,8 +528,8 @@ AutoPtr<IDrawable> ExpandableListView::GetIndicator(
             // Empty check based on availability of data.  If the groupMetadata isn't NULL,
             // we do a check on it. Otherwise, the group is collapsed so we consider it
             // empty for performance reasons.
-            Boolean isEmpty = (((PositionMetadata*)pos)->mGroupMetadata == NULL) ||
-                    (((GroupMetadata*)((PositionMetadata*)pos)->mGroupMetadata.Get())->mLastChildFlPos == ((GroupMetadata*)((PositionMetadata*)pos)->mGroupMetadata.Get())->mFlPos);
+            Boolean isEmpty = (((ExpandableListConnector::PositionMetadata*)pos)->mGroupMetadata == NULL) ||
+                    (((ExpandableListConnector::GroupMetadata*)((ExpandableListConnector::PositionMetadata*)pos)->mGroupMetadata.Get())->mLastChildFlPos == ((ExpandableListConnector::GroupMetadata*)((ExpandableListConnector::PositionMetadata*)pos)->mGroupMetadata.Get())->mFlPos);
 
             Boolean expanded;
             pos->IsExpanded(&expanded);
@@ -545,7 +547,7 @@ AutoPtr<IDrawable> ExpandableListView::GetIndicator(
         Boolean stateful = FALSE;
         if (indicator != NULL && (indicator->IsStateful(&stateful), stateful)) {
             // No need for a state sets array for the child since it only has two states
-            AutoPtr<GroupMetadata> gmData = (GroupMetadata*)(((PositionMetadata*)pos)->mGroupMetadata.Get());
+            AutoPtr<ExpandableListConnector::GroupMetadata> gmData = (ExpandableListConnector::GroupMetadata*)(((ExpandableListConnector::PositionMetadata*)pos)->mGroupMetadata.Get());
             AutoPtr< ArrayOf<Int32> > stateSet;
             if (elpos->mFlatListPos == gmData->mLastChildFlPos) {
                 stateSet = CHILD_LAST_STATE_SET;
@@ -587,9 +589,9 @@ void ExpandableListView::DrawDivider(
 
         Boolean expanded;
         pos->IsExpanded(&expanded);
-        AutoPtr<ExpandableListPosition> elpos = (ExpandableListPosition*)(((PositionMetadata*)pos.Get())->mPosition.Get());
+        AutoPtr<ExpandableListPosition> elpos = (ExpandableListPosition*)(((ExpandableListConnector::PositionMetadata*)pos.Get())->mPosition.Get());
         if ((elpos->mType == ExpandableListPosition::CHILD) || (expanded &&
-                ((GroupMetadata*)((PositionMetadata*)pos.Get())->mGroupMetadata.Get())->mLastChildFlPos != ((GroupMetadata*)((PositionMetadata*)pos.Get())->mGroupMetadata.Get())->mFlPos)) {
+                ((ExpandableListConnector::GroupMetadata*)((ExpandableListConnector::PositionMetadata*)pos.Get())->mGroupMetadata.Get())->mLastChildFlPos != ((ExpandableListConnector::GroupMetadata*)((ExpandableListConnector::PositionMetadata*)pos.Get())->mGroupMetadata.Get())->mFlPos)) {
             // These are the cases where we draw the child divider
             AutoPtr<IDrawable> divider = mChildDivider;
             divider->SetBounds(bounds);
@@ -687,10 +689,10 @@ Boolean ExpandableListView::HandleItemClick(
     AutoPtr<IPositionMetadata> posMetadata;
     mConnector->GetUnflattenedPos(position, (IPositionMetadata**)&posMetadata);
 
-    id = GetChildOrGroupId(((PositionMetadata*)posMetadata.Get())->mPosition);
+    id = GetChildOrGroupId(((ExpandableListConnector::PositionMetadata*)posMetadata.Get())->mPosition);
 
     Boolean returnValue = FALSE;
-    AutoPtr<ExpandableListPosition> listPosition = (ExpandableListPosition*)((PositionMetadata*)posMetadata.Get())->mPosition.Get();
+    AutoPtr<ExpandableListPosition> listPosition = (ExpandableListPosition*)((ExpandableListConnector::PositionMetadata*)posMetadata.Get())->mPosition.Get();
 
     if (listPosition->mType == ExpandableListPosition::GROUP) {
 
@@ -782,7 +784,7 @@ ECode ExpandableListView::ExpandGroup(
     }
 
     if(animate) {
-        Int32 groupFlatPos = ((ExpandableListPosition*)((PositionMetadata*)pm.Get())->mPosition.Get())->mFlatListPos;
+        Int32 groupFlatPos = ((ExpandableListPosition*)((ExpandableListConnector::PositionMetadata*)pm.Get())->mPosition.Get())->mFlatListPos;
         Int32 shiftedGroupPosition = groupFlatPos + GetHeaderViewsCount();
         Int32 childCount = 0;
         mAdapter->GetChildrenCount(groupPos, &childCount);
@@ -855,7 +857,7 @@ ECode ExpandableListView::GetExpandableListPosition(
     AutoPtr<IPositionMetadata> pm;
     mConnector->GetUnflattenedPos(adjustedPosition, (IPositionMetadata**)&pm);
     Int64 packedPos = 0;
-    ((ExpandableListPosition*)((PositionMetadata*)pm.Get())->mPosition.Get())->GetPackedPosition(&packedPos);
+    ((ExpandableListPosition*)((ExpandableListConnector::PositionMetadata*)pm.Get())->mPosition.Get())->GetPackedPosition(&packedPos);
     pm->Recycle();
     *position = packedPos;
     return NOERROR;
@@ -873,7 +875,7 @@ ECode ExpandableListView::GetFlatListPosition(
     mConnector->GetFlattenedPos(elPackedPos, (IPositionMetadata**)&pm);
     elPackedPos->Recycle();
 
-    Int32 flatListPosition = ((ExpandableListPosition*)((PositionMetadata*)pm.Get())->mPosition.Get())->mFlatListPos;
+    Int32 flatListPosition = ((ExpandableListPosition*)((ExpandableListConnector::PositionMetadata*)pm.Get())->mPosition.Get())->mFlatListPos;
     pm->Recycle();
     *position = GetAbsoluteFlatPosition(flatListPosition);
     return NOERROR;
@@ -928,7 +930,7 @@ ECode ExpandableListView::SetSelectedGroup(
     AutoPtr<IPositionMetadata> pm = NULL;
     mConnector->GetFlattenedPos(elGroupPos, (IPositionMetadata**)&pm);
     elGroupPos->Recycle();
-    Int32 absoluteFlatPosition = GetAbsoluteFlatPosition(((ExpandableListPosition*)((PositionMetadata*)pm.Get())->mPosition.Get())->mFlatListPos);
+    Int32 absoluteFlatPosition = GetAbsoluteFlatPosition(((ExpandableListPosition*)((ExpandableListConnector::PositionMetadata*)pm.Get())->mPosition.Get())->mFlatListPos);
     ListView::SetSelection(absoluteFlatPosition);
     pm->Recycle();
     return NOERROR;
@@ -965,7 +967,7 @@ ECode ExpandableListView::SetSelectedChild(
         }
     }
 
-    Int32 absoluteFlatPosition = GetAbsoluteFlatPosition(((ExpandableListPosition*)((PositionMetadata*)flatChildPos.Get())->mPosition.Get())->mFlatListPos);
+    Int32 absoluteFlatPosition = GetAbsoluteFlatPosition(((ExpandableListPosition*)((ExpandableListConnector::PositionMetadata*)flatChildPos.Get())->mPosition.Get())->mFlatListPos);
     ListView::SetSelection(absoluteFlatPosition);
 
     elChildPos->Recycle();
@@ -1043,7 +1045,7 @@ AutoPtr<IContextMenuInfo> ExpandableListView::CreateContextMenuInfo(
     Int32 adjustedPosition = GetFlatPositionForConnector(flatListPosition);
     AutoPtr<IPositionMetadata> pm;
     mConnector->GetUnflattenedPos(adjustedPosition, (IPositionMetadata**)&pm);
-    AutoPtr<IExpandableListPosition> pos = ((PositionMetadata*)pm.Get())->mPosition;
+    AutoPtr<IExpandableListPosition> pos = ((ExpandableListConnector::PositionMetadata*)pm.Get())->mPosition;
 
     id = GetChildOrGroupId(pos);
     Int64 packedPosition;

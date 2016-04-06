@@ -36,6 +36,7 @@ public:
       */
     class GroupMetadata
         : public Object
+        , public IGroupMetadata
         , public IParcelable
         , public IComparable
     {
@@ -52,25 +53,15 @@ public:
             /* [in] */ IInterface* another,
             /* [out] */ Int32* result);
 
-        virtual CARAPI DescribeContents(
-            /* [out] */ Int32* result);
-
         virtual CARAPI WriteToParcel(
-            /* [in] */ IParcel* dest,
-            /* [in] */ Int32 flags);
+            /* [in] */ IParcel* dest);
 
         // overwrite CAR func for compile
         virtual CARAPI ReadFromParcel(
             /* [in] */ IParcel* source);
 
-        // overwrite CAR func for compile
-        virtual CARAPI WriteToParcel(
-            /* [in] */ IParcel* source);
-
     private:
         GroupMetadata();
-
-        static AutoPtr<IParcelable> InitCreator();
 
     public:
         static const Int32 REFRESH = -1;
@@ -78,7 +69,6 @@ public:
         Int32 mLastChildFlPos;
         Int32 mGPos;
         Int64 mGId;
-        static AutoPtr<IParcelable> CREATOR;
     };
 
     /**
@@ -154,33 +144,6 @@ protected:
 
     private:
         ExpandableListConnector* mOwner;
-    };
-
-private:
-    class InnerParcelableCreator
-        : public Object
-        , public IParcelable
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        InnerParcelableCreator();
-
-        virtual CARAPI CreateFromParcel(
-            /* [in] */ IParcel* in,
-            /* [out] */ GroupMetadata** result);
-
-        virtual CARAPI NewArray(
-            /* [in] */ Int32 size,
-            /* [out] */ ArrayOf<GroupMetadata*>** result);
-
-        // overwrite CAR func for compile
-        virtual CARAPI ReadFromParcel(
-            /* [in] */ IParcel* source);
-
-        // overwrite CAR func for compile
-        virtual CARAPI WriteToParcel(
-            /* [in] */ IParcel* source);
     };
 
 public:
