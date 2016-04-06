@@ -407,7 +407,7 @@ MediaFocusControl::MediaFocusControl(
     CStack::New((IStack**)&mPRStack);
     CArrayList::New((IArrayList**)&mRcDisplays);
     mPhoneStateListener = new MyPhoneStateListener(this);
-
+    CStack::New((IStack**)&mFocusStack);
     constructor(looper, cntxt, volumeCtrl, as);
 }
 

@@ -366,7 +366,9 @@ CAudioService::VolumeStreamState::VolumeStreamState(
     /* [in] */ Int32 streamType)
 {
     mHost = host;
-    CConcurrentHashMap::New(8, 0.75f, 4, (IConcurrentHashMap**)&mIndex);
+    Logger::W(TAG, "TODO: CConcurrentHashMap is not completed");
+    // CConcurrentHashMap::New(8, 0.75f, 4, (IConcurrentHashMap**)&mIndex);
+    CHashMap::New((IHashMap**)&mIndex);
 
     mVolumeIndexSettingName = settingName;
 
@@ -406,6 +408,8 @@ ECode CAudioService::VolumeStreamState::ReadSettings()
             CInteger32::New(IAudioSystem::DEVICE_OUT_DEFAULT, (IInteger32**)&iKey);
             AutoPtr<IInteger32> iValue;
             CInteger32::New(mIndexMax, (IInteger32**)&iValue);
+            //TODO: delete this lock when mIndex is IConcurrentHashMap
+            AutoLock lock(mIndex);
             IMap::Probe(mIndex)->Put(iKey, iValue);
             return NOERROR;
         }
@@ -427,6 +431,8 @@ ECode CAudioService::VolumeStreamState::ReadSettings()
             CInteger32::New(IAudioSystem::DEVICE_OUT_DEFAULT, (IInteger32**)&iKey);
             AutoPtr<IInteger32> iValue;
             CInteger32::New(index, (IInteger32**)&iValue);
+            //TODO: delete this lock when mIndex is IConcurrentHashMap
+            AutoLock _lock(mIndex);
             IMap::Probe(mIndex)->Put(iKey, iValue);
             return NOERROR;
         }
@@ -458,6 +464,8 @@ ECode CAudioService::VolumeStreamState::ReadSettings()
             CInteger32::New(device, (IInteger32**)&iKey);
             AutoPtr<IInteger32> iValue;
             CInteger32::New(GetValidIndex(10 * index), (IInteger32**)&iValue);
+            //TODO: delete this lock when mIndex is IConcurrentHashMap
+            AutoLock lock(mIndex);
             IMap::Probe(mIndex)->Put(iKey, iValue);
         }
     }
@@ -498,6 +506,9 @@ ECode CAudioService::VolumeStreamState::ApplyAllVolumes()
             index = (tmp + 5)/10;
         }
         AudioSystem::SetStreamVolumeIndex(mStreamType, index, IAudioSystem::DEVICE_OUT_DEFAULT);
+
+        //TODO: delete this lock when mIndex is IConcurrentHashMap
+        AutoLock lock(mIndex);
         // then apply device specific volumes
         AutoPtr<ISet> set;
         IMap::Probe(mIndex)->GetEntrySet((ISet**)&set);
@@ -571,7 +582,11 @@ ECode CAudioService::VolumeStreamState::SetIndex(
         CInteger32::New(device, (IInteger32**)&iKey);
         AutoPtr<IInteger32> iValue;
         CInteger32::New(index, (IInteger32**)&iValue);
-        IMap::Probe(mIndex)->Put(iKey, iValue);
+        {
+            //TODO: delete this lock when mIndex is IConcurrentHashMap
+            AutoLock lock(mIndex);
+            IMap::Probe(mIndex)->Put(iKey, iValue);
+        }
 
         if (oldIndex != index) {
             // Apply change to all streams using this one as alias
@@ -609,6 +624,8 @@ ECode CAudioService::VolumeStreamState::GetIndex(
         AutoPtr<IInterface> obj;
         AutoPtr<IInteger32> iKey;
         CInteger32::New(device, (IInteger32**)&iKey);
+        //TODO: delete this lock when mIndex is IConcurrentHashMap
+        AutoLock lock(mIndex);
         IMap::Probe(mIndex)->Get(iKey, (IInterface**)&obj);
         AutoPtr<IInteger32> index = IInteger32::Probe(obj);
         if (index == NULL) {
@@ -645,19 +662,26 @@ ECode CAudioService::VolumeStreamState::SetAllIndexes(
         index = mHost->RescaleIndex(index, srcStreamType, mStreamType);
 
         AutoPtr<ISet> set;
-        IMap::Probe(mIndex)->GetEntrySet((ISet**)&set);
         AutoPtr<IIterator> i;
-        set->GetIterator((IIterator**)&i);
         Boolean b;
-        while (i->HasNext(&b), b) {
-            AutoPtr<IInterface> obj;
-            i->GetNext((IInterface**)&obj);
-            AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
-            AutoPtr<IInteger32> i32;
-            CInteger32::New(index, (IInteger32**)&i32);
-            obj = NULL;
-            entry->SetValue(i32, (IInterface**)&obj);
+        {
+            //TODO: delete this lock when mIndex is IConcurrentHashMap
+            AutoLock lock(mIndex);
+            IMap::Probe(mIndex)->GetEntrySet((ISet**)&set);
+            set->GetIterator((IIterator**)&i);
+            while (i->HasNext(&b), b) {
+                AutoPtr<IInterface> obj;
+                i->GetNext((IInterface**)&obj);
+                AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
+                AutoPtr<IInteger32> i32;
+                CInteger32::New(index, (IInteger32**)&i32);
+                obj = NULL;
+                entry->SetValue(i32, (IInterface**)&obj);
+            }
         }
+
+        //TODO: delete this lock when mIndex is IConcurrentHashMap
+        AutoLock lock(((VolumeStreamState*)srcStream)->mIndex);
         // Now apply actual volume for devices in source stream state
         set = NULL;
         IMap::Probe(((VolumeStreamState*)srcStream)->mIndex)->GetEntrySet((ISet**)&set);
@@ -684,6 +708,8 @@ ECode CAudioService::VolumeStreamState::SetAllIndexes(
 ECode CAudioService::VolumeStreamState::SetAllIndexesToMax()
 {
     synchronized(this) {
+        //TODO: delete this lock when mIndex is IConcurrentHashMap
+        AutoLock lock(mIndex);
         AutoPtr<ISet> set;
         IMap::Probe(mIndex)->GetEntrySet((ISet**)&set);
         AutoPtr<IIterator> i;
@@ -730,6 +756,8 @@ ECode CAudioService::VolumeStreamState::CheckFixedVolumeDevices()
     synchronized(this) {
         // ignore settings for fixed volume devices: volume should always be at max or 0
         if ((*mHost->mStreamVolumeAlias)[mStreamType] == IAudioSystem::STREAM_MUSIC) {
+            //TODO: delete this lock when mIndex is IConcurrentHashMap
+            AutoLock lock(mIndex);
             AutoPtr<ISet> set;
             IMap::Probe(mIndex)->GetEntrySet((ISet**)&set);
 
@@ -830,6 +858,8 @@ void CAudioService::VolumeStreamState::Dump(
     pw->Println((mIndexMax + 5) / 10);
     pw->Print(String("   Current: "));
 
+    //TODO: delete this lock when mIndex is IConcurrentHashMap
+    AutoLock lock(mIndex);
     AutoPtr<ISet> set;
     IMap::Probe(mIndex)->GetEntrySet((ISet**)&set);
     AutoPtr<IIterator> i;
@@ -3001,10 +3031,9 @@ ECode CAudioService::constructor(
 
     // Register for device connection intent broadcasts.
     AutoPtr<IIntentFilter> intentFilter;
-// TODO: Need Bluetooth
-    // CIntentFilter::New(IBluetoothHeadset::ACTION_AUDIO_STATE_CHANGED,
-    //         (IIntentFilter**)&intentFilter);
-    // intentFilter->AddAction(IBluetoothHeadset::ACTION_CONNECTION_STATE_CHANGED);
+    CIntentFilter::New(IBluetoothHeadset::ACTION_AUDIO_STATE_CHANGED,
+            (IIntentFilter**)&intentFilter);
+    intentFilter->AddAction(IBluetoothHeadset::ACTION_CONNECTION_STATE_CHANGED);
     intentFilter->AddAction(IIntent::ACTION_DOCK_EVENT);
     intentFilter->AddAction(IAudioManager::ACTION_USB_AUDIO_ACCESSORY_PLUG);
     intentFilter->AddAction(IAudioManager::ACTION_USB_AUDIO_DEVICE_PLUG);
@@ -4424,7 +4453,7 @@ ECode CAudioService::StartWatchingRoutes(
 ECode CAudioService::DisableSafeMediaVolume()
 {
     EnforceSelfOrSystemUI(String("disable the safe media volume"));
-    synchronized(mSafeMediaVolumeState) {
+    synchronized(mSafeMediaVolumeStateLock) {
         SetSafeMediaVolumeEnabled(FALSE);
         if (mPendingVolumeCommand != NULL) {
             OnSetStreamVolume(mPendingVolumeCommand->mStreamType,
@@ -4791,8 +4820,7 @@ void CAudioService::ReadPersistedSettings()
     }
 
     Int32 resTmp = 0;
-    assert(0);
-    Settings::Secure::GetInt32(cr, String("")/*TODO: ISettingsSecure::VOLUME_LINK_NOTIFICATION*/, 1, &resTmp);
+    Settings::Secure::GetInt32(cr, ISettingsSecure::VOLUME_LINK_NOTIFICATION, 1, &resTmp);
     mLinkNotificationWithVolume = (resTmp == 1);
 
     Settings::System::GetInt32ForUser(cr,
@@ -4922,7 +4950,7 @@ void CAudioService::AdjustStreamVolume(
     }
 
     // reset any pending volume command
-    synchronized(mSafeMediaVolumeState) {
+    synchronized(mSafeMediaVolumeStateLock) {
         mPendingVolumeCommand = NULL;
     }
 
@@ -5101,7 +5129,7 @@ void CAudioService::SetStreamVolume(
         return;
     }
 
-    synchronized(mSafeMediaVolumeState) {
+    synchronized(mSafeMediaVolumeStateLock) {
         // reset any pending volume command
         mPendingVolumeCommand = NULL;
 
@@ -5440,6 +5468,8 @@ void CAudioService::SetRingerModeInt(
                         (*mStreamVolumeAlias)[streamType] == IAudioSystem::STREAM_RING) {
                     AutoPtr<VolumeStreamState> vss = (*mStreamStates)[streamType];
                     synchronized(vss) {
+                        //TODO: delete this lock when mIndex is IConcurrentHashMap
+                        AutoLock lock((*mStreamStates)[streamType]->mIndex);
                         AutoPtr<ISet> set;
                         IMap::Probe((*mStreamStates)[streamType]->mIndex)->GetEntrySet((ISet**)&set);
                         AutoPtr<IIterator> i;
@@ -5762,7 +5792,7 @@ void CAudioService::ReadAudioSettings(
     CheckAllFixedVolumeDevices();
     CheckAllAliasStreamVolumes();
 
-    synchronized(mSafeMediaVolumeState) {
+    synchronized(mSafeMediaVolumeStateLock) {
         Int32 val;
         Settings::System::GetInt32ForUser(mContentResolver,
                 ISettingsSecure::UNSAFE_VOLUME_MUSIC_ACTIVE_MS, 0, IUserHandle::USER_CURRENT, &val);
@@ -5895,7 +5925,7 @@ void CAudioService::OnBroadcastScoConnectionState(
 
 void CAudioService::OnCheckMusicActive()
 {
-    synchronized(mSafeMediaVolumeState) {
+    synchronized(mSafeMediaVolumeStateLock) {
         Int32 value;
         mSafeMediaVolumeState->GetValue(&value);
         if (value == SAFE_MEDIA_VOLUME_INACTIVE) {
@@ -5937,7 +5967,7 @@ void CAudioService::SaveMusicActiveMs()
 void CAudioService::OnConfigureSafeVolume(
     /* [in] */ Boolean force)
 {
-    synchronized(mSafeMediaVolumeState) {
+    synchronized(mSafeMediaVolumeStateLock) {
         AutoPtr<IResources> res;
         mContext->GetResources((IResources**)&res);
         AutoPtr<IConfiguration> conf;
@@ -6109,9 +6139,10 @@ Boolean CAudioService::IsInCommunication()
 {
     Boolean IsInCall = FALSE;
 
-    AutoPtr<IInterface> service;
-    mContext->GetSystemService(IContext::TELECOM_SERVICE, ((IInterface**)&service));
 // TODO: Need ITelecomManager
+    Logger::W(TAG, "TODO: IsInCommunication need ITelecomManager");
+    // AutoPtr<IInterface> service;
+    // mContext->GetSystemService(IContext::TELECOM_SERVICE, ((IInterface**)&service));
     // AutoPtr<ITelecomManager> telecomManager = ITelecomManager::Probe(service);
     // telecomManager->IsInCall(&IsInCall);
 
@@ -6979,7 +7010,7 @@ void CAudioService::SetRotationForAudioSystem()
 void CAudioService::SetSafeMediaVolumeEnabled(
     /* [in] */ Boolean on)
 {
-    synchronized(mSafeMediaVolumeState) {
+    synchronized(mSafeMediaVolumeStateLock) {
         Int32 value;
         mSafeMediaVolumeState->GetValue(&value);
         if ((value != SAFE_MEDIA_VOLUME_NOT_CONFIGURED) &&
@@ -7039,7 +7070,7 @@ Boolean CAudioService::CheckSafeMediaVolume(
     /* [in] */ Int32 index,
     /* [in] */ Int32 device)
 {
-    synchronized(mSafeMediaVolumeState) {
+    synchronized(mSafeMediaVolumeStateLock) {
         Int32 value;
         mSafeMediaVolumeState->GetValue(&value);
         if ((value == SAFE_MEDIA_VOLUME_ACTIVE) &&

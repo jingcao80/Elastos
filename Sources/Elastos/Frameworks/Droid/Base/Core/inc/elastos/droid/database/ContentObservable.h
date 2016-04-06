@@ -14,9 +14,13 @@ namespace Database {
  * that provides methods for sending notifications to a list of
  * {@link ContentObserver} objects.
  */
-class ContentObservable : public Observable
+class ContentObservable
+    : public Observable
+    , public IContentObservable
 {
 public:
+    CAR_INTERFACE_DECL()
+
     // Even though the generic method defined in Observable would be perfectly
     // fine on its own, we can't delete this overridden method because it would
     // potentially break binary compatibility with existing applications.

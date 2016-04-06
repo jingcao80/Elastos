@@ -470,6 +470,7 @@ ECode CAppOpsService::SystemReady()
             pkgs->GetSize(&pkgsSize);
             if (pkgsSize <= 0) {
                 mUidOps->RemoveAt(i);
+                mUidOps->GetSize(&size);
             }
         }
 

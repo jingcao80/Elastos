@@ -247,6 +247,7 @@ public:
         Int32 mIndexMax;
         Int32 mStreamType;
         AutoPtr<IConcurrentHashMap> mIndex;
+        // AutoPtr<IHashMap> mIndex;
         AutoPtr<IArrayList> mDeathHandlers; //handles mute/solo clients death
 
     private:
@@ -594,8 +595,10 @@ private:
     public:
         AudioHandler(
             /* [in] */ CAudioService* host)
-                : Handler()
-            {}
+            : mHost(host)
+        {
+            Handler::constructor();
+        }
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
@@ -1955,6 +1958,7 @@ private:
     static const Int32 SAFE_MEDIA_VOLUME_INACTIVE;
     static const Int32 SAFE_MEDIA_VOLUME_ACTIVE;
     AutoPtr<IInteger32> mSafeMediaVolumeState;
+    Object mSafeMediaVolumeStateLock;
 
     Int32 mMcc;
     // mSafeMediaVolumeIndex is the cached value of config_safe_media_volume_index property

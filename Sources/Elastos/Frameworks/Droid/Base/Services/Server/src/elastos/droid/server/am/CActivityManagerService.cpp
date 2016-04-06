@@ -12763,35 +12763,34 @@ ECode CActivityManagerService::AppNotRespondingViaProvider(
 
 ECode CActivityManagerService::InstallSystemProviders()
 {
-    Slogger::W(TAG, " >> TODO: InstallSystemProviders");
-    // AutoPtr<IList> providers;
-    // {
-    //     AutoLock lock(this);
-    //     AutoPtr<ProcessRecord> app = mProcessNames->Get(String("system"), IProcess::SYSTEM_UID);
-    //     providers = GenerateApplicationProvidersLocked(app);
-    //     if (providers != NULL) {
-    //         Int32 size, flags;
-    //         String name;
-    //         providers->GetSize(&size);
-    //         for (Int32 i = size - 1; i >= 0; i--) {
-    //             AutoPtr<IInterface> item;
-    //             providers->Get(i, (IInterface**)&item);
-    //             // AutoPtr<IProviderInfo> pi = IProviderInfo::Probe(item);
-    //             AutoPtr<IApplicationInfo> appInfo;
-    //             IComponentInfo::Probe(item)->GetApplicationInfo((IApplicationInfo**)&appInfo);
-    //             appInfo->GetFlags(&flags);
-    //             IPackageItemInfo::Probe(item)->GetName(&name);
-    //             if ((flags&IApplicationInfo::FLAG_SYSTEM) == 0) {
-    //                 Slogger::W(TAG, "Not installing system proc provider %s: not system .apk", name.string());
-    //                 providers->Remove(item);
-    //             }
-    //         }
-    //     }
-    // }
+    AutoPtr<IList> providers;
+    {
+        AutoLock lock(this);
+        AutoPtr<ProcessRecord> app = mProcessNames->Get(String("system"), IProcess::SYSTEM_UID);
+        providers = GenerateApplicationProvidersLocked(app);
+        if (providers != NULL) {
+            Int32 size, flags;
+            String name;
+            providers->GetSize(&size);
+            for (Int32 i = size - 1; i >= 0; i--) {
+                AutoPtr<IInterface> item;
+                providers->Get(i, (IInterface**)&item);
+                // AutoPtr<IProviderInfo> pi = IProviderInfo::Probe(item);
+                AutoPtr<IApplicationInfo> appInfo;
+                IComponentInfo::Probe(item)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+                appInfo->GetFlags(&flags);
+                IPackageItemInfo::Probe(item)->GetName(&name);
+                if ((flags&IApplicationInfo::FLAG_SYSTEM) == 0) {
+                    Slogger::W(TAG, "Not installing system proc provider %s: not system .apk", name.string());
+                    providers->Remove(item);
+                }
+            }
+        }
+    }
 
-    // if (providers != NULL) {
-    //     mSystemThread->InstallSystemProviders(providers);
-    // }
+    if (providers != NULL) {
+        mSystemThread->InstallSystemProviders(providers);
+    }
 
     mCoreSettingsObserver = new CoreSettingsObserver();
     mCoreSettingsObserver->constructor(this);

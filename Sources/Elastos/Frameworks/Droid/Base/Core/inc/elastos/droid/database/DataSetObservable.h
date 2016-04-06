@@ -11,9 +11,13 @@ namespace Database {
  * A specialization of Observable for DataSetObserver that provides methods for
  * invoking the various callback methods of DataSetObserver.
  */
-class DataSetObservable : public Observable
+class DataSetObservable
+    : public Observable
+    , public IDataSetObservable
 {
 public:
+    CAR_INTERFACE_DECL()
+
     /**
      * Invokes onChanged on each observer. Called when the data set being observed has
      * changed, and which when read contains the new state of the data.

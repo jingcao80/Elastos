@@ -1,5 +1,5 @@
 
-TARGET_NAME = SettingsProvider
+TARGET_NAME = Elastos.Droid.SettingsProvider
 TARGET_TYPE = eco
 
 EXPORT_ALL_SYMBOLS = 1
@@ -10,7 +10,7 @@ INCLUDES += $(MAKEDIR)/../../../../inc/
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
-SOURCES = SettingsProvider.car
+SOURCES = Elastos.Droid.SettingsProvider.car
 SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += R.cpp
@@ -30,6 +30,6 @@ LIBRARIES += $(PREBUILD_LIB)/libm.a
 LIBRARIES += -lm -licuuc -llog -lutils -landroidfw
 
 APPPACK = 1
-APP_PACKAGE_NAME = SettingsProvider
+APP_PACKAGE_NAME = Elastos.Droid.SettingsProvider
 RES_NAMESPACE = Elastos.Droid.SettingsProvider
 DIRRESOURCES += $(MAKEDIR)/res;

@@ -80,6 +80,8 @@ using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIClipboard;
+using Elastos::Droid::Media::CAudioService;
+using Elastos::Droid::Media::IAudioService;
 using Elastos::Droid::View::IIWindowManager;
 using Elastos::Droid::Accounts::IIAccountManager;
 using Elastos::Droid::Hardware::Input::IIInputManager;
@@ -477,7 +479,7 @@ ECode SystemServer::StartOtherServices()
     AutoPtr<CInputManagerService> inputManager;
     // AutoPtr<CTelephonyRegistry> telephonyRegistry;
     AutoPtr<CConsumerIrService> consumerIr;
-    // AutoPtr<CAudioService> audioService;
+    AutoPtr<IAudioService> audioService;
     // AutoPtr<CMmsServiceBroker> mmsService;
 
     AutoPtr<CStatusBarManagerService> statusBar;
@@ -896,9 +898,9 @@ ECode SystemServer::StartOtherServices()
         if (!disableMedia &&
             (systemProperties->Get(String("system_init.startaudioservice"), &str), !str.Equals("0"))) {
             Slogger::I(TAG, "Audio Service todo");
-            // ec = CAudioService::NewByFriend(context, (CAudioService**)&audioService);
-            // if (FAILED(ec)) ReportWtf("starting Audio Service", ec);
-            // ServiceManager::AddService(IContext::AUDIO_SERVICE, TO_IINTERFACE(audioService));
+            ec = CAudioService::New(context, (IAudioService**)&audioService);
+            if (FAILED(ec)) ReportWtf("starting Audio Service", ec);
+            ServiceManager::AddService(IContext::AUDIO_SERVICE, audioService);
         }
 
         if (!disableNonCoreServices) {

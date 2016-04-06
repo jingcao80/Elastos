@@ -1016,18 +1016,17 @@ ECode CWindowManagerService::constructor(
     mAppOps->StartWatchingMode(IAppOpsManager::OP_SYSTEM_ALERT_WINDOW, String(NULL), opListener);
     mAppOps->StartWatchingMode(IAppOpsManager::OP_TOAST_WINDOW, String(NULL), opListener);
 
-    Slogger::D(TAG, " >> todo setting-provider");
     // Get persisted window scale setting
-    // AutoPtr<IContentResolver> resolver;
-    // context->GetContentResolver((IContentResolver**)&resolver);
-    // Settings::Global::GetFloat(resolver, ISettingsGlobal::WINDOW_ANIMATION_SCALE,
-    //         mWindowAnimationScaleSetting, &mWindowAnimationScaleSetting);
-    // Settings::Global::GetFloat(resolver, ISettingsGlobal::TRANSITION_ANIMATION_SCALE,
-    //         mTransitionAnimationScaleSetting, &mTransitionAnimationScaleSetting);
-    // Float scaleSetting;
-    // Settings::Global::GetFloat(resolver, ISettingsGlobal::ANIMATOR_DURATION_SCALE,
-    //         mAnimatorDurationScaleSetting, &scaleSetting);
-    // SetAnimatorDurationScale(scaleSetting);
+    AutoPtr<IContentResolver> resolver;
+    context->GetContentResolver((IContentResolver**)&resolver);
+    Settings::Global::GetFloat(resolver, ISettingsGlobal::WINDOW_ANIMATION_SCALE,
+            mWindowAnimationScaleSetting, &mWindowAnimationScaleSetting);
+    Settings::Global::GetFloat(resolver, ISettingsGlobal::TRANSITION_ANIMATION_SCALE,
+            mTransitionAnimationScaleSetting, &mTransitionAnimationScaleSetting);
+    Float scaleSetting;
+    Settings::Global::GetFloat(resolver, ISettingsGlobal::ANIMATOR_DURATION_SCALE,
+            mAnimatorDurationScaleSetting, &scaleSetting);
+    SetAnimatorDurationScale(scaleSetting);
 
     // Track changes to DevicePolicyManager state so we can enable/disable keyguard.
     AutoPtr<IIntentFilter> filter;

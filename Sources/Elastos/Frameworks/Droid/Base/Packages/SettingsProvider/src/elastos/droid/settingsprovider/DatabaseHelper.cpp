@@ -158,12 +158,10 @@ ECode DatabaseHelper::OnCreate(
     db->ExecSQL(String("CREATE INDEX systemIndex1 ON system (name);"));
 
     CreateSecureTable(db);
-
     // Only create the global table for the singleton 'owner' user
     if (mUserHandle == IUserHandle::USER_OWNER) {
         CreateGlobalTable(db);
     }
-
     db->ExecSQL(String("CREATE TABLE bluetooth_devices (_id INTEGER PRIMARY KEY,name TEXT,addr TEXT,channel INTEGER,type INTEGER);"));
     db->ExecSQL(String("CREATE TABLE bookmarks (_id INTEGER PRIMARY KEY,title TEXT,folder TEXT,intent TEXT,shortcut INTEGER,ordering INTEGER);"));
 
@@ -186,10 +184,8 @@ ECode DatabaseHelper::OnCreate(
     if (!onlyCore) {
         LoadBookmarks(db);
     }
-
     // Load initial volume levels into DB
     LoadVolumeLevels(db);
-
     // Load inital settings values
     LoadSettings(db);
     return NOERROR;
@@ -2397,10 +2393,24 @@ void DatabaseHelper::LoadVolumeLevels(
     db->CompileStatement(String("INSERT OR IGNORE INTO system(name,value) VALUES(?,?);"),
             (ISQLiteStatement**)&stmt);
 
-    AutoPtr<IAudioManagerHelper> helper;
-    assert(0 && "TODO");
+    Slogger::W(TAG, "TODO: LoadVolumeLevels need CAudioManagerHelper");
+    // AutoPtr<IAudioManagerHelper> helper;
     // CAudioManagerHelper::AcquireSingleton((IAudioManagerHelper**)&helper);
-    AutoPtr< ArrayOf<Int32> > volume;
+    static Int32 DEFAULT_STREAM_VOLUME[] = { // TODO: delete
+        4,  // STREAM_VOICE_CALL
+        7,  // STREAM_SYSTEM
+        5,  // STREAM_RING
+        11, // STREAM_MUSIC
+        6,  // STREAM_ALARM
+        5,  // STREAM_NOTIFICATION
+        7,  // STREAM_BLUETOOTH_SCO
+        7,  // STREAM_SYSTEM_ENFORCED
+        11, // STREAM_DTMF
+        11,  // STREAM_TTS
+        4   // STREAM_INCALL_MUSIC
+    };
+    AutoPtr< ArrayOf<Int32> > volume = ArrayOf<Int32>::Alloc(DEFAULT_STREAM_VOLUME,
+        sizeof(DEFAULT_STREAM_VOLUME) / sizeof(Int32));
     // helper->GetDefaultStreamVolume((ArrayOf<Int32>**)&volume);
 
     LoadSetting(stmt, ISettingsSystem::VOLUME_MUSIC,

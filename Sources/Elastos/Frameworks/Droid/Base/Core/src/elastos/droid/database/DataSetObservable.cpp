@@ -6,6 +6,8 @@ namespace Elastos {
 namespace Droid {
 namespace Database {
 
+CAR_INTERFACE_IMPL(DataSetObservable, Observable, IDataSetObservable)
+
 ECode DataSetObservable::NotifyChanged()
 {
     synchronized(mObserversLock) {

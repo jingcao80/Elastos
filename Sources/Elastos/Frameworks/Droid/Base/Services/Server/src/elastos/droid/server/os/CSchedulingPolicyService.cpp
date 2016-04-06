@@ -2,6 +2,9 @@
 #include "elastos/droid/server/os/CSchedulingPolicyService.h"
 #include <Elastos.Droid.Content.h>
 #include <elastos/droid/os/Process.h>
+#include <elastos/utility/logging/Slogger.h>
+#include <binder/IServiceManager.h>
+#include <binder/Parcel.h>
 
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
@@ -10,11 +13,45 @@ using Elastos::Droid::Os::CBinderHelper;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::EIID_IISchedulingPolicyService;
 using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Os {
+
+// Keep in sync with frameworks/base/core/java/android/os/ISchedulingPolicyService.aidl
+enum {
+    REQUEST_PRIORITY_TRANSACTION = IBinder::FIRST_CALL_TRANSACTION,
+};
+
+android::status_t CSchedulingPolicyService::NativeSchedulingPolicyService::onTransact(
+    /* [in] */ uint32_t code,
+    /* [in] */ const android::Parcel& data,
+    /* [in] */ android::Parcel* reply,
+    /* [in] */ uint32_t flags)
+{
+    switch (code) {
+    case REQUEST_PRIORITY_TRANSACTION:
+    {
+        data.enforceInterface(android::String16("android.os.ISchedulingPolicyService"));
+        Int32 arg0;
+        arg0 = data.readInt32();
+        Int32 arg1;
+        arg1 = data.readInt32();
+        Int32 arg2;
+        arg2 = data.readInt32();
+        Int32 result;
+        mHost->RequestPriority(arg0, arg1, arg2, &result);
+        reply->writeNoException();
+        reply->writeInt32(result);
+        break;
+    }
+    default:
+        return BBinder::onTransact(code, data, reply, flags);
+    }
+    return android::NO_ERROR;
+}
 
 const String CSchedulingPolicyService::TAG("CSchedulingPolicyService");
 
@@ -31,6 +68,13 @@ CSchedulingPolicyService::CSchedulingPolicyService()
 
 ECode CSchedulingPolicyService::constructor()
 {
+    mNative = new NativeSchedulingPolicyService(this);
+    android::sp<android::IServiceManager> sm = android::defaultServiceManager();
+    int res = sm->addService(android::String16("scheduling_policy"), mNative);
+    if (res != 0) {
+        Slogger::E(TAG, "add service scheduling_policy failed");
+        return E_RUNTIME_EXCEPTION;
+    }
     return NOERROR;
 }
 

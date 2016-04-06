@@ -5,6 +5,7 @@
 #include "_Elastos_Droid_Server_Os_CSchedulingPolicyService.h"
 #include <Elastos.Droid.Os.h>
 #include <elastos/core/Object.h>
+#include <binder/Binder.h>
 
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IISchedulingPolicyService;
@@ -19,6 +20,25 @@ CarClass(CSchedulingPolicyService)
     , public IISchedulingPolicyService
     , public IBinder
 {
+private:
+    class NativeSchedulingPolicyService : public android::BBinder
+    {
+    public:
+        NativeSchedulingPolicyService(
+            /* [in] */ CSchedulingPolicyService* host)
+            : mHost(host)
+        {}
+
+        android::status_t onTransact(
+            /* [in] */ uint32_t code,
+            /* [in] */ const android::Parcel& data,
+            /* [in] */ android::Parcel* reply,
+            /* [in] */ uint32_t flags = 0);
+
+    private:
+        CSchedulingPolicyService* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -43,6 +63,7 @@ private:
     // Minimum and maximum values allowed for requestPriority parameter prio
     static const Int32 PRIORITY_MIN;
     static const Int32 PRIORITY_MAX;
+    android::sp<NativeSchedulingPolicyService> mNative;
 };
 
 } // namespace Os

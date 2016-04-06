@@ -40,7 +40,7 @@ ECode SQLiteDirectCursorDriver::Query(
     }
 
     if (factory == NULL) {
-        ec = CSQLiteCursor::New(this, mEditTable, query, (ISQLiteCursor**)&cursor);
+        ec = CSQLiteCursor::New(this, mEditTable, query, (ICursor**)&cursor);
     }
     else {
         ec = factory->NewCursor(mDatabase, this, mEditTable, query, (ICursor**)&cursor);

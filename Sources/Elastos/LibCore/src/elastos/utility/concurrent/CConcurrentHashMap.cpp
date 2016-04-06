@@ -1495,8 +1495,12 @@ ECode CConcurrentHashMap::CollectionView::ToArray(
     Int32 n = (Int32)sz;
     AutoPtr<ArrayOf<IInterface*> > r = ArrayOf<IInterface*>::Alloc(n);
     Int32 i = 0;
-    /* for (E e : this) */ {
+    AutoPtr<IIterator> it;
+    GetIterator((IIterator**)&it);
+    Boolean hasNext = FALSE;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> e;
+        it->GetNext((IInterface**)&e);
         if (i == n) {
             if (n >= MAX_ARRAY_SIZE)
                 return E_OUT_OF_MEMORY;
@@ -1506,7 +1510,7 @@ ECode CConcurrentHashMap::CollectionView::ToArray(
                 n += (n >> 1) + 1;
             Arrays::CopyOf(r, n, (ArrayOf<IInterface*>**)&r);
         }
-        (*r)[i++] = e;
+        r->Set(i++, e);
     }
 
     if (i == n) {
@@ -1532,11 +1536,16 @@ ECode CConcurrentHashMap::CollectionView::ToArray(
     // AutoPtr<ArrayOf<IInterface*> > r = (inArray->GetLength() >= m) ? inArray :
     //     (T[])java.lang.reflect.Array
     //     .newInstance(inArray.getClass().getComponentType(), m);
-    AutoPtr<ArrayOf<IInterface*> > r = (inArray->GetLength() >= m) ? inArray : inArray;
+    AutoPtr<ArrayOf<IInterface*> > r = (inArray->GetLength() >= m) ? inArray :
+        ArrayOf<IInterface*>::Alloc(m);
     Int32 n = r->GetLength();
     Int32 i = 0;
-    /* for (E e : this) */ {
+    AutoPtr<IIterator> it;
+    GetIterator((IIterator**)&it);
+    Boolean hasNext = FALSE;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> e;
+        it->GetNext((IInterface**)&e);
         if (i == n) {
             if (n >= MAX_ARRAY_SIZE)
                 return E_OUT_OF_MEMORY;

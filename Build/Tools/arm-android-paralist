@@ -386,7 +386,7 @@
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui
 
 # ==== build SettingsProvider ====
-  Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider SettingsProvider.car
+  Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider Elastos.Droid.SettingsProvider.car
 > Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider
 
 #  Elastos/Frameworks/Droid/DevSamples/SoftKeyboard

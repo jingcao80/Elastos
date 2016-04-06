@@ -5,6 +5,7 @@
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/content/CContentValues.h"
+#include "elastos/droid/content/ContentResolver.h"
 #include "elastos/droid/content/Intent.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/os/CBundle.h"
@@ -25,6 +26,7 @@
 
 using Elastos::Droid::Content::CContentValues;
 using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::ContentResolver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIContentProvider;
 using Elastos::Droid::Content::Intent;
@@ -35,6 +37,7 @@ using Elastos::Droid::Location::ILocationManager;
 using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IBaseBundle;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::UserHandle;
@@ -175,8 +178,8 @@ ECode Settings::NameValueCache::PutStringForUser(
         *result = FALSE;
         return ec == (ECode)E_REMOTE_EXCEPTION ? NOERROR : ec;
     }
-    assert(0 && "TODO");
-    // ec = cp->Call(cr->GetPackageName(), name, arg, (IBundle**)&tmp);
+
+    ec = cp->Call(((ContentResolver*)cr)->GetPackageName(), mCallSetCommand, name, arg, (IBundle**)&tmp);
     if (FAILED(ec)) {
         Slogger::W(TAG, "Can't set key %s in %s", name.string(), TO_CSTR(mUri));
         *result = FALSE;
@@ -213,7 +216,7 @@ ECode Settings::NameValueCache::GetStringForUser(
                     Slogger::V(TAG, "invalidate [%s]: current %d != cached %d", segment.string(), newValuesVersion, mValuesVersion);
                 }
 
-                mValues.Clear();
+                mValues->Clear();
                 mValuesVersion = newValuesVersion;
             }
 
@@ -223,7 +226,7 @@ ECode Settings::NameValueCache::GetStringForUser(
                 AutoPtr<IInterface> interf;
                 mValues->Get(CoreUtils::Convert(name), (IInterface**)&interf);
                 AutoPtr<ICharSequence> cs = ICharSequence::Probe(interf);
-                return cs->ToString(value); // Could be null, that's OK -- negative caching
+                return cs != NULL ? cs->ToString(value) : NOERROR; // Could be null, that's OK -- negative caching
             }
         }
     } else {
@@ -249,21 +252,20 @@ ECode Settings::NameValueCache::GetStringForUser(
             args->PutInt32(ISettings::CALL_METHOD_USER_KEY, userHandle);
         }
         AutoPtr<IBundle> b;
-        assert(0 && "TODO");// cr->GetPackageName()
-/*        if (SUCCEEDED(cp->Call(cr->GetPackageName(), name, args, (IBundle**)&b)) && b != NULL) {
+        if (SUCCEEDED(cp->Call(((ContentResolver*)cr)->GetPackageName(), mCallGetCommand, name, args, (IBundle**)&b)) && b != NULL) {
             String _value;
-            b->GetPairValue(&_value);
+            IBaseBundle::Probe(b)->GetPairValue(&_value);
             // Don't update our cache for reads of other users' data
             if (isSelf) {
                 AutoLock lock(sLock);
-                (*mValues)[name] = _value;
+                mValues->Put(CoreUtils::Convert(name), CoreUtils::Convert(_value));
             } else {
                 if (LOCAL_LOGV)
                     Slogger::I(TAG, "call-query of user %d by %d so not updating cache", userHandle, UserHandle::GetMyUserId());
             }
             *value = _value;
             return NOERROR;
-        }*/
+        }
         // If the response Bundle is null, we fall through
         // to the query interface below.
         // } catch (RemoteException e) {
@@ -277,16 +279,15 @@ ECode Settings::NameValueCache::GetStringForUser(
     AutoPtr< ArrayOf<String> > selectionArgs = ArrayOf<String>::Alloc(1);
     (*selectionArgs)[0] = name;
 
-    assert(0 && "TODO"); // cr->GetPackageName()
-/*    if (FAILED(cp->Query(cr->GetPackageName(), mUri, SELECT_VALUE, NAME_EQ_PLACEHOLDER, selectionArgs, String(NULL), NULL, (ICursor**)&c))) {
+    if (FAILED(cp->Query(((ContentResolver*)cr)->GetPackageName(), mUri, SELECT_VALUE,
+        NAME_EQ_PLACEHOLDER, selectionArgs, String(NULL), NULL, (ICursor**)&c))) {
         Slogger::W(TAG, "Can't get key %s from %p", name.string(), mUri.Get());
         if (c != NULL) {
-            assert(0 && "TODO");
-            // c->Close();
+            ICloseable::Probe(c)->Close();
         }
         *value = String(NULL);  // Return null, but don't cache it.
         return NOERROR;
-    }*/
+    }
     if (c == NULL) {
         Slogger::W(TAG, "Can't get key %s from %p", name.string(), mUri.Get());
         *value = String(NULL);
@@ -309,8 +310,7 @@ ECode Settings::NameValueCache::GetStringForUser(
         Slogger::V(TAG, "cache miss [%s]: %s = %s", segment.string(), name.string(), (_value.IsNull()? "(null)" : _value.string()));
     }
     if (c != NULL) {
-        assert(0 && "TODO");
-        // c->Close();
+        ICloseable::Probe(c)->Close();
     }
     *value = _value;
     return NOERROR;
@@ -2392,12 +2392,9 @@ ECode Settings::Bookmarks::GetIntentForShortcut(
         //     Log.w(TAG, "Intent column not found", e);
         // }
     }
-    // } finally {
-    //     if (c != null) c.close();
-    // }
+
     if (c != NULL) {
-        assert(0 && "TODO");
-        // c->Close();
+        ICloseable::Probe(c)->Close();
     }
     *intent = _intent;
     REFCOUNT_ADD(*intent)

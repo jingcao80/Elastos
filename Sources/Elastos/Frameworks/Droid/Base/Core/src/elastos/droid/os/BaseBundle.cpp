@@ -173,7 +173,10 @@ ECode BaseBundle::GetPairValue(
     AutoPtr<IInterface> obj;
     mMap->GetValueAt(0, (IInterface**)&obj);
 
-    if (ICharSequence::Probe(obj) == NULL) {
+    if (obj == NULL) {
+        return NOERROR;
+    }
+    else if (ICharSequence::Probe(obj) == NULL) {
         TypeWarning(String("getPairValue()"), String("String"));
         return NOERROR;
     }

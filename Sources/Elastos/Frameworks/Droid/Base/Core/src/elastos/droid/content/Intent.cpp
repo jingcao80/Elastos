@@ -2494,143 +2494,140 @@ void Intent::ToUriInner(
     /* [in] */ const String& scheme,
     /* [in] */ Int32 flags)
 {
-    assert(0 && "TODO");
-    // if (!scheme.IsNull()) {
-    //     uri.Append("scheme=");
-    //     uri.Append(scheme);
-    //     uri.AppendChar(';');
-    // }
-    // if (!mAction.IsNull()) {
-    //     uri.Append("action=");
-    //     String s;
-    //     Uri::Encode(mAction, &s);
-    //     uri.Append(s);
-    //     uri.AppendChar(';');
-    // }
-    // if (mCategories != NULL) {
-    //     HashSet<String>::Iterator it;
-    //     for (it = mCategories->Begin(); it != mCategories->End(); ++it) {
-    //         uri.Append("category=");
-    //         String s;
-    //         Uri::Encode(*it, &s);
-    //         uri.Append(s);
-    //         uri.AppendChar(';');
-    //     }
-    // }
-    // if (!mType.IsNull()) {
-    //     uri.Append("type=");
-    //     String s;
-    //     Uri::Encode(mType, String("/"), &s);
-    //     uri.Append(s);
-    //     uri.AppendChar(';');
-    // }
-    // if (mFlags != 0) {
-    //     uri.Append("launchFlags=0x");
-    //     uri.Append(StringUtils::ToString(mFlags));
-    //     uri.AppendChar(';');
-    // }
-    // if (!mPackage.IsNull()) {
-    //     uri.Append("package=");
-    //     String s;
-    //     Uri::Encode(mPackage, &s);
-    //     uri.Append(s);
-    //     uri.AppendChar(';');
-    // }
+    if (!scheme.IsNull()) {
+        uri.Append("scheme=");
+        uri.Append(scheme);
+        uri.AppendChar(';');
+    }
+    if (!mAction.IsNull()) {
+        uri.Append("action=");
+        String s;
+        Uri::Encode(mAction, &s);
+        uri.Append(s);
+        uri.AppendChar(';');
+    }
+    if (mCategories != NULL) {
+        HashSet<String>::Iterator it;
+        for (it = mCategories->Begin(); it != mCategories->End(); ++it) {
+            uri.Append("category=");
+            String s;
+            Uri::Encode(*it, &s);
+            uri.Append(s);
+            uri.AppendChar(';');
+        }
+    }
+    if (!mType.IsNull()) {
+        uri.Append("type=");
+        String s;
+        Uri::Encode(mType, String("/"), &s);
+        uri.Append(s);
+        uri.AppendChar(';');
+    }
+    if (mFlags != 0) {
+        uri.Append("launchFlags=0x");
+        uri.Append(StringUtils::ToString(mFlags));
+        uri.AppendChar(';');
+    }
+    if (!mPackage.IsNull()) {
+        uri.Append("package=");
+        String s;
+        Uri::Encode(mPackage, &s);
+        uri.Append(s);
+        uri.AppendChar(';');
+    }
 
-    // if (mComponent != NULL) {
-    //     uri.Append("component=");
-    //     String compS;
-    //     mComponent->FlattenToShortString(&compS);
-    //     String s;
-    //     Uri::Encode(compS, String("/"), &s);
-    //     uri.Append(s);
-    //     uri.AppendChar(';');
-    // }
-    // if (mSourceBounds != NULL) {
-    //     uri.Append("sourceBounds=");
-    //     String tmp;
-    //     mSourceBounds->FlattenToString(&tmp);
-    //     String s;
-    //     Uri::Encode(tmp, &s);
-    //     uri.Append(s);
-    //     uri.AppendChar(';');
-    // }
-    // if (mExtras != NULL) {
-    //     AutoPtr<IArrayList> objContainer;
-    //     mExtras->KeySet((IArrayList**)&objContainer);
-    //     AutoPtr<IObjectEnumerator> objEnumerator;
-    //     objContainer->GetObjectEnumerator((IObjectEnumerator**)&objEnumerator);
-    //     Boolean hasNext = FALSE;
-    //     while ((objEnumerator->MoveNext(&hasNext), hasNext)) {
-    //         AutoPtr<ICharSequence> obj;
-    //         objEnumerator->Current((IInterface**)(ICharSequence**)&obj);
-    //         String key;
-    //         obj->ToString(&key);
-    //         AutoPtr<IInterface> value;
-    //         mExtras->Get(key, (IInterface**)&value);
-    //         Char32 entryType =
-    //                 ICharSequence::Probe(value) != NULL    ? 'S' :
-    //                 IBoolean::Probe(value) != NULL         ? 'B' :
-    //                 IByte::Probe(value) != NULL            ? 'b' :
-    //                 IChar32::Probe(value) != NULL          ? 'c' :
-    //                 IDouble::Probe(value) != NULL          ? 'd' :
-    //                 IFloat::Probe(value) != NULL           ? 'f' :
-    //                 IInteger32::Probe(value) != NULL       ? 'i' :
-    //                 IInteger64::Probe(value) != NULL       ? 'l' :
-    //                 IInteger16::Probe(value) != NULL       ? 's' :
-    //                 '\0';
-    //         if (entryType != '\0') {
-    //             uri.AppendChar(entryType);
-    //             uri.AppendChar('.');
-    //             String s;
-    //             Uri::Encode(key, &s);
-    //             uri.Append(s);
-    //             uri.AppendChar('=');
-    //             String tmp;
-    //             if (entryType == 'S') {
-    //                 ((ICharSequence*)value.Get())->ToString(&tmp);
-    //             }
-    //             else if (entryType == 'B') {
-    //                 Boolean val;
-    //                 ((IBoolean*)value.Get())->GetValue(&val);
-    //                 tmp = StringUtils::BooleanToString(val);
-    //             }
-    //             else if (entryType == 'b') {
-    //                 Byte val;
-    //                 ((IByte*)value.Get())->GetValue(&val);
-    //                 tmp = StringUtils::ToString((Int32)val);
-    //             }
-    //             else if (entryType == 'd') {
-    //                 Double val;
-    //                 ((IDouble*)value.Get())->GetValue(&val);
-    //                 tmp = StringUtils::DoubleToString(val);
-    //             }
-    //             else if (entryType == 'f') {
-    //                 Float val;
-    //                 ((IFloat*)value.Get())->GetValue(&val);
-    //                 tmp = StringUtils::DoubleToString((Double)val);
-    //             }
-    //             else if (entryType == 'i') {
-    //                 Int32 val;
-    //                 ((IInteger32*)value.Get())->GetValue(&val);
-    //                 tmp = StringUtils::ToString(val);
-    //             }
-    //             else if (entryType == 'l') {
-    //                 Int64 val;
-    //                 ((IInteger64*)value.Get())->GetValue(&val);
-    //                 tmp = StringUtils::ToString(val);
-    //             }
-    //             else if (entryType == 's') {
-    //                 Int16 val;
-    //                 ((IInteger16*)value.Get())->GetValue(&val);
-    //                 tmp = StringUtils::ToString((Int32)val);
-    //             }
-    //             Uri::Encode(tmp, &s);
-    //             uri.Append(s);
-    //             uri.AppendChar(';');
-    //         }
-    //     }
-    // }
+    if (mComponent != NULL) {
+        uri.Append("component=");
+        String compS;
+        mComponent->FlattenToShortString(&compS);
+        String s;
+        Uri::Encode(compS, String("/"), &s);
+        uri.Append(s);
+        uri.AppendChar(';');
+    }
+    if (mSourceBounds != NULL) {
+        uri.Append("sourceBounds=");
+        String tmp;
+        mSourceBounds->FlattenToString(&tmp);
+        String s;
+        Uri::Encode(tmp, &s);
+        uri.Append(s);
+        uri.AppendChar(';');
+    }
+    if (mExtras != NULL) {
+        AutoPtr<ISet> set;
+        mExtras->GetKeySet((ISet**)&set);
+        AutoPtr<ArrayOf<IInterface*> > keys;
+        set->ToArray((ArrayOf<IInterface*>**)&keys);
+        Int32 size = keys->GetLength();
+        for (Int32 i = 0; i < size; i++) {
+            String key;
+            ICharSequence::Probe((*keys)[i])->ToString(&key);
+            AutoPtr<IInterface> value;
+            mExtras->Get(key, (IInterface**)&value);
+            Char32 entryType =
+                    ICharSequence::Probe(value) != NULL    ? 'S' :
+                    IBoolean::Probe(value) != NULL         ? 'B' :
+                    IByte::Probe(value) != NULL            ? 'b' :
+                    IChar32::Probe(value) != NULL          ? 'c' :
+                    IDouble::Probe(value) != NULL          ? 'd' :
+                    IFloat::Probe(value) != NULL           ? 'f' :
+                    IInteger32::Probe(value) != NULL       ? 'i' :
+                    IInteger64::Probe(value) != NULL       ? 'l' :
+                    IInteger16::Probe(value) != NULL       ? 's' :
+                    '\0';
+            if (entryType != '\0') {
+                uri.AppendChar(entryType);
+                uri.AppendChar('.');
+                String s;
+                Uri::Encode(key, &s);
+                uri.Append(s);
+                uri.AppendChar('=');
+                String tmp;
+                if (entryType == 'S') {
+                    ((ICharSequence*)value.Get())->ToString(&tmp);
+                }
+                else if (entryType == 'B') {
+                    Boolean val;
+                    ((IBoolean*)value.Get())->GetValue(&val);
+                    tmp = StringUtils::BooleanToString(val);
+                }
+                else if (entryType == 'b') {
+                    Byte val;
+                    ((IByte*)value.Get())->GetValue(&val);
+                    tmp = StringUtils::ToString((Int32)val);
+                }
+                else if (entryType == 'd') {
+                    Double val;
+                    ((IDouble*)value.Get())->GetValue(&val);
+                    tmp = StringUtils::ToString(val);
+                }
+                else if (entryType == 'f') {
+                    Float val;
+                    ((IFloat*)value.Get())->GetValue(&val);
+                    tmp = StringUtils::ToString((Double)val);
+                }
+                else if (entryType == 'i') {
+                    Int32 val;
+                    ((IInteger32*)value.Get())->GetValue(&val);
+                    tmp = StringUtils::ToString(val);
+                }
+                else if (entryType == 'l') {
+                    Int64 val;
+                    ((IInteger64*)value.Get())->GetValue(&val);
+                    tmp = StringUtils::ToString(val);
+                }
+                else if (entryType == 's') {
+                    Int16 val;
+                    ((IInteger16*)value.Get())->GetValue(&val);
+                    tmp = StringUtils::ToString((Int32)val);
+                }
+                Uri::Encode(tmp, &s);
+                uri.Append(s);
+                uri.AppendChar(';');
+            }
+        }
+    }
 }
 
 ECode Intent::WriteToParcel(

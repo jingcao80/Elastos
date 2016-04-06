@@ -4,9 +4,9 @@
 ; Format:  SrcFile/Folder or
 ;          SrcFile/Folder [DestFolder]
 ;
-SystemUI.epk            /system/app
+;SystemUI.epk            /system/app
 ;SoftKeyboard.epk              /system/app
-PinyinIME.epk                 /system/app
-Gallery.epk                   /system/app
-MusicPlayer.epk               /system/app
-SettingsProvider.epk          /system/app
+;PinyinIME.epk                 /system/app
+;Gallery.epk                   /system/app
+;MusicPlayer.epk               /system/app
+Elastos.Droid.SettingsProvider.epk  /system/priv-app

@@ -142,12 +142,14 @@ Boolean SettingsProvider::InitGlobalKeys()
     // Keys (name column) from the 'secure' table that are now in the owner user's 'global'
     // table, shared across all users
     // These must match Settings.Secure.MOVED_TO_GLOBAL
+    CHashSet::New((IHashSet**)&sSecureGlobalKeys);
     AutoPtr<ISettingsSecure> secure;
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&secure);
     secure->GetMovedKeys(sSecureGlobalKeys);
 
     // Keys from the 'system' table now moved to 'global'
     // These must match Settings.System.MOVED_TO_GLOBAL
+    CHashSet::New((IHashSet**)&sSystemGlobalKeys);
     AutoPtr<ISettingsSystem> sys;
     CSettingsSystem::AcquireSingleton((ISettingsSystem**)&sys);
     sys->GetNonLegacyMovedKeys(sSystemGlobalKeys);
@@ -170,17 +172,16 @@ Boolean SettingsProvider::InitGlobalKeys()
     AutoPtr< ArrayOf<String> > args1;
     secure->GetCLONE_TO_MANAGED_PROFILE((ArrayOf<String>**)&args1);
     for (Int32 i = 0; i < args1->GetLength(); i++) {
-        ISet::Probe(sSecureCloneToManagedKeys)->Add(CoreUtils::Convert((*args1)[i]));
+        sSecureCloneToManagedKeys->Add(CoreUtils::Convert((*args1)[i]));
     }
 
     CHashSet::New((IHashSet**)&sSystemCloneToManagedKeys);
-    assert(0 && "TODO");
-    // AutoPtr< ArrayOf<String> > args2;
-    // sys->GetCLONE_TO_MANAGED_PROFILE((ArrayOf<String>**)&args2);
+    AutoPtr< ArrayOf<String> > args2;
+    sys->GetCLONE_TO_MANAGED_PROFILE((ArrayOf<String>**)&args2);
 
-    // for (Int32 i = 0; i < args2->GetLength(); i++) {
-    //     ISet::Probe(sSystemCloneToManagedKeys)->Add(CoreUtils::Convert((*args2)[i]));
-    // }
+    for (Int32 i = 0; i < args2->GetLength(); i++) {
+        sSystemCloneToManagedKeys->Add(CoreUtils::Convert((*args2)[i]));
+    }
 
     return TRUE;
 }
@@ -289,8 +290,8 @@ ECode SettingsProvider::SqlArguments::constructor(
             // Rewrite the table for known-migrated names
             if (TABLE_SYSTEM.Equals(mTable) || TABLE_SECURE.Equals(mTable)) {
                 Boolean res1, res2;
-                if ((ISet::Probe(sSecureGlobalKeys)->Contains(CoreUtils::Convert(name), &res1), res1)
-                        || (ISet::Probe(sSystemGlobalKeys)->Contains(CoreUtils::Convert(name), &res2), res2)) {
+                if ((sSecureGlobalKeys->Contains(CoreUtils::Convert(name), &res1), res1)
+                        || (sSystemGlobalKeys->Contains(CoreUtils::Convert(name), &res2), res2)) {
                     mTable = TABLE_GLOBAL;
                 }
             }
@@ -566,8 +567,8 @@ Boolean SettingsProvider::SettingMovedToGlobal(
     /* [in] */ const String& name)
 {
     Boolean res1, res2;
-    ISet::Probe(sSecureGlobalKeys)->Contains(CoreUtils::Convert(name), &res1);
-    ISet::Probe(sSystemGlobalKeys)->Contains(CoreUtils::Convert(name), &res2);
+    sSecureGlobalKeys->Contains(CoreUtils::Convert(name), &res1);
+    sSystemGlobalKeys->Contains(CoreUtils::Convert(name), &res2);
     return res1 || res2;
 }
 
@@ -718,7 +719,8 @@ ECode SettingsProvider::CheckUserRestrictions(
     AutoPtr<IInterface> obj;
     sRestrictedKeys->Get(CoreUtils::Convert(setting), (IInterface**)&obj);
     String userRestriction;
-    ICharSequence::Probe(obj)->ToString(&userRestriction);
+    if (obj != NULL)
+        ICharSequence::Probe(obj)->ToString(&userRestriction);
 
     AutoPtr<IUserHandle> handle;
     CUserHandle::New(userId, (IUserHandle**)&handle);
@@ -739,16 +741,14 @@ ECode SettingsProvider::OnCreate(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    assert(0 && "TODO");
+    Slogger::W(TAG, "TODO: SettingsProvider::OnCreate need CBackupManager!");
     // CBackupManager::New(context, (IBackupManager**)&mBackupManager);
 
     AutoPtr<IUserManagerHelper> helper;
     CUserManagerHelper::AcquireSingleton((IUserManagerHelper**)&helper);
     helper->Get(context, (IUserManager**)&mUserManager);
-
     SetAppOps(IAppOpsManager::OP_NONE, IAppOpsManager::OP_WRITE_SETTINGS);
     EstablishDbTracking(IUserHandle::USER_OWNER);
-
     AutoPtr<IIntentFilter> userFilter;
     CIntentFilter::New((IIntentFilter**)&userFilter);
     userFilter->AddAction(IIntent::ACTION_USER_REMOVED);
@@ -756,9 +756,7 @@ ECode SettingsProvider::OnCreate(
     AutoPtr<IBroadcastReceiver> receiver = (IBroadcastReceiver*)new MyBroadcastReceiver(this);
     AutoPtr<IIntent> intent;
     context->RegisterReceiver(receiver, userFilter, (IIntent**)&intent);
-
     OnProfilesChanged();
-
     *result = TRUE;
     return NOERROR;
 }
@@ -834,7 +832,6 @@ void SettingsProvider::EstablishDbTracking(
             GetContext((IContext**)&context);
             dbhelper = new DatabaseHelper(context, userHandle);
             mOpenHelpers->Append(userHandle, (ISQLiteOpenHelper*)dbhelper);
-
             AutoPtr<SettingsCache> systemCache = new SettingsCache(TABLE_SYSTEM);
             AutoPtr<SettingsCache> secureCache = new SettingsCache(TABLE_SECURE);
             sSystemCaches->Append(userHandle, TO_IINTERFACE(systemCache));
@@ -871,7 +868,6 @@ void SettingsProvider::EstablishDbTracking(
 
     Boolean result;
     EnsureAndroidIdIsSet(userHandle, &result);
-
     StartAsyncCachePopulation(userHandle);
 }
 
@@ -1076,7 +1072,7 @@ ECode SettingsProvider::GetOrEstablishDatabase(
     synchronized(this) {
         AutoPtr<IInterface> obj;
         mOpenHelpers->Get(callingUser, (IInterface**)&obj);
-        dbHelper = (DatabaseHelper*)ISQLiteDatabase::Probe(obj);
+        dbHelper = (DatabaseHelper*)ISQLiteOpenHelper::Probe(obj);
     }
 
     if (NULL == dbHelper) {
@@ -1084,7 +1080,7 @@ ECode SettingsProvider::GetOrEstablishDatabase(
         synchronized(this) {
             AutoPtr<IInterface> obj;
             mOpenHelpers->Get(callingUser, (IInterface**)&obj);
-            dbHelper = (DatabaseHelper*)ISQLiteDatabase::Probe(obj);
+            dbHelper = (DatabaseHelper*)ISQLiteOpenHelper::Probe(obj);
         }
     }
     // } finally {
@@ -1304,7 +1300,7 @@ ECode SettingsProvider::Call(
         // Clone the settings to the managed profiles so that notifications can be sent out
         Boolean res;
         if (callingUser == IUserHandle::USER_OWNER && mManagedProfiles != NULL
-                && (ISet::Probe(sSystemCloneToManagedKeys)->Contains(CoreUtils::Convert(request), &res), res)) {
+                && (sSystemCloneToManagedKeys->Contains(CoreUtils::Convert(request), &res), res)) {
             const Int64 token = Binder::ClearCallingIdentity();
             // try {
             Int32 size;
@@ -1350,7 +1346,7 @@ ECode SettingsProvider::Call(
         // Clone the settings to the managed profiles so that notifications can be sent out
         Boolean res;
         if (callingUser == IUserHandle::USER_OWNER && mManagedProfiles != NULL
-                && (ISet::Probe(sSecureCloneToManagedKeys)->Contains(CoreUtils::Convert(request), &res), res)) {
+                && (sSecureCloneToManagedKeys->Contains(CoreUtils::Convert(request), &res), res)) {
             const Int64 token = Binder::ClearCallingIdentity();
             // try {
             Int32 size;
@@ -1410,7 +1406,7 @@ Boolean SettingsProvider::ShouldShadowParentProfile(
     /* [in] */ const String& name)
 {
     Boolean res;
-    return IsManagedProfile(userId) && (ISet::Probe(keys)->Contains(CoreUtils::Convert(name), &res), res);
+    return IsManagedProfile(userId) && (keys->Contains(CoreUtils::Convert(name), &res), res);
 }
 
 AutoPtr<IBundle> SettingsProvider::LookupValue(
@@ -1457,7 +1453,7 @@ AutoPtr<IBundle> SettingsProvider::LookupValue(
         return NULL;
     }
     Int32 count;
-    if (cursor != NULL && cursor->GetCount(&count), count == 1) {
+    if (cursor != NULL && (cursor->GetCount(&count), count == 1)) {
         Boolean result;
         cursor->MoveToFirst(&result);
         String value;
@@ -1696,7 +1692,7 @@ Boolean SettingsProvider::ParseProviderList(
             AutoPtr<ICursor> cursor;
             QueryForUser(url, columns, where, NULL, String(NULL), desiredUser, (ICursor**)&cursor);
             Int32 count;
-            if (cursor != NULL && cursor->GetCount(&count), count == 1) {
+            if (cursor != NULL && (cursor->GetCount(&count), count == 1)) {
                 // try {
                 Boolean result;
                 cursor->MoveToFirst(&result);
@@ -1811,8 +1807,8 @@ ECode SettingsProvider::InsertForUser(
     // redirect the operation to that store
     Boolean res1, res2;
     if (!name.IsNull()) {
-        if ((ISet::Probe(sSecureGlobalKeys)->Contains(CoreUtils::Convert(name), &res1), res1)
-                || (ISet::Probe(sSystemGlobalKeys)->Contains(CoreUtils::Convert(name), &res2), res2)) {
+        if ((sSecureGlobalKeys->Contains(CoreUtils::Convert(name), &res1), res1)
+                || (sSystemGlobalKeys->Contains(CoreUtils::Convert(name), &res2), res2)) {
             if (!TABLE_GLOBAL.Equals(args->mTable)) {
                 if (LOCAL_LOGV) Logger::I(TAG, "Rewrite of insert() of now-global key %s", name.string());
             }

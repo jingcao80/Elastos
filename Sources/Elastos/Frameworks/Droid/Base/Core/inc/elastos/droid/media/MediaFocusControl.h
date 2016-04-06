@@ -738,7 +738,7 @@ private:
     AutoPtr<IAudioServiceVolumeController> mVolumeController;
     AutoPtr<IAppOpsManager> mAppOps;
     AutoPtr<IKeyguardManager> mKeyguardManager;
-    AutoPtr<IAudioService> mAudioService;
+    IAudioService* mAudioService;
     AutoPtr<NotificationListenerObserver> mNotifListenerObserver;
 
     static AutoPtr<IUri> ENABLED_NOTIFICATION_LISTENERS_URI;

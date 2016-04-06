@@ -6110,9 +6110,8 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
 
         String packagePath, className;
         if (name.Equals("com.android.providers.settings.SettingsProvider")) {
-            packagePath = String("/data/elastos/SettingsProvider.eco");
-            className = String("CSettingsProvider");
-            assert(0 && "TODO");
+            packagePath = String("/data/elastos/Elastos.Droid.SettingsProvider.eco");
+            className = String("Elastos.Droid.SettingsProvider.CSettingsProvider");
         }
         else {
             Int32 index = name.LastIndexOf('.');
@@ -6123,8 +6122,7 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
             sb.Append(".eco");
 
             packagePath = sb.ToString();
-            className = name.Substring(index + 1);
-            assert("0" && "TODO");
+            className = name;
         }
 
         AutoPtr<IModuleInfo> moduleInfo;

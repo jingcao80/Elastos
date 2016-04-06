@@ -186,7 +186,7 @@ ECode SQLiteDatabase::GetThreadSession(
 {
     VALIDATE_NOT_NULL(session);
 
-    MakeKey();
+    pthread_once(&sKeyOnce, MakeKey);
 
     AutoPtr<SQLiteSession> sqliteSession = (SQLiteSession*)pthread_getspecific(sKeyThreadSession);
     if (sqliteSession == NULL) {
@@ -999,13 +999,9 @@ ECode SQLiteDatabase::InsertWithOnConflict(
         Boolean hasNext = FALSE;
         String name;
         while ((it->HasNext(&hasNext), hasNext)) {
-            AutoPtr<IInterface> outface;
-            it->GetNext((IInterface**)&outface);
-            AutoPtr<IMapEntry> entry = IMapEntry::Probe(outface);
-            AutoPtr<IInterface> obj;
-            entry->GetKey((IInterface**)&obj);
-            assert(ICharSequence::Probe(obj) != NULL);
-            ICharSequence::Probe(obj)->ToString(&name);
+            AutoPtr<IInterface> key;
+            it->GetNext((IInterface**)&key);
+            ICharSequence::Probe(key)->ToString(&name);
             sql.Append((i > 0) ? "," : "");
             sql += name;
             AutoPtr<IInterface> temp;
@@ -1055,8 +1051,7 @@ ECode SQLiteDatabase::Delete(
     AutoPtr<ISQLiteStatement> statement;
     StringBuilder sb("DELETE FROM ");
     sb.Append(table);
-    assert(0 && "TODO TextUtils::IsEmpty");
-    //sb.Append(!TextUtils::IsEmpty(whereClause) ? String(" WHERE ") + whereClause : String(""));
+    sb.Append(!TextUtils::IsEmpty(whereClause) ? String(" WHERE ") + whereClause : String(""));
 
     AutoPtr< ArrayOf<IInterface*> > bindArgs;
     if (whereArgs != NULL && whereArgs->GetLength() > 0) {

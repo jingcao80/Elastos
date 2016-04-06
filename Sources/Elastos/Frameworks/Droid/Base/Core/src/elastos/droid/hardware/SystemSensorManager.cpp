@@ -51,10 +51,10 @@ SystemSensorManager::BaseEventQueue::BaseEventQueue(
 {
     AutoPtr<IMessageQueue> queue;
     looper->GetQueue((IMessageQueue**)&queue);
+    mScratch = ArrayOf<Float>::Alloc(16);
     nSensorEventQueue = NativeInitBaseEventQueue(this, queue, mScratch);
     //mCloseGuard.open("dispose");
     mManager = manager;
-    mScratch = ArrayOf<Float>::Alloc(16);
 }
 
 SystemSensorManager::BaseEventQueue::~BaseEventQueue()
@@ -244,9 +244,8 @@ Int64 SystemSensorManager::BaseEventQueue::NativeInitBaseEventQueue(
     }
 
     android::sp<Receiver> receiver = new Receiver(queue, messageQueue, eventQ, scratch);
-    assert(0 && "TODO: decStrong");
-    // receiver->incStrong((void*)nativeInitSensorEventQueue);
-    return 0;//Int64(receiver.get());
+    receiver->incStrong((void*)&NativeInitBaseEventQueue);
+    return reinterpret_cast<Int64>(receiver.get());
 }
 
 Int32 SystemSensorManager::BaseEventQueue::NativeEnableSensor(
@@ -274,8 +273,7 @@ void SystemSensorManager::BaseEventQueue::NativeDestroySensorEventQueue(
 {
     android::sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
     receiver->destroy();
-    assert(0 && "TODO: decStrong");
-    //receiver->decStrong((void*)NativeInitBaseEventQueue);
+    receiver->decStrong((void*)&NativeInitBaseEventQueue);
 }
 
 Int32 SystemSensorManager::BaseEventQueue::NativeFlushSensor(
@@ -374,7 +372,7 @@ int SystemSensorManager::Receiver::handleEvent(
                 mReceiverObject->DispatchSensorEvent(buffer[i].sensor, mScratch,
                         status, buffer[i].timestamp);
             }
-            assert(0 && "TODO: env->ExceptionCheck()");
+            // assert(0 && "TODO: env->ExceptionCheck()");
             // if (env->ExceptionCheck()) {
             //     mSensorQueue->sendAck(buffer, n);
             //     ALOGE("Exception dispatching input event.");
@@ -440,7 +438,7 @@ void SystemSensorManager::SensorEventQueue::DispatchSensorEvent(
     }
     // Copy from the values array.
     //System.arraycopy(values, 0, t.values, 0, t.values.length);
-    ((CTriggerEvent*)t.Get())->mValues->Copy(values, 0, ((CTriggerEvent*)t.Get())->mValues->GetLength());
+    ((CSensorEvent*)t.Get())->mValues->Copy(values, 0, ((CSensorEvent*)t.Get())->mValues->GetLength());
     t->SetTimestamp(timestamp);
     t->SetAccuracy(inAccuracy);
     t->SetSensor(sensor);

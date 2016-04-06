@@ -371,7 +371,8 @@ void LruCache<K, V>::TrimToSize(
     while (TRUE) {
         K key;
         V value;
-        synchronized(this) {
+        {
+            AutoLock lock(this);
             if (mSize < 0 || (mMap.IsEmpty() && mSize != 0)) {
                 Slogger::E("LruCache", ".sizeOf() is reporting inconsistent results!");
                 assert(0);

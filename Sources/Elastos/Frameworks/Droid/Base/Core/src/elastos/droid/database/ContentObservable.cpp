@@ -6,6 +6,8 @@ namespace Elastos {
 namespace Droid {
 namespace Database {
 
+CAR_INTERFACE_IMPL(ContentObservable, Observable, IContentObservable)
+
 ECode ContentObservable::RegisterObserver(
     /* [in] */ IInterface* observer)
 {
