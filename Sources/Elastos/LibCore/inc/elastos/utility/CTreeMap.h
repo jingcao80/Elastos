@@ -930,31 +930,35 @@ public:
          * Returns true if the key is in bounds.
          */
         // @SuppressWarnings("unchecked") // this method throws ClassCastExceptions!
-        CARAPI_(Boolean) IsInBounds(
-            /* [in] */ IInterface* key);
+        CARAPI IsInBounds(
+            /* [in] */ IInterface* key,
+            /* [out] */ Boolean* result);
 
         /**
          * Returns true if the key is in bounds. Use this overload with
          * NO_BOUND to skip bounds checking on either end.
          */
-        CARAPI_(Boolean) IsInBounds(
+        CARAPI IsInBounds(
             /* [in] */ IInterface* key,
             /* [in] */ Bound fromBound,
-            /* [in] */ Bound toBound);
+            /* [in] */ Bound toBound,
+            /* [out] */ Boolean* result);
 
         /**
          * Returns the entry if it is in bounds, or null if it is out of bounds.
          */
-        CARAPI_(AutoPtr<Node>) GetBound(
+        CARAPI GetBound(
             /* [in] */ Node* node,
             /* [in] */ Bound fromBound,
-            /* [in] */ Bound toBound);
+            /* [in] */ Bound toBound,
+            /* [out] */ Node** outnode);
 
         /**
          * @param first true for the first element, false for the last.
          */
-        CARAPI_(AutoPtr<Node>) Endpoint(
-            /* [in] */ Boolean first);
+        CARAPI Endpoint(
+            /* [in] */ Boolean first,
+            /* [out] */ Node** outnode);
 
         /**
          * Performs a find on the underlying tree after constraining it to the
@@ -975,9 +979,10 @@ public:
          *   bound is (A..C]
          *   findBounded(D, LOWER) becomes source.find(C, FLOOR)
          */
-        CARAPI_(AutoPtr<IMapEntry>) FindBounded(
+        CARAPI FindBounded(
             /* [in] */ IInterface* key,
-            /* [in] */ Relation relation);
+            /* [in] */ Relation relation,
+            /* [out] */ IMapEntry** outent);
 
         CARAPI SubMap(
             /* [in] */ IInterface* from,

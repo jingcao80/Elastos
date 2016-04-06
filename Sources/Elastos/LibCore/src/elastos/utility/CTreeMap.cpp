@@ -1825,9 +1825,13 @@ ECode CTreeMap::BoundedMap::BoundedIterator::StepForward(
     *outnode = NULL;
 
     AutoPtr<Node> result;
+    Boolean isinbounds = FALSE;
     FAIL_RETURN(MapIterator::StepForward((Node**)&result));
-    if (mNext != NULL && !mBoundParent->IsInBounds(mNext->mKey, NO_BOUND, mBoundParent->mToBound)) {
-        mNext = NULL;
+    if (mNext != NULL) {
+        FAIL_RETURN(mBoundParent->IsInBounds(mNext->mKey, NO_BOUND, mBoundParent->mToBound, &isinbounds));
+        if (!isinbounds){
+            mNext = NULL;
+        }
     }
     *outnode = result;
     REFCOUNT_ADD(*outnode)
@@ -1841,9 +1845,13 @@ ECode CTreeMap::BoundedMap::BoundedIterator::StepBackward(
     *outnode = NULL;
 
     AutoPtr<Node> result;
+    Boolean isinbounds = FALSE;
     FAIL_RETURN(MapIterator::StepBackward((Node**)&result));
-    if (mNext != NULL && ! mBoundParent->IsInBounds(mNext->mKey, mBoundParent->mFromBound, NO_BOUND)) {
-        mNext = NULL;
+    if (mNext != NULL) {
+        FAIL_RETURN(mBoundParent->IsInBounds(mNext->mKey, mBoundParent->mFromBound, NO_BOUND, &isinbounds));
+        if(!isinbounds){
+            mNext = NULL;
+        }
     }
     *outnode = result;
     REFCOUNT_ADD(*outnode)
@@ -1905,7 +1913,9 @@ ECode CTreeMap::BoundedMap::BoundedEntrySet::GetIterator(
 {
     VALIDATE_NOT_NULL(outiter)
 
-    *outiter = new BoundedEntrySetIterator(mHost->Endpoint(TRUE), mHost);
+    AutoPtr<Node> outnode;
+    FAIL_RETURN(mHost->Endpoint(TRUE, (Node**)&outnode));
+    *outiter = new BoundedEntrySetIterator(outnode, mHost);
     REFCOUNT_ADD(*outiter);
     return NOERROR;
 }
@@ -1925,8 +1935,10 @@ ECode CTreeMap::BoundedMap::BoundedEntrySet::Contains(
     entry->GetKey((IInterface**)&keyface);
 
     AutoPtr<Node> node;
+    Boolean isinbounds = FALSE;
     FAIL_RETURN(mHost->mHost->FindByEntry(entry, (Node**)&node));
-    *value = mHost->IsInBounds(keyface) && node != NULL;
+    FAIL_RETURN(mHost->IsInBounds(keyface, &isinbounds));
+    *value = isinbounds && node != NULL;
     return NOERROR;
 }
 
@@ -1946,7 +1958,9 @@ ECode CTreeMap::BoundedMap::BoundedEntrySet::Remove(
     AutoPtr<ISet> entries;
     mHost->mHost->GetEntrySet((ISet**)&entries);
     Boolean isflag = FALSE;
-    *value = mHost->IsInBounds(keyface) && ((ICollection::Probe(entries))->Remove(entry, &isflag), isflag);
+    Boolean isinbounds = FALSE;
+    FAIL_RETURN(mHost->IsInBounds(keyface, &isinbounds));
+    *value = isinbounds && ((ICollection::Probe(entries))->Remove(entry, &isflag), isflag);
     return NOERROR;
 }
 
@@ -2100,7 +2114,9 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::GetIterator(
 {
     VALIDATE_NOT_NULL(outiter)
 
-    *outiter = new BoundedKeySetIterator(mHost->Endpoint(TRUE), mHost);
+    AutoPtr<Node> outnode;
+    FAIL_RETURN(mHost->Endpoint(TRUE, (Node**)&outnode));
+    *outiter = new BoundedKeySetIterator(outnode, mHost);
     REFCOUNT_ADD(*outiter);;
     return NOERROR;
 }
@@ -2110,7 +2126,9 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::GetDescendingIterator(
 {
     VALIDATE_NOT_NULL(outiter)
 
-    *outiter = new BoundedKeySetIterator(mHost->Endpoint(FALSE), mHost);
+    AutoPtr<Node> outnode;
+    FAIL_RETURN(mHost->Endpoint(FALSE, (Node**)&outnode));
+    *outiter = new BoundedKeySetIterator(outnode, mHost);
     REFCOUNT_ADD(*outiter);;
     return NOERROR;
 }
@@ -2122,7 +2140,9 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::Contains(
     VALIDATE_NOT_NULL(value)
     AutoPtr<Node> node;
     FAIL_RETURN(mHost->mHost->FindByObject(o, (Node**)&node));
-    *value = mHost->IsInBounds(o) && node != NULL;
+    Boolean isinbounds = FALSE;
+    FAIL_RETURN(mHost->IsInBounds(o, &isinbounds));
+    *value = isinbounds && node != NULL;
     return NOERROR;
 }
 
@@ -2133,7 +2153,9 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::Remove(
     VALIDATE_NOT_NULL(value)
     AutoPtr<Node> node;
     FAIL_RETURN(mHost->mHost->RemoveInternalByKey(o, (Node**)&node));
-    *value = mHost->IsInBounds(o) && node != NULL;
+    Boolean isinbounds = FALSE;
+    FAIL_RETURN(mHost->IsInBounds(o, &isinbounds));
+    *value = isinbounds && node != NULL;
     return NOERROR;
 }
 
@@ -2453,7 +2475,9 @@ ECode CTreeMap::BoundedMap::IsEmpty(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = Endpoint(TRUE) == NULL;
+    AutoPtr<Node> outnode;
+    FAIL_RETURN(Endpoint(TRUE, (Node**)&outnode));
+    *result = outnode == NULL;
     return NOERROR;
 }
 
@@ -2464,7 +2488,9 @@ ECode CTreeMap::BoundedMap::Get(
     VALIDATE_NOT_NULL(value)
 
     AutoPtr<IInterface> keyface;
-    *value = IsInBounds(key) ? (mHost->Get(key, (IInterface**)&keyface), keyface) : NULL;
+    Boolean isinbounds = FALSE;
+    FAIL_RETURN(IsInBounds(key, &isinbounds));
+    *value = isinbounds ? (mHost->Get(key, (IInterface**)&keyface), keyface) : NULL;
     REFCOUNT_ADD(*value)
     return NOERROR;
 }
@@ -2476,7 +2502,10 @@ ECode CTreeMap::BoundedMap::ContainsKey(
     VALIDATE_NOT_NULL(result)
 
     Boolean isflag = FALSE;
-    *result = IsInBounds(key) && (mHost->ContainsKey(key, &isflag), isflag);
+    Boolean isinbounds = FALSE;
+    FAIL_RETURN(IsInBounds(key, &isinbounds));
+    FAIL_RETURN(mHost->ContainsKey(key, &isflag));
+    *result = isinbounds && isflag;
     return NOERROR;
 }
 
@@ -2485,7 +2514,9 @@ ECode CTreeMap::BoundedMap::Put(
     /* [in] */ PInterface value,
     /* [out] */ PInterface* oldValue)
 {
-    if (!IsInBounds(key)) {
+    Boolean isinbounds = FALSE;
+    FAIL_RETURN(IsInBounds(key, &isinbounds));
+    if (!isinbounds) {
         if (oldValue) {
             *oldValue = NULL;
         }
@@ -2510,7 +2541,9 @@ ECode CTreeMap::BoundedMap::Remove(
     VALIDATE_NOT_NULL(value)
 
     AutoPtr<IInterface> res;
-    *value = IsInBounds(key) ? (mHost->Remove(key, (IInterface**)&res), res) : NULL;
+    Boolean isinbounds = FALSE;
+    FAIL_RETURN(IsInBounds(key, &isinbounds));
+    *value = isinbounds ? (mHost->Remove(key, (IInterface**)&res), res) : NULL;
     REFCOUNT_ADD(*value)
     return NOERROR;
 }
@@ -2522,51 +2555,74 @@ ECode CTreeMap::BoundedMap::Remove(
     return Remove(key, (IInterface**)&obj);
 }
 
-Boolean CTreeMap::BoundedMap::IsInBounds(
-    /* [in] */ IInterface* key)
+ECode CTreeMap::BoundedMap::IsInBounds(
+    /* [in] */ IInterface* key,
+    /* [out] */ Boolean* result)
 {
-    return IsInBounds(key, mFromBound, mToBound);
+    return IsInBounds(key, mFromBound, mToBound, result);
 }
 
-Boolean CTreeMap::BoundedMap::IsInBounds(
+ECode CTreeMap::BoundedMap::IsInBounds(
     /* [in] */ IInterface* key,
     /* [in] */ Bound fromBound,
-    /* [in] */ Bound toBound)
+    /* [in] */ Bound toBound,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     Int32 comvalue = 0;
     if (fromBound == INCLUSIVE) {
-        if ((mHost->mComparator->Compare(key, mFrom, &comvalue), comvalue) < 0) {
-            return FALSE; // less than from
+        FAIL_RETURN(mHost->mComparator->Compare(key, mFrom, &comvalue));
+        if (comvalue < 0) {
+            *result = FALSE;
+            return NOERROR; // less than from
         }
     }
     else if (fromBound == EXCLUSIVE) {
-        if ((mHost->mComparator->Compare(key, mFrom, &comvalue), comvalue) <= 0) {
-            return FALSE; // less than or equal to from
+        FAIL_RETURN(mHost->mComparator->Compare(key, mFrom, &comvalue));
+        if (comvalue <= 0) {
+            *result = FALSE;
+            return NOERROR; // less than or equal to from
         }
     }
 
     if (toBound == INCLUSIVE) {
-        if ((mHost->mComparator->Compare(key, mTo, &comvalue), comvalue) > 0) {
-            return FALSE; // greater than 'to'
+        FAIL_RETURN(mHost->mComparator->Compare(key, mTo, &comvalue));
+        if (comvalue > 0) {
+            *result = FALSE;
+            return NOERROR; // greater than 'to'
         }
     }
     else if (toBound == EXCLUSIVE) {
-        if ((mHost->mComparator->Compare(key, mTo, &comvalue), comvalue) >= 0) {
-            return FALSE; // greater than or equal to 'to'
+        FAIL_RETURN(mHost->mComparator->Compare(key, mTo, &comvalue));
+        if (comvalue >= 0) {
+            *result = FALSE;
+            return NOERROR; // greater than or equal to 'to'
         }
     }
 
-    return TRUE;
+    *result = TRUE;
+    return NOERROR;
 }
 
-AutoPtr<CTreeMap::Node> CTreeMap::BoundedMap::GetBound(
+ECode CTreeMap::BoundedMap::GetBound(
     /* [in] */ Node* node,
     /* [in] */ Bound fromBound,
-    /* [in] */ Bound toBound)
+    /* [in] */ Bound toBound,
+    /* [out] */ Node** outnode)
 {
     AutoPtr<IInterface> keyface;
-    AutoPtr<Node> res = node != NULL && IsInBounds((node->GetKey((IInterface**)&keyface), keyface), fromBound, toBound) ? node : NULL;
-    return res;
+    AutoPtr<Node> res = NULL;
+    Boolean isinbounds = FALSE;
+    if (node != NULL){
+        FAIL_RETURN(IsInBounds((node->GetKey((IInterface**)&keyface), keyface), fromBound, toBound, &isinbounds));
+        if (isinbounds){
+            res = node;
+        }
+    }
+    *outnode = res;
+    REFCOUNT_ADD(*outnode)
+    return NOERROR;
 }
 
 ECode CTreeMap::BoundedMap::GetFirstEntry(
@@ -2574,7 +2630,8 @@ ECode CTreeMap::BoundedMap::GetFirstEntry(
 {
     VALIDATE_NOT_NULL(outent)
 
-    AutoPtr<Node> res = Endpoint(TRUE);
+    AutoPtr<Node> res;
+    FAIL_RETURN(Endpoint(TRUE, (Node**)&res));
     AutoPtr<SimpleImmutableEntry> res2 = mHost->ImmutableCopy((IMapEntry*)res.Get());
     *outent = (IMapEntry*)res2.Get();
     REFCOUNT_ADD(*outent)
@@ -2584,7 +2641,8 @@ ECode CTreeMap::BoundedMap::GetFirstEntry(
 ECode CTreeMap::BoundedMap::PollFirstEntry(
     /* [out] */ IMapEntry** outent)
 {
-    AutoPtr<Node> result = Endpoint(TRUE);
+    AutoPtr<Node> result;
+    FAIL_RETURN(Endpoint(TRUE, (Node**)&result));
     if (result != NULL) {
         mHost->RemoveInternal(result);
     }
@@ -2599,11 +2657,14 @@ ECode CTreeMap::BoundedMap::GetFirstKey(
 {
     VALIDATE_NOT_NULL(outface)
 
-    AutoPtr<IMapEntry> entry = Endpoint(TRUE);
-    if (entry == NULL) {
+    AutoPtr<Node> outnode;
+    AutoPtr<IMapEntry> entry;
+    FAIL_RETURN(Endpoint(TRUE, (Node**)&outnode));
+    if (outnode == NULL) {
         // throw new NoSuchElementException();
         return E_NO_SUCH_ELEMENT_EXCEPTION;
     }
+    entry = (IMapEntry*)outnode.Get();
     return entry->GetKey(outface);
 }
 
@@ -2612,7 +2673,8 @@ ECode CTreeMap::BoundedMap::GetLastEntry(
 {
     VALIDATE_NOT_NULL(outent)
 
-    AutoPtr<Node> res = Endpoint(FALSE);
+    AutoPtr<Node> res;
+    FAIL_RETURN(Endpoint(FALSE, (Node**)&res));
     AutoPtr<SimpleImmutableEntry> res2 = mHost->ImmutableCopy((IMapEntry*)res.Get());
     *outent = (IMapEntry*)res2.Get();
     REFCOUNT_ADD(*outent)
@@ -2624,7 +2686,8 @@ ECode CTreeMap::BoundedMap::PollLastEntry(
 {
     VALIDATE_NOT_NULL(outent)
 
-    AutoPtr<Node> result = Endpoint(FALSE);
+    AutoPtr<Node> result;
+    FAIL_RETURN(Endpoint(FALSE, (Node**)&result));
     if (result != NULL) {
         mHost->RemoveInternal(result);
     }
@@ -2639,16 +2702,20 @@ ECode CTreeMap::BoundedMap::GetLastKey(
 {
     VALIDATE_NOT_NULL(outface)
 
-    AutoPtr<IMapEntry> entry = Endpoint(FALSE);
-    if (entry == NULL) {
+    AutoPtr<Node> outnode;
+    AutoPtr<IMapEntry> entry;
+    FAIL_RETURN(Endpoint(FALSE, (Node**)&outnode));
+    if (outnode == NULL) {
         // throw new NoSuchElementException();
         return E_NO_SUCH_ELEMENT_EXCEPTION;
     }
+    entry = (IMapEntry*)outnode.Get();
     return entry->GetKey(outface);
 }
 
-AutoPtr<CTreeMap::Node> CTreeMap::BoundedMap::Endpoint(
-    /* [in] */ Boolean first)
+ECode CTreeMap::BoundedMap::Endpoint(
+    /* [in] */ Boolean first,
+    /* [out] */ Node** outnode)
 {
     AutoPtr<Node> node;
     if (mAscending == first) {
@@ -2657,16 +2724,20 @@ AutoPtr<CTreeMap::Node> CTreeMap::BoundedMap::Endpoint(
                 node = mHost->mRoot == NULL ? NULL : mHost->mRoot->GetFirst();
                 break;
             case INCLUSIVE:
-                mHost->Find(mFrom, CEILING, (Node**)&node);
+                FAIL_RETURN(mHost->Find(mFrom, CEILING, (Node**)&node));
                 break;
             case EXCLUSIVE:
-                mHost->Find(mFrom, HIGHER, (Node**)&node);
+                FAIL_RETURN(mHost->Find(mFrom, HIGHER, (Node**)&node));
                 break;
             default:
                 // throw new AssertionError();
-                return NULL;
+                *outnode = NULL;
+                return NOERROR;
         }
-        return GetBound(node, NO_BOUND, mToBound);
+        FAIL_RETURN(GetBound(node, NO_BOUND, mToBound, (Node**)&node));
+        *outnode = node;
+        REFCOUNT_ADD(*outnode)
+        return NOERROR;
     }
     else {
         switch (mToBound) {
@@ -2674,22 +2745,27 @@ AutoPtr<CTreeMap::Node> CTreeMap::BoundedMap::Endpoint(
                 node = mHost->mRoot == NULL ? NULL : mHost->mRoot->GetLast();
                 break;
             case INCLUSIVE:
-                mHost->Find(mTo, FLOOR, (Node**)&node);
+                FAIL_RETURN(mHost->Find(mTo, FLOOR, (Node**)&node));
                 break;
             case EXCLUSIVE:
-                mHost->Find(mTo, LOWER, (Node**)&node);
+                FAIL_RETURN(mHost->Find(mTo, LOWER, (Node**)&node));
                 break;
             default:
                 // throw new AssertionError();
-                return NULL;
+                *outnode = NULL;
+                return NOERROR;
         }
-        return GetBound(node, mFromBound, NO_BOUND);
+        FAIL_RETURN(GetBound(node, mFromBound, NO_BOUND, (Node**)&node));
+        *outnode = node;
+        REFCOUNT_ADD(*outnode)
+        return NOERROR;
     }
 }
 
-AutoPtr<IMapEntry> CTreeMap::BoundedMap::FindBounded(
+ECode CTreeMap::BoundedMap::FindBounded(
     /* [in] */ IInterface* key,
-    /* [in] */ Relation relation)
+    /* [in] */ Relation relation,
+    /* [out] */ IMapEntry** outent)
 {
     relation = mHost->ForOrder(mAscending, relation);
     Bound fromBoundForCheck = mFromBound;
@@ -2697,7 +2773,7 @@ AutoPtr<IMapEntry> CTreeMap::BoundedMap::FindBounded(
 
     if (mToBound != NO_BOUND && (relation == LOWER || relation == FLOOR)) {
         Int32 comparison = 0;
-        mHost->mComparator->Compare(mTo, key, &comparison);
+        FAIL_RETURN(mHost->mComparator->Compare(mTo, key, &comparison));
         if (comparison <= 0) {
             key = mTo;
             if (mToBound == EXCLUSIVE) {
@@ -2712,7 +2788,7 @@ AutoPtr<IMapEntry> CTreeMap::BoundedMap::FindBounded(
 
     if (mFromBound != NO_BOUND && (relation == CEILING || relation == HIGHER)) {
         Int32 comparison = 0;
-        mHost->mComparator->Compare(mFrom, key, &comparison);
+        FAIL_RETURN(mHost->mComparator->Compare(mFrom, key, &comparison));
         if (comparison >= 0) {
             key = mFrom;
             if (mFromBound == EXCLUSIVE) {
@@ -2726,8 +2802,12 @@ AutoPtr<IMapEntry> CTreeMap::BoundedMap::FindBounded(
     }
 
     AutoPtr<Node> nodfind;
-    mHost->Find(key, relation, (Node**)&nodfind);
-    return GetBound(nodfind, fromBoundForCheck, toBoundForCheck);
+    AutoPtr<Node> outnode;
+    FAIL_RETURN(mHost->Find(key, relation, (Node**)&nodfind));
+    FAIL_RETURN(GetBound(nodfind, fromBoundForCheck, toBoundForCheck, (Node**)&outnode));
+    *outent = (IMapEntry*)outnode.Get();
+    REFCOUNT_ADD(*outent)
+    return NOERROR;
 }
 
 ECode CTreeMap::BoundedMap::GetLowerEntry(
@@ -2736,7 +2816,8 @@ ECode CTreeMap::BoundedMap::GetLowerEntry(
 {
     VALIDATE_NOT_NULL(outent)
 
-    AutoPtr<IMapEntry> findentry = FindBounded(key, LOWER);
+    AutoPtr<IMapEntry> findentry;
+    FAIL_RETURN(FindBounded(key, LOWER, (IMapEntry**)&findentry));
     AutoPtr<SimpleImmutableEntry> res = mHost->ImmutableCopy(findentry);
     *outent = (IMapEntry*)res.Get();
     REFCOUNT_ADD(*outent)
@@ -2749,7 +2830,8 @@ ECode CTreeMap::BoundedMap::GetLowerKey(
 {
     VALIDATE_NOT_NULL(outface)
 
-    AutoPtr<IMapEntry> entry = FindBounded(key, LOWER);
+    AutoPtr<IMapEntry> entry;
+    FAIL_RETURN(FindBounded(key, LOWER, (IMapEntry**)&entry));
     AutoPtr<IInterface> res;
     *outface = entry != NULL ? (entry->GetKey((IInterface**)&res), res) : NULL;
     REFCOUNT_ADD(*outface)
@@ -2762,7 +2844,8 @@ ECode CTreeMap::BoundedMap::GetFloorEntry(
 {
     VALIDATE_NOT_NULL(outent)
 
-    AutoPtr<IMapEntry> res = FindBounded(key, FLOOR);
+    AutoPtr<IMapEntry> res;
+    FAIL_RETURN(FindBounded(key, FLOOR, (IMapEntry**)&res));
     AutoPtr<SimpleImmutableEntry> res2 = mHost->ImmutableCopy(res);
     *outent = (IMapEntry*)res.Get();
     REFCOUNT_ADD(*outent)
@@ -2775,7 +2858,8 @@ ECode CTreeMap::BoundedMap::GetFloorKey(
 {
     VALIDATE_NOT_NULL(outface)
 
-    AutoPtr<IMapEntry> entry = FindBounded(key, FLOOR);
+    AutoPtr<IMapEntry> entry;
+    FAIL_RETURN(FindBounded(key, FLOOR, (IMapEntry**)&entry));
     AutoPtr<IInterface> res;
     *outface = entry != NULL ? (entry->GetKey((IInterface**)&res), res) : NULL;
     REFCOUNT_ADD(*outface)
@@ -2788,7 +2872,8 @@ ECode CTreeMap::BoundedMap::GetCeilingEntry(
 {
     VALIDATE_NOT_NULL(outent)
 
-    AutoPtr<IMapEntry> res = FindBounded(key, CEILING);
+    AutoPtr<IMapEntry> res;
+    FAIL_RETURN(FindBounded(key, CEILING, (IMapEntry**)&res));
     AutoPtr<SimpleImmutableEntry> res2 = mHost->ImmutableCopy(res);
     *outent = (IMapEntry*)res.Get();
     REFCOUNT_ADD(*outent)
@@ -2801,7 +2886,8 @@ ECode CTreeMap::BoundedMap::GetCeilingKey(
 {
     VALIDATE_NOT_NULL(outface)
 
-    AutoPtr<IMapEntry> entry = FindBounded(key, CEILING);
+    AutoPtr<IMapEntry> entry;
+    FAIL_RETURN(FindBounded(key, CEILING, (IMapEntry**)&entry));
     AutoPtr<IInterface> res;
     *outface = entry != NULL ? (entry->GetKey((IInterface**)&res), res) : NULL;
     REFCOUNT_ADD(*outface)
@@ -2814,7 +2900,8 @@ ECode CTreeMap::BoundedMap::GetHigherEntry(
 {
     VALIDATE_NOT_NULL(outent)
 
-    AutoPtr<IMapEntry> entry = FindBounded(key, HIGHER);
+    AutoPtr<IMapEntry> entry;
+    FAIL_RETURN(FindBounded(key, HIGHER, (IMapEntry**)&entry));
     AutoPtr<SimpleImmutableEntry> res = mHost->ImmutableCopy(entry);
     *outent = (IMapEntry*)res.Get();
     REFCOUNT_ADD(*outent)
@@ -2827,7 +2914,8 @@ ECode CTreeMap::BoundedMap::GetHigherKey(
 {
     VALIDATE_NOT_NULL(outface)
 
-    AutoPtr<IMapEntry> entry = FindBounded(key, HIGHER);
+    AutoPtr<IMapEntry> entry;
+    FAIL_RETURN(FindBounded(key, HIGHER, (IMapEntry**)&entry));
     AutoPtr<IInterface> res;
     *outface = entry != NULL ? (entry->GetKey((IInterface**)&res), res) : NULL;
     REFCOUNT_ADD(*outface)
@@ -3029,6 +3117,7 @@ ECode CTreeMap::BoundedMap::SubMap(
      * If both the current and requested bounds are exclusive, the isInBounds check must be
      * inclusive. For example, to create (C..F) from (A..F), the bound 'F' is in bounds.
      */
+    Boolean isinbounds = FALSE;
 
     if (fromBound == NO_BOUND) {
         from = mFrom;
@@ -3036,7 +3125,9 @@ ECode CTreeMap::BoundedMap::SubMap(
     }
     else {
         Bound fromBoundToCheck = fromBound == mFromBound ? INCLUSIVE : mFromBound;
-        if (!IsInBounds(from, fromBoundToCheck, mToBound)) {
+
+        FAIL_RETURN(IsInBounds(from, fromBoundToCheck, mToBound, &isinbounds))
+        if (!isinbounds) {
             // throw outOfBounds(to, fromBoundToCheck, this.toBound);
             return OutOfBounds(from, fromBoundToCheck, mToBound);
         }
@@ -3048,7 +3139,8 @@ ECode CTreeMap::BoundedMap::SubMap(
     }
     else {
         Bound toBoundToCheck = toBound == mToBound ? INCLUSIVE : mToBound;
-        if (!IsInBounds(to, mFromBound, toBoundToCheck)) {
+        FAIL_RETURN(IsInBounds(to, mFromBound, toBoundToCheck, &isinbounds));
+        if (!isinbounds) {
             // throw outOfBounds(to, this.fromBound, toBoundToCheck);
             return OutOfBounds(to, mFromBound, toBoundToCheck);
         }
