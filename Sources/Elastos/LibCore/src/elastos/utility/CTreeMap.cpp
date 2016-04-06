@@ -164,10 +164,10 @@ ECode CTreeMap::Get(
 {
     VALIDATE_NOT_NULL(value)
 
-    AutoPtr<IMapEntry> entry;
-    FAIL_RETURN(FindByObject(key, (Node**)&entry));
+    AutoPtr<Node> outnode;
+    FAIL_RETURN(FindByObject(key, (Node**)&outnode));
     AutoPtr<IInterface> valueface;
-    *value = entry != NULL ? (entry->GetValue((IInterface**)&valueface), valueface) : NULL;
+    *value = outnode != NULL ? (outnode->GetValue((IInterface**)&valueface), valueface) : NULL;
     REFCOUNT_ADD(*value)
     return NOERROR;
 }
@@ -178,9 +178,9 @@ ECode CTreeMap::ContainsKey(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IMapEntry> entry;
-    FAIL_RETURN(FindByObject(key, (Node**)&entry));
-    if (NULL != entry) *result = TRUE;
+    AutoPtr<Node> outnode;
+    FAIL_RETURN(FindByObject(key, (Node**)&outnode));
+    if (NULL != outnode) *result = TRUE;
     else *result = FALSE;
     return NOERROR;
 }
