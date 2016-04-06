@@ -87,25 +87,25 @@ public:
         /* [in] */ const String& packageName,
         /* [out] */ Int32* result);
 
-    static Int32 StringToControl(
+    static CARAPI_(Int32) StringToControl(
         /* [in] */ const String& show);
 
 private:
-    void ReadDefaultPolicy(
+    CARAPI_(void) ReadDefaultPolicy(
         /* [in] */ IXmlPullParser* parser,
         /* [in] */ String packageName);
 
-    void ReadApplicationPolicy(
+    CARAPI_(void) ReadApplicationPolicy(
         /* [in] */ IXmlPullParser* parser);
 
-    void ReadPkgPolicy(
+    CARAPI_(void) ReadPkgPolicy(
         /* [in] */ IXmlPullParser* parser);
 
-    void ReadOpPolicy(
+    CARAPI_(void) ReadOpPolicy(
         /* [in] */ IXmlPullParser* parser,
         /* [in] */ PolicyPkg* pkg);
 
-    String GetAppType(
+    CARAPI_(String) GetAppType(
         /* [in] */ String packageName);
 
 public:

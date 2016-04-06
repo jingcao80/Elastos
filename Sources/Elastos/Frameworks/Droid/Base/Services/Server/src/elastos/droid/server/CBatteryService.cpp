@@ -45,6 +45,8 @@ using Elastos::Droid::Os::EIID_IIBatteryPropertiesListener;
 using Elastos::Droid::Os::EIID_IBatteryManagerInternal;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::CSettingsSystem;
 using Elastos::Droid::Server::Am::CBatteryStatsService;
 using Elastos::Droid::Server::Lights::LightsManager;
 using Elastos::Droid::Server::Lights::EIID_ILightsManager;
@@ -89,6 +91,7 @@ ECode CBatteryService::BootPhaseContentObserver::OnChange(
 ECode CBatteryService::ShutdownIfNoPowerLockedRunnable::Run()
 {
     if (ActivityManagerNative::IsSystemReady()) {
+        Slogger::E(TAG, "silent_reboot shutdownIfNoPowerLocked");
         AutoPtr<IIntent> intent;
         CIntent::New(IIntent::ACTION_REQUEST_SHUTDOWN, (IIntent**)&intent);
         intent->PutBooleanExtra(IIntent::EXTRA_KEY_CONFIRM, FALSE);
@@ -108,6 +111,7 @@ ECode CBatteryService::ShutdownIfNoPowerLockedRunnable::Run()
 ECode CBatteryService::ShutdownIfOverTempRunnable::Run()
 {
     if (ActivityManagerNative::IsSystemReady()) {
+        Slogger::E(TAG, "silent_reboot shutdownIfOverTempLocked");
         AutoPtr<ISystemProperties> sysProp;
         CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
         AutoPtr<IIntent> intent;
@@ -233,38 +237,54 @@ CBatteryService::Led::Led(
 
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
-    res->GetInteger(R::integer::config_notificationsBatteryLowARGB, &mBatteryLowARGB);
-    res->GetInteger(R::integer::config_notificationsBatteryMediumARGB, &mBatteryMediumARGB);
-    res->GetInteger(R::integer::config_notificationsBatteryFullARGB, &mBatteryFullARGB);
+
+    // Does the Device support changing battery LED colors?
+    res->GetBoolean(
+            R::bool_::config_multiColorBatteryLed, &(mHost->mMultiColorLed));
+
     res->GetInteger(R::integer::config_notificationsBatteryLedOn, &mBatteryLedOn);
     res->GetInteger(R::integer::config_notificationsBatteryLedOff, &mBatteryLedOff);
 }
 
 ECode CBatteryService::Led::UpdateLightsLocked()
 {
-    Int32 level, status;
+    // mBatteryProps could be null on startup (called by SettingsObserver)
+    if (mHost->mBatteryProps == NULL) {
+        Slogger::W(TAG, "updateLightsLocked: mBatteryProps is null; skipping");
+        return NOERROR;
+    }
+
+    Int32 level = 0, status = 0;
     mHost->mBatteryProps->GetBatteryLevel(&level);
     mHost->mBatteryProps->GetBatteryStatus(&status);
-    if (level < mHost->mLowBatteryWarningLevel) {
+    if (!(mHost->mLightEnabled)) {
+        // No lights if explicitly disabled
+        mBatteryLight->TurnOff();
+    }
+    else if (level < mHost->mLowBatteryWarningLevel) {
         if (status == IBatteryManager::BATTERY_STATUS_CHARGING) {
-            // Solid red when battery is charging
-            mBatteryLight->SetColor(mBatteryLowARGB);
+            // Battery is charging and low
+            mBatteryLight->SetColor(mHost->mBatteryLowARGB);
+        }
+        else if (mHost->mLedPulseEnabled) {
+            // Battery is low and not charging
+            mBatteryLight->SetFlashing(mHost->mBatteryLowARGB, Light::LIGHT_FLASH_TIMED,
+                    mBatteryLedOn, mBatteryLedOff);
         }
         else {
-            // Flash red when battery is low and not charging
-            mBatteryLight->SetFlashing(mBatteryLowARGB, Light::LIGHT_FLASH_TIMED,
-                    mBatteryLedOn, mBatteryLedOff);
+            // "Pulse low battery light" is disabled, no lights.
+            mBatteryLight->TurnOff();
         }
     }
     else if (status == IBatteryManager::BATTERY_STATUS_CHARGING
             || status == IBatteryManager::BATTERY_STATUS_FULL) {
         if (status == IBatteryManager::BATTERY_STATUS_FULL || level >= 90) {
-            // Solid green when full or charging and nearly full
-            mBatteryLight->SetColor(mBatteryFullARGB);
+            // Battery is full or charging and nearly full
+            mBatteryLight->SetColor(mHost->mBatteryFullARGB);
         }
         else {
-            // Solid orange when charging and halfway full
-            mBatteryLight->SetColor(mBatteryMediumARGB);
+            // Battery is charging and halfway full
+            mBatteryLight->SetColor(mHost->mBatteryMediumARGB);
         }
     }
     else {
@@ -415,6 +435,114 @@ ECode CBatteryService::LocalService::GetInvalidCharger(
     return NOERROR;
 }
 
+//=====================================================================
+// CBatteryService::SettingsObserver::
+//=====================================================================
+CBatteryService::SettingsObserver::SettingsObserver(
+    /* [in] */ CBatteryService* host)
+    : mHost(host)
+{}
+
+ECode CBatteryService::SettingsObserver::constructor(
+    /* [in] */ IHandler* handler)
+{
+    return ContentObserver::constructor(handler);
+}
+
+ECode CBatteryService::SettingsObserver::Observe()
+{
+    AutoPtr<IContentResolver> resolver;
+    mHost->mContext->GetContentResolver((IContentResolver**)&resolver);
+
+    AutoPtr<ISettingsSystem> settingsSys;
+    CSettingsSystem::AcquireSingleton((ISettingsSystem**)&settingsSys);
+    // Battery light enabled
+    AutoPtr<IUri> lEnable;
+    settingsSys->GetUriFor(
+            ISettingsSystem::BATTERY_LIGHT_ENABLED, (IUri**)&lEnable);
+    resolver->RegisterContentObserver(lEnable, FALSE, this, IUserHandle::USER_ALL);
+
+    // Low battery pulse
+    AutoPtr<IUri> lPulse;
+    settingsSys->GetUriFor(
+            ISettingsSystem::BATTERY_LIGHT_PULSE, (IUri**)&lPulse);
+    resolver->RegisterContentObserver(lPulse, FALSE, this, IUserHandle::USER_ALL);
+
+    // Light colors
+    if (mHost->mMultiColorLed) {
+        // Register observer if we have a multi color led
+        AutoPtr<IUri> low_color;
+        settingsSys->GetUriFor(ISettingsSystem::BATTERY_LIGHT_LOW_COLOR, (IUri**)&low_color);
+        resolver->RegisterContentObserver(
+                low_color,
+                FALSE, this, IUserHandle::USER_ALL);
+        AutoPtr<IUri> med_color;
+        settingsSys->GetUriFor(ISettingsSystem::BATTERY_LIGHT_MEDIUM_COLOR, (IUri**)&med_color);
+        resolver->RegisterContentObserver(
+                med_color,
+                FALSE, this, IUserHandle::USER_ALL);
+        AutoPtr<IUri> ful_color;
+        settingsSys->GetUriFor(ISettingsSystem::BATTERY_LIGHT_FULL_COLOR, (IUri**)&ful_color);
+        resolver->RegisterContentObserver(
+                ful_color,
+                FALSE, this, IUserHandle::USER_ALL);
+    }
+
+    Update();
+    return NOERROR;
+}
+
+ECode CBatteryService::SettingsObserver::OnChange(
+    /* [in] */ Boolean selfChange)
+{
+    Update();
+    return NOERROR;
+}
+
+ECode CBatteryService::SettingsObserver::Update()
+{
+    AutoPtr<IContentResolver> resolver;
+    mHost->mContext->GetContentResolver((IContentResolver**)&resolver);
+    AutoPtr<IResources> res;
+    mHost->mContext->GetResources((IResources**)&res);
+
+    AutoPtr<ISettingsSystem> settingsSys;
+    CSettingsSystem::AcquireSingleton((ISettingsSystem**)&settingsSys);
+
+    // Battery light enabled
+    Int32 light_enabled = 0;
+    settingsSys->GetInt32(resolver,
+            ISettingsSystem::BATTERY_LIGHT_ENABLED, 1, &light_enabled);
+    mHost->mLightEnabled = light_enabled != 0;
+
+    // Low battery pulse
+    Int32 light_pulse = 0;
+    settingsSys->GetInt32(resolver,
+                ISettingsSystem::BATTERY_LIGHT_PULSE, 1, &light_pulse);
+    mHost->mLedPulseEnabled = light_pulse != 0;
+
+    // Light colors
+    Int32 res_low = 0;
+    res->GetInteger(
+        R::integer::config_notificationsBatteryLowARGB, &res_low);
+    settingsSys->GetInt32(resolver,
+            ISettingsSystem::BATTERY_LIGHT_LOW_COLOR, res_low, &(mHost->mBatteryLowARGB));
+
+    Int32 res_medium = 0;
+    res->GetInteger(
+            R::integer::config_notificationsBatteryMediumARGB, &res_medium);
+    settingsSys->GetInt32(resolver,
+            ISettingsSystem::BATTERY_LIGHT_MEDIUM_COLOR, res_medium, &(mHost->mBatteryMediumARGB));
+
+    Int32 res_full = 0;
+    res->GetInteger(
+            R::integer::config_notificationsBatteryFullARGB, &res_full);
+    settingsSys->GetInt32(resolver,
+            ISettingsSystem::BATTERY_LIGHT_FULL_COLOR, res_full, &(mHost->mBatteryFullARGB));
+
+    mHost->UpdateLedPulse();
+    return NOERROR;
+}
 
 //=====================================================================
 // CBatteryService
@@ -458,6 +586,9 @@ CBatteryService::CBatteryService()
     , mDischargeStartTime(0)
     , mDischargeStartLevel(0)
     , mUpdatesStopped(FALSE)
+    , mLightEnabled(FALSE)
+    , mLedPulseEnabled(FALSE)
+    , mMultiColorLed(FALSE)
     , mSentLowBatteryBroadcast(FALSE)
 {
     mInvalidChargerObserver = new InvalidChargerObserver(this);
@@ -541,6 +672,13 @@ ECode CBatteryService::OnBootPhase(
                 FALSE, (ContentObserver*)obs.Get(), UserHandle::USER_ALL);
             UpdateBatteryWarningLevelLocked();
         }
+    }
+    else if (phase == PHASE_BOOT_COMPLETED) {
+        AutoPtr<IHandler> h;
+        CHandler::New((IHandler**)&h);
+        AutoPtr<SettingsObserver> observer = new SettingsObserver(this);
+        observer->constructor(h);
+        observer->Observe();
     }
     return NOERROR;
 }
@@ -1090,6 +1228,10 @@ ECode CBatteryService::DumpInternal(
     return NOERROR;
 }
 
+void CBatteryService::UpdateLedPulse()
+{
+    mLed->UpdateLightsLocked();
+}
 
 } // namespace Server
 } // namespace Droid

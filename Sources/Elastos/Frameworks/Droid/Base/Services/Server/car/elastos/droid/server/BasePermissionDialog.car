@@ -1,0 +1,27 @@
+module
+{
+    interface Elastos.Droid.View.IKeyEvent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.App.IDialog
+     * interface Elastos.Droid.App.IDialogInterface
+     * interface Elastos.Droid.App.IAlertDialog
+     */
+    interface IBasePermissionDialog {
+
+        OnStart();
+
+        DispatchKeyEvent(
+            [in] IKeyEvent* event,
+            [out] Boolean* result);
+    }
+
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

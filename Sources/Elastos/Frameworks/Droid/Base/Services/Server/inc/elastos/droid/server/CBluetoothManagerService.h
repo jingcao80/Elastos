@@ -192,10 +192,8 @@ public:
         /* [in] */ IIQBluetoothManagerCallback* qbmcallback,
         /* [out] */ IIQBluetooth** qBluetooth);
 
-
     CARAPI UnregisterQAdapter(
         /* [in] */ IIQBluetoothManagerCallback* qbmcallback);
-
 
     CARAPI Enable(
         /* [in] */ const String& callingPackage,
@@ -232,6 +230,16 @@ private:
 
     CARAPI_(void) SendBluetoothServiceDownCallback();
 
+    /**
+     * Inform QBluetoothAdapter instances that QAdapter service is up
+     */
+    CARAPI_(void) SendQBluetoothServiceUpCallback();
+
+    /**
+     * Inform BluetoothAdapter instances that Adapter service is down
+     */
+    CARAPI_(void) SendQBluetoothServiceDownCallback();
+
     CARAPI_(void) HandleEnable(
         /* [in] */ Boolean quietMode);
 
@@ -251,7 +259,8 @@ private:
 
     CARAPI_(Boolean) WaitForOnOff(
         /* [in] */ Boolean on,
-        /* [in] */ Boolean off);
+        /* [in] */ Boolean off,
+        /* [in] */ Int32 loop);
 
     CARAPI_(void) SendDisableMsg();
 
@@ -283,6 +292,8 @@ private:
     static const Int32 MESSAGE_DISABLE;// = 2;
     static const Int32 MESSAGE_REGISTER_ADAPTER;// = 20;
     static const Int32 MESSAGE_UNREGISTER_ADAPTER;// = 21;
+    static const Int32 MESSAGE_REGISTER_Q_ADAPTER;// = 22;
+    static const Int32 MESSAGE_UNREGISTER_Q_ADAPTER;// = 23;
     static const Int32 MESSAGE_REGISTER_STATE_CHANGE_CALLBACK;// = 30;
     static const Int32 MESSAGE_UNREGISTER_STATE_CHANGE_CALLBACK;// = 31;
     static const Int32 MESSAGE_BLUETOOTH_SERVICE_CONNECTED;// = 40;
@@ -296,6 +307,9 @@ private:
     static const Int32 MESSAGE_USER_SWITCHED;// = 300;
     static const Int32 MAX_SAVE_RETRIES;//=3;
     static const Int32 MAX_ERROR_RESTART_RETRIES;//=6;
+    static const Int32 WAIT_NORMAL;// = 10;
+    static const Int32 WAIT_USERSWITCH;// = 30;
+
     // Bluetooth persisted setting is off
     static const Int32 BLUETOOTH_OFF;//=0;
     // Bluetooth persisted setting is on
@@ -308,6 +322,7 @@ private:
 
     static const Int32 SERVICE_IBLUETOOTH;
     static const Int32 SERVICE_IBLUETOOTHGATT;
+    static const Int32 SERVICE_IBLUETOOTHQ;
 
     AutoPtr<IContext> mContext;
 
@@ -317,8 +332,10 @@ private:
     String mName;
     AutoPtr<IContentResolver> mContentResolver;
     AutoPtr<IRemoteCallbackList> mCallbacks; // RemoteCallbackList<IBluetoothManagerCallback>
+    AutoPtr<IRemoteCallbackList> mQCallbacks; // RemoteCallbackList<IQBluetoothManagerCallback>
     AutoPtr<IRemoteCallbackList> mStateChangeCallbacks; // RemoteCallbackList<IBluetoothStateChangeCallback>
     AutoPtr<IIBluetooth> mBluetooth;
+    AutoPtr<IIQBluetooth> mQBluetooth;
     AutoPtr<IIBluetoothGatt> mBluetoothGatt;
     Boolean mBinding;
     Boolean mUnbinding;
@@ -337,6 +354,7 @@ private:
     AutoPtr<BluetoothHandler> mHandler;
     Int32 mErrorRecoveryRetryCounter;
     Int32 mSystemUiUid;
+    Boolean mIsBluetoothServiceConnected;
 
     AutoPtr<BluetoothServiceConnection> mConnection;// = new BluetoothServiceConnection();
     AutoPtr<IIBluetoothCallback> mBluetoothCallback;

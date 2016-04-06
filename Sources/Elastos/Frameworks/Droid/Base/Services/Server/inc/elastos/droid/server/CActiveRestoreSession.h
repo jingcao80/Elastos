@@ -7,6 +7,7 @@
 #include "CBackupManagerService.h"
 
 using Elastos::Droid::Server::CBackupManagerService;
+
 namespace Elastos {
 namespace Droid {
 namespace Server {
@@ -145,4 +146,5 @@ private:
 } //namespace Server
 } //namespace Droid
 } //namespace Elastos
-#endif //__CATIVERESTORESESSION_H__
+
+#endif //__ELASTOS_DROID_SERVER_CACTIVERESTORESESSION_H__

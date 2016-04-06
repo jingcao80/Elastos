@@ -2,6 +2,7 @@
 module
 {
     merge("AppOpsPolicy.car");
+    merge("BasePermissionDialog.car");
     merge("Exceptions.car");
     merge("SystemServer.car");
     merge("SystemService.car");
@@ -128,6 +129,8 @@ module
     using interface Elastos.Droid.App.IStopUserCallback;
     using interface Elastos.Droid.App.IWallpaperInfo;
     using interface Elastos.Droid.App.IPendingIntentOnFinished;
+    using interface Elastos.Droid.App.IAlertDialog;
+    using interface Elastos.Droid.App.IDialog;
     //using interface Elastos.Droid.App.Admin.IIDevicePolicyManager;
     using interface Elastos.Droid.App.Job.IJobService;
     using interface Elastos.Droid.Bluetooth.IIBluetoothManager;
@@ -145,6 +148,7 @@ module
     using interface Elastos.Droid.Content.IISyncStatusObserver;
     using interface Elastos.Droid.Content.IIntentReceiver;
     using interface Elastos.Droid.Content.IServiceConnection;
+    using interface Elastos.Droid.Content.IDialogInterface;
     using interface Elastos.Droid.Content.Pm.IILauncherApps;
     using interface Elastos.Droid.Content.Pm.IIPackageInstallObserver2;
     using interface Elastos.Droid.Content.Pm.IIPackageInstaller;
@@ -273,6 +277,17 @@ module
 
         interface IIAppOpsService;
         interface IBinder;
+    }
+
+    [local]
+    class CBasePermissionDialog {
+        constructor(
+            [in] IContext* context);
+
+        interface IBasePermissionDialog;
+        interface IAlertDialog;
+        interface IDialogInterface;
+        interface IDialog;
     }
 
     class CInputMethodManagerServiceMethodCallback {

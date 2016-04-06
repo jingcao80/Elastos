@@ -34,6 +34,7 @@ SOURCES += CAppOpsService.cpp
 SOURCES += CAssetAtlasService.cpp
 SOURCES += AttributeCache.cpp
 SOURCES += CBatteryService.cpp
+SOURCES += CBasePermissionDialog.cpp
 SOURCES += CBluetoothManagerService.cpp
 SOURCES += BrickReceiver.cpp
 SOURCES += CCertBlacklister.cpp
