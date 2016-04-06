@@ -4,6 +4,7 @@ module
     namespace Droid {
     namespace Server {
 
+    [deprecated]
     interface ICmHardwareInterface {
 
         GetSupportedFeatures(
@@ -15,11 +16,11 @@ module
 
         Set(
             [in] Int32 feature,
-            [in] Boolean enable,
+            [in] Boolean nbl,
             [out] Boolean* result);
 
         GetDisplayColorCalibration(
-            [out] ArrayOf<Int32>** result);
+            [out, callee] ArrayOf<Int32>* result);
 
         SetDisplayColorCalibration(
             [in] ArrayOf<Int32>* rgb,
@@ -30,7 +31,7 @@ module
 
         GetDisplayGammaCalibration(
             [in] Int32 idx,
-            [out] ArrayOf<Int32>** result);
+            [out, callee] ArrayOf<Int32>* result);
 
         SetDisplayGammaCalibration(
             [in] Int32 idx,
@@ -38,7 +39,7 @@ module
             [out] Boolean* result);
 
         GetVibratorIntensity(
-            [out] ArrayOf<Int32>** result);
+            [out, callee] ArrayOf<Int32>* result);
 
         SetVibratorIntensity(
             [in] Int32 intensity,

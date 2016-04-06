@@ -1,16 +1,28 @@
 
 #include "elastos/droid/server/CCmHardwareService.h"
+#include "elastos/droid/Manifest.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Hardware::ICmHardwareManager;
+using Elastos::Droid::Hardware::EIID_IICmHardwareService;
+using Elastos::Droid::Manifest;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
-private static final boolean DEBUG = true;
-private static final String TAG = CmHardwareService.class.getSimpleName();
+Boolean CCmHardwareService::DEBUG = TRUE;
+String CCmHardwareService::TAG("CCmHardwareService");
 
 //=======================================================================
 // CCmHardwareService::LegacyCmHardware::
 //=======================================================================
+CAR_INTERFACE_IMPL(CCmHardwareService::LegacyCmHardware, Object, ICmHardwareInterface)
 
 CCmHardwareService::LegacyCmHardware::LegacyCmHardware()
     : mSupportedFeatures(0)
@@ -118,11 +130,11 @@ ECode CCmHardwareService::LegacyCmHardware::SplitStringToInt32(
         return NOERROR;
     }
     AutoPtr<ArrayOf<String> > strArray;
-    input.Split(delimiter, (ArrayOf<String>**)&strArray);
+    StringUtils::Split(input, delimiter, (ArrayOf<String>**)&strArray);
     // try {
     AutoPtr<ArrayOf<Int32> > intArray = ArrayOf<Int32>::Alloc(strArray->GetLength());
     for(Int32 i = 0; i < strArray->GetLength(); i++) {
-        (*intArray)[i] = StringUtils::Parse((*strArray)[i]);
+        (*intArray)[i] = StringUtils::ParseInt32((*strArray)[i]);
     }
     *result = intArray;
     return NOERROR;
@@ -286,6 +298,9 @@ ECode CCmHardwareService::LegacyCmHardware::RequireAdaptiveBacklightForSunlightE
 //=======================================================================
 // CCmHardwareService::
 //=======================================================================
+CAR_OBJECT_IMPL(CCmHardwareService)
+
+CAR_INTERFACE_IMPL(CCmHardwareService, Object, IICmHardwareService)
 
 AutoPtr<ICmHardwareInterface> CCmHardwareService::GetImpl(
     /* [in] */ IContext* context)
@@ -315,7 +330,7 @@ ECode CCmHardwareService::GetSupportedFeatures(
 {
     VALIDATE_NOT_NULL(result)
     mContext->EnforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
     return mCmHwImpl->GetSupportedFeatures(result);
 }
 
@@ -325,7 +340,7 @@ ECode CCmHardwareService::Get(
 {
     VALIDATE_NOT_NULL(result)
     mContext->EnforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
     if (!IsSupported(feature)) {
         Logger::E(TAG, "feature %d is not supported", feature);
         *result = FALSE;
@@ -341,9 +356,9 @@ ECode CCmHardwareService::Set(
 {
     VALIDATE_NOT_NULL(result)
     mContext->EnforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
     if (!IsSupported(feature)) {
-        Logger::E(TAG, "feature " + feature + " is not supported");
+        Logger::E(TAG, "feature %d is not supported", feature);
         *result = FALSE;
         return NOERROR;
     }
@@ -355,7 +370,7 @@ ECode CCmHardwareService::GetDisplayColorCalibration(
 {
     VALIDATE_NOT_NULL(result)
     mContext->EnforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
     if (!IsSupported(ICmHardwareManager::FEATURE_DISPLAY_COLOR_CALIBRATION)) {
         Logger::E(TAG, "Display color calibration is not supported");
         *result = NULL;
@@ -370,7 +385,7 @@ ECode CCmHardwareService::SetDisplayColorCalibration(
 {
     VALIDATE_NOT_NULL(result)
     mContext->EnforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
     if (!IsSupported(ICmHardwareManager::FEATURE_DISPLAY_COLOR_CALIBRATION)) {
         Logger::E(TAG, "Display color calibration is not supported");
         *result = FALSE;
@@ -389,7 +404,7 @@ ECode CCmHardwareService::GetNumGammaControls(
 {
     VALIDATE_NOT_NULL(result)
     mContext->EnforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
     if (!IsSupported(ICmHardwareManager::FEATURE_DISPLAY_GAMMA_CALIBRATION)) {
         Logger::E(TAG, "Display gamma calibration is not supported");
         *result = 0;
@@ -404,7 +419,7 @@ ECode CCmHardwareService::GetDisplayGammaCalibration(
 {
     VALIDATE_NOT_NULL(result)
     mContext->EnforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
     if (!IsSupported(ICmHardwareManager::FEATURE_DISPLAY_GAMMA_CALIBRATION)) {
         Logger::E(TAG, "Display gamma calibration is not supported");
         *result = NULL;
@@ -420,7 +435,7 @@ ECode CCmHardwareService::SetDisplayGammaCalibration(
 {
     VALIDATE_NOT_NULL(result)
     mContext->EnforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
     if (!IsSupported(ICmHardwareManager::FEATURE_DISPLAY_GAMMA_CALIBRATION)) {
         Logger::E(TAG, "Display gamma calibration is not supported");
         *result = FALSE;
@@ -434,7 +449,7 @@ ECode CCmHardwareService::GetVibratorIntensity(
 {
     VALIDATE_NOT_NULL(result)
     mContext->EnforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
     if (!IsSupported(ICmHardwareManager::FEATURE_VIBRATOR)) {
         Logger::E(TAG, "Vibrator is not supported");
         *result = NULL;
@@ -449,7 +464,7 @@ ECode CCmHardwareService::SetVibratorIntensity(
 {
     VALIDATE_NOT_NULL(result)
     mContext->EnforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
     if (!IsSupported(ICmHardwareManager::FEATURE_VIBRATOR)) {
         Logger::E(TAG, "Vibrator is not supported");
         *result = FALSE;
@@ -463,7 +478,7 @@ ECode CCmHardwareService::GetLtoSource(
 {
     VALIDATE_NOT_NULL(result)
     mContext->EnforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
     if (!IsSupported(ICmHardwareManager::FEATURE_LONG_TERM_ORBITS)) {
         Logger::E(TAG, "Long term orbits is not supported");
         *result = NULL;
@@ -477,52 +492,55 @@ ECode CCmHardwareService::GetLtoDestination(
 {
     VALIDATE_NOT_NULL(result)
     mContext->EnforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
     if (!IsSupported(ICmHardwareManager::FEATURE_LONG_TERM_ORBITS)) {
         Logger::E(TAG, "Long term orbits is not supported");
         *result = NULL;
         return NOERROR;
     }
-    return mCmHwImpl.getLtoDestination();
+    return mCmHwImpl->GetLtoDestination(result);
 }
 
 ECode CCmHardwareService::GetLtoDownloadInterval(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result)
-    mContext.enforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
-    if (!isSupported(ICmHardwareManager::FEATURE_LONG_TERM_ORBITS)) {
-        Log.e(TAG, "Long term orbits is not supported");
-        return 0;
+    mContext->EnforceCallingOrSelfPermission(
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
+    if (!IsSupported(ICmHardwareManager::FEATURE_LONG_TERM_ORBITS)) {
+        Logger::E(TAG, "Long term orbits is not supported");
+        *result = 0;
+        return NOERROR;
     }
-    return mCmHwImpl.getLtoDownloadInterval();
+    return mCmHwImpl->GetLtoDownloadInterval(result);
 }
 
 ECode CCmHardwareService::GetSerialNumber(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-    mContext.enforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
-    if (!isSupported(ICmHardwareManager::FEATURE_SERIAL_NUMBER)) {
-        Log.e(TAG, "Serial number is not supported");
-        return NULL;
+    mContext->EnforceCallingOrSelfPermission(
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
+    if (!IsSupported(ICmHardwareManager::FEATURE_SERIAL_NUMBER)) {
+        Logger::E(TAG, "Serial number is not supported");
+        *result = NULL;
+        return NOERROR;
     }
-    return mCmHwImpl.getSerialNumber();
+    return mCmHwImpl->GetSerialNumber(result);
 }
 
 ECode CCmHardwareService::RequireAdaptiveBacklightForSunlightEnhancement(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    mContext.enforceCallingOrSelfPermission(
-            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, NULL);
-    if (!isSupported(ICmHardwareManager::FEATURE_SUNLIGHT_ENHANCEMENT)) {
-        Log.e(TAG, "Sunlight enhancement is not supported");
-        return false;
+    mContext->EnforceCallingOrSelfPermission(
+            Manifest::permission::HARDWARE_ABSTRACTION_ACCESS, String(NULL));
+    if (!IsSupported(ICmHardwareManager::FEATURE_SUNLIGHT_ENHANCEMENT)) {
+        Logger::E(TAG, "Sunlight enhancement is not supported");
+        *result = FALSE;
+        return NOERROR;
     }
-    return mCmHwImpl.requireAdaptiveBacklightForSunlightEnhancement();
+    return mCmHwImpl->RequireAdaptiveBacklightForSunlightEnhancement(result);
 }
 
 } //namespace Server

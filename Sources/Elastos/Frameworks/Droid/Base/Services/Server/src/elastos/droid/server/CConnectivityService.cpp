@@ -194,7 +194,15 @@ const Int32 CConnectivityService::DEFAULT_SAMPLING_INTERVAL_IN_SECONDS = (SAMPLE
 // start network sampling a minute after booting ...
 const Int32 CConnectivityService::DEFAULT_START_SAMPLING_INTERVAL_IN_SECONDS = (SAMPLE_DBG ? 30 : 60);
 
-const Int32 SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE = 0;
+const String CConnectivityService::NETID_UPDATE("org.codeaurora.NETID_UPDATE");
+
+const String CConnectivityService::EXTRA_NETWORK_TYPE("netType");
+
+const String CConnectivityService::EXTRA_NETID("netID");
+
+const Int32 CConnectivityService::EVENT_DEFAULT_NETWORK_SWITCH = 540670;
+
+const Int32 CConnectivityService::SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE = 0;
 
 const Int32 CConnectivityService::ENABLED  = 1;
 const Int32 CConnectivityService::DISABLED = 0;
@@ -756,9 +764,14 @@ ECode CConnectivityService::NetworkStateTrackerHandler::HandleMessage(
             NetworkAgentInfo* nai = (NetworkAgentInfo*)INetworkAgentInfo::Probe(naiObj);
             if (nai == NULL) {
                 Slogger::E("CConnectivityService", "EVENT_NETWORK_CAPABILITIES_CHANGED from unknown NetworkAgent");
-            } else {
+            }
+            else {
                 mHost->UpdateCapabilities(nai, INetworkCapabilities::Probe(obj));
             }
+            break;
+        }
+        case EVENT_DEFAULT_NETWORK_SWITCH: {
+            mHost->HandleDefaultNetworkSwitch();
             break;
         }
         case INetworkAgent::EVENT_NETWORK_PROPERTIES_CHANGED: {
@@ -767,7 +780,8 @@ ECode CConnectivityService::NetworkStateTrackerHandler::HandleMessage(
             NetworkAgentInfo* nai = (NetworkAgentInfo*)INetworkAgentInfo::Probe(naiObj);
             if (nai == NULL) {
                 Slogger::E("CConnectivityService", "NetworkAgent not found for EVENT_NETWORK_PROPERTIES_CHANGED");
-            } else {
+            }
+            else {
                 if (VDBG) {
                     Slogger::D("CConnectivityService", "Update of LinkProperties for %s; created=",
                         nai->Name().string(), nai->mCreated);
@@ -776,7 +790,10 @@ ECode CConnectivityService::NetworkStateTrackerHandler::HandleMessage(
                 synchronized(nai) {
                     nai->mLinkProperties = ILinkProperties::Probe(obj);
                 }
-                if (nai->mCreated) mHost->UpdateLinkProperties(nai, oldLp);
+                if (nai->mCreated) {
+                    mHost->UpdateLinkProperties(nai, oldLp);
+                    mHost->NotifyNetworkCallbacks(nai, IConnectivityManager::CALLBACK_IP_CHANGED);
+                }
             }
             break;
         }
@@ -1137,16 +1154,22 @@ ECode CConnectivityService::constructor(
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
     String prop;
     sysProp->Get(String("net.hostname"), &prop);
-    if (TextUtils::IsEmpty(prop)) {
+    String hostname;
+    AutoPtr<ISettingsSecure> sysSec;
+    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&sysSec);
+    sysSec->GetString(resolver, ISettingsSecure::DEVICE_HOSTNAME, &hostname);
+    if (TextUtils::IsEmpty(hostname) &&
+        TextUtils::IsEmpty(prop)) {
         String id;
-        AutoPtr<ISettingsSecure> settingsSecure;
-        CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
-        settingsSecure->GetString(resolver, ISettingsSystem::ANDROID_ID, &id);
+        sysSec->GetString(resolver, ISettingsSecure::ANDROID_ID, &id);
         if (!id.IsNullOrEmpty()) {
             String name("android-");
             name += id;
             sysProp->Set(String("net.hostname"), name);
         }
+    }
+    else {
+        sysProp->Set(String("net.hostname"), hostname);
     }
 
     // read our default dns server ip
@@ -2036,6 +2059,10 @@ void CConnectivityService::HandleAsyncChannelHalfConnect(
     if (bval) {
         if (arg1 == IAsyncChannel::STATUS_SUCCESSFUL) {
             if (VDBG) Slogger::D(TAG, "NetworkFactory connected");
+            AutoPtr<IInterface> p;
+            mNetworkFactoryInfos->Get(replyTo, (IInterface**)&p);
+            AutoPtr<NetworkFactoryInfo> _p = (NetworkFactoryInfo*)IObject::Probe(p);
+            _p->mAsyncChannel->SendMessage(IAsyncChannel::CMD_CHANNEL_FULL_CONNECTION);
             // A network factory has connected.  Send it all current NetworkRequests.
             AutoPtr<ICollection> values;
             mNetworkRequests->GetValues((ICollection**)&values);
@@ -2265,19 +2292,26 @@ void CConnectivityService::HandleRegisterNetworkRequest(
             }
         }
     }
-    if (bestNetwork != NULL) {
-        if (DBG) Slogger::D(TAG, "using %s", bestNetwork->Name().string());
+    Int32 id = 0;
+    nri->mRequest->GetRequestId(&id);
+    AutoPtr<IInterface> pId;
+    mNetworkForRequestId->Get(id, (IInterface**)&pId);
+    if (pId != NULL) {
+        if (DBG) {
+            Slogger::E(TAG, "ignoring duplicate request");
+        }
+    }
+    else if (bestNetwork != NULL) {
+        if (VDBG) Slogger::D(TAG, "using %s", bestNetwork->Name().string());
         Boolean bval;
         bestNetwork->mNetworkInfo->IsConnected(&bval);
-        if (bval) {
+        if (nri->mIsRequest && bval) {
             // Cancel any lingering so the linger timeout doesn't teardown this network
             // even though we have a request for it.
             bestNetwork->mNetworkLingered->Clear();
             bestNetwork->mNetworkMonitor->SendMessage(NetworkMonitor::CMD_NETWORK_CONNECTED);
         }
-        // TODO: This logic may be better replaced with a call to RematchNetworkAndRequests
         bestNetwork->AddRequest(nri->mRequest);
-        Int32 id;
         nri->mRequest->GetRequestId(&id);
         mNetworkForRequestId->Put(id, TO_IINTERFACE(bestNetwork));
         NotifyNetworkCallback((INetworkAgentInfo*)bestNetwork.Get(), nri);
@@ -2285,6 +2319,7 @@ void CConnectivityService::HandleRegisterNetworkRequest(
         Int32 type;
         nri->mRequest->GetLegacyType(&type);
         if (type != IConnectivityManager::TYPE_NONE) {
+            //To support legacy calls for network request
             mLegacyTypeTracker->Add(type, (INetworkAgentInfo*)bestNetwork.Get());
         }
     }
@@ -2540,6 +2575,25 @@ AutoPtr<IIntent> CConnectivityService::MakeGeneralIntent(
     if (egressInfo->GetExtraInfo(&extraInfo), !extraInfo.IsNull()) {
         intent->PutExtra(IConnectivityManager::EXTRA_EXTRA_INFO, extraInfo);
     }
+    Int32 requestId = 0;
+    mDefaultRequest->GetRequestId(&requestId);
+    AutoPtr<IInterface> tmpObj;
+    mNetworkForRequestId->Get(requestId, (IInterface**)&tmpObj);
+    AutoPtr<NetworkAgentInfo> def = (NetworkAgentInfo*)INetworkAgentInfo::Probe(tmpObj);
+    Boolean isDefault = FALSE;
+    Boolean bHasTransport = FALSE;
+    def->mNetworkCapabilities->HasTransport(INetworkCapabilities::TRANSPORT_CELLULAR, &bHasTransport);
+    if((type == IConnectivityManager::TYPE_MOBILE) &&
+        bHasTransport) {
+        isDefault = TRUE;
+    }
+
+    def->mNetworkCapabilities->HasTransport(INetworkCapabilities::TRANSPORT_WIFI, &bHasTransport);
+    if((type == IConnectivityManager::TYPE_WIFI) &&
+        bHasTransport) {
+        isDefault = TRUE;
+    }
+    intent->PutExtra(String("isDefault"), isDefault);
     intent->PutExtra(IConnectivityManager::EXTRA_INET_CONDITION, mDefaultInetConditionPublished);
     return intent;
 }
@@ -3016,6 +3070,23 @@ Boolean CConnectivityService::IsRequest(
     mNetworkRequests->Get(request, (IInterface**)&obj);
     NetworkRequestInfo* nri = (NetworkRequestInfo*)IObject::Probe(obj);
     return nri->mIsRequest;
+}
+
+ECode CConnectivityService::GetTetherConnectedSta(
+    /* [out] */ IList** result)
+{
+    VALIDATE_NOT_NULL(result)
+    Boolean bSupported = FALSE;
+    IsTetheringSupported(&bSupported);
+    if (bSupported) {
+        assert(0 && "TODO");
+        // return mTethering->GetTetherConnectedSta(result);
+        return NOERROR;
+    }
+    else {
+        *result = NULL;
+        return NOERROR;
+    }
 }
 
 ECode CConnectivityService::Tether(
@@ -5006,6 +5077,51 @@ void CConnectivityService::HandleLingerComplete(
     TeardownUnneededNetwork(networkAgent);
 }
 
+void CConnectivityService::HandleDefaultNetworkSwitch()
+{
+    AutoPtr<NetworkAgentInfo> currentDefaultNetwork;
+    AutoPtr<ICollection> values;
+    mNetworkAgentInfos->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> it;
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> tmp;
+        it->GetNext((IInterface**)&tmp);
+        NetworkAgentInfo* nai = (NetworkAgentInfo*)INetworkAgentInfo::Probe(tmp);
+        Int32 id = 0;
+        mDefaultRequest->GetRequestId(&id);
+        AutoPtr<IInterface> p;
+        nai->mNetworkRequests->Get(id, (IInterface**)&p);
+        if(p != NULL) {
+            currentDefaultNetwork = nai;
+            break;
+        }
+    }
+    if(currentDefaultNetwork == NULL) return;
+    Slogger::D(TAG, "currentDefaultNetwork: %p", currentDefaultNetwork.Get());
+    AutoPtr<NetworkAgentInfo> networkSwitchTo = currentDefaultNetwork;
+    it = NULL;
+    values->GetIterator((IIterator**)&it);
+    hasNext = FALSE;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> tmp;
+        it->GetNext((IInterface**)&tmp);
+        NetworkAgentInfo* nai = (NetworkAgentInfo*)INetworkAgentInfo::Probe(tmp);
+        assert(0 && "TODO");
+        // if(mDefaultRequest->mNetworkCapabilities->SatisfiedByNetworkCapabilities(
+        //             nai->mNetworkCapabilities)) {
+        //     if(nai->GetCurrentScore() > networkSwitchTo->GetCurrentScore()) {
+        //         networkSwitchTo = nai;
+        //     }
+        // }
+    }
+    Slogger::D(TAG, "network switch to: %p", networkSwitchTo.Get());
+    if(networkSwitchTo != currentDefaultNetwork) {
+        networkSwitchTo->mNetworkMonitor->SendMessage(NetworkMonitor::CMD_NETWORK_CONNECTED);
+    }
+}
+
 void CConnectivityService::MakeDefault(
     /* [in] */ INetworkAgentInfo* networkAgent)
 {
@@ -5323,11 +5439,26 @@ void CConnectivityService::NotifyLockdownVpn(
     }
 }
 
+void CConnectivityService::SendNetworkInfoUpdateBroadcast(
+    /* [in] */ Int32 type,
+    /* [in] */ Int32 netid)
+{
+    AutoPtr<IIntent> intent;
+    CIntent::New(NETID_UPDATE, (IIntent**)&intent);
+    intent->PutExtra(EXTRA_NETWORK_TYPE, type);
+    intent->PutExtra(EXTRA_NETID, netid);
+    Slogger::D(TAG, "sendNetworkInfoUpdateBroadcast type = %d netid = %d", type, netid);
+
+    mContext->SendBroadcast(intent);
+}
+
 void CConnectivityService::UpdateNetworkInfo(
     /* [in] */ INetworkAgentInfo* nai,
     /* [in] */ INetworkInfo* newInfo)
 {
     NetworkAgentInfo* networkAgent = (NetworkAgentInfo*)nai;
+    AutoPtr<ISystemProperties> sysProp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
 
     NetworkInfoState state;
     newInfo->GetState(&state);
@@ -5396,6 +5527,22 @@ void CConnectivityService::UpdateNetworkInfo(
         }
         // Consider network even though it is not yet validated.
         RematchNetworkAndRequests(nai, FALSE);
+        Int32 val = 0;
+        sysProp->GetInt32(String("persist.cne.feature"), 0, &val);
+        Boolean isPropFeatureEnabled = (val == 3) ? TRUE : FALSE;
+        if (isPropFeatureEnabled) {
+            Int32 type = 0;
+            newInfo->GetType(&type);
+            if ((type == IConnectivityManager::TYPE_WIFI) ||
+                (type == IConnectivityManager::TYPE_MOBILE)) {
+                if (DBG) {
+                    Slogger::D(TAG, "sending network info update for type = %d", type);
+                }
+                Int32 netId = 0;
+                networkAgent->mNetwork->GetNetId(&netId);
+                SendNetworkInfoUpdateBroadcast(type, netId);
+            }
+        }
     }
     else if (state == NetworkInfoState_DISCONNECTED ||
             state == NetworkInfoState_SUSPENDED) {

@@ -495,6 +495,9 @@ public:
         /* [in] */ INetworkInfo* info,
         /* [in] */ Boolean isCaptivePortal);
 
+    CARAPI GetTetherConnectedSta(
+        /* [out] */ IList** result);
+
     CARAPI Tether(
         /* [in] */ const String& iface,
         /* [out] */ Int32* status);
@@ -1060,6 +1063,13 @@ private:
     void HandleLingerComplete(
         /* [in] */ INetworkAgentInfo* oldNetwork);
 
+    /**
+     By default ConnectivityService will establish connections
+     over one network.Provide a way to allow switching to another established
+     network with a higher score.
+     */
+    void HandleDefaultNetworkSwitch();
+
     void MakeDefault(
         /* [in] */ INetworkAgentInfo* newNetwork);
 
@@ -1114,6 +1124,10 @@ private:
 
     void NotifyLockdownVpn(
         /* [in] */ INetworkAgentInfo* nai);
+
+    void SendNetworkInfoUpdateBroadcast(
+        /* [in] */ Int32 type,
+        /* [in] */ Int32 netid);
 
     void UpdateNetworkInfo(
         /* [in] */ INetworkAgentInfo* networkAgent,
@@ -1288,17 +1302,25 @@ private:
 
     static const String ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED;
 
-    static const int SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE;
+    static const String NETID_UPDATE;
+
+    static const String EXTRA_NETWORK_TYPE;
+
+    static const String EXTRA_NETID;
+
+    static const Int32 EVENT_DEFAULT_NETWORK_SWITCH;
+
+    static const Int32 SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE;
 
     AutoPtr<IPendingIntent> mSampleIntervalElapsedIntent;
 
     // Set network sampling interval at 12 minutes, this way, even if the timers get
     // aggregated, it will fire at around 15 minutes, which should allow us to
     // aggregate this timer with other timers (specially the socket keep alive timers)
-    static const int DEFAULT_SAMPLING_INTERVAL_IN_SECONDS;
+    static const Int32 DEFAULT_SAMPLING_INTERVAL_IN_SECONDS;
 
     // start network sampling a minute after booting ...
-    static const int DEFAULT_START_SAMPLING_INTERVAL_IN_SECONDS;
+    static const Int32 DEFAULT_START_SAMPLING_INTERVAL_IN_SECONDS;
 
     AutoPtr<IAlarmManager> mAlarmManager;
 

@@ -3,6 +3,7 @@ module
 {
     merge("AppOpsPolicy.car");
     merge("BasePermissionDialog.car");
+    merge("CmHardwareService.car");
     merge("Exceptions.car");
     merge("SystemServer.car");
     merge("SystemService.car");
@@ -158,6 +159,7 @@ module
     using interface Elastos.Droid.Content.Pm.IPackageInstallerSessionParams;
     using interface Elastos.Droid.Hardware.IISerialManager;
     using interface Elastos.Droid.Hardware.IIConsumerIrService;
+    using interface Elastos.Droid.Hardware.IICmHardwareService;
     using interface Elastos.Droid.Hardware.Display.IIDisplayManager;
     using interface Elastos.Droid.Hardware.Hdmi.IHdmiDeviceInfo;
     using interface Elastos.Droid.Hardware.Hdmi.IIHdmiControlCallback;
@@ -277,6 +279,14 @@ module
 
         interface IIAppOpsService;
         interface IBinder;
+    }
+
+    [local]
+    class CCmHardwareService {
+        constructor(
+            [in] IContext* context);
+
+        interface IICmHardwareService;
     }
 
     [local]
