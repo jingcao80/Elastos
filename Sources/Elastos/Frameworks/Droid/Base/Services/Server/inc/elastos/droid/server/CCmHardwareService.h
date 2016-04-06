@@ -3,14 +3,21 @@
 #define __ELASTOS_DROID_SERVER_CCMHARDWARESERVICE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Content.h"
 #include "_Elastos_Droid_Server_CCmHardwareService.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Hardware::IICmHardwareService;
+using Elastos::Droid::Server::ICmHardwareInterface;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
 CarClass(CCmHardwareService)
-    : public Object
+    , public Object
     , public IICmHardwareService
 {
 private:
@@ -87,10 +94,14 @@ private:
             /* [out] */ String* result);
 
     private:
-        Int32 mSupportedFeatures = 0;
+        Int32 mSupportedFeatures;
     };
 
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 

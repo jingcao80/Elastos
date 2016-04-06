@@ -88,6 +88,9 @@ module
             [in] Int32 networkType,
             [in] Boolean enabled);
 
+        GetTetherConnectedSta(
+            [out] IList** result);
+
         Tether(
             [in] String iface,
             [out] Int32* result);

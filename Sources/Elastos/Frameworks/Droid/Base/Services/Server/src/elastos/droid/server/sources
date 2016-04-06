@@ -38,6 +38,7 @@ SOURCES += CBasePermissionDialog.cpp
 SOURCES += CBluetoothManagerService.cpp
 SOURCES += BrickReceiver.cpp
 SOURCES += CCertBlacklister.cpp
+SOURCES += CCmHardwareService.cpp
 SOURCES += CCommonTimeManagementService.cpp
 SOURCES += CConnectivityService.cpp
 SOURCES += CConsumerIrService.cpp
