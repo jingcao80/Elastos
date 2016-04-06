@@ -10,6 +10,7 @@ module
     interface Elastos.Droid.Os.IBinder;
     interface Elastos.Droid.Os.IMessenger;
     interface Elastos.Droid.Os.IParcelFileDescriptor;
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
