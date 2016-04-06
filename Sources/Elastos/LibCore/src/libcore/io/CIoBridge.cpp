@@ -191,6 +191,7 @@ ECode CIoBridge::ConnectErrno(
         return NOERROR;
     }
 
+    if (errno != EINPROGRESS) return E_SOCKET_EXCEPTION;
     // } catch (ErrnoException errnoException) {
     //    if (errnoException.errno != EINPROGRESS) {
     //        throw errnoException;

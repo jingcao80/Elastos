@@ -66,7 +66,7 @@ ECode Socket::constructor(
         sFactory->CreateSocketImpl((ISocketImpl**)&mImpl);
     }
     else {
-        CPlainSocketImpl::New(proxy, (IPlainSocketImpl**)&mImpl);
+        CPlainSocketImpl::New(proxy, (ISocketImpl**)&mImpl);
     }
 
     return NOERROR;

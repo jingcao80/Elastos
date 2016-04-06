@@ -1378,11 +1378,15 @@ ECode CTreeMap::_EntrySet::Contains(
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value)
+    *value = FALSE;
 
     AutoPtr<IMapEntry> res = IMapEntry::Probe(o);
+
+    if (res == NULL) return NOERROR;
+
     AutoPtr<Node> outnode;
     FAIL_RETURN(mHost->FindByEntry(res, (Node**)&outnode));
-    *value = res != NULL && outnode != NULL;
+    *value = outnode != NULL;
     return NOERROR;
 }
 
@@ -1516,7 +1520,7 @@ ECode CTreeMap::_KeySet::GetDescendingIterator(
 {
     VALIDATE_NOT_NULL(outiter)
 
-    AutoPtr<IIterator> res = (IIterator*) new _KeySetBackwardMapIterator(mHost->mRoot == NULL ? NULL : mHost->mRoot->GetFirst(), mHost);
+    AutoPtr<IIterator> res = (IIterator*) new _KeySetBackwardMapIterator(mHost->mRoot == NULL ? NULL : mHost->mRoot->GetLast(), mHost);
     *outiter = res;
     REFCOUNT_ADD(*outiter)
     return NOERROR;
