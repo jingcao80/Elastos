@@ -6327,10 +6327,11 @@ Boolean CAudioService::IsInCommunication()
 {
     Boolean IsInCall = FALSE;
 
-    AutoPtr<IInterface> service;
-    mContext->GetSystemService(IContext::TELECOM_SERVICE, ((IInterface**)&service));
-    AutoPtr<ITelecomManager> telecomManager = ITelecomManager::Probe(service);
-    telecomManager->IsInCall(&IsInCall);
+    // TODO:
+    // AutoPtr<IInterface> service;
+    // mContext->GetSystemService(IContext::TELECOM_SERVICE, ((IInterface**)&service));
+    // AutoPtr<ITelecomManager> telecomManager = ITelecomManager::Probe(service);
+    // telecomManager->IsInCall(&IsInCall);
 
     Int32 mode;
     GetMode(&mode);
