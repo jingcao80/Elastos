@@ -778,8 +778,9 @@ void AbsListView::RecycleBin::FillActiveViews(
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
         mHost->GetChildAt(i, (IView**)&child);
-        AutoPtr<IAbsListViewLayoutParams> lp;
-        child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+        AutoPtr<IViewGroupLayoutParams> vglp;
+        child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+        IAbsListViewLayoutParams* lp = IAbsListViewLayoutParams::Probe(vglp);
         // Don't put header or footer views into the scrap heap
 
         if(lp != NULL) {
@@ -884,8 +885,9 @@ void AbsListView::RecycleBin::AddScrapView(
     /* [in ]*/ IView* scrap,
     /* [in] */ Int32 position)
 {
-    AutoPtr<IAbsListViewLayoutParams> lp;
-    scrap->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+    AutoPtr<IViewGroupLayoutParams> vglp;
+    scrap->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+    IAbsListViewLayoutParams* lp = IAbsListViewLayoutParams::Probe(vglp);
     if (lp == NULL) {
         return;
     }
@@ -8120,12 +8122,13 @@ ECode AbsListView::ReclaimViews(
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
-        AutoPtr<IAbsListViewLayoutParams> lp;
-        child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+        AutoPtr<IViewGroupLayoutParams> vglp;
+        child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+        IAbsListViewLayoutParams* lp = IAbsListViewLayoutParams::Probe(vglp);
         // Don't reclaim header or footer views, or views that should be ignored
 
         if (lp != NULL && mRecycler->ShouldRecycleViewType(
-                ((CAbsListViewLayoutParams*)lp.Get())->mViewType)) {
+                ((CAbsListViewLayoutParams*)lp)->mViewType)) {
             views->Add(child);
             child->SetAccessibilityDelegate(NULL);
             if (listener != NULL) {

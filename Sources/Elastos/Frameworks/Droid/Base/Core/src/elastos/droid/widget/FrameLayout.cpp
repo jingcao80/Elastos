@@ -474,10 +474,12 @@ void FrameLayout::OnMeasure(
         if (mMeasureAllChildren || visibility != IView::GONE) {
             MeasureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
 
-            AutoPtr<IFrameLayoutLayoutParams> lp;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+            AutoPtr<IViewGroupLayoutParams> vglp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+            IViewGroupMarginLayoutParams* lp = IViewGroupMarginLayoutParams::Probe(vglp);
+
             Int32 ml, mt, mr, mb;
-            IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&ml, &mt, &mr, &mb);
+            lp->GetMargins(&ml, &mt, &mr, &mb);
 
             Int32 childWidth, childHeight, state;
             child->GetMeasuredWidth(&childWidth);
@@ -489,8 +491,8 @@ void FrameLayout::OnMeasure(
             childState = CombineMeasuredStates(childState, state);
             if (measureMatchParentChildren) {
                 Int32 width, height;
-                IViewGroupLayoutParams::Probe(lp)->GetWidth(&width);
-                IViewGroupLayoutParams::Probe(lp)->GetHeight(&height);
+                vglp->GetWidth(&width);
+                vglp->GetHeight(&height);
                 if (width == IViewGroupLayoutParams::MATCH_PARENT ||
                         height == IViewGroupLayoutParams::MATCH_PARENT) {
                     mMatchParentChildren.PushBack(child);
@@ -528,13 +530,15 @@ void FrameLayout::OnMeasure(
         for (Int32 i = 0; i < count; i++) {
             AutoPtr<IView> child = mMatchParentChildren[i];
 
-            AutoPtr<IFrameLayoutLayoutParams> lp;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+            AutoPtr<IViewGroupLayoutParams> vglp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+            IViewGroupMarginLayoutParams* lp = IViewGroupMarginLayoutParams::Probe(vglp);
+
             Int32 ml, mt, mr, mb;
-            IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&ml, &mt, &mr, &mb);
+            lp->GetMargins(&ml, &mt, &mr, &mb);
             Int32 width, height;
-            IViewGroupLayoutParams::Probe(lp)->GetWidth(&width);
-            IViewGroupLayoutParams::Probe(lp)->GetHeight(&height);
+            vglp->GetWidth(&width);
+            vglp->GetHeight(&height);
 
             Int32 childWidthMeasureSpec;
             Int32 childHeightMeasureSpec;

@@ -685,6 +685,7 @@ void TableLayout::FindLargestCells(
         if (ITableRow::Probe(child) != NULL) {
             // TableRow* row = (TableRow*)child;
             // forces the row's height
+            assert(0 && "TODO");
             AutoPtr<IViewGroupLayoutParams> layoutParams;// = row->GetLayoutParams();
             layoutParams->SetHeight(IViewGroupLayoutParams::WRAP_CONTENT);
 

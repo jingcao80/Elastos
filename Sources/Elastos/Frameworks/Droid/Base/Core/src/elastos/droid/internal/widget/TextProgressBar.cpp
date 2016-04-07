@@ -128,7 +128,7 @@ ECode TextProgressBar::OnChronometerTick(
 
     // Move the Chronometer if gravity is set correctly
     if (mChronometerFollow) {
-        AutoPtr<IRelativeLayoutLayoutParams> params;
+        AutoPtr<IViewGroupLayoutParams> params;
 
         // Calculate estimate of ProgressBar leading edge position
         IView::Probe(mProgressBar)->GetLayoutParams((IViewGroupLayoutParams**)&params);

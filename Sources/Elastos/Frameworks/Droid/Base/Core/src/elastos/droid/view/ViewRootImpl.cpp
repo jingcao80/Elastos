@@ -6476,9 +6476,9 @@ void ViewRootImpl::HandleWindowFocusChanged(
             //
             wmlp->mSoftInputMode &= ~IWindowManagerLayoutParams::SOFT_INPUT_IS_FORWARD_NAVIGATION;
 
-            AutoPtr<IWindowManagerLayoutParams> params;
+            AutoPtr<IViewGroupLayoutParams> params;
             mView->GetLayoutParams((IViewGroupLayoutParams**)&params);
-            CWindowManagerLayoutParams* wmlp = (CWindowManagerLayoutParams*)params.Get();
+            CWindowManagerLayoutParams* wmlp = (CWindowManagerLayoutParams*)IWindowManagerLayoutParams::Probe(params);
             wmlp->mSoftInputMode &= ~IWindowManagerLayoutParams::SOFT_INPUT_IS_FORWARD_NAVIGATION;
             mHasHadWindowFocus = TRUE;
         }

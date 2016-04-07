@@ -1354,38 +1354,33 @@ void ActionBarOverlayLayout::OnMeasure(
     Int32 childState = 0;
     Int32 topInset = 0;
     Int32 bottomInset = 0;
+    IView* barTop = IView::Probe(mActionBarTop);
+    IView* barBottom = IView::Probe(mActionBarBottom);
 
-    MeasureChildWithMargins(IView::Probe(mActionBarTop), widthMeasureSpec, 0, heightMeasureSpec, 0);
+    MeasureChildWithMargins(barTop, widthMeasureSpec, 0, heightMeasureSpec, 0);
     AutoPtr<IViewGroupLayoutParams> lp;
-    IView::Probe(mActionBarTop)->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+    barTop->GetLayoutParams((IViewGroupLayoutParams**)&lp);
 
     Int32 measureWidth = 0, measureHeight = 0, measureState = 0;
     Int32 leftMargin = 0, rightMargin = 0, topMargin = 0, bottomMargin = 0;
-    IView::Probe(mActionBarTop)->GetMeasuredWidth(&measureWidth);
-    IView::Probe(mActionBarTop)->GetMeasuredHeight(&measureHeight);
-    IView::Probe(mActionBarTop)->GetMeasuredState(&measureState);
-    IViewGroupMarginLayoutParams::Probe(lp)->GetLeftMargin(&leftMargin);
-    IViewGroupMarginLayoutParams::Probe(lp)->GetRightMargin(&rightMargin);
-    IViewGroupMarginLayoutParams::Probe(lp)->GetTopMargin(&topMargin);
-    IViewGroupMarginLayoutParams::Probe(lp)->GetBottomMargin(&bottomMargin);
+    barTop->GetMeasuredWidth(&measureWidth);
+    barTop->GetMeasuredHeight(&measureHeight);
+    barTop->GetMeasuredState(&measureState);
+    IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin);
     maxWidth = Elastos::Core::Math::Max(maxWidth, measureWidth + leftMargin + rightMargin);
     maxHeight = Elastos::Core::Math::Max(maxHeight, measureHeight + topMargin + bottomMargin);
     childState = CombineMeasuredStates(childState, measureState);
 
     // xlarge screen layout doesn't have bottom action bar.
     if (mActionBarBottom != NULL) {
-        MeasureChildWithMargins(IView::Probe(mActionBarBottom), widthMeasureSpec, 0, heightMeasureSpec, 0);
+        MeasureChildWithMargins(barBottom, widthMeasureSpec, 0, heightMeasureSpec, 0);
 
         lp = NULL;
-        IView::Probe(mActionBarBottom)->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-
-        IView::Probe(mActionBarBottom)->GetMeasuredWidth(&measureWidth);
-        IView::Probe(mActionBarBottom)->GetMeasuredHeight(&measureHeight);
-        IView::Probe(mActionBarBottom)->GetMeasuredState(&measureState);
-        IViewGroupMarginLayoutParams::Probe(lp)->GetLeftMargin(&leftMargin);
-        IViewGroupMarginLayoutParams::Probe(lp)->GetRightMargin(&rightMargin);
-        IViewGroupMarginLayoutParams::Probe(lp)->GetTopMargin(&topMargin);
-        IViewGroupMarginLayoutParams::Probe(lp)->GetBottomMargin(&bottomMargin);
+        barBottom->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+        barBottom->GetMeasuredWidth(&measureWidth);
+        barBottom->GetMeasuredHeight(&measureHeight);
+        barBottom->GetMeasuredState(&measureState);
+        IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin);
 
         maxWidth = Elastos::Core::Math::Max(maxWidth, measureWidth + leftMargin + rightMargin);
         maxHeight = Elastos::Core::Math::Max(maxHeight, measureHeight + topMargin + bottomMargin);
@@ -1396,7 +1391,7 @@ void ActionBarOverlayLayout::OnMeasure(
     GetWindowSystemUiVisibility(&vis);
     Boolean stable = (vis & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0;
     Int32 visibility = 0;
-    IView::Probe(mActionBarTop)->GetVisibility(&visibility);
+    barTop->GetVisibility(&visibility);
 
     if (stable) {
         // This is the standard space needed for the action bar.  For stable measurement,
@@ -1414,7 +1409,7 @@ void ActionBarOverlayLayout::OnMeasure(
     else if (visibility != IView::GONE) {
         // This is the space needed on top of the window for all of the action bar
         // and tabs.
-        IView::Probe(mActionBarTop)->GetMeasuredHeight(&topInset);
+        barTop->GetMeasuredHeight(&topInset);
     }
 
     Boolean isSplit = FALSE;
@@ -1426,7 +1421,7 @@ void ActionBarOverlayLayout::OnMeasure(
                 bottomInset = mActionBarHeight;
             }
             else {
-                IView::Probe(mActionBarBottom)->GetMeasuredHeight(&bottomInset);
+                barBottom->GetMeasuredHeight(&bottomInset);
             }
         }
     }
@@ -1478,10 +1473,7 @@ void ActionBarOverlayLayout::OnMeasure(
     mContent->GetMeasuredWidth(&measureWidth);
     mContent->GetMeasuredHeight(&measureHeight);
     mContent->GetMeasuredState(&measureState);
-    IViewGroupMarginLayoutParams::Probe(lp)->GetLeftMargin(&leftMargin);
-    IViewGroupMarginLayoutParams::Probe(lp)->GetRightMargin(&rightMargin);
-    IViewGroupMarginLayoutParams::Probe(lp)->GetTopMargin(&topMargin);
-    IViewGroupMarginLayoutParams::Probe(lp)->GetBottomMargin(&bottomMargin);
+    IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin);
 
     maxWidth = Elastos::Core::Math::Max(maxWidth, measureWidth + leftMargin + rightMargin);
     maxHeight = Elastos::Core::Math::Max(maxHeight, measureHeight + topMargin + bottomMargin);

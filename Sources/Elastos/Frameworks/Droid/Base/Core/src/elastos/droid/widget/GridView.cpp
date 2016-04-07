@@ -1112,25 +1112,29 @@ void GridView::OnMeasure(
     if (count > 0) {
         AutoPtr<IView> child = ObtainView(0, mIsScrap);
 
-        AutoPtr<IAbsListViewLayoutParams> p;
-        child->GetLayoutParams((IViewGroupLayoutParams**)&p);
+        AutoPtr<IViewGroupLayoutParams> vglp;
+        child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+        IAbsListViewLayoutParams* p = IAbsListViewLayoutParams::Probe(vglp);
         if (p == NULL) {
             CAbsListViewLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT,
-                    IViewGroupLayoutParams::WRAP_CONTENT, 0, (IAbsListViewLayoutParams**)&p);
-            child->SetLayoutParams(IViewGroupLayoutParams::Probe(p));
+                IViewGroupLayoutParams::WRAP_CONTENT, 0, (IViewGroupLayoutParams**)&vglp);
+            child->SetLayoutParams(vglp);
+            p = IAbsListViewLayoutParams::Probe(vglp);
         }
-        IAdapter::Probe(mAdapter)->GetItemViewType(0, &((CAbsListViewLayoutParams*)p.Get())->mViewType);
-        ((CAbsListViewLayoutParams*)p.Get())->mForceAdd = TRUE;
+
+        CAbsListViewLayoutParams* alvlp = (CAbsListViewLayoutParams*)p;
+        IAdapter::Probe(mAdapter)->GetItemViewType(0, &alvlp->mViewType);
+        alvlp->mForceAdd = TRUE;
 
         Int32 childHeightSpec = GetChildMeasureSpec(
-            MeasureSpec::MakeMeasureSpec(0, MeasureSpec::UNSPECIFIED), 0, ((CAbsListViewLayoutParams*)p.Get())->mHeight);
+            MeasureSpec::MakeMeasureSpec(0, MeasureSpec::UNSPECIFIED), 0, alvlp->mHeight);
         Int32 childWidthSpec = GetChildMeasureSpec(
-            MeasureSpec::MakeMeasureSpec(mColumnWidth, MeasureSpec::EXACTLY), 0, ((CAbsListViewLayoutParams*)p.Get())->mWidth);
+            MeasureSpec::MakeMeasureSpec(mColumnWidth, MeasureSpec::EXACTLY), 0, alvlp->mWidth);
         child->Measure(childWidthSpec, childHeightSpec);
 
         child->GetMeasuredHeight(&childHeight);
 
-        if (mRecycler->ShouldRecycleViewType(((CAbsListViewLayoutParams*)p.Get())->mViewType)) {
+        if (mRecycler->ShouldRecycleViewType(((CAbsListViewLayoutParams*)p)->mViewType)) {
             mRecycler->AddScrapView(child, -1);
         }
     }
@@ -1523,8 +1527,9 @@ void GridView::SetupChild(
 
     // Respect layout params that are already in the view. Otherwise make
     // some up...
-    AutoPtr<IAbsListViewLayoutParams> p;
-    child->GetLayoutParams((IViewGroupLayoutParams**)&p);
+    AutoPtr<IViewGroupLayoutParams> vglp;
+    child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+    AutoPtr<IAbsListViewLayoutParams> p = IAbsListViewLayoutParams::Probe(vglp);
     if (p == NULL) {
         CAbsListViewLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT,
                 IViewGroupLayoutParams::WRAP_CONTENT, 0, (IAbsListViewLayoutParams**)&p);

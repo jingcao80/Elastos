@@ -841,8 +841,9 @@ void ActionBarContextView::OnMeasure(
 
     if (mClose != NULL) {
         availableWidth = MeasureChildView(mClose, availableWidth, childSpecHeight, 0);
-        AutoPtr<IViewGroupMarginLayoutParams> lp;
-        mClose->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+        AutoPtr<IViewGroupLayoutParams> vglp;
+        mClose->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+        IViewGroupMarginLayoutParams* lp = IViewGroupMarginLayoutParams::Probe(vglp);
 
         Int32 leftMargin = 0, rightMargin = 0;
         lp->GetLeftMargin(&leftMargin);
@@ -968,8 +969,9 @@ ECode ActionBarContextView::OnLayout(
     Int32 visible = 0;
     mClose->GetVisibility(&visible);
     if (mClose != NULL && visible != IView::GONE) {
-        AutoPtr<IViewGroupMarginLayoutParams> lp;
-        mClose->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+        AutoPtr<IViewGroupLayoutParams> vglp;
+        mClose->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+        IViewGroupMarginLayoutParams* lp = IViewGroupMarginLayoutParams::Probe(vglp);
 
         Int32 leftMargin = 0;
         Int32 rightMargin = 0;
@@ -1120,8 +1122,10 @@ AutoPtr<IAnimator> ActionBarContextView::MakeInAnimation()
     Int32 width = 0;
     mClose->GetWidth(&width);
 
-    AutoPtr<IViewGroupMarginLayoutParams> layoutParams;
-    mClose->GetLayoutParams((IViewGroupLayoutParams**)&layoutParams);
+    AutoPtr<IViewGroupLayoutParams> vglp;
+    mClose->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+    IViewGroupMarginLayoutParams* layoutParams = IViewGroupMarginLayoutParams::Probe(vglp);
+
     Int32 leftMargin;
     layoutParams->GetLeftMargin(&leftMargin);
     mClose->SetTranslationX(-width - leftMargin);
@@ -1193,8 +1197,9 @@ AutoPtr<IAnimator> ActionBarContextView::MakeOutAnimation()
 
     Int32 width = 0;
     mClose->GetWidth(&width);
-    AutoPtr<IViewGroupMarginLayoutParams> layoutParams;
-    mClose->GetLayoutParams((IViewGroupLayoutParams**)&layoutParams);
+    AutoPtr<IViewGroupLayoutParams> vglp;
+    mClose->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+    IViewGroupMarginLayoutParams* layoutParams = IViewGroupMarginLayoutParams::Probe(vglp);
     Int32 leftMargin;
     layoutParams->GetLeftMargin(&leftMargin);
     AutoPtr<ArrayOf<Float> > tmpValues = ArrayOf<Float>::Alloc(1);

@@ -213,8 +213,10 @@ List< AutoPtr<Node> >& DependencyGraph::FindRoots(
     for (it = mNodes.Begin(); it != mNodes.End(); ++it) {
         AutoPtr<Node> node = *it;
 
-        AutoPtr<IRelativeLayoutLayoutParams> layoutParams;
-        node->mView->GetLayoutParams((IViewGroupLayoutParams**)&layoutParams);
+        AutoPtr<IViewGroupLayoutParams> vglp;
+        node->mView->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+        IRelativeLayoutLayoutParams* layoutParams = IRelativeLayoutLayoutParams::Probe(vglp);
+
         AutoPtr<ArrayOf<Int32> > rules;
         layoutParams->GetRules((ArrayOf<Int32>**)&rules);
         Int32 rulesCount = rulesFilter->GetLength();
@@ -962,12 +964,14 @@ void RelativeLayout::OnMeasure(
         Int32 visibility;
         child->GetVisibility(&visibility);
         if (visibility != IView::GONE) {
-            AutoPtr<IRelativeLayoutLayoutParams> params;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&params);
+            AutoPtr<IViewGroupLayoutParams> vglp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+            IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
+
             AutoPtr<ArrayOf<Int32> > rules;
             params->GetRules(layoutDirection, (ArrayOf<Int32>**)&rules);
 
-            LayoutParams* lp = (LayoutParams*)params.Get();
+            LayoutParams* lp = (LayoutParams*)params;
             ApplyHorizontalSizeRules(lp, myWidth, rules);
             MeasureChildHorizontal(child, lp, myWidth, myHeight);
             if (PositionChildHorizontal(child, lp, myWidth, isWrapContentWidth)) {
@@ -992,10 +996,11 @@ void RelativeLayout::OnMeasure(
         Int32 visibility;
         child->GetVisibility(&visibility);
         if (visibility != IView::GONE) {
-            AutoPtr<IRelativeLayoutLayoutParams> params;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&params);
+            AutoPtr<IViewGroupLayoutParams> vglp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+            IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
 
-            LayoutParams* lp = (LayoutParams*)params.Get();
+            LayoutParams* lp = (LayoutParams*)params;
             assert(lp);
             ApplyVerticalSizeRules(lp, myHeight);
             MeasureChild(child, lp, myWidth, myHeight);
@@ -1045,10 +1050,11 @@ void RelativeLayout::OnMeasure(
             Int32 visibility;
             child->GetVisibility(&visibility);
             if (visibility != IView::GONE) {
-                AutoPtr<IRelativeLayoutLayoutParams> params;
-                child->GetLayoutParams((IViewGroupLayoutParams**)&params);
+                AutoPtr<IViewGroupLayoutParams> vglp;
+                child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+                IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
 
-                LayoutParams* lp = (LayoutParams*)params.Get();
+                LayoutParams* lp = (LayoutParams*)params;
                 AlignBaseline(child, lp);
                 if (child != ignore || verticalGravity) {
                     left = Elastos::Core::Math::Min(left, lp->mLeft - lp->mLeftMargin);
@@ -1084,10 +1090,10 @@ void RelativeLayout::OnMeasure(
                 Int32 visibility;
                 child->GetVisibility(&visibility);
                 if (visibility != IView::GONE) {
-                    AutoPtr<IRelativeLayoutLayoutParams> params;
-                    child->GetLayoutParams((IViewGroupLayoutParams**)&params);
+                    AutoPtr<IViewGroupLayoutParams> vglp;
+                    child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
 
-                    LayoutParams* lp = (LayoutParams*)params.Get();
+                    LayoutParams* lp = (LayoutParams*)IRelativeLayoutLayoutParams::Probe(vglp);
                     AutoPtr<ArrayOf<Int32> > rules;
                     lp->GetRules(layoutDirection, (ArrayOf<Int32>**)&rules);
                     if ((*rules)[IRelativeLayout::CENTER_IN_PARENT] != 0 ||
@@ -1126,10 +1132,11 @@ void RelativeLayout::OnMeasure(
                 Int32 visibility;
                 child->GetVisibility(&visibility);
                 if (visibility != IView::GONE) {
-                    AutoPtr<IRelativeLayoutLayoutParams> params;
-                    child->GetLayoutParams((IViewGroupLayoutParams**)&params);
+                    AutoPtr<IViewGroupLayoutParams> vglp;
+                    child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+                    IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
 
-                    LayoutParams* lp = (LayoutParams*)params.Get();
+                    LayoutParams* lp = (LayoutParams*)params;
                     AutoPtr<ArrayOf<Int32> > rules;
                     lp->GetRules(layoutDirection, (ArrayOf<Int32>**)&rules);
                     if ((*rules)[IRelativeLayout::CENTER_IN_PARENT] != 0 ||
@@ -1164,9 +1171,10 @@ void RelativeLayout::OnMeasure(
                 Int32 visibility;
                 child->GetVisibility(&visibility);
                 if (visibility != IView::GONE && child != ignore) {
-                    AutoPtr<IRelativeLayoutLayoutParams> params;
-                    child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-                    LayoutParams* lp = (LayoutParams*)params.Get();
+                    AutoPtr<IViewGroupLayoutParams> vglp;
+                    child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+                    IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
+                    LayoutParams* lp = (LayoutParams*)params;
                     if (horizontalGravity) {
                         lp->mLeft += horizontalOffset;
                         lp->mRight += horizontalOffset;
@@ -1187,10 +1195,11 @@ void RelativeLayout::OnMeasure(
             GetChildAt(i, (IView**)&child);
             Int32 visibility = 0;
             if ((child->GetVisibility(&visibility), visibility) != IView::GONE) {
-                AutoPtr<IRelativeLayoutLayoutParams> params;
-                child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-                ((LayoutParams*)params.Get())->mLeft -= offsetWidth;
-                ((LayoutParams*)params.Get())->mRight -= offsetWidth;
+                AutoPtr<IViewGroupLayoutParams> vglp;
+                child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+                IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
+                ((LayoutParams*)params)->mLeft -= offsetWidth;
+                ((LayoutParams*)params)->mRight -= offsetWidth;
             }
         }
     }
@@ -1231,9 +1240,11 @@ void RelativeLayout::AlignBaseline(
         mBaselineView = child;
     }
     else {
-        AutoPtr<IRelativeLayoutLayoutParams> layoutParams;
-        mBaselineView->GetLayoutParams((IViewGroupLayoutParams**)&layoutParams);
-        LayoutParams* lp = (LayoutParams*)layoutParams.Get();
+        AutoPtr<IViewGroupLayoutParams> vglp;
+        mBaselineView->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+        IRelativeLayoutLayoutParams* layoutParams = IRelativeLayoutLayoutParams::Probe(vglp);
+
+        LayoutParams* lp = (LayoutParams*)layoutParams;
         if (params->mTop < lp->mTop || (params->mTop == lp->mTop && params->mLeft < lp->mLeft)) {
             mBaselineView = child;
         }
@@ -1642,8 +1653,10 @@ AutoPtr<IView> RelativeLayout::GetRelatedView(
         Int32 visibility;
         v->GetVisibility(&visibility);
         while (visibility == IView::GONE) {
-            AutoPtr<IRelativeLayoutLayoutParams> params;
-            v->GetLayoutParams((IViewGroupLayoutParams**)&params);
+            AutoPtr<IViewGroupLayoutParams> vglp;
+            v->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+            IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
+
             AutoPtr<ArrayOf<Int32> > rules;
             Int32 direction;
             v->GetLayoutDirection(&direction);
@@ -1742,9 +1755,9 @@ ECode RelativeLayout::OnLayout(
         Int32 visibility;
         child->GetVisibility(&visibility);
         if (visibility != IView::GONE) {
-            AutoPtr<IRelativeLayoutLayoutParams> params;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-            LayoutParams* st = (LayoutParams*)params.Get();
+            AutoPtr<IViewGroupLayoutParams> vglp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+            LayoutParams* st = (LayoutParams*)IRelativeLayoutLayoutParams::Probe(vglp);
             child->Layout(st->mLeft, st->mTop, st->mRight, st->mBottom);
         }
     }
@@ -1756,12 +1769,12 @@ ECode RelativeLayout::GenerateLayoutParams(
     /* [out] */ IViewGroupLayoutParams** params)
 {
     VALIDATE_NOT_NULL(params);
-    assert(attrs != NULL);
-    AutoPtr<IRelativeLayoutLayoutParams> lp;
+    *params = NULL;
+    AutoPtr<IViewGroupLayoutParams> lp;
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    FAIL_RETURN(CRelativeLayoutLayoutParams::New(context, attrs, (IRelativeLayoutLayoutParams**)&lp));
-    *params = IViewGroupLayoutParams::Probe(lp);
+    FAIL_RETURN(CRelativeLayoutLayoutParams::New(context, attrs, (IViewGroupLayoutParams**)&lp));
+    *params = lp;
     REFCOUNT_ADD(*params);
     return NOERROR;
 }

@@ -337,7 +337,7 @@ void LinearLayout::DrawDividersVertical(
             child->GetVisibility(&visibility);
             if (visibility != IView::GONE) {
                 if (HasDividerBeforeChildAt(i)) {
-                    AutoPtr<ILinearLayoutLayoutParams> lp;
+                    AutoPtr<IViewGroupLayoutParams> lp;
                     child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
                     Int32 ml, mt, mr, mb;
                     IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&ml, &mt, &mr, &mb);
@@ -358,7 +358,7 @@ void LinearLayout::DrawDividersVertical(
             bottom = (GetHeight(&h), h) - (GetPaddingBottom(&b), b) - mDividerHeight;
         }
         else {
-            AutoPtr<ILinearLayoutLayoutParams> lp;
+            AutoPtr<IViewGroupLayoutParams> lp;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
             Int32 mb;
             IViewGroupMarginLayoutParams::Probe(lp)->GetBottomMargin(&mb);
@@ -384,7 +384,7 @@ void LinearLayout::DrawDividersHorizontal(
             child->GetVisibility(&visibility);
             if (visibility != IView::GONE) {
                 if (HasDividerBeforeChildAt(i)) {
-                    AutoPtr<ILinearLayoutLayoutParams> lp;
+                    AutoPtr<IViewGroupLayoutParams> lp;
                     child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
                     Int32 ml, mt, mr, mb;
                     IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&ml, &mt, &mr, &mb);
@@ -418,7 +418,7 @@ void LinearLayout::DrawDividersHorizontal(
             }
         }
         else {
-            AutoPtr<ILinearLayoutLayoutParams> lp;
+            AutoPtr<IViewGroupLayoutParams> lp;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
             Int32 ml, mt, mr, mb;
             IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&ml, &mt, &mr, &mb);
@@ -549,7 +549,7 @@ ECode LinearLayout::GetBaseline(
         }
     }
 
-    AutoPtr<IViewGroupMarginLayoutParams> lp;
+    AutoPtr<IViewGroupLayoutParams> lp;
     child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
     Int32 ml, mt, mr,mb;
     IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&ml, &mt, &mr, &mb);

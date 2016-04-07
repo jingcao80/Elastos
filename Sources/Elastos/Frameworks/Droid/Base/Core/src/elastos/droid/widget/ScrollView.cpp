@@ -374,12 +374,13 @@ void ScrollView::OnMeasure(
         Int32 childHeight = 0;
         child->GetMeasuredHeight(&childHeight);
         if (childHeight < height) {
-            AutoPtr<IFrameLayoutLayoutParams> params;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&params);
+            AutoPtr<IViewGroupLayoutParams> vglp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+            IFrameLayoutLayoutParams* params = IFrameLayoutLayoutParams::Probe(vglp);
 
             Int32 childWidthMeasureSpec = GetChildMeasureSpec(widthMeasureSpec,
                     mPaddingLeft + mPaddingRight,
-                    ((CFrameLayoutLayoutParams*)params.Get())->mWidth);
+                    ((CFrameLayoutLayoutParams*)params)->mWidth);
             height -= mPaddingTop;
             height -= mPaddingBottom;
             Int32 childHeightMeasureSpec =
@@ -1511,9 +1512,9 @@ void ScrollView::MeasureChildWithMargins(
     /* [in] */ Int32 parentHeightMeasureSpec,
     /* [in] */ Int32 heightUsed)
 {
-    AutoPtr<IViewGroupMarginLayoutParams> params;
+    AutoPtr<IViewGroupLayoutParams> params;
     child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-    CViewGroupMarginLayoutParams* lp = (CViewGroupMarginLayoutParams*)params.Get();
+    CViewGroupMarginLayoutParams* lp = (CViewGroupMarginLayoutParams*)IViewGroupMarginLayoutParams::Probe(params);
 
     Int32 childWidthMeasureSpec = GetChildMeasureSpec(parentWidthMeasureSpec,
             mPaddingLeft + mPaddingRight + lp->mLeftMargin + lp->mRightMargin

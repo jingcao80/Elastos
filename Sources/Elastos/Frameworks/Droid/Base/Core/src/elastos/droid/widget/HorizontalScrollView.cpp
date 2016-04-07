@@ -371,12 +371,13 @@ void HorizontalScrollView::OnMeasure(
         if (childWidth < width) {
 
             ///////////////////////////////////////////////////////////
-            AutoPtr<IFrameLayoutLayoutParams> params;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&params);
+            AutoPtr<IViewGroupLayoutParams> vglp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+            IFrameLayoutLayoutParams* params = IFrameLayoutLayoutParams::Probe(vglp);
 
             Int32 childHeightMeasureSpec = GetChildMeasureSpec(heightMeasureSpec,
                     mPaddingTop + mPaddingBottom,
-                    ((FrameLayout::LayoutParams*)params.Get())->mHeight);
+                    ((FrameLayout::LayoutParams*)params)->mHeight);
             width -= mPaddingLeft;
             width -= mPaddingRight;
             Int32 childWidthMeasureSpec =
@@ -1412,9 +1413,10 @@ void HorizontalScrollView::MeasureChildWithMargins(
     /* [in] */ Int32 parentHeightMeasureSpec,
     /* [in] */ Int32 heightUsed)
 {
-    AutoPtr<IViewGroupMarginLayoutParams> params;
-    child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-    CViewGroupMarginLayoutParams* lp = (CViewGroupMarginLayoutParams*)params.Get();
+    AutoPtr<IViewGroupLayoutParams> vglp;
+    child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+    IViewGroupLayoutParams* params = IViewGroupLayoutParams::Probe(vglp);
+    CViewGroupMarginLayoutParams* lp = (CViewGroupMarginLayoutParams*)params;
 
     Int32 childHeightMeasureSpec = GetChildMeasureSpec(parentHeightMeasureSpec,
             mPaddingTop + mPaddingBottom + lp->mTopMargin + lp->mBottomMargin

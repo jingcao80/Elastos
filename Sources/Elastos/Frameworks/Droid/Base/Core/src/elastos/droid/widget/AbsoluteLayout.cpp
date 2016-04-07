@@ -114,8 +114,7 @@ void AbsoluteLayout::OnMeasure(
     MeasureChildren(widthMeasureSpec, heightMeasureSpec);
 
     // Find rightmost and bottom-most child
-    for (Int32 i = 0; i < count; i++)
-    {
+    for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
 
@@ -125,8 +124,9 @@ void AbsoluteLayout::OnMeasure(
             Int32 childRight;
             Int32 childBottom;
 
-            AutoPtr<IAbsoluteLayoutLayoutParams> lp;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+            AutoPtr<IViewGroupLayoutParams> vglp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+            IAbsoluteLayoutLayoutParams* lp = IAbsoluteLayoutLayoutParams::Probe(vglp);
 
             Int32 w, h;
             child->GetMeasuredWidth(&w);
@@ -193,8 +193,9 @@ ECode AbsoluteLayout::OnLayout(
         child->GetVisibility(&v);
         if (v != IView::GONE) {
 
-            AutoPtr<IAbsoluteLayoutLayoutParams> lp;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+            AutoPtr<IViewGroupLayoutParams> vglp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+            IAbsoluteLayoutLayoutParams* lp = IAbsoluteLayoutLayoutParams::Probe(vglp);
             Int32 lx, ly;
             lp->GetX(&lx);
             lp->GetY(&ly);
