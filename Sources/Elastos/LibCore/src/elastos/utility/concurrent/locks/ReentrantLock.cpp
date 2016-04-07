@@ -62,8 +62,7 @@ Boolean ReentrantLock::Sync::IsHeldExclusively()
 {
     // While we must in general read state before owner,
     // we don't need to do so to check if current thread is owner
-    // return getExclusiveOwnerThread() == Thread.currentThread();
-    return FALSE;
+    return GetExclusiveOwnerThread() == Thread::GetCurrentThread();
 }
 
 AutoPtr<AbstractQueuedSynchronizer::ConditionObject> ReentrantLock::Sync::NewCondition()
@@ -210,7 +209,8 @@ ECode ReentrantLock::TryLock(
 
 ECode ReentrantLock::UnLock()
 {
-    mSync->TryRelease(1);
+    Boolean res;
+    mSync->ReleaseIt(1, &res);
     return NOERROR;
 }
 

@@ -5456,6 +5456,7 @@ void CActivityManagerService::CleanupRecentTasksLocked(
                 // This situation is broken, and we should just get rid of it now.
                 it = mRecentTasks->Erase(it);
                 task->RemovedFromRecents(mTaskPersister);
+                N--;
                 Slogger::W(TAG, "Removing auto-remove without activity: %s", TO_CSTR(task));
                 continue;
             }
@@ -5504,6 +5505,7 @@ void CActivityManagerService::CleanupRecentTasksLocked(
                         // Doesn't exist any more!  Good-bye.
                         it = mRecentTasks->Erase(it);
                         task->RemovedFromRecents(mTaskPersister);
+                        N--;
                         Slogger::W(TAG, "Removing no longer valid recent: %s", TO_CSTR(task));
                         continue;
                     }
