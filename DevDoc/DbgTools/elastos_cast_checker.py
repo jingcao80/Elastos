@@ -15,15 +15,31 @@ def read_file(path):
             handle.close()
     return lines
 
-def find_declare_line(param, lines, lineIndex):
+def find_declare_line(usedType, param, lines, lineIndex):
     if len(lines) == 0:
         return -1
 
     for i in range(lineIndex, 0, -1):
         eachLine = lines[i]
         if (len(eachLine) > 1) and (eachLine.startswith("//") == False):
-            pattern = re.compile(r'[>,*]\s*'+param+'[; ,]')
+
+            pattern = re.compile(r'AutoPtr<'+usedType+'>\s*(.*)'+param+'[; ,]')
             match = pattern.search(eachLine)
+            if match == None:
+                pattern = re.compile(r''+usedType+'\s*\*(.*)'+param+'[; ,]')
+                match = pattern.search(eachLine)
+            if match:
+                #print eachLine, 'match', match.group()
+                return i;
+
+    for i in range(lineIndex, 0, -1):
+        eachLine = lines[i]
+        if (len(eachLine) > 1) and (eachLine.startswith("//") == False):
+            pattern = re.compile(r'[>]\s\s*'+param+'[; ,]')
+            match = pattern.search(eachLine)
+            if match == None:
+                pattern = re.compile(r'[,*]\s*'+param+'[; ,]')
+                match = pattern.search(eachLine)
             if match == None:
                 pattern = re.compile(r'[,*]'+param+'[; ,]')
                 match = pattern.search(eachLine)
@@ -39,7 +55,7 @@ def process_declare_line_in_header(filepath, logFile, firstLog, match, lines, li
     usedType = match.group(2)
     paramName = match.group(4)
     matchInfo = match.group()
-    declLineNum = find_declare_line(paramName, headerLines, len(headerLines)-1)
+    declLineNum = find_declare_line(usedType, paramName, headerLines, len(headerLines)-1)
     if (declLineNum != -1):
         declLine = headerLines[declLineNum]
 
@@ -85,7 +101,7 @@ def process_file(path, logFile):
                 usedType = match.group(2)
                 paramName = match.group(4)
                 matchInfo = match.group()
-                declLineNum = find_declare_line(paramName, lines, lineNum)
+                declLineNum = find_declare_line(usedType, paramName, lines, lineNum)
                 if (declLineNum != -1):
                     declLine = lines[declLineNum]
                     #print 'declLine', declLine
@@ -139,21 +155,6 @@ def process(path, logPath):
         print 'invalid path:', path
     logFile.close()
 
-process('/home/kesalin/test/python/test.cpp', 'elastos_cast_checker.log')
+#process('/home/kesalin/test/python/test.cpp', 'elastos_cast_checker.log')
 #process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/', '/home/kesalin/elastos_cast_checker.log')
-#process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app', '/home/kesalin/elastos_cast_checker.log')
-
-# def test():
-#     param = 'ab';
-#     pattern = re.compile(r'[>,*]\s'+param+'[; ,]')
-#     match = pattern.search('AutoPtr<IAnimation> ab;')
-#     if match == None:
-#         pattern = re.compile(r'[,*]'+param+'[; ,]')
-#         match = pattern.search('AutoPtr<IAnimation> aOut, aIn;')
-#     if match:
-#         print param, 'match', match.group()
-#     else:
-#         print 'unmatch', param
-#     pass
-
-# test()
+process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app', '/home/kesalin/elastos_cast_checker.log')
