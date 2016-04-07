@@ -1,32 +1,33 @@
 
-#ifndef __CACTIVITYONE_H__
-#define __CACTIVITYONE_H__
+#ifndef __Elastos_DevSamples_PopupMenuDemo_CACTIVITYONE_H__
+#define __Elastos_DevSamples_PopupMenuDemo_CACTIVITYONE_H__
 
-#include "elastos/droid/ext/frameworkdef.h"
-#include "elastos/droid/app/Activity.h"
-#include "_CActivityOne.h"
+#include "_Elastos_DevSamples_PopupMenuDemo_CActivityOne.h"
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.View.h>
+#include <Elastos.Droid.Widget.h>
+#include <elastos/droid/app/Activity.h>
 
 using Elastos::Droid::App::Activity;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnClickListener;
-using Elastos::Droid::View::EIID_IViewOnClickListener;
-using Elastos::Droid::Widget::IPopupMenu;
-using Elastos::Droid::Widget::CPopupMenu;
 using Elastos::Droid::Widget::IButton;
+using Elastos::Droid::Widget::IPopupMenu;
 using Elastos::Droid::Widget::IPopupMenuOnMenuItemClickListener;
-using Elastos::Droid::Widget::EIID_IPopupMenuOnMenuItemClickListener;
 
 namespace Elastos {
-namespace Droid {
 namespace DevSamples {
 namespace PopupMenuDemo {
 
-
-class CActivityOne : public Activity
+class CActivityOne
+    : public Activity
 {
 public:
     class MyListener
-        : public IViewOnClickListener
-        , public ElRefBase
+        : public Object
+        , public IViewOnClickListener
     {
     public:
         CAR_INTERFACE_DECL()
@@ -41,8 +42,8 @@ public:
     };
 
     class MemuListener
-        : public IPopupMenuOnMenuItemClickListener
-        , public ElRefBase
+        : public Object
+        , public IPopupMenuOnMenuItemClickListener
     {
     public:
         CAR_INTERFACE_DECL()
@@ -51,6 +52,11 @@ public:
             /* [in] */ IMenuItem* item,
             /* [out] */ Boolean* result);
     };
+
+public:
+    CAR_OBJECT_DECL()
+
+    CARAPI constructor();
 
 protected:
     CARAPI OnCreate(
@@ -67,13 +73,11 @@ protected:
     CARAPI OnDestroy();
 
 private:
-
     AutoPtr<IButton> mButton;
 };
 
 } // namespace PopupMenuDemo
 } // namespace DevSamples
-} // namespace Droid
 } // namespace Elastos
 
-#endif // __CACTIVITYONE_H__
+#endif // __Elastos_DevSamples_PopupMenuDemo_CACTIVITYONE_H__
