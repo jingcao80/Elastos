@@ -405,10 +405,10 @@ ECode UsbDeviceManager::UsbHandler::HandleMessage(
             HandleMsgEnableAdb(arg1 == 1);
             break;
         case UsbDeviceManager::MSG_SET_CURRENT_FUNCTIONS: {
-                AutoPtr<ICharSequence> seq;
+                AutoPtr<IInterface> seq;
                 msg->GetObj((IInterface**)&seq);
                 String info;
-                seq->ToString(&info);
+                ICharSequence::Probe(seq)->ToString(&info);
                 HandleMsgSetCurrentFunctions(info, arg1 == 1);
             }
             break;
@@ -983,9 +983,9 @@ ECode UsbDeviceManager::Init(
     pm->HasSystemFeature(IPackageManager::FEATURE_USB_ACCESSORY, &mHasUsbAccessory);
     InitRndisAddress();
 
-    AutoPtr<IPowerManager> power;
+    AutoPtr<IInterface> power;
     mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&power);
-    power->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, TAG, (IPowerManagerWakeLock**)&mWl);
+    IPowerManager::Probe(power)->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, TAG, (IPowerManagerWakeLock**)&mWl);
 
     ReadOemUsbOverrideConfig();
 

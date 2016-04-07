@@ -400,30 +400,30 @@ static const char* lookupLabelByValue(int value, const InputEventLabel* list) {
     return NULL;
 }
 
-static int32_t getKeyCodeByLabel(const char* label) {
+__attribute__((__unused__)) static int32_t getKeyCodeByLabel(const char* label) {
     return int32_t(lookupValueByLabel(label, KEYCODES));
 }
 
-static const char* getLabelByKeyCode(int32_t keyCode) {
+__attribute__((__unused__)) static const char* getLabelByKeyCode(int32_t keyCode) {
     if (keyCode >= 0 && keyCode < size(KEYCODES)) {
         return KEYCODES[keyCode].literal;
     }
     return NULL;
 }
 
-static uint32_t getKeyFlagByLabel(const char* label) {
+__attribute__((__unused__)) static uint32_t getKeyFlagByLabel(const char* label) {
     return uint32_t(lookupValueByLabel(label, FLAGS));
 }
 
-static int32_t getAxisByLabel(const char* label) {
+__attribute__((__unused__)) static int32_t getAxisByLabel(const char* label) {
     return int32_t(lookupValueByLabel(label, AXES));
 }
 
-static const char* getAxisLabel(int32_t axisId) {
+__attribute__((__unused__)) static const char* getAxisLabel(int32_t axisId) {
     return lookupLabelByValue(axisId, AXES);
 }
 
-static int32_t getLedByLabel(const char* label) {
+__attribute__((__unused__)) static int32_t getLedByLabel(const char* label) {
     return int32_t(lookupValueByLabel(label, LEDS));
 }
 

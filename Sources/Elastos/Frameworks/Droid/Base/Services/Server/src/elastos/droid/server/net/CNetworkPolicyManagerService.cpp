@@ -1917,7 +1917,7 @@ ECode CNetworkPolicyManagerService::WritePolicyLocked()
     ECode ec;
     FAIL_GOTO(ec = mPolicyFile->StartWrite((IFileOutputStream**)&fos), ERROR);
 
-    CFastXmlSerializer::New((IFastXmlSerializer**)&out);
+    CFastXmlSerializer::New((IXmlSerializer**)&out);
     FAIL_GOTO(ec = out->SetOutput((IOutputStream*)fos.Get(), String("utf-8")), ERROR);
     CBoolean::New(TRUE, (IBoolean**)&value);
     FAIL_GOTO(ec = out->StartDocument(String(NULL), Ptr(value)->Func(value->GetValue)), ERROR);
@@ -3058,7 +3058,7 @@ void CNetworkPolicyManagerService::HandleMsgRulesChanged(
     for (Int32 i = 0; i < length; i++) {
         AutoPtr<IInterface> obj;
         mListeners->GetBroadcastItem(i, (IInterface**)&obj);
-        AutoPtr<IINetworkPolicyListener> listener = IINetworkPolicyListener::Probe(obj);
+        IINetworkPolicyListener* listener = IINetworkPolicyListener::Probe(obj);
         if (listener != NULL) {
             listener->OnUidRulesChanged(uid, uidRules);
         }
@@ -3076,10 +3076,10 @@ void CNetworkPolicyManagerService::HandleMsgMeteredIfacesChanged(
         array = ArrayOf<String>::Alloc(size);
 
         for (Int32 i = 0; i < size; i++) {
-            AutoPtr<ICharSequence> seq;
+            AutoPtr<IInterface> seq;
             meteredIfaces->Get(i, (IInterface**)&seq);
             String info;
-            seq->ToString(&info);
+            ICharSequence::Probe(seq)->ToString(&info);
             (*array)[i] = info;
         }
     }
@@ -3092,7 +3092,7 @@ void CNetworkPolicyManagerService::HandleMsgMeteredIfacesChanged(
     for (Int32 i = 0; i < length; i++) {
         AutoPtr<IInterface> obj;
         mListeners->GetBroadcastItem(i, (IInterface**)&obj);
-        AutoPtr<IINetworkPolicyListener> listener = IINetworkPolicyListener::Probe(obj);
+        IINetworkPolicyListener* listener = IINetworkPolicyListener::Probe(obj);
         if (listener != NULL) {
             listener->OnMeteredIfacesChanged(array);
         }
@@ -3124,8 +3124,9 @@ void CNetworkPolicyManagerService::HandleMsgRestrictBackgroundChanged(
     Int32 length;
     mListeners->BeginBroadcast(&length);
     for (Int32 i = 0; i < length; i++) {
-        AutoPtr<IINetworkPolicyListener> listener;
-        mListeners->GetBroadcastItem(i, (IInterface**)&listener);
+        AutoPtr<IInterface> obj;
+        mListeners->GetBroadcastItem(i, (IInterface**)&obj);
+        IINetworkPolicyListener* listener = IINetworkPolicyListener::Probe(obj);
         if (listener != NULL) {
             listener->OnRestrictBackgroundChanged(restrictBackground);
         }

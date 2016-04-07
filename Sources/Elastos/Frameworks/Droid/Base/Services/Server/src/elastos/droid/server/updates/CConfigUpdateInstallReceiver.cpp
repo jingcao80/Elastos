@@ -162,16 +162,16 @@ AutoPtr<IX509Certificate> CConfigUpdateInstallReceiver::GetCert(
         IBase64::Decode(cert, IBase64::DEFAULT, (ArrayOf<Byte>**)&derCert);
 
         AutoPtr<IInputStream> istream;
-        CByteArrayInputStream::New(derCert, (IByteArrayInputStream**)&istream);
+        CByteArrayInputStream::New(derCert, (IInputStream**)&istream);
 
         AutoPtr<ICertificateFactory> cf;
         AutoPtr<ICertificateFactoryHelper> cf_helper;
         CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&cf_helper);
         cf_helper->GetInstance("X.509", (ICertificateFactory**)&cf);
 
-        AutoPtr<IX509Certificate> x509cf;
+        AutoPtr<ICertificate> x509cf;
         cf->GenerateCertificate(istream, (ICertificate**)&x509cf);
-        return x509cf;
+        return IX509Certificate::Probe(x509cf);
     //} catch (CertificateException e) {
     //    throw new IllegalStateException("Got malformed certificate from settings, ignoring");
     //}

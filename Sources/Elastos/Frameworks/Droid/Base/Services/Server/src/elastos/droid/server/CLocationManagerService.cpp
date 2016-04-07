@@ -720,8 +720,9 @@ ECode CLocationManagerService::EnsureFallbackFusedProviderPresentLocked(
     rInfos->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
     Boolean hasNext = FALSE;
     while (enumerator->MoveNext(&hasNext), hasNext) {
-        AutoPtr<IResolveInfo> rInfo;
-        enumerator->Current((IInterface**)&rInfo);
+        AutoPtr<IInterface> obj;
+        enumerator->Current((IInterface**)&obj);
+        IResolveInfo* rInfo = IResolveInfo::Probe(obj);
 
         AutoPtr<IServiceInfo> serviceInfo;
         rInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
@@ -1229,12 +1230,11 @@ String CLocationManagerService::PickBest(
     AutoPtr<IObjectEnumerator> enumerator;
     providers->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
     Boolean hasNext = FALSE;
-    AutoPtr<ICharSequence> cs;
     String s;
     while (enumerator->MoveNext(&hasNext), hasNext) {
-        cs = NULL;
-        enumerator->Current((IInterface**)&cs);
-        cs->ToString(&s);
+        AutoPtr<IInterface> obj;
+        enumerator->Current((IInterface**)&obj);
+        ICharSequence::Probe(obj)->ToString(&s);
         if (s.Equals(ILocationManager::GPS_PROVIDER)) {
             return ILocationManager::GPS_PROVIDER;
         }
@@ -1244,9 +1244,9 @@ String CLocationManagerService::PickBest(
     }
     enumerator->Reset();
     enumerator->MoveNext(&hasNext);
-    cs = NULL;
-    enumerator->Current((IInterface**)&cs);
-    cs->ToString(&s);
+    AutoPtr<IInterface> obj;
+    enumerator->Current((IInterface**)&obj);
+    ICharSequence::Probe(obj)->ToString(&s);
     return s;
 }
 

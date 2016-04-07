@@ -52,10 +52,10 @@ ECode OrFilter::Matches(
 
     for (Int32 i = 0;  i < size;  i++) {
 
-        AutoPtr<IFilter> filter;
+        AutoPtr<IInterface> filter;
         children->Get(i, (IInterface**)&filter);
 
-        filter->Matches(ifw, resolvedComponent, intent, callerUid, callerPid,
+        IFilter::Probe(filter)->Matches(ifw, resolvedComponent, intent, callerUid, callerPid,
                 resolvedType, receivingUid, ret);
         if (*ret) {
             return NOERROR;

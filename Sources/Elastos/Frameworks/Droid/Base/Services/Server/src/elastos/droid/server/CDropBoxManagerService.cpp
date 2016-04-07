@@ -452,7 +452,7 @@ ECode CDropBoxManagerService::Add(
        }
        AutoPtr<IFileOutputStream> foutput;
        CFileOutputStream::New(temp, (IFileOutputStream**)&foutput);
-       CBufferedOutputStream::New(IOutputStream::Probe(foutput), bufferSize, (IBufferedOutputStream**)&output);
+       CBufferedOutputStream::New(IOutputStream::Probe(foutput), bufferSize, (IOutputStream**)&output);
        if (read == buffer->GetLength() && ((flags & IDropBoxManager::IS_GZIPPED) == 0)) {
            AutoPtr<IOutputStream> goutput;
            CGZIPOutputStream::New(output, (IOutputStream**)&goutput);

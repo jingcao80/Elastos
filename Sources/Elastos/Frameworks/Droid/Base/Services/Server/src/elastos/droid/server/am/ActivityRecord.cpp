@@ -424,8 +424,9 @@ void ActivityRecord::Dump(
         for (; iter != mPendingResults->End(); ++iter) {
             AutoPtr<IWeakReference> wpir = *iter;
             AutoPtr<IIIntentSender> pir;
-            if (wpir != NULL)
+            if (wpir != NULL) {
                 wpir->Resolve(EIID_IIIntentSender, (IInterface**)&pir);
+            }
             pw->Print(prefix);
             pw->Print(String("  - "));
             if (pir == NULL) {

@@ -66,8 +66,9 @@ ECode GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback::Run(
     /* [in] */ IAccountManagerFuture* future)
 {
     // try {
-    AutoPtr<ICharSequence> authTokenLabel;
-    ASSERT_SUCCEEDED(future->GetResult((IInterface**)&authTokenLabel));
+    AutoPtr<IInterface> obj;
+    ASSERT_SUCCEEDED(future->GetResult((IInterface**)&obj));
+    ICharSequence* authTokenLabel = ICharSequence::Probe(obj);
     if (!TextUtils::IsEmpty(authTokenLabel)) {
         AutoPtr<IRunnable> runnable = new OnCreateAccountManagerCallbackRunnable(
             authTokenLabel, this);
@@ -133,8 +134,10 @@ ECode GrantCredentialsPermissionActivity::OnCreate(
             (ICharSequence**)&csq);
     SetTitle(csq);
 
+    AutoPtr<IInterface> service;
     ASSERT_SUCCEEDED(GetSystemService(IContext::LAYOUT_INFLATER_SERVICE,
-            (IInterface**)&mInflater));
+            (IInterface**)&service));
+    mInflater = ILayoutInflater::Probe(service);
 
     AutoPtr<IIntent> intent;
     GetIntent((IIntent**)&intent);

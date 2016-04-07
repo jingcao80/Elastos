@@ -2492,7 +2492,7 @@ SyncManager::SyncManager(
         SYNC_LOOP_WAKE_LOCK, (IPowerManagerWakeLock**)&mSyncManagerWakeLock);
     mSyncManagerWakeLock->SetReferenceCounted(FALSE);
 
-    AutoPtr<IISyncStatusObserver > oberservr;
+    AutoPtr<IISyncStatusObserver> oberservr;
     CSyncStatusObserver::New(this, (IISyncStatusObserver**)&oberservr);
     mSyncStorageEngine->AddStatusChangeListener(
         IContentResolver::SYNC_OBSERVER_TYPE_SETTINGS, oberservr);

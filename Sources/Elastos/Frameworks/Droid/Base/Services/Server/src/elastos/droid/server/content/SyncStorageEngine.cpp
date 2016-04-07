@@ -2837,7 +2837,7 @@ void SyncStorageEngine::ReadAndDeleteLegacyAccountInfoLocked()
         CSQLiteQueryBuilder::New((ISQLiteQueryBuilder**)&qb);
         qb->SetTables(String("settings"));
         c = NULL;
-        qb->Query(db, NULL, nullStr, NULL, nullStr, nullStr, nullStr, (ICursor**)&qb);
+        qb->Query(db, NULL, nullStr, NULL, nullStr, nullStr, nullStr, (ICursor**)&c);
         while (c->MoveToNext(&bval), bval) {
             String name, value;
             c->GetColumnIndex(String("name"), &index);
@@ -3159,7 +3159,7 @@ void SyncStorageEngine::WritePendingOperationsLocked()
     ec = mPendingFile->StartWrite((IFileOutputStream**)&fos);
     FAIL_GOTO(ec, _EXIT_)
 
-    CFastXmlSerializer::New((IFastXmlSerializer**)&out);
+    CFastXmlSerializer::New((IXmlSerializer**)&out);
     ec = out->SetOutput(IOutputStream::Probe(fos), String("utf-8"));
     FAIL_GOTO(ec, _EXIT_)
 
@@ -3217,7 +3217,7 @@ void SyncStorageEngine::AppendPendingOperationLocked(
     }
 
     AutoPtr<IXmlSerializer> out;
-    CFastXmlSerializer::New((IFastXmlSerializer**)&out);
+    CFastXmlSerializer::New((IXmlSerializer**)&out);
     ec = out->SetOutput(IOutputStream::Probe(fos), String("utf-8"));
     FAIL_GOTO(ec, _EXIT_)
 

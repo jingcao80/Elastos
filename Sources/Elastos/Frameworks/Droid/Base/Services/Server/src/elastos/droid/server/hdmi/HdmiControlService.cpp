@@ -2276,7 +2276,8 @@ ECode HdmiControlService::UpdateSafeMhlInput()
             Boolean isEmpty;
             inputs->IsEmpty(&isEmpty);
             if (isEmpty) {
-                CArrayList::New((IArrayList**)&inputs);
+                inputs = NULL;
+                CArrayList::New((IList**)&inputs);
             }
             AutoPtr<IHdmiDeviceInfo> deviceInfo;
             device->GetInfo((IHdmiDeviceInfo**)&deviceInfo);

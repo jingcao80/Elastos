@@ -914,8 +914,9 @@ AutoPtr<List<AutoPtr<IResolveInfo> > > UsbSettingsManager::GetDeviceMatchesLocke
     resolveInfos->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
     Boolean hasNext;
     while (enumerator->MoveNext(&hasNext), hasNext) {
-        AutoPtr<IResolveInfo> resolveInfo;
-        enumerator->Current((IInterface**)&resolveInfo);
+        AutoPtr<IInterface> obj;
+        enumerator->Current((IInterface**)&obj);
+        IResolveInfo* resolveInfo = IResolveInfo::Probe(obj);
         String action;
         intent->GetAction(&action);
         if (PackageMatchesLocked(resolveInfo, action, device, NULL)) {
@@ -936,8 +937,9 @@ AutoPtr<List<AutoPtr<IResolveInfo> > > UsbSettingsManager::GetAccessoryMatchesLo
     resolveInfos->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
     Boolean hasNext;
     while (enumerator->MoveNext(&hasNext), hasNext) {
-        AutoPtr<IResolveInfo> resolveInfo;
-        enumerator->Current((IInterface**)&resolveInfo);
+        AutoPtr<IInterface> obj;
+        enumerator->Current((IInterface**)&obj);
+        IResolveInfo* resolveInfo = IResolveInfo::Probe(obj);
         String action;
         intent->GetAction(&action);
         if (PackageMatchesLocked(resolveInfo, action, NULL, accessory)) {
