@@ -3,15 +3,26 @@
 #include "R.h"
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::IMenu;
+using Elastos::Droid::View::IMenuInflater;
+using Elastos::Droid::Widget::CPopupMenu;
+using Elastos::Droid::Widget::EIID_IPopupMenuOnMenuItemClickListener;
+using Elastos::Utility::Logging::Slogger;
+
 namespace Elastos {
-namespace Droid {
 namespace DevSamples {
 namespace PopupMenuDemo {
 
-CAR_INTERFACE_IMPL(CActivityOne::MyListener, IViewOnClickListener)
+//=====================================
+// CActivityOne::MyListener
+//=====================================
+
+CAR_INTERFACE_IMPL(CActivityOne::MyListener, Object, IViewOnClickListener)
 
 CActivityOne::MyListener::MyListener(
-    /* [in] */ CActivityOne* host) : mHost(host)
+    /* [in] */ CActivityOne* host)
+    : mHost(host)
 {}
 
 ECode CActivityOne::MyListener::OnClick(
@@ -30,14 +41,29 @@ ECode CActivityOne::MyListener::OnClick(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CActivityOne::MemuListener, IPopupMenuOnMenuItemClickListener)
+//=====================================
+// CActivityOne::MemuListener
+//=====================================
+
+CAR_INTERFACE_IMPL(CActivityOne::MemuListener, Object, IPopupMenuOnMenuItemClickListener)
 
 ECode CActivityOne::MemuListener::OnMenuItemClick(
     /* [in] */ IMenuItem* item,
     /* [out] */ Boolean* result)
 {
-    SLOGGERD("CActivityOne", "CActivityOne::MemuListener::OnMenuItemClick")
+    Slogger::D("CActivityOne", "CActivityOne::MemuListener::OnMenuItemClick");
     return NOERROR;
+}
+
+//=====================================
+// CActivityOne
+//=====================================
+
+CAR_OBJECT_IMPL(CActivityOne)
+
+ECode CActivityOne::constructor()
+{
+    return Activity::constructor();
 }
 
 ECode CActivityOne::OnCreate(
@@ -47,7 +73,7 @@ ECode CActivityOne::OnCreate(
     SetContentView(R::layout::main);
     mButton = IButton::Probe(FindViewById(R::id::button));
     AutoPtr<IViewOnClickListener> l = new MyListener(this);
-    mButton->SetOnClickListener(l);
+    IView::Probe(mButton)->SetOnClickListener(l);
     return NOERROR;
 }
 
@@ -83,5 +109,4 @@ ECode CActivityOne::OnDestroy()
 
 } // namespace AutoCompleteTextViewDemo
 } // namespace DevSamples
-} // namespace Droid
 } // namespace Elastos

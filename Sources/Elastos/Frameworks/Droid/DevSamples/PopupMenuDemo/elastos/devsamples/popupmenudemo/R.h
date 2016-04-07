@@ -5,13 +5,16 @@
  * should not be modified by hand.
  */
 
-#ifndef __Elastos_Droid_DevSamples_PopupMenuDemo_R_H__
-#define __Elastos_Droid_DevSamples_PopupMenuDemo_R_H__
+#ifndef __Elastos_DevSamples_PopupMenuDemo_R_H__
+#define __Elastos_DevSamples_PopupMenuDemo_R_H__
+
+#include <elatypes.h>
+
 namespace Elastos {
-namespace Droid {
 namespace DevSamples {
 namespace PopupMenuDemo {
-class R {
+
+class ECO_PUBLIC R {
     public: class attr {
     };
     public: class drawable {
@@ -33,10 +36,9 @@ class R {
         public: static const int hello = 0x7f040001;
         public: static const int planet_prompt = 0x7f040002;
     };
-};
-};
-};
-};
-};
 
-#endif // __Elastos_Droid_DevSamples_PopupMenuDemo_R_H__
+};
+};
+};
+};
+#endif // __Elastos_DevSamples_PopupMenuDemo_R_H__
