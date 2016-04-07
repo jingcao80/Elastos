@@ -102,9 +102,9 @@ ECode CRttManager::ServiceHandler::ReportSuccess(
     /* [in] */ IObject* listener,
     /* [in] */ IMessage* msg)
 {
-    AutoPtr<IRttManagerRttListener> rttListener = IRttManagerRttListener::Probe(listener);
-    AutoPtr<IRttManagerParcelableRttResults> parcelableResults;
-    msg->GetObj((IInterface**)&parcelableResults);
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    IRttManagerParcelableRttResults* parcelableResults = IRttManagerParcelableRttResults::Probe(obj);
     AutoPtr< ArrayOf<IRttManagerRttResult*> > results;
     parcelableResults->GetResults((ArrayOf<IRttManagerRttResult*>**)&results);
     return IRttManagerRttListener::Probe(listener)->OnSuccess(results);
@@ -114,13 +114,12 @@ ECode CRttManager::ServiceHandler::ReportFailure(
     /* [in] */ IObject* listener,
     /* [in] */ IMessage* msg)
 {
-    AutoPtr<IRttManagerRttListener> rttListener = IRttManagerRttListener::Probe(listener);
-    AutoPtr<IBundle> bundle;
+    AutoPtr<IInterface> bundle;
     msg->GetObj((IInterface**)&bundle);
     Int32 arg1;
     msg->GetArg1(&arg1);
     String str;
-    bundle->GetString(DESCRIPTION_KEY, &str);
+    IBundle::Probe(bundle)->GetString(DESCRIPTION_KEY, &str);
     return IRttManagerRttListener::Probe(listener)->OnFailure(arg1, str);
 }
 
@@ -267,9 +266,9 @@ AutoPtr<IObject> CRttManager::GetListener(
 
     {
         AutoLock lock(sListenerMapLock);
-        AutoPtr<IObject> listener;
+        AutoPtr<IInterface> listener;
         sListenerMap->Get(key, (IInterface**)&listener);
-        return listener;
+        return IObject::Probe(listener);
     }
 }
 
@@ -300,10 +299,10 @@ AutoPtr<IObject> CRttManager::RemoveListener(
 
     {
         AutoLock lock(sListenerMapLock);
-        AutoPtr<IObject> listener;
+        AutoPtr<IInterface> listener;
         sListenerMap->Get(key, (IInterface**)&listener);
         sListenerMap->Remove(key);
-        return listener;
+        return IObject::Probe(listener);
     }
 }
 
@@ -311,9 +310,7 @@ Int32 CRttManager::RemoveListener(
     /* [in] */ IObject* listener)
 {
     Int32 key = GetListenerKey(listener);
-    if (key == INVALID_KEY) return key;
-
-    {
+    if (key == INVALID_KEY) return key; {
         AutoLock lock(sListenerMapLock);
         sListenerMap->Remove(key);
         return key;

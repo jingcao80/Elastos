@@ -118,9 +118,10 @@ ECode CCursorToBulkCursorAdaptor::GetBulkCursorDescriptor(
         AutoPtr<CBulkCursorDescriptor> d;
         CBulkCursorDescriptor::NewByFriend((CBulkCursorDescriptor**)&d);
         d->mCursor = this;
-        ICursor::Probe(mCursor)->GetColumnNames((ArrayOf<String>**)&d->mColumnNames);
-        ICursor::Probe(mCursor)->GetWantsAllOnMoveCalls(&d->mWantsAllOnMoveCalls);
-        ICursor::Probe(mCursor)->GetCount(&d->mCount);
+        ICursor* cursor = ICursor::Probe(mCursor);
+        cursor->GetColumnNames((ArrayOf<String>**)&d->mColumnNames);
+        cursor->GetWantsAllOnMoveCalls(&d->mWantsAllOnMoveCalls);
+        cursor->GetCount(&d->mCount);
         mCursor->GetWindow((ICursorWindow**)&d->mWindow);
         if (d->mWindow != NULL) {
             // Acquire a reference to the window because its reference count will be
@@ -235,7 +236,7 @@ ECode CCursorToBulkCursorAdaptor::Requery(
         if (ec == (ECode)E_ILLEGAL_STATE_EXCEPTION) {
             Boolean isClosed;
             ICursor::Probe(mCursor)->IsClosed(&isClosed);
-            Slogger::E(TAG, "%s Requery misuse db, mCursor isClosed:%d, 0x%08x", mProviderName.string(), isClosed, ec);
+            Slogger::E(TAG, "%s Requery misuse db, cursor isClosed:%d, 0x%08x", mProviderName.string(), isClosed, ec);
             return ec;
         }
         if (!isSuccess) {
@@ -319,7 +320,7 @@ ECode CCursorToBulkCursorAdaptor::constructor(
         mCursor = ICrossProcessCursor::Probe(cursor);
     }
     else {
-        CCrossProcessCursorWrapper::New(cursor, (ICrossProcessCursorWrapper**)&mCursor);
+        CCrossProcessCursorWrapper::New(cursor, (ICrossProcessCursor**)&mCursor);
     }
     mProviderName = providerName;
 

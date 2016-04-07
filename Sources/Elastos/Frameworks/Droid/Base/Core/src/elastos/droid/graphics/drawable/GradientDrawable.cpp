@@ -956,7 +956,7 @@ Boolean GradientDrawable::EnsureValidRect()
 
                 AutoPtr<IShader> shader;
                 CLinearGradient::New(x0, y0, x1, y1, *colors,
-                        st->mPositions, ShaderTileMode_CLAMP, (ILinearGradient**)&shader);
+                        st->mPositions, ShaderTileMode_CLAMP, (IShader**)&shader);
                 mFillPaint->SetShader(shader);
             }
             else if (st->mGradient == IGradientDrawable::RADIAL_GRADIENT) {
@@ -1024,7 +1024,7 @@ Boolean GradientDrawable::EnsureValidRect()
 
                 }
                 AutoPtr<IShader> shader;
-                CSweepGradient::New(x0, y0, *tempColors, tempPositions, (ISweepGradient**)&shader);
+                CSweepGradient::New(x0, y0, *tempColors, tempPositions, (IShader**)&shader);
                 mFillPaint->SetShader(shader);
             }
 

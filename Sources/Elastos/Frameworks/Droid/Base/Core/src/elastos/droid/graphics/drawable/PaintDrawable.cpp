@@ -52,7 +52,7 @@ ECode PaintDrawable::SetCornerRadii(
     }
     else {
         AutoPtr<IShape> shape;
-        CRoundRectShape::New(radii, NULL, NULL, (IRoundRectShape**)&shape);
+        CRoundRectShape::New(radii, NULL, NULL, (IShape**)&shape);
         SetShape(shape);
     }
     return InvalidateSelf();;

@@ -1648,11 +1648,12 @@ ECode SQLiteDatabase::IsDatabaseIntegrityOk(
             continue;
         }
         if (!rslt.EqualsIgnoreCase("ok")) {
-            AutoPtr<ICharSequence> cs, keyObj;
+            AutoPtr<ICharSequence> keyObj;
             CString::New(name, (ICharSequence**)&keyObj);
+            AutoPtr<IInterface> cs;
             attachedDbs->Get(keyObj, (IInterface**)&cs);
             String value;
-            cs->ToString(&value);
+            ICharSequence::Probe(cs)->ToString(&value);
             // integrity_checker failed on main or attached databases
             Slogger::E(TAG, "PRAGMA integrity_check on %s returned: %s", value.string(), rslt.string());
             *result = FALSE;

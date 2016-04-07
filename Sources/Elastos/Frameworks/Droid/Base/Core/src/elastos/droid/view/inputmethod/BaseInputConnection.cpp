@@ -882,13 +882,13 @@ void BaseInputConnection::ReplaceText(
         assert(text != NULL);
         AutoPtr<ISpannable> sp;
         if (ISpannable::Probe(text) == NULL) {
-            CSpannableStringBuilder::New(text, (ISpannableStringBuilder**)&sp);
+            CSpannableStringBuilder::New(text, (ISpannable**)&sp);
             text = ICharSequence::Probe(sp);
             EnsureDefaultComposingSpans();
             if (mDefaultComposingSpans != NULL) {
+                Int32 len2 = 0;
+                text->GetLength(&len2);
                 for (Int32 i = 0; i < mDefaultComposingSpans->GetLength(); ++i) {
-                    Int32 len2 = 0;
-                    ICharSequence::Probe(sp)->GetLength(&len2);
                     sp->SetSpan((*mDefaultComposingSpans)[i], 0, len2,
                             ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE | ISpanned::SPAN_COMPOSING);
                 }

@@ -55,10 +55,10 @@ ECode CScanSettings::IsValid(
     Boolean bNext;
     iter->HasNext(&bNext);
     for (; bNext; iter->HasNext(&bNext)) {
-        AutoPtr<IWifiChannel> channel;
+        AutoPtr<IInterface> channel;
         iter->GetNext((IInterface**)&channel);
         Boolean bFlag;
-        channel->IsValid(&bFlag);
+        IWifiChannel::Probe(channel)->IsValid(&bFlag);
         if (!bFlag) {
             *result = FALSE;
             return NOERROR;
@@ -94,11 +94,9 @@ ECode CScanSettings::WriteToParcel(
         Boolean bNext;
         iter->HasNext(&bNext);
         for (; bNext; iter->HasNext(&bNext)) {
-            AutoPtr<IWifiChannel> channel;
+            AutoPtr<IInterface> channel;
             iter->GetNext((IInterface**)&channel);
-            assert(0);
-            // TODO
-            // channel->WriteToParcel(out, flags);
+            IParcelable::Probe(channel)->WriteToParcel(out);
         }
     }
 

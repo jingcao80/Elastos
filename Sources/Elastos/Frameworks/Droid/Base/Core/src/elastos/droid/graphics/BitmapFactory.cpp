@@ -258,7 +258,7 @@ ECode BitmapFactory::DecodeStream(
     is->IsMarkSupported(&supported);
     if (!supported) {
         is = NULL;
-        CBufferedInputStream::New(_is, DECODE_BUFFER_SIZE, (IBufferedInputStream**)&is);
+        CBufferedInputStream::New(_is, DECODE_BUFFER_SIZE, (IInputStream**)&is);
     }
 
     is->Mark(DECODE_BUFFER_SIZE);

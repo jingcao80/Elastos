@@ -32,10 +32,10 @@ BatchedScanResult::BatchedScanResult(
     Boolean bNext;
     iter->HasNext(&bNext);
     for (; bNext; iter->HasNext(&bNext)) {
-        AutoPtr<IScanResult> s;
+        AutoPtr<IInterface> s;
         iter->GetNext((IInterface**)&s);
         AutoPtr<IScanResult> sr;
-        CScanResult::New(s, (IScanResult**)&sr);
+        CScanResult::New(IScanResult::Probe(s), (IScanResult**)&sr);
         scanResults->Add(sr);
     }
 }
@@ -57,14 +57,10 @@ ECode BatchedScanResult::ToString(
     Boolean bNext;
     iter->HasNext(&bNext);
     for (; bNext; iter->HasNext(&bNext)) {
-        AutoPtr<IScanResult> s;
+        AutoPtr<IInterface> s;
         iter->GetNext((IInterface**)&s);
-        String _str;
-        assert(0);
-        // TODO
-        // s->ToString(&_str);
         sb.Append(" <");
-        sb.Append(_str);
+        sb.Append(Object::ToString(s));
         sb.Append("> ");
     }
     sb.Append(" ]");
@@ -96,11 +92,9 @@ ECode BatchedScanResult::WriteToParcel(
     Boolean bNext;
     iter->HasNext(&bNext);
     for (; bNext; iter->HasNext(&bNext)) {
-        AutoPtr<IScanResult> s;
+        AutoPtr<IInterface> s;
         iter->GetNext((IInterface**)&s);
-        assert(0);
-        // TODO
-        // s->WriteToParcel(dest, flags);
+        IParcelable::Probe(s)->WriteToParcel(dest);
     }
     return NOERROR;
 }

@@ -218,7 +218,7 @@ ECode CDropBoxManagerEntry::GetInputStream(
 
     AutoPtr<IInputStream> is;
     if (mData != NULL) {
-        CByteArrayInputStream::New(mData, (IByteArrayInputStream**)&is);
+        CByteArrayInputStream::New(mData, (IInputStream**)&is);
     }
     else if (mFileDescriptor != NULL) {
         AutoPtr<IParcelFileDescriptorAutoCloseInputStream> aci;

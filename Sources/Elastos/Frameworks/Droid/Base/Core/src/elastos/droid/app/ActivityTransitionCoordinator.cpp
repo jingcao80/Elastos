@@ -476,8 +476,7 @@ ECode ActivityTransitionCoordinator::GetMappedNames(
 ECode ActivityTransitionCoordinator::CopyMappedViews(
     /* [out] */ IArrayList** list)
 {
-    VALIDATE_NOT_NULL(list)
-    return CArrayList::New(ICollection::Probe(mSharedElements), (IArrayList**)&list);
+    return CArrayList::New(ICollection::Probe(mSharedElements), list);
 }
 
 ECode ActivityTransitionCoordinator::GetAllSharedElementNames(

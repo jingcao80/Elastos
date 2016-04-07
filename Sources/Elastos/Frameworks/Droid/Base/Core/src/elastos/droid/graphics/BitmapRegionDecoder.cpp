@@ -112,7 +112,7 @@ ECode BitmapRegionDecoder::NewInstance(
     Boolean support;
     if (is->IsMarkSupported(&support), !support) {
         is = NULL;
-        CBufferedInputStream::New(_is, 16 * 1024, (IBufferedInputStream**)&is);
+        CBufferedInputStream::New(_is, 16 * 1024, (IInputStream**)&is);
     }
 
     if (IAssetInputStream::Probe(is.Get()) != NULL) {
@@ -139,7 +139,7 @@ ECode BitmapRegionDecoder::NewInstance(
     AutoPtr<IInputStream> stream;
 
     // try {
-    ECode ec = CFileInputStream::New(pathName, (IFileInputStream**)&stream);
+    ECode ec = CFileInputStream::New(pathName, (IInputStream**)&stream);
     if (SUCCEEDED(ec)) ec = NewInstance(stream, isShareable, decoder);
     // } finally {
     //     if (stream != null) {

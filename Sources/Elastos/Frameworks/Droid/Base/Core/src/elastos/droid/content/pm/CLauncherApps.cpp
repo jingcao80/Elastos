@@ -437,7 +437,7 @@ ECode CLauncherApps::ResolveActivity(
         // } catch (NameNotFoundException nnfe) {
         //     // Sorry, can't find package
         // }
-        return CLauncherActivityInfo::New(mContext, ri, user, firstInstallTime, (ILauncherActivityInfo**)&info);
+        return CLauncherActivityInfo::New(mContext, ri, user, firstInstallTime, info);
     }
     // } catch (RemoteException re) {
     //     throw new RuntimeException("Failed to call LauncherAppsService");

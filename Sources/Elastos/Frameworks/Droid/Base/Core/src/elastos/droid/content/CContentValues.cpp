@@ -597,12 +597,12 @@ ECode CContentValues::GetAsByteArray(
             Int32 length = 0;
             FAIL_RETURN(array->GetLength(&length))
             AutoPtr<ArrayOf<Byte> > byteArray = ArrayOf<Byte>::Alloc(length);
-            AutoPtr<IByte> byteObj;
+
             Byte b;
             for (Int32 i = 0; i != length; i++) {
-                byteObj = NULL;
+                AutoPtr<IInterface> byteObj;
                 FAIL_RETURN(array->Get(i, (IInterface**)&byteObj))
-                FAIL_RETURN(byteObj->GetValue(&b))
+                FAIL_RETURN(IByte::Probe(byteObj)->GetValue(&b))
                 (*byteArray)[i] = b;
             }
             *value = byteArray;

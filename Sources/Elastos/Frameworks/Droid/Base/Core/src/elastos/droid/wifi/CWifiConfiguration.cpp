@@ -206,15 +206,29 @@ ECode CWifiConfiguration::constructor(
         AutoPtr<IBitSet> allowedGroupCiphers;
 
         source->GetAllowedKeyManagement((IBitSet**)&allowedKeyManagement);
-        ICloneable::Probe(allowedKeyManagement)->Clone((IInterface**)&mAllowedKeyManagement);
+        AutoPtr<IInterface> obj;
+        ICloneable::Probe(allowedKeyManagement)->Clone((IInterface**)&obj);
+        mAllowedKeyManagement = IBitSet::Probe(obj);
+
+        obj = NULL;
         source->GetAllowedKeyManagement((IBitSet**)&allowedProtocols);
-        ICloneable::Probe(allowedProtocols)->Clone((IInterface**)&mAllowedProtocols);
+        ICloneable::Probe(allowedProtocols)->Clone((IInterface**)&obj);
+        mAllowedProtocols = IBitSet::Probe(obj);
+
+        obj = NULL;
         source->GetAllowedKeyManagement((IBitSet**)&allowedAuthAlgorithms);
-        ICloneable::Probe(allowedAuthAlgorithms)->Clone((IInterface**)&mAllowedAuthAlgorithms);
+        ICloneable::Probe(allowedAuthAlgorithms)->Clone((IInterface**)&obj);
+        mAllowedAuthAlgorithms = IBitSet::Probe(obj);
+
+        obj = NULL;
         source->GetAllowedKeyManagement((IBitSet**)&allowedPairwiseCiphers);
-        ICloneable::Probe(allowedPairwiseCiphers)->Clone((IInterface**)&mAllowedPairwiseCiphers);
+        ICloneable::Probe(allowedPairwiseCiphers)->Clone((IInterface**)&obj);
+        mAllowedPairwiseCiphers = IBitSet::Probe(obj);
+
+        obj = NULL;
         source->GetAllowedKeyManagement((IBitSet**)&allowedGroupCiphers);
-        ICloneable::Probe(allowedGroupCiphers)->Clone((IInterface**)&mAllowedGroupCiphers);
+        ICloneable::Probe(allowedGroupCiphers)->Clone((IInterface**)&obj);
+        mAllowedGroupCiphers = IBitSet::Probe(obj);
 
         AutoPtr<IWifiEnterpriseConfig> enterpriseConfig;
         source->GetEnterpriseConfig((IWifiEnterpriseConfig**)&enterpriseConfig);
@@ -544,10 +558,10 @@ ECode CWifiConfiguration::ToString(
         Boolean bNext;
         iter->HasNext(&bNext);
         for (; bNext; iter->HasNext(&bNext)) {
-            AutoPtr<ICharSequence> iKey;
+            AutoPtr<IInterface> iKey;
             iter->GetNext((IInterface**)&iKey);
             String key;
-            iKey->ToString(&key);
+            ICharSequence::Probe(iKey)->ToString(&key);
             sbuf.Append(" linked: ");
             sbuf.Append(key);
             sbuf.AppendChar('\n');
@@ -562,18 +576,18 @@ ECode CWifiConfiguration::ToString(
         Boolean bNext;
         iter->HasNext(&bNext);
         for (; bNext; iter->HasNext(&bNext)) {
-            AutoPtr<ICharSequence> iKey;
+            AutoPtr<IInterface> iKey;
             iter->GetNext((IInterface**)&iKey);
-            AutoPtr<IInteger32> choice;
+            AutoPtr<IInterface> choice;
             mConnectChoices->Get(iKey, (IInterface**)&choice);
             if (choice != NULL) {
                 sbuf.Append(" choice: ");
                 String key;
-                iKey->ToString(&key);
+                ICharSequence::Probe(iKey)->ToString(&key);
                 sbuf.Append(key);
                 sbuf.Append(" = ");
                 Int32 value;
-                choice->GetValue(&value);
+                IInteger32::Probe(choice)->GetValue(&value);
                 sbuf.Append(value);
                 sbuf.AppendChar('\n');
             }
@@ -593,8 +607,9 @@ ECode CWifiConfiguration::ToString(
             Boolean bNext;
             iter->HasNext(&bNext);
             for (; bNext; iter->HasNext(&bNext)) {
-                AutoPtr<IScanResult> result;
-                iter->GetNext((IInterface**)&result);
+                AutoPtr<IInterface> obj;
+                iter->GetNext((IInterface**)&obj);
+                IScanResult* result = IScanResult::Probe(obj);
                 Int64 seen;
                 result->GetSeen(&seen);
                 Int64 milli = now_ms - seen;
@@ -1838,8 +1853,9 @@ ECode CWifiConfiguration::SetVisibility(
     Boolean bNext;
     iter->HasNext(&bNext);
     for (; bNext; iter->HasNext(&bNext)) {
-        AutoPtr<IScanResult> result;
-        iter->GetNext((IInterface**)&result);
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IScanResult* result = IScanResult::Probe(obj);
         Int64 seen;
         result->GetSeen(&seen);
         if (seen == 0)
@@ -1937,27 +1953,29 @@ ECode CWifiConfiguration::IsLinked(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
 
     AutoPtr<IHashMap> linkedConfigurations;
     config->GetLinkedConfigurations((IHashMap**)&linkedConfigurations);
     if (linkedConfigurations != NULL && mLinkedConfigurations != NULL) {
-        String key1, key2;
-        ConfigKey(&key1);
-        AutoPtr<IString> iKey1, iKey2;
-        CString::New(key1, (IString**)&iKey1);
-        AutoPtr<IInterface> value1, value2;
-        linkedConfigurations->Get(iKey1, (IInterface**)&value1);
-        if (value1 != NULL
-                && (config->ConfigKey(&key2),
-                    CString::New(key2, (IString**)&iKey2),
-                    mLinkedConfigurations->Get(iKey2, (IInterface**)&value2),
-                    value2 != NULL)) {
-            *result = TRUE;
-            return NOERROR;
+        String key;
+        ConfigKey(&key);
+        AutoPtr<ICharSequence> keyObj;
+        CString::New(key, (ICharSequence**)&keyObj);
+
+        AutoPtr<IInterface> value;
+        linkedConfigurations->Get(keyObj, (IInterface**)&value);
+        if (value != NULL) {
+            config->ConfigKey(&key);
+            keyObj = NULL;
+            value = NULL;
+            CString::New(key, (ICharSequence**)&keyObj);
+            mLinkedConfigurations->Get(keyObj, (IInterface**)&value);
+            if (value != NULL) {
+                *result = TRUE;
+            }
         }
     }
-
-    *result = FALSE;
 
     return NOERROR;
 }
@@ -1981,8 +1999,9 @@ ECode CWifiConfiguration::LastSeen(
     Boolean bNext;
     iter->HasNext(&bNext);
     for (; bNext; iter->HasNext(&bNext)) {
-        AutoPtr<IScanResult> result;
-        iter->GetNext((IInterface**)&result);
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IScanResult* result = IScanResult::Probe(obj);
         if (mostRecent == NULL) {
             Int64 seen;
             result->GetSeen(&seen);

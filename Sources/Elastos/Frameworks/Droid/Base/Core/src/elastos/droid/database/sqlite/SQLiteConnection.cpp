@@ -2252,10 +2252,10 @@ ECode SQLiteConnection::BindArguments(
                  argIArrayOf->GetLength(&length);
                  AutoPtr< ArrayOf<Byte> > argArray = ArrayOf<Byte>::Alloc(length);
                  for (Int32 j = 0; j < length; ++j) {
-                    AutoPtr<IByte> ibyte;
+                    AutoPtr<IInterface> ibyte;
                     argIArrayOf->Get(j, (IInterface**)&ibyte);
                     Byte argByte;
-                    ibyte->GetValue(&argByte);
+                    IByte::Probe(ibyte)->GetValue(&argByte);
                     (*argArray)[j] = argByte;
                  }
                  FAIL_RETURN(NativeBindBlob(mConnectionPtr, statementPtr, i + 1, argArray));

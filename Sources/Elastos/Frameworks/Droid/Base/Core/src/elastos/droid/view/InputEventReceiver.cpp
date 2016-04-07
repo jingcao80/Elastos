@@ -421,7 +421,6 @@ InputEventReceiver::constructor(
     }
 
     mInputChannel = inputChannel;
-    AutoPtr<IMessageQueue> queue;
     looper->GetQueue((IMessageQueue**)&mMessageQueue);
 
     AutoPtr<IWeakReference> weakThis;

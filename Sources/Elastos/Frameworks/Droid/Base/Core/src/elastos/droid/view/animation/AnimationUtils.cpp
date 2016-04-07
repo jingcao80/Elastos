@@ -204,7 +204,7 @@ ECode AnimationUtils::CreateLayoutAnimationFromXml(
         }
         else if (name.Equals("gridLayoutAnimation")) {
             FAIL_RETURN(CGridLayoutAnimationController::New(
-                c, attrs, (IGridLayoutAnimationController**)&temp));
+                c, attrs, (ILayoutAnimationController**)&temp));
         }
         else {
             Logger::E("AnimationUtils", "Unknown layout animation name: %s", name.string());
@@ -233,7 +233,7 @@ ECode AnimationUtils::MakeInAnimation(
     }
 
     AutoPtr<IInterpolator> interpolator;
-    FAIL_RETURN(CDecelerateInterpolator::New((IDecelerateInterpolator**)&interpolator));
+    FAIL_RETURN(CDecelerateInterpolator::New((IInterpolator**)&interpolator));
     (*animation)->SetInterpolator(interpolator);
     Int64 time;
     CurrentAnimationTimeMillis(&time);
@@ -258,7 +258,7 @@ ECode AnimationUtils::MakeOutAnimation(
     }
 
     AutoPtr<IInterpolator> interpolator;
-    FAIL_RETURN(CAccelerateInterpolator::New((IAccelerateInterpolator**)&interpolator));
+    FAIL_RETURN(CAccelerateInterpolator::New((IInterpolator**)&interpolator));
     (*animation)->SetInterpolator(interpolator);
     Int64 time;
     CurrentAnimationTimeMillis(&time);
@@ -277,7 +277,7 @@ ECode AnimationUtils::MakeInChildBottomAnimation(
     FAIL_RETURN(AnimationUtils::LoadAnimation(context, R::anim::slide_in_left, animation));
 
     AutoPtr<IInterpolator> interpolator;
-    FAIL_RETURN(CAccelerateInterpolator::New((IAccelerateInterpolator**)&interpolator));
+    FAIL_RETURN(CAccelerateInterpolator::New((IInterpolator**)&interpolator));
     (*animation)->SetInterpolator(interpolator);
     Int64 time;
     CurrentAnimationTimeMillis(&time);
@@ -368,34 +368,34 @@ ECode AnimationUtils::CreateInterpolatorFromXml(
         attrs = Xml::AsAttributeSet(parser);
         parser->GetName(&name);
         if (name.Equals("linearInterpolator")) {
-            FAIL_RETURN(CLinearInterpolator::New((ILinearInterpolator**)&temp));
+            FAIL_RETURN(CLinearInterpolator::New((IInterpolator**)&temp));
         }
         else if (name.Equals("accelerateInterpolator")) {
-            FAIL_RETURN(CAccelerateInterpolator::New(res, theme, attrs, (IAccelerateInterpolator**)&temp));
+            FAIL_RETURN(CAccelerateInterpolator::New(res, theme, attrs, (IInterpolator**)&temp));
         }
         else if (name.Equals("decelerateInterpolator")) {
-            FAIL_RETURN(CDecelerateInterpolator::New(res, theme, attrs, (IDecelerateInterpolator**)&temp));
+            FAIL_RETURN(CDecelerateInterpolator::New(res, theme, attrs, (IInterpolator**)&temp));
         }
         else if (name.Equals("accelerateDecelerateInterpolator")) {
-            FAIL_RETURN(CAccelerateDecelerateInterpolator::New((IAccelerateDecelerateInterpolator**)&temp));
+            FAIL_RETURN(CAccelerateDecelerateInterpolator::New((IInterpolator**)&temp));
         }
         else if (name.Equals("cycleInterpolator")) {
-            FAIL_RETURN(CCycleInterpolator::New(res, theme, attrs, (ICycleInterpolator**)&temp));
+            FAIL_RETURN(CCycleInterpolator::New(res, theme, attrs, (IInterpolator**)&temp));
         }
         else if (name.Equals("anticipateInterpolator")) {
-            FAIL_RETURN(CAnticipateInterpolator::New(res, theme, attrs, (IAnticipateInterpolator**)&temp));
+            FAIL_RETURN(CAnticipateInterpolator::New(res, theme, attrs, (IInterpolator**)&temp));
         }
         else if (name.Equals("overshootInterpolator")) {
-            FAIL_RETURN(COvershootInterpolator::New(res, theme, attrs, (IOvershootInterpolator**)&temp));
+            FAIL_RETURN(COvershootInterpolator::New(res, theme, attrs, (IInterpolator**)&temp));
         }
         else if (name.Equals("anticipateOvershootInterpolator")) {
-            FAIL_RETURN(CAnticipateOvershootInterpolator::New(res, theme, attrs, (IAnticipateOvershootInterpolator**)&temp));
+            FAIL_RETURN(CAnticipateOvershootInterpolator::New(res, theme, attrs, (IInterpolator**)&temp));
         }
         else if (name.Equals("bounceInterpolator")) {
-            FAIL_RETURN(CBounceInterpolator::New((IBounceInterpolator**)&temp));
+            FAIL_RETURN(CBounceInterpolator::New((IInterpolator**)&temp));
         }
         else if (name.Equals("pathInterpolator")) {
-            FAIL_RETURN(CPathInterpolator::New(res, theme, attrs, (IPathInterpolator**)&interpolator));
+            FAIL_RETURN(CPathInterpolator::New(res, theme, attrs, (IInterpolator**)&interpolator));
         }
         else {
             Logger::E("AnimationUtils", "Unknown interpolator name: %s", name.string());

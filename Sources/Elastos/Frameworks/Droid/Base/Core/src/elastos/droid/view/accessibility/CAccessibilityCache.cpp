@@ -224,7 +224,7 @@ ECode CAccessibilityCache::GetWindows(
             }
 
             AutoPtr<IList> windows;
-            CArrayList::New(windowCount, (IArrayList**)&windows);
+            CArrayList::New(windowCount, (IList**)&windows);
             for (Int32 i = windowCount - 1; i >= 0; i--) {
                 AutoPtr<IInterface> obj;
                 sortedWindows->ValueAt(i, (IInterface**)&obj);

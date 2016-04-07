@@ -173,7 +173,7 @@ ECode Dialog::constructor(
             theme = GetResourceId(context, R::attr::dialogTheme);
         }
         mContext = NULL;
-        CContextThemeWrapper::New(context, theme, (IContextThemeWrapper**)&mContext);
+        CContextThemeWrapper::New(context, theme, (IContext**)&mContext);
     }
     else {
         mContext = context;

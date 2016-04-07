@@ -362,7 +362,7 @@ ECode FragmentBreadCrumbs::UpdateCrumbs()
         }
         if (i < numViews) {
             AutoPtr<IView> v;
-            cvp->GetChildAt(i, (IView**)&i);
+            cvp->GetChildAt(i, (IView**)&v);
             AutoPtr<IInterface> tag;
             v->GetTag((IInterface**)&tag);
             if (IFragmentManagerBackStackEntry::Probe(tag) != bse) {

@@ -906,7 +906,7 @@ View::AttachInfo::AttachInfo(
     ASSERT_SUCCEEDED(CMatrix::New((IMatrix**)&mTmpMatrix));
     ASSERT_SUCCEEDED(CTransformation::New((ITransformation**)&mTmpTransformation));
     ASSERT_SUCCEEDED(COutline::New((IOutline**)&mTmpOutline));
-    ASSERT_SUCCEEDED(CPaint::New((IPaint**)&mPoint));
+    ASSERT_SUCCEEDED(CPoint::New((IPoint**)&mPoint));
     CArrayList::New(24, (IArrayList**)&mTmpRectList);
     CArrayList::New(24, (IArrayList**)&mTempArrayList);
     CViewTreeObserver::New((IViewTreeObserver**)&mTreeObserver);
@@ -2117,7 +2117,7 @@ ECode View::RequestRectangleOnScreen(
         return NOERROR;
     }
 
-    View* child = this;
+    AutoPtr<View> child = this;
     AutoPtr<IRectF> position;
     if (mAttachInfo != NULL) {
         position = mAttachInfo->mTmpTransformRect;
@@ -2138,8 +2138,7 @@ ECode View::RequestRectangleOnScreen(
         rectangle->Set((Int32)l, (Int32)t, (Int32)r, (Int32)b);
 
         Boolean result = FALSE;
-        parent->RequestChildRectangleOnScreen(
-            IView::Probe(child), rectangle, immediate, &result);
+        parent->RequestChildRectangleOnScreen(child.Get(), rectangle, immediate, &result);
 
         scrolled |= result;
 
@@ -2156,14 +2155,14 @@ ECode View::RequestRectangleOnScreen(
             break;
         }
 
-        View* parentView = VIEW_PROBE(parent);
+        View* parentView = (View*)IView::Probe(parent);
         Int32 scrollX, scrollY;
         parentView->GetScrollX(&scrollX);
         parentView->GetScrollY(&scrollY);
         position->Offset(-scrollX, -scrollY);
 
         child = parentView;
-        child->GetParent((IViewParent**)&child);
+        child->GetParent((IViewParent**)&parent);
     }
 
     *res = scrolled;
@@ -11353,8 +11352,9 @@ ECode View::DispatchRestoreInstanceState(
     /* [in] */ ISparseArray* container)
 {
     if (mID != IView::NO_ID) {
-        AutoPtr<IParcelable> state;
-        container->Get(mID, (IInterface**)&state);
+        AutoPtr<IInterface> obj;
+        container->Get(mID, (IInterface**)&obj);
+        IParcelable* state = IParcelable::Probe(obj);
         if (state != NULL) {
             // Log.i(VIEW_LOG_TAG, "Restoreing #" + Integer.toHexString(mID)
             // + ": " + state);
@@ -13179,9 +13179,13 @@ void View::DrawAccessibilityFocus(
     AutoPtr<IRect> bounds = mAttachInfo->mTmpInvalRect;
     AutoPtr<IViewRootImpl> viewRoot;
     GetViewRootImpl((IViewRootImpl**)&viewRoot);
-    AutoPtr<IView> leftHandle;
-    if (viewRoot == NULL ||
-        (viewRoot->GetAccessibilityFocusedHost((IView**)&viewRoot), IView::Probe(viewRoot)) != (IView*)this) {
+    if (viewRoot == NULL) {
+        return;
+    }
+
+    AutoPtr<IView> focusedHost;
+    viewRoot->GetAccessibilityFocusedHost((IView**)&focusedHost);
+    if (focusedHost.Get() != (IView*)this) {
         return;
     }
 

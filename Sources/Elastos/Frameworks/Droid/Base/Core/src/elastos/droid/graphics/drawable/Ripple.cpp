@@ -258,8 +258,9 @@ Boolean Ripple::DrawHardware(
         mHardwareAnimating = TRUE;
 
         for (Int32 i = 0; i < N; i++) {
-            AutoPtr<IRenderNodeAnimator> node;
-            pendingAnimations->Get(i, (IInterface**)&node);
+            AutoPtr<IInterface> obj;
+            pendingAnimations->Get(i, (IInterface**)&obj);
+            IRenderNodeAnimator* node = IRenderNodeAnimator::Probe(obj);
             node->SetTarget(ICanvas::Probe(c));
             IAnimator::Probe(node)->Start();
         }
@@ -552,9 +553,10 @@ void Ripple::CancelHardwareAnimations(
     Int32 N = 0;
     runningAnimations->GetSize(&N);
     for (Int32 i = 0; i < N; i++) {
-        AutoPtr<IRenderNodeAnimator> node;
-        runningAnimations->Get(i, (IInterface**)&node);
-        IAnimator::Probe(node)->Cancel();
+        AutoPtr<IInterface> obj;
+        runningAnimations->Get(i, (IInterface**)&obj);
+        IAnimator* node = IAnimator::Probe(obj);
+        node->Cancel();
     }
     runningAnimations->Clear();
 

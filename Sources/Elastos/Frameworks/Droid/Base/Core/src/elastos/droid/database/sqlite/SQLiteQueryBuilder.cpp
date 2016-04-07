@@ -437,10 +437,11 @@ ECode SQLiteQueryBuilder::ComputeProjection(
             for (Int32 i = 0; i < length; i++) {
                 String userColumn = (*projectionIn)[i];
                 String column;
-                AutoPtr<ICharSequence> value, columnObj;
+                AutoPtr<ICharSequence> columnObj;
                 CString::New(column, (ICharSequence**)&columnObj);
+                AutoPtr<IInterface> value;
                 mProjectionMap->Get(columnObj, (IInterface**)&value);
-                value->ToString(&column);
+                ICharSequence::Probe(value)->ToString(&column);
 
                 if (!column.IsNull()) {
                     (*projection)[i] = column;
@@ -495,11 +496,12 @@ ECode SQLiteQueryBuilder::ComputeProjection(
             if (key.Equals(IBaseColumns::COUNT)) {
                 continue;
             }
-            AutoPtr<ICharSequence> cs, keyObj;
+            AutoPtr<ICharSequence> keyObj;
             CString::New(key, (ICharSequence**)&keyObj);
+            AutoPtr<IInterface> cs;
             mProjectionMap->Get(keyObj, (IInterface**)&cs);
             String value;
-            cs->ToString(&value);
+            ICharSequence::Probe(cs)->ToString(&value);
             (*projection)[i++] = value;
         }
 

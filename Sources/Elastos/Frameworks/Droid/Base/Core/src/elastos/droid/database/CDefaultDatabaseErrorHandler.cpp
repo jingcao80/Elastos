@@ -80,10 +80,10 @@ ECode CDefaultDatabaseErrorHandler::OnCorruption(
             assert(ICharSequence::Probe(obj) != NULL);
             ICharSequence::Probe(obj)->ToString(&name);
 
-            AutoPtr<ICharSequence> value;
+            AutoPtr<IInterface> value;
             attachedDbs->Get(obj, (IInterface**)&value);
             String second;
-            value->ToString(&second);
+            ICharSequence::Probe(value)->ToString(&second);
             DeleteDatabaseFile(second);
         }
     }

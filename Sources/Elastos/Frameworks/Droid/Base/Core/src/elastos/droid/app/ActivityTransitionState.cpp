@@ -298,7 +298,7 @@ ECode ActivityTransitionState::StartExitOutTransition(
     }
 
     AutoPtr<IActivityOptions> activityOptions;
-    CActivityOptions::New((IActivityOptions**)&options);
+    CActivityOptions::New((IActivityOptions**)&activityOptions);
     mEnterTransitionCoordinator = NULL;
     Int32 type;
     activityOptions->GetAnimationType(&type);

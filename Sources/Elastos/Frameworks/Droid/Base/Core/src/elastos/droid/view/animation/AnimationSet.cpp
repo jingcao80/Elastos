@@ -139,10 +139,10 @@ ECode AnimationSet::CloneImpl(
     AutoPtr<IArrayList> animations = mAnimations;
 
     for (Int32 i = 0; i < count; i++) {
-        obj = NULL;
-        animations->Get(i, (IInterface**)&obj);
+        AutoPtr<IInterface> temp;
+        animations->Get(i, (IInterface**)&temp);
         AutoPtr<IInterface> objectClone;
-        ICloneable::Probe(obj)->Clone((IInterface**)&objectClone);
+        ICloneable::Probe(temp)->Clone((IInterface**)&objectClone);
         obj->mAnimations->Add(objectClone);
     }
 

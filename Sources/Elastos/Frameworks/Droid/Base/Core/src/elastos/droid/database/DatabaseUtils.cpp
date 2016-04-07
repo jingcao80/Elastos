@@ -195,8 +195,9 @@ Int64 DatabaseUtils::InsertHelper::InsertInternal(
         assert(ICharSequence::Probe(obj) != NULL);
         ICharSequence::Probe(obj)->ToString(&key);
 
-        value = NULL;
-        values->Get(key, (IInterface**)&value);
+        obj = NULL;
+        values->Get(key, (IInterface**)&obj);
+        value = ISQLiteProgram::Probe(obj);
         GetColumnIndex(key, &i);
         if (DatabaseUtils::BindObjectToProgram(ISQLiteProgram::Probe(stmt), i, value) == (ECode)E_SQLITE_EXCEPTION) {
             Slogger::E(TAG, "Error inserting %p into table  %s", values, mTableName.string());
@@ -557,10 +558,10 @@ ECode DatabaseUtils::BindObjectToProgram(
         iarray->GetLength(&len);
         AutoPtr< ArrayOf<Byte> > byteArray = ArrayOf<Byte>::Alloc(len);
         for (Int32 i = 0; i < len; ++i) {
-            AutoPtr<IByte> b;
+            AutoPtr<IInterface> b;
             iarray->Get(i, (IInterface**)&b);
             Byte value;
-            b->GetValue(&value);
+            IByte::Probe(b)->GetValue(&value);
             (*byteArray)[i] = value;
         }
         return prog->BindBlob(index, *byteArray);

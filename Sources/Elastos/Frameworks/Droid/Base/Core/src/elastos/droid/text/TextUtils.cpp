@@ -709,8 +709,9 @@ ECode TextUtils::WriteToParcel(
 
             AutoPtr<ICharacterStyle> temp = ICharacterStyle::Probe(prop);
             if (temp != NULL) {
-                prop = NULL;
-                temp->GetUnderlying((ICharacterStyle**)&prop);
+                AutoPtr<ICharacterStyle> style;
+                temp->GetUnderlying((ICharacterStyle**)&style);
+                prop = IInterface::Probe(style);
             }
 
             AutoPtr<IParcelableSpan> ps = IParcelableSpan::Probe(prop);

@@ -138,8 +138,9 @@ ECode GhostView::AddGhost(
     if (IViewGroup::Probe(parent) == NULL) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    AutoPtr<IViewGroupOverlay> overlay;
-    IView::Probe(viewGroup)->GetOverlay((IViewOverlay**)&overlay);
+    AutoPtr<IViewOverlay> obj;
+    IView::Probe(viewGroup)->GetOverlay((IViewOverlay**)&obj);
+    IViewGroupOverlay* overlay = IViewGroupOverlay::Probe(obj);
     assert(0);
     //AutoPtr<IOverlayViewGroup> overlayViewGroup = ((CViewGroupOverlay*)overlay.Get())->mOverlayViewGroup;
     AutoPtr<IGhostView> ghostView = VIEW_PROBE(view)->mGhostView;

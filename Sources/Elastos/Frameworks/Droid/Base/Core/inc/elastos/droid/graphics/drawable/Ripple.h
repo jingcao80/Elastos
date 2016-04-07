@@ -196,8 +196,8 @@ private:
     static const Int64 RIPPLE_ENTER_DELAY;
 
     // Hardware animators.
-    AutoPtr<IArrayList/*<RenderNodeAnimator*/> mRunningAnimations/* = new ArrayList<RenderNodeAnimator>()*/;
-    AutoPtr<IArrayList/*<RenderNodeAnimator*/> mPendingAnimations/* = new ArrayList<RenderNodeAnimator>()*/;
+    AutoPtr<IArrayList> mRunningAnimations;/* = new ArrayList<RenderNodeAnimator>()*/
+    AutoPtr<IArrayList> mPendingAnimations;/* = new ArrayList<RenderNodeAnimator>()*/
 
     AutoPtr<IRippleDrawable> mOwner;
 

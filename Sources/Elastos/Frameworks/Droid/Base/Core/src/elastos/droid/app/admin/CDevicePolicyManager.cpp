@@ -892,9 +892,9 @@ ECode CDevicePolicyManager::SetGlobalProxy(
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
 
-            AutoPtr<IInetSocketAddress> sa;
-            proxySpec->GetAddress((ISocketAddress**)&sa);
-
+            AutoPtr<ISocketAddress> isa;
+            proxySpec->GetAddress((ISocketAddress**)&isa);
+            IInetSocketAddress* sa = IInetSocketAddress::Probe(isa);
             String hostName;
             Int32 port;
             sa->GetHostName(&hostName);

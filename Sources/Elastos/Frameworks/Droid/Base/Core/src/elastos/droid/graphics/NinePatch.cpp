@@ -236,7 +236,7 @@ ECode NinePatch::GetTransparentRegion(
     VALIDATE_NOT_NULL(region);
     Int64 r = NativeGetTransparentRegion(((CBitmap*)mBitmap.Get())->mNativeBitmap, mNativeChunk, bounds);
     if (r != 0) {
-        return CRegion::New(r, (IRegion**)&region);
+        return CRegion::New(r, region);
     }
 
     *region = NULL;

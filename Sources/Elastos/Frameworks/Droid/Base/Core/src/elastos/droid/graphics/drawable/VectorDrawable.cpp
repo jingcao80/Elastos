@@ -1398,10 +1398,11 @@ AutoPtr<IVectorDrawable> VectorDrawable::Create(
     /* [in] */ Int32 rid)
 {
     // try {
-    AutoPtr<IXmlPullParser> parser;
-    if (FAILED(resources->GetXml(rid, (IXmlResourceParser**)&parser))) {
+    AutoPtr<IXmlResourceParser> obj;
+    if (FAILED(resources->GetXml(rid, (IXmlResourceParser**)&obj))) {
         return NULL;
     }
+    IXmlPullParser* parser = IXmlPullParser::Probe(obj);
     AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(parser);
     Int32 type = 0;
     while ((parser->Next(&type), type) != IXmlPullParser::START_TAG &&

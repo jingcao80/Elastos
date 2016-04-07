@@ -201,10 +201,11 @@ Boolean RippleBackground::DrawHardware(
         mHardwareAnimating = TRUE;
 
         for (Int32 i = 0; i < N; i++) {
-            AutoPtr<IRenderNodeAnimator> node;
-            pendingAnimations->Get(i, (IInterface**)&node);
-            IAnimator::Probe(node)->SetTarget(c);
-            IAnimator::Probe(node)->Start();
+            AutoPtr<IInterface> obj;
+            pendingAnimations->Get(i, (IInterface**)&obj);
+            IAnimator* node = IAnimator::Probe(obj);
+            node->SetTarget(c);
+            node->Start();
         }
 
         mRunningAnimations->AddAll(ICollection::Probe(pendingAnimations));
@@ -309,37 +310,37 @@ void RippleBackground::ExitHardware(
     mPropOuterX = CanvasProperty::CreateFloat(mOuterX);
     mPropOuterY = CanvasProperty::CreateFloat(mOuterY);
 
-    AutoPtr<IRenderNodeAnimator> outerOpacityAnim;
+    AutoPtr<IAnimator> outerOpacityAnim;
     if (inflectionDuration > 0) {
         // Outer opacity continues to increase for a bit.
         assert(0 && "TODO");
         // outerOpacityAnim = new RenderNodeAnimator(mPropOuterPaint,
         //         RenderNodeAnimator.PAINT_ALPHA, inflectionOpacity);
-        IAnimator::Probe(outerOpacityAnim)->SetDuration(inflectionDuration);
-        IAnimator::Probe(outerOpacityAnim)->SetInterpolator(LINEAR_INTERPOLATOR);
+        outerOpacityAnim->SetDuration(inflectionDuration);
+        outerOpacityAnim->SetInterpolator(LINEAR_INTERPOLATOR);
 
         // Chain the outer opacity exit animation.
         Int32 outerDuration = opacityDuration - inflectionDuration;
         if (outerDuration > 0) {
-            AutoPtr<IRenderNodeAnimator> outerFadeOutAnim;
+            AutoPtr<IAnimator> outerFadeOutAnim;
             assert(0 && "TODO");
-            // CRenderNodeAnimator::New(mPropOuterPaint, RenderNodeAnimator.PAINT_ALPHA, 0, (IRenderNodeAnimator**)&outerFadeOutAnim);
-            IAnimator::Probe(outerFadeOutAnim)->SetDuration(outerDuration);
-            IAnimator::Probe(outerFadeOutAnim)->SetInterpolator(LINEAR_INTERPOLATOR);
-            IAnimator::Probe(outerFadeOutAnim)->SetStartDelay(inflectionDuration);
-            outerFadeOutAnim->SetStartValue(inflectionOpacity);
-            IAnimator::Probe(outerFadeOutAnim)->AddListener(mAnimationListener);
+            // CRenderNodeAnimator::New(mPropOuterPaint, RenderNodeAnimator.PAINT_ALPHA, 0, (IAnimator**)&outerFadeOutAnim);
+            outerFadeOutAnim->SetDuration(outerDuration);
+            outerFadeOutAnim->SetInterpolator(LINEAR_INTERPOLATOR);
+            outerFadeOutAnim->SetStartDelay(inflectionDuration);
+            IRenderNodeAnimator::Probe(outerFadeOutAnim)->SetStartValue(inflectionOpacity);
+            outerFadeOutAnim->AddListener(mAnimationListener);
 
             mPendingAnimations->Add(outerFadeOutAnim);
         } else {
-            IAnimator::Probe(outerOpacityAnim)->AddListener(mAnimationListener);
+            outerOpacityAnim->AddListener(mAnimationListener);
         }
     } else {
         assert(0 && "TODO");
-        // CRenderNodeAnimator::New(mPropOuterPaint, RenderNodeAnimator.PAINT_ALPHA, 0, (IRenderNodeAnimator**)&outerOpacityAnim);
-        IAnimator::Probe(outerOpacityAnim)->SetInterpolator(LINEAR_INTERPOLATOR);
-        IAnimator::Probe(outerOpacityAnim)->SetDuration(opacityDuration);
-        IAnimator::Probe(outerOpacityAnim)->AddListener(mAnimationListener);
+        // CRenderNodeAnimator::New(mPropOuterPaint, RenderNodeAnimator.PAINT_ALPHA, 0, (IAnimator**)&outerOpacityAnim);
+        outerOpacityAnim->SetInterpolator(LINEAR_INTERPOLATOR);
+        outerOpacityAnim->SetDuration(opacityDuration);
+        outerOpacityAnim->AddListener(mAnimationListener);
     }
 
     mPendingAnimations->Add(outerOpacityAnim);
@@ -432,8 +433,9 @@ void RippleBackground::CancelHardwareAnimations(
     Int32 N = 0;
     runningAnimations->GetSize(&N);
     for (Int32 i = 0; i < N; i++) {
-        AutoPtr<IRenderNodeAnimator> node;
-        runningAnimations->Get(i, (IInterface**)&node);
+        AutoPtr<IInterface> obj;
+        runningAnimations->Get(i, (IInterface**)&obj);
+        IRenderNodeAnimator* node = IRenderNodeAnimator::Probe(obj);
         IAnimator::Probe(node)->Cancel();
     }
     runningAnimations->Clear();

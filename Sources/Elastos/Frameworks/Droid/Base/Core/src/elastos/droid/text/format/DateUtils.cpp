@@ -601,12 +601,12 @@ AutoPtr<ICharSequence> DateUtils::FormatSameDayTime(
     /* [in] */ Int32 timeStyle)
 {
     AutoPtr<ICalendar> thenCal;
-    CGregorianCalendar::New((IGregorianCalendar**)&thenCal);
+    CGregorianCalendar::New((ICalendar**)&thenCal);
     thenCal->SetTimeInMillis(then);
     AutoPtr<IDate> thenDate;
     thenCal->GetTime((IDate**)&thenDate);
     AutoPtr<ICalendar> nowCal;
-    CGregorianCalendar::New((IGregorianCalendar**)&nowCal);
+    CGregorianCalendar::New((ICalendar**)&nowCal);
     nowCal->SetTimeInMillis(now);
 
     AutoPtr<Elastos::Text::IDateFormat> f;

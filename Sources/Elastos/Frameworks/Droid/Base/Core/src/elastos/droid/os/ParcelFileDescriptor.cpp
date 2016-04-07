@@ -99,7 +99,7 @@ ECode ParcelFileDescriptor::AutoCloseInputStream::constructor(
     /* [in] */ IParcelFileDescriptor* pfd)
 {
     AutoPtr<IFileDescriptor> fd;
-    pfd->GetFileDescriptor((IFileDescriptor**)&pfd);
+    pfd->GetFileDescriptor((IFileDescriptor**)&fd);
     FAIL_RETURN(FileInputStream::constructor(fd))
 
     mPfd = pfd;
@@ -127,7 +127,7 @@ ECode ParcelFileDescriptor::AutoCloseOutputStream::constructor(
     /* [in] */ IParcelFileDescriptor* pfd)
 {
     AutoPtr<IFileDescriptor> fd;
-    pfd->GetFileDescriptor((IFileDescriptor**)&pfd);
+    pfd->GetFileDescriptor((IFileDescriptor**)&fd);
     FAIL_RETURN(FileOutputStream::constructor(fd))
 
     mPfd = pfd;

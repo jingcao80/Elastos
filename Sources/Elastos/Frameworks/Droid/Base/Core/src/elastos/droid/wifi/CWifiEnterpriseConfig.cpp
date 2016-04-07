@@ -8,7 +8,7 @@
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
-using Elastos::Core::IString;
+using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuffer;
 using Elastos::Security::IKey;
 using Elastos::Utility::CHashMap;
@@ -50,7 +50,8 @@ ECode CWifiEnterpriseConfig::constructor(
     Boolean bNext;
     iter->HasNext(&bNext);
     for (; bNext; iter->HasNext(&bNext)) {
-        AutoPtr<ICharSequence> iKey;
+        AutoPtr<IInterface> iKey;
+        iter->GetNext((IInterface**)&iKey);
         AutoPtr<IInterface> value;
         fields->Get(iKey, (IInterface**)&value);
         mFields->Put(iKey, value);
@@ -94,15 +95,15 @@ ECode CWifiEnterpriseConfig::SetEapMethod(
                 AutoPtr<IWifiEnterpriseConfigEap> iEap;
                 CWifiEnterpriseConfigEap::AcquireSingleton((IWifiEnterpriseConfigEap**)&iEap);
                 iEap->GetStrings((ArrayOf<String>**)&arrays);
-                AutoPtr<IString> iEAP_KEY;
-                CString::New(EAP_KEY, (IString**)&iEAP_KEY);
-                AutoPtr<IString> im;
-                CString::New((*arrays)[eapMethod], (IString**)&im);
+                AutoPtr<ICharSequence> iEAP_KEY;
+                CString::New(EAP_KEY, (ICharSequence**)&iEAP_KEY);
+                AutoPtr<ICharSequence> im;
+                CString::New((*arrays)[eapMethod], (ICharSequence**)&im);
                 mFields->Put(iEAP_KEY, im);
                 AutoPtr<ICharSequence> iValue;
-                CString::New(String("1"), (IString**)&iValue);
-                AutoPtr<IString> iOPP_KEY_CACHING;
-                CString::New(OPP_KEY_CACHING, (IString**)&iOPP_KEY_CACHING);
+                CString::New(String("1"), (ICharSequence**)&iValue);
+                AutoPtr<ICharSequence> iOPP_KEY_CACHING;
+                CString::New(OPP_KEY_CACHING, (ICharSequence**)&iOPP_KEY_CACHING);
                 mFields->Put(iOPP_KEY_CACHING, iValue);
             }
             break;
@@ -124,11 +125,11 @@ ECode CWifiEnterpriseConfig::GetEapMethod(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<ICharSequence> iKey;
-    CString::New(EAP_KEY, (IString**)&iKey);
-    AutoPtr<ICharSequence> iEapMethod;
+    CString::New(EAP_KEY, (ICharSequence**)&iKey);
+    AutoPtr<IInterface> iEapMethod;
     mFields->Get(iKey, (IInterface**)&iEapMethod);
     String eapMethod;
-    iEapMethod->ToString(&eapMethod);
+    ICharSequence::Probe(iEapMethod)->ToString(&eapMethod);
     AutoPtr< ArrayOf<String> > strings;
     AutoPtr<IWifiEnterpriseConfigEap> iEap;
     CWifiEnterpriseConfigEap::AcquireSingleton((IWifiEnterpriseConfigEap**)&iEap);
@@ -152,8 +153,8 @@ ECode CWifiEnterpriseConfig::SetPhase2Method(
     switch (phase2Method) {
         case IWifiEnterpriseConfigPhase2::NONE: {
                 AutoPtr<ICharSequence> key, value;
-                CString::New(PHASE2_KEY, (IString**)&key);
-                CString::New(EMPTY_VALUE, (IString**)&value);
+                CString::New(PHASE2_KEY, (ICharSequence**)&key);
+                CString::New(EMPTY_VALUE, (ICharSequence**)&value);
                 mFields->Put(key, value);
             }
             break;
@@ -163,7 +164,7 @@ ECode CWifiEnterpriseConfig::SetPhase2Method(
         case IWifiEnterpriseConfigPhase2::MSCHAPV2:
         case IWifiEnterpriseConfigPhase2::GTC: {
                 AutoPtr<ICharSequence> key;
-                CString::New(PHASE2_KEY, (IString**)&key);
+                CString::New(PHASE2_KEY, (ICharSequence**)&key);
                 String str(CWifiEnterpriseConfigPhase2::PREFIX);
                 AutoPtr<IWifiEnterpriseConfigPhase2> phase2;
                 CWifiEnterpriseConfigPhase2::AcquireSingleton((IWifiEnterpriseConfigPhase2**)&phase2);
@@ -172,7 +173,7 @@ ECode CWifiEnterpriseConfig::SetPhase2Method(
                 str += (*strings)[phase2Method];
                 String value  = ConvertToQuotedString(str);
                 AutoPtr<ICharSequence> iValue;
-                CString::New(value, (IString**)&iValue);
+                CString::New(value, (ICharSequence**)&iValue);
                 mFields->Put(key, iValue);
             }
             break;
@@ -195,11 +196,11 @@ ECode CWifiEnterpriseConfig::GetPhase2Method(
     VALIDATE_NOT_NULL(result);
 
     AutoPtr<ICharSequence> iKey;
-    CString::New(PHASE2_KEY, (IString**)&iKey);
-    AutoPtr<ICharSequence> iValue;
+    CString::New(PHASE2_KEY, (ICharSequence**)&iKey);
+    AutoPtr<IInterface> iValue;
     mFields->Get(iKey, (IInterface**)&iValue);
     String value;
-    iValue->ToString(&value);
+    ICharSequence::Probe(iValue)->ToString(&value);
     String phase2Method = RemoveDoubleQuotes(value);
     // Remove auth= prefix
     if (phase2Method.StartWith(CWifiEnterpriseConfigPhase2::PREFIX)) {
@@ -376,8 +377,8 @@ ECode CWifiEnterpriseConfig::SetClientCertificateAlias(
     // Also, set engine parameters
     if (TextUtils::IsEmpty(alias)) {
         AutoPtr<ICharSequence> key1, value1;
-        CString::New(ENGINE_KEY, (IString**)&key1);
-        CString::New(ENGINE_DISABLE, (IString**)&value1);
+        CString::New(ENGINE_KEY, (ICharSequence**)&key1);
+        CString::New(ENGINE_DISABLE, (ICharSequence**)&value1);
         mFields->Put(key1, value1);
         AutoPtr<ICharSequence> key2, value2;
         CString::New(ENGINE_ID_KEY, (ICharSequence**)&key2);
@@ -386,12 +387,12 @@ ECode CWifiEnterpriseConfig::SetClientCertificateAlias(
     }
     else {
         AutoPtr<ICharSequence> key1, value1;
-        CString::New(ENGINE_KEY, (IString**)&key1);
-        CString::New(ENGINE_ENABLE, (IString**)&value1);
+        CString::New(ENGINE_KEY, (ICharSequence**)&key1);
+        CString::New(ENGINE_ENABLE, (ICharSequence**)&value1);
         mFields->Put(key1, value1);
         AutoPtr<ICharSequence> key2, value2;
-        CString::New(ENGINE_ID_KEY, (IString**)&key2);
-        CString::New(ConvertToQuotedString(ENGINE_ID_KEYSTORE), (IString**)&value2);
+        CString::New(ENGINE_ID_KEY, (ICharSequence**)&key2);
+        CString::New(ConvertToQuotedString(ENGINE_ID_KEYSTORE), (ICharSequence**)&value2);
         mFields->Put(key2, value2);
     }
 
@@ -522,11 +523,11 @@ ECode CWifiEnterpriseConfig::GetFieldValue(
     VALIDATE_NOT_NULL(result);
 
     AutoPtr<ICharSequence> iKey;
-    CString::New(key, (IString**)&iKey);
-    AutoPtr<ICharSequence> iValue;
+    CString::New(key, (ICharSequence**)&iKey);
+    AutoPtr<IInterface> iValue;
     mFields->Get(iKey, (IInterface**)&iValue);
     String value;
-    iValue->ToString(&value);
+    ICharSequence::Probe(iValue)->ToString(&value);
     // Uninitialized or known to be empty after reading from supplicant
     if (TextUtils::IsEmpty(value) || String(EMPTY_VALUE).Equals(value)) {
         *result = "";
@@ -559,16 +560,16 @@ ECode CWifiEnterpriseConfig::SetFieldValue(
 {
     if (TextUtils::IsEmpty(value)) {
         AutoPtr<ICharSequence> iKey, iValue;
-        CString::New(key, (IString**)&iKey);
-        CString::New(EMPTY_VALUE, (IString**)&iValue);
+        CString::New(key, (ICharSequence**)&iKey);
+        CString::New(EMPTY_VALUE, (ICharSequence**)&iValue);
         mFields->Put(iKey, iValue);
     }
     else {
         AutoPtr<ICharSequence> iKey, iValue;
-        CString::New(key, (IString**)&iKey);
+        CString::New(key, (ICharSequence**)&iKey);
         String str(prefix);
         str += value;
-        CString::New(str, (IString**)&iValue);
+        CString::New(str, (ICharSequence**)&iValue);
         mFields->Put(iKey, iValue);
     }
 
@@ -587,14 +588,14 @@ ECode CWifiEnterpriseConfig::SetFieldValue(
 {
     if (TextUtils::IsEmpty(value)) {
         AutoPtr<ICharSequence> iKey, iValue;
-        CString::New(key, (IString**)&iKey);
-        CString::New(EMPTY_VALUE, (IString**)&iValue);
+        CString::New(key, (ICharSequence**)&iKey);
+        CString::New(EMPTY_VALUE, (ICharSequence**)&iValue);
         mFields->Put(iKey, iValue);
     }
     else {
         AutoPtr<ICharSequence> iKey, iValue;
-        CString::New(key, (IString**)&iKey);
-        CString::New(ConvertToQuotedString(value), (IString**)&iValue);
+        CString::New(key, (ICharSequence**)&iKey);
+        CString::New(ConvertToQuotedString(value), (ICharSequence**)&iValue);
         IMap::Probe(mFields)->Put(iKey, iValue);
     }
 
@@ -625,14 +626,15 @@ ECode CWifiEnterpriseConfig::WriteToParcel(
     Boolean bNext;
     iter->HasNext(&bNext);
     for (; bNext; iter->HasNext(&bNext)) {
-        AutoPtr<IMapEntry> entry;
-        iter->GetNext((IInterface**)&entry);
-        AutoPtr<ICharSequence> iKey, iValue;
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        IMapEntry* entry = IMapEntry::Probe(obj);
+        AutoPtr<IInterface> iKey, iValue;
         entry->GetKey((IInterface**)&iKey);
         entry->GetValue((IInterface**)&iValue);
         String key, value;
-        iKey->ToString(&key);
-        iValue->ToString(&value);
+        ICharSequence::Probe(iKey)->ToString(&key);
+        ICharSequence::Probe(iValue)->ToString(&value);
         dest->WriteString(key);
         dest->WriteString(value);
     }
@@ -669,22 +671,22 @@ ECode CWifiEnterpriseConfig::GetKeyId(
     VALIDATE_NOT_NULL(keyId);
 
     AutoPtr<ICharSequence> key1, key2;
-    CString::New(EAP_KEY, (IString**)&key1);
-    CString::New(PHASE2_KEY, (IString**)&key2);
-    AutoPtr<ICharSequence> iEap, iPhase2;
+    CString::New(EAP_KEY, (ICharSequence**)&key1);
+    CString::New(PHASE2_KEY, (ICharSequence**)&key2);
+    AutoPtr<IInterface> iEap, iPhase2;
     mFields->Get(key1, (IInterface**)&iEap);
     String eap;
-    iEap->ToString(&eap);
+    ICharSequence::Probe(iEap)->ToString(&eap);
     mFields->Get(key2, (IInterface**)&iPhase2);
     String phase2;
-    iPhase2->ToString(&phase2);
+    ICharSequence::Probe(iPhase2)->ToString(&phase2);
 
     // If either eap or phase2 are not initialized, use current config details
     if (TextUtils::IsEmpty((eap))) {
         AutoPtr<IHashMap> fields;
         current->GetFields((IHashMap**)&fields);
         AutoPtr<ICharSequence> key, value;
-        CString::New(EAP_KEY, (IString**)&key);
+        CString::New(EAP_KEY, (ICharSequence**)&key);
         fields->Get(key, (IInterface**)&value);
         value->ToString(&eap);
     }
@@ -693,7 +695,7 @@ ECode CWifiEnterpriseConfig::GetKeyId(
         AutoPtr<IHashMap> fields;
         current->GetFields((IHashMap**)&fields);
         AutoPtr<ICharSequence> key, value;
-        CString::New(PHASE2_KEY, (IString**)&key);
+        CString::New(PHASE2_KEY, (ICharSequence**)&key);
         fields->Get(key, (IInterface**)&value);
         value->ToString(&eap);
     }
@@ -725,10 +727,10 @@ ECode CWifiEnterpriseConfig::ToString(
         iKey->ToString(&key);
         sb.Append(key);
         sb.Append(" ");
-        AutoPtr<ICharSequence> iValue;
+        AutoPtr<IInterface> iValue;
         mFields->Get(iKey, (IInterface**)&iValue);
         String value;
-        iValue->ToString(&value);
+        ICharSequence::Probe(iValue)->ToString(&value);
         sb.Append(value);
         sb.Append("\n");
     }

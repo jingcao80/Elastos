@@ -27,10 +27,11 @@ String LegacyFontListParser::Family::GetName()
 {
     Boolean isEmpty;
     if (mNameset != NULL && (mNameset->IsEmpty(&isEmpty), !isEmpty)) {
-        AutoPtr<ICharSequence> cs;
-        mNameset->Get(0, (IInterface**)&cs);
+        AutoPtr<IInterface> obj;
+        mNameset->Get(0, (IInterface**)&obj);
+        ICharSequence* csq = ICharSequence::Probe(obj);
         String name;
-        cs->ToString(&name);
+        csq->ToString(&name);
         return name;
     }
     return String(NULL);

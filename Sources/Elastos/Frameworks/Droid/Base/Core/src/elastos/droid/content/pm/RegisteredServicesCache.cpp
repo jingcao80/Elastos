@@ -388,8 +388,9 @@ ECode RegisteredServicesCache::GetListener(
 
 ECode RegisteredServicesCache::SetListener(
     /* [in] */ IRegisteredServicesCacheListener* listener,
-    /* [in] */ IHandler* handler)
+    /* [in] */ IHandler* inHandler)
 {
+    AutoPtr<IHandler> handler = inHandler;
     if (handler == NULL) {
         AutoPtr<ILooper> looper;
         mContext->GetMainLooper((ILooper**)&looper);

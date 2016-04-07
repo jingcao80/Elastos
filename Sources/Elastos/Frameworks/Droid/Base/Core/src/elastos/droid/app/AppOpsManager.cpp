@@ -106,7 +106,7 @@ ECode AppOpsManager::PackageOps::ReadFromParcel(
 {
     source->ReadString(&mPackageName);
     source->ReadInt32(&mUid);
-    CArrayList::New((IArrayList**)&mEntries);
+    CArrayList::New((IList**)&mEntries);
     Int32 N;
     source->ReadInt32(&N);
     for (Int32 i = 0; i < N; i++) {

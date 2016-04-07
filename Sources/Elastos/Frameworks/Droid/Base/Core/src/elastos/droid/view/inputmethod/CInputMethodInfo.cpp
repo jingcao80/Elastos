@@ -500,8 +500,9 @@ ECode CInputMethodInfo::Init(
     CString::New(mId, (ICharSequence**)&cs);
     Boolean contains = FALSE;
     if (additionalSubtypesMap != NULL && (additionalSubtypesMap->ContainsKey(cs, &contains), contains)) {
-        AutoPtr<IList> additionalSubtypes;
-        additionalSubtypesMap->Get(cs, (IInterface**)&additionalSubtypes);
+        AutoPtr<IInterface> obj;
+        additionalSubtypesMap->Get(cs, (IInterface**)&obj);
+        IList* additionalSubtypes = IList::Probe(obj);
         Int32 N = 0;
         additionalSubtypes->GetSize(&N);
         for (Int32 i = 0; i < N; ++i) {

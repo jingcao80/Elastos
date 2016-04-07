@@ -612,7 +612,7 @@ ECode Animation::SetAnimationListener(
 void Animation::EnsureInterpolator()
 {
     if (mInterpolator == NULL) {
-        CAccelerateDecelerateInterpolator::New((IAccelerateDecelerateInterpolator**)&mInterpolator);
+        CAccelerateDecelerateInterpolator::New((IInterpolator**)&mInterpolator);
     }
 }
 

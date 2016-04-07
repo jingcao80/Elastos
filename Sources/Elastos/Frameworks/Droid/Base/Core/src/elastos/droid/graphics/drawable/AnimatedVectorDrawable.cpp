@@ -50,22 +50,24 @@ AnimatedVectorDrawable::AnimatedVectorDrawableState::AnimatedVectorDrawableState
             CArrayList::New(numAnimators, (IArrayList**)&mAnimators);
             CArrayMap::New(numAnimators, (IArrayMap**)&mTargetNameMap);
             for (Int32 i = 0; i < numAnimators; ++i) {
-                AutoPtr<IAnimator> anim;
-                IList::Probe(copy->mAnimators)->Get(i, (IInterface**)&anim);
+                AutoPtr<IInterface> obj;
+                IList::Probe(copy->mAnimators)->Get(i, (IInterface**)&obj);
+                IAnimator* anim = IAnimator::Probe(obj);
                 AutoPtr<IInterface> tmp;
                 AutoPtr<IAnimator> animClone;
                 (ICloneable::Probe(anim))->Clone((IInterface**)&tmp);
                 animClone = IAnimator::Probe(tmp);
                 String targetName;
-                AutoPtr<ICharSequence> cs;
+                AutoPtr<IInterface> cs;
                 IMap::Probe(copy->mTargetNameMap)->Get(anim, (IInterface**)&cs);
-                cs->ToString(&targetName);
+                AutoPtr<ICharSequence> csq = ICharSequence::Probe(cs);
+                csq->ToString(&targetName);
                 AutoPtr<IInterface> targetObject = ((VectorDrawable*)mVectorDrawable.Get())->GetTargetByName(targetName);
                 animClone->SetTarget(targetObject);
                 mAnimators->Add(animClone);
-                cs = NULL;
-                CString::New(targetName, (ICharSequence**)&cs);
-                IMap::Probe(mTargetNameMap)->Put(animClone, cs);
+                csq = NULL;
+                CString::New(targetName, (ICharSequence**)&csq);
+                IMap::Probe(mTargetNameMap)->Put(animClone, csq);
             }
         }
     } else {
@@ -412,8 +414,9 @@ ECode AnimatedVectorDrawable::IsRunning(
     Int32 size = 0;
     IList::Probe(animators)->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IAnimator> animator;
-        animators->Get(i, (IInterface**)&animator);
+        AutoPtr<IInterface> obj;
+        animators->Get(i, (IInterface**)&obj);
+        IAnimator* animator = IAnimator::Probe(obj);
         Boolean isRunning = FALSE;
         if (animator->IsRunning(&isRunning), isRunning) {
             *result = TRUE;
@@ -430,8 +433,9 @@ Boolean AnimatedVectorDrawable::IsStarted()
     Int32 size = 0;
     IList::Probe(animators)->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IAnimator> animator;
-        animators->Get(i, (IInterface**)&animator);
+        AutoPtr<IInterface> obj;
+        animators->Get(i, (IInterface**)&obj);
+        IAnimator* animator = IAnimator::Probe(obj);
         Boolean result = FALSE;
         if (animator->IsStarted(&result), result) {
             return TRUE;
@@ -446,8 +450,9 @@ ECode AnimatedVectorDrawable::Start()
     Int32 size = 0;
     IList::Probe(animators)->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IAnimator> animator;
-        animators->Get(i, (IInterface**)&animator);
+        AutoPtr<IInterface> obj;
+        animators->Get(i, (IInterface**)&obj);
+        IAnimator* animator = IAnimator::Probe(obj);
         Boolean result = FALSE;
         if (!(animator->IsStarted(&result), result)) {
             animator->Start();
@@ -462,8 +467,9 @@ ECode AnimatedVectorDrawable::Stop()
     Int32 size = 0;
     IList::Probe(animators)->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IAnimator> animator;
-        animators->Get(i, (IInterface**)&animator);
+        AutoPtr<IInterface> obj;
+        animators->Get(i, (IInterface**)&obj);
+        IAnimator* animator = IAnimator::Probe(obj);
         animator->End();
     }
     return NOERROR;
@@ -475,8 +481,9 @@ ECode AnimatedVectorDrawable::Reverse()
     Int32 size = 0;
     IList::Probe(animators)->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IAnimator> animator;
-        animators->Get(i, (IInterface**)&animator);
+        AutoPtr<IInterface> obj;
+        animators->Get(i, (IInterface**)&obj);
+        IAnimator* animator = IAnimator::Probe(obj);
         Boolean result = FALSE;
         if (animator->CanReverse(&result)) {
             animator->Reverse();
@@ -495,8 +502,9 @@ ECode AnimatedVectorDrawable::CanReverse(
     Int32 size = 0;
     IList::Probe(animators)->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IAnimator> animator;
-        animators->Get(i, (IInterface**)&animator);
+        AutoPtr<IInterface> obj;
+        animators->Get(i, (IInterface**)&obj);
+        IAnimator* animator = IAnimator::Probe(obj);
         Boolean result = FALSE;
         if (!(animator->CanReverse(&result), result)) {
             *can = FALSE;

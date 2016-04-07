@@ -1,5 +1,8 @@
 # elastos_cast_checker.py
 # encoding: UTF-8
+# usages:
+#        sudo chmod a+x elastos_cast_checker.py
+#        python elastos_cast_checker.py
 
 import re
 import os
@@ -161,6 +164,6 @@ def process(path, logPath):
 
 #process('/home/kesalin/test/python/test.cpp', 'elastos_cast_checker.log')
 #process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/', '/home/kesalin/elastos_cast_checker.log')
-process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view', '/home/kesalin/elastos_cast_checker.log')
+process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/wifi', '/home/kesalin/elastos_cast_checker.log')
 
-#done: os, content, app, graphics
+#done: app, content, database, graphics, os, text, view, wifi, wifidisplay

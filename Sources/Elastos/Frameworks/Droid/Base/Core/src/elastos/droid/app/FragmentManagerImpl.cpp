@@ -1844,8 +1844,9 @@ ECode FragmentManagerImpl::SaveAllState(
 
             haveFragments = TRUE;
 
-            AutoPtr<FragmentState> fs;
-            CFragmentState::New((IFragmentState**)&f);
+            AutoPtr<IFragmentState> fsObj;
+            CFragmentState::New((IFragmentState**)&fsObj);
+            CFragmentState* fs = (CFragmentState*)fsObj.Get();
             active->Set(i, fs);
 
             Int32 fstate;

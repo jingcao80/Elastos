@@ -156,7 +156,9 @@ ECode CWifiConnectionStatistics::IncrementOrAddUntrusted(
     CString::New(SSID, (IString**)&iSSID);
     mUntrustedNetworkHistory->ContainsKey(iSSID, &bContainsKey);
     if (bContainsKey) {
-        mUntrustedNetworkHistory->Get(iSSID, (IInterface**)&stats);
+        AutoPtr<IInterface> obj;
+        mUntrustedNetworkHistory->Get(iSSID, (IInterface**)&obj);
+        stats = IWifiNetworkConnectionStatistics::Probe(obj);
         if (stats != NULL){
             Int32 numConnection;
             stats->GetNumConnection(&numConnection);
@@ -204,14 +206,16 @@ ECode CWifiConnectionStatistics::ToString(
     Boolean bNext;
     iter->HasNext(&bNext);
     for (; bNext; iter->HasNext(&bNext)) {
-        AutoPtr<ICharSequence> iKey;
+        AutoPtr<IInterface> iKey;
         iter->GetNext((IInterface**)&iKey);
         String key;
-        iKey->ToString(&key);
+        ICharSequence::Probe(iKey)->ToString(&key);
         AutoPtr<IWifiNetworkConnectionStatistics> stats;
         AutoPtr<IString> iK;
         CString::New(key, (IString**)&iK);
-        mUntrustedNetworkHistory->Get(iK, (IInterface**)&stats);
+        AutoPtr<IInterface> obj;
+        mUntrustedNetworkHistory->Get(iK, (IInterface**)&obj);
+        stats = IWifiNetworkConnectionStatistics::Probe(obj);
         if (stats != NULL) {
             sbuf.Append(key);
             sbuf.Append(" ");
@@ -258,14 +262,16 @@ ECode CWifiConnectionStatistics::WriteToParcel(
     Boolean bNext;
     iter->HasNext(&bNext);
     for (; bNext; iter->HasNext(&bNext)) {
-        AutoPtr<ICharSequence> iKey;
+        AutoPtr<IInterface> iKey;
         iter->GetNext((IInterface**)&iKey);
         String key;
-        iKey->ToString(&key);
+        ICharSequence::Probe(iKey)->ToString(&key);
         AutoPtr<IWifiNetworkConnectionStatistics> num;
         AutoPtr<IString> iK;
         CString::New(key, (IString**)&iK);
-        mUntrustedNetworkHistory->Get(iK, (IInterface**)&num);
+        AutoPtr<IInterface> obj;
+        mUntrustedNetworkHistory->Get(iK, (IInterface**)&obj);
+        num = IWifiNetworkConnectionStatistics::Probe(obj);
         dest->WriteString(key);
         Int32 numConnection;
         num->GetNumConnection(&numConnection);

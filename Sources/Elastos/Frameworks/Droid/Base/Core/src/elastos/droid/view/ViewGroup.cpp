@@ -4442,7 +4442,7 @@ AutoPtr<IList> ViewGroup::BuildOrderedChildList()
     if (count <= 1 || !HasChildWithZ()) return NULL;
 
     if (mPreSortedChildren == NULL) {
-        CArrayList::New(count, (IArrayList**)&mPreSortedChildren);
+        CArrayList::New(count, (IList**)&mPreSortedChildren);
     } else {
         IArrayList::Probe(mPreSortedChildren)->EnsureCapacity(count);
     }
@@ -6682,7 +6682,7 @@ void ViewGroup::AddDisappearingView(
     /* [in] */ IView* v)
 {
     if (mDisappearingChildren == NULL) {
-        CArrayList::New((IArrayList**)&mDisappearingChildren);
+        CArrayList::New((IList**)&mDisappearingChildren);
     }
     mDisappearingChildren->Add(v);
 

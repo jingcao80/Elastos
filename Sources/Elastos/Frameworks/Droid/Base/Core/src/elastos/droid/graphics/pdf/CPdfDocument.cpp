@@ -292,7 +292,9 @@ private:
 
 
 CAR_OBJECT_IMPL(CPdfDocument);
+
 CAR_INTERFACE_IMPL(CPdfDocument, Object, IPdfDocument);
+
 CPdfDocument::CPdfDocument()
     : mNativeDocument(0)
 {

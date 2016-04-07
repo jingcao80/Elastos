@@ -2079,7 +2079,7 @@ ECode PackageParser::CollectCertificates(
     List<AutoPtr<IZipEntry> > toVerify;
     List<AutoPtr<IZipEntry> >::Iterator lit;
     AutoPtr<ArrayOf<ISignature*> > entrySignatures;
-    AutoPtr< ICertificateArray2 > entryCerts;
+    AutoPtr<ICertificateArray2> entryCerts;
     ICertificate* cert;
     AutoPtr<IPublicKey> pubKey;
 

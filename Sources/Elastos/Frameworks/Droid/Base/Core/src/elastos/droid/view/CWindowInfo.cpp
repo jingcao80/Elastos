@@ -19,7 +19,9 @@ AutoPtr<Pools::SynchronizedPool<IWindowInfo> > CWindowInfo::sPool =
         new Pools::SynchronizedPool<IWindowInfo>(MAX_POOL_SIZE);
 
 CAR_OBJECT_IMPL(CWindowInfo);
+
 CAR_INTERFACE_IMPL_2(CWindowInfo, Object, IWindowInfo, IParcelable);
+
 CWindowInfo::CWindowInfo()
     : mType(0)
     , mLayer(0)
@@ -98,9 +100,9 @@ ECode CWindowInfo::WriteToParcel(
         mChildTokens->GetSize(&size);
         parcel->WriteInt32(size);
         for (Int32 i = 0; i < size; i++) {
-            AutoPtr<IBinder> binder;
-            mChildTokens->Get(i, (IInterface**)&binder);
-            parcel->WriteInterfacePtr(binder);
+            AutoPtr<IInterface> obj;
+            mChildTokens->Get(i, (IInterface**)&obj);
+            parcel->WriteInterfacePtr(obj);
         }
     } else {
         parcel->WriteInt32(0);

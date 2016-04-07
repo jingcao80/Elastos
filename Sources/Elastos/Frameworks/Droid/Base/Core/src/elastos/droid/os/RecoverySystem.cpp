@@ -443,8 +443,9 @@ ECode RecoverySystem::RebootWipeUserData(
     /* [in] */ const String& reason,
     /* [in] */ Boolean wipeMedia)
 {
-    AutoPtr<IUserManager> um;
-    FAIL_RETURN(context->GetSystemService(IContext::USER_SERVICE, (IInterface**)&um));
+    AutoPtr<IInterface> service;
+    FAIL_RETURN(context->GetSystemService(IContext::USER_SERVICE, (IInterface**)&service));
+    IUserManager* um = IUserManager::Probe(service);
     Boolean hasUR = FALSE;
     um->HasUserRestriction(IUserManager::DISALLOW_FACTORY_RESET, &hasUR);
     if (hasUR) {

@@ -41,7 +41,7 @@ ECode CBatchedScanSettings::constructor(
     if (channelSet != NULL) {
         AutoPtr<ICollection> cs;
         source->GetChannelSet((ICollection**)&cs);
-        CArrayList::New(cs, (IArrayList**)&mChannelSet);
+        CArrayList::New(cs, (ICollection**)&mChannelSet);
     }
     source->GetScanIntervalSec(&mScanIntervalSec);
     return source->GetMaxApForDistance(&mMaxApForDistance);
@@ -319,10 +319,10 @@ ECode CBatchedScanSettings::ToString(
         Boolean bNext;
         iter->HasNext(&bNext);
         for (; bNext; iter->HasNext(&bNext)) {
-            AutoPtr<ICharSequence> channel;
+            AutoPtr<IInterface> channel;
             iter->GetNext((IInterface**)&channel);
             String str;
-            channel->ToString(&str);
+            ICharSequence::Probe(channel)->ToString(&str);
             sb.Append(" ");
             sb.Append(str);
         }
@@ -360,10 +360,10 @@ ECode CBatchedScanSettings::WriteToParcel(
         Boolean bNext;
         iter->HasNext(&bNext);
         for (; bNext; iter->HasNext(&bNext)) {
-            AutoPtr<ICharSequence> channel;
+            AutoPtr<IInterface> channel;
             iter->GetNext((IInterface**)&channel);
             String str;
-            channel->ToString(&str);
+            ICharSequence::Probe(channel)->ToString(&str);
             dest->WriteString(str);
         }
     }
@@ -399,10 +399,10 @@ Boolean CBatchedScanSettings::ChannelSetIsValid()
     Boolean bNext;
     iter->HasNext(&bNext);
     for (; bNext; iter->HasNext(&bNext)) {
-        AutoPtr<ICharSequence> iChannel;
+        AutoPtr<IInterface> iChannel;
         iter->GetNext((IInterface**)&iChannel);
         String channel;
-        iChannel->ToString(&channel);
+        ICharSequence::Probe(iChannel)->ToString(&channel);
         // try {
             Int32 i = StringUtils::ParseInt32(channel);
             if (i > 0 && i <= MAX_WIFI_CHANNEL) continue;

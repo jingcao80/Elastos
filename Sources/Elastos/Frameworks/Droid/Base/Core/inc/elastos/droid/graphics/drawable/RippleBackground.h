@@ -170,8 +170,8 @@ private:
     static const Float WAVE_OUTER_SIZE_INFLUENCE_MIN;
 
     // Hardware animators.
-    AutoPtr<IArrayList/*<RenderNodeAnimator*/> mRunningAnimations/* = new ArrayList<RenderNodeAnimator>()*/;
-    AutoPtr<IArrayList/*<RenderNodeAnimator*/> mPendingAnimations/* = new ArrayList<RenderNodeAnimator>()*/;
+    AutoPtr<IArrayList> mRunningAnimations;/* = new ArrayList<RenderNodeAnimator>()*/
+    AutoPtr<IArrayList> mPendingAnimations;/* = new ArrayList<RenderNodeAnimator>()*/
 
     AutoPtr<RippleDrawable> mOwner;
 

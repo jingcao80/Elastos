@@ -56,10 +56,10 @@ ECode ImageSpan::constructor(
     if(context != NULL) {
         AutoPtr<IResources> rs;
         context->GetResources( (IResources**)&rs );
-        CBitmapDrawable::New(rs, b, (IBitmapDrawable**)&mDrawable);
+        CBitmapDrawable::New(rs, b, (IDrawable**)&mDrawable);
     }
     else {
-        CBitmapDrawable::New((IBitmapDrawable**)&mDrawable);
+        CBitmapDrawable::New((IDrawable**)&mDrawable);
     }
     Int32 width;
     mDrawable->GetIntrinsicWidth(&width);
@@ -161,7 +161,7 @@ ECode ImageSpan::GetDrawable(
             bf->DecodeStream(is.Get(), (IBitmap**)&bitmap);
             AutoPtr<IResources> rs;
             mContext->GetResources((IResources**)&rs);
-            CBitmapDrawable::New(rs, bitmap, (IBitmapDrawable**)&drawable);
+            CBitmapDrawable::New(rs, bitmap, (IDrawable**)&drawable);
             Int32 dIntrinsicWidth, dIntrinsicHeight;
             drawable->GetIntrinsicWidth(&dIntrinsicWidth);
             drawable->GetIntrinsicHeight(&dIntrinsicHeight);

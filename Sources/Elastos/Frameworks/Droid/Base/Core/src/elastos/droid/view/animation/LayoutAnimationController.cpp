@@ -285,7 +285,7 @@ Int64 LayoutAnimationController::GetDelayForView(
     Float totalDelay = delay * params->mCount;
 
     if (mInterpolator == NULL) {
-        ASSERT_SUCCEEDED(CLinearInterpolator::New((ILinearInterpolator**)&mInterpolator));
+        ASSERT_SUCCEEDED(CLinearInterpolator::New((IInterpolator**)&mInterpolator));
     }
 
     Float normalizedDelay = viewDelay / totalDelay;

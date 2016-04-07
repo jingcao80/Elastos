@@ -194,7 +194,7 @@ ECode CWallpaperManager::GetBuiltInDrawable(
         if (outWidth <= 0 || outHeight <= 0) {
             AutoPtr<IBitmap> fullSize;
             BitmapFactory::DecodeStream(is, NULL, NULL, (IBitmap**)&fullSize);
-            return CBitmapDrawable::New(resources, fullSize, (IDrawable**)&drawable);
+            return CBitmapDrawable::New(resources, fullSize, drawable);
         }
         else {
             Int32 inWidth;

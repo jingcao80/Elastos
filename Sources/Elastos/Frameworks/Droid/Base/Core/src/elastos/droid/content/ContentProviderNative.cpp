@@ -301,8 +301,9 @@ ECode ContentProviderNative::ContentProviderProxy::ApplyBatch(
     FAIL_RETURN(operations->GetObjectEnumerator((IObjectEnumerator**)&ObjEnumerator));
 
     while ((ObjEnumerator->MoveNext(&hasNext), hasNext)) {
-        operation = NULL;
-        FAIL_RETURN(ObjEnumerator->Current((IInterface**)&operation));
+        AutoPtr<IInterface> obj;
+        FAIL_RETURN(ObjEnumerator->Current((IInterface**)&obj));
+        operation = IContentProviderOperation::Probe(obj);
         AutoPtr<IParcelable> operationParcelable = (IParcelable*) operation->Probe(EIID_IParcelable);
         FAIL_RETURN(operationParcelable->WriteToParcel(data));
     }
@@ -690,8 +691,9 @@ ECode ContentProviderNative::AsInterface(
         return NOERROR;
     }
 
-    AutoPtr<IIContentProvider> provider;
-    FAIL_RETURN(obj->QueryLocalInterface(IIContentProviderConstants::DESCRIPTOR, (IInterface**)&provider));
+    AutoPtr<IInterface> temp;
+    FAIL_RETURN(obj->QueryLocalInterface(IIContentProviderConstants::DESCRIPTOR, (IInterface**)&temp));
+    IIContentProvider* provider = IIContentProvider::Probe(temp);
 
     if (NULL != provider) {
         *contentProvider = provider;

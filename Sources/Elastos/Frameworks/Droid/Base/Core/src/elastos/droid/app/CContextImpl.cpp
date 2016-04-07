@@ -3728,7 +3728,7 @@ ECode CContextImpl::GetReceiverRestrictedContext(
         return NOERROR;
     }
     AutoPtr<IContext> outCtx = GetOuterContext();
-    CReceiverRestrictedContext::New(outCtx, (IReceiverRestrictedContext**)&mReceiverRestrictedContext);
+    CReceiverRestrictedContext::New(outCtx, (IContext**)&mReceiverRestrictedContext);
     *ctx = mReceiverRestrictedContext;
     REFCOUNT_ADD(*ctx);
     return NOERROR;

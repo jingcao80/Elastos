@@ -180,7 +180,7 @@ Boolean FileUtils::CopyFile(
     Boolean result = FALSE;
 
     AutoPtr<IInputStream> in;
-    ECode ec = CFileInputStream::New(srcFile, (IFileInputStream**)&in);
+    ECode ec = CFileInputStream::New(srcFile, (IInputStream**)&in);
     FAIL_GOTO(ec, _EXIT_);
     result = CopyToFile(in, destFile);
 

@@ -1012,8 +1012,7 @@ ECode CTime::TimeCalculator::UpdateZoneInfoFromTimeZone()
 {
     String zoneInfoID;
     ITimeZone::Probe(mZoneInfo)->GetID(&zoneInfoID);
-    if (!zoneInfoID.Equals(mTimeZone))
-    {
+    if (!zoneInfoID.Equals(mTimeZone)) {
         LookupZoneInfo(mTimeZone, (IZoneInfo**)&mZoneInfo);
     }
     return NOERROR;

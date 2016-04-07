@@ -389,9 +389,9 @@ ECode MatrixCursor::GetBlob(
         array->GetLength(&len);
         AutoPtr< ArrayOf<Byte> > _blob = ArrayOf<Byte>::Alloc(len);
         for (Int32 i = 0; i < len; ++i) {
-            AutoPtr<IByte> b;
+            AutoPtr<IInterface> b;
             array->Get(i, (IInterface**)&b);
-            b->GetValue(&(*_blob)[i]);
+            IByte::Probe(b)->GetValue(&(*_blob)[i]);
         }
         *blob = _blob;
         REFCOUNT_ADD(*blob)

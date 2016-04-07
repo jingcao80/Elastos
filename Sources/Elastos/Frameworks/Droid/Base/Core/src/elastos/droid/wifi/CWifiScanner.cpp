@@ -89,8 +89,9 @@ ECode CWifiScanner::ServiceHandler::HandleMessage(
             IWifiScannerActionListener::Probe(listener)->OnSuccess();
             break;
         case CMD_OP_FAILED : {
-                AutoPtr<IWifiScannerOperationResult> result;
-                msg->GetObj((IInterface**)&result);
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+                IWifiScannerOperationResult* result = IWifiScannerOperationResult::Probe(obj);
                 Int32 reason;
                 result->GetReason(&reason);
                 String description;
@@ -100,16 +101,19 @@ ECode CWifiScanner::ServiceHandler::HandleMessage(
             }
             break;
         case CMD_SCAN_RESULT : {
-                AutoPtr<IWifiScannerParcelableScanResults> result;
-                msg->GetObj((IInterface**)&result);
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+                IWifiScannerParcelableScanResults* result = IWifiScannerParcelableScanResults::Probe(obj);
                 AutoPtr< ArrayOf<IScanResult*> > results;
                 result->GetResults((ArrayOf<IScanResult*>**)&results);
                 IWifiScannerScanListener::Probe(listener)->OnResults(results);
                 return NOERROR;
             }
         case CMD_FULL_SCAN_RESULT : {
-                AutoPtr<IScanResult> result;
-                msg->GetObj((IInterface**)&result);
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+                IScanResult* result = IScanResult::Probe(obj);
+
                 IWifiScannerScanListener::Probe(listener)->OnFullResult(result);
                 return NOERROR;
             }
@@ -120,24 +124,30 @@ ECode CWifiScanner::ServiceHandler::HandleMessage(
                 return NOERROR;
             }
         case CMD_AP_FOUND: {
-                AutoPtr<IWifiScannerParcelableScanResults> result;
-                msg->GetObj((IInterface**)&result);
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+                IWifiScannerParcelableScanResults* result = IWifiScannerParcelableScanResults::Probe(obj);
+
                 AutoPtr< ArrayOf<IScanResult*> > results;
                 result->GetResults((ArrayOf<IScanResult*>**)&results);
                 IWifiScannerBssidListener::Probe(listener)->OnFound(results);
                 return NOERROR;
             }
         case CMD_WIFI_CHANGE_DETECTED: {
-                AutoPtr<IWifiScannerParcelableScanResults> result;
-                msg->GetObj((IInterface**)&result);
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+                IWifiScannerParcelableScanResults* result = IWifiScannerParcelableScanResults::Probe(obj);
+
                 AutoPtr< ArrayOf<IScanResult*> > results;
                 result->GetResults((ArrayOf<IScanResult*>**)&results);
                 IWifiScannerWifiChangeListener::Probe(listener)->OnChanging(results);
                return NOERROR;
            }
         case CMD_WIFI_CHANGES_STABILIZED: {
-                AutoPtr<IWifiScannerParcelableScanResults> result;
-                msg->GetObj((IInterface**)&result);
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+                IWifiScannerParcelableScanResults* result = IWifiScannerParcelableScanResults::Probe(obj);
+
                 AutoPtr< ArrayOf<IScanResult*> > results;
                 result->GetResults((ArrayOf<IScanResult*>**)&results);
                 IWifiScannerWifiChangeListener::Probe(listener)->OnQuiescence(results);
@@ -438,9 +448,9 @@ AutoPtr<IObject> CWifiScanner::GetListener(
 
     {
         AutoLock lock(sListenerMapLock);
-        AutoPtr<IObject> listener;
+        AutoPtr<IInterface> listener;
         sListenerMap->Get(key, (IInterface**)&listener);
-        return listener;
+        return IObject::Probe(listener);
     }
 }
 
@@ -475,10 +485,10 @@ AutoPtr<IObject> CWifiScanner::RemoveListener(
 
     {
         AutoLock lock(sListenerMapLock);
-        AutoPtr<IObject> listener;
+        AutoPtr<IInterface> listener;
         sListenerMap->Get(key, (IInterface**)&listener);
         sListenerMap->Remove(key);
-        return listener;
+        return IObject::Probe(listener);
     }
 }
 

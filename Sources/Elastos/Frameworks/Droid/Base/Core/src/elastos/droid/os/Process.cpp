@@ -119,7 +119,7 @@ ECode Process::ZygoteState::Connect(
 
     AutoPtr<IInputStream> inputStream;
     AutoPtr<IOutputStream> outputStream;
-    AutoPtr<IOutputStreamWriter> outputStreamWriter;
+    AutoPtr<IWriter> outputStreamWriter;
     AutoPtr<ArrayOf<String> > splits;
     AutoPtr<List<String> > lists;
     String abiListString;
@@ -144,7 +144,7 @@ ECode Process::ZygoteState::Connect(
     ec = COutputStreamWriter::New(outputStream, (IWriter**)&outputStreamWriter);
     FAIL_GOTO(ec, _EXIT_)
 
-    ec = CBufferedWriter::New(IWriter::Probe(outputStreamWriter), 256, (IBufferedWriter**)&zygoteWriter);
+    ec = CBufferedWriter::New(outputStreamWriter, 256, (IBufferedWriter**)&zygoteWriter);
     FAIL_GOTO(ec, _EXIT_)
 
     ec =  Process::GetAbiList(zygoteWriter, zygoteInputStream, &abiListString);

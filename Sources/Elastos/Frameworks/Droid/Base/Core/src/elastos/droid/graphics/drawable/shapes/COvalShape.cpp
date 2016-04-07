@@ -20,10 +20,10 @@ ECode COvalShape::Clone(
     /* [out] */ IInterface** shape)
 {
     VALIDATE_NOT_NULL(shape);
-    AutoPtr<COvalShape> s;
-    COvalShape::New((IOvalShape**)&s);
-    OvalShape::CloneImpl(IRectShape::Probe(s));
-    *shape = (IShape*)s.Get();
+    AutoPtr<IRectShape> s;
+    COvalShape::New((IRectShape**)&s);
+    OvalShape::CloneImpl(s);
+    *shape = s.Get();
     REFCOUNT_ADD(*shape);
     return NOERROR;
 }

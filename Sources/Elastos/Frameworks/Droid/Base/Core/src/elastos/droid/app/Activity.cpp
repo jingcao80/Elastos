@@ -360,8 +360,9 @@ AutoPtr<ILoaderManagerImpl> Activity::GetLoaderManager(
     }
 
     AutoPtr<ICharSequence> key = CoreUtils::Convert(who);
-    AutoPtr<ILoaderManagerImpl> lm;
-    mAllLoaderManagers->Get(IInterface::Probe(key), (IInterface**)&lm);
+    AutoPtr<IInterface> obj;
+    mAllLoaderManagers->Get(IInterface::Probe(key), (IInterface**)&obj);
+    ILoaderManagerImpl* lm = ILoaderManagerImpl::Probe(obj);
     if (lm == NULL) {
         if (create) {
             // TODO
@@ -1036,8 +1037,9 @@ ECode Activity::InvalidateFragment(
     if (mAllLoaderManagers != NULL) {
         AutoPtr<ICharSequence> key = CoreUtils::Convert(who);
         IInterface* keyObj = IInterface::Probe(key);
-        AutoPtr<ILoaderManagerImpl> lm;
-        mAllLoaderManagers->Get(keyObj, (IInterface**)&lm);
+        AutoPtr<IInterface> obj;
+        mAllLoaderManagers->Get(keyObj, (IInterface**)&obj);
+        ILoaderManagerImpl* lm = ILoaderManagerImpl::Probe(obj);
         if (lm != NULL) {
             assert(0 && "TODO");
             // LoaderManagerImpl* lmi = (LoaderManagerImpl*)lm.Get();

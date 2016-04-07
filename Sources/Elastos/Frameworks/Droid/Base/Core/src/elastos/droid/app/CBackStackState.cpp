@@ -1449,8 +1449,8 @@ void BackStackRecord::CallSharedElementEnd(
     IMap::Probe(namedViews)->GetValues((ICollection**)&values);
 
     AutoPtr<IList> names, views;
-    CArrayList::New(ICollection::Probe(keyset), (IArrayList**)&names);
-    CArrayList::New(values, (IArrayList**)&views);
+    CArrayList::New(ICollection::Probe(keyset), (IList**)&names);
+    CArrayList::New(values, (IList**)&views);
 
     Fragment* fragment = NULL;
     if (isBack) {
@@ -1635,8 +1635,8 @@ void BackStackRecord::ConfigureTransitions(Int32 containerId,
             IMap::Probe(namedViews)->GetValues((ICollection**)&values);
 
             AutoPtr<IList> names, views;
-            CArrayList::New(ICollection::Probe(keyset), (IArrayList**)&names);
-            CArrayList::New(values, (IArrayList**)&views);
+            CArrayList::New(ICollection::Probe(keyset), (IList**)&names);
+            CArrayList::New(values, (IList**)&views);
 
             Fragment* fragment = NULL;
             if (isBack) {

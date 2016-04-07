@@ -174,7 +174,7 @@ ECode Movie::DecodeFile(
 
     AutoPtr<IInputStream> is;
     // try {
-    FAIL_RETURN(CFileInputStream::New(pathName, (IFileInputStream**)&is));
+    FAIL_RETURN(CFileInputStream::New(pathName, (IInputStream**)&is));
     // }
     // catch (java.io.FileNotFoundException e) {
     //     return null;
