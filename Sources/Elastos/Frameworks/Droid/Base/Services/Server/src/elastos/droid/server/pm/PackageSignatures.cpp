@@ -3,6 +3,7 @@
 #include "elastos/droid/server/pm/CPackageManagerService.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include <elastos/core/StringUtils.h>
+#include <Elastos.CoreLibrary.h>
 
 using Elastos::Core::StringUtils;
 using Elastos::Droid::Server::Pm::CPackageManagerService;
@@ -141,10 +142,20 @@ void PackageSignatures::ReadXml(
                             pastSignatures.PushBack(NULL);
                         }
                         AutoPtr<ISignature> sig;
-                        CSignature::New(key, (ISignature**)&sig);
-                        pastSignatures[idx] = sig;
-                        mSignatures->Set(pos, sig);
-                        pos++;
+                        ECode ec = CSignature::New(key, (ISignature**)&sig);
+                        if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
+                            String des;
+                            parser->GetPositionDescription(&des);
+                             CPackageManagerService::ReportSettingsProblem(5/*TODO: Log.WARN*/,
+                                    String("Error in package manager settings: <cert> ")
+                                       + "index " + index + " has an invalid signature at "
+                                       + des);
+                        }
+                        if (SUCCEEDED(ec)) {
+                            pastSignatures[idx] = sig;
+                            mSignatures->Set(pos, sig);
+                            pos++;
+                        }
                     }
                     // } catch (NumberFormatException e) {
                     //     PackageManagerService.reportSettingsProblem(Log.WARN,

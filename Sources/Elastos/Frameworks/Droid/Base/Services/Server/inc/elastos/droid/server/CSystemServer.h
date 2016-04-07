@@ -5,6 +5,7 @@
 #include "_Elastos_Droid_Server_CSystemServer.h"
 #include <Elastos.Droid.Content.h>
 #include <Elastos.CoreLibrary.Utility.h>
+#include "elastos/droid/server/CMountService.h"
 #include "elastos/droid/server/am/CActivityManagerService.h"
 #include "elastos/droid/server/display/CDisplayManagerService.h"
 #include "elastos/droid/server/input/CInputManagerService.h"
@@ -26,6 +27,7 @@ using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Server::CMountService;
 using Elastos::Droid::Server::Am::CActivityManagerService;
 using Elastos::Droid::Server::Display::CDisplayManagerService;
 using Elastos::Droid::Server::Input::CInputManagerService;
@@ -53,7 +55,7 @@ private:
         : public Object
     {
     public:
-        // AutoPtr<CMountService> mMountServiceF;
+        AutoPtr<CMountService> mMountServiceF;
         AutoPtr<CNetworkManagementService> mNetworkManagementF;
         AutoPtr<CNetworkStatsService> mNetworkStatsF;
         AutoPtr<CNetworkPolicyManagerService> mNetworkPolicyF;

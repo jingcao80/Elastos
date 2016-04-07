@@ -66,6 +66,7 @@ using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::IISchedulingPolicyService;
+using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Internal::Os::BinderInternal;
 using Elastos::Droid::Internal::Telephony::IITelephonyRegistry;
 using Elastos::Droid::App::IContextImpl;
@@ -463,7 +464,7 @@ ECode SystemServer::StartOtherServices()
     AutoPtr<CContentService> contentService;
     AutoPtr<CVibratorService> vibrator;
     AutoPtr<IIAlarmManager> alarm;
-    // AutoPtr<CMountService> mountService;
+    AutoPtr<CMountService> mountService;
     AutoPtr<CNetworkManagementService> networkManagement;
     AutoPtr<CNetworkStatsService> networkStats;
     AutoPtr<CNetworkPolicyManagerService> networkPolicy;
@@ -667,13 +668,10 @@ ECode SystemServer::StartOtherServices()
                  * NotificationManagerService is dependant on MountService,
                  * (for media / usb notifications) so we must start MountService first.
                  */
-                Slogger::I(TAG, "Mount Service todo");
-                // AutoPtr<IMountService> service;
-                // ec = CMountService::New(context, (IMountService**)&service);
-                // if (FAILED(ec)) Slogger::E(TAG, "failed to start Mount service");
-                // mountService = new MountService(context);
-                // ServiceManager::AddService(String("mount"), mountService.Get());
-
+                Slogger::I(TAG, "Mount Service");
+                ec = CMountService::NewByFriend(context, (CMountService**)&mountService);
+                if (FAILED(ec)) Slogger::E(TAG, "failed to start Mount service");
+                ServiceManager::AddService(String("mount"), IIMountService::Probe(mountService));
         }
 
         if (!disableNonCoreServices) {
@@ -826,9 +824,9 @@ ECode SystemServer::StartOtherServices()
          * AppWidget Provider. Make sure MountService is completely started
          * first before continuing.
          */
-        // if (mountService != NULL && !mOnlyCore) {
-        //     mountService->WaitForAsecScan();
-        // }
+        if (mountService != NULL && !mOnlyCore) {
+            mountService->WaitForAsecScan();
+        }
 
         // if (accountManager != NULL) {
         //     ec = accountManager->SystemReady();
@@ -1167,7 +1165,7 @@ ECode SystemServer::StartOtherServices()
 
     // These are needed to propagate to the runnable below.
     AutoPtr<ServiceBundle> bundle = new ServiceBundle();
-    // bundle->mMountServiceF = mountService;
+    bundle->mMountServiceF = mountService;
     bundle->mNetworkManagementF = networkManagement;
     bundle->mNetworkStatsF = networkStats;
     bundle->mNetworkPolicyF = networkPolicy;
@@ -1251,12 +1249,12 @@ ECode SystemServer::SystemReadyRunnable::Run()
     //     mHost->ReportWtf("starting System UI", ec);
     // }
 
-    // if (mServiceBundle->mMountServiceF != NULL) {
-    //     ec = mServiceBundle->mMountServiceF->SystemReady();
-    //     if (FAILED(ec)) {
-    //         mHost->ReportWtf("making Mount Service ready", ec);
-    //     }
-    // }
+    if (mServiceBundle->mMountServiceF != NULL) {
+        mServiceBundle->mMountServiceF->SystemReady();
+        // if (FAILED(ec)) {
+        //     mHost->ReportWtf("making Mount Service ready", ec);
+        // }
+    }
 
     // if (mServiceBundle->mNetworkScoreF != NULL) {
     //     ec = mServiceBundle->mNetworkScoreF->SystemReady();
