@@ -41,13 +41,13 @@ ECode FloatArrayEvaluator::Evaluate(
     AutoPtr<IArrayOf> array;
     CArrayOf::New(EIID_IFloat, length, (IArrayOf**)&array);
     for (Int32 i = 0; i < length; i++) {
-        AutoPtr<IFloat> istart, iend;
+        AutoPtr<IInterface> istart, iend;
         IArrayOf::Probe(startValue)->Get(i, (IInterface**)&istart);
         IArrayOf::Probe(endValue)->Get(i, (IInterface**)&iend);
         Float start = 0;
-        istart->GetValue(&start);
+        IFloat::Probe(istart)->GetValue(&start);
         Float end = 0;
-        iend->GetValue(&end);
+        IFloat::Probe(iend)->GetValue(&end);
         Float iv = start + (fraction * (end - start));
         AutoPtr<IFloat> value;
         CFloat::New(iv, (IFloat**)&value);

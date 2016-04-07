@@ -455,9 +455,9 @@ AutoPtr<IOrientedBoundingBox> GestureUtils::ComputeOrientedBoundingBox(
     AutoPtr<ArrayOf<Float> > points = ArrayOf<Float>::Alloc(count * 2);
 
     for (Int32 i = 0; i < count; i++) {
-        AutoPtr<IGesturePoint> point;
-
-        originalPoints->Get(i, (IInterface**)&point);
+        AutoPtr<IInterface> obj;
+        originalPoints->Get(i, (IInterface**)&obj);
+        IGesturePoint* point = IGesturePoint::Probe(obj);
         Int32 index = i * 2;
 
         Float x, y;

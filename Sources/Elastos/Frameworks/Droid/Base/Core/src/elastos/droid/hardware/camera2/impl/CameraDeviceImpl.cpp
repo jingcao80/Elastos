@@ -186,7 +186,7 @@ ECode CameraDeviceImpl::CaptureCallbackHolder::constructor(
     }
     mRepeating = repeating;
     mHandler = handler;
-    CArrayList::New(ICollection::Probe(requestList), (IArrayList**)&mRequestList);
+    CArrayList::New(ICollection::Probe(requestList), (IList**)&mRequestList);
     mCallback = _callback;
     return NOERROR;
 }
@@ -359,7 +359,7 @@ ECode CameraDeviceImpl::FrameNumberTracker::UpdateTracker(
     // Partial results must be aggregated in-order for that frame number
     AutoPtr<IList> partials = mPartialResults[frameNumber];
     if (partials == NULL) {
-        CArrayList::New((IArrayList**)&partials);
+        CArrayList::New((IList**)&partials);
         mPartialResults[frameNumber] = partials;
     }
 

@@ -50,9 +50,9 @@ ECode MultiInt32ValuesHolder::SetAnimatedValue(
     AutoPtr<ArrayOf<Int32> > values = ArrayOf<Int32>::Alloc(numParameters);
     Int32 iv = 0;
     for (Int32 i = 0; i < numParameters; i++) {
-        AutoPtr<IInteger32> value;
+        AutoPtr<IInterface> value;
         list->Get(i, (IInterface**)&value);
-        value->GetValue(&iv);
+        IInteger32::Probe(value)->GetValue(&iv);
         (*values)[i] = iv;
     }
 
@@ -107,10 +107,10 @@ ECode MultiInt32ValuesHolder::SetupSetter(
     if (mJniSetter == NULL) {
         String methodName = GetMethodName(String("Set"), mPropertyName);
         CalculateValue(0.f);
-        AutoPtr<IArrayList> values;
+        AutoPtr<IInterface> values;
         GetAnimatedValue((IInterface**)&values);
         Int32 numParams = 0;
-        values->GetSize(&numParams);
+        IArrayList::Probe(values)->GetSize(&numParams);
         try {
             mJniSetter = nGetMultipleInt32Method(info, methodName, numParams);
         } catch (NoSuchMethodError e) {

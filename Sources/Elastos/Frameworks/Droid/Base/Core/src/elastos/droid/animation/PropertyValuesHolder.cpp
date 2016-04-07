@@ -620,12 +620,12 @@ ECode PropertyValuesHolder::SetupSetterAndGetter(
                     ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
                 }
                 else if(carType == CarDataType_Interface) {
-                    AutoPtr<IInteger32> getRst;
+                    AutoPtr<IInterface> getRst;
                     arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
                     FAIL_RETURN(mGetter->Invoke(target, arg));
 
                     AutoPtr<IInterface> value;
-                    FAIL_RETURN(ConvertBack(getRst, (IInterface**)&value));
+                    FAIL_RETURN(ConvertBack(IInteger32::Probe(getRst), (IInterface**)&value));
                     kf->SetValue(value);
                     ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
                 }
@@ -647,12 +647,12 @@ ECode PropertyValuesHolder::SetupSetterAndGetter(
                     ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
                 }
                 else if (carType == CarDataType_Interface) {
-                    AutoPtr<IFloat> getRst;
+                    AutoPtr<IInterface> getRst;
                     arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
                     FAIL_RETURN(mGetter->Invoke(target, arg));
 
                     AutoPtr<IInterface> value;
-                    FAIL_RETURN(ConvertBack(getRst, (IInterface**)&value));
+                    FAIL_RETURN(ConvertBack(IFloat::Probe(getRst), (IInterface**)&value));
                     kf->SetValue(value);
                     ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
                 }
@@ -674,12 +674,12 @@ ECode PropertyValuesHolder::SetupSetterAndGetter(
                     ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
                 }
                 else if(carType == CarDataType_Interface) {
-                    AutoPtr<IDouble> getRst;
+                    AutoPtr<IInterface> getRst;
                     arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
                     FAIL_RETURN(mGetter->Invoke(target, arg));
 
                     AutoPtr<IInterface> value;
-                    FAIL_RETURN(ConvertBack(getRst, (IInterface**)&value));
+                    FAIL_RETURN(ConvertBack(IDouble::Probe(getRst), (IInterface**)&value));
                     kf->SetValue(value);
                     ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
                 }

@@ -193,7 +193,7 @@ void JNISoundTriggerCallback::onRecognitionEvent(struct sound_trigger_recognitio
         CSoundTriggerKeyphraseRecognitionEvent::New(event->status, event->model, event->capture_available,
                 event->capture_session, event->capture_delay_ms,
                 event->capture_preamble_ms, event->trigger_in_data,
-                jAudioFormat, jData, jExtras, (ISoundTriggerKeyphraseRecognitionEvent**)&jEvent);
+                jAudioFormat, jData, jExtras, (ISoundTriggerRecognitionEvent**)&jEvent);
 
         // env->DeleteLocalRef(jAudioFormat);
         // env->DeleteLocalRef(jData);

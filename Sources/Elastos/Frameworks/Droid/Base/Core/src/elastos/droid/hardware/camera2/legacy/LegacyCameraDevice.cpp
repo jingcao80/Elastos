@@ -661,7 +661,7 @@ ECode LegacyCameraDevice::GetSurfaceSize(
     Int32 tmp;
     FAIL_RETURN(LegacyExceptionUtils::ThrowOnError(NativeDetectSurfaceDimens(surface, dimens), &tmp))
 
-    return CSize::New((*dimens)[0], (*dimens)[1], (ISize**)&size);
+    return CSize::New((*dimens)[0], (*dimens)[1], size);
 }
 
 ECode LegacyCameraDevice::DetectSurfaceType(
@@ -815,7 +815,7 @@ ECode LegacyCameraDevice::GetTextureSize(
     LegacyExceptionUtils::ThrowOnError(NativeDetectTextureDimens(surfaceTexture,
             /*out*/dimens), &tmp);
 
-    return CSize::New((*dimens)[0], (*dimens)[1], (ISize**)&size);
+    return CSize::New((*dimens)[0], (*dimens)[1], size);
 }
 
 ECode LegacyCameraDevice::SetNextTimestamp(

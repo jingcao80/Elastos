@@ -209,31 +209,25 @@ ECode BluetoothGattCharacteristic::GetIntValue(
 
     switch (formatType) {
         case FORMAT_UINT8:
-            CInteger32::New(UnsignedByteToInt((*mValue)[offset]), (IInteger32**)&result);
-            return NOERROR;
+            return CInteger32::New(UnsignedByteToInt((*mValue)[offset]), result);
 
         case FORMAT_UINT16:
-            CInteger32::New(UnsignedBytesToInt((*mValue)[offset], (*mValue)[offset+1]), (IInteger32**)&result);
-            return NOERROR;
+            return CInteger32::New(UnsignedBytesToInt((*mValue)[offset], (*mValue)[offset+1]), result);
 
         case FORMAT_UINT32:
-            CInteger32::New(UnsignedBytesToInt((*mValue)[offset], (*mValue)[offset+1],
-                                      (*mValue)[offset+2], (*mValue)[offset+3]), (IInteger32**)&result);
-            return NOERROR;
+            return CInteger32::New(UnsignedBytesToInt((*mValue)[offset], (*mValue)[offset+1],
+                                      (*mValue)[offset+2], (*mValue)[offset+3]), result);
 
         case FORMAT_SINT8:
-            CInteger32::New(UnsignedToSigned(UnsignedByteToInt((*mValue)[offset]), 8), (IInteger32**)&result);
-            return NOERROR;
+            return CInteger32::New(UnsignedToSigned(UnsignedByteToInt((*mValue)[offset]), 8), result);
 
         case FORMAT_SINT16:
-            CInteger32::New(UnsignedToSigned(UnsignedBytesToInt((*mValue)[offset],
-                                                       (*mValue)[offset+1]), 16), (IInteger32**)&result);
-            return NOERROR;
+            return CInteger32::New(UnsignedToSigned(UnsignedBytesToInt((*mValue)[offset],
+                                                       (*mValue)[offset+1]), 16), result);
 
         case FORMAT_SINT32:
-            CInteger32::New(UnsignedToSigned(UnsignedBytesToInt((*mValue)[offset],
-                    (*mValue)[offset+1], (*mValue)[offset+2], (*mValue)[offset+3]), 32), (IInteger32**)&result);
-            return NOERROR;
+            return CInteger32::New(UnsignedToSigned(UnsignedBytesToInt((*mValue)[offset],
+                    (*mValue)[offset+1], (*mValue)[offset+2], (*mValue)[offset+3]), 32), result);
     }
 
     return NOERROR;
@@ -252,13 +246,11 @@ ECode BluetoothGattCharacteristic::GetFloatValue(
 
     switch (formatType) {
         case FORMAT_SFLOAT:
-            CFloat::New(BytesToFloat((*mValue)[offset], (*mValue)[offset+1]), (IFloat**)&result);
-            return NOERROR;
+            return CFloat::New(BytesToFloat((*mValue)[offset], (*mValue)[offset+1]), result);
 
         case FORMAT_FLOAT:
-            CFloat::New(BytesToFloat((*mValue)[offset], (*mValue)[offset+1],
-                                (*mValue)[offset+2], (*mValue)[offset+3]), (IFloat**)&result);
-            return NOERROR;
+            return CFloat::New(BytesToFloat((*mValue)[offset], (*mValue)[offset+1],
+                                (*mValue)[offset+2], (*mValue)[offset+3]), result);
     }
 
     return NOERROR;

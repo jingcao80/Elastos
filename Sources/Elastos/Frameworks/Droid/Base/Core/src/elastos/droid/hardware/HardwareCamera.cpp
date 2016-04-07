@@ -218,10 +218,10 @@ ECode HardwareCamera::EventHandler::HandleMessage(
                 IArrayOf::Probe(obj)->GetLength(&length);
                 AutoPtr<ArrayOf<Byte> > values = ArrayOf<Byte>::Alloc(length);
                 for (Int32 i = 0; i < length; i++) {
-                    AutoPtr<IByte> bObj;
+                    AutoPtr<IInterface> bObj;
                     IArrayOf::Probe(obj)->Get(i, (IInterface**)&bObj);
                     Byte value;
-                    bObj->GetValue(&value);
+                    IByte::Probe(bObj)->GetValue(&value);
                     values->Set(i, value);
                 }
                 mCamera->mRawImageCallback->OnPictureTaken(values, mCamera);
@@ -236,10 +236,10 @@ ECode HardwareCamera::EventHandler::HandleMessage(
                 IArrayOf::Probe(obj)->GetLength(&length);
                 AutoPtr<ArrayOf<Byte> > values = ArrayOf<Byte>::Alloc(length);
                 for (Int32 i = 0; i < length; i++) {
-                    AutoPtr<IByte> bObj;
+                    AutoPtr<IInterface> bObj;
                     IArrayOf::Probe(obj)->Get(i, (IInterface**)&bObj);
                     Byte value;
-                    bObj->GetValue(&value);
+                    IByte::Probe(bObj)->GetValue(&value);
                     values->Set(i, value);
                 }
                 mCamera->mJpegCallback->OnPictureTaken(values, mCamera);
@@ -267,10 +267,10 @@ ECode HardwareCamera::EventHandler::HandleMessage(
                 IArrayOf::Probe(obj)->GetLength(&length);
                 AutoPtr<ArrayOf<Byte> > values = ArrayOf<Byte>::Alloc(length);
                 for (Int32 i = 0; i < length; i++) {
-                    AutoPtr<IByte> bObj;
+                    AutoPtr<IInterface> bObj;
                     IArrayOf::Probe(obj)->Get(i, (IInterface**)&bObj);
                     Byte value;
-                    bObj->GetValue(&value);
+                    IByte::Probe(bObj)->GetValue(&value);
                     values->Set(i, value);
                 }
                 pCb->OnPreviewFrame(values, mCamera);
@@ -285,10 +285,10 @@ ECode HardwareCamera::EventHandler::HandleMessage(
                 IArrayOf::Probe(obj)->GetLength(&length);
                 AutoPtr<ArrayOf<Byte> > values = ArrayOf<Byte>::Alloc(length);
                 for (Int32 i = 0; i < length; i++) {
-                    AutoPtr<IByte> bObj;
+                    AutoPtr<IInterface> bObj;
                     IArrayOf::Probe(obj)->Get(i, (IInterface**)&bObj);
                     Byte value;
-                    bObj->GetValue(&value);
+                    IByte::Probe(bObj)->GetValue(&value);
                     values->Set(i, value);
                 }
                 mCamera->mPostviewCallback->OnPictureTaken(values, mCamera);
@@ -326,9 +326,9 @@ ECode HardwareCamera::EventHandler::HandleMessage(
                 IArrayOf::Probe(obj)->GetLength(&length);
                 AutoPtr<ArrayOf<ICameraFace*> > faces = ArrayOf<ICameraFace*>::Alloc(length);
                 for (Int32 i = 0; i < length; i++) {
-                    AutoPtr<ICameraFace> faceObj;
+                    AutoPtr<IInterface> faceObj;
                     IArrayOf::Probe(obj)->Get(i, (IInterface**)&faceObj);
-                    faces->Set(i, faceObj);
+                    faces->Set(i, ICameraFace::Probe(faceObj));
                 }
                 assert(0 && "TODO: OnFaceDetection");
                 //mCamera->mFaceListener->OnFaceDetection(faces, mCamera);
@@ -1121,10 +1121,10 @@ ECode HardwareCamera::Parameters::Unflatten(
 
     Boolean has = FALSE;
     while (splitter->HasNext(&has), has) {
-        AutoPtr<ICharSequence> cs;
+        AutoPtr<IInterface> cs;
         IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
         String kv;
-        cs->ToString(&kv);
+        ICharSequence::Probe(cs)->ToString(&kv);
 
         Int32 pos = kv.IndexOf('=');
         if (pos == -1) {
@@ -2197,10 +2197,10 @@ AutoPtr<ArrayOf<String> > HardwareCamera::Parameters::Split(
         has = FALSE;
         Int32 index = 0;
         while(splitter->HasNext(&has), has) {
-            AutoPtr<ICharSequence> cs;
+            AutoPtr<IInterface> cs;
             IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
             String s;
-            cs->ToString(&s);
+            ICharSequence::Probe(cs)->ToString(&s);
 
             (*substrings)[index++] = s;
             assert(index > count);
@@ -2232,10 +2232,10 @@ AutoPtr<ArrayOf<IInteger32*> > HardwareCamera::Parameters::SplitInt(
         has = FALSE;
         Int32 index = 0;
         while(splitter->HasNext(&has), has) {
-            AutoPtr<ICharSequence> cs;
+            AutoPtr<IInterface> cs;
             IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
             String s;
-            cs->ToString(&s);
+            ICharSequence::Probe(cs)->ToString(&s);
 
             AutoPtr<IInteger32> obj;
             CInteger32::New(StringUtils::ParseInt32(s), (IInteger32**)&obj);
@@ -2262,10 +2262,10 @@ void HardwareCamera::Parameters::SplitInt(
     Int32 index = 0;
     Boolean has = FALSE;
     while(splitter->HasNext(&has), has) {
-        AutoPtr<ICharSequence> cs;
+        AutoPtr<IInterface> cs;
         IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
         String s;
-        cs->ToString(&s);
+        ICharSequence::Probe(cs)->ToString(&s);
 
         (*output)[index++] = StringUtils::ParseInt32(s);
     }
@@ -2284,10 +2284,10 @@ void HardwareCamera::Parameters::SplitFloat(
     Boolean has = FALSE;
     Int32 index = 0;
     while(splitter->HasNext(&has), has) {
-        AutoPtr<ICharSequence> cs;
+        AutoPtr<IInterface> cs;
         IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
         String s;
-        cs->ToString(&s);
+        ICharSequence::Probe(cs)->ToString(&s);
 
         (*output)[index++] = StringUtils::ParseFloat(s);
     }
@@ -2342,10 +2342,10 @@ AutoPtr<ArrayOf<ICameraSize*> > HardwareCamera::Parameters::SplitSize(
         has = FALSE;
         Int32 index = 0;
         while(splitter->HasNext(&has), has) {
-            AutoPtr<ICharSequence> cs;
+            AutoPtr<IInterface> cs;
             IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
             String s;
-            cs->ToString(&s);
+            ICharSequence::Probe(cs)->ToString(&s);
 
             AutoPtr<ICameraSize> size = StrToSize(s);
             if (size != NULL) {

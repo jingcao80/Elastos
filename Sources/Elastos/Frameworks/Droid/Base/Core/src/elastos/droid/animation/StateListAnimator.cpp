@@ -85,7 +85,7 @@ ECode StateListAnimator::SetTarget(
     /* [in] */ IView* view)
 {
     AutoPtr<IView> current;
-    GetTarget((IView**)&view);
+    GetTarget((IView**)&current);
     if (current.Get() == view) {
         return NOERROR;
     }
@@ -93,7 +93,8 @@ ECode StateListAnimator::SetTarget(
         ClearTarget();
     }
     if (view != NULL) {
-        mViewRef = IWeakReference::Probe(view);
+        mViewRef = NULL;
+        IWeakReferenceSource::Probe(view)->GetWeakReference((IWeakReference**)&mViewRef);
     }
 
     return NOERROR;

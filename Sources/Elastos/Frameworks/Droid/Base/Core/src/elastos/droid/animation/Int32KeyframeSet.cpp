@@ -26,7 +26,7 @@ ECode Int32KeyframeSet::GetValue(
 {
     Int32 vTemp;
     GetInt32Value(fraction, &vTemp);
-    AutoPtr<IInterface> iv;
+    AutoPtr<IInteger32> iv;
     CInteger32::New(vTemp, (IInteger32**)&iv);
     *value = iv;
     REFCOUNT_ADD(*value);
@@ -56,13 +56,15 @@ ECode Int32KeyframeSet::GetInt32Value(
         if (mEvaluator == NULL) {
             *value = mFirstValue + (Int32)(fraction * mDeltaValue);
             return NOERROR;
-        } else {
-            AutoPtr<IInteger32> obj, fValue, lValue;
+        }
+        else {
+            AutoPtr<IInteger32> fValue, lValue;
             CInteger32::New(mFirstValue, (IInteger32**)&fValue);
             CInteger32::New(mLastValue, (IInteger32**)&lValue);
+            AutoPtr<IInterface> obj;
             mEvaluator->Evaluate(fraction, fValue, lValue, (IInterface**)&obj);
             assert(obj != NULL);
-            obj->GetValue(value);
+            IInteger32::Probe(obj)->GetValue(value);
             return NOERROR;
         }
     }
@@ -90,15 +92,16 @@ ECode Int32KeyframeSet::GetInt32Value(
             return NOERROR;
         }
 
-        AutoPtr<IInteger32> obj, pValue, nValue;
+        AutoPtr<IInteger32> pValue, nValue;
         CInteger32::New(prevValue, (IInteger32**)&pValue);
         CInteger32::New(nextValue, (IInteger32**)&nValue);
+        AutoPtr<IInterface> obj;
         mEvaluator->Evaluate(intervalFraction, pValue, nValue, (IInterface**)&obj);
-
         assert(obj != NULL);
-        obj->GetValue(value);
+        IInteger32::Probe(obj)->GetValue(value);
         return NOERROR;
-    } else if (fraction >= 1.0f) {
+    }
+    else if (fraction >= 1.0f) {
         AutoPtr<IInt32Keyframe> prevKeyframe =
                 (IInt32Keyframe*)((*mKeyframes)[mNumKeyframes - 2]->Probe(EIID_IInt32Keyframe));
         AutoPtr<IInt32Keyframe> nextKeyframe =
@@ -123,13 +126,13 @@ ECode Int32KeyframeSet::GetInt32Value(
             return NOERROR;
         }
 
-        AutoPtr<IInteger32> obj, pValue, nValue;
+        AutoPtr<IInteger32> pValue, nValue;
         CInteger32::New(prevValue, (IInteger32**)&pValue);
         CInteger32::New(nextValue, (IInteger32**)&nValue);
+        AutoPtr<IInterface> obj;
         mEvaluator->Evaluate(intervalFraction, pValue, nValue, (IInterface**)&obj);
-
         assert(obj != NULL);
-        obj->GetValue(value);
+        IInteger32::Probe(obj)->GetValue(value);
         return NOERROR;
     }
 
@@ -159,13 +162,13 @@ ECode Int32KeyframeSet::GetInt32Value(
                 return NOERROR;
             }
 
-            AutoPtr<IInteger32> obj, pValue, nValue;
+            AutoPtr<IInteger32> pValue, nValue;
             CInteger32::New(prevValue, (IInteger32**)&pValue);
             CInteger32::New(nextValue, (IInteger32**)&nValue);
+            AutoPtr<IInterface> obj;
             mEvaluator->Evaluate(intervalFraction, pValue, nValue, (IInterface**)&obj);
-
             assert(obj != NULL);
-            obj->GetValue(value);
+            IInteger32::Probe(obj)->GetValue(value);
             return NOERROR;
         }
 
@@ -174,9 +177,9 @@ ECode Int32KeyframeSet::GetInt32Value(
 
     // shouldn't get here
     AutoPtr<IInt32Keyframe> obj = (IInt32Keyframe*)((*mKeyframes)[mNumKeyframes - 1]->Probe(EIID_IInt32Keyframe));
-    AutoPtr<INumber> rst;
+    AutoPtr<IInterface> rst;
     IKeyframe::Probe(obj)->GetValue((IInterface**)&rst);
-    rst->Int32Value(value);
+    INumber::Probe(rst)->Int32Value(value);
     return NOERROR;
 }
 
@@ -192,9 +195,9 @@ ECode Int32KeyframeSet::Clone(
     Int32 numKeyframes = mKeyframes->GetLength();
     AutoPtr<ArrayOf<IInt32Keyframe*> > newKeyframes = ArrayOf<IInt32Keyframe*>::Alloc(numKeyframes);
     for (Int32 i = 0; i < numKeyframes; ++i) {
-        AutoPtr<IInt32Keyframe> newone;
+        AutoPtr<IInterface> newone;
         ICloneable::Probe((*mKeyframes)[i])->Clone((IInterface**)&newone);
-        newKeyframes->Set(i, newone);
+        newKeyframes->Set(i, IInt32Keyframe::Probe(newone));
     }
     AutoPtr<IInt32KeyframeSet> newSet = new Int32KeyframeSet(newKeyframes);
     *obj = newSet;

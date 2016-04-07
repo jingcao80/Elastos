@@ -448,7 +448,7 @@ ECode ScanFilter::Matches(
     }
 
     AutoPtr<IScanRecord> scanRecord;
-    scanResult->GetScanRecord((IScanRecord**)&scanResult);
+    scanResult->GetScanRecord((IScanRecord**)&scanRecord);
 
     // Scan record is null but there exist filters on it.
     if (scanRecord == NULL

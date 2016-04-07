@@ -1031,7 +1031,7 @@ ECode ParameterUtils::ConvertScalerCropRegion(
                 "= %s", zoomIdx, str.string(), str2.string());
     }
 
-    return CZoomData::New(zoomIdx, previewCropRegion, reportedCropRegion, (IParameterUtilsZoomData**)&outzd);
+    return CZoomData::New(zoomIdx, previewCropRegion, reportedCropRegion, outzd);
 }
 
 ECode ParameterUtils::ConvertMeteringRectangleToLegacy(

@@ -50,9 +50,9 @@ ECode MultiFloatValuesHolder::SetAnimatedValue(
     AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(numParameters);
     Float fv = 0.f;
     for (Int32 i = 0; i < numParameters; i++) {
-        AutoPtr<IFloat> value;
+        AutoPtr<IInterface> value;
         list->Get(i, (IInterface**)&value);
-        value->GetValue(&fv);
+        IFloat::Probe(value)->GetValue(&fv);
         (*values)[i] = fv;
     }
     if (mJniSetter != 0) {
@@ -109,10 +109,10 @@ ECode MultiFloatValuesHolder::SetupSetter(
     if (mJniSetter == NULL) {
         String methodName = GetMethodName(String("Set"), mPropertyName);
         CalculateValue(0.f);
-        AutoPtr<IArrayList> values;
+        AutoPtr<IInterface> values;
         GetAnimatedValue((IInterface**)&values);
         Int32 numParams = 0;
-        values->GetSize(&numParams);
+        IArrayList::Probe(values)->GetSize(&numParams);
 
         try {
             mJniSetter = nGetMultipleFloatMethod(info, methodName, numParams);

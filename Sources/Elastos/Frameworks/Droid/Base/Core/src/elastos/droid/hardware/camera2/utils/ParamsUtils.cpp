@@ -38,7 +38,7 @@ ECode ParamsUtils::CreateRect(
     size->GetHeight(&width);
     Int32 heihtt;
     size->GetHeight(&heihtt);
-    return CRect::New(/*left*/0, /*top*/0, width, heihtt, (IRect**)&result);
+    return CRect::New(/*left*/0, /*top*/0, width, heihtt, result);
 }
 
 ECode ParamsUtils::CreateRect(
