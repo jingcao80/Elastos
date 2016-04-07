@@ -2738,9 +2738,7 @@ ECode CTreeMap::BoundedMap::Endpoint(
                 *outnode = NULL;
                 return NOERROR;
         }
-        FAIL_RETURN(GetBound(node, NO_BOUND, mToBound, (Node**)&node));
-        *outnode = node;
-        REFCOUNT_ADD(*outnode)
+        FAIL_RETURN(GetBound(node, NO_BOUND, mToBound, (Node**)outnode));
         return NOERROR;
     }
     else {
@@ -2759,9 +2757,7 @@ ECode CTreeMap::BoundedMap::Endpoint(
                 *outnode = NULL;
                 return NOERROR;
         }
-        FAIL_RETURN(GetBound(node, mFromBound, NO_BOUND, (Node**)&node));
-        *outnode = node;
-        REFCOUNT_ADD(*outnode)
+        FAIL_RETURN(GetBound(node, mFromBound, NO_BOUND, (Node**)outnode));
         return NOERROR;
     }
 }
