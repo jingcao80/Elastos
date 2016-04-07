@@ -179,13 +179,13 @@ ECode CUUID::FromString(
     }
 
     Int64 m1, m2, m3;
-    StringUtils::ParsePositiveInt64((*parts)[0], 16, &m1);
-    StringUtils::ParsePositiveInt64((*parts)[1], 16, &m2);
-    StringUtils::ParsePositiveInt64((*parts)[2], 16, &m3);
+    FAIL_RETURN(StringUtils::ParsePositiveInt64((*parts)[0], 16, &m1));
+    FAIL_RETURN(StringUtils::ParsePositiveInt64((*parts)[1], 16, &m2));
+    FAIL_RETURN(StringUtils::ParsePositiveInt64((*parts)[2], 16, &m3));
 
     Int64 lsb1, lsb2;
-    StringUtils::ParsePositiveInt64((*parts)[3], 16, &lsb1);
-    StringUtils::ParsePositiveInt64((*parts)[4], 16, &lsb2);
+    FAIL_RETURN(StringUtils::ParsePositiveInt64((*parts)[3], 16, &lsb1));
+    FAIL_RETURN(StringUtils::ParsePositiveInt64((*parts)[4], 16, &lsb2));
 
     Int64 msb = (m1 << 32) | (m2 << 16) | m3;
     Int64 lsb = (lsb1 << 48) | lsb2;
