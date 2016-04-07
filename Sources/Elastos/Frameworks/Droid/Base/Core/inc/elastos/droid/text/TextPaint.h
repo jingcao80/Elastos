@@ -22,6 +22,14 @@ public:
 
     virtual ~TextPaint();
 
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ Int32 flags);
+
+    CARAPI constructor(
+        /* [in] */ IPaint * pPaint);
+
     // Special value 0 means no background paint
     CARAPI SetBgColor(
         /* [in] */ Int32 bgColor);

@@ -337,8 +337,9 @@ void LinearLayout::DrawDividersVertical(
             child->GetVisibility(&visibility);
             if (visibility != IView::GONE) {
                 if (HasDividerBeforeChildAt(i)) {
-                    AutoPtr<IViewGroupLayoutParams> lp;
-                    child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+                    AutoPtr<IViewGroupLayoutParams> vglp;
+                    child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
+                    ILinearLayoutLayoutParams* lp = ILinearLayoutLayoutParams::Probe(vglp);
                     Int32 ml, mt, mr, mb;
                     IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&ml, &mt, &mr, &mb);
                     Int32 top;
@@ -360,6 +361,7 @@ void LinearLayout::DrawDividersVertical(
         else {
             AutoPtr<IViewGroupLayoutParams> lp;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+
             Int32 mb;
             IViewGroupMarginLayoutParams::Probe(lp)->GetBottomMargin(&mb);
             child->GetBottom(&bottom);
@@ -420,6 +422,7 @@ void LinearLayout::DrawDividersHorizontal(
         else {
             AutoPtr<IViewGroupLayoutParams> lp;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+
             Int32 ml, mt, mr, mb;
             IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&ml, &mt, &mr, &mb);
 
@@ -551,6 +554,7 @@ ECode LinearLayout::GetBaseline(
 
     AutoPtr<IViewGroupLayoutParams> lp;
     child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+
     Int32 ml, mt, mr,mb;
     IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&ml, &mt, &mr, &mb);
     *baseline = childTop + mt + childBaseline;

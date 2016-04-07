@@ -403,8 +403,9 @@ NumberPicker::SetSelectionCommand::SetSelectionCommand(
 
 ECode NumberPicker::SetSelectionCommand::Run()
 {
-    AutoPtr<INumberPicker> num;
-    mWeakHost->Resolve(EIID_INumberPicker, (IInterface**)&num);
+    AutoPtr<IInterface> obj;
+    mWeakHost->Resolve(EIID_INumberPicker, (IInterface**)&obj);
+    AutoPtr<INumberPicker> num = INumberPicker::Probe(obj);
     if (num == NULL) {
         return NOERROR;
     }

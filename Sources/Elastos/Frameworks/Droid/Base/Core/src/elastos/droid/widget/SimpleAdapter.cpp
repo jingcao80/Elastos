@@ -58,16 +58,18 @@ ECode SimpleAdapter::SimpleFilter::PerformFiltering(
         CArrayList::New(count, (IArrayList**)&newValues);
 
         for (Int32 i = 0; i < count; i++) {
-            AutoPtr<IMap> h;
-            unfilteredValues->Get(i, (IInterface**)&h);
+            AutoPtr<IInterface> obj;
+            unfilteredValues->Get(i, (IInterface**)&obj);
+            AutoPtr<IMap> h = IMap::Probe(obj);
             if (h != NULL) {
                 Int32 len = mHost->mTo->GetLength();
 
                 for (Int32 j = 0; j < len; j++) {
-                    AutoPtr<ICharSequence> cs;
                     AutoPtr<ICharSequence> key;
                     CString::New((*mHost->mFrom)[j], (ICharSequence**)&key);
-                    h->Get(key, (IInterface**)&cs);
+                    obj = NULL;
+                    h->Get(key, (IInterface**)&obj);
+                    AutoPtr<ICharSequence> cs = ICharSequence::Probe(obj);
                     String str;
                     cs->ToString(&str);
 
@@ -219,8 +221,9 @@ ECode SimpleAdapter::BindView(
     /* [in] */ Int32 position,
     /* [in] */ IView* view)
 {
-    AutoPtr<IMap> dataSet;
-    mData->Get(position, (IInterface**)&dataSet);
+    AutoPtr<IInterface> obj;
+    mData->Get(position, (IInterface**)&obj);
+    AutoPtr<IMap> dataSet = IMap::Probe(obj);
     if (dataSet == NULL) {
         return NOERROR;
     }

@@ -73,11 +73,21 @@ ECode _SuggestionsAdapter::FilterDelayer::GetPostingDelay(
 _SuggestionsAdapter::ChildViewCache::ChildViewCache(
     /* [in] */ IView* v)
 {
-    v->FindViewById(R::id::text1, (IView**)&mText1);
-    v->FindViewById(R::id::text2, (IView**)&mText2);
-    v->FindViewById(R::id::icon1, (IView**)&mIcon1);
-    v->FindViewById(R::id::icon2, (IView**)&mIcon2);
-    v->FindViewById(R::id::edit_query, (IView**)&mIconRefine);
+    AutoPtr<IView> view;
+    v->FindViewById(R::id::text1, (IView**)&view);
+    mText1 = ITextView::Probe(view);
+    view = NULL;
+    v->FindViewById(R::id::text2, (IView**)&view);
+    mText2 = ITextView::Probe(view);
+    view = NULL;
+    v->FindViewById(R::id::icon1, (IView**)&view);
+    mIcon1 = IImageView::Probe(obj);
+    view = NULL;
+    v->FindViewById(R::id::icon2, (IView**)&view);
+    mIcon2 = IImageView::Probe(obj);
+    view = NULL;
+    v->FindViewById(R::id::edit_query, (IView**)&view);
+    mIconRefine = IImageView::Probe(obj);
 }
 
 _SuggestionsAdapter::_SuggestionsAdapter(
@@ -244,9 +254,9 @@ ECode _SuggestionsAdapter::BindView(
     /* [in] */ IContext* context,
     /* [in] */ ICursor* cursor)
 {
-
-    AutoPtr<ChildViewCache> views;
-    view->GetTag((IInterface**)&views);
+    AutoPtr<IInterface> obj;
+    view->GetTag((IInterface**)&obj);
+    AutoPtr<ChildViewCache> views = (ChildViewCache*) IObject::Probe(obj);
 
     Int32 flags = 0;
     if (mFlagsCol != INVALID_INDEX) {
@@ -364,8 +374,9 @@ AutoPtr<IView> _SuggestionsAdapter::GetView(
 {
     AutoPtr<IView> v = ResourceCursorAdapter::GetView(position, convertView, parent);
     if (v == NULL) {
-        AutoPtr<IContext> context;
-        mWeakContext->Resolve(EIID_IContext, (IInterface**)&context);
+        AutoPtr<IInterface> obj;
+        mWeakContext->Resolve(EIID_IContext, (IInterface**)&obj);
+        IContext* context = IContext::Probe(obj);
         if (context == NULL) {
             return NULL;
         }
@@ -425,8 +436,9 @@ AutoPtr<ICharSequence> _SuggestionsAdapter::FormatUrl(
     /* [in] */ ICharSequence* url)
 {
     if (mUrlColor == NULL) {
-        AutoPtr<IContext> context;
-        mWeakContext->Resolve(EIID_IContext, (IInterface**)&context);
+        AutoPtr<IInterface> obj;
+        mWeakContext->Resolve(EIID_IContext, (IInterface**)&obj);
+        AutoPtr<IContext> context = IContext::Probe(obj);
 
         // Lazily get the URL color from the current theme.
         AutoPtr<ITypedValue> colorValue;
@@ -669,8 +681,9 @@ AutoPtr<IDrawable> _SuggestionsAdapter::GetDefaultIcon1(
         return drawable;
     }
 
-    AutoPtr<IContext> context;
-    mWeakContext->Resolve(EIID_IContext, (IInterface**)&context);
+    AutoPtr<IInterface> obj;
+    mWeakContext->Resolve(EIID_IContext, (IInterface**)&obj);
+    AutoPtr<IContext> context = IContext::Probe(obj);
 
     // Fall back to a default icon
     AutoPtr<IPackageManager> pm;
@@ -704,8 +717,9 @@ AutoPtr<IDrawable> _SuggestionsAdapter::GetActivityIconWithCache(
 AutoPtr<IDrawable> _SuggestionsAdapter::GetActivityIcon(
     /* [in] */ IComponentName* component)
 {
-    AutoPtr<IContext> context;
-    mWeakContext->Resolve(EIID_IContext, (IInterface**)&context);
+    AutoPtr<IInterface> obj;
+    mWeakContext->Resolve(EIID_IContext, (IInterface**)&obj);
+    AutoPtr<IContext> context = IContext::Probe(obj);
 
     AutoPtr<IPackageManager> pm;
     context->GetPackageManager((IPackageManager**)&pm);

@@ -500,8 +500,8 @@ private:
     Boolean mInputEnabled;
     AutoPtr<IOnValueSelectedListener> mListener;
 
-    AutoPtr<IArrayList/*<Animator*/> mHoursToMinutesAnims;
-    AutoPtr<IArrayList/*<Animator*/> mMinuteToHoursAnims;
+    AutoPtr<IArrayList> mHoursToMinutesAnims; /*<Animator*/
+    AutoPtr<IArrayList> mMinuteToHoursAnims; /*<Animator*/
 };
 
 }// namespace Widget

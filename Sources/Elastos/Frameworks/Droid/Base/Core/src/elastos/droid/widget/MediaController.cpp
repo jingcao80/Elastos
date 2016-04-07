@@ -425,8 +425,9 @@ void MediaController::InitControllerView(
     mContext->GetResources((IResources**)&res);
     res->GetText(R::string::lockscreen_transport_play_description, (ICharSequence**)&mPlayDescription);
     res->GetText(R::string::lockscreen_transport_pause_description, (ICharSequence**)&mPauseDescription);
-    mPauseButton = NULL;
-    view->FindViewById(R::id::pause, (IView**)&mPauseButton);
+    AutoPtr<IView> _view;
+    view->FindViewById(R::id::pause, (IView**)&_view);
+    mPauseButton = IImageButton::Probe(_view);
     if (mPauseButton != NULL) {
         Boolean result = FALSE;
         IView::Probe(mPauseButton)->RequestFocus(&result);
@@ -434,8 +435,9 @@ void MediaController::InitControllerView(
         IView::Probe(mPauseButton)->SetOnClickListener(mPauseListener);
     }
 
-    mFfwdButton = NULL;
-    view->FindViewById(R::id::ffwd, (IView**)&mFfwdButton);
+    _view = NULL;
+    view->FindViewById(R::id::ffwd, (IView**)&_view);
+    mFfwdButton = IImageButton::Probe(_view);
     if (mFfwdButton != NULL) {
         AutoPtr<FfwdOnClickListener> mFfwdListener = new FfwdOnClickListener(this);
         IView::Probe(mFfwdButton)->SetOnClickListener(mFfwdListener);
@@ -444,8 +446,9 @@ void MediaController::InitControllerView(
         }
     }
 
-    mRewButton = NULL;
-    view->FindViewById(R::id::rew, (IView**)&mRewButton);
+    _view = NULL;
+    view->FindViewById(R::id::rew, (IView**)&_view);
+    mRewButton = IImageButton::Probe(_view);
     if (mRewButton != NULL) {
         AutoPtr<RewOnClickListener> mRewListener = new RewOnClickListener(this);
         IView::Probe(mRewButton)->SetOnClickListener(mRewListener);
@@ -455,14 +458,16 @@ void MediaController::InitControllerView(
     }
 
     // By default these are hidden. They will be enabled when setPrevNextListeners() is called
-    mNextButton = NULL;
-    view->FindViewById(R::id::next, (IView**)&mNextButton);
+    _view = NULL;
+    view->FindViewById(R::id::next, (IView**)&_view);
+    mNextButton = IImageButton::Probe(_view);
     if (mNextButton != NULL && !mFromXml && !mListenersSet) {
         IView::Probe(mNextButton)->SetVisibility(IView::GONE);
     }
 
-    mPrevButton = NULL;
-    view->FindViewById(R::id::prev, (IView**)&mPrevButton);
+    _view = NULL;
+    view->FindViewById(R::id::prev, (IView**)&_view);
+    mPrevButton = IImageButton::Probe(_view);
     if (mPrevButton != NULL && !mFromXml && !mListenersSet) {
         IView::Probe(mPrevButton)->SetVisibility(IView::GONE);
     }

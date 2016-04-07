@@ -193,7 +193,9 @@ AutoPtr<ExpandableListPosition> ExpandableListPosition::GetRecycledOrCreate()
             elp = (ExpandableListPosition*)objTmp;
         }
         else {
-            CExpandableListPosition::New((IExpandableListPosition**)&elp);
+            AutoPtr<IExpandableListPosition> pos;
+            CExpandableListPosition::New((IExpandableListPosition**)&pos);
+            elp = (ExpandableListPosition*)pos.Get();
         }
     }
 

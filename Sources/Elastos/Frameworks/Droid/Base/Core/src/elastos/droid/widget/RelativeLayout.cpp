@@ -216,7 +216,6 @@ List< AutoPtr<Node> >& DependencyGraph::FindRoots(
         AutoPtr<IViewGroupLayoutParams> vglp;
         node->mView->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
         IRelativeLayoutLayoutParams* layoutParams = IRelativeLayoutLayoutParams::Probe(vglp);
-
         AutoPtr<ArrayOf<Int32> > rules;
         layoutParams->GetRules((ArrayOf<Int32>**)&rules);
         Int32 rulesCount = rulesFilter->GetLength();
@@ -1175,6 +1174,7 @@ void RelativeLayout::OnMeasure(
                     child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
                     IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
                     LayoutParams* lp = (LayoutParams*)params;
+
                     if (horizontalGravity) {
                         lp->mLeft += horizontalOffset;
                         lp->mRight += horizontalOffset;
@@ -1197,9 +1197,10 @@ void RelativeLayout::OnMeasure(
             if ((child->GetVisibility(&visibility), visibility) != IView::GONE) {
                 AutoPtr<IViewGroupLayoutParams> vglp;
                 child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
-                IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
-                ((LayoutParams*)params)->mLeft -= offsetWidth;
-                ((LayoutParams*)params)->mRight -= offsetWidth;
+
+                AutoPtr<IRelativeLayoutLayoutParams> params = IRelativeLayoutLayoutParams::Probe(vglp);
+                ((LayoutParams*)params.Get())->mLeft -= offsetWidth;
+                ((LayoutParams*)params.Get())->mRight -= offsetWidth;
             }
         }
     }
@@ -1243,8 +1244,8 @@ void RelativeLayout::AlignBaseline(
         AutoPtr<IViewGroupLayoutParams> vglp;
         mBaselineView->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
         IRelativeLayoutLayoutParams* layoutParams = IRelativeLayoutLayoutParams::Probe(vglp);
-
         LayoutParams* lp = (LayoutParams*)layoutParams;
+
         if (params->mTop < lp->mTop || (params->mTop == lp->mTop && params->mLeft < lp->mLeft)) {
             mBaselineView = child;
         }

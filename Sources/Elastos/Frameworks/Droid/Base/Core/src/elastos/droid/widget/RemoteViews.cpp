@@ -2952,8 +2952,9 @@ ECode RemoteViews::GetMethod(
     }
     {
         AutoLock lock(sMethodsLock);
-        AutoPtr<IArrayMap> methods;
-        sMethods->Get(klass, (IInterface**)&methods);
+        AutoPtr<IInterface> obj;
+        sMethods->Get(klass, (IInterface**)&obj);;
+        AutoPtr<IArrayMap> methods = IArrayMap::Probe(obj);
         if (methods == NULL) {
             CArrayMap::New((IArrayMap**)&methods);
             sMethods->Put(klass, methods);
@@ -2962,7 +2963,9 @@ ECode RemoteViews::GetMethod(
         mPair->SetFirst(methodName);
         mPair->SetSecond(paramType);
 
-        methods->Get(mPair, (IInterface**)&method);
+        obj = NULL;
+        methods->Get(mPair, (IInterface**)&obj);
+        method = IMethodInfo::Probe(obj);
         if (method == NULL) {
             FAIL_RETURN(klass->GetMethodInfo(methodName, paramType, (IMethodInfo**)&method))
         }

@@ -2164,16 +2164,16 @@ ECode TextView::InitFromAttributes(
         AutoPtr<IContext> ctx;
         GetContext((IContext**)&ctx);
         AutoPtr<ITransformationMethod> method;
-        CAllCapsTransformationMethod::New(ctx, (IAllCapsTransformationMethod**)&method);
+        CAllCapsTransformationMethod::New(ctx, (ITransformationMethod**)&method);
         SetTransformationMethod(method);
     }
 
     if (password || passwordInputType || webPasswordInputType || numberPasswordInputType) {
         AutoPtr<IPasswordTransformationMethodHelper> helper;
         CPasswordTransformationMethodHelper::AcquireSingleton((IPasswordTransformationMethodHelper**)&helper);
-        AutoPtr<ITransformationMethod> method;
+        AutoPtr<IPasswordTransformationMethod> method;
         helper->GetInstance((IPasswordTransformationMethod**)&method);
-        SetTransformationMethod(method);
+        SetTransformationMethod(ITransformationMethod::Probe(method));
         typefaceIndex = MONOSPACE;
     }
     assert(0);
@@ -3518,7 +3518,7 @@ ECode TextView::SetTextAppearance(
         AutoPtr<ITransformationMethod> method;
         AutoPtr<IContext> c;
         GetContext((IContext**)&c);
-        CAllCapsTransformationMethod::New(c, (IAllCapsTransformationMethod**)&method);
+        CAllCapsTransformationMethod::New(c, (ITransformationMethod**)&method);
         SetTransformationMethod(method);
     }
 
@@ -5022,7 +5022,7 @@ AutoPtr<ICharSequence> TextView::RemoveSuggestionSpans(
            retText = ICharSequence::Probe(spannable);
        }
        else {
-            CSpannableString::New(text, (ISpannableString**)&spannable);
+            CSpannableString::New(text, (ISpannable**)&spannable);
             retText = ICharSequence::Probe(spannable);
        }
 
@@ -5161,43 +5161,57 @@ void TextView::SetInputType(
 
         AutoPtr<ITextKeyListenerHelper> helper;
         CTextKeyListenerHelper::AcquireSingleton((ITextKeyListenerHelper**)&helper);
-        helper->GetInstance(autotext, cap, (ITextKeyListener**)&input);
+        AutoPtr<ITextKeyListener> tkl;
+        helper->GetInstance(autotext, cap, (ITextKeyListener**)&tkl);
+        input = IKeyListener::Probe(tkl);
     }
     else if (cls == IInputType::TYPE_CLASS_NUMBER) {
         AutoPtr<IDigitsKeyListenerHelper> helper;
         CDigitsKeyListenerHelper::AcquireSingleton((IDigitsKeyListenerHelper**)&helper);
+        AutoPtr<IDigitsKeyListener> dkl;
         helper->GetInstance(
                 (type & IInputType::TYPE_NUMBER_FLAG_SIGNED) != 0,
                 (type & IInputType::TYPE_NUMBER_FLAG_DECIMAL) != 0,
-                (IDigitsKeyListener**)&input);
+                (IDigitsKeyListener**)&dkl);
+        input = IKeyListener::Probe(dkl);
     }
     else if (cls == IInputType::TYPE_CLASS_DATETIME) {
         Int32 flag = type & IInputType::TYPE_MASK_VARIATION;
         if (flag == IInputType::TYPE_DATETIME_VARIATION_DATE) {
             AutoPtr<IDateKeyListenerHelper> helper;
             CDateKeyListenerHelper::AcquireSingleton((IDateKeyListenerHelper**)&helper);
-            helper->GetInstance((IDateKeyListener**)&input);
+            AutoPtr<IDateKeyListener> dkl;
+            helper->GetInstance((IDateKeyListener**)&dkl);
+            input = IKeyListener::Probe(dkl);
         }
         else if (flag == IInputType::TYPE_DATETIME_VARIATION_TIME) {
             AutoPtr<ITimeKeyListenerHelper> helper;
             CTimeKeyListenerHelper::AcquireSingleton((ITimeKeyListenerHelper**)&helper);
-            helper->GetInstance((ITimeKeyListener**)&input);
+            AutoPtr<ITimeKeyListener> tkl;
+            helper->GetInstance((ITimeKeyListener**)&tkl);
+            input = IKeyListener::Probe(tkl);
         }
         else {
             AutoPtr<IDateTimeKeyListenerHelper> helper;
             CDateTimeKeyListenerHelper::AcquireSingleton((IDateTimeKeyListenerHelper**)&helper);
-            helper->GetInstance((IDateTimeKeyListener**)&input);
+            AutoPtr<IDateTimeKeyListener> dtkl;
+            helper->GetInstance((IDateTimeKeyListener**)&dtkl);
+            input = IKeyListener::Probe(dtkl);
         }
     }
     else if (cls == IInputType::TYPE_CLASS_PHONE) {
         AutoPtr<IDialerKeyListenerHelper> helper;
         CDialerKeyListenerHelper::AcquireSingleton((IDialerKeyListenerHelper**)&helper);
-        helper->GetInstance((IDialerKeyListener**)&input);
+        AutoPtr<IDialerKeyListener> dkl;
+        helper->GetInstance((IDialerKeyListener**)&dkl);
+        input = IKeyListener::Probe(dkl);
     }
     else {
         AutoPtr<ITextKeyListenerHelper> helper;
         CTextKeyListenerHelper::AcquireSingleton((ITextKeyListenerHelper**)&helper);
-        helper->GetInstance((ITextKeyListener**)&input);
+        AutoPtr<ITextKeyListener> tkl;
+        helper->GetInstance((ITextKeyListener**)&tkl);
+        input = IKeyListener::Probe(tkl);
     }
     SetRawInputType(type);
     if (direct)
@@ -7562,10 +7576,11 @@ void TextView::MakeNewLayout(
             if (hbwidth <= hintWidth &&
                 (!shouldEllipsize || hbwidth <= ellipsisWidth)) {
                 if (mSavedHintLayout != NULL) {
-                    mHintLayout = NULL;
+                    AutoPtr<IBoringLayout> blObj;
                     mSavedHintLayout->ReplaceOrMake(mHint, mTextPaint,
                             hintWidth, alignment, mSpacingMult, mSpacingAdd,
-                            hintBoring, mIncludePad, (IBoringLayout**)&mHintLayout);
+                            hintBoring, mIncludePad, (IBoringLayout**)&blObj);
+                    mHintLayout = ILayout::Probe(blObj);
                 }
                 else {
                     mHintLayout = ILayout::Probe(BoringLayout::Make(mHint, mTextPaint,
@@ -7577,11 +7592,12 @@ void TextView::MakeNewLayout(
             }
             else if (shouldEllipsize && hbwidth <= hintWidth) {
                 if (mSavedHintLayout != NULL) {
-                    mHintLayout = NULL;
+                    AutoPtr<IBoringLayout> blObj;
                     mSavedHintLayout->ReplaceOrMake(mHint, mTextPaint,
                             hintWidth, alignment, mSpacingMult, mSpacingAdd,
                             hintBoring, mIncludePad, mEllipsize,
-                            ellipsisWidth, (IBoringLayout**)&mHintLayout);
+                            ellipsisWidth, (IBoringLayout**)&blObj);
+                    mHintLayout = ILayout::Probe(blObj);
                 }
                 else {
                     mHintLayout = ILayout::Probe(BoringLayout::Make(mHint, mTextPaint,
@@ -7593,29 +7609,39 @@ void TextView::MakeNewLayout(
             else if (shouldEllipsize) {
                 Int32 length;
                 mHint->GetLength(&length);
+                AutoPtr<IStaticLayout> slObj;
                 ASSERT_SUCCEEDED(CStaticLayout::New(
                     mHint, 0, length, mTextPaint, hintWidth, alignment, mTextDir,
                     mSpacingMult, mSpacingAdd, mIncludePad, mEllipsize,
-                    ellipsisWidth, mMaxMode == LINES ? mMaximum : Elastos::Core::Math::INT32_MAX_VALUE, (IStaticLayout**)&mHintLayout));
+                    ellipsisWidth, mMaxMode == LINES ? mMaximum : Elastos::Core::Math::INT32_MAX_VALUE,
+                    (IStaticLayout**)&slObj));
+                mHintLayout = ILayout::Probe(slObj);
             }
             else {
+                AutoPtr<IStaticLayout> slObj;
                 ASSERT_SUCCEEDED(CStaticLayout::New(
                     mHint, mTextPaint, hintWidth, alignment, mTextDir,mSpacingMult,
-                    mSpacingAdd, mIncludePad, (IStaticLayout**)&mHintLayout));
+                    mSpacingAdd, mIncludePad, (IStaticLayout**)&slObj));
+                mHintLayout = ILayout::Probe(slObj);
             }
         }
         else if (shouldEllipsize) {
             Int32 length;
             mHint->GetLength(&length);
+            AutoPtr<IStaticLayout> slObj;
             ASSERT_SUCCEEDED(CStaticLayout::New(
                 mHint, 0, length, mTextPaint, hintWidth, alignment,mTextDir,
                 mSpacingMult, mSpacingAdd, mIncludePad, mEllipsize,
-                ellipsisWidth, mMaxMode == LINES ? mMaximum : Elastos::Core::Math::INT32_MAX_VALUE, (IStaticLayout**)&mHintLayout));
+                ellipsisWidth, mMaxMode == LINES ? mMaximum : Elastos::Core::Math::INT32_MAX_VALUE,
+                (IStaticLayout**)&slObj));
+            mHintLayout = ILayout::Probe(slObj);
         }
         else {
+            AutoPtr<IStaticLayout> slObj;
             ASSERT_SUCCEEDED(CStaticLayout::New(
                 mHint, mTextPaint, hintWidth, alignment, mTextDir,mSpacingMult,
-                mSpacingAdd, mIncludePad, (IStaticLayout**)&mHintLayout));
+                mSpacingAdd, mIncludePad, (IStaticLayout**)&slObj));
+            mHintLayout = ILayout::Probe(slObj);
         }
     }
 
@@ -7661,10 +7687,12 @@ AutoPtr<ILayout> TextView::MakeSingleLayout(
     if (ISpannable::Probe(mText)) {
         AutoPtr<IKeyListener> keyListener;
         GetKeyListener((IKeyListener**)&keyListener);
+        AutoPtr<IDynamicLayout> dlObj;
         ASSERT_SUCCEEDED(CDynamicLayout::New(mText, mTransformed, mTextPaint, wantWidth,
             alignment, mTextDir, mSpacingMult, mSpacingAdd, mIncludePad,
             keyListener == NULL ? effectiveEllipsize : TextUtilsTruncateAt_NONE,
-            ellipsisWidth, (IDynamicLayout**)&result));
+            ellipsisWidth, (IDynamicLayout**)&dlObj));
+        result = ILayout::Probe(dlObj);
     }
     else {
         if (boring == UNKNOWN_BORING) {
@@ -7700,10 +7728,12 @@ AutoPtr<ILayout> TextView::MakeSingleLayout(
             }
             else if (shouldEllipsize && bwidth <= wantWidth) {
                 if (useSaved && mSavedLayout != NULL) {
+                    AutoPtr<IBoringLayout> blObj;
                     mSavedLayout->ReplaceOrMake(mTransformed, mTextPaint,
                         wantWidth, alignment, mSpacingMult, mSpacingAdd,
                         boring, mIncludePad, effectiveEllipsize,
-                        ellipsisWidth, (IBoringLayout**)&result);
+                        ellipsisWidth, (IBoringLayout**)&blObj);
+                    result = ILayout::Probe(blObj);
                 }
                 else {
                     result = ILayout::Probe(BoringLayout::Make(mTransformed, mTextPaint,
@@ -7713,31 +7743,39 @@ AutoPtr<ILayout> TextView::MakeSingleLayout(
                 }
             }
             else if (shouldEllipsize) {
+                AutoPtr<IStaticLayout> slObj;
                 ASSERT_SUCCEEDED(CStaticLayout::New(mTransformed,
                     0, tlen,
                     mTextPaint, wantWidth, alignment, mTextDir, mSpacingMult,
                     mSpacingAdd, mIncludePad, effectiveEllipsize,
                     ellipsisWidth, mMaxMode == LINES ? mMaximum : Elastos::Core::Math::INT32_MAX_VALUE,
-                    (IStaticLayout**)&result));
+                    (IStaticLayout**)&slObj));
+                result = ILayout::Probe(slObj);
             }
             else {
+                AutoPtr<IStaticLayout> slObj;
                 ASSERT_SUCCEEDED(CStaticLayout::New(mTransformed, mTextPaint,
                     wantWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
-                    mIncludePad, (IStaticLayout**)&result));
+                    mIncludePad, (IStaticLayout**)&slObj));
+                result = ILayout::Probe(slObj);
             }
         }
         else if (shouldEllipsize) {
+            AutoPtr<IStaticLayout> slObj;
             ASSERT_SUCCEEDED(CStaticLayout::New(mTransformed,
                 0, tlen,
                 mTextPaint, wantWidth, alignment, mTextDir, mSpacingMult,
                 mSpacingAdd, mIncludePad, effectiveEllipsize,
                 ellipsisWidth, mMaxMode == LINES ? mMaximum : Elastos::Core::Math::INT32_MAX_VALUE,
-                (IStaticLayout**)&result));
+                (IStaticLayout**)&slObj));
+            result = ILayout::Probe(slObj);
         }
         else {
+            AutoPtr<IStaticLayout> slObj;
             ASSERT_SUCCEEDED(CStaticLayout::New(mTransformed, mTextPaint,
                 wantWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
-                mIncludePad, (IStaticLayout**)&result));
+                mIncludePad, (IStaticLayout**)&slObj));
+            result = ILayout::Probe(slObj);
         }
     }
     return result;

@@ -680,8 +680,7 @@ ECode ActivityChooserView::ActivityChooserViewAdapter::GetView(
             {
                 AutoPtr<IView> convertViewTmp = convertView;
                 Int32 id = 0;
-                convertView->GetId(&id);
-                if (convertView == NULL || id != ITEM_VIEW_TYPE_FOOTER) {
+                if (convertView == NULL || (convertView->GetId(&id), id) != ITEM_VIEW_TYPE_FOOTER) {
                     AutoPtr<IContext> context;
                     mOwner->GetContext((IContext**)&context);
 
@@ -717,8 +716,7 @@ ECode ActivityChooserView::ActivityChooserViewAdapter::GetView(
             {
                 AutoPtr<IView> convertViewTmp = convertView;
                 Int32 id = 0;
-                convertView->GetId(&id);
-                if (convertView == NULL || id != R::id::list_item) {
+                if (convertView == NULL || (convertView->GetId(&id), id) != R::id::list_item) {
                     AutoPtr<IContext> context;
                     mOwner->GetContext((IContext**)&context);
 
@@ -804,6 +802,7 @@ ECode ActivityChooserView::ActivityChooserViewAdapter::MeasureContentWidth(
 
     Int32 oldMaxActivityCount = mMaxActivityCount;
     mMaxActivityCount = MAX_ACTIVITY_COUNT_UNLIMITED;
+    AutoPtr<IView> itemView;
 
     Int32 contentWidth = 0;
     Int32 widthMeasureSpec = View::MeasureSpec::MakeMeasureSpec(0, View::MeasureSpec::UNSPECIFIED);
@@ -812,8 +811,8 @@ ECode ActivityChooserView::ActivityChooserViewAdapter::MeasureContentWidth(
     GetCount(&count);
     Int32 measureWidth = 0;
     for (int i = 0; i < count; i++) {
-        AutoPtr<IView> itemView;
-        GetView(i, itemView, NULL, (IView**)&itemView);
+        AutoPtr<IView> itemViewtmp = itemView;
+        GetView(i, itemViewtmp, NULL, (IView**)&itemView);
         itemView->Measure(widthMeasureSpec, heightMeasureSpec);
         itemView->GetMeasuredWidth(&measureWidth);
         contentWidth = Elastos::Core::Math::Max(contentWidth, measureWidth);

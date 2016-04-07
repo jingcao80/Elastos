@@ -945,8 +945,9 @@ void PopupWindow::InvokePopup(
 void PopupWindow::SetLayoutDirectionFromAnchor()
 {
     if (mAnchor != NULL) {
-        AutoPtr<IView> anchor;
-        mAnchor->Resolve(EIID_IView, (IInterface**)&anchor);
+        AutoPtr<IInterface> obj;
+        mAnchor->Resolve(EIID_IView, (IInterface**)&obj);
+        AutoPtr<IView> anchor = IView::Probe(obj);
         if (anchor != NULL && mPopupViewInitialLayoutDirectionInherited) {
             Int32 dir;
             anchor->GetLayoutDirection(&dir);
@@ -1439,7 +1440,9 @@ void PopupWindow::Update(
     AutoPtr<IWeakReference> oldAnchor = mAnchor;
     AutoPtr<IView> oldView;
     if (oldAnchor != NULL) {
-        oldAnchor->Resolve(EIID_IView, (IInterface**)&oldView);
+        AutoPtr<IInterface> obj;
+        oldAnchor->Resolve(EIID_IView, (IInterface**)&obj);
+        oldView = IView::Probe(obj);
     }
 
     Boolean needsUpdate = updateLocation && (mAnchorXoff != xoff || mAnchorYoff != yoff);
@@ -1490,7 +1493,9 @@ void PopupWindow::UnregisterForScrollChanged()
 {
     AutoPtr<IView> anchor;
     if (mAnchor != NULL) {
-        mAnchor->Resolve(EIID_IView, (IInterface**)&anchor);
+        AutoPtr<IInterface> obj;
+        mAnchor->Resolve(EIID_IView, (IInterface**)&obj);
+        anchor = IView::Probe(obj);
     }
     if (anchor != NULL) {
         AutoPtr<IViewTreeObserver> vto;

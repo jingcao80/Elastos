@@ -6,8 +6,6 @@
 #include "elastos/droid/widget/CExpandableListConnector.h"
 #include "elastos/droid/widget/ExpandableListConnector.h"
 #include "elastos/droid/widget/ExpandableListPosition.h"
-// #include "elastos/droid/widget/GroupMetadata.h"
-// #include "elastos/droid/widget/PositionMetadata.h"
 #include "elastos/droid/view/SoundEffectConstants.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/os/Build.h"
@@ -223,7 +221,7 @@ ECode ExpandableListView::SavedState::ReadFromParcel(
         }
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> value;
-            in->ReadInterfacePtr((Handle32*)(IGroupMetadata**)&value);
+            in->ReadInterfacePtr((Handle32*)(IInterface**)&value);
             mExpandedGroupMetadataList->Add(value);
         }
     }

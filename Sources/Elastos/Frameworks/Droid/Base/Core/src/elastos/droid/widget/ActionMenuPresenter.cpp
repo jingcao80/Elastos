@@ -639,8 +639,9 @@ ECode ActionMenuPresenter::UpdateMenuView(
         mOverflowButton = new OverflowMenuButton(mSystemContext, this);
     }
 
-    AutoPtr<IViewGroup> parent;
-    mOverflowButton->GetParent((IViewParent**)&parent);
+    AutoPtr<IViewParent> par;
+    mOverflowButton->GetParent((IViewParent**)&par);
+    AutoPtr<IViewGroup> parent = IViewGroup::Probe(par);
     if (hasOverflow) {
         if (parent.Get() != IViewGroup::Probe(mMenuView)) {
             if (parent != NULL) {
@@ -1047,8 +1048,8 @@ ECode ActionMenuPresenter::OnSaveInstanceState(
 {
     VALIDATE_NOT_NULL(parcel)
 
-    CActionMenuPresenterSavedState::New((IParcelable**)&parcel);
-    ((SavedState*)(*parcel))->mOpenSubMenuId = this->mOpenSubMenuId;
+    CActionMenuPresenterSavedState::New(parcel);
+    ((SavedState*)(*parcel))->mOpenSubMenuId = mOpenSubMenuId;
     return NOERROR;
 }
 

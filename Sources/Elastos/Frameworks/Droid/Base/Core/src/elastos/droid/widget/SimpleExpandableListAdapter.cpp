@@ -88,8 +88,9 @@ ECode SimpleExpandableListAdapter::GetChild(
     /* [out] */ IInterface** child)
 {
     VALIDATE_NOT_NULL(child);
-    AutoPtr<IList> group;
-    mChildData->Get(groupPosition, (IInterface**)&group);
+    AutoPtr<IInterface> obj;
+    mChildData->Get(groupPosition, (IInterface**)&obj);
+    AutoPtr<IList> group = IList::Probe(obj);
     return group->Get(childPosition, child);
 }
 
@@ -118,10 +119,12 @@ ECode SimpleExpandableListAdapter::GetChildView(
     } else {
         v = convertView;
     }
-    AutoPtr<IList> group;
-    mChildData->Get(groupPosition, (IInterface**)&group);
-    AutoPtr<IMap> children;
-    group->Get(childPosition, (IInterface**)&children);
+    AutoPtr<IInterface> obj;
+    mChildData->Get(groupPosition, (IInterface**)&obj);
+    AutoPtr<IList> group = IList::Probe(obj);
+    obj = NULL;
+    group->Get(childPosition, (IInterface**)&obj);
+    AutoPtr<IMap> children = IMap::Probe(obj);
     BindView(v, children, mChildFrom, mChildTo);
     *view = v;
     REFCOUNT_ADD(*view);
@@ -142,8 +145,9 @@ ECode SimpleExpandableListAdapter::GetChildrenCount(
     /* [out] */ Int32* count)
 {
     VALIDATE_NOT_NULL(count);
-    AutoPtr<IList> group;
-    mChildData->Get(groupPosition, (IInterface**)&group);
+    AutoPtr<IInterface> obj;
+    mChildData->Get(groupPosition, (IInterface**)&obj);
+    AutoPtr<IList> group = IList::Probe(obj);
     return group->GetSize(count);
 }
 
@@ -185,8 +189,9 @@ ECode SimpleExpandableListAdapter::GetGroupView(
     } else {
         v = convertView;
     }
-    AutoPtr<IMap> group;
-    mGroupData->Get(groupPosition, (IInterface**)&group);
+    AutoPtr<IInterface> obj;
+    mGroupData->Get(groupPosition, (IInterface**)&obj);
+    AutoPtr<IMap> group = IMap::Probe(obj);
     BindView(v, group, mGroupFrom, mGroupTo);
     *view = v;
     REFCOUNT_ADD(*view);

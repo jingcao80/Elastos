@@ -653,7 +653,8 @@ CARAPI GridView::OnInitializeAccessibilityNodeInfo(
     Int32 selectionMode = GetSelectionModeForAccessibility();
     AutoPtr<IAccessibilityNodeInfoCollectionInfo> collectionInfo;
     AccessibilityNodeInfoCollectionInfo::Obtain(
-            rowsCount, columnsCount, FALSE, (IAccessibilityNodeInfoCollectionInfo**)&selectionMode);
+            rowsCount, columnsCount, FALSE, selectionMode,
+            (IAccessibilityNodeInfoCollectionInfo**)&collectionInfo);
     info->SetCollectionInfo(collectionInfo);
     return NOERROR;
 }

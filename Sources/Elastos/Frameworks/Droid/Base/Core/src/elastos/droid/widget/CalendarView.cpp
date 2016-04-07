@@ -187,7 +187,7 @@ CalendarView::LegacyCalendarViewDelegate::LegacyCalendarViewDelegate(
 {
     mScrollStateChangedRunnable = new ScrollStateRunnable(this);
 
-    CSimpleDateFormat::New(DATE_FORMAT, (ISimpleDateFormat**)&mDateFormat);
+    CSimpleDateFormat::New(DATE_FORMAT, (IDateFormat**)&mDateFormat);
 
     // initialization based on locale
     AutoPtr<ILocaleHelper> hlp;

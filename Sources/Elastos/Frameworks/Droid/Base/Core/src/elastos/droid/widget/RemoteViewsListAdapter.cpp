@@ -15,7 +15,7 @@ CAR_INTERFACE_IMPL(RemoteViewsListAdapter, BaseAdapter, IRemoteViewsListAdapter)
 RemoteViewsListAdapter::RemoteViewsListAdapter()
     : mViewTypeCount(0)
 {
-    CArrayList::New((IArrayList**)&mViewTypes);
+    // CArrayList::New((IArrayList**)&mViewTypes);
 }
 
 ECode RemoteViewsListAdapter::constructor(
@@ -69,7 +69,7 @@ ECode RemoteViewsListAdapter::GetItemId(
     /* [in] */ Int32 position,
     /* [out] */ Int64* itemId)
 {
-    *itemId = position;
+    *itemId = (Int64)position;
     return NOERROR;
 }
 
@@ -159,7 +159,7 @@ ECode RemoteViewsListAdapter::Init()
     }
 
     if (mViewTypes.GetSize() > mViewTypeCount || mViewTypeCount < 1) {
-        SLOGGERE("RemoteViewsListAdapter", String("Invalid view type count -- view type count must be >= 1") + 
+        SLOGGERE("RemoteViewsListAdapter", String("Invalid view type count -- view type count must be >= 1") +
             "and must be as large as the total number of distinct view types")
         return E_RUNTIME_EXCEPTION;
     }

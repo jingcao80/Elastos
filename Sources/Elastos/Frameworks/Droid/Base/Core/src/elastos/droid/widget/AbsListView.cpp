@@ -376,7 +376,7 @@ ECode AbsListView::SavedState::ReadFromParcel(
             Int64 key;
             source->ReadInt64(&key);
             AutoPtr<IInterface> value;
-            source->ReadInterfacePtr((Handle32*)(IInteger32**)&value);
+            source->ReadInterfacePtr((Handle32*)(IInterface**)&value);
             mCheckIdState->Put(key, value);
         }
     }
@@ -5202,8 +5202,9 @@ Boolean AbsListView::PerformLongPress(
     Boolean res;
     if (mChoiceMode == IAbsListView::CHOICE_MODE_MULTIPLE_MODAL) {
         if (mChoiceActionMode == NULL &&
-                (StartActionMode(IActionModeCallback::Probe(mMultiChoiceModeCallback),
-                (IActionMode**)&mChoiceActionMode), mChoiceActionMode) != NULL) {
+                (StartActionMode(
+                    IActionModeCallback::Probe(mMultiChoiceModeCallback),
+                    (IActionMode**)&mChoiceActionMode), mChoiceActionMode) != NULL) {
             SetItemChecked(longPressPosition, TRUE);
             PerformHapticFeedback(IHapticFeedbackConstants::LONG_PRESS, &res);
         }
@@ -7890,8 +7891,9 @@ AutoPtr<IEditText> AbsListView::GetTextFilterInput()
         GetContext((IContext**)&c);
         AutoPtr<ILayoutInflater> layoutInflater;
         LayoutInflater::From(c, (ILayoutInflater**)&layoutInflater);
-        mTextFilter = NULL;
-        layoutInflater->Inflate(R::layout::typing_filter, NULL, (IView**)&mTextFilter);
+        AutoPtr<IView> view;
+        layoutInflater->Inflate(R::layout::typing_filter, NULL, (IView**)&view);
+        mTextFilter = IEditText::Probe(view);
         // For some reason setting this as the "real" input type changes
         // the text view in some way that it doesn't work, and I don't
         // want to figure out why this is.

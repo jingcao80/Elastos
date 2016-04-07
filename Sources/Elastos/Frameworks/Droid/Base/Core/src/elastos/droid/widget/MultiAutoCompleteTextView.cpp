@@ -278,7 +278,7 @@ ECode MultiAutoCompleteTextView::CommaTokenizer::TerminateToken(
             text->ToString(&str);
             AutoPtr<ICharSequence> csq = CoreUtils::Convert(str + String(","));
             AutoPtr<ISpannable> sp;
-            CSpannableString::New(csq, (ISpannableString**)&sp);
+            CSpannableString::New(csq, (ISpannable**)&sp);
             Int32 len = 0;
             text->GetLength(&len);
             TextUtils::CopySpansFrom(ISpanned::Probe(text), 0, len, EIID_IInterface, sp, 0);

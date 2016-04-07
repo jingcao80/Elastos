@@ -133,8 +133,9 @@ AutoCompleteTextView::PopupDataSetObserver::PopupDataSetObserver(
 ECode AutoCompleteTextView::PopupDataSetObserver::OnChanged()
 {
     if (mHost != NULL) {
-        AutoPtr<IAutoCompleteTextView> tmp;
-        mHost->Resolve(EIID_IAutoCompleteTextView, (IInterface**)&tmp);
+        AutoPtr<IInterface> obj;
+        mHost->Resolve(EIID_IAutoCompleteTextView, (IInterface**)&obj);
+        AutoPtr<IAutoCompleteTextView> tmp = IAutoCompleteTextView::Probe(obj);
         AutoCompleteTextView* impl = (AutoCompleteTextView*)tmp.Get();
         if (impl != NULL && impl->mAdapter != NULL) {
             // If the popup is not showing already, showing it will cause
@@ -331,12 +332,12 @@ ECode AutoCompleteTextView::SetCompletionHint(
             LayoutInflater::From(context, (ILayoutInflater**)&layoutInflater);
             AutoPtr<IView> view;
             layoutInflater->Inflate(mHintResource, NULL, (IView**)&view);
-            AutoPtr<ITextView> hintView;
-            view->FindViewById(R::id::text1, (IView**)&hintView);
+            AutoPtr<IView> viewObj;
+            view->FindViewById(R::id::text1, (IView**)&viewObj);
+            AutoPtr<ITextView> hintView = ITextView::Probe(viewObj);
             hintView->SetText(mHintText);
             mHintView = hintView;
-            AutoPtr<IView> param = IView::Probe(hintView);
-            mPopup->SetPromptView(param);
+            mPopup->SetPromptView(viewObj);
         } else {
             mHintView->SetText(hint);
         }

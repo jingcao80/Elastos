@@ -781,7 +781,7 @@ ECode ExpandableListConnector::GetFilter(
     GetAdapter((IExpandableListAdapter**)&adapter);
     IFilterable* filter = IFilterable::Probe(adapter);
     if (filter != NULL) {
-        filter->GetFilter((IFilter**)&result);
+        filter->GetFilter(result);
     }
     else {
         *result = NULL;

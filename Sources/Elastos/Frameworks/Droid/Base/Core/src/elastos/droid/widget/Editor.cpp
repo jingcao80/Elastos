@@ -446,7 +446,9 @@ ECode EasyEditPopupWindow::InitContentView()
         IViewGroupLayoutParams::WRAP_CONTENT,
         (IViewGroupLayoutParams**)&wrapContent);
 
-    inflater->Inflate(POPUP_TEXT_LAYOUT, NULL, (IView**)&mDeleteTextView);
+    AutoPtr<IView> view;
+    inflater->Inflate(POPUP_TEXT_LAYOUT, NULL, (IView**)&view);
+    mDeleteTextView = ITextView::Probe(view);
     IView::Probe(mDeleteTextView)->SetLayoutParams(wrapContent);
     mDeleteTextView->SetText(R::string::delete_);
     IView::Probe(mDeleteTextView)->SetOnClickListener(this);
@@ -3227,8 +3229,9 @@ void Editor::ShowError()
         AutoPtr<ILayoutInflater> inflater;
         LayoutInflater::From(context, (ILayoutInflater**)&inflater);
 
-        AutoPtr<ITextView> err;
-        inflater->Inflate(R::layout::textview_hint, NULL, (IView**)&err);
+        AutoPtr<IView> view;
+        inflater->Inflate(R::layout::textview_hint, NULL, (IView**)&view);
+        AutoPtr<ITextView> err = ITextView::Probe(view);
 
         AutoPtr<IResources> resources;
         mTextView->GetResources((IResources**)&resources);
@@ -3588,7 +3591,7 @@ void Editor::ChooseSize(
     tv->GetPaint((ITextPaint**)&paint);
     AutoPtr<ILayout> layout;
     CStaticLayout::New(text, paint, defaultWidthInPixels,
-        Elastos::Droid::Text::ALIGN_NORMAL, 1, 0, TRUE, (IStaticLayout**)&layout);
+        Elastos::Droid::Text::ALIGN_NORMAL, 1, 0, TRUE, (ILayout**)&layout);
     Float max = 0;
     Float lineWidth;
     Int32 lineCount;

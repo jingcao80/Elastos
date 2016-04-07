@@ -21,6 +21,23 @@ TextPaint::~TextPaint()
 {
 }
 
+ECode TextPaint::constructor()
+{
+    return Paint::constructor();
+}
+
+ECode TextPaint::constructor(
+    /* [in] */ Int32 flags)
+{
+    return Paint::constructor(flags);
+}
+
+ECode TextPaint::constructor(
+    /* [in] */ IPaint* paint)
+{
+    return Paint::constructor(paint);
+}
+
 // Special value 0 means no background paint
 ECode TextPaint::SetBgColor(
     /* [in] */ Int32 bgColor)

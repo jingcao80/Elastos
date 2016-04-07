@@ -189,7 +189,7 @@ ECode SlidingDrawer::OnFinishInflate()
     AutoPtr<DrawerToggler> toggler = new DrawerToggler(this);
     mHandle->SetOnClickListener(toggler);
 
-    FindViewById(mContentId, (IView**)&mContentId);
+    FindViewById(mContentId, (IView**)&mContent);
     if (mContent == NULL) {
         SLOGGERD(TAG, String("The content attribute is must refer to an")
                 + " existing child.");

@@ -33,8 +33,8 @@ class _SuggestionsAdapter
 private:
 
     class FilterDelayer
-        : public IFilterDelayer
-        , public ElRefBase
+        : Object
+        , public IFilterDelayer
     {
     public:
         CAR_INTERFACE_DECL()
@@ -53,8 +53,7 @@ private:
     };
 
     class ChildViewCache
-        : public IInterface
-        , public ElRefBase
+        : public Object
     {
     public:
         CAR_INTERFACE_DECL()

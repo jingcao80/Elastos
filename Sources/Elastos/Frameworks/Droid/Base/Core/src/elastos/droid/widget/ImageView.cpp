@@ -1154,7 +1154,7 @@ ECode ImageView::SetColorFilter(
     /* [in] */ PorterDuffMode mode)
 {
     AutoPtr<IColorFilter> cf;
-    CPorterDuffColorFilter::New(color, mode, (IPorterDuffColorFilter**)&cf);
+    CPorterDuffColorFilter::New(color, mode, (IColorFilter**)&cf);
     return SetColorFilter(cf.Get());
 }
 

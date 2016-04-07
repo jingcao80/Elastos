@@ -98,7 +98,7 @@ ECode SimpleMonthAdapter::GetView(
     /* [out] */ IView** view)
 {
     AutoPtr<ISimpleMonthView> v;
-    AutoPtr<IHashMap/*<String, Integer*/> drawingParams;
+    AutoPtr<IHashMap> drawingParams;/*<String, Integer*/
     if (convertView != NULL) {
         v = ISimpleMonthView::Probe(convertView);
         // We store the drawing parameters in the view so it can be recycled

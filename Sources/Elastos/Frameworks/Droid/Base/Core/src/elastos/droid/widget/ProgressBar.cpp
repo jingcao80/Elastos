@@ -1340,7 +1340,7 @@ void ProgressBar::StartAnimation()
         mHasAnimation = TRUE;
 
         if (mInterpolator == NULL) {
-            CLinearInterpolator::New((ILinearInterpolator**)&mInterpolator);
+            CLinearInterpolator::New((IInterpolator**)&mInterpolator);
         }
 
         if (mTransformation == NULL) {
@@ -1350,7 +1350,7 @@ void ProgressBar::StartAnimation()
         }
 
         if (mAnimation == NULL) {
-            CAlphaAnimation::New(0.0f, 1.0f, (IAlphaAnimation**)&mAnimation);
+            CAlphaAnimation::New(0.0f, 1.0f, (IAnimation**)&mAnimation);
         } else {
             mAnimation->Reset();
         }

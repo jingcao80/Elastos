@@ -477,7 +477,6 @@ void FrameLayout::OnMeasure(
             AutoPtr<IViewGroupLayoutParams> vglp;
             child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
             IViewGroupMarginLayoutParams* lp = IViewGroupMarginLayoutParams::Probe(vglp);
-
             Int32 ml, mt, mr, mb;
             lp->GetMargins(&ml, &mt, &mr, &mb);
 
@@ -533,7 +532,6 @@ void FrameLayout::OnMeasure(
             AutoPtr<IViewGroupLayoutParams> vglp;
             child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
             IViewGroupMarginLayoutParams* lp = IViewGroupMarginLayoutParams::Probe(vglp);
-
             Int32 ml, mt, mr, mb;
             lp->GetMargins(&ml, &mt, &mr, &mb);
             Int32 width, height;
