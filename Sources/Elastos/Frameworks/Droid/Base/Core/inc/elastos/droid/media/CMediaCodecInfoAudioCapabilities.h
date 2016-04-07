@@ -5,11 +5,9 @@
 #include "Elastos.Droid.Utility.h"
 #include "_Elastos_Droid_Media_CMediaCodecInfoAudioCapabilities.h"
 #include "elastos/droid/ext/frameworkext.h"
-// #include "elastos/droid/utility/Range.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Utility::IRange;
-// using Elastos::Droid::Utility::Range;
 using Elastos::Core::IInteger32;
 
 namespace Elastos {
@@ -103,14 +101,12 @@ private:
     /** modifies rateRanges */
     CARAPI_(void) LimitSampleRates(
         /* [in] */ ArrayOf<IRange*>* rateRanges);
-         // [in]  ArrayOf<Range<IInteger32*> >* rateRanges);
 
     CARAPI_(void) ApplyLevelLimits();
 
     CARAPI_(void) ApplyLimits(
         /* [in] */ Int32 maxInputChannels,
         /* [in] */ IRange* bitRates);
-         // [in]  Range<IInteger32*>* bitRates);
 
     CARAPI_(void) ParseFromInfo(
         /* [in] */ IMediaFormat* info);
@@ -122,11 +118,10 @@ private:
 
     AutoPtr<IMediaCodecInfoCodecCapabilities> mParent;
     AutoPtr<IRange> mBitrateRange;
-    // AutoPtr<Range<IInteger32*> > mBitrateRange;
 
     AutoPtr<ArrayOf<Int32> > mSampleRates;
     AutoPtr<ArrayOf<IRange*> > mSampleRateRanges;
-    // AutoPtr<ArrayOf<Range<IInteger32*> > > mSampleRateRanges;
+
     Int32 mMaxInputChannelCount;
 };
 

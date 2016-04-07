@@ -148,6 +148,7 @@ ECode CAudioAttributes::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
     VALIDATE_NOT_NULL(hashCode)
+    *hashCode = 0;
 //TODO: Need Objects.hash
     // return Objects.hash(mContentType, mFlags, mSource, mUsage, mFormattedTags);
     return NOERROR;

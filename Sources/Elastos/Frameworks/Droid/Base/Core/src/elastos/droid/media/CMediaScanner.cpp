@@ -28,7 +28,7 @@
 #include "elastos/droid/os/CSystemProperties.h"
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/sax/CRootElement.h"
-//TODO: #include "elastos/droid/telephony/CTelephonyManager.h"
+#include "elastos/droid/telephony/CTelephonyManager.h"
 #include <elastos/droid/utility/Xml.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Math.h>
@@ -72,7 +72,7 @@ using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::ISystemProperties;
-//TODO: using Elastos::Droid::Telephony::CTelephonyManager;
+using Elastos::Droid::Telephony::CTelephonyManager;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Graphics::CBitmapFactory;
 using Elastos::Droid::Graphics::IBitmapFactory;
@@ -1107,7 +1107,7 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
                 }
             } else if (ringtones && !RingtoneDefaultsSet()) {
                 AutoPtr<ITelephonyManager> defaultTelephonyManager;
-                // TODO: CTelephonyManager::GetDefault((ITelephonyManager**)&defaultTelephonyManager);
+                CTelephonyManager::GetDefault((ITelephonyManager**)&defaultTelephonyManager);
                 Int32 phoneCount = 0;
                 defaultTelephonyManager->GetPhoneCount(&phoneCount);
                 for (Int32 i = 0; i < phoneCount; ++i) {
@@ -1189,7 +1189,7 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
             // memorize default system ringtone persistently
             SetSettingIfNotSet(ISettingsSystem::DEFAULT_RINGTONE, tableUri, rowId);
             AutoPtr<ITelephonyManager> defaultTelephonyManager;
-            // TODO: CTelephonyManager::GetDefault((ITelephonyManager**)&defaultTelephonyManager);
+            CTelephonyManager::GetDefault((ITelephonyManager**)&defaultTelephonyManager);
             Int32 phoneCount = 0;
             defaultTelephonyManager->GetPhoneCount(&phoneCount);
             String uri;
@@ -1226,7 +1226,7 @@ Boolean CMediaScanner::MyMediaScannerClient::RingtoneDefaultsSet()
 {
     // If not multisim, just check default sim's default
     AutoPtr<ITelephonyManager> defaultTelephonyManager;
-    // TODO: CTelephonyManager::GetDefault((ITelephonyManager**)&defaultTelephonyManager);
+    CTelephonyManager::GetDefault((ITelephonyManager**)&defaultTelephonyManager);
     Boolean isMultiSimEnabled = FALSE;
     defaultTelephonyManager->IsMultiSimEnabled(&isMultiSimEnabled);
 
@@ -1447,7 +1447,7 @@ void CMediaScanner::SetDefaultRingtoneFileNames()
     sp->Get(DEFAULT_RINGTONE_PROPERTY_PREFIX + ISettingsSystem::RINGTONE, &defaultAllSimRingtone);
 
     AutoPtr<ITelephonyManager> defaultTelephonyManager;
-    // TODO: CTelephonyManager::GetDefault((ITelephonyManager****)&defaultTelephonyManager);
+    CTelephonyManager::GetDefault((ITelephonyManager**)&defaultTelephonyManager);
     Int32 phoneCount = 0;
     defaultTelephonyManager->GetPhoneCount(&phoneCount);
 

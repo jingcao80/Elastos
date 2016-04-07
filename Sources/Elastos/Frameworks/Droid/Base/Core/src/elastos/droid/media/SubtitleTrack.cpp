@@ -463,12 +463,37 @@ SubtitleTrack::Run::~Run()
 
 CAR_INTERFACE_IMPL(SubtitleTrack::Run, Object, ISubtitleTrackRun)
 
-//TODO
-// ECode SubtitleTrack::Run::StoreByEndTimeMs(
-//     /* [in] */ ILongSparseArray* runsByEndTime)
-// {
-    // return NOERROR;
-// }
+ECode SubtitleTrack::Run::StoreByEndTimeMs(
+    /* [in] */ IInt64SparseArray* runsByEndTime)
+{
+    // remove old value if any
+    Int32 ix;
+    runsByEndTime->IndexOfKey(mStoredEndTimeMs, &ix);
+    if (ix >= 0) {
+        if (mPrevRunAtEndTimeMs == NULL) {
+            // Assert(this == runsByEndTime->ValueAt(ix));
+            if (mNextRunAtEndTimeMs == NULL) {
+                runsByEndTime->RemoveAt(ix);
+            }
+            else {
+                runsByEndTime->SetValueAt(ix, (IInterface*)(IObject*)mNextRunAtEndTimeMs);
+            }
+        }
+        RemoveAtEndTimeMs();
+    }
+
+    // add new value
+    if (mEndTimeMs >= 0) {
+        mPrevRunAtEndTimeMs = NULL;
+        runsByEndTime->Get(mEndTimeMs, (IInterface**)&mNextRunAtEndTimeMs);
+        if (mNextRunAtEndTimeMs != NULL) {
+            mNextRunAtEndTimeMs->mPrevRunAtEndTimeMs = this;
+        }
+        runsByEndTime->Put(mEndTimeMs, (IInterface*)(IObject*)this);
+        mStoredEndTimeMs = mEndTimeMs;
+    }
+    return NOERROR;
+}
 
 ECode SubtitleTrack::Run::RemoveAtEndTimeMs()
 {

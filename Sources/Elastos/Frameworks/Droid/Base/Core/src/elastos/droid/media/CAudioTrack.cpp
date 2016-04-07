@@ -1976,6 +1976,9 @@ Int32 CAudioTrack::NativeGetOutputSampleRate(
     case AUDIO_STREAM_NOTIFICATION:
     case AUDIO_STREAM_BLUETOOTH_SCO:
     case AUDIO_STREAM_DTMF:
+#ifdef QCOM_HARDWARE
+    case AUDIO_STREAM_INCALL_MUSIC:
+#endif
         nativeStreamType = (audio_stream_type_t) javaStreamType;
         break;
     default:

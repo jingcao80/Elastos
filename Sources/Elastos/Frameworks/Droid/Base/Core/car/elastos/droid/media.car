@@ -1197,6 +1197,34 @@ module
         interface IMiniThumbFileHelper;
     }
 
+    class CPlayerRecordRccPlaybackState {
+        constructor(
+            [in] Int32 state,
+            [in] Int64 positionMs,
+            [in] Float speed);
+
+        interface IPlayerRecordRccPlaybackState;
+    }
+
+    class CPlayerRecordRemotePlaybackState {
+        constructor(
+            [in] Int32 id,
+            [in] Int32 vol,
+            [in] Int32 volMax);
+
+        interface IPlayerRecordRemotePlaybackState;
+    }
+
+    class CPlayerRecord {
+        constructor(
+            [in] IPendingIntent* mediaIntent,
+            [in] IComponentName* eventReceiver,
+            [in] IBinder* token);
+
+        interface IPlayerRecord;
+        interface IProxyDeathRecipient;
+    }
+
     class CMetadata {
 
         constructor();

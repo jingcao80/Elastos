@@ -14,7 +14,7 @@
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::App::IPendingIntent;
-//TODO: using Elastos::Droid::App::IProfileManager;
+using Elastos::Droid::App::IProfileManager;
 using Elastos::Droid::Bluetooth::IBluetoothDevice;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
@@ -1539,7 +1539,7 @@ private:
     Boolean mUseFixedVolume;
     AutoPtr<IBinder> mToken;
     static const String TAG;
-    AutoPtr</*TODO IProfileManager*/IInterface> mProfileManager;
+    AutoPtr<IProfileManager> mProfileManager;
     AutoPtr<AudioPortEventHandler> mAudioPortEventHandler;
 
     // maximum valid ringer mode value. Values must start from 0 and be contiguous.

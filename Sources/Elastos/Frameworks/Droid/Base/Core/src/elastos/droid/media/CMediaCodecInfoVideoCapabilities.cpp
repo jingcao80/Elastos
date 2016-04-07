@@ -4,18 +4,21 @@
 #include "elastos/droid/media/CMediaCodecInfoVideoCapabilities.h"
 #include "elastos/droid/media/Utils.h"
 #include "elastos/droid/utility/CSize.h"
+#include "elastos/droid/utility/CRange.h"
 #include "elastos/droid/utility/CRational.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Utility::CSize;
+using Elastos::Droid::Utility::CRange;
 using Elastos::Droid::Utility::CRational;
+using Elastos::Droid::Utility::CSize;
 using Elastos::Droid::Utility::IPair;
 using Elastos::Core::CDouble;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CInteger64;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::IDouble;
 using Elastos::Core::IInteger64;
 using Elastos::Core::Math;
 using Elastos::Utility::Logging::Logger;
@@ -140,9 +143,9 @@ ECode CMediaCodecInfoVideoCapabilities::GetSupportedWidthsFor(
     INumber::Probe(barLower)->DoubleValue(&ld);
     INumber::Probe(barUpper)->DoubleValue(&ud);
 
-    Int32 val;
-// TODO: Need Utils
-    // val = Utils::DivUp(bcLower, heightInBlocks);
+    Int32 bcLowerVal;
+    IInteger32::Probe(bcLower)->GetValue(&bcLowerVal);
+    Int32 val = Utils::DivUp(bcLowerVal, heightInBlocks);
     Int32 minWidthInBlocks = Elastos::Core::Math::Max(
             val, (Int32)Elastos::Core::Math::Ceil(ld * heightInBlocks));
     IInteger32::Probe(bcUpper)->GetValue(&val);
@@ -220,9 +223,9 @@ ECode CMediaCodecInfoVideoCapabilities::GetSupportedHeightsFor(
     INumber::Probe(barLower)->DoubleValue(&ld);
     INumber::Probe(barUpper)->DoubleValue(&ud);
 
-    Int32 val;
-// TODO: Need Utils
-    // val = Utils::DivUp(bcLower, widthInBlocks);
+    Int32 bcLowerVal;
+    IInteger32::Probe(bcLower)->GetValue(&bcLowerVal);
+    Int32 val = Utils::DivUp(bcLowerVal, widthInBlocks);
     Int32 minHeightInBlocks = Elastos::Core::Math::Max(
             val, (Int32)Elastos::Core::Math::Ceil(widthInBlocks / ud));
     IInteger32::Probe(bcUpper)->GetValue(&val);
@@ -290,19 +293,29 @@ ECode CMediaCodecInfoVideoCapabilities::GetSupportedFrameRatesFor(
 
     AutoPtr<IInterface> bpsUpper;
     mBlocksPerSecondRange->GetUpper((IInterface**)&bpsUpper);
+    Int64 bpsUpperVal;
+    IInteger64::Probe(bpsUpper)->GetValue(&bpsUpperVal);
     AutoPtr<IInterface> bpsLower;
     mBlocksPerSecondRange->GetLower((IInterface**)&bpsLower);
+    Int64 bpsLowerVal;
+    IInteger64::Probe(bpsLower)->GetValue(&bpsLowerVal);
     AutoPtr<IInterface> frUpper;
     mFrameRateRange->GetUpper((IInterface**)&frUpper);
+    Int64 frUpperVal;
+    IInteger64::Probe(frUpper)->GetValue(&frUpperVal);
     AutoPtr<IInterface> frLower;
     mFrameRateRange->GetLower((IInterface**)&frLower);
-// TODO: Need CRange
-    // return CRange::Create(
-    //         Elastos::Core::Math::Max(bpsLower / (double) blockCount,
-    //                 (double) frLower),
-    //         Elastos::Core::Math::Min(bpsUpper / (double) blockCount,
-    //                 (double) frUpper), result);
-    return NOERROR;
+    Int64 frLowerVal;
+    IInteger64::Probe(frLower)->GetValue(&frLowerVal);
+
+    AutoPtr<IDouble> begin;
+    CDouble::New(Elastos::Core::Math::Max(bpsLowerVal / (Double)blockCount,
+            (Double)frLowerVal), (IDouble**)&begin);
+    AutoPtr<IDouble> end;
+    CDouble::New(Elastos::Core::Math::Min(bpsUpperVal / (Double)blockCount,
+            (Double)frUpperVal), (IDouble**)&end);
+
+    return CRange::Create(begin, end, result);
 }
 
 ECode CMediaCodecInfoVideoCapabilities::AreSizeAndRateSupported(
@@ -458,11 +471,9 @@ Boolean CMediaCodecInfoVideoCapabilities::Supports(
         ok = Elastos::Core::Math::Min(heightVal, widthVal) <= mSmallerDimensionUpperLimit;
 
         Int32 widthInBlocks;
-// TODO: Need Utils
-        // widthInBlocks = Utils::DivUp(width, mBlockWidth);
+        widthInBlocks = Utils::DivUp(widthVal, mBlockWidth);
         Int32 heightInBlocks;
-// TODO: Need Utils
-        // heightInBlocks = Utils::DivUp(height, mBlockHeight);
+        heightInBlocks = Utils::DivUp(heightVal, mBlockHeight);
         Int32 blockCount = widthInBlocks * heightInBlocks;
         AutoPtr<IInteger32> iBlockCount;
         CInteger32::New(blockCount, (IInteger32**)&iBlockCount);
@@ -482,7 +493,7 @@ Boolean CMediaCodecInfoVideoCapabilities::Supports(
             blocksPerSec = blockCount * blocksPerSec;
             AutoPtr<IRange> r;
 // TODO: Need Utils
-            // r = Utils::LongRangeFor(blocksPerSec);
+            // r = Utils::Int64RangeFor(blocksPerSec);
             mBlocksPerSecondRange->Contains(r, &ok);
         }
     }
@@ -491,8 +502,11 @@ Boolean CMediaCodecInfoVideoCapabilities::Supports(
 
 void CMediaCodecInfoVideoCapabilities::InitWithPlatformLimits()
 {
-// TODO: Need CRange
-    // CRange::Create(0, Elastos::Core::Math::INT32_MAX_VALUE, (IRange**)&mBitrateRange);
+    AutoPtr<IInteger32> begin;
+    CInteger32::New(0, (IInteger32**)&begin);
+    AutoPtr<IInteger32> end;
+    CInteger32::New(Elastos::Core::Math::INT32_MAX_VALUE, (IInteger32**)&end);
+    CRange::Create(begin, end, (IRange**)&mBitrateRange);
 
     mWidthRange  = CMediaCodecInfo::SIZE_RANGE;
     mHeightRange = CMediaCodecInfo::SIZE_RANGE;
@@ -532,15 +546,13 @@ void CMediaCodecInfoVideoCapabilities::ParseFromInfo(
     CString::New(String("block-size"), (ICharSequence**)&cs);
     AutoPtr<IInterface> obj;
     map->Get(cs, (IInterface**)&obj);
-// TODO: Need Utils
-    // blockSize = Utils::ParseSize(obj, blockSize);
+    blockSize = Utils::ParseSize(obj, blockSize);
 
     cs = NULL;
     CString::New(String("alignment"), (ICharSequence**)&cs);
     obj = NULL;
     map->Get(cs, (IInterface**)&obj);
-// TODO: Need Utils
-    // alignment = Utils::ParseSize(OBJ, alignment);
+    alignment = Utils::ParseSize(obj, alignment);
 
     cs = NULL;
     CString::New(String("block-count-range"), (ICharSequence**)&cs);
@@ -556,7 +568,7 @@ void CMediaCodecInfoVideoCapabilities::ParseFromInfo(
     map->Get(cs, (IInterface**)&obj);
     AutoPtr<IRange> blockRates;
 // TODO: Need Utils
-    // blockRates = Utils::ParseLongRange(obj, NULL);
+    // blockRates = Utils::ParseInt64Range(obj, NULL);
 
     AutoPtr<IRange> widths;
     AutoPtr<IRange> heights;
@@ -566,17 +578,31 @@ void CMediaCodecInfoVideoCapabilities::ParseFromInfo(
         obj = NULL;
         map->Get(cs, (IInterface**)&obj);
         AutoPtr<IPair> sizeRange;
-// TODO: Need Utils
-        // sizeRange = Utils::ParseSizeRange(obj);
+        sizeRange = Utils::ParseSizeRange(obj);
         if (sizeRange != NULL) {
             // try {
-// TODO: Need CRange
-            // widths = CRange::Create(
-            //         sizeRange.first->GetWidth(),
-            //         sizeRange.second->GetWidth());
-            // heights = CRange::Create(
-            //         sizeRange.first->GetHeight(),
-            //         sizeRange.second->GetHeight());
+            AutoPtr<IInterface> first;
+            sizeRange->GetFirst((IInterface**)&first);
+            Int32 firstWidth, firstHeight;
+            ISize::Probe(first)->GetWidth(&firstWidth);
+            ISize::Probe(first)->GetHeight(&firstHeight);
+            AutoPtr<IInterface> second;
+            sizeRange->GetSecond((IInterface**)&second);
+            Int32 secondWidth, secondHeight;
+            ISize::Probe(second)->GetWidth(&secondWidth);
+            ISize::Probe(second)->GetHeight(&secondHeight);
+
+            AutoPtr<IInteger32> begin;
+            CInteger32::New(firstWidth, (IInteger32**)&begin);
+            AutoPtr<IInteger32> end;
+            CInteger32::New(secondWidth, (IInteger32**)&end);
+            CRange::Create(begin, end, (IRange**)&widths);
+
+            begin = NULL;
+            CInteger32::New(firstHeight, (IInteger32**)&begin);
+            end = NULL;
+            CInteger32::New(secondHeight, (IInteger32**)&end);
+            CRange::Create(begin, end, (IRange**)&heights);
             // } catch (IllegalArgumentException e) {
             //     Log.w(TAG, "could not parse size range '" + o + "'");
             //     widths = NULL;
@@ -857,15 +883,30 @@ void CMediaCodecInfoVideoCapabilities::UpdateLimits()
 
     AutoPtr<IInterface> bcUpper;
     mBlockCountRange->GetUpper((IInterface**)&bcUpper);
+    Int32 bcUpperVal;
+    IInteger32::Probe(bcUpper)->GetValue(&bcUpperVal);
+
     AutoPtr<IInterface> bcLower;
     mBlockCountRange->GetLower((IInterface**)&bcLower);
+    Int32 bcLowerVal;
+    IInteger32::Probe(bcLower)->GetValue(&bcLowerVal);
+
     AutoPtr<IInterface> vbUpper;
     mVerticalBlockRange->GetUpper((IInterface**)&vbUpper);
+    Int32 vbUpperVal;
+    IInteger32::Probe(vbUpper)->GetValue(&vbUpperVal);
+
     AutoPtr<IInterface> vbLower;
     mVerticalBlockRange->GetLower((IInterface**)&vbLower);
+    Int32 vbLowerVal;
+    IInteger32::Probe(vbLower)->GetValue(&vbLowerVal);
+
+    AutoPtr<IInteger32> begin;
+    CInteger32::New(bcLowerVal / vbUpperVal, (IInteger32**)&begin);
+    AutoPtr<IInteger32> end;
+    CInteger32::New(bcUpperVal / vbLowerVal, (IInteger32**)&end);
     range = NULL;
-// TODO: Need CRange
-    // CRange::Create(bcLower / vbUpper, bcUpper / vbLower, (IRange**)&range);
+    CRange::Create(begin, end, (IRange**)&range);
     mHorizontalBlockRange->Intersect(range, (IRange**)&mHorizontalBlockRange);
 
     range = NULL;
@@ -875,26 +916,31 @@ void CMediaCodecInfoVideoCapabilities::UpdateLimits()
 
     AutoPtr<IInterface> hbUpper;
     mHorizontalBlockRange->GetUpper((IInterface**)&hbUpper);
+    Int32 hbUpperVal;
+    IInteger32::Probe(hbUpper)->GetValue(&hbUpperVal);
     AutoPtr<IInterface> hbLower;
     mHorizontalBlockRange->GetLower((IInterface**)&hbLower);
+    Int32 hbLowerVal;
+    IInteger32::Probe(hbLower)->GetValue(&hbLowerVal);
+
+    begin = NULL;
+    CInteger32::New(bcLowerVal / hbUpperVal, (IInteger32**)&begin);
+    end = NULL;
+    CInteger32::New(bcUpperVal / hbLowerVal, (IInteger32**)&end);
     range = NULL;
-// TODO: Need CRange
-    // CRange::Create(bcLower / hbUpper, bcUpper / hbLower, (IRange**)&range);
+    CRange::Create(begin, end, (IRange**)&range);
     mVerticalBlockRange->Intersect(range, (IRange**)&mVerticalBlockRange);
 
+    begin = NULL;
+    CInteger32::New(hbLowerVal * vbLowerVal, (IInteger32**)&begin);
+    end = NULL;
+    CInteger32::New(hbUpperVal * vbUpperVal, (IInteger32**)&end);
     range = NULL;
-// TODO: Need CRange
-    // CRange::Create(hbLower * vbLower, hbUpper * vbUpper, (IRange**)&range);
+    CRange::Create(begin, end, (IRange**)&range);
     mBlockCountRange->Intersect(range, (IRange**)&mBlockCountRange);
 
-    Int32 hbLowerVal, vbUpperVal;
-    IInteger32::Probe(hbLower)->GetValue(&hbLowerVal);
-    IInteger32::Probe(vbUpper)->GetValue(&vbUpperVal);
     AutoPtr<IRational> lower;
     CRational::New(hbLowerVal, vbUpperVal, (IRational**)&lower);
-    Int32 hbUpperVal, vbLowerVal;
-    IInteger32::Probe(hbUpper)->GetValue(&hbUpperVal);
-    IInteger32::Probe(vbLower)->GetValue(&vbLowerVal);
     AutoPtr<IRational> upper;
     CRational::New(hbUpperVal, vbLowerVal, (IRational**)&upper);
     mBlockAspectRatioRange->Intersect(lower, upper, (IRange**)&mBlockAspectRatioRange);
@@ -953,9 +999,6 @@ void CMediaCodecInfoVideoCapabilities::UpdateLimits()
     Int64 frLowerVal, frUpperVal;
     IInteger64::Probe(frLower)->GetValue(&frLowerVal);
     IInteger64::Probe(frUpper)->GetValue(&frUpperVal);
-    Int32 bcLowerVal, bcUpperVal;
-    IInteger32::Probe(bcLower)->GetValue(&bcLowerVal);
-    IInteger32::Probe(bcUpper)->GetValue(&bcUpperVal);
     AutoPtr<IInteger64> i3;
     CInteger64::New(bcLowerVal * frLowerVal, (IInteger64**)&i3);
     AutoPtr<IInteger64> i4;
@@ -985,19 +1028,26 @@ void CMediaCodecInfoVideoCapabilities::ApplyMacroBlockLimits(
     /* [in] */ Int32 heightAlignment)
 {
     ApplyAlignment(widthAlignment, heightAlignment);
+    AutoPtr<IInteger32> begin;
+    CInteger32::New(1, (IInteger32**)&begin);
+    AutoPtr<IInteger32> end;
+    CInteger32::New(maxBlocks, (IInteger32**)&end);
     AutoPtr<IRange> counts;
-// TODO: Need CRange
-    // CRange::Create(1, maxBlocks, (IRange**)&counts);
+    CRange::Create(begin, end, (IRange**)&counts);
+
+    AutoPtr<IInteger64> begin64;
+    CInteger64::New(1L, (IInteger64**)&begin64);
+    AutoPtr<IInteger64> end64;
+    CInteger64::New(maxBlocksPerSecond, (IInteger64**)&end64);
     AutoPtr<IRange> rates;
-// TODO: Need CRange
-    // CRange::Create(1L, maxBlocksPerSecond, (IRange**)&rates);
+    CRange::Create(begin64, end64, (IRange**)&rates);
+
     AutoPtr<IRational> lower;
     CRational::New(1, maxVerticalBlocks, (IRational**)&lower);
     AutoPtr<IRational> upper;
     CRational::New(maxHorizontalBlocks, 1, (IRational**)&upper);
     AutoPtr<IRange> ratios;
-// TODO: Need CRange
-    // CRange::Create(lower, upper, (IRange**)&ratios);
+    CRange::Create(lower, upper, (IRange**)&ratios);
     ApplyBlockLimits(
             blockWidth, blockHeight, counts, rates, ratios);
 
@@ -1294,8 +1344,12 @@ void CMediaCodecInfoVideoCapabilities::ApplyLevelLimits()
                 maxBlocks, maxBlocksPerSecond,
                 16 /* blockWidth */, 16 /* blockHeight */,
                 1 /* widthAlignment */, 1 /* heightAlignment */);
-// TODO: Need CRange
-        // CRange::Create(1, maxRate, (IRange**)&mFrameRateRange);
+
+        AutoPtr<IInteger32> begin;
+        CInteger32::New(1, (IInteger32**)&begin);
+        AutoPtr<IInteger32> end;
+        CInteger32::New(maxRate, (IInteger32**)&end);
+        CRange::Create(begin, end, (IRange**)&mFrameRateRange);
     }
     else if (mime.EqualsIgnoreCase(IMediaFormat::MIMETYPE_VIDEO_VP8) ||
             mime.EqualsIgnoreCase(IMediaFormat::MIMETYPE_VIDEO_VP9)) {
@@ -1426,10 +1480,9 @@ void CMediaCodecInfoVideoCapabilities::ApplyLevelLimits()
 
         Int32 maxLengthInBlocks = (Int32)(Elastos::Core::Math::Sqrt(maxBlocks * 8));
         // CTBs are at least 8x8
-// TODO: Need Utils
-        // maxBlocks = Utils::DivUp(maxBlocks, 8 * 8);
-        // maxBlocksPerSecond = Utils::DivUp(maxBlocksPerSecond, 8 * 8);
-        // maxLengthInBlocks = Utils::DivUp(maxLengthInBlocks, 8);
+        maxBlocks = Utils::DivUp(maxBlocks, 8 * 8);
+        maxBlocksPerSecond = Utils::DivUp(maxBlocksPerSecond, 8 * 8);
+        maxLengthInBlocks = Utils::DivUp(maxLengthInBlocks, 8);
 
         ApplyMacroBlockLimits(
                 maxLengthInBlocks, maxLengthInBlocks,
@@ -1444,8 +1497,11 @@ void CMediaCodecInfoVideoCapabilities::ApplyLevelLimits()
         maxBps = 64000;
         errors |= CMediaCodecInfo::ERROR_UNSUPPORTED;
     }
-// TODO: Need CRange
-    // CRange::Create(1, maxBps, (IRange**)&mBitrateRange);
+    AutoPtr<IInteger32> begin;
+    CInteger32::New(1, (IInteger32**)&begin);
+    AutoPtr<IInteger32> end;
+    CInteger32::New(maxBps, (IInteger32**)&end);
+    CRange::Create(begin, end, (IRange**)&mBitrateRange);
     ((CMediaCodecInfoCodecCapabilities*)mParent.Get())->mError |= errors;
 }
 

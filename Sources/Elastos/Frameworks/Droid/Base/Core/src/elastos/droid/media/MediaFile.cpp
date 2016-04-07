@@ -19,7 +19,7 @@ const Int32 MediaFile::LAST_MIDI_FILE_TYPE = IMediaFile::FILE_TYPE_IMY;
 const Int32 MediaFile::FIRST_VIDEO_FILE_TYPE = IMediaFile::FILE_TYPE_MP4;
 const Int32 MediaFile::LAST_VIDEO_FILE_TYPE = IMediaFile::FILE_TYPE_WEBM;
 const Int32 MediaFile::FIRST_VIDEO_FILE_TYPE2 = IMediaFile::FILE_TYPE_MP2PS;
-const Int32 MediaFile::LAST_VIDEO_FILE_TYPE2 = IMediaFile::FILE_TYPE_MP2PS;
+const Int32 MediaFile::LAST_VIDEO_FILE_TYPE2 = IMediaFile::FILE_TYPE_FLV;
 // More audio file types
 const Int32 MediaFile::FIRST_IMAGE_FILE_TYPE = IMediaFile::FILE_TYPE_JPEG;
 const Int32 MediaFile::LAST_IMAGE_FILE_TYPE = IMediaFile::FILE_TYPE_WEBP;

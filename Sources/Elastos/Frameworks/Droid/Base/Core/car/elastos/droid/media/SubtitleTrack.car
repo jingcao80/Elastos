@@ -5,6 +5,7 @@ module
     interface Elastos.Droid.Media.IMediaFormat;
     interface Elastos.Droid.Media.IMediaTimeProvider;
     interface Elastos.Droid.Media.ISubtitleTrackRenderingWidget;
+    interface Elastos.Droid.Utility.IInt64SparseArray;
     using interface Elastos.Utility.IVector;
     using interface Elastos.Utility.IIterable;
 
@@ -28,9 +29,8 @@ module
     /** @hide */
     interface ISubtitleTrackRun
     {
-        //TODO
-        //StoreByEndTimeMs(
-        //    [in] ILongSparseArray* runsByEndTime);
+        StoreByEndTimeMs(
+           [in] IInt64SparseArray* runsByEndTime);
 
         RemoveAtEndTimeMs();
     }

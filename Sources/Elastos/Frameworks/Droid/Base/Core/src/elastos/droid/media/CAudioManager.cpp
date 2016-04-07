@@ -20,7 +20,8 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IPendingIntentHelper;
-//TODO: using Elastos::Droid::App::IProfileGroup;
+using Elastos::Droid::App::IProfileGroup;
+using Elastos::Droid::App::ProfileGroupMode;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
@@ -171,9 +172,8 @@ ECode CAudioManager::constructor(
     resources->GetBoolean(R::bool_::config_useFixedVolume, &mUseFixedVolume);
 
     AutoPtr<IInterface> interfaceTmp;
-    assert(0);
-    context->GetSystemService(String("")/*TODO: IContext::PROFILE_SERVICE*/, (IInterface**)&interfaceTmp);
-    // TODO: mProfileManager = IProfileManager::Probe(interfaceTmp);
+    context->GetSystemService(IContext::PROFILE_SERVICE, (IInterface**)&interfaceTmp);
+    mProfileManager = IProfileManager::Probe(interfaceTmp);
     return NOERROR;
 }
 
@@ -183,8 +183,6 @@ AutoPtr<IIAudioService> CAudioManager::GetService()
         return sService;
     }
 
-    //todo: for java compatible
-    //sService = (IAudioService)ElServiceManager.getService(Context.AUDIO_SERVICE);
     AutoPtr<IServiceManager> serviceManager;
     CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
     AutoPtr<IInterface> obj;
@@ -780,21 +778,23 @@ ECode CAudioManager::ShouldVibrate(
     // Don't apply profiles for "android" context, as these could
     // come from the NotificationManager, and originate from a real package.
     if (!packageName.Equals("android")) {
-        assert(0);
-        AutoPtr<IInterface/*TODO: IProfileGroup*/> profileGroup;
-        // TODO: mProfileManager->GetActiveProfileGroup(packageName, (IProfileGroup**)&profileGroup);
+        AutoPtr<IProfileGroup> profileGroup;
+        mProfileManager->GetActiveProfileGroup(packageName, (IProfileGroup**)&profileGroup);
         if (profileGroup != NULL) {
-            //TODO: Logger::V(TAG, "shouldVibrate, group: " + profileGroup->GetUuid() + " mode: " + profileGroup->GetVibrateMode());
-            /*switch (profileGroup->GetVibrateMode()) {
-                case OVERRIDE :
+            // Logger::V(TAG, "shouldVibrate, group: " + profileGroup->GetUuid() + " mode: " + profileGroup->GetVibrateMode());
+            ProfileGroupMode mode;
+            profileGroup->GetVibrateMode(&mode);
+            switch (mode) {
+                case Elastos::Droid::App::ProfileGroupMode_OVERRIDE:
                     *result = TRUE;
                     return NOERROR;
-                case SUPPRESS :
+                case Elastos::Droid::App::ProfileGroupMode_SUPPRESS:
                     *result = FALSE;
                     return NOERROR;
-                case DEFAULT :
+                case Elastos::Droid::App::ProfileGroupMode_DEFAULT:
                 // Drop through
-            }*/
+                    break;
+            }
         }
     }
     else {

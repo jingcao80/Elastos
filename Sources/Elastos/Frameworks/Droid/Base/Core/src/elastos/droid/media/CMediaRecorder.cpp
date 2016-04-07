@@ -685,10 +685,10 @@ ECode CMediaRecorder::Start()
 
 ECode CMediaRecorder::Pause()
 {
-    assert(0);
-    // TODO: call jni func
+    // ALOGV("pause");
     android::sp<android::MediaRecorder> mr = getMediaRecorder(this);
-    return NOERROR;
+    return process_media_recorder_call(mr->pause(),
+        E_RUNTIME_EXCEPTION, "pause failed.");
 }
 
 ECode CMediaRecorder::Stop()

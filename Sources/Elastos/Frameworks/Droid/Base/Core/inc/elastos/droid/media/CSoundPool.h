@@ -104,16 +104,14 @@ public:
     {
         friend class CSoundPool;
     public:
-        Builder(
-            /* [in] */ CSoundPool* host);
+        Builder();
 
         ~Builder();
 
         CAR_INTERFACE_DECL()
 
         CARAPI SetMaxStreams(
-            /* [in] */ Int32 maxStreams,
-            /* [out] */ ISoundPoolBuilder** result);
+            /* [in] */ Int32 maxStreams);
 
         CARAPI SetAudioAttributes(
             /* [in] */ IAudioAttributes * attributes);
@@ -124,7 +122,6 @@ public:
     private:
         Int32 mMaxStreams;
         AutoPtr<IAudioAttributes> mAudioAttributes;
-        CSoundPool* mHost;
     };
 
     class SoundPoolImpl

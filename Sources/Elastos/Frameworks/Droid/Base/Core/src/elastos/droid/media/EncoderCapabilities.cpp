@@ -187,10 +187,9 @@ AutoPtr<EncoderCapabilities::VideoEncoderCap> EncoderCapabilities::Native_get_vi
     Int32 maxFrameWidth = sssProfiles->getVideoEncoderParamByName("enc.vid.width.max", encoder);
     Int32 minFrameHeight = sssProfiles->getVideoEncoderParamByName("enc.vid.height.min", encoder);
     Int32 maxFrameHeight = sssProfiles->getVideoEncoderParamByName("enc.vid.height.max", encoder);
-    assert(0);
-    Int32 maxHFRFrameWidth = sssProfiles->getVideoEncoderParamByName(""/*TODO: string is?*/, encoder);
-    Int32 maxHFRFrameHeight = sssProfiles->getVideoEncoderParamByName(""/*TODO: string is?*/, encoder);
-    Int32 maxHFRMode = sssProfiles->getVideoEncoderParamByName(""/*TODO: string is?*/, encoder);
+    Int32 maxHFRFrameWidth = sssProfiles->getVideoEncoderParamByName("enc.vid.hfr.width.max", encoder);
+    Int32 maxHFRFrameHeight = sssProfiles->getVideoEncoderParamByName("enc.vid.hfr.height.max", encoder);
+    Int32 maxHFRMode = sssProfiles->getVideoEncoderParamByName("enc.vid.hfr.mode.max", encoder);
 
     // Check on the values retrieved
     if ((minBitRate == -1 || maxBitRate == -1) ||
@@ -203,17 +202,6 @@ AutoPtr<EncoderCapabilities::VideoEncoderCap> EncoderCapabilities::Native_get_vi
         return NULL;
     }
 
-    // Construct an instance of the VideoEncoderCap and set its member variables
-    // jclass videoEncoderCapClazz = env->FindClass("android/media/EncoderCapabilities$VideoEncoderCap");
-    // jmethodID videoEncoderCapConstructorMethodID = env->GetMethodID(videoEncoderCapClazz, "<init>", "(IIIIIIIII)V");
-    // jobject cap = env->NewObject(videoEncoderCapClazz,
-    //                              videoEncoderCapConstructorMethodID,
-    //                              static_cast<int>(encoder),
-    //                              minBitRate, maxBitRate,
-    //                              minFrameRate, maxFrameRate,
-    //                              minFrameWidth, maxFrameWidth,
-    //                              minFrameHeight, maxFrameHeight);
-    // return cap;
     AutoPtr<VideoEncoderCap> cap = new VideoEncoderCap(encoder,
                                                        minBitRate,
                                                        maxBitRate,

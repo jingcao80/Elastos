@@ -37,6 +37,9 @@ module
         GetStreamType(
             [out] Int32* result);
 
+        GetClientId(
+            [out] String* result);
+
         Dump(
             [in] IPrintWriter* pw);
 

@@ -17,6 +17,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <binder/AppOpsManager.h>
+#include <binder/IPCThreadState.h>
 #include <media/AudioRecord.h>
 #include <system/audio.h>
 
@@ -894,8 +896,6 @@ Int32 CAudioRecord::NativeSetup(
          ALOGE("Error creating AudioRecord: frameCount is 0.");
         return AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT;
     }
-    size_t frameSize = channelCount * bytesPerSample;
-    size_t frameCount = buffSizeInBytes / frameSize;
 
     if (session == NULL) {
         ALOGE("Error creating AudioRecord: invalid session ID pointer");
@@ -917,6 +917,16 @@ Int32 CAudioRecord::NativeSetup(
 
     paa->source = (audio_source_t) attr->mSource;
     paa->flags = (audio_flags_mask_t)attr->mFlags;
+
+    //overwrite bytesPerSample for compress VOIP use cases
+    if ((paa->source == AUDIO_SOURCE_VOICE_COMMUNICATION) &&
+        (format != AUDIO_FORMAT_PCM_16_BIT)) {
+        bytesPerSample = sizeof(uint8_t);
+    }
+
+    size_t frameSize = channelCount * bytesPerSample;
+    size_t frameCount = buffSizeInBytes / frameSize;
+
     ALOGV("AudioRecord_setup for source=%d tags=%s flags=%08x", paa->source, paa->tags, paa->flags);
 
     audio_input_flags_t flags = AUDIO_INPUT_FLAG_NONE;
@@ -995,7 +1005,7 @@ void CAudioRecord::NativeRelease()
     if (lpRecorder) {
         ALOGV("About to delete lpRecorder: %p\n", lpRecorder);
         lpRecorder->stop();
-//TODO:
+// TODO:
         // delete lpRecorder;
     }
 
@@ -1269,16 +1279,12 @@ ECode CAudioRecord::Native_check_permission(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    android::AudioRecord* lpRecorder = (android::AudioRecord*)mNativeRecorderInJavaObj;
-    if (lpRecorder == NULL) {
-        *result = IAudioSystem::ERROR;
-        return E_ILLEGAL_STATE_EXCEPTION;
-    }
 
-    assert(0);
-    //TODO: *result = NativeToElastosStatus(
-    //        lpRecorder->checkPermission((const char*)packageName.string());
-    return NOERROR;
+    AutoPtr<IAppOpsManager> appOpsManager;
+
+    // Get UID here for permission checking
+    Int32 clientUid = android::IPCThreadState::self()->getCallingUid();
+    return appOpsManager->NoteOp(IAppOpsManager::OP_RECORD_AUDIO, clientUid, packageName, result);
 }
 
 //-------------------------------------------------

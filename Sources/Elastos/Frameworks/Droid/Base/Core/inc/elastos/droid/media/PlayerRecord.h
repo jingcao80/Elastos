@@ -30,7 +30,7 @@ class PlayerRecord
     , public IPlayerRecord
     , public IProxyDeathRecipient
 {
-protected:
+public:
     class RccPlaybackState
         : public Object
         , public IPlayerRecordRccPlaybackState
@@ -72,7 +72,8 @@ protected:
 
         virtual ~RemotePlaybackState();
 
-    protected:
+        CAR_INTERFACE_DECL()
+
         CARAPI constructor(
             /* [in] */ Int32 id,
             /* [in] */ Int32 vol,
@@ -132,15 +133,13 @@ public:
 
     CARAPI Destroy();
 
-    CARAPI BinderDied();
+    CARAPI ProxyDied();
 
     CARAPI GetRcc(
         /* [out] */ IIRemoteControlClient** result);
 
-protected:
-
     static CARAPI SetMediaFocusControl(
-        /* [in] */ IPendingIntentOnFinished* mfc);
+        /* [in] */ IMediaFocusControl* mfc);
 
     CARAPI constructor(
         /* [in] */ IPendingIntent* mediaIntent,
@@ -173,7 +172,7 @@ protected:
     CARAPI Finalize();
 
 public:
-    static AutoPtr<IPendingIntentOnFinished> sController; //MediaFocusControl
+    static AutoPtr<IMediaFocusControl> sController; //MediaFocusControl
     /**
      * Information only used for non-local playback
      */

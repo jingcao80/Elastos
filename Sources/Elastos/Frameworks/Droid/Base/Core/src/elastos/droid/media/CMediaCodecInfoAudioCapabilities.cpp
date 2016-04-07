@@ -2,10 +2,12 @@
 #include "elastos/droid/media/CMediaCodecInfoAudioCapabilities.h"
 #include "elastos/droid/media/CMediaCodecInfoCodecCapabilities.h"
 #include "elastos/droid/media/Utils.h"
+#include "elastos/droid/utility/CRange.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Utility::CRange;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
@@ -171,8 +173,7 @@ void CMediaCodecInfoAudioCapabilities::InitWithPlatformLimits()
     CInteger32::New(0, (IInteger32**)&begin);
     AutoPtr<IInteger32> end;
     CInteger32::New(Elastos::Core::Math::INT32_MAX_VALUE, (IInteger32**)&end);
-//TODO: Need CRange
-    // CRange::Create(begin, end, (IRange**)&mBitrateRange);
+    CRange::Create(begin, end, (IRange**)&mBitrateRange);
 
     mMaxInputChannelCount = MAX_INPUT_CHANNEL_COUNT;
     begin = NULL;
@@ -180,8 +181,7 @@ void CMediaCodecInfoAudioCapabilities::InitWithPlatformLimits()
     end = NULL;
     CInteger32::New(96000, (IInteger32**)&end);
     AutoPtr<IRange> r;
-//TODO: Need CRange
-    // CRange::Create(begin, end, (IRange**)&r);
+    CRange::Create(begin, end, (IRange**)&r);
     mSampleRateRanges = ArrayOf<IRange*>::Alloc(1);
     mSampleRateRanges->Set(0, r);
 
@@ -222,8 +222,7 @@ void CMediaCodecInfoAudioCapabilities::LimitSampleRates(
         CInteger32::New(rate, (IInteger32**)&val);
         if (Supports(val, NULL /* channels */)) {
             AutoPtr<IRange> r;
-//TODO: Need CRange
-            // CRange::Create(val, val, (IRange**)&r);
+            CRange::Create(val, val, (IRange**)&r);
             ranges->Add(r);
         }
     }
@@ -297,8 +296,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(8000, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(320000, (IInteger32**)&end);
-//TODO: Need CRange
-        // CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(begin, end, (IRange**)&bitRates);
 
         maxChannels = 2;
     }
@@ -310,8 +308,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(4750, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(12200, (IInteger32**)&end);
-//TODO: Need CRange
-        // CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(begin, end, (IRange**)&bitRates);
 
         maxChannels = 1;
     }
@@ -323,8 +320,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(6600, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(23850, (IInteger32**)&end);
-//TODO: Need CRange
-        // CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(begin, end, (IRange**)&bitRates);
 
         maxChannels = 1;
     }
@@ -348,8 +344,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(8000, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(510000, (IInteger32**)&end);
-//TODO: Need CRange
-        // CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(begin, end, (IRange**)&bitRates);
 
         maxChannels = 48;
     }
@@ -366,8 +361,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(32000, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(500000, (IInteger32**)&end);
-//TODO: Need CRange
-        // CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(begin, end, (IRange**)&bitRates);
 
         maxChannels = 255;
     }
@@ -383,8 +377,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(6000, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(510000, (IInteger32**)&end);
-//TODO: Need CRange
-        // CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(begin, end, (IRange**)&bitRates);
 
         maxChannels = 255;
     }
@@ -393,13 +386,11 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(1, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(96000, (IInteger32**)&end);
-//TODO: Need CRange
-        // CRange::Create(begin, end, (IRange**)&sampleRateRange);
+        CRange::Create(begin, end, (IRange**)&sampleRateRange);
 
         end = NULL;
         CInteger32::New(10000000, (IInteger32**)&end);
-//TODO: Need CRange
-        // CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(begin, end, (IRange**)&bitRates);
 
         maxChannels = 8;
     }
@@ -408,8 +399,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(1, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(655350, (IInteger32**)&end);
-//TODO: Need CRange
-        // CRange::Create(begin, end, (IRange**)&sampleRateRange);
+        CRange::Create(begin, end, (IRange**)&sampleRateRange);
 
         // lossless codec, so bitrate is ignored
         maxChannels = 255;
@@ -423,8 +413,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(64000, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(64000, (IInteger32**)&end);
-//TODO: Need CRange
-        // CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(begin, end, (IRange**)&bitRates);
         // platform allows multiple channels for this format
     }
     else if (mime.EqualsIgnoreCase(IMediaFormat::MIMETYPE_AUDIO_MSGSM)) {
@@ -435,8 +424,7 @@ void CMediaCodecInfoAudioCapabilities::ApplyLevelLimits()
         CInteger32::New(13000, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(13000, (IInteger32**)&end);
-//TODO: Need CRange
-        // CRange::Create(begin, end, (IRange**)&bitRates);
+        CRange::Create(begin, end, (IRange**)&bitRates);
 
         maxChannels = 1;
     }
@@ -462,9 +450,12 @@ void CMediaCodecInfoAudioCapabilities::ApplyLimits(
     /* [in] */ Int32 maxInputChannels,
     /* [in] */ IRange* bitRates)
 {
+    AutoPtr<IInteger32> begin;
+    CInteger32::New(1, (IInteger32**)&begin);
+    AutoPtr<IInteger32> end;
+    CInteger32::New(mMaxInputChannelCount, (IInteger32**)&end);
     AutoPtr<IRange> r;
-//TODO: Need CRange
-    // CRange::Create(1, mMaxInputChannelCount, (IRange**)&r);
+    CRange::Create(begin, end, (IRange**)&r);
     AutoPtr<IInteger32> val;
     CInteger32::New(maxInputChannels, (IInteger32**)&val);
     AutoPtr<IInterface> obj;
@@ -491,23 +482,28 @@ void CMediaCodecInfoAudioCapabilities::ParseFromInfo(
         AutoPtr<ArrayOf<IRange*> > rateRanges =
                 ArrayOf<IRange*>::Alloc(rateStrings->GetLength());
         for (Int32 i = 0; i < rateStrings->GetLength(); i++) {
+            AutoPtr<ICharSequence> cs;
+            CString::New((*rateStrings)[i], (ICharSequence**)&cs);
 //TODO: Need Utils
-            // (*rateRanges)[i] = Utils::ParseIntRange((*rateStrings)[i], NULL);
+            // (*rateRanges)[i] = Utils::ParseIntRange(cs, NULL);
         }
         LimitSampleRates(rateRanges);
     }
     if (info->ContainsKey(String("max-channel-count"), &b), b) {
         String str;
         info->GetString(String("max-channel-count"), &str);
-//TODO: Need Utils
-        // maxInputChannels = Utils::ParseIntSafely(str, maxInputChannels);
+        AutoPtr<ICharSequence> cs;
+        CString::New(str, (ICharSequence**)&cs);
+        maxInputChannels = Utils::ParseIntSafely(cs, maxInputChannels);
     }
     if (info->ContainsKey(String("bitrate-range"), &b), b) {
         String str;
         info->GetString(String("bitrate"), &str);
+        AutoPtr<ICharSequence> cs;
+        CString::New(str, (ICharSequence**)&cs);
         AutoPtr<IRange> range;
 //TODO: Need Utils
-        // range = Utils::ParseIntRange(str, bitRates);
+        // range = Utils::ParseIntRange(cs, bitRates);
         bitRates->Intersect(range, (IRange**)&bitRates);
     }
     ApplyLimits(maxInputChannels, bitRates);

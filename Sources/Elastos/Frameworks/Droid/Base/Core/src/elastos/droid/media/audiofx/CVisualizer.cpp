@@ -656,6 +656,7 @@ void CVisualizer::Native_Finalize()
     // delete the Visualizer object
     android::Visualizer* lpVisualizer = (android::Visualizer *)mNativeVisualizer;
     if (lpVisualizer) {
+        lpVisualizer->cancelCaptureCallBack();
         delete lpVisualizer;
     }
 

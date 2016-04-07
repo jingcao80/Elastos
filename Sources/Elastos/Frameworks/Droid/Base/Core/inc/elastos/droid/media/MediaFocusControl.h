@@ -6,11 +6,13 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Speech.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
+#include "elastos/droid/telephony/PhoneStateListener.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::App::IAppOpsManager;
@@ -25,6 +27,7 @@ using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Droid::Telephony::PhoneStateListener;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::IO::IPrintWriter;
 using Elastos::Utility::IArrayList;
@@ -77,10 +80,8 @@ private:
         MediaFocusControl* mHost;
     };
 
-    // TODO: Need PhoneStateListener
-        // : public PhoneStateListener
     class MyPhoneStateListener
-        : public Object
+        : public PhoneStateListener
     {
     public:
         MyPhoneStateListener(

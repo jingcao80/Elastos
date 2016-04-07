@@ -92,6 +92,9 @@ String PlayerRecord::RccPlaybackState::StateToString()
 //================================================================================
 //                      PlayerRecord::RemotePlaybackState
 //================================================================================
+
+CAR_INTERFACE_IMPL(PlayerRecord::RemotePlaybackState, Object, IPlayerRecordRemotePlaybackState)
+
 PlayerRecord::RemotePlaybackState::RemotePlaybackState()
     : mRccId(0)
     , mVolume(0)
@@ -163,7 +166,7 @@ ECode PlayerRecord::RcClientDeathHandler::ProxyDied()
 const String PlayerRecord::TAG (String("MediaFocusControl"));
 const Boolean PlayerRecord::DEBUG = FALSE;
 Int32 PlayerRecord::sLastRccId = 0;
-AutoPtr<IPendingIntentOnFinished> PlayerRecord::sController;
+AutoPtr<IMediaFocusControl> PlayerRecord::sController;
 
 PlayerRecord::PlayerRecord()
     : mRccId(-1)
@@ -255,14 +258,14 @@ ECode PlayerRecord::Destroy()
     return NOERROR;
 }
 
-ECode PlayerRecord::BinderDied()
+ECode PlayerRecord::ProxyDied()
 {
     ((MediaFocusControl*)(sController.Get()))->UnregisterMediaButtonIntentAsync(mMediaIntent);
     return NOERROR;
 }
 
 ECode PlayerRecord::SetMediaFocusControl(
-    /* [in] */ IPendingIntentOnFinished* mfc)
+    /* [in] */ IMediaFocusControl* mfc)
 {
     sController = mfc;
     return NOERROR;
