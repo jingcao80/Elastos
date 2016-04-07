@@ -22,7 +22,6 @@ def find_declare_line(usedType, param, lines, lineIndex):
     for i in range(lineIndex, 0, -1):
         eachLine = lines[i]
         if (len(eachLine) > 1) and (eachLine.startswith("//") == False):
-
             pattern = re.compile(r'AutoPtr<'+usedType+'>\s*(.*)'+param+'[; ,]')
             match = pattern.search(eachLine)
             if match == None:
@@ -101,31 +100,36 @@ def process_file(path, logFile):
                 usedType = match.group(2)
                 paramName = match.group(4)
                 matchInfo = match.group()
-                declLineNum = find_declare_line(usedType, paramName, lines, lineNum)
-                if (declLineNum != -1):
-                    declLine = lines[declLineNum]
-                    #print 'declLine', declLine
 
-                    pattern = re.compile(r'AutoPtr<'+usedType+'>\s*(.*)'+paramName+'[; ,]')
-                    match = pattern.search(declLine)
-                    if match == None:
-                        pattern = re.compile(r''+usedType+'\s*\*(.*)'+paramName+'[; ,]')
+                # do not check weak-reference Resolve
+                if usedType == 'IInterface' and eachLine.find('->Resolve(') != -1:
+                    pass
+                else:
+                    declLineNum = find_declare_line(usedType, paramName, lines, lineNum)
+                    if (declLineNum != -1):
+                        declLine = lines[declLineNum]
+                        #print 'declLine', declLine
+
+                        pattern = re.compile(r'AutoPtr<'+usedType+'>\s*(.*)'+paramName+'[; ,]')
                         match = pattern.search(declLine)
+                        if match == None:
+                            pattern = re.compile(r''+usedType+'\s*\*(.*)'+paramName+'[; ,]')
+                            match = pattern.search(declLine)
 
-                    if match == None:
-                        if firstLog:
-                            firstLog = False
-                            logInfo ='\n>> process file: ' + path + '\n'
+                        if match == None:
+                            if firstLog:
+                                firstLog = False
+                                logInfo ='\n>> process file: ' + path + '\n'
+                                logFile.write(logInfo)
+                                print logInfo
+                            logInfo = "   > error: invalid using of {0} at line {1:d}, it is declared as {2} at line {3:d}.\n".format(matchInfo, lineNum + 1, declLine, declLineNum + 1)
                             logFile.write(logInfo)
                             print logInfo
-                        logInfo = "   > error: invalid using of {0} at line {1:d}, it is declared as {2} at line {3:d}.\n".format(matchInfo, lineNum + 1, declLine, declLineNum + 1)
-                        logFile.write(logInfo)
-                        print logInfo
+                        else:
+                            #print 'match ', matchInfo, declLine
+                            pass
                     else:
-                        #print 'match ', matchInfo, declLine
-                        pass
-                else:
-                    process_declare_line_in_header(path, logFile, firstLog, match, lines, lineNum)
+                        process_declare_line_in_header(path, logFile, firstLog, match, lines, lineNum)
         lineNum = lineNum +1
 
 def process_dir(path, logFile):
@@ -157,4 +161,6 @@ def process(path, logPath):
 
 #process('/home/kesalin/test/python/test.cpp', 'elastos_cast_checker.log')
 #process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/', '/home/kesalin/elastos_cast_checker.log')
-process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app', '/home/kesalin/elastos_cast_checker.log')
+process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view', '/home/kesalin/elastos_cast_checker.log')
+
+#done: os, content, app, graphics
