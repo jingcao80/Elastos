@@ -1753,7 +1753,7 @@ ECode PhoneWindow::_DecorView::StartActionMode(
                     actionBarTheme->SetTo(baseTheme);
                     actionBarTheme->ApplyStyle(resId, TRUE);
 
-                    CContextThemeWrapper::New(mContext, 0, (IContextThemeWrapper**)&actionBarContext);
+                    CContextThemeWrapper::New(mContext, 0, (IContext**)&actionBarContext);
                     AutoPtr<IResourcesTheme> ctxTheme;
                     actionBarContext->GetTheme((IResourcesTheme**)&ctxTheme);
                     ctxTheme->SetTo(actionBarTheme);
@@ -1798,7 +1798,9 @@ ECode PhoneWindow::_DecorView::StartActionMode(
                 FindViewById(R::id::action_mode_bar_stub, (IView**)&view);
                 AutoPtr<IViewStub> stub = IViewStub::Probe(view);
                 if (stub != NULL) {
-                    stub->Inflate((IView**)&mActionModeView);
+                    view = NULL;
+                    stub->Inflate((IView**)&view);
+                    mActionModeView = IActionBarContextView::Probe(view);
                 }
             }
         }
@@ -2204,12 +2206,12 @@ ECode PhoneWindow::DialogMenuCallback::OnCloseMenu(
     /* [in] */ Boolean allMenusAreClosing)
 {
     if (allMenusAreClosing) {
-        AutoPtr<IInterface> w;
+        AutoPtr<IPhoneWindow> w;
         mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
         if (w == NULL)
             return NOERROR;
 
-        AutoPtr<PhoneWindow> mHost = reinterpret_cast<PhoneWindow*>(w.Get());
+        AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
 
         AutoPtr<IMenuBuilder> m;
         if ((menu->GetRootMenu((IMenuBuilder**)&m), m.Get()) != menu) {
@@ -2240,12 +2242,12 @@ ECode PhoneWindow::DialogMenuCallback::OnCloseMenu(
 ECode PhoneWindow::DialogMenuCallback::OnCloseSubMenu(
     /* [in] */ IMenuBuilder* menu)
 {
-    AutoPtr<IInterface> w;
+    AutoPtr<IPhoneWindow> w;
     mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
     if (w == NULL)
         return NOERROR;
 
-    AutoPtr<PhoneWindow> mHost = reinterpret_cast<PhoneWindow*>(w.Get());
+    AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
 
     AutoPtr<IWindowCallback> callback;
     mHost->GetCallback((IWindowCallback**)&callback);
@@ -2265,12 +2267,12 @@ ECode PhoneWindow::DialogMenuCallback::OnMenuItemSelected(
     /* [in] */ IMenuItem* item,
     /* [out] */ Boolean* toFinish)
 {
-    AutoPtr<IInterface> w;
+    AutoPtr<IPhoneWindow> w;
     mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
     if (w == NULL)
         return NOERROR;
 
-    AutoPtr<PhoneWindow> mHost = reinterpret_cast<PhoneWindow*>(w.Get());
+    AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
 
     AutoPtr<IWindowCallback> callback;
     mHost->GetCallback((IWindowCallback**)&callback);
@@ -2322,12 +2324,12 @@ PhoneWindow::DecorRunnable::DecorRunnable(
 
 ECode PhoneWindow::DecorRunnable::Run()
 {
-    AutoPtr<IInterface> w;
+    AutoPtr<IPhoneWindow> w;
     mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
     if (w == NULL)
         return NOERROR;
 
-    AutoPtr<PhoneWindow> mHost = reinterpret_cast<PhoneWindow*>(w.Get());
+    AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
     // Invalidate if the panel menu hasn't been created before this.
     AutoPtr<PanelFeatureState> st;
     FAIL_RETURN(mHost->GetPanelState(FEATURE_OPTIONS_PANEL, FALSE, (PanelFeatureState**)&st));
@@ -2357,12 +2359,12 @@ PhoneWindow::InvalidatePanelMenuRunnable::InvalidatePanelMenuRunnable(
 
 ECode PhoneWindow::InvalidatePanelMenuRunnable::Run()
 {
-    AutoPtr<IInterface> w;
+    AutoPtr<IPhoneWindow> w;
     mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
     if (w == NULL)
         return NOERROR;
 
-    AutoPtr<PhoneWindow> host = reinterpret_cast<PhoneWindow*>(w.Get());
+    AutoPtr<PhoneWindow> host = (PhoneWindow*)w.Get();
     for (Int32 i = 0; i <= FEATURE_MAX; i++) {
         if ((host->mInvalidatePanelMenuFeatures & (1 << i)) != 0) {
             host->DoInvalidatePanelMenu(i);
@@ -2397,18 +2399,18 @@ ECode PhoneWindow::PanelMenuPresenterCallback::OnCloseMenu(
     /* [in] */ IMenuBuilder* menu,
     /* [in] */ Boolean allMenusAreClosing)
 {
-    AutoPtr<IInterface> w;
+    AutoPtr<IPhoneWindow> w;
     mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
     if (w == NULL)
         return NOERROR;
 
-    AutoPtr<PhoneWindow> mHost = reinterpret_cast<PhoneWindow*>(w.Get());
+    AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
 
-    AutoPtr<IMenu> parentMenu;
-    menu->GetRootMenu((IMenuBuilder**)&parentMenu);
-
-    Boolean isSubMenu = (parentMenu.Get() != IMenu::Probe(menu));
-    AutoPtr<PanelFeatureState> panel = mHost->FindMenuPanel(isSubMenu ? parentMenu.Get() : IMenu::Probe(menu));
+    AutoPtr<IMenuBuilder> mb;
+    menu->GetRootMenu((IMenuBuilder**)&mb);
+    IMenu* parentMenu = IMenu::Probe(mb);
+    Boolean isSubMenu = (parentMenu != IMenu::Probe(menu));
+    AutoPtr<PanelFeatureState> panel = mHost->FindMenuPanel(isSubMenu ? parentMenu : IMenu::Probe(menu));
     if (panel != NULL) {
         if (isSubMenu) {
             mHost->CallOnPanelClosed(panel->mFeatureId, panel, parentMenu);
@@ -2430,12 +2432,12 @@ ECode PhoneWindow::PanelMenuPresenterCallback::OnOpenSubMenu(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    AutoPtr<IInterface> w;
+    AutoPtr<IPhoneWindow> w;
     mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
     if (w == NULL)
         return NOERROR;
 
-    AutoPtr<PhoneWindow> mHost = reinterpret_cast<PhoneWindow*>(w.Get());
+    AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
     Boolean has = FALSE;
     if (subMenu == NULL && (mHost->HasFeature(FEATURE_ACTION_BAR, &has), has)) {
         AutoPtr<IWindowCallback> cb;
@@ -2468,12 +2470,12 @@ ECode PhoneWindow::ActionMenuPresenterCallback::OnOpenSubMenu(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    AutoPtr<IInterface> w;
+    AutoPtr<IPhoneWindow> w;
     mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
     if (w == NULL)
         return NOERROR;
 
-    AutoPtr<PhoneWindow> mHost = reinterpret_cast<PhoneWindow*>(w.Get());
+    AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
 
     AutoPtr<IWindowCallback> cb;
     mHost->GetCallback((IWindowCallback**)&cb);
@@ -2492,12 +2494,12 @@ ECode PhoneWindow::ActionMenuPresenterCallback::OnCloseMenu(
     /* [in] */ IMenuBuilder* menu,
     /* [in] */ Boolean allMenusAreClosing)
 {
-    AutoPtr<IInterface> w;
+    AutoPtr<IPhoneWindow> w;
     mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
     if (w == NULL)
         return NOERROR;
 
-    AutoPtr<PhoneWindow> mHost = reinterpret_cast<PhoneWindow*>(w.Get());
+    AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
     mHost->CheckCloseActionMenu(IMenu::Probe(menu));
     return NOERROR;
 }
@@ -2591,24 +2593,24 @@ ECode PhoneWindow::InnerSwipeDismissLayoutOnSwipeProgressChangedListener1::OnSwi
 //    VALIDATE_NOT_NULL(state)
 //    *state = FALSE;
 //
-//    AutoPtr<IInterface> w;
+//    AutoPtr<IPhoneWindow> w;
 //    mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
 //    if (w == NULL)
 //        return NOERROR;
 //
-//    AutoPtr<PhoneWindow> mHost = reinterpret_cast<PhoneWindow*>(w.Get());
+//    AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
 //    return mHost->OnMenuItemSelected(menu, item, state);
 //}
 //
 //ECode PhoneWindow::MyMenuBuilderCallback::OnMenuModeChange(
 //    /* [in] */ IMenuBuilder* menu)
 //{
-//    AutoPtr<IInterface> w;
+//    AutoPtr<IPhoneWindow> w;
 //    mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
 //    if (w == NULL)
 //        return NOERROR;
 //
-//    AutoPtr<PhoneWindow> mHost = reinterpret_cast<PhoneWindow*>(w.Get());
+//    AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
 //    return mHost->OnMenuModeChange(menu);
 //}
 
@@ -3259,10 +3261,10 @@ void PhoneWindow::OnOptionsPanelRotationChanged()
 
     if (lp != NULL) {
         ((CWindowManagerLayoutParams*)lp.Get())->mGravity = GetOptionsPanelGravity();
-        AutoPtr<IViewManager> wm;
+        AutoPtr<IWindowManager> wm;
         GetWindowManager((IWindowManager**)&wm);
         if (wm != NULL) {
-            wm->UpdateViewLayout(IView::Probe(st->mDecorView), IViewGroupLayoutParams::Probe(lp));
+            IViewManager::Probe(wm)->UpdateViewLayout(IView::Probe(st->mDecorView), IViewGroupLayoutParams::Probe(lp));
         }
     }
 }
@@ -5560,7 +5562,9 @@ void PhoneWindow::InstallDecor()
                 InvalidatePanelMenu(FEATURE_ACTION_BAR);
             }
         } else {
-            FindViewById(R::id::title, (IView**)&mTitleView);
+            AutoPtr<IView> obj;
+            FindViewById(R::id::title, (IView**)&obj);
+            mTitleView = ITextView::Probe(obj);
             if (mTitleView != NULL) {
                 Int32 direction = 0;
                 mDecor->GetLayoutDirection(&direction);
@@ -6026,7 +6030,9 @@ AutoPtr<IImageView> PhoneWindow::GetLeftIconView()
         InstallDecor();
     }
 
-    FindViewById(R::id::left_icon, (IView**)&mLeftIconView);
+    AutoPtr<IView> view;
+    FindViewById(R::id::left_icon, (IView**)&view);
+    mLeftIconView = IImageView::Probe(view);
     return mLeftIconView;
 }
 
@@ -6040,7 +6046,9 @@ AutoPtr<IProgressBar> PhoneWindow::GetCircularProgressBar(
         InstallDecor();
     }
 
-    FindViewById(R::id::progress_circular, (IView**)&mCircularProgressBar);
+    AutoPtr<IView> view;
+    FindViewById(R::id::progress_circular, (IView**)&view);
+    mCircularProgressBar = IProgressBar::Probe(view);
     if (mCircularProgressBar != NULL) {
         IView::Probe(mCircularProgressBar)->SetVisibility(IView::INVISIBLE);
     }
@@ -6057,7 +6065,9 @@ AutoPtr<IProgressBar> PhoneWindow::GetHorizontalProgressBar(
         InstallDecor();
     }
 
-    FindViewById(R::id::progress_horizontal, (IView**)&mHorizontalProgressBar);
+    AutoPtr<IView> view;
+    FindViewById(R::id::progress_horizontal, (IView**)&view);
+    mHorizontalProgressBar = IProgressBar::Probe(view);
     if (mHorizontalProgressBar != NULL) {
         IView::Probe(mHorizontalProgressBar)->SetVisibility(IView::INVISIBLE);
     }
@@ -6073,7 +6083,9 @@ AutoPtr<IImageView> PhoneWindow::GetRightIconView()
         InstallDecor();
     }
 
-    FindViewById(R::id::right_icon, (IView**)&mRightIconView);
+    AutoPtr<IView> view;
+    FindViewById(R::id::right_icon, (IView**)&view);
+    mRightIconView = IImageView::Probe(view);
     return mRightIconView;
 }
 
@@ -6294,7 +6306,7 @@ Boolean PhoneWindow::InitializePanelMenu(
         if (widgetTheme != NULL)
         {
             AutoPtr<IContext> temp;
-            CContextThemeWrapper::New(context, 0, (IContextThemeWrapper**)&temp);
+            CContextThemeWrapper::New(context, 0, (IContext**)&temp);
             context = temp;
             AutoPtr<IResourcesTheme> ctxTheme;
             context->GetTheme((IResourcesTheme**)&ctxTheme);

@@ -312,7 +312,7 @@ private:
 
     /* const */ AutoPtr<ISparseArray> mServiceMap;
 
-    /* const */ AutoPtr<IInterface> mMapLock;
+    /* const */ Object mMapLock;
 
     /* const */ AutoPtr<IAsyncChannel> mAsyncChannel;
 

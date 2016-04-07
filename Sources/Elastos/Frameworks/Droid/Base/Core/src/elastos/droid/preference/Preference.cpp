@@ -304,9 +304,9 @@ ECode Preference::OnBindView(
     /* [in] */ IView* view)
 {
     Slogger::E("Preference", "~~~~~~~~~~~~~~~~~~~~~OnBindView");
-    AutoPtr<ITextView> titleView;
-    view->FindViewById(R::id::title, (IView**)&titleView);
-    AutoPtr<IView> vv = IView::Probe(titleView);
+    AutoPtr<IView> vv;
+    view->FindViewById(R::id::title, (IView**)&vv);
+    AutoPtr<ITextView> titleView = ITextView::Probe(vv);
     if (titleView != NULL) {
         AutoPtr<ICharSequence> title;
         GetTitle((ICharSequence**)&title);
@@ -319,9 +319,9 @@ ECode Preference::OnBindView(
         }
     }
 
-    AutoPtr<ITextView> summaryView;
-    view->FindViewById(R::id::summary, (IView**)&summaryView);
-    vv = IView::Probe(summaryView);
+    vv = NULL;
+    view->FindViewById(R::id::summary, (IView**)&vv);
+    AutoPtr<ITextView> summaryView = ITextView::Probe(vv);
     if (summaryView != NULL) {
         AutoPtr<ICharSequence> summary;
         GetSummary((ICharSequence**)&summary);
@@ -334,9 +334,9 @@ ECode Preference::OnBindView(
         }
     }
 
-    AutoPtr<IImageView> imageView;
-    view->FindViewById(R::id::icon, (IView**)&imageView);
-    vv = IView::Probe(imageView);
+    vv = NULL;
+    view->FindViewById(R::id::icon, (IView**)&vv);
+    AutoPtr<IImageView> imageView = IImageView::Probe(vv);
     if (imageView != NULL) {
         if (mIconResId != 0 || mIcon != NULL) {
             if (mIcon == NULL) {

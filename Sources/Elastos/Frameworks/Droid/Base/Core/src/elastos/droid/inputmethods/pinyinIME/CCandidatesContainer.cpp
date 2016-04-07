@@ -81,15 +81,16 @@ ECode CCandidatesContainer::ShowCandidates(
     Int32 count = 0;
     mFlipper->GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
-        AutoPtr<ICandidateView> cv;
-        mFlipper->GetChildAt(i, (IView**)&cv);
+        AutoPtr<IView> view;
+        mFlipper->GetChildAt(i, (IView**)&view);
+        ICandidateView* cv = ICandidateView::Probe(view);
         cv->SetDecodingInfo(mDecInfo);
     }
     StopAnimation();
 
-    AutoPtr<ICandidateView> cv;
+    AutoPtr<IView> cv;
     mFlipper->GetCurrentView((IView**)&cv);
-    cv->ShowPage(mCurrentPage, 0, enableActiveHighlight);
+    ICandidateView::Probe(cv)->ShowPage(mCurrentPage, 0, enableActiveHighlight);
 
     UpdateArrowStatus();
     return RelativeLayout::Invalidate();
@@ -106,9 +107,9 @@ ECode CCandidatesContainer::GetCurrentPage(
 ECode CCandidatesContainer::EnableActiveHighlight(
     /* [in] */ Boolean enableActiveHighlight)
 {
-    AutoPtr<ICandidateView> cv;
+    AutoPtr<IView> cv;
     mFlipper->GetCurrentView((IView**)&cv);
-    cv->EnableActiveHighlight(enableActiveHighlight);
+    ICandidateView::Probe(cv)->EnableActiveHighlight(enableActiveHighlight);
     return RelativeLayout::Invalidate();
 }
 
@@ -145,8 +146,9 @@ ECode CCandidatesContainer::ActiveCurseBackward(
         return NOERROR;
     }
 
-    AutoPtr<ICandidateView> cv;
-    mFlipper->GetCurrentView((IView**)&cv);
+    AutoPtr<IView> view;
+    mFlipper->GetCurrentView((IView**)&view);
+    ICandidateView* cv = ICandidateView::Probe(view);
     assert(cv != NULL);
 
     Boolean state = FALSE;
@@ -168,9 +170,9 @@ ECode CCandidatesContainer::ActiveCurseForward(
         return NOERROR;
     }
 
-    AutoPtr<ICandidateView> cv;
-    mFlipper->GetCurrentView((IView**)&cv);
-
+    AutoPtr<IView> view;
+    mFlipper->GetCurrentView((IView**)&view);
+    ICandidateView* cv = ICandidateView::Probe(view);
     if (cv->ActiveCursorForward(&state), state) {
         cv->Invalidate();
         *result = TRUE;
@@ -199,10 +201,13 @@ ECode CCandidatesContainer::PageBackward(
     Int32 child = 0;
     mFlipper->GetDisplayedChild(&child);
     Int32 childNext = (child + 1) % 2;
-    AutoPtr<ICandidateView> cv;
-    mFlipper->GetChildAt(child, (IView**)&cv);
-    AutoPtr<ICandidateView> cvNext;
-    mFlipper->GetChildAt(childNext, (IView**)&cvNext);
+
+    AutoPtr<IView> view;
+    mFlipper->GetChildAt(child, (IView**)&view);
+    AutoPtr<ICandidateView> cv = ICandidateView::Probe(view);
+    view = NULL;
+    mFlipper->GetChildAt(childNext, (IView**)&view);
+    AutoPtr<ICandidateView> cvNext = ICandidateView::Probe(view);
 
     mCurrentPage--;
     Int32 activeCandInPage = 0;
@@ -241,14 +246,16 @@ ECode CCandidatesContainer::PageForward(
     Int32 child = 0;
     mFlipper->GetDisplayedChild(&child);
     Int32 childNext = (child + 1) % 2;
-    AutoPtr<ICandidateView> cv;
-    mFlipper->GetChildAt(child, (IView**)&cv);
+    AutoPtr<IView> view;
+    mFlipper->GetChildAt(child, (IView**)&view);
+    AutoPtr<ICandidateView> cv = ICandidateView::Probe(view);
     Int32 activeCandInPage = 0;
     cv->GetActiveCandiatePosInPage(&activeCandInPage);
     cv->EnableActiveHighlight(enableActiveHighlight);
 
-    AutoPtr<ICandidateView> cvNext;
-    mFlipper->GetChildAt(childNext, (IView**)&cvNext);
+    view = NULL;
+    mFlipper->GetChildAt(childNext, (IView**)&view);
+    AutoPtr<ICandidateView> cvNext = ICandidateView::Probe(view);
     mCurrentPage++;
     if (animLeftRight) activeCandInPage = 0;
 
@@ -269,9 +276,10 @@ ECode CCandidatesContainer::GetActiveCandiatePos(
         *pos = -1;
         return NOERROR;
     }
-    AutoPtr<ICandidateView> cv;
-    mFlipper->GetCurrentView((IView**)&cv);
-    return cv->GetActiveCandiatePosGlobal(pos);
+
+    AutoPtr<IView> view;
+    mFlipper->GetCurrentView((IView**)&view);
+    return ICandidateView::Probe(view)->GetActiveCandiatePosGlobal(pos);
 }
 
 ECode CCandidatesContainer::UpdateArrowStatus()
@@ -323,10 +331,10 @@ Boolean CCandidatesContainer::OnTouchEvent(
 {
     assert(event != NULL);
     event->OffsetLocation(-mXOffsetForFlipper, 0);
-    AutoPtr<ICandidateView> cv;
-    mFlipper->GetCurrentView((IView**)&cv);
+    AutoPtr<IView> view;
+    mFlipper->GetCurrentView((IView**)&view);
     Boolean result = FALSE;
-    cv->OnTouchEventReal(event, &result);
+    ICandidateView::Probe(view)->OnTouchEventReal(event, &result);
     return TRUE;
 }
 
@@ -398,10 +406,10 @@ AutoPtr<IAnimation> CCandidatesContainer::CreateAnimation(
     CTranslateAnimation::New(IAnimation::RELATIVE_TO_SELF,
             xFrom, IAnimation::RELATIVE_TO_SELF, xTo,
             IAnimation::RELATIVE_TO_SELF, yFrom, IAnimation::RELATIVE_TO_SELF,
-            yTo, (ITranslateAnimation**)&trans);
+            yTo, (IAnimation**)&trans);
 
     AutoPtr<IAnimation> alpha;
-    CAlphaAnimation::New(alphaFrom, alphaTo, (IAlphaAnimation**)&alpha);
+    CAlphaAnimation::New(alphaFrom, alphaTo, (IAnimation**)&alpha);
     animSet->AddAnimation(trans);
     animSet->AddAnimation(alpha);
     animSet->SetDuration(duration);
@@ -446,9 +454,9 @@ ECode CCandidatesContainer::OnAnimationEnd(
 {
     Boolean pressed = FALSE;
     if (!(mLeftArrowBtn->IsPressed(&pressed), pressed) && !(mRightArrowBtn->IsPressed(&pressed), pressed)) {
-        AutoPtr<ICandidateView> cv;
+        AutoPtr<IView> cv;
         mFlipper->GetCurrentView((IView**)&cv);
-        cv->EnableActiveHighlight(TRUE);
+        ICandidateView::Probe(cv)->EnableActiveHighlight(TRUE);
     }
     return NOERROR;
 }
@@ -474,9 +482,9 @@ ECode CCandidatesContainer::OnTouch(
             mCvListener->OnToLeftGesture();
         }
     } else if (action == IMotionEvent::ACTION_UP) {
-        AutoPtr<ICandidateView> cv;
+        AutoPtr<IView> cv;
         mFlipper->GetCurrentView((IView**)&cv);
-        cv->EnableActiveHighlight(TRUE);
+        ICandidateView::Probe(cv)->EnableActiveHighlight(TRUE);
     }
 
     *result = FALSE;

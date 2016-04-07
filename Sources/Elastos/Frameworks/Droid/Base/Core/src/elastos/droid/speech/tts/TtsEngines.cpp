@@ -196,13 +196,17 @@ ECode TtsEngines::GetHighestRankedEngineName(
     if (engines != NULL ) {
 
         Boolean b;
-        AutoPtr<TextToSpeech::TextToSpeechEngineInfo> engine;
-
         engines->IsEmpty(&b);
-        engines->Get(0, (IInterface**)&engine);
-        if ( !b && engine->system) {
-            *pRet = engine->name;
+        if (!b) {
+            TextToSpeech::TextToSpeechEngineInfo* engine;
+            AutoPtr<IInterface> obj;
+            engines->Get(0, (IInterface**)&obj);
+            engine = (TextToSpeech::TextToSpeechEngineInfo*)IObject::Probe(obj);
+            if (engine->system) {
+                *pRet = engine->name;
+            }
         }
+
     } else {
         *pRet = String(NULL);
     }
@@ -264,10 +268,10 @@ ECode TtsEngines::GetEngines(
     oc->GetSize(&resolveInfosSize);
 
     for (Int32 i = 0; i < resolveInfosSize; i++) {
-        AutoPtr<IResolveInfo> resolve;
+        AutoPtr<IInterface> obj;
         AutoPtr<TextToSpeech::TextToSpeechEngineInfo> engine;
-        oc->Get(i, (IInterface**)&resolve);
-
+        oc->Get(i, (IInterface**)&obj);
+        IResolveInfo* resolve = IResolveInfo::Probe(obj);
         engine = GetEngineInfo(resolve, pm.Get());
         if (engine != NULL) {
             (*ppRet)->Set(i, TO_IINTERFACE(engine));
@@ -317,17 +321,16 @@ ECode TtsEngines::GetSettingsIntent(
 
     AutoPtr<IList> oc;
     pm->QueryIntentServices(intent.Get(),
-                IPackageManager::MATCH_DEFAULT_ONLY | IPackageManager::GET_META_DATA, (IList**)&oc);
-
-    AutoPtr<IServiceInfo> service;
+        IPackageManager::MATCH_DEFAULT_ONLY | IPackageManager::GET_META_DATA, (IList**)&oc);
 
     // Note that the current API allows only one engine per
     // package name. Since the "engine name" is the same as
     // the package name.
-    oc->Get(0, (IInterface**)&service);
-
+    AutoPtr<IInterface> obj;
+    oc->Get(0, (IInterface**)&obj);
+    IServiceInfo* service = IServiceInfo::Probe(obj);
     if (service != NULL) {
-        String settings = SettingsActivityFromServiceInfo(service.Get(), pm.Get());
+        String settings = SettingsActivityFromServiceInfo(service, pm);
         if (!settings.IsNull()) {
             AutoPtr<IIntent> intent;
             CIntent::New((IIntent**)&intent);

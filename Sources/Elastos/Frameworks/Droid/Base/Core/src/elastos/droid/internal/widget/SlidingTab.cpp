@@ -989,11 +989,11 @@ ECode SlidingTab::AnimationEndInStartAnimating(
     AutoPtr<IAnimation> anim;
     if(holdAfter)
     {
-        CTranslateAnimation::New((Float)dx, (Float)dx, (Float)dy, (Float)dy, (ITranslateAnimation**)&anim);
+        CTranslateAnimation::New((Float)dx, (Float)dx, (Float)dy, (Float)dy, (IAnimation**)&anim);
         anim->SetDuration(1000);
         mAnimating = FALSE;
     } else {
-        CAlphaAnimation::New(0.5f, 1.0f, (IAlphaAnimation**)&anim);
+        CAlphaAnimation::New(0.5f, 1.0f, (IAnimation**)&anim);
         anim->SetDuration(ANIM_DURATION);
         ResetView();
     }

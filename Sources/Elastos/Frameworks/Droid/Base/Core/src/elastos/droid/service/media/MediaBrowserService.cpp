@@ -104,10 +104,11 @@ ECode MediaBrowserService::DisconnectRunnable::Run()
     AutoPtr<IBinder> b = IBinder::Probe(mCallbacks);
 
     // Clear out the old subscriptions.  We are getting new ones.
-    AutoPtr<ConnectionRecord> old;
+    AutoPtr<IInterface> old;
     IMap::Probe(mMediaBrowserService->mConnections)->Remove(b, (IInterface**)&old);
     if (old != NULL) {
         // TODO
+        //ConnectionRecord* cr = (ConnectionRecord*)IObject::Probe(old);
     }
     return NOERROR;
 }
@@ -135,14 +136,14 @@ ECode MediaBrowserService::AddSubscriptionRunnable::Run()
     // Get the record for the connection
     Int32 index;
     mMediaBrowserService->mConnections->GetIndexOfKey(b, &index);
-    AutoPtr<ConnectionRecord> connection;
-    mMediaBrowserService->mConnections->GetValueAt(index, (IInterface**)&connection);
-    if (connection == NULL) {
+    AutoPtr<IInterface> obj;
+    mMediaBrowserService->mConnections->GetValueAt(index, (IInterface**)&obj);
+    if (obj == NULL) {
         Logger::W(TAG, String("addSubscription for callback that isn't registered id=")
             + mId);
         return NOERROR;
     }
-
+    ConnectionRecord* connection = (ConnectionRecord*)IObject::Probe(obj);
     mMediaBrowserService->AddSubscription(mId, connection);
     return NOERROR;
 }
@@ -169,13 +170,14 @@ ECode MediaBrowserService::RemoveSubscriptionRunnable::Run()
 
     Int32 index;
     mMediaBrowserService->mConnections->GetIndexOfKey(b, &index);
-    AutoPtr<ConnectionRecord> connection;
-    mMediaBrowserService->mConnections->GetValueAt(index, (IInterface**)&connection);
-    if (connection == NULL) {
+    AutoPtr<IInterface> obj;
+    mMediaBrowserService->mConnections->GetValueAt(index, (IInterface**)&obj);
+    if (obj == NULL) {
         Logger::W(TAG, String("removeSubscription for callback that isn't registered id=")
                 + mId);
         return NOERROR;
     }
+    ConnectionRecord* connection = (ConnectionRecord*)IObject::Probe(obj);
     Boolean result;
     AutoPtr<ICharSequence> csq;
     CString::New(mId, (ICharSequence**)&csq);
@@ -211,9 +213,9 @@ ECode MediaBrowserService::NotifyChildrenChangedRunnable::Run()
         AutoPtr<IBinder> binder = IBinder::Probe((*array)[i]);
         Int32 index;
         mMediaBrowserService->mConnections->GetIndexOfKey(binder, &index);
-        AutoPtr<ConnectionRecord> connection;
-        mMediaBrowserService->mConnections->GetValueAt(index, (IInterface**)&connection);
-
+        AutoPtr<IInterface> obj;
+        mMediaBrowserService->mConnections->GetValueAt(index, (IInterface**)&obj);
+        ConnectionRecord* connection = (ConnectionRecord*)IObject::Probe(obj);
         Boolean result;
         AutoPtr<ICharSequence> csq;
         CString::New(mParentId, (ICharSequence**)&csq);
@@ -249,9 +251,9 @@ ECode MediaBrowserService::PerformLoadChildrenResult::OnResultSent(
     }
     Int32 index;
     mMediaBrowserService->mConnections->GetIndexOfKey(IBinder::Probe(mConnection->callbacks), &index);
-    AutoPtr<ConnectionRecord> connection;
-    mMediaBrowserService->mConnections->GetValueAt(index, (IInterface**)&connection);
-
+    AutoPtr<IInterface> obj;
+    mMediaBrowserService->mConnections->GetValueAt(index, (IInterface**)&obj);
+    ConnectionRecord* connection = (ConnectionRecord*)IObject::Probe(obj);
     if (connection != mConnection) {
         if (mMediaBrowserService->DBG) {
             Logger::D(TAG, String("Not sending onLoadChildren result for connection that has")

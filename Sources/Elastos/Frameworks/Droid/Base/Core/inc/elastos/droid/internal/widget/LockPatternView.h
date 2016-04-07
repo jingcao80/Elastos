@@ -506,7 +506,7 @@ private:
     AutoPtr<IPaint> mPathPaint;
     Byte mPatternSize;
     AutoPtr<IOnPatternListener> mOnPatternListener;
-    AutoPtr<IArrayList/*<Cell*/> mPattern;
+    AutoPtr<IArrayList> mPattern;/*<Cell*/
 
     AutoPtr<ArrayOf<IArrayOf*> > mPatternDrawLookup;
 

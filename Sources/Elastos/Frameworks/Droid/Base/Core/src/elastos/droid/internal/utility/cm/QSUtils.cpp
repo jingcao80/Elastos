@@ -55,7 +55,7 @@ ECode QSUtils::GetDefaultTiles(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IList> tiles;
-    CArrayList::New((IArrayList**)&tiles);
+    CArrayList::New((IList**)&tiles);
     String defaults;
     context->GetString(R::string::config_defaultQuickSettingsTiles, &defaults);
     if (!defaults.IsEmpty()) {
@@ -176,10 +176,10 @@ ECode QSUtils::DeviceSupportsFlashLight(
         String id = (*ids)[i];
         AutoPtr<ICameraCharacteristics> c;
         cameraManager->GetCameraCharacteristics(id, (ICameraCharacteristics**)&c);
-        AutoPtr<IBoolean> ib;
+        AutoPtr<IInterface> ib;
         c->Get(CameraCharacteristics::FLASH_INFO_AVAILABLE, (IInterface**)&ib);
         Boolean flashAvailable;
-        ib->GetValue(&flashAvailable);
+        IBoolean::Probe(ib)->GetValue(&flashAvailable);
         AutoPtr<IInterface> obj;
         c->Get(CameraCharacteristics::LENS_FACING, (IInterface**)&obj);
         AutoPtr<IInteger32> lensFacing = IInteger32::Probe(obj);

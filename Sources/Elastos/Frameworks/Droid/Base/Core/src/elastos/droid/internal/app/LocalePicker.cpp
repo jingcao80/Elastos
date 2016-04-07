@@ -75,7 +75,7 @@ ECode LocalePicker::LocalArrayAdapter::GetView(
     }
     else {
         view = convertView;
-        AutoPtr<IView> tempView;
+        AutoPtr<IInterface> tempView;
         view->GetTag((IInterface**)&tempView);
         text = ITextView::Probe(tempView);
     }

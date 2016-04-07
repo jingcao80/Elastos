@@ -1547,10 +1547,10 @@ Int32 CMtpDatabase::BeginSendObject(
         if (uri != NULL) {
             AutoPtr<IList> list;
             uri->GetPathSegments((IList**)&list);
-            AutoPtr<ICharSequence> cs;
+            AutoPtr<IInterface> cs;
             list->Get(2, (IInterface**)&cs);
             String s;
-            cs->ToString(&s);
+            ICharSequence::Probe(cs)->ToString(&s);
             return StringUtils::ParseInt32(s);
         } else {
             return -1;
@@ -1893,8 +1893,9 @@ AutoPtr<IMtpPropertyList> CMtpDatabase::GetObjectPropertyList(
     if (property == 0xFFFFFFFFL) {
         AutoPtr<IInteger32> iFormat;
         CInteger32::New(format, (IInteger32**)&iFormat);
-        mPropertyGroupsByFormat->Get(iFormat, (IInterface**)&propertyGroup);
-         // propertyGroup = mPropertyGroupsByFormat.get(format);
+        AutoPtr<IInterface> obj;
+        mPropertyGroupsByFormat->Get(iFormat, (IInterface**)&obj);
+         propertyGroup = IMtpPropertyGroup::Probe(obj);
         if (propertyGroup == NULL) {
             AutoPtr<ArrayOf<Int32> > propertyList = GetSupportedObjectProperties(format);
             CMtpPropertyGroup::New(this, mMediaProvider, mPackageName, mVolumeName, propertyList, (IMtpPropertyGroup**)&propertyGroup);
@@ -1903,8 +1904,9 @@ AutoPtr<IMtpPropertyList> CMtpDatabase::GetObjectPropertyList(
     } else {
         AutoPtr<IInteger32> iProperty;
         CInteger32::New(property, (IInteger32**)&iProperty);
-        mPropertyGroupsByProperty->Get(iProperty, (IInterface**)&propertyGroup);
-        // propertyGroup = mPropertyGroupsByProperty.get(property);
+        AutoPtr<IInterface> obj;
+        mPropertyGroupsByProperty->Get(iProperty, (IInterface**)&obj);
+        propertyGroup = IMtpPropertyGroup::Probe(obj);
         if (propertyGroup == NULL) {
             AutoPtr<ArrayOf<Int32> > propertyList = ArrayOf<Int32>::Alloc(1);
             propertyList->Set(0, (Int32)property);
@@ -2065,9 +2067,11 @@ Int32 CMtpDatabase::GetDeviceProperty(
             outStringValue->Set(length, 0);
             return IMtpConstants::RESPONSE_OK;
 
-        case IMtpConstants::DEVICE_PROPERTY_IMAGE_SIZE:
+        case IMtpConstants::DEVICE_PROPERTY_IMAGE_SIZE: {
             // use screen size as max image size
-            mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&wm);
+            AutoPtr<IInterface> service;
+            mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&service);
+            wm = IWindowManager::Probe(service);
             wm->GetDefaultDisplay((IDisplay**)&display);
             display->GetMaximumSizeDimension(&width);
             display->GetMaximumSizeDimension(&height);
@@ -2077,6 +2081,7 @@ Int32 CMtpDatabase::GetDeviceProperty(
             // TextUtils::GetChars(csq, 0, imageSize.GetLength(), outStringValue, 0);
             outStringValue->Set(imageSize.GetLength(), 0);
             return IMtpConstants::RESPONSE_OK;
+        }
 
             // DEVICE_PROPERTY_BATTERY_LEVEL is implemented in the JNI code
 

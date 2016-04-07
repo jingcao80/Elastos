@@ -961,7 +961,7 @@ void CAlertControllerAlertParams::CreateListView(
             AutoPtr<ArrayOf<Int32> > iParams = ArrayOf<Int32>::Alloc(1);
             (*sParams)[0] = mLabelColumn;
             (*iParams)[0] = R::id::text1;
-            CSimpleCursorAdapter::New(mContext, layout, mCursor, sParams, iParams, (ISimpleCursorAdapter**)&adapter);
+            CSimpleCursorAdapter::New(mContext, layout, mCursor, sParams, iParams, (IListAdapter**)&adapter);
         }
     }
 

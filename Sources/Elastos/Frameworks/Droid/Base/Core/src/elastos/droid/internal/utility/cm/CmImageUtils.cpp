@@ -144,7 +144,7 @@ ECode CmImageUtils::CropImage(
             DEFAULT_IMG_QUALITY, IOutputStream::Probe(tmpOut), &b), b) {
         AutoPtr<ArrayOf<Byte> > outByteArray;
         tmpOut->ToByteArray((ArrayOf<Byte>**)&outByteArray);
-        CByteArrayInputStream::New(outByteArray, (IByteArrayInputStream**)&compressed);
+        CByteArrayInputStream::New(outByteArray, (IInputStream**)&compressed);
     }
     // } catch (Exception e) {
     //     Log.e(TAG, "Exception " + e);

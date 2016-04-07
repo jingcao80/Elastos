@@ -80,7 +80,7 @@ ECode IconMenuPresenter::constructor(
     /* [in] */ IContext* context)
 {
     AutoPtr<IContext> themeContext;
-    CContextThemeWrapper::New(context, R::style::Theme_IconMenu, (IContextThemeWrapper**)&themeContext);
+    CContextThemeWrapper::New(context, R::style::Theme_IconMenu, (IContext**)&themeContext);
     return BaseMenuPresenter::constructor(themeContext, R::layout::icon_menu_layout,
             R::layout::icon_menu_item_layout);
 }

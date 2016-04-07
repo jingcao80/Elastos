@@ -187,7 +187,7 @@ private:
     AutoPtr<IILockSettings> mService;
 
     /** Only access when holding {@code mCache} lock. */
-    AutoPtr<IArrayMap/*<CacheKey, Object*/> mCache;
+    AutoPtr<IArrayMap> mCache;/*<CacheKey, Object*/
 
     /** Only access when holding {@link #mCache} lock. */
     AutoPtr<CacheKey> mCacheKey;

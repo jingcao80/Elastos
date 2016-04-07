@@ -456,8 +456,9 @@ AutoPtr<ISentenceSuggestionsInfo> SpellCheckerService::SentenceLevelAdapter::Rec
     AutoPtr<ArrayOf<ISuggestionsInfo*> > reconstructedSuggestions = ArrayOf<ISuggestionsInfo*>::Alloc(querySize);
 
     for (Int32 i = 0; i < querySize; ++i) {
-        AutoPtr<SentenceWordItem> item;
-        originalTextInfoParams->mItems->Get(i, (IInterface**)&item);
+        AutoPtr<IInterface> obj;
+        originalTextInfoParams->mItems->Get(i, (IInterface**)&obj);
+        SentenceWordItem* item = (SentenceWordItem*)IObject::Probe(obj);
         AutoPtr<ISuggestionsInfo> result = NULL;
         for (Int32 j = 0; j < results->GetLength(); ++j) {
             AutoPtr<ISuggestionsInfo> cur = (*results)[j];

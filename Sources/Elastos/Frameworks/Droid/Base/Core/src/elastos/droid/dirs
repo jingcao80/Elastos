@@ -43,11 +43,7 @@ DIRS += webkit
 DIRS += widget
 DIRS += wifi
 
-#DIRS += opengl
-#DIRS += speech
 #DIRS += privacy
-#DIRS += accounts
-#DIRS += statusbar
 #DIRS += googleremote
 #DIRS += wifidisplay
 #DIRS += inputmethods

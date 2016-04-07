@@ -427,8 +427,9 @@ ECode ActionBarContextView::InitForMode(
     AutoPtr<IViewOnClickListener> l = new InnerCloseButtonListener(mode);
     closeButton->SetOnClickListener(l);
 
-    AutoPtr<IMenuBuilder> menu;
-    mode->GetMenu((IMenu**)&menu);
+    AutoPtr<IMenu> mb;
+    mode->GetMenu((IMenu**)&mb);
+    IMenuBuilder* menu = IMenuBuilder::Probe(mb);
     if (mActionMenuPresenter != NULL) {
         Boolean res = FALSE;
         mActionMenuPresenter->DismissPopupMenus(&res);
@@ -1049,8 +1050,12 @@ void ActionBarContextView::InitTitle()
         AutoPtr<IView> viewTmp;
         GetChildAt(count - 1, (IView**)&viewTmp);
         mTitleLayout = ILinearLayout::Probe(viewTmp);
-        IView::Probe(mTitleLayout)->FindViewById(R::id::action_bar_title, (IView**)&mTitleView);
-        IView::Probe(mTitleLayout)->FindViewById(R::id::action_bar_subtitle, (IView**)&mSubtitleView);
+        viewTmp = NULL;
+        IView::Probe(mTitleLayout)->FindViewById(R::id::action_bar_title, (IView**)&viewTmp);
+        mTitleView = ITextView::Probe(viewTmp);
+        viewTmp = NULL;
+        IView::Probe(mTitleLayout)->FindViewById(R::id::action_bar_subtitle, (IView**)&viewTmp);
+        mSubtitleView = ITextView::Probe(viewTmp);
         if (mTitleStyleRes != 0) {
             mTitleView->SetTextAppearance(mContext, mTitleStyleRes);
         }

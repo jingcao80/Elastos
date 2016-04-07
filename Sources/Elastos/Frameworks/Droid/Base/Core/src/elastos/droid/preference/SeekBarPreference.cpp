@@ -79,14 +79,15 @@ ECode SeekBarPreference::OnBindView(
     /* [in] */ IView* view)
 {
     FAIL_RETURN(Preference::OnBindView(view))
-    AutoPtr<ISeekBar> seekBar;
-    view->FindViewById(R::id::seekbar, (IView**)&seekBar);
+    AutoPtr<IView> tempView;
+    view->FindViewById(R::id::seekbar, (IView**)&tempView);
+    ISeekBar* seekBar = ISeekBar::Probe(tempView);
     seekBar->SetOnSeekBarChangeListener(this);
     IProgressBar::Probe(seekBar)->SetMax(mMax);
     IProgressBar::Probe(seekBar)->SetProgress(mProgress);
     Boolean isEnabled;
     IsEnabled(&isEnabled);
-    IView::Probe(seekBar)->SetEnabled(isEnabled);
+    tempView->SetEnabled(isEnabled);
     return NOERROR;
 }
 

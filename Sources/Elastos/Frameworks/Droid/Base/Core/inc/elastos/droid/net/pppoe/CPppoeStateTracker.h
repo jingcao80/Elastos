@@ -164,7 +164,7 @@ private:
     Boolean mPppInterfaceAdded;// = false;
     String mInterfaceName;// = "ppp0";
     AutoPtr<DhcpInfoInternal> mDhcpInfoInternal;
-    AutoPtr<CPppoeMonitor> mMonitor;
+    AutoPtr<IPppoeMonitor> mMonitor;
     AutoPtr<IAtomicBoolean> mTeardownRequested; //= new AtomicBoolean(false);
     AutoPtr<IAtomicBoolean> mPrivateDnsRouteSet; //= new AtomicBoolean(false);
     AutoPtr<IAtomicBoolean> mDefaultRouteSet; //= new AtomicBoolean(false);

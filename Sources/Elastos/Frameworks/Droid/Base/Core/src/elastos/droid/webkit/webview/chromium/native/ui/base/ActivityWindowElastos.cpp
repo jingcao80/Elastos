@@ -172,10 +172,10 @@ Boolean ActivityWindowElastos::OnActivityResult(
 
     AutoPtr<IInteger32> requestCodeTmp;
     CInteger32::New(requestCode, (IInteger32**)&requestCodeTmp);
-    AutoPtr<ICharSequence> errorMessageTmp;
+    AutoPtr<IInterface> errorMessageTmp;
     mIntentErrors->Remove(requestCodeTmp, (IInterface**)&errorMessageTmp);
     String errorMessage;
-    errorMessageTmp->ToString(&errorMessage);
+    ICharSequence::Probe(errorMessageTmp)->ToString(&errorMessage);
 
     if (NULL != callback) {
         AutoPtr<IContentResolver> contentResolver;

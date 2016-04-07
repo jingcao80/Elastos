@@ -47,12 +47,12 @@ ECode TrustAgentService::MHandler::HandleMessage(
         case TrustAgentService::MSG_SET_TRUST_AGENT_FEATURES_ENABLED: {
             AutoPtr<IBundle> features;
             msg->PeekData((IBundle**)&features);
-            AutoPtr<IBinder> token;
+            AutoPtr<IInterface> token;
             msg->GetObj((IInterface**)&token);
             Boolean result;
             mHost->OnSetTrustAgentFeaturesEnabled(features, &result);
             synchronized(this) {
-                ECode ec = mHost->mCallback->OnSetTrustAgentFeaturesEnabledCompleted(result, token);
+                ECode ec = mHost->mCallback->OnSetTrustAgentFeaturesEnabledCompleted(result, IBinder::Probe(token));
                 if (FAILED(ec)) {
                     mHost->OnError(String("calling onSetTrustAgentFeaturesEnabledCompleted()"));
                     return E_REMOTE_EXCEPTION;

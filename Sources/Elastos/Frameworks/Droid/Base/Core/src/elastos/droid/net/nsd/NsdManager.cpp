@@ -57,7 +57,6 @@ NsdManager::NsdManager()
 {
     CSparseArray::New((ISparseArray**)&mListenerMap);
     CSparseArray::New((ISparseArray**)&mServiceMap);
-    Elastos::Core::CObject::New((IObject**)&mMapLock);
     CAsyncChannel::New((IAsyncChannel**)&mAsyncChannel);
     CCountDownLatch::New(1, (ICountDownLatch**)&mConnected);
 }

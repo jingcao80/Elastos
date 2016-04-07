@@ -68,8 +68,9 @@ ECode SeekBarDialogPreference::OnBindDialogView(
 {
     DialogPreference::OnBindDialogView(view);
 
-    AutoPtr<IImageView> iconView;
-    view->FindViewById(R::id::icon, (IView**)&iconView);
+    AutoPtr<IView> icon;
+    view->FindViewById(R::id::icon, (IView**)&icon);
+    IImageView* iconView = IImageView::Probe(icon);
     if (mMyIcon != NULL) {
         iconView->SetImageDrawable(mMyIcon);
     }

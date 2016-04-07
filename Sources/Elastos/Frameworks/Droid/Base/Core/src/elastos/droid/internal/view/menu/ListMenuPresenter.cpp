@@ -172,7 +172,7 @@ ECode ListMenuPresenter::InitForMenu(
     if (mThemeRes != 0) {
         mContext = NULL;
         mInflater = NULL;
-        CContextThemeWrapper::New(context, mThemeRes, (IContextThemeWrapper**)&mContext);
+        CContextThemeWrapper::New(context, mThemeRes, (IContext**)&mContext);
         LayoutInflater::From(mContext, (ILayoutInflater**)&mInflater);
     }
     else if (mContext != NULL) {

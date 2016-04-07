@@ -451,8 +451,9 @@ ECode CPackageHelper::ExtractPublicFiles(
         AutoPtr<IZipEntry> zipEntry;
         String zipEntryName;
         for (Int32 i = 0; i < length; i++) {
-            zipEntry = NULL;
-            arrayList->Get(i, (IInterface**)&zipEntry);
+            AutoPtr<IInterface> obj;
+            arrayList->Get(i, (IInterface**)&obj);
+            zipEntry = IZipEntry::Probe(obj);
             zipEntry->GetName(&zipEntryName);
             if (String("AndroidManifest.xml").Equals(zipEntryName)
                     || String("resources.arsc").Equals(zipEntryName)

@@ -164,6 +164,8 @@ def process(path, logPath):
 
 #process('/home/kesalin/test/python/test.cpp', 'elastos_cast_checker.log')
 #process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/', '/home/kesalin/elastos_cast_checker.log')
-process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/wifi', '/home/kesalin/elastos_cast_checker.log')
+process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/ims', '/home/kesalin/elastos_cast_checker.log')
 
-#done: app, content, database, graphics, os, text, view, wifi, wifidisplay, LibCore
+
+#todo
+# webkit

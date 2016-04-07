@@ -335,7 +335,7 @@ void CLockscreenShortcutsHelper::FetchTargets()
     Int32 itemsToPad = 2/*Shortcuts.values().length*/ - size;
     if (itemsToPad > 0) {
         for (Int32 i = 0; i < itemsToPad; i++) {
-            AutoPtr<ICharSequences> cs;
+            AutoPtr<ICharSequence> cs;
             CString::New(DEFAULT, (ICharSequence**)&cs);
             mTargetActivities->Add(cs);
         }

@@ -6,6 +6,7 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/animation/ValueAnimator.h"
 #include "elastos/droid/graphics/CPaint.h"
+#include "elastos/droid/graphics/CPath.h"
 #include "elastos/droid/graphics/CMatrix.h"
 #include "elastos/droid/graphics/CBitmapFactory.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -20,6 +21,7 @@ using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Animation::ValueAnimator;
 using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CPath;
 using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Graphics::IBitmapFactory;
@@ -511,7 +513,7 @@ LockPatternView::LockPatternView()
     CPaint::New((IPaint**)&mPaint);
     CPaint::New((IPaint**)&mPathPaint);
     CArrayList::New(mPatternSize * mPatternSize, (IArrayList**)&mPattern);
-    CPaint::New((IPaint**)&mCurrentPath);
+    CPath::New((IPath**)&mCurrentPath);
     CRect::NewByFriend((CRect**)&mInvalidate);
     CRect::NewByFriend((CRect**)&mTmpInvalidateRect);
 }

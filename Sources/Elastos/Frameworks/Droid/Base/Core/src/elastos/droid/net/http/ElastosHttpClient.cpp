@@ -347,7 +347,7 @@ ECode ElastosHttpClient::GetUngzippedContent(
     header->GetValue(&contentEncoding);
     if (contentEncoding == NULL) FUNC_RETURN(responseStream);
     if (contentEncoding.Contains("gzip"))
-        CGZIPInputStream::New(responseStream, (IGZIPInputStream**)&responseStream);
+        CGZIPInputStream::New(responseStream, (IInputStream**)&responseStream);
     FUNC_RETURN(responseStream);
 }
 
@@ -659,7 +659,7 @@ String ElastosHttpClient::ToCurl(
     AutoPtr<IHttpEntityEnclosingRequest> entityRequest = IHttpEntityEnclosingRequest::Probe(request);
     if (entityRequest != NULL) {
         AutoPtr<IHttpEntity> entity;
-        entityRequest->GetEntity((IHttpEntity**)&entityRequest);
+        entityRequest->GetEntity((IHttpEntity**)&entity);
         if (entity != NULL && Ptr(entity)->Func(entity->IsRepeatable)) {
             if (Ptr(entity)->Func(entity->GetContentLength) < 1024) {
                 AutoPtr<IByteArrayOutputStream> stream;

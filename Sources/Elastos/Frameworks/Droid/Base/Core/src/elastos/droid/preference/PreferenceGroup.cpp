@@ -189,9 +189,9 @@ ECode PreferenceGroup::RemoveAll()
         Int32 i;
         preferenceList->GetSize(&i);
         for (i = i - 1; i >= 0; i--) {
-            AutoPtr<IPreference> preference;
-            preferenceList->Get(0, (IInterface**)&preference);
-            RemovePreferenceInt(preference);
+            AutoPtr<IInterface> obj;
+            preferenceList->Get(0, (IInterface**)&obj);
+            RemovePreferenceInt(IPreference::Probe(obj));
         }
     }
     NotifyHierarchyChanged();

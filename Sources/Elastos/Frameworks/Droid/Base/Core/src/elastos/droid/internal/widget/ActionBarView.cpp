@@ -2176,17 +2176,20 @@ ECode ActionBarView::SetNavigationMode(
                         CLinearLayout::New(mContext, NULL, R::attr::actionBarTabBarStyle, (ILinearLayout**)&mListNavLayout);
                         AutoPtr<ILinearLayoutLayoutParams> params;
                         CLinearLayoutLayoutParams::New(
-                                IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::MATCH_PARENT, (ILinearLayoutLayoutParams**)&params);
+                            IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::MATCH_PARENT,
+                            (ILinearLayoutLayoutParams**)&params);
                         params->SetGravity(IGravity::CENTER);
                         IViewGroup::Probe(mListNavLayout)->AddView(IView::Probe(mSpinner), IViewGroupLayoutParams::Probe(params));
                     }
 
-                    AutoPtr<ISpinnerAdapter> spinnerAdapter;
-                    IAdapterView::Probe(mSpinner)->GetAdapter((IAdapter**)&spinnerAdapter);
+                    IAdapterView* av = IAdapterView::Probe(mSpinner);
+                    AutoPtr<IAdapter> temp;
+                    av->GetAdapter((IAdapter**)&temp);
+                    ISpinnerAdapter* spinnerAdapter = ISpinnerAdapter::Probe(temp);
                     if (spinnerAdapter != mSpinnerAdapter) {
-                        IAdapterView::Probe(mSpinner)->SetAdapter(IAdapter::Probe(mSpinnerAdapter));
+                        av->SetAdapter(IAdapter::Probe(mSpinnerAdapter));
                     }
-                    IAdapterView::Probe(mSpinner)->SetOnItemSelectedListener(mNavItemSelectedListener);
+                    av->SetOnItemSelectedListener(mNavItemSelectedListener);
                     AddView(IView::Probe(mListNavLayout));
                 }
                 break;

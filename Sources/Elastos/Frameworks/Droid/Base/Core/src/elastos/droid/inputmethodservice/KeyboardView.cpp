@@ -592,7 +592,9 @@ ECode KeyboardView::constructor(
 
     CPopupWindow::New(context, (IPopupWindow**)&mPreviewPopup);
     if (previewLayout != 0) {
-        inflate->Inflate(previewLayout, NULL, (IView**)&mPreviewText);
+        AutoPtr<IView> tv;
+        inflate->Inflate(previewLayout, NULL, (IView**)&tv);
+        mPreviewText = ITextView::Probe(tv);
         Float textSize = 0.0;
         mPreviewText->GetTextSize(&textSize);
         mPreviewTextSizeLarge = (Int32)textSize;
@@ -691,9 +693,9 @@ ECode KeyboardView::SetKeyboard(
     keys->GetSize(&size);
     mKeys = ArrayOf<IKeyboardKey*>::Alloc(size);
     for (Int32 pos = 0; pos < size; pos++) {
-        AutoPtr<IKeyboardKey> key;
+        AutoPtr<IInterface> key;
         keys->Get(pos, ((IInterface**)&key));
-        mKeys->Set(pos, key);
+        mKeys->Set(pos, IKeyboardKey::Probe(key));
     }
 
     RequestLayout();

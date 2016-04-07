@@ -951,9 +951,9 @@ ECode TextToSpeech::GetFeatures(
         Boolean succeeded = FALSE;
         String strTemp;
         while(it->MoveNext(&succeeded), succeeded) {
-            AutoPtr<ICharSequence> cs;
+            AutoPtr<IInterface> cs;
             it->Current((IInterface**)&cs);
-            cs->ToString(&strTemp);
+            ICharSequence::Probe(cs)->ToString(&strTemp);
             sRet->Insert(strTemp);
         }
     }
@@ -1331,9 +1331,9 @@ AutoPtr<IBundle> TextToSpeech::ConvertParamsHashMaptoBundle(
                 if( ((*keys)[i]).StartWith(mCurrentEngine) )
                 {
                     String val;
-                    AutoPtr<ICharSequence> csEx;
+                    AutoPtr<IInterface> csEx;
                     params->Get((*keys)[i], (IInterface**)&csEx);
-                    bundle->PutString((*keys)[i], (csEx->ToString(&val), val));
+                    bundle->PutString((*keys)[i], (ICharSequence::Probe(csEx)->ToString(&val), val));
                 }
             }
         }
@@ -1351,12 +1351,12 @@ void TextToSpeech::CopyStringParam(
     /* [in] */ IMap* params,
     /* [in] */ const String& key)
 {
-    AutoPtr<ICharSequence> cs;
+    AutoPtr<IInterface> cs;
     AutoPtr<ICharSequence> skey;
     CString::New(key, (ICharSequence**)&skey);
     params->Get(skey, (IInterface**)&cs);
     String value;
-    cs->ToString(&value);
+    ICharSequence::Probe(cs)->ToString(&value);
     if (!value.IsNull()) {
         bundle->PutString(key, value);
     }
@@ -1367,12 +1367,12 @@ void TextToSpeech::CopyIntParam(
     /* [in] */ IMap* params,
     /* [in] */ const String& key)
 {
-    AutoPtr<ICharSequence> cs;
+    AutoPtr<IInterface> cs;
     AutoPtr<ICharSequence> skey;
     CString::New(key, (ICharSequence**)&skey);
     params->Get(skey, (IInterface**)&cs);
     String valueString;
-    cs->ToString(&valueString);
+    ICharSequence::Probe(cs)->ToString(&valueString);
     if (!TextUtils::IsEmpty(valueString)) {
         //try {
             Int32 value = StringUtils::ParseInt32(valueString);
@@ -1388,12 +1388,12 @@ void TextToSpeech::CopyFloatParam(
     /* [in] */ IMap* params,
     /* [in] */ const String& key)
 {
-    AutoPtr<ICharSequence> cs;
+    AutoPtr<IInterface> cs;
     AutoPtr<ICharSequence> skey;
     CString::New(key, (ICharSequence**)&skey);
     params->Get(skey, (IInterface**)&cs);
     String valueString;
-    cs->ToString(&valueString);
+    ICharSequence::Probe(cs)->ToString(&valueString);
     if (!TextUtils::IsEmpty(valueString)) {
         //try {
             Float value = StringUtils::ParseFloat(valueString);

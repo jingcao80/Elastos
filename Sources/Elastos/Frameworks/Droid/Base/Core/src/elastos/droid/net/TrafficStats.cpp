@@ -624,7 +624,7 @@ ECode TrafficStats::GetDataLayerSnapshotForUid(
 
     // TODO: take snapshot locally, since proc file is now visible
     Int32 uid = Process::MyUid();
-    return GetStatsService()->GetDataLayerSnapshotForUid(uid, (INetworkStats**)&result);
+    return GetStatsService()->GetDataLayerSnapshotForUid(uid, result);
 }
 
 ECode TrafficStats::GetMobileIfaces(

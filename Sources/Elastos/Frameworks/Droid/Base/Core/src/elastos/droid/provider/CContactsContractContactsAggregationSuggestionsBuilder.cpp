@@ -75,7 +75,7 @@ ECode CContactsContractContactsAggregationSuggestionsBuilder::Build(
         FAIL_RETURN(builder->AppendQueryParameter(String("query"), str + str_))
     }
 
-    return builder->Build((IUri**)&uri);
+    return builder->Build(uri);
 }
 
 } //Provider

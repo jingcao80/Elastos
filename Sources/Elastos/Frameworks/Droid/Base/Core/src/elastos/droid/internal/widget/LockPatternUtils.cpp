@@ -510,7 +510,7 @@ ECode LockPatternUtils::IsLockScreenDisabled(
     Boolean value = FALSE;
     if ((IsSecure(&value), !value) && GetInt64(DISABLE_LOCKSCREEN_KEY, 0) != 0) {
         // Check if the number of switchable users forces the lockscreen.
-        AutoPtr<IList/*<UserInfo*/> users;
+        AutoPtr<IList> users;/*<UserInfo*/
         CUserManager::Get(mContext)->GetUsers(TRUE, (IList**)&users);
         Int32 userCount = 0;
         users->GetSize(&userCount);
@@ -1980,7 +1980,7 @@ ECode LockPatternUtils::GetEnabledTrustAgents(
     }
     AutoPtr<ArrayOf<String> > split = TextUtils::Split(serialized, String(","));
     AutoPtr<IArrayList> activeTrustAgents;
-    CArrayList::New(split->GetLength(), (IList**)&activeTrustAgents);
+    CArrayList::New(split->GetLength(), (IArrayList**)&activeTrustAgents);
     for (Int32 i = 0; i < split->GetLength(); i++) {
         String s = (*split)[i];
         if (!TextUtils::IsEmpty(s)) {

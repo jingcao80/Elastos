@@ -3368,7 +3368,7 @@ ECode PhoneWindowManager::CreateForceHideEnterAnimation(
     AutoPtr<IAnimationUtils> animUtils;
     CAnimationUtils::AcquireSingleton((IAnimationUtils**)&animUtils);
     if (goingToNotificationShade) {
-        return animUtils->LoadAnimation(mContext, R::anim::lock_screen_behind_enter_fade_in, (IAnimation**)&anim);
+        return animUtils->LoadAnimation(mContext, R::anim::lock_screen_behind_enter_fade_in, anim);
     } else if (onWallpaper) {
         AutoPtr<IAnimation> a;
         animUtils->LoadAnimation(mContext, R::anim::lock_screen_behind_enter_wallpaper, (IAnimation**)&a);
@@ -4057,7 +4057,9 @@ void PhoneWindowManager::LaunchAssistAction(
 AutoPtr<ISearchManager> PhoneWindowManager::GetSearchManager()
 {
     if (mSearchManager == NULL) {
-        mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&mSearchManager);
+        AutoPtr<IInterface> obj;
+        mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
+        mSearchManager = ISearchManager::Probe(obj);
     }
     return mSearchManager;
 }

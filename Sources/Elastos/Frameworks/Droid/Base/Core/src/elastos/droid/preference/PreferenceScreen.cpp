@@ -104,8 +104,9 @@ ECode PreferenceScreen::ShowDialog(
     AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
     AutoPtr<IView> childPrefScreen;
     inflater->Inflate(R::layout::preference_list_fragment, NULL, (IView**)&childPrefScreen);
-    mListView = NULL;
-    childPrefScreen->FindViewById(R::id::list, (IView**)&mListView);
+    AutoPtr<IView> listViewObj;
+    childPrefScreen->FindViewById(R::id::list, (IView**)&listViewObj);
+    mListView = IListView::Probe(listViewObj);
     Bind(mListView);
 
     // Set the title bar if title is available, else no title bar

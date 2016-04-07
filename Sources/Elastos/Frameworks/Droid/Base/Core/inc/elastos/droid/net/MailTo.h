@@ -94,7 +94,7 @@ private:
         /* [out] */ String* result);
 
 private:
-    AutoPtr <IHashMap> mHeaders;
+    AutoPtr<IHashMap> mHeaders;
 
     // Well known headers
     static const String TO;

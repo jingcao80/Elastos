@@ -1145,10 +1145,11 @@ ECode PreferenceActivity::SetListFooter(
     /* [in] */ IView* view)
 {
     IViewGroup::Probe(mListFooter)->RemoveAllViews();
-    AutoPtr<IViewGroupLayoutParams> layoutParams;
-    CFrameLayoutLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT,
-            IViewGroupLayoutParams::WRAP_CONTENT, (IFrameLayoutLayoutParams**)&layoutParams);
-    return IViewGroup::Probe(mListFooter)->AddView(view, layoutParams);
+    AutoPtr<IViewGroupLayoutParams> vglp;
+    CFrameLayoutLayoutParams::New(
+        IViewGroupLayoutParams::MATCH_PARENT,
+        IViewGroupLayoutParams::WRAP_CONTENT, (IViewGroupLayoutParams**)&vglp);
+    return IViewGroup::Probe(mListFooter)->AddView(view, vglp);
 }
 
 ECode PreferenceActivity::OnStop()

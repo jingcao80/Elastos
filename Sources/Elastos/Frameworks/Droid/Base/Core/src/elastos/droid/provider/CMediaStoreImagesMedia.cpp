@@ -100,7 +100,7 @@ ECode CMediaStoreImagesMedia::GetBitmap(
     ASSERT_SUCCEEDED(CBitmapFactory::AcquireSingleton(
         (IBitmapFactory**)&factory));
 
-    factory->DecodeStream(input, (IBitmap**)&bitmap);
+    factory->DecodeStream(input, bitmap);
 
     input->Close();
     return NOERROR;

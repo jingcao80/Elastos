@@ -430,7 +430,7 @@ Int32 MenuPopupHelper::MeasureContentWidth()
         }
 
         if (mMeasureParent == NULL) {
-            CFrameLayout::New(mContext, (IFrameLayout**)&mMeasureParent);
+            CFrameLayout::New(mContext, (IViewGroup**)&mMeasureParent);
         }
         AutoPtr<IView> temp;
         adapter->GetView(i, itemView, mMeasureParent, (IView**)&temp);

@@ -36,10 +36,10 @@ ECode BaseChromiumApplication::InnerActivityLifecycleCallbacks::InnerWindowCallb
     AutoPtr<IIterator> iter;
     mOwner->mOwner->mWindowFocusListeners.GetIterator((IIterator**)&iter);
     Boolean bNext;
-    AutoPtr<WindowFocusChangedListener> listener;
     for (iter->HasNext(&bNext); bNext; iter->HasNext(&bNext)) {
+        AutoPtr<IInterface> listener;
         iter->GetNext((IInterface**)&listener);
-        listener->OnWindowFocusChanged(activity, hasFocus);
+        ((WindowFocusChangedListener*)IObject::Probe(listener))->OnWindowFocusChanged(activity, hasFocus);
     }
 
     return NOERROR;

@@ -118,13 +118,13 @@ ECode VolumePreference::OnBindDialogView(
 {
     FAIL_RETURN(SeekBarDialogPreference::OnBindDialogView(view))
 
-    AutoPtr<ISeekBar> seekBar;
-    view->FindViewById(R::id::seekbar, (IView**)&seekBar);
+    AutoPtr<IView> seekBarView;
+    view->FindViewById(R::id::seekbar, (IView**)&seekBarView);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     CSeekBarVolumizer::New(context, mStreamType, NULL,
             ISeekBarVolumizerCallback::Probe(this),(ISeekBarVolumizer**)&mSeekBarVolumizer);
-    mSeekBarVolumizer->SetSeekBar(seekBar);
+    mSeekBarVolumizer->SetSeekBar(ISeekBar::Probe(seekBarView));
 
     AutoPtr<IPreferenceManager> manager;
     GetPreferenceManager((IPreferenceManager**)&manager);

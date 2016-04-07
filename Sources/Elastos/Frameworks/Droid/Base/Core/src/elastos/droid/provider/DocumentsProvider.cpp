@@ -702,7 +702,7 @@ ECode DocumentsProvider:: OpenTypedAssetFile(
         AutoPtr<IParcelable> pla;
         opts->GetParcelable(IContentResolver::EXTRA_SIZE, (IParcelable**)&pla);
         AutoPtr<IPoint> sizeHint = IPoint::Probe(pla);
-        return OpenDocumentThumbnail(docID, sizeHint, signal, (IAssetFileDescriptor**)&fileDescriptor);
+        return OpenDocumentThumbnail(docID, sizeHint, signal, fileDescriptor);
     }
     else {
         return OpenTypedAssetFile(uri, mimeTypeFilter, opts, signal, fileDescriptor);

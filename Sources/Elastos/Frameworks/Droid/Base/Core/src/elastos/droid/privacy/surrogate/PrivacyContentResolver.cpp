@@ -214,7 +214,7 @@ ECode PrivacyContentResolver::EnforcePrivacyPermission(
     if (uri != NULL) {
         if (mPrivacySetMan == NULL) {
             AutoPtr<IInterface> obj;
-            context->GetSystemService(String("privacy"), (IInterface**)&mPrivacySetMan);
+            context->GetSystemService(String("privacy"), (IInterface**)&obj);
             mPrivacySetMan = IPrivacySettingsManager::Probe(obj);
         }
 

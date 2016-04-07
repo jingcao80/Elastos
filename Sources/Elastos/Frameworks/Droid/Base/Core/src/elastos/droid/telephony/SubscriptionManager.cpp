@@ -88,7 +88,7 @@ ECode SubscriptionManager::GetSubInfoUsingIccId(
     // }
 
     if (list == NULL) {
-        CArrayList::New((IArrayList**)&list);
+        CArrayList::New((IList**)&list);
     }
     *result = list;
     REFCOUNT_ADD(*result)
@@ -123,7 +123,7 @@ ECode SubscriptionManager::GetSubInfoUsingSlotId(
 
 
     if (list == NULL) {
-        CArrayList::New((IArrayList**)&list);
+        CArrayList::New((IList**)&list);
     }
     *result = list;
     REFCOUNT_ADD(*result)
@@ -149,7 +149,7 @@ ECode SubscriptionManager::GetAllSubInfoList(
     // }
 
     if (list == NULL) {
-        CArrayList::New((IArrayList**)&list);
+        CArrayList::New((IList**)&list);
     }
     *result = list;
     REFCOUNT_ADD(*result)
@@ -173,7 +173,7 @@ ECode SubscriptionManager::GetActiveSubInfoList(
     // }
 
     if (list == NULL) {
-        CArrayList::New((IArrayList**)&list);
+        CArrayList::New((IList**)&list);
     }
     *result = list;
     REFCOUNT_ADD(*result)

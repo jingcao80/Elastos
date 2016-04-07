@@ -111,7 +111,7 @@ ECode CContactsContractGroups::EntityIteratorImpl::GetEntityAndIncrementCursor(
     DatabaseUtils::CursorStringToContentValuesIfPresent(cursor, values, AUTO_ADD);
     Boolean result;
     FAIL_RETURN(cursor->MoveToNext(&result))
-    return CEntity::New(values, (IEntity**)&entity);
+    return CEntity::New(values, entity);
 }
 
 //override

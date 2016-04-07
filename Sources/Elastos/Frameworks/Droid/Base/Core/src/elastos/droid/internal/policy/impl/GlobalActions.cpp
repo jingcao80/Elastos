@@ -142,9 +142,10 @@ ECode GlobalActions::MyAdapter::IsEnabled(
     /* [in] */ Int32 position,
     /* [out] */ Boolean* enabled)
 {
-    AutoPtr<Action> action;
+    AutoPtr<IInterface> action;
     GetItem(position, (IInterface**)&action);
-    *enabled = action->IsEnabled();
+    Action* a = (Action*)IGlobalActionsSilentModeTriStateAction::Probe(action);
+    *enabled = a->IsEnabled();
     return NOERROR;
 }
 
@@ -274,12 +275,12 @@ ECode GlobalActions::MyAdapter::GetView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view);
-    AutoPtr<Action> action;
+    AutoPtr<IInterface> action;
     GetItem(position, (IInterface**)&action);
     AutoPtr<IInterface> service;
     mHost->mContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&service);
     AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(service);
-    AutoPtr<IView> viewTemp = action->Create(mHost->mContext, convertView, parent, inflater);
+    AutoPtr<IView> viewTemp = ((Action*)IObject::Probe(action))->Create(mHost->mContext, convertView, parent, inflater);
     *view = viewTemp;
     REFCOUNT_ADD(*view);
     return NOERROR;
@@ -1392,7 +1393,7 @@ ECode GlobalActions::MyAdapterViewOnItemLongClickListener::OnItemLongClick(
     /* [in] */ Int64 id,
     /* [out] */ Boolean* result)
 {
-    AutoPtr<Action> action;
+    AutoPtr<IInterface> action;
     mHost->mAdapter->GetItem(position, (IInterface**)&action);
     IGlobalActionsLongPressAction* lpAction = IGlobalActionsLongPressAction::Probe(action);
     if (lpAction != NULL)
@@ -1874,14 +1875,13 @@ ECode GlobalActions::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
 {
-    AutoPtr<Action> action;
+    AutoPtr<IInterface> action;
     mAdapter->GetItem(which, (IInterface**)&action);
     //if (action->Probe(EIID_SilentModeTriStateAction) == NULL)
-    if (IGlobalActionsSilentModeTriStateAction::Probe(action) == NULL)
-    {
+    if (IGlobalActionsSilentModeTriStateAction::Probe(action) == NULL) {
         dialog->Dismiss();
     }
-    action->OnPress();
+    ((Action*)IGlobalActionsSilentModeTriStateAction::Probe(action))->OnPress();
     return NOERROR;
 }
 

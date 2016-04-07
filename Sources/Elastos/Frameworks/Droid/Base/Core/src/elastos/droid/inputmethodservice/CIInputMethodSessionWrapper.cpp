@@ -73,10 +73,10 @@ ECode CIInputMethodSessionWrapper::ImeInputEventReceiver::FinishedEvent(
     Int32 index = 0;
     mPendingEvents->IndexOfKey(seq, &index);
     if (index >= 0) {
-        AutoPtr<IInputEvent> event;
+        AutoPtr<IInterface> event;
         mPendingEvents->ValueAt(index, (IInterface**)&event);
         mPendingEvents->RemoveAt(index);
-        FinishInputEvent(event, handled);
+        FinishInputEvent(IInputEvent::Probe(event), handled);
     }
     return NOERROR;
 }

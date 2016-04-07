@@ -87,7 +87,7 @@ ECode AlwaysOnHotwordDetector::EventPayload::GetCaptureSession(
 {
     VALIDATE_NOT_NULL(cs)
     if (mCaptureAvailable) {
-        CInteger32::New(mCaptureSession, (IInteger32**)&cs);
+        CInteger32::New(mCaptureSession, cs);
     }
     else {
         *cs = NULL;

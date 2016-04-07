@@ -529,10 +529,14 @@ ECode InputMethodService::OnCreate()
             &mTheme);
     AbstractInputMethodService::SetTheme(mTheme);
     AbstractInputMethodService::OnCreate();
+    AutoPtr<IInterface> service;
     AbstractInputMethodService::GetSystemService(
-        IContext::INPUT_METHOD_SERVICE, (IInterface**)&mImm);
+        IContext::INPUT_METHOD_SERVICE, (IInterface**)&service);
+    mImm = IInputMethodManager::Probe(service);
+    service = NULL;
     AbstractInputMethodService::GetSystemService(
-        IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&mInflater);
+        IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&service);
+    mInflater = ILayoutInflater::Probe(service);
     CSoftInputWindow::New(this, String("InputMethod"),
             mTheme, NULL, NULL, mDispatcherState, IWindowManagerLayoutParams::TYPE_INPUT_METHOD,
             IGravity::BOTTOM, FALSE, (ISoftInputWindow**)&mWindow);
@@ -594,17 +598,28 @@ void InputMethodService::InitViews()
     //     window->SetWindowAnimations(
     //             R::style::Animation_InputMethodFancy);
     // }
-    mRootView->FindViewById(R::id::fullscreenArea, (IView**)&mFullscreenArea);
+    AutoPtr<IView> view;
+    mRootView->FindViewById(R::id::fullscreenArea, (IView**)&view);
+    mFullscreenArea = IViewGroup::Probe(view);
     mExtractViewHidden = FALSE;
-    mRootView->FindViewById(R::id::extractArea, (IView**)&mExtractFrame);
+
+    view = NULL;
+    mRootView->FindViewById(R::id::extractArea, (IView**)&view);
+    mExtractFrame = IFrameLayout::Probe(view);
     mExtractView = NULL;
     mExtractEditText = NULL;
     mExtractAccessories = NULL;
     mExtractAction = NULL;
     mFullscreenApplied = FALSE;
 
-    mRootView->FindViewById(R::id::candidatesArea, (IView**)&mCandidatesFrame);
-    mRootView->FindViewById(R::id::inputArea, (IView**)&mInputFrame);
+    view = NULL;
+    mRootView->FindViewById(R::id::candidatesArea, (IView**)&view);
+    mExtractFrame = IFrameLayout::Probe(view);
+
+    view = NULL;
+    mRootView->FindViewById(R::id::inputArea, (IView**)&view);
+    mExtractFrame = IFrameLayout::Probe(view);
+
     mInputView = NULL;
     mIsInputViewShown = FALSE;
 
@@ -747,8 +762,9 @@ ECode InputMethodService::GetMaxWidth(
     /* [out] */ Int32* maxWidth)
 {
     assert(maxWidth != NULL);
-    AutoPtr<IWindowManager> wm;
-    AbstractInputMethodService::GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&wm);
+    AutoPtr<IInterface> obj;
+    AbstractInputMethodService::GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&obj);
+    AutoPtr<IWindowManager> wm = IWindowManager::Probe(obj);
     assert(wm != NULL);
     AutoPtr<IDisplay> display;
     wm->GetDefaultDisplay((IDisplay**)&display);
@@ -1169,14 +1185,18 @@ ECode InputMethodService::SetExtractView(
     mExtractAction = NULL;
 
     if (view != NULL) {
-        view->FindViewById(R::id::inputExtractEditText,
-            (IView**)&mExtractEditText);
+        AutoPtr<IView> tv;
+        view->FindViewById(R::id::inputExtractEditText, (IView**)&tv);
+        mExtractEditText = IExtractEditText::Probe(tv);
         mExtractEditText->SetIME(this);
-        view->FindViewById(R::id::inputExtractAction,
-            (IView**)&mExtractAction);
+
+        tv = NULL;
+        view->FindViewById(R::id::inputExtractAction, (IView**)&tv);
+        mExtractAction = IButton::Probe(tv);
         if (mExtractAction != NULL) {
-            view->FindViewById(R::id::inputExtractAccessories,
-                (IView**)&mExtractAccessories);
+            tv = NULL;
+            view->FindViewById(R::id::inputExtractAccessories, (IView**)&tv);
+            mExtractAccessories = IViewGroup::Probe(tv);
         }
         StartExtractingText(FALSE);
     }

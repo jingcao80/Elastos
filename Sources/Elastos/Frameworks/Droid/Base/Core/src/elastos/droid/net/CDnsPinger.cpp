@@ -455,7 +455,7 @@ ECode CDnsPinger::GetDefaultDns(
         resources->GetString(R::string::config_default_dns_server, &dns);
     }
 
-    AutoPtr< IInetAddress> addr;
+    AutoPtr<IInetAddress> addr;
     ECode ec = NetworkUtils::NumericToInetAddress(dns, (IInetAddress**)&addr);
     if (FAILED(ec)) {
         Loge("getDefaultDns::malformed default dns address");

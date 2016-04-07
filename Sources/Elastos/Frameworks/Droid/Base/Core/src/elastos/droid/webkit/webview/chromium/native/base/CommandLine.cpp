@@ -461,7 +461,7 @@ AutoPtr< ArrayOf<Char32> > CommandLine::ReadUtf8FileFully(
     /* [in] */ const String& fileName,
     /* [in] */ Int32 sizeLimit)
 {
-    AutoPtr<IReader> reader = NULL;
+    AutoPtr<IReader> reader;
     AutoPtr<IFile> f;
     CFile::New(fileName, (IFile**)&f);
     Int64 fileLength;
@@ -482,7 +482,7 @@ AutoPtr< ArrayOf<Char32> > CommandLine::ReadUtf8FileFully(
         AutoPtr<IFileInputStream> fis;
         CFileInputStream::New(f, (IFileInputStream**)&fis);
         //reader = new InputStreamReader(new FileInputStream(f), "UTF-8");
-        CInputStreamReader::New(IInputStream::Probe(fis), String("UTF-8"), (IInputStreamReader**)&reader);
+        CInputStreamReader::New(IInputStream::Probe(fis), String("UTF-8"), (IReader**)&reader);
         Int32 charsRead;
         ECode ec = reader->Read(buffer, &charsRead);
         // Debug check that we've exhausted the input stream (will fail e.g. if the

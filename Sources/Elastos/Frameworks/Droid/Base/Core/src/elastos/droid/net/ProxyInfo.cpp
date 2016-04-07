@@ -163,7 +163,7 @@ ECode ProxyInfo::GetSocketAddress(
 
     *result = NULL;
     // try {
-    ECode ec = CInetSocketAddress::New(mHost, mPort, (IInetSocketAddress**)&result);
+    ECode ec = CInetSocketAddress::New(mHost, mPort, result);
     // } catch (IllegalArgumentException e) { }
     if (FAILED(ec)) {
         if (ec != (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) return ec;

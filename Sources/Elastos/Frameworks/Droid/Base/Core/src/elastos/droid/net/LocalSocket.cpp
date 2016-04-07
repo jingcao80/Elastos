@@ -195,9 +195,9 @@ ECode LocalSocket::GetReceiveBufferSize(
 {
     VALIDATE_NOT_NULL(size);
 
-    AutoPtr<IInteger32> sizeObj;
+    AutoPtr<IInterface> sizeObj;
     FAIL_RETURN(mImpl->GetOption(ISocketOptions::_SO_RCVBUF, (IInterface**)&sizeObj));
-    return sizeObj->GetValue(size);
+    return IInteger32::Probe(sizeObj)->GetValue(size);
 }
 
 ECode LocalSocket::SetSoTimeout(
@@ -213,9 +213,9 @@ ECode LocalSocket::GetSoTimeout(
 {
     VALIDATE_NOT_NULL(n);
 
-    AutoPtr<IInteger32> nObj;
+    AutoPtr<IInterface> nObj;
     FAIL_RETURN(mImpl->GetOption(ISocketOptions::_SO_TIMEOUT, (IInterface**)&nObj));
-    return nObj->GetValue(n);
+    return IInteger32::Probe(nObj)->GetValue(n);
 }
 
 ECode LocalSocket::SetSendBufferSize(
@@ -231,9 +231,9 @@ ECode LocalSocket::GetSendBufferSize(
 {
     VALIDATE_NOT_NULL(size);
 
-    AutoPtr<IInteger32> sizeObj;
+    AutoPtr<IInterface> sizeObj;
     FAIL_RETURN(mImpl->GetOption(ISocketOptions::_SO_SNDBUF, (IInterface**)&sizeObj));
-    return sizeObj->GetValue(size);
+    return IInteger32::Probe(sizeObj)->GetValue(size);
 }
 
 ECode LocalSocket::GetRemoteSocketAddress(

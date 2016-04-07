@@ -41,7 +41,7 @@ ECode PacProxySelector::constructor()
     Elastos::Net::CProxyHelper::AcquireSingleton((Elastos::Net::IProxyHelper**)&helper);
     AutoPtr<Elastos::Net::IProxy> noProxy;
     helper->GetNO_PROXY((Elastos::Net::IProxy**)&noProxy);
-    CArrayList::New((IArrayList**)&mDefaultList);
+    CArrayList::New((IList**)&mDefaultList);
     mDefaultList->Add(noProxy);
     return NOERROR;
 }

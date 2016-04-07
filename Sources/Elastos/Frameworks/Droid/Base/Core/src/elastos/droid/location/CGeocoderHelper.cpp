@@ -19,11 +19,10 @@ ECode CGeocoderHelper::IsPresent(
     /* [out] */ Boolean* isPresent)
 {
     AutoPtr<IServiceManager> serviceManager;
-    AutoPtr<IILocationManager> lm;
-
     CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
-    serviceManager->GetService(IContext::LOCATION_SERVICE, (IInterface**)&lm);
-
+    AutoPtr<IInterface> obj;
+    serviceManager->GetService(IContext::LOCATION_SERVICE, (IInterface**)&obj);
+    IILocationManager* lm = IILocationManager::Probe(obj);
     return lm->GeocoderIsPresent(isPresent);
 }
 

@@ -191,7 +191,7 @@ ECode CPppoeStateTracker::StartMonitoring(
     if (mServiceStarted) {
         mContext = context;
         AutoPtr<IInterface> obj;
-        FAIL_RETURN(mContext->GetSystemService(IContext::PPPOE_SERVICE, (IPppoeManager**)&obj));
+        FAIL_RETURN(mContext->GetSystemService(IContext::PPPOE_SERVICE, (IInterface**)&obj));
         mEM = IPppoeManager::Probe(obj);
         mTarget = target;
         AutoPtr<ILooper> looper;
