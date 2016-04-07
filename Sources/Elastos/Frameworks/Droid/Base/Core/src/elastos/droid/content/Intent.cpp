@@ -9,6 +9,7 @@
 #include "elastos/droid/content/CClipDataItem.h"
 #include "elastos/droid/content/CClipData.h"
 #include "elastos/droid/content/CComponentName.h"
+#include "elastos/droid/content/CComponentNameHelper.h"
 #include "elastos/droid/content/ContentProvider.h"
 #include "elastos/droid/content/CClipDataHelper.h"
 #include "elastos/droid/os/CBundle.h"
@@ -17,6 +18,7 @@
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/R.h"
+#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
@@ -25,6 +27,7 @@
 using Elastos::Droid::Content::CClipDataItem;
 using Elastos::Droid::Content::CClipData;
 using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Content::CComponentNameHelper;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Pm::IResolveInfo;
@@ -55,6 +58,7 @@ using Elastos::Core::EIID_ICloneable;
 using Elastos::Utility::Objects;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -2864,49 +2868,65 @@ ECode Intent::SaveToXml(
 AutoPtr<IIntent> Intent::RestoreFromXml(
     /* [in] */ IXmlPullParser* in)
 {
-    assert(0 && "TODO");
-    // Intent intent = new Intent();
-    // final int outerDepth = in.getDepth();
+    AutoPtr<IIntent> intent;
+    CIntent::New((IIntent**)&intent);
+    Int32 outerDepth;
+    in->GetDepth(&outerDepth);
 
-    // int attrCount = in.getAttributeCount();
-    // for (int attrNdx = attrCount - 1; attrNdx >= 0; --attrNdx) {
-    //     final String attrName = in.getAttributeName(attrNdx);
-    //     final String attrValue = in.getAttributeValue(attrNdx);
-    //     if (ATTR_ACTION.Equals(attrName)) {
-    //         intent.setAction(attrValue);
-    //     } else if (ATTR_DATA.Equals(attrName)) {
-    //         intent.setData(Uri.parse(attrValue));
-    //     } else if (ATTR_TYPE.Equals(attrName)) {
-    //         intent.setType(attrValue);
-    //     } else if (ATTR_COMPONENT.Equals(attrName)) {
-    //         intent.setComponent(ComponentName.unflattenFromString(attrValue));
-    //     } else if (ATTR_FLAGS.Equals(attrName)) {
-    //         intent.setFlags(Integer.valueOf(attrValue, 16));
-    //     } else {
-    //         Log.e("Intent", "restoreFromXml: unknown attribute=" + attrName);
-    //     }
-    // }
+    Int32 attrCount;
+    in->GetAttributeCount(&attrCount);
+    for (Int32 attrNdx = attrCount - 1; attrNdx >= 0; --attrNdx) {
+        String attrName, attrValue;
+        in->GetAttributeName(attrNdx, &attrName);
+        in->GetAttributeValue(attrNdx, &attrValue);
+        if (ATTR_ACTION.Equals(attrName)) {
+            intent->SetAction(attrValue);
+        }
+        else if (ATTR_DATA.Equals(attrName)) {
+            AutoPtr<IUri> uri;
+            Uri::Parse(attrValue, (IUri**)&uri);
+            intent->SetData(uri);
+        }
+        else if (ATTR_TYPE.Equals(attrName)) {
+            intent->SetType(attrValue);
+        }
+        else if (ATTR_COMPONENT.Equals(attrName)) {
+            AutoPtr<IComponentNameHelper> helper;
+            CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&helper);
+            AutoPtr<IComponentName> component;
+            helper->UnflattenFromString(attrValue, (IComponentName**)&component);
+            intent->SetComponent(component);
+        }
+        else if (ATTR_FLAGS.Equals(attrName)) {
+            intent->SetFlags(StringUtils::ParseInt32(attrValue, 16));
+        }
+        else {
+            Logger::E(TAG, "restoreFromXml: unknown attribute=%s", attrName.string());
+        }
+    }
 
-    // int event;
-    // String name;
-    // while (((event = in.next()) != XmlPullParser.END_DOCUMENT) &&
-    //         (event != XmlPullParser.END_TAG || in.getDepth() < outerDepth)) {
-    //     if (event == XmlPullParser.START_TAG) {
-    //         name = in.getName();
-    //         if (TAG_CATEGORIES.Equals(name)) {
-    //             attrCount = in.getAttributeCount();
-    //             for (int attrNdx = attrCount - 1; attrNdx >= 0; --attrNdx) {
-    //                 intent.addCategory(in.getAttributeValue(attrNdx));
-    //             }
-    //         } else {
-    //             Log.w("Intent", "restoreFromXml: unknown name=" + name);
-    //             XmlUtils.skipCurrentTag(in);
-    //         }
-    //     }
-    // }
+    Int32 event, depth;
+    String name;
+    while (((in->Next(&event), event) != IXmlPullParser::END_DOCUMENT) &&
+            (event != IXmlPullParser::END_TAG || (in->GetDepth(&depth), depth) < outerDepth)) {
+        if (event == IXmlPullParser::START_TAG) {
+            in->GetName(&name);
+            if (TAG_CATEGORIES.Equals(name)) {
+                in->GetAttributeCount(&attrCount);
+                for (Int32 attrNdx = attrCount - 1; attrNdx >= 0; --attrNdx) {
+                    String category;
+                    in->GetAttributeValue(attrNdx, &category);
+                    intent->AddCategory(category);
+                }
+            }
+            else {
+                Logger::W(TAG, "restoreFromXml: unknown name=%s", name.string());
+                XmlUtils::SkipCurrentTag(in);
+            }
+        }
+    }
 
-    // return intent;
-    return NULL;
+    return intent;
 }
 
 String Intent::NormalizeMimeType(

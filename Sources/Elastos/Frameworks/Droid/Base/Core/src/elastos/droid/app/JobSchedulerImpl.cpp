@@ -27,14 +27,17 @@ ECode JobSchedulerImpl::Schedule(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = IJobScheduler::RESULT_FAILURE;
 
-    ECode ec = mBinder->Schedule(job, result);
-    if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        *result = IJobScheduler::RESULT_FAILURE;
-        ec = NOERROR;
-    }
-    return ec;
+    // TODO:cannot get JOB_SCHEDULER_SERVICE service
+    // *result = IJobScheduler::RESULT_FAILURE;
+
+    // ECode ec = mBinder->Schedule(job, result);
+    // if (ec == (ECode)E_REMOTE_EXCEPTION) {
+    //     *result = IJobScheduler::RESULT_FAILURE;
+    //     ec = NOERROR;
+    // }
+    // return ec;
+    return NOERROR;
 }
 
 ECode JobSchedulerImpl::Cancel(

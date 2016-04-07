@@ -953,8 +953,7 @@ Boolean AbstractQueuedSynchronizer::DoAcquireNanos(
         }
         if (ShouldParkAfterFailedAcquire(p, node) &&
             nanosTimeout > sSpinForTimeoutThreshold) {
-            assert(0 && "TODO");
-            // LockSupport::ParkNanos(TO_IINTERFACE(this), nanosTimeout);
+            LockSupport::ParkNanos(TO_IINTERFACE(this), nanosTimeout);
         }
         Int64 now;
         system->GetNanoTime(&now);
@@ -1416,8 +1415,7 @@ Boolean AbstractQueuedSynchronizer::DoAcquireSharedNanos(
             return FALSE;
         if (ShouldParkAfterFailedAcquire(p, node) &&
             nanosTimeout > sSpinForTimeoutThreshold) {
-            // LockSupport.parkNanos(this, nanosTimeout);
-            assert(0 && "TODO");
+            LockSupport::ParkNanos(TO_IINTERFACE(this), nanosTimeout);
         }
         Int64 now;
         system->GetNanoTime(&now);

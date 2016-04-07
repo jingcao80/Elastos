@@ -92,7 +92,8 @@ ECode CIntentHelper::RestoreFromXml(
     /* [out] */ IIntent** intent)
 {
     VALIDATE_NOT_NULL(intent)
-    *intent = Intent::RestoreFromXml(in);
+    AutoPtr<IIntent> temp = Intent::RestoreFromXml(in);
+    *intent = temp;
     REFCOUNT_ADD(*intent)
     return NOERROR;
 }
