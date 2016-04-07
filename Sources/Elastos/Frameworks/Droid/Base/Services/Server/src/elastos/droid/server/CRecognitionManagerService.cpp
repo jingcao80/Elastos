@@ -120,9 +120,9 @@ ECode CRecognitionManagerService::FindAvailRecognizer(
         if (NULL != prefPackage)  {
             FAIL_RETURN(available->GetObjectEnumerator((IObjectEnumerator**)&enumerator));
             while(enumerator->MoveNext(&hasNext), hasNext) {
-                resolveInfo = NULL;
-                enumerator->Current((IInterface**)&resolveInfo);
-                serviceInfo = NULL;
+                AutoPtr<IInterface> obj;
+                enumerator->Current((IInterface**)&obj);
+                resolveInfo = IResolveInfo::Probe(obj);
                 resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
                 serviceInfo->GetPackageName(&packageName);
                 serviceInfo->GetName(&name);
@@ -138,8 +138,9 @@ ECode CRecognitionManagerService::FindAvailRecognizer(
         enumerator = NULL;
         FAIL_RETURN(available->GetObjectEnumerator((IObjectEnumerator**)&enumerator));
         enumerator->MoveNext(&hasNext);
-        resolveInfo = NULL;
-        enumerator->Current((IInterface**)&resolveInfo);
+        AutoPtr<IInterface> obj;
+        enumerator->Current((IInterface**)&obj);
+        resolveInfo = IResolveInfo::Probe(obj);
         serviceInfo = NULL;
         resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
         serviceInfo->GetPackageName(&packageName);

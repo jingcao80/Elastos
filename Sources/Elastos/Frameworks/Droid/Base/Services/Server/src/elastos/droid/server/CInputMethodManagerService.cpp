@@ -365,6 +365,7 @@ ECode CInputMethodManagerService::UpdateFromSettingsLockObserver::OnChange(
     /* [in] */ IUri* uri)
 {
     mHost->UpdateFromSettingsLocked(TRUE);
+    return NOERROR;
 }
 
 //============================================================================
@@ -2085,7 +2086,7 @@ ECode CInputMethodManagerService::OnSessionCreated(
 
             AutoPtr<IInputBindResult> res;
             AttachNewInputLocked(TRUE, (IInputBindResult**)&res);
-            AutoPtr<IInputMethodSession> m;
+            AutoPtr<IIInputMethodSession> m;
             res->GetMethod((IIInputMethodSession**)&m);
             if (m != NULL) {
                 AutoPtr<IMessage> msg;

@@ -1533,7 +1533,7 @@ ECode CBackupManagerService::PerformFullBackupTask::Run()
         CDeflater::New(IDeflater::BEST_COMPRESSION, (IDeflater**)&deflater);
         // finalOutput = new DeflaterOutputStream(finalOutput, deflater, true);
         AutoPtr<IOutputStream> temp;
-        CDeflaterOutputStream::New(finalOutput, deflater, TRUE, (IDeflaterOutputStream**)&temp);
+        CDeflaterOutputStream::New(finalOutput, deflater, TRUE, (IOutputStream**)&temp);
         finalOutput = temp;
     }
 
@@ -2233,7 +2233,7 @@ ECode CBackupManagerService::PerformFullRestoreTask::Run()
 
     // okay, use the right stream layer based on compression
     if (compressed) {
-        CInflaterInputStream::New(preCompressStream, (IInflaterInputStream**)&in);
+        CInflaterInputStream::New(preCompressStream, (IInputStream**)&in);
     }
     else {
         in = preCompressStream;

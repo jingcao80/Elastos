@@ -6832,7 +6832,7 @@ Int32 CPackageManagerService::CompareSignaturesCompat(
     }
 
     AutoPtr<IHashSet> existingSet;
-    CHashSet::New((IHashSet**)&existingSigs);
+    CHashSet::New((IHashSet**)&existingSet);
     for (Int32 i = 0; i < existingSigs->mSignatures->GetLength(); ++i) {
         existingSet->Add((*existingSigs->mSignatures)[i]);
     }

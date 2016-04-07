@@ -740,7 +740,7 @@ ECode CWifiP2pService::P2pStateMachine::NotifyInvitationReceived()
     mSavedPeerConfig->GetWps((IWpsInfo**)&wps);
 
     AutoPtr<Elastos::Droid::Widget::IEditText> pin;
-    textEntryView->FindViewById(Elastos::Droid::R::id::wifi_p2p_wps_pin, (IView**)&pin);
+    textEntryView->FindViewById(Elastos::Droid::R::id::wifi_p2p_wps_pin, (IEditText**)&pin);
 
     AutoPtr<IAlertDialog> dialog;
     AutoPtr<IAlertDialogBuilder> builder;

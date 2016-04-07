@@ -11951,7 +11951,7 @@ AutoPtr<CContentProviderConnection> CActivityManagerService::IncProviderCountLoc
             }
         }
         AutoPtr<CContentProviderConnection> conn;
-        CContentProviderConnection::New((Handle32)cpr, (Handle32)r, (IBinder**)&conn);
+        CContentProviderConnection::NewByFriend((Handle32)cpr, (Handle32)r, (CContentProviderConnection**)&conn);
         if (stable) {
             conn->mStableCount = 1;
             conn->mNumStableIncs = 1;
@@ -15742,7 +15742,7 @@ ECode CActivityManagerService::GetProcessesInErrorState(
 
     FAIL_RETURN(EnforceNotIsolatedCaller(String("getProcessesInErrorState")));
     // assume our apps are happy - lazy create the list
-    CArrayList::New((IList**)&procs);
+    CArrayList::New(procs);
 
     AutoPtr<IActivityManagerHelper> helper;
     CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);

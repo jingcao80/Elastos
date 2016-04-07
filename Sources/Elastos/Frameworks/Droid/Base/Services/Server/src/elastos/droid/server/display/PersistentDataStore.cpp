@@ -204,13 +204,14 @@ void PersistentDataStore::Load()
 {
     ClearState();
 
-    AutoPtr<IInputStream> is;
+    AutoPtr<IFileInputStream> fis;
     // try {
-    ECode ec = mAtomicFile->OpenRead((IFileInputStream**)&is);
+    ECode ec = mAtomicFile->OpenRead((IFileInputStream**)&fis);
     if (FAILED(ec)) return;
     // } catch (FileNotFoundException ex) {
     //     return;
     // }
+    AutoPtr<IInputStream> is = IInputStream::Probe(fis);
 
     AutoPtr<IXmlPullParser> parser;
     Xml::NewPullParser((IXmlPullParser**)&parser);

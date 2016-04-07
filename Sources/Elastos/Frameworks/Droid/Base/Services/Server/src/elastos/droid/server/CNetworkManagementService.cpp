@@ -594,8 +594,9 @@ ECode CNetworkManagementService::NotifyInterfaceStatusChanged(
     // try {
     for (Int32 i = 0; i < length; i++) {
         // try {
-        AutoPtr<IINetworkManagementEventObserver> observer;
-        mObservers->GetBroadcastItem(i, (IInterface**)&observer);
+        AutoPtr<IInterface> obj;
+        mObservers->GetBroadcastItem(i, (IInterface**)&obj);
+        IINetworkManagementEventObserver* observer = IINetworkManagementEventObserver::Probe(obj);
         ec = observer->InterfaceStatusChanged(iface, up);
         // } catch (RemoteException e) {
         // } catch (RuntimeException e) {
@@ -623,8 +624,9 @@ ECode CNetworkManagementService::NotifyInterfaceLinkStateChanged(
     // try {
     for (Int32 i = 0; i < length; i++) {
         // try {
-        AutoPtr<IINetworkManagementEventObserver> observer;
-        mObservers->GetBroadcastItem(i, (IInterface**)&observer);
+        AutoPtr<IInterface> obj;
+        mObservers->GetBroadcastItem(i, (IInterface**)&obj);
+        IINetworkManagementEventObserver* observer = IINetworkManagementEventObserver::Probe(obj);
         ec = observer->InterfaceLinkStateChanged(iface, up);
         // } catch (RemoteException e) {
         // } catch (RuntimeException e) {
@@ -650,8 +652,9 @@ ECode CNetworkManagementService::NotifyInterfaceAdded(
     ECode ec = NOERROR;
     for (Int32 i = 0; i < length; i++) {
         // try {
-        AutoPtr<IINetworkManagementEventObserver> observer;
-        mObservers->GetBroadcastItem(i, (IInterface**)&observer);
+        AutoPtr<IInterface> obj;
+        mObservers->GetBroadcastItem(i, (IInterface**)&obj);
+        IINetworkManagementEventObserver* observer = IINetworkManagementEventObserver::Probe(obj);
         ec = observer->InterfaceAdded(iface);
         // } catch (RemoteException e) {
         // } catch (RuntimeException e) {
@@ -682,8 +685,9 @@ ECode CNetworkManagementService::NotifyInterfaceRemoved(
     ECode ec = NOERROR;
     for (Int32 i = 0; i < length; i++) {
         // try {
-        AutoPtr<IINetworkManagementEventObserver> observer;
-        mObservers->GetBroadcastItem(i, (IInterface**)&observer);
+        AutoPtr<IInterface> obj;
+        mObservers->GetBroadcastItem(i, (IInterface**)&obj);
+        IINetworkManagementEventObserver* observer = IINetworkManagementEventObserver::Probe(obj);
         ec = observer->InterfaceRemoved(iface);
         // } catch (RemoteException e) {
         // } catch (RuntimeException e) {
@@ -710,8 +714,9 @@ ECode CNetworkManagementService::NotifyLimitReached(
     ECode ec = NOERROR;
     for (Int32 i = 0; i < length; i++) {
         // try {
-        AutoPtr<IINetworkManagementEventObserver> observer;
-        mObservers->GetBroadcastItem(i, (IInterface**)&observer);
+        AutoPtr<IInterface> obj;
+        mObservers->GetBroadcastItem(i, (IInterface**)&obj);
+        IINetworkManagementEventObserver* observer = IINetworkManagementEventObserver::Probe(obj);
         ec = observer->LimitReached(limitName, iface);
         // } catch (RemoteException e) {
         // } catch (RuntimeException e) {
@@ -829,8 +834,9 @@ ECode CNetworkManagementService::NotifyAddressUpdated(
     // try {
     for (Int32 i = 0; i < length; i++) {
         // try {
-        AutoPtr<IINetworkManagementEventObserver> observer;
-        mObservers->GetBroadcastItem(i, (IInterface**)&observer);
+        AutoPtr<IInterface> obj;
+        mObservers->GetBroadcastItem(i, (IInterface**)&obj);
+        IINetworkManagementEventObserver* observer = IINetworkManagementEventObserver::Probe(obj);
         ec = observer->AddressUpdated(iface, address);
         // } catch (RemoteException e) {
         // } catch (RuntimeException e) {
@@ -858,8 +864,9 @@ ECode CNetworkManagementService::NotifyAddressRemoved(
     // try {
     for (Int32 i = 0; i < length; i++) {
         // try {
-        AutoPtr<IINetworkManagementEventObserver> observer;
-        mObservers->GetBroadcastItem(i, (IInterface**)&observer);
+        AutoPtr<IInterface> obj;
+        mObservers->GetBroadcastItem(i, (IInterface**)&obj);
+        IINetworkManagementEventObserver* observer = IINetworkManagementEventObserver::Probe(obj);
         ec = observer->AddressRemoved(iface, address);
         // } catch (RemoteException e) {
         // } catch (RuntimeException e) {
@@ -888,8 +895,9 @@ ECode CNetworkManagementService::NotifyInterfaceDnsServerInfo(
     // try {
     for (Int32 i = 0; i < length; i++) {
         // try {
-        AutoPtr<IINetworkManagementEventObserver> observer;
-        mObservers->GetBroadcastItem(i, (IInterface**)&observer);
+        AutoPtr<IInterface> obj;
+        mObservers->GetBroadcastItem(i, (IInterface**)&obj);
+        IINetworkManagementEventObserver* observer = IINetworkManagementEventObserver::Probe(obj);
         ec = observer->InterfaceDnsServerInfo(iface, lifetime,
                         addresses);
         // } catch (RemoteException e) {
@@ -918,11 +926,13 @@ ECode CNetworkManagementService::NotifyRouteChange(
     // try {
     for (Int32 i = 0; i < length; i++) {
         // try {
-        AutoPtr<IINetworkManagementEventObserver> observer;
-        mObservers->GetBroadcastItem(i, (IInterface**)&observer);
+        AutoPtr<IInterface> obj;
+        mObservers->GetBroadcastItem(i, (IInterface**)&obj);
+        IINetworkManagementEventObserver* observer = IINetworkManagementEventObserver::Probe(obj);
         if (action.Equals("updated")) {
             ec = observer->RouteUpdated(route);
-        } else {
+        }
+        else {
             ec = observer->RouteRemoved(route);
         }
         // } catch (RemoteException e) {

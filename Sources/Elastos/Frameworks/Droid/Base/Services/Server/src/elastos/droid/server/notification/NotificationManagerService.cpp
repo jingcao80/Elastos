@@ -3037,7 +3037,7 @@ ECode NotificationManagerService::OnStart()
 
     CHashMap::New((IHashMap**)&mNotificationPulseCustomLedValues);
 
-    CHashMap::New((IHashMap**)&mPackageNameMappings);
+    CHashMap::New((IMap**)&mPackageNameMappings);
     AutoPtr<ArrayOf<String> > defaultMapping;
     resources->GetStringArray(
             R::array::notification_light_package_mapping, (ArrayOf<String>**)&defaultMapping);

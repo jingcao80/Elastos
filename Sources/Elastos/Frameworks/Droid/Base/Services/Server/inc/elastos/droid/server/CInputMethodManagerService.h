@@ -796,8 +796,8 @@ public:
 
     // All known input methods.  mMethodMap also serves as the global
     // lock for this class.
-    AutoPtr< IArrayList > mMethodList; // ArrayList<InputMethodInfo>
-    AutoPtr< IHashMap > mMethodMap; //HashMap<String, IInputMethodInfo>
+    AutoPtr<IArrayList> mMethodList; // ArrayList<InputMethodInfo>
+    AutoPtr<IHashMap> mMethodMap; //HashMap<String, IInputMethodInfo>
     Object mMethodMapLock;
 
     AutoPtr<IInputMethodSubtypeSwitchingController> mSwitchingController;

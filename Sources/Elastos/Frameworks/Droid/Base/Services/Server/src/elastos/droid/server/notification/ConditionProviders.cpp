@@ -179,7 +179,7 @@ ECode ConditionProviders::constructor(
 {
     ManagedServices::constructor(context, handler, (IObject*)new Object(), userProfiles);
 
-    CArrayMap::New((IArrayMap**)&mRecords);
+    CArrayMap::New((IArrayMap**)&mListeners);
     CArrayList::New((IArrayList**)&mRecords);
     mCountdown = new CountdownConditionProvider();
     mDowntime = new DowntimeConditionProvider();

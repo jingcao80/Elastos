@@ -925,10 +925,10 @@ Boolean CAccountManagerService::AddAccountInternal(
         keys->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
         Boolean hasNext;
         while(enumerator->MoveNext(&hasNext), hasNext) {
-            AutoPtr<ICharSequence> keyCS;
+            AutoPtr<IInterface> keyCS;
             enumerator->Current((IInterface**)&keyCS);
             String key;
-            keyCS->ToString(&key);
+            ICharSequence::Probe(keyCS)->ToString(&key);
             String value;
             extras->GetString(key, &value);
             if (InsertExtraLocked(db, accountId, key, value) < 0) {
@@ -2078,9 +2078,9 @@ ECode CAccountManagerService::GetAllAccounts(
     Boolean hasNext;
     Int32 i = 0;
     while(enumerator->MoveNext(&hasNext), hasNext) {
-        AutoPtr<IUserInfo> info;
+        AutoPtr<IInterface> info;
         enumerator->Current((IInterface**)&info);
-        info->GetId(&(*userIds)[i]);
+        IUserInfo::Probe(info)->GetId(&(*userIds)[i]);
     }
     return GetAccounts(*userIds, accounts);
 }

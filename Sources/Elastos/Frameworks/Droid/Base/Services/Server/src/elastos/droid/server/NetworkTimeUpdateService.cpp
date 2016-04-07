@@ -95,7 +95,9 @@ ECode NetworkTimeUpdateService::constructor(
     mContext = context;
     AutoPtr<INtpTrustedTimeHelper> helper;
     CNtpTrustedTimeHelper::AcquireSingleton((INtpTrustedTimeHelper**)&helper);
-    helper->GetInstance(context, (INtpTrustedTime**)&mTime);
+    AutoPtr<INtpTrustedTime> ntpTime;
+    helper->GetInstance(context, (INtpTrustedTime**)&ntpTime);
+    mTime = ITrustedTime::Probe(ntpTime);
 
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);

@@ -3,30 +3,6 @@
 #include "elastos/droid/wifi/SupplicantStateHelper.h"
 #include "elastos/droid/wifi/WifiWatchdogStateMachine.h"
 #include "elastos/droid/wifi/WifiApConfigStore.h"
-#ifdef DROID_CORE
-#include "elastos/droid/app/CPendingIntentHelper.h"
-#include "elastos/droid/content/CIntent.h"
-#include "elastos/droid/content/CIntentFilter.h"
-#include "elastos/droid/CInterfaceConfiguration.h"
-#include "elastos/droid/CNetworkInfo.h"
-#include "elastos/droid/CLinkProperties.h"
-#include "elastos/droid/CLinkAddress.h"
-#include "elastos/droid/wifi/CRssiPacketCountInfo.h"
-#include "elastos/droid/wifi/CWifiInfo.h"
-#include "elastos/droid/wifi/CWifiInfoHelper.h"
-#include "elastos/droid/wifi/CWpsResult.h"
-#include "elastos/droid/wifi/CWifiSsidHelper.h"
-#include "elastos/droid/wifi/CScanResult.h"
-#include "elastos/droid/wifi/CWifiManagerHelper.h"
-#include "elastos/droid/os/CMessageHelper.h"
-#include "elastos/droid/os/CMessenger.h"
-#include "elastos/droid/os/CWorkSource.h"
-#include "elastos/droid/os/CUserHandleHelper.h"
-#include "elastos/droid/os/CSystemProperties.h"
-#include "elastos/droid/utility/CParcelableObjectContainer.h"
-#include "elastos/droid/provider/CSettingsSecure.h"
-#include "elastos/droid/provider/CSettingsGlobal.h"
-#endif
 #include "elastos/droid/net/NetworkUtils.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/Process.h"
@@ -3780,9 +3756,9 @@ AutoPtr<IWifiInfo> WifiStateMachine::SyncRequestConnectionInfo()
                 bc->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
                 Boolean hasNext = FALSE;
                 while (enumerator->MoveNext(&hasNext), hasNext) {
-                    AutoPtr<IInetAddress> ethaddr;
+                    AutoPtr<IInterface> ethaddr;
                     enumerator->Current((IInterface**)&ethaddr);
-                    notwifiInfo->SetInetAddress(ethaddr);
+                    notwifiInfo->SetInetAddress(IInetAddress::Probe(ethaddr));
                     break;
                 }
 

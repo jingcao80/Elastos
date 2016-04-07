@@ -2760,10 +2760,10 @@ void AccessibilityManagerService::MainHandler::SendStateToClients(
     Int32 userClientCount;
     clients->BeginBroadcast(&userClientCount);
     for (Int32 i = 0; i < userClientCount; i++) {
-        AutoPtr<IIAccessibilityManagerClient> client;
+        AutoPtr<IInterface> client;
         clients->GetBroadcastItem(i, (IInterface**)&client);
         // try {
-        client->SetState(clientState);
+        IIAccessibilityManagerClient::Probe(client)->SetState(clientState);
         // } catch (RemoteException re) {
         //     /* ignore */
         // }

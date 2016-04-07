@@ -571,7 +571,7 @@ void Notifier::PlayWirelessChargingStartedSound()
             ISettingsGlobal::WIRELESS_CHARGING_STARTED_SOUND, &soundPath);
     if (!soundPath.IsNull()) {
         AutoPtr<IUri> soundUri;
-        Uri::Parse(String("file://") + soundPath, (IUri**)&soundPath);
+        Uri::Parse(String("file://") + soundPath, (IUri**)&soundUri);
         if (soundUri != NULL) {
             AutoPtr<IRingtone> sfx;
             assert(0 && "TODO");

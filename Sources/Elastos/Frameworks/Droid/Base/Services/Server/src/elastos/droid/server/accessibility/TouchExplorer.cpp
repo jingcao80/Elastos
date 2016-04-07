@@ -847,12 +847,12 @@ void TouchExplorer::PerformLongPressDelayed::Post(
     /* [in] */ Int32 policyFlags)
 {
     AutoPtr<IMotionEventHelper> helper;
-    ASSERT_SUCCEEDED(CMotionEventHelper::AcquireSingleton((IMotionEventHelper**)&helper));
+    CMotionEventHelper::AcquireSingleton((IMotionEventHelper**)&helper);
     mEvent = NULL;
     helper->Obtain(prototype, (IMotionEvent**)&mEvent);
     mPolicyFlags = policyFlags;
     AutoPtr<IViewConfigurationHelper> configHelper;
-    ASSERT_SUCCEEDED(CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper));
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&configHelper);
     Int32 timeOut;
     configHelper->GetLongPressTimeout(&timeOut);
 
