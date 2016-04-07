@@ -5,6 +5,9 @@
 #include "elastos/droid/media/CMediaRouterClientState.h"
 #include "elastos/droid/media/CMediaRouterClientStateRouteInfo.h"
 #include "elastos/droid/media/CMediaSyncEvent.h"
+#include "elastos/droid/media/CPlayerRecord.h"
+#include "elastos/droid/media/CPlayerRecordRccPlaybackState.h"
+#include "elastos/droid/media/CPlayerRecordRemotePlaybackState.h"
 #include "elastos/droid/media/CRemoteDisplayInfo.h"
 #include "elastos/droid/media/CRemoteDisplayState.h"
 #include "elastos/droid/media/CSRTRenderer.h"
@@ -61,6 +64,9 @@ CAR_OBJECT_IMPL(CMediaRouterUserRouteInfo)
 CAR_OBJECT_IMPL(CMediaRouterRouteGroup)
 CAR_OBJECT_IMPL(CRouteCategory)
 CAR_OBJECT_IMPL(CMediaRouterSimpleCallback)
+CAR_OBJECT_IMPL(CPlayerRecordRccPlaybackState)
+CAR_OBJECT_IMPL(CPlayerRecordRemotePlaybackState)
+CAR_OBJECT_IMPL(CPlayerRecord)
 
 } // namespace Media
 } // namepsace Droid

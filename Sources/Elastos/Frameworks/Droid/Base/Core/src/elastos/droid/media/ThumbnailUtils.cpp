@@ -5,7 +5,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/media/ThumbnailUtils.h"
 #include "elastos/droid/media/CMediaFile.h"
-// #include "elastos/droid/media/CMediaMetadataRetriever.h"
+#include "elastos/droid/media/CMediaMetadataRetriever.h"
 #include "elastos/droid/media/CExifInterface.h"
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/graphics/CBitmapFactory.h"
@@ -162,8 +162,7 @@ ECode ThumbnailUtils::CreateVideoThumbnail(
     VALIDATE_NOT_NULL(result);
     AutoPtr<IBitmap> bitmap;
     AutoPtr<IMediaMetadataRetriever> retriever;
-    assert(0 && "TODO");
-    // CMediaMetadataRetriever::New((IMediaMetadataRetriever**)&retriever);
+    CMediaMetadataRetriever::New((IMediaMetadataRetriever**)&retriever);
 
     AutoPtr<IBitmapFactory> bitmapFactory;
     CBitmapFactory::AcquireSingleton((IBitmapFactory**)&bitmapFactory);

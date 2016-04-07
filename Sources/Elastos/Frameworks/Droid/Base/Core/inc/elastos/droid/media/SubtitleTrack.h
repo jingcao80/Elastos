@@ -7,6 +7,7 @@
 #include <Elastos.CoreLibrary.Utility.h>
 
 using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Utility::IInt64SparseArray;
 using Elastos::Droid::Utility::IPair;
 using Elastos::Utility::IIterable;
 using Elastos::Utility::IIterator;
@@ -202,9 +203,8 @@ private:
 
         ~Run();
 
-        //TODO
-        //StoreByEndTimeMs(
-        //    [in] ILongSparseArray* runsByEndTime);
+        CARAPI StoreByEndTimeMs(
+           /* [in] */ IInt64SparseArray* runsByEndTime);
 
         CARAPI RemoveAtEndTimeMs();
 
@@ -335,9 +335,9 @@ public:
 
 protected:
     /** @hide TODO private */
-    // AutoPtr<ILongSparseArray> mRunsByEndTime;
+    AutoPtr<IInt64SparseArray> mRunsByEndTime;
     /** @hide TODO private */
-    // AutoPtr<ILongSparseArray> mRunsByID;
+    AutoPtr<IInt64SparseArray> mRunsByID;
     /** @hide TODO private */
     AutoPtr<ISubtitleTrackCueList> mCues;
     /** @hide TODO private */

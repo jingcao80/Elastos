@@ -3,6 +3,7 @@
 #define __ELASTOS_DROID_TELEPHONY_PHONESTATELISTENER_H__
 
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Telephony.h"
 #include <Elastos.CoreLibrary.Core.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>

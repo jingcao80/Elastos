@@ -34,6 +34,8 @@ class Range
     : public Object
 {
 public:
+    friend class CRange;
+
     /**
      * Create a new immutable range.
      *

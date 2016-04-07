@@ -198,6 +198,14 @@ module
         interface IPairHelper;
     }
 
+    class CRange {
+        constructor(
+            [in] IInterface* lower,
+            [in] IInterface* upper);
+
+        interface IRange;
+    }
+
     class CRational {
         constructor(
             [in] Int32 numerator,

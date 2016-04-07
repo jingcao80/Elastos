@@ -114,6 +114,169 @@ const Int32 CMediaPlayer::KEY_PARAMETER_AUDIO_ATTRIBUTES = 1400;
 
 static Object sLock;
 
+//TODO: Need com/qualcomm/qcmedia/QCMediaPlayer
+//===================================================================
+//                  JNIExtMediaPlayerListener
+//===================================================================
+
+// struct extfields_t
+// {
+//     jmethodID   ext_post_event;
+// };
+
+// static extfields_t extfields;
+
+// #define MAX_NUM_PARCELS 30
+
+// class JNIExtMediaPlayerListener: public android::MediaPlayerListener
+// {
+//   public:
+//     JNIExtMediaPlayerListener(JNIEnv* env, jobject thiz, jobject weak_thiz, const sp<android::MediaPlayerListener>& listener);
+
+//     ~JNIExtMediaPlayerListener();
+
+//     virtual void notify(Int32 msg, Int32 ext1, Int32 ext2, const Parcel *obj = NULL);
+
+//     static bool checkExtMedia(JNIEnv *env, jobject thiz);
+
+//   private:
+//     JNIExtMediaPlayerListener();
+
+//     jclass     mClass;   // Reference to MediaPlayer class
+//     jobject    mObject;  // Weak ref to MediaPlayer Java object to call on
+//     jobject    mParcel;
+//     jobject    mParcelArray[MAX_NUM_PARCELS];
+//     Int32      mParcelIndex;
+//     jobject    mParcelCodecConf;
+//     sp<android::MediaPlayerListener> mplistener;
+// };
+
+// bool JNIExtMediaPlayerListener::checkExtMedia(JNIEnv *env, jobject thiz)
+// {
+//   jclass clazz = NULL;
+//   bool nRet = false;
+//   clazz = env->FindClass("com/qualcomm/qcmedia/QCMediaPlayer");
+//   if (clazz != NULL)
+//   {
+//     if (env->IsInstanceOf(thiz,clazz))
+//     {
+//       nRet = true;
+//       ALOGD("QCMediaPlayer mediaplayer present");
+//     }
+//   }
+//   else
+//   {
+//     //Clear the exception as QCMediaPlayer is optional
+//     env->ExceptionClear();
+//     ALOGE("QCMediaPlayer could not be located....");
+//   }
+//   return nRet;
+// }
+
+// JNIExtMediaPlayerListener::JNIExtMediaPlayerListener(JNIEnv* env, jobject thiz, jobject weak_thiz,const sp<android::MediaPlayerListener>& listener)
+// {
+//   jclass clazz = env->GetObjectClass(thiz);
+//   if (clazz == NULL) {
+//       ALOGE("Can't find android/media/MediaPlayer");
+//       jniThrowException(env, "java/lang/Exception", NULL);
+//       return;
+//   }
+//   mplistener = listener;
+//   extfields.ext_post_event = env->GetStaticMethodID(clazz, "QCMediaPlayerNativeEventHandler",
+//                              "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+//   mClass = (jclass)env->NewGlobalRef(clazz);
+
+//   // We use a weak reference so the MediaPlayer object can be garbage collected.
+//   // The reference is only used as a proxy for callbacks.
+//   mObject  = env->NewGlobalRef(weak_thiz);
+//   //Set up the event handler as we were able to detect QCMediaPlayer.
+
+//   mParcel = env->NewGlobalRef(createJavaParcelObject(env));
+//   mParcelCodecConf = env->NewGlobalRef(createJavaParcelObject(env));
+
+//   mParcelIndex = 0;
+//   for (int i = 0; i < MAX_NUM_PARCELS; i++)
+//   {
+//     mParcelArray[i] = env->NewGlobalRef(createJavaParcelObject(env));
+//   }
+// }
+
+// JNIExtMediaPlayerListener::~JNIExtMediaPlayerListener()
+// {
+//   // remove global references
+//   JNIEnv *env = AndroidRuntime::getJNIEnv();
+//   env->DeleteGlobalRef(mObject);
+//   env->DeleteGlobalRef(mClass);
+//   recycleJavaParcelObject(env, mParcel);
+//   env->DeleteGlobalRef(mParcel);
+
+//   recycleJavaParcelObject(env, mParcelCodecConf);
+//   env->DeleteGlobalRef(mParcelCodecConf);
+
+//   for (int i = 0; i < MAX_NUM_PARCELS; i++)
+//   {
+//     recycleJavaParcelObject(env, mParcelArray[i]);
+//     env->DeleteGlobalRef(mParcelArray[i]);
+//   }
+// }
+
+// void JNIExtMediaPlayerListener::notify(int msg, int ext1, int ext2, const Parcel *obj)
+// {
+//   JNIEnv *env = AndroidRuntime::getJNIEnv();
+//   if (env && obj && obj->dataSize() > 0)
+//   {
+//     if (mParcel != NULL)
+//     {
+//       if((extfields.ext_post_event != NULL) &&
+//          ((msg == MEDIA_PREPARED) || (msg == MEDIA_TIMED_TEXT) || (msg == MEDIA_QOE)))
+//       {
+//         ALOGE("JNIExtMediaPlayerListener::notify calling ext_post_event");
+//         if (ext2 == 1 && (msg == MEDIA_TIMED_TEXT))
+//         { // only in case of codec config frame
+//           if (mParcelCodecConf != NULL)
+//           {
+//             Parcel* nativeParcelLocal = parcelForJavaObject(env, mParcelCodecConf);
+//             nativeParcelLocal->setData(obj->data(), obj->dataSize());
+//             env->CallStaticVoidMethod(mClass, extfields.ext_post_event, mObject,
+//                             msg, ext1, ext2, mParcelCodecConf);
+//             ALOGD("JNIExtMediaPlayerListener::notify ext_post_event done (Codec Conf)");
+//           }
+//         }
+//         else
+//         {
+//           jobject mTempJParcel = mParcelArray[mParcelIndex];
+//           mParcelIndex = (mParcelIndex + 1) % MAX_NUM_PARCELS;
+//           Parcel* javaparcel = parcelForJavaObject(env, mTempJParcel);
+//           javaparcel->setData(obj->data(), obj->dataSize());
+//           env->CallStaticVoidMethod(mClass, extfields.ext_post_event, mObject,
+//                     msg, ext1, ext2, mTempJParcel);
+//           ALOGD("JNIExtMediaPlayerListener::notify ext_post_event done");
+//         }
+//       }
+//       else
+//       {
+//         ALOGD("JNIExtMediaPlayerListener::notify calling for generic event");
+//         mplistener->notify(msg, ext1, ext2, obj);
+//       }
+//     }
+//   }
+//   else
+//   {
+//     if((extfields.ext_post_event != NULL) &&
+//        ((msg == MEDIA_PREPARED) || (msg == MEDIA_TIMED_TEXT) ||(msg == MEDIA_QOE)))
+//     {
+//       ALOGD("JNIExtMediaPlayerListener::notify calling ext_post_events");
+//       env->CallStaticVoidMethod(mClass, extfields.ext_post_event, mObject, msg, ext1, ext2, NULL);
+//     }
+//     else
+//     {
+//       ALOGD("JNIExtMediaPlayerListener::notify for generic events");
+//       mplistener->notify(msg, ext1, ext2, obj);
+//     }
+//   }
+//   return;
+// }
+
 //===================================================================
 //                  JNIMediaPlayerListener
 //===================================================================
@@ -2316,6 +2479,16 @@ ECode CMediaPlayer::NativeSetup()
     GetWeakReference((IWeakReference**)&wr);
     android::sp<JNIMediaPlayerListener> listener = new JNIMediaPlayerListener(wr);
     mp->setListener(listener);
+
+//TODO: Need com/qualcomm/qcmedia/QCMediaPlayer
+    // if (JNIExtMediaPlayerListener::checkExtMedia()) {
+    //   Logger::D(TAG, "QCMediaPlayer mediaplayer present");
+    //    sp<JNIExtMediaPlayerListener> extmedialistener = new JNIExtMediaPlayerListener(wr, listener);
+    //    mp->setListener(extmedialistener);
+    // }
+    // else {
+    //   Logger::E(TAG, "QCMediaPlayer mediaplayer NOT present");
+    // }
 
     // Stow our new C++ MediaPlayer in an opaque field in the Java object.
     setMediaPlayer(this, mp);

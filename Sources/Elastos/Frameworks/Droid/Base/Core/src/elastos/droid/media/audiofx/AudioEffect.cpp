@@ -1324,24 +1324,20 @@ queryEffects_failure:
 AutoPtr<ArrayOf<IAudioEffectDescriptor* > > AudioEffect::NativeQueryPreProcessing(
     /* [in] */ Int32 audioSession)
 {
-    // kDefaultNumEffects is a "reasonable" value ensuring that only one query will be enough on
-    // most devices to get all active audio pre processing on a given session.
-    const uint32_t kDefaultNumEffects = 5;
-
-    effect_descriptor_t *descriptors = new effect_descriptor_t[kDefaultNumEffects];
-    uint32_t numEffects = kDefaultNumEffects;
+    effect_descriptor_t *descriptors = new effect_descriptor_t[android::AudioEffect::kMaxPreProcessing];
+    uint32_t numEffects = android::AudioEffect::kMaxPreProcessing;
 
     android::status_t status = android::AudioEffect::queryDefaultPreProcessing(audioSession,descriptors,&numEffects);
 
-    if ((status != android::NO_ERROR && status != android::NO_MEMORY) || numEffects == 0) {
-        delete[] descriptors;
-        return NULL;
-    }
-    if (status == android::NO_MEMORY) {
-        delete [] descriptors;
-        descriptors = new effect_descriptor_t[numEffects];
-        status = android::AudioEffect::queryDefaultPreProcessing(audioSession,descriptors,&numEffects);
-    }
+    // if ((status != android::NO_ERROR && status != android::NO_MEMORY) || numEffects == 0) {
+    //     delete[] descriptors;
+    //     return NULL;
+    // }
+    // if (status == android::NO_MEMORY) {
+    //     delete [] descriptors;
+    //     descriptors = new effect_descriptor_t[numEffects];
+    //     status = android::AudioEffect::queryDefaultPreProcessing(audioSession,descriptors,&numEffects);
+    // }
     if (status != android::NO_ERROR || numEffects == 0) {
         delete[] descriptors;
         return NULL;

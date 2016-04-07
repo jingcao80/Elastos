@@ -1,9 +1,11 @@
 #include "elastos/droid/media/CMediaCodecInfo.h"
+#include "elastos/droid/utility/CRange.h"
 #include "elastos/droid/utility/CRational.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Utility::CRange;
 using Elastos::Droid::Utility::CRational;
 using Elastos::Core::CString;
 using Elastos::Core::CInteger32;
@@ -194,34 +196,29 @@ void CMediaCodecInfo::Init()
     CInteger32::New(1, (IInteger32**)&begin);
     AutoPtr<IInteger32> end;
     CInteger32::New(Elastos::Core::Math::INT32_MAX_VALUE, (IInteger32**)&end);
-//TODO: Need CRange
-    // CRange::Create(begin, end, (IRange**)&POSITIVE_INTEGERS);
+    CRange::Create(begin, end, (IRange**)&POSITIVE_INTEGERS);
 
     AutoPtr<IInteger64> b64;
     CInteger64::New(1l, (IInteger64**)&b64);
     AutoPtr<IInteger64> e64;
     CInteger64::New(Elastos::Core::Math::INT64_MAX_VALUE, (IInteger64**)&end);
-//TODO: Need CRange
-    // CRange::Create(b64, e64, (IRange**)&POSITIVE_LONGS);
+    CRange::Create(b64, e64, (IRange**)&POSITIVE_LONGS);
 
     AutoPtr<IRational> s;
     CRational::New(1, Elastos::Core::Math::INT32_MAX_VALUE, (IRational**)&s);
     AutoPtr<IRational> e;
     CRational::New(Elastos::Core::Math::INT32_MAX_VALUE, 1, (IRational**)&e);
-//TODO: Need CRange
-    // CRange::Create(s, e, (IRange**)&POSITIVE_RATIONALS);
+    CRange::Create(s, e, (IRange**)&POSITIVE_RATIONALS);
 
     end = NULL;
     CInteger32::New(32768, (IInteger32**)&end);
-//TODO: Need CRange
-    // CRange::Create(begin, end, (IRange**)&SIZE_RANGE);
+    CRange::Create(begin, end, (IRange**)&SIZE_RANGE);
 
     begin = NULL;
     end = NULL;
     CInteger32::New(0, (IInteger32**)&begin);
     CInteger32::New(960, (IInteger32**)&end);
-//TODO: Need CRange
-    // CRange::Create(begin, end, (IRange**)&FRAME_RATE_RANGE);
+    CRange::Create(begin, end, (IRange**)&FRAME_RATE_RANGE);
 }
 
 } // namespace Media

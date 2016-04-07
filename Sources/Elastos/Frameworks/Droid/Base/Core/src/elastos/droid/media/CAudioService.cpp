@@ -1,5 +1,6 @@
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/app/CActivityManager.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
@@ -10,6 +11,7 @@
 #include "elastos/droid/media/CAudioRoutesInfo.h"
 #include "elastos/droid/media/CAudioService.h"
 #include "elastos/droid/media/CMediaPlayer.h"
+#include "elastos/droid/media/CSoundPool.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/CHandler.h"
@@ -32,6 +34,10 @@
 
 using Elastos::Droid::App::CActivityManager;
 using Elastos::Droid::App::ActivityManagerNative;
+using Elastos::Droid::Bluetooth::CBluetoothAdapter;
+using Elastos::Droid::Bluetooth::EIID_IBluetoothProfileServiceListener;
+using Elastos::Droid::Bluetooth::IBluetoothClass;
+using Elastos::Droid::Bluetooth::IBluetoothClassDevice;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
@@ -61,6 +67,7 @@ using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
 using Elastos::Droid::View::Accessibility::EIID_IAccessibilityManagerTouchExplorationStateChangeListener;
 using Elastos::Droid::View::Accessibility::IAccessibilityManager;
 using Elastos::Droid::View::IDisplay;
@@ -1426,8 +1433,7 @@ ECode CAudioService::ScoClient::IncCount(
 {
     AutoPtr<IArrayList> lock = mHost->mScoClients;
     synchronized(lock) {
-// TODO: Need Bluetooth
-        // RequestScoState(IBluetoothHeadset::STATE_AUDIO_CONNECTED, scoAudioMode);
+        RequestScoState(IBluetoothHeadset::STATE_AUDIO_CONNECTED, scoAudioMode);
         if (mStartcount == 0) {
             // try {
             AutoPtr<IProxy> proxy = (IProxy*)mCb->Probe(EIID_IProxy);
@@ -1460,8 +1466,7 @@ ECode CAudioService::ScoClient::DecCount()
                 //     Log.w(TAG, "decCount() going to 0 but not registered to binder");
                 // }
             }
-// TODO: Need Bluetooth
-            // RequestScoState(IBluetoothHeadset::STATE_AUDIO_DISCONNECTED, 0);
+            RequestScoState(IBluetoothHeadset::STATE_AUDIO_DISCONNECTED, 0);
         }
     }
     return NOERROR;
@@ -1483,8 +1488,7 @@ ECode CAudioService::ScoClient::ClearCount(
         }
         mStartcount = 0;
         if (stopSco) {
-// TODO: Need Bluetooth
-            // RequestScoState(IBluetoothHeadset::STATE_AUDIO_DISCONNECTED, 0);
+            RequestScoState(IBluetoothHeadset::STATE_AUDIO_DISCONNECTED, 0);
         }
     }
     return NOERROR;
@@ -1544,8 +1548,7 @@ void CAudioService::ScoClient::RequestScoState(
     Int32 count;
     TotalCount(&count);
     if (count == 0) {
-// TODO: Need Bluetooth
-        if (state == 12 /*IBluetoothHeadset::STATE_AUDIO_CONNECTED*/) {
+        if (state == IBluetoothHeadset::STATE_AUDIO_CONNECTED) {
             // Make sure that the state transitions to CONNECTING even if we cannot initiate
             // the connection.
             mHost->BroadcastScoConnectionState(IAudioManager::SCO_AUDIO_STATE_CONNECTING);
@@ -1566,8 +1569,7 @@ void CAudioService::ScoClient::RequestScoState(
                         mHost->mScoAudioMode = scoAudioMode;
                         if (scoAudioMode == SCO_MODE_UNDEFINED) {
                             String addr;
-// TODO: Need Bluetooth
-                            // mHost->mBluetoothHeadsetDevice->GetAddress(&addr);
+                            mHost->mBluetoothHeadsetDevice->GetAddress(&addr);
                             Int32 value;
                             Settings::Global::GetInt32(mHost->mContentResolver,
                                     String("bluetooth_sco_channel_") + addr,
@@ -1580,27 +1582,26 @@ void CAudioService::ScoClient::RequestScoState(
                                 mHost->mScoAudioMode = SCO_MODE_VIRTUAL_CALL;
                             }
                         }
-// TODO: Need Bluetooth
-                        // if (mHost->mBluetoothHeadset != NULL && mHost->mBluetoothHeadsetDevice != NULL) {
-                        //     Boolean status = FALSE;
-                        //     if (mHost->mScoAudioMode == SCO_MODE_VR) {
-                        //         mHost->mBluetoothHeadset->StartVoiceRecognition(mHost->mBluetoothHeadsetDevice, &status);
-                        //     }
-                        //     else
-                        //         mHost->mBluetoothHeadset->StartScoUsingVirtualVoiceCall(
-                        //                 mHost->mBluetoothHeadsetDevice, &status);
-                        //     }
-                        //     if (status) {
-                        //         mHost->mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
-                        //     }
-                        //     else {
-                        //         mHost->BroadcastScoConnectionState(
-                        //                 IAudioManager::SCO_AUDIO_STATE_DISCONNECTED);
-                        //     }
-                        // }
-                        // else if (mHost->GetBluetoothHeadset()) {
-                        //     mHost->mScoAudioState = SCO_STATE_ACTIVATE_REQ;
-                        // }
+                        if (mHost->mBluetoothHeadset != NULL && mHost->mBluetoothHeadsetDevice != NULL) {
+                            Boolean status = FALSE;
+                            if (mHost->mScoAudioMode == SCO_MODE_VR) {
+                                mHost->mBluetoothHeadset->StartVoiceRecognition(mHost->mBluetoothHeadsetDevice, &status);
+                            }
+                            else {
+                                mHost->mBluetoothHeadset->StartScoUsingVirtualVoiceCall(
+                                        mHost->mBluetoothHeadsetDevice, &status);
+                            }
+                            if (status) {
+                                mHost->mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
+                            }
+                            else {
+                                mHost->BroadcastScoConnectionState(
+                                        IAudioManager::SCO_AUDIO_STATE_DISCONNECTED);
+                            }
+                        }
+                        else if (mHost->GetBluetoothHeadset()) {
+                            mHost->mScoAudioState = SCO_STATE_ACTIVATE_REQ;
+                        }
                     }
                     else {
                         mHost->mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
@@ -1612,29 +1613,28 @@ void CAudioService::ScoClient::RequestScoState(
                 }
             }
         }
-// TODO: Need Bluetooth
-        else if (state == 10 /*IBluetoothHeadset::STATE_AUDIO_DISCONNECTED*/ &&
+        else if (state == IBluetoothHeadset::STATE_AUDIO_DISCONNECTED &&
                       (mHost->mScoAudioState == SCO_STATE_ACTIVE_INTERNAL ||
                        mHost->mScoAudioState == SCO_STATE_ACTIVATE_REQ)) {
             if (mHost->mScoAudioState == SCO_STATE_ACTIVE_INTERNAL) {
-                // if (mHost->mBluetoothHeadset != NULL && mHost->mBluetoothHeadsetDevice != NULL) {
-                //     Boolean status = FALSE;
-                //     if (mHost->mScoAudioMode == SCO_MODE_VR) {
-                //         mHost->mBluetoothHeadset->StopVoiceRecognition(mHost->mBluetoothHeadsetDevice, &status);
-                //     }
-                //     else
-                //         mHost->mBluetoothHeadset->StopScoUsingVirtualVoiceCall(
-                //                 mHost->mBluetoothHeadsetDevice, &status);
-                //     }
-                //     if (!status) {
-                //         mHost->mScoAudioState = SCO_STATE_INACTIVE;
-                //         mHost->BroadcastScoConnectionState(
-                //                 IAudioManager::SCO_AUDIO_STATE_DISCONNECTED);
-                //     }
-                // }
-                // else if (mHost->GetBluetoothHeadset()) {
-                //     mHost->mScoAudioState = SCO_STATE_DEACTIVATE_REQ;
-                // }
+                if (mHost->mBluetoothHeadset != NULL && mHost->mBluetoothHeadsetDevice != NULL) {
+                    Boolean status = FALSE;
+                    if (mHost->mScoAudioMode == SCO_MODE_VR) {
+                        mHost->mBluetoothHeadset->StopVoiceRecognition(mHost->mBluetoothHeadsetDevice, &status);
+                    }
+                    else {
+                        mHost->mBluetoothHeadset->StopScoUsingVirtualVoiceCall(
+                                mHost->mBluetoothHeadsetDevice, &status);
+                    }
+                    if (!status) {
+                        mHost->mScoAudioState = SCO_STATE_INACTIVE;
+                        mHost->BroadcastScoConnectionState(
+                                IAudioManager::SCO_AUDIO_STATE_DISCONNECTED);
+                    }
+                }
+                else if (mHost->GetBluetoothHeadset()) {
+                    mHost->mScoAudioState = SCO_STATE_DEACTIVATE_REQ;
+                }
             }
             else {
                 mHost->mScoAudioState = SCO_STATE_INACTIVE;
@@ -1882,14 +1882,12 @@ ECode CAudioService::AudioHandler::HandleMessage(
             break;
         }
         case MSG_SET_A2DP_SRC_CONNECTION_STATE:
-// TODO: Need Bluetooth
-            // OnSetA2dpSourceConnectionState(IBluetoothDevice::Probe(obj), arg1);
+            mHost->OnSetA2dpSourceConnectionState(IBluetoothDevice::Probe(obj), arg1);
             mHost->mAudioEventWakeLock->ReleaseLock();
             break;
 
         case MSG_SET_A2DP_SINK_CONNECTION_STATE:
-// TODO: Need Bluetooth
-            // OnSetA2dpSinkConnectionState(IBluetoothDevice::Probe(obj), arg1);
+            mHost->OnSetA2dpSinkConnectionState(IBluetoothDevice::Probe(obj), arg1);
             mHost->mAudioEventWakeLock->ReleaseLock();
             break;
 
@@ -2059,9 +2057,7 @@ Boolean CAudioService::AudioHandler::OnLoadSoundEffects()
 
         mHost->LoadTouchSoundAssets();
 
-        AutoPtr<ISoundPoolBuilder> sb;
-// TODO Need CSoundPoolBuilder
-        // CSoundPoolBuilder::New((ISoundPoolBuilder**)&sb);
+        AutoPtr<CSoundPool::Builder> sb = new CSoundPool::Builder();
         sb->SetMaxStreams(NUM_SOUNDPOOL_CHANNELS);
         AutoPtr<IAudioAttributesBuilder> ab;
         CAudioAttributesBuilder::New((IAudioAttributesBuilder**)&ab);
@@ -2356,7 +2352,7 @@ ECode CAudioService::SettingsObserver::OnChange(
 
         Int32 resTmp = 0;
         assert(0);
-        Settings::Secure::GetInt32(mHost->mContentResolver, String("")/*TODO: ISettingsSecure::VOLUME_LINK_NOTIFICATION*/, 1, &resTmp);
+        Settings::Secure::GetInt32(mHost->mContentResolver, String("volume_link_notification")/*TODO: ISettingsSecure::VOLUME_LINK_NOTIFICATION*/, 1, &resTmp);
         mHost->mLinkNotificationWithVolume = (resTmp == 1);
         if (mHost->mLinkNotificationWithVolume) {
             (*mHost->mStreamVolumeAlias)[IAudioSystem::STREAM_NOTIFICATION] = IAudioSystem::STREAM_RING;
@@ -2413,61 +2409,59 @@ ECode CAudioService::AudioServiceBroadcastReceiver::OnReceive(
         }
         mHost->mDockState = dockState;
     }
-// TODO: Need Bluetooth
-    else if (action.Equals("android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED"
-            /*IBluetoothHeadset::ACTION_CONNECTION_STATE_CHANGED*/)) {
-        // intent->GetInt32Extra(IBluetoothProfile::EXTRA_STATE,
-        //         IBluetoothProfile::STATE_DISCONNECTED, &state);
+    else if (action.Equals(IBluetoothHeadset::ACTION_CONNECTION_STATE_CHANGED)) {
+        intent->GetInt32Extra(IBluetoothProfile::EXTRA_STATE,
+                IBluetoothProfile::STATE_DISCONNECTED, &state);
         outDevice = IAudioSystem::DEVICE_OUT_BLUETOOTH_SCO;
         inDevice = IAudioSystem::DEVICE_IN_BLUETOOTH_SCO_HEADSET;
         String address;
 
-// TODO: Need Bluetooth
-        // AutoPtr<IBluetoothDevice> btDevice;
-        // intent->GetParcelableExtra(IBluetoothDevice::EXTRA_DEVICE, (IBluetoothDevice**)&btDevice);
-        // if (btDevice == NULL) {
-        //     return NOERROR;
-        // }
+        AutoPtr<IParcelable> p;
+        intent->GetParcelableExtra(IBluetoothDevice::EXTRA_DEVICE, (IParcelable**)&p);
+        AutoPtr<IBluetoothDevice> btDevice = IBluetoothDevice::Probe(p);
+        if (btDevice == NULL) {
+            return NOERROR;
+        }
 
-        // btDevice->GetAddress(&address);
-        // AutoPtr<IBluetoothClass> btClass;
-        // btDevice->GetBluetoothClass((IBluetoothClass**)&btClass);
-        // if (btClass != NULL) {
-        //     Int32 cls;
-        //     btClass->getDeviceClass(&cls);
-        //     switch (cls) {
-        //     case IBluetoothClassDevice::AUDIO_VIDEO_WEARABLE_HEADSET:
-        //     case IBluetoothClassDevice::AUDIO_VIDEO_HANDSFREE:
-        //         outDevice = IAudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
-        //         break;
-        //     case IBluetoothClassDevice::AUDIO_VIDEO_CAR_AUDIO:
-        //         outDevice = IAudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
-        //         break;
-        //     }
-        // }
+        btDevice->GetAddress(&address);
+        AutoPtr<IBluetoothClass> btClass;
+        btDevice->GetBluetoothClass((IBluetoothClass**)&btClass);
+        if (btClass != NULL) {
+            Int32 cls;
+            btClass->GetDeviceClass(&cls);
+            switch (cls) {
+            case IBluetoothClassDevice::AUDIO_VIDEO_WEARABLE_HEADSET:
+            case IBluetoothClassDevice::AUDIO_VIDEO_HANDSFREE:
+                outDevice = IAudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
+                break;
+            case IBluetoothClassDevice::AUDIO_VIDEO_CAR_AUDIO:
+                outDevice = IAudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
+                break;
+            }
+        }
 
-        // Boolean b;
-        // b = CBluetoothAdapter::CheckBluetoothAddress(address);
-        // if (!b) {
-        //     address = String("");
-        // }
+        Boolean b;
+        b = CBluetoothAdapter::CheckBluetoothAddress(address);
+        if (!b) {
+            address = String("");
+        }
 
-        // Boolean connected;
-        // connected = (state == IBluetoothProfile::STATE_CONNECTED);
-        // Boolean success = mHost->HandleDeviceConnection(connected, outDevice, address) &&
-        //                       mHost->HandleDeviceConnection(connected, inDevice, address);
-        // if (success) {
-        //     AutoPtr<IArrayList> lock = mHost->mScoClients;
-        //     synchronized(lock) {
-        //         if (connected) {
-        //             // mHost->mBluetoothHeadsetDevice = btDevice;
-        //         }
-        //         else {
-        //             mHost->mBluetoothHeadsetDevice = NULL;
-        //             mHost->ResetBluetoothSco();
-        //         }
-        //     }
-        // }
+        Boolean connected;
+        connected = (state == IBluetoothProfile::STATE_CONNECTED);
+        Boolean success = mHost->HandleDeviceConnection(connected, outDevice, address) &&
+                              mHost->HandleDeviceConnection(connected, inDevice, address);
+        if (success) {
+            AutoPtr<IArrayList> lock = mHost->mScoClients;
+            synchronized(lock) {
+                if (connected) {
+                    mHost->mBluetoothHeadsetDevice = btDevice;
+                }
+                else {
+                    mHost->mBluetoothHeadsetDevice = NULL;
+                    mHost->ResetBluetoothSco();
+                }
+            }
+        }
     }
     else if (action.Equals(IAudioManager::ACTION_USB_AUDIO_ACCESSORY_PLUG)) {
         intent->GetInt32Extra(String("state"), 0, &state);
@@ -2796,6 +2790,207 @@ ECode CAudioService::MediaPlayerInfo::GetPackageName(
 }
 
 //==============================================================================
+//                        CAudioService::BluetoothProfileServiceListener
+//==============================================================================
+
+CAR_INTERFACE_IMPL(CAudioService::BluetoothProfileServiceListener,
+        Object, IBluetoothProfileServiceListener)
+
+ECode CAudioService::BluetoothProfileServiceListener::OnServiceConnected(
+    /* [in] */ Int32 profile,
+    /* [in] */ IBluetoothProfile* proxy)
+{
+    AutoPtr<IBluetoothDevice> btDevice;
+    AutoPtr<IList> deviceList;
+    switch(profile) {
+    case IBluetoothProfile::A2DP:
+        synchronized(mHost->mA2dpAvrcpLock) {
+            mHost->mA2dp = IBluetoothA2dp::Probe(proxy);
+            IBluetoothProfile::Probe(mHost->mA2dp)->GetConnectedDevices((IList**)&deviceList);
+            Int32 size;
+            deviceList->GetSize(&size);
+            if (size > 0) {
+                AutoPtr<IInterface> obj;
+                deviceList->Get(0, (IInterface**)&obj);
+                btDevice = IBluetoothDevice::Probe(obj);
+                synchronized(mHost->mConnectedDevices) {
+                    Int32 state;
+                    IBluetoothProfile::Probe(mHost->mA2dp)->GetConnectionState(btDevice, &state);
+                    Int32 delay = mHost->CheckSendBecomingNoisyIntent(
+                            IAudioSystem::DEVICE_OUT_BLUETOOTH_A2DP,
+                            (state == IBluetoothProfile::STATE_CONNECTED) ? 1 : 0);
+                    mHost->QueueMsgUnderWakeLock(mHost->mAudioHandler,
+                            MSG_SET_A2DP_SINK_CONNECTION_STATE,
+                            state,
+                            0,
+                            btDevice,
+                            delay);
+                }
+            }
+        }
+        break;
+
+    case IBluetoothProfile::A2DP_SINK:
+        proxy->GetConnectedDevices((IList**)&deviceList);
+        Int32 size;
+        deviceList->GetSize(&size);
+        if (size > 0) {
+            AutoPtr<IInterface> obj;
+            deviceList->Get(0, (IInterface**)&obj);
+            btDevice = IBluetoothDevice::Probe(obj);
+            synchronized(mHost->mConnectedDevices) {
+                Int32 state;
+                proxy->GetConnectionState(btDevice, &state);
+                mHost->QueueMsgUnderWakeLock(mHost->mAudioHandler,
+                        MSG_SET_A2DP_SRC_CONNECTION_STATE,
+                        state,
+                        0,
+                        btDevice,
+                        0 /* delay */);
+            }
+        }
+        break;
+
+    case IBluetoothProfile::HEADSET:
+        synchronized(mHost->mScoClients) {
+            // Discard timeout message
+            mHost->mAudioHandler->RemoveMessages(MSG_BT_HEADSET_CNCT_FAILED);
+            mHost->mBluetoothHeadset = IBluetoothHeadset::Probe(proxy);
+            IBluetoothProfile::Probe(mHost->mBluetoothHeadset)->GetConnectedDevices(
+                    (IList**)&deviceList);
+            Int32 size;
+            deviceList->GetSize(&size);
+            if (size > 0) {
+                AutoPtr<IInterface> obj;
+                deviceList->Get(0, (IInterface**)&obj);
+                mHost->mBluetoothHeadsetDevice = IBluetoothDevice::Probe(obj);
+            }
+            else {
+                mHost->mBluetoothHeadsetDevice = NULL;
+            }
+            // Refresh SCO audio state
+            mHost->CheckScoAudioState();
+            // Continue pending action if any
+            if (mHost->mScoAudioState == SCO_STATE_ACTIVATE_REQ ||
+                    mHost->mScoAudioState == SCO_STATE_DEACTIVATE_REQ ||
+                    mHost->mScoAudioState == SCO_STATE_DEACTIVATE_EXT_REQ) {
+                Boolean status = FALSE;
+                if (mHost->mBluetoothHeadsetDevice != NULL) {
+                    switch (mHost->mScoAudioState) {
+                    case SCO_STATE_ACTIVATE_REQ:
+                        mHost->mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
+                        if (mHost->mScoAudioMode == SCO_MODE_VR) {
+                            mHost->mBluetoothHeadset->StartVoiceRecognition(
+                                    mHost->mBluetoothHeadsetDevice, &status);
+                        }
+                        else {
+                            mHost->mBluetoothHeadset->StartScoUsingVirtualVoiceCall(
+                                    mHost->mBluetoothHeadsetDevice, &status);
+                        }
+                        break;
+                    case SCO_STATE_DEACTIVATE_REQ:
+                        if (mHost->mScoAudioMode == SCO_MODE_VR) {
+                            mHost->mBluetoothHeadset->StopVoiceRecognition(
+                                mHost->mBluetoothHeadsetDevice, &status);
+                        }
+                        else {
+                            mHost->mBluetoothHeadset->StopScoUsingVirtualVoiceCall(
+                                    mHost->mBluetoothHeadsetDevice, &status);
+                        }
+                        break;
+                    case SCO_STATE_DEACTIVATE_EXT_REQ:
+                        mHost->mBluetoothHeadset->StopVoiceRecognition(
+                                mHost->mBluetoothHeadsetDevice, &status);
+                    }
+                }
+                if (!status) {
+                    SendMsg(mHost->mAudioHandler, MSG_BT_HEADSET_CNCT_FAILED,
+                            SENDMSG_REPLACE, 0, 0, NULL, 0);
+                }
+            }
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return NOERROR;
+}
+
+ECode CAudioService::BluetoothProfileServiceListener::OnServiceDisconnected(
+    /* [in] */ Int32 profile)
+{
+    Logger::D(TAG, "onServiceDisconnected: Bluetooth profile: %d", profile);
+    switch(profile) {
+    case IBluetoothProfile::A2DP:
+        synchronized(mHost->mA2dpAvrcpLock) {
+            mHost->mA2dp = NULL;
+            synchronized(mHost->mConnectedDevices) {
+                AutoPtr<IInteger32> i32;
+                CInteger32::New(IAudioSystem::DEVICE_OUT_BLUETOOTH_A2DP, (IInteger32**)&i32);
+                Boolean b;
+                if (mHost->mConnectedDevices->ContainsKey(i32, &b), b) {
+                    Logger::D(TAG, "A2dp service disconnects, pause music player");
+                    AutoPtr<IBluetoothAdapter> adapter = CBluetoothAdapter::GetDefaultAdapter();
+                    AutoPtr<IInterface> obj;
+                    mHost->mConnectedDevices->Get(i32, (IInterface**)&obj);
+                    String str;
+                    ICharSequence::Probe(obj)->ToString(&str);
+                    AutoPtr<IBluetoothDevice> btDevice;
+                    adapter->GetRemoteDevice(str, (IBluetoothDevice**)&btDevice);
+                    Int32 delay = mHost->CheckSendBecomingNoisyIntent(
+                            IAudioSystem::DEVICE_OUT_BLUETOOTH_A2DP, 0);
+                    mHost->QueueMsgUnderWakeLock(mHost->mAudioHandler,
+                                        MSG_SET_A2DP_SRC_CONNECTION_STATE,
+                                        IBluetoothProfile::STATE_DISCONNECTED,
+                                        0,
+                                        btDevice,
+                                        delay);
+                }
+            }
+        }
+        break;
+
+    case IBluetoothProfile::A2DP_SINK:
+        synchronized(mHost->mConnectedDevices) {
+            AutoPtr<IInteger32> i32;
+            CInteger32::New(IAudioSystem::DEVICE_IN_BLUETOOTH_A2DP, (IInteger32**)&i32);
+            Boolean b;
+            if (mHost->mConnectedDevices->ContainsKey(i32, &b), b) {
+                AutoPtr<IInterface> obj;
+                mHost->mConnectedDevices->Get(i32, (IInterface**)&obj);
+                String str;
+                ICharSequence::Probe(obj)->ToString(&str);
+                mHost->MakeA2dpSrcUnavailable(str);
+            }
+        }
+        break;
+
+    case IBluetoothProfile::HEADSET:
+        synchronized(mHost->mScoClients) {
+            mHost->mBluetoothHeadset = NULL;
+            synchronized(mHost->mConnectedDevices) {
+                if (mHost->mForcedUseForComm == IAudioSystem::FORCE_BT_SCO) {
+                    Logger::D(TAG, "Hfp service disconnects, update device to NONE");
+                    mHost->mForcedUseForComm = IAudioSystem::FORCE_NONE;
+                    SendMsg(mHost->mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
+                            IAudioSystem::FOR_COMMUNICATION, mHost->mForcedUseForComm, NULL, 0);
+                    SendMsg(mHost->mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
+                            IAudioSystem::FOR_RECORD, mHost->mForcedUseForComm, NULL, 0);
+                }
+            }
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return NOERROR;
+}
+
+//==============================================================================
 //  CAudioService
 //==============================================================================
 
@@ -2911,6 +3106,8 @@ CAudioService::CAudioService()
     CHashMap::New((IHashMap**)&mAudioPolicies);
 
     CBoolean::New(FALSE, (IBoolean**)&mCameraSoundForced);
+
+    mBluetoothProfileServiceListener = new BluetoothProfileServiceListener(this);
 }
 
 CAudioService::~CAudioService()
@@ -3112,13 +3309,13 @@ ECode CAudioService::OnSystemReady()
             IAudioManager::SCO_AUDIO_STATE_DISCONNECTED);
     SendStickyBroadcastToAll(newIntent);
 
-// TODO: Need Bluetooth
-    // AutoPtr<IBluetoothAdapter> adapter;
-    // adapter = CBluetoothAdapter::GetDefaultAdapter();
-    // if (adapter != NULL) {
-    //     adapter->GetProfileProxy(mContext, mBluetoothProfileServiceListener,
-    //                             IBluetoothProfile::A2DP);
-    // }
+    AutoPtr<IBluetoothAdapter> adapter;
+    adapter = CBluetoothAdapter::GetDefaultAdapter();
+    if (adapter != NULL) {
+        Boolean b;
+        adapter->GetProfileProxy(mContext, mBluetoothProfileServiceListener,
+                                IBluetoothProfile::A2DP, &b);
+    }
 
     service = NULL;
     mContext->GetSystemService(IContext::HDMI_CONTROL_SERVICE, ((IInterface**)&service));
@@ -4055,24 +4252,23 @@ ECode CAudioService::SetBluetoothA2dpDeviceConnectionState(
     *result = 0;
 
     Int32 delay;
-// TODO: Need Bluetooth
-    if (profile != 2 /*IBluetoothProfile::A2DP*/ &&
-            profile != 10 /*IBluetoothProfile::A2DP_SINK*/) {
+    if (profile != IBluetoothProfile::A2DP &&
+            profile != IBluetoothProfile::A2DP_SINK) {
         // throw new IllegalArgumentException("invalid profile " + profile);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     synchronized(mConnectedDevices) {
-        if (profile == 2 /*IBluetoothProfile::A2DP*/) {
-            // delay = CheckSendBecomingNoisyIntent(IAudioSystem::DEVICE_OUT_BLUETOOTH_A2DP,
-            //         (state == IBluetoothA2dp::STATE_CONNECTED) ? 1 : 0);
+        if (profile == IBluetoothProfile::A2DP) {
+            delay = CheckSendBecomingNoisyIntent(IAudioSystem::DEVICE_OUT_BLUETOOTH_A2DP,
+                    (state == IBluetoothProfile::STATE_CONNECTED) ? 1 : 0);
         }
         else {
             delay = 0;
         }
-        // QueueMsgUnderWakeLock(mAudioHandler,
-        //         (profile == 2 /*IBluetoothProfile::A2DP*/ ?
-        //         MSG_SET_A2DP_SINK_CONNECTION_STATE : MSG_SET_A2DP_SRC_CONNECTION_STATE),
-        //         state, 0, device, delay);
+        QueueMsgUnderWakeLock(mAudioHandler,
+                (profile == IBluetoothProfile::A2DP ?
+                MSG_SET_A2DP_SINK_CONNECTION_STATE : MSG_SET_A2DP_SRC_CONNECTION_STATE),
+                state, 0, device, delay);
     }
     *result = delay;
     return NOERROR;
@@ -4148,22 +4344,19 @@ ECode CAudioService::SetRemoteControlClientPlayItem(
     /* [in] */ Int64 uid,
     /* [in] */ Int32 scope)
 {
-    assert(0);
-    //TODO: mMediaFocusControl->SetRemoteControlClientPlayItem(uid, scope);
+    mMediaFocusControl->SetRemoteControlClientPlayItem(uid, scope);
     return NOERROR;
 }
 
 ECode CAudioService::GetRemoteControlClientNowPlayingEntries()
 {
-    assert(0);
-    //TODO: mMediaFocusControl->GetRemoteControlClientNowPlayingEntries();
+    mMediaFocusControl->GetRemoteControlClientNowPlayingEntries();
     return NOERROR;
 }
 
 ECode CAudioService::SetRemoteControlClientBrowsedPlayer()
 {
-    assert(0);
-    //TODO: mMediaFocusControl->SetRemoteControlClientBrowsedPlayer();
+    mMediaFocusControl->SetRemoteControlClientBrowsedPlayer();
     return NOERROR;
 }
 
@@ -5011,10 +5204,9 @@ void CAudioService::AdjustStreamVolume(
             (device & IAudioSystem::DEVICE_OUT_ALL_A2DP) != 0 &&
             (flags & IAudioManager::FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
             synchronized(mA2dpAvrcpLock) {
-// TODO: Need Bluetooth
-                // if (mA2dp != NULL && mAvrcpAbsVolSupported) {
-                //     mA2dp->AdjustAvrcpAbsoluteVolume(direction);
-                // }
+                if (mA2dp != NULL && mAvrcpAbsVolSupported) {
+                    mA2dp->AdjustAvrcpAbsoluteVolume(direction);
+                }
             }
         }
 
@@ -5141,10 +5333,9 @@ void CAudioService::SetStreamVolume(
             (device & IAudioSystem::DEVICE_OUT_ALL_A2DP) != 0 &&
             (flags & IAudioManager::FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
             synchronized(mA2dpAvrcpLock) {
-// TODO: Need Bluetooth
-                // if (mA2dp != NULL && mAvrcpAbsVolSupported) {
-                //     mA2dp->SetAvrcpAbsoluteVolume(index / 10);
-                // }
+                if (mA2dp != NULL && mAvrcpAbsVolSupported) {
+                    mA2dp->SetAvrcpAbsoluteVolume(index / 10);
+                }
             }
         }
 
@@ -5808,14 +5999,13 @@ void CAudioService::ReadAudioSettings(
 
 void CAudioService::CheckScoAudioState()
 {
-    // Int32 state;
-// TODO: Need Bluetooth
-    // if (mBluetoothHeadset != NULL && mBluetoothHeadsetDevice != NULL &&
-    //         mScoAudioState == SCO_STATE_INACTIVE
-    //         && (mBluetoothHeadset->GetAudioState(mBluetoothHeadsetDevice, &state), state)
-    //         != IBluetoothHeadset::STATE_AUDIO_DISCONNECTED) {
-    //     mScoAudioState = SCO_STATE_ACTIVE_EXTERNAL;
-    // }
+    Int32 state;
+    if (mBluetoothHeadset != NULL && mBluetoothHeadsetDevice != NULL &&
+            mScoAudioState == SCO_STATE_INACTIVE
+            && (mBluetoothHeadset->GetAudioState(mBluetoothHeadsetDevice, &state), state)
+            != IBluetoothHeadset::STATE_AUDIO_DISCONNECTED) {
+        mScoAudioState = SCO_STATE_ACTIVE_EXTERNAL;
+    }
 }
 
 AutoPtr<CAudioService::ScoClient> CAudioService::GetScoClient(
@@ -5848,12 +6038,11 @@ AutoPtr<CAudioService::ScoClient> CAudioService::GetScoClient(
 Boolean CAudioService::GetBluetoothHeadset()
 {
     Boolean result = FALSE;
-// TODO: Need Bluetooth
-    // AutoPtr<IBluetoothAdapter> adapter = CBluetoothAdapter::GetDefaultAdapter();
-    // if (adapter != NULL) {
-    //     adapter->GetProfileProxy(mContext, mBluetoothProfileServiceListener,
-    //                             IBluetoothProfile::HEADSET, &result);
-    // }
+    AutoPtr<IBluetoothAdapter> adapter = CBluetoothAdapter::GetDefaultAdapter();
+    if (adapter != NULL) {
+        adapter->GetProfileProxy(mContext, mBluetoothProfileServiceListener,
+                IBluetoothProfile::HEADSET, &result);
+    }
 
     // If we could not get a bluetooth headset proxy, send a failure message
     // without delay to reset the SCO audio state and clear SCO clients.
@@ -5871,21 +6060,20 @@ void CAudioService::DisconnectBluetoothSco(
         CheckScoAudioState();
         if (mScoAudioState == SCO_STATE_ACTIVE_EXTERNAL ||
                 mScoAudioState == SCO_STATE_DEACTIVATE_EXT_REQ) {
-// TODO: Need Bluetooth
-            // if (mBluetoothHeadsetDevice != NULL) {
-            //     if (mBluetoothHeadset != NULL) {
-            //         Boolean b;
-            //         if (mBluetoothHeadset->StopVoiceRecognition(
-            //                 mBluetoothHeadsetDevice, &b), !b) {
-            //             SendMsg(mAudioHandler, MSG_BT_HEADSET_CNCT_FAILED,
-            //                     SENDMSG_REPLACE, 0, 0, NULL, 0);
-            //         }
-            //     }
-            //     else if (mScoAudioState == SCO_STATE_ACTIVE_EXTERNAL &&
-            //             GetBluetoothHeadset()) {
-            //         mScoAudioState = SCO_STATE_DEACTIVATE_EXT_REQ;
-            //     }
-            // }
+            if (mBluetoothHeadsetDevice != NULL) {
+                if (mBluetoothHeadset != NULL) {
+                    Boolean b;
+                    if (mBluetoothHeadset->StopVoiceRecognition(
+                            mBluetoothHeadsetDevice, &b), !b) {
+                        SendMsg(mAudioHandler, MSG_BT_HEADSET_CNCT_FAILED,
+                                SENDMSG_REPLACE, 0, 0, NULL, 0);
+                    }
+                }
+                else if (mScoAudioState == SCO_STATE_ACTIVE_EXTERNAL &&
+                        GetBluetoothHeadset()) {
+                    mScoAudioState = SCO_STATE_DEACTIVATE_EXT_REQ;
+                }
+            }
         }
         else {
             ClearAllScoClients(exceptPid, TRUE);
@@ -6139,12 +6327,10 @@ Boolean CAudioService::IsInCommunication()
 {
     Boolean IsInCall = FALSE;
 
-// TODO: Need ITelecomManager
-    Logger::W(TAG, "TODO: IsInCommunication need ITelecomManager");
-    // AutoPtr<IInterface> service;
-    // mContext->GetSystemService(IContext::TELECOM_SERVICE, ((IInterface**)&service));
-    // AutoPtr<ITelecomManager> telecomManager = ITelecomManager::Probe(service);
-    // telecomManager->IsInCall(&IsInCall);
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::TELECOM_SERVICE, ((IInterface**)&service));
+    AutoPtr<ITelecomManager> telecomManager = ITelecomManager::Probe(service);
+    telecomManager->IsInCall(&IsInCall);
 
     Int32 mode;
     GetMode(&mode);
@@ -6354,8 +6540,7 @@ void CAudioService::MakeA2dpDeviceAvailable(
     // Reset A2DP suspend state each time a new sink is connected
     AudioSystem::SetParameters(String("A2dpSuspended=FALSE"));
     AutoPtr<IInteger32> i32;
-// TODO: Need Bluetooth
-    // CInteger32::New(IAudioSystem::DEVICE_OUT_BLUETOOTH_A2DP), address, (IInteger32**)&i32);
+    CInteger32::New(IAudioSystem::DEVICE_OUT_BLUETOOTH_A2DP, (IInteger32**)&i32);
     AutoPtr<ICharSequence> cs;
     CString::New(address, (ICharSequence**)&cs);
     mConnectedDevices->Put(i32, cs);
@@ -6458,11 +6643,10 @@ void CAudioService::OnSetA2dpSinkConnectionState(
         return;
     }
     String address;
-// TODO: Need Bluetooth
-    // btDevice->GetAddress(&address);
-    // if (!BluetoothAdapter::CheckBluetoothAddress(address)) {
-    //     address = String("");
-    // }
+    btDevice->GetAddress(&address);
+    if (!CBluetoothAdapter::CheckBluetoothAddress(address)) {
+        address = String("");
+    }
 
     synchronized(mConnectedDevices) {
         AutoPtr<IInteger32> i32;
@@ -6475,20 +6659,19 @@ void CAudioService::OnSetA2dpSinkConnectionState(
         ICharSequence::Probe(obj)->ToString(&str);
         Boolean isConnected = (b && str.Equals(address));
 
-// TODO: Need Bluetooth
-        if (isConnected && state != 2 /*IBluetoothProfile::STATE_CONNECTED*/) {
-            // if (btDevice->IsBluetoothDock(&b), b) {
-            //     if (state == 0 /*IBluetoothProfile::STATE_DISCONNECTED*/) {
-            //         // introduction of a delay for transient disconnections of docks when
-            //         // power is rapidly turned off/on, this message will be canceled if
-            //         // we reconnect the dock under a preset delay
-            //         MakeA2dpDeviceUnavailableLater(address);
-            //         // the next time isConnected is evaluated, it will be FALSE for the dock
-            //     }
-            // }
-            // else {
-            //     MakeA2dpDeviceUnavailableNow(address);
-            // }
+        if (isConnected && state != IBluetoothProfile::STATE_CONNECTED) {
+            if (btDevice->IsBluetoothDock(&b), b) {
+                if (state == IBluetoothProfile::STATE_DISCONNECTED) {
+                    // introduction of a delay for transient disconnections of docks when
+                    // power is rapidly turned off/on, this message will be canceled if
+                    // we reconnect the dock under a preset delay
+                    MakeA2dpDeviceUnavailableLater(address);
+                    // the next time isConnected is evaluated, it will be FALSE for the dock
+                }
+            }
+            else {
+                MakeA2dpDeviceUnavailableNow(address);
+            }
             synchronized(mCurAudioRoutes) {
                 AutoPtr<ICharSequence> cs;
                 mCurAudioRoutes->GetBluetoothName((ICharSequence**)&cs);
@@ -6499,24 +6682,24 @@ void CAudioService::OnSetA2dpSinkConnectionState(
                 }
             }
         }
-        else if (!isConnected && state == 2 /*IBluetoothProfile::STATE_CONNECTED*/) {
-            // if (btDevice->IsBluetoothDock(&b), b) {
-            //     // this could be a reconnection after a transient disconnection
-            //     CancelA2dpDeviceTimeout();
-            //     mDockAddress = address;
-            // }
-            // else {
-            //     // this could be a connection of another A2DP device before the timeout of
-            //     // a dock: cancel the dock timeout, and make the dock unavailable now
-            //     if(HasScheduledA2dpDockTimeout()) {
-            //         CancelA2dpDeviceTimeout();
-            //         MakeA2dpDeviceUnavailableNow(mDockAddress);
-            //     }
-            // }
+        else if (!isConnected && state == IBluetoothProfile::STATE_CONNECTED) {
+            if (btDevice->IsBluetoothDock(&b), b) {
+                // this could be a reconnection after a transient disconnection
+                CancelA2dpDeviceTimeout();
+                mDockAddress = address;
+            }
+            else {
+                // this could be a connection of another A2DP device before the timeout of
+                // a dock: cancel the dock timeout, and make the dock unavailable now
+                if(HasScheduledA2dpDockTimeout()) {
+                    CancelA2dpDeviceTimeout();
+                    MakeA2dpDeviceUnavailableNow(mDockAddress);
+                }
+            }
             MakeA2dpDeviceAvailable(address);
             synchronized(mCurAudioRoutes) {
                 String name;
-                // btDevice->GetAliasName(&name);
+                btDevice->GetAliasName(&name);
                 AutoPtr<ICharSequence> cs;
                 mCurAudioRoutes->GetBluetoothName((ICharSequence**)&cs);
                 String str;
@@ -6544,11 +6727,10 @@ void CAudioService::OnSetA2dpSourceConnectionState(
         return;
     }
     String address;
-// TODO: Need Bluetooth
-    // btDevice->GetAddress(&address);
-    // if (!CBluetoothAdapter::CheckBluetoothAddress(address)) {
-    //     address = String("");
-    // }
+    btDevice->GetAddress(&address);
+    if (!CBluetoothAdapter::CheckBluetoothAddress(address)) {
+        address = String("");
+    }
 
     synchronized(mConnectedDevices) {
         AutoPtr<IInteger32> i32;
@@ -6561,10 +6743,10 @@ void CAudioService::OnSetA2dpSourceConnectionState(
         ICharSequence::Probe(obj)->ToString(&str);
         Boolean isConnected = (b && str.Equals(address));
 
-        if (isConnected && state != 2 /*IBluetoothProfile::STATE_CONNECTED*/) {
+        if (isConnected && state != IBluetoothProfile::STATE_CONNECTED) {
             MakeA2dpSrcUnavailable(address);
         }
-        else if (!isConnected && state == 2 /*IBluetoothProfile::STATE_CONNECTED*/) {
+        else if (!isConnected && state == IBluetoothProfile::STATE_CONNECTED) {
             MakeA2dpSrcAvailable(address);
         }
     }
@@ -6735,7 +6917,7 @@ void CAudioService::StartMusicPlayer()
     Int32 resTmp = 0;
     assert(0);
     Settings::System::GetInt32ForUser(contentResolver,
-            String("")/*TODO: ISettingsSystem::HEADSET_CONNECT_PLAYER*/, 0, IUserHandle::USER_CURRENT, &resTmp);
+            String("headset_connect_player")/*TODO: ISettingsSystem::HEADSET_CONNECT_PLAYER*/, 0, IUserHandle::USER_CURRENT, &resTmp);
     Boolean launchPlayer = (resTmp != 0);
     if (launchPlayer) {
         AutoPtr<IIntent> playerIntent;

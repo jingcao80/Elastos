@@ -1,9 +1,11 @@
 #include "elastos/droid/media/CMediaCodecInfoCodecCapabilities.h"
 #include "elastos/droid/media/CMediaCodecInfoCodecProfileLevel.h"
 #include "elastos/droid/media/CMediaCodecInfoEncoderCapabilities.h"
+#include "elastos/droid/utility/CRange.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
 
+using Elastos::Droid::Utility::CRange;
 using Elastos::Droid::Utility::IRange;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CString;
@@ -83,9 +85,8 @@ ECode CMediaCodecInfoEncoderCapabilities::Init(
     CInteger32::New(0, (IInteger32**)&begin);
     AutoPtr<IInteger32> end;
     CInteger32::New(0, (IInteger32**)&end);
-//TODO: Need CRange
-    // CRange::Create(begin, end, (IRange**)&mComplexityRange);
-    // CRange::Create(begin, end, (IRange**)&mQualityRange);
+    CRange::Create(begin, end, (IRange**)&mComplexityRange);
+    CRange::Create(begin, end, (IRange**)&mQualityRange);
     mBitControl = (1 << IMediaCodecInfoEncoderCapabilities::BITRATE_MODE_VBR);
 
     ApplyLevelLimits();
@@ -247,8 +248,7 @@ void CMediaCodecInfoEncoderCapabilities::ApplyLevelLimits()
         CInteger32::New(0, (IInteger32**)&begin);
         AutoPtr<IInteger32> end;
         CInteger32::New(8, (IInteger32**)&end);
-//TODO: Need CRange
-        // CRange::Create(begin, end, (IRange**)&mComplexityRange);
+        CRange::Create(begin, end, (IRange**)&mComplexityRange);
 
         mBitControl = (1 << IMediaCodecInfoEncoderCapabilities::BITRATE_MODE_CQ);
     }

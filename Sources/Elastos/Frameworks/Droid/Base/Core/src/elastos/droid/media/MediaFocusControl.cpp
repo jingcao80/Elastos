@@ -3,6 +3,9 @@
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/media/CAudioService.h"
 #include "elastos/droid/media/CFocusRequester.h"
+#include "elastos/droid/media/CPlayerRecord.h"
+#include "elastos/droid/media/CPlayerRecordRccPlaybackState.h"
+#include "elastos/droid/media/CPlayerRecordRemotePlaybackState.h"
 #include "elastos/droid/media/MediaFocusControl.h"
 #include "elastos/droid/media/PlayerRecord.h"
 #include "elastos/droid/os/Binder.h"
@@ -28,9 +31,8 @@ using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Speech::IRecognizerIntent;
-// TODO: Need Telephony
-// using Elastos::Droid::Telephony::IPhoneStateListener;
-// using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::IPhoneStateListener;
+using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::View::CKeyEvent;
 using Elastos::Droid::Manifest;
 using Elastos::Core::CoreUtils;
@@ -233,15 +235,14 @@ ECode MediaFocusControl::MyPhoneStateListener::OnCallStateChanged(
     /* [in] */ Int32 state,
     /* [in] */ const String& incomingNumber)
 {
-// TODO: Need ITelephonyManager
-    if (state == 1 /*ITelephonyManager::CALL_STATE_RINGING*/) {
+    if (state == ITelephonyManager::CALL_STATE_RINGING) {
         //Log.v(TAG, " CALL_STATE_RINGING");
         synchronized(mRingingLock) {
             mHost->mIsRinging = TRUE;
         }
     }
-    else if ((state == 2 /*ITelephonyManager::CALL_STATE_OFFHOOK*/)
-            || (state == 0 /*ITelephonyManager::CALL_STATE_IDLE*/)) {
+    else if ((state == ITelephonyManager::CALL_STATE_OFFHOOK)
+            || (state == ITelephonyManager::CALL_STATE_IDLE)) {
         synchronized(mRingingLock) {
             mHost->mIsRinging = FALSE;
         }
@@ -435,16 +436,15 @@ ECode MediaFocusControl::constructor(
             String("handleMediaEvent"), (IPowerManagerWakeLock**)&mMediaEventWakeLock);
     Int32 val;
     CAudioService::GetMaxStreamVolume(IAudioManager::STREAM_MUSIC, &val);
-// TODO: Need PlayerRecord
-    // mMainRemote = new PlayerRecord::RemotePlaybackState(-1, val, val);
+    CPlayerRecordRemotePlaybackState::New(-1, val, val,
+            (IPlayerRecordRemotePlaybackState**)&mMainRemote);
 
     // Register for phone state monitoring
 
     service = NULL;
     mContext->GetSystemService(IContext::TELEPHONY_SERVICE, ((IInterface**)&service));
-// TODO: Need ITelephonyManager
-    // AutoPtr<ITelephonyManager> tmgr = ITelephonyManager::Probe(service);
-    // tmgr->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_CALL_STATE);
+    AutoPtr<ITelephonyManager> tmgr = ITelephonyManager::Probe(service);
+    tmgr->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_CALL_STATE);
 
     service = NULL;
     mContext->GetSystemService(IContext::APP_OPS_SERVICE, ((IInterface**)&service));
@@ -458,8 +458,7 @@ ECode MediaFocusControl::constructor(
     mHasRemotePlayback = FALSE;
     mMainRemoteIsActive = FALSE;
 
-// TODO: Need CPlayerRecord
-    // CPlayerRecord::SetMediaFocusControl(this);
+    PlayerRecord::SetMediaFocusControl(IMediaFocusControl::Probe(this));
 
     PostReevaluateRemote();
     return NOERROR;
@@ -856,27 +855,30 @@ Int32 MediaFocusControl::RegisterRemoteControlClient(
         for (Int32 index = size - 1; index >= 0; index--) {
             AutoPtr<IInterface> obj;
             mPRStack->Get(index, (IInterface**)&obj);
-            AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
-// TODO: Need PlayerRecord
-            // if(prse->HasMatchingMediaButtonIntent(mediaIntent)) {
-            //     prse->ResetControllerInfoForRcc(rcClient, callingPackageName,
-            //             Binder::GetCallingUid());
+            AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
 
-            //     if (rcClient == NULL) {
-            //         break;
-            //     }
+            Boolean b;
+            if(prse->HasMatchingMediaButtonIntent(mediaIntent, &b), b) {
+                prse->ResetControllerInfoForRcc(rcClient, callingPackageName,
+                        Binder::GetCallingUid());
 
-            //     rccId = prse->GetRccId();
+                if (rcClient == NULL) {
+                    break;
+                }
 
-            //     // there is a new (non-NULL) client:
-            //     //     give the new client the displays (if any)
-            //     Int32 size;
-            //     mRcDisplays->GetSize(&size);
-            //     if (size > 0) {
-            //         PlugRemoteControlDisplaysIntoClient_syncPrs(prse->GetRcc());
-            //     }
-            //     break;
-            // }
+                prse->GetRccId(&rccId);
+
+                // there is a new (non-NULL) client:
+                //     give the new client the displays (if any)
+                Int32 size;
+                mRcDisplays->GetSize(&size);
+                if (size > 0) {
+                    AutoPtr<IIRemoteControlClient> rcc;
+                    prse->GetRcc((IIRemoteControlClient**)&rcc);
+                    PlugRemoteControlDisplaysIntoClient_syncPrs(rcc);
+                }
+                break;
+            }
         }//for
         // } catch (ArrayIndexOutOfBoundsException e) {
         //     // not expected to happen, indicates improper concurrent modification
@@ -905,16 +907,20 @@ void MediaFocusControl::UnregisterRemoteControlClient(
         for (Int32 index = size - 1; index >= 0; index--) {
             AutoPtr<IInterface> obj;
             mPRStack->Get(index, (IInterface**)&obj);
-            AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
-// TODO: Need PlayerRecord
-            // if ((prse->HasMatchingMediaButtonIntent(mediaIntent))
-            //         && rcClient->Equals(prse->GetRcc())) {
-            //     // we found the IRemoteControlClient to unregister
-            //     prse->ResetControllerInfoForNoRcc();
-            //     topRccChange = (index == size-1);
-            //     // there can only be one matching RCC in the RC stack, we're done
-            //     break;
-            // }
+            AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
+
+            Boolean b;
+            if (prse->HasMatchingMediaButtonIntent(mediaIntent, &b), b) {
+                AutoPtr<IIRemoteControlClient> rcc;
+                prse->GetRcc((IIRemoteControlClient**)&rcc);
+                if (IObject::Probe(rcClient)->Equals(rcc, &b), b) {
+                    // we found the IRemoteControlClient to unregister
+                    prse->ResetControllerInfoForNoRcc();
+                    topRccChange = (index == size - 1);
+                    // there can only be one matching RCC in the RC stack, we're done
+                    break;
+                }
+            }
         }
         // } catch (ArrayIndexOutOfBoundsException e) {
         //     // not expected to happen, indicates improper concurrent modification
@@ -959,16 +965,17 @@ void MediaFocusControl::UnregisterRemoteControlDisplay(
             while (stackIterator->HasNext(&b), b) {
                 AutoPtr<IInterface> obj;
                 stackIterator->GetNext((IInterface**)&obj);
-                AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
+                AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
 
-// TODO: Need PlayerRecord
-                // if(prse->GetRcc() != NULL) {
-                //     // try {
-                //     prse->GetRcc()->UnplugRemoteControlDisplay(rcd);
-                //     // } catch (RemoteException e) {
-                //     //     Logger::E(TAG, "Error disconnecting remote control display to client: ", e);
-                //     // }
-                // }
+                AutoPtr<IIRemoteControlClient> rcc;
+                prse->GetRcc((IIRemoteControlClient**)&rcc);
+                if(rcc != NULL) {
+                    // try {
+                    rcc->UnplugRemoteControlDisplay(rcd);
+                    // } catch (RemoteException e) {
+                    //     Logger::E(TAG, "Error disconnecting remote control display to client: ", e);
+                    // }
+                }
             }
         }
         else {
@@ -1008,16 +1015,17 @@ void MediaFocusControl::RemoteControlDisplayUsesBitmapSize(
             while (stackIterator->HasNext(&b), b) {
                 AutoPtr<IInterface> obj;
                 stackIterator->GetNext((IInterface**)&obj);
-                AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
+                AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
 
-// TODO: Need PlayerRecord
-                // if(prse->GetRcc() != NULL) {
-                //     // try {
-                //     prse->GetRcc()->SetBitmapSizeForDisplay(rcd, w, h);
-                //     // } catch (RemoteException e) {
-                //     //     Log.e(TAG, "Error setting bitmap size for RCD on RCC: ", e);
-                //     // }
-                // }
+                AutoPtr<IIRemoteControlClient> rcc;
+                prse->GetRcc((IIRemoteControlClient**)&rcc);
+                if(rcc != NULL) {
+                    // try {
+                    rcc->SetBitmapSizeForDisplay(rcd, w, h);
+                    // } catch (RemoteException e) {
+                    //     Log.e(TAG, "Error setting bitmap size for RCD on RCC: ", e);
+                    // }
+                }
             }
         }
     }
@@ -1051,15 +1059,17 @@ void MediaFocusControl::RemoteControlDisplayWantsPlaybackPositionSync(
         array = NULL;
         mPRStack->ToArray((ArrayOf<IInterface*>**)&array);
         for (Int32 i = 0; i < array->GetLength(); i++) {
-            AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe((*array)[i]);
-// TODO: Need PlayerRecord
-            // if (prse->GetRcc() != NULL) {
-            //     // try {
-            //     prse->GetRcc()->SetWantsSyncForDisplay(rcd, wantsSync);
-            //     // } catch (RemoteException e) {
-            //     //     Logger::E(TAG, "Error setting position sync flag for RCD on RCC: ", e);
-            //     // }
-            // }
+            AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe((*array)[i]);
+
+            AutoPtr<IIRemoteControlClient> rcc;
+            prse->GetRcc((IIRemoteControlClient**)&rcc);
+            if (rcc != NULL) {
+                // try {
+                rcc->SetWantsSyncForDisplay(rcd, wantsSync);
+                // } catch (RemoteException e) {
+                //     Logger::E(TAG, "Error setting position sync flag for RCD on RCC: ", e);
+                // }
+            }
         }
     }
 }
@@ -1075,23 +1085,24 @@ Boolean MediaFocusControl::CheckUpdateRemoteStateIfActive(
         for (Int32 index = size-1; index >= 0; index--) {
             AutoPtr<IInterface> obj;
             mPRStack->Get(index, (IInterface**)&obj);
-            AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
+            AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
 
-// TODO: Need PlayerRecord
-            // if ((prse->mPlaybackType == IRemoteControlClient::PLAYBACK_TYPE_REMOTE)
-            //         && IsPlaystateActive(prse->mPlaybackState->mState)
-            //         && (prse->mPlaybackStream == streamType)) {
-            //     if (DEBUG_RC) Logger::D(TAG, "remote playback active on stream %d, vol =%d",
-            //         streamType, prse->mPlaybackVolume);
-            //     synchronized(mMainRemote) {
-            //         mMainRemote->mRccId = prse->GetRccId();
-            //         mMainRemote->mVolume = prse->mPlaybackVolume;
-            //         mMainRemote->mVolumeMax = prse->mPlaybackVolumeMax;
-            //         mMainRemote->mVolumeHandling = prse->mPlaybackVolumeHandling;
-            //         mMainRemoteIsActive = TRUE;
-            //     }
-            //     return TRUE;
-            // }
+            if ((prse->mPlaybackType == IRemoteControlClient::PLAYBACK_TYPE_REMOTE)
+                    && IsPlaystateActive(((CPlayerRecordRccPlaybackState*)(prse->mPlaybackState).Get())->mState)
+                    && (prse->mPlaybackStream == streamType)) {
+                if (DEBUG_RC) Logger::D(TAG, "remote playback active on stream %d, vol =%d",
+                    streamType, prse->mPlaybackVolume);
+                synchronized(mMainRemote) {
+                    AutoPtr<CPlayerRecordRemotePlaybackState> rps =
+                            (CPlayerRecordRemotePlaybackState*)mMainRemote.Get();
+                    prse->GetRccId(&rps->mRccId);
+                    rps->mVolume = prse->mPlaybackVolume;
+                    rps->mVolumeMax = prse->mPlaybackVolumeMax;
+                    rps->mVolumeHandling = prse->mPlaybackVolumeHandling;
+                    mMainRemoteIsActive = TRUE;
+                }
+                return TRUE;
+            }
         }
         // } catch (ArrayIndexOutOfBoundsException e) {
         //     // not expected to happen, indicates improper concurrent modification
@@ -1123,11 +1134,12 @@ Boolean MediaFocusControl::IsPlaystateActive(
 Int32 MediaFocusControl::GetRemoteStreamMaxVolume()
 {
     synchronized(mMainRemote) {
-// TODO: Need PlayerRecordRemotePlaybackState
-    //     if (mMainRemote->mRccId == IRemoteControlClient::RCSE_ID_UNREGISTERED) {
-    //         return 0;
-    //     }
-    //     return mMainRemote->mVolumeMax;
+        AutoPtr<CPlayerRecordRemotePlaybackState> rps =
+                (CPlayerRecordRemotePlaybackState*)mMainRemote.Get();
+        if (rps->mRccId == IRemoteControlClient::RCSE_ID_UNREGISTERED) {
+            return 0;
+        }
+        return rps->mVolumeMax;
     }
     return 0;
 }
@@ -1135,11 +1147,12 @@ Int32 MediaFocusControl::GetRemoteStreamMaxVolume()
 Int32 MediaFocusControl::GetRemoteStreamVolume()
 {
     synchronized(mMainRemote) {
-// TODO: Need PlayerRecordRemotePlaybackState
-    //     if (mMainRemote->mRccId == RemoteControlClient.RCSE_ID_UNREGISTERED) {
-    //         return 0;
-    //     }
-    //     return mMainRemote->mVolume;
+        AutoPtr<CPlayerRecordRemotePlaybackState> rps =
+                (CPlayerRecordRemotePlaybackState*)mMainRemote.Get();
+        if (rps->mRccId == IRemoteControlClient::RCSE_ID_UNREGISTERED) {
+            return 0;
+        }
+        return rps->mVolume;
     }
     return 0;
 }
@@ -1150,11 +1163,12 @@ void MediaFocusControl::SetRemoteStreamVolume(
     if (DEBUG_VOL) { Logger::D(TAG, "setRemoteStreamVolume(vol=%d)", vol); }
     Int32 rccId = IRemoteControlClient::RCSE_ID_UNREGISTERED;
     synchronized(mMainRemote) {
-// TODO: Need PlayerRecordRemotePlaybackState
-        // if (mMainRemote->mRccId == IRemoteControlClient::RCSE_ID_UNREGISTERED) {
-        //     return;
-        // }
-        // rccId = mMainRemote->mRccId;
+        AutoPtr<CPlayerRecordRemotePlaybackState> rps =
+                (CPlayerRecordRemotePlaybackState*)mMainRemote.Get();
+        if (rps->mRccId == IRemoteControlClient::RCSE_ID_UNREGISTERED) {
+            return;
+        }
+        rccId = rps->mRccId;
     }
     AutoPtr<IIRemoteVolumeObserver> rvo;
     synchronized(mPRStack) {
@@ -1167,14 +1181,15 @@ void MediaFocusControl::SetRemoteStreamVolume(
         for (Int32 index = size-1; index >= 0; index--) {
             AutoPtr<IInterface> obj;
             mPRStack->Get(index, (IInterface**)&obj);
-            AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
+            AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
 
             //FIXME OPTIMIZE store this info in mMainRemote so we don't have to iterate?
-// TODO: Need PlayerRecord
-            // if (prse->GetRccId() == rccId) {
-            //     rvo = prse->mRemoteVolumeObs;
-            //     break;
-            // }
+            Int32 id;
+            prse->GetRccId(&id);
+            if (id == rccId) {
+                rvo = prse->mRemoteVolumeObs;
+                break;
+            }
         }
         // } catch (ArrayIndexOutOfBoundsException e) {
         //     // not expected to happen, indicates improper concurrent modification
@@ -1485,7 +1500,12 @@ Boolean MediaFocusControl::CanReassignAudioFocus(
     AutoPtr<IFocusRequester> fr = IFocusRequester::Probe(obj);
     fr->HasSameClient(IN_VOICE_COMM_FOCUS_ID, &b2);
     if (!b1 && b2) {
-        return FALSE;
+        if (clientId.Contains(CLIENT_ID_QCHAT)) {
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
     }
     return TRUE;
 }
@@ -1585,11 +1605,13 @@ void MediaFocusControl::DispatchMediaKeyEvent(
             // try {
             AutoPtr<IInterface> obj;
             mPRStack->Peek((IInterface**)&obj);
-            AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
-// TODO: Need PlayerRecord
-            // prse->GetMediaButtonIntent()->Send(mContext,
-            //         needWakeLock ? WAKELOCK_RELEASE_ON_FINISHED : 0 /*code*/,
-            //         keyIntent, this, mEventHandler);
+            AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
+
+            AutoPtr<IPendingIntent> pIntent;
+            prse->GetMediaButtonIntent((IPendingIntent**)&pIntent);
+            pIntent->Send(mContext,
+                    needWakeLock ? WAKELOCK_RELEASE_ON_FINISHED : 0 /*code*/,
+                    keyIntent, IPendingIntentOnFinished::Probe(this), mEventHandler);
             // } catch (CanceledException e) {
             //     Logger::E(TAG, "Error sending pending intent " + mPRStack.peek());
             //     e.printStackTrace();
@@ -1724,16 +1746,13 @@ void MediaFocusControl::StartVoiceBasedInteractions(
 
     Boolean b;
     if (!isLocked && (pm->IsScreenOn(&b), b)) {
-// TODO: Need IRecognizerIntent
-        // CIntent::New(IRecognizerIntent::ACTION_WEB_SEARCH, (IIntent**)&voiceIntent);
+        CIntent::New(IRecognizerIntent::ACTION_WEB_SEARCH, (IIntent**)&voiceIntent);
         Logger::I(TAG, "voice-based interactions: about to use ACTION_WEB_SEARCH");
     }
     else {
-// TODO: Need IRecognizerIntent
-        // CIntent::New(IRecognizerIntent::ACTION_VOICE_SEARCH_HANDS_FREE, (IIntent**)&voiceIntent);
+        CIntent::New(IRecognizerIntent::ACTION_VOICE_SEARCH_HANDS_FREE, (IIntent**)&voiceIntent);
         mKeyguardManager->IsKeyguardSecure(&b);
-// TODO: Need IRecognizerIntent
-        // voiceIntent->PutExtra(IRecognizerIntent::EXTRA_SECURE, isLocked && b);
+        voiceIntent->PutExtra(IRecognizerIntent::EXTRA_SECURE, isLocked && b);
         Logger::I(TAG, "voice-based interactions: about to use ACTION_VOICE_SEARCH_HANDS_FREE");
     }
     // start the search activity
@@ -1792,13 +1811,14 @@ void MediaFocusControl::DumpRCCStack(
         pw->Println(String("\nRemote Volume State:"));
         pw->Println(String("  has remote: ") + StringUtils::BooleanToString(mHasRemotePlayback));
         pw->Println(String("  is remote active: ") + StringUtils::BooleanToString(mMainRemoteIsActive));
-// TODO: Need PlayerRecordRemotePlaybackState
-        // pw->Println(String("  rccId: ") + mMainRemote->mRccId);
-        // pw->Println(String("  volume handling: ")
-        //         + ((mMainRemote->mVolumeHandling == IRemoteControlClient::PLAYBACK_VOLUME_FIXED) ?
-        //                 "PLAYBACK_VOLUME_FIXED(0)" : "PLAYBACK_VOLUME_VARIABLE(1)"));
-        // pw->Println(String("  volume: ") + mMainRemote->mVolume);
-        // pw->Println(String("  volume steps: ") + mMainRemote->mVolumeMax);
+        AutoPtr<CPlayerRecordRemotePlaybackState> rps =
+                (CPlayerRecordRemotePlaybackState*)mMainRemote.Get();
+        pw->Println(String("  rccId: ") + rps->mRccId);
+        pw->Println(String("  volume handling: ")
+                + ((rps->mVolumeHandling == IRemoteControlClient::PLAYBACK_VOLUME_FIXED) ?
+                        "PLAYBACK_VOLUME_FIXED(0)" : "PLAYBACK_VOLUME_VARIABLE(1)"));
+        pw->Println(String("  volume: ") + rps->mVolume);
+        pw->Println(String("  volume steps: ") + rps->mVolumeMax);
     }
 }
 
@@ -1828,21 +1848,19 @@ Boolean MediaFocusControl::PushMediaButtonReceiver_syncPrs(
     Boolean b;
     if ((mPRStack->IsEmpty(&b), b)) {
         AutoPtr<IPlayerRecord> pr;
-// TODO: Need CPlayerRecord
-        // CPlayerRecord::New(mediaIntent, target, token, (IPlayerRecord**)&pr);
+        CPlayerRecord::New(mediaIntent, target, token, (IPlayerRecord**)&pr);
         mPRStack->Push(pr);
         return TRUE;
     }
 
     AutoPtr<IInterface> obj;
     mPRStack->Peek((IInterface**)&obj);
-    AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
+    AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
 
-// TODO: Need PlayerRecord
-    // if (prse->HasMatchingMediaButtonIntent(mediaIntent)) {
-    //     // already at top of stack
-    //     return FALSE;
-    // }
+    if (prse->HasMatchingMediaButtonIntent(mediaIntent, &b), b) {
+        // already at top of stack
+        return FALSE;
+    }
 
     String str;
     mediaIntent->GetCreatorPackage(&str);
@@ -1868,47 +1886,45 @@ Boolean MediaFocusControl::PushMediaButtonReceiver_syncPrs(
         obj = NULL;
         mPRStack->Get(index, (IInterface**)&obj);
         prse = NULL;
-        prse = IPlayerRecord::Probe(obj);
+        prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
 
-// TODO: Need PlayerRecord
-        // if (prse->IsPlaybackActive()) {
-        //     lastPlayingIndex = index;
-        // }
-        // if (prse->HasMatchingMediaButtonIntent(mediaIntent)) {
-        //     inStackIndex = index;
-        // }
+        if (prse->IsPlaybackActive(&b), b) {
+            lastPlayingIndex = index;
+        }
+        if (prse->HasMatchingMediaButtonIntent(mediaIntent, &b), b) {
+            inStackIndex = index;
+        }
     }
 
     if (inStackIndex == -1) {
         // is not in stack
-// TODO: Need CPlayerRecord
-        // CPlayerRecord::New(mediaIntent, target, token, (IPlayerRecord**)&prse);
+        CPlayerRecord::New(mediaIntent, target, token, (IPlayerRecord**)&prse);
         // it's new so it's not playing (no RemoteControlClient to give a playstate),
         // therefore it goes after the ones with active playback
-        mPRStack->Add(lastPlayingIndex, prse);
+        mPRStack->Add(lastPlayingIndex, (IInterface*)(IObject*)prse);
     }
     else {
         // is in the stack
         if (size > 1) { // no need to remove and add if stack contains only 1
             obj = NULL;
             mPRStack->Get(inStackIndex, (IInterface**)&obj);
-            prse = IPlayerRecord::Probe(obj);
+            prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
             // remove it from its old location in the stack
             IVector::Probe(mPRStack)->RemoveElementAt(inStackIndex);
-// TODO: Need PlayerRecord
-            // if (prse->IsPlaybackActive()) {
-            //     // and put it at the top
-            //     mPRStack->Push(prse);
-            // }
-            // else {
-            //     // and put it after the ones with active playback
-            //     if (inStackIndex > lastPlayingIndex) {
-            //         mPRStack->Add(lastPlayingIndex, prse);
-            //     }
-            //     else {
-            //         mPRStack->Add(lastPlayingIndex - 1, prse);
-            //     }
-            // }
+
+            if (prse->IsPlaybackActive(&b), b) {
+                // and put it at the top
+                mPRStack->Push((IInterface*)(IObject*)prse);
+            }
+            else {
+                // and put it after the ones with active playback
+                if (inStackIndex > lastPlayingIndex) {
+                    mPRStack->Add(lastPlayingIndex, (IInterface*)(IObject*)prse);
+                }
+                else {
+                    mPRStack->Add(lastPlayingIndex - 1, (IInterface*)(IObject*)prse);
+                }
+            }
         }
     }
 
@@ -1931,16 +1947,15 @@ void MediaFocusControl::RemoveMediaButtonReceiver_syncPrs(
     for (Int32 index = size-1; index >= 0; index--) {
         AutoPtr<IInterface> obj;
         mPRStack->Get(index, (IInterface**)&obj);
-        AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
+        AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
 
-        // Boolean b = FALSE;
-// TODO: Need PlayerRecord
-        // if ((prse->HasMatchingMediaButtonIntent(pi, &b), b)) {
-        //     prse->Destroy();
-        //     // ok to remove element while traversing the stack since we're leaving the loop
-        //     mPRStack->Remove(index);
-        //     break;
-        // }
+        Boolean b = FALSE;
+        if ((prse->HasMatchingMediaButtonIntent(pi, &b), b)) {
+            prse->Destroy();
+            // ok to remove element while traversing the stack since we're leaving the loop
+            mPRStack->Remove(index);
+            break;
+        }
     }
     // } catch (ArrayIndexOutOfBoundsException e) {
     //     // not expected to happen, indicates improper concurrent modification
@@ -1955,10 +1970,9 @@ Boolean MediaFocusControl::IsCurrentRcController(
     mPRStack->IsEmpty(&b1);
     AutoPtr<IInterface> obj;
     mPRStack->Peek((IInterface**)&obj);
-    AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
+    AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
     Boolean b2 = FALSE;
-// TODO: Need PlayerRecord
-    // prse->HasMatchingMediaButtonIntent(pi, &b2);
+    prse->HasMatchingMediaButtonIntent(pi, &b2);
     if (!b1 && b2) {
         return TRUE;
     }
@@ -2000,17 +2014,20 @@ void MediaFocusControl::SetNewRcClientGenerationOnClients_syncRcsCurrc(
     array = NULL;
     mPRStack->ToArray((ArrayOf<IInterface*>**)&array);
     for (Int32 i = 0; i < array->GetLength(); i++) {
-        AutoPtr<IPlayerRecord> se = IPlayerRecord::Probe((*array)[i]);
-// TODO: Need PlayerRecord
-        // if ((se != NULL) && (se->GetRcc() != NULL)) {
-        //     // try {
-        //     se->GetRcc()->SetCurrentClientGenerationId(newClientGeneration);
-        //     // } catch (RemoteException e) {
-        //     //     Logger::W(TAG, "Dead client in setNewRcClientGenerationOnClients_syncRcsCurrc()",e);
-        //     //     stackIterator.remove();
-        //     //     se.unlinkToRcClientDeath();
-        //     // }
-        // }
+        AutoPtr<PlayerRecord> se = (PlayerRecord*)IPlayerRecord::Probe((*array)[i]);
+        if (se != NULL) {
+            AutoPtr<IIRemoteControlClient> controlClient;
+            se->GetRcc((IIRemoteControlClient**)&controlClient);
+            if (controlClient != NULL) {
+                // try {
+                controlClient->SetCurrentClientGenerationId(newClientGeneration);
+                // } catch (RemoteException e) {
+                //     Logger::W(TAG, "Dead client in setNewRcClientGenerationOnClients_syncRcsCurrc()",e);
+                //     stackIterator.remove();
+                //     se.unlinkToRcClientDeath();
+                // }
+            }
+        }
     }
 }
 
@@ -2040,37 +2057,41 @@ void MediaFocusControl::OnRcDisplayClear()
 }
 
 void MediaFocusControl::OnRcDisplayUpdate(
-    /* [in] */ IPlayerRecord* prse,
+    /* [in] */ IPlayerRecord* pr,
     /* [in] */ Int32 flags /* USED ?*/)
 {
     synchronized(mPRStack) {
         synchronized(mCurrentRcLock) {
-            // Boolean b = FALSE;
-// TODO: Need PlayerRecord
-            // if ((mCurrentRcClient != NULL) && (IObject::Probe(mCurrentRcClient)->Equals(prse->GetRcc(), &b),b)) {
-            //     if (DEBUG_RC) Logger::I(TAG, "Display/update remote control ");
+            Boolean b = FALSE;
+            AutoPtr<PlayerRecord> prse = (PlayerRecord*)pr;
+            AutoPtr<IIRemoteControlClient> controlClient;
+            prse->GetRcc((IIRemoteControlClient**)&controlClient);
+            if ((mCurrentRcClient != NULL) && (IObject::Probe(mCurrentRcClient)->Equals(controlClient, &b),b)) {
+                if (DEBUG_RC) Logger::I(TAG, "Display/update remote control ");
 
-            //     mCurrentRcClientGen++;
-            //     // synchronously update the displays and clients with
-            //     //      the new client generation
-            //     SetNewRcClient_syncRcsCurrc(mCurrentRcClientGen,
-            //             prse->GetMediaButtonIntent() /*newMediaIntent*/,
-            //             FALSE /*clearing*/);
+                mCurrentRcClientGen++;
+                // synchronously update the displays and clients with
+                //      the new client generation
+                AutoPtr<IPendingIntent> pi;
+                prse->GetMediaButtonIntent((IPendingIntent**)&pi);
+                SetNewRcClient_syncRcsCurrc(mCurrentRcClientGen,
+                        pi /*newMediaIntent*/,
+                        FALSE /*clearing*/);
 
-            //     // tell the current client that it needs to send info
-            //     // try {
-            //     //TODO change name to informationRequestForAllDisplays()
-            //     mCurrentRcClient->OnInformationRequested(mCurrentRcClientGen, flags);
-            //     // } catch (RemoteException e) {
-            //     //     Logger::E(TAG, "Current valid remote client is dead: "+e);
-            //     //     mCurrentRcClient = NULL;
-            //     // }
-            // }
-            // else {
-            //     // the remote control display owner has changed between the
-            //     // the message to update the display was sent, and the time it
-            //     // gets to be processed (now)
-            // }
+                // tell the current client that it needs to send info
+                // try {
+                //TODO change name to informationRequestForAllDisplays()
+                mCurrentRcClient->OnInformationRequested(mCurrentRcClientGen, flags);
+                // } catch (RemoteException e) {
+                //     Logger::E(TAG, "Current valid remote client is dead: "+e);
+                //     mCurrentRcClient = NULL;
+                // }
+            }
+            else {
+                // the remote control display owner has changed between the
+                // the message to update the display was sent, and the time it
+                // gets to be processed (now)
+            }
         }
     }
 }
@@ -2122,29 +2143,30 @@ void MediaFocusControl::UpdateRemoteControlDisplay_syncPrs(
 {
     AutoPtr<IInterface> obj;
     mPRStack->Peek((IInterface**)&obj);
-    AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
+    AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
     Int32 infoFlagsAboutToBeUsed = infoChangedFlags;
     // this is where we enforce opt-in for information display on the remote controls
     //   with the new AudioManager.registerRemoteControlClient() API
-// TODO: Need PlayerRecord
-    // if (prse->GetRcc() == NULL) {
-    //     //Logger::W(TAG, "Can't update remote control display with NULL remote control client");
-    //     ClearRemoteControlDisplay_syncPrs();
-    //     return;
-    // }
+    AutoPtr<IIRemoteControlClient> controlClient;
+    prse->GetRcc((IIRemoteControlClient**)&controlClient);
+    if (controlClient == NULL) {
+        // Logger::W(TAG, "Can't update remote control display with NULL remote control client");
+        ClearRemoteControlDisplay_syncPrs();
+        return;
+    }
     synchronized(mCurrentRcLock) {
-// TODO: Need PlayerRecord
-        // if (!prse->GetRcc()->Equals(mCurrentRcClient)) {
-        //     // new RC client, assume every type of information shall be queried
-        //     infoFlagsAboutToBeUsed = RC_INFO_ALL;
-        // }
-        // mCurrentRcClient = prse->GetRcc();
-        // mCurrentRcClientIntent = prse->GetMediaButtonIntent();
+        Boolean b;
+        if (IObject::Probe(controlClient)->Equals(mCurrentRcClient, &b), !b) {
+            // new RC client, assume every type of information shall be queried
+            infoFlagsAboutToBeUsed = RC_INFO_ALL;
+        }
+        mCurrentRcClient = controlClient;
+        prse->GetMediaButtonIntent((IPendingIntent**)&mCurrentRcClientIntent);
     }
     // will cause onRcDisplayUpdate() to be called in AudioService's handler thread
     AutoPtr<IMessage> msg;
     mEventHandler->ObtainMessage(MSG_RCDISPLAY_UPDATE,
-            infoFlagsAboutToBeUsed /* arg1 */, 0, prse /* obj, != NULL */, (IMessage**)&msg);
+            infoFlagsAboutToBeUsed /* arg1 */, 0, (IInterface*)(IObject*)prse /* obj, != NULL */, (IMessage**)&msg);
     Boolean b;
     mEventHandler->SendMessage(msg, &b);
 }
@@ -2196,16 +2218,17 @@ void MediaFocusControl::EnableRemoteControlDisplayForClient_syncRcStack(
     AutoPtr<ArrayOf<IInterface*> > array;
     mPRStack->ToArray((ArrayOf<IInterface*>**)&array);
     for (Int32 i = 0; i < array->GetLength(); i++) {
-        AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe((*array)[i]);
+        AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe((*array)[i]);
 
-// TODO: Need PlayerRecord
-        // if(prse->GetRcc() != NULL) {
-        //     // try {
-        //     prse->GetRcc()->EnableRemoteControlDisplay(rcd, enabled);
-        //     // } catch (RemoteException e) {
-        //     //     Logger::E(TAG, "Error connecting RCD to client: ", e);
-        //     // }
-        // }
+        AutoPtr<IIRemoteControlClient> controlClient;
+        prse->GetRcc((IIRemoteControlClient**)&controlClient);
+        if(controlClient != NULL) {
+            // try {
+            controlClient->EnableRemoteControlDisplay(rcd, enabled);
+            // } catch (RemoteException e) {
+            //     Logger::E(TAG, "Error connecting RCD to client: ", e);
+            // }
+        }
     }
 }
 
@@ -2253,16 +2276,17 @@ void MediaFocusControl::RegisterRemoteControlDisplay_int(
             AutoPtr<ArrayOf<IInterface*> > array;
             mPRStack->ToArray((ArrayOf<IInterface*>**)&array);
             for (Int32 i = 0; i < array->GetLength(); i++) {
-                AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe((*array)[i]);
+                AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe((*array)[i]);
 
-// TODO: Need PlayerRecord
-                // if(prse->GetRcc() != NULL) {
-                //     // try {
-                //     prse->GetRcc()->PlugRemoteControlDisplay(rcd, w, h);
-                //     // } catch (RemoteException e) {
-                //     //     Logger::E(TAG, "Error connecting RCD to client: ", e);
-                //     // }
-                // }
+                AutoPtr<IIRemoteControlClient> controlClient;
+                prse->GetRcc((IIRemoteControlClient**)&controlClient);
+                if(controlClient != NULL) {
+                    // try {
+                    controlClient->PlugRemoteControlDisplay(rcd, w, h);
+                    // } catch (RemoteException e) {
+                    //     Logger::E(TAG, "Error connecting RCD to client: ", e);
+                    // }
+                }
             }
 
             // we have a new display, of which all the clients are now aware: have it be
@@ -2289,13 +2313,14 @@ void MediaFocusControl::OnRegisterVolumeObserverForRcc(
         for (Int32 index = size - 1; index >= 0; index--) {
             AutoPtr<IInterface> obj;
             mPRStack->Get(index, (IInterface**)&obj);
-            AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
+            AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
 
-// TODO: Need PlayerRecord
-            // if (prse->GetRccId() == rccId) {
-            //     prse->mRemoteVolumeObs = rvo;
-            //     break;
-            // }
+            Int32 id;
+            prse->GetRccId(&id);
+            if (id == rccId) {
+                prse->mRemoteVolumeObs = rvo;
+                break;
+            }
         }
         // } catch (ArrayIndexOutOfBoundsException e) {
         //     // not expected to happen, indicates improper concurrent modification
@@ -2324,13 +2349,15 @@ void MediaFocusControl::SendVolumeUpdateToRemote(
         for (Int32 index = size - 1; index >= 0; index--) {
             AutoPtr<IInterface> obj;
             mPRStack->Get(index, (IInterface**)&obj);
-            AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
+            AutoPtr<PlayerRecord> prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
             //FIXME OPTIMIZE store this info in mMainRemote so we don't have to iterate?
-// TODO: Need PlayerRecord
-            // if (prse->GetRccId() == rccId) {
-            //     rvo = prse->mRemoteVolumeObs;
-            //     break;
-            // }
+
+            Int32 id;
+            prse->GetRccId(&id);
+            if (id == rccId) {
+                rvo = prse->mRemoteVolumeObs;
+                break;
+            }
         }
         // } catch (ArrayIndexOutOfBoundsException e) {
         //     // not expected to happen, indicates improper concurrent modification

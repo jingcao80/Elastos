@@ -12,6 +12,7 @@
 #include "Elastos.Droid.Hardware.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telecomm.h"
 #include "Elastos.Droid.View.h"
 #include "_Elastos_Droid_Media_CAudioService.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
@@ -25,14 +26,12 @@
 
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::App::IKeyguardManager;
-// using Elastos::Droid::Bluetooth::IBluetoothA2dp;
-// using Elastos::Droid::Bluetooth::IBluetoothAdapter;
-// using Elastos::Droid::Bluetooth::IBluetoothClass;
-// using Elastos::Droid::Bluetooth::IBluetoothClassDevice;
+using Elastos::Droid::Bluetooth::IBluetoothA2dp;
+using Elastos::Droid::Bluetooth::IBluetoothAdapter;
 using Elastos::Droid::Bluetooth::IBluetoothDevice;
 using Elastos::Droid::Bluetooth::IBluetoothHeadset;
 using Elastos::Droid::Bluetooth::IBluetoothProfile;
-// using Elastos::Droid::Bluetooth::IBluetoothProfileServiceListener;
+using Elastos::Droid::Bluetooth::IBluetoothProfileServiceListener;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IComponentName;
@@ -840,6 +839,29 @@ private:
     private:
         String mPackageName;
         Boolean mIsfocussed;
+    };
+
+    class BluetoothProfileServiceListener
+        : public Object
+        , public IBluetoothProfileServiceListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        BluetoothProfileServiceListener(
+            /* [in] */ CAudioService* host)
+            : mHost(host)
+        {}
+
+        CARAPI OnServiceConnected(
+            /* [in] */ Int32 profile,
+            /* [in] */ IBluetoothProfile* proxy);
+
+        CARAPI OnServiceDisconnected(
+            /* [in] */ Int32 profile);
+
+    private:
+        CAudioService* mHost;
     };
 
 public:
@@ -1806,12 +1828,11 @@ private:
     // List of clients having issued a SCO start request
     AutoPtr<IArrayList> mScoClients;
 
-// TODO: Need Bluetooth
     // BluetoothHeadset API to control SCO connection
-    // AutoPtr<IBluetoothHeadset> mBluetoothHeadset;
+    AutoPtr<IBluetoothHeadset> mBluetoothHeadset;
 
     // Bluetooth headset device
-    // AutoPtr<IBluetoothDevice> mBluetoothHeadsetDevice;
+    AutoPtr<IBluetoothDevice> mBluetoothHeadsetDevice;
 
     // Indicate if SCO audio connection is currently active and if the initiator is
     // audio service (internal) or bluetooth headset (external)
@@ -1903,8 +1924,7 @@ private:
     AutoPtr<MediaFocusControl> mMediaFocusControl;
 
     // Reference to BluetoothA2dp to query for AbsoluteVolume.
-// TODO: Need Bluetooth
-    // AutoPtr<IBluetoothA2dp> mA2dp;
+    AutoPtr<IBluetoothA2dp> mA2dp;
     Object mA2dpAvrcpLock;
     // If absolute volume is supported in AVRCP device
     Boolean mAvrcpAbsVolSupported;
@@ -1931,8 +1951,7 @@ private:
 
     static const Int32 SOUND_EFFECTS_LOAD_TIMEOUT_MS;
 
-// TODO: Need Bluetooth
-    // AutoPtr<IBluetoothProfileServiceListener> mBluetoothProfileServiceListener; // = new BluetoothProfile.ServiceListener();
+    AutoPtr<IBluetoothProfileServiceListener> mBluetoothProfileServiceListener; // = new BluetoothProfile.ServiceListener();
 
     /* cache of the address of the last dock the device was connected to */
     String mDockAddress;

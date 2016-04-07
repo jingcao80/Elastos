@@ -57,10 +57,8 @@ const Boolean CSoundPool::DEBUG = FALSE;
 //----------------------------
 //    CSoundPool::Builder
 //----------------------------
-CSoundPool::Builder::Builder(
-    /* [in] */ CSoundPool* host)
+CSoundPool::Builder::Builder()
     : mMaxStreams(1)
-    , mHost(host)
 {}
 
 CSoundPool::Builder::~Builder()
@@ -69,17 +67,13 @@ CSoundPool::Builder::~Builder()
 CAR_INTERFACE_IMPL(CSoundPool::Builder, Object, ISoundPoolBuilder)
 
 ECode CSoundPool::Builder::SetMaxStreams(
-    /* [in] */ Int32 maxStreams,
-    /* [out] */ ISoundPoolBuilder** result)
+    /* [in] */ Int32 maxStreams)
 {
-    VALIDATE_NOT_NULL(result);
     if (maxStreams <= 0) {
         Slogger::E("CSoundPool::Builder", "Strictly positive value required for the maximum number of streams");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     mMaxStreams = maxStreams;
-    *result = this;
-    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 

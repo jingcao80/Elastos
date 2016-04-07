@@ -33,6 +33,7 @@ SOURCES += CPair.cpp
 SOURCES += CPairHelper.cpp
 SOURCES += PathParser.cpp
 SOURCES += Patterns.cpp
+SOURCES += CRange.cpp
 SOURCES += CRational.cpp
 SOURCES += CRationalHelper.cpp
 SOURCES += CSize.cpp

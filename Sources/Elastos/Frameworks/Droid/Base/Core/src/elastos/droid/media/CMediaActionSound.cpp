@@ -1,7 +1,6 @@
 
 #include "elastos/droid/media/CMediaActionSound.h"
-// TODO: Need CSoundPool
-// #include "elastos/droid/media/CSoundPool.h"
+#include "elastos/droid/media/CSoundPool.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Utility::Logging::Logger;
@@ -82,8 +81,7 @@ ECode CMediaActionSound::constructor()
     GetWeakReference((IWeakReference**)&weakHost);
     mLoadCompleteListener = new SoundPoolOnLoadCompleteListener(weakHost);
 
-// TODO: Need CSoundPool
-    // CSoundPool::New(NUM_MEDIA_SOUND_STREAMS, IAudioManager::STREAM_SYSTEM_ENFORCED, 0, (ISoundPool**)&mSoundPool);
+    CSoundPool::New(NUM_MEDIA_SOUND_STREAMS, IAudioManager::STREAM_SYSTEM_ENFORCED, 0, (ISoundPool**)&mSoundPool);
     mSoundPool->SetOnLoadCompleteListener(mLoadCompleteListener);
 
     mSoundIds = ArrayOf<Int32>::Alloc(sizeof(SOUND_FILES));
