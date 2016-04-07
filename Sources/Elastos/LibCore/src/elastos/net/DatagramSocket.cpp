@@ -243,10 +243,10 @@ ECode DatagramSocket::GetReceiveBufferSize(
 
     synchronized(this) {
         FAIL_RETURN(CheckOpen());
-        AutoPtr<IInteger32> optVal;
+        AutoPtr<IInterface> optVal;
         ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
         FAIL_RETURN(option->GetOption(ISocketOptions::_SO_RCVBUF, (IInterface**)&optVal));
-        return optVal->GetValue(size);
+        return IInteger32::Probe(optVal)->GetValue(size);
     }
     return NOERROR;
 }
@@ -258,10 +258,10 @@ ECode DatagramSocket::GetSendBufferSize(
 
     synchronized(this) {
         FAIL_RETURN(CheckOpen());
-        AutoPtr<IInteger32> optVal;
+        AutoPtr<IInterface> optVal;
         ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
         FAIL_RETURN(option->GetOption(ISocketOptions::_SO_SNDBUF, (IInterface**)&optVal));
-        return optVal->GetValue(size);
+        return IInteger32::Probe(optVal)->GetValue(size);
     }
     return NOERROR;
 }
@@ -273,10 +273,10 @@ ECode DatagramSocket::GetSoTimeout(
 
     synchronized(this) {
         FAIL_RETURN(CheckOpen());
-        AutoPtr<IInteger32> optVal;
+        AutoPtr<IInterface> optVal;
         ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
         FAIL_RETURN(option->GetOption(ISocketOptions::_SO_TIMEOUT, (IInterface**)&optVal));
-        return optVal->GetValue(timeout);
+        return IInteger32::Probe(optVal)->GetValue(timeout);
     }
     return NOERROR;
 }
@@ -615,10 +615,10 @@ ECode DatagramSocket::GetReuseAddress(
     VALIDATE_NOT_NULL(reuse);
 
     FAIL_RETURN(CheckOpen());
-    AutoPtr<IBoolean> optVal;
+    AutoPtr<IInterface> optVal;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     FAIL_RETURN(option->GetOption(ISocketOptions::_SO_REUSEADDR, (IInterface**)&optVal));
-    return optVal->GetValue(reuse);
+    return IBoolean::Probe(optVal)->GetValue(reuse);
 }
 
 ECode DatagramSocket::SetBroadcast(
@@ -637,10 +637,10 @@ ECode DatagramSocket::GetBroadcast(
     VALIDATE_NOT_NULL(broadcast);
 
     FAIL_RETURN(CheckOpen());
-    AutoPtr<IBoolean> optVal;
+    AutoPtr<IInterface> optVal;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     FAIL_RETURN(option->GetOption(ISocketOptions::_SO_BROADCAST, (IInterface**)&optVal));
-    return optVal->GetValue(broadcast);
+    return IBoolean::Probe(optVal)->GetValue(broadcast);
 }
 
 ECode DatagramSocket::SetTrafficClass(
@@ -663,10 +663,10 @@ ECode DatagramSocket::GetTrafficClass(
     VALIDATE_NOT_NULL(value);
 
     FAIL_RETURN(CheckOpen());
-    AutoPtr<IInteger32> optVal;
+    AutoPtr<IInterface> optVal;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     FAIL_RETURN(option->GetOption(ISocketOptions::_IP_TOS, (IInterface**)&optVal));
-    return optVal->GetValue(value);
+    return IInteger32::Probe(optVal)->GetValue(value);
 }
 
 ECode DatagramSocket::IsClosed(

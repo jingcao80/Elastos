@@ -161,7 +161,7 @@ ECode CDefaultHostnameVerifier::GetSubjectAltNames(
     VALIDATE_NOT_NULL(names)
 
     AutoPtr<IList> result;
-    CArrayList::New((IArrayList**)&result);
+    CArrayList::New((IList**)&result);
     //try {
         AutoPtr<ICollection> subjectAltNames;
         AutoPtr< ArrayOf<IInterface*> > outarr;

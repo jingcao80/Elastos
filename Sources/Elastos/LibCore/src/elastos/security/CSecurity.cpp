@@ -470,10 +470,10 @@ void CSecurity::FilterProviders(
     providers->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
-        AutoPtr<IProvider> p;
+        AutoPtr<IInterface> p;
         it->GetNext((IInterface**)&p);
         Boolean result;
-        if (p->ImplementsAlg(service, algorithm, attribute, attrValue, &result), !result) {
+        if (IProvider::Probe(p)->ImplementsAlg(service, algorithm, attribute, attrValue, &result), !result) {
             it->Remove();
         }
     }
@@ -586,9 +586,9 @@ ECode CSecurity::RenumProviders()
     Int32 size;
     providers->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IProvider> provider;
+        AutoPtr<IInterface> provider;
         providers->Get(i, (IInterface**)&provider);
-        provider->SetProviderNumber(i + 1);
+        IProvider::Probe(provider)->SetProviderNumber(i + 1);
     }
     return NOERROR;
 }

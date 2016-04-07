@@ -125,7 +125,7 @@ ECode EntityUtils::ToString(
         charset = IHTTP::DEFAULT_CONTENT_CHARSET;
     }
     AutoPtr<IInputStreamReader> inputReader;
-    CInputStreamReader::New(instream, charset, (InputStreamReader**)&inputReader);
+    CInputStreamReader::New(instream, charset, (IInputStreamReader**)&inputReader);
     AutoPtr<IReader> reader = IReader::Probe(inputReader);
     AutoPtr<ICharArrayBuffer> buffer;
     CCharArrayBuffer::New(i, (ICharArrayBuffer**)&buffer);

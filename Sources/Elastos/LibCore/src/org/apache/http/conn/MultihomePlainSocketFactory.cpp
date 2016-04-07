@@ -115,11 +115,11 @@ ECode MultihomePlainSocketFactory::ConnectSocket(
     ECode ec = NOERROR;
     Boolean hasNext;
     while(it->HasNext(&hasNext), hasNext) {
-        AutoPtr<IInetAddress> address;
+        AutoPtr<IInterface> address;
         it->GetNext((IInterface**)&address);
         // try {
         AutoPtr<IInetSocketAddress> insa;
-        CInetSocketAddress::New(address, port, (IInetSocketAddress**)&insa);
+        CInetSocketAddress::New(IInetAddress::Probe(address), port, (IInetSocketAddress**)&insa);
         AutoPtr<ISocketAddress> sa = ISocketAddress::Probe(insa);
         ec = sock->Connect(sa, timeout);
         if (ec == (ECode)E_SOCKET_TIMEOUT_EXCEPTION) {

@@ -356,10 +356,10 @@ ECode Signature::TryAlgorithm(
     services->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
-        AutoPtr<IProviderService> service;
+        AutoPtr<IInterface> service;
         it->GetNext((IInterface**)&service);
         AutoPtr<ISpiAndProvider> sap;
-        TryAlgorithmWithProvider(key, service, (ISpiAndProvider**)&sap);
+        TryAlgorithmWithProvider(key, IProviderService::Probe(service), (ISpiAndProvider**)&sap);
         if (sap != NULL) {
             *spi = sap;
             REFCOUNT_ADD(*spi);
@@ -447,10 +447,10 @@ ECode Signature::InitVerify(
             ce->GetIterator((IIterator**)&i);
             Boolean hasNext;
             while (i->HasNext(&hasNext), hasNext) {
-                AutoPtr<ICharSequence> strObj;
+                AutoPtr<IInterface> strObj;
                 i->GetNext((IInterface**)&strObj);
                 String str;
-                strObj->ToString(&str);
+                ICharSequence::Probe(strObj)->ToString(&str);
                 if (String("2.5.29.15").Equals(str)) {
                     //KeyUsage OID = 2.5.29.15
                     critical = TRUE;

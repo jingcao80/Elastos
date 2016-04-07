@@ -82,8 +82,9 @@ ECode CCookieManager::Get(
     cookies->GetListIterator((IListIterator**)&enumerator);
     Boolean hasNext;
     while(IIterator::Probe(enumerator)->HasNext(&hasNext), hasNext) {
-        AutoPtr<IHttpCookie> cookie;
-        IIterator::Probe(enumerator)->GetNext((IInterface**)&cookie);
+        AutoPtr<IInterface> obj;
+        IIterator::Probe(enumerator)->GetNext((IInterface**)&obj);
+        AutoPtr<IHttpCookie> cookie = IHttpCookie::Probe(obj);
         if (CHttpCookie::PathMatches(cookie, uri)
                 && CHttpCookie::SecureMatches(cookie, uri)
                 && CHttpCookie::PortMatches(cookie, uri)) {

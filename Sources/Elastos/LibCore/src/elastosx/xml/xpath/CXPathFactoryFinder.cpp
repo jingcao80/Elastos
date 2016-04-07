@@ -253,7 +253,7 @@ ECode CXPathFactoryFinder::_newFactory(
         if (debug) {
             DebugPrintln(String("attempting to use the platform default W3C DOM XPath lib"));
         }
-        return CreateInstance(String("org.apache.xpath.jaxp.XPathFactoryImpl"),(IXPathFactory**)&xp);
+        return CreateInstance(String("org.apache.xpath.jaxp.XPathFactoryImpl"), xp);
     }
 
     if (debug) {

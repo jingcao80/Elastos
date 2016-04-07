@@ -276,7 +276,7 @@ ECode CSystem::InheritedChannel(
     CSelectorProviderHelper::AcquireSingletonByFriend((CSelectorProviderHelper**)&helper);
     AutoPtr<ISelectorProvider> provider;
     helper->GetProvider((ISelectorProvider**)&provider);
-    provider->InheritedChannel((IChannel**)&value);
+    provider->InheritedChannel(value);
     return NOERROR;
 }
 

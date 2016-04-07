@@ -136,8 +136,9 @@ ECode CServices::RemoveProvider(
     /* [in] */ Int32 providerNumber)
 {
     AutoLock lock(this);
-    AutoPtr<IProvider> p;
-    sProviders->Remove(providerNumber - 1, (IInterface**)&p);
+    AutoPtr<IInterface> value;
+    sProviders->Remove(providerNumber - 1, (IInterface**)&value);
+    AutoPtr<IProvider> p = IProvider::Probe(value);
     String name;
     p->GetName(&name);
     sProvidersNames.Erase(name);
@@ -174,9 +175,9 @@ ECode CServices::InitServiceInfo(
         Boolean hasNextAlias;
         while(aliasIt->HasNext(&hasNextAlias), hasNextAlias) {
             String alias;
-            AutoPtr<ICharSequence> aliasObj;
+            AutoPtr<IInterface> aliasObj;
             aliasIt->GetNext((IInterface**)&aliasObj);
-            aliasObj->ToString(&alias);
+            ICharSequence::Probe(aliasObj)->ToString(&alias);
             key = type + "." + alias.ToUpperCase();
             AppendServiceLocked(key, service);
         }
@@ -252,9 +253,9 @@ ECode CServices::GetCacheVersion(
         sProviders->GetIterator((IIterator**)&it);
         Boolean hasNext;
         while (it->HasNext(&hasNext), hasNext) {
-            AutoPtr<IProvider> p;
+            AutoPtr<IInterface> p;
             it->GetNext((IInterface**)&p);
-            InitServiceInfo(p);
+            InitServiceInfo(IProvider::Probe(p));
         }
         sNeedRefresh = FALSE;
     }

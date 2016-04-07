@@ -152,7 +152,7 @@ ECode ListResourceBundle::HandleGetObject(
     }
     AutoPtr<ICharSequence> seq;
     CString::New(key, (ICharSequence**)&seq);
-    (IMap::Probe(mTable))->Get(seq, (IInterface**)&outface);
+    (IMap::Probe(mTable))->Get(seq, outface);
     return NOERROR;
 }
 

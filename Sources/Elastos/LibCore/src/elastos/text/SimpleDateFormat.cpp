@@ -1362,8 +1362,9 @@ AutoPtr<ArrayOf<String> > SimpleDateFormat::IArrayofToStringArray(
 ECode SimpleDateFormat::Set2DigitYearStart(
     /* [in] */ IDate* date)
 {
-    mDefaultCenturyStart = NULL;
-    FAIL_RETURN (ICloneable::Probe(date)->Clone((IInterface**)&mDefaultCenturyStart));
+    AutoPtr<IInterface> clone;
+    FAIL_RETURN (ICloneable::Probe(date)->Clone((IInterface**)&clone));
+    mDefaultCenturyStart = IDate::Probe(clone);
     AutoPtr<ICalendar> cal;
     CGregorianCalendar::New((ICalendar**)&cal);
     cal->SetTime((IDate*)mDefaultCenturyStart);

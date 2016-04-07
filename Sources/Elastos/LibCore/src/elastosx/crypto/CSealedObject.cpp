@@ -245,17 +245,18 @@ AutoPtr<ArrayOf<Byte> > CSealedObject::GetSafeCopy(
     /* [in] */ const String& fieldName)
 {
     AutoPtr<ArrayOf<Byte> > fieldValue;
-    AutoPtr<IArrayOf> array;
-    fields->Get(fieldName, NULL, (IInterface**)&array);
+    AutoPtr<IInterface> obj;
+    fields->Get(fieldName, NULL, (IInterface**)&obj);
+    AutoPtr<IArrayOf> array = IArrayOf::Probe(obj);
     if (array != NULL) {
         Int32 len;
         array->GetLength(&len);
         fieldValue = ArrayOf<Byte>::Alloc(len);
         for (Int32 i = 0; i < len; i++) {
-            AutoPtr<IByte> ib;
+            AutoPtr<IInterface> ib;
             array->Get(i, (IInterface**)&ib);
             Byte b;
-            ib->GetValue(&b);
+            IByte::Probe(ib)->GetValue(&b);
             fieldValue->Set(i, b);
         }
         return fieldValue;
@@ -274,12 +275,12 @@ void CSealedObject::ReadObject(
     // The mutable byte arrays are cloned and the immutable strings are not.
     mEncodedParams = GetSafeCopy(fields, String("mEncodedParams"));
     mEncryptedContent = GetSafeCopy(fields, String("mEncryptedContent"));
-    AutoPtr<ICharSequence> cs;
+    AutoPtr<IInterface> cs;
     fields->Get(String("mParamsAlg"), NULL, (IInterface**)&cs);
-    cs->ToString(&mParamsAlg);
+    ICharSequence::Probe(cs)->ToString(&mParamsAlg);
     cs = NULL;
     fields->Get(String("mSealAlg"), NULL, (IInterface**)&cs);
-    cs->ToString(&mSealAlg);
+    ICharSequence::Probe(cs)->ToString(&mSealAlg);
 }
 
 ECode CSealedObject::ReadSerialized(

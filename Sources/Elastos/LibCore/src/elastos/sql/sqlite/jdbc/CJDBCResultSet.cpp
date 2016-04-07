@@ -2056,10 +2056,11 @@ ECode CJDBCResultSet::IsUpdatable(
         }
         updatable = UPD_INS;
         uptable = lastt;
-        AutoPtr<CJDBCResultSet> pk ;
         AutoPtr<IDatabaseMetaData> mdatabase;
         ECode ec1 = IConnection::Probe(((JDBCStatement *)s.Get())->conn)->GetMetaData((IDatabaseMetaData **)&mdatabase);
-        ECode ec2 = mdatabase->GetPrimaryKeys(String(NULL), String(NULL), uptable, (IResultSet**)&pk);
+        AutoPtr<IResultSet> res;
+        ECode ec2 = mdatabase->GetPrimaryKeys(String(NULL), String(NULL), uptable, (IResultSet**)&res);
+        AutoPtr<CJDBCResultSet> pk = (CJDBCResultSet*)res.Get();
         if (pk->tr->mNrows > 0) {
             Boolean colnotfound = FALSE;
             pkcols = ArrayOf<String>::Alloc(pk->tr->mNrows);

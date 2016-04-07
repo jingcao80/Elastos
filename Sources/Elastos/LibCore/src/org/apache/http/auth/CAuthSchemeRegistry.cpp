@@ -73,10 +73,10 @@ ECode CAuthSchemeRegistry::GetAuthScheme(
     }
     AutoPtr<ICharSequence> cs;
     CString::New(name.ToLowerCase(/*ILocale::ENGLISH*/), (ICharSequence**)&cs);
-    AutoPtr<IAuthSchemeFactory> factory;
+    AutoPtr<IInterface> factory;
     mRegisteredSchemes->Get(cs, (IInterface**)&factory);
     if (factory != NULL) {
-        return factory->NewInstance(params, scheme);
+        return IAuthSchemeFactory::Probe(factory)->NewInstance(params, scheme);
     }
     else {
         Logger::E("CAuthSchemeRegistry", "Unsupported authentication scheme: %s", name.string());

@@ -99,10 +99,10 @@ ECode CEncryptedPrivateKeyInfo::constructor(
         array->GetLength(&len);
         mEncryptedData = ArrayOf<Byte>::Alloc(len);
         for (Int32 i = 0; i < len; i++) {
-            AutoPtr<IByte> ib;
+            AutoPtr<IInterface> ib;
             array->Get(i, (IInterface**)&ib);
             Byte b;
-            ib->GetValue(&b);
+            IByte::Probe(ib)->GetValue(&b);
             mEncryptedData->Set(i, b);
         }
     }

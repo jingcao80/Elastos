@@ -396,10 +396,10 @@ ECode CKXmlSerializer::SetOutput(
     }
     AutoPtr<IWriter> writer;
     if (encoding.IsNull()) {
-        COutputStreamWriter::New(os, (IOutputStreamWriter**)&writer);
+        COutputStreamWriter::New(os, (IWriter**)&writer);
     }
     else {
-        COutputStreamWriter::New(os, encoding, (IOutputStreamWriter**)&writer);
+        COutputStreamWriter::New(os, encoding, (IWriter**)&writer);
     }
     SetOutput(writer);
     mEncoding = encoding;

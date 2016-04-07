@@ -149,8 +149,9 @@ void Provider::MyPutAll(
     AutoPtr<IInterface> key, value;
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
-        AutoPtr<IMapEntry> entry;
-        it->GetNext((IInterface**)&entry);
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
         key = NULL;
         entry->GetKey((IInterface**)&key);
         if (IString::Probe(key)) {
@@ -164,7 +165,7 @@ void Provider::MyPutAll(
         value = NULL;
         entry->GetValue((IInterface**)&value);
         Properties::Put(key, value);
-        AutoPtr<IInterface> obj;
+        obj = NULL;
         mChangedProperties->Remove(key, (IInterface**)&obj);
         if (obj == NULL) {
             RemoveFromPropertyServiceTable(key);
@@ -365,8 +366,9 @@ ECode Provider::GetService(
     services->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
-        AutoPtr<IProviderService> service;
-        it->GetNext((IInterface**)&service);
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IProviderService> service = IProviderService::Probe(obj);
         String srvType;
         service->GetType(&srvType);
         if (type.Equals(srvType)) {
@@ -589,15 +591,17 @@ void Provider::ServiceInfoToProperties(
         entrySet->GetIterator((IIterator**)&it);
         Boolean hasNext;
         while (it->HasNext(&hasNext), hasNext) {
-            AutoPtr<IMapEntry> entry;
-            it->GetNext((IInterface**)&entry);
-            AutoPtr<ICharSequence> entryKey, entryValue;
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
+            AutoPtr<IInterface> entryKey, entryValue;
             entry->GetKey((IInterface**)&entryKey);
+            entry->GetValue((IInterface**)&entryValue);
             String entryKeyStr;
-            entryKey->ToString(&entryKeyStr);
+            ICharSequence::Probe(entryKey)->ToString(&entryKeyStr);
             keyObj = NULL;
             CString::New(type + String(".") + algo + String(" ") + entryKeyStr, (ICharSequence**)&keyObj);
-            Properties::Put(keyObj, entryValue);
+            Properties::Put(keyObj, ICharSequence::Probe(entryValue));
         }
     }
     if (mProviderNumber != -1) {
@@ -642,12 +646,12 @@ void Provider::ServiceInfoFromProperties(
         entrySet->GetIterator((IIterator**)&it);
         Boolean hasNext;
         while (it->HasNext(&hasNext), hasNext) {
-            AutoPtr<IMapEntry> entry;
+            AutoPtr<IInterface> entry;
             it->GetNext((IInterface**)&entry);
-            AutoPtr<ICharSequence> entryKey, entryValue;
-            entry->GetKey((IInterface**)&entryKey);
+            AutoPtr<IInterface> entryKey;
+            IMapEntry::Probe(entry)->GetKey((IInterface**)&entryKey);
             String entryKeyStr;
-            entryKey->ToString(&entryKeyStr);
+            ICharSequence::Probe(entryKey)->ToString(&entryKeyStr);
             keyObj = NULL;
             CString::New(type + String(".") + algo + String(" ") + entryKeyStr, (ICharSequence**)&keyObj);
             Properties::Remove(keyObj);
@@ -697,8 +701,9 @@ void Provider::RemoveFromPropertyServiceTable(
             values->GetIterator((IIterator**)&it);
             Boolean hasNext;
             while (it->HasNext(&hasNext), hasNext) {
-                s = NULL;
-                it->GetNext((IInterface**)&s);
+                AutoPtr<IInterface> obj;
+                it->GetNext((IInterface**)&obj);
+                s = IProviderService::Probe(obj);
                 AutoPtr<IList> aliases;
                 s->GetAliases((IList**)&aliases);
                 Boolean result;
@@ -780,8 +785,9 @@ void Provider::UpdatePropertyServiceTable()
     entrySet->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
-        AutoPtr<IMapEntry> entry;
-        it->GetNext((IInterface**)&entry);
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
         AutoPtr<IInterface> _key;
         AutoPtr<IInterface> _value;
         entry->GetKey((IInterface**)&_key);

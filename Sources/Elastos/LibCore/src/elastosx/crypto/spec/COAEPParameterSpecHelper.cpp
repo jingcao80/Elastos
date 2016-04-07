@@ -12,8 +12,7 @@ CAR_SINGLETON_IMPL(COAEPParameterSpecHelper)
 ECode COAEPParameterSpecHelper::GetDEFAULT(
     /* [out] */ IOAEPParameterSpec ** spec)
 {
-    VALIDATE_NOT_NULL(spec);
-    return COAEPParameterSpec::New((IOAEPParameterSpec**)&spec);
+    return COAEPParameterSpec::New(spec);
 }
 
 } // Spec

@@ -85,8 +85,9 @@ ECode CEngine::GetInstance(
         Logger::E("CEngine", "%s %s implementation not found", mServiceName.string(), algorithm.string());
         return E_NO_SUCH_ALGORITHM_EXCEPTION;
     }
-    AutoPtr<IProviderService> service;
-    services->Get(0, (IInterface**)&service);
+    AutoPtr<IInterface> item;
+    services->Get(0, (IInterface**)&item);
+    AutoPtr<IProviderService> service = IProviderService::Probe(item);
     AutoPtr<IInterface> obj;
     service->NewInstance(param, (IInterface**)&obj);
     AutoPtr<IProvider> pro;

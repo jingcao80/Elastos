@@ -232,10 +232,10 @@ ECode Socket::GetKeepAlive(
     VALIDATE_NOT_NULL(keepAlive);
 
     FAIL_RETURN(CheckOpenAndCreate(TRUE));
-    AutoPtr<IBoolean> optVal;
+    AutoPtr<IInterface> optVal;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     FAIL_RETURN(option->GetOption(ISocketOptions::_SO_KEEPALIVE, (IInterface**)&optVal));
-    return optVal->GetValue(keepAlive);
+    return IBoolean::Probe(optVal)->GetValue(keepAlive);
 }
 
 ECode Socket::GetLocalAddress(

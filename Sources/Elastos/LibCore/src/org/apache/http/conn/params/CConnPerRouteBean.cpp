@@ -97,11 +97,11 @@ ECode CConnPerRouteBean::SetMaxForRoutes(
     keys->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
-        AutoPtr<IHttpRoute> key;
+        AutoPtr<IInterface> key;
         it->GetNext((IInterface**)&key);
-        AutoPtr<IInteger32> value;
+        AutoPtr<IInterface> value;
         map->Get(key, (IInterface**)&value);
-        mMaxPerHostMap[key] = value;
+        mMaxPerHostMap[IHttpRoute::Probe(key)] = IInteger32::Probe(value);
     }
     return NOERROR;
 }

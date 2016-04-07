@@ -225,8 +225,9 @@ ECode CJarUtils::VerifySignature(
         atr->GetIterator((IIterator**)&it);
         Boolean hasNext;
         while (it->HasNext(&hasNext), hasNext) {
-            AutoPtr<IAttributeTypeAndValue> a;
-            it->GetNext((IInterface**)&a);
+            AutoPtr<IInterface> item;
+            it->GetNext((IInterface**)&item);
+            AutoPtr<IAttributeTypeAndValue> a = IAttributeTypeAndValue::Probe(item);
             AutoPtr<IObjectIdentifier> oi;
             a->GetType((IObjectIdentifier**)&oi);
             AutoPtr< ArrayOf<Int32> > oid;
@@ -249,15 +250,16 @@ ECode CJarUtils::VerifySignature(
                 }
                 AutoPtr<IIterator> entriesIt;
                 entries->GetIterator((IIterator**)&entriesIt);
-                AutoPtr<IArrayOf> arrayObj;
-                entriesIt->GetNext((IInterface**)&arrayObj);
+                AutoPtr<IInterface> obj;
+                entriesIt->GetNext((IInterface**)&obj);
+                AutoPtr<IArrayOf> arrayObj = IArrayOf::Probe(obj);
                 arrayObj->GetLength(&size);
                 existingDigest = ArrayOf<Byte>::Alloc(size);
                 for (Int32 i = 0; i < size; i++) {
-                    AutoPtr<IByte> byteObj;
+                    AutoPtr<IInterface> byteObj;
                     arrayObj->Get(i, (IInterface**)&byteObj);
                     Byte value;
-                    byteObj->GetValue(&value);
+                    IByte::Probe(byteObj)->GetValue(&value);
                     (*existingDigest)[i] = value;
                 }
             }

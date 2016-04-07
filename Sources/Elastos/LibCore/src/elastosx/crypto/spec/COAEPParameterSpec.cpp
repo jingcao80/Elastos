@@ -24,7 +24,9 @@ ECode COAEPParameterSpec::constructor()
     // mMgfSpec = Elastos::Security::Spec::CMGF1ParameterSpec::SHA1;
     AutoPtr<IPSpecifiedHelper> helper;
     CPSpecifiedHelper::AcquireSingleton((IPSpecifiedHelper**)&helper);
-    helper->GetDEFAULT((IPSpecified**)&mPSrc);
+    AutoPtr<IPSpecified> result;
+    helper->GetDEFAULT((IPSpecified**)&result);
+    mPSrc = IPSource::Probe(result);
     return NOERROR;
 }
 

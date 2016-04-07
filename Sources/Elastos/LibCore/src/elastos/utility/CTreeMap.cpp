@@ -98,7 +98,7 @@ ECode CTreeMap::constructor(
     /* [in] */ ISortedMap* copyFrom)
 {
     AutoPtr<IComparator> sourceComparator;
-    copyFrom->GetComparator((IComparator**)&copyFrom);
+    copyFrom->GetComparator((IComparator**)&sourceComparator);
     if (sourceComparator != NULL) {
         mComparator = sourceComparator;
     }
@@ -107,7 +107,7 @@ ECode CTreeMap::constructor(
     }
     AutoPtr<ArrayOf<IInterface*> > entries;
     AutoPtr<ISet> outset;
-    (IMap::Probe(copyFrom))->GetEntrySet((ISet**)&entries);
+    (IMap::Probe(copyFrom))->GetEntrySet((ISet**)&outset);
     (ICollection::Probe(outset))->ToArray((ArrayOf<IInterface*>**)&entries);
     for (Int32 i = 0; i < entries->GetLength(); i++) {
         AutoPtr<IMapEntry> entry = IMapEntry::Probe((*entries)[i]);
@@ -1066,7 +1066,9 @@ ECode CTreeMap::ReadObject(
 {
     AutoPtr<IObjectInputStreamGetField> fields;
     stream->ReadFields((IObjectInputStreamGetField**)&fields);
-    fields->Get(String("comparator"), NULL, (IInterface**)&mComparator);
+    AutoPtr<IInterface> comparator;
+    fields->Get(String("comparator"), NULL, (IInterface**)&comparator);
+    mComparator = IComparator::Probe(comparator);
     if (mComparator == NULL) {
         mComparator = NATURAL_ORDER;
     }

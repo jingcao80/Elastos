@@ -271,10 +271,10 @@ ECode Cipher::Init(
                 ce->GetIterator((IIterator**)&it);
                 Boolean hasNext;
                 while (it->HasNext(&hasNext), hasNext) {
-                    AutoPtr<ICharSequence> cs;
+                    AutoPtr<IInterface> cs;
                     it->GetNext((IInterface**)&cs);
                     String oid;
-                    cs->ToString(&oid);
+                    ICharSequence::Probe(cs)->ToString(&oid);
                     if (oid.Equals("2.5.29.15")) { // KeyUsage OID = 2.5.29.15
                         critical = TRUE;
                         break;

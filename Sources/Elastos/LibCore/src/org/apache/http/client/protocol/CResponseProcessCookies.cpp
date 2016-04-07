@@ -94,8 +94,9 @@ void CResponseProcessCookies::ProcessCookies(
         cookies->GetIterator((IIterator**)&it);
         Boolean result;
         while(it->HasNext(&result), result) {
-            AutoPtr<ICookie> cookie;
-            it->GetNext((IInterface**)&cookie);
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<ICookie> cookie = ICookie::Probe(obj);
             // try {
             ECode ec = cookieSpec->Validate(cookie, cookieOrigin);
             if (FAILED(ec)) {

@@ -286,7 +286,7 @@ ECode CX509CRLImpl::GetTBSCertList(
 {
     VALIDATE_NOT_NULL(tbsCertList)
     if (mTbsCertListEncoding == NULL) {
-        mTbsCertList->GetEncoded((ITBSCertList**)&mTbsCertListEncoding);
+        mTbsCertList->GetEncoded((ArrayOf<Byte>**)&mTbsCertListEncoding);
     }
     AutoPtr<ArrayOf<Byte> > result = ArrayOf<Byte>::Alloc(mTbsCertListEncoding->GetLength());
     result->Copy(0, mTbsCertListEncoding, 0, mTbsCertListEncoding->GetLength());

@@ -290,7 +290,9 @@ ECode CMac::Clone(
     AutoPtr<IMacSpi> spi;
     GetSpi((IMacSpi**)&spi);
     if (spi != NULL) {
-        ICloneable::Probe(spi)->Clone((IInterface**)&newSpiImpl);
+        AutoPtr<IInterface> clone;
+        ICloneable::Probe(spi)->Clone((IInterface**)&clone);
+        newSpiImpl = IMacSpi::Probe(clone);
     }
     AutoPtr<CMac> mac;
     CMac::NewByFriend(newSpiImpl, mProvider, mAlgorithm, (CMac**)&mac);

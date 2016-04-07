@@ -325,7 +325,7 @@ AutoPtr<IInputStream> FileURLConnection::GetDirectoryListing(
     AutoPtr<IInputStream> outinput;
     AutoPtr< ArrayOf<Byte> > outbytes;
     bytes->ToByteArray((ArrayOf<Byte>**)&outbytes);
-    CByteArrayInputStream::New(outbytes, (IByteArrayInputStream**)&outinput);
+    CByteArrayInputStream::New(outbytes, (IInputStream**)&outinput);
 
     return outinput;
 }

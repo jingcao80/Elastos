@@ -133,9 +133,9 @@ ECode EnglishReasonPhraseCatalog::GetReason(
     String reason(NULL);
     Int32 len;
     if ((*REASON_PHRASES)[category]->GetLength(&len), len > subcode) {
-        AutoPtr<ICharSequence> cs;
+        AutoPtr<IInterface> cs;
         (*REASON_PHRASES)[category]->Get(subcode, (IInterface**)&cs);
-        cs->ToString(&reason);
+        ICharSequence::Probe(cs)->ToString(&reason);
     }
     *_reason = reason;
     return NOERROR;

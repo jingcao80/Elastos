@@ -142,14 +142,14 @@ ECode CertStore::GetCertificates(
     /* [in] */ ICertSelector *selector,
     /* [out] */ ICollection **certs)
 {
-    return mSpiImpl->EngineGetCertificates(selector, (ICollection**)&certs);
+    return mSpiImpl->EngineGetCertificates(selector, certs);
 }
 
 ECode CertStore::GetCRLs(
     /* [in] */ ICRLSelector *selector,
     /* [out] */ ICollection **crls)
 {
-    return mSpiImpl->EngineGetCRLs(selector, (ICollection**)&crls);
+    return mSpiImpl->EngineGetCRLs(selector, crls);
 }
 
 CertStore::CertStore(

@@ -105,10 +105,7 @@ ECode CHttpDate::_Parse(
         AutoPtr<ISimpleDateFormat> sdf;
         ECode ec = CSimpleDateFormat::New(BROWSER_COMPATIBLE_DATE_FORMATS[i], CLocale::US, (ISimpleDateFormat**)&sdf);
         if(ec == NOERROR) {
-            AutoPtr<IDate> outdate;
-            IDateFormat::Probe(sdf)->Parse(value, (IDate**)&adate);
-            *adate = outdate;
-            REFCOUNT_ADD(*adate)
+            IDateFormat::Probe(sdf)->Parse(value, adate);
             return NOERROR;
         }
         // } catch (ParseException ignore) {

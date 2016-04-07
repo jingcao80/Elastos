@@ -987,9 +987,9 @@ void CConcurrentSkipListMap::BuildFromSorted(
                 Int32 size = 0;
                 (ICollection::Probe(preds))->GetSize(&size);
                 if (i < size) {
-                    AutoPtr<Index> ar;
+                    AutoPtr<IInterface> ar;
                     (IList::Probe(preds))->Get(i, (IInterface**)&ar);
-                    ar->mRight = idx;
+                    ((Index*)IObject::Probe(ar))->mRight = idx;
                     AutoPtr<IInterface> pre;
                     (IList::Probe(preds))->Set(i, idx->Probe(EIID_IInterface), (IInterface**)&pre);
                 }
@@ -1077,9 +1077,9 @@ void CConcurrentSkipListMap::ReadObject(
                 Int32 size = 0;
                 (ICollection::Probe(preds))->GetSize(&size);
                 if (i < size) {
-                    AutoPtr<Index> ar;
+                    AutoPtr<IInterface> ar;
                     (IList::Probe(preds))->Get(i, (IInterface**)&ar);
-                    ar->mRight = idx;
+                    ((Index*)IObject::Probe(ar))->mRight = idx;
                     AutoPtr<IInterface> pre;
                     (IList::Probe(preds))->Set(i, idx->Probe(EIID_IInterface), (IInterface**)&pre);
                 }

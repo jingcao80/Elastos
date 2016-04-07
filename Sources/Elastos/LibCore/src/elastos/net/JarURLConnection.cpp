@@ -148,7 +148,7 @@ ECode JarURLConnection::GetMainAttributes(
     jarFile->GetManifest((IManifest**)&m);
 
     if (m) {
-        return m->GetMainAttributes((IAttributes**)&attr);
+        return m->GetMainAttributes(attr);
     }
     return NOERROR;
 }

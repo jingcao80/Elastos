@@ -153,8 +153,9 @@ ECode CRequestAddCookies::Process(
     cookies->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while(it->HasNext(&hasNext), hasNext) {
-        AutoPtr<ICookie> cookie;
-        it->GetNext((IInterface**)&cookie);
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<ICookie> cookie = ICookie::Probe(obj);
         Boolean match;
         if (cookieSpec->Match(cookie, cookieOrigin, &match), match) {
             // if (this.log.isDebugEnabled()) {
@@ -172,9 +173,9 @@ ECode CRequestAddCookies::Process(
         AutoPtr<IIterator> headersIt;
         headers->GetIterator((IIterator**)&headersIt);
         while(headersIt->HasNext(&hasNext), hasNext) {
-            AutoPtr<IHeader> header;
+            AutoPtr<IInterface> header;
             headersIt->GetNext((IInterface**)&header);
-            message->AddHeader(header);
+            message->AddHeader(IHeader::Probe(header));
         }
     }
 
@@ -185,8 +186,9 @@ ECode CRequestAddCookies::Process(
         AutoPtr<IIterator> matchedIt;
         matchedCookies->GetIterator((IIterator**)&matchedIt);
         while(matchedIt->HasNext(&hasNext), hasNext) {
-            AutoPtr<ICookie> cookie;
-            matchedIt->GetNext((IInterface**)&cookie);
+            AutoPtr<IInterface> obj;
+            matchedIt->GetNext((IInterface**)&obj);
+            AutoPtr<ICookie> cookie = ICookie::Probe(obj);
             Int32 cookieVer;
             if (cookie->GetVersion(&cookieVer), ver != cookieVer) {
                 needVersionHeader = TRUE;

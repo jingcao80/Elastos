@@ -468,7 +468,7 @@ ECode CSubject::DoAs_PrivilegedAction(
             *result = NULL;
 
 #if 0 // TODO: Waiting for CAccessControlContext
-            return CAccessControlContext::New(mContext, mCombiner, (IAccessControlContext**)&result);
+            return CAccessControlContext::New(mContext, mCombiner, result);
 #else
             assert(0);
             return NOERROR;
@@ -538,7 +538,7 @@ ECode CSubject::DoAs_PrivilegedExceptionAction(
             *result = NULL;
 
 #if 0 // TODO: Waiting for CAccessControlContext
-            return CAccessControlContext::New(mContext, mCombiner, (IAccessControlContext**)&result);
+            return CAccessControlContext::New(mContext, mCombiner, result);
 #else
             assert(0);
             return NOERROR;

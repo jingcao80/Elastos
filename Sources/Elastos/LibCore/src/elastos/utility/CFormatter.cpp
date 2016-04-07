@@ -216,7 +216,7 @@ ECode CFormatter::constructor(
     ec = COutputStreamWriter::New(IOutputStream::Probe(fout), csn, (IOutputStreamWriter**)&osw);
     FAIL_GOTO(ec, _EXIT_)
 
-    ec = CBufferedWriter::New(IWriter::Probe(osw), (IBufferedWriter**)&mOut);
+    ec = CBufferedWriter::New(IWriter::Probe(osw), (IAppendable**)&mOut);
     FAIL_GOTO(ec, _EXIT_)
     // } catch (RuntimeException e) {
     //     IoUtils.closeQuietly(fout);
@@ -242,7 +242,7 @@ ECode CFormatter::constructor(
     defchar->GetName(&charname);
     AutoPtr<IOutputStreamWriter> osw;
     FAIL_RETURN(COutputStreamWriter::New(os, charname, (IOutputStreamWriter**)&osw));
-    FAIL_RETURN(CBufferedWriter::New(IWriter::Probe(osw), (IBufferedWriter**)&mOut));
+    FAIL_RETURN(CBufferedWriter::New(IWriter::Probe(osw), (IAppendable**)&mOut));
     mLocale = CLocale::GetDefault();
     return NOERROR;
 }
@@ -262,7 +262,7 @@ ECode CFormatter::constructor(
 {
     AutoPtr<IOutputStreamWriter> osw;
     FAIL_RETURN(COutputStreamWriter::New(os, csn, (IOutputStreamWriter**)&osw));
-    FAIL_RETURN(CBufferedWriter::New(IWriter::Probe(osw), (IBufferedWriter**)&mOut));
+    FAIL_RETURN(CBufferedWriter::New(IWriter::Probe(osw), (IAppendable**)&mOut));
     mLocale = l;
     return NOERROR;
 }

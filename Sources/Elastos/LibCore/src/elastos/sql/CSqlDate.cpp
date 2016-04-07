@@ -121,11 +121,7 @@ ECode CSqlDate::ValueOf(
     StringUtils::ParsePositiveInt64((*parts)[2], &value);
     Int32 day = value;
 
-    AutoPtr<ISQLDate> obj;
-    CSqlDate::New(year - 1900, month - 1, day, (ISQLDate**)&date);
-    *date =  obj;
-    REFCOUNT_ADD(*date);
-    return NOERROR;
+    return CSqlDate::New(year - 1900, month - 1, day, date);
 }
 
 Int64 CSqlDate::NormalizeTime(

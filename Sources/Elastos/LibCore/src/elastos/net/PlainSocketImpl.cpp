@@ -353,10 +353,10 @@ ECode PlainSocketImpl::SetOption(
 
 Int32 PlainSocketImpl::SocksGetServerPort()
 {
-    AutoPtr<IInetSocketAddress> addr;
+    AutoPtr<ISocketAddress> addr;
     mProxy->GetAddress((ISocketAddress**)&addr);
     Int32 port;
-    addr->GetPort(&port);
+    IInetSocketAddress::Probe(addr)->GetPort(&port);
     return port;
 }
 
@@ -366,8 +366,9 @@ AutoPtr<IInetAddress> PlainSocketImpl::SocksGetServerAddress()
     // get socks server address from proxy. It is unnecessary to check
     // "socksProxyHost" property, since all proxy setting should be
     // determined by ProxySelector.
-    AutoPtr<IInetSocketAddress> addr;
-    mProxy->GetAddress((ISocketAddress**)&addr);
+    AutoPtr<ISocketAddress> saddr;
+    mProxy->GetAddress((ISocketAddress**)&saddr);
+    AutoPtr<IInetSocketAddress> addr = IInetSocketAddress::Probe(saddr);
     addr->GetHostName(&proxyName);
     if (proxyName.IsNull()) {
         AutoPtr<IInetAddress> iaddr;

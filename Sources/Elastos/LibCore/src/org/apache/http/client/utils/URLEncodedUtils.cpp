@@ -146,8 +146,9 @@ String URLEncodedUtils::Format(
     parameters->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while(it->HasNext(&hasNext), hasNext) {
-        AutoPtr<INameValuePair> parameter;
-        it->GetNext((IInterface**)&parameter);
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<INameValuePair> parameter = INameValuePair::Probe(obj);
         String name;
         parameter->GetName(&name);
         String encodedName;

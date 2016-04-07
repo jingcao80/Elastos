@@ -237,7 +237,7 @@ ECode CX500Principal::constructor(
     // try {
         // FIXME dn = new Name(name);
 #if 0 // TODO: Waiting for IName
-    return IName::ASN1->Probe(EIID_IASN1Type)->Decode(name, (IInterface**)&mDn);
+    return IName::ASN1->Probe(EIID_IASN1Type)->Decode(name, (IName**)&mDn);
 #else
     assert(0);
     return NOERROR;
@@ -258,7 +258,7 @@ ECode CX500Principal::constructor(
     // try {
         // FIXME dn = new Name(is);
 #if 0 // TODO: Waiting for IName
-    return IName::ASN1->Probe(EIID_IASN1Type)->Decode(in, (IInterface**)&mDn);
+    return IName::ASN1->Probe(EIID_IASN1Type)->Decode(in, (IName**)&mDn);
 #else
     assert(0);
     return NOERROR;

@@ -56,8 +56,9 @@ AutoPtr<ICredentials> BasicCredentialsProvider::MatchCredentials(
         keySet->GetIterator((IIterator**)&it);
         Boolean hasNext;
         while (it->HasNext(&hasNext), hasNext) {
-            AutoPtr<IAuthScope> current;
-            it->GetNext((IInterface**)&current);
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IAuthScope> current = IAuthScope::Probe(obj);
             Int32 factor;
             authscope->Match(current, &factor);
             if (factor > bestMatchFactor) {

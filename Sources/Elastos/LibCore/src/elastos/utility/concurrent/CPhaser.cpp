@@ -524,7 +524,8 @@ void CPhaser::ReleaseWaiters(
     AutoPtr<IThread> t;  // its thread
     AutoPtr<IAtomicReference> head = (phase & 1) == 0 ? mEvenQ : mOddQ;
     AutoPtr<CPhaser> cr = (CPhaser*)mRoot.Get();
-    while ((head->Get((IInterface**)&q), q) != NULL &&
+    AutoPtr<IInterface> obj;
+    while ((head->Get((IInterface**)&obj), q = (QNode*)IObject::Probe(obj)) != NULL &&
            q->mPhase != (Int32)(cr->mState >> PHASE_SHIFT)) {
         Boolean b = FALSE;
         if ((head->CompareAndSet(q->Probe(EIID_IInterface), q->mNext->Probe(EIID_IInterface), &b), b) &&
@@ -541,8 +542,9 @@ Int32 CPhaser::AbortWait(
     AutoPtr<IAtomicReference> head = (phase & 1) == 0 ? mEvenQ : mOddQ;
     for (;;) {
         AutoPtr<IThread> t;
-        AutoPtr<QNode> q;
-        head->Get((IInterface**)&q);
+        AutoPtr<IInterface> obj;
+        head->Get((IInterface**)&obj);
+        AutoPtr<QNode> q = (QNode*)IObject::Probe(obj);
         AutoPtr<CPhaser> cr = (CPhaser*)mRoot.Get();
         Int32 p = (Int32)(cr->mState >> PHASE_SHIFT);
         if (q == NULL || ((t = q->mThread) != NULL && q->mPhase == p))
@@ -588,8 +590,9 @@ Int32 CPhaser::InternalAwaitAdvance(
             break;
         else if (!queued) {           // push onto queue
             AutoPtr<IAtomicReference> head = (phase & 1) == 0 ? mEvenQ : mOddQ;
-            AutoPtr<QNode> q;
-            head->Get((IInterface**)&q);
+            AutoPtr<IInterface> obj;
+            head->Get((IInterface**)&obj);
+            AutoPtr<QNode> q = (QNode*)IObject::Probe(obj);
             node->mNext = q;
             if ((q == NULL || q->mPhase == phase) &&
                 (Int32)(mState >> PHASE_SHIFT) == phase) // avoid stale enq

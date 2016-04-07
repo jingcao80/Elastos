@@ -352,10 +352,11 @@ void CURL::SetupStreamHandler()
                     continue;
                 }
 
-                mStreamHandler = NULL;
-                if (FAILED(c->CreateObject((IInterface**)&mStreamHandler))) {
+                AutoPtr<IInterface> obj;
+                if (FAILED(c->CreateObject((IInterface**)&obj))) {
                     continue;
                 }
+                mStreamHandler = IURLStreamHandler::Probe(obj);
 
                 if (mStreamHandler != NULL) {
                     sStreamHandlers[mProtocol] = mStreamHandler;

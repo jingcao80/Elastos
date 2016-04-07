@@ -3591,9 +3591,9 @@ ECode Collections::_UnmodifiableMap::UnmodifiableEntrySet::Iterator::HasNext(
 ECode Collections::_UnmodifiableMap::UnmodifiableEntrySet::Iterator::GetNext(
     /* [out] */ IMapEntry** object)
 {
-    AutoPtr<IMapEntry> o;
+    AutoPtr<IInterface> o;
     mIterator->GetNext((IInterface**)&o);
-    AutoPtr<IMapEntry> res = new UnmodifiableMapEntry(o);
+    AutoPtr<IMapEntry> res = new UnmodifiableMapEntry(IMapEntry::Probe(o));
     *object = res;
     REFCOUNT_ADD(*object)
     return NOERROR;
@@ -5054,7 +5054,7 @@ ECode Collections::LastIndexOfSubList(
             // iterate through the elements in sublist to see
             // if they are included in the same order in the list
             AutoPtr<IListIterator> sublistIt;
-            sublist->GetListIterator(sublistSize - 1, (IListIterator**)&sublist);
+            sublist->GetListIterator(sublistSize - 1, (IListIterator**)&sublistIt);
             Boolean difFound = FALSE;
             Boolean subPrevious, listPrevious;
             while ((sublistIt->HasPrevious(&subPrevious), subPrevious)) {

@@ -133,7 +133,7 @@ ECode CX509CertPathImpl::ASN1SequenceOfDerived::GetDecodedObject(
     Int32 size;
     encodings->GetSize(&size);
     AutoPtr<IList> certificates;
-    CArrayList::New(size, (IArrayList**)&certificates);
+    CArrayList::New(size, (IList**)&certificates);
     for (Int32 i = 0; i < size; i++) {
         // create the X.509 certificate on the base of its encoded form
         // and add it to the list.
@@ -198,7 +198,7 @@ ECode CX509CertPathImpl::ASN1SequenceOfDerived::GetValues(
     Int32 size;
     cp->mCertificates->GetSize(&size);
     AutoPtr<IList> encodings;
-    CArrayList::New(size, (IArrayList**)&encodings);
+    CArrayList::New(size, (IList**)&encodings);
     ECode ec = NOERROR;
     for (Int32 i = 0; i < size; i++) {
         // get the encoded form of certificate and place it into the
@@ -333,10 +333,10 @@ ECode CX509CertPathImpl::GetInstance(
         sd->GetCertificates((IList**)&certs);
         if (certs == NULL) {
             // empty chain of certificates
-            CArrayList::New((IArrayList**)&certs);
+            CArrayList::New((IList**)&certs);
         }
         AutoPtr<IList> result;
-        CArrayList::New((IArrayList**)&result);
+        CArrayList::New((IList**)&result);
         AutoPtr<IIterator> it;
         certs->GetIterator((IIterator**)&it);
         Boolean hasNext;
@@ -410,11 +410,11 @@ ECode CX509CertPathImpl::GetInstance(
         AutoPtr<IList> certs;
         sd->GetCertificates((IList**)&certs);
         if (certs == NULL) {
-            CArrayList::New((IArrayList**)&certs);
+            CArrayList::New((IList**)&certs);
         }
 
         AutoPtr<IList> result;
-        CArrayList::New((IArrayList**)&result);
+        CArrayList::New((IList**)&result);
         AutoPtr<IIterator> it;
         certs->GetIterator((IIterator**)&it);
         Boolean hasNext;
@@ -526,7 +526,7 @@ ECode CX509CertPathImpl::constructor(
     CertPath::Init("X.509");
     Int32 size;
     certs->GetSize(&size);
-    CArrayList::New(size, (IArrayList**)&mCertificates);
+    CArrayList::New(size, (IList**)&mCertificates);
 
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> cert;

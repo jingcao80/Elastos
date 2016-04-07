@@ -215,10 +215,10 @@ ECode ServerSocket::GetSoTimeout(
 
     FAIL_RETURN(CheckOpen());
 
-    AutoPtr<IInteger32> optVal;
+    AutoPtr<IInterface> optVal;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     FAIL_RETURN(option->GetOption(ISocketOptions::_SO_TIMEOUT, (IInterface**)&optVal));
-    return optVal->GetValue(timeout);
+    return IInteger32::Probe(optVal)->GetValue(timeout);
 }
 
 ECode ServerSocket::ImplAccept(
@@ -406,10 +406,10 @@ ECode ServerSocket::GetReuseAddress(
     VALIDATE_NOT_NULL(reuse);
 
     FAIL_RETURN(CheckOpen())
-    AutoPtr<IBoolean> optVal;
+    AutoPtr<IInterface> optVal;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     FAIL_RETURN(option->GetOption(ISocketOptions::_SO_REUSEADDR, (IInterface**)&optVal));
-    return optVal->GetValue(reuse);
+    return IBoolean::Probe(optVal)->GetValue(reuse);
 }
 
 ECode ServerSocket::SetReceiveBufferSize(
@@ -432,10 +432,10 @@ ECode ServerSocket::GetReceiveBufferSize(
     VALIDATE_NOT_NULL(size);
 
     FAIL_RETURN(CheckOpen())
-    AutoPtr<IInteger32> optVal;
+    AutoPtr<IInterface> optVal;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     FAIL_RETURN(option->GetOption(ISocketOptions::_SO_RCVBUF, (IInterface**)&optVal));
-    return optVal->GetValue(size);
+    return IInteger32::Probe(optVal)->GetValue(size);
 }
 
 ECode ServerSocket::GetChannel(

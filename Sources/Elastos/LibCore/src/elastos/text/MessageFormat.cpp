@@ -537,8 +537,9 @@ ECode MessageFormat::Parse(
                 target = string.Substring(offset);
                 offset = (Int32)(string.GetLength());
             }
-
-            CString::New(target, (ICharSequence**)&parse);
+            AutoPtr<ICharSequence> cs;
+            CString::New(target, (ICharSequence**)&cs);
+            parse = ICharSequence::Probe(cs);
         }
         else {
             internalPos->SetIndex(offset);

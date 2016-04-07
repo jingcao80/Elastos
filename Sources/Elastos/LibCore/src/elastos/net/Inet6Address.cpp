@@ -95,13 +95,13 @@ ECode Inet6Address::GetByAddress(
     nif->GetInetAddresses((IEnumeration**)&em);
     Boolean hasNext;
     while (em->HasMoreElements(&hasNext), hasNext) {
-        AutoPtr<IInetAddress> ia;
+        AutoPtr<IInterface> ia;
         em->GetNextElement((IInterface**)&ia);
         AutoPtr<ArrayOf<Byte> > addresses;
-        ia->GetAddress((ArrayOf<Byte>**)&addresses);
+        IInetAddress::Probe(ia)->GetAddress((ArrayOf<Byte>**)&addresses);
         if(addresses->GetLength() == 16)
         {
-            AutoPtr<IInet6Address> v6ia = (IInet6Address*)ia->Probe(EIID_IInet6Address);
+            AutoPtr<IInet6Address> v6ia = IInet6Address::Probe(ia);
             if(v6ia != NULL){
                 CInet6Address* cv6ia = (CInet6Address*)(v6ia.Get());
                 Boolean isSameType = cv6ia->CompareLocalType((IInet6Address*)*address);

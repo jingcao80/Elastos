@@ -49,9 +49,10 @@ ECode CMulticastSocket::GetInterface(
 
     FAIL_RETURN(CheckOpen());
     if (mSetAddress == NULL) {
-        AutoPtr<IInetAddress> ipvXaddress;
+        AutoPtr<IInterface> opt;
         ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
-        option->GetOption(ISocketOptions::_IP_MULTICAST_IF, (IInterface**)&ipvXaddress);
+        option->GetOption(ISocketOptions::_IP_MULTICAST_IF, (IInterface**)&opt);
+        AutoPtr<IInetAddress> ipvXaddress = IInetAddress::Probe(opt);
         Boolean isAnyLocalAddress;
         if (ipvXaddress->IsAnyLocalAddress(&isAnyLocalAddress), isAnyLocalAddress) {
             // the address was not set at the IPV4 level so check the IPV6
@@ -95,10 +96,11 @@ ECode CMulticastSocket::GetNetworkInterface(
     // check if it is set at the IPV6 level. If so then use that. Otherwise
     // do it at the IPV4 level
     // Integer theIndex = Integer.valueOf(0);
-    AutoPtr<IInteger32> theIndex;
+    AutoPtr<IInterface> opt;
     // try {
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
-    ECode ec = option->GetOption(ISocketOptions::_IP_MULTICAST_IF2, (IInterface**)&theIndex);
+    ECode ec = option->GetOption(ISocketOptions::_IP_MULTICAST_IF2, (IInterface**)&opt);
+    AutoPtr<IInteger32> theIndex = IInteger32::Probe(opt);
     if (FAILED(ec)) {
         theIndex = NULL;
         CInteger32::New(0, (IInteger32**)&theIndex);
@@ -414,11 +416,11 @@ ECode CMulticastSocket::GetLoopbackMode(
     VALIDATE_NOT_NULL(isDisabled);
 
     FAIL_RETURN(CheckOpen());
-    AutoPtr<IBoolean> value;
+    AutoPtr<IInterface> value;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     option->GetOption(ISocketOptions::_IP_MULTICAST_LOOP, (IInterface**)&value);
     Boolean bv;
-    value->GetValue(&bv);
+    IBoolean::Probe(value)->GetValue(&bv);
     *isDisabled = !bv;
 
     return NOERROR;

@@ -150,10 +150,10 @@ ECode AbstractVerifier::Verify(
     names->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
-        AutoPtr<ICharSequence> cs;
+        AutoPtr<IInterface> cs;
         it->GetNext((IInterface**)&cs);
         String cn;
-        cs->ToString(&cn);
+        ICharSequence::Probe(cs)->ToString(&cn);
         cn = cn.ToLowerCase(/*ILocale::ENGLISH*/);
         // Store CN in StringBuffer in case we need to report an error.
         buf.Append(" <");
@@ -268,15 +268,16 @@ AutoPtr< ArrayOf<String> > AbstractVerifier::GetDNSSubjectAlts(
         iterable->GetIterator((IIterator**)&it);
         Boolean hasNext;
         while (it->HasNext(&hasNext), hasNext) {
-            AutoPtr<IList> aC;
-            it->GetNext((IInterface**)&aC);
-            AutoPtr<IInteger32> value;
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IList> aC = IList::Probe(obj);
+            AutoPtr<IInterface> value;
             aC->Get(0, (IInterface**)&value);
             Int32 type;
-            value->GetValue(&type);
+            IInteger32::Probe(value)->GetValue(&type);
             // If type is 2, then we've got a dNSName
             if (type == 2) {
-                AutoPtr<ICharSequence> cs;
+                AutoPtr<IInterface> cs;
                 aC->Get(1, (IInterface**)&cs);
                 subjectAltCol->Add(cs);
             }
