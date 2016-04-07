@@ -125,7 +125,8 @@ ECode StreamConfigurationMap::constructor(
         AutoPtr<ISize> size;
         config->GetSize((ISize**)&size);
         AutoPtr<Range<IInteger32> > fpsRange;
-        config->GetFpsRange((IInterface**)&fpsRange);
+        assert(0 && "TODO");
+        // config->GetFpsRange((IInterface**)&fpsRange);
         Int32 fpsRangeCount;
         HashMap<AutoPtr<ISize>, Int32>::Iterator it = mHighSpeedVideoSizeMap.Find(size);
         if (it != mHighSpeedVideoSizeMap.End()) {

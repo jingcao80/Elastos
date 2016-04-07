@@ -127,10 +127,10 @@ AutoPtr<ArrayOf<Float> > Instance::TemporalSampler(
     /* [in] */ IGesture* gesture)
 {
     AutoPtr<IArrayList> strokes;
-    AutoPtr<IGestureStroke> stroke;
-
     gesture->GetStrokes((IArrayList**)&strokes);
-    strokes->Get(0, (IInterface**)&stroke);
+    AutoPtr<IInterface> obj;
+    strokes->Get(0, (IInterface**)&obj);
+    IGestureStroke* stroke = IGestureStroke::Probe(obj);
 
     AutoPtr<ArrayOf<Float> > pts = GestureUtils::TemporalSampling((IGestureStroke *)stroke,
             SEQUENCE_SAMPLE_SIZE);

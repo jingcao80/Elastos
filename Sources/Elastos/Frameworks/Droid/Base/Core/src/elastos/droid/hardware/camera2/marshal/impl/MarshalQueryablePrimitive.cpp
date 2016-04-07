@@ -36,9 +36,7 @@ ECode MarshalQueryablePrimitive::MarshalerPrimitive::Unmarshal(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface);
-    *outface = NULL;
-
-    return UnmarshalObject(buffer, (IInterface**)&outface);
+    return UnmarshalObject(buffer, outface);
 }
 
 ECode MarshalQueryablePrimitive::MarshalerPrimitive::CalculateMarshalSize(
@@ -46,7 +44,6 @@ ECode MarshalQueryablePrimitive::MarshalerPrimitive::CalculateMarshalSize(
     /* [out] */ Int32* outvalue)
 {
     VALIDATE_NOT_NULL(outvalue);
-
     return MarshalHelpers::GetPrimitiveTypeSize(mNativeType, outvalue);
 }
 

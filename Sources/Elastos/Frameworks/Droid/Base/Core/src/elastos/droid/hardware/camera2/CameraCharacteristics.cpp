@@ -624,12 +624,12 @@ ECode CameraCharacteristics::GetAvailableKeyList(
     //     return E_ASSERTION_ERROR;
     // }
 
-    AutoPtr<IList> staticKeyList;
+    AutoPtr<IArrayList> staticKeyList;
     CameraMetadata::GetKeysStatic(
             metadataClass, keyClass, /*instance*/NULL, filterTags, (IArrayList**)&staticKeyList);
     AutoPtr<ICollections> collections;
     CCollections::AcquireSingleton((ICollections**)&collections);
-    return collections->UnmodifiableList(staticKeyList, outlist);
+    return collections->UnmodifiableList(IList::Probe(staticKeyList), outlist);
 }
 
 } // namespace Camera2

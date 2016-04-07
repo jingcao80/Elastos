@@ -527,7 +527,7 @@ ECode ValueAnimator::SetInterpolator(
 {
     mInterpolator = value;
     if (mInterpolator == NULL) {
-        CLinearInterpolator::New((ILinearInterpolator**)&mInterpolator);
+        CLinearInterpolator::New((ITimeInterpolator**)&mInterpolator);
     }
 
     return NOERROR;
@@ -934,31 +934,32 @@ ECode ValueAnimator::Clone(
 void ValueAnimator::CloneInternal(
     /* [in] */ ValueAnimator* anim)
 {
-     if (mUpdateListeners.IsEmpty() == FALSE) {
-        anim->mUpdateListeners.Clear();
-        Copy(mUpdateListeners.Begin(), mUpdateListeners.End(), anim->mUpdateListeners.Begin());
-     }
+    if (mUpdateListeners.IsEmpty() == FALSE) {
+       anim->mUpdateListeners.Clear();
+       Copy(mUpdateListeners.Begin(), mUpdateListeners.End(), anim->mUpdateListeners.Begin());
+    }
 
-     anim->mSeekTime = -1;
-     anim->mPlayingBackwards = FALSE;
-     anim->mCurrentIteration = 0;
-     anim->mInitialized = FALSE;
-     anim->mPlayingState = STOPPED;
-     anim->mStartedDelay = FALSE;
+    anim->mSeekTime = -1;
+    anim->mPlayingBackwards = FALSE;
+    anim->mCurrentIteration = 0;
+    anim->mInitialized = FALSE;
+    anim->mPlayingState = STOPPED;
+    anim->mStartedDelay = FALSE;
 
-     if (mValues != NULL) {
-         Int32 numValues = mValues->GetLength();
-         anim->mValues = ArrayOf<IPropertyValuesHolder*>::Alloc(numValues);
-         anim->mValuesMap.Clear();
-         for (Int32 i = 0; i < numValues; ++i) {
-             AutoPtr<IPropertyValuesHolder> newValuesHolder;
-             ICloneable::Probe((*mValues)[i])->Clone((IInterface**)&newValuesHolder);
-             anim->mValues->Set(i, newValuesHolder);
-             String propertyName;
-             newValuesHolder->GetPropertyName(&propertyName);
-             anim->mValuesMap[propertyName] = newValuesHolder;
-         }
-     }
+    if (mValues != NULL) {
+        Int32 numValues = mValues->GetLength();
+        anim->mValues = ArrayOf<IPropertyValuesHolder*>::Alloc(numValues);
+        anim->mValuesMap.Clear();
+        for (Int32 i = 0; i < numValues; ++i) {
+            AutoPtr<IInterface> obj;
+            ICloneable::Probe((*mValues)[i])->Clone((IInterface**)&obj);
+            IPropertyValuesHolder* newValuesHolder = IPropertyValuesHolder::Probe(obj);
+            anim->mValues->Set(i, newValuesHolder);
+            String propertyName;
+            newValuesHolder->GetPropertyName(&propertyName);
+            anim->mValuesMap[propertyName] = newValuesHolder;
+        }
+    }
 }
 
 Int32 ValueAnimator::GetCurrentAnimationsCount()

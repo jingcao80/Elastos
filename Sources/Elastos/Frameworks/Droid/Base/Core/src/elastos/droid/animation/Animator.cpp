@@ -43,8 +43,9 @@ ECode Animator::Pause()
     if (started && !mPaused) {
         mPaused = TRUE;
         if (mPauseListeners != NULL) {
-            AutoPtr<IArrayList> tmpListeners;
-            ICloneable::Probe(mPauseListeners)->Clone((IInterface**)&tmpListeners);
+            AutoPtr<IInterface> obj;
+            ICloneable::Probe(mPauseListeners)->Clone((IInterface**)&obj);
+            IArrayList* tmpListeners = IArrayList::Probe(obj);
             Int32 numListeners = 0;
             tmpListeners->GetSize(&numListeners);
             for (Int32 i = 0; i < numListeners; ++i) {
@@ -62,8 +63,9 @@ ECode Animator::Resume()
     if (mPaused) {
         mPaused = FALSE;
         if (mPauseListeners != NULL) {
-            AutoPtr<IArrayList> tmpListeners;
-            ICloneable::Probe(mPauseListeners)->Clone((IInterface**)&tmpListeners);
+            AutoPtr<IInterface> obj;
+            ICloneable::Probe(mPauseListeners)->Clone((IInterface**)&obj);
+            IArrayList* tmpListeners = IArrayList::Probe(obj);
             Int32 numListeners = 0;
             tmpListeners->GetSize(&numListeners);
             for (Int32 i = 0; i < numListeners; ++i) {

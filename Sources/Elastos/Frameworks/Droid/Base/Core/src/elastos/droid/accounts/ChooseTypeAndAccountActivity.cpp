@@ -428,8 +428,9 @@ void ChooseTypeAndAccountActivity::RunAddAccountForAuthenticator(
 ECode ChooseTypeAndAccountActivity::Run(
     /* [in] */ IAccountManagerFuture* accountManagerFuture)
 {
-    AutoPtr<IBundle> accountManagerResult;
-    FAIL_RETURN(accountManagerFuture->GetResult((IInterface**)&accountManagerResult));
+    AutoPtr<IInterface> obj;
+    FAIL_RETURN(accountManagerFuture->GetResult((IInterface**)&obj));
+    IBundle* accountManagerResult = IBundle::Probe(obj);
     AutoPtr<IParcelable> parcel;
     accountManagerResult->GetParcelable(IAccountManager::KEY_INTENT, (IParcelable**)&parcel);
     AutoPtr<IIntent> intent = (IIntent*)parcel->Probe(Elastos::Droid::Content::EIID_IIntent);

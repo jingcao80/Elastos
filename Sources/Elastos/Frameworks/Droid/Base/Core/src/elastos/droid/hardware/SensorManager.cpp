@@ -53,7 +53,9 @@ ECode SensorManager::GetSensorList(
     synchronized(mSensorListByTypeLock) {
         AutoPtr<IInteger32> key;
         CInteger32::New(type, (IInteger32**)&key);
-        mSensorListByType->Get(TO_IINTERFACE(key), (IInterface**)&list);
+        AutoPtr<IInterface> value;
+        mSensorListByType->Get(key, (IInterface**)&value);
+        list = IList::Probe(value);
         if (list == NULL) {
             Int32 length = fullList != NULL ? fullList->GetLength() : 0;
             CArrayList::New((IList**)&list);

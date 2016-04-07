@@ -382,10 +382,14 @@ CLayoutTransition::CLayoutTransition()
         IAnimator::Probe(sDefaultChangeIn)->SetDuration(DEFAULT_DURATION);
         IAnimator::Probe(sDefaultChangeIn)->SetStartDelay(mChangingAppearingDelay);
         IAnimator::Probe(sDefaultChangeIn)->SetInterpolator(mChangingAppearingInterpolator);
-        ICloneable::Probe(sDefaultChangeIn)->Clone((IInterface**)&sDefaultChangeOut);
+        AutoPtr<IInterface> obj;
+        ICloneable::Probe(sDefaultChangeIn)->Clone((IInterface**)&obj);
+        sDefaultChangeOut = IObjectAnimator::Probe(obj);
         IAnimator::Probe(sDefaultChangeOut)->SetStartDelay(mChangingDisappearingDelay);
         IAnimator::Probe(sDefaultChangeOut)->SetInterpolator(mChangingDisappearingInterpolator);
-        ICloneable::Probe(sDefaultChangeIn)->Clone((IInterface**)&sDefaultChange);
+        obj = NULL;
+        ICloneable::Probe(sDefaultChangeIn)->Clone((IInterface**)&obj);
+        sDefaultChange = IObjectAnimator::Probe(obj);
         IAnimator::Probe(sDefaultChange)->SetStartDelay(mChangingDelay);
         IAnimator::Probe(sDefaultChange)->SetInterpolator(mChangingInterpolator);
 

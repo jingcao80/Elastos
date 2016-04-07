@@ -39,19 +39,20 @@ AutoPtr<IKeyframeSet> KeyframeSet::OfInt32(
             ArrayOf<IInt32Keyframe*>::Alloc(Elastos::Core::Math::Max(numKeyframes, 2));
 
     if (numKeyframes == 1) {
-        AutoPtr<IInt32Keyframe> temp;
+        AutoPtr<IKeyframe> temp;
         Keyframe::OfInt32(0.0f, (IKeyframe**)&temp);
-        keyframes->Set(0, temp); temp = NULL;
+        keyframes->Set(0, IInt32Keyframe::Probe(temp));
+        temp = NULL;
         Keyframe::OfInt32(1.0f, (*values)[0], (IKeyframe**)&temp);
-        keyframes->Set(1, temp);
+        keyframes->Set(1, IInt32Keyframe::Probe(temp));
     } else {
-        AutoPtr<IInt32Keyframe> temp;
+        AutoPtr<IKeyframe> temp;
         Keyframe::OfInt32(0.0f, (*values)[0], (IKeyframe**)&temp);
-        keyframes->Set(0, temp);
+        keyframes->Set(0, IInt32Keyframe::Probe(temp));
         for (Int32 i = 1; i < numKeyframes; ++i) {
             temp = NULL;
             Keyframe::OfInt32((Float) i / (numKeyframes - 1), (*values)[i], (IKeyframe**)&temp);
-            keyframes->Set(i, temp);
+            keyframes->Set(i, IInt32Keyframe::Probe(temp));
         }
     }
 
@@ -69,22 +70,23 @@ AutoPtr<IKeyframeSet> KeyframeSet::OfFloat(
             ArrayOf<IFloatKeyframe*>::Alloc(Elastos::Core::Math::Max(numKeyframes, 2));
 
     if (numKeyframes == 1) {
-        AutoPtr<IFloatKeyframe> temp;
+        AutoPtr<IKeyframe> temp;
         Keyframe::OfFloat(0.0f, (IKeyframe**)&temp);
-        keyframes->Set(0, temp); temp = NULL;
+        keyframes->Set(0, IFloatKeyframe::Probe(temp));
+        temp = NULL;
         Keyframe::OfFloat(1.0f, (*values)[0], (IKeyframe**)&temp);
-        keyframes->Set(1, temp);
+        keyframes->Set(1, IFloatKeyframe::Probe(temp));
         if (Elastos::Core::Math::IsNaN((*values)[0])) {
             badValue = TRUE;
         }
     } else {
-        AutoPtr<IFloatKeyframe> temp;
+        AutoPtr<IKeyframe> temp;
         Keyframe::OfFloat(0.0f, (*values)[0], (IKeyframe**)&temp);
-        keyframes->Set(0, temp);
+        keyframes->Set(0, IFloatKeyframe::Probe(temp));
         for (Int32 i = 1; i < numKeyframes; ++i) {
             temp = NULL;
             Keyframe::OfFloat((Float) i / (numKeyframes - 1), (*values)[i], (IKeyframe**)&temp);
-            keyframes->Set(i, temp);
+            keyframes->Set(i, IFloatKeyframe::Probe(temp));
             if (Elastos::Core::Math::IsNaN((*values)[i])) {
                 badValue = TRUE;
             }
@@ -151,19 +153,21 @@ AutoPtr<IKeyframeSet> KeyframeSet::OfObject(
             ArrayOf<IObjectKeyframe*>::Alloc(Elastos::Core::Math::Max(numKeyframes, 2));
 
     if (numKeyframes == 1) {
-        AutoPtr<IObjectKeyframe> temp;
+        AutoPtr<IKeyframe> temp;
         Keyframe::OfObject(0.0f, (IKeyframe**)&temp);
-        keyframes->Set(0, temp); temp = NULL;
+        keyframes->Set(0, IObjectKeyframe::Probe(temp));
+        temp = NULL;
         Keyframe::OfObject(1.0f, (*values)[0], (IKeyframe**)&temp);
-        keyframes->Set(1, temp);
-    } else {
-        AutoPtr<IObjectKeyframe> temp;
+        keyframes->Set(1, IObjectKeyframe::Probe(temp));
+    }
+    else {
+        AutoPtr<IKeyframe> temp;
         Keyframe::OfObject(0.0f, (*values)[0], (IKeyframe**)&temp);
-        keyframes->Set(0, temp);
+        keyframes->Set(0, IObjectKeyframe::Probe(temp));
         for (Int32 i = 1; i < numKeyframes; ++i) {
             temp = NULL;
             Keyframe::OfObject((Float) i / (numKeyframes - 1), (*values)[i], (IKeyframe**)&temp);
-            keyframes->Set(i, temp);
+            keyframes->Set(i, IObjectKeyframe::Probe(temp));
         }
     }
 
@@ -297,9 +301,9 @@ ECode KeyframeSet::Clone(
     Int32 numKeyframes = mKeyframes->GetLength();
     AutoPtr<ArrayOf<IKeyframe*> > newKeyframes = ArrayOf<IKeyframe*>::Alloc(numKeyframes);
     for (Int32 i = 0; i < numKeyframes; ++i) {
-        AutoPtr<IKeyframe> temp;
+        AutoPtr<IInterface> temp;
         ICloneable::Probe((*mKeyframes)[i])->Clone((IInterface**)&temp);
-        newKeyframes->Set(i, temp);
+        newKeyframes->Set(i, IKeyframe::Probe(temp));
     }
     AutoPtr<IKeyframeSet> newSet = new KeyframeSet(newKeyframes);
     *object = newSet;

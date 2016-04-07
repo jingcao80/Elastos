@@ -41,13 +41,13 @@ ECode Int32ArrayEvaluator::Evaluate(
     AutoPtr<IArrayOf> array;
     CArrayOf::New(EIID_IInteger32, length, (IArrayOf**)&array);
     for (Int32 i = 0; i < length; i++) {
-        AutoPtr<IInteger32> istart, iend;
+        AutoPtr<IInterface> istart, iend;
         IArrayOf::Probe(startValue)->Get(i, (IInterface**)&istart);
         IArrayOf::Probe(endValue)->Get(i, (IInterface**)&iend);
         Int32 start = 0;
-        istart->GetValue(&start);
+        IInteger32::Probe(istart)->GetValue(&start);
         Int32 end = 0;
-        iend->GetValue(&end);
+        IInteger32::Probe(iend)->GetValue(&end);
         Int32 iv = (Int32) (start + (fraction * (end - start)));
         AutoPtr<IInteger32> value;
         CInteger32::New(iv, (IInteger32**)&value);

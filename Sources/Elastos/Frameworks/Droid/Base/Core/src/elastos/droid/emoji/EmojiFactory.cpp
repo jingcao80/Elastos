@@ -136,20 +136,20 @@ ECode EmojiFactory::GetBitmapFromAndroidPua(
 {
     VALIDATE_NOT_NULL(retBitmap);
 
-    AutoPtr<IBitmap> cache;
     AutoPtr<IInteger32> I32;
     CInteger32::New(pua, (IInteger32**)&I32);
-
+    AutoPtr<IInterface> cache;
     mCache->Get(I32, (IInterface**)&cache);
+    IBitmap* bm = IBitmap::Probe(cache);
 
-    if (cache == NULL) {
+    if (bm == NULL) {
         AutoPtr<IBitmap> ret;
 
         ret = NativeGetBitmapFromAndroidPua(mNativeEmojiFactory, pua);
         mCache->Put(I32, (IInterface*)ret);
     }
 
-    *retBitmap = cache;
+    *retBitmap = bm;
     REFCOUNT_ADD(*retBitmap);
     return NOERROR;
 }

@@ -523,8 +523,9 @@ ECode CAccountManager::GetAuthTokenByTypeAndFeaturesTask::Run(
     /* [in] */ IAccountManagerFuture* future)
 {
     //try {
-    AutoPtr<IBundle> result;
-    FAIL_RETURN(future->GetResult((IInterface**)&result));
+    AutoPtr<IInterface> obj;
+    FAIL_RETURN(future->GetResult((IInterface**)&obj));
+    IBundle* result = IBundle::Probe(obj);
     if (mNumAccounts == 0) {
         String accountName, accountType;
         result->GetString(IAccountManager::KEY_ACCOUNT_NAME, &accountName);
@@ -1486,8 +1487,9 @@ ECode CAccountManager::BlockingGetAuthToken(
     AutoPtr<IAccountManagerFuture> accountManagerFuture;
     GetAuthToken(account, authTokenType, notifyAuthFailure, NULL /* callback */,
             NULL /* handler */, (IAccountManagerFuture**)&accountManagerFuture);
-    AutoPtr<IBundle> bundle;
-    accountManagerFuture->GetResult((IInterface**)&bundle);
+    AutoPtr<IInterface> obj;
+    accountManagerFuture->GetResult((IInterface**)&obj);
+    IBundle* bundle = IBundle::Probe(obj);
     if (bundle == NULL) {
         // This should never happen, but it does, occasionally. If it does return null to
         // signify that we were not able to get the authtoken.

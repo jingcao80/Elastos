@@ -205,7 +205,7 @@ ECode AppWidgetHost::StartListening()
     String packageName;
     mContext->GetOpPackageName(&packageName);
 
-    ECode ec = sService->StartListening((IIAppWidgetHost*)mCallbacks.Get(),
+    ECode ec = sService->StartListening(mCallbacks,
             packageName, mHostId, (IList**)&updatedViews, (ArrayOf<Int32>**)&updatedIds);
     if (FAILED(ec)) {
         Logger::E("AppWidgetHost", "system server dead? ec=%08x", ec);

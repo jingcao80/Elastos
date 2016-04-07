@@ -160,21 +160,23 @@ ECode Gesture::ToPath(
 }
 
 ECode Gesture::ToPath(
-    /* [in] */ IPath *path,
-    /* [out] */ IPath **outPath)
+    /* [in] */ IPath * _path,
+    /* [out] */ IPath ** outPath)
 {
     VALIDATE_NOT_NULL(outPath);
 
-    if (path == NULL)
+    AutoPtr<IPath> path = _path;
+    if (path == NULL) {
         CPath::New((IPath**)&path);
+    }
 
     Int32 count;
     mStrokes->GetSize(&count);
 
     for (Int32 i = 0; i < count; i++) {
-        AutoPtr<IPath> tempPath;
+        AutoPtr<IInterface> tempPath;
         mStrokes->Get(i, (IInterface**)&tempPath);
-        path->AddPath(tempPath);
+        path->AddPath(IPath::Probe(tempPath));
     }
 
     *outPath = path;
@@ -209,11 +211,10 @@ ECode Gesture::ToPath(
     mStrokes->GetSize(&count);
 
     for (Int32 i = 0; i < count; i++) {
-        AutoPtr<IGestureStroke> it;
+        AutoPtr<IInterface> obj;
+        mStrokes->Get(i, (IInterface**)&obj);
         AutoPtr<IPath> tempPath;
-
-        mStrokes->Get(i, (IInterface**)&it);
-        it->ToPath(width - 2 * edge, height - 2 * edge, numSample, (IPath**)&tempPath);
+        IGestureStroke::Probe(obj)->ToPath(width - 2 * edge, height - 2 * edge, numSample, (IPath**)&tempPath);
         path->AddPath(tempPath);
     }
 
@@ -268,11 +269,10 @@ ECode Gesture::ToBitmap(
     mStrokes->GetSize(&count);
 
     for (Int32 i = 0; i < count; i++) {
-        AutoPtr<IGestureStroke> it;
+        AutoPtr<IInterface> obj;
+        mStrokes->Get(i, (IInterface**)&obj);
         AutoPtr<IPath> tempPath;
-
-        mStrokes->Get(i, (IInterface**)&it);
-        it->ToPath(width - 2 * edge, height - 2 * edge, numSample, (IPath**)&tempPath);
+        IGestureStroke::Probe(obj)->ToPath(width - 2 * edge, height - 2 * edge, numSample, (IPath**)&tempPath);
         canvas->DrawPath(tempPath, paint);
     }
 
@@ -350,11 +350,9 @@ ECode Gesture::Serialize(
     IDataOutput::Probe(out)->WriteInt32(count);
 
     for (Int32 i = 0; i < count; i++) {
-        AutoPtr<IGestureStroke> it;
-        AutoPtr<IPath> tempPath;
-
-        mStrokes->Get(i, (IInterface**)&it);
-        it->Serialize(out);
+        AutoPtr<IInterface> obj;
+        mStrokes->Get(i, (IInterface**)&obj);
+        IGestureStroke::Probe(obj)->Serialize(out);
     }
 
     return NOERROR;

@@ -247,7 +247,7 @@ protected:
     AutoPtr<IContext> mContext;
     AutoPtr<IHandler> mHandler;
     Int32 mHostId;
-    AutoPtr<Callbacks> mCallbacks;
+    AutoPtr<IIAppWidgetHost> mCallbacks;
     /* final HashMap<Integer,AppWidgetHostView> mViews = new HashMap<Integer, AppWidgetHostView>();*/
     AutoPtr<IHashMap> mViews;
     Object mViewsLock;
