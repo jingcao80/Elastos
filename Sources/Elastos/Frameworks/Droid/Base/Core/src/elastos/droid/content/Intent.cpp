@@ -9,7 +9,6 @@
 #include "elastos/droid/content/CClipDataItem.h"
 #include "elastos/droid/content/CClipData.h"
 #include "elastos/droid/content/CComponentName.h"
-#include "elastos/droid/content/CComponentNameHelper.h"
 #include "elastos/droid/content/ContentProvider.h"
 #include "elastos/droid/content/CClipDataHelper.h"
 #include "elastos/droid/os/CBundle.h"
@@ -27,7 +26,6 @@
 using Elastos::Droid::Content::CClipDataItem;
 using Elastos::Droid::Content::CClipData;
 using Elastos::Droid::Content::CComponentName;
-using Elastos::Droid::Content::CComponentNameHelper;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Pm::IResolveInfo;
@@ -2891,10 +2889,8 @@ AutoPtr<IIntent> Intent::RestoreFromXml(
             intent->SetType(attrValue);
         }
         else if (ATTR_COMPONENT.Equals(attrName)) {
-            AutoPtr<IComponentNameHelper> helper;
-            CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&helper);
             AutoPtr<IComponentName> component;
-            helper->UnflattenFromString(attrValue, (IComponentName**)&component);
+            CComponentName::UnflattenFromString(attrValue, (IComponentName**)&component);
             intent->SetComponent(component);
         }
         else if (ATTR_FLAGS.Equals(attrName)) {
@@ -2907,8 +2903,8 @@ AutoPtr<IIntent> Intent::RestoreFromXml(
 
     Int32 event, depth;
     String name;
-    while (((in->Next(&event), event) != IXmlPullParser::END_DOCUMENT) &&
-            (event != IXmlPullParser::END_TAG || (in->GetDepth(&depth), depth) < outerDepth)) {
+    while ((in->Next(&event), event != IXmlPullParser::END_DOCUMENT) &&
+            (event != IXmlPullParser::END_TAG || in->GetDepth(&depth), depth < outerDepth)) {
         if (event == IXmlPullParser::START_TAG) {
             in->GetName(&name);
             if (TAG_CATEGORIES.Equals(name)) {
