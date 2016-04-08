@@ -7,6 +7,8 @@ namespace Droid {
 namespace Text {
 
 
+CAR_INTERFACE_IMPL(TextPaint, Paint, ITextPaint);
+
 TextPaint::TextPaint()
     : mBgColor(0)
     , mBaselineShift(0)

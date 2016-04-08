@@ -16,11 +16,14 @@ namespace Text {
  */
 class TextPaint
     : public Elastos::Droid::Graphics::Paint
+    , public ITextPaint
 {
 public:
     TextPaint();
 
     virtual ~TextPaint();
+
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor();
 
