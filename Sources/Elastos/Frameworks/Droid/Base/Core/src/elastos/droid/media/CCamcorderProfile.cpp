@@ -360,17 +360,17 @@ ECode CCamcorderProfile::NativeGetCamcorderProfile(
     android::MediaProfiles* sProfiles = android::MediaProfiles::getInstance();
     android::camcorder_quality q = static_cast<android::camcorder_quality>(quality);
 // TODO: Need android::MediaProfiles::getCamcorderProfileParamByName
-    Int32 duration         ; //= sProfiles->getCamcorderProfileParamByName("duration",    cameraId, q);
-    Int32 fileFormat       ; //= sProfiles->getCamcorderProfileParamByName("file.format", cameraId, q);
-    Int32 videoCodec       ; //= sProfiles->getCamcorderProfileParamByName("vid.codec",   cameraId, q);
-    Int32 videoBitRate     ; //= sProfiles->getCamcorderProfileParamByName("vid.bps",     cameraId, q);
-    Int32 videoFrameRate   ; //= sProfiles->getCamcorderProfileParamByName("vid.fps",     cameraId, q);
-    Int32 videoFrameWidth  ; //= sProfiles->getCamcorderProfileParamByName("vid.width",   cameraId, q);
-    Int32 videoFrameHeight ; //= sProfiles->getCamcorderProfileParamByName("vid.height",  cameraId, q);
-    Int32 audioCodec       ; //= sProfiles->getCamcorderProfileParamByName("aud.codec",   cameraId, q);
-    Int32 audioBitRate     ; //= sProfiles->getCamcorderProfileParamByName("aud.bps",     cameraId, q);
-    Int32 audioSampleRate  ; //= sProfiles->getCamcorderProfileParamByName("aud.hz",      cameraId, q);
-    Int32 audioChannels    ; //= sProfiles->getCamcorderProfileParamByName("aud.ch",      cameraId, q);
+    Int32 duration         = sProfiles->getCamcorderProfileParamByName("duration",    cameraId, q);
+    Int32 fileFormat       = sProfiles->getCamcorderProfileParamByName("file.format", cameraId, q);
+    Int32 videoCodec       = sProfiles->getCamcorderProfileParamByName("vid.codec",   cameraId, q);
+    Int32 videoBitRate     = sProfiles->getCamcorderProfileParamByName("vid.bps",     cameraId, q);
+    Int32 videoFrameRate   = sProfiles->getCamcorderProfileParamByName("vid.fps",     cameraId, q);
+    Int32 videoFrameWidth  = sProfiles->getCamcorderProfileParamByName("vid.width",   cameraId, q);
+    Int32 videoFrameHeight = sProfiles->getCamcorderProfileParamByName("vid.height",  cameraId, q);
+    Int32 audioCodec       = sProfiles->getCamcorderProfileParamByName("aud.codec",   cameraId, q);
+    Int32 audioBitRate     = sProfiles->getCamcorderProfileParamByName("aud.bps",     cameraId, q);
+    Int32 audioSampleRate  = sProfiles->getCamcorderProfileParamByName("aud.hz",      cameraId, q);
+    Int32 audioChannels    = sProfiles->getCamcorderProfileParamByName("aud.ch",      cameraId, q);
 
     // Check on the values retrieved
     if (duration == -1 || fileFormat == -1 || videoCodec == -1 || audioCodec == -1 ||
@@ -416,7 +416,7 @@ Boolean CCamcorderProfile::NativeHasCamcorderProfile(
     android::MediaProfiles* sProfiles = android::MediaProfiles::getInstance();
     android::camcorder_quality q = static_cast<android::camcorder_quality>(quality);
 // TODO: Need android::MediaProfiles::hasCamcorderProfile
-    // return sProfiles->hasCamcorderProfile(cameraId, q);
+    return sProfiles->hasCamcorderProfile(cameraId, q);
     return TRUE;
 }
 

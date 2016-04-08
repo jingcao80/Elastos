@@ -25,10 +25,11 @@ CAR_INTERFACE_IMPL(CMediaProjectionManager::CallbackDelegate, Object, IIMediaPro
 CMediaProjectionManager::CallbackDelegate::CallbackDelegate(
     /* [in] */ CMediaProjectionManager* host,
     /* [in] */ IMediaProjectionManagerCallback * callback,
-    /* [in] */ IHandler * handler)
+    /* [in] */ IHandler * _handler)
 {
     mHost = host;
     mCallback = callback;
+    AutoPtr<IHandler> handler = _handler;
     if (handler == NULL) {
         CHandler::New((IHandler**)&handler);
     }
@@ -157,8 +158,9 @@ ECode CMediaProjectionManager::RemoveCallback(
         // throw new IllegalArgumentException("callback must not be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    AutoPtr<CallbackDelegate> delegate;
-    IMap::Probe(mCallbacks)->Remove(callback, (IInterface**)&delegate);
+    AutoPtr<IInterface> obj;
+    IMap::Probe(mCallbacks)->Remove(callback, (IInterface**)&obj);
+    AutoPtr<CallbackDelegate> delegate = (CallbackDelegate*)(IObject*)obj.Get();
     // try {
     if (delegate != NULL) {
         mService->RemoveCallback(IIMediaProjectionWatcherCallback::Probe(delegate));

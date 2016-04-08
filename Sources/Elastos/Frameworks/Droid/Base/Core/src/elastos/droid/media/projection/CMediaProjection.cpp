@@ -27,8 +27,9 @@ ECode CMediaProjection::MediaProjectionCallback::OnStop()
     Int32 N;
     IMap::Probe(mHost->mCallbacks)->GetSize(&N);
     for (Int32 i = 0; i < N; i++) {
-        AutoPtr<CallbackRecord> cr;
-        mHost->mCallbacks->GetValueAt(i, (IInterface**)&cr);
+        AutoPtr<IInterface> obj;
+        mHost->mCallbacks->GetValueAt(i, (IInterface**)&obj);
+        AutoPtr<CallbackRecord> cr = (CallbackRecord*)(IObject*)obj.Get();
         cr->OnStop();
     }
     return NOERROR;
@@ -91,8 +92,8 @@ ECode CMediaProjection::UnregisterCallback(
         // throw new IllegalArgumentException("callback should not be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    AutoPtr<CallbackRecord> cr;
-    return IMap::Probe(mCallbacks)->Remove(cb, (IInterface**)&cr);
+
+    return IMap::Probe(mCallbacks)->Remove(cb);
 }
 
 ECode CMediaProjection::CreateVirtualDisplay(

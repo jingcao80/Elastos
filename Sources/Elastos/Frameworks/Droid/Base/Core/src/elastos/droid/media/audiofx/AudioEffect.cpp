@@ -109,15 +109,17 @@ ECode AudioEffect::NativeEventHandler::HandleMessage(
                 //     p->Set(i, b);
                 //     i++;
                 // }
-                AutoPtr<IArrayOf> obj;
-                AutoPtr<ArrayOf<Byte> > p;
+                AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
+                AutoPtr<IArrayOf> array = IArrayOf::Probe(obj);
                 Int32 count;
-                obj->GetLength(&count);
+                array->GetLength(&count);
+                AutoPtr<ArrayOf<Byte> > p;
                 p = ArrayOf<Byte>::Alloc(count);
                 for(Int32 i = 0; i < count; i++) {
-                    AutoPtr<IByte> ib;
-                    obj->Get(i, (IInterface**)&ib);
+                    obj = NULL;
+                    array->Get(i, (IInterface**)&obj);
+                    AutoPtr<IByte> ib = IByte::Probe(obj);
                     Byte b;
                     ib->GetValue(&b);
                     p->Set(i, b);

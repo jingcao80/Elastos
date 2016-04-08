@@ -207,8 +207,9 @@ ECode CTvInputManager::TvInputClient::OnSessionCreated(
 {
     AutoPtr<ISparseArray> lock = mHost->mSessionCallbackRecordMap;
     synchronized(lock) {
-        AutoPtr<SessionCallbackRecord> record;
-        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
+        AutoPtr<IInterface> obj;
+        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&obj);
+        AutoPtr<SessionCallbackRecord> record = (SessionCallbackRecord*)(IObject*)obj.Get();
         if (record == NULL) {
             String str;
             token->ToString(&str);
@@ -230,8 +231,9 @@ ECode CTvInputManager::TvInputClient::OnSessionReleased(
 {
     AutoPtr<ISparseArray> lock = mHost->mSessionCallbackRecordMap;
     synchronized(lock) {
-        AutoPtr<SessionCallbackRecord> record;
-        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
+        AutoPtr<IInterface> obj;
+        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&obj);
+        AutoPtr<SessionCallbackRecord> record = (SessionCallbackRecord*)(IObject*)obj.Get();
         mHost->mSessionCallbackRecordMap->Delete(seq);
         if (record == NULL) {
             Logger::E(TAG, "Callback not found for seq %d", seq);
@@ -250,8 +252,9 @@ ECode CTvInputManager::TvInputClient::OnSessionEvent(
 {
     AutoPtr<ISparseArray> lock = mHost->mSessionCallbackRecordMap;
     synchronized(lock) {
-        AutoPtr<SessionCallbackRecord> record;
-        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
+        AutoPtr<IInterface> obj;
+        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&obj);
+        AutoPtr<SessionCallbackRecord> record = (SessionCallbackRecord*)(IObject*)obj.Get();
         if (record == NULL) {
             Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
@@ -267,8 +270,9 @@ ECode CTvInputManager::TvInputClient::OnChannelRetuned(
 {
     AutoPtr<ISparseArray> lock = mHost->mSessionCallbackRecordMap;
     synchronized(lock) {
-        AutoPtr<SessionCallbackRecord> record;
-        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
+        AutoPtr<IInterface> obj;
+        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&obj);
+        AutoPtr<SessionCallbackRecord> record = (SessionCallbackRecord*)(IObject*)obj.Get();
         if (record == NULL) {
             Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
@@ -284,8 +288,9 @@ ECode CTvInputManager::TvInputClient::OnTracksChanged(
 {
     AutoPtr<ISparseArray> lock = mHost->mSessionCallbackRecordMap;
     synchronized(lock) {
-        AutoPtr<SessionCallbackRecord> record;
-        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
+        AutoPtr<IInterface> obj;
+        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&obj);
+        AutoPtr<SessionCallbackRecord> record = (SessionCallbackRecord*)(IObject*)obj.Get();
         if (record == NULL) {
             Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
@@ -302,8 +307,9 @@ ECode CTvInputManager::TvInputClient::OnTrackSelected(
 {
     AutoPtr<ISparseArray> lock = mHost->mSessionCallbackRecordMap;
     synchronized(lock) {
-        AutoPtr<SessionCallbackRecord> record;
-        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
+        AutoPtr<IInterface> obj;
+        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&obj);
+        AutoPtr<SessionCallbackRecord> record = (SessionCallbackRecord*)(IObject*)obj.Get();
         if (record == NULL) {
             Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
@@ -318,8 +324,9 @@ ECode CTvInputManager::TvInputClient::OnVideoAvailable(
 {
     AutoPtr<ISparseArray> lock = mHost->mSessionCallbackRecordMap;
     synchronized(lock) {
-        AutoPtr<SessionCallbackRecord> record;
-        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
+        AutoPtr<IInterface> obj;
+        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&obj);
+        AutoPtr<SessionCallbackRecord> record = (SessionCallbackRecord*)(IObject*)obj.Get();
         if (record == NULL) {
             Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
@@ -335,8 +342,9 @@ ECode CTvInputManager::TvInputClient::OnVideoUnavailable(
 {
     AutoPtr<ISparseArray> lock = mHost->mSessionCallbackRecordMap;
     synchronized(lock) {
-        AutoPtr<SessionCallbackRecord> record;
-        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
+        AutoPtr<IInterface> obj;
+        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&obj);
+        AutoPtr<SessionCallbackRecord> record = (SessionCallbackRecord*)(IObject*)obj.Get();
         if (record == NULL) {
             Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
@@ -351,8 +359,9 @@ ECode CTvInputManager::TvInputClient::OnContentAllowed(
 {
     AutoPtr<ISparseArray> lock = mHost->mSessionCallbackRecordMap;
     synchronized(lock) {
-        AutoPtr<SessionCallbackRecord> record;
-        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
+        AutoPtr<IInterface> obj;
+        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&obj);
+        AutoPtr<SessionCallbackRecord> record = (SessionCallbackRecord*)(IObject*)obj.Get();
         if (record == NULL) {
             Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
@@ -368,8 +377,9 @@ ECode CTvInputManager::TvInputClient::OnContentBlocked(
 {
     AutoPtr<ISparseArray> lock = mHost->mSessionCallbackRecordMap;
     synchronized(lock) {
-        AutoPtr<SessionCallbackRecord> record;
-        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
+        AutoPtr<IInterface> obj;
+        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&obj);
+        AutoPtr<SessionCallbackRecord> record = (SessionCallbackRecord*)(IObject*)obj.Get();
         if (record == NULL) {
             Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
@@ -390,8 +400,9 @@ ECode CTvInputManager::TvInputClient::OnLayoutSurface(
 {
     AutoPtr<ISparseArray> lock = mHost->mSessionCallbackRecordMap;
     synchronized(lock) {
-        AutoPtr<SessionCallbackRecord> record;
-        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
+        AutoPtr<IInterface> obj;
+        mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&obj);
+        AutoPtr<SessionCallbackRecord> record = (SessionCallbackRecord*)(IObject*)obj.Get();
         if (record == NULL) {
             Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;

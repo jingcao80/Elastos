@@ -90,8 +90,9 @@ ECode TvContractChannels::GetVideoResolution(
     VALIDATE_NOT_NULL(result)
     AutoPtr<ICharSequence> csq;
     CString::New(videoFormat, (ICharSequence**)&csq);
-    AutoPtr<ICharSequence> cs;
-    VIDEO_FORMAT_TO_RESOLUTION_MAP->Get(csq, (IInterface**)&cs);
+    AutoPtr<IInterface> obj;
+    VIDEO_FORMAT_TO_RESOLUTION_MAP->Get(csq, (IInterface**)&obj);
+    AutoPtr<ICharSequence> cs = ICharSequence::Probe(obj);
     return cs->ToString(result);
 }
 

@@ -245,8 +245,8 @@ public:
     public:
         Int32 mIndexMax;
         Int32 mStreamType;
-        AutoPtr<IConcurrentHashMap> mIndex;
-        // AutoPtr<IHashMap> mIndex;
+        //TODO: AutoPtr<IConcurrentHashMap> mIndex;
+        AutoPtr<IHashMap> mIndex;
         AutoPtr<IArrayList> mDeathHandlers; //handles mute/solo clients death
 
     private:

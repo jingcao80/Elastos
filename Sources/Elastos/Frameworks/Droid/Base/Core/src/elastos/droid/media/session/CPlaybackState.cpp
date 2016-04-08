@@ -51,7 +51,9 @@ ECode CPlaybackState::constructor(
     mUpdateTime = updateTime;
     mBufferedPosition = bufferedPosition;
     mActions = transportControls;
-    CArrayList::New(ICollection::Probe(customActions), (IArrayList**)&mCustomActions);
+    AutoPtr<IArrayList> arrayList;
+    CArrayList::New(ICollection::Probe(customActions), (IArrayList**)&arrayList);
+    mCustomActions = IList::Probe(arrayList);
     mActiveItemId = activeItemId;
     mErrorMessage = error;
     return NOERROR;

@@ -41,8 +41,9 @@ ECode MediaSessionCallback::OnMediaButtonEvent(
     String action;
     mediaButtonIntent->GetAction(&action);
     if (mSession != NULL && action.Equals(IIntent::ACTION_MEDIA_BUTTON)) {
-        AutoPtr<IKeyEvent> ke;
-        mediaButtonIntent->GetParcelableExtra(IIntent::EXTRA_KEY_EVENT, (IParcelable**)&ke);
+        AutoPtr<IParcelable> parcelable;
+        mediaButtonIntent->GetParcelableExtra(IIntent::EXTRA_KEY_EVENT, (IParcelable**)&parcelable);
+        AutoPtr<IKeyEvent> ke = IKeyEvent::Probe(parcelable);
         if (ke != NULL) {
             Int32 ac;
             ke->GetAction(&ac);

@@ -18,8 +18,6 @@
 #include <elastos/utility/logging/Logger.h>
 #include <media/AudioSystem.h>
 #include <media/AudioTrack.h>
-//TODO: Need audio_utils/primitives.h
-// #include <media/audio_utils/primitives.h>
 #include <system/audio.h>
 
 using Elastos::Droid::App::CActivityThread;
@@ -1629,8 +1627,13 @@ static Int32 WriteToTrack(
                 Int32 count = sizeInBytes;
                 int16_t *dst = (int16_t *)pTrack->sharedBuffer()->pointer();
                 const uint8_t *src = (const uint8_t *)(data + offsetInBytes);
-//TODO: Need audio_utils/primitives.h
-                // memcpy_to_i16_from_u8(dst, src, count);
+
+                // memcpy_to_i16_from_u8(dst, src, count)
+                dst += count;
+                src += count;
+                while (count--) {
+                    *--dst = (int16_t)(*--src - 0x80) << 8;
+                }
                 // even though we wrote 2*sizeInBytes, we only report sizeInBytes as written to hide
                 // the 8bit mixer restriction from the user of this function
                 written = sizeInBytes;

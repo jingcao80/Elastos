@@ -73,14 +73,16 @@ void CVisualizer::NativeEventHandler::HandleCaptureMessage(
     }
     if (l != NULL) {
         AutoPtr< ArrayOf<Byte> > data;
-        AutoPtr<IArrayOf> obj;
+        AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
+        AutoPtr<IArrayOf> array = IArrayOf::Probe(obj);
         Int32 count;
-        obj->GetLength(&count);
+        array->GetLength(&count);
         data = ArrayOf<Byte>::Alloc(count);
         for(Int32 i = 0; i < count; i++) {
-            AutoPtr<IByte> ib;
-            obj->Get(i, (IInterface**)&ib);
+            obj = NULL;
+            array->Get(i, (IInterface**)&obj);
+            AutoPtr<IByte> ib = IByte::Probe(obj);
             Byte b;
             ib->GetValue(&b);
             data->Set(i, b);

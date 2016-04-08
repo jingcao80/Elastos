@@ -133,8 +133,9 @@ ECode CMediaSessionManager::GetActiveSessionsForUser(
     Int32 size;
     binders->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IBinder> binder;
-        binders->Get(i, (IInterface**)&binder);
+        AutoPtr<IInterface> obj;
+        binders->Get(i, (IInterface**)&obj);
+        AutoPtr<IBinder> binder = IBinder::Probe(obj);
         AutoPtr<IMediaController> controller;
         CMediaController::New(mContext, IISessionController::Probe(binder), (IMediaController**)&controller);
         controllers->Add(controller);
@@ -182,8 +183,9 @@ ECode CMediaSessionManager::AddOnActiveSessionsChangedListener(
         CHandler::New((IHandler**)&handler);
     }
     synchronized(mLock) {
-        AutoPtr<SessionsChangedWrapper> wrapper;
-        IMap::Probe(mListeners)->Get(sessionListener, (IInterface**)&wrapper);
+        AutoPtr<IInterface> obj;
+        IMap::Probe(mListeners)->Get(sessionListener, (IInterface**)&obj);
+        AutoPtr<SessionsChangedWrapper> wrapper = (SessionsChangedWrapper*)(IObject*)obj.Get();
         if (wrapper != NULL) {
             Logger::W(TAG, String("Attempted to add session listener twice, ignoring."));
             return NOERROR;
@@ -207,8 +209,9 @@ ECode CMediaSessionManager::RemoveOnActiveSessionsChangedListener(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     synchronized(mLock) {
-        AutoPtr<SessionsChangedWrapper> wrapper;
-        IMap::Probe(mListeners)->Remove(listener, (IInterface**)&wrapper);
+        AutoPtr<IInterface> obj;
+        IMap::Probe(mListeners)->Remove(listener, (IInterface**)&obj);
+        AutoPtr<SessionsChangedWrapper> wrapper = (SessionsChangedWrapper*)(IObject*)obj.Get();
         if (wrapper != NULL) {
             // try {
             mService->RemoveSessionsListener(wrapper->mStub);

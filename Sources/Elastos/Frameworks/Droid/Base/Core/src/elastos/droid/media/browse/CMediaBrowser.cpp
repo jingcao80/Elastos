@@ -174,7 +174,7 @@ CMediaBrowser::Subscription::Subscription(
 ECode CMediaBrowser::ConnectRunnable::Run()
 {
     // Ensure that nobody else came in or tried to connect again.
-    if (mServiceConnection == mHost->mServiceConnection) {
+    if (mServiceConnection == IServiceConnection::Probe(mHost->mServiceConnection)) {
         mHost->ForceCloseConnection();
         mHost->mCallback->OnConnectionFailed();
     }
@@ -505,7 +505,9 @@ ECode CMediaBrowser::Subscribe(
     CString::New(parentId, (ICharSequence**)&csq);
     Int32 index;
     mSubscriptions->GetIndexOfKey(csq, &index);
-    mSubscriptions->GetValueAt(index, (IInterface**)&sub);
+    AutoPtr<IInterface> obj;
+    mSubscriptions->GetValueAt(index, (IInterface**)&obj);
+    sub = (Subscription*)(IObject*)obj.Get();
     Boolean newSubscription = sub == NULL;
     if (newSubscription) {
         sub = new Subscription(parentId);
@@ -542,7 +544,9 @@ ECode CMediaBrowser::Unsubscribe(
     CString::New(parentId, (ICharSequence**)&csq);
     Int32 index;
     mSubscriptions->GetIndexOfKey(csq, &index);
-    mSubscriptions->RemoveAt(index, (IInterface**)&sub);
+    AutoPtr<IInterface> obj;
+    mSubscriptions->RemoveAt(index, (IInterface**)&obj);
+    sub = (Subscription*)(IObject*)obj.Get();
 
     // Tell the service if necessary.
     if (mState == CMediaBrowser::CONNECT_STATE_CONNECTED && sub != NULL) {

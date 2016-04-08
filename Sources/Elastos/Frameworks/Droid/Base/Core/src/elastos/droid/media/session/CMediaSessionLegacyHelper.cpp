@@ -302,8 +302,9 @@ ECode CMediaSessionLegacyHelper::GetSession(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<SessionHolder> holder;
-    IMap::Probe(mSessions)->Get(pi, (IInterface**)&result);
+    AutoPtr<IInterface> obj;
+    IMap::Probe(mSessions)->Get(pi, (IInterface**)&obj);
+    AutoPtr<SessionHolder> holder = (SessionHolder*)(IObject*)obj.Get();
     *result = (holder == NULL) ? NULL : holder->mSession;
     return NOERROR;
 }
@@ -702,8 +703,9 @@ AutoPtr<CMediaSessionLegacyHelper::SessionHolder> CMediaSessionLegacyHelper::Get
     /* [in] */ IPendingIntent * pi,
     /* [in] */ Boolean createIfMissing)
 {
-    AutoPtr<SessionHolder> holder;
-    IMap::Probe(mSessions)->Get(pi, (IInterface**)&holder);
+    AutoPtr<IInterface> obj;
+    IMap::Probe(mSessions)->Get(pi, (IInterface**)&obj);
+    AutoPtr<SessionHolder> holder = (SessionHolder*)(IObject*)obj.Get();
     if (holder == NULL && createIfMissing) {
         String pkg;
         pi->GetCreatorPackage(&pkg);

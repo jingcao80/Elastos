@@ -330,10 +330,14 @@ ECode CMediaHTTPConnection::SeekTo(
             AutoPtr<Elastos::Net::IProxy> proxyTemp;
             proxyhelper->GetNO_PROXY((Elastos::Net::IProxy**)&proxyTemp);
 
-            url->OpenConnection(proxyTemp, (IURLConnection**)&mConnection);
+            AutoPtr<IURLConnection> urlConnection;
+            url->OpenConnection(proxyTemp, (IURLConnection**)&urlConnection);
+            mConnection = IHttpURLConnection::Probe(urlConnection);
         }
         else {
-            url->OpenConnection((IURLConnection**)&mConnection);
+            AutoPtr<IURLConnection> urlConnection;
+            url->OpenConnection((IURLConnection**)&urlConnection);
+            mConnection = IHttpURLConnection::Probe(urlConnection);
         }
 
         // handle redirects ourselves if we do not allow cross-domain redirect

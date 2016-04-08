@@ -55,7 +55,9 @@ ECode CMediaCodecInfo::constructor(
 {
     mName = name;
     mIsEncoder = isEncoder;
-    CHashMap::New((IHashMap**)&mCaps);
+    AutoPtr<IHashMap> hMap;
+    CHashMap::New((IHashMap**)&hMap);
+    mCaps = IMap::Probe(hMap);
 
     for (Int32 i = 0; i < caps->GetLength(); i++) {
         AutoPtr<IMediaCodecInfoCodecCapabilities> c = (*caps)[i];
@@ -201,7 +203,7 @@ void CMediaCodecInfo::Init()
     AutoPtr<IInteger64> b64;
     CInteger64::New(1l, (IInteger64**)&b64);
     AutoPtr<IInteger64> e64;
-    CInteger64::New(Elastos::Core::Math::INT64_MAX_VALUE, (IInteger64**)&end);
+    CInteger64::New(Elastos::Core::Math::INT64_MAX_VALUE, (IInteger64**)&e64);
     CRange::Create(b64, e64, (IRange**)&POSITIVE_LONGS);
 
     AutoPtr<IRational> s;

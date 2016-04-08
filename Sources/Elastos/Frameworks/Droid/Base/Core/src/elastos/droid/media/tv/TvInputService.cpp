@@ -207,8 +207,9 @@ ECode TvInputService::ServiceHandler::HandleMessage(
             return NOERROR;
         }
         case DO_NOTIFY_SESSION_CREATED: {
-            AutoPtr<SomeArgs> args;
-            msg->GetObj((IInterface**)&args);
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<SomeArgs> args = (SomeArgs*)(IObject*)obj.Get();
 
             AutoPtr<IITvInputSession> stub = IITvInputSession::Probe(args->mArg1);
             AutoPtr<IITvInputSessionCallback> cb = IITvInputSessionCallback::Probe(args->mArg2);
