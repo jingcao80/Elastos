@@ -4,6 +4,7 @@
 #include <elastos/droid/provider/Settings.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Provider::ISettingsGlobal;
@@ -33,8 +34,8 @@ ECode CBootReceiver::OnReceive(
 
     if (value != 0) {
         AutoPtr<IIntent> loadavg;
-        assert(0 && "TODO");
-        // CIntent::New(context, com.android.systemui.LoadAverageService.class);
+        CIntent::New(context, ECLSID_CLoadAverageService/*com.android.systemui.LoadAverageService.class*/
+                        , (IIntent**)&loadavg);
 
         AutoPtr<IComponentName> name;
         if (FAILED(context->StartService(loadavg, (IComponentName**)&name))) {

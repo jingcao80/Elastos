@@ -472,7 +472,6 @@ ECode CDozeService::OnCreate()
     GetApplication((IApplication**)&a);
     if (ISystemUIApplication::Probe(a)) {
         AutoPtr<ISystemUIApplication> app = ISystemUIApplication::Probe(a);
-        AutoPtr<IClassInfo> classInfo = Utils::GetClassInfo(String("CDozeHost"));
         AutoPtr<IInterface> obj;
         app->GetComponent(EIID_IDozeHost/*.class*/, (IInterface**)&obj);
         mHost = IDozeHost::Probe(obj);

@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_SYSTEMUI_VOLUME_CREMOTEVOLUMECONTROLLER_H__
 
 #include "_Elastos_Droid_SystemUI_Volume_CRemoteVolumeController.h"
-#include "elastos/droid/systemui/volume/VolumeUI.h"
+#include "elastos/droid/systemui/volume/CVolumeUI.h"
 
 namespace Elastos {
 namespace Droid {
@@ -10,7 +10,7 @@ namespace SystemUI{
 namespace Volume{
 
 CarClass(CRemoteVolumeController)
-    , public VolumeUI::RemoteVolumeController
+    , public CVolumeUI::RemoteVolumeController
 {
 public:
     CAR_OBJECT_DECL()

@@ -50,4 +50,4 @@ SOURCES += QSTileHost.cpp
 SOURCES += PhoneStatusBarTransitions.cpp
 SOURCES += CPhoneStatusBarView.cpp
 SOURCES += PhoneStatusBarPolicy.cpp
-SOURCES += PhoneStatusBar.cpp
+SOURCES += CPhoneStatusBar.cpp

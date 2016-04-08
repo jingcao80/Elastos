@@ -3,7 +3,6 @@
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_MISC_SYSTEMSERVICESPROXY_H__
 
 #include "_SystemUI.h"
-#include <elastos/core/Object.h>
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.AppWidget.h"
 #include "Elastos.Droid.Content.h"
@@ -11,6 +10,7 @@
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::App::IActivityOptions;

@@ -1,11 +1,13 @@
 
 #include "elastos/droid/systemui/statusbar/policy/BrightnessMirrorController.h"
+#include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 #include "../../R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::SystemUI::R;
+using Elastos::Droid::SystemUI::StatusBar::Phone::CPhoneStatusBar;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
 
@@ -44,8 +46,7 @@ BrightnessMirrorController::BrightnessMirrorController(
 ECode BrightnessMirrorController::ShowMirror()
 {
     mBrightnessMirror->SetVisibility(IView::VISIBLE);
-    assert(0 && "TODO");
-    // mScrimBehind->AnimateViewAlpha(0.0f, TRANSITION_DURATION_OUT, PhoneStatusBar::ALPHA_OUT);
+    mScrimBehind->AnimateViewAlpha(0.0f, TRANSITION_DURATION_OUT, CPhoneStatusBar::ALPHA_OUT);
     AutoPtr<IViewPropertyAnimator> a;
     mPanelHolder->Animate((IViewPropertyAnimator**)&a);
     AutoPtr<IViewPropertyAnimator> o = OutAnimation(a);
@@ -55,8 +56,7 @@ ECode BrightnessMirrorController::ShowMirror()
 
 ECode BrightnessMirrorController::HideMirror()
 {
-    assert(0 && "TODO");
-    // mScrimBehind->AnimateViewAlpha(1.0f, TRANSITION_DURATION_IN, PhoneStatusBar.ALPHA_IN);
+    mScrimBehind->AnimateViewAlpha(1.0f, TRANSITION_DURATION_IN, CPhoneStatusBar::ALPHA_IN);
     AutoPtr<IViewPropertyAnimator> a;
     mPanelHolder->Animate((IViewPropertyAnimator**)&a);
     AutoPtr<IViewPropertyAnimator> o = InAnimation(a);
@@ -71,8 +71,7 @@ AutoPtr<IViewPropertyAnimator> BrightnessMirrorController::OutAnimation(
 {
     a->Alpha(0.0f);
     a->SetDuration(TRANSITION_DURATION_OUT);
-    assert(0 && "TODO");
-    // a->SetInterpolator(PhoneStatusBar.ALPHA_OUT);
+    a->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT));
     return a;
 }
 
@@ -81,8 +80,7 @@ AutoPtr<IViewPropertyAnimator> BrightnessMirrorController::InAnimation(
 {
     a->Alpha(1.0f);
     a->SetDuration(TRANSITION_DURATION_IN);
-    assert(0 && "TODO");
-    // a->SetInterpolator(PhoneStatusBar.ALPHA_IN);
+    a->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_IN));
     return a;
 }
 

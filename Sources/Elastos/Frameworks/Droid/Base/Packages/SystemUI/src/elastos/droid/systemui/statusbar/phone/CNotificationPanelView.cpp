@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CNotificationPanelView.h"
+#include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 #include "elastos/droid/systemui/statusbar/phone/ScrimController.h"
 #include "elastos/droid/systemui/statusbar/BaseStatusBar.h"
 #include "elastos/droid/view/animation/AnimationUtils.h"
@@ -1397,8 +1398,7 @@ void CNotificationPanelView::AnimateKeyguardStatusBarOut()
 
     mStatusBar->GetKeyguardFadingAwayDuration(&t);
     vpa->SetDuration(t / 2);
-    assert(0 && "TODO");
-    // vpa->SetInterpolator(PhoneStatusBar::ALPHA_OUT);
+    vpa->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT));
     vpa->WithEndAction(mAnimateKeyguardStatusBarInvisibleEndRunnable);
     vpa->Start();
 }
@@ -1419,8 +1419,7 @@ void CNotificationPanelView::SetKeyguardBottomAreaVisibility(
         vpa->SetStartDelay((mStatusBar->GetKeyguardFadingAwayDelay(&t), t));
         vpa->SetDuration((mStatusBar->GetKeyguardFadingAwayDuration(&t), t) / 2);
 
-        assert(0 && "TODO");
-        // vpa->SetInterpolator(PhoneStatusBar::ALPHA_OUT);
+        vpa->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT));
         vpa->WithEndAction(mAnimateKeyguardBottomAreaInvisibleEndRunnable);
         vpa->Start();
     }
@@ -1460,7 +1459,7 @@ void CNotificationPanelView::SetKeyguardStatusViewVisibility(
     //     vpa->SetStartDelay(0);
     //     vpa->SetDuration(160);
     //     assert(0 && "TODO");
-    //     // vpa->SetInterpolator(PhoneStatusBar::ALPHA_OUT);
+    //     // vpa->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT));
     //     vpa->WithEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable);
     //     if (keyguardFadingAway) {
     //         vpa = NULL;
@@ -1487,7 +1486,7 @@ void CNotificationPanelView::SetKeyguardStatusViewVisibility(
     //     vpa->SetDuration(320);
 
     //     assert(0 && "TODO");
-    //     // vpa->SetInterpolator(PhoneStatusBar::ALPHA_IN);
+    //     // vpa->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_IN));
     //     vpa->WithEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable);
     // }
     // else if (statusBarState == IStatusBarState::KEYGUARD) {

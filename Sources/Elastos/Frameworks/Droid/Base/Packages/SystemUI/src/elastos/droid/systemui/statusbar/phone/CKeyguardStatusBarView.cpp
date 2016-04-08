@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CKeyguardStatusBarView.h"
+#include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 #include "../../R.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/view/animation/AnimationUtils.h>
@@ -97,8 +98,7 @@ ECode CKeyguardStatusBarView::OnPreDrawListener::OnPreDraw(
         va->Alpha(0.f);
         va->SetDuration(300);
         va->SetStartDelay(0);
-        assert(0 && "TODO");
-        // IAnimator::Probe(va)->SetInterpolator(PhoneStatusBar::ALPHA_OUT);
+        IAnimator::Probe(va)->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT));
         AutoPtr<Runnable1> run = new Runnable1(mHost);
         va->WithEndAction(run);
         va->Start();
@@ -110,8 +110,7 @@ ECode CKeyguardStatusBarView::OnPreDrawListener::OnPreDraw(
         va->Alpha(1.f);
         va->SetDuration(300);
         va->SetStartDelay(200);
-        assert(0 && "TODO");
-        // IAnimator::Probe(va)->SetInterpolator(PhoneStatusBar::ALPHA_IN);
+        IAnimator::Probe(va)->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_IN));
     }
     *result = TRUE;
     return NOERROR;

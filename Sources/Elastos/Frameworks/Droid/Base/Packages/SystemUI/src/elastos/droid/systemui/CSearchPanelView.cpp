@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/CSearchPanelView.h"
+#include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Provider.h"
 #include <elastos/droid/os/AsyncTask.h>
@@ -26,8 +27,7 @@ using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::SystemUI::StatusBar::ICommandQueue;
 using Elastos::Droid::SystemUI::StatusBar::ICommandQueueCallbacks;
 using Elastos::Droid::SystemUI::StatusBar::EIID_IStatusBarPanel;
-using Elastos::Droid::SystemUI::StatusBar::Phone::IPhoneStatusBar;
-using Elastos::Droid::SystemUI::StatusBar::Phone::IPhoneStatusBar;
+using Elastos::Droid::SystemUI::StatusBar::Phone::CPhoneStatusBar;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -321,8 +321,7 @@ void CSearchPanelView::StartEnterAnimation()
     animator->Alpha(1.f);
     animator->SetDuration(300);
     animator->SetStartDelay(50);
-    assert(0 && "TODO");
-    // animator->SetInterpolator(IPhoneStatusBar::ALPHA_IN);
+    animator->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_IN));
     animator->Start();
 
 }
@@ -337,8 +336,7 @@ void CSearchPanelView::StartAbortAnimation()
     animator->Alpha(0.f);
     animator->SetDuration(300);
     animator->SetStartDelay(0);
-    assert(0 && "TODO");
-    // animator->SetInterpolator(IPhoneStatusBar::ALPHA_OUT);
+    animator->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT));
 }
 
 ECode CSearchPanelView::Hide(
@@ -502,8 +500,7 @@ void CSearchPanelView::StartExitAnimation()
     animator->Alpha(0.f);
     animator->SetDuration(300);
     animator->SetStartDelay(0);
-    assert(0 && "TODO");
-    // animator->SetInterpolator(IPhoneStatusBar::ALPHA_OUT);
+    animator->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT));
 }
 
 ECode CSearchPanelView::SetHorizontal(

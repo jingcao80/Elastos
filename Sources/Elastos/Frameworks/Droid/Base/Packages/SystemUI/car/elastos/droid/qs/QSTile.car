@@ -58,9 +58,6 @@ module
         CopyTo(
             [in] IQSTileState* other,
             [out] Boolean* ret);
-
-        ToStringBuilder(
-            [out] IStringBuilder** builder);
     }
 
     interface IQSTileCallback {
@@ -207,15 +204,6 @@ module
      */
     [local]
     interface IQSTile {
-        NewTileState(
-            [out] IInterface** state);
-
-        HandleClick();
-
-        HandleUpdateState(
-            [in] IInterface* state,
-            [in] IInterface* arg);
-
         SupportsDualTargets(
             [out] Boolean* ret);
 
@@ -241,11 +229,6 @@ module
         ShowDetail(
             [in] Boolean show);
 
-        RefreshState();
-
-        RefreshState(
-            [in] IInterface* arg);
-
         UserSwitch(
             [in] Int32 newUserId);
 
@@ -258,23 +241,7 @@ module
         Destroy();
 
         GetState(
-            [out] IInterface** state);
-
-        HandleSecondaryClick();
-
-        HandleRefreshState(
-            [in] IInterface* arg);
-
-        ShouldAnnouncementBeDelayed(
-            [out] Boolean* ret);
-
-        ComposeChangeAnnouncement(
-            [out] String* ret);
-
-        HandleUserSwitch(
-            [in] Int32 newUserId);
-
-        HandleDestroy();
+            [out] IQSTileState** state);
     }
 
     } // namespace Qs

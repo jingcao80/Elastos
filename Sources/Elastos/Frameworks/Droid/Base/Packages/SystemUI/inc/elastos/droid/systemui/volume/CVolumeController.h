@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_SYSTEMUI_VOLUME_CVOLUMECONTROLLER_H__
 
 #include "_Elastos_Droid_SystemUI_Volume_CVolumeController.h"
-#include "elastos/droid/systemui/volume/VolumeUI.h"
+#include "elastos/droid/systemui/volume/CVolumeUI.h"
 
 namespace Elastos {
 namespace Droid {
@@ -10,7 +10,7 @@ namespace SystemUI{
 namespace Volume{
 
 CarClass(CVolumeController)
-    , public VolumeUI::VolumeController
+    , public CVolumeUI::VolumeController
 {
 public:
     CAR_OBJECT_DECL()

@@ -1,7 +1,7 @@
 module
 {
     using interface Elastos.Core.IRunnable;
-    using interface Elastos.Droid.Graphics.IInterpolator;
+    using interface Elastos.Droid.View.Animation.IInterpolator;
 
     namespace Elastos {
     namespace Droid {

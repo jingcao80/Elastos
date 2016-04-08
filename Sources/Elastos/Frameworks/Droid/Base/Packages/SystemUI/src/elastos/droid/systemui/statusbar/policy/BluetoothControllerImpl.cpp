@@ -7,6 +7,7 @@
 #include "Elastos.Droid.Os.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Bluetooth::EIID_IBluetoothProfileServiceListener;
 using Elastos::Droid::Bluetooth::IBluetoothManager;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
@@ -89,6 +90,7 @@ BluetoothControllerImpl::DeviceInfo::DeviceInfo()
     , mBonded(FALSE)
 {}
 
+CAR_INTERFACE_IMPL(BluetoothControllerImpl::ServiceListener, Object, IBluetoothProfileServiceListener);
 BluetoothControllerImpl::ServiceListener::ServiceListener(
     /* [in] */ IBluetoothDevice* device,
     /* [in] */ const String& action,

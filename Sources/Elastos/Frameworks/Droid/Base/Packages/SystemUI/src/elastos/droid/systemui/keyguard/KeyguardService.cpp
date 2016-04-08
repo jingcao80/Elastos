@@ -263,7 +263,7 @@ ECode KeyguardService::OnCreate()
     AutoPtr<IInterface> obj;
     sa->GetComponent(EIID_IKeyguardViewMediator, (IInterface**)&obj);
 
-    mKeyguardViewMediator = (KeyguardViewMediator*)(IKeyguardViewMediator::Probe(obj));
+    mKeyguardViewMediator = (CKeyguardViewMediator*)(IKeyguardViewMediator::Probe(obj));
     return NOERROR;
 }
 

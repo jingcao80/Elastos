@@ -10,6 +10,6 @@ SOURCES = volume.cpp
 SOURCES += Interaction.cpp
 SOURCES += SegmentedButtons.cpp
 SOURCES += ZenToast.cpp
-SOURCES += VolumeUI.cpp
+SOURCES += CVolumeUI.cpp
 SOURCES += ZenModePanel.cpp
 SOURCES += VolumePanel.cpp

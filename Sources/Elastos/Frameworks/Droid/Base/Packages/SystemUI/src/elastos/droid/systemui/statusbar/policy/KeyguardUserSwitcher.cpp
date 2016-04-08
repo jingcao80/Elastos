@@ -2,6 +2,7 @@
 #include "elastos/droid/systemui/statusbar/policy/KeyguardUserSwitcher.h"
 #include "elastos/droid/systemui/statusbar/policy/KeyguardUserSwitcherScrim.h"
 #include "elastos/droid/systemui/statusbar/policy/UserSwitcherController.h"
+#include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 #include "../../R.h"
 #include <elastos/droid/view/LayoutInflater.h>
 #include <elastos/core/Math.h>
@@ -11,6 +12,7 @@ using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IObjectAnimatorHelper;
 using Elastos::Droid::Animation::IValueAnimator;
 using Elastos::Droid::SystemUI::Qs::Tiles::IUserDetailItemView;
+using Elastos::Droid::SystemUI::StatusBar::Phone::CPhoneStatusBar;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IViewPropertyAnimator;
@@ -266,8 +268,7 @@ void KeyguardUserSwitcher::StartAppearAnimation()
     (*ivs)[1] = 255;
     helper->OfInt32(mBackground, String("alpha"), ivs, (IObjectAnimator**)&mBgAnimator);
     IValueAnimator::Probe(mBgAnimator)->SetDuration(400);
-    assert(0 && "TODO");
-    // mBgAnimator->SetInterpolator(PhoneStatusBar::ALPHA_IN);
+    IAnimator::Probe(mBgAnimator)->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_IN));
     AutoPtr<AnimatorListenerAdapter1> listener = new AnimatorListenerAdapter1(this);
     IAnimator::Probe(mBgAnimator)->AddListener(listener);
     IAnimator::Probe(mBgAnimator)->Start();
@@ -279,8 +280,7 @@ void KeyguardUserSwitcher::StartDisappearAnimation()
     IView::Probe(mUserSwitcher)->Animate((IViewPropertyAnimator**)&vp);
     vp->Alpha(0.f);
     vp->SetDuration(300);
-    assert(0 && "TODO");
-    // vp->SetInterpolator(PhoneStatusBar::ALPHA_OUT);
+    vp->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT));
     AutoPtr<Runnable1> run = new Runnable1(this);
     vp->WithEndAction(run);
 }

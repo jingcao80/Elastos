@@ -9,7 +9,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/app/Service.h"
-#include "elastos/droid/systemui/keyguard/KeyguardViewMediator.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardViewMediator.h"
 
 using Elastos::Droid::App::Service;
 using Elastos::Droid::Content::IIntent;
@@ -165,7 +165,7 @@ public:
     const static String PERMISSION;
 
 private:
-    AutoPtr<KeyguardViewMediator> mKeyguardViewMediator;
+    AutoPtr<CKeyguardViewMediator> mKeyguardViewMediator;
 
     AutoPtr<KeyguardServiceBinder> mBinder;
 

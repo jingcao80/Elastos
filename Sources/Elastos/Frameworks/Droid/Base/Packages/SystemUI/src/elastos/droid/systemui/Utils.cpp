@@ -10,7 +10,7 @@ namespace SystemUI {
 
 static const String TAG("Elastos.Droid.SystemUI.Utils");
 
-const String Utils::sModulePath("......../SystemUI.eco");
+const String Utils::sModulePath("SystemUI.eco");
 const Int32 Utils::ELASTOS_DROID_CORE_ECO_FALG = 1;
 AutoPtr<IModuleInfo> Utils::sModuleInfo;
 AutoPtr<IClassInfo> Utils::GetClassInfo(

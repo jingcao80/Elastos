@@ -375,6 +375,7 @@
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents/misc
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/settings
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/screenshot
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/qs/tiles
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/qs
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents/views
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents/model

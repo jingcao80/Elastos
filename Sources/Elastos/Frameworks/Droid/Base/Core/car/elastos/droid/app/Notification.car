@@ -1175,6 +1175,20 @@ module
             [in] Int32 streamType);
 
         /**
+         * Set the sound to play, along with specific {@link AudioAttributes audio attributes} to
+         * use during playback.
+         *
+         * <p>
+         * A notification that is noisy is more likely to be presented as a heads-up notification.
+         * </p>
+         *
+         * @see Notification#sound
+         */
+        SetSound(
+            [in] IUri* sound,
+            [in] IAudioAttributes* audioAttributes);
+
+        /**
          * Set the vibration pattern to use.
          *
 

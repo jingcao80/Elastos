@@ -9,3 +9,6 @@ INCLUDES += $(MAKEDIR)/../../../../../../inc/
 SOURCES += Task.cpp
 SOURCES += TaskGrouping.cpp
 SOURCES += TaskStack.cpp
+SOURCES += SpaceNode.cpp
+SOURCES += RecentsPackageMonitor.cpp
+SOURCES += RecentsTaskLoader.cpp

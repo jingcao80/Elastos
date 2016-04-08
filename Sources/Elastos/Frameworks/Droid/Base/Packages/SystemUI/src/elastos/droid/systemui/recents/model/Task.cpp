@@ -81,6 +81,15 @@ AutoPtr<Task::ComponentNameKey> Task::TaskKey::GetComponentNameKey()
     return mComponentNameKey;
 }
 
+ECode Task::TaskKey::GetComponentNameKey(
+    /* [out] */ IComponentNameKey** cnk)
+{
+    VALIDATE_NOT_NULL(cnk)
+    *cnk = mComponentNameKey;
+    REFCOUNT_ADD(*cnk)
+    return NOERROR;
+}
+
 // @Override
 ECode Task::TaskKey::Equals(
     /* [in] */ IInterface* o,
@@ -176,8 +185,9 @@ Task::Task(
 
 /** Copies the other task. */
 ECode Task::CopyFrom(
-    /* [in] */ Task* o)
+    /* [in] */ ITask* _o)
 {
+    AutoPtr<Task> o = (Task*)_o;
     mKey = o->mKey;
     mTaskAffiliation = o->mTaskAffiliation;
     mTaskAffiliationColor = o->mTaskAffiliationColor;

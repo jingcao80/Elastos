@@ -8,4 +8,5 @@ INCLUDES += $(MAKEDIR)/../../../../../inc/
 SOURCES = media.cpp
 SOURCES += MediaProjectionPermissionActivity.cpp
 SOURCES += NotificationPlayer.cpp
-SOURCES += RingtonePlayer.cpp
+SOURCES += CMyRingtonePlayer.cpp
+SOURCES += CRingtonePlayer.cpp

@@ -214,11 +214,11 @@ module
     //merge("../../../../car/elastos/droid/recents/RecentsConfiguration.car");
 
     //recents/model
-    merge("../../../../car/elastos/droid/recents/model/BitmapLruCache.car");
-    merge("../../../../car/elastos/droid/recents/model/DrawableLruCache.car");
-    merge("../../../../car/elastos/droid/recents/model/KeyStoreLruCache.car");
+    //merge("../../../../car/elastos/droid/recents/model/BitmapLruCache.car");
+    //merge("../../../../car/elastos/droid/recents/model/DrawableLruCache.car");
+    //merge("../../../../car/elastos/droid/recents/model/KeyStoreLruCache.car");
     merge("../../../../car/elastos/droid/recents/model/RecentsPackageMonitor.car");
-    merge("../../../../car/elastos/droid/recents/model/StringLruCache.car");
+    //merge("../../../../car/elastos/droid/recents/model/StringLruCache.car");
     merge("../../../../car/elastos/droid/recents/model/Task.car");
     merge("../../../../car/elastos/droid/recents/model/TaskGrouping.car");
     merge("../../../../car/elastos/droid/recents/model/TaskStack.car");
@@ -259,6 +259,7 @@ module
     using interface Elastos.Droid.Content.IIntent;
     using interface Elastos.Droid.Content.Pm.IResolveInfo;
     using interface Elastos.Droid.Media.IIRemoteVolumeController;
+    using interface Elastos.Droid.Media.IIRingtonePlayer;
     using interface Elastos.Droid.Media.IIVolumeController;
     using interface Elastos.Droid.Utility.IAttributeSet;
     using interface Elastos.Droid.Graphics.Drawable.IDrawable;
@@ -313,11 +314,19 @@ module
     using interface Elastos.Core.ICharSequence;
     interface Elastos.Droid.SystemUI.IDemoMode;
     interface Elastos.Droid.SystemUI.IExpandHelperCallback;
+    interface Elastos.Droid.SystemUI.IRecentsComponent;
+    interface Elastos.Droid.SystemUI.IRecentsComponentCallbacks;
     interface Elastos.Droid.SystemUI.ISystemUI;
     interface Elastos.Droid.SystemUI.ISwipeHelperCallback;
     interface Elastos.Droid.SystemUI.Qs.IQSPanel;
     interface Elastos.Droid.SystemUI.Recents.Model.ITaskStack;
+    interface Elastos.Droid.SystemUI.StatusBar.IActivatableNotificationViewOnActivatedListener;
+    interface Elastos.Droid.SystemUI.StatusBar.IBaseStatusBar;
+    interface Elastos.Droid.SystemUI.StatusBar.ICommandQueueCallbacks;
+    interface Elastos.Droid.SystemUI.StatusBar.IDragDownCallback;
+    interface Elastos.Droid.SystemUI.StatusBar.IExpansionLogger;
     interface Elastos.Droid.SystemUI.StatusBar.IExpandableViewOnHeightChangedListener;
+    interface Elastos.Droid.SystemUI.StatusBar.INotificationEnvironment;
     interface Elastos.Droid.SystemUI.StatusBar.INotificationOverflowIconsView;
     interface Elastos.Droid.SystemUI.StatusBar.IStatusBarPanel;
     interface Elastos.Droid.SystemUI.StatusBar.Stack.IOnOverscrollTopChangedListener;
@@ -637,6 +646,11 @@ module
             interface IBinder;
         }
 
+        class CKeyguardViewMediator {
+            interface IKeyguardViewMediator;
+            interface ISystemUI;
+        }
+
     } // namespace Keyguard
 
     //===========================================================================
@@ -774,6 +788,7 @@ module
     //                              volume
     //===========================================================================
     namespace Volume {
+
         [local]
         class CSegmentedButtons {
             constructor(
@@ -834,6 +849,10 @@ module
             interface IHandler;
             interface IVolumePanel;
         }
+
+        class CVolumeUI {
+            interface ISystemUI;
+        }
     }
 
      //===========================================================================
@@ -859,6 +878,19 @@ module
             interface IAlertActivity;
             interface IDialogInterfaceOnClickListener;
             interface ICompoundButtonOnCheckedChangeListener;
+        }
+
+        [local]
+        class CMyRingtonePlayer {
+            constructor(
+                [in] ISystemUI* host);
+
+            interface IIRingtonePlayer;
+            interface IBinder;
+        }
+
+        class CRingtonePlayer {
+            interface ISystemUI;
         }
 
      } // namespace Media
@@ -888,112 +920,25 @@ module
 
     } // namespace Net
 
-//     //===========================================================================
-//     //                              Recent
-//     //===========================================================================
-//     namespace Recent {
+    //===========================================================================
+    //                              Power
+    //===========================================================================
+    namespace Power {
+        class CPowerUI {
+            interface IPowerUI;
+            interface ISystemUI;
+        }
+    } // Power
 
-//         [local]
-//         class CStatusBarTouchProxy {
-//             constructor(
-//                 [in] IContext* ctx,
-//                 [in] IAttributeSet* attrs);
-
-//             interface IStatusBarTouchProxy;
-//             interface IViewParent;
-//             interface IViewManager;
-//             interface IDrawableCallback;
-//             interface IKeyEventCallback;
-//             interface IAccessibilityEventSource;
-//         }
-
-//         [local]
-//         class CRecentsPanelView {
-//             constructor(
-//                 [in] IContext* ctx,
-//                 [in] IAttributeSet* attrs);
-
-//             constructor(
-//                 [in] IContext* ctx,
-//                 [in] IAttributeSet* attrs,
-//                 [in] Int32 defStyle);
-
-//             interface IRecentsPanelView;
-//             interface IAdapterViewOnItemClickListener;
-//             interface IRecentsCallback;
-//             interface IStatusBarPanel;
-//             interface IAnimatorListener;
-//             interface IViewParent;
-//             interface IViewManager;
-//             interface IDrawableCallback;
-//             interface IKeyEventCallback;
-//             interface IAccessibilityEventSource;
-//         }
-
-//         // class CRecentsActivity {
-//         //     interface IRecentsActivity;
-//         // }
-
-//         [local]
-//         class CRecentTasksLoader {
-//             constructor(
-//                 [in] IContext* ctx);
-
-//             interface IRecentTasksLoader;
-//         }
-
-//         [local]
-//         singleton class CRecentTasksLoaderHelper {
-//             interface IRecentTasksLoaderHelper;
-//         }
-
-//         [deprecated]
-//         class CTaskDescription {
-//             constructor();
-
-//             constructor(
-//                 [in] Int32 taskId,
-//                 [in] Int32 persistentTaskId,
-//                 [in] IResolveInfo* resolveInfo,
-//                 [in] IIntent* intent,
-//                 [in] String packageName,
-//                 [in] ICharSequence* description);
-
-//             interface ITaskDescription;
-//         }
-
-//         [local]
-//         class CRecentsVerticalScrollView {
-//             constructor(
-//                 [in] IContext* ctx,
-//                 [in] IAttributeSet* attrs);
-
-//             interface IRecentsVerticalScrollView;
-//             interface IRecentsScrollView;
-//             interface ISwipeHelperCallback;
-//             interface IViewParent;
-//             interface IViewManager;
-//             interface IDrawableCallback;
-//             interface IKeyEventCallback;
-//             interface IAccessibilityEventSource;
-//         }
-
-//         [local]
-//         class CRecentsHorizontalScrollView {
-//             constructor(
-//                 [in] IContext* ctx,
-//                 [in] IAttributeSet* attrs);
-
-//             interface IRecentsHorizontalScrollView;
-//             interface IRecentsScrollView;
-//             interface ISwipeHelperCallback;
-//             interface IViewParent;
-//             interface IViewManager;
-//             interface IDrawableCallback;
-//             interface IKeyEventCallback;
-//             interface IAccessibilityEventSource;
-//         }
-//     } // Recent
+    //===========================================================================
+    //                              Recent
+    //===========================================================================
+    namespace Recent {
+        class CRecents {
+            interface IRecentsComponent;
+            interface ISystemUI;
+        }
+    } // Recent
 
     //===========================================================================
     //                              Recents
@@ -2266,262 +2211,140 @@ module
             interface IAccessibilityEventSource;
         }
 
+        class CPhoneStatusBar {
+            interface IPhoneStatusBar;
+            interface IDemoMode;
+            interface IDragDownCallback;
+            interface IActivityStarter;
+            interface IBaseStatusBar;
+            interface ICommandQueueCallbacks;
+            interface IActivatableNotificationViewOnActivatedListener;
+            interface IRecentsComponentCallbacks;
+            interface IExpansionLogger;
+            interface INotificationEnvironment;
+            interface ISystemUI;
+        }
+
     } // namespace Phone
 
-//     //===========================================================================
-//     //                                  Tablet
-//     //===========================================================================
-//     namespace Tablet {
-
-//     [local]
-//     class CCompatModePanel {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         interface ICompatModePanel;
-//         interface IViewParent;
-//         interface IViewManager;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//         interface IStatusBarPanel;
-//         interface IViewOnClickListener;
-//     }
-
-//     [local]
-//     class CInputMethodsPanel {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs,
-//             [in] Int32 defStyle);
-
-//         interface IInputMethodsPanel;
-//         interface IViewParent;
-//         interface IViewManager;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//         interface IStatusBarPanel;
-//         interface IViewOnClickListener;
-//     }
-
-//     [local]
-//     class CNotificationArea {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         interface INotificationArea;
-//         interface IViewParent;
-//         interface IViewManager;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//     }
-
-//     [local]
-//     class CNotificationIconArea {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         interface INotificationIconArea;
-//         interface IViewParent;
-//         interface IViewManager;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//     }
-
-//     [local]
-//     class CNotificationIconAreaIconLayout {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         interface INotificationIconAreaIconLayout;
-//         interface IViewParent;
-//         interface IViewManager;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//     }
-
-//     [local]
-//     class CNotificationLinearLayout {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs,
-//             [in] Int32 defStyle);
-
-//         interface INotificationLinearLayout;
-//         interface IViewParent;
-//         interface IViewManager;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//     }
-
-//     [local]
-//     class CNotificationPanel {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs,
-//             [in] Int32 defStyle);
-
-//         interface INotificationPanel;
-//         interface IViewParent;
-//         interface IViewManager;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//         interface IStatusBarPanel;
-//         interface IViewOnClickListener;
-//     }
-
-//     [local]
-//     class CNotificationPanelTitle {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         interface INotificationPanelTitle;
-//         interface IViewParent;
-//         interface IViewManager;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//         interface IViewOnClickListener;
-//     }
-
-//     [local]
-//     class CNotificationPeekPanel {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs,
-//             [in] Int32 defStyle);
-
-//         interface INotificationPeekPanel;
-//         interface IViewParent;
-//         interface IViewManager;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//         interface IStatusBarPanel;
-//     }
-
-//     [local]
-//     class CSettingsView {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs,
-//             [in] Int32 defStyle);
-
-//         interface ISettingsView;
-//         interface IViewParent;
-//         interface IViewManager;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//         interface IViewOnClickListener;
-//     }
-
-//     [local]
-//     class CTabletStatusBarView {
-//         constructor(
-//             [in] IContext* ctx);
-
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         interface ITabletStatusBarView;
-//         interface IViewParent;
-//         interface IViewManager;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//     }
-
-//     [local]
-//     class CInputMethodButton {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         interface IInputMethodButton;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//     }
-
-//     [local]
-//     class CPanelBackgroundView {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         interface IPanelBackgroundView;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//     }
-
-//     [local]
-//     class CShirtPocket {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         interface IShirtPocket;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//     }
-
-//     [local]
-//     class CDropZone {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IAttributeSet* attrs);
-
-//         interface IDropZone;
-//         interface IDrawableCallback;
-//         interface IKeyEventCallback;
-//         interface IAccessibilityEventSource;
-//     }
-
-//      [local]
-//      class CTabletStatusBar {
-//          interface ITabletStatusBar;
-//          interface ICommandQueueCallbacks;
-//          interface IOnHardKeyboardEnabledChangeListener;
-//      }
-
-//     } // namespace Tablet
-
     } // namespace StatusBar
+
+    namespace Qs {
+        [local]
+        class CDataUsageGraph {
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IDataUsageGraph;
+            interface IView;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }
+
+        [local]
+        class CQSDetailItems {
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IQSDetailItems;
+            interface IFrameLayout;
+            interface IViewGroup;
+            interface IView;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }
+
+        [local]
+        class CQSPanel {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IQSPanel;
+            interface IViewGroup;
+            interface IView;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }
+
+        namespace Tiles {
+            [local]
+            class CDataUsageDetailView {
+                constructor(
+                    [in] IContext* ctx,
+                    [in] IAttributeSet* attrs);
+
+                interface IDataUsageDetailView;
+                interface ILinearLayout;
+                interface IViewGroup;
+                interface IView;
+                interface IViewParent;
+                interface IViewManager;
+                interface IDrawableCallback;
+                interface IKeyEventCallback;
+                interface IAccessibilityEventSource;
+            }
+
+            [local]
+            class CUserDetailItemView {
+                constructor(
+                    [in] IContext* ctx);
+
+                constructor(
+                    [in] IContext* ctx,
+                    [in] IAttributeSet* attrs);
+
+                constructor(
+                    [in] IContext* ctx,
+                    [in] IAttributeSet* attrs,
+                    [in] Int32 defStyleAttr);
+
+                constructor(
+                    [in] IContext* ctx,
+                    [in] IAttributeSet* attrs,
+                    [in] Int32 defStyleAttr,
+                    [in] Int32 defStyleRes);
+
+                interface IUserDetailItemView;
+                interface ILinearLayout;
+                interface IViewGroup;
+                interface IView;
+                interface IViewParent;
+                interface IViewManager;
+                interface IDrawableCallback;
+                interface IKeyEventCallback;
+                interface IAccessibilityEventSource;
+            }
+
+            [local]
+            class CUserDetailView {
+                constructor(
+                    [in] IContext* ctx,
+                    [in] IAttributeSet* attrs);
+
+                interface IUserDetailView;
+                interface IViewGroup;
+                interface IView;
+                interface IViewParent;
+                interface IViewManager;
+                interface IDrawableCallback;
+                interface IKeyEventCallback;
+                interface IAccessibilityEventSource;
+            }
+        }
+    } // namespace Qs
 
     } // namespace SystemUI
     } // namespace Droid

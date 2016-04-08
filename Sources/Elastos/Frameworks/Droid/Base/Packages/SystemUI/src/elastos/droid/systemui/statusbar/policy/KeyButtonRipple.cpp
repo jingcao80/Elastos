@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/policy/KeyButtonRipple.h"
+#include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 #include "../../R.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/core/Math.h>
@@ -15,6 +16,7 @@ using Elastos::Droid::Graphics::CanvasProperty;
 using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::SystemUI::StatusBar::Phone::CPhoneStatusBar;
 using Elastos::Droid::View::CRenderNodeAnimator;
 using Elastos::Droid::View::IRenderNodeAnimator;
 using Elastos::Droid::View::Animation::EIID_IInterpolator;
@@ -71,8 +73,7 @@ KeyButtonRipple::KeyButtonRipple(
     , mSupportHardware(FALSE)
 {
     mInterpolator = new LogInterpolator();
-    assert(0 && "TODO");
-    // mAlphaExitInterpolator = PhoneStatusBar::ALPHA_OUT;
+    mAlphaExitInterpolator = CPhoneStatusBar::ALPHA_OUT;
     CHashSet::New((IHashSet**)&mRunningAnimations);
     CArrayList::New((IArrayList**)&mTmpArray);
     mAnimatorListener = new AnimatorListener(this);

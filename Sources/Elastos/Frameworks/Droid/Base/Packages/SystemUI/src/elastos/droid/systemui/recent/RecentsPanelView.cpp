@@ -42,9 +42,9 @@ using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::IMatrix;
 using Elastos::Droid::Graphics::ShaderTileMode_REPEAT;
 using Elastos::Droid::Graphics::Drawable::IBitmapDrawable;
+using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
-using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IUserHandle;
@@ -1277,10 +1277,10 @@ void RecentsPanelView::StartApplicationDetailsActivity(
     /* [in] */ const String& packageName,
     /* [in] */ Int32 userId)
 {
-    AutoPtr<IUriHelper> urihelper;
-    CUriHelper::AcquireSingleton((IUriHelper**)&urihelper);
+    AutoPtr<IUriHelper> uriHelper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
     AutoPtr<IUri> uri;
-    urihelper->FromParts(String("package"), packageName, String(NULL), (IUri**)&uri);
+    uriHelper->FromParts(String("package"), packageName, String(NULL), (IUri**)&uri);
     AutoPtr<IIntent> intent;
     CIntent::New(ISettings::ACTION_APPLICATION_DETAILS_SETTINGS, uri, (IIntent**)&intent);
     AutoPtr<IContext> ctx;
@@ -1341,7 +1341,7 @@ ECode RecentsPanelView::HandleLongPress(
 ECode RecentsPanelView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
-    DispatchDraw(canvas);
+    FrameLayout::DispatchDraw(canvas);
 
     Int32 paddingLeft;
     GetPaddingLeft(&paddingLeft);

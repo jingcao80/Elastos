@@ -33,6 +33,7 @@ SOURCES += CImageWallpaper.cpp
 SOURCES += CLoadAverageService.cpp
 SOURCES += CSomnambulator.cpp
 SOURCES += CSystemUIService.cpp
+SOURCES += SearchPanelCircleView.cpp
 SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 

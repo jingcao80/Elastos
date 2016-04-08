@@ -6,4 +6,4 @@ INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 SOURCES = PowerNotificationWarnings.cpp
-SOURCES += PowerUI.cpp
+SOURCES += CPowerUI.cpp

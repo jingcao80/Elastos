@@ -7,5 +7,5 @@ INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 SOURCES = keyguard.cpp
-SOURCES += KeyguardViewMediator.cpp
+SOURCES += CKeyguardViewMediator.cpp
 SOURCES += KeyguardService.cpp

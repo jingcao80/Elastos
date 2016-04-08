@@ -485,6 +485,7 @@ ECode BaseStatusBar::_NotificationListenerService::OnNotificationRankingUpdate(
 //==============================================================================
 //                  BaseStatusBar::RecentsPreloadOnTouchListener
 //==============================================================================
+CAR_INTERFACE_IMPL(BaseStatusBar::RecentsPreloadOnTouchListener, Object, IViewOnTouchListener);
 BaseStatusBar::RecentsPreloadOnTouchListener::RecentsPreloadOnTouchListener(
     /* [in] */ BaseStatusBar* host)
     : mHost(host)
@@ -610,6 +611,7 @@ ECode BaseStatusBar::TouchOutsideListener::OnTouch(
 //==============================================================================
 //                  BaseStatusBar::NotificationClicker
 //==============================================================================
+CAR_INTERFACE_IMPL(BaseStatusBar::NotificationClicker, Object, IViewOnClickListener);
 BaseStatusBar::NotificationClicker::NotificationClicker(
     /* [in] */ IPendingIntent* intent,
     /* [in] */ const String& notificationKey,

@@ -16,6 +16,7 @@
 #include "elastos/droid/systemui/statusbar/phone/SystemUIDialog.h"
 #include "elastos/droid/systemui/volume/ZenModePanel.h"
 #include "elastos/droid/R.h"
+#include <elastos/droid/media/session/MediaControllerCallback.h>
 
 using Elastos::Droid::App::Dialog;
 using Elastos::Droid::App::IAlertDialog;
@@ -36,6 +37,7 @@ using Elastos::Droid::Media::Session::IMediaController;
 using Elastos::Droid::Media::Session::IMediaControllerCallback;
 using Elastos::Droid::Media::Session::IMediaControllerPlaybackInfo;
 using Elastos::Droid::Media::Session::IPlaybackState;
+using Elastos::Droid::Media::Session::MediaControllerCallback;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IVibrator;
 using Elastos::Droid::SystemUI::StatusBar::Phone::SystemUIDialog;
@@ -257,62 +259,14 @@ private:
         VolumePanel* mHost;
     };
 
-    class MyMediaControllerCb
-        : public Object
-        , public IMediaControllerCallback
+    class MyMediaControllerCb: public MediaControllerCallback
     {
     public:
-        CAR_INTERFACE_DECL()
-
         MyMediaControllerCb(
             /* [in] */ VolumePanel* host);
 
         CARAPI OnAudioInfoChanged(
             /* [in] */ IMediaControllerPlaybackInfo* info);
-
-        CARAPI OnSessionDestroyed();
-
-        CARAPI OnSessionEvent(
-            /* [in] */ const String& event,
-            /* [in] */ IBundle* extras);
-
-        CARAPI OnPlaybackStateChanged(
-            /* [in] */ IPlaybackState* state);
-
-        CARAPI OnMetadataChanged(
-            /* [in] */ IMediaMetadata* metadata);
-
-        CARAPI OnQueueChanged(
-            /* [in] */ IList* queue);
-
-        CARAPI OnQueueTitleChanged(
-            /* [in] */ ICharSequence* title);
-
-        CARAPI OnExtrasChanged(
-            /* [in] */ IBundle * extras);
-
-        /**
-         * @hide
-         */
-        CARAPI OnUpdateFolderInfoBrowsedPlayer(
-            /* [in] */ const String& stringUri);
-
-        /**
-         * @hide
-         */
-        CARAPI OnUpdateNowPlayingEntries(
-            /* [in] */ ArrayOf<Int64>* playList);
-
-        /**
-         * @hide
-         */
-        CARAPI OnUpdateNowPlayingContentChange();
-
-        /**
-         * @hide
-         */
-        CARAPI OnPlayItemResponse(
-            /* [in] */ Boolean success);
 
     private:
         VolumePanel* mHost;

@@ -16,4 +16,4 @@ SOURCES += RecentsPreloadReceiver.cpp
 SOURCES += RecentsActivity.cpp
 SOURCES += RecentsHorizontalScrollView.cpp
 SOURCES += RecentsVerticalScrollView.cpp
-SOURCES += Recents.cpp
+SOURCES += CRecents.cpp

@@ -73,6 +73,9 @@ public:
         /** Returns the component name key for this task. */
         CARAPI_(AutoPtr<ComponentNameKey>) GetComponentNameKey();
 
+        CARAPI GetComponentNameKey(
+            /* [out] */ IComponentNameKey** cnk);
+
         // @Override
         CARAPI Equals(
             /* [in] */ IInterface* o,
@@ -116,7 +119,7 @@ public:
 
     /** Copies the other task. */
     CARAPI CopyFrom(
-        /* [in] */ Task* o);
+        /* [in] */ ITask* o);
 
     /** Set the callbacks */
     CARAPI SetCallbacks(

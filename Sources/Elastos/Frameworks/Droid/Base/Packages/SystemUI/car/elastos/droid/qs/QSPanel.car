@@ -12,6 +12,17 @@ module
     namespace SystemUI {
     namespace Qs {
 
+    interface IQSPanelRecord {
+    }
+
+    /**
+     *
+     * @Involve
+     * interface IQSPanelRecord
+     */
+    interface IQSPanelTileRecord {
+    }
+
     [deprecated]
     interface IQSPanelCallback {
         OnShowingDetail(

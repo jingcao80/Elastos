@@ -398,9 +398,6 @@ ECode VolumePanel::MyZenCallback::OnNextAlarmChanged()
 //------------------------------------------------------------------------------------
 // VolumePanel::MyMediaControllerCb
 //------------------------------------------------------------------------------------
-
-CAR_INTERFACE_IMPL(VolumePanel::MyMediaControllerCb, Object, IMediaControllerCallback)
-
 VolumePanel::MyMediaControllerCb::MyMediaControllerCb(
     /* [in] */ VolumePanel* host)
     : mHost(host)
@@ -410,71 +407,6 @@ ECode VolumePanel::MyMediaControllerCb::OnAudioInfoChanged(
     /* [in] */ IMediaControllerPlaybackInfo* info)
 {
     return mHost->OnRemoteVolumeUpdateIfShown();
-}
-
-ECode VolumePanel::MyMediaControllerCb::OnSessionDestroyed()
-{
-    return NOERROR;
-}
-
-ECode VolumePanel::MyMediaControllerCb::OnSessionEvent(
-    /* [in] */ const String& event,
-    /* [in] */ IBundle* extras)
-{
-    return NOERROR;
-}
-
-ECode VolumePanel::MyMediaControllerCb::OnPlaybackStateChanged(
-    /* [in] */ IPlaybackState* state)
-{
-    return NOERROR;
-}
-
-ECode VolumePanel::MyMediaControllerCb::OnMetadataChanged(
-    /* [in] */ IMediaMetadata* metadata)
-{
-    return NOERROR;
-}
-
-ECode VolumePanel::MyMediaControllerCb::OnQueueChanged(
-    /* [in] */ IList* queue)
-{
-    return NOERROR;
-}
-
-ECode VolumePanel::MyMediaControllerCb::OnQueueTitleChanged(
-    /* [in] */ ICharSequence* title)
-{
-    return NOERROR;
-}
-
-ECode VolumePanel::MyMediaControllerCb::OnExtrasChanged(
-    /* [in] */ IBundle * extras)
-{
-    return NOERROR;
-}
-
-ECode VolumePanel::MyMediaControllerCb::OnUpdateFolderInfoBrowsedPlayer(
-    /* [in] */ const String& stringUri)
-{
-    return NOERROR;
-}
-
-ECode VolumePanel::MyMediaControllerCb::OnUpdateNowPlayingEntries(
-    /* [in] */ ArrayOf<Int64>* playList)
-{
-    return NOERROR;
-}
-
-ECode VolumePanel::MyMediaControllerCb::OnUpdateNowPlayingContentChange()
-{
-    return NOERROR;
-}
-
-ECode VolumePanel::MyMediaControllerCb::OnPlayItemResponse(
-    /* [in] */ Boolean success)
-{
-    return NOERROR;
 }
 
 //------------------------------------------------------------------------------------

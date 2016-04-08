@@ -4,6 +4,7 @@ module
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.View.IView;
     interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
@@ -11,35 +12,6 @@ module
     namespace Qs {
 
     interface IQSDetailItemsItem {
-        SetIcon(
-            [in] Int32 icon);
-
-        SetLine1(
-            [in] String line);
-
-        SetLine2(
-            [in] String line);
-
-        SetTag(
-            [in] IInterface* tag);
-
-        SetCanDisconnect(
-            [in] Boolean discon);
-
-        GetIcon(
-            [out] Int32* icon);
-
-        GetLine1(
-            [out] String* line);
-
-        GetLine2(
-            [out] String* line);
-
-        GetTag(
-            [out] IInterface** tag);
-
-        GetCanDisconnect(
-            [out] Boolean* discon);
     }
 
     interface IQSDetailItemsCallback {
@@ -76,7 +48,7 @@ module
             [in] IQSDetailItemsCallback* _callback);
 
         SetItems(
-            [in] ArrayOf<IQSDetailItemsItem*>* items);
+            [in] IArrayList* items);
 
         SetItemsVisible(
             [in] Boolean visible);

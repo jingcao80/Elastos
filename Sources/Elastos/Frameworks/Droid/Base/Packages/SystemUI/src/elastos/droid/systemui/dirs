@@ -1,4 +1,5 @@
 
+DIRS += qs
 DIRS += doze
 DIRS += media
 DIRS += recent
@@ -8,7 +9,6 @@ DIRS += egg
 DIRS += keyguard
 DIRS += net
 DIRS += power
-DIRS += qs
 DIRS += screenshot
 DIRS += settings
 DIRS += usb

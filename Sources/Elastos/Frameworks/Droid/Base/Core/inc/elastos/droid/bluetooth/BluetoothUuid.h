@@ -73,6 +73,9 @@ public:
     static CARAPI_(AutoPtr<IParcelUuid>) ParseUuidFrom(
         /* [in] */ ArrayOf<Byte>* uuidBytes);
 
+private:
+    ECO_LOCAL static CARAPI_(Boolean) InitStatic();
+
 public:
     /* See Bluetooth Assigned Numbers document - SDP section, to get the values of UUIDs
      * for the various services.
@@ -109,6 +112,9 @@ public:
     static const Int32 UUID_BYTES_128_BIT = 16;
 
     static const AutoPtr< ArrayOf<IParcelUuid*> > RESERVED_UUIDS;
+
+private:
+    ECO_LOCAL static Boolean sInit;
 };
 
 } // Bluetooth

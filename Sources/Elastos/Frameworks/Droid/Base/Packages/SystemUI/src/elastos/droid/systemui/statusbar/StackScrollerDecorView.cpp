@@ -101,10 +101,10 @@ void StackScrollerDecorView::AnimateText(
         AutoPtr<IInterpolator> interpolator;
         assert(0 && "TODO");
         // if (nowVisible) {
-        //     interpolator = PhoneStatusBar.ALPHA_IN;
+        //     interpolator = CPhoneStatusBar::ALPHA_IN;
         // }
         // else {
-        //     interpolator = PhoneStatusBar.ALPHA_OUT;
+        //     interpolator = CPhoneStatusBar::ALPHA_OUT;
         // }
         mAnimating = TRUE;
         AutoPtr<IViewPropertyAnimator> anim;

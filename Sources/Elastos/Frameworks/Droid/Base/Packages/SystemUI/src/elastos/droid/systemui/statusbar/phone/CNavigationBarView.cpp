@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CNavigationBarView.h"
+#include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 #include "elastos/droid/systemui/statusbar/phone/NavigationBarViewTaskSwitchHelper.h"
 #include "../../R.h"
 #include "Elastos.CoreLibrary.IO.h"
@@ -818,7 +819,7 @@ ECode CNavigationBarView::Dump(
     mDisplay->GetRealSize(size);
 
     assert(0 && "TODO");
-    String psInfo/* = PhoneStatusBar::ViewInfo(this)*/;
+    String psInfo = CPhoneStatusBar::ViewInfo(this);
     Int32 v = 0;
     GetVisibility(&v);
     pw->Println(String("      this: ") + psInfo + String(" ") + VisibilityToString(v));
@@ -878,8 +879,7 @@ void CNavigationBarView::DumpButton(
         pw->Print(String("NULL"));
     }
     else {
-        assert(0 && "TODO");
-        String viewInfo/* = PhoneStatusBar::ViewInfo(button)*/;
+        String viewInfo = CPhoneStatusBar::ViewInfo(button);
         Int32 v = 0;
         Float alpha = 0;
         button->GetVisibility(&v);

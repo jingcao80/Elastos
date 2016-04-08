@@ -7,7 +7,7 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/os/AsyncTask.h"
 #include "elastos/droid/os/SystemClock.h"
-#include "elastos/droid/systemui/power/PowerUI.h"
+#include "elastos/droid/systemui/power/CPowerUI.h"
 #include "elastos/droid/R.h"
 #include "../R.h"
 #include <elastos/core/StringUtils.h>
@@ -34,9 +34,9 @@ using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
 using Elastos::Droid::Media::IAudioAttributesBuilder;
+using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
-using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::CUserHandleHelper;
@@ -170,8 +170,8 @@ ECode PowerNotificationWarnings::MyOnDismissListener::OnDismiss(
 // PowerNotificationWarnings
 //-----------------------------------------------------------------------------------
 
-const String PowerNotificationWarnings::TAG(PowerUI::TAG + ".Notification");
-const Boolean PowerNotificationWarnings::DEBUG = PowerUI::DEBUG;
+const String PowerNotificationWarnings::TAG(CPowerUI::TAG + ".Notification");
+const Boolean PowerNotificationWarnings::DEBUG = CPowerUI::DEBUG;
 
 const String PowerNotificationWarnings::TAG_NOTIFICATION("low_battery");
 const Int32 PowerNotificationWarnings::ID_NOTIFICATION;
@@ -593,8 +593,7 @@ void PowerNotificationWarnings::AttachLowBatterySound(
             AutoPtr<IUri> soundUri;
             helper->Parse(String("file://") + soundPath, (IUri**)&soundUri);
             if (soundUri != NULL) {
-                assert(0 && "TODO");
-                // b->SetSound(soundUri, AUDIO_ATTRIBUTES);
+                b->SetSound(soundUri, AUDIO_ATTRIBUTES);
                 if (DEBUG) Slogger::D(TAG, "playing sound %s", TO_CSTR(soundUri));
             }
         }

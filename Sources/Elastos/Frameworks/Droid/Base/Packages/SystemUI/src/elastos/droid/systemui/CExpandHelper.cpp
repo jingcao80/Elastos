@@ -16,16 +16,18 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
 using Elastos::Droid::Media::IAudioAttributesBuilder;
 using Elastos::Droid::SystemUI::StatusBar::IExpandableNotificationRow;
+using Elastos::Droid::View::CMotionEventHelper;
+using Elastos::Droid::View::CScaleGestureDetector;
+using Elastos::Droid::View::CVelocityTrackerHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
-using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::View::IMotionEventHelper;
-using Elastos::Droid::View::CMotionEventHelper;
-using Elastos::Droid::View::CScaleGestureDetector;
+using Elastos::Droid::View::IVelocityTrackerHelper;
 using Elastos::Core::AutoLock;
 using Elastos::Core::Math;
 using Elastos::Utility::Logging::Logger;
@@ -216,8 +218,7 @@ ECode CExpandHelper::constructor(
     configuration->GetScaledTouchSlop(&mTouchSlop);
 
     CScaleGestureDetector::New(mContext, mScaleGestureListener, (IScaleGestureDetector**)&mSGD);
-    assert(0 && "TODO");
-    // mFlingAnimationUtils = new FlingAnimationUtils(context, EXPAND_DURATION);
+    mFlingAnimationUtils = new FlingAnimationUtils(context, EXPAND_DURATION);
     return NOERROR;
 }
 
@@ -458,8 +459,9 @@ void CExpandHelper::TrackVelocity(
     switch(action) {
         case IMotionEvent::ACTION_DOWN:
             if (mVelocityTracker == NULL) {
-                assert(0 && "TODO");
-                // mVelocityTracker = VelocityTracker.obtain();
+                AutoPtr<IVelocityTrackerHelper> helper;
+                CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&helper);
+                helper->Obtain((IVelocityTracker**)&mVelocityTracker);
             } else {
                 mVelocityTracker->Clear();
             }

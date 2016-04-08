@@ -3,6 +3,7 @@
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_RECENTSCONFIGURATION_H__
 
 #include "_SystemUI.h"
+#include "elastos/droid/systemui/recents/misc/SystemServicesProxy.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.View.h"
@@ -10,14 +11,13 @@
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::SystemUI::Recents::Misc::SystemServicesProxy;
 using Elastos::Droid::View::Animation::IInterpolator;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Recents {
-
-class SystemServicesProxy;
 
 /** A static Recents configuration for the current context
  * NOTE: We should not hold any references to a Context from a static instance */
