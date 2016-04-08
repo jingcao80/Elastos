@@ -28,6 +28,7 @@
 #include "elastos/droid/text/method/CWordIterator.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/LayoutInflater.h"
+#include "elastos/droid/view/CRenderNodeHelper.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/view/CViewConfigurationHelper.h"
 #include "elastos/droid/view/CDragShadowBuilder.h"
@@ -111,6 +112,8 @@ using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::IRenderNodeHelper;
+using Elastos::Droid::View::CRenderNodeHelper;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::EIID_IActionModeCallback;
 using Elastos::Droid::View::IViewGroupLayoutParams;
@@ -132,6 +135,40 @@ using Elastos::Droid::InputMethodService::IExtractEditText;
 namespace Elastos {
 namespace Droid {
 namespace Widget {
+
+//==============================================================================
+//              SuggestionInfo
+//==============================================================================
+SuggestionInfo::SuggestionInfo()
+    : mSuggestionStart(0)
+    , mSuggestionEnd(0)
+    , mSuggestionIndex(-1)
+{
+}
+
+//==============================================================================
+//              TextDisplayList
+//==============================================================================
+
+TextDisplayList::TextDisplayList(
+    /* [in] */ const String& name)
+    : mIsDirty(FALSE)
+{
+    mIsDirty = TRUE;
+    AutoPtr<IRenderNodeHelper> helper;
+    CRenderNodeHelper::AcquireSingleton((IRenderNodeHelper**)&helper);
+    helper->Create(name, NULL, (IRenderNode**)&mDisplayList);
+}
+
+TextDisplayList::~TextDisplayList()
+{}
+
+Boolean TextDisplayList::NeedsRecord()
+{
+    Boolean res;
+    mDisplayList->IsValid(&res);
+    return mIsDirty || !res;
+}
 
 //==============================================================================
 //              ActionPopupShowerRunnable
@@ -521,16 +558,6 @@ Int32 EasyEditPopupWindow::ClipVertically(
 {
     // As we display the pop-up below the span, no vertical clipping is required.
     return positionY;
-}
-
-//==============================================================================
-//              SuggestionInfo
-//==============================================================================
-SuggestionInfo::SuggestionInfo()
-    : mSuggestionStart(0)
-    , mSuggestionEnd(0)
-    , mSuggestionIndex(-1)
-{
 }
 
 //==============================================================================
@@ -1618,6 +1645,8 @@ Int32 ActionPopupWindow::ClipVertically(
 const Int32 HandleView::HISTORY_SIZE;
 const Int32 HandleView::TOUCH_UP_FILTER_DELAY_AFTER;
 const Int32 HandleView::TOUCH_UP_FILTER_DELAY_BEFORE;
+
+CAR_INTERFACE_IMPL(HandleView, View, ITextViewPositionListener);
 
 HandleView::HandleView()
     : View()
@@ -3077,6 +3106,7 @@ const Boolean Editor::DEBUG_UNDO = FALSE;
 const Int32 Editor::BLINK;
 
 AutoPtr<ArrayOf<Float> > Editor::TEMP_POSITION = ArrayOf<Float>::Alloc(2);
+Object Editor::TEMP_POSITION_OBJECT;
 const Int32 Editor::DRAG_SHADOW_MAX_TEXT_LENGTH;
 const Int32 Editor::EXTRACT_NOTHING;
 const Int32 Editor::EXTRACT_UNKNOWN;

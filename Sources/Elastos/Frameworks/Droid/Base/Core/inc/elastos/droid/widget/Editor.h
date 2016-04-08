@@ -68,8 +68,70 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class TextView;
+//==============================================================================
+//              SuggestionInfo
+//==============================================================================
+class SuggestionInfo
+    : public Object
+{
+public:
+    SuggestionInfo();
+
+    // range of actual suggestion within text
+    Int32 mSuggestionStart;
+    Int32 mSuggestionEnd;
+
+    // the SuggestionSpan that this TextView represents
+    AutoPtr<ISuggestionSpan> mSuggestionSpan;
+
+    // the index of this suggestion inside suggestionSpan
+    Int32 mSuggestionIndex;
+
+    AutoPtr<ISpannableStringBuilder> mText;
+    AutoPtr<ITextAppearanceSpan> mHighlightSpan;
+};
+
+} // namespace Widget
+} // namespace Droid
+} // namespace Elastos
+
+DEFINE_CONVERSION_FOR(Elastos::Droid::Widget::SuggestionInfo, IInterface)
+
+namespace Elastos {
+namespace Droid {
+namespace Widget {
+
+class TextDisplayList
+    : public Object
+{
+public:
+    friend class Editor;
+
+    TextDisplayList(
+        /* [in] */ const String& name);
+
+    ~TextDisplayList();
+
+    CARAPI_(Boolean) NeedsRecord();
+
+private:
+    AutoPtr<IRenderNode> mDisplayList;
+
+    Boolean mIsDirty;
+};
+
+} // namespace Widget
+} // namespace Droid
+} // namespace Elastos
+
+DEFINE_CONVERSION_FOR(Elastos::Droid::Widget::TextDisplayList, IInterface)
+
+namespace Elastos {
+namespace Droid {
+namespace Widget {
+
 class Editor;
+class TextView;
 class ActionPopupWindow;
 class SuggestionsPopupWindow;
 class InsertionHandleView;
@@ -295,29 +357,6 @@ private:
     AutoPtr<ITextView> mDeleteTextView;
     AutoPtr<IEasyEditSpan> mEasyEditSpan;
     AutoPtr<IEasyEditDeleteListener> mOnDeleteListener;
-};
-
-//==============================================================================
-//              SuggestionInfo
-//==============================================================================
-class SuggestionInfo
-    : public Object
-{
-public:
-    SuggestionInfo();
-
-    // range of actual suggestion within text
-    Int32 mSuggestionStart;
-    Int32 mSuggestionEnd;
-
-    // the SuggestionSpan that this TextView represents
-    AutoPtr<ISuggestionSpan> mSuggestionSpan;
-
-    // the index of this suggestion inside suggestionSpan
-    Int32 mSuggestionIndex;
-
-    AutoPtr<ISpannableStringBuilder> mText;
-    AutoPtr<ITextAppearanceSpan> mHighlightSpan;
 };
 
 //==============================================================================
@@ -1188,23 +1227,6 @@ class Editor
     , public IEditor
 {
 private:
-    class TextDisplayList
-        : public Object
-    {
-    public:
-        friend class Editor;
-
-        TextDisplayList(
-            /* [in] */ const String& name);
-
-        CARAPI_(Boolean) NeedsRecord();
-
-    private:
-        AutoPtr<IRenderNode> mDisplayList;
-
-        Boolean mIsDirty;
-    };
-
     class SpanController
         : public Object
         , public ISpanWatcher
@@ -1747,8 +1769,5 @@ private:
 } // namespace Widget
 } // namespace Droid
 } // namespace Elastos
-
-DEFINE_CONVERSION_FOR(Elastos::Droid::Widget::SuggestionInfo, IInterface)
-DEFINE_CONVERSION_FOR(Elastos::Droid::Widget::Editor::TextDisplayList, IInterface)
 
 #endif // __ELASTOS_DROID_WIDGET_EDITOR_H__

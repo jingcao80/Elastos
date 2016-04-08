@@ -5668,7 +5668,7 @@ ECode CWindowManagerService::RemoveAppToken(
                     Slogger::V(TAG, "removeAppToken make exiting: %s", TO_CSTR(wtoken));
                 }
                 stack->mExitingAppTokens.PushBack(wtoken);
-                wtoken->mDeferRemoval = FALSE;
+                wtoken->mDeferRemoval = TRUE;
             }
             else {
                 // Make sure there is no animation running on this token,

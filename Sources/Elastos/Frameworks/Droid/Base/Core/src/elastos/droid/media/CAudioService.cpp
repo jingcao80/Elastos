@@ -6327,7 +6327,7 @@ Boolean CAudioService::IsInCommunication()
 {
     Boolean IsInCall = FALSE;
 
-    // TODO:
+    //TODO:
     // AutoPtr<IInterface> service;
     // mContext->GetSystemService(IContext::TELECOM_SERVICE, ((IInterface**)&service));
     // AutoPtr<ITelecomManager> telecomManager = ITelecomManager::Probe(service);

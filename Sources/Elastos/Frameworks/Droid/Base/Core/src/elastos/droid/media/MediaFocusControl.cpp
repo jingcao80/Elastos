@@ -441,11 +441,13 @@ ECode MediaFocusControl::constructor(
 
     // Register for phone state monitoring
 
-    // TODO:
-    // service = NULL;
-    // mContext->GetSystemService(IContext::TELEPHONY_SERVICE, ((IInterface**)&service));
-    // AutoPtr<ITelephonyManager> tmgr = ITelephonyManager::Probe(service);
-    // tmgr->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_CALL_STATE);
+    service = NULL;
+    mContext->GetSystemService(IContext::TELEPHONY_SERVICE, ((IInterface**)&service));
+    AutoPtr<ITelephonyManager> tmgr = ITelephonyManager::Probe(service);
+    if (tmgr != NULL) {
+        Logger::E(TAG, "TODO, tmgr is not NULL, tmgr must be implemented");
+        tmgr->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_CALL_STATE);
+    }
 
     service = NULL;
     mContext->GetSystemService(IContext::APP_OPS_SERVICE, ((IInterface**)&service));
