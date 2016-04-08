@@ -83,6 +83,14 @@ module
 
     /**
      * @Involve
+     * interface Elastos.Core.ICharSequence
+     * interface Elastos.Droid.Text.IGetChars
+     * interface Elastos.Droid.Text.IGraphicsOperations
+     */
+    interface ICharWrapper {}
+
+    /**
+     * @Involve
      * interface Elastos.Droid.View.IView
      *
      * interface Elastos.Droid.View.OnPreDrawListener

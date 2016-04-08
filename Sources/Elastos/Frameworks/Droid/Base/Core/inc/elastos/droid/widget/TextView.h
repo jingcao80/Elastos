@@ -54,6 +54,10 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
+#ifndef TO_EDITOR
+#define TO_EDITOR(obj) ((Editor*)obj.Get())
+#endif
+
 class TextView;
 
 //==============================================================================
@@ -163,6 +167,7 @@ public:
 //==============================================================================
 class CharWrapper
     : public Object
+    , public ICharWrapper
     , public ICharSequence
     , public IGetChars
     , public IGraphicsOperations

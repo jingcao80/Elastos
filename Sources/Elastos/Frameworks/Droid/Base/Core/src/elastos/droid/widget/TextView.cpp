@@ -6,10 +6,10 @@
 #include "elastos/droid/widget/Editor.h"
 #include "elastos/droid/widget/CTextViewSavedState.h"
 #include "elastos/droid/widget/SpellChecker.h"
-#include "elastos/droid/content/CClipDataHelper.h"
+#include "elastos/droid/content/CClipData.h"
 #include "elastos/droid/content/res/CColorStateList.h"
-#include "elastos/droid/content/res/CResourcesHelper.h"
-#include "elastos/droid/content/res/CColorStateListHelper.h"
+#include "elastos/droid/content/res/CResources.h"
+#include "elastos/droid/content/res/CColorStateList.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CRectF.h"
 #include "elastos/droid/graphics/CPath.h"
@@ -32,7 +32,7 @@
 #include "elastos/droid/text/CSpannableString.h"
 #include "elastos/droid/text/CSpannableStringBuilder.h"
 #include "elastos/droid/text/TextDirectionHeuristics.h"
-#include "elastos/droid/text/method/CMetaKeyKeyListenerHelper.h"
+#include "elastos/droid/text/method/MetaKeyKeyListener.h"
 #include "elastos/droid/text/CBoringLayoutMetrics.h"
 #include "elastos/droid/text/CEditableFactory.h"
 #include "elastos/droid/text/CSpannableFactory.h"
@@ -40,20 +40,20 @@
 #include "elastos/droid/text/utility/Linkify.h"
 #include "elastos/droid/text/method/DigitsKeyListener.h"
 #include "elastos/droid/text/method/CDialerKeyListener.h"
-#include "elastos/droid/text/method/CTextKeyListenerHelper.h"
+#include "elastos/droid/text/method/TextKeyListener.h"
 #include "elastos/droid/text/method/CDateKeyListenerHelper.h"
-#include "elastos/droid/text/method/CTimeKeyListenerHelper.h"
-#include "elastos/droid/text/method/CDigitsKeyListenerHelper.h"
-#include "elastos/droid/text/method/CLinkMovementMethodHelper.h"
-#include "elastos/droid/text/method/CArrowKeyMovementMethodHelper.h"
+#include "elastos/droid/text/method/TimeKeyListener.h"
+#include "elastos/droid/text/method/DigitsKeyListener.h"
+#include "elastos/droid/text/method/LinkMovementMethod.h"
+#include "elastos/droid/text/method/ArrowKeyMovementMethod.h"
 #include "elastos/droid/text/method/CAllCapsTransformationMethod.h"
-#include "elastos/droid/text/method/CPasswordTransformationMethodHelper.h"
-#include "elastos/droid/text/method/CDateTimeKeyListenerHelper.h"
-#include "elastos/droid/text/method/CDialerKeyListenerHelper.h"
-#include "elastos/droid/text/method/CSingleLineTransformationMethodHelper.h"
-#include "elastos/droid/utility/CTypedValueHelper.h"
+#include "elastos/droid/text/method/CPasswordTransformationMethod.h"
+#include "elastos/droid/text/method/DateTimeKeyListener.h"
+#include "elastos/droid/text/method/DialerKeyListener.h"
+#include "elastos/droid/text/method/CSingleLineTransformationMethod.h"
+#include "elastos/droid/utility/CTypedValue.h"
 #include "elastos/droid/view/CKeyEvent.h"
-#include "elastos/droid/view/CViewConfigurationHelper.h"
+#include "elastos/droid/view/ViewConfiguration.h"
 #include "elastos/droid/view/CChoreographerHelper.h"
 #include "elastos/droid/view/Gravity.h"
 #include "elastos/droid/view/accessibility/CAccessibilityManager.h"
@@ -68,16 +68,13 @@
 
 using Elastos::Droid::Content::IUndoOwner;
 using Elastos::Droid::Content::IClipDataItem;
-using Elastos::Droid::Content::IClipDataHelper;
-using Elastos::Droid::Content::CClipDataHelper;
+using Elastos::Droid::Content::CClipData;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IClipboardManager;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Res::IXmlResourceParser;
-using Elastos::Droid::Content::Res::IColorStateListHelper;
-using Elastos::Droid::Content::Res::CColorStateListHelper;
-using Elastos::Droid::Content::Res::IResourcesHelper;
-using Elastos::Droid::Content::Res::CResourcesHelper;
+using Elastos::Droid::Content::Res::CColorStateList;
+using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::CColorStateList;
 using Elastos::Droid::Content::Res::ICompatibilityInfo;
 using Elastos::Droid::Content::Res::IResourcesTheme;
@@ -143,40 +140,29 @@ using Elastos::Droid::Text::Method::IDigitsKeyListener;
 using Elastos::Droid::Text::Method::CDialerKeyListener;
 using Elastos::Droid::Text::Method::IDialerKeyListener;
 using Elastos::Droid::Text::Method::IMetaKeyKeyListener;
-using Elastos::Droid::Text::Method::IMetaKeyKeyListenerHelper;
-using Elastos::Droid::Text::Method::CMetaKeyKeyListenerHelper;
+using Elastos::Droid::Text::Method::MetaKeyKeyListener;
 using Elastos::Droid::Text::Method::IDateKeyListener;
-using Elastos::Droid::Text::Method::ITextKeyListenerHelper;
-using Elastos::Droid::Text::Method::CTextKeyListenerHelper;
-using Elastos::Droid::Text::Method::IArrowKeyMovementMethodHelper;
-using Elastos::Droid::Text::Method::CArrowKeyMovementMethodHelper;
+using Elastos::Droid::Text::Method::TextKeyListener;
+using Elastos::Droid::Text::Method::ArrowKeyMovementMethod;
 using Elastos::Droid::Text::Method::CAllCapsTransformationMethod;
-using Elastos::Droid::Text::Method::IPasswordTransformationMethodHelper;
-using Elastos::Droid::Text::Method::CPasswordTransformationMethodHelper;
+using Elastos::Droid::Text::Method::CPasswordTransformationMethod;
 using Elastos::Droid::Text::Method::IPasswordTransformationMethod;
 using Elastos::Droid::Text::Method::IAllCapsTransformationMethod;
 using Elastos::Droid::Text::Method::ITransformationMethod2;
-using Elastos::Droid::Text::Method::ILinkMovementMethodHelper;
-using Elastos::Droid::Text::Method::CLinkMovementMethodHelper;
-using Elastos::Droid::Text::Method::IDigitsKeyListenerHelper;
-using Elastos::Droid::Text::Method::CDigitsKeyListenerHelper;
+using Elastos::Droid::Text::Method::LinkMovementMethod;
+using Elastos::Droid::Text::Method::DigitsKeyListener;
 using Elastos::Droid::Text::Method::IDateKeyListenerHelper;
 using Elastos::Droid::Text::Method::CDateKeyListenerHelper;
-using Elastos::Droid::Text::Method::ITimeKeyListenerHelper;
-using Elastos::Droid::Text::Method::CTimeKeyListenerHelper;
+using Elastos::Droid::Text::Method::TimeKeyListener;
 using Elastos::Droid::Text::Method::ITimeKeyListener;
-using Elastos::Droid::Text::Method::IDateTimeKeyListenerHelper;
-using Elastos::Droid::Text::Method::CDateTimeKeyListenerHelper;
+using Elastos::Droid::Text::Method::DateTimeKeyListener;
 using Elastos::Droid::Text::Method::IDateTimeKeyListener;
-using Elastos::Droid::Text::Method::IDialerKeyListenerHelper;
-using Elastos::Droid::Text::Method::CDialerKeyListenerHelper;
+using Elastos::Droid::Text::Method::DialerKeyListener;
 using Elastos::Droid::Text::Method::ISingleLineTransformationMethod;
-using Elastos::Droid::Text::Method::ISingleLineTransformationMethodHelper;
-using Elastos::Droid::Text::Method::CSingleLineTransformationMethodHelper;
+using Elastos::Droid::Text::Method::CSingleLineTransformationMethod;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::Utility::ITypedValue;
-using Elastos::Droid::Utility::ITypedValueHelper;
-using Elastos::Droid::Utility::CTypedValueHelper;
+using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IDispatcherState;
@@ -187,8 +173,7 @@ using Elastos::Droid::View::EIID_IFrameCallback;
 using Elastos::Droid::View::EIID_IOnPreDrawListener;
 using Elastos::Droid::View::IChoreographerHelper;
 using Elastos::Droid::View::CChoreographerHelper;
-using Elastos::Droid::View::IViewConfigurationHelper;
-using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::ViewConfiguration;
 using Elastos::Droid::View::IHapticFeedbackConstants;
 using Elastos::Droid::View::Gravity;
 using Elastos::Droid::View::CKeyEvent;
@@ -482,7 +467,7 @@ void Drawables::ApplyErrorDrawableIfNeeded(
 //          CharWrapper
 //==============================================================================
 
-CAR_INTERFACE_IMPL_3(CharWrapper, Object, ICharSequence, IGetChars, IGraphicsOperations)
+CAR_INTERFACE_IMPL_4(CharWrapper, Object, ICharWrapper, ICharSequence, IGetChars, IGraphicsOperations)
 
 CharWrapper::CharWrapper(
     /* [in] */ const ArrayOf<Char32>* chars,
@@ -1005,12 +990,10 @@ ECode ChangeWatcher::AfterTextChanged(
 
     mHost->SendAfterTextChanged(buffer);
 
-    AutoPtr<IMetaKeyKeyListenerHelper> helper;
-    CMetaKeyKeyListenerHelper::AcquireSingleton((IMetaKeyKeyListenerHelper**)&helper);
     Int32 state;
-    helper->GetMetaState(ICharSequence::Probe(buffer), IMetaKeyKeyListener::META_SELECTING, &state);
+    MetaKeyKeyListener::GetMetaState(ICharSequence::Probe(buffer), IMetaKeyKeyListener::META_SELECTING, &state);
     if (state != 0) {
-        helper->StopSelecting(mHost, ISpannable::Probe(buffer));
+        MetaKeyKeyListener::StopSelecting(mHost, ISpannable::Probe(buffer));
     }
 
     return NOERROR;
@@ -1966,7 +1949,7 @@ ECode TextView::InitFromAttributes(
         digits->ToString(&dstring);
         AutoPtr<IDigitsKeyListener> listener;
         DigitsKeyListener::GetInstance(dstring, (IDigitsKeyListener**)&listener);
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         editor->mKeyListener = IKeyListener::Probe(listener);
         editor->mInputType = inputType != IInputType::TYPE_NULL ? inputType : IInputType::TYPE_CLASS_TEXT;
     }
@@ -1978,7 +1961,7 @@ ECode TextView::InitFromAttributes(
         CreateEditorIfNeeded();
         AutoPtr<IDialerKeyListener> listener;
         CDialerKeyListener::GetInstance((IDialerKeyListener**)&listener);
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         editor->mKeyListener = IKeyListener::Probe(listener);
         editor->mInputType = inputType = IInputType::TYPE_CLASS_PHONE;
     }
@@ -1986,7 +1969,7 @@ ECode TextView::InitFromAttributes(
         CreateEditorIfNeeded();
         AutoPtr<IDigitsKeyListener> listener;
         DigitsKeyListener::GetInstance((numeric & SIGNED) != 0, (numeric & DECIMAL) != 0, (IDigitsKeyListener**)&listener);
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         editor->mKeyListener = IKeyListener::Probe(listener);
         inputType = IInputType::TYPE_CLASS_NUMBER;
         if ((numeric & SIGNED) != 0) {
@@ -2027,43 +2010,37 @@ ECode TextView::InitFromAttributes(
                 break;
         }
         CreateEditorIfNeeded();
-        AutoPtr<ITextKeyListenerHelper> helper;
-        CTextKeyListenerHelper::AcquireSingleton((ITextKeyListenerHelper**)&helper);
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         editor->mKeyListener = NULL;
         AutoPtr<ITextKeyListener> listener;
-        helper->GetInstance(autotext, cap, (ITextKeyListener**)&listener);
+        TextKeyListener::GetInstance(autotext, cap, (ITextKeyListener**)&listener);
         editor->mKeyListener = IKeyListener::Probe(listener);
         editor->mInputType = inputType;
     }
     else if (IsTextSelectable(&isTextSelectable), isTextSelectable) {
         // Prevent text changes from keyboard.
         if (mEditor != NULL) {
-            AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+            AutoPtr<Editor> editor = TO_EDITOR(mEditor);
             editor->mKeyListener = NULL;
             editor->mInputType = IInputType::TYPE_NULL;
         }
         bufferType = Elastos::Droid::Widget::BufferType_SPANNABLE;
         // So that selection can be changed using arrow keys and touch is handled.
-        AutoPtr<IArrowKeyMovementMethodHelper> helper;
-        CArrowKeyMovementMethodHelper::AcquireSingleton((IArrowKeyMovementMethodHelper**)&helper);
         AutoPtr<IMovementMethod> method;
-        helper->GetInstance((IMovementMethod**)&method);
+        ArrowKeyMovementMethod::GetInstance((IMovementMethod**)&method);
         SetMovementMethod(method);
     }
     else if (editable) {
         CreateEditorIfNeeded();
-        AutoPtr<ITextKeyListenerHelper> helper;
-        CTextKeyListenerHelper::AcquireSingleton((ITextKeyListenerHelper**)&helper);
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         editor->mKeyListener = NULL;
         AutoPtr<ITextKeyListener> tkl;
-        helper->GetInstance((ITextKeyListener**)&tkl);
+        TextKeyListener::GetInstance((ITextKeyListener**)&tkl);
         editor->mKeyListener = IKeyListener::Probe(tkl);
         editor->mInputType = IInputType::TYPE_CLASS_TEXT;
     }
     else {
-        if (mEditor != NULL) ((Editor*)mEditor.Get())->mKeyListener = NULL;
+        if (mEditor != NULL) TO_EDITOR(mEditor)->mKeyListener = NULL;
 
         switch (buffertype) {
             case 0:
@@ -2079,13 +2056,13 @@ ECode TextView::InitFromAttributes(
     }
 
     if (mEditor != NULL) {
-        ((Editor*)mEditor.Get())->AdjustInputType(password, passwordInputType,
+        TO_EDITOR(mEditor)->AdjustInputType(password, passwordInputType,
                 webPasswordInputType, numberPasswordInputType);
         }
 
     if (selectallonfocus) {
         CreateEditorIfNeeded();
-        ((Editor*)mEditor.Get())->mSelectAllOnFocus = TRUE;
+        TO_EDITOR(mEditor)->mSelectAllOnFocus = TRUE;
 
         if (bufferType == BufferType_NORMAL) {
             bufferType = BufferType_SPANNABLE;
@@ -2119,12 +2096,8 @@ ECode TextView::InitFromAttributes(
         case 3:
             SetEllipsize(TextUtilsTruncateAt_END);
             break;
-        case 4:
-            {
-                AutoPtr<IViewConfigurationHelper> helper;
-                CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
-                AutoPtr<IViewConfiguration> config;
-                helper->Get(context, (IViewConfiguration**)&config);
+        case 4: {
+                AutoPtr<IViewConfiguration> config = ViewConfiguration::Get(context);
                 Boolean isFadingMarqueeEnabled = FALSE;
                 config->IsFadingMarqueeEnabled(&isFadingMarqueeEnabled);
                 if (isFadingMarqueeEnabled) {
@@ -2166,15 +2139,13 @@ ECode TextView::InitFromAttributes(
     }
 
     if (password || passwordInputType || webPasswordInputType || numberPasswordInputType) {
-        AutoPtr<IPasswordTransformationMethodHelper> helper;
-        CPasswordTransformationMethodHelper::AcquireSingleton((IPasswordTransformationMethodHelper**)&helper);
         AutoPtr<IPasswordTransformationMethod> method;
-        helper->GetInstance((IPasswordTransformationMethod**)&method);
+        CPasswordTransformationMethod::GetInstance((IPasswordTransformationMethod**)&method);
         SetTransformationMethod(ITransformationMethod::Probe(method));
         typefaceIndex = MONOSPACE;
     }
     else if (mEditor != NULL &&
-            (((Editor*)mEditor.Get())->mInputType & (IInputType::TYPE_MASK_CLASS | IInputType::TYPE_MASK_VARIATION))
+            (TO_EDITOR(mEditor)->mInputType & (IInputType::TYPE_MASK_CLASS | IInputType::TYPE_MASK_VARIATION))
             == (IInputType::TYPE_CLASS_TEXT | IInputType::TYPE_TEXT_VARIATION_PASSWORD)) {
         typefaceIndex = MONOSPACE;
     }
@@ -2241,7 +2212,7 @@ ECode TextView::InitFromAttributes(
     SetClickable(clickable);
     SetLongClickable(longClickable);
 
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->PrepareCursorControllers();
+    if (mEditor != NULL) TO_EDITOR(mEditor)->PrepareCursorControllers();
 
     // If not explicitly specified this view is important for accessibility.
     Int32 importantForAccessibility;
@@ -2375,7 +2346,7 @@ ECode TextView::SetEnabled(
 
     // Will change text color
     if (mEditor != NULL) {
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         editor->InvalidateTextDisplayList();
         editor->PrepareCursorControllers();
 
@@ -2478,7 +2449,7 @@ AutoPtr<ILayout> TextView::GetHintLayout()
 
 AutoPtr<IUndoManager> TextView::GetUndoManager()
 {
-    return mEditor == NULL ? NULL : ((Editor*)mEditor.Get())->mUndoManager;
+    return mEditor == NULL ? NULL : TO_EDITOR(mEditor)->mUndoManager;
 }
 
 void TextView::SetUndoManager(
@@ -2516,7 +2487,7 @@ ECode TextView::GetKeyListener(
         *listener = NULL;
     }
     else {
-        *listener = ((Editor*)mEditor.Get())->mKeyListener;
+        *listener = TO_EDITOR(mEditor)->mKeyListener;
         REFCOUNT_ADD(*listener)
     }
     return NOERROR;
@@ -2597,7 +2568,7 @@ ECode TextView::SetMovementMethod(
 
         // SelectionModifierCursorController depends on textCanBeSelected, which depends on
         // mMovement
-        if (mEditor != NULL) ((Editor*)mEditor.Get())->PrepareCursorControllers();
+        if (mEditor != NULL) TO_EDITOR(mEditor)->PrepareCursorControllers();
     }
 
     return NOERROR;
@@ -2605,7 +2576,7 @@ ECode TextView::SetMovementMethod(
 
 void TextView::FixFocusableAndClickableSettings()
 {
-    if (mMovement != NULL || (mEditor != NULL && ((Editor*)mEditor.Get())->mKeyListener != NULL)) {
+    if (mMovement != NULL || (mEditor != NULL && TO_EDITOR(mEditor)->mKeyListener != NULL)) {
         SetFocusable(TRUE);
         SetClickable(TRUE);
         SetLongClickable(TRUE);
@@ -3590,9 +3561,7 @@ ECode TextView::SetTextSize(
     AutoPtr<IResources> r;
 
     if (c == NULL) {
-        AutoPtr<IResourcesHelper> helper;
-        CResourcesHelper::AcquireSingleton((IResourcesHelper**)&helper);
-        helper->GetSystem((IResources**)&r);
+        r = CResources::GetSystem();
     }
     else {
         c->GetResources((IResources**)&r);
@@ -3601,11 +3570,7 @@ ECode TextView::SetTextSize(
     AutoPtr<IDisplayMetrics> metrics;
     r->GetDisplayMetrics((IDisplayMetrics**)&metrics);
 
-    AutoPtr<ITypedValueHelper> tvh;
-    CTypedValueHelper::AcquireSingleton((ITypedValueHelper**)&tvh);
-    assert(tvh != NULL);
-    Float result;
-    tvh->ApplyDimension(unit, size, metrics, &result);
+    Float result = CTypedValue::ApplyDimension(unit, size, metrics);
     SetRawTextSize(result);
     return NOERROR;
 }
@@ -3800,7 +3765,7 @@ ECode TextView::SetShowSoftInputOnFocus(
     /* [in] */ Boolean show)
 {
     CreateEditorIfNeeded();
-    ((Editor*)mEditor.Get())->mShowSoftInputOnFocus = show;
+    TO_EDITOR(mEditor)->mShowSoftInputOnFocus = show;
     return NOERROR;
 }
 
@@ -3808,7 +3773,7 @@ ECode TextView::GetShowSoftInputOnFocus(
     /* [out] */ Boolean* show)
 {
     VALIDATE_NOT_NULL(show)
-    *show = mEditor == NULL || ((Editor*)mEditor.Get())->mShowSoftInputOnFocus;
+    *show = mEditor == NULL || TO_EDITOR(mEditor)->mShowSoftInputOnFocus;
     return NOERROR;
 }
 
@@ -3826,7 +3791,7 @@ ECode TextView::SetShadowLayer(
     mShadowColor = color;
 
     // Will change text clip region
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->InvalidateTextDisplayList();
+    if (mEditor != NULL) TO_EDITOR(mEditor)->InvalidateTextDisplayList();
 
     Invalidate();
     return NOERROR;
@@ -3924,9 +3889,7 @@ ECode TextView::SetHintTextColor(
     /* [in] */ Int32 color)
 {
     mHintTextColor = NULL;
-    AutoPtr<IColorStateListHelper> helper;
-    CColorStateListHelper::AcquireSingleton((IColorStateListHelper**)&helper);
-    helper->ValueOf(color, (IColorStateList**)&mHintTextColor);
+    CColorStateList::ValueOf(color, (IColorStateList**)&mHintTextColor);
     UpdateTextColors();
     return NOERROR;
 }
@@ -3960,9 +3923,7 @@ ECode TextView::SetLinkTextColor(
     /* [in] */ Int32 color)
 {
     mLinkTextColor = NULL;
-    AutoPtr<IColorStateListHelper> helper;
-    CColorStateListHelper::AcquireSingleton((IColorStateListHelper**)&helper);
-    helper->ValueOf(color, (IColorStateList**)&mLinkTextColor);
+    CColorStateList::ValueOf(color, (IColorStateList**)&mLinkTextColor);
     UpdateTextColors();
     return NOERROR;
 }
@@ -4364,7 +4325,7 @@ void TextView::UpdateTextColors()
 
     if (inval) {
         // Text needs to be redrawn with the new color
-        if (mEditor != NULL) ((Editor*)mEditor.Get())->InvalidateTextDisplayList();
+        if (mEditor != NULL) TO_EDITOR(mEditor)->InvalidateTextDisplayList();
         Invalidate();
     }
 }
@@ -4481,7 +4442,7 @@ AutoPtr<IParcelable> TextView::OnSaveInstanceState()
 
             if (mEditor != NULL) {
                 RemoveMisspelledSpans(sp);
-                sp->RemoveSpan(((Editor*)mEditor.Get())->mSuggestionRangeSpan);
+                sp->RemoveSpan(TO_EDITOR(mEditor)->mSuggestionRangeSpan);
             }
 
             ss->mText = ICharSequence::Probe(sp);
@@ -4572,7 +4533,7 @@ void TextView::OnRestoreInstanceState(
 
                 if (ss->mFrozenWithFocus) {
                     CreateEditorIfNeeded();
-                    ((Editor*)mEditor.Get())->mFrozenWithFocus = TRUE;
+                    TO_EDITOR(mEditor)->mFrozenWithFocus = TRUE;
                 }
             }
         }
@@ -4668,10 +4629,7 @@ ECode TextView::SetText(
         Int32 spanStart = 0;
         spanned->GetSpanStart(iobj->Probe(EIID_IInterface), &spanStart);
         if (spanStart >= 0) {
-            AutoPtr<IViewConfigurationHelper> helper;
-            CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
-            AutoPtr<IViewConfiguration> vc;
-            helper->Get(mContext, (IViewConfiguration**)&vc);
+            AutoPtr<IViewConfiguration> vc = ViewConfiguration::Get(mContext);
             Boolean enabled = FALSE;
             if (vc->IsFadingMarqueeEnabled(&enabled), enabled) {
                 SetHorizontalFadingEdgeEnabled(TRUE);
@@ -4736,12 +4694,8 @@ ECode TextView::SetText(
         mSpannableFactory->NewSpannable(text, (ISpannable**)&t);
         text = ICharSequence::Probe(t);
     }
-    else {
-        assert(0);
-        /*CharWrapper* cw = reinterpret_cast<CharWrapper*>(text->Probe(EIID_CharWrapper));
-        if (NULL == cw) {
-            text = TextUtils::StringOrSpannedString(text);
-        }*/
+    else if (ICharWrapper::Probe(text) == NULL) {
+        text = TextUtils::StringOrSpannedString(text);
     }
 
     if (mAutoLinkMask != 0) {
@@ -4760,10 +4714,8 @@ ECode TextView::SetText(
             mText = text;
 
             if (mLinksClickable && !TextCanBeSelected()) {
-                AutoPtr<ILinkMovementMethodHelper> helper;
-                CLinkMovementMethodHelper::AcquireSingleton((ILinkMovementMethodHelper**)&helper);
                 AutoPtr<IMovementMethod> method;
-                helper->GetInstance((IMovementMethod**)&method);
+                LinkMovementMethod::GetInstance((IMovementMethod**)&method);
                 SetMovementMethod(method);
             }
         }
@@ -4811,7 +4763,7 @@ ECode TextView::SetText(
 
         if (mMovement != NULL) {
             mMovement->Initialize(this, ISpannable::Probe(text));
-            if (mEditor != NULL) ((Editor*)mEditor.Get())->mSelectionMoved = FALSE;
+            if (mEditor != NULL) TO_EDITOR(mEditor)->mSelectionMoved = FALSE;
         }
     }
 
@@ -4830,7 +4782,7 @@ ECode TextView::SetText(
 
     // SelectionModifierCursorController depends on textCanBeSelected, which depends on text
     if (mEditor != NULL) {
-        ((Editor*)mEditor.Get())->PrepareCursorControllers();
+        TO_EDITOR(mEditor)->PrepareCursorControllers();
     }
 
     return NOERROR;
@@ -4953,7 +4905,7 @@ ECode TextView::SetHint(
 
     // Invalidate display list if hint is currently used
     if (mEditor != NULL && len == 0 && mHint != NULL) {
-        ((Editor*)mEditor.Get())->InvalidateTextDisplayList();
+        TO_EDITOR(mEditor)->InvalidateTextDisplayList();
     }
 
     return NOERROR;
@@ -5036,10 +4988,8 @@ ECode TextView::SetInputType(
     const Boolean isVisiblePassword = IsVisiblePasswordInputType(type);
     Boolean forceUpdate = FALSE;
 
-    AutoPtr<IPasswordTransformationMethodHelper> helper;
-    CPasswordTransformationMethodHelper::AcquireSingleton((IPasswordTransformationMethodHelper**)&helper);
     AutoPtr<IPasswordTransformationMethod> ptm;
-    helper->GetInstance((IPasswordTransformationMethod**)&ptm);
+    CPasswordTransformationMethod::GetInstance((IPasswordTransformationMethod**)&ptm);
     String nullStr;
     if (isPassword) {
          SetTransformationMethod(ITransformationMethod::Probe(ptm));
@@ -5115,7 +5065,7 @@ ECode TextView::SetRawInputType(
 {
     if (type == IInputType::TYPE_NULL && mEditor == NULL) return NOERROR; //TYPE_NULL is the default value
     CreateEditorIfNeeded();
-    ((Editor*)mEditor.Get())->mInputType = type;
+    TO_EDITOR(mEditor)->mInputType = type;
     return NOERROR;
 }
 
@@ -5141,17 +5091,13 @@ void TextView::SetInputType(
             cap = Elastos::Droid::Text::Method::Capitalize_NONE;
         }
 
-        AutoPtr<ITextKeyListenerHelper> helper;
-        CTextKeyListenerHelper::AcquireSingleton((ITextKeyListenerHelper**)&helper);
         AutoPtr<ITextKeyListener> tkl;
-        helper->GetInstance(autotext, cap, (ITextKeyListener**)&tkl);
+        TextKeyListener::GetInstance(autotext, cap, (ITextKeyListener**)&tkl);
         input = IKeyListener::Probe(tkl);
     }
     else if (cls == IInputType::TYPE_CLASS_NUMBER) {
-        AutoPtr<IDigitsKeyListenerHelper> helper;
-        CDigitsKeyListenerHelper::AcquireSingleton((IDigitsKeyListenerHelper**)&helper);
         AutoPtr<IDigitsKeyListener> dkl;
-        helper->GetInstance(
+        DigitsKeyListener::GetInstance(
                 (type & IInputType::TYPE_NUMBER_FLAG_SIGNED) != 0,
                 (type & IInputType::TYPE_NUMBER_FLAG_DECIMAL) != 0,
                 (IDigitsKeyListener**)&dkl);
@@ -5167,39 +5113,31 @@ void TextView::SetInputType(
             input = IKeyListener::Probe(dkl);
         }
         else if (flag == IInputType::TYPE_DATETIME_VARIATION_TIME) {
-            AutoPtr<ITimeKeyListenerHelper> helper;
-            CTimeKeyListenerHelper::AcquireSingleton((ITimeKeyListenerHelper**)&helper);
             AutoPtr<ITimeKeyListener> tkl;
-            helper->GetInstance((ITimeKeyListener**)&tkl);
+            TimeKeyListener::GetInstance((ITimeKeyListener**)&tkl);
             input = IKeyListener::Probe(tkl);
         }
         else {
-            AutoPtr<IDateTimeKeyListenerHelper> helper;
-            CDateTimeKeyListenerHelper::AcquireSingleton((IDateTimeKeyListenerHelper**)&helper);
             AutoPtr<IDateTimeKeyListener> dtkl;
-            helper->GetInstance((IDateTimeKeyListener**)&dtkl);
+            DateTimeKeyListener::GetInstance((IDateTimeKeyListener**)&dtkl);
             input = IKeyListener::Probe(dtkl);
         }
     }
     else if (cls == IInputType::TYPE_CLASS_PHONE) {
-        AutoPtr<IDialerKeyListenerHelper> helper;
-        CDialerKeyListenerHelper::AcquireSingleton((IDialerKeyListenerHelper**)&helper);
         AutoPtr<IDialerKeyListener> dkl;
-        helper->GetInstance((IDialerKeyListener**)&dkl);
+        DialerKeyListener::GetInstance((IDialerKeyListener**)&dkl);
         input = IKeyListener::Probe(dkl);
     }
     else {
-        AutoPtr<ITextKeyListenerHelper> helper;
-        CTextKeyListenerHelper::AcquireSingleton((ITextKeyListenerHelper**)&helper);
         AutoPtr<ITextKeyListener> tkl;
-        helper->GetInstance((ITextKeyListener**)&tkl);
+        TextKeyListener::GetInstance((ITextKeyListener**)&tkl);
         input = IKeyListener::Probe(tkl);
     }
     SetRawInputType(type);
     if (direct)
     {
         CreateEditorIfNeeded();
-        ((Editor*)mEditor.Get())->mKeyListener = input;
+        TO_EDITOR(mEditor)->mKeyListener = input;
     }
     else {
         SetKeyListenerOnly(input);
@@ -5214,7 +5152,7 @@ ECode TextView::GetInputType(
         *type = IInputType::TYPE_NULL;
     }
     else {
-        *type = ((Editor*)mEditor.Get())->mInputType;
+        *type = TO_EDITOR(mEditor)->mInputType;
     }
     return NOERROR;
 }
@@ -5223,7 +5161,7 @@ ECode TextView::SetImeOptions(
     /* [in] */ Int32 imeOptions)
 {
     CreateEditorIfNeeded();
-    AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+    AutoPtr<Editor> editor = TO_EDITOR(mEditor);
     editor->CreateInputContentTypeIfNeeded();
     editor->mInputContentType->mImeOptions = imeOptions;
     return NOERROR;
@@ -5233,8 +5171,8 @@ ECode TextView::GetImeOptions(
     /* [out] */ Int32* options)
 {
     VALIDATE_NOT_NULL(options)
-    if (mEditor != NULL && ((Editor*)mEditor.Get())->mInputContentType != NULL) {
-        *options = ((Editor*)mEditor.Get())->mInputContentType->mImeOptions;
+    if (mEditor != NULL && TO_EDITOR(mEditor)->mInputContentType != NULL) {
+        *options = TO_EDITOR(mEditor)->mInputContentType->mImeOptions;
     }
     else {
         *options = IEditorInfo::IME_NULL;
@@ -5248,7 +5186,7 @@ ECode TextView::SetImeActionLabel(
     /* [in] */ Int32 actionId)
 {
     CreateEditorIfNeeded();
-    AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+    AutoPtr<Editor> editor = TO_EDITOR(mEditor);
     editor->CreateInputContentTypeIfNeeded();
     editor->mInputContentType->mImeActionLabel = label;
     editor->mInputContentType->mImeActionId = actionId;
@@ -5259,8 +5197,8 @@ ECode TextView::GetImeActionLabel(
     /* [out] */ ICharSequence** label)
 {
     VALIDATE_NOT_NULL(label)
-    if (mEditor != NULL && ((Editor*)mEditor.Get())->mInputContentType != NULL) {
-        *label = ((Editor*)mEditor.Get())->mInputContentType->mImeActionLabel;
+    if (mEditor != NULL && TO_EDITOR(mEditor)->mInputContentType != NULL) {
+        *label = TO_EDITOR(mEditor)->mInputContentType->mImeActionLabel;
         REFCOUNT_ADD(*label)
     }
     else {
@@ -5273,8 +5211,8 @@ ECode TextView::GetImeActionId(
     /* [out] */ Int32* id)
 {
     VALIDATE_NOT_NULL(id)
-    if (mEditor != NULL && ((Editor*)mEditor.Get())->mInputContentType != NULL) {
-        *id = ((Editor*)mEditor.Get())->mInputContentType->mImeActionId;
+    if (mEditor != NULL && TO_EDITOR(mEditor)->mInputContentType != NULL) {
+        *id = TO_EDITOR(mEditor)->mInputContentType->mImeActionId;
     }
     else {
         *id = 0;
@@ -5286,7 +5224,7 @@ ECode TextView::SetOnEditorActionListener(
     /* [in] */ IOnEditorActionListener* l)
 {
     CreateEditorIfNeeded();
-    AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+    AutoPtr<Editor> editor = TO_EDITOR(mEditor);
     editor->CreateInputContentTypeIfNeeded();
     editor->mInputContentType->mOnEditorActionListener = l;
     return NOERROR;
@@ -5379,7 +5317,7 @@ ECode TextView::SetPrivateImeOptions(
     /* [in] */ const String& type)
 {
     CreateEditorIfNeeded();
-    AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+    AutoPtr<Editor> editor = TO_EDITOR(mEditor);
     editor->CreateInputContentTypeIfNeeded();
     editor->mInputContentType->mPrivateImeOptions = type;
     return NOERROR;
@@ -5389,7 +5327,7 @@ ECode TextView::GetPrivateImeOptions(
     /* [out] */ String* options)
 {
     VALIDATE_NOT_NULL(options)
-    AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+    AutoPtr<Editor> editor = TO_EDITOR(mEditor);
     if(mEditor != NULL && editor->mInputContentType != NULL) {
         *options = editor->mInputContentType->mPrivateImeOptions;
     }
@@ -5407,7 +5345,7 @@ ECode TextView::SetInputExtras(
     GetResources((IResources**)&res);
     AutoPtr<IXmlResourceParser> parser;
     res->GetXml(xmlResId, (IXmlResourceParser**)&parser);
-    AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+    AutoPtr<Editor> editor = TO_EDITOR(mEditor);
     editor->CreateInputContentTypeIfNeeded();
     editor->mInputContentType->mExtras = NULL;
     CBundle::New((IBundle**)&editor->mInputContentType->mExtras);
@@ -5426,7 +5364,7 @@ ECode TextView::GetInputExtras(
     }
     CreateEditorIfNeeded();
 
-    AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+    AutoPtr<Editor> editor = TO_EDITOR(mEditor);
     if (editor->mInputContentType == NULL) {
         if (!create) {
             *bundle = NULL;
@@ -5455,7 +5393,7 @@ ECode TextView::GetError(
         *error = NULL;
     }
     else {
-        *error = ((Editor*)mEditor.Get())->mError;
+        *error = TO_EDITOR(mEditor)->mError;
         REFCOUNT_ADD(*error)
     }
     return NOERROR;
@@ -5501,7 +5439,7 @@ Boolean TextView::SetFrame(
     /* [in] */ Int32 b)
 {
     Boolean result = View::SetFrame(l, t, r, b);
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->SetFrame();
+    if (mEditor != NULL) TO_EDITOR(mEditor)->SetFrame();
     RestartMarqueeIfNeeded();
     return result;
 }
@@ -5537,7 +5475,7 @@ ECode TextView::SetFilters(
     /* [in] */ ArrayOf<Elastos::Droid::Text::IInputFilter*>* filters)
 {
     if (mEditor) {
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         Boolean undoFilter = editor->mUndoInputFilter != NULL;
         Boolean keyFilter = FALSE;
         if (IInputFilter::Probe(editor->mKeyListener) != NULL) {
@@ -5684,7 +5622,7 @@ void TextView::InvalidateCursorPath()
         GetCompoundPaddingLeft(&horizontalPadding);
         GetExtendedPaddingTop(&extendedPaddingTop);
         Int32 verticalPadding = extendedPaddingTop + GetVerticalOffset(TRUE);
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         if (editor->mCursorCount == 0) {
             AutoLock lock(sTempRectLock);
 
@@ -5789,7 +5727,7 @@ ECode TextView::InvalidateRegion(
         // mEditor can be NULL in case selection is set programmatically.
         if (invalidateCursor && mEditor != NULL) {
             Int32 t, b;
-            AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+            AutoPtr<Editor> editor = TO_EDITOR(mEditor);
             for (Int32 i = 0; i < editor->mCursorCount; i++) {
                 AutoPtr<IRect> bounds;
                 (*editor->mCursorDrawable)[i]->GetBounds((IRect**)&bounds);
@@ -5864,8 +5802,8 @@ ECode TextView::OnPreDraw(
         Int32 curs;
         GetSelectionEnd(&curs);
         // Do not create the controller if it is not already created.
-        if (mEditor != NULL && ((Editor*)mEditor.Get())->mSelectionModifierCursorController != NULL &&
-            ((Editor*)mEditor.Get())->mSelectionModifierCursorController->IsSelectionStartDragged()) {
+        if (mEditor != NULL && TO_EDITOR(mEditor)->mSelectionModifierCursorController != NULL &&
+            TO_EDITOR(mEditor)->mSelectionModifierCursorController->IsSelectionStartDragged()) {
                 GetSelectionStart(&curs);
         }
 
@@ -5893,8 +5831,8 @@ ECode TextView::OnPreDraw(
     // - ExtractEditText does not call onFocus when it is displayed. Fixing this issue would
     //   allow to test for hasSelection in onFocusChanged, which would trigger a
     //   startTextSelectionMode here. TODO
-    if (mEditor != NULL && ((Editor*)mEditor.Get())->mCreatedWithASelection) {
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+    if (mEditor != NULL && TO_EDITOR(mEditor)->mCreatedWithASelection) {
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         editor->StartSelectionActionMode();
         editor->mCreatedWithASelection = FALSE;
     }
@@ -5905,7 +5843,7 @@ ECode TextView::OnPreDraw(
     Boolean hasSelection;
     if (this->Probe(EIID_IExtractEditText) != NULL
         && (HasSelection(&hasSelection), hasSelection) && mEditor != NULL) {
-        ((Editor*)mEditor.Get())->StartSelectionActionMode();
+        TO_EDITOR(mEditor)->StartSelectionActionMode();
     }
 
     UnregisterForPreDraw();
@@ -5919,7 +5857,7 @@ ECode TextView::OnAttachedToWindow()
 
     mTemporaryDetach = FALSE;
 
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->OnAttachedToWindow();
+    if (mEditor != NULL) TO_EDITOR(mEditor)->OnAttachedToWindow();
 
     if (mPreDrawListenerDetached) {
         AutoPtr<IViewTreeObserver> observer;
@@ -5942,7 +5880,7 @@ ECode TextView::OnDetachedFromWindowInternal()
 
     ResetResolvedDrawables();
 
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->OnDetachedFromWindow();
+    if (mEditor != NULL) TO_EDITOR(mEditor)->OnDetachedFromWindow();
 
     View::OnDetachedFromWindowInternal();
     return NOERROR;
@@ -5952,7 +5890,7 @@ ECode TextView::OnScreenStateChanged(
     /* [in] */ Int32 screenState)
 {
     View::OnScreenStateChanged(screenState);
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->OnScreenStateChanged(screenState);
+    if (mEditor != NULL) TO_EDITOR(mEditor)->OnScreenStateChanged(screenState);
     return NOERROR;
 }
 
@@ -6115,7 +6053,7 @@ ECode TextView::IsTextSelectable(
     /* [out] */ Boolean* selectable)
 {
     VALIDATE_NOT_NULL(selectable)
-    *selectable = mEditor == NULL ? FALSE : ((Editor*)mEditor.Get())->mTextIsSelectable;
+    *selectable = mEditor == NULL ? FALSE : TO_EDITOR(mEditor)->mTextIsSelectable;
     return NOERROR;
 }
 
@@ -6125,7 +6063,7 @@ ECode TextView::SetTextIsSelectable(
     if (!selectable && mEditor == NULL) return NOERROR; // FALSE is default value with no edit data
 
     CreateEditorIfNeeded();
-    AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+    AutoPtr<Editor> editor = TO_EDITOR(mEditor);
     if (editor->mTextIsSelectable == selectable) return NOERROR;
 
     editor->mTextIsSelectable = selectable;
@@ -6138,9 +6076,7 @@ ECode TextView::SetTextIsSelectable(
 
     AutoPtr<IMovementMethod> method;
     if (selectable) {
-        AutoPtr<IArrowKeyMovementMethodHelper> helper;
-        CArrowKeyMovementMethodHelper::AcquireSingleton((IArrowKeyMovementMethodHelper**)&helper);
-        helper->GetInstance((IMovementMethod**)&method);
+        ArrowKeyMovementMethod::GetInstance((IMovementMethod**)&method);
     }
     SetMovementMethod(method);
     SetText(mText, selectable ? BufferType_SPANNABLE : BufferType_NORMAL);
@@ -6429,7 +6365,7 @@ void TextView::OnDraw(
     AutoPtr<IPath> highlight = GetUpdatedHighlightPath();
 
     if (mEditor != NULL) {
-        ((Editor*)mEditor.Get())->OnDraw(canvas, layout, highlight, mHighlightPaint, cursorOffsetVertical);
+        TO_EDITOR(mEditor)->OnDraw(canvas, layout, highlight, mHighlightPaint, cursorOffsetVertical);
     }
     else {
         layout->Draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
@@ -6634,7 +6570,7 @@ ECode TextView::OnKeyPreIme(
 {
     VALIDATE_NOT_NULL(result);
     if (keyCode == IKeyEvent::KEYCODE_BACK) {
-        Boolean isInSelectionMode = mEditor != NULL && ((Editor*)mEditor.Get())->mSelectionActionMode != NULL;
+        Boolean isInSelectionMode = mEditor != NULL && TO_EDITOR(mEditor)->mSelectionActionMode != NULL;
 
         if (isInSelectionMode) {
             Int32 action, repeatCount;
@@ -6719,7 +6655,7 @@ ECode TextView::OnKeyMultiple(
 
     if (which == 1) {
         Boolean res;
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         editor->mKeyListener->OnKeyUp(
             this, IEditable::Probe(mText),
             keyCode, up, &res);
@@ -6758,8 +6694,8 @@ Boolean TextView::ShouldAdvanceFocusOnEnter()
     if (mSingleLine) {
         return TRUE;
     }
-    if (mEditor != NULL && (((Editor*)mEditor.Get())->mInputType & IInputType::TYPE_MASK_CLASS) == IInputType::TYPE_CLASS_TEXT) {
-        Int32 variation = ((Editor*)mEditor.Get())->mInputType & IInputType::TYPE_MASK_VARIATION;
+    if (mEditor != NULL && (TO_EDITOR(mEditor)->mInputType & IInputType::TYPE_MASK_CLASS) == IInputType::TYPE_CLASS_TEXT) {
+        Int32 variation = TO_EDITOR(mEditor)->mInputType & IInputType::TYPE_MASK_VARIATION;
         if (variation == IInputType::TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
             variation == IInputType::TYPE_TEXT_VARIATION_EMAIL_SUBJECT) {
             return TRUE;
@@ -6774,8 +6710,8 @@ Boolean TextView::ShouldAdvanceFocusOnTab()
     AutoPtr<IKeyListener> keyListener;
     GetKeyListener((IKeyListener**)&keyListener);
     if (keyListener != NULL && !mSingleLine && mEditor != NULL &&
-            (((Editor*)mEditor.Get())->mInputType & IInputType::TYPE_MASK_CLASS) == IInputType::TYPE_CLASS_TEXT) {
-        Int32 variation = ((Editor*)mEditor.Get())->mInputType & IInputType::TYPE_MASK_VARIATION;
+            (TO_EDITOR(mEditor)->mInputType & IInputType::TYPE_MASK_CLASS) == IInputType::TYPE_CLASS_TEXT) {
+        Int32 variation = TO_EDITOR(mEditor)->mInputType & IInputType::TYPE_MASK_VARIATION;
         if (variation == IInputType::TYPE_TEXT_FLAG_IME_MULTI_LINE
                 || variation == IInputType::TYPE_TEXT_FLAG_MULTI_LINE) {
             return FALSE;
@@ -6813,10 +6749,10 @@ Int32 TextView::DoKeyDown(
                 // running in a "modern" cupcake environment, so don't need
                 // to worry about the application trying to capture
                 // enter key events.
-                if (mEditor != NULL && ((Editor*)mEditor.Get())->mInputContentType != NULL) {
+                if (mEditor != NULL && TO_EDITOR(mEditor)->mInputContentType != NULL) {
                     // If there is an action listener, given them a
                     // chance to consume the event.
-                    AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+                    AutoPtr<Editor> editor = TO_EDITOR(mEditor);
                     if (editor->mInputContentType->mOnEditorActionListener != NULL) {
                         editor->mInputContentType->mOnEditorActionListener->OnEditorAction(
                                 this, IEditorInfo::IME_NULL, event, &result);
@@ -6861,15 +6797,15 @@ Int32 TextView::DoKeyDown(
 
             // Has to be done on key down (and not on key up) to correctly be intercepted.
         case IKeyEvent::KEYCODE_BACK:
-            if (mEditor != NULL && ((Editor*)mEditor.Get())->mSelectionActionMode != NULL) {
+            if (mEditor != NULL && TO_EDITOR(mEditor)->mSelectionActionMode != NULL) {
                 StopSelectionActionMode();
                 return -1;
             }
             break;
     }
 
-    if (mEditor != NULL && ((Editor*)mEditor.Get())->mKeyListener != NULL) {
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+    if (mEditor != NULL && TO_EDITOR(mEditor)->mKeyListener != NULL) {
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
 
         Boolean doDown = TRUE;
         if (otherEvent != NULL) {
@@ -6942,7 +6878,7 @@ ECode TextView::ResetErrorChangedFlag()
      * that error showing.  Otherwise, we take down whatever
      * error was showing when the user types something.
      */
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->mErrorWasChanged = FALSE;
+    if (mEditor != NULL) TO_EDITOR(mEditor)->mErrorWasChanged = FALSE;
     return NOERROR;
 }
 
@@ -6951,8 +6887,8 @@ ECode TextView::ResetErrorChangedFlag()
  */
 ECode TextView::HideErrorIfUnchanged()
 {
-    if (mEditor != NULL && ((Editor*)mEditor.Get())->mError != NULL
-            && !((Editor*)mEditor.Get())->mErrorWasChanged) {
+    if (mEditor != NULL && TO_EDITOR(mEditor)->mError != NULL
+            && !TO_EDITOR(mEditor)->mErrorWasChanged) {
         SetError(NULL, NULL);
     }
     return NOERROR;
@@ -7014,7 +6950,7 @@ ECode TextView::OnKeyUp(
         case IKeyEvent::KEYCODE_ENTER:
             if (hasNoMod) {
                 if (mEditor != NULL) {
-                    AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+                    AutoPtr<Editor> editor = TO_EDITOR(mEditor);
                     if (editor->mInputContentType != NULL
                             && editor->mInputContentType->mOnEditorActionListener != NULL
                             && editor->mInputContentType->mEnterDown) {
@@ -7083,9 +7019,9 @@ ECode TextView::OnKeyUp(
             }
             break;
     }
-    if (mEditor != NULL && ((Editor*)mEditor.Get())->mKeyListener != NULL) {
+    if (mEditor != NULL && TO_EDITOR(mEditor)->mKeyListener != NULL) {
         Boolean res;
-        ((Editor*)mEditor.Get())->mKeyListener->OnKeyUp(this, IEditable::Probe(mText), keyCode, event, &res);
+        TO_EDITOR(mEditor)->mKeyListener->OnKeyUp(this, IEditable::Probe(mText), keyCode, event, &res);
         if (res) {
             *resValue = TRUE;
             return NOERROR;
@@ -7107,7 +7043,7 @@ ECode TextView::OnCheckIsTextEditor(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
-    *res = mEditor != NULL && ((Editor*)mEditor.Get())->mInputType != IInputType::TYPE_NULL;
+    *res = mEditor != NULL && TO_EDITOR(mEditor)->mInputType != IInputType::TYPE_NULL;
     return NOERROR;
 }
 
@@ -7119,12 +7055,14 @@ ECode TextView::OnCreateInputConnection(
     Boolean isEnabled, onCheckIsTextEditor;
     if ((OnCheckIsTextEditor(&onCheckIsTextEditor), onCheckIsTextEditor)
         && (IsEnabled(&isEnabled), isEnabled)) {
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
-        editor->CreateInputMethodStateIfNeeded();
+        if (mEditor != NULL) {
+            TO_EDITOR(mEditor)->CreateInputMethodStateIfNeeded();
+        }
         Int32 type;
         GetInputType(&type);
         outAttrs->SetInputType(type);
-        if (editor->mInputContentType != NULL) {
+        if (mEditor != NULL && TO_EDITOR(mEditor)->mInputContentType != NULL) {
+            AutoPtr<Editor> editor = TO_EDITOR(mEditor);
             outAttrs->SetImeOptions(editor->mInputContentType->mImeOptions);
             outAttrs->SetPrivateImeOptions(editor->mInputContentType->mPrivateImeOptions);
             outAttrs->SetActionLabel(editor->mInputContentType->mImeActionLabel);
@@ -7211,7 +7149,7 @@ ECode TextView::ExtractText(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = ((Editor*)mEditor.Get())->ExtractText(request, outText);
+    *result = TO_EDITOR(mEditor)->ExtractText(request, outText);
     return NOERROR;
 }
 
@@ -7287,16 +7225,14 @@ ECode TextView::SetExtractedText(
     Selection::SetSelection(spannable, start, end);
 
     // Finally, update the selection mode.
-    AutoPtr<IMetaKeyKeyListenerHelper> helper;
-    CMetaKeyKeyListenerHelper::AcquireSingleton((IMetaKeyKeyListenerHelper**)&helper);
 
     Int32 flags;
     text->GetFlags(&flags);
     if ((flags & IExtractedText::FLAG_SELECTING) != 0) {
-        helper->StartSelecting(this, spannable);
+        MetaKeyKeyListener::StartSelecting(this, spannable);
     }
     else {
-        helper->StopSelecting(this, spannable);
+        MetaKeyKeyListener::StopSelecting(this, spannable);
     }
     return NOERROR;
 }
@@ -7304,8 +7240,8 @@ ECode TextView::SetExtractedText(
 ECode TextView::SetExtracting(
     /* [in] */ IExtractedTextRequest* req)
 {
-    AutoPtr<Editor> editor = (Editor*)mEditor.Get();
-    if (editor->mInputMethodState != NULL) {
+    if ( mEditor != NULL && TO_EDITOR(mEditor)->mInputMethodState != NULL) {
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         editor->mInputMethodState->mExtractedTextRequest = req;
 
         // This would stop a possible selection mode, but no such mode is started in case
@@ -7378,7 +7314,7 @@ void TextView::NullLayouts()
     mBoring = mHintBoring = NULL;
 
     // Since it depends on the value of mLayout
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->PrepareCursorControllers();
+    if (mEditor != NULL) TO_EDITOR(mEditor)->PrepareCursorControllers();
 }
 
 void TextView::AssumeLayout()
@@ -7630,7 +7566,7 @@ void TextView::MakeNewLayout(
     }
 
     // CursorControllers need a non-NULL mLayout
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->PrepareCursorControllers();
+    if (mEditor != NULL) TO_EDITOR(mEditor)->PrepareCursorControllers();
 
 }
 
@@ -8790,7 +8726,7 @@ void TextView::SetInputTypeSingleLine(
     /* [in] */ Boolean singleLine)
 {
     if (mEditor != NULL) {
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         if ((editor->mInputType & IInputType::TYPE_MASK_CLASS) == IInputType::TYPE_CLASS_TEXT) {
             if (singleLine) {
                 editor->mInputType &= ~IInputType::TYPE_TEXT_FLAG_MULTI_LINE;
@@ -8812,10 +8748,8 @@ ECode TextView::ApplySingleLine(
         SetLines(1);
         SetHorizontallyScrolling(TRUE);
         if (applyTransformation) {
-            AutoPtr<ISingleLineTransformationMethodHelper> helper;
-            CSingleLineTransformationMethodHelper::AcquireSingleton((ISingleLineTransformationMethodHelper**)&helper);
             AutoPtr<ISingleLineTransformationMethod> method;
-            helper->GetInstance((ISingleLineTransformationMethod**)&method);
+            CSingleLineTransformationMethod::GetInstance((ISingleLineTransformationMethod**)&method);
             SetTransformationMethod(ITransformationMethod::Probe(method));
         }
     }
@@ -8875,7 +8809,7 @@ ECode TextView::SetSelectAllOnFocus(
     /* [in] */ Boolean selectAllOnFocus)
 {
     CreateEditorIfNeeded();
-    ((Editor*)mEditor.Get())->mSelectAllOnFocus = selectAllOnFocus;
+    TO_EDITOR(mEditor)->mSelectAllOnFocus = selectAllOnFocus;
 
     if (selectAllOnFocus && !(ISpannable::Probe(mText))) {
         SetText(mText, BufferType_SPANNABLE);
@@ -8888,7 +8822,7 @@ ECode TextView::SetCursorVisible(
 {
     if (visible && mEditor == NULL) return NOERROR; // visible is the default value with no edit data
     CreateEditorIfNeeded();
-    AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+    AutoPtr<Editor> editor = TO_EDITOR(mEditor);
     if (editor->mCursorVisible != visible) {
         editor->mCursorVisible = visible;
         Invalidate();
@@ -8905,7 +8839,7 @@ ECode TextView::IsCursorVisible(
     /* [out] */ Boolean* visible)
 {
     VALIDATE_NOT_NULL(visible)
-    *visible = mEditor == NULL ? TRUE : ((Editor*)mEditor.Get())->mCursorVisible;
+    *visible = mEditor == NULL ? TRUE : TO_EDITOR(mEditor)->mCursorVisible;
     return NOERROR;
 }
 
@@ -9101,7 +9035,7 @@ void TextView::SendOnTextChanged(
     }
 
     if (mEditor != NULL) {
-        ((Editor*)mEditor.Get())->SendOnTextChanged(start, after);
+        TO_EDITOR(mEditor)->SendOnTextChanged(start, after);
     }
 }
 
@@ -9129,7 +9063,7 @@ void TextView::UpdateAfterEdit()
 
     if (curs >= 0) {
         mHighlightPathBogus = TRUE;
-        if (mEditor != NULL) ((Editor*)mEditor.Get())->MakeBlink();
+        if (mEditor != NULL) TO_EDITOR(mEditor)->MakeBlink();
         Boolean bringPointIntoView;
         BringPointIntoView(curs, &bringPointIntoView);
     }
@@ -9142,7 +9076,7 @@ void TextView::HandleTextChanged(
     /* [in] */ Int32 after)
 {
     assert(0);
-    /*InputMethodState* ims = mEditor == NULL ? NULL : ((Editor*)mEditor.Get())->mInputMethodState.Get();
+    /*InputMethodState* ims = mEditor == NULL ? NULL : TO_EDITOR(mEditor)->mInputMethodState.Get();
 
     if (ims == NULL || ims->mBatchEditNesting == 0) {
         UpdateAfterEdit();
@@ -9233,14 +9167,11 @@ ECode TextView::SpanChange(
         }
     }
 
-    AutoPtr<IMetaKeyKeyListenerHelper> helper;
-    CMetaKeyKeyListenerHelper::AcquireSingleton((IMetaKeyKeyListenerHelper**)&helper);
-
     Boolean result;
-    helper->IsMetaTracker(buf, what, &result);
+    MetaKeyKeyListener::IsMetaTracker(buf, what, &result);
     if (result) {
         mHighlightPathBogus = TRUE;
-        if (ims != NULL && (helper->IsSelectingMetaTracker(buf, what, &result), result)) {
+        if (ims != NULL && (MetaKeyKeyListener::IsSelectingMetaTracker(buf, what, &result), result)) {
             ims->mSelectionModeChanged = TRUE;
         }
 
@@ -9311,7 +9242,7 @@ ECode TextView::OnStartTemporaryDetach()
 
     // Tell the editor that we are temporarily detached. It can use this to preserve
     // selection state as needed.
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->mTemporaryDetach = TRUE;
+    if (mEditor != NULL) TO_EDITOR(mEditor)->mTemporaryDetach = TRUE;
 
     return ec;
 }
@@ -9322,7 +9253,7 @@ ECode TextView::OnFinishTemporaryDetach()
     // Only track when onStartTemporaryDetach() is called directly,
     // usually because this instance is an editable field in a list
     if (!mDispatchTemporaryDetach) mTemporaryDetach = FALSE;
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->mTemporaryDetach = FALSE;
+    if (mEditor != NULL) TO_EDITOR(mEditor)->mTemporaryDetach = FALSE;
     return ec;
 }
 
@@ -9336,14 +9267,12 @@ void TextView::OnFocusChanged(
         View::OnFocusChanged(focused, direction, previouslyFocusedRect);
         return;
     }
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->OnFocusChanged(focused, direction);
+    if (mEditor != NULL) TO_EDITOR(mEditor)->OnFocusChanged(focused, direction);
 
     if (focused) {
         AutoPtr<ISpannable> spannable = ISpannable::Probe(mText);
         if (spannable) {
-            AutoPtr<IMetaKeyKeyListenerHelper> helper;
-            CMetaKeyKeyListenerHelper::AcquireSingleton((IMetaKeyKeyListenerHelper**)&helper);
-            helper->ResetMetaState(spannable);
+            MetaKeyKeyListener::ResetMetaState(spannable);
         }
     }
 
@@ -9362,7 +9291,7 @@ ECode TextView::OnWindowFocusChanged(
     /* [in] */ Boolean hasWindowFocus)
 {
     View::OnWindowFocusChanged(hasWindowFocus);
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->OnWindowFocusChanged(hasWindowFocus);
+    if (mEditor != NULL) TO_EDITOR(mEditor)->OnWindowFocusChanged(hasWindowFocus);
 
     StartStopMarquee(hasWindowFocus);
     return NOERROR;
@@ -9374,7 +9303,7 @@ ECode TextView::OnVisibilityChanged(
 {
     View::OnVisibilityChanged(changedView, visibility);
     if (mEditor != NULL && visibility != IView::VISIBLE) {
-        ((Editor*)mEditor.Get())->HideControllers();
+        TO_EDITOR(mEditor)->HideControllers();
     }
 
     return NOERROR;
@@ -9417,7 +9346,7 @@ ECode TextView::OnTouchEvent(
     Int32 action;
     event->GetActionMasked(&action);
 
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->OnTouchEvent(event);
+    if (mEditor != NULL) TO_EDITOR(mEditor)->OnTouchEvent(event);
 
     Boolean superResult;
     View::OnTouchEvent(event, &superResult);
@@ -9427,14 +9356,14 @@ ECode TextView::OnTouchEvent(
      * move the selection away from whatever the menu action was
      * trying to affect.
      */
-    if (mEditor != NULL && ((Editor*)mEditor.Get())->mDiscardNextActionUp && action == IMotionEvent::ACTION_UP) {
-        ((Editor*)mEditor.Get())->mDiscardNextActionUp = FALSE;
+    if (mEditor != NULL && TO_EDITOR(mEditor)->mDiscardNextActionUp && action == IMotionEvent::ACTION_UP) {
+        TO_EDITOR(mEditor)->mDiscardNextActionUp = FALSE;
         *res = superResult;
         return NOERROR;
     }
     Boolean isFocused;
     Boolean touchIsFinished = (action == IMotionEvent::ACTION_UP) &&
-            (mEditor == NULL || !((Editor*)mEditor.Get())->mIgnoreActionUpEvent) &&
+            (mEditor == NULL || !TO_EDITOR(mEditor)->mIgnoreActionUpEvent) &&
         (IsFocused(&isFocused), isFocused);
     Boolean isEnabled, onCheckIsTextEditor;
      if ((mMovement != NULL || (OnCheckIsTextEditor(&onCheckIsTextEditor), onCheckIsTextEditor))
@@ -9474,7 +9403,7 @@ ECode TextView::OnTouchEvent(
             // Show the IME, except when selecting in read-only text.
             AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();
             ViewClicked(imm);
-            if (!textIsSelectable && ((Editor*)mEditor.Get())->mShowSoftInputOnFocus) {
+            if (!textIsSelectable && TO_EDITOR(mEditor)->mShowSoftInputOnFocus) {
                 Boolean result = (imm != NULL);
                 if (result) {
                     imm->ShowSoftInput(this, 0, &result);
@@ -9483,7 +9412,7 @@ ECode TextView::OnTouchEvent(
             }
 
             // The above condition ensures that the mEditor is not NULL
-            ((Editor*)mEditor.Get())->OnTouchUpEvent(event);
+            TO_EDITOR(mEditor)->OnTouchUpEvent(event);
 
             handled = TRUE;
         }
@@ -9533,14 +9462,14 @@ ECode TextView::DidTouchFocusSelect(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = mEditor != NULL && ((Editor*)mEditor.Get())->mTouchFocusSelected;
+    *result = mEditor != NULL && TO_EDITOR(mEditor)->mTouchFocusSelected;
     return NOERROR;
 }
 
 ECode TextView::CancelLongPress()
 {
     ECode ec = View::CancelLongPress();
-    if (mEditor != NULL) ((Editor*)mEditor.Get())->mIgnoreActionUpEvent = TRUE;
+    if (mEditor != NULL) TO_EDITOR(mEditor)->mIgnoreActionUpEvent = TRUE;
     return ec;
 }
 
@@ -9844,7 +9773,7 @@ Boolean TextView::CanSelectText()
 {
     Int32 len;
     mText->GetLength(&len);
-    return len != 0 && mEditor != NULL && ((Editor*)mEditor.Get())->HasSelectionController();
+    return len != 0 && mEditor != NULL && TO_EDITOR(mEditor)->HasSelectionController();
 }
 
 Boolean TextView::TextCanBeSelected()
@@ -9933,7 +9862,7 @@ void TextView::UpdateTextServicesLocaleLocked()
 ECode TextView::OnLocaleChanged()
 {
     // Will be re-created on demand in getWordIterator with the proper new locale
-    ((Editor*)mEditor.Get())->mWordIterator = NULL;
+    TO_EDITOR(mEditor)->mWordIterator = NULL;
     return NOERROR;
 }
 
@@ -9942,7 +9871,7 @@ ECode TextView::GetWordIterator(
 {
     VALIDATE_NOT_NULL(iterator)
     if (mEditor != NULL) {
-        return ((Editor*)mEditor.Get())->GetWordIterator(iterator);
+        return TO_EDITOR(mEditor)->GetWordIterator(iterator);
     }
     else {
         *iterator = NULL;
@@ -10026,7 +9955,7 @@ ECode TextView::OnInitializeAccessibilityNodeInfo(
     }
 
     if (mEditor) {
-        AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+        AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         info->SetInputType(editor->mInputType);
 
         if (editor->mError) {
@@ -10114,7 +10043,7 @@ ECode TextView::PerformAccessibilityAction(
                 AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();
                 ViewClicked(imm);
                 Boolean res;
-                if ((IsTextSelectable(&res), !res) && ((Editor*)mEditor.Get())->mShowSoftInputOnFocus && imm) {
+                if ((IsTextSelectable(&res), !res) && TO_EDITOR(mEditor)->mShowSoftInputOnFocus && imm) {
                     Boolean show;
                     imm->ShowSoftInput(this, 0, &show);
                     handled |= show;
@@ -10199,7 +10128,7 @@ ECode TextView::PerformAccessibilityAction(
                         Selection::SetSelection(spa, start, end);
                         // Make sure selection mode is engaged.
                         if (mEditor) {
-                            ((Editor*)mEditor.Get())->StartSelectionActionMode();
+                            TO_EDITOR(mEditor)->StartSelectionActionMode();
                         }
                         *res = TRUE;
                         return NOERROR;
@@ -10307,11 +10236,8 @@ ECode TextView::OnTextContextMenuItem(
             return NOERROR;
 
         case R::id::cut: {
-            AutoPtr<IClipDataHelper> helper;
-            CClipDataHelper::AcquireSingleton((IClipDataHelper**)&helper);
-            assert(helper);
             AutoPtr<IClipData> data;
-            helper->NewPlainText(NULL, GetTransformedText(min, max), (IClipData**)&data);
+            CClipData::NewPlainText(NULL, GetTransformedText(min, max), (IClipData**)&data);
             SetPrimaryClip(data);
             DeleteText_internal(min, max);
             StopSelectionActionMode();
@@ -10320,11 +10246,8 @@ ECode TextView::OnTextContextMenuItem(
         }
 
         case R::id::copy: {
-            AutoPtr<IClipDataHelper> helper;
-            CClipDataHelper::AcquireSingleton((IClipDataHelper**)&helper);
-            assert(helper);
             AutoPtr<IClipData> data;
-            helper->NewPlainText(NULL, GetTransformedText(min, max), (IClipData**)&data);
+            CClipData::NewPlainText(NULL, GetTransformedText(min, max), (IClipData**)&data);
             SetPrimaryClip(data);
             StopSelectionActionMode();
             *result = TRUE;
@@ -10364,7 +10287,7 @@ ECode TextView::PerformLongClick(
     if (handled) {
         Boolean result;
         PerformHapticFeedback(IHapticFeedbackConstants::LONG_PRESS, &result);
-        if (mEditor != NULL) ((Editor*)mEditor.Get())->mDiscardNextActionUp = TRUE;
+        if (mEditor != NULL) TO_EDITOR(mEditor)->mDiscardNextActionUp = TRUE;
     }
 
     return handled;
@@ -10378,7 +10301,7 @@ void TextView::OnScrollChanged(
 {
     View::OnScrollChanged(horiz, vert, oldHoriz, oldVert);
     if (mEditor != NULL) {
-        ((Editor*)mEditor.Get())->OnScrollChanged();
+        TO_EDITOR(mEditor)->OnScrollChanged();
     }
 }
 
@@ -10387,7 +10310,7 @@ ECode TextView::IsSuggestionsEnabled(
 {
     VALIDATE_NOT_NULL(enabled)
     if (mEditor == NULL) return FALSE;
-    AutoPtr<Editor> editor = (Editor*)mEditor.Get();
+    AutoPtr<Editor> editor = TO_EDITOR(mEditor);
     if ((editor->mInputType & IInputType::TYPE_MASK_CLASS) != IInputType::TYPE_CLASS_TEXT) {
         return FALSE;
     }
@@ -10406,7 +10329,7 @@ ECode TextView::SetCustomSelectionActionModeCallback(
     /* [in] */ IActionModeCallback* actionModeCallback)
 {
     CreateEditorIfNeeded();
-    ((Editor*)mEditor.Get())->mCustomSelectionActionModeCallback = actionModeCallback;
+    TO_EDITOR(mEditor)->mCustomSelectionActionModeCallback = actionModeCallback;
     return NOERROR;
 }
 
@@ -10418,7 +10341,7 @@ ECode TextView::GetCustomSelectionActionModeCallback(
         *actionModeCallback = NULL;
     }
     else {
-        *actionModeCallback = ((Editor*)mEditor.Get())->mCustomSelectionActionModeCallback;
+        *actionModeCallback = TO_EDITOR(mEditor)->mCustomSelectionActionModeCallback;
         REFCOUNT_ADD(*actionModeCallback)
     }
     return NOERROR;
@@ -10426,7 +10349,7 @@ ECode TextView::GetCustomSelectionActionModeCallback(
 
 void TextView::StopSelectionActionMode()
 {
-    ((Editor*)mEditor.Get())->StopSelectionActionMode();
+    TO_EDITOR(mEditor)->StopSelectionActionMode();
 }
 
 Boolean TextView::CanCut()
@@ -10439,7 +10362,7 @@ Boolean TextView::CanCut()
     mText->GetLength(&tl);
     Boolean res;
     if (tl > 0 && (HasSelection(&res), res) && IEditable::Probe(mText)
-        && mEditor != NULL && ((Editor*)mEditor.Get())->mKeyListener != NULL) {
+        && mEditor != NULL && TO_EDITOR(mEditor)->mKeyListener != NULL) {
         return TRUE;
     }
 
@@ -10475,7 +10398,7 @@ Boolean TextView::CanPaste()
     cm->HasPrimaryClip(&hasClip);
     Int32 start, end;
     return IEditable::Probe(mText)
-            && mEditor != NULL && ((Editor*)mEditor.Get())->mKeyListener != NULL
+            && mEditor != NULL && TO_EDITOR(mEditor)->mKeyListener != NULL
             && (GetSelectionStart(&start), start) >= 0 && (GetSelectionEnd(&end), end) >= 0
             && hasClip;
 }
@@ -10622,7 +10545,7 @@ ECode TextView::OnDragEvent(
     event->GetAction(&action);
     switch (action) {
         case IDragEvent::ACTION_DRAG_STARTED:{
-            *res = mEditor != NULL && ((Editor*)mEditor.Get())->HasInsertionController();
+            *res = mEditor != NULL && TO_EDITOR(mEditor)->HasInsertionController();
             return NOERROR;
         }
 
@@ -10644,7 +10567,7 @@ ECode TextView::OnDragEvent(
             return NOERROR;
         }
         case IDragEvent::ACTION_DROP: {
-            if (mEditor != NULL) ((Editor*)mEditor.Get())->OnDrop(event);
+            if (mEditor != NULL) TO_EDITOR(mEditor)->OnDrop(event);
             *res = TRUE;
             return NOERROR;
         }
@@ -10661,11 +10584,11 @@ ECode TextView::OnDragEvent(
 Boolean TextView::IsInBatchEditMode()
 {
     if (mEditor == NULL) return FALSE;
-    InputMethodState* ims = ((Editor*)mEditor.Get())->mInputMethodState.Get();
+    InputMethodState* ims = TO_EDITOR(mEditor)->mInputMethodState.Get();
     if (ims != NULL) {
         return ims->mBatchEditNesting > 0;
     }
-    return ((Editor*)mEditor.Get())->mInBatchEditControllers;
+    return TO_EDITOR(mEditor)->mInBatchEditControllers;
 }
 
 ECode TextView::OnRtlPropertiesChanged(
@@ -10880,7 +10803,7 @@ ECode TextView::SetAccessibilitySelection(
     // since we are doing so explicitlty by other means and these
     // controllers interact with how selection behaves.
     if (mEditor) {
-        ((Editor*)mEditor.Get())->HideControllers();
+        TO_EDITOR(mEditor)->HideControllers();
     }
     AutoPtr<ICharSequence> text;
     GetIterableTextForAccessibility((ICharSequence**)&text);

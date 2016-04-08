@@ -18,19 +18,19 @@
 #include "elastos/droid/os/CMessenger.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/content/CIntent.h"
-#include "elastos/droid/content/CClipDataHelper.h"
+#include "elastos/droid/content/CClipData.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/text/Selection.h"
 #include "elastos/droid/text/CStaticLayout.h"
 #include "elastos/droid/text/DynamicLayout.h"
 #include "elastos/droid/text/style/CSuggestionRangeSpan.h"
-#include "elastos/droid/text/method/CMetaKeyKeyListenerHelper.h"
+#include "elastos/droid/text/method/MetaKeyKeyListener.h"
 #include "elastos/droid/text/method/CWordIterator.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/LayoutInflater.h"
-#include "elastos/droid/view/CRenderNodeHelper.h"
+#include "elastos/droid/view/RenderNode.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
-#include "elastos/droid/view/CViewConfigurationHelper.h"
+#include "elastos/droid/view/ViewConfiguration.h"
 #include "elastos/droid/view/CDragShadowBuilder.h"
 #include "elastos/droid/view/inputmethod/CExtractedText.h"
 #include "elastos/droid/view/inputmethod/CInputMethodManager.h"
@@ -42,31 +42,32 @@
 #include "elastos/droid/widget/CListView.h"
 #include "elastos/droid/internal/widget/EditableInputConnection.h"
 
-using Elastos::Core::Character;
-using Elastos::Core::EIID_IComparator;
-using Elastos::Core::EIID_IRunnable;
-using Elastos::Core::IInteger32;
-using Elastos::Core::CInteger32;
-using Elastos::Core::CString;
-using Elastos::Core::StringUtils;
-
-//using Elastos::Text::IBreakIterator;
-using Elastos::Droid::R;
-using Elastos::Droid::Internal::Utility::GrowingArrayUtils;
 using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::CClipData;
+using Elastos::Droid::Content::IClipDataItem;
+using Elastos::Droid::Content::IClipData;
+using Elastos::Droid::Content::Res::ICompatibilityInfo;
+using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Graphics::Color;
+using Elastos::Droid::Graphics::CMatrix;
+using Elastos::Droid::Graphics::CPath;
+using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CRectF;
+using Elastos::Droid::Graphics::IColor;
+using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
+using Elastos::Droid::InputMethodService::EIID_IExtractEditText;
+using Elastos::Droid::InputMethodService::IExtractEditText;
+using Elastos::Droid::Internal::Utility::GrowingArrayUtils;
+using Elastos::Droid::Internal::View::Menu::IMenuBuilder;
+using Elastos::Droid::Internal::Widget::EditableInputConnection;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::CMessenger;
 using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Os::Build;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::CIntent;
-using Elastos::Droid::Content::CClipDataHelper;
-using Elastos::Droid::Content::IClipDataItem;
-using Elastos::Droid::Content::IClipData;
-using Elastos::Droid::Content::IClipDataHelper;
-using Elastos::Droid::Content::Res::ICompatibilityInfo;
-using Elastos::Droid::Content::Res::ITypedArray;
-using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Provider::ISettings;
 using Elastos::Droid::Text::EIID_ISpanWatcher;
 using Elastos::Droid::Text::EIID_IParcelableSpan;
@@ -85,18 +86,7 @@ using Elastos::Droid::Text::Method::CWordIterator;
 using Elastos::Droid::Text::Method::ITransformationMethod;
 using Elastos::Droid::Text::Method::IPasswordTransformationMethod;
 using Elastos::Droid::Text::Method::IMetaKeyKeyListener;
-using Elastos::Droid::Text::Method::IMetaKeyKeyListenerHelper;
-using Elastos::Droid::Text::Method::CMetaKeyKeyListenerHelper;
-using Elastos::Droid::Graphics::Color;
-using Elastos::Droid::Graphics::CMatrix;
-using Elastos::Droid::Graphics::CPath;
-using Elastos::Droid::Graphics::CPaint;
-using Elastos::Droid::Graphics::CRect;
-using Elastos::Droid::Graphics::CRectF;
-using Elastos::Droid::Graphics::IColor;
-using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
-using Elastos::Droid::Internal::View::Menu::IMenuBuilder;
-using Elastos::Droid::Internal::Widget::EditableInputConnection;
+using Elastos::Droid::Text::Method::MetaKeyKeyListener;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::EIID_IView;
 using Elastos::Droid::View::EIID_IViewGroup;
@@ -110,10 +100,8 @@ using Elastos::Droid::View::View;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::IViewConfiguration;
-using Elastos::Droid::View::IViewConfigurationHelper;
-using Elastos::Droid::View::CViewConfigurationHelper;
-using Elastos::Droid::View::IRenderNodeHelper;
-using Elastos::Droid::View::CRenderNodeHelper;
+using Elastos::Droid::View::ViewConfiguration;
+using Elastos::Droid::View::RenderNode;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::EIID_IActionModeCallback;
 using Elastos::Droid::View::IViewGroupLayoutParams;
@@ -129,8 +117,15 @@ using Elastos::Droid::View::InputMethod::CInputMethodManager;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::CListView;
 using Elastos::Droid::Widget::CSpellChecker;
-using Elastos::Droid::InputMethodService::EIID_IExtractEditText;
-using Elastos::Droid::InputMethodService::IExtractEditText;
+using Elastos::Droid::R;
+using Elastos::Core::Character;
+using Elastos::Core::EIID_IComparator;
+using Elastos::Core::EIID_IRunnable;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CInteger32;
+using Elastos::Core::CString;
+using Elastos::Core::StringUtils;
+//using Elastos::Text::IBreakIterator;
 
 namespace Elastos {
 namespace Droid {
@@ -155,9 +150,7 @@ TextDisplayList::TextDisplayList(
     : mIsDirty(FALSE)
 {
     mIsDirty = TRUE;
-    AutoPtr<IRenderNodeHelper> helper;
-    CRenderNodeHelper::AcquireSingleton((IRenderNodeHelper**)&helper);
-    helper->Create(name, NULL, (IRenderNode**)&mDisplayList);
+    mDisplayList = RenderNode::Create(name, NULL);
 }
 
 TextDisplayList::~TextDisplayList()
@@ -2158,10 +2151,7 @@ ECode InsertionHandleView::OnTouchEvent(
                 Float deltaY = mDownPositionY - rawY;
                 Float distanceSquared = deltaX * deltaX + deltaY * deltaY;
 
-                AutoPtr<IViewConfigurationHelper> helper;
-                CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
-                AutoPtr<IViewConfiguration> viewConfiguration;
-                helper->Get(context, (IViewConfiguration**)&viewConfiguration);
+                AutoPtr<IViewConfiguration> viewConfiguration = ViewConfiguration::Get(context);
                 Int32 touchSlop;
                 viewConfiguration->GetScaledTouchSlop(&touchSlop);
 
@@ -2574,9 +2564,6 @@ void SelectionModifierCursorController::OnTouchEvent(
     event->GetX(&x);
     event->GetY(&y);
 
-    AutoPtr<IViewConfigurationHelper> helper;
-    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
-
     switch (mask) {
         case IMotionEvent::ACTION_DOWN:
             // Remember finger down position, to be able to start selection from there
@@ -2586,15 +2573,13 @@ void SelectionModifierCursorController::OnTouchEvent(
             // Double tap detection
             if (mGestureStayedInTapRegion) {
                 Int64 duration = SystemClock::GetUptimeMillis() - mPreviousTapUpTime;
-                Int32 timeout;
-                helper->GetDoubleTapTimeout(&timeout);
+                Int32 timeout = ViewConfiguration::GetDoubleTapTimeout();
                 if (duration <= timeout) {
                     Float deltaX = x - mDownPositionX;
                     Float deltaY = y - mDownPositionY;
                     Float distanceSquared = deltaX * deltaX + deltaY * deltaY;
 
-                    AutoPtr<IViewConfiguration> viewConfiguration;
-                    helper->Get(context, (IViewConfiguration**)&viewConfiguration);
+                    AutoPtr<IViewConfiguration> viewConfiguration = ViewConfiguration::Get(context);
                     Int32 doubleTapSlop;
                     viewConfiguration->GetScaledDoubleTapSlop(&doubleTapSlop);
                     Boolean stayedInArea = distanceSquared < doubleTapSlop * doubleTapSlop;
@@ -2632,8 +2617,7 @@ void SelectionModifierCursorController::OnTouchEvent(
                 Float deltaY = y - mDownPositionY;
                 Float distanceSquared = deltaX * deltaX + deltaY * deltaY;
 
-                AutoPtr<IViewConfiguration> viewConfiguration;
-                helper->Get(context, (IViewConfiguration**)&viewConfiguration);
+                AutoPtr<IViewConfiguration> viewConfiguration = ViewConfiguration::Get(context);
                 Int32 doubleTapTouchSlop;
                 viewConfiguration->GetScaledDoubleTapTouchSlop(&doubleTapTouchSlop);
 
@@ -3962,10 +3946,8 @@ ECode Editor::PerformLongClick(
             mTextView->GetSelectionStart(&start);
             mTextView->GetSelectionEnd(&end);
             AutoPtr<ICharSequence> selectedText = mTextView->GetTransformedText(start, end);
-            AutoPtr<IClipDataHelper> helper;
-            CClipDataHelper::AcquireSingleton((IClipDataHelper**)&helper);
             AutoPtr<IClipData> data;
-            helper->NewPlainText(NULL, selectedText, (IClipData**)&data);
+            CClipData::NewPlainText(NULL, selectedText, (IClipData**)&data);
 
             AutoPtr<DragLocalState> localState = new DragLocalState(mTextView, start, end);
             AutoPtr<IDragShadowBuilder> builder = GetTextThumbnailBuilder(selectedText);
@@ -4371,10 +4353,8 @@ Boolean Editor::ExtractTextInternal(
         }
         outText->SetFlags(0);
 
-        AutoPtr<IMetaKeyKeyListenerHelper> helper;
-        CMetaKeyKeyListenerHelper::AcquireSingleton((IMetaKeyKeyListenerHelper**)&helper);
         Int32 state;
-        helper->GetMetaState(content, IMetaKeyKeyListener::META_SELECTING, &state);
+        MetaKeyKeyListener::GetMetaState(content, IMetaKeyKeyListener::META_SELECTING, &state);
         if (state != 0) {
             Int32 flags;
             outText->GetFlags(&flags);
@@ -4914,10 +4894,7 @@ void Editor::OnTouchUpEvent(
                 mShowSuggestionRunnable = new ShowSuggestionRunnable(this);
 
                 // removeCallbacks is performed on every touch
-                AutoPtr<IViewConfigurationHelper> helper;
-                CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
-                Int32 doubleTapTimeout;
-                helper->GetDoubleTapTimeout(&doubleTapTimeout);
+                Int32 doubleTapTimeout = ViewConfiguration::GetDoubleTapTimeout();
                 Boolean res;
                 mTextView->PostDelayed(mShowSuggestionRunnable, doubleTapTimeout, &res);
             }
