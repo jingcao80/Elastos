@@ -769,8 +769,6 @@ module
             [in] String lowerCaseLanguageCode,
             [in] String upperCaseCountryCode);
 
-        constructor();
-
         /**
          * Constructs a new {@code Locale} using the specified language.
          */

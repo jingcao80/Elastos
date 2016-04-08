@@ -412,14 +412,8 @@ ECode CLocaleBuilder::Build(
 
     // NOTE: We need to make a copy of attributes, keywords and extensions
     // because the RI allows this builder to reused.
-    AutoPtr<CLocale> locale;
-    CLocale::NewByFriend((CLocale**)&locale);
-    FAIL_RETURN(locale->constructor(mLanguage, mRegion, mVariant,
-        mScript, mAttributes, mKeywords, mExtensions, TRUE /* has validated fields */));
-    AutoPtr<ILocale> l = (ILocale*)locale->Probe(EIID_ILocale);
-    *result = l;
-    REFCOUNT_ADD(*result);
-    return NOERROR;
+    return CLocale::New(mLanguage, mRegion, mVariant,
+        mScript, mAttributes, mKeywords, mExtensions, TRUE /* has validated fields */, (ILocale**)result);
 }
 
 

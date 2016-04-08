@@ -30,7 +30,7 @@ ECode PlainServerSocketImpl::Create(
     if (isStreaming) {
         AutoPtr<IBoolean> obj;
         CBoolean::New(TRUE, (IBoolean**)&obj);
-        SetOption(0, obj.Get());
+        SetOption(ISocketOptions::_SO_REUSEADDR, obj.Get());
     }
     return NOERROR;
 }
