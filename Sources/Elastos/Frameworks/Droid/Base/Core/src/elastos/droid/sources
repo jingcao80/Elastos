@@ -76,7 +76,6 @@ ELASTOS_LIBS += wifi/wifi.lib
 // ELASTOS_LIBS += speech/speech.lib
 // ELASTOS_LIBS += privacy/privacy.lib
 // ELASTOS_LIBS += accounts/accounts.lib
-// ELASTOS_LIBS += inputmethods/pinyinIME/pinyin.lib
 // ELASTOS_LIBS += swextend/gpio/gpio.lib
 
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib

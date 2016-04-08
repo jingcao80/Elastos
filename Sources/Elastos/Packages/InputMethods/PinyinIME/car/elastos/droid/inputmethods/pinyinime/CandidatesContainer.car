@@ -1,0 +1,64 @@
+
+module
+{
+    using interface Elastos.Droid.View.IGestureDetector;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Inputmethods {
+    namespace PinyinIME {
+
+    interface IArrowUpdater {
+        UpdateArrowStatus();
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IRelativeLayout
+     */
+    [local]
+    interface ICandidatesContainer {
+        Initialize(
+            [in] ICandidateViewListener* cvListener,
+            [in] IBalloonHint* balloonHint,
+            [in] IGestureDetector* gestureDetector);
+
+        ShowCandidates(
+            [in] IDecodingInfo* decInfo,
+            [in] Boolean enableActiveHighlight);
+
+        GetCurrentPage(
+            [out] Int32* page);
+
+        EnableActiveHighlight(
+            [in] Boolean enableActiveHighlight);
+
+        ActiveCurseBackward(
+            [out] Boolean* result);
+
+        ActiveCurseForward(
+            [out] Boolean* result);
+
+        PageBackward(
+            [in] Boolean animLeftRight,
+            [in] Boolean enableActiveHighlight,
+            [out] Boolean* result);
+
+        PageForward(
+            [in] Boolean animLeftRight,
+            [in] Boolean enableActiveHighlight,
+            [out] Boolean* result);
+
+        GetActiveCandiatePos(
+            [out] Int32* pos);
+
+        LoadAnimation(
+            [in] Boolean animLeftRight,
+            [in] Boolean forward);
+    }
+
+    } // namespace PinyinIME
+    } // namespace Inputmethods
+    } // namespace Droid
+    } // namespace Elastos
+}
