@@ -180,12 +180,12 @@ def process(path, logPath):
 #process('/home/kesalin/test/python/test.cpp', 'elastos_cast_checker.log')
 
 #total: 2 errors, 10 warnings.
-#process('/home/kesalin/Elastos5/Sources/Elastos/LibCore/src', '/home/kesalin/elastos_cast_checker.log')
+#process('/home/kesalin/Elastos5/Sources/Elastos/LibCore/src', '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_cast_checker.log')
 
-#process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/', '/home/kesalin/elastos_cast_checker.log')
+#process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/', '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_cast_checker.log')
 
 #total: 7 errors, 0 warnings.
-#process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server/src', '/home/kesalin/elastos_cast_checker.log')
+#process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server/src', '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_cast_checker.log')
 
-#total: 253 errors, 70 warnings.
-process('/home/kesalin/Elastos5/Sources/', '/home/kesalin/elastos_cast_checker.log')
+#total: 101 errors, 60 warnings.
+process('/home/kesalin/Elastos5/Sources/', '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_cast_checker.log')
