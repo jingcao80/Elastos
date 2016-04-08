@@ -186,7 +186,7 @@ print "python  :", sys.argv[0]
 argc = len(sys.argv)
 if argc == 3:
     scan_path = sys.argv[1]
-    log_path = sys.argv[2]
+    log_filepath = sys.argv[2]
 
 print "process :", scan_path
 print "log to  :", log_filepath
