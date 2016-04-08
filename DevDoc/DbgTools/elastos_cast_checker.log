@@ -279,9 +279,6 @@
 >> process file: /home/kesalin/Elastos5/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/bluetooth/QBluetoothAdapter.cpp
    > error: invalid using of (IWeakReference**)&mAdapter) at line 35, it is declared as static AutoPtr<IBluetoothAdapter> mAdapter; 'in .h file' at line 214.
 
->> process file: /home/kesalin/Elastos5/Sources//Elastos/Frameworks/Droid/Base/Test-runner/src/elastos/droid/test/suitebuilder/TestGrouping.cpp
-   = warning: declaration for (IInterface**)&obj) at line 203 not found!
-
 >> process file: /home/kesalin/Elastos5/Sources//Elastos/Runtime/Core/reflection/CClassInfo.cpp
    > error: invalid using of (IInterface**)&obj) at line 707, it is declared as AutoPtr<IInterfaceInfo> obj; '' at line 706.
 
@@ -342,4 +339,4 @@
    = warning: declaration for (IName**)&mDn) at line 240 not found! is it declared in super class's .h file?
    = warning: declaration for (IName**)&mDn) at line 261 not found! is it declared in super class's .h file?
 
-total: 101 errors, 60 warnings.
+results: 101 errors, 59 warnings.

@@ -2,7 +2,7 @@
 # encoding: UTF-8
 # usages:
 #        sudo chmod a+x elastos_cast_checker.py
-#        python elastos_cast_checker.py
+#        python elastos_cast_checker.py scan_path log_filepath
 
 import re
 import os
@@ -158,7 +158,7 @@ def summarize_log(logPath):
 
         # log
         logFile = open(logPath, 'a')
-        logInfo = '\ntotal: {0:d} errors, {1:d} warnings.'.format(errorCount, warningCount)
+        logInfo = '\nresults: {0:d} errors, {1:d} warnings.'.format(errorCount, warningCount)
         logFile.write(logInfo)
         print logInfo
         logFile.close()
@@ -167,7 +167,6 @@ def process(path, logPath):
     if(os.path.isfile(logPath)):
         os.remove(logPath)
     logFile = open(logPath, 'a')
-    print 'output to', logPath
     if(os.path.isdir(path)):
         process_dir(path, logFile)
     elif(os.path.isfile(path)):
@@ -177,15 +176,18 @@ def process(path, logPath):
     logFile.close()
     summarize_log(logPath)
 
-#process('/home/kesalin/test/python/test.cpp', 'elastos_cast_checker.log')
+############################################################################################################
 
-#total: 2 errors, 10 warnings.
-#process('/home/kesalin/Elastos5/Sources/Elastos/LibCore/src', '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_cast_checker.log')
+#results: 101 errors, 59 warnings.
+scan_path = '/home/kesalin/Elastos5/Sources/'                                       # default sacn dir
+log_filepath = '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_cast_checker.log'    # default log file path
 
-#process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/', '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_cast_checker.log')
+print "python  :", sys.argv[0]
+argc = len(sys.argv)
+if argc == 3:
+    scan_path = sys.argv[1]
+    log_path = sys.argv[2]
 
-#total: 7 errors, 0 warnings.
-#process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server/src', '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_cast_checker.log')
-
-#total: 101 errors, 60 warnings.
-process('/home/kesalin/Elastos5/Sources/', '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_cast_checker.log')
+print "process :", scan_path
+print "log to  :", log_filepath
+process(scan_path, log_filepath)
