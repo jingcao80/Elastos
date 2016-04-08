@@ -135,7 +135,9 @@ def process_dir(path, logFile):
             if(filename[0] == '.'):
                 pass
             else:
-                process_dir(filepath, logFile)
+                # skip bak dirs
+                if filename != 'bak':
+                    process_dir(filepath, logFile)
         elif(os.path.isfile(filepath)):
             process_file(filepath, logFile)
 
