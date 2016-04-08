@@ -245,10 +245,6 @@ private:
 
         CARAPI Dispose();
 
-        CARAPI ConsumeBatchedInputEvents(
-            /* [in] */ Int64 frameTimeNanos,
-            /* [in] */ Boolean* result);
-
     private:
         AutoPtr<IWeakReference> mHost;
     };

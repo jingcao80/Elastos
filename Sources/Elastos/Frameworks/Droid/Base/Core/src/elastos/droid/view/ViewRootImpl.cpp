@@ -570,13 +570,6 @@ ECode ViewRootImpl::WindowInputEventReceiver::FinishInputEvent(
     return NOERROR;
 }
 
-ECode ViewRootImpl::WindowInputEventReceiver::ConsumeBatchedInputEvents(
-    /* [in] */ Int64 frameTimeNanos,
-    /* [in] */ Boolean* result)
-{
-    return NOERROR;
-}
-
 //=======================================================================================
 // ViewRootImpl::ConsumeBatchedInputRunnable
 //=======================================================================================

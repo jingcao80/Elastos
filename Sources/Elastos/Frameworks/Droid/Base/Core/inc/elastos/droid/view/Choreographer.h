@@ -434,7 +434,7 @@ public:
 
 private:
     static const char* TAG;
-    static const Boolean DEBUG = FALSE;
+    static const Boolean DEBUG;
 
     // The default amount of time in ms between animation frames.
     // When vsync is not enabled, we want to have some idea of how Int64 we should
