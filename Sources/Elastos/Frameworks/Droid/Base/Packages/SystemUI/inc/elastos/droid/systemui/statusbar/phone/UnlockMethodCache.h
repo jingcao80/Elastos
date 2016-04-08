@@ -91,7 +91,7 @@ private:
 
     AutoPtr<ILockPatternUtils> mLockPatternUtils;
     // AutoPtr<IKeyguardUpdateMonitor> mKeyguardUpdateMonitor;
-    AutoPtr<IArrayList/*<OnUnlockMethodChangedListener*/> mListeners;
+    AutoPtr<IArrayList> mListeners;  /*<OnUnlockMethodChangedListener*/
     Boolean mMethodInsecure;
     Boolean mTrustManaged;
     Boolean mFaceUnlockRunning;

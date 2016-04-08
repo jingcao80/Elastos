@@ -199,8 +199,9 @@ AutoPtr<IList> TestGrouping::GetTests()
         Int32 N;
         testMethodList->GetSize(&N);
         for (Int32 i = 0; i < N; i++) {
-            AutoPtr<IMethodInfo> testMethod;
-            testMethodList->Get(i, (IInterface**)&testMethod);
+            AutoPtr<IInterface> testMethod;
+            testMethodList->Get(i, (IInterface**)&obj);
+            IMethodInfo* testMethod = IMethodInfo::Probe(obj);
             AutoPtr<ITestMethod> method;
             CTestMethod::New(testMethod, testCase, (ITestMethod**)&method);
             Boolean result;

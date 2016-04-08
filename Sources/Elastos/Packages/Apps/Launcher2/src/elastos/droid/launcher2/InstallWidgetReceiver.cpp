@@ -105,7 +105,7 @@ ECode InstallWidgetReceiver::WidgetListAdapter::HasStableIds(
 
 ECode InstallWidgetReceiver::WidgetListAdapter::GetView(
     /* [in] */ Int32 position,
-    /* [in] */ IView* convertView,
+    /* [in] */ IView* inConvertView,
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
@@ -123,6 +123,7 @@ ECode InstallWidgetReceiver::WidgetListAdapter::GetView(
     }
 
     // Use the convert-view where possible
+    AutoPtr<IView> convertView = inConvertView;
     if (convertView == NULL) {
         mInflater->Inflate(Elastos::Droid::Launcher2::R::layout::external_widget_drop_list_item, parent,
                 FALSE, (IView**)&convertView);

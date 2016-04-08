@@ -77,7 +77,7 @@ private:
 
 private:
     AutoPtr<IContext> mContext;
-    AutoPtr<ICopyOnWriteArrayList/*<RotationLockControllerCallback*/> mCallbacks;
+    AutoPtr<ICopyOnWriteArrayList> mCallbacks;  /*<RotationLockControllerCallback*/
 
     AutoPtr<IRotationPolicyListener> mRotationPolicyListener;
 };

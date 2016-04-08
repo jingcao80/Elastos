@@ -102,7 +102,7 @@ public:
         CARAPI_(String) ToJson();
 
     private:
-        AutoPtr<ILinkedList/*<Record*/> mRecords;
+        AutoPtr<ILinkedList> mRecords;  /*<Record*/
         HashSet<String> mTags;
         Int64 mDownTime;
         Boolean mComplete;
@@ -158,7 +158,7 @@ private:
     static const Int64 SAVE_DELAY; // ms
     static const Int32 SAVE_MESSAGE;
 
-    AutoPtr<ILinkedList/*<Gesture*/> mGestures;
+    AutoPtr<ILinkedList> mGestures;  /*<Gesture*/
     AutoPtr<Gesture> mCurrentGesture;
     Int32 mLastSaveLen;
     String mLogfile;

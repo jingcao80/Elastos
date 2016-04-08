@@ -131,7 +131,7 @@ void BluetoothTile::BluetoothDetailAdapter::UpdateItems()
 {
     if (mItems == NULL) return;
     AutoPtr<IArrayList> items;
-    AutoPtr<ISet/*<IBluetoothControllerPairedDevice*/> devices;
+    AutoPtr<ISet> devices;  /*<IBluetoothControllerPairedDevice*/
     mHost->mController->GetPairedDevices((ISet**)&devices);
     if (devices != NULL) {
         Int32 size = 0;

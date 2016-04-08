@@ -205,7 +205,7 @@ private:
     Int32 mMaxNotificationHeight;
     AutoPtr<IExpandableViewOnHeightChangedListener> mOnHeightChangedListener;
     Boolean mActualHeightInitialized;
-    AutoPtr<IArrayList/*<View*/> mMatchParentViews;
+    AutoPtr<IArrayList> mMatchParentViews;  /*<View*/
 };
 
 } // namespace StatusBar

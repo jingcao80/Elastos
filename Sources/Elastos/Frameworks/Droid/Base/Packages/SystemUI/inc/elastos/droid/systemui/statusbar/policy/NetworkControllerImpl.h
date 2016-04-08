@@ -386,12 +386,12 @@ private:
 
     // our ui
     AutoPtr<IContext> mContext;
-    AutoPtr<IArrayList/*<TextView*/> mCombinedLabelViews;
-    AutoPtr<IArrayList/*<TextView*/> mMobileLabelViews;
-    AutoPtr<IArrayList/*<TextView*/> mWifiLabelViews;
-    AutoPtr<IArrayList/*<StatusBarHeaderView*/> mEmergencyViews;
-    AutoPtr<IArrayList/*<SignalCluster*/> mSignalClusters;
-    AutoPtr<IArrayList/*<NetworkSignalChangedCallback*/> mSignalsChangedCallbacks;
+    AutoPtr<IArrayList> mCombinedLabelViews;  /*<TextView*/
+    AutoPtr<IArrayList> mMobileLabelViews;  /*<TextView*/
+    AutoPtr<IArrayList> mWifiLabelViews;  /*<TextView*/
+    AutoPtr<IArrayList> mEmergencyViews;  /*<StatusBarHeaderView*/
+    AutoPtr<IArrayList> mSignalClusters;  /*<SignalCluster*/
+    AutoPtr<IArrayList> mSignalsChangedCallbacks;  /*<NetworkSignalChangedCallback*/
     Int32 mLastPhoneSignalIconId;
     Int32 mLastDataDirectionIconId;
     Int32 mLastWifiIconId;

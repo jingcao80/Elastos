@@ -77,7 +77,7 @@ public:
 
     virtual CARAPI_(Boolean) IsInSandbox() = 0;
 
-    virtual CARAPI_(AutoPtr<ChildProcessService/*TODO IChildProcessService*/>) GetService() = 0;
+    virtual CARAPI_(AutoPtr<ChildProcessService>) GetService() = 0;  /*TODO IChildProcessService*/
 
     /**
      * @return the connection pid, or 0 if not yet connected

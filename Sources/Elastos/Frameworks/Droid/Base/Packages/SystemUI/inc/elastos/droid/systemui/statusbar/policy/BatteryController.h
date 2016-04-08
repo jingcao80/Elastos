@@ -60,7 +60,7 @@ private:
     static const String TAG;
     static const Boolean DEBUG;
 
-    AutoPtr<IArrayList/*<BatteryStateChangeCallback*/> mChangeCallbacks;
+    AutoPtr<IArrayList> mChangeCallbacks;  /*<BatteryStateChangeCallback*/
     AutoPtr<IPowerManager> mPowerManager;
 
     Int32 mLevel;

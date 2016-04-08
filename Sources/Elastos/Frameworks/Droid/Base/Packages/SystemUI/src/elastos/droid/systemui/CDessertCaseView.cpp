@@ -92,7 +92,7 @@ CDessertCaseView::CDessertCaseView()
 {
     CSparseArray::New(NUM_PASTRIES, (ISparseArray**)&mDrawables);
 
-    CHashSet::New((IHashSet**)&mFreeList);
+    CHashSet::New((ISet**)&mFreeList);
     CHandler::New((IHandler**)&mHandler);
 
     mJuggle = new Runnable_1(this);

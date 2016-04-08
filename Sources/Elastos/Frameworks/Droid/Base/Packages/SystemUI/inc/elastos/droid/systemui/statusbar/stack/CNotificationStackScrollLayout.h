@@ -926,14 +926,14 @@ private:
      */
     AutoPtr<IStackScrollState> mCurrentStackScrollState;
     AutoPtr<IAmbientState> mAmbientState;
-    AutoPtr<IArrayList/*<View*/> mChildrenToAddAnimated;
-    AutoPtr<IArrayList/*<View*/> mChildrenToRemoveAnimated;
-    AutoPtr<IArrayList/*<View*/> mSnappedBackChildren;
-    AutoPtr<IArrayList/*<View*/> mDragAnimPendingChildren;
-    AutoPtr<IArrayList/*<View*/> mChildrenChangingPositions;
-    AutoPtr<IHashSet/*<View*/> mFromMoreCardAdditions;
-    AutoPtr<IArrayList/*<AnimationEvent*/> mAnimationEvents;
-    AutoPtr<IArrayList/*<View*/> mSwipedOutViews;
+    AutoPtr<IArrayList> mChildrenToAddAnimated;  /*<View*/
+    AutoPtr<IArrayList> mChildrenToRemoveAnimated;  /*<View*/
+    AutoPtr<IArrayList> mSnappedBackChildren;  /*<View*/
+    AutoPtr<IArrayList> mDragAnimPendingChildren;  /*<View*/
+    AutoPtr<IArrayList> mChildrenChangingPositions;  /*<View*/
+    AutoPtr<IHashSet> mFromMoreCardAdditions;  /*<View*/
+    AutoPtr<IArrayList> mAnimationEvents;  /*<AnimationEvent*/
+    AutoPtr<IArrayList> mSwipedOutViews;  /*<View*/
     AutoPtr<IStackStateAnimator> mStateAnimator;
     Boolean mAnimationsEnabled;
     Boolean mChangePositionInProgress;

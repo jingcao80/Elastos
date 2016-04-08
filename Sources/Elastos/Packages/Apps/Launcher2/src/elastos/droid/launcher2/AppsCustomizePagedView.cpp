@@ -1364,7 +1364,7 @@ void AppsCustomizePagedView::CancelAllTasks()
 {
     // Clean up all the async tasks
     AutoPtr<IIterator> iter;
-    mRunningTasks->GetIterator((IIterator**)&it);
+    mRunningTasks->GetIterator((IIterator**)&iter);
     Boolean res;
     while (iter->HasNext(&res), res) {
         AutoPtr<IInterface> obj;
@@ -1407,7 +1407,7 @@ ECode AppsCustomizePagedView::SnapToPage(
 
     // Update the thread priorities given the direction lookahead
     AutoPtr<IIterator> iter;
-    mRunningTasks->GetIterator((IIterator**)&it);
+    mRunningTasks->GetIterator((IIterator**)&iter);
     Boolean res;
     while (iter->HasNext(&res), res) {
         AutoPtr<IInterface> obj;
@@ -1559,7 +1559,7 @@ Int32 AppsCustomizePagedView::GetWidgetPageLoadPriority(
     // the specified page.
     Int32 minPageDiff = Integer.MAX_VALUE;
     AutoPtr<IIterator> iter;
-    mRunningTasks->GetIterator((IIterator**)&it);
+    mRunningTasks->GetIterator((IIterator**)&iter);
     Boolean res;
     while (iter->HasNext(&res), res) {
         AutoPtr<IInterface> obj;
@@ -1607,7 +1607,7 @@ void AppsCustomizePagedView::PrepareLoadWidgetPreviewsTask(
     // Prune all tasks that are no longer needed
     Int32 minPageDiff = Integer.MAX_VALUE;
     AutoPtr<IIterator> iter;
-    mRunningTasks->GetIterator((IIterator**)&it);
+    mRunningTasks->GetIterator((IIterator**)&iter);
     Boolean res;
     while (iter->HasNext(&res), res) {
         AutoPtr<IInterface> obj;

@@ -58,7 +58,7 @@ public:
         CARAPI_(void) ReleaseAdapter();
 
     private:
-        AutoPtr<IWeakReference/*<ViewGroup*/> mViewGroup;
+        AutoPtr<IWeakReference> mViewGroup;  /*<ViewGroup*/
         AutoPtr<IBaseAdapter> mAdapter;
         Boolean mReleased;
     };

@@ -6753,7 +6753,7 @@ AutoPtr<IInterface/*IPrintDocumentAdapter*/> WebViewChromium::CreatePrintDocumen
     // ==================before translated======================
     // return createPrintDocumentAdapter("default");
 
-    AutoPtr<IInterface/*IPrintDocumentAdapter*/> result = CreatePrintDocumentAdapter(String("default"));
+    AutoPtr<IInterface> result = CreatePrintDocumentAdapter(String("default"));  /*IPrintDocumentAdapter*/
     return result;
 }
 
@@ -6765,7 +6765,7 @@ AutoPtr<IInterface/*IPrintDocumentAdapter*/> WebViewChromium::CreatePrintDocumen
     // return new AwPrintDocumentAdapter(mAwContents.getPdfExporter(), documentName);
 
     CheckThread();
-    AutoPtr<IInterface/*IPrintDocumentAdapter*/> result;// = new AwPrintDocumentAdapter(mAwContents->GetPdfExporter(), documentName);
+    AutoPtr<IInterface> result;// = new AwPrintDocumentAdapter(mAwContents->GetPdfExporter(), documentName);  /*IPrintDocumentAdapter*/
     return result;
 }
 

@@ -42,7 +42,7 @@ public:
         /* [in] */ Boolean secure);
 
 private:
-    AutoPtr<IArrayList/*<Callback*/> mCallbacks;
+    AutoPtr<IArrayList> mCallbacks;  /*<Callback*/
 
     Boolean mShowing;
     Boolean mSecure;

@@ -54,7 +54,7 @@ private:
     CARAPI_(void) FireNextAlarmChanged();
 
 private:
-    AutoPtr<IArrayList/*<NextAlarmChangeCallback*/> mChangeCallbacks;
+    AutoPtr<IArrayList> mChangeCallbacks;  /*<NextAlarmChangeCallback*/
 
     AutoPtr<IAlarmManager> mAlarmManager;
     AutoPtr<IAlarmClockInfo> mNextAlarm;

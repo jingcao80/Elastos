@@ -131,7 +131,7 @@ private:
     static const String CHILD_NOT_FOUND_TAG;
 
     AutoPtr<IViewGroup> mHostView;
-    AutoPtr<IMap/*<ExpandableView, ViewState*/> mStateMap;
+    AutoPtr<IMap> mStateMap;  /*<ExpandableView, ViewState*/
     AutoPtr<IRect> mClipRect;
     Int32 mClearAllTopPadding;
 };

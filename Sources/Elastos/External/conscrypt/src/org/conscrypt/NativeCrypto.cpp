@@ -8695,11 +8695,12 @@ ECode NativeCrypto::SetEnabledCipherSuites(
             SSL_set_mode(ssl, SSL_MODE_SEND_FALLBACK_SCSV, &result);
             continue;
         }
-        AutoPtr<ICharSequence> keyObj, valueObj;
+        AutoPtr<ICharSequence> keyObj;
         CString::New(cipherSuite, (ICharSequence**)&keyObj);
+        AutoPtr<IInterface> valueObj;
         STANDARD_TO_OPENSSL_CIPHER_SUITES->Get(keyObj, (IInterface**)&valueObj);
         String openssl;
-        valueObj->ToString(&openssl);
+        ICharSequence::Probe(valueObj)->ToString(&openssl);
         String cs = openssl.IsNull() ? cipherSuite : openssl;
         opensslSuites.PushBack(cs);
     }

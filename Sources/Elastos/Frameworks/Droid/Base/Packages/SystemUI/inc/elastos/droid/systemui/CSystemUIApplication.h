@@ -95,7 +95,7 @@ private:
     AutoPtr<ArrayOf<ISystemUI*> > mServices;
     Boolean mServicesStarted;
     Boolean mBootCompleted;
-    // AutoPtr<IMap/*<Class<?>, Object*/> mComponents;
+    // AutoPtr<IMap> mComponents;  /*<Class<?>, Object*/
     AutoPtr<HashMap<InterfaceID, AutoPtr<IInterface> > > mComponents;
 };
 

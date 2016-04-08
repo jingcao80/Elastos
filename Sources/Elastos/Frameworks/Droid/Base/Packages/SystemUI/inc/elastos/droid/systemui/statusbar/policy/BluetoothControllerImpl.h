@@ -174,10 +174,10 @@ private:
     static const Boolean DEBUG;
 
     AutoPtr<IContext> mContext;
-    AutoPtr<IArrayList/*<Callback*/> mCallbacks;
+    AutoPtr<IArrayList> mCallbacks;  /*<Callback*/
     AutoPtr<IBluetoothAdapter> mAdapter;
     AutoPtr<Receiver> mReceiver;
-    AutoPtr<IArrayMap/*<BluetoothDevice, DeviceInfo*/> mDeviceInfo;
+    AutoPtr<IArrayMap> mDeviceInfo;  /*<BluetoothDevice, DeviceInfo*/
 
     Boolean mEnabled;
     Boolean mConnecting;

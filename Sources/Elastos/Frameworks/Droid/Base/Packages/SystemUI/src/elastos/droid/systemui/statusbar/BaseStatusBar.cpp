@@ -1507,7 +1507,7 @@ void BaseStatusBar::InflateGuts(
         CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&appSettingsQueryIntent);
         appSettingsQueryIntent->AddCategory(INotification::INTENT_CATEGORY_NOTIFICATION_PREFERENCES);
         appSettingsQueryIntent->SetPackage(pkg);
-        AutoPtr<IList/*<ResolveInfo*/> infos;
+        AutoPtr<IList> infos;  /*<ResolveInfo*/
         pmUser->QueryIntentActivities(appSettingsQueryIntent, 0, (IList**)&infos);
         Int32 size = 0;
         infos->GetSize(&size);
@@ -2398,7 +2398,7 @@ void BaseStatusBar::UpdateRowStates()
     mKeyguardIconOverflowContainer->GetIconsView((INotificationOverflowIconsView**)&nov);
     IViewGroup::Probe(nov)->RemoveAllViews();
 
-    AutoPtr<IArrayList/*<Entry*/> activeNotifications;
+    AutoPtr<IArrayList> activeNotifications;  /*<Entry*/
     mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
     Int32 N = 0;
     activeNotifications->GetSize(&N);

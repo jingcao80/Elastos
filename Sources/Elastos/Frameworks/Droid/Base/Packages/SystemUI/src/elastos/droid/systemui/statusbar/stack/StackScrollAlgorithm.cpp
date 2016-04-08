@@ -355,7 +355,7 @@ void StackScrollAlgorithm::HandleDraggedViews(
     /* [in] */ StackScrollState* resultState,
     /* [in] */ StackScrollAlgorithmState* algorithmState)
 {
-    AutoPtr<IArrayList/*<View*/> draggedViews;
+    AutoPtr<IArrayList> draggedViews;  /*<View*/
     ambientState->GetDraggedViews((IArrayList**)&draggedViews);
 
     AutoPtr<IIterator> it;

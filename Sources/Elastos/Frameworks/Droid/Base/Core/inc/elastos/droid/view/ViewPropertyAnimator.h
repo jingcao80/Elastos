@@ -324,7 +324,7 @@ private:
     AutoPtr<IAnimatorListener> mListener;
     AutoPtr<IAnimatorUpdateListener> mUpdateListener;
     AutoPtr<IValueAnimator> mTempValueAnimator;
-    AutoPtr<IInterface/*IViewPropertyAnimatorRT*/> mRTBackend;
+    AutoPtr<IInterface> mRTBackend;  /*IViewPropertyAnimatorRT*/
     AutoPtr<AnimatorEventListener> mAnimatorEventListener;
     AutoPtr<List<AutoPtr<NameValuesHolder> > > mPendingAnimations;
     AutoPtr<IRunnable> mPendingSetupAction;

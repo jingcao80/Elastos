@@ -6111,8 +6111,8 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
 
         String packagePath, className;
         if (name.Equals("com.android.providers.settings.SettingsProvider")) {
-            packagePath = String("/data/elastos/Elastos.Droid.SettingsProvider.eco");
-            className = String("Elastos.Droid.SettingsProvider.CSettingsProvider");
+            packagePath = "/data/elastos/Elastos.Droid.SettingsProvider.eco";
+            className = "Elastos.Droid.SettingsProvider.CSettingsProvider";
         }
         else {
             Int32 index = name.LastIndexOf('.');
@@ -6129,20 +6129,20 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
         AutoPtr<IModuleInfo> moduleInfo;
         ECode ec = CReflector::AcquireModuleInfo(packagePath, (IModuleInfo**)&moduleInfo);
         if (FAILED(ec)) {
-            Slogger::E(TAG, "InstallProvider: Cann't Find the path is %s", packagePath.string());
+            Slogger::E(TAG, "InstallProvider: Cann't find the path %s, ec=%08x", packagePath.string(), ec);
             return NULL;
         }
 
         AutoPtr<IClassInfo> classInfo;
         ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
         if (FAILED(ec)) {
-            Slogger::E(TAG, "InstallProvider: Get class info of %s failed.", className.string());
+            Slogger::E(TAG, "InstallProvider: Get class info of %s failed, ec=%08x", className.string(), ec);
             return NULL;
         }
         AutoPtr<IInterface> object;
         ec = classInfo->CreateObject((IInterface**)&object);
         if (FAILED(ec)) {
-            Slogger::E(TAG, "InstallProvider: Create ContentProvider object failed.");
+            Slogger::E(TAG, "InstallProvider: Create ContentProvider object %s failed, ec=%08x", className.string(), ec);
             return NULL;
         }
 

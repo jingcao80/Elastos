@@ -69,17 +69,23 @@ ECode CSettingsActivity::OnCreate(
     GetString(R::string::setting_sound_key, &key);
     AutoPtr<ICharSequence> value;
     CStringWrapper::New(key, (ICharSequence**)&value);
-    prefSet->FindPreference(value, (IPreference**)&mKeySoundPref);
+    AutoPtr<IPreference> pref;
+    prefSet->FindPreference(value, (IPreference**)&pref);
+    mKeySoundPref = ICheckBoxPreference::Probe(pref);
 
     GetString(R::string::setting_vibrate_key, &key);
     value = NULL;
+    pref = NULL;
     CStringWrapper::New(key, (ICharSequence**)&value);
-    prefSet->FindPreference(value, (IPreference**)&mVibratePref);
+    prefSet->FindPreference(value, (IPreference**)&pref);
+    mVibratePref = ICheckBoxPreference::Probe(pref);
 
     GetString(R::string::setting_prediction_key, &key);
     value = NULL;
+    pref = NULL;
     CStringWrapper::New(key, (ICharSequence**)&value);
-    prefSet->FindPreference(value, (IPreference**)&mPredictionPref);
+    prefSet->FindPreference(value, (IPreference**)&pref);
+    mPredictionPref = ICheckBoxPreference::Probe(pref);
 
     prefSet->SetOnPreferenceChangeListener(this);
 

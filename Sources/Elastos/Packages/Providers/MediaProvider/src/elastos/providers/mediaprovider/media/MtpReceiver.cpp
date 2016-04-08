@@ -68,24 +68,25 @@ ECode MtpReceiver::HandleUsbState(
     AutoPtr<IUriHelper> uh;
     CUriHelper::AcquireSingleton((IUriHelper**)&uh);
     if (connected && (mtpEnabled || ptpEnabled)) {
-        intent = NULL;
-        CIntent::New(context, ECLSID_CMtpService, (IIntent**)&intent);
+        AutoPtr<IIntent> temp;
+        CIntent::New(context, ECLSID_CMtpService, (IIntent**)&temp);
         if (ptpEnabled) {
-            intent->PutExtra(IUsbManager::USB_FUNCTION_PTP, TRUE);
+            temp->PutExtra(IUsbManager::USB_FUNCTION_PTP, TRUE);
         }
         AutoPtr<IComponentName> cn;
-        context->StartService(intent, (IComponentName**)&cn);
+        context->StartService(temp, (IComponentName**)&cn);
         // tell MediaProvider MTP is connected so it can bind to the service
 
         uh->Parse(String("content://media/none/mtp_connected"), (IUri**)&uri);
         context->GetContentResolver((IContentResolver**)&resolver);
         AutoPtr<IUri> oUri;
         resolver->Insert(uri.Get(), NULL, (IUri**)&oUri);
-    } else {
-        intent = NULL;
-        CIntent::New(context, ECLSID_CMtpService, (IIntent**)&intent);
+    }
+    else {
+        AutoPtr<IIntent> temp;
+        CIntent::New(context, ECLSID_CMtpService, (IIntent**)&temp);
         Boolean flag = FALSE;
-        context->StopService(intent, &flag);
+        context->StopService(temp, &flag);
         // tell MediaProvider MTP is disconnected so it can unbind from the service
         uh->Parse(String("content://media/none/mtp_connected"), (IUri**)&uri);
         context->GetContentResolver((IContentResolver**)&resolver);

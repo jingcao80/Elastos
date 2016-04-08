@@ -832,7 +832,7 @@ ECode WidgetPreviewLoader::GenerateWidgetPreview(
         dest->Set(x, 0, x + previewWidth, previewHeight);
 
         AutoPtr<IInterface> obj4 = mCachedAppWidgetPreviewPaint->Get();
-        AutoPTR<IPaint> p = IPaint::Probe(obj4);
+        AutoPtr<IPaint> p = IPaint::Probe(obj4);
         if (p == NULL) {
             CPaint::New((IPaint**)&p);
             p->SetFilterBitmap(TRUE);

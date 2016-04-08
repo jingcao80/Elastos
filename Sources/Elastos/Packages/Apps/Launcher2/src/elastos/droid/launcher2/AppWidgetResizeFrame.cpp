@@ -491,11 +491,13 @@ AutoPtr<IRect> AppWidgetResizeFrame::GetWidgetSizeRanges(
     /* [in] */ ILauncher* launcher,
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY,
-    /* [in] */ IRect* rect)
+    /* [in] */ IRect* inRect)
 {
+    AutoPtr<IRect> rect = inRect;
     if (rect == NULL) {
         CRect::New((IRect**)&rect);
     }
+
     AutoPtr<IRect> landMetrics;
     assert(0 && "need class Workspace");
     // Workspace::GetCellLayoutMetrics(launcher, ICellLayout::LANDSCAPE,

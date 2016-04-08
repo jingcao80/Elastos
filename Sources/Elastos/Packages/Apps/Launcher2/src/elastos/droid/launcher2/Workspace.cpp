@@ -369,7 +369,7 @@ ECode Workspace::MyAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> obj;
-    animation->GetAnimatedValue((IInterface**)&value);
+    animation->GetAnimatedValue((IInterface**)&obj);
     AutoPtr<IFloat> fvalue = IFloat::Probe(obj);
     Float value;
     fvalue->GetValue(&value);
@@ -843,13 +843,14 @@ ECode Workspace::constructor(
     SetDataIsReady();
 
     mLauncher = ILauncher::Probe(context);
-    AUtoPtr<IResources> res;
+    AutoPtr<IResources> res;
     GetResources((IResources**)&res);
     res->GetBoolean(
             Elastos::Droid::Launcher2::R::bool::config_workspaceFadeAdjacentScreens,
             &mWorkspaceFadeInAdjacentScreens);
     mFadeInAdjacentScreens = FALSE;
-    WallpaperManager::GetInstance((IWallpaperManager**)&context);
+    AutoPtr<IWallpaperManager> wallpaperManager;
+    WallpaperManager::GetInstance((IWallpaperManager**)&wallpaperManager);
 
     Int32 cellCountX = DEFAULT_CELL_COUNT_X;
     Int32 cellCountY = DEFAULT_CELL_COUNT_Y;
@@ -5255,7 +5256,7 @@ ECode Workspace::GetAllShortcutAndWidgetContainers(
 {
     VALIDATE_NOT_NULL(list);
 
-    AUtoPtr<IArrayList> childrenLayouts;
+    AutoPtr<IArrayList> childrenLayouts;
     CArrayList::New((IArrayList**)&childrenLayouts);
     Int32 screenCount;
     GetChildCount(&screenCount);

@@ -307,7 +307,7 @@ ECode CPhoneStatusBar::VisibilityReporter::Run()
     //    notifications.
     // 3. Report newly visible and no-longer visible notifications.
     // 4. Keep currently visible notifications for next report.
-    AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+    AutoPtr<IArrayList> activeNotifications;  /*<INotificationDataEntry*/
     mHost->mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
     Int32 N = 0;
     activeNotifications->GetSize(&N);
@@ -337,7 +337,7 @@ ECode CPhoneStatusBar::VisibilityReporter::Run()
             mTmpNewlyVisibleNotifications->Add(k);
         }
     }
-    AutoPtr<IArraySet/*<String*/> noLongerVisibleNotifications = mHost->mCurrentlyVisibleNotifications;
+    AutoPtr<IArraySet> noLongerVisibleNotifications = mHost->mCurrentlyVisibleNotifications;  /*<String*/
     noLongerVisibleNotifications->RemoveAll(ICollection::Probe(mTmpCurrentlyVisibleNotifications));
 
     mHost->LogNotificationVisibilityChanges(ICollection::Probe(mTmpNewlyVisibleNotifications)
@@ -754,7 +754,7 @@ CPhoneStatusBar::ShadeUpdates::ShadeUpdates(
 ECode CPhoneStatusBar::ShadeUpdates::Check()
 {
     mNewVisibleNotifications->Clear();
-    AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+    AutoPtr<IArrayList> activeNotifications;  /*<INotificationDataEntry*/
     mHost->mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
     Int32 size = 0, v = 0;
     activeNotifications->GetSize(&size);
@@ -1867,7 +1867,7 @@ void CPhoneStatusBar::ClearAllNotifications()
     IViewGroup::Probe(mStackScroller)->GetChildCount(&numChildren);
 
     Boolean tmp = FALSE;
-    AutoPtr<IArrayList/*<View*/> viewsToHide;
+    AutoPtr<IArrayList> viewsToHide;  /*<View*/
     CArrayList::New(numChildren, (IArrayList**)&viewsToHide);
     for (Int32 i = 0; i < numChildren; i++) {
         AutoPtr<IView> child;
@@ -2472,11 +2472,11 @@ void CPhoneStatusBar::UpdateNotificationShade()
         return;
     }
 
-    AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+    AutoPtr<IArrayList> activeNotifications;  /*<INotificationDataEntry*/
     mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
     Int32 size = 0;
     activeNotifications->GetSize(&size);
-    AutoPtr<IArrayList/*<IExpandableNotificationRow*/> toShow;
+    AutoPtr<IArrayList> toShow;  /*<IExpandableNotificationRow*/
     CArrayList::New(size, (IArrayList**)&toShow);
     Int32 N = size;
     for (Int32 i = 0; i < N; i++) {
@@ -2524,7 +2524,7 @@ void CPhoneStatusBar::UpdateNotificationShade()
         toShow->Add(row);
     }
 
-    AutoPtr<IArrayList/*<View*/> toRemove;
+    AutoPtr<IArrayList> toRemove;  /*<View*/
     CArrayList::New((IArrayList**)&toRemove);
     Int32 count = 0;
     IViewGroup::Probe(mStackScroller)->GetChildCount(&count);
@@ -2631,7 +2631,7 @@ void CPhoneStatusBar::UpdateSpeedbump()
 {
     Int32 speedbumpIndex = -1;
     Int32 currentIndex = 0;
-    AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+    AutoPtr<IArrayList> activeNotifications;  /*<INotificationDataEntry*/
     mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
     Int32 N = 0;
     activeNotifications->GetSize(&N);
@@ -2674,11 +2674,11 @@ void CPhoneStatusBar::UpdateNotificationIcons()
     CLinearLayoutLayoutParams::New(mIconSize + 2 * mIconHPadding, mNaturalBarHeight
             , (ILinearLayoutLayoutParams**)&params);
 
-    AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+    AutoPtr<IArrayList> activeNotifications;  /*<INotificationDataEntry*/
     mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
     Int32 N = 0;
     activeNotifications->GetSize(&N);
-    AutoPtr<IArrayList/*<StatusBarIconView*/> toShow;
+    AutoPtr<IArrayList> toShow;  /*<StatusBarIconView*/
     CArrayList::New(N, (IArrayList**)&toShow);
 
     // Filter out notifications with low scores.
@@ -2706,7 +2706,7 @@ void CPhoneStatusBar::UpdateNotificationIcons()
         Logger::D(TAG, "refreshing icons: %d notifications, mNotificationIcons=%s", size, TO_CSTR(mNotificationIcons));
     }
 
-    AutoPtr<IArrayList/*<View*/> toRemove;
+    AutoPtr<IArrayList> toRemove;  /*<View*/
     CArrayList::New((IArrayList**)&toRemove);
     Int32 count = 0;
     IViewGroup::Probe(mNotificationIcons)->GetChildCount(&count);
@@ -2861,7 +2861,7 @@ ECode CPhoneStatusBar::FindAndUpdateMediaNotifications()
     Boolean metaDataChanged = FALSE;
 
     synchronized (mNotificationData) {
-        AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+        AutoPtr<IArrayList> activeNotifications;  /*<INotificationDataEntry*/
         mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
         Int32 N = 0;
         activeNotifications->GetSize(&N);
@@ -2897,7 +2897,7 @@ ECode CPhoneStatusBar::FindAndUpdateMediaNotifications()
             // one of our notifications. This will catch apps that aren't (yet!) using media
             // notifications.
             if (mMediaSessionManager != NULL) {
-                AutoPtr<IList/*<MediaController*/> sessions;
+                AutoPtr<IList> sessions;  /*<MediaController*/
                 mMediaSessionManager->GetActiveSessionsForUser(
                         NULL, IUserHandle::USER_ALL, (IList**)&sessions);
 
@@ -4479,7 +4479,7 @@ ECode CPhoneStatusBar::StartActivityDismissingKeyguard(
 
 void CPhoneStatusBar::ResetUserExpandedStates()
 {
-    AutoPtr<IArrayList/*<INotificationDataEntry*/> activeNotifications;
+    AutoPtr<IArrayList> activeNotifications;  /*<INotificationDataEntry*/
     mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
     Int32 notificationCount = 0;
     activeNotifications->GetSize(&notificationCount);
@@ -5637,7 +5637,7 @@ ECode CPhoneStatusBar::HasActiveNotifications(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<IArrayList/*<INotificationDataEntry*/> list;
+    AutoPtr<IArrayList> list;  /*<INotificationDataEntry*/
     mNotificationData->GetActiveNotifications((IArrayList**)&list);
     Boolean tmp = FALSE;
     list->IsEmpty(&tmp);

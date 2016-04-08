@@ -51,8 +51,8 @@ AutoPtr<ClassPathPackageInfo> ClassPathPackageInfoSource::CreatePackageInfo(
     /* [in] */ const String& packageName)
 {
     AutoPtr<ISet> subpackageNames, classInfos, topLevelClasses;
-    CTreeSet::New((INavigableSet**)&subpackageNames);
-    CTreeSet::New((INavigableSet**)&classInfos);
+    CTreeSet::New((ISet**)&subpackageNames);
+    CTreeSet::New((ISet**)&classInfos);
     CHashSet::New((ISet**)&topLevelClasses);
     FindClasses(packageName, classInfos, subpackageNames);
     AutoPtr<IIterator> it;

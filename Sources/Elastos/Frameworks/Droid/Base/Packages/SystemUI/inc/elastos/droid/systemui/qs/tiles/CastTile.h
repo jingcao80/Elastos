@@ -119,7 +119,7 @@ private:
             /* [in] */ IQSDetailItemsItem* item);
 
     private:
-        AutoPtr<ILinkedHashMap/*<String, ICastControllerCastDevice*/> mVisibleOrder;
+        AutoPtr<ILinkedHashMap> mVisibleOrder;  /*<String, ICastControllerCastDevice*/
 
         AutoPtr<IQSDetailItems> mItems;
         CastTile* mHost;

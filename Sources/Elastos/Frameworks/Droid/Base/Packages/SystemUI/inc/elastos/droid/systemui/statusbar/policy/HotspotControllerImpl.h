@@ -85,7 +85,7 @@ private:
     static const String TAG;
     static const Boolean DEBUG;
 
-    AutoPtr<IArrayList/*<IHotspotControllerCallback*/> mCallbacks;
+    AutoPtr<IArrayList> mCallbacks;  /*<IHotspotControllerCallback*/
     AutoPtr<Receiver> mReceiver;
     AutoPtr<IContext> mContext;
     AutoPtr<IWifiManager> mWifiManager;

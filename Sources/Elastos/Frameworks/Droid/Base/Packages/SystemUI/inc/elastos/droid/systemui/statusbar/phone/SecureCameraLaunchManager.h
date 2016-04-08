@@ -181,7 +181,7 @@ private:
 
     AutoPtr<ICameraManager> mCameraManager;
     AutoPtr<CameraAvailabilityCallback> mCameraAvailabilityCallback;
-    AutoPtr<IMap/*<String, Boolean*/> mCameraAvailabilityMap;
+    AutoPtr<IMap> mCameraAvailabilityMap;  /*<String, Boolean*/
     Boolean mWaitingToLaunchSecureCamera;
     AutoPtr<IRunnable> mLaunchCameraRunnable;
 };

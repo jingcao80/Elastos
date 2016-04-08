@@ -237,7 +237,7 @@ String CDownloadService::TAG("CDownloadService");
 
 CDownloadService::CDownloadService()
 {
-    CHashMap::New((IHashMap**)&mDownloads);
+    CHashMap::New((IMap**)&mDownloads);
 
     mExecutor = BuildDownloadExecutor();
 

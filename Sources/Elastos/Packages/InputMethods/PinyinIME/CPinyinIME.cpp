@@ -1234,9 +1234,13 @@ ECode CPinyinIME::OnCreateCandidatesView(
     mFloatingContainer = ILinearLayout::Probe(view);
 
     // The first child is the composing view.
-    mFloatingContainer->GetChildAt(0, (IView**)&mComposingView);
+    view = NULL;
+    mFloatingContainer->GetChildAt(0, (IView**)&view);
+    mComposingView = IComposingView::Probe(view);
 
-    inflater->Inflate(R::layout::candidates_container, NULL, (IView**)&mCandidatesContainer);
+    view = NULL;
+    inflater->Inflate(R::layout::candidates_container, NULL, (IView**)&view);
+    mCandidatesContainer = ICandidatesContainer::Probe(view);
 
     // Create balloon hint for candidates view.
     const Int32 MODE_SHIFT = 30;
@@ -1433,7 +1437,9 @@ ECode CPinyinIME::OnCreateInputView(
     // }
     AutoPtr<ILayoutInflater> inflater;
     InputMethodService::GetLayoutInflater((ILayoutInflater**)&inflater);
-    inflater->Inflate(R::layout::skb_container, NULL, (IView**)&mSkbContainer);
+    AutoPtr<IView> view;
+    inflater->Inflate(R::layout::skb_container, NULL, (IView**)&view);
+    mSkbContainer = ISkbContainer::Probe(view);
     mSkbContainer->SetService(this);
     mSkbContainer->SetInputModeSwitcher(mInputModeSwitcher);
     mSkbContainer->SetGestureDetector(mGestureDetectorSkb);

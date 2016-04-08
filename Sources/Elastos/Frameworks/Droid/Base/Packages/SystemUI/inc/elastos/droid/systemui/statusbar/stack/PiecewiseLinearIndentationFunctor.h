@@ -74,7 +74,7 @@ private:
         /* [in] */ Int32 n);
 
 private:
-    AutoPtr<IArrayList/*<Float*/> mBaseValues;
+    AutoPtr<IArrayList> mBaseValues;  /*<Float*/
     Float mLinearPart;
 };
 

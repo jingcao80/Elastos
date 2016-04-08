@@ -137,7 +137,7 @@ private:
     AutoPtr<IConnectivityManager> mConnectivityManager;
     AutoPtr<IIConnectivityManager> mConnectivityService;
     AutoPtr<IDevicePolicyManager> mDevicePolicyManager;
-    AutoPtr<IArrayList/*<SecurityControllerCallback*/> mCallbacks;
+    AutoPtr<IArrayList> mCallbacks;  /*<SecurityControllerCallback*/
 
     AutoPtr<IVpnConfig> mVpnConfig;
     String mVpnName;

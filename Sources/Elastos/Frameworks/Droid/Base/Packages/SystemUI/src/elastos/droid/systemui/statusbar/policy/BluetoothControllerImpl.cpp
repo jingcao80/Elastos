@@ -283,7 +283,7 @@ ECode BluetoothControllerImpl::GetPairedDevices(
     /* [out] */ ISet** devices)
 {
     VALIDATE_NOT_NULL(devices);
-    AutoPtr<IArraySet/*<PairedDevice*/> rt;
+    AutoPtr<IArraySet> rt;  /*<PairedDevice*/
     CArraySet::New((IArraySet**)&rt);
     Int32 size = 0;
     mDeviceInfo->GetSize(&size);

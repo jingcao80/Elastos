@@ -127,7 +127,7 @@ private:
 
     Boolean mAreActiveLocationRequests;
 
-    AutoPtr<IArrayList/*<LocationSettingsChangeCallback*/> mSettingsChangeCallbacks;
+    AutoPtr<IArrayList> mSettingsChangeCallbacks;  /*<LocationSettingsChangeCallback*/
 };
 
 } // namespace Policy

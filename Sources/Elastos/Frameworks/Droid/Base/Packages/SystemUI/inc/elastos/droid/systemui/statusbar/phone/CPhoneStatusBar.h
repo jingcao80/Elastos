@@ -211,8 +211,8 @@ private:
 
     private:
         CPhoneStatusBar* mHost;
-        AutoPtr<IArrayList/*<String*/> mTmpNewlyVisibleNotifications;
-        AutoPtr<IArrayList/*<String*/> mTmpCurrentlyVisibleNotifications;
+        AutoPtr<IArrayList> mTmpNewlyVisibleNotifications;  /*<String*/
+        AutoPtr<IArrayList> mTmpCurrentlyVisibleNotifications;  /*<String*/
     };
 
     class OverflowClickListener
@@ -496,8 +496,8 @@ private:
     private:
         CPhoneStatusBar* mHost;
 
-        AutoPtr<IArraySet/*<String*/> mVisibleNotifications;
-        AutoPtr<IArraySet/*<String*/> mNewVisibleNotifications;
+        AutoPtr<IArraySet> mVisibleNotifications;  /*<String*/
+        AutoPtr<IArraySet> mNewVisibleNotifications;  /*<String*/
     };
 
     class DozeServiceHost
@@ -582,7 +582,7 @@ private:
         // refreshed once we've finished rendering a new frame.
         static const Int64 PROCESSING_TIME;
 
-        AutoPtr<IArrayList/*<Callback*/> mCallbacks;
+        AutoPtr<IArrayList> mCallbacks;  /*<Callback*/
         AutoPtr<DozeServiceHostHandler> mHandler;
     };
 
@@ -1827,7 +1827,7 @@ private:
     AutoPtr<IVelocityTracker> mVelocityTracker;
 
     AutoPtr<ArrayOf<Int32> > mAbsPos;
-    AutoPtr<IArrayList/*<Runnable*/> mPostCollapseRunnables;
+    AutoPtr<IArrayList> mPostCollapseRunnables;  /*<Runnable*/
 
     // for disabling the status bar
     Int32 mDisabled;
@@ -1891,7 +1891,7 @@ private:
     Int32 mDisabledUnmodified;
 
     /** Keys of notifications currently visible to the user. */
-    AutoPtr<IArraySet/*<String*/> mCurrentlyVisibleNotifications;
+    AutoPtr<IArraySet> mCurrentlyVisibleNotifications;  /*<String*/
     Int64 mLastVisibilityReportUptimeMs;
 
     AutoPtr<ShadeUpdates> mShadeUpdates;

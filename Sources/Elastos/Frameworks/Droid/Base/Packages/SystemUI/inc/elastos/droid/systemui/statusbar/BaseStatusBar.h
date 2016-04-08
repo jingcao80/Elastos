@@ -844,7 +844,7 @@ protected:
     AutoPtr<ISearchPanelView> mSearchPanelView;
 
     Int32 mCurrentUserId;
-    AutoPtr<ISparseArray/*<UserInfo*/> mCurrentProfiles;
+    AutoPtr<ISparseArray> mCurrentProfiles;  /*<UserInfo*/
 
     Int32 mLayoutDirection; // invalid
     AutoPtr<IAccessibilityManager> mAccessibilityManager;

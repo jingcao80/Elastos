@@ -413,10 +413,10 @@ private:
     AutoPtr<IInterpolator> mFastOutSlowInInterpolator;
     Int32 mGoToFullShadeAppearingTranslation;
     AutoPtr<INotificationStackScrollLayout> mHostLayout;
-    AutoPtr<IArrayList/*<NotificationStackScrollLayout.AnimationEvent*/> mNewEvents;
-    AutoPtr<IArrayList/*<View*/> mNewAddChildren;
-    AutoPtr<ISet/*<Animator*/> mAnimatorSet;
-    AutoPtr<IStack/*<AnimatorListenerAdapter*/> mAnimationListenerPool;
+    AutoPtr<IArrayList> mNewEvents;  /*<NotificationStackScrollLayout.AnimationEvent*/
+    AutoPtr<IArrayList> mNewAddChildren;  /*<View*/
+    AutoPtr<ISet> mAnimatorSet;  /*<Animator*/
+    AutoPtr<IStack> mAnimationListenerPool;  /*<AnimatorListenerAdapter*/
     AutoPtr<AnimationFilter> mAnimationFilter;
     Int64 mCurrentLength;
     Int64 mCurrentAdditionalDelay;

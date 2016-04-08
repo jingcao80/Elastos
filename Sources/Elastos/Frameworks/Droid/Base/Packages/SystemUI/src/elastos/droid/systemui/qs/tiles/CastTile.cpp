@@ -292,7 +292,7 @@ void CastTile::HandleUpdateState(
     mContext->GetString(R::string::quick_settings_cast_title, &state->mLabel);
     ((BooleanState*)state)->mValue = FALSE;
     state->mAutoMirrorDrawable = FALSE;
-    AutoPtr<ISet/*<ICastControllerCastDevice*/> devices;
+    AutoPtr<ISet> devices;  /*<ICastControllerCastDevice*/
     mController->GetCastDevices((ISet**)&devices);
     Boolean connecting = FALSE;
 

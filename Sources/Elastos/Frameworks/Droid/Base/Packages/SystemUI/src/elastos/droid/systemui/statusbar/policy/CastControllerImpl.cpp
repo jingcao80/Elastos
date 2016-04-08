@@ -233,7 +233,7 @@ ECode CastControllerImpl::GetCastDevices(
     /* [out] */ ISet** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<IArraySet/*<CastDevice*/> devices;
+    AutoPtr<IArraySet> devices;  /*<CastDevice*/
     CArraySet::New((IArraySet**)&devices);
     synchronized (mProjectionLock) {
         if (mProjection != NULL) {

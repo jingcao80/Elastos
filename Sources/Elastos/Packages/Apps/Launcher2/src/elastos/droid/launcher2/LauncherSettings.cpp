@@ -110,8 +110,7 @@ LauncherSettings::Favorites::GetContentUri(
     // sb += notify;
     AutoPtr<IUriHelper> uriHelper;
     CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
-    AutoPtr<IUri> tmp;
-    return uriHelper->Parse(sb.ToString(), (IUri**)&uri);
+    return uriHelper->Parse(sb.ToString(), uri);
 }
 
 } // namespace Launcher2

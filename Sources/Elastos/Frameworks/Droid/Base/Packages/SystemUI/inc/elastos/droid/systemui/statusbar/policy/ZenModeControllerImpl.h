@@ -210,12 +210,12 @@ private:
     static const String TAG;
     static const Boolean DEBUG;
 
-    AutoPtr<IArrayList/*<Callback*/> mCallbacks;
+    AutoPtr<IArrayList> mCallbacks;  /*<Callback*/
     AutoPtr<IContext> mContext;
     AutoPtr<IGlobalSetting> mModeSetting;
     AutoPtr<IGlobalSetting> mConfigSetting;
     AutoPtr<IINotificationManager> mNoMan;
-    AutoPtr<ILinkedHashMap/*<Uri, Condition*/> mConditions;
+    AutoPtr<ILinkedHashMap> mConditions;  /*<Uri, Condition*/
     AutoPtr<IAlarmManager> mAlarmManager;
     AutoPtr<SetupObserver> mSetupObserver;
 

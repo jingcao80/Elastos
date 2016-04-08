@@ -100,7 +100,7 @@ private:
     static const String KEYGUARD_CLASS;
 
     static AutoPtr<KeyguardTouchDelegate> sInstance;
-    static AutoPtr<IList/*<OnKeyguardConnectionListener*/> sConnectionListeners;
+    static AutoPtr<IList> sConnectionListeners;  /*<OnKeyguardConnectionListener*/
 
     /*volatile*/ AutoPtr<IIKeyguardService> mService;
 

@@ -137,10 +137,13 @@ ECode RecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
     Int32 origPri;
     Process::GetThreadPriority(Process::MyTid(), &origPri);
     Process::SetThreadPriority(IProcess::THREAD_PRIORITY_BACKGROUND);
+
     AutoPtr<IPackageManager> pm;
     mHost->mContext->GetPackageManager((IPackageManager**)&pm);
-    AutoPtr<IActivityManager> am;
-    mHost->mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&am);
+
+    AutoPtr<IInterface> service;
+    mHost->mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&service);
+    IActivityManager* am = IActivityManager::Probe(service);
 
     AutoPtr<IList> recentTasks;
     am->GetRecentTasks(MAX_TASKS,
@@ -318,7 +321,9 @@ ECode RecentTasksLoader::ThumbnailLoaderAsyncTask::DoInBackground(
         AutoPtr<ITaskDescription> td;
         while (td == NULL) {
             // try {
-            mTasksWaitingForThumbnails->Take((IInterface**)&td);
+            AutoPtr<IInterface> obj;
+            mTasksWaitingForThumbnails->Take((IInterface**)&obj);
+            td = ITaskDescription::Probe(obj);
             // } catch (InterruptedException e) {
             // }
         }
@@ -379,9 +384,9 @@ RecentTasksLoader::RecentTasksLoader(
     AutoPtr<IDisplayMetrics> dm;
     res->GetDisplayMetrics((IDisplayMetrics**)&dm);
     if (isTablet) {
-        AutoPtr<IActivityManager> activityManager;
-        context->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&activityManager);
-        activityManager->GetLauncherLargeIconDensity(&mIconDpi);
+        AutoPtr<IInterface> am;
+        context->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&am);
+        IActivityManager::Probe(am)->GetLauncherLargeIconDensity(&mIconDpi);
     }
     else {
         dm->GetDensityDpi(&mIconDpi);
@@ -574,8 +579,9 @@ ECode RecentTasksLoader::CreateTaskDescription(
 ECode RecentTasksLoader::LoadThumbnailAndIcon(
     /* [in] */ ITaskDescription* td)
 {
-    AutoPtr<IActivityManager> am;
-    mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&am);
+    AutoPtr<IInterface> amObj;
+    mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&amObj);
+    AutoPtr<IActivityManager> am = IActivityManager::Probe(am);
     AutoPtr<IPackageManager> pm;
     mContext->GetPackageManager((IPackageManager**)&pm);
     AutoPtr<TaskDescription> _td = (TaskDescription*)td;
@@ -818,8 +824,9 @@ ECode RecentTasksLoader::LoadFirstTask(
     VALIDATE_NOT_NULL(des);
     *des = NULL;
 
-    AutoPtr<IActivityManager> am;
-    mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&am);
+    AutoPtr<IInterface> amObj;
+    mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&amObj);
+    AutoPtr<IActivityManager> am = IActivityManager::Probe(am);
 
     AutoPtr<IUserHandleHelper> uhh;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);

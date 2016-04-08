@@ -171,7 +171,7 @@ private:
         /* [in] */ const String& tileSpec,
         /* [out] */ IQSTile** values);
 
-    CARAPI_(AutoPtr<IList/*<String*/>) LoadTileSpecs();
+    CARAPI_(AutoPtr<IList>) LoadTileSpecs();  /*<String*/
 
 private:
     static const String TAG;
@@ -181,7 +181,7 @@ private:
 
     AutoPtr<IContext> mContext;
     AutoPtr<IPhoneStatusBar> mStatusBar;
-    AutoPtr<ILinkedHashMap/*<String, QSTile<?>*/> mTiles;
+    AutoPtr<ILinkedHashMap> mTiles;  /*<String, QSTile<?>*/
     AutoPtr<Observer> mObserver;
     AutoPtr<IBluetoothController> mBluetooth;
     AutoPtr<ILocationController> mLocation;

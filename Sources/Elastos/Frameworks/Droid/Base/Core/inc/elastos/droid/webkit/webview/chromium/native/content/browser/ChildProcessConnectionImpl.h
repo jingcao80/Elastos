@@ -60,7 +60,7 @@ private:
     public:
         AutoPtr< ArrayOf<String> > mCommandLine;
         AutoPtr< ArrayOf<FileDescriptorInfo*> > mFilesToBeMapped;
-        AutoPtr<IInterface/*IChildProcessCallback*/> mCallback;
+        AutoPtr<IInterface> mCallback;  /*IChildProcessCallback*/
         AutoPtr<IBundle> mSharedRelros;
     };
 
@@ -117,7 +117,7 @@ public:
     CARAPI_(Boolean) IsInSandbox();
 
     //@Override
-    CARAPI_(AutoPtr<ChildProcessService/*IChildProcessService*/>) GetService();
+    CARAPI_(AutoPtr<ChildProcessService>) GetService();  /*IChildProcessService*/
 
     //@Override
     CARAPI_(Int32) GetPid();
@@ -177,13 +177,13 @@ private:
     const Int32 mServiceNumber;
     const Boolean mInSandbox;
     const AutoPtr<ChildProcessConnection::DeathCallback> mDeathCallback;
-    const AutoPtr<ChildProcessService/*TODO IInterface*/> mServiceClass;
+    const AutoPtr<ChildProcessService> mServiceClass;  /*TODO IInterface*/
 
     // Synchronization: While most internal flow occurs on the UI thread, the public API
     // (specifically start and stop) may be called from any thread, hence all entry point methods
     // into the class are synchronized on the lock to protect access to these members.
     Object mLock;
-    AutoPtr<ChildProcessService/*TODO IChildProcessService*/> mService;
+    AutoPtr<ChildProcessService> mService;  /*TODO IChildProcessService*/
     // Set to true when the service connected successfully.
     Boolean mServiceConnectComplete;
     // Set to true when the service disconnects, as opposed to being properly closed. This happens

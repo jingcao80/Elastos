@@ -251,10 +251,10 @@ private:
 private:
     AutoPtr<INotificationEnvironment> mEnvironment;
 
-    AutoPtr<IArrayMap/*<String, Entry*/> mEntries;
-    AutoPtr<IArrayList/*<Entry*/> mSortedAndFiltered;
-    AutoPtr<IArraySet/*<String*/> mGroupsWithSummaries;
-    AutoPtr<IComparator/*<Entry*/> mRankingComparator;
+    AutoPtr<IArrayMap> mEntries;  /*<String, Entry*/
+    AutoPtr<IArrayList> mSortedAndFiltered;  /*<Entry*/
+    AutoPtr<IArraySet> mGroupsWithSummaries;  /*<String*/
+    AutoPtr<IComparator> mRankingComparator;  /*<Entry*/
     AutoPtr<INotificationListenerServiceRankingMap> mRankingMap;
     AutoPtr<INotificationListenerServiceRanking> mTmpRanking;
 };

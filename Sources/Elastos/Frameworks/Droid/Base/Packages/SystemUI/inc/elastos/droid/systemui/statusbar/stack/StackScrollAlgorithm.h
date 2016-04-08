@@ -80,7 +80,7 @@ private:
         /**
          * The children from the host view which are not gone.
          */
-        AutoPtr<IArrayList/*<ExpandableView*/> mVisibleChildren;
+        AutoPtr<IArrayList> mVisibleChildren;  /*<ExpandableView*/
     };
 
     class OnLayoutChangeListener

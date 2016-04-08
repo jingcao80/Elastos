@@ -2643,7 +2643,7 @@ public:
     CARAPI ComputeScroll();
 
     // TODO(sgurun) this is only to have master-gpl compiling.
-    virtual CARAPI_(AutoPtr<IInterface/*IPrintDocumentAdapter*/>) CreatePrintDocumentAdapter();
+    virtual CARAPI_(AutoPtr<IInterface>) CreatePrintDocumentAdapter();  /*IPrintDocumentAdapter*/
 
     //@Override TODO(sgurun) commenting this out to have master-gpl compiling.
     virtual CARAPI_(AutoPtr<IInterface/*IPrintDocumentAdapter*/>) CreatePrintDocumentAdapter(

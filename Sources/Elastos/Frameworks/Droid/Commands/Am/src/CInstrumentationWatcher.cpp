@@ -39,10 +39,10 @@ ECode CInstrumentationWatcher::InstrumentationStatus(
             Boolean hasNext = FALSE;
 
             while (enumerator->MoveNext(&hasNext), hasNext) {
-                AutoPtr<ICharSequence> element;
+                AutoPtr<IInterface> element;
                 enumerator->Current((IInterface**)&element);
                 String objString;
-                element->ToString(&objString);
+                ICharSequence::Probe(element)->ToString(&objString);
                 AutoPtr<IInterface> value;
                 results->Get(objString, (IInterface**)&value);
                 //System.out.println(
@@ -80,11 +80,11 @@ ECode CInstrumentationWatcher::InstrumentationFinished(
             keySet->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
             Boolean hasNext = FALSE;
             while (enumerator->MoveNext(&hasNext), hasNext) {
-                AutoPtr<ICharSequence> element;
+                AutoPtr<IInterface> element;
                 enumerator->Current((IInterface**)&element);
                 String objString;
                 AutoPtr<IInterface> value;
-                element->ToString(&objString);
+                ICharSequence::Probe(element)->ToString(&objString);
                 results->Get(objString, (IInterface**)&value);
                 //System.out.println(
                 //                    "INSTRUMENTATION_STATUS: " + key + "=" + results.get(key));

@@ -703,9 +703,10 @@ ECode CClassInfo::HasInterfaceInfo(
     }
 
     for (Int32 i = 0; i < mIFCount; i++) {
-        AutoPtr<IInterfaceInfo> itfInfo;
-        mInterfaceList->AcquireObjByIndex(i, (IInterface**)&itfInfo);
-        if (interfaceInfo == itfInfo.Get()) {
+        AutoPtr<IInterfaceInfo> obj;
+        mInterfaceList->AcquireObjByIndex(i, (IInterface**)&obj);
+        IInterfaceInfo* itfInfo = IInterfaceInfo::Probe(obj);
+        if (interfaceInfo == itfInfo) {
             *result = TRUE;
             return NOERROR;
         }

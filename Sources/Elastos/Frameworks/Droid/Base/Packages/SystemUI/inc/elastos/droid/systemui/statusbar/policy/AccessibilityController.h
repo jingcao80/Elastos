@@ -62,7 +62,7 @@ private:
     CARAPI_(void) FireChanged();
 
 private:
-    AutoPtr<IArrayList/*<AccessibilityStateChangedCallback*/> mChangeCallbacks;
+    AutoPtr<IArrayList> mChangeCallbacks;  /*<AccessibilityStateChangedCallback*/
 
     Boolean mAccessibilityEnabled;
     Boolean mTouchExplorationEnabled;

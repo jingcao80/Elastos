@@ -1,0 +1,3 @@
+
+>> process file: /home/kesalin/test/python/test.cpp
+   = warning: declaration for (IArrayList**)&mExitingTo) at line 7 not found!

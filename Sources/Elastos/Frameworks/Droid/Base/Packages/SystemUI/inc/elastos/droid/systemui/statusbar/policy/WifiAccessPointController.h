@@ -109,7 +109,7 @@ private:
 
     CARAPI_(Int32) GetConnectedNetworkId();
 
-    CARAPI_(AutoPtr<IArrayMap/*<String, WifiConfiguration*/>) GetConfiguredNetworksBySsid();
+    CARAPI_(AutoPtr<IArrayMap>) GetConfiguredNetworksBySsid();  /*<String, WifiConfiguration*/
 
     CARAPI_(void) UpdateAccessPoints();
 
@@ -120,12 +120,12 @@ private:
     static const Int32 ICONS[5];
 
     AutoPtr<IContext> mContext;
-    AutoPtr<IArrayList/*<AccessPointCallback*/> mCallbacks;
+    AutoPtr<IArrayList> mCallbacks;  /*<AccessPointCallback*/
     AutoPtr<IWifiManager> mWifiManager;
     AutoPtr<Receiver> mReceiver;
 
     Boolean mScanning;
-    AutoPtr<IComparator/*<INetworkControllerAccessPoint*/> mByStrength;
+    AutoPtr<IComparator> mByStrength;  /*<INetworkControllerAccessPoint*/
 };
 
 } // namespace Policy

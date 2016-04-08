@@ -183,4 +183,7 @@ def process(path, logPath):
 #process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/', '/home/kesalin/elastos_cast_checker.log')
 
 #total: 7 errors, 0 warnings.
-process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server/src', '/home/kesalin/elastos_cast_checker.log')
+#process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server/src', '/home/kesalin/elastos_cast_checker.log')
+
+#total: 253 errors, 70 warnings.
+process('/home/kesalin/Elastos5/Sources/', '/home/kesalin/elastos_cast_checker.log')

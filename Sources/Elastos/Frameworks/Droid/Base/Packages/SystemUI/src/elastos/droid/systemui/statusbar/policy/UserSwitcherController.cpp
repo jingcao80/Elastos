@@ -149,7 +149,7 @@ ECode UserSwitcherController::BaseUserAdapter::GetSwitchableUsers(
 {
     VALIDATE_NOT_NULL(user);
     Int32 result = 0;
-    AutoPtr<IArrayList/*<UserRecord*/> users = mController->mUsers;
+    AutoPtr<IArrayList> users = mController->mUsers;  /*<UserRecord*/
     Int32 N = 0;
     users->GetSize(&N);
     for (Int32 i = 0; i < N; i++) {
@@ -513,8 +513,8 @@ ECode UserSwitcherController::UserAsyncTask::DoInBackground(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<ISparseArray/*<Bitmap*/> bitmaps = ISparseArray::Probe((*params)[0]);
-    AutoPtr<IList/*<UserInfo*/> infos;
+    AutoPtr<ISparseArray> bitmaps = ISparseArray::Probe((*params)[0]);  /*<Bitmap*/
+    AutoPtr<IList> infos;  /*<UserInfo*/
     mHost->mUserManager->GetUsers(TRUE, (IList**)&infos);
     if (infos == NULL) {
         *result = NULL;
@@ -523,7 +523,7 @@ ECode UserSwitcherController::UserAsyncTask::DoInBackground(
 
     Int32 size = 0;
     infos->GetSize(&size);
-    AutoPtr<IArrayList/*<UserRecord*/> records;
+    AutoPtr<IArrayList> records;  /*<UserRecord*/
     CArrayList::New(size, (IArrayList**)&records);
 
     AutoPtr<IActivityManagerHelper> helper;
@@ -687,7 +687,7 @@ UserSwitcherController::UserSwitcherController(
 void UserSwitcherController::RefreshUsers(
     /* [in] */ Int32 forcePictureLoadForId)
 {
-    AutoPtr<ISparseArray/*<Bitmap*/> bitmaps;
+    AutoPtr<ISparseArray> bitmaps;  /*<Bitmap*/
     Int32 size = 0;
     mUsers->GetSize(&size);
     CSparseArray::New(size, (ISparseArray**)&bitmaps);

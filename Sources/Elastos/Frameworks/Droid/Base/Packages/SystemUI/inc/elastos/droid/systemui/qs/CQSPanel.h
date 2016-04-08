@@ -75,7 +75,7 @@ private:
         TileRecord();
 
     public:
-        AutoPtr<QSTile/*<?*/> mTile;
+        AutoPtr<QSTile> mTile;  /*<?*/
         AutoPtr<IQSTileView> mTileView;
         Int32 mRow;
         Int32 mCol;
@@ -348,7 +348,7 @@ private:
     static const Float TILE_ASPECT;
 
     AutoPtr<IContext> mContext;
-    AutoPtr<IArrayList/*<TileRecord*/> mRecords;
+    AutoPtr<IArrayList> mRecords;  /*<TileRecord*/
     AutoPtr<IView> mDetail;
     AutoPtr<IViewGroup> mDetailContent;
     AutoPtr<ITextView> mDetailSettingsButton;

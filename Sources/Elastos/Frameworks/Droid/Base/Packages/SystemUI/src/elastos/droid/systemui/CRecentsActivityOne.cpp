@@ -211,8 +211,9 @@ ECode CRecentsActivityOne::DismissAndGoHome()
 ECode CRecentsActivityOne::DismissAndGoBack()
 {
     if (mRecentsPanel != NULL) {
-        AutoPtr<IActivityManager> am;
-        GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&am);
+        AutoPtr<IInterface> amObj;
+        GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&amObj);
+        AutoPtr<IActivityManager> am = IActivityManager::Probe(am);
 
         AutoPtr<IObjectContainer> objectcontainer;
         am->GetRecentTasks(2,
@@ -228,10 +229,10 @@ ECode CRecentsActivityOne::DismissAndGoBack()
                 Boolean hasNext = FALSE;
                 enumerator->MoveNext(&hasNext);
                 enumerator->MoveNext(&hasNext);
-                AutoPtr<IActivityManagerRecentTaskInfo> recentInfo;
+                AutoPtr<IInterface> recentInfo;
                 enumerator->Current((IInterface**)&recentInfo);
                 Int32 id;
-                recentInfo->GetPersistentId(&id);
+                IActivityManagerRecentTaskInfo::Probe(recentInfo)->GetPersistentId(&id);
                 Boolean b;
                 mRecentsPanel->SimulateClick(id, &b);
                 if (b) {
@@ -276,7 +277,9 @@ ECode CRecentsActivityOne::OnCreate(
 {
     SetContentView(R::layout::status_bar_recent_panel);
 
-    FindViewById(R::id::recents_root, (IView**)&mRecentsPanel);
+    AutoPtr<IView> view;
+    FindViewById(R::id::recents_root, (IView**)&view);
+    mRecentsPanel = IRecentsPanelView::Probe(view);
     AutoPtr<IStatusBarPanel> panel = IStatusBarPanel::Probe(mRecentsPanel);
     AutoPtr<IViewOnTouchListener> l = new TouchOutsideListener(this, panel);
     mRecentsPanel->SetOnTouchListener(l);

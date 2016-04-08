@@ -143,7 +143,7 @@ private:
     CARAPI_(void) SetExtendStart(
         /* [in] */ ICanvasProperty/*<Float>*/* prop);
 
-    CARAPI_(AutoPtr<ICanvasProperty/*<Float*/>) GetExtendStart();
+    CARAPI_(AutoPtr<ICanvasProperty>) GetExtendStart();  /*<Float*/
 
     /**
      * Sets the right/bottom property for the round rect to {@code prop} depending on whether we are
@@ -152,7 +152,7 @@ private:
     CARAPI_(void) SetExtendEnd(
         /* [in] */ ICanvasProperty/*<Float>*/* prop);
 
-    CARAPI_(AutoPtr<ICanvasProperty/*<Float*/>) GetExtendEnd();
+    CARAPI_(AutoPtr<ICanvasProperty>) GetExtendEnd();  /*<Float*/
 
     CARAPI_(Int32) GetExtendSize();
 
@@ -169,13 +169,13 @@ private:
     static const Int32 ANIMATION_DURATION_FADE;
 
     AutoPtr<IPaint> mRipplePaint;
-    AutoPtr<ICanvasProperty/*<Float*/> mLeftProp;
-    AutoPtr<ICanvasProperty/*<Float*/> mTopProp;
-    AutoPtr<ICanvasProperty/*<Float*/> mRightProp;
-    AutoPtr<ICanvasProperty/*<Float*/> mBottomProp;
-    AutoPtr<ICanvasProperty/*<Float*/> mRxProp;
-    AutoPtr<ICanvasProperty/*<Float*/> mRyProp;
-    AutoPtr<ICanvasProperty/*<Paint*/> mPaintProp;
+    AutoPtr<ICanvasProperty> mLeftProp;  /*<Float*/
+    AutoPtr<ICanvasProperty> mTopProp;  /*<Float*/
+    AutoPtr<ICanvasProperty> mRightProp;  /*<Float*/
+    AutoPtr<ICanvasProperty> mBottomProp;  /*<Float*/
+    AutoPtr<ICanvasProperty> mRxProp;  /*<Float*/
+    AutoPtr<ICanvasProperty> mRyProp;  /*<Float*/
+    AutoPtr<ICanvasProperty> mPaintProp;  /*<Paint*/
     Float mGlowAlpha;
     Float mGlowScale;
     Boolean mPressed;
@@ -187,8 +187,8 @@ private:
     Boolean mSupportHardware;
     AutoPtr<IView> mTargetView;
 
-    AutoPtr<IHashSet/*<Animator*/> mRunningAnimations;
-    AutoPtr<IArrayList/*<Animator*/> mTmpArray;
+    AutoPtr<IHashSet> mRunningAnimations;  /*<Animator*/
+    AutoPtr<IArrayList> mTmpArray;  /*<Animator*/
     AutoPtr<AnimatorListenerAdapter> mAnimatorListener;
 };
 

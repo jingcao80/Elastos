@@ -92,7 +92,7 @@ public:
         /* [in] */ Int32 speedBumpIndex);
 
 private:
-    AutoPtr<IArrayList/*<View*/> mDraggedViews;
+    AutoPtr<IArrayList> mDraggedViews;  /*<View*/
     Int32 mScrollY;
     Boolean mDimmed;
     AutoPtr<IActivatableNotificationView> mActivatedChild;

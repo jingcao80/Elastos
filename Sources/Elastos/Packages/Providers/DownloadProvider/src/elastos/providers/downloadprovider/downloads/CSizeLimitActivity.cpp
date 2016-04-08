@@ -43,7 +43,7 @@ CAR_INTERFACE_IMPL_3(CSizeLimitActivity, Activity, IDialogInterfaceOnCancelListe
 
 CSizeLimitActivity::CSizeLimitActivity()
 {
-    CLinkedList::New((ILinkedList**)&mDownloadsToShow);
+    CLinkedList::New((IQueue**)&mDownloadsToShow);
 }
 
 ECode CSizeLimitActivity::OnNewIntent(
@@ -143,7 +143,9 @@ void CSizeLimitActivity::ShowDialog(
         builder->SetNegativeButton(R::string::button_queue_for_wifi, this);
     }
     builder->SetOnCancelListener(this);
-    builder->Show((IAlertDialog**)&mDialog);
+    AutoPtr<IAlertDialog> ad;
+    builder->Show((IAlertDialog**)&ad);
+    mDialog = IDialog::Probe(ad);
 }
 
 ECode CSizeLimitActivity::OnCancel(

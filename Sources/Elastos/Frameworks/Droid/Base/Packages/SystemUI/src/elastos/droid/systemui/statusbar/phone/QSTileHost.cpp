@@ -293,7 +293,7 @@ ECode QSTileHost::GetSecurityController(
 void QSTileHost::RecreateTiles()
 {
     if (DEBUG) Logger::D(TAG, "Recreating tiles");
-    AutoPtr<IList/*<String*/> tileSpecs = LoadTileSpecs();
+    AutoPtr<IList> tileSpecs = LoadTileSpecs();  /*<String*/
 
     AutoPtr<ISet> set;
     mTiles->GetEntrySet((ISet**)&set);
@@ -321,7 +321,7 @@ void QSTileHost::RecreateTiles()
         }
     }
 
-    AutoPtr<ILinkedHashMap/*<String, QSTile<?>*/> newTiles;
+    AutoPtr<ILinkedHashMap> newTiles;  /*<String, QSTile<?>*/
     CLinkedHashMap::New((ILinkedHashMap**)&newTiles);
     ator = NULL;
     tileSpecs->GetIterator((IIterator**)&ator);
@@ -421,7 +421,7 @@ AutoPtr<IList/*<String*/> QSTileHost::LoadTileSpecs()
         if (DEBUG) Logger::D(TAG, "Loaded tile specs from setting: %s", tileList.string());
     }
 
-    AutoPtr<IArrayList/*<String*/> tiles;
+    AutoPtr<IArrayList> tiles;  /*<String*/
     CArrayList::New((IArrayList**)&tiles);
     Boolean addedDefault = FALSE;
     AutoPtr<ArrayOf<String> > values;

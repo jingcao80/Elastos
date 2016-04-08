@@ -198,10 +198,10 @@ void MonkeySourceScript::HandleEvent(
 
         AutoPtr<IMonkeyMotionEvent> e;
         if (s.IndexOf("Pointer") > 0) {
-            CMonkeyTouchEvent::New(action, (IMonkeyTouchEvent**)&e);
+            CMonkeyTouchEvent::New(action, (IMonkeyMotionEvent**)&e);
         }
         else {
-            CMonkeyTrackballEvent::New(action, (IMonkeyTrackballEvent**)&e);
+            CMonkeyTrackballEvent::New(action, (IMonkeyMotionEvent**)&e);
         }
 
         e->SetDownTime(downTime);
@@ -244,7 +244,7 @@ void MonkeySourceScript::HandleEvent(
         // Set the default parameters
         Int64 downTime = SystemClock::GetUptimeMillis();
         AutoPtr<IMonkeyMotionEvent> e1;
-        CMonkeyTouchEvent::New(IMotionEvent::ACTION_DOWN, (IMonkeyTouchEvent**)&e1);
+        CMonkeyTouchEvent::New(IMotionEvent::ACTION_DOWN, (IMonkeyMotionEvent**)&e1);
         e1->SetDownTime(downTime);
         e1->SetEventTime(downTime);
         e1->AddPointer(0, x, y, 1, 5);
@@ -257,7 +257,7 @@ void MonkeySourceScript::HandleEvent(
         }
 
         AutoPtr<IMonkeyMotionEvent> e2;
-        CMonkeyTouchEvent::New(IMotionEvent::ACTION_UP, (IMonkeyTouchEvent**)&e2);
+        CMonkeyTouchEvent::New(IMotionEvent::ACTION_UP, (IMonkeyMotionEvent**)&e2);
         e2->SetDownTime(downTime);
         e2->SetEventTime(downTime);
         e2->AddPointer(0, x, y, 1, 5);
@@ -275,7 +275,7 @@ void MonkeySourceScript::HandleEvent(
         Int64 downTime = SystemClock::GetUptimeMillis();
 
         AutoPtr<IMonkeyMotionEvent> e1;
-        CMonkeyTouchEvent::New(IMotionEvent::ACTION_DOWN, (IMonkeyTouchEvent**)&e1);
+        CMonkeyTouchEvent::New(IMotionEvent::ACTION_DOWN, (IMonkeyMotionEvent**)&e1);
         e1->SetDownTime(downTime);
         e1->SetEventTime(downTime);
         e1->AddPointer(0, x, y, 1, 5);
@@ -311,7 +311,7 @@ void MonkeySourceScript::HandleEvent(
             Float xStep = (xEnd - xStart) / stepCount;
             Float yStep = (yEnd - yStart) / stepCount;
             AutoPtr<IMonkeyMotionEvent> e;
-            CMonkeyTouchEvent::New(IMotionEvent::ACTION_DOWN, (IMonkeyTouchEvent**)&e);
+            CMonkeyTouchEvent::New(IMotionEvent::ACTION_DOWN, (IMonkeyMotionEvent**)&e);
             e->SetDownTime(downTime);
             e->SetEventTime(eventTime);
             e->AddPointer(0, x, y, 1, 5);
@@ -322,7 +322,7 @@ void MonkeySourceScript::HandleEvent(
                 y += yStep;
                 eventTime = SystemClock::GetUptimeMillis();
                 e = NULL;
-                CMonkeyTouchEvent::New(IMotionEvent::ACTION_MOVE, (IMonkeyTouchEvent**)&e);
+                CMonkeyTouchEvent::New(IMotionEvent::ACTION_MOVE, (IMonkeyMotionEvent**)&e);
                 e->SetDownTime(downTime);
                 e->SetEventTime(eventTime);
                 e->AddPointer(0, x, y, 1, 5);
@@ -331,7 +331,7 @@ void MonkeySourceScript::HandleEvent(
 
             eventTime = SystemClock::GetUptimeMillis();
             e = NULL;
-            CMonkeyTouchEvent::New(IMotionEvent::ACTION_UP, (IMonkeyTouchEvent**)&e);
+            CMonkeyTouchEvent::New(IMotionEvent::ACTION_UP, (IMonkeyMotionEvent**)&e);
             e->SetDownTime(downTime);
             e->SetEventTime(eventTime);
             e->AddPointer(0, x, y, 1, 5);
@@ -370,7 +370,7 @@ void MonkeySourceScript::HandleEvent(
             Float pt2yStep = (pt2yEnd - pt2yStart) / stepCount;
 
             AutoPtr<IMonkeyMotionEvent> e;
-            CMonkeyTouchEvent::New(IMotionEvent::ACTION_DOWN, (IMonkeyTouchEvent**)&e);
+            CMonkeyTouchEvent::New(IMotionEvent::ACTION_DOWN, (IMonkeyMotionEvent**)&e);
             e->SetDownTime(downTime);
             e->SetEventTime(eventTime);
             e->AddPointer(0, x1, y1, 1, 5);
@@ -378,7 +378,7 @@ void MonkeySourceScript::HandleEvent(
 
             e = NULL;
             CMonkeyTouchEvent::New(IMotionEvent::ACTION_POINTER_DOWN
-                | (1 << IMotionEvent::ACTION_POINTER_INDEX_SHIFT), (IMonkeyTouchEvent**)&e);
+                | (1 << IMotionEvent::ACTION_POINTER_INDEX_SHIFT), (IMonkeyMotionEvent**)&e);
             e->SetDownTime(downTime);
             e->AddPointer(0, x1, y1);
             e->AddPointer(0, x2, y2);
@@ -393,7 +393,7 @@ void MonkeySourceScript::HandleEvent(
 
                 eventTime = SystemClock::GetUptimeMillis();
                 e = NULL;
-                CMonkeyTouchEvent::New(IMotionEvent::ACTION_MOVE, (IMonkeyTouchEvent**)&e);
+                CMonkeyTouchEvent::New(IMotionEvent::ACTION_MOVE, (IMonkeyMotionEvent**)&e);
                 e->SetDownTime(downTime);
                 e->SetEventTime(eventTime);
                 e->AddPointer(0, x1, y1, 1, 5);
@@ -403,7 +403,7 @@ void MonkeySourceScript::HandleEvent(
 
             eventTime = SystemClock::GetUptimeMillis();
             e = NULL;
-            CMonkeyTouchEvent::New(IMotionEvent::ACTION_POINTER_UP, (IMonkeyTouchEvent**)&e);
+            CMonkeyTouchEvent::New(IMotionEvent::ACTION_POINTER_UP, (IMonkeyMotionEvent**)&e);
             e->SetDownTime(downTime);
             e->SetEventTime(eventTime);
             e->AddPointer(0, x1, y1);
@@ -460,46 +460,46 @@ void MonkeySourceScript::HandleEvent(
         AutoPtr<IComponentName> app;
         CComponentName::New(pkg_name, cl_name, (IComponentName**)&app);
         AutoPtr<IMonkeyEvent> e;
-        CMonkeyActivityEvent::New(app, deviceSleepTime, (IMonkeyActivityEvent**)&e);
+        CMonkeyActivityEvent::New(app, deviceSleepTime, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
 
         //inject the special key for the wakeUpScreen test activity.
         e = NULL;
         CMonkeyKeyEvent::New(IKeyEvent::ACTION_DOWN,
-            IKeyEvent::KEYCODE_0, (IMonkeyKeyEvent**)&e);
+            IKeyEvent::KEYCODE_0, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
 
         e = NULL;
         CMonkeyKeyEvent::New(IKeyEvent::ACTION_UP,
-            IKeyEvent::KEYCODE_0, (IMonkeyKeyEvent**)&e);
+            IKeyEvent::KEYCODE_0, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
 
         //Add the wait event after the device sleep event so that the monkey
         //can continue after the device wake up.
         e = NULL;
-        CMonkeyWaitEvent::New(deviceSleepTime + 3000, (IMonkeyWaitEvent**)&e);
+        CMonkeyWaitEvent::New(deviceSleepTime + 3000, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
 
         //Insert the menu key to unlock the screen
         e = NULL;
         CMonkeyKeyEvent::New(IKeyEvent::ACTION_DOWN,
-            IKeyEvent::KEYCODE_MENU, (IMonkeyKeyEvent**)&e);
+            IKeyEvent::KEYCODE_MENU, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
 
         e = NULL;
         CMonkeyKeyEvent::New(IKeyEvent::ACTION_UP,
-            IKeyEvent::KEYCODE_MENU, (IMonkeyKeyEvent**)&e);
+            IKeyEvent::KEYCODE_MENU, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
 
         //Insert the back key to dismiss the test activity
         e = NULL;
         CMonkeyKeyEvent::New(IKeyEvent::ACTION_DOWN,
-            IKeyEvent::KEYCODE_BACK, (IMonkeyKeyEvent**)&e);
+            IKeyEvent::KEYCODE_BACK, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
 
         e = NULL;
         CMonkeyKeyEvent::New(IKeyEvent::ACTION_UP,
-            IKeyEvent::KEYCODE_BACK, (IMonkeyKeyEvent**)&e);
+            IKeyEvent::KEYCODE_BACK, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
         return;
     }
@@ -519,7 +519,7 @@ void MonkeySourceScript::HandleEvent(
     if (s.IndexOf(EVENT_KEYWORD_WAIT) >= 0 && args->GetSize() == 1) {
         Int64 sleeptime = StringUtils::ParseInt32((*args)[0]);
         AutoPtr<IMonkeyEvent> e;
-        CMonkeyWaitEvent::New(sleeptime, (IMonkeyWaitEvent**)&e);
+        CMonkeyWaitEvent::New(sleeptime, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
         return;
     }
@@ -527,7 +527,7 @@ void MonkeySourceScript::HandleEvent(
     // Handle the profile wait time
     if (s.IndexOf(EVENT_KEYWORD_PROFILE_WAIT) >= 0) {
         AutoPtr<IMonkeyEvent> e;
-        CMonkeyWaitEvent::New(mProfileWaitTime, (IMonkeyWaitEvent**)&e);
+        CMonkeyWaitEvent::New(mProfileWaitTime, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
         return;
     }
@@ -547,12 +547,12 @@ void MonkeySourceScript::HandleEvent(
 
         AutoPtr<IMonkeyEvent> e;
         CMonkeyKeyEvent::New(IKeyEvent::ACTION_DOWN,
-        keyCode, (IMonkeyKeyEvent**)&e);
+        keyCode, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
 
         e = NULL;
         CMonkeyKeyEvent::New(IKeyEvent::ACTION_UP,
-        keyCode, (IMonkeyKeyEvent**)&e);
+        keyCode, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
         return;
     }
@@ -561,16 +561,16 @@ void MonkeySourceScript::HandleEvent(
     if (s.IndexOf(EVENT_KEYWORD_LONGPRESS) >= 0) {
         AutoPtr<IMonkeyEvent> e;
         CMonkeyKeyEvent::New(IKeyEvent::ACTION_DOWN,
-            IKeyEvent::KEYCODE_DPAD_CENTER, (IMonkeyKeyEvent**)&e);
+            IKeyEvent::KEYCODE_DPAD_CENTER, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
 
         e = NULL;
-        CMonkeyWaitEvent::New(LONGPRESS_WAIT_TIME, (IMonkeyWaitEvent**)&e);
+        CMonkeyWaitEvent::New(LONGPRESS_WAIT_TIME, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
 
         e = NULL;
         CMonkeyKeyEvent::New(IKeyEvent::ACTION_UP,
-            IKeyEvent::KEYCODE_DPAD_CENTER, (IMonkeyKeyEvent**)&e);
+            IKeyEvent::KEYCODE_DPAD_CENTER, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
     }
 
@@ -581,14 +581,14 @@ void MonkeySourceScript::HandleEvent(
 
         if (args->GetSize() == 1) {
             AutoPtr<IMonkeyEvent> e;
-            CMonkeyPowerEvent::New(power_log_type, (IMonkeyPowerEvent**)&e);
+            CMonkeyPowerEvent::New(power_log_type, (IMonkeyEvent**)&e);
             mQ->AddLast(e);
         }
         else if (args->GetSize() == 2) {
             test_case_status = (*args)[1];
             AutoPtr<IMonkeyEvent> e;
             CMonkeyPowerEvent::New(power_log_type,
-                test_case_status, (IMonkeyPowerEvent**)&e);
+                test_case_status, (IMonkeyEvent**)&e);
             mQ->AddLast(e);
         }
     }
@@ -596,7 +596,7 @@ void MonkeySourceScript::HandleEvent(
     //Write power log to sdcard
     if (s.IndexOf(EVENT_KEYWORD_WRITEPOWERLOG) >= 0) {
         AutoPtr<IMonkeyEvent> e;
-        CMonkeyPowerEvent::New((IMonkeyPowerEvent**)&e);
+        CMonkeyPowerEvent::New((IMonkeyEvent**)&e);
         mQ->AddLast(e);
     }
 
@@ -604,7 +604,7 @@ void MonkeySourceScript::HandleEvent(
     if (s.IndexOf(EVENT_KEYWORD_RUNCMD) >= 0 && args->GetSize() == 1) {
         String cmd = (*args)[0];
         AutoPtr<IMonkeyEvent> e;
-        CMonkeyCommandEvent::New(cmd, (IMonkeyCommandEvent**)&e);
+        CMonkeyCommandEvent::New(cmd, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
     }
 
@@ -614,14 +614,14 @@ void MonkeySourceScript::HandleEvent(
         String cmd;
         cmd.AppendFormat("input text  %s", input.string());
         AutoPtr<IMonkeyEvent> e;
-        CMonkeyCommandEvent::New(cmd, (IMonkeyCommandEvent**)&e);
+        CMonkeyCommandEvent::New(cmd, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
         return;
     }
 
     if (s.IndexOf(EVENT_KEYWORD_START_FRAMERATE_CAPTURE) >= 0) {
         AutoPtr<IMonkeyEvent> e;
-        CMonkeyGetFrameRateEvent::New(String("start"), (IMonkeyGetFrameRateEvent**)&e);
+        CMonkeyGetFrameRateEvent::New(String("start"), (IMonkeyEvent**)&e);
         mQ->AddLast(e);
         return;
     }
@@ -629,7 +629,7 @@ void MonkeySourceScript::HandleEvent(
     if (s.IndexOf(EVENT_KEYWORD_END_FRAMERATE_CAPTURE) >= 0 && args->GetSize() == 1) {
         String input = (*args)[0];
         AutoPtr<IMonkeyEvent> e;
-        CMonkeyGetFrameRateEvent::New(String("end"), input, (IMonkeyGetFrameRateEvent**)&e);
+        CMonkeyGetFrameRateEvent::New(String("end"), input, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
         return;
     }
@@ -637,7 +637,7 @@ void MonkeySourceScript::HandleEvent(
     if (s.IndexOf(EVENT_KEYWORD_START_APP_FRAMERATE_CAPTURE) >= 0 && args->GetSize() == 1) {
         String app = (*args)[0];
         AutoPtr<IMonkeyEvent> e;
-        CMonkeyGetAppFrameRateEvent::New(String("start"), app, (IMonkeyGetAppFrameRateEvent**)&e);
+        CMonkeyGetAppFrameRateEvent::New(String("start"), app, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
         return;
     }
@@ -646,7 +646,7 @@ void MonkeySourceScript::HandleEvent(
         String app = (*args)[0];
         String label = (*args)[1];
         AutoPtr<IMonkeyEvent> e;
-        CMonkeyGetAppFrameRateEvent::New(String("end"), app, label, (IMonkeyGetAppFrameRateEvent**)&e);
+        CMonkeyGetAppFrameRateEvent::New(String("end"), app, label, (IMonkeyEvent**)&e);
         mQ->AddLast(e);
         return;
     }
@@ -668,10 +668,10 @@ void MonkeySourceScript::ProcessLine(
 
     Boolean has = FALSE;
     while (splitter->HasNext(&has), has) {
-        AutoPtr<ICharSequence> cs;
+        AutoPtr<IInterface> cs;
         splitter->Next((IInterface**)&cs);
         String arg;
-        cs->ToString(&arg);
+        ICharSequence::Probe(cs)->ToString(&arg);
         args->PushBack(arg.Trim());
     }
     HandleEvent(line, args);

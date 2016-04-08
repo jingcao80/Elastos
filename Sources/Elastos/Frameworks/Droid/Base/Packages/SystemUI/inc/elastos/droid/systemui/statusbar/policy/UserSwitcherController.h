@@ -334,11 +334,11 @@ private:
 
     AutoPtr<IContext> mContext;
     AutoPtr<IUserManager> mUserManager;
-    AutoPtr<IArrayList/*<WeakReference<BaseUserAdapter>*/> mAdapters;
+    AutoPtr<IArrayList> mAdapters;  /*<WeakReference<BaseUserAdapter>*/
     AutoPtr<IGuestResumeSessionReceiver> mGuestResumeSessionReceiver;
     AutoPtr<IKeyguardMonitor> mKeyguardMonitor;
 
-    AutoPtr<IArrayList/*<UserRecord*/> mUsers;
+    AutoPtr<IArrayList> mUsers;  /*<UserRecord*/
     AutoPtr<IDialog> mExitGuestDialog;
     AutoPtr<IDialog> mAddUserDialog;
     Int32 mLastNonGuestUser;

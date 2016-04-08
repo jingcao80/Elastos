@@ -3926,7 +3926,7 @@ void Launcher::ShowAppsCustomizeHelper(
     // Shrink workspaces away if going to AppsCustomize from workspace
     AutoPtr<IAnimator> workspaceAnim;
     mWorkspace->GetChangeStateAnimation(Workspace::State::SMALL, animated,
-            (IAnimator**)&IAnimator);
+            (IAnimator**)&workspaceAnim);
 
     if (animated) {
         toView->SetScaleX(scale);
@@ -5436,6 +5436,7 @@ Boolean Launcher::IsClingsEnabled()
     // Check if the system has requested skipping of first-use hints.
     AutoPtr<IContentResolver> cr;
     GetContentResolver((IContentResolver**)&cr),
+    AutoPtr<ISettingsSecure> ss;
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&ss);
     Int32 value;
     ss->GetInt32(cr, ISettingsSecure::SKIP_FIRST_USE_HINTS, 0, &value);

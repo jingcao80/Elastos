@@ -181,8 +181,9 @@ int LaunchApp(void *handle, char *appName)
         }
     }
 
-    AutoPtr<IIActivityManager> activityManager;
-    serviceManager->GetService(IContext::ACTIVITY_SERVICE, (IInterface**)&activityManager);
+    AutoPtr<IInterface> am;
+    serviceManager->GetService(IContext::ACTIVITY_SERVICE, (IInterface**)&am);
+    activityManager = IIActivityManager::Probe(am);
     assert(activityManager != NULL);
 
     AutoPtr<IIntent> intent;

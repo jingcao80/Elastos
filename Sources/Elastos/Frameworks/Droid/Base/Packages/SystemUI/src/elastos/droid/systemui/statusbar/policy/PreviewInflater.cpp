@@ -92,7 +92,7 @@ AutoPtr<PreviewInflater::WidgetInfo> PreviewInflater::GetWidgetInfo(
 
     Int32 user = 0;
     mLockPatternUtils->GetCurrentUser(&user);
-    AutoPtr<IList/*<ResolveInfo*/> appList;
+    AutoPtr<IList> appList;  /*<ResolveInfo*/
     packageManager->QueryIntentActivitiesAsUser(intent,
             IPackageManager::MATCH_DEFAULT_ONLY, user, (IList**)&appList);
 
@@ -137,7 +137,7 @@ Boolean PreviewInflater::WouldLaunchResolverActivity(
 {
     AutoPtr<IPackageManager> packageManager;
     ctx->GetPackageManager((IPackageManager**)&packageManager);
-    AutoPtr<IList/*<ResolveInfo*/> appList;
+    AutoPtr<IList> appList;  /*<ResolveInfo*/
     packageManager->QueryIntentActivitiesAsUser(
             intent, IPackageManager::MATCH_DEFAULT_ONLY, currentUserId, (IList**)&appList);
 

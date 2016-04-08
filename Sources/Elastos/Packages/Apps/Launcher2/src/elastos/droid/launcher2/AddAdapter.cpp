@@ -39,7 +39,7 @@ const Int32 AddAdapter::ITEM_WALLPAPER = 3;
 
 AddAdapter::AddAdapter()
 {
-    CArrayList::New((IArrayList**)&mInflater);
+    CArrayList::New((IArrayList**)&mItems);
 }
 
 ECode AddAdapter::constructor(
@@ -64,7 +64,7 @@ ECode AddAdapter::constructor(
 
 ECode AddAdapter::GetView(
     /* [in] */ Int32 position,
-    /* [in] */ IView* convertView,
+    /* [in] */ IView* inConvertView,
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
@@ -74,6 +74,7 @@ ECode AddAdapter::GetView(
     GetItem(position, (IInterface**)&obj);
     AutoPtr<ListItem> item = (ListItem*)IObject::Probe(obj);
 
+    AutoPtr<IView> convertView = inConvertView;
     if (convertView == NULL) {
         mInflater->Inflate(Elastos::Droid::Launcher2::R::layout::add_list_item,
                 parent, FALSE, (IView**)&convertView);

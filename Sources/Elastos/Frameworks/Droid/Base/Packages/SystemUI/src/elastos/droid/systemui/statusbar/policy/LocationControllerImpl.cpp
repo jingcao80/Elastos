@@ -178,7 +178,7 @@ Boolean LocationControllerImpl::IsUserLocationRestricted(
 
 Boolean LocationControllerImpl::AreActiveHighPowerLocationRequests()
 {
-    AutoPtr<IList/*<AppOpsManager.PackageOps*/> packages;
+    AutoPtr<IList> packages;  /*<AppOpsManager.PackageOps*/
     mAppOpsManager->GetPackagesForOps(mHighPowerRequestAppOpArray, (IList**)&packages);
     // AppOpsManager can return NULL when there is no requested data.
     if (packages != NULL) {
@@ -188,7 +188,7 @@ Boolean LocationControllerImpl::AreActiveHighPowerLocationRequests()
             AutoPtr<IInterface> obj;
             packages->Get(packageInd, (IInterface**)&obj);
             AutoPtr<IAppOpsManagerPackageOps> packageOp = IAppOpsManagerPackageOps::Probe(obj);
-            AutoPtr<IList/*<AppOpsManager.OpEntry*/> opEntries;
+            AutoPtr<IList> opEntries;  /*<AppOpsManager.OpEntry*/
             packageOp->GetOps((IList**)&opEntries);
             if (opEntries != NULL) {
                 Int32 numOps = 0;

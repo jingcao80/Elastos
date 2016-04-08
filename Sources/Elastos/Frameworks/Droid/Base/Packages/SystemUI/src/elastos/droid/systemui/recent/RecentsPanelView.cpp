@@ -1249,8 +1249,9 @@ ECode RecentsPanelView::HandleSwipe(
 
     // Currently, either direction means the same thing, so ignore direction and remove
     // the task.
-    AutoPtr<IActivityManager> am;
-    mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&am);
+    AutoPtr<IInterface> amObj;
+    mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&amObj);
+    AutoPtr<IActivityManager> am = IActivityManager::Probe(am);
     if (am != NULL) {
         AutoPtr<TaskDescription> _ad = (TaskDescription*)ad.Get();
         Int32 persistentTaskId = _ad->mPersistentTaskId;

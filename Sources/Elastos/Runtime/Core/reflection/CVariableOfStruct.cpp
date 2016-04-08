@@ -564,12 +564,13 @@ ECode CVariableOfStruct::AcquireCppVectorFieldSGetter(
             return ec;
         }
 
-        AutoPtr<ICppVectorInfo> typeInfo;
-        fieldInfo->GetTypeInfo((IDataTypeInfo**)&typeInfo);
+        AutoPtr<IDataTypeInfo> typeInfoObj;
+        fieldInfo->GetTypeInfo((IDataTypeInfo**)&typeInfoObj);
         if (FAILED(ec)) {
             g_objInfoList.UnlockHashTable(EntryType_Struct);
             return ec;
         }
+        ICppVectorInfo* typeInfo = ICppVectorInfo::Probe(typeInfoObj);
 
         Int32 length = 0;
         ec = typeInfo->GetLength(&length);

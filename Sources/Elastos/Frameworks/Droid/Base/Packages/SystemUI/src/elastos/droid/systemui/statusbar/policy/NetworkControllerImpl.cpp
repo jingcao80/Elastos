@@ -1187,7 +1187,7 @@ String NetworkControllerImpl::HuntForSsid(
         return ssid;
     }
     // OK, it's not in the connectionInfo; we have to go hunting for it
-    AutoPtr<IList/*<WifiConfiguration*/> networks;
+    AutoPtr<IList> networks;  /*<WifiConfiguration*/
     mWifiManager->GetConfiguredNetworks((IList**)&networks);
 
     AutoPtr<IIterator> ator;

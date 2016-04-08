@@ -149,8 +149,9 @@ ECode CTestSuiteBuilder::Build(
     Int32 N;
     tests->GetSize(&N);
     for (Int32 i = 0; i < N; i++) {
-        AutoPtr<ITestMethod> test;
-        tests->Get(i, (IInterface**)&test);
+        AutoPtr<IInterface> test;
+        tests->Get(i, (IInterface**)&obj);
+        ITestMethod* test = ITestMethod::Probe(obj);
         if (SatisfiesAllPredicates(test)) {
             AddTest(test);
         }
@@ -205,8 +206,9 @@ Boolean CTestSuiteBuilder::SatisfiesAllPredicates(
     mPredicates->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
-        AutoPtr<IPredicate> predicate;
-        it->GetNext((IInterface**)&predicate);
+        AutoPtr<IInterface> predicate;
+        it->GetNext((IInterface**)&obj);
+        IPredicate* predicate = IPredicate::Probe(obj);
         Boolean result;
         if (predicate->Apply(test, &result), !result) {
             return FALSE;

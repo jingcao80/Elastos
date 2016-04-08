@@ -165,9 +165,9 @@ private:
     static const Boolean DEBUG;
 
     AutoPtr<IContext> mContext;
-    AutoPtr<IArrayList/*<Callback*/> mCallbacks;
+    AutoPtr<IArrayList> mCallbacks;  /*<Callback*/
     AutoPtr<IMediaRouter> mMediaRouter;
-    AutoPtr<IArrayMap/*<String, RouteInfo*/> mRoutes;
+    AutoPtr<IArrayMap> mRoutes;  /*<String, RouteInfo*/
     Object mDiscoveringLock/* = new Object()*/;
     AutoPtr<IMediaProjectionManager> mProjectionManager;
     Object mProjectionLock/* = new Object()*/;

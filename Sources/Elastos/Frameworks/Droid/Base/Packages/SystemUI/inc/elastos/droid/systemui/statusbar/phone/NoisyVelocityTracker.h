@@ -70,7 +70,7 @@ private:
     static const Boolean DEBUG;
 
     const Int32 MAX_EVENTS;
-    AutoPtr<IArrayDeque/*<MotionEventCopy*/> mEventBuf;
+    AutoPtr<IArrayDeque> mEventBuf;  /*<MotionEventCopy*/
     Float mVX;
     Float mVY;
 };

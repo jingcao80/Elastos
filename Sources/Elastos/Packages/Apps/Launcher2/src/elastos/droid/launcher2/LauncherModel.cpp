@@ -2518,8 +2518,8 @@ Boolean LauncherModel::InitStaticBlock()
     CArrayList::New((IArrayList**)&mDeferredBindRunnables);
 
     CHashMap::New((IHashMap**)&sBgItemsIdMap);
-    CHashMap::New((IHashMap**)&sBgWorkspaceItems);
-    CHashMap::New((IHashMap**)&sBgAppWidgets);
+    CArrayList::New((IArrayList**)&sBgWorkspaceItems);
+    CArrayList::New((IArrayList**)&sBgAppWidgets);
     CHashMap::New((IHashMap**)&sBgFolders);
     CHashMap::New((IHashMap**)&sBgDbIconCache);
     return TRUE;
@@ -2625,8 +2625,7 @@ ECode LauncherModel::GetFallbackIcon(
 
     AutoPtr<IBitmapHelper> helper;
     CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
-    AutoPtr<IBitmap> b;
-    return helper->CreateBitmap(mDefaultIcon, (IBitmap**)&bitmap);
+    return helper->CreateBitmap(mDefaultIcon, bitmap);
 }
 
 ECode LauncherModel::UnbindItemInfosAndClearQueuedBindRunnables()
@@ -4106,7 +4105,7 @@ ECode LauncherModel::GetComponentNameFromResolveInfo(
         IPackageItemInfo::Probe(activityInfo)->GetPackageName(&pname);
         String name;
         IPackageItemInfo::Probe(activityInfo)->GetName(&name);
-        return CComponentName::New(pname, name, (IComponentName**)&outname);
+        return CComponentName::New(pname, name, outname);
     }
     else {
         AutoPtr<IServiceInfo> serviceInfo;
@@ -4115,7 +4114,7 @@ ECode LauncherModel::GetComponentNameFromResolveInfo(
         IPackageItemInfo::Probe(serviceInfo)->GetPackageName(&pname);
         String name;
         IPackageItemInfo::Probe(serviceInfo)->GetName(&name);
-        return CComponentName::New(pname, name, (IComponentName**)&outname);
+        return CComponentName::New(pname, name, outname);
     }
 }
 

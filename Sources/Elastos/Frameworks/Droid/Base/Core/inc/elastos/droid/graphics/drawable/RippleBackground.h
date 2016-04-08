@@ -191,10 +191,10 @@ private:
     Float mDensity;
 
     // Hardware rendering properties.
-    AutoPtr<CanvasProperty/*<Paint*/> mPropOuterPaint;
-    AutoPtr<CanvasProperty/*<Float*/> mPropOuterRadius;
-    AutoPtr<CanvasProperty/*<Float*/> mPropOuterX;
-    AutoPtr<CanvasProperty/*<Float*/> mPropOuterY;
+    AutoPtr<CanvasProperty> mPropOuterPaint;  /*<Paint*/
+    AutoPtr<CanvasProperty> mPropOuterRadius;  /*<Float*/
+    AutoPtr<CanvasProperty> mPropOuterX;  /*<Float*/
+    AutoPtr<CanvasProperty> mPropOuterY;  /*<Float*/
 
     // Software animators.
     AutoPtr<IObjectAnimator> mAnimOuterOpacity;

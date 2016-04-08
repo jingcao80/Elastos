@@ -205,7 +205,7 @@ private:
     AutoPtr<IHandler> mHandler;
 
     /** Lock on mListeners when accessing */
-    AutoPtr<IArrayList/*<WeakReference<FlashlightListener>*/> mListeners;
+    AutoPtr<IArrayList> mListeners;  /*<WeakReference<FlashlightListener>*/
 
     /** Lock on {@code this} when accessing */
     Boolean mFlashlightEnabled;

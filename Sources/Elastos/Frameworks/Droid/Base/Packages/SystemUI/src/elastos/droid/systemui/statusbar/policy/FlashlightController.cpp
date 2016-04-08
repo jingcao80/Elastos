@@ -292,7 +292,7 @@ ECode FlashlightController::StartSession() /*throws CameraAccessException*/
     size->GetHeight(&h);
     mSurfaceTexture->SetDefaultBufferSize(w, w);
     CSurface::New(mSurfaceTexture, (ISurface**)&mSurface);
-    AutoPtr<IArrayList/*<Surface*/> outputs;
+    AutoPtr<IArrayList> outputs;  /*<Surface*/
     CArrayList::New(1, (IArrayList**)&outputs);
     outputs->Add(mSurface);
     return mCameraDevice->CreateCaptureSession(IList::Probe(outputs),

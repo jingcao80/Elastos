@@ -195,7 +195,7 @@ Boolean SecureCameraLaunchManager::TargetWillWaitForCameraAvailable()
     mContext->GetPackageManager((IPackageManager**)&packageManager);
 
     // Get the list of applications that can handle the intent.
-    AutoPtr<IList/*<ResolveInfo*/> appList;
+    AutoPtr<IList> appList;  /*<ResolveInfo*/
     Int32 user = 0;
     mLockPatternUtils->GetCurrentUser(&user);
     packageManager->QueryIntentActivitiesAsUser(

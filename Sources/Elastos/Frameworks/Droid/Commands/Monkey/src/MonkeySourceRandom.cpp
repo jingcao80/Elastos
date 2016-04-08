@@ -141,9 +141,9 @@ void MonkeySourceRandom::Init(
     Boolean hasNext = FALSE;
 
     while (enumerator->MoveNext(&hasNext), hasNext) {
-        AutoPtr<IComponentName> element;
+        AutoPtr<IInterface> element;
         enumerator->Current((IInterface**)&element);
-        mMainApps->PushBack(element);
+        mMainApps->PushBack(IComponentName::Probe(element));
     }
 
     CMonkeyEventQueue::New(pRandom, throttle, randomizeThrottle,
@@ -453,7 +453,7 @@ void MonkeySourceRandom::GenerateTrackballEvent(
         dY = dY - 5;
 
         AutoPtr<IMonkeyMotionEvent> event;
-        CMonkeyTrackballEvent::New(IMotionEvent::ACTION_MOVE, (IMonkeyTrackballEvent**)&event);
+        CMonkeyTrackballEvent::New(IMotionEvent::ACTION_MOVE, (IMonkeyMotionEvent**)&event);
         event->AddPointer(0, dX, dY);
         event->SetIntermediateNote(i > 0);
         mQ->AddLast(IMonkeyEvent::Probe(event));
@@ -465,14 +465,14 @@ void MonkeySourceRandom::GenerateTrackballEvent(
     if (0 == rdm) {
         Int64 downAt = SystemClock::GetUptimeMillis();
         AutoPtr<IMonkeyMotionEvent> event;
-        CMonkeyTrackballEvent::New(IMotionEvent::ACTION_DOWN, (IMonkeyTrackballEvent**)&event);
+        CMonkeyTrackballEvent::New(IMotionEvent::ACTION_DOWN, (IMonkeyMotionEvent**)&event);
         event->SetDownTime(downAt);
         event->AddPointer(0, 0, 0);
         event->SetIntermediateNote(TRUE);
         mQ->AddLast(IMonkeyEvent::Probe(event));
 
         event = NULL;
-        CMonkeyTrackballEvent::New(IMotionEvent::ACTION_UP, (IMonkeyTrackballEvent**)&event);
+        CMonkeyTrackballEvent::New(IMotionEvent::ACTION_UP, (IMonkeyMotionEvent**)&event);
         event->SetDownTime(downAt);
         event->AddPointer(0, 0, 0);
         event->SetIntermediateNote(FALSE);

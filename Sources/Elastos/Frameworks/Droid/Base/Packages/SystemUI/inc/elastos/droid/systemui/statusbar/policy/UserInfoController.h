@@ -111,8 +111,8 @@ private:
     static const String TAG;
 
     AutoPtr<IContext> mContext;
-    AutoPtr<IArrayList/*<OnUserInfoChangedListener*/> mCallbacks;
-    AutoPtr<AsyncTask/*<Void, Void, Pair<String, Drawable>*/> mUserInfoTask;
+    AutoPtr<IArrayList> mCallbacks;  /*<OnUserInfoChangedListener*/
+    AutoPtr<AsyncTask> mUserInfoTask;  /*<Void, Void, Pair<String, Drawable>*/
 
     Boolean mUseDefaultAvatar;
     String mUserName;

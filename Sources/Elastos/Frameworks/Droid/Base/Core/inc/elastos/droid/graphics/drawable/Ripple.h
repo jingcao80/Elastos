@@ -219,10 +219,10 @@ private:
     Float mClampedStartingY;
 
     // Hardware rendering properties.
-    AutoPtr<CanvasProperty/*<Paint*/> mPropPaint;
-    AutoPtr<CanvasProperty/*<Float*/> mPropRadius;
-    AutoPtr<CanvasProperty/*<Float*/> mPropX;
-    AutoPtr<CanvasProperty/*<Float*/> mPropY;
+    AutoPtr<CanvasProperty> mPropPaint;  /*<Paint*/
+    AutoPtr<CanvasProperty> mPropRadius;  /*<Float*/
+    AutoPtr<CanvasProperty> mPropX;  /*<Float*/
+    AutoPtr<CanvasProperty> mPropY;  /*<Float*/
 
     // Software animators.
     AutoPtr<IObjectAnimator> mAnimRadius;
