@@ -113,7 +113,7 @@ ECode URIUtils::Resolve(
 
 ECode URIUtils::Resolve(
     /* [in] */ IURI* baseURI,
-    /* [in] */ IURI* reference,
+    /* [in] */ IURI* inReference,
     /* [out] */ IURI** uri)
 {
     VALIDATE_NOT_NULL(uri)
@@ -121,10 +121,11 @@ ECode URIUtils::Resolve(
         Logger::E("URIUtils", "Base URI may not be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    if (reference == NULL) {
+    if (inReference == NULL) {
         Logger::E("URIUtils", "Reference URI may not be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
+    AutoPtr<IURI> reference = inReference;
     String referenceStr;
     IObject::Probe(reference)->ToString(&referenceStr);
     Boolean emptyReference = referenceStr.GetLength() == 0;

@@ -173,7 +173,7 @@ ECode VersionInfo::LoadVersionInfo(
 
 ECode VersionInfo::LoadVersionInfo(
     /* [in] */ const String& pckg,
-    /* [in] */ IClassLoader* clsldr,
+    /* [in] */ IClassLoader* inClsldr,
     /* [out] */ IVersionInfo** info)
 {
     VALIDATE_NOT_NULL(info)
@@ -183,6 +183,7 @@ ECode VersionInfo::LoadVersionInfo(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
+    AutoPtr<IClassLoader> clsldr = inClsldr;
     if (clsldr == NULL) {
         AutoPtr<IThread> t = Thread::GetCurrentThread();
         t->GetContextClassLoader((IClassLoader**)&clsldr);

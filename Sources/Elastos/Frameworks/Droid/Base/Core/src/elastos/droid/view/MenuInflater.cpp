@@ -277,21 +277,22 @@ ECode MenuInflater::MenuState::SetItem(
 }
 
 ECode MenuInflater::MenuState::AddItem(
-    /* [out] */ IMenuItem** item)
+    /* [out] */ IMenuItem** result)
 {
-    VALIDATE_NOT_NULL(item)
+    VALIDATE_NOT_NULL(result)
     mItemAdded = TRUE;
-    AutoPtr<IMenuItem> _item;
+    AutoPtr<IMenuItem> item;
     mMenu->Add(mGroupId, mItemId, mItemCategoryOrder, mItemTitle, (IMenuItem**)&item);
-    SetItem(_item);
-    *item = _item;
-    REFCOUNT_ADD(*item)
+    SetItem(item);
+    *result = item;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 ECode MenuInflater::MenuState::AddSubMenuItem(
     /* [out] */ ISubMenu** subMenu)
 {
+    VALIDATE_NOT_NULL(subMenu)
     mItemAdded = TRUE;
     FAIL_RETURN(mMenu->AddSubMenu(mGroupId, mItemId, mItemCategoryOrder, mItemTitle, subMenu));
     AutoPtr<IMenuItem> item;
@@ -310,6 +311,7 @@ ECode MenuInflater::MenuState::NewInstance(
     /* [in] */ ArrayOf<IInterface*>* arguments,
     /* [out] */ IInterface** object)
 {
+    VALIDATE_NOT_NULL(object)
     *object = NULL;
     AutoPtr<IClassLoader> cl;
     FAIL_RETURN(mOwner->mContext->GetClassLoader((IClassLoader**)&cl));

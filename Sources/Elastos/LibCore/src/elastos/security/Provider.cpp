@@ -727,8 +727,9 @@ void Provider::RemoveFromPropertyServiceTable(
         if (mPropertyServiceTable != NULL) {
             AutoPtr<ICharSequence> keyObj;
             CString::New(Key(serviceName, algorithm), (ICharSequence**)&keyObj);
-            AutoPtr<IProviderService> ser;
-            mPropertyServiceTable->Remove(keyObj, (IInterface**)&ser);
+            AutoPtr<IInterface> serObj;
+            mPropertyServiceTable->Remove(keyObj, (IInterface**)&serObj);
+            IProviderService* ser = IProviderService::Probe(serObj);
             AutoPtr<IList> aliases;
             if (ser != NULL && mPropertyAliasTable != NULL
                     && (ser->GetAliases((IList**)&aliases), aliases != NULL)) {

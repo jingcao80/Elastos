@@ -381,9 +381,9 @@ ECode MenuPopupHelper::OnItemClick(
     mAdapter->mWeakAdapterMenu->Resolve(EIID_IMenuBuilder, (IInterface**)&adapterMenu);
     if (adapterMenu != NULL) {
         Boolean tmp;
-        AutoPtr<IMenuItem> item;
+        AutoPtr<IInterface> item;
         mAdapter->GetItem(position, (IInterface**)&item);
-        return adapterMenu->PerformItemAction(item, 0, &tmp);
+        return adapterMenu->PerformItemAction(IMenuItem::Probe(item), 0, &tmp);
     }
     return NOERROR;
 }

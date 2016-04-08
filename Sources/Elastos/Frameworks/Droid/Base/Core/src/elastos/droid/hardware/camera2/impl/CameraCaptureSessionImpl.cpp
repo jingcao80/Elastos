@@ -472,15 +472,16 @@ ECode CameraCaptureSessionImpl::Capture(
 
         FAIL_RETURN(CheckNotClosed())
 
-        CameraDeviceImpl::CheckHandler(handler, TO_IINTERFACE(_callback), (IHandler**)&handler);
+        AutoPtr<IHandler> newHandler;
+        CameraDeviceImpl::CheckHandler(handler, TO_IINTERFACE(_callback), (IHandler**)&newHandler);
 
         if (VERBOSE) {
             // Slogger::V(TAG, mIdString + "capture - request " + request + ", callback " + _callback +
-            //         " handler " + handler);
+            //         " newHandler " + newHandler);
         }
 
         AutoPtr<ICameraDeviceImplCaptureCallback> back;
-        CreateCaptureCallbackProxy(handler, _callback, (ICameraDeviceImplCaptureCallback**)&back);
+        CreateCaptureCallbackProxy(newHandler, _callback, (ICameraDeviceImplCaptureCallback**)&back);
         Int32 _value;
         FAIL_RETURN(mDeviceImpl->Capture(request, back, mDeviceHandler, &_value))
         return AddPendingSequence(_value, value);
@@ -512,16 +513,17 @@ ECode CameraCaptureSessionImpl::CaptureBurst(
 
         FAIL_RETURN(CheckNotClosed())
 
-        CameraDeviceImpl::CheckHandler(handler, _callback, (IHandler**)&handler);
+         AutoPtr<IHandler> newHandler;
+        CameraDeviceImpl::CheckHandler(handler, _callback, (IHandler**)&newHandler);
 
         if (VERBOSE) {
             // CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
             // Log.v(TAG, mIdString + "captureBurst - requests " + Arrays.toString(requestArray) +
-            //         ", callback " + _callback + " handler " + handler);
+            //         ", callback " + _callback + " newHandler " + newHandler);
         }
 
         AutoPtr<ICameraDeviceImplCaptureCallback> back;
-        CreateCaptureCallbackProxy(handler, _callback, (ICameraDeviceImplCaptureCallback**)&back);
+        CreateCaptureCallbackProxy(newHandler, _callback, (ICameraDeviceImplCaptureCallback**)&back);
         Int32 _value;
         FAIL_RETURN(mDeviceImpl->CaptureBurst(requests, back, mDeviceHandler, &_value))
         return AddPendingSequence(_value, value);

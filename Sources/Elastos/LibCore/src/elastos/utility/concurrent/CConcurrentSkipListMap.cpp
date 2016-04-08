@@ -964,8 +964,9 @@ void CConcurrentSkipListMap::BuildFromSorted(
     (IIterable::Probe(s))->GetIterator((IIterator**)&it);
     Boolean bNext;
     while ((it->HasNext(&bNext), bNext)) {
-        AutoPtr<IMapEntry> e;
-        it->GetNext((IInterface**)&e);
+        AutoPtr<IInterface> me;
+        it->GetNext((IInterface**)&me);
+        IMapEntry* e = IMapEntry::Probe(me);
         Int32 j = RandomLevel();
         if (j > h->mLevel) j = h->mLevel + 1;
         AutoPtr<IInterface> k;

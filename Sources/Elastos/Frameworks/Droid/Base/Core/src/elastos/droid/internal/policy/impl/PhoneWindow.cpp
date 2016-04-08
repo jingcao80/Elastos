@@ -3869,7 +3869,7 @@ void PhoneWindow::DoInvalidatePanelMenu(
 
 ECode PhoneWindow::CloseAllPanels()
 {
-    const AutoPtr<IViewManager> wm;
+    AutoPtr<IWindowManager> wm;
     GetWindowManager((IWindowManager**)&wm);
     if (wm == NULL) {
         return NOERROR;

@@ -766,12 +766,12 @@ ECode PropertyValuesHolder::SetupValue(
             kf->SetValue(cValue);
         }
         else if (carType == CarDataType_Interface) {
-            AutoPtr<IInteger32> getRst;
+            AutoPtr<IInterface> getRst;
             arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
             FAIL_RETURN(mGetter->Invoke(target, arg));
 
             AutoPtr<IInterface> cValue;
-            FAIL_RETURN(ConvertBack(getRst, (IInterface**)&cValue));
+            FAIL_RETURN(ConvertBack(IInteger32::Probe(getRst), (IInterface**)&cValue));
             kf->SetValue(cValue);
         }
         else{
@@ -791,12 +791,12 @@ ECode PropertyValuesHolder::SetupValue(
             kf->SetValue(cValue);
         }
         else if (carType == CarDataType_Interface) {
-            AutoPtr<IFloat> getRst;
+            AutoPtr<IInterface> getRst;
             arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
             FAIL_RETURN(mGetter->Invoke(target, arg));
 
             AutoPtr<IInterface> cValue;
-            FAIL_RETURN(ConvertBack(getRst, (IInterface**)&cValue));
+            FAIL_RETURN(ConvertBack(IFloat::Probe(getRst), (IInterface**)&cValue));
             kf->SetValue(cValue);
         }
         else{
@@ -815,12 +815,12 @@ ECode PropertyValuesHolder::SetupValue(
             kf->SetValue(cValue);
         }
         else if (carType == CarDataType_Interface) {
-            AutoPtr<IDouble> getRst;
+            AutoPtr<IInterface> getRst;
             arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
             FAIL_RETURN(mGetter->Invoke(target, arg));
 
             AutoPtr<IInterface> cValue;
-            FAIL_RETURN(ConvertBack(getRst, (IInterface**)&cValue));
+            FAIL_RETURN(ConvertBack(IDouble::Probe(getRst), (IInterface**)&cValue));
             kf->SetValue(cValue);
         }
         else{

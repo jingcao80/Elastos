@@ -338,7 +338,7 @@ ECode PlatLogoActivity::OnAttachedToWindow()
     stick->SetAlpha(0.f);
 
     AutoPtr<IView> im;
-    CImageView::New(this, (IImageView**)&im);
+    CImageView::New(this, (IView**)&im);
     AutoPtr<IImageView> imageview = IImageView::Probe(im);
     im->SetTranslationZ(20);
     im->SetScaleX(0);

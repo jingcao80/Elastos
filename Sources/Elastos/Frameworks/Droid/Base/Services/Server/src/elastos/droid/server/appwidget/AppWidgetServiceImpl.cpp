@@ -2336,7 +2336,7 @@ void AppWidgetServiceImpl::BackupRestoreController::StashProviderRestoreUpdateLo
 
     AutoPtr<IInterface> valueTmp;
     mUpdatesByProvider->Get(TO_IINTERFACE(provider), (IInterface**)&valueTmp);
-    IList* r = IList::Probe(valueTmp);
+    AutoPtr<IList> r = IList::Probe(valueTmp);
 
     if (r == NULL) {
         CArrayList::New((IList**)&r);
@@ -2411,7 +2411,7 @@ void AppWidgetServiceImpl::BackupRestoreController::StashHostRestoreUpdateLocked
 
     AutoPtr<IInterface> valueTmp;
     mUpdatesByHost->Get(TO_IINTERFACE(host), (IInterface**)&valueTmp);
-    IList* r = IList::Probe(valueTmp);
+    AutoPtr<IList> r = IList::Probe(valueTmp);
     if (r == NULL) {
         CArrayList::New((IList**)&r);
         mUpdatesByHost->Put(TO_IINTERFACE(host), TO_IINTERFACE(r));

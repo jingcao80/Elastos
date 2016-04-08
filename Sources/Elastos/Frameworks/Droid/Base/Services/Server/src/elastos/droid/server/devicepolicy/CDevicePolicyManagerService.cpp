@@ -2478,11 +2478,10 @@ ECode CDevicePolicyManagerService::GetCrossProfileWidgetProviders(
         Boolean isEmpty;
         activeAdmin->mCrossProfileWidgetProviders->IsEmpty(&isEmpty);
         if (activeAdmin->mCrossProfileWidgetProviders == NULL || isEmpty) {
-            *result = NULL;
             return NOERROR;
         }
         if (Binder::GetCallingUid() == Process::MyUid()) {
-            return CArrayList::New(ICollection::Probe(activeAdmin->mCrossProfileWidgetProviders), (IList**)&result);
+            return CArrayList::New(ICollection::Probe(activeAdmin->mCrossProfileWidgetProviders), result);
         } else {
             *result = activeAdmin->mCrossProfileWidgetProviders;
             REFCOUNT_ADD(*result)

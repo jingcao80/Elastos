@@ -315,10 +315,10 @@ ECode Socket::GetReceiveBufferSize(
     AutoLock lock(this);
 
     FAIL_RETURN(CheckOpenAndCreate(TRUE));
-    AutoPtr<IInteger32> optVal;
+    AutoPtr<IInterface> optVal;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     FAIL_RETURN(option->GetOption(ISocketOptions::_SO_RCVBUF, (IInterface**)&optVal));
-    return optVal->GetValue(size);
+    return IInteger32::Probe(optVal)->GetValue(size);
 }
 
 ECode Socket::GetSendBufferSize(
@@ -329,10 +329,10 @@ ECode Socket::GetSendBufferSize(
     AutoLock lock(this);
 
     FAIL_RETURN(CheckOpenAndCreate(TRUE));
-    AutoPtr<IInteger32> optVal;
+    AutoPtr<IInterface> optVal;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     FAIL_RETURN(option->GetOption(ISocketOptions::_SO_SNDBUF, (IInterface**)&optVal));
-    return optVal->GetValue(size);
+    return IInteger32::Probe(optVal)->GetValue(size);
 }
 
 ECode Socket::GetSoTimeout(
@@ -343,10 +343,10 @@ ECode Socket::GetSoTimeout(
     AutoLock lock(this);
 
     FAIL_RETURN(CheckOpenAndCreate(TRUE));
-    AutoPtr<IInteger32> optVal;
+    AutoPtr<IInterface> optVal;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     FAIL_RETURN(option->GetOption(ISocketOptions::_SO_TIMEOUT, (IInterface**)&optVal));
-    return optVal->GetValue(timeout);
+    return IInteger32::Probe(optVal)->GetValue(timeout);
 }
 
 ECode Socket::GetTcpNoDelay(
@@ -843,10 +843,10 @@ ECode Socket::GetReuseAddress(
     VALIDATE_NOT_NULL(reuse);
 
     FAIL_RETURN(CheckOpenAndCreate(TRUE));
-    AutoPtr<IBoolean> optVal;
+    AutoPtr<IInterface> optVal;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     FAIL_RETURN(option->GetOption(ISocketOptions::_SO_REUSEADDR, (IInterface**)&optVal));
-    return optVal->GetValue(reuse);
+    return IBoolean::Probe(optVal)->GetValue(reuse);
 }
 
 ECode Socket::SetOOBInline(
@@ -865,10 +865,10 @@ ECode Socket::GetOOBInline(
     VALIDATE_NOT_NULL(oobinline);
 
     FAIL_RETURN(CheckOpenAndCreate(TRUE));
-    AutoPtr<IBoolean> optVal;
+    AutoPtr<IInterface> optVal;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     FAIL_RETURN(option->GetOption(ISocketOptions::_SO_OOBINLINE, (IInterface**)&optVal));
-    return optVal->GetValue(oobinline);
+    return IBoolean::Probe(optVal)->GetValue(oobinline);
 }
 
 ECode Socket::SetTrafficClass(
@@ -889,10 +889,10 @@ ECode Socket::GetTrafficClass(
     /* [out] */ Int32* value)
 {
     FAIL_RETURN(CheckOpenAndCreate(TRUE));
-    AutoPtr<IInteger32> optVal;
+    AutoPtr<IInterface> optVal;
     ISocketOptions* option = (ISocketOptions*)mImpl->Probe(EIID_ISocketOptions);
     FAIL_RETURN(option->GetOption(ISocketOptions::_IP_TOS, (IInterface**)&optVal));
-    return optVal->GetValue(value);
+    return IInteger32::Probe(optVal)->GetValue(value);
 }
 
 ECode Socket::SendUrgentData(

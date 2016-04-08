@@ -422,7 +422,7 @@ ECode RequestQueue::QueueRequest(
     /* [in] */ IWebAddress* uri,
     /* [in] */ const String& method,
     /* [in] */ IMap* headers,
-    /* [in] */ IEventHandler* eventHandler,
+    /* [in] */ IEventHandler* inEventHandler,
     /* [in] */ IInputStream* bodyProvider,
     /* [in] */ Int32 bodyLength,
     /* [out] */ IRequestHandle** result)
@@ -435,6 +435,7 @@ ECode RequestQueue::QueueRequest(
     }
 
     // Ensure there is an eventHandler set
+    AutoPtr<IEventHandler> eventHandler = inEventHandler;
     if (eventHandler == NULL) {
         CLoggingEventHandler::New((IEventHandler**)&eventHandler);
     }

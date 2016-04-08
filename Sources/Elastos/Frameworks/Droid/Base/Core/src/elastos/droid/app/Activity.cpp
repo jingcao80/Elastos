@@ -3703,7 +3703,7 @@ ECode Activity::GetActivityOptions(
     VALIDATE_NOT_NULL(options)
     // try {
     AutoPtr<IIActivityManager> defaultAM = ActivityManagerNative::GetDefault();
-    return defaultAM->GetActivityOptions(mToken, (IActivityOptions**)&options);
+    return defaultAM->GetActivityOptions(mToken, options);
     // } catch (RemoteException e) {
     // }
 }

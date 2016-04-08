@@ -148,10 +148,10 @@ ECode CDeviceAdminReceiver::OnReceive(
         OnEnabled(context, intent);
     }
     else if (IDeviceAdminReceiver::ACTION_DEVICE_ADMIN_DISABLE_REQUESTED.Equals(action)) {
-        AutoPtr < ICharSequence > res;
+        AutoPtr<ICharSequence> res;
         OnDisableRequested(context, intent, (ICharSequence**)&res);
         if (res != NULL) {
-            AutoPtr < IBundle > extras;
+            AutoPtr<IBundle> extras;
             GetResultExtras(TRUE, (IBundle**)&extras);
             extras->PutCharSequence(IDeviceAdminReceiver::EXTRA_DISABLE_WARNING, res);
         }

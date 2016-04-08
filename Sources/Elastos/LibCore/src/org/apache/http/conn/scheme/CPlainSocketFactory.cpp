@@ -44,7 +44,7 @@ ECode CPlainSocketFactory::CreateSocket(
 }
 
 ECode CPlainSocketFactory::ConnectSocket(
-    /* [in] */ ISocket* sock,
+    /* [in] */ ISocket* insock,
     /* [in] */ const String& host,
     /* [in] */ Int32 port,
     /* [in] */ IInetAddress* localAddress,
@@ -64,6 +64,7 @@ ECode CPlainSocketFactory::ConnectSocket(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
+    AutoPtr<ISocket> sock = insock;
     if (sock == NULL) {
         CreateSocket((ISocket**)&sock);
     }

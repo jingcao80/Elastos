@@ -63,7 +63,7 @@ private:
             /* [in] */ Boolean handled);
 
     private:
-        AutoPtr<ISparseArray/*<InputEvent>*/> mPendingEvents/* = new SparseArray<InputEvent>()*/;
+        AutoPtr<ISparseArray> mPendingEvents/* = new SparseArray<InputEvent>()*/;
         CIInputMethodSessionWrapper* mHost;
     };
 

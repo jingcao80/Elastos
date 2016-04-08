@@ -1960,12 +1960,12 @@ ECode CAppOpsService::WriteState()
                 FAIL_GOTO(out->WriteAttribute(nullStr, String("n"), StringUtils::ToString(uid)), _ERROR_)
 
                 synchronized(this) {
-                    AutoPtr<Ops> ops = GetOpsLocked(uid, pkgName, FALSE);
+                    AutoPtr<Ops> op = GetOpsLocked(uid, pkgName, FALSE);
                     // Should always be present as the list of PackageOps is generated
                     // from Ops.
-                    if (ops != NULL) {
+                    if (op != NULL) {
                         FAIL_GOTO(out->WriteAttribute(nullStr, String("p"),
-                            StringUtils::BooleanToString(ops->mIsPrivileged)), _ERROR_)
+                            StringUtils::BooleanToString(op->mIsPrivileged)), _ERROR_)
 
                     }
                     else {

@@ -547,14 +547,14 @@ ECode DialerFilter::SetFilterWatcher(
 ECode DialerFilter::RemoveFilterWatcher(
     /* [in] */  ITextWatcher* watcher)
 {
-    AutoPtr<ISpannable> text;
+    AutoPtr<ICharSequence> text;
     if(mMode != DIGITS_ONLY) {
         ITextView::Probe(mLetters)->GetText((ICharSequence**)&text);
     }
     else {
         ITextView::Probe(mDigits)->GetText((ICharSequence**)&text);
     }
-    text->RemoveSpan(watcher);
+    ISpannable::Probe(text)->RemoveSpan(watcher);
     return NOERROR;
 }
 

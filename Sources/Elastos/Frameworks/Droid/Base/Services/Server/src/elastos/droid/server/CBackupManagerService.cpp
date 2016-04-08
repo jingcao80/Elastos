@@ -1616,8 +1616,9 @@ AutoPtr<IOutputStream> CBackupManagerService::PerformFullBackupTask::EmitAesBack
  *
  *    // primary encryption of the datastream with the random key
  *    Cipher c = Cipher->GetInstance("AES/CBC/PKCS5Padding");
- *    AutoPtr<SecretKeySpec> masterKeySpec;
- *    CSecretKeySpec::New(masterPw, "AES", (ISecretKeySpec**)&masterKeySpec);
+ *    AutoPtr<ISecretKeySpec> specObj;
+ *    CSecretKeySpec::New(masterPw, "AES", (ISecretKeySpec**)&specObj);
+      masterKeySpec = (SecretKeySpec*)IXX::Probe(specObj);
  *    c->Init(Cipher.ENCRYPT_MODE, masterKeySpec);
  *
  *    OutputStream finalOutput = new CipherOutputStream(ofstream, c);
@@ -2383,7 +2384,7 @@ AutoPtr<IInputStream> CBackupManagerService::PerformFullRestoreTask::DecodeAesHe
  *            c->Init(Cipher.DECRYPT_MODE, new SecretKeySpec(mk, "AES"), ivSpec);
  *             Only if all of the above worked properly will 'result' be assigned
  *             result = new CipherInputStream(rawInStream, c);
- *            CCipherInputStream::New(rawInStream, c, (ICipherInputStream**)&result);
+ *            CCipherInputStream::New(rawInStream, c, (IInputStream**)&result);
  *
  *        }
  *        else Slogger::W(TAG, "Incorrect password");

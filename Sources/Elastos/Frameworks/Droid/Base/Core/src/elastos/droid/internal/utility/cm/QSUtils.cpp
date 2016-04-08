@@ -229,7 +229,7 @@ void QSUtils::FilterTiles(
     tiles->GetIterator((IIterator**)&iterator);
     Boolean b;
     while (iterator->HasNext(&b), b) {
-        AutoPtr<IObject> obj;
+        AutoPtr<IInterface> obj;
         iterator->GetNext((IInterface**)&obj);
         String tileKey;
         ICharSequence::Probe(obj)->ToString(&tileKey);

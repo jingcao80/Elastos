@@ -1805,8 +1805,9 @@ void CInputManagerService::DeliverInputDevicesChanged(
         AutoPtr<IInputDevice> keyboardMissingLayout;
         synchronized (mDataStore) {
             for (int i = 0; i < numFullKeyboards; i++) {
-                AutoPtr<IInputDevice> inputDevice;
-                mTempFullKeyboards->Get(i, (IInterface**)&inputDevice);
+                AutoPtr<IInterface> obj;
+                mTempFullKeyboards->Get(i, (IInterface**)&obj);
+                IInputDevice* inputDevice = IInputDevice::Probe(obj);
                 AutoPtr<IInputDeviceIdentifier> identifier;
                 inputDevice->GetIdentifier((IInputDeviceIdentifier**)&identifier);
                 String layout;

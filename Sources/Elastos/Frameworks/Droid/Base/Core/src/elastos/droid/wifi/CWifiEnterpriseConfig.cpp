@@ -685,19 +685,21 @@ ECode CWifiEnterpriseConfig::GetKeyId(
     if (TextUtils::IsEmpty((eap))) {
         AutoPtr<IHashMap> fields;
         current->GetFields((IHashMap**)&fields);
-        AutoPtr<ICharSequence> key, value;
+        AutoPtr<ICharSequence> key;
         CString::New(EAP_KEY, (ICharSequence**)&key);
+        AutoPtr<IInterface> value;
         fields->Get(key, (IInterface**)&value);
-        value->ToString(&eap);
+        ICharSequence::Probe(value)->ToString(&eap);
     }
 
     if (TextUtils::IsEmpty(phase2)) {
         AutoPtr<IHashMap> fields;
         current->GetFields((IHashMap**)&fields);
-        AutoPtr<ICharSequence> key, value;
+        AutoPtr<ICharSequence> key;
         CString::New(PHASE2_KEY, (ICharSequence**)&key);
+        AutoPtr<IInterface> value;
         fields->Get(key, (IInterface**)&value);
-        value->ToString(&eap);
+        ICharSequence::Probe(value)->ToString(&eap);
     }
 
     *keyId = eap;
@@ -721,8 +723,9 @@ ECode CWifiEnterpriseConfig::ToString(
     Boolean bNext;
     iter->HasNext(&bNext);
     for (; bNext; iter->HasNext(&bNext)) {
-        AutoPtr<ICharSequence> iKey;
-        iter->GetNext((IInterface**)&iKey);
+        AutoPtr<IInterface> iKeyObj;
+        iter->GetNext((IInterface**)&iKeyObj);
+        ICharSequence* iKey = ICharSequence::Probe(iKeyObj);
         String key;
         iKey->ToString(&key);
         sb.Append(key);

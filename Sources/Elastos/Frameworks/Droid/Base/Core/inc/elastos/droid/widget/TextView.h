@@ -3310,7 +3310,7 @@ private:
     Int32 mDeferScroll;// = -1;
 
     // tmp primitives, so we don't alloc them on each draw
-    AutoPtr<IRect>mTempRect;
+    AutoPtr<IRect> mTempRect;
     Int64 mLastScroll;
     AutoPtr<IScroller> mScroller;
 

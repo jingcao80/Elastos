@@ -386,7 +386,7 @@ private:
 
     AutoPtr<ICloseGuard> mCloseGuard;
 
-    AutoPtr<IList/*<IPdfDocumentPageInfo*>*/> mPages;
+    AutoPtr<IList> mPages;/*List<IPdfDocumentPageInfo*>*/
 
     Int64 mNativeDocument;
 

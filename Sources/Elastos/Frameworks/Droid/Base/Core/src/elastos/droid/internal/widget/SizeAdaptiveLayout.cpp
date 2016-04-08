@@ -547,9 +547,8 @@ AutoPtr<IViewGroupLayoutParams> SizeAdaptiveLayout::GenerateDefaultLayoutParams(
     if (DEBUG) Slogger::D(TAG, "generate default layout from NULL");
 
     AutoPtr<IViewGroupLayoutParams> lp;
-    CSizeAdaptiveLayoutLayoutParams::New((ISizeAdaptiveLayoutLayoutParams**)&lp);
-    AutoPtr<IViewGroupLayoutParams> vglp = IViewGroupLayoutParams::Probe(lp);
-    return vglp;
+    CSizeAdaptiveLayoutLayoutParams::New((IViewGroupLayoutParams**)&lp);
+    return lp;
 }
 
 Boolean SizeAdaptiveLayout::CheckLayoutParams(

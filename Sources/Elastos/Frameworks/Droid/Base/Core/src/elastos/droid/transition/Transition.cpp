@@ -1931,9 +1931,10 @@ Transition::AnimationInfo::AnimationInfo(
 //===============================================================
 
 AutoPtr<IArrayList> Transition::ArrayListManager::Add(
-    /* [in] */ IArrayList* list,
+    /* [in] */ IArrayList* inList,
     /* [in] */ IInterface* item)
 {
+    AutoPtr<IArrayList> list = inList;
     if (list == NULL) {
         CArrayList::New((IArrayList**)&list);
     }
@@ -1945,9 +1946,10 @@ AutoPtr<IArrayList> Transition::ArrayListManager::Add(
 }
 
 AutoPtr<IArrayList> Transition::ArrayListManager::Remove(
-    /* [in] */ IArrayList* list,
+    /* [in] */ IArrayList* inList,
     /* [in] */ IInterface* item)
 {
+    AutoPtr<IArrayList> list = inList;
     if (list != NULL) {
         list->Remove(item);
         Boolean bIsEmpty = FALSE;

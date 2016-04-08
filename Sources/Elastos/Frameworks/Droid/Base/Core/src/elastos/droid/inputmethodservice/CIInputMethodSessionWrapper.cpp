@@ -28,7 +28,9 @@ namespace Elastos {
 namespace Droid {
 namespace InputMethodService {
 
-CAR_INTERFACE_IMPL(CIInputMethodSessionWrapper::ImeInputEventReceiver, InputEventReceiver, ILocalInputMethodSessionEventCallback);
+CAR_INTERFACE_IMPL(CIInputMethodSessionWrapper::ImeInputEventReceiver, \
+    InputEventReceiver, ILocalInputMethodSessionEventCallback)
+
 CIInputMethodSessionWrapper::ImeInputEventReceiver::ImeInputEventReceiver(
     /* [in] */ IInputChannel* inputChannel,
     /* [in] */ ILooper* looper,

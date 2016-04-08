@@ -567,13 +567,13 @@ ECode Toast::SetText(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    AutoPtr<ITextView> tv;
+    AutoPtr<IView> tv;
     mNextView->FindViewById(R::id::message, (IView**)&tv);
 
     if (tv == NULL) {
         return E_ILLEGAL_STATE_EXCEPTION;
     }
-    return tv->SetText(s);
+    return ITextView::Probe(tv)->SetText(s);
 }
 
 AutoPtr<IINotificationManager> Toast::GetService()

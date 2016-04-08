@@ -296,7 +296,7 @@ ECode CameraDeviceImpl::FrameNumberTracker::Update()
 
     Boolean result;
     while (iter->HasNext(&result), result) {
-        AutoPtr<IIterator> obj;
+        AutoPtr<IInterface> obj;
         iter->GetNext((IInterface**)&obj);
         AutoPtr<IInteger64> errorFrameNumberObj = IInteger64::Probe(obj);
         Int64 errorFrameNumber;
@@ -1215,13 +1215,14 @@ ECode CameraDeviceImpl::ConfigureOutputs(
 }
 
 ECode CameraDeviceImpl::ConfigureOutputsChecked(
-    /* [in] */ IList* outputs,
+    /* [in] */ IList* inOutputs,
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value)
     *value = FALSE;
 
     // Treat a null input the same an empty list
+    AutoPtr<IList> outputs = inOutputs;
     if (outputs == NULL) {
         CArrayList::New((IList**)&outputs);
     }

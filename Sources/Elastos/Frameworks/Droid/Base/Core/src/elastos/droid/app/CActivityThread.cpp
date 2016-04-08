@@ -2800,15 +2800,16 @@ ECode CActivityThread::HandleReceiver(
             comp.string(), dir.string());
     }
 
-    AutoPtr<IContextImpl> context;
+    AutoPtr<IContext> context;
     IContextWrapper::Probe(app)->GetBaseContext((IContext**)&context);
+    CContextImpl* ctx = (CContextImpl*)IContextImpl::Probe(context);
 
     pthread_setspecific(sCurrentBroadcastIntentKey, data->mIntent.Get());
     REFCOUNT_ADD(data->mIntent);
 
     receiver->SetPendingResult((IPendingResult*)data);
     AutoPtr<IContext> ic;
-    ((CContextImpl*)context.Get())->GetReceiverRestrictedContext((IContext**)&ic);
+    ctx->GetReceiverRestrictedContext((IContext**)&ic);
     ec = receiver->OnReceive(ic, data->mIntent);
     if (FAILED(ec)) {
         String comp;

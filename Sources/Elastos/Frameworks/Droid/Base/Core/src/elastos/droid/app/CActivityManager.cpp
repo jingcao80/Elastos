@@ -346,7 +346,7 @@ ECode CActivityManager::EnsureAppTaskThumbnailSizeLocked()
 ECode CActivityManager::AddAppTask(
     /* [in] */ IActivity* activity,
     /* [in] */ IIntent* intent,
-    /* [in] */ IActivityManagerTaskDescription* description,
+    /* [in] */ IActivityManagerTaskDescription* inDescription,
     /* [in] */ IBitmap* thumbnail,
     /* [out] */ Int32* value)
 {
@@ -396,6 +396,7 @@ ECode CActivityManager::AddAppTask(
 
         thumbnail = bm;
     }
+    AutoPtr<IActivityManagerTaskDescription> description = inDescription;
     if (description == NULL) {
         CActivityManagerTaskDescription::New((IActivityManagerTaskDescription**)&description);
     }

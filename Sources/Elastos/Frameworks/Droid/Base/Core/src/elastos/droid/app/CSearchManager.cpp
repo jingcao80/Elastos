@@ -376,7 +376,7 @@ void CSearchManager::EnsureSearchDialog()
 void CSearchManager::StartGlobalSearch(
     /* [in] */ const String& initialQuery,
     /* [in] */ Boolean selectInitialQuery,
-    /* [in] */ IBundle* appSearchData,
+    /* [in] */ IBundle* inAppSearchData,
     /* [in] */ IRect* sourceBounds)
 {
     AutoPtr<IComponentName> globalSearchActivity;
@@ -385,6 +385,7 @@ void CSearchManager::StartGlobalSearch(
         //Log.w(TAG, "No global search activity found.");
         return;
     }
+    AutoPtr<IBundle> appSearchData = inAppSearchData;
     AutoPtr<IIntent> intent;
     CIntent::New(ISearchManager::INTENT_ACTION_GLOBAL_SEARCH, (IIntent**)&intent);
     intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);

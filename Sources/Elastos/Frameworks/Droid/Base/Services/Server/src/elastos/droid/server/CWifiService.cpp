@@ -1635,7 +1635,7 @@ ECode CWifiService::AcquireWifiLock(
     /* [in] */ IBinder* binder,
     /* [in] */ Int32 lockMode,
     /* [in] */ const String& tag,
-    /* [in] */ IWorkSource* ws,
+    /* [in] */ IWorkSource* inWs,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -1654,6 +1654,8 @@ ECode CWifiService::AcquireWifiLock(
         *result = FALSE;
         return NOERROR;
     }
+
+    AutoPtr<IWorkSource> ws = inWs;
     Int32 size;
     if (ws != NULL && (ws->GetSize(&size), size == 0)) {
         ws = NULL;
@@ -1662,7 +1664,7 @@ ECode CWifiService::AcquireWifiLock(
         FAIL_RETURN(EnforceWakeSourcePermission(Binder::GetCallingUid(), Binder::GetCallingPid()));
     }
     if (ws == NULL) {
-        CWorkSource::New(Binder::GetCallingUid(), (IWorkSource**)&ws);
+        CWorkSource::New(Binder::GetCallingUid(), ws);
     }
     AutoPtr<WifiLock> wifiLock = new WifiLock(lockMode, tag, binder, ws, this);
     {

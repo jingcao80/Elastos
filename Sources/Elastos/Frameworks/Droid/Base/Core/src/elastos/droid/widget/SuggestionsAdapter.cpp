@@ -595,12 +595,11 @@ AutoPtr<IDrawable> _SuggestionsAdapter::GetDrawable(
     /* [in] */ IUri* uri)
 {
     // try {
-
     String scheme;
     uri->GetScheme(&scheme);
     if (IContentResolver::SCHEME_ANDROID_RESOURCE.Equals(scheme)) {
         // Load drawables through Resources, to get the source density information
-        AutoPtr<IContentResolver>cr;
+        AutoPtr<IContentResolver> cr;
         mProviderContext->GetContentResolver((IContentResolver**)&cr);
         AutoPtr<IContentResolverOpenResourceIdResult> r;
         cr->GetResourceId(uri, (IContentResolverOpenResourceIdResult**)&r);
@@ -618,7 +617,7 @@ AutoPtr<IDrawable> _SuggestionsAdapter::GetDrawable(
     } else {
         // Let the ContentResolver handle content and file URIs.
         AutoPtr<IInputStream> stream;
-        AutoPtr<IContentResolver>cr;
+        AutoPtr<IContentResolver> cr;
         mProviderContext->GetContentResolver((IContentResolver**)&cr);
         if(FAILED(cr->OpenInputStream(uri, (IInputStream**)&stream)))
         {

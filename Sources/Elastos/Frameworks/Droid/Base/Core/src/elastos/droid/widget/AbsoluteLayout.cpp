@@ -217,13 +217,9 @@ ECode AbsoluteLayout::GenerateLayoutParams(
     /* [out] */ IViewGroupLayoutParams** params)
 {
     VALIDATE_NOT_NULL(params);
-    AutoPtr<IAbsoluteLayoutLayoutParams> lp;
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    FAIL_RETURN(CAbsoluteLayoutLayoutParams::New(context, attrs, (IAbsoluteLayoutLayoutParams**)&lp));
-    *params = IViewGroupLayoutParams::Probe(lp);
-    REFCOUNT_ADD(*params);
-    return NOERROR;
+    return CAbsoluteLayoutLayoutParams::New(context, attrs, params);
 }
 
 // Override to allow type-checking of LayoutParams.
@@ -237,7 +233,7 @@ AutoPtr<IViewGroupLayoutParams> AbsoluteLayout::GenerateLayoutParams(
     /* [in] */ IViewGroupLayoutParams* p)
 {
     AutoPtr<IViewGroupLayoutParams> lp;
-    CAbsoluteLayoutLayoutParams::New(p, (IAbsoluteLayoutLayoutParams**)&lp);
+    CAbsoluteLayoutLayoutParams::New(p, (IViewGroupLayoutParams**)&lp);
     return lp;
 }
 

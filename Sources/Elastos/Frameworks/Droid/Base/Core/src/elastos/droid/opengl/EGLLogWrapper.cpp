@@ -650,7 +650,7 @@ ECode EGLLogWrapper::Arg(
     /* [in] */ XIEGLDisplay* obj)
 {
     IInterface* src = (IInterface*)obj->Probe(EIID_IInterface);
-    IEGL10Helper* helper;
+    AutoPtr<IEGL10Helper> helper;
     CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
     AutoPtr<IInterface> tempDe;
     helper->GetDefaultDisplay((IInterface**)&tempDe);
@@ -675,7 +675,7 @@ ECode EGLLogWrapper::Arg(
     /* [in] */ const String& name,
     /* [in] */ XIEGLContext* obj)
 {
-    IEGL10Helper* helper;
+    AutoPtr<IEGL10Helper> helper;
     CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
 
     AutoPtr<XIEGLContext> temp;
@@ -697,7 +697,7 @@ ECode EGLLogWrapper::Arg(
     /* [in] */ const String& name,
     /* [in] */ XIEGLSurface* obj)
 {
-    IEGL10Helper* helper;
+    AutoPtr<IEGL10Helper> helper;
     CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
 
     AutoPtr<XIEGLSurface> temp;

@@ -782,13 +782,14 @@ AutoPtr<ICharSequence> CFormatter::TransformFromPercent()
 }
 
 AutoPtr<ICharSequence> CFormatter::Padding(
-    /* [in] */ ICharSequence* source,
+    /* [in] */ ICharSequence* inSource,
     /* [in] */ Int32 startIndex)
 {
     Int32 start = startIndex;
     Int32 width = mFormatToken->GetWidth();
     Int32 precision = mFormatToken->GetPrecision();
 
+    AutoPtr<ICharSequence> source = inSource;
     Int32 length = 0;
     source->GetLength(&length);
     if (precision >= 0) {
@@ -797,7 +798,8 @@ AutoPtr<ICharSequence> CFormatter::Padding(
             IStringBuilder::Probe(source)->SetLength(length);
         }
         else {
-            source->SubSequence(0, length, (ICharSequence**)&source);
+            source = NULL;
+            inSource->SubSequence(0, length, (ICharSequence**)&source);
         }
     }
     if (width > 0) {

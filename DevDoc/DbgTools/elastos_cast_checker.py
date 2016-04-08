@@ -18,78 +18,86 @@ def read_file(path):
             handle.close()
     return lines
 
-def find_declare_line(usedType, param, lines, lineIndex):
+def find_declare_match(param, line):
+    pattern = re.compile(r'AutoPtr\s*<(.*)>\s*(.*)'+'[, ]'+param+'[; ,]')
+    return pattern.search(line)
+
+
+def check_declare_match(usedType, param, declLine):
+    pattern = re.compile(r'AutoPtr\s*<\s*'+usedType+'\s*>\s*(.*)'+'[, ]'+param+'[; ,]')
+    return pattern.search(declLine)
+
+
+def find_declare_line(param, lines, lineIndex):
     if len(lines) == 0:
         return -1
 
     for i in range(lineIndex, 0, -1):
-        eachLine = lines[i]
-        if (len(eachLine) > 1) and (eachLine.startswith("//") == False):
-            pattern = re.compile(r'AutoPtr<'+usedType+'>\s*(.*)'+param+'[; ,]')
-            match = pattern.search(eachLine)
-            if match == None:
-                pattern = re.compile(r''+usedType+'\s*\*(.*)'+param+'[; ,]')
-                match = pattern.search(eachLine)
+        line = lines[i]
+        if (len(line) > 1) and (line.startswith("//") == False):
+            match = find_declare_match(param, line)
             if match:
-                #print eachLine, 'match', match.group()
-                return i;
-
-    for i in range(lineIndex, 0, -1):
-        eachLine = lines[i]
-        if (len(eachLine) > 1) and (eachLine.startswith("//") == False):
-            pattern = re.compile(r'[>]\s\s*'+param+'[; ,]')
-            match = pattern.search(eachLine)
-            if match == None:
-                pattern = re.compile(r'[,*]\s*'+param+'[; ,]')
-                match = pattern.search(eachLine)
-            if match == None:
-                pattern = re.compile(r'[,*]'+param+'[; ,]')
-                match = pattern.search(eachLine)
-            if match:
-                #print eachLine, 'match', match.group()
+                #print line, 'match', match.group()
                 return i;
     return -1
 
-def process_declare_line_in_header(filepath, logFile, firstLog, match, lines, lineNum):
-    headerFilepath = filepath.replace("/src/", "/inc/").replace(".cpp", ".h")
-    headerLines = read_file(headerFilepath)
 
-    usedType = match.group(2)
-    paramName = match.group(4)
-    matchInfo = match.group()
-    declLineNum = find_declare_line(usedType, paramName, headerLines, len(headerLines)-1)
-    if (declLineNum != -1):
-        declLine = headerLines[declLineNum]
+def check_match(firstLog, logFile, cppFilepath, usedMatch, usedLineNum, declLine, declLineNum, isHeader = True):
+    usedType = usedMatch.group(2)
+    param = usedMatch.group(4)
+    matchInfo = usedMatch.group()
 
-        pattern = re.compile(r'AutoPtr<'+usedType+'>\s*(.*)'+paramName+'[; ,]')
-        match = pattern.search(declLine)
-        if match == None:
-            pattern = re.compile(r''+usedType+'\s*\*(.*)'+paramName+'[; ,]')
-            match = pattern.search(declLine)
-
-        if match == None:
-            if firstLog:
-                firstLog = False
-                logInfo ='\n>> process file: ' + filepath + '\n'
-                logFile.write(logInfo)
-                print logInfo
-            logInfo = "   > error: invalid using of {0} at line {1:d}, it is declared as {2} in .h file at line {3:d}.\n".format(matchInfo, lineNum + 1, declLine, declLineNum + 1)
-            logFile.write(logInfo)
-            print logInfo
-        else:
-            #print 'match ', matchInfo, declLine
-            return
-    else:
+    match = check_declare_match(usedType, param, declLine)
+    if match == None:
         if firstLog:
             firstLog = False
-            logInfo ='\n>> process file: ' + filepath + '\n'
+            logInfo ='\n>> process file: ' + cppFilepath + '\n'
             logFile.write(logInfo)
             print logInfo
-        logInfo = "   = warning: declaration for {0} at line {1:d} not found!\n".format(matchInfo, lineNum + 1)
+
+        fileInfo = ''
+        if isHeader:
+            fileInfo = 'in .h file'
+        logInfo = "   > error: invalid using of {0} at line {1:d}, it is declared as {2} '{3}' at line {4:d}.\n" \
+            .format(matchInfo, usedLineNum + 1, declLine, fileInfo, declLineNum + 1)
         logFile.write(logInfo)
         print logInfo
+    else:
+        #print 'match ', matchInfo, declLine
+        return firstLog
+
+
+def process_declare_line_in_header(logFile, firstLog, cppFilepath, match, lines, lineNum, headerFilepath):
+    headerLines = read_file(headerFilepath)
+    param = match.group(4)
+    matchInfo = match.group()
+
+    declLineNum = find_declare_line(param, headerLines, len(headerLines)-1)
+    if (declLineNum != -1):
+        declLine = headerLines[declLineNum]
+        #print 'declLine', declLine
+        firstLog = check_match(firstLog, logFile, cppFilepath, match, lineNum, declLine, declLineNum)
+    else:
+        logInfo = ''
+        if firstLog:
+            firstLog = False
+            logInfo ='\n>> process file: ' + cppFilepath + '\n'
+            logFile.write(logInfo)
+            print logInfo
+
+        if param.startswith('m'):
+            logInfo = "   = warning: declaration for {0} at line {1:d} not found! is it declared in super class's .h file?\n".format(matchInfo, lineNum + 1)
+        else:
+            logInfo = "   = warning: declaration for {0} at line {1:d} not found!\n".format(matchInfo, lineNum + 1)
+        logFile.write(logInfo)
+        print logInfo
+    return firstLog
+
 
 def process_file(path, logFile):
+    if path.endswith('.cpp') == False:
+        return
+
     firstLog = True;
     lines = read_file(path)
     lineNum = 0
@@ -101,39 +109,22 @@ def process_file(path, logFile):
                 #print match.group() match.groups()
                 #print match.group(2), match.group(4)
                 usedType = match.group(2)
-                paramName = match.group(4)
-                matchInfo = match.group()
+                param = match.group(4)
 
                 # do not check weak-reference Resolve
                 if usedType == 'IInterface' and eachLine.find('->Resolve(') != -1:
                     pass
                 else:
-                    declLineNum = find_declare_line(usedType, paramName, lines, lineNum)
+                    declLineNum = find_declare_line(param, lines, lineNum)
                     if (declLineNum != -1):
                         declLine = lines[declLineNum]
                         #print 'declLine', declLine
-
-                        pattern = re.compile(r'AutoPtr<'+usedType+'>\s*(.*)'+paramName+'[; ,]')
-                        match = pattern.search(declLine)
-                        if match == None:
-                            pattern = re.compile(r''+usedType+'\s*\*(.*)'+paramName+'[; ,]')
-                            match = pattern.search(declLine)
-
-                        if match == None:
-                            if firstLog:
-                                firstLog = False
-                                logInfo ='\n>> process file: ' + path + '\n'
-                                logFile.write(logInfo)
-                                print logInfo
-                            logInfo = "   > error: invalid using of {0} at line {1:d}, it is declared as {2} at line {3:d}.\n".format(matchInfo, lineNum + 1, declLine, declLineNum + 1)
-                            logFile.write(logInfo)
-                            print logInfo
-                        else:
-                            #print 'match ', matchInfo, declLine
-                            pass
+                        firstLog = check_match(firstLog, logFile, path, match, lineNum, declLine, declLineNum, False)
                     else:
-                        process_declare_line_in_header(path, logFile, firstLog, match, lines, lineNum)
+                        headerFilepath = path.replace("/src/", "/inc/").replace(".cpp", ".h")
+                        firstLog = process_declare_line_in_header(logFile, firstLog, path, match, lines, lineNum, headerFilepath)
         lineNum = lineNum +1
+
 
 def process_dir(path, logFile):
     listfile = os.listdir(path)
@@ -148,6 +139,27 @@ def process_dir(path, logFile):
         elif(os.path.isfile(filepath)):
             process_file(filepath, logFile)
 
+def summarize_log(logPath):
+    if(os.path.isfile(logPath)):
+        errorCount = 0
+        warningCount = 0
+
+        # summarize
+        logFile = open(logPath, 'r')
+        for line in logFile:
+            line = line.strip()
+            if line.startswith('> error:') == True:
+                errorCount = errorCount + 1
+            elif line.startswith('= warning:') == True:
+                warningCount = warningCount + 1
+        logFile.close()
+
+        # log
+        logFile = open(logPath, 'a')
+        logInfo = '\ntotal: {0:d} errors, {1:d} warnings.'.format(errorCount, warningCount)
+        logFile.write(logInfo)
+        print logInfo
+        logFile.close()
 
 def process(path, logPath):
     if(os.path.isfile(logPath)):
@@ -161,11 +173,14 @@ def process(path, logPath):
     else:
         print 'invalid path:', path
     logFile.close()
+    summarize_log(logPath)
 
 #process('/home/kesalin/test/python/test.cpp', 'elastos_cast_checker.log')
+
+#total: 2 errors, 10 warnings.
+#process('/home/kesalin/Elastos5/Sources/Elastos/LibCore/src', '/home/kesalin/elastos_cast_checker.log')
+
 #process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/', '/home/kesalin/elastos_cast_checker.log')
-process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/ims', '/home/kesalin/elastos_cast_checker.log')
 
-
-#todo
-# webkit
+#total: 7 errors, 0 warnings.
+process('/home/kesalin/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Services/Server/src', '/home/kesalin/elastos_cast_checker.log')

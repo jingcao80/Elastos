@@ -256,11 +256,12 @@ ECode Preference::GetWidgetLayoutResource(
 }
 
 ECode Preference::GetView(
-    /* [in] */ IView* convertView,
+    /* [in] */ IView* inConvertView,
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view)
+    AutoPtr<IView> convertView = inConvertView;
     if (convertView == NULL) {
         OnCreateView(parent, (IView**)&convertView);
     }
