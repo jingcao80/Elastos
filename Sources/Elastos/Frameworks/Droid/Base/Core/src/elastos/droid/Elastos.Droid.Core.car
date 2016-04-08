@@ -56,8 +56,6 @@ module
     merge("../../../car/elastos/droid/content.car"); //should after os.car and text.car
     }
 
-    //merge("../../../car/elastos/droid/inputmethods.car"); //should be removed
-
     submodule Elastos.Droid.View {
     merge("../../../car/elastos/droid/view.car");
     }
