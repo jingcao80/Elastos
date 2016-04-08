@@ -9,6 +9,7 @@
 
 using Elastos::Droid::Os::IMessageQueue;
 using Elastos::Droid::Os::ILooper;
+using Elastos::Core::ICloseGuard;
 using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
@@ -56,12 +57,6 @@ public:
     ECO_LOCAL CARAPI DispatchBatchedInputEventPending();
 
 private:
-    // public static interface Factory {
-    //     public InputEventReceiver createInputEventReceiver(
-    //             InputChannel inputChannel, Looper looper);
-    // }
-
-private:
     ECO_LOCAL static CARAPI NativeInit(
         /* [in] */ IWeakReference* receiver,
         /* [in] */ IInputChannel* inputChannel,
@@ -82,9 +77,8 @@ private:
         /* [out] */ Boolean* result);
 
 private:
-    ECO_LOCAL static const char* TAG;
 
-    //final CloseGuard mCloseGuard = CloseGuard.get();
+    AutoPtr<ICloseGuard> mCloseGuard;// = CloseGuard.get();
 
     // We keep references to the input channel and message queue objects here so that
     // they are not GC'd while the native peer of the receiver is using them.

@@ -1671,6 +1671,7 @@ ECode Activity::DispatchTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* isConsumed)
 {
+    Logger::I(TAG, " >> DispatchTouchEvent: %s", TO_CSTR(event));
     VALIDATE_NOT_NULL(isConsumed);
     *isConsumed = FALSE;
 
@@ -1679,17 +1680,20 @@ ECode Activity::DispatchTouchEvent(
     if (action == IMotionEvent::ACTION_DOWN) {
         FAIL_RETURN(OnUserInteraction());
     }
-
+    Logger::I(TAG, " << DispatchTouchEvent: %s 1", TO_CSTR(event));
     AutoPtr<IWindow> win = GetWindow();
     Boolean succeeded;
     FAIL_RETURN(win->SuperDispatchTouchEvent(event, &succeeded));
-
+    Logger::I(TAG, " << DispatchTouchEvent: %s 2", TO_CSTR(event));
     if (succeeded) {
         *isConsumed = TRUE;
+        Logger::I(TAG, " << DispatchTouchEvent: %s 1", TO_CSTR(event));
         return NOERROR;
     }
 
-    return OnTouchEvent(event, isConsumed);
+    ECode ec = OnTouchEvent(event, isConsumed);
+    Logger::I(TAG, " << DispatchTouchEvent: %s 2", TO_CSTR(event));
+    return ec;
 }
 
 ECode Activity::DispatchTrackballEvent(

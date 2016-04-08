@@ -54,7 +54,6 @@ ECode InputDevice::MotionRange::GetAxis(
 {
     VALIDATE_NOT_NULL(axis)
     *axis = mAxis;
-
     return NOERROR;
 }
 
@@ -63,7 +62,6 @@ ECode InputDevice::MotionRange::GetSource(
 {
     VALIDATE_NOT_NULL(source)
     *source = mSource;
-
     return NOERROR;
 }
 
@@ -81,7 +79,6 @@ ECode InputDevice::MotionRange::GetMin(
 {
     VALIDATE_NOT_NULL(minimum);
     *minimum = mMin;
-
     return NOERROR;
 }
 
@@ -90,7 +87,6 @@ ECode InputDevice::MotionRange::GetMax(
 {
     VALIDATE_NOT_NULL(maximum);
     *maximum = mMax;
-
     return NOERROR;
 }
 
@@ -99,7 +95,6 @@ ECode InputDevice::MotionRange::GetRange(
 {
     VALIDATE_NOT_NULL(range);
     *range = mMax - mMin;
-
     return NOERROR;
 }
 
@@ -108,7 +103,6 @@ ECode InputDevice::MotionRange::GetFlat(
 {
     VALIDATE_NOT_NULL(flat);
     *flat = mFlat;
-
     return NOERROR;
 }
 
@@ -117,7 +111,6 @@ ECode InputDevice::MotionRange::GetFuzz(
 {
     VALIDATE_NOT_NULL(fuzz);
     *fuzz = mFuzz;
-
     return NOERROR;
 }
 
@@ -126,13 +119,21 @@ ECode InputDevice::MotionRange::GetResolution(
 {
     VALIDATE_NOT_NULL(resolution);
     *resolution = mResolution;
-
     return NOERROR;
 }
 
 InputDevice::InputDevice()
+    : mId(0)
+    , mGeneration(0)
+    , mControllerNumber(0)
+    , mVendorId(0)
+    , mProductId(0)
+    , mIsExternal(FALSE)
+    , mSources(0)
+    , mKeyboardType(0)
+    , mHasVibrator(FALSE)
+    , mHasButtonUnderPad(FALSE)
 {
-    CArrayList::New((IArrayList**)&mMotionRanges);
 }
 
 InputDevice::~InputDevice()
@@ -141,6 +142,7 @@ InputDevice::~InputDevice()
 
 ECode InputDevice::constructor()
 {
+    CArrayList::New((IArrayList**)&mMotionRanges);
     return NOERROR;
 }
 
@@ -159,6 +161,8 @@ ECode InputDevice::constructor(
     /* [in] */ Boolean hasVibrator,
     /* [in] */ Boolean hasButtonUnderPad)
 {
+    CArrayList::New((IArrayList**)&mMotionRanges);
+
     mId = id;
     mGeneration = generation;
     mControllerNumber = controllerNumber;
@@ -180,14 +184,12 @@ ECode InputDevice::GetDevice(
     /* [in] */ Int32 id,
     /* [out] */ IInputDevice** device)
 {
-    VALIDATE_NOT_NULL(device);
     return CInputManager::GetInstance()->GetInputDevice(id, device);
 }
 
 ECode InputDevice::GetDeviceIds(
     /* [out, callee] */ ArrayOf<Int32>** deviceIds)
 {
-    VALIDATE_NOT_NULL(deviceIds);
     return CInputManager::GetInstance()->GetInputDeviceIds(deviceIds);
 }
 
@@ -196,7 +198,6 @@ ECode InputDevice::GetId(
 {
     VALIDATE_NOT_NULL(id);
     *id = mId;
-
     return NOERROR;
 }
 
@@ -222,7 +223,6 @@ ECode InputDevice::GetGeneration(
 {
     VALIDATE_NOT_NULL(generation);
     *generation = mGeneration;
-
     return NOERROR;
 }
 
@@ -247,7 +247,6 @@ ECode InputDevice::GetDescriptor(
 {
     VALIDATE_NOT_NULL(descriptor);
     *descriptor = mDescriptor;
-
     return NOERROR;
 }
 
@@ -256,7 +255,6 @@ ECode InputDevice::IsVirtual(
 {
      VALIDATE_NOT_NULL(isVirtual);
      *isVirtual = mId < 0;
-
      return NOERROR;
 }
 
@@ -265,7 +263,6 @@ ECode InputDevice::IsExternal(
 {
     VALIDATE_NOT_NULL(isExternal);
     *isExternal = mIsExternal;
-
     return NOERROR;
 }
 
@@ -275,7 +272,6 @@ ECode InputDevice::IsFullKeyboard(
     VALIDATE_NOT_NULL(isFullKeyboard);
     *isFullKeyboard = (mSources & SOURCE_KEYBOARD) == SOURCE_KEYBOARD
         && mKeyboardType == KEYBOARD_TYPE_ALPHABETIC;
-
     return NOERROR;
 }
 
@@ -284,7 +280,6 @@ ECode InputDevice::GetName(
 {
     VALIDATE_NOT_NULL(name);
     *name = mName;
-
     return NOERROR;
 }
 
@@ -293,7 +288,6 @@ ECode InputDevice::GetSources(
 {
     VALIDATE_NOT_NULL(sources);
     *sources = mSources;
-
     return NOERROR;
 }
 
@@ -303,7 +297,6 @@ ECode InputDevice::SupportsSource(
 {
     VALIDATE_NOT_NULL(rst);
     *rst = (mSources & source) == source;
-
     return NOERROR;
 }
 
@@ -312,7 +305,6 @@ ECode InputDevice::GetKeyboardType(
 {
     VALIDATE_NOT_NULL(type);
     *type = mKeyboardType;
-
     return NOERROR;
 }
 
@@ -322,7 +314,6 @@ ECode InputDevice::GetKeyCharacterMap(
     VALIDATE_NOT_NULL(keyCharacterMap);
     *keyCharacterMap = mKeyCharacterMap;
     REFCOUNT_ADD(*keyCharacterMap);
-
     return NOERROR;
 }
 
@@ -396,7 +387,6 @@ ECode InputDevice::GetMotionRanges(
     /* [out] */ IList** motionRanges)
 {
     VALIDATE_NOT_NULL(motionRanges);
-
     *motionRanges = IList::Probe(mMotionRanges);
     REFCOUNT_ADD(*motionRanges)
     return NOERROR;
@@ -459,26 +449,20 @@ ECode InputDevice::ReadFromParcel(
     in->ReadBoolean(&mIsExternal);
     in->ReadInt32(&mSources);
     in->ReadInt32(&mKeyboardType);
-    if (mKeyCharacterMap != NULL) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        // IParcelable::Probe(mKeyCharacterMap)->ReadFromParcel(in);
-    }
-    else {
-        CKeyCharacterMap::New((IKeyCharacterMap**)&mKeyCharacterMap);
-        IParcelable::Probe(mKeyCharacterMap)->ReadFromParcel(in);
-    }
+
+    CKeyCharacterMap::New((IKeyCharacterMap**)&mKeyCharacterMap);
+    IParcelable::Probe(mKeyCharacterMap)->ReadFromParcel(in);
+
     in->ReadBoolean(&mHasVibrator);
     in->ReadBoolean(&mHasButtonUnderPad);
     CInputDeviceIdentifier::New(mDescriptor, mVendorId, mProductId, (IInputDeviceIdentifier**)&mIdentifier);
 
-    for (;;) {
-        Int32 axis;
-        in->ReadInt32(&axis);
-        if (axis < 0) {
-            break;
-        }
-        Int32 source;
+    Int32 size;
+    in->ReadInt32(&size);
+    for (Int32 i = 0; i < size; ++i) {
+        Int32 axis, source;
         Float min, max, flat, fuzz, resolution;
+        in->ReadInt32(&axis);
         in->ReadInt32(&source);
         in->ReadFloat(&min);
         in->ReadFloat(&max);
@@ -510,23 +494,21 @@ ECode InputDevice::WriteToParcel(
 
     Int32 size;
     mMotionRanges->GetSize(&size);
-
+    out->WriteInt32(size);
     for (Int32 i = 0; i < size; ++i) {
         AutoPtr<IInterface> tmp;
         mMotionRanges->Get(i, (IInterface**)&tmp);
         AutoPtr<IMotionRange> rangeItf = IMotionRange::Probe(tmp);
         MotionRange* range = (MotionRange*)(rangeItf.Get());
-        if (range != NULL) {
-            out->WriteInt32(range->mAxis);
-            out->WriteInt32(range->mSource);
-            out->WriteFloat(range->mMin);
-            out->WriteFloat(range->mMax);
-            out->WriteFloat(range->mFlat);
-            out->WriteFloat(range->mFuzz);
-            out->WriteFloat(range->mResolution);
-        }
+        assert(range != NULL);
+        out->WriteInt32(range->mAxis);
+        out->WriteInt32(range->mSource);
+        out->WriteFloat(range->mMin);
+        out->WriteFloat(range->mMax);
+        out->WriteFloat(range->mFlat);
+        out->WriteFloat(range->mFuzz);
+        out->WriteFloat(range->mResolution);
     }
-    out->WriteInt32(-1);
 
     return NOERROR;
 }

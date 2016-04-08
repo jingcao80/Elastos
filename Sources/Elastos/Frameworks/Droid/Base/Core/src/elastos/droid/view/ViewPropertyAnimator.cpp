@@ -315,22 +315,6 @@ ECode ViewPropertyAnimator::InnerSetLayerTypeRunnable::Run()
 //=====================================================================
 CAR_INTERFACE_IMPL(ViewPropertyAnimator, Object, IViewPropertyAnimator)
 
-ViewPropertyAnimator::ViewPropertyAnimator(
-    /* [in] */ IView* view)
-    : mView(view)
-    , mDuration(0)
-    , mDurationSet(FALSE)
-    , mStartDelay(0)
-    , mStartDelaySet(FALSE)
-    , mInterpolatorSet(FALSE)
-{
-    mPendingAnimations = new List<AutoPtr<NameValuesHolder> >();
-    CHashMap::New((IHashMap**)&mAnimatorMap);
-    mAnimatorEventListener = new AnimatorEventListener(this);
-    mAnimationStarter = new InnerStartAnimationRunnable(this);
-    VIEW_PROBE(view)->EnsureTransformationInfo();
-}
-
 ViewPropertyAnimator::ViewPropertyAnimator()
     : mDuration(0)
     , mDurationSet(FALSE)
@@ -338,18 +322,6 @@ ViewPropertyAnimator::ViewPropertyAnimator()
     , mStartDelaySet(FALSE)
     , mInterpolatorSet(FALSE)
 {
-    mPendingAnimations = new List<AutoPtr<NameValuesHolder> >();
-    CHashMap::New((IHashMap**)&mAnimatorMap);
-    mAnimatorEventListener = new AnimatorEventListener(this);
-    mAnimationStarter = new InnerStartAnimationRunnable(this);
-}
-
-ECode ViewPropertyAnimator::Init(
-    /* [in] */ IView* v)
-{
-    mView = v;
-    VIEW_PROBE(v)->EnsureTransformationInfo();
-    return NOERROR;
 }
 
 ViewPropertyAnimator::~ViewPropertyAnimator()
@@ -360,6 +332,19 @@ ViewPropertyAnimator::~ViewPropertyAnimator()
     mAnimatorCleanupMap = NULL;
     mAnimatorOnStartMap = NULL;
     mAnimatorOnEndMap = NULL;
+}
+
+ECode ViewPropertyAnimator::constructor(
+    /* [in] */ IView* v)
+{
+    mView = v;
+    ((View*)v)->EnsureTransformationInfo();
+
+    mPendingAnimations = new List<AutoPtr<NameValuesHolder> >();
+    CHashMap::New((IHashMap**)&mAnimatorMap);
+    mAnimatorEventListener = new AnimatorEventListener(this);
+    mAnimationStarter = new InnerStartAnimationRunnable(this);
+    return NOERROR;
 }
 
 ECode ViewPropertyAnimator::SetDuration(
