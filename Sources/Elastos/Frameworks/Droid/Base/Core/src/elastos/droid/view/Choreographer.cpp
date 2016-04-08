@@ -37,7 +37,7 @@ namespace Droid {
 namespace View {
 
 const char* Choreographer::TAG = "Choreographer";
-const Boolean Choreographer::DEBUG;
+const Boolean Choreographer::DEBUG = FALSE;
 const Int64 Choreographer::DEFAULT_FRAME_DELAY;
 volatile Int64 Choreographer::sFrameDelay = DEFAULT_FRAME_DELAY;
 
