@@ -1,0 +1,75 @@
+module
+{
+    using interface Elastos.Droid.View.IMotionEvent;
+
+    enum Elastos.Droid.Launcher2.AppsCustomizePagedViewContentType;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+     /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IFrameLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     *
+     * interface ITabHost
+     * interface ILauncherTransitionable
+     * interface ITabHostOnTabChangeListener
+     */
+    interface IAppsCustomizeTabHost {
+        /**
+         * Convenience methods to select specific tabs.  We want to set the content type immediately
+         * in these cases, but we note that we still call setCurrentTabByTag() so that the tab view
+         * reflects the new content (but doesn't do the animation and logic associated with changing
+         * tabs manually).
+         */
+        SetContentTypeImmediate(
+            [in] AppsCustomizePagedViewContentType type);
+
+        SelectAppsTab();
+
+        SelectWidgetsTab();
+
+        OnInterceptTouchEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+
+        SetCurrentTabFromContent(
+            [in] AppsCustomizePagedViewContentType type);
+
+        /**
+         * Returns the content type for the specified tab tag.
+         */
+        GetContentTypeForTabTag(
+            [in] String tag,
+            [out] AppsCustomizePagedViewContentType* type);
+
+        /**
+         * Returns the tab tag for a given content type.
+         */
+        GetTabTagForContentType(
+            [in] AppsCustomizePagedViewContentType type,
+            [out] String* str);
+
+        Reset();
+
+        OnWindowVisible();
+
+        OnTrimMemory();
+
+        IsTransitioning(
+            [out] Boolean* result);
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -9,8 +9,8 @@ module
     }
 
     enum AppsCustomizePagedViewContentType {
-        Applications,
-        Widgets
+        AppsCustomizePagedViewContentType_Applications,
+        AppsCustomizePagedViewContentType_Widgets
     }
 
     /**
@@ -42,10 +42,24 @@ module
      * The Apps/Customize page that displays all the applications, widgets, and shortcuts.
      *
      * @invoke
-     * interface ~~~~~~~~~~~~~
+     * interface IViewGroup;
+     * interface IView;
+     * interface IDrawableCallback;
+     * interface IKeyEventCallback;
+     * interface IAccessibilityEventSource;
+     * interface IViewParent;
+     * interface IViewManager;
+     * interface IPagedView
+     * interface IViewOnLongClickListener
+     * interface IViewOnTouchListener
+     * interface IViewOnClickListener,
+     * interface IViewOnKeyListener,
+     * interface IDragSource,
+     * interface IPagedViewIconPressedCallback,
+     * interface IPagedViewWidgetShortPressListener,
+     * interface ILauncherTransitionable
     */
     interface IAppsCustomizePagedView {
-
     }
 
     } // namespace Launcher2

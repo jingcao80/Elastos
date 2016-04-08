@@ -208,3 +208,4 @@ EXPORT_HEADERS += elastos/droid/widget/ViewSwitcher.h
 EXPORT_HEADERS += elastos/droid/widget/TextSwitcher.h
 EXPORT_HEADERS += elastos/droid/widget/TabWidget.h
 EXPORT_HEADERS += elastos/droid/widget/GridLayout.h
+EXPORT_HEADERS += elastos/droid/widget/TabHost.h

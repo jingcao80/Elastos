@@ -102,4 +102,6 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
+DEFINE_CONVERSION_FOR(Elastos::Droid::Launcher2::InterruptibleInOutAnimator, IInterface)
+
 #endif // __ELASTOS_DROID_LAUNCHER2_INTERRUPTIBLEINOUTANIMATOR_H__

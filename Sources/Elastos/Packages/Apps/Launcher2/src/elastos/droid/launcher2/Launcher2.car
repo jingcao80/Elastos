@@ -5,6 +5,7 @@ module
     merge("../../../../car/elastos/droid/launcher2/Alarm.car");
     merge("../../../../car/elastos/droid/launcher2/AccessibleTabView.car");
     merge("../../../../car/elastos/droid/launcher2/ApplicationInfo.car");
+    merge("../../../../car/elastos/droid/launcher2/AppsCustomizeTabHost.car");
     merge("../../../../car/elastos/droid/launcher2/AppsCustomizePagedView.car");
     merge("../../../../car/elastos/droid/launcher2/AppWidgetResizeFrame.car");
     merge("../../../../car/elastos/droid/launcher2/BubbleTextView.car");
@@ -61,9 +62,12 @@ module
 
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IFragment;
+    using interface Elastos.Droid.App.IApplication;
     using interface Elastos.Droid.App.IDialogFragment;
+    using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContentProvider;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
     using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
     using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
@@ -75,15 +79,20 @@ module
     using interface Elastos.Droid.View.IViewManager;
     using interface Elastos.Droid.View.IOnPreDrawListener;
     using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnLongClickListener;
+    using interface Elastos.Droid.View.IViewOnClickListener;
     using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
     using interface Elastos.Droid.View.IViewGroupOnHierarchyChangeListener;
     using interface Elastos.Droid.View.IViewOnFocusChangeListener;
+    using interface Elastos.Droid.Widget.ITabHost;
+    using interface Elastos.Droid.Widget.ITabHostOnTabChangeListener;
     using interface Elastos.Droid.Widget.ITextView;
     using interface Elastos.Droid.Widget.IImageView;
     using interface Elastos.Droid.Widget.ILinearLayout;
     using interface Elastos.Droid.Widget.IFrameLayout;
     using interface Elastos.Droid.Widget.ITabWidget;
     using interface Elastos.Droid.Widget.IEditText;
+    using interface Elastos.Droid.Widget.IOnEditorActionListener;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
@@ -95,14 +104,14 @@ module
     [local]
     class CAccessibleTabView {
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -113,6 +122,28 @@ module
         interface IDrawableCallback;
         interface ITextView;
         interface IAccessibleTabView;
+    }
+
+    [local]
+    class CAppsCustomizeTabHost {
+        constructor();
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IViewGroup;
+        interface IFrameLayout;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ITabHost;
+        interface ILauncherTransitionable;
+        interface ITabHostOnTabChangeListener;
+        interface IAppsCustomizeTabHost;
     }
 
     [local]
@@ -136,6 +167,36 @@ module
         interface IDrawableCallback;
         interface ITextView;
         interface IBubbleTextView;
+    }
+
+    [local]
+    class CCellLayout {
+        constructor();
+
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IViewGroup;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IViewParent;
+        interface IViewManager;
+        interface ICellLayout;
+    }
+
+    singleton class CCellLayoutHelper {
+        interface ICellLayoutHelper;
     }
 
     [local]
@@ -230,6 +291,42 @@ module
         interface ITextView;
         interface IButtonDropTarget;
         interface IDeleteDropTarget;
+    }
+
+    [local]
+    class CFolder {
+        constructor();
+
+        /**
+         * Used to inflate the Workspace from XML.
+         *
+         * @param context The application's context.
+         * @param attrs The attribtues set containing the Workspace's customization values.
+         */
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ILinearLayout;
+        interface IDragSource;
+        interface IViewOnClickListener;
+        interface IViewOnLongClickListener;
+        interface IDropTarget;
+        interface IFolderListener;
+        interface IOnEditorActionListener;
+        interface IViewOnFocusChangeListener;
+        interface IFolder;
+    }
+
+    singleton class CFolderHelper {
+        interface IFolderHelper;
     }
 
     [local]
@@ -433,6 +530,19 @@ module
 
     singleton class CLauncherProviderHelper {
         interface ILauncherProviderHelper;
+    }
+
+    class CLauncherApplication {
+        interface IContextWrapper;
+        interface IContext;
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
+        interface IApplication;
+        interface ILauncherApplication;
+    }
+
+    singleton class CLauncherApplicationHelper {
+        interface ILauncherApplicationHelper;
     }
 
     [local]

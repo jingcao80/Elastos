@@ -915,14 +915,14 @@ AutoPtr<IDropTarget> DragController::FindDropTarget(
         if (!res)
             continue;
 
-        target->GetHitRect(r);
+        IView::Probe(target)->GetHitRect(r);
 
         // Convert the hit rect to DragLayer coordinates
         target->GetLocationInDragLayer(dropCoordinates);
         Int32 left;
-        target->GetLeft(&left);
+        IView::Probe(target)->GetLeft(&left);
         Int32 top;
-        target->GetTop(&top);
+        IView::Probe(target)->GetTop(&top);
         r->Offset((*dropCoordinates)[0] - left, (*dropCoordinates)[1] - top);
 
         mDragObject->mX = x;

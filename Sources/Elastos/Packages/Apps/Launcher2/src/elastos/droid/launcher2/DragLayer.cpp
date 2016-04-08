@@ -28,14 +28,18 @@ namespace Launcher2 {
 CAR_INTERFACE_IMPL(DragLayer::LayoutParams, FrameLayout::LayoutParams,
         IDragLayerLayoutParams);
 
-DragLayer::LayoutParams::LayoutParams(
-    /* [in] */ Int32 width,
-    /* [in] */ Int32 height)
+DragLayer::LayoutParams::LayoutParams()
     : mX(0)
     , mY(0)
     , mCustomPosition(FALSE)
 {
-    FrameLayout::LayoutParams::constructor(width, height);
+}
+
+ECode DragLayer::LayoutParams::constructor(
+    /* [in] */ Int32 width,
+    /* [in] */ Int32 height)
+{
+    return FrameLayout::LayoutParams::constructor(width, height);
 }
 
 ECode DragLayer::LayoutParams::SetWidth(
@@ -904,7 +908,8 @@ ECode DragLayer::AddResizeFrame(
     AutoPtr<AppWidgetResizeFrame> resizeFrame = new AppWidgetResizeFrame();
     resizeFrame->constructor(context, widget, cellLayout, this);
 
-    AutoPtr<LayoutParams> lp = new LayoutParams(-1, -1);
+    AutoPtr<LayoutParams> lp = new LayoutParams();
+    lp->constructor(-1, -1);
     lp->mCustomPosition = TRUE;
 
     AddView(resizeFrame, lp);
@@ -1311,7 +1316,7 @@ Boolean DragLayer::IsLayoutDirectionRtl()
     return (direction == LAYOUT_DIRECTION_RTL);
 }
 
-void DragLayer::DispatchDraw(
+ECode DragLayer::DispatchDraw(
         /* [in] */ ICanvas* canvas)
 {
     FrameLayout::DispatchDraw(canvas);
@@ -1378,6 +1383,7 @@ void DragLayer::DispatchDraw(
             }
         }
     }
+    return NOERROR;
 }
 
 } // namespace Launcher2

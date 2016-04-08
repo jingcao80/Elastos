@@ -83,7 +83,7 @@ ECode ShortcutAndWidgetContainer::GetChildAt(
     return NOERROR;
 }
 
-void ShortcutAndWidgetContainer::DispatchDraw(
+ECode ShortcutAndWidgetContainer::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     //@SuppressWarnings("all") // suppress dead code warning
@@ -106,7 +106,7 @@ void ShortcutAndWidgetContainer::DispatchDraw(
             // canvas->DrawRect(lp->mX, lp->mY, lp->mX + lp->mWidth, lp->mY + lp->mHeight, p);
         }
     }
-    ViewGroup::DispatchDraw(canvas);
+    return ViewGroup::DispatchDraw(canvas);
 }
 
 void ShortcutAndWidgetContainer::OnMeasure(

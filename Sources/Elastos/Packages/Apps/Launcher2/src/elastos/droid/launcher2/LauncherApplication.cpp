@@ -1,13 +1,25 @@
 
 #include "elastos/droid/launcher2/LauncherApplication.h"
+#include "elastos/droid/launcher2/LauncherSettings.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Utility.h"
+
+using Elastos::Droid::App::ISearchManager;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IBroadcastReceiver;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Utility::IDisplayMetrics;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-MyContentObserver::MyContentObserver(
+LauncherApplication::MyContentObserver::MyContentObserver(
     /* [in] */ IHandler* handler,
     /* [in] */ LauncherApplication* host)
     : mHost(host)
@@ -15,13 +27,14 @@ MyContentObserver::MyContentObserver(
     ContentObserver::constructor(handler);
 }
 
-ECode MyContentObserver::OnChange(
+ECode LauncherApplication::MyContentObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
     // If the database has ever changed, then we really need to force a reload of the
     // workspace on the next load
-    mHost->mModel->ResetLoadedState(FALSE, TRUE);
-    return mHost->mModel->StartLoaderFromBackground();
+    LauncherModel* _mode = (LauncherModel*)(mHost->mModel.Get());
+    _mode->ResetLoadedState(FALSE, TRUE);
+    return _mode->StartLoaderFromBackground();
 }
 
 CAR_INTERFACE_IMPL(LauncherApplication, Application, ILauncherApplication);
@@ -36,28 +49,30 @@ LauncherApplication::LauncherApplication()
 {
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
-    mFavoritesObserver = new MyContentObserver(handler);
+    mFavoritesObserver = new MyContentObserver(handler, this);
 }
 
-ECode LauncherApplication::OnCreate();
+ECode LauncherApplication::OnCreate()
 {
     Application::OnCreate();
 
     // set sIsScreenXLarge and sScreenDensity *before* creating icon cache
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
-    resources->GetBoolean(Elastos::Droid::Launcher2::R::bool::is_large_screen,
+    resources->GetBoolean(Elastos::Droid::Launcher2::R::bool_::is_large_screen,
             &sIsScreenLarge);
     AutoPtr<IDisplayMetrics> metrics;
     resources->GetDisplayMetrics((IDisplayMetrics**)&metrics);
     metrics->GetDensity(&sScreenDensity);
 
     RecreateWidgetPreviewDb();
-    mIconCache = new IconCache(this);
-    mModel = new LauncherModel(this, mIconCache);
+    mIconCache = new IconCache();
+    mIconCache->constructor(ILauncherApplication::Probe(this));
+    mModel = new LauncherModel();
+    mModel->constructor(ILauncherApplication::Probe(this), mIconCache);
 
     AutoPtr<IInterface> obj;
-    context->GetSystemService(IContext::LAUNCHER_APPS_SERVICE, (IInterface**)&obj);
+    GetSystemService(IContext::LAUNCHER_APPS_SERVICE, (IInterface**)&obj);
     AutoPtr<ILauncherApps> launcherApps = ILauncherApps::Probe(obj);
     AutoPtr<ILauncherAppsCallback> _callback;
     mModel->GetLauncherAppsCallback((ILauncherAppsCallback**)&_callback);
@@ -68,26 +83,30 @@ ECode LauncherApplication::OnCreate();
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IIntent::ACTION_LOCALE_CHANGED);
     filter->AddAction(IIntent::ACTION_CONFIGURATION_CHANGED);
-    RegisterReceiver(mModel, filter);
+    AutoPtr<IIntent> intent1;
+    RegisterReceiver(IBroadcastReceiver::Probe(mModel), filter, (IIntent**)&intent1);
     AutoPtr<IIntentFilter> filter2;
     CIntentFilter::New((IIntentFilter**)&filter2);
     filter2->AddAction(ISearchManager::INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
-    registerReceiver(mModel, filter2);
+    AutoPtr<IIntent> intent2;
+    RegisterReceiver(IBroadcastReceiver::Probe(mModel), filter2, (IIntent**)&intent2);
     AutoPtr<IIntentFilter> filter3;
     CIntentFilter::New((IIntentFilter**)&filter3);
     filter3->AddAction(ISearchManager::INTENT_ACTION_SEARCHABLES_CHANGED);
-    RegisterReceiver(mModel, filter3);
+    AutoPtr<IIntent> intent3;
+    RegisterReceiver(IBroadcastReceiver::Probe(mModel), filter3, (IIntent**)&intent3);
 
     // Register for changes to the favorites
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
-    return resolver->RegisterContentObserver(ILauncherSettings::Favorites::CONTENT_URI, TRUE,
+    return resolver->RegisterContentObserver(LauncherSettings::Favorites::CONTENT_URI, TRUE,
             mFavoritesObserver);
 }
 
 ECode LauncherApplication::RecreateWidgetPreviewDb()
 {
-    mWidgetPreviewCacheDb = new WidgetPreviewLoader::CacheDb(this);
+    assert(0);
+    //mWidgetPreviewCacheDb = new WidgetPreviewLoader::CacheDb(this);
     return NOERROR;
 }
 
@@ -104,45 +123,46 @@ ECode LauncherApplication::OnTerminate()
 
 ECode LauncherApplication::SetLauncher(
     /* [in] */ ILauncher* launcher,
-    /* [out] */ LauncherModel** mode)
+    /* [out] */ ILauncherModel** mode)
 {
-    VALIDATR_NOT_NULL(mode);
+    VALIDATE_NOT_NULL(mode);
 
-    mModel->Initialize(launcher);
-    *mode = mModel;
+    assert(0);
+    //mModel->Initialize(launcher);
+    *mode = ILauncherModel::Probe(mModel);
     REFCOUNT_ADD(*mode);
     return NOERROR;
 }
 
 ECode LauncherApplication::GetIconCache(
-    /* [out] */ IconCache** cache)
+    /* [out] */ IIconCache** cache)
 {
-    VALIDATR_NOT_NULL(cache);
+    VALIDATE_NOT_NULL(cache);
 
-    *cache = mIconCache;
+    *cache = IIconCache::Probe(mIconCache);
     REFCOUNT_ADD(*cache);
     return NOERROR;
 }
 
 ECode LauncherApplication::GetModel(
-    /* [out] */ LauncherModel** mode)
+    /* [out] */ ILauncherModel** mode)
 {
-    VALIDATR_NOT_NULL(mode);
+    VALIDATE_NOT_NULL(mode);
 
-    *mode = mModel;
+    *mode = ILauncherModel::Probe(mModel);
     REFCOUNT_ADD(*mode);
     return NOERROR;
 }
 
-ECode LauncherApplication::GetWidgetPreviewCacheDb(
-    /* [out] */ WidgetPreviewLoader::CacheDb** db)
-{
-    VALIDATR_NOT_NULL(db);
+// ECode LauncherApplication::GetWidgetPreviewCacheDb(
+//     /* [out] */ IWidgetPreviewLoaderCacheDb** db)
+// {
+//     VALIDATE_NOT_NULL(db);
 
-    *db = mWidgetPreviewCacheDb;
-    REFCOUNT_ADD(*db);
-    return NOERROR;
-}
+//     *db = mWidgetPreviewCacheDb;
+//     REFCOUNT_ADD(*db);
+//     return NOERROR;
+// }
 
 ECode LauncherApplication::SetLauncherProvider(
     /* [in] */ ILauncherProvider* provider)
@@ -153,7 +173,7 @@ ECode LauncherApplication::SetLauncherProvider(
 ECode LauncherApplication::GetLauncherProvider(
     /* [out] */ ILauncherProvider** provider)
 {
-    VALIDATR_NOT_NULL(provider);
+    VALIDATE_NOT_NULL(provider);
 
     AutoPtr<IInterface> obj;
     mLauncherProvider->Resolve(EIID_ILauncherProvider, (IInterface**)&obj);
@@ -165,7 +185,7 @@ ECode LauncherApplication::GetLauncherProvider(
 ECode LauncherApplication::GetSharedPreferencesKey(
     /* [out] */ String* key)
 {
-    VALIDATR_NOT_NULL(key);
+    VALIDATE_NOT_NULL(key);
 
     *key = sSharedPreferencesKey;
     return NOERROR;
@@ -174,7 +194,7 @@ ECode LauncherApplication::GetSharedPreferencesKey(
 ECode LauncherApplication::IsScreenLarge(
     /* [out] */ Boolean* result)
 {
-    VALIDATR_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     *result = sIsScreenLarge;
     return NOERROR;
@@ -184,7 +204,7 @@ ECode LauncherApplication::IsScreenLandscape(
     /* [in] */ IContext* context,
     /* [out] */ Boolean* result)
 {
-    VALIDATR_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
@@ -200,7 +220,7 @@ ECode LauncherApplication::IsScreenLandscape(
 ECode LauncherApplication::GetScreenDensity(
     /* [out] */ Float* density)
 {
-    VALIDATR_NOT_NULL(density);
+    VALIDATE_NOT_NULL(density);
 
     *density = sScreenDensity;
     return NOERROR;
@@ -209,7 +229,7 @@ ECode LauncherApplication::GetScreenDensity(
 ECode LauncherApplication::GetLongPressTimeout(
     /* [out] */ Int32* timeout)
 {
-    VALIDATR_NOT_NULL(timeout);
+    VALIDATE_NOT_NULL(timeout);
 
     *timeout = sLongPressTimeout;
     return NOERROR;

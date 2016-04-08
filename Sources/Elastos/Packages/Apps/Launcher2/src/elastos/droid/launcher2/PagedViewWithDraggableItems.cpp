@@ -1,7 +1,11 @@
 
-#include "elastos/droid/launcher2/PackageChangedReceiver.h"
+#include "elastos/droid/launcher2/PagedViewWithDraggableItems.h"
 #include "Elastos.Droid.Service.h"
+#include <elastos/core/Math.h>
 #include "R.h"
+
+using Elastos::Droid::View::EIID_IViewOnLongClickListener;
+using Elastos::Droid::View::EIID_IViewOnTouchListener;
 
 namespace Elastos {
 namespace Droid {
@@ -60,11 +64,11 @@ void PagedViewWithDraggableItems::HandleTouchEvent(
     Int32 action;
     ev->GetAction(&action);
     switch (action & IMotionEvent::ACTION_MASK) {
-        case MotionEvent::ACTION_DOWN:
+        case IMotionEvent::ACTION_DOWN:
             CancelDragging();
             mIsDragEnabled = TRUE;
             break;
-        case MotionEvent::ACTION_MOVE:
+        case IMotionEvent::ACTION_MOVE:
             if (mTouchState != TOUCH_STATE_SCROLLING && !mIsDragging && mIsDragEnabled) {
                 DetermineDraggingStart(ev);
             }
@@ -124,34 +128,39 @@ ECode PagedViewWithDraggableItems::OnLongClick(
         return NOERROR;
     }
     // When we have exited all apps or are in transition, disregard long clicks
-    mLauncher->IsAllAppsVisible(&res);
+    assert(0);
+    //mLauncher->IsAllAppsVisible(&res);
     if (!res) {
         *result = FALSE;
         return NOERROR;
     }
     AutoPtr<IWorkspace> ws;
-    mLauncher->GetWorkspace((IWorkspace**)&ws);
-    ws->IsSwitchingState(&res)
+    assert(0);
+    //mLauncher->GetWorkspace((IWorkspace**)&ws);
+    //ws->IsSwitchingState(&res);
     if (res) {
         *result = FALSE;
         return NOERROR;
     }
     // Return if global dragging is not enabled
-    mLauncher->IsDraggingEnabled(&res);
+    assert(0);
+    //mLauncher->IsDraggingEnabled(&res);
     if (!res) {
         *result = FALSE;
         return NOERROR;
     }
 
-    return BeginDragging(v, result);
+    *result = BeginDragging(v);
+    return NOERROR;
 }
 
-void PagedViewWithDraggableItems::DetermineScrollingStart(
+ECode PagedViewWithDraggableItems::DetermineScrollingStart(
     /* [in] */ IMotionEvent* ev)
 {
     if (!mIsDragging) {
-        PagedView::DetermineScrollingStart(ev);
+        return PagedView::DetermineScrollingStart(ev);
     }
+    return NOERROR;
 }
 
 void PagedViewWithDraggableItems::DetermineDraggingStart(
@@ -167,8 +176,8 @@ void PagedViewWithDraggableItems::DetermineDraggingStart(
     ev->GetX(pointerIndex, &x);
     Float y;
     ev->GetY(pointerIndex, &y);
-    Int32 xDiff = (Int32)(Math::Abs(x - mLastMotionX));
-    Int32 yDiff = (Int32)(Math::Abs(y - mLastMotionY));
+    Int32 xDiff = (Int32)(Elastos::Core::Math::Abs(x - mLastMotionX));
+    Int32 yDiff = (Int32)(Elastos::Core::Math::Abs(y - mLastMotionY));
 
     const Int32 touchSlop = mTouchSlop;
     Boolean yMoved = yDiff > touchSlop;
@@ -184,8 +193,7 @@ void PagedViewWithDraggableItems::DetermineDraggingStart(
             // Try canceling the long press. It could also have been scheduled
             // by a distant descendant, so use the mAllowLongPress flag to block
             // everything
-            AutoPtr<IView> currentPage;
-            GetPageAt(mCurrentPage, (IView**)&currentPage);
+            AutoPtr<IView> currentPage = GetPageAt(mCurrentPage);
             if (currentPage != NULL) {
                 currentPage->CancelLongPress();
             }
@@ -200,20 +208,21 @@ ECode PagedViewWithDraggableItems::SetDragSlopeThreshold(
     return NOERROR;
 }
 
-ECode PagedViewWithDraggableItemsOnDetachedFromWindow()
+ECode PagedViewWithDraggableItems::OnDetachedFromWindow()
 {
     CancelDragging();
-    return PagedView::OnDetachedFromWindow();
+    PagedView::OnDetachedFromWindow();
+    return NOERROR;
 }
 
-void PagedViewWithDraggableItems::OnPageBeginMoving()
+ECode PagedViewWithDraggableItems::OnPageBeginMoving()
 {
-    ShowScrollingIndicator(FALSE);
+    return ShowScrollingIndicator(FALSE);
 }
 
-void PagedViewWithDraggableItems::OnPageEndMoving()
+ECode PagedViewWithDraggableItems::OnPageEndMoving()
 {
-    HideScrollingIndicator(FALSE);
+    return HideScrollingIndicator(FALSE);
 }
 
 } // namespace Launcher2

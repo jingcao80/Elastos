@@ -1,5 +1,18 @@
 module
 {
+    using interface Elastos.Droid.Content.Res.IResources;
+    using interface Elastos.Droid.Graphics.IRect;
+    using interface Elastos.Droid.Graphics.IBitmap;
+    using interface Elastos.Droid.Graphics.IPoint;
+    using interface Elastos.Droid.Utility.ISparseArray;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewOnTouchListener;
+
+    interface Elastos.Droid.Launcher2.IItemInfo;
+    interface Elastos.Droid.Launcher2.IFolderIconFolderRingAnimator;
+    interface Elastos.Droid.Launcher2.ICellLayoutLayoutParams;
+    interface Elastos.Droid.Launcher2.IShortcutAndWidgetContainer;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
@@ -14,11 +27,720 @@ module
      * interface IViewParent;
      * interface IViewManager;
      */
-    [local]
+    [local, deprecated]
     interface ICellLayout {
+        EnableHardwareLayers();
+
+        DisableHardwareLayers();
+
+        BuildHardwareLayer();
+
+        GetChildrenScale(
+            [out] Float* scale);
+
+        SetGridSize(
+            [in] Int32 x,
+            [in] Int32 y);
+
+        // Set whether or not to invert the layout horizontally if the layout is in RTL mode.
+        SetInvertIfRtl(
+            [in] Boolean invert);
+
+        SetOverScrollAmount(
+            [in] Float r,
+            [in] Boolean left);
+
+        SetPressedOrFocusedIcon(
+            [in] IBubbleTextView* icon);
+
+        SetIsDragOverlapping(
+            [in] Boolean isDragOverlapping);
+
+        GetIsDragOverlapping(
+            [out] Boolean* result);
+
+        ScaleRect(
+            [in] IRect* r,
+            [in] Float scale);
+
+        ScaleRectAboutCenter(
+            [in] IRect* _in,
+            [in] IRect* _out,
+            [in] Float scale);
+
+        ShowFolderAccept(
+            [in] IFolderIconFolderRingAnimator* fra);
+
+        HideFolderAccept(
+            [in] IFolderIconFolderRingAnimator* fra);
+
+        SetFolderLeaveBehindCell(
+            [in] Int32 x,
+            [in] Int32 y);
+
+        ClearFolderLeaveBehind();
+
+        RestoreInstanceState(
+            [in] ISparseArray* states);
+
+        SetOnInterceptTouchListener(
+            [in] IViewOnTouchListener* listener);
+
+        GetCountX(
+            [out] Int32* x);
+
+        GetCountY(
+            [out] Int32* y);
+
+        SetIsHotseat(
+            [in] Boolean isHotseat);
+
+        AddViewToCellLayout(
+            [in] IView* child,
+            [in] Int32 index,
+            [in] Int32 childId,
+            [in] ICellLayoutLayoutParams* params,
+            [in] Boolean markCells,
+            [out] Boolean* result);
+
+        RemoveViewWithoutMarkingCells(
+            [in] IView* view);
+
+        SetTagToCellInfoForPoint(
+            [in] Int32 touchX,
+            [in] Int32 touchY);
+
+        //CARAPI_(AutoPtr<CellInfo>) GetTag();
+
+        /**
+         * Given a point, return the cell that strictly encloses that point
+         * @param x X coordinate of the point
+         * @param y Y coordinate of the point
+         * @param result Array of 2 ints to hold the x and y coordinate of the cell
+         */
+        PointToCellExact(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] ArrayOf<Int32>* result);
+
+        /**
+         * Given a point, return the cell that most closely encloses that point
+         * @param x X coordinate of the point
+         * @param y Y coordinate of the point
+         * @param result Array of 2 ints to hold the x and y coordinate of the cell
+         */
+        PointToCellRounded(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] ArrayOf<Int32>* result);
+
+        /**
+         * Given a cell coordinate, return the point that represents the upper left corner of that cell
+         *
+         * @param cellX X coordinate of the cell
+         * @param cellY Y coordinate of the cell
+         *
+         * @param result Array of 2 ints to hold the x and y coordinate of the point
+         */
+        CellToPoint(
+            [in] Int32 cellX,
+            [in] Int32 cellY,
+            [in] ArrayOf<Int32>* result);
+
+        /**
+         * Given a cell coordinate, return the point that represents the center of the cell
+         *
+         * @param cellX X coordinate of the cell
+         * @param cellY Y coordinate of the cell
+         *
+         * @param result Array of 2 ints to hold the x and y coordinate of the point
+         */
+        CellToCenterPoint(
+            [in] Int32 cellX,
+            [in] Int32 cellY,
+            [in] ArrayOf<Int32>* result);
+
+        /**
+         * Given a cell coordinate and span return the point that represents the center of the regio
+         *
+         * @param cellX X coordinate of the cell
+         * @param cellY Y coordinate of the cell
+         *
+         * @param result Array of 2 ints to hold the x and y coordinate of the point
+         */
+        RegionToCenterPoint(
+            [in] Int32 cellX,
+            [in] Int32 cellY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] ArrayOf<Int32>* result);
+
+         /**
+         * Given a cell coordinate and span fills out a corresponding pixel rect
+         *
+         * @param cellX X coordinate of the cell
+         * @param cellY Y coordinate of the cell
+         * @param result Rect in which to write the result
+         */
+        RegionToRect(
+            [in] Int32 cellX,
+            [in] Int32 cellY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] IRect* result);
+
+        GetDistanceFromCell(
+            [in] Float x,
+            [in] Float y,
+            [in] ArrayOf<Int32>* cell,
+            [out] Float* result);
+
+        GetCellWidth(
+            [out] Int32* width);
+
+        GetCellHeight(
+            [out] Int32* height);
+
+        GetWidthGap(
+            [out] Int32* wgap);
+
+        GetHeightGap(
+            [out] Int32* hgap);
+
+        GetContentRect(
+            [in] IRect* r,
+            [out] IRect** outrect);
+
+        GetBackgroundAlpha(
+            [out] Float* alph);
+
+        SetBackgroundAlphaMultiplier(
+            [in] Float multiplier);
+
+        GetBackgroundAlphaMultiplier(
+            [out] Float* multiplier);
+
+        SetBackgroundAlpha(
+            [in] Float alpha);
+
+        SetShortcutAndWidgetAlpha(
+            [in] Float alpha);
+
+        GetShortcutsAndWidgets(
+            [out]  IShortcutAndWidgetContainer** container);
+
+        GetChildAt(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] IView** outview);
+
+        AnimateChildToPosition(
+            [in] IView* child,
+            [in] Int32 cellX,
+            [in] Int32 cellY,
+            [in] Int32 duration,
+            [in] Int32 delay,
+            [in] Boolean permanent,
+            [in] Boolean adjustOccupied,
+            [out] Boolean* result);
+
+        /**
+         * Estimate where the top left cell of the dragged item will land if it is dropped.
+         *
+         * @param originX The X value of the top left corner of the item
+         * @param originY The Y value of the top left corner of the item
+         * @param spanX The number of horizontal cells that the item spans
+         * @param spanY The number of vertical cells that the item spans
+         * @param result The estimated drop cell X and Y.
+         */
+        EstimateDropCell(
+            [in] Int32 originX,
+            [in] Int32 originY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] ArrayOf<Int32>* result);
+
+        VisualizeDropLocation(
+            [in] IView* v,
+            [in] IBitmap* dragOutline,
+            [in] Int32 originX,
+            [in] Int32 originY,
+            [in] Int32 cellX,
+            [in] Int32 cellY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] Boolean resize,
+            [in] IPoint* dragOffset,
+            [in] IRect* dragRegion);
+
+        ClearDragOutlines();
+
+        /**
+         * Find a vacant area that will fit the given bounds nearest the requested
+         * cell location. Uses Euclidean distance to score multiple vacant areas.
+         *
+         * @param pixelX The X location at which you want to search for a vacant area.
+         * @param pixelY The Y location at which you want to search for a vacant area.
+         * @param spanX Horizontal span of the object.
+         * @param spanY Vertical span of the object.
+         * @param result Array in which to place the result, or NULL (in which case a new array will
+         *        be allocated)
+         * @return The X, Y cell of a vacant area that can contain this object,
+         *         nearest the requested location.
+         */
+        FindNearestVacantArea(
+            [in] Int32 pixelX,
+            [in] Int32 pixelY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] ArrayOf<Int32>* result,
+            [out, callee] ArrayOf<Int32>* outarray);
+
+        /**
+         * Find a vacant area that will fit the given bounds nearest the requested
+         * cell location. Uses Euclidean distance to score multiple vacant areas.
+         *
+         * @param pixelX The X location at which you want to search for a vacant area.
+         * @param pixelY The Y location at which you want to search for a vacant area.
+         * @param minSpanX The minimum horizontal span required
+         * @param minSpanY The minimum vertical span required
+         * @param spanX Horizontal span of the object.
+         * @param spanY Vertical span of the object.
+         * @param result Array in which to place the result, or NULL (in which case a new array will
+         *        be allocated)
+         * @return The X, Y cell of a vacant area that can contain this object,
+         *         nearest the requested location.
+         */
+        FindNearestVacantArea(
+            [in] Int32 pixelX,
+            [in] Int32 pixelY,
+            [in] Int32 minSpanX,
+            [in] Int32 minSpanY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] ArrayOf<Int32>* result,
+            [in] ArrayOf<Int32>* resultSpan,
+            [out, callee] ArrayOf<Int32>* outarray);
+
+        /**
+         * Find a vacant area that will fit the given bounds nearest the requested
+         * cell location. Uses Euclidean distance to score multiple vacant areas.
+         *
+         * @param pixelX The X location at which you want to search for a vacant area.
+         * @param pixelY The Y location at which you want to search for a vacant area.
+         * @param spanX Horizontal span of the object.
+         * @param spanY Vertical span of the object.
+         * @param ignoreOccupied If TRUE, the result can be an occupied cell
+         * @param result Array in which to place the result, or NULL (in which case a new array will
+         *        be allocated)
+         * @return The X, Y cell of a vacant area that can contain this object,
+         *         nearest the requested location.
+         */
+        FindNearestArea(
+            [in] Int32 pixelX,
+            [in] Int32 pixelY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] IView* ignoreView,
+            [in] Boolean ignoreOccupied,
+            [in] ArrayOf<Int32>* result,
+            [out, callee] ArrayOf<Int32>* outarray);
+
+        /**
+         * Find a vacant area that will fit the given bounds nearest the requested
+         * cell location. Uses Euclidean distance to score multiple vacant areas.
+         *
+         * @param pixelX The X location at which you want to search for a vacant area.
+         * @param pixelY The Y location at which you want to search for a vacant area.
+         * @param minSpanX The minimum horizontal span required
+         * @param minSpanY The minimum vertical span required
+         * @param spanX Horizontal span of the object.
+         * @param spanY Vertical span of the object.
+         * @param ignoreOccupied If TRUE, the result can be an occupied cell
+         * @param result Array in which to place the result, or NULL (in which case a new array will
+         *        be allocated)
+         * @return The X, Y cell of a vacant area that can contain this object,
+         *         nearest the requested location.
+         */
+        /*FindNearestArea(
+            [in] Int32 pixelX,
+            [in] Int32 pixelY,
+            [in] Int32 minSpanX,
+            [in] Int32 minSpanY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] IView* ignoreView,
+            [in] Boolean ignoreOccupied,
+            [in] ArrayOf<Int32>* result,
+            [in] ArrayOf<Int32>* resultSpan,
+            [in] ArrayOf<ArrayOf<Boolean>* >* occupied,
+            [out, callee] ArrayOf<Int32>* outarray);*/
+
+        /*CARAPI_(AutoPtr<ItemConfiguration>) SimpleSwap(
+            [in] Int32 pixelX,
+            [in] Int32 pixelY,
+            [in] Int32 minSpanX,
+            [in] Int32 minSpanY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] ArrayOf<Int32>* direction,
+            [in] IView* dragView,
+            [in] Boolean decX,
+            [in] ItemConfiguration* solution);*/
+
+        SetUseTempCoords(
+            [in] Boolean useTempCoords);
+
+        /*CARAPI_(AutoPtr<ItemConfiguration>) FindConfigurationNoShuffle(
+            [in] Int32 pixelX,
+            [in] Int32 pixelY,
+            [in] Int32 minSpanX,
+            [in] Int32 minSpanY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] IView* dragView,
+            [in] ItemConfiguration* solution);*/
+
+        PrepareChildForDrag(
+            [in] IView* child);
+
+        IsNearestDropLocationOccupied(
+            [in] Int32 pixelX,
+            [in] Int32 pixelY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] IView* dragView,
+            [in] ArrayOf<Int32>* _result,
+            [out] Boolean* success);
+
+        RevertTempState();
+
+        CreateAreaForResize(
+            [in] Int32 cellX,
+            [in] Int32 cellY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] IView* dragView,
+            [in] ArrayOf<Int32>* direction,
+            [in] Boolean commit,
+            [out] Boolean* result);
+
+        CreateArea(
+            [in] Int32 pixelX,
+            [in] Int32 pixelY,
+            [in] Int32 minSpanX,
+            [in] Int32 minSpanY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] IView* dragView,
+            [in] ArrayOf<Int32>* _result,
+            [in] ArrayOf<Int32>* resultSpan,
+            [in] Int32 mode,
+            [out, callee] ArrayOf<Int32>* outarray);
+
+        SetItemPlacementDirty(
+            [in] Boolean dirty);
+
+        IsItemPlacementDirty(
+            [out] Boolean* result);
+
+        /**
+         * Find a vacant area that will fit the given bounds nearest the requested
+         * cell location. Uses Euclidean distance to score multiple vacant areas.
+         *
+         * @param pixelX The X location at which you want to search for a vacant area.
+         * @param pixelY The Y location at which you want to search for a vacant area.
+         * @param spanX Horizontal span of the object.
+         * @param spanY Vertical span of the object.
+         * @param ignoreView Considers space occupied by this view as unoccupied
+         * @param result Previously returned value to possibly recycle.
+         * @return The X, Y cell of a vacant area that can contain this object,
+         *         nearest the requested location.
+         */
+        FindNearestVacantArea(
+            [in] Int32 pixelX,
+            [in] Int32 pixelY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] IView* ignoreView,
+            [in] ArrayOf<Int32>* result,
+            [out, callee] ArrayOf<Int32>* outarray);
+
+        /**
+         * Find a vacant area that will fit the given bounds nearest the requested
+         * cell location. Uses Euclidean distance to score multiple vacant areas.
+         *
+         * @param pixelX The X location at which you want to search for a vacant area.
+         * @param pixelY The Y location at which you want to search for a vacant area.
+         * @param minSpanX The minimum horizontal span required
+         * @param minSpanY The minimum vertical span required
+         * @param spanX Horizontal span of the object.
+         * @param spanY Vertical span of the object.
+         * @param ignoreView Considers space occupied by this view as unoccupied
+         * @param result Previously returned value to possibly recycle.
+         * @return The X, Y cell of a vacant area that can contain this object,
+         *         nearest the requested location.
+         */
+        FindNearestVacantArea(
+            [in] Int32 pixelX,
+            [in] Int32 pixelY,
+            [in] Int32 minSpanX,
+            [in] Int32 minSpanY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] IView* ignoreView,
+            [in] ArrayOf<Int32>* result,
+            [in] ArrayOf<Int32>* resultSpan,
+            [out, callee] ArrayOf<Int32>* outarray);
+
+        /**
+         * Find a starting cell position that will fit the given bounds nearest the requested
+         * cell location. Uses Euclidean distance to score multiple vacant areas.
+         *
+         * @param pixelX The X location at which you want to search for a vacant area.
+         * @param pixelY The Y location at which you want to search for a vacant area.
+         * @param spanX Horizontal span of the object.
+         * @param spanY Vertical span of the object.
+         * @param ignoreView Considers space occupied by this view as unoccupied
+         * @param result Previously returned value to possibly recycle.
+         * @return The X, Y cell of a vacant area that can contain this object,
+         *         nearest the requested location.
+         */
+        FindNearestArea(
+            [in] Int32 pixelX,
+            [in] Int32 pixelY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] ArrayOf<Int32>* result,
+            [out, callee] ArrayOf<Int32>* outarray);
+
+        ExistsEmptyCell(
+            [out] Boolean* result);
+
+        /**
+         * Finds the upper-left coordinate of the first rectangle in the grid that can
+         * hold a cell of the specified dimensions. If intersectX and intersectY are not -1,
+         * then this method will only return coordinates for rectangles that contain the cell
+         * (intersectX, intersectY)
+         *
+         * @param cellXY The array that will contain the position of a vacant cell if such a cell
+         *               can be found.
+         * @param spanX The horizontal span of the cell we want to find.
+         * @param spanY The vertical span of the cell we want to find.
+         *
+         * @return True if a vacant cell of the specified dimension was found, FALSE otherwise.
+         */
+        FindCellForSpan(
+            [in] ArrayOf<Int32>* cellXY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [out] Boolean* result);
+
+        /**
+         * Like above, but ignores any cells occupied by the item "ignoreView"
+         *
+         * @param cellXY The array that will contain the position of a vacant cell if such a cell
+         *               can be found.
+         * @param spanX The horizontal span of the cell we want to find.
+         * @param spanY The vertical span of the cell we want to find.
+         * @param ignoreView The home screen item we should treat as not occupying any space
+         * @return
+         */
+        FindCellForSpanIgnoring(
+            [in] ArrayOf<Int32>* cellXY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] IView* ignoreView,
+            [out] Boolean* result);
+
+        /**
+         * Like above, but if intersectX and intersectY are not -1, then this method will try to
+         * return coordinates for rectangles that contain the cell [intersectX, intersectY]
+         *
+         * @param spanX The horizontal span of the cell we want to find.
+         * @param spanY The vertical span of the cell we want to find.
+         * @param ignoreView The home screen item we should treat as not occupying any space
+         * @param intersectX The X coordinate of the cell that we should try to overlap
+         * @param intersectX The Y coordinate of the cell that we should try to overlap
+         *
+         * @return True if a vacant cell of the specified dimension was found, FALSE otherwise.
+         */
+        FindCellForSpanThatIntersects(
+            [in] ArrayOf<Int32>* cellXY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] Int32 intersectX,
+            [in] Int32 intersectY,
+            [out] Boolean* result);
+
+        /**
+         * The superset of the above two methods
+         */
+        /*FindCellForSpanThatIntersectsIgnoring(
+            [in] ArrayOf<Int32>* cellXY,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] Int32 intersectX,
+            [in] Int32 intersectY,
+            [in] IView* ignoreView,
+            [in] ArrayOf<ArrayOf<Boolean>* >* occupied,
+            [out] Boolean* result);*/
+
+        /**
+         * A drag event has begun over this layout.
+         * It may have begun over this layout (in which case onDragChild is called first),
+         * or it may have begun on another layout.
+         */
+        OnDragEnter();
+
+        /**
+         * Called when drag has left this CellLayout or has been completed (successfully or not)
+         */
+        OnDragExit();
+
+        /**
+         * Mark a child as having been dropped.
+         * At the beginning of the drag operation, the child may have been on another
+         * screen, but it is re-parented before this method is called.
+         *
+         * @param child The child that is being dropped
+         */
+        OnDropChild(
+            [in] IView* child);
+
+        /**
+         * Computes a bounding rectangle for a range of cells
+         *
+         * @param cellX X coordinate of upper left corner expressed as a cell position
+         * @param cellY Y coordinate of upper left corner expressed as a cell position
+         * @param cellHSpan Width in cells
+         * @param cellVSpan Height in cells
+         * @param resultRect Rect into which to put the results
+         */
+        CellToRect(
+            [in] Int32 cellX,
+            [in] Int32 cellY,
+            [in] Int32 cellHSpan,
+            [in] Int32 cellVSpan,
+            [in] IRect* resultRect);
+
+        /**
+         * Computes the required horizontal and vertical cell spans to always
+         * fit the given rectangle.
+         *
+         * @param width Width in pixels
+         * @param height Height in pixels
+         * @param result An array of length 2 in which to store the result (may be NULL).
+         */
+        RectToCell(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] ArrayOf<Int32>* result,
+            [out, callee] ArrayOf<Int32>* outArray);
+
+        CellSpansToSize(
+            [in] Int32 hSpans,
+            [in] Int32 vSpans,
+            [out, callee] ArrayOf<Int32>* outArray);
+
+        /**
+         * Calculate the grid spans needed to fit given item
+         */
+        CalculateSpans(
+            [in] IItemInfo* info);
+
+        /**
+         * Find the first vacant cell, if there is one.
+         *
+         * @param vacant Holds the x and y coordinate of the vacant cell
+         * @param spanX Horizontal cell span.
+         * @param spanY Vertical cell span.
+         *
+         * @return True if a vacant cell was found
+         */
+        GetVacantCell(
+            [in] ArrayOf<Int32>* vacant,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [out] Boolean* result);
+
+        OnMove(
+            [in] IView* view,
+            [in] Int32 newCellX,
+            [in] Int32 newCellY,
+            [in] Int32 newSpanX,
+            [in] Int32 newSpanY);
+
+        MarkCellsAsOccupiedForView(
+            [in] IView* view);
+
+        /*MarkCellsAsOccupiedForView(
+            [in] IView* view,
+            [in] ArrayOf<ArrayOf<Boolean>* >* occupied);*/
+
+        MarkCellsAsUnoccupiedForView(
+            [in] IView* view);
+
+        /*MarkCellsAsUnoccupiedForView(
+            [in] IView* view,
+            [in] ArrayOf<ArrayOf<Boolean>* >* occupied);*/
+
+        GetDesiredWidth(
+            [out] Int32* width);
+
+        GetDesiredHeight(
+            [out] Int32* height);
+
+        IsOccupied(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] Boolean* result);
+
+        LastDownOnOccupiedCell(
+            [out] Boolean* result);
+
+        SetOverscrollTransformsDirty(
+            [in] Boolean dirty);
+
+        ResetOverscrollTransforms();
     }
 
+    [deprecated]
     interface ICellLayoutHelper {
+        WidthInPortrait(
+            [in] IResources* r,
+            [in] Int32 numCells,
+            [out] Int32* outWidth);
+
+        HeightInLandscape(
+            [in] IResources* r,
+            [in] Int32 numCells,
+            [out] Int32* outHeight);
+
+        GetMetrics(
+            [in] IRect* metrics,
+            [in] IResources* res,
+            [in] Int32 measureWidth,
+            [in] Int32 measureHeight,
+            [in] Int32 countX,
+            [in] Int32 countY,
+            [in] Int32 orientation);
+
+        RectToCell(
+            [in] IResources* resources,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] ArrayOf<Int32>* result,
+            [out, callee] ArrayOf<Int32>* outArray);
+
+        /*FindVacantCell(
+            [in] ArrayOf<Int32>* vacant,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] Int32 xCount,
+            [in] Int32 yCount,
+            [in] ArrayOf<ArrayOf<Boolean>* >* occupied,
+            [out] Boolean* result);*/
     }
 
     /**

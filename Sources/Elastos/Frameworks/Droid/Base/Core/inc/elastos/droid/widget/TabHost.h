@@ -26,7 +26,7 @@ namespace Widget {
  * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-tabwidget.html">Tab Layout
  * tutorial</a>.</p>
  */
-class TabHost
+class ECO_PUBLIC TabHost
     : public FrameLayout
     , public ITabHost
     , public IOnTouchModeChangeListener

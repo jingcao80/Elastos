@@ -115,6 +115,8 @@ public:
         CARAPI_(void) Animate();
 
     private:
+        friend class CellLayout;
+
         CARAPI_(void) Cancel();
 
         CARAPI_(void) CompleteAnimationImmediately();
@@ -523,6 +525,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 
@@ -545,81 +549,86 @@ public:
         /* [in] */ Int32 numCells,
         /* [out] */ Int32* outHeight);
 
-    CARAPI_(void) EnableHardwareLayers();
+    CARAPI EnableHardwareLayers();
 
-    CARAPI_(void) DisableHardwareLayers();
+    CARAPI DisableHardwareLayers();
 
-    CARAPI_(void) BuildHardwareLayer();
+    CARAPI BuildHardwareLayer();
 
-    CARAPI_(Float) GetChildrenScale();
+    CARAPI GetChildrenScale(
+        /* [out] */ Float* scale);
 
-    CARAPI_(void) SetGridSize(
+    CARAPI SetGridSize(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
     // Set whether or not to invert the layout horizontally if the layout is in RTL mode.
-    CARAPI_(void) SetInvertIfRtl(
+    CARAPI SetInvertIfRtl(
         /* [in] */ Boolean invert);
 
-    CARAPI_(void) SetOverScrollAmount(
+    CARAPI SetOverScrollAmount(
         /* [in] */ Float r,
         /* [in] */ Boolean left);
 
-    CARAPI_(void) SetPressedOrFocusedIcon(
-        /* [in] */ BubbleTextView* icon);
+    CARAPI SetPressedOrFocusedIcon(
+        /* [in] */ IBubbleTextView* icon);
 
-    CARAPI_(void) SetIsDragOverlapping(
+    CARAPI SetIsDragOverlapping(
         /* [in] */ Boolean isDragOverlapping);
 
-    CARAPI_(Boolean) GetIsDragOverlapping();
+    CARAPI GetIsDragOverlapping(
+        /* [out] */ Boolean* result);
 
-    CARAPI_(void) ScaleRect(
+    CARAPI ScaleRect(
         /* [in] */ IRect* r,
         /* [in] */ Float scale);
 
-    CARAPI_(void) ScaleRectAboutCenter(
-        /* [in] */ IRect* in,
-        /* [in] */ IRect* out,
+    CARAPI ScaleRectAboutCenter(
+        /* [in] */ IRect* _in,
+        /* [in] */ IRect* _out,
         /* [in] */ Float scale);
 
-    CARAPI_(void) ShowFolderAccept(
-        /* [in] */ FolderIcon::FolderRingAnimator* fra);
+    CARAPI ShowFolderAccept(
+        /* [in] */ IFolderIconFolderRingAnimator* fra);
 
-    CARAPI_(void) HideFolderAccept(
-        /* [in] */ FolderIcon::FolderRingAnimator* fra);
+    CARAPI HideFolderAccept(
+        /* [in] */ IFolderIconFolderRingAnimator* fra);
 
-    CARAPI_(void) SetFolderLeaveBehindCell(
+    CARAPI SetFolderLeaveBehindCell(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
-    CARAPI_(void) ClearFolderLeaveBehind();
+    CARAPI ClearFolderLeaveBehind();
 
     // @Override
     CARAPI ShouldDelayChildPressedState(
         /* [out] */ Boolean* res);
 
-    CARAPI_(void) RestoreInstanceState(
+    CARAPI RestoreInstanceState(
         /* [in] */ ISparseArray* states);
 
     // @Override
     CARAPI CancelLongPress();
 
-    CARAPI_(void) SetOnInterceptTouchListener(
+    CARAPI SetOnInterceptTouchListener(
         /* [in] */ IViewOnTouchListener* listener);
 
-    CARAPI_(Int32) GetCountX();
+    CARAPI GetCountX(
+        /* [out] */ Int32* x);
 
-    CARAPI_(Int32) GetCountY();
+    CARAPI GetCountY(
+        /* [out] */ Int32* y);
 
-    CARAPI_(void) SetIsHotseat(
+    CARAPI SetIsHotseat(
         /* [in] */ Boolean isHotseat);
 
-    CARAPI_(Boolean) AddViewToCellLayout(
+    CARAPI AddViewToCellLayout(
         /* [in] */ IView* child,
         /* [in] */ Int32 index,
         /* [in] */ Int32 childId,
-        /* [in] */ LayoutParams* params,
-        /* [in] */ Boolean markCells);
+        /* [in] */ ICellLayoutLayoutParams* params,
+        /* [in] */ Boolean markCells,
+        /* [out] */ Boolean* result);
 
     // @Override
     CARAPI RemoveAllViews();
@@ -652,7 +661,7 @@ public:
         /* [in] */ Int32 start,
         /* [in] */ Int32 count);
 
-    CARAPI_(void) SetTagToCellInfoForPoint(
+    CARAPI SetTagToCellInfoForPoint(
         /* [in] */ Int32 touchX,
         /* [in] */ Int32 touchY);
 
@@ -669,7 +678,7 @@ public:
      * @param y Y coordinate of the point
      * @param result Array of 2 ints to hold the x and y coordinate of the cell
      */
-    CARAPI_(void) PointToCellExact(
+    CARAPI PointToCellExact(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ ArrayOf<Int32>* result);
@@ -680,7 +689,7 @@ public:
      * @param y Y coordinate of the point
      * @param result Array of 2 ints to hold the x and y coordinate of the cell
      */
-    CARAPI_(void) PointToCellRounded(
+    CARAPI PointToCellRounded(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ ArrayOf<Int32>* result);
@@ -693,7 +702,7 @@ public:
      *
      * @param result Array of 2 ints to hold the x and y coordinate of the point
      */
-    CARAPI_(void) CellToPoint(
+    CARAPI CellToPoint(
         /* [in] */ Int32 cellX,
         /* [in] */ Int32 cellY,
         /* [in] */ ArrayOf<Int32>* result);
@@ -706,7 +715,7 @@ public:
      *
      * @param result Array of 2 ints to hold the x and y coordinate of the point
      */
-    CARAPI_(void) CellToCenterPoint(
+    CARAPI CellToCenterPoint(
         /* [in] */ Int32 cellX,
         /* [in] */ Int32 cellY,
         /* [in] */ ArrayOf<Int32>* result);
@@ -719,7 +728,7 @@ public:
      *
      * @param result Array of 2 ints to hold the x and y coordinate of the point
      */
-    CARAPI_(void) RegionToCenterPoint(
+    CARAPI RegionToCenterPoint(
         /* [in] */ Int32 cellX,
         /* [in] */ Int32 cellY,
         /* [in] */ Int32 spanX,
@@ -733,28 +742,34 @@ public:
      * @param cellY Y coordinate of the cell
      * @param result Rect in which to write the result
      */
-    CARAPI_(void) RegionToRect(
+    CARAPI RegionToRect(
         /* [in] */ Int32 cellX,
         /* [in] */ Int32 cellY,
         /* [in] */ Int32 spanX,
         /* [in] */ Int32 spanY,
         /* [in] */ IRect* result);
 
-    CARAPI_(Float) GetDistanceFromCell(
+    CARAPI GetDistanceFromCell(
         /* [in] */ Float x,
         /* [in] */ Float y,
-        /* [in] */ ArrayOf<Int32>* cell);
+        /* [in] */ ArrayOf<Int32>* cell,
+        /* [out] */ Float* result);
 
-    CARAPI_(Int32) GetCellWidth();
+    CARAPI GetCellWidth(
+        /* [out] */ Int32* width);
 
-    CARAPI_(Int32) GetCellHeight();
+    CARAPI GetCellHeight(
+        /* [out] */ Int32* height);
 
-    CARAPI_(Int32) GetWidthGap();
+    CARAPI GetWidthGap(
+        /* [out] */ Int32* wgap);
 
-    CARAPI_(Int32) GetHeightGap();
+    CARAPI GetHeightGap(
+        /* [out] */ Int32* hgap);
 
-    CARAPI_(AutoPtr<IRect>) GetContentRect(
-        /* [in] */ IRect* r);
+    CARAPI GetContentRect(
+        /* [in] */ IRect* r,
+        /* [out] */ IRect** outrect);
 
     static CARAPI GetMetrics(
         /* [in] */ IRect* metrics,
@@ -765,33 +780,38 @@ public:
         /* [in] */ Int32 countY,
         /* [in] */ Int32 orientation);
 
-    CARAPI_(Float) GetBackgroundAlpha();
+    CARAPI GetBackgroundAlpha(
+        /* [out] */ Float* alph);
 
-    CARAPI_(void) SetBackgroundAlphaMultiplier(
+    CARAPI SetBackgroundAlphaMultiplier(
         /* [in] */ Float multiplier);
 
-    CARAPI_(Float) GetBackgroundAlphaMultiplier();
+    CARAPI GetBackgroundAlphaMultiplier(
+        /* [out] */ Float* multiplier);
 
-    CARAPI_(void) SetBackgroundAlpha(
+    CARAPI SetBackgroundAlpha(
         /* [in] */ Float alpha);
 
-    CARAPI_(void) SetShortcutAndWidgetAlpha(
+    CARAPI SetShortcutAndWidgetAlpha(
         /* [in] */ Float alpha);
 
-    CARAPI_(AutoPtr<ShortcutAndWidgetContainer>) GetShortcutsAndWidgets();
+    CARAPI GetShortcutsAndWidgets(
+        /* [out] */  IShortcutAndWidgetContainer** container);
 
-    CARAPI_(AutoPtr<IView>) GetChildAt(
+    CARAPI GetChildAt(
         /* [in] */ Int32 x,
-        /* [in] */ Int32 y);
+        /* [in] */ Int32 y,
+        /* [out] */ IView** outview);
 
-    CARAPI_(Boolean) AnimateChildToPosition(
+    CARAPI AnimateChildToPosition(
         /* [in] */ IView* child,
         /* [in] */ Int32 cellX,
         /* [in] */ Int32 cellY,
         /* [in] */ Int32 duration,
         /* [in] */ Int32 delay,
         /* [in] */ Boolean permanent,
-        /* [in] */ Boolean adjustOccupied);
+        /* [in] */ Boolean adjustOccupied,
+        /* [out] */ Boolean* result);
 
     /**
      * Estimate where the top left cell of the dragged item will land if it is dropped.
@@ -802,14 +822,14 @@ public:
      * @param spanY The number of vertical cells that the item spans
      * @param result The estimated drop cell X and Y.
      */
-    CARAPI_(void) EstimateDropCell(
+    CARAPI EstimateDropCell(
         /* [in] */ Int32 originX,
         /* [in] */ Int32 originY,
         /* [in] */ Int32 spanX,
         /* [in] */ Int32 spanY,
         /* [in] */ ArrayOf<Int32>* result);
 
-    CARAPI_(void) VisualizeDropLocation(
+    CARAPI VisualizeDropLocation(
         /* [in] */ IView* v,
         /* [in] */ IBitmap* dragOutline,
         /* [in] */ Int32 originX,
@@ -822,7 +842,7 @@ public:
         /* [in] */ IPoint* dragOffset,
         /* [in] */ IRect* dragRegion);
 
-    CARAPI_(void) ClearDragOutlines();
+    CARAPI ClearDragOutlines();
 
     /**
      * Find a vacant area that will fit the given bounds nearest the requested
@@ -837,12 +857,13 @@ public:
      * @return The X, Y cell of a vacant area that can contain this object,
      *         nearest the requested location.
      */
-    CARAPI_(AutoPtr<ArrayOf<Int32> >) FindNearestVacantArea(
+    CARAPI FindNearestVacantArea(
         /* [in] */ Int32 pixelX,
         /* [in] */ Int32 pixelY,
         /* [in] */ Int32 spanX,
         /* [in] */ Int32 spanY,
-        /* [in] */ ArrayOf<Int32>* result);
+        /* [in] */ ArrayOf<Int32>* result,
+        /* [out, callee] */ ArrayOf<Int32>** outarray);
 
     /**
      * Find a vacant area that will fit the given bounds nearest the requested
@@ -859,7 +880,7 @@ public:
      * @return The X, Y cell of a vacant area that can contain this object,
      *         nearest the requested location.
      */
-    CARAPI_(AutoPtr<ArrayOf<Int32> >) FindNearestVacantArea(
+    CARAPI FindNearestVacantArea(
         /* [in] */ Int32 pixelX,
         /* [in] */ Int32 pixelY,
         /* [in] */ Int32 minSpanX,
@@ -867,7 +888,8 @@ public:
         /* [in] */ Int32 spanX,
         /* [in] */ Int32 spanY,
         /* [in] */ ArrayOf<Int32>* result,
-        /* [in] */ ArrayOf<Int32>* resultSpan);
+        /* [in] */ ArrayOf<Int32>* resultSpan,
+        /* [out, callee] */ ArrayOf<Int32>** outarray);
 
     /**
      * Find a vacant area that will fit the given bounds nearest the requested
@@ -883,13 +905,15 @@ public:
      * @return The X, Y cell of a vacant area that can contain this object,
      *         nearest the requested location.
      */
-    CARAPI_(AutoPtr<ArrayOf<Int32> >) FindNearestArea(
+    CARAPI FindNearestArea(
         /* [in] */ Int32 pixelX,
         /* [in] */ Int32 pixelY,
         /* [in] */ Int32 spanX,
-        /* [in] */ Int32 spanY, View ignoreView,
+        /* [in] */ Int32 spanY,
+        /* [in] */ IView* ignoreView,
         /* [in] */ Boolean ignoreOccupied,
-        /* [in] */ ArrayOf<Int32>* result);
+        /* [in] */ ArrayOf<Int32>* result,
+        /* [out, callee] */ ArrayOf<Int32>** outarray);
 
     /**
      * Find a vacant area that will fit the given bounds nearest the requested
@@ -907,7 +931,7 @@ public:
      * @return The X, Y cell of a vacant area that can contain this object,
      *         nearest the requested location.
      */
-    CARAPI_(AutoPtr<ArrayOf<Int32> >) FindNearestArea(
+    CARAPI FindNearestArea(
         /* [in] */ Int32 pixelX,
         /* [in] */ Int32 pixelY,
         /* [in] */ Int32 minSpanX,
@@ -918,7 +942,8 @@ public:
         /* [in] */ Boolean ignoreOccupied,
         /* [in] */ ArrayOf<Int32>* result,
         /* [in] */ ArrayOf<Int32>* resultSpan,
-        /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied);
+        /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied,
+        /* [out, callee] */ ArrayOf<Int32>** outarray);
 
     CARAPI_(AutoPtr<ItemConfiguration>) SimpleSwap(
         /* [in] */ Int32 pixelX,
@@ -932,7 +957,7 @@ public:
         /* [in] */ Boolean decX,
         /* [in] */ ItemConfiguration* solution);
 
-    CARAPI_(void) SetUseTempCoords(
+    CARAPI SetUseTempCoords(
         /* [in] */ Boolean useTempCoords);
 
     CARAPI_(AutoPtr<ItemConfiguration>) FindConfigurationNoShuffle(
@@ -945,29 +970,31 @@ public:
         /* [in] */ IView* dragView,
         /* [in] */ ItemConfiguration* solution);
 
-    CARAPI_(void) PrepareChildForDrag(
+    CARAPI PrepareChildForDrag(
         /* [in] */ IView* child);
 
-    CARAPI_(Boolean) IsNearestDropLocationOccupied(
+    CARAPI IsNearestDropLocationOccupied(
         /* [in] */ Int32 pixelX,
         /* [in] */ Int32 pixelY,
         /* [in] */ Int32 spanX,
         /* [in] */ Int32 spanY,
         /* [in] */ IView* dragView,
-        /* [in] */ ArrayOf<Int32>* _result);
+        /* [in] */ ArrayOf<Int32>* _result,
+        /* [out] */ Boolean* success);
 
-    CARAPI_(void) RevertTempState();
+    CARAPI RevertTempState();
 
-    CARAPI_(Boolean) createAreaForResize(
+    CARAPI CreateAreaForResize(
         /* [in] */ Int32 cellX,
         /* [in] */ Int32 cellY,
         /* [in] */ Int32 spanX,
         /* [in] */ Int32 spanY,
         /* [in] */ IView* dragView,
         /* [in] */ ArrayOf<Int32>* direction,
-        /* [in] */ Boolean commit);
+        /* [in] */ Boolean commit,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(AutoPtr<ArrayOf<Int32> >) CreateArea(
+    CARAPI CreateArea(
         /* [in] */ Int32 pixelX,
         /* [in] */ Int32 pixelY,
         /* [in] */ Int32 minSpanX,
@@ -977,12 +1004,14 @@ public:
         /* [in] */ IView* dragView,
         /* [in] */ ArrayOf<Int32>* _result,
         /* [in] */ ArrayOf<Int32>* resultSpan,
-        /* [in] */ Int32 mode);
+        /* [in] */ Int32 mode,
+        /* [out, callee] */ ArrayOf<Int32>** outarray);
 
-    CARAPI_(void) SetItemPlacementDirty(
+    CARAPI SetItemPlacementDirty(
         /* [in] */ Boolean dirty);
 
-    CARAPI_(Boolean) IsItemPlacementDirty();
+    CARAPI IsItemPlacementDirty(
+        /* [out] */ Boolean* result);
 
     /**
      * Find a vacant area that will fit the given bounds nearest the requested
@@ -997,13 +1026,14 @@ public:
      * @return The X, Y cell of a vacant area that can contain this object,
      *         nearest the requested location.
      */
-    CARAPI_(AutoPtr<ArrayOf<Int32> >) FindNearestVacantArea(
+    CARAPI FindNearestVacantArea(
         /* [in] */ Int32 pixelX,
         /* [in] */ Int32 pixelY,
         /* [in] */ Int32 spanX,
         /* [in] */ Int32 spanY,
         /* [in] */ IView* ignoreView,
-        /* [in] */ ArrayOf<Int32>* result);
+        /* [in] */ ArrayOf<Int32>* result,
+        /* [out, callee] */ ArrayOf<Int32>** outarray);
 
     /**
      * Find a vacant area that will fit the given bounds nearest the requested
@@ -1020,15 +1050,17 @@ public:
      * @return The X, Y cell of a vacant area that can contain this object,
      *         nearest the requested location.
      */
-    CARAPI_(AutoPtr<ArrayOf<Int32> >) FindNearestVacantArea(
+    CARAPI FindNearestVacantArea(
         /* [in] */ Int32 pixelX,
         /* [in] */ Int32 pixelY,
         /* [in] */ Int32 minSpanX,
         /* [in] */ Int32 minSpanY,
         /* [in] */ Int32 spanX,
-        /* [in] */ Int32 spanY, View ignoreView,
+        /* [in] */ Int32 spanY,
+        /* [in] */ IView* ignoreView,
         /* [in] */ ArrayOf<Int32>* result,
-        /* [in] */ ArrayOf<Int32>* resultSpan);
+        /* [in] */ ArrayOf<Int32>* resultSpan,
+        /* [out, callee] */ ArrayOf<Int32>** outarray);
 
     /**
      * Find a starting cell position that will fit the given bounds nearest the requested
@@ -1043,14 +1075,16 @@ public:
      * @return The X, Y cell of a vacant area that can contain this object,
      *         nearest the requested location.
      */
-    CARAPI_(AutoPtr<ArrayOf<Int32> >) FindNearestArea(
+    CARAPI FindNearestArea(
         /* [in] */ Int32 pixelX,
         /* [in] */ Int32 pixelY,
         /* [in] */ Int32 spanX,
         /* [in] */ Int32 spanY,
-        /* [in] */ ArrayOf<Int32>* result);
+        /* [in] */ ArrayOf<Int32>* result,
+        /* [out, callee] */ ArrayOf<Int32>** outarray);
 
-    CARAPI_(Boolean) ExistsEmptyCell();
+    CARAPI ExistsEmptyCell(
+        /* [out] */ Boolean* result);
 
     /**
      * Finds the upper-left coordinate of the first rectangle in the grid that can
@@ -1065,10 +1099,11 @@ public:
      *
      * @return True if a vacant cell of the specified dimension was found, FALSE otherwise.
      */
-    CARAPI_(Boolean) FindCellForSpan(
+    CARAPI FindCellForSpan(
         /* [in] */ ArrayOf<Int32>* cellXY,
         /* [in] */ Int32 spanX,
-        /* [in] */ Int32 spanY);
+        /* [in] */ Int32 spanY,
+        /* [out] */ Boolean* result);
 
     /**
      * Like above, but ignores any cells occupied by the item "ignoreView"
@@ -1080,11 +1115,12 @@ public:
      * @param ignoreView The home screen item we should treat as not occupying any space
      * @return
      */
-    CARAPI_(Boolean) FindCellForSpanIgnoring(
+    CARAPI FindCellForSpanIgnoring(
         /* [in] */ ArrayOf<Int32>* cellXY,
         /* [in] */ Int32 spanX,
         /* [in] */ Int32 spanY,
-        /* [in] */ IView* ignoreView);
+        /* [in] */ IView* ignoreView,
+        /* [out] */ Boolean* result);
 
     /**
      * Like above, but if intersectX and intersectY are not -1, then this method will try to
@@ -1098,36 +1134,38 @@ public:
      *
      * @return True if a vacant cell of the specified dimension was found, FALSE otherwise.
      */
-    CARAPI_(Boolean) FindCellForSpanThatIntersects(
+    CARAPI FindCellForSpanThatIntersects(
         /* [in] */ ArrayOf<Int32>* cellXY,
         /* [in] */ Int32 spanX,
         /* [in] */ Int32 spanY,
         /* [in] */ Int32 intersectX,
-        /* [in] */ Int32 intersectY);
+        /* [in] */ Int32 intersectY,
+        /* [out] */ Boolean* result);
 
     /**
      * The superset of the above two methods
      */
-    CARAPI_(Boolean) FindCellForSpanThatIntersectsIgnoring(
+    CARAPI FindCellForSpanThatIntersectsIgnoring(
         /* [in] */ ArrayOf<Int32>* cellXY,
         /* [in] */ Int32 spanX,
         /* [in] */ Int32 spanY,
         /* [in] */ Int32 intersectX,
         /* [in] */ Int32 intersectY,
         /* [in] */ IView* ignoreView,
-        /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied);
+        /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied,
+        /* [out] */ Boolean* result);
 
     /**
      * A drag event has begun over this layout.
      * It may have begun over this layout (in which case onDragChild is called first),
      * or it may have begun on another layout.
      */
-    CARAPI_(void) OnDragEnter();
+    CARAPI OnDragEnter();
 
     /**
      * Called when drag has left this CellLayout or has been completed (successfully or not)
      */
-    CARAPI_(void) OnDragExit();
+    CARAPI OnDragExit();
 
     /**
      * Mark a child as having been dropped.
@@ -1136,7 +1174,7 @@ public:
      *
      * @param child The child that is being dropped
      */
-    CARAPI_(void) OnDropChild(
+    CARAPI OnDropChild(
         /* [in] */ IView* child);
 
     /**
@@ -1148,7 +1186,7 @@ public:
      * @param cellVSpan Height in cells
      * @param resultRect Rect into which to put the results
      */
-    CARAPI_(void) CellToRect(
+    CARAPI CellToRect(
         /* [in] */ Int32 cellX,
         /* [in] */ Int32 cellY,
         /* [in] */ Int32 cellHSpan,
@@ -1163,10 +1201,11 @@ public:
      * @param height Height in pixels
      * @param result An array of length 2 in which to store the result (may be NULL).
      */
-    CARAPI_(AutoPtr<ArrayOf<Int32> >) RectToCell(
+    CARAPI RectToCell(
         /* [in] */ Int32 width,
         /* [in] */ Int32 height,
-        /* [in] */ ArrayOf<Int32>* result);
+        /* [in] */ ArrayOf<Int32>* result,
+        /* [out, callee] */ ArrayOf<Int32>** outArray);
 
     static CARAPI RectToCell(
         /* [in] */ IResources* resources,
@@ -1175,15 +1214,16 @@ public:
         /* [in] */ ArrayOf<Int32>* result,
         /* [out, callee] */ ArrayOf<Int32>** outArray);
 
-    CARAPI_(AutoPtr<ArrayOf<Int32> >) CellSpansToSize(
+    CARAPI CellSpansToSize(
         /* [in] */ Int32 hSpans,
-        /* [in] */ Int32 vSpans);
+        /* [in] */ Int32 vSpans,
+        /* [out, callee] */ ArrayOf<Int32>** outArray);
 
     /**
      * Calculate the grid spans needed to fit given item
      */
-    CARAPI_(void) CalculateSpans(
-        /* [in] */ ItemInfo* info);
+    CARAPI CalculateSpans(
+        /* [in] */ IItemInfo* info);
 
     /**
      * Find the first vacant cell, if there is one.
@@ -1194,10 +1234,11 @@ public:
      *
      * @return True if a vacant cell was found
      */
-    CARAPI_(Boolean) GetVacantCell(
+    CARAPI GetVacantCell(
         /* [in] */ ArrayOf<Int32>* vacant,
         /* [in] */ Int32 spanX,
-        /* [in] */ Int32 spanY);
+        /* [in] */ Int32 spanY,
+        /* [out] */ Boolean* result);
 
     static CARAPI FindVacantCell(
         /* [in] */ ArrayOf<Int32>* vacant,
@@ -1208,30 +1249,32 @@ public:
         /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied,
         /* [out] */ Boolean* result);
 
-    CARAPI_(void) OnMove(
+    CARAPI OnMove(
         /* [in] */ IView* view,
         /* [in] */ Int32 newCellX,
         /* [in] */ Int32 newCellY,
         /* [in] */ Int32 newSpanX,
         /* [in] */ Int32 newSpanY);
 
-    CARAPI_(void) MarkCellsAsOccupiedForView(
+    CARAPI MarkCellsAsOccupiedForView(
         /* [in] */ IView* view);
 
-    CARAPI_(void) MarkCellsAsOccupiedForView(
+    CARAPI MarkCellsAsOccupiedForView(
         /* [in] */ IView* view,
         /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied);
 
-    CARAPI_(void) MarkCellsAsUnoccupiedForView(
+    CARAPI MarkCellsAsUnoccupiedForView(
         /* [in] */ IView* view);
 
-    CARAPI_(void) MarkCellsAsUnoccupiedForView(
+    CARAPI MarkCellsAsUnoccupiedForView(
         /* [in] */ IView* view,
         /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied);
 
-    CARAPI_(Int32) GetDesiredWidth();
+    CARAPI GetDesiredWidth(
+        /* [out] */ Int32* width);
 
-    CARAPI_(Int32) GetDesiredHeight();
+    CARAPI GetDesiredHeight(
+        /* [out] */ Int32* height);
 
     CARAPI IsOccupied(
         /* [in] */ Int32 x,
@@ -1243,20 +1286,21 @@ public:
         /* [in] */ IAttributeSet* attrs,
         /* [out] */ IViewGroupLayoutParams** lp);
 
-    CARAPI_(Boolean) LastDownOnOccupiedCell();
+    CARAPI LastDownOnOccupiedCell(
+        /* [out] */ Boolean* result);
 
 protected:
-    CARAPI_(void) SetOverscrollTransformsDirty(
+    CARAPI SetOverscrollTransformsDirty(
         /* [in] */ Boolean dirty);
 
-    CARAPI_(void) ResetOverscrollTransforms();
+    CARAPI ResetOverscrollTransforms();
 
     // @Override
     CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
     // @Override
-    CARAPI_(void) DispatchDraw(
+    CARAPI DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
     // @Override
@@ -1300,7 +1344,7 @@ protected:
 
 private:
     CARAPI_(void) InvalidateBubbleTextView(
-        /* [in] */ BubbleTextView* icon);
+        /* [in] */ IBubbleTextView* icon);
 
     CARAPI_(void) ClearTagCellInfo();
 
@@ -1539,7 +1583,7 @@ private:
     Int32 mDragOutlineCurrent;
     AutoPtr<IPaint> mDragOutlinePaint;
 
-    AutoPtr<BubbleTextView> mPressedOrFocusedIcon;
+    AutoPtr<IBubbleTextView> mPressedOrFocusedIcon;
 
     AutoPtr<IHashMap> mReorderAnimators; // <CellLayout.LayoutParams, Animator>
     AutoPtr<IHashMap> mShakeAnimators; // <View, ReorderHintAnimation>

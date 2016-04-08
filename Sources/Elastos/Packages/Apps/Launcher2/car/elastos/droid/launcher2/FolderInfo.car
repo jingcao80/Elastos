@@ -12,6 +12,7 @@ module
     * @invoke interface IItemInfo
     */
     interface IFolderInfo {
+
     }
 
     interface IFolderListener {

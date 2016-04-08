@@ -2,28 +2,34 @@
 #include "elastos/droid/launcher2/CellLayout.h"
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include "elastos/droid/launcher2/LauncherModel.h"
+#include "elastos/droid/launcher2/LauncherAppWidgetInfo.h"
+#include "elastos/droid/launcher2/PendingAddItemInfo.h"
 #include <elastos/utility/Arrays.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/droid/R.h>
 #include "R.h"
-
+#include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Animation::IAnimatorSet;
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Graphics::CRectHelper;
+using Elastos::Droid::Graphics::IRectHelper;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Graphics::CPoint;
 using Elastos::Droid::Graphics::CPorterDuffXfermode;
 using Elastos::Droid::Graphics::PorterDuffMode_ADD;
 using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::IXfermode;
 using Elastos::Droid::Graphics::Drawable::CColorDrawable;
 using Elastos::Droid::Graphics::Drawable::IColorDrawable;
 using Elastos::Droid::Graphics::Drawable::INinePatchDrawable;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::Animation::IAnimation;
 using Elastos::Droid::View::Animation::CDecelerateInterpolator;
+using Elastos::Droid::Widget::ITextView;
 using Elastos::Core::IFloat;
 using Elastos::Core::ICloneable;
 using Elastos::Core::EIID_IComparator;
@@ -77,7 +83,7 @@ ECode CellLayout::ReorderHintAnimation::MyAnimatorListenerAdapter::OnAnimationRe
     // We make sure to end only after a full period
     mHost->mInitDeltaX = 0.0f;
     mHost->mInitDeltaY = 0.0f;
-    mHost->mInitScale = mHost->mHost->GetChildrenScale();
+    mHost->mHost->GetChildrenScale(&(mHost->mInitScale));
     return NOERROR;
 }
 
@@ -125,7 +131,9 @@ CellLayout::ReorderHintAnimation::ReorderHintAnimation(
     child->GetTranslationY(&mInitDeltaY);
     Int32 width;
     child->GetWidth(&width);
-    mFinalScale = mHost->GetChildrenScale() - 4.0f / width;
+    Float scale;
+    mHost->GetChildrenScale(&scale);
+    mFinalScale = scale - 4.0f / width;
     child->GetScaleX(&mInitScale);
     mChild = child;
 }
@@ -152,7 +160,7 @@ void CellLayout::ReorderHintAnimation::Animate()
     (*array)[0] = 0.0f;
     (*array)[1] = 1.0f;
     AutoPtr<IValueAnimator> va = LauncherAnimUtils::OfFloat(mChild, array);
-    mA = va;
+    mA = IAnimator::Probe(va);
     va->SetRepeatMode(IValueAnimator::ANIMATION_REVERSE);
     va->SetRepeatCount(IValueAnimator::ANIMATION_INFINITE);
     va->SetDuration(DURATION);
@@ -162,7 +170,7 @@ void CellLayout::ReorderHintAnimation::Animate()
     va->AddUpdateListener(listener);
     AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter(this);
     IAnimator::Probe(va)->AddListener(adapter);
-    mHost->mShakeAnimators->Put(mChild, this);
+    mHost->mShakeAnimators->Put(TO_IINTERFACE(mChild), TO_IINTERFACE(this));
     IAnimator::Probe(va)->Start();
 }
 
@@ -183,16 +191,17 @@ void CellLayout::ReorderHintAnimation::CompleteAnimationImmediately()
     mA = IAnimator::Probe(s);
     AutoPtr<ArrayOf<IAnimator*> > items = ArrayOf<IAnimator*>::Alloc(4);
     AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
-    (*array)[0] = mHost->GetChildrenScale();
-    AutoPtr<IValueAnimator> va = LauncherAnimUtils::OfFloat(mChild, String("scaleX"), array);
+    mHost->GetChildrenScale(&((*array)[0]));
+    AutoPtr<IValueAnimator> va = IValueAnimator::Probe(LauncherAnimUtils::OfFloat(mChild,
+            String("scaleX"), array));
     items->Set(0, IAnimator::Probe(va));
-    va = LauncherAnimUtils::OfFloat(mChild, String("scaleY"), array);
+    va = IValueAnimator::Probe(LauncherAnimUtils::OfFloat(mChild, String("scaleY"), array));
     items->Set(1, IAnimator::Probe(va));
     array = ArrayOf<Float>::Alloc(1);
     (*array)[0] = 0.0f;
-    va = LauncherAnimUtils::OfFloat(mChild, String("translationX"), array);
+    va = IValueAnimator::Probe(LauncherAnimUtils::OfFloat(mChild, String("translationX"), array));
     items->Set(2, IAnimator::Probe(va));
-    va = LauncherAnimUtils::OfFloat(mChild, String("translationY"), array);
+    va = IValueAnimator::Probe(LauncherAnimUtils::OfFloat(mChild, String("translationY"), array));
     items->Set(3, IAnimator::Probe(va));
     s->PlayTogether(items);
     mA->SetDuration(REORDER_ANIMATION_DURATION);
@@ -936,6 +945,11 @@ CellLayout::CellLayout()
     CStack::New((IStack**)&mTempRectStack);
 }
 
+ECode CellLayout::constructor()
+{
+    return NOERROR;
+}
+
 ECode CellLayout::constructor(
     /* [in] */ IContext* context)
 {
@@ -992,9 +1006,12 @@ ECode CellLayout::constructor(
 
     SetAlwaysDrawnWithCacheEnabled(FALSE);
 
-    AutoPtr<IResources> res = GetResources();
-    res->GetInteger(R::integer::hotseat_item_scale_percentage, &mHotseatScale);
-    mHotseatScale /= 100.0f;;
+    AutoPtr<IResources> res;
+    GetResources((IResources**)&res);
+    Int32 tmp;
+    res->GetInteger(R::integer::hotseat_item_scale_percentage, &tmp);
+    mHotseatScale = tmp;
+    mHotseatScale /= 100.0f;
 
     res->GetDrawable(R::drawable::homescreen_blue_normal_holo, (IDrawable**)&mNormalBackground);
     res->GetDrawable(R::drawable::homescreen_blue_strong_holo, (IDrawable**)&mActiveGlowBackground);
@@ -1037,21 +1054,22 @@ ECode CellLayout::constructor(
     for (Int32 i = 0; i < mDragOutlineAnims->GetLength(); i++) {
         AutoPtr<InterruptibleInOutAnimator> anim =
             new InterruptibleInOutAnimator(this, duration, fromAlphaValue, toAlphaValue);
-        anim->GetAnimator()->SetInterpolator(mEaseOutInterpolator);
+        IAnimator::Probe(anim->GetAnimator())->SetInterpolator(mEaseOutInterpolator);
         Int32 thisIndex = i;
         AutoPtr<AnimatorUpdateListener> listener = new AnimatorUpdateListener(this, anim, thisIndex);
         anim->GetAnimator()->AddUpdateListener(listener);
         // The animation holds a reference to the drag outline bitmap as long is it's
         // running. This way the bitmap can be GCed when the animations are complete.
         AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter2(anim);
-        anim->GetAnimator()->AddListener(adapter);
+        IAnimator::Probe(anim->GetAnimator())->AddListener(adapter);
         (*mDragOutlineAnims)[i] = anim;
     }
 
     CRect::New((IRect**)&mBackgroundRect);
     CRect::New((IRect**)&mForegroundRect);
 
-    mShortcutsAndWidgets = new ShortcutAndWidgetContainer(context);
+    mShortcutsAndWidgets = new ShortcutAndWidgetContainer();
+    mShortcutsAndWidgets->constructor(context);
     mShortcutsAndWidgets->SetCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap,
             mCountX);
 
@@ -1091,7 +1109,7 @@ ECode CellLayout::HeightInLandscape(
     // have. We ignore the left/right padding on CellLayout because it turns out in our design
     // the padding extends outside the visible screen size, but it looked fine anyway.
     Int32 cellHeight;
-    r->GetDimensionPixelSize(R::dimen::workspace_cell_height, cellHeight);
+    r->GetDimensionPixelSize(R::dimen::workspace_cell_height, &cellHeight);
     Int32 wgap, hgap;
     r->GetDimensionPixelSize(R::dimen::workspace_width_gap, &wgap);
     r->GetDimensionPixelSize(R::dimen::workspace_height_gap, &hgap);
@@ -1101,27 +1119,31 @@ ECode CellLayout::HeightInLandscape(
     return NOERROR;
 }
 
-void CellLayout::EnableHardwareLayers()
+ECode CellLayout::EnableHardwareLayers()
 {
-    mShortcutsAndWidgets->SetLayerType(LAYER_TYPE_HARDWARE, sPaint);
+    return mShortcutsAndWidgets->SetLayerType(LAYER_TYPE_HARDWARE, sPaint);
 }
 
-void CellLayout::DisableHardwareLayers()
+ECode CellLayout::DisableHardwareLayers()
 {
-    mShortcutsAndWidgets->SetLayerType(LAYER_TYPE_NONE, sPaint);
+    return mShortcutsAndWidgets->SetLayerType(LAYER_TYPE_NONE, sPaint);
 }
 
-void CellLayout::BuildHardwareLayer()
+ECode CellLayout::BuildHardwareLayer()
 {
-    mShortcutsAndWidgets->BuildLayer();
+    return mShortcutsAndWidgets->BuildLayer();
 }
 
-Float CellLayout::GetChildrenScale()
+ECode CellLayout::GetChildrenScale(
+    /* [out] */ Float* scale)
 {
-    return mIsHotseat ? mHotseatScale : 1.0f;
+    VALIDATE_NOT_NULL(scale);
+
+    *scale = mIsHotseat ? mHotseatScale : 1.0f;
+    return NOERROR;
 }
 
-void CellLayout::SetGridSize(
+ECode CellLayout::SetGridSize(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y)
 {
@@ -1136,26 +1158,26 @@ void CellLayout::SetGridSize(
     mTempRectStack->Clear();
     mShortcutsAndWidgets->SetCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap,
             mCountX);
-    RequestLayout();
+    return RequestLayout();
 }
 
 // Set whether or not to invert the layout horizontally if the layout is in RTL mode.
-void CellLayout::SetInvertIfRtl(
+ECode CellLayout::SetInvertIfRtl(
     /* [in] */ Boolean invert)
 {
-    mShortcutsAndWidgets->SetInvertIfRtl(invert);
+    return mShortcutsAndWidgets->SetInvertIfRtl(invert);
 }
 
 void CellLayout::InvalidateBubbleTextView(
-    /* [in] */ BubbleTextView* icon)
+    /* [in] */ IBubbleTextView* icon)
 {
     Int32 padding;
     icon->GetPressedOrFocusedBackgroundPadding(&padding);
     Int32 l, t, r, b;
-    icon->GetLeft(&l);
-    icon->GetTop(&t);
-    icon->GetRight(&r);
-    icon->GetBottom(&b);
+    IView::Probe(icon)->GetLeft(&l);
+    IView::Probe(icon)->GetTop(&t);
+    IView::Probe(icon)->GetRight(&r);
+    IView::Probe(icon)->GetBottom(&b);
     Int32 pl, pt;
     GetPaddingLeft(&pl);
     GetPaddingTop(&pt);
@@ -1163,7 +1185,7 @@ void CellLayout::InvalidateBubbleTextView(
             r + pl + padding, b + pt + padding);
 }
 
-void CellLayout::SetOverScrollAmount(
+ECode CellLayout::SetOverScrollAmount(
     /* [in] */ Float r,
     /* [in] */ Boolean left)
 {
@@ -1176,15 +1198,15 @@ void CellLayout::SetOverScrollAmount(
 
     mForegroundAlpha = (Int32) Elastos::Core::Math::Round((r * 255));
     mOverScrollForegroundDrawable->SetAlpha(mForegroundAlpha);
-    Invalidate();
+    return Invalidate();
 }
 
-void CellLayout::SetPressedOrFocusedIcon(
-    /* [in] */ BubbleTextView* icon)
+ECode CellLayout::SetPressedOrFocusedIcon(
+    /* [in] */ IBubbleTextView* icon)
 {
     // We draw the pressed or focused BubbleTextView's background in CellLayout because it
     // requires an expanded clip rect (due to the glow's blur radius)
-    AutoPtr<BubbleTextView> oldIcon = mPressedOrFocusedIcon;
+    AutoPtr<IBubbleTextView> oldIcon = mPressedOrFocusedIcon;
     mPressedOrFocusedIcon = icon;
     if (oldIcon != NULL) {
         InvalidateBubbleTextView(oldIcon);
@@ -1192,29 +1214,36 @@ void CellLayout::SetPressedOrFocusedIcon(
     if (mPressedOrFocusedIcon != NULL) {
         InvalidateBubbleTextView(mPressedOrFocusedIcon);
     }
+    return NOERROR;
 }
 
-void CellLayout::SetIsDragOverlapping(
+ECode CellLayout::SetIsDragOverlapping(
     /* [in] */ Boolean isDragOverlapping)
 {
     if (mIsDragOverlapping != isDragOverlapping) {
         mIsDragOverlapping = isDragOverlapping;
         Invalidate();
     }
+    return NOERROR;
 }
 
-Boolean CellLayout::GetIsDragOverlapping()
+ECode CellLayout::GetIsDragOverlapping(
+    /* [out] */ Boolean* result)
 {
-    return mIsDragOverlapping;
+    VALIDATE_NOT_NULL(result);
+
+    *result = mIsDragOverlapping;
+    return NOERROR;
 }
 
-void CellLayout::SetOverscrollTransformsDirty(
+ECode CellLayout::SetOverscrollTransformsDirty(
     /* [in] */ Boolean dirty)
 {
     mScrollingTransformsDirty = dirty;
+    return NOERROR;
 }
 
-void CellLayout::ResetOverscrollTransforms()
+ECode CellLayout::ResetOverscrollTransforms()
 {
     if (mScrollingTransformsDirty) {
         SetOverscrollTransformsDirty(FALSE);
@@ -1229,9 +1258,10 @@ void CellLayout::ResetOverscrollTransforms()
         SetPivotX(w / 2);
         SetPivotY(h / 2);
     }
+    return NOERROR;
 }
 
-void CellLayout::ScaleRect(
+ECode CellLayout::ScaleRect(
     /* [in] */ IRect* r,
     /* [in] */ Float scale)
 {
@@ -1246,20 +1276,21 @@ void CellLayout::ScaleRect(
         r->SetRight((Int32)(right * scale + 0.5f));
         r->SetBottom((Int32)(bottom * scale + 0.5f));
     }
+    return NOERROR;
 }
 
-void CellLayout::ScaleRectAboutCenter(
-    /* [in] */ IRect* in,
-    /* [in] */ IRect* out,
+ECode CellLayout::ScaleRectAboutCenter(
+    /* [in] */ IRect* _in,
+    /* [in] */ IRect* _out,
     /* [in] */ Float scale)
 {
     Int32 cx, cy;
-    in->GetCenterX(&cx);
-    in->GetCenterY(&cy);
-    out->Set(in);
-    out->Offset(-cx, -cy);
-    ScaleRect(out, scale);
-    out->Offset(cx, cy);
+    _in->GetCenterX(&cx);
+    _in->GetCenterY(&cy);
+    _out->Set(_in);
+    _out->Offset(-cx, -cy);
+    ScaleRect(_out, scale);
+    return _out->Offset(cx, cy);
 }
 
 void CellLayout::OnDraw(
@@ -1291,7 +1322,9 @@ void CellLayout::OnDraw(
         Float alpha = (*mDragOutlineAlphas)[i];
         if (alpha > 0) {
             AutoPtr<IRect> r = (*mDragOutlines)[i];
-            ScaleRectAboutCenter(r, mTemp, GetChildrenScale());
+            Float scale;
+            GetChildrenScale(&scale);
+            ScaleRectAboutCenter(r, mTemp, scale);
             AutoPtr<IBitmap> b = IBitmap::Probe((*mDragOutlineAnims)[i]->GetTag());
             paint->SetAlpha((Int32)(alpha + .5f));
             canvas->DrawBitmap(b, NULL, mTemp, paint);
@@ -1307,8 +1340,8 @@ void CellLayout::OnDraw(
         mPressedOrFocusedIcon->GetPressedOrFocusedBackground((IBitmap**)&b);
         if (b != NULL) {
             Int32 l, t, pl, pt;
-            mPressedOrFocusedIcon->GetLeft(&l);
-            mPressedOrFocusedIcon->GetTop(&t);
+            IView::Probe(mPressedOrFocusedIcon)->GetLeft(&l);
+            IView::Probe(mPressedOrFocusedIcon)->GetTop(&t);
             GetPaddingLeft(&pl);
             GetPaddingTop(&pt);
             canvas->DrawBitmap(b, l + pl - padding, t + pt - padding, NULL);
@@ -1319,14 +1352,15 @@ void CellLayout::OnDraw(
         AutoPtr<ArrayOf<Int32> > pt = ArrayOf<Int32>::Alloc(2);
         AutoPtr<IColorDrawable> cd;
         CColorDrawable::New(IColor::RED, (IColorDrawable**)&cd);
-        cd->SetBounds(0, 0,  mCellWidth, mCellHeight);
+        IDrawable::Probe(cd)->SetBounds(0, 0,  mCellWidth, mCellHeight);
         for (Int32 i = 0; i < mCountX; i++) {
             for (Int32 j = 0; j < mCountY; j++) {
                 if ((*(*mOccupied)[i])[j]) {
                     CellToPoint(i, j, pt);
-                    canvas->Save();
+                    Int32 tmp;
+                    canvas->Save(&tmp);
                     canvas->Translate((*pt)[0], (*pt)[1]);
-                    cd->Draw(canvas);
+                    IDrawable::Probe(cd)->Draw(canvas);
                     canvas->Restore();
                 }
             }
@@ -1345,14 +1379,17 @@ void CellLayout::OnDraw(
 
         // Draw outer ring
         AutoPtr<IDrawable> d = FolderIcon::FolderRingAnimator::sSharedOuterRingDrawable;
-        Int32 width = (Int32) fra->GetOuterRingSize();
+        Float _size;
+        fra->GetOuterRingSize(&_size);
+        Int32 width = (Int32)_size;
         Int32 height = width;
         CellToPoint(fra->mCellX, fra->mCellY, mTempLocation);
 
         Int32 centerX = (*mTempLocation)[0] + mCellWidth / 2;
         Int32 centerY = (*mTempLocation)[1] + previewOffset / 2;
 
-        canvas->Save();
+        Int32 tmp;
+        canvas->Save(&tmp);
         canvas->Translate(centerX - width / 2, centerY - height / 2);
         d->SetBounds(0, 0, width, height);
         d->Draw(canvas);
@@ -1360,13 +1397,15 @@ void CellLayout::OnDraw(
 
         // Draw inner ring
         d = FolderIcon::FolderRingAnimator::sSharedInnerRingDrawable;
-        width = (Int32) fra->GetInnerRingSize();
+        Float _size2;
+        fra->GetInnerRingSize(&_size2);
+        width = (Int32)_size2;
         height = width;
         CellToPoint(fra->mCellX, fra->mCellY, mTempLocation);
 
         centerX = (*mTempLocation)[0] + mCellWidth / 2;
         centerY = (*mTempLocation)[1] + previewOffset / 2;
-        canvas->Save();
+        canvas->Save(&tmp);
         canvas->Translate(centerX - width / 2, centerY - width / 2);
         d->SetBounds(0, 0, width, height);
         d->Draw(canvas);
@@ -1383,7 +1422,8 @@ void CellLayout::OnDraw(
         Int32 centerX = (*mTempLocation)[0] + mCellWidth / 2;
         Int32 centerY = (*mTempLocation)[1] + previewOffset / 2;
 
-        canvas->Save();
+        Int32 tmp;
+        canvas->Save(&tmp);
         canvas->Translate(centerX - width / 2, centerY - width / 2);
         d->SetBounds(0, 0, width, height);
         d->Draw(canvas);
@@ -1391,7 +1431,7 @@ void CellLayout::OnDraw(
     }
 }
 
-void CellLayout::DispatchDraw(
+ECode CellLayout::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     ViewGroup::DispatchDraw(canvas);
@@ -1399,41 +1439,44 @@ void CellLayout::DispatchDraw(
         mOverScrollForegroundDrawable->SetBounds(mForegroundRect);
         AutoPtr<IPaint> p;
         INinePatchDrawable::Probe(mOverScrollForegroundDrawable)->GetPaint((IPaint**)&p);
-        p->SetXfermode(sAddBlendMode);
+        p->SetXfermode(IXfermode::Probe(sAddBlendMode));
         mOverScrollForegroundDrawable->Draw(canvas);
         p->SetXfermode(NULL);
     }
+    return NOERROR;
 }
 
-void CellLayout::ShowFolderAccept(
-    /* [in] */ FolderIcon::FolderRingAnimator* fra)
+ECode CellLayout::ShowFolderAccept(
+    /* [in] */ IFolderIconFolderRingAnimator* fra)
 {
-    mFolderOuterRings->Add((IObject*)fra);
+    return mFolderOuterRings->Add(TO_IINTERFACE(fra));
 }
 
-void CellLayout::HideFolderAccept(
-    /* [in] */ FolderIcon::FolderRingAnimator* fra)
+ECode CellLayout::HideFolderAccept(
+    /* [in] */ IFolderIconFolderRingAnimator* fra)
 {
-    if (mFolderOuterRings->Contains((IObject*)fra)) {
-        mFolderOuterRings->Remove((IObject*)fra);
+    Boolean res;
+    mFolderOuterRings->Contains(TO_IINTERFACE(fra), &res);
+    if (res) {
+        mFolderOuterRings->Remove(TO_IINTERFACE(fra));
     }
-    Invalidate();
+    return Invalidate();
 }
 
-void CellLayout::SetFolderLeaveBehindCell(
+ECode CellLayout::SetFolderLeaveBehindCell(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y)
 {
     (*mFolderLeaveBehindCell)[0] = x;
     (*mFolderLeaveBehindCell)[1] = y;
-    Invalidate();
+    return Invalidate();
 }
 
-void CellLayout::ClearFolderLeaveBehind()
+ECode CellLayout::ClearFolderLeaveBehind()
 {
     (*mFolderLeaveBehindCell)[0] = -1;
     (*mFolderLeaveBehindCell)[1] = -1;
-    Invalidate();
+    return Invalidate();
 }
 
 ECode CellLayout::ShouldDelayChildPressedState(
@@ -1444,10 +1487,10 @@ ECode CellLayout::ShouldDelayChildPressedState(
     return NOERROR;
 }
 
-void CellLayout::RestoreInstanceState(
+ECode CellLayout::RestoreInstanceState(
     /* [in] */ ISparseArray* states)
 {
-    DispatchRestoreInstanceState(states);
+    return DispatchRestoreInstanceState(states);
 }
 
 ECode CellLayout::CancelLongPress()
@@ -1459,62 +1502,77 @@ ECode CellLayout::CancelLongPress()
     GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
-        GetChildAt(i, (IView**)&child);
+        ViewGroup::GetChildAt(i, (IView**)&child);
         child->CancelLongPress();
     }
     return NOERROR;
 }
 
-void CellLayout::SetOnInterceptTouchListener(
+ECode CellLayout::SetOnInterceptTouchListener(
     /* [in] */ IViewOnTouchListener* listener)
 {
     mInterceptTouchListener = listener;
+    return NOERROR;
 }
 
-Int32 CellLayout::GetCountX()
+ECode CellLayout::GetCountX(
+    /* [out] */ Int32* x)
 {
-    return mCountX;
+    VALIDATE_NOT_NULL(x);
+
+    *x = mCountX;
+    return NOERROR;
 }
 
-Int32 CellLayout::GetCountY()
+ECode CellLayout::GetCountY(
+    /* [out] */ Int32* y)
 {
-    return mCountY;
+    VALIDATE_NOT_NULL(y);
+
+    *y = mCountY;
+    return NOERROR;
 }
 
-void CellLayout::SetIsHotseat(
+ECode CellLayout::SetIsHotseat(
     /* [in] */ Boolean isHotseat)
 {
     mIsHotseat = isHotseat;
+    return NOERROR;
 }
 
-Boolean CellLayout::AddViewToCellLayout(
+ECode CellLayout::AddViewToCellLayout(
     /* [in] */ IView* child,
     /* [in] */ Int32 index,
     /* [in] */ Int32 childId,
-    /* [in] */ LayoutParams* params,
-    /* [in] */ Boolean markCells)
+    /* [in] */ ICellLayoutLayoutParams* params,
+    /* [in] */ Boolean markCells,
+    /* [out] */ Boolean* result)
 {
-    LayoutParams* lp = params;
+    VALIDATE_NOT_NULL(result);
+
+    LayoutParams* lp = (LayoutParams*)params;
 
     // Hotseat icons - remove text
     if (IBubbleTextView::Probe(child)) {
-        AutoPtr<IBubbleTextView> bubbleChild = (BubbleTextView*)IBubbleTextView::Probe(child);
+        AutoPtr<IBubbleTextView> bubbleChild = IBubbleTextView::Probe(child);
 
         AutoPtr<IResources> res;
         GetResources((IResources**)&res);
         Int32 color;
         if (mIsHotseat) {
             res->GetColor(Elastos::Droid::R::color::transparent, &color);
-            bubbleChild->SetTextColor(color);
+            ITextView::Probe(bubbleChild)->SetTextColor(color);
         }
         else {
             res->GetColor(R::color::workspace_icon_text_color, &color);
-            bubbleChild->SetTextColor(color);
+            ITextView::Probe(bubbleChild)->SetTextColor(color);
         }
     }
 
-    child->SetScaleX(GetChildrenScale());
-    child->SetScaleY(GetChildrenScale());
+    Float scale;
+    GetChildrenScale(&scale);
+    child->SetScaleX(scale);
+    child->SetScaleY(scale);
 
     // Generate an id for each view, this assumes we have at most 256x256 cells
     // per workspace screen
@@ -1530,9 +1588,11 @@ Boolean CellLayout::AddViewToCellLayout(
 
         if (markCells) MarkCellsAsOccupiedForView(child);
 
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
     }
-    return FALSE;
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode CellLayout::RemoveAllViews()
@@ -1572,7 +1632,7 @@ ECode CellLayout::RemoveViewAt(
     /* [in] */ Int32 index)
 {
     AutoPtr<IView> child;
-    mShortcutsAndWidgets->GetChildAt(index, (IView**)&child);
+    IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(index, (IView**)&child);
     MarkCellsAsUnoccupiedForView(child);
     mShortcutsAndWidgets->RemoveViewAt(index);
     return NOERROR;
@@ -1592,7 +1652,7 @@ ECode CellLayout::RemoveViews(
 {
     for (Int32 i = start; i < start + count; i++) {
         AutoPtr<IView> child;
-        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
+        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         MarkCellsAsUnoccupiedForView(child);
     }
     mShortcutsAndWidgets->RemoveViews(start, count);
@@ -1605,7 +1665,7 @@ ECode CellLayout::RemoveViewsInLayout(
 {
     for (Int32 i = start; i < start + count; i++) {
         AutoPtr<IView> child;
-        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
+        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         MarkCellsAsUnoccupiedForView(child);
     }
     mShortcutsAndWidgets->RemoveViewsInLayout(start, count);
@@ -1621,7 +1681,7 @@ ECode CellLayout::OnAttachedToWindow()
     return NOERROR;
 }
 
-void CellLayout::SetTagToCellInfoForPoint(
+ECode CellLayout::SetTagToCellInfoForPoint(
     /* [in] */ Int32 touchX,
     /* [in] */ Int32 touchY)
 {
@@ -1638,7 +1698,7 @@ void CellLayout::SetTagToCellInfoForPoint(
     Boolean found = FALSE;
     for (Int32 i = count - 1; i >= 0; i--) {
         AutoPtr<IView> child;
-        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
+        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
         LayoutParams* lp = (LayoutParams*)_lp.Get();
@@ -1646,8 +1706,8 @@ void CellLayout::SetTagToCellInfoForPoint(
         Int32 v;
         child->GetVisibility(&v);
         AutoPtr<IAnimation> anim;
-        if ((v == VISIBLE || (child->GetAnimation((IAnimation**)&anim), anim != NULL) &&
-                lp->mIsLockedToGrid) {
+        if ((v == VISIBLE || (child->GetAnimation((IAnimation**)&anim), anim) != NULL) &&
+                    lp->mIsLockedToGrid) {
             child->GetHitRect(frame);
 
             Float scale;
@@ -1698,7 +1758,7 @@ void CellLayout::SetTagToCellInfoForPoint(
         cellInfo->mSpanX = 1;
         cellInfo->mSpanY = 1;
     }
-    SetTag((IObject*)cellInfo);
+    return SetTag((IObject*)cellInfo);
 }
 
 ECode CellLayout::OnInterceptTouchEvent(
@@ -1751,7 +1811,7 @@ AutoPtr<CellLayout::CellInfo> CellLayout::GetTag()
     return (CellInfo*)IObject::Probe(tag);
 }
 
-void CellLayout::PointToCellExact(
+ECode CellLayout::PointToCellExact(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
     /* [in] */ ArrayOf<Int32>* result)
@@ -1770,17 +1830,18 @@ void CellLayout::PointToCellExact(
     if ((*result)[0] >= xAxis) (*result)[0] = xAxis - 1;
     if ((*result)[1] < 0) (*result)[1] = 0;
     if ((*result)[1] >= yAxis) (*result)[1] = yAxis - 1;
+    return NOERROR;
 }
 
-void CellLayout::PointToCellRounded(
+ECode CellLayout::PointToCellRounded(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
     /* [in] */ ArrayOf<Int32>* result)
 {
-    PointToCellExact(x + (mCellWidth / 2), y + (mCellHeight / 2), result);
+    return PointToCellExact(x + (mCellWidth / 2), y + (mCellHeight / 2), result);
 }
 
-void CellLayout::CellToPoint(
+ECode CellLayout::CellToPoint(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY,
     /* [in] */ ArrayOf<Int32>* result)
@@ -1791,17 +1852,18 @@ void CellLayout::CellToPoint(
 
     (*result)[0] = hStartPadding + cellX * (mCellWidth + mWidthGap);
     (*result)[1] = vStartPadding + cellY * (mCellHeight + mHeightGap);
+    return NOERROR;
 }
 
-void CellLayout::CellToCenterPoint(
+ECode CellLayout::CellToCenterPoint(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY,
     /* [in] */ ArrayOf<Int32>* result)
 {
-    RegionToCenterPoint(cellX, cellY, 1, 1, result);
+    return RegionToCenterPoint(cellX, cellY, 1, 1, result);
 }
 
-void CellLayout::RegionToCenterPoint(
+ECode CellLayout::RegionToCenterPoint(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY,
     /* [in] */ Int32 spanX,
@@ -1815,9 +1877,10 @@ void CellLayout::RegionToCenterPoint(
             (spanX * mCellWidth + (spanX - 1) * mWidthGap) / 2;
     (*result)[1] = vStartPadding + cellY * (mCellHeight + mHeightGap) +
             (spanY * mCellHeight + (spanY - 1) * mHeightGap) / 2;
+    return NOERROR;
 }
 
-void CellLayout::RegionToRect(
+ECode CellLayout::RegionToRect(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY,
     /* [in] */ Int32 spanX,
@@ -1829,44 +1892,67 @@ void CellLayout::RegionToRect(
     GetPaddingTop(&vStartPadding);
     Int32 left = hStartPadding + cellX * (mCellWidth + mWidthGap);
     Int32 top = vStartPadding + cellY * (mCellHeight + mHeightGap);
-    result->Set(left, top, left + (spanX * mCellWidth + (spanX - 1) * mWidthGap),
+    return result->Set(left, top, left + (spanX * mCellWidth + (spanX - 1) * mWidthGap),
             top + (spanY * mCellHeight + (spanY - 1) * mHeightGap));
 }
 
-Float CellLayout::GetDistanceFromCell(
+ECode CellLayout::GetDistanceFromCell(
     /* [in] */ Float x,
     /* [in] */ Float y,
-    /* [in] */ ArrayOf<Int32>* cell)
+    /* [in] */ ArrayOf<Int32>* cell,
+    /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(cell);
+
     CellToCenterPoint((*cell)[0], (*cell)[1], mTmpPoint);
     Float distance = (Float) Elastos::Core::Math::Sqrt( Elastos::Core::Math::Pow(x - (*mTmpPoint)[0], 2) +
             Elastos::Core::Math::Pow(y - (*mTmpPoint)[1], 2));
-    return distance;
+    *result = distance;
+    return NOERROR;
 }
 
-Int32 CellLayout::GetCellWidth()
+ECode CellLayout::GetCellWidth(
+    /* [out] */ Int32* width)
 {
-    return mCellWidth;
+    VALIDATE_NOT_NULL(width);
+
+    *width = mCellWidth;
+    return NOERROR;
 }
 
-Int32 CellLayout::GetCellHeight()
+ECode CellLayout::GetCellHeight(
+    /* [out] */ Int32* height)
 {
-    return mCellHeight;
+    VALIDATE_NOT_NULL(height);
+
+    *height = mCellHeight;
+    return NOERROR;
 }
 
-Int32 CellLayout::GetWidthGap()
+ECode CellLayout::GetWidthGap(
+    /* [out] */ Int32* wgap)
 {
-    return mWidthGap;
+    VALIDATE_NOT_NULL(wgap);
+
+    *wgap = mWidthGap;
+    return NOERROR;
 }
 
-Int32 CellLayout::GetHeightGap()
+ECode CellLayout::GetHeightGap(
+    /* [out] */ Int32* hgap)
 {
-    return mHeightGap;
+    VALIDATE_NOT_NULL(hgap);
+
+    *hgap = mHeightGap;
+    return NOERROR;
 }
 
-AutoPtr<IRect> CellLayout::GetContentRect(
-    /* [in] */ IRect* r)
+ECode CellLayout::GetContentRect(
+    /* [in] */ IRect* r,
+    /* [out] */ IRect** outrect)
 {
+    VALIDATE_NOT_NULL(outrect);
+
     if (r == NULL) {
         CRect::New((IRect**)&r);
     }
@@ -1881,7 +1967,9 @@ AutoPtr<IRect> CellLayout::GetContentRect(
     right = left + w - left - right;
     bottom = top + h - top - bottom;
     r->Set(left, top, right, bottom);
-    return r;
+    *outrect = r;
+    REFCOUNT_ADD(*outrect);
+    return NOERROR;
 }
 
 ECode CellLayout::GetMetrics(
@@ -1993,7 +2081,7 @@ void CellLayout::OnMeasure(
     GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
-        GetChildAt(i, (IView**)&child);
+        ViewGroup::GetChildAt(i, (IView**)&child);
         Int32 childWidthMeasureSpec = MeasureSpec::MakeMeasureSpec(newWidth - left -
                 right, MeasureSpec::EXACTLY);
         Int32 childheightMeasureSpec = MeasureSpec::MakeMeasureSpec(newHeight - top -
@@ -2019,7 +2107,7 @@ ECode CellLayout::OnLayout(
     GetPaddingBottom(&bottom);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
-        GetChildAt(i, (IView**)&child);
+        ViewGroup::GetChildAt(i, (IView**)&child);
         child->Layout(left, top, r - l - right, b - t - bottom);
     }
     return NOERROR;
@@ -2049,82 +2137,106 @@ void CellLayout::SetChildrenDrawnWithCacheEnabled(
     mShortcutsAndWidgets->SetChildrenDrawnWithCacheEnabled(enabled);
 }
 
-Float CellLayout::GetBackgroundAlpha()
+ECode CellLayout::GetBackgroundAlpha(
+    /* [out] */ Float* alph)
 {
-    return mBackgroundAlpha;
+    VALIDATE_NOT_NULL(alph);
+
+    *alph = mBackgroundAlpha;
+    return NOERROR;
 }
 
-void CellLayout::SetBackgroundAlphaMultiplier(
+ECode CellLayout::SetBackgroundAlphaMultiplier(
     /* [in] */ Float multiplier)
 {
     if (mBackgroundAlphaMultiplier != multiplier) {
         mBackgroundAlphaMultiplier = multiplier;
         Invalidate();
     }
+    return NOERROR;
 }
 
-Float CellLayout::GetBackgroundAlphaMultiplier()
+ECode CellLayout::GetBackgroundAlphaMultiplier(
+    /* [out] */ Float* multiplier)
 {
-    return mBackgroundAlphaMultiplier;
+    VALIDATE_NOT_NULL(multiplier);
+
+    *multiplier = mBackgroundAlphaMultiplier;
+    return NOERROR;
 }
 
-void CellLayout::SetBackgroundAlpha(
+ECode CellLayout::SetBackgroundAlpha(
     /* [in] */ Float alpha)
 {
     if (mBackgroundAlpha != alpha) {
         mBackgroundAlpha = alpha;
         Invalidate();
     }
+    return NOERROR;
 }
 
-void CellLayout::SetShortcutAndWidgetAlpha(
+ECode CellLayout::SetShortcutAndWidgetAlpha(
     /* [in] */ Float alpha)
 {
     Int32 childCount;
     GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        GetChildAt(i, (IView**)&child);
+        ViewGroup::GetChildAt(i, (IView**)&child);
         child->SetAlpha(alpha);
     }
+    return NOERROR;
 }
 
-AutoPtr<ShortcutAndWidgetContainer> CellLayout::GetShortcutsAndWidgets()
+ECode CellLayout::GetShortcutsAndWidgets(
+    /* [out] */  IShortcutAndWidgetContainer** container)
 {
+    VALIDATE_NOT_NULL(container);
+
     Int32 childCount;
     GetChildCount(&childCount);
     if (childCount > 0) {
         AutoPtr<IView> child;
-        GetChildAt(0, (IView**)&child);
-        return (ShortcutAndWidgetContainer*)child;
+        ViewGroup::GetChildAt(0, (IView**)&child);
+        *container = IShortcutAndWidgetContainer::Probe(child);
+        REFCOUNT_ADD(*container);
+        return NOERROR;
     }
-    return NULL;
+    *container = NULL;
+    return NOERROR;
 }
 
-AutoPtr<IView> CellLayout::GetChildAt(
+ECode CellLayout::GetChildAt(
     /* [in] */ Int32 x,
-    /* [in] */ Int32 y)
+    /* [in] */ Int32 y,
+    /* [out] */ IView** outview)
 {
-    return mShortcutsAndWidgets->GetChildAt(x, y);
+    VALIDATE_NOT_NULL(outview);
+
+    return mShortcutsAndWidgets->GetChildAt(x, y, outview);
 }
 
-Boolean CellLayout::AnimateChildToPosition(
+ECode CellLayout::AnimateChildToPosition(
     /* [in] */ IView* child,
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY,
     /* [in] */ Int32 duration,
     /* [in] */ Int32 delay,
     /* [in] */ Boolean permanent,
-    /* [in] */ Boolean adjustOccupied)
+    /* [in] */ Boolean adjustOccupied,
+    /* [out] */ Boolean* result)
 {
-    AutoPtr<ShortcutAndWidgetContainer> clc = GetShortcutsAndWidgets();
+    VALIDATE_NOT_NULL(result);
+
+    AutoPtr<IShortcutAndWidgetContainer> clc;
+    GetShortcutsAndWidgets((IShortcutAndWidgetContainer**)&clc);
     AutoPtr<ArrayOf<ArrayOf<Boolean>* > > occupied = mOccupied;
     if (!permanent) {
         occupied = mTmpOccupied;
     }
 
     Int32 index;
-    clc->IndexOfChild(child, &index);
+    IViewGroup::Probe(clc)->IndexOfChild(child, &index);
     if (index != -1) {
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
@@ -2134,11 +2246,13 @@ Boolean CellLayout::AnimateChildToPosition(
         ItemInfo* info = (ItemInfo*)IObject::Probe(tag);
 
         // We cancel any existing animations
-        if (mReorderAnimators->ContainsKey(_lp)) {
+        Boolean res;
+        mReorderAnimators->ContainsKey(TO_IINTERFACE(_lp), &res);
+        if (res) {
             AutoPtr<IInterface> value;
-            mReorderAnimators->Get(lp, (IInterface**)&value);
+            mReorderAnimators->Get(TO_IINTERFACE(lp), (IInterface**)&value);
             IAnimator::Probe(value)->Cancel();
-            mReorderAnimators->Remove(lp);
+            mReorderAnimators->Remove(TO_IINTERFACE(lp));
         }
 
         Int32 oldX = lp->mX;
@@ -2156,7 +2270,8 @@ Boolean CellLayout::AnimateChildToPosition(
             lp->mTmpCellX = cellX;
             lp->mTmpCellY = cellY;
         }
-        clc->SetupLp(lp);
+        assert(0);
+        //clc->SetupLp(lp);
         lp->mIsLockedToGrid = FALSE;
         Int32 newX = lp->mX;
         Int32 newY = lp->mY;
@@ -2167,7 +2282,8 @@ Boolean CellLayout::AnimateChildToPosition(
         // Exit early if we're not actually moving the view
         if (oldX == newX && oldY == newY) {
             lp->mIsLockedToGrid = TRUE;
-            return TRUE;
+            *result = TRUE;
+            return NOERROR;
         }
 
         AutoPtr<ArrayOf<Float> > params = ArrayOf<Float>::Alloc(2);
@@ -2184,12 +2300,14 @@ Boolean CellLayout::AnimateChildToPosition(
         IAnimator::Probe(va)->AddListener(adapter);
         IAnimator::Probe(va)->SetStartDelay(delay);
         IAnimator::Probe(va)->Start();
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
     }
-    return FALSE;
+    *result = FALSE;
+    return NOERROR;
 }
 
-void CellLayout::EstimateDropCell(
+ECode CellLayout::EstimateDropCell(
     /* [in] */ Int32 originX,
     /* [in] */ Int32 originY,
     /* [in] */ Int32 spanX,
@@ -2214,9 +2332,10 @@ void CellLayout::EstimateDropCell(
         (*result)[1] -= bottomOverhang; // Snap to bottom
     }
     (*result)[1] = Elastos::Core::Math::Max(0, (*result)[1]); // Snap to top
+    return NOERROR;
 }
 
-void CellLayout::VisualizeDropLocation(
+ECode CellLayout::VisualizeDropLocation(
     /* [in] */ IView* v,
     /* [in] */ IBitmap* dragOutline,
     /* [in] */ Int32 originX,
@@ -2243,7 +2362,7 @@ void CellLayout::VisualizeDropLocation(
     }
 
     if (dragOutline == NULL && v == NULL) {
-        return;
+        return NOERROR;
     }
 
     Int32 width, height;
@@ -2263,7 +2382,7 @@ void CellLayout::VisualizeDropLocation(
             // When drawing the drag outline, it did not account for margin offsets
             // added by the view's parent.
             AutoPtr<IViewGroupLayoutParams> _lp;
-            child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
+            v->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
             MarginLayoutParams* lp = (MarginLayoutParams*)_lp.Get();
             left += lp->mLeftMargin;
             top += lp->mTopMargin;
@@ -2308,26 +2427,31 @@ void CellLayout::VisualizeDropLocation(
         (*mDragOutlineAnims)[mDragOutlineCurrent]->SetTag(dragOutline);
         (*mDragOutlineAnims)[mDragOutlineCurrent]->AnimateIn();
     }
+    return NOERROR;
 }
 
-void CellLayout::ClearDragOutlines()
+ECode CellLayout::ClearDragOutlines()
 {
     Int32 oldIndex = mDragOutlineCurrent;
     (*mDragOutlineAnims)[oldIndex]->AnimateOut();
     (*mDragCell)[0] = (*mDragCell)[1] = -1;
+    return NOERROR;
 }
 
-AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestVacantArea(
+ECode CellLayout::FindNearestVacantArea(
     /* [in] */ Int32 pixelX,
     /* [in] */ Int32 pixelY,
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY,
-    /* [in] */ ArrayOf<Int32>* result)
+    /* [in] */ ArrayOf<Int32>* result,
+    /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
-    return FindNearestVacantArea(pixelX, pixelY, spanX, spanY, NULL, result);
+    VALIDATE_NOT_NULL(outarray);
+
+    return FindNearestVacantArea(pixelX, pixelY, spanX, spanY, NULL, result, outarray);
 }
 
-AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestVacantArea(
+ECode CellLayout::FindNearestVacantArea(
     /* [in] */ Int32 pixelX,
     /* [in] */ Int32 pixelY,
     /* [in] */ Int32 minSpanX,
@@ -2335,22 +2459,29 @@ AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestVacantArea(
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY,
     /* [in] */ ArrayOf<Int32>* result,
-    /* [in] */ ArrayOf<Int32>* resultSpan)
+    /* [in] */ ArrayOf<Int32>* resultSpan,
+    /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
+    VALIDATE_NOT_NULL(outarray);
+
     return FindNearestVacantArea(pixelX, pixelY, minSpanX, minSpanY, spanX, spanY, NULL,
-            result, resultSpan);
+            result, resultSpan, outarray);
 }
 
-AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
+ECode CellLayout::FindNearestArea(
     /* [in] */ Int32 pixelX,
     /* [in] */ Int32 pixelY,
     /* [in] */ Int32 spanX,
-    /* [in] */ Int32 spanY, View ignoreView,
+    /* [in] */ Int32 spanY,
+    /* [in] */ IView* ignoreView,
     /* [in] */ Boolean ignoreOccupied,
-    /* [in] */ ArrayOf<Int32>* result)
+    /* [in] */ ArrayOf<Int32>* result,
+    /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
+    VALIDATE_NOT_NULL(outarray);
+
     return FindNearestArea(pixelX, pixelY, spanX, spanY,
-            spanX, spanY, ignoreView, ignoreOccupied, result, NULL, mOccupied);
+            spanX, spanY, ignoreView, ignoreOccupied, result, NULL, mOccupied, outarray);
 }
 
 void CellLayout::LazyInitTempRectStack()
@@ -2378,7 +2509,7 @@ void CellLayout::RecycleTempRects(
     }
 }
 
-AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
+ECode CellLayout::FindNearestArea(
     /* [in] */ Int32 pixelX,
     /* [in] */ Int32 pixelY,
     /* [in] */ Int32 minSpanX,
@@ -2389,8 +2520,11 @@ AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
     /* [in] */ Boolean ignoreOccupied,
     /* [in] */ ArrayOf<Int32>* result,
     /* [in] */ ArrayOf<Int32>* resultSpan,
-    /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied)
+    /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied,
+    /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
+    VALIDATE_NOT_NULL(outarray);
+
     LazyInitTempRectStack();
     // mark space take by ignoreView as available (method checks if ignoreView is NULL)
     MarkCellsAsUnoccupiedForView(ignoreView, occupied);
@@ -2414,7 +2548,9 @@ AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
 
     if (minSpanX <= 0 || minSpanY <= 0 || spanX <= 0 || spanY <= 0 ||
             spanX < minSpanX || spanY < minSpanY) {
-        return bestXY;
+        *outarray = bestXY;
+        REFCOUNT_ADD(*outarray);
+        return NOERROR;
     }
 
     for (Int32 y = 0; y < countY - (minSpanY - 1); y++) {
@@ -2483,7 +2619,7 @@ AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
             // candidates. In this case, the current rect is disqualified in favour of the
             // containing rect.
             AutoPtr<IInterface> item;
-            mTempRectStack->Pop((IInterface**)&item)
+            mTempRectStack->Pop((IInterface**)&item);
             AutoPtr<IRect> currentRect = IRect::Probe(item);
             currentRect->Set(x, y, x + xSize, y + ySize);
             Boolean contained = FALSE;
@@ -2527,7 +2663,9 @@ AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
         (*bestXY)[1] = -1;
     }
     RecycleTempRects(validRegions);
-    return bestXY;
+    *outarray = bestXY;
+    REFCOUNT_ADD(*outarray);
+    return NOERROR;
 }
 
 AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
@@ -2549,9 +2687,9 @@ AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
     Int32 countY = mCountY;
 
     for (Int32 y = 0; y < countY - (spanY - 1); y++) {
-        Boolean toInner = FALSE:
+        Boolean toInner = FALSE;
         for (Int32 x = 0; x < countX - (spanX - 1); x++) {// inner
-            toInner = FALSE:
+            toInner = FALSE;
             // First, let's see if this thing fits anywhere
             for (Int32 i = 0; i < spanX; i++) {
                 for (Int32 j = 0; j < spanY; j++) {
@@ -2595,7 +2733,7 @@ AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
     return bestXY;
 }
 
-BooleanCellLayout:: AddViewToTempLocation(
+Boolean CellLayout:: AddViewToTempLocation(
     /* [in] */ IView* v,
     /* [in] */ IRect* rectOccupiedByPotentialDrop,
     /* [in] */ ArrayOf<Int32>* direction,
@@ -2984,7 +3122,7 @@ Boolean CellLayout::RearrangementExists(
     CRect::New(cellX, cellY, cellX + spanX, cellY + spanY, (IRect**)&r0);
     CRect::New((IRect**)&r1);
     AutoPtr<ISet> keySet;
-    solution->GetKeySet((ISet**)&keySet);
+    solution->mMap->GetKeySet((ISet**)&keySet);
     AutoPtr<ArrayOf<IInterface*> > array;
     keySet->ToArray((ArrayOf<IInterface*>**)&array);
     AutoPtr<IRectHelper> rHelper;
@@ -3084,7 +3222,7 @@ AutoPtr<CellLayout::ItemConfiguration> CellLayout::SimpleSwap(
     // We find the nearest cell into which we would place the dragged item, assuming there's
     // nothing in its way.
     AutoPtr<ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(2);
-    result = FindNearestArea(pixelX, pixelY, spanX, spanY, result);
+    FindNearestArea(pixelX, pixelY, spanX, spanY, result, (ArrayOf<Int32>**)&result);
 
     Boolean success = FALSE;
     // First we try the exact nearest position of the item being dragged,
@@ -3123,7 +3261,7 @@ void CellLayout::CopyCurrentStateToSolution(
     mShortcutsAndWidgets->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
+        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
         LayoutParams* lp = (LayoutParams*)_lp.Get();
@@ -3152,7 +3290,7 @@ void CellLayout::CopySolutionToTempState(
     mShortcutsAndWidgets->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
+        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         if (child.Get() == dragView) continue;
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
@@ -3188,14 +3326,15 @@ void CellLayout::AnimateItemsToSolution(
     mShortcutsAndWidgets->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
+        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         if (child.Get() == dragView) continue;
         AutoPtr<IInterface> value;
         solution->mMap->Get(child, (IInterface**)&value);
         CellAndSpan* c = (CellAndSpan*)IObject::Probe(value);
         if (c != NULL) {
+            Boolean res;
             AnimateChildToPosition(child, c->mX, c->mY, REORDER_ANIMATION_DURATION, 0,
-                    DESTRUCTIVE_REORDER, FALSE);
+                    DESTRUCTIVE_REORDER, FALSE, &res);
             MarkCellsForView(c->mX, c->mY, c->mSpanX, c->mSpanY, occupied, TRUE);
         }
     }
@@ -3215,7 +3354,7 @@ void CellLayout::BeginOrAdjustHintAnimations(
     mShortcutsAndWidgets->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
+        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         if (child.Get() == dragView) continue;
         AutoPtr<IInterface> value;
         solution->mMap->Get(child, (IInterface**)&value);
@@ -3254,7 +3393,7 @@ void CellLayout::CommitTempPlacement()
     mShortcutsAndWidgets->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
+        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
         LayoutParams* lp = (LayoutParams*)_lp.Get();
@@ -3274,22 +3413,24 @@ void CellLayout::CommitTempPlacement()
             info->mSpanY = lp->mCellVSpan;
         }
     }
-    mLauncher->GetWorkspace()->UpdateItemLocationsInDatabase(this);
+    assert(0);
+    //mLauncher->GetWorkspace()->UpdateItemLocationsInDatabase(this);
 }
 
-void CellLayout::SetUseTempCoords(
+ECode CellLayout::SetUseTempCoords(
     /* [in] */ Boolean useTempCoords)
 {
     Int32 childCount;
     mShortcutsAndWidgets->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
+        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
         LayoutParams* lp = (LayoutParams*)_lp.Get();
         lp->mUseTmpCoords = useTempCoords;
     }
+    return NOERROR;
 }
 
 AutoPtr<CellLayout::ItemConfiguration> CellLayout::FindConfigurationNoShuffle(
@@ -3304,8 +3445,9 @@ AutoPtr<CellLayout::ItemConfiguration> CellLayout::FindConfigurationNoShuffle(
 {
     AutoPtr<ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(2);
     AutoPtr<ArrayOf<Int32> > resultSpan = ArrayOf<Int32>::Alloc(2);
+    AutoPtr<ArrayOf<Int32> > outarray;
     FindNearestVacantArea(pixelX, pixelY, minSpanX, minSpanY, spanX, spanY, NULL, result,
-            resultSpan);
+            resultSpan, (ArrayOf<Int32>**)&outarray);
     if ((*result)[0] >= 0 && (*result)[1] >= 0) {
         CopyCurrentStateToSolution(solution, FALSE);
         solution->mDragViewX = (*result)[0];
@@ -3320,10 +3462,10 @@ AutoPtr<CellLayout::ItemConfiguration> CellLayout::FindConfigurationNoShuffle(
     return solution;
 }
 
-void CellLayout::PrepareChildForDrag(
+ECode CellLayout::PrepareChildForDrag(
     /* [in] */ IView* child)
 {
-    MarkCellsAsUnoccupiedForView(child);
+    return MarkCellsAsUnoccupiedForView(child);
 }
 
 void CellLayout::GetDirectionVectorForDrop(
@@ -3336,7 +3478,9 @@ void CellLayout::GetDirectionVectorForDrop(
 {
     AutoPtr<ArrayOf<Int32> > targetDestination = ArrayOf<Int32>::Alloc(2);
 
-    FindNearestArea(dragViewCenterX, dragViewCenterY, spanX, spanY, targetDestination);
+    AutoPtr<ArrayOf<Int32> > outarray;
+    FindNearestArea(dragViewCenterX, dragViewCenterY, spanX, spanY,
+            targetDestination, (ArrayOf<Int32>**)&outarray);
     AutoPtr<IRect> dragRect;
     CRect::New((IRect**)&dragRect);
     RegionToRect((*targetDestination)[0], (*targetDestination)[1], spanX, spanY, dragRect);
@@ -3404,7 +3548,7 @@ void CellLayout::GetViewsIntersectingRegion(
     CRectHelper::AcquireSingleton((IRectHelper**)&rHelper);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
-        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
+        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         if (child.Get() == dragView) continue;
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
@@ -3421,51 +3565,64 @@ void CellLayout::GetViewsIntersectingRegion(
     }
 }
 
-Boolean CellLayout::IsNearestDropLocationOccupied(
+ECode CellLayout::IsNearestDropLocationOccupied(
     /* [in] */ Int32 pixelX,
     /* [in] */ Int32 pixelY,
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY,
     /* [in] */ IView* dragView,
-    /* [in] */ ArrayOf<Int32>* _result)
+    /* [in] */ ArrayOf<Int32>* _result,
+    /* [out] */ Boolean* success)
 {
-    AutoPtr<ArrayOf<Int32> > result = FindNearestArea(pixelX, pixelY, spanX, spanY, _result);
+    VALIDATE_NOT_NULL(success);
+
+    AutoPtr<ArrayOf<Int32> > result;
+    FindNearestArea(pixelX, pixelY, spanX, spanY, _result, (ArrayOf<Int32>**)&result);
     GetViewsIntersectingRegion((*result)[0], (*result)[1], spanX, spanY, dragView, NULL,
             mIntersectingViews);
-    return !mIntersectingViews->IsEmpty();
+    Boolean tmp;
+    mIntersectingViews->IsEmpty(&tmp);
+    *success = !tmp;
+    return NOERROR;
 }
 
-void CellLayout::RevertTempState()
+ECode CellLayout::RevertTempState()
 {
-    if (!IsItemPlacementDirty() || DESTRUCTIVE_REORDER) return;
+    Boolean res;
+    IsItemPlacementDirty(&res);
+    if (!res || DESTRUCTIVE_REORDER) return NOERROR;
     Int32 count;
     mShortcutsAndWidgets->GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
-        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
+        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
         LayoutParams* lp = (LayoutParams*)_lp.Get();
         if (lp->mTmpCellX != lp->mCellX || lp->mTmpCellY != lp->mCellY) {
             lp->mTmpCellX = lp->mCellX;
             lp->mTmpCellY = lp->mCellY;
+            Boolean tmp;
             AnimateChildToPosition(child, lp->mCellX, lp->mCellY, REORDER_ANIMATION_DURATION,
-                    0, FALSE, FALSE);
+                    0, FALSE, FALSE, &tmp);
         }
     }
     CompleteAndClearReorderHintAnimations();
-    SetItemPlacementDirty(FALSE);
+    return SetItemPlacementDirty(FALSE);
 }
 
-Boolean CellLayout::createAreaForResize(
+ECode CellLayout::CreateAreaForResize(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY,
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY,
     /* [in] */ IView* dragView,
     /* [in] */ ArrayOf<Int32>* direction,
-    /* [in] */ Boolean commit)
+    /* [in] */ Boolean commit,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
+
     AutoPtr<ArrayOf<Int32> > pixelXY = ArrayOf<Int32>::Alloc(2);
     RegionToCenterPoint(cellX, cellY, spanX, spanY, pixelXY);
 
@@ -3494,10 +3651,11 @@ Boolean CellLayout::createAreaForResize(
         }
         mShortcutsAndWidgets->RequestLayout();
     }
-    return swapSolution->mIsSolution;
+    *result = swapSolution->mIsSolution;
+    return NOERROR;
 }
 
-AutoPtr<ArrayOf<Int32> > CellLayout::CreateArea(
+ECode CellLayout::CreateArea(
     /* [in] */ Int32 pixelX,
     /* [in] */ Int32 pixelY,
     /* [in] */ Int32 minSpanX,
@@ -3507,10 +3665,14 @@ AutoPtr<ArrayOf<Int32> > CellLayout::CreateArea(
     /* [in] */ IView* dragView,
     /* [in] */ ArrayOf<Int32>* _result,
     /* [in] */ ArrayOf<Int32>* resultSpan,
-    /* [in] */ Int32 mode)
+    /* [in] */ Int32 mode,
+    /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
+    VALIDATE_NOT_NULL(outarray);
+
     // First we determine if things have moved enough to cause a different layout
-    AutoPtr<ArrayOf<Int32> > result = FindNearestArea(pixelX, pixelY, spanX, spanY, _result);
+    AutoPtr<ArrayOf<Int32> > result;
+    FindNearestArea(pixelX, pixelY, spanX, spanY, _result, (ArrayOf<Int32>**)&result);
 
     if (resultSpan == NULL) {
         resultSpan = ArrayOf<Int32>::Alloc(2);
@@ -3594,98 +3756,131 @@ AutoPtr<ArrayOf<Int32> > CellLayout::CreateArea(
     }
 
     mShortcutsAndWidgets->RequestLayout();
-    return result;
+    *outarray = result;
+    REFCOUNT_ADD(*outarray);
+    return NOERROR;
 }
 
-void CellLayout::SetItemPlacementDirty(
+ECode CellLayout::SetItemPlacementDirty(
     /* [in] */ Boolean dirty)
 {
     mItemPlacementDirty = dirty;
+    return NOERROR;
 }
 
-Boolean CellLayout::IsItemPlacementDirty()
+ECode CellLayout::IsItemPlacementDirty(
+    /* [out] */ Boolean* result)
 {
-    return mItemPlacementDirty;
+    VALIDATE_NOT_NULL(result);
+
+    *result = mItemPlacementDirty;
+    return NOERROR;
 }
 
-AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestVacantArea(
+ECode CellLayout::FindNearestVacantArea(
     /* [in] */ Int32 pixelX,
     /* [in] */ Int32 pixelY,
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY,
     /* [in] */ IView* ignoreView,
-    /* [in] */ ArrayOf<Int32>* result)
+    /* [in] */ ArrayOf<Int32>* result,
+    /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
-    return FindNearestArea(pixelX, pixelY, spanX, spanY, ignoreView, TRUE, result);
+    VALIDATE_NOT_NULL(outarray);
+
+    return FindNearestArea(pixelX, pixelY, spanX, spanY, ignoreView, TRUE, result, outarray);
 }
 
-AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestVacantArea(
+ECode CellLayout::FindNearestVacantArea(
     /* [in] */ Int32 pixelX,
     /* [in] */ Int32 pixelY,
     /* [in] */ Int32 minSpanX,
     /* [in] */ Int32 minSpanY,
     /* [in] */ Int32 spanX,
-    /* [in] */ Int32 spanY, View ignoreView,
+    /* [in] */ Int32 spanY,
+    /* [in] */ IView* ignoreView,
     /* [in] */ ArrayOf<Int32>* result,
-    /* [in] */ ArrayOf<Int32>* resultSpan)
+    /* [in] */ ArrayOf<Int32>* resultSpan,
+    /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
+    VALIDATE_NOT_NULL(outarray);
+
     return FindNearestArea(pixelX, pixelY, minSpanX, minSpanY, spanX, spanY, ignoreView, TRUE,
-            result, resultSpan, mOccupied);
+            result, resultSpan, mOccupied, outarray);
 }
 
-AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
+ECode CellLayout::FindNearestArea(
     /* [in] */ Int32 pixelX,
     /* [in] */ Int32 pixelY,
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY,
-    /* [in] */ ArrayOf<Int32>* result)
+    /* [in] */ ArrayOf<Int32>* result,
+    /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
-    return FindNearestArea(pixelX, pixelY, spanX, spanY, NULL, FALSE, result);
+    VALIDATE_NOT_NULL(outarray);
+
+    return FindNearestArea(pixelX, pixelY, spanX, spanY, NULL, FALSE, result, outarray);
 }
 
-Boolean CellLayout::ExistsEmptyCell()
+ECode CellLayout::ExistsEmptyCell(
+    /* [out] */ Boolean* result)
 {
-    return FindCellForSpan(NULL, 1, 1);
+    VALIDATE_NOT_NULL(result);
+
+    return FindCellForSpan(NULL, 1, 1, result);
 }
 
-Boolean CellLayout::FindCellForSpan(
-    /* [in] */ ArrayOf<Int32>* cellXY,
-    /* [in] */ Int32 spanX,
-    /* [in] */ Int32 spanY)
-{
-    return FindCellForSpanThatIntersectsIgnoring(cellXY, spanX, spanY, -1, -1, NULL, mOccupied);
-}
-
-Boolean CellLayout::FindCellForSpanIgnoring(
+ECode CellLayout::FindCellForSpan(
     /* [in] */ ArrayOf<Int32>* cellXY,
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY,
-    /* [in] */ IView* ignoreView)
+    /* [out] */ Boolean* result)
 {
-    return FindCellForSpanThatIntersectsIgnoring(cellXY, spanX, spanY, -1, -1,
-            ignoreView, mOccupied);
+    VALIDATE_NOT_NULL(result);
+
+    return FindCellForSpanThatIntersectsIgnoring(cellXY, spanX,
+            spanY, -1, -1, NULL, mOccupied, result);
 }
 
-Boolean CellLayout::FindCellForSpanThatIntersects(
+ECode CellLayout::FindCellForSpanIgnoring(
+    /* [in] */ ArrayOf<Int32>* cellXY,
+    /* [in] */ Int32 spanX,
+    /* [in] */ Int32 spanY,
+    /* [in] */ IView* ignoreView,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+
+    return FindCellForSpanThatIntersectsIgnoring(cellXY, spanX, spanY, -1, -1,
+            ignoreView, mOccupied, result);
+}
+
+ECode CellLayout::FindCellForSpanThatIntersects(
     /* [in] */ ArrayOf<Int32>* cellXY,
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY,
     /* [in] */ Int32 intersectX,
-    /* [in] */ Int32 intersectY)
+    /* [in] */ Int32 intersectY,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
+
     return FindCellForSpanThatIntersectsIgnoring(
-            cellXY, spanX, spanY, intersectX, intersectY, NULL, mOccupied);
+            cellXY, spanX, spanY, intersectX, intersectY, NULL, mOccupied, result);
 }
 
-Boolean CellLayout::FindCellForSpanThatIntersectsIgnoring(
+ECode CellLayout::FindCellForSpanThatIntersectsIgnoring(
     /* [in] */ ArrayOf<Int32>* cellXY,
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY,
     /* [in] */ Int32 intersectX,
     /* [in] */ Int32 intersectY,
     /* [in] */ IView* ignoreView,
-    /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied)
+    /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
+
     // mark space take by ignoreView as available (method checks if ignoreView is NULL)
     MarkCellsAsUnoccupiedForView(ignoreView, occupied);
 
@@ -3748,16 +3943,18 @@ Boolean CellLayout::FindCellForSpanThatIntersectsIgnoring(
 
     // re-mark space taken by ignoreView as occupied
     MarkCellsAsOccupiedForView(ignoreView, occupied);
-    return foundCell;
+    *result = foundCell;
+    return NOERROR;
 }
 
-void CellLayout::OnDragEnter()
+ECode CellLayout::OnDragEnter()
 {
     mDragEnforcer->OnDragEnter();
     mDragging = TRUE;
+    return NOERROR;
 }
 
-void CellLayout::OnDragExit()
+ECode CellLayout::OnDragExit()
 {
     mDragEnforcer->OnDragExit();
     // This can actually be called when we aren't in a drag, e.g. when adding a new
@@ -3773,9 +3970,10 @@ void CellLayout::OnDragExit()
     mDragOutlineCurrent = (mDragOutlineCurrent + 1) % mDragOutlineAnims->GetLength();
     RevertTempState();
     SetIsDragOverlapping(FALSE);
+    return NOERROR;
 }
 
-void CellLayout::OnDropChild(
+ECode CellLayout::OnDropChild(
     /* [in] */ IView* child)
 {
     if (child != NULL) {
@@ -3785,9 +3983,10 @@ void CellLayout::OnDropChild(
         lp->mDropped = TRUE;
         child->RequestLayout();
     }
+    return NOERROR;
 }
 
-void CellLayout::CellToRect(
+ECode CellLayout::CellToRect(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY,
     /* [in] */ Int32 cellHSpan,
@@ -3809,17 +4008,24 @@ void CellLayout::CellToRect(
     Int32 x = hStartPadding + cellX * (cellWidth + widthGap);
     Int32 y = vStartPadding + cellY * (cellHeight + heightGap);
 
-    resultRect->Set(x, y, x + width, y + height);
+    return resultRect->Set(x, y, x + width, y + height);
 }
 
-AutoPtr<ArrayOf<Int32> > CellLayout::RectToCell(
+ECode CellLayout::RectToCell(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
-    /* [in] */ ArrayOf<Int32>* result)
+    /* [in] */ ArrayOf<Int32>* result,
+    /* [out, callee] */ ArrayOf<Int32>** outArray)
 {
+    VALIDATE_NOT_NULL(outArray);
+
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
-    return RectToCell(res, width, height, result);
+    AutoPtr<ArrayOf<Int32> > array;
+    RectToCell(res, width, height, result, (ArrayOf<Int32>**)&array);
+    *outArray = array;
+    REFCOUNT_ADD(*outArray);
+    return NOERROR;
 }
 
 ECode CellLayout::RectToCell(
@@ -3833,13 +4039,15 @@ ECode CellLayout::RectToCell(
 
     // Always assume we're working with the smallest span to make sure we
     // reserve enough space in both orientations.
-    Int32 actualWidth = resources->GetDimensionPixelSize(R::dimen::workspace_cell_width);
-    Int32 actualHeight = resources->GetDimensionPixelSize(R::dimen::workspace_cell_height);
+    Int32 actualWidth;
+    resources->GetDimensionPixelSize(R::dimen::workspace_cell_width, &actualWidth);
+    Int32 actualHeight;
+    resources->GetDimensionPixelSize(R::dimen::workspace_cell_height, &actualHeight);
     Int32 smallerSize = Elastos::Core::Math::Min(actualWidth, actualHeight);
 
     // Always round up to next largest cell
-    Int32 spanX = (Int32) Elastos::Core::Math::Ceil(width / (Float) smallerSize);
-    Int32 spanY = (Int32) Elastos::Core::Math::Ceil(height / (Float) smallerSize);
+    Int32 spanX = (Int32)Elastos::Core::Math::Ceil(width / (Float)smallerSize);
+    Int32 spanY = (Int32)Elastos::Core::Math::Ceil(height / (Float)smallerSize);
 
     if (result == NULL) {
         AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(2);
@@ -3856,50 +4064,59 @@ ECode CellLayout::RectToCell(
     return NOERROR;
 }
 
-AutoPtr<ArrayOf<Int32> > CellLayout::CellSpansToSize(
+ECode CellLayout::CellSpansToSize(
     /* [in] */ Int32 hSpans,
-    /* [in] */ Int32 vSpans)
+    /* [in] */ Int32 vSpans,
+    /* [out, callee] */ ArrayOf<Int32>** outArray)
 {
+    VALIDATE_NOT_NULL(outArray);
+
     AutoPtr<ArrayOf<Int32> > size = ArrayOf<Int32>::Alloc(2);
     (*size)[0] = hSpans * mCellWidth + (hSpans - 1) * mWidthGap;
     (*size)[1] = vSpans * mCellHeight + (vSpans - 1) * mHeightGap;
-    return size;
+    *outArray = size;
+    REFCOUNT_ADD(*outArray);
+    return NOERROR;
 }
 
-void CellLayout::CalculateSpans(
-    /* [in] */ ItemInfo* info)
+ECode CellLayout::CalculateSpans(
+    /* [in] */ IItemInfo* info)
 {
     Int32 minWidth;
     Int32 minHeight;
 
-    if (ILauncherAppWidgetInfo::Probe(info)) {
-        AutoPtr<LauncherAppWidgetInfo> lawInfo = (LauncherAppWidgetInfo*)info;
+    ItemInfo* _info = (ItemInfo*)info;
+    if (ILauncherAppWidgetInfo::Probe(_info)) {
+        AutoPtr<LauncherAppWidgetInfo> lawInfo = (LauncherAppWidgetInfo*)_info;
         minWidth = lawInfo->mMinWidth;
         minHeight = lawInfo->mMinHeight;
     }
-    else if (IPendingAddWidgetInfo::Probe(info)) {
-        AutoPtr<PendingAddWidgetInfo> pawInfo = (PendingAddWidgetInfo*)info;
+    else if (IPendingAddWidgetInfo::Probe(_info)) {
+        AutoPtr<PendingAddWidgetInfo> pawInfo = (PendingAddWidgetInfo*)_info;
         pawInfo->mInfo->GetMinWidth(&minWidth);
         pawInfo->mInfo->GetMinHeight(&minHeight);
     }
     else {
         // It's not a widget, so it must be 1x1
-        info->mSpanX = info->mSpanY = 1;
-        return;
+        _info->mSpanX = _info->mSpanY = 1;
+        return NOERROR;
     }
-    AutoPtr<ArrayOf<Int32> > spans = RectToCell(minWidth, minHeight, NULL);
-    info->mSpanX = (*spans)[0];
-    info->mSpanY = (*spans)[1];
+    AutoPtr<ArrayOf<Int32> > spans;
+    RectToCell(minWidth, minHeight, NULL, (ArrayOf<Int32>**)&spans);
+    _info->mSpanX = (*spans)[0];
+    _info->mSpanY = (*spans)[1];
+    return NOERROR;
 }
 
-Boolean CellLayout::GetVacantCell(
+ECode CellLayout::GetVacantCell(
     /* [in] */ ArrayOf<Int32>* vacant,
     /* [in] */ Int32 spanX,
-    /* [in] */ Int32 spanY)
+    /* [in] */ Int32 spanY,
+    /* [out] */ Boolean* result)
 {
-    Boolean res;
-    FindVacantCell(vacant, spanX, spanY, mCountX, mCountY, mOccupied, &res);
-    return res;
+    VALIDATE_NOT_NULL(result);
+
+    return FindVacantCell(vacant, spanX, spanY, mCountX, mCountY, mOccupied, result);
 }
 
 ECode CellLayout::FindVacantCell(
@@ -3916,13 +4133,14 @@ ECode CellLayout::FindVacantCell(
     for (Int32 y = 0; y < yCount; y++) {
         for (Int32 x = 0; x < xCount; x++) {
             Boolean available = !(*(*occupied)[x])[y];
-            Boolean breakOut = FALSE
+            Boolean breakOut = FALSE;
             for (Int32 i = x; i < x + spanX - 1 && x < xCount; i++) { // out
                 for (Int32 j = y; j < y + spanY - 1 && y < yCount; j++) {
                     available = available && !(*(*occupied)[i])[j];
                     if (!available) {
                         breakOut = TRUE;
                         break;
+                    }
                 }
                 if (breakOut)
                     break;
@@ -3950,7 +4168,7 @@ void CellLayout::ClearOccupiedCells()
     }
 }
 
-void CellLayout::OnMove(
+ECode CellLayout::OnMove(
     /* [in] */ IView* view,
     /* [in] */ Int32 newCellX,
     /* [in] */ Int32 newCellY,
@@ -3959,46 +4177,51 @@ void CellLayout::OnMove(
 {
     MarkCellsAsUnoccupiedForView(view);
     MarkCellsForView(newCellX, newCellY, newSpanX, newSpanY, mOccupied, TRUE);
+    return NOERROR;
 }
 
-void CellLayout::MarkCellsAsOccupiedForView(
+ECode CellLayout::MarkCellsAsOccupiedForView(
     /* [in] */ IView* view)
 {
-    MarkCellsAsOccupiedForView(view, mOccupied);
+    return MarkCellsAsOccupiedForView(view, mOccupied);
 }
 
-void CellLayout::MarkCellsAsOccupiedForView(
+ECode CellLayout::MarkCellsAsOccupiedForView(
     /* [in] */ IView* view,
     /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied)
 {
     AutoPtr<IViewParent> vp;
     if (view == NULL || (view->GetParent((IViewParent**)&vp),
-        vp.Get() != IViewParent::Probe(mShortcutsAndWidgets)))
-        return;
+        vp.Get() != IViewParent::Probe(mShortcutsAndWidgets))) {
+        return NOERROR;
+    }
     AutoPtr<IViewGroupLayoutParams> _lp;
-    child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
+    view->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
     LayoutParams* lp = (LayoutParams*)_lp.Get();
     MarkCellsForView(lp->mCellX, lp->mCellY, lp->mCellHSpan, lp->mCellVSpan, occupied, TRUE);
+    return NOERROR;
 }
 
-void CellLayout::MarkCellsAsUnoccupiedForView(
+ECode CellLayout::MarkCellsAsUnoccupiedForView(
     /* [in] */ IView* view)
 {
-    MarkCellsAsUnoccupiedForView(view, mOccupied);
+    return MarkCellsAsUnoccupiedForView(view, mOccupied);
 }
 
-void CellLayout::MarkCellsAsUnoccupiedForView(
+ECode CellLayout::MarkCellsAsUnoccupiedForView(
     /* [in] */ IView* view,
     /* [in] */ ArrayOf<ArrayOf<Boolean>* >* occupied)
 {
     AutoPtr<IViewParent> vp;
     if (view == NULL || (view->GetParent((IViewParent**)&vp),
-        vp.Get() != IViewParent::Probe(mShortcutsAndWidgets)))
-        return;
+        vp.Get() != IViewParent::Probe(mShortcutsAndWidgets))) {
+        return NOERROR;
+    }
     AutoPtr<IViewGroupLayoutParams> _lp;
-    child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
+    view->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
     LayoutParams* lp = (LayoutParams*)_lp.Get();
     MarkCellsForView(lp->mCellX, lp->mCellY, lp->mCellHSpan, lp->mCellVSpan, occupied, FALSE);
+    return NOERROR;
 }
 
 void CellLayout::MarkCellsForView(
@@ -4017,22 +4240,30 @@ void CellLayout::MarkCellsForView(
     }
 }
 
-Int32 CellLayout::GetDesiredWidth()
+ECode CellLayout::GetDesiredWidth(
+    /* [out] */ Int32* width)
 {
+    VALIDATE_NOT_NULL(width);
+
     Int32 pl, pr;
     GetPaddingLeft(&pl);
     GetPaddingRight(&pr);
-    return pl + pr + (mCountX * mCellWidth) +
+    *width = pl + pr + (mCountX * mCellWidth) +
             (Elastos::Core::Math::Max((mCountX - 1), 0) * mWidthGap);
+    return NOERROR;
 }
 
-Int32 CellLayout::GetDesiredHeight()
+ECode CellLayout::GetDesiredHeight(
+    /* [out] */ Int32* height)
 {
+    VALIDATE_NOT_NULL(height);
+
     Int32 pt, pb;
     GetPaddingTop(&pt);
     GetPaddingBottom(&pb);
-    return pt + pb + (mCountY * mCellHeight) +
+    *height = pt + pb + (mCountY * mCellHeight) +
             (Elastos::Core::Math::Max((mCountY - 1), 0) * mHeightGap);
+    return NOERROR;
 }
 
 ECode CellLayout::IsOccupied(
@@ -4058,7 +4289,9 @@ ECode CellLayout::GenerateLayoutParams(
     VALIDATE_NOT_NULL(lp);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    *lp = new LayoutParams(context, attrs);
+    AutoPtr<LayoutParams> p = new LayoutParams();
+    p->constructor(context, attrs);
+    *lp = IViewGroupLayoutParams::Probe(p);
     REFCOUNT_ADD(*lp);
     return NOERROR;
 }
@@ -4072,12 +4305,18 @@ Boolean CellLayout::CheckLayoutParams(
 AutoPtr<IViewGroupLayoutParams> CellLayout::GenerateLayoutParams(
     /* [in] */ IViewGroupLayoutParams* p)
 {
-    return new LayoutParams(p);
+    AutoPtr<LayoutParams> _p = new LayoutParams();
+    _p->constructor(p);
+    return IViewGroupLayoutParams::Probe(_p);
 }
 
-Boolean CellLayout::LastDownOnOccupiedCell()
+ECode CellLayout::LastDownOnOccupiedCell(
+    /* [out] */ Boolean* result)
 {
-    return mLastDownOnOccupiedCell;
+    VALIDATE_NOT_NULL(result);
+
+    *result = mLastDownOnOccupiedCell;
+    return NOERROR;
 }
 
 } // namespace Launcher2

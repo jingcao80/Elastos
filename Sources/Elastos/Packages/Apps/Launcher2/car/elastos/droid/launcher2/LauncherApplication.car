@@ -1,11 +1,65 @@
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+
+    interface Elastos.Droid.Launcher2.IIconCache;
+    interface Elastos.Droid.Launcher2.ILauncher;
+    interface Elastos.Droid.Launcher2.ILauncherModel;
+    interface Elastos.Droid.Launcher2.ILauncherProvider;
+    //interface Elastos.Droid.Launcher2.IWidgetPreviewLoaderCacheDb;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
 
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IComponentCallbacks2;
+     * interface Elastos.Droid.Content.IComponentCallbacks;
+     * interface IApplication
+     */
     interface ILauncherApplication {
-        // ~~~~~~~~~~~~~~~~~ car class
+        RecreateWidgetPreviewDb();
+
+        SetLauncher(
+            [in] ILauncher* launcher,
+            [out] ILauncherModel** mode);
+
+        GetIconCache(
+            [out] IIconCache** cache);
+
+        GetModel(
+            [out] ILauncherModel** mode);
+
+        //GetWidgetPreviewCacheDb(
+        //    [out] IWidgetPreviewLoaderCacheDb** db);
+
+        SetLauncherProvider(
+            [in] ILauncherProvider* provider);
+
+        GetLauncherProvider(
+            [out] ILauncherProvider** provider);
+    }
+
+    [local]
+    interface ILauncherApplicationHelper {
+        GetSharedPreferencesKey(
+            [out] String* key);
+
+        IsScreenLarge(
+            [out] Boolean* result);
+
+        IsScreenLandscape(
+            [in] IContext* context,
+            [out] Boolean* result);
+
+        GetScreenDensity(
+            [out] Float* density);
+
+        GetLongPressTimeout(
+            [out] Int32* timeout);
     }
 
     } // namespace Launcher2

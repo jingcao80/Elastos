@@ -76,8 +76,6 @@ private:
         : public BaseAdapter
     {
     public:
-        CAR_INTERFACE_DECL();
-
         ImageAdapter(
             /* [in] */ WallpaperChooserDialogFragment* host,
             /* [in] */ IActivity* activity);

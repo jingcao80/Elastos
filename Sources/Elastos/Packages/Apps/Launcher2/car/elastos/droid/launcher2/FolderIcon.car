@@ -19,6 +19,44 @@ module
     namespace Droid {
     namespace Launcher2 {
 
+    [local, deprecated]
+    interface IFolderIconFolderRingAnimator {
+        AnimateToAcceptState();
+
+        AnimateToNaturalState();
+
+        // Location is expressed in window coordinates
+        GetCell(
+            [in] ArrayOf<Int32>* loc);
+
+        // Location is expressed in window coordinates
+        SetCell(
+            [in] Int32 x,
+            [in] Int32 y);
+
+        SetCellLayout(
+            [in] ICellLayout* layout);
+
+        GetOuterRingSize(
+            [out] Float* size);
+
+        GetInnerRingSize(
+            [out] Float* size);
+    }
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface ILinearLayout
+     * interface IFolderListener;
+     */
     [local]
     interface IFolderIcon {
         IsDropEnabled(

@@ -103,18 +103,8 @@ module
             [in] IDropTargetDragObject* dragObject,
             [out] Boolean* result);
 
-        // These methods are implemented in Views
-        GetHitRect(
-            [in] IRect* outRect);
-
         GetLocationInDragLayer(
             [in] ArrayOf<Int32>* loc);
-
-        GetLeft(
-            [out] Int32* left);
-
-        GetTop(
-            [out] Int32* top);
     }
 
     } // namespace Launcher2

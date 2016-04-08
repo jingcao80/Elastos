@@ -4,6 +4,11 @@
 #include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CCellLayoutHelper.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Graphics::IRect;
 
 namespace Elastos {
 namespace Droid {

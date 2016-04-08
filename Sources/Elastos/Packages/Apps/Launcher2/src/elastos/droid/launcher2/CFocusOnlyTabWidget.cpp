@@ -9,6 +9,8 @@ namespace Launcher2 {
 
 CAR_INTERFACE_IMPL(CFocusOnlyTabWidget, TabWidget, IFocusOnlyTabWidget);
 
+CAR_OBJECT_IMPL(CFocusOnlyTabWidget);
+
 ECode CFocusOnlyTabWidget::constructor()
 {
     return NOERROR;

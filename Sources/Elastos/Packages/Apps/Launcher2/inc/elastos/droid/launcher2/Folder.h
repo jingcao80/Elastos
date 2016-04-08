@@ -1,7 +1,51 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_FOLDER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_FOLDER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/widget/LinearLayout.h"
+#include "elastos/droid/launcher2/ShortcutInfo.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Object;
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::IPointF;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IActionMode;
+using Elastos::Droid::View::IMenu;
+using Elastos::Droid::View::IActionModeCallback;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IActionModeCallback;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewOnLongClickListener;
+using Elastos::Droid::View::IViewOnFocusChangeListener;
+using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
+using Elastos::Droid::View::InputMethod::IInputMethodManager;
+using Elastos::Droid::Widget::LinearLayout;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IOnEditorActionListener;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Core::IComparator;
+using Elastos::Core::ICharSequence;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -14,12 +58,12 @@ class Folder
     , public IViewOnClickListener
     , public IViewOnLongClickListener
     , public IDropTarget
-    , public IFolderInfoFolderListener
-    , public ITextViewOnEditorActionListener
+    , public IFolderListener
+    , public IOnEditorActionListener
     , public IViewOnFocusChangeListener
 {
 private:
-    class  MyActionModeCallback
+    class MyActionModeCallback
         : public Object
         , public IActionModeCallback
     {
@@ -101,7 +145,7 @@ private:
 
     class MyOnAlarmListener
         : public Object
-        , public IOnAlarmListener
+        , public IAlarmOnAlarmListener
     {
     public:
         CAR_INTERFACE_DECL();
@@ -118,7 +162,7 @@ private:
 
     class MyOnAlarmListener2
         : public Object
-        , public IOnAlarmListener
+        , public IAlarmOnAlarmListener
     {
     public:
         CAR_INTERFACE_DECL();
@@ -150,6 +194,8 @@ public:
     CAR_INTERFACE_DECL();
 
     Folder();
+
+    CARAPI constructor();
 
     /**
      * Used to inflate the Workspace from XML.
@@ -195,8 +241,8 @@ public:
      */
     //@Override
     CARAPI OnTouchEvent(
-        /* [in] */ IMotionEvent* ev,);
-        /* [out] */ Boolean* result
+        /* [in] */ IMotionEvent* ev,
+        /* [out] */ Boolean* result);
 
     CARAPI SetDragController(
         /* [in] */ IDragController* dragController);
@@ -236,11 +282,11 @@ public:
     CARAPI NotifyDataSetChanged();
 
     CARAPI AcceptDrop(
-        /* [in] */ DragObject* d,
+        /* [in] */ IDropTargetDragObject* d,
         /* [out] */ Boolean* result);
 
     CARAPI OnDragEnter(
-        /* [in] */ DragObject* d);
+        /* [in] */ IDropTargetDragObject* d);
 
     CARAPI ReadingOrderGreaterThan(
         /* [in] */ ArrayOf<Int32>* v1,
@@ -251,16 +297,16 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI OnDragOver(
-        /* [in] */ DragObject* d);
+        /* [in] */ IDropTargetDragObject* d);
 
     CARAPI CompleteDragExit();
 
     CARAPI OnDragExit(
-        /* [in] */ DragObject* d);
+        /* [in] */ IDropTargetDragObject* d);
 
     CARAPI OnDropCompleted(
         /* [in] */ IView* target,
-        /* [in] */ DragObject* d,
+        /* [in] */ IDropTargetDragObject* d,
         /* [in] */ Boolean isFlingToDelete,
         /* [in] */ Boolean success);
 
@@ -269,7 +315,7 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI OnFlingToDelete(
-        /* [in] */ DragObject* d,
+        /* [in] */ IDropTargetDragObject* d,
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ IPointF* vec);
@@ -283,7 +329,7 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI GetDropTargetDelegate(
-        /* [in] */ DragObject* d,
+        /* [in] */ IDropTargetDragObject* d,
         /* [out] */ IDropTarget** target);
 
     CARAPI IsFull(
@@ -306,7 +352,7 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI OnDrop(
-        /* [in] */ DragObject* d);
+        /* [in] */ IDropTargetDragObject* d);
 
     // This is used so the item doesn't immediately appear in the folder when added. In one case
     // we need to create the illusion that the item isn't added back to the folder yet, to
@@ -350,7 +396,7 @@ protected:
         /* [in] */ IShortcutInfo* item,
         /* [out] */ Boolean* result);
 
-    CARAPI OnMeasure(
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
@@ -414,8 +460,8 @@ public:
     Boolean mSuppressOnAdd;
     AutoPtr<IFolderEditText> mFolderName;
 
-    AutoPtr<IOnAlarmListener> mReorderAlarmListener;
-    AutoPtr<IOnAlarmListener> mOnExitAlarmListener;
+    AutoPtr<IAlarmOnAlarmListener> mReorderAlarmListener;
+    AutoPtr<IAlarmOnAlarmListener> mOnExitAlarmListener;
 
 protected:
     AutoPtr<IDragController> mDragController;
@@ -437,7 +483,7 @@ private:
     Int32 mMaxCountY;
     Int32 mMaxNumItems;
     AutoPtr<IDrawable> mIconDrawable;
-    AutoPtr<IShortcutInfo> mCurrentDragInfo;
+    AutoPtr<ShortcutInfo> mCurrentDragInfo;
     AutoPtr<IView> mCurrentDragView;
     Int32 mFolderNameHeight;
     Boolean mDragInProgress;
@@ -459,6 +505,8 @@ private:
     AutoPtr<IAlarm> mReorderAlarm;
     AutoPtr<IAlarm> mOnExitAlarm;
     AutoPtr<IRect> mTempRect;
+
+    AutoPtr<IActionModeCallback> mActionModeCallback;
 };
 
 } // namespace Launcher2

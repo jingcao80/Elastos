@@ -15,6 +15,7 @@ using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Graphics::Drawable::IBitmapDrawable;
 using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemSelectedListener;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 using Elastos::Core::CoreUtils;
@@ -24,6 +25,9 @@ using Elastos::Utility::CArrayList;
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
+
+CAR_INTERFACE_IMPL(WallpaperChooserDialogFragment::MyOnClickListener, Object,
+        IViewOnClickListener);
 
 WallpaperChooserDialogFragment::MyOnClickListener::MyOnClickListener(
     /* [in] */ WallpaperChooserDialogFragment* host,

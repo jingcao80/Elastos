@@ -1,7 +1,21 @@
 #ifndef  __ELASTOS_DROI_LAUNCHER2_LAUNCHERAPPLICATION_H__
 #define  __ELASTOS_DROI_LAUNCHER2_LAUNCHERAPPLICATION_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/launcher2/IconCache.h"
+#include "elastos/droid/launcher2/LauncherModel.h"
+#include "elastos/droid/app/Application.h"
+#include "elastos/droid/database/ContentObserver.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Os.h"
+
+using Elastos::Droid::App::Application;
+using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Database::IContentObserver;
+using Elastos::Droid::Os::IHandler;
 
 namespace Elastos {
 namespace Droid {
@@ -13,7 +27,7 @@ class LauncherApplication
 {
 private:
     class MyContentObserver
-        : ContentObserver
+        : public ContentObserver
     {
     public:
         MyContentObserver(
@@ -46,22 +60,22 @@ public:
 
     CARAPI SetLauncher(
         /* [in] */ ILauncher* launcher,
-        /* [out] */ LauncherModel** mode);
+        /* [out] */ ILauncherModel** mode);
 
     CARAPI GetIconCache(
-        /* [out] */ IconCache** cache);
+        /* [out] */ IIconCache** cache);
 
     CARAPI GetModel(
-        /* [out] */ LauncherModel** mode);
+        /* [out] */ ILauncherModel** mode);
 
-    CARAPI GetWidgetPreviewCacheDb(
-        /* [out] */ WidgetPreviewLoader::CacheDb** db);
+    //CARAPI GetWidgetPreviewCacheDb(
+    //    /* [out] */ IWidgetPreviewLoaderCacheDb** db);
 
     CARAPI SetLauncherProvider(
         /* [in] */ ILauncherProvider* provider);
 
     CARAPI GetLauncherProvider(
-        /* [in] */ ILauncherProvider** provider);
+        /* [out] */ ILauncherProvider** provider);
 
     static CARAPI GetSharedPreferencesKey(
         /* [out] */ String* key);
@@ -85,7 +99,7 @@ protected:
 private:
     AutoPtr<LauncherModel> mModel;
     AutoPtr<IconCache> mIconCache;
-    AutoPtr<WidgetPreviewLoader::CacheDb> mWidgetPreviewCacheDb;
+    //AutoPtr<IWidgetPreviewLoaderCacheDb> mWidgetPreviewCacheDb;
     static Boolean sIsScreenLarge;
     static Float sScreenDensity;
     static Int32 sLongPressTimeout;

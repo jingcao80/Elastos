@@ -49,6 +49,7 @@ class FolderIcon
 public:
     class FolderRingAnimator
         : public Object
+        , public IFolderIconFolderRingAnimator
     {
     private:
         class MyAnimatorUpdateListener
@@ -118,6 +119,8 @@ public:
         };
 
     public:
+        CAR_INTERFACE_DECL();
+
         FolderRingAnimator(
             /* [in] */ ILauncher* launcher,
             /* [in] */ FolderIcon* folderIcon);
@@ -348,7 +351,7 @@ protected:
         /* [out] */ IParcelable** p);
 
     //@Override
-    CARAPI_(void) DispatchDraw(
+    CARAPI DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
 private:

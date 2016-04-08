@@ -1,6 +1,7 @@
 module
 {
     using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Droid.View.IView;
 
     interface Elastos.Droid.Launcher2.IShortcutInfo;
 
@@ -50,6 +51,31 @@ module
 
 
         //~~~~~~~~~~~~~
+    }
+
+    [local]
+    interface ILauncherTransitionable {
+        GetContent(
+            [out] IView** view);
+
+        OnLauncherTransitionPrepare(
+            [in] ILauncher* l,
+            [in] Boolean animated,
+            [in] Boolean toWorkspace);
+
+        OnLauncherTransitionStart(
+            [in] ILauncher* l,
+            [in] Boolean animated,
+            [in] Boolean toWorkspace);
+
+        OnLauncherTransitionStep(
+            [in] ILauncher* l,
+            [in] Float t);
+
+        OnLauncherTransitionEnd(
+            [in] ILauncher* l,
+            [in] Boolean animated,
+            [in] Boolean toWorkspace);
     }
 
     } // namespace Launcher2

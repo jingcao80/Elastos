@@ -55,10 +55,12 @@ public:
     public:
         CAR_INTERFACE_DECL();
 
+        LayoutParams();
+
         /**
          * {@inheritDoc}
          */
-        LayoutParams(
+        CARAPI constructor(
             /* [in] */ Int32 width,
             /* [in] */ Int32 height);
 
@@ -433,7 +435,7 @@ protected:
         /* [out] */ Int32* order);
 
     //@Override
-    CARAPI_(void) DispatchDraw(
+    CARAPI DispatchDraw(
         /* [in] */ ICanvas* canvas);
 
 private:

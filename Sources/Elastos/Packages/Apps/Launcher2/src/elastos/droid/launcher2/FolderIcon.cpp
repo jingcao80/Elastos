@@ -130,6 +130,9 @@ AutoPtr<IDrawable> FolderIcon::FolderRingAnimator::sSharedInnerRingDrawable;
 Int32 FolderIcon::FolderRingAnimator::sPreviewSize = -1;
 Int32 FolderIcon::FolderRingAnimator::sPreviewPadding = -1;
 
+CAR_INTERFACE_IMPL(FolderIcon::FolderRingAnimator, Object,
+        IFolderIconFolderRingAnimator);
+
 FolderIcon::FolderRingAnimator::FolderRingAnimator(
     /* [in] */ ILauncher* launcher,
     /* [in] */ FolderIcon* folderIcon)
@@ -376,6 +379,11 @@ FolderIcon::FolderIcon()
     mAnimParams = new PreviewItemDrawingParams(0, 0, 0, 0);
     AutoPtr<IArrayList> mHiddenItems;
     CArrayList::New((IArrayList**)&mHiddenItems);
+}
+
+ECode FolderIcon::constructor()
+{
+    return NOERROR;
 }
 
 ECode FolderIcon::constructor(
@@ -880,16 +888,16 @@ void FolderIcon::DrawPreviewItem(
     canvas->Restore();
 }
 
-void FolderIcon::DispatchDraw(
+ECode FolderIcon::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     LinearLayout::DispatchDraw(canvas);
 
-    if (mFolder == NULL) return;
+    if (mFolder == NULL) return NOERROR;
     Int32 count;
     assert(0);
     //mFolder->GetItemCount(&count);
-    if (count == 0 && !mAnimating) return;
+    if (count == 0 && !mAnimating) return NOERROR;
 
     AutoPtr<IArrayList> items;
     assert(0);
@@ -939,6 +947,7 @@ void FolderIcon::DispatchDraw(
     else {
         DrawPreviewItem(canvas, mAnimParams);
     }
+    return NOERROR;
 }
 
 void FolderIcon::AnimateFirstItem(

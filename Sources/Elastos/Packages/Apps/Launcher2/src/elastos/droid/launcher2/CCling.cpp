@@ -237,7 +237,7 @@ ECode CCling::OnTouchEvent(
     return NOERROR;
 }
 
-void CCling::DispatchDraw(
+ECode CCling::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
     if (mIsInitialized) {
@@ -364,7 +364,7 @@ void CCling::DispatchDraw(
     }
 
     // Draw the rest of the cling
-    FrameLayout::DispatchDraw(canvas);
+    return FrameLayout::DispatchDraw(canvas);
 }
 
 AutoPtr<ArrayOf<Int32> > CCling::GetPunchThroughPositions()

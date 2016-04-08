@@ -1,7 +1,19 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_PACKAGECHANGEDRECEIVER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_PACKAGECHANGEDRECEIVER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/launcher2/PagedView.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IViewOnLongClickListener;
+using Elastos::Droid::View::IViewOnTouchListener;
+using Elastos::Droid::Utility::IAttributeSet;
 
 namespace Elastos {
 namespace Droid {
@@ -64,7 +76,7 @@ protected:
      * Determines if we should change the touch state to start scrolling after the
      * user moves their touch point too far.
      */
-    CARAPI_(void) DetermineScrollingStart(
+    CARAPI DetermineScrollingStart(
         /* [in] */ IMotionEvent* ev);
 
     /*
@@ -78,9 +90,9 @@ protected:
     CARAPI OnDetachedFromWindow();
 
     /** Show the scrolling indicators when we move the page */
-    CARAPI_(void) OnPageBeginMoving();
+    CARAPI OnPageBeginMoving();
 
-    CARAPI_(void) OnPageEndMoving();
+    CARAPI OnPageEndMoving();
 
 private:
     CARAPI_(void) HandleTouchEvent(

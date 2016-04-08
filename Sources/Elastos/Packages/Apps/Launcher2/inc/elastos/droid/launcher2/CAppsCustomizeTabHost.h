@@ -1,14 +1,44 @@
-#ifndef  __ELASTOS_DROID_LAUNCHER2_APPSCUSTOMIZETABHOST_H__
-#define  __ELASTOS_DROID_LAUNCHER2_APPSCUSTOMIZETABHOST_H__
+#ifndef  __ELASTOS_DROID_LAUNCHER2_CAPPSCUSTOMIZETABHOST_H__
+#define  __ELASTOS_DROID_LAUNCHER2_CAPPSCUSTOMIZETABHOST_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "_Elastos_Droid_Launcher2_CAppsCustomizeTabHost.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include "elastos/droid/widget/TabHost.h"
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.CoreLibrary.Core.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::Widget::TabHost;
+using Elastos::Droid::Widget::IFrameLayout;
+using Elastos::Droid::Widget::ILinearLayout;
+using Elastos::Droid::Widget::ITabHostTabContentFactory;
+using Elastos::Droid::Widget::ITabHostOnTabChangeListener;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Core::IRunnable;
+
+using Elastos::Droid::Launcher2::AppsCustomizePagedViewContentType;
 
 namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-class AppsCustomizeTabHost
-    : public TabHost
+CarClass(CAppsCustomizeTabHost)
+    , public TabHost
     , public IAppsCustomizeTabHost
     , public ILauncherTransitionable
     , public ITabHostOnTabChangeListener
@@ -19,12 +49,12 @@ private:
     {
     public:
         MyRunnable(
-            /* [in] */ AppsCustomizeTabHost* host);
+            /* [in] */ CAppsCustomizeTabHost* host);
 
         CARAPI Run();
 
     private:
-        AppsCustomizeTabHost* mHost;
+        CAppsCustomizeTabHost* mHost;
     };
 
     class MyTabHostTabContentFactory
@@ -49,56 +79,67 @@ private:
         : public Runnable
     {
     public:
+        class MyAnimatorListenerAdapter
+            : public AnimatorListenerAdapter
+        {
+        public:
+            MyAnimatorListenerAdapter(
+                /* [in] */ CAppsCustomizeTabHost* host);
+
+            //@Override
+            CARAPI OnAnimationEnd(
+                /* [in] */ IAnimator* animation);
+
+            //@Override
+            CARAPI OnAnimationCancel(
+                /* [in] */ IAnimator* animation);
+
+        private:
+            CARAPI ClearAnimationBuffer();
+
+        private:
+            CAppsCustomizeTabHost* mHost;
+        };
+
+        class MyAnimatorListenerAdapter2
+            : public AnimatorListenerAdapter
+        {
+        public:
+            MyAnimatorListenerAdapter2(
+                /* [in] */ CAppsCustomizeTabHost* host);
+
+            //@Override
+            CARAPI OnAnimationEnd(
+                /* [in] */ IAnimator* animation);
+
+        private:
+            CAppsCustomizeTabHost* mHost;
+        };
+
+    public:
         MyRunnable2(
-            /* [in] */ AppsCustomizeTabHost* host);
+            /* [in] */ CAppsCustomizeTabHost* host,
+            /* [in] */ AppsCustomizePagedViewContentType type,
+            /* [in] */ Int32 duration);
 
         CARAPI Run();
 
     private:
-        AppsCustomizeTabHost* mHost;
-    };
-
-    class MyAnimatorListenerAdapter
-        : public AnimatorListenerAdapter
-    {
-    public:
-        MyAnimatorListenerAdapter(
-            /* [in] */ AppsCustomizeTabHost* host);
-
-        //@Override
-        CARAPI OnAnimationEnd(
-            /* [in] */ IAnimator* animation);
-
-        //@Override
-        CARAPI OnAnimationCancel(
-            /* [in] */ IAnimator* animation);
-
-    private:
-        CARAPI ClearAnimationBuffer();
-
-    private:
-        AppsCustomizeTabHost* mHost;
-    };
-
-    class MyAnimatorListenerAdapter2
-        : public AnimatorListenerAdapter
-    {
-    public:
-        MyAnimatorListenerAdapter(
-            /* [in] */ AppsCustomizeTabHost* host);
-
-        //@Override
-        CARAPI OnAnimationEnd(
-            /* [in] */ IAnimator* animation);
-
-    private:
-        AppsCustomizeTabHost* mHost;
+        CAppsCustomizeTabHost* mHost;
+        AppsCustomizePagedViewContentType mType;
+        Int32 mDuration;
     };
 
 public:
     CAR_INTERFACE_DECL();
 
-    AppsCustomizeTabHost(
+    CAR_OBJECT_DECL();
+
+    CAppsCustomizeTabHost();
+
+    CARAPI constructor();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
@@ -109,7 +150,7 @@ public:
      * tabs manually).
      */
     CARAPI SetContentTypeImmediate(
-        /* [in] */ AppsCustomizePagedView::ContentType type);
+        /* [in] */ AppsCustomizePagedViewContentType type);
 
     CARAPI SelectAppsTab();
 
@@ -129,20 +170,20 @@ public:
         /* [in] */ const String& tabId);
 
     CARAPI SetCurrentTabFromContent(
-        /* [in] */ AppsCustomizePagedView::ContentType type);
+        /* [in] */ AppsCustomizePagedViewContentType type);
 
     /**
      * Returns the content type for the specified tab tag.
      */
     CARAPI GetContentTypeForTabTag(
         /* [in] */ const String& tag,
-        /* [out] */ AppsCustomizePagedView::ContentType* type);
+        /* [out] */ AppsCustomizePagedViewContentType* type);
 
     /**
      * Returns the tab tag for a given content type.
      */
     CARAPI GetTabTagForContentType(
-        /* [in] */ AppsCustomizePagedView::ContentType type,
+        /* [in] */ AppsCustomizePagedViewContentType type,
         /* [out] */ String* str);
 
     /**
@@ -197,7 +238,7 @@ protected:
     CARAPI OnFinishInflate();
 
     //@Override
-    CARAPI OnMeasure(
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
@@ -207,17 +248,15 @@ private:
     CARAPI ReloadCurrentPage();
 
     CARAPI OnTabChangedEnd(
-        /* [in] */ AppsCustomizePagedView::ContentType type);
+        /* [in] */ AppsCustomizePagedViewContentType type);
 
     CARAPI EnableAndBuildHardwareLayer();
 
     CARAPI SetVisibilityOfSiblingsWithLowerZOrder(
         /* [in] */ Int32 visibility);
 
-public:
-    static const String LOG_TAG;
-
 private:
+    static const String TAG;
     static const String APPS_TAB_TAG;
     static const String WIDGETS_TAB_TAG;
 
@@ -238,4 +277,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_LAUNCHER2_APPSCUSTOMIZETABHOST_H__
+#endif // __ELASTOS_DROID_LAUNCHER2_CAPPSCUSTOMIZETABHOST_H__

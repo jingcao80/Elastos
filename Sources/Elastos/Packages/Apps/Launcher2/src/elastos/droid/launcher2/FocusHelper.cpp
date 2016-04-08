@@ -1,7 +1,25 @@
 
 #include "elastos/droid/launcher2/FocusHelper.h"
+#include "elastos/droid/launcher2/CellLayout.h"
+#include "elastos/droid/launcher2/LauncherApplication.h"
 #include "Elastos.Droid.Service.h"
 #include "R.h"
+#include "Elastos.Droid.Content.h"
+#include <elastos/core/Math.h>
+
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Res::IConfiguration;
+using Elastos::Droid::View::IViewParent;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::EIID_IViewOnKeyListener;
+using Elastos::Droid::Widget::IFrameLayout;
+using Elastos::Droid::Widget::ITabWidget;
+using Elastos::Core::EIID_IComparator;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::ICollections;
+using Elastos::Utility::CCollections;
 
 namespace Elastos {
 namespace Droid {
@@ -89,23 +107,17 @@ ECode FocusHelper::MyComparator::Compare(
 
     AutoPtr<IViewGroupLayoutParams> lhsParams;
     lhsView->GetLayoutParams((IViewGroupLayoutParams**)&lhsParams);
-    AutoPtr<ICellLayoutLayoutParams> llp = ICellLayoutLayoutParams::Probe(lhsParams);
+    AutoPtr<CellLayout::LayoutParams> llp =
+            (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(lhsParams);
 
     AutoPtr<IViewGroupLayoutParams> rhsParams;
     rhsView->GetLayoutParams((IViewGroupLayoutParams**)&rhsParams);
-    AutoPtr<ICellLayoutLayoutParams> rlp = ICellLayoutLayoutParams::Probe(rhsParams);
+    AutoPtr<CellLayout::LayoutParams> rlp =
+            (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(rhsParams);
 
-    Int32 llpCellY;
-    llp->GetCellY(&llpCellY);
-    Int32 llpCellX;
-    llp->GetCellX(&llpCellX);
-    Int32 lvIndex = llpCellY * cellCountX) + llpCellX;
+    Int32 lvIndex = (llp->mCellY * mCellCountX) + llp->mCellX;
+    Int32 rvIndex = (rlp->mCellY * mCellCountX) + rlp->mCellX;
 
-    Int32 rlpCellY;
-    rlp->GetCellY(&rlpCellY);
-    Int32 rlpCellX;
-    rlp->GetCellX(&rlpCellX);
-    Int32 rvIndex = (rlpCellY * cellCountX) + rlpCellX;
     *result = lvIndex - rvIndex;
     return NOERROR;
 }
@@ -131,10 +143,11 @@ Boolean FocusHelper::HandleAppsCustomizeTabKeyEvent(
     /* [in] */ IKeyEvent* e)
 {
     AutoPtr<ITabHost> tabHost = FindTabHostParent(v);
-    AutoPtr<IViewGroup> contents;
-    tabHost->GetTabContentView((IViewGroup**)&contents);
+    AutoPtr<IFrameLayout> view;
+    tabHost->GetTabContentView((IFrameLayout**)&view);
+    AutoPtr<IViewGroup> contents = IViewGroup::Probe(view);
     AutoPtr<IView> shop;
-    tabHost->FindViewById(
+    IView::Probe(tabHost)->FindViewById(
             Elastos::Droid::Launcher2::R::id::market_button, (IView**)&shop);
 
     Int32 action;
@@ -146,7 +159,8 @@ Boolean FocusHelper::HandleAppsCustomizeTabKeyEvent(
             if (handleKeyEvent) {
                 // Select the shop button if we aren't on it
                 if (TO_IINTERFACE(v) != TO_IINTERFACE(shop)) {
-                    shop->RequestFocus();
+                    Boolean tmp;
+                    shop->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -155,12 +169,14 @@ Boolean FocusHelper::HandleAppsCustomizeTabKeyEvent(
             if (handleKeyEvent) {
                 // Select the content view (down is handled by the tab key handler otherwise)
                 if (TO_IINTERFACE(v) == TO_IINTERFACE(shop)) {
-                    contents->RequestFocus();
+                    Boolean tmp;
+                    IView::Probe(contents)->RequestFocus(&tmp);
                     wasHandled = TRUE;
                 }
             }
             break;
-        default: break;
+        default:
+            break;
     }
     return wasHandled;
 }
@@ -171,7 +187,8 @@ AutoPtr<IViewGroup> FocusHelper::GetAppsCustomizePage(
 {
     AutoPtr<IPagedView> pview = IPagedView::Probe(container);
     AutoPtr<IView> view;
-    pview->GetPageAt(index, (IView**)&view);
+    assert(0);
+    //pview->GetPageAt(index, (IView**)&view);
     AutoPtr<IViewGroup> page = IViewGroup::Probe(view);
     if (IPagedViewCellLayout::Probe(page) != NULL) {
         // There are two layers, a PagedViewCellLayout and PagedViewCellLayoutChildren
@@ -188,28 +205,29 @@ Boolean FocusHelper::HandlePagedViewGridLayoutWidgetKeyEvent(
     /* [in] */ IKeyEvent* e)
 {
     AutoPtr<IViewParent> vparent;
-    IViewGroup::Probe(w)->GetParent((IViewParent**)&vparent);
+    IView::Probe(w)->GetParent((IViewParent**)&vparent);
     AutoPtr<IPagedViewGridLayout> parent = IPagedViewGridLayout::Probe(vparent);
 
     AutoPtr<IViewParent> vparent2;
-    IViewGroup::Probe(parent)->GetParent((IViewParent**)&vparent2);
+    IView::Probe(parent)->GetParent((IViewParent**)&vparent2);
     AutoPtr<IPagedView> container = IPagedView::Probe(vparent2);
 
-    AutoPtr<ITabHost> tabHost = FindTabHostParent(container);
+    AutoPtr<ITabHost> tabHost = FindTabHostParent(IView::Probe(container));
     AutoPtr<ITabWidget> tabs;
     tabHost->GetTabWidget((ITabWidget**)&tabs);
     Int32 widgetIndex;
-    parent->IndexOfChild(w, &widgetIndex);
+    IViewGroup::Probe(parent)->IndexOfChild(IView::Probe(w), &widgetIndex);
     Int32 widgetCount;
-    parent->GetChildCount(&widgetCount);
+    IViewGroup::Probe(parent)->GetChildCount(&widgetCount);
 
     Int32 index;
-    container->IndexOfChild(IView::Probe(parent), &index);
+    IViewGroup::Probe(container)->IndexOfChild(IView::Probe(parent), &index);
     Int32 pageIndex;
-    container->IndexToPage(index, &pageIndex);
+    assert(0);
+    //container->IndexToPage(index, &pageIndex);
 
     Int32 pageCount;
-    container->GetChildCount(&pageCount);
+    IViewGroup::Probe(container)->GetChildCount(&pageCount);
     Int32 cellCountX;
     parent->GetCellCountX(&cellCountX);
     Int32 cellCountY;
@@ -233,16 +251,20 @@ Boolean FocusHelper::HandlePagedViewGridLayoutWidgetKeyEvent(
                 if (widgetIndex > 0) {
                     AutoPtr<IView> view;
                     IViewGroup::Probe(parent)->GetChildAt(widgetIndex - 1, (IView**)&view);
-                    view->RequestFocus();
+                    Boolean tmp;
+                    view->RequestFocus(&tmp);
                 }
                 else {
                     if (pageIndex > 0) {
-                        newParent = GetAppsCustomizePage(container, pageIndex - 1);
+                        newParent = GetAppsCustomizePage(IViewGroup::Probe(container), pageIndex - 1);
                         if (newParent != NULL) {
                             Int32 count;
                             newParent->GetChildCount(&count);
                             newParent->GetChildAt(count - 1, (IView**)&child);
-                            if (child != NULL) child->RequestFocus();
+                            if (child != NULL) {
+                                Boolean tmp;
+                                child->RequestFocus(&tmp);
+                            }
                         }
                     }
                 }
@@ -256,15 +278,19 @@ Boolean FocusHelper::HandlePagedViewGridLayoutWidgetKeyEvent(
                 // Select the next widget or the first widget on the next page
                 if (widgetIndex < (widgetCount - 1)) {
                     AutoPtr<IView> view;
-                    parent->GetChildAt(widgetIndex + 1, (IView**)&view);
-                    view->RequestFocus();
+                    IViewGroup::Probe(parent)->GetChildAt(widgetIndex + 1, (IView**)&view);
+                    Boolean tmp;
+                    view->RequestFocus(&tmp);
                 }
                 else {
                     if (pageIndex < (pageCount - 1)) {
-                        newParent = GetAppsCustomizePage(container, pageIndex + 1);
+                        newParent = GetAppsCustomizePage(IViewGroup::Probe(container), pageIndex + 1);
                         if (newParent != NULL) {
                             newParent->GetChildAt(0, (IView**)&child);
-                            if (child != NULL) child->RequestFocus();
+                            if (child != NULL) {
+                                Boolean tmp;
+                                child->RequestFocus(&tmp);
+                            }
                         }
                     }
                 }
@@ -278,11 +304,15 @@ Boolean FocusHelper::HandlePagedViewGridLayoutWidgetKeyEvent(
                 // Select the closest icon in the previous row, otherwise select the tab bar
                 if (y > 0) {
                     Int32 newWidgetIndex = ((y - 1) * cellCountX) + x;
-                    parent->GetChildAt(newWidgetIndex, (IView**)&child);
-                    if (child != NULL) child->RequestFocus();
+                    IViewGroup::Probe(parent)->GetChildAt(newWidgetIndex, (IView**)&child);
+                    if (child != NULL) {
+                        Boolean tmp;
+                        child->RequestFocus(&tmp);
+                    }
                 }
                 else {
-                    tabs->RequestFocus();
+                    Boolean tmp;
+                    IView::Probe(tabs)->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -293,9 +323,12 @@ Boolean FocusHelper::HandlePagedViewGridLayoutWidgetKeyEvent(
             if (handleKeyEvent) {
                 // Select the closest icon in the previous row, otherwise do nothing
                 if (y < (cellCountY - 1)) {
-                    Int32 newWidgetIndex = Math::Min(widgetCount - 1, ((y + 1) * cellCountX) + x);
-                    parent->GetChildAt(newWidgetIndex, (IView**)&child);
-                    if (child != NULL) child->RequestFocus();
+                    Int32 newWidgetIndex = Elastos::Core::Math::Min(widgetCount - 1, ((y + 1) * cellCountX) + x);
+                    IViewGroup::Probe(parent)->GetChildAt(newWidgetIndex, (IView**)&child);
+                    if (child != NULL) {
+                        Boolean tmp;
+                        child->RequestFocus(&tmp);
+                    }
                 }
             }
             wasHandled = TRUE;
@@ -308,7 +341,7 @@ Boolean FocusHelper::HandlePagedViewGridLayoutWidgetKeyEvent(
                 // Simulate a click on the widget
                 AutoPtr<IViewOnClickListener> clickListener =
                         IViewOnClickListener::Probe(container);
-                clickListener->OnClick(w);
+                clickListener->OnClick(IView::Probe(w));
             }
             wasHandled = TRUE;
             break;
@@ -319,15 +352,18 @@ Boolean FocusHelper::HandlePagedViewGridLayoutWidgetKeyEvent(
                 // Select the first item on the previous page, or the first item on this page
                 // if there is no previous page
                 if (pageIndex > 0) {
-                    newParent = GetAppsCustomizePage(container, pageIndex - 1);
+                    newParent = GetAppsCustomizePage(IViewGroup::Probe(container), pageIndex - 1);
                     if (newParent != NULL) {
                         newParent->GetChildAt(0, (IView**)&child);
                     }
                 }
                 else {
-                    parent->GetChildAt(0, (IView**)&child);
+                    IViewGroup::Probe(parent)->GetChildAt(0, (IView**)&child);
                 }
-                if (child != NULL) child->RequestFocus();
+                if (child != NULL) {
+                    Boolean tmp;
+                    child->RequestFocus(&tmp);
+                }
             }
             wasHandled = TRUE;
             break;
@@ -338,15 +374,18 @@ Boolean FocusHelper::HandlePagedViewGridLayoutWidgetKeyEvent(
                 // Select the first item on the next page, or the last item on this page
                 // if there is no next page
                 if (pageIndex < (pageCount - 1)) {
-                    newParent = GetAppsCustomizePage(container, pageIndex + 1);
+                    newParent = GetAppsCustomizePage(IViewGroup::Probe(container), pageIndex + 1);
                     if (newParent != NULL) {
                         newParent->GetChildAt(0, (IView**)&child);
                     }
                 }
                 else {
-                    parent->GetChildAt(widgetCount - 1, (IView**)&child);
+                    IViewGroup::Probe(parent)->GetChildAt(widgetCount - 1, (IView**)&child);
                 }
-                if (child != NULL) child->RequestFocus();
+                if (child != NULL) {
+                    Boolean tmp;
+                    child->RequestFocus(&tmp);
+                }
             }
             wasHandled = TRUE;
             break;
@@ -355,8 +394,11 @@ Boolean FocusHelper::HandlePagedViewGridLayoutWidgetKeyEvent(
         {
             if (handleKeyEvent) {
                 // Select the first item on this page
-                parent->GetChildAt(0, (IView**)&child);
-                if (child != NULL) child->RequestFocus();
+                IViewGroup::Probe(parent)->GetChildAt(0, (IView**)&child);
+                if (child != NULL) {
+                    Boolean tmp;
+                    child->RequestFocus(&tmp);
+                }
             }
             wasHandled = TRUE;
             break;
@@ -366,8 +408,9 @@ Boolean FocusHelper::HandlePagedViewGridLayoutWidgetKeyEvent(
             if (handleKeyEvent) {
                 // Select the last item on this page
                 AutoPtr<IView> view;
-                parent->GetChildAt(widgetCount - 1, (IView**)&view);
-                view->RequestFocus();
+                IViewGroup::Probe(parent)->GetChildAt(widgetCount - 1, (IView**)&view);
+                Boolean tmp;
+                view->RequestFocus(&tmp);
             }
             wasHandled = TRUE;
             break;
@@ -392,10 +435,11 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
     if (IPagedViewCellLayoutChildren::Probe(parent) != NULL) {
         itemContainer = IViewGroup::Probe(parent);
         AutoPtr<IViewParent> parent2;
-        itemContainer->GetParent((IViewParent**)&parent2);
+        IView::Probe(itemContainer)->GetParent((IViewParent**)&parent2);
         parentLayout = IViewGroup::Probe(parent2);
-        IPagedViewCellLayout::Probe(parentLayout)->GetCellCountX(&countX);
-        IPagedViewCellLayout::Probe(parentLayout)->GetCellCountY(&countY);
+        assert(0);
+        // IPagedViewCellLayout::Probe(parentLayout)->GetCellCountX(&countX);
+        // IPagedViewCellLayout::Probe(parentLayout)->GetCellCountY(&countY);
     }
     else {
         parentLayout = IViewGroup::Probe(parent);
@@ -407,9 +451,9 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
     // Note we have an extra parent because of the
     // PagedViewCellLayout/PagedViewCellLayoutChildren relationship
     AutoPtr<IViewParent> _parent;
-    parentLayout->GetParent((IViewParent**)&_parent);
+    IView::Probe(parentLayout)->GetParent((IViewParent**)&_parent);
     AutoPtr<IPagedView> container = IPagedView::Probe(_parent);
-    AutoPtr<ITabHost> tabHost = FindTabHostParent(container);
+    AutoPtr<ITabHost> tabHost = FindTabHostParent(IView::Probe(container));
     AutoPtr<ITabWidget> tabs;
     tabHost->GetTabWidget((ITabWidget**)&tabs);
     Int32 iconIndex;
@@ -417,11 +461,12 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
     Int32 itemCount;
     itemContainer->GetChildCount(&itemCount);
     Int32 index;
-    IViewGroup::Probe(container)->IndexOfChild(parentLayout, &index);
+    IViewGroup::Probe(container)->IndexOfChild(IView::Probe(parentLayout), &index);
     Int32 pageIndex;
-    container->IndexToPage(index, &pageIndex);
+    assert(0);
+    //container->IndexToPage(index, &pageIndex);
     Int32 pageCount;
-    container->GetChildCount(&pageCount);
+    IViewGroup::Probe(container)->GetChildCount(&pageCount);
 
     Int32 x = iconIndex % countX;
     Int32 y = iconIndex / countX;
@@ -442,17 +487,23 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
                 if (iconIndex > 0) {
                     AutoPtr<IView> view;
                     itemContainer->GetChildAt(iconIndex - 1, (IView**)&view);
-                    view->RequestFocus();
+                    Boolean tmp;
+                    view->RequestFocus(&tmp);
                 }
                 else {
                     if (pageIndex > 0) {
-                        newParent = GetAppsCustomizePage(container, pageIndex - 1);
+                        newParent = GetAppsCustomizePage(IViewGroup::Probe(container),
+                                pageIndex - 1);
                         if (newParent != NULL) {
-                            container->SnapToPage(pageIndex - 1);
+                            assert(0);
+                            // container->SnapToPage(pageIndex - 1);
                             Int32 count;
                             newParent->GetChildCount(&count);
                             newParent->GetChildAt(count - 1, (IView**)&child);
-                            if (child != NULL) child->RequestFocus();
+                            if (child != NULL) {
+                                Boolean tmp;
+                                child->RequestFocus(&tmp);
+                            }
                         }
                     }
                 }
@@ -467,15 +518,21 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
                 if (iconIndex < (itemCount - 1)) {
                     AutoPtr<IView> view;
                     itemContainer->GetChildAt(iconIndex + 1, (IView**)&view);
-                    view->RequestFocus();
+                    Boolean tmp;
+                    view->RequestFocus(&tmp);
                 }
                 else {
                     if (pageIndex < (pageCount - 1)) {
-                        newParent = GetAppsCustomizePage(container, pageIndex + 1);
+                        newParent = GetAppsCustomizePage(IViewGroup::Probe(container),
+                                pageIndex + 1);
                         if (newParent != NULL) {
-                            container->SnapToPage(pageIndex + 1);
+                            assert(0);
+                            //container->SnapToPage(pageIndex + 1);
                             newParent->GetChildAt(0, (IView**)&child);
-                            if (child != NULL) child->RequestFocus();
+                            if (child != NULL) {
+                                Boolean tmp;
+                                child->RequestFocus(&tmp);
+                            }
                         }
                     }
                 }
@@ -491,10 +548,12 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
                     Int32 newiconIndex = ((y - 1) * countX) + x;
                     AutoPtr<IView> view;
                     itemContainer->GetChildAt(newiconIndex, (IView**)&view);
-                    view->RequestFocus();
+                    Boolean tmp;
+                    view->RequestFocus(&tmp);
                 }
                 else {
-                    tabs->RequestFocus();
+                    Boolean tmp;
+                    IView::Probe(tabs)->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -505,10 +564,11 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
             if (handleKeyEvent) {
                 // Select the closest icon in the previous row, otherwise do nothing
                 if (y < (countY - 1)) {
-                    Int32 newiconIndex = Math::Min(itemCount - 1, ((y + 1) * countX) + x);
+                    Int32 newiconIndex = Elastos::Core::Math::Min(itemCount - 1, ((y + 1) * countX) + x);
                     AutoPtr<IView> view;
                     itemContainer->GetChildAt(newiconIndex, (IView**)&view);
-                    view->RequestFocus();
+                    Boolean tmp;
+                    view->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -532,17 +592,23 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
                 // Select the first icon on the previous page, or the first icon on this page
                 // if there is no previous page
                 if (pageIndex > 0) {
-                    newParent = GetAppsCustomizePage(container, pageIndex - 1);
+                    newParent = GetAppsCustomizePage(IViewGroup::Probe(container),
+                            pageIndex - 1);
                     if (newParent != NULL) {
-                        container->SnapToPage(pageIndex - 1);
+                        assert(0);
+                        //container->SnapToPage(pageIndex - 1);
                         newParent->GetChildAt(0, (IView**)&child);
-                        if (child != NULL) child->RequestFocus();
+                        if (child != NULL) {
+                            Boolean tmp;
+                            child->RequestFocus(&tmp);
+                        }
                     }
                 }
                 else {
                     AutoPtr<IView> view;
                     itemContainer->GetChildAt(0, (IView**)&view);
-                    view->RequestFocus();
+                    Boolean tmp;
+                    view->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -554,17 +620,23 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
                 // Select the first icon on the next page, or the last icon on this page
                 // if there is no next page
                 if (pageIndex < (pageCount - 1)) {
-                    newParent = GetAppsCustomizePage(container, pageIndex + 1);
+                    newParent = GetAppsCustomizePage(IViewGroup::Probe(container),
+                            pageIndex + 1);
                     if (newParent != NULL) {
-                        container->SnapToPage(pageIndex + 1);
-                        newParent.getChildAt(0, (IView**)&child);
-                        if (child != NULL) child->RequestFocus();
+                        assert(0);
+                        //container->SnapToPage(pageIndex + 1);
+                        newParent->GetChildAt(0, (IView**)&child);
+                        if (child != NULL) {
+                            Boolean tmp;
+                            child->RequestFocus(&tmp);
+                        }
                     }
                 }
                 else {
                     AutoPtr<IView> view;
                     itemContainer->GetChildAt(itemCount - 1, (IView**)&view);
-                    view->RequestFocus();
+                    Boolean tmp;
+                    view->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -576,7 +648,8 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
                 // Select the first icon on this page
                 AutoPtr<IView> view;
                 itemContainer->GetChildAt(0, (IView**)&view);
-                view->RequestFocus();
+                Boolean tmp;
+                view->RequestFocus(&tmp);
             }
             wasHandled = TRUE;
             break;
@@ -587,7 +660,8 @@ Boolean FocusHelper::HandleAppsCustomizeKeyEvent(
                 // Select the last icon on this page
                 AutoPtr<IView> view;
                 itemContainer->GetChildAt(itemCount - 1, (IView**)&view);
-                view->RequestFocus();
+                Boolean tmp;
+                view->RequestFocus(&tmp);
             }
             wasHandled = TRUE;
             break;
@@ -602,18 +676,23 @@ Boolean FocusHelper::HandleTabKeyEvent(
     /* [in] */ Int32 keyCode,
     /* [in] */ IKeyEvent* e)
 {
-    if (!LauncherApplication::IsScreenLarge()) return FALSE;
+    Boolean res;
+    LauncherApplication::IsScreenLarge(&res);
+    if (!res) {
+        return FALSE;
+    }
 
     AutoPtr<IViewParent> _parent;
-    v->GetParent((IViewParent**)&_parent);
+    IView::Probe(v)->GetParent((IViewParent**)&_parent);
     AutoPtr<IFocusOnlyTabWidget> parent = IFocusOnlyTabWidget::Probe(_parent);
-    AutoPtr<ITabHost> tabHost = FindTabHostParent(parent);
-    AutoPtr<IViewGroup> contents;
-    tabHost->GetTabContentView((IViewGroup**)&contents);
+    AutoPtr<ITabHost> tabHost = FindTabHostParent(IView::Probe(parent));
+    AutoPtr<IFrameLayout> layout;
+    tabHost->GetTabContentView((IFrameLayout**)&layout);
+    AutoPtr<IViewGroup> contents = IViewGroup::Probe(layout);
     Int32 tabCount;
-    parent->GetTabCount(&tabCount);
+    ITabWidget::Probe(parent)->GetTabCount(&tabCount);
     Int32 tabIndex;
-    parent->GetChildTabIndex(v, &tabIndex);
+    parent->GetChildTabIndex(IView::Probe(v), &tabIndex);
 
     Int32 action;
     e->GetAction(&action);
@@ -627,7 +706,8 @@ Boolean FocusHelper::HandleTabKeyEvent(
                 if (tabIndex > 0) {
                     AutoPtr<IView> view;
                     ITabWidget::Probe(parent)->GetChildTabViewAt(tabIndex - 1, (IView**)&view);
-                    view->RequestFocus();
+                    Boolean tmp;
+                    view->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -640,15 +720,17 @@ Boolean FocusHelper::HandleTabKeyEvent(
                 if (tabIndex < (tabCount - 1)) {
                     AutoPtr<IView> view;
                     ITabWidget::Probe(parent)->GetChildTabViewAt(tabIndex + 1, (IView**)&view);
-                    view->RequestFocus();
+                    Boolean tmp;
+                    view->RequestFocus(&tmp);
                 }
                 else {
                     Int32 id;
                     IView::Probe(v)->GetNextFocusRightId(&id);
                     if (id != IView::NO_ID) {
                         AutoPtr<IView> view;
-                        tabHost->FindViewById(id, (IView**)&view);
-                        view->RequestFocus();
+                        IView::Probe(tabHost)->FindViewById(id, (IView**)&view);
+                        Boolean tmp;
+                        view->RequestFocus(&tmp);
                     }
                 }
             }
@@ -665,7 +747,8 @@ Boolean FocusHelper::HandleTabKeyEvent(
         {
             if (handleKeyEvent) {
                 // Select the content view
-                contents->RequestFocus();
+                Boolean tmp;
+                IView::Probe(contents)->RequestFocus(&tmp);
             }
             wasHandled = TRUE;
             break;
@@ -686,11 +769,11 @@ Boolean FocusHelper::HandleHotseatButtonKeyEvent(
     AutoPtr<IViewGroup> parent = IViewGroup::Probe(viewParent);
 
     AutoPtr<IViewParent> viewParent2;
-    parent->GetParent((IViewParent**)&viewParent2);
+    IView::Probe(parent)->GetParent((IViewParent**)&viewParent2);
     AutoPtr<IViewGroup> launcher = IViewGroup::Probe(viewParent2);
 
     AutoPtr<IView> view;
-    launcher->FindViewById(
+    IView::Probe(launcher)->FindViewById(
             Elastos::Droid::Launcher2::R::id::workspace,
             (IView**)&view);
     AutoPtr<IWorkspace> workspace = IWorkspace::Probe(view);
@@ -699,7 +782,8 @@ Boolean FocusHelper::HandleHotseatButtonKeyEvent(
     Int32 buttonCount;
     parent->GetChildCount(&buttonCount);
     Int32 pageIndex;
-    workspace->GetCurrentPage(&pageIndex);
+    assert(0);
+    //workspace->GetCurrentPage(&pageIndex);
 
     // NOTE: currently we don't special case for the phone UI in different
     // orientations, even though the hotseat is on the side in landscape mode.  This
@@ -716,10 +800,12 @@ Boolean FocusHelper::HandleHotseatButtonKeyEvent(
                 if (buttonIndex > 0) {
                     AutoPtr<IView> view;
                     parent->GetChildAt(buttonIndex - 1, (IView**)&view);
-                    view->RequestFocus();
+                    Boolean tmp;
+                    view->RequestFocus(&tmp);
                 }
                 else {
-                    workspace->SnapToPage(pageIndex - 1);
+                    assert(0);
+                    //workspace->SnapToPage(pageIndex - 1);
                 }
             }
             wasHandled = TRUE;
@@ -730,10 +816,12 @@ Boolean FocusHelper::HandleHotseatButtonKeyEvent(
                 if (buttonIndex < (buttonCount - 1)) {
                     AutoPtr<IView> view;
                     parent->GetChildAt(buttonIndex + 1, (IView**)&view);
-                    view->RequestFocus();
+                    Boolean tmp;
+                    view->RequestFocus(&tmp);
                 }
                 else {
-                    workspace->SnapToPage(pageIndex + 1);
+                    assert(0);
+                    //workspace->SnapToPage(pageIndex + 1);
                 }
             }
             wasHandled = TRUE;
@@ -742,16 +830,20 @@ Boolean FocusHelper::HandleHotseatButtonKeyEvent(
             if (handleKeyEvent) {
                 // Select the first bubble text view in the current page of the workspace
                 AutoPtr<IView> view;
-                workspace->GetChildAt(pageIndex, (IView**)&view);
+                assert(0);
+                //workspace->GetChildAt(pageIndex, (IView**)&view);
                 AutoPtr<ICellLayout> layout = ICellLayout::Probe(view);
                 AutoPtr<IShortcutAndWidgetContainer> children;
                 layout->GetShortcutsAndWidgets((IShortcutAndWidgetContainer**)&children);
-                AutoPtr<IView> newIcon = GetIconInDirection(layout, children, -1, 1);
+                AutoPtr<IView> newIcon = GetIconInDirection(layout, IViewGroup::Probe(children), -1, 1);
                 if (newIcon != NULL) {
-                    newIcon->RequestFocus();
+                    Boolean tmp;
+                    newIcon->RequestFocus(&tmp);
                 }
                 else {
-                    workspace->RequestFocus();
+                    assert(0);
+                    Boolean tmp;
+                    IView::Probe(workspace)->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -775,9 +867,9 @@ AutoPtr<IShortcutAndWidgetContainer> FocusHelper::GetCellLayoutChildrenForIndex(
 
     AutoPtr<IView> view2;
     parent->GetChildAt(0, (IView**)&view2);
-    AutoPtr<IShortcutAndWidgetContainer> container =
+    AutoPtr<IShortcutAndWidgetContainer> _container =
             IShortcutAndWidgetContainer::Probe(view2);
-    return container;
+    return _container;
 }
 
 AutoPtr<IArrayList> FocusHelper::GetCellLayoutChildrenSortedSpatially(
@@ -797,7 +889,9 @@ AutoPtr<IArrayList> FocusHelper::GetCellLayoutChildrenSortedSpatially(
         views->Add(TO_IINTERFACE(view));
     }
     AutoPtr<IComparator> cmp = new MyComparator(cellCountX);
-    Collections::Sort(views, cmp);
+    AutoPtr<ICollections> collections;
+    CCollections::AcquireSingleton((ICollections**)&collections);
+    collections->Sort(IList::Probe(views), cmp);
     return views;
 }
 
@@ -854,14 +948,14 @@ AutoPtr<IView> FocusHelper::GetClosestIconOnLine(
     AutoPtr<IArrayList> views = GetCellLayoutChildrenSortedSpatially(layout, parent);
     AutoPtr<IViewGroupLayoutParams> params;
     v->GetLayoutParams((IViewGroupLayoutParams**)&params);
-    AutoPtr<ICellLayoutLayoutParams> lp = ICellLayoutLayoutParams::Probe(params);
+    AutoPtr<CellLayout::LayoutParams> lp =
+            (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(params);
     Int32 cellCountY;
     layout->GetCountY(&cellCountY);
-    Int32 row;
-    lp->GetCellY(&row);
+    Int32 row = lp->mCellY;
     Int32 newRow = row + lineDelta;
     if (0 <= newRow && newRow < cellCountY) {
-        Float closestDistance = Float.MAX_VALUE;
+        Float closestDistance = Elastos::Core::Math::FLOAT_MAX_VALUE;
         Int32 closestIndex = -1;
         Int32 index;
         views->IndexOf(v, &index);
@@ -874,20 +968,14 @@ AutoPtr<IView> FocusHelper::GetClosestIconOnLine(
             AutoPtr<IView> newV = IView::Probe(obj);
             AutoPtr<IViewGroupLayoutParams> _params;
             newV->GetLayoutParams((IViewGroupLayoutParams**)&_params);
-            AutoPtr<ICellLayoutLayoutParams> tmpLp = ICellLayoutLayoutParams::Probe(_params);
-            Int32 tmpLpY;
-            tmpLp->GetCellY(&tmpLpY);
-            Boolean satisfiesRow = (lineDelta < 0) ? (tmpLpY < row) : (tmpLpY > row);
+            AutoPtr<CellLayout::LayoutParams> tmpLp =
+                    (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(_params);
+            Boolean satisfiesRow = (lineDelta < 0) ? (tmpLp->mCellY < row) : (tmpLp->mCellY > row);
             if (satisfiesRow && (IBubbleTextView::Probe(newV) != NULL
                         || IFolderIcon::Probe(newV) != NULL)) {
-                Int32 tmpLpX;
-                tmpLp->GetCellX(&tmpLpX);
-                Int32 lpX;
-                lp->GetCellX(&lpX);
-                Int32 lpY;
-                lp->GetCellY(&lpY);
-                Float tmpDistance = (Float)Math::Sqrt(Math::Pow(tmpLpX - lpX, 2) +
-                        Math.pow(tmpLpY - lpY, 2));
+                Float tmpDistance = (Float)Elastos::Core::Math::Sqrt(
+                        Elastos::Core::Math::Pow(tmpLp->mCellX - lp->mCellX, 2) +
+                        Elastos::Core::Math::Pow(tmpLp->mCellY - lp->mCellY, 2));
                 if (tmpDistance < closestDistance) {
                     closestIndex = index;
                     closestDistance = tmpDistance;
@@ -921,31 +1009,33 @@ Boolean FocusHelper::HandleIconKeyEvent(
             IShortcutAndWidgetContainer::Probe(viewParent);
 
     AutoPtr<IViewParent> viewParent2;
-    parent->GetParent((IViewParent**)&viewParent2);
+    IView::Probe(parent)->GetParent((IViewParent**)&viewParent2);
     AutoPtr<ICellLayout> layout = ICellLayout::Probe(viewParent2);
 
     AutoPtr<IViewParent> viewParent3;
-    layout->GetParent((IViewParent**)&viewParent3);
+    IView::Probe(layout)->GetParent((IViewParent**)&viewParent3);
     AutoPtr<IWorkspace> workspace = IWorkspace::Probe(viewParent3);
 
     AutoPtr<IViewParent> viewParent4;
-    workspace->GetParent((IViewParent**)&viewParent4);
+    IView::Probe(workspace)->GetParent((IViewParent**)&viewParent4);
     AutoPtr<IViewGroup> launcher = IViewGroup::Probe(viewParent4);
 
     AutoPtr<IView> view;
-    launcher->FindViewById(
+    IView::Probe(launcher)->FindViewById(
             Elastos::Droid::Launcher2::R::id::qsb_bar, (IView**)&view);
     AutoPtr<IViewGroup> tabs = IViewGroup::Probe(view);
 
     AutoPtr<IView> view2;
-    launcher->FindViewById(
+    IView::Probe(launcher)->FindViewById(
             Elastos::Droid::Launcher2::R::id::hotseat, (IView**)&view2);
     AutoPtr<IViewGroup> hotseat = IViewGroup::Probe(view2);
 
     Int32 pageIndex;
-    workspace->IndexOfChild(layout, &pageIndex);
+    assert(0);
+    //workspace->IndexOfChild(layout, &pageIndex);
     Int32 pageCount;
-    workspace->GetChildCount(&pageCount);
+    assert(0);
+    //workspace->GetChildCount(&pageCount);
 
     Int32 action;
     e->GetAction(&action);
@@ -956,22 +1046,25 @@ Boolean FocusHelper::HandleIconKeyEvent(
         {
             if (handleKeyEvent) {
                 // Select the previous icon or the last icon on the previous page if possible
-                AutoPtr<IView> newIcon = GetIconInDirection(layout, parent, v, -1);
+                AutoPtr<IView> newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent), v, -1);
                 if (newIcon != NULL) {
-                    newIcon->RequestFocus();
+                    Boolean tmp;
+                    IView::Probe(newIcon)->RequestFocus(&tmp);
                 }
                 else {
                     if (pageIndex > 0) {
-                        parent = GetCellLayoutChildrenForIndex(workspace, pageIndex - 1);
+                        parent = GetCellLayoutChildrenForIndex(IViewGroup::Probe(workspace), pageIndex - 1);
                         Int32 count;
-                        parent->GetChildCount(&count);
-                        newIcon = GetIconInDirection(layout, parent, count, -1);
+                        IViewGroup::Probe(parent)->GetChildCount(&count);
+                        newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent), count, -1);
                         if (newIcon != NULL) {
-                            newIcon->RequestFocus();
+                            Boolean tmp;
+                            IView::Probe(newIcon)->RequestFocus(&tmp);
                         }
                         else {
                             // Snap to the previous page
-                            workspace->SnapToPage(pageIndex - 1);
+                            assert(0);
+                            //workspace->SnapToPage(pageIndex - 1);
                         }
                     }
                 }
@@ -983,20 +1076,23 @@ Boolean FocusHelper::HandleIconKeyEvent(
         {
             if (handleKeyEvent) {
                 // Select the next icon or the first icon on the next page if possible
-                AutoPtr<IView> newIcon = GetIconInDirection(layout, parent, v, 1);
+                AutoPtr<IView> newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent), v, 1);
                 if (newIcon != NULL) {
-                    newIcon->RequestFocus();
+                    Boolean tmp;
+                    IView::Probe(newIcon)->RequestFocus(&tmp);
                 }
                 else {
                     if (pageIndex < (pageCount - 1)) {
-                        parent = GetCellLayoutChildrenForIndex(workspace, pageIndex + 1);
-                        newIcon = GetIconInDirection(layout, parent, -1, 1);
+                        parent = GetCellLayoutChildrenForIndex(IViewGroup::Probe(workspace), pageIndex + 1);
+                        newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent), -1, 1);
                         if (newIcon != NULL) {
-                            newIcon->RequestFocus();
+                            Boolean tmp;
+                            IView::Probe(newIcon)->RequestFocus(&tmp);
                         }
                         else {
                             // Snap to the next page
-                            workspace->SnapToPage(pageIndex + 1);
+                            assert(0);
+                            //workspace->SnapToPage(pageIndex + 1);
                         }
                     }
                 }
@@ -1008,13 +1104,15 @@ Boolean FocusHelper::HandleIconKeyEvent(
         {
             if (handleKeyEvent) {
                 // Select the closest icon in the previous line, otherwise select the tab bar
-                AutoPtr<IView> newIcon = GetClosestIconOnLine(layout, parent, v, -1);
+                AutoPtr<IView> newIcon = GetClosestIconOnLine(layout, IViewGroup::Probe(parent), v, -1);
                 if (newIcon != NULL) {
-                    newIcon->RequestFocus();
+                    Boolean tmp;
+                    IView::Probe(newIcon)->RequestFocus(&tmp);
                     wasHandled = TRUE;
                 }
                 else {
-                    tabs0>RequestFocus();
+                    Boolean tmp;
+                    IView::Probe(tabs)->RequestFocus(&tmp);
                 }
             }
             break;
@@ -1022,12 +1120,15 @@ Boolean FocusHelper::HandleIconKeyEvent(
         case IKeyEvent::KEYCODE_DPAD_DOWN:
             if (handleKeyEvent) {
                 // Select the closest icon in the next line, otherwise select the button bar
-                AutoPtr<IView> newIcon = GetClosestIconOnLine(layout, parent, v, 1);
+                AutoPtr<IView> newIcon = GetClosestIconOnLine(layout, IViewGroup::Probe(parent), v, 1);
                 if (newIcon != NULL) {
-                    newIcon->RequestFocus();
+                    Boolean tmp;
+                    IView::Probe(newIcon)->RequestFocus(&tmp);
                     wasHandled = TRUE;
-                } else if (hotseat != NULL) {
-                    hotseat->RequestFocus();
+                }
+                else if (hotseat != NULL) {
+                    Boolean tmp;
+                    IView::Probe(hotseat)->RequestFocus(&tmp);
                 }
             }
             break;
@@ -1036,20 +1137,23 @@ Boolean FocusHelper::HandleIconKeyEvent(
                 // Select the first icon on the previous page or the first icon on this page
                 // if there is no previous page
                 if (pageIndex > 0) {
-                    parent = GetCellLayoutChildrenForIndex(workspace, pageIndex - 1);
-                    AutoPtr<IView> newIcon = GetIconInDirection(layout, parent, -1, 1);
+                    parent = GetCellLayoutChildrenForIndex(IViewGroup::Probe(workspace), pageIndex - 1);
+                    AutoPtr<IView> newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent), -1, 1);
                     if (newIcon != NULL) {
-                        newIcon->RequestFocus();
+                        Boolean tmp;
+                        IView::Probe(newIcon)->RequestFocus(&tmp);
                     }
                     else {
                         // Snap to the previous page
-                        workspace->SnapToPage(pageIndex - 1);
+                        assert(0);
+                        //workspace->SnapToPage(pageIndex - 1);
                     }
                 }
                 else {
-                    AutoPtr<IView> newIcon = GetIconInDirection(layout, parent, -1, 1);
+                    AutoPtr<IView> newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent), -1, 1);
                     if (newIcon != NULL) {
-                        newIcon->RequestFocus();
+                        Boolean tmp;
+                        IView::Probe(newIcon)->RequestFocus(&tmp);
                     }
                 }
             }
@@ -1060,23 +1164,26 @@ Boolean FocusHelper::HandleIconKeyEvent(
                 // Select the first icon on the next page or the last icon on this page
                 // if there is no previous page
                 if (pageIndex < (pageCount - 1)) {
-                    parent = GetCellLayoutChildrenForIndex(workspace, pageIndex + 1);
-                    AutoPtr<IView> newIcon = GetIconInDirection(layout, parent, -1, 1);
+                    parent = GetCellLayoutChildrenForIndex(IViewGroup::Probe(workspace), pageIndex + 1);
+                    AutoPtr<IView> newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent), -1, 1);
                     if (newIcon != NULL) {
-                        newIcon->RequestFocus();
+                        Boolean tmp;
+                        IView::Probe(newIcon)->RequestFocus(&tmp);
                     }
                     else {
                         // Snap to the next page
-                        workspace->SnapToPage(pageIndex + 1);
+                        assert(0);
+                        //workspace->SnapToPage(pageIndex + 1);
                     }
                 }
                 else {
                     Int32 count;
-                    parent->GetChildCount(&count);
-                    AutoPtr<IView> newIcon = GetIconInDirection(layout, parent,
+                    IViewGroup::Probe(parent)->GetChildCount(&count);
+                    AutoPtr<IView> newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent),
                             count, -1);
                     if (newIcon != NULL) {
-                        newIcon->RequestFocus();
+                        Boolean tmp;
+                        IView::Probe(newIcon)->RequestFocus(&tmp);
                     }
                 }
             }
@@ -1085,9 +1192,10 @@ Boolean FocusHelper::HandleIconKeyEvent(
         case IKeyEvent::KEYCODE_MOVE_HOME:
             if (handleKeyEvent) {
                 // Select the first icon on this page
-                AutoPtr<IView> newIcon = getIconInDirection(layout, parent, -1, 1);
+                AutoPtr<IView> newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent), -1, 1);
                 if (newIcon != NULL) {
-                    newIcon->RequestFocus();
+                    Boolean tmp;
+                    IView::Probe(newIcon)->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -1096,11 +1204,12 @@ Boolean FocusHelper::HandleIconKeyEvent(
             if (handleKeyEvent) {
                 // Select the last icon on this page
                 Int32 count;
-                parent->GetChildCount(&count);
-                AutoPtr<IView> newIcon = GetIconInDirection(layout, parent,
+                IViewGroup::Probe(parent)->GetChildCount(&count);
+                AutoPtr<IView> newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent),
                         count, -1);
                 if (newIcon != NULL) {
-                    newIcon->RequestFocus();
+                    Boolean tmp;
+                    IView::Probe(newIcon)->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -1121,15 +1230,16 @@ Boolean FocusHelper::HandleFolderKeyEvent(
             IShortcutAndWidgetContainer::Probe(viewParent);
 
     AutoPtr<IViewParent> viewParent2;
-    parent->GetParent((IViewParent**)&viewParent2);
+    IView::Probe(parent)->GetParent((IViewParent**)&viewParent2);
     AutoPtr<ICellLayout> layout = ICellLayout::Probe(viewParent2);
 
     AutoPtr<IViewParent> viewParent3;
-    layout->GetParent((IViewParent**)&viewParent3);
+    IView::Probe(layout)->GetParent((IViewParent**)&viewParent3);
     AutoPtr<IFolder> folder = IFolder::Probe(viewParent3);
 
     AutoPtr<IView> title;
-    folder->GetFolderName((IView**)&title);
+    assert(0);
+    //folder->GetFolderName((IView**)&title);
 
     Int32 action;
     e->GetAction(&action);
@@ -1139,9 +1249,10 @@ Boolean FocusHelper::HandleFolderKeyEvent(
         case IKeyEvent::KEYCODE_DPAD_LEFT:
             if (handleKeyEvent) {
                 // Select the previous icon
-                AutoPtr<IView> newIcon = GetIconInDirection(layout, parent, v, -1);
+                AutoPtr<IView> newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent), v, -1);
                 if (newIcon != NULL) {
-                    newIcon->RequestFocus();
+                    Boolean tmp;
+                    newIcon->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -1149,12 +1260,14 @@ Boolean FocusHelper::HandleFolderKeyEvent(
         case IKeyEvent::KEYCODE_DPAD_RIGHT:
             if (handleKeyEvent) {
                 // Select the next icon
-                AutoPtr<IView> newIcon = GetIconInDirection(layout, parent, v, 1);
+                AutoPtr<IView> newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent), v, 1);
                 if (newIcon != NULL) {
-                    newIcon->RequestFocus();
+                    Boolean tmp;
+                    newIcon->RequestFocus(&tmp);
                 }
                 else {
-                    title->RequestFocus();
+                    Boolean tmp;
+                    title->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -1162,9 +1275,10 @@ Boolean FocusHelper::HandleFolderKeyEvent(
         case IKeyEvent::KEYCODE_DPAD_UP:
             if (handleKeyEvent) {
                 // Select the closest icon in the previous line
-                AutoPtr<IView> newIcon = GetClosestIconOnLine(layout, parent, v, -1);
+                AutoPtr<IView> newIcon = GetClosestIconOnLine(layout, IViewGroup::Probe(parent), v, -1);
                 if (newIcon != NULL) {
-                    newIcon->RequestFocus();
+                    Boolean tmp;
+                    newIcon->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -1172,12 +1286,14 @@ Boolean FocusHelper::HandleFolderKeyEvent(
         case IKeyEvent::KEYCODE_DPAD_DOWN:
             if (handleKeyEvent) {
                 // Select the closest icon in the next line
-                AutoPtr<IView> newIcon = GetClosestIconOnLine(layout, parent, v, 1);
+                AutoPtr<IView> newIcon = GetClosestIconOnLine(layout, IViewGroup::Probe(parent), v, 1);
                 if (newIcon != NULL) {
-                    newIcon->RequestFocus();
+                    Boolean tmp;
+                    newIcon->RequestFocus(&tmp);
                 }
                 else {
-                    title->RequestFocus();
+                    Boolean tmp;
+                    title->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -1185,9 +1301,10 @@ Boolean FocusHelper::HandleFolderKeyEvent(
         case IKeyEvent::KEYCODE_MOVE_HOME:
             if (handleKeyEvent) {
                 // Select the first icon on this page
-                AutoPtr<IView> newIcon = GetIconInDirection(layout, parent, -1, 1);
+                AutoPtr<IView> newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent), -1, 1);
                 if (newIcon != NULL) {
-                    newIcon->RequestFocus();
+                    Boolean tmp;
+                    newIcon->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;
@@ -1196,11 +1313,12 @@ Boolean FocusHelper::HandleFolderKeyEvent(
             if (handleKeyEvent) {
                 // Select the last icon on this page
                 Int32 count;
-                parent->GetChildCount(&count);
-                AutoPtr<IView> newIcon = GetIconInDirection(layout, parent,
+                IViewGroup::Probe(parent)->GetChildCount(&count);
+                AutoPtr<IView> newIcon = GetIconInDirection(layout, IViewGroup::Probe(parent),
                         count, -1);
                 if (newIcon != NULL) {
-                    newIcon->RequestFocus();
+                    Boolean tmp;
+                    newIcon->RequestFocus(&tmp);
                 }
             }
             wasHandled = TRUE;

@@ -3,6 +3,20 @@
 
 #include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/launcher2/PagedView.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Launcher2::PagedView;
+using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Core::Object;
+
 
 namespace Elastos {
 namespace Droid {
@@ -27,8 +41,13 @@ public:
 
         CARAPI_(void) DisableSettle();
 
-        CARAPI_(Float) GetInterpolation(
-            /* [in] */ Float t);
+        CARAPI GetInterpolation(
+            /* [in] */ Float t,
+            /* [out] */ Float* result);
+
+        // @Override
+        CARAPI HasNativeInterpolator(
+            /* [out] */ Boolean* res);
 
     private:
         static const Float DEFAULT_TENSION;
@@ -36,13 +55,15 @@ public:
     };
 
 public:
+    SmoothPagedView();
+
     /**
      * Used to inflate the Workspace from XML.
      *
      * @param context The application's context.
      * @param attrs The attributes set containing the Workspace's customization values.
      */
-    SmoothPagedView(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
@@ -53,7 +74,7 @@ public:
      * @param attrs The attributes set containing the Workspace's customization values.
      * @param defStyle Unused.
      */
-    SmoothPagedView(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs,
         /* [in] */ Int32 defStyle);

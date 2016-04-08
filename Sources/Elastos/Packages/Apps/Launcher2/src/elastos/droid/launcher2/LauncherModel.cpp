@@ -2504,6 +2504,17 @@ const Int32 LauncherModel::ITEMS_CHUNK = 6;
 const Int32 LauncherModel::MAIN_THREAD_NORMAL_RUNNABLE = 0;
 const Int32 LauncherModel::MAIN_THREAD_BINDING_RUNNABLE = 1;
 
+AutoPtr<IHandlerThread> LauncherModel::sWorkerThread;
+AutoPtr<IHandler> LauncherModel::sWorker;
+
+AutoPtr<IArrayList> LauncherModel::mDeferredBindRunnables;
+
+AutoPtr<IHashMap> LauncherModel::sBgItemsIdMap;
+AutoPtr<IArrayList> LauncherModel::sBgWorkspaceItems;
+AutoPtr<IArrayList> LauncherModel::sBgAppWidgets;
+AutoPtr<IHashMap> LauncherModel::sBgFolders;
+AutoPtr<IHashMap> LauncherModel::sBgDbIconCache;
+
 Boolean LauncherModel::InitStaticBlock()
 {
     AutoPtr<IHandlerThread> sWorkerThread;
