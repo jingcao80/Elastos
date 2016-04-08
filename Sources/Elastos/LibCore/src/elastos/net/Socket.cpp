@@ -524,6 +524,21 @@ Boolean Socket::UsingSocks()
     return mProxy != NULL && (mProxy->GetType(&type), type == ProxyType_SOCKS);
 }
 
+ECode Socket::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+
+    Boolean isConnected = FALSE;
+    if (IsConnected(&isConnected), !isConnected) {
+        *str = "Socket[unconnected]";
+    }
+    else {
+        IObject::Probe(mImpl)->ToString(str);
+    }
+    return NOERROR;
+}
+
 ECode Socket::ShutdownInput()
 {
     Boolean isInputShutdown;
@@ -896,6 +911,8 @@ void Socket::CacheLocalAddress()
 {
     AutoPtr<IFileDescriptor> fd;
     mImpl->GetFileDescriptor((IFileDescriptor**)&fd);
+
+    mLocalAddress = NULL;
     CIoBridge::_GetSocketLocalAddress(fd, (IInetAddress**)&mLocalAddress);
 }
 

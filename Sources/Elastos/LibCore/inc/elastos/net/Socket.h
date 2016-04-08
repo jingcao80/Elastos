@@ -123,6 +123,9 @@ public:
     CARAPI SetTcpNoDelay(
         /* [in] */ Boolean on);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
     CARAPI ShutdownInput();
 
     CARAPI ShutdownOutput();
