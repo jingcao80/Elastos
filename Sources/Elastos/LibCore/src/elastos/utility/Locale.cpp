@@ -167,14 +167,6 @@ ECode Locale::constructor(
     return NOERROR;
 }
 
-ECode Locale::constructor()
-{
-    mLanguageCode = "en";
-    mCountryCode = "US";
-    mVariantCode = "";
-    return NOERROR;
-}
-
 ECode Locale::constructor(
     /* [in] */ const String& language)
 {
@@ -279,7 +271,7 @@ ECode Locale::Clone(
 {
     VALIDATE_NOT_NULL(newObj);
     AutoPtr<ILocale> locale;
-    CLocale::New((ILocale**)&locale);
+    CLocale::New(mLanguageCode, (ILocale**)&locale);
 
     CloneImpl(locale);
 
@@ -1631,13 +1623,8 @@ ECode Locale::ForLanguageTag(
         variantCode = variantsBuilder.ToString();
     }
 
-    AutoPtr<CLocale> l;
-    CLocale::NewByFriend((CLocale**)&l);
-    l->constructor(languageCode, regionCode, variantCode, scriptCode,
-            unicodeKeywords, unicodeAttributes, extensions, TRUE /* has validated fields */);
-    *locale = (ILocale*)l.Get();
-    REFCOUNT_ADD(*locale)
-    return NOERROR;
+    return CLocale::New(languageCode, regionCode, variantCode, scriptCode,
+            unicodeKeywords, unicodeAttributes, extensions, TRUE /* has validated fields */, (ILocale**)locale);
 }
 
 } // namespace Utility

@@ -46,8 +46,6 @@ public:
         /* [in] */ const String& lowerCaseLanguageCode,
         /* [in] */ const String& upperCaseCountryCode);
 
-    CARAPI constructor();
-
     /**
      * Constructs a new {@code Locale} using the specified language.
      */
