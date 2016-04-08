@@ -5744,13 +5744,13 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
     /* [in] */ Int32 policyFlags,
     /* [out] */ Int32* bitwise)
 {
-    if (bitwise == NULL) {
-        return E_INVALID_ARGUMENT;
-    }
+    VALIDATE_NOT_NULL(bitwise)
+    *bitwise = 0;
+
+    Logger::I(TAG, " >>> InterceptKeyBeforeQueueing %s", TO_CSTR(event));
 
     if (!mSystemBooted) {
         // If we have not yet booted, don't let key events do anything.
-        *bitwise = 0;
         return NOERROR;
     }
 
@@ -5817,6 +5817,7 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
         *bitwise = result;
         return NOERROR;
     }
+
     Int32 count;
     event->GetRepeatCount(&count);
     Boolean useHapticFeedback = down
@@ -6111,6 +6112,7 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
     }
 
     *bitwise = result;
+    Logger::I(TAG, " <<< InterceptKeyBeforeQueueing %s", TO_CSTR(event));
     return NOERROR;
 }
 

@@ -147,10 +147,12 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    ViewPropertyAnimator(
-        /* [in] */ IView* view);
+    ViewPropertyAnimator();
 
     ~ViewPropertyAnimator();
+
+    CARAPI constructor(
+        /* [in] */ IView* v);
 
     CARAPI SetDuration(
         /* [in] */ Int64 duration);
@@ -268,12 +270,6 @@ public:
 
     CARAPI HasActions(
         /* [out] */ Boolean* result);
-
-protected:
-    ViewPropertyAnimator();
-
-    CARAPI Init(
-        /* [in] */ IView* v);
 
 private:
     CARAPI StartAnimation();

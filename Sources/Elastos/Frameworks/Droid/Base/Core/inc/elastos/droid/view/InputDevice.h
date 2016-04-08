@@ -25,7 +25,6 @@ class InputDevice
     , public IParcelable
 {
 public:
-    CAR_INTERFACE_DECL()
     /**
      * Provides information about the range of values for a particular {@link MotionEvent} axis.
      *
@@ -150,6 +149,8 @@ public:
         /* [out, callee] */ ArrayOf<Int32>** deviceIds);
 
 public:
+    CAR_INTERFACE_DECL()
+
     InputDevice();
 
     ~InputDevice();

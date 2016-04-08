@@ -10,10 +10,8 @@
 #include "elastos/droid/view/InputChannel.h"
 #include "elastos/droid/view/NativeInputChannel.h"
 #include "elastos/droid/view/ScopedLocalRef.h"
-#ifdef DROID_CORE
 #include "elastos/droid/view/CKeyEvent.h"
 #include "elastos/droid/view/CMotionEvent.h"
-#endif
 #include <elastos/utility/logging/Logger.h>
 #include <android/looper.h>
 #include <input/Input.h>
@@ -23,6 +21,8 @@
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::MessageQueue;
 using Elastos::Droid::Os::NativeMessageQueue;
+using Elastos::Core::ICloseGuardHelper;
+using Elastos::Core::CCloseGuardHelper;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Logging::Logger;
 using android::Vector;
@@ -31,7 +31,7 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
-const char* InputEventReceiver::TAG = "InputEventReceiver";
+static const String TAG("InputEventReceiver");
 
 #define DEBUG_DISPATCH_CYCLE 0
 
@@ -52,7 +52,7 @@ static AutoPtr<IKeyEvent> CreateKeyEventFromNative(
             event->getSource(),
             (IKeyEvent**)&eventObj);
     if (FAILED(ec)) {
-       ALOGE("An exception occurred while obtaining a key event.");
+       Logger::E(TAG, "An exception occurred while obtaining a key event.");
         return NULL;
     }
     return eventObj;
@@ -62,9 +62,12 @@ static AutoPtr<IMotionEvent> CreateMotionEventFromNative(
     /* [in] */ const android::MotionEvent* event)
 {
     AutoPtr<IMotionEvent> eventObj;
-    if (FAILED(CMotionEvent::New((IMotionEvent**)&eventObj))) {
+    ECode ec = CMotionEvent::New((IMotionEvent**)&eventObj);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "An exception occurred while obtaining a motion event.");
         return NULL;
     }
+
     Handle64 native;
     eventObj->GetNative(&native);
     android::MotionEvent* destEvent = (android::MotionEvent*)native;
@@ -404,7 +407,7 @@ InputEventReceiver::~InputEventReceiver()
  * @param inputChannel The input channel.
  * @param looper The looper to use when invoking callbacks.
  */
-InputEventReceiver::constructor(
+ECode InputEventReceiver::constructor(
     /* [in] */ IInputChannel* inputChannel,
     /* [in] */ ILooper* looper)
 {
@@ -420,14 +423,17 @@ InputEventReceiver::constructor(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
+    AutoPtr<ICloseGuardHelper> helper;
+    CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
+    helper->Get((ICloseGuard**)&mCloseGuard);
+    mCloseGuard->Open(String("dispose"));
+
     mInputChannel = inputChannel;
     looper->GetQueue((IMessageQueue**)&mMessageQueue);
 
     AutoPtr<IWeakReference> weakThis;
     GetWeakReference((IWeakReference**)&weakThis);
     return NativeInit(weakThis, inputChannel, mMessageQueue, &mReceiverPtr);
-
-    //mCloseGuard.open("dispose");
 }
 
 /**
@@ -435,9 +441,10 @@ InputEventReceiver::constructor(
  */
 ECode InputEventReceiver::Dispose()
 {
-    // if (mCloseGuard != NULL) {
-    //     mCloseGuard.close();
-    // }
+    if (mCloseGuard != NULL) {
+        mCloseGuard->Close();
+    }
+
     if (mReceiverPtr != 0) {
         NativeDispose(mReceiverPtr);
         mReceiverPtr = 0;
