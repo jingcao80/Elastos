@@ -51,6 +51,21 @@ WindowOrientationListener::SensorEventListenerImpl::SensorEventListenerImpl(
     /* [in] */ WindowOrientationListener* owner)
     : TILT_OVERHEAD_ENTER(-40)
     , TILT_OVERHEAD_EXIT(-15)
+    , mLastFilteredTimestampNanos(0)
+    , mLastFilteredX(0.f)
+    , mLastFilteredY(0.f)
+    , mLastFilteredZ(0.f)
+    , mProposedRotation(0)
+    , mPredictedRotation(0)
+    , mPredictedRotationTimestampNanos(0)
+    , mFlatTimestampNanos(0)
+    , mFlat(FALSE)
+    , mSwingTimestampNanos(0)
+    , mSwinging(FALSE)
+    , mAccelerationTimestampNanos(0)
+    , mAccelerating(FALSE)
+    , mOverhead(FALSE)
+    , mTiltHistoryIndex(0)
 {
     TILT_TOLERANCE = ArrayOf<AutoPtr<ArrayOf<Int32> > >::Alloc(4);
     AutoPtr<ArrayOf<Int32> > t0 = ArrayOf<Int32>::Alloc(2);
