@@ -13111,7 +13111,7 @@ void CWindowManagerService::SaveANRStateLocked(
     CStringWriter::New((IStringWriter**)&sw);
     AutoPtr<IFastPrintWriter> fpw;
     CFastPrintWriter::New(IWriter::Probe(sw), FALSE, 1024, (IFastPrintWriter**)&fpw);
-    AutoPtr<IPrintWriter> pw = IPrintWriter::Probe(pw);
+    AutoPtr<IPrintWriter> pw = IPrintWriter::Probe(fpw);
     AutoPtr<IDate> date;
     CDate::New((IDate**)&date);
     AutoPtr<IDateFormatHelper> dfh;
