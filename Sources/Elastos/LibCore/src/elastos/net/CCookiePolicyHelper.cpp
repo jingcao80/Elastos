@@ -66,9 +66,9 @@ ECode CCookiePolicyHelper::CookiePolicyAcceptOriginalServer::ShouldAccept(
 // CCookiePolicyHelper
 //========================================================================
 
-INIT_PROI_1 AutoPtr<ICookiePolicy> CCookiePolicyHelper::ACCEPT_ALL = new CookiePolicyAcceptAll();
-INIT_PROI_1 AutoPtr<ICookiePolicy> CCookiePolicyHelper::ACCEPT_NONE = new CookiePolicyAcceptNone();
-INIT_PROI_1 AutoPtr<ICookiePolicy> CCookiePolicyHelper::ACCEPT_ORIGINAL_SERVER = new CookiePolicyAcceptOriginalServer();
+INIT_PROI_3 AutoPtr<ICookiePolicy> CCookiePolicyHelper::ACCEPT_ALL = new CookiePolicyAcceptAll();
+INIT_PROI_3 AutoPtr<ICookiePolicy> CCookiePolicyHelper::ACCEPT_NONE = new CookiePolicyAcceptNone();
+INIT_PROI_3 AutoPtr<ICookiePolicy> CCookiePolicyHelper::ACCEPT_ORIGINAL_SERVER = new CookiePolicyAcceptOriginalServer();
 
 CAR_INTERFACE_IMPL(CCookiePolicyHelper, Singleton, ICookiePolicyHelper)
 
