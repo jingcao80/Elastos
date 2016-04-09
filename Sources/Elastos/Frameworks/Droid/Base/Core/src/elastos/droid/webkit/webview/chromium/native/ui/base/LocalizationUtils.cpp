@@ -10,7 +10,10 @@ using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Webkit::Webview::Chromium::Base::ApiCompatibilityUtils;
 using Elastos::Droid::Webkit::Webview::Chromium::Base::ApplicationStatus;
+using Elastos::Utility::ILocale;
 using Elastos::Utility::CLocale;
+using Elastos::Utility::ILocaleHelper;
+using Elastos::Utility::CLocaleHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -48,8 +51,10 @@ String LocalizationUtils::GetDefaultLocale()
     // }
     // return country.isEmpty() ? language : language + "-" + country;
 
+    AutoPtr<ILocaleHelper> helper;
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
     AutoPtr<ILocale> locale;
-    CLocale::New((ILocale**)&locale);
+    helper->GetDefault((ILocale**)&locale);
     String language;
     String country;
     locale->GetLanguage(&language);
