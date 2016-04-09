@@ -688,7 +688,9 @@ ECode CActivityManagerService::ProcessCpuThread::Run()
             Int64 ltime;
             mHost->mLastCpuTime->Get(&ltime);
             Int64 nextCpuDelay = (ltime + MONITOR_CPU_MAX_TIME) - now;
-            Int64 nextWriteDelay = (mHost->mLastWriteTime + BATTERY_STATS_TIME) - now;
+            // TODO: wait for batteryservice
+            // Int64 nextWriteDelay = (mHost->mLastWriteTime + BATTERY_STATS_TIME) - now;
+            Int64 nextWriteDelay = BATTERY_STATS_TIME;
             //Slogger::I(TAG, "Cpu delay=" + nextCpuDelay
             //        + ", write delay=" + nextWriteDelay);
             if (nextWriteDelay < nextCpuDelay) {
