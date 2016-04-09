@@ -252,6 +252,7 @@ ECode ReentrantLock::IsFair(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    assert(0);
 //    *result = mSync->Probe(EIID_FairSync) != NULL;
     return NOERROR;
 }

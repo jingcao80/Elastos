@@ -169,6 +169,13 @@ ECode AsyncTask::SerialExecutor::ScheduleNext()
 //====================================================================
 CAR_INTERFACE_IMPL(AsyncTask::WorkerRunnable, Object, ICallable)
 
+AsyncTask::WorkerRunnable::~WorkerRunnable()
+{
+    if (mIsExecuted) {
+        mOwner->Release();
+    }
+}
+
 ECode AsyncTask::WorkerRunnable::Call(
     /* [out] */ IInterface** result)
 {
@@ -187,7 +194,6 @@ ECode AsyncTask::WorkerRunnable::Call(
 //====================================================================
 // AsyncTask::MyFutureTask
 //====================================================================
-
 void AsyncTask::MyFutureTask::Done()
 {
     // try {
@@ -208,12 +214,21 @@ void AsyncTask::MyFutureTask::Done()
 // AsyncTask
 //====================================================================
 AsyncTask::AsyncTask()
-    : mStatus(PENDING)
+    : mIsExecuted(FALSE)
+    , mStatus(PENDING)
 {
     CAtomicBoolean::New((IAtomicBoolean**)&mCancelled);
     CAtomicBoolean::New((IAtomicBoolean**)&mTaskInvoked);
     mWorker = new WorkerRunnable(this);
     mFuture = new MyFutureTask(mWorker, this);
+}
+
+AsyncTask::~AsyncTask()
+{
+    if (!mIsExecuted) {
+        delete mWorker;
+        delete mFuture;
+    }
 }
 
 ECode AsyncTask::Init()
@@ -332,6 +347,10 @@ ECode AsyncTask::ExecuteOnExecutor(
 
     mWorker->mParams = params;
     exec->Execute(IRunnable::Probe(mFuture));
+
+    mWorker->mOwner->AddRef();
+    mWorker->mIsExecuted = TRUE;
+    mIsExecuted = TRUE;
 
     return NOERROR;
 }

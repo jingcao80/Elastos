@@ -127,8 +127,8 @@ static Boolean CompareAndSwapObject(volatile int32_t* address, IInterface* expec
 
 static void PutOrderedInt32(volatile int32_t* address, Int32 newValue)
 {
-    // ANDROID_MEMBAR_STORE();
-    // *address = newValue;
+    ANDROID_MEMBAR_STORE();
+    *address = newValue;
 }
 
 ECode FutureTask::Cancel(
@@ -356,9 +356,8 @@ ECode FutureTask::AwaitDone(
 {
     VALIDATE_NOT_NULL(state)
 
-    AutoPtr<Elastos::Core::CSystem> cs;
-    Elastos::Core::CSystem::AcquireSingletonByFriend((Elastos::Core::CSystem**)&cs);
-    AutoPtr<ISystem> system = (ISystem*)cs.Get();
+    AutoPtr<ISystem> system;
+    Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
 
     Int64 deadline = 0ll;
     if (timed) {

@@ -659,11 +659,11 @@ ECode CAppOpsService::GetPackagesForOps(
             AutoPtr<ICollection> values;
             packages->GetValues((ICollection**)&values);
             AutoPtr<IIterator> it;
+            values->GetIterator((IIterator**)&it);
             while (it->HasNext(&hasNext), hasNext) {
                 obj = NULL;
                 it->GetNext((IInterface**)&obj);
                 AutoPtr<Ops> pkgOps = (Ops*)IObject::Probe(obj);
-
                 AutoPtr<IArrayList> resOps = CollectOps(pkgOps, ops); //<IAppOpsManager::OpEntry>
                 if (resOps != NULL) {
                     if (res == NULL) {
@@ -674,7 +674,7 @@ ECode CAppOpsService::GetPackagesForOps(
                     CAppOpsManagerPackageOps::New(
                         pkgOps->mPackageName, pkgOps->mUid, IList::Probe(resOps),
                         (IAppOpsManagerPackageOps**)&resPackage);
-                    res->Add(resPackage.Get());
+                    res->Add(resPackage);
                 }
             }
         }

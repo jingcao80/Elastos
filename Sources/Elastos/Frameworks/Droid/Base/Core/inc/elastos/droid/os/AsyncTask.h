@@ -269,7 +269,10 @@ private:
         WorkerRunnable(
             /* [in] */ AsyncTask* owner)
             : mOwner(owner)
+            , mIsExecuted(FALSE)
         {}
+
+        ~WorkerRunnable();
 
         CAR_INTERFACE_DECL();
 
@@ -279,6 +282,7 @@ private:
     public:
         AutoPtr< ArrayOf<IInterface*> > mParams;
         AsyncTask* mOwner;
+        Boolean mIsExecuted;
     };
 
     class ECO_LOCAL MyFutureTask
@@ -320,6 +324,8 @@ public:
      * Creates a new asynchronous task. This constructor must be invoked on the UI thread.
      */
     AsyncTask();
+
+    ~AsyncTask();
 
     /** @hide Used to force static handler to be created. */
     static CARAPI Init();
@@ -612,6 +618,7 @@ private:
     ECO_LOCAL static CARAPI_(AutoPtr<IExecutor>) InitThreadPoolExecutor();
 
     ECO_LOCAL static CARAPI_(AutoPtr<IHandler>) GetHandler();
+
 public:
     /**
      * An {@link Executor} that executes tasks one at a time in serial
@@ -643,8 +650,11 @@ private:
     ECO_LOCAL static const Int32 MESSAGE_POST_RESULT = 0x1;
     ECO_LOCAL static const Int32 MESSAGE_POST_PROGRESS = 0x2;
 
-    AutoPtr<WorkerRunnable> mWorker;
-    AutoPtr<MyFutureTask> mFuture;
+    // do not use AutoPtr<WorkerRunnable>
+    WorkerRunnable* mWorker;
+    // do not use AutoPtr<MyFutureTask>
+    MyFutureTask* mFuture;
+    Boolean mIsExecuted;
 
     volatile Status mStatus;
 
