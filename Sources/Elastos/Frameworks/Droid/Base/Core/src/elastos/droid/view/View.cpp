@@ -1249,6 +1249,10 @@ View::~View()
         Logger::D("View", "===========View::~View() %p, mID: %08x", this, mID);
     }
 
+    // see CContextThemeWrapper::New in LayoutInflater::CreateViewFromTag
+    if (IContextThemeWrapperInLayoutInflater::Probe(mContext) != NULL) {
+        mContext->Release();
+    }
     mKeyedTags.Clear();
     mInputEventConsistencyVerifier = NULL;
     mAccessibilityDelegate = NULL;
@@ -17690,6 +17694,10 @@ ECode View::constructor(
     /* [in] */ IContext* context)
 {
     mContext = context;
+    // see CContextThemeWrapper::New in LayoutInflater::CreateViewFromTag
+    if (IContextThemeWrapperInLayoutInflater::Probe(context) != NULL) {
+        mContext->AddRef();
+    }
     if (context != NULL) {
         context->GetResources((IResources**)&mResources);
     }

@@ -84,6 +84,10 @@ void ViewStub::Initialize(
     /* [in] */ IContext* context)
 {
     mContext = context;
+    // see CContextThemeWrapper::New in LayoutInflater::CreateViewFromTag
+    if (IContextThemeWrapperInLayoutInflater::Probe(context) != NULL) {
+        mContext->AddRef();
+    }
     SetVisibility(IView::GONE);
     SetWillNotDraw(TRUE);
 }

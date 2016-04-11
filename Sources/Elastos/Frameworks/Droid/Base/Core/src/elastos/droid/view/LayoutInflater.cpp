@@ -20,6 +20,7 @@
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/widget/CBlinkLayout.h"
 #include "elastos/droid/view/CContextThemeWrapper.h"
+#include "elastos/droid/view/ContextThemeWrapperInLayoutInflater.h"
 
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Content::Res::IResources;
@@ -672,8 +673,16 @@ String LayoutInflater::GetReflectionClassName(
     if (!prefix.IsNull()) {
         sb += prefix;
     }
-    sb += "C";
-    sb += name;
+    Int32 index = name.LastIndexOf('.');
+    if (index != -1) {
+        sb += name.Substring(0, index + 1);
+        sb += "C";
+        sb += name.Substring(index + 1, strlen(name));
+    }
+    else {
+        sb += "C";
+        sb += name;
+    }
     return sb.ToString();
 }
 
@@ -891,7 +900,8 @@ ECode LayoutInflater::CreateViewFromTag(
     AutoPtr<IContext> viewContext;
     if (parent != NULL && inheritContext) {
         parent->GetContext((IContext**)&viewContext);
-    } else {
+    }
+    else {
         viewContext = mContext;
     }
 
@@ -903,7 +913,10 @@ ECode LayoutInflater::CreateViewFromTag(
     Int32 themeResId;
     ta->GetResourceId(0, 0, &themeResId);
     if (themeResId != 0) {
-        CContextThemeWrapper::New(viewContext, themeResId, (IContext**)&viewContext);
+        // mContext of class View is naked pointer
+        AutoPtr<ContextThemeWrapperInLayoutInflater> themeContex = new ContextThemeWrapperInLayoutInflater();
+        themeContex->constructor(viewContext, themeResId);
+        viewContext = themeContex;
     }
     ta->Recycle();
 
