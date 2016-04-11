@@ -459,7 +459,7 @@ ECode Layout::constructor(
     /* [in] */ Float spacingMult,
     /* [in] */ Float spacingAdd)
 {
-    AutoPtr<ITextDirectionHeuristic> tdh = TextDirectionHeuristics::GetFIRSTSTRONG_LTR();
+    AutoPtr<ITextDirectionHeuristic> tdh = TextDirectionHeuristics::FIRSTSTRONG_LTR;
     return constructor(text, paint, width, align, tdh,
             spacingMult, spacingAdd);
 }
@@ -2177,7 +2177,7 @@ Float Layout::MeasurePara(
     AutoPtr<MeasuredText> mt = MeasuredText::Obtain();
     AutoPtr<TextLine> tl = TextLine::Obtain();
     //try {
-    AutoPtr<ITextDirectionHeuristic> ltr = TextDirectionHeuristics::GetLTR();
+    AutoPtr<ITextDirectionHeuristic> ltr = TextDirectionHeuristics::LTR;
         mt->SetPara(text, start, end, ltr);
         AutoPtr<ILayoutDirections> directions;
         Int32 dir;

@@ -217,7 +217,7 @@ ECode DynamicLayout::constructor(
     /* [in] */ TextUtilsTruncateAt ellipsize,
     /* [in] */ Int32 ellipsizedWidth)
 {
-    AutoPtr<ITextDirectionHeuristic> ltr = TextDirectionHeuristics::GetFIRSTSTRONG_LTR();
+    AutoPtr<ITextDirectionHeuristic> ltr = TextDirectionHeuristics::FIRSTSTRONG_LTR;
     return constructor(base, display, paint, width, align, ltr,
         spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth);
 }

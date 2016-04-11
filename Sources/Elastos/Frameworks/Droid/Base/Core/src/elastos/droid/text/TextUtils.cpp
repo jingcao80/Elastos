@@ -1285,7 +1285,7 @@ AutoPtr<ICharSequence> TextUtils::Ellipsize(
 
     AutoPtr<ICharSequence> rst;
     rst = Ellipsize(text, paint, avail, where, preserveLength, callback,
-        TextDirectionHeuristics::GetFIRSTSTRONG_LTR(), ellipsis);
+        TextDirectionHeuristics::FIRSTSTRONG_LTR, ellipsis);
     if(rst == NULL) {
         String sNull("");
         CString::New(sNull, (ICharSequence**)&rst);
@@ -1412,7 +1412,7 @@ AutoPtr<ICharSequence> TextUtils::CommaEllipsize(
     /* [in] */ const String& more)
 {
     return CommaEllipsize(text, p, avail, oneMore, more,
-            TextDirectionHeuristics::GetFIRSTSTRONG_LTR());
+            TextDirectionHeuristics::FIRSTSTRONG_LTR);
 }
 
 AutoPtr<ICharSequence> TextUtils::CommaEllipsize(

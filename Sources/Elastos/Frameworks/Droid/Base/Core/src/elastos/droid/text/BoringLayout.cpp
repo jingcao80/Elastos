@@ -274,7 +274,7 @@ AutoPtr<IBoringLayoutMetrics> BoringLayout::IsBoring(
     /* [in] */ ICharSequence* text,
     /* [in] */ ITextPaint* paint)
 {
-    AutoPtr<ITextDirectionHeuristic> ltr = TextDirectionHeuristics::GetFIRSTSTRONG_LTR();
+    AutoPtr<ITextDirectionHeuristic> ltr = TextDirectionHeuristics::FIRSTSTRONG_LTR;
     return IsBoring(text, paint, ltr, NULL);
 }
 
@@ -291,7 +291,7 @@ AutoPtr<IBoringLayoutMetrics> BoringLayout::IsBoring(
     /* [in] */ ITextPaint* paint,
     /* [in] */ IBoringLayoutMetrics* metrics)
 {
-    AutoPtr<ITextDirectionHeuristic> ltr = TextDirectionHeuristics::GetFIRSTSTRONG_LTR();
+    AutoPtr<ITextDirectionHeuristic> ltr = TextDirectionHeuristics::FIRSTSTRONG_LTR;
     return IsBoring(text, paint, ltr, metrics);
 }
 

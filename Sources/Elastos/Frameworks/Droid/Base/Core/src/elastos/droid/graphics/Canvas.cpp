@@ -23,6 +23,7 @@
 #include "elastos/droid/graphics/TemporaryBuffer.h"
 #include "elastos/droid/internal/utility/ArrayUtils.h"
 #include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 #include <skia/core/SkCanvas.h>
@@ -46,6 +47,7 @@ using Elastos::Droid::Text::ISpannedString;
 using Elastos::Droid::Text::ISpannableString;
 using Elastos::Droid::Text::IGraphicsOperations;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::IString;
 using Elastos::Utility::Logging::Logger;
 using android::Layout;
@@ -1480,7 +1482,7 @@ ECode Canvas::DrawText(
 {
     if (IString::Probe(text) != NULL || ISpannedString::Probe(text) != NULL ||
         ISpannableString::Probe(text) != NULL) {
-        NativeDrawText(mNativeCanvas, TO_STR(text), start, end, x, y,
+        NativeDrawText(mNativeCanvas, CoreUtils::Unbox(text), start, end, x, y,
                 TO_PAINT(paint)->mBidiFlags, TO_PAINT(paint)->mNativePaint,
                 TO_PAINT(paint)->mNativeTypeface);
     }
@@ -1557,7 +1559,7 @@ ECode Canvas::DrawTextRun(
 
     if (IString::Probe(text) != NULL || ISpannedString::Probe(text) != NULL ||
             ISpannableString::Probe(text) != NULL) {
-        NativeDrawTextRun(mNativeCanvas, TO_STR(text), start, end,
+        NativeDrawTextRun(mNativeCanvas, CoreUtils::Unbox(text), start, end,
                 contextStart, contextEnd, x, y, isRtl, TO_PAINT(paint)->mNativePaint,
                 TO_PAINT(paint)->mNativeTypeface);
     }

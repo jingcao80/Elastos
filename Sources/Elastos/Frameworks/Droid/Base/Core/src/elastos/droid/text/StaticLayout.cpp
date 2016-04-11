@@ -158,7 +158,7 @@ ECode StaticLayout::constructor(
     /* [in] */ TextUtilsTruncateAt ellipsize,
     /* [in] */ Int32 ellipsizedWidth)
 {
-    AutoPtr<ITextDirectionHeuristic> ltr = TextDirectionHeuristics::GetFIRSTSTRONG_LTR();
+    AutoPtr<ITextDirectionHeuristic> ltr = TextDirectionHeuristics::FIRSTSTRONG_LTR;
     return constructor(source, bufstart, bufend, paint, outerwidth, align,
             ltr,
             spacingmult, spacingadd, includepad, ellipsize,

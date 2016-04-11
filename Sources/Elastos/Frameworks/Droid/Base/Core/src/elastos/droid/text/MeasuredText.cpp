@@ -137,9 +137,9 @@ void MeasuredText::SetPara(
         }
     }
 
-    if ((textDir == TextDirectionHeuristics::GetLTR() ||
-            textDir == TextDirectionHeuristics::GetFIRSTSTRONG_LTR() ||
-            textDir == TextDirectionHeuristics::GetANYRTL_LTR()) &&
+    if ((textDir == TextDirectionHeuristics::LTR ||
+            textDir == TextDirectionHeuristics::FIRSTSTRONG_LTR ||
+            textDir == TextDirectionHeuristics::ANYRTL_LTR) &&
             TextUtils::DoesNotNeedBidi(mChars, 0, len)) {
         mDir = ILayout::DIR_LEFT_TO_RIGHT;
         mEasy = TRUE;
@@ -149,16 +149,16 @@ void MeasuredText::SetPara(
             mLevels = ArrayUtils::NewUnpaddedByteArray(len);
         }
         Int32 bidiRequest;
-        if (textDir == TextDirectionHeuristics::GetLTR()) {
+        if (textDir == TextDirectionHeuristics::LTR) {
             bidiRequest = ILayout::DIR_REQUEST_LTR;
         }
-        else if (textDir == TextDirectionHeuristics::GetRTL()) {
+        else if (textDir == TextDirectionHeuristics::RTL) {
             bidiRequest = ILayout::DIR_REQUEST_RTL;
         }
-        else if (textDir == TextDirectionHeuristics::GetFIRSTSTRONG_LTR()) {
+        else if (textDir == TextDirectionHeuristics::FIRSTSTRONG_LTR) {
             bidiRequest = ILayout::DIR_REQUEST_DEFAULT_LTR;
         }
-        else if (textDir == TextDirectionHeuristics::GetFIRSTSTRONG_RTL()) {
+        else if (textDir == TextDirectionHeuristics::FIRSTSTRONG_RTL) {
             bidiRequest = ILayout::DIR_REQUEST_DEFAULT_RTL;
         }
         else {

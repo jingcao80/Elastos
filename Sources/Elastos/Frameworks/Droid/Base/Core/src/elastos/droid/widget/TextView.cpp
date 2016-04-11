@@ -10611,7 +10611,7 @@ AutoPtr<ITextDirectionHeuristic> TextView::GetTextDirectionHeuristic()
     if (HasPasswordTransformationMethod()) {
         // TODO: take care of the content direction to show the password text and dots justified
         // to the left or to the right
-        result = TextDirectionHeuristics::GetLTR();
+        result = TextDirectionHeuristics::LTR;
         return result;
     }
 
@@ -10624,20 +10624,20 @@ AutoPtr<ITextDirectionHeuristic> TextView::GetTextDirectionHeuristic()
     switch (GetTextDirection(&direction), direction) {
         default:
         case IView::TEXT_DIRECTION_FIRST_STRONG:
-            result = (defaultIsRtl ? TextDirectionHeuristics::GetFIRSTSTRONG_RTL() :
-                    TextDirectionHeuristics::GetFIRSTSTRONG_LTR());
+            result = (defaultIsRtl ? TextDirectionHeuristics::FIRSTSTRONG_RTL :
+                    TextDirectionHeuristics::FIRSTSTRONG_LTR);
             return result;
         case IView::TEXT_DIRECTION_ANY_RTL:
-            result = TextDirectionHeuristics::GetANYRTL_LTR();
+            result = TextDirectionHeuristics::ANYRTL_LTR;
             return result;
         case IView::TEXT_DIRECTION_LTR:
-            result = TextDirectionHeuristics::GetLTR();
+            result = TextDirectionHeuristics::LTR;
             return result;
         case IView::TEXT_DIRECTION_RTL:
-            result = TextDirectionHeuristics::GetRTL();
+            result = TextDirectionHeuristics::RTL;
             return result;
         case IView::TEXT_DIRECTION_LOCALE:
-            result = TextDirectionHeuristics::GetLOCALE();
+            result = TextDirectionHeuristics::LOCALE;
             return result;
     }
     return result;

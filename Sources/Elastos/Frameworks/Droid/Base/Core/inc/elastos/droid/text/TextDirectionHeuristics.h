@@ -27,16 +27,157 @@ namespace Text {
  */
 class TextDirectionHeuristics
 {
+private:
+    /**
+     * Computes the text direction based on an algorithm.  Subclasses implement
+     * {@link #defaultIsRtl} to handle cases where the algorithm cannot determine the
+     * direction from the text alone.
+     */
+    class TextDirectionHeuristicImpl
+        : public Object
+        , public ITextDirectionHeuristic
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TextDirectionHeuristicImpl(
+            /* [in] */ ITextDirectionAlgorithm* algorithm);
+
+        virtual ~TextDirectionHeuristicImpl();
+
+        //@Override
+        CARAPI IsRtl(
+            /* [in] */ ArrayOf<Char32>* chars,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 count,
+            /* [out] */ Boolean* result);
+
+        CARAPI IsRtl(
+            /* [in] */ ICharSequence* chars,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 count,
+            /* [out] */ Boolean* result);
+
+    protected:
+        /**
+         * Return true if the default text direction is rtl.
+         */
+        virtual CARAPI_(Boolean) DefaultIsRtl() = 0;
+
+    private:
+        CARAPI_(Boolean) DoCheck(
+            /* [in] */ ICharSequence* chars,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 count);
+
+        AutoPtr<ITextDirectionAlgorithm> mAlgorithm;
+    };
+
+    class TextDirectionHeuristicInternal
+        : public TextDirectionHeuristicImpl
+    {
+    public:
+        TextDirectionHeuristicInternal(
+            /* [in] */ ITextDirectionAlgorithm* algorithm,
+            /* [in] */ Boolean defaultIsRtl);
+
+        ~TextDirectionHeuristicInternal();
+
+        //@Override
+        CARAPI_(Boolean) DefaultIsRtl();
+
+    private:
+        Boolean mDefaultIsRtl;
+    };
+
+    /**
+     * Algorithm that uses the first strong directional character to determine the paragraph
+     * direction. This is the standard Unicode Bidirectional algorithm.
+     */
+    class FirstStrong
+        : public Object
+        , public ITextDirectionAlgorithm
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        //@Override
+        CARAPI CheckRtl(
+            /* [in] */ ICharSequence* text,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 count,
+            /* [out] */ Int32* result);
+
+        virtual ~FirstStrong();
+
+    private:
+        FirstStrong();
+
+    public:
+        static AutoPtr<FirstStrong> INSTANCE;// = new FirstStrong();
+    };
+
+    /**
+     * Algorithm that uses the presence of any strong directional non-format
+     * character (e.g. excludes LRE, LRO, RLE, RLO) to determine the
+     * direction of text.
+     *
+     */
+    class AnyStrong
+        : public Object
+        , public ITextDirectionAlgorithm
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        //@Override
+        CARAPI CheckRtl(
+            /* [in] */ ICharSequence* text,
+            /* [in] */ Int32 start,
+            /* [in] */ Int32 count,
+            /* [out] */ Int32* result);
+
+        virtual ~AnyStrong();
+
+    private:
+        AnyStrong(
+            /* [in] */ Boolean lookForRtl);
+
+    public:
+        static AutoPtr<AnyStrong> INSTANCE_RTL;// = new AnyStrong(true);
+        static AutoPtr<AnyStrong> INSTANCE_LTR;// = new AnyStrong(false);
+
+    private:
+        Boolean mLookForRtl;
+    };
+
+    /**
+     * Algorithm that uses the Locale direction to force the direction of a paragraph.
+     */
+    class TextDirectionHeuristicLocale
+        : public TextDirectionHeuristicImpl
+    {
+    public:
+        TextDirectionHeuristicLocale();
+
+        ~TextDirectionHeuristicLocale();
+
+    protected:
+        //@Override
+        CARAPI_(Boolean) DefaultIsRtl();
+
+    public:
+        static AutoPtr<TextDirectionHeuristicLocale> INSTANCE;// = new TextDirectionHeuristicLocale();
+    };
+
+private:
+    static Int32 IsRtlText(
+        /* [in] */ Int32 directionality);
+
+    static Int32 IsRtlTextOrFormat(
+        /* [in] */ Int32 directionality);
+
 public:
-    static AutoPtr<ITextDirectionHeuristic> GetLTR();
-    static AutoPtr<ITextDirectionHeuristic> GetRTL();
-
-    static AutoPtr<ITextDirectionHeuristic> GetFIRSTSTRONG_LTR();
-    static AutoPtr<ITextDirectionHeuristic> GetFIRSTSTRONG_RTL();
-
-    static AutoPtr<ITextDirectionHeuristic> GetANYRTL_LTR();
-    static AutoPtr<ITextDirectionHeuristic> GetLOCALE();
-
     /** Always decides that the direction is left to right. */
     static AutoPtr<ITextDirectionHeuristic> LTR;
 
@@ -75,264 +216,6 @@ private:
     static const Int32 STATE_TRUE;// = 0;
     static const Int32 STATE_FALSE;// = 1;
     static const Int32 STATE_UNKNOWN;// = 2;
-
-private:
-
-    /**
-     * Interface for an algorithm to guess the direction of a paragraph of text.
-     *
-     */
-    class TextDirectionAlgorithm : public Object
-    {
-    public:
-        /**
-         * Returns whether the range of text is RTL according to the algorithm.
-         *
-         */
-        virtual CARAPI_(Int32) CheckRtl(
-            /* [in] */ ICharSequence* text,
-            /* [in] */ Int32 start,
-            /* [in] */ Int32 count) = 0;
-
-        virtual ~TextDirectionAlgorithm()
-        {}
-    };
-
-    /**
-     * Computes the text direction based on an algorithm.  Subclasses implement
-     * {@link #defaultIsRtl} to handle cases where the algorithm cannot determine the
-     * direction from the text alone.
-     */
-    class TextDirectionHeuristicImpl
-        : public Object
-        , public ITextDirectionHeuristic
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        TextDirectionHeuristicImpl(
-            /* [in] */ TextDirectionAlgorithm* algorithm)
-             : mAlgorithm(algorithm)
-        {
-        }
-
-        //@Override
-        CARAPI IsRtl(
-            /* [in] */ ArrayOf<Char32>* chars,
-            /* [in] */ Int32 start,
-            /* [in] */ Int32 count,
-            /* [out] */ Boolean* result);
-
-        CARAPI IsRtl(
-            /* [in] */ ICharSequence* chars,
-            /* [in] */ Int32 start,
-            /* [in] */ Int32 count,
-            /* [out] */ Boolean* result);
-
-    protected:
-
-        /**
-         * Return true if the default text direction is rtl.
-         */
-        virtual CARAPI_(Boolean) DefaultIsRtl() = 0;
-
-    private:
-
-        CARAPI_(Boolean) DoCheck(
-            /* [in] */ ICharSequence* chars,
-            /* [in] */ Int32 start,
-            /* [in] */ Int32 count);
-
-        AutoPtr<TextDirectionAlgorithm> mAlgorithm;
-    };
-
-    class TextDirectionHeuristicInternal
-        : public TextDirectionHeuristicImpl
-    {
-        friend class TextDirectionHeuristics;
-
-    public:
-        //@Override
-        CARAPI_(Boolean) DefaultIsRtl()
-        {
-            return mDefaultIsRtl;
-        }
-
-        TextDirectionHeuristicInternal(
-            /* [in] */ TextDirectionAlgorithm* algorithm,
-            /* [in] */ Boolean defaultIsRtl)
-            : TextDirectionHeuristicImpl(algorithm)
-        {
-            mDefaultIsRtl = defaultIsRtl;
-        }
-
-    private:
-        Boolean mDefaultIsRtl;
-    };
-
-    /**
-     * Algorithm that uses the first strong directional character to determine the paragraph
-     * direction. This is the standard Unicode Bidirectional algorithm.
-     */
-    class FirstStrong
-        : public TextDirectionAlgorithm
-    {
-    public:
-
-        static CARAPI_(AutoPtr<FirstStrong>) GetInstance()
-        {
-            if (sInstance == NULL) {
-                sInstance = new FirstStrong();
-            }
-
-            return sInstance;
-        }
-
-        //@Override
-        CARAPI_(Int32) CheckRtl(
-            /* [in] */ ICharSequence* text,
-            /* [in] */ Int32 start,
-            /* [in] */ Int32 count)
-        {
-            Int32 result = TextDirectionHeuristics::STATE_UNKNOWN;
-            String str = Object::ToString(text);
-            AutoPtr<ArrayOf<Char32> > chars = str.GetChars();
-            for (Int32 i = start, e = start + count; i < e && result == TextDirectionHeuristics::STATE_UNKNOWN; ++i) {
-                result = IsRtlTextOrFormat(Character::GetDirectionality((*chars)[i]));
-            }
-            return result;
-        }
-
-        virtual ~FirstStrong()
-        {
-        }
-
-    private:
-        FirstStrong()
-        {
-        }
-
-        static AutoPtr<FirstStrong> sInstance;// = new FirstStrong();
-    };
-
-    /**
-     * Algorithm that uses the presence of any strong directional non-format
-     * character (e.g. excludes LRE, LRO, RLE, RLO) to determine the
-     * direction of text.
-     *
-     */
-    class AnyStrong
-        : public TextDirectionAlgorithm
-    {
-    public:
-        static CARAPI_(AutoPtr<AnyStrong>) GetRTLInstance()
-        {
-            if (sRTLInstance == NULL) {
-                sRTLInstance = new AnyStrong(TRUE);
-            }
-
-            return sRTLInstance;
-        }
-
-        static CARAPI_(AutoPtr<AnyStrong>) GetLTRInstance()
-        {
-            if (sLTRInstance == NULL) {
-                sLTRInstance = new AnyStrong(FALSE);
-            }
-
-            return sLTRInstance;
-        }
-
-        //@Override
-        CARAPI_(Int32) CheckRtl(
-            /* [in] */ ICharSequence* text,
-            /* [in] */ Int32 start,
-            /* [in] */ Int32 count)
-        {
-            String str = Object::ToString(text);
-            AutoPtr<ArrayOf<Char32> > chars = str.GetChars();
-            Boolean haveUnlookedFor = false;
-            for (Int32 i = start, e = start + count; i < e; ++i) {
-                switch (IsRtlText(Character::GetDirectionality((*chars)[i]))) {
-                    case TRUE:
-                        if (mLookForRtl) {
-                            return TextDirectionHeuristics::STATE_TRUE;
-                        }
-                        haveUnlookedFor = TRUE;
-                        break;
-                    case FALSE:
-                        if (!mLookForRtl) {
-                            return TextDirectionHeuristics::STATE_FALSE;
-                        }
-                        haveUnlookedFor = TRUE;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            if (haveUnlookedFor) {
-                return mLookForRtl ? TextDirectionHeuristics::STATE_FALSE : TextDirectionHeuristics::STATE_TRUE;
-            }
-            return TextDirectionHeuristics::STATE_UNKNOWN;
-        }
-
-        virtual ~AnyStrong()
-        {
-        }
-
-    private:
-        AnyStrong(
-            /* [in] */ Boolean lookForRtl)
-            : mLookForRtl(lookForRtl)
-        {
-        }
-
-        static AutoPtr<AnyStrong> sRTLInstance;// = new AnyStrong(true);
-        static AutoPtr<AnyStrong> sLTRInstance;// = new AnyStrong(false);
-
-        Boolean mLookForRtl;
-    };
-
-    /**
-     * Algorithm that uses the Locale direction to force the direction of a paragraph.
-     */
-    class TextDirectionHeuristicLocale
-        : public TextDirectionHeuristicImpl
-    {
-    public:
-
-        TextDirectionHeuristicLocale()
-            : TextDirectionHeuristicImpl(NULL)
-        {
-        }
-
-        ~TextDirectionHeuristicLocale()
-        {
-        }
-
-        static AutoPtr<TextDirectionHeuristicLocale> GetInstance()
-        {
-            if (sInstance == NULL) {
-                sInstance = new TextDirectionHeuristicLocale();
-            }
-
-            return sInstance;
-        }
-
-    protected:
-        //@Override
-        CARAPI_(Boolean) DefaultIsRtl();
-
-    private:
-        static AutoPtr<TextDirectionHeuristicLocale> sInstance;// = new TextDirectionHeuristicLocale();
-    };
-
-private:
-    static Int32 IsRtlText(
-        /* [in] */ Int32 directionality);
-
-    static Int32 IsRtlTextOrFormat(
-        /* [in] */ Int32 directionality);
 };
 
 } // namespace Text
