@@ -6,6 +6,7 @@
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.View.h>
 #include <Elastos.Droid.Widget.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IIActivityManager;
@@ -16,6 +17,7 @@ using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::CoreUtils;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -53,6 +55,14 @@ ECode CActivityOne::OnCreate(
 ECode CActivityOne::OnStart()
 {
     Logger::I(DBG_TAG, " >> OnStart()");
+
+    AutoPtr<IView> view = FindViewById(R::id::TextView);
+    assert(view != NULL);
+    ITextView* textView = ITextView::Probe(view);
+    textView->SetText(CoreUtils::Convert("ABCD123456444444444444444444444444444444444444444444444444444444444"));
+
+    textView->SetText(CoreUtils::Convert("是否支持中文输入是否支持中文输入是否支持中文输入是否支持中文输入是否支持中文输入是否支持中文输入"));
+
     return Activity::OnStart();
 }
 

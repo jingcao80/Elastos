@@ -198,6 +198,10 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
+#ifndef TO_EDITOR
+#define TO_EDITOR(obj) ((Editor*)obj.Get())
+#endif
+
 //==============================================================================
 //              UpdateTextServicesLocaleRunnable
 //==============================================================================
@@ -7055,13 +7059,11 @@ ECode TextView::OnCreateInputConnection(
     Boolean isEnabled, onCheckIsTextEditor;
     if ((OnCheckIsTextEditor(&onCheckIsTextEditor), onCheckIsTextEditor)
         && (IsEnabled(&isEnabled), isEnabled)) {
-        if (mEditor != NULL) {
-            TO_EDITOR(mEditor)->CreateInputMethodStateIfNeeded();
-        }
+        TO_EDITOR(mEditor)->CreateInputMethodStateIfNeeded();
         Int32 type;
         GetInputType(&type);
         outAttrs->SetInputType(type);
-        if (mEditor != NULL && TO_EDITOR(mEditor)->mInputContentType != NULL) {
+        if (TO_EDITOR(mEditor)->mInputContentType != NULL) {
             AutoPtr<Editor> editor = TO_EDITOR(mEditor);
             outAttrs->SetImeOptions(editor->mInputContentType->mImeOptions);
             outAttrs->SetPrivateImeOptions(editor->mInputContentType->mPrivateImeOptions);
@@ -7240,7 +7242,7 @@ ECode TextView::SetExtractedText(
 ECode TextView::SetExtracting(
     /* [in] */ IExtractedTextRequest* req)
 {
-    if ( mEditor != NULL && TO_EDITOR(mEditor)->mInputMethodState != NULL) {
+    if (TO_EDITOR(mEditor)->mInputMethodState != NULL) {
         AutoPtr<Editor> editor = TO_EDITOR(mEditor);
         editor->mInputMethodState->mExtractedTextRequest = req;
 
@@ -10609,7 +10611,7 @@ AutoPtr<ITextDirectionHeuristic> TextView::GetTextDirectionHeuristic()
     if (HasPasswordTransformationMethod()) {
         // TODO: take care of the content direction to show the password text and dots justified
         // to the left or to the right
-        result = TextDirectionHeuristics::LTR;
+        result = TextDirectionHeuristics::GetLTR();
         return result;
     }
 
@@ -10622,20 +10624,20 @@ AutoPtr<ITextDirectionHeuristic> TextView::GetTextDirectionHeuristic()
     switch (GetTextDirection(&direction), direction) {
         default:
         case IView::TEXT_DIRECTION_FIRST_STRONG:
-            result = (defaultIsRtl ? TextDirectionHeuristics::FIRSTSTRONG_RTL :
-                    TextDirectionHeuristics::FIRSTSTRONG_LTR);
+            result = (defaultIsRtl ? TextDirectionHeuristics::GetFIRSTSTRONG_RTL() :
+                    TextDirectionHeuristics::GetFIRSTSTRONG_LTR());
             return result;
         case IView::TEXT_DIRECTION_ANY_RTL:
-            result = TextDirectionHeuristics::ANYRTL_LTR;
+            result = TextDirectionHeuristics::GetANYRTL_LTR();
             return result;
         case IView::TEXT_DIRECTION_LTR:
-            result = TextDirectionHeuristics::LTR;
+            result = TextDirectionHeuristics::GetLTR();
             return result;
         case IView::TEXT_DIRECTION_RTL:
-            result = TextDirectionHeuristics::RTL;
+            result = TextDirectionHeuristics::GetRTL();
             return result;
         case IView::TEXT_DIRECTION_LOCALE:
-            result = TextDirectionHeuristics::LOCALE;
+            result = TextDirectionHeuristics::GetLOCALE();
             return result;
     }
     return result;

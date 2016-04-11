@@ -11,7 +11,7 @@ using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::IO::ICharBuffer;
 using Elastos::IO::ICharBufferHelper;
-// using Elastos::IO::CCharBufferHelper;
+using Elastos::IO::CCharBufferHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -133,8 +133,7 @@ ECode TextDirectionHeuristics::TextDirectionHeuristicImpl::IsRtl(
     VALIDATE_NOT_NULL(result);
 
     AutoPtr<ICharBufferHelper> charBuffer;
-    assert(0 && "TODO");
-    // CCharBufferHelper::AcquireSingleton((ICharBufferHelper**)&charBuffer);
+    CCharBufferHelper::AcquireSingleton((ICharBufferHelper**)&charBuffer);
     AutoPtr<ICharBuffer> cb;
     charBuffer->Wrap(array, (ICharBuffer**)&cb);
     return IsRtl(ICharSequence::Probe(cb), start, count, result);

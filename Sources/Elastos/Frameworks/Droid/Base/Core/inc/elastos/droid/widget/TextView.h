@@ -54,10 +54,6 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-#ifndef TO_EDITOR
-#define TO_EDITOR(obj) ((Editor*)obj.Get())
-#endif
-
 class TextView;
 
 //==============================================================================
