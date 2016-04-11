@@ -114,6 +114,8 @@ def process_file(path, logFile):
                 # do not check weak-reference Resolve
                 if usedType == 'IInterface' and eachLine.find('->Resolve(') != -1:
                     pass
+                elif isIgnored(path, usedType, param) == True:
+                    pass
                 else:
                     declLineNum = find_declare_line(param, lines, lineNum)
                     if (declLineNum != -1):
@@ -176,6 +178,110 @@ def process(path, logPath):
     logFile.close()
     summarize_log(logPath)
 
+def get_finename(path):
+    index = path.rfind('/');
+    if index != -1:
+        index = path.rfind('/', 0, index)
+    if index != -1:
+        filename = path[index:len(path)]
+    else:
+        filename = path
+    return filename
+
+# def log_ignored(path, usedType, param):
+#     if path.find('/webkit/') != -1:
+#         return
+
+#     key = generate_ignored_key(path, usedType, param)
+#     if key in ignored_list:
+#         return
+
+#     ignored_file = '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_cast_checker.ignored'
+#     logFile = open(ignored_file, 'a')
+#     logFile.write('    \'' + key + '\',\n')
+#     logFile.close()
+
+def generate_ignored_key(path, usedType, param):
+    filename = get_finename(path)
+    key = '{0}#{1}#{2}'.format(filename, usedType, param);
+    return key
+
+def isIgnored(path, usedType, param):
+    key = generate_ignored_key(path, usedType, param)
+    return key in ignored_list
+
+############################################################################################################
+ignored_list = [
+    '/userfunc/userfunc.cpp#IInterface#pClassObject',
+    '/launcher2/AppsCustomizePagedView.cpp#IBitmapCache#mCachedShortcutPreviewBitmap',
+    '/launcher2/AppsCustomizePagedView.cpp#IPaintCache#mCachedShortcutPreviewPaint',
+    '/launcher2/AppsCustomizePagedView.cpp#ICanvasCache#mCachedShortcutPreviewCanvas',
+    '/launcher2/AppsCustomizePagedView.cpp#ICanvasCache#mCachedAppWidgetPreviewCanvas',
+    '/launcher2/AppsCustomizePagedView.cpp#IRectCache#mCachedAppWidgetPreviewSrcRect',
+    '/launcher2/AppsCustomizePagedView.cpp#IRectCache#mCachedAppWidgetPreviewDestRect',
+    '/launcher2/AppsCustomizePagedView.cpp#IPaintCache#mCachedAppWidgetPreviewPaint',
+    '/launcher2/Launcher.cpp#IAppWidgetProviderInfo#appWidgetInfo',
+    '/launcher2/Launcher.cpp#IBundle#appSearchData',
+    '/pinyinime/CEnvironmentHelper.cpp#IEnvironment#mInstance',
+    '/phone/CPhoneStatusBar.cpp#IStatusBarKeyguardViewManager#mStatusBarKeyguardViewManager',
+    '/framework/CTestSuite.cpp#IInterface#each',
+    '/firewall/StringFilter.cpp#IPatternMatcher#mPattern',
+    '/accessibility/AccessibilityManagerService.cpp#ISparseArray#mPendingEvents',
+    '/wm/CSession.cpp#ISurfaceSession#mSurfaceSession',
+    '/p2p/WifiP2pServiceImpl.cpp#IEditText#pin',
+    '/server/AlarmManagerService.cpp#IArrayMap#mFilterStats',
+    '/pm/CPackageInstallerService.cpp#IRemoteCallbackList#mCallbacks',
+    '/server/CVibratorService.cpp#IThread#mThread',
+    '/app/WindowDecorActionBar.cpp#IWeakReference#mCustomView',
+    '/app/ProcessStats.cpp#IArrayMap#mProcesses',
+    '/widget/ActionBarContextView.cpp#IActionMenuPresenter#mActionMenuPresenter',
+    '/widget/ActionBarView.cpp#IActionMenuPresenter#mActionMenuPresenter',
+    '/inputmethodservice/CIInputMethodSessionWrapper.cpp#ISparseArray#mPendingEvents',
+    '/net/ProxyDataTracker.cpp#INetworkInfo#mNetworkInfo',
+    '/net/ProxyDataTracker.cpp#ILinkProperties#mLinkProperties',
+    '/net/ProxyDataTracker.cpp#INetworkCapabilities#mNetworkCapabilities',
+    '/net/DhcpResults.cpp#IInetAddress#mGateway',
+    '/animation/Keyframe.cpp#IInteger32#mValue',
+    '/animation/Keyframe.cpp#IFloat#mValue',
+    '/view/InputEventReceiver.cpp#IMessageQueue#mMessageQueue',
+    '/view/View.cpp#IInterpolator#mScrollBarInterpolator',
+    '/animation/GridLayoutAnimationController.cpp#ILinearInterpolator#mInterpolator',
+    '/animation/GridLayoutAnimationController.cpp#IRandom#mRandomizer',
+    '/view/TextureView.cpp#IPaint#mLayerPaint',
+    '/view/InputDevice.cpp#IArrayList#mMotionRanges',
+    '/soundtrigger/CSoundTriggerKeyphraseSoundModel.cpp#IUUID#mUuid',
+    '/soundtrigger/CSoundTriggerKeyphraseSoundModel.cpp#IUUID#mVendorUuid',
+    '/media/WebVttRenderingWidget.cpp#ICaptioningManagerCaptionStyle#mCaptionStyle',
+    '/media/TtmlRenderer.cpp#IXmlPullParser#mParser',
+    '/media/SubtitleTrack.cpp#IInterface#mNextRunAtEndTimeMs',
+    '/widget/TabHost.cpp#IView#mTabContent',
+    '/widget/Spinner.cpp#IAlertDialog#mPopup',
+    '/res/CResources.cpp#IFormatter#f',
+    '/pm/PackageParser.cpp#IPermissionInfo#mInfo',
+    '/pm/PackageParser.cpp#IPermissionGroupInfo#mInfo',
+    '/voice/VoiceInteractionSession.cpp#IWeakReference#mSession',
+    '/bluetooth/QBluetoothAdapter.cpp#IWeakReference#mAdapter',
+    '/reflection/CClassInfo.cpp#IInterface#obj',
+    '/reflection/CObjInfoList.cpp#IModuleInfo#iModInfo',
+    '/reflection/CObjInfoList.cpp#IInterface#interfaceObj',
+    '/reflection/CObjInfoList.cpp#IInterface#iMethodInfo',
+    '/android_linux/CRemoteParcel.cpp#IInterface#parcelable',
+    '/linux_rpc/CRemoteParcel.cpp#IInterface#parcelable',
+    '/marshal/metainfos.cpp#IInterface#modInfo',
+    '/math/BigIntegerTest.cpp#IBigInteger#xNumber',
+    '/Quintet/test.cpp#IBigInteger#i1',
+    '/url/CJarURLConnectionImpl.cpp#IURLConnection#mJarFileURLConnection',
+    '/text/SimpleDateFormat.cpp#INumberFormat#mNumberFormat',
+    '/text/SimpleDateFormat.cpp#ICalendar#mCalendar',
+    '/text/RuleBasedCollator.cpp#IRuleBasedCollatorICU#mICUColl',
+    '/net/CPlainDatagramSocketImpl.cpp#IFileDescriptor#mFd',
+    '/net/CMulticastSocket.cpp#IDatagramSocketImpl#mImpl',
+    '/net/PlainSocketImpl.cpp#IInetAddress#mAddress',
+    '/utility/Collections.cpp#IListIterator#mIterator',
+    '/utility/CTreeMap.cpp#IWeakReference#mKeySet',
+    '/x500/CX500Principal.cpp#IName#mDn',
+]
+
 ############################################################################################################
 
 #results: 101 errors, 59 warnings.
@@ -191,3 +297,4 @@ if argc == 3:
 print "process :", scan_path
 print "log to  :", log_filepath
 process(scan_path, log_filepath)
+
