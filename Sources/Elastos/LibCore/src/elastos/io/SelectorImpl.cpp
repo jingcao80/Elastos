@@ -4,7 +4,7 @@
 #include "IoUtils.h"
 #include "CStructPollfd.h"
 #include "OsConstants.h"
-#include "CIoBridge.h"
+#include "IoBridge.h"
 #include "SelectionKeyImpl.h"
 #include "AutoLock.h"
 
@@ -15,7 +15,7 @@ using Libcore::IO::IoUtils;
 using Elastos::Droid::System::IStructPollfd;
 using Elastos::Droid::System::CStructPollfd;
 using Elastos::Droid::System::OsConstants;
-using Libcore::IO::CIoBridge;
+using Libcore::IO::IoBridge;
 using Elastos::IO::Channels::EIID_ISelector;
 using Elastos::IO::Channels::Spi::IAbstractSelectionKey;
 using Elastos::IO::Channels::Spi::EIID_IAbstractSelector;
@@ -370,7 +370,7 @@ Int32 SelectorImpl::ProcessPollFds()
         // Read bytes from the wakeup pipe until the pipe is empty.
         AutoPtr< ArrayOf<Byte> > buffer = ArrayOf<Byte>::Alloc(8);
         Int32 readnum = 0;
-        while (CIoBridge::_Read(mWakeupIn, buffer, 0, 1, &readnum), readnum > 0) {
+        while (IoBridge::Read(mWakeupIn, buffer, 0, 1, &readnum), readnum > 0) {
         }
     }
 

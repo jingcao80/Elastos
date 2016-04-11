@@ -5,7 +5,7 @@
 #include "CFile.h"
 #include "CRandomAccessFile.h"
 #include "CLibcore.h"
-#include "CIoBridge.h"
+#include "IoBridge.h"
 #include "StringBuilder.h"
 #include "CRandom.h"
 #include "CSystem.h"
@@ -41,7 +41,7 @@ IoUtils::FileReader::Init(
     // "absolutePath" is a directory or not. We can eliminate it
     // at the cost of copying some code from IoBridge.open.
     // try {
-    ECode ec = CIoBridge::_Open(absolutePath, O_RDONLY, (IFileDescriptor**)&mFd);
+    ECode ec = IoBridge::Open(absolutePath, O_RDONLY, (IFileDescriptor**)&mFd);
     if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
         return E_IO_EXCEPTION;
     }

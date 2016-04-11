@@ -6,7 +6,7 @@
 #include "CPlainSocketImpl.h"
 #include "CInteger32.h"
 #include "CBoolean.h"
-#include "CIoBridge.h"
+#include "IoBridge.h"
 #include "AutoLock.h"
 
 using Elastos::Core::IBoolean;
@@ -16,7 +16,7 @@ using Elastos::Core::CInteger32;
 using Elastos::Net::CInet4Address;
 using Elastos::Net::CPlainSocketImpl;
 using Elastos::Net::CInetSocketAddress;
-using Libcore::IO::CIoBridge;
+using Libcore::IO::IoBridge;
 using Elastos::IO::EIID_ICloseable;
 
 namespace Elastos {
@@ -913,7 +913,7 @@ void Socket::CacheLocalAddress()
     mImpl->GetFileDescriptor((IFileDescriptor**)&fd);
 
     mLocalAddress = NULL;
-    CIoBridge::_GetSocketLocalAddress(fd, (IInetAddress**)&mLocalAddress);
+    IoBridge::GetSocketLocalAddress(fd, (IInetAddress**)&mLocalAddress);
 }
 
 ECode Socket::GetChannel(

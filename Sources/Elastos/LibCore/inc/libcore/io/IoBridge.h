@@ -1,9 +1,7 @@
+#ifndef __LIBCORE_IO_IOBRIDGE_H__
+#define __LIBCORE_IO_IOBRIDGE_H__
 
-#ifndef __LIBCORE_IO_CIOBRIDGE_H__
-#define __LIBCORE_IO_CIOBRIDGE_H__
-
-#include "Singleton.h"
-#include "_Libcore_IO_CIoBridge.h"
+#include "Elastos.CoreLibrary.Libcore.h"
 
 using Elastos::IO::IByteBuffer;
 using Elastos::IO::IFileDescriptor;
@@ -14,39 +12,33 @@ using Elastos::Net::IInetSocketAddress;
 namespace Libcore {
 namespace IO {
 
-CarClass(CIoBridge)
-    , public Singleton
-    , public IIoBridge
+class IoBridge
 {
 public:
-    CAR_SINGLETON_DECL()
-
-    CAR_INTERFACE_DECL()
-
-    CARAPI Available(
+    static CARAPI Available(
         /* [in] */ IFileDescriptor* fd,
         /* [out] */ Int32* avail);
 
-    CARAPI Bind(
+    static CARAPI Bind(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IInetAddress* inetAddress,
         /* [in] */ Int32 port);
 
-    CARAPI Connect(
+    static CARAPI Connect(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IInetAddress* inetAddress,
         /* [in] */ Int32 port);
 
-    CARAPI Connect(
+    static CARAPI Connect(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IInetAddress* inetAddress,
         /* [in] */ Int32 port,
         /* [in] */ Int32 timeoutMs);
 
-    CARAPI CloseAndSignalBlockedThreads(
+    static CARAPI CloseAndSignalBlockedThreads(
         /* [in] */ IFileDescriptor* fd);
 
-    CARAPI IsConnected(
+    static CARAPI IsConnected(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IInetAddress* inetAddress,
         /* [in] */ Int32 port,
@@ -54,35 +46,35 @@ public:
         /* [in] */ Int32 remainingTimeoutMs,
         /* [out] */ Boolean* isConnected);
 
-    CARAPI GetSocketOption(
+    static CARAPI GetSocketOption(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ Int32 option,
         /* [out] */ IInterface** value);
 
-    CARAPI SetSocketOption(
+    static CARAPI SetSocketOption(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ Int32 option,
         /* [in] */ IInterface* value);
 
-    CARAPI Open(
+    static CARAPI Open(
         /* [in] */ const String& path,
         /* [in] */ Int32 flags,
         /* [out] */ IFileDescriptor** fd);
 
-    CARAPI Read(
+    static CARAPI Read(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ ArrayOf<Byte>* bytes,
         /* [in] */ Int32 byteOffset,
         /* [in] */ Int32 byteCount,
         /* [out] */ Int32* count);
 
-    CARAPI Write(
+    static CARAPI Write(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ ArrayOf<Byte>* bytes,
         /* [in] */ Int32 byteOffset,
         /* [in] */ Int32 byteCount);
 
-    CARAPI Sendto(
+    static CARAPI Sendto(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ ArrayOf<Byte>* bytes,
         /* [in] */ Int32 byteOffset,
@@ -92,7 +84,7 @@ public:
         /* [in] */ Int32 port,
         /* [out] */ Int32* result);
 
-    CARAPI Sendto(
+    static CARAPI Sendto(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IByteBuffer* buffer,
         /* [in] */ Int32 flags,
@@ -100,7 +92,7 @@ public:
         /* [in] */ Int32 port,
         /* [out] */ Int32* result);
 
-    CARAPI Recvfrom(
+    static CARAPI Recvfrom(
         /* [in] */ Boolean isRead,
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ ArrayOf<Byte>* bytes,
@@ -111,7 +103,7 @@ public:
         /* [in] */ Boolean isConnected,
         /* [out] */ Int32* result);
 
-    CARAPI Recvfrom(
+    static CARAPI Recvfrom(
         /* [in] */ Boolean isRead,
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IByteBuffer* buffer,
@@ -120,20 +112,53 @@ public:
         /* [in] */ Boolean isConnected,
         /* [out] */ Int32* result);
 
-    CARAPI Socket(
+    static CARAPI Socket(
         /* [in] */ Boolean stream,
         /* [out] */ IFileDescriptor** fd);
 
-    CARAPI GetSocketLocalAddress(
+    static CARAPI GetSocketLocalAddress(
         /* [in] */ IFileDescriptor* fd,
         /* [out] */ IInetAddress** address);
 
-    CARAPI GetSocketLocalPort(
+    static CARAPI GetSocketLocalPort(
         /* [in] */ IFileDescriptor* fd,
         /* [out] */ Int32* port);
+
+private:
+    static CARAPI ConnectErrno(
+        /* [in] */ IFileDescriptor* fd,
+        /* [in] */ IInetAddress* inetAddress,
+        /* [in] */ Int32 port,
+        /* [in] */ Int32 timeoutMs);
+
+    static CARAPI GetSocketOptionErrno(
+        /* [in] */ IFileDescriptor* fd,
+        /* [in] */ Int32 option,
+        /* [out] */ IInterface** value);
+
+    static CARAPI_(Int32) GetGroupSourceReqOp(
+        /* [in] */ Int32 value);
+
+    static CARAPI_(Boolean) BooleanFromInt(
+        /* [in] */ Int32 i);
+
+    static CARAPI_(Int32) BooleanToInt(
+        /* [in] */ Boolean b);
+
+    static CARAPI SetSocketOptionErrno(
+        /* [in] */ IFileDescriptor* fd,
+        /* [in] */ Int32 option,
+        /* [in] */ IInterface* value);
+
+    static CARAPI_(Int32) PostRecvfrom(
+        /* [in] */ Boolean isRead,
+        /* [in] */ IDatagramPacket* packet,
+        /* [in] */ Boolean isConnected,
+        /* [in] */ IInetSocketAddress* srcAddress,
+        /* [in] */ Int32 byteCount);
 };
 
 } // namespace IO
 } // namespace Libcore
 
-#endif // __LIBCORE_IO_CIOBRIDGE_H__
+#endif // __LIBCORE_IO_IOBRIDGE_H__

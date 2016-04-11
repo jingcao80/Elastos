@@ -8,7 +8,7 @@
 #include "CBoolean.h"
 #include "CSocket.h"
 #include "AutoLock.h"
-#include "CIoBridge.h"
+#include "IoBridge.h"
 #include "StringBuilder.h"
 
 using Elastos::Core::StringBuilder;
@@ -22,7 +22,7 @@ using Elastos::Net::CSocket;
 using Elastos::Net::CInet4Address;
 using Elastos::Net::CPlainSocketImpl;
 using Elastos::Net::CPlainServerSocketImpl;
-using Libcore::IO::CIoBridge;
+using Libcore::IO::IoBridge;
 
 namespace Elastos {
 namespace Net {
@@ -110,7 +110,7 @@ ECode ServerSocket::ReadBackBindState()
     AutoPtr<IFileDescriptor> fd;
     FAIL_RETURN(mImpl->GetFileDescriptor((IFileDescriptor**)&fd))
     mLocalAddress = NULL;
-    FAIL_RETURN(CIoBridge::_GetSocketLocalAddress(fd, (IInetAddress**)&mLocalAddress))
+    FAIL_RETURN(IoBridge::GetSocketLocalAddress(fd, (IInetAddress**)&mLocalAddress))
     mIsBound = true;
     return NOERROR;
 }

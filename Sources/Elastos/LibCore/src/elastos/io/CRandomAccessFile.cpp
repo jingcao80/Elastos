@@ -7,7 +7,7 @@
 #include "Character.h"
 #include "StringBuilder.h"
 #include "OsConstants.h"
-#include "CIoBridge.h"
+#include "IoBridge.h"
 #include "CLibcore.h"
 #include "CFileDescriptor.h"
 #include "CModifiedUtf8.h"
@@ -23,13 +23,10 @@ using Elastos::Core::StringBuilder;
 using Elastos::IO::Channels::IChannel;
 using Elastos::IO::Charset::IModifiedUtf8;
 using Elastos::IO::Charset::CModifiedUtf8;
-using Libcore::IO::IIoBridge;
-using Libcore::IO::CIoBridge;
+using Libcore::IO::IoBridge;
 using Libcore::IO::ILibcore;
 using Libcore::IO::CLibcore;
 using Libcore::IO::IOs;
-using Libcore::IO::IIoBridge;
-using Libcore::IO::CIoBridge;
 using Libcore::IO::IoUtils;
 using Libcore::IO::Memory;
 
@@ -65,9 +62,7 @@ CRandomAccessFile::~CRandomAccessFile()
         mChannel = NULL;
     }
 
-    AutoPtr<IIoBridge> ioBridge;
-    CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
-    ioBridge->CloseAndSignalBlockedThreads(mFd);
+    IoBridge::CloseAndSignalBlockedThreads(mFd);
 }
 
 ECode CRandomAccessFile::constructor(
@@ -97,13 +92,10 @@ ECode CRandomAccessFile::constructor(
 
     mMode = flags;
 
-    AutoPtr<CIoBridge> ioObj;
-    FAIL_RETURN(CIoBridge::AcquireSingletonByFriend((CIoBridge**)&ioObj));
-    AutoPtr<IIoBridge> ioBridge = (IIoBridge*)ioObj.Get();
     String path;
     file->GetPath(&path);
     AutoPtr<IFileDescriptor> fd;
-    FAIL_RETURN(ioBridge->Open(path, flags, (IFileDescriptor**)&fd));
+    FAIL_RETURN(IoBridge::Open(path, flags, (IFileDescriptor**)&fd));
 
     Int32 ifd;
     fd->GetDescriptor(&ifd);
@@ -140,9 +132,7 @@ ECode CRandomAccessFile::Close()
         mChannel = NULL;
     }
 
-    AutoPtr<IIoBridge> ioBridge;
-    CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
-    return ioBridge->CloseAndSignalBlockedThreads(mFd);
+    return IoBridge::CloseAndSignalBlockedThreads(mFd);
 }
 
 ECode CRandomAccessFile::GetChannel(
@@ -236,9 +226,7 @@ ECode CRandomAccessFile::Read(
 {
     VALIDATE_NOT_NULL(number);
 
-    AutoPtr<IIoBridge> ioBridge;
-    CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
-    return ioBridge->Read(mFd, buffer, offset, length, number);
+    return IoBridge::Read(mFd, buffer, offset, length, number);
 }
 
 ECode CRandomAccessFile::ReadBoolean(
@@ -565,11 +553,7 @@ ECode CRandomAccessFile::Write(
     /* [in] */ Int32 offset,
     /* [in] */ Int32 count)
 {
-    AutoPtr<CIoBridge> obj;
-    FAIL_RETURN(CIoBridge::AcquireSingletonByFriend((CIoBridge**)&obj));
-    AutoPtr<IIoBridge> ioBridge = (IIoBridge*)obj.Get();
-
-    FAIL_RETURN(ioBridge->Write(mFd, buffer, offset, count));
+    FAIL_RETURN(IoBridge::Write(mFd, buffer, offset, count));
 
     // if we are in "rws" mode, attempt to sync file+metadata
     if (mSyncMetadata) {

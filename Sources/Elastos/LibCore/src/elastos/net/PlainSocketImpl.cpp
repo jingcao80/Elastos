@@ -8,7 +8,7 @@
 #include "Arrays.h"
 #include "CCloseGuard.h"
 #include "CLibcore.h"
-#include "CIoBridge.h"
+#include "IoBridge.h"
 #include "OsConstants.h"
 #include "Memory.h"
 #include "CPlainSocketInputStream.h"
@@ -26,8 +26,7 @@ using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CCloseGuard;
 using Elastos::Utility::Arrays;
-using Libcore::IO::IIoBridge;
-using Libcore::IO::CIoBridge;
+using Libcore::IO::IoBridge;
 using Libcore::IO::CLibcore;
 using Libcore::IO::Memory;
 using Droid::System::OsConstants;
@@ -137,7 +136,7 @@ ECode PlainSocketImpl::Accept(
     // Reset the client's inherited read timeout to the Java-specified default of 0.
     CInteger32::New(0, (IInteger32**)&val);
     ISocketOptions::Probe(newImpl)->SetOption(ISocketOptions::_SO_TIMEOUT, val);
-    CIoBridge::_GetSocketLocalPort(p->mFd, &(p->mLocalport));
+    IoBridge::GetSocketLocalPort(p->mFd, &(p->mLocalport));
     return NOERROR;
 
 _Exit_:
@@ -179,21 +178,21 @@ ECode PlainSocketImpl::Available(
         return NOERROR;
     }
 
-    return CIoBridge::_Available(mFd, value);
+    return IoBridge::Available(mFd, value);
 }
 
 ECode PlainSocketImpl::Bind(
     /* [in] */ IInetAddress* address,
     /* [in] */ Int32 port)
 {
-    FAIL_RETURN(CIoBridge::_Bind(mFd, address, port));
+    FAIL_RETURN(IoBridge::Bind(mFd, address, port));
 
     if (port != 0) {
         mLocalport = port;
         return NOERROR;
     }
     else {
-       return CIoBridge::_GetSocketLocalPort(mFd, &mLocalport);
+       return IoBridge::GetSocketLocalPort(mFd, &mLocalport);
     }
 }
 
@@ -208,7 +207,7 @@ ECode PlainSocketImpl::OnBind(
 ECode PlainSocketImpl::Close()
 {
     mGuard->Close();
-    return CIoBridge::_CloseAndSignalBlockedThreads(mFd);
+    return IoBridge::CloseAndSignalBlockedThreads(mFd);
 }
 
 ECode PlainSocketImpl::OnClose()
@@ -256,7 +255,7 @@ ECode PlainSocketImpl::Connect(
         ec = SocksConnect(anAddr, aPort, 0);
     }
     else {
-        ec = CIoBridge::_Connect(mFd, normalAddr, aPort, timeout);
+        ec = IoBridge::Connect(mFd, normalAddr, aPort, timeout);
     }
 
     mAddress = normalAddr;
@@ -278,7 +277,7 @@ ECode PlainSocketImpl::Create(
 {
     mStreaming = streaming;
     AutoPtr<IFileDescriptor> outfd;
-    FAIL_RETURN(CIoBridge::_Socket(streaming, (IFileDescriptor **)&outfd));
+    FAIL_RETURN(IoBridge::Socket(streaming, (IFileDescriptor **)&outfd));
     mFd = outfd;
     return NOERROR;
 }
@@ -314,7 +313,7 @@ ECode PlainSocketImpl::GetOption(
     VALIDATE_NOT_NULL(res)
 
     AutoPtr<IInterface> out;
-    CIoBridge::_GetSocketOption(mFd, option, (IInterface**)&out);
+    IoBridge::GetSocketOption(mFd, option, (IInterface**)&out);
     *res = out;
     REFCOUNT_ADD(*res)
     return NOERROR;
@@ -348,7 +347,7 @@ ECode PlainSocketImpl::SetOption(
     /* [in] */ Int32 option,
     /* [in] */ IInterface* value)
 {
-    return CIoBridge::_SetSocketOption(mFd, option, value);
+    return IoBridge::SetSocketOption(mFd, option, value);
 }
 
 Int32 PlainSocketImpl::SocksGetServerPort()
@@ -389,7 +388,7 @@ ECode PlainSocketImpl::SocksConnect(
     /* [in] */ Int32 timeout)
 {
     AutoPtr<IInetAddress> outadd = SocksGetServerAddress();
-    CIoBridge::_Connect(mFd, outadd, SocksGetServerPort(), timeout);
+    IoBridge::Connect(mFd, outadd, SocksGetServerPort(), timeout);
     SocksRequestConnection(applicationServerAddress, applicationServerPort);
     sLastConnectedAddress = applicationServerAddress;
     sLastConnectedPort = applicationServerPort;
@@ -446,7 +445,7 @@ ECode PlainSocketImpl::SocksBind()
     AutoPtr<ArrayOf<Byte> > array;
     addr->GetAddress((ArrayOf<Byte>**)&array);
 
-    FAIL_RETURN(CIoBridge::_Connect(mFd, addr, SocksGetServerPort()));
+    FAIL_RETURN(IoBridge::Connect(mFd, addr, SocksGetServerPort()));
 
     // There must be a connection to an application host for the bind to
     // work.
@@ -592,7 +591,7 @@ ECode PlainSocketImpl::Read(
     }
 
     Int32 readCount;
-    CIoBridge::_Recvfrom(TRUE, mFd, buffer, offset, byteCount, 0, NULL, FALSE, &readCount);
+    IoBridge::Recvfrom(TRUE, mFd, buffer, offset, byteCount, 0, NULL, FALSE, &readCount);
     // Return of zero bytes for a blocking socket means a timeout occurred
     if (readCount == 0) {
         // throw new SocketTimeoutException();
@@ -620,7 +619,7 @@ ECode PlainSocketImpl::Write(
     if (mStreaming) {
         while (byteCount > 0) {
             Int32 bytesWritten;
-            FAIL_RETURN(CIoBridge::_Sendto(mFd, buffer, offset, byteCount, 0, NULL, 0, &bytesWritten));
+            FAIL_RETURN(IoBridge::Sendto(mFd, buffer, offset, byteCount, 0, NULL, 0, &bytesWritten));
             byteCount -= bytesWritten;
             offset += bytesWritten;
         }
@@ -629,7 +628,7 @@ ECode PlainSocketImpl::Write(
         // Unlike writes to a streaming socket, writes to a datagram
         // socket are all-or-nothing, so we don't need a loop here.
         // http://code.google.com/p/android/issues/detail?id=15304
-        FAIL_RETURN(CIoBridge::_Sendto(mFd, buffer, offset, byteCount, 0, mAddress, mPort, value));
+        FAIL_RETURN(IoBridge::Sendto(mFd, buffer, offset, byteCount, 0, mAddress, mPort, value));
     }
     *value = byteCount;
     return NOERROR;

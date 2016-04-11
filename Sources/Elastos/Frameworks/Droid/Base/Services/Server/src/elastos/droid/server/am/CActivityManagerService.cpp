@@ -3219,6 +3219,7 @@ ECode CActivityManagerService::UpdateCpuStatsNow()
     AutoPtr<ArrayOf<Int64> > cpuSpeedTimes;
     mProcessCpuTracker->GetLastCpuSpeedTimes((ArrayOf<Int64>**)&cpuSpeedTimes);
     AutoPtr<IBatteryStatsImpl> bstats = mBatteryStatsService->GetActiveStatistics();
+    // TODO: should remove
     if (bstats == NULL) return NOERROR;
 
     synchronized(bstats) {

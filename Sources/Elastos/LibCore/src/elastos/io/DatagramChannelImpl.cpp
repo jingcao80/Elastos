@@ -1,5 +1,5 @@
 #include "DatagramChannelImpl.h"
-#include "CIoBridge.h"
+#include "IoBridge.h"
 #include "CLibcore.h"
 #include "CFileDescriptor.h"
 #include "SelectorProvider.h"
@@ -25,12 +25,11 @@ using Elastos::Net::CDatagramPacket;
 using Elastos::Net::InetAddress;
 using Elastos::Utility::Arrays;
 using Elastos::IO::Channels::EIID_IDatagramChannel;
-using Libcore::IO::IIoBridge;
-using Libcore::IO::CIoBridge;
 using Libcore::IO::ILibcore;
 using Libcore::IO::CLibcore;
 using Libcore::IO::IOs;
 using Libcore::IO::IoUtils;
+using Libcore::IO::IoBridge;
 using Libcore::Utility::EmptyArray;
 
 namespace Elastos{
@@ -225,7 +224,7 @@ ECode DatagramChannelImpl::constructor(
     /* [in] */ ISelectorProvider* provider)
 {
     FAIL_RETURN(DatagramChannel::constructor(provider))
-    return CIoBridge::_Socket(FALSE, (IFileDescriptor**)&mFd);
+    return IoBridge::Socket(FALSE, (IFileDescriptor**)&mFd);
 }
 
 ECode DatagramChannelImpl::GetSocket(
@@ -302,7 +301,7 @@ ECode DatagramChannelImpl::Connect(
     inetSocketAddress->GetPort(&remotePort);
     //try {
         Begin();
-        CIoBridge::_Connect(mFd, remoteAddress, remotePort);
+        IoBridge::Connect(mFd, remoteAddress, remotePort);
     //} catch (ConnectException e) {
         // ConnectException means connect fail, not exception
     //} finally {
@@ -449,7 +448,7 @@ ECode DatagramChannelImpl::ReceiveImpl(
         receivePacket->GetLength(&length);
         Boolean isflag = FALSE;
         IsConnected(&isflag);
-        FAIL_RETURN(CIoBridge::_Recvfrom(FALSE, mFd, bytearr, offset, length, 0, receivePacket, isflag, &received));
+        FAIL_RETURN(IoBridge::Recvfrom(FALSE, mFd, bytearr, offset, length, 0, receivePacket, isflag, &received));
         AutoPtr<IInetAddress> outnet;
         receivePacket->GetAddress((IInetAddress**)&outnet);
         if (outnet != NULL) {
@@ -489,7 +488,7 @@ ECode DatagramChannelImpl::ReceiveDirectImpl(
     do {
         Boolean isflag = FALSE;
         IsConnected(&isflag);
-        CIoBridge::_Recvfrom(FALSE, mFd, target, 0, receivePacket, isflag, &received);
+        IoBridge::Recvfrom(FALSE, mFd, target, 0, receivePacket, isflag, &received);
         AutoPtr<IInetAddress> address;
         receivePacket->GetAddress((IInetAddress**)&address);
         if (address != NULL) {
@@ -544,7 +543,7 @@ ECode DatagramChannelImpl::Send(
             IBuffer::Probe(source)->GetPosition(&oldPosition);
             Int32 port;
             isa->GetPort(&port);
-            CIoBridge::_Sendto(mFd, source, 0, ia, port, &sendCount);
+            IoBridge::Sendto(mFd, source, 0, ia, port, &sendCount);
             if (sendCount > 0) {
                 IBuffer::Probe(source)->SetPosition(oldPosition + sendCount);
             }
@@ -660,7 +659,7 @@ ECode DatagramChannelImpl::ReadImpl(
             Begin();
             Boolean isflag = FALSE;
             IsConnected(&isflag);
-            CIoBridge::_Recvfrom(FALSE, mFd, dst, 0, NULL, isflag, &readCount);
+            IoBridge::Recvfrom(FALSE, mFd, dst, 0, NULL, isflag, &readCount);
         // } catch (InterruptedIOException e) {
         //     // InterruptedIOException will be thrown when timeout.
         //     return 0;
@@ -758,7 +757,7 @@ ECode DatagramChannelImpl::WriteImpl(
         Int32 result = 0;
         // try {
             Begin();
-            CIoBridge::_Sendto(mFd, buf, 0, NULL, 0, &result);
+            IoBridge::Sendto(mFd, buf, 0, NULL, 0, &result);
         // } finally {
             End(result > 0);
         // }
@@ -771,7 +770,7 @@ ECode DatagramChannelImpl::ImplCloseSelectableChannel()
 {
     // A closed channel is not connected.
     OnDisconnect(TRUE /* updateSocketState */);
-    CIoBridge::_CloseAndSignalBlockedThreads(mFd);
+    IoBridge::CloseAndSignalBlockedThreads(mFd);
 
     Boolean bval;
     if (mSocket != NULL && (mSocket->IsClosed(&bval), !bval)) {

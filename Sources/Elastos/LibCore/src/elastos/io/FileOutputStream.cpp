@@ -2,10 +2,11 @@
 #include "FileOutputStream.h"
 #include "CFile.h"
 #include "IoUtils.h"
+#include "IoBridge.h"
 #include "NioUtils.h"
 #include "OsConstants.h"
 #include "CLibcore.h"
-#include "CIoBridge.h"
+#include "IoBridge.h"
 #include "CFileDescriptor.h"
 #include "AutoLock.h"
 
@@ -14,9 +15,8 @@ using Elastos::IO::NioUtils;
 using Libcore::IO::ILibcore;
 using Libcore::IO::CLibcore;
 using Libcore::IO::IOs;
-using Libcore::IO::IIoBridge;
-using Libcore::IO::CIoBridge;
 using Libcore::IO::IoUtils;
+using Libcore::IO::IoBridge;
 
 namespace Elastos {
 namespace IO {
@@ -67,11 +67,9 @@ ECode FileOutputStream::constructor(
     mMode = OsConstants::_O_WRONLY
         | OsConstants::_O_CREAT
         | (append ? OsConstants::_O_APPEND : OsConstants::_O_TRUNC);
-    AutoPtr<CIoBridge> ioBridge;
-    CIoBridge::AcquireSingletonByFriend((CIoBridge**)&ioBridge);
     String path;
     file->GetPath(&path);
-    FAIL_RETURN(ioBridge->Open(path, mMode, (IFileDescriptor**)&mFd))
+    FAIL_RETURN(IoBridge::Open(path, mMode, (IFileDescriptor**)&mFd))
     mShouldClose = TRUE;
     return NOERROR;
 }
@@ -148,9 +146,7 @@ ECode FileOutputStream::Write(
     /* [in] */ Int32 byteOffset,
     /* [in] */ Int32 byteCount)
 {
-    AutoPtr<IIoBridge> ioBridge;
-    CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
-    return ioBridge->Write(mFd, buffer, byteOffset, byteCount);
+    return IoBridge::Write(mFd, buffer, byteOffset, byteCount);
 }
 
 ECode FileOutputStream::CloseInner()
@@ -158,9 +154,7 @@ ECode FileOutputStream::CloseInner()
     AutoLock lock(this);
 
     if (mShouldClose) {
-        AutoPtr<IIoBridge> ioBridge;
-        CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
-        return ioBridge->CloseAndSignalBlockedThreads(mFd);
+        return IoBridge::CloseAndSignalBlockedThreads(mFd);
     }
     else {
         // An owned fd has been invalidated by IoUtils.close, but

@@ -2,9 +2,9 @@
 #include "FileInputStream.h"
 #include "CFile.h"
 #include "IoUtils.h"
+#include "IoBridge.h"
 #include "OsConstants.h"
 #include "CLibcore.h"
-#include "CIoBridge.h"
 #include "NioUtils.h"
 #include "CFileDescriptor.h"
 #include "AutoLock.h"
@@ -16,8 +16,7 @@ using Elastos::Droid::System::OsConstants;
 using Libcore::IO::ILibcore;
 using Libcore::IO::CLibcore;
 using Libcore::IO::IOs;
-using Libcore::IO::IIoBridge;
-using Libcore::IO::CIoBridge;
+using Libcore::IO::IoBridge;
 using Libcore::IO::IStreams;
 using Libcore::IO::CStreams;
 
@@ -51,10 +50,8 @@ ECode FileInputStream::constructor(
     CFileDescriptor::New((IFileDescriptor**)&mFd);
     String path;
     file->GetPath(&path);
-    AutoPtr<IIoBridge> ioBridge;
-    CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
     AutoPtr<IFileDescriptor> fd;
-    FAIL_RETURN(ioBridge->Open(path, OsConstants::_O_RDONLY, (IFileDescriptor**)&fd));
+    FAIL_RETURN(IoBridge::Open(path, OsConstants::_O_RDONLY, (IFileDescriptor**)&fd));
     Int32 ifd;
     fd->GetDescriptor(&ifd);
     mFd->SetDescriptor(ifd);
@@ -88,9 +85,7 @@ ECode FileInputStream::Available(
 {
     VALIDATE_NOT_NULL(avail)
 
-    AutoPtr<IIoBridge> ioBridge;
-    CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
-    ECode ec = ioBridge->Available(mFd, avail);
+    ECode ec = IoBridge::Available(mFd, avail);
     if (FAILED(ec)) {
         return E_IO_EXCEPTION;
     }
@@ -105,9 +100,7 @@ ECode FileInputStream::Close()
             ICloseable::Probe(mChannel)->Close();
         }
         if (mShouldClose) {
-            AutoPtr<IIoBridge> ioBridge;
-            CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
-            ioBridge->CloseAndSignalBlockedThreads(mFd);
+            IoBridge::CloseAndSignalBlockedThreads(mFd);
         }
         else {
             // An owned fd has been invalidated by IoUtils.close, but
@@ -162,9 +155,7 @@ ECode FileInputStream::Read(
     *number = -1;
     VALIDATE_NOT_NULL(buffer);
 
-    AutoPtr<IIoBridge> ioBridge;
-    CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
-    return ioBridge->Read(mFd, buffer, byteOffset, byteCount, number);
+    return IoBridge::Read(mFd, buffer, byteOffset, byteCount, number);
 }
 
 ECode FileInputStream::Skip(

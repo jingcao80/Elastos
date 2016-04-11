@@ -4,7 +4,7 @@
 #include "InetAddress.h"
 #include "CInet4Address.h"
 #include "CInet6Address.h"
-#include "CIoBridge.h"
+#include "IoBridge.h"
 #include "BlockGuard.h"
 #include "NetworkUtilities.h"
 #include "CStructAddrinfo.h"
@@ -22,8 +22,7 @@ using Droid::System::CStructAddrinfo;
 using Elastos::Droid::System::IStructUtsname;
 using Libcore::IO::ILibcore;
 using Libcore::IO::CLibcore;
-using Libcore::IO::IIoBridge;
-using Libcore::IO::CIoBridge;
+using Libcore::IO::IoBridge;
 using Elastos::IO::EIID_ISerializable;
 using Elastos::Core::BlockGuard;
 using Elastos::Core::IBlockGuardPolicy;
@@ -654,20 +653,18 @@ Boolean InetAddress::IsReachable(
     /* [in] */ Int32 timeout)
 {
     AutoPtr<IFileDescriptor> fd;
-    AutoPtr<IIoBridge> ioBridge;
-    CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
-    ioBridge->Socket(TRUE, (IFileDescriptor**)&fd);
-    if(source != NULL) {
-        if (FAILED(ioBridge->Bind(fd, source, 0))) {
+    IoBridge::Socket(TRUE, (IFileDescriptor**)&fd);
+    if (source != NULL) {
+        if (FAILED(IoBridge::Bind(fd, source, 0))) {
             return FALSE;
         }
     }
 
-    if (FAILED(ioBridge->Connect(fd, (IInetAddress*)destination->Probe(EIID_IInetAddress), 7, timeout))) {
+    if (FAILED(IoBridge::Connect(fd, (IInetAddress*)destination->Probe(EIID_IInetAddress), 7, timeout))) {
         return FALSE;
     }
 
-    ioBridge->CloseAndSignalBlockedThreads(fd);
+    IoBridge::CloseAndSignalBlockedThreads(fd);
 
     return TRUE;
 }

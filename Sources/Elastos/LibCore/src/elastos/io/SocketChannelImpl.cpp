@@ -1,5 +1,5 @@
 #include "SocketChannelImpl.h"
-#include "CIoBridge.h"
+#include "IoBridge.h"
 #include "SocketUtils.h"
 #include "AutoLock.h"
 #include "CPlainSocketImpl.h"
@@ -10,8 +10,7 @@
 #include "CLibcore.h"
 #include "IoUtils.h"
 
-using Libcore::IO::IIoBridge;
-using Libcore::IO::CIoBridge;
+using Libcore::IO::IoBridge;
 using Libcore::IO::CLibcore;
 using Libcore::IO::IoUtils;
 using Elastos::Net::SocketUtils;
@@ -267,10 +266,12 @@ SocketChannelImpl::SocketChannelImpl(
     SocketChannel::constructor(provider);
     mStatus = SOCKET_STATUS_UNCONNECTED;
     Boolean connect = TRUE;
-    if(connect)
-        CIoBridge::_Socket(TRUE, (IFileDescriptor**)&mFd);
-    else
+    if (connect) {
+        IoBridge::Socket(TRUE, (IFileDescriptor**)&mFd);
+    }
+    else {
         CFileDescriptor::New((IFileDescriptor**)&mFd);
+    }
 }
 
 SocketChannelImpl::SocketChannelImpl(
@@ -279,10 +280,12 @@ SocketChannelImpl::SocketChannelImpl(
 {
     SocketChannel::constructor(provider);
     mStatus = SOCKET_STATUS_UNCONNECTED;
-    if(connect)
-        CIoBridge::_Socket(TRUE, (IFileDescriptor**)&mFd);
-    else
+    if (connect) {
+        IoBridge::Socket(TRUE, (IFileDescriptor**)&mFd);
+    }
+    else {
         CFileDescriptor::New((IFileDescriptor**)&mFd);
+    }
 }
 
 SocketChannelImpl::SocketChannelImpl(
@@ -376,7 +379,7 @@ ECode SocketChannelImpl::Connect(
         // When in blocking mode, IoBridge.connect() will return without an exception when the
         // mSocket is connected. When in non-blocking mode it will return without an exception
         // without knowing the result of the connection attempt, which could still be going on.
-        ECode ec = CIoBridge::_Connect(mFd, normalAddr, port);
+        ECode ec = IoBridge::Connect(mFd, normalAddr, port);
         if (ec == NOERROR) {
             newStatus = isBlocking ? SOCKET_STATUS_CONNECTED : SOCKET_STATUS_PENDING;
             finished = TRUE;
@@ -443,7 +446,7 @@ ECode SocketChannelImpl::FinishConnect(
         mConnectAddress->GetAddress((IInetAddress**)&inetAddress);
         Int32 port = 0;
         mConnectAddress->GetPort(&port);
-        ECode ec = CIoBridge::_IsConnected(mFd, inetAddress, port, 0, 0, &finished); // Return immediately.
+        ECode ec = IoBridge::IsConnected(mFd, inetAddress, port, 0, 0, &finished); // Return immediately.
     // } catch (ConnectException e) {
         if (ec != NOERROR) {
             if (IsOpen()) {
@@ -675,7 +678,7 @@ ECode SocketChannelImpl::ImplCloseSelectableChannel()
         mStatus = SOCKET_STATUS_CLOSED;
         // IoBridge.closeAndSignalBlockedThreads(mFd) is idempotent: It is safe to call on an
         // already-closed file descriptor.
-        CIoBridge::_CloseAndSignalBlockedThreads(mFd);
+        IoBridge::CloseAndSignalBlockedThreads(mFd);
         Boolean isflag = FALSE;
         if (mSocket != NULL && (mSocket->IsClosed(&isflag), !isflag)) {
             mSocket->OnClose();
@@ -704,7 +707,7 @@ ECode SocketChannelImpl::ReadImpl(
             if (IsBlocking(&isflag), isflag) {
                 Begin();
             }
-            CIoBridge::_Recvfrom(TRUE, mFd, dst, 0, NULL, FALSE, &readCount);
+            IoBridge::Recvfrom(TRUE, mFd, dst, 0, NULL, FALSE, &readCount);
             if (readCount > 0) {
                 Int32 pos = 0;
                 IBuffer::Probe(dst)->GetPosition(&pos);
@@ -738,7 +741,7 @@ ECode SocketChannelImpl::WriteImpl(
             if (IsBlocking(&isflag), isflag) {
                 Begin();
             }
-            CIoBridge::_Sendto(mFd, src, 0, NULL, 0, &writeCount);
+            IoBridge::Sendto(mFd, src, 0, NULL, 0, &writeCount);
             if (writeCount > 0) {
                 Int32 pos;
                 IBuffer::Probe(src)->GetPosition(&pos);

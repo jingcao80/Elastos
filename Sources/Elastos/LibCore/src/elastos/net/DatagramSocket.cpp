@@ -8,7 +8,7 @@
 #include "CPlainDatagramSocketImpl.h"
 #include "AutoLock.h"
 #include "CLibcore.h"
-#include "CIoBridge.h"
+#include "IoBridge.h"
 #include "OsConstants.h"
 #include <cutils/log.h>
 
@@ -21,7 +21,7 @@ using Elastos::IO::EIID_ICloseable;
 using Elastos::Net::EIID_ISocketOptions;
 using Libcore::IO::IOs;
 using Libcore::IO::CLibcore;
-using Libcore::IO::CIoBridge;
+using Libcore::IO::IoBridge;
 using Droid::System::OsConstants;
 
 namespace Elastos {
@@ -201,7 +201,7 @@ ECode DatagramSocket::GetLocalAddress(
 
     AutoPtr<IFileDescriptor> fd;
     mImpl->GetFileDescriptor((IFileDescriptor**)&fd);
-    return CIoBridge::_GetSocketLocalAddress(fd, address);
+    return IoBridge::GetSocketLocalAddress(fd, address);
 }
 
 ECode DatagramSocket::GetLocalPort(
