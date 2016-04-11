@@ -67,6 +67,7 @@ CAR_INTERFACE_IMPL(Properties, HashTable, IProperties)
 
 Properties::Properties()
 {
+    HashTable::constructor();
 }
 
 ECode Properties::constructor(

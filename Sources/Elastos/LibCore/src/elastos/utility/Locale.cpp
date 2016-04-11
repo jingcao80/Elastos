@@ -1624,7 +1624,7 @@ ECode Locale::ForLanguageTag(
     }
 
     return CLocale::New(languageCode, regionCode, variantCode, scriptCode,
-            unicodeKeywords, unicodeAttributes, extensions, TRUE /* has validated fields */, (ILocale**)locale);
+            unicodeKeywords, unicodeAttributes, extensions, TRUE /* has validated fields */, locale);
 }
 
 } // namespace Utility

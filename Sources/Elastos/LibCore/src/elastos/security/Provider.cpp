@@ -222,8 +222,9 @@ ECode Provider::Put(
     /* [in] */ IInterface* value,
     /* [out] */ IInterface** oldValue)
 {
-    VALIDATE_NOT_NULL(oldValue);
-    *oldValue = NULL;
+    if (oldValue) {
+        *oldValue = NULL;
+    }
 
     if (IString::Probe(key)) {
         String str;

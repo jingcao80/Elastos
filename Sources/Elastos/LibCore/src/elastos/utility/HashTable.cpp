@@ -663,7 +663,8 @@ ECode HashTable::_EntrySet::Contains(
     AutoPtr<IInterface> valueface;
     e->GetKey((IInterface**)&keyface);
     e->GetValue((IInterface**)&valueface);
-    return mHost->ContainsMapping(keyface, valueface);
+    *value = mHost->ContainsMapping(keyface, valueface);
+    return NOERROR;
 }
 
 ECode HashTable::_EntrySet::Remove(
