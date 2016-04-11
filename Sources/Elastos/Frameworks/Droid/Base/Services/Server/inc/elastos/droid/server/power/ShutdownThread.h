@@ -18,6 +18,8 @@ using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Media::IAudioAttributes;
+using Elastos::Droid::Media::IMediaPlayer;
+using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Os::Storage::IIMountShutdownObserver;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IPowerManager;
@@ -111,7 +113,8 @@ private:
         CAR_INTERFACE_DECL();
 
         DialogInterfaceOnClickListener(
-            /* [in] */ IContext* context);
+            /* [in] */ IContext* context,
+            /* [in] */ Boolean advancedReboot);
 
         //@Override
         CARAPI OnClick(
@@ -120,6 +123,7 @@ private:
 
     private:
         AutoPtr<IContext> mContext;
+        Boolean mAdvancedReboot;
     };
 
     // used in function Run();
@@ -232,6 +236,15 @@ private:
 
     ~ShutdownThread();
 
+    static CARAPI_(Boolean) IsAdvancedRebootPossible(
+        /* [in] */ IContext* context);
+
+    static CARAPI_(void) DoSoftReboot();
+
+    static CARAPI_(String) GetShutdownMusicFilePath();
+
+    static CARAPI_(void) LockDevice();
+
     static CARAPI_(void) BeginShutdownSequence(
         /* [in] */ IContext* context);
 
@@ -239,6 +252,8 @@ private:
         /* [in] */ Int32 timeout);
 
     static CARAPI_(AutoPtr<IAudioAttributes>) InitVIBRATION_ATTRIBUTES();
+
+    static CARAPI_(Boolean) CheckAnimationFileExist();
 
 public:
     // Provides shutdown assurance in case the system_server is killed
@@ -256,8 +271,17 @@ private:
     static const Int32 MAX_SHUTDOWN_WAIT_TIME;
     static const Int32 MAX_RADIO_WAIT_TIME;
 
+    static const String SOFT_REBOOT;
+
     // length of vibration before shutting down
     static const Int32 SHUTDOWN_VIBRATE_MS;
+
+    static const String OEM_BOOTANIMATION_FILE;
+    static const String SYSTEM_BOOTANIMATION_FILE;
+    static const String SYSTEM_ENCRYPTED_BOOTANIMATION_FILE;
+
+    static const String SHUTDOWN_MUSIC_FILE;
+    static const String OEM_SHUTDOWN_MUSIC_FILE;
 
     // state tracking
     static Object sIsStartedGuard;
@@ -279,8 +303,12 @@ private:
     AutoPtr<IPowerManagerWakeLock> mCpuWakeLock;
     AutoPtr<IPowerManagerWakeLock> mScreenWakeLock;
     AutoPtr<IHandler> mHandler;
+    static AutoPtr<IMediaPlayer> mMediaPlayer;
+
+    Boolean mIsShutdownMusicPlaying;
 
     static AutoPtr<IAlertDialog> sConfirmDialog;
+    static AutoPtr<IAudioManager> sAudioManager;
 };
 
 } // namespace Power

@@ -3758,6 +3758,16 @@ void PowerManagerService::NativeSendPowerHint(
     }
 }
 
+void PowerManagerService::NativeCpuBoost(
+    /* [in] */ Int32 duration)
+{
+
+}
+
+void PowerManagerService::NativeSetPowerProfile(
+    /* [in] */ Int32 profile)
+{}
+
 } // namespace Power
 } // namespace Server
 } // namespace Droid

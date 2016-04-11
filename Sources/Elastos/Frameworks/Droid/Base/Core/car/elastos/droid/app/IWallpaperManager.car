@@ -51,6 +51,9 @@ module
             [out] IBundle** outParams,
             [out] IParcelFileDescriptor** descriptor);
 
+        IsKeyguardWallpaperSet(
+            [out] Boolean* result);
+
         /**
          * Get information about a live wallpaper.
          */

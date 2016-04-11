@@ -48,7 +48,6 @@ const Int32 Notifier::POWER_STATE_ASLEEP = 2;
 
 const Int32 Notifier::MSG_USER_ACTIVITY = 1;
 const Int32 Notifier::MSG_BROADCAST = 2;
-const Int32 Notifier::MSG_WIRELESS_CHARGING_STARTED = 3;
 
 //==============================================================================
 //          Notifier::WakeUpBroadcastDone
@@ -105,10 +104,6 @@ ECode Notifier::NotifierHandler::HandleMessage(
 
         case Notifier::MSG_BROADCAST:
             mHost->SendNextBroadcast();
-            break;
-
-        case Notifier::MSG_WIRELESS_CHARGING_STARTED:
-            mHost->PlayWirelessChargingStartedSound();
             break;
     }
 
@@ -431,13 +426,6 @@ void Notifier::OnWirelessChargingStarted()
     if (DEBUG) {
         Slogger::D(TAG, "onWirelessChargingStarted");
     }
-
-    mSuspendBlocker->AcquireBlocker();
-    AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(MSG_WIRELESS_CHARGING_STARTED, (IMessage**)&msg);
-    msg->SetAsynchronous(TRUE);
-    Boolean result;
-    mHandler->SendMessage(msg, &result);
 }
 
 void Notifier::UpdatePendingBroadcastLocked()
@@ -560,30 +548,6 @@ void Notifier::SendGoToSleepBroadcast()
     //     EventLog::WriteEvent(IEventLogTags::POWER_SCREEN_BROADCAST_STOP, 3, 1);
     //     SendNextBroadcast();
     // }
-}
-
-void Notifier::PlayWirelessChargingStartedSound()
-{
-    AutoPtr<IContentResolver> cr;
-    mContext->GetContentResolver((IContentResolver**)&cr);
-    String soundPath;
-    Settings::Global::GetString(cr,
-            ISettingsGlobal::WIRELESS_CHARGING_STARTED_SOUND, &soundPath);
-    if (!soundPath.IsNull()) {
-        AutoPtr<IUri> soundUri;
-        Uri::Parse(String("file://") + soundPath, (IUri**)&soundUri);
-        if (soundUri != NULL) {
-            AutoPtr<IRingtone> sfx;
-            assert(0 && "TODO");
-            // CRingtoneManager::GetRingtone(mContext, soundUri, (IRingtone**)&sfx);
-            if (sfx != NULL) {
-                sfx->SetStreamType(IAudioManager::STREAM_SYSTEM);
-                sfx->Play();
-            }
-        }
-    }
-
-    mSuspendBlocker->ReleaseBlocker();
 }
 
 } // namespace Power

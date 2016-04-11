@@ -1396,8 +1396,8 @@ void WifiDisplayController::UpdateConnection()
         AutoPtr<IRemoteDisplayListener> listener = new MyRemoteDisplayListener(this, oldDevice);
 
         if(ExtendedRemoteDisplayHelper::IsAvailable()){
-            mExtRemoteDisplay = ExtendedRemoteDisplayHelper::Listen(iface,
-                    listener, mHandler, mContext);
+            ExtendedRemoteDisplayHelper::Listen(iface,
+                    listener, mHandler, mContext, (IInterface**)&mExtRemoteDisplay);
         }
         else {
             AutoPtr<IRemoteDisplayHelper> h;

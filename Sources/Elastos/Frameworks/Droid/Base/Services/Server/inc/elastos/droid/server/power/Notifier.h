@@ -236,8 +236,6 @@ private:
 
     CARAPI_(void) SendGoToSleepBroadcast();
 
-    CARAPI_(void) PlayWirelessChargingStartedSound();
-
 private:
     static const String TAG;
 
@@ -249,7 +247,6 @@ private:
 
     static const Int32 MSG_USER_ACTIVITY;// = 1;
     static const Int32 MSG_BROADCAST;// = 2;
-    static const Int32 MSG_WIRELESS_CHARGING_STARTED;// = 3;
 
     Object mLock;
 

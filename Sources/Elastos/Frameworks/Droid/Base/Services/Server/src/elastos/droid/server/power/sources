@@ -15,3 +15,4 @@ SOURCES += Notifier.cpp
 SOURCES += PowerManagerService.cpp
 SOURCES += ShutdownThread.cpp
 SOURCES += WirelessChargerDetector.cpp
+SOURCES += PerformanceManager.cpp
