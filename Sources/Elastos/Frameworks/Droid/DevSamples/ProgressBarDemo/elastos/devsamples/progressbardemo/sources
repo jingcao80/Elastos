@@ -1,4 +1,4 @@
-TARGET_NAME = Elastos.DevSamples.PopupMenuDemo
+TARGET_NAME = Elastos.DevSamples.ProgressBarDemo
 TARGET_TYPE = eco
 
 CAR_FLAGS += -n -u
@@ -8,7 +8,7 @@ include $(MAKEDIR)/../../../../../sources.inc
 INCLUDES += $(MAKEDIR)
 INCLUDES += $(MAKEDIR)/../../../
 
-SOURCES  = Elastos.DevSamples.PopupMenuDemo.car
+SOURCES  = Elastos.DevSamples.ProgressBarDemo.car
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
 SOURCES += CActivityOne.cpp
@@ -22,5 +22,5 @@ LIBRARIES += -lm -licuuc -llog
 
 APPPACK = 1
 DIRRESOURCES += $(MAKEDIR)/res;
-APP_PACKAGE_NAME = Elastos.DevSamples.PopupMenuDemo
-RES_NAMESPACE = Elastos.DevSamples.PopupMenuDemo
+APP_PACKAGE_NAME = Elastos.DevSamples.ProgressBarDemo
+RES_NAMESPACE = Elastos.DevSamples.ProgressBarDemo

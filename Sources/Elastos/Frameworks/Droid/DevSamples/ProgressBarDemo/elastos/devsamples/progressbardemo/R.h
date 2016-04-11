@@ -5,12 +5,11 @@
  * should not be modified by hand.
  */
 
-#ifndef __Elastos_Droid_DevSamples_ImageButtonDemo_R_H__
-#define __Elastos_Droid_DevSamples_ImageButtonDemo_R_H__
+#ifndef __Elastos_DevSamples_ProgressBarDemo_R_H__
+#define __Elastos_DevSamples_ProgressBarDemo_R_H__
 namespace Elastos {
-namespace Droid {
 namespace DevSamples {
-namespace ImageButtonDemo {
+namespace ProgressBarDemo {
 class R {
     public: class attr {
     };
@@ -29,6 +28,19 @@ class R {
     };
     public: class id {
         public: static const int ProgressBar = 0x7f050000;
+        public: static const int tabhost = 0x7f050001;
+        public: static const int view1 = 0x7f050002;
+        public: static const int view2 = 0x7f050003;
+        public: static const int view3 = 0x7f050004;
+        public: static const int DatePicker = 0x7f050005;
+        public: static const int SeekBar = 0x7f050006;
+        public: static const int NumberPicker = 0x7f050007;
+        public: static const int TimePicker = 0x7f050008;
+        public: static const int ViewSwitcher = 0x7f050009;
+        public: static const int prev = 0x7f05000a;
+        public: static const int next = 0x7f05000b;
+        public: static const int ImageSwitcher = 0x7f05000c;
+        public: static const int last = 0x7f05000d;
     };
     public: class layout {
         public: static const int main = 0x7f030000;
@@ -40,6 +52,5 @@ class R {
 };
 };
 };
-};
 
-#endif // __Elastos_Droid_DevSamples_ImageButtonDemo_R_H__
+#endif // __Elastos_DevSamples_ProgressBarDemo_R_H__
