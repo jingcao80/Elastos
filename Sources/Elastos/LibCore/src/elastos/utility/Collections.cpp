@@ -4504,6 +4504,9 @@ ECode Collections::Copy(
 {
     ECode ec = 0;
     Int32 sizeDes, sizeSrc;
+    if (destination == NULL || source == NULL){
+        return E_NULL_POINTER_EXCEPTION;
+    }
     (ICollection::Probe(destination))->GetSize(&sizeDes);
     (ICollection::Probe(source))->GetSize(&sizeSrc);
     if (sizeDes < sizeSrc) {
@@ -4544,6 +4547,9 @@ ECode Collections::Fill(
     /* [in] */ IInterface* object)
 {
     AutoPtr<IListIterator> it;
+    if(list == NULL){
+        return E_NULL_POINTER_EXCEPTION;
+    }
     list->GetListIterator((IListIterator**)&it);
     Boolean b;
     while (((IIterator::Probe(it))->HasNext(&b), b)) {
@@ -4560,6 +4566,9 @@ ECode Collections::Max(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IIterator> it;
+    if(collection == NULL){
+        return E_NO_SUCH_ELEMENT_EXCEPTION;
+    }
     (IIterable::Probe(collection))->GetIterator((IIterator**)&it);
     AutoPtr<IInterface> max;
     it->GetNext((IInterface**)&max);
@@ -4590,6 +4599,9 @@ ECode Collections::Max(
     }
 
     AutoPtr<IIterator> it;
+    if(collection == NULL){
+        return E_NO_SUCH_ELEMENT_EXCEPTION;
+    }
     (IIterable::Probe(collection))->GetIterator((IIterator**)&it);
     AutoPtr<IInterface> max;
     it->GetNext((IInterface**)&max);
@@ -4613,6 +4625,9 @@ ECode Collections::Min(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IIterator> it;
+    if(collection == NULL){
+        return E_NO_SUCH_ELEMENT_EXCEPTION;
+    }
     (IIterable::Probe(collection))->GetIterator((IIterator**)&it);
     AutoPtr<IInterface> min;
     it->GetNext((IInterface**)&min);
@@ -4642,6 +4657,9 @@ ECode Collections::Min(
     }
 
     AutoPtr<IIterator> it;
+    if(collection == NULL){
+        return E_NO_SUCH_ELEMENT_EXCEPTION;
+    }
     (IIterable::Probe(collection))->GetIterator((IIterator**)&it);
     AutoPtr<IInterface> min;
     it->GetNext((IInterface**)&min);
