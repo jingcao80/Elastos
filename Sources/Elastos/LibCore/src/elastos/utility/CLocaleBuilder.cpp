@@ -413,7 +413,7 @@ ECode CLocaleBuilder::Build(
     // NOTE: We need to make a copy of attributes, keywords and extensions
     // because the RI allows this builder to reused.
     return CLocale::New(mLanguage, mRegion, mVariant,
-        mScript, mAttributes, mKeywords, mExtensions, TRUE /* has validated fields */, (ILocale**)result);
+        mScript, mAttributes, mKeywords, mExtensions, TRUE /* has validated fields */, result);
 }
 
 

@@ -119,11 +119,8 @@ ECode AbstractCollection::ContainsAll(
     *result = FALSE;
     VALIDATE_NOT_NULL(collection);
 
-    IIterable* iterable = IIterable::Probe(collection);
-    VALIDATE_NOT_NULL(iterable)
-
     AutoPtr<IIterator> it;
-    iterable->GetIterator((IIterator**)&it);
+    collection->GetIterator((IIterator**)&it);
     Boolean hasnext = FALSE;
     Boolean flag = FALSE;
     while ((it->HasNext(&hasnext), hasnext)) {

@@ -192,6 +192,10 @@ ECode CSecurity::InsertProviderAt(
     /* [in] */ Int32 position,
     /* [out] */ Int32* pos)
 {
+    if (NULL == provider) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
     // check that provider is not already
     // installed, else return -1; if (position <1) or (position > max
     // position) position = max position + 1; insert provider, shift up
@@ -582,7 +586,7 @@ ECode CSecurity::RenumProviders()
     AutoPtr<IServices> services;
     CServices::AcquireSingleton((IServices**)&services);
     AutoPtr<IArrayList> providers;
-    services->GetProviders((IArrayList**)&providers);
+    FAIL_RETURN(services->GetProviders((IArrayList**)&providers));
     Int32 size;
     providers->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
