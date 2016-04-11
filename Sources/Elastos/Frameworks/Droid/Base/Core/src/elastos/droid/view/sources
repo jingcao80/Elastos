@@ -47,6 +47,7 @@ SOURCES += ThreadedRenderer.cpp
 SOURCES += InputChannel.cpp
 SOURCES += CInputChannelHelper.cpp
 SOURCES += InputEvent.cpp
+SOURCES += ContextThemeWrapperInLayoutInflater.cpp
 SOURCES += LayoutInflater.cpp
 SOURCES += HardwareRenderer.cpp
 SOURCES += Surface.cpp

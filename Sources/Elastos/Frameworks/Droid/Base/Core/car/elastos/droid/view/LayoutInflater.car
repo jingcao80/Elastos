@@ -99,6 +99,13 @@ module
     }
 
     /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContextWrapper
+     */
+    interface IContextThemeWrapperInLayoutInflater {
+    }
+
+    /**
      * Instantiates a layout XML file into its corresponding {@link android.view.View}
      * objects. It is never used directly. Instead, use
      * {@link android.app.Activity#getLayoutInflater()} or

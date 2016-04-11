@@ -179,7 +179,7 @@ void WindowAnimator::UpdateAppWindowsLocked(
             }
         }
 
-        AppTokenList exitingAppTokens = stack->mExitingAppTokens;
+        AppTokenList& exitingAppTokens = stack->mExitingAppTokens;
         AppTokenList::Iterator tokenIt = exitingAppTokens.Begin();
         for (; tokenIt != exitingAppTokens.End(); ++tokenIt) {
             AutoPtr<AppWindowAnimator> appAnimator = (*tokenIt)->mAppAnimator;

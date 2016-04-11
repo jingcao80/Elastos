@@ -5661,7 +5661,7 @@ ECode CWindowManagerService::RemoveAppToken(
             }
             AutoPtr<IInterface> value;
             mTaskIdToTask->Get(wtoken->mGroupId, (IInterface**)&value);
-            AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(value);
+            AutoPtr<TaskStack> stack = ((Task*)IObject::Probe(value))->mStack;
             if (delayed) {
                 // set the token aside because it has an active animation to be finished
                 if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) {
@@ -10418,7 +10418,7 @@ void CWindowManagerService::RebuildAppWindowListLocked(
     List< AutoPtr<TaskStack> >& stacks = displayContent->GetStacks();
     List<AutoPtr<TaskStack> >::Iterator stackIt = stacks.Begin();
     for (; stackIt != stacks.End(); ++stackIt) {
-        AppTokenList exitingAppTokens = (*stackIt)->mExitingAppTokens;
+        AppTokenList& exitingAppTokens = (*stackIt)->mExitingAppTokens;
         AppTokenList::Iterator tokenIt = exitingAppTokens.Begin();
         for (; tokenIt != exitingAppTokens.End(); ++tokenIt) {
             it = ReAddAppWindowsLocked(displayContent, it, *tokenIt);
@@ -11549,7 +11549,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         AutoPtr<IInterface> value;
         mStackIdToStack->ValueAt(stackNdx, (IInterface**)&value);
         AutoPtr<TaskStack> taskStack = (TaskStack*)IObject::Probe(value);
-        AppTokenList exitingAppTokens = taskStack->mExitingAppTokens;
+        AppTokenList& exitingAppTokens = taskStack->mExitingAppTokens;
         AppTokenList::ReverseIterator tokenRit = exitingAppTokens.RBegin();
         for (; tokenRit != exitingAppTokens.REnd(); ++tokenRit) {
             (*tokenRit)->mHasVisible = FALSE;
@@ -12020,7 +12020,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedInner(
         AutoPtr<IInterface> value;
         mStackIdToStack->ValueAt(stackNdx, (IInterface**)&value);
         AutoPtr<TaskStack> taskStack = (TaskStack*)IObject::Probe(value);
-        AppTokenList exitingAppTokens = taskStack->mExitingAppTokens;
+        AppTokenList& exitingAppTokens = taskStack->mExitingAppTokens;
         AppTokenList::ReverseIterator appTokenRit = exitingAppTokens.RBegin();
         while (appTokenRit != exitingAppTokens.REnd()) {
             AutoPtr<AppWindowToken> token = *appTokenRit;

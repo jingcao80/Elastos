@@ -774,7 +774,7 @@ void CAlertController::SetupContent(
 {
     AutoPtr<IView> scrollView;
     mWindow->FindViewById(R::id::scrollView, (IView**)&scrollView);
-    mScrollView = IScrollView::Probe(scrollView.Get());
+    mScrollView = IScrollView::Probe(scrollView);
     assert(mScrollView != NULL);
     scrollView->SetFocusable(FALSE);
 
