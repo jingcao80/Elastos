@@ -1,26 +1,26 @@
 
+#include <Elastos.CoreLibrary.Text.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/text/StaticLayout.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/text/TextDirectionHeuristics.h"
 #include "elastos/droid/text/AndroidBidi.h"
+#include "elastos/droid/graphics/CPaintFontMetricsInt.h"
 #include "elastos/droid/internal/utility/ArrayUtils.h"
 #include "elastos/droid/internal/utility/GrowingArrayUtils.h"
-#include "elastos/droid/graphics/CPaintFontMetricsInt.h"
-
-#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/Character.h>
+#include <elastos/utility/etl/Vector.h>
+#include <elastos/utility/logging/Slogger.h>
 #include <unistd.h>
 #include "unicode/locid.h"
 #include "unicode/brkiter.h"
 #include "utils/misc.h"
 #include "utils/Log.h"
-// #include <vector>
 
+using Elastos::Droid::Graphics::CPaintFontMetricsInt;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Droid::Internal::Utility::GrowingArrayUtils;
-using Elastos::Droid::Graphics::CPaintFontMetricsInt;
 using Elastos::Droid::Text::Style::EIID_ILineHeightSpan;
 using Elastos::Droid::Text::Style::EIID_ILeadingMarginSpan;
 using Elastos::Droid::Text::Style::EIID_ILeadingMarginSpan2;
@@ -30,10 +30,11 @@ using Elastos::Droid::Text::Style::ILeadingMarginSpan2;
 using Elastos::Droid::Text::Style::EIID_IMetricAffectingSpan;
 using Elastos::Droid::Text::Style::IMetricAffectingSpan;
 using Elastos::Droid::Text::Style::EIID_ITabStopSpan;
-
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Core::EIID_ICharSequence;
 using Elastos::Core::Character;
+using Elastos::Core::EIID_ICharSequence;
+using Elastos::Text::IBreakIterator;
+using Elastos::Utility::Etl::Vector;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -1148,7 +1149,7 @@ public:
     ScopedBreakIterator(
         /* [in] */ BreakIterator* breakIterator,
         /* [in] */ ArrayOf<Char32>* inputText,
-        /* [in] */Int32 length)
+        /* [in] */ Int32 length)
         : mBreakIterator(breakIterator)
         , mChars(inputText)
     {
@@ -1187,42 +1188,42 @@ AutoPtr<ArrayOf<Int32> > StaticLayout::nLineBreakOpportunities(
 {
     AutoPtr<ArrayOf<Int32> > ret;
 
-    assert(0 && "TODO");
-    // std::vector<Int32> breaks;
+    Vector<Int32> breaks;
 
-    // ScopedIcuLocale icuLocale(javaLocaleName);
-    // if (icuLocale.valid()) {
-    //     UErrorCode status = U_ZERO_ERROR;
-    //     BreakIterator* it = BreakIterator::createLineInstance(icuLocale.locale(), status);
-    //     if (!U_SUCCESS(status) || it == NULL) {
-    //         if (it) {
-    //             delete it;
-    //         }
-    //     } else {
-    //         ScopedBreakIterator breakIterator(env, it, inputText, length);
-    //         for (int loc = breakIterator->first(); loc != BreakIterator::DONE;
-    //                 loc = breakIterator->next()) {
-    //             breaks.push_back(loc);
-    //         }
-    //     }
-    // }
+    ScopedIcuLocale icuLocale(locale);
+    if (icuLocale.valid()) {
+        UErrorCode status = U_ZERO_ERROR;
+        BreakIterator* it = BreakIterator::createLineInstance(icuLocale.locale(), status);
+        if (!U_SUCCESS(status) || it == NULL) {
+            if (it) {
+                delete it;
+            }
+        }
+        else {
+            ScopedBreakIterator breakIterator(it, text, length);
+            for (int loc = breakIterator->first(); loc != IBreakIterator::DONE;
+                loc = breakIterator->next()) {
+                breaks.PushBack(loc);
+            }
+        }
+    }
 
-    // breaks.push_back(-1); // sentinel terminal value
+    breaks.PushBack(-1); // sentinel terminal value
 
-    // if (recycle != NULL && recycle->GetLength() >= breaks.size()) {
-    //     ret = recycle;
-    // }
-    // else {
-    //     ret = ArrayOf<Int32>::Alloc(breaks.size());
-    // }
+    if (recycle != NULL && recycle->GetLength() >= (Int32)(breaks.GetSize())) {
+        ret = recycle;
+    }
+    else {
+        ret = ArrayOf<Int32>::Alloc(breaks.GetSize());
+    }
 
-    // if (ret != NULL) {
-    //     std::vector<Int32>::iterator it;
-    //     Int32 i = 0;
-    //     for (it = breaks.begin(); it != breaks.end(); ++it) {
-    //         ret->Set(i++, *it);
-    //     }
-    // }
+    if (ret != NULL) {
+        Vector<Int32>::Iterator it;
+        Int32 i = 0;
+        for (it = breaks.Begin(); it != breaks.End(); ++it) {
+            ret->Set(i++, *it);
+        }
+    }
 
     return ret;
 }
