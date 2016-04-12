@@ -16,6 +16,7 @@
 #include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/graphics/Insets.h"
 #include "elastos/droid/graphics/Typeface.h"
+#include "elastos/droid/internal/widget/CEditableInputConnection.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/AsyncTask.h"
@@ -89,6 +90,7 @@ using Elastos::Droid::Graphics::IRectF;
 using Elastos::Droid::Graphics::Typeface;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
 using Elastos::Droid::InputMethodService::EIID_IExtractEditText;
+using Elastos::Droid::Internal::Widget::CEditableInputConnection;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::AsyncTask;
@@ -1829,32 +1831,29 @@ ECode TextView::InitFromAttributes(
 
             case R::styleable::TextView_imeOptions: {
                 CreateEditorIfNeeded();
-                assert(0 && "TODO");
-                // AutoPtr<Editor> editor = TO_EDITOR(mEditor);
-                // editor->CreateInputContentTypeIfNeeded();
-                // a->GetInt32(attr,
-                //         editor->mInputContentType->mImeOptions,
-                //         &editor->mInputContentType->mImeOptions);
+                AutoPtr<Editor> editor = TO_EDITOR(mEditor);
+                editor->CreateInputContentTypeIfNeeded();
+                a->GetInt32(attr,
+                        editor->mInputContentType->mImeOptions,
+                        &editor->mInputContentType->mImeOptions);
                 break;
             }
 
             case R::styleable::TextView_imeActionLabel: {
                 CreateEditorIfNeeded();
-                assert(0 && "TODO");
-                // AutoPtr<Editor> editor = TO_EDITOR(mEditor);
-                // editor->CreateInputContentTypeIfNeeded();
-                // a->GetText(attr, (ICharSequence**)&(editor->mInputContentType->mImeActionLabel));
+                AutoPtr<Editor> editor = TO_EDITOR(mEditor);
+                editor->CreateInputContentTypeIfNeeded();
+                a->GetText(attr, (ICharSequence**)&(editor->mInputContentType->mImeActionLabel));
                 break;
             }
 
             case R::styleable::TextView_imeActionId: {
                 CreateEditorIfNeeded();
-                assert(0 && "TODO");
-                // AutoPtr<Editor> editor = TO_EDITOR(mEditor);
-                // editor->CreateInputContentTypeIfNeeded();
-                // a->GetInt32(attr,
-                //         editor->mInputContentType->mImeActionId,
-                //         &editor->mInputContentType->mImeActionId);
+                AutoPtr<Editor> editor = TO_EDITOR(mEditor);
+                editor->CreateInputContentTypeIfNeeded();
+                a->GetInt32(attr,
+                        editor->mInputContentType->mImeActionId,
+                        &editor->mInputContentType->mImeActionId);
                 break;
             }
 
@@ -2516,18 +2515,18 @@ ECode TextView::SetKeyListener(
     if (input != NULL) {
         CreateEditorIfNeeded();
         //try {
-        assert(0);
-            //mEditor->mKeyListener->GetInputType(&mEditor->mInputType);
+        ECode ec = TO_EDITOR(mEditor)->mKeyListener->GetInputType(&TO_EDITOR(mEditor)->mInputType);
+        if (FAILED(ec)) {
         //} catch (IncompatibleClassChangeError e) {
-        //    mEditor->mInputType = IInputType::TYPE_CLASS_TEXT;
+            TO_EDITOR(mEditor)->mInputType = IInputType::TYPE_CLASS_TEXT;
         //}
+        }
         // Change inputType, without affecting transformation.
         // No need to applySingleLine since mSingleLine is unchanged.
         SetInputTypeSingleLine(mSingleLine);
     }
     else {
-        assert(0);
-        //if (mEditor != NULL) mEditor->mInputType = IInputType::TYPE_NULL;
+        if (mEditor != NULL) TO_EDITOR(mEditor)->mInputType = IInputType::TYPE_NULL;
     }
 
     AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();
@@ -2544,9 +2543,8 @@ void TextView::SetKeyListenerOnly(
     if (mEditor == NULL && input == NULL) return; // NULL is the default value
 
     CreateEditorIfNeeded();
-    assert(0);
-    /*if (input != mEditor->mKeyListener) {
-        mEditor->mKeyListener = input;
+    if (input != TO_EDITOR(mEditor)->mKeyListener) {
+        TO_EDITOR(mEditor)->mKeyListener = input;
 
         AutoPtr<IEditable> editable = IEditable::Probe(mText);
         if (input != NULL && NULL == editable) {
@@ -2555,7 +2553,7 @@ void TextView::SetKeyListenerOnly(
 
         editable = IEditable::Probe(mText);
         SetFilters(editable, mFilters);
-    }*/
+    }
 }
 
 ECode TextView::GetMovementMethod(
@@ -6912,6 +6910,8 @@ ECode TextView::OnKeyUp(
     /* [out] */ Boolean* resValue)
 {
     VALIDATE_NOT_NULL(resValue);
+    *resValue = FALSE;
+
     Boolean isEnabled;
     if (IsEnabled(&isEnabled), !isEnabled) {
         return View::OnKeyUp(keyCode, event, resValue);
@@ -6997,7 +6997,8 @@ ECode TextView::OnKeyUp(
                                 Boolean focus = FALSE;
                                 v->RequestFocus(IView::FOCUS_DOWN, &focus);
                                 if (!focus) {
-                                    assert(0 && "TODO");
+                                    Logger::E(TEXT_VIEW_TAG, "focus search returned a view that wasn't able to take focus!");
+                                    return E_ILLEGAL_STATE_EXCEPTION;
                                     // throw new IllegalStateException("focus search returned a view " +
                                     //         "that wasn't able to take focus!");
                                 }
@@ -7131,8 +7132,7 @@ ECode TextView::OnCreateInputConnection(
         outAttrs->SetHintText(mHint);
         if (IEditable::Probe(mText) != NULL) {
            AutoPtr<IInputConnection> ic;
-           assert(0);
-           //CEditableInputConnection::New(this, (IEditableInputConnection**)&ic);
+           CEditableInputConnection::New(this, (IInputConnection**)&ic);
            Int32 start, end;
            GetSelectionStart(&start);
            GetSelectionEnd(&end);

@@ -52,6 +52,7 @@ using Elastos::Droid::Widget::CAbsListViewLayoutParams;
 using Elastos::Droid::Widget::CHeaderViewListAdapter;
 using Elastos::Droid::R;
 using Elastos::Core::CoreUtils;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -178,7 +179,7 @@ void ListView::ArrowScrollFocusResult::Populate(
 //            ListView
 //==============================================================================
 
-CAR_INTERFACE_IMPL(ListView, AbsListView, IListView);
+CAR_INTERFACE_IMPL(ListView, AbsListView, IListView)
 
 ListView::ListView()
     : mDividerHeight(0)
@@ -189,6 +190,8 @@ ListView::ListView()
     , mAreAllItemsSelectable(TRUE)
     , mItemsCanFocus(FALSE)
 {
+    CArrayList::New((IArrayList**)&mHeaderViewInfos);
+    CArrayList::New((IArrayList**)&mFooterViewInfos);
     ASSERT_SUCCEEDED(CRect::New((IRect**)&mTempRect));
     mArrowScrollFocusResult = new ArrowScrollFocusResult();
 }
@@ -364,11 +367,10 @@ ECode ListView::AddHeaderView(
     // Wrap the adapter if it wasn't already wrapped.
     if (mAdapter != NULL) {
         if (IHeaderViewListAdapter::Probe(mAdapter) == NULL) {
-            assert(0 && "TODO");
-            // AutoPtr<IListAdapter> adapter;
-            // CHeaderViewListAdapter::New(mHeaderViewInfos, mFooterViewInfos,
-            //         mAdapter, (IListAdapter**)&adapter);
-            // mAdapter = adapter;
+            AutoPtr<IListAdapter> adapter;
+            CHeaderViewListAdapter::New(mHeaderViewInfos, mFooterViewInfos,
+                    mAdapter, (IListAdapter**)&adapter);
+            mAdapter = adapter;
         }
 
         // In the case of re-adding a header view, or adding one later on,
@@ -453,8 +455,10 @@ ECode ListView::AddFooterView(
     // Wrap the adapter if it wasn't already wrapped.
     if (mAdapter != NULL) {
         if (IHeaderViewListAdapter::Probe(mAdapter) == NULL) {
-            assert(0 && "TODO");
-            // mAdapter = new HeaderViewListAdapter(mHeaderViewInfos, mFooterViewInfos, mAdapter);
+            AutoPtr<IListAdapter> adapter;
+            CHeaderViewListAdapter::New(mHeaderViewInfos, mFooterViewInfos,
+                    mAdapter, (IListAdapter**)&adapter);
+            mAdapter = adapter;
         }
 
         // In the case of re-adding a footer view, or adding one later on,
@@ -534,11 +538,9 @@ ECode ListView::SetAdapter(
     mHeaderViewInfos->GetSize(&size);
     mFooterViewInfos->GetSize(&size2);
     if (size > 0 || size2 > 0) {
-        assert(0 && "TODO");
-        // AutoPtr<IListAdapter> temp;
-        // CHeaderViewListAdapter::New(mHeaderViewInfos, mFooterViewInfos,
-        //         IListAdapter::Probe(adapter), (IListAdapter**)&temp);
-        // mAdapter = temp;
+        mAdapter = NULL;
+        CHeaderViewListAdapter::New(mHeaderViewInfos, mFooterViewInfos,
+                IListAdapter::Probe(adapter), (IListAdapter**)&mAdapter);
     }
     else {
         mAdapter = IListAdapter::Probe(adapter);

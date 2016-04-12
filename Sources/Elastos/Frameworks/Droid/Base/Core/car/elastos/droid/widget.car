@@ -2888,6 +2888,8 @@ module
 
         interface IHeaderViewListAdapter;
         interface IWrapperListAdapter;
+        interface IListAdapter;
+        interface IAdapter;
         interface IFilterable;
     }
 

@@ -2492,7 +2492,6 @@ ECode CContextImpl::GetSystemService(
     }
     else if (IContext::TEXT_SERVICES_MANAGER_SERVICE.Equals(name)) {
         AutoLock lock(mCacheLock);
-        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
         AutoPtr<ITextServicesManager> iManager = CTextServicesManager::GetInstance();
         mServiceCache[name] = iManager;
         *object = iManager;
