@@ -1,23 +1,144 @@
 
+#include <Elastos.CoreLibrary.Core.h>
 #include "elastos/droid/server/display/ExtendedRemoteDisplayHelper.h"
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Core::CPathClassLoader;
+using Elastos::Core::IClassLoader;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Display {
 
-AutoPtr<IInterface> ExtendedRemoteDisplayHelper::Listen(
+const String ExtendedRemoteDisplayHelper::TAG("ExtendedRemoteDisplayHelper");
+
+AutoPtr<IClassInfo> ExtendedRemoteDisplayHelper::sExtRemoteDisplayClass;
+AutoPtr<IMethodInfo> ExtendedRemoteDisplayHelper::sExtRemoteDisplayListen;
+AutoPtr<IMethodInfo> ExtendedRemoteDisplayHelper::sExtRemoteDisplayDispose;
+
+Boolean ExtendedRemoteDisplayHelper::InitExtRemoteDisplay()
+{
+    // todo
+    //Check availability of ExtendedRemoteDisplay runtime
+        // try {
+        //     sExtRemoteDisplayClass = Class.forName("com.qualcomm.wfd.ExtendedRemoteDisplay");
+        // } catch (Throwable t) {
+        //     Slog.i(TAG, "ExtendedRemoteDisplay Not available.");
+        // }
+
+        // if(sExtRemoteDisplayClass != null) {
+        //     // If ExtendedRemoteDisplay is available find the methods
+        //     Slog.i(TAG, "ExtendedRemoteDisplay Is available. Find Methods");
+        //     try {
+        //         Class args[] = {
+        //                            String.class,
+        //                            RemoteDisplay.Listener.class,
+        //                            Handler.class, Context.class
+        //                        };
+        //         sExtRemoteDisplayListen = sExtRemoteDisplayClass.getDeclaredMethod("listen", args);
+        //     } catch (Throwable t) {
+        //         Slog.i(TAG, "ExtendedRemoteDisplay.listen Not available.");
+        //     }
+
+        //     try {
+        //         Class args[] = {};
+        //         sExtRemoteDisplayDispose = sExtRemoteDisplayClass.getDeclaredMethod("dispose", args);
+        //     } catch (Throwable t) {
+        //         Slog.i(TAG, "ExtendedRemoteDisplay.dispose Not available.");
+        //     }
+        // }
+
+    //Check availability of ExtendedRemoteDisplay runtime
+    // try {
+    AutoPtr<IClassLoader> cl;
+    ECode ec = CPathClassLoader::New(String(""), (IClassLoader**)&cl);
+    if (FAILED(ec)) {
+        Slogger::I(TAG, "ExtendedRemoteDisplay Not available.");
+    }
+    cl->LoadClass(String("com.qualcomm.wfd.ExtendedRemoteDisplay"), (IClassInfo**)&sExtRemoteDisplayClass);
+    // } catch (Throwable t) {
+    //     Slog.i(TAG, "ExtendedRemoteDisplay Not available.");
+    // }
+
+    if(sExtRemoteDisplayClass != NULL) {
+        // If ExtendedRemoteDisplay is available find the methods
+        Slogger::I(TAG, "ExtendedRemoteDisplay Is available. Find Methods");
+        // try {
+        // Class args[] = {
+        //                    String.class,
+        //                    RemoteDisplay.Listener.class,
+        //                    Handler.class, Context.class
+        //                };
+        ec = sExtRemoteDisplayClass->GetMethodInfo(String("listen"), String(NULL),
+                (IMethodInfo**)&sExtRemoteDisplayListen);
+        if (FAILED(ec)) {
+            Slogger::I(TAG, "ExtendedRemoteDisplay.listen Not available.");
+        }
+        // } catch (Throwable t) {
+        //     Slog.i(TAG, "ExtendedRemoteDisplay.listen Not available.");
+        // }
+
+        // try {
+        // Class args[] = {};
+        ec = sExtRemoteDisplayClass->GetMethodInfo(String("dispose"), String(NULL),
+                (IMethodInfo**)&sExtRemoteDisplayDispose);
+        if (FAILED(ec)) {
+            Slogger::I(TAG, "ExtendedRemoteDisplay.dispose Not available.");
+        }
+        // } catch (Throwable t) {
+        //     Slog.i(TAG, "ExtendedRemoteDisplay.dispose Not available.");
+        // }
+    }
+    return TRUE;
+}
+Boolean ExtendedRemoteDisplayHelper::sInit = ExtendedRemoteDisplayHelper::InitExtRemoteDisplay();
+
+ECode ExtendedRemoteDisplayHelper::Listen(
     /* [in] */ const String& iface,
     /* [in] */ IRemoteDisplayListener* listener,
     /* [in] */ IHandler* handler,
-    /* [in] */ IContext* context)
+    /* [in] */ IContext* context,
+    /* [out] */ IInterface** result)
 {
-    return NULL;
+    // AutoPtr<IInterface> extRemoteDisplay;
+    // Slogger::I(TAG, "ExtendedRemoteDisplay.listen");
+
+    // if(sExtRemoteDisplayListen != NULL && sExtRemoteDisplayDispose != NULL){
+    //     // try {
+    //     AutoPtr<IArgumentList> argumentList;
+    //     methodInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    //     argumentList->SetInputArgumentOfString(0, iface);
+    //     argumentList->SetInputArgumentOfObjectPtr(1, listener);
+    //     argumentList->SetInputArgumentOfObjectPtr(2, handler);
+    //     argumentList->SetInputArgumentOfObjectPtr(3, context);
+    //     ECode ec = sExtRemoteDisplayListen->Invoke(NULL, argumentList);
+    //     // } catch (InvocationTargetException e) {
+    //     //     Slog.i(TAG, "ExtendedRemoteDisplay.listen - InvocationTargetException");
+    //     //     Throwable cause = e.getCause();
+    //     //     if (cause instanceof RuntimeException) {
+    //     //         throw (RuntimeException) cause;
+    //     //     } else if (cause instanceof Error) {
+    //     //         throw (Error) cause;
+    //     //     } else {
+    //     //         throw new RuntimeException(e);
+    //     //     }
+    //     // } catch (IllegalAccessException e) {
+    //     //     Slog.i(TAG, "ExtendedRemoteDisplay.listen -IllegalAccessException");
+    //     //     e.printStackTrace();
+    //     // }
+    // }
+    // return extRemoteDisplay;
+
+    return NOERROR;
 }
 
-void ExtendedRemoteDisplayHelper::Dispose(
+ECode ExtendedRemoteDisplayHelper::Dispose(
     /* [in] */ IInterface* extRemoteDisplay)
-{}
+{
+    return NOERROR;
+}
 
 Boolean ExtendedRemoteDisplayHelper::IsAvailable()
 {

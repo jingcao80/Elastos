@@ -1,15 +1,20 @@
 
 #include <Elastos.Droid.Core.h>
 #include <Elastos.Droid.Nfc.h>
+#include <Elastos.Droid.Provider.h>
+#include <Elastos.Droid.Widget.h>
 #include "elastos/droid/server/power/ShutdownThread.h"
 #include "elastos/droid/server/power/CMountShutdownObserver.h"
 #include "elastos/droid/server/power/PowerManagerService.h"
 // #include "elastos/droid/server/pm/CPackageManagerService.h"
 #include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::App::IKeyguardManager;
 using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::App::CAlertDialogBuilder;
 using Elastos::Droid::App::IProgressDialog;
@@ -19,6 +24,7 @@ using Elastos::Droid::App::CProgressDialog;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
@@ -40,12 +46,20 @@ using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::IVibrator;
 using Elastos::Droid::Os::CSystemVibrator;
 using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::Storage::EIID_IIMountShutdownObserver;
 using Elastos::Droid::Os::Storage::IIMountService;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::Widget::IListView;
+using Elastos::Droid::Widget::IAbsListView;
+using Elastos::Droid::Widget::IAdapterView;
 // using Elastos::Droid::Server::Pm::CPackageManagerService;
+using Elastos::Droid::View::IIWindowManager;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::StringUtils;
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
 using Elastos::Utility::Logging::Logger;
@@ -62,7 +76,13 @@ const Int32 ShutdownThread::PHONE_STATE_POLL_SLEEP_MSEC = 500;
 const Int32 ShutdownThread::MAX_BROADCAST_TIME = 10*1000;
 const Int32 ShutdownThread::MAX_SHUTDOWN_WAIT_TIME = 20*1000;
 const Int32 ShutdownThread::MAX_RADIO_WAIT_TIME = 12*1000;
+const String ShutdownThread::SOFT_REBOOT("soft_reboot");
 const Int32 ShutdownThread::SHUTDOWN_VIBRATE_MS = 500;
+const String ShutdownThread::OEM_BOOTANIMATION_FILE("/oem/media/shutdownanimation.zip");
+const String ShutdownThread::SYSTEM_BOOTANIMATION_FILE("/system/media/shutdownanimation.zip");
+const String ShutdownThread::SYSTEM_ENCRYPTED_BOOTANIMATION_FILE("/system/media/shutdownanimation-encrypted.zip");
+const String ShutdownThread::SHUTDOWN_MUSIC_FILE("/system/media/shutdown.wav");
+const String ShutdownThread::OEM_SHUTDOWN_MUSIC_FILE("/oem/media/shutdown.wav");
 
 Object ShutdownThread::sIsStartedGuard;
 Boolean ShutdownThread::sIsStarted = FALSE;
@@ -86,6 +106,7 @@ AutoPtr<IAudioAttributes> ShutdownThread::InitVIBRATION_ATTRIBUTES()
 AutoPtr<IAudioAttributes> ShutdownThread::VIBRATION_ATTRIBUTES = InitVIBRATION_ATTRIBUTES();
 
 AutoPtr<IAlertDialog> ShutdownThread::sConfirmDialog;
+AutoPtr<IAudioManager> ShutdownThread::sAudioManager;
 
 //==============================================================================
 //          ShutdownThread::MountShutdownObserver
@@ -151,14 +172,39 @@ ECode ShutdownThread::CloseDialogReceiver::OnDismiss(
 CAR_INTERFACE_IMPL(ShutdownThread::DialogInterfaceOnClickListener, Object, IDialogInterfaceOnClickListener);
 
 ShutdownThread::DialogInterfaceOnClickListener::DialogInterfaceOnClickListener(
-    /* [in] */ IContext* context)
+    /* [in] */ IContext* context,
+    /* [in] */ Boolean advancedReboot)
     : mContext(context)
+    , mAdvancedReboot(advancedReboot)
 {}
 
 ECode ShutdownThread::DialogInterfaceOnClickListener::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
 {
+    if (mAdvancedReboot) {
+        Boolean softReboot = FALSE;
+        AutoPtr<IListView> reasonsList;
+        IAlertDialog::Probe(dialog)->GetListView((IListView**)&reasonsList);
+        Int32 selected;
+        IAbsListView::Probe(reasonsList)->GetCheckedItemPosition(&selected);
+        if (selected != IAdapterView::INVALID_POSITION) {
+            AutoPtr<IResources> res;
+            mContext->GetResources((IResources**)&res);
+            AutoPtr<ArrayOf<String> > actions;
+            res->GetStringArray(Elastos::Droid::R::array::shutdown_reboot_actions, (ArrayOf<String>**)&actions);
+            if (selected >= 0 && selected < actions->GetLength()) {
+                ShutdownThread::mRebootReason = (*actions)[selected];
+                if ((*actions)[selected].Equals(SOFT_REBOOT)) {
+                    ShutdownThread::DoSoftReboot();
+                    return NOERROR;
+                }
+            }
+        }
+
+        ShutdownThread::mReboot = TRUE;
+    }
+
     ShutdownThread::BeginShutdownSequence(mContext);
     return NOERROR;
 }
@@ -350,6 +396,7 @@ ECode ShutdownThread::ShutdownRadiosThread::Run()
 
 ShutdownThread::ShutdownThread()
     : mActionDone(FALSE)
+    , mIsShutdownMusicPlaying(FALSE)
 {
     Thread::constructor();
 }
@@ -367,6 +414,27 @@ void ShutdownThread::Shutdown(
     ShutdownInner(context, confirm);
 }
 
+Boolean ShutdownThread::IsAdvancedRebootPossible(
+    /* [in] */ IContext* context)
+{
+    AutoPtr<IInterface> service;
+    context->GetSystemService(IContext::KEYGUARD_SERVICE, (IInterface**)&service);
+    AutoPtr<IKeyguardManager> km = IKeyguardManager::Probe(service);
+    Boolean isInputMode, isSecure;
+    Boolean keyguardLocked = (km->InKeyguardRestrictedInputMode(&isInputMode), isInputMode) &&
+            (km->IsKeyguardSecure(&isSecure), isSecure);
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsSecure> secure;
+    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&secure);
+    Int32 value;
+    secure->GetInt32(cr, ISettingsSecure::ADVANCED_REBOOT, 0, &value);
+    Boolean advancedRebootEnabled = value == 1;
+    Boolean isPrimaryUser = UserHandle::GetCallingUserId() == IUserHandle::USER_OWNER;
+
+    return advancedRebootEnabled && !keyguardLocked && isPrimaryUser;
+}
+
 void ShutdownThread::ShutdownInner(
     /* [in] */ IContext* context,
     /* [in] */ Boolean confirm)
@@ -380,6 +448,32 @@ void ShutdownThread::ShutdownInner(
         }
     }
 
+    Boolean showRebootOption = FALSE;
+
+    AutoPtr<ArrayOf<String> > actionsArray;
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsSecure> secure;
+    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&secure);
+    String actions;
+    secure->GetStringForUser(cr,
+            ISettingsSecure::POWER_MENU_ACTIONS, IUserHandle::USER_CURRENT, &actions);
+    if (actions.IsNull()) {
+        AutoPtr<IResources> res;
+        context->GetResources((IResources**)&res);
+        res->GetStringArray(Elastos::Droid::R::array::config_globalActionsList, (ArrayOf<String>**)&actionsArray);
+    }
+    else {
+        StringUtils::Split(actions, String("\\|"), (ArrayOf<String>**)&actionsArray);
+    }
+
+    for (Int32 i = 0; i < actionsArray->GetLength(); i++) {
+        if ((*actionsArray)[i].Equals("reboot")) {
+            showRebootOption = TRUE;
+            break;
+        }
+    }
+
     AutoPtr<IResources> res;
     ASSERT_SUCCEEDED(context->GetResources((IResources**)&res));
     Int32 longPressBehavior;
@@ -390,23 +484,40 @@ void ShutdownThread::ShutdownInner(
                     ? R::string::shutdown_confirm_question
                     : R::string::shutdown_confirm);
 
+    if (showRebootOption && !mRebootSafeMode) {
+        resourceId = Elastos::Droid::R::string::reboot_confirm;
+    }
+
     Logger::D(TAG, "Notifying thread to start shutdown longPressBehavior=%d", longPressBehavior);
 
     if (confirm) {
         AutoPtr<CloseDialogReceiver> closer = new CloseDialogReceiver(context);
+        Boolean advancedReboot = IsAdvancedRebootPossible(context);
         if (sConfirmDialog != NULL) {
             IDialogInterface::Probe(sConfirmDialog)->Dismiss();
+            sConfirmDialog = NULL;
         }
-        AutoPtr<IAlertDialogBuilder> dialogBuilder;
-        ASSERT_SUCCEEDED(CAlertDialogBuilder::New(context, (IAlertDialogBuilder**)&dialogBuilder));
-        dialogBuilder->SetTitle(mRebootSafeMode
-                ? R::string::reboot_safemode_title
-                : R::string::power_off);
-        dialogBuilder->SetMessage(resourceId);
-        AutoPtr<IDialogInterfaceOnClickListener> listener = new DialogInterfaceOnClickListener(context);
-        dialogBuilder->SetPositiveButton(R::string::yes, listener);
-        dialogBuilder->SetNegativeButton(R::string::no, NULL);
-        ASSERT_SUCCEEDED(dialogBuilder->Create((IAlertDialog**)&sConfirmDialog));
+        AutoPtr<IAlertDialogBuilder> confirmDialogBuilder;
+        CAlertDialogBuilder::New(context, (IAlertDialogBuilder**)&confirmDialogBuilder);
+        confirmDialogBuilder->SetTitle(mRebootSafeMode
+                ? Elastos::Droid::R::string::reboot_safemode_title
+                : showRebootOption
+                        ? Elastos::Droid::R::string::reboot_title
+                        : Elastos::Droid::R::string::power_off);
+
+        if (!advancedReboot) {
+            confirmDialogBuilder->SetMessage(resourceId);
+        }
+        else {
+            confirmDialogBuilder->SetSingleChoiceItems(Elastos::Droid::R::array::shutdown_reboot_options,
+                    0, NULL);
+        }
+
+        AutoPtr<IDialogInterfaceOnClickListener> listener = new DialogInterfaceOnClickListener(context, advancedReboot);
+        confirmDialogBuilder->SetPositiveButton(Elastos::Droid::R::string::yes, listener);
+        confirmDialogBuilder->SetNegativeButton(Elastos::Droid::R::string::no, NULL);
+        sConfirmDialog = NULL;
+        confirmDialogBuilder->Create((IAlertDialog**)&sConfirmDialog);
 
         closer->mDialog = IDialog::Probe(sConfirmDialog);
         closer->mDialog->SetOnDismissListener(closer);
@@ -418,6 +529,24 @@ void ShutdownThread::ShutdownInner(
     else {
         BeginShutdownSequence(context);
     }
+}
+
+void ShutdownThread::DoSoftReboot()
+{
+    // try {
+    AutoPtr<IServiceManager> serviceManager;
+    CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
+    AutoPtr<IInterface> obj;
+    serviceManager->CheckService(String("activity"), (IInterface**)&obj);
+    AutoPtr<IIActivityManager> am = IIActivityManager::Probe(obj);
+    if (am != NULL) {
+        if (FAILED(am->Restart())) {
+            Logger::E(TAG, "failure trying to perform soft reboot");
+        }
+    }
+    // } catch (RemoteException e) {
+    //     Log.e(TAG, "failure trying to perform soft reboot", e);
+    // }
 }
 
 void ShutdownThread::Reboot(
@@ -441,6 +570,39 @@ void ShutdownThread::RebootSafeMode(
     ShutdownInner(context, confirm);
 }
 
+String ShutdownThread::GetShutdownMusicFilePath()
+{
+    AutoPtr<ArrayOf<String> > fileName = ArrayOf<String>::Alloc(2);
+    (*fileName)[0] = OEM_SHUTDOWN_MUSIC_FILE;
+    (*fileName)[1] = SHUTDOWN_MUSIC_FILE;
+    AutoPtr<IFile> checkFile;
+    for (Int32 i = 0; i < fileName->GetLength(); ++i) {
+        String music = (*fileName)[i];
+        CFile::New(music, (IFile**)&checkFile);
+        Boolean exists;
+        if (checkFile->Exists(&exists), exists) {
+            return music;
+        }
+    }
+    return String(NULL);
+}
+
+void ShutdownThread::LockDevice()
+{
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> value;
+    sm->GetService(IContext::WINDOW_SERVICE, (IInterface**)&value);
+    AutoPtr<IIWindowManager> wm = IIWindowManager::Probe(value);
+    // try {
+    if (FAILED(wm->UpdateRotation(FALSE, FALSE))) {
+        Logger::W(TAG, "boot animation can not lock device!");
+    }
+    // } catch (RemoteException e) {
+    //     Log.w(TAG, "boot animation can not lock device!");
+    // }
+}
+
 void ShutdownThread::BeginShutdownSequence(
     /* [in] */ IContext* context)
 {
@@ -452,22 +614,43 @@ void ShutdownThread::BeginShutdownSequence(
         sIsStarted = TRUE;
     }
 
-    // throw up an indeterminate system dialog to indicate radio is
-    // shutting down.
-    AutoPtr<IProgressDialog> pd;
-    CProgressDialog::New(context, (IProgressDialog**)&pd);
-    AutoPtr<ICharSequence> csq;
-    context->GetText(R::string::power_off, (ICharSequence**)&csq);
-    IDialog::Probe(pd)->SetTitle(csq);
-    csq = NULL;
-    context->GetText(R::string::shutdown_progress, (ICharSequence**)&csq);
-    IAlertDialog::Probe(pd)->SetMessage(csq);
-    pd->SetIndeterminate(TRUE);
-    IDialog::Probe(pd)->SetCancelable(FALSE);
-    AutoPtr<IWindow> win;
-    IDialog::Probe(pd)->GetWindow((IWindow**)&win);
-    win->SetType(IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG);
-    IDialog::Probe(pd)->Show();
+    //acquire audio focus to make the other apps to stop playing muisc
+    AutoPtr<IInterface> service;
+    context->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&service);
+    sAudioManager = IAudioManager::Probe(service);
+    Int32 result;
+    sAudioManager->RequestAudioFocus(NULL,
+            IAudioManager::STREAM_MUSIC, IAudioManager::AUDIOFOCUS_GAIN, &result);
+
+    if (!CheckAnimationFileExist()) {
+        // throw up an indeterminate system dialog to indicate radio is
+        // shutting down.
+        AutoPtr<IProgressDialog> pd;
+        CProgressDialog::New(context, (IProgressDialog**)&pd);
+        if (mReboot) {
+            AutoPtr<ICharSequence> csq;
+            context->GetText(Elastos::Droid::R::string::reboot_title, (ICharSequence**)&csq);
+            IDialog::Probe(pd)->SetTitle(csq);
+            csq = NULL;
+            context->GetText(R::string::reboot_progress, (ICharSequence**)&csq);
+            IAlertDialog::Probe(pd)->SetMessage(csq);
+        }
+        else {
+            AutoPtr<ICharSequence> csq;
+            context->GetText(Elastos::Droid::R::string::power_off, (ICharSequence**)&csq);
+            IDialog::Probe(pd)->SetTitle(csq);
+            csq = NULL;
+            context->GetText(R::string::shutdown_progress, (ICharSequence**)&csq);
+            IAlertDialog::Probe(pd)->SetMessage(csq);
+        }
+        pd->SetIndeterminate(TRUE);
+        IDialog::Probe(pd)->SetCancelable(FALSE);
+        AutoPtr<IWindow> win;
+        IDialog::Probe(pd)->GetWindow((IWindow**)&win);
+        win->SetType(IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG);
+
+        IDialog::Probe(pd)->Show();
+    }
 
     sInstance->mContext = context;
     AutoPtr<IInterface> obj;
@@ -609,7 +792,41 @@ ECode ShutdownThread::Run()
     // if (pm != NULL) {
     //     pm->Shutdown();
     // }
+// begin from this
+    // String shutDownFile = null;
 
+    // //showShutdownAnimation() is called from here to sync
+    // //music and animation properly
+    // if(checkAnimationFileExist()) {
+    //     lockDevice();
+    //     showShutdownAnimation();
+
+    //     if (!isSilentMode()
+    //             && (shutDownFile = getShutdownMusicFilePath()) != null) {
+    //         isShutdownMusicPlaying = true;
+    //         shutdownMusicHandler.obtainMessage(0, shutDownFile).sendToTarget();
+    //     }
+    // }
+
+    // Log.i(TAG, "wait for shutdown music");
+    // final long endTimeForMusic = SystemClock.elapsedRealtime() + MAX_BROADCAST_TIME;
+    // synchronized (mActionDoneSync) {
+    //     while (isShutdownMusicPlaying) {
+    //         long delay = endTimeForMusic - SystemClock.elapsedRealtime();
+    //         if (delay <= 0) {
+    //             Log.w(TAG, "play shutdown music timeout!");
+    //             break;
+    //         }
+    //         try {
+    //             mActionDoneSync.wait(delay);
+    //         } catch (InterruptedException e) {
+    //         }
+    //     }
+    //     if (!isShutdownMusicPlaying) {
+    //         Log.i(TAG, "play shutdown music complete.");
+    //     }
+    // }
+// end
     // Shutdown radios.
     ShutdownRadios(MAX_RADIO_WAIT_TIME);
 
@@ -707,6 +924,11 @@ void ShutdownThread::RebootOrShutdown(
     // Shutdown power
     Logger::I(TAG, "Performing low-level shutdown...");
     PowerManagerService::LowLevelShutdown();
+}
+
+Boolean ShutdownThread::CheckAnimationFileExist()
+{
+    return FALSE;
 }
 
 } // namespace Power

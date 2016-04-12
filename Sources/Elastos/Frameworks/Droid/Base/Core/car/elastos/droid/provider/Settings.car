@@ -5075,6 +5075,7 @@ module
         const String ADVANCED_REBOOT = "advanced_reboot";
 
         /**
+<<<<<<< Updated upstream
          * Whether to display a menu containing 'Wipe data', 'Force close' and other options
          * in the notification area and in the recent app list
          * @hide

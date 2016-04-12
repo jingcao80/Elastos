@@ -700,6 +700,9 @@ public:
         /* [in] */ nsecs_t eventTime,
         /* [in] */ int32_t eventType);
 
+    static CARAPI_(void) NativeSetPowerProfile(
+        /* [in] */ Int32 profile);
+
 protected:
     CARAPI_(void) UpdateLowPowerModeLocked();
 
@@ -1083,6 +1086,9 @@ private:
     static CARAPI_(void) NativeSendPowerHint(
         /* [in] */ Int32 hintId,
         /* [in] */ Int32 data);
+
+    static CARAPI_(void) NativeCpuBoost(
+        /* [in] */ Int32 duration);
 
 private:
     static const String TAG;

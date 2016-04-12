@@ -25,22 +25,46 @@ public:
      * @param handler The handler on which to invoke the listener.
      * @param context The current service context
      *  */
-    static CARAPI_(AutoPtr<IInterface>) Listen(
+    static CARAPI Listen(
         /* [in] */ const String& iface,
         /* [in] */ IRemoteDisplayListener* listener,
         /* [in] */ IHandler* handler,
-        /* [in] */ IContext* context);
+        /* [in] */ IContext* context,
+        /* [out] */ IInterface** result);
 
     /**
      * Disconnects the remote display and stops listening for new connections.
      */
-    static CARAPI_(void) Dispose(
+    static CARAPI Dispose(
         /* [in] */ IInterface* extRemoteDisplay);
 
     /**
      * Checks if ExtendedRemoteDisplay is available
      */
     static CARAPI_(Boolean) IsAvailable();
+
+private:
+    static CARAPI_(Boolean) InitExtRemoteDisplay();
+
+private:
+    static const String TAG;
+
+    // ExtendedRemoteDisplay class
+    // ExtendedRemoteDisplay is an enhanced RemoteDisplay. It has
+    // similar interface as RemoteDisplay class
+    static AutoPtr<IClassInfo> sExtRemoteDisplayClass;
+
+    // Method object for the API ExtendedRemoteDisplay.Listen
+    // ExtendedRemoteDisplay.Listen has the same API signature as
+    // RemoteDisplay.Listen except for an additional argument to pass the
+    // Context
+    static AutoPtr<IMethodInfo> sExtRemoteDisplayListen;
+
+    // Method Object for the API ExtendedRemoteDisplay.Dispose
+    // ExtendedRemoteDisplay.Dispose follows the same API signature as
+    // RemoteDisplay.Dispose
+    static AutoPtr<IMethodInfo> sExtRemoteDisplayDispose;
+    static Boolean sInit;
 };
 
 } // namespace Display
