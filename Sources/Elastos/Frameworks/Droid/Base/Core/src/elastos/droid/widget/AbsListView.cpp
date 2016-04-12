@@ -5157,7 +5157,7 @@ ECode AbsListView::OnWindowFocusChanged(
 ECode AbsListView::OnRtlPropertiesChanged(
     /* [in] */ Int32 layoutDirection)
 {
-    FAIL_RETURN(AbsListView::OnRtlPropertiesChanged(layoutDirection));
+    FAIL_RETURN(AdapterView::OnRtlPropertiesChanged(layoutDirection));
     if (mFastScroll != NULL) {
         Int32 position;
         GetVerticalScrollbarPosition(&position);

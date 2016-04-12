@@ -14,6 +14,7 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::Logging::Logger;
@@ -150,6 +151,7 @@ FocusFinder::FocusFinder()
     ASSERT_SUCCEEDED(CRect::New((IRect**)&mOtherRect));
     ASSERT_SUCCEEDED(CRect::New((IRect**)&mBestCandidateRect));
     mSequentialFocusComparator = new SequentialFocusComparator();
+    CArrayList::New((IArrayList**)&mTempList);
 }
 
 ECode FocusFinder::FindNextFocus(

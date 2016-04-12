@@ -91,6 +91,14 @@ module
 
     /**
      * @Involve
+     * interface Elastos.Droid.Text.ITextWatcher
+     * interface Elastos.Droid.Text.INoCopySpan
+     * interface Elastos.Droid.Text.ISpanWatcher
+     */
+    interface IChangeWatcher {}
+
+    /**
+     * @Involve
      * interface Elastos.Droid.View.IView
      *
      * interface Elastos.Droid.View.OnPreDrawListener

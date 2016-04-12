@@ -5,7 +5,7 @@
 #include "elastos/droid/text/SpanSet.h"
 
 using Elastos::Core::ICharSequence;
-//using Elastos::Droid::Emoji::IEmojiFactory;
+using Elastos::Droid::Emoji::IEmojiFactory;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IPaint;
 using Elastos::Droid::Graphics::IPath;
@@ -877,7 +877,7 @@ private:
         /* [in] */ TextUtilsTruncateAt method);
 
 public:
-//    /* package */ static AutoPtr<IEmojiFactory> EMOJI_FACTORY;
+   /* package */ static AutoPtr<IEmojiFactory> EMOJI_FACTORY;
     /* package */ static Int32 MIN_EMOJI, MAX_EMOJI;
 
     /* package */ static AutoPtr<ILayoutDirections> DIRS_ALL_LEFT_TO_RIGHT;

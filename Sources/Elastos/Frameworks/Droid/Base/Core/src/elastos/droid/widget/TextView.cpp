@@ -60,6 +60,7 @@
 #include "elastos/droid/view/accessibility/CAccessibilityEvent.h"
 #include "elastos/droid/view/inputmethod/BaseInputConnection.h"
 #include "elastos/droid/view/inputmethod/CInputMethodManager.h"
+#include "elastos/droid/view/textservice/CSpellCheckerSubtype.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
@@ -107,6 +108,7 @@ using Elastos::Droid::Text::Selection;
 using Elastos::Droid::Text::IInputType;
 using Elastos::Droid::Text::CTextPaint;
 using Elastos::Droid::Text::EIID_IGetChars;
+using Elastos::Droid::Text::IParcelableSpan;
 using Elastos::Droid::Text::EIID_IParcelableSpan;
 using Elastos::Droid::Text::EIID_IGraphicsOperations;
 using Elastos::Droid::Text::EIID_ITextWatcher;
@@ -127,6 +129,7 @@ using Elastos::Droid::Text::TextUtilsTruncateAt_START;
 using Elastos::Droid::Text::TextUtilsTruncateAt_MIDDLE;
 using Elastos::Droid::Text::TextUtilsTruncateAt_END;
 using Elastos::Droid::Text::TextUtilsTruncateAt_END_SMALL;
+using Elastos::Droid::Text::EIID_INoCopySpan;
 using Elastos::Droid::Text::Style::ISuggestionSpan;
 using Elastos::Droid::Text::Style::EIID_IClickableSpan;
 using Elastos::Droid::Text::Style::EIID_ISuggestionSpan;
@@ -184,6 +187,8 @@ using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::Accessibility::CAccessibilityEvent;
 using Elastos::Droid::View::InputMethod::BaseInputConnection;
 using Elastos::Droid::View::InputMethod::CInputMethodManager;
+using Elastos::Droid::View::TextService::ISpellCheckerSubtype;
+using Elastos::Droid::View::TextService::CSpellCheckerSubtype;
 using Elastos::Core::EIID_ICharSequence;
 using Elastos::Core::CString;
 using Elastos::Core::IInteger32;
@@ -915,7 +920,7 @@ void Marquee::ResetScroll()
 //          ChangeWatcher
 //==============================================================================
 
-CAR_INTERFACE_IMPL_2(ChangeWatcher, Object, ITextWatcher, ISpanWatcher)
+CAR_INTERFACE_IMPL_4(ChangeWatcher, Object, IChangeWatcher, ITextWatcher, ISpanWatcher, INoCopySpan)
 
 ChangeWatcher::ChangeWatcher(
     /* [in] */ TextView* host)
@@ -923,8 +928,7 @@ ChangeWatcher::ChangeWatcher(
 {}
 
 ChangeWatcher::~ChangeWatcher()
-{
-}
+{}
 
 ECode ChangeWatcher::BeforeTextChanged(
     /* [in] */ ICharSequence* buffer,
@@ -1823,38 +1827,44 @@ ECode TextView::InitFromAttributes(
 
                 break;
 
-            case R::styleable::TextView_imeOptions:
+            case R::styleable::TextView_imeOptions: {
                 CreateEditorIfNeeded();
-                assert(0);
-                /*mEditor->CreateInputContentTypeIfNeeded();
-                a->GetInt32(attr,
-                    mEditor->mInputContentType->mImeOptions, &mEditor->mInputContentType->mImeOptions);*/
+                assert(0 && "TODO");
+                // AutoPtr<Editor> editor = TO_EDITOR(mEditor);
+                // editor->CreateInputContentTypeIfNeeded();
+                // a->GetInt32(attr,
+                //         editor->mInputContentType->mImeOptions,
+                //         &editor->mInputContentType->mImeOptions);
                 break;
+            }
 
-            case R::styleable::TextView_imeActionLabel:
+            case R::styleable::TextView_imeActionLabel: {
                 CreateEditorIfNeeded();
-                assert(0);
-                /*mEditor->CreateInputContentTypeIfNeeded();
-                a->GetText(attr, (ICharSequence**)&(mEditor->mInputContentType->mImeActionLabel));*/
+                assert(0 && "TODO");
+                // AutoPtr<Editor> editor = TO_EDITOR(mEditor);
+                // editor->CreateInputContentTypeIfNeeded();
+                // a->GetText(attr, (ICharSequence**)&(editor->mInputContentType->mImeActionLabel));
                 break;
+            }
 
-            case R::styleable::TextView_imeActionId:
+            case R::styleable::TextView_imeActionId: {
                 CreateEditorIfNeeded();
-                assert(0);
-                /*mEditor->CreateInputContentTypeIfNeeded();
-                a->GetInt32(attr,
-                    mEditor->mInputContentType->mImeActionId, &mEditor->mInputContentType->mImeActionId);*/
+                assert(0 && "TODO");
+                // AutoPtr<Editor> editor = TO_EDITOR(mEditor);
+                // editor->CreateInputContentTypeIfNeeded();
+                // a->GetInt32(attr,
+                //         editor->mInputContentType->mImeActionId,
+                //         &editor->mInputContentType->mImeActionId);
                 break;
+            }
 
-            case R::styleable::TextView_privateImeOptions:
-            {
+            case R::styleable::TextView_privateImeOptions: {
                 String str;
                 a->GetString(attr, &str);
                 SetPrivateImeOptions(str);
                 break;
             }
-            case R::styleable::TextView_editorExtras:
-            {
+            case R::styleable::TextView_editorExtras: {
                 a->GetResourceId(attr, 0, &ivalue);
                 ECode ec = SetInputExtras(ivalue);
                 if (ec == (Int32)E_XML_PULL_PARSER_EXCEPTION) {
@@ -4745,8 +4755,7 @@ ECode TextView::SetText(
         // Remove any ChangeWatchers that might have come
         // from other TextViews.
         AutoPtr<ArrayOf<IInterface*> > watchers;
-        assert(0);
-        //sp->GetSpans(0, textLength, EIID_ChangeWatcher, (ArrayOf<IInterface*>**)&watchers);
+        ISpanned::Probe(sp)->GetSpans(0, textLength, EIID_IChangeWatcher, (ArrayOf<IInterface*>**)&watchers);
         Int32 count = watchers->GetLength();
         for (Int32 i = 0; i < count; i++) {
             sp->RemoveSpan((*watchers)[i]);
@@ -6145,9 +6154,8 @@ AutoPtr<IPath> TextView::GetUpdatedHighlightPath()
     if (mMovement != NULL && ((IsFocused(&isFocused), isFocused)
         || (IsPressed(&isPressed), isPressed)) && selStart >= 0) {
         if (selStart == selEnd) {
-            assert(0);
-            /*if (mEditor != NULL && mEditor->IsCursorVisible() &&
-                (SystemClock::GetUptimeMillis() - mEditor->mShowCursor) %
+            if (mEditor != NULL && TO_EDITOR(mEditor)->IsCursorVisible() &&
+                (SystemClock::GetUptimeMillis() - TO_EDITOR(mEditor)->mShowCursor) %
                     (2 * Editor::BLINK) < Editor::BLINK) {
                 if (mHighlightPathBogus) {
                     if (mHighlightPath == NULL) {
@@ -6155,7 +6163,7 @@ AutoPtr<IPath> TextView::GetUpdatedHighlightPath()
                     }
                     mHighlightPath->Reset();
                     mLayout->GetCursorPath(selStart, mHighlightPath, mText);
-                    mEditor->UpdateCursorsPositions();
+                    TO_EDITOR(mEditor)->UpdateCursorsPositions();
                     mHighlightPathBogus = FALSE;
                 }
 
@@ -6163,7 +6171,7 @@ AutoPtr<IPath> TextView::GetUpdatedHighlightPath()
                 highlightPaint->SetColor(mCurTextColor);
                 highlightPaint->SetStyle(Elastos::Droid::Graphics::PaintStyle_STROKE);
                 highlight = mHighlightPath;
-            }*/
+            }
         }
         else {
             if (mHighlightPathBogus) {
@@ -9077,8 +9085,7 @@ void TextView::HandleTextChanged(
     /* [in] */ Int32 before,
     /* [in] */ Int32 after)
 {
-    assert(0);
-    /*InputMethodState* ims = mEditor == NULL ? NULL : TO_EDITOR(mEditor)->mInputMethodState.Get();
+    AutoPtr<InputMethodState> ims = mEditor == NULL ? NULL : TO_EDITOR(mEditor)->mInputMethodState;
 
     if (ims == NULL || ims->mBatchEditNesting == 0) {
         UpdateAfterEdit();
@@ -9087,14 +9094,14 @@ void TextView::HandleTextChanged(
         ims->mContentChanged = TRUE;
         if (ims->mChangedStart < 0) {
             ims->mChangedStart = start;
-            ims->mChangedEnd = start+before;
+            ims->mChangedEnd = start + before;
         }
         else {
             ims->mChangedStart = Elastos::Core::Math::Min(ims->mChangedStart, start);
             ims->mChangedEnd = Elastos::Core::Math::Max(ims->mChangedEnd, start + before - ims->mChangedDelta);
         }
         ims->mChangedDelta += after-before;
-    }*/
+    }
 
     ResetErrorChangedFlag();
     SendOnTextChanged(buffer, start, before, after);
@@ -9111,23 +9118,24 @@ ECode TextView::SpanChange(
 {
     // XXX Make the start and end move together if this ends up
     // spending too much time invalidating.
-    assert(0);
-    /*Boolean selChanged = FALSE;
-    Int32 newSelStart=-1, newSelEnd=-1;
+    Boolean selChanged = FALSE;
+    Int32 newSelStart = -1, newSelEnd = -1;
 
-    InputMethodState* ims = mEditor == NULL ? NULL : mEditor->mInputMethodState.Get();
+    AutoPtr<InputMethodState> ims = mEditor == NULL ? NULL : TO_EDITOR(mEditor)->mInputMethodState;
+
+    AutoPtr<ICharSequence> csBuf = ICharSequence::Probe(buf);
 
     if (what == Selection::SELECTION_END) {
         selChanged = TRUE;
         newSelEnd = newStart;
 
         if (oldStart >= 0 || newStart >= 0) {
-            InvalidateCursor(Selection::GetSelectionStart(buf), oldStart, newStart);
+            InvalidateCursor(Selection::GetSelectionStart(csBuf), oldStart, newStart);
 
             CheckForResize();
             RegisterForPreDraw();
 
-            if (mEditor != NULL) mEditor->MakeBlink();
+            if (mEditor != NULL) TO_EDITOR(mEditor)->MakeBlink();
         }
     }
 
@@ -9136,29 +9144,31 @@ ECode TextView::SpanChange(
         newSelStart = newStart;
 
         if (oldStart >= 0 || newStart >= 0) {
-            Int32 end = Selection::GetSelectionEnd(buf);
+            Int32 end = Selection::GetSelectionEnd(csBuf);
             InvalidateCursor(end, oldStart, newStart);
         }
     }
 
     if (selChanged) {
         mHighlightPathBogus = TRUE;
-        if (mEditor != NULL && !IsFocused()) mEditor->mSelectionMoved = TRUE;
+        Boolean res;
+        if (mEditor != NULL && (IsFocused(&res), !res)) TO_EDITOR(mEditor)->mSelectionMoved = TRUE;
 
         Int32 flags;
         buf->GetSpanFlags(what, &flags);
         if ((flags & ISpanned::SPAN_INTERMEDIATE) == 0) {
             if (newSelStart < 0) {
-                newSelStart = Selection::GetSelectionStart(buf);
+                newSelStart = Selection::GetSelectionStart(csBuf);
             }
             if (newSelEnd < 0) {
-                newSelEnd = Selection::GetSelectionEnd(buf);
+                newSelEnd = Selection::GetSelectionEnd(csBuf);
             }
             OnSelectionChanged(newSelStart, newSelEnd);
         }
     }
 
-    if (IUpdateAppearance::Probe(what) || IParagraphStyle::Probe(what)) {
+    if (IUpdateAppearance::Probe(what) != NULL || IParagraphStyle::Probe(what) != NULL ||
+            ICharacterStyle::Probe(what) != NULL) {
         if (ims == NULL || ims->mBatchEditNesting == 0) {
             Invalidate();
             mHighlightPathBogus = TRUE;
@@ -9167,17 +9177,21 @@ ECode TextView::SpanChange(
         else {
             ims->mContentChanged = TRUE;
         }
+        if (mEditor != NULL) {
+            if (oldStart >= 0) TO_EDITOR(mEditor)->InvalidateTextDisplayList(mLayout, oldStart, oldEnd);
+            if (newStart >= 0) TO_EDITOR(mEditor)->InvalidateTextDisplayList(mLayout, newStart, newEnd);
+        }
     }
 
     Boolean result;
-    MetaKeyKeyListener::IsMetaTracker(buf, what, &result);
+    MetaKeyKeyListener::IsMetaTracker(csBuf, what, &result);
     if (result) {
         mHighlightPathBogus = TRUE;
-        if (ims != NULL && (MetaKeyKeyListener::IsSelectingMetaTracker(buf, what, &result), result)) {
+        if (ims != NULL && (MetaKeyKeyListener::IsSelectingMetaTracker(csBuf, what, &result), result)) {
             ims->mSelectionModeChanged = TRUE;
         }
 
-        if (Selection::GetSelectionStart(buf) >= 0) {
+        if (Selection::GetSelectionStart(csBuf) >= 0) {
             if (ims == NULL || ims->mBatchEditNesting == 0) {
                 InvalidateCursor();
             }
@@ -9187,7 +9201,7 @@ ECode TextView::SpanChange(
         }
     }
 
-    if (IParcelableSpan::Probe(what)) {
+    if (IParcelableSpan::Probe(what) != NULL) {
        // If this is a span that can be sent to a remote process,
         // the current extract editor would be interested in it.
         if (ims != NULL && ims->mExtractedTextRequest != NULL) {
@@ -9211,18 +9225,18 @@ ECode TextView::SpanChange(
             }
             else {
                 if (DEBUG_EXTRACT)
-                    Logger::V(TEXT_VIEW_TAG, "Span change outside of batch: %d-%d, %d-%d",
-                        oldStart, oldEnd, newStart, newEnd + what);
+                    Logger::V(TEXT_VIEW_TAG, "Span change outside of batch: %d-%d, %d-%d %d",
+                        oldStart, oldEnd, newStart, newEnd, what);
                 ims->mContentChanged = TRUE;
             }
         }
     }
 
-    if (mEditor != NULL && mEditor->mSpellChecker != NULL && newStart < 0
-            && ISpellCheckSpan::Probe(what)) {
-            mEditor->mSpellChecker->OnSpellCheckSpanRemoved(
-                    (ISpellCheckSpan*)(ISpellCheckSpan::Probe(what)));
-    }*/
+    if (mEditor != NULL && TO_EDITOR(mEditor)->mSpellChecker != NULL && newStart < 0
+            && ISpellCheckSpan::Probe(what) != NULL) {
+            TO_EDITOR(mEditor)->mSpellChecker->OnSpellCheckSpanRemoved(
+                    ISpellCheckSpan::Probe(what));
+    }
 
     return NOERROR;
 }
@@ -9836,29 +9850,24 @@ void TextView::UpdateTextServicesLocaleAsync()
 
 void TextView::UpdateTextServicesLocaleLocked()
 {
-    assert(0);
-    // TODO
-    // AutoPtr<IInterface> obj;
-    // mContext->GetSystemService(IContext::TEXT_SERVICES_MANAGER_SERVICE, (IInterface**)&obj);
-    // AutoPtr<ITextServicesManager> textServicesManager = ITextServicesManager::Probe(obj);
-    // if (textServicesManager) {
-    //    AutoPtr<ISpellCheckerSubtype> subtype;
-    //    textServicesManager->GetCurrentSpellCheckerSubtype(TRUE, (ISpellCheckerSubtype**)&subtype);
-    //    AutoPtr<ILocale> locale;
-    //    if (subtype != NULL) {
-    //         AutoPtr<ILocale> scLocale;
-    //         subtype->GetLocale((ILocale**)&scLocale);
-    //         AutoPtr<ISpellCheckerSubtypeHelper> helper;
-    //         CSpellCheckerSubtypeHelper::AcquireSingleton((ISpellCheckerSubtypeHelper**)&helper);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::TEXT_SERVICES_MANAGER_SERVICE, (IInterface**)&obj);
+    AutoPtr<ITextServicesManager> textServicesManager = ITextServicesManager::Probe(obj);
+    AutoPtr<ILocale> locale;
+    if (textServicesManager) {
+        AutoPtr<ISpellCheckerSubtype> subtype;
+        textServicesManager->GetCurrentSpellCheckerSubtype(TRUE, (ISpellCheckerSubtype**)&subtype);
+        if (subtype != NULL) {
+            String str;
+            subtype->GetLocale(&str);
+            locale = CSpellCheckerSubtype::ConstructLocaleFromString(str);
+        }
+        else {
+            locale = NULL;
+        }
+    }
 
-    //         helper->ConstructLocaleFromString(scLocale, (ILocale**)&locale);
-    //    }
-    //    else {
-    //         locale = NULL;
-    //    }
-    // }
-
-    // mCurrentSpellCheckerLocaleCache = locale;
+    mCurrentSpellCheckerLocaleCache = locale;
 }
 
 ECode TextView::OnLocaleChanged()

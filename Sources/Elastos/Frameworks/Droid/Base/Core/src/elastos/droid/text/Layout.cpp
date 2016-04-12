@@ -8,17 +8,17 @@
 #include "elastos/droid/text/CLayoutDirections.h"
 #include "elastos/droid/text/MeasuredText.h"
 #include "elastos/droid/text/AndroidBidi.h"
-//#include "elastos/droid/text/method/CTextKeyListener.h"
-//#include "elastos/droid/emoji/CEmojiFactoryHelper.h"
+#include "elastos/droid/text/method/MetaKeyKeyListener.h"
+#include "elastos/droid/emoji/CEmojiFactoryHelper.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/internal/utility/ArrayUtils.h"
 #include "elastos/droid/internal/utility/GrowingArrayUtils.h"
-
-#include <elastos/core/Math.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
-//using Elastos::Droid::Emoji::IEmojiFactoryHelper;
+using Elastos::Droid::Emoji::IEmojiFactoryHelper;
+using Elastos::Droid::Emoji::CEmojiFactoryHelper;
 using Elastos::Droid::Graphics::CRect;
 //using Elastos::Droid::Graphics::PathDirection;
 using Elastos::Droid::Graphics::PathDirection_CW;
@@ -35,7 +35,7 @@ using Elastos::Droid::Text::Style::ITabStopSpan;
 using Elastos::Droid::Text::Style::IAlignmentSpan;
 using Elastos::Droid::Text::Style::ILeadingMarginSpan;
 using Elastos::Droid::Text::Style::ILeadingMarginSpan2;
-//using Elastos::Droid::Text::Method::CTextKeyListener;
+using Elastos::Droid::Text::Method::MetaKeyKeyListener;
 using Elastos::Droid::Text::Method::IMetaKeyKeyListener;
 using Elastos::Droid::Text::MeasuredText;
 using Elastos::Droid::Text::AndroidBidi;
@@ -354,10 +354,9 @@ static AutoPtr<ILayoutDirections> InitDIRS_ALL_LEFT_TO_RIGHT()
     (*val)[0] = 0;
     (*val)[1] = ILayout::RUN_LENGTH_MASK;
 
-    AutoPtr<CLayoutDirections> obj;
-    CLayoutDirections::NewByFriend(val, (CLayoutDirections**)&obj);
-    AutoPtr<ILayoutDirections> temp = (ILayoutDirections*)obj.Get();
-    return temp;
+    AutoPtr<ILayoutDirections> obj;
+    CLayoutDirections::New(val, (ILayoutDirections**)&obj);
+    return obj;
 }
 
 static AutoPtr<ILayoutDirections> InitDIRS_ALL_RIGHT_TO_LEFT()
@@ -366,35 +365,35 @@ static AutoPtr<ILayoutDirections> InitDIRS_ALL_RIGHT_TO_LEFT()
     (*val)[0] = 0;
     (*val)[1] = ILayout::RUN_LENGTH_MASK | ILayout::RUN_RTL_FLAG;
 
-    AutoPtr<CLayoutDirections> obj;
-    CLayoutDirections::NewByFriend(val, (CLayoutDirections**)&obj);
-    AutoPtr<ILayoutDirections> temp = (ILayoutDirections*)obj.Get();
-    return temp;
+    AutoPtr<ILayoutDirections> obj;
+    CLayoutDirections::New(val, (ILayoutDirections**)&obj);
+    return obj;
 }
 
-/*
+
 static AutoPtr<IEmojiFactory> InitEMOJI()
 {
     AutoPtr<IEmojiFactoryHelper> efh;
-    CEmojiFactoryHelper::AcquireSingle((IEmojiFactoryHelper**)&efh);
+    CEmojiFactoryHelper::AcquireSingleton((IEmojiFactoryHelper**)&efh);
     AutoPtr<IEmojiFactory> ef;
-    efh->NewAvailableInstance((IEmojiFactory**)&ef);
-    if (ef != NULL) {
-        ef->GetMinimumAndroidPua(&(Layout::MIN_EMOJI));
-        ef->GetMaximumAndroidPua(&(Layout::MAX_EMOJI));
-    }
-    else {
-        Layout::MIN_EMOJI = -1;
-        Layout::MAX_EMOJI = -1;
-    }
+    // TODO:
+    // efh->NewAvailableInstance((IEmojiFactory**)&ef);
+    // if (ef != NULL) {
+    //     ef->GetMinimumAndroidPua(&(Layout::MIN_EMOJI));
+    //     ef->GetMaximumAndroidPua(&(Layout::MAX_EMOJI));
+    // }
+    // else {
+    //     Layout::MIN_EMOJI = -1;
+    //     Layout::MAX_EMOJI = -1;
+    // }
 
     return ef;
 }
-*/
+
 
 // AutoPtr< ArrayOf<IParagraphStyle*> > Layout::NO_PARA_SPANS = ArrayOf<IParagraphStyle*>::Alloc(0);
 AutoPtr< ArrayOf<IInterface*> > Layout::NO_PARA_SPANS = ArrayOf<IInterface*>::Alloc(0);
-//AutoPtr<IEmojiFactory> Layout::EMOJI_FACTORY = InitEMOJI();
+AutoPtr<IEmojiFactory> Layout::EMOJI_FACTORY = InitEMOJI();
 AutoPtr<IRect> Layout::sTempRect = InitsTempRect();
 AutoPtr<ILayoutDirections> Layout::DIRS_ALL_LEFT_TO_RIGHT = InitDIRS_ALL_LEFT_TO_RIGHT();
 AutoPtr<ILayoutDirections> Layout::DIRS_ALL_RIGHT_TO_LEFT = InitDIRS_ALL_RIGHT_TO_LEFT();
@@ -1872,10 +1871,10 @@ ECode Layout::GetCursorPath(
     Float h2 = bval ? horiz - 0.5f : h1;
 
     Int32 caps = 0, fn = 0, dist = 0;
-    assert(0 && "TODO");
-    // caps = CTextKeyListener::GetMetaState(editingBuffer, IMetaKeyKeyListener::META_SHIFT_ON)
-    //     | CTextKeyListener::GetMetaState(editingBuffer, IMetaKeyKeyListener::META_SELECTING);
-    // fn = CTextKeyListener::GetMetaState(editingBuffer, IMetaKeyKeyListener::META_ALT_ON);
+    Int32 data1, data2;
+    caps = (MetaKeyKeyListener::GetMetaState(editingBuffer, IMetaKeyKeyListener::META_SHIFT_ON, &data1), data1)
+        | (MetaKeyKeyListener::GetMetaState(editingBuffer, IMetaKeyKeyListener::META_SELECTING, &data2), data2);
+    MetaKeyKeyListener::GetMetaState(editingBuffer, IMetaKeyKeyListener::META_ALT_ON, &fn);
     dist = 0;
 
     if (caps != 0 || fn != 0) {

@@ -29,6 +29,7 @@ using Elastos::Droid::Text::LayoutAlignment;
 using Elastos::Droid::Text::TextUtilsTruncateAt;
 using Elastos::Droid::Text::ITextDirectionHeuristic;
 using Elastos::Droid::Text::IBoringLayoutMetrics;
+using Elastos::Droid::Text::INoCopySpan;
 using Elastos::Droid::Text::Method::IKeyListener;
 using Elastos::Droid::Text::Method::IMovementMethod;
 using Elastos::Droid::Text::Method::ITransformationMethod;
@@ -382,8 +383,10 @@ private:
 //==============================================================================
 class ChangeWatcher
     : public Object
+    , public IChangeWatcher
     , public ITextWatcher
     , public ISpanWatcher
+    , public INoCopySpan
 {
 public:
     CAR_INTERFACE_DECL()

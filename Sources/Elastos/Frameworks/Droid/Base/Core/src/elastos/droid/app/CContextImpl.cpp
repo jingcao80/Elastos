@@ -64,6 +64,7 @@
 #include "elastos/droid/wifi/p2p/CWifiP2pManager.h"
 #include "elastos/droid/view/accessibility/CAccessibilityManager.h"
 #include "elastos/droid/view/inputmethod/CInputMethodManager.h"
+#include "elastos/droid/view/textservice/CTextServicesManager.h"
 #include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/view/WindowManagerImpl.h"
 #include "elastos/droid/view/DisplayAdjustments.h"
@@ -201,6 +202,8 @@ using Elastos::Droid::View::Accessibility::IAccessibilityManager;
 using Elastos::Droid::View::Accessibility::CAccessibilityManager;
 using Elastos::Droid::View::InputMethod::IInputMethodManager;
 using Elastos::Droid::View::InputMethod::CInputMethodManager;
+using Elastos::Droid::View::TextService::CTextServicesManager;
+using Elastos::Droid::View::TextService::ITextServicesManager;
 using Elastos::Droid::Utility::CArrayMap;
 using Elastos::Droid::Wifi::IWifiManager;
 using Elastos::Droid::Wifi::CWifiManager;
@@ -2490,11 +2493,10 @@ ECode CContextImpl::GetSystemService(
     else if (IContext::TEXT_SERVICES_MANAGER_SERVICE.Equals(name)) {
         AutoLock lock(mCacheLock);
         Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        assert(0 && "TODO");
-        // AutoPtr<ITextServicesManager> iManager = CTextServicesManager::GetInstance();
-        // mServiceCache[name] = iManager;
-        // *object = iManager;
-        // REFCOUNT_ADD(*object);
+        AutoPtr<ITextServicesManager> iManager = CTextServicesManager::GetInstance();
+        mServiceCache[name] = iManager;
+        *object = iManager;
+        REFCOUNT_ADD(*object);
         return NOERROR;
     }
     else if (IContext::KEYGUARD_SERVICE.Equals(name)) {

@@ -400,8 +400,7 @@ ECode SpellChecker::SpellCheck(
     mTextView->GetSpellCheckerLocale((ILocale**)&locale);
     Boolean isSessionActive = IsSessionActive();
     Boolean equals = FALSE;
-    mCurrentLocale->Equals(locale, &equals);
-    if (locale == NULL || mCurrentLocale == NULL || !equals) {
+    if (locale == NULL || mCurrentLocale == NULL || (mCurrentLocale->Equals(locale, &equals), !equals)) {
         SetLocale(locale);
         start = 0;
         AutoPtr<ICharSequence> csq;

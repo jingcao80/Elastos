@@ -16,7 +16,7 @@
 #include "elastos/droid/view/SoundEffectConstants.h"
 #include "elastos/droid/widget/CArrayAdapter.h"
 #include "elastos/droid/widget/CAbsListViewLayoutParams.h"
-// #include "elastos/droid/widget/CHeaderViewListAdapter.h"
+#include "elastos/droid/widget/CHeaderViewListAdapter.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
@@ -49,7 +49,7 @@ using Elastos::Droid::View::CViewGroupLayoutParams;
 using Elastos::Droid::View::SoundEffectConstants;
 using Elastos::Droid::Widget::CArrayAdapter;
 using Elastos::Droid::Widget::CAbsListViewLayoutParams;
-// using Elastos::Droid::Widget::CHeaderViewListAdapter;
+using Elastos::Droid::Widget::CHeaderViewListAdapter;
 using Elastos::Droid::R;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::Logging::Slogger;
@@ -365,7 +365,10 @@ ECode ListView::AddHeaderView(
     if (mAdapter != NULL) {
         if (IHeaderViewListAdapter::Probe(mAdapter) == NULL) {
             assert(0 && "TODO");
-            // mAdapter = new HeaderViewListAdapter(mHeaderViewInfos, mFooterViewInfos, mAdapter);
+            // AutoPtr<IListAdapter> adapter;
+            // CHeaderViewListAdapter::New(mHeaderViewInfos, mFooterViewInfos,
+            //         mAdapter, (IListAdapter**)&adapter);
+            // mAdapter = adapter;
         }
 
         // In the case of re-adding a header view, or adding one later on,
@@ -532,17 +535,10 @@ ECode ListView::SetAdapter(
     mFooterViewInfos->GetSize(&size2);
     if (size > 0 || size2 > 0) {
         assert(0 && "TODO");
-        // AutoPtr< ArrayOf<IFixedViewInfo*> > first = ArrayOf<IFixedViewInfo*>::Alloc(mHeaderViewInfos.GetSize());
-        // for(Int32 i = 0; i < mHeaderViewInfos.GetSize(); ++i) {
-        //     first->Set(i, (IFixedViewInfo*)(mHeaderViewInfos.At(i)));
-        // }
-        // AutoPtr< ArrayOf<IFixedViewInfo*> > second = ArrayOf<IFixedViewInfo*>::Alloc(mFooterViewInfos.GetSize());
-        // for(Int32 i = 0; i < mFooterViewInfos.GetSize(); ++i) {
-        //     second->Set(i, (IFixedViewInfo*)(mFooterViewInfos.At(i)));
-        // }
-        // AutoPtr<IHeaderViewListAdapter> temp;
-        // CHeaderViewListAdapter::New(first, second, IListAdapter::Probe(adapter), (IHeaderViewListAdapter**)&temp);
-        // mAdapter = IListAdapter::Probe(temp);
+        // AutoPtr<IListAdapter> temp;
+        // CHeaderViewListAdapter::New(mHeaderViewInfos, mFooterViewInfos,
+        //         IListAdapter::Probe(adapter), (IListAdapter**)&temp);
+        // mAdapter = temp;
     }
     else {
         mAdapter = IListAdapter::Probe(adapter);
@@ -605,8 +601,7 @@ void ListView::ResetList()
 void ListView::ClearRecycledState(
     /* [in] */ IArrayList* infos)
 {
-    Boolean res;
-    if (infos->IsEmpty(&res), !res) {
+    if (infos != NULL) {
         Int32 count;
         infos->GetSize(&count);
 

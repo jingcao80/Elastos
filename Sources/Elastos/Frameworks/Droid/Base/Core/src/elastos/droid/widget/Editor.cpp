@@ -3153,7 +3153,6 @@ ECode Editor::OnAttachedToWindow()
     mTextView->GetLength(&length);
     UpdateSpellCheckSpans(0, length, TRUE);
     Boolean hasTransientState;
-    ;
     Int32 start, end;
     if ((IView::Probe(mTextView)->HasTransientState(&hasTransientState), hasTransientState) &&
         (mTextView->GetSelectionStart(&start), start)

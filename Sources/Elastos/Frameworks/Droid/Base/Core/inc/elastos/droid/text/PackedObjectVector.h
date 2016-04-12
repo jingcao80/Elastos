@@ -2,11 +2,13 @@
 #define __ELASTOS_DROID_TEXT_PACKEDOBJECTVECTOR_H__
 
 #include "elastos/droid/ext/frameworkdef.h"
-//#include "elastos/droid/internal/utility/EmptyArray.h"
+#include "elastos/droid/internal/utility/ArrayUtils.h"
+#include "elastos/droid/internal/utility/GrowingArrayUtils.h"
 #include <elastos/core/Object.h>
 #include <libcore/utility/EmptyArray.h>
 
-//using Elastos::Droid::Internal::Utility::ArrayUtils;
+using Elastos::Droid::Internal::Utility::ArrayUtils;
+using Elastos::Droid::Internal::Utility::GrowingArrayUtils;
 using Libcore::Utility::EmptyArray;
 
 namespace Elastos {
@@ -154,19 +156,18 @@ Int32 PackedObjectVector<E>::Width()
 template<typename E>
 void PackedObjectVector<E>::GrowBuffer()
 {
-    assert(0 && "TODO");
-    // AutoPtr< ArrayOf<IInterface*> > newvalues = ArrayUtils::NewUnpaddedObjectArray(
-    //         GrowingArrayUtils::GrowSize(size()) * mColumns);
-    // Int32 newsize = newvalues->GetLength() / mColumns;
+    AutoPtr< ArrayOf<IInterface*> > newvalues = ArrayUtils::NewUnpaddedObjectArray(
+            GrowingArrayUtils::GrowSize(Size()) * mColumns);
+    Int32 newsize = newvalues->GetLength() / mColumns;
 
-    // Int32 after = mRows - (mRowGapStart + mRowGapLength);
+    Int32 after = mRows - (mRowGapStart + mRowGapLength);
 
-    // newvalues->Copy(mValues, mColumns * mRowGapStart);
-    // newvalues->Copy((newsize - after) * mColumns, mValues, (mRows - after) * mColumns, after * mColumns);
+    newvalues->Copy(0, mValues, 0, mColumns * mRowGapStart);
+    newvalues->Copy((newsize - after) * mColumns, mValues, (newsize - after) * mColumns, after * mColumns);
 
-    // mRowGapLength += newsize - mRows;
-    // mRows = newsize;
-    // mValues = newvalues;
+    mRowGapLength += newsize - mRows;
+    mRows = newsize;
+    mValues = newvalues;
 }
 
 template<typename E>
