@@ -1241,7 +1241,7 @@ ECode GpsLocationProvider::GetName(
 }
 
 ECode GpsLocationProvider::GetProperties(
-    /* [out] */ IProviderProperties* properties)
+    /* [out] */ IProviderProperties** properties)
 {
     // VALIDATE_NOT_NULL(properties)
     // *properties = PROPERTIES;

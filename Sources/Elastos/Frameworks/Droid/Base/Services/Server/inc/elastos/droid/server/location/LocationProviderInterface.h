@@ -10,8 +10,8 @@
 
 using Elastos::IO::IPrintWriter;
 using Elastos::IO::IFileDescriptor;
-using Elastos::Droid::Location::IProviderRequest;
-using Elastos::Droid::Location::IProviderProperties;
+using Elastos::Droid::Internal::Location::IProviderRequest;
+using Elastos::Droid::Internal::Location::IProviderProperties;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IWorkSource;
 

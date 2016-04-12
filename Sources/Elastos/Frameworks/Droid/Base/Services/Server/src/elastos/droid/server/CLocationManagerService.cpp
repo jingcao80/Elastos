@@ -1,84 +1,135 @@
 
-#include "CLocationManagerService.h"
-//#include "location/GpsLocationProvider.h"
-#include "location/PassiveProvider.h"
-#include "location/LocationProviderInterface.h"
+#include "Elastos.Droid.Provider.h"
+#include "elastos/droid/server/CLocationManagerService.h"
+#include "elastos/droid/server/location/GpsLocationProvider.h"
+#include "elastos/droid/server/location/PassiveProvider.h"
+#include "elastos/droid/server/location/FusedProxy.h"
+#include "elastos/droid/server/location/FlpHardwareProvider.h"
+#include "elastos/droid/server/location/GeofenceProxy.h"
+#include "elastos/droid/server/location/ActivityRecognitionProxy.h"
+#include "elastos/droid/server/location/MockProvider.h"
+//#include "elastos/droid/server/location/GeoFencerProxy.h"
+//#include "elastos/droid/server/location/LocationProviderInterface.h"
+//#include "elastos/droid/internal/location/CProviderRequest.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/Looper.h"
-#include "ServiceWatcher.h"
+//#include "elastos/droid/os/CWorkSource.h"
+//#include "elastos/droid/provider/CSettingsSecure.h"
+//#include "ServiceWatcher.h"
+#include "elastos/droid/hardware/location/ActivityRecognitionHardware.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/Manifest.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Core::Math;
-using Elastos::Core::ISystem;
-using Elastos::Core::CSystem;
-using Elastos::Core::StringBuilder;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
-using Elastos::Core::IThread;
-using Elastos::Core::CThread;
-using Elastos::Droid::R;
+using Elastos::Droid::App::EIID_IAppOpsManagerOnOpChangedInternalListener;
+using Elastos::Droid::App::EIID_IPendingIntentOnFinished;
+using Elastos::Droid::App::IAppOpsManagerOnOpChangedListener;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Content::Pm::IComponentInfo;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Hardware::Location::IActivityRecognitionHardware;
+using Elastos::Droid::Hardware::Location::ActivityRecognitionHardware;
+//using Elastos::Droid::Internal::Location::CProviderRequest;
+using Elastos::Droid::Internal::Os::IBackgroundThreadHelper;
+using Elastos::Droid::Internal::Os::CBackgroundThreadHelper;
+using Elastos::Droid::Internal::Os::IBackgroundThread;
+using Elastos::Droid::Internal::Location::CProviderProperties;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::CWorkSource;
 using Elastos::Droid::Location::CLocationRequest;
-using Elastos::Droid::Location::CProviderRequest;
 using Elastos::Droid::Location::ILocationProviderHelper;
 using Elastos::Droid::Location::CLocationProviderHelper;
-using Elastos::Droid::Database::ICursor;
-using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::Location::CLocation;
+using Elastos::Droid::Location::EIID_IILocationManager;
+using Elastos::Droid::Location::IGeoFenceParams;
+using Elastos::Droid::Location::CGeoFenceParams;
+using Elastos::Droid::Location::ILocationProvider;
+//using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Provider::ISettingsSecure;
-using Elastos::Droid::Content::CIntentFilter;
-using Elastos::Droid::Content::Pm::IApplicationInfo;
-using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Utility::CParcelableObjectContainer;
+using Elastos::Droid::Provider::ISettings;
+using Elastos::Droid::Server::Location::LocationProviderProxy;
+using Elastos::Droid::Server::Location::GpsLocationProvider;
+using Elastos::Droid::Server::Location::FusedProxy;
+using Elastos::Droid::Server::Location::IFlpHardwareProvider;
+using Elastos::Droid::Server::Location::FlpHardwareProvider;
+using Elastos::Droid::Server::Location::GeofenceProxy;
+using Elastos::Droid::Server::Location::ActivityRecognitionProxy;
+using Elastos::Droid::Server::Location::MockProvider;
+//using Elastos::Droid::Server::Location::GeoFencerProxy;
+using Elastos::Droid::R;
+using Elastos::Core::Math;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::StringUtils;
+using Elastos::Core::CString;
+using Elastos::Core::IThread;
+using Elastos::Core::CThread;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::Arrays;
 using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
-namespace Location {
 
-const Boolean CLocationManagerService::D = FALSE;
 const String CLocationManagerService::TAG("LocationManagerService");
+const Boolean CLocationManagerService::D = Logger::IsLoggable(TAG, Logger::___DEBUG);
+
 const String CLocationManagerService::WAKELOCK_KEY = TAG;
-const String CLocationManagerService::THREAD_NAME = TAG;
+
 const Int32 CLocationManagerService::RESOLUTION_LEVEL_NONE = 0;
 const Int32 CLocationManagerService::RESOLUTION_LEVEL_COARSE = 1;
 const Int32 CLocationManagerService::RESOLUTION_LEVEL_FINE = 2;
-// const String CLocationManagerService::ACCESS_MOCK_LOCATION =
-//         String("elastos.Manifest.permission.ACCESS_MOCK_LOCATION");
-// const String CLocationManagerService::ACCESS_LOCATION_EXTRA_COMMANDS =
-//         String("elastos.Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS");
-// const String CLocationManagerService::INSTALL_LOCATION_PROVIDER =
-//         String("elastos.Manifest.permission.INSTALL_LOCATION_PROVIDER");
-// const String CLocationManagerService::NETWORK_LOCATION_SERVICE_ACTION =
-//         String("elastos.location.service.v2.NetworkLocationProvider");
-// const String CLocationManagerService::FUSED_LOCATION_SERVICE_ACTION =
-//         String("elastos.location.service.FusedLocationProvider");
+
 const String CLocationManagerService::ACCESS_MOCK_LOCATION =
-        String("android.permission.ACCESS_MOCK_LOCATION");
+        Manifest::permission::ACCESS_MOCK_LOCATION;
 const String CLocationManagerService::ACCESS_LOCATION_EXTRA_COMMANDS =
-        String("android.permission.ACCESS_LOCATION_EXTRA_COMMANDS");
+        Manifest::permission::ACCESS_LOCATION_EXTRA_COMMANDS;
 const String CLocationManagerService::INSTALL_LOCATION_PROVIDER =
-        String("android.permission.INSTALL_LOCATION_PROVIDER");
-const String CLocationManagerService::NETWORK_LOCATION_SERVICE_ACTION =
-        String("com.android.location.service.v2.NetworkLocationProvider");
-const String CLocationManagerService::FUSED_LOCATION_SERVICE_ACTION =
-        String("com.android.location.service.FusedLocationProvider");
+        Manifest::permission::INSTALL_LOCATION_PROVIDER;
+
+const String CLocationManagerService::NETWORK_LOCATION_SERVICE_ACTION("elastos.location.service.v2.NetworkLocationProvider");
+const String CLocationManagerService::FUSED_LOCATION_SERVICE_ACTION("elastos.location.service.FusedLocationProvider");
+
 const Int32 CLocationManagerService::MSG_LOCATION_CHANGED = 1;
+
+const Int64 CLocationManagerService::NANOS_PER_MILLI = 1000000L;
+
+const Int64 CLocationManagerService::HIGH_POWER_INTERVAL_MS = 5 * 60 * 1000;
+
 const Int32 CLocationManagerService::MAX_PROVIDER_SCHEDULING_JITTER_MS = 100;
 
 static AutoPtr<ILocationRequest> InitDefaultLocationRequest() {
@@ -90,16 +141,112 @@ static AutoPtr<ILocationRequest> InitDefaultLocationRequest() {
 const AutoPtr<ILocationRequest> CLocationManagerService::DEFAULT_LOCATION_REQUEST =
         InitDefaultLocationRequest();
 
+//=================================================================
+// CLocationManagerService::AppOpsManagerOnOpChangedInternalListener
+//=================================================================
 
-/*******************************************************************************************/
-/*                                                                                         */
-/********        CLocationManagerService::LocationWorkerHandler Start         *************/
-/*                                                                                         */
-/*******************************************************************************************/
+CAR_INTERFACE_IMPL(CLocationManagerService::AppOpsManagerOnOpChangedInternalListener, Object,
+                    IAppOpsManagerOnOpChangedInternalListener)
+
+CLocationManagerService::AppOpsManagerOnOpChangedInternalListener::AppOpsManagerOnOpChangedInternalListener(
+    /* [in] */ CLocationManagerService* host)
+    : mHost(host)
+{}
+
+ECode CLocationManagerService::AppOpsManagerOnOpChangedInternalListener::OnOpChanged(
+    /* [in] */ Int32 op,
+    /* [in] */ const String& packageName)
+{
+    synchronized (mHost->mLock) {
+        AutoPtr<ICollection> cl;
+        mHost->mReceivers->GetValues((ICollection**)&cl);
+        AutoPtr<IIterator> it;
+        cl->GetIterator((IIterator**)&it);
+        Boolean bHasNxt = FALSE;
+        while ((it->HasNext(&bHasNxt), bHasNxt)) {
+            AutoPtr<IInterface> p;
+            it->GetNext((IInterface**)&p);
+            AutoPtr<Receiver> receiver = (Receiver*)IObject::Probe(p);
+            receiver->UpdateMonitoring(TRUE);
+        }
+        mHost->ApplyAllProviderRequirementsLocked();
+    }
+    return NOERROR;
+}
+
+ECode CLocationManagerService::AppOpsManagerOnOpChangedInternalListener::OnOpChanged(
+    /* [in] */ const String& op,
+    /* [in] */ const String& packageName)
+{
+    return NOERROR;
+}
+
+//=================================================================
+// CLocationManagerService::MyContentObserver
+//=================================================================
+
+CLocationManagerService::MyContentObserver::MyContentObserver(
+    /* [in] */ CLocationManagerService* host)
+    : mHost(host)
+{}
+
+ECode CLocationManagerService::MyContentObserver::constructor(
+    /* [in] */ IHandler* handler)
+{
+    ContentObserver::constructor(handler);
+    return NOERROR;
+}
+
+ECode CLocationManagerService::MyContentObserver::OnChange(
+    /* [in] */ Boolean selfChange)
+{
+    synchronized (mLock) {
+        mHost->UpdateProvidersLocked();
+    }
+    return NOERROR;
+}
+
+//=================================================================
+// CLocationManagerService::MyBroadcastReceiver
+//=================================================================
+
+CLocationManagerService::MyBroadcastReceiver::MyBroadcastReceiver(
+    /* [in] */ CLocationManagerService* host)
+    : mHost(host)
+{}
+
+ECode CLocationManagerService::MyBroadcastReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    String action;
+    intent->GetAction(&action);
+    if (IIntent::ACTION_USER_SWITCHED.Equals(action)) {
+        Int32 i = 0;
+        intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, 0, &i);
+        mHost->SwitchUser(i);
+    }
+    else if (IIntent::ACTION_MANAGED_PROFILE_ADDED.Equals(action)
+            || IIntent::ACTION_MANAGED_PROFILE_REMOVED.Equals(action)) {
+        mHost->UpdateUserProfiles(mHost->mCurrentUserId);
+    }
+    return NOERROR;
+}
+
+//=================================================================
+// CLocationManagerService::LocationWorkerHandler
+//=================================================================
+CLocationManagerService::LocationWorkerHandler::LocationWorkerHandler(
+    /* [in] */ ILooper* looper,
+    /* [in] */ CLocationManagerService* host)
+    : Handler(looper, NULL, TRUE)
+    , mHost(host)
+{}
+
 ECode CLocationManagerService::LocationWorkerHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    Int32 what;
+    Int32 what = 0;
     msg->GetWhat(&what);
     switch (what) {
         case CLocationManagerService::MSG_LOCATION_CHANGED: {
@@ -115,11 +262,9 @@ ECode CLocationManagerService::LocationWorkerHandler::HandleMessage(
     return NOERROR;
 }
 
-/*******************************************************************************************/
-/*                                                                                         */
-/********        CLocationManagerService::LocationPackageMonitor Start         *************/
-/*                                                                                         */
-/*******************************************************************************************/
+//=================================================================
+// CLocationManagerService::LocationPackageMonitor
+//=================================================================
 
 CLocationManagerService::LocationPackageMonitor::LocationPackageMonitor(
     /* [in] */ CLocationManagerService* host) : mHost(host)
@@ -129,36 +274,46 @@ ECode CLocationManagerService::LocationPackageMonitor::OnPackageDisappeared(
     /* [in] */ const String& packageName,
     /* [in] */ Int32 reason)
 {
-    AutoLock lock(mLock);
-    AutoPtr< List<AutoPtr<Receiver> > > deadReceivers;
-    InterfaceReceiverIterator it = mHost->mReceivers.Begin();
-    for(; it != mHost->mReceivers.End(); ++it) {
-        AutoPtr<Receiver> receiver = it->mSecond;
-        if(receiver->mPackageName == packageName) {
-            if (deadReceivers == NULL) {
-                deadReceivers = new List<AutoPtr<Receiver> >();
+    // remove all receivers associated with this package name
+    synchronized (mLock) {
+        AutoPtr<IArrayList> deadReceivers;
+
+        AutoPtr<ICollection> cl;
+        mHost->mReceivers->GetValues((ICollection**)&cl);
+        AutoPtr<IIterator> it;
+        cl->GetIterator((IIterator**)&it);
+        Boolean bHasNxt = FALSE;
+        while ((it->HasNext(&bHasNxt), bHasNxt)) {
+            AutoPtr<IInterface> p;
+            it->GetNext((IInterface**)&p);
+            AutoPtr<Receiver> receiver = (Receiver*)IObject::Probe(p);
+            if (receiver->mPackageName.Equals(packageName)) {
+                if (deadReceivers == NULL) {
+                    CArrayList::New((IArrayList**)&deadReceivers);
+                }
+                deadReceivers->Add(p);
             }
-            deadReceivers->PushBack(receiver);
+        }
+
+        // perform removal outside of mReceivers loop
+        if (deadReceivers != NULL) {
+            AutoPtr<IIterator> itR;
+            deadReceivers->GetIterator((IIterator**)&itR);
+            bHasNxt = FALSE;
+            while ((itR->HasNext(&bHasNxt), bHasNxt)) {
+                AutoPtr<IInterface> p;
+                itR->GetNext((IInterface**)&p);
+                AutoPtr<Receiver> receiver = (Receiver*)IObject::Probe(p);
+                mHost->RemoveUpdatesLocked(receiver);
+            }
         }
     }
-
-    // perform removal outside of mReceivers loop
-    if (deadReceivers != NULL) {
-        List<AutoPtr<Receiver> >::Iterator listIt = deadReceivers->Begin();
-        AutoPtr<Receiver> receiver = *listIt;
-        for(; listIt != deadReceivers->End(); ++listIt) {
-            mHost->RemoveUpdatesLocked(receiver);
-        }
-    }
-
     return NOERROR;
 }
 
-/*******************************************************************************************/
-/*                                                                                         */
-/********             CLocationManagerService::UpdateRecord Start              *************/
-/*                                                                                         */
-/*******************************************************************************************/
+//=================================================================
+// CLocationManagerService::UpdateRecord
+//=================================================================
 
 CLocationManagerService::UpdateRecord::UpdateRecord(
     /* [in] */ const String& provider,
@@ -171,127 +326,78 @@ CLocationManagerService::UpdateRecord::UpdateRecord(
     , mLastStatusBroadcast(0)
     , mHost(host)
 {
-    AutoPtr< UpdateRecordList > records;
-    HashMap<String, AutoPtr< UpdateRecordList > >::Iterator it =
-            mHost->mRecordsByProvider.Find(provider);
-    if (it != mHost->mRecordsByProvider.End()) {
-        records = it->mSecond;
-    }
+    AutoPtr<IInterface> _records;
+    mHost->mRecordsByProvider->Get(CoreUtils::Convert(provider), (IInterface**)&_records);
+    AutoPtr<IArrayList> records = IArrayList::Probe(_records);
     if (records == NULL) {
-        records = new List<AutoPtr<UpdateRecord> >();
-        mHost->mRecordsByProvider[provider] = records;
+        CArrayList::New((IArrayList**)&records);
+        mHost->mRecordsByProvider->Put(CoreUtils::Convert(provider), records);
     }
-    List<AutoPtr<UpdateRecord> >::Iterator recordIt;
-    for (recordIt = records->Begin(); recordIt != records->End(); ++recordIt) {
-        if ((*recordIt).Get() == this) break;
+    Boolean bContain = FALSE;
+    records->Contains((IInterface*)(IObject*)this, &bContain);
+    if (!bContain) {
+        records->Add((IInterface*)(IObject*)this);
     }
-    if (recordIt == records->End()) {
-        records->PushBack(this);
-    }
+
+    // Update statistics for historical location requests by package/provider
+    Int64 interval = 0;
+    request->GetInterval(&interval);
+    mHost->mRequestStatistics->StartRequesting(
+            mReceiver->mPackageName, provider, interval);
 }
 
 void CLocationManagerService::UpdateRecord::DisposeLocked(
     /* [in] */ Boolean removeReceiver)
 {
-    AutoPtr< UpdateRecordList > globalRecords;
-    HashMap<String, AutoPtr< UpdateRecordList > >::Iterator it =
-            mHost->mRecordsByProvider.Find(mProvider);
-    if (it != mHost->mRecordsByProvider.End()) {
-        globalRecords = it->mSecond;
-    }
+    mHost->mRequestStatistics->StopRequesting(mReceiver->mPackageName, mProvider);
+
+    // remove from mRecordsByProvider
+    AutoPtr<IInterface> _globalRecords;
+    mHost->mRecordsByProvider->Get(CoreUtils::Convert(mProvider), (IInterface**)&_globalRecords);
+    AutoPtr<IArrayList> globalRecords = IArrayList::Probe(_globalRecords);
     if (globalRecords != NULL) {
-        AutoPtr<UpdateRecord> temp(this);
-        globalRecords->Remove(temp);
+        AutoPtr<UpdateRecord> tmp(this);
+        globalRecords->Remove((IInterface*)(IObject*)tmp);
     }
 
     if (!removeReceiver) return;  // the caller will handle the rest
 
     // remove from Receiver#mUpdateRecords
-    HashMap<String, AutoPtr<UpdateRecord> > receiverRecords = mReceiver->mUpdateRecords;
-    if (receiverRecords.Begin() != receiverRecords.End()) {
-        receiverRecords.Erase(mProvider);
+    AutoPtr<IHashMap> receiverRecords = mReceiver->mUpdateRecords;
+    if (receiverRecords != NULL) {
+        receiverRecords->Remove(CoreUtils::Convert(mProvider));
 
         // and also remove the Receiver if it has no more update records
-        if (removeReceiver && receiverRecords.Begin() == receiverRecords.End()) {
+        Int32 size = 0;
+        receiverRecords->GetSize(&size);
+        if (removeReceiver && size == 0) {
             mHost->RemoveUpdatesLocked(mReceiver);
         }
     }
 }
 
-String CLocationManagerService::UpdateRecord::ToString()
+ECode CLocationManagerService::UpdateRecord::ToString(
+    /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result)
     StringBuilder s;
-    s.AppendString(String("UpdateRecord["));
-    s.AppendString(mProvider);
-    s.AppendChar(' ');
-    s.AppendString(mReceiver->mPackageName);
-    s.AppendChar('(');
-    s.AppendInt32(mReceiver->mUid);
-    s.AppendChar(')');
-    s.AppendChar(' ');
-    s.AppendObject((IInterface*)(mRequest.Get()));
-    s.AppendChar(']');
-    String result;
-    s.ToString(&result);
-    return result;
+    s.Append(String("UpdateRecord["));
+    s.Append(mProvider);
+    s.Append(' ');
+    s.Append(mReceiver->mPackageName);
+    s.Append('(');
+    s.Append(mReceiver->mUid);
+    s.Append(')');
+    s.Append(' ');
+    s.Append((IInterface*)(mRequest.Get()));
+    s.Append(']');
+    return s.ToString(result);
 }
 
-/*******************************************************************************************/
-/*                                                                                         */
-/********        CLocationManagerService::LocationContentObserver Start        *************/
-/*                                                                                         */
-/*******************************************************************************************/
-
-CLocationManagerService::LocationContentObserver::LocationContentObserver(
-    /* [in] */ IHandler* handler,
-    /* [in] */ CLocationManagerService* host)
-    : ContentObserver(handler)
-    , mHost(host)
-{}
-
-PInterface CLocationManagerService::LocationContentObserver::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(IContentObserver*)this;
-    }
-    else if (riid == EIID_IContentObserver) {
-        return (IContentObserver*)this;
-    }
-
-    return NULL;
-}
-
-UInt32 CLocationManagerService::LocationContentObserver::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 CLocationManagerService::LocationContentObserver::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode CLocationManagerService::LocationContentObserver::GetInterfaceID(
-    /* [in] */ IInterface* pObject,
-    /* [in] */ InterfaceID* pIID)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CLocationManagerService::LocationContentObserver::OnChange(
-    /* [in] */ Boolean selfUpdate)
-{
-    AutoLock lock(mHost->mLock);
-    mHost->UpdateProvidersLocked();
-    return NOERROR;
-}
-
-/*******************************************************************************************/
-/*                                                                                         */
-/*********              CLocationManagerService::Receiver Start               **************/
-/*                                                                                         */
-/*******************************************************************************************/
+//=================================================================
+// CLocationManagerService::Receiver
+//=================================================================
+CAR_INTERFACE_IMPL_2(CLocationManagerService::Receiver, Object, IProxyDeathRecipient, IPendingIntentOnFinished)
 
 CLocationManagerService::Receiver::Receiver(
     /* [in] */ IILocationListener* listener,
@@ -299,6 +405,8 @@ CLocationManagerService::Receiver::Receiver(
     /* [in] */ Int32 pid,
     /* [in] */ Int32 uid,
     /* [in] */ const String& packageName,
+    /* [in] */ IWorkSource* workSource,
+    /* [in] */ Boolean hideFromAppOps,
     /* [in] */ CLocationManagerService* host)
     : mHost(host)
     , mUid(uid)
@@ -315,40 +423,29 @@ CLocationManagerService::Receiver::Receiver(
         mKey = intent;
     }
     mAllowedResolutionLevel = mHost->GetAllowedResolutionLevel(pid, uid);
-}
 
-PInterface CLocationManagerService::Receiver::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(IProxyDeathRecipient*)this;
-    } else if(riid == EIID_IProxyDeathRecipient) {
-        return (IProxyDeathRecipient*)this;
-    } else if (riid == EIID_IPendingIntentOnFinished) {
-        return (IPendingIntentOnFinished*)this;
+    AutoPtr<IWorkSource> _workSource = workSource;
+    Int32 size = 0;
+    if (_workSource != NULL && (_workSource->GetSize(&size), size) <= 0) {
+        _workSource = NULL;
     }
-    return NULL;
+    mWorkSource = _workSource;
+    mHideFromAppOps = hideFromAppOps;
+
+    UpdateMonitoring(TRUE);
+
+    // construct/configure wakelock
+    mHost->mPowerManager->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, WAKELOCK_KEY, (IPowerManagerWakeLock**)&mWakeLock);
+    if (_workSource == NULL) {
+        CWorkSource::New(mUid, mPackageName, (IWorkSource**)&_workSource);
+    }
+    mWakeLock->SetWorkSource(_workSource);
 }
 
-UInt32 CLocationManagerService::Receiver::AddRef()
+ECode CLocationManagerService::Receiver::ToString(
+    /* [out] */ String* result)
 {
-    return ElRefBase::AddRef();
-}
-
-UInt32 CLocationManagerService::Receiver::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode CLocationManagerService::Receiver::GetInterfaceID(
-    /* [in] */ IInterface* pObject,
-    /* [out] */ InterfaceID* pIID)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-String CLocationManagerService::Receiver::ToString()
-{
+    VALIDATE_NOT_NULL(result)
     StringBuilder s;
     s.Append("Reciever[");
     // s.Append(Integer.toHexString(System.identityHashCode(this)));
@@ -358,15 +455,116 @@ String CLocationManagerService::Receiver::ToString()
     else {
         s.Append(" intent");
     }
-    HashMap<String, AutoPtr<UpdateRecord> >::Iterator it;
-    for (it = mUpdateRecords.Begin(); it != mUpdateRecords.End(); ++it) {
+    AutoPtr<ISet> st;
+    mUpdateRecords->GetKeySet((ISet**)&st);
+    AutoPtr<IIterator> it;
+    st->GetIterator((IIterator**)&it);
+    Boolean bHasNxt = FALSE;
+    while ((it->HasNext(&bHasNxt), bHasNxt)) {
+        AutoPtr<IInterface> _p;
+        it->GetNext((IInterface**)&_p);
+        // AutoPtr<ICharSequence> pStr = ICharSequence::Probe(_p);
+        // String p;
+        // pStr->ToString(&p);
+        AutoPtr<IInterface> val;
+        mUpdateRecords->Get(_p, (IInterface**)&val);
+        AutoPtr<ICharSequence> pStr = ICharSequence::Probe(val);
+        String str;
+        pStr->ToString(&str);
         s.Append(" ");
-        s.AppendString(it->mSecond->ToString());
+        s.Append(str);
     }
     s.Append("]");
-    String result;
-    s.ToString(&result);
-    return result;
+    return s.ToString(result);
+}
+
+void CLocationManagerService::Receiver::UpdateMonitoring(
+    /* [in] */ Boolean allow)
+{
+    if (mHideFromAppOps) {
+        return;
+    }
+
+    Boolean requestingLocation = FALSE;
+    Boolean requestingHighPowerLocation = FALSE;
+    if (allow) {
+        // See if receiver has any enabled update records.  Also note if any update records
+        // are high power (has a high power provider with an interval under a threshold).
+        AutoPtr<ICollection> cl;
+        mUpdateRecords->GetValues((ICollection**)&cl);
+        AutoPtr<IIterator> it;
+        cl->GetIterator((IIterator**)&it);
+        Boolean bHasNxt = FALSE;
+        while ((it->HasNext(&bHasNxt), bHasNxt)) {
+            AutoPtr<IInterface> p;
+            it->GetNext((IInterface**)&p);
+            AutoPtr<UpdateRecord> updateRecord = (UpdateRecord*)IObject::Probe(p);
+            if (mHost->IsAllowedByCurrentUserSettingsLocked(updateRecord->mProvider)) {
+                requestingLocation = TRUE;
+                assert(0 && "TODO");
+                // LocationProviderInterface locationProvider
+                //         = mProvidersByName.get(updateRecord->mProvider);
+                // AutoPtr<IProviderProperties> properties = locationProvider != NULL
+                //         ? locationProvider->GetProperties() : NULL;
+                // if (properties != NULL
+                //         && properties->mPowerRequirement == ICriteria::POWER_HIGH
+                //         && updateRecord->mRequest->GetInterval() < HIGH_POWER_INTERVAL_MS) {
+                //     requestingHighPowerLocation = TRUE;
+                //     break;
+                // }
+            }
+        }
+    }
+
+    // First update monitoring of any location request (including high power).
+    mOpMonitoring = UpdateMonitoring(
+            requestingLocation,
+            mOpMonitoring,
+            IAppOpsManager::OP_MONITOR_LOCATION);
+
+    // Now update monitoring of high power requests only.
+    Boolean wasHighPowerMonitoring = mOpHighPowerMonitoring;
+    mOpHighPowerMonitoring = UpdateMonitoring(
+            requestingHighPowerLocation,
+            mOpHighPowerMonitoring,
+            IAppOpsManager::OP_MONITOR_HIGH_POWER_LOCATION);
+    if (mOpHighPowerMonitoring != wasHighPowerMonitoring) {
+        // Send an intent to notify that a high power request has been added/removed.
+        AutoPtr<IIntent> intent;
+        CIntent::New(ILocationManager::HIGH_POWER_REQUEST_CHANGE_ACTION, (IIntent**)&intent);
+        AutoPtr<IUserHandleHelper> hlp;
+        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&hlp);
+        AutoPtr<IUserHandle> h;
+        hlp->GetALL((IUserHandle**)&h);
+        mHost->mContext->SendBroadcastAsUser(intent, h);
+    }
+}
+
+Boolean CLocationManagerService::Receiver::UpdateMonitoring(
+    /* [in] */ Boolean allowMonitoring,
+    /* [in] */ Boolean currentlyMonitoring,
+    /* [in] */ Int32 op)
+{
+    if (!currentlyMonitoring) {
+        if (allowMonitoring) {
+            Int32 mode = 0;
+            mHost->mAppOps->StartOpNoThrow(op, mUid, mPackageName, &mode);
+            return mode == IAppOpsManager::MODE_ALLOWED;
+        }
+    }
+    else {
+        Int32 mode = 0;
+        mHost->mAppOps->CheckOpNoThrow(op, mUid, mPackageName, &mode);
+        if (allowMonitoring && mode == IAppOpsManager::MODE_ASK) {
+            return TRUE;
+        }
+        if (!allowMonitoring || mode != IAppOpsManager::MODE_ALLOWED) {
+            mHost->mAppOps->FinishOp(op, mUid, mPackageName);
+            return FALSE;
+        }
+    }
+
+    return currentlyMonitoring;
 }
 
 Boolean CLocationManagerService::Receiver::IsListener()
@@ -487,6 +685,10 @@ Boolean CLocationManagerService::Receiver::CallProviderEnabledLocked(
     /* [in] */ const String& provider,
     /* [in] */ Boolean enabled)
 {
+    // First update AppOp monitoring.
+    // An app may get/lose location access as providers are enabled/disabled.
+    UpdateMonitoring(TRUE);
+
     if (mListener != NULL) {
         // try {
         AutoLock lock(mLock);
@@ -541,10 +743,7 @@ ECode CLocationManagerService::Receiver::ProxyDied()
     }
 
     AutoLock lock(mLock);
-    if (mPendingBroadcasts > 0) {
-        mHost->DecrementPendingBroadcasts();
-        mPendingBroadcasts = 0;
-    }
+    ClearPendingBroadcastsLocked();
     return NOERROR;
 }
 
@@ -563,62 +762,78 @@ ECode CLocationManagerService::Receiver::OnSendFinished(
 void CLocationManagerService::Receiver::IncrementPendingBroadcastsLocked()
 {
     if (mPendingBroadcasts++ == 0) {
-        mHost->IncrementPendingBroadcasts();
+        mWakeLock->AcquireLock();
     }
 }
 
 void CLocationManagerService::Receiver::DecrementPendingBroadcastsLocked()
 {
     if (--mPendingBroadcasts == 0) {
-        mHost->DecrementPendingBroadcasts();
+        Boolean b = FALSE;
+        mWakeLock->IsHeld(&b);
+        if (b) {
+            mWakeLock->Release();
+        }
     }
 }
 
-/*******************************************************************************************/
-/*                                                                                         */
-/*********        CLocationManagerService::MyBroadcastReceiver::Start         **************/
-/*                                                                                         */
-/*******************************************************************************************/
-CLocationManagerService::MyBroadcastReceiver::MyBroadcastReceiver(
-    /* [in] */ CLocationManagerService* host)
+void CLocationManagerService::Receiver::ClearPendingBroadcastsLocked()
 {
-    mHost = host;
+    if (mPendingBroadcasts > 0) {
+        mPendingBroadcasts = 0;
+        Boolean b = FALSE;
+        mWakeLock->IsHeld(&b);
+        if (b) {
+            mWakeLock->Release();
+        }
+    }
 }
 
-ECode CLocationManagerService::MyBroadcastReceiver::OnReceive(
-    /* [in] */ IContext* context,
-    /* [in] */ IIntent* intent)
-{
-    String action;
-    intent->GetAction(&action);
-    if (IIntent::ACTION_USER_SWITCHED.Equals(action)) {
-        Int32 userId;
-        intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, 0, &userId);
-        mHost->SwitchUser(userId);
-    }
-    return NOERROR;
-}
-/*******************************************************************************************/
-/*                                                                                         */
-/*********                   CLocationManagerService::Start                   **************/
-/*                                                                                         */
-/*******************************************************************************************/
+//=================================================================
+// CLocationManagerService::
+//=================================================================
+CAR_OBJECT_IMPL(CLocationManagerService)
+
+CAR_INTERFACE_IMPL(CLocationManagerService, Object, IILocationManager)
 
 CLocationManagerService::CLocationManagerService()
     : mLocationFudger(NULL)
     , mGeofenceManager(NULL)
     , mGeocodeProvider(NULL)
     , mBlacklist(NULL)
-    , mPendingBroadcasts(0)
     , mCurrentUserId(IUserHandle::USER_OWNER)
 {
-    mPackageMonitor = new LocationPackageMonitor(this);
+    // mPackageMonitor = new LocationPackageMonitor(this);
+    CHashSet::New((ISet**)&mEnabledProviders);
+    CHashSet::New((ISet**)&mDisabledProviders);
+    CHashMap::New((IHashMap**)&mMockProviders);
+    CHashMap::New((IHashMap**)&mReceivers);
+    CArrayList::New((IArrayList**)&mProviders);
+    CHashMap::New((IHashMap**)&mRealProviders);
+    CHashMap::New((IHashMap**)&mProvidersByName);
+    CHashMap::New((IHashMap**)&mRecordsByProvider);
+
+    mRequestStatistics = new LocationRequestStatistics();
+
+    CHashMap::New((IHashMap**)&mLastLocation);
+    CHashMap::New((IHashMap**)&mLastLocationCoarseInterval);
+    CArrayList::New((IArrayList**)&mProxyProviders);
+
+    mCurrentUserId = IUserHandle::USER_OWNER;
+    mCurrentUserProfiles = ArrayOf<Int32>::Alloc(1);
+    (*mCurrentUserProfiles)[0] = IUserHandle::USER_OWNER;
 }
 
 ECode CLocationManagerService::constructor(
     /* [in] */ IContext* ctx)
 {
     mContext = ctx;
+    AutoPtr<IInterface> p;
+    mContext->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&p);
+    mAppOps = IAppOpsManager::Probe(p);
+    mGeoFencerEnabled = FALSE;
+    if (D) Logger::D(TAG, "Constructed");
+
     // most startup is deferred until systemReady()
     return NOERROR;
 }
@@ -628,106 +843,142 @@ CLocationManagerService::~CLocationManagerService()
     mRecordsByProvider.Clear();
 }
 
-ECode CLocationManagerService::SystemReady()
+ECode CLocationManagerService::SystemRunning()
 {
-    AutoPtr<IThread> thread;
-    ASSERT_SUCCEEDED(CThread::New(NULL, this, String("CLocationManagerService"),
-            (IThread**)&thread));
-    thread->Start();
-    return NOERROR;
-}
-
-ECode CLocationManagerService::Run()
-{
-    Process::SetThreadPriority(IProcess::THREAD_PRIORITY_BACKGROUND);
-    Looper::Prepare();
-    mLocationHandler = new LocationWorkerHandler(this);
-    Init();
-    Looper::Loop();
-    return NOERROR;
-}
-
-void CLocationManagerService::Init()
-{
-    // if (D) Log.d(TAG, "init()");
-
-    AutoPtr<IInterface> obj;
-    ASSERT_SUCCEEDED(mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj));
-    AutoPtr<IPowerManager> pmc = IPowerManager::Probe(obj);
-    if(mWakeLock) mWakeLock = NULL;
-    pmc->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK,
-            WAKELOCK_KEY, (IPowerManagerWakeLock**)&mWakeLock);
-    if(mPackageManager) mPackageManager = NULL;
-    mContext->GetPackageManager((IPackageManager**)&mPackageManager);
-
-    mBlacklist = new LocationBlacklist(mContext, mLocationHandler);
-    mBlacklist->Init();
-    mLocationFudger = new LocationFudger(mContext, mLocationHandler);
-
     {
         AutoLock lock(mLock);
+        if (D) Logger::D(TAG, "systemReady()");
+
+        // fetch package manager
+        mContext->GetPackageManager((IPackageManager**)&mPackageManager);
+
+        // fetch power manager
+        AutoPtr<IInterface> pPM;
+        mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&pPM);
+        mPowerManager = IPowerManager::Probe(pPM);
+
+        // prepare worker thread
+        AutoPtr<IBackgroundThreadHelper> hlp;
+        CBackgroundThreadHelper::AcquireSingleton((IBackgroundThreadHelper**)&hlp);
+        AutoPtr<IBackgroundThread> bt;
+        hlp->GetInstance((IBackgroundThread**)&bt);
+        AutoPtr<ILooper> lp;
+        IHandlerThread::Probe(bt)->GetLooper((ILooper**)&lp);
+        mLocationHandler = new LocationWorkerHandler(lp, this);
+
+        // prepare mLocationHandler's dependents
+        mLocationFudger = new LocationFudger(mContext, mLocationHandler);
+        mBlacklist = new LocationBlacklist(mContext, mLocationHandler);
+        mBlacklist->Init();
+        mGeofenceManager = new GeofenceManager(mContext, mBlacklist);
+
+        // Monitor for app ops mode changes.
+        AutoPtr<AppOpsManagerOnOpChangedInternalListener> callback
+                = new AppOpsManagerOnOpChangedInternalListener(this);
+        mAppOps->StartWatchingMode(IAppOpsManager::OP_COARSE_LOCATION, String(NULL), IAppOpsManagerOnOpChangedListener::Probe(callback));
+
+        AutoPtr<IInterface> ss;
+        mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&ss);
+        mUserManager = IUserManager::Probe(ss);
+        UpdateUserProfiles(mCurrentUserId);
+
+        // prepare providers
         LoadProvidersLocked();
+        UpdateProvidersLocked();
     }
 
-    mGeofenceManager = new GeofenceManager(mContext, mBlacklist);
-
     // listen for settings changes
-    AutoPtr<IContentResolver> resolver;
-    mContext->GetContentResolver((IContentResolver**)&resolver);
-    AutoPtr<ICursor> settingsCursor;
-    AutoPtr<LocationContentObserver> lcObserver = new LocationContentObserver(mLocationHandler, this);
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsSecure> sSecure;
+    //CSettingsSecure::AcquireSingleton((ISettingsSecure**)&sSecure);
     AutoPtr<IUri> uri;
-    AutoPtr<ISettingsSecure> settingsSecure;
-    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
-    settingsSecure->GetUriFor(ISettingsSecure::LOCATION_PROVIDERS_ALLOWED, (IUri**)&uri);
-    resolver->RegisterContentObserver(uri, TRUE, lcObserver.Get(), IUserHandle::USER_ALL);
-    AutoPtr<ILooper> myLooper = Looper::GetMyLooper();
-    mPackageMonitor->Register(mContext, myLooper, TRUE);
+    sSecure->GetUriFor(ISettingsSecure::LOCATION_PROVIDERS_ALLOWED, (IUri**)&uri);
+    AutoPtr<MyContentObserver> co = new MyContentObserver(this);
+    co->constructor(mLocationHandler);
+    cr->RegisterContentObserver(
+            uri, TRUE,
+            co, IUserHandle::USER_ALL);
+    AutoPtr<ILooper> lp;
+    mLocationHandler->GetLooper((ILooper**)&lp);
+    // mPackageMonitor->Register(mContext, lp, TRUE);
 
     // listen for user change
     AutoPtr<IIntentFilter> intentFilter;
     CIntentFilter::New((IIntentFilter**)&intentFilter);
     intentFilter->AddAction(IIntent::ACTION_USER_SWITCHED);
-    AutoPtr<MyBroadcastReceiver> mbr = new MyBroadcastReceiver(this);
-    AutoPtr<IIntent> rst;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    AutoPtr<IUserHandle> ALL;
-    helper->GetALL((IUserHandle**)&ALL);
+    intentFilter->AddAction(IIntent::ACTION_MANAGED_PROFILE_ADDED);
+    intentFilter->AddAction(IIntent::ACTION_MANAGED_PROFILE_REMOVED);
 
-    mContext->RegisterReceiverAsUser(mbr.Get(), ALL, intentFilter, String(NULL), NULL, (IIntent**)&rst);
+    AutoPtr<IUserHandleHelper> hlp;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&hlp);
+    AutoPtr<IUserHandle> h;
+    hlp->GetALL((IUserHandle**)&h);
+    AutoPtr<IIntent> res;
+    mContext->RegisterReceiverAsUser(new MyBroadcastReceiver(this),
+        h, intentFilter, String(NULL), mLocationHandler, (IIntent**)&res);
+    return NOERROR;
+}
 
-    UpdateProvidersLocked();
+void CLocationManagerService::UpdateUserProfiles(
+    /* [in] */ Int32 currentUserId)
+{
+    AutoPtr<IList> profiles;
+    mUserManager->GetProfiles(currentUserId, (IList**)&profiles);
+    synchronized (mLock) {
+        Int32 size = 0;
+        profiles->GetSize(&size);
+        mCurrentUserProfiles = ArrayOf<Int32>::Alloc(size);
+        for (Int32 i = 0; i < mCurrentUserProfiles->GetLength(); i++) {
+            AutoPtr<IInterface> p;
+            profiles->Get(i, (IInterface**)&p);
+            AutoPtr<IUserInfo> _p = IUserInfo::Probe(p);
+            _p->GetId(&((*mCurrentUserProfiles)[i]));
+        }
+    }
+}
+
+Boolean CLocationManagerService::IsCurrentProfile(
+    /* [in] */ Int32 userId)
+{
+    synchronized (mLock) {
+        for (Int32 i = 0; i < mCurrentUserProfiles->GetLength(); i++) {
+            if ((*mCurrentUserProfiles)[i] == userId) {
+                return TRUE;
+            }
+        }
+        return FALSE;
+    }
+    return FALSE;
 }
 
 ECode CLocationManagerService::EnsureFallbackFusedProviderPresentLocked(
-    /* [in] */ List<String>* pkgs)
+    /* [in] */ IArrayList* pkgs)
 {
     AutoPtr<IPackageManager> pm;
     ASSERT_SUCCEEDED(mContext->GetPackageManager((IPackageManager**)&pm));
     String systemPackageName;
     mContext->GetPackageName(&systemPackageName);
-    // TODO: Ignore signature check
-    // List<HashSet<AutoPtr<ISignature> > > sigSets =
-    //         ServiceWatcher::GetSignatureSets(mContext, pkgs);
+    assert(0 && "TODO");
+    AutoPtr<IArrayList> sigSets;// = ServiceWatcher::GetSignatureSets(mContext, pkgs);
 
-    AutoPtr<IObjectContainer> rInfos;
+    AutoPtr<IList> rInfos;
     AutoPtr<IIntent> intent;
     CIntent::New(String(FUSED_LOCATION_SERVICE_ACTION), (IIntent**)&intent);
     pm->QueryIntentServicesAsUser(intent, IPackageManager::GET_META_DATA,
-            mCurrentUserId, (IObjectContainer**)&rInfos);
-    AutoPtr<IObjectEnumerator> enumerator;
-    rInfos->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
+            mCurrentUserId, (IList**)&rInfos);
+    AutoPtr<IIterator> it;
+    rInfos->GetIterator((IIterator**)&it);
     Boolean hasNext = FALSE;
-    while (enumerator->MoveNext(&hasNext), hasNext) {
-        AutoPtr<IInterface> obj;
-        enumerator->Current((IInterface**)&obj);
-        IResolveInfo* rInfo = IResolveInfo::Probe(obj);
+    while ((it->HasNext(&hasNext), hasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<IResolveInfo> rInfo = IResolveInfo::Probe(p);
 
         AutoPtr<IServiceInfo> serviceInfo;
         rInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
         String packageName;
-        serviceInfo->GetPackageName(&packageName);
+        IPackageItemInfo::Probe(serviceInfo)->GetPackageName(&packageName);
 
         // Check that the signature is in the list of supported sigs. If it's not in
         // this list the standard provider binding logic won't bind to it.
@@ -735,7 +986,7 @@ ECode CLocationManagerService::EnsureFallbackFusedProviderPresentLocked(
         AutoPtr<IPackageInfo> pInfo;
         if (FAILED(pm->GetPackageInfo(packageName, IPackageManager::GET_SIGNATURES,
                 (IPackageInfo**)&pInfo))) {
-            // Log.e(TAG, "missing package: " + packageName);
+            Logger::E(TAG, "missing package: %s", packageName.string());
             continue;
         }
 
@@ -748,20 +999,15 @@ ECode CLocationManagerService::EnsureFallbackFusedProviderPresentLocked(
         //     continue;
         // }
 
-        // } catch (NameNotFoundException e) {
-        //     Log.e(TAG, "missing package: " + packageName);
-        //     continue;
-        // }
-
         // Get the version info
         AutoPtr<IBundle> metaData;
-        serviceInfo->GetMetaData((IBundle**)&metaData);
+        IPackageItemInfo::Probe(serviceInfo)->GetMetaData((IBundle**)&metaData);
         if (metaData == NULL) {
-            // Log.w(TAG, "Found fused provider without metadata: " + packageName);
+            Logger::W(TAG, "Found fused provider without metadata: %s", packageName.string());
             continue;
         }
 
-        Int32 version;
+        Int32 version = 0;
         metaData->GetInt32(
                 ServiceWatcher::EXTRA_SERVICE_VERSION, -1, &version);
         if (version == 0) {
@@ -769,31 +1015,33 @@ ECode CLocationManagerService::EnsureFallbackFusedProviderPresentLocked(
 
             // Make sure it's in the system partition.
             AutoPtr<IApplicationInfo> appInfo;
-            serviceInfo->GetApplicationInfo((IApplicationInfo**)&appInfo);
+            IComponentInfo::Probe(serviceInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
             Int32 flags;
             appInfo->GetFlags(&flags);
             if ((flags & IApplicationInfo::FLAG_SYSTEM) == 0) {
-                // if (D) Log.d(TAG, "Fallback candidate not in /system: " + packageName);
+                if (D) Logger::D(TAG, "Fallback candidate not in /system: %s", packageName.string());
                 continue;
             }
 
             // Check that the fallback is signed the same as the OS
             // as a proxy for coreApp="true"
             // TODO: Ignore signature check
-            // Int32 result;
-            // pm->CheckSignatures(systemPackageName, packageName, &result);
-            // if (result != IPackageManager::SIGNATURE_MATCH) {
-            //     // if (D) Log.d(TAG, "Fallback candidate not signed the same as system: "
-            //     //         + packageName);
-            //     continue;
-            // }
+            Int32 result;
+            pm->CheckSignatures(systemPackageName, packageName, &result);
+            if (result != IPackageManager::SIGNATURE_MATCH) {
+                if (D) {
+                    Logger::D(TAG, "Fallback candidate not signed the same as system: %s",
+                        packageName.string());
+                }
+                continue;
+            }
 
             // Found a valid fallback.
-            // if (D) Log.d(TAG, "Found fallback provider: " + packageName);
+            if (D) Logger::D(TAG, "Found fallback provider: %s", packageName.string());
             return NOERROR;
         }
         else {
-            // if (D) Log.d(TAG, "Fallback candidate not version 0: " + packageName);
+            if (D) Logger::D(TAG, "Fallback candidate not version 0: %s", packageName.string());
         }
     }
 
@@ -813,19 +1061,22 @@ void CLocationManagerService::LoadProvidersLocked()
     AddProviderLocked(passiveProvider);
     String name;
     passiveProvider->GetName(&name);
-    mEnabledProviders.Insert(name);
+    mEnabledProviders->Add(CoreUtils::Convert(name));
     mPassiveProvider = passiveProvider;
+    // Create a gps location provider
+    AutoPtr<ILooper> lp;
+    mLocationHandler->GetLooper((ILooper**)&lp);
+    AutoPtr<GpsLocationProvider> gpsProvider = new GpsLocationProvider(mContext, this,
+            lp);
 
-    PFL_EX("DEBUG")
-//    if (GpsLocationProvider::IsSupported()) {
-//        // Create a gps location provider
-//
-//        AutoPtr<GpsLocationProvider> gpsProvider;// = new GpsLocationProvider(mContext, this);
-//        mGpsStatusProvider = gpsProvider->GetGpsStatusProvider();
-//        mNetInitiatedListener = gpsProvider->GetNetInitiatedListener();
-//        AddProviderLocked(gpsProvider);
-//        mRealProviders[ILocationManager::GPS_PROVIDER] = gpsProvider;
-//    }
+    if (GpsLocationProvider::IsSupported()) {
+        gpsProvider->GetGpsStatusProvider((IIGpsStatusProvider**)&mGpsStatusProvider);
+        gpsProvider->GetNetInitiatedListener((IINetInitiatedListener**)&mNetInitiatedListener);
+        AddProviderLocked(gpsProvider);
+        mRealProviders->Put(CoreUtils::Convert(ILocationManager::GPS_PROVIDER), ILocationProviderInterface::Probe(gpsProvider));
+    }
+    gpsProvider->GetGpsMeasurementsProvider((GpsMeasurementsProvider**)&mGpsMeasurementsProvider);
+    gpsProvider->GetGpsNavigationMessageProvider((GpsNavigationMessageProvider**)&mGpsNavigationMessageProvider);
 
     /*
     Load package name(s) containing location provider support.
@@ -840,16 +1091,19 @@ void CLocationManagerService::LoadProvidersLocked()
     */
     AutoPtr<IResources> resources;
     mContext->GetResources((IResources**)&resources);
-    AutoPtr< List<String> > providerPackageNames = new List<String>();
+    AutoPtr<IArrayList> providerPackageNames;
+    CArrayList::New((IArrayList**)&providerPackageNames);
     AutoPtr<ArrayOf<String> > pkgs;
     resources->GetStringArray(
             R::array::config_locationProviderPackageNames, (ArrayOf<String>**)&pkgs);
-    // if (D) Log.d(TAG, "certificates for location providers pulled from: " +
-    //         Arrays.toString(pkgs));
+    if (D) {
+        Logger::D(TAG, "certificates for location providers pulled from: %s",
+            Arrays::ToString(pkgs).string());
+    }
     if (pkgs != NULL) {
-        for (Int32 i = 0; i< pkgs->GetLength(); ++i) {
-            providerPackageNames->PushBack((*pkgs)[i]);
-        }
+        AutoPtr<IList> res;
+        Arrays::AsList(pkgs, (IList**)&res);
+        providerPackageNames->AddAll(ICollection::Probe(res));
     }
 
     EnsureFallbackFusedProviderPresentLocked(providerPackageNames);
@@ -859,14 +1113,16 @@ void CLocationManagerService::LoadProvidersLocked()
             mContext,
             ILocationManager::NETWORK_PROVIDER,
             String(NETWORK_LOCATION_SERVICE_ACTION),
-            providerPackageNames, mLocationHandler, mCurrentUserId);
+            R::bool_::config_enableNetworkLocationOverlay,
+            R::string::config_networkLocationProviderPackageName,
+            R::array::config_locationProviderPackageNames,
+            mLocationHandler);
     if (networkProvider != NULL) {
-        mRealProviders[ILocationManager::NETWORK_PROVIDER] = networkProvider;
-        mProxyProviders.PushBack(networkProvider);
+        mRealProviders->Put(CoreUtils::Convert(ILocationManager::NETWORK_PROVIDER), ILocationProviderInterface::Probe(networkProvider));
+        mProxyProviders->Add(ILocationProviderInterface::Probe(networkProvider));
         AddProviderLocked((ILocationProviderInterface*)networkProvider);
     }
     else {
-        // Slog.w(TAG,  "no network location provider found");
         Slogger::W(TAG, "no network location provider found");
     }
 
@@ -876,58 +1132,189 @@ void CLocationManagerService::LoadProvidersLocked()
                     mContext,
                     ILocationManager::FUSED_PROVIDER,
                     String(FUSED_LOCATION_SERVICE_ACTION),
-                    providerPackageNames, mLocationHandler, mCurrentUserId);
+                    R::bool_::config_enableFusedLocationOverlay,
+                    R::string::config_fusedLocationProviderPackageName,
+                    R::array::config_locationProviderPackageNames,
+                    mLocationHandler);
     if (fusedLocationProvider != NULL) {
         AddProviderLocked(fusedLocationProvider);
-        mProxyProviders.PushBack(fusedLocationProvider);
+        mProxyProviders->Add(ILocationProviderInterface::Probe(fusedLocationProvider));
         String providerName;
         fusedLocationProvider->GetName(&providerName);
-        mEnabledProviders.Insert(providerName);
-        mRealProviders[ILocationManager::FUSED_PROVIDER] = fusedLocationProvider;
+        mEnabledProviders->Add(CoreUtils::Convert(providerName));
+        mRealProviders->Put(CoreUtils::Convert(ILocationManager::FUSED_PROVIDER), ILocationProviderInterface::Probe(fusedLocationProvider));
     }
     else {
         Slogger::E(TAG, "no fused location provider found Location service needs a fused location provider");
     }
 
     // bind to geocoder provider
-    mGeocodeProvider = GeocoderProxy::CreateAndBind(mContext, providerPackageNames,
-            mCurrentUserId);
+    mGeocodeProvider = GeocoderProxy::CreateAndBind(mContext,
+            R::bool_::config_enableGeocoderOverlay,
+            R::string::config_geocoderProviderPackageName,
+            R::array::config_locationProviderPackageNames,
+            mLocationHandler);
     if (mGeocodeProvider == NULL) {
         Slogger::E(TAG,  "no geocoder provider found");
+    }
+
+    resources->GetString(
+            R::string::config_geofenceServicesProvider, &mGeoFencerPackageName);
+    if (!mGeoFencerPackageName.IsNull()) {
+        AutoPtr<IIntent> intent;
+        CIntent::New(mGeoFencerPackageName, (IIntent**)&intent);
+        AutoPtr<IResolveInfo> ri;
+        mPackageManager->ResolveService(intent, 0, (IResolveInfo**)&ri);
+        if (ri != NULL) {
+            //mGeoFencer = GeoFencerProxy::GetGeoFencerProxy(mContext, mGeoFencerPackageName);
+            mGeoFencerEnabled = TRUE;
+        }
+    }
+    else {
+        mGeoFencer = NULL;
+        mGeoFencerEnabled = FALSE;
+    }
+
+    resources->GetString(
+        R::string::config_comboNetworkLocationProvider, &mComboNlpPackageName);
+    if (!mComboNlpPackageName.IsNull()) {
+        mComboNlpReadyMarker = mComboNlpPackageName + ".nlp:ready";
+        mComboNlpScreenMarker = mComboNlpPackageName + ".nlp:screen";
+    }
+
+    // bind to fused hardware provider if supported
+    // in devices without support, requesting an instance of FlpHardwareProvider will raise an
+    // exception, so make sure we only do that when supported
+    AutoPtr<IFlpHardwareProvider> flpHardwareProvider;
+    if (FlpHardwareProvider::IsSupported()) {
+        flpHardwareProvider = FlpHardwareProvider::GetInstance(mContext);
+        AutoPtr<IIFusedLocationHardware> hd;
+        flpHardwareProvider->GetLocationHardware((IIFusedLocationHardware**)&hd);
+        AutoPtr<FusedProxy> fusedProxy = FusedProxy::CreateAndBind(
+                mContext,
+                mLocationHandler,
+                hd,
+                R::bool_::config_enableHardwareFlpOverlay,
+                R::string::config_hardwareFlpPackageName,
+                R::array::config_locationProviderPackageNames);
+        if (fusedProxy == NULL) {
+            Slogger::E(TAG, "Unable to bind FusedProxy.");
+        }
+    }
+    else {
+        flpHardwareProvider = NULL;
+        Slogger::E(TAG, "FLP HAL not supported");
+    }
+
+    // bind to geofence provider
+    AutoPtr<IIFusedGeofenceHardware> hd;
+    if (flpHardwareProvider != NULL) {
+        flpHardwareProvider->GetGeofenceHardware((IIFusedGeofenceHardware**)&hd);
+    }
+    AutoPtr<IIGpsGeofenceHardware> gf;
+    gpsProvider->GetGpsGeofenceProxy((IIGpsGeofenceHardware**)&gf);
+    AutoPtr<GeofenceProxy> provider = GeofenceProxy::CreateAndBind(
+            mContext,
+            R::bool_::config_enableGeofenceOverlay,
+            R::string::config_geofenceProviderPackageName,
+            R::array::config_locationProviderPackageNames,
+            mLocationHandler,
+            gf,
+            hd);
+    if (provider == NULL) {
+        Slogger::E(TAG,  "Unable to bind FLP Geofence proxy.");
+    }
+
+    // bind to the hardware activity recognition if supported
+    Boolean bSup = FALSE;
+    if ((ActivityRecognitionHardware::IsSupported(&bSup), bSup)) {
+        AutoPtr<IActivityRecognitionHardware> arh;
+        ActivityRecognitionHardware::GetInstance(mContext, (IActivityRecognitionHardware**)&arh);
+        AutoPtr<ActivityRecognitionProxy> proxy = ActivityRecognitionProxy::CreateAndBind(
+                mContext,
+                mLocationHandler,
+                arh,
+                R::bool_::config_enableActivityRecognitionHardwareOverlay,
+                R::string::config_activityRecognitionHardwarePackageName,
+                R::array::config_locationProviderPackageNames);
+
+        if (proxy == NULL) {
+            Slogger::E(TAG, "Unable to bind ActivityRecognitionProxy.");
+        }
+    }
+    else {
+        Slogger::E(TAG, "Hardware Activity-Recognition not supported.");
+    }
+
+    AutoPtr<ArrayOf<String> > testProviderStrings;
+    resources->GetStringArray(
+            R::array::config_testLocationProviders, (ArrayOf<String>**)&testProviderStrings);
+    for (Int32 i = 0;i < testProviderStrings->GetLength();i++) {
+        String testProviderString = (*testProviderStrings)[i];
+        AutoPtr<ArrayOf<String> > fragments;
+        StringUtils::Split(testProviderString, String(","), (ArrayOf<String>**)&fragments);
+        String name = (*fragments)[0].Trim();
+        AutoPtr<IInterface> pro;
+        mProvidersByName->Get(CoreUtils::Convert(name), (IInterface**)&pro);
+        if (pro != NULL) {
+            // throw new IllegalArgumentException("Provider \"" + name + "\" already exists");
+            return;
+        }
+        AutoPtr<IProviderProperties> properties;
+        CProviderProperties::New(
+                StringUtils::ParseBoolean((*fragments)[1]) /* requiresNetwork */,
+                StringUtils::ParseBoolean((*fragments)[2]) /* requiresSatellite */,
+                StringUtils::ParseBoolean((*fragments)[3]) /* requiresCell */,
+                StringUtils::ParseBoolean((*fragments)[4]) /* hasMonetaryCost */,
+                StringUtils::ParseBoolean((*fragments)[5]) /* supportsAltitude */,
+                StringUtils::ParseBoolean((*fragments)[6]) /* supportsSpeed */,
+                StringUtils::ParseBoolean((*fragments)[7]) /* supportsBearing */,
+                StringUtils::ParseInt32((*fragments)[8]) /* powerRequirement */,
+                StringUtils::ParseInt32((*fragments)[9]) /* accuracy */,
+                (IProviderProperties**)&properties);
+        AddTestProviderLocked(name, properties);
     }
 }
 
 void CLocationManagerService::SwitchUser(
     /* [in] */ Int32 userId)
 {
+    if (mCurrentUserId == userId) {
+        return;
+    }
     mBlacklist->SwitchUser(userId);
+    mLocationHandler->RemoveMessages(MSG_LOCATION_CHANGED);
     AutoLock lock(mLock);
     mLastLocation.Clear();
-    List<AutoPtr<ILocationProviderInterface> >::Iterator it;
-    for (it = mProviders.Begin(); it != mProviders.End(); ++it) {
-        AutoPtr<ILocationProviderInterface> p = *it;
+    mLastLocationCoarseInterval.Clear();
+    AutoPtr<IIterator> it;
+    mProviders->GetIterator((IIterator**)&it);
+    Boolean bHasNxt = FALSE;
+    while ((it->HasNext(&bHasNxt), bHasNxt)) {
+        AutoPtr<IInterface> _p;
+        it->GetNext((IInterface**)&_p);
+        AutoPtr<ILocationProviderInterface> p = ILocationProviderInterface::Probe(_p);
         String name;
         p->GetName(&name);
-        UpdateProviderListenersLocked(name, FALSE, mCurrentUserId);
-        p->SwitchUser(userId);
+        UpdateProviderListenersLocked(name, FALSE);
     }
     mCurrentUserId = userId;
+    UpdateUserProfiles(userId);
     UpdateProvidersLocked();
 }
 
 ECode CLocationManagerService::LocationCallbackFinished(
     /* [in] */ IILocationListener* listener)
 {
-    //Do not use getReceiver here as that will add the ILocationListener to
+    //Do not use getReceiverLocked here as that will add the ILocationListener to
     //the receiver list if it is not found.  If it is not found then the
     //LocationListener was removed when it had a pending broadcast and should
     //not be added back.
-    AutoPtr<Receiver> receiver;
-    AutoPtr<IInterface> temp = listener;
-    InterfaceReceiverIterator it = mReceivers.Find(temp);
-    if (it != mReceivers.End()) {
-        receiver = it->mSecond;
-    }
+    AutoLock lock(mLock);
+    AutoPtr<IBinder> binder;// = listener->AsBinder();
+    AutoPtr<IInterface> p;
+    mReceivers->Get(binder, (IInterface**)&p);
+    AutoPtr<Receiver> receiver = (Receiver*)IProxyDeathRecipient::Probe(p);
     if (receiver != NULL) {
         AutoLock lock(receiver->mLock);
             // so wakelock calls will succeed
@@ -941,42 +1328,30 @@ ECode CLocationManagerService::LocationCallbackFinished(
 void CLocationManagerService::AddProviderLocked(
     /* [in] */ ILocationProviderInterface* provider)
 {
-    mProviders.PushBack(provider);
+    mProviders->Add(provider);
     String name;
     provider->GetName(&name);
-    mProvidersByName[name] = provider;
+    mProvidersByName->Put(CoreUtils::Convert(name), provider);
 }
 
 void CLocationManagerService::RemoveProviderLocked(
     /* [in] */ ILocationProviderInterface* provider)
 {
     provider->Disable();
-    List<AutoPtr<ILocationProviderInterface> >::Iterator it = mProviders.Begin();
-    for(; it != mProviders.End(); ++it) {
-        if (provider == *it) {
-            break;
-        }
-    }
-    if(it != mProviders.End())
-    {
-        mProviders.Erase(it);
-    }
+    mProviders->Remove(provider);
     String name;
     provider->GetName(&name);
-    mProvidersByName.Erase(name);
+    mProvidersByName->Remove(CoreUtils::Convert(name));
 }
 
-Boolean CLocationManagerService::IsAllowedBySettingsLocked(
-    /* [in] */ const String& provider,
-    /* [in] */ Int32 userId)
+Boolean CLocationManagerService::IsAllowedByCurrentUserSettingsLocked(
+    /* [in] */ const String& provider)
 {
-    if (userId != mCurrentUserId) {
-        return FALSE;
-    }
-    if (mEnabledProviders.Find(provider) != mEnabledProviders.End()) {
+    Boolean bContain = FALSE;
+    if ((mEnabledProviders->Contains(CoreUtils::Convert(provider), &bContain), bContain)) {
         return TRUE;
     }
-    if (mDisabledProviders.Find(provider) != mDisabledProviders.End()) {
+    if ((mDisabledProviders->Contains(CoreUtils::Convert(provider), &bContain), bContain)) {
         return FALSE;
     }
     // Use system settings
@@ -985,9 +1360,23 @@ Boolean CLocationManagerService::IsAllowedBySettingsLocked(
 
     Boolean rst;
     AutoPtr<ISettingsSecure> settingsSecure;
-    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
+    //CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
     settingsSecure->IsLocationProviderEnabled(resolver, provider, &rst);
     return rst;
+}
+
+Boolean CLocationManagerService::IsAllowedByUserSettingsLocked(
+    /* [in] */ String provider,
+    /* [in] */ Int32 uid)
+{
+    AutoPtr<IUserHandleHelper> helper;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
+    Int32 userHandleId = 0;
+    helper->GetUserId(uid, &userHandleId);
+    if (!IsCurrentProfile(userHandleId) && !IsUidALocationProvider(uid)) {
+        return FALSE;
+    }
+    return IsAllowedByCurrentUserSettingsLocked(provider);
 }
 
 String CLocationManagerService::GetResolutionPermission(
@@ -995,9 +1384,9 @@ String CLocationManagerService::GetResolutionPermission(
 {
     switch (resolutionLevel) {
         case RESOLUTION_LEVEL_FINE:
-            return Elastos::Droid::Manifest::permission::ACCESS_FINE_LOCATION;
+            return Manifest::permission::ACCESS_FINE_LOCATION;
         case RESOLUTION_LEVEL_COARSE:
-            return Elastos::Droid::Manifest::permission::ACCESS_COARSE_LOCATION;
+            return Manifest::permission::ACCESS_COARSE_LOCATION;
         default:
             return String(NULL);
     }
@@ -1008,13 +1397,13 @@ Int32 CLocationManagerService::GetAllowedResolutionLevel(
     /* [in] */ Int32 uid)
 {
     Int32 result;
-    FAIL_RETURN(mContext->CheckPermission(Elastos::Droid::Manifest::permission::ACCESS_FINE_LOCATION,
+    FAIL_RETURN(mContext->CheckPermission(Manifest::permission::ACCESS_FINE_LOCATION,
             pid, uid, &result));
     if (result == IPackageManager::PERMISSION_GRANTED) {
         return RESOLUTION_LEVEL_FINE;
     }
     else {
-        FAIL_RETURN(mContext->CheckPermission(Elastos::Droid::Manifest::permission::ACCESS_COARSE_LOCATION,
+        FAIL_RETURN(mContext->CheckPermission(Manifest::permission::ACCESS_COARSE_LOCATION,
                 pid, uid, &result));
         if (result == IPackageManager::PERMISSION_GRANTED) {
             return RESOLUTION_LEVEL_COARSE;
@@ -1055,12 +1444,9 @@ Int32 CLocationManagerService::GetMinimumResolutionLevelForProviderUse(
     }
     else {
         // mock providers
-        HashMap<String, AutoPtr<MockProvider> >::Iterator it
-                = mMockProviders.Find(provider);
-        AutoPtr<ILocationProviderInterface> lp;
-        if (it != mMockProviders.End()) {
-            lp = it->mSecond;
-        }
+        AutoPtr<IInterface> p;
+        mMockProviders->Get(CoreUtils::Convert(provider), (IInterface**)&p);
+        AutoPtr<ILocationProviderInterface> lp = ILocationProviderInterface::Probe(p);
         if (lp != NULL) {
             AutoPtr<IProviderProperties> properties;
             lp->GetProperties((IProviderProperties**)&properties);
@@ -1110,58 +1496,137 @@ ECode CLocationManagerService::CheckResolutionLevelIsSufficientForProviderUse(
     return NOERROR;
 }
 
+void CLocationManagerService::CheckDeviceStatsAllowed()
+{
+    mContext->EnforceCallingOrSelfPermission(
+            Manifest::permission::UPDATE_DEVICE_STATS, String(NULL));
+}
+
+void CLocationManagerService::CheckUpdateAppOpsAllowed()
+{
+    mContext->EnforceCallingOrSelfPermission(
+            Manifest::permission::UPDATE_APP_OPS_STATS, String(NULL));
+}
+
+ECode CLocationManagerService::ResolutionLevelToOp(
+    /* [in] */ Int32 allowedResolutionLevel,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    if (allowedResolutionLevel != RESOLUTION_LEVEL_NONE) {
+        if (allowedResolutionLevel == RESOLUTION_LEVEL_COARSE) {
+            *result = IAppOpsManager::OP_COARSE_LOCATION;
+            return NOERROR;
+        }
+        else {
+            *result = IAppOpsManager::OP_FINE_LOCATION;
+            return NOERROR;
+        }
+    }
+    *result = -1;
+    return NOERROR;
+}
+
+Boolean CLocationManagerService::ReportLocationAccessNoThrow(
+    /* [in] */ Int32 uid,
+    /* [in] */ String packageName,
+    /* [in] */ Int32 allowedResolutionLevel)
+{
+    Int32 op = 0;
+    ResolutionLevelToOp(allowedResolutionLevel, &op);
+    if (op >= 0) {
+        Int32 mode = 0;
+        mAppOps->NoteOpNoThrow(op, uid, packageName, &mode);
+        if (mode != IAppOpsManager::MODE_ALLOWED) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+Boolean CLocationManagerService::CheckLocationAccess(
+    /* [in] */ Int32 uid,
+    /* [in] */ String packageName,
+    /* [in] */ Int32 allowedResolutionLevel)
+{
+    Int32 op = 0;
+    ResolutionLevelToOp(allowedResolutionLevel, &op);
+    if (op >= 0) {
+        Int32 mode = 0;
+        mAppOps->CheckOp(op, uid, packageName, &mode);
+        if (mode != IAppOpsManager::MODE_ALLOWED && mode != IAppOpsManager::MODE_ASK) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
 ECode CLocationManagerService::GetAllProviders(
-    /* [out] */ IObjectContainer** allProviders)
+    /* [out] */ IList** allProviders)
 {
     VALIDATE_NOT_NULL(allProviders);
 
-    AutoLock lock(mLock);
-
-    CParcelableObjectContainer::New(allProviders);
-    List<AutoPtr<ILocationProviderInterface> >::Iterator it;
-    for (it = mProviders.Begin(); it != mProviders.End(); ++it) {
-        String name;
-        (*it)->GetName(&name);
-        if (ILocationManager::FUSED_PROVIDER.Equals(name)) {
-            continue;
+    AutoPtr<IArrayList> out;
+    {
+        AutoLock lock(mLock);
+        Int32 size = 0;
+        mProviders->GetSize(&size);
+        CArrayList::New(size, (IArrayList**)&out);
+        AutoPtr<IIterator> it;
+        mProviders->GetIterator((IIterator**)&it);
+        Boolean bHasNxt = FALSE;
+        while ((it->HasNext(&bHasNxt), bHasNxt)) {
+            AutoPtr<IInterface> p;
+            it->GetNext((IInterface**)&p);
+            AutoPtr<ILocationProviderInterface> provider = ILocationProviderInterface::Probe(p);
+            String name;
+            provider->GetName(&name);
+            if (ILocationManager::FUSED_PROVIDER.Equals(name)) {
+                continue;
+            }
+            AutoPtr<ICharSequence> wrapper;
+            CString::New(name, (ICharSequence**)&wrapper);
+            out->Add(wrapper.Get());
         }
-        AutoPtr<ICharSequence> wrapper;
-        CString::New(name, (ICharSequence**)&wrapper);
-        (*allProviders)->Add(wrapper.Get());
     }
 
-    // if (D) Log.d(TAG, "getAllProviders()=" + out);
+    if (D) Logger::D(TAG, "getAllProviders()=%p", out.Get());
+    *allProviders = IList::Probe(out);
+    REFCOUNT_ADD(*allProviders)
     return NOERROR;
 }
 
 ECode CLocationManagerService::GetProviders(
     /* [in] */ ICriteria* criteria,
     /* [in] */ Boolean enabledOnly,
-    /* [out] */ IObjectContainer** providers)
+    /* [out] */ IList** providers)
 {
     VALIDATE_NOT_NULL(providers);
 
     Int32 allowedResolutionLevel = GetCallerAllowedResolutionLevel();
-    AutoPtr<IUserHandleHelper> h;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&h);
-    Int32 callingUserId;
-    h->GetCallingUserId(&callingUserId);
+    AutoPtr<IArrayList> out;
+    Int32 uid = Binder::GetCallingUid();
     Int64 identity = Binder::ClearCallingIdentity();
 
-    // try {
     AutoLock lock(mLock);
 
-    CParcelableObjectContainer::New(providers);
-    List<AutoPtr<ILocationProviderInterface> >::Iterator it;
-    for (it = mProviders.Begin(); it != mProviders.End(); ++it) {
-        AutoPtr<ILocationProviderInterface> provider = *it;
+    Int32 size = 0;
+    mProviders->GetSize(&size);
+    CArrayList::New(size, (IArrayList**)&out);
+    AutoPtr<IIterator> it;
+    mProviders->GetIterator((IIterator**)&it);
+    Boolean bHasNxt = FALSE;
+    while ((it->HasNext(&bHasNxt), bHasNxt)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<ILocationProviderInterface> provider = ILocationProviderInterface::Probe(p);
         String name;
         provider->GetName(&name);
         if (ILocationManager::FUSED_PROVIDER.Equals(name)) {
             continue;
         }
         if (allowedResolutionLevel >= GetMinimumResolutionLevelForProviderUse(name)) {
-            if (enabledOnly && !IsAllowedBySettingsLocked(name, callingUserId)) {
+            if (enabledOnly && !IsAllowedByUserSettingsLocked(name, uid)) {
                 continue;
             }
 
@@ -1178,13 +1643,14 @@ ECode CLocationManagerService::GetProviders(
             }
             AutoPtr<ICharSequence> wrapper;
             CString::New(name, (ICharSequence**)&wrapper);
-            (*providers)->Add(wrapper);
+            out->Add(wrapper);
         }
     }
-    // } finally {
-    //     Binder.restoreCallingIdentity(identity);
-    // }
     Binder::RestoreCallingIdentity(identity);
+
+    if (D) Logger::D(TAG, "getProviders()=%p", out.Get());
+    *providers = IList::Probe(out);
+    REFCOUNT_ADD(*providers)
     return NOERROR;
 }
 
@@ -1194,60 +1660,50 @@ ECode CLocationManagerService::GetBestProvider(
     /* [out] */ String* provider)
 {
     VALIDATE_NOT_NULL(provider);
+    String result(NULL);
 
-    *provider = String(NULL);
-
-    AutoPtr<IObjectContainer> providers;
-    GetProviders(criteria, enabledOnly, (IObjectContainer**)&providers);
-    AutoPtr<IObjectEnumerator> enumerator;
-    providers->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
-    Boolean hasNext = FALSE;
-    enumerator->MoveNext(&hasNext);
-    if (hasNext) {
-        *provider = PickBest(providers);
-        // if (D) Log.d(TAG, "getBestProvider(" + criteria + ", " + enabledOnly + ")=" + result);
+    AutoPtr<IList> providers;
+    GetProviders(criteria, enabledOnly, (IList**)&providers);
+    Boolean bEmp = FALSE;
+    if (!(providers->IsEmpty(&bEmp), bEmp)) {
+        result = PickBest(providers);
+        if (D) Logger::D(TAG, "getBestProvider(%p, %b)=%s", criteria, enabledOnly, result.string());
+        *provider = result;
         return NOERROR;
     }
 
     providers = NULL;
-    GetProviders(NULL, enabledOnly, (IObjectContainer**)&providers);
-    enumerator = NULL;
-    providers->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
-    enumerator->MoveNext(&hasNext);
-    if (hasNext) {
-        *provider = PickBest(providers);
-        // if (D) Log.d(TAG, "getBestProvider(" + criteria + ", " + enabledOnly + ")=" + result);
+    GetProviders(NULL, enabledOnly, (IList**)&providers);
+    if (!(providers->IsEmpty(&bEmp), bEmp)) {
+        result = PickBest(providers);
+        if (D) Logger::D(TAG, "getBestProvider(%p, %b)=%s", criteria, enabledOnly, result.string());
+        *provider = result;
         return NOERROR;
     }
 
-    // if (D) Log.d(TAG, "getBestProvider(" + criteria + ", " + enabledOnly + ")=" + result);
+    if (D) Logger::D(TAG, "getBestProvider(%p, %b)=%s", criteria, enabledOnly, result.string());
+    *provider = String(NULL);
     return NOERROR;
 }
 
 String CLocationManagerService::PickBest(
-    /* [in] */ IObjectContainer* providers)
+    /* [in] */ IList* providers)
 {
-    AutoPtr<IObjectEnumerator> enumerator;
-    providers->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
-    Boolean hasNext = FALSE;
-    String s;
-    while (enumerator->MoveNext(&hasNext), hasNext) {
-        AutoPtr<IInterface> obj;
-        enumerator->Current((IInterface**)&obj);
-        ICharSequence::Probe(obj)->ToString(&s);
-        if (s.Equals(ILocationManager::GPS_PROVIDER)) {
-            return ILocationManager::GPS_PROVIDER;
-        }
-        else if (s.Equals(ILocationManager::NETWORK_PROVIDER)) {
-            return ILocationManager::NETWORK_PROVIDER;
-        }
+    Boolean bContain = FALSE;
+    if ((providers->Contains(CoreUtils::Convert(ILocationManager::GPS_PROVIDER), &bContain), bContain)) {
+        return ILocationManager::GPS_PROVIDER;
     }
-    enumerator->Reset();
-    enumerator->MoveNext(&hasNext);
-    AutoPtr<IInterface> obj;
-    enumerator->Current((IInterface**)&obj);
-    ICharSequence::Probe(obj)->ToString(&s);
-    return s;
+    else if ((providers->Contains(CoreUtils::Convert(ILocationManager::NETWORK_PROVIDER), &bContain), bContain)) {
+        return ILocationManager::NETWORK_PROVIDER;
+    }
+    else {
+        AutoPtr<IInterface> p;
+        providers->Get(0, (IInterface**)&p);
+        AutoPtr<ICharSequence> pStr = ICharSequence::Probe(p);
+        String str;
+        pStr->ToString(&str);
+        return str;
+    }
 }
 
 ECode CLocationManagerService::ProviderMeetsCriteria(
@@ -1257,12 +1713,9 @@ ECode CLocationManagerService::ProviderMeetsCriteria(
 {
     VALIDATE_NOT_NULL(result);
 
-    AutoPtr<ILocationProviderInterface> p;
-    HashMap<String, AutoPtr<ILocationProviderInterface> >::Iterator it
-            = mProvidersByName.Find(provider);
-    if (it != mProvidersByName.End()) {
-        p = it->mSecond;
-    }
+    AutoPtr<IInterface> _p;
+    mProvidersByName->Get(CoreUtils::Convert(provider), (IInterface**)&_p);
+    AutoPtr<ILocationProviderInterface> p = ILocationProviderInterface::Probe(_p);
     if (p == NULL) {
         // throw new IllegalArgumentException("provider=" + provider);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1274,7 +1727,7 @@ ECode CLocationManagerService::ProviderMeetsCriteria(
     AutoPtr<IProviderProperties> properties;
     p->GetProperties((IProviderProperties**)&properties);
     helper->PropertiesMeetCriteria(name, properties, criteria, result);
-    // if (D) Log.d(TAG, "providerMeetsCriteria(" + provider + ", " + criteria + ")=" + result);
+    if (D) Logger::D(TAG, "providerMeetsCriteria(%s, %p)=%b", provider.string(), criteria, result);
     return NOERROR;
 }
 
@@ -1282,20 +1735,29 @@ void CLocationManagerService::UpdateProvidersLocked()
 {
     Boolean changesMade = FALSE;
 
-    List<AutoPtr<ILocationProviderInterface> >::ReverseIterator rit;
-    for (rit = mProviders.RBegin(); rit != mProviders.REnd(); ++rit) {
-        AutoPtr<ILocationProviderInterface> p = *rit;
-        Boolean isEnabled;
+    AutoPtr<IIterator> it;
+    mProviders->GetIterator((IIterator**)&it);
+    Boolean bHasNxt = FALSE;
+    while ((it->HasNext(&bHasNxt), bHasNxt)) {
+        AutoPtr<IInterface> _p;
+        it->GetNext((IInterface**)&_p);
+        AutoPtr<ILocationProviderInterface> p = ILocationProviderInterface::Probe(_p);
+        Boolean isEnabled = FALSE;
         p->IsEnabled(&isEnabled);
         String name;
         p->GetName(&name);
-        Boolean shouldBeEnabled = IsAllowedBySettingsLocked(name, mCurrentUserId);
+        Boolean shouldBeEnabled = IsAllowedByCurrentUserSettingsLocked(name);
         if (isEnabled && !shouldBeEnabled) {
-            UpdateProviderListenersLocked(name, FALSE, mCurrentUserId);
+            UpdateProviderListenersLocked(name, FALSE);
+            // If any provider has been disabled, clear all last locations for all providers.
+            // This is to be on the safe side in case a provider has location derived from
+            // this disabled provider.
+            mLastLocation->Clear();
+            mLastLocationCoarseInterval->Clear();
             changesMade = TRUE;
         }
         else if (!isEnabled && shouldBeEnabled) {
-            UpdateProviderListenersLocked(name, TRUE, mCurrentUserId);
+            UpdateProviderListenersLocked(name, TRUE);
             changesMade = TRUE;
         }
     }
@@ -1307,49 +1769,49 @@ void CLocationManagerService::UpdateProvidersLocked()
         AutoPtr<IUserHandle> all;
         helper->GetALL((IUserHandle**)&all);
         mContext->SendBroadcastAsUser(intent, all);
+        AutoPtr<IIntent> intentMode;
+        CIntent::New(ILocationManager::MODE_CHANGED_ACTION, (IIntent**)&intentMode);
+        mContext->SendBroadcastAsUser(intentMode, all);
     }
 }
 
 void CLocationManagerService::UpdateProviderListenersLocked(
     /* [in] */ const String& provider,
-    /* [in] */ Boolean enabled,
-    /* [in] */ Int32 userId)
+    /* [in] */ Boolean enabled)
 {
     Int32 listeners = 0;
 
-    AutoPtr<ILocationProviderInterface> p;
-    HashMap<String, AutoPtr<ILocationProviderInterface> >::Iterator it =
-            mProvidersByName.Find(provider);
-    if (it != mProvidersByName.End()) {
-        p = it->mSecond;
-    }
+    AutoPtr<IInterface> _p;
+    mProvidersByName->Get(CoreUtils::Convert(provider), (IInterface**)&_p);
+    AutoPtr<ILocationProviderInterface> p = ILocationProviderInterface::Probe(_p);
     if (p == NULL) {
         return;
     }
 
-    AutoPtr< List<AutoPtr<Receiver> > > deadReceivers;
+    AutoPtr<IArrayList> deadReceivers;
 
-    AutoPtr< UpdateRecordList > records;
-    HashMap<String, AutoPtr< UpdateRecordList > >::Iterator hmIt =
-            mRecordsByProvider.Find(provider);
-    if (hmIt != mRecordsByProvider.End()) {
-        records = hmIt->mSecond;
-    }
+    AutoPtr<IInterface> _records;
+    mRecordsByProvider->Get(CoreUtils::Convert(provider), (IInterface**)&_records);
+    AutoPtr<IArrayList> records = IArrayList::Probe(_records);
+
     if (records != NULL) {
-        List<AutoPtr<UpdateRecord> >::Iterator lit;
-        for (lit = records->Begin(); lit != records->End(); ++lit) {
-            AutoPtr<UpdateRecord> record = *lit;
+        Int32 N = 0;
+        records->GetSize(&N);
+        for (Int32 i = 0; i < N; i++) {
+            AutoPtr<IInterface> p;
+            records->Get(i, (IInterface**)&p);
+            AutoPtr<UpdateRecord> record = (UpdateRecord*)IObject::Probe(p);
             AutoPtr<IUserHandleHelper> helper;
             CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-            Int32 userHandleId;
+            Int32 userHandleId = 0;
             helper->GetUserId(record->mReceiver->mUid, &userHandleId);
-            if (userHandleId == userId) {
+            if (IsCurrentProfile(userHandleId)) {
                 // Sends a notification message to the receiver
                 if (!record->mReceiver->CallProviderEnabledLocked(provider, enabled)) {
                     if (deadReceivers == NULL) {
-                        deadReceivers = new List<AutoPtr<Receiver> >();
+                        CArrayList::New((IArrayList**)&deadReceivers);
                     }
-                    deadReceivers->PushBack(record->mReceiver);
+                    deadReceivers->Add((IInterface*)(IObject*)(record->mReceiver));
                 }
                 listeners++;
             }
@@ -1357,9 +1819,13 @@ void CLocationManagerService::UpdateProviderListenersLocked(
     }
 
     if (deadReceivers != NULL) {
-        List<AutoPtr<Receiver> >::ReverseIterator lrit;
-        for (lrit = deadReceivers->RBegin(); lrit != deadReceivers->REnd(); ++lrit) {
-            RemoveUpdatesLocked(*lrit);
+        Int32 size = 0;
+        deadReceivers->GetSize(&size);
+        for (Int32 i = size - 1; i >= 0; i--) {
+            AutoPtr<IInterface> p;
+            deadReceivers->Get(i, (IInterface**)&p);
+            AutoPtr<Receiver> _p = (Receiver*)IObject::Probe(p);
+            RemoveUpdatesLocked(_p);
         }
     }
 
@@ -1377,47 +1843,49 @@ void CLocationManagerService::UpdateProviderListenersLocked(
 void CLocationManagerService::ApplyRequirementsLocked(
     /* [in] */ const String& provider)
 {
-    AutoPtr<ILocationProviderInterface> p;
-    HashMap<String, AutoPtr<ILocationProviderInterface> >::Iterator it =
-            mProvidersByName.Find(provider);
-    if (it != mProvidersByName.End()) {
-        p = it->mSecond;
-    }
+    AutoPtr<IInterface> _p;
+    mProvidersByName->Get(CoreUtils::Convert(provider), (IInterface**)&_p);
+    AutoPtr<ILocationProviderInterface> p = ILocationProviderInterface::Probe(_p);
     if (p == NULL) return;
 
-    AutoPtr< UpdateRecordList > records;
-    HashMap<String, AutoPtr< UpdateRecordList > >::Iterator hmIt =
-            mRecordsByProvider.Find(provider);
-    if (hmIt != mRecordsByProvider.End()) {
-        records = hmIt->mSecond;
-    }
+    AutoPtr<IInterface> _records;
+    mRecordsByProvider->Get(CoreUtils::Convert(provider), (IInterface**)&_records);
+    AutoPtr<IArrayList> records = IArrayList::Probe(_records);
     AutoPtr<IWorkSource> worksource;
     CWorkSource::New((IWorkSource**)&worksource);
     AutoPtr<IProviderRequest> providerRequest;
-    CProviderRequest::New((IProviderRequest**)&providerRequest);
+    assert(0 && "TODO");
+    // CProviderRequest::New((IProviderRequest**)&providerRequest);
 
     if (records != NULL) {
-        List<AutoPtr<UpdateRecord> >::Iterator recordIt;
-        for (recordIt = records->Begin(); recordIt != records->End(); ++recordIt) {
-            AutoPtr<UpdateRecord> record = *recordIt;
+        AutoPtr<IIterator> it;
+        records->GetIterator((IIterator**)&it);
+        Boolean bHasNxt = FALSE;
+        while ((it->HasNext(&bHasNxt), bHasNxt)) {
+            AutoPtr<IInterface> p;
+            it->GetNext((IInterface**)&p);
+            AutoPtr<UpdateRecord> record = (UpdateRecord*)IObject::Probe(p);
             AutoPtr<IUserHandleHelper> helper;
             CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-            Int32 userHandleId;
+            Int32 userHandleId = 0;
             helper->GetUserId(record->mReceiver->mUid, &userHandleId);
-            if (userHandleId == mCurrentUserId) {
-                AutoPtr<ILocationRequest> locationRequest = record->mRequest;
-                providerRequest->SetLocationRequest(locationRequest);
-                Int64 locationInterval, providerInterval;
-                locationRequest->GetInterval(&locationInterval);
-                providerRequest->GetInterval(&providerInterval);
-                if (locationInterval < providerInterval) {
-                    providerRequest->SetReportLocation(TRUE);
-                    providerRequest->SetInterval(locationInterval);
+            if (IsCurrentProfile(userHandleId)) {
+                if (CheckLocationAccess(record->mReceiver->mUid, record->mReceiver->mPackageName,
+                        record->mReceiver->mAllowedResolutionLevel)) {
+                    AutoPtr<ILocationRequest> locationRequest = record->mRequest;
+                    // providerRequest->SetLocationRequest(locationRequest);
+                    Int64 locationInterval = 0, providerInterval = 0;
+                    locationRequest->GetInterval(&locationInterval);
+                    providerRequest->GetInterval(&providerInterval);
+                    if (locationInterval < providerInterval) {
+                        providerRequest->SetReportLocation(TRUE);
+                        providerRequest->SetInterval(locationInterval);
+                    }
                 }
             }
         }
 
-        Boolean value;
+        Boolean value = FALSE;
         providerRequest->GetReportLocation(&value);
         if (value) {
             // calculate who to blame for power
@@ -1425,22 +1893,44 @@ void CLocationManagerService::ApplyRequirementsLocked(
             // that is slightly higher that the minimum interval, and
             // spread the blame across all applications with a request
             // under that threshold.
-            Int64 interval;
+            Int64 interval = 0;
             providerRequest->GetInterval(&interval);
             Int64 thresholdInterval = (interval + 1000) * 3 / 2;
-            for (recordIt = records->Begin(); recordIt != records->End(); ++recordIt) {
-                AutoPtr<UpdateRecord> record = *recordIt;
+            it = NULL;
+            records->GetIterator((IIterator**)&it);
+            bHasNxt = FALSE;
+            while ((it->HasNext(&bHasNxt), bHasNxt)) {
+                AutoPtr<IInterface> p;
+                it->GetNext((IInterface**)&p);
+                AutoPtr<UpdateRecord> record = (UpdateRecord*)IObject::Probe(p);
                 AutoPtr<IUserHandleHelper> helper;
                 CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
                 Int32 userHandleId;
                 helper->GetUserId(record->mReceiver->mUid, &userHandleId);
-                if (userHandleId == mCurrentUserId) {
+                if (IsCurrentProfile(userHandleId)) {
                     AutoPtr<ILocationRequest> locationRequest = record->mRequest;
                     Int64 locationInterval;
                     locationRequest->GetInterval(&locationInterval);
                     if (locationInterval <= thresholdInterval) {
-                        Boolean addRst;
-                        worksource->Add(record->mReceiver->mUid, &addRst);
+                        if (record->mReceiver->mWorkSource != NULL) {
+                            Int32 size = 0;
+                            record->mReceiver->mWorkSource->GetSize(&size);
+                            String name;
+                            record->mReceiver->mWorkSource->GetName(0, &name);
+                            if ( size > 0 && !name.IsNull()) {
+                                // Assign blame to another work source.
+                                // Can only assign blame if the WorkSource contains names.
+                                Boolean addRst;
+                                worksource->Add(record->mReceiver->mWorkSource, &addRst);
+                            }
+                        }
+                        else {
+                            // Assign blame to caller.
+                            Boolean addRst;
+                            worksource->Add(
+                                    record->mReceiver->mUid,
+                                    record->mReceiver->mPackageName, &addRst);
+                        }
                     }
                 }
             }
@@ -1451,54 +1941,52 @@ void CLocationManagerService::ApplyRequirementsLocked(
     p->SetRequest(providerRequest, worksource);
 }
 
-AutoPtr<CLocationManagerService::Receiver> CLocationManagerService::GetReceiver(
+AutoPtr<CLocationManagerService::Receiver> CLocationManagerService::GetReceiverLocked(
     /* [in] */ IILocationListener* listener,
     /* [in] */ Int32 pid,
     /* [in] */ Int32 uid,
-    /* [in] */ const String& packageName)
+    /* [in] */ const String& packageName,
+    /* [in] */ IWorkSource* workSource,
+    /* [in] */ Boolean hideFromAppOps)
 {
-    // IBinder binder = listener.asBinder();
-    AutoPtr<Receiver> receiver;
-    AutoPtr<IInterface> keyTemp = listener->Probe(EIID_IInterface);
-    InterfaceReceiverIterator it = mReceivers.Find(keyTemp);
-    if (it != mReceivers.End()) {
-        receiver = it->mSecond;
-    }
+    assert(0 && "TODO");
+    AutoPtr<IBinder> binder;// = listener.asBinder();
+    AutoPtr<IInterface> _receiver;
+    mReceivers->Get(binder, (IInterface**)&_receiver);
+    AutoPtr<Receiver> receiver = (Receiver*)IProxyDeathRecipient::Probe(_receiver);
+
     if (receiver == NULL) {
-        receiver = new Receiver(listener, NULL, pid, uid, packageName, this);
-        mReceivers[keyTemp] = receiver;
+        receiver = new Receiver(listener, NULL, pid, uid, packageName, workSource, hideFromAppOps, this);
+        mReceivers->Put(binder, (IInterface*)(IObject*)receiver);
 
         AutoPtr<IILocationListener> l;
         receiver->GetListener((IILocationListener**)&l);
         AutoPtr<IProxy> link = (IProxy*)(l->Probe(EIID_IProxy));
-        if (link != NULL && FAILED(link->LinkToDeath(receiver, 0))) {
+        if (link == NULL) {
             return NULL;
         }
-        // try {
-        // receiver.getListener().asBinder().linkToDeath(receiver, 0);
-        // } catch (RemoteException e) {
-        //     Slog.e(TAG, "linkToDeath failed:", e);
-        //     return null;
-        // }
+        if (FAILED(link->LinkToDeath(receiver, 0))) {
+            return NULL;
+        }
     }
     return receiver;
 }
 
-AutoPtr<CLocationManagerService::Receiver> CLocationManagerService::GetReceiver(
+AutoPtr<CLocationManagerService::Receiver> CLocationManagerService::GetReceiverLocked(
     /* [in] */ IPendingIntent* intent,
     /* [in] */ Int32 pid,
     /* [in] */ Int32 uid,
-    /* [in] */ const String& packageName)
+    /* [in] */ const String& packageName,
+    /* [in] */ IWorkSource* workSource,
+    /* [in] */ Boolean hideFromAppOps)
 {
-    AutoPtr<Receiver> receiver;
-    AutoPtr<IInterface> keyTemp = intent->Probe(EIID_IInterface);
-    HashMap<AutoPtr<IInterface>, AutoPtr<Receiver> >::Iterator it = mReceivers.Find(keyTemp);
-    if (it != mReceivers.End()) {
-        receiver = it->mSecond;
-    }
+    AutoPtr<IInterface> _receiver;
+    mReceivers->Get(intent, (IInterface**)&_receiver);
+    AutoPtr<Receiver> receiver = (Receiver*)IProxyDeathRecipient::Probe(_receiver);
+
     if (receiver == NULL) {
-        receiver = new Receiver(NULL, intent, pid, uid, packageName, this);
-        mReceivers[keyTemp] = receiver;
+        receiver = new Receiver(NULL, intent, pid, uid, packageName, workSource, hideFromAppOps, this);
+        mReceivers->Put(intent, (IInterface*)(IObject*)receiver);
     }
     return receiver;
 }
@@ -1509,9 +1997,9 @@ AutoPtr<ILocationRequest> CLocationManagerService::CreateSanitizedRequest(
 {
     AutoPtr<ILocationRequest> sanitizedRequest;
     CLocationRequest::New(request, (ILocationRequest**)&sanitizedRequest);
-    Int64 interval;
+    Int64 interval = 0;
     if (resolutionLevel < RESOLUTION_LEVEL_FINE) {
-        Int32 quality;
+        Int32 quality = 0;
         sanitizedRequest->GetQuality(&quality);
         switch (quality) {
             case ILocationRequest::ACCURACY_FINE:
@@ -1532,7 +2020,7 @@ AutoPtr<ILocationRequest> CLocationManagerService::CreateSanitizedRequest(
         }
     }
     // make getFastestInterval() the minimum of interval and fastest interval
-    Int64 fastestInterval;
+    Int64 fastestInterval = 0;
     sanitizedRequest->GetFastestInterval(&fastestInterval);
     sanitizedRequest->GetInterval(&interval);
     if (fastestInterval > interval) {
@@ -1573,12 +2061,14 @@ ECode CLocationManagerService::CheckPendingIntent(
     return NOERROR;
 }
 
-ECode CLocationManagerService::CheckListenerOrIntent(
+ECode CLocationManagerService::CheckListenerOrIntentLocked(
     /* [in] */ IILocationListener* listener,
     /* [in] */ IPendingIntent* intent,
     /* [in] */ Int32 pid,
     /* [in] */ Int32 uid,
     /* [in] */ const String& packageName,
+    /* [in] */ IWorkSource* workSource,
+    /* [in] */ Boolean hideFromAppOps,
     /* [out] */ Receiver** receiver)
 {
     VALIDATE_NOT_NULL(receiver);
@@ -1586,7 +2076,7 @@ ECode CLocationManagerService::CheckListenerOrIntent(
 
     if (intent == NULL && listener == NULL) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        // throw new IllegalArgumentException("need eiter listener or intent");
+        // throw new IllegalArgumentException("need either listener or intent");
     }
     else if (intent != NULL && listener != NULL) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1594,13 +2084,13 @@ ECode CLocationManagerService::CheckListenerOrIntent(
     }
     else if (intent != NULL) {
         FAIL_RETURN(CheckPendingIntent(intent));
-        AutoPtr<Receiver> r = GetReceiver(intent, pid, uid, packageName);
+        AutoPtr<Receiver> r = GetReceiverLocked(intent, pid, uid, packageName, workSource, hideFromAppOps);
         *receiver = r;
         REFCOUNT_ADD(*receiver);
         return NOERROR;
     }
     else {
-        AutoPtr<Receiver> r = GetReceiver(listener, pid, uid, packageName);
+        AutoPtr<Receiver> r = GetReceiverLocked(listener, pid, uid, packageName, workSource, hideFromAppOps);
         *receiver = r;
         REFCOUNT_ADD(*receiver);
         return NOERROR;
@@ -1620,25 +2110,41 @@ ECode CLocationManagerService::RequestLocationUpdates(
     request->GetProvider(&provider);
     FAIL_RETURN(CheckResolutionLevelIsSufficientForProviderUse(
             allowedResolutionLevel, provider));
+    AutoPtr<IWorkSource> workSource;
+    request->GetWorkSource((IWorkSource**)&workSource);
+    Int32 size = 0;
+    if (workSource != NULL &&
+        (workSource->GetSize(&size), size) > 0) {
+        CheckDeviceStatsAllowed();
+    }
+    Boolean hideFromAppOps = FALSE;
+    request->GetHideFromAppOps(&hideFromAppOps);
+    if (hideFromAppOps) {
+        CheckUpdateAppOpsAllowed();
+    }
     AutoPtr<ILocationRequest> sanitizedRequest
             = CreateSanitizedRequest(request, allowedResolutionLevel);
 
     Int32 pid = Binder::GetCallingPid();
     Int32 uid = Binder::GetCallingUid();
-    AutoPtr<Receiver> receiver;
-    FAIL_RETURN(CheckListenerOrIntent(listener, intent, pid, uid,
-            packageName, (Receiver**)&receiver));
-
     // providers may use public location API's, need to clear identity
     Int64 identity = Binder::ClearCallingIdentity();
-    // try {
-    AutoLock lock(mLock);
-    ECode ec = RequestLocationUpdatesLocked(sanitizedRequest, receiver, pid, uid,
-            packageName);
-        // }
-    // } finally {
+
+    // We don't check for MODE_IGNORED here; we will do that when we go to deliver
+    // a location.
+    ECode ec = 0;
+    CheckLocationAccess(uid, packageName, allowedResolutionLevel);
+    {
+        AutoLock lock(mLock);
+        AutoPtr<Receiver> receiver;
+        CheckListenerOrIntentLocked(listener, intent, pid, uid,
+                            packageName, workSource, hideFromAppOps, (Receiver**)&receiver);
+        if (receiver != NULL) {
+            ec = RequestLocationUpdatesLocked(sanitizedRequest, receiver, pid, uid,
+                    packageName);
+        }
+    }
     Binder::RestoreCallingIdentity(identity);
-    // }
     return ec;
 }
 
@@ -1658,32 +2164,32 @@ ECode CLocationManagerService::RequestLocationUpdatesLocked(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
         // throw new IllegalArgumentException("provider name must not be null");
     }
-    AutoPtr<ILocationProviderInterface> provider;
-    HashMap<String, AutoPtr<ILocationProviderInterface> >::Iterator it
-            = mProvidersByName.Find(name);
-    if (it != mProvidersByName.End()) {
-        provider = it->mSecond;
+
+    if (D) {
+        AutoPtr<ISystem> sys;
+        CSystem::AcquireSingleton((ISystem**)&sys);
+        Int32 hashCode = 0;
+        sys->IdentityHashCode((IInterface*)(IObject*)receiver, &hashCode);
+        Logger::D(TAG, "request %s %s %p from %s(%d)", StringUtils::ToHexString(hashCode).string(),
+                name.string(), request, packageName.string(), uid);
     }
+    AutoPtr<IInterface> _provider;
+    mProvidersByName->Get(CoreUtils::Convert(name), (IInterface**)&_provider);
+    AutoPtr<ILocationProviderInterface> provider = ILocationProviderInterface::Probe(_provider);
     if (provider == NULL) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        // throw new IllegalArgumentException("provider doesn't exisit: " + provider);
+        // throw new IllegalArgumentException("provider doesn't exist: " + name);
     }
 
-    // if (D) Log.d(TAG, "request " + Integer.toHexString(System.identityHashCode(receiver))
-    //         + " " + name + " " + request + " from " + packageName + "(" + uid + ")");
-
     AutoPtr<UpdateRecord> record = new UpdateRecord(name, request, receiver, this);
-    AutoPtr<UpdateRecord> oldRecord = receiver->mUpdateRecords[name];
-    receiver->mUpdateRecords[name] = record;
+    AutoPtr<IInterface> _oldRecord;
+    receiver->mUpdateRecords->Put(CoreUtils::Convert(name), (IInterface*)(IObject*)(record.Get()), (IInterface**)&_oldRecord);
+    AutoPtr<UpdateRecord> oldRecord = (UpdateRecord*)IObject::Probe(_oldRecord);
     if (oldRecord != NULL) {
         oldRecord->DisposeLocked(FALSE);
     }
 
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    Int32 userId;
-    helper->GetUserId(uid, &userId);
-    Boolean isProviderEnabled = IsAllowedBySettingsLocked(name, userId);
+    Boolean isProviderEnabled = IsAllowedByUserSettingsLocked(name, uid);
     if (isProviderEnabled) {
         ApplyRequirementsLocked(name);
     }
@@ -1691,6 +2197,9 @@ ECode CLocationManagerService::RequestLocationUpdatesLocked(
         // Notify the listener that updates are currently disabled
         receiver->CallProviderEnabledLocked(name, FALSE);
     }
+    // Update the monitoring here just in case multiple location requests were added to the
+    // same receiver (this request may be high power and the initial might not have been).
+    receiver->UpdateMonitoring(TRUE);
     return NOERROR;
 }
 
@@ -1703,71 +2212,120 @@ ECode CLocationManagerService::RemoveUpdates(
 
     Int32 pid = Binder::GetCallingPid();
     Int32 uid = Binder::GetCallingUid();
+
+    AutoLock lock(mLock);
+    AutoPtr<IWorkSource> workSource;
+    Boolean hideFromAppOps = FALSE;
     AutoPtr<Receiver> receiver;
-    FAIL_RETURN(CheckListenerOrIntent(listener, intent, pid, uid,
-            packageName, (Receiver**)&receiver));
+    CheckListenerOrIntentLocked(listener, intent, pid, uid,
+            packageName, workSource, hideFromAppOps, (Receiver**)&receiver);
 
     // providers may use public location API's, need to clear identity
     Int64 identity = Binder::ClearCallingIdentity();
-    // try {
-    AutoLock lock(mLock);
-    RemoveUpdatesLocked(receiver);
-        // }
-    // } finally {
+
+    if (receiver != NULL) {
+        RemoveUpdatesLocked(receiver);
+    }
+
     Binder::RestoreCallingIdentity(identity);
-    // }
     return NOERROR;
 }
 
 void CLocationManagerService::RemoveUpdatesLocked(
     /* [in] */ Receiver* receiver)
 {
-    // if (D) Log.i(TAG, "remove " + Integer.toHexString(System.identityHashCode(receiver)));
-
-    HashMap<AutoPtr<IInterface>, AutoPtr<Receiver> >::Iterator it
-            = mReceivers.Find(receiver->mKey);
-    if (it != mReceivers.End() && receiver->IsListener()) {
-        mReceivers.Erase(it);
-        // receiver.getListener().asBinder().unlinkToDeath(receiver, 0);
-        AutoLock lock(receiver->mLock);
-        if(receiver->mPendingBroadcasts > 0) {
-            DecrementPendingBroadcasts();
-            receiver->mPendingBroadcasts = 0;
-        }
+    if (D) {
+        AutoPtr<ISystem> sys;
+        CSystem::AcquireSingleton((ISystem**)&sys);
+        Int32 hashCode = 0;
+        sys->IdentityHashCode((IInterface*)(IObject*)receiver, &hashCode);
+        Logger::I(TAG, "remove %s", StringUtils::ToHexString(hashCode).string());
     }
 
+    AutoPtr<IInterface> old;
+    mReceivers->Remove(receiver->mKey, (IInterface**)&old);
+    if (old != NULL && receiver->IsListener()) {
+        // receiver.getListener().asBinder().unlinkToDeath(receiver, 0);
+        AutoLock lock(receiver->mLock);
+        receiver->ClearPendingBroadcastsLocked();
+    }
+
+    receiver->UpdateMonitoring(FALSE);
+
     // Record which providers were associated with this listener
-    HashSet<String> providers;
-    HashMap<String, AutoPtr<UpdateRecord> >& oldRecords = receiver->mUpdateRecords;
-    // Call dispose() on the obsolete update records.
-    HashMap<String, AutoPtr<UpdateRecord> >::Iterator oldit;
-    for (oldit = oldRecords.Begin(); oldit != oldRecords.End(); ++oldit) {
-        oldit->mSecond->DisposeLocked(FALSE);
+    AutoPtr<IHashSet> providers;
+    CHashSet::New((IHashSet**)&providers);
+    AutoPtr<IHashMap> oldRecords = receiver->mUpdateRecords;
+    if (oldRecords != NULL) {
+        // Call dispose() on the obsolete update records.
+        AutoPtr<ICollection> cl;
+        oldRecords->GetValues((ICollection**)&cl);
+        AutoPtr<IIterator> it;
+        cl->GetIterator((IIterator**)&it);
+        Boolean bHasNxt = FALSE;
+        while ((it->HasNext(&bHasNxt), bHasNxt)) {
+            AutoPtr<IInterface> p;
+            it->GetNext((IInterface**)&p);
+            AutoPtr<UpdateRecord> record = (UpdateRecord*)IObject::Probe(p);
+            // Update statistics for historical location requests by package/provider
+            record->DisposeLocked(FALSE);
+        }
         // Accumulate providers
-        providers.Insert(oldit->mFirst);
+        AutoPtr<ISet> st;
+        oldRecords->GetKeySet((ISet**)&st);
+        providers->AddAll(ICollection::Probe(st));
     }
 
     // update provider
-    HashSet<String>::Iterator providersIt;
-    for (providersIt = providers.Begin(); providersIt != providers.End(); ++providersIt) {
+    AutoPtr<IIterator> itP;
+    providers->GetIterator((IIterator**)&itP);
+    Boolean b = FALSE;
+    while ((itP->HasNext(&b), b)) {
+        AutoPtr<IInterface> p;
+        itP->GetNext((IInterface**)&p);
+        AutoPtr<ICharSequence> _p = ICharSequence::Probe(p);
+        String provider;
+        _p->ToString(&provider);
         // If provider is already disabled, don't need to do anything
-        if (!IsAllowedBySettingsLocked(*providersIt, mCurrentUserId)) {
+        if (!IsAllowedByCurrentUserSettingsLocked(provider)) {
             continue;
         }
 
-        ApplyRequirementsLocked(*providersIt);
+        ApplyRequirementsLocked(provider);
+    }
+}
+
+void CLocationManagerService::ApplyAllProviderRequirementsLocked()
+{
+    AutoPtr<IIterator> it;
+    mProviders->GetIterator((IIterator**)&it);
+    Boolean bHasNxt = FALSE;
+    while ((it->HasNext(&bHasNxt), bHasNxt)) {
+        AutoPtr<IInterface> _p;
+        it->GetNext((IInterface**)&_p);
+        AutoPtr<ILocationProviderInterface> p = ILocationProviderInterface::Probe(_p);
+        // If provider is already disabled, don't need to do anything
+        String name;
+        p->GetName(&name);
+        if (!IsAllowedByCurrentUserSettingsLocked(name)) {
+            continue;
+        }
+
+        ApplyRequirementsLocked(name);
     }
 }
 
 ECode CLocationManagerService::GetLastLocation(
     /* [in] */ ILocationRequest* request,
     /* [in] */ const String& packageName,
-    /* [out] */ ILocation** location)
+    /* [out] */ ILocation** result)
 {
-    VALIDATE_NOT_NULL(location);
-    *location = NULL;
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
 
-    // if (D) Log.d(TAG, "getLastLocation: " + request);
+    if (D) {
+        Logger::D(TAG, "getLastLocation: %p", request);
+    }
     if (request == NULL) request = DEFAULT_LOCATION_REQUEST;
     Int32 allowedResolutionLevel = GetCallerAllowedResolutionLevel();
     FAIL_RETURN(CheckPackageName(packageName));
@@ -1777,11 +2335,27 @@ ECode CLocationManagerService::GetLastLocation(
             name));
     // no need to sanitize this request, as only the provider name is used
 
+    Int32 uid = Binder::GetCallingUid();
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
-    if (mBlacklist->IsBlacklisted(packageName)) {
-        // if (D) Log.d(TAG, "not returning last loc for blacklisted app: " +
-        //         packageName);
+    Boolean b = FALSE;
+    mBlacklist->IsBlacklisted(packageName, &b);
+    if (b) {
+        if (D) {
+            Logger::D(TAG, "not returning last loc for blacklisted app: %s",
+                (const char*)packageName);
+        }
+        *result = NULL;
+        Binder::RestoreCallingIdentity(identity);
+        return NOERROR;
+    }
+
+    if (!ReportLocationAccessNoThrow(uid, packageName, allowedResolutionLevel)) {
+        if (D) {
+            Logger::D(TAG, "not returning last loc for no op app: %s",
+                (const char*)packageName);
+        }
+        *result = NULL;
         Binder::RestoreCallingIdentity(identity);
         return NOERROR;
     }
@@ -1790,53 +2364,64 @@ ECode CLocationManagerService::GetLastLocation(
     // Figure out the provider. Either its explicitly request (deprecated API's),
     // or use the fused provider
     if (name.IsNull()) name = ILocationManager::FUSED_PROVIDER;
-    AutoPtr<ILocationProviderInterface> provider;
-    HashMap<String, AutoPtr<ILocationProviderInterface> >::Iterator it
-            = mProvidersByName.Find(name);
-    if (it != mProvidersByName.End()) {
-        provider = it->mSecond;
-    }
+    AutoPtr<IInterface> _provider;
+    mProvidersByName->Get(CoreUtils::Convert(name), (IInterface**)&_provider);
+    AutoPtr<ILocationProviderInterface> provider = ILocationProviderInterface::Probe(_provider);
     if (provider == NULL) {
         Binder::RestoreCallingIdentity(identity);
+        *result = NULL;
         return NOERROR;
     }
 
-    if (!IsAllowedBySettingsLocked(name, mCurrentUserId)) {
+    if (!IsAllowedByUserSettingsLocked(name, uid)) {
         Binder::RestoreCallingIdentity(identity);
+        *result = NULL;
         return NOERROR;
     }
 
-    AutoPtr<ILocation> l;
-    HashMap<String, AutoPtr<ILocation> >::Iterator locationIt
-            = mLastLocation.Find(name);
-    if (locationIt != mLastLocation.End()) {
-        l = locationIt->mSecond;
+    AutoPtr<ILocation> location;
+    if (allowedResolutionLevel < RESOLUTION_LEVEL_FINE) {
+        // Make sure that an app with coarse permissions can't get frequent location
+        // updates by calling LocationManager.getLastKnownLocation repeatedly.
+        AutoPtr<IInterface> p;
+        mLastLocationCoarseInterval->Get(CoreUtils::Convert(name), (IInterface**)&p);
+        location = ILocation::Probe(p);
     }
-    if (l == NULL) {
+    else {
+        AutoPtr<IInterface> p;
+        mLastLocation->Get(CoreUtils::Convert(name), (IInterface**)&p);
+        location = ILocation::Probe(p);
+    }
+    if (location == NULL) {
         Binder::RestoreCallingIdentity(identity);
+        *result = NULL;
         return NOERROR;
     }
     if (allowedResolutionLevel < RESOLUTION_LEVEL_FINE) {
         AutoPtr<ILocation> noGPSLocation;
-        l->GetExtraLocation(ILocation::EXTRA_NO_GPS_LOCATION, (ILocation**)&noGPSLocation);
+        location->GetExtraLocation(ILocation::EXTRA_NO_GPS_LOCATION, (ILocation**)&noGPSLocation);
         if (noGPSLocation != NULL) {
-            AutoPtr<ILocation> temp = mLocationFudger->GetOrCreate(noGPSLocation);
-            CLocation::New(temp, location);
+            AutoPtr<ILocation> temp;
+            mLocationFudger->GetOrCreate(noGPSLocation, (ILocation**)&temp);
+            AutoPtr<ILocation> l;
+            CLocation::New(temp, (ILocation**)&l);
             Binder::RestoreCallingIdentity(identity);
+            *result = l;
+            REFCOUNT_ADD(*result)
             return NOERROR;
         }
     }
     else {
-        CLocation::New(l, location);
+        AutoPtr<ILocation> l;
+        CLocation::New(location, (ILocation**)&l);
         Binder::RestoreCallingIdentity(identity);
+        *result = l;
+        REFCOUNT_ADD(*result)
         return NOERROR;
     }
 
     Binder::RestoreCallingIdentity(identity);
     return NOERROR;
-    // } finally {
-    //     Binder.restoreCallingIdentity(identity);
-    // }
 }
 
 ECode CLocationManagerService::RequestGeofence(
@@ -1857,26 +2442,49 @@ ECode CLocationManagerService::RequestGeofence(
     AutoPtr<ILocationRequest> sanitizedRequest = CreateSanitizedRequest(
             request, allowedResolutionLevel);
 
-    // if (D) Log.d(TAG, "requestGeofence: " + sanitizedRequest + " " + geofence + " " + intent);
+    if (D) Logger::D(TAG, "requestGeofence: %p %p %p", sanitizedRequest.Get(), geofence, intent);
 
     // geo-fence manager uses the public location API, need to clear identity
     Int32 uid = Binder::GetCallingUid();
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    Int32 userId;
+    Int32 userId = 0;
     helper->GetUserId(uid, &userId);
     if (userId != IUserHandle::USER_OWNER) {
         // temporary measure until geofences work for secondary users
-        // Log.w(TAG, "proximity alerts are currently available only to the primary user");
+        Logger::W(TAG, "proximity alerts are currently available only to the primary user");
         return NOERROR;
     }
     Int64 identity = Binder::ClearCallingIdentity();
-    // try {
-    mGeofenceManager->AddFence(sanitizedRequest, geofence, intent, uid, packageName);
-    // } finally {
+
+    if (mGeoFencer != NULL && mGeoFencerEnabled) {
+        Int64 expiration = 0, expi = 0;
+        sanitizedRequest->GetExpireAt(&expi);
+        if (expi == Elastos::Core::Math::INT64_MAX_VALUE) {
+            expiration = -1; // -1 means forever
+        }
+        else {
+            expiration = expi - SystemClock::GetElapsedRealtime();
+        }
+        Double lat = 0.0, tud = 0.0;
+        Float rad = 0.0;
+        geofence->GetLatitude(&lat);
+        geofence->GetLongitude(&tud);
+        geofence->GetRadius(&rad);
+        AutoPtr<IGeoFenceParams> p;
+        CGeoFenceParams::New(uid, lat,
+                          tud, rad,
+                          expiration, intent, packageName,
+                          (IGeoFenceParams**)&p);
+        mGeoFencer->Add(p);
+    }
+    else {
+        mGeofenceManager->AddFence(sanitizedRequest, geofence, intent,
+                                  allowedResolutionLevel, uid, packageName);
+    }
+
     Binder::RestoreCallingIdentity(identity);
-    // }
     return NOERROR;
 }
 
@@ -1890,20 +2498,25 @@ ECode CLocationManagerService::RemoveGeofence(
     FAIL_RETURN(CheckPendingIntent(intent));
     FAIL_RETURN(CheckPackageName(packageName));
 
-    // if (D) Log.d(TAG, "removeGeofence: " + geofence + " " + intent);
+    if (D) Logger::D(TAG, "removeGeofence: %p %p", geofence, intent);
 
     // geo-fence manager uses the public location API, need to clear identity
     Int64 identity = Binder::ClearCallingIdentity();
-    // try {
-    mGeofenceManager->RemoveFence(geofence, intent);
-    // } finally {
+
+    if (mGeoFencer != NULL && mGeoFencerEnabled) {
+        mGeoFencer->Remove(intent);
+    }
+    else {
+        mGeofenceManager->RemoveFence(geofence, intent);
+    }
+
     Binder::RestoreCallingIdentity(identity);
-    // }
     return NOERROR;
 }
 
 ECode CLocationManagerService::AddGpsStatusListener(
     /* [in] */ IIGpsStatusListener* listener,
+    /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -1912,20 +2525,25 @@ ECode CLocationManagerService::AddGpsStatusListener(
         *result = FALSE;
         return NOERROR;
     }
+    Int32 allowedResolutionLevel = GetCallerAllowedResolutionLevel();
     FAIL_RETURN(CheckResolutionLevelIsSufficientForProviderUse(
-            GetCallerAllowedResolutionLevel(),
+            allowedResolutionLevel,
             ILocationManager::GPS_PROVIDER));
 
-    // try {
+    Int32 uid = Binder::GetCallingUid();
+    Int64 ident = Binder::ClearCallingIdentity();
+    if (!CheckLocationAccess(uid, packageName, allowedResolutionLevel)) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    Binder::RestoreCallingIdentity(ident);
+
     ECode ec = mGpsStatusProvider->AddGpsStatusListener(listener);
     if (FAILED(ec)) {
+        Slogger::E(TAG, "mGpsStatusProvider.addGpsStatusListener failed%d", ec);
         *result = FALSE;
         return ec;
     }
-    // } catch (RemoteException e) {
-    //     Slog.e(TAG, "mGpsStatusProvider.addGpsStatusListener failed", e);
-    //     return false;
-    // }
     *result = TRUE;
     return NOERROR;
 }
@@ -1939,6 +2557,74 @@ ECode CLocationManagerService::RemoveGpsStatusListener(
         // } catch (Exception e) {
         //     Slog.e(TAG, "mGpsStatusProvider.removeGpsStatusListener failed", e);
         // }
+}
+
+ECode CLocationManagerService::AddGpsMeasurementsListener(
+    /* [in] */ IIGpsMeasurementsListener* listener,
+    /* [in] */ const String& packageName,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Int32 allowedResolutionLevel = GetCallerAllowedResolutionLevel();
+    CheckResolutionLevelIsSufficientForProviderUse(
+            allowedResolutionLevel,
+            ILocationManager::GPS_PROVIDER);
+
+    Int32 uid = Binder::GetCallingUid();
+    Int64 identity = Binder::ClearCallingIdentity();
+    Boolean hasLocationAccess;
+
+    hasLocationAccess = CheckLocationAccess(uid, packageName, allowedResolutionLevel);
+
+    Binder::RestoreCallingIdentity(identity);
+
+    if (!hasLocationAccess) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    return mGpsMeasurementsProvider->AddListener(listener, result);
+}
+
+ECode CLocationManagerService::RemoveGpsMeasurementsListener(
+    /* [in] */ IIGpsMeasurementsListener* listener,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return mGpsMeasurementsProvider->RemoveListener(listener, result);
+}
+
+ECode CLocationManagerService::AddGpsNavigationMessageListener(
+    /* [in] */ IIGpsNavigationMessageListener* listener,
+    /* [in] */ const String& packageName,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Int32 allowedResolutionLevel = GetCallerAllowedResolutionLevel();
+    CheckResolutionLevelIsSufficientForProviderUse(
+            allowedResolutionLevel,
+            ILocationManager::GPS_PROVIDER);
+
+    Int32 uid = Binder::GetCallingUid();
+    Int64 identity = Binder::ClearCallingIdentity();
+    Boolean hasLocationAccess;
+
+    hasLocationAccess = CheckLocationAccess(uid, packageName, allowedResolutionLevel);
+
+    Binder::RestoreCallingIdentity(identity);
+
+    if (!hasLocationAccess) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    return mGpsNavigationMessageProvider->AddListener(listener, result);
+}
+
+ECode CLocationManagerService::RemoveGpsNavigationMessageListener(
+    /* [in] */ IIGpsNavigationMessageListener* listener,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return mGpsNavigationMessageProvider->RemoveListener(listener, result);
 }
 
 ECode CLocationManagerService::SendExtraCommand(
@@ -1960,7 +2646,7 @@ ECode CLocationManagerService::SendExtraCommand(
             GetCallerAllowedResolutionLevel(), provider));
 
     // and check for ACCESS_LOCATION_EXTRA_COMMANDS
-    Int32 perm;
+    Int32 perm = 0;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(ACCESS_LOCATION_EXTRA_COMMANDS, &perm));
     if ((perm != IPackageManager::PERMISSION_GRANTED)) {
         return E_SECURITY_EXCEPTION;
@@ -1968,12 +2654,9 @@ ECode CLocationManagerService::SendExtraCommand(
     }
 
     AutoLock lock(mLock);
-    AutoPtr<ILocationProviderInterface> p;
-    HashMap<String, AutoPtr<ILocationProviderInterface> >::Iterator it =
-            mProvidersByName.Find(provider);
-    if (it != mProvidersByName.End()) {
-        p = it->mSecond;
-    }
+    AutoPtr<IInterface> _p;
+    mProvidersByName->Get(CoreUtils::Convert(provider), (IInterface**)&_p);
+    AutoPtr<ILocationProviderInterface> p = ILocationProviderInterface::Probe(_p);
     if (p == NULL) {
         *result = FALSE;
         return NOERROR;
@@ -1988,23 +2671,19 @@ ECode CLocationManagerService::SendNiResponse(
     /* [in] */ Int32 userResponse,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (Binder::GetCallingUid() != Process::MyUid()) {
         // throw new SecurityException(
         //        "calling sendNiResponse from outside of the system is not allowed");
         return E_SECURITY_EXCEPTION;
     }
-    // try {
+
     ECode ec = mNetInitiatedListener->SendNiResponse(notifId, userResponse, result);
     if (FAILED(ec)) {
+        Slogger::E(TAG, "RemoteException in LocationManagerService.sendNiResponse");
         *result = FALSE;
     }
     return ec;
-    // }
-    // catch (RemoteException e)
-    // {
-    //     Slog.e(TAG, "RemoteException in LocationManagerService.sendNiResponse");
-    //     return false;
-    // }
 }
 
 ECode CLocationManagerService::GetProviderProperties(
@@ -2014,10 +2693,10 @@ ECode CLocationManagerService::GetProviderProperties(
     VALIDATE_NOT_NULL(properties);
     *properties = NULL;
 
-    AutoPtr<ILocationProviderInterface> p;
-    HashMap<String, AutoPtr<ILocationProviderInterface> >::Iterator it
-            = mProvidersByName.Find(provider);
-    if (it == mProvidersByName.End()) {
+    AutoPtr<IInterface> _p;
+    mProvidersByName->Get(CoreUtils::Convert(provider), (IInterface**)&_p);
+    AutoPtr<ILocationProviderInterface> p = ILocationProviderInterface::Probe(_p);
+    if (p == NULL) {
         return NOERROR;
     }
 
@@ -2025,8 +2704,10 @@ ECode CLocationManagerService::GetProviderProperties(
             GetCallerAllowedResolutionLevel(), provider));
     {
         AutoLock lock(mLock);
-        it = mProvidersByName.Find(provider);
-        p = it->mSecond;
+        _p = NULL;
+        mProvidersByName->Get(CoreUtils::Convert(provider), (IInterface**)&_p);
+        p = NULL;
+        p = ILocationProviderInterface::Probe(_p);
     }
 
     if (p == NULL) {
@@ -2042,29 +2723,51 @@ ECode CLocationManagerService::IsProviderEnabled(
     VALIDATE_NOT_NULL(isEnabled);
     *isEnabled = FALSE;
 
-    FAIL_RETURN(CheckResolutionLevelIsSufficientForProviderUse(
-            GetCallerAllowedResolutionLevel(), provider));
+    // Fused provider is accessed indirectly via criteria rather than the provider-based APIs,
+    // so we discourage its use
     if (ILocationManager::FUSED_PROVIDER.Equals(provider)) {
         return NOERROR;
     }
 
+    Int32 uid = Binder::GetCallingUid();
     Int64 identity = Binder::ClearCallingIdentity();
-    // try {
     AutoLock lock(mLock);
-    AutoPtr<ILocationProviderInterface> p;
-    HashMap<String, AutoPtr<ILocationProviderInterface> >::Iterator it
-            = mProvidersByName.Find(provider);
-    if (it == mProvidersByName.End()) {
-        *isEnabled = FALSE;
+    AutoPtr<IInterface> _p;
+    mProvidersByName->Get(CoreUtils::Convert(provider), (IInterface**)&_p);
+    AutoPtr<ILocationProviderInterface> p = ILocationProviderInterface::Probe(_p);
+    if (p == NULL) {
         Binder::RestoreCallingIdentity(identity);
         return NOERROR;
     }
 
-    *isEnabled = IsAllowedBySettingsLocked(provider, mCurrentUserId);
-    // } finally {
-        Binder::RestoreCallingIdentity(identity);
-    // }
+    *isEnabled = IsAllowedByUserSettingsLocked(provider, uid);
+    Binder::RestoreCallingIdentity(identity);
     return NOERROR;
+}
+
+Boolean CLocationManagerService::IsUidALocationProvider(
+    /* [in] */ Int32 uid)
+{
+    if (uid == IProcess::SYSTEM_UID) {
+        return TRUE;
+    }
+    if (mGeocodeProvider != NULL) {
+        String gName;
+        mGeocodeProvider->GetConnectedPackageName(&gName);
+        if (DoesUidHavePackage(uid, gName)) return TRUE;
+    }
+    AutoPtr<IIterator> it;
+    mProxyProviders->GetIterator((IIterator**)&it);
+    Boolean bHasNxt = FALSE;
+    while ((it->HasNext(&bHasNxt), bHasNxt)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<LocationProviderProxy> proxy = (LocationProviderProxy*)ILocationProviderInterface::Probe(p);
+        String pName;
+        proxy->GetConnectedPackageName(&pName);
+        if (DoesUidHavePackage(uid, pName)) return TRUE;
+    }
+    return FALSE;
 }
 
 ECode CLocationManagerService::CheckCallerIsProvider()
@@ -2082,17 +2785,12 @@ ECode CLocationManagerService::CheckCallerIsProvider()
     // also allow providers with a UID matching the
     // currently bound package name
 
-    Int32 uid = Binder::GetCallingUid();
+    if (IsUidALocationProvider(Binder::GetCallingUid())) {
+        return NOERROR;
+    }
 
-    if (mGeocodeProvider != NULL) {
-        if (DoesPackageHaveUid(uid, mGeocodeProvider->GetConnectedPackageName()))
-            return NOERROR;
-    }
-    List<AutoPtr<LocationProviderProxy> >::Iterator it = mProxyProviders.Begin();
-    for (; it != mProxyProviders.End(); ++it) {
-        if (DoesPackageHaveUid(uid, (*it)->GetConnectedPackageName()))
-            return NOERROR;
-    }
+    // throw new SecurityException("need INSTALL_LOCATION_PROVIDER permission, " +
+    //             "or UID of a currently bound location provider");
     return E_SECURITY_EXCEPTION;
 }
 
@@ -2105,7 +2803,7 @@ ECode CLocationManagerService::ReportLocation(
     Boolean isComplete;
     location->IsComplete(&isComplete);
     if (!isComplete) {
-        // Log.w(TAG, "Dropping incomplete location: " + location);
+        Logger::W(TAG, "Dropping incomplete location: %p", location);
         return NOERROR;
     }
 
@@ -2117,30 +2815,26 @@ ECode CLocationManagerService::ReportLocation(
     return mLocationHandler->SendMessageAtFrontOfQueue(msg, &result);
 }
 
-Boolean CLocationManagerService::DoesPackageHaveUid(
+Boolean CLocationManagerService::DoesUidHavePackage(
     /* [in] */ Int32 uid,
     /* [in] */ const String& packageName)
 {
     if (packageName.IsNull()) {
         return FALSE;
     }
-//    try {
-        AutoPtr<IApplicationInfo> appInfo;
-        ECode ec = mPackageManager->GetApplicationInfo(packageName, 0, (IApplicationInfo**)&appInfo);
-        if(appInfo == NULL || FAILED(ec))
-        {
-            return FALSE;
-        }
-        Int32 infoUid;
-        appInfo->GetUid(&infoUid);
 
-        if (infoUid != uid) {
-            return FALSE;
+    AutoPtr<ArrayOf<String> > packageNames;
+    mPackageManager->GetPackagesForUid(uid, (ArrayOf<String>**)&packageNames);
+    if (packageNames == NULL) {
+        return FALSE;
+    }
+    for (Int32 i = 0; i < packageNames->GetLength(); i++) {
+        String name = (*packageNames)[i];
+        if (packageName.Equals(name)) {
+            return TRUE;
         }
-//    } catch (NameNotFoundException e) {
-//        return false;
-//    }
-    return TRUE;
+    }
+    return FALSE;
 }
 
 Boolean CLocationManagerService::ShouldBroadcastSafe(
@@ -2155,12 +2849,12 @@ Boolean CLocationManagerService::ShouldBroadcastSafe(
     }
 
     // Check whether sufficient time has passed
-    Int64 minTime;
+    Int64 minTime = 0;
     record->mRequest->GetFastestInterval(&minTime);
-    Int64 nanos, lastNanos;
+    Int64 nanos = 0, lastNanos = 0;
     loc->GetElapsedRealtimeNanos(&nanos);
     lastLoc->GetElapsedRealtimeNanos(&lastNanos);
-    Int64 delta = (nanos - lastNanos) / 1000000L;
+    Int64 delta = (nanos - lastNanos) / NANOS_PER_MILLI;
     if (delta < minTime - MAX_PROVIDER_SCHEDULING_JITTER_MS) {
         return FALSE;
     }
@@ -2179,14 +2873,14 @@ Boolean CLocationManagerService::ShouldBroadcastSafe(
     }
 
     // Check whether sufficient number of udpates is left
-    Int32 numUpdates;
+    Int32 numUpdates = 0;
     record->mRequest->GetNumUpdates(&numUpdates);
     if (numUpdates <= 0) {
         return FALSE;
     }
 
     // Check whether the expiry date has passed
-    Int64 value;
+    Int64 value = 0;
     record->mRequest->GetExpireAt(&value);
     if (value < now) {
         return FALSE;
@@ -2199,7 +2893,9 @@ void CLocationManagerService::HandleLocationChangedLocked(
     /* [in] */ ILocation* location,
     /* [in] */ Boolean passive)
 {
-    // if (D) Log.d(TAG, "incoming location: " + location);
+    if (D) {
+        Logger::D(TAG, "incoming location: %p", location);
+    }
 
     Int64 now = SystemClock::GetElapsedRealtime();
     String provider;
@@ -2211,12 +2907,9 @@ void CLocationManagerService::HandleLocationChangedLocked(
     }
 
     // Skip if the provider is unknown.
-    AutoPtr<ILocationProviderInterface> p;
-    HashMap<String, AutoPtr<ILocationProviderInterface> >::Iterator providersIt =
-            mProvidersByName.Find(provider);
-    if (providersIt != mProvidersByName.End()) {
-        p = providersIt->mSecond;
-    }
+    AutoPtr<IInterface> _p;
+    mProvidersByName->Get(CoreUtils::Convert(provider), (IInterface**)&_p);
+    AutoPtr<ILocationProviderInterface> p = ILocationProviderInterface::Probe(_p);
     if (p == NULL) {
         return;
     }
@@ -2225,14 +2918,12 @@ void CLocationManagerService::HandleLocationChangedLocked(
     AutoPtr<ILocation> noGPSLocation;
     location->GetExtraLocation(ILocation::EXTRA_NO_GPS_LOCATION, (ILocation**)&noGPSLocation);
     AutoPtr<ILocation> lastNoGPSLocation;
-    AutoPtr<ILocation> lastLocation;
-    HashMap<String, AutoPtr<ILocation> >::Iterator locIt = mLastLocation.Find(provider);
-    if (locIt != mLastLocation.End()) {
-        lastLocation = locIt->mSecond;
-    }
+    AutoPtr<IInterface> _lastLocation;
+    mLastLocation->Get(CoreUtils::Convert(provider), (IInterface**)&_lastLocation);
+    AutoPtr<ILocation> lastLocation = ILocation::Probe(_lastLocation);
     if (lastLocation == NULL) {
         CLocation::New(provider, (ILocation**)&lastLocation);
-        mLastLocation[provider] = lastLocation;
+        mLastLocation->Put(CoreUtils::Convert(provider), lastLocation);
     }
     else {
         lastLocation->GetExtraLocation(ILocation::EXTRA_NO_GPS_LOCATION,
@@ -2245,19 +2936,37 @@ void CLocationManagerService::HandleLocationChangedLocked(
     }
     lastLocation->Set(location);
 
-    // Skip if there are no UpdateRecords for this provider.
-    AutoPtr< UpdateRecordList > records;
-    HashMap<String, AutoPtr< UpdateRecordList > >::Iterator it =
-            mRecordsByProvider.Find(provider);
-    if (it == mRecordsByProvider.End() || it->mSecond->Begin() == it->mSecond->End())
-        return;
+    // Update last known coarse interval location if enough time has passed.
+    AutoPtr<IInterface> pIn;
+    mLastLocationCoarseInterval->Get(CoreUtils::Convert(provider), (IInterface**)&pIn);
+    AutoPtr<ILocation> lastLocationCoarseInterval = ILocation::Probe(pIn);
+    if (lastLocationCoarseInterval == NULL) {
+        CLocation::New(location, (ILocation**)&lastLocationCoarseInterval);
+        mLastLocationCoarseInterval->Put(CoreUtils::Convert(provider), lastLocationCoarseInterval);
+    }
+    Int64 lNanos = 0, iNano = 0;
+    location->GetElapsedRealtimeNanos(&lNanos);
+    lastLocationCoarseInterval->GetElapsedRealtimeNanos(&iNano);
+    Int64 timeDiffNanos = lNanos - iNano;
+    if (timeDiffNanos > LocationFudger::FASTEST_INTERVAL_MS * NANOS_PER_MILLI) {
+        lastLocationCoarseInterval->Set(location);
+    }
+    // Don't ever return a coarse location that is more recent than the allowed update
+    // interval (i.e. don't allow an app to keep registering and unregistering for
+    // location updates to overcome the minimum interval).
+    lastLocationCoarseInterval->GetExtraLocation(ILocation::EXTRA_NO_GPS_LOCATION, (ILocation**)&noGPSLocation);
 
-    records = it->mSecond;
+    // Skip if there are no UpdateRecords for this provider.
+    AutoPtr<IInterface> _records;
+    mRecordsByProvider->Get(CoreUtils::Convert(provider), (IInterface**)&_records);
+    AutoPtr<IArrayList> records = IArrayList::Probe(_records);
+    Int32 size = 0;
+    if (records == NULL || (records->GetSize(&size), size) == 0) return;
 
     // Fetch coarse location
-    AutoPtr<ILocation> coarseLocation = NULL;
-    if (noGPSLocation != NULL && !(noGPSLocation == lastNoGPSLocation)) {
-        coarseLocation = mLocationFudger->GetOrCreate(noGPSLocation);
+    AutoPtr<ILocation> coarseLocation;
+    if (noGPSLocation != NULL) {
+        mLocationFudger->GetOrCreate(noGPSLocation, (ILocation**)&coarseLocation);
     }
 
     // Fetch latest status update time
@@ -2270,13 +2979,17 @@ void CLocationManagerService::HandleLocationChangedLocked(
     Int32 status;
     p->GetStatus(extras, &status);
 
-    List<AutoPtr<Receiver> > deadReceivers;
-    List<AutoPtr<UpdateRecord> > deadUpdateRecords;
+    AutoPtr<IArrayList> deadReceivers;
+    AutoPtr<IArrayList> deadUpdateRecords;
 
     // Broadcast location or status to all listeners
-    UpdateRecordListIterator recordIt;
-    for (recordIt = records->Begin(); recordIt != records->End(); ++recordIt) {
-        AutoPtr<UpdateRecord> r = *recordIt;
+    AutoPtr<IIterator> it;
+    records->GetIterator((IIterator**)&it);
+    Boolean bHasNxt = FALSE;
+    while ((it->HasNext(&bHasNxt), bHasNxt)) {
+        AutoPtr<IInterface> _r;
+        it->GetNext((IInterface**)&_r);
+        AutoPtr<UpdateRecord> r = (UpdateRecord*)IObject::Probe(_r);
         AutoPtr<Receiver> receiver = r->mReceiver;
         Boolean receiverDead = FALSE;
 
@@ -2284,18 +2997,31 @@ void CLocationManagerService::HandleLocationChangedLocked(
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
         Int32 receiverUserId;
         helper->GetUserId(receiver->mUid, &receiverUserId);
-        if (receiverUserId != mCurrentUserId) {
-            // if (D) {
-            //     Log.d(TAG, "skipping loc update for background user " + receiverUserId +
-            //             " (current user: " + mCurrentUserId + ", app: " +
-            //             receiver.mPackageName + ")");
-            // }
+        if (!IsCurrentProfile(receiverUserId) &&
+            !IsUidALocationProvider(receiver->mUid)) {
+            if (D) {
+                Logger::D(TAG, "skipping loc update for background user %d (current user: %d, app: %s)",
+                    receiverUserId, mCurrentUserId, receiver->mPackageName.string());
+            }
             continue;
         }
 
-        if (mBlacklist->IsBlacklisted(receiver->mPackageName)) {
-            // if (D) Log.d(TAG, "skipping loc update for blacklisted app: " +
-            //         receiver.mPackageName);
+        Boolean bl = FALSE;
+        mBlacklist->IsBlacklisted(receiver->mPackageName, &bl);
+        if (bl) {
+            if (D) {
+                Logger::D(TAG, "skipping loc update for blacklisted app: %s",
+                    receiver->mPackageName.string());
+            }
+            continue;
+        }
+
+        if (!ReportLocationAccessNoThrow(receiver->mUid, receiver->mPackageName,
+                receiver->mAllowedResolutionLevel)) {
+            if (D) {
+                Logger::D(TAG, "skipping loc update for no op app: %s",
+                    receiver->mPackageName.string());
+            }
             continue;
         }
 
@@ -2317,7 +3043,7 @@ void CLocationManagerService::HandleLocationChangedLocked(
                     lastLoc->Set(notifyLocation);
                 }
                 if (!receiver->CallLocationChangedLocked(notifyLocation)) {
-                    // Slog.w(TAG, "RemoteException calling onLocationChanged on " + receiver);
+                    Slogger::W(TAG, "RemoteException calling onLocationChanged on %p", receiver.Get());
                     receiverDead = TRUE;
                 }
                 r->mRequest->DecrementNumUpdates();
@@ -2330,105 +3056,180 @@ void CLocationManagerService::HandleLocationChangedLocked(
             r->mLastStatusBroadcast = newStatusUpdateTime;
             if (!receiver->CallStatusChangedLocked(provider, status, extras)) {
                 receiverDead = TRUE;
-                // Slog.w(TAG, "RemoteException calling onStatusChanged on " + receiver);
+                Slogger::W(TAG, "RemoteException calling onStatusChanged on %p", receiver.Get());
             }
         }
 
         // track expired records
-        Int32 numUpdates;
+        Int32 numUpdates = 0;
         r->mRequest->GetNumUpdates(&numUpdates);
-        Int64 value;
+        Int64 value = 0;
         r->mRequest->GetExpireAt(&value);
         if (numUpdates <= 0 || value < now) {
-            deadUpdateRecords.PushBack(r);
+            deadUpdateRecords->Add(_r);
         }
 
         // track dead receivers
         if (receiverDead) {
-            List<AutoPtr<Receiver> >::Iterator deadIt = Find(deadReceivers.Begin(), deadReceivers.End(), receiver);
-            if (deadIt == deadReceivers.End()) {
-                deadReceivers.PushBack(receiver);
+            if (deadReceivers == NULL) {
+                CArrayList::New((IArrayList**)&deadReceivers);
+            }
+            Boolean bContain = FALSE;
+            deadReceivers->Contains((IInterface*)(IObject*)receiver.Get(), &bContain);
+            if (!bContain) {
+                deadReceivers->Add((IInterface*)(IObject*)receiver.Get());
             }
         }
     }
 
     // remove dead records and receivers outside the loop
-    if (deadReceivers.IsEmpty() == FALSE) {
-        List<AutoPtr<Receiver> >::Iterator deadIt = deadReceivers.Begin();
-        for (; deadIt != deadReceivers.End(); ++deadIt) {
-            RemoveUpdatesLocked(*deadIt);
+    if (deadReceivers != NULL) {
+        AutoPtr<IIterator> recIt;
+        deadReceivers->GetIterator((IIterator**)&recIt);
+        Boolean b = FALSE;
+        while ((recIt->HasNext(&b), b)) {
+            AutoPtr<IInterface> p;
+            recIt->GetNext((IInterface**)&p);
+            AutoPtr<Receiver> receiver = (Receiver*)IProxyDeathRecipient::Probe(p);
+            RemoveUpdatesLocked(receiver);
         }
-        deadReceivers.Clear();
     }
 
-    if (deadUpdateRecords.IsEmpty() == FALSE) {
-        UpdateRecordListIterator deadIt = deadUpdateRecords.Begin();
-        for (; deadIt != deadUpdateRecords.End(); ++deadIt) {
-            (*deadIt)->DisposeLocked(TRUE);
+    if (deadUpdateRecords != NULL) {
+        AutoPtr<IIterator> recIt;
+        deadUpdateRecords->GetIterator((IIterator**)&recIt);
+        Boolean b = FALSE;
+        while ((recIt->HasNext(&b), b)) {
+            AutoPtr<IInterface> p;
+            recIt->GetNext((IInterface**)&p);
+            AutoPtr<UpdateRecord> r = (UpdateRecord*)IObject::Probe(p);
+            r->DisposeLocked(TRUE);
         }
         ApplyRequirementsLocked(provider);
-        deadUpdateRecords.Clear();
     }
+}
+
+Boolean CLocationManagerService::IsMockProvider(
+    /* [in] */ String provider)
+{
+    AutoLock lock(mLock);
+    Boolean b = FALSE;
+    mMockProviders->ContainsKey(CoreUtils::Convert(provider), &b);
+    return b;
+}
+
+AutoPtr<ILocation> CLocationManagerService::ScreenLocationLocked(
+    /* [in] */ ILocation* location,
+    /* [in] */ String provider)
+{
+    if (IsMockProvider(ILocationManager::NETWORK_PROVIDER)) {
+        return location;
+    }
+    AutoPtr<IInterface> p;
+    mProvidersByName->Get(CoreUtils::Convert(ILocationManager::NETWORK_PROVIDER), (IInterface**)&p);
+    AutoPtr<LocationProviderProxy> providerProxy = (LocationProviderProxy*)IObject::Probe(p);
+    if (mComboNlpPackageName == NULL || providerProxy == NULL ||
+        FALSE == provider.Equals(ILocationManager::NETWORK_PROVIDER) ||
+        IsMockProvider(ILocationManager::NETWORK_PROVIDER)) {
+        return location;
+    }
+
+    String connectedNlpPackage;
+    providerProxy->GetConnectedPackageName(&connectedNlpPackage);
+    if (connectedNlpPackage.IsNull() || !connectedNlpPackage.Equals(mComboNlpPackageName)) {
+        return location;
+    }
+
+    AutoPtr<IBundle> extras;
+    location->GetExtras((IBundle**)&extras);
+    Boolean isBeingScreened = FALSE;
+    if (extras == NULL) {
+        CBundle::New((IBundle**)&extras);
+    }
+
+    Boolean bContain = FALSE;
+    extras->ContainsKey(mComboNlpReadyMarker, &bContain);
+    if (!bContain) {
+        // see if Combo Nlp is a passive listener
+        AutoPtr<IInterface> _records;
+        mRecordsByProvider->Get(CoreUtils::Convert(ILocationManager::PASSIVE_PROVIDER), (IInterface**)&_records);
+        AutoPtr<IArrayList> records = IArrayList::Probe(_records);
+        if (records != NULL) {
+            AutoPtr<IIterator> it;
+            records->GetIterator((IIterator**)&it);
+            Boolean bHasNxt = FALSE;
+            while ((it->HasNext(&bHasNxt), bHasNxt)) {
+                AutoPtr<IInterface> _r;
+                it->GetNext((IInterface**)&_r);
+                AutoPtr<UpdateRecord> r = (UpdateRecord*)IObject::Probe(_r);
+                if (r->mReceiver->mPackageName.Equals(mComboNlpPackageName)) {
+                    if (!isBeingScreened) {
+                        isBeingScreened = TRUE;
+                        extras->PutBoolean(mComboNlpScreenMarker, TRUE);
+                    }
+                    // send location to Combo Nlp for screening
+                    if (!r->mReceiver->CallLocationChangedLocked(location)) {
+                        Slogger::W(TAG, "RemoteException calling onLocationChanged on %p",
+                               r->mReceiver.Get());
+                    }
+                    else {
+                        if (D) {
+                            Logger::D(TAG, "Sending location for screening");
+                        }
+                    }
+                }
+            }
+        }
+        if (isBeingScreened) {
+            return NULL;
+        }
+        if (D) {
+            Logger::D(TAG, "Not screening locations");
+        }
+    }
+    else {
+        if (D) {
+            Logger::D(TAG, "This location is marked as ready for broadcast");
+        }
+        // clear the ready marker
+        extras->Remove(mComboNlpReadyMarker);
+    }
+
+    return location;
 }
 
 void CLocationManagerService::HandleLocationChanged(
     /* [in] */ ILocation* location,
     /* [in] */ Boolean passive)
 {
+    // create a working copy of the incoming Location so that the service can modify it without
+    // disturbing the caller's copy
+    AutoPtr<ILocation> myLocation;
+    CLocation::New(location, (ILocation**)&myLocation);
     String provider;
-    location->GetProvider(&provider);
+    myLocation->GetProvider(&provider);
 
-    if (!passive) {
-        // notify passive provider of the new location
-        mPassiveProvider->UpdateLocation(location);
+    // set "isFromMockProvider" bit if location came from a mock provider. we do not clear this
+    // bit if location did not come from a mock provider because passive/fused providers can
+    // forward locations from mock providers, and should not grant them legitimacy in doing so.
+    Boolean b = FALSE;
+    myLocation->IsFromMockProvider(&b);
+    if (!b && IsMockProvider(provider)) {
+        myLocation->SetIsFromMockProvider(TRUE);
     }
 
     AutoLock lock(mLock);
-    if (IsAllowedBySettingsLocked(provider, mCurrentUserId)) {
-        HandleLocationChangedLocked(location, passive);
-    }
-}
-
-void CLocationManagerService::IncrementPendingBroadcasts()
-{
-    // synchronized(mWakeLock) {
-    AutoLock lock(mLockForWakeLock);
-    if (mPendingBroadcasts++ == 0) {
-        // try {
-//        mWakeLock->Acquire();
-        // log("Acquired wakelock");
-        // } catch (Exception e) {
-        //     // This is to catch a runtime exception thrown when we try to release an
-        //     // already released lock.
-        //     Slog.e(TAG, "exception in acquireWakeLock()", e);
-        // }
-    }
-    // }
-}
-
-void CLocationManagerService::DecrementPendingBroadcasts()
-{
-    AutoLock lock(mLockForWakeLock);
-    // synchronized(mWakeLock) {
-    if (--mPendingBroadcasts == 0) {
-        // try {
-        // Release wake lock
-        Boolean isHeld;
-        mWakeLock->IsHeld(&isHeld);
-        if (isHeld) {
-            mWakeLock->Release();
-            // log("Released wakelock");
+    if (IsAllowedByCurrentUserSettingsLocked(provider)) {
+        if (!passive) {
+            location = ScreenLocationLocked(location, provider);
+            if (location == NULL) {
+                return;
+            }
+            // notify passive provider of the new location
+            mPassiveProvider->UpdateLocation(myLocation);
         }
-        else {
-            // log("Can't release wakelock again!");
-        }
-        // } catch (Exception e) {
-        //     // This is to catch a runtime exception thrown when we try to release an
-        //     // already released lock.
-        //     Slog.e(TAG, "exception in releaseWakeLock()", e);
-        // }
+        HandleLocationChangedLocked(myLocation, passive);
     }
-    // }
 }
 
 ECode CLocationManagerService::GeocoderIsPresent(
@@ -2445,18 +3246,17 @@ ECode CLocationManagerService::GetFromLocation(
     /* [in] */ Double longitude,
     /* [in] */ Int32 maxResults,
     /* [in] */ IGeocoderParams* params,
-    /* [out] */ IObjectContainer** addrs,
+    /* [out] */ IList** addrs,
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(addrs);
     VALIDATE_NOT_NULL(result);
 
     if (mGeocodeProvider != NULL) {
-        *result = mGeocodeProvider->GetFromLocation(latitude, longitude, maxResults,
-                params, addrs);
-        return NOERROR;
+        return mGeocodeProvider->GetFromLocation(latitude, longitude, maxResults,
+                params, addrs, result);
     }
-        *result = String(NULL);
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -2468,17 +3268,16 @@ ECode CLocationManagerService::GetFromLocationName(
     /* [in] */ Double upperRightLongitude,
     /* [in] */ Int32 maxResults,
     /* [in] */ IGeocoderParams* params,
-    /* [out] */ IObjectContainer** addrs,
+    /* [out] */ IList** addrs,
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(addrs);
     VALIDATE_NOT_NULL(result);
 
     if (mGeocodeProvider != NULL) {
-        *result = mGeocodeProvider->GetFromLocationName(locationName, lowerLeftLatitude,
+        return mGeocodeProvider->GetFromLocationName(locationName, lowerLeftLatitude,
                 lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                maxResults, params, addrs);
-        return NOERROR;
+                maxResults, params, addrs, result);
     }
     *result = String(NULL);
     return NOERROR;
@@ -2488,19 +3287,17 @@ ECode CLocationManagerService::CheckMockPermissionsSafe()
 {
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
-    Int32 mockLocation;
+    Int32 mockLocation = 0;
     AutoPtr<ISettingsSecure> settingsSecure;
-    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
+    //CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
     settingsSecure->GetInt32(cr, ISettingsSecure::ALLOW_MOCK_LOCATION, 0, &mockLocation);
     Boolean allowMocks = mockLocation == 1;
-    // Boolean allowMocks = Settings.Secure.getInt(mContext.getContentResolver(),
-    //         Settings.Secure.ALLOW_MOCK_LOCATION, 0) == 1;
-     if (!allowMocks) {
-//         throw new SecurityException("Requires ACCESS_MOCK_LOCATION secure setting");
-         return E_SECURITY_EXCEPTION;
-     }
+    if (!allowMocks) {
+        //throw new SecurityException("Requires ACCESS_MOCK_LOCATION secure setting");
+        return E_SECURITY_EXCEPTION;
+    }
 
-    Int32 value;
+    Int32 value = 0;
     FAIL_RETURN(mContext->CheckCallingPermission(ACCESS_MOCK_LOCATION, &value));
     if (value != IPackageManager::PERMISSION_GRANTED) {
         // throw new SecurityException("Requires ACCESS_MOCK_LOCATION permission");
@@ -2521,31 +3318,42 @@ ECode CLocationManagerService::AddTestProvider(
     }
 
     Int64 identity = Binder::ClearCallingIdentity();
-    AutoLock lock(mLock);
-    AutoPtr<MockProvider> provider = new MockProvider(name, this, properties);
-    // remove the real provider if we are replacing GPS or network provider
-    HashMap<String, AutoPtr<ILocationProviderInterface> >::Iterator it;
-    if (ILocationManager::GPS_PROVIDER.Equals(name)
-            || ILocationManager::NETWORK_PROVIDER.Equals(name)
-            || ILocationManager::FUSED_PROVIDER.Equals(name)) {
-        it = mProvidersByName.Find(name);
-        if (it != mProvidersByName.End()) {
-            AutoPtr<ILocationProviderInterface> p = it->mSecond;
-            if(p != NULL)
+    {
+        AutoLock lock(mLock);
+        // remove the real provider if we are replacing GPS or network provider
+        if (ILocationManager::GPS_PROVIDER.Equals(name)
+                || ILocationManager::NETWORK_PROVIDER.Equals(name)
+                || ILocationManager::FUSED_PROVIDER.Equals(name)) {
+            AutoPtr<IInterface> _p;
+            mProvidersByName->Get(CoreUtils::Convert(name), (IInterface**)&_p);
+            AutoPtr<ILocationProviderInterface> p = ILocationProviderInterface::Probe(_p);
+            if(p != NULL) {
                 RemoveProviderLocked(p);
+            }
         }
+        mGeoFencerEnabled = FALSE;
+        AddTestProviderLocked(name, properties);
+        UpdateProvidersLocked();
     }
-    it = mProvidersByName.Find(name);
-    if (it != mProvidersByName.End()) {
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        // throw new IllegalArgumentException("Provider \"" + name + "\" already exists");
-    }
-    AddProviderLocked(provider);
-    mMockProviders[name] = provider;
-    mLastLocation[name] = NULL;
-    UpdateProvidersLocked();
     Binder::RestoreCallingIdentity(identity);
     return NOERROR;
+}
+
+void CLocationManagerService::AddTestProviderLocked(
+    /* [in] */ String name,
+    /* [in] */ IProviderProperties* properties)
+{
+    AutoPtr<IInterface> p;
+    mProvidersByName->Get(CoreUtils::Convert(name), (IInterface**)&p);
+    if (p != NULL) {
+        // throw new IllegalArgumentException("Provider \"" + name + "\" already exists");
+        return;
+    }
+    AutoPtr<MockProvider> provider = new MockProvider(name, this, properties);
+    AddProviderLocked(provider);
+    mMockProviders->Put(CoreUtils::Convert(name), ILocationProviderInterface::Probe(provider));
+    mLastLocation->Put(CoreUtils::Convert(name), NULL);
+    mLastLocationCoarseInterval->Put(CoreUtils::Convert(name), NULL);
 }
 
 ECode CLocationManagerService::RemoveTestProvider(
@@ -2553,37 +3361,37 @@ ECode CLocationManagerService::RemoveTestProvider(
 {
     FAIL_RETURN(CheckMockPermissionsSafe());
     AutoLock lock(mLock);
-    AutoPtr<MockProvider> mockProvider;
-    HashMap<String, AutoPtr<MockProvider> >::Iterator mpIt =
-            mMockProviders.Find(provider);
-    if(mpIt != mMockProviders.End())
-    {
-        mockProvider = mpIt->mSecond;
-    }
+
+    // These methods can't be called after removing the test provider, so first make sure
+    // we don't leave anything dangling.
+    ClearTestProviderEnabled(provider);
+    ClearTestProviderLocation(provider);
+    ClearTestProviderStatus(provider);
+
+    AutoPtr<IInterface> _mockProvider;
+    mMockProviders->Remove(CoreUtils::Convert(provider), (IInterface**)&_mockProvider);
+    AutoPtr<MockProvider> mockProvider = (MockProvider*)ILocationProviderInterface::Probe(_mockProvider);
     if (mockProvider == NULL) {
 //        throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Int64 identity = Binder::ClearCallingIdentity();
-    HashMap<String, AutoPtr<ILocationProviderInterface> >::Iterator lpiIt =
-            mProvidersByName.Find(provider);
+    AutoPtr<IInterface> p;
+    mProvidersByName->Get(CoreUtils::Convert(provider), (IInterface**)&p);
+    RemoveProviderLocked(ILocationProviderInterface::Probe(p));
 
-    RemoveProviderLocked(lpiIt->mSecond);
-    mMockProviders.Erase(mpIt);
-
-    // reinstate real provider if available
-    AutoPtr<ILocationProviderInterface> realProvider;
-    lpiIt = mRealProviders.Find(provider);
-    if(lpiIt != mRealProviders.End())
-    {
-        realProvider = lpiIt->mSecond;
-        if(realProvider != NULL)
-        {
-            AddProviderLocked(realProvider);
-        }
+    if (mGeoFencer != NULL) {
+        mGeoFencerEnabled = TRUE;
     }
-
-    mLastLocation[provider] = NULL;
+    // reinstate real provider if available
+    AutoPtr<IInterface> _realProvider;
+    mRealProviders->Get(CoreUtils::Convert(provider), (IInterface**)&_realProvider);
+    AutoPtr<ILocationProviderInterface> realProvider = ILocationProviderInterface::Probe(_realProvider);
+    if (realProvider != NULL) {
+        AddProviderLocked(realProvider);
+    }
+    mLastLocation->Put(CoreUtils::Convert(provider), NULL);
+    mLastLocationCoarseInterval->Put(CoreUtils::Convert(provider), NULL);
     UpdateProvidersLocked();
     Binder::RestoreCallingIdentity(identity);
     return NOERROR;
@@ -2595,13 +3403,9 @@ ECode CLocationManagerService::SetTestProviderLocation(
 {
     FAIL_RETURN(CheckMockPermissionsSafe());
     AutoLock lock(mLock);
-    AutoPtr<MockProvider> mockProvider;
-    HashMap<String, AutoPtr<MockProvider> >::Iterator mpIt =
-            mMockProviders.Find(provider);
-    if(mpIt != mMockProviders.End())
-    {
-        mockProvider = mpIt->mSecond;
-    }
+    AutoPtr<IInterface> _mockProvider;
+    mMockProviders->Get(CoreUtils::Convert(provider), (IInterface**)&_mockProvider);
+    AutoPtr<MockProvider> mockProvider = (MockProvider*)ILocationProviderInterface::Probe(_mockProvider);
     if (mockProvider == NULL) {
 //        throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -2611,7 +3415,6 @@ ECode CLocationManagerService::SetTestProviderLocation(
     Int64 identity = Binder::ClearCallingIdentity();
     mockProvider->SetLocation(loc);
     Binder::RestoreCallingIdentity(identity);
-
     return NOERROR;
 }
 
@@ -2620,13 +3423,9 @@ ECode CLocationManagerService::ClearTestProviderLocation(
 {
     FAIL_RETURN(CheckMockPermissionsSafe());
     AutoLock lock(mLock);
-    AutoPtr<MockProvider> mockProvider;
-    HashMap<String, AutoPtr<MockProvider> >::Iterator mpIt =
-            mMockProviders.Find(provider);
-    if(mpIt != mMockProviders.End())
-    {
-        mockProvider = mpIt->mSecond;
-    }
+    AutoPtr<IInterface> _mockProvider;
+    mMockProviders->Get(CoreUtils::Convert(provider), (IInterface**)&_mockProvider);
+    AutoPtr<MockProvider> mockProvider = (MockProvider*)ILocationProviderInterface::Probe(_mockProvider);
     if (mockProvider == NULL) {
 //        throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -2642,13 +3441,9 @@ ECode CLocationManagerService::SetTestProviderEnabled(
 {
     FAIL_RETURN(CheckMockPermissionsSafe());
     AutoLock lock(mLock);
-    AutoPtr<MockProvider> mockProvider;
-    HashMap<String, AutoPtr<MockProvider> >::Iterator mpIt =
-            mMockProviders.Find(provider);
-    if(mpIt != mMockProviders.End())
-    {
-        mockProvider = mpIt->mSecond;
-    }
+    AutoPtr<IInterface> _mockProvider;
+    mMockProviders->Get(CoreUtils::Convert(provider), (IInterface**)&_mockProvider);
+    AutoPtr<MockProvider> mockProvider = (MockProvider*)ILocationProviderInterface::Probe(_mockProvider);
     if (mockProvider == NULL) {
 //        throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -2657,12 +3452,13 @@ ECode CLocationManagerService::SetTestProviderEnabled(
     Int64 identity = Binder::ClearCallingIdentity();
     if (enabled) {
         mockProvider->Enable();
-        mEnabledProviders.Insert(provider);
-        mDisabledProviders.Erase(provider);
-    } else {
+        mEnabledProviders->Add(CoreUtils::Convert(provider));
+        mDisabledProviders->Remove(CoreUtils::Convert(provider));
+    }
+    else {
         mockProvider->Disable();
-        mEnabledProviders.Erase(provider);
-        mDisabledProviders.Insert(provider);
+        mEnabledProviders->Remove(CoreUtils::Convert(provider));
+        mDisabledProviders->Add(CoreUtils::Convert(provider));
     }
     UpdateProvidersLocked();
     Binder::RestoreCallingIdentity(identity);
@@ -2674,13 +3470,9 @@ ECode CLocationManagerService::ClearTestProviderEnabled(
 {
     FAIL_RETURN(CheckMockPermissionsSafe());
     AutoLock lock(mLock);
-    AutoPtr<MockProvider> mockProvider;
-    HashMap<String, AutoPtr<MockProvider> >::Iterator mpIt =
-            mMockProviders.Find(provider);
-    if(mpIt != mMockProviders.End())
-    {
-        mockProvider = mpIt->mSecond;
-    }
+    AutoPtr<IInterface> _mockProvider;
+    mMockProviders->Get(CoreUtils::Convert(provider), (IInterface**)&_mockProvider);
+    AutoPtr<MockProvider> mockProvider = (MockProvider*)ILocationProviderInterface::Probe(_mockProvider);
     if (mockProvider == NULL) {
 //        throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -2688,14 +3480,12 @@ ECode CLocationManagerService::ClearTestProviderEnabled(
 
     // clear calling identity so INSTALL_LOCATION_PROVIDER permission is not required
     Int64 identity = Binder::ClearCallingIdentity();
-    mEnabledProviders.Erase(provider);
-    mDisabledProviders.Erase(provider);
+    mEnabledProviders->Remove(CoreUtils::Convert(provider));
+    mDisabledProviders->Remove(CoreUtils::Convert(provider));
     UpdateProvidersLocked();
     Binder::RestoreCallingIdentity(identity);
-
     return NOERROR;
 }
-
 
 ECode CLocationManagerService::SetTestProviderStatus(
     /* [in] */ const String& provider,
@@ -2705,13 +3495,9 @@ ECode CLocationManagerService::SetTestProviderStatus(
 {
     FAIL_RETURN(CheckMockPermissionsSafe());
     AutoLock lock(mLock);
-    AutoPtr<MockProvider> mockProvider;
-    HashMap<String, AutoPtr<MockProvider> >::Iterator mpIt =
-            mMockProviders.Find(provider);
-    if(mpIt != mMockProviders.End())
-    {
-        mockProvider = mpIt->mSecond;
-    }
+    AutoPtr<IInterface> _mockProvider;
+    mMockProviders->Get(CoreUtils::Convert(provider), (IInterface**)&_mockProvider);
+    AutoPtr<MockProvider> mockProvider = (MockProvider*)ILocationProviderInterface::Probe(_mockProvider);
     if (mockProvider == NULL) {
 //        throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -2726,13 +3512,9 @@ ECode CLocationManagerService::ClearTestProviderStatus(
 {
     FAIL_RETURN(CheckMockPermissionsSafe());
     AutoLock lock(mLock);
-    AutoPtr<MockProvider> mockProvider;
-    HashMap<String, AutoPtr<MockProvider> >::Iterator mpIt =
-            mMockProviders.Find(provider);
-    if(mpIt != mMockProviders.End())
-    {
-        mockProvider = mpIt->mSecond;
-    }
+    AutoPtr<IInterface> _mockProvider;
+    mMockProviders->Get(CoreUtils::Convert(provider), (IInterface**)&_mockProvider);
+    AutoPtr<MockProvider> mockProvider = (MockProvider*)ILocationProviderInterface::Probe(_mockProvider);
     if (mockProvider == NULL) {
 //        throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -2742,7 +3524,96 @@ ECode CLocationManagerService::ClearTestProviderStatus(
     return NOERROR;
 }
 
-} // wm
+void CLocationManagerService::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    Int32 mode = 0;
+    mContext->CheckCallingOrSelfPermission(Manifest::permission::DUMP, &mode);
+    if (mode != IPackageManager::PERMISSION_GRANTED) {
+        // pw->Println("Permission Denial: can't dump LocationManagerService from from pid=%d, uid=%d",
+        //         Binder::GetCallingPid(),
+        //         Binder::GetCallingUid());
+        return;
+    }
+
+    // synchronized (mLock) {
+    //     pw->Println("Current Location Manager state:");
+    //     pw->Println("  Location Listeners:");
+    //     for (Receiver receiver : mReceivers.values()) {
+    //         pw->Println("    " + receiver);
+    //     }
+    //     pw.println("  Active Records by Provider:");
+    //     for (Map.Entry<String, ArrayList<UpdateRecord>> entry : mRecordsByProvider.entrySet()) {
+    //         pw.println("    " + entry.getKey() + ":");
+    //         for (UpdateRecord record : entry.getValue()) {
+    //             pw.println("      " + record);
+    //         }
+    //     }
+    //     pw.println("  Historical Records by Provider:");
+    //     for (Map.Entry<PackageProviderKey, PackageStatistics> entry
+    //             : mRequestStatistics.statistics.entrySet()) {
+    //         PackageProviderKey key = entry.getKey();
+    //         PackageStatistics stats = entry.getValue();
+    //         pw.println("    " + key.packageName + ": " + key.providerName + ": " + stats);
+    //     }
+    //     pw.println("  Last Known Locations:");
+    //     for (Map.Entry<String, Location> entry : mLastLocation.entrySet()) {
+    //         String provider = entry.getKey();
+    //         Location location = entry.getValue();
+    //         pw.println("    " + provider + ": " + location);
+    //     }
+
+    //     pw.println("  Last Known Locations Coarse Intervals:");
+    //     for (Map.Entry<String, Location> entry : mLastLocationCoarseInterval.entrySet()) {
+    //         String provider = entry.getKey();
+    //         Location location = entry.getValue();
+    //         pw.println("    " + provider + ": " + location);
+    //     }
+
+    //     mGeofenceManager.dump(pw);
+
+    //     if (mEnabledProviders.size() > 0) {
+    //         pw.println("  Enabled Providers:");
+    //         for (String i : mEnabledProviders) {
+    //             pw.println("    " + i);
+    //         }
+
+    //     }
+    //     if (mDisabledProviders.size() > 0) {
+    //         pw.println("  Disabled Providers:");
+    //         for (String i : mDisabledProviders) {
+    //             pw.println("    " + i);
+    //         }
+    //     }
+    //     pw.append("  ");
+    //     mBlacklist.dump(pw);
+    //     if (mMockProviders.size() > 0) {
+    //         pw.println("  Mock Providers:");
+    //         for (Map.Entry<String, MockProvider> i : mMockProviders.entrySet()) {
+    //             i.getValue().dump(pw, "      ");
+    //         }
+    //     }
+
+    //     pw.append("  fudger: ");
+    //     mLocationFudger.dump(fd, pw,  args);
+
+    //     if (args.length > 0 && "short".equals(args[0])) {
+    //         return;
+    //     }
+    //     for (LocationProviderInterface provider: mProviders) {
+    //         pw.print(provider.getName() + " Internal State");
+    //         if (provider instanceof LocationProviderProxy) {
+    //             LocationProviderProxy proxy = (LocationProviderProxy) provider;
+    //             pw.print(" (" + proxy.getConnectedPackageName() + ")");
+    //         }
+    //         pw.println(":");
+    //         provider.dump(fd, pw, args);
+    //     }
+    // }
+}
+
 } // Server
 } // Droid
 } // Elastos
