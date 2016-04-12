@@ -1,0 +1,22 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace DailerBinder {
+
+    interface IAnalyticsInterface {
+        SendHitEvent(
+            [in] String categoryId,
+            [in] String actionId,
+            [in] String labelId);
+
+        SendScreenView();
+    }
+
+    } // DailerBinder
+    } // Apps
+    } // Elastos
+
+}

@@ -1,0 +1,18 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dialer {
+    namespace DailerBinder {
+
+    interface IDatabaseHelperManager {
+        GetDatabaseHelper(
+            [in] IContext* context,
+            [out] IDialerDatabaseHelper** helper);
+    }
+
+    } //Elastos
+    } //Apps
+    } //Dialer
+    } //DailerBinder
+}

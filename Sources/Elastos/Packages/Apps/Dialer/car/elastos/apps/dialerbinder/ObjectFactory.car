@@ -1,0 +1,28 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace DailerBinder {
+
+    interface IObjectFactory {
+        NewCachedNumberLookupService(
+            [out] ICachedNumberLookupService** service);
+
+        NewCallLogAdapter(
+            [in] IContext* context,
+            [in] ICallFetcher* callFetcher,
+            [in] IContactInfoHelper* contactInfoHelper,
+            [in] ICallItemExpandedListener* callItemExpandedListener,
+            [in] IOnReportButtonClickListener* onReportButtonClickListener,
+            [in] Boolean isCallLog,
+            [out] ICallLogAdapter** adapter);
+
+        GetReportDialogFragment(
+            [in] String name,
+            [out] IDialogFragment** fragment);
+    }
+
+    } // DailerBinder
+    } // Apps
+    } // Elastos
+}

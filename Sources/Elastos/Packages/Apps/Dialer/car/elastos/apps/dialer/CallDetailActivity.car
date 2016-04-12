@@ -1,0 +1,54 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface Elastos.Droid.View.IContextThemeWrapper
+     * interface ILayoutInflaterFactory
+     * interface ILayoutInflaterFactory2
+     * interface IWindowCallback
+     * interface IKeyEventCallback
+     * interface IViewOnCreateContextMenuListener
+     * interface IComponentCallbacks
+     * interface IComponentCallbacks2
+     * interface IOnWindowDismissedCallback
+     */
+    interface ICallDetailActivity {
+        /** The enumeration of {@link AsyncTask} objects used in this class. */
+        enum Tasks {
+            MARK_VOICEMAIL_READ,
+            DELETE_VOICEMAIL_AND_FINISH,
+            REMOVE_FROM_CALL_LOG_AND_FINISH,
+            UPDATE_PHONE_CALL_DETAILS,
+        }
+
+         /** A long array extra containing ids of call log entries to display. */
+        const String EXTRA_CALL_LOG_IDS = "EXTRA_CALL_LOG_IDS";
+        /** If we are started with a voicemail, we'll find the uri to play with this extra. */
+        const String EXTRA_VOICEMAIL_URI = "EXTRA_VOICEMAIL_URI";
+        /** If we should immediately start playback of the voicemail, this extra will be set to true. */
+        const String EXTRA_VOICEMAIL_START_PLAYBACK = "EXTRA_VOICEMAIL_START_PLAYBACK";
+        /** If the activity was triggered from a notification. */
+        const String EXTRA_FROM_NOTIFICATION = "EXTRA_FROM_NOTIFICATION";
+
+        const String VOICEMAIL_FRAGMENT_TAG = "voicemail_fragment";
+
+        OnMenuRemoveFromCallLog(
+            [in] IMenuItem* menuItem);
+
+        OnMenuEditNumberBeforeCall(
+            [in] IMenuItem* menuItem);
+
+        OnMenuTrashVoicemail(
+            [in] IMenuItem* menuItem);
+    }
+
+    } //Dailer
+    } //Apps
+    } //Elastos
+}
