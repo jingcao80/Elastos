@@ -81,7 +81,7 @@ ECode Provider::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    *str = mName + String(" version ") + mVersion;
+    *str = mName + String(" version ") + mVersionString;
     return NOERROR;
 }
 
@@ -968,12 +968,12 @@ void Provider::PutProviderInfo()
     else {
         CString::New(String("null"), (ICharSequence**)&valueObj);
     }
-    Properties::Put(keyObj, valueObj);
+    Properties::Put(keyObj, valueObj, NULL);
     keyObj = NULL;
     CString::New(String("Provider.id version"), (ICharSequence**)&keyObj);
     valueObj = NULL;
     CString::New(mVersionString, (ICharSequence**)&valueObj);
-    Properties::Put(keyObj, valueObj);
+    Properties::Put(keyObj, valueObj, NULL);
     keyObj = NULL;
     CString::New(String("Provider.id info"), (ICharSequence**)&keyObj);
     valueObj = NULL;
@@ -983,7 +983,7 @@ void Provider::PutProviderInfo()
     else {
         CString::New(String("null"), (ICharSequence**)&valueObj);
     }
-    Properties::Put(keyObj, valueObj);
+    Properties::Put(keyObj, valueObj, NULL);
     keyObj = NULL;
     CString::New(String("Provider.id className"), (ICharSequence**)&keyObj);
     valueObj = NULL;
@@ -993,7 +993,7 @@ void Provider::PutProviderInfo()
     clsInfo->GetName(&name);
     clsInfo->GetNamespace(&ns);
     CString::New(name + ns, (ICharSequence**)&valueObj);
-    Properties::Put(keyObj, valueObj);
+    Properties::Put(keyObj, valueObj, NULL);
 }
 
 String Provider::GetPropertyIgnoreCase(
