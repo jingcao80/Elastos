@@ -102,16 +102,16 @@ ECode Collections::_Enumeration2::GetNextElement(
 //====================================================================
 CAR_INTERFACE_IMPL(Collections::CopiesList, AbstractList, ISerializable)
 
-Collections::CopiesList::CopiesList(
+ECode Collections::CopiesList::constructor(
     /* [in] */ Int32 length,
     /* [in] */ IInterface* object)
 {
     if (length < 0) {
-        assert(0);
-        return;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     mN = length;
     mElement = object;
+    return NOERROR;
 }
 
 ECode Collections::CopiesList::Contains(
@@ -4504,7 +4504,7 @@ ECode Collections::Copy(
 {
     ECode ec = 0;
     Int32 sizeDes, sizeSrc;
-    if (destination == NULL || source == NULL){
+    if (destination == NULL || source == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
     (ICollection::Probe(destination))->GetSize(&sizeDes);
@@ -4547,7 +4547,7 @@ ECode Collections::Fill(
     /* [in] */ IInterface* object)
 {
     AutoPtr<IListIterator> it;
-    if(list == NULL){
+    if (list == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
     list->GetListIterator((IListIterator**)&it);
@@ -4566,7 +4566,7 @@ ECode Collections::Max(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IIterator> it;
-    if(collection == NULL){
+    if (collection == NULL) {
         return E_NO_SUCH_ELEMENT_EXCEPTION;
     }
     (IIterable::Probe(collection))->GetIterator((IIterator**)&it);
@@ -4599,7 +4599,7 @@ ECode Collections::Max(
     }
 
     AutoPtr<IIterator> it;
-    if(collection == NULL){
+    if (collection == NULL) {
         return E_NO_SUCH_ELEMENT_EXCEPTION;
     }
     (IIterable::Probe(collection))->GetIterator((IIterator**)&it);
@@ -4625,7 +4625,7 @@ ECode Collections::Min(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IIterator> it;
-    if(collection == NULL){
+    if (collection == NULL) {
         return E_NO_SUCH_ELEMENT_EXCEPTION;
     }
     (IIterable::Probe(collection))->GetIterator((IIterator**)&it);
@@ -4657,7 +4657,7 @@ ECode Collections::Min(
     }
 
     AutoPtr<IIterator> it;
-    if(collection == NULL){
+    if (collection == NULL) {
         return E_NO_SUCH_ELEMENT_EXCEPTION;
     }
     (IIterable::Probe(collection))->GetIterator((IIterator**)&it);
@@ -4684,7 +4684,8 @@ ECode Collections::NCopies(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<IList> res = new CopiesList(length, object);
+    AutoPtr<CopiesList> res = new CopiesList();
+    FAIL_RETURN(res->constructor(length, object));
     *result = res;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -4694,6 +4695,9 @@ ECode Collections::Reverse(
     /* [in] */ IList* list)
 {
     Int32 size;
+    if (list == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     (ICollection::Probe(list))->GetSize(&size);
     AutoPtr<IListIterator> front;
     list->GetListIterator((IListIterator**)&front);
@@ -4751,6 +4755,9 @@ ECode Collections::Shuffle(
     /* [in] */ IList* list,
     /* [in] */ IRandom* random)
 {
+    if (list == NULL || random == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     AutoPtr<IList> objectList = list;
 
     if (IRandomAccess::Probe(list) != NULL) {
@@ -4827,6 +4834,9 @@ ECode Collections::SingletonMap(
 ECode Collections::Sort(
     /* [in] */ IList* list)
 {
+    if (list == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     AutoPtr<ArrayOf<IInterface*> > array;
     (ICollection::Probe(list))->ToArray((ArrayOf<IInterface*>**)&array);
     Arrays::Sort(array.Get());
@@ -4847,6 +4857,9 @@ ECode Collections::Sort(
     /* [in] */ IComparator* comparator)
 {
     Int32 num;
+    if (list == NULL || comparator == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     (ICollection::Probe(list))->GetSize(&num);
     AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(num);
     AutoPtr<ArrayOf<IInterface*> > array;
@@ -4855,8 +4868,8 @@ ECode Collections::Sort(
     AutoPtr<IListIterator> it;
     list->GetListIterator((IListIterator**)&it);
     Boolean b;
+    Int32 i = 0;
     while (((IIterator::Probe(it))->HasNext(&b), b)) {
-        Int32 i = 0;
         AutoPtr<IInterface> o;
         (IIterator::Probe(it))->GetNext((IInterface**)&o);
         it->Set((*array)[i++]);

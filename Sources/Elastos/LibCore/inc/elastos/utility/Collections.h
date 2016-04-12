@@ -723,11 +723,11 @@ private:
         , public ISerializable
     {
     public:
-        CopiesList(
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
             /* [in] */ Int32 length,
             /* [in] */ IInterface* object);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI Contains(
             /* [in] */ IInterface* object,
