@@ -127,8 +127,9 @@ Boolean UsbMidiDeviceFactoryElastos::EnumerateDevices(
     Boolean hasNext = FALSE;
     while (it->HasNext(&hasNext), hasNext)
     {
-        AutoPtr<IUsbDevice> device;
-        it->GetNext((IInterface**)&device);
+        AutoPtr<IInterface> deviceObj;
+        it->GetNext((IInterface**)&deviceObj);
+        IUsbDevice* device = IUsbDevice::Probe(deviceObj);
         Boolean found = false;
         Int32 interfaceCount;
         device->GetInterfaceCount(&interfaceCount);

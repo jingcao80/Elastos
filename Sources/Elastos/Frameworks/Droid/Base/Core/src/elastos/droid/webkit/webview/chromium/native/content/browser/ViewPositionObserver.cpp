@@ -117,8 +117,9 @@ ECode ViewPositionObserver::NotifyListeners()
     iterable->GetIterator((IIterator**)&iterator);
     Boolean bNext = FALSE;
     for (iterator->HasNext(&bNext); bNext; iterator->HasNext(&bNext)) {
-        AutoPtr<Listener> listener;
-        iterator->GetNext((IInterface**)&listener);
+        AutoPtr<IInterface> listenerObj;
+        iterator->GetNext((IInterface**)&listenerObj);
+        Listener* listener = (Listener*)(IObject::Probe(listenerObj));
         listener->OnPositionChanged((*mPosition)[0], (*mPosition)[1]);
     }
 

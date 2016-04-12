@@ -499,9 +499,10 @@ Boolean DeviceSensors::RegisterSensors(
     AutoPtr<IIterator> iter;
     sensorsToActivate->GetIterator((IIterator**)&iter);
     Boolean bHasNext = FALSE;
-    AutoPtr<IInteger32> value;
     for (iter->HasNext(&bHasNext); bHasNext; iter->HasNext(&bHasNext)) {
-        iter->GetNext((IInterface**)&value);
+        AutoPtr<IInterface> valueObj;
+        iter->GetNext((IInterface**)&valueObj);
+        IInteger32* value = IInteger32::Probe(valueObj);
         Int32 sensorType;
         value->GetValue(&sensorType);
         Boolean result = RegisterForSensorType(sensorType, rateInMilliseconds);
@@ -527,9 +528,10 @@ void DeviceSensors::UnregisterSensors(
     AutoPtr<IIterator> iter;
     sensorTypes->GetIterator((IIterator**)&iter);
     Boolean bNext = FALSE;
-    AutoPtr<IInteger32> sensorType;
     while(iter->HasNext(&bNext), bNext) {
-        iter->GetNext((IInterface**)&sensorType);
+        AutoPtr<IInterface> sensorTypeObj;
+        iter->GetNext((IInterface**)&sensorTypeObj);
+        IInteger32* sensorType = IInteger32::Probe(sensorTypeObj);
         Boolean bContains = FALSE;
         mActiveSensors->Contains(sensorType, &bContains);
         if (bContains) {

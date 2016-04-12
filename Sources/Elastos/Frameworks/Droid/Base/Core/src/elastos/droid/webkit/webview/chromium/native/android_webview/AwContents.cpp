@@ -753,7 +753,7 @@ void AwContents::InnerSmartClipDataListener::OnSmartClipDataExtracted(
         AutoPtr<IMessageHelper> msgHelper;
         CMessageHelper::AcquireSingleton((IMessageHelper**)&msgHelper);
         AutoPtr<IMessage> msg;
-        msgHelper->Obtain(mResultHandler, 0, (IMessage**)&msgHelper);
+        msgHelper->Obtain(mResultHandler, 0, (IMessage**)&msg);
         msg->SetData(bundle);
         msg->SendToTarget();
     //} catch (Exception e) {

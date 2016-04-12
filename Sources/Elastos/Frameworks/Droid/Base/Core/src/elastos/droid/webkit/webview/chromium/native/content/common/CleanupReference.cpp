@@ -47,8 +47,9 @@ ECode CleanupReference::LazyHolder::InnerHandler::HandleMessage(
     VALIDATE_NOT_NULL(msg);
 
     TraceEvent::Begin();
-    AutoPtr<CleanupReference> ref;
-    msg->GetObj((IInterface**)&ref);
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    CleanupReference* ref = (CleanupReference*)(IObject::Probe(obj));
     Int32 what;
     msg->GetWhat(&what);
     switch (what) {

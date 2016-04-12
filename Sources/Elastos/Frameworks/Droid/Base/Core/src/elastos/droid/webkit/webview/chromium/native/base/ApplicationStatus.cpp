@@ -250,8 +250,9 @@ void ApplicationStatus::OnStateChange(
         sCachedApplicationState = NULL;
     }
 
-    AutoPtr<ActivityInfo> info;
-    sActivityInfo->Get(activity, (IInterface**)&info);
+    AutoPtr<IInterface> infoObj;
+    sActivityInfo->Get(activity, (IInterface**)&infoObj);
+    ActivityInfo* info = (ActivityInfo*)(IActivityInfo::Probe(infoObj));
     info->SetStatus(newState);
 
     // Notify all state observers that are specifically listening to this activity.
@@ -259,8 +260,9 @@ void ApplicationStatus::OnStateChange(
     info->GetListeners()->GetIterator((IIterator**)&iter);
     Boolean bNext;
     for (iter->HasNext(&bNext); bNext; iter->HasNext(&bNext)) {
-        AutoPtr<ActivityStateListener> listener;
-        iter->GetNext((IInterface**)&listener);
+        AutoPtr<IInterface> listenerObj;
+        iter->GetNext((IInterface**)&listenerObj);
+        ActivityStateListener* listener = (ActivityStateListener*)(IObject::Probe(listenerObj));
         listener->OnActivityStateChange(activity, newState);
     }
 
@@ -270,8 +272,9 @@ void ApplicationStatus::OnStateChange(
     sGeneralActivityStateListeners.GetIterator((IIterator**)&iter2);
     Boolean bNext2;
     for (iter2->HasNext(&bNext2); bNext2; iter2->HasNext(&bNext2)) {
-        AutoPtr<ActivityStateListener> listener;
-        iter2->GetNext((IInterface**)&listener);
+        AutoPtr<IInterface> listenerObj;
+        iter2->GetNext((IInterface**)&listenerObj);
+        ActivityStateListener* listener = (ActivityStateListener*)(IObject::Probe(listenerObj));
         listener->OnActivityStateChange(activity, newState);
     }
 
@@ -281,8 +284,9 @@ void ApplicationStatus::OnStateChange(
         sApplicationStateListeners.GetIterator((IIterator**)&iter);
         Boolean bNext;
         for (iter->HasNext(&bNext); bNext; iter->HasNext(&bNext)) {
-            AutoPtr<ApplicationStateListener> listener;
-            iter->GetNext((IInterface**)&listener);
+            AutoPtr<IInterface> listenerObj;
+            iter->GetNext((IInterface**)&listenerObj);
+            ApplicationStateListener* listener = (ApplicationStateListener*)(IObject::Probe(listenerObj));
             listener->OnApplicationStateChange(applicationState);
         }
     }
@@ -400,8 +404,9 @@ AutoPtr<IContext> ApplicationStatus::GetApplicationContext()
 Int32 ApplicationStatus::GetStateForActivity(
     /* [in] */ IActivity* activity)
 {
-    AutoPtr<ActivityInfo> info;
-    sActivityInfo->Get(activity, (IInterface**)&info);
+    AutoPtr<IInterface> infoObj;
+    sActivityInfo->Get(activity, (IInterface**)&infoObj);
+    ActivityInfo* info = (ActivityInfo*)(IActivity::Probe(infoObj));
     return info != NULL ? info->GetStatus() : ActivityState::DESTROYED;
 }
 
@@ -469,8 +474,9 @@ void ApplicationStatus::RegisterStateListenerForActivity(
 {
     assert(activity != NULL);
 
-    AutoPtr<ActivityInfo> info;
-    sActivityInfo->Get(activity, (IInterface**)&info);
+    AutoPtr<IInterface> infoObj;
+    sActivityInfo->Get(activity, (IInterface**)&infoObj);
+    ActivityInfo* info = (ActivityInfo*)(IActivity::Probe(infoObj));
     assert(info != NULL && info->GetStatus() != ActivityState::DESTROYED);
     info->GetListeners()->AddObserver((IObject*)listener);
 }
@@ -489,10 +495,11 @@ void ApplicationStatus::UnregisterActivityStateListener(
     sActivityInfo->GetValues((ICollection**)&collection);
     AutoPtr<IIterator> iter;
     collection->GetIterator((IIterator**)&iter);
-    AutoPtr<ActivityInfo> info;
     Boolean bNext;
     for (iter->HasNext(&bNext); bNext; iter->HasNext(&bNext)) {
-        iter->GetNext((IInterface**)&info);
+        AutoPtr<IInterface> infoObj;
+        iter->GetNext((IInterface**)&infoObj);
+        ActivityInfo* info = (ActivityInfo*)(IActivity::Probe(infoObj));
         info->GetListeners()->RemoveObserver((IObject*)listener);
     }
 }
@@ -549,8 +556,9 @@ Int32 ApplicationStatus::DetermineApplicationState()
     AutoPtr<IIterator> iter = IIterator::Probe(collection);
     Boolean bNext;
     for (iter->HasNext(&bNext); bNext; iter->HasNext(&bNext)) {
-        AutoPtr<ActivityInfo> info;
-        iter->GetNext((IInterface**)&info);
+        AutoPtr<IInterface> infoObj;
+        iter->GetNext((IInterface**)&infoObj);
+        ActivityInfo* info = (ActivityInfo*)(IActivity::Probe(infoObj));
         Int32 state = info->GetStatus();
         if (state != ActivityState::PAUSED
                 && state != ActivityState::STOPPED

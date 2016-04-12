@@ -100,11 +100,22 @@ MultiFieldTimePickerDialog::MultiFieldTimePickerDialog(
              (IView**)&view);
     SetView(view);
 
-    view->FindViewById(R::id::hour, (IView**)&mHourSpinner);
-    view->FindViewById(R::id::minute, (IView**)&mMinuteSpinner);
-    view->FindViewById(R::id::second, (IView**)&mSecSpinner);
-    view->FindViewById(R::id::milli, (IView**)&mMilliSpinner);
-    view->FindViewById(R::id::ampm, (IView**)&mAmPmSpinner);
+    AutoPtr<IView> tmpView;
+    view->FindViewById(R::id::hour, (IView**)&tmpView);
+    mHourSpinner = INumberPicker::Probe(tmpView);
+    tmpView = NULL;
+    view->FindViewById(R::id::minute, (IView**)&tmpView);
+    mMinuteSpinner = INumberPicker::Probe(tmpView);
+    tmpView = NULL;
+    view->FindViewById(R::id::second, (IView**)&tmpView);
+    mSecSpinner = INumberPicker::Probe(tmpView);
+    tmpView = NULL;
+    view->FindViewById(R::id::milli, (IView**)&tmpView);
+    mMilliSpinner = INumberPicker::Probe(tmpView);
+    tmpView = NULL;
+    view->FindViewById(R::id::ampm, (IView**)&tmpView);
+    mAmPmSpinner = INumberPicker::Probe(tmpView);
+    tmpView = NULL;
 
     Int32 minHour = min / HOUR_IN_MILLIS;
     Int32 maxHour = max / HOUR_IN_MILLIS;

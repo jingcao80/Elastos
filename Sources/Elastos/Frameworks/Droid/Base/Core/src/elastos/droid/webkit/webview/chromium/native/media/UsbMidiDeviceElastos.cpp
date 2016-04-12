@@ -279,8 +279,9 @@ void UsbMidiDeviceElastos::Send(
     }
 
     //UsbEndpoint endpoint = mEndpointMap.get(endpointNumber);
-    AutoPtr<IUsbEndpoint> endpoint;
-    mEndpointMap->Get(endpointNumber, (IInterface**)&endpoint);
+    AutoPtr<IInterface> endpointObj;
+    mEndpointMap->Get(endpointNumber, (IInterface**)&endpointObj);
+    IUsbEndpoint* endpoint = IUsbEndpoint::Probe(endpointObj);
     if (endpoint == NULL) {
         return;
     }

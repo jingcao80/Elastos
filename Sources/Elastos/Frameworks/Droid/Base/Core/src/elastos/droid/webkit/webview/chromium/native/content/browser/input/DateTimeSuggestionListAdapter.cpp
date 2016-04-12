@@ -49,10 +49,12 @@ ECode DateTimeSuggestionListAdapter::GetView(
              (IView**)&layout);
     }
 
-    AutoPtr<ITextView> labelView;
-    layout->FindViewById(R::id::date_time_suggestion_value, (IView**)&labelView);
-    AutoPtr<ITextView> sublabelView;
-    layout->FindViewById(R::id::date_time_suggestion_label, (IView**)&sublabelView);
+    AutoPtr<IView> labelViewView;
+    layout->FindViewById(R::id::date_time_suggestion_value, (IView**)&labelViewView);
+    ITextView* labelView = ITextView::Probe(labelViewView);
+    AutoPtr<IView> sublabelViewView;
+    layout->FindViewById(R::id::date_time_suggestion_label, (IView**)&sublabelViewView);
+    ITextView* sublabelView = ITextView::Probe(sublabelViewView);
 
     Int32 count;
     GetCount(&count);

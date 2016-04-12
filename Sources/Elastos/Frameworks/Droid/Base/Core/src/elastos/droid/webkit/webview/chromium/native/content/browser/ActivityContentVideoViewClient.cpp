@@ -33,15 +33,15 @@ Boolean ActivityContentVideoViewClient::OnShowCustomView(
 {
     AutoPtr<IWindow> window;
     mActivity->GetWindow((IWindow**)&window);
-    AutoPtr<IFrameLayout> decor;
-    window->GetDecorView((IView**)&decor);
+    AutoPtr<IView> decorView;
+    window->GetDecorView((IView**)&decorView);
+    IFrameLayout* decor = IFrameLayout::Probe(decorView);
     AutoPtr<IFrameLayoutLayoutParams> params;
     CFrameLayoutLayoutParams::New(
          IViewGroupLayoutParams::MATCH_PARENT,
          IViewGroupLayoutParams::MATCH_PARENT,
          IGravity::CENTER,
          (IFrameLayoutLayoutParams**)&params);
-    AutoPtr<IView> decorView = IView::Probe(decor);
     IViewGroup::Probe(decor)->AddView(view, 0, IViewGroupLayoutParams::Probe(params));
     SetSystemUiVisibility(decorView, TRUE);
     mView = view;
@@ -53,8 +53,9 @@ void ActivityContentVideoViewClient::OnDestroyContentVideoView()
 {
     AutoPtr<IWindow> window;
     mActivity->GetWindow((IWindow**)&window);
-    AutoPtr<IFrameLayout> decor;
-    window->GetDecorView((IView**)&decor);
+    AutoPtr<IView> decorView;
+    window->GetDecorView((IView**)&decorView);
+    IFrameLayout* decor = IFrameLayout::Probe(decorView);
     IViewGroup::Probe(decor)->RemoveView(mView);
     SetSystemUiVisibility(IView::Probe(decor), FALSE);
     mView = NULL;

@@ -93,12 +93,16 @@ FindActionModeCallback::FindActionModeCallback(
     AutoPtr<ILayoutInflater> inflate;
     LayoutInflater::From(context, (ILayoutInflater**)&inflate);
     inflate->Inflate(R::layout::webview_find, NULL, (IView**)&mCustomView);
-    mCustomView->FindViewById(R::id::edit, (IView**)&mEditText);
+    AutoPtr<IView> editTextView;
+    mCustomView->FindViewById(R::id::edit, (IView**)&editTextView);
+    mEditText = IEditText::Probe(editTextView);
     AutoPtr<NoAction> action = new NoAction();
     ITextView::Probe(mEditText)->SetCustomSelectionActionModeCallback(action);
     IView::Probe(mEditText)->SetOnClickListener(this);
     SetText(String(""));
-    mCustomView->FindViewById(R::id::matches, (IView**)&mMatches);
+    AutoPtr<IView> matchesView;
+    mCustomView->FindViewById(R::id::matches, (IView**)&matchesView);
+    mMatches = ITextView::Probe(matchesView);
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
     mInput = IInputMethodManager::Probe(obj);
@@ -120,8 +124,9 @@ void FindActionModeCallback::SetText(
     AutoPtr<ICharSequence> textWrapper;
     CString::New(text, (ICharSequence**)&textWrapper);
     ITextView::Probe(mEditText)->SetText(textWrapper);
-    AutoPtr<ISpannable> span;
-    ITextView::Probe(mEditText)->GetText((ICharSequence**)&span);
+    AutoPtr<ICharSequence> spancs;
+    ITextView::Probe(mEditText)->GetText((ICharSequence**)&spancs);
+    ISpannable* span = ISpannable::Probe(spancs);
     Int32 length;
     ICharSequence::Probe(span)->GetLength(&length);
     // Ideally, we would like to set the selection to the whole field,
@@ -255,8 +260,9 @@ ECode FindActionModeCallback::OnCreateActionMode(
     mode->GetMenuInflater((IMenuInflater**)&menuInflater);
     menuInflater->Inflate(R::menu::webview_find, menu);
     mActionMode = mode;
-    AutoPtr<IEditable> edit;
-    ITextView::Probe(mEditText)->GetText((ICharSequence**)&edit);
+    AutoPtr<ICharSequence> editcs;
+    ITextView::Probe(mEditText)->GetText((ICharSequence**)&editcs);
+    IEditable* edit = IEditable::Probe(editcs);
     Int32 length;
     ICharSequence::Probe(edit)->GetLength(&length);
     Selection::SetSelection(ISpannable::Probe(edit), length);
@@ -372,8 +378,9 @@ Int32 FindActionModeCallback::GetActionModeGlobalBottom()
         return 0;
     }
 
-    AutoPtr<IView> view;
-    mCustomView->GetParent((IViewParent**)&view);
+    AutoPtr<IViewParent> viewParent;
+    mCustomView->GetParent((IViewParent**)&viewParent);
+    IView* view = IView::Probe(viewParent);
     if (view == NULL) {
         view = mCustomView;
     }

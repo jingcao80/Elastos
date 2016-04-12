@@ -72,11 +72,15 @@ DateTimePickerDialog::DateTimePickerDialog(
     AutoPtr<IView> view;
     inflater->Inflate(R::layout::date_time_picker_dialog, NULL, (IView**)&view);
     SetView(view);
-    view->FindViewById(R::id::date_picker, (IView**)&mDatePicker);
+    AutoPtr<IView> tmpView;
+    view->FindViewById(R::id::date_picker, (IView**)&tmpView);
+    mDatePicker = IDatePicker::Probe(tmpView);
     DateDialogNormalizer::Normalize(mDatePicker, this,
         year, monthOfYear, dayOfMonth, hourOfDay, minute, mMinTimeMillis, mMaxTimeMillis);
 
-    view->FindViewById(R::id::time_picker, (IView**)&mTimePicker);
+    tmpView = NULL;
+    view->FindViewById(R::id::time_picker, (IView**)&tmpView);
+    mTimePicker = ITimePicker::Probe(tmpView);
     mTimePicker->SetIs24HourView(is24HourView);
     mTimePicker->SetCurrentHour(hourOfDay);
     mTimePicker->SetCurrentMinute(minute);

@@ -240,10 +240,11 @@ Boolean SpeechRecognition::Initialize(
     AutoPtr<IIterator> iterator;
     iterable->GetIterator((IIterator**)&iterator);
     Boolean bHasNext;
-    AutoPtr<IResolveInfo> resolve;
     for (iterator->HasNext(&bHasNext);
          bHasNext; iterator->HasNext(&bHasNext)) {
-        iterator->GetNext((IInterface**)&resolve);
+        AutoPtr<IInterface> resolveObj;
+        iterator->GetNext((IInterface**)&resolveObj);
+        IResolveInfo* resolve = IResolveInfo::Probe(resolveObj);
         AutoPtr<IServiceInfo> service;
         resolve->GetServiceInfo((IServiceInfo**)&service);
 

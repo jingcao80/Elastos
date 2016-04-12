@@ -306,15 +306,17 @@ String LoadUrlParams::GetExtraHeadersString(
         }
 
         // Header name should be lower case.
-        AutoPtr<ICharSequence> key;
-        header->GetKey((IInterface**)&key);
+        AutoPtr<IInterface> keyObj;
+        header->GetKey((IInterface**)&keyObj);
+        ICharSequence* key = ICharSequence::Probe(keyObj);;
         String strKey;
         key->ToString(&strKey);
         // headerBuilder.append(header.getKey().toLowerCase(Locale.US));
         headerBuilder->Append(strKey);
         headerBuilder->Append(":");
-        AutoPtr<ICharSequence> value;
-        header->GetValue((IInterface**)&value);
+        AutoPtr<IInterface> valueObj;
+        header->GetValue((IInterface**)&valueObj);
+        ICharSequence* value = ICharSequence::Probe(valueObj);
         String strValue;
         value->ToString(&strValue);
         headerBuilder->Append(strValue);

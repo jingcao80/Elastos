@@ -1779,8 +1779,9 @@ void ContentViewCore::OnFlingStartEventConsumed(
     mGestureStateListenersIterator->HasNext(&bNext);
     for (mGestureStateListenersIterator->Rewind();
                 bNext; mGestureStateListenersIterator->HasNext(&bNext)) {
-        AutoPtr<GestureStateListener> listener;
-        mGestureStateListenersIterator->GetNext((IInterface**)&listener);
+        AutoPtr<IInterface> listenerObj;
+        mGestureStateListenersIterator->GetNext((IInterface**)&listenerObj);
+        GestureStateListener* listener = (GestureStateListener*)(IObject::Probe(listenerObj));
         listener->OnFlingStartGesture(
                 vx, vy, ComputeVerticalScrollOffset(), ComputeVerticalScrollExtent());
     }
@@ -1797,8 +1798,9 @@ void ContentViewCore::OnFlingStartEventHadNoConsumer(
     mGestureStateListenersIterator->HasNext(&bNext);
     for (mGestureStateListenersIterator->Rewind();
                 bNext; mGestureStateListenersIterator->HasNext(&bNext)) {
-        AutoPtr<GestureStateListener> listener;
-        mGestureStateListenersIterator->GetNext((IInterface**)&listener);
+        AutoPtr<IInterface> listenerObj;
+        mGestureStateListenersIterator->GetNext((IInterface**)&listenerObj);
+        GestureStateListener* listener = (GestureStateListener*)(IObject::Probe(listenerObj));
         listener->OnUnhandledFlingStartEvent(vx, vy);
     }
 }
@@ -1829,8 +1831,9 @@ void ContentViewCore::OnScrollUpdateGestureConsumed()
     mGestureStateListenersIterator->HasNext(&bNext);
     for (mGestureStateListenersIterator->Rewind();
             bNext; mGestureStateListenersIterator->HasNext(&bNext)) {
-        AutoPtr<GestureStateListener> listener;
-        mGestureStateListenersIterator->GetNext((IInterface**)&listener);
+        AutoPtr<IInterface> listenerObj;
+        mGestureStateListenersIterator->GetNext((IInterface**)&listenerObj);
+        GestureStateListener* listener = (GestureStateListener*)(IObject::Probe(listenerObj));;
         listener->OnScrollUpdateGestureConsumed();
     }
 }
@@ -1872,8 +1875,9 @@ void ContentViewCore::OnSingleTapEventAck(
     mGestureStateListenersIterator->HasNext(&bNext);
     for (mGestureStateListenersIterator->Rewind();
             bNext; mGestureStateListenersIterator->HasNext(&bNext)) {
-        AutoPtr<GestureStateListener> listener;
-        mGestureStateListenersIterator->GetNext((IInterface**)&listener);
+        AutoPtr<IInterface> listenerObj;
+        mGestureStateListenersIterator->GetNext((IInterface**)&listenerObj);
+        GestureStateListener* listener = (GestureStateListener*)(IObject::Probe(listenerObj));;
         listener->OnSingleTap(consumed, x, y);
     }
 }
@@ -1975,8 +1979,9 @@ void ContentViewCore::UpdateGestureStateListener(
     mGestureStateListenersIterator->HasNext(&bNext);
     for (mGestureStateListenersIterator->Rewind();
             bNext; mGestureStateListenersIterator->HasNext(&bNext)) {
-        AutoPtr<GestureStateListener> listener;
-        mGestureStateListenersIterator->GetNext((IInterface**)&listener);
+        AutoPtr<IInterface> listenerObj;
+        mGestureStateListenersIterator->GetNext((IInterface**)&listenerObj);
+        GestureStateListener* listener = (GestureStateListener*)(IObject::Probe(listenerObj));;
         switch (gestureType) {
             case GestureEventType::PINCH_BEGIN:
                 listener->OnPinchStarted();
@@ -3103,8 +3108,9 @@ void ContentViewCore::UpdateFrameInfo(
         mGestureStateListenersIterator->HasNext(&bNext);
         for (mGestureStateListenersIterator->Rewind();
                 bNext; mGestureStateListenersIterator->HasNext(&bNext)) {
-            AutoPtr<GestureStateListener> listener;
-            mGestureStateListenersIterator->GetNext((IInterface**)&listener);
+            AutoPtr<IInterface> listenerObj;
+            mGestureStateListenersIterator->GetNext((IInterface**)&listenerObj);
+            GestureStateListener* listener = (GestureStateListener*)(IObject::Probe(listenerObj));
             listener->OnScrollOffsetOrExtentChanged(
                     ComputeVerticalScrollOffset(),
                     ComputeVerticalScrollExtent());

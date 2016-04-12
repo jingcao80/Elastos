@@ -207,10 +207,12 @@ AutoPtr<ArrayOf<VideoCapture::CaptureFormat*> > VideoCaptureElastos::GetDeviceSu
         //for (int[] fpsRange : listFpsRange)
         for(Int32 i = 0; i < count; ++i)
         {
-            AutoPtr<IArrayList> fpsRange;
-            listFpsRange->Get(i, (IInterface**)&fpsRange);
-            AutoPtr<IInteger32> range_0;
-            fpsRange->Get(0, (IInterface**)&range_0);
+            AutoPtr<IInterface> fpsRangeObj;
+            listFpsRange->Get(i, (IInterface**)&fpsRangeObj);
+            IArrayList* fpsRange = IArrayList::Probe(fpsRangeObj);
+            AutoPtr<IInterface> range_0Obj;
+            fpsRange->Get(0, (IInterface**)&range_0Obj);
+            IInteger32* range_0 = IInteger32::Probe(range_0Obj);
             Int32 value_range_0;
             range_0->GetValue(&value_range_0);
 

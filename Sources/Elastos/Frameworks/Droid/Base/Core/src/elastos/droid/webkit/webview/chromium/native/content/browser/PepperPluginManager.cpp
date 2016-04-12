@@ -55,8 +55,9 @@ String PepperPluginManager::GetPlugins(
     iterable->GetIterator((IIterator**)&iter);
     Boolean bNext = FALSE;
     for (iter->HasNext(&bNext); bNext; iter->HasNext(&bNext)) {
-        AutoPtr<IResolveInfo> info;
-        iter->GetNext((IInterface**)&info);
+        AutoPtr<IInterface> infoObj;
+        iter->GetNext((IInterface**)&infoObj);
+        IResolveInfo* info = IResolveInfo::Probe(infoObj);
         // Retrieve the plugin's service information.
         AutoPtr<IServiceInfo> serviceInfo;
         info->GetServiceInfo((IServiceInfo**)&serviceInfo);

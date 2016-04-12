@@ -53,13 +53,15 @@ ColorPickerAdvancedComponent::ColorPickerAdvancedComponent(
     // mSeekBar.setThumbOffset(offset / 2);
 
     rootView->FindViewById(R::id::gradient, (IView**)&mGradientView);
-    IView* viewTmp = IView::Probe(mText);
+    AutoPtr<IView> viewTmp;
     rootView->FindViewById(R::id::text, (IView**)&viewTmp);
+    mText = ITextView::Probe(viewTmp);
     mText->SetText(textResourceId);
     CGradientDrawable::New(GradientDrawableOrientation_LEFT_RIGHT, NULL, (IGradientDrawable**)&mGradientDrawable);
 
-    IView* viewTmp1 = IView::Probe(mSeekBar);
+    AutoPtr<IView> viewTmp1;
     rootView->FindViewById(R::id::seek_bar, (IView**)&viewTmp1);
+    mSeekBar = ISeekBar::Probe(viewTmp1);
     mSeekBar->SetOnSeekBarChangeListener(seekBarListener);
 
     IProgressBar* progressBar = IProgressBar::Probe(mSeekBar);

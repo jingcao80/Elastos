@@ -86,37 +86,42 @@ ECode AwContentsClientCallbackHelper::MyHandler::HandleMessage(
     msg->GetWhat(&what);
     switch(what) {
         case MSG_ON_LOAD_RESOURCE: {
-            AutoPtr<ICharSequence> cs;
-            msg->GetObj((IInterface**)&cs);
+            AutoPtr<IInterface> csObj;
+            msg->GetObj((IInterface**)&csObj);
+            ICharSequence* cs = ICharSequence::Probe(csObj);
             String url;
             cs->ToString(&url);
             mOwner->mContentsClient->OnLoadResource(url);
             break;
         }
         case MSG_ON_PAGE_STARTED: {
-            AutoPtr<ICharSequence> cs;
-            msg->GetObj((IInterface**)&cs);
+            AutoPtr<IInterface> csObj;
+            msg->GetObj((IInterface**)&csObj);
+            ICharSequence* cs = ICharSequence::Probe(csObj);
             String url;
             cs->ToString(&url);
             mOwner->mContentsClient->OnPageStarted(url);
             break;
         }
         case MSG_ON_DOWNLOAD_START: {
-            AutoPtr<DownloadInfo> info;
-            msg->GetObj((IInterface**)&info);
+            AutoPtr<IInterface> infoObj;
+            msg->GetObj((IInterface**)&infoObj);
+            DownloadInfo* info = (DownloadInfo*)(IObject::Probe(infoObj));
             mOwner->mContentsClient->OnDownloadStart(info->mUrl, info->mUserAgent,
                     info->mContentDisposition, info->mMimeType, info->mContentLength);
             break;
         }
         case MSG_ON_RECEIVED_LOGIN_REQUEST: {
-            AutoPtr<LoginRequestInfo> info;
-            msg->GetObj((IInterface**)&info);
+            AutoPtr<IInterface> infoObj;
+            msg->GetObj((IInterface**)&infoObj);
+            LoginRequestInfo* info = (LoginRequestInfo*)(IObject::Probe(infoObj));
             mOwner->mContentsClient->OnReceivedLoginRequest(info->mRealm, info->mAccount, info->mArgs);
             break;
         }
         case MSG_ON_RECEIVED_ERROR: {
-            AutoPtr<OnReceivedErrorInfo> info;
-            msg->GetObj((IInterface**)&info);
+            AutoPtr<IInterface> infoObj;
+            msg->GetObj((IInterface**)&infoObj);
+            OnReceivedErrorInfo* info = (OnReceivedErrorInfo*)(IObject::Probe(infoObj));
             mOwner->mContentsClient->OnReceivedError(info->mErrorCode, info->mDescription,
                     info->mFailingUrl);
             break;

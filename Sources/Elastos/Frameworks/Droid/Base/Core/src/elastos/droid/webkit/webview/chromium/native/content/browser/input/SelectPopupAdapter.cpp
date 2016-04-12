@@ -35,7 +35,9 @@ SelectPopupAdapter::SelectPopupAdapter(
     /* [in] */ IList* items)
 {
     ArrayAdapter::constructor(context, layoutResource, items);
-    CArrayList::New(ICollection::Probe(items), (IArrayList**)&mItems);
+    AutoPtr<IArrayList> arrayList;
+    CArrayList::New(ICollection::Probe(items), (IArrayList**)&arrayList);
+    mItems = IList::Probe(arrayList);
 
     mAreAllItemsEnabled = TRUE;
     Int32 size;

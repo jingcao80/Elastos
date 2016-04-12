@@ -355,8 +355,9 @@ Boolean MediaResourceGetter::FilePathAcceptable(
     iterable->GetIterator((IIterator**)&iter);
     Boolean bNext = FALSE;
     for (iter->HasNext(&bNext); bNext; iter->HasNext(&bNext)) {
-        AutoPtr<ICharSequence> cs;
-        iter->GetNext((IInterface**)&cs);
+        AutoPtr<IInterface> obj;
+        iter->GetNext((IInterface**)&obj);
+        ICharSequence* cs = ICharSequence::Probe(obj);
         String acceptablePath;
         cs->ToString(&acceptablePath);
         if (path.StartWith(acceptablePath)) {
@@ -579,10 +580,11 @@ AutoPtr<IList> MediaResourceGetter::Canonicalize(
         AutoPtr<IIterable> iterable = IIterable::Probe(paths);
         AutoPtr<IIterator> iter;
         paths->GetIterator((IIterator**)&iter);
-        AutoPtr<ICharSequence> pathCS;
         Boolean bNext;
         for (iter->HasNext(&bNext); bNext; iter->HasNext(&bNext)) {
-            iter->GetNext((IInterface**)&pathCS);
+            AutoPtr<IInterface> pathObj;
+            iter->GetNext((IInterface**)&pathObj);
+            ICharSequence* pathCS = ICharSequence::Probe(pathObj);
             String path;
             pathCS->ToString(&path);
             AutoPtr<IFile> file;

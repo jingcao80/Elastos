@@ -118,7 +118,7 @@ String AwWebContentsDelegateAdapter::GetDisplayNameTask::ResolveFileName(
     AutoPtr<IUriHelper> helper;
     CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     AutoPtr<IUri> uri;
-    helper->Parse(filePath, (IUri**)&helper);
+    helper->Parse(filePath, (IUri**)&uri);
     return ContentUriUtils::GetDisplayName(
             uri, mContentResolver, IMediaStoreMediaColumns::DISPLAY_NAME);
 }

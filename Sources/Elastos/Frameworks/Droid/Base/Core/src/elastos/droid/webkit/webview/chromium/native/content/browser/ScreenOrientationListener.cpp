@@ -227,8 +227,9 @@ ECode ScreenOrientationListener::NotifyObservers()
     mObservers.GetIterator((IIterator**)&iter);
     Boolean bNext;
     for (iter->HasNext(&bNext); bNext; iter->HasNext(&bNext)) {
-        AutoPtr<ScreenOrientationObserver> observer;
-        iter->GetNext((IInterface**)&observer);
+        AutoPtr<IInterface> observerObj;
+        iter->GetNext((IInterface**)&observerObj);
+        ScreenOrientationObserver* observer = (ScreenOrientationObserver*)(IObject::Probe(observerObj));
         observer->OnScreenOrientationChanged(mOrientation);
     }
 

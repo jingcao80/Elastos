@@ -182,7 +182,7 @@ Boolean ElastosNetworkLibrary::HaveOnlyLoopbackAddresses()
     // }
     // return true;
 
-    AutoPtr<IEnumeration> list(NULL);
+    AutoPtr<IEnumeration> list;
     //try {
         AutoPtr<INetworkInterfaceHelper> helper;
         CNetworkInterfaceHelper::AcquireSingleton((INetworkInterfaceHelper**)&helper);
@@ -264,7 +264,7 @@ String ElastosNetworkLibrary::GetNetworkList()
     // }
     // return result.toString();
 
-    AutoPtr<IEnumeration> lists(NULL);
+    AutoPtr<IEnumeration> lists;
     //try {
         AutoPtr<INetworkInterfaceHelper> helper;
         CNetworkInterfaceHelper::AcquireSingleton((INetworkInterfaceHelper**)&helper);

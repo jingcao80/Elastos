@@ -186,9 +186,10 @@ AutoPtr<CipherFactory::CipherData> CipherFactory::GetCipherData(
         TriggerKeyGeneration();
 
         // Grab the data from the task.
-        AutoPtr<CipherData> data;
+        AutoPtr<IInterface> dataObj;
         // try {
-            mDataGenerator->Get((IInterface**)&data);
+            mDataGenerator->Get((IInterface**)&dataObj);
+            CipherData* data = (CipherData*)(IObject::Probe(dataObj));
         // } catch (InterruptedException e) {
         //     throw new RuntimeException(e);
         // } catch (ExecutionException e) {

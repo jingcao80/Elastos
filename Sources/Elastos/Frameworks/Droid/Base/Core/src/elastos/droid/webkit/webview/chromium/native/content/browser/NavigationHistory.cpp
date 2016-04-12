@@ -31,8 +31,9 @@ Int32 NavigationHistory::GetEntryCount()
 AutoPtr<NavigationEntry> NavigationHistory::GetEntryAtIndex(
     /* [in] */ Int32 index)
 {
-    AutoPtr<NavigationEntry> entry;
-    mEntries->Get(index, (IInterface**)&entry);
+    AutoPtr<IInterface> entryObj;
+    mEntries->Get(index, (IInterface**)&entryObj);
+    NavigationEntry* entry = (NavigationEntry*)(IObject::Probe(entryObj));
     return entry;
 }
 

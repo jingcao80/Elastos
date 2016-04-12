@@ -32,7 +32,7 @@ public:
     // MessageLoop to post directly to AwContents.
 
     class DownloadInfo
-    : public Object
+        : public Object
     {
     public:
         DownloadInfo(
@@ -51,7 +51,7 @@ public:
     };
 
     class LoginRequestInfo
-    :public Object
+        : public Object
     {
     public:
         LoginRequestInfo(
@@ -66,7 +66,7 @@ public:
     };
 
     class OnReceivedErrorInfo
-    :public Object
+        : public Object
     {
     public:
         OnReceivedErrorInfo(

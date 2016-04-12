@@ -192,8 +192,9 @@ ECode AwSettings::EventHandler::InnerHandler::HandleMessage(
             {
                 AutoLock lock(&(mOwner->mOwner->mAwSettingsLock));
                 if (mOwner->mOwner->mNativeAwSettings != 0) {
-                    AutoPtr<IRunnable> runnable;
-                    msg->GetObj((IInterface**)&runnable);
+                    AutoPtr<IInterface> runnableObj;
+                    msg->GetObj((IInterface**)&runnableObj);
+                    IRunnable* runnable = IRunnable::Probe(runnableObj);
                     runnable->Run();
                 }
                 mOwner->mSynchronizationPending = FALSE;

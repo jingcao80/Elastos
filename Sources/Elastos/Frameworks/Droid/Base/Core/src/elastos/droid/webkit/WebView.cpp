@@ -785,11 +785,14 @@ ECode WebView::LoadUrl(
             Boolean bNext = FALSE;
             iter->HasNext(&bNext);
             for (; bNext; iter->HasNext(&bNext)) {
-                AutoPtr<IMapEntry> entry;
-                iter->GetNext((IInterface**)&entry);
-                AutoPtr<ICharSequence> iKey, iValue;
-                entry->GetKey((IInterface**)&iKey);
-                entry->GetValue((IInterface**)&iValue);
+                AutoPtr<IInterface> objEntry;
+                iter->GetNext((IInterface**)&objEntry);
+                IMapEntry* entry = IMapEntry::Probe(objEntry);
+                AutoPtr<IInterface> objKey, objValue;
+                entry->GetKey((IInterface**)&objKey);
+                entry->GetValue((IInterface**)&objValue);
+                ICharSequence* iKey = ICharSequence::Probe(objKey);;
+                ICharSequence* iValue = ICharSequence::Probe(objValue);;
                 String key, value;
                 iKey->ToString(&key);
                 iValue->ToString(&value);

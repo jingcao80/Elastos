@@ -50,8 +50,9 @@ GamepadDevice::GamepadDevice(
     Boolean bNext = FALSE;
     iter->HasNext(&bNext);
     for (; bNext; iter->HasNext(&bNext)) {
-        AutoPtr<IMotionRange> range;
-        iter->GetNext((IInterface**)&range);
+        AutoPtr<IInterface> rangeObj;
+        iter->GetNext((IInterface**)&rangeObj);
+        IMotionRange* range = IMotionRange::Probe(rangeObj);
         Int32 source;
         range->GetSource(&source);
         if ((source & IInputDevice::SOURCE_CLASS_JOYSTICK) != 0) {

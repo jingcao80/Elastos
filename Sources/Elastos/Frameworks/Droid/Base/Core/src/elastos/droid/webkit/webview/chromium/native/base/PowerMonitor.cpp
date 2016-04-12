@@ -96,9 +96,10 @@ void PowerMonitor::CreateForTests(
  *                will be used from this parameter.
  */
 void PowerMonitor::Create(
-    /* [in] */ IContext* context)
+    /* [in] */ IContext* _context)
 {
-    context->GetApplicationContext((IContext**)&context);
+    AutoPtr<IContext> context;
+    _context->GetApplicationContext((IContext**)&context);
     if (sInstance == NULL) {
         sInstance = LazyHolder::INSTANCE();
         ApplicationStatus::RegisterApplicationStateListener(sInstance);

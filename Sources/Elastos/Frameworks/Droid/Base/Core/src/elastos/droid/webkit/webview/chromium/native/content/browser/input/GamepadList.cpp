@@ -179,7 +179,7 @@ void GamepadList::OnInputDeviceAddedImpl(
     AutoPtr<IInputDeviceHelper> helper;
     //TODO CInputDeviceHelper::AcquireSingleton((IInputDeviceHelper**)&helper);
     AutoPtr<IInputDevice> inputDevice;
-    helper->GetDevice(deviceId, (IInputDevice**)&helper);
+    helper->GetDevice(deviceId, (IInputDevice**)&inputDevice);
     if (!IsGamepadDevice(inputDevice)) return;
 
     {

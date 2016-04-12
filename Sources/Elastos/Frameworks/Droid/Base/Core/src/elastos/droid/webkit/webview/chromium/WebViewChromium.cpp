@@ -233,7 +233,7 @@ ECode WebViewChromium::InnerContextWrapper::InnerClassLoader::FindClass(
     assert(NULL != mWebViewCl);
     // First look in the WebViewProvider class loader.
     //try {
-        return mWebViewCl->LoadClass(name, (IClassInfo**)&klass);
+        return mWebViewCl->LoadClass(name, klass);
     //}
     //catch (ClassNotFoundException e) {
         // Look in the app class loader; allowing it to throw ClassNotFoundException.

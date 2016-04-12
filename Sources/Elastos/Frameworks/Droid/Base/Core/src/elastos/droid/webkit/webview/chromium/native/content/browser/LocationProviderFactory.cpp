@@ -228,8 +228,9 @@ Boolean LocationProviderFactory::LocationProviderImpl::IsOnlyPassiveLocationProv
     mLocationManager->GetProviders(TRUE, (IList**)&providers);
     Int32 size;
     providers->GetSize(&size);
-    AutoPtr<ICharSequence> strC;
-    providers->Get(0, (IInterface**)&strC);
+    AutoPtr<IInterface> strObj;
+    providers->Get(0, (IInterface**)&strObj);
+    ICharSequence* strC = ICharSequence::Probe(strObj);
     String str;
     strC->ToString(&str);
     return providers != NULL && size == 1
