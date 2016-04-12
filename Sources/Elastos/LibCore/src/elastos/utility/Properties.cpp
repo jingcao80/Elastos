@@ -466,8 +466,6 @@ ECode Properties::SetProperty(
     /* [in] */ const String& value,
     /* [out] */ String* oldValue)
 {
-    assert(!name.IsNull() && !value.IsNull());
-
     AutoPtr<IInterface> obj;
     AutoPtr<ICharSequence> seqName = StrToCS(name);
     AutoPtr<ICharSequence> seqValue = StrToCS(value);
