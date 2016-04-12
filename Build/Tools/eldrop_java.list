@@ -13,7 +13,7 @@
 ; libandroid_runtime.so    /system/lib
 ; libbinder.so             /system/lib
 ; libmedia_jni.so          /system/lib
-Linux/usr/lib/libelwebviewchromium.so       /system/lib
+../Linux/usr/lib/libelwebviewchromium.so       /system/lib
 ; ../Linux/usr/lib/libelchromium_net.so       /system/lib
 ; ../Linux/usr/lib/libelwebcore.so            /system/lib
 ; Launcher2.apk            /system/app
@@ -35,4 +35,4 @@ Linux/usr/lib/libelwebviewchromium.so       /system/lib
 ; com.google.android.inputmethod.pinyin_165713.apk    /data/app
 ; DeskClock.apk            /system/app
 ; XBMC_13.0-ALPHA6.apk     /data/app
-; bootanimation.zip        /system/media
+bootanimation.zip        /system/media

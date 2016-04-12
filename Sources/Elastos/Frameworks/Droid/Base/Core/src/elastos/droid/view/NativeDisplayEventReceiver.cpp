@@ -100,7 +100,7 @@ int NativeDisplayEventReceiver::handleEvent(int receiveFd, int events, void* dat
     nsecs_t vsyncTimestamp;
     int32_t vsyncDisplayId;
     uint32_t vsyncCount;
-    if (!processPendingEvents(&vsyncTimestamp, &vsyncDisplayId, &vsyncCount)) {
+    if (processPendingEvents(&vsyncTimestamp, &vsyncDisplayId, &vsyncCount)) {
         if (DBG) Logger::V(TAG, "receiver %p ~ Vsync pulse: timestamp=%lld, id=%d, count=%d",
             this, vsyncTimestamp, vsyncDisplayId, vsyncCount);
         mWaitingForVsync = false;
@@ -118,7 +118,7 @@ bool NativeDisplayEventReceiver::processPendingEvents(
     while ((n = mReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
         if (DBG) Logger::V(TAG, "receiver %p ~ Read %d events.", this, int(n));
         for (ssize_t i = 0; i < n; i++) {
-            const android::DisplayEventReceiver::Event& ev = buf[n];
+            const android::DisplayEventReceiver::Event& ev = buf[i];
             switch (ev.header.type) {
                 case android::DisplayEventReceiver::DISPLAY_EVENT_VSYNC:
                     // Later vsync events will just overwrite the info from earlier

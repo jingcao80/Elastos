@@ -246,7 +246,7 @@ function eldrop ()
                 if [ "`expr index "$LINE" ";"`" == "0" ]; then
                     TARGET=${LINE% *}
                     TARGET_DIR=${LINE#* }
-                    elcopy $XDK_BUILD_PATH/Prebuilt/$TARGET $TARGET_DIR
+                    elcopy $XDK_BUILD_PATH/Prebuilt/JavaFramework/$TARGET $TARGET_DIR
                 fi
             done 3<$XDK_TOOLS/eldrop_java.list
             unset ANDROID_AVD_TAG MAKE_DIR SET_FOR_ANDROID ANDROID_AVD
