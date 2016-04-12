@@ -686,23 +686,24 @@ ECode CWindowManagerService::LocalService::WaitForAllWindowsDrawn(
     /* [in] */ IRunnable* callback,
     /* [in] */ Int64 timeout)
 {
-    synchronized(mHost->mWindowMapLock) {
-        mHost->mWaitingForDrawnCallback = callback;
-        AutoPtr<WindowList> windows = mHost->GetDefaultWindowListLocked();
-        WindowList::ReverseIterator rit = windows->RBegin();
-        for (; rit != windows->REnd(); ++rit) {
-            AutoPtr<WindowState> win = *rit;
-            Boolean isVisible, isHiding;
-            if ((win->IsVisibleLw(&isVisible), isVisible)
-                    && (win->mAppToken != NULL || (mHost->mPolicy->IsForceHiding(win->mAttrs, &isHiding), isHiding))) {
-                win->mWinAnimator->mDrawState = WindowStateAnimator::DRAW_PENDING;
-                // Force add to mResizingWindows.
-                win->mLastContentInsets->Set(-1, -1, -1, -1);
-                mHost->mWaitingForDrawn.PushBack(win);
-            }
-        }
-        mHost->RequestTraversalLocked();
-    }
+    Slogger::W(TAG, "TODO: wait for launcher app");
+    // synchronized(mHost->mWindowMapLock) {
+    //     mHost->mWaitingForDrawnCallback = callback;
+    //     AutoPtr<WindowList> windows = mHost->GetDefaultWindowListLocked();
+    //     WindowList::ReverseIterator rit = windows->RBegin();
+    //     for (; rit != windows->REnd(); ++rit) {
+    //         AutoPtr<WindowState> win = *rit;
+    //         Boolean isVisible, isHiding;
+    //         if ((win->IsVisibleLw(&isVisible), isVisible)
+    //                 && (win->mAppToken != NULL || (mHost->mPolicy->IsForceHiding(win->mAttrs, &isHiding), isHiding))) {
+    //             win->mWinAnimator->mDrawState = WindowStateAnimator::DRAW_PENDING;
+    //             // Force add to mResizingWindows.
+    //             win->mLastContentInsets->Set(-1, -1, -1, -1);
+    //             mHost->mWaitingForDrawn.PushBack(win);
+    //         }
+    //     }
+    //     mHost->RequestTraversalLocked();
+    // }
     mHost->mH->RemoveMessages(CWindowManagerService::H::WAITING_FOR_DRAWN_TIMEOUT);
     if (mHost->mWaitingForDrawn.IsEmpty()) {
         callback->Run();
@@ -6874,9 +6875,10 @@ Boolean CWindowManagerService::CheckWaitingForWindowsLocked()
     // If we are turning on the screen after the boot is completed
     // normally, don't do so until we have the application and
     // wallpaper.
-    if (mSystemBooted && ((!haveApp && !haveKeyguard) || (wallpaperEnabled && !haveWallpaper))) {
-        return TRUE;
-    }
+    Slogger::W(TAG, "TODO: we only have a home app now");
+    // if (mSystemBooted && ((!haveApp && !haveKeyguard) || (wallpaperEnabled && !haveWallpaper))) {
+    //     return TRUE;
+    // }
 
     return FALSE;
 }
