@@ -149,7 +149,7 @@ private:
      */
     CARAPI_(Float) LoadCoarseAccuracy();
 
-private:
+public:
     const static Boolean D;
     const static String TAG;
 

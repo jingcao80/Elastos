@@ -414,7 +414,7 @@ public:
 
     // @Override
     CARAPI GetProperties(
-        /* [out] */ IProviderProperties* properties);
+        /* [out] */ IProviderProperties** properties);
 
     CARAPI UpdateNetworkState(
         /* [in] */ Int32 state,

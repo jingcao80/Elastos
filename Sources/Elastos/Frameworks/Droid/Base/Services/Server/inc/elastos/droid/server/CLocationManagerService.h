@@ -1,58 +1,137 @@
 
-#ifndef __ELASTOS_DROID_SERVER_LOCATION_CLOCATIONMANAGERSERVICE_H__
-#define __ELASTOS_DROID_SERVER_LOCATION_CLOCATIONMANAGERSERVICE_H__
+#ifndef __ELASTOS_DROID_SERVER_CLOCATIONMANAGERSERVICE_H__
+#define __ELASTOS_DROID_SERVER_CLOCATIONMANAGERSERVICE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "_Elastos_Droid_Server_Location_CLocationManagerService.h"
-#include "location/LocationFudger.h"
-#include "location/GeofenceManager.h"
-#include "location/PassiveProvider.h"
-#include "location/GeocoderProxy.h"
-#include "location/LocationBlacklist.h"
-#include "location/MockProvider.h"
-#include "location/LocationProviderProxy.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include "_Elastos_Droid_Server_CLocationManagerService.h"
+#include "elastos/droid/server/location/LocationFudger.h"
+#include "elastos/droid/server/location/GeofenceManager.h"
+#include "elastos/droid/server/location/PassiveProvider.h"
+#include "elastos/droid/server/location/GeocoderProxy.h"
+#include "elastos/droid/server/location/LocationBlacklist.h"
+#include "elastos/droid/server/location/MockProvider.h"
+#include "elastos/droid/server/location/LocationProviderProxy.h"
+#include "elastos/droid/server/location/LocationFudger.h"
+#include "elastos/droid/server/location/GeoFencerBase.h"
+#include "elastos/droid/server/location/GpsMeasurementsProvider.h"
+#include "elastos/droid/server/location/LocationRequestStatistics.h"
+#include "elastos/droid/server/location/GpsNavigationMessageProvider.h"
+#include "elastos/droid/os/Handler.h"
 #include "elastos/droid/database/ContentObserver.h"
-#include <elastos/utility/etl/List.h>
-#include <elastos/utility/etl/HashMap.h>
-#include <elastos/utility/etl/HashSet.h>
 
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Utility::Etl::HashSet;
 using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::App::IAppOpsManagerOnOpChangedInternalListener;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Database::EIID_IContentObserver;
 using Elastos::Droid::Internal::Content::IPackageMonitor;
 using Elastos::Droid::Internal::Content::PackageMonitor;
-using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Location::ICriteria;
 using Elastos::Droid::Location::IGpsStatusListener;
 using Elastos::Droid::Location::IIGpsStatusProvider;
 using Elastos::Droid::Location::IINetInitiatedListener;
-using Elastos::Droid::Database::EIID_IContentObserver;
 using Elastos::Droid::Location::IILocationListener;
 using Elastos::Droid::Location::IIGpsStatusListener;
-
+using Elastos::Droid::Location::IIGpsMeasurementsListener;
+using Elastos::Droid::Location::IIGpsNavigationMessageListener;
+using Elastos::Droid::Server::Location::LocationFudger;
+using Elastos::Droid::Server::Location::GeofenceManager;
+using Elastos::Droid::Server::Location::GeoFencerBase;
+using Elastos::Droid::Server::Location::GeocoderProxy;
+using Elastos::Droid::Server::Location::PassiveProvider;
+using Elastos::Droid::Server::Location::LocationBlacklist;
+using Elastos::Droid::Server::Location::GpsMeasurementsProvider;
+using Elastos::Droid::Server::Location::LocationRequestStatistics;
+using Elastos::Droid::Server::Location::GpsNavigationMessageProvider;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::ISet;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
-namespace Location {
 
 CarClass(CLocationManagerService)
+    , public Object
+    , public IILocationManager
 {
     class Receiver;
     class UpdateRecord;
 
 private:
-    class LocationWorkerHandler : public HandlerBase
+    class AppOpsManagerOnOpChangedInternalListener
+        : public Object
+        , public IAppOpsManagerOnOpChangedInternalListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        AppOpsManagerOnOpChangedInternalListener(
+            /* [in] */ CLocationManagerService* host);
+
+        CARAPI OnOpChanged(
+            /* [in] */ const String& op,
+            /* [in] */ const String& packageName);
+
+        CARAPI OnOpChanged(
+            /* [in] */ Int32 op,
+            /* [in] */ const String& packageName);
+
+    public:
+        CLocationManagerService* mHost;
+    };
+
+    class MyContentObserver
+        : public ContentObserver
+    {
+    public:
+        MyContentObserver(
+            /* [in] */ CLocationManagerService* host);
+
+        CARAPI constructor(
+            /* [in] */ IHandler* handler);
+
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    public:
+        CLocationManagerService* mHost;
+    };
+
+    class MyBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        MyBroadcastReceiver(
+            /* [in] */ CLocationManagerService* host);
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* info)
+        {
+            VALIDATE_NOT_NULL(info);
+            *info = String("CLocationManagerService::MyBroadcastReceiver: ");
+            (*info).AppendFormat("%p", this);
+            return NOERROR;
+        }
+
+    public:
+        CLocationManagerService* mHost;
+    };
+
+    class LocationWorkerHandler
+        : public Handler
     {
     public:
         LocationWorkerHandler(
-            /* [in] */ CLocationManagerService* host)
-            : mHost(host)
-        {}
+            /* [in] */ ILooper* looper,
+            /* [in] */ CLocationManagerService* host);
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
@@ -61,9 +140,8 @@ private:
         CLocationManagerService* mHost;
     };
 
-    typedef HashMap<AutoPtr<IInterface>, AutoPtr<Receiver> > InterfaceReceiverMap;
-    typedef HashMap<AutoPtr<IInterface>, AutoPtr<Receiver> >::Iterator InterfaceReceiverIterator;
-    class LocationPackageMonitor : public PackageMonitor
+    class LocationPackageMonitor
+        : public PackageMonitor
     {
     public:
         LocationPackageMonitor(
@@ -74,34 +152,7 @@ private:
             /* [in] */ Int32 reason);
 
     private:
-
         Object mLock;
-        CLocationManagerService* mHost;
-
-    };
-
-    class LocationContentObserver : public ContentObserver
-    {
-    public:
-        LocationContentObserver(
-            /* [in] */ IHandler* handler,
-            /* [in] */ CLocationManagerService* host);
-
-        CARAPI_(PInterface) Probe(
-            /* [in] */ REIID riid);
-
-        CARAPI_(UInt32) AddRef();
-
-        CARAPI_(UInt32) Release();
-
-        CARAPI GetInterfaceID(
-            /* [in] */ IInterface* pObject,
-            /* [in] */ InterfaceID* pIID);
-
-        CARAPI OnChange(
-            /* [in] */ Boolean selfUpdate);
-
-    private:
         CLocationManagerService* mHost;
     };
 
@@ -110,31 +161,34 @@ private:
      * location updates.
      */
     class Receiver
-        : public ElRefBase
+        : public Object
         , public IProxyDeathRecipient
         , public IPendingIntentOnFinished
     {
+        friend class CLocationManagerService;
     public:
+        CAR_INTERFACE_DECL()
+
         Receiver(
             /* [in] */ IILocationListener* listener,
             /* [in] */ IPendingIntent* intent,
             /* [in] */ Int32 pid,
             /* [in] */ Int32 uid,
             /* [in] */ const String& packageName,
+            /* [in] */ IWorkSource* workSource,
+            /* [in] */ Boolean hideFromAppOps,
             /* [in] */ CLocationManagerService* host);
 
-        CARAPI_(PInterface) Probe(
-            /* [in] */ REIID riid);
+        CARAPI ToString(
+            /* [out] */ String* result);
 
-        CARAPI_(UInt32) AddRef();
-
-        CARAPI_(UInt32) Release();
-
-        CARAPI GetInterfaceID(
-            /* [in] */ IInterface *pObject,
-            /* [out] */ InterfaceID *pIID);
-
-        CARAPI_(String) ToString();
+        /**
+         * Update AppOp monitoring for this receiver.
+         *
+         * @param allow If true receiver is currently active, if false it's been removed.
+         */
+        void UpdateMonitoring(
+            /* [in] */ Boolean allow);
 
         CARAPI_(Boolean) IsListener();
 
@@ -171,45 +225,49 @@ private:
 
         CARAPI_(void) DecrementPendingBroadcastsLocked();
 
+        CARAPI_(void) ClearPendingBroadcastsLocked();
+
+    private:
+        /**
+         * Update AppOps monitoring for a single location request and op type.
+         *
+         * @param allowMonitoring True if monitoring is allowed for this request/op.
+         * @param currentlyMonitoring True if AppOps is currently monitoring this request/op.
+         * @param op AppOps code for the op to update.
+         * @return True if monitoring is on for this request/op after updating.
+         */
+        Boolean UpdateMonitoring(
+            /* [in] */ Boolean allowMonitoring,
+            /* [in] */ Boolean currentlyMonitoring,
+            /* [in] */ Int32 op);
+
     private:
         CLocationManagerService* mHost;
         Int32 mUid;  // uid of receiver
         Int32 mPid;  // pid of receiver
         String mPackageName;  // package name of receiver
         Int32 mAllowedResolutionLevel;  // resolution level allowed to receiver
+
         AutoPtr<IILocationListener> mListener;
         AutoPtr<IPendingIntent> mPendingIntent;
+        AutoPtr<IWorkSource> mWorkSource; // WorkSource for battery blame, or null to assign to caller.
+        Boolean mHideFromAppOps; // True if AppOps should not monitor this receiver.
         AutoPtr<IInterface> mKey;
-        HashMap<String, AutoPtr<UpdateRecord> > mUpdateRecords;
+
+        AutoPtr<IHashMap> mUpdateRecords;
+
+        // True if app ops has started monitoring this receiver for locations.
+        Boolean mOpMonitoring;
+        // True if app ops has started monitoring this receiver for high power (gps) locations.
+        Boolean mOpHighPowerMonitoring;
         Int32 mPendingBroadcasts;
+        AutoPtr<IPowerManagerWakeLock> mWakeLock;
+
         Object mLock;
-    friend class CLocationManagerService;
     };
 
-    class MyBroadcastReceiver : public BroadcastReceiver
-    {
-    public:
-
-        MyBroadcastReceiver(
-            /* [in] */ CLocationManagerService* host);
-
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = String("CLocationManagerService::MyBroadcastReceiver: ");
-            (*info).AppendFormat("%p", this);
-            return NOERROR;
-        }
-    private:
-        CLocationManagerService* mHost;
-    };
-
-    class UpdateRecord : public ElRefBase
+    class UpdateRecord
+        : public Object
     {
     public:
          /**
@@ -222,26 +280,30 @@ private:
             /* [in] */ CLocationManagerService* host);
 
         /**
-         * Method to be called when a record will no longer be used.  Calling this multiple times
-         * must have the same effect as calling it once.
+         * Method to be called when a record will no longer be used.
          */
         CARAPI_(void) DisposeLocked(
             /* [in] */ Boolean removeReceiver);
 
-        CARAPI_(String) ToString();
+        CARAPI ToString(
+            /* [out] */ String* result);
 
     public:
-
         String mProvider;
         AutoPtr<ILocationRequest> mRequest;
         AutoPtr<Receiver> mReceiver;
         AutoPtr<ILocation> mLastFixBroadcast;
         Int64 mLastStatusBroadcast;
+
     private:
         CLocationManagerService* mHost;
     };
 
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CLocationManagerService();
 
     ~CLocationManagerService();
@@ -249,20 +311,22 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* ctx);
 
-    CARAPI SystemReady();
-
-    CARAPI Run();
+    CARAPI SystemRunning();
 
     CARAPI LocationCallbackFinished(
         /* [in] */ IILocationListener* listener);
 
+    static CARAPI ResolutionLevelToOp(
+        /* [in] */ Int32 allowedResolutionLevel,
+        /* [out] */ Int32* result);
+
     CARAPI GetAllProviders(
-        /* [out] */ IObjectContainer** allProviders);
+        /* [out] */ IList** allProviders);
 
     CARAPI GetProviders(
         /* [in] */ ICriteria* criteria,
         /* [in] */ Boolean enabledOnly,
-        /* [out] */ IObjectContainer** providers);
+        /* [out] */ IList** providers);
 
     CARAPI GetBestProvider(
         /* [in] */ ICriteria* criteria,
@@ -288,7 +352,7 @@ public:
     CARAPI GetLastLocation(
         /* [in] */ ILocationRequest* request,
         /* [in] */ const String& packageName,
-        /* [out] */ ILocation** location);
+        /* [out] */ ILocation** result);
 
     CARAPI RequestGeofence(
         /* [in] */ ILocationRequest* request,
@@ -303,10 +367,29 @@ public:
 
     CARAPI AddGpsStatusListener(
         /* [in] */ IIGpsStatusListener* listener,
+        /* [in] */ const String& packageName,
         /* [out] */ Boolean* result);
 
     CARAPI RemoveGpsStatusListener(
         /* [in] */ IIGpsStatusListener* listener);
+
+    CARAPI AddGpsMeasurementsListener(
+        /* [in] */ IIGpsMeasurementsListener* listener,
+        /* [in] */ const String& packageName,
+        /* [out] */ Boolean* result);
+
+    CARAPI RemoveGpsMeasurementsListener(
+        /* [in] */ IIGpsMeasurementsListener* listener,
+        /* [out] */ Boolean* result);
+
+    CARAPI AddGpsNavigationMessageListener(
+        /* [in] */ IIGpsNavigationMessageListener* listener,
+        /* [in] */ const String& packageName,
+        /* [out] */ Boolean* result);
+
+    CARAPI RemoveGpsNavigationMessageListener(
+        /* [in] */ IIGpsNavigationMessageListener* listener,
+        /* [out] */ Boolean* result);
 
     CARAPI SendExtraCommand(
         /* [in] */ const String& provider,
@@ -345,7 +428,7 @@ public:
         /* [in] */ Double longitude,
         /* [in] */ Int32 maxResults,
         /* [in] */ IGeocoderParams* params,
-        /* [out] */ IObjectContainer** addrs,
+        /* [out] */ IList** addrs,
         /* [out] */ String* result);
 
     CARAPI GetFromLocationName(
@@ -356,7 +439,7 @@ public:
         /* [in] */ Double upperRightLongitude,
         /* [in] */ Int32 maxResults,
         /* [in] */ IGeocoderParams* params,
-        /* [out] */ IObjectContainer** addrs,
+        /* [out] */ IList** addrs,
         /* [out] */ String* result);
 
     CARAPI AddTestProvider(
@@ -390,11 +473,35 @@ public:
     CARAPI ClearTestProviderStatus(
         /* [in] */ const String& provider);
 
-private:
-    CARAPI_(void) Init();
+    CARAPI_(Boolean) ReportLocationAccessNoThrow(
+        /* [in] */ Int32 uid,
+        /* [in] */ String packageName,
+        /* [in] */ Int32 allowedResolutionLevel);
 
+    CARAPI_(Boolean) CheckLocationAccess(
+        /* [in] */ Int32 uid,
+        /* [in] */ String packageName,
+        /* [in] */ Int32 allowedResolutionLevel);
+
+    CARAPI_(void) Dump(
+        /* [in] */ IFileDescriptor* fd,
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ ArrayOf<String>* args);
+
+
+    /**
+     * Makes a list of userids that are related to the current user. This is
+     * relevant when using managed profiles. Otherwise the list only contains
+     * the current user.
+     *
+     * @param currentUserId the current user, who might have an alter-ego.
+     */
+    void UpdateUserProfiles(
+        /* [in] */ Int32 currentUserId);
+
+private:
     CARAPI EnsureFallbackFusedProviderPresentLocked(
-        /* [in] */ List<String>* pkgs);
+        /* [in] */ IArrayList* pkgs);
 
     CARAPI_(void) LoadProvidersLocked();
 
@@ -411,9 +518,29 @@ private:
     CARAPI_(void) RemoveProviderLocked(
         /* [in] */ ILocationProviderInterface* provider);
 
-    CARAPI_(Boolean) IsAllowedBySettingsLocked(
-        /* [in] */ const String& provider,
-        /* [in] */ Int32 userId);
+    /**
+     * Returns "true" if access to the specified location provider is allowed by the current
+     * user's settings. Access to all location providers is forbidden to non-location-provider
+     * processes belonging to background users.
+     *
+     * @param provider the name of the location provider
+     * @return
+     */
+    CARAPI_(Boolean) IsAllowedByCurrentUserSettingsLocked(
+        /* [in] */ const String& provider);
+
+    /**
+     * Returns "true" if access to the specified location provider is allowed by the specified
+     * user's settings. Access to all location providers is forbidden to non-location-provider
+     * processes belonging to background users.
+     *
+     * @param provider the name of the location provider
+     * @param uid the requestor's UID
+     * @return
+     */
+    CARAPI_(Boolean) IsAllowedByUserSettingsLocked(
+        /* [in] */ String provider,
+        /* [in] */ Int32 uid);
 
     /**
      * Returns the permission string associated with the specified resolution level.
@@ -470,39 +597,47 @@ private:
         /* [in] */ Int32 allowedResolutionLevel,
         /* [in] */ const String& providerName);
 
+    /**
+     * Throw SecurityException if WorkSource use is not allowed (i.e. can't blame other packages
+     * for battery).
+     */
+    CARAPI_(void) CheckDeviceStatsAllowed();
+
+    CARAPI_(void) CheckUpdateAppOpsAllowed();
+
     CARAPI_(String) PickBest(
-        /* [in] */ IObjectContainer* providers);
+        /* [in] */ IList* providers);
 
     CARAPI_(void) UpdateProvidersLocked();
 
     CARAPI_(void) UpdateProviderListenersLocked(
         /* [in] */ const String& provider,
-        /* [in] */ Boolean enabled,
-        /* [in] */ Int32 userId);
+        /* [in] */ Boolean enabled);
 
     CARAPI_(void) ApplyRequirementsLocked(
         /* [in] */ const String& provider);
 
-    CARAPI_(AutoPtr<Receiver>) GetReceiver(
+    CARAPI_(AutoPtr<Receiver>) GetReceiverLocked(
         /* [in] */ IILocationListener* listener,
         /* [in] */ Int32 pid,
         /* [in] */ Int32 uid,
-        /* [in] */ const String& packageName);
+        /* [in] */ const String& packageName,
+        /* [in] */ IWorkSource* workSource,
+        /* [in] */ Boolean hideFromAppOps);
 
-    CARAPI_(AutoPtr<Receiver>) GetReceiver(
+    CARAPI_(AutoPtr<Receiver>) GetReceiverLocked(
         /* [in] */ IPendingIntent* intent,
         /* [in] */ Int32 pid,
         /* [in] */ Int32 uid,
-        /* [in] */ const String& packageName);
+        /* [in] */ const String& packageName,
+        /* [in] */ IWorkSource* workSource,
+        /* [in] */ Boolean hideFromAppOps);
 
     /**
      * Creates a LocationRequest based upon the supplied LocationRequest that to meets resolution
      * and consistency requirements.
      *
      * @param request the LocationRequest from which to create a sanitized version
-     * @param shouldBeCoarse whether the sanitized version should be held to coarse resolution
-     * constraints
-     * @param fastestCoarseIntervalMS minimum interval allowed for coarse resolution
      * @return a version of request that meets the given resolution and consistency requirements
      * @hide
      */
@@ -516,12 +651,14 @@ private:
     CARAPI CheckPendingIntent(
         /* [in] */ IPendingIntent* intent);
 
-    CARAPI CheckListenerOrIntent(
+    CARAPI CheckListenerOrIntentLocked(
         /* [in] */ IILocationListener* listener,
         /* [in] */ IPendingIntent* intent,
         /* [in] */ Int32 pid,
         /* [in] */ Int32 uid,
         /* [in] */ const String& packageName,
+        /* [in] */ IWorkSource* workSource,
+        /* [in] */ Boolean hideFromAppOps,
         /* [out] */ Receiver** receiver);
 
     CARAPI RequestLocationUpdatesLocked(
@@ -534,9 +671,23 @@ private:
     CARAPI_(void) RemoveUpdatesLocked(
         /* [in] */ Receiver* receiver);
 
+    CARAPI_(void) ApplyAllProviderRequirementsLocked();
+
+    /**
+     * Returns "true" if the UID belongs to a bound location provider.
+     *
+     * @param uid the uid
+     * @return true if uid belongs to a bound location provider
+     */
+    CARAPI_(Boolean) IsUidALocationProvider(
+        /* [in] */ Int32 uid);
+
     CARAPI CheckCallerIsProvider();
 
-    CARAPI_(Boolean) DoesPackageHaveUid(
+    /**
+     * Returns true if the given package belongs to the given uid.
+     */
+    CARAPI_(Boolean) DoesUidHavePackage(
         /* [in] */ Int32 uid,
         /* [in] */ const String& packageName);
 
@@ -550,16 +701,30 @@ private:
         /* [in] */ ILocation* location,
         /* [in] */ Boolean passive);
 
+    CARAPI_(Boolean) IsMockProvider(
+        /* [in] */ String provider);
+
+    CARAPI_(AutoPtr<ILocation>) ScreenLocationLocked(
+        /* [in] */ ILocation* location,
+        /* [in] */ String provider);
+
     CARAPI_(void) HandleLocationChanged(
         /* [in] */ ILocation* location,
         /* [in] */ Boolean passive);
 
-    CARAPI_(void) IncrementPendingBroadcasts();
-
-    CARAPI_(void) DecrementPendingBroadcasts();
-
     // Mock Providers
     CARAPI CheckMockPermissionsSafe();
+
+    CARAPI_(void) AddTestProviderLocked(
+        /* [in] */ String name,
+        /* [in] */ IProviderProperties* properties);
+
+    /**
+     * Checks if the specified userId matches any of the current foreground
+     * users stored in mCurrentUserProfiles.
+     */
+    CARAPI_(Boolean) IsCurrentProfile(
+        /* [in] */ Int32 userId);
 
 public:
     static const Boolean D;
@@ -568,7 +733,6 @@ private:
     static const String TAG;
 
     static const String WAKELOCK_KEY;
-    static const String THREAD_NAME;
 
     // Location resolution level: no location data whatsoever
     static const Int32 RESOLUTION_LEVEL_NONE;
@@ -586,6 +750,11 @@ private:
 
     static const Int32 MSG_LOCATION_CHANGED;
 
+    static const Int64 NANOS_PER_MILLI;
+
+    // The maximum interval a location request can have and still be considered "high power".
+    static const Int64 HIGH_POWER_INTERVAL_MS;
+
     // Location Providers may sometimes deliver location updates
     // slightly faster that requested - provide grace period so
     // we don't unnecessarily filter events that are otherwise on
@@ -595,69 +764,80 @@ private:
     static const AutoPtr<ILocationRequest> DEFAULT_LOCATION_REQUEST;
 
 private:
-
     AutoPtr<IContext> mContext;
+    AutoPtr<IAppOpsManager> mAppOps;
+
     // used internally for synchronization
     Object mLock;
     Object mLockForWakeLock;
 
-    // --- fields below are final after init() ---
+    // --- fields below are final after systemReady() ---
     AutoPtr<LocationFudger> mLocationFudger;
     AutoPtr<GeofenceManager> mGeofenceManager;
-    AutoPtr<IPowerManagerWakeLock> mWakeLock;
     AutoPtr<IPackageManager> mPackageManager;
+    String mGeoFencerPackageName;
+    String mComboNlpPackageName;
+    String mComboNlpReadyMarker;
+    String mComboNlpScreenMarker;
+    AutoPtr<GeoFencerBase> mGeoFencer;
+    Boolean mGeoFencerEnabled;
+    AutoPtr<IPowerManager> mPowerManager;
+    AutoPtr<IUserManager> mUserManager;
     AutoPtr<GeocoderProxy> mGeocodeProvider;
     AutoPtr<IIGpsStatusProvider> mGpsStatusProvider;
     AutoPtr<IINetInitiatedListener> mNetInitiatedListener;
     AutoPtr<IHandler> mLocationHandler;
     AutoPtr<PassiveProvider> mPassiveProvider;  // track passive provider for special cases
     AutoPtr<LocationBlacklist> mBlacklist;
-
-    // --- fields below are protected by mWakeLock ---
-    Int32 mPendingBroadcasts;
+    AutoPtr<GpsMeasurementsProvider> mGpsMeasurementsProvider;
+    AutoPtr<GpsNavigationMessageProvider> mGpsNavigationMessageProvider;
 
     // --- fields below are protected by mLock ---
     // Set of providers that are explicitly enabled
-    HashSet<String> mEnabledProviders;
+    AutoPtr<ISet> mEnabledProviders;
 
     // Set of providers that are explicitly disabled
-    HashSet<String> mDisabledProviders;
+    AutoPtr<ISet> mDisabledProviders;
 
     // Mock (test) providers
-    HashMap<String, AutoPtr<MockProvider> > mMockProviders;
+    AutoPtr<IHashMap> mMockProviders;
 
     // all receivers
-    InterfaceReceiverMap mReceivers;
+    AutoPtr<IHashMap> mReceivers;
 
     // currently installed providers (with mocks replacing real providers)
-    List<AutoPtr<ILocationProviderInterface> > mProviders;
+    AutoPtr<IArrayList> mProviders;
 
     // real providers, saved here when mocked out
-    HashMap<String, AutoPtr<ILocationProviderInterface> > mRealProviders;
+    AutoPtr<IHashMap> mRealProviders;
 
     // mapping from provider name to provider
-    HashMap<String, AutoPtr<ILocationProviderInterface> > mProvidersByName;
+    AutoPtr<IHashMap> mProvidersByName;
 
     // mapping from provider name to all its UpdateRecords
-    typedef List<AutoPtr<UpdateRecord> > UpdateRecordList;
-    typedef typename UpdateRecordList::Iterator UpdateRecordListIterator;
-    HashMap<String, AutoPtr< UpdateRecordList > > mRecordsByProvider;
+    AutoPtr<IHashMap> mRecordsByProvider;
+
+    AutoPtr<LocationRequestStatistics> mRequestStatistics;
 
     // mapping from provider name to last known location
-    HashMap<String, AutoPtr<ILocation> > mLastLocation;
+    AutoPtr<IHashMap> mLastLocation;
+
+    // same as mLastLocation, but is not updated faster than LocationFudger.FASTEST_INTERVAL_MS.
+    // locations stored here are not fudged for coarse permissions.
+    AutoPtr<IHashMap> mLastLocationCoarseInterval;
 
     // all providers that operate over proxy, for authorizing incoming location
-    List<AutoPtr<LocationProviderProxy> > mProxyProviders;
+    AutoPtr<IArrayList> mProxyProviders;
 
     // current active user on the device - other users are denied location data
     Int32 mCurrentUserId;
+    AutoPtr<ArrayOf<Int32> > mCurrentUserProfiles;
 
-    AutoPtr<IPackageMonitor> mPackageMonitor;
+    // AutoPtr<IPackageMonitor> mPackageMonitor;
 };
 
-} // namespace Location
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_SERVER_LOCATION_CLOCATIONMANAGERSERVICE_H__
+#endif //__ELASTOS_DROID_SERVER_CLOCATIONMANAGERSERVICE_H__

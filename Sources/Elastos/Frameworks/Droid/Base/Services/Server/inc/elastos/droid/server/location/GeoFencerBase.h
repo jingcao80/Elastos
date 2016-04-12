@@ -1,6 +1,6 @@
 
-#ifndef __ELASTOS_DROID_SERVER_LOCATION_GEOCODERPROXY_H__
-#define __ELASTOS_DROID_SERVER_LOCATION_GEOCODERPROXY_H__
+#ifndef __ELASTOS_DROID_SERVER_LOCATION_GEOFENCERBASE_H__
+#define __ELASTOS_DROID_SERVER_LOCATION_GEOFENCERBASE_H__
 
 #include "Elastos.Droid.Location.h"
 #include "Elastos.CoreLibrary.Utility.h"
@@ -82,5 +82,5 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_SERVER_LOCATION_GEOCODERPROXY_H__
+#endif //__ELASTOS_DROID_SERVER_LOCATION_GEOFENCERBASE_H__
 

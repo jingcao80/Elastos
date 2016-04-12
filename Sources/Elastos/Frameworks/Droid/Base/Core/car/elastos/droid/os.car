@@ -491,6 +491,10 @@ module
         constructor(
             [in] Int32 uid);
 
+        constructor(
+            [in] Int32 uid,
+            [in] String name);
+
         interface IWorkSource;
         interface IParcelable;
     }
