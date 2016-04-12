@@ -1888,7 +1888,6 @@ Boolean MediaFocusControl::PushMediaButtonReceiver_syncPrs(
     for (Int32 index = size-1; index >= 0; index--) {
         obj = NULL;
         mPRStack->Get(index, (IInterface**)&obj);
-        prse = NULL;
         prse = (PlayerRecord*)IPlayerRecord::Probe(obj);
 
         if (prse->IsPlaybackActive(&b), b) {
@@ -1901,10 +1900,12 @@ Boolean MediaFocusControl::PushMediaButtonReceiver_syncPrs(
 
     if (inStackIndex == -1) {
         // is not in stack
-        CPlayerRecord::New(mediaIntent, target, token, (IPlayerRecord**)&prse);
+        AutoPtr<IPlayerRecord> pr;
+        CPlayerRecord::New(mediaIntent, target, token, (IPlayerRecord**)&pr);
+        prse = (CPlayerRecord*)pr.Get();
         // it's new so it's not playing (no RemoteControlClient to give a playstate),
         // therefore it goes after the ones with active playback
-        mPRStack->Add(lastPlayingIndex, (IInterface*)(IObject*)prse);
+        mPRStack->Add(lastPlayingIndex, pr.Get());
     }
     else {
         // is in the stack
@@ -1917,15 +1918,15 @@ Boolean MediaFocusControl::PushMediaButtonReceiver_syncPrs(
 
             if (prse->IsPlaybackActive(&b), b) {
                 // and put it at the top
-                mPRStack->Push((IInterface*)(IObject*)prse);
+                mPRStack->Push((IInterface*)(IPlayerRecord*)prse);
             }
             else {
                 // and put it after the ones with active playback
                 if (inStackIndex > lastPlayingIndex) {
-                    mPRStack->Add(lastPlayingIndex, (IInterface*)(IObject*)prse);
+                    mPRStack->Add(lastPlayingIndex, (IInterface*)(IPlayerRecord*)prse);
                 }
                 else {
-                    mPRStack->Add(lastPlayingIndex - 1, (IInterface*)(IObject*)prse);
+                    mPRStack->Add(lastPlayingIndex - 1, (IInterface*)(IPlayerRecord*)prse);
                 }
             }
         }

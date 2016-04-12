@@ -244,23 +244,19 @@ ECode GestureDetector::constructor(
     }
     mIsLongpressEnabled = TRUE;
 
-    AutoPtr<IViewConfigurationHelper> helper;
-    // CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
-
     // Fallback to support pre-donuts releases
     Int32 touchSlop, doubleTapSlop, doubleTapTouchSlop;
     if (context == NULL) {
         //noinspection deprecation
-        helper->GetTouchSlop(&touchSlop);
+        touchSlop = ViewConfiguration::GetTouchSlop();
         doubleTapTouchSlop = touchSlop; // Hack rather than adding a hiden method for this
-        helper->GetDoubleTapSlop(&doubleTapSlop);
+        doubleTapSlop = ViewConfiguration::GetDoubleTapSlop();
         //noinspection deprecation
-        helper->GetMinimumFlingVelocity(&mMinimumFlingVelocity);
-        helper->GetMaximumFlingVelocity(&mMaximumFlingVelocity);
+        mMinimumFlingVelocity = ViewConfiguration::GetMinimumFlingVelocity();
+        mMaximumFlingVelocity = ViewConfiguration::GetMaximumFlingVelocity();
     }
     else {
-        AutoPtr<IViewConfiguration> configuration;
-        helper->Get(context, (IViewConfiguration**)&configuration);
+        AutoPtr<IViewConfiguration> configuration = ViewConfiguration::Get(context);
         configuration->GetScaledTouchSlop(&touchSlop);
         configuration->GetScaledDoubleTapTouchSlop(&doubleTapTouchSlop);
         configuration->GetScaledDoubleTapSlop(&doubleTapSlop);

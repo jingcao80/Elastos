@@ -1,5 +1,7 @@
 #include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.Droid.Provider.h"
 #include "elastos/droid/app/CActivityManagerHelper.h"
+#include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/internal/policy/impl/PhoneWindow.h"
 #include "elastos/droid/internal/policy/impl/PhoneWindowManager.h"
 #include "elastos/droid/internal/widget/CBackgroundFallback.h"
@@ -11,6 +13,7 @@
 #include "elastos/droid/media/session/CMediaSessionLegacyHelperHelper.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/CBundle.h"
+#include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/CUserHandleHelper.h"
 #include "elastos/droid/transition/CTransitionManager.h"
@@ -23,6 +26,7 @@
 #include "elastos/droid/view/CKeyCharacterMap.h"
 #include "elastos/droid/view/CKeyCharacterMapHelper.h"
 #include "elastos/droid/view/CKeyEvent.h"
+#include "elastos/droid/view/CGestureDetector.h"
 #include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/view/CMotionEvent.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
@@ -39,22 +43,28 @@
 #include "elastos/droid/internal/view/menu/CIconMenuPresenter.h"
 #include "elastos/droid/internal/widget/CActionBarContextView.h"
 #include "elastos/droid/widget/CPopupWindow.h"
+#include "elastos/droid/widget/Toast.h"
+#include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/utility/CTypedValue.h"
 #include "elastos/droid/utility/CTypedValueHelper.h"
 #include "elastos/droid/utility/CSparseArray.h"
 #include <elastos/core/Math.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 #include "elastos/droid/internal/policy/impl/CPhoneWindowRotationWatcher.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::R;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::App::ISearchManager;
-using Elastos::Droid::R;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IService;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
@@ -90,6 +100,7 @@ using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::CKeyCharacterMap;
 using Elastos::Droid::View::CKeyCharacterMapHelper;
 using Elastos::Droid::View::CKeyEvent;
+using Elastos::Droid::View::CGestureDetector;
 using Elastos::Droid::View::CView;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::CViewConfigurationHelper;
@@ -143,9 +154,14 @@ using Elastos::Droid::Widget::IFrameLayout;
 using Elastos::Droid::Widget::IListAdapter;
 using Elastos::Droid::Widget::EIID_IFrameLayout;
 using Elastos::Droid::Widget::CPopupWindow;
+using Elastos::Droid::Widget::Toast;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Internal::Widget::CActionBarContextView;
 using Elastos::Droid::Internal::Widget::IActionBarContainer;
 using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Utility::CTypedValue;
@@ -153,6 +169,9 @@ using Elastos::Droid::Utility::CTypedValueHelper;
 using Elastos::Droid::Utility::ITypedValueHelper;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::IO::IInputStream;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Logging::Logger;
@@ -186,21 +205,71 @@ const Int32 PhoneWindow::FLAG_RESOURCE_SET_ICON_FALLBACK;
 
 static AutoPtr<ITransition> InitUseDefault_Transition()
 {
-    AutoPtr<CTransitionSet> tmp;
-    CTransitionSet::NewByFriend((CTransitionSet**)&tmp);
-    return (ITransition*)tmp.Get();
+    AutoPtr<ITransition> tmp;
+    CTransitionSet::New((ITransition**)&tmp);
+    return tmp;
 }
 
 AutoPtr<ITransition> PhoneWindow::USE_DEFAULT_TRANSITION = InitUseDefault_Transition();
 
 static AutoPtr<IPhoneWindowRotationWatcher> InitStaticWatcher()
 {
-    AutoPtr<CPhoneWindowRotationWatcher> tmp;
-    CPhoneWindowRotationWatcher::NewByFriend((CPhoneWindowRotationWatcher**)&tmp);
-    return (IPhoneWindowRotationWatcher*)tmp.Get();
+    AutoPtr<IPhoneWindowRotationWatcher> tmp;
+    CPhoneWindowRotationWatcher::New((IPhoneWindowRotationWatcher**)&tmp);
+    return tmp;
 }
 
 AutoPtr<IPhoneWindowRotationWatcher> PhoneWindow::sRotationWatcher = InitStaticWatcher();
+
+
+
+//===============================================================================================
+// PhoneWindow::SettingsObserver
+//===============================================================================================
+PhoneWindow::SettingsObserver::SettingsObserver(
+    /* [in] */ PhoneWindow* host)
+    : mHost(host)
+{}
+
+ECode PhoneWindow::SettingsObserver::constructor(
+    /* [in] */ IHandler* handler)
+{
+    return ContentObserver::constructor(handler);
+}
+
+ECode PhoneWindow::SettingsObserver::Observe()
+{
+    AutoPtr<IContentResolver> resolver;
+    mHost->mContext->GetContentResolver((IContentResolver**)&resolver);
+    AutoPtr<IUri> uri;
+    Settings::System::GetUriFor(ISettingsSystem::ENABLE_STYLUS_GESTURES, (IUri**)&uri);
+    resolver->RegisterContentObserver(uri, FALSE, this);
+    CheckGestures();
+    return NOERROR;
+}
+
+ECode PhoneWindow::SettingsObserver::Unobserve()
+{
+    AutoPtr<IContentResolver> resolver;
+    mHost->mContext->GetContentResolver((IContentResolver**)&resolver);
+    return resolver->UnregisterContentObserver(this);
+}
+
+ECode PhoneWindow::SettingsObserver::OnChange(
+    /* [in] */ Boolean selfChange)
+{
+    return CheckGestures();
+}
+
+ECode PhoneWindow::SettingsObserver::CheckGestures()
+{
+    AutoPtr<IContentResolver> resolver;
+    mHost->mContext->GetContentResolver((IContentResolver**)&resolver);
+    Int32 ival;
+    Settings::System::GetInt32(resolver, ISettingsSystem::ENABLE_STYLUS_GESTURES, 0, &ival);
+    mHost->mEnableGestures = ival == 1;
+    return NOERROR;
+}
 
 //===============================================================================================
 // PhoneWindow::_DecorView::ShowActionModePopupRunnable
@@ -244,7 +313,8 @@ ECode PhoneWindow::_DecorView::ActionModeCallbackWrapper::OnCreateActionMode(
 ECode PhoneWindow::_DecorView::ActionModeCallbackWrapper::OnPrepareActionMode(
     /* [in] */ IActionMode* mode,
     /* [in] */ IMenu* menu,
-    /* [out] */ Boolean* result) {
+    /* [out] */ Boolean* result)
+{
     mHost->RequestFitSystemWindows();
     return mWrapped->OnPrepareActionMode(mode, menu, result);
 }
@@ -318,6 +388,118 @@ ECode PhoneWindow::_DecorView::DecorViewWeakReferenceImpl::Resolve(
    return NOERROR;
 }
 
+
+//===============================================================================================
+// PhoneWindow::_DecorView::StylusGestureFilter::
+//===============================================================================================
+const Int32 PhoneWindow::_DecorView::StylusGestureFilter::SWIPE_UP = 1;
+const Int32 PhoneWindow::_DecorView::StylusGestureFilter::SWIPE_DOWN = 2;
+const Int32 PhoneWindow::_DecorView::StylusGestureFilter::SWIPE_LEFT = 3;
+const Int32 PhoneWindow::_DecorView::StylusGestureFilter::SWIPE_RIGHT = 4;
+const Int32 PhoneWindow::_DecorView::StylusGestureFilter::PRESS_LONG = 5;
+const Int32 PhoneWindow::_DecorView::StylusGestureFilter::TAP_DOUBLE = 6;
+const Double PhoneWindow::_DecorView::StylusGestureFilter::SWIPE_MIN_DISTANCE = 25.0;
+const Double PhoneWindow::_DecorView::StylusGestureFilter::SWIPE_MIN_VELOCITY = 50.0;
+const Int32 PhoneWindow::_DecorView::StylusGestureFilter::KEY_NO_ACTION = 1000;
+const Int32 PhoneWindow::_DecorView::StylusGestureFilter::KEY_HOME = 1001;
+const Int32 PhoneWindow::_DecorView::StylusGestureFilter::KEY_BACK = 1002;
+const Int32 PhoneWindow::_DecorView::StylusGestureFilter::KEY_MENU = 1003;
+const Int32 PhoneWindow::_DecorView::StylusGestureFilter::KEY_SEARCH = 1004;
+const Int32 PhoneWindow::_DecorView::StylusGestureFilter::KEY_RECENT = 1005;
+const Int32 PhoneWindow::_DecorView::StylusGestureFilter::KEY_APP = 1006;
+const String PhoneWindow::_DecorView::StylusGestureFilter::TAG("StylusGestureFilter");
+
+PhoneWindow::_DecorView::StylusGestureFilter::StylusGestureFilter(
+    /* [in] */ PhoneWindow::_DecorView* host)
+    : mHost(host)
+{}
+
+ECode PhoneWindow::_DecorView::StylusGestureFilter::constructor()
+{
+    GestureDetector::SimpleOnGestureListener::constructor();
+    return CGestureDetector::New(this, (IGestureDetector**)&mDetector);
+}
+
+ECode PhoneWindow::_DecorView::StylusGestureFilter::OnTouchEvent(
+    /* [in] */ IMotionEvent* e,
+    /* [out] */ Boolean* res)
+{
+    return mDetector->OnTouchEvent(e, res);
+}
+
+ECode PhoneWindow::_DecorView::StylusGestureFilter::OnFling(
+    /* [in] */ IMotionEvent* e1,
+    /* [in] */ IMotionEvent* e2,
+    /* [in] */ Float velocityX,
+    /* [in] */ Float velocityY,
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+
+    Float x1, y1, x2, y2;
+    e1->GetX(&x1);
+    e1->GetY(&y1);
+    e2->GetX(&x2);
+    e2->GetY(&y2);
+
+    using Elastos::Core::Math;
+    Float xDistance = Math::Abs(x1 - x2);
+    Float yDistance = Math::Abs(y1 - y2);
+
+    velocityX = Math::Abs(velocityX);
+    velocityY = Math::Abs(velocityY);
+    Boolean result = FALSE;
+
+    AutoPtr<IResources> resources;
+    mHost->GetResources((IResources**)&resources);
+    AutoPtr<IDisplayMetrics> dm;
+    resources->GetDisplayMetrics((IDisplayMetrics**)&dm);
+    Float density;
+    dm->GetDensity(&density);
+
+    if (velocityX > (SWIPE_MIN_VELOCITY * density)
+            && xDistance > (SWIPE_MIN_DISTANCE * density)
+            && xDistance > yDistance) {
+        if (x1 > x2) { // right to left
+            // Swipe Left
+            mHost->DispatchStylusAction(SWIPE_LEFT);
+        } else {
+            // Swipe Right
+            mHost->DispatchStylusAction(SWIPE_RIGHT);
+        }
+        result = true;
+    } else if (velocityY > (SWIPE_MIN_VELOCITY * density)
+            && yDistance > (SWIPE_MIN_DISTANCE * density)
+            && yDistance > xDistance) {
+        if (y1 > y2) { // bottom to up
+            // Swipe Up
+            mHost->DispatchStylusAction(SWIPE_UP);
+        } else {
+            // Swipe Down
+            mHost->DispatchStylusAction(SWIPE_DOWN);
+        }
+        result = TRUE;
+    }
+    *res = result;
+    return NOERROR;
+}
+
+ECode PhoneWindow::_DecorView::StylusGestureFilter::OnDoubleTap(
+    /* [in] */ IMotionEvent* e,
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    *res = TRUE;
+    return mHost->DispatchStylusAction(TAP_DOUBLE);
+}
+
+ECode PhoneWindow::_DecorView::StylusGestureFilter::OnLongPress(
+    /* [in] */ IMotionEvent* e)
+{
+    return mHost->DispatchStylusAction(PRESS_LONG);
+}
+
 //===============================================================================================
 // PhoneWindow::_DecorView
 //===============================================================================================
@@ -344,11 +526,30 @@ ECode PhoneWindow::_DecorView::constructor(
 
     FAIL_RETURN(FrameLayout::constructor(context))
 
+    mSettingsObserver = new SettingsObserver(mHost);
+    AutoPtr<IHandler> handler;
+    CHandler::New((IHandler**)&handler);
+    mSettingsObserver->constructor(handler);
+
+    mStylusFilter = new StylusGestureFilter(this);
+    mStylusFilter->constructor();
+
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mDrawingBounds));
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mBackgroundPadding));
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mFramePadding));
     ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mFrameOffsets));
     return CBackgroundFallback::New((IBackgroundFallback**)&mBackgroundFallback);
+}
+
+ECode PhoneWindow::_DecorView::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("Object[0X");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += "], Class[PhoneWindow::DecorView]";
+    *str = sb.ToString();
+    return NOERROR;
 }
 
 ECode PhoneWindow::_DecorView::WillYouTakeTheSurface(
@@ -452,13 +653,13 @@ ECode PhoneWindow::_DecorView::SetBackgroundFallback(
     /* [in] */ Int32 resId)
 {
     AutoPtr<IDrawable> drawable;
-    if (resId != 0)
-    {
+    if (resId != 0) {
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         context->GetDrawable(resId, (IDrawable**)&drawable);
     }
     mBackgroundFallback->SetDrawable(drawable);
+
     AutoPtr<IDrawable> bg;
     GetBackground((IDrawable**)&bg);
     Boolean hasFallback;
@@ -658,11 +859,172 @@ ECode PhoneWindow::_DecorView::DispatchKeyShortcutEvent(
     return NOERROR;
 }
 
+ECode PhoneWindow::_DecorView::MenuAction()
+{
+    AutoPtr<IKeyEvent> down, up;
+    CKeyEvent::New(IKeyEvent::ACTION_DOWN, IKeyEvent::KEYCODE_MENU, (IKeyEvent**)&down);
+    CKeyEvent::New(IKeyEvent::ACTION_UP, IKeyEvent::KEYCODE_MENU, (IKeyEvent**)&up);
+    Boolean bval;
+    DispatchKeyEvent(down, &bval);
+    DispatchKeyEvent(up, &bval);
+    return NOERROR;
+}
+
+ECode PhoneWindow::_DecorView::BackAction()
+{
+    AutoPtr<IKeyEvent> down, up;
+    CKeyEvent::New(IKeyEvent::ACTION_DOWN, IKeyEvent::KEYCODE_BACK, (IKeyEvent**)&down);
+    CKeyEvent::New(IKeyEvent::ACTION_UP, IKeyEvent::KEYCODE_BACK, (IKeyEvent**)&up);
+    Boolean bval;
+    DispatchKeyEvent(down, &bval);
+    DispatchKeyEvent(up, &bval);
+    return NOERROR;
+}
+
+ECode PhoneWindow::_DecorView::DispatchStylusAction(
+    /* [in] */ Int32 gestureAction)
+{
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    String pkgName;
+    mContext->GetPackageName(&pkgName);
+    Boolean isSystemUI = pkgName.Equals("com.android.systemui");
+    assert(0 && "TODO");
+
+    String setting;
+    Int32 dispatchAction = -1;
+    switch (gestureAction) {
+        case StylusGestureFilter::SWIPE_LEFT:
+            Settings::System::GetString(resolver,
+                ISettingsSystem::GESTURES_LEFT_SWIPE, &setting);
+            break;
+        case StylusGestureFilter::SWIPE_RIGHT:
+            Settings::System::GetString(resolver,
+                ISettingsSystem::GESTURES_RIGHT_SWIPE, &setting);
+            break;
+        case StylusGestureFilter::SWIPE_UP:
+            Settings::System::GetString(resolver,
+                ISettingsSystem::GESTURES_UP_SWIPE, &setting);
+            break;
+        case StylusGestureFilter::SWIPE_DOWN:
+            Settings::System::GetString(resolver,
+                ISettingsSystem::GESTURES_DOWN_SWIPE, &setting);
+            break;
+        case StylusGestureFilter::TAP_DOUBLE:
+            Settings::System::GetString(resolver,
+                ISettingsSystem::GESTURES_DOUBLE_TAP, &setting);
+            break;
+        case StylusGestureFilter::PRESS_LONG:
+            Settings::System::GetString(resolver,
+                ISettingsSystem::GESTURES_LONG_PRESS, &setting);
+            break;
+        default:
+            return NOERROR;
+    }
+
+    Int32 value;
+    ECode ec = StringUtils::Parse(setting, &value);
+    if (FAILED(ec)) {
+        dispatchAction = StylusGestureFilter::KEY_APP;
+    }
+    else {
+        if (value == StylusGestureFilter::KEY_NO_ACTION) {
+            return NOERROR;
+        }
+        dispatchAction = value;
+    }
+
+    // Dispatching action
+    switch (dispatchAction) {
+        case StylusGestureFilter::KEY_HOME: {
+            AutoPtr<IIntent> homeIntent;
+            CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&homeIntent);
+            homeIntent->AddCategory(IIntent::CATEGORY_HOME);
+            homeIntent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
+            mContext->StartActivity(homeIntent);
+            break;
+        }
+
+        case StylusGestureFilter::KEY_BACK:
+            BackAction();
+            break;
+
+        case StylusGestureFilter::KEY_MENU:
+            // Menu action on notificationbar / systemui will be converted
+            // to back action
+            if (isSystemUI) {
+                BackAction();
+                break;
+            }
+            MenuAction();
+            break;
+
+        case StylusGestureFilter::KEY_SEARCH:
+            // Search action on notificationbar / systemui will be converted
+            // to back action
+            if (isSystemUI) {
+                BackAction();
+                break;
+            }
+
+            mHost->LaunchDefaultSearch();
+            break;
+
+        case StylusGestureFilter::KEY_RECENT: {
+            AutoPtr<IIStatusBarService> mStatusBarService;
+            AutoPtr<IInterface> service = ServiceManager::GetService(String("statusbar"));
+            IIStatusBarService* statusBarService = IIStatusBarService::Probe(service);
+            statusBarService->ToggleRecentApps();
+
+            break;
+        }
+
+        case StylusGestureFilter::KEY_APP: {
+            // Launching app on notificationbar / systemui will be preceded
+            // with a back Action
+            if (isSystemUI) {
+                BackAction();
+            }
+
+            AutoPtr<IPackageManager> pm;
+            mContext->GetPackageManager((IPackageManager**)&pm);
+            AutoPtr<IIntent> launchIntent;
+            pm->GetLaunchIntentForPackage(setting, (IIntent**)&launchIntent);
+            if (launchIntent != NULL) {
+                ec = mContext->StartActivity(launchIntent);
+                if (ec == (ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION) {
+                    AutoPtr<ArrayOf<IInterface*> > params = ArrayOf<IInterface*>::Alloc(1);
+                    params->Set(0, CoreUtils::Convert(setting));
+                    String str;
+                    mContext->GetString(R::string::stylus_app_not_installed, params, &str);
+                    AutoPtr<IToast> toast;
+                    Toast::MakeText(mContext, CoreUtils::Convert(str), IToast::LENGTH_LONG, (IToast**)&toast);
+                    toast->Show();
+                }
+            }
+            break;
+        }
+    }
+    return NOERROR;
+}
+
 ECode PhoneWindow::_DecorView::DispatchTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean *result)
 {
     VALIDATE_NOT_NULL(result);
+
+    // Stylus events with side button pressed are filtered and other
+    // events are processed normally.
+    Int32 bs;
+    event->GetButtonState(&bs);
+    if (mHost->mEnableGestures && IMotionEvent::BUTTON_SECONDARY == bs) {
+        Boolean bval;
+        mStylusFilter->OnTouchEvent(event, &bval);
+        *result = FALSE;
+        return NOERROR;
+    }
+
     AutoPtr<IWindowCallback> cb;
     mHost->GetCallback((IWindowCallback**)&cb);
 
@@ -724,8 +1086,7 @@ ECode PhoneWindow::_DecorView::SuperDispatchKeyEvent(
     // Give priority to closing action modes if applicable.
     Int32 keyCode;
     event->GetKeyCode(&keyCode);
-    if (keyCode == IKeyEvent::KEYCODE_BACK)
-    {
+    if (keyCode == IKeyEvent::KEYCODE_BACK) {
         Int32 action;
         event->GetAction(&action);
         // Back cancels action modes first.
@@ -743,7 +1104,6 @@ ECode PhoneWindow::_DecorView::SuperDispatchTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
     return FrameLayout::DispatchTouchEvent(event, result);
 }
 
@@ -751,7 +1111,6 @@ ECode PhoneWindow::_DecorView::SuperDispatchTrackballEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
     return FrameLayout::DispatchTrackballEvent(event, result);
 }
 
@@ -759,7 +1118,6 @@ ECode PhoneWindow::_DecorView::SuperDispatchGenericMotionEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
     return FrameLayout::DispatchGenericMotionEvent(event, result);
 }
 
@@ -767,9 +1125,9 @@ ECode PhoneWindow::_DecorView::SuperDispatchKeyShortcutEvent(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
     return FrameLayout::DispatchKeyShortcutEvent(event, result);
 }
+
 ECode PhoneWindow::_DecorView::DispatchApplyWindowInsets(
     /* [in] */ IWindowInsets* insets,
     /* [out] */ IWindowInsets** result)
@@ -803,7 +1161,7 @@ ECode PhoneWindow::_DecorView::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    Logger::I(TAG, " >> PhoneWindow::_DecorView::OnTouchEvent( %s", TO_CSTR(event));
     return OnInterceptTouchEvent(event, result);
 }
 
@@ -1348,12 +1706,10 @@ Boolean PhoneWindow::_DecorView::SetFrame(
             IViewGroupLayoutParams* vgLayoutParam = IViewGroupLayoutParams::Probe(attr);
             vgLayoutParam->GetHeight(&height);
             if (mMenuBackground == NULL && mFeatureId < 0
-                    && height
-                    == IViewGroupLayoutParams::MATCH_PARENT) {
-                //AutoPtr<IResources> res;
+                && height == IViewGroupLayoutParams::MATCH_PARENT) {
+
                 AutoPtr<IContext> context;
                 GetContext((IContext**)&context);
-                //context->GetResources((IResources**)&res);
                 context->GetDrawable(R::drawable::menu_background, (IDrawable**)&mMenuBackground);
             }
 
@@ -1582,6 +1938,10 @@ ECode PhoneWindow::_DecorView::OnAttachedToWindow()
 {
     FrameLayout::OnAttachedToWindow();
 
+    Logger::I(TAG, "TODO mSettingsObserver->Observe();");
+    //assert(0 && "TODO");
+    // mSettingsObserver->Observe();
+
     UpdateWindowResizeState();
 
     AutoPtr<IWindowCallback> cb;
@@ -1606,6 +1966,9 @@ ECode PhoneWindow::_DecorView::OnAttachedToWindow()
 ECode PhoneWindow::_DecorView::OnDetachedFromWindow()
 {
     FrameLayout::OnDetachedFromWindow();
+
+    //assert(0 && "TODO");
+    // mSettingsObserver->Unobserve();
 
     AutoPtr<IWindowCallback> cb;
     mHost->GetCallback((IWindowCallback**)&cb);
@@ -2633,6 +2996,7 @@ PhoneWindow::PhoneWindow()
     , mForcedNavigationBarColor(FALSE)
     , mTitleColor(0)
     , mAlwaysReadCloseOnTouchAttr(FALSE)
+    , mEnableGestures(FALSE)
     , mClosingActionMenu(FALSE)
     , mUiOptions(0)
     , mInvalidatePanelMenuPosted(FALSE)
@@ -2737,8 +3101,7 @@ ECode PhoneWindow::RequestFeature(
     const Int32 features = GetFeatures();
     Int32 newFeatures = features | (1 << featureId);
     if ((newFeatures & ( 1 << IWindow::FEATURE_CUSTOM_TITLE)) != 0
-           && (newFeatures & ~CUSTOM_TITLE_COMPATIBLE_FEATURES) !=0
-            )
+           && (newFeatures & ~CUSTOM_TITLE_COMPATIBLE_FEATURES) !=0)
     {
         Slogger::E(TAG, "requestFeature() You cannot combine custom titles with other title features");
         /* Another feature is enabled and the user is trying to enable the custom title feature */
@@ -3087,9 +3450,9 @@ ECode PhoneWindow::OnKeyUpPanel(
         vcHelper->Get(context, (IViewConfiguration**)&viewConfig);
         Boolean hasPerMk;
         viewConfig->HasPermanentMenuKey(&hasPerMk);
-        if (featureId == FEATURE_OPTIONS_PANEL && mDecorContentParent != NULL &&
-                (mDecorContentParent->CanShowOverflowMenu(&reserved), reserved) &&
-                !hasPerMk)
+        if (featureId == FEATURE_OPTIONS_PANEL && mDecorContentParent != NULL
+            && (mDecorContentParent->CanShowOverflowMenu(&reserved), reserved)
+            && !hasPerMk)
         {
             Boolean showing = FALSE;
             if (!(mDecorContentParent->IsOverflowMenuShowing(&showing), showing)) {
@@ -3101,8 +3464,7 @@ ECode PhoneWindow::OnKeyUpPanel(
                 mDecorContentParent->HideOverflowMenu(&playSoundEffect);
             }
         }
-        else
-        {
+        else {
             if (st->mIsOpen || st->mIsHandled) {
 
                 // Play the sound effect if the user closed an open menu (and not if
@@ -3178,15 +3540,14 @@ ECode PhoneWindow::OpenPanel(
     vcHelper->Get(context, (IViewConfiguration**)&viewConfig);
     Boolean hasPerMk;
     viewConfig->HasPermanentMenuKey(&hasPerMk);
-    if (featureId == FEATURE_OPTIONS_PANEL && mDecorContentParent != NULL &&
-            (mDecorContentParent->CanShowOverflowMenu(&reserved), reserved) &&
-            !hasPerMk)
+    if (featureId == FEATURE_OPTIONS_PANEL && mDecorContentParent != NULL
+        && (mDecorContentParent->CanShowOverflowMenu(&reserved), reserved)
+        && !hasPerMk)
     {
         Boolean tmp = FALSE;
         mDecorContentParent->ShowOverflowMenu(&tmp);
     }
-    else
-    {
+    else {
         AutoPtr<PanelFeatureState> st;
         FAIL_RETURN(GetPanelState(featureId, TRUE, (PanelFeatureState**)&st));
         OpenPanel(st, event);
@@ -3212,17 +3573,15 @@ Boolean PhoneWindow::InitializePanelDecor(
     st->mGravity = IGravity::CENTER | IGravity::BOTTOM;
     st->SetStyle(context);
 
+    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
+        const_cast<Int32 *>(R::styleable::Window),
+        ArraySize(R::styleable::Window));
     AutoPtr<ITypedArray> a;
-    Int32 length = ArraySize(R::styleable::Window);
-    AutoPtr<ArrayOf<Int32> > wArray = ArrayOf<Int32>::Alloc(length);
-    for(Int32 i = 0; i < length; ++i) {
-        (*wArray)[i] = R::styleable::Window[i];
-    }
-    context->ObtainStyledAttributes(NULL, wArray, 0, st->mListPresenterTheme, (ITypedArray**)&a);
+    context->ObtainStyledAttributes(NULL, attrIds, 0, st->mListPresenterTheme, (ITypedArray**)&a);
+
     Float evelation;
     a->GetDimension(R::styleable::Window_windowElevation, 0, &evelation);
-    if (evelation != 0)//Is is ok??
-    {
+    if (evelation != 0) {
         st->mDecorView->SetElevation(evelation);
     }
     a->Recycle();
@@ -3427,8 +3786,6 @@ void PhoneWindow::OpenPanel(
 
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
-        //AutoPtr<IResources> resource;
-        //context->GetResources((IResources**)&resource);
         AutoPtr<IDrawable> drawable;
         context->GetDrawable(backgroundResId, (IDrawable**)&drawable);
 
@@ -3455,7 +3812,8 @@ void PhoneWindow::OpenPanel(
     }
     else if (!(st->IsInListMode(&temp), temp)) {
         width = IViewGroupLayoutParams::MATCH_PARENT;
-    } else if (st->mCreatedPanelView != NULL) {
+    }
+    else if (st->mCreatedPanelView != NULL) {
         // If we already had a panel view, carry width=MATCH_PARENT through
         // as we did above when it was created.
         AutoPtr<IViewGroupLayoutParams> lp;
@@ -3502,9 +3860,9 @@ ECode PhoneWindow::ClosePanel(
     vcHelper->Get(context, (IViewConfiguration**)&viewConfig);
     Boolean hasPerMk;
     viewConfig->HasPermanentMenuKey(&hasPerMk);
-    if (featureId == FEATURE_OPTIONS_PANEL && mDecorContentParent != NULL &&
-            (mDecorContentParent->CanShowOverflowMenu(&reserved), reserved) &&
-            !hasPerMk)
+    if (featureId == FEATURE_OPTIONS_PANEL && mDecorContentParent != NULL
+        && (mDecorContentParent->CanShowOverflowMenu(&reserved), reserved)
+        && !hasPerMk)
     {
         Boolean tmp = FALSE;
         mDecorContentParent->HideOverflowMenu(&tmp);
@@ -3526,8 +3884,9 @@ ECode PhoneWindow::ClosePanel(
     /* [in] */ Boolean doCallback)
 {
     Boolean showing = FALSE;
-    if (doCallback && st->mFeatureId == FEATURE_OPTIONS_PANEL &&
-            mDecorContentParent != NULL && (mDecorContentParent->IsOverflowMenuShowing(&showing), showing)) {
+    if (doCallback && st->mFeatureId == FEATURE_OPTIONS_PANEL
+        && mDecorContentParent != NULL
+        && (mDecorContentParent->IsOverflowMenuShowing(&showing), showing)) {
         CheckCloseActionMenu(IMenu::Probe(st->mMenu));
         return NOERROR;
     }
@@ -3997,8 +4356,7 @@ ECode PhoneWindow::SetBackgroundDrawable(
             mDecor->SetWindowBackground(drawable);
         }
 
-        if (mBackgroundFallbackResource != 0)
-        {
+        if (mBackgroundFallbackResource != 0) {
             mDecor->SetBackgroundFallback(drawable != NULL? 0 : mBackgroundFallbackResource);
         }
     }
@@ -4016,8 +4374,6 @@ ECode PhoneWindow::SetFeatureDrawableResource(
             st->mResid = resId;
             st->mUri = NULL;
 
-            //AutoPtr<IResources> resource;
-            //mContext->GetResources((IResources**)&resource);
             AutoPtr<IContext> context;
             GetContext((IContext**)&context);
             AutoPtr<IDrawable> drawable;
@@ -4196,45 +4552,35 @@ ECode PhoneWindow::SuperDispatchKeyEvent(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* succeeded)
 {
-    VALIDATE_NOT_NULL(succeeded)
-    mDecor->SuperDispatchKeyEvent(event, succeeded);
-    return NOERROR;
+    return mDecor->SuperDispatchKeyEvent(event, succeeded);
 }
 
 ECode PhoneWindow::SuperDispatchKeyShortcutEvent(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* succeeded)
 {
-    VALIDATE_NOT_NULL(succeeded)
-    mDecor->SuperDispatchKeyShortcutEvent(event, succeeded);
-    return NOERROR;
+    return mDecor->SuperDispatchKeyShortcutEvent(event, succeeded);
 }
 
 ECode PhoneWindow::SuperDispatchTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* succeeded)
 {
-    VALIDATE_NOT_NULL(succeeded)
-    mDecor->SuperDispatchTouchEvent(event, succeeded);
-    return NOERROR;
+    return mDecor->SuperDispatchTouchEvent(event, succeeded);
 }
 
 ECode PhoneWindow::SuperDispatchTrackballEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* succeeded)
 {
-    VALIDATE_NOT_NULL(succeeded)
-    mDecor->SuperDispatchTrackballEvent(event, succeeded);
-    return NOERROR;
+    return mDecor->SuperDispatchTrackballEvent(event, succeeded);
 }
 
 ECode PhoneWindow::SuperDispatchGenericMotionEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* succeeded)
 {
-    VALIDATE_NOT_NULL(succeeded)
-    mDecor->SuperDispatchGenericMotionEvent(event, succeeded);
-    return NOERROR;
+    return mDecor->SuperDispatchGenericMotionEvent(event, succeeded);
 }
 
 /**
@@ -4553,8 +4899,6 @@ ECode PhoneWindow::SaveHierarchyState(
     }
 
     // save the panels
-    //AutoPtr<IObjectInt32Map> panelStates;
-    //CObjectInt32Map::New((IObjectInt32Map**)&panelStates);
     AutoPtr<ISparseArray> panelStates;
     CSparseArray::New((ISparseArray**)&panelStates);
     SavePanelState(panelStates);
@@ -4563,13 +4907,10 @@ ECode PhoneWindow::SaveHierarchyState(
         state->PutSparseParcelableArray(PANELS_TAG, panelStates);
     }
 
-    if (mDecorContentParent != NULL)
-    {
-        //AutoPtr<IObjectInt32Map> actionBarStates;
-        //CObjectInt32Map::New((IObjectInt32Map**)&panelStates);
+    if (mDecorContentParent != NULL) {
         AutoPtr<ISparseArray> actionBarStates;
         CSparseArray::New((ISparseArray**)&actionBarStates);
-        //TODO mDecorContentParent->SaveToolbarHierarchyState(actionBarStates);
+        mDecorContentParent->SaveToolbarHierarchyState(actionBarStates);
         state->PutSparseParcelableArray(ACTION_BAR_TAG, actionBarStates);
     }
 
@@ -4609,22 +4950,20 @@ ECode PhoneWindow::RestoreHierarchyState(
     }
 
     // restore the panels
-    //AutoPtr<IObjectInt32Map> panelStates;
     AutoPtr<ISparseArray> panelStates;
     savedInstanceState->GetSparseParcelableArray(PANELS_TAG, (ISparseArray**)&panelStates);
     if (panelStates != NULL) {
         RestorePanelState(panelStates);
     }
 
-    if (mDecorContentParent != NULL)
-    {
-        //AutoPtr<IObjectInt32Map> actionBarStates;
+    if (mDecorContentParent != NULL) {
         AutoPtr<ISparseArray> actionBarStates;
         savedInstanceState->GetSparseParcelableArray(ACTION_BAR_TAG, (ISparseArray**)&actionBarStates);
         if (actionBarStates != NULL) {
             DoPendingInvalidatePanelMenu();
-            //TODO mDecorContentParent->RestoreToolbarHierarchyState(actionBarStates);
-        } else {
+            mDecorContentParent->RestoreToolbarHierarchyState(actionBarStates);
+        }
+        else {
             Logger::W(TAG, "Missing saved instance states for action bar views! State will not be restored.");
         }
     }
@@ -5111,10 +5450,6 @@ ECode PhoneWindow::GenerateLayout(
         mDecor->SetWindowFrame(frame);
         mDecor->SetElevation(mElevation);
         mDecor->SetClipToOutline(mClipToOutline);
-
-        // System.out.println("Text=" + Integer.toHexString(mTextColor) +
-        // " Sel=" + Integer.toHexString(mTextSelectedColor) +
-        // " Title=" + Integer.toHexString(mTitleColor));
 
         if (mTitle != NULL) {
             SetTitle(mTitle);
@@ -5951,13 +6286,13 @@ void PhoneWindow::ShowProgressBars(
 {
     const Int32 features = GetLocalFeatures();
     Int32 visibility = 0;
-    if ((features & (1 << FEATURE_INDETERMINATE_PROGRESS)) != 0 && spinnyProgressBar != NULL &&
-            (IView::Probe(spinnyProgressBar)->GetVisibility(&visibility), visibility) == IView::INVISIBLE) {
+    if ((features & (1 << FEATURE_INDETERMINATE_PROGRESS)) != 0
+        && spinnyProgressBar != NULL
+        && (IView::Probe(spinnyProgressBar)->GetVisibility(&visibility), visibility) == IView::INVISIBLE) {
         IView::Probe(spinnyProgressBar)->SetVisibility(IView::VISIBLE);
     }
     // Only show the progress bars if the primary progress is not complete
-    if (horizontalProgressBar != NULL)
-    {
+    if (horizontalProgressBar != NULL) {
         Int32 progress = 0;
         horizontalProgressBar->GetProgress(&progress);
         if ((features & (1 << FEATURE_PROGRESS)) != 0 &&
@@ -6491,11 +6826,9 @@ void PhoneWindow::ReopenMenu(
     vcHelper->Get(context, (IViewConfiguration**)&viewConfig);
     Boolean hasPerMk;
     viewConfig->HasPermanentMenuKey(&hasPerMk);
-    if (mDecorContentParent != NULL &&
-        (mDecorContentParent->CanShowOverflowMenu(&tmp), tmp) &&
-        ( !hasPerMk||
-          (mDecorContentParent->IsOverflowMenuShowing(&tmp), tmp)
-        ))
+    if (mDecorContentParent != NULL
+        && (mDecorContentParent->CanShowOverflowMenu(&tmp), tmp)
+        && (!hasPerMk|| (mDecorContentParent->IsOverflowMenuShowing(&tmp), tmp)))
     {
         AutoPtr<IWindowCallback> cb;
         GetCallback((IWindowCallback**)&cb);
@@ -6503,8 +6836,7 @@ void PhoneWindow::ReopenMenu(
         Boolean destoryed = FALSE;
         IsDestroyed(&destoryed);
         if (!(mDecorContentParent->IsOverflowMenuShowing(&tmp), tmp) || !toggleMenuMode) {
-            if (cb != NULL && !destoryed )
-            {
+            if (cb != NULL && !destoryed ) {
                 // If we have a menu invalidation pending, do it now.
                 if (mInvalidatePanelMenuPosted &&
                     (mInvalidatePanelMenuFeatures & (1 << FEATURE_OPTIONS_PANEL)) != 0)

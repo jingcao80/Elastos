@@ -469,11 +469,6 @@ CNetworkManagementService::CNetworkManagementService()
     , mLastPowerStateFromRadio(IDataConnectionRealTimeInfo::DC_POWER_STATE_LOW)
     , mNetworkActive(FALSE)
 {
-    CCountDownLatch::New(1, (ICountDownLatch**)&mConnectedSignal);
-    CRemoteCallbackList::New((IRemoteCallbackList**)&mObservers);
-    CNetworkStatsFactory::New((INetworkStatsFactory**)&mStatsFactory);
-    Elastos::Core::CObject::New((IObject**)&mIdleTimerLock);
-    CRemoteCallbackList::New((IRemoteCallbackList**)&mNetworkActivityListeners);
 }
 
 ECode CNetworkManagementService::constructor(
@@ -481,6 +476,16 @@ ECode CNetworkManagementService::constructor(
     /* [in] */ const String& socket)
 {
     mContext = context;
+
+    CCountDownLatch::New(1, (ICountDownLatch**)&mConnectedSignal);
+    CRemoteCallbackList::New((IRemoteCallbackList**)&mObservers);
+    CNetworkStatsFactory::New((INetworkStatsFactory**)&mStatsFactory);
+    CRemoteCallbackList::New((IRemoteCallbackList**)&mNetworkActivityListeners);
+
+    CHashMap::New((IHashMap**)&mActiveQuotas);
+    CHashMap::New((IHashMap**)&mActiveAlerts);
+    CSparseBooleanArray::New((ISparseBooleanArray**)&mUidRejectOnQuota);
+    CHashMap::New((IHashMap**)&mActiveIdleTimers);
 
     // make sure this is on the same looper as our NativeDaemonConnector for sync purposes
     AutoPtr<ILooper> looper;
@@ -1000,11 +1005,11 @@ ECode CNetworkManagementService::PrepareNativeDaemon()
         if (size > 0) {
             Slogger::D(TAG, "pushing %d active quota rules", size);
             AutoPtr<IHashMap> activeQuotas = mActiveQuotas;
+            mActiveQuotas = NULL;
             CHashMap::New((IHashMap**)&mActiveQuotas);
             FOR_EACH(iter, Ptr(activeQuotas)->Func(activeQuotas->GetEntrySet)) {
                 AutoPtr<IMapEntry> entry = IMapEntry::Probe(Ptr(iter)->Func(iter->GetNext));
-                AutoPtr<IInterface> key;
-                AutoPtr<IInterface> value;
+                AutoPtr<IInterface> key, value;
                 entry->GetKey((IInterface**)&key);
                 entry->GetValue((IInterface**)&value);
                 SetInterfaceQuota(Object::ToString(key), Ptr(IInteger64::Probe(value))->Func(IInteger64::GetValue));
@@ -1015,11 +1020,11 @@ ECode CNetworkManagementService::PrepareNativeDaemon()
         if (size > 0) {
             Slogger::D(TAG, "pushing %d active quota rules", size);
             AutoPtr<IHashMap> activeAlerts = mActiveAlerts;
+            mActiveAlerts = NULL;
             CHashMap::New((IHashMap**)&mActiveAlerts);
             FOR_EACH(iter, Ptr(activeAlerts)->Func(activeAlerts->GetEntrySet)) {
                 AutoPtr<IMapEntry> entry = IMapEntry::Probe(Ptr(iter)->Func(iter->GetNext));
-                AutoPtr<IInterface> key;
-                AutoPtr<IInterface> value;
+                AutoPtr<IInterface> key, value;
                 entry->GetKey((IInterface**)&key);
                 entry->GetValue((IInterface**)&value);
                 SetInterfaceAlert(Object::ToString(key), Ptr(IInteger64::Probe(value))->Func(IInteger64::GetValue));
@@ -1030,6 +1035,7 @@ ECode CNetworkManagementService::PrepareNativeDaemon()
         if (size > 0) {
             Slogger::D(TAG, "pushing %d active uid rules", size);
             AutoPtr<ISparseBooleanArray> uidRejectOnQuota = mUidRejectOnQuota;
+            mUidRejectOnQuota = NULL;
             CSparseBooleanArray::New((ISparseBooleanArray**)&mUidRejectOnQuota);
             for (Int32 i = 0; i < Ptr(uidRejectOnQuota)->Func(uidRejectOnQuota->GetSize); i++) {
                 Int32 key;

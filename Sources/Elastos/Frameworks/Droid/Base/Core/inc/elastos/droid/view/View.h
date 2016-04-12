@@ -812,11 +812,6 @@ public:
 
 protected:
     /**
-     * The logging tag used by this class with android.util.Log.
-     */
-    static const char* VIEW_LOG_TAG;
-
-    /**
      * Base View state sets
      */
     // Singles
@@ -1651,6 +1646,7 @@ public:
     {
     public:
         class Callbacks
+            : public Object
         {
         public:
             virtual ~Callbacks() {}
@@ -2355,6 +2351,9 @@ private:
 
         CARAPI Run();
 
+        CARAPI ToString(
+            /* [out] */ String* str);
+
     private:
         View* mView;
     };
@@ -2369,6 +2368,9 @@ private:
         {}
 
         CARAPI Run();
+
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         View* mView;

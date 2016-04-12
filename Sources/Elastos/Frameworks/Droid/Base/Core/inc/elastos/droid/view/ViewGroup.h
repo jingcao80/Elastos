@@ -2083,7 +2083,7 @@ private:
      * Returns true if the flag was previously set.
      */
     static CARAPI_(Boolean) ResetCancelNextUpFlag(
-        /* [in] */ View* view);
+        /* [in] */ IView* view);
 
     static CARAPI_(void) DrawRect(
         /* [in] */ ICanvas* canvas,
@@ -2280,7 +2280,6 @@ protected:
 
 private:
     static const Boolean DBG;
-    static const char* VG_TAG;
 
     // When set, ViewGroup excludes the padding area from the invalidate rectangle
     // Set by default

@@ -729,9 +729,9 @@ ECode SubtitleTrack::UpdateActiveCues(
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<IPair> event = IPair::Probe(obj);
-        AutoPtr<ISubtitleTrackCue> st;
+        AutoPtr<IInterface> st;
         event->GetSecond((IInterface**)&st);
-        Cue* cue = (Cue*)st.Get();
+        Cue* cue = (Cue*)ISubtitleTrackCue::Probe(st);
 
         AutoPtr<IInterface> fst;
         event->GetFirst((IInterface**)&fst);

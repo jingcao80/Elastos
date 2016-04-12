@@ -6147,8 +6147,7 @@ Boolean PhoneWindowManager::IsWakeKeyWhenScreenOff(
 
 Boolean PhoneWindowManager::ShouldDispatchInputWhenNonInteractive()
 {
-    if (KeyguardIsShowingTq() && mDisplay != NULL)
-    {
+    if (KeyguardIsShowingTq() && mDisplay != NULL) {
         Int32 state;
         mDisplay->GetState(&state);
         if (state != IDisplay::STATE_OFF)

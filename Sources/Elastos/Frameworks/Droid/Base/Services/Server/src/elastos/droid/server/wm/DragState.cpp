@@ -58,9 +58,9 @@ void DragState::Register(
     /* [in] */ IDisplay* display)
 {
     mDisplay = display;
-    // if (WindowManagerService.DEBUG_DRAG) {
-    //     Slogger::D(CWindowManagerService::TAG, "registering drag input channel");
-    // }
+    if (CWindowManagerService::DEBUG_DRAG) {
+        Slogger::D(CWindowManagerService::TAG, "registering drag input channel");
+    }
     if (mClientChannel != NULL) {
         Slogger::E(CWindowManagerService::TAG, "Duplicate register of drag input channel");
     }

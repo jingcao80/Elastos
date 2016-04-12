@@ -2,8 +2,8 @@
 module
 {
     using interface Elastos.Core.ICharSequence;
-    using interface Elastos.Utility.IHashMap;
 
+    interface Elastos.Droid.Utility.ISparseArray;
     interface Elastos.Droid.View.IMenu;
     interface Elastos.Droid.View.IWindowCallback;
     interface Elastos.Droid.Graphics.Drawable.IDrawable;
@@ -72,10 +72,10 @@ module
             [in] IMenuPresenterCallback* cb);
 
         SaveToolbarHierarchyState(
-            [in] IHashMap* toolbarStates);
+            [in] ISparseArray* toolbarStates);
 
         RestoreToolbarHierarchyState(
-            [in] IHashMap* toolbarStates);
+            [in] ISparseArray* toolbarStates);
 
         DismissPopups();
 

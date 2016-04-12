@@ -563,10 +563,11 @@ ECode ViewRootImpl::WindowInputEventReceiver::Dispose()
     return InputEventReceiver::Dispose();
 }
 
-ECode ViewRootImpl::WindowInputEventReceiver::FinishInputEvent(
-    /* [in] */ IInputEvent* event,
-    /* [in] */ Boolean handled)
+ECode ViewRootImpl::WindowInputEventReceiver::ToString(
+    /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str)
+    *str = "WindowInputEventReceiver";
     return NOERROR;
 }
 
@@ -604,7 +605,7 @@ ViewRootImpl::InvalidateOnAnimationRunnable::InvalidateOnAnimationRunnable(
 void ViewRootImpl::InvalidateOnAnimationRunnable::AddView(
     /* [in] */ IView* view)
 {
-    AutoLock lock(mSelfLock);
+    AutoLock lock(this);
     mViews.PushBack(view);
     PostIfNeededLocked();
 }
@@ -612,7 +613,7 @@ void ViewRootImpl::InvalidateOnAnimationRunnable::AddView(
 void ViewRootImpl::InvalidateOnAnimationRunnable::AddViewRect(
     /* [in] */ View::AttachInfo::InvalidateInfo* info)
 {
-    AutoLock lock(mSelfLock);
+    AutoLock lock(this);
     mViewRects.PushBack(info);
     PostIfNeededLocked();
 }
@@ -620,7 +621,7 @@ void ViewRootImpl::InvalidateOnAnimationRunnable::AddViewRect(
 void ViewRootImpl::InvalidateOnAnimationRunnable::RemoveView(
     /* [in] */ IView* view)
 {
-    AutoLock lock(mSelfLock);
+    AutoLock lock(this);
     mViews.Remove(view);
 
     typedef typename List<AutoPtr<View::AttachInfo::InvalidateInfo> >::ReverseIterator InfoReverseIterator;
@@ -652,7 +653,7 @@ ECode ViewRootImpl::InvalidateOnAnimationRunnable::Run()
     Int32 viewCount;
     Int32 viewRectCount;
     {
-        AutoLock lock(mSelfLock);
+        AutoLock lock(this);
         mPosted = FALSE;
 
         viewCount = mViews.GetSize();
@@ -797,9 +798,9 @@ ECode ViewRootImpl::TakenSurfaceHolder::SetKeepScreenOn(
 const Float ViewRootImpl::TrackballAxis::MAX_ACCELERATION = 20;
 const Int64 ViewRootImpl::TrackballAxis::FAST_MOVE_TIME = 150;
 const Float ViewRootImpl::TrackballAxis::ACCEL_MOVE_SCALING_FACTOR = (1.0f/40);
-const Float FIRST_MOVEMENT_THRESHOLD = 0.5f;
-const Float SECOND_CUMULATIVE_MOVEMENT_THRESHOLD = 2.0f;
-const Float SUBSEQUENT_INCREMENTAL_MOVEMENT_THRESHOLD = 1.0f;
+const Float ViewRootImpl::TrackballAxis::FIRST_MOVEMENT_THRESHOLD = 0.5f;
+const Float ViewRootImpl::TrackballAxis::SECOND_CUMULATIVE_MOVEMENT_THRESHOLD = 2.0f;
+const Float ViewRootImpl::TrackballAxis::SUBSEQUENT_INCREMENTAL_MOVEMENT_THRESHOLD = 1.0f;
 
 ViewRootImpl::TrackballAxis::TrackballAxis()
     : mPosition(0)
@@ -982,7 +983,7 @@ void ViewRootImpl::RunQueue::Post(
 
 void ViewRootImpl::RunQueue::PostDelayed(
     /* [in] */ IRunnable* action,
-    /* [in] */ Int32 delayMillis)
+    /* [in] */ Int64 delayMillis)
 {
     AutoPtr<HandlerAction> handlerAction = new HandlerAction();
     handlerAction->mAction = action;
@@ -1016,6 +1017,7 @@ void ViewRootImpl::RunQueue::ExecuteActions(
 
     List<AutoPtr<HandlerAction> >::Iterator iter;
     for (iter = mActions.Begin(); iter != mActions.End(); ++iter) {
+        Logger::I(TAG, " >> ExecuteActions %s, delay:%lld", TO_CSTR((*iter)->mAction), (*iter)->mDelay);
         handler->PostDelayed((*iter)->mAction, (*iter)->mDelay, &result);
     }
 
@@ -1598,7 +1600,7 @@ ECode ViewRootImpl::SetView(
         ECode ec = mWindowSession->AddToDisplay(
             mWindow.Get(), mSeq, mWindowAttributes.Get(),
             hostVisibility, displayId, mAttachInfo->mContentInsets.Get(),
-             mInputChannel.Get(), (IRect**)&tempRect,
+             mInputChannel, (IRect**)&tempRect,
             (IInputChannel**)&tempInputChannel, &res);
 
         if (tempRect != NULL) {
@@ -1634,8 +1636,8 @@ ECode ViewRootImpl::SetView(
         }
 
         mPendingOverscanInsets->Set(0, 0, 0, 0);
-        mPendingContentInsets->Set((IRect*)mAttachInfo->mContentInsets);
-        mPendingStableInsets->Set((IRect*)mAttachInfo->mStableInsets);
+        mPendingContentInsets->Set(mAttachInfo->mContentInsets);
+        mPendingStableInsets->Set(mAttachInfo->mStableInsets);
         mPendingVisibleInsets->Set(0, 0, 0, 0);
 
         if (DEBUG_LAYOUT)
@@ -1651,25 +1653,23 @@ ECode ViewRootImpl::SetView(
             switch (res) {
                 case IWindowManagerGlobal::ADD_BAD_APP_TOKEN:
                 case IWindowManagerGlobal::ADD_BAD_SUBWINDOW_TOKEN:
-                    /*Logger::E(TAG, "Unable to add window -- token 0x%08x"
-                        "  is not valid; is your activity running?",
-                        mWindowAttributes->mToken.Get());*/
+                    Logger::E(TAG, "Unable to add window -- token %s is not valid; is your activity running?",
+                        TO_CSTR(temp->mToken));
                     return E_BAD_TOKEN_EXCEPTION;
 
                 case IWindowManagerGlobal::ADD_NOT_APP_TOKEN:
-                    /*Logger::E(TAG, "Unable to add window -- token 0x%08x"
-                        "  is not for an application",
-                        mWindowAttributes->mToken.Get());*/
+                    Logger::E(TAG, "Unable to add window -- token %s is not for an application",
+                        TO_CSTR(temp->mToken));
                     return E_BAD_TOKEN_EXCEPTION;
 
                 case IWindowManagerGlobal::ADD_APP_EXITING:
-                    /*Logger::E(TAG, "Unable to add window -- app for token 0x%08x"
-                        "   is exiting?", mWindowAttributes->mToken.Get());*/
+                    Logger::E(TAG, "Unable to add window -- token %s is exiting?",
+                        TO_CSTR(temp->mToken));
                     return E_BAD_TOKEN_EXCEPTION;
 
                 case IWindowManagerGlobal::ADD_DUPLICATE_ADD:
-                    Logger::E(TAG, "Unable to add window -- window 0x%08x"
-                        "  has already been added", mWindow.Get());
+                    Logger::E(TAG, "Unable to add window -- token %s has already been added",
+                        TO_CSTR(temp->mToken));
                     return E_BAD_TOKEN_EXCEPTION;
 
                 case IWindowManagerGlobal::ADD_STARTING_NOT_NEEDED:
@@ -1678,18 +1678,18 @@ ECode ViewRootImpl::SetView(
                     return NOERROR;
 
                 case IWindowManagerGlobal::ADD_MULTIPLE_SINGLETON:
-                    Logger::E(TAG, "Unable to add window 0x%08x -- another "
-                        "window of this type already exists", mWindow.Get());
+                    Logger::E(TAG, "Unable to add window -- %s another window of this type already exists",
+                        TO_CSTR(mWindow));
                     return E_BAD_TOKEN_EXCEPTION;
 
                 case IWindowManagerGlobal::ADD_PERMISSION_DENIED:
-                    Logger::E(TAG, "Unable to add window 0x%08x -- permission "
-                        "denied for this window type", mWindow.Get());
+                    Logger::E(TAG, "Unable to add window -- %s permission denied for this window type",
+                        TO_CSTR(mWindow));
                     return E_BAD_TOKEN_EXCEPTION;
 
                 case IWindowManagerGlobal::ADD_INVALID_DISPLAY:
-                    Logger::E(TAG, "Unable to add window 0x%08x -- the specified "
-                        " display can not be found", mWindow.Get());
+                    Logger::E(TAG, "Unable to add window -- %s the specified display can not be found",
+                        TO_CSTR(mWindow));
                     return E_INVALID_DISPLAY_EXCEPTION;
 
                 default:
@@ -1699,11 +1699,13 @@ ECode ViewRootImpl::SetView(
         }
 
         if (rootViewST) {
+            mInputQueueCallback = NULL;
             rootViewST->WillYouTakeTheInputQueue((IInputQueueCallback**)&mInputQueueCallback);
         }
 
         if (mInputChannel != NULL) {
             if (mInputQueueCallback != NULL) {
+                mInputQueue = NULL;
                 CInputQueue::New((IInputQueue**)&mInputQueue);
                 mInputQueueCallback->OnInputQueueCreated(mInputQueue);
             }

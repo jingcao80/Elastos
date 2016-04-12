@@ -6654,7 +6654,7 @@ void CAudioService::OnSetA2dpSinkConnectionState(
         CInteger32::New(IAudioSystem::DEVICE_OUT_BLUETOOTH_A2DP, (IInteger32**)&i32);
         Boolean b;
         mConnectedDevices->ContainsKey(i32, &b);
-        AutoPtr<IObject> obj;
+        AutoPtr<IInterface> obj;
         mConnectedDevices->Get(i32, (IInterface**)&obj);
         String str;
         ICharSequence::Probe(obj)->ToString(&str);
@@ -6738,7 +6738,7 @@ void CAudioService::OnSetA2dpSourceConnectionState(
         CInteger32::New(IAudioSystem::DEVICE_IN_BLUETOOTH_A2DP, (IInteger32**)&i32);
         Boolean b;
         mConnectedDevices->ContainsKey(i32, &b);
-        AutoPtr<IObject> obj;
+        AutoPtr<IInterface> obj;
         mConnectedDevices->Get(i32, (IInterface**)&obj);
         String str;
         ICharSequence::Probe(obj)->ToString(&str);
@@ -6773,7 +6773,7 @@ Boolean CAudioService::HandleDeviceConnection(
         if (isConnected && !connected) {
             AutoPtr<IInteger32> i32;
             CInteger32::New(device, (IInteger32**)&i32);
-            AutoPtr<IObject> obj;
+            AutoPtr<IInterface> obj;
             mConnectedDevices->Get(i32, (IInterface**)&obj);
             String str;
             ICharSequence::Probe(obj)->ToString(&str);

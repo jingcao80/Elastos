@@ -51,7 +51,7 @@ namespace Widget {
   */
 class ActionBarOverlayLayout
     : public ViewGroup
-    //, public IDecorContentParent
+    , public IDecorContentParent
     , public IActionBarOverlayLayout
 {
 public:

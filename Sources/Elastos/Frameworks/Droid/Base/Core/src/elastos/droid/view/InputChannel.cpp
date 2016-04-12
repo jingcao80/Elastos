@@ -57,12 +57,12 @@ ECode InputChannel::OpenInputChannelPair(
     VALIDATE_NOT_NULL(icp);
 
     if (_name.IsNull()) {
-        SLOGGERE(TAG, "OpenInputChannelPair: name must not be null")
+        Slogger::E(TAG, "OpenInputChannelPair: name must not be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     if (DEBUG) {
-        SLOGGERD(TAG, "OpenInputChannelPair: Opening input channel pair '%s'", _name.string())
+        Slogger::D(TAG, "OpenInputChannelPair: Opening input channel pair '%s'", _name.string());
     }
 
     return NativeOpenInputChannelPair(_name, icp);
@@ -89,7 +89,7 @@ ECode InputChannel::TransferTo(
     /* [in] */ IInputChannel* outParameter)
 {
     if (outParameter == NULL) {
-        SLOGGERE(TAG, "outParameter must not be null.");
+        Slogger::E(TAG, "outParameter must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -100,7 +100,7 @@ ECode InputChannel::ReadFromParcel(
     /* [in] */ IParcel *in)
 {
     if (in == NULL) {
-        SLOGGERD("InputChannel", "ReadFromParcel: in must not be null")
+        Slogger::D("InputChannel", "ReadFromParcel: in must not be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NativeReadFromParcel(in);
@@ -110,7 +110,7 @@ ECode InputChannel::WriteToParcel(
     /* [in] */ IParcel *dest)
 {
     if (dest == NULL) {
-        SLOGGERE(TAG, "dest must not be null.");
+        Slogger::E(TAG, "dest must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NativeWriteToParcel(dest);
@@ -165,8 +165,6 @@ ECode InputChannel::NativeOpenInputChannelPair(
     CInputChannel::New((IInputChannel**)&clientChannelObj);
     ((InputChannel*)clientChannelObj.Get())->mNative = reinterpret_cast<Handle64>(tmpClient);
 
-
-
     rArray->Set(0, serverChannelObj);
     rArray->Set(1, clientChannelObj);
     *pair = rArray;
@@ -198,7 +196,7 @@ ECode InputChannel::NativeTransferTo(
     InputChannel* otherObj = (InputChannel*)other;
 
     if (otherObj->mNative != 0) {
-        SLOGGERE("InputChannel", "Other object already has a native input channel.")
+        Slogger::E("InputChannel", "Other object already has a native input channel.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -211,7 +209,7 @@ ECode InputChannel::NativeReadFromParcel(
     /* [in] */ IParcel* in)
 {
     if (mNative != 0) {
-        SLOGGERE("InputChannel",
+        Slogger::E("InputChannel",
                 "This object already has a native input channel.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

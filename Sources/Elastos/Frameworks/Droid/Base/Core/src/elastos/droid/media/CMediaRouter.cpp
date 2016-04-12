@@ -75,7 +75,7 @@ Object CMediaRouter::mStaticClass;
 //-----------------------------------------------
 //    CMediaRouter::Static::MyAudioRoutesObserver
 //-----------------------------------------------
-AutoPtr<Handler> CMediaRouter::Static::mHandler;
+AutoPtr<IHandler> CMediaRouter::Static::mHandler;
 AutoPtr<IIMediaRouterClient> CMediaRouter::Static::mClient;
 CMediaRouter* CMediaRouter::Static::mOwner;
 

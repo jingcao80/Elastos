@@ -12,7 +12,9 @@
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/view/Window.h"
+#include "elastos/droid/view/GestureDetector.h"
 #include "elastos/droid/widget/FrameLayout.h"
+#include "elastos/droid/database/ContentObserver.h"
 
 using Elastos::Droid::App::IKeyguardManager;
 using Elastos::Droid::Content::IContext;
@@ -20,7 +22,6 @@ using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
-//using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Internal::View::IRootViewSurfaceTaker;
@@ -40,6 +41,7 @@ using Elastos::Droid::Internal::Widget::IOnDismissedListener;
 using Elastos::Droid::Internal::Widget::IOnSwipeProgressChangedListener;
 using Elastos::Droid::Internal::Widget::ISwipeDismissLayout;
 using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::Runnable;
@@ -48,15 +50,12 @@ using Elastos::Droid::Transition::ITransition;
 using Elastos::Droid::Transition::ITransitionManager;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::Utility::ITypedValue;
-//using Elastos::Droid::View::Accessibility::IAccessibilityEventSource;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
-//using Elastos::Droid::View::BaseSurfaceHolder;
 using Elastos::Droid::View::IActionMode;
 using Elastos::Droid::View::IActionModeCallback;
 using Elastos::Droid::View::IInputEvent;
 using Elastos::Droid::View::IInputQueueCallback;
 using Elastos::Droid::View::IIWindowManager;
-//using Elastos::Droid::View::IKeyEventCallback;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IMenu;
@@ -68,17 +67,15 @@ using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IViewRootImpl;
 using Elastos::Droid::View::IWindow;
-//using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IWindowCallback;
 using Elastos::Droid::View::IOnWindowDismissedCallback;
-//using Elastos::Droid::View::IWindowManager;
+using Elastos::Droid::View::GestureDetector;
+using Elastos::Droid::View::IGestureDetector;
 using Elastos::Droid::View::IWindowInsets;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::View::Window;
 using Elastos::Droid::Widget::FrameLayout;
-//using Elastos::Droid::Widget::IFrameLayout;
 using Elastos::Droid::Widget::IImageView;
-//using Elastos::Droid::Widget::Internal::IActionBarView;
 using Elastos::Droid::Widget::IPopupWindow;
 using Elastos::Droid::Widget::IProgressBar;
 using Elastos::Droid::Widget::ITextView;
@@ -102,6 +99,29 @@ class PhoneWindow
     friend class CPhoneWindowRotationWatcher;
 
 private:
+    class SettingsObserver
+        : public ContentObserver
+    {
+    public:
+        SettingsObserver(
+            /* [in] */ PhoneWindow* host);
+
+        CARAPI constructor(
+            /* [in] */ IHandler* handler);
+
+        CARAPI Observe();
+
+        CARAPI Unobserve();
+
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+        CARAPI CheckGestures();
+
+    private:
+        PhoneWindow* mHost;
+    };
+
     class InvalidatePanelMenuRunnable
         : public Runnable
     {
@@ -223,27 +243,78 @@ private:
             _DecorView* mHost;
         };
 
-       class DecorViewWeakReferenceImpl
+        class DecorViewWeakReferenceImpl
            : public Object
            , public IWeakReference
-       {
-       public:
-           CAR_INTERFACE_DECL()
+        {
+        public:
+            CAR_INTERFACE_DECL()
 
-           DecorViewWeakReferenceImpl(
-               /* [in] */ IInterface* object,
-               /* [in] */ ElRefBase::WeakRefType* ref);
+            DecorViewWeakReferenceImpl(
+                /* [in] */ IInterface* object,
+                /* [in] */ ElRefBase::WeakRefType* ref);
 
-           ~DecorViewWeakReferenceImpl();
+            ~DecorViewWeakReferenceImpl();
 
-           CARAPI Resolve(
+            CARAPI Resolve(
                /* [in] */ const InterfaceID& riid,
                /* [out] */ IInterface** objectReference);
 
-       private:
-           IInterface* mObject;
-           ElRefBase::WeakRefType* mRef;
-       };
+        private:
+            IInterface* mObject;
+            ElRefBase::WeakRefType* mRef;
+        };
+
+        class StylusGestureFilter
+            : public GestureDetector::SimpleOnGestureListener
+        {
+        public:
+            StylusGestureFilter(
+                /* [in] */ _DecorView* host);
+
+            CARAPI constructor();
+
+            CARAPI OnTouchEvent(
+                /* [in] */ IMotionEvent* e,
+                /* [out] */ Boolean* res);
+
+            CARAPI OnFling(
+                /* [in] */ IMotionEvent* e1,
+                /* [in] */ IMotionEvent* e2,
+                /* [in] */ Float velocityX,
+                /* [in] */ Float velocityY,
+                /* [out] */ Boolean* res);
+
+            CARAPI OnDoubleTap(
+                /* [in] */ IMotionEvent* e,
+                /* [out] */ Boolean* res);
+
+            CARAPI OnLongPress(
+                /* [in] */ IMotionEvent* e);
+
+        private:
+            friend class _DecorView;
+
+            static const Int32 SWIPE_UP;// = 1;
+            static const Int32 SWIPE_DOWN;// = 2;
+            static const Int32 SWIPE_LEFT;// = 3;
+            static const Int32 SWIPE_RIGHT;// = 4;
+            static const Int32 PRESS_LONG;// = 5;
+            static const Int32 TAP_DOUBLE;// = 6;
+            static const Double SWIPE_MIN_DISTANCE;// = 25.0;
+            static const Double SWIPE_MIN_VELOCITY;// = 50.0;
+            static const Int32 KEY_NO_ACTION;// = 1000;
+            static const Int32 KEY_HOME;// = 1001;
+            static const Int32 KEY_BACK;// = 1002;
+            static const Int32 KEY_MENU;// = 1003;
+            static const Int32 KEY_SEARCH;// = 1004;
+            static const Int32 KEY_RECENT;// = 1005;
+            static const Int32 KEY_APP;// = 1006;
+            AutoPtr<IGestureDetector> mDetector;
+            static const String TAG;// = "StylusGestureFilter";
+
+            _DecorView* mHost;
+        };
 
     public:
         CAR_INTERFACE_DECL()
@@ -254,6 +325,9 @@ private:
         CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ Int32 featureId);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
 
         CARAPI WillYouTakeTheSurface(
             /* [out] */ ISurfaceHolderCallback2** cback);
@@ -279,6 +353,7 @@ private:
 
         CARAPI SetBackgroundDrawable(
             /* [in] */ IDrawable* d);
+
         CARAPI SetBackgroundFallback(
             /* [in] */ Int32 resId);
 
@@ -413,6 +488,13 @@ private:
         CARAPI OnDetachedFromWindow();
 
     private:
+        CARAPI MenuAction();
+
+        CARAPI BackAction();
+
+        CARAPI DispatchStylusAction(
+            /* [in] */ Int32 gestureAction);
+
         CARAPI_(void) DrawableChanged();
 
         CARAPI OnAttachedToWindow();
@@ -455,35 +537,36 @@ private:
         Int32 mFeatureId;
 
         AutoPtr<CRect> mDrawingBounds;
-
         AutoPtr<CRect> mBackgroundPadding;
-
         AutoPtr<CRect> mFramePadding;
-
         AutoPtr<CRect> mFrameOffsets;
 
         Boolean mChanging;
 
         AutoPtr<IDrawable> mMenuBackground;
-
         Boolean mWatchingForMenu;
-
         Int32 mDownY;
 
         AutoPtr<IActionMode> mActionMode;
         AutoPtr<IActionBarContextView> mActionModeView;
         AutoPtr<IPopupWindow> mActionModePopup;
         AutoPtr<IRunnable> mShowActionModePopup;
+
         // View added at runtime to draw under the status bar area
         AutoPtr<IView> mStatusGuard;
         // View added at runtime to draw under the navigation bar area
         AutoPtr<IView> mNavigationGuard;
+        AutoPtr<SettingsObserver> mSettingsObserver;
+
         AutoPtr<IView> mStatusColorView;
         AutoPtr<IView> mNavigationColorView;
         AutoPtr<IBackgroundFallback> mBackgroundFallback;
+
         Int32 mLastTopInset;
         Int32 mLastBottomInset;
         Int32 mLastRightInset;
+
+        AutoPtr<StylusGestureFilter> mStylusFilter;
         friend class ActionModeCallbackWrapper;
         friend class PhoneWindow;
 
@@ -1571,6 +1654,7 @@ private:
     // The icon resource is currently configured to use the system fallback
     // as no default was previously specified. Anything can override this.
     static const Int32 FLAG_RESOURCE_SET_ICON_FALLBACK = 1 << 2;
+
     Int32 mResourcesSetFlags;
     Int32 mIconRes;
     Int32 mLogoRes;
@@ -1592,8 +1676,10 @@ private:
     //AutoPtr<IActionBarView> mActionBar;
     AutoPtr<ActionMenuPresenterCallback> mActionMenuPresenterCallback;
     AutoPtr<PanelMenuPresenterCallback> mPanelMenuPresenterCallback;
+
     AutoPtr<ITransitionManager> mTransitionManager;
     AutoPtr<IScene> mContentScene;
+
     AutoPtr< ArrayOf<DrawableFeatureState*> > mDrawables;
     AutoPtr< ArrayOf<PanelFeatureState*> > mPanels;
 
@@ -1620,19 +1706,26 @@ private:
     /** Whether window content should be clipped to the background outline. */
     Boolean mClipToOutline;
     Int32 mFrameResource;
+
     Int32 mTextColor;
     Int32 mStatusBarColor;
     Int32 mNavigationBarColor;
     Boolean mForcedStatusBarColor;
     Boolean mForcedNavigationBarColor;
     AutoPtr<ICharSequence> mTitle;
+
     Int32 mTitleColor;
+
     Boolean mAlwaysReadCloseOnTouchAttr;
+    Boolean mEnableGestures;
+
     AutoPtr<IContextMenuBuilder> mContextMenu;
     AutoPtr<IMenuDialogHelper> mContextMenuHelper;
     Boolean mClosingActionMenu;
+
     Int32 mVolumeControlStreamType;
     AutoPtr<IMediaController> mMediaController;
+
     AutoPtr<IAudioManager> mAudioManager;
     AutoPtr<IKeyguardManager> mKeyguardManager;
     Int32 mUiOptions;
@@ -1640,6 +1733,7 @@ private:
     Int32 mInvalidatePanelMenuFeatures;
     AutoPtr<InvalidatePanelMenuRunnable> mInvalidatePanelMenuRunnable;
     static AutoPtr<IPhoneWindowRotationWatcher> sRotationWatcher;
+
     AutoPtr<ITransition> mEnterTransition;
     AutoPtr<ITransition> mReturnTransition;
     AutoPtr<ITransition> mExitTransition;
@@ -1648,6 +1742,7 @@ private:
     AutoPtr<ITransition> mSharedElementReturnTransition;
     AutoPtr<ITransition> mSharedElementExitTransition;
     AutoPtr<ITransition> mSharedElementReenterTransition;
+
     Boolean mAllowReturnTransitionOverlap;
     Boolean mAllowEnterTransitionOverlap;
     Int64 mBackgroundFadeDurationMillis;

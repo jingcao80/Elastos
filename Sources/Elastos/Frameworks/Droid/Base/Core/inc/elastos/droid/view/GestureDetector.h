@@ -4,7 +4,6 @@
 
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/os/Handler.h>
-// #include "elastos/droid/view/VelocityTracker.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;

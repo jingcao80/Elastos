@@ -778,13 +778,13 @@ ECode CTvInputManager::GetInputState(
     synchronized(mLock) {
         AutoPtr<ICharSequence> csq;
         CString::New(inputId, (ICharSequence**)&csq);
-        AutoPtr<IInteger32> state;
+        AutoPtr<IInterface> state;
         mStateMap->Get(csq, (IInterface**)&state);
         if (state == NULL) {
             // throw new IllegalArgumentException("Unrecognized input ID: " + inputId);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-        return state->GetValue(result);
+        return IInteger32::Probe(state)->GetValue(result);
     }
     return NOERROR;
 }

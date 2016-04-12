@@ -4,6 +4,7 @@
 #include "elastos/droid/server/wm/AccessibilityController.h"
 #include "elastos/droid/server/wm/DisplayContent.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -23,6 +24,7 @@ using Elastos::Droid::View::IInternalInsetsInfo;
 using Elastos::Droid::View::EIID_IWindowState;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -1512,14 +1514,15 @@ Boolean WindowState::IsFocused()
 
 String WindowState::MakeInputChannelName()
 {
-    String s = StringUtils::ToString((Int32)this);
-    s += " ";
+    StringBuilder sb(128);
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += " ";
     AutoPtr<ICharSequence> cs;
     mAttrs->GetTitle((ICharSequence**)&cs);
     String aStr;
     cs->ToString(&aStr);
-    s += aStr;
-    return s;
+    sb += aStr;
+    return sb.ToString();
 }
 
 ECode WindowState::ToString(

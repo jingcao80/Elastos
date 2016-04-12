@@ -726,7 +726,7 @@ private:
     /** Set of UIDs with active reject rules. */
     AutoPtr<ISparseBooleanArray> mUidRejectOnQuota;
 
-    AutoPtr<IObject> mIdleTimerLock;
+    Object mIdleTimerLock;
 
     AutoPtr<IHashMap> mActiveIdleTimers;
 

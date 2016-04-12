@@ -252,7 +252,6 @@ const Int32 View::ScrollabilityCache::OFF;
 const Int32 View::ScrollabilityCache::ON;
 const Int32 View::ScrollabilityCache::FADING;
 
-const char* View::VIEW_LOG_TAG = "View";
 static const String TAG("View");
 
 AutoPtr<ArrayOf<Int32> > View::EMPTY_STATE_SET;
@@ -653,7 +652,7 @@ Int32 View::MeasureSpec::Adjust(
     }
     Int32 size = GetSize(measureSpec) + delta;
     if (size < 0) {
-        /*Log.e(VIEW_LOG_TAG, "MeasureSpec.adjust: new size would be negative! (" + size +
+        /*Log.e(TAG, "MeasureSpec.adjust: new size would be negative! (" + size +
                 ") spec: " + toString(measureSpec) + " delta: " + delta);*/
         size = 0;
     }
@@ -826,9 +825,25 @@ ECode View::ViewPerformClick::Run()
     return NOERROR;
 }
 
+ECode View::ViewPerformClick::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    *str = "ViewPerformClick";
+    return NOERROR;
+}
+
 ECode View::UnsetPressedState::Run()
 {
     mView->SetPressed(FALSE);
+    return NOERROR;
+}
+
+ECode View::UnsetPressedState::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    *str = "UnsetPressedState";
     return NOERROR;
 }
 
@@ -896,23 +911,23 @@ View::AttachInfo::AttachInfo(
     , mAccessibilityWindowId(IAccessibilityNodeInfo::UNDEFINED_ITEM_ID)
 {
     SystemProperties::GetBoolean(IView::DEBUG_LAYOUT_PROPERTY, FALSE, &mDebugLayout);
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mOverscanInsets));
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mContentInsets));
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mVisibleInsets));
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mStableInsets));
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTmpInvalRect));
-    ASSERT_SUCCEEDED(CRectF::New((IRectF**)&mTmpTransformRect));
-    ASSERT_SUCCEEDED(CRectF::New((IRectF**)&mTmpTransformRect1));
-    ASSERT_SUCCEEDED(CMatrix::New((IMatrix**)&mTmpMatrix));
-    ASSERT_SUCCEEDED(CTransformation::New((ITransformation**)&mTmpTransformation));
-    ASSERT_SUCCEEDED(COutline::New((IOutline**)&mTmpOutline));
-    ASSERT_SUCCEEDED(CPoint::New((IPoint**)&mPoint));
-    CArrayList::New(24, (IArrayList**)&mTmpRectList);
+    CRect::New((IRect**)&mOverscanInsets);
+    CRect::New((IRect**)&mContentInsets);
+    CRect::New((IRect**)&mVisibleInsets);
+    CRect::New((IRect**)&mStableInsets);
+    CRect::New((IRect**)&mTmpInvalRect);
+    CRectF::New((IRectF**)&mTmpTransformRect);
+    CRectF::New((IRectF**)&mTmpTransformRect1);
+    CArrayList::New((IArrayList**)&mTmpRectList);
+    CMatrix::New((IMatrix**)&mTmpMatrix);
+    CTransformation::New((ITransformation**)&mTmpTransformation);
+    COutline::New((IOutline**)&mTmpOutline);
+    CPoint::New((IPoint**)&mPoint);
     CArrayList::New(24, (IArrayList**)&mTempArrayList);
     CViewTreeObserver::New((IViewTreeObserver**)&mTreeObserver);
     mGivenInternalInsets = new ViewTreeObserver::InternalInsetsInfo();
 
-    ASSERT_SUCCEEDED(CDispatcherState::New((IDispatcherState**)&mKeyDispatchState));
+    CDispatcherState::New((IDispatcherState**)&mKeyDispatchState);
     mTransparentLocation[0] = mTransparentLocation[1] = 0;
     mInvalidateChildLocation[0] = mInvalidateChildLocation[1] = 0;
     mTmpTransformLocation = ArrayOf<Float>::Alloc(2);
@@ -1833,6 +1848,7 @@ ECode View::SetOnCreateContextMenuListener(
 ECode View::PerformClick(
     /* [out] */ Boolean* res)
 {
+    Logger::I(TAG, " >> PerformClick");
     VALIDATE_NOT_NULL(res)
     Boolean result;
     AutoPtr<ListenerInfo> li = mListenerInfo;
@@ -1846,20 +1862,24 @@ ECode View::PerformClick(
 
     SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_CLICKED);
     *res = result;
+    Logger::I(TAG, " << PerformClick handled:%d", result);
     return NOERROR;
 }
 
 ECode View::CallOnClick(
     /* [out] */ Boolean* res)
 {
+    Logger::I(TAG, " >> CallOnClick");
     VALIDATE_NOT_NULL(res)
     AutoPtr<ListenerInfo> li = mListenerInfo;
     if (li != NULL && li->mOnClickListener != NULL) {
         li->mOnClickListener->OnClick(this);
         *res = TRUE;
+        Logger::I(TAG, " << CallOnClick handled");
         return NOERROR;
     }
     *res = FALSE;
+    Logger::I(TAG, " << CallOnClick not handled");
     return NOERROR;
 }
 
@@ -4155,7 +4175,7 @@ ECode View::SetHasTransientState(
             mTransientStateCount - 1;
     if (mTransientStateCount < 0) {
         mTransientStateCount = 0;
-        // Log.e(VIEW_LOG_TAG, "hasTransientState decremented below 0: " +
+        // Log.e(TAG, "hasTransientState decremented below 0: " +
         //         "unmatched pair of setHasTransientState calls");
     } else if ((hasTransientState && mTransientStateCount == 1) ||
             (!hasTransientState && mTransientStateCount == 0)) {
@@ -4165,7 +4185,7 @@ ECode View::SetHasTransientState(
         if (mParent != NULL) {
             mParent->ChildHasTransientStateChanged(this, hasTransientState);
             // } catch (AbstractMethodError e) {
-            //     Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+            //     Log.e(TAG, mParent.getClass().getSimpleName() +
             //             " does not fully implement ViewParent", e);
             // }
         }
@@ -4674,7 +4694,7 @@ AutoPtr<IView> View::FindViewInsideOutShouldExist(
     root->FindViewByPredicateInsideOut(
         this, mMatchIdPredicate, (IView**)&result);
     if (result == NULL) {
-        Logger::W(VIEW_LOG_TAG, "couldn't find view with id %d", id);
+        Logger::W(TAG, "couldn't find view with id %d", id);
     }
 
     return result;
@@ -4687,7 +4707,7 @@ AutoPtr<IView> View::FindViewShouldExist(
     AutoPtr<IView> result;
     root->FindViewById(childViewId, (IView**)&result);
     if (result == NULL) {
-        Logger::W(VIEW_LOG_TAG, "couldn't find next focus view specified by user for id %d", childViewId);
+        Logger::W(TAG, "couldn't find next focus view specified by user for id %d", childViewId);
     }
     return result;
 }
@@ -5371,7 +5391,7 @@ ECode View::NotifySubtreeAccessibilityStateChangedIfNeeded()
             ECode ec = mParent->NotifySubtreeAccessibilityStateChanged(
                     this, this, IAccessibilityEvent::CONTENT_CHANGE_TYPE_SUBTREE);
         //} catch (AbstractMethodError e) {
-        //    Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+        //    Log.e(TAG, mParent.getClass().getSimpleName() +
         //            " does not fully implement ViewParent", e);
         //}
         return ec;
@@ -5927,6 +5947,7 @@ ECode View::DispatchTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* res)
 {
+    Logger::I(TAG, " >>> View::DispatchTouchEvent %s %s", TO_CSTR(this), TO_CSTR(event));
     VALIDATE_NOT_NULL(res)
     Boolean result = FALSE;
     if (mInputEventConsistencyVerifier != NULL) {
@@ -5939,18 +5960,18 @@ ECode View::DispatchTouchEvent(
         // Defensive cleanup for new gesture
         StopNestedScroll();
     }
-    Boolean touchEventForSecurity;
-    if (OnFilterTouchEventForSecurity(event, &touchEventForSecurity), touchEventForSecurity) {
+    Boolean bval;
+    if (OnFilterTouchEventForSecurity(event, &bval), bval) {
         //noinspection SimplifiableIfStatement
         AutoPtr<ListenerInfo> li = mListenerInfo;
-        Boolean result = FALSE;
-        if (li != NULL && li->mOnTouchListener != NULL && (mViewFlags & ENABLED_MASK) == ENABLED
-            && (li->mOnTouchListener->OnTouch(this, event, &result), result)) {
+        Boolean bval = FALSE;
+        if (li != NULL && li->mOnTouchListener != NULL
+            && (mViewFlags & ENABLED_MASK) == ENABLED
+            && (li->mOnTouchListener->OnTouch(this, event, &bval), bval)) {
             result = TRUE;
         }
 
-        OnTouchEvent(event, &touchEventForSecurity);
-        if (!result && touchEventForSecurity) {
+        if (!result && (OnTouchEvent(event, &bval), bval)) {
             result = TRUE;
         }
     }
@@ -5969,6 +5990,7 @@ ECode View::DispatchTouchEvent(
     }
 
     *res = result;
+    Logger::I(TAG, " >>> View::DispatchTouchEvent handled:%d, %s %s", result, TO_CSTR(this), TO_CSTR(event));
     return NOERROR;
 }
 
@@ -6548,6 +6570,7 @@ ECode View::OnKeyUp(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* res)
 {
+    Logger::I(TAG, " >> OnKeyUp");
     VALIDATE_NOT_NULL(res)
     Boolean result;
     AutoPtr<IKeyEventHelper> helper;
@@ -6920,13 +6943,12 @@ ECode View::OnTouchEvent(
         Int32 action;
         event->GetAction(&action);
         switch (action) {
-        case IMotionEvent::ACTION_UP:
-            {
+        case IMotionEvent::ACTION_UP: {
                 Boolean prepressed = (mPrivateFlags & PFLAG_PREPRESSED) != 0;
                 if ((mPrivateFlags & PFLAG_PRESSED) != 0 || prepressed) {
                     // take focus if we don't have it already and we should in
                     // touch mode.
-                    Boolean focusTaken = FALSE, isFocusable, isFocusableInTouchMode, isFocused;
+                    Boolean focusTaken = FALSE, isFocusable, isFocusableInTouchMode, isFocused, bval;
                     IsFocusable(&isFocusable);
                     IsFocusableInTouchMode(&isFocusableInTouchMode);
                     IsFocused(&isFocused);
@@ -6954,10 +6976,9 @@ ECode View::OnTouchEvent(
                             if (mPerformClick == NULL) {
                                 mPerformClick = new ViewPerformClick(this);
                             }
-                            Boolean isPost;
-                            Post(mPerformClick, &isPost);
-                            if (!isPost) {
-                                PerformClick(&isPost);
+
+                            if (Post(mPerformClick, &bval), !bval) {
+                                PerformClick(&bval);
                             }
                         }
                     }
@@ -6965,22 +6986,22 @@ ECode View::OnTouchEvent(
                     if (mUnsetPressedState == NULL) {
                         mUnsetPressedState = new UnsetPressedState(this);
                     }
-                    Boolean unsetPressedStatePost;
+
                     if (prepressed) {
-                        Boolean res;
                         PostDelayed(mUnsetPressedState,
-                            CViewConfiguration::GetPressedStateDuration(), &res);
+                            CViewConfiguration::GetPressedStateDuration(), &bval);
                     }
-                    else if (Post(mUnsetPressedState, &unsetPressedStatePost), !unsetPressedStatePost) {
+                    else if (Post(mUnsetPressedState, &bval), !bval) {
                         // If the post failed, unpress right now
                         mUnsetPressedState->Run();
                     }
+
                     RemoveTapCallback();
                 }
             }
             break;
-        case IMotionEvent::ACTION_DOWN:
-            {
+
+        case IMotionEvent::ACTION_DOWN: {
                 mHasPerformedLongPress = FALSE;
 
                 if (PerformButtonActionOnTouchDown(event)) {
@@ -7010,15 +7031,15 @@ ECode View::OnTouchEvent(
                 }
             }
             break;
-        case IMotionEvent::ACTION_CANCEL:
-            {
+
+        case IMotionEvent::ACTION_CANCEL: {
                 SetPressed(FALSE);
                 RemoveTapCallback();
                 RemoveLongPressCallback();
             }
             break;
-        case IMotionEvent::ACTION_MOVE:
-            {
+
+        case IMotionEvent::ACTION_MOVE: {
                 DrawableHotspotChanged(x, y);
                 Float fx, fy;
                 event->GetX(&fx);
@@ -7042,9 +7063,11 @@ ECode View::OnTouchEvent(
                 }
             }
             break;
+
         default:
             break;
         }
+
         *res = TRUE;
         return NOERROR;
     }
@@ -9585,9 +9608,12 @@ ECode View::Post(
 {
     VALIDATE_NOT_NULL(res)
     if (mAttachInfo != NULL) {
+        Logger::I(TAG, " >> View::Post to mAttachInfo->mHandler: %s", TO_CSTR(action));
         mAttachInfo->mHandler->Post(action, res);
         return NOERROR;
     }
+
+    Logger::I(TAG, " >> View::Post to ViewRootImpl::GetRunQueue(): %s", TO_CSTR(action));
     // Assume that post will succeed later
     ViewRootImpl::GetRunQueue()->Post(action);
     *res = TRUE;
@@ -9676,11 +9702,13 @@ ECode View::RemoveCallbacks(
     VALIDATE_NOT_NULL(res)
     if (action != NULL) {
         if (mAttachInfo != NULL) {
+            Logger::I(TAG, " >> View::RemoveCallbacks from mAttachInfo->mHandler: %s", TO_CSTR(action));
             mAttachInfo->mHandler->RemoveCallbacks(action);
             ViewRootImpl* impl = (ViewRootImpl*)IViewRootImpl::Probe(mAttachInfo->mViewRootImpl);
             impl->mChoreographer->RemoveCallbacks(
                     IChoreographer::CALLBACK_ANIMATION, action, NULL);
         }
+            Logger::I(TAG, " >> View::RemoveCallbacks from ViewRootImpl::GetRunQueue(): %s", TO_CSTR(action));
         // Assume that post will succeed later
         ViewRootImpl::GetRunQueue()->RemoveCallbacks(action);
     }
@@ -10813,7 +10841,7 @@ ECode View::CanResolveLayoutDirection(
                 ECode ec = mParent->CanResolveLayoutDirection(res);
                 return ec;
                 //} catch (AbstractMethodError e) {
-                //    Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                //    Log.e(TAG, mParent.getClass().getSimpleName() +
                 //            " does not fully implement ViewParent", e);
                 //}
             }
@@ -11290,7 +11318,7 @@ ECode View::DispatchSaveInstanceState(
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         if (state != NULL) {
-            // Log.i(VIEW_LOG_TAG, "Freezing #" + Integer.toHexString(mID)
+            // Log.i(TAG, "Freezing #" + Integer.toHexString(mID)
             // + ": " + state);
             container->Put(mID, state.Get());
         }
@@ -11360,7 +11388,7 @@ ECode View::DispatchRestoreInstanceState(
         container->Get(mID, (IInterface**)&obj);
         IParcelable* state = IParcelable::Probe(obj);
         if (state != NULL) {
-            // Log.i(VIEW_LOG_TAG, "Restoreing #" + Integer.toHexString(mID)
+            // Log.i(TAG, "Restoreing #" + Integer.toHexString(mID)
             // + ": " + state);
             mPrivateFlags &= ~PFLAG_SAVE_STATE_CALLED;
             OnRestoreInstanceState(state);
@@ -11621,7 +11649,7 @@ ECode View::IsDrawingCacheEnabled(
  */
 // @SuppressWarnings({"UnusedDeclaration"})
 // public void OutputDirtyFlags(String indent, boolean clear, int clearMask) {
-//     Log.d(VIEW_LOG_TAG, indent + this + "             DIRTY(" + (mPrivateFlags & View.PFLAG_DIRTY_MASK) +
+//     Log.d(TAG, indent + this + "             DIRTY(" + (mPrivateFlags & View.PFLAG_DIRTY_MASK) +
 //             ") DRAWN(" + (mPrivateFlags & PFLAG_DRAWN) + ")" + " CACHE_VALID(" +
 //             (mPrivateFlags & View.PFLAG_DRAWING_CACHE_VALID) +
 //             ") INVALIDATED(" + (mPrivateFlags & PFLAG_INVALIDATED) + ")");
@@ -11950,7 +11978,7 @@ ECode View::BuildDrawingCache(
         Int64 drawingCacheSize = size;
         if (width <= 0 || height <= 0 || projectedBitmapSize > drawingCacheSize) {
             if (width > 0 && height > 0) {
-                Logger::W(VIEW_LOG_TAG, "View too large to fit into drawing cache, needs %lld bytes, only %lld available"
+                Logger::W(TAG, "View too large to fit into drawing cache, needs %lld bytes, only %lld available"
                         , projectedBitmapSize, drawingCacheSize);
             }
             DestroyDrawingCache();
@@ -14063,8 +14091,8 @@ ECode View::OnCreateDrawableState(
 
     //noinspection ConstantIfStatement
 //    if (FALSE) {
-//        Log.i(VIEW_LOG_TAG, "drawableStateIndex=" + viewStateIndex);
-//        Log.i(VIEW_LOG_TAG, toString()
+//        Log.i(TAG, "drawableStateIndex=" + viewStateIndex);
+//        Log.i(TAG, toString()
 //                + " pressed=" + ((privateFlags & PFLAG_PRESSED) != 0)
 //                + " en=" + ((mViewFlags & ENABLED_MASK) == ENABLED)
 //                + " fo=" + hasFocus()
@@ -15490,7 +15518,7 @@ ECode View::SetTag(
     // If the package id is 0x00 or 0x01, it's either an undefined package
     // or a framework id
     if (((key & 0x7FFFFFFF) >> 24) < 2) {
-        Logger::E(VIEW_LOG_TAG, "The key must be an application-specific resource id.");
+        Logger::E(TAG, "The key must be an application-specific resource id.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -15509,7 +15537,7 @@ ECode View::SetTagInternal(
    /* [in] */ IInterface* tag)
 {
    if (((key & 0x7FFFFFFF) >> 24) != 0x1) {
-        Logger::E(VIEW_LOG_TAG, "The key must be an framework-specific resource id.");
+        Logger::E(TAG, "The key must be an framework-specific resource id.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
    }
 
@@ -15581,7 +15609,7 @@ ECode View::GetTransitionName(
 
 /**
  * Prints information about this view in the log output, with the tag
- * {@link #VIEW_LOG_TAG}.
+ * {@link #TAG}.
  *
  * @hide
  */
@@ -15593,7 +15621,7 @@ ECode View::Debug()
 
 /**
  * Prints information about this view in the log output, with the tag
- * {@link #VIEW_LOG_TAG}. Each line in the output is preceded with an
+ * {@link #TAG}. Each line in the output is preceded with an
  * indentation defined by the <code>depth</code>.
  *
  * @param depth the indentation level
@@ -15614,31 +15642,31 @@ ECode View::Debug()
 //    if (tag != NULL) {
 //        output += " (tag=" + tag + ")";
 //    }
-//    Log.d(VIEW_LOG_TAG, output);
+//    Log.d(TAG, output);
 //
 //    if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
 //        output = debugIndent(depth) + " PFLAG_FOCUSED";
-//        Log.d(VIEW_LOG_TAG, output);
+//        Log.d(TAG, output);
 //    }
 //
 //    output = debugIndent(depth);
 //    output += "frame={" + mLeft + ", " + mTop + ", " + mRight
 //            + ", " + mBottom + "} scroll={" + mScrollX + ", " + mScrollY
 //            + "} ";
-//    Log.d(VIEW_LOG_TAG, output);
+//    Log.d(TAG, output);
 //
 //    if (mPaddingLeft != 0 || mPaddingTop != 0 || mPaddingRight != 0
 //            || mPaddingBottom != 0) {
 //        output = debugIndent(depth);
 //        output += "padding={" + mPaddingLeft + ", " + mPaddingTop
 //                + ", " + mPaddingRight + ", " + mPaddingBottom + "}";
-//        Log.d(VIEW_LOG_TAG, output);
+//        Log.d(TAG, output);
 //    }
 //
 //    output = debugIndent(depth);
 //    output += "mMeasureWidth=" + mMeasuredWidth +
 //            " mMeasureHeight=" + mMeasuredHeight;
-//    Log.d(VIEW_LOG_TAG, output);
+//    Log.d(TAG, output);
 //
 //    output = debugIndent(depth);
 //    if (mLayoutParams == NULL) {
@@ -15647,19 +15675,19 @@ ECode View::Debug()
 //    else {
 //        output = mLayoutParams.debug(output);
 //    }
-//    Log.d(VIEW_LOG_TAG, output);
+//    Log.d(TAG, output);
 //
 //    output = debugIndent(depth);
 //    output += "flags={";
 //    output += View.printFlags(mViewFlags);
 //    output += "}";
-//    Log.d(VIEW_LOG_TAG, output);
+//    Log.d(TAG, output);
 //
 //    output = debugIndent(depth);
 //    output += "privateFlags={";
 //    output += View.printPrivateFlags(mPrivateFlags);
 //    output += "}";
-//    Log.d(VIEW_LOG_TAG, output);
+//    Log.d(TAG, output);
 //}
 
 /**
@@ -16464,7 +16492,7 @@ ECode View::StartDrag(
 {
     VALIDATE_NOT_NULL(res)
     // if (ViewDebug.DEBUG_DRAG) {
-    //     Log.d(VIEW_LOG_TAG, "startDrag: data=" + data + " flags=" + flags);
+    //     Log.d(TAG, "startDrag: data=" + data + " flags=" + flags);
     // }
     Boolean okay = FALSE;
 
@@ -16489,7 +16517,7 @@ ECode View::StartDrag(
     }
 
     // if (ViewDebug.DEBUG_DRAG) {
-    //     Log.d(VIEW_LOG_TAG, "drag shadow: width=" + shadowSize.x + " height=" + shadowSize.y
+    //     Log.d(TAG, "drag shadow: width=" + shadowSize.x + " height=" + shadowSize.y
     //             + " shadowX=" + shadowTouchPoint.x + " shadowY=" + shadowTouchPoint.y);
     // }
     AutoPtr<ISurface> surface;
@@ -16500,7 +16528,7 @@ ECode View::StartDrag(
         AutoPtr<IBinder> token;
         ec = mAttachInfo->mSession->PrepareDrag(mAttachInfo->mWindow,
                 flags, shadowSizeX, shadowSizeY, (ISurface**)&surface, (IBinder**)&token);
-        // if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "prepareDrag returned token=" + token
+        // if (ViewDebug.DEBUG_DRAG) Log.d(TAG, "prepareDrag returned token=" + token
         //         + " surface=" + surface);
         if (FAILED(ec)) {
             break;
@@ -16542,7 +16570,7 @@ ECode View::StartDrag(
             if (FAILED(ec)) {
                 break;
             }
-            // if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "performDrag returned " + okay);
+            // if (ViewDebug.DEBUG_DRAG) Log.d(TAG, "performDrag returned " + okay);
 
             // Off and running!  Release our local surface instance; the drag
             // shadow surface is now managed by the system process.
@@ -16551,7 +16579,7 @@ ECode View::StartDrag(
     } while (0);
 
     if (FAILED(ec)) {
-        Logger::E(VIEW_LOG_TAG, "Unable to initiate drag");
+        Logger::E(TAG, "Unable to initiate drag");
         surface->Destroy();
     }
 
@@ -16619,7 +16647,7 @@ ECode View::ApplyDrawableToTransparentRegion(
     /* [in] */ IRegion* region)
 {
     if (DBG) {
-        //Log.i(VIEW_LOG_TAG, "Getting transparent region for: " + this);
+        //Log.i(TAG, "Getting transparent region for: " + this);
     }
     AutoPtr<IRegion> r;
     dr->GetTransparentRegion((IRegion**)&r);
@@ -16957,7 +16985,7 @@ ECode View::StartNestedScroll(
                     return NOERROR;
                 }
             //} catch (AbstractMethodError e) {
-            //    Log.e(VIEW_LOG_TAG, "ViewParent " + p + " does not implement interface " +
+            //    Log.e(TAG, "ViewParent " + p + " does not implement interface " +
             //            "method onStartNestedScroll", e);
                 // Allow the search upward to continue
             //}
@@ -17320,7 +17348,7 @@ ECode View::ResolveTextDirection(
                 ECode ec = mParent->IsTextDirectionResolved(&isTextDirectionResolved);
                 if (ec == (ECode)E_ABSTRACET_METHOD_ERROR) {
 
-                    /*Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                    /*Log.e(TAG, mParent.getClass().getSimpleName() +
                             " does not fully implement ViewParent", e);*/
                     mPrivateFlags2 |= PFLAG2_TEXT_DIRECTION_RESOLVED |
                             PFLAG2_TEXT_DIRECTION_RESOLVED_DEFAULT;
@@ -17340,7 +17368,7 @@ ECode View::ResolveTextDirection(
                 Int32 parentResolvedDirection;
                 ECode oc = mParent->GetTextDirection(&parentResolvedDirection);
                 if (oc == (ECode)E_ABSTRACET_METHOD_ERROR) {
-                    /*Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                    /*Log.e(TAG, mParent.getClass().getSimpleName() +
                             " does not fully implement ViewParent", e);*/
                     parentResolvedDirection = IView::TEXT_DIRECTION_LTR;
                 }
@@ -17396,7 +17424,7 @@ ECode View::CanResolveTextDirection(
             if (mParent != NULL) {
                 ECode ec = mParent->CanResolveTextDirection(res);
                 if (ec == (ECode)E_ABSTRACET_METHOD_ERROR) {
-                    /*Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                    /*Log.e(TAG, mParent.getClass().getSimpleName() +
                         " does not fully implement ViewParent", e);*/
                 }
 
@@ -17511,7 +17539,7 @@ ECode View::ResolveTextAlignment(
                 Boolean isTextAlignmentResolved;
                 ECode ec = mParent->IsTextAlignmentResolved(&isTextAlignmentResolved);
                 if (ec == (ECode)E_ABSTRACET_METHOD_ERROR) {
-                    /*Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                    /*Log.e(TAG, mParent.getClass().getSimpleName() +
                             " does not fully implement ViewParent", e);*/
                     mPrivateFlags2 |= PFLAG2_TEXT_ALIGNMENT_RESOLVED |
                             PFLAG2_TEXT_ALIGNMENT_RESOLVED_DEFAULT;
@@ -17532,7 +17560,7 @@ ECode View::ResolveTextAlignment(
 
                 ECode oc = mParent->GetTextAlignment(&parentResolvedTextAlignment);
                 if (oc == (ECode)E_ABSTRACET_METHOD_ERROR) {
-                    /*Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                    /*Log.e(TAG, mParent.getClass().getSimpleName() +
                             " does not fully implement ViewParent", e);*/
                     parentResolvedTextAlignment = IView::TEXT_ALIGNMENT_GRAVITY;
                 }
@@ -17592,7 +17620,7 @@ ECode View::CanResolveTextAlignment(
             if (mParent != NULL) {
                 ECode ec = mParent->CanResolveTextAlignment(res);
                 if (ec == (ECode)E_ABSTRACET_METHOD_ERROR) {
-                    /*Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                    /*Log.e(TAG, mParent.getClass().getSimpleName() +
                             " does not fully implement ViewParent", e);*/
                 }
             }

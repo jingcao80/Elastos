@@ -48,8 +48,7 @@ class CViewRootImplW;
 class CAccessibilityInteractionController;
 
 class ViewRootImpl
-    : public Object
-    , public View::AttachInfo::Callbacks
+    : public View::AttachInfo::Callbacks
     , public IViewRootImpl
     , public IViewParent
     , public IHardwareDrawCallbacks
@@ -233,17 +232,17 @@ private:
             /* [in] */ ILooper* looper,
             /* [in] */ IWeakReference* viewRootImpl);
 
-        CARAPI FinishInputEvent(
-            /* [in] */ IInputEvent* event,
-            /* [in] */ Boolean handled);
-
         //@Override
         CARAPI OnInputEvent(
             /* [in] */ IInputEvent* event);
 
+        //@Override
         CARAPI OnBatchedInputEventPending();
 
         CARAPI Dispose();
+
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         AutoPtr<IWeakReference> mHost;
@@ -291,7 +290,6 @@ private:
         AutoPtr<ArrayOf<IView*> > mTempViews;
         AutoPtr<ArrayOf<View::AttachInfo::InvalidateInfo*> > mTempViewRects;
 
-        Object mSelfLock;
         AutoPtr<IWeakReference> mHost;
     };
 
@@ -467,10 +465,10 @@ private:
             /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next);
 
-        CARAPI Deliver(
+        virtual CARAPI Deliver(
             /* [in] */ QueuedInputEvent* q);
 
-        CARAPI Dump(
+        virtual CARAPI Dump(
             /* [in] */ const String& prefix,
             /* [in] */ IPrintWriter* writer);
 
@@ -486,14 +484,22 @@ private:
             /* [in] */ QueuedInputEvent* q,
             /* [in] */ Int32 result);
 
-        CARAPI_(Int32) OnProcess(
+        virtual CARAPI_(Int32) OnProcess(
             /* [in] */ QueuedInputEvent* q);
 
-        CARAPI OnDeliverToNext(
+        virtual CARAPI OnDeliverToNext(
             /* [in] */ QueuedInputEvent* q);
 
         CARAPI_(Boolean) ShouldDropInputEvent(
             /* [in] */ QueuedInputEvent* q);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "InputStage";
+            return NOERROR;
+        }
 
     protected:
         static const Int32 FORWARD;
@@ -518,6 +524,13 @@ private:
             /* [in] */ const String& prefix,
             /* [in] */ IPrintWriter* writer);
 
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "AsyncInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI Defer(
             /* [in] */ QueuedInputEvent* q);
@@ -553,17 +566,24 @@ private:
         , public IInputQueueFinishedInputEventCallback
     {
     public:
+        CAR_INTERFACE_DECL()
+
         NativePreImeInputStage(
             /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next,
             /* [in] */ const String& traceCounter);
 
-        CAR_INTERFACE_DECL()
-
         CARAPI OnFinishedInputEvent(
             /* [in] */ IInterface* token,
             /* [in] */ Boolean handled);
 
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "NativePreImeInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI_(Int32) OnProcess(
             /* [in] */ QueuedInputEvent* q);
@@ -577,6 +597,13 @@ private:
             /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next);
 
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "ViewPreImeInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI_(Int32) OnProcess(
             /* [in] */ QueuedInputEvent* q);
@@ -591,17 +618,24 @@ private:
         , public IInputMethodManagerFinishedInputEventCallback
     {
     public:
+        CAR_INTERFACE_DECL()
+
         ImeInputStage(
             /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next,
             /* [in] */ const String& traceCounter);
 
-        CAR_INTERFACE_DECL()
-
         CARAPI OnFinishedInputEvent(
             /* [in] */ IInterface* token,
             /* [in] */ Boolean handled);
 
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "ImeInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI_(Int32) OnProcess(
             /* [in] */ QueuedInputEvent* q);
@@ -615,6 +649,13 @@ private:
             /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next);
 
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "EarlyPostImeInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI_(Int32) OnProcess(
             /* [in] */ QueuedInputEvent* q);
@@ -632,17 +673,24 @@ private:
         , public IInputQueueFinishedInputEventCallback
     {
     public:
+        CAR_INTERFACE_DECL()
+
         NativePostImeInputStage(
             /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next,
             /* [in] */ const String& traceCounter);
 
-        CAR_INTERFACE_DECL()
-
         CARAPI OnFinishedInputEvent(
             /* [in] */ IInterface* token,
             /* [in] */ Boolean handled);
 
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "NativePostImeInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI_(Int32) OnProcess(
             /* [in] */ QueuedInputEvent* q);
@@ -656,6 +704,13 @@ private:
             /* [in] */ ViewRootImpl* host,
             /* [in] */ InputStage* next);
 
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "ViewPostImeInputStage";
+            return NOERROR;
+        }
     protected:
         CARAPI_(Int32) OnProcess(
             /* [in] */ QueuedInputEvent* q);
@@ -944,7 +999,7 @@ public:
 
         CARAPI_(void) PostDelayed(
             /* [in] */ IRunnable* action,
-            /* [in] */ Int32 delayMillis);
+            /* [in] */ Int64 delayMillis);
 
         CARAPI_(void) RemoveCallbacks(
             /* [in] */ IRunnable* action);
@@ -962,7 +1017,7 @@ public:
             {}
 
             AutoPtr<IRunnable> mAction;
-            Int32 mDelay;
+            Int64 mDelay;
         };
 
     private:

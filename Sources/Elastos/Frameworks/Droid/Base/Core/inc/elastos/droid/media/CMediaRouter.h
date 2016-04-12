@@ -190,7 +190,7 @@ public:
         AutoPtr<IIAudioService> mAudioService;
         AutoPtr<IDisplayManager> mDisplayService;
         AutoPtr<IIMediaRouterService> mMediaRouterService;
-        static AutoPtr<Handler> mHandler;
+        static AutoPtr<IHandler> mHandler;
         List<AutoPtr<CallbackInfo> > mCallbacks; // = new CopyOnWriteArrayList<CallbackInfo>();
 
         List<AutoPtr<IMediaRouterRouteInfo> > mRoutes; // = new ArrayList<RouteInfo>();

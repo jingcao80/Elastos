@@ -269,14 +269,14 @@ ECode CMediaBrowser::LoadChildrenRunnable::Run()
     }
 
     // Check that the subscription is still subscribed.
-    AutoPtr<Subscription> subscription;
     AutoPtr<ICharSequence> csq;
     CString::New(mParentId, (ICharSequence**)&csq);
     Int32 index;
     mHost->mSubscriptions->GetIndexOfKey(csq, &index);
-    mHost->mSubscriptions->GetValueAt(index, (IInterface**)&subscription);
+    AutoPtr<IInterface> obj;
+    mHost->mSubscriptions->GetValueAt(index, (IInterface**)&obj);
 
-    if (subscription == NULL) {
+    if (obj == NULL) {
         if (DBG) {
             Logger::D(TAG, String("onLoadChildren for id that isn't subscribed id=")
                     + mParentId);
@@ -285,6 +285,7 @@ ECode CMediaBrowser::LoadChildrenRunnable::Run()
     }
 
     // Tell the app.
+    Subscription* subscription = (Subscription*)IObject::Probe(obj);
     subscription->mCallback->OnChildrenLoaded(mParentId, data);
     return NOERROR;
 }
