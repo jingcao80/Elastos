@@ -12,6 +12,7 @@
 
 using Elastos::Utility::Etl::HashMap;
 using Elastos::IO::IPrintWriter;
+using Elastos::IO::IFileDescriptor;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
@@ -20,6 +21,10 @@ using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Os::IMessenger;
+using Elastos::Droid::Wifi::ISupplicantState;
+using Elastos::Droid::Wifi::IWifiInfo;
+using Elastos::Droid::Wifi::IWifiManager;
 using Elastos::Droid::Utility::IProtocol;
 using Elastos::Droid::Internal::Utility::AsyncChannel;
 using Elastos::Droid::Internal::Utility::State;
@@ -459,13 +464,17 @@ public:
      *                       (all other states)
      */
     WifiWatchdogStateMachine(
-        /* [in] */ IContext* context);
+        /* [in] */ IContext* context,
+        /* [in] */ IMessenger* dstMessenger);
 
     static CARAPI_(AutoPtr<WifiWatchdogStateMachine>) MakeWifiWatchdogStateMachine(
-        /* [in] */ IContext* context);
+        /* [in] */ IContext* context,
+        /* [in] */ IMessenger* dstMessenger);
 
     CARAPI_(void) Dump(
-        /* [in] */ IPrintWriter* pw);
+        /* [in] */ IFileDescriptor* fd,
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ ArrayOf<String> args);
 
 private:
     CARAPI_(void) SetupNetworkReceiver();
@@ -556,12 +565,12 @@ public:
     /* Internal messages */
     static const Int32 CMD_RSSI_FETCH = BASE + 11;
 
-    static const Boolean DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED = FALSE;
+    //static const Boolean DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED = FALSE;
 
 private:
     /* STOPSHIP: Keep this configurable for debugging until ship */
-    static Boolean DBG;
-    static const String TAG;
+    static const Boolean DBG;
+    //static const String TAG;
 
     /*
      * RSSI levels as used by notification icon

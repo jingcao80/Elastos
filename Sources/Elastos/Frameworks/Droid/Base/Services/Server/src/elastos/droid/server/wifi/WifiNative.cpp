@@ -1,35 +1,39 @@
 
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/wifi/WifiNative.h"
 #include <Elastos.CoreLibrary.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringUtils.h>
-//#include <wifi.h>
+#include "elastos/core/AutoLock.h"
+#include <wifi.h>
+#include <wifi_hal.h>
 #include <stdlib.h>
 
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Wifi::P2p::IWifiP2pDevice;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Etl::List;
-using Elastos::Droid::Wifi::P2p::IWifiP2pDevice;
 
 #define WIFI_PKG_NAME "android/net/wifi/WifiNative"
 #define BUF_SIZE 256
 #define EVENT_BUF_SIZE 2048
 
-static const Boolean DBG = FALSE;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wifi {
 
-static int doCommand(const char *ifname, const char *cmd, char *replybuf, int replybuflen)
+static int doCommand(const char *cmd, char *replybuf, int replybuflen)
 {
     size_t reply_len = replybuflen - 1;
 
-    if (::wifi_command(ifname, cmd, replybuf, &reply_len) != 0) {
+    if (::wifi_command(cmd, replybuf, &reply_len) != 0) {
         return -1;
     }
     else {
@@ -44,7 +48,7 @@ static int doCommand(const char *ifname, const char *cmd, char *replybuf, int re
     }
 }
 
-static int doIntCommand(const char *ifname, const char* fmt, ...)
+static int doIntCommand(const char* fmt, ...)
 {
     char buf[BUF_SIZE];
     va_list args;
@@ -55,13 +59,13 @@ static int doIntCommand(const char *ifname, const char* fmt, ...)
         return -1;
     }
     char reply[BUF_SIZE];
-    if (doCommand(ifname, buf, reply, sizeof(reply)) != 0) {
+    if (doCommand(buf, reply, sizeof(reply)) != 0) {
         return -1;
     }
     return static_cast<int>(atoi(reply));
 }
 
-static Boolean doBooleanCommand(const char *ifname, const char* expect, const char* fmt, ...)
+static Boolean doBooleanCommand(const char* expect, const char* fmt, ...)
 {
     char buf[BUF_SIZE];
     va_list args;
@@ -72,14 +76,14 @@ static Boolean doBooleanCommand(const char *ifname, const char* expect, const ch
         return FALSE;
     }
     char reply[BUF_SIZE];
-    if (doCommand(ifname, buf, reply, sizeof(reply)) != 0) {
+    if (doCommand(buf, reply, sizeof(reply)) != 0) {
         return FALSE;
     }
     return (strcmp(reply, expect) == 0);
 }
 
 // Send a command to the supplicant, and return the reply as a String
-static String doStringCommand(const char *ifname, const char* fmt, ...)
+static String doStringCommand(const char* fmt, ...)
 {
     char buf[BUF_SIZE];
     va_list args;
@@ -90,24 +94,85 @@ static String doStringCommand(const char *ifname, const char* fmt, ...)
         return String(NULL);
     }
     char reply[4096];
-    if (doCommand(ifname, buf, reply, sizeof(reply)) != 0) {
+    if (doCommand(buf, reply, sizeof(reply)) != 0) {
         return String(NULL);
     }
     return String(reply);
 }
 
+Boolean WifiNative::DBG = FALSE;
+const  Object WifiNative::mLock;
 const Int32 WifiNative::DEFAULT_GROUP_OWNER_INTENT;
 const Int32 WifiNative::BLUETOOTH_COEXISTENCE_MODE_ENABLED;
 const Int32 WifiNative::BLUETOOTH_COEXISTENCE_MODE_DISABLED;
 const Int32 WifiNative::BLUETOOTH_COEXISTENCE_MODE_SENSE;
 
+const Int32 WifiNative::SCAN_WITHOUT_CONNECTION_SETUP;
+const Int32 WifiNative::SCAN_WITH_CONNECTION_SETUP;
+
+static AutoPtr<ILocalLog> InitLocalLog()
+{
+    return NULL;//TODO ILocalLog have not been implemented.
+}
+AutoPtr<ILocalLog> WifiNative::mLocalLog = InitLocalLog();
+Int32 WifiNative::sCmdId;
+
+String WifiNative::TAG("WifiNative-HAL");
+Int64 WifiNative::sWifiHalHandle;  /* used by JNI to save wifi_handle */
+AutoPtr<ArrayOf<Int64> > WifiNative::sWifiIfaceHandles;  /* used by JNI to save interface handles */
+Int32 WifiNative::sWlan0Index;
+Int32 WifiNative::sP2p0Index;
+Boolean WifiNative::sHalIsStarted = FALSE;
+Object WifiNative::mClassLock;
+Int32 WifiNative::WIFI_SCAN_BUFFER_FULL;
+Int32 WifiNative::WIFI_SCAN_COMPLETE;
+Int32 WifiNative::sScanCmdId;
+AutoPtr<ScanEventHandler> WifiNative::sScanEventHandler;
+AutoPtr<ScanSettings> WifiNative::sScanSettings;
+Int32 WifiNative::sHotlistCmdId;
+AutoPtr<HotlistEventHandler> WifiNative::sHotlistEventHandler;
+AutoPtr<SignificantWifiChangeEventHandler> WifiNative::sSignificantWifiChangeHandler;
+Int32 WifiNative::sSignificantWifiChangeCmdId;
+AutoPtr<RttEventHandler> WifiNative::sRttEventHandler;
+Int32 WifiNative::sRttCmdId;
+
+WifiNative::MonitorThread::MonitorThread(
+    /* [in] */ WifiNative* owner)
+    :mOwner(owner)
+{
+}
+
+ECode WifiNative::MonitorThread::Run()
+{
+    Logger::I(TAG, "Waiting for HAL events mWifiHalHandle=%ld", sWifiHalHandle);
+    mOwner->WaitForHalEventNative();
+    return NOERROR;
+}
+
 WifiNative::WifiNative(
-    /* [in] */ const String& iface)
-    : mInterface(iface)
+    /* [in] */ const String& interfaceName)
+    : mInterfaceName(interfaceName)
     , mSuspendOptEnabled(FALSE)
 {
-    mTAG = String("WifiNative-") + iface;
+    mTAG = String("WifiNative-") + mInterfaceName;
+    if (!interfaceName.Equals("p2p0")) {
+        mInterfacePrefix = String("IFNAME=") + interfaceName + String(" ");
+    } else {
+        // commands for p2p0 interface don't need prefix
+        mInterfacePrefix = "";
+    }
 }
+
+void WifiNative::EnableVerboseLogging(
+    /* [in] */ Int32 verbose)
+{
+    if (verbose > 0) {
+        DBG = TRUE;
+    } else {
+        DBG = FALSE;
+    }
+}
+
 
 Boolean WifiNative::LoadDriver()
 {
@@ -136,23 +201,32 @@ Boolean WifiNative::KillSupplicant(
     return (::wifi_stop_supplicant(p2pSupported) == 0);
 }
 
-Boolean WifiNative::ConnectToSupplicant(
-    /* [in] */ const String& iface)
+Int32 WifiNative::GetNewCmdIdLocked()
 {
-    return (::wifi_connect_to_supplicant(iface.string()) == 0);
+    return sCmdId++;
 }
 
-void WifiNative::CloseSupplicantConnection(
-    /* [in] */ const String& iface)
+void WifiNative::LocalLog(
+    /* [in] */ const String& s)
 {
-    ::wifi_close_supplicant_connection(iface.string());
+    if (mLocalLog != NULL)
+        mLocalLog->Log(mInterfaceName + String(": ") + s);
 }
 
-String WifiNative::WaitForEvent(
-    /* [in] */ const String& iface)
+Boolean WifiNative::ConnectToSupplicantNative()
+{
+    return (::wifi_connect_to_supplicant() == 0);
+}
+
+void WifiNative::CloseSupplicantConnectionNative()
+{
+    ::wifi_close_supplicant_connection();
+}
+
+String WifiNative::WaitForEventNative()
 {
     char buf[EVENT_BUF_SIZE];
-    int nread = ::wifi_wait_for_event(iface.string(), buf, sizeof buf);
+    int nread = ::wifi_wait_for_event(buf, sizeof buf);
     if (nread > 0) {
         return String(buf);
     }
@@ -161,51 +235,57 @@ String WifiNative::WaitForEvent(
     }
 }
 
-Boolean WifiNative::DoBooleanCommand(
-    /* [in] */ const String& iface,
+Boolean WifiNative::DoBooleanCommandNative(
     /* [in] */ const String& command)
 {
     if (command.IsNull()) {
         return FALSE;
     }
 
-    return doBooleanCommand(iface.string(), "OK", "%s", command.string());
+    return doBooleanCommand("OK", "%s", command.string());
 }
 
-Int32 WifiNative::DoIntCommand(
-    /* [in] */ const String& iface,
+Int32 WifiNative::DoIntCommandNative(
     /* [in] */ const String& command)
 {
     if (command.IsNull()) {
         return -1;
     }
 
-    return doIntCommand(iface.string(), "%s", command.string());
+    return doIntCommand("%s", command.string());
 }
 
-String WifiNative::DoStringCommand(
-    /* [in] */ const String& iface,
+String WifiNative::DoStringCommandNative(
     /* [in] */ const String& command)
 {
     if (command.IsNull()) {
         return String(NULL);
     }
 
-    return doStringCommand(iface.string(), "%s", command.string());
+    return doStringCommand("%s", command.string());
+}
+
+AutoPtr<ILocalLog> WifiNative::GetLocalLog()
+{
+    return mLocalLog;
 }
 
 Boolean WifiNative::ConnectToSupplicant()
 {
-    return ConnectToSupplicant(mInterface);
+    // No synchronization necessary .. it is implemented in WifiMonitor
+    LocalLog(mInterfacePrefix + "connectToSupplicant");
+    return ConnectToSupplicantNative();
 }
 
 void WifiNative::CloseSupplicantConnection()
 {
-    CloseSupplicantConnection(mInterface);
+    LocalLog(mInterfacePrefix + "closeSupplicantConnection");
+    CloseSupplicantConnectionNative();
 }
 
 String WifiNative::WaitForEvent()
 {
+    // No synchronization necessary .. it is implemented in WifiMonitor
     return WaitForEvent(mInterface);
 }
 
@@ -213,24 +293,71 @@ Boolean WifiNative::DoBooleanCommand(
     /* [in] */ const String& command)
 {
     if (DBG) Logger::D(mTAG, "doBoolean: [%s]", command.string());
-    return DoBooleanCommand(mInterface, command);
+    {
+        AutoLock lock(mLock);
+        Int32 cmdId = GetNewCmdIdLocked();
+        String toLog = StringUtils::Int32ToString(cmdId) + ":" + mInterfacePrefix + command;
+        Boolean result = DoBooleanCommandNative(mInterfacePrefix + command);
+        LocalLog(toLog + " -> " + StringUtils::BooleanToString(result));
+        if (DBG) Logger::D(mTAG, command + ": returned " + StringUtils::BooleanToString(result));
+        return result;
+    }
 }
 
 Int32 WifiNative::DoIntCommand(
     /* [in] */ const String& command)
 {
     if (DBG) Logger::D(mTAG, "doInt: [%s]", command.string());
-    return DoIntCommand(mInterface, command);
+    {
+        AutoLock lock(mLock);
+        Int32 cmdId = GetNewCmdIdLocked();
+        String toLog = StringUtils::Int32ToString(cmdId) + ":" + mInterfacePrefix + command;
+        Int32 result = DoIntCommandNative(mInterfacePrefix + command);
+        LocalLog(toLog + " -> " + result);
+        if (DBG) Logger::D(mTAG, String("   returned ") + StringUtils::Int32ToString(result));
+        return result;
+    }
 }
 
 String WifiNative::DoStringCommand(
     /* [in] */ const String& command)
 {
     if (DBG) {
-        if (!command.Equals("CMD_RSSI_POLL") && !command.Equals("SIGNAL_POLL"))
+        //GET_NETWORK commands flood the logs
+        if (!command.StartWith("GET_NETWORK")) {
             Logger::D(mTAG, "doString: [%s]", command.string());
+        }
     }
-    return DoStringCommand(mInterface, command);
+    {
+        AutoLock lock(mLock);
+        Int32 cmdId = GetNewCmdIdLocked();
+        String toLog = StringUtils::Int32ToString(cmdId) + ":" + mInterfacePrefix + command;
+        String result = DoStringCommandNative(mInterfacePrefix + command);
+        if (result.IsNull()) {
+            if (DBG) Logger::D(mTAG, "doStringCommandNative no result");
+        } else {
+            if (!command.StartWith("STATUS-")) {
+                LocalLog(toLog + " -> " + result);
+            }
+            if (DBG) Logger::D(mTAG, "   returned " + result);//.replace("\n", " "));
+        }
+        return result;
+    }
+}
+
+String WifiNative::DoStringCommandWithoutLogging(
+    /* [in] */ const String& command)
+{
+    if (DBG) {
+        //GET_NETWORK commands flood the logs
+        if (!command.StartWith("GET_NETWORK")) {
+            Logger::D(mTAG, "doString: [%s]", command.string());
+        }
+    }
+    {
+        AutoLock lock(mLock);
+        return DoStringCommandNative(mInterfacePrefix + command);
+    }
 }
 
 Boolean WifiNative::Ping()
@@ -239,9 +366,33 @@ Boolean WifiNative::Ping()
     return (!pong.IsNull() && pong.Equals("PONG"));
 }
 
-Boolean WifiNative::Scan()
+void WifiNative::SetSupplicantLogLevel(
+    /* [in] */ const String& level)
 {
-   return DoBooleanCommand(String("SCAN"));
+    DoStringCommand(String("LOG_LEVEL ") + level);
+}
+
+String WifiNative::GetFreqCapability()
+{
+    return DoStringCommand(String("GET_CAPABILITY freq"));
+}
+
+Boolean WifiNative::Scan(
+    /* [in] */ Int32 type,
+    /* [in] */ const String& freqList)
+{
+    if (type == SCAN_WITHOUT_CONNECTION_SETUP) {
+        if (freqList.IsNull()) return DoBooleanCommand(String("SCAN TYPE=ONLY"));
+        else
+            return DoBooleanCommand(String("SCAN TYPE=ONLY freq=") + freqList);
+    } else if (type == SCAN_WITH_CONNECTION_SETUP) {
+        if (freqList.IsNull()) return DoBooleanCommand(String("SCAN"));
+        else
+            return DoBooleanCommand(String("SCAN freq=") + freqList);
+    } else {
+        //throw new IllegalArgumentException("Invalid scan type");
+        Logger::E(mTAG, "WifiNative::Scan Invalid scan type");
+    }
 }
 
 Boolean WifiNative::SetScanMode(
@@ -296,7 +447,7 @@ String WifiNative::GetNetworkVariable(
     command.AppendInt32(netId);
     command.Append(" ");
     command.AppendString(name);
-    return DoStringCommand(command.ToString());
+    return DoStringCommandWithoutLogging(command.ToString());
 }
 
 Boolean WifiNative::RemoveNetwork(
@@ -305,10 +456,25 @@ Boolean WifiNative::RemoveNetwork(
     return DoBooleanCommand(String("REMOVE_NETWORK ") + StringUtils::Int32ToString(netId));
 }
 
+void WifiNative::LogDbg(
+    /* [in] */ const String& debug)
+{
+    //long now = SystemClock.elapsedRealtimeNanos();
+    //String ts = String.format("[%,d us] ", now/1000);
+    //Log.e("WifiNative: ", ts+debug+ " stack:"
+    //        + Thread.currentThread().getStackTrace()[2].getMethodName() +" - "
+    //        + Thread.currentThread().getStackTrace()[3].getMethodName() +" - "
+    //        + Thread.currentThread().getStackTrace()[4].getMethodName() +" - "
+    //        + Thread.currentThread().getStackTrace()[5].getMethodName()+" - "
+    //        + Thread.currentThread().getStackTrace()[6].getMethodName());
+}
+
 Boolean WifiNative::EnableNetwork(
     /* [in] */ Int32 netId,
     /* [in] */ Boolean disableOthers)
 {
+    if (DBG) LogDbg(String("enableNetwork nid=") + StringUtils::Int32ToString(netId)
+                            + " disableOthers=" + StringUtils::BooleanToString(disableOthers));
     if (disableOthers) {
         return DoBooleanCommand(String("SELECT_NETWORK ") + StringUtils::Int32ToString(netId));
     }
@@ -320,27 +486,41 @@ Boolean WifiNative::EnableNetwork(
 Boolean WifiNative::DisableNetwork(
     /* [in] */ Int32 netId)
 {
+    if (DBG) LogDbg(String("disableNetwork nid=") + StringUtils::Int32ToString(netId));
     return DoBooleanCommand(String("DISABLE_NETWORK ") + StringUtils::Int32ToString(netId));
 }
 
 Boolean WifiNative::Reconnect()
 {
+    if (DBG) LogDbg(String("RECONNECT "));
     return DoBooleanCommand(String("RECONNECT"));
 }
 
 Boolean WifiNative::Reassociate()
 {
+    if (DBG) LogDbg(String("REASSOCIATE "));
     return DoBooleanCommand(String("REASSOCIATE"));
 }
 
 Boolean WifiNative::Disconnect()
 {
+    if (DBG) LogDbg(String("DISCONNECT "));
     return DoBooleanCommand(String("DISCONNECT"));
 }
 
 String WifiNative::Status()
 {
-    return DoStringCommand(String("STATUS"));
+    return Status(FALSE);
+}
+
+String WifiNative::Status(
+    /* [in] */ Boolean noEvent)
+{
+    if (noEvents) {
+        return DoStringCommand(String("STATUS-NO_EVENTS"));
+    } else {
+        return DoStringCommand(String("STATUS"));
+    }
 }
 
 String WifiNative::GetMacAddress()
@@ -355,9 +535,63 @@ String WifiNative::GetMacAddress()
     return String(NULL);
 }
 
-String WifiNative::ScanResults()
+String WifiNative::ScanResults(
+    /* [in] */ Int32 sid)
 {
-    return DoStringCommand(String("BSS RANGE=ALL MASK=0x1986"));
+    return DoStringCommandWithoutLogging(String("BSS RANGE=") + StringUtils::Int32ToString(sid) + "- MASK=0x21987");
+}
+
+String WifiNative::ScanResult(
+    /* [in] */ const String& bssid)
+{
+    return DoStringCommand(String("BSS ") + bssid);
+}
+
+String WifiNative::SetBatchedScanSettings(
+    /* [in] */ IBatchedScanSettings* settings)
+{
+    if (settings == NULL) {
+        return DoStringCommand(String("DRIVER WLS_BATCHING STOP"));
+    }
+    Int32 scanIntervalSec;
+    settings->GetScanIntervalSec(&scanIntervalSec);
+    Int32 scansPerBatch;
+    settings->GetMaxScansPerBatch(&scansPerBatch);
+    String cmd = String("DRIVER WLS_BATCHING SET SCANFREQ=") + StringUtils::Int32ToString(scanIntervalSec);
+    cmd += " MSCAN=" + StringUtils::Int32ToString(scansPerBatch);
+    Int32 maxApPerScan;
+    settings->GetMaxApPerScan(&maxApPerScan);
+    if (maxApPerScan != IBatchedScanSettings::UNSPECIFIED) {
+        cmd += " BESTN=" + maxApPerScan;
+    }
+    AutoPtr<ICollection> channelSet;
+    settings->GetChannelSet((ICollection**)&channelSet);
+    Boolean isEmpty;
+    if (channelSet != NULL && !(channelSet->IsEmpty(&isEmpty), isEmpty)) {
+        cmd += " CHANNEL=<";
+        Int32 i = 0;
+        AutoPtr<ArrayOf<IInterface*> > array;
+        channelSet->ToArray((ArrayOf<IInterface*>**)&array);
+        Int32 size = array->GetLength();
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> obj = (*array)[i];
+            String channel;
+            ICharSequence::Probe(obj)->ToString(&channel);
+            cmd += (i > 0 ? "," : "") + channel;
+        }
+        cmd += ">";
+    }
+    Int32 maxApForDistance;
+    settings->GetMaxApForDistance(&maxApForDistance);
+    if (maxApForDistance != IBatchedScanSettings::UNSPECIFIED) {
+        cmd += " RTT=" + maxApForDistance;
+    }
+    return DoStringCommand(cmd);
+}
+
+String WifiNative::GetBatchedScanResults()
+{
+    return DoStringCommand(String("DRIVER WLS_BATCHING GET"));
 }
 
 Boolean WifiNative::StartDriver()
@@ -438,16 +672,14 @@ Boolean WifiNative::SetBluetoothCoexistenceScanMode(
     }
 }
 
-Boolean WifiNative::SaveConfig()
+void WifiNative::EnableSaveConfig()
 {
-    // Make sure we never write out a value for AP_SCAN other than 1
-    return DoBooleanCommand(String("AP_SCAN 1")) && DoBooleanCommand(String("SAVE_CONFIG"));
+    DoBooleanCommand(String("SET update_config 1"));
 }
 
-Boolean WifiNative::SetScanResultHandling(
-    /* [in] */ Int32 mode)
+Boolean WifiNative::SaveConfig()
 {
-    return DoBooleanCommand(String("AP_SCAN ") + StringUtils::Int32ToString(mode));
+    return DoBooleanCommand(String("SAVE_CONFIG"));
 }
 
 Boolean WifiNative::AddToBlacklist(
@@ -465,8 +697,9 @@ Boolean WifiNative::ClearBlacklist()
 Boolean WifiNative::SetSuspendOptimizations(
     /* [in] */ Boolean enabled)
 {
-    if (mSuspendOptEnabled == enabled) return TRUE;
+    //if (mSuspendOptEnabled == enabled) return TRUE;
     mSuspendOptEnabled = enabled;
+    Logger::E("native", "do suspend %d", enabled);
     if (enabled) {
         return DoBooleanCommand(String("DRIVER SETSUSPENDMODE 1"));
     }
@@ -478,17 +711,28 @@ Boolean WifiNative::SetSuspendOptimizations(
 Boolean WifiNative::SetCountryCode(
     /* [in] */ const String& countryCode)
 {
-    return DoBooleanCommand(String("DRIVER COUNTRY ") + countryCode);
+    return DoBooleanCommand(String("DRIVER COUNTRY ") + countryCode/*.toUpperCase(Locale.ROOT)*/);
 }
 
-void WifiNative::EnableBackgroundScan(
+Boolean WifiNative::EnableBackgroundScan(
     /* [in] */ Boolean enable)
 {
     if (enable) {
-        DoBooleanCommand(String("SET pno 1"));
+        Logger::E(mTAG, "doBoolean: enable");
+        return DoBooleanCommand(String("SET pno 1"));
     }
     else {
-        DoBooleanCommand(String("SET pno 0"));
+        Logger::E(mTAG, "doBoolean: disable");
+        return DoBooleanCommand(String("SET pno 0"));
+    }
+}
+
+void WifiNative::EnableAutoConnect(
+    /* [in] */ Boolean enable) {
+    if (enable) {
+        DoBooleanCommand(String("STA_AUTOCONNECT 1"));
+    } else {
+        DoBooleanCommand(String("STA_AUTOCONNECT 0"));
     }
 }
 
@@ -498,14 +742,30 @@ void WifiNative::SetScanInterval(
     DoBooleanCommand(String("SCAN_INTERVAL ") + StringUtils::Int32ToString(scanInterval));
 }
 
+void WifiNative::StartTdls(
+    /* [in] */ const String& macAddr,
+    /* [in] */ Boolean enable)
+{
+    if (enable) {
+        DoBooleanCommand(String("TDLS_DISCOVER ") + macAddr);
+        DoBooleanCommand(String("TDLS_SETUP ") + macAddr);
+    } else {
+        DoBooleanCommand(String("TDLS_TEARDOWN ") + macAddr);
+    }
+}
+
 String WifiNative::SignalPoll()
 {
-    return DoStringCommand(String("SIGNAL_POLL"));
+    return DoStringCommandWithoutLogging(String("SIGNAL_POLL"));
 }
 
 String WifiNative::PktcntPoll()
 {
     return DoStringCommand(String("PKTCNT_POLL"));
+}
+
+void WifiNative::bssFlush() {
+    DoBooleanCommand(String("BSS_FLUSH 0"));
 }
 
 Boolean WifiNative::StartWpsPbc(
@@ -523,16 +783,19 @@ Boolean WifiNative::StartWpsPbc(
     /* [in] */ const String& iface,
     /* [in] */ const String& bssid)
 {
-    if (bssid.IsNullOrEmpty()) {
-        return DoBooleanCommand(String("WPS_PBC interface=") + iface);
-    }
-    else {
-        StringBuilder command;
-        command.Append("WPS_PBC interface=");
-        command.AppendString(iface);
-        command.Append(" ");
-        command.AppendString(bssid);
-        return DoBooleanCommand(command.ToString());
+    {
+        AutoLock lock(mLock);
+        if (bssid.IsNullOrEmpty()) {
+            return DoBooleanCommandNative(String("IFNAME=") + iface + " WPS_PBC");
+        }
+        else {
+            StringBuilder command;
+            command.Append("IFNAME=");
+            command.AppendString(iface);
+            command.Append(" WPS_PBC");
+            command.AppendString(bssid);
+            return DoBooleanCommandNative(command.ToString());
+        }
     }
 }
 
@@ -548,12 +811,15 @@ Boolean WifiNative::StartWpsPinKeypad(
     /* [in] */ const String& pin)
 {
     if (pin.IsNullOrEmpty()) return FALSE;
-    StringBuilder command;
-    command.Append("WPS_PIN interface=");
-    command.AppendString(iface);
-    command.Append(" any ");
-    command.AppendString(pin);
-    return DoBooleanCommand(command.ToString());
+    {
+        AutoLock lock(mLock);
+        StringBuilder command;
+        command.Append("IFNAME=");
+        command.AppendString(iface);
+        command.Append(" WPS_PIN any ");
+        command.AppendString(pin);
+        return DoBooleanCommand(command.ToString());
+    }
 }
 
 String WifiNative::StartWpsPinDisplay(
@@ -571,20 +837,44 @@ String WifiNative::StartWpsPinDisplay(
     /* [in] */ const String& iface,
     /* [in] */ const String& bssid)
 {
-    if (bssid.IsNullOrEmpty()) {
-        StringBuilder command;
-        command.Append("WPS_PIN interface=");
-        command.AppendString(iface);
-        command.Append(" any");
-        return DoStringCommand(command.ToString());
+    {
+        AutoLock lock(mLock);
+        if (bssid.IsNullOrEmpty()) {
+            StringBuilder command;
+            command.Append("IFNAME=");
+            command.AppendString(iface);
+            command.Append(" WPS_PIN any");
+            return DoStringCommandNative(command.ToString());
+        }
+        else {
+            StringBuilder command;
+            command.Append("IFNAME=");
+            command.AppendString(iface);
+            command.Append(" WPS_PIN ");
+            command.AppendString(bssid);
+            return DoStringCommandNative(command.ToString());
+        }
     }
-    else {
-        StringBuilder command;
-        command.Append("WPS_PIN interface=");
-        command.AppendString(iface);
-        command.Append(" ");
-        command.AppendString(bssid);
-        return DoStringCommand(command.ToString());
+}
+
+Boolean WifiNative::SetExternalSim(
+    /* [in] */ Boolean external)
+{
+    {
+        AutoLock lock(mLock);
+        String value = external ? String("1") : String("0");
+        Logger::D(TAG, "Setting external_sim to %s", value.string());
+        return DoBooleanCommand(String("SET external_sim ") + value);
+    }
+}
+
+Boolean WifiNative::SimAuthResponse(
+    /* [in] */ Int32 id,
+    /* [in] */ const String& response)
+{
+    {
+        AutoLock lock(mLock);
+        return DoBooleanCommand(String("CTRL-RSP-SIM-") + StringUtils::Int32ToString(id) + ":GSM-AUTH" + response);
     }
 }
 
@@ -613,11 +903,11 @@ Boolean WifiNative::SetPersistentReconnect(
     return DoBooleanCommand(String("SET persistent_reconnect ") + StringUtils::Int32ToString(value));
 }
 
-Boolean WifiNative::SetGroupOwnerPsk(
-    /* [in] */ const String& name)
-{
-    return DoBooleanCommand(String("SET p2p_go_swpsk ") + name);
-}
+//Boolean WifiNative::SetGroupOwnerPsk(
+//    /* [in] */ const String& name)
+//{
+//    return DoBooleanCommand(String("SET p2p_go_swpsk ") + name);
+//}
 
 Boolean WifiNative::SetDeviceName(
     /* [in] */ const String& name)
@@ -671,12 +961,15 @@ Boolean WifiNative::SetP2pGroupIdle(
     /* [in] */ const String& iface,
     /* [in] */ Int32 time)
 {
-    StringBuilder command;
-    command.Append("SET interface=");
-    command.AppendString(iface);
-    command.Append(" p2p_group_idle ");
-    command.AppendInt32(time);
-    return DoBooleanCommand(command.ToString());
+    {
+        AutoLock lock(mLock);
+        StringBuilder command;
+        command.Append("IFNAME=");
+        command.AppendString(iface);
+        command.Append(" SET p2p_group_idle ");
+        command.AppendInt32(time);
+        return DoBooleanCommandNative(command.ToString());
+    }
 }
 
 void WifiNative::SetPowerSave(
@@ -694,19 +987,22 @@ Boolean WifiNative::SetP2pPowerSave(
     /* [in] */ const String& iface,
     /* [in] */ Boolean enabled)
 {
-    if (enabled) {
-        StringBuilder command;
-        command.Append("P2P_SET interface=");
-        command.AppendString(iface);
-        command.Append(" ps 1");
-        return DoBooleanCommand(String("P2P_SET interface=") + iface + String(" ps 1"));
-    }
-    else {
-        StringBuilder command;
-        command.Append("P2P_SET interface=");
-        command.AppendString(iface);
-        command.Append(" ps 0");
-        return DoBooleanCommand(String("P2P_SET interface=") + iface + String(" ps 0"));
+    {
+        AutoLock lock(mLock);
+        if (enabled) {
+            StringBuilder command;
+            command.Append("P2P_SET interface=");
+            command.AppendString(iface);
+            command.Append(" ps 1");
+            return DoBooleanCommandNative(String("IFNAME=") + iface + String(" P2P_SET ps 1"));
+        }
+        else {
+            StringBuilder command;
+            command.Append("P2P_SET interface=");
+            command.AppendString(iface);
+            command.Append(" ps 0");
+            return DoBooleanCommandNative(String("IFNAME=") + iface + String(" P2P_SET ps 0"));
+        }
     }
 }
 
@@ -759,6 +1055,44 @@ Boolean WifiNative::P2pListen(
         return P2pListen();
     }
     return DoBooleanCommand(String("P2P_LISTEN ") + StringUtils::Int32ToString(timeout));
+}
+
+Boolean WifiNative::P2pExtListen(
+    /* [in] */ Boolean enable,
+    /* [in] */ Int32 period,
+    /* [in] */ Int32 interval)
+{
+    if (enable && interval < period) {
+        return FALSE;
+    }
+    return DoBooleanCommand(String("P2P_EXT_LISTEN")
+            + (enable ? (String(" ") + StringUtils::Int32ToString(period) + " " + interval) : ""));
+}
+
+Boolean WifiNative::P2pSetChannel(
+    /* [in] */ Int32 lc,
+    /* [in] */ Int32 oc)
+{
+    if (DBG) Logger::D(mTAG, "p2pSetChannel: lc=%d, oc=%d", lc, oc);
+
+    if (lc >=1 && lc <= 11) {
+        if (!DoBooleanCommand(String("P2P_SET listen_channel ") + StringUtil::Int32ToString(lc))) {
+            return FALSE;
+        }
+    } else if (lc != 0) {
+        return FALSE;
+    }
+
+    if (oc >= 1 && oc <= 165 ) {
+        Int32 freq = (oc <= 14 ? 2407 : 5000) + oc * 5;
+        return DoBooleanCommand(String("P2P_SET disallow_freq 1000-")
+                + StringUtil::Int32ToString(freq - 5) + "," + StringUtil::Int32ToString(freq + 5) + "-6000");
+    } else if (oc == 0) {
+        /* oc==0 disables "P2P_SET disallow_freq" (enables all freqs) */
+        return DoBooleanCommand(String("P2P_SET disallow_freq \"\""));
+    }
+
+    return FALSE;
 }
 
 Boolean WifiNative::P2pFlush()
@@ -893,7 +1227,10 @@ Boolean WifiNative::P2pGroupRemove(
     /* [in] */ const String& iface)
 {
     if (iface.IsNullOrEmpty()) return FALSE;
-    return DoBooleanCommand(String("P2P_GROUP_REMOVE ") + iface);
+    {
+        AutoLock lock(mLock);
+        return DoBooleanCommandNative(String("IFNAME=") + iface + " P2P_GROUP_REMOVE " + iface);
+    }
 }
 
 Boolean WifiNative::P2pReject(
@@ -953,22 +1290,36 @@ String WifiNative::P2pGetSsid(
 
 String WifiNative::P2pGetDeviceAddress()
 {
-    String status = Status();
-    if (status.IsNull()) return String("");
+    Logger::D(TAG, "p2pGetDeviceAddress");
 
-    AutoPtr< ArrayOf<String> > tokens;
-    StringUtils::Split(status, String("\n"), (ArrayOf<String>**)&tokens);
-    if (tokens == NULL) return String("");
-    for (Int32 i = 0; i < tokens->GetLength(); ++i) {
-        String token = (*tokens)[i];
-        if (token.StartWith("p2p_device_address=")) {
-            AutoPtr< ArrayOf<String> > nameValue;
-            StringUtils::Split(token, String("="), (ArrayOf<String>**)&nameValue);
-            if (nameValue->GetLength() != 2) break;
-            return (*nameValue)[1];
+    String status;
+    /* Explicitly calling the API without IFNAME= prefix to take care of the devices that
+       don't have p2p0 interface. Supplicant seems to be returning the correct address anyway. */
+
+    {
+        AutoLock lock(mLock);
+        status = doStringCommandNative("STATUS");
+    }
+
+    String result("");
+    if (!status.IsNull()) {
+        AutoPtr< ArrayOf<String> > tokens;
+        StringUtils::Split(status, String("\n"), (ArrayOf<String>**)&tokens);
+        if (tokens == NULL) return String("");
+        for (Int32 i = 0; i < tokens->GetLength(); ++i) {
+            String token = (*tokens)[i];
+            if (token.StartWith("p2p_device_address=")) {
+                AutoPtr< ArrayOf<String> > nameValue;
+                StringUtils::Split(token, String("="), (ArrayOf<String>**)&nameValue);
+                if (nameValue->GetLength() != 2)
+                    break;
+                result = (*nameValue)[1];
+            }
         }
     }
-    return String("");
+
+    Logger::D(TAG, "p2pGetDeviceAddress returning %s", result.string());
+    return result;
 }
 
 Int32 WifiNative::GetGroupCapability(
@@ -1087,7 +1438,7 @@ Boolean WifiNative::P2pServiceDel(
      * P2P_SERVICE_DEL bonjour <query hexdump>
      * P2P_SERVICE_DEL upnp <version hex> <service>
      */
-assert(0);
+    assert(0);
 
     AutoPtr<ArrayOf<String> > list;
     servInfo->GetSupplicantQueryList((ArrayOf<String>**)&list);
@@ -1144,6 +1495,1267 @@ Boolean WifiNative::P2pServDiscCancelReq(
     /* [in] */ const String& id)
 {
     return DoBooleanCommand(String("P2P_SERV_DISC_CANCEL_REQ ") + id);
+}
+
+void WifiNative::SetMiracastMode(
+    /* [in] */ Int32 mode)
+{
+    // Note: optional feature on the driver. It is ok for this to fail.
+    DoBooleanCommand(String("DRIVER MIRACAST ") + StringUtils::Int32ToString(mode));
+}
+
+Boolean WifiNative::GetModeCapability(
+    /* [in] */ const String& mode)
+{
+    String ret = DoStringCommand("GET_CAPABILITY modes");
+    if (!TextUtils::IsEmpty(ret)) {
+        AutoPtr<ArrayOf<String> > tokens;
+        StringUtils::Split(ret, " ", (ArrayOf<String>**)&tokens);
+
+        for (Int32 i = 0; i < tokens->GetLength(); ++i) {
+            String t = (*tokens)[i];
+            if (t.Compare(mode) == 0)
+                return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+Boolean WifiNative::FetchAnqp(
+    /* [in] */ const String& bssid,
+    /* [in] */ const String& subtypes)
+{
+    return DoBooleanCommand(String("ANQP_GET ") + bssid + " " + subtypes);
+}
+
+Boolean WifiNative::SetMode(
+    /* [in] */ Int32 mode)
+{
+    return (::wifi_set_mode(type) == 0);
+}
+
+Boolean WifiNative::StartHalNative()
+{
+    wifi_handle halHandle = (halHandle)sWifiHalHandle;
+    if (halHandle == NULL) {
+        wifi_error res = wifi_initialize(&halHandle);
+        if (res == WIFI_SUCCESS) {
+            //setStaticLongField(env, cls, WifiHandleVarName, (jlong)halHandle);
+            sWifiHalHandle = (Int64)(halHandle);
+            Logger::D("Did set static halHandle = %p", halHandle);
+        }
+        //env->GetJavaVM(&mVM);
+        //mCls = (jclass) env->NewGlobalRef(cls);
+        Logger::D("halHandle = %p", halHandle);
+        return res == WIFI_SUCCESS;
+    } else {
+        return TRUE;
+    }
+}
+
+static void elastos_net_wifi_hal_cleaned_up_handler(wifi_handle handle) {
+    Logger::D("In wifi cleaned up handler");
+    sWifiHalHandle = 0;
+}
+
+void WifiNative::StopHalNative()
+{
+    Logger::D("In wifi stop Hal");
+    wifi_handle halHandle = (halHandle)sWifiHalHandle;
+    wifi_cleanup(halHandle, elastos_net_wifi_hal_cleaned_up_handler);
+}
+
+void WifiNative::WaitForHalEventNative()
+{
+    //ALOGD("waitForHalEvents called, vm = %p, obj = %p, env = %p", mVM, mCls, env);
+    wifi_handle halHandle = (halHandle)sWifiHalHandle;
+    wifi_event_loop(halHandle);
+}
+
+Boolean WifiNative::StartHal() {
+
+    AutoLock classLock(mClassLock);
+    Logger::I(TAG, "startHal");
+    {
+        AutoLock lock(mLock);
+        if (sHalIsStarted)
+            return TRUE;
+        if (StartHalNative()) {
+            GetInterfaces();
+            AutoPtr<MonitorThread> mt = new MonitorThread(this);
+            mt->Start();
+            sHalIsStarted = TRUE;
+            return TRUE;
+        } else {
+            Logger::I(TAG, "Could not start hal");
+            sHalIsStarted = FALSE;
+            return FALSE;
+        }
+    }
+}
+
+void WifiNative::StopHal()
+{
+    StopHalNative();
+}
+
+Int32 WifiNative::GetInterfacesNative()
+{
+    Int32 n = 0;
+    wifi_handle halHandle = (halHandle)sWifiHalHandle;
+    wifi_interface_handle *ifaceHandles = NULL;
+    Int32 result = wifi_get_ifaces(halHandle, &n, &ifaceHandles);
+    if (result < 0) {
+        return result;
+    }
+
+    if (n < 0) {
+        Logger::E("WifiNative::GetInterfacesNative", "android_net_wifi_getInterfaces no interfaces");
+        return 0;
+    }
+
+    if (ifaceHandles == NULL) {
+        //THROW(env, "android_net_wifi_getInterfaces null interface array");
+        Logger::E("WifiNative::GetInterfacesNative", "android_net_wifi_getInterfaces null interface array");
+        return 0;
+    }
+
+    if (n > 8) {
+        //THROW(env, "Too many interfaces");
+        Logger::E("WifiNative::GetInterfacesNative", "Too many interfaces");
+        return 0;
+    }
+
+    sWifiIfaceHandles = ArrayOf<Int64>::Alloc(n);
+
+    for (int i = 0; i < n; i++) {
+        (sWifiIfaceHandles)[i] = reinterpret_cast<Int64>(ifaceHandles[i]);
+    }
+
+    return (result < 0) ? result : n;
+}
+
+Int32 WifiNative::GetInterfaces() {
+    AutoLock classLock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        if (sWifiIfaceHandles == NULL) {
+            Int32 num = GetInterfacesNative();
+            Int32 wifi_num = 0;
+            for (Int32 i = 0; i < num; i++) {
+                String name = GetInterfaceNameNative(i);
+                Logger::I(TAG, "interface[%d] = %s", i, name.string());
+                if (name.Equals("wlan0")) {
+                    sWlan0Index = i;
+                    wifi_num++;
+                } else if (name.Equals("p2p0")) {
+                    sP2p0Index = i;
+                    wifi_num++;
+                }
+            }
+            return wifi_num;
+        } else {
+            return sWifiIfaceHandles->GetLength();
+        }
+    }
+}
+
+String WifiNative::GetInterfaceNameNative(
+    /* [in] */ Int32 index)
+{
+    char buf[EVENT_BUF_SIZE];
+
+    Int64 value = (*sWifiIfaceHandles)[index];
+    wifi_interface_handle handle = (wifi_interface_handle) value;
+    Int32 result = ::wifi_get_iface_name(handle, buf, sizeof(buf));
+    if (result < 0) {
+            return String(NULL);
+    }
+    else {
+            return String(buf);
+    }
+}
+
+String WifiNative::GetInterfaceName(
+    /* [in] */ Int32 index)
+{
+    AutoLock classLock(mClassLock);
+    return GetInterfaceNameNative(index);
+}
+
+Boolean WifiNative::GetScanCapabilities(
+    /* [in] */ ScanCapabilities* capabilities)
+{
+    return GetScanCapabilitiesNative(sWlan0Index, capabilities);
+}
+
+Boolean WifiNative::GetScanCapabilitiesNative(
+    /* [in] */ Int32 iface,
+    /* [in] */ ScanCapabilities* capabilities)
+{
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    Logger::D("getting scan capabilities on interface[%d] = %p", iface, handle);
+
+    wifi_gscan_capabilities c;
+    memset(&c, 0, sizeof(c));
+    Int32 result = wifi_get_gscan_capabilities(handle, &c);
+    if (result != WIFI_SUCCESS) {
+        Logger::D("failed to get capabilities : %d", result);
+        return FALSE;
+    }
+
+    capabilities->max_scan_cache_size = c.max_scan_cache_size;
+    capabilities->max_scan_buckets = c.max_scan_buckets;
+    capabilities->max_ap_cache_per_scan = c.max_ap_cache_per_scan;
+    capabilities->max_rssi_sample_size = c.max_rssi_sample_size;
+    capabilities->max_scan_reporting_threshold = c.max_scan_reporting_threshold;
+    capabilities->max_hotlist_aps = c.max_hotlist_aps;
+    capabilities->max_significant_wifi_change_aps = c.max_significant_wifi_change_aps;
+
+    return TRUE;
+}
+
+Boolean WifiNative::StartScanNative(
+    /* [in] */ Int32 iface,
+    /* [in] */ Int32 id,
+    /* [in] */ ScanSettings* settings)
+{
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    Logger::D("starting scan on interface[%d] = %p", iface, handle);
+
+    wifi_scan_cmd_params params;
+    memset(&params, 0, sizeof(params));
+
+    params.base_period = settings->base_period_ms;
+    params.max_ap_per_scan = settings->max_ap_per_scan;
+    params.report_threshold = settings->report_threshold;
+
+    Logger::D("Initialized common fields %d, %d, %d", params.base_period,
+            params.max_ap_per_scan, params.report_threshold);
+
+    //const char *bucket_array_type = "[Lcom/android/server/wifi/WifiNative$BucketSettings;";
+    //const char *channel_array_type = "[Lcom/android/server/wifi/WifiNative$ChannelSettings;";
+
+    //jobjectArray buckets = (jobjectArray)getObjectField(env, settings, "buckets", bucket_array_type);
+    AutoPtr<ArrayOf<BucketSettings*> > buckets = settings->buckets;
+    params.num_buckets = settings->num_buckets;
+
+    Logger::D("Initialized num_buckets to %d", params.num_buckets);
+
+    for (int i = 0; i < params.num_buckets; i++) {
+        //jobject bucket = getObjectArrayField(env, settings, "buckets", bucket_array_type, i);
+        AutoPtr<BucketSettings> bucket = (*buckets)[i];
+
+        params.buckets[i].bucket = bucket->bucket;
+        params.buckets[i].band = (wifi_band) bucket->band;
+        params.buckets[i].period = bucket->period_ms;
+
+        Logger::D("Initialized common bucket fields %d:%d:%d", params.buckets[i].bucket,
+                params.buckets[i].band, params.buckets[i].period);
+
+        Int32 report_events = bucket->report_events;
+        params.buckets[i].report_events = report_events;
+
+        Logger::D("Initialized report events to %d", params.buckets[i].report_events);
+
+        //jobjectArray channels = (jobjectArray)getObjectField(env, bucket, "channels", channel_array_type);
+        AutoPtr<ArrayOf<ChannelSettings*> > channels = bucket->channels;
+
+        params.buckets[i].num_channels = bucket->num_channels;
+        Logger::D("Initialized num_channels to %d", params.buckets[i].num_channels);
+
+        for (int j = 0; j < params.buckets[i].num_channels; j++) {
+            //jobject channel = getObjectArrayField(env, bucket, "channels", channel_array_type, j);
+            AutoPtr<ChannelSettings> channel = (*channels)[j];
+
+            params.buckets[i].channels[j].channel = channel->frequency;
+            params.buckets[i].channels[j].dwellTimeMs = channel->dwell_time_ms;
+
+            Boolean passive = channel->passive;
+            params.buckets[i].channels[j].passive = (passive ? 1 : 0);
+
+            Logger::D("Initialized channel %d", params.buckets[i].channels[j].channel);
+        }
+    }
+
+    Logger::D("Initialized all fields");
+
+    wifi_scan_result_handler handler;
+    memset(&handler, 0, sizeof(handler));
+    handler.on_scan_results_available = &onScanResultsAvailable;
+    handler.on_full_scan_result = &onFullScanResult;
+    handler.on_scan_event = &onScanEvent;
+
+    return wifi_start_gscan(id, handle, params, handler) == WIFI_SUCCESS;
+}
+
+Boolean WifiNative::StopScanNative(
+    /* [in] */ Int32 iface,
+    /* [in] */ Int32 id)
+{
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    Logger::D("stopping scan on interface[%d] = %p", iface, handle);
+
+    return wifi_stop_gscan(id, handle)  == WIFI_SUCCESS;
+}
+
+AutoPtr<ArrayOf<IScanResult*> > WifiNative::GetScanResultsNative(
+    /* [in] */ Int32 iface,
+    /* [in] */ Boolean flush)
+{
+    wifi_scan_result results[256];
+    Int32 num_results = 256;
+
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    Logger::D("getting scan results on interface[%d] = %p", iface, handle);
+
+    Int32 result = wifi_get_cached_gscan_results(handle, 1, num_results, results, &num_results);
+    if (result == WIFI_SUCCESS) {
+        AutoPtr<ArrayOf<IScanResult*> > scanResults = ArrayOf<IScanResult*>::Alloc(num_results);
+
+        for (Int32 i = 0; i < num_results; i++) {
+
+            AutoPtr<IScanResult> scanResult;
+            CScanResult::New((IScanResult**)&scanResult);
+
+            scanResult->SetSSID(String(results[i].ssid));
+
+            char bssid[32];
+            sprintf(bssid, "%02x:%02x:%02x:%02x:%02x:%02x", results[i].bssid[0],
+                    results[i].bssid[1], results[i].bssid[2], results[i].bssid[3],
+                    results[i].bssid[4], results[i].bssid[5]);
+
+            scanResult->SetBSSID(String(bssid));
+
+            scanResult->SetLevel(results[i].rssi);
+            scanResult->SetFrequency(results[i].channel);
+            scanResult->SetTimestamp(results[i].ts);
+
+            scanResults->Set(i, scanResult);
+        }
+
+        return scanResults;
+    } else {
+        return NULL;
+    }
+}
+
+static wifi_iface_stat link_stat;
+static wifi_radio_stat radio_stat; // L release has support for only one radio
+
+static void onLinkStatsResults(wifi_request_id id, wifi_iface_stat *iface_stat,
+     int num_radios, wifi_radio_stat *radio_stats)
+{
+    if (iface_stat != 0) {
+        memcpy(&link_stat, iface_stat, sizeof(wifi_iface_stat));
+    } else {
+        memset(&link_stat, 0, sizeof(wifi_iface_stat));
+    }
+
+    if (num_radios > 0 && radio_stats != 0) {
+        memcpy(&radio_stat, radio_stats, sizeof(wifi_radio_stat));
+    } else {
+        memset(&radio_stat, 0, sizeof(wifi_radio_stat));
+    }
+}
+
+AutoPtr<IWifiLinkLayerStats> WifiNative::GetWifiLinkLayerStatsNative(
+    /* [in] */ Int32 iface)
+{
+    wifi_stats_result_handler handler;
+    memset(&handler, 0, sizeof(handler));
+    handler.on_link_stats_results = &onLinkStatsResults;
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    Int32 result = wifi_get_link_stats(0, handle, handler);
+    if (result < 0) {
+        Logger::D("android_net_wifi_getLinkLayerStats: failed to get link statistics\n");
+        return NULL;
+    }
+
+    AutoPtr<IWifiLinkLayerStats> wifiLinkLayerStats;
+    CWifiLinkLayerStats::New((IWifiLinkLayerStats**)&wifiLinkLayerStats);
+
+    wifiLinkLayerStats->SetBeacon_rx(link_stat.beacon_rx);
+    wifiLinkLayerStats->SetRssi_mgmt(link_stat.rssi_mgmt);
+    wifiLinkLayerStats->SetRxmpdu_be(link_stat.ac[WIFI_AC_BE].rx_mpdu);
+    wifiLinkLayerStats->SetRxmpdu_bk(link_stat.ac[WIFI_AC_BK].rx_mpdu);
+    wifiLinkLayerStats->SetRxmpdu_vi(link_stat.ac[WIFI_AC_VI].rx_mpdu);
+    wifiLinkLayerStats->SetRxmpdu_vo(link_stat.ac[WIFI_AC_VO].rx_mpdu);
+    wifiLinkLayerStats->SetTxmpdu_be(link_stat.ac[WIFI_AC_BE].tx_mpdu);
+    wifiLinkLayerStats->SetTxmpdu_bk(link_stat.ac[WIFI_AC_BK].tx_mpdu);
+    wifiLinkLayerStats->SetTxmpdu_vi(link_stat.ac[WIFI_AC_VI].tx_mpdu);
+    wifiLinkLayerStats->SetTxmpdu_vo(link_stat.ac[WIFI_AC_VO].tx_mpdu);
+    wifiLinkLayerStats->SetLostmpdu_be(link_stat.ac[WIFI_AC_BE].mpdu_lost);
+    wifiLinkLayerStats->SetLostmpdu_bk(link_stat.ac[WIFI_AC_BK].mpdu_lost);
+    wifiLinkLayerStats->SetLostmpdu_vi(link_stat.ac[WIFI_AC_VI].mpdu_lost);
+    wifiLinkLayerStats->SetLostmpdu_vo(link_stat.ac[WIFI_AC_VO].mpdu_lost);
+    wifiLinkLayerStats->SetRetries_be(link_stat.ac[WIFI_AC_BE].retries);
+    wifiLinkLayerStats->SetRetries_bk(link_stat.ac[WIFI_AC_BK].retries);
+    wifiLinkLayerStats->SetRetries_vi(link_stat.ac[WIFI_AC_VI].retries);
+    wifiLinkLayerStats->SetRetries_vo(link_stat.ac[WIFI_AC_VO].retries);
+
+
+    wifiLinkLayerStats->SetOn_time(radio_stat.on_time);
+    wifiLinkLayerStats->SetTx_time(radio_stat.tx_time);
+    wifiLinkLayerStats->SetRx_time(radio_stat.rx_time);
+    wifiLinkLayerStats->SetOn_time_scan(radio_stat.on_time_scan);
+
+    return wifiLinkLayerStats;
+}
+
+void WifiNative::OnScanResultsAvailable(
+    /* [in] */ Int32 id)
+{
+    AutoLock classlock(mClassLock);
+    if (sScanEventHandler != NULL) {
+        sScanEventHandler->OnScanResultsAvailable();
+    }
+}
+
+void WifiNative::OnScanStatus(
+    /* [in] */ Int32 status)
+{
+    AutoLock classlock(mClassLock);
+    Logger::I(TAG, "Got a scan status changed event, status = %d", status);
+
+    if (status == WIFI_SCAN_BUFFER_FULL) {
+        /* we have a separate event to take care of this */
+    } else if (status == WIFI_SCAN_COMPLETE) {
+        if (sScanEventHandler  != NULL) {
+            sScanEventHandler->OnSingleScanComplete();
+        }
+    }
+}
+
+void WifiNative::OnFullScanResult(
+    /* [in] */ Int32 id,
+    /* [in] */ IScanResult* result,
+    /* [in] */ ArrayOf<Byte>* bytes)
+{
+    AutoLock classlock(mClassLock);
+    if (DBG) {
+        String ssid;
+        result->GetSSID(&ssid);
+        Logger::I(TAG, "Got a full scan results event, ssid = %s, num = %d", ssid.string(), bytes->GetLength());
+    }
+
+    Int32 num = 0;
+    for (Int32 i = 0; i < bytes->GetLength(); ) {
+        num++;
+        Int32 type  = (Int32)(*bytes)[i] & 0xFF;
+        Int32 len = (Int32) (*bytes)[i + 1] & 0xFF;
+        if (len < 0) {
+            Logger::E(TAG, "bad length; returning");
+            return;
+        }
+        i += len + 2;
+        if (DBG) Logger::I(TAG, "bytes[%d] = [%d, %d], next = %d", i, type, len, i);
+    }
+
+    AutoPtr<ArrayOf<IScanResultInformationElement*> > elements = ArrayOf<IScanResultInformationElement*>::Alloc(num);
+    for (Int32 i = 0, index = 0; i < num; i++) {
+        Int32 type  = (Int32) bytes[index] & 0xFF;
+        Int32 len = (Int32) bytes[index + 1] & 0xFF;
+        if (DBG) Logger::I(TAG, "index = %d, type = %d, len = %d", index, type, len);
+
+        AutoPtr<IScanResultInformationElement> elem;
+        CScanResultInformationElement::New((IScanResultInformationElement**)&elem);
+        elem->SetId(type);
+        AutoPtr<ArrayOf<Byte> > elemBytes = ArrayOf<Byte>::Alloc(len);
+        for (Int32 j = 0; j < len; j++) {
+            (*elemBytes)[j] = (*bytes)[index + j + 2];
+        }
+        elem->SetBytes(elemBytes);
+        elements->Set(i, elem);
+        index += (len + 2);
+    }
+
+    result->SetInformationElements(elements);
+    if (sScanEventHandler  != NULL) {
+        sScanEventHandler->OnFullScanResult(result);
+    }
+}
+
+Boolean WifiNative::StartScan(
+    /* [in] */ ScanSettings* settings,
+    /* [in] */ ScanEventHandler* eventHandler)
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+
+        if (sScanCmdId != 0) {
+            StopScan();
+        } else if (sScanSettings != NULL || sScanEventHandler != NULL) {
+            /* current scan is paused; no need to stop it */
+        }
+
+        sScanCmdId = GetNewCmdIdLocked();
+
+        sScanSettings = settings;
+        sScanEventHandler = eventHandler;
+
+        if (StartScanNative(sWlan0Index, sScanCmdId, settings) == FALSE) {
+            sScanEventHandler = NULL;
+            sScanSettings = NULL;
+            return FALSE;
+        }
+
+        return TRUE;
+    }
+}
+
+void WifiNative::StopScan()
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        StopScanNative(sWlan0Index, sScanCmdId);
+        sScanSettings = NULL;
+        sScanEventHandler = NULL;
+        sScanCmdId = 0;
+    }
+}
+
+void WifiNative::PauseScan()
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        if (sScanCmdId != 0 && sScanSettings != NULL && sScanEventHandler != NULL) {
+            Logger::D(TAG, "Pausing scan");
+            StopScanNative(sWlan0Index, sScanCmdId);
+            sScanCmdId = 0;
+            sScanEventHandler->OnScanPaused();
+        }
+    }
+}
+
+void WifiNative::RestartScan()
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        if (sScanCmdId == 0 && sScanSettings != NULL && sScanEventHandler != NULL) {
+            Logger::D(TAG, "Restarting scan");
+            StartScan(sScanSettings, sScanEventHandler);
+            sScanEventHandler->OnScanRestarted();
+        }
+    }
+}
+
+AutoPtr<ArrayOf<IScanResult*> > WifiNative::GetScanResults()
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        return GetScanResultsNative(sWlan0Index, /* flush = */ FALSE);
+    }
+}
+
+static void parseMacAddress(const char *str, mac_addr addr) {
+    addr[0] = parseHexByte(str);
+    addr[1] = parseHexByte(str);
+    addr[2] = parseHexByte(str);
+    addr[3] = parseHexByte(str);
+    addr[4] = parseHexByte(str);
+    addr[5] = parseHexByte(str);
+}
+
+static void onHotlistApFound(wifi_request_id id,
+        unsigned num_results, wifi_scan_result *results) {
+
+    Logger::D("onHotlistApFound called, num_results = %d", num_results);
+
+    AutoPtr<ArrayOf<IScanResult*> > scanResults = ArrayOf<IScanResult*>::Alloc(num_results);
+
+    for (unsigned i = 0; i < num_results; i++) {
+
+        AutoPtr<IScanResult> scanResult;
+        CScanResult::New((IScanResult**)&scanResult);
+        if (scanResult == NULL) {
+            Logger::E("Error in creating scan result");
+            return;
+        }
+
+        scanResult->SetSSID(String(results[i].ssid));
+
+        char bssid[32];
+        sprintf(bssid, "%02x:%02x:%02x:%02x:%02x:%02x", results[i].bssid[0], results[i].bssid[1],
+                results[i].bssid[2], results[i].bssid[3], results[i].bssid[4], results[i].bssid[5]);
+
+        scanResult->SetBSSID(String(bssid));
+
+        scanResult->SetLevel(results[i].rssi);
+        scanResult->SetFrequency(results[i].channel);
+        scanResult->SetTimestamp(results[i].ts);
+
+        scanResults->Set(i, scanResult);
+
+        Logger::D("Found AP %32s %s", results[i].ssid, bssid);
+    }
+
+    //reportEvent(env, mCls, "onHotlistApFound", "(I[Landroid/net/wifi/ScanResult;)V", id, scanResults);
+    WifiNative::OnHotlistApFound(id, scanResults);
+}
+
+Boolean WifiNative::SetHotlistNative(
+    /* [in] */ Int32 iface,
+    /* [in] */ Int32 id,
+    /* [in] */ IWifiScannerHotlistSettings* settings)
+{
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    Logger::D("setting hotlist on interface[%d] = %p", iface, handle);
+
+    wifi_bssid_hotlist_params params;
+    memset(&params, 0, sizeof(params));
+
+    AutoPtr<ArrayOf<IWifiScannerBssidInfo*> > array;
+    settings->GetBssidInfos((ArrayOf<IWifiScannerBssidInfo*>**)&array);
+    params.num_ap = array->GetLength();
+
+    if (params.num_ap == 0) {
+        Logger::E("Error in accesing array");
+        return FALSE;
+    }
+
+    for (Int32 i = 0; i < params.num_ap; i++) {
+        AutoPtr<IWifiScannerBssidInfo> objAp = (*array)[i];
+
+        String macAddrString;
+        objAp->GetBssid(&macAddrString);
+        if (macAddrString.IsNUll()) {
+            Logger::E("Error getting bssid field");
+            return FALSE;
+        }
+
+        const char *bssid = macAddrString.string();
+        if (bssid == NULL) {
+            ALOGE("Error getting bssid");
+            return false;
+        }
+        parseMacAddress(bssid, params.ap[i].bssid);
+
+        mac_addr addr;
+        memcpy(addr, params.ap[i].bssid, sizeof(mac_addr));
+
+        char bssidOut[32];
+        sprintf(bssidOut, "%0x:%0x:%0x:%0x:%0x:%0x", addr[0], addr[1],
+                addr[2], addr[3], addr[4], addr[5]);
+
+        Logger::D("Added bssid %s", bssidOut);
+
+        Int32 low, high;
+        objAp->GetLow(&low);
+        objAp->GetHigh(&high);
+        params.ap[i].low = low;
+        params.ap[i].high = high;
+    }
+
+    wifi_hotlist_ap_found_handler handler;
+    memset(&handler, 0, sizeof(handler));
+
+    handler.on_hotlist_ap_found = &onHotlistApFound;
+    return wifi_set_bssid_hotlist(id, handle, params, handler) == WIFI_SUCCESS;
+}
+
+Boolean WifiNative::ResetHotlistNative(
+    /* [in] */ Int32 iface,
+    /* [in] */ Int32 id)
+{
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    Logger::D("resetting hotlist on interface[%d] = %p", iface, handle);
+
+    return wifi_reset_bssid_hotlist(id, handle) == WIFI_SUCCESS;
+}
+
+Boolean WifiNative::SetHotlist(
+    /* [in] */ IWifiScannerHotlistSettings* settings,
+    /* [in] */ HotlistEventHandler* eventHandler)
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        if (sHotlistCmdId != 0) {
+            return FALSE;
+        } else {
+            sHotlistCmdId = GetNewCmdIdLocked();
+        }
+
+        sHotlistEventHandler = eventHandler;
+        if (SetHotlistNative(sWlan0Index, sScanCmdId, settings) == FALSE) {
+            sHotlistEventHandler = NULL;
+            return FALSE;
+        }
+
+        return TRUE;
+    }
+}
+
+void WifiNative::ResetHotlist()
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        if (sHotlistCmdId != 0) {
+            ResetHotlistNative(sWlan0Index, sHotlistCmdId);
+            sHotlistCmdId = 0;
+            sHotlistEventHandler = NULL;
+        }
+    }
+}
+
+void WifiNative::OnHotlistApFound(
+    /* [in] */ Int32 id,
+    /* [in] */ ArrayOf<IScanResult*>* results)
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        if (sHotlistCmdId != 0) {
+            sHotlistEventHandler->OnHotlistApFound(results);
+        } else {
+            /* this can happen because of race conditions */
+            Logger::D(TAG, "Ignoring hotlist AP found change");
+        }
+    }
+}
+
+static void onSignificantWifiChange(wifi_request_id id,
+        unsigned num_results, wifi_significant_change_result **results) {
+    AutoPtr<ArrayOf<IScanResult*> > scanResults = ArrayOf<IScanResult*>::Alloc(num_results);
+    if (scanResults == NULL) {
+        Logger::E("Error in allocating array");
+        return;
+    }
+
+    for (unsigned i = 0; i < num_results; i++) {
+
+        wifi_significant_change_result result = *(results[i]);
+
+        AutoPtr<IScanResult> scanResult;
+        CScanResult::New((IScanResult**)&scanResult);
+        if (scanResult == NULL) {
+            Logger::E("Error in creating scan result");
+            return;
+        }
+
+        char bssid[32];
+        sprintf(bssid, "%02x:%02x:%02x:%02x:%02x:%02x", result.bssid[0], result.bssid[1],
+                result.bssid[2], result.bssid[3], result.bssid[4], result.bssid[5]);
+
+        scanResult->SetBSSID(String(bssid));
+
+        scanResult->SetLevel(result.rssi[0]);
+        scanResult->SetFrequency(result.channel);
+
+        env->SetObjectArrayElement(scanResults, i, scanResult);
+    }
+
+    //reportEvent(env, mCls, "OnSignificantWifiChange", "(I[Landroid/net/wifi/ScanResult;)V", id, scanResults);
+    WifiNative::OnSignificantWifiChange(id, scanResults);
+
+}
+
+Boolean WifiNative::TrackSignificantWifiChangeNative(
+    /* [in] */ Int32 iface,
+    /* [in] */ Int32 id,
+    /* [in] */ IWifiScannerWifiChangeSettings* settings)
+{
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    Logger::D("tracking significant wifi change on interface[%d] = %p", iface, handle);
+
+    wifi_significant_change_params params;
+    memset(&params, 0, sizeof(params));
+
+    Int32 rssiSampleSize;
+    settings->GetLostApSampleSize(&rssiSampleSize);
+    params.rssi_sample_size = rssi_sample_size;
+    Int32 lostApSampleSize;
+    settings->GetLostApSampleSize(&lostApSampleSize);
+    params.lost_ap_sample_size = lostApSampleSize;
+    Int32 minApsBreachingThreshold;
+    settings->GetMinApsBreachingThreshold(&minApsBreachingThreshold);
+    params.min_breaching = minApsBreachingThreshold;
+
+    //const char *bssid_info_array_type = "[Landroid/net/wifi/WifiScanner$BssidInfo;";
+    //jobjectArray bssids = (jobjectArray)getObjectField(
+    //        env, settings, "bssidInfos", bssid_info_array_type);
+    AutoPtr<ArrayOf<IWifiScannerBssidInfo*> > bssids;
+    settings->GetBssidInfos((ArrayOf<IWifiScannerBssidInfo*>**)&bssids);
+    params.num_ap = bssids->GetLength();
+
+    if (params.num_ap == 0) {
+        Logger::E("Error in accessing array");
+        return FALSE;
+    }
+
+    Logger::D("Initialized common fields %d, %d, %d, %d", params.rssi_sample_size,
+            params.lost_ap_sample_size, params.min_breaching, params.num_ap);
+
+    for (Int32 i = 0; i < params.num_ap; i++) {
+        //jobject objAp = env->GetObjectArrayElement(bssids, i);
+        AutoPtr<IWifiScannerBssidInfo> objAp = (*bssids)[i];
+
+        //jstring macAddrString = (jstring) getObjectField(
+        //        env, objAp, "bssid", "Ljava/lang/String;");
+        String macAddrString;
+        objAp->GetBssid(&macAddrString);
+        if (macAddrString.IsNull()) {
+            Logger::E("Error getting bssid field");
+            return FALSE;
+        }
+
+        const char *bssid = macAddrString.string();
+        if (bssid == NULL) {
+            Logger::E("Error getting bssid");
+            return FALSE;
+        }
+
+        mac_addr addr;
+        parseMacAddress(bssid, addr);
+        memcpy(params.ap[i].bssid, addr, sizeof(mac_addr));
+
+        char bssidOut[32];
+        sprintf(bssidOut, "%02x:%02x:%02x:%02x:%02x:%02x", addr[0], addr[1],
+                addr[2], addr[3], addr[4], addr[5]);
+
+        Int32 low, high;
+        objAp->GetLow(&low);
+        objAp->GetHigh(&high);
+
+        params.ap[i].low = low;
+        params.ap[i].high = high;
+
+        Logger::D("Added bssid %s, [%04d, %04d]", bssidOut, params.ap[i].low, params.ap[i].high);
+    }
+
+    Logger::D("Added %d bssids", params.num_ap);
+
+    wifi_significant_change_handler handler;
+    memset(&handler, 0, sizeof(handler));
+
+    handler.on_significant_change = &onSignificantWifiChange;
+    return wifi_set_significant_change_handler(id, handle, params, handler) == WIFI_SUCCESS;
+}
+
+Boolean WifiNative::UntrackSignificantWifiChangeNative(
+    /* [in] */ Int32 iface,
+    /* [in] */ Int32 id)
+{
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    Logger::D("resetting significant wifi change on interface[%d] = %p", iface, handle);
+
+    return wifi_reset_significant_change_handler(id, handle) == WIFI_SUCCESS;
+}
+
+Boolean WifiNative::TrackSignificantWifiChange(
+    /* [in] */ IWifiScannerWifiChangeSettings* settings,
+    /* [in] */ SignificantWifiChangeEventHandler* handler)
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        if (sSignificantWifiChangeCmdId != 0) {
+            return FALSE;
+        } else {
+            sSignificantWifiChangeCmdId = GetNewCmdIdLocked();
+        }
+
+        sSignificantWifiChangeHandler = handler;
+        if (TrackSignificantWifiChangeNative(sWlan0Index, sScanCmdId, settings) == FALSE) {
+            sSignificantWifiChangeHandler = NULL;
+            return FALSE;
+        }
+
+        return TRUE;
+    }
+}
+
+void WifiNative::UntrackSignificantWifiChange()
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        if (sSignificantWifiChangeCmdId != 0) {
+            UntrackSignificantWifiChangeNative(sWlan0Index, sSignificantWifiChangeCmdId);
+            sSignificantWifiChangeCmdId = 0;
+            sSignificantWifiChangeHandler = NULL;
+        }
+    }
+}
+
+void WifiNative::OnSignificantWifiChange(
+    /* [in] */ Int32 id,
+    /* [in] */ ArrayOf<IScanResult*>* results)
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        if (sSignificantWifiChangeCmdId != 0) {
+            sSignificantWifiChangeHandler->OnChangesFound(results);
+        } else {
+            /* this can happen because of race conditions */
+            Logger::D(TAG, "Ignoring significant wifi change");
+        }
+    }
+}
+
+AutoPtr<IWifiLinkLayerStats> GetWifiLinkLayerStats(
+    /* [in] */ const String& iface)
+{
+    AutoLock classlock(mClassLock);
+    // TODO: use correct iface name to Index translation
+    if (iface.IsNull()) return NULL;
+    {
+        AutoLock lock(mLock);
+        if (!sHalIsStarted)
+            StartHal();
+        if (sHalIsStarted)
+            return GetWifiLinkLayerStatsNative(sWlan0Index);
+    }
+    return NULL;
+}
+
+String WifiNative::GetNfcWpsConfigurationToken(
+    /* [in] */ Int32 netId)
+{
+    return DoStringCommand(String("WPS_NFC_CONFIG_TOKEN WPS ") + StringUtils::Int32ToString(netId));
+}
+
+String WifiNative::GetNfcHandoverRequest()
+{
+    return DoStringCommand(String("NFC_GET_HANDOVER_REQ NDEF P2P-CR"));
+}
+
+String WifiNative::GetNfcHandoverSelect()
+{
+    return DoStringCommand(String("NFC_GET_HANDOVER_SEL NDEF P2P-CR"));
+}
+
+Boolean WifiNative::InitiatorReportNfcHandover(
+    /* [in] */ const String& selectMessage)
+{
+    return DoBooleanCommand(String("NFC_REPORT_HANDOVER INIT P2P 00 ") + selectMessage);
+}
+
+Boolean WifiNative::ResponderReportNfcHandover(
+    /* [in] */ const String& requestMessage)
+{
+    return DoBooleanCommand(String("NFC_REPORT_HANDOVER RESP P2P ") + requestMessage + " 00");
+}
+
+Int32 WifiNative::GetSupportedFeatureSetNative(
+    /* [in] */ Int32 iface)
+{
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    feature_set set = 0;
+
+    wifi_error result = WIFI_SUCCESS;
+    /*
+       set = WIFI_FEATURE_INFRA
+       | WIFI_FEATURE_INFRA_5G
+       | WIFI_FEATURE_HOTSPOT
+       | WIFI_FEATURE_P2P
+       | WIFI_FEATURE_SOFT_AP
+       | WIFI_FEATURE_GSCAN
+       | WIFI_FEATURE_PNO
+       | WIFI_FEATURE_TDLS
+       | WIFI_FEATURE_EPR;
+     */
+
+    result = wifi_get_supported_feature_set(handle, &set);
+    if (result == WIFI_SUCCESS) {
+        /* Temporary workaround for RTT capability */
+        set = set | WIFI_FEATURE_D2AP_RTT;
+        Logger::D("wifi_get_supported_feature_set returned set = 0x%x", set);
+        return set;
+    } else {
+        Logger::D("wifi_get_supported_feature_set returned error = 0x%x", result);
+        return 0;
+    }
+}
+
+Int32 WifiNative::GetSupportedFeatureSet()
+{
+    AutoLock classlock(mClassLock);
+    return GetSupportedFeatureSetNative(sWlan0Index);
+}
+
+void WifiNative::OnRttResults(
+    /* [in] */ Int32 id,
+    /* [in] */ ArrayOf<IRttManagerRttResult*>* results)
+{
+    AutoLock classlock(mClassLock);
+    if (id == sRttCmdId) {
+        Logger::D(TAG, "Received %d rtt results", results->GetLength());
+        sRttEventHandler->OnRttResults(results);
+        sRttCmdId = 0;
+    } else {
+        Logger::D(TAG, "Received event for unknown cmd = %d, current id = %d",  id, sRttCmdId);
+    }
+}
+
+const static Int32 MaxRttConfigs = 16;
+
+static void onRttResults(wifi_request_id id, unsigned num_results, wifi_rtt_result results[]) {
+
+    AutoPtr<ArrayOf<IRttManagerRttResult*> > rttResults = ArrayOf<IRttManagerRttResult*>::Alloc(num_results);
+    if (rttResults == NULL) {
+        Logger::E("Error in allocating array");
+        return;
+    }
+
+    for (unsigned i = 0; i < num_results; i++) {
+
+        wifi_rtt_result& result = results[i];
+
+        AutoPtr<IRttManagerRttResult> rttResult;
+        CRttManagerRttResult::New((IRttManagerRttResult**)&rttResult);
+        if (rttResult == NULL) {
+            Logger::E("Error in creating rtt result");
+            return;
+        }
+
+        char bssid[32];
+        sprintf(bssid, "%02x:%02x:%02x:%02x:%02x:%02x", result.addr[0], result.addr[1],
+                result.addr[2], result.addr[3], result.addr[4], result.addr[5]);
+
+        rttResult->SetBssid(String(bssid));
+        rttResult->SetStatus(result.status);
+        rttResult->SetRequestType(result.type);
+        rttResult->SetTs(result.ts);
+        rttResult->SetRssi(result.rssi);
+        rttResult->SetRssi_spread(result.rssi_spread);
+        rttResult->SetTx_rate(result.tx_rate.bitrate);
+        rttResult->SetRtt_ns(result.rtt);
+        rttResult->SetRtt_sd_ns(result.rtt_sd);
+        rttResult->SetRtt_spread_ns(result.rtt_spread);
+        rttResult->SetDistance_cm(result.distance);
+        rttResult->SetDistance_sd_cm(result.distance_sd);
+        rttResult->SetDistance_spread_cm(result.distance_spread);
+
+        rttResults->Set(i, rttResults);
+    }
+
+    //reportEvent(env, mCls, "OnRttResults", "(I[Landroid/net/wifi/RttManager$RttResult;)V", id, rttResults);
+    WifiNative::OnRttResults(id, rttResults);
+}
+
+
+Boolean WifiNative::RequestRangeNative(
+    /* [in] */ Int32 iface,
+    /* [in] */ Int32 id,
+    /* [in] */ Arrayof<IRttManagerRttParams*>* params)
+{
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    Logger::D("sending rtt request [%d] = %p", id, handle);
+
+    wifi_rtt_config configs[MaxRttConfigs];
+    memset(&configs, 0, sizeof(configs));
+
+    Int32 len = params->GetLength();
+    if (len > MaxRttConfigs) {
+        return FALSE;
+    }
+
+    for (Int32 i = 0; i < len; i++) {
+
+        //jobject param = env->GetObjectArrayElement((jobjectArray)params, i);
+        AutoPtr<IRttManagerRttParams> param = (*params)[i];
+        if (param == NULL) {
+            Logger::D("could not get element %d", i);
+            continue;
+        }
+
+        wifi_rtt_config &config = configs[i];
+
+        String bssid;
+        param->GetBssid(&bssid);
+        parseMacAddress(bssid.string(), config.addr);
+        Int32 requestType;
+        param->GetRequestType(&requestType);
+        config.type = (wifi_rtt_type)requestType;
+        Int32 deviceType;
+        param->GetDeviceType(&deviceType);
+        config.peer = (wifi_peer_type)deviceType ;
+        Int32 frequency;
+        param->GetFrequency(&frequency);
+        config.channel.center_freq = frequency;
+        Int32 channelWidth;
+        param->GetChannelWidth(&channelWidth);
+        config.channel.width = (wifi_channel_width)channelWidth;
+        Int32 num_samples;
+        param->GetNum_samples(&num_samples);
+        config.num_samples_per_measurement = num_samples;
+        Int32 num_retries;
+        param->GetNum_retries(&num_retries);
+        config.num_retries_per_measurement = num_retries;
+    }
+
+    wifi_rtt_event_handler handler;
+    handler.on_rtt_results = &onRttResults;
+
+    return wifi_rtt_range_request(id, handle, len, configs, handler) == WIFI_SUCCESS;
+
+}
+
+Boolean WifiNative::CancelRangeRequestNative(
+    /* [in] */ Int32 iface,
+    /* [in] */ Int32 id,
+    /* [in] */ ArrayOf<IRttManagerRttParams*>* params)
+{
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    Logger::D("cancelling rtt request [%d] = %p", id, handle);
+
+    mac_addr addrs[MaxRttConfigs];
+    memset(&addrs, 0, sizeof(addrs));
+
+    Int32 len = params->GetLength();
+    if (len > MaxRttConfigs) {
+        return FALSE;
+    }
+
+    for (Int32 i = 0; i < len; i++) {
+
+        AutoPtr<IRttManagerRttParams> param = (*params)[i];
+        if (param == NULL) {
+            Logger::D("could not get element %d", i);
+            continue;
+        }
+
+        String bssid;
+        param->GetBssid(&bssid);
+        parseMacAddress(bssid.string(), addrs[i]);
+    }
+
+    return wifi_rtt_range_cancel(id, handle, len, addrs) == WIFI_SUCCESS;
+}
+
+Boolean WifiNative::RequestRtt(
+    /* [in] */ ArrayOf<IRttManagerRttParams*>* params,
+    /* [in] */ RttEventHandler* handler)
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        if (sRttCmdId != 0) {
+            return FALSE;
+        } else {
+            sRttCmdId = GetNewCmdIdLocked();
+        }
+        sRttEventHandler = handler;
+        return RequestRangeNative(sWlan0Index, sRttCmdId, params);
+    }
+}
+
+Boolean WifiNative::CancelRtt(
+    /* [in] */ ArrayOf<IRttManagerRttParams*>* params)
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        if (sRttCmdId == 0) {
+            return FALSE;
+        }
+
+        if (CancelRangeRequestNative(sWlan0Index, sRttCmdId, params)) {
+            sRttEventHandler = NULL;
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+}
+
+Boolean WifiNative::SetScanningMacOui(
+    /* [in] */ ArrayOf<Byte>* oui)
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        if (StartHal()) {
+            return SetScanningMacOuiNative(sWlan0Index, oui);
+        } else {
+            return FALSE;
+        }
+    }
+}
+
+AutoPtr<ArrayOf<Int32> > WifiNative::GetChannelsForBand(
+    /* [in] */ Int32 band)
+{
+    AutoLock classlock(mClassLock);
+    {
+        AutoLock lock(mLock);
+        if (StartHal()) {
+            return GetChannelsForBandNative(sWlan0Index, band);
+        } else {
+            return NULL;
+        }
+    }
+}
+
+Boolean WifiNative::Disable5GHzFrequencies(
+    /* [in] */ Boolean disable)
+{
+    if (disable) {
+        return DoBooleanCommand(String("P2P_SET disallow_freq 2485-6000"));
+    } else {
+        //Empty set means,it will enable all frequences
+        return DoBooleanCommand(String("P2P_SET disallow_freq \"\""));
+    }
+}
+
+Boolean WifiNative::SetScanningMacOuiNative(
+    /* [in] */ Int32 iface,
+    /* [in] */ ArrayOf<Byte>* oui)
+{
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    Logger::D("setting scan oui %p", handle);
+
+    static const UInt32 oui_len = 3;          /* OUI is upper 3 bytes of mac_address */
+    Int32 len = oui->GetLength();
+    if (len != oui_len) {
+        Logger::E("invalid oui length %d", len);
+        return FALSE;
+    }
+
+    Byte* bytes = oui->GetPayload();
+    if (bytes == NULL) {
+        Logger::E("failed to get array");
+        return FALSE;
+    }
+
+    return wifi_set_scanning_mac_oui(handle, (byte *)bytes) == WIFI_SUCCESS;
+}
+
+AutoPtr<ArrayOf<Int32> > WifiNative::GetChannelsForBandNative(
+    /* [in] */ Int32 iface,
+    /* [in] */ Int32 band)
+{
+    wifi_interface_handle handle = (wifi_interface_handle)((*sWifiIfaceHandles)[iface]);
+    Logger::D("getting valid channels %p", handle);
+
+    static const Int32 MaxChannels = 64;
+    wifi_channel channels[64];
+    Int32 num_channels = 0;
+    wifi_error result = wifi_get_valid_channels(handle, band, MaxChannels,
+            channels, &num_channels);
+
+    if (result == WIFI_SUCCESS) {
+        AutoPtr<ArrayOf<Int32> > channelArray = ArrayOf<Int32>::Alloc(num_channels);
+        if (channelArray == NULL) {
+            Logger::E("failed to allocate channel list");
+            return NULL;
+        }
+
+        channelArray->Copy(0, channels, num_channels);
+        return channelArray;
+    } else {
+        Logger::E("failed to get channel list : %d", result);
+        return NULL;
+    }
 }
 
 } // namespace Wifi
