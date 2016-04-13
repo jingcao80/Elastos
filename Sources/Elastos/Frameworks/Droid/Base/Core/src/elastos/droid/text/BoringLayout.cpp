@@ -29,11 +29,11 @@ AutoPtr<IBoringLayout> BoringLayout::Make(
     /* [in] */ IBoringLayoutMetrics* metrics,
     /* [in] */ Boolean includepad)
 {
-    AutoPtr<CBoringLayout> layout;
-    ASSERT_SUCCEEDED(CBoringLayout::NewByFriend(source, paint, outerwidth, align,
-        spacingmult, spacingadd, metrics, includepad, (CBoringLayout**)&layout));
+    AutoPtr<IBoringLayout> layout;
+    ASSERT_SUCCEEDED(CBoringLayout::New(source, paint, outerwidth, align,
+        spacingmult, spacingadd, metrics, includepad, (IBoringLayout**)&layout));
 
-    return (IBoringLayout*)layout.Get();
+    return layout;
 }
 
 AutoPtr<IBoringLayout> BoringLayout::Make(
@@ -48,12 +48,12 @@ AutoPtr<IBoringLayout> BoringLayout::Make(
     /* [in] */ TextUtilsTruncateAt ellipsize,
     /* [in] */ Int32 ellipsizedWidth)
 {
-    AutoPtr<CBoringLayout> layout;
-    ASSERT_SUCCEEDED(CBoringLayout::NewByFriend(source, paint, outerwidth, align,
+    AutoPtr<IBoringLayout> layout;
+    ASSERT_SUCCEEDED(CBoringLayout::New(source, paint, outerwidth, align,
         spacingmult, spacingadd, metrics, includepad, ellipsize,
-        ellipsizedWidth, (CBoringLayout**)&layout));
+        ellipsizedWidth, (IBoringLayout**)&layout));
 
-    return (IBoringLayout*)layout.Get();
+    return layout;
 }
 
 ECode BoringLayout::ReplaceOrMake(
@@ -128,12 +128,12 @@ ECode BoringLayout::ReplaceOrMake(
 }
 
 BoringLayout::BoringLayout()
-     : mTopPadding(0)
-     , mBottomPadding(0)
-     , mMax(0)
-     , mEllipsizedWidth(0)
-     , mEllipsizedStart(0)
-     , mEllipsizedCount(0)
+    : mTopPadding(0)
+    , mBottomPadding(0)
+    , mMax(0)
+    , mEllipsizedWidth(0)
+    , mEllipsizedStart(0)
+    , mEllipsizedCount(0)
 {}
 
 ECode BoringLayout::constructor(
