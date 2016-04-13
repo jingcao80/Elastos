@@ -5,23 +5,61 @@
  * should not be modified by hand.
  */
 
-#ifndef __Elastos_DevSamples_ProgressBarDemo_R_H__
-#define __Elastos_DevSamples_ProgressBarDemo_R_H__
+#ifndef __Elastos_DevSamples_TextViewDemo_R_H__
+#define __Elastos_DevSamples_TextViewDemo_R_H__
 #include <elatypes.h>
 namespace Elastos {
 namespace DevSamples {
-namespace ProgressBarDemo {
+namespace TextViewDemo {
 class ECO_PUBLIC R {
     public: class attr {
     };
     public: class drawable {
-        public: static const int icon = 0x7f020000;
+        public: static const int ic_sysbar_back = 0x7f020000;
+        public: static const int ic_sysbar_home = 0x7f020001;
+        public: static const int ic_sysbar_menu = 0x7f020002;
+        public: static const int icon = 0x7f020003;
     };
     public: class id {
-        public: static const int TextView = 0x7f050000;
+        public: static const int AnamtionButton = 0x7f050010;
+        public: static const int ConnectivityManagerButton = 0x7f050014;
+        public: static const int DialogButton = 0x7f050011;
+        public: static const int PopupWindowButton = 0x7f050012;
+        public: static const int PowerManagerButton = 0x7f050013;
+        public: static const int back = 0x7f050019;
+        public: static const int btn_close_popup = 0x7f05001c;
+        public: static const int button1 = 0x7f050004;
+        public: static const int button2 = 0x7f050006;
+        public: static const int button3 = 0x7f050005;
+        public: static const int buttonPanel = 0x7f050003;
+        public: static const int chkAndroid = 0x7f05000a;
+        public: static const int chkIos = 0x7f050009;
+        public: static const int contentPanel = 0x7f050001;
+        public: static const int home = 0x7f050018;
+        public: static const int menu = 0x7f050017;
+        public: static const int message = 0x7f050002;
+        public: static const int myEditText = 0x7f050008;
+        public: static const int myListView = 0x7f050015;
+        public: static const int myTextView = 0x7f050007;
+        public: static const int nav_buttons = 0x7f050016;
+        public: static const int parentPanel = 0x7f050000;
+        public: static const int popup_element = 0x7f05001a;
+        public: static const int radioFemale = 0x7f05000d;
+        public: static const int radioMale = 0x7f05000c;
+        public: static const int radioSex = 0x7f05000b;
+        public: static const int textview1 = 0x7f05001d;
+        public: static const int textview2 = 0x7f05001e;
+        public: static const int toggleButton1 = 0x7f05000e;
+        public: static const int toggleButton2 = 0x7f05000f;
+        public: static const int txtView = 0x7f05001b;
     };
     public: class layout {
-        public: static const int main = 0x7f030000;
+        public: static const int dialog = 0x7f030000;
+        public: static const int list_item = 0x7f030001;
+        public: static const int main = 0x7f030002;
+        public: static const int navigationbar = 0x7f030003;
+        public: static const int popupwindow = 0x7f030004;
+        public: static const int view = 0x7f030005;
     };
     public: class string {
         public: static const int app_name = 0x7f040000;
@@ -31,4 +69,4 @@ class ECO_PUBLIC R {
 };
 };
 
-#endif // __Elastos_DevSamples_ProgressBarDemo_R_H__
+#endif // __Elastos_DevSamples_TextViewDemo_R_H__
