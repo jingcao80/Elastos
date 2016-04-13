@@ -70,7 +70,7 @@ module
             [out] Int32* result);
 
         GetBatteryTechnology(
-            [out] Int32* result);
+            [out] String* result);
     }
 
     } // namespace Os

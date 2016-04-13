@@ -18,82 +18,81 @@ AutoPtr<IClassInfo> ExtendedRemoteDisplayHelper::sExtRemoteDisplayClass;
 AutoPtr<IMethodInfo> ExtendedRemoteDisplayHelper::sExtRemoteDisplayListen;
 AutoPtr<IMethodInfo> ExtendedRemoteDisplayHelper::sExtRemoteDisplayDispose;
 
-Boolean ExtendedRemoteDisplayHelper::InitExtRemoteDisplay()
+ExtendedRemoteDisplayHelper::StaticInitializer::StaticInitializer()
 {
     // todo
     //Check availability of ExtendedRemoteDisplay runtime
-        // try {
-        //     sExtRemoteDisplayClass = Class.forName("com.qualcomm.wfd.ExtendedRemoteDisplay");
-        // } catch (Throwable t) {
-        //     Slog.i(TAG, "ExtendedRemoteDisplay Not available.");
-        // }
-
-        // if(sExtRemoteDisplayClass != null) {
-        //     // If ExtendedRemoteDisplay is available find the methods
-        //     Slog.i(TAG, "ExtendedRemoteDisplay Is available. Find Methods");
-        //     try {
-        //         Class args[] = {
-        //                            String.class,
-        //                            RemoteDisplay.Listener.class,
-        //                            Handler.class, Context.class
-        //                        };
-        //         sExtRemoteDisplayListen = sExtRemoteDisplayClass.getDeclaredMethod("listen", args);
-        //     } catch (Throwable t) {
-        //         Slog.i(TAG, "ExtendedRemoteDisplay.listen Not available.");
-        //     }
-
-        //     try {
-        //         Class args[] = {};
-        //         sExtRemoteDisplayDispose = sExtRemoteDisplayClass.getDeclaredMethod("dispose", args);
-        //     } catch (Throwable t) {
-        //         Slog.i(TAG, "ExtendedRemoteDisplay.dispose Not available.");
-        //     }
-        // }
-
-    //Check availability of ExtendedRemoteDisplay runtime
     // try {
-    AutoPtr<IClassLoader> cl;
-    ECode ec = CPathClassLoader::New(String(""), (IClassLoader**)&cl);
-    if (FAILED(ec)) {
-        Slogger::I(TAG, "ExtendedRemoteDisplay Not available.");
-    }
-    cl->LoadClass(String("com.qualcomm.wfd.ExtendedRemoteDisplay"), (IClassInfo**)&sExtRemoteDisplayClass);
+    //     sExtRemoteDisplayClass = Class.forName("com.qualcomm.wfd.ExtendedRemoteDisplay");
     // } catch (Throwable t) {
     //     Slog.i(TAG, "ExtendedRemoteDisplay Not available.");
     // }
 
-    if(sExtRemoteDisplayClass != NULL) {
-        // If ExtendedRemoteDisplay is available find the methods
-        Slogger::I(TAG, "ExtendedRemoteDisplay Is available. Find Methods");
-        // try {
-        // Class args[] = {
-        //                    String.class,
-        //                    RemoteDisplay.Listener.class,
-        //                    Handler.class, Context.class
-        //                };
-        ec = sExtRemoteDisplayClass->GetMethodInfo(String("listen"), String(NULL),
-                (IMethodInfo**)&sExtRemoteDisplayListen);
-        if (FAILED(ec)) {
-            Slogger::I(TAG, "ExtendedRemoteDisplay.listen Not available.");
-        }
-        // } catch (Throwable t) {
-        //     Slog.i(TAG, "ExtendedRemoteDisplay.listen Not available.");
-        // }
+    // if(sExtRemoteDisplayClass != null) {
+    //     // If ExtendedRemoteDisplay is available find the methods
+    //     Slog.i(TAG, "ExtendedRemoteDisplay Is available. Find Methods");
+    //     try {
+    //         Class args[] = {
+    //                            String.class,
+    //                            RemoteDisplay.Listener.class,
+    //                            Handler.class, Context.class
+    //                        };
+    //         sExtRemoteDisplayListen = sExtRemoteDisplayClass.getDeclaredMethod("listen", args);
+    //     } catch (Throwable t) {
+    //         Slog.i(TAG, "ExtendedRemoteDisplay.listen Not available.");
+    //     }
 
-        // try {
-        // Class args[] = {};
-        ec = sExtRemoteDisplayClass->GetMethodInfo(String("dispose"), String(NULL),
-                (IMethodInfo**)&sExtRemoteDisplayDispose);
-        if (FAILED(ec)) {
-            Slogger::I(TAG, "ExtendedRemoteDisplay.dispose Not available.");
-        }
-        // } catch (Throwable t) {
-        //     Slog.i(TAG, "ExtendedRemoteDisplay.dispose Not available.");
-        // }
-    }
-    return TRUE;
+    //     try {
+    //         Class args[] = {};
+    //         sExtRemoteDisplayDispose = sExtRemoteDisplayClass.getDeclaredMethod("dispose", args);
+    //     } catch (Throwable t) {
+    //         Slog.i(TAG, "ExtendedRemoteDisplay.dispose Not available.");
+    //     }
+    // }
+
+    // //Check availability of ExtendedRemoteDisplay runtime
+    // // try {
+    // AutoPtr<IClassLoader> cl;
+    // ECode ec = CPathClassLoader::New(String(""), (IClassLoader**)&cl);
+    // if (FAILED(ec)) {
+    //     Slogger::I(TAG, "ExtendedRemoteDisplay Not available.");
+    // }
+    // cl->LoadClass(String("com.qualcomm.wfd.ExtendedRemoteDisplay"), (IClassInfo**)&sExtRemoteDisplayClass);
+    // // } catch (Throwable t) {
+    // //     Slog.i(TAG, "ExtendedRemoteDisplay Not available.");
+    // // }
+
+    // if(sExtRemoteDisplayClass != NULL) {
+    //     // If ExtendedRemoteDisplay is available find the methods
+    //     Slogger::I(TAG, "ExtendedRemoteDisplay Is available. Find Methods");
+    //     // try {
+    //     // Class args[] = {
+    //     //                    String.class,
+    //     //                    RemoteDisplay.Listener.class,
+    //     //                    Handler.class, Context.class
+    //     //                };
+    //     ec = sExtRemoteDisplayClass->GetMethodInfo(String("listen"), String(NULL),
+    //             (IMethodInfo**)&sExtRemoteDisplayListen);
+    //     if (FAILED(ec)) {
+    //         Slogger::I(TAG, "ExtendedRemoteDisplay.listen Not available.");
+    //     }
+    //     // } catch (Throwable t) {
+    //     //     Slog.i(TAG, "ExtendedRemoteDisplay.listen Not available.");
+    //     // }
+
+    //     // try {
+    //     // Class args[] = {};
+    //     ec = sExtRemoteDisplayClass->GetMethodInfo(String("dispose"), String(NULL),
+    //             (IMethodInfo**)&sExtRemoteDisplayDispose);
+    //     if (FAILED(ec)) {
+    //         Slogger::I(TAG, "ExtendedRemoteDisplay.dispose Not available.");
+    //     }
+    //     // } catch (Throwable t) {
+    //     //     Slog.i(TAG, "ExtendedRemoteDisplay.dispose Not available.");
+    //     // }
+    // }
 }
-Boolean ExtendedRemoteDisplayHelper::sInit = ExtendedRemoteDisplayHelper::InitExtRemoteDisplay();
+INIT_PROI_4 const ExtendedRemoteDisplayHelper::StaticInitializer ExtendedRemoteDisplayHelper::sInitializer;
 
 ECode ExtendedRemoteDisplayHelper::Listen(
     /* [in] */ const String& iface,

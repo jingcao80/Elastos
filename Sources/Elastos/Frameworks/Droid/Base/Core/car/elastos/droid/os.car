@@ -581,6 +581,13 @@ module
         interface IRecoverySystem;
     }
 
+    class CBatteryProperties {
+        constructor();
+
+        interface IBatteryProperties;
+        interface IParcelable;
+    }
+
     // [deprecated]
     // class CDropBoxManagerEntry {
     //     constructor();

@@ -41,6 +41,7 @@ using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IDropBoxManager;
+using Elastos::Droid::Os::CBatteryProperties;
 using Elastos::Droid::Os::EIID_IIBatteryPropertiesListener;
 using Elastos::Droid::Os::EIID_IBatteryManagerInternal;
 using Elastos::Droid::Provider::Settings;
@@ -605,8 +606,7 @@ ECode CBatteryService::constructor(
     AutoPtr<IInterface> lmObj = GetLocalService(EIID_ILightsManager);
     mLed = new Led(context, ILightsManager::Probe(lmObj), this);
     mBatteryStats = CBatteryStatsService::GetService();
-    assert(0 && "TODO");
-    // CBatteryProperties::New((IBatteryProperties**)&mLastBatteryProps);
+    CBatteryProperties::New((IBatteryProperties**)&mLastBatteryProps);
 
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
@@ -637,8 +637,8 @@ ECode CBatteryService::OnStart()
     AutoPtr<IInterface> obj;
     sm->GetService(String("batteryproperties"), (IInterface**)&obj);
     AutoPtr<IIBatteryPropertiesRegistrar> batteryPropertiesRegistrar =
-        IIBatteryPropertiesRegistrar::Probe(obj);
-    assert(0 && "TODO");
+            IIBatteryPropertiesRegistrar::Probe(obj);
+    // assert(0 && "TODO");
     // try {
     // batteryPropertiesRegistrar->RegisterListener(new BatteryListener());
     // } catch (RemoteException e) {
@@ -789,7 +789,8 @@ void CBatteryService::Update(
             mBatteryProps = props;
             // Process the new values.
             ProcessValuesLocked(FALSE);
-        } else {
+        }
+        else {
             mLastBatteryProps->Set(props);
         }
     }
@@ -971,7 +972,8 @@ void CBatteryService::SendIntentLocked()
             | IIntent::FLAG_RECEIVER_REPLACE_PENDING);
 
     Boolean present;
-    Int32 status, health, level, temperature, voltage, technology;
+    Int32 status, health, level, temperature, voltage;
+    String technology;
     mBatteryProps->GetBatteryLevel(&level);
     mBatteryProps->GetBatteryStatus(&status);
     mBatteryProps->GetBatteryHealth(&health);
