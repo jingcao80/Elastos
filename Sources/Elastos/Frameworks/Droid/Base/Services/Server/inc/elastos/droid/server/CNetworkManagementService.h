@@ -121,6 +121,7 @@ public:
         static const Int32 TetheringStatsResult      = 221;
         static const Int32 DnsProxyQueryResult       = 222;
         static const Int32 ClatdStatusResult         = 223;
+        static const Int32 V6RtrAdvResult            = 227;
 
         static const Int32 InterfaceChange           = 600;
         static const Int32 BandwidthControl          = 601;
@@ -128,6 +129,7 @@ public:
         static const Int32 InterfaceAddressChange    = 614;
         static const Int32 InterfaceDnsServerInfo    = 615;
         static const Int32 RouteChange               = 616;
+        static const Int32 InterfaceMessage          = 617;
     };
 
 private:
@@ -616,6 +618,12 @@ private:
         /* [in] */ Int32 powerState,
         /* [in] */ Int64 tsNanos,
         /* [in] */ Boolean fromRadio);
+
+    /**
+     * Notify our observers of a change in the data activity state of the interface
+     */
+    CARAPI NotifyInterfaceMessage(
+        /* [in] */ const String& message);
 
     CARAPI PrepareNativeDaemon();
 

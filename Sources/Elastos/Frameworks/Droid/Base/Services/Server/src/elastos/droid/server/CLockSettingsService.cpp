@@ -85,7 +85,7 @@ static AutoPtr<ArrayOf<String> > InitCOLUMNS_FOR_QUERY()
 
 static AutoPtr<ArrayOf<String> > InitVALID_SETTINGS()
 {
-    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(16);
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(19);
     array->Set(0, ILockPatternUtils::LOCKOUT_PERMANENT_KEY);
     array->Set(1, ILockPatternUtils::LOCKOUT_ATTEMPT_DEADLINE);
     array->Set(2, ILockPatternUtils::PATTERN_EVER_CHOSEN_KEY);
@@ -105,6 +105,9 @@ static AutoPtr<ArrayOf<String> > InitVALID_SETTINGS()
     array->Set(13, ISettingsSecure::LOCK_BIOMETRIC_WEAK_FLAGS);
     array->Set(14, ISettingsSecure::LOCK_PATTERN_VISIBLE);
     array->Set(15, ISettingsSecure::LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
+    array->Set(16, ISettingsSecure::LOCK_PATTERN_SIZE);
+    array->Set(17, ISettingsSecure::LOCK_DOTS_VISIBLE);
+    array->Set(18, ISettingsSecure::LOCK_SHOW_ERROR_PATH);
     return array;
 }
 
@@ -619,7 +622,7 @@ ECode CLockSettingsService::GetLockPatternSize(
     VALIDATE_NOT_NULL(result);
 
     // try {
-    Int64 size;
+    Int64 size = 0;
     GetInt64(ISettingsSecure::LOCK_PATTERN_SIZE, -1, userId, &size);
     if (size > 0 && size < 128) {
         *result = (Byte) size;
@@ -630,6 +633,14 @@ ECode CLockSettingsService::GetLockPatternSize(
     // }
     *result = ILockPatternUtils::PATTERN_SIZE_DEFAULT;
     return NOERROR;
+}
+
+Boolean CLockSettingsService::IsDefaultSize(
+    /* [in] */ Int32 userId)
+{
+    Byte res;
+    GetLockPatternSize(userId, &res);
+    return res == ILockPatternUtils::PATTERN_SIZE_DEFAULT;
 }
 
 ECode CLockSettingsService::RegisterObserver(
@@ -723,6 +734,13 @@ Int32 CLockSettingsService::GetUserParentOrSelfId(
 String CLockSettingsService::GetLockPatternFilename(
     /* [in] */ Int32 uid)
 {
+    return GetLockPatternFilename(uid, IsDefaultSize(uid));
+}
+
+String CLockSettingsService::GetLockPatternFilename(
+    /* [in] */ Int32 userId,
+    /* [in] */ Boolean defaultSize)
+{
     AutoPtr<IEnvironment> env;
     CEnvironment::AcquireSingleton((IEnvironment**)&env);
     AutoPtr<IFile> dataDir;
@@ -731,16 +749,18 @@ String CLockSettingsService::GetLockPatternFilename(
     String absPath;
     dataDir->GetAbsolutePath(&absPath);
     String dataSystemDirectory = absPath + SYSTEM_DIRECTORY;
+    String patternFile = defaultSize ? String("") : String("cm_");
+    patternFile += LOCK_PATTERN_FILE;
 
-    Int32 userId = GetUserParentOrSelfId(uid);
     if (userId == 0) {
         // Leave it in the same place for user 0
-        return dataSystemDirectory + LOCK_PATTERN_FILE;
-    } else {
+        return dataSystemDirectory + patternFile;
+    }
+    else {
         AutoPtr<IFile> sysDir;
         env->GetUserSystemDirectory(userId, (IFile**)&sysDir);
         AutoPtr<IFile> tmpDir;
-        CFile::New(sysDir, LOCK_PATTERN_FILE, (IFile**)&tmpDir);
+        CFile::New(sysDir, patternFile, (IFile**)&tmpDir);
         tmpDir->GetAbsolutePath(&absPath);
         return absPath;
     }
@@ -853,15 +873,13 @@ ECode CLockSettingsService::SetLockPattern(
     MaybeUpdateKeystore(pattern, userId);
 
     AutoPtr<ArrayOf<Byte> > hash;
-
-    assert(0 && "TODO");
-    // AutoPtr<ILockPatternUtilsHelper> helper;
-    // CLockPatternUtilsHelper::AcquireSingleton((ILockPatternUtilsHelper**)&helper);
-    // AutoPtr<IList> list;
-    // helper->StringToPattern(pattern, (IList**)&list);
-    // helper->PatternToHash(list, (ArrayOf<Byte>**)&hash);
-
-    return WriteFile(GetLockPatternFilename(userId), hash);
+    AutoPtr<IList> list;
+    mLockPatternUtils->StringToPattern(pattern, (IList**)&list);
+    mLockPatternUtils->PatternToHash(list, (ArrayOf<Byte>**)&hash);
+    Boolean defaultSize = IsDefaultSize(userId);
+    WriteFile(GetLockPatternFilename(userId, defaultSize), hash);
+    WriteFile(GetLockPatternFilename(userId, !defaultSize), NULL);
+    return NOERROR;
 }
 
 ECode CLockSettingsService::SetLockPassword(
@@ -886,9 +904,6 @@ ECode CLockSettingsService::CheckPattern(
     *res = FALSE;
     FAIL_RETURN(CheckPasswordReadPermission(userId))
 
-    assert(0 && "TODO");
-    // AutoPtr<ILockPatternUtilsHelper> helper;
-    // CLockPatternUtilsHelper::AcquireSingleton((ILockPatternUtilsHelper**)&helper);
     AutoPtr<IList> list;
     AutoPtr<ArrayOf<Byte> > bytes;
     Boolean matched;
@@ -910,9 +925,8 @@ ECode CLockSettingsService::CheckPattern(
         return NOERROR;
     }
 
-    assert(0 && "TODO");
-    // helper->StringToPattern(pattern, (IList**)&list);
-    // helper->PatternToHash(list, (ArrayOf<Byte>**)&bytes);
+    mLockPatternUtils->StringToPattern(pattern, (IList**)&list);
+    mLockPatternUtils->PatternToHash(list, (ArrayOf<Byte>**)&bytes);
     matched = Arrays::Equals(stored, bytes);
     if (matched && !TextUtils::IsEmpty(pattern)) {
         MaybeUpdateKeystore(pattern, userId);
