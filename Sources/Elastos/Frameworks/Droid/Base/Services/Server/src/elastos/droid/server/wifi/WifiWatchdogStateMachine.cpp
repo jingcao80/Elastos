@@ -30,8 +30,8 @@ namespace Droid {
 namespace Server {
 namespace Wifi {
 
-Boolean WifiWatchdogStateMachine::DBG = FALSE;
-const String WifiWatchdogStateMachine::TAG("WifiWatchdogStateMachine");
+const Boolean WifiWatchdogStateMachine::DBG = FALSE;
+//const String WifiWatchdogStateMachine::TAG("WifiWatchdogStateMachine");
 const Int32 WifiWatchdogStateMachine::BASE;
 const Int32 WifiWatchdogStateMachine::EVENT_WATCHDOG_TOGGLED;
 const Int32 WifiWatchdogStateMachine::EVENT_NETWORK_STATE_CHANGE;
@@ -45,7 +45,7 @@ const Int32 WifiWatchdogStateMachine::EVENT_SCREEN_OFF;
 const Int32 WifiWatchdogStateMachine::CMD_RSSI_FETCH;
 const Int32 WifiWatchdogStateMachine::POOR_LINK_DETECTED;
 const Int32 WifiWatchdogStateMachine::GOOD_LINK_DETECTED;
-const Boolean WifiWatchdogStateMachine::DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED;
+//const Boolean WifiWatchdogStateMachine::DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED;
 const Int32 WifiWatchdogStateMachine::LINK_MONITOR_LEVEL_THRESHOLD;
 const Int32 WifiWatchdogStateMachine::BSSID_STAT_CACHE_SIZE;
 const Int32 WifiWatchdogStateMachine::BSSID_STAT_RANGE_LOW_DBM;
@@ -293,15 +293,10 @@ ECode WifiWatchdogStateMachine::WatchdogEnabledState::ProcessMessage(
         case EVENT_WIFI_RADIO_STATE_CHANGE: {
             if (DBG) Logger::D("WifiWatchdogStateMachine::WatchdogEnabledState",
                 "ProcessMessage EVENT_WIFI_RADIO_STATE_CHANGE");
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            AutoPtr<IInteger32> iobj = IInteger32::Probe(obj);
-            if (iobj) {
-                Int32 state;
-                iobj->GetValue(&state);
-                if (state == IWifiManager::WIFI_STATE_DISABLING) {
-                    mOwner->TransitionTo(mOwner->mNotConnectedState);
-                }
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            if (arg1 == IWifiManager::WIFI_STATE_DISABLING) {
+                mOwner->TransitionTo(mOwner->mNotConnectedState);
             }
             break;
         }
@@ -340,7 +335,8 @@ ECode WifiWatchdogStateMachine::VerifyingLinkState::Enter()
 {
     if (DBG) Logger::D("WifiWatchdogStateMachine::VerifyingLinkState", "Enter");
     mSampleCount = 0;
-    mOwner->mCurrentBssid->NewLinkDetected();
+    if (mOwner->mCurrentBssid != NULL)
+        mOwner->mCurrentBssid->NewLinkDetected();
     AutoPtr<IMessage> m = mOwner->ObtainMessage(CMD_RSSI_FETCH, ++mOwner->mRssiFetchToken, 0);
     mOwner->SendMessage(m);
     return NOERROR;
@@ -385,6 +381,9 @@ ECode WifiWatchdogStateMachine::VerifyingLinkState::ProcessMessage(
                 "ProcessMessage RSSI_PKTCNT_FETCH_SUCCEEDED");
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
+            if (mOwner->mCurrentBssid == NULL || obj == NULL) {
+                break;
+            }
             IRssiPacketCountInfo* info = IRssiPacketCountInfo::Probe(obj);
             Int32 rssi;
             info->GetRssi(&rssi);
@@ -449,9 +448,6 @@ ECode WifiWatchdogStateMachine::ConnectedState::ProcessMessage(
     switch (what) {
         case EVENT_WATCHDOG_SETTINGS_CHANGE:
             mOwner->UpdateSettings();
-            // STOPSHIP: Remove this at ship
-            mOwner->Logd(String("Updated secure settings and turned debug on"));
-            DBG = TRUE;
 
             if (mOwner->mPoorNetworkDetectionEnabled) {
                 mOwner->TransitionTo(mOwner->mOnlineWatchState);
@@ -571,6 +567,9 @@ ECode WifiWatchdogStateMachine::LinkMonitoringState::ProcessMessage(
             break;
         }
         case IWifiManager::RSSI_PKTCNT_FETCH_SUCCEEDED: {
+            if (mOwner->mCurrentBssid == NULL) {
+                break;
+            }
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             IRssiPacketCountInfo* info = IRssiPacketCountInfo::Probe(obj);
@@ -919,8 +918,9 @@ ECode WifiWatchdogStateMachine::NetworkBroadcastReceiver::OnReceive(
 // WifiWatchdogStateMachine
 //==============================================================
 WifiWatchdogStateMachine::WifiWatchdogStateMachine(
-    /* [in] */ IContext* context)
-    : StateMachine(TAG)
+    /* [in] */ IContext* context,
+    /* [in] */ IMessenger* dstMessenger)
+    : StateMachine(String("WifiWatchdogStateMachine"))
     , mContext(context)
     , mPoorNetworkDetectionEnabled(FALSE)
     , mRssiFetchToken(0)
@@ -942,10 +942,10 @@ WifiWatchdogStateMachine::WifiWatchdogStateMachine(
     context->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
     mWifiManager = IWifiManager::Probe(obj);
     AutoPtr<IHandler> h = GetHandler();
-    AutoPtr<IMessenger> msgr;
-    mWifiManager->GetWifiStateMachineMessenger((IMessenger**)&msgr);
+    //AutoPtr<IMessenger> msgr;
+    //mWifiManager->GetWifiStateMachineMessenger((IMessenger**)&msgr);
     mWsmChannel = new AsyncChannel();
-    mWsmChannel->ConnectSync(mContext, h, msgr);
+    mWsmChannel->ConnectSync(mContext, h, dstMessenger);
 
     SetupNetworkReceiver();
 
@@ -968,11 +968,14 @@ WifiWatchdogStateMachine::WifiWatchdogStateMachine(
     else {
         SetInitialState(mWatchdogDisabledState);
     }
+    SetLogRecSize(25);
+    SetLogOnlyTransitions(TRUE);
     UpdateSettings();
 }
 
 AutoPtr<WifiWatchdogStateMachine> WifiWatchdogStateMachine::MakeWifiWatchdogStateMachine(
-    /* [in] */ IContext* context)
+    /* [in] */ IContext* context,
+    /* [in] */ IMessenger* dstMessenger)
 {
     AutoPtr<IContentResolver> contentResolver;
     context->GetContentResolver((IContentResolver**)&contentResolver);
@@ -987,9 +990,9 @@ AutoPtr<WifiWatchdogStateMachine> WifiWatchdogStateMachine::MakeWifiWatchdogStat
     // Watchdog is always enabled. Poor network detection can be seperately turned on/off
     // TODO: Remove this setting & clean up state machine since we always have
     // watchdog in an enabled state
-    PutSettingsGlobalBoolean(contentResolver, ISettingsGlobal::WIFI_WATCHDOG_ON, FALSE); // disable default by huzhen @2012-12-12 19:20
+    PutSettingsGlobalBoolean(contentResolver, ISettingsGlobal::WIFI_WATCHDOG_ON, TRUE);
 
-    AutoPtr<WifiWatchdogStateMachine> wwsm = new WifiWatchdogStateMachine(context);
+    AutoPtr<WifiWatchdogStateMachine> wwsm = new WifiWatchdogStateMachine(context, dstMessenger);
     wwsm->Start();
     return wwsm;
 }
@@ -1040,8 +1043,13 @@ void WifiWatchdogStateMachine::RegisterForSettingsChanges()
 }
 
 void WifiWatchdogStateMachine::Dump(
-    /* [in] */ IPrintWriter* pw)
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String> args)
+
 {
+    Logger::D("WifiWatchdogStateMachine::Dump", "TODO");
+    // super.dump(fd, pw, args);
     // pw.print("WatchdogStatus: ");
     // pw.print("State: " + getCurrentState());
     // pw.println("mWifiInfo: [" + mWifiInfo + "]");
@@ -1070,7 +1078,7 @@ void WifiWatchdogStateMachine::UpdateSettings()
     else {
         mPoorNetworkDetectionEnabled = GetSettingsGlobalBoolean(mContentResolver,
                 ISettingsGlobal::WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
-                DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED);
+                IWifiManager::DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED);
     }
 }
 
