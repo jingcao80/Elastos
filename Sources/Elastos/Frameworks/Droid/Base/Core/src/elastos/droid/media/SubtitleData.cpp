@@ -18,8 +18,13 @@ SubtitleData::~SubtitleData()
 
 const String SubtitleData::TAG("SubtitleData");
 
-ECode SubtitleData::constructor()
+ECode SubtitleData::constructor(
+    /* [in] */ IParcel* parcel)
 {
+    if (!ParseParcel(parcel)) {
+        // throw new IllegalArgumentException("parseParcel() fails");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     return NOERROR;
 }
 

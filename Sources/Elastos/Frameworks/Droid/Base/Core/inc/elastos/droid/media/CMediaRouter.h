@@ -601,7 +601,7 @@ public:
   CARAPI RebindAsUser(
     /* [in] */ Int32 userId);
 
-private:
+public:
   static CARAPI UpdateRoute(
     /* [in] */ IMediaRouterRouteInfo* info);
 
@@ -694,6 +694,7 @@ private:
     /* [in] */ IWifiDisplayStatus* wfdStatus,
     /* [out] */ IMediaRouterRouteInfo** result);
 
+private:
   static CARAPI_(void) UpdateWifiDisplayRoute(
     /* [in] */ IMediaRouterRouteInfo* route,
     /* [in] */ IWifiDisplay* display,

@@ -484,8 +484,8 @@ void CMediaCodecInfoAudioCapabilities::ParseFromInfo(
         for (Int32 i = 0; i < rateStrings->GetLength(); i++) {
             AutoPtr<ICharSequence> cs;
             CString::New((*rateStrings)[i], (ICharSequence**)&cs);
-//TODO: Need Utils
-            // (*rateRanges)[i] = Utils::ParseIntRange(cs, NULL);
+            AutoPtr<IRange> r = Utils::ParseIntRange(cs, (IRange*)NULL);
+            rateRanges->Set(i, r);
         }
         LimitSampleRates(rateRanges);
     }
@@ -502,8 +502,7 @@ void CMediaCodecInfoAudioCapabilities::ParseFromInfo(
         AutoPtr<ICharSequence> cs;
         CString::New(str, (ICharSequence**)&cs);
         AutoPtr<IRange> range;
-//TODO: Need Utils
-        // range = Utils::ParseIntRange(cs, bitRates);
+        range = Utils::ParseIntRange(cs, bitRates);
         bitRates->Intersect(range, (IRange**)&bitRates);
     }
     ApplyLimits(maxInputChannels, bitRates);

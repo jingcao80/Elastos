@@ -984,10 +984,8 @@ ECode CMediaPlayer::EventHandler::HandleMessage(
             }
             if (IParcel::Probe(obj) != NULL) {
                 AutoPtr<ISubtitleData> data;
-                assert(0);
                 AutoPtr<IParcel> parcel = IParcel::Probe(obj);
-// TODO: Need CSubtitleData::constructor(IParcel)
-                // CSubtitleData::New(parcel, (ISubtitleData**)&data);
+                CSubtitleData::New(parcel, (ISubtitleData**)&data);
                 // parcel->Recycle();
                 mMediaPlayer->mOnSubtitleDataListener->OnSubtitleData(mMediaPlayer, data);
             }
@@ -2081,7 +2079,7 @@ ECode CMediaPlayer::SetMetadataFilter(
     /* [in] */ ISet* block,
     /* [out] */ Int32* result)
 {
-    assert(0 && "TODO");
+    VALIDATE_NOT_NULL(result)
     // Do our serialization manually instead of calling
     // Parcel.writeArray since the sets are made of the same type
     // we avoid paying the price of calling writeValue (used by
@@ -2095,6 +2093,7 @@ ECode CMediaPlayer::SetMetadataFilter(
     // store the len followed by a number of Int32 (4 bytes as well)
     // representing the metadata type.
     Int32 capacity;
+    assert(0 && "TODO");
     //request->DataSize(&capacity);
     //capacity += 4 * (1 + allow->Size() + 1 + block->Size());
 

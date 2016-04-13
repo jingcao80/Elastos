@@ -2,6 +2,7 @@
 #include "elastos/droid/media/Utils.h"
 #include "elastos/droid/utility/CPair.h"
 #include "elastos/droid/utility/CSize.h"
+#include "elastos/droid/utility/CRange.h"
 #include "elastos/droid/utility/CRational.h"
 #include <elastos/utility/Arrays.h>
 #include <elastos/core/CoreUtils.h>
@@ -10,6 +11,7 @@
 
 using Elastos::Droid::Utility::CPair;
 using Elastos::Droid::Utility::CSize;
+using Elastos::Droid::Utility::CRange;
 using Elastos::Droid::Utility::CRational;
 using Elastos::Droid::Utility::IPair;
 using Elastos::Droid::Utility::ISize;
@@ -182,6 +184,34 @@ AutoPtr<Range<IInteger32> > Utils::FactorRange(
     return r;
 }
 
+AutoPtr<IRange> Utils::FactorRange(
+    /* [in] */ IRange* range,
+    /* [in] */ Int32 factor)
+{
+    if (factor == 1) {
+        return range;
+    }
+
+    AutoPtr<IInterface> obj;
+    range->GetLower((IInterface**)&obj);
+    AutoPtr<IInteger32> interLower = IInteger32::Probe(obj);
+    Int32 lower;
+    interLower->GetValue(&lower);
+
+    obj = NULL;
+    range->GetUpper((IInterface**)&obj);
+    AutoPtr<IInteger32> interUpper = IInteger32::Probe(obj);
+    Int32 upper;
+    interUpper->GetValue(&upper);
+    Int32 lv = DivUp(lower, factor);
+    Int32 rv = upper / factor;
+
+    AutoPtr<IRange> r;
+    CRange::Create(CoreUtils::Convert(lv).Get(), CoreUtils::Convert(rv).Get(),
+            (IRange**)&r);
+    return r;
+}
+
 AutoPtr<Range<IInteger64> > Utils::FactorRange(
     /* [in] */ Range<IInteger64>* range,
     /* [in] */ Int64 factor)
@@ -203,20 +233,73 @@ AutoPtr<Range<IInteger64> > Utils::FactorRange(
     return r;
 }
 
-AutoPtr<Range<CRational> > Utils::ScaleRange(
-    /* [in] */ Range<CRational>* range,
+AutoPtr<IRange> Utils::FactorRange(
+    /* [in] */ IRange* range,
+    /* [in] */ Int64 factor)
+{
+    if (factor == 1) {
+        return range;
+    }
+
+    AutoPtr<IInterface> obj;
+    range->GetLower((IInterface**)&obj);
+    AutoPtr<IInteger64> interLower = IInteger64::Probe(obj);
+    Int64 lower;
+    interLower->GetValue(&lower);
+
+    obj = NULL;
+    range->GetUpper((IInterface**)&obj);
+    AutoPtr<IInteger64> interUpper = IInteger64::Probe(obj);
+    Int64 upper;
+    interUpper->GetValue(&upper);
+    Int64 lv = DivUp(lower, factor);
+    Int64 rv = upper / factor;
+
+    AutoPtr<IRange> r;
+    CRange::Create(
+            CoreUtils::Convert(lv).Get(),
+            CoreUtils::Convert(rv).Get(),
+            (IRange**)&r);
+    return r;
+}
+
+AutoPtr<Range<IRational> > Utils::ScaleRange(
+    /* [in] */ Range<IRational>* range,
     /* [in] */ Int32 num,
     /* [in] */ Int32 den)
 {
     if (num == den) {
         return range;
     }
-    AutoPtr<CRational> lower = range->GetLower();
-    AutoPtr<CRational> upper = range->GetUpper();
+    AutoPtr<IRational> lower = range->GetLower();
+    AutoPtr<IRational> upper = range->GetUpper();
 
-    return Range<CRational>::Create(
+    return Range<IRational>::Create(
             ScaleRatio(lower.Get(), num, den).Get(),
             ScaleRatio(upper.Get(), num, den).Get());
+}
+
+AutoPtr<IRange> Utils::ScaleRange(
+    /* [in] */ IRange* range,
+    /* [in] */ Int32 num,
+    /* [in] */ Int32 den)
+{
+    if (num == den) {
+        return range;
+    }
+    AutoPtr<IInterface> obj;
+    range->GetLower((IInterface**)&obj);
+    AutoPtr<IRational> lower = IRational::Probe(obj);
+    obj = NULL;
+    range->GetUpper((IInterface**)&obj);
+    AutoPtr<IRational> upper = IRational::Probe(obj);
+
+    AutoPtr<IRange> r;
+    CRange::Create(
+            ScaleRatio(lower.Get(), num, den).Get(),
+            ScaleRatio(upper.Get(), num, den).Get(),
+            (IRange**)&r);
+    return r;
 }
 
 AutoPtr<Range<IInteger32> > Utils::AlignRange(
@@ -239,6 +322,31 @@ AutoPtr<Range<IInteger32> > Utils::AlignRange(
     return r;
 }
 
+AutoPtr<IRange> Utils::AlignRange(
+    /* [in] */ IRange* range,
+    /* [in] */ Int32 align)
+{
+    AutoPtr<IInterface> obj;
+    range->GetLower((IInterface**)&obj);
+    AutoPtr<IInteger32> interLower = IInteger32::Probe(obj);
+    Int32 lower;
+    interLower->GetValue(&lower);
+
+    obj = NULL;
+    range->GetUpper((IInterface**)&obj);
+    AutoPtr<IInteger32> interUpper = IInteger32::Probe(obj);
+    Int32 upper;
+    interUpper->GetValue(&upper);
+
+    Int32 lv = DivUp(lower, align) * align;
+    Int32 rv = (upper / align) * align;
+
+    AutoPtr<IRange> r;
+    range->Intersect(CoreUtils::Convert(lv).Get(), CoreUtils::Convert(rv).Get(),
+            (IRange**)&r);
+    return r;
+}
+
 Int32 Utils::DivUp(
     /* [in] */ Int32 num,
     /* [in] */ Int32 den)
@@ -253,10 +361,30 @@ AutoPtr<Range<IInteger32> > Utils::IntRangeFor(
         CoreUtils::Convert((Int32)Elastos::Core::Math::Ceil(v)).Get());
 }
 
+ECode Utils::IntRangeFor(
+    /* [in] */ Double v,
+    /* [out] */ IRange** result)
+{
+    AutoPtr<IRange> range;
+    return CRange::Create(CoreUtils::Convert((Int32)v).Get(),
+            CoreUtils::Convert((Int32)Elastos::Core::Math::Ceil(v)).Get(),
+            result);
+}
+
 AutoPtr<Range<IInteger64> > Utils::Int64RangeFor(
     /* [in] */ Double v)
 {
     return Range<IInteger64>::Create(CoreUtils::Convert((Int64)v).Get(), CoreUtils::Convert((Int64)Elastos::Core::Math::Ceil(v)));
+}
+
+ECode Utils::Int64RangeFor(
+    /* [in] */ Double v,
+    /* [out] */ IRange** result)
+{
+    AutoPtr<IRange> range;
+    return CRange::Create(CoreUtils::Convert((Int64)v).Get(),
+            CoreUtils::Convert((Int64)Elastos::Core::Math::Ceil(v)).Get(),
+            result);
 }
 
 AutoPtr<ISize> Utils::ParseSize(
@@ -335,6 +463,36 @@ AutoPtr<Range<IInteger32> > Utils::ParseIntRange(
     // return fallback;
 }
 
+AutoPtr<IRange> Utils::ParseIntRange(
+    /* [in] */ IInterface* o,
+    /* [in] */ IRange* fallback)
+{
+    // try {
+    AutoPtr<ICharSequence> cs = ICharSequence::Probe(o);
+    String s;
+    cs->ToString(&s);
+    Int32 ix = s.IndexOf('-');
+    AutoPtr<IRange> range;
+    if (ix >= 0) {
+        CRange::Create(
+                CoreUtils::Convert(StringUtils::ParseInt32(s.Substring(0, ix), 10)).Get(),
+                CoreUtils::Convert(StringUtils::ParseInt32(s.Substring(ix + 1), 10)).Get(),
+                (IRange**)&range);
+        return range;
+    }
+    AutoPtr<IInteger32> value = CoreUtils::Convert(StringUtils::ParseInt32(s));
+    CRange::Create(value, value, (IRange**)&range);
+    return range;
+    // } catch (ClassCastException e) {
+    // } catch (NumberFormatException e) {
+    // } catch (NullPointerException e) {
+    //     return fallback;
+    // } catch (IllegalArgumentException e) {
+    // }
+    // Log.w(TAG, "could not parse integer range '" + o + "'");
+    // return fallback;
+}
+
 AutoPtr<Range<IInteger64> > Utils::ParseInt64Range(
     /* [in] */ IInterface* o,
     /* [in] */ Range<IInteger64>* fallback)
@@ -365,6 +523,36 @@ AutoPtr<Range<IInteger64> > Utils::ParseInt64Range(
     // return fallback;
 }
 
+AutoPtr<IRange> Utils::ParseInt64Range(
+    /* [in] */ IInterface* o,
+    /* [in] */ IRange* fallback)
+{
+    // try {
+    AutoPtr<ICharSequence> cs = ICharSequence::Probe(o);
+    String s;
+    cs->ToString(&s);
+    Int32 ix = s.IndexOf('-');
+    AutoPtr<IRange> range;
+    if (ix >= 0) {
+        CRange::Create(
+                CoreUtils::Convert(StringUtils::ParseInt64(s.Substring(0, ix), 10)).Get(),
+                CoreUtils::Convert(StringUtils::ParseInt64(s.Substring(ix + 1), 10)).Get(),
+                (IRange**)&range);
+        return range;
+    }
+    AutoPtr<IInteger64> value = CoreUtils::Convert(StringUtils::ParseInt64(s));
+    CRange::Create(value, value, (IRange**)&range);
+    return range;
+    // } catch (ClassCastException e) {
+    // } catch (NumberFormatException e) {
+    // } catch (NullPointerException e) {
+    //     return fallback;
+    // } catch (IllegalArgumentException e) {
+    // }
+    // Log.w(TAG, "could not parse integer range '" + o + "'");
+    // return fallback;
+}
+
 AutoPtr<Range<IRational> > Utils::ParseRationalRange(
     /* [in] */ IInterface* o,
     /* [in] */ Range<IRational>* fallback)
@@ -391,6 +579,38 @@ AutoPtr<Range<IRational> > Utils::ParseRationalRange(
     // } catch (IllegalArgumentException e) {
     // }
     // Slogger::W(TAG, "could not parse rational range '%p'", o);
+    // return fallback;
+}
+
+AutoPtr<IRange> Utils::ParseRationalRange(
+    /* [in] */ IInterface* o,
+    /* [in] */ IRange* fallback)
+{
+    // try {
+    AutoPtr<ICharSequence> cs = ICharSequence::Probe(o);
+    String s;
+    cs->ToString(&s);
+    Int32 ix = s.IndexOf('-');
+    AutoPtr<IRange> range;
+    if (ix >= 0) {
+        AutoPtr<IRational> r1;
+        CRational::ParseRational(s.Substring(0, ix), (IRational**)&r1);
+        AutoPtr<IRational> r2;
+        CRational::ParseRational(s.Substring(0, ix), (IRational**)&r2);
+        CRange::Create(r1, r2, (IRange**)&range);
+        return range;
+    }
+    AutoPtr<IRational> value;
+    CRational::ParseRational(s, (IRational**)&value);
+    CRange::Create(value, value, (IRange**)&range);
+    return range;
+    // } catch (ClassCastException e) {
+    // } catch (NumberFormatException e) {
+    // } catch (NullPointerException e) {
+    //     return fallback;
+    // } catch (IllegalArgumentException e) {
+    // }
+    // Log.w(TAG, "could not parse rational range '" + o + "'");
     // return fallback;
 }
 
@@ -430,8 +650,8 @@ AutoPtr<IPair> Utils::ParseSizeRange(
 Utils::Utils()
 {}
 
-AutoPtr<CRational> Utils::ScaleRatio(
-    /* [in] */ CRational* ratio,
+AutoPtr<IRational> Utils::ScaleRatio(
+    /* [in] */ IRational* ratio,
     /* [in] */ Int32 num,
     /* [in] */ Int32 den)
 {
@@ -443,9 +663,9 @@ AutoPtr<CRational> Utils::ScaleRatio(
     ratio->GetNumerator(&numberator);
     Int32 denominator;
     ratio->GetDenominator(&denominator);
-    AutoPtr<CRational> cr;
-    CRational::NewByFriend((Int32)(numberator * (Double)num),
-        (Int32)(denominator * (Double)den), (CRational**)&cr);
+    AutoPtr<IRational> cr;
+    CRational::New((Int32)(numberator * (Double)num),
+        (Int32)(denominator * (Double)den), (IRational**)&cr);
     return cr;
 }
 

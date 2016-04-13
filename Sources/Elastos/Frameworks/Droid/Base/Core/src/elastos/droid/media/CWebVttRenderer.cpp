@@ -1,5 +1,7 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/media/CWebVttRenderer.h"
+#include "elastos/droid/media/CWebVttRenderingWidget.h"
+#include "elastos/droid/media/CWebVttTrack.h"
 
 namespace Elastos {
 namespace Droid {
@@ -45,13 +47,11 @@ ECode CWebVttRenderer::CreateTrack(
 {
     VALIDATE_NOT_NULL(result);
     if (mRenderingWidget == NULL) {
-        //TODO
-        // CWebVttRenderingWidget::New(mContext, (IWebVttRenderingWidget**)&mRenderingWidget);
+        CWebVttRenderingWidget::New(mContext, (IWebVttRenderingWidget**)&mRenderingWidget);
     }
 
     AutoPtr<ISubtitleTrack> ist;
-    //TODO
-    // CWebVttTrack::New(mRenderingWidget, format, (ISubtitleTrack**)&ist);
+    CWebVttTrack::New(mRenderingWidget, format, (ISubtitleTrack**)&ist);
     *result = ist;
     REFCOUNT_ADD(*result);
     return NOERROR;

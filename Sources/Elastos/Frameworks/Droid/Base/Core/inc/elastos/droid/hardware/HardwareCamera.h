@@ -1904,6 +1904,10 @@ public:
     CARAPI SetDisplayOrientation(
         /* [in] */ Int32 degrees);
 
+    static android::sp<android::Camera> get_native_camera(
+        /* [in] */ HardwareCamera* thiz,
+        /* [in] */ JNICameraContext** pContext);
+
 private:
     CARAPI_(Int32) CameraInitVersion(
         /* [in] */ Int32 cameraId,
@@ -1976,10 +1980,6 @@ private:
         /* [in] */ Int32 arg1,
         /* [in] */ Int32 arg2,
         /* [in] */ const void* data);
-
-    static android::sp<android::Camera> get_native_camera(
-        /* [in] */ HardwareCamera* thiz,
-        /* [in] */ JNICameraContext** pContext);
 
 private:
     static String TAG;

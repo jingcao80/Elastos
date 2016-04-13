@@ -1,14 +1,15 @@
 #include "Elastos.CoreLibrary.h"
 #include "Elastos.Droid.Media.h"
-#include "elastos/droid/media/WebVttParser.h"
-#include "elastos/droid/media/TextTrackCue.h"
 #include "elastos/droid/media/CWebVttRendererTextTrackCue.h"
+#include "elastos/droid/media/TextTrackCue.h"
+#include "elastos/droid/media/WebVttParser.h"
+#include "elastos/droid/media/WebVttParserHelper.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
 
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Core::StringUtils;
 using Elastos::Core::CString;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -146,9 +147,12 @@ ECode WebVttParser::ParseCueTimePhase::Parse(
     rest = spaceAt > 0 ? rest.Substring(spaceAt + 1) : String("");
 
     AutoPtr<ITextTrackCue> cue = mHost->mCue;
-    //TODO
-    // mCue.mStartTimeMs = ParseTimestampMs(start);
-    // mCue.mEndTimeMs = ParseTimestampMs(end);
+    Int64 vol;
+    WebVttParserHelper::ParseTimestampMs(start, &vol);
+    ISubtitleTrackCue::Probe(cue)->SetStartTimeMs(vol);
+    WebVttParserHelper::ParseTimestampMs(end, &vol);
+    ISubtitleTrackCue::Probe(cue)->SetEndTimeMs(vol);
+
     AutoPtr<ArrayOf<String> > splits;
     StringUtils::Split(rest, String(" +"), (ArrayOf<String>**)&splits);
 
@@ -174,69 +178,73 @@ ECode WebVttParser::ParseCueTimePhase::Parse(
             } else {
                 Slogger::W("cue setting", "%s has invalid value%s", name.string(), value.string());
             }
-                } else if (name.Equals(String("line"))) {
-                    // try {
-                        /* TRICKY: we know that there are no spaces in value */
-                        assert(value.IndexOf(' ') < 0);
-                        Boolean bRet = FALSE;
-                        StringUtils::Matches(value, String(".*[^0-9].*"), &bRet);
-                        if (value.EndWith(String("%"))) {
-                            cue->SetSnapToLines(FALSE);
-                            // mCue.mLinePosition = ParseIntPercentage(value);
-                        } else if (bRet) {
-                            Slogger::W("cue setting", "%s contains an invalid character %s", name.string(), value.string());
-                        } else {
-                            cue->SetSnapToLines(TRUE);
-                            cue->SetLinePosition(StringUtils::ParseInt32(value));
-                        }
-                    // } catch (NumberFormatException e) {
-                        // Slogger::W("cue setting", "%s is not numeric or percentage%s", name.string(), value.string());
-                    // }
-                    // TODO: add support for optional alignment value [,start|middle|end]
-                } else if (name.Equals(String("position"))) {
-                    // try {
-                        //TODO
-                        // mCue.mTextPosition = ParseIntPercentage(value);
-                    // } catch (NumberFormatException e) {
-                        // Slogger::W("cue setting", "%s is not numeric or percentage %s", name.string(), value.string());
-                    // }
-                } else if (name.Equals(String("size"))) {
-                    // try {
-                        //TODO
-                        // mCue.mSize = ParseIntPercentage(value);
-                    // } catch (NumberFormatException e) {
-                        // Slogger::W("cue setting", "%s is not numeric or percentage %s", name.string(), value.string());
-                    // }
-                } else if (name.Equals(String("align"))) {
-                    if (value.Equals(String("start"))) {
-                        cue->SetAlignment(ITextTrackCue::ALIGNMENT_START);
-                    } else if (value.Equals(String("middle"))) {
-                        cue->SetAlignment(ITextTrackCue::ALIGNMENT_MIDDLE);
-                    } else if (value.Equals(String("end"))) {
-                        cue->SetAlignment(ITextTrackCue::ALIGNMENT_END);
-                    } else if (value.Equals(String("left"))) {
-                        cue->SetAlignment(ITextTrackCue::ALIGNMENT_LEFT);
-                    } else if (value.Equals(String("right"))) {
-                        cue->SetAlignment(ITextTrackCue::ALIGNMENT_RIGHT);
-                    } else {
-                        Slogger::W("cue setting", "%s has invalid value %s", name.string(), value.string());
-                        continue;
-                    }
-                }
+        } else if (name.Equals(String("line"))) {
+            // try {
+            /* TRICKY: we know that there are no spaces in value */
+            assert(value.IndexOf(' ') < 0);
+            Boolean bRet = FALSE;
+            StringUtils::Matches(value, String(".*[^0-9].*"), &bRet);
+            if (value.EndWith(String("%"))) {
+                cue->SetSnapToLines(FALSE);
+                Int32 val;
+                WebVttParserHelper::ParseIntPercentage(value, &val);
+                cue->SetLinePosition(val);
+            } else if (bRet) {
+                Slogger::W("cue setting", "%s contains an invalid character %s", name.string(), value.string());
+            } else {
+                cue->SetSnapToLines(TRUE);
+                cue->SetLinePosition(StringUtils::ParseInt32(value));
             }
-
-            Int32 size;
-            Int32 writingDirection;
-
-            if (/*mCue.mLinePosition != NULL ||*/
-                    (cue->GetSize(&size), size) != 100 ||
-                    ((cue->GetWritingDirection(&writingDirection), writingDirection) !=
-                        ITextTrackCue::WRITING_DIRECTION_HORIZONTAL)) {
-                cue->SetRegionId(String(""));
+            // } catch (NumberFormatException e) {
+                // Slogger::W("cue setting", "%s is not numeric or percentage%s", name.string(), value.string());
+            // }
+            // TODO: add support for optional alignment value [,start|middle|end]
+        } else if (name.Equals(String("position"))) {
+            // try {
+            Int32 val;
+            WebVttParserHelper::ParseIntPercentage(value, &val);
+            cue->SetTextPosition(val);
+            // } catch (NumberFormatException e) {
+                // Slogger::W("cue setting", "%s is not numeric or percentage %s", name.string(), value.string());
+            // }
+        } else if (name.Equals(String("size"))) {
+            // try {
+            Int32 val;
+            WebVttParserHelper::ParseIntPercentage(value, &val);
+            cue->SetSize(val);
+            // } catch (NumberFormatException e) {
+                // Slogger::W("cue setting", "%s is not numeric or percentage %s", name.string(), value.string());
+            // }
+        } else if (name.Equals(String("align"))) {
+            if (value.Equals(String("start"))) {
+                cue->SetAlignment(ITextTrackCue::ALIGNMENT_START);
+            } else if (value.Equals(String("middle"))) {
+                cue->SetAlignment(ITextTrackCue::ALIGNMENT_MIDDLE);
+            } else if (value.Equals(String("end"))) {
+                cue->SetAlignment(ITextTrackCue::ALIGNMENT_END);
+            } else if (value.Equals(String("left"))) {
+                cue->SetAlignment(ITextTrackCue::ALIGNMENT_LEFT);
+            } else if (value.Equals(String("right"))) {
+                cue->SetAlignment(ITextTrackCue::ALIGNMENT_RIGHT);
+            } else {
+                Slogger::W("cue setting", "%s has invalid value %s", name.string(), value.string());
+                continue;
             }
+        }
+    }
 
-           mHost->mPhase = mHost->mParseCueText;
-           return NOERROR;
+    Int32 size;
+    Int32 writingDirection;
+
+    if (((TextTrackCue*)cue.Get())->mLinePosition != NULL ||
+            (cue->GetSize(&size), size) != 100 ||
+            ((cue->GetWritingDirection(&writingDirection), writingDirection) !=
+                ITextTrackCue::WRITING_DIRECTION_HORIZONTAL)) {
+        cue->SetRegionId(String(""));
+    }
+
+   mHost->mPhase = mHost->mParseCueText;
+   return NOERROR;
 }
 
 //===============================================================

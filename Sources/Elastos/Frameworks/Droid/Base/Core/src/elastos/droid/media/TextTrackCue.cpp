@@ -156,8 +156,9 @@ ECode TextTrackCue::AppendLinesToBuilder(
                         builder->Append(String(">"));
                         lastTimestamp = timestampMs;
                     }
-                    //TODO
-                    // builder->Append(span_->mText);
+                    String text;
+                    span->GetText(&text);
+                    builder->Append(text);
                     innerFirst = FALSE;
                 }
                 builder->Append(String("\""));

@@ -1,7 +1,9 @@
 #include "elastos/droid/media/CMediaCodecInfoCodecCapabilities.h"
 #include "elastos/droid/media/CMediaCodecInfoCodecProfileLevel.h"
 #include "elastos/droid/media/CMediaCodecInfoEncoderCapabilities.h"
+#include "elastos/droid/media/Utils.h"
 #include "elastos/droid/utility/CRange.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
 
@@ -271,15 +273,13 @@ void CMediaCodecInfoEncoderCapabilities::ParseFromInfo(
     if (info->ContainsKey(String("complexity-range"), &b), b) {
         String str;
         info->GetString(String("complexity-range"), &str);
-//TODO: Need Utils
-        // mComplexityRange = Utils::ParseIntRange(str, mComplexityRange);
+        mComplexityRange = Utils::ParseIntRange(CoreUtils::Convert(str), mComplexityRange);
         // TODO should we limit this to level limits?
     }
     if (info->ContainsKey(String("quality-range"), &b), b) {
         String str;
         info->GetString(String("quality-range"), &str);
-//TODO: Need Utils
-        // mQualityRange = Utils::ParseIntRange(str, mQualityRange);
+        mQualityRange = Utils::ParseIntRange(CoreUtils::Convert(str), mQualityRange);
     }
     if (info->ContainsKey(String("feature-bitrate-control"), &b), b) {
         String str;

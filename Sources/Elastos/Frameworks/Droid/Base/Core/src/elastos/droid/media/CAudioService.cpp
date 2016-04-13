@@ -2351,8 +2351,7 @@ ECode CAudioService::SettingsObserver::OnChange(
         mHost->ReadDockAudioSettings(mHost->mContentResolver);
 
         Int32 resTmp = 0;
-        assert(0);
-        Settings::Secure::GetInt32(mHost->mContentResolver, String("volume_link_notification")/*TODO: ISettingsSecure::VOLUME_LINK_NOTIFICATION*/, 1, &resTmp);
+        Settings::Secure::GetInt32(mHost->mContentResolver, ISettingsSecure::VOLUME_LINK_NOTIFICATION, 1, &resTmp);
         mHost->mLinkNotificationWithVolume = (resTmp == 1);
         if (mHost->mLinkNotificationWithVolume) {
             (*mHost->mStreamVolumeAlias)[IAudioSystem::STREAM_NOTIFICATION] = IAudioSystem::STREAM_RING;
@@ -6916,9 +6915,8 @@ void CAudioService::StartMusicPlayer()
     AutoPtr<IContentResolver> contentResolver;
     mContext->GetContentResolver((IContentResolver**)&contentResolver);
     Int32 resTmp = 0;
-    assert(0);
     Settings::System::GetInt32ForUser(contentResolver,
-            String("headset_connect_player")/*TODO: ISettingsSystem::HEADSET_CONNECT_PLAYER*/, 0, IUserHandle::USER_CURRENT, &resTmp);
+            ISettingsSystem::HEADSET_CONNECT_PLAYER, 0, IUserHandle::USER_CURRENT, &resTmp);
     Boolean launchPlayer = (resTmp != 0);
     if (launchPlayer) {
         AutoPtr<IIntent> playerIntent;
