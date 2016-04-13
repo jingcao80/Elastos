@@ -12,7 +12,7 @@ namespace Droid {
 namespace Internal {
 namespace Os {
 
-class BaseCommand
+class ECO_PUBLIC BaseCommand
     : public Object
     , public IBaseCommand
 {
