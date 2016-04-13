@@ -2814,7 +2814,7 @@ ECode CMountService::SetUsbMassStorageEnabled(
     AutoPtr<IArrayList> volumes = GetShareableVolumes();
     AutoPtr<IIterator> it;
     volumes->GetIterator((IIterator**)&it);
-    Boolean hasNext;
+    Boolean hasNext = FALSE;
     while(it->HasNext(&hasNext), hasNext) {
         /*
          * If the volume is mounted and we're enabling then unmount it

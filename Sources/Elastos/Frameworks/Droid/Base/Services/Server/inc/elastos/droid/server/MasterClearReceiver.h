@@ -26,12 +26,14 @@ private:
         friend class FileObserver;
     public:
         RebootThread(
+            /* [in] */ IIntent* intent,
             /* [in] */ Boolean shutdown,
             /* [in] */ const String& reason);
 
         CARAPI Run();
 
     private:
+        AutoPtr<IIntent> mIntent;
         Boolean mShutdown;
         String mReason;
     };
@@ -49,6 +51,10 @@ public:
         (*info).AppendFormat("%p", this);
         return NOERROR;
     }
+
+public:
+    static const String EXTRA_WIPE_MEDIA;
+
 private:
     AutoPtr<RebootThread> mRebootThread;
 };

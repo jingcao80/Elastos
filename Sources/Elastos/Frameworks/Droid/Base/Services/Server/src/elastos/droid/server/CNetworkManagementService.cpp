@@ -22,22 +22,15 @@
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/droid/os/SystemProperties.h>
 #include <elastos/droid/server/NetworkManagementSocketTagger.h>
+#include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Core::CObject;
-using Elastos::Core::CoreUtils;
-using Elastos::Core::CString;
-using Elastos::Core::CSystem;
-using Elastos::Core::CThread;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::ISystem;
-using Elastos::Core::StringBuffer;
-using Elastos::Core::StringUtils;
 using Elastos::Droid::App::IService;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Net::CNetworkStatsFactory;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Net::CConnectivityManager;
@@ -64,10 +57,20 @@ using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::R;
 using Elastos::Droid::Server::Net::LockdownVpnTracker;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Droid::Utility::CSparseBooleanArray;
+using Elastos::Core::CObject;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::CString;
+using Elastos::Core::CSystem;
+using Elastos::Core::CThread;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::ISystem;
+using Elastos::Core::StringBuffer;
+using Elastos::Core::StringUtils;
 using Elastos::IO::CFile;
 using Elastos::IO::IBuffer;
 using Elastos::IO::IDataInput;
@@ -216,6 +219,28 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
         Logger::E(TAG, "%s", errorMessage.string());
         return E_ILLEGAL_STATE_EXCEPTION;
         // break;
+    case NetdResponseCode::InterfaceMessage: {
+        /*
+         * An message arrived in network interface.
+         * Format: "NNN IfaceMessage <3>AP-STA-CONNECTED 00:08:22:64:9d:84
+         */
+        if (cooked->GetLength() < 3 || !(*cooked)[1].Equals("IfaceMessage")) {
+            // throw new IllegalStateException(errorMessage);
+            return E_ILLEGAL_STATE_EXCEPTION;
+        }
+        Slogger::D(TAG, "onEvent: %d", raw.string());
+        if(!((*cooked)[4]).IsNull()) {
+            String str = (*cooked)[3];
+            str += " ";
+            str += (*cooked)[4];
+            mHost->NotifyInterfaceMessage(str);
+        }
+        else {
+            mHost->NotifyInterfaceMessage((*cooked)[3]);
+        }
+        return TRUE;
+        // break;
+    }
     case NetdResponseCode::InterfaceClassActivity:
     {
         /*
@@ -829,6 +854,21 @@ ECode CNetworkManagementService::NotifyInterfaceClassActivity(
     return NOERROR;
 }
 
+ECode CNetworkManagementService::NotifyInterfaceMessage(
+    /* [in] */ const String& message)
+{
+    Int32 length = 0;
+    mObservers->BeginBroadcast(&length);
+    for (Int32 i = 0; i < length; i++) {
+        AutoPtr<IInterface> p;
+        mObservers->GetBroadcastItem(i, (IInterface**)&p);
+        AutoPtr<IINetworkManagementEventObserver> _p = IINetworkManagementEventObserver::Probe(p);
+        _p->InterfaceMessageRecevied(message);
+    }
+    mObservers->FinishBroadcast();
+    return NOERROR;
+}
+
 ECode CNetworkManagementService::NotifyAddressUpdated(
     /* [in] */ const String& iface,
     /* [in] */ ILinkAddress* address)
@@ -1074,6 +1114,44 @@ ECode CNetworkManagementService::ListInterfaces(
      //     throw e.rethrowAsParcelableException();
      // }
      return NOERROR;
+}
+
+ECode CNetworkManagementService::AddUpstreamV6Interface(
+    /* [in] */ const String& iface)
+{
+    mContext->EnforceCallingOrSelfPermission(
+            Manifest::permission::ACCESS_NETWORK_STATE, String("NetworkManagementService"));
+
+    Slogger::D(TAG, "addUpstreamInterface(%s)", iface.string());
+
+    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
+    args->Set(0, CoreUtils::Convert(String("interface")));
+    args->Set(1, CoreUtils::Convert(String("add_upstream")));
+    AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
+            String("tether"), args);
+    cmd->AppendArg(CoreUtils::Convert(iface));
+    AutoPtr<NativeDaemonEvent> event;
+    mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
+    return NOERROR;
+}
+
+ECode CNetworkManagementService::RemoveUpstreamV6Interface(
+    /* [in] */ const String& iface)
+{
+    mContext->EnforceCallingOrSelfPermission(
+            Manifest::permission::ACCESS_NETWORK_STATE, String("NetworkManagementService"));
+
+    Slogger::D(TAG, "removeUpstreamInterface(%s)", iface.string());
+
+    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
+    args->Set(0, CoreUtils::Convert(String("interface")));
+    args->Set(1, CoreUtils::Convert(String("remove_upstream")));
+    AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
+            String("tether"), args);
+    cmd->AppendArg(CoreUtils::Convert(iface));
+    AutoPtr<NativeDaemonEvent> event;
+    mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
+    return NOERROR;
 }
 
 ECode CNetworkManagementService::GetInterfaceConfig(
@@ -1856,18 +1934,6 @@ ECode CNetworkManagementService::DisableNat(
     return ModifyNat(String("disable"), internalInterface, externalInterface);
 }
 
-ECode CNetworkManagementService::AddUpstreamV6Interface(
-    /* [in] */ const String& iface)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CNetworkManagementService::RemoveUpstreamV6Interface(
-    /* [in] */ const String& iface)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
 ECode CNetworkManagementService::ListTtys(
     /* [out, callee] */ ArrayOf<String>** result)
 {
@@ -1952,7 +2018,13 @@ ECode CNetworkManagementService::StartAccessPoint(
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
     // try {
-    WifiFirmwareReload(wlanIface, String("AP"));
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    Boolean b = FALSE;
+    res->GetBoolean(R::bool_::config_wifiApFirmwareReload, &b);
+    if (b) {
+        WifiFirmwareReload(wlanIface, String("AP"));
+    }
     StringBuffer cmd("softap start ");
     cmd += wlanIface;
     String strcmd = cmd.ToString();

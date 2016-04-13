@@ -235,6 +235,7 @@ public:
     {
         return Object::ToString(str);
     }
+
 private:
     CARAPI_(void) MigrateOldData();
 
@@ -257,6 +258,10 @@ private:
 
     CARAPI_(String) GetLockPatternFilename(
         /* [in] */ Int32 userId);
+
+    CARAPI_(String) GetLockPatternFilename(
+        /* [in] */ Int32 userId,
+        /* [in] */ Boolean defaultSize);
 
     CARAPI_(String) GetLockPasswordFilename(
         /* [in] */ Int32 userId);
@@ -282,6 +287,9 @@ private:
         /* [out]*/ String* value);
 
     AutoPtr<IIMountService> GetMountService();
+
+    CARAPI_(Boolean) IsDefaultSize(
+        /* [in] */ Int32 userId);
 
 private:
 
