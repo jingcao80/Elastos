@@ -877,7 +877,7 @@ private:
         /* [in] */ TextUtilsTruncateAt method);
 
 public:
-   /* package */ static AutoPtr<IEmojiFactory> EMOJI_FACTORY;
+    /* package */ static AutoPtr<IEmojiFactory> EMOJI_FACTORY;
     /* package */ static Int32 MIN_EMOJI, MAX_EMOJI;
 
     /* package */ static AutoPtr<ILayoutDirections> DIRS_ALL_LEFT_TO_RIGHT;

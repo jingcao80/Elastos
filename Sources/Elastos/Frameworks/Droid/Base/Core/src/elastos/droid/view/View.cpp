@@ -2181,6 +2181,7 @@ ECode View::RequestRectangleOnScreen(
         position->Offset(-scrollX, -scrollY);
 
         child = parentView;
+        parent = NULL;
         child->GetParent((IViewParent**)&parent);
     }
 
@@ -2318,14 +2319,17 @@ ECode View::HasFocusable(
     Boolean isFocusableInTouchMode;
     IsFocusableInTouchMode(&isFocusableInTouchMode);
     if (!isFocusableInTouchMode) {
-        while (IViewGroup::Probe(mParent)) {
-            AutoPtr<IViewGroup> g = (IViewGroup*)IViewGroup::Probe(mParent);
+        AutoPtr<IViewParent> p = mParent;
+        while (IViewGroup::Probe(p) != NULL) {
+            AutoPtr<IViewGroup> g = IViewGroup::Probe(p);
             Boolean shouldBlockFocusForTouchscreen;
             if (g->ShouldBlockFocusForTouchscreen(&shouldBlockFocusForTouchscreen), shouldBlockFocusForTouchscreen) {
                 *res = FALSE;
                 return NOERROR;
             }
-            mParent->GetParent((IViewParent**)&mParent);
+            AutoPtr<IViewParent> temp;
+            p->GetParent((IViewParent**)&temp);
+            p = temp;
         }
     }
     Boolean isFocusable;
@@ -5250,7 +5254,9 @@ ECode View::IsImportantForAccessibility(
             *isImportant = FALSE;
             return NOERROR;
         }
-        IView::Probe(parent)->GetParent((IViewParent**)&parent);
+        AutoPtr<IViewParent> temp;
+        parent->GetParent((IViewParent**)&temp);
+        parent = temp;
     }
     Boolean isActionable;
     IsActionableForAccessibility(&isActionable);
@@ -5756,8 +5762,8 @@ Boolean View::HasAncestorThatBlocksDescendantFocus()
     Boolean focusableInTouchMode;
     IsFocusableInTouchMode(&focusableInTouchMode);
     AutoPtr<IViewParent> ancestor = mParent;
-    while (ancestor != NULL && ancestor->Probe(EIID_IViewGroup) != NULL) {
-        AutoPtr<IViewGroup> vgAncestor = (IViewGroup*)ancestor->Probe(EIID_IViewGroup);
+    while (ancestor != NULL && IViewGroup::Probe(ancestor) != NULL) {
+        AutoPtr<IViewGroup> vgAncestor = IViewGroup::Probe(ancestor);
         Int32 focusability;
         vgAncestor->GetDescendantFocusability(&focusability);
         Boolean res;
@@ -15822,7 +15828,7 @@ ECode View::Measure(
     /* [in] */ Int32 heightMeasureSpec)
 {
     Boolean optical = IsLayoutModeOptical(TO_IINTERFACE(this));
-    if (optical != IsLayoutModeOptical((IInterface*)mParent->Probe(EIID_IInterface))) {
+    if (optical != IsLayoutModeOptical(mParent)) {
         AutoPtr<IInsets> insets;
         GetOpticalInsets((IInsets**)&insets);
         Insets* temp = (Insets*)insets.Get();
@@ -15947,7 +15953,7 @@ void View::SetMeasuredDimension(
     /* [in] */ Int32 measuredHeight)
 {
     Boolean optical = IsLayoutModeOptical(TO_IINTERFACE(this));
-    Boolean parentOptical = IsLayoutModeOptical((IInterface*)mParent->Probe(EIID_IInterface));
+    Boolean parentOptical = IsLayoutModeOptical(mParent);
     if (optical != parentOptical) {
         AutoPtr<IInsets> insets;
         GetOpticalInsets((IInsets**)&insets);
@@ -18555,7 +18561,7 @@ ECode View::AlpahFloatProperty::Get(
     (IView::Probe(obj))->GetAlpha(&alpha);
     AutoPtr<IFloat> temp;
     CFloat::New(alpha, (IFloat**)&temp);
-    *rst = (IInterface*)temp->Probe(EIID_IInterface);
+    *rst = temp;
     REFCOUNT_ADD(*rst);
     return NOERROR;
 }
@@ -18585,7 +18591,7 @@ ECode View::TranslationXFloatProperty::Get(
     (IView::Probe(obj))->GetTranslationX(&translationX);
     AutoPtr<IFloat> temp;
     CFloat::New(translationX, (IFloat**)&temp);
-    *rst = (IInterface*)temp->Probe(EIID_IInterface);
+    *rst = temp;
     REFCOUNT_ADD(*rst);
     return NOERROR;
 }
@@ -18615,7 +18621,7 @@ ECode View::TranslationYFloatProperty::Get(
     (IView::Probe(obj))->GetTranslationY(&translationY);
     AutoPtr<IFloat> temp;
     CFloat::New(translationY, (IFloat**)&temp);
-    *rst = (IInterface*)temp->Probe(EIID_IInterface);
+    *rst = temp;
     REFCOUNT_ADD(*rst);
     return NOERROR;
 }
@@ -18645,7 +18651,7 @@ ECode View::TranslationZFloatProperty::Get(
     (IView::Probe(obj))->GetTranslationZ(&translationZ);
     AutoPtr<IFloat> temp;
     CFloat::New(translationZ, (IFloat**)&temp);
-    *rst = (IInterface*)temp->Probe(EIID_IInterface);
+    *rst = temp;
     REFCOUNT_ADD(*rst);
     return NOERROR;
 }
@@ -18675,7 +18681,7 @@ ECode View::XFloatProperty::Get(
     (IView::Probe(obj))->GetX(&x);
     AutoPtr<IFloat> temp;
     CFloat::New(x, (IFloat**)&temp);
-    *rst = (IInterface*)temp->Probe(EIID_IInterface);
+    *rst = temp;
     REFCOUNT_ADD(*rst);
     return NOERROR;
 }
@@ -18705,7 +18711,7 @@ ECode View::YFloatProperty::Get(
     (IView::Probe(obj))->GetY(&y);
     AutoPtr<IFloat> temp;
     CFloat::New(y, (IFloat**)&temp);
-    *rst = (IInterface*)temp->Probe(EIID_IInterface);
+    *rst = temp;
     REFCOUNT_ADD(*rst);
     return NOERROR;
 }
@@ -18735,7 +18741,7 @@ ECode View::ZFloatProperty::Get(
     (IView::Probe(obj))->GetZ(&z);
     AutoPtr<IFloat> temp;
     CFloat::New(z, (IFloat**)&temp);
-    *rst = (IInterface*)temp->Probe(EIID_IInterface);
+    *rst = temp;
     REFCOUNT_ADD(*rst);
     return NOERROR;
 }
@@ -18765,7 +18771,7 @@ ECode View::RotationFloatProperty::Get(
     (IView::Probe(obj))->GetRotation(&rotation);
     AutoPtr<IFloat> temp;
     CFloat::New(rotation, (IFloat**)&temp);
-    *rst = (IInterface*)temp->Probe(EIID_IInterface);
+    *rst = temp;
     REFCOUNT_ADD(*rst);
     return NOERROR;
 }
@@ -18795,7 +18801,7 @@ ECode View::RotationXFloatProperty::Get(
     (IView::Probe(obj))->GetRotationX(&rotation);
     AutoPtr<IFloat> temp;
     CFloat::New(rotation, (IFloat**)&temp);
-    *rst = (IInterface*)temp->Probe(EIID_IInterface);
+    *rst = temp;
     REFCOUNT_ADD(*rst);
     return NOERROR;
 }
@@ -18825,7 +18831,7 @@ ECode View::RotationYFloatProperty::Get(
     (IView::Probe(obj))->GetRotationY(&rotation);
     AutoPtr<IFloat> temp;
     CFloat::New(rotation, (IFloat**)&temp);
-    *rst = (IInterface*)temp->Probe(EIID_IInterface);
+    *rst = temp;
     REFCOUNT_ADD(*rst);
     return NOERROR;
 }
@@ -18855,7 +18861,7 @@ ECode View::ScaleXFloatProperty::Get(
     (IView::Probe(obj))->GetScaleX(&rotation);
     AutoPtr<IFloat> temp;
     CFloat::New(rotation, (IFloat**)&temp);
-    *rst = (IInterface*)temp->Probe(EIID_IInterface);
+    *rst = temp;
     REFCOUNT_ADD(*rst);
     return NOERROR;
 }
@@ -18885,7 +18891,7 @@ ECode View::ScaleYFloatProperty::Get(
     (IView::Probe(obj))->GetScaleY(&rotation);
     AutoPtr<IFloat> temp;
     CFloat::New(rotation, (IFloat**)&temp);
-    *rst = (IInterface*)temp->Probe(EIID_IInterface);
+    *rst = temp;
     REFCOUNT_ADD(*rst);
     return NOERROR;
 }

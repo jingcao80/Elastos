@@ -1843,6 +1843,7 @@ ECode TextView::InitFromAttributes(
                 CreateEditorIfNeeded();
                 AutoPtr<Editor> editor = TO_EDITOR(mEditor);
                 editor->CreateInputContentTypeIfNeeded();
+                editor->mInputContentType->mImeActionLabel = NULL;
                 a->GetText(attr, (ICharSequence**)&(editor->mInputContentType->mImeActionLabel));
                 break;
             }
@@ -7630,7 +7631,7 @@ AutoPtr<ILayout> TextView::MakeSingleLayout(
                             boring, mIncludePad));
                     }
                     if (useSaved) {
-                        mSavedLayout = (IBoringLayout*) result.Get();
+                        mSavedLayout = IBoringLayout::Probe(result);
                     }
             }
             else if (shouldEllipsize && bwidth <= wantWidth) {

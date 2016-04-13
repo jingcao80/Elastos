@@ -168,12 +168,13 @@ void CInterpolator::NativeSetKeyFrame(
 {
     SkInterpolator* interp = reinterpret_cast<SkInterpolator*>(interpHandle);
 
-    // AutoJavaFloatArray autoValues(env, valueArray);
-    // AutoJavaFloatArray autoBlend(env, blendArray, 4);
-    assert(blendArray->GetLength() >= 4);
+    assert(blendArray == NULL || blendArray->GetLength() >= 4);
 #ifdef SK_SCALAR_IS_FLOAT
     SkScalar* scalars = valueArray->GetPayload();
-    SkScalar* blend = blendArray->GetPayload();
+    SkScalar* blend = NULL;
+    if (blendArray) {
+        blend = blendArray->GetPayload();
+    }
 #else
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
