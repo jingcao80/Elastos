@@ -2,9 +2,10 @@
 module
 {
     interface Elastos.Droid.Content.Res.IThemeConfig;
-    using interface Elastos.Utility.ILocale;
 
-    interface Elastos.Droid.Content.Res.IThemeConfig;
+    using interface Elastos.Utility.ILocale;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+    using interface Org.Xmlpull.V1.IXmlSerializer;
 
     namespace Elastos {
     namespace Droid {
@@ -544,6 +545,27 @@ module
 
         GetEmpty(
             [out] IConfiguration** empty);
+
+        LocaleToResourceQualifier(
+            [in] ILocale* locale,
+            [out] String* resourceQualifier);
+
+        ResourceQualifierString(
+            [in] IConfiguration* config,
+            [out] String* resourceQualifier);
+
+        GenerateDelta(
+            [in] IConfiguration* base,
+            [in] IConfiguration* change,
+            [out] IConfiguration** configuration);
+
+        ReadXmlAttrs(
+            [in] IXmlPullParser* parser,
+            [in] IConfiguration* configOut);
+
+        WriteXmlAttrs(
+            [in] IXmlSerializer* xml,
+            [in] IConfiguration* config);
     }
 
     } // namespace Res

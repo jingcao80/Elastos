@@ -2,8 +2,14 @@
 #ifndef __ELASTOS_DROID_CONTENT_RES_CCONFIGURATIONHELPER_H__
 #define __ELASTOS_DROID_CONTENT_RES_CCONFIGURATIONHELPER_H__
 
+#include <Elastos.CoreLibrary.Utility.h>
 #include "_Elastos_Droid_Content_Res_CConfigurationHelper.h"
 #include <elastos/core/Singleton.h>
+
+using Elastos::Core::Singleton;
+using Elastos::Utility::ILocale;
+using Org::Xmlpull::V1::IXmlPullParser;
+using Org::Xmlpull::V1::IXmlSerializer;
 
 namespace Elastos {
 namespace Droid {
@@ -47,6 +53,27 @@ public:
 
     CARAPI GetEmpty(
         /* [out] */ IConfiguration** empty);
+
+    CARAPI LocaleToResourceQualifier(
+        /* [in] */ ILocale* locale,
+        /* [out] */ String* resourceQualifier);
+
+    CARAPI ResourceQualifierString(
+        /* [in] */ IConfiguration* config,
+        /* [out] */ String* resourceQualifier);
+
+    CARAPI GenerateDelta(
+        /* [in] */ IConfiguration* base,
+        /* [in] */ IConfiguration* change,
+        /* [out] */ IConfiguration** configuration);
+
+    CARAPI ReadXmlAttrs(
+        /* [in] */ IXmlPullParser* parser,
+        /* [in] */ IConfiguration* configOut);
+
+    CARAPI WriteXmlAttrs(
+        /* [in] */ IXmlSerializer* xml,
+        /* [in] */ IConfiguration* config);
 };
 
 }

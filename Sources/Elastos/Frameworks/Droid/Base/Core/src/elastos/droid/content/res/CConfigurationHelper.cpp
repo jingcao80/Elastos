@@ -8,7 +8,7 @@ namespace Droid {
 namespace Content {
 namespace Res {
 
-CAR_INTERFACE_IMPL(CConfigurationHelper, Object, IConfigurationHelper)
+CAR_INTERFACE_IMPL(CConfigurationHelper, Singleton, IConfigurationHelper)
 
 CAR_SINGLETON_IMPL(CConfigurationHelper)
 
@@ -49,6 +49,50 @@ ECode CConfigurationHelper::GetEmpty(
     *empty = CConfiguration::EMPTY;
     REFCOUNT_ADD(*empty);
     return NOERROR;
+}
+
+ECode CConfigurationHelper::LocaleToResourceQualifier(
+    /* [in] */ ILocale* locale,
+    /* [out] */ String* resourceQualifier)
+{
+    VALIDATE_NOT_NULL(resourceQualifier);
+    *resourceQualifier = CConfiguration::LocaleToResourceQualifier(locale);
+    return NOERROR;
+}
+
+ECode CConfigurationHelper::ResourceQualifierString(
+    /* [in] */ IConfiguration* config,
+    /* [out] */ String* resourceQualifier)
+{
+    VALIDATE_NOT_NULL(resourceQualifier);
+    *resourceQualifier = CConfiguration::ResourceQualifierString(config);
+    return NOERROR;
+}
+
+ECode CConfigurationHelper::GenerateDelta(
+    /* [in] */ IConfiguration* base,
+    /* [in] */ IConfiguration* change,
+    /* [out] */ IConfiguration** configuration)
+{
+    VALIDATE_NOT_NULL(configuration);
+    AutoPtr<IConfiguration> ac = CConfiguration::GenerateDelta(base, change);
+    *configuration = ac;
+    REFCOUNT_ADD(*configuration);
+    return NOERROR;
+}
+
+ECode CConfigurationHelper::ReadXmlAttrs(
+    /* [in] */ IXmlPullParser* parser,
+    /* [in] */ IConfiguration* configOut)
+{
+    return CConfiguration::ReadXmlAttrs(parser, configOut);
+}
+
+ECode CConfigurationHelper::WriteXmlAttrs(
+    /* [in] */ IXmlSerializer* xml,
+    /* [in] */ IConfiguration* config)
+{
+    return CConfiguration::WriteXmlAttrs(xml, config);
 }
 
 }
