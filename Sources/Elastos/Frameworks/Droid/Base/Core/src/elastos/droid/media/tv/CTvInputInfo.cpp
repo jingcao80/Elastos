@@ -527,9 +527,10 @@ ECode CTvInputInfo::CreateTvInputInfo(
     AutoPtr<CTvInputInfo> input;
     CTvInputInfo::NewByFriend(service, id, parentId, inputType, (CTvInputInfo**)&input);
     AutoPtr<ITypedArray> sa;
-    assert(0);
-//TODO: Need R::styleable::TvInputService
-    // res->ObtainAttributes(attrs, R::styleable::TvInputService, (ITypedArray**)&sa);
+    AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(2);
+    (*array)[0] = R::styleable::TvInputService[0];
+    (*array)[1] = R::styleable::TvInputService[1];
+    res->ObtainAttributes(attrs, array, (ITypedArray**)&sa);
     sa->GetString(R::styleable::TvInputService_setupActivity, &input->mSetupActivity);
     if (DEBUG) {
         // Logger::D(TAG, "Setup activity loaded. [" + input.mSetupActivity + "] for " + si.name);

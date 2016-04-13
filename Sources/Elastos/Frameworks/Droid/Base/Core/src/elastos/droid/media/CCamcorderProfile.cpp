@@ -359,7 +359,6 @@ ECode CCamcorderProfile::NativeGetCamcorderProfile(
 
     android::MediaProfiles* sProfiles = android::MediaProfiles::getInstance();
     android::camcorder_quality q = static_cast<android::camcorder_quality>(quality);
-// TODO: Need android::MediaProfiles::getCamcorderProfileParamByName
     Int32 duration         = sProfiles->getCamcorderProfileParamByName("duration",    cameraId, q);
     Int32 fileFormat       = sProfiles->getCamcorderProfileParamByName("file.format", cameraId, q);
     Int32 videoCodec       = sProfiles->getCamcorderProfileParamByName("vid.codec",   cameraId, q);
@@ -415,7 +414,6 @@ Boolean CCamcorderProfile::NativeHasCamcorderProfile(
 
     android::MediaProfiles* sProfiles = android::MediaProfiles::getInstance();
     android::camcorder_quality q = static_cast<android::camcorder_quality>(quality);
-// TODO: Need android::MediaProfiles::hasCamcorderProfile
     return sProfiles->hasCamcorderProfile(cameraId, q);
     return TRUE;
 }

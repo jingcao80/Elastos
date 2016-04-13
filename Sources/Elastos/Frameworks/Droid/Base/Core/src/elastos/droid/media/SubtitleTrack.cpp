@@ -669,13 +669,13 @@ ECode SubtitleTrack::SetRunDiscardTimeMs(
     /* [in] */ Int64 runID,
     /* [in] */ Int64 timeMs)
 {
-    assert(0 && "TODO");
     if (runID != 0 && runID != ~0) {
-        AutoPtr<Run> run;
-        // Run run = mRunsByID->Get(runID);
+        AutoPtr<IInterface> obj;
+        mRunsByID->Get(runID, (IInterface**)&obj);
+        AutoPtr<Run> run = (Run*)(IObject*)obj.Get();
         if (run != NULL) {
             run->mEndTimeMs = timeMs;
-            // run->StoreByEndTimeMs(mRunsByEndTime);
+            run->StoreByEndTimeMs(mRunsByEndTime);
         }
     }
     return NOERROR;
@@ -762,11 +762,13 @@ ECode SubtitleTrack::UpdateActiveCues(
     }
 
     /* complete any runs */
-    assert(0 && "TODO"); // ILongSparseArray
-/*        while (mRunsByEndTime.size() > 0 &&
-           mRunsByEndTime.keyAt(0) <= timeMs) {
-        removeRunsByEndTimeIndex(0); // removes element
-    }*/
+    Int32 size;
+    mRunsByEndTime->GetSize(&size);
+    Int64 value;
+    while ((size > 0) &&
+           (mRunsByEndTime->KeyAt(0, &value), value <= timeMs)) {
+        RemoveRunsByEndTimeIndex(0); // removes element
+    }
 
     mLastUpdateTimeMs = timeMs;
     return NOERROR;
@@ -776,8 +778,7 @@ ECode SubtitleTrack::Finalize()
 {
     /* remove all cues (untangle all cross-links) */
     Int32 size;
-    assert(0 && "TODO");
-    // mRunsByEndTime.size();
+    mRunsByEndTime->GetSize(&size);
     for(Int32 ix = size - 1; ix >= 0; ix--) {
         RemoveRunsByEndTimeIndex(ix);
     }
@@ -823,11 +824,12 @@ ECode SubtitleTrack::AddCue(
     Int64 startTimeMs;
     cue->GetStartTimeMs(&startTimeMs);
     if (runID != 0) {
-        AutoPtr<Run> run;
-        // Run run = mRunsByID.get(cue.mRunID);
+        AutoPtr<IInterface> obj;
+        mRunsByID->Get(runID, (IInterface**)&obj);
+        AutoPtr<Run> run = (Run*)(IObject*)obj.Get();
         if (run == NULL) {
             run = new Run();
-            // mRunsByID->Put(((Cue*)cue)->mRunID, run);
+            mRunsByID->Put(((Cue*)cue)->mRunID, (IInterface*)(IObject*)run);
 
             run->mEndTimeMs = endTimeMs;
         } else if (run->mEndTimeMs < endTimeMs) {
@@ -889,11 +891,11 @@ ECode SubtitleTrack::FinishedRun(
     /* [in] */ Int64 runID)
 {
     if (runID != 0 && runID != ~0) {
-        AutoPtr<Run> run;
-        assert(0 && "TODO");
-        // mRunsByID->Get(runID);
+        AutoPtr<IInterface> obj;
+        mRunsByID->Get(runID, (IInterface**)&obj);
+        AutoPtr<Run> run = (Run*)(IObject*)obj.Get();
         if (run != NULL) {
-            // run->StoreByEndTimeMs(mRunsByEndTime);
+            run->StoreByEndTimeMs(mRunsByEndTime);
         }
     }
     return NOERROR;
@@ -902,9 +904,9 @@ ECode SubtitleTrack::FinishedRun(
 ECode SubtitleTrack::RemoveRunsByEndTimeIndex(
     /* [in] */ Int32 ix)
 {
-    AutoPtr<Run> run;
-    //TODO
-    // mRunsByEndTime->ValueAt(ix);
+    AutoPtr<IInterface> obj;
+    mRunsByEndTime->ValueAt(ix, (IInterface**)&obj);
+    AutoPtr<Run> run = (Run*)(IObject*)obj.Get();
     while (run != NULL) {
         Cue* cue = run->mFirstCue;
         while (cue != NULL) {
@@ -913,15 +915,13 @@ ECode SubtitleTrack::RemoveRunsByEndTimeIndex(
             cue->mNextInRun = NULL;
             cue = nextCue;
         }
-        // mRunsByID->Remove(run.mRunID);
+        mRunsByID->Remove(run->mRunID);
         AutoPtr<Run> nextRun = run->mNextRunAtEndTimeMs;
         run->mPrevRunAtEndTimeMs = NULL;
         run->mNextRunAtEndTimeMs = NULL;
         run = nextRun;
     }
-    //TODO
-    // return mRunsByEndTime->RemoveAt(ix);
-    return NOERROR;
+    return mRunsByEndTime->RemoveAt(ix);
 }
 
 ECode SubtitleTrack::TakeTime(

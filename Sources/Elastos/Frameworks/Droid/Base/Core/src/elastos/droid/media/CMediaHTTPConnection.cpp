@@ -1,5 +1,7 @@
 #include "elastos/droid/media/CMediaHTTPConnection.h"
 #include "elastos/droid/net/NetworkUtils.h"
+#include "elastos/droid/os/CStrictMode.h"
+#include "elastos/droid/os/CStrictModeThreadPolicyBuilder.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -10,6 +12,11 @@
 
 using Elastos::Droid::Net::NetworkUtils;
 using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::CStrictMode;
+using Elastos::Droid::Os::CStrictModeThreadPolicyBuilder;
+using Elastos::Droid::Os::IStrictMode;
+using Elastos::Droid::Os::IStrictModeThreadPolicy;
+using Elastos::Droid::Os::IStrictModeThreadPolicyBuilder;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
@@ -503,11 +510,15 @@ Int32 CMediaHTTPConnection::ReadAt(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 size)
 {
-// TODO: Need StrictMode
-    // StrictMode.ThreadPolicy policy =
-    //     new StrictMode.ThreadPolicy.Builder().permitAll().build();
+    AutoPtr<IStrictModeThreadPolicyBuilder> builder;
+    CStrictModeThreadPolicyBuilder::New((IStrictModeThreadPolicyBuilder**)&builder);
+    builder->PermitAll();
+    AutoPtr<IStrictModeThreadPolicy> policy;
+    builder->Build((IStrictModeThreadPolicy**)&policy);
 
-    // StrictMode.setThreadPolicy(policy);
+    AutoPtr<IStrictMode> sm;
+    CStrictMode::AcquireSingleton((IStrictMode**)&sm);
+    sm->SetThreadPolicy(policy);
 
     // try {
     if (offset != mCurrentOffset) {

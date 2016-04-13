@@ -463,8 +463,9 @@ Boolean CMediaCodecInfoVideoCapabilities::Supports(
     }
     if (ok && rate != NULL) {
         AutoPtr<IRange> r;
-// TODO: Need Utils
-        // r = Utils::IntRangeFor(rate);
+        Double val;
+        rate->GetValue(&val);
+        Utils::IntRangeFor(val, (IRange**)&r);
         mFrameRateRange->Contains(r, &ok);
     }
     if (ok && height != NULL && width != NULL) {
@@ -492,8 +493,7 @@ Boolean CMediaCodecInfoVideoCapabilities::Supports(
             rate->GetValue(&blocksPerSec);
             blocksPerSec = blockCount * blocksPerSec;
             AutoPtr<IRange> r;
-// TODO: Need Utils
-            // r = Utils::Int64RangeFor(blocksPerSec);
+            Utils::Int64RangeFor(blocksPerSec, (IRange**)&r);
             mBlocksPerSecondRange->Contains(r, &ok);
         }
     }
@@ -559,16 +559,14 @@ void CMediaCodecInfoVideoCapabilities::ParseFromInfo(
     obj = NULL;
     map->Get(cs, (IInterface**)&obj);
     AutoPtr<IRange> counts;
-// TODO: Need Utils
-    // counts = Utils::ParseIntRange(obj, NULL);
+    counts = Utils::ParseIntRange(obj, (IRange*)NULL);
 
     cs = NULL;
     CString::New(String("blocks-per-second-range"), (ICharSequence**)&cs);
     obj = NULL;
     map->Get(cs, (IInterface**)&obj);
     AutoPtr<IRange> blockRates;
-// TODO: Need Utils
-    // blockRates = Utils::ParseInt64Range(obj, NULL);
+    blockRates = Utils::ParseInt64Range(obj, (IRange*)NULL);
 
     AutoPtr<IRange> widths;
     AutoPtr<IRange> heights;
@@ -658,24 +656,21 @@ void CMediaCodecInfoVideoCapabilities::ParseFromInfo(
     obj = NULL;
     map->Get(cs, (IInterface**)&obj);
     AutoPtr<IRange> ratios;
-// TODO: Need Utils
-    // ratios = Utils::ParseRationalRange(obj, NULL);
+    ratios = Utils::ParseRationalRange(obj, (IRange*)NULL);
 
     cs = NULL;
     CString::New(String("pixel-aspect-ratio-range"), (ICharSequence**)&cs);
     obj = NULL;
     map->Get(cs, (IInterface**)&obj);
     AutoPtr<IRange> blockRatios;
-// TODO: Need Utils
-    // blockRatios = Utils::ParseRationalRange(obj, NULL);
+    blockRatios = Utils::ParseRationalRange(obj, (IRange*)NULL);
 
     cs = NULL;
     CString::New(String("frame-rate-range"), (ICharSequence**)&cs);
     obj = NULL;
     map->Get(cs, (IInterface**)&obj);
     AutoPtr<IRange> frameRates;
-// TODO: Need Utils
-    // frameRates = Utils::ParseIntRange(obj, NULL);
+    frameRates = Utils::ParseIntRange(obj, (IRange*)NULL);
 
     if (frameRates != NULL) {
         // try {
@@ -726,25 +721,22 @@ void CMediaCodecInfoVideoCapabilities::ParseFromInfo(
         }
         if (counts != NULL) {
             AutoPtr<IRange> range;
-// TODO: Need Utils
-            // range = Utils::FactorRange(counts,
-            //         mBlockWidth * mBlockHeight / bsWidth / bsHeight);
+            range = Utils::FactorRange(counts,
+                    mBlockWidth * mBlockHeight / bsWidth / bsHeight);
             CMediaCodecInfo::POSITIVE_INTEGERS->Intersect(
                     range, (IRange**)&mBlockCountRange);
         }
         if (blockRates != NULL) {
             AutoPtr<IRange> range;
-// TODO: Need Utils
-            // range = Utils::FactorRange(blockRates,
-            //         mBlockWidth * mBlockHeight / bsWidth / bsHeight);
+            range = Utils::FactorRange(blockRates,
+                    mBlockWidth * mBlockHeight / bsWidth / bsHeight);
             CMediaCodecInfo::POSITIVE_LONGS->Intersect(
                     range, (IRange**)&mBlocksPerSecondRange);
         }
         if (blockRatios != NULL) {
             AutoPtr<IRange> range;
-// TODO: Need Utils
-            // range = Utils::ScaleRange(blockRatios,
-            //         mBlockHeight / bsHeight, mBlockWidth / bsWidth);
+            range = Utils::ScaleRange(blockRatios,
+                    mBlockHeight / bsHeight, mBlockWidth / bsWidth);
             CMediaCodecInfo::POSITIVE_RATIONALS->Intersect(
                     range,(IRange**)&mBlockAspectRatioRange);
         }
@@ -767,23 +759,20 @@ void CMediaCodecInfoVideoCapabilities::ParseFromInfo(
         }
         if (counts != NULL) {
             AutoPtr<IRange> range;
-// TODO: Need Utils
-            // range = Utils::FactorRange(counts,
-            //         mBlockWidth * mBlockHeight / bsWidth / bsHeight);
+            range = Utils::FactorRange(counts,
+                    mBlockWidth * mBlockHeight / bsWidth / bsHeight);
             mBlockCountRange->Intersect(range, (IRange**)&mBlockCountRange);
         }
         if (blockRates != NULL) {
             AutoPtr<IRange> range;
-// TODO: Need Utils
-            // range = Utils::FactorRange(blockRates,
-            //         mBlockWidth * mBlockHeight / bsWidth / bsHeight);
+            range = Utils::FactorRange(blockRates,
+                    mBlockWidth * mBlockHeight / bsWidth / bsHeight);
             mBlocksPerSecondRange->Intersect(range , (IRange**)&mBlocksPerSecondRange);
         }
         if (blockRatios != NULL) {
             AutoPtr<IRange> range;
-// TODO: Need Utils
-            // range = Utils::ScaleRange(blockRatios,
-            //         mBlockHeight / bsHeight, mBlockWidth / bsWidth);
+            range = Utils::ScaleRange(blockRatios,
+                    mBlockHeight / bsHeight, mBlockWidth / bsWidth);
             mBlockAspectRatioRange->Intersect(range, (IRange**)&mBlockAspectRatioRange);
         }
         if (ratios != NULL) {
@@ -816,27 +805,25 @@ void CMediaCodecInfoVideoCapabilities::ApplyBlockLimits(
     Int32 factor =
         newBlockWidth * newBlockHeight / mBlockWidth / mBlockHeight;
     if (factor != 1) {
-// TODO: Need Utils
-        // mBlockCountRange = Utils::FactorRange(mBlockCountRange, factor);
-        // mBlocksPerSecondRange = Utils::FactorRange(
-        //         mBlocksPerSecondRange, factor);
-        // mBlockAspectRatioRange = Utils::ScaleRange(
-        //         mBlockAspectRatioRange,
-        //         newBlockHeight / mBlockHeight,
-        //         newBlockWidth / mBlockWidth);
-        // mHorizontalBlockRange = Utils::FactorRange(
-        //         mHorizontalBlockRange, newBlockWidth / mBlockWidth);
-        // mVerticalBlockRange = Utils::FactorRange(
-        //         mVerticalBlockRange, newBlockHeight / mBlockHeight);
+        mBlockCountRange = Utils::FactorRange(mBlockCountRange, factor);
+        mBlocksPerSecondRange = Utils::FactorRange(
+                mBlocksPerSecondRange, factor);
+        mBlockAspectRatioRange = Utils::ScaleRange(
+                mBlockAspectRatioRange,
+                newBlockHeight / mBlockHeight,
+                newBlockWidth / mBlockWidth);
+        mHorizontalBlockRange = Utils::FactorRange(
+                mHorizontalBlockRange, newBlockWidth / mBlockWidth);
+        mVerticalBlockRange = Utils::FactorRange(
+                mVerticalBlockRange, newBlockHeight / mBlockHeight);
     }
     factor = newBlockWidth * newBlockHeight / blockWidth / blockHeight;
     if (factor != 1) {
-// TODO: Need Utils
-        // counts = Utils::FactorRange(counts, factor);
-        // rates = Utils::FactorRange(rates, factor);
-        // ratios = Utils::ScaleRange(
-        //         ratios, newBlockHeight / blockHeight,
-        //         newBlockWidth / blockWidth);
+        counts = Utils::FactorRange(counts, factor);
+        rates = Utils::FactorRange(rates, factor);
+        ratios = Utils::ScaleRange(
+                ratios, newBlockHeight / blockHeight,
+                newBlockWidth / blockWidth);
     }
     mBlockCountRange->Intersect(counts, (IRange**)&mBlockCountRange);
     mBlocksPerSecondRange->Intersect(rates, (IRange**)&mBlocksPerSecondRange);
@@ -868,17 +855,15 @@ void CMediaCodecInfoVideoCapabilities::ApplyAlignment(
     mWidthAlignment = Elastos::Core::Math::Max(widthAlignment, mWidthAlignment);
     mHeightAlignment = Elastos::Core::Math::Max(heightAlignment, mHeightAlignment);
 
-// TODO: Need Utils
-    // mWidthRange = Utils::AlignRange(mWidthRange, mWidthAlignment);
-    // mHeightRange = Utils::AlignRange(mHeightRange, mHeightAlignment);
+    mWidthRange = Utils::AlignRange(mWidthRange, mWidthAlignment);
+    mHeightRange = Utils::AlignRange(mHeightRange, mHeightAlignment);
 }
 
 void CMediaCodecInfoVideoCapabilities::UpdateLimits()
 {
     // pixels -> blocks <- counts
     AutoPtr<IRange> range;
-// TODO: Need Utils
-    // range = Utils::FactorRange(mWidthRange, mBlockWidth);
+    range = Utils::FactorRange(mWidthRange, mBlockWidth);
     mHorizontalBlockRange->Intersect(range, (IRange**)&mHorizontalBlockRange);
 
     AutoPtr<IInterface> bcUpper;
@@ -910,8 +895,7 @@ void CMediaCodecInfoVideoCapabilities::UpdateLimits()
     mHorizontalBlockRange->Intersect(range, (IRange**)&mHorizontalBlockRange);
 
     range = NULL;
-// TODO: Need Utils
-    // range = Utils::FactorRange(mHeightRange, mBlockHeight);
+    range = Utils::FactorRange(mHeightRange, mBlockHeight);
     mVerticalBlockRange->Intersect(range, (IRange**)&mVerticalBlockRange);
 
     AutoPtr<IInterface> hbUpper;

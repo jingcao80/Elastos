@@ -943,7 +943,8 @@ module
 
     class CSubtitleData {
 
-        constructor();
+        constructor(
+            [in] IParcel* parcel);
 
         interface ISubtitleData;
     }

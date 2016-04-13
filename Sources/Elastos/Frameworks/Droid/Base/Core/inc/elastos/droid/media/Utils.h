@@ -87,6 +87,10 @@ public:
         /* [in] */ Range<IInteger32>* range,
         /* [in] */ Int32 factor);
 
+    static CARAPI_(AutoPtr<IRange>) FactorRange(
+        /* [in] */ IRange* range,
+        /* [in] */ Int32 factor);
+
     /** Returns the equivalent factored range {@code newrange}, where for every
      * {@code e}: {@code newrange.contains(e)} implies that {@code range.contains(e * factor)},
      * and {@code !newrange.contains(e)} implies that {@code !range.contains(e * factor)}.
@@ -95,13 +99,26 @@ public:
         /* [in] */ Range<IInteger64>* range,
         /* [in] */ Int64 factor);
 
-    static CARAPI_(AutoPtr< Range<CRational> >) ScaleRange(
-        /* [in] */ Range<CRational>* range,
+    static CARAPI_(AutoPtr<IRange>) FactorRange(
+        /* [in] */ IRange* range,
+        /* [in] */ Int64 factor);
+
+    static CARAPI_(AutoPtr< Range<IRational> >) ScaleRange(
+        /* [in] */ Range<IRational>* range,
+        /* [in] */ Int32 num,
+        /* [in] */ Int32 den);
+
+    static CARAPI_(AutoPtr<IRange>) ScaleRange(
+        /* [in] */ IRange* range,
         /* [in] */ Int32 num,
         /* [in] */ Int32 den);
 
     static CARAPI_(AutoPtr<Range<IInteger32> >) AlignRange(
         /* [in] */ Range<IInteger32>* range,
+        /* [in] */ Int32 align);
+
+    static CARAPI_(AutoPtr<IRange>) AlignRange(
+        /* [in] */ IRange* range,
         /* [in] */ Int32 align);
 
     static CARAPI_(Int32) DivUp(
@@ -111,8 +128,16 @@ public:
     static CARAPI_(AutoPtr<Range<IInteger32> >) IntRangeFor(
         /* [in] */ Double v);
 
+    static CARAPI IntRangeFor(
+        /* [in] */ Double v,
+        /* [out] */ IRange** result);
+
     static CARAPI_(AutoPtr<Range<IInteger64> >) Int64RangeFor(
         /* [in] */ Double v);
+
+    static CARAPI Int64RangeFor(
+        /* [in] */ Double v,
+        /* [out] */ IRange** result);
 
     static AutoPtr<ISize> ParseSize(
         /* [in] */ IInterface* o,
@@ -126,13 +151,25 @@ public:
         /* [in] */ IInterface* o,
         /* [in] */ Range<IInteger32>* fallback);
 
+    static AutoPtr<IRange> ParseIntRange(
+        /* [in] */ IInterface* o,
+        /* [in] */ IRange* fallback);
+
     static AutoPtr<Range<IInteger64> > ParseInt64Range(
         /* [in] */ IInterface* o,
         /* [in] */ Range<IInteger64>* fallback);
 
+    static AutoPtr<IRange> ParseInt64Range(
+        /* [in] */ IInterface* o,
+        /* [in] */ IRange* fallback);
+
     static AutoPtr<Range<IRational> > ParseRationalRange(
         /* [in] */ IInterface* o,
         /* [in] */ Range<IRational>* fallback);
+
+    static AutoPtr<IRange> ParseRationalRange(
+        /* [in] */ IInterface* o,
+        /* [in] */ IRange* fallback);
 
     static AutoPtr<IPair> ParseSizeRange(
         /* [in] */ IInterface* o);
@@ -140,8 +177,8 @@ public:
 private:
     Utils();
 
-    static CARAPI_(AutoPtr<CRational>) ScaleRatio(
-        /* [in] */ CRational* ratio,
+    static CARAPI_(AutoPtr<IRational>) ScaleRatio(
+        /* [in] */ IRational* ratio,
         /* [in] */ Int32 num,
         /* [in] */ Int32 den);
 

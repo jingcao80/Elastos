@@ -20,7 +20,8 @@ public:
 
     virtual ~SubtitleData();
 
-    CARAPI constructor();
+    CARAPI constructor(
+        /* [in] */ IParcel* parcel);
 
     CARAPI GetTrackIndex(
         /* [out] */ Int32* trackIndex);

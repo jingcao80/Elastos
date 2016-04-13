@@ -1,4 +1,5 @@
 #include "elastos/droid/media/MediaRouterRouteGroup.h"
+#include "elastos/droid/media/CMediaRouter.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringBuilder.h>
 
@@ -266,9 +267,8 @@ ECode MediaRouterRouteGroup::RouteUpdated()
     Int32 count;
     mRoutes->GetSize(&count);
     if (count == 0) {
-    // Don't keep empty groups in the router.
-    assert(0 && "TODO");
-    // return CMediaRouterHelper::RemoveRouteStatic(this);
+      // Don't keep empty groups in the router.
+      return CMediaRouter::RemoveRouteStatic(this);
     }
 
     Int32 maxVolume = 0;

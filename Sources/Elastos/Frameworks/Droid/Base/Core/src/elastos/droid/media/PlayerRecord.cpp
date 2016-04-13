@@ -390,9 +390,7 @@ ECode PlayerRecord::ResetControllerInfoForRcc(
         // here mcse.mRcClientDeathHandler is NULL;
         return ResetPlaybackInfo();
     } else {
-        AutoPtr<IBinder> b;
-        assert(0 && "TODO");
-        // mRcClient->AsBinder((IBinder**)&b);
+        AutoPtr<IBinder> b = IBinder::Probe(mRcClient);
         AutoPtr<RcClientDeathHandler> rcdh = new RcClientDeathHandler(this, b.Get(), mMediaIntent.Get());
         // try {
         AutoPtr<IProxy> proxy = (IProxy*)b->Probe(EIID_IProxy);

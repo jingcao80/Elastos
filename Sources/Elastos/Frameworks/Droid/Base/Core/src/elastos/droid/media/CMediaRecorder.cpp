@@ -1,5 +1,6 @@
 #include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/hardware/CHardwareCamera.h"
+#include "elastos/droid/hardware/HardwareCamera.h"
 #include "elastos/droid/media/CMediaRecorder.h"
 #include "elastos/droid/media/CCamcorderProfile.h"
 #include "elastos/droid/os/Environment.h"
@@ -17,6 +18,7 @@
 
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Hardware::CHardwareCamera;
+using Elastos::Droid::Hardware::HardwareCamera;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::ILooperHelper;
 using Elastos::Droid::Os::Looper;
@@ -116,15 +118,6 @@ static android::sp<android::Surface> get_surface(ISurface* clazz)
     sur = reinterpret_cast<android::Surface *>(
             surface->mNativeObject);
     return sur;
-}
-
-static android::sp<android::Camera> get_native_camera(
-    /* [in] */ IHardwareCamera* thiz,
-    /* [in] */ CHardwareCamera::JNICameraContext* obj)
-{
-   android::sp<android::Camera> camera;
-   assert(0 && "TODO: android_hardware_Camera.cpp");
-   return camera;
 }
 
 //================================================================================
@@ -233,7 +226,7 @@ ECode CMediaRecorder::SetCamera(
         return E_NULL_POINTER_EXCEPTION;
     }
 
-    android::sp<android::Camera> c = get_native_camera(camera, NULL);
+    android::sp<android::Camera> c = CHardwareCamera::get_native_camera((HardwareCamera*)camera, NULL);
     if (c == NULL) {
         // get_native_camera will throw an exception in this case
         return NOERROR;

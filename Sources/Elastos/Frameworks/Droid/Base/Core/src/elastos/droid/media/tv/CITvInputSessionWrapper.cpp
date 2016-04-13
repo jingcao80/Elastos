@@ -93,8 +93,7 @@ ECode CITvInputSessionWrapper::constructor(
     /* [in] */ ITvInputServiceSession* sessionImpl,
     /* [in] */ IInputChannel* channel)
 {
-//TODO: Need HandlerCaller(Context context, Looper looper, Callback callback, boolean asyncHandler)
-    // CHandlerCaller::New(context, NULL, this, TRUE /* asyncHandler */, (IHandlerCaller**)&mCaller);
+    CHandlerCaller::New(context, NULL, this, TRUE /* asyncHandler */, TRUE, (IHandlerCaller**)&mCaller);
     mTvInputSessionImpl = sessionImpl;
     mChannel = channel;
     if (channel != NULL) {

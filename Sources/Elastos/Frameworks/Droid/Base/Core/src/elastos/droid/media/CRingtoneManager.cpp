@@ -17,6 +17,7 @@ using Elastos::Droid::App::ProfileGroupMode;
 using Elastos::Droid::App::ProfileGroupMode_DEFAULT;
 using Elastos::Droid::App::ProfileGroupMode_SUPPRESS;
 using Elastos::Droid::App::ProfileGroupMode_OVERRIDE;
+using Elastos::Droid::App::IProfileManager;
 using Elastos::Droid::Content::IContentUris;
 using Elastos::Droid::Internal::Database::CSortCursor;
 using Elastos::Droid::Internal::Database::ISortCursor;
@@ -444,12 +445,11 @@ ECode CRingtoneManager::GetDefaultType(
     Boolean tempState = FALSE;
     Boolean tempState1 = FALSE;
     Boolean tempState2 = FALSE;
-    assert(0);
     if (defaultRingtoneUri == NULL) {
         *result = -1;
     } else if ((IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_RINGTONE_URI, &tempState), tempState)
-        || (IObject::Probe(defaultRingtoneUri)->Equals(NULL/*TODO: Settings::System::DEFAULT_RINGTONE_URI_2*/, &tempState1), tempState1)
-        || (IObject::Probe(defaultRingtoneUri)->Equals(NULL/*TODO: Settings::System::DEFAULT_RINGTONE_URI_3*/, &tempState2), tempState2)) {
+        || (IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_RINGTONE_URI_2, &tempState1), tempState1)
+        || (IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_RINGTONE_URI_3, &tempState2), tempState2)) {
         *result = TYPE_RINGTONE;
     } else if (IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_NOTIFICATION_URI, &tempState), tempState) {
         *result = TYPE_NOTIFICATION;
@@ -528,8 +528,7 @@ ECode CRingtoneManager::GetDefaultRingtoneSubIdByUri(
     IObject::Probe(Settings::System::DEFAULT_RINGTONE_URI)->ToString(&defaultRingtoneUriStr);
     if (uriString.StartWith(defaultRingtoneUriStr)) {
         parsedSubId = StringUtils::ParseInt32(uriString.Substring(uriString.LastIndexOf('_') + 1));
-        assert(0);
-        if ((parsedSubId > 0 &&  parsedSubId <= -1/*TODO: ISettingsSystem::MAX_NUM_RINGTONES*/)) {
+        if ((parsedSubId > 0 &&  parsedSubId <= ISettingsSystem::MAX_NUM_RINGTONES)) {
             *result = parsedSubId - 1;
             return NOERROR;
         }
@@ -543,7 +542,7 @@ ECode CRingtoneManager::GetDefaultRingtoneUriBySubId(
     /* [out] */ IUri** result)
 {
     VALIDATE_NOT_NULL(result);
-    if (!(subId >= 0 &&  subId < -1/*TODO: ISettingsSystem::MAX_NUM_RINGTONES*/)) {
+    if (!(subId >= 0 &&  subId < ISettingsSystem::MAX_NUM_RINGTONES)) {
         *result = NULL;
         return NOERROR;
     }
@@ -567,7 +566,7 @@ ECode CRingtoneManager::GetActualRingtoneUriBySubId(
 {
     VALIDATE_NOT_NULL(context);
     VALIDATE_NOT_NULL(result);
-    if (!(subId >= 0 &&  subId < -1/*TODO: ISettingsSystem::MAX_NUM_RINGTONES*/)) {
+    if (!(subId >= 0 &&  subId < ISettingsSystem::MAX_NUM_RINGTONES)) {
         *result = NULL;
         return NOERROR;
     }
@@ -618,7 +617,7 @@ ECode CRingtoneManager::SetActualRingtoneUriBySubId(
 {
     VALIDATE_NOT_NULL(context);
     VALIDATE_NOT_NULL(ringtoneUri);
-    if (!(subId >= 0 &&  subId < -1/*TODO: ISettingsSystem::MAX_NUM_RINGTONES*/)) {
+    if (!(subId >= 0 &&  subId < ISettingsSystem::MAX_NUM_RINGTONES)) {
         return NOERROR;
     }
     String setting;
@@ -779,15 +778,13 @@ AutoPtr<IRingtone> CRingtoneManager::GetRingtone(
     /* [in] */ IUri* ringtoneUri,
     /* [in] */ Int32 streamType)
 {
-    assert(0);
     AutoPtr<IInterface> interfaceTmp;
     context->GetSystemService(IContext::PROFILE_SERVICE, (IInterface**)&interfaceTmp);
-    // IObject* objTmp = IObject::Probe(interfaceTmp);
-    // TODO: ProfileManager* pm = (ProfileManager*)objTmp;
+    AutoPtr<IProfileManager> pm = IProfileManager::Probe(interfaceTmp);
     String packageName;
     context->GetPackageName(&packageName);
     AutoPtr<IProfileGroup> profileGroup;
-    // TODO: pm->GetActiveProfileGroup(packageName, (IProfileGroup**)&profileGroup);
+    pm->GetActiveProfileGroup(packageName, (IProfileGroup**)&profileGroup);
 
 //    try {
     AutoPtr<IRingtone> r;
