@@ -168,7 +168,8 @@ ECode CAudioManager::constructor(
     resources->GetBoolean(R::bool_::config_useMasterVolume, &mUseMasterVolume);
     resources->GetBoolean(R::bool_::config_useVolumeKeySounds, &mUseVolumeKeySounds);
 
-    mAudioPortEventHandler = new AudioPortEventHandler(this);
+    mAudioPortEventHandler = new AudioPortEventHandler();
+    mAudioPortEventHandler->constructor(this);
     resources->GetBoolean(R::bool_::config_useFixedVolume, &mUseFixedVolume);
 
     AutoPtr<IInterface> interfaceTmp;

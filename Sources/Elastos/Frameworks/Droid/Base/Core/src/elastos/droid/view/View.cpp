@@ -1848,12 +1848,11 @@ ECode View::SetOnCreateContextMenuListener(
 ECode View::PerformClick(
     /* [out] */ Boolean* res)
 {
-    Logger::I(TAG, " >> PerformClick");
     VALIDATE_NOT_NULL(res)
     Boolean result;
     AutoPtr<ListenerInfo> li = mListenerInfo;
     if (li != NULL && li->mOnClickListener != NULL) {
-        PlaySoundEffect(SoundEffectConstants::CLICK);
+        // PlaySoundEffect(SoundEffectConstants::CLICK);
         li->mOnClickListener->OnClick(this);
         result = TRUE;
     } else {
@@ -1862,24 +1861,20 @@ ECode View::PerformClick(
 
     SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_CLICKED);
     *res = result;
-    Logger::I(TAG, " << PerformClick handled:%d", result);
     return NOERROR;
 }
 
 ECode View::CallOnClick(
     /* [out] */ Boolean* res)
 {
-    Logger::I(TAG, " >> CallOnClick");
     VALIDATE_NOT_NULL(res)
     AutoPtr<ListenerInfo> li = mListenerInfo;
     if (li != NULL && li->mOnClickListener != NULL) {
         li->mOnClickListener->OnClick(this);
         *res = TRUE;
-        Logger::I(TAG, " << CallOnClick handled");
         return NOERROR;
     }
     *res = FALSE;
-    Logger::I(TAG, " << CallOnClick not handled");
     return NOERROR;
 }
 
@@ -5947,7 +5942,6 @@ ECode View::DispatchTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* res)
 {
-    Logger::I(TAG, " >>> View::DispatchTouchEvent %s %s", TO_CSTR(this), TO_CSTR(event));
     VALIDATE_NOT_NULL(res)
     Boolean result = FALSE;
     if (mInputEventConsistencyVerifier != NULL) {
@@ -5990,7 +5984,6 @@ ECode View::DispatchTouchEvent(
     }
 
     *res = result;
-    Logger::I(TAG, " >>> View::DispatchTouchEvent handled:%d, %s %s", result, TO_CSTR(this), TO_CSTR(event));
     return NOERROR;
 }
 
@@ -9608,12 +9601,10 @@ ECode View::Post(
 {
     VALIDATE_NOT_NULL(res)
     if (mAttachInfo != NULL) {
-        Logger::I(TAG, " >> View::Post to mAttachInfo->mHandler: %s", TO_CSTR(action));
         mAttachInfo->mHandler->Post(action, res);
         return NOERROR;
     }
 
-    Logger::I(TAG, " >> View::Post to ViewRootImpl::GetRunQueue(): %s", TO_CSTR(action));
     // Assume that post will succeed later
     ViewRootImpl::GetRunQueue()->Post(action);
     *res = TRUE;

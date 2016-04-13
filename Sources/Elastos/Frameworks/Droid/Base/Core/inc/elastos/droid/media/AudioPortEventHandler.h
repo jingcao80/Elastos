@@ -43,10 +43,12 @@ private:
     };
 
 public:
-    AudioPortEventHandler(
-        /* [in] */ IAudioManager* audioManager);
+    AudioPortEventHandler();
 
     virtual ~AudioPortEventHandler();
+
+    CARAPI constructor(
+        /* [in] */ IAudioManager* audioManager);
 
     CARAPI RegisterListener(
         /* [in] */ IAudioManagerOnAudioPortUpdateListener* l);
@@ -58,7 +60,7 @@ public:
         /* [out] */ IHandler** result);
 
     static CARAPI PostEventFromNative(
-        /* [in] */ IInterface* module_ref,
+        /* [in] */ IWeakReference* module_ref,
         /* [in] */ Int32 what,
         /* [in] */ Int32 arg1,
         /* [in] */ Int32 arg2,
@@ -66,7 +68,7 @@ public:
 
 private:
     CARAPI NativeSetup(
-        /* [in] */ IInterface* module_this);
+        /* [in] */ IWeakReference* module_this);
 
     CARAPI NativeFinalize();
 
@@ -79,9 +81,7 @@ public:
 private:
     AutoPtr<IHandler> mHandler;
     AutoPtr<IArrayList> mListeners;
-    AutoPtr<IAudioManager> mAudioManager;
-
-    const static String TAG;
+    IAudioManager* mAudioManager; // AudioManager holder this
 };
 
 } // namespace Media

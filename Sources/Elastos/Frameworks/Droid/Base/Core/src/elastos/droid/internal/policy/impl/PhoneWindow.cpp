@@ -1161,7 +1161,6 @@ ECode PhoneWindow::_DecorView::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
-    Logger::I(TAG, " >> PhoneWindow::_DecorView::OnTouchEvent( %s", TO_CSTR(event));
     return OnInterceptTouchEvent(event, result);
 }
 

@@ -4596,7 +4596,7 @@ ECode ViewRootImpl::EnsureTouchMode(
 {
     VALIDATE_NOT_NULL(res)
     if (DBG) {
-        Logger::D("touchmode", "ensureTouchMode(%d), current touch mode is%d",
+        Logger::D("touchmode", "ensureTouchMode(%d), current touch mode is% d",
             inTouchMode, mAttachInfo->mInTouchMode);
     }
 
