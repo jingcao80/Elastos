@@ -839,8 +839,7 @@ void Provider::UpdatePropertyServiceTable()
                 CString::New(serviceName + "." + algorithm, (ICharSequence**)&keyObj);
                 AutoPtr<IInterface> valueObj;
                 mChangedProperties->Get(keyObj, (IInterface**)&valueObj);
-                String className;
-                ICharSequence::Probe(valueObj)->ToString(&className);
+                String className = Object::ToString(valueObj);
                 if (!className.IsNull()) {
                     AutoPtr<IList> l;
                     CArrayList::New((IList**)&l);
@@ -966,7 +965,7 @@ void Provider::PutProviderInfo()
         CString::New(mName, (ICharSequence**)&valueObj);
     }
     else {
-        CString::New(String("null"), (ICharSequence**)&valueObj);
+        CString::New(String("NULL"), (ICharSequence**)&valueObj);
     }
     Properties::Put(keyObj, valueObj, NULL);
     keyObj = NULL;
@@ -981,7 +980,7 @@ void Provider::PutProviderInfo()
         CString::New(mInfo, (ICharSequence**)&valueObj);
     }
     else {
-        CString::New(String("null"), (ICharSequence**)&valueObj);
+        CString::New(String("NULL"), (ICharSequence**)&valueObj);
     }
     Properties::Put(keyObj, valueObj, NULL);
     keyObj = NULL;

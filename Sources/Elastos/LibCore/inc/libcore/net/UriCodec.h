@@ -78,8 +78,6 @@ public :
         /* [in] */ Boolean throwOnFailure,
         /* [out] */ String* result);
 
-    static CARAPI_(AutoPtr<ICharset>) GetDefaultCharset();
-
 private:
     /**
      * Encodes {@code s} and appends the result to {@code builder}.

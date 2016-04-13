@@ -21,8 +21,7 @@ ECode CURLEncoder::Encode(
     /* [in] */ const String& s,
     /* [out] */ String* result)
 {
-    AutoPtr<ICharset> charset = UriCodec::GetDefaultCharset();
-    ENCODER.Encode(s, charset, result);
+    ENCODER.Encode(s, StandardCharsets::UTF_8, result);
     return NOERROR;
 }
 
@@ -32,7 +31,7 @@ ECode CURLEncoder::Encode(
     /* [out] */ String* result)
 {
     AutoPtr<ICharsetHelper> helper;
-    AutoPtr<ICharset> charset = StandardCharsets::UTF_8;
+    AutoPtr<ICharset> charset;
     CCharsetHelper::AcquireSingleton((ICharsetHelper**)&helper);
     FAIL_RETURN(helper->ForName(charsetName, (ICharset**)&charset));
     return ENCODER.Encode(s, charset, result);

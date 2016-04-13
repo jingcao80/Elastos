@@ -1015,7 +1015,7 @@ ECode HashTable::ContainsValue(
 
         for (Int32 i = 0; i < len; i++) {
             for (HashtableEntry * e = (*tab)[i]; e != NULL; e = e->mNext) {
-                if (value == e->mValue) {
+                if (Object::Equals(value, e->mValue)) {
                     *result = TRUE;
                     return NOERROR;
                 }
@@ -1279,10 +1279,10 @@ ECode HashTable::Clear()
 {
     synchronized(this) {
         if (mSize != 0) {
-        // Arrays.fill(table, null);
+            // Arrays.fill(table, null);
             for (Int32 i = 0; i < mTable->GetLength(); ++i) {
                 mTable->Set(i, NULL);
-                }
+            }
             mModCount++;
             mSize = 0;
         }

@@ -5,6 +5,7 @@
 #include "CharBuffer.h"
 #include "CByteArrayOutputStream.h"
 #include "CCharsets.h"
+#include "charset/StandardCharsets.h"
 
 using Elastos::Core::Character;
 using Elastos::Core::StringBuilder;
@@ -17,6 +18,7 @@ using Elastos::IO::CharBuffer;
 using Elastos::IO::CByteArrayOutputStream;
 using Elastos::IO::Charset::ICharsets;
 using Elastos::IO::Charset::CCharsets;
+using Elastos::IO::Charset::StandardCharsets;
 using Elastos::IO::IOutputStream;
 
 namespace Libcore {
@@ -82,8 +84,7 @@ ECode UriCodec::AppendEncoded(
     /* [in] */ IStringBuilder * builder,
     /* [in] */ const String& s)
 {
-    AutoPtr<ICharset> charset = GetDefaultCharset();
-    return AppendEncoded(builder, s, charset, FALSE);
+    return AppendEncoded(builder, s, StandardCharsets::UTF_8, FALSE);
 }
 
 ECode UriCodec::AppendEncoded(
@@ -135,8 +136,7 @@ ECode UriCodec::AppendEncoded(
     /* [in] */ StringBuilder & builder,
     /* [in] */ const String& s)
 {
-    AutoPtr<ICharset> charset = GetDefaultCharset();
-    return AppendEncoded(builder, s, charset, FALSE);
+    return AppendEncoded(builder, s, StandardCharsets::UTF_8, FALSE);
 }
 
 ECode UriCodec::AppendEncoded(
@@ -200,8 +200,7 @@ ECode UriCodec::AppendPartiallyEncoded(
     /* [in] */ StringBuilder & builder,
     /* [in] */ const String& s)
 {
-    AutoPtr<ICharset> charset = GetDefaultCharset();
-    AppendEncoded(builder, s, charset, TRUE);
+    AppendEncoded(builder, s, StandardCharsets::UTF_8, TRUE);
     return NOERROR;
 }
 
@@ -209,8 +208,7 @@ ECode UriCodec::AppendPartiallyEncoded(
     /* [in] */ IStringBuilder * builder,
     /* [in] */ const String& s)
 {
-    AutoPtr<ICharset> charset = GetDefaultCharset();
-    AppendEncoded(builder, s, charset, TRUE);
+    AppendEncoded(builder, s, StandardCharsets::UTF_8, TRUE);
     return NOERROR;
 }
 
@@ -219,8 +217,7 @@ ECode UriCodec::Decode(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<ICharset> charset = GetDefaultCharset();
-    return Decode(s, FALSE, charset, TRUE, result);
+    return Decode(s, FALSE, StandardCharsets::UTF_8, TRUE, result);
 }
 
 AutoPtr<ArrayOf<Byte> > UriCodec::GetBytes(
@@ -378,15 +375,6 @@ ECode UriCodec::AppendHex(
         AppendHex(builder, (*bytes)[i]);
     }
     return NOERROR;
-}
-
-AutoPtr<ICharset> UriCodec::GetDefaultCharset()
-{
-    AutoPtr<ICharset> charset;
-    AutoPtr<ICharsets> charsets;
-    CCharsets::AcquireSingleton((ICharsets**)&charsets);
-    charsets->GetUTF_8((ICharset**)&charset);
-    return charset;
 }
 
 } // namespace Net
