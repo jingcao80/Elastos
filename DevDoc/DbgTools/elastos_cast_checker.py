@@ -257,6 +257,7 @@ ignored_list = [
     '/media/SubtitleTrack.cpp#IInterface#mNextRunAtEndTimeMs',
     '/widget/TabHost.cpp#IView#mTabContent',
     '/widget/Spinner.cpp#IAlertDialog#mPopup',
+    '/widget/ListView.cpp#IListAdapter#mAdapter',
     '/res/CResources.cpp#IFormatter#f',
     '/accessibility/AccessibilityInjector.cpp#ITextToSpeech#mTextToSpeech',
     '/pm/PackageParser.cpp#IPermissionInfo#mInfo',
@@ -282,6 +283,7 @@ ignored_list = [
     '/utility/Collections.cpp#IListIterator#mIterator',
     '/utility/CTreeMap.cpp#IWeakReference#mKeySet',
     '/x500/CX500Principal.cpp#IName#mDn',
+    '/dialer/CCallDetailActivity.cpp#ICallTypeHelper#mCallTypeHelper',
 ]
 
 ############################################################################################################

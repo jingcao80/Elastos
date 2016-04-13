@@ -40,10 +40,12 @@ ECode CActivityOne::MyListener::OnClick(
     /* [in] */ IView* v)
 {
     Logger::I(TAG, "MyListener::OnClick");
+
     AutoPtr<IServiceManager> sm;
-    AutoPtr<IIActivityManager> am;
     CServiceManager::AcquireSingleton((IServiceManager**)&sm);
-    sm->GetService(IContext::ACTIVITY_SERVICE, (IInterface**)&am);
+    sm->GetService(IContext::ACTIVITY_SERVICE, (IInterface**)&service);
+    AutoPtr<IInterface> service;
+    IIActivityManager* am = IIActivityManager::Probe(service);
 
     String package("Elastos.DevSamples.ImageDemo");
     String action("android.intent.action.MAIN");
