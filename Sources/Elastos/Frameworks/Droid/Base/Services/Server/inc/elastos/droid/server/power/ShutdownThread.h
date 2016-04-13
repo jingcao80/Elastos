@@ -332,9 +332,9 @@ private:
     static Object sIsStartedGuard;
     static Boolean sIsStarted;
 
-    static Boolean mReboot;
-    static Boolean mRebootSafeMode;
-    static String mRebootReason;
+    static Boolean sReboot;
+    static Boolean sRebootSafeMode;
+    static String sRebootReason;
 
     // static instance of this thread
     static AutoPtr<ShutdownThread> sInstance;

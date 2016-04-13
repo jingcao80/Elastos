@@ -44,7 +44,11 @@ public:
     static CARAPI_(Boolean) IsAvailable();
 
 private:
-    static CARAPI_(Boolean) InitExtRemoteDisplay();
+    class StaticInitializer
+    {
+    public:
+        StaticInitializer();
+    };
 
 private:
     static const String TAG;
@@ -64,7 +68,7 @@ private:
     // ExtendedRemoteDisplay.Dispose follows the same API signature as
     // RemoteDisplay.Dispose
     static AutoPtr<IMethodInfo> sExtRemoteDisplayDispose;
-    static Boolean sInit;
+    static const StaticInitializer sInitializer;
 };
 
 } // namespace Display

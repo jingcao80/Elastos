@@ -92,9 +92,9 @@ const String ShutdownThread::OEM_SHUTDOWN_MUSIC_FILE("/oem/media/shutdown.wav");
 
 Object ShutdownThread::sIsStartedGuard;
 Boolean ShutdownThread::sIsStarted = FALSE;
-Boolean ShutdownThread::mReboot = FALSE;
-Boolean ShutdownThread::mRebootSafeMode = FALSE;
-String ShutdownThread::mRebootReason(NULL);
+Boolean ShutdownThread::sReboot = FALSE;
+Boolean ShutdownThread::sRebootSafeMode = FALSE;
+String ShutdownThread::sRebootReason(NULL);
 
 AutoPtr<ShutdownThread> ShutdownThread::sInstance = new ShutdownThread();
 
@@ -200,7 +200,7 @@ ECode ShutdownThread::DialogInterfaceOnClickListener::OnClick(
             AutoPtr<ArrayOf<String> > actions;
             res->GetStringArray(Elastos::Droid::R::array::shutdown_reboot_actions, (ArrayOf<String>**)&actions);
             if (selected >= 0 && selected < actions->GetLength()) {
-                ShutdownThread::mRebootReason = (*actions)[selected];
+                ShutdownThread::sRebootReason = (*actions)[selected];
                 if ((*actions)[selected].Equals(SOFT_REBOOT)) {
                     ShutdownThread::DoSoftReboot();
                     return NOERROR;
@@ -208,7 +208,7 @@ ECode ShutdownThread::DialogInterfaceOnClickListener::OnClick(
             }
         }
 
-        ShutdownThread::mReboot = TRUE;
+        ShutdownThread::sReboot = TRUE;
     }
 
     ShutdownThread::BeginShutdownSequence(mContext);
@@ -457,8 +457,8 @@ void ShutdownThread::Shutdown(
     /* [in] */ IContext* context,
     /* [in] */ Boolean confirm)
 {
-    mReboot = FALSE;
-    mRebootSafeMode = FALSE;
+    sReboot = FALSE;
+    sRebootSafeMode = FALSE;
     ShutdownInner(context, confirm);
 }
 
@@ -526,13 +526,13 @@ void ShutdownThread::ShutdownInner(
     ASSERT_SUCCEEDED(context->GetResources((IResources**)&res));
     Int32 longPressBehavior;
     res->GetInteger(R::integer::config_longPressOnPowerBehavior, &longPressBehavior);
-    Int32 resourceId = mRebootSafeMode
+    Int32 resourceId = sRebootSafeMode
             ? R::string::reboot_safemode_confirm
             : (longPressBehavior == 2
                     ? R::string::shutdown_confirm_question
                     : R::string::shutdown_confirm);
 
-    if (showRebootOption && !mRebootSafeMode) {
+    if (showRebootOption && !sRebootSafeMode) {
         resourceId = Elastos::Droid::R::string::reboot_confirm;
     }
 
@@ -547,7 +547,7 @@ void ShutdownThread::ShutdownInner(
         }
         AutoPtr<IAlertDialogBuilder> confirmDialogBuilder;
         CAlertDialogBuilder::New(context, (IAlertDialogBuilder**)&confirmDialogBuilder);
-        confirmDialogBuilder->SetTitle(mRebootSafeMode
+        confirmDialogBuilder->SetTitle(sRebootSafeMode
                 ? Elastos::Droid::R::string::reboot_safemode_title
                 : showRebootOption
                         ? Elastos::Droid::R::string::reboot_title
@@ -602,9 +602,9 @@ void ShutdownThread::Reboot(
     /* [in] */ const String& reason,
     /* [in] */ Boolean confirm)
 {
-    mReboot = TRUE;
-    mRebootSafeMode = FALSE;
-    mRebootReason = reason;
+    sReboot = TRUE;
+    sRebootSafeMode = FALSE;
+    sRebootReason = reason;
     ShutdownInner(context, confirm);
 }
 
@@ -612,9 +612,9 @@ void ShutdownThread::RebootSafeMode(
     /* [in] */ IContext* context,
     /* [in] */ Boolean confirm)
 {
-    mReboot = TRUE;
-    mRebootSafeMode = TRUE;
-    mRebootReason = NULL;
+    sReboot = TRUE;
+    sRebootSafeMode = TRUE;
+    sRebootReason = NULL;
     ShutdownInner(context, confirm);
 }
 
@@ -675,7 +675,7 @@ void ShutdownThread::BeginShutdownSequence(
         // shutting down.
         AutoPtr<IProgressDialog> pd;
         CProgressDialog::New(context, (IProgressDialog**)&pd);
-        if (mReboot) {
+        if (sReboot) {
             AutoPtr<ICharSequence> csq;
             context->GetText(Elastos::Droid::R::string::reboot_title, (ICharSequence**)&csq);
             IDialog::Probe(pd)->SetTitle(csq);
@@ -773,8 +773,8 @@ ECode ShutdownThread::Run()
      * the beginning of the SystemServer startup.
      */
     {
-        String reason = (mReboot ? String("1") : String("0"))
-                + (mRebootReason != NULL ? mRebootReason : String(""));
+        String reason = (sReboot ? String("1") : String("0"))
+                + (sRebootReason != NULL ? sRebootReason : String(""));
         sysProp->Set(SHUTDOWN_ACTION_PROPERTY, reason);
     }
 
@@ -782,7 +782,7 @@ ECode ShutdownThread::Run()
      * If we are rebooting into safe mode, write a system property
      * indicating so.
      */
-    if (mRebootSafeMode) {
+    if (sRebootSafeMode) {
         sysProp->Set(REBOOT_SAFEMODE_PROPERTY, String("1"));
     }
 
@@ -921,7 +921,7 @@ ECode ShutdownThread::Run()
         }
     }
 
-    RebootOrShutdown(mReboot, mRebootReason);
+    RebootOrShutdown(sReboot, sRebootReason);
 
     return NOERROR;
 }
