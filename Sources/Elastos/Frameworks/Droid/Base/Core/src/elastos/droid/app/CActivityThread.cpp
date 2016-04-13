@@ -792,7 +792,7 @@ String CActivityThread::H::CodeToString(
 
 void CActivityThread::H::MaybeSnapshot()
 {
-    assert(0 && "TODO");
+    Slogger::I(TAG, "TODO CActivityThread::H::MaybeSnapshot()");
     // if (mHost->mBoundApplication != NULL && SamplingProfilerIntegration.isEnabled()) {
     //     // convert the *private* ActivityThread.PackageInfo to *public* known
     //     // android.content.pm.PackageInfo

@@ -896,9 +896,9 @@ ECode SystemServer::StartOtherServices()
         if (!disableMedia &&
             (systemProperties->Get(String("system_init.startaudioservice"), &str), !str.Equals("0"))) {
             Slogger::I(TAG, "Audio Service");
-            // ec = CAudioService::New(context, (IAudioService**)&audioService);
-            // if (FAILED(ec)) ReportWtf("starting Audio Service", ec);
-            // ServiceManager::AddService(IContext::AUDIO_SERVICE, audioService);
+            ec = CAudioService::New(context, (IAudioService**)&audioService);
+            if (FAILED(ec)) ReportWtf("starting Audio Service", ec);
+            ServiceManager::AddService(IContext::AUDIO_SERVICE, audioService);
         }
 
         if (!disableNonCoreServices) {

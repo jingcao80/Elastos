@@ -694,8 +694,14 @@ module
         interface IPicture;
     }
 
-    singleton class CPixelFormat {
+    class CPixelFormat {
+        constructor();
+
         interface IPixelFormat;
+    }
+
+    singleton class CPixelFormatHelper {
+        interface IPixelFormatHelper;
     }
 
     class CPixelXorXfermode {

@@ -29,13 +29,13 @@ public:
 
     SQLiteProgram();
 
-    CARAPI Init(
+    virtual ~SQLiteProgram() {}
+
+    CARAPI constructor(
         /* [in] */ ISQLiteDatabase* db,
         /* [in] */ const String& sql,
         /* [in] */ ArrayOf<IInterface*>* bindArgs,
         /* [in] */ ICancellationSignal* cancellationSignalForPrepare);
-
-    virtual ~SQLiteProgram() {}
 
     CARAPI_(AutoPtr<ISQLiteDatabase>) GetDatabase();
 

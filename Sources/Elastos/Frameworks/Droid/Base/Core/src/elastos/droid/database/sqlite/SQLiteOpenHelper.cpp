@@ -162,7 +162,7 @@ ECode SQLiteOpenHelper::GetDatabaseLocked(
                 IContext::MODE_ENABLE_WRITE_AHEAD_LOGGING : 0, mFactory, (ISQLiteDatabase**)&db);
         }
         //} catch (SQLiteException ex) {
-        if(ec == (ECode)E_SQLITE_EXCEPTION) {
+        if (ec == (ECode)E_SQLITE_EXCEPTION) {
             if (writable) {
                 mIsInitializing = FALSE;
                 if (db != NULL && db != mDatabase) {

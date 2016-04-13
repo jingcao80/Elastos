@@ -10,8 +10,10 @@
 
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Graphics::CPixelFormat;
+using Elastos::Droid::Graphics::IPixelFormatHelper;
+using Elastos::Droid::Graphics::CPixelFormatHelper;
 using Elastos::Droid::Graphics::IPixelFormat;
+using Elastos::Droid::Graphics::CPixelFormat;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::View::ISurface;
 using Elastos::Utility::Logging::Logger;
@@ -89,16 +91,13 @@ Int32 DeviceDisplayInfo::GetPhysicalDisplayWidth()
 
 Int32 DeviceDisplayInfo::GetBitsPerPixel()
 {
-    // ==================before translated======================
-    // int format = getPixelFormat();
-    // PixelFormat info = new PixelFormat();
-    // PixelFormat.getPixelFormatInfo(format, info);
-    // return info.bitsPerPixel;
-
     Int32 format = GetPixelFormat();
     AutoPtr<IPixelFormat> info;
-    CPixelFormat::AcquireSingleton((IPixelFormat**)&info);
-    info->GetPixelFormatInfo(format, info);
+    CPixelFormat::New((IPixelFormat**)&info);
+
+    AutoPtr<IPixelFormatHelper> helper;
+    CPixelFormatHelper::AcquireSingleton((IPixelFormatHelper**)&helper);
+    helper->GetPixelFormatInfo(format, info);
     Int32 bitsPerPixel = 0;
     info->GetBitsPerPixel(&bitsPerPixel);
     return bitsPerPixel;

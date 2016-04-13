@@ -64,6 +64,20 @@ module
          */
         const Int32 JPEG        = 0x100;
 
+        SetBitsPerPixel(
+            [in] Int32 bits);
+
+        GetBitsPerPixel(
+            [out] Int32* result);
+
+        SetBytesPerPixel(
+            [in] Int32 bytes);
+
+        GetBytesPerPixel(
+            [out] Int32* result);
+    }
+
+    interface IPixelFormatHelper {
         FormatHasAlpha(
             [in] Int32 format,
             [out] Boolean* result);
@@ -72,8 +86,9 @@ module
             [in] Int32 format,
             [in] IPixelFormat* info);
 
-        GetBitsPerPixel(
-            [out] Int32* result);
+        IsPublicFormat(
+            [in] Int32 format,
+            [out] Boolean* result);
     }
 
     } // namespace Graphics

@@ -62,78 +62,6 @@ ECode CSQLiteQuery::FillWindow(
     return ec;
 }
 
-ECode CSQLiteQuery::GetUniqueId(
-    /* [out] */ Int32 *value)
-{
-    VALIDATE_NOT_NULL(value)
-    return SQLiteProgram::GetUniqueId(value);
-}
-
-ECode CSQLiteQuery::BindNull(
-    /* [in] */ Int32 index)
-{
-    return SQLiteProgram::BindNull(index);
-}
-
-ECode CSQLiteQuery::BindInt64(
-    /* [in] */ Int32 index,
-    /* [in] */ Int64 value)
-{
-    return SQLiteProgram::BindInt64(index, value);
-}
-
-ECode CSQLiteQuery::BindDouble(
-    /* [in] */ Int32 index,
-    /* [in] */ Double value)
-{
-    return SQLiteProgram::BindDouble(index, value);
-}
-
-ECode CSQLiteQuery::BindString(
-    /* [in] */ Int32 index,
-    /* [in] */ const String& value)
-{
-    return SQLiteProgram::BindString(index, value);
-}
-
-ECode CSQLiteQuery::BindBlob(
-    /* [in] */ Int32 index,
-    /* [in] */ const ArrayOf<Byte>& value)
-{
-    return SQLiteProgram::BindBlob(index, value);
-}
-
-ECode CSQLiteQuery::ClearBindings()
-{
-    return SQLiteProgram::ClearBindings();
-}
-
-ECode CSQLiteQuery::BindAllArgsAsStrings(
-    /* [in] */ ArrayOf<String>* bindArgs)
-{
-    return SQLiteProgram::BindAllArgsAsStrings(bindArgs);
-}
-
-ECode CSQLiteQuery::AcquireReference()
-{
-    return SQLiteProgram::AcquireReference();
-}
-
-ECode CSQLiteQuery::ReleaseReference()
-{
-    return SQLiteProgram::ReleaseReference();
-}
-
-ECode CSQLiteQuery::ReleaseReferenceFromContainer()
-{
-    return SQLiteProgram::ReleaseReferenceFromContainer();
-}
-
-ECode CSQLiteQuery::Close()
-{
-    return SQLiteProgram::Close();
-}
-
 ECode CSQLiteQuery::ToString(
     /* [out] */ String* value)
 {
@@ -148,7 +76,7 @@ ECode CSQLiteQuery::constructor(
     /* [in] */ ICancellationSignal* cancellationSignal)
 {
     mCancellationSignal = cancellationSignal;
-    return SQLiteProgram::Init(db, query, NULL, cancellationSignal);
+    return SQLiteProgram::constructor(db, query, NULL, cancellationSignal);
 }
 
 } //Sqlite

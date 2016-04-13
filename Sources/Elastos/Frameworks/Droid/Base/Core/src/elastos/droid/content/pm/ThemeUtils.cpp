@@ -167,7 +167,7 @@ const String ThemeUtils::EXTRA_REQUEST_TYPE("request_type");
 const String ThemeUtils::EXTRA_UPDATE_TIME("update_time");
 const Int32 ThemeUtils::SYSTEM_TARGET_API;
 const String ThemeUtils::DEFAULT_PKG("default");
-const String ThemeUtils::SETTINGS_DB("/data/data/com.android.providers.settings/databases/settings.db");
+const String ThemeUtils::SETTINGS_DB("/data/data/Elastos.Droid.SettingsProvider/databases/settings.db");
 const String ThemeUtils::SETTINGS_SECURE_TABLE("secure");
 
 static AutoPtr<ArrayOf<String> > InitSupportedActions()

@@ -15,17 +15,14 @@ class PixelFormat
     , public IPixelFormat
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     static CARAPI_(Boolean) FormatHasAlpha(
         /* [in] */ Int32 format);
 
-    CARAPI GetPixelFormatInfo(
+    static CARAPI GetPixelFormatInfo(
         /* [in] */ Int32 format,
         /* [in] */ IPixelFormat* info);
-
-    CARAPI GetBitsPerPixel(
-        /* [out] */ Int32* result);
 
     /**
      * Determine whether or not this is a public-visible and non-deprecated {@code format}.
@@ -42,6 +39,22 @@ public:
      */
     static CARAPI_(Boolean) IsPublicFormat(
         /* [in] */ Int32 format);
+
+    PixelFormat();
+
+    CARAPI constructor();
+
+    CARAPI SetBitsPerPixel(
+        /* [in] */ Int32 bits);
+
+    CARAPI GetBitsPerPixel(
+        /* [out] */ Int32* result);
+
+    CARAPI SetBytesPerPixel(
+        /* [in] */ Int32 bytes);
+
+    CARAPI GetBytesPerPixel(
+        /* [out] */ Int32* result);
 
 public:
     Int32  mBytesPerPixel;

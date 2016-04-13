@@ -127,13 +127,12 @@ ECode AppOpsPolicy::ReadPolicy()
 {
     AutoPtr<IFileInputStream> stream;
     synchronized (this) {
-        // try {
-        CFileInputStream::New(mFile, (IFileInputStream**)&stream);
-        // } catch (FileNotFoundException e) {
-        //     Slog.i(TAG, "App ops policy file (" + mFile.getPath()
-        //             + ") not found; Skipping.");
-        //     return;
-        // }
+        ECode ec = CFileInputStream::New(mFile, (IFileInputStream**)&stream);
+        if (FAILED(ec)) {
+            Slogger::I(TAG, "App ops policy file (%s) not found; Skipping.", TO_CSTR(mFile));
+            return NOERROR;
+        }
+
         Boolean success = FALSE;
         // try {
         AutoPtr<IXmlPullParserFactoryHelper> hlp;
@@ -366,7 +365,7 @@ void AppOpsPolicy::ReadOpPolicy(
     }
     else {
         Slogger::W(TAG, "Duplicate policy found for package: %s type: %s op: %d",
-                (const char*)(pkg->mPackageName), (const char*)(pkg->mType), op->mOp);
+            pkg->mPackageName.string(), pkg->mType.string(), op->mOp);
         op->mMode = mode;
         op->mShow = show;
     }
@@ -380,7 +379,6 @@ ECode AppOpsPolicy::DebugPoilcy()
     s->GetIterator((IIterator**)&iterator);
     Boolean bHasNxt = FALSE;
     while ((iterator->HasNext(&bHasNxt), bHasNxt)) {
-
         AutoPtr<IInterface> nxt;
         iterator->GetNext((IInterface**)&nxt);
         AutoPtr<IMapEntry> pNxt = IMapEntry::Probe(nxt);
@@ -389,14 +387,14 @@ ECode AppOpsPolicy::DebugPoilcy()
         String key;
         ICharSequence::Probe(pKey)->ToString(&key);
         if (DEBUG) {
-            Slogger::D(TAG, "Key: %s", (const char*)key);
+            Slogger::D(TAG, "Key: %s", key.string());
         }
         AutoPtr<IInterface> pPkg;
         mPolicy->Get(pKey, (IInterface**)&pPkg);
         AutoPtr<PolicyPkg> pkg = (PolicyPkg*)IObject::Probe(pPkg);
         if (pkg == NULL) {
             if (DEBUG) {
-                Slogger::D(TAG, "Pkg is NULL for key: %s", (const char*)key);
+                Slogger::D(TAG, "Pkg is NULL for key: %s", key.string());
             }
             continue;
         }
@@ -524,7 +522,7 @@ ECode AppOpsPolicy::GetDefualtMode(
     }
     if (DEBUG){
         Slogger::D(TAG, "Default mode requested for op=%d package=%s",
-                code, (const char*)packageName);
+            code, packageName.string());
     }
     type = GetAppType(packageName);
     if (!type.IsNull()) {

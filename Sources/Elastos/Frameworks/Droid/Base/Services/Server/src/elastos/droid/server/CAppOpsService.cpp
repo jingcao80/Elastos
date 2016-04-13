@@ -1,5 +1,6 @@
 
 #include "elastos/droid/server/CAppOpsService.h"
+#include "elastos/droid/server/AppOpsPolicy.h"
 #include "elastos/droid/app/AppOpsManager.h"
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/os/Binder.h>
@@ -2542,10 +2543,11 @@ void CAppOpsService::ReadPolicy()
     if (mStrictEnable) {
         AutoPtr<IFile> f;
         CFile::New(DEFAULT_POLICY_FILE, (IFile**)&f);
-        assert(0 && "TODO");
-        // CAppOpsPolicy::New(f, mContext, (IAppOpsPolicy**)&mPolicy);
-        mPolicy->ReadPolicy();
-        mPolicy->DebugPoilcy();
+        AutoPtr<AppOpsPolicy> aop = new AppOpsPolicy();
+        aop->constructor(f, mContext);
+        aop->ReadPolicy();
+        aop->DebugPoilcy();
+        mPolicy = (IAppOpsPolicy*)aop.Get();
     }
     else {
         mPolicy = NULL;

@@ -19,6 +19,7 @@
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.Text.h>
 #include <Elastos.Droid.Utility.h>
+#include <Elastos.Droid.KeyStore.h>
 #include <Elastos.CoreLibrary.Core.h>
 #include <Elastos.CoreLibrary.Net.h>
 #include <Elastos.CoreLibrary.Security.h>
@@ -58,10 +59,10 @@ using Elastos::Droid::Net::NetworkInfoState_DISCONNECTED;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::IINetworkManagementService;
 using Elastos::Droid::R;
-// using Elastos::Droid::Security::ICredentials;
-// using Elastos::Droid::Security::CKeyStoreHelper;
-// using Elastos::Droid::Security::IKeyStore;
-// using Elastos::Droid::Security::IKeyStoreHelper;
+using Elastos::Droid::KeyStore::Security::ICredentials;
+using Elastos::Droid::KeyStore::Security::IKeyStore;
+// using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
+using Elastos::Droid::KeyStore::Security::IKeyStoreHelper;
 using Elastos::Droid::System::Os;
 using Elastos::Droid::Text::ITextUtils;
 using Elastos::Droid::Text::TextUtils;
@@ -136,15 +137,13 @@ ECode LockdownVpnTracker::constructor(
 
 Boolean LockdownVpnTracker::IsEnabled()
 {
-    Boolean rev;
-    // TODO: Waiting for KeyStore
-    assert(0);
-    // AutoPtr<IKeyStoreHelper> helper;
+    Boolean rev = FALSE;
+    Logger::W(TAG, "TODO CKeyStoreHelper not ready.");
+    AutoPtr<IKeyStoreHelper> helper;
     // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
     // AutoPtr<IKeyStore> keyStore;
     // helper->GetInstance((IKeyStore**)&keyStore);
     // keyStore->Contains(ICredentials::LOCKDOWN_VPN, &rev);
-    // return KeyStore.getInstance().contains(Credentials.LOCKDOWN_VPN);
     return rev;
 }
 

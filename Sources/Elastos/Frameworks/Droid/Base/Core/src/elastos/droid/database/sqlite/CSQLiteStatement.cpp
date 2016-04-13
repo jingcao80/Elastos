@@ -139,78 +139,6 @@ ECode CSQLiteStatement::SimpleQueryForBlobFileDescriptor(
     return ec;
 }
 
-ECode CSQLiteStatement::AcquireReference()
-{
-    return SQLiteProgram::AcquireReference();
-}
-
-ECode CSQLiteStatement::ReleaseReference()
-{
-    return SQLiteProgram::ReleaseReference();
-}
-
-ECode CSQLiteStatement::ReleaseReferenceFromContainer()
-{
-    return SQLiteProgram::ReleaseReferenceFromContainer();
-}
-
-ECode CSQLiteStatement::Close()
-{
-    return SQLiteProgram::Close();
-}
-
-ECode CSQLiteStatement::GetUniqueId(
-    /* [out] */ Int32 *value)
-{
-    VALIDATE_NOT_NULL(value);
-    return SQLiteProgram::GetUniqueId(value);
-}
-
-ECode CSQLiteStatement::BindNull(
-    /* [in] */ Int32 index)
-{
-    return SQLiteProgram::BindNull(index);
-}
-
-ECode CSQLiteStatement::BindInt64(
-    /* [in] */ Int32 index,
-    /* [in] */ Int64 value)
-{
-    return SQLiteProgram::BindInt64(index, value);
-}
-
-ECode CSQLiteStatement::BindDouble(
-    /* [in] */ Int32 index,
-    /* [in] */ Double value)
-{
-    return SQLiteProgram::BindDouble(index, value);
-}
-
-ECode CSQLiteStatement::BindString(
-    /* [in] */ Int32 index,
-    /* [in] */ const String& value)
-{
-    return SQLiteProgram::BindString(index, value);
-}
-
-ECode CSQLiteStatement::BindBlob(
-    /* [in] */ Int32 index,
-    /* [in] */ const ArrayOf<Byte>& value)
-{
-    return SQLiteProgram::BindBlob(index, value);
-}
-
-ECode CSQLiteStatement::ClearBindings()
-{
-    return SQLiteProgram::ClearBindings();
-}
-
-ECode CSQLiteStatement::BindAllArgsAsStrings(
-    /* [in] */ ArrayOf<String>* bindArgs)
-{
-    return SQLiteProgram::BindAllArgsAsStrings(bindArgs);
-}
-
 ECode CSQLiteStatement::ToString(
     /* [out] */ String* str)
 {
@@ -224,7 +152,7 @@ ECode CSQLiteStatement::constructor(
     /* [in] */ const String& sql,
     /* [in] */ ArrayOf<IInterface*>* bindArgs)
 {
-    return SQLiteProgram::Init(db, sql, bindArgs, NULL);
+    return SQLiteProgram::constructor(db, sql, bindArgs, NULL);
 }
 
 } //Sqlite

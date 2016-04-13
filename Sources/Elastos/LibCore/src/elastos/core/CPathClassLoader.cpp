@@ -32,8 +32,8 @@ ECode CPathClassLoader::LoadClass(
         return E_INVALID_ARGUMENT;
     }
 
-    ALOGI("CPathClassLoader::LoadClass: GetClassInfo %s in %s",
-        className.string(), mPath.string());
+    // ALOGI("CPathClassLoader::LoadClass: GetClassInfo %s in %s",
+    //     className.string(), mPath.string());
 
     AutoPtr<IModuleInfo> moduleInfo;
     ECode ec = CReflector::AcquireModuleInfo(mPath, (IModuleInfo**)&moduleInfo);

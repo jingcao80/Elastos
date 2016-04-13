@@ -275,11 +275,22 @@ ECode SQLiteSession::Prepare(
         FAIL_RETURN(cancellationSignal->ThrowIfCanceled())
     }
 
-    FAIL_RETURN(AcquireConnection(sql, connectionFlags, cancellationSignal)) // might throw
+    ECode ec = AcquireConnection(sql, connectionFlags, cancellationSignal); // might throw
+    if (FAILED(ec)) {
+        Slogger::E("SQLiteSession", "Failed to AcquireConnection %s", sql.string());
+        return ec;
+    }
     //try {
-    ECode ec = mConnection->Prepare(sql, outStatementInfo); // might throw
+    ec = mConnection->Prepare(sql, outStatementInfo); // might throw
+    if (FAILED(ec)) {
+        Slogger::E("SQLiteSession", "Failed to Prepare %s", sql.string());
+    }
+
     //} finally {
-    FAIL_RETURN(ReleaseConnection()) // might throw
+    ec = ReleaseConnection(); // might throw
+    if (FAILED(ec)) {
+        Slogger::E("SQLiteSession", "Failed to ReleaseConnection %s", sql.string());
+    }
     //}
     return ec;
 }

@@ -2,14 +2,24 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/graphics/PixelFormat.h"
-#include "elastos/droid/graphics/CPixelFormat.h"
 #include <ui/PixelFormat.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-CAR_INTERFACE_IMPL(PixelFormat, Object, IPixelFormat);
+CAR_INTERFACE_IMPL(PixelFormat, Object, IPixelFormat)
+
+PixelFormat::PixelFormat()
+    : mBytesPerPixel(0)
+    , mBitsPerPixel(0)
+{}
+
+ECode PixelFormat::constructor()
+{
+    return NOERROR;
+}
+
 Boolean PixelFormat::FormatHasAlpha(
     /* [in] */ Int32 format)
 {
@@ -70,14 +80,6 @@ ECode PixelFormat::GetPixelFormatInfo(
     return NOERROR;
 }
 
-ECode PixelFormat::GetBitsPerPixel(
-    /* [out] */ Int32* result)
-{
-    VALIDATE_NOT_NULL(result);
-    *result = mBitsPerPixel;
-    return NOERROR;
-}
-
 Boolean PixelFormat::IsPublicFormat(
     /* [in] */ Int32 format)
 {
@@ -91,6 +93,37 @@ Boolean PixelFormat::IsPublicFormat(
 
     return FALSE;
 }
+
+ECode PixelFormat::SetBitsPerPixel(
+    /* [in] */ Int32 bits)
+{
+    mBitsPerPixel = bits;
+    return NOERROR;
+}
+
+ECode PixelFormat::GetBitsPerPixel(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mBitsPerPixel;
+    return NOERROR;
+}
+
+ECode PixelFormat::SetBytesPerPixel(
+    /* [in] */ Int32 bytes)
+{
+    mBytesPerPixel = bytes;
+    return NOERROR;
+}
+
+ECode PixelFormat::GetBytesPerPixel(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mBytesPerPixel;
+    return NOERROR;
+}
+
 
 } // namespace Graphics
 } // namepsace Droid

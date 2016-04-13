@@ -2990,7 +2990,6 @@ ECode PhoneWindowManager::AddStartingWindow(
         win->SetDefaultIcon(icon);
         win->SetDefaultLogo(logo);
 
-
         win->SetLayout(
             IViewGroupLayoutParams::MATCH_PARENT,
             IViewGroupLayoutParams::MATCH_PARENT);

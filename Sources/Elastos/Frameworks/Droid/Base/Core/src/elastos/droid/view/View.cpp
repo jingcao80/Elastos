@@ -1853,7 +1853,7 @@ ECode View::PerformClick(
     Boolean result;
     AutoPtr<ListenerInfo> li = mListenerInfo;
     if (li != NULL && li->mOnClickListener != NULL) {
-        // PlaySoundEffect(SoundEffectConstants::CLICK);
+        PlaySoundEffect(SoundEffectConstants::CLICK);
         li->mOnClickListener->OnClick(this);
         result = TRUE;
     } else {
@@ -16335,9 +16335,7 @@ ECode View::PlaySoundEffect(
     if (mAttachInfo == NULL || mAttachInfo->mRootCallbacks == NULL || !isSoundEffectsEnabled) {
         return NOERROR;
     }
-    mAttachInfo->mRootCallbacks->PlaySoundEffect(soundConstant);
-
-    return NOERROR;
+    return mAttachInfo->mRootCallbacks->PlaySoundEffect(soundConstant);
 }
 
 /**

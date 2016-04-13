@@ -113,13 +113,13 @@ ECode SQLiteConnectionPool::Dispose(
             FAIL_RETURN(ThrowIfClosedLocked())
 
             mIsOpen = FALSE;
-
             CloseAvailableConnectionsAndLogExceptionsLocked();
 
             Int32 pendingCount = mAcquiredConnections.GetSize();
             if (pendingCount != 0) {
-                Slogger::I(TAG, "The connection pool for %s has been closed but there are still %d connections in use.  They will be closed as they are released back to the pool."
-                        , mConfiguration->mLabel.string(), pendingCount);
+                Slogger::I(TAG, "The connection pool for %s has been closed but there are still %d connections in use."
+                    " They will be closed as they are released back to the pool.",
+                    mConfiguration->mLabel.string(), pendingCount);
             }
 
             WakeConnectionWaitersLocked();
@@ -227,17 +227,16 @@ ECode SQLiteConnectionPool::ReleaseConnection(
     synchronized(mLock) {
         AcquiredConnectionStatus status;
         HashMap<AutoPtr<SQLiteConnection>, AcquiredConnectionStatus>::Iterator it = mAcquiredConnections.Find(connection);
-        if(it != mAcquiredConnections.End()) {
-            status = it->mSecond;
-            mAcquiredConnections.Erase(it);
-        }
-
         if (it == mAcquiredConnections.End()) {
             //throw new IllegalStateException("Cannot perform this operation "
             //        + "because the specified connection was not acquired "
             //        + "from this pool or has already been released.");
             Slogger::E(TAG, "Cannot perform this operation because the specified connection was not acquired from this pool or has already been released.");
             return E_ILLEGAL_STATE_EXCEPTION;
+        }
+        else {
+            status = it->mSecond;
+            mAcquiredConnections.Erase(it);
         }
 
         if (!mIsOpen) {

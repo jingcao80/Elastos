@@ -540,7 +540,7 @@ void WindowAnimator::TestTokenMayBeDrawnLocked(
                     if (appAnimator->mFreezingScreen) {
                         appAnimator->ShowAllWindowsLocked();
                         mService->UnsetAppFreezingScreenLocked(wtoken, FALSE, TRUE);
-                        // if (WindowManagerService.DEBUG_ORIENTATION) Slog.i(TAG,
+                        // if (WindowManagerService.DEBUG_ORIENTATION) Slogger::I(TAG,
                         //         "Setting mOrientationChangeComplete=true because wtoken "
                         //         + wtoken + " numInteresting=" + wtoken.numInterestingWindows
                         //         + " numDrawn=" + wtoken.numDrawnWindows);
@@ -584,12 +584,13 @@ void WindowAnimator::AnimateLocked()
     mBulkUpdateParams = CWindowManagerService::LayoutFields::SET_ORIENTATION_CHANGE_COMPLETE;
     Boolean wasAnimating = mAnimating;
     mAnimating = FALSE;
-    // if (WindowManagerService.DEBUG_WINDOW_TRACE) {
-    //     Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
+    // if (CWindowManagerService::DEBUG_WINDOW_TRACE) {
+    //     Slogger::I(TAG, "!!! animate: entry time=%lld", mCurrentTime);
     // }
 
-    // if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(
-    //         TAG, ">>> OPEN TRANSACTION animateLocked");
+    // if (CWindowManagerService::SHOW_TRANSACTIONS) {
+    //     Slogger::I(TAG, ">>> OPEN TRANSACTION animateLocked");
+    // }
     AutoPtr<ISurfaceControlHelper> helper;
     CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&helper);
     helper->OpenTransaction();
@@ -666,11 +667,11 @@ void WindowAnimator::AnimateLocked()
     // } catch (RuntimeException e) {
     //     Log.wtf(TAG, "Unhandled exception in Window Manager", e);
     // } finally {
-    //     Surface.closeTransaction();
-    //     if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(
-    //             TAG, "<<< CLOSE TRANSACTION animateLocked");
-    // }
     helper->CloseTransaction();
+    // if (CWindowManagerService::SHOW_TRANSACTIONS) {
+    //     Slogger::I(TAG, "<<< CLOSE TRANSACTION animateLocked");
+    // }
+    // }
 
     Boolean hasPendingLayoutChanges = FALSE;
     Int32 numDisplays;
@@ -700,10 +701,10 @@ void WindowAnimator::AnimateLocked()
     if (!mAnimating && wasAnimating) {
         mService->RequestTraversalLocked();
     }
-    if (CWindowManagerService::DEBUG_WINDOW_TRACE) {
-        Slogger::I(TAG, "!!! animate: exit mAnimating=%d mBulkUpdateParams=%d mPendingLayoutChanges(DEFAULT_DISPLAY)=%d",
-                mAnimating, mBulkUpdateParams, GetPendingLayoutChanges(IDisplay::DEFAULT_DISPLAY));
-    }
+    // if (CWindowManagerService::DEBUG_WINDOW_TRACE) {
+    //     Slogger::I(TAG, "!!! animate: exit mAnimating=%d mBulkUpdateParams=%d mPendingLayoutChanges(DEFAULT_DISPLAY)=%d",
+    //             mAnimating, mBulkUpdateParams, GetPendingLayoutChanges(IDisplay::DEFAULT_DISPLAY));
+    // }
 }
 
 String WindowAnimator::BulkUpdateParamsToString(

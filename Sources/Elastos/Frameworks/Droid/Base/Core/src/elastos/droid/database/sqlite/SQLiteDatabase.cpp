@@ -185,6 +185,7 @@ ECode SQLiteDatabase::GetThreadSession(
     /* [out] */ SQLiteSession** session)
 {
     VALIDATE_NOT_NULL(session);
+    *session = NULL;
 
     pthread_once(&sKeyOnce, MakeKey);
 
@@ -202,6 +203,9 @@ ECode SQLiteDatabase::GetThreadSession(
 ECode SQLiteDatabase::CreateSession(
     /* [out] */ SQLiteSession** session)
 {
+    VALIDATE_NOT_NULL(session)
+    *session = NULL;
+
     AutoPtr<SQLiteConnectionPool> pool;
     synchronized(mLock) {
         FAIL_RETURN(ThrowIfNotOpenLocked());
@@ -714,6 +718,9 @@ ECode SQLiteDatabase::CompileStatement(
     AcquireReference();
     //try {
     ECode ec = CSQLiteStatement::New(this, sql, NULL, stmt);
+    if (FAILED(ec)) {
+        Slogger::E(TAG, "failed to CompileStatement:%s", sql.string());
+    }
     //} finally {
     SQLiteClosable::ReleaseReference();
     //}

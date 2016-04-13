@@ -1,8 +1,11 @@
 
+#include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/database/sqlite/SQLiteDatabaseConfiguration.h"
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::IO::IFile;
+using Elastos::IO::CFile;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
@@ -35,10 +38,20 @@ SQLiteDatabaseConfiguration::SQLiteDatabaseConfiguration(
     , mForeignKeyConstraintsEnabled(FALSE)
 {
     if (path.IsNull()) {
-        Slogger::E(String("SQLiteDatabaseConfiguration"), "path must not be null.");
+        Slogger::E("SQLiteDatabaseConfiguration", "path must not be null.");
         assert(0);
         // throw new IllegalArgumentException("path must not be null.");
     }
+
+#ifdef _DEBUG
+    AutoPtr<IFile> file;
+    CFile::New(path, (IFile**)&file);
+    Boolean exists;
+    file->Exists(&exists);
+    if (!exists) {
+        assert(0 && "not exists" && path.string());
+    }
+#endif
 
     mPath = path;
     mLabel = StripPathForLogs(path);
@@ -56,13 +69,14 @@ SQLiteDatabaseConfiguration::SQLiteDatabaseConfiguration(
     , mForeignKeyConstraintsEnabled(FALSE)
 {
     if (other == NULL) {
-        Slogger::E(String("SQLiteDatabaseConfiguration"), "other must not be null.");
+        Slogger::E("SQLiteDatabaseConfiguration", "other must not be null.");
         assert(0);
         //throw new IllegalArgumentException("other must not be null.");
     }
 
     mPath  = other->mPath;
     mLabel = other->mLabel;
+
     ASSERT_SUCCEEDED(UpdateParametersFrom(other));
 }
 
@@ -70,12 +84,12 @@ ECode SQLiteDatabaseConfiguration::UpdateParametersFrom(
     /* [in] */ SQLiteDatabaseConfiguration* other)
 {
     if (other == NULL) {
-        Slogger::E(String("SQLiteDatabaseConfiguration"), "other must not be null.");
+        Slogger::E("SQLiteDatabaseConfiguration", "other must not be null.");
         //throw new IllegalArgumentException("other must not be null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (!mPath.Equals(other->mPath)) {
-        Slogger::E(String("SQLiteDatabaseConfiguration"), "other configuration must refer to the same database.");
+        Slogger::E("SQLiteDatabaseConfiguration", "other configuration must refer to the same database.");
         //throw new IllegalArgumentException("other configuration must refer to "
         //        + "the same database.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;

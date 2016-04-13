@@ -452,7 +452,7 @@ ECode TaskPersister::SaveToXml(
     FAIL_RETURN(xmlSerializer->WriteEndTag(String(NULL), TAG_TASK));
 
     FAIL_RETURN(xmlSerializer->EndDocument());
-    FAIL_RETURN(IFlushable::Probe(xmlSerializer)->Flush());
+    FAIL_RETURN(xmlSerializer->Flush());
 
     return NOERROR;
 }

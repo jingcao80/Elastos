@@ -2838,28 +2838,35 @@ ECode Intent::ParseIntent(
 ECode Intent::SaveToXml(
     /* [in] */ IXmlSerializer* out)
 {
-    assert(0 && "TODO");
-    // if (mAction != NULL) {
-    //     out.attribute(NULL, ATTR_ACTION, mAction);
-    // }
-    // if (mData != NULL) {
-    //     out.attribute(NULL, ATTR_DATA, mData.toString());
-    // }
-    // if (mType != NULL) {
-    //     out.attribute(NULL, ATTR_TYPE, mType);
-    // }
-    // if (mComponent != NULL) {
-    //     out.attribute(NULL, ATTR_COMPONENT, mComponent.flattenToShortString());
-    // }
-    // out.attribute(NULL, ATTR_FLAGS, Integer.toHexString(getFlags()));
+    String nullStr;
+    if (mAction != NULL) {
+        out->WriteAttribute(nullStr, ATTR_ACTION, mAction);
+    }
+    if (mData != NULL) {
+        String uri = Object::ToString(mData);
+        out->WriteAttribute(nullStr, ATTR_DATA, uri);
+    }
+    if (mType != NULL) {
+        out->WriteAttribute(nullStr, ATTR_TYPE, mType);
+    }
+    if (mComponent != NULL) {
+        String str;
+        mComponent->FlattenToShortString(&str);
+        out->WriteAttribute(nullStr, ATTR_COMPONENT, str);
+    }
 
-    // if (mCategories != NULL) {
-    //     out.startTag(NULL, TAG_CATEGORIES);
-    //     for (int categoryNdx = mCategories.size() - 1; categoryNdx >= 0; --categoryNdx) {
-    //         out.attribute(NULL, ATTR_CATEGORY, mCategories.valueAt(categoryNdx));
-    //     }
-    //     out.endTag(NULL, TAG_CATEGORIES);
-    // }
+    Int32 flags;
+    GetFlags(&flags);
+    out->WriteAttribute(nullStr, ATTR_FLAGS, StringUtils::ToHexString(flags));
+
+    if (mCategories != NULL) {
+        out->WriteStartTag(nullStr, TAG_CATEGORIES);
+        HashSet<String>::Iterator it = mCategories->Begin();
+        for (; it != mCategories->End(); ++it) {
+            out->WriteAttribute(nullStr, ATTR_CATEGORY, *it);
+        }
+        out->WriteEndTag(nullStr, TAG_CATEGORIES);
+    }
     return NOERROR;
 }
 

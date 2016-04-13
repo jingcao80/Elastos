@@ -31,7 +31,7 @@ SQLiteProgram::SQLiteProgram()
     , mNumParameters(0)
 {}
 
-ECode SQLiteProgram::Init(
+ECode SQLiteProgram::constructor(
     /* [in] */ ISQLiteDatabase* db,
     /* [in] */ const String& sql,
     /* [in] */ ArrayOf<IInterface*>* bindArgs,
@@ -50,18 +50,27 @@ ECode SQLiteProgram::Init(
             mNumParameters = 0;
             break;
 
-        default:
+        default: {
             Boolean assumeReadOnly = (n == DatabaseUtils_STATEMENT_SELECT);
             AutoPtr<SQLiteStatementInfo> info = new SQLiteStatementInfo();
             AutoPtr<SQLiteSession> session;
-            FAIL_RETURN(mDatabase->GetThreadSession((SQLiteSession**)&session));
+            ECode ec = mDatabase->GetThreadSession((SQLiteSession**)&session);
+            if (FAILED(ec)) {
+                Slogger::E("SQLiteProgram", "failed to GetThreadSession when creating SQLiteProgram for [%s]", mSql.string());
+                return ec;
+            }
             Int32 flags = mDatabase->GetThreadDefaultConnectionFlags(assumeReadOnly);
             assert(session != NULL);
-            FAIL_RETURN(session->Prepare(mSql, flags, cancellationSignalForPrepare, info));
+            ec = session->Prepare(mSql, flags, cancellationSignalForPrepare, info);
+            if (FAILED(ec)) {
+                Slogger::E("SQLiteProgram", "failed to Prepare when creating SQLiteProgram for [%s]", mSql.string());
+                return ec;
+            }
             mReadOnly = info->mReadOnly;
             mColumnNames = info->mColumnNames;
             mNumParameters = info->mNumParameters;
             break;
+        }
     }
 
     if (bindArgs != NULL && bindArgs->GetLength() > mNumParameters) {
@@ -79,7 +88,6 @@ ECode SQLiteProgram::Init(
             for(Int32 i = 0; i < bindArgs->GetLength(); i++) {
                 mBindArgs->Set(i, (*bindArgs)[i]);
             }
-
         }
     }
     else {

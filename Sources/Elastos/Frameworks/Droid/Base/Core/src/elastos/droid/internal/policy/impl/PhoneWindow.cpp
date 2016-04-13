@@ -8,7 +8,6 @@
 #include "elastos/droid/internal/policy/impl/CPhoneWindowSavedState.h"
 #include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/graphics/CPaint.h"
-#include "elastos/droid/graphics/CPixelFormat.h"
 #include "elastos/droid/graphics/drawable/Drawable.h"
 #include "elastos/droid/media/session/CMediaSessionLegacyHelperHelper.h"
 #include "elastos/droid/os/Build.h"
@@ -70,7 +69,6 @@ using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Res::IResourcesTheme;
 using Elastos::Droid::Content::Pm::IPackageManager;
-using Elastos::Droid::Graphics::CPixelFormat;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Graphics::Drawable::Drawable;
@@ -1849,7 +1847,7 @@ void PhoneWindow::_DecorView::DrawableChanged()
     RequestLayout();
     Invalidate();
 
-    Int32 opacity = CPixelFormat::OPAQUE;
+    Int32 opacity = IPixelFormat::OPAQUE;
 
     // Note: if there is no background, we will assume opaque. The
     // common case seems to be that an application sets there to be
@@ -1873,11 +1871,11 @@ void PhoneWindow::_DecorView::DrawableChanged()
             bg->GetOpacity(&bop);
             // if (false)
             //     Log.v(TAG, "Background opacity: " + bop + ", Frame opacity: " + fop);
-            if (fop == CPixelFormat::OPAQUE || bop == CPixelFormat::OPAQUE) {
-                opacity = CPixelFormat::OPAQUE;
-            } else if (fop == CPixelFormat::UNKNOWN) {
+            if (fop == IPixelFormat::OPAQUE || bop == IPixelFormat::OPAQUE) {
+                opacity = IPixelFormat::OPAQUE;
+            } else if (fop == IPixelFormat::UNKNOWN) {
                 opacity = bop;
-            } else if (bop == CPixelFormat::UNKNOWN) {
+            } else if (bop == IPixelFormat::UNKNOWN) {
                 opacity = fop;
             } else {
                 Drawable::Drawable::ResolveOpacity(fop, bop, &opacity);
@@ -1888,7 +1886,7 @@ void PhoneWindow::_DecorView::DrawableChanged()
             // frame and background together will draw all pixels.
             // if (false)
             //     Log.v(TAG, "Padding: " + mFramePadding);
-            opacity = CPixelFormat::TRANSLUCENT;
+            opacity = IPixelFormat::TRANSLUCENT;
         }
     }
 

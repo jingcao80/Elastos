@@ -10,7 +10,8 @@
 
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::IPixelFormat;
-using Elastos::Droid::Graphics::CPixelFormat;
+using Elastos::Droid::Graphics::IPixelFormatHelper;
+using Elastos::Droid::Graphics::CPixelFormatHelper;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::View::Animation::CTransformation;
@@ -128,7 +129,7 @@ WindowStateAnimator::WindowStateAnimator(
 void WindowStateAnimator::SetAnimation(
     /* [in] */ IAnimation* anim)
 {
-    // if (localLOGV) Slog.v(TAG, "Setting animation in " + this + ": " + anim);
+    // if (localLOGV) Slogger::V(TAG, "Setting animation in " + this + ": " + anim);
     mAnimating = FALSE;
     mLocalAnimating = FALSE;
     mAnimation = anim;
@@ -201,7 +202,7 @@ Boolean WindowStateAnimator::StepAnimation(
     mTransformation->Clear();
     Boolean more;
     mAnimation->GetTransformation(currentTime, mTransformation, &more);
-    // if (false && DEBUG_ANIM) Slog.v(
+    // if (false && DEBUG_ANIM) Slogger::V(
     //     TAG, "Stepped animation in " + this +
     //     ": more=" + more + ", xform=" + mTransformation);
     return more;
@@ -220,7 +221,7 @@ Boolean WindowStateAnimator::StepAnimationLocked(
             mHasTransformation = TRUE;
             mHasLocalTransformation = TRUE;
             if (!mLocalAnimating) {
-                // if (DEBUG_ANIM) Slog.v(
+                // if (DEBUG_ANIM) Slogger::V(
                 //     TAG, "Starting animation in " + this +
                 //     " @ " + currentTime + ": ww=" + mWin.mFrame.width() +
                 //     " wh=" + mWin.mFrame.height() +
@@ -242,7 +243,7 @@ Boolean WindowStateAnimator::StepAnimationLocked(
                     return TRUE;
                 }
             }
-            // if (DEBUG_ANIM) Slog.v(
+            // if (DEBUG_ANIM) Slogger::V(
             //     TAG, "Finished animation in " + this +
             //     " @ " + currentTime);
             //WindowManagerService.this.dump();
@@ -282,7 +283,7 @@ Boolean WindowStateAnimator::StepAnimationLocked(
     }
 
     // Done animating, clean up.
-    // if (DEBUG_ANIM) Slog.v(
+    // if (DEBUG_ANIM) Slogger::V(
     //     TAG, "Animation done in " + this + ": exiting=" + mWin.mExiting
     //     + ", reportedVisible="
     //     + (mWin.mAppToken != null ? mWin.mAppToken.reportedVisible : false));
@@ -334,8 +335,10 @@ Boolean WindowStateAnimator::StepAnimationLocked(
             && mWin->mAppToken != NULL
             && mWin->mAppToken->mFirstWindowDrawn
             && mWin->mAppToken->mStartingData != NULL) {
-        // if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Finish starting "
-        //         + mWin.mToken + ": first real window done animating");
+        if (CWindowManagerService::DEBUG_STARTING_WINDOW) {
+            Slogger::V(TAG, "Finish starting %s: first real window done animating",
+                TO_CSTR(mWin->mToken));
+        }
         mService->mFinishedStarting.PushBack(mWin->mAppToken);
         Boolean result;
         mService->mH->SendEmptyMessage(CWindowManagerService::H::FINISHED_STARTING, &result);
@@ -352,7 +355,7 @@ Boolean WindowStateAnimator::StepAnimationLocked(
     Int32 displayId = mWin->GetDisplayId();
     mAnimator->SetPendingLayoutChanges(displayId,
             IWindowManagerPolicy::FINISH_LAYOUT_REDO_ANIM);
-    // if (WindowManagerService.DEBUG_LAYOUT_REPEATS) mService.debugLayoutRepeats(
+    // if (CWindowManagerService::DEBUG_LAYOUT_REPEATS) mService.debugLayoutRepeats(
     //         "WindowStateAnimator", mAnimator.getPendingLayoutChanges(displayId));
 
     if (mWin->mAppToken != NULL) {
@@ -364,7 +367,7 @@ Boolean WindowStateAnimator::StepAnimationLocked(
 
 void WindowStateAnimator::FinishExit()
 {
-    // if (WindowManagerService.DEBUG_ANIM) Slog.v(
+    // if (CWindowManagerService::DEBUG_ANIM) Slogger::V(
     //         TAG, "finishExit in " + this
     //         + ": exiting=" + mWin.mExiting
     //         + " remove=" + mWin.mRemoveOnExit
@@ -383,7 +386,7 @@ void WindowStateAnimator::FinishExit()
         return;
     }
 
-    // if (WindowManagerService.localLOGV) Slog.v(
+    // if (CWindowManagerService::localLOGV) Slogger::V(
     //         TAG, "Exit animation finished in " + this
     //         + ": remove=" + mWin.mRemoveOnExit);
     if (mSurfaceControl != NULL) {
@@ -406,7 +409,7 @@ void WindowStateAnimator::Hide()
     if (!mLastHidden) {
         //dump();
         mLastHidden = TRUE;
-        // if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
+        // if (CWindowManagerService::SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
         //         "HIDE (performLayout)", null);
         if (mSurfaceControl != NULL) {
             mSurfaceShown = FALSE;
@@ -435,16 +438,16 @@ Boolean WindowStateAnimator::FinishDrawingLocked()
 {
     // if (DEBUG_STARTING_WINDOW &&
     //         mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
-    //     Slog.v(TAG, "Finishing drawing window " + mWin + ": mDrawState="
+    //     Slogger::V(TAG, "Finishing drawing window " + mWin + ": mDrawState="
     //             + drawStateToString(mDrawState));
     // }
     if (mDrawState == DRAW_PENDING) {
         // if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
-        //     Slog.v(TAG, "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING " + this + " in "
+        //     Slogger::V(TAG, "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING " + this + " in "
         //             + mSurfaceControl);
         // if (DEBUG_STARTING_WINDOW &&
         //         mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
-        //     Slog.v(TAG, "Draw state now committed in " + mWin);
+        //     Slogger::V(TAG, "Draw state now committed in " + mWin);
         // }
         mDrawState = COMMIT_DRAW_PENDING;
         return TRUE;
@@ -455,21 +458,22 @@ Boolean WindowStateAnimator::FinishDrawingLocked()
 Boolean WindowStateAnimator::CommitFinishDrawingLocked(
     /* [in] */ Int64 currentTime)
 {
-    // if (DEBUG_STARTING_WINDOW &&
-    //         mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
-    //     Slog.i(TAG, "commitFinishDrawingLocked: " + mWin + " cur mDrawState="
-    //             + drawStateToString(mDrawState));
-    // }
-    if (mDrawState != COMMIT_DRAW_PENDING) {
-        return FALSE;
-    }
-    // if (DEBUG_SURFACE_TRACE || DEBUG_ANIM) {
-    //     Slog.i(TAG, "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW " + mSurfaceControl);
-    // }
-    mDrawState = READY_TO_SHOW;
     Int32 type;
     mWin->mAttrs->GetType(&type);
     Boolean starting = type == IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING;
+
+    if (CWindowManagerService::DEBUG_STARTING_WINDOW && starting) {
+        Slogger::I(TAG, "commitFinishDrawingLocked: %s cur mDrawState=%s",
+            TO_CSTR(mWin), DrawStateToString(mDrawState).string());
+    }
+    if (mDrawState != COMMIT_DRAW_PENDING) {
+        return FALSE;
+    }
+    if (CWindowManagerService::DEBUG_SURFACE_TRACE || CWindowManagerService::DEBUG_ANIM) {
+        Slogger::I(TAG, "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW %s", TO_CSTR(mSurfaceControl));
+    }
+
+    mDrawState = READY_TO_SHOW;
     AutoPtr<AppWindowToken> atoken = mWin->mAppToken;
     if (atoken == NULL || atoken->mAllDrawn || starting) {
         PerformShowLocked();
@@ -588,8 +592,8 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
             (attrs->GetType(&attrstype), attrstype == IWindowManagerLayoutParams::TYPE_APPLICATION_STARTING)) {
                 format = attrsformat;
         }
-        AutoPtr<IPixelFormat> pf;
-        CPixelFormat::AcquireSingleton((IPixelFormat**)&pf);
+        AutoPtr<IPixelFormatHelper> pf;
+        CPixelFormatHelper::AcquireSingleton((IPixelFormatHelper**)&pf);
         attrs->GetFormat(&attrsformat);
         Boolean hasAlpha;
         if ((pf->FormatHasAlpha(attrsformat, &hasAlpha), !hasAlpha)
@@ -635,13 +639,13 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
         // }
 
         // if (WindowManagerService::localLOGV) {
-        //     Slog.v(TAG, "Got surface: " + mSurfaceControl
+        //     Slogger::V(TAG, "Got surface: " + mSurfaceControl
         //             + ", set left=" + w.mFrame.left + " top=" + w.mFrame.top
         //             + ", animLayer=" + mAnimLayer);
         // }
 
         // if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) {
-        //     Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
+        //     Slogger::I(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
         //     WindowManagerService.logSurface(w, "CREATE pos=("
         //             + w.mFrame.left + "," + w.mFrame.top + ") ("
         //             + w.mCompatFrame.width() + "x" + w.mCompatFrame.height()
@@ -674,7 +678,7 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
         mLastHidden = TRUE;
         // } finally {
         //     SurfaceControl.closeTransaction();
-        //     if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+        //     if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG,
         //             "<<< CLOSE TRANSACTION createSurfaceLocked");
         // }
         sch->CloseTransaction();
@@ -828,28 +832,29 @@ void WindowStateAnimator::ComputeShownFrameLocked()
     AutoPtr<ITransformation> appTransformation = (mAppAnimator != NULL && mAppAnimator->mHasTransformation)
             ? mAppAnimator->mTransformation : NULL;
 
+    Boolean bval;
     // Wallpapers are animated based on the "real" window they
     // are currently targeting.
     AutoPtr<WindowState> wallpaperTarget = mService->mWallpaperTarget;
     if (mIsWallpaper && wallpaperTarget != NULL && mService->mAnimateWallpaperWithTarget) {
         AutoPtr<WindowStateAnimator> wallpaperAnimator = wallpaperTarget->mWinAnimator;
-        Boolean result;
         if (wallpaperAnimator->mHasLocalTransformation
                 && wallpaperAnimator->mAnimation != NULL
-                && (wallpaperAnimator->mAnimation->GetDetachWallpaper(&result), !result)) {
+                && (wallpaperAnimator->mAnimation->GetDetachWallpaper(&bval), !bval)) {
                 attachedTransformation = wallpaperAnimator->mTransformation;
-                // if (WindowManagerService.DEBUG_WALLPAPER && attachedTransformation != null) {
-                //     Slog.v(TAG, "WP target attached xform: " + attachedTransformation);
+                if (CWindowManagerService::DEBUG_WALLPAPER && attachedTransformation != NULL) {
+                    Slogger::V(TAG, "WP target attached xform: %s", TO_CSTR(attachedTransformation));
+                }
         }
         AutoPtr<AppWindowAnimator> wpAppAnimator = wallpaperTarget->mAppToken == NULL ?
                     NULL : wallpaperTarget->mAppToken->mAppAnimator;
         if (wpAppAnimator != NULL && wpAppAnimator->mHasTransformation
                 && wpAppAnimator->mAnimation != NULL
-                && (wpAppAnimator->mAnimation->GetDetachWallpaper(&result), !result)) {
+                && (wpAppAnimator->mAnimation->GetDetachWallpaper(&bval), !bval)) {
                 appTransformation = wpAppAnimator->mTransformation;
-                // if (WindowManagerService.DEBUG_WALLPAPER && appTransformation != null) {
-                //     Slog.v(TAG, "WP target app xform: " + appTransformation);
-                // }
+                if (CWindowManagerService::DEBUG_WALLPAPER && appTransformation != NULL) {
+                    Slogger::V(TAG, "WP target app xform: %s", TO_CSTR(appTransformation));
+                }
         }
     }
 
@@ -899,26 +904,25 @@ void WindowStateAnimator::ComputeShownFrameLocked()
         Int32 left, top;
         frame->GetLeft(&left);
         frame->GetTop(&top);
-        Boolean result;
-        tmpMatrix->PostTranslate(left + mWin->mXOffset, top + mWin->mYOffset, &result);
+        tmpMatrix->PostTranslate(left + mWin->mXOffset, top + mWin->mYOffset, &bval);
         if (attachedTransformation != NULL) {
             attachedTransformation->GetMatrix((IMatrix**)&m);
-            tmpMatrix->PostConcat(m, &result);
+            tmpMatrix->PostConcat(m, &bval);
         }
         if (appTransformation != NULL) {
             m = NULL;
             appTransformation->GetMatrix((IMatrix**)&m);
-            tmpMatrix->PostConcat(m, &result);
+            tmpMatrix->PostConcat(m, &bval);
         }
         if (mAnimator->mUniverseBackground != NULL) {
             m = NULL;
             mAnimator->mUniverseBackground->mUniverseTransform->GetMatrix((IMatrix**)&m);
-            tmpMatrix->PostConcat(m, &result);
+            tmpMatrix->PostConcat(m, &bval);
         }
         if (screenAnimation) {
             m = NULL;
             screenRotationAnimation->GetEnterTransformation()->GetMatrix((IMatrix**)&m);
-            tmpMatrix->PostConcat(m, &result);
+            tmpMatrix->PostConcat(m, &bval);
         }
         //TODO (multidisplay): Magnification is supported only for the default display.
         if (mService->mAccessibilityController != NULL && displayId == IDisplay::DEFAULT_DISPLAY) {
@@ -926,13 +930,12 @@ void WindowStateAnimator::ComputeShownFrameLocked()
                     mService->mAccessibilityController->GetMagnificationSpecForWindowLocked(mWin);
             Boolean isNop;
             if (spec != NULL && (spec->IsNop(&isNop), !isNop)) {
-                Boolean result;
                 Float scale, offsetX, offsetY;
                 spec->GetScale(&scale);
                 spec->GetOffsetX(&offsetX);
                 spec->GetOffsetY(&offsetY);
-                tmpMatrix->PostScale(scale, scale, &result);
-                tmpMatrix->PostTranslate(offsetX, offsetY, &result);
+                tmpMatrix->PostScale(scale, scale, &bval);
+                tmpMatrix->PostTranslate(offsetX, offsetY, &bval);
             }
         }
 
@@ -940,7 +943,7 @@ void WindowStateAnimator::ComputeShownFrameLocked()
         // (a 2x2 matrix + an offset)
         // Here we must not transform the position of the surface
         // since it is already included in the transformation.
-        //Slog.i(TAG, "Transform: " + matrix);
+        //Slogger::I(TAG, "Transform: " + matrix);
 
         mHaveMatrix = TRUE;
         tmpMatrix->GetValues(tmpFloats.Get());
@@ -962,15 +965,20 @@ void WindowStateAnimator::ComputeShownFrameLocked()
         // animation be smooth.
         mShownAlpha = mAlpha;
 
-        AutoPtr<IPixelFormat> pixelFormat;
-        CPixelFormat::AcquireSingleton((IPixelFormat**)&pixelFormat);
-        Int32 format;
-        mWin->mAttrs->GetFormat(&format);
-        pixelFormat->FormatHasAlpha(format, &result);
+        bval = FALSE;
+        if (mService->mLimitedAlphaCompositing) {
+            AutoPtr<IPixelFormatHelper> pixelFormat;
+            CPixelFormatHelper::AcquireSingleton((IPixelFormatHelper**)&pixelFormat);
+            Int32 format;
+            assert(mWin->mAttrs != NULL);
+            mWin->mAttrs->GetFormat(&format);
+            pixelFormat->FormatHasAlpha(format, &bval);
+        }
+
         if (!mService->mLimitedAlphaCompositing
-                || (!result || (mWin->IsIdentityMatrix(mDsDx, mDtDx, mDsDy, mDtDy)
-                        && x == left && y == top))) {
-            //Slog.i(TAG, "Applying alpha transform");
+            || (!bval || (mWin->IsIdentityMatrix(mDsDx, mDtDx, mDsDy, mDtDy)
+                && x == left && y == top))) {
+            // Slogger::I(TAG, "Applying alpha transform");
             Float alpha;
             if (selfTransformation) {
                 mTransformation->GetAlpha(&alpha);
@@ -983,8 +991,7 @@ void WindowStateAnimator::ComputeShownFrameLocked()
             if (appTransformation != NULL) {
                 appTransformation->GetAlpha(&alpha);
                 mShownAlpha *= alpha;
-                Boolean hasClipRect;
-                if (appTransformation->HasClipRect(&hasClipRect), hasClipRect) {
+                if (appTransformation->HasClipRect(&bval), bval) {
                     AutoPtr<IRect> clipRect;
                     appTransformation->GetClipRect((IRect**)&clipRect);
                     mClipRect->Set(clipRect);
@@ -1015,11 +1022,11 @@ void WindowStateAnimator::ComputeShownFrameLocked()
             }
         }
         else {
-            // Slog.i(TAG, "Not applying alpha transform");
+            Slogger::I(TAG, "Not applying alpha transform");
         }
 
         // if ((DEBUG_SURFACE_TRACE || WindowManagerService.localLOGV)
-        //         && (mShownAlpha == 1.0 || mShownAlpha == 0.0)) Slog.v(
+        //         && (mShownAlpha == 1.0 || mShownAlpha == 0.0)) Slogger::V(
         //         TAG, "computeShownFrameLocked: Animating " + this + " mAlpha=" + mAlpha
         //         + " self=" + (selfTransformation ? mTransformation.getAlpha() : "null")
         //         + " attached=" + (attachedTransformation == null ?
@@ -1033,9 +1040,9 @@ void WindowStateAnimator::ComputeShownFrameLocked()
         return;
     }
 
-    // if (WindowManagerService.localLOGV) Slog.v(
-    //         TAG, "computeShownFrameLocked: " + this +
-    //         " not attached, mAlpha=" + mAlpha);
+    if (CWindowManagerService::localLOGV) {
+        Slogger::V(TAG, "computeShownFrameLocked: %s not attached, mAlpha=%d", TO_CSTR(this), mAlpha);
+    }
 
     Int32 type;
     Boolean applyUniverseTransformation = (mAnimator->mUniverseBackground != NULL
@@ -1370,7 +1377,7 @@ void WindowStateAnimator::SetSurfaceBoundariesLocked(
         mSurfaceH = height;
         mSurfaceResized = true;
         // try {
-        // if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
+        // if (CWindowManagerService::SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
         //         "SIZE " + width + "x" + height, null);
         if (FAILED(mSurfaceControl->SetSize(width, height))) {
             Slogger::W(TAG, "Error resizing surface of %s size=(%d,%d)", TO_CSTR(w), left, top);
@@ -1424,9 +1431,9 @@ void WindowStateAnimator::PrepareSurfaceLocked(
     AutoPtr<WindowState> w = mWin;
     if (mSurfaceControl == NULL) {
         if (w->mOrientationChanging) {
-            // if (DEBUG_ORIENTATION) {
-            //     Slog.v(TAG, "Orientation change skips hidden " + w);
-            // }
+            if (CWindowManagerService::DEBUG_ORIENTATION) {
+                Slogger::V(TAG, "Orientation change skips hidden %s", TO_CSTR(w));
+            }
             w->mOrientationChanging = FALSE;
         }
         return;
@@ -1454,8 +1461,9 @@ void WindowStateAnimator::PrepareSurfaceLocked(
         // new orientation.
         if (w->mOrientationChanging) {
             w->mOrientationChanging = FALSE;
-            // if (DEBUG_ORIENTATION) Slog.v(TAG,
-            //         "Orientation change skips hidden " + w);
+            if (CWindowManagerService::DEBUG_ORIENTATION) {
+                Slogger::V(TAG, "Orientation change skips hidden %s", TO_CSTR(w));
+            }
         }
     }
     else if (mLastLayer != mAnimLayer
@@ -1476,7 +1484,7 @@ void WindowStateAnimator::PrepareSurfaceLocked(
         mLastDtDy = mDtDy;
         w->mLastHScale = w->mHScale;
         w->mLastVScale = w->mVScale;
-        // if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
+        // if (CWindowManagerService::SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
         //         "alpha=" + mShownAlpha + " layer=" + mAnimLayer
         //         + " matrix=[" + mDsDx + "*" + w.mHScale
         //         + "," + mDtDx + "*" + w.mVScale
@@ -1501,9 +1509,9 @@ void WindowStateAnimator::PrepareSurfaceLocked(
             }
 
             if (mLastHidden && mDrawState == HAS_DRAWN) {
-                // if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
+                // if (CWindowManagerService::SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
                 //         "SHOW (performLayout)", null);
-                // if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + w
+                // if (CWindowManagerService::DEBUG_VISIBILITY) Slogger::V(TAG, "Showing " + w
                 //         + " during relayout");
                 if (ShowSurfaceRobustlyLocked()) {
                     mLastHidden = FALSE;
@@ -1532,8 +1540,8 @@ void WindowStateAnimator::PrepareSurfaceLocked(
         }
     }
     else {
-        // if (DEBUG_ANIM && isAnimating()) {
-        //     Slog.v(TAG, "prepareSurface: No changes in animation for " + this);
+        // if (CWindowManagerService::DEBUG_ANIM && IsAnimating()) {
+        //     Slogger::V(TAG, "prepareSurface: No changes in animation for %s", TO_CSTR(this));
         // }
         displayed = TRUE;
     }
@@ -1543,12 +1551,15 @@ void WindowStateAnimator::PrepareSurfaceLocked(
             if (!w->IsDrawnLw()) {
                 mAnimator->mBulkUpdateParams &= ~CWindowManagerService::LayoutFields::SET_ORIENTATION_CHANGE_COMPLETE;
                 mAnimator->mLastWindowFreezeSource = w;
-                // if (DEBUG_ORIENTATION) Slog.v(TAG,
-                //         "Orientation continue waiting for draw in " + w);
+                if (CWindowManagerService::DEBUG_ORIENTATION) {
+                    Slogger::V(TAG, "Orientation continue waiting for draw in %s", TO_CSTR(w));
+                }
             }
             else {
                 w->mOrientationChanging = FALSE;
-                // if (DEBUG_ORIENTATION) Slog.v(TAG, "Orientation change complete in " + w);
+                if (CWindowManagerService::DEBUG_ORIENTATION) {
+                    Slogger::V(TAG, "Orientation change complete in %s", TO_CSTR(w));
+                }
             }
         }
         w->mToken->mHasVisible = TRUE;
@@ -1610,7 +1621,7 @@ void WindowStateAnimator::SetWallpaperOffset(
         CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&surfaceHelper);
         surfaceHelper->OpenTransaction();
         // try {
-        // if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
+        // if (CWindowManagerService::SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
         //         "POS " + left + ", " + top, null);
         Int32 winLeft, winTop;
         mWin->mFrame->GetLeft(&winLeft);
@@ -1635,7 +1646,7 @@ void WindowStateAnimator::SetWallpaperOffset(
         //             + " pos=(" + left + "," + top + ")", e);
         // } finally {
         //     SurfaceControl.closeTransaction();
-        //     if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+        //     if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG,
         //             "<<< CLOSE TRANSACTION setWallpaperOffset");
         // }
         surfaceHelper->CloseTransaction();
@@ -1659,7 +1670,7 @@ void WindowStateAnimator::SetOpaqueLocked(
     mSurfaceControl->SetOpaque(isOpaque);
     // } finally {
     //     SurfaceControl.closeTransaction();
-    //     if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setOpaqueLocked");
+    //     if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, "<<< CLOSE TRANSACTION setOpaqueLocked");
     // }
     surfaceHelper->CloseTransaction();
     if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, "<<< CLOSE TRANSACTION setWallpaperOffset");
@@ -1677,7 +1688,7 @@ Boolean WindowStateAnimator::PerformShowLocked()
     //         e = new RuntimeException();
     //         e.fillInStackTrace();
     //     }
-    //     Slog.v(TAG, "performShow on " + this
+    //     Slogger::V(TAG, "performShow on " + this
     //             + ": mDrawState=" + mDrawState + " readyForDisplay="
     //             + mWin.isReadyForDisplayIgnoringKeyguard()
     //             + " starting=" + (mWin.mAttrs.type == TYPE_APPLICATION_STARTING)
@@ -1696,7 +1707,7 @@ Boolean WindowStateAnimator::PerformShowLocked()
         //     WindowManagerService.logSurface(mWin, "SHOW (performShowLocked)", null);
         // if (DEBUG_VISIBILITY || (DEBUG_STARTING_WINDOW &&
         //         mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING)) {
-        //     Slog.v(TAG, "Showing " + this
+        //     Slogger::V(TAG, "Showing " + this
         //             + " during animation: policyVis=" + mWin.mPolicyVisibility
         //             + " attHidden=" + mWin.mAttachedHidden
         //             + " tok.hiddenRequested="
@@ -1714,8 +1725,9 @@ Boolean WindowStateAnimator::PerformShowLocked()
 
         // Force the show in the next prepareSurfaceLocked() call.
         mLastAlpha = -1;
-        // if (DEBUG_SURFACE_TRACE || DEBUG_ANIM)
-        //     Slog.v(TAG, "performShowLocked: mDrawState=HAS_DRAWN in " + this);
+        if (CWindowManagerService::DEBUG_SURFACE_TRACE || CWindowManagerService::DEBUG_ANIM) {
+            Slogger::V(TAG, "performShowLocked: mDrawState=HAS_DRAWN in %s", TO_CSTR(this));
+        }
         mDrawState = HAS_DRAWN;
         mService->ScheduleAnimationLocked();
 
@@ -1746,10 +1758,11 @@ Boolean WindowStateAnimator::PerformShowLocked()
             mWin->mAppToken->mFirstWindowDrawn = TRUE;
 
             if (mWin->mAppToken->mStartingData != NULL) {
-                // if (WindowManagerService.DEBUG_STARTING_WINDOW ||
-                //         WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
-                //         "Finish starting " + mWin.mToken
-                //         + ": first real window is shown, no animation");
+                if (CWindowManagerService::DEBUG_STARTING_WINDOW || CWindowManagerService::DEBUG_ANIM) {
+                    Slogger::V(TAG, "Finish starting %s: first real window is shown, no animation",
+                        TO_CSTR(mWin->mToken));
+                }
+
                 // If this initial window is animating, stop it -- we
                 // will do an animation to reveal it from behind the
                 // starting window, so there is no need for it to also
@@ -1790,7 +1803,7 @@ Boolean WindowStateAnimator::ShowSurfaceRobustlyLocked()
             }
         }
         if (mWin->mTurnOnScreen) {
-            // if (DEBUG_VISIBILITY) Slog.v(TAG,
+            // if (DEBUG_VISIBILITY) Slogger::V(TAG,
             //         "Show surface turning screen on: " + mWin);
             mWin->mTurnOnScreen = FALSE;
             mAnimator->mBulkUpdateParams |= CWindowManagerService::LayoutFields::SET_TURN_ON_SCREEN;
@@ -1865,20 +1878,20 @@ Boolean WindowStateAnimator::ApplyAnimationLocked(
                 a = mService->mAppTransition->LoadAnimationAttr(mWin->mAttrs, attr);
             }
         }
-        // if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
+        // if (CWindowManagerService::DEBUG_ANIM) Slogger::V(TAG,
         //         "applyAnimation: win=" + this
         //         + " anim=" + anim + " attr=0x" + Integer.toHexString(attr)
         //         + " a=" + a
         //         + " transit=" + transit
         //         + " isEntrance=" + isEntrance + " Callers " + Debug.getCallers(3));
         if (a != NULL) {
-            // if (WindowManagerService.DEBUG_ANIM) {
+            // if (CWindowManagerService::DEBUG_ANIM) {
             //     RuntimeException e = null;
             //     if (!WindowManagerService.HIDE_STACK_CRAWLS) {
             //         e = new RuntimeException();
             //         e.fillInStackTrace();
             //     }
-            //     Slog.v(TAG, "Loaded animation " + a + " for " + this, e);
+            //     Slogger::V(TAG, "Loaded animation " + a + " for " + this, e);
             // }
             SetAnimation(a);
             mAnimationIsEntrance = isEntrance;
@@ -1956,8 +1969,8 @@ void WindowStateAnimator::UpdateBlurWithMaskingState(
             }
             Int32 attrsFormat;
             attrs->GetFormat(&attrsFormat);
-            AutoPtr<IPixelFormat> pixelFormat;
-            CPixelFormat::AcquireSingleton((IPixelFormat**)&pixelFormat);
+            AutoPtr<IPixelFormatHelper> pixelFormat;
+            CPixelFormatHelper::AcquireSingleton((IPixelFormatHelper**)&pixelFormat);
             Boolean result;
             pixelFormat->FormatHasAlpha(attrsFormat, &result);
             if (!result) {
@@ -1970,8 +1983,8 @@ void WindowStateAnimator::UpdateBlurWithMaskingState(
             title->ToString(&str);
             mSurfaceControlBlur = NULL;
             CSurfaceControl::New(mSession->mSurfaceSession,
-                    str + " blur", (Int32)mSurfaceW, (Int32)mSurfaceH,
-                    format, flags, (ISurfaceControl**)&mSurfaceControlBlur);
+                str + " blur", (Int32)mSurfaceW, (Int32)mSurfaceH,
+                format, flags, (ISurfaceControl**)&mSurfaceControlBlur);
         }
 
         AutoPtr<ISurfaceControlHelper> helper;

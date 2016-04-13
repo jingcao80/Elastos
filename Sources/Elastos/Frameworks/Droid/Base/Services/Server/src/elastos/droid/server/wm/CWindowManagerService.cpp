@@ -3642,9 +3642,9 @@ Int32 CWindowManagerService::RelayoutWindow(
             ECode ec = NOERROR;
             if (surfaceControl != NULL) {
                 ec = inSurface->CopyFrom(surfaceControl);
-                // if (SHOW_TRANSACTIONS) {
-                //     Slogger::I(TAG,"  OUT SURFACE " + outSurface + ": copied");
-                // }
+                if (SHOW_TRANSACTIONS) {
+                    Slogger::I(TAG,"  OUT SURFACE %s: copied", TO_CSTR(surfaceControl));
+                }
             }
             else {
                 // For some reason there isn't a surface.  Clear the
@@ -5717,9 +5717,10 @@ void CWindowManagerService::ScheduleRemoveStartingWindowLocked(
         return;
     }
     if (wtoken != NULL && wtoken->mStartingWindow != NULL) {
-        // if (DEBUG_STARTING_WINDOW) Slogger::V(TAG, Debug.getCallers(1) +
-        //         ": Schedule remove starting " + wtoken + (wtoken != null ?
-        //         " startingWindow=" + wtoken.startingWindow : ""));
+        if (DEBUG_STARTING_WINDOW) {
+            Slogger::V(TAG, "Schedule remove starting %s startingWindow %s",
+                TO_CSTR(wtoken), TO_CSTR(wtoken->mStartingWindow));
+        }
         AutoPtr<IMessage> msg;
         mH->ObtainMessage(H::REMOVE_STARTING, (IObject*)wtoken, (IMessage**)&msg);
         Boolean result;
@@ -9490,7 +9491,7 @@ ECode CWindowManagerService::HandleAddStarting(
     }
 
     if (DEBUG_STARTING_WINDOW) {
-        Slogger::V(TAG, "Add starting %p: pkg=%s", wtoken, sd->mPkg.string());
+        Slogger::V(TAG, "Add starting %s: pkg=%s", TO_CSTR(wtoken), sd->mPkg.string());
     }
 
     AutoPtr<IView> view;
@@ -9498,7 +9499,7 @@ ECode CWindowManagerService::HandleAddStarting(
             wtoken->mToken, sd->mPkg,
             sd->mTheme, sd->mCompatInfo, sd->mNonLocalizedLabel, sd->mLabelRes,
             sd->mIcon, sd->mLogo, sd->mWindowFlags, (IView**)&view))) {
-        Slogger::W(TAG, "Exception when adding starting window");
+        Slogger::W(TAG, "Exception when adding starting window %s: pkg=%s", TO_CSTR(wtoken), sd->mPkg.string());
     }
 
     if (view != NULL) {
@@ -9530,6 +9531,7 @@ ECode CWindowManagerService::HandleAddStarting(
         }
 
         if (abort) {
+            Slogger::V(TAG, " >>>> RemoveStartingWindow line %d, token:%s, view:%s", __LINE__, TO_CSTR(wtoken->mToken), TO_CSTR(view));
             if (FAILED(mPolicy->RemoveStartingWindow(wtoken->mToken, view))) {
                 Slogger::W(TAG, "Exception when removing starting window");
             }
@@ -9563,6 +9565,7 @@ ECode CWindowManagerService::HandleRemoveStarting(
     }
 
     if (view != NULL) {
+        Slogger::V(TAG, " >>>> RemoveStartingWindow line %d, token:%s, view:%s", __LINE__, TO_CSTR(token), TO_CSTR(view));
         if (FAILED(mPolicy->RemoveStartingWindow(token, view))) {
             Slogger::W(TAG, "Exception when removing starting window");
         }
@@ -9577,7 +9580,7 @@ ECode CWindowManagerService::HandleFinishedStarting()
     AutoPtr<IView> view;
     while (TRUE) {
         synchronized(mWindowMapLock) {
-            if (mFinishedStarting.Begin() == mFinishedStarting.End()) {
+            if (mFinishedStarting.IsEmpty()) {
                 break;
             }
 
@@ -9601,6 +9604,7 @@ ECode CWindowManagerService::HandleFinishedStarting()
             wtoken->mStartingDisplayed = FALSE;
         }
 
+        Slogger::V(TAG, " >>>> RemoveStartingWindow line %d, token:%s, view:%s", __LINE__, TO_CSTR(token), TO_CSTR(view));
         if (FAILED(mPolicy->RemoveStartingWindow(token, view))) {
             Slogger::W(TAG, "Exception when removing starting window");
         }
