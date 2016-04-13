@@ -2931,17 +2931,15 @@ ECode ViewGroup::DispatchTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* res)
 {
-    Logger::I(TAG, " >>> ViewGroup::DispatchTouchEvent %s %s", TO_CSTR(this), TO_CSTR(ev));
     VALIDATE_NOT_NULL(res)
     if (mInputEventConsistencyVerifier != NULL) {
         mInputEventConsistencyVerifier->OnTouchEvent(ev, 1);
     }
-    Int32 action = 0;
-    ev->GetAction(&action);
+
     Boolean handled = FALSE, bval;
     if (OnFilterTouchEventForSecurity(ev, &bval), bval) {
-        // Int32 action = 0;
-        // ev->GetAction(&action);
+        Int32 action = 0;
+        ev->GetAction(&action);
         Int32 actionMasked = action & IMotionEvent::ACTION_MASK;
         // Handle an initial down.
         if (actionMasked == IMotionEvent::ACTION_DOWN) {
@@ -3129,7 +3127,6 @@ ECode ViewGroup::DispatchTouchEvent(
     }
 
     *res = handled;
-    Logger::I(TAG, " <<< ViewGroup::DispatchTouchEvent handled:%d, %s %s", handled, TO_CSTR(this), TO_CSTR(ev));
     return NOERROR;
 }
 

@@ -677,7 +677,6 @@ ECode Handler::DispatchMessage(
     AutoPtr<IRunnable> callback;
     msg->GetCallback((IRunnable**)&callback);
     if (callback != NULL) {
-        Logger::I("Handler", " >> Handler::DispatchMessage %s", TO_CSTR(callback));
         return callback->Run();
     }
     else {
@@ -697,7 +696,6 @@ ECode Handler::DispatchMessage(
             }
         }
 
-        Logger::I("Handler", " >> Handler::HandleMessage %s", TO_CSTR(msg));
         return HandleMessage(msg);
     }
 }

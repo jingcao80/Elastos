@@ -1671,7 +1671,6 @@ ECode Activity::DispatchTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* isConsumed)
 {
-    Logger::I(TAG, " >> DispatchTouchEvent %s", TO_CSTR(event));
     VALIDATE_NOT_NULL(isConsumed);
     *isConsumed = FALSE;
 
