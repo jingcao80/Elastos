@@ -192,22 +192,19 @@ ECode CLinkedList::LinkIterator::Set(
 ECode CLinkedList::LinkIterator::GetNextIndex(
     /* [out] */ Int32* index)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return NextIndex(index);
 }
 
 ECode CLinkedList::LinkIterator::GetPrevious(
     /* [out] */ IInterface** object)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return Previous(object);
 }
 
 ECode CLinkedList::LinkIterator::GetPreviousIndex(
     /* [out] */ Int32* index)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return PreviousIndex(index);
 }
 
 
