@@ -184,12 +184,11 @@ AutoPtr<IServiceLoader> ServiceLoader::Load(
     /* [in] */ InterfaceID service,
     /* [in] */ IClassLoader* cl)
 {
-    if (!cl) {
-        AutoPtr<IClassLoader> loader = ClassLoader::GetSystemClassLoader();
-        cl = loader;
-        REFCOUNT_ADD(cl);
+    AutoPtr<IClassLoader> loader = cl;
+    if (!loader) {
+        loader = ClassLoader::GetSystemClassLoader();
     }
-    return new ServiceLoader(service, cl);
+    return new ServiceLoader(service, loader);
 }
 
 AutoPtr<IServiceLoader> ServiceLoader::Load(
@@ -256,6 +255,7 @@ AutoPtr<ISet> ServiceLoader::GetServices()
 
 ECode ServiceLoader::InternalLoad()
 {
+    //TODO
     return E_NOT_IMPLEMENTED;
 
     (ICollection::Probe(mServices))->Clear();
