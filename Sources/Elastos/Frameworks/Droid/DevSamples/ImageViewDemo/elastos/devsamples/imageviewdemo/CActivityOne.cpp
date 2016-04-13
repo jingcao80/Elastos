@@ -43,8 +43,8 @@ ECode CActivityOne::MyListener::OnClick(
 
     AutoPtr<IServiceManager> sm;
     CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IIActivityManager> IInterface;
     sm->GetService(IContext::ACTIVITY_SERVICE, (IInterface**)&service);
-    AutoPtr<IInterface> service;
     IIActivityManager* am = IIActivityManager::Probe(service);
 
     String package("Elastos.DevSamples.ImageDemo");
