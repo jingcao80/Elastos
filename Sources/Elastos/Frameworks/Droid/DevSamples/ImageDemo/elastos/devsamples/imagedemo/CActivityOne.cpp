@@ -20,9 +20,9 @@ using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace DevSamples {
-namespace ImageViewDemo {
+namespace ImageDemo {
 
-static const String TAG("ImageViewDemo::CActivityOne");
+static const String TAG("ImageDemo::CActivityOne");
 
 //=======================================================================
 // MyListener
@@ -40,27 +40,6 @@ ECode CActivityOne::MyListener::OnClick(
     /* [in] */ IView* v)
 {
     Logger::I(TAG, "MyListener::OnClick");
-    AutoPtr<IServiceManager> sm;
-    AutoPtr<IIActivityManager> am;
-    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
-    sm->GetService(IContext::ACTIVITY_SERVICE, (IInterface**)&am);
-
-    String package("Elastos.DevSamples.ImageDemo");
-    String action("android.intent.action.MAIN");
-    String nullStr;
-
-    AutoPtr<IIntent> intent;
-    CIntent::New((IIntent**)&intent);
-    intent->SetPackage(package);
-    intent->SetAction(action);
-    Int32 status;
-    ECode ec = am->StartActivity(NULL, package, intent, nullStr,
-        NULL, nullStr, 0, 0, NULL, NULL, &status);
-    if (FAILED(ec)) {
-        Logger::E(TAG, "Failed to StartActivity package:%s, action:%s, ec=%08x, status=%d, intent=%s",
-            package.string(), action.string(), ec, status, TO_CSTR(intent));
-    }
-
     return NOERROR;
 }
 
@@ -133,6 +112,6 @@ ECode CActivityOne::OnActivityResult(
     return Activity::OnActivityResult(requestCode, resultCode, data);
 }
 
-} // namespace ImageViewDemo
+} // namespace ImageDemo
 } // namespace DevSamples
 } // namespace Elastos
