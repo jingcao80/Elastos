@@ -1,5 +1,6 @@
 
 #include <Elastos.Droid.Provider.h>
+#include <Elastos.Droid.Telephony.h>
 #include "elastos/droid/server/power/PowerManagerService.h"
 #include "elastos/droid/server/power/CPowerManagerServiceBinderService.h"
 #include "elastos/droid/server/power/ShutdownThread.h"
@@ -7,6 +8,7 @@
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/Looper.h"
+#include "elastos/droid/os/Process.h"
 #include "elastos/droid/Manifest.h"
 #include <elastos/droid/utility/TimeUtils.h>
 #include "elastos/droid/R.h"
@@ -24,12 +26,15 @@
 #include <utils/Log.h>
 #include <utils/Errors.h>
 
+using Elastos::Droid::App::IActivityManager;
+using Elastos::Droid::App::IActivityManagerRunningAppProcessInfo;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::IContentObserver;
+using Elastos::Droid::Hardware::EIID_ISensorEventListener;
 using Elastos::Droid::Hardware::Display::CDisplayPowerRequest;
 using Elastos::Droid::Hardware::Display::EIID_IDisplayPowerCallbacks;
 using Elastos::Droid::Hardware::Display::EIID_IDisplayManagerInternal;
@@ -54,6 +59,7 @@ using Elastos::Droid::Os::EIID_IPowerManagerInternal;
 using Elastos::Droid::Os::IBatteryManager;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IProcess;
+using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::CSettingsSecure;
@@ -63,16 +69,20 @@ using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Provider::CSettingsSystem;
 using Elastos::Droid::Server::Lights::EIID_ILightsManager;
 using Elastos::Droid::Service::Dreams::EIID_IDreamManagerInternal;
+using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Utility::TimeUtils;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::EIID_IWindowManagerPolicy;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Core::EIID_IRunnable;
+using Elastos::Core::CInteger32;
+using Elastos::Core::IInteger32;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Objects;
+using Elastos::Utility::IList;
 using android::LogIfSlow;
 
 namespace Elastos {
@@ -93,6 +103,7 @@ const Boolean PowerManagerService::DEBUG = FALSE;
 const Boolean PowerManagerService::DEBUG_SPEW = DEBUG && FALSE;
 const Int32 PowerManagerService::MSG_USER_ACTIVITY_TIMEOUT = 1;
 const Int32 PowerManagerService::MSG_SANDMAN = 2;
+const Int32 PowerManagerService::MSG_WAKE_UP = 5;
 const Int32 PowerManagerService::DIRTY_WAKE_LOCKS = 1 << 0;
 const Int32 PowerManagerService::DIRTY_WAKEFULNESS = 1 << 1;
 const Int32 PowerManagerService::DIRTY_USER_ACTIVITY = 1 << 2;
@@ -122,6 +133,62 @@ const Int32 PowerManagerService::DEFAULT_SCREEN_OFF_TIMEOUT = 15 * 1000;
 const Int32 PowerManagerService::DEFAULT_SLEEP_TIMEOUT = -1;
 const Int32 PowerManagerService::POWER_HINT_INTERACTION = 2;
 const Int32 PowerManagerService::POWER_HINT_LOW_POWER = 5;
+const Int32 PowerManagerService::DEFAULT_BUTTON_ON_DURATION = 5 * 1000;
+const Int32 PowerManagerService::DPM_CONFIG_FEATURE_MASK_NSRM = 0x00000004;
+const Int32 PowerManagerService::MAX_CPU_BOOST_TIME = 5000000;
+const Float PowerManagerService::PROXIMITY_NEAR_THRESHOLD = 5.0;
+
+
+//==============================================================================
+//          PowerManagerService::BinderService::WakeUpRunnable
+//==============================================================================
+
+ECode PowerManagerService::BinderService::WakeUpRunnable::Run()
+{
+    Int64 ident = Binder::ClearCallingIdentity();
+    // try {
+    mHost->WakeUpInternal(mEventTime, mUid);
+    // } finally {
+    Binder::RestoreCallingIdentity(ident);
+    // }
+    return NOERROR;
+}
+
+
+//==============================================================================
+//          PowerManagerService::BinderService::SensorEventListener
+//==============================================================================
+
+CAR_INTERFACE_IMPL(PowerManagerService::BinderService::SensorEventListener, Object, ISensorEventListener)
+
+ECode PowerManagerService::BinderService::SensorEventListener::OnSensorChanged(
+    /* [in] */ ISensorEvent* event)
+{
+    mHost->CleanupProximity();
+    Boolean hasMessages;
+    if (mHost->mHandler->HasMessages(MSG_WAKE_UP, &hasMessages), !hasMessages) {
+        Slogger::W(TAG, "The proximity sensor took too long, wake event already triggered!");
+        return NOERROR;
+    }
+    mHost->mHandler->RemoveMessages(MSG_WAKE_UP);
+    AutoPtr<ArrayOf<Float> > values;
+    event->GetValues((ArrayOf<Float>**)&values);
+    Float distance = (*values)[0];
+    Float maxRange;
+    if (distance >= PROXIMITY_NEAR_THRESHOLD ||
+            (mHost->mProximitySensor->GetMaximumRange(&maxRange), distance >= maxRange)) {
+        mR->Run();
+    }
+    return NOERROR;
+}
+
+ECode PowerManagerService::BinderService::SensorEventListener::OnAccuracyChanged(
+    /* [in] */ ISensor* sensor,
+    /* [in] */ Int32 accuracy)
+{
+    return NOERROR;
+}
+
 
 //==============================================================================
 //          PowerManagerService::BinderService
@@ -140,21 +207,85 @@ ECode PowerManagerService::BinderService::UpdateBlockedUids(
     /* [in] */ Int32 uid,
     /* [in] */ Boolean isBlocked)
 {
-    // TODO cm
+    if (DEBUG_SPEW) Slogger::V(TAG, "updateBlockedUids: uid = %disBlocked = %d", uid, isBlocked);
+
+    if (Binder::GetCallingUid() != IProcess::SYSTEM_UID) {
+        if (DEBUG_SPEW) Slogger::V(TAG, "UpdateBlockedUids is not allowed");
+        return NOERROR;
+    }
+
+    synchronized(mHost->mLock) {
+        if(isBlocked) {
+            AutoPtr<IInteger32> integer;
+            CInteger32::New(uid, (IInteger32**)&integer);
+            mHost->mBlockedUids->Add(integer);
+            Int32 size;
+            mHost->mWakeLocks->GetSize(&size);
+            for (Int32 index = 0; index < size; index++) {
+                AutoPtr<IInterface> obj;
+                mHost->mWakeLocks->Get(index, (IInterface**)&obj);
+                AutoPtr<WakeLock> wl = (WakeLock*)(IObject*)obj.Get();
+                if(wl != NULL) {
+                    if(wl->mTag.StartWith("*sync*") && wl->mOwnerUid == IProcess::SYSTEM_UID) {
+                        mHost->ReleaseWakeLockInternal(wl->mLock, wl->mFlags);
+                        index--;
+                        if (DEBUG_SPEW) Slogger::V(TAG, "Internally releasing the wakelock acquired by SyncManager");
+                        continue;
+                    }
+                    // release the wakelock for the blocked uid
+                    if (wl->mOwnerUid == uid || mHost->CheckWorkSourceObjectId(uid, wl)) {
+                        mHost->ReleaseWakeLockInternal(wl->mLock, wl->mFlags);
+                        index--;
+                        if (DEBUG_SPEW) Slogger::V(TAG, "Internally releasing it");
+                    }
+                }
+            }
+        }
+        else {
+            AutoPtr<IInteger32> integer;
+            CInteger32::New(uid, (IInteger32**)&integer);
+            mHost->mBlockedUids->Remove(integer);
+        }
+    }
     return NOERROR;
 }
 
 ECode PowerManagerService::BinderService::CpuBoost(
     /* [in] */ Int32 duration)
 {
-    // TODO cm
+    if (duration > 0 && duration <= MAX_CPU_BOOST_TIME) {
+        // Don't send boosts if we're in another power profile
+        String profile = mHost->mPerformanceManager->GetPowerProfile();
+        if (profile.IsNull() || profile.Equals(IPowerManager::PROFILE_BALANCED)) {
+            mHost->NativeCpuBoost(duration);
+        }
+    }
+    else {
+        Slogger::E(TAG, "Invalid boost duration: %d", duration);
+    }
     return NOERROR;
 }
 
 ECode PowerManagerService::BinderService::SetKeyboardVisibility(
     /* [in] */ Boolean visible)
 {
-    // TODO cm
+    AutoLock lock(mHost->mLock);
+    if (DEBUG_SPEW) {
+        Slogger::D(TAG, "setKeyboardVisibility: %d", visible);
+    }
+    if (mHost->mKeyboardVisible != visible) {
+        mHost->mKeyboardVisible = visible;
+        if (!visible) {
+            // If hiding keyboard, turn off leds
+            SetKeyboardLight(FALSE, 1);
+            SetKeyboardLight(FALSE, 2);
+        }
+        {
+            AutoLock lock(mHost->mLock);
+            mHost->mDirty |= DIRTY_USER_ACTIVITY;
+            mHost->UpdatePowerStateLocked();
+        }
+    }
     return NOERROR;
 }
 
@@ -162,36 +293,56 @@ ECode PowerManagerService::BinderService::SetKeyboardLight(
     /* [in] */ Boolean on,
     /* [in] */ Int32 key)
 {
-    // TODO cm
+    if (key == 1) {
+        if (on)
+            mHost->mCapsLight->SetColor(0x00ffffff);
+        else
+            mHost->mCapsLight->TurnOff();
+    }
+    else if (key == 2) {
+        if (on)
+            mHost->mFnLight->SetColor(0x00ffffff);
+        else
+            mHost->mFnLight->TurnOff();
+    }
     return NOERROR;
 }
 
 ECode PowerManagerService::BinderService::WakeUpWithProximityCheck(
     /* [in] */ Int64 time)
 {
-    // TODO cm
-    return NOERROR;
+    return WakeUp(time);
 }
 
 ECode PowerManagerService::BinderService::SetPowerProfile(
     /* [in] */ const String& profile,
     /* [out] */ Boolean* result)
 {
-    // TODO cm
+    VALIDATE_NOT_NULL(result)
+    FAIL_RETURN(mHost->mContext->EnforceCallingOrSelfPermission(
+            Elastos::Droid::Manifest::permission::DEVICE_POWER, String(NULL)))
+    Int64 ident = Binder::ClearCallingIdentity();
+    // try {
+    mHost->SetLowPowerModeInternal(IPowerManager::PROFILE_POWER_SAVE.Equals(profile));
+    // } finally {
+    Binder::RestoreCallingIdentity(ident);
+    // }
+    *result = mHost->mPerformanceManager->SetPowerProfile(profile);
     return NOERROR;
 }
 
 ECode PowerManagerService::BinderService::GetPowerProfile(
     /* [out] */ String* result)
 {
-    // TODO cm
+    VALIDATE_NOT_NULL(result)
+    *result = mHost->mPerformanceManager->GetPowerProfile();
     return NOERROR;
 }
 
 ECode PowerManagerService::BinderService::ActivityResumed(
     /* [in] */ const String& componentName)
 {
-    // TODO cm
+    mHost->mPerformanceManager->ActivityResumed(componentName);
     return NOERROR;
 }
 
@@ -272,6 +423,22 @@ ECode PowerManagerService::BinderService::AcquireWakeLock(
 
     Int32 uid = Binder::GetCallingUid();
     Int32 pid = Binder::GetCallingPid();
+
+    // try {
+    Int32 result;
+    if (mHost->mAppOps != NULL &&
+            (mHost->mAppOps->CheckOperation(IAppOpsManager::OP_WAKE_LOCK, uid, packageName, &result),
+                result != IAppOpsManager::MODE_ALLOWED)) {
+        Slogger::D(TAG, "acquireWakeLock: ignoring request from %s", packageName.string());
+        // For (ignore) accounting purposes
+        Int32 v;
+        mHost->mAppOps->NoteOperation(IAppOpsManager::OP_WAKE_LOCK, uid, packageName, &v);
+        // silent return
+        return NOERROR;
+    }
+    // } catch (RemoteException e) {
+    // }
+
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
     ECode ec = mHost->AcquireWakeLockInternal(lock, flags, tag, packageName, ws, historyTag, uid, pid);
@@ -419,17 +586,68 @@ ECode PowerManagerService::BinderService::WakeUp(
         // throw new IllegalArgumentException("event time must not be in the future");
     }
 
+    // check wakeup caller under QuickBoot mode
+    AutoPtr<ISystemProperties> props;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&props);
+    Int32 value;
+    if (props->GetInt32(String("sys.quickboot.enable"), 0, &value), value == 1) {
+        if (!mHost->IsQuickBootCall()) {
+            Slogger::D(TAG, "ignore wakeup request under QuickBoot");
+            return NOERROR;
+        }
+    }
+
     FAIL_RETURN(mHost->mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::DEVICE_POWER, String(NULL)));
 
     Int32 uid = Binder::GetCallingUid();
-    Int64 ident = Binder::ClearCallingIdentity();
-    // try {
-    mHost->WakeUpInternal(eventTime, uid);
-    // } finally {
-    Binder::RestoreCallingIdentity(ident);
-    // }
+    AutoPtr<IRunnable> r = new WakeUpRunnable(mHost, eventTime, uid);
+    RunWithProximityCheck(r);
     return NOERROR;
+}
+
+void PowerManagerService::BinderService::RunWithProximityCheck(
+    /* [in] */ IRunnable* r)
+{
+    Boolean hasMessages;
+    if (mHost->mHandler->HasMessages(MSG_WAKE_UP, &hasMessages), hasMessages) {
+        // There is already a message queued;
+        return;
+    }
+
+    AutoPtr<IInterface> service;
+    mHost->mContext->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&service);
+    AutoPtr<ITelephonyManager> tm = ITelephonyManager::Probe(service);
+    Int32 callState;
+    tm->GetCallState(&callState);
+    Boolean hasIncomingCall = callState == ITelephonyManager::CALL_STATE_RINGING;
+
+    if (mHost->mProximityWakeSupported && mHost->mProximityWakeEnabled && mHost->mProximitySensor != NULL
+            && !hasIncomingCall) {
+        AutoPtr<IMessage> msg;
+        mHost->mHandler->ObtainMessage(MSG_WAKE_UP, (IMessage**)&msg);
+        msg->SetObj(r);
+        Boolean result;
+        mHost->mHandler->SendMessageDelayed(msg, mHost->mProximityTimeOut, &result);
+        RunPostProximityCheck(r);
+    }
+    else {
+        r->Run();
+    }
+}
+
+void PowerManagerService::BinderService::RunPostProximityCheck(
+    /* [in] */ IRunnable* r)
+{
+    if (mHost->mSensorManager == NULL) {
+        r->Run();
+        return;
+    }
+    mHost->mProximityWakeLock->AcquireLock();
+    mHost->mProximityListener = new SensorEventListener(mHost, r);
+    Boolean result;
+    mHost->mSensorManager->RegisterListener(mHost->mProximityListener,
+           mHost->mProximitySensor, ISensorManager::SENSOR_DELAY_FASTEST, &result);
 }
 
 ECode PowerManagerService::BinderService::GoToSleep(
@@ -514,7 +732,12 @@ ECode PowerManagerService::BinderService::SetPowerSaveMode(
 
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
-    *result = mHost->SetLowPowerModeInternal(mode);
+    Boolean changed = mHost->SetLowPowerModeInternal(mode);
+    if (changed) {
+        mHost->mPerformanceManager->SetPowerProfile(mHost->mLowPowerModeEnabled ?
+                IPowerManager::PROFILE_POWER_SAVE : IPowerManager::PROFILE_BALANCED);
+    }
+    *result = changed;
     // } finally {
     Binder::RestoreCallingIdentity(ident);
     // }
@@ -809,6 +1032,12 @@ ECode PowerManagerService::PowerManagerHandler::HandleMessage(
         case PowerManagerService::MSG_SANDMAN:
             mHost->HandleSandman();
             break;
+        case MSG_WAKE_UP:
+            mHost->CleanupProximity();
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            IRunnable::Probe(obj)->Run();
+            break;
     }
 
     return NOERROR;
@@ -1081,8 +1310,15 @@ ECode PowerManagerService::LocalService::SetScreenBrightnessOverrideFromWindowMa
 ECode PowerManagerService::LocalService::SetButtonBrightnessOverrideFromWindowManager(
     /* [in] */ Int32 screenBrightness)
 {
-    // Do nothing.
-    // Button lights are not currently supported in the new implementation.
+    FAIL_RETURN(mHost->mContext->EnforceCallingOrSelfPermission(
+            Elastos::Droid::Manifest::permission::DEVICE_POWER, String(NULL)))
+
+    Int64 ident = Binder::ClearCallingIdentity();
+    // try {
+    mHost->SetButtonBrightnessOverrideFromWindowManagerInternal(screenBrightness);
+    // } finally {
+    Binder::RestoreCallingIdentity(ident);
+    // }
     return NOERROR;
 }
 
@@ -1332,7 +1568,12 @@ ECode PowerManagerService::CrashThread::Run()
 CAR_INTERFACE_IMPL(PowerManagerService, SystemService, IWatchdogMonitor);
 
 PowerManagerService::PowerManagerService()
-    : mDirty(0)
+    : mButtonTimeout(0)
+    , mButtonBrightness(0)
+    , mButtonBrightnessSettingDefault(0)
+    , mKeyboardBrightness(0)
+    , mKeyboardBrightnessSettingDefault(0)
+    , mDirty(0)
     , mWakefulness(0)
     , mSandmanSummoned(FALSE)
     , mSandmanScheduled(FALSE)
@@ -1381,6 +1622,7 @@ PowerManagerService::PowerManagerService()
     , mSleepTimeoutSetting(0)
     , mMaximumScreenOffTimeoutFromDeviceAdmin(Elastos::Core::Math::INT32_MAX_VALUE)
     , mStayOnWhilePluggedInSetting(0)
+    , mWakeUpWhenPluggedOrUnpluggedSetting(0)
     , mStayOn(FALSE)
     , mProximityPositive(FALSE)
     , mScreenBrightnessSettingMinimum(0)
@@ -1390,6 +1632,7 @@ PowerManagerService::PowerManagerService()
     , mScreenAutoBrightnessAdjustmentSetting(0.0f)
     , mScreenBrightnessModeSetting(0)
     , mScreenBrightnessOverrideFromWindowManager(-1)
+    , mButtonBrightnessOverrideFromWindowManager(-1)
     , mUserActivityTimeoutOverrideFromWindowManager(-1)
     , mTemporaryScreenBrightnessSettingOverride(-1)
     , mTemporaryScreenAutoBrightnessAdjustmentSettingOverride(Elastos::Core::Math::FLOAT_NAN)
@@ -1401,11 +1644,16 @@ PowerManagerService::PowerManagerService()
     , mAutoLowPowerModeConfigured(FALSE)
     , mAutoLowPowerModeSnoozing(FALSE)
     , mBatteryLevelLow(FALSE)
+    , mKeyboardVisible(FALSE)
+    , mProximityWakeEnabled(FALSE)
+    , mProximityTimeOut(0)
+    , mProximityWakeSupported(FALSE)
 {
     CArrayList::New((IArrayList**)&mSuspendBlockers);
     CArrayList::New((IArrayList**)&mWakeLocks);
     CDisplayPowerRequest::New((IDisplayPowerRequest**)&mDisplayPowerRequest);
     CArrayList::New((IArrayList**)&mLowPowerModeListeners);
+    CArrayList::New((IArrayList**)&mBlockedUids);
     mDisplayPowerCallbacks = (IDisplayPowerCallbacks*)new MyDisplayPowerCallbacks(this);
 }
 
@@ -1424,6 +1672,11 @@ ECode PowerManagerService::constructor(
     AutoPtr<ILooper> looper;
     ASSERT_SUCCEEDED(mHandlerThread->GetLooper((ILooper**)&looper));
     mHandler = new PowerManagerHandler(looper, this);
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::SENSOR_SERVICE, (IInterface**)&service);
+    mSensorManager = ISensorManager::Probe(service);
+    mSensorManager->GetDefaultSensor(ISensor::TYPE_PROXIMITY, (ISensor**)&mProximitySensor);
+    mPerformanceManager = new PerformanceManager(context);
 
     synchronized(mLock) {
         mWakeLockSuspendBlocker = CreateSuspendBlockerLocked(String("PowerManagerService.WakeLocks"));
@@ -1451,7 +1704,7 @@ ECode PowerManagerService::OnStart()
 
     PublishBinderService(IContext::POWER_SERVICE, binderServide);
     AutoPtr<LocalService> service = new LocalService(this);
-    PublishLocalService(EIID_IPowerManagerInternal, TO_IINTERFACE(service));
+    PublishLocalService(EIID_IPowerManagerInternal, (IPowerManagerInternal*)service);
 
     AutoPtr<Watchdog> watchdog = Watchdog::GetInstance();
     watchdog->AddMonitor(this);
@@ -1497,6 +1750,8 @@ ECode PowerManagerService::SystemReady(
         pm->GetMinimumScreenBrightnessSetting(&mScreenBrightnessSettingMinimum);
         pm->GetMaximumScreenBrightnessSetting(&mScreenBrightnessSettingMaximum);
         pm->GetDefaultScreenBrightnessSetting(&mScreenBrightnessSettingDefault);
+        pm->GetDefaultButtonBrightness(&mButtonBrightnessSettingDefault);
+        pm->GetDefaultKeyboardBrightness(&mKeyboardBrightnessSettingDefault);
 
         AutoPtr<ILooper> looper;
         mHandler->GetLooper((ILooper**)&looper);
@@ -1526,6 +1781,10 @@ ECode PowerManagerService::SystemReady(
         AutoPtr<ILightsManager> manager = ILightsManager::Probe(obj);
         mLightsManager = (LightsManager*)manager.Get();
         mAttentionLight = mLightsManager->GetLight(LightsManager::LIGHT_ID_ATTENTION);
+        mButtonsLight = mLightsManager->GetLight(LightsManager::LIGHT_ID_BUTTONS);
+        mKeyboardLight = mLightsManager->GetLight(LightsManager::LIGHT_ID_KEYBOARD);
+        mCapsLight = mLightsManager->GetLight(LightsManager::LIGHT_ID_CAPS);
+        mFnLight = mLightsManager->GetLight(LightsManager::LIGHT_ID_FUNC);
 
         // Initialize display power management.
         mDisplayManagerInternal->InitPowerManagement(
@@ -1628,6 +1887,31 @@ ECode PowerManagerService::SystemReady(
         resolver->RegisterContentObserver(uri, FALSE,
                 (IContentObserver*)mSettingsObserver.Get(), IUserHandle::USER_ALL);
 
+        uri = NULL;
+        settingsSystem->GetUriFor(ISettingsSystem::PROXIMITY_ON_WAKE, (IUri**)&uri);
+        resolver->RegisterContentObserver(uri, FALSE,
+                (IContentObserver*)mSettingsObserver.Get(), IUserHandle::USER_ALL);
+
+        uri = NULL;
+        settingsSecure->GetUriFor(ISettingsSecure::BUTTON_BRIGHTNESS, (IUri**)&uri);
+        resolver->RegisterContentObserver(uri, FALSE,
+                (IContentObserver*)mSettingsObserver.Get(), IUserHandle::USER_ALL);
+
+        uri = NULL;
+        settingsSecure->GetUriFor(ISettingsSecure::KEYBOARD_BRIGHTNESS, (IUri**)&uri);
+        resolver->RegisterContentObserver(uri, FALSE,
+                (IContentObserver*)mSettingsObserver.Get(), IUserHandle::USER_ALL);
+
+        uri = NULL;
+        settingsSecure->GetUriFor(ISettingsSecure::BUTTON_BACKLIGHT_TIMEOUT, (IUri**)&uri);
+        resolver->RegisterContentObserver(uri, FALSE,
+                (IContentObserver*)mSettingsObserver.Get(), IUserHandle::USER_ALL);
+
+        uri = NULL;
+        settingsGlobal->GetUriFor(ISettingsGlobal::WAKE_WHEN_PLUGGED_OR_UNPLUGGED, (IUri**)&uri);
+        resolver->RegisterContentObserver(uri, FALSE,
+                (IContentObserver*)mSettingsObserver.Get(), IUserHandle::USER_ALL);
+
         // Go.
         ReadConfigurationLocked();
         UpdateSettingsLocked();
@@ -1686,6 +1970,19 @@ void PowerManagerService::ReadConfigurationLocked()
     resources->GetFraction(
             R::fraction::config_maximumScreenDimRatio, 1, 1,
             &mMaximumScreenDimRatioConfig);
+    resources->GetInteger(
+            R::integer::config_proximityCheckTimeout,
+            &mProximityTimeOut);
+    resources->GetBoolean(
+            R::bool_::config_proximityCheckOnWake,
+            &mProximityWakeSupported);
+    if (mProximityWakeSupported) {
+        AutoPtr<IInterface> service;
+        mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&service);
+        AutoPtr<IPowerManager> powerManager = IPowerManager::Probe(service);
+        powerManager->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK,
+                String("ProximityWakeLock"), (IPowerManagerWakeLock**)&mProximityWakeLock);
+    }
 }
 
 void PowerManagerService::UpdateSettingsLocked()
@@ -1729,6 +2026,13 @@ void PowerManagerService::UpdateSettingsLocked()
             ISettingsGlobal::STAY_ON_WHILE_PLUGGED_IN,
             IBatteryManager::BATTERY_PLUGGED_AC, &mStayOnWhilePluggedInSetting);
 
+    settingsGlobal->GetInt32(resolver,
+            ISettingsGlobal::WAKE_WHEN_PLUGGED_OR_UNPLUGGED,
+            (mWakeUpWhenPluggedOrUnpluggedConfig ? 1 : 0), &mWakeUpWhenPluggedOrUnpluggedSetting);
+    settingsSystem->GetInt32(resolver,
+            ISettingsSystem::PROXIMITY_ON_WAKE, 0, &value);
+    mProximityWakeEnabled = value == 1;
+
     Int32 oldScreenBrightnessSetting = mScreenBrightnessSetting;
     settingsSystem->GetInt32ForUser(resolver,
             ISettingsSystem::SCREEN_BRIGHTNESS,
@@ -1767,6 +2071,17 @@ void PowerManagerService::UpdateSettingsLocked()
         mAutoLowPowerModeConfigured = autoLowPowerModeConfigured;
         UpdateLowPowerModeLocked();
     }
+
+    settingsSecure->GetInt32ForUser(resolver,
+            ISettingsSecure::BUTTON_BACKLIGHT_TIMEOUT,
+            DEFAULT_BUTTON_ON_DURATION, IUserHandle::USER_CURRENT, &mButtonTimeout);
+
+    settingsSecure->GetInt32ForUser(resolver,
+            ISettingsSecure::BUTTON_BRIGHTNESS,
+            mButtonBrightnessSettingDefault, IUserHandle::USER_CURRENT, &mButtonBrightness);
+    settingsSecure->GetInt32ForUser(resolver,
+            ISettingsSecure::KEYBOARD_BRIGHTNESS,
+            mKeyboardBrightnessSettingDefault, IUserHandle::USER_CURRENT, &mKeyboardBrightness);
 
     mDirty |= DIRTY_SETTINGS;
 }
@@ -1820,6 +2135,18 @@ ECode PowerManagerService::AcquireWakeLockInternal(
     /* [in] */ Int32 pid)
 {
     synchronized(mLock) {
+        AutoPtr<IInteger32> integer;
+        CInteger32::New(uid, (IInteger32**)&integer);
+        Boolean contains;
+        if((mBlockedUids->Contains(integer, &contains), contains) && uid != Process::MyUid()) {
+            //wakelock acquisition for blocked uid, do not acquire.
+            if (DEBUG_SPEW) {
+                Slogger::D(TAG, "uid is blocked not acquiring wakeLock flags=0x%s tag=%s uid=%d pid =%d",
+                        StringUtils::ToHexString(flags).string(), tag.string(), uid, pid);
+            }
+            return NOERROR;
+        }
+
         if (DEBUG_SPEW) {
             Slogger::D(TAG, "acquireWakeLockInternal: lock=%d, flags=0x%08x, tag=%s, ws=%p, uid=%d, pid=%d",
                     Objects::GetHashCode(lock), flags, tag.string(), ws, uid, pid);
@@ -1831,7 +2158,7 @@ ECode PowerManagerService::AcquireWakeLockInternal(
         if (index >= 0) {
             AutoPtr<IInterface> obj;
             mWakeLocks->Get(index, (IInterface**)&obj);
-            wakeLock = (WakeLock*)(IProxyDeathRecipient::Probe(obj));
+            wakeLock = (WakeLock*)(IObject*)obj.Get();
             if (!wakeLock->HasSameProperties(flags, tag, ws, uid, pid)) {
                 // Update existing wake lock.  This shouldn't happen but is harmless.
                 NotifyWakeLockChangingLocked(wakeLock, flags, tag, packageName,
@@ -1847,7 +2174,7 @@ ECode PowerManagerService::AcquireWakeLockInternal(
                 Slogger::E(TAG, "Wake lock is already dead.");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
-            mWakeLocks->Add(TO_IINTERFACE(wakeLock));
+            mWakeLocks->Add((IObject*)wakeLock);
             notifyAcquire = TRUE;
         }
 
@@ -1904,7 +2231,7 @@ void PowerManagerService::ReleaseWakeLockInternal(
 
         AutoPtr<IInterface> obj;
         mWakeLocks->Get(index, (IInterface**)&obj);
-        AutoPtr<WakeLock> wakeLock = (WakeLock*)(IProxyDeathRecipient::Probe(obj));
+        AutoPtr<WakeLock> wakeLock = (WakeLock*)(IObject*)obj.Get();
         if (DEBUG_SPEW) {
             Slogger::D(TAG, "releaseWakeLockInternal: lock=%d [%s], flags=0x%08x",
                     Objects::GetHashCode(lock), wakeLock->mTag.string(), flags);
@@ -1933,7 +2260,7 @@ void PowerManagerService::HandleWakeLockDeath(
         }
 
         Int32 index;
-        mWakeLocks->IndexOf(TO_IINTERFACE(wakeLock), &index);
+        mWakeLocks->IndexOf((IObject*)wakeLock, &index);
         if (index < 0) {
             return;
         }
@@ -1974,20 +2301,32 @@ ECode PowerManagerService::UpdateWakeLockWorkSourceInternal(
 {
     synchronized(mLock) {
         Int32 index = FindWakeLockIndexLocked(lock);
+        AutoPtr<ISystemProperties> sp;
+        CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
+        Int32 value;
+        sp->GetInt32(String("persist.dpm.feature"), 0, &value);
+        Boolean isNsrmEnabled = FALSE;
+
+        if ((value & DPM_CONFIG_FEATURE_MASK_NSRM) == DPM_CONFIG_FEATURE_MASK_NSRM)
+            isNsrmEnabled = TRUE;
+
         if (index < 0) {
             if (DEBUG_SPEW) {
                 Slogger::D(TAG, "UpdateWakeLockWorkSourceInternal: lock=%d [not found], ws=%p",
                         Objects::GetHashCode(lock), ws);
             }
-            Slogger::E(TAG, "Wake lock not active: %p from uid %d", lock, callingUid);
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
-            // throw new IllegalArgumentException("Wake lock not active: " + lock
-            //         + " from uid " + callingUid);
+            if (!isNsrmEnabled) {
+                Slogger::E(TAG, "Wake lock not active: %p from uid %d", lock, callingUid);
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            }
+            else {
+                return NOERROR;
+            }
         }
 
         AutoPtr<IInterface> obj;
         mWakeLocks->Get(index, (IInterface**)&obj);
-        AutoPtr<WakeLock> wakeLock = (WakeLock*)(IProxyDeathRecipient::Probe(obj));
+        AutoPtr<WakeLock> wakeLock = (WakeLock*)(IObject*)obj.Get();
         if (DEBUG_SPEW) {
             Slogger::D(TAG, "UpdateWakeLockWorkSourceInternal: lock=%d [%s], ws=%p",
                     Objects::GetHashCode(lock), wakeLock->mTag.string(), ws);
@@ -2005,6 +2344,27 @@ ECode PowerManagerService::UpdateWakeLockWorkSourceInternal(
     return NOERROR;
 }
 
+Boolean PowerManagerService::CheckWorkSourceObjectId(
+    /* [in] */ Int32 uid,
+    /* [in] */ WakeLock* wl)
+{
+    // try {
+    Int32 size;
+    wl->mWorkSource->GetSize(&size);
+    for (Int32 index = 0; index < size; index++) {
+        Int32 value;
+        if (wl->mWorkSource->Get(index, &value), uid == value) {
+            if (DEBUG_SPEW) Slogger::V(TAG, "WS uid matched");
+            return TRUE;
+        }
+    }
+    // }
+    // catch (Exception e) {
+    //     return false;
+    // }
+    return FALSE;
+}
+
 Int32 PowerManagerService::FindWakeLockIndexLocked(
     /* [in] */IBinder* lock)
 {
@@ -2013,7 +2373,7 @@ Int32 PowerManagerService::FindWakeLockIndexLocked(
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> obj;
         mWakeLocks->Get(i, (IInterface**)&obj);
-        AutoPtr<WakeLock> wakeLock = (WakeLock*)(IProxyDeathRecipient::Probe(obj));
+        AutoPtr<WakeLock> wakeLock = (WakeLock*)(IObject*)obj.Get();
         if (IBinder::Probe(wakeLock->mLock) == IBinder::Probe(lock)) {
             return i;
         }
@@ -2081,6 +2441,33 @@ Boolean PowerManagerService::IsWakeLockLevelSupportedInternal(
 
             default:
                 return FALSE;
+        }
+    }
+    return FALSE;
+}
+
+Boolean PowerManagerService::IsQuickBootCall()
+{
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&service);
+    AutoPtr<IActivityManager> activityManager = IActivityManager::Probe(service);
+
+    AutoPtr<IList> runningList;
+    activityManager->GetRunningAppProcesses((IList**)&runningList);
+    Int32 callingPid = Binder::GetCallingPid();
+    AutoPtr<IIterator> iterator;
+    runningList->GetIterator((IIterator**)&iterator);
+    Boolean hasNext;
+    while (iterator->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> value;
+        iterator->GetNext((IInterface**)&value);
+        AutoPtr<IActivityManagerRunningAppProcessInfo> processInfo = IActivityManagerRunningAppProcessInfo::Probe(value);
+        Int32 pid;
+        if (processInfo->GetPid(&pid), pid == callingPid) {
+            String process;
+            processInfo->GetProcessName(&process);
+            if (process.Equals("com.qapp.quickboot"))
+                return TRUE;
         }
     }
     return FALSE;
@@ -2212,6 +2599,22 @@ Boolean PowerManagerService::WakeUpNoUpdateLocked(
     return TRUE;
 }
 
+void PowerManagerService::EnableQbCharger(
+    /* [in] */ Boolean enable)
+{
+    AutoPtr<ISystemProperties> props;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&props);
+    Int32 value, value1;
+    if ((props->GetInt32(String("sys.quickboot.enable"), 0, &value), value == 1) &&
+            (props->GetInt32(String("sys.quickboot.poweroff"), 0, &value1), value1 != 1)) {
+        // only handle "charged" event, qbcharger process will handle
+        // "uncharged" event itself
+        if (enable && mIsPowered && !IsInteractiveInternal()) {
+            props->Set(String("sys.qbcharger.enable"), String("true"));
+        }
+    }
+}
+
 void PowerManagerService::GoToSleepInternal(
     /* [in] */ Int64 eventTime,
     /* [in] */ Int32 reason,
@@ -2280,7 +2683,7 @@ Boolean PowerManagerService::GoToSleepNoUpdateLocked(
     for (Int32 i = 0; i < numWakeLocks; i++) {
         AutoPtr<IInterface> obj;
         mWakeLocks->Get(i, (IInterface**)&obj);
-        AutoPtr<WakeLock> wakeLock = (WakeLock*)(IProxyDeathRecipient::Probe(obj));
+        AutoPtr<WakeLock> wakeLock = (WakeLock*)(IObject*)obj.Get();
         switch (wakeLock->mFlags & IPowerManager::WAKE_LOCK_LEVEL_MASK) {
             case IPowerManager::FULL_WAKE_LOCK:
             case IPowerManager::SCREEN_BRIGHT_WAKE_LOCK:
@@ -2459,6 +2862,7 @@ void PowerManagerService::UpdateIsPoweredLocked(
                     wasPowered, mIsPowered, oldPlugType, mPlugType, mBatteryLevel);
         }
 
+        EnableQbCharger(mIsPowered);
         if (wasPowered != mIsPowered || oldPlugType != mPlugType) {
             mDirty |= DIRTY_IS_POWERED;
 
@@ -2503,7 +2907,14 @@ Boolean PowerManagerService::ShouldWakeUpWhenPluggedOrUnpluggedLocked(
     /* [in] */ Boolean dockedOnWirelessCharger)
 {
     // Don't wake when powered unless configured to do so.
-    if (!mWakeUpWhenPluggedOrUnpluggedConfig) {
+    if (mWakeUpWhenPluggedOrUnpluggedSetting == 0) {
+        return FALSE;
+    }
+
+    AutoPtr<ISystemProperties> props;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&props);
+    Int32 value;
+    if (props->GetInt32(String("sys.quickboot.enable"), 0, &value), value == 1) {
         return FALSE;
     }
 
@@ -2561,7 +2972,7 @@ void PowerManagerService::UpdateWakeLockSummaryLocked(
         for (Int32 i = 0; i < numWakeLocks; i++) {
             AutoPtr<IInterface> obj;
             mWakeLocks->Get(i, (IInterface**)&obj);
-            AutoPtr<WakeLock> wakeLock = (WakeLock*)(IProxyDeathRecipient::Probe(obj));
+            AutoPtr<WakeLock> wakeLock = (WakeLock*)(IObject*)obj.Get();
             switch (wakeLock->mFlags & IPowerManager::WAKE_LOCK_LEVEL_MASK) {
                 case IPowerManager::PARTIAL_WAKE_LOCK:
                     mWakeLockSummary |= WAKE_LOCK_CPU;
@@ -2632,15 +3043,42 @@ void PowerManagerService::UpdateUserActivitySummaryLocked(
             Int32 screenDimDuration = GetScreenDimDurationLocked(screenOffTimeout);
 
             mUserActivitySummary = 0;
-            if (mLastUserActivityTime >= mLastWakeTime) {
+            if (mWakefulness == WAKEFULNESS_AWAKE && mLastUserActivityTime >= mLastWakeTime) {
                 nextTimeout = mLastUserActivityTime
                         + screenOffTimeout - screenDimDuration;
                 if (now < nextTimeout) {
+                    Int32 buttonBrightness, keyboardBrightness;
+                    if (mButtonBrightnessOverrideFromWindowManager >= 0) {
+                        buttonBrightness = mButtonBrightnessOverrideFromWindowManager;
+                        keyboardBrightness = mButtonBrightnessOverrideFromWindowManager;
+                    }
+                    else {
+                        buttonBrightness = mButtonBrightness;
+                        keyboardBrightness = mKeyboardBrightness;
+                    }
+
+                    mKeyboardLight->SetBrightness(mKeyboardVisible ? keyboardBrightness : 0);
+                    if (mButtonTimeout != 0 && now > mLastUserActivityTime + mButtonTimeout) {
+                         mButtonsLight->SetBrightness(0);
+                    }
+                    else {
+                        // The proximity sensor during a call may indicate positive,
+                        // the screen & buttons should stay off until it indicates negative
+                        if (!mProximityPositive) {
+                            mButtonsLight->SetBrightness(buttonBrightness);
+                            if (buttonBrightness != 0 && mButtonTimeout != 0) {
+                                nextTimeout = now + mButtonTimeout;
+                            }
+                        }
+                    }
+
                     mUserActivitySummary = USER_ACTIVITY_SCREEN_BRIGHT;
                 }
                 else {
                     nextTimeout = mLastUserActivityTime + screenOffTimeout;
                     if (now < nextTimeout) {
+                        mButtonsLight->SetBrightness(0);
+                        mKeyboardLight->SetBrightness(0);
                         mUserActivitySummary = USER_ACTIVITY_SCREEN_DIM;
                     }
                 }
@@ -3580,7 +4018,7 @@ void PowerManagerService::DumpInternal(
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             mWakeLocks->Get(i, (IInterface**)&obj);
-            AutoPtr<WakeLock> wl = (WakeLock*)(IProxyDeathRecipient::Probe(obj));
+            AutoPtr<WakeLock> wl = (WakeLock*)(IObject*)obj.Get();
             buider.Reset();
             buider += "  ";
             buider += TO_IINTERFACE(wl);
@@ -3761,12 +4199,44 @@ void PowerManagerService::NativeSendPowerHint(
 void PowerManagerService::NativeCpuBoost(
     /* [in] */ Int32 duration)
 {
-
+    // Tell the Power HAL to boost the CPU
+    if (sPowerModule && sPowerModule->powerHint) {
+        sPowerModule->powerHint(sPowerModule, POWER_HINT_CPU_BOOST, (void *)(static_cast<int64_t>(duration)));
+    }
 }
 
 void PowerManagerService::NativeSetPowerProfile(
     /* [in] */ Int32 profile)
-{}
+{
+    // Tell the Power HAL to select a power profile
+    if (sPowerModule && sPowerModule->powerHint) {
+        sPowerModule->powerHint(sPowerModule, POWER_HINT_SET_PROFILE, (void *)(static_cast<int64_t>(profile)));
+    }
+}
+
+void PowerManagerService::CleanupProximity()
+{
+    Boolean isHeld;
+    if (mProximityWakeLock->IsHeld(&isHeld), isHeld) {
+        mProximityWakeLock->Release();
+    }
+    if (mProximityListener != NULL) {
+        mSensorManager->UnregisterListener(mProximityListener);
+        mProximityListener = NULL;
+    }
+}
+
+void PowerManagerService::SetButtonBrightnessOverrideFromWindowManagerInternal(
+    /* [in] */ Int32 brightness)
+{
+    synchronized (mLock) {
+        if (mButtonBrightnessOverrideFromWindowManager != brightness) {
+            mButtonBrightnessOverrideFromWindowManager = brightness;
+            mDirty |= DIRTY_SETTINGS;
+            UpdatePowerStateLocked();
+        }
+    }
+}
 
 } // namespace Power
 } // namespace Server

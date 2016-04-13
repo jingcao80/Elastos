@@ -6,6 +6,7 @@
 #include <Elastos.Droid.Os.h>
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/os/Handler.h"
 #include <elastos/core/Object.h>
 #include <elastos/core/Thread.h>
 
@@ -20,10 +21,11 @@ using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Media::IAudioAttributes;
 using Elastos::Droid::Media::IMediaPlayer;
 using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Media::IMediaPlayerOnCompletionListener;
 using Elastos::Droid::Os::Storage::IIMountShutdownObserver;
-using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Droid::Os::Handler;
 using Elastos::Core::Thread;
 using Elastos::Core::IThread;
 
@@ -169,6 +171,41 @@ private:
         Int64 mEndTime;
     };
 
+    class ShutdownMusicHandler : public Handler
+    {
+    private:
+        class OnCompletionListener
+            : public Object
+            , public IMediaPlayerOnCompletionListener
+        {
+        public:
+            OnCompletionListener(
+                /* [in] */ ShutdownThread* host)
+                : mHost(host)
+            {}
+
+            CAR_INTERFACE_DECL()
+
+            CARAPI OnCompletion(
+                /* [in] */ IMediaPlayer* mp);
+
+        private:
+            ShutdownThread* mHost;
+        };
+
+    public:
+        ShutdownMusicHandler(
+            /* [in] */ ShutdownThread* host)
+            : mHost(host)
+        {}
+
+        CARAPI HandleMessage(
+            /* [in] */ IMessage* msg);
+
+    private:
+        ShutdownThread* mHost;
+    };
+
 public:
     /**
      * Request a clean shutdown, waiting for subsystems to clean up their
@@ -253,7 +290,15 @@ private:
 
     static CARAPI_(AutoPtr<IAudioAttributes>) InitVIBRATION_ATTRIBUTES();
 
+    static CARAPI_(void) DeviceRebootOrShutdown(
+        /* [in] */ Boolean reboot,
+        /* [in] */ const String& reason);
+
     static CARAPI_(Boolean) CheckAnimationFileExist();
+
+    static CARAPI_(Boolean) IsSilentMode();
+
+    static CARAPI_(void) ShowShutdownAnimation();
 
 public:
     // Provides shutdown assurance in case the system_server is killed
@@ -303,12 +348,14 @@ private:
     AutoPtr<IPowerManagerWakeLock> mCpuWakeLock;
     AutoPtr<IPowerManagerWakeLock> mScreenWakeLock;
     AutoPtr<IHandler> mHandler;
-    static AutoPtr<IMediaPlayer> mMediaPlayer;
+    static AutoPtr<IMediaPlayer> sMediaPlayer;
 
     Boolean mIsShutdownMusicPlaying;
 
     static AutoPtr<IAlertDialog> sConfirmDialog;
     static AutoPtr<IAudioManager> sAudioManager;
+
+    AutoPtr<IHandler> mShutdownMusicHandler;
 };
 
 } // namespace Power

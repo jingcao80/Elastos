@@ -6,7 +6,7 @@
 #include "elastos/droid/server/power/ShutdownThread.h"
 #include "elastos/droid/server/power/CMountShutdownObserver.h"
 #include "elastos/droid/server/power/PowerManagerService.h"
-// #include "elastos/droid/server/pm/CPackageManagerService.h"
+#include "elastos/droid/server/pm/CPackageManagerService.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/R.h"
@@ -33,7 +33,10 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Telephony::IITelephony;
 using Elastos::Droid::Media::IAudioAttributesBuilder;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
+using Elastos::Droid::Media::CMediaPlayer;
+using Elastos::Droid::Media::EIID_IMediaPlayerOnCompletionListener;
 using Elastos::Droid::Nfc::IINfcAdapter;
+using Elastos::Droid::Nfc::INfcAdapter;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::IUserHandle;
@@ -54,12 +57,15 @@ using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::IAbsListView;
 using Elastos::Droid::Widget::IAdapterView;
-// using Elastos::Droid::Server::Pm::CPackageManagerService;
+using Elastos::Droid::Server::Pm::CPackageManagerService;
 using Elastos::Droid::View::IIWindowManager;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
+using Elastos::Core::CPathClassLoader;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CString;
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
 using Elastos::Utility::Logging::Logger;
@@ -104,7 +110,7 @@ AutoPtr<IAudioAttributes> ShutdownThread::InitVIBRATION_ATTRIBUTES()
 }
 
 AutoPtr<IAudioAttributes> ShutdownThread::VIBRATION_ATTRIBUTES = InitVIBRATION_ATTRIBUTES();
-
+AutoPtr<IMediaPlayer> ShutdownThread::sMediaPlayer;
 AutoPtr<IAlertDialog> ShutdownThread::sConfirmDialog;
 AutoPtr<IAudioManager> ShutdownThread::sAudioManager;
 
@@ -263,21 +269,16 @@ ECode ShutdownThread::ShutdownRadiosThread::Run()
     Boolean res;
 
     // try {
-    Int32 state;
-    ECode ec = nfc->GetState(&state);
-    if (FAILED(ec)) {
-        Logger::E(TAG, "RemoteException during NFC shutdown");
-        nfcOff = TRUE;
-    }
-    else {
-        assert(0 && "TODO");
-        // nfcOff = nfc == NULL || state == INfcAdapter::STATE_OFF;
-        if (!nfcOff) {
-            Logger::W(TAG, "Turning off NFC...");
-            if (FAILED(nfc->Disable(FALSE, &res))) { // Don't persist new state
-                Logger::E(TAG, "RemoteException during NFC shutdown");
-                nfcOff = TRUE;
-            }
+    nfcOff = TRUE;
+    if (nfc != NULL) {
+        Int32 state;
+        ECode ec = nfc->GetState(&state);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "RemoteException during NFC shutdown");
+            nfcOff = TRUE;
+        }
+        else {
+            nfcOff = state == INfcAdapter::STATE_OFF;
         }
     }
     // } catch (RemoteException ex) {
@@ -308,7 +309,7 @@ ECode ShutdownThread::ShutdownRadiosThread::Run()
     // // }
 
     // try {
-    ec = phone->NeedMobileRadioShutdown(&isEnabled);
+    ECode ec = phone->NeedMobileRadioShutdown(&isEnabled);
     if (FAILED(ec)) {
         Logger::E(TAG, "RemoteException during radio shutdown");
         radioOff = TRUE;
@@ -364,12 +365,15 @@ ECode ShutdownThread::ShutdownRadiosThread::Run()
         }
         if (!nfcOff) {
             // try {
-            if (FAILED(nfc->GetState(&state))) {
+            Int32 state;
+            ECode ec = nfc->GetState(&state);
+            if (FAILED(ec)) {
                 Logger::E(TAG, "RemoteException during NFC shutdown");
                 nfcOff = TRUE;
             }
-            assert(0 && "TODO");
-            // nfcOff = state == INfcAdapter::STATE_OFF;
+            else {
+                nfcOff = state == INfcAdapter::STATE_OFF;
+            }
 
             // } catch (RemoteException ex) {
             //     Log.e(TAG, "RemoteException during NFC shutdown", ex);
@@ -390,6 +394,49 @@ ECode ShutdownThread::ShutdownRadiosThread::Run()
     return NOERROR;
 }
 
+
+//==============================================================================
+//          ShutdownThread::ShutdownMusicHandler::OnCompletionListener
+//==============================================================================
+
+CAR_INTERFACE_IMPL(ShutdownThread::ShutdownMusicHandler::OnCompletionListener, Object, IMediaPlayerOnCompletionListener)
+
+ECode ShutdownThread::ShutdownMusicHandler::OnCompletionListener::OnCompletion(
+    /* [in] */ IMediaPlayer* mp)
+{
+    AutoLock lock(mHost->mActionDoneSync);
+    mHost->mIsShutdownMusicPlaying = FALSE;
+    mHost->mActionDoneSync.NotifyAll();
+    return NOERROR;
+}
+
+
+//==============================================================================
+//          ShutdownThread::ShutdownMusicHandler
+//==============================================================================
+
+ShutdownThread::ShutdownMusicHandler::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    String path;
+    ICharSequence::Probe(obj)->ToString(&path);
+    CMediaPlayer::New((IMediaPlayer**)&sMediaPlayer);
+    // try {
+    sMediaPlayer->Reset();
+    sMediaPlayer->SetDataSource(path);
+    sMediaPlayer->Prepare();
+    sMediaPlayer->Start();
+    AutoPtr<IMediaPlayerOnCompletionListener> listener = new OnCompletionListener(mHost);
+    sMediaPlayer->SetOnCompletionListener(listener);
+    // } catch (IOException e) {
+    //     Log.d(TAG, "play shutdown music error:" + e);
+    // }
+    return NOERROR;
+}
+
+
 //==============================================================================
 //          ShutdownThread
 //==============================================================================
@@ -399,6 +446,7 @@ ShutdownThread::ShutdownThread()
     , mIsShutdownMusicPlaying(FALSE)
 {
     Thread::constructor();
+    mShutdownMusicHandler = new ShutdownMusicHandler(this);
 }
 
 ShutdownThread::~ShutdownThread()
@@ -788,45 +836,50 @@ ECode ShutdownThread::Run()
     obj = NULL;
     serviceManager->GetService(String("package"), (IInterface**)&obj);
     assert(0 && "TODO");
-    // AutoPtr<CPackageManagerService> pm = (CPackageManagerService*)IIPackageManager::Probe(obj);
-    // if (pm != NULL) {
-    //     pm->Shutdown();
-    // }
-// begin from this
-    // String shutDownFile = null;
+    AutoPtr<CPackageManagerService> pm = (CPackageManagerService*)IIPackageManager::Probe(obj);
+    if (pm != NULL) {
+        pm->Shutdown();
+    }
 
-    // //showShutdownAnimation() is called from here to sync
-    // //music and animation properly
-    // if(checkAnimationFileExist()) {
-    //     lockDevice();
-    //     showShutdownAnimation();
+    String shutDownFile(NULL);
 
-    //     if (!isSilentMode()
-    //             && (shutDownFile = getShutdownMusicFilePath()) != null) {
-    //         isShutdownMusicPlaying = true;
-    //         shutdownMusicHandler.obtainMessage(0, shutDownFile).sendToTarget();
-    //     }
-    // }
+    //showShutdownAnimation() is called from here to sync
+    //music and animation properly
+    if(CheckAnimationFileExist()) {
+        LockDevice();
+        ShowShutdownAnimation();
 
-    // Log.i(TAG, "wait for shutdown music");
-    // final long endTimeForMusic = SystemClock.elapsedRealtime() + MAX_BROADCAST_TIME;
-    // synchronized (mActionDoneSync) {
-    //     while (isShutdownMusicPlaying) {
-    //         long delay = endTimeForMusic - SystemClock.elapsedRealtime();
-    //         if (delay <= 0) {
-    //             Log.w(TAG, "play shutdown music timeout!");
-    //             break;
-    //         }
-    //         try {
-    //             mActionDoneSync.wait(delay);
-    //         } catch (InterruptedException e) {
-    //         }
-    //     }
-    //     if (!isShutdownMusicPlaying) {
-    //         Log.i(TAG, "play shutdown music complete.");
-    //     }
-    // }
-// end
+        if (!IsSilentMode()
+                && !(shutDownFile = GetShutdownMusicFilePath()).IsNull()) {
+            mIsShutdownMusicPlaying = TRUE;
+            AutoPtr<IMessage> msg;
+            AutoPtr<ICharSequence> cs;
+            CString::New(shutDownFile, (ICharSequence**)&cs);
+            mShutdownMusicHandler->ObtainMessage(0, cs, (IMessage**)&msg);
+            msg->SendToTarget();
+        }
+    }
+
+    Logger::I(TAG, "wait for shutdown music");
+
+    Int64 endTimeForMusic = SystemClock::GetElapsedRealtime() + MAX_BROADCAST_TIME;
+    synchronized (mActionDoneSync) {
+        while (mIsShutdownMusicPlaying) {
+            Int64 delay = endTimeForMusic - SystemClock::GetElapsedRealtime();
+            if (delay <= 0) {
+                Logger::W(TAG, "play shutdown music timeout!");
+                break;
+            }
+            // try {
+            mActionDoneSync.Wait(delay);
+            // } catch (InterruptedException e) {
+            // }
+        }
+        if (!mIsShutdownMusicPlaying) {
+            Logger::I(TAG, "play shutdown music complete.");
+        }
+    }
+
     // Shutdown radios.
     ShutdownRadios(MAX_RADIO_WAIT_TIME);
 
@@ -896,6 +949,8 @@ void ShutdownThread::RebootOrShutdown(
     /* [in] */ Boolean reboot,
     /* [in] */ const String& reason)
 {
+    // TODO
+    // DeviceRebootOrShutdown(reboot, reason);
     if (reboot) {
         Logger::I(TAG, "Rebooting, reason: %s", (const char*)reason);
         PowerManagerService::LowLevelReboot(reason);
@@ -926,9 +981,74 @@ void ShutdownThread::RebootOrShutdown(
     PowerManagerService::LowLevelShutdown();
 }
 
+void ShutdownThread::DeviceRebootOrShutdown(
+    /* [in] */ Boolean reboot,
+    /* [in] */ const String& reason)
+{
+    // Class<?> cl;
+    AutoPtr<IClassLoader> oemClassLoader;
+    if (FAILED(CPathClassLoader::New(String("/system/framework/oem-services.jar"), (IClassLoader**)&oemClassLoader))) {
+        Slogger::E(TAG, "failed to load system class loaded");
+        return;
+    }
+    // PathClassLoader oemClassLoader = new PathClassLoader("/system/framework/oem-services.jar",
+    //         ClassLoader.getSystemClassLoader());
+    String deviceShutdownClassName("com.qti.server.power.ShutdownOem");
+    // try{
+    // cl = Class.forName(deviceShutdownClassName);
+    // Method m;
+    // try {
+    //     m = cl.getMethod("rebootOrShutdown", new Class[] {boolean.class, String.class});
+    //     m.invoke(cl.newInstance(), reboot, reason);
+    // } catch (NoSuchMethodException ex) {
+    //     Log.e(TAG, "rebootOrShutdown method not found in class "
+    //             + deviceShutdownClassName);
+    // } catch (Exception ex) {
+    //     Log.e(TAG, "Unknown exception hit while trying to invoke rebootOrShutdown");
+    // }
+    // } catch(ClassNotFoundException e) {
+    //     Log.e(TAG, "Unable to find class " + deviceShutdownClassName);
+    // } catch (Exception e) {
+    //     Log.e(TAG, "Unknown exception while trying to invoke rebootOrShutdown");
+    // }
+}
+
 Boolean ShutdownThread::CheckAnimationFileExist()
 {
-    return FALSE;
+    AutoPtr<IFile> f, f1, f2;
+    CFile::New(OEM_BOOTANIMATION_FILE, (IFile**)&f);
+    CFile::New(SYSTEM_BOOTANIMATION_FILE, (IFile**)&f1);
+    CFile::New(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, (IFile**)&f2);
+    Boolean exists, exists1, exists2;
+    if ((f->Exists(&exists), exists)
+            || (f1->Exists(&exists1), exists1)
+            || (f2->Exists(&exists2), exists2))
+        return TRUE;
+    else
+        return FALSE;
+}
+
+Boolean ShutdownThread::IsSilentMode()
+{
+    Boolean isSilentMode;
+    sAudioManager->IsSilentMode(&isSilentMode);
+    return isSilentMode;
+}
+
+void ShutdownThread::ShowShutdownAnimation()
+{
+    /*
+     * When boot completed, "service.bootanim.exit" property is set to 1.
+     * Bootanimation checks this property to stop showing the boot animation.
+     * Since we use the same code for shutdown animation, we
+     * need to reset this property to 0. If this is not set to 0 then shutdown
+     * will stop and exit after displaying the first frame of the animation
+     */
+    AutoPtr<ISystemProperties> prop;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&prop);
+    prop->Set(String("service.bootanim.exit"), String("0")) ;
+
+    prop->Set(String("ctl.start"), String("bootanim")) ;
 }
 
 } // namespace Power

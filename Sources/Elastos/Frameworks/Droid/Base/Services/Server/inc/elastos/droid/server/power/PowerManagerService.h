@@ -10,6 +10,7 @@
 #include "elastos/droid/server/lights/LightsManager.h"
 #include "elastos/droid/server/power/Notifier.h"
 #include "elastos/droid/server/power/WirelessChargerDetector.h"
+#include "elastos/droid/server/power/PerformanceManager.h"
 #include "elastos/droid/server/ServiceThread.h"
 #include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
@@ -25,6 +26,10 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Hardware::ISensorManager;
+using Elastos::Droid::Hardware::ISensor;
+using Elastos::Droid::Hardware::ISensorEvent;
+using Elastos::Droid::Hardware::ISensorEventListener;
 using Elastos::Droid::Hardware::Display::IDisplayManagerInternal;
 using Elastos::Droid::Hardware::Display::IDisplayPowerCallbacks;
 using Elastos::Droid::Hardware::Display::IDisplayPowerRequest;
@@ -38,6 +43,7 @@ using Elastos::Droid::Os::ILowPowerModeListener;
 using Elastos::Droid::Os::IPowerManagerInternal;
 using Elastos::Droid::Os::IWorkSource;
 using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Server::Lights::Light;
 using Elastos::Droid::Server::Lights::LightsManager;
 using Elastos::Droid::Service::Dreams::IDreamManagerInternal;
@@ -67,6 +73,53 @@ public:
         , public IIPowerManager
         , public IBinder
     {
+    private:
+        class WakeUpRunnable : public Runnable
+        {
+        public:
+            WakeUpRunnable(
+                /* [in] */ PowerManagerService* host,
+                /* [in] */ Int64 eventTime,
+                /* [in] */ Int32 uid)
+                : mHost(host)
+                , mEventTime(eventTime)
+                , mUid(uid)
+            {}
+
+            CARAPI Run();
+
+        private:
+            PowerManagerService* mHost;
+            Int64 mEventTime;
+            Int32 mUid;
+        };
+
+        class SensorEventListener
+            : public Object
+            , public ISensorEventListener
+        {
+        public:
+            SensorEventListener(
+                /* [in] */ PowerManagerService* host,
+                /* [in] */ IRunnable* r)
+                : mHost(host)
+                , mR(r)
+            {}
+
+            CAR_INTERFACE_DECL()
+
+            CARAPI OnSensorChanged(
+                /* [in] */ ISensorEvent* event);
+
+            CARAPI OnAccuracyChanged(
+                /* [in] */ ISensor* sensor,
+                /* [in] */ Int32 accuracy);
+
+        private:
+            PowerManagerService* mHost;
+            AutoPtr<IRunnable> mR;
+        };
+
     public:
         CAR_INTERFACE_DECL();
 
@@ -289,6 +342,12 @@ public:
             /* [in] */ IFileDescriptor* fd,
             /* [in] */ IPrintWriter* pw,
             /* [in] */ ArrayOf<String>* args);
+
+        CARAPI_(void) RunWithProximityCheck(
+            /* [in] */ IRunnable* r);
+
+        CARAPI_(void) RunPostProximityCheck(
+            /* [in] */ IRunnable* r);
 
     private:
         PowerManagerService* mHost;
@@ -751,6 +810,10 @@ private:
         /* [in] */ const String& historyTag,
         /* [in] */ Int32 callingUid);
 
+    CARAPI_(Boolean) CheckWorkSourceObjectId(
+        /* [in] */ Int32 uid,
+        /* [in] */ WakeLock* wl);
+
     CARAPI_(Int32) FindWakeLockIndexLocked(
         /* [in] */ IBinder* lock);
 
@@ -773,6 +836,8 @@ private:
     // @SuppressWarnings("deprecation")
     CARAPI_(Boolean) IsWakeLockLevelSupportedInternal(
         /* [in] */ Int32 level);
+
+    CARAPI_(Boolean) IsQuickBootCall();
 
     CARAPI_(void) UserActivityFromNative(
         /* [in] */ Int64 eventTime,
@@ -798,6 +863,9 @@ private:
     CARAPI_(Boolean) WakeUpNoUpdateLocked(
         /* [in] */ Int64 eventTime,
         /* [in] */ Int32 uid);
+
+    CARAPI_(void) EnableQbCharger(
+        /* [in] */ Boolean enable);
 
     CARAPI_(void) GoToSleepInternal(
         /* [in] */ Int64 eventTime,
@@ -1090,6 +1158,11 @@ private:
     static CARAPI_(void) NativeCpuBoost(
         /* [in] */ Int32 duration);
 
+    CARAPI_(void) CleanupProximity();
+
+    CARAPI_(void) SetButtonBrightnessOverrideFromWindowManagerInternal(
+        /* [in] */ Int32 brightness);
+
 private:
     static const String TAG;
 
@@ -1100,6 +1173,7 @@ private:
     static const Int32 MSG_USER_ACTIVITY_TIMEOUT;// = 1;
     // Message: Sent when the device enters or exits a dreaming or dozing state.
     static const Int32 MSG_SANDMAN;// = 2;
+    static const Int32 MSG_WAKE_UP;
 
     // Dirty bit: mWakeLocks changed
     static const Int32 DIRTY_WAKE_LOCKS;
@@ -1166,6 +1240,16 @@ private:
     static const Int32 POWER_HINT_INTERACTION;
     static const Int32 POWER_HINT_LOW_POWER;
 
+    static const Int32 DEFAULT_BUTTON_ON_DURATION;
+
+    // Config value for NSRM
+    static const Int32 DPM_CONFIG_FEATURE_MASK_NSRM;
+
+    // Max time (microseconds) to allow a CPU boost for
+    static const Int32 MAX_CPU_BOOST_TIME;
+
+    static const Float PROXIMITY_NEAR_THRESHOLD;
+
     AutoPtr<IContext> mContext;
     AutoPtr<ServiceThread> mHandlerThread;
     AutoPtr<PowerManagerHandler> mHandler;
@@ -1181,6 +1265,16 @@ private:
     AutoPtr<SettingsObserver> mSettingsObserver;
     AutoPtr<IDreamManagerInternal> mDreamManager;
     AutoPtr<Light> mAttentionLight;
+    AutoPtr<Light> mButtonsLight;
+    AutoPtr<Light> mKeyboardLight;
+    AutoPtr<Light> mCapsLight;
+    AutoPtr<Light> mFnLight;
+
+    Int32 mButtonTimeout;
+    Int32 mButtonBrightness;
+    Int32 mButtonBrightnessSettingDefault;
+    Int32 mKeyboardBrightness;
+    Int32 mKeyboardBrightnessSettingDefault;
 
     Object mLock;
 
@@ -1367,6 +1461,9 @@ private:
     // A bitfield of battery conditions under which to make the screen stay on.
     Int32 mStayOnWhilePluggedInSetting;
 
+    // True if the device should wake up when plugged or unplugged
+    Int32 mWakeUpWhenPluggedOrUnpluggedSetting;
+
     // True if the device should stay on.
     Boolean mStayOn;
 
@@ -1394,6 +1491,11 @@ private:
     // to allow the current foreground activity to override the brightness.
     // Use -1 to disable.
     Int32 mScreenBrightnessOverrideFromWindowManager; // = -1
+
+    // The button brightness setting override from the window manager
+    // to allow the current foreground activity to override the button brightness.
+    // Use -1 to disable.
+    Int32 mButtonBrightnessOverrideFromWindowManager;
 
     // The user activity timeout override from the window manager
     // to allow the current foreground activity to override the user activity timeout.
@@ -1439,11 +1541,27 @@ private:
     // private final ArrayList<PowerManagerInternal.LowPowerModeListener> mLowPowerModeListeners
     //         = new ArrayList<PowerManagerInternal.LowPowerModeListener>();
 
+    //track the blocked uids.
+    AutoPtr<IArrayList> mBlockedUids;
+
     AutoPtr<IDisplayPowerCallbacks> mDisplayPowerCallbacks;
+
+    Boolean mKeyboardVisible;
+
+    AutoPtr<ISensorManager> mSensorManager;
+    AutoPtr<ISensor> mProximitySensor;
+    Boolean mProximityWakeEnabled;
+    Int32 mProximityTimeOut;
+    Boolean mProximityWakeSupported;
+    AutoPtr<IPowerManagerWakeLock> mProximityWakeLock;
+    AutoPtr<ISensorEventListener> mProximityListener;
+
+    AutoPtr<PerformanceManager> mPerformanceManager;
 
     friend class MyDisplayPowerCallbacks;
     friend class WakeLock;
     friend class SuspendBlockerImpl;
+    friend class BinderService;
 };
 
 } // namespace Power
