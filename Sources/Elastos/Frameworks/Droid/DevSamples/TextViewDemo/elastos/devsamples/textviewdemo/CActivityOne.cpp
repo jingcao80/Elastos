@@ -627,8 +627,9 @@ ECode CActivityOne::OnCreatePopupWindow()
     Logger::D("CActivityOne", "CActivityOne::OnCreatePopupWindow()");
     mPopupWindow = NULL;
 
-    AutoPtr<ILayoutInflater> inflater;
-    GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
+    AutoPtr<IInterface> obj;
+    GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
 
     AutoPtr<IView> layout;
     inflater->Inflate(R::layout::popupwindow, NULL, (IView**)&layout);
@@ -671,8 +672,9 @@ ECode CActivityOne::OnTestPowerManager()
     // //  ..screen will stay on during this section..
     // wl->ReleaseLock();
 
-    AutoPtr<IWifiManager> wifi;
-    GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&wifi);
+    AutoPtr<IInterface> obj;
+    GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
+    AutoPtr<IWifiManager> wifi = IWifiManager::Probe(obj);
     assert(wifi != NULL);
 
     Boolean result;
@@ -732,8 +734,9 @@ ECode CActivityOne::OnTestPowerManager()
 
 ECode CActivityOne::OnTestConnectivityManager()
 {
-    AutoPtr<IConnectivityManager> conn;
-    GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&conn);
+    AutoPtr<IInterface> obj;
+    GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    AutoPtr<IConnectivityManager> conn = IConnectivityManager::Probe(obj);
     assert(conn != NULL);
 
     AutoPtr<INetworkInfo> info;

@@ -313,6 +313,7 @@ ECode CompoundButton::GetButtonTintList(
 {
     VALIDATE_NOT_NULL(tint)
     *tint = mButtonTintList;
+    REFCOUNT_ADD(*tint)
     return NOERROR;
 }
 

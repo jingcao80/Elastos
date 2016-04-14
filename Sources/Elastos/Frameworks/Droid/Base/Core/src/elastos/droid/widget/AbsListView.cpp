@@ -229,6 +229,7 @@ ECode AbsListView::LayoutParams::SetViewType(
 ECode AbsListView::LayoutParams::GetItemId(
     /* [out] */ Int64* itemId)
 {
+    VALIDATE_NOT_NULL(itemId)
     *itemId = mItemId;
     return NOERROR;
 }
@@ -236,6 +237,7 @@ ECode AbsListView::LayoutParams::GetItemId(
 ECode AbsListView::LayoutParams::GetScrappedFromPosition(
     /* [out] */ Int32* scrappedFromPosition)
 {
+    VALIDATE_NOT_NULL(scrappedFromPosition)
     *scrappedFromPosition = mScrappedFromPosition;
     return NOERROR;
 }
@@ -243,6 +245,7 @@ ECode AbsListView::LayoutParams::GetScrappedFromPosition(
 ECode AbsListView::LayoutParams::GetForceAdd(
     /* [out] */ Boolean* force)
 {
+    VALIDATE_NOT_NULL(force)
     *force = mForceAdd;
     return NOERROR;
 }
@@ -250,6 +253,7 @@ ECode AbsListView::LayoutParams::GetForceAdd(
 ECode AbsListView::LayoutParams::GetRecycledHeaderFooter(
     /* [out] */ Boolean* footer)
 {
+    VALIDATE_NOT_NULL(footer)
     *footer = mRecycledHeaderFooter;
     return NOERROR;
 }
@@ -7839,6 +7843,7 @@ AbsListView::OnCreateInputConnection(
         outAttrs->SetInputType(IInputType::TYPE_CLASS_TEXT | IInputType::TYPE_TEXT_VARIATION_FILTER);
         outAttrs->SetImeOptions(IEditorInfo::IME_ACTION_DONE);
         *connection = mPublicInputConnection;
+        REFCOUNT_ADD(*connection)
         return NOERROR;
     }
     return NOERROR;

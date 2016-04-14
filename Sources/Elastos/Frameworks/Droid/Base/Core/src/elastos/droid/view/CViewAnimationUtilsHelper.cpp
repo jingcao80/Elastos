@@ -13,7 +13,7 @@ CAR_INTERFACE_IMPL(CViewAnimationUtilsHelper, Singleton, IViewAnimationUtilsHelp
 CAR_SINGLETON_IMPL(CViewAnimationUtilsHelper)
 
 ECode CViewAnimationUtilsHelper::CreateCircularReveal(
-	/* [in] */ IView* view,
+    /* [in] */ IView* view,
     /* [in] */ Int32 centerX,
     /* [in] */ Int32 centerY,
     /* [in] */ Float startRadius,
@@ -21,13 +21,14 @@ ECode CViewAnimationUtilsHelper::CreateCircularReveal(
     /* [out] */ IAnimator** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = NULL;
     VALIDATE_NOT_NULL(view)
-    *result = new RevealAnimator(view, centerX, centerY, startRadius, endRadius);
+
+    AutoPtr<RevealAnimator> ra = new RevealAnimator(view, centerX, centerY, startRadius, endRadius);
+    *result = (IAnimator*)ra.Get();
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 } // namespace View
 } // namespace Droid
 } // namespace Elastos
-

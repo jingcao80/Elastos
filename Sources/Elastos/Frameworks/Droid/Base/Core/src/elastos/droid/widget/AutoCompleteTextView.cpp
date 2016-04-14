@@ -363,6 +363,7 @@ ECode AutoCompleteTextView::GetCompletionHint(
     VALIDATE_NOT_NULL(hint)
 
     *hint = mHintText;
+    REFCOUNT_ADD(*hint)
     return NOERROR;
 }
 
@@ -378,6 +379,7 @@ ECode AutoCompleteTextView::GetCompletionHint(
 ECode AutoCompleteTextView::GetDropDownWidth(
     /* [out] */ Int32* width)
 {
+    VALIDATE_NOT_NULL(width)
     return mPopup->GetWidth(width);
 }
 
@@ -409,6 +411,7 @@ ECode AutoCompleteTextView::SetDropDownWidth(
 ECode AutoCompleteTextView::GetDropDownHeight(
     /* [out] */ Int32* height)
 {
+    VALIDATE_NOT_NULL(height)
     return mPopup->GetHeight(height);
 }
 
@@ -440,6 +443,7 @@ ECode AutoCompleteTextView::SetDropDownHeight(
 ECode AutoCompleteTextView::GetDropDownAnchor(
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = mDropDownAnchorId;
     return NOERROR;
 }
@@ -472,6 +476,7 @@ ECode AutoCompleteTextView::SetDropDownAnchor(
 ECode AutoCompleteTextView::GetDropDownBackground(
     /* [out] */ IDrawable** drawable)
 {
+    VALIDATE_NOT_NULL(drawable)
     return mPopup->GetBackground(drawable);
 }
 
@@ -527,6 +532,7 @@ ECode AutoCompleteTextView::SetDropDownVerticalOffset(
 ECode AutoCompleteTextView::GetDropDownVerticalOffset(
     /* [out] */ Int32* offset)
 {
+    VALIDATE_NOT_NULL(offset)
     return mPopup->GetVerticalOffset(offset);
 }
 
@@ -551,6 +557,7 @@ ECode AutoCompleteTextView::SetDropDownHorizontalOffset(
 ECode AutoCompleteTextView::GetDropDownHorizontalOffset(
     /* [out] */ Int32* offset)
 {
+    VALIDATE_NOT_NULL(offset)
     return mPopup->GetHorizontalOffset(offset);
 }
 
@@ -585,6 +592,7 @@ ECode AutoCompleteTextView::SetDropDownAnimationStyle(
 ECode AutoCompleteTextView::GetDropDownAnimationStyle(
     /* [out] */ Int32* animationStyle)
 {
+    VALIDATE_NOT_NULL(animationStyle)
     return mPopup->GetAnimationStyle(animationStyle);
 }
 
@@ -596,6 +604,7 @@ ECode AutoCompleteTextView::GetDropDownAnimationStyle(
 ECode AutoCompleteTextView::IsDropDownAlwaysVisible(
     /* [out] */ Boolean* visible)
 {
+    VALIDATE_NOT_NULL(visible)
     return mPopup->IsDropDownAlwaysVisible(visible);
 }
 
@@ -628,6 +637,7 @@ ECode AutoCompleteTextView::SetDropDownAlwaysVisible(
 ECode AutoCompleteTextView::IsDropDownDismissedOnCompletion(
     /* [out] */ Boolean* completion)
 {
+    VALIDATE_NOT_NULL(completion)
     *completion = mDropDownDismissedOnCompletion;
     return NOERROR;
 }
@@ -659,6 +669,7 @@ ECode AutoCompleteTextView::SetDropDownDismissedOnCompletion(
 ECode AutoCompleteTextView::GetThreshold(
     /* [out] */ Int32* threshold)
 {
+    VALIDATE_NOT_NULL(threshold)
     *threshold = mThreshold;
     return NOERROR;
 }
@@ -706,7 +717,9 @@ ECode AutoCompleteTextView::SetOnItemClickListener(
 ECode AutoCompleteTextView::GetItemClickListener(
     /* [out] */ IAdapterViewOnItemClickListener** l)
 {
+    VALIDATE_NOT_NULL(l)
     *l = mItemClickListener;
+    REFCOUNT_ADD(*l)
     return NOERROR;
 }
 
@@ -733,6 +746,7 @@ ECode AutoCompleteTextView::SetOnItemSelectedListener(
 ECode AutoCompleteTextView::GetOnItemClickListener(
     /* [out] */ IAdapterViewOnItemClickListener** l)
 {
+    VALIDATE_NOT_NULL(l)
     *l = mItemClickListener;
     REFCOUNT_ADD(*l)
     return NOERROR;
@@ -747,6 +761,7 @@ ECode AutoCompleteTextView::GetOnItemClickListener(
 ECode AutoCompleteTextView::GetOnItemSelectedListener(
     /* [out] */ IAdapterViewOnItemSelectedListener** l)
 {
+    VALIDATE_NOT_NULL(l)
     *l = mItemSelectedListener;
     REFCOUNT_ADD(*l)
     return NOERROR;
@@ -776,6 +791,7 @@ ECode AutoCompleteTextView::SetOnDismissListener(
 ECode AutoCompleteTextView::GetAdapter(
     /* [out] */ IListAdapter** adapter)
 {
+    VALIDATE_NOT_NULL(adapter)
     *adapter = mAdapter;
     REFCOUNT_ADD(*adapter)
     return NOERROR;
@@ -1037,6 +1053,7 @@ void AutoCompleteTextView::DoAfterTextChanged()
 ECode AutoCompleteTextView::IsPopupShowing(
     /* [out] */ Boolean* isPopupShowing)
 {
+    VALIDATE_NOT_NULL(isPopupShowing)
     return mPopup->IsShowing(isPopupShowing);
 }
 
@@ -1089,6 +1106,7 @@ ECode AutoCompleteTextView::SetListSelection(
 ECode AutoCompleteTextView::GetListSelection(
     /* [out] */ Int32* selection)
 {
+    VALIDATE_NOT_NULL(selection)
     return mPopup->GetSelectedItemPosition(selection);
 }
 
@@ -1187,8 +1205,9 @@ void AutoCompleteTextView::PerformCompletion(
 ECode AutoCompleteTextView::IsPerformingCompletion(
     /* [out] */ Boolean* isPerformingCompletion)
 {
-     *isPerformingCompletion = mBlockCompletion;
-     return NOERROR;
+    VALIDATE_NOT_NULL(isPerformingCompletion)
+    *isPerformingCompletion = mBlockCompletion;
+    return NOERROR;
 }
 
 /**
@@ -1200,8 +1219,8 @@ ECode AutoCompleteTextView::IsPerformingCompletion(
  * @hide Pending API council approval.
  */
 ECode AutoCompleteTextView::SetText(
-   /* [in] */ ICharSequence* text,
-   /* [in] */ Boolean filter)
+    /* [in] */ ICharSequence* text,
+    /* [in] */ Boolean filter)
 {
     if (filter) {
         SetText(text);
@@ -1417,6 +1436,7 @@ ECode AutoCompleteTextView::EnsureImeVisible(
 ECode AutoCompleteTextView::IsInputMethodNotNeeded(
     /* [out] */ Boolean* isInputMethodNotNeeded)
 {
+    VALIDATE_NOT_NULL(isInputMethodNotNeeded)
     Int32 mode;
     mPopup->GetInputMethodMode(&mode);
     *isInputMethodNotNeeded = mode == IPopupWindow::INPUT_METHOD_NOT_NEEDED;
@@ -1538,7 +1558,9 @@ ECode AutoCompleteTextView::SetValidator(
 ECode AutoCompleteTextView::GetValidator(
     /* [out] */ IValidator** validator)
 {
+    VALIDATE_NOT_NULL(validator)
     *validator = mValidator;
+    REFCOUNT_ADD(*validator)
     return NOERROR;
 }
 

@@ -135,10 +135,10 @@ public:
         /* [out] */ Int32* ret);
 
     static /*const*/ CARAPI GetMetaState(
-           /* [in] */ ICharSequence* text,
-           /* [in] */ Int32 meta,
-           /* [in] */ IKeyEvent* event,
-           /* [out] */ Int32* ret);
+        /* [in] */ ICharSequence* text,
+        /* [in] */ Int32 meta,
+        /* [in] */ IKeyEvent* event,
+        /* [out] */ Int32* ret);
 
     /**
      * Call this method after you handle a keypress so that the meta

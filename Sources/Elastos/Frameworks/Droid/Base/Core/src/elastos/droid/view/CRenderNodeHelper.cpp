@@ -26,9 +26,10 @@ ECode CRenderNodeHelper::Create(
     /* [in] */ IView* owningView,
     /* [out] */ IRenderNode** node)
 {
+    VALIDATE_NOT_NULL(node)
     AutoPtr<IRenderNode> tmp = RenderNode::Create(name, owningView);
     *node = tmp;
-    REFCOUNT_ADD(tmp)
+    REFCOUNT_ADD(*node)
     return NOERROR;
 }
 
@@ -36,9 +37,10 @@ ECode CRenderNodeHelper::Adopt(
     /* [in] */ Handle64 nativePtr,
     /* [out] */ IRenderNode** node)
 {
+    VALIDATE_NOT_NULL(node)
     AutoPtr<IRenderNode> tmp = RenderNode::Adopt(nativePtr);
     *node = tmp;
-    REFCOUNT_ADD(tmp)
+    REFCOUNT_ADD(*node)
     return NOERROR;
 }
 

@@ -527,7 +527,7 @@ ECode Layout::ReplaceWith(
 ECode Layout::Draw(
     /* [in] */ ICanvas* c)
 {
-    return Layout::Draw(c, NULL, NULL, 0);
+    return Draw(c, NULL, NULL, 0);
 }
 
 ECode Layout::Draw(

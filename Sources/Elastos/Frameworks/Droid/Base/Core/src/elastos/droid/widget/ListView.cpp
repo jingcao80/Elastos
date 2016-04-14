@@ -3597,6 +3597,7 @@ ECode ListView::GetOverscrollHeader(
 {
     VALIDATE_NOT_NULL(overScrollHeader);
     *overScrollHeader = mOverScrollHeader;
+    REFCOUNT_ADD(*overScrollHeader)
     return NOERROR;
 }
 
@@ -3611,8 +3612,9 @@ ECode ListView::SetOverscrollFooter(
 ECode ListView::GetOverscrollFooter(
     /* [out] */ IDrawable** overScrollFooter)
 {
-    VALIDATE_NOT_NULL(overScrollFooter);
+    VALIDATE_NOT_NULL(overScrollFooter)
     *overScrollFooter = mOverScrollFooter;
+    REFCOUNT_ADD(*overScrollFooter)
     return NOERROR;
 }
 

@@ -670,6 +670,7 @@ ECode View::MeasureSpec::GetDescription(
     /* [in] */ Int32 measureSpec,
     /* [out] */ String* description)
 {
+    VALIDATE_NOT_NULL(description)
     if (description == NULL) return E_INVALID_ARGUMENT;
 
     Int32 mode = GetMode(measureSpec);
@@ -1356,7 +1357,7 @@ void View::InitializeFadingEdgeInternal(
  * @attr ref android.R.styleable#View_fadingEdgeLength
  */
 ECode View::GetVerticalFadingEdgeLength(
-         /* [out] */ Int32* length)
+    /* [out] */ Int32* length)
 {
     VALIDATE_NOT_NULL(length)
     Boolean isVerticalFadingEdgeEnabled;
@@ -3000,7 +3001,8 @@ ECode View::ComputeClickPointInScreenForAccessibility(
         bounds->GetCenterX(&x);
         bounds->GetCenterY(&y);
         outPoint->Set(x, y);
-    } else {
+    }
+    else {
         // This view is partially covered by other views, then compute
         // the not covered region and pick a point on its boundary.
         AutoPtr<IRegion> region;
@@ -3207,7 +3209,8 @@ ECode View::SetContentDescription(
     if (nonEmptyDesc && importantForAccessibility == IView::IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
         SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
         NotifySubtreeAccessibilityStateChangedIfNeeded();
-    } else {
+    }
+    else {
         NotifyViewAccessibilityStateChangedIfNeeded(
                 IAccessibilityEvent::CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION);
     }
@@ -3294,7 +3297,8 @@ ECode View::FindFocus(
         *res = this;
         REFCOUNT_ADD(*res)
         return NOERROR;
-    } else {
+    }
+    else {
         *res = NULL;
         return NOERROR;
     }
@@ -3612,8 +3616,8 @@ ECode View::FitSystemWindows(
 }
 
 ECode View::FitSystemWindowsInt(
-        /* [in] */ IRect* insets,
-        /* [in] */ Boolean* res)
+    /* [in] */ IRect* insets,
+    /* [in] */ Boolean* res)
 {
     if ((mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS) {
         mUserPaddingStart = UNDEFINED_PADDING;
@@ -13417,23 +13421,23 @@ ECode View::PrintFlags(
     }
 
     switch (flags & VISIBILITY_MASK) {
-    case IView::INVISIBLE:
-        if (numFlags > 0) {
-            sb += " ";
+        case IView::INVISIBLE:
+            if (numFlags > 0) {
+                sb += " ";
+            }
+            sb += "INVISIBLE";
+            // USELESS HERE numFlags++;
+            break;
+        case IView::GONE:
+            if (numFlags > 0) {
+                sb += " ";
+            }
+            sb += "GONE";
+            // USELESS HERE numFlags++;
+            break;
+        default:
+            break;
         }
-        sb += "INVISIBLE";
-        // USELESS HERE numFlags++;
-        break;
-    case IView::GONE:
-        if (numFlags > 0) {
-            sb += " ";
-        }
-        sb += "GONE";
-        // USELESS HERE numFlags++;
-        break;
-    default:
-        break;
-    }
     *output = sb.ToString();
     return NOERROR;
 }
@@ -13543,7 +13547,8 @@ Boolean View::SetOpticalFrame(
     AutoPtr<IInsets> parentInsets;
     if (IView::Probe(mParent)) {
         (IView::Probe(mParent))->GetOpticalInsets((IInsets**)&parentInsets);
-    } else {
+    }
+    else {
         parentInsets = Insets::NONE;
     }
     AutoPtr<IInsets> childInsets;
@@ -14465,7 +14470,8 @@ ECode View::GetBackgroundTintMode(
     VALIDATE_NOT_NULL(res)
     if (mBackgroundTint) {
         *res = mBackgroundTint->mTintMode;
-    } else {
+    }
+    else {
         *res = PorterDuffMode_NONE;
     }
     return NOERROR;
@@ -15208,9 +15214,9 @@ AutoPtr<IView> View::FindViewTraversal(
     /* [in] */ Int32 id)
 {
     if (id == mID) {
-        return AutoPtr<IView>(this);
+        return this;
     }
-    return AutoPtr<IView>(NULL);
+    return NULL;
 }
 
 /**
@@ -15221,10 +15227,11 @@ AutoPtr<IView> View::FindViewTraversal(
 AutoPtr<IView> View::FindViewWithTagTraversal(
     /* [in] */ IInterface* tag)
 {
+    AutoPtr<IView> view;
     if (tag != NULL && tag == mTag.Get()) {
-        return AutoPtr<IView>(this);
+        view = this;
     }
-    return AutoPtr<IView>(NULL);
+    return view;
 }
 
 /**
@@ -15263,7 +15270,8 @@ ECode View::FindViewById(
         *res = NULL;
         return NOERROR;
     }
-    *res = FindViewTraversal(id);
+    AutoPtr<IView> view = FindViewTraversal(id);
+    *res = view;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }
@@ -15311,7 +15319,8 @@ ECode View::FindViewWithTag(
         *res = NULL;
         return NOERROR;
     }
-    *res = FindViewWithTagTraversal(tag);
+    AutoPtr<IView> view = FindViewWithTagTraversal(tag);
+    *res = view;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }
@@ -15321,7 +15330,8 @@ ECode View::FindViewByPredicate(
     /* [out] */ IView** res)
 {
     VALIDATE_NOT_NULL(res)
-    *res = FindViewByPredicateTraversal(predicate, NULL);
+    AutoPtr<IView> view = FindViewByPredicateTraversal(predicate, NULL);
+    *res = view;
     REFCOUNT_ADD(*res)
     return NOERROR;
 }
@@ -15854,7 +15864,8 @@ ECode View::Measure(
         if (it == mMeasureCache.End() || sIgnoreMeasureCache) {
             OnMeasure(widthMeasureSpec, heightMeasureSpec);
             mPrivateFlags3 &= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
-        } else {
+        }
+        else {
             Int64 value = it->mSecond;
             // Casting a long to int drops the high 32 bits, no mask needed
             SetMeasuredDimensionRaw((Int32) (value >> 32), (Int32) value);
@@ -15933,7 +15944,7 @@ void View::OnMeasure(
     /* [in] */ Int32 heightMeasureSpec)
 {
     SetMeasuredDimension(GetDefaultSize(GetSuggestedMinimumWidth(), widthMeasureSpec),
-        GetDefaultSize(GetSuggestedMinimumHeight(), heightMeasureSpec));
+            GetDefaultSize(GetSuggestedMinimumHeight(), heightMeasureSpec));
 }
 
 /**
@@ -16030,20 +16041,20 @@ Int32 View::ResolveSizeAndState(
     Int32 specMode = MeasureSpec::GetMode(measureSpec);
     Int32 specSize =  MeasureSpec::GetSize(measureSpec);
     switch (specMode) {
-    case MeasureSpec::UNSPECIFIED:
-        result = size;
-        break;
-    case MeasureSpec::AT_MOST:
-        if (specSize < size) {
-            result = specSize | IView::MEASURED_STATE_TOO_SMALL;
-        }
-        else {
+        case MeasureSpec::UNSPECIFIED:
             result = size;
-        }
-        break;
-    case MeasureSpec::EXACTLY:
-        result = specSize;
-        break;
+            break;
+        case MeasureSpec::AT_MOST:
+            if (specSize < size) {
+                result = specSize | IView::MEASURED_STATE_TOO_SMALL;
+            }
+            else {
+                result = size;
+            }
+            break;
+        case MeasureSpec::EXACTLY:
+            result = specSize;
+            break;
     }
     return result | (childMeasuredState & IView::MEASURED_STATE_MASK);
 }
@@ -16066,13 +16077,13 @@ Int32 View::GetDefaultSize(
     Int32 specSize =  MeasureSpec::GetSize(measureSpec);
 
     switch (specMode) {
-    case MeasureSpec::UNSPECIFIED:
-        result = size;
-        break;
-    case MeasureSpec::AT_MOST:
-    case MeasureSpec::EXACTLY:
-        result = specSize;
-        break;
+        case MeasureSpec::UNSPECIFIED:
+            result = size;
+            break;
+        case MeasureSpec::AT_MOST:
+        case MeasureSpec::EXACTLY:
+            result = specSize;
+            break;
     }
 
     return result;
@@ -16170,6 +16181,7 @@ ECode View::GetAnimation(
 {
     VALIDATE_NOT_NULL(res)
     *res = mCurrentAnimation;
+    REFCOUNT_ADD(*res)
     return NOERROR;
 }
 
@@ -16723,6 +16735,7 @@ ECode View::Inflate(
     /* [in] */ IViewGroup* root,
     /* [out] */ IView** view)
 {
+    VALIDATE_NOT_NULL(view)
     AutoPtr<ILayoutInflater> factory;
     FAIL_RETURN(LayoutInflater::From(context, (ILayoutInflater**)&factory));
     return factory->Inflate(resource, root, view);
@@ -17271,6 +17284,7 @@ ECode View::GetVerticalScrollFactor(
 ECode View::GetHorizontalScrollFactor(
     /* [out] */ Float* scroll)
 {
+    VALIDATE_NOT_NULL(scroll)
     // TODO: Should use something else.
     return GetVerticalScrollFactor(scroll);
 }

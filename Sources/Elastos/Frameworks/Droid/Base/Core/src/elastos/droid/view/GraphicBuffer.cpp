@@ -232,10 +232,12 @@ ECode GraphicBuffer::LockCanvas(
     if (nLockCanvas(mNativeObject, mCanvas, dirty)) {
         mCanvas->Save(&mSaveCount);
         *canvas = mCanvas;
+        REFCOUNT_ADD(*canvas);
         return NOERROR;
     }
 
     *canvas = mCanvas;
+    REFCOUNT_ADD(*canvas);
     return NOERROR;
 }
 

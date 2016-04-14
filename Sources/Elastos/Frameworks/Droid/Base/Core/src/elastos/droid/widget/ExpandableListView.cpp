@@ -641,6 +641,7 @@ ECode ExpandableListView::GetExpandableListAdapter(
 {
     VALIDATE_NOT_NULL(adapter);
     *adapter = mAdapter;
+    REFCOUNT_ADD(*adapter)
     return NOERROR;
 }
 

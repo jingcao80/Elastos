@@ -563,7 +563,7 @@ ECode AdapterView::GetSelectedItem(
         Int32 count;
         adapter->GetCount(&count);
         if (count > 0 && selection >= 0) {
-            adapter->GetItem(selection, result);
+            return adapter->GetItem(selection, result);
         }
     }
 
@@ -849,7 +849,7 @@ ECode AdapterView::GetItemAtPosition(
     AutoPtr<IAdapter> adapter;
     GetAdapter((IAdapter**)&adapter);
     if (adapter == NULL || position < 0) {
-        *result = AutoPtr<IInterface>(NULL);
+        *result = NULL;
     }
     else {
         adapter->GetItem(position, result);
@@ -878,6 +878,7 @@ ECode AdapterView::GetItemIdAtPosition(
 ECode AdapterView::GetAdapter(
     /* [out] */ IAdapter** adapter)
 {
+    VALIDATE_NOT_NULL(adapter)
     // abstract function, nothing to do here
     return NOERROR;
 }

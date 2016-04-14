@@ -2,8 +2,11 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/os/ServiceManager.h"
+#include "elastos/droid/text/CNoCopySpanConcrete.h"
 #include "elastos/droid/text/method/MetaKeyKeyListener.h"
 
+using Elastos::Droid::Text::CNoCopySpanConcrete;
+using Elastos::Droid::Text::INoCopySpan;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::View::IKeyCharacterMap;
@@ -13,9 +16,6 @@ namespace Droid {
 namespace Text {
 namespace Method {
 
-// These bits are privately used by the meta key key listener.
-// They are deliberately assigned values outside of the representable range of an 'Int32'
-// so as not to conflict with any meta key states publicly defined by KeyEvent.
 const Int64 MetaKeyKeyListener::META_CAP_USED = 1LL << 32;
 const Int64 MetaKeyKeyListener::META_ALT_USED = 1LL << 33;
 const Int64 MetaKeyKeyListener::META_SYM_USED = 1LL << 34;
@@ -32,31 +32,24 @@ const Int64 MetaKeyKeyListener::META_SHIFT_MASK = IMetaKeyKeyListener::META_SHIF
 const Int64 MetaKeyKeyListener::META_ALT_MASK = IMetaKeyKeyListener::META_ALT_ON | IMetaKeyKeyListener::META_ALT_LOCKED | META_ALT_USED | META_ALT_PRESSED | META_ALT_RELEASED;
 const Int64 MetaKeyKeyListener::META_SYM_MASK = IMetaKeyKeyListener::META_SYM_ON | IMetaKeyKeyListener::META_SYM_LOCKED | META_SYM_USED | META_SYM_PRESSED | META_SYM_RELEASED;
 
-const AutoPtr<IInterface> MetaKeyKeyListener::CAP /*= MetaKeyKeyListener::NewNoCopySpan()*/;// = new NoCopySpan.Concrete();
-const AutoPtr<IInterface> MetaKeyKeyListener::ALT /*= MetaKeyKeyListener::NewNoCopySpan()*/;// = new NoCopySpan.Concrete();
-const AutoPtr<IInterface> MetaKeyKeyListener::SYM /*= MetaKeyKeyListener::NewNoCopySpan()*/;// = new NoCopySpan.Concrete();
-const AutoPtr<IInterface> MetaKeyKeyListener::SELECTING /*= MetaKeyKeyListener::NewNoCopySpan()*/;// = new NoCopySpan.Concrete();
+static AutoPtr<IInterface> InitNoCopySpanConcrete()
+{
+    AutoPtr<INoCopySpan> ncs;
+    CNoCopySpanConcrete::New((INoCopySpan**)&ncs);
+    return (IInterface*)ncs.Get();
+}
 
-/**
- * The meta key has been pressed but has not yet been used.
- */
+const AutoPtr<IInterface> MetaKeyKeyListener::CAP = InitNoCopySpanConcrete();
+const AutoPtr<IInterface> MetaKeyKeyListener::ALT = InitNoCopySpanConcrete();
+const AutoPtr<IInterface> MetaKeyKeyListener::SYM = InitNoCopySpanConcrete();
+const AutoPtr<IInterface> MetaKeyKeyListener::SELECTING = InitNoCopySpanConcrete();
+
 const Int32 MetaKeyKeyListener::PRESSED = ISpanned::SPAN_MARK_MARK | (1 << ISpanned::SPAN_USER_SHIFT);
 
-/**
- * The meta key has been pressed and released but has still
- * not yet been used.
- */
 const Int32 MetaKeyKeyListener::RELEASED = ISpanned::SPAN_MARK_MARK | (2 << ISpanned::SPAN_USER_SHIFT);
 
-/**
- * The meta key has been pressed and used but has not yet been released.
- */
 const Int32 MetaKeyKeyListener::USED = ISpanned::SPAN_MARK_MARK | (3 << ISpanned::SPAN_USER_SHIFT);
 
-/**
- * The meta key has been pressed and released without use, and then
- * pressed again; it may also have been released again.
- */
 const Int32 MetaKeyKeyListener::LOCKED = ISpanned::SPAN_MARK_MARK | (4 << ISpanned::SPAN_USER_SHIFT);
 
 const Int32 MetaKeyKeyListener::PRESSED_RETURN_VALUE = 1;
@@ -65,17 +58,6 @@ const Int32 MetaKeyKeyListener::LOCKED_RETURN_VALUE = 2;
 
 CAR_INTERFACE_IMPL(MetaKeyKeyListener, Object, IMetaKeyKeyListener)
 
-// AutoPtr<IInterface> MetaKeyKeyListener::NewNoCopySpan()
-// {
-// #ifdef DROID_CORE
-//     AutoPtr<CNoCopySpan> noCopySpan;
-//     CNoCopySpan::NewByFriend((CNoCopySpan**)&noCopySpan);
-// #else
-//     AutoPtr<INoCopySpan> noCopySpan;
-//     CNoCopySpan::New((INoCopySpan**)&noCopySpan);
-// #endif
-//     return noCopySpan->Probe(EIID_IInterface);
-// }
 MetaKeyKeyListener::MetaKeyKeyListener()
 {}
 
@@ -123,24 +105,7 @@ ECode MetaKeyKeyListener::AdjustMetaAfterKeypress(
     Adjust(content, CAP);
     Adjust(content, ALT);
     Adjust(content, SYM);
-    // try {
-        AutoPtr<IInterface> interfaceTmp = ServiceManager::GetService(String("power"));
-        // IPowerManager* power = IPowerManager::Probe(interfaceTmp);
-        Int32 metaStateTmp = 0;
-        GetMetaState(ICharSequence::Probe(content), META_SHIFT_ON, &metaStateTmp);
-        if (metaStateTmp <= 0) {
-            // TODO: power->SetKeyboardLight(FALSE, 1);
-            assert(0);
-        }
 
-        GetMetaState(ICharSequence::Probe(content), META_ALT_ON, &metaStateTmp);
-        if (metaStateTmp <= 0) {
-            // TODO: power->SetKeyboardLight(FALSE, 2);
-            assert(0);
-        }
-    // }
-    // catch (RemoteException doe)  {
-    // }
     return NOERROR;
 }
 
@@ -209,23 +174,6 @@ ECode MetaKeyKeyListener::OnKeyDown(
     VALIDATE_NOT_NULL(ret);
     if (keyCode == IKeyEvent::KEYCODE_SHIFT_LEFT || keyCode == IKeyEvent::KEYCODE_SHIFT_RIGHT) {
         Press(content, CAP);
-        //try {
-            AutoPtr<IInterface> interfaceTmp = ServiceManager::GetService(String("power"));
-            // IPowerManager* power = IPowerManager::Probe(interfaceTmp);
-
-            Int32 state = 0;
-            ISpanned::Probe(content)->GetSpanFlags(CAP, &state);
-            if (state == PRESSED || state == LOCKED) {
-                // TODO: power->SetKeyboardLight(true, 1);
-                assert(0);
-            }
-            else {
-                // TODO: power->SetKeyboardLight(false, 1);
-                assert(0);
-            }
-        // }
-        // catch (RemoteException doe) {
-        // }
         *ret = TRUE;
         return NOERROR;
     }
@@ -233,23 +181,6 @@ ECode MetaKeyKeyListener::OnKeyDown(
     if (keyCode == IKeyEvent::KEYCODE_ALT_LEFT || keyCode == IKeyEvent::KEYCODE_ALT_RIGHT
             || keyCode == IKeyEvent::KEYCODE_NUM) {
         Press(content, ALT);
-        // try {
-            AutoPtr<IInterface> interfaceTmp = ServiceManager::GetService(String("power"));
-            // IPowerManager* power = IPowerManager::Probe(interfaceTmp);
-
-            Int32 state = 0;
-            ISpanned::Probe(content)->GetSpanFlags(ALT, &state);
-            if (state == PRESSED || state == LOCKED) {
-                // TODO: power->SetKeyboardLight(TRUE, 2);
-                assert(0);
-            }
-            else {
-                // TODO: power->SetKeyboardLight(FALSE, 2);
-                assert(0);
-            }
-        // }
-        // catch (RemoteException doe) {
-        // }
         *ret = TRUE;
         return NOERROR;
     }
@@ -313,18 +244,21 @@ ECode MetaKeyKeyListener::OnKeyUp(
     if (keyCode == IKeyEvent::KEYCODE_SHIFT_LEFT || keyCode == IKeyEvent::KEYCODE_SHIFT_RIGHT) {
         ReleaseInternal(content, CAP, event);
         *ret = TRUE;
-        return NOERROR;    }
+        return NOERROR;
+    }
 
     if (keyCode == IKeyEvent::KEYCODE_ALT_LEFT || keyCode == IKeyEvent::KEYCODE_ALT_RIGHT
             || keyCode == IKeyEvent::KEYCODE_NUM) {
         ReleaseInternal(content, ALT, event);
         *ret = TRUE;
-        return NOERROR;    }
+        return NOERROR;
+    }
 
     if (keyCode == IKeyEvent::KEYCODE_SYM) {
         ReleaseInternal(content, SYM, event);
         *ret = TRUE;
-        return NOERROR;    }
+        return NOERROR;
+    }
 
     *ret = FALSE; // no super to call through to
     return NOERROR;
@@ -346,18 +280,18 @@ void MetaKeyKeyListener::ReleaseInternal(
     kcm->GetModifierBehavior(&modifierBehavior);
 
     switch (modifierBehavior) {
-    case IKeyCharacterMap::MODIFIER_BEHAVIOR_CHORDED_OR_TOGGLED: {
-        if (current == USED) {
+        case IKeyCharacterMap::MODIFIER_BEHAVIOR_CHORDED_OR_TOGGLED: {
+            if (current == USED) {
+                ISpannable::Probe(content)->RemoveSpan(what);
+            }
+            else if (current == PRESSED) {
+                ISpannable::Probe(content)->SetSpan(what, 0, 0, RELEASED);
+            }
+            break;
+        }
+        default:
             ISpannable::Probe(content)->RemoveSpan(what);
-        }
-        else if (current == PRESSED) {
-            ISpannable::Probe(content)->SetSpan(what, 0, 0, RELEASED);
-        }
-        break;
-    }
-    default:
-        ISpannable::Probe(content)->RemoveSpan(what);
-        break;
+            break;
     }
 }
 
@@ -447,20 +381,38 @@ ECode MetaKeyKeyListener::GetMetaState(
     VALIDATE_NOT_NULL(ret)
     switch (meta) {
         case IMetaKeyKeyListener::META_SHIFT_ON:
-            if ((state & IMetaKeyKeyListener::META_CAP_LOCKED) != 0) return MetaKeyKeyListener::LOCKED_RETURN_VALUE;
-            if ((state & IMetaKeyKeyListener::META_SHIFT_ON) != 0) return MetaKeyKeyListener::PRESSED_RETURN_VALUE;
+            if ((state & IMetaKeyKeyListener::META_CAP_LOCKED) != 0) {
+                *ret = MetaKeyKeyListener::LOCKED_RETURN_VALUE;
+                return NOERROR;
+            }
+            if ((state & IMetaKeyKeyListener::META_SHIFT_ON) != 0) {
+                *ret = MetaKeyKeyListener::PRESSED_RETURN_VALUE;
+                return NOERROR;
+            }
             *ret = 0;
             return NOERROR;
 
         case IMetaKeyKeyListener::META_ALT_ON:
-            if ((state & IMetaKeyKeyListener::META_ALT_LOCKED) != 0) return MetaKeyKeyListener::LOCKED_RETURN_VALUE;
-            if ((state & IMetaKeyKeyListener::META_ALT_ON) != 0) return MetaKeyKeyListener::PRESSED_RETURN_VALUE;
+            if ((state & IMetaKeyKeyListener::META_ALT_LOCKED) != 0) {
+                *ret = MetaKeyKeyListener::LOCKED_RETURN_VALUE;
+                return NOERROR;
+            }
+            if ((state & IMetaKeyKeyListener::META_ALT_ON) != 0) {
+                *ret = MetaKeyKeyListener::PRESSED_RETURN_VALUE;
+                return NOERROR;
+            }
             *ret = 0;
             return NOERROR;
 
         case IMetaKeyKeyListener::META_SYM_ON:
-            if ((state & IMetaKeyKeyListener::META_SYM_LOCKED) != 0) return MetaKeyKeyListener::LOCKED_RETURN_VALUE;
-            if ((state & IMetaKeyKeyListener::META_SYM_ON) != 0) return MetaKeyKeyListener::PRESSED_RETURN_VALUE;
+            if ((state & IMetaKeyKeyListener::META_SYM_LOCKED) != 0) {
+                *ret = MetaKeyKeyListener::LOCKED_RETURN_VALUE;
+                return NOERROR;
+            }
+            if ((state & IMetaKeyKeyListener::META_SYM_ON) != 0) {
+                *ret = MetaKeyKeyListener::PRESSED_RETURN_VALUE;
+                return NOERROR;
+            }
             *ret = 0;
             return NOERROR;
 
@@ -484,19 +436,19 @@ ECode MetaKeyKeyListener::GetMetaState(
     Int32 behavior;
     keyCharacterMap->GetModifierBehavior(&behavior);
     if (behavior == IKeyCharacterMap::MODIFIER_BEHAVIOR_CHORDED_OR_TOGGLED) {
-            Int32 tmpOut;
-            GetMetaState(text, &tmpOut);
-            metaState |= tmpOut;
+        Int32 tmpOut;
+        GetMetaState(text, &tmpOut);
+        metaState |= tmpOut;
     }
     *ret = metaState;
     return NOERROR;
 }
 
 ECode MetaKeyKeyListener::GetMetaState(
-       /* [in] */ ICharSequence* text,
-       /* [in] */ Int32 meta,
-       /* [in] */ IKeyEvent* event,
-       /* [out] */ Int32* ret)
+    /* [in] */ ICharSequence* text,
+    /* [in] */ Int32 meta,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Int32* ret)
 {
     VALIDATE_NOT_NULL(ret);
     Int32 metaState;
@@ -530,9 +482,9 @@ ECode MetaKeyKeyListener::GetMetaState(
 {
     VALIDATE_NOT_NULL(ret)
     *ret = GetActive(text, CAP, IMetaKeyKeyListener::META_SHIFT_ON, IMetaKeyKeyListener::META_CAP_LOCKED) |
-           GetActive(text, ALT, IMetaKeyKeyListener::META_ALT_ON, IMetaKeyKeyListener::META_ALT_LOCKED) |
-           GetActive(text, SYM, IMetaKeyKeyListener::META_SYM_ON, IMetaKeyKeyListener::META_SYM_LOCKED) |
-           GetActive(text, SELECTING, IMetaKeyKeyListener::META_SELECTING, IMetaKeyKeyListener::META_SELECTING);
+            GetActive(text, ALT, IMetaKeyKeyListener::META_ALT_ON, IMetaKeyKeyListener::META_ALT_LOCKED) |
+            GetActive(text, SYM, IMetaKeyKeyListener::META_SYM_ON, IMetaKeyKeyListener::META_SYM_LOCKED) |
+            GetActive(text, SELECTING, IMetaKeyKeyListener::META_SELECTING, IMetaKeyKeyListener::META_SELECTING);
     return NOERROR;
 }
 
@@ -544,19 +496,24 @@ ECode MetaKeyKeyListener::GetMetaState(
     VALIDATE_NOT_NULL(ret)
     switch (meta) {
         case IMetaKeyKeyListener::META_SHIFT_ON:
-            *ret =  GetActive(text, CAP, MetaKeyKeyListener::PRESSED_RETURN_VALUE, MetaKeyKeyListener::LOCKED_RETURN_VALUE);
+            *ret = GetActive(text, CAP, MetaKeyKeyListener::PRESSED_RETURN_VALUE,
+                    MetaKeyKeyListener::LOCKED_RETURN_VALUE);
             return NOERROR;
         case IMetaKeyKeyListener::META_ALT_ON:
-            *ret =  GetActive(text, ALT, MetaKeyKeyListener::PRESSED_RETURN_VALUE, MetaKeyKeyListener::LOCKED_RETURN_VALUE);
+            *ret = GetActive(text, ALT, MetaKeyKeyListener::PRESSED_RETURN_VALUE,
+                    MetaKeyKeyListener::LOCKED_RETURN_VALUE);
             return NOERROR;
         case IMetaKeyKeyListener::META_SYM_ON:
-            *ret =  GetActive(text, SYM, MetaKeyKeyListener::PRESSED_RETURN_VALUE, MetaKeyKeyListener::LOCKED_RETURN_VALUE);
+            *ret = GetActive(text, SYM, MetaKeyKeyListener::PRESSED_RETURN_VALUE,
+                    MetaKeyKeyListener::LOCKED_RETURN_VALUE);
             return NOERROR;
         case IMetaKeyKeyListener::META_SELECTING:
-            *ret =  GetActive(text, SELECTING, MetaKeyKeyListener::PRESSED_RETURN_VALUE, MetaKeyKeyListener::LOCKED_RETURN_VALUE);
+            *ret = GetActive(text, SELECTING,
+                    MetaKeyKeyListener::PRESSED_RETURN_VALUE,
+                    MetaKeyKeyListener::LOCKED_RETURN_VALUE);
             return NOERROR;
         default:
-            *ret =  0;
+            *ret = 0;
             return NOERROR;
         }
 }
@@ -575,7 +532,8 @@ ECode MetaKeyKeyListener::AdjustMetaAfterKeypress(
 
     if ((state & META_ALT_PRESSED) != 0) {
         state = (state & ~META_ALT_MASK) | META_ALT_ON | META_ALT_USED;
-    } else if ((state & META_ALT_RELEASED) != 0) {
+    }
+    else if ((state & META_ALT_RELEASED) != 0) {
         state &= ~META_ALT_MASK;
     }
 
@@ -596,22 +554,27 @@ ECode MetaKeyKeyListener::HandleKeyDown(
     /* [out] */ Int64* ret)
 {
     VALIDATE_NOT_NULL(ret);
-    if (keyCode == IKeyEvent::KEYCODE_SHIFT_LEFT || keyCode == IKeyEvent::KEYCODE_SHIFT_RIGHT) {
+    if (keyCode == IKeyEvent::KEYCODE_SHIFT_LEFT ||
+            keyCode == IKeyEvent::KEYCODE_SHIFT_RIGHT) {
         *ret = Press(state, IMetaKeyKeyListener::META_SHIFT_ON, META_SHIFT_MASK,
-                IMetaKeyKeyListener::META_CAP_LOCKED, META_CAP_PRESSED, META_CAP_RELEASED, META_CAP_USED);
+                IMetaKeyKeyListener::META_CAP_LOCKED, META_CAP_PRESSED,
+                META_CAP_RELEASED, META_CAP_USED);
         return NOERROR;
     }
 
-    if (keyCode == IKeyEvent::KEYCODE_ALT_LEFT || keyCode == IKeyEvent::KEYCODE_ALT_RIGHT
+    if (keyCode == IKeyEvent::KEYCODE_ALT_LEFT ||
+            keyCode == IKeyEvent::KEYCODE_ALT_RIGHT
             || keyCode == IKeyEvent::KEYCODE_NUM) {
         *ret = Press(state, IMetaKeyKeyListener::META_ALT_ON, META_ALT_MASK,
-                IMetaKeyKeyListener::META_ALT_LOCKED, META_ALT_PRESSED, META_ALT_RELEASED, META_ALT_USED);
+                IMetaKeyKeyListener::META_ALT_LOCKED, META_ALT_PRESSED,
+                META_ALT_RELEASED, META_ALT_USED);
         return NOERROR;
     }
 
     if (keyCode == IKeyEvent::KEYCODE_SYM) {
         *ret = Press(state, IMetaKeyKeyListener::META_SYM_ON, META_SYM_MASK,
-                IMetaKeyKeyListener::META_SYM_LOCKED, META_SYM_PRESSED, META_SYM_RELEASED, META_SYM_USED);
+                IMetaKeyKeyListener::META_SYM_LOCKED, META_SYM_PRESSED,
+                META_SYM_RELEASED, META_SYM_USED);
         return NOERROR;
     }
     *ret = state;
@@ -674,7 +637,6 @@ ECode MetaKeyKeyListener::HandleKeyUp(
     return NOERROR;
 }
 
-
 Int64 MetaKeyKeyListener::ReleaseInternal(
     /* [in] */ Int64 state,
     /* [in] */ Int32 what,
@@ -711,19 +673,21 @@ ECode MetaKeyKeyListener::ClearMetaKeyState(
     /* [out] */ Int64* ret)
 {
     VALIDATE_NOT_NULL(ret);
-    if ((which & IMetaKeyKeyListener::META_SHIFT_ON) != 0 && (state & IMetaKeyKeyListener::META_CAP_LOCKED) != 0) {
+    if ((which & IMetaKeyKeyListener::META_SHIFT_ON) != 0 &&
+            (state & IMetaKeyKeyListener::META_CAP_LOCKED) != 0) {
         state &= ~META_SHIFT_MASK;
     }
-    if ((which & IMetaKeyKeyListener::META_ALT_ON) != 0 && (state & IMetaKeyKeyListener::META_ALT_LOCKED) != 0) {
+    if ((which & IMetaKeyKeyListener::META_ALT_ON) != 0 &&
+            (state & IMetaKeyKeyListener::META_ALT_LOCKED) != 0) {
         state &= ~META_ALT_MASK;
     }
-    if ((which & IMetaKeyKeyListener::META_SYM_ON) != 0 && (state & IMetaKeyKeyListener::META_SYM_LOCKED) != 0) {
+    if ((which & IMetaKeyKeyListener::META_SYM_ON) != 0 &&
+            (state & IMetaKeyKeyListener::META_SYM_LOCKED) != 0) {
         state &= ~META_SYM_MASK;
     }
     *ret = state;
     return NOERROR;
 }
-
 
 } // namespace Method
 } // namespace Text

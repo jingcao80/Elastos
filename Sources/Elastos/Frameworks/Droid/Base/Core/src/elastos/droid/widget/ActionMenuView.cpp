@@ -107,6 +107,7 @@ ECode ActionMenuView::LayoutParams::SetIsOverflowButton(
 ECode ActionMenuView::LayoutParams::GetIsOverflowButton(
     /* [out] */ Boolean* isOverflow)
 {
+    VALIDATE_NOT_NULL(isOverflow)
     *isOverflow = mIsOverflowButton;
     return NOERROR;
 }
@@ -121,6 +122,7 @@ ECode ActionMenuView::LayoutParams::SetCellsUsed(
 ECode ActionMenuView::LayoutParams::GetCellsUsed(
     /* [out] */ Int32* cellsUsed)
 {
+    VALIDATE_NOT_NULL(cellsUsed)
     *cellsUsed = mCellsUsed;
     return NOERROR;
 }
@@ -135,6 +137,7 @@ ECode ActionMenuView::LayoutParams::SetExtraPixels(
 ECode ActionMenuView::LayoutParams::GetExtraPixels(
     /* [out] */ Int32* extraPixels)
 {
+    VALIDATE_NOT_NULL(extraPixels)
     *extraPixels = mExtraPixels;
     return NOERROR;
 }
@@ -149,6 +152,7 @@ ECode ActionMenuView::LayoutParams::SetExpandable(
 ECode ActionMenuView::LayoutParams::GetExpandable(
     /* [out] */ Boolean* expandable)
 {
+    VALIDATE_NOT_NULL(expandable)
     *expandable = mExpandable;
     return NOERROR;
 }
@@ -163,6 +167,7 @@ ECode ActionMenuView::LayoutParams::SetPreventEdgeOffset(
 ECode ActionMenuView::LayoutParams::GetPreventEdgeOffset(
     /* [out] */ Boolean* preventEdgeOffset)
 {
+    VALIDATE_NOT_NULL(preventEdgeOffset)
     *preventEdgeOffset = mPreventEdgeOffset;
     return NOERROR;
 }
@@ -177,6 +182,7 @@ ECode ActionMenuView::LayoutParams::SetExpanded(
 ECode ActionMenuView::LayoutParams::GetExpanded(
     /* [out] */ Boolean* expanded)
 {
+    VALIDATE_NOT_NULL(expanded)
     *expanded = mExpanded;
     return NOERROR;
 }
@@ -193,6 +199,7 @@ ECode ActionMenuView::MenuBuilderCallback::OnMenuItemSelected(
     /* [in] */ IMenuItem* item,
     /* [out] */ Boolean* state)
 {
+    VALIDATE_NOT_NULL(state)
     return mHost->mOnMenuItemClickListener != NULL &&
             mHost->mOnMenuItemClickListener->OnMenuItemClick(item, state);
 }
@@ -224,6 +231,7 @@ ECode ActionMenuView::ActionMenuPresenterCallback::OnOpenSubMenu(
     /* [in] */ IMenuBuilder* subMenu,
     /* [out] */ Boolean* handle)
 {
+    VALIDATE_NOT_NULL(handle)
     *handle = FALSE;
     return NOERROR;
 }
@@ -278,6 +286,7 @@ ECode ActionMenuView::SetPopupTheme(
 ECode ActionMenuView::GetPopupTheme(
     /* [out] */ Int32* theme)
 {
+    VALIDATE_NOT_NULL(theme)
     *theme = mPopupTheme;
     return NOERROR;
 }
@@ -926,10 +935,10 @@ AutoPtr<IViewGroupLayoutParams> ActionMenuView::GenerateLayoutParams(
 {
     if (p != NULL) {
         AutoPtr<IActionMenuViewLayoutParams> result;
-        if(IActionMenuViewLayoutParams::Probe(p) != NULL)
-        {
+        if(IActionMenuViewLayoutParams::Probe(p) != NULL) {
             CActionMenuViewLayoutParams::New(IActionMenuViewLayoutParams::Probe(p), (IActionMenuViewLayoutParams**)&result);
-        } else {
+        }
+        else {
             CActionMenuViewLayoutParams::New(p, (IActionMenuViewLayoutParams**)&result);
         }
 
@@ -958,6 +967,7 @@ Boolean ActionMenuView::CheckLayoutParams(
 ECode ActionMenuView::GenerateOverflowButtonLayoutParams(
     /* [out] */ IActionMenuViewLayoutParams** amlp)
 {
+    VALIDATE_NOT_NULL(amlp)
     AutoPtr<IViewGroupLayoutParams> lp;
     GenerateDefaultLayoutParams((IViewGroupLayoutParams**)&lp);
     *amlp = IActionMenuViewLayoutParams::Probe(lp);
@@ -969,6 +979,7 @@ ECode ActionMenuView::InvokeItem(
     /* [in] */ IMenuItemImpl* item,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     return mMenu->PerformItemAction(IMenuItem::Probe(item), 0, result);
 }
 
@@ -991,6 +1002,7 @@ ECode ActionMenuView::Initialize(
 ECode ActionMenuView::GetMenu(
     /* [out] */ IMenu** menu)
 {
+    VALIDATE_NOT_NULL(menu)
     if (mMenu == NULL) {
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
@@ -1035,7 +1047,9 @@ ECode ActionMenuView::SetMenuCallbacks(
 ECode ActionMenuView::PeekMenu(
     /* [out] */ IMenuBuilder** build)
 {
+    VALIDATE_NOT_NULL(build)
     *build = mMenu;
+    REFCOUNT_ADD(*build)
     return NOERROR;
 }
 
@@ -1047,6 +1061,7 @@ ECode ActionMenuView::PeekMenu(
 ECode ActionMenuView::ShowOverflowMenu(
     /* [out] */ Boolean* showOverflowMenu)
 {
+    VALIDATE_NOT_NULL(showOverflowMenu)
     *showOverflowMenu = FALSE;
     AutoPtr<IActionMenuPresenter> presenter = GetPresenter();
     if (presenter != NULL) {
@@ -1063,6 +1078,7 @@ ECode ActionMenuView::ShowOverflowMenu(
 ECode ActionMenuView::HideOverflowMenu(
     /* [out] */ Boolean* hideOverflowMenu)
 {
+    VALIDATE_NOT_NULL(hideOverflowMenu)
     *hideOverflowMenu = FALSE;
     AutoPtr<IActionMenuPresenter> presenter = GetPresenter();
     if (presenter != NULL) {
@@ -1080,6 +1096,7 @@ ECode ActionMenuView::HideOverflowMenu(
 ECode ActionMenuView::IsOverflowMenuShowing(
     /* [out] */ Boolean* isOverflowMenuShowing)
 {
+    VALIDATE_NOT_NULL(isOverflowMenuShowing)
     *isOverflowMenuShowing = FALSE;
     AutoPtr<IActionMenuPresenter> presenter = GetPresenter();
     if (presenter != NULL) {
@@ -1092,6 +1109,7 @@ ECode ActionMenuView::IsOverflowMenuShowing(
 ECode ActionMenuView::IsOverflowMenuShowPending(
     /* [out] */ Boolean* isOverflowMenuShowPending)
 {
+    VALIDATE_NOT_NULL(isOverflowMenuShowPending)
     *isOverflowMenuShowPending = FALSE;
     AutoPtr<IActionMenuPresenter> presenter = GetPresenter();
     if (presenter != NULL) {
@@ -1156,6 +1174,7 @@ ECode ActionMenuView::DispatchPopulateAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = FALSE;
     return NOERROR;
 }

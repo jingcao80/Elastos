@@ -15,9 +15,10 @@ ECode CEmptyAbsSavedState::constructor()
 ECode CEmptyAbsSavedState::GetSuperState(
     /* [out] */ IParcelable** superState)
 {
-    VALIDATE_NOT_NULL(superState);
+    VALIDATE_NOT_NULL(superState)
     AutoPtr<IParcelable> temp = AbsSavedState::GetSuperState();
     *superState = temp;
+    REFCOUNT_ADD(*superState)
     return NOERROR;
 }
 

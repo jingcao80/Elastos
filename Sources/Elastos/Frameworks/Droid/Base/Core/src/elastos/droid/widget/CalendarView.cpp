@@ -482,6 +482,7 @@ ECode CalendarView::LegacyCalendarViewDelegate::GetSelectedDateVerticalBar(
 {
     VALIDATE_NOT_NULL(result)
     *result = mSelectedDateVerticalBar;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -1224,7 +1225,7 @@ ECode CalendarView::LegacyCalendarViewDelegate::WeeksAdapter::GetView(
         // weekView = new WeekView(mContext);
         AutoPtr<AbsListView::LayoutParams> params = new AbsListView::LayoutParams();
         params->constructor(IViewGroupLayoutParams::WRAP_CONTENT,
-                        IViewGroupLayoutParams::WRAP_CONTENT);
+                IViewGroupLayoutParams::WRAP_CONTENT);
         weekView->SetLayoutParams(params);
         weekView->SetClickable(TRUE);
         weekView->SetOnTouchListener(this);
