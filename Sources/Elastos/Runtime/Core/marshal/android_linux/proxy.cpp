@@ -1209,10 +1209,9 @@ ECode CObjectProxy::S_CreateObject(
                 ec));
         goto ErrorExit;
     }
-    proxyObj->AddRef();
 
     *proxy = (IProxy*)proxyObj;
-
+    (*proxy)->AddRef();
     return NOERROR;
 
 ErrorExit:

@@ -764,9 +764,8 @@ ELAPI _CCallbackParcel_New(
     if (!location) return E_OUT_OF_MEMORY;
 
     obj = (Elastos::CCallbackParcel *)new(location) Elastos::CCallbackParcel;
-    obj->AddRef();
 
     *parcel = (IParcel*)obj;
-
+    (*parcel)->AddRef();
     return NOERROR;
 }

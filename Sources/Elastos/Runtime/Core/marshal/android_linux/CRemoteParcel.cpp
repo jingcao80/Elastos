@@ -908,9 +908,8 @@ ELAPI _CParcel_New(
     if (!location) return E_OUT_OF_MEMORY;
 
     Elastos::IPC::CRemoteParcel* parcelObj = new(location) Elastos::IPC::CRemoteParcel(FALSE);
-    parcelObj->AddRef();
 
     *parcel = (IParcel*)parcelObj;
-
+    (*parcel)->AddRef();
     return NOERROR;
 }

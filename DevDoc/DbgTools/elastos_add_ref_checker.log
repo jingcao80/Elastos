@@ -1,0 +1,168 @@
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Packages/Apps/Launcher2/src/elastos/droid/launcher2/LauncherProvider.cpp
+ > error: assignment at line 1358 for IComponentName** name needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Packages/Apps/Settings/src/elastos/droid/settings/SettingsActivity.cpp
+ > error: assignment at line 1712 for IIntent** intent needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/stack/CNotificationStackScrollLayout.cpp
+ > error: assignment at line 952 for IExpandableView** view needs AddRef!
+ > error: assignment at line 1749 for IView** view needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/policy/PreviewInflater.cpp
+ > error: assignment at line 55 for IView** view needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/qs/tiles/CastTile.cpp
+ > error: assignment at line 129 for IView** result needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/keyguard/CKeyguardViewMediator.cpp
+ > error: assignment at line 1636 for IViewMediatorCallback** cb needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/GraphicBuffer.cpp
+ > error: assignment at line 234 for ICanvas** canvas needs AddRef!
+ > error: assignment at line 238 for ICanvas** canvas needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/CViewAnimationUtilsHelper.cpp
+ > error: assignment at line 26 for IAnimator** result needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/CRenderNodeHelper.cpp
+ > error: assignment at line 30 for IRenderNode** node needs AddRef!
+ > error: assignment at line 40 for IRenderNode** node needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/View.cpp
+ > error: assignment at line 2960 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 2966 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 2985 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3034 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3047 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3059 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3079 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3086 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3222 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3278 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3307 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3354 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3393 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3424 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3452 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3480 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3508 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3531 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3556 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3561 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3567 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3573 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3587 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3633 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3636 for IAccessibilityNodeInfo** res needs AddRef!
+ > error: assignment at line 3307 for IView** res needs AddRef!
+ > error: assignment at line 11436 for IBinder** res needs AddRef!
+ > error: assignment at line 11470 for IBinder** res needs AddRef!
+ > error: assignment at line 11552 for IBinder** res needs AddRef!
+ > error: assignment at line 11637 for IBinder** res needs AddRef!
+ > error: assignment at line 11674 for IBinder** res needs AddRef!
+ > error: assignment at line 11914 for IBinder** res needs AddRef!
+ > error: assignment at line 12255 for IBinder** res needs AddRef!
+ > error: assignment at line 12362 for IBinder** res needs AddRef!
+ > error: assignment at line 13396 for IBinder** res needs AddRef!
+ > error: assignment at line 13515 for IBinder** res needs AddRef!
+ > error: assignment at line 14467 for IBinder** res needs AddRef!
+ > error: assignment at line 14469 for IBinder** res needs AddRef!
+ > error: assignment at line 14666 for IBinder** res needs AddRef!
+ > error: assignment at line 14681 for IBinder** res needs AddRef!
+ > error: assignment at line 14703 for IBinder** res needs AddRef!
+ > error: assignment at line 14720 for IBinder** res needs AddRef!
+ > error: assignment at line 14743 for IBinder** res needs AddRef!
+ > error: assignment at line 14760 for IBinder** res needs AddRef!
+ > error: assignment at line 14769 for IBinder** res needs AddRef!
+ > error: assignment at line 14881 for IBinder** res needs AddRef!
+ > error: assignment at line 14909 for IBinder** res needs AddRef!
+ > error: assignment at line 14992 for IBinder** res needs AddRef!
+ > error: assignment at line 15000 for IBinder** res needs AddRef!
+ > error: assignment at line 15019 for IBinder** res needs AddRef!
+ > error: assignment at line 15027 for IBinder** res needs AddRef!
+ > error: assignment at line 15408 for IBinder** res needs AddRef!
+ > error: assignment at line 15426 for IBinder** res needs AddRef!
+ > error: assignment at line 15739 for IBinder** res needs AddRef!
+ > error: assignment at line 16119 for IBinder** res needs AddRef!
+ > error: assignment at line 16142 for IBinder** res needs AddRef!
+ > error: assignment at line 16172 for IBinder** res needs AddRef!
+ > error: assignment at line 16302 for IBinder** res needs AddRef!
+ > error: assignment at line 16370 for IBinder** res needs AddRef!
+ > error: assignment at line 16379 for IBinder** res needs AddRef!
+ > error: assignment at line 16385 for IBinder** res needs AddRef!
+ > error: assignment at line 16409 for IBinder** res needs AddRef!
+ > error: assignment at line 16417 for IBinder** res needs AddRef!
+ > error: assignment at line 16583 for IBinder** res needs AddRef!
+ > error: assignment at line 16592 for IBinder** res needs AddRef!
+ > error: assignment at line 16606 for IBinder** res needs AddRef!
+ > error: assignment at line 11914 for IBitmap** res needs AddRef!
+ > error: assignment at line 12255 for IBitmap** res needs AddRef!
+ > error: assignment at line 12362 for IBitmap** res needs AddRef!
+ > error: assignment at line 13396 for IBitmap** res needs AddRef!
+ > error: assignment at line 13515 for IBitmap** res needs AddRef!
+ > error: assignment at line 14467 for IBitmap** res needs AddRef!
+ > error: assignment at line 14469 for IBitmap** res needs AddRef!
+ > error: assignment at line 14666 for IBitmap** res needs AddRef!
+ > error: assignment at line 14681 for IBitmap** res needs AddRef!
+ > error: assignment at line 14703 for IBitmap** res needs AddRef!
+ > error: assignment at line 14720 for IBitmap** res needs AddRef!
+ > error: assignment at line 14743 for IBitmap** res needs AddRef!
+ > error: assignment at line 14760 for IBitmap** res needs AddRef!
+ > error: assignment at line 14769 for IBitmap** res needs AddRef!
+ > error: assignment at line 14881 for IBitmap** res needs AddRef!
+ > error: assignment at line 14909 for IBitmap** res needs AddRef!
+ > error: assignment at line 14992 for IBitmap** res needs AddRef!
+ > error: assignment at line 15000 for IBitmap** res needs AddRef!
+ > error: assignment at line 15019 for IBitmap** res needs AddRef!
+ > error: assignment at line 15027 for IBitmap** res needs AddRef!
+ > error: assignment at line 14881 for IInsets** res needs AddRef!
+ > error: assignment at line 14909 for IInsets** res needs AddRef!
+ > error: assignment at line 14992 for IInsets** res needs AddRef!
+ > error: assignment at line 15000 for IInsets** res needs AddRef!
+ > error: assignment at line 15019 for IInsets** res needs AddRef!
+ > error: assignment at line 15027 for IInsets** res needs AddRef!
+ > error: assignment at line 16172 for IAnimation** res needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/ThreadedRenderer.cpp
+ > error: assignment at line 467 for IHardwareLayer** layer needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/view/CEmptyAbsSavedState.cpp
+ > error: assignment at line 20 for IParcelable** superState needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget/SlidingDrawer.cpp
+ > error: assignment at line 605 for IView** v needs AddRef!
+ > error: assignment at line 612 for IView** v needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget/AdapterView.cpp
+ > error: assignment at line 852 for IInterface** result needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget/CompoundButton.cpp
+ > error: assignment at line 315 for IColorStateList** tint needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget/ToolBar.cpp
+ > error: assignment at line 840 for ICharSequence** description needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget/ListView.cpp
+ > error: assignment at line 3599 for IDrawable** overScrollHeader needs AddRef!
+ > error: assignment at line 3615 for IDrawable** overScrollFooter needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget/CalendarView.cpp
+ > error: assignment at line 484 for IDrawable** result needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget/ExpandableListView.cpp
+ > error: assignment at line 643 for IExpandableListAdapter** adapter needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget/ActionMenuView.cpp
+ > error: assignment at line 1038 for IMenuBuilder** build needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget/AutoCompleteTextView.cpp
+ > error: assignment at line 365 for ICharSequence** hint needs AddRef!
+ > error: assignment at line 709 for IAdapterViewOnItemClickListener** l needs AddRef!
+ > error: assignment at line 1541 for IValidator** validator needs AddRef!
+
+>> process file: /home/kesalin/Elastos_AddRef/Sources//Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget/AbsListView.cpp
+ > error: assignment at line 7841 for IInputConnection** connection needs AddRef!
+
+
+results: 121 errors, 0 warnings.

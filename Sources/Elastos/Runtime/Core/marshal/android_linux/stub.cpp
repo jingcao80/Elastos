@@ -815,9 +815,8 @@ ECode CObjectStub::S_CreateObject(
         goto ErrorExit;
     }
 
-    stubObj->AddRef();
     *stub = (IStub *)stubObj;
-
+    (*stub)->AddRef();
     return NOERROR;
 
 ErrorExit:
