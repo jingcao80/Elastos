@@ -4909,6 +4909,9 @@ ECode Collections::ReplaceAll(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    if (list == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     Int32 index;
     Boolean found = FALSE;
     while ((list->IndexOf(obj, &index), index) > -1) {
@@ -4924,6 +4927,9 @@ ECode Collections::Rotate(
     /* [in] */ IList* lst,
     /* [in] */ Int32 dist)
 {
+    if (lst == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     AutoPtr<IList> list = lst;
     Int32 size;
     (ICollection::Probe(list))->GetSize(&size);
@@ -4956,6 +4962,7 @@ ECode Collections::Rotate(
             index = (index + normdist) % size;
             AutoPtr<IInterface> temp2;
             list->Set(index, temp, (IInterface**)&temp2);
+            temp = temp2;
             if (index == beginIndex) {
                 index = ++beginIndex;
                 temp = NULL;
@@ -4982,6 +4989,9 @@ ECode Collections::IndexOfSubList(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
+    if (list == NULL || sublist == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     Int32 size, sublistSize;
     (ICollection::Probe(list))->GetSize(&size);
     (ICollection::Probe(list))->GetSize(&sublistSize);
