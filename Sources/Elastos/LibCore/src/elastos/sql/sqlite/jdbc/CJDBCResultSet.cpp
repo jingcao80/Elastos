@@ -746,7 +746,7 @@ ECode CJDBCResultSet::InsertRow()
     }
     AutoPtr<IResultSetMetaData> obj;
     GetMetaData((IResultSetMetaData **)&obj);
-    CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj;
+    CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj.Get();
     StringBuffer sb;
     sb.Append("INSERT INTO ");
     sb.Append(SQLite::CShell::SqlQuoteDbl(uptable));
@@ -885,7 +885,7 @@ ECode CJDBCResultSet::RefreshRow()
     }
     AutoPtr<IResultSetMetaData> obj;
     GetMetaData((IResultSetMetaData **)&obj);
-    CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj;
+    CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj.Get();
     StringBuffer sb;
     AutoPtr<ArrayOf<String> > rd = tr->mRows[mRow];
     sb.Append("SELECT ");
@@ -1370,7 +1370,7 @@ ECode CJDBCResultSet::UpdateRow()
     AutoPtr<ArrayOf<String> > rd = tr->mRows[mRow];
     AutoPtr<IResultSetMetaData> obj;
     GetMetaData((IResultSetMetaData **)&obj);
-    CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj;
+    CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj.Get();
     AutoPtr<ArrayOf<String> > args = ArrayOf<String>::Alloc(tr->mNcolumns + pkcols->GetLength());
     StringBuffer sb;
     sb.Append("UPDATE ");
@@ -2059,7 +2059,7 @@ ECode CJDBCResultSet::IsUpdatable(
     if (updatable == UPD_UNKNOWN) {
         AutoPtr<IResultSetMetaData> obj;
         GetMetaData((IResultSetMetaData **)&obj);
-        CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj;
+        CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj.Get();
         HashSet<String> h;
         String lastt = String(NULL);
         for (Int32 i = 1; i <= tr->mNcolumns; i++) {
@@ -2127,7 +2127,7 @@ ECode CJDBCResultSet::FindColumn(
 {
     AutoPtr<IResultSetMetaData> obj;
     GetMetaData((IResultSetMetaData **)&obj);
-    CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj;
+    CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj.Get();
     m->FindColByName(colName,value);
     return NOERROR;
 }
