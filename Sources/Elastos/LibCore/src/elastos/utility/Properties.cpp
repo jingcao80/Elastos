@@ -342,7 +342,7 @@ ECode Properties::Load(
                     if (keyLength == -1) {
                         keyLength = offset;
                     }
-                    String temp(*buf, offset);
+                    String temp(*buf, 0, offset);
                     AutoPtr<IInterface> res;
                     Put(StrToCS(temp.Substring(0, keyLength)),
                         StrToCS(temp.Substring(keyLength)),

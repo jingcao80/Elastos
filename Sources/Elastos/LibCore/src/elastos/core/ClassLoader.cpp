@@ -155,7 +155,7 @@ ECode BootClassLoader::FindClass(
     }
 
     *klass = NULL;
-    return NOERROR;
+    return E_CLASS_NOT_FOUND_EXCEPTION;
 }
 
 ECode BootClassLoader::LoadClass(
