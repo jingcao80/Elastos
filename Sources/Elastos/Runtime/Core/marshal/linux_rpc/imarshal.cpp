@@ -74,10 +74,11 @@ static ECode StdUnmarshalCustomInterface(
 
     ECode ec = customMarshal->GetClsid(&proxyClsid);
     if (SUCCEEDED(ec)) {
-        AutoPtr<ICustomMarshal> tempCustMsh;
+        AutoPtr<IInterface> obj;
         ec = _CObject_CreateInstance(proxyClsid, RGM_SAME_DOMAIN,
-                EIID_ICustomMarshal, (IInterface **)&tempCustMsh);
+                EIID_ICustomMarshal, (IInterface **)&obj);
         if (SUCCEEDED(ec)) {
+            ICustomMarshal* tempCustMsh = ICustomMarshal::Probe(obj);
             ec = tempCustMsh->CreateObject(customMarshal, object);
         }
     }

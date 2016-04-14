@@ -31,8 +31,8 @@ private:
         virtual CARAPI_(void) EntryRemoved(
             /* [in] */ Boolean evicted,
             /* [in] */ IInteger32* netId,
-            /* [in] */ AutoPtr<IWifiP2pGroup> oldValue,
-            /* [in] */ AutoPtr<IWifiP2pGroup> newValue);
+            /* [in] */ IWifiP2pGroup* oldValue,
+            /* [in] */ IWifiP2pGroup* newValue);
     private:
         CWifiP2pGroupList* mHost;
     };

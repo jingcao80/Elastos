@@ -51,8 +51,8 @@ private:
             CARAPI_(String) ToStringInternal();
 
             static CARAPI_(Int32) Compare(
-                /* [in] */ AutoPtr<TimeCalculator> aObject,
-                /* [in] */ AutoPtr<TimeCalculator> bObject);
+                /* [in] */ TimeCalculator* aObject,
+                /* [in] */ TimeCalculator* bObject);
 
             CARAPI CopyFieldsToTime(
                 /* [in] */ ITime* time);

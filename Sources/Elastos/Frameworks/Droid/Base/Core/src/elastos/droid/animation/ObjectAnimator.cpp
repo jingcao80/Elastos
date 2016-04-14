@@ -107,7 +107,7 @@ ECode ObjectAnimator::constructor(
 
 ECode ObjectAnimator::constructor(
     /* [in] */ IInterface* target,
-    /* [in] */ AutoPtr<IProperty> property)
+    /* [in] */ IProperty* property)
 {
     SetTarget(target);
     return SetProperty(property);

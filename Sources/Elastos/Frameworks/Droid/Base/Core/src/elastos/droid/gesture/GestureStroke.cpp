@@ -46,9 +46,9 @@ ECode GestureStroke::constructor(
     Int32 index = 0;
 
     for (Int32 i = 0; i < count; i++) {
-        AutoPtr<IGesturePoint> p;
-        points->Get(i, (IInterface **)&p);
-
+        AutoPtr<IInterface> obj;
+        points->Get(i, (IInterface **)&obj);
+        IGesturePoint* p = IGesturePoint::Probe(obj);
         p->GetX(&(*tmpPoints)[i * 2]);
         p->GetY(&(*tmpPoints)[i * 2 + 1]);
         p->GetTimestamp(&(*times)[index]);

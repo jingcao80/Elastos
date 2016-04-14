@@ -1146,8 +1146,8 @@ String CTime::TimeCalculator::ToStringInternal()
 }
 
 Int32 CTime::TimeCalculator::Compare(
-    /* [in] */ AutoPtr<TimeCalculator> aObject,
-    /* [in] */ AutoPtr<TimeCalculator> bObject)
+    /* [in] */ TimeCalculator* aObject,
+    /* [in] */ TimeCalculator* bObject)
 {
     if((aObject->mTimeZone).Equals(bObject->mTimeZone)) {
         // If the timezones are the same, we can easily compare the two times.

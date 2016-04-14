@@ -5,6 +5,8 @@
 #include <sys/wait.h>
 #include "AutoLock.h"
 
+using Elastos::Sql::SQLite::ITableResult;
+
 namespace Elastos {
 namespace Sql {
 namespace SQLite {
@@ -174,7 +176,7 @@ ECode JDBCStatement::ExecuteQuery(
     VALIDATE_NOT_NULL(resultset);
     *resultset = NULL;
 
-    AutoPtr<SQLite::ITableResult> tr;
+    AutoPtr<ITableResult> tr;
     if (rs != NULL) {
         ((CJDBCResultSet *)&rs)->Close();
         rs = NULL;

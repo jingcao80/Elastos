@@ -1127,7 +1127,7 @@ ECode SimpleDateFormat::ParseNumber(
     }
     position->SetIndex(index);
     AutoPtr<INumber> outn;
-    CInteger32::New(result,(IInteger32 **)&outn);
+    CInteger32::New(result,(INumber **)&outn);
     *number = outn;
     REFCOUNT_ADD(*number);
     //return Integer.valueOf(result);

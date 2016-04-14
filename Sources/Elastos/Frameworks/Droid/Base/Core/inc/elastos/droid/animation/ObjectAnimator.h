@@ -668,7 +668,7 @@ protected:
      */
     CARAPI constructor(
         /* [in] */ IInterface* target,
-        /* [in] */ AutoPtr<IProperty> property);
+        /* [in] */ IProperty* property);
 
 private:
     static const String LOGTAG;

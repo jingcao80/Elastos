@@ -352,8 +352,8 @@ GlobalActions::SinglePressAction::SinglePressAction(
 GlobalActions::SinglePressAction::SinglePressAction(
     /* [in] */ GlobalActions* owner,
     /* [in] */ Int32 iconResId,
-    /* [in] */ AutoPtr<IDrawable> icon,
-    /* [in] */ AutoPtr<ICharSequence> message)
+    /* [in] */ IDrawable* icon,
+    /* [in] */ ICharSequence* message)
     : mOwner(owner)
     , mIconResId(iconResId)
     , mIcon(icon)
@@ -365,7 +365,7 @@ GlobalActions::SinglePressAction::SinglePressAction(
 GlobalActions::SinglePressAction::SinglePressAction(
     /* [in] */ GlobalActions* owner,
     /* [in] */ Int32 iconResId,
-    /* [in] */ AutoPtr<ICharSequence> message)
+    /* [in] */ ICharSequence* message)
     : mOwner(owner)
     , mIconResId(iconResId)
     , mIcon(NULL)

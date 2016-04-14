@@ -122,14 +122,14 @@ ECode CDelegateProxy::EventHander(
     /* [in] */ PVoid paramBuf,
     /* [out] */ UInt32* paramBufSize)
 {
-    AutoPtr<CCallbackArgumentList> cbArgumentList;
-
+    AutoPtr<ICallbackArgumentList> obj;
     ECode ec = ((CCallbackMethodInfo *)mCallbackMethodInfo.Get())->CreateCBArgumentList(
-            (ICallbackArgumentList **)&cbArgumentList);
+            (ICallbackArgumentList **)&obj);
     if (FAILED(ec)) {
         return ec;
     }
 
+    CCallbackArgumentList* cbArgumentList = (CCallbackArgumentList*)obj.Get();
     memcpy(cbArgumentList->mParamBuf, paramBuf, cbArgumentList->mParamBufSize);
 
     if (paramBufSize) {

@@ -34,10 +34,11 @@ ECode Learner::RemoveInstance(
 
     instances->GetSize(&size);
     for (Int32 i = 0;  i < size;  i++) {
-        AutoPtr<IInstance> instance;
+        AutoPtr<IInterface> obj;
+        instances->Get(i, (IInterface **)&obj);
+        IInstance* instance = IInstance::Probe(obj);
 
-        instances->Get(i, (IInterface **)&instance);
-
+        assert(0 && "TODO");
         /* TODO WAITING
         if (id == instance->mId) {
             instances->Remove(i);
@@ -56,10 +57,11 @@ ECode Learner::RemoveInstances(
 
     instances->GetSize(&size);
     for (Int32 i = 0;  i < size;  i++) {
-        AutoPtr<IInstance> instance;
+        AutoPtr<IInterface> obj;
+        instances->Get(i, (IInterface **)&obj);
+        IInstance* instance = IInstance::Probe(obj);
 
-        instances->Get(i, (IInterface **)&instance);
-
+        assert(0 && "TODO");
         /* TODO WAITING
         if ((instance->mLabel.IsNull() && name.IsNull())
                 || (!instance->mLabel.IsNull() && instance->mLabel.Equals(name))) {
@@ -71,10 +73,11 @@ ECode Learner::RemoveInstances(
 }
 
 ECode Learner::GetInstances(
-    /* [in] */ IArrayList** instances)
+    /* [out] */ IArrayList** instances)
 {
+    VALIDATE_NOT_NULL(instances)
     *instances = mInstances;
-    REFCOUNT_ADD(mInstances);
+    REFCOUNT_ADD(*instances);
     return NOERROR;
 }
 

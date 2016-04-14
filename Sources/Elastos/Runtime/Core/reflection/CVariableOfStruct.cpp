@@ -346,12 +346,14 @@ ECode CVariableOfStruct::GetStructFieldSetter(
 
     AutoPtr<IFieldInfo> fieldInfo;
     AutoPtr<IStructInfo> structInfo;
+    AutoPtr<IDataTypeInfo> dataTypeInfo;
     ec = mStructInfo->GetFieldInfo(name, (IFieldInfo**)&fieldInfo);
     if (FAILED(ec)) return ec;
 
-    ec = fieldInfo->GetTypeInfo((IDataTypeInfo **)&structInfo);
+    ec = fieldInfo->GetTypeInfo((IDataTypeInfo **)&dataTypeInfo);
     if (FAILED(ec)) return ec;
 
+    structInfo = IStructInfo::Probe(dataTypeInfo);
     AutoPtr<IVariableOfStruct> variable;
     ec = structInfo->CreateVariableBox(
             mVarBuf + mStructFieldDesc[index].mPos, (IVariableOfStruct**)&variable);
@@ -512,12 +514,14 @@ ECode CVariableOfStruct::GetStructFieldGetter(
 
     AutoPtr<IFieldInfo> fieldInfo;
     AutoPtr<IStructInfo> structInfo;
+    AutoPtr<IDataTypeInfo> dataTypeInfo;
     ec = mStructInfo->GetFieldInfo(name, (IFieldInfo **)&fieldInfo);
     if (FAILED(ec)) return ec;
 
-    ec = fieldInfo->GetTypeInfo((IDataTypeInfo **)&structInfo);
+    ec = fieldInfo->GetTypeInfo((IDataTypeInfo **)&dataTypeInfo);
     if (FAILED(ec)) return ec;
 
+    structInfo = IStructInfo::Probe(dataTypeInfo);
     AutoPtr<IVariableOfStruct> variable;
     ec = structInfo->CreateVariableBox(
             mVarBuf + mStructFieldDesc[index].mPos, (IVariableOfStruct **)&variable);

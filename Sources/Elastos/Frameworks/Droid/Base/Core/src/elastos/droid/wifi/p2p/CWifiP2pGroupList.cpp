@@ -27,8 +27,8 @@ CWifiP2pGroupList::GroupLruCache::GroupLruCache(
 void CWifiP2pGroupList::GroupLruCache::EntryRemoved(
     /* [in] */ Boolean evicted,
     /* [in] */ IInteger32* netId,
-    /* [in] */ AutoPtr<IWifiP2pGroup> oldValue,
-    /* [in] */ AutoPtr<IWifiP2pGroup> newValue)
+    /* [in] */ IWifiP2pGroup* oldValue,
+    /* [in] */ IWifiP2pGroup* newValue)
 {
     if (mHost->mListener != NULL && !mHost->mIsClearCalled) {
         Int32 networkId;

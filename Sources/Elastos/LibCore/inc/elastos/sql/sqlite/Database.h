@@ -215,11 +215,11 @@ private:
 
     CARAPI _Exec(
         /* [in] */ const String& sql,
-        /* [in] */ AutoPtr<ICallback> cb);
+        /* [in] */ ICallback* cb);
 
     CARAPI _Exec(
         /* [in] */ const String& sql,
-        /* [in] */ AutoPtr<ICallback> cb,
+        /* [in] */ ICallback* cb,
         /* [in] */ ArrayOf<String> * args);
 
     CARAPI_(Int64) _LastInsertRowid();
@@ -229,7 +229,7 @@ private:
     CARAPI_(Int64) _Changes();
 
     CARAPI _BusyHandler(
-        /* [in] */ AutoPtr<IBusyHandler> bh);
+        /* [in] */ IBusyHandler* bh);
 
     CARAPI _BusyTimeout(
         /* [in] */ Int32 ms);
@@ -237,12 +237,12 @@ private:
     CARAPI _CreateFunction(
         /* [in] */ const String& name,
         /* [in] */ Int32 nargs,
-        /* [in] */ AutoPtr<IFunction> f);
+        /* [in] */ IFunction* f);
 
     CARAPI _CreateAggregate(
         /* [in] */ const String& name,
         /* [in] */ Int32 nargs,
-        /* [in] */ AutoPtr<IFunction> f);
+        /* [in] */ IFunction* f);
 
     CARAPI _FunctionType(
         /* [in] */ const String& name,
@@ -254,13 +254,13 @@ private:
         /* [in] */ const String& enc);
 
     CARAPI _SetAuthorizer(
-        /* [in] */ AutoPtr<IAuthorizer> auth);
+        /* [in] */ IAuthorizer* auth);
 
     CARAPI _Trace(
-        /* [in] */ AutoPtr<ITrace> tr);
+        /* [in] */ ITrace* tr);
 
     CARAPI _Profile(
-        /* [in] */ AutoPtr<IProfile> pr);
+        /* [in] */ IProfile* pr);
 
     CARAPI_(Int32) _DbStatus(
         /* [in] */ Int32 op,
@@ -269,16 +269,16 @@ private:
 
     CARAPI Vm_compile(
         /* [in] */ const String& sql,
-        /* [in] */ AutoPtr<IVm> vm);
+        /* [in] */ IVm* vm);
 
     CARAPI Vm_compile_args(
         /* [in] */ const String& sql,
-        /* [in] */ AutoPtr<IVm> vm,
+        /* [in] */ IVm* vm,
         /* [in] */ ArrayOf<String> * argsstr);
 
     CARAPI Stmt_prepare(
         /* [in] */ const String& sql,
-        /* [in] */ AutoPtr<IStmt> stmt);
+        /* [in] */ IStmt* stmt);
 
     CARAPI _OpenBlob(
         /* [in] */ const String& db,
@@ -286,11 +286,11 @@ private:
         /* [in] */ const String& column,
         /* [in] */ Int64 row,
         /* [in] */ Boolean rw,
-        /* [in] */ AutoPtr<IBlob> blob);
+        /* [in] */ IBlob* blob);
 
     CARAPI _ProgressHandler(
         /* [in] */ Int32 n,
-        /* [in] */ AutoPtr<IProgressHandler> ph);
+        /* [in] */ IProgressHandler* ph);
 
     CARAPI _Key(
         /* [in] */ ArrayOf<Byte> * ekey);
@@ -305,10 +305,10 @@ private:
         /* [in] */ const String& sql);
 
     static CARAPI _Backup(
-        /* [in] */ AutoPtr<IBackup> b,
-        /* [in] */ AutoPtr<IDatabase> dest,
+        /* [in] */ IBackup* b,
+        /* [in] */ IDatabase* dest,
         /* [in] */ const String& destName,
-        /* [in] */ AutoPtr<IDatabase> src,
+        /* [in] */ IDatabase* src,
         /* [in] */ const String& srcName);
 
     static CARAPI_(Int32) _Status(

@@ -142,11 +142,12 @@ ELAPI _CObject_ReflectInterfaceInfo(
     ec = iObject->GetClassID(&clsid);
     if (FAILED(ec)) return E_INVALID_ARGUMENT;
 
-    AutoPtr<CModuleInfo> moduleInfo;
-    ec = _CReflector_AcquireModuleInfo(String(clsid.mUunm), (IModuleInfo **)&moduleInfo);
+    AutoPtr<IModuleInfo> obj;
+    ec = _CReflector_AcquireModuleInfo(String(clsid.mUunm), (IModuleInfo **)&obj);
     if (FAILED(ec)) {
         return ec;
     }
+    CModuleInfo* moduleInfo = (CModuleInfo*)obj.Get();
 
     ClassDirEntry* classDir = NULL;
     ClassDescriptor* clsDesc = NULL;

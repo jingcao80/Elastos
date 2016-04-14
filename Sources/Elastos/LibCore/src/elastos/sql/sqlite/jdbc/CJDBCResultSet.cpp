@@ -744,8 +744,9 @@ ECode CJDBCResultSet::InsertRow()
     if (!oninsrow || rowbuf == NULL) {
         return E_SQL_EXCEPTION;
     }
-    AutoPtr<CJDBCResultSetMetaData> m;
-    GetMetaData((IResultSetMetaData **)&m);
+    AutoPtr<IResultSetMetaData> obj;
+    GetMetaData((IResultSetMetaData **)&obj);
+    CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj;
     StringBuffer sb;
     sb.Append("INSERT INTO ");
     sb.Append(SQLite::CShell::SqlQuoteDbl(uptable));
@@ -882,8 +883,9 @@ ECode CJDBCResultSet::RefreshRow()
     if (updatable < UPD_INSUPDDEL) {
         return E_SQL_EXCEPTION;
     }
-    AutoPtr<CJDBCResultSetMetaData> m;
-    GetMetaData((IResultSetMetaData **)&m);
+    AutoPtr<IResultSetMetaData> obj;
+    GetMetaData((IResultSetMetaData **)&obj);
+    CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj;
     StringBuffer sb;
     AutoPtr<ArrayOf<String> > rd = tr->mRows[mRow];
     sb.Append("SELECT ");
@@ -1366,8 +1368,9 @@ ECode CJDBCResultSet::UpdateRow()
         return E_SQL_EXCEPTION;
     }
     AutoPtr<ArrayOf<String> > rd = tr->mRows[mRow];
-    AutoPtr<CJDBCResultSetMetaData> m;
-    GetMetaData((IResultSetMetaData **)&m);
+    AutoPtr<IResultSetMetaData> obj;
+    GetMetaData((IResultSetMetaData **)&obj);
+    CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj;
     AutoPtr<ArrayOf<String> > args = ArrayOf<String>::Alloc(tr->mNcolumns + pkcols->GetLength());
     StringBuffer sb;
     sb.Append("UPDATE ");
@@ -2054,8 +2057,9 @@ ECode CJDBCResultSet::IsUpdatable(
     /* [out] */ Boolean * value)
 {
     if (updatable == UPD_UNKNOWN) {
-        AutoPtr<CJDBCResultSetMetaData> m ;
-        GetMetaData((IResultSetMetaData **)&m);
+        AutoPtr<IResultSetMetaData> obj;
+        GetMetaData((IResultSetMetaData **)&obj);
+        CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj;
         HashSet<String> h;
         String lastt = String(NULL);
         for (Int32 i = 1; i <= tr->mNcolumns; i++) {
@@ -2121,8 +2125,9 @@ ECode CJDBCResultSet::FindColumn(
     /* [in] */ const String& colName,
     /* [out] */ Int32 * value)
 {
-    AutoPtr<IJDBCResultSetMetaData> m ;
-    GetMetaData((IResultSetMetaData **)&m);
+    AutoPtr<IResultSetMetaData> obj;
+    GetMetaData((IResultSetMetaData **)&obj);
+    CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj;
     m->FindColByName(colName,value);
     return NOERROR;
 }

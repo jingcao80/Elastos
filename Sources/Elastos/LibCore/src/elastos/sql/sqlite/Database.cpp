@@ -766,7 +766,7 @@ ECode Database::OpenBlob(
     VALIDATE_NOT_NULL(blob);
 
     synchronized(this) {
-        AutoPtr<CBlob> bl;
+        AutoPtr<IBlob> bl;
         CBlob::New((IBlob **)&bl);
         _OpenBlob(db, table, column, row, rw, bl);
         *blob = bl;
@@ -1217,7 +1217,7 @@ ECode Database::_Close()
 
 ECode Database::_Exec(
     /* [in] */ const String& sql,
-    /* [in] */ AutoPtr<ICallback> cb)
+    /* [in] */ ICallback* cb)
 {
     handle *h = (handle *)mHandle;
     freemem *freeproc;
@@ -1278,7 +1278,7 @@ ECode Database::_Exec(
 
 ECode Database::_Exec(
     /* [in] */ const String& sql,
-    /* [in] */ AutoPtr<ICallback> cb,
+    /* [in] */ ICallback* cb,
     /* [in] */ ArrayOf<String> * argsstr)
 {
     handle *h = (handle *)mHandle;
@@ -1586,7 +1586,7 @@ Int64 Database::_Changes()
 }
 
 ECode Database::_BusyHandler(
-    /* [in] */ AutoPtr<IBusyHandler> bh)
+    /* [in] */ IBusyHandler* bh)
 {
     handle *h = (handle*)mHandle;
 
@@ -1786,7 +1786,7 @@ static ECode Mkfunc_common(handle * ihandle,AutoPtr<IDatabase> obj,Int32 isagg, 
 ECode Database::_CreateFunction(
     /* [in] */ const String& name,
     /* [in] */ Int32 nargs,
-    /* [in] */ AutoPtr<IFunction> f)
+    /* [in] */ IFunction* f)
 {
     return Mkfunc_common((handle *)mHandle,(IDatabase *)(this->Probe(EIID_IDatabase)), 0, name, nargs, f);
 }
@@ -1794,7 +1794,7 @@ ECode Database::_CreateFunction(
 ECode Database::_CreateAggregate(
     /* [in] */ const String& name,
     /* [in] */ Int32 nargs,
-    /* [in] */ AutoPtr<IFunction> f)
+    /* [in] */ IFunction* f)
 {
     return Mkfunc_common((handle *)mHandle,(IDatabase *)(this->Probe(EIID_IDatabase)), 1, name, nargs, f);
 }
@@ -1880,7 +1880,7 @@ ECode Database::_SetEncoding(
 }
 
 ECode Database::_SetAuthorizer(
-    /* [in] */ AutoPtr<IAuthorizer> auth)
+    /* [in] */ IAuthorizer* auth)
 {
     handle *h = (handle *)mHandle;
 
@@ -1924,7 +1924,7 @@ static void Dotrace(void *arg, const char *msg)
 #endif
 
 ECode Database::_Trace(
-    /* [in] */ AutoPtr<ITrace> tr)
+    /* [in] */ ITrace* tr)
 {
     handle *h = (handle *)mHandle;
 
@@ -1954,10 +1954,10 @@ ECode Database::_Trace(
 }
 
 ECode Database::_Backup(
-    /* [in] */ AutoPtr<IBackup> b,
-    /* [in] */ AutoPtr<IDatabase> dest,
+    /* [in] */ IBackup* b,
+    /* [in] */ IDatabase* dest,
     /* [in] */ const String& destName,
-    /* [in] */ AutoPtr<IDatabase> src,
+    /* [in] */ IDatabase* src,
     /* [in] */ const String& srcName)
 {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_BACKUPAPI
@@ -2079,7 +2079,7 @@ static void Doprofile(void *arg, const char *msg, sqlite_uint64 est)
 #endif
 
 ECode Database::_Profile(
-    /* [in] */ AutoPtr<IProfile> pr)
+    /* [in] */ IProfile* pr)
 {
 #if HAVE_SQLITE3_PROFILE
     handle *h = gethandle(env, obj);
@@ -2158,7 +2158,7 @@ Int32 Database::_DbStatus(
 
 ECode Database::Vm_compile(
     /* [in] */ const String& sql,
-    /* [in] */ AutoPtr<IVm> vm)
+    /* [in] */ IVm* vm)
 {
 #if HAVE_SQLITE_COMPILE
     handle *h = (handle *)mHandle;
@@ -2291,7 +2291,7 @@ ECode Database::Vm_compile(
     v->hh.enc = h->enc;
     v->hh.funcs = 0;
     v->hh.vms = 0;
-    ((CVm *)vm.Get())->mHandle = (Int64 )v;
+    ((CVm *)vm)->mHandle = (Int64 )v;
 #else
     throwex(env, "unsupported");
 #endif
@@ -2300,7 +2300,7 @@ ECode Database::Vm_compile(
 
 ECode Database::Vm_compile_args(
     /* [in] */ const String& sql,
-    /* [in] */ AutoPtr<IVm> vm,
+    /* [in] */ IVm* vm,
     /* [in] */ ArrayOf<String>* argsstr)
 {
 #if HAVE_SQLITE_COMPILE
@@ -2410,7 +2410,7 @@ ECode Database::Vm_compile_args(
         if (rc != SQLITE_OK) {
             sqlite3_free(s);
             Freep((char **) &cargv);
-            ((CVm *)vm.Get())->mError_code = rc;
+            ((CVm *)vm)->mError_code = rc;
             return E_SQL_EXCEPTION;
         }
         v = (hvm*)malloc(sizeof (hvm) + strlen(tail) + 1);
@@ -2418,7 +2418,7 @@ ECode Database::Vm_compile_args(
             sqlite3_free(s);
             Freep((char **) &cargv);
             sqlite3_finalize((sqlite3_stmt *) svm);
-            ((CVm *)vm.Get())->mError_code = SQLITE_NOMEM;
+            ((CVm *)vm)->mError_code = SQLITE_NOMEM;
             return E_NULL_POINTER_EXCEPTION;
         }
         v->next = h->vms;
@@ -2443,7 +2443,7 @@ ECode Database::Vm_compile_args(
         v->hh.enc = h->enc;
         v->hh.funcs = 0;
         v->hh.vms = 0;
-        ((CVm *)vm.Get())->mHandle = (Int64 )v;
+        ((CVm *)vm)->mHandle = (Int64 )v;
         Freep((char **) &cargv);
         return NOERROR;
     }
@@ -2455,7 +2455,7 @@ ECode Database::Vm_compile_args(
 
 ECode Database::Stmt_prepare(
     /* [in] */ const String& sql,
-    /* [in] */ AutoPtr<IStmt> stmt)
+    /* [in] */ IStmt* stmt)
 {
 #if HAVE_SQLITE3
     handle *h = (handle *)mHandle;
@@ -2501,7 +2501,7 @@ ECode Database::Stmt_prepare(
     if (ret != SQLITE_OK) {
         const char *err = sqlite3_errmsg((sqlite3*)h->sqlite);
         Logger::E("Database", err);
-        ((CStmt *)stmt.Get())->mError_code = ret;
+        ((CStmt *)stmt)->mError_code = ret;
         return E_SQL_EXCEPTION;
     }
     if (!svm) {
@@ -2539,7 +2539,7 @@ ECode Database::Stmt_prepare(
     v->hh.enc = h->enc;
     v->hh.funcs = 0;
     v->hh.vms = 0;
-    ((CStmt *)stmt.Get())->mHandle = (Int64)v;
+    ((CStmt *)stmt)->mHandle = (Int64)v;
     return NOERROR;
 #else
     return E_SQL_FEATURE_NOT_SUPPORTED_EXCEPTION;
@@ -2552,7 +2552,7 @@ ECode Database::_OpenBlob(
     /* [in] */ const String& column,
     /* [in] */ Int64 row,
     /* [in] */ Boolean rw,
-    /* [in] */ AutoPtr<IBlob> blob)
+    /* [in] */ IBlob* blob)
 {
 #if HAVE_SQLITE3 && HAVE_SQLITE3_INCRBLOBIO
     handle *h = (handle *)mHandle;
@@ -2646,7 +2646,7 @@ static Int32 Progresshandlervoid(void *udata)
 
 ECode Database::_ProgressHandler(
     /* [in] */ Int32 n,
-    /* [in] */ AutoPtr<IProgressHandler> ph)
+    /* [in] */ IProgressHandler* ph)
 {
     handle *h = (handle *)mHandle;
 

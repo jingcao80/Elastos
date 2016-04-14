@@ -43,7 +43,7 @@ ECode CActivityOne::MyListener::OnClick(
 
     AutoPtr<IServiceManager> sm;
     CServiceManager::AcquireSingleton((IServiceManager**)&sm);
-    AutoPtr<IIActivityManager> IInterface;
+    AutoPtr<IInterface> service;
     sm->GetService(IContext::ACTIVITY_SERVICE, (IInterface**)&service);
     IIActivityManager* am = IIActivityManager::Probe(service);
 
