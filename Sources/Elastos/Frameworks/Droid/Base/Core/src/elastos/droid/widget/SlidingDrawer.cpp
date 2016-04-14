@@ -332,6 +332,7 @@ ECode SlidingDrawer::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (mLocked) {
         *result = FALSE;
         return NOERROR;
@@ -389,6 +390,7 @@ ECode SlidingDrawer::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (mLocked) {
         *result = TRUE;
         return NOERROR;
@@ -602,14 +604,18 @@ ECode SlidingDrawer::SetOnDrawerScrollListener(
 ECode SlidingDrawer::GetHandle(
     /* [out] */ IView** v)
 {
+    VALIDATE_NOT_NULL(v)
     *v = mHandle;
+    REFCOUNT_ADD(*v)
     return NOERROR;
 }
 
 ECode SlidingDrawer::GetContent(
     /* [out] */ IView** v)
 {
+    VALIDATE_NOT_NULL(v)
     *v = mContent;
+    REFCOUNT_ADD(*v)
     return NOERROR;
 }
 
@@ -628,6 +634,7 @@ ECode SlidingDrawer::Lock()
 ECode SlidingDrawer::IsOpened(
     /* [out] */ Boolean* opened)
 {
+    VALIDATE_NOT_NULL(opened)
     *opened = mExpanded;
     return NOERROR;
 }
@@ -635,12 +642,13 @@ ECode SlidingDrawer::IsOpened(
 ECode SlidingDrawer::IsMoving(
     /* [out] */ Boolean* moving)
 {
+    VALIDATE_NOT_NULL(moving)
     *moving = mTracking || mAnimating;
     return NOERROR;
 }
 
 ECode SlidingDrawer::AnimateClose(
-        /* [in] */ Int32 position)
+    /* [in] */ Int32 position)
 {
     PrepareTracking(position);
     PerformFling(position, mMaximumAcceleration, TRUE);
@@ -648,7 +656,7 @@ ECode SlidingDrawer::AnimateClose(
 }
 
 ECode SlidingDrawer::AnimateOpen(
-        /* [in] */ Int32 position)
+    /* [in] */ Int32 position)
 {
     PrepareTracking(position);
     PerformFling(position, -mMaximumAcceleration, TRUE);

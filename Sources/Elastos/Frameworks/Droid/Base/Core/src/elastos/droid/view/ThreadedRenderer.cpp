@@ -180,6 +180,7 @@ ECode ThreadedRenderer::Initialize(
     /* [in] */ ISurface* surface,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     mInitialized = TRUE;
     UpdateEnabledState(surface);
     Boolean status = NativeInitialize(mNativeProxy, surface);
@@ -289,6 +290,7 @@ ECode ThreadedRenderer::SetOpaque(
 ECode ThreadedRenderer::GetWidth(
     /* [out] */ Int32* width)
 {
+    VALIDATE_NOT_NULL(width)
     *width = mWidth;
     return NOERROR;
 }
@@ -296,6 +298,7 @@ ECode ThreadedRenderer::GetWidth(
 ECode ThreadedRenderer::GetHeight(
     /* [out] */ Int32* height)
 {
+    VALIDATE_NOT_NULL(height)
     *height = mHeight;
     return NOERROR;
 }
@@ -330,6 +333,7 @@ Boolean ThreadedRenderer::CheckIfProfilingRequested()
 ECode ThreadedRenderer::LoadSystemProperties(
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     Boolean changed = NativeLoadSystemProperties(mNativeProxy);
     Boolean wantProfiling = CheckIfProfilingRequested();
     if (wantProfiling != mProfilingEnabled) {
@@ -463,8 +467,11 @@ ECode ThreadedRenderer::InvokeFunctor(
 ECode ThreadedRenderer::CreateTextureLayer(
     /* [out] */ IHardwareLayer** layer)
 {
+    VALIDATE_NOT_NULL(layer)
     Int64 nLayer = NativeCreateTextureLayer(mNativeProxy);
-    *layer = HardwareLayer::AdoptTextureLayer(this, nLayer);;
+    AutoPtr<IHardwareLayer> hl = HardwareLayer::AdoptTextureLayer(this, nLayer);
+    *layer = hl;
+    REFCOUNT_ADD(*layer)
     return NOERROR;
 }
 
@@ -483,6 +490,7 @@ ECode ThreadedRenderer::CopyLayerInto(
     /* [in] */ IBitmap* bitmap,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     Int64 dlu = 0;
     layer->GetDeferredLayerUpdater(&dlu);
     AutoPtr<CBitmap> cbmp = (CBitmap*)bitmap;

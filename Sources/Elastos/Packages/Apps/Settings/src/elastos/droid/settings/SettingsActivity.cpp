@@ -1710,6 +1710,7 @@ ECode SettingsActivity::GetResultIntentData(
 {
     VALIDATE_NOT_NULL(intent);
     *intent = mResultIntentData;
+    REFCOUNT_ADD(*intent);
     return NOERROR;
 }
 
