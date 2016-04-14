@@ -24,6 +24,7 @@ ECode CECParameterSpec::GetCurve(
 {
     VALIDATE_NOT_NULL(curve)
     *curve = mCurve;
+    REFCOUNT_ADD(*curve)
     return NOERROR;
 }
 
@@ -32,6 +33,7 @@ ECode CECParameterSpec::GetGenerator(
 {
     VALIDATE_NOT_NULL(generator)
     *generator = mGenerator;
+    REFCOUNT_ADD(*generator)
     return NOERROR;
 }
 
@@ -40,6 +42,7 @@ ECode CECParameterSpec::GetOrder(
 {
     VALIDATE_NOT_NULL(order)
     *order = mOrder;
+    REFCOUNT_ADD(*order)
     return NOERROR;
 }
 

@@ -52,6 +52,7 @@ ECode Loader::GetContext(
 {
     VALIDATE_NOT_NULL(context)
     *context = mContext;
+    REFCOUNT_ADD(*context)
     return NOERROR;
 }
 

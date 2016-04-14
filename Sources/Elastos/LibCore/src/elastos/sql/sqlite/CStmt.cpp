@@ -1,6 +1,12 @@
 
 #include "CStmt.h"
 #include "sqlitejni.h"
+#include "elastos/core/CoreUtils.h"
+
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IInteger64;
+using Elastos::Core::IDouble;
+using Elastos::Core::EIID_IByte;
 
 namespace Elastos {
 namespace Sql {
@@ -533,7 +539,7 @@ ECode CStmt::ColumnDouble(
 
 ECode CStmt::ColumnBytes(
     /* [in] */ Int32 col,
-    /* [out, callee] */ ArrayOf<unsigned char>** array)
+    /* [out, callee] */ ArrayOf<Byte>** array)
 {
     VALIDATE_NOT_NULL(array);
 #if HAVE_SQLITE3 && HAVE_SQLITE_COMPILE
@@ -555,8 +561,8 @@ ECode CStmt::ColumnBytes(
             *array = NULL;
             return E_SQL_EXCEPTION;
         }
-        AutoPtr<ArrayOf<unsigned char> > outchar = ArrayOf<unsigned char>::Alloc(nbytes);
-        outchar->Copy(data,nbytes);
+        AutoPtr<ArrayOf<Byte> > outchar = ArrayOf<Byte>::Alloc(nbytes);
+        outchar->Copy(data, nbytes);
         *array = outchar;
     } else {
         return E_NULL_POINTER_EXCEPTION;
@@ -651,33 +657,46 @@ ECode CStmt::Column(
         case SQLITE_INTEGER:
             {
                 Int64 value = 0;
-                ColumnLong(col,&value);
-                *obj = (IInterface *)&value; // android-changed: performance
+                ColumnLong(col, &value);
+                AutoPtr<IInteger64> val = CoreUtils::Convert(value);
+                *obj = val.Get();
+                REFCOUNT_ADD(*obj)
             }
             break;
         case SQLITE_FLOAT:
             {
                 Double value = 0.0;
                 ColumnDouble(col,&value);
-                *obj = (IInterface *)&value;
+                AutoPtr<IDouble> val = CoreUtils::Convert(value);
+                *obj = val.Get();
+                REFCOUNT_ADD(*obj)
             }
             break;
         case SQLITE_BLOB:
             {
                 AutoPtr<ArrayOf<Byte> > value;
-                ColumnBytes(col,(ArrayOf<unsigned char>**)&value);
-                *obj = (IInterface *)&value;
+                ColumnBytes(col,(ArrayOf<Byte>**)&value);
+                AutoPtr<IArrayOf> array;
+                CArrayOf::New(EIID_IByte, value->GetLength(), (IArrayOf**)&array);
+                for (Int32 i = 0; i < value->GetLength(); ++i) {
+                    AutoPtr<IByte> b = CoreUtils::ConvertByte((*value)[i]);
+                    array->Set(i, b.Get());
+                }
+                *obj = array.Get();
+                REFCOUNT_ADD(*obj)
             }
             break;
         case SQLITE3_TEXT:
             {
                 String value;
                 ColumnString(col,&value);
-                *obj = (IInterface *)&value;
+                AutoPtr<ICharSequence> val = CoreUtils::Convert(value);
+                *obj = val.Get();
+                REFCOUNT_ADD(*obj)
             }
             break;
     }
-    REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 

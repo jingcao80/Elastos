@@ -204,6 +204,7 @@ ECode CBluetoothAdapter::GetBluetoothLeAdvertiser(
         }
     }
     *btAdvertiser = sBluetoothLeAdvertiser;
+    REFCOUNT_ADD(*btAdvertiser)
     return NOERROR;
 }
 
@@ -226,6 +227,7 @@ ECode CBluetoothAdapter::GetBluetoothLeScanner(
         }
     }
     *btLeScanner = sBluetoothLeScanner;
+    REFCOUNT_ADD(*btLeScanner)
     return NOERROR;
 }
 

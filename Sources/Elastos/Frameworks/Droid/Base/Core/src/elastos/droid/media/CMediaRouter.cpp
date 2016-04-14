@@ -906,7 +906,8 @@ ECode CMediaRouter::RouteCategory::GetRoutes(
        AutoPtr<IArrayList> al;
        CArrayList::New((IArrayList**)&al);
        outList = IList::Probe(al);
-    } else {
+    }
+    else {
        outList->Clear();
     }
 

@@ -310,7 +310,7 @@ ECode CStrictMode::GetThreadPolicy(
     GetThreadPolicyMask(&mask);
     AutoPtr<ThreadPolicy> tp = new ThreadPolicy(mask);
     *policy = (IStrictModeThreadPolicy*)tp.Get();
-    REFCOUNT_ADD(tp);
+    REFCOUNT_ADD(*policy);
     return NOERROR;
 }
 
@@ -327,7 +327,7 @@ ECode CStrictMode::AllowThreadDiskWrites(
     }
     AutoPtr<ThreadPolicy> tp = new ThreadPolicy(oldPolicyMask);
     *policy = (IStrictModeThreadPolicy*)tp.Get();
-    REFCOUNT_ADD(tp);
+    REFCOUNT_ADD(*policy);
     return NOERROR;
 }
 
@@ -343,7 +343,7 @@ ECode CStrictMode::AllowThreadDiskReads(
     }
     AutoPtr<ThreadPolicy> tp = new ThreadPolicy(oldPolicyMask);
     *policy = (IStrictModeThreadPolicy*)tp.Get();
-    REFCOUNT_ADD(tp);
+    REFCOUNT_ADD(*policy);
     return NOERROR;
 }
 

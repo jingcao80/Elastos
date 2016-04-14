@@ -170,6 +170,7 @@ ECode WebVttRenderingWidget::RegionLayout::GetRegion(
 {
     VALIDATE_NOT_NULL(result);
     *result = mRegion;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -368,6 +369,7 @@ ECode WebVttRenderingWidget::CueLayout::GetCue(
 {
     VALIDATE_NOT_NULL(result);
     *result = mCue;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

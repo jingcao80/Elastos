@@ -2091,7 +2091,7 @@ ECode HdmiControlService::GetAllLocalDevices(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = 0;
+    *result = NULL;
 
     AssertRunOnServiceThread();
     return mCecController->GetLocalDeviceList(result);

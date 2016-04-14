@@ -50,7 +50,7 @@ ECode Address::GetLocale(
 {
     VALIDATE_NOT_NULL(locale);
     *locale = mLocale;
-    REFCOUNT_ADD(mLocale);
+    REFCOUNT_ADD(*locale);
     return NOERROR;
 }
 

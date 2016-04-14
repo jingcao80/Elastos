@@ -95,26 +95,32 @@ ECode SomeArgs::GetObjectArg(
     switch (index) {
         case 1:
             *arg = mArg1;
+            REFCOUNT_ADD(*arg);
             break;
         case 2:
             *arg = mArg2;
+            REFCOUNT_ADD(*arg);
             break;
         case 3:
             *arg = mArg3;
+            REFCOUNT_ADD(*arg);
             break;
         case 4:
             *arg = mArg4;
+            REFCOUNT_ADD(*arg);
             break;
         case 5:
             *arg = mArg5;
+            REFCOUNT_ADD(*arg);
             break;
         case 6:
             *arg = mArg6;
+            REFCOUNT_ADD(*arg);
             break;
         default:
             Logger::E("SomeArgs", "GetObjectArg invalid index!");
     }
-    REFCOUNT_ADD(*arg);
+
     return NOERROR;
 }
 

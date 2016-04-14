@@ -129,6 +129,7 @@ ECode SSLCertificateSocketFactory::GetDefault(
     AutoPtr<ISSLCertificateSocketFactory> sslCertificateSocketFactory = new CSSLCertificateSocketFactory();
     ((SSLCertificateSocketFactory*)sslCertificateSocketFactory.Get())->constructor(handshakeTimeoutMillis, cache, TRUE);
     *result = ISSLSocketFactory::Probe(sslCertificateSocketFactory);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -142,6 +143,7 @@ ECode SSLCertificateSocketFactory::GetInsecure(
     AutoPtr<ISSLCertificateSocketFactory> sslCertificateSocketFactory = new CSSLCertificateSocketFactory();
     ((SSLCertificateSocketFactory*)sslCertificateSocketFactory.Get())->constructor(handshakeTimeoutMillis, cache, FALSE);
     *result = ISSLSocketFactory::Probe(sslCertificateSocketFactory);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

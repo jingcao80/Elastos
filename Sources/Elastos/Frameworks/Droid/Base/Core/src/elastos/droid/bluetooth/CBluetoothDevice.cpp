@@ -634,6 +634,7 @@ ECode CBluetoothDevice::ConnectGatt(
         Boolean connect;
         gatt->Connect(autoConnect, cb, &connect);
         *btGatt = gatt;
+        REFCOUNT_ADD(*btGatt)
     //} catch (RemoteException e) {Log.e(TAG, "", e);}
     //return null;
     return NOERROR;

@@ -2153,12 +2153,13 @@ ECode CBigDecimal::Min(
     CompareTo(val, &cmp);
     if (cmp <= 0) {
         *result = this;
+        REFCOUNT_ADD(*result);
     }
     else {
         *result = val;
+        REFCOUNT_ADD(*result);
     }
 
-    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -2173,12 +2174,13 @@ ECode CBigDecimal::Max(
     CompareTo(val, &cmp);
     if (cmp >= 0) {
         *result = this;
+        REFCOUNT_ADD(*result);
     }
     else {
         *result = val;
+        REFCOUNT_ADD(*result);
     }
 
-    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 

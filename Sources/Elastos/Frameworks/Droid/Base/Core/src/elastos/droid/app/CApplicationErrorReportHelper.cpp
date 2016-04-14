@@ -26,8 +26,10 @@ ECode CApplicationErrorReportHelper::GetErrorReportReceiver(
     *receiver = NULL;
     VALIDATE_NOT_NULL(context);
 
-    *receiver = CApplicationErrorReport::GetErrorReportReceiver(
-            context, packageName, appFlags);
+    AutoPtr<IComponentName> cn = CApplicationErrorReport::GetErrorReportReceiver(
+            context, packageName, appFlags);;
+    *receiver = cn;
+    REFCOUNT_ADD(*receiver)
     return NOERROR;
 }
 
@@ -41,8 +43,10 @@ ECode CApplicationErrorReportHelper::GetErrorReportReceiver(
     *receiver = NULL;
     VALIDATE_NOT_NULL(pm);
 
-    *receiver = CApplicationErrorReport::GetErrorReportReceiver(
-            pm, errorPackage, receiverPackage);
+    AutoPtr<IComponentName> cn = CApplicationErrorReport::GetErrorReportReceiver(
+            pm, errorPackage, receiverPackage);;
+    *receiver = cn;
+    REFCOUNT_ADD(*receiver)
     return NOERROR;
 }
 

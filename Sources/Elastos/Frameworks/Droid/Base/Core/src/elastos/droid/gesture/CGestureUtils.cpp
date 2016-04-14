@@ -69,10 +69,9 @@ ECode CGestureUtils::ComputeCentroid(
     /* [out, callee] */ ArrayOf<Float> **center)
 {
     AutoPtr<ArrayOf<Float> > ret;
-
     ret = GestureUtils::ComputeCentroid(points);
     *center = ret;
-
+    REFCOUNT_ADD(*center)
     return NOERROR;
 }
 
@@ -80,6 +79,7 @@ ECode CGestureUtils::ComputeTotalLength(
     /* [in] */ ArrayOf<Float> *points,
     /* [out] */ Float *pLength)
 {
+    VALIDATE_NOT_NULL(pLength)
     *pLength = GestureUtils::ComputeTotalLength(points);
     return NOERROR;
 }
@@ -88,6 +88,7 @@ ECode CGestureUtils::ComputeStraightness(
     /* [in] */ ArrayOf<Float> *points,
     /* [out] */ Float *pStraightness)
 {
+    VALIDATE_NOT_NULL(pStraightness)
     *pStraightness = GestureUtils::ComputeStraightness(points);
     return NOERROR;
 }
@@ -97,6 +98,7 @@ ECode CGestureUtils::ComputeStraightness(
     /* [in] */ Float totalLen,
     /* [out] */ Float *pStraightness)
 {
+    VALIDATE_NOT_NULL(pStraightness)
     *pStraightness = GestureUtils::ComputeStraightness(points, totalLen);
     return NOERROR;
 }
@@ -106,6 +108,7 @@ ECode CGestureUtils::SquaredEuclideanDistance(
     /* [in] */ ArrayOf<Float> *vector2,
     /* [out] */ Float *pDistance)
 {
+    VALIDATE_NOT_NULL(pDistance)
     *pDistance = GestureUtils::SquaredEuclideanDistance(vector1, vector2);
     return NOERROR;
 }
@@ -115,6 +118,7 @@ ECode CGestureUtils::CosineDistance(
     /* [in] */ ArrayOf<Float> *vector2,
     /* [out] */ Float *pDistance)
 {
+    VALIDATE_NOT_NULL(pDistance)
     *pDistance = GestureUtils::CosineDistance(vector1, vector2);
     return NOERROR;
 }
@@ -125,6 +129,7 @@ ECode CGestureUtils::MinimumCosineDistance(
     /* [in] */ Int32 numOrientations,
     /* [out] */ Float *pDistance)
 {
+    VALIDATE_NOT_NULL(pDistance)
     *pDistance = GestureUtils::MinimumCosineDistance(vector1, vector2, numOrientations);
     return NOERROR;
 }
@@ -133,26 +138,20 @@ ECode CGestureUtils::ComputeOrientedBoundingBox(
     /* [in] */ Elastos::Utility::IArrayList *originalPoints,
     /* [out] */ IOrientedBoundingBox **ppBox)
 {
-    AutoPtr<IOrientedBoundingBox> ret;
-
-    ret = GestureUtils::ComputeOrientedBoundingBox(originalPoints);
-
+    AutoPtr<IOrientedBoundingBox> ret = GestureUtils::ComputeOrientedBoundingBox(originalPoints);
     *ppBox = ret;
+    REFCOUNT_ADD(*ppBox)
     return NOERROR;
-
 }
 
 ECode CGestureUtils::ComputeOrientedBoundingBox(
     /* [in] */ ArrayOf<Float> *originalPoints,
     /* [out] */ IOrientedBoundingBox **ppBox)
 {
-    AutoPtr<IOrientedBoundingBox> ret;
-
-    ret = GestureUtils::ComputeOrientedBoundingBox(originalPoints);
-
+    AutoPtr<IOrientedBoundingBox> ret = GestureUtils::ComputeOrientedBoundingBox(originalPoints);
     *ppBox = ret;
+    REFCOUNT_ADD(*ppBox)
     return NOERROR;
-
 }
 
 ECode CGestureUtils::Rotate(
@@ -160,7 +159,10 @@ ECode CGestureUtils::Rotate(
     /* [in] */ Float angle,
     /* [out, callee] */ ArrayOf<Float> **ppPoints)
 {
-    *ppPoints = GestureUtils::Rotate(points, angle);
+    VALIDATE_NOT_NULL(ppPoints)
+    AutoPtr< ArrayOf<Float> > array = GestureUtils::Rotate(points, angle);
+    *ppPoints = array;
+    REFCOUNT_ADD(*ppPoints)
     return NOERROR;
 }
 
@@ -170,7 +172,10 @@ ECode CGestureUtils::Translate(
     /* [in] */ Float dy,
     /* [out, callee] */ ArrayOf<Float>** ppPoints)
 {
-    *ppPoints = GestureUtils::Translate(points, dx, dy);
+    VALIDATE_NOT_NULL(ppPoints)
+    AutoPtr< ArrayOf<Float> > array = GestureUtils::Translate(points, dx, dy);
+    *ppPoints = array;
+    REFCOUNT_ADD(*ppPoints)
     return NOERROR;
 }
 
@@ -180,7 +185,10 @@ ECode CGestureUtils::Scale(
     /* [in] */ Float sy,
     /* [out, callee] */ ArrayOf<Float> **ppPoints)
 {
-    *ppPoints = GestureUtils::Scale(points, sx, sy);
+    VALIDATE_NOT_NULL(ppPoints)
+    AutoPtr< ArrayOf<Float> > array = GestureUtils::Scale(points, sx, sy);
+    *ppPoints = array;
+    REFCOUNT_ADD(*ppPoints)
     return NOERROR;
 }
 

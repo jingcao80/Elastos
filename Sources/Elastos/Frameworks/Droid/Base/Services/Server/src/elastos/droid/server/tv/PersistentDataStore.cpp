@@ -164,6 +164,7 @@ ECode PersistentDataStore::GetBlockedRatings(
     mBlockedRatings->ToArray(array, (ArrayOf<IInterface*>**)&outArray);
     Int32 size = outArray->GetLength();
     *result = ArrayOf<ITvContentRating*>::Alloc(size);
+    REFCOUNT_ADD(*result)
     for (Int32 i = 0; i < size; ++i)
         (*result)->Set(i, ITvContentRating::Probe((*outArray)[i]));
     return NOERROR;

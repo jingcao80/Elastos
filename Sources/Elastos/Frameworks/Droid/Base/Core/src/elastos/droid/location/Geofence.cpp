@@ -36,6 +36,7 @@ ECode Geofence::CreateCircle(
     VALIDATE_NOT_NULL(geofence)
     AutoPtr<Geofence> geo = new Geofence(latitude, longitude, radius);
     *geofence = IGeofence::Probe(geo);
+    REFCOUNT_ADD(*geofence)
     return NOERROR;
 }
 

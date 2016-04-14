@@ -346,6 +346,7 @@ ECode CWifiEnterpriseConfig::GetCaCertificate(
 {
     VALIDATE_NOT_NULL(result);
     *result = mCaCert;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

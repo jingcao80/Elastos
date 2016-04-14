@@ -1072,8 +1072,9 @@ ECode TextToSpeech::GetLanguage(
 {
     AutoPtr<TextToSpeechActionR> ttsActionR = new TextToSpeechActionRGetLanguage(this);
     AutoPtr<ILocale> lRet = (ILocale*)RunAction(ttsActionR.Get(), (Handle32)NULL, String("getLanguage") );
-    lRet->Release();//???
+    assert(0 && "TODO");
     *language = lRet;
+    REFCOUNT_ADD(*language)
     return NOERROR;
 }
 
@@ -1448,11 +1449,7 @@ ECode TextToSpeech::AreDefaultsEnforced(
 ECode TextToSpeech::GetEngines(
     /* [out] */ IList** ret)
 {
-    AutoPtr<IList> engines;
-
-    mEnginesHelper->GetEngines((IList**)&engines);
-    *ret = engines;
-
+    mEnginesHelper->GetEngines(ret);
     return NOERROR;
 }
 

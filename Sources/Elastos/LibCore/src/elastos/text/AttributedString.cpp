@@ -98,6 +98,7 @@ ECode AttributedString::AttributedIterator::Clone(
         clone->mAttributesAllowed = mAttributesAllowed;
     }
     *copy = TO_IINTERFACE(clone);
+    REFCOUNT_ADD(*copy)
     return NOERROR;
     // } catch (CloneNotSupportedException e) {
     //     throw new AssertionError(e);

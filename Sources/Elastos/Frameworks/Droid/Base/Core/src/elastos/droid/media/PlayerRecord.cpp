@@ -337,6 +337,7 @@ ECode PlayerRecord::GetMediaButtonIntent(
 {
     VALIDATE_NOT_NULL(result);
     *result = mMediaIntent;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

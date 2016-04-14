@@ -19,8 +19,8 @@ ListResourceBundle::_FirstEnumeration::_FirstEnumeration(
     , mNextElement(String())
 {
     AutoPtr<ISet> set;
-    (IMap::Probe(mHost->mTable))->GetKeySet((ISet**)&set);
-    (IIterable::Probe(set))->GetIterator((IIterator**)&mLocal);
+    mHost->mTable->GetKeySet((ISet**)&set);
+    set->GetIterator((IIterator**)&mLocal);
     (mHost->mParent)->GetKeys((IEnumeration**)&mEnum);
 }
 
@@ -46,6 +46,7 @@ ECode ListResourceBundle::_FirstEnumeration::GetNextElement(
         AutoPtr<IInterface> next;
         mLocal->GetNext((IInterface**)&next);
         *res = next;
+        REFCOUNT_ADD(*res)
         return NOERROR;
     }
     if (FindNext()) {
@@ -53,11 +54,11 @@ ECode ListResourceBundle::_FirstEnumeration::GetNextElement(
         CString::New(mNextElement, (ICharSequence**)&seq);
         mNextElement = NULL;
         *res = (IInterface*)seq->Probe(EIID_IInterface);
+        REFCOUNT_ADD(*res)
         return NOERROR;
     }
-    AutoPtr<IInterface> next;
-    mEnum->GetNextElement((IInterface**)&next);
-    *res = next;
+
+    mEnum->GetNextElement(res);
     return NOERROR;
 }
 
@@ -71,7 +72,7 @@ Boolean ListResourceBundle::_FirstEnumeration::FindNext()
         AutoPtr<IInterface> next;
         mEnum->GetNextElement((IInterface**)&next);
         Boolean containsKey;
-        if (!((IMap::Probe(mHost->mTable))->ContainsKey(next, &containsKey), &containsKey)) {
+        if (!(mHost->mTable->ContainsKey(next, &containsKey), &containsKey)) {
             AutoPtr<ICharSequence> seq = ICharSequence::Probe(next);
             assert(seq);
             seq->ToString(&mNextElement);
@@ -91,8 +92,8 @@ ListResourceBundle::_SecondEnumeration::_SecondEnumeration(
     : mHost(host)
 {
     AutoPtr<ISet> set;
-    (IMap::Probe(mHost->mTable))->GetKeySet((ISet**)&set);
-    (IIterable::Probe(set))->GetIterator((IIterator**)&mIt);
+    mHost->mTable->GetKeySet((ISet**)&set);
+    set->GetIterator((IIterator**)&mIt);
 }
 
 ECode ListResourceBundle::_SecondEnumeration::HasMoreElements(
@@ -106,10 +107,7 @@ ECode ListResourceBundle::_SecondEnumeration::HasMoreElements(
 ECode ListResourceBundle::_SecondEnumeration::GetNextElement(
     /* [out] */ IInterface** res)
 {
-    VALIDATE_NOT_NULL(res)
-    AutoPtr<IInterface> next;
-    mIt->GetNext((IInterface**)&next);
-    *res = next;
+    mIt->GetNext(res);
     return NOERROR;
 }
 

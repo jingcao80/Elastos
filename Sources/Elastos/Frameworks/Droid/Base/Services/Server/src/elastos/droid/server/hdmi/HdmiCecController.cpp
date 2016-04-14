@@ -1180,7 +1180,8 @@ ECode HdmiCecController::NativeGetPortInfos(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = android::nativeGetPortInfos(controllerPtr);
+    assert(0 && "TODO");
+    // *result = android::nativeGetPortInfos(controllerPtr);
     return NOERROR;
 }
 

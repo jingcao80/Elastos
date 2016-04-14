@@ -24,6 +24,7 @@ ECode SSLContext::GetDefault(
             FAIL_RETURN(SSLContext::GetInstance(String("Default"), (ISSLContext**)&sDEFAULT))
         }
         *context = sDEFAULT;
+        REFCOUNT_ADD(*context)
         return NOERROR;
     }
     return NOERROR;

@@ -690,32 +690,35 @@ ECode CLayoutTransition::GetInterpolator(
     /* [in] */ Int32 transitionType,
     /* [out] */ ITimeInterpolator** polator)
 {
-    assert(polator != NULL);
-
+    VALIDATE_NOT_NULL(polator)
     *polator = NULL;
     switch (transitionType) {
         case ILayoutTransition::CHANGE_APPEARING: {
             *polator = mChangingAppearingInterpolator;
+            REFCOUNT_ADD(*polator);
             break;
         }
         case ILayoutTransition::CHANGE_DISAPPEARING: {
             *polator = mChangingDisappearingInterpolator;
+            REFCOUNT_ADD(*polator);
             break;
         }
         case ILayoutTransition::CHANGING: {
             *polator = mChangingInterpolator;
+            REFCOUNT_ADD(*polator);
             break;
         }
         case ILayoutTransition::APPEARING: {
             *polator = mAppearingInterpolator;
+            REFCOUNT_ADD(*polator);
             break;
         }
         case ILayoutTransition::DISAPPEARING: {
             *polator = mDisappearingInterpolator;
+            REFCOUNT_ADD(*polator);
         }
     }
 
-    REFCOUNT_ADD(*polator);
     return NOERROR;
 }
 
@@ -754,26 +757,29 @@ ECode CLayoutTransition::GetAnimator(
     switch (transitionType) {
         case ILayoutTransition::CHANGE_APPEARING: {
             *mator = mChangingAppearingAnim;
+            REFCOUNT_ADD(*mator);
             break;
         }
         case ILayoutTransition::CHANGE_DISAPPEARING: {
             *mator = mChangingDisappearingAnim;
+            REFCOUNT_ADD(*mator);
             break;
         }
         case ILayoutTransition::CHANGING: {
             *mator = mChangingAnim;
+            REFCOUNT_ADD(*mator);
             break;
         }
         case ILayoutTransition::APPEARING: {
             *mator = mAppearingAnim;
+            REFCOUNT_ADD(*mator);
             break;
         }
         case ILayoutTransition::DISAPPEARING: {
             *mator = mDisappearingAnim;
+            REFCOUNT_ADD(*mator);
         }
     }
-
-    REFCOUNT_ADD(*mator);
 
     return NOERROR;
 }

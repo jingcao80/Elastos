@@ -49,6 +49,7 @@ ECode CCodeSigner::GetSignerCertPath(
 {
     VALIDATE_NOT_NULL(certPath)
     *certPath = mSignerCertPath;
+    REFCOUNT_ADD(*certPath)
     return NOERROR;
 }
 
@@ -57,6 +58,7 @@ ECode CCodeSigner::GetTimestamp(
 {
     VALIDATE_NOT_NULL(timestamp)
     *timestamp = mTimestamp;
+    REFCOUNT_ADD(*timestamp)
     return NOERROR;
 }
 

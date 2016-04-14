@@ -358,6 +358,7 @@ ECode ReflectiveProperty::Get(
             AutoPtr<IBoolean> rTmp;
             CBoolean::New(v, (IBoolean**)&rTmp);
             *rst = rTmp;
+            REFCOUNT_ADD(*rst)
             return NOERROR;
 
         }

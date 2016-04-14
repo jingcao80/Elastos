@@ -88,12 +88,13 @@ ECode CJDBCDatabaseMetaData::GetBestRowIdentifier(
     VALIDATE_NOT_NULL(resultSet);
     *resultSet = NULL;
 
-    AutoPtr<CJDBCStatement> s0;
-    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s0));
-    AutoPtr<CJDBCResultSet> rs0;
-    AutoPtr<CJDBCStatement> s1;
-    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s1));
-    AutoPtr<CJDBCResultSet> rs1;
+    AutoPtr<IJDBCStatement> s0Obj, s1Obj;
+    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s0Obj));
+    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s1Obj));
+    CJDBCStatement* s0 = (CJDBCStatement*)s0Obj.Get();
+    CJDBCStatement* s1 = (CJDBCStatement*)s1Obj.Get();
+    AutoPtr<IResultSet> rs0Obj, rs1Obj;
+
     // try {
     //     try {
         conn->mDb->Exec(String("SELECT 1 FROM sqlite_master LIMIT 1"), NULL);
@@ -103,10 +104,12 @@ ECode CJDBCDatabaseMetaData::GetBestRowIdentifier(
     //     }
         s0->ExecuteQuery(String("PRAGMA index_list(") +
                          Elastos::Sql::SQLite::CShell::SqlQuote(table) +
-                         String(")"),(IResultSet **)&rs0);
+                         String(")"),(IResultSet **)&rs0Obj);
         s1->ExecuteQuery(String("PRAGMA table_info(") +
                          Elastos::Sql::SQLite::CShell::SqlQuote(table) +
-                         String(")"),(IResultSet **)&rs1);
+                         String(")"),(IResultSet **)&rs1Obj);
+    CJDBCResultSet* rs0 = (CJDBCResultSet*)rs0Obj.Get();
+    CJDBCResultSet* rs1 = (CJDBCResultSet*)rs1Obj.Get();
     // } catch (SQLException e) {
     //     throw e;
     // } finally {
@@ -132,12 +135,13 @@ ECode CJDBCDatabaseMetaData::GetBestRowIdentifier(
     (*types)[5] = ITypes::INTEGER;
     (*types)[6] = ITypes::SMALLINT;
     (*types)[7] = ITypes::SMALLINT;
-    AutoPtr<CTableResultX> tr;
-    FAIL_RETURN(CTableResultX::New((ITableResultX **)&tr));
+    AutoPtr<ITableResultX> trObj;
+    FAIL_RETURN(CTableResultX::New((ITableResultX **)&trObj));
+    CTableResultX* tr = (CTableResultX*)trObj.Get();
     tr->Columns(cols);
     tr->Sql_types(types);
-    AutoPtr<CJDBCResultSet> rs ;
-    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL,(IJDBCResultSet **)&rs));
+    AutoPtr<IJDBCResultSet> rs ;
+    FAIL_RETURN(CJDBCResultSet::New(ITableResult::Probe(trObj), NULL,(IJDBCResultSet **)&rs));
     if (rs0 != NULL && rs0->tr != NULL && rs0->tr->mNrows > 0 &&
         rs1 != NULL && rs1->tr != NULL && rs1->tr->mNrows > 0) {
 
@@ -158,13 +162,15 @@ ECode CJDBCDatabaseMetaData::GetBestRowIdentifier(
             if (uniq.GetChar(0) == '0') {
                 continue;
             }
-            AutoPtr<CJDBCStatement> s2;
-            FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s2));
-            AutoPtr<CJDBCResultSet> rs2;
+            AutoPtr<IJDBCStatement> s2Obj;
+            FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s2Obj));
+            CJDBCStatement* s2 = (CJDBCStatement*)s2Obj.Get();
+            AutoPtr<IResultSet> rs2Obj;
             // try {
                 s2->ExecuteQuery(String("PRAGMA index_info(") +
                                  Elastos::Sql::SQLite::CShell::SqlQuote(iname) +
-                                 String(")"),(IResultSet **)&rs2);
+                                 String(")"),(IResultSet **)&rs2Obj);
+                CJDBCResultSet* rs2 = (CJDBCResultSet*)rs2Obj.Get();
             // } catch (SQLException e) {
             // } finally {
             //     s2.close();
@@ -213,7 +219,8 @@ ECode CJDBCDatabaseMetaData::GetBestRowIdentifier(
         Boolean rowflag = FALSE;
         tr->Newrow(row, &rowflag);
     }
-    *resultSet = (IResultSet *)rs.Get();
+    *resultSet = IResultSet::Probe(rs);
+    REFCOUNT_ADD(*resultSet)
     return NOERROR;
 }
 
@@ -232,8 +239,10 @@ ECode CJDBCDatabaseMetaData::GetCatalogs(
     (*row)[0] = String("");
     Boolean flag = FALSE;
     tr->Newrow(row, &flag);
-    FAIL_RETURN(CJDBCResultSet::New(tr,NULL,(IJDBCResultSet **)resultSet));
-
+    AutoPtr<IJDBCResultSet> jrs;
+    FAIL_RETURN(CJDBCResultSet::New(tr,NULL,(IJDBCResultSet **)&jrs));
+    *resultSet = IResultSet::Probe(jrs);
+    REFCOUNT_ADD(*resultSet)
     return NOERROR;
 }
 
@@ -296,15 +305,17 @@ ECode CJDBCDatabaseMetaData::GetColumns(
     /* [in] */ const String& catalog,
     /* [in] */ const String& schemaPattern,
     /* [in] */ const String& tableNamePattern,
-    /* [in] */ const String& columnNamePattern,
+    /* [in] */ const String& inColumnNamePattern,
     /* [out] */ IResultSet ** resultSet)
 {
+    String columnNamePattern = inColumnNamePattern;
     if (conn->mDb == NULL) {
         // throw new SQLException("connection closed.");
     }
-    AutoPtr<CJDBCStatement> s ;
-    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s));
-    AutoPtr<CJDBCResultSet> rs0 ;
+    AutoPtr<IJDBCStatement> sObj ;
+    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&sObj));
+    CJDBCStatement* s = (CJDBCStatement*)sObj.Get();
+    AutoPtr<IResultSet> rs0Obj ;
     // try {
     //     try {
              conn->mDb->Exec(String("SELECT 1 FROM sqlite_master LIMIT 1"), NULL);
@@ -313,8 +324,9 @@ ECode CJDBCDatabaseMetaData::GetColumns(
     //     }
              s->ExecuteQuery(String("PRAGMA table_info(") +
                      SQLite::CShell::SqlQuote(tableNamePattern) +
-                     String(")"),(IResultSet **)&rs0);
+                     String(")"),(IResultSet **)&rs0Obj);
              s->Close();
+            CJDBCResultSet* rs0 = (CJDBCResultSet*)rs0Obj.Get();
     // } catch (SQLException e) {
     //     throw e;
     // } finally {
@@ -362,26 +374,28 @@ ECode CJDBCDatabaseMetaData::GetColumns(
     (*types)[15] = ITypes::INTEGER;
     (*types)[16] = ITypes::INTEGER;
     (*types)[17] = ITypes::VARCHAR;
-    AutoPtr<CTableResultX> tr;
-    FAIL_RETURN(CTableResultX::New((ITableResultX **)&tr));
+    AutoPtr<ITableResultX> trObj;
+    FAIL_RETURN(CTableResultX::New((ITableResultX **)&trObj));
+    CTableResultX* tr = (CTableResultX*)trObj.Get();
     tr->Columns(cols);
     tr->Sql_types(types);
-    AutoPtr<CJDBCResultSet> rs;
-    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr,NULL,(IJDBCResultSet **)&rs));
+    AutoPtr<IJDBCResultSet> rsObj;
+    FAIL_RETURN(CJDBCResultSet::New(ITableResult::Probe(tr),NULL,(IJDBCResultSet **)&rsObj));
+    CJDBCResultSet* rs = (CJDBCResultSet*)rsObj.Get();
     if (rs0 != NULL && rs0->tr != NULL && rs0->tr->mNrows > 0) {
         HashMap<String, Int32> h ;
         for (Int32 i = 0; i < rs0->tr->mNcolumns; i++) {
-        h.Insert(Pair<String,Int32>((*rs0->tr->mColumn)[i], i)); // android-changed
+            h.Insert(Pair<String,Int32>((*rs0->tr->mColumn)[i], i)); // android-changed
         }
         if (columnNamePattern != NULL && columnNamePattern.GetChar(0) == '%') {
-            *(const_cast<String *>(&columnNamePattern)) = String(NULL);
+            columnNamePattern = NULL;
         }
         for (Int32 i = 0; i < rs0->tr->mNrows; i++) {
             AutoPtr<ArrayOf<String> > r0 = rs0->tr->mRows[i];
             Int32 col =  h[String("name")];
             if (columnNamePattern != NULL) {
                 if ((*r0)[col].Compare(columnNamePattern) != 0) {
-                continue;
+                    continue;
                 }
             }
             AutoPtr<ArrayOf<String> > row = ArrayOf<String>::Alloc(cols->GetLength());
@@ -415,7 +429,7 @@ ECode CJDBCDatabaseMetaData::GetColumns(
             tr->Newrow(row,&rowflag);
         }
     }
-    *resultSet = (IResultSet *)rs.Get();
+    *resultSet = IResultSet::Probe(rs);
     REFCOUNT_ADD(*resultSet);
     return NOERROR;
 }
@@ -423,7 +437,8 @@ ECode CJDBCDatabaseMetaData::GetColumns(
 ECode CJDBCDatabaseMetaData::GetConnection(
     /* [out] */ IConnection ** connection)
 {
-    *connection = (IConnection *)conn.Get();
+    *connection = IConnection::Probe(conn);
+    REFCOUNT_ADD(*connection)
     return NOERROR;
 }
 

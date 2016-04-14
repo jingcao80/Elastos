@@ -27,6 +27,7 @@ ECode CBrowserContractBookmarks::GetCONTENT_URI_DEFAULT_FOLDER(
 {
     VALIDATE_NOT_NULL(uri);
     *uri = BrowserContract::Bookmarks::CONTENT_URI_DEFAULT_FOLDER;
+    REFCOUNT_ADD(*uri)
     return NOERROR;
 }
 

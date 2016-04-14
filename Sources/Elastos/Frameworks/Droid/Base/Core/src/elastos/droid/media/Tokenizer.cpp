@@ -118,6 +118,7 @@ ECode Tokenizer::TagTokenizer::Start(
     mName = mAnnotation = String("");
     mAtAnnotation = FALSE;
     *result = this;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

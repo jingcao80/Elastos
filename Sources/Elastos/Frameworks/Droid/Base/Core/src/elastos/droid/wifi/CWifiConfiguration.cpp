@@ -2019,6 +2019,7 @@ ECode CWifiConfiguration::LastSeen(
     }
 
     *resultOut = mostRecent;
+    REFCOUNT_ADD(*resultOut)
 
     return NOERROR;
 }

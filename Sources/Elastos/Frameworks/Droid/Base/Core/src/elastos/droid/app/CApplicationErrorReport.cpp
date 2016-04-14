@@ -150,6 +150,7 @@ ECode CApplicationErrorReport::GetCrashInfo(
 {
     VALIDATE_NOT_NULL(crashInfo);
     *crashInfo = mCrashInfo;
+    REFCOUNT_ADD(*crashInfo)
     return NOERROR;
 }
 
@@ -165,6 +166,7 @@ ECode CApplicationErrorReport::GetAnrInfo(
 {
     VALIDATE_NOT_NULL(anrInfo);
     *anrInfo = mAnrInfo;
+    REFCOUNT_ADD(*anrInfo)
     return NOERROR;
 }
 
@@ -180,6 +182,7 @@ ECode CApplicationErrorReport::GetBatteryInfo(
 {
     VALIDATE_NOT_NULL(batteryInfo);
     *batteryInfo = mBatteryInfo;
+    REFCOUNT_ADD(*batteryInfo)
     return NOERROR;
 }
 
@@ -195,6 +198,7 @@ ECode CApplicationErrorReport::GetRunningServiceInfo(
 {
     VALIDATE_NOT_NULL(runningServiceInfo);
     *runningServiceInfo = mRunningServiceInfo;
+    REFCOUNT_ADD(*runningServiceInfo)
     return NOERROR;
 }
 

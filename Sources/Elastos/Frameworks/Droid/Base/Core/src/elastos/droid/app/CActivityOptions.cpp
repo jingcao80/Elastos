@@ -304,7 +304,8 @@ ECode CActivityOptions::MakeSceneTransitionAnimation(
     window->HasFeature(IWindow::FEATURE_ACTIVITY_TRANSITIONS, &bval);
     if (!bval) {
         opts->mAnimationType = IActivityOptions::ANIM_DEFAULT;
-        *options = (IActivityOptions*)opts;
+        *options = (IActivityOptions*)opts.Get();
+        REFCOUNT_ADD(*options)
         return NOERROR;
     }
 

@@ -249,6 +249,7 @@ ECode CTelephonyManager::GetCellLocation(
         return NOERROR;
 
     *res = cl;
+    REFCOUNT_ADD(*res)
     return NOERROR;
     // } catch (RemoteException ex) {
     //     return null;

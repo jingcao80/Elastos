@@ -78,11 +78,12 @@ ECode CCoderResult::MalformedForLength(
             r = CreateCoderResult(TYPE_MALFORMED_INPUT, length);
             (*sMalformedErrors)[length] = r;
             *result = r;
+            REFCOUNT_ADD(*result)
         }
         else {
             *result = iter->mSecond;
+            REFCOUNT_ADD(*result)
         }
-        REFCOUNT_ADD(*result)
         return NOERROR;
     }
     // throw new IllegalArgumentException("length <= 0: " + length);
@@ -104,11 +105,12 @@ ECode CCoderResult::UnmappableForLength(
             r = CreateCoderResult(TYPE_MALFORMED_INPUT, length);
             (*sUnmappableErrors)[length] = r;
             *result = r;
+            REFCOUNT_ADD(*result)
         }
         else {
             *result = iter->mSecond;
+            REFCOUNT_ADD(*result)
         }
-        REFCOUNT_ADD(*result)
 
     }
     // throw new IllegalArgumentException("length <= 0: " + length);

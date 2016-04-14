@@ -297,6 +297,7 @@ ECode AdapterInputConnection::GetEditable(
 {
     VALIDATE_NOT_NULL(editable);
     *editable = mEditable;
+    REFCOUNT_ADD(*editable)
     return NOERROR;
 }
 
@@ -518,6 +519,7 @@ ECode AdapterInputConnection::GetExtractedText(
     et->SetFlags(mSingleLine ? IExtractedText::FLAG_SINGLE_LINE : 0);
 
     *text = et;
+    REFCOUNT_ADD(*text)
 
     return NOERROR;
 }

@@ -162,12 +162,15 @@ ECode CRouteTracker::GetHopTarget(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    if (hop < hopcount-1)
+    if (hop < hopcount-1) {
         *target = (*mProxyChain)[hop];
-    else
+        REFCOUNT_ADD(*target)
+    }
+    else {
         *target = mTargetHost;
+        REFCOUNT_ADD(*target)
+    }
 
-    REFCOUNT_ADD(*target)
     return NOERROR;
 }
 

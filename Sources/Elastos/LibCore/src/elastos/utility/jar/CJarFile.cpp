@@ -453,6 +453,7 @@ ECode CJarFile::GetEntry(
     FAIL_RETURN(ZipFile::GetEntry(entryName, (IZipEntry**)&ze));
     if (ze == NULL) {
         *entry = ze;
+        REFCOUNT_ADD(*entry)
         return NOERROR;
     }
 

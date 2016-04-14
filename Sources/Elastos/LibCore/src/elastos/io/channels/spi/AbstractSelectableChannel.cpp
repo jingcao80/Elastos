@@ -19,6 +19,7 @@ AbstractSelectableChannel::AbstractSelectableChannel()
 ECode AbstractSelectableChannel::constructor(
     /* [in] */ ISelectorProvider* provider)
 {
+    mBlockingLock = new Object();
     mProvider = provider;
     return NOERROR;
 }
@@ -142,7 +143,8 @@ ECode AbstractSelectableChannel::GetBlockingLock(
     /* [out] */ IObject** obj)
 {
     VALIDATE_NOT_NULL(obj)
-    *obj = (IObject*)&mBlockingLock;
+    *obj = (IObject*)mBlockingLock.Get();
+    REFCOUNT_ADD(*obj)
     return NOERROR;
 }
 

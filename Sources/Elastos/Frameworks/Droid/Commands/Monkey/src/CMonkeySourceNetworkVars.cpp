@@ -262,8 +262,8 @@ ECode CMonkeySourceNetworkVars::GetVarCommand::TranslateCommand(
         CMonkeyCommandReturn::New(TRUE, getter->Get(), ret);
         return NOERROR;
     }
-    REFCOUNT_ADD(*ret)
     *ret = MonkeySourceNetwork::EARG;
+    REFCOUNT_ADD(*ret)
     return NOERROR;
 }
 

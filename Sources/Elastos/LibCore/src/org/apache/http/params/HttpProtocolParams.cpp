@@ -95,10 +95,12 @@ ECode HttpProtocolParams::GetVersion(
     }
     AutoPtr<IInterface> param;
     params->GetParameter(ICoreProtocolPNames::PROTOCOL_VERSION, (IInterface**)&param);
-    *ver = IProtocolVersion::Probe(param);
-    if (*ver == NULL) {
-        *ver = IProtocolVersion::Probe(CHttpVersion::HTTP_1_1);
+    AutoPtr<IProtocolVersion> pv = IProtocolVersion::Probe(param);
+    if (pv == NULL) {
+        pv = IProtocolVersion::Probe(CHttpVersion::HTTP_1_1);
     }
+
+    *ver = pv;
     REFCOUNT_ADD(*ver)
     return NOERROR;
 }

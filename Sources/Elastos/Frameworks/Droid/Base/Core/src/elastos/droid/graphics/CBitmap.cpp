@@ -2109,7 +2109,9 @@ ECode CBitmap::NativeExtractAlpha(
         array[1] = offset.fY;
     }
 
-    *bitmap = GraphicsNative::CreateBitmap(dst, allocator.getStorageObj(), GetPremulBitmapCreateFlags(TRUE), NULL, NULL, -1);
+    AutoPtr<IBitmap> bmp = GraphicsNative::CreateBitmap(dst, allocator.getStorageObj(), GetPremulBitmapCreateFlags(TRUE), NULL, NULL, -1);
+    *bitmap = bmp;
+    REFCOUNT_ADD(*bitmap)
     return NOERROR;
 }
 

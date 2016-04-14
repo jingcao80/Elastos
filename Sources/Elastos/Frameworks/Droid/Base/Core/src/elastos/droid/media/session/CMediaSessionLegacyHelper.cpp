@@ -306,6 +306,7 @@ ECode CMediaSessionLegacyHelper::GetSession(
     IMap::Probe(mSessions)->Get(pi, (IInterface**)&obj);
     AutoPtr<SessionHolder> holder = (SessionHolder*)(IObject*)obj.Get();
     *result = (holder == NULL) ? NULL : holder->mSession;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

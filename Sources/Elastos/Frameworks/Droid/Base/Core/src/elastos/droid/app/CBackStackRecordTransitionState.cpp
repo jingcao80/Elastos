@@ -33,6 +33,7 @@ ECode CBackStackRecordTransitionState::GetEnteringEpicenterView(
 {
     VALIDATE_NOT_NULL(result)
     *result = mEnteringEpicenterView;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -48,6 +49,7 @@ ECode CBackStackRecordTransitionState::GetNonExistentView(
 {
     VALIDATE_NOT_NULL(result)
     *result = mNonExistentView;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

@@ -312,7 +312,7 @@ ECode CActivityManager::GetAppTaskThumbnailSize(
     /* [out] */ ISize** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = 0;
+    *result = NULL;
 
     synchronized(this) {
         FAIL_RETURN(EnsureAppTaskThumbnailSizeLocked())

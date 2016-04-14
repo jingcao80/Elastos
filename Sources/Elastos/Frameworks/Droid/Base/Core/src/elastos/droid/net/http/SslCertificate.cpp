@@ -322,7 +322,9 @@ ECode SslCertificate::GetValidNotBeforeDate(
 {
     VALIDATE_NOT_NULL(result);
 
-    *result = CloneDate(mValidNotBefore);
+    AutoPtr<IDate> d = CloneDate(mValidNotBefore);
+    *result = d;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -340,7 +342,9 @@ ECode SslCertificate::GetValidNotAfterDate(
 {
     VALIDATE_NOT_NULL(result);
 
-    *result = CloneDate(mValidNotAfter);
+    AutoPtr<IDate> d = CloneDate(mValidNotAfter);
+    *result = d;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

@@ -791,11 +791,12 @@ ECode InputMethodService::GetCurrentInputConnection(
     assert(inputConnection != NULL);
     if (mStartedInputConnection != NULL) {
         *inputConnection = mStartedInputConnection;
+        REFCOUNT_ADD(*inputConnection);
     }
     else {
         *inputConnection = mInputConnection;
+        REFCOUNT_ADD(*inputConnection);
     }
-    REFCOUNT_ADD(*inputConnection);
     return NOERROR;
 }
 

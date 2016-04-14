@@ -282,11 +282,13 @@ ECode Environment::UserEnvironment::GetSecondaryStorageDirectory(
     Int32 length = mExternalDirsForApp->GetLength();
     if (length > 1) {
         *file = (*mExternalDirsForApp)[1];
+        REFCOUNT_ADD(*file)
     }
     else {
         *file = (*mExternalDirsForApp)[0];
+        REFCOUNT_ADD(*file)
     }
-    REFCOUNT_ADD(*file)
+
     return NOERROR;
 }
 

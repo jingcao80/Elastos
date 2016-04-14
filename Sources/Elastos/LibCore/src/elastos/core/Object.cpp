@@ -175,7 +175,7 @@ ECode Object::GetWeakReference(
 {
     VALIDATE_NOT_NULL(weakReference);
     *weakReference = new WeakReferenceImpl(TO_IINTERFACE(this), CreateWeak(this));
-    (*weakReference)->AddRef();
+    REFCOUNT_ADD(*weakReference)
     return NOERROR;
 }
 

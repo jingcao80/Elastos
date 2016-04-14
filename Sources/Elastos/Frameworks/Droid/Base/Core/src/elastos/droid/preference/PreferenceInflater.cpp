@@ -135,11 +135,13 @@ ECode PreferenceInflater::OnMergeRoots(
         AutoPtr<IPreference> pg = IPreference::Probe(xmlRoot);
         if (pg != NULL) pg->OnAttachedToHierarchy(mPreferenceManager);
         *p = xmlRoot;
+        REFCOUNT_ADD(*p)
     }
     else {
         *p = givenRoot;
+        REFCOUNT_ADD(*p)
     }
-    REFCOUNT_ADD(*p)
+
     return NOERROR;
 }
 

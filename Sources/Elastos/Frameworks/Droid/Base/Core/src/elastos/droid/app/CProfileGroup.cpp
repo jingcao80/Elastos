@@ -111,6 +111,7 @@ ECode CProfileGroup::GetUuid(
 {
     VALIDATE_NOT_NULL(uuid);
     *uuid = mUuid;
+    REFCOUNT_ADD(*uuid)
     return NOERROR;
 }
 

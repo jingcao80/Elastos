@@ -121,6 +121,7 @@ ECode CertStore::GetProvider(
 {
     VALIDATE_NOT_NULL(provider)
     *provider = mProvider;
+    REFCOUNT_ADD(*provider)
     return NOERROR;
 }
 

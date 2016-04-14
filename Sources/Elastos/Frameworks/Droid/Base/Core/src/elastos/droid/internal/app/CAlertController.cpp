@@ -548,18 +548,20 @@ ECode CAlertController::GetButton(
     switch (whichButton) {
         case IDialogInterface::BUTTON_POSITIVE:
             *button = mButtonPositive;
+            REFCOUNT_ADD(*button);
             break;
         case IDialogInterface::BUTTON_NEGATIVE:
             *button = mButtonNegative;
+            REFCOUNT_ADD(*button);
             break;
         case IDialogInterface::BUTTON_NEUTRAL:
             *button = mButtonNeutral;
+            REFCOUNT_ADD(*button);
             break;
         default:
             break;
     }
 
-    REFCOUNT_ADD(*button);
     return NOERROR;
 }
 

@@ -24,6 +24,7 @@ ECode CECFieldF2m::GetM(
 {
     VALIDATE_NOT_NULL(m)
     *m = mM;
+    REFCOUNT_ADD(*m)
     return NOERROR;
 }
 

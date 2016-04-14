@@ -32,11 +32,13 @@ ECode BrowserCompatSpecFactory::NewInstance(
             cs->ToString(&(*strs)[i]);
         }
         *spec = (ICookieSpec*)new BrowserCompatSpec(strs);
+        REFCOUNT_ADD(*spec)
     }
     else {
         *spec = (ICookieSpec*)new BrowserCompatSpec();
+        REFCOUNT_ADD(*spec)
     }
-    REFCOUNT_ADD(*spec)
+
     return NOERROR;
 }
 

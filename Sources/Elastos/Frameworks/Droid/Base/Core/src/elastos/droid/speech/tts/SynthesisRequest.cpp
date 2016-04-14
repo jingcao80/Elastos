@@ -60,6 +60,7 @@ ECode SynthesisRequest::GetCharSequenceText(
 {
     VALIDATE_NOT_NULL(ret);
     *ret = mText;
+    REFCOUNT_ADD(*ret)
     return NOERROR;
 }
 

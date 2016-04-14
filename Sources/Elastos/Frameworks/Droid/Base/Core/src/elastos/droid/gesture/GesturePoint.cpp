@@ -80,11 +80,10 @@ ECode GesturePoint::Deserialize(
     /* [in] */ IDataInputStream *in,
     /* [out] */ IGesturePoint **instance)
 {
-    AutoPtr<IGesturePoint> inst;
-
     VALIDATE_NOT_NULL(instance);
-    inst = Deserialize(in);
+    AutoPtr<IGesturePoint> inst = Deserialize(in);
     *instance = inst;
+    REFCOUNT_ADD(*instance)
 
     if (*instance != NULL)
         return NOERROR;

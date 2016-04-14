@@ -397,6 +397,7 @@ ECode ThreadGroup::GetParent(
         mParent->CheckAccess();
     }
     *parent = mParent;
+    REFCOUNT_ADD(*parent)
     return NOERROR;
 }
 

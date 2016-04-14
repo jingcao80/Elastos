@@ -77,6 +77,7 @@ ECode  CMediaController::PlaybackInfo::GetAudioAttributes(
 {
     VALIDATE_NOT_NULL(result);
     *result = mAudioAttrs;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -722,6 +723,7 @@ ECode CMediaController::GetHandlerForCallbackLocked(
         AutoPtr<MessageHandler> handler = (MessageHandler*)(IObject*)obj.Get();
         if (cb == handler->mCallback) {
             *result = handler;
+            REFCOUNT_ADD(*result)
             return NOERROR;
         }
     }

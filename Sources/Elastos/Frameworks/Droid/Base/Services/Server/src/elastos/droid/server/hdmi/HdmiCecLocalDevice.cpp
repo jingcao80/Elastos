@@ -86,6 +86,7 @@ ECode HdmiCecLocalDevice::ActiveSource::Of(
     AutoPtr<ActiveSource> rev = new ActiveSource();
     rev->constructor(logical, physical);
     *result = IHdmiCecLocalDeviceActiveSource::Probe(rev);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

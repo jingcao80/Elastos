@@ -76,6 +76,7 @@ ECode CVerifierInfo::GetPublicKey(
 {
     VALIDATE_NOT_NULL(publicKey);
     *publicKey = mPublicKey;
+    REFCOUNT_ADD(*publicKey)
     return NOERROR;
 }
 

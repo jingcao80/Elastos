@@ -38,10 +38,7 @@ ECode MediaSyncEvent::CreateEvent(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    AutoPtr<IMediaSyncEvent> event;
-    CMediaSyncEvent::New(eventType, (IMediaSyncEvent**)&event);
-    *result = event.Get();
-    return NOERROR;
+    return CMediaSyncEvent::New(eventType, result);
 }
 
 ECode MediaSyncEvent::SetAudioSessionId(

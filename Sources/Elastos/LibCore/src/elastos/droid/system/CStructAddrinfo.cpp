@@ -106,6 +106,7 @@ ECode CStructAddrinfo::GetAddr(
 {
     VALIDATE_NOT_NULL(addr);
     *addr = ai_addr;
+    REFCOUNT_ADD(*addr)
     return NOERROR;
 }
 

@@ -170,11 +170,13 @@ ECode RFC2109Spec::FormatCookies(
     }
     if (mOneHeader) {
         *headers = DoFormatOneHeader(IList::Probe(newCookies));
+        REFCOUNT_ADD(*headers)
     }
     else {
         *headers = DoFormatManyHeaders(IList::Probe(newCookies));
+        REFCOUNT_ADD(*headers)
     }
-    REFCOUNT_ADD(*headers)
+
     return NOERROR;
 }
 

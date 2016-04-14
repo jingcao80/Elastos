@@ -255,6 +255,7 @@ ECode ElastosHttpClient::NewInstance(
     /* [out] */ IElastosHttpClient** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
 
     AutoPtr<IHttpParams> params;
     CBasicHttpParams::New((IHttpParams**)&params);
@@ -303,8 +304,13 @@ ECode ElastosHttpClient::NewInstance(
     // CThreadSafeClientConnManager::New(params, schemeRegistry, (IClientConnectionManager**)&manager);
     // We use a factory method to modify superclass initialization
     // parameters without the funny call-a-static-method dance.
-    *result = new CElastosHttpClient();
-    return ((CElastosHttpClient*)(*result))->constructor(manager, params);
+    AutoPtr<CElastosHttpClient>  ehc = new CElastosHttpClient();
+    ECode ec = ehc->constructor(manager, params);
+    FAIL_RETURN(ec)
+
+    *result = (IElastosHttpClient*)ehc.Get();
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode ElastosHttpClient::NewInstance(

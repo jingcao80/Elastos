@@ -68,6 +68,7 @@ ECode SelectionKeyImpl::GetInterestOps(
     AutoLock lock(((SelectorImpl*)mSelector.Get())->mKeysLock);
     mInterestOps = operations;
     *key = this;
+    REFCOUNT_ADD(*key)
 
     return NOERROR;
 }

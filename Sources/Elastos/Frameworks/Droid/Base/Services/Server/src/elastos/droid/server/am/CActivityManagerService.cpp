@@ -150,7 +150,7 @@ using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Pm::IPathPermission;
 using Elastos::Droid::Content::Pm::ThemeUtils;
 using Elastos::Droid::Content::Res::CConfiguration;
-// using Elastos::Droid::Content::Res::CThemeConfigHelper;
+using Elastos::Droid::Content::Res::CThemeConfigHelper;
 using Elastos::Droid::Content::Res::IThemeConfigHelper;
 using Elastos::Droid::Graphics::CPoint;
 using Elastos::Droid::Internal::Os::IBatteryStatsImplUidPkg;
@@ -20950,8 +20950,7 @@ ECode CActivityManagerService::GetConfiguration(
         AutoPtr<IContentResolver> cr;
         mContext->GetContentResolver((IContentResolver**)&cr);
         AutoPtr<IThemeConfigHelper> tcHelper;
-        assert(0);
-        // CThemeConfigHelper::AcquireSingleton((IThemeConfigHelper**)&tcHelper);
+        CThemeConfigHelper::AcquireSingleton((IThemeConfigHelper**)&tcHelper);
         tcHelper->GetBootTheme(cr, (IThemeConfig**)&themeConfig);
         (*config)->SetThemeConfig(themeConfig);
     }

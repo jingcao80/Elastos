@@ -32,11 +32,13 @@ ECode NetscapeDraftSpecFactory::NewInstance(
             cs->ToString(&(*strs)[i]);
         }
         *spec = (ICookieSpec*)new NetScapeDraftSpec(strs);
+        REFCOUNT_ADD(*spec)
     }
     else {
         *spec = (ICookieSpec*)new NetScapeDraftSpec();
+        REFCOUNT_ADD(*spec)
     }
-    REFCOUNT_ADD(*spec)
+
     return NOERROR;
 }
 

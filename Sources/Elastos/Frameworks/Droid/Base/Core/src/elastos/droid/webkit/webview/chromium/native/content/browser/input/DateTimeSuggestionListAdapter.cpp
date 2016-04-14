@@ -79,6 +79,7 @@ ECode DateTimeSuggestionListAdapter::GetView(
     }
 
     *outView = layout;
+    REFCOUNT_ADD(*outView)
 
     return NOERROR;
 }

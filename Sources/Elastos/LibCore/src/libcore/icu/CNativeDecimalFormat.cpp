@@ -1471,7 +1471,7 @@ ECode CNativeDecimalFormat::Clone(
     clone->mPosPrefNull = mPosPrefNull;
     clone->mPosSuffNull = mPosSuffNull;
     *rev = clone->Probe(EIID_IInterface);
-    REFCOUNT_ADD(clone);
+    REFCOUNT_ADD(*rev);
     return NOERROR;
 }
 

@@ -72,6 +72,7 @@ ECode CharSequenceAdapter::Duplicate(
     AutoPtr<CharSequenceAdapter> csa;
     FAIL_RETURN(Copy(this, (CharSequenceAdapter**)&csa))
     *buffer = ICharBuffer::Probe(csa);
+    REFCOUNT_ADD(*buffer)
     return NOERROR;
 }
 

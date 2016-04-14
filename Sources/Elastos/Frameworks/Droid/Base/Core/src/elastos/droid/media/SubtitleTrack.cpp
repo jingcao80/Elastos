@@ -233,6 +233,7 @@ ECode SubtitleTrack::CueList::EntryIterator::GetNext(
         NextKey();
     }
     *result = mLastEntry;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -560,6 +561,7 @@ ECode SubtitleTrack::GetFormat(
 {
     VALIDATE_NOT_NULL(result);
     *result = mFormat;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

@@ -92,8 +92,9 @@ ECode Gesture::constructor()
 ECode Gesture::GetStrokes(
     /* [out] */ IArrayList **container)
 {
+    VALIDATE_NOT_NULL(container)
     *container = mStrokes;
-    REFCOUNT_ADD(mStrokes);
+    REFCOUNT_ADD(*container);
     return NOERROR;
 }
 
@@ -101,7 +102,6 @@ ECode Gesture::GetStrokesCount(
     /* [out] */ Int32 *count)
 {
     VALIDATE_NOT_NULL(count);
-
     mStrokes->GetSize(count);
     return NOERROR;
 }

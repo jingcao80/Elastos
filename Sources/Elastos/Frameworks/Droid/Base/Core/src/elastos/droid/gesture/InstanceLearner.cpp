@@ -136,10 +136,9 @@ ECode InstanceLearner::Classify(
     /* [in] */ ArrayOf<Float>* vec,
     /* [out] */ IArrayList** predictions)
 {
-    AutoPtr<IArrayList> list;
-
-    list = Classify(sequenceType, orientationType, vec);
+    AutoPtr<IArrayList> list = Classify(sequenceType, orientationType, vec);
     *predictions = list;
+    REFCOUNT_ADD(*predictions)
     return NOERROR;
 }
 

@@ -248,6 +248,7 @@ ECode CCertificationRequest::GetInfo(
 {
     VALIDATE_NOT_NULL(info)
     *info = mInfo;
+    REFCOUNT_ADD(*info)
     return NOERROR;
 }
 
@@ -283,7 +284,7 @@ ECode CCertificationRequest::GetAlgorithmIdentifier(
 {
     VALIDATE_NOT_NULL(algId)
     *algId = mAlgId;
-    REFCOUNT_ADD(algId);
+    REFCOUNT_ADD(*algId)
     return NOERROR;
 }
 

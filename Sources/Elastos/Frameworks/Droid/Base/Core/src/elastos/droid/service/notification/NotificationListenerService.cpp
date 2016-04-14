@@ -246,8 +246,9 @@ ECode NotificationListenerService::GetActiveNotifications(
     AutoPtr<ArrayOf<IInterface*> > _ans;
     list->ToArray(_sbns, (ArrayOf<IInterface*>**)&_ans);
     *ans = ArrayOf<IStatusBarNotification*>::Alloc(_ans->GetLength());
+    REFCOUNT_ADD(*ans)
     for (Int32 i = 0; i < _ans->GetLength(); i++) {
-        (**ans)[i] = IStatusBarNotification::Probe((*_ans)[i]);
+        (*ans)->Set(i, IStatusBarNotification::Probe((*_ans)[i]));
     }
     return NOERROR;
     //TODO
@@ -404,11 +405,13 @@ ECode NotificationListenerService::GetContext(
     VALIDATE_NOT_NULL(ctx)
     if (mSystemContext != NULL) {
         *ctx = mSystemContext;
+        REFCOUNT_ADD(*ctx)
     }
     else {
         *ctx = this;
+        REFCOUNT_ADD(*ctx)
     }
-    REFCOUNT_ADD(*ctx)
+
     return NOERROR;
 }
 

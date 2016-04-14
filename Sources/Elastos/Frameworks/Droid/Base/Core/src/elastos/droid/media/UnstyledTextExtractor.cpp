@@ -114,6 +114,7 @@ ECode UnstyledTextExtractor::GetText(
     }
     Init();
     *result = lines.Get();
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

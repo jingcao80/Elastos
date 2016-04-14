@@ -103,11 +103,12 @@ ECode CUsageStatsManager::QueryEvents(
     mService->QueryEvents(beginTime, endTime, packageName, (IUsageEvents**)&iter);
     if (iter != NULL) {
         *result = iter;
+        REFCOUNT_ADD(*result)
     }
     else {
         *result = sEmptyResults;
+        REFCOUNT_ADD(*result)
     }
-    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

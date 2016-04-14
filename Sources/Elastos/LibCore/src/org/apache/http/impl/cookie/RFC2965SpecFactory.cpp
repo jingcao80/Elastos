@@ -34,11 +34,13 @@ ECode RFC2965SpecFactory::NewInstance(
         Boolean value;
         params->GetBooleanParameter(ICookieSpecPNames::SINGLE_COOKIE_HEADER, FALSE, &value);
         *spec = (ICookieSpec*)new RFC2965Spec(strs, value);
+        REFCOUNT_ADD(*spec)
     }
     else {
         *spec = (ICookieSpec*)new RFC2965Spec();
+        REFCOUNT_ADD(*spec)
     }
-    REFCOUNT_ADD(*spec)
+
     return NOERROR;
 }
 

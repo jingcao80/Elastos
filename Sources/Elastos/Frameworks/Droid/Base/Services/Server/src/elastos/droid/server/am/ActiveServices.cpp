@@ -360,6 +360,7 @@ ECode ActiveServices::StartServiceLocked(
                 smap->mDelayedStartList.PushBack(r);
                 r->mDelayed = TRUE;
                 *name = r->mName;
+                REFCOUNT_ADD(*name)
                 return NOERROR;
             }
             if (DEBUG_DELAYED_STARTS) Slogger::V(TAG, "Not delaying: %s", TO_CSTR(r));

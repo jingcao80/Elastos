@@ -180,7 +180,7 @@ private:
 private:
     AutoPtr<ISelectorProvider> mProvider;
     List<AutoPtr<ISelectionKey> > mKeyList;
-    Object mBlockingLock;
+    AutoPtr<Object> mBlockingLock;
     Boolean mIsBlocking;
 };
 

@@ -122,12 +122,11 @@ ERROR_PROCESS_1:
         }
 
         ECode ToString(
-            /* [out] */ String* rev)
+            /* [out] */ String* str)
         {
-            VALIDATE_NOT_NULL(rev)
-            *rev = String(NULL);
-
-            return IObject::Probe(mCert)->ToString(rev);
+            VALIDATE_NOT_NULL(str)
+            *str = Object::ToString(mCert);
+            return NOERROR;
         }
 
         ECode GetPublicKey(

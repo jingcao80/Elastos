@@ -835,6 +835,7 @@ ECode CSynchronousQueue::ToArray(
     VALIDATE_NOT_NULL(array)
 
     *array = ArrayOf<IInterface*>::Alloc(1);
+    REFCOUNT_ADD(*array)
     return NOERROR;
 }
 

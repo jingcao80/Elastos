@@ -202,8 +202,8 @@ ECode MonkeySourceNetwork::TrackballCommand::TranslateCommand(
         CMonkeyTrackballEvent::New(IMotionEvent::ACTION_MOVE, (IMonkeyTrackballEvent**)&e);
         e->AddPointer(0, dx, dy);
         queue->EnqueueEvent(IMonkeyEvent::Probe(e));
-        REFCOUNT_ADD(*ret)
         *ret = OK;
+        REFCOUNT_ADD(*ret)
         return NOERROR;
     }
 

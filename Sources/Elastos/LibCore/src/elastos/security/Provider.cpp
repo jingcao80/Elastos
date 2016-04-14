@@ -404,6 +404,7 @@ ECode Provider::GetService(
 
     if (type.Equals(mLastServiceName) && algorithm.EqualsIgnoreCase(mLastAlgorithm)) {
         *service = mReturnedService;
+        REFCOUNT_ADD(*service)
         return NOERROR;
     }
 

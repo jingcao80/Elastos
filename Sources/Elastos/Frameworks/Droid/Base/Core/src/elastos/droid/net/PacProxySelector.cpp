@@ -93,7 +93,10 @@ ECode PacProxySelector::Select(
     if (response == NULL) {
         FUNC_RETURN(mDefaultList)
     }
-    *result = ParseResponse(response);
+
+    AutoPtr<IList> list = ParseResponse(response);
+    *result = list;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

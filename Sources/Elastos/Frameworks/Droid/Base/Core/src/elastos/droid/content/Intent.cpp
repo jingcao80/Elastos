@@ -1348,7 +1348,6 @@ ECode Intent::GetExtra(
     /* [out] */ IInterface** obj)
 {
     VALIDATE_NOT_NULL(obj)
-    *obj = defaultValue;
     if (mExtras != NULL) {
         AutoPtr<IInterface> newObj;
         mExtras->Get(name, (IInterface**)&newObj);
@@ -1359,6 +1358,7 @@ ECode Intent::GetExtra(
         }
     }
 
+    *obj = defaultValue;
     REFCOUNT_ADD(*obj);
     return NOERROR;
 }

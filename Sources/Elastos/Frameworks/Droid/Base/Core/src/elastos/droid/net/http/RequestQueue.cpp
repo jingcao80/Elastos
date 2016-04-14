@@ -611,6 +611,7 @@ ECode RequestQueue::GetRequest(
             HttpLog::V("RequestQueue.getRequest() => %s", TO_CSTR(ret));
         }
         *req = ret;
+        REFCOUNT_ADD(*req)
     }
     return NOERROR;
 }

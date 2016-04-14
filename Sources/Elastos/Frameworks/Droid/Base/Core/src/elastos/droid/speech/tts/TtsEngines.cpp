@@ -336,6 +336,7 @@ ECode TtsEngines::GetSettingsIntent(
             CIntent::New((IIntent**)&intent);
             intent->SetClassName(engine, settings);
             *ppRet = intent;
+            REFCOUNT_ADD(*ppRet)
             return NOERROR;
         }
     }

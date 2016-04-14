@@ -868,10 +868,13 @@ ECode ProcessStats::ProcessState::PullFixedProc(
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         *retProc = proc;
+        REFCOUNT_ADD(*retProc)
     }
-    else
+    else {
         *retProc = this;
-    REFCOUNT_ADD(*retProc)
+        REFCOUNT_ADD(*retProc)
+    }
+
     return NOERROR;
 }
 

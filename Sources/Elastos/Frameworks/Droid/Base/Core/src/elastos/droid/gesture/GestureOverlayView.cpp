@@ -976,7 +976,7 @@ ECode GestureOverlayView::TouchMove(
     }
 
     *rect = areaToRefresh;
-    REFCOUNT_ADD(rect);
+    REFCOUNT_ADD(*rect);
 */
     return NOERROR;
 }

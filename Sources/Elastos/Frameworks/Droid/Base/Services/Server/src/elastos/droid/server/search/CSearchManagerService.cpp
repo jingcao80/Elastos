@@ -222,14 +222,15 @@ ECode CSearchManagerService::GetSearchables(
     Iterator it = mSearchables.Find(userId);
     if ((it != mSearchables.End()) && it->mSecond != NULL) {
         *rst = it->mSecond;
+        REFCOUNT_ADD(*rst);
     }
     else {
         //Log.i(TAG, "Building list of searchable activities for userId=" + userId);
         *rst = new Searchables(mContext, userId);
+        REFCOUNT_ADD(*rst);
         (*rst)->BuildSearchableList();
         mSearchables[userId] = (*rst);
     }
-    REFCOUNT_ADD(*rst);
 
     return NOERROR;
 }

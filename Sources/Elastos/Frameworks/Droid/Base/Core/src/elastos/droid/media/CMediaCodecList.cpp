@@ -102,6 +102,7 @@ ECode CMediaCodecList::GetCodecInfoAt(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     *result = (*sRegularCodecInfos)[index];
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -115,6 +116,7 @@ ECode CMediaCodecList::GetInfoFor(
     Int32 val;
     NativeFindCodecByName(codec, &val);
     *result = (*sAllCodecInfos)[val];
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

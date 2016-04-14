@@ -281,6 +281,7 @@ ECode CRingtone::GetUri(
 {
     VALIDATE_NOT_NULL(result);
     *result = mUri;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

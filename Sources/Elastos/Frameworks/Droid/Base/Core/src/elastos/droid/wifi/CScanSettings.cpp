@@ -34,6 +34,7 @@ ECode CScanSettings::GetChannelSet(
 {
     VALIDATE_NOT_NULL(result);
     *result = mChannelSet;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

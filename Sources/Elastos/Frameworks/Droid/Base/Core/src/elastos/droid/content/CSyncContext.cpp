@@ -44,6 +44,7 @@ ECode CSyncContext::GetSyncContextBinder(
 {
     VALIDATE_NOT_NULL(binder)
     *binder = IBinder::Probe(mSyncContext);
+    REFCOUNT_ADD(*binder)
     return NOERROR;
 }
 

@@ -705,6 +705,7 @@ ECode BluetoothGatt::GetService(
             id == instanceId &&
             (u->Equals(uuid, &ue), ue)) {
             *result = svc;
+            REFCOUNT_ADD(*result)
             return NOERROR;
         }
     }
@@ -791,6 +792,7 @@ ECode BluetoothGatt::GetDevice(
 {
     VALIDATE_NOT_NULL(result);
     *result = mDevice;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

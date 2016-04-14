@@ -1063,12 +1063,14 @@ ECode CConnectivityManager::GetNetworkManagementService(
     synchronized(this) {
         if (mNMService != NULL) {
             *result = mNMService;
+            REFCOUNT_ADD(*result)
             return NOERROR;
         }
         AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::TELEPHONY_SERVICE);
         AutoPtr<IBinder> b = IBinder::Probe(obj);
         mNMService = IINetworkManagementService::Probe(b);
         *result = mNMService;
+        REFCOUNT_ADD(*result)
     }
     return NOERROR;
 }

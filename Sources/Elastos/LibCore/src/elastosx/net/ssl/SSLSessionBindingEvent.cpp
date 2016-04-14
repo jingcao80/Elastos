@@ -31,6 +31,7 @@ ECode SSLSessionBindingEvent::GetSession(
     VALIDATE_NOT_NULL(session)
 
     *session = (ISSLSession*)ISSLSession::Probe(mSource);
+    REFCOUNT_ADD(*session)
     return NOERROR;
 }
 

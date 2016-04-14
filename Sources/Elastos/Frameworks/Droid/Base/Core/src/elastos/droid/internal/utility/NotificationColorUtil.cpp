@@ -207,10 +207,12 @@ ECode NotificationColorUtil::InvertCharSequenceColors(
             ISpannable::Probe(builder)->SetSpan(resultSpan, start, end, flags);
         }
         *outCs = ICharSequence::Probe(builder);
+        REFCOUNT_ADD(*outCs)
     }
-    else
+    else {
         *outCs = charSequence;
-    REFCOUNT_ADD(*outCs)
+        REFCOUNT_ADD(*outCs)
+    }
     return NOERROR;
 }
 

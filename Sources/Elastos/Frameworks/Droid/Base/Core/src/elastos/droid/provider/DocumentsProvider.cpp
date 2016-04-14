@@ -568,6 +568,7 @@ ECode DocumentsProvider::Call(
         // throw new IllegalStateException("Failed call " + method, e);
     // }
     *bundle = out;
+    REFCOUNT_ADD(*bundle)
     return NOERROR;
 }
 

@@ -1,5 +1,6 @@
 #include "elastos/droid/provider/BrowserContract.h"
 #include "elastos/droid/provider/CBrowserContractHistory.h"
+#include "Elastos.Droid.Net.h"
 
 using Elastos::Droid::Net::IUri;
 
@@ -16,6 +17,7 @@ ECode CBrowserContractHistory::GetCONTENT_URI(
 {
     VALIDATE_NOT_NULL(uri);
     *uri = BrowserContract::History::CONTENT_URI;
+    REFCOUNT_ADD(*uri)
     return NOERROR;
 }
 

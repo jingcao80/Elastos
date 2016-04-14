@@ -2081,7 +2081,7 @@ ECode HardwareCamera::Parameters::GetFocusAreas(
     Get(KEY_FOCUS_AREAS, &str);
     AutoPtr<ArrayOf<ICameraArea*> > array = SplitArea(str);
     *areas = array;
-    REFCOUNT_ADD(array);
+    REFCOUNT_ADD(*areas);
 
     return NOERROR;
 }

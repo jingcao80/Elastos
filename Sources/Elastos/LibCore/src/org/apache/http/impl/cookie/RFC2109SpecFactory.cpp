@@ -32,11 +32,13 @@ ECode RFC2109SpecFactory::NewInstance(
             cs->ToString(&(*strs)[i]);
         }
         *spec = (ICookieSpec*)new RFC2109Spec(strs, FALSE);
+        REFCOUNT_ADD(*spec)
     }
     else {
         *spec = (ICookieSpec*)new RFC2109Spec();
+        REFCOUNT_ADD(*spec)
     }
-    REFCOUNT_ADD(*spec)
+
     return NOERROR;
 }
 

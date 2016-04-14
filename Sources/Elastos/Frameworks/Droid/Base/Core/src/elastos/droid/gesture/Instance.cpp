@@ -107,6 +107,7 @@ ECode Instance::CreateInstance(
 {
     AutoPtr<IInstance> p = CreateInstance(sequenceType, orientationType, gesture, label);
     *obj = p;
+    REFCOUNT_ADD(*obj)
 
     return NOERROR;
 }

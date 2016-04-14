@@ -375,6 +375,7 @@ ECode KeySetManagerService::AddKeySetLPw(
         HashMap<Int64, AutoPtr<CKeySetHandle> >::Iterator handleIt = mKeySets.Find(existingKeySetId);
         if (handleIt != mKeySets.End()) {
             *handle = handleIt->mSecond;
+            REFCOUNT_ADD(*handle)
         }
         return NOERROR;
     }

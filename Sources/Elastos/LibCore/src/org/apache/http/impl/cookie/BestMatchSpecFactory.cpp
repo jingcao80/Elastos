@@ -34,11 +34,13 @@ ECode BestMatchSpecFactory::NewInstance(
         Boolean boolValue;
         params->GetBooleanParameter(ICookieSpecPNames::SINGLE_COOKIE_HEADER, FALSE, &boolValue);
         *spec = (ICookieSpec*)new BestMatchSpec(strs, boolValue);
+        REFCOUNT_ADD(*spec)
     }
     else {
         *spec = (ICookieSpec*)new BestMatchSpec();
+        REFCOUNT_ADD(*spec)
     }
-    REFCOUNT_ADD(*spec)
+
     return NOERROR;
 }
 

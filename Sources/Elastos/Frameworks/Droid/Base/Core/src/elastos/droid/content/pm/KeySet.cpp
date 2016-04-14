@@ -30,6 +30,7 @@ ECode KeySet::GetToken(
 {
     VALIDATE_NOT_NULL(token)
     *token = mToken;
+    REFCOUNT_ADD(*token)
     return NOERROR;
 }
 

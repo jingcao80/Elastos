@@ -112,7 +112,7 @@ ECode Int32ArrayBuffer::AsReadOnlyBuffer(
     /* [out] */ IInt32Buffer** buffer)
 {
     VALIDATE_NOT_NULL(buffer)
-    *buffer = 0;
+    *buffer = NULL;
 
     AutoPtr<Int32ArrayBuffer> iab;
     FAIL_RETURN(Copy(this, mMark, TRUE, (Int32ArrayBuffer**)&iab))
@@ -141,7 +141,7 @@ ECode Int32ArrayBuffer::Duplicate(
     /* [out] */ IInt32Buffer** buffer)
 {
     VALIDATE_NOT_NULL(buffer)
-    *buffer = 0;
+    *buffer = NULL;
 
     AutoPtr<Int32ArrayBuffer> iab;
     FAIL_RETURN(Copy(this, mMark, mIsReadOnly, (Int32ArrayBuffer**)&iab))
@@ -245,7 +245,7 @@ ECode Int32ArrayBuffer::Slice(
     /* [out] */ IInt32Buffer** buffer)
 {
     VALIDATE_NOT_NULL(buffer)
-    *buffer = 0;
+    *buffer = NULL;
 
     Int32 remainvalue = 0;
     GetRemaining(&remainvalue);

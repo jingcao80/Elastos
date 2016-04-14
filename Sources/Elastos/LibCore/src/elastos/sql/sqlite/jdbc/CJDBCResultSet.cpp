@@ -631,7 +631,9 @@ ECode CJDBCResultSet::GetTime(
     /* [in] */ Int32 colIndex,
     /* [out] */ ITime ** sqltime)
 {
+    VALIDATE_NOT_NULL(sqltime)
     *sqltime = InternalGetTime(colIndex, NULL);
+    REFCOUNT_ADD(*sqltime)
     return NOERROR;
 }
 
@@ -640,7 +642,9 @@ ECode CJDBCResultSet::GetTime(
     /* [in] */ ICalendar * pCal,
     /* [out] */ ITime ** sqltime)
 {
+    VALIDATE_NOT_NULL(sqltime)
     *sqltime = InternalGetTime(colIndex, pCal);
+    REFCOUNT_ADD(*sqltime)
     return NOERROR;
 }
 
@@ -669,7 +673,9 @@ ECode CJDBCResultSet::GetTimestamp(
     /* [in] */ Int32 colIndex,
     /* [out] */ ITimestamp ** timestamp)
 {
+    REFCOUNT_ADD(*timestamp)
     *timestamp = InternalGetTimestamp(colIndex, NULL);
+    REFCOUNT_ADD(*timestamp)
     return NOERROR;
 }
 
@@ -678,7 +684,9 @@ ECode CJDBCResultSet::GetTimestamp(
     /* [in] */ ICalendar * pCal,
     /* [out] */ ITimestamp ** timestamp)
 {
+    REFCOUNT_ADD(*timestamp)
     *timestamp = InternalGetTimestamp(colIndex, pCal);
+    REFCOUNT_ADD(*timestamp)
     return NOERROR;
 }
 
@@ -686,7 +694,7 @@ ECode CJDBCResultSet::GetTimestamp(
     /* [in] */ const String& colName,
     /* [out] */ ITimestamp ** timestamp)
 {
-
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -695,7 +703,7 @@ ECode CJDBCResultSet::GetTimestamp(
     /* [in] */ ICalendar * pCal,
     /* [out] */ ITimestamp ** timestamp)
 {
-
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -1939,7 +1947,9 @@ ECode CJDBCResultSet::GetDate(
     /* [in] */ Int32 colIndex,
     /* [out] */ ISQLDate ** idate)
 {
+    VALIDATE_NOT_NULL(idate)
     *idate = InternalGetDate(colIndex, NULL);
+    REFCOUNT_ADD(*idate)
     return NOERROR;
 }
 
@@ -1948,7 +1958,9 @@ ECode CJDBCResultSet::GetDate(
     /* [in] */ ICalendar * cal,
     /* [out] */ ISQLDate ** idate)
 {
+    VALIDATE_NOT_NULL(idate)
     *idate = InternalGetDate(colIndex, cal);
+    REFCOUNT_ADD(*idate)
     return NOERROR;
 }
 

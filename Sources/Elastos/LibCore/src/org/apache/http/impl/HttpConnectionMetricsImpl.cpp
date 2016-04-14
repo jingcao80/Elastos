@@ -99,17 +99,20 @@ ECode HttpConnectionMetricsImpl::GetMetric(
         AutoPtr<IInterface> i;
         map->Get(cs, (IInterface**)&i);
         *metric = IObject::Probe(i);
+        REFCOUNT_ADD(*metric)
     }
     if (*metric == NULL) {
         if (REQUEST_COUNT.Equals(metricName)) {
             AutoPtr<IInteger64> integer;
             CInteger64::New(mRequestCount, (IInteger64**)&integer);
             *metric = IObject::Probe(integer);
+            REFCOUNT_ADD(*metric)
         }
         else if (RESPONSE_COUNT.Equals(metricName)) {
             AutoPtr<IInteger64> integer;
             CInteger64::New(mResponseCount, (IInteger64**)&integer);
             *metric = IObject::Probe(integer);
+            REFCOUNT_ADD(*metric)
         }
         else if (RECEIVED_BYTES_COUNT.Equals(metricName)) {
             if (mInTransportMetric != NULL) {
@@ -118,6 +121,7 @@ ECode HttpConnectionMetricsImpl::GetMetric(
                 AutoPtr<IInteger64> integer;
                 CInteger64::New(bytes, (IInteger64**)&integer);
                 *metric = IObject::Probe(integer);
+                REFCOUNT_ADD(*metric)
             }
             else {
                 *metric = NULL;
@@ -131,6 +135,7 @@ ECode HttpConnectionMetricsImpl::GetMetric(
                 AutoPtr<IInteger64> integer;
                 CInteger64::New(bytes, (IInteger64**)&integer);
                 *metric = IObject::Probe(integer);
+                REFCOUNT_ADD(*metric)
             }
             else {
                 *metric = NULL;
@@ -138,7 +143,7 @@ ECode HttpConnectionMetricsImpl::GetMetric(
             }
         }
     }
-    REFCOUNT_ADD(*metric)
+
     return NOERROR;
 }
 

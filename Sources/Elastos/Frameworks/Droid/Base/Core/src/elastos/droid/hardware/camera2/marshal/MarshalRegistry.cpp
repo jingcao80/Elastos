@@ -140,6 +140,7 @@ ECode MarshalRegistry::GetMarshaler(
     }
 
     *outmar = marshaler;
+    REFCOUNT_ADD(*outmar)
     return NOERROR;
 }
 

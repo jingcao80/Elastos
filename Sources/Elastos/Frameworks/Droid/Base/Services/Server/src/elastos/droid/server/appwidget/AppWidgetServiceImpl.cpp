@@ -4396,7 +4396,8 @@ ECode AppWidgetServiceImpl::GetAppWidgetInfo(
                 Binder::GetCallingUid(), callingPackage);
 
         if (widget != NULL && widget->mProvider != NULL && !widget->mProvider->mZombie) {
-            *result = CloneIfLocalBinder(widget->mProvider->mInfo);
+            AutoPtr<IAppWidgetProviderInfo> awpi = CloneIfLocalBinder(widget->mProvider->mInfo);
+            *result = awpi.Get();
             REFCOUNT_ADD(*result);
             return NOERROR;
         }
@@ -4457,7 +4458,8 @@ ECode AppWidgetServiceImpl::GetAppWidgetViews(
                 Binder::GetCallingUid(), callingPackage);
 
         if (widget != NULL) {
-            *result = CloneIfLocalBinder(widget->mViews);
+            AutoPtr<IRemoteViews> rv = CloneIfLocalBinder(widget->mViews);
+            *result = rv.Get();
             REFCOUNT_ADD(*result);
             return NOERROR;
         }
@@ -4588,7 +4590,9 @@ ECode AppWidgetServiceImpl::GetAppWidgetOptions(
                 Binder::GetCallingUid(), callingPackage);
 
         if (widget != NULL && widget->mOptions != NULL) {
-            *result = CloneIfLocalBinder(widget->mOptions);
+            AutoPtr<IBundle> rv = CloneIfLocalBinder(widget->mOptions);
+            *result = rv.Get();
+            REFCOUNT_ADD(*result)
             return NOERROR;
         }
 

@@ -1596,7 +1596,7 @@ ECode HdmiCecLocalDeviceTv::AddDeviceInfo(
     /* [out] */ IHdmiDeviceInfo** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = FALSE;
+    *result = NULL;
 
     AssertRunOnServiceThread();
     Int32 logicalAddr;
@@ -1621,7 +1621,7 @@ ECode HdmiCecLocalDeviceTv::RemoveDeviceInfo(
     /* [out] */ IHdmiDeviceInfo** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = FALSE;
+    *result = NULL;
 
     AssertRunOnServiceThread();
     AutoPtr<IInterface> obj;
@@ -1641,7 +1641,7 @@ ECode HdmiCecLocalDeviceTv::GetDeviceInfoList(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = FALSE;
+    *result = NULL;
 
     AssertRunOnServiceThread();
     if (includeLocalDevice) {
@@ -1829,9 +1829,6 @@ ECode HdmiCecLocalDeviceTv::IsLocalDeviceAddress(
 ECode HdmiCecLocalDeviceTv::GetAvrDeviceInfo(
     /* [out] */ IHdmiDeviceInfo** result)
 {
-    VALIDATE_NOT_NULL(result)
-    *result = FALSE;
-
     AssertRunOnServiceThread();
     return GetCecDeviceInfo(Constants::ADDR_AUDIO_SYSTEM, result);
 }
@@ -1841,7 +1838,7 @@ ECode HdmiCecLocalDeviceTv::GetCecDeviceInfo(
     /* [out] */ IHdmiDeviceInfo** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = FALSE;
+    *result = NULL;
 
     AssertRunOnServiceThread();
     AutoPtr<IInterface> obj;
@@ -2008,7 +2005,7 @@ ECode HdmiCecLocalDeviceTv::GetDeviceInfoByPath(
     /* [out] */ IHdmiDeviceInfo** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = FALSE;
+    *result = NULL;
 
     AssertRunOnServiceThread();
     AutoPtr<IList> infos;
