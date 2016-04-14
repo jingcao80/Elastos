@@ -3272,8 +3272,8 @@ ECode Collections::_UnmodifiableList::Add(
 ECode Collections::_UnmodifiableList::Add(
     /* [in] */ IInterface* object)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean modified = FALSE;
+    return _UnmodifiableCollection::Add(object, &modified);
 }
 
 ECode Collections::_UnmodifiableList::AddAll(
@@ -4994,7 +4994,7 @@ ECode Collections::IndexOfSubList(
     }
     Int32 size, sublistSize;
     (ICollection::Probe(list))->GetSize(&size);
-    (ICollection::Probe(list))->GetSize(&sublistSize);
+    (ICollection::Probe(sublist))->GetSize(&sublistSize);
 
     if (sublistSize > size) {
         *result = -1;
@@ -5065,6 +5065,9 @@ ECode Collections::LastIndexOfSubList(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
+    if (list == NULL || sublist == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     Int32 sublistSize, size;
     (ICollection::Probe(sublist))->GetSize(&sublistSize);
     (ICollection::Probe(list))->GetSize(&size);
