@@ -103,7 +103,7 @@ def process_file(path, logFile):
     lineNum = 0
     for eachLine in lines:
         if (len(eachLine) > 1) and (eachLine.startswith("//") == False):
-            pattern = re.compile(r'(\()(I\w*)(\*\*\)&)([a-zA-Z]\w*)(\))')
+            pattern = re.compile(r'(\()(I\w*)(\s*\*\*\s*\)\s*&\s*)([a-zA-Z]\w*)(\s*\))')
             match = pattern.search(eachLine)
             if match:
                 #print match.group() match.groups()
@@ -289,8 +289,8 @@ ignored_list = [
 ############################################################################################################
 
 #results: 101 errors, 59 warnings.
-scan_path = '/home/kesalin/Elastos5/Sources/'                                       # default sacn dir
-log_filepath = '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_cast_checker.log'    # default log file path
+scan_path = '/home/kesalin/Elastos_new/Sources/'                                       # default sacn dir
+log_filepath = '/home/kesalin/Elastos_AddRef/DevDoc/DbgTools/elastos_cast_checker.log'    # default log file path
 
 print "python  :", sys.argv[0]
 argc = len(sys.argv)
