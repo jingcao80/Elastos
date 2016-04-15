@@ -1,0 +1,65 @@
+
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace CallLog {
+
+    /**
+     * @Involve
+     * interface IHandler
+     * interface IAsyncQueryHandler
+     */
+     interface ICallLogQueryHandler {
+        /**
+         * Call type similar to Calls.INCOMING_TYPE used to specify all types instead of one particular
+         * type.
+         */
+        Int32 CALL_TYPE_ALL = -1;
+
+        /**
+         * Fetches the list of calls from the call log for a given type.
+         * This call ignores the new or old state.
+         * <p>
+         * It will asynchronously update the content of the list view when the fetch completes.
+         */
+        FetchCalls(
+            [in] Int32 callType,
+            [in] Int64 newerThan);
+
+        FetchCalls(
+            [in] Int32 callType);
+
+        FetchVoicemailStatus();
+
+        /** Updates all new calls to mark them as old. */
+        MarkNewCallsAsOld();
+
+        /** Updates all new voicemails to mark them as old. */
+        MarkNewVoicemailsAsOld();
+
+        /** Updates all missed calls to mark them as read. */
+        MarkMissedCallsAsRead();
+    }
+
+    /** Listener to completion of various queries. */
+    interface ICallLogQueryHandlerListener {
+        /** Called when {@link CallLogQueryHandler#fetchVoicemailStatus()} completes. */
+        OnVoicemailStatusFetched(
+            [in] ICursor* statusCursor);
+
+        /**
+         * Called when {@link CallLogQueryHandler#fetchCalls(int)}complete.
+         * Returns true if takes ownership of cursor.
+         */
+        OnCallsFetched(
+            [in] ICursor* combinedCursor,
+            [out] Boolean* result);
+    }
+
+    } //CallLog
+    } //Dailer
+    } //Apps
+    } //Elastos
+}

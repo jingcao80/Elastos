@@ -2,7 +2,6 @@ module
 {
     namespace Elastos{
     namespace Apps {
-    namespace Dialer {
     namespace DailerBinder {
 
     interface IDatabaseHelperManager {
@@ -11,8 +10,7 @@ module
             [out] IDialerDatabaseHelper** helper);
     }
 
-    } //Elastos
-    } //Apps
-    } //Dialer
     } //DailerBinder
+    } //Apps
+    } //Elastos
 }

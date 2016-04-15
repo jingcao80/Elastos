@@ -1,5 +1,5 @@
-#ifndef __ELASTOS_APPS_DIALER_CCALLDETAIL_ACTIVITY_H__
-#define __ELASTOS_APPS_DIALER_CCALLDETAIL_ACTIVITY_H__
+#ifndef __ELASTOS_APPS_DIALER_CCALLDETAILACTIVITY_H__
+#define __ELASTOS_APPS_DIALER_CCALLDETAILACTIVITY_H__
 
 #include "_Elastos_Apps_Dialer_CCallDetailActivity.h"
 #include <AnalyticsActivity.h>
@@ -55,7 +55,7 @@ private:
             CARAPI Run();
 
         private:
-            AutoPtr<CCallDetailActivity> mHost;
+            CCallDetailActivity* mHost;
         };
 
         class UnblankRunnable
@@ -71,7 +71,7 @@ private:
             CARAPI Run();
 
         private:
-            AutoPtr<CCallDetailActivity> mHost;
+            CCallDetailActivity* mHost;
         };
 
     public:
@@ -93,7 +93,7 @@ private:
             /* [in] */ IRunnable* runnable,
             /* [in] */ Int64 delayMillis);
     private:
-        AutoPtr<CCallDetailActivity> mHost;
+        CCallDetailActivity* mHost;
         AutoPtr<IRunnable> mBlankRunnable;
         AutoPtr<IRunnable> mUnblankRunnable;
     };
@@ -111,7 +111,7 @@ private:
             /* [out] */ IInterface** result);
 
     private:
-        AutoPtr<CCallDetailActivity> mHost;
+        CCallDetailActivity* mHost;
     };
 
 
@@ -143,7 +143,7 @@ private:
             /* [in] */ IPhoneCallDetails details);
 
     private:
-        AutoPtr<CCallDetailActivity> mHost;
+        CCallDetailActivity* mHost;
     };
 
     class ViewEntry
@@ -175,7 +175,7 @@ private:
         /** The description for accessibility of the secondary action. */
         String mSecondaryDescription;
     private:
-        AutoPtr<CCallDetailActivity> mHost;
+        CCallDetailActivity* mHost;
     };
 
     class StatusMessageViewOnClickListener
@@ -194,7 +194,7 @@ private:
 
     private:
         AutoPtr<StatusMessage> mMessage;
-        AutoPtr<CCallDetailActivity> mHost;
+        CCallDetailActivity* mHost;
     };
 
     class RemoveMenuFromCallLogTask
@@ -216,7 +216,7 @@ private:
 
     private:
         AutoPtr<IStringBuilder> mCallIds;
-        AutoPtr<CCallDetailActivity> mHost;
+        CCallDetailActivity* mHost;
     };
 
     class MenuTrashVoicemailTask
@@ -236,7 +236,7 @@ private:
             /* [in] */ IInterface* result);
 
     private:
-        AutoPtr<CCallDetailActivity> mHost;
+        CCallDetailActivity* mHost;
     };
 
 public:
@@ -428,4 +428,4 @@ private:
 } // Apps
 } // Elastos
 
-#endif //__ELASTOS_APPS_DIALER_CCALLDETAIL_ACTIVITY_H__
+#endif //__ELASTOS_APPS_DIALER_CCALLDETAILACTIVITY_H__

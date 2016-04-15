@@ -8,6 +8,14 @@ module
         NewCachedNumberLookupService(
             [out] ICachedNumberLookupService** service);
 
+        /**
+         * Create a new instance of the call log adapter.
+         * @param context The context to use.
+         * @param callFetcher Instance of call fetcher to use.
+         * @param contactInfoHelper Instance of contact info helper class to use.
+         * @param isCallLog Is this call log adapter being used on the call log?
+         * @return Instance of CallLogAdapter.
+         */
         NewCallLogAdapter(
             [in] IContext* context,
             [in] ICallFetcher* callFetcher,
