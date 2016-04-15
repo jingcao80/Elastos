@@ -36,12 +36,11 @@ def find_function_range(lines, index):
     for index in range(startLineNum , totalNum):
         line = lines[index]
         if isCodeLine(line):
-            # if line.startswith('}') and line.endswith('{'):     # case: } else {
-            #     pass
+            if line.startswith('}') and line.endswith('{'):     # case: } else {
+                pass
             # elif line.find('{') != -1 and line.find('}') != -1 and line.find('{') < line.find('}'): # case if (bval) { do something }
             #     pass
-            # el
-            if line.endswith('{'):
+            elif line.endswith('{'):
                 matchCount = matchCount + 1
             elif line.endswith("}"):
                 matchCount = matchCount - 1
@@ -236,10 +235,8 @@ ignored_list = [
 ############################################################################################################
 
 #results: 121 errors, 0 warnings.
-scan_path = '/home/kesalin/Elastos5/Sources/'                                           # default sacn dir
+scan_path = '/home/kesalin/Elastos/Sources/'                                           # default sacn dir
 log_filepath = '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_add_ref_checker.log'     # default log file path
-
-#scan_path = '/home/kesalin/Elastos5/Sources/Elastos/Runtime'
 
 print "python  :", sys.argv[0]
 argc = len(sys.argv)

@@ -100,7 +100,7 @@ ECode DecimalFormatSymbols::Clone(
     VALIDATE_NOT_NULL(object)
 
     AutoPtr<IDecimalFormatSymbols> outdec ;
-    FAIL_RETURN(CDecimalFormatSymbols::New(mLocale, (IDecimalFormatSymbols **)&outdec));
+    FAIL_RETURN(CDecimalFormatSymbols::New(mLocale, (IDecimalFormatSymbols**)&outdec));
 
     CloneImpl(outdec);
 

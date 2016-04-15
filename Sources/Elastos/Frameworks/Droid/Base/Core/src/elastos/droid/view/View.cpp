@@ -1060,8 +1060,8 @@ ECode View::_Predicate::Apply(
     /* [in] */ IInterface* t,
     /* [out] */ Boolean* result)
 {
-    assert(result != NULL && t != NULL && IView::Probe(t) != NULL);
-    View* v = (View*)IView::Probe(v);
+    VALIDATE_NOT_NULL(result)
+    View* v = (View*)IView::Probe(t);
     assert(v != NULL);
     *result = v->mNextFocusForwardId == mId;
     return NOERROR;
@@ -2683,9 +2683,9 @@ ECode View::GetBoundsOnScreen(
 
     position->Offset(mLeft, mTop);
 
-    AutoPtr<IView> parent = IView::Probe(mParent.Get());
+    AutoPtr<IView> parent = IView::Probe(mParent);
     while (parent != NULL) {
-        View* parentView = (View*)parent;
+        View* parentView = (View*)parent.Get();
         position->Offset(-parentView->mScrollX, -parentView->mScrollY);
         if (!parentView->HasIdentityMatrix()) {
             AutoPtr<IMatrix> matrix;
@@ -2695,7 +2695,7 @@ ECode View::GetBoundsOnScreen(
         }
 
         position->Offset(parentView->mLeft, parentView->mTop);
-        parent = IView::Probe(parentView->mParent.Get());
+        parent = IView::Probe(parentView->mParent);
     }
 
     IViewRootImpl* vri = IViewRootImpl::Probe(parent);
@@ -7315,7 +7315,7 @@ void View::SetFlags(
             ClearAccessibilityFocus();
             DestroyDrawingCache();
 
-            IView* vp = IView::Probe(vp);
+            IView* vp = IView::Probe(mParent);
             if (vp != NULL) {
                 // GONE views noop invalidation, so invalidate the parent
                 ((View*)vp)->Invalidate(TRUE);
@@ -7370,8 +7370,7 @@ void View::SetFlags(
             mParent->InvalidateChild(this, NULL);
         }
 
-        DispatchVisibilityChanged(
-            this, newVisibility);
+        DispatchVisibilityChanged(this, newVisibility);
 
         NotifySubtreeAccessibilityStateChangedIfNeeded();
     }
@@ -15348,7 +15347,7 @@ ECode View::FindViewByPredicateInsideOut(
     AutoPtr<IView> childToSkip;
     AutoPtr<IView> start = inStart;
     for (;;) {
-        View* startView = (View*)start;
+        View* startView = (View*)start.Get();
         AutoPtr<IView> view = startView->FindViewByPredicateTraversal(predicate, childToSkip);
         if (view != NULL || startView == this) {
             *res = view;

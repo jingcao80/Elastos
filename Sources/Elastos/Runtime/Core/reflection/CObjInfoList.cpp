@@ -1151,7 +1151,7 @@ ECode CObjInfoList::AcquireCppVectorInfo(
         cppVectorInfoObj->GetLength(&len);
         if (len == length) {
             AutoPtr<IDataTypeInfo> elementInfo;
-            ec = cppVectorInfoObj->GetElementTypeInfo((IDataTypeInfo **)&elementInfo);
+            ec = cppVectorInfoObj->GetElementTypeInfo((IDataTypeInfo**)&elementInfo);
             if (FAILED(ec)) {
                 UnlockHashTable(EntryType_DataType);
                 return ec;
@@ -1241,7 +1241,7 @@ ECode CObjInfoList::AcquireCarArrayInfo(
         for (; node; node = node->mNext) {
             carArrayInfoObj = (ICarArrayInfo *)node->mInfo;
             elementInfo = NULL;
-            ec = carArrayInfoObj->GetElementTypeInfo((IDataTypeInfo **)&elementInfo);
+            ec = carArrayInfoObj->GetElementTypeInfo((IDataTypeInfo**)&elementInfo);
             if (FAILED(ec)) {
                 UnlockHashTable(EntryType_DataType);
                 return ec;

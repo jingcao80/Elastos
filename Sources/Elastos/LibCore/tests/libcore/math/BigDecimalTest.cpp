@@ -104,7 +104,7 @@ void test_ConstructorLjava_math_BigInteger()
     }
 
     AutoPtr<IBigInteger> rInteger;
-    big->GetUnscaledValue((IBigInteger **)&rInteger);
+    big->GetUnscaledValue((IBigInteger**)&rInteger);
 
     Boolean result;
 	rInteger->Equals(bA, &result);
@@ -150,7 +150,7 @@ void test_ConstructorLjava_math_BigIntegerI()
     }
 
     AutoPtr<IBigInteger> rInteger;
-    big->GetUnscaledValue((IBigInteger **)&rInteger);
+    big->GetUnscaledValue((IBigInteger**)&rInteger);
 
     Boolean result;
 	rInteger->Equals(bA, &result);

@@ -234,7 +234,7 @@ ECode CParserAdapter::Parse(
     /* [in] */ const String& systemId)
 {
     AutoPtr<IInputSource> input;
-    FAIL_RETURN(CInputSource::New(systemId, (IInputSource **)&input));
+    FAIL_RETURN(CInputSource::New(systemId, (IInputSource**)&input));
     return Parse(input);
 }
 

@@ -300,9 +300,9 @@ ECode CTimestamp::ValueOf(
     }
 
     AutoPtr<ISimpleDateFormat> df;
-    CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm:ss"), CLocale::US, (ISimpleDateFormat **)&df);
+    CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm:ss"), CLocale::US, (ISimpleDateFormat**)&df);
     AutoPtr<IParsePosition> pp;
-    CParsePosition::New(0, (IParsePosition **)&pp);
+    CParsePosition::New(0, (IParsePosition**)&pp);
 
     /*
      * First parse out the yyyy-MM-dd HH:mm:ss component of the String into
@@ -312,7 +312,7 @@ ECode CTimestamp::ValueOf(
      * precede the nanoseconds value
      */
     AutoPtr<IDate> theDate;
-    ECode ec = IDateFormat::Probe(df)->Parse(s, pp, (IDate **)&theDate);
+    ECode ec = IDateFormat::Probe(df)->Parse(s, pp, (IDate**)&theDate);
     if (FAILED(ec)) {
         return BadTimestampString(s);;
     }
@@ -360,7 +360,7 @@ ECode CTimestamp::ValueOf(
     AutoPtr<ITimestamp> theTimestamp;
     Int64 outtime = 0;
     theDate->GetTime(&outtime);
-    CTimestamp::New(outtime, (ITimestamp **)&theTimestamp);
+    CTimestamp::New(outtime, (ITimestamp**)&theTimestamp);
     return theTimestamp->SetNanos(nanos);
 }
 

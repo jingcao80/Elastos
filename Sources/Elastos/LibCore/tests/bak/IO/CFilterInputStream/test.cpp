@@ -9,18 +9,18 @@ void testConstructor()
 {
     String str("abcd");
     AutoPtr<IStringBufferInputStream> is;
-	CStringBufferInputStream::New(str,(IStringBufferInputStream **)&is);
+	CStringBufferInputStream::New(str,(IStringBufferInputStream**)&is);
 	AutoPtr<IFilterInputStream> fis;
-	CFilterInputStream::New(is,(IFilterInputStream **)&fis);
+	CFilterInputStream::New(is,(IFilterInputStream**)&fis);
 }
 void testAvailable()
 {
     Int32 num = 0;
 	String str("abcd");
     AutoPtr<IStringBufferInputStream> is;
-	CStringBufferInputStream::New(str,(IStringBufferInputStream **)&is);
+	CStringBufferInputStream::New(str,(IStringBufferInputStream**)&is);
 	AutoPtr<IFilterInputStream> fis;
-	CFilterInputStream::New(is,(IFilterInputStream **)&fis);
+	CFilterInputStream::New(is,(IFilterInputStream**)&fis);
 	fis->Available(&num);
 	assert(num == 4);
 }
@@ -29,9 +29,9 @@ void testClose()
     Int32 num = 0;
 	String str("abcd");
     AutoPtr<IStringBufferInputStream> is;
-	CStringBufferInputStream::New(str,(IStringBufferInputStream **)&is);
+	CStringBufferInputStream::New(str,(IStringBufferInputStream**)&is);
 	AutoPtr<IFilterInputStream> fis;
-	CFilterInputStream::New(is,(IFilterInputStream **)&fis);
+	CFilterInputStream::New(is,(IFilterInputStream**)&fis);
 	fis->Close();
 	fis->Available(&num);
 	printf("num=%d\n",num);
@@ -41,9 +41,9 @@ void testMark()
     Int32 readLimit = 2;
 	String str("abcd");
     AutoPtr<IStringBufferInputStream> is;
-	CStringBufferInputStream::New(str,(IStringBufferInputStream **)&is);
+	CStringBufferInputStream::New(str,(IStringBufferInputStream**)&is);
 	AutoPtr<IFilterInputStream> fis;
-	CFilterInputStream::New(is,(IFilterInputStream **)&fis);
+	CFilterInputStream::New(is,(IFilterInputStream**)&fis);
 	fis->Mark(readLimit);
 }
 void testIsMarkSupported()
@@ -51,9 +51,9 @@ void testIsMarkSupported()
     Boolean supported = TRUE;
 	String str("abcd");
     AutoPtr<IStringBufferInputStream> is;
-	CStringBufferInputStream::New(str,(IStringBufferInputStream **)&is);
+	CStringBufferInputStream::New(str,(IStringBufferInputStream**)&is);
 	AutoPtr<IFilterInputStream> fis;
-	CFilterInputStream::New(is,(IFilterInputStream **)&fis);
+	CFilterInputStream::New(is,(IFilterInputStream**)&fis);
     fis->IsMarkSupported(&supported);
     assert(supported==FALSE);
 }
@@ -62,9 +62,9 @@ void testRead()
     Int32 value = 0;
 	String str("abcde");
     AutoPtr<IStringBufferInputStream> is;
-	CStringBufferInputStream::New(str,(IStringBufferInputStream **)&is);
+	CStringBufferInputStream::New(str,(IStringBufferInputStream**)&is);
 	AutoPtr<IFilterInputStream> fis;
-	CFilterInputStream::New(is,(IFilterInputStream **)&fis);
+	CFilterInputStream::New(is,(IFilterInputStream**)&fis);
     fis->Read(&value);
     printf("value=%c\n",value);	//a
     fis->Read(&value);
@@ -86,9 +86,9 @@ void testReadBuffer()
 	ArrayOf_<Byte, 8> bytes;
 	String str("abcd");
     AutoPtr<IStringBufferInputStream> is;
-	CStringBufferInputStream::New(str,(IStringBufferInputStream **)&is);
+	CStringBufferInputStream::New(str,(IStringBufferInputStream**)&is);
 	AutoPtr<IFilterInputStream> fis;
-	CFilterInputStream::New(is,(IFilterInputStream **)&fis);
+	CFilterInputStream::New(is,(IFilterInputStream**)&fis);
     fis->ReadBuffer(&bytes, &number);
     for(Int32 i = 0; i < number; i++)
 	{
@@ -105,9 +105,9 @@ void testReadBufferEx()
 	ArrayOf_<Byte, 8> bytes;
 	String str("abcdefg");
     AutoPtr<IStringBufferInputStream> is;
-	CStringBufferInputStream::New(str,(IStringBufferInputStream **)&is);
+	CStringBufferInputStream::New(str,(IStringBufferInputStream**)&is);
 	AutoPtr<IFilterInputStream> fis;
-	CFilterInputStream::New(is,(IFilterInputStream **)&fis);
+	CFilterInputStream::New(is,(IFilterInputStream**)&fis);
 	fis->ReadBufferEx(offset,length,&bytes,&number);
 	for(Int32 i = offset; i < offset+length; i++)
 	{
@@ -121,9 +121,9 @@ void testSkip()
 	Int64 number = 0LL;
     String str("abcdefg");
     AutoPtr<IStringBufferInputStream> is;
-	CStringBufferInputStream::New(str,(IStringBufferInputStream **)&is);
+	CStringBufferInputStream::New(str,(IStringBufferInputStream**)&is);
 	AutoPtr<IFilterInputStream> fis;
-	CFilterInputStream::New(is,(IFilterInputStream **)&fis);
+	CFilterInputStream::New(is,(IFilterInputStream**)&fis);
     Int32 value = 0;
     fis->Read(&value);
     printf("value=%c\n",value);	//a

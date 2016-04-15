@@ -647,7 +647,7 @@ ECode Properties::StoreToXML(
 
     String encodingCanonicalName("UTF-8");
     AutoPtr<ICharsetHelper> sethelper;
-    CCharsetHelper::AcquireSingleton((ICharsetHelper **)&sethelper);
+    CCharsetHelper::AcquireSingleton((ICharsetHelper**)&sethelper);
     AutoPtr<ICharset> charset;
     if (SUCCEEDED(sethelper->ForName(encoding, (ICharset**)&charset))) {
         charset->GetName(&encodingCanonicalName);
@@ -663,7 +663,7 @@ ECode Properties::StoreToXML(
     // }
 
     AutoPtr<IPrintStream> printStream;
-    FAIL_RETURN(CPrintStream::New(os, FALSE, encodingCanonicalName , (IPrintStream **)&printStream));
+    FAIL_RETURN(CPrintStream::New(os, FALSE, encodingCanonicalName , (IPrintStream**)&printStream));
 
     printStream->Print(String("<?xml version=\"1.0\" encoding=\""));
     printStream->Print(encodingCanonicalName);

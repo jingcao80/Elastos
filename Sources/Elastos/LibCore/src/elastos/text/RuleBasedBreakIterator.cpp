@@ -50,7 +50,7 @@ ECode RuleBasedBreakIterator::CheckOffset(
     }
 
     AutoPtr<ICharacterIterator> it;
-    mWrapped->GetText((ICharacterIterator **)&it);
+    mWrapped->GetText((ICharacterIterator**)&it);
     Int32 beginIndex, endIndex;
     it->GetBeginIndex(&beginIndex);
     it->GetEndIndex(&endIndex);

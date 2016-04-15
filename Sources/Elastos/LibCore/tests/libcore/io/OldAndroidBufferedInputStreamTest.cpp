@@ -152,11 +152,11 @@ static void testBufferedInputStream()
     AutoPtr<IByteArrayInputStream> da;
     AutoPtr<IByteArrayInputStream> ea;
 
-    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)aBytes, (IByteArrayInputStream **)&aa);
-    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)aBytes, (IByteArrayInputStream **)&ba);
-    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)aBytes, (IByteArrayInputStream **)&ca);
-    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)aBytes, (IByteArrayInputStream **)&da);
-    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)aBytes, (IByteArrayInputStream **)&ea);
+    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)aBytes, (IByteArrayInputStream**)&aa);
+    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)aBytes, (IByteArrayInputStream**)&ba);
+    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)aBytes, (IByteArrayInputStream**)&ca);
+    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)aBytes, (IByteArrayInputStream**)&da);
+    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)aBytes, (IByteArrayInputStream**)&ea);
 
     AutoPtr<IBufferedInputStream> a;
     AutoPtr<IBufferedInputStream> b;
@@ -166,7 +166,7 @@ static void testBufferedInputStream()
 
     AutoPtr<IInputStream> ais;
     ais = IInputStream::Probe((IByteArrayInputStream *)aa);
-    ec = CBufferedInputStream::New((IInputStream *)ais, 6, (IBufferedInputStream **)&a);
+    ec = CBufferedInputStream::New((IInputStream *)ais, 6, (IBufferedInputStream**)&a);
     ais = NULL;
     ais = IInputStream::Probe((IBufferedInputStream *)a);
 
@@ -181,7 +181,7 @@ static void testBufferedInputStream()
 
     AutoPtr<IInputStream> bis;
     bis = IInputStream::Probe((IByteArrayInputStream *)ba);
-    ec = CBufferedInputStream::New((IInputStream *)bis, 7, (IBufferedInputStream **)&b);
+    ec = CBufferedInputStream::New((IInputStream *)bis, 7, (IBufferedInputStream**)&b);
     bis = NULL;
     bis = IInputStream::Probe((IBufferedInputStream *)b);
 
@@ -196,7 +196,7 @@ static void testBufferedInputStream()
 
     AutoPtr<IInputStream> cis;
     cis = IInputStream::Probe((IByteArrayInputStream *)ca);
-    ec = CBufferedInputStream::New((IInputStream *)cis, 7, (IBufferedInputStream **)&c);
+    ec = CBufferedInputStream::New((IInputStream *)cis, 7, (IBufferedInputStream**)&c);
     cis = NULL;
     cis = IInputStream::Probe((IBufferedInputStream *)c);
 
@@ -211,7 +211,7 @@ static void testBufferedInputStream()
 
     AutoPtr<IInputStream> dis;
     dis = IInputStream::Probe((IByteArrayInputStream *)da);
-    ec = CBufferedInputStream::New((IInputStream *)dis, 7, (IBufferedInputStream **)&d);
+    ec = CBufferedInputStream::New((IInputStream *)dis, 7, (IBufferedInputStream**)&d);
     dis = NULL;
     dis = IInputStream::Probe((IBufferedInputStream *)d);
 
@@ -234,7 +234,7 @@ static void testBufferedInputStream()
 
     AutoPtr<IInputStream> eis;
     eis = IInputStream::Probe((IByteArrayInputStream *)ea);
-    ec = CBufferedInputStream::New((IInputStream *)eis, 11, (IBufferedInputStream **)&e);
+    ec = CBufferedInputStream::New((IInputStream *)eis, 11, (IBufferedInputStream**)&e);
     eis = NULL;
     eis = IInputStream::Probe((IBufferedInputStream *)e);
 

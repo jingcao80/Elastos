@@ -164,7 +164,7 @@ void testZeroPos()
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->And(bNumber, (IBigInteger **)&result);
+    aNumber->And(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -229,7 +229,7 @@ void testZeroNeg()
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->And(bNumber, (IBigInteger **)&result);
+    aNumber->And(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -293,7 +293,7 @@ void testPosZero()
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->And(bNumber, (IBigInteger **)&result);
+    aNumber->And(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {

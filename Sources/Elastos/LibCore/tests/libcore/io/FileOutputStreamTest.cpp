@@ -122,7 +122,7 @@ static void testFileDescriptorOwnership()
         printf(" Failed to create CFile. Error %08X\n", ec);
     }
 
-    ec = CFileOutputStream::New(f, (IFileOutputStream **)&fos1);
+    ec = CFileOutputStream::New(f, (IFileOutputStream**)&fos1);
     if (FAILED(ec) || fos1 == NULL) {
         printf("Failed to create CFileInputStream, Error %08X\n", ec);
     }
@@ -132,7 +132,7 @@ static void testFileDescriptorOwnership()
         printf(" Failed to GetFD. Error %08X\n", ec);
     }
 
-    ec = CFileOutputStream::New(fd, (IFileOutputStream **)&fos2);
+    ec = CFileOutputStream::New(fd, (IFileOutputStream**)&fos2);
     if (FAILED(ec) || fos2 == NULL) {
         printf("Failed to create CFileOutputStream, Error %08X\n", ec);
     }
@@ -216,7 +216,7 @@ static void testClose()
         printf(" Failed to create CFile. Error %08X\n", ec);
     }
 
-    ec = CFileOutputStream::New(f, (IFileOutputStream **)&fos);
+    ec = CFileOutputStream::New(f, (IFileOutputStream**)&fos);
     if (FAILED(ec) || fos == NULL) {
         printf("Failed to create CFileInputStream, Error %08X\n", ec);
     }

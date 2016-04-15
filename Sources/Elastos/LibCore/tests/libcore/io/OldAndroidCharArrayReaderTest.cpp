@@ -102,10 +102,10 @@ void testCharArrayReader()
     AutoPtr<ICharArrayReader> c;
     AutoPtr<ICharArrayReader> d;
 
-    ec = CCharArrayReader::New(str.GetChars(), (ICharArrayReader **)&a);
-    ec = CCharArrayReader::New(str.GetChars(), (ICharArrayReader **)&b);
-    ec = CCharArrayReader::New(str.GetChars(), (ICharArrayReader **)&c);
-    ec = CCharArrayReader::New(str.GetChars(), (ICharArrayReader **)&d);
+    ec = CCharArrayReader::New(str.GetChars(), (ICharArrayReader**)&a);
+    ec = CCharArrayReader::New(str.GetChars(), (ICharArrayReader**)&b);
+    ec = CCharArrayReader::New(str.GetChars(), (ICharArrayReader**)&c);
+    ec = CCharArrayReader::New(str.GetChars(), (ICharArrayReader**)&d);
 
 
 

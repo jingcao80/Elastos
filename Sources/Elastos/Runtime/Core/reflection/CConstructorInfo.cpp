@@ -56,7 +56,7 @@ ECode CConstructorInfo::Init(
     AutoPtr<IInterface> obj;
     mMethodInfo = NULL;
     ECode ec = g_objInfoList.AcquireMethodInfo(clsModule, methodDescriptor,
-            index, (IInterface **)&obj);
+            index, (IInterface**)&obj);
     mMethodInfo = (CMethodInfo*)obj.Get();
     return ec;
 }

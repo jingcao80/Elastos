@@ -99,13 +99,13 @@ ECode CPendingIntent::Send(
     String resolvedType;
     if (intent != NULL) {
         AutoPtr<IContentResolver> resolver;
-        FAIL_RETURN(context->GetContentResolver((IContentResolver **)&resolver));
+        FAIL_RETURN(context->GetContentResolver((IContentResolver**)&resolver));
         FAIL_RETURN(intent->ResolveTypeIfNeeded(resolver, &resolvedType));
     }
 
     AutoPtr<IIntentReceiver> receiver;
     if (onFinished != NULL) {
-        FAIL_RETURN(CPendingIntentFinishedDispatcher::New(this, onFinished, handler, (IIntentReceiver **)&receiver));
+        FAIL_RETURN(CPendingIntentFinishedDispatcher::New(this, onFinished, handler, (IIntentReceiver**)&receiver));
     }
 
     Int32 res;

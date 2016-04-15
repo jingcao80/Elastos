@@ -75,7 +75,7 @@ static ECode StdUnmarshalCustomInterface(
     if (SUCCEEDED(ec)) {
         AutoPtr<IInterface> obj;
         ec = _CObject_CreateInstance(proxyClsid, RGM_SAME_DOMAIN,
-                EIID_ICustomMarshal, (IInterface **)&obj);
+                EIID_ICustomMarshal, (IInterface**)&obj);
         if (SUCCEEDED(ec)) {
             ICustomMarshal* tempCustMsh = ICustomMarshal::Probe(obj);
             ec = tempCustMsh->CreateObject(customMarshal, object);
@@ -131,7 +131,7 @@ ECode StdUnmarshalInterface(
         ec = CObjectProxy::S_CreateObject(
             interfacePack->mClsid,
             interfacePack->mBinder,
-            (IProxy **)&proxy);
+            (IProxy**)&proxy);
         pthread_mutex_unlock(&g_marshalLock);
         if (SUCCEEDED(ec)) {
             customMarshal = ICustomMarshal::Probe(proxy);

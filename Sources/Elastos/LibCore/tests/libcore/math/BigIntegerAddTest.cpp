@@ -130,7 +130,7 @@ void testCase1() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Add(bNumber, (IBigInteger **)&result);
+    aNumber->Add(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -194,7 +194,7 @@ void testCase2() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Add(bNumber, (IBigInteger **)&result);
+    aNumber->Add(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -260,7 +260,7 @@ void testCase3() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Add(bNumber, (IBigInteger **)&result);
+    aNumber->Add(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -326,7 +326,7 @@ void testCase4() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Add(bNumber, (IBigInteger **)&result);
+    aNumber->Add(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -391,7 +391,7 @@ void testCase5() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Add(bNumber, (IBigInteger **)&result);
+    aNumber->Add(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -456,7 +456,7 @@ void testCase6() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Add(bNumber, (IBigInteger **)&result);
+    aNumber->Add(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -520,7 +520,7 @@ void testCase7() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Add(bNumber, (IBigInteger **)&result);
+    aNumber->Add(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -579,7 +579,7 @@ void testCase8() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Add(bNumber, (IBigInteger **)&result);
+    aNumber->Add(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -643,7 +643,7 @@ void testCase9() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Add(bNumber, (IBigInteger **)&result);
+    aNumber->Add(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -707,7 +707,7 @@ void testCase10() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Add(bNumber, (IBigInteger **)&result);
+    aNumber->Add(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {

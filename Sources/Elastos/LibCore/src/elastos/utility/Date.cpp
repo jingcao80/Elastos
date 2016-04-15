@@ -699,11 +699,11 @@ ECode Date::ToString(
     AutoPtr<ILocaleData> localeData;
     AutoPtr<ILocale> usloc;
     AutoPtr<ILocaleHelper> lochep;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lochep);
-    lochep->GetUS((ILocale **)&usloc);
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lochep);
+    lochep->GetUS((ILocale**)&usloc);
     AutoPtr<ILocaleDataHelper> ldh;
-    CLocaleDataHelper::AcquireSingleton((ILocaleDataHelper **)&ldh);
-    ldh->Get(usloc , (ILocaleData **)&localeData);
+    CLocaleDataHelper::AcquireSingleton((ILocaleDataHelper**)&ldh);
+    ldh->Get(usloc , (ILocaleData**)&localeData);
     AutoPtr<IGregorianCalendar> cal;
     CGregorianCalendar::New(mMilliseconds, (IGregorianCalendar**)&cal);
     AutoPtr<ITimeZone> tz;

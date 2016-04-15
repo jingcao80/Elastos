@@ -53,6 +53,7 @@ ECode PreviewInflater::InflatePreview(
     AutoPtr<IKeyguardPreviewContainer> container = new KeyguardPreviewContainer(mContext, NULL);
     IViewGroup::Probe(container)->AddView(v);
     *view = IView::Probe(container);
+    REFCOUNT_ADD(*view)
     return NOERROR;
 }
 

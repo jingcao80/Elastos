@@ -105,13 +105,13 @@ static void testBufferedInputStream()
     AutoPtr<IBufferedInputStream> bin;
     AutoPtr<IInputStream> in;
 
-    ec = CBufferedInputStream::New((IInputStream *)NULL, (IBufferedInputStream **)&bin);
+    ec = CBufferedInputStream::New((IInputStream *)NULL, (IBufferedInputStream**)&bin);
     in = IInputStream::Probe(bin);
     assertReadsFailWithIoException(in);
 
     bin = NULL;
     in = NULL;
-    ec = CBufferedInputStream::New((IInputStream *)NULL, 1024, (IBufferedInputStream **)&bin);
+    ec = CBufferedInputStream::New((IInputStream *)NULL, 1024, (IBufferedInputStream**)&bin);
     in = IInputStream::Probe(bin);
     assertReadsFailWithIoException(in);
 }
@@ -130,7 +130,7 @@ static void testCheckedInputStream()
     AutoPtr<IChecksum> crc;
     ec = CCRC32::New((IChecksum**)&crc);
 
-    ec = CCheckedInputStream::New((IInputStream *)NULL, crc, (ICheckedInputStream **)&cin);
+    ec = CCheckedInputStream::New((IInputStream *)NULL, crc, (ICheckedInputStream**)&cin);
     in = IInputStream::Probe(cin);
     assertReadsFailWithNullPointerException(in);
 }
@@ -161,9 +161,9 @@ static void testCipherInputStream()
     AutoPtr<IInputStream> in;
     AutoPtr<ICipher> c;
 
-    ec = CNullCipher::New((INullCipher **)&nc);
+    ec = CNullCipher::New((INullCipher**)&nc);
     c = ICipher::Probe(nc);
-    ec = CCipherInputStream::New((IInputStream *)NULL, (ICipher *)c, (ICipherInputStream **)&cis);
+    ec = CCipherInputStream::New((IInputStream *)NULL, (ICipher *)c, (ICipherInputStream**)&cis);
 
     in = IInputStream::Probe(cis);
 
@@ -204,7 +204,7 @@ static void testDataInputStream()
     AutoPtr<IDataInputStream> dis;
     AutoPtr<IInputStream> in;
 
-    ec = CDataInputStream::New(NULL, (IDataInputStream **)&dis);
+    ec = CDataInputStream::New(NULL, (IDataInputStream**)&dis);
     in = IInputStream::Probe(dis);
 
     assertReadsFailWithNullPointerException(in);
@@ -242,7 +242,7 @@ static void testFilterInputStream()
     AutoPtr<IFilterInputStream> fis;
     AutoPtr<IInputStream> in;
 
-    ec = CFilterInputStream::New((IInputStream *)NULL, (IFilterInputStream **)&fis);
+    ec = CFilterInputStream::New((IInputStream *)NULL, (IFilterInputStream**)&fis);
     in = IInputStream::Probe(fis);
 
     assertReadsFailWithNullPointerException(in);
@@ -273,22 +273,22 @@ static void testInflaterInputStream()
     AutoPtr<IInflaterInputStream> iis;
     AutoPtr<IInflater> inflater;
 
-    ec = CInflaterInputStream::New((IInputStream *)NULL, (IInflaterInputStream **)&iis);
+    ec = CInflaterInputStream::New((IInputStream *)NULL, (IInflaterInputStream**)&iis);
     if (ec == (ECode)E_NULL_POINTER_EXCEPTION) {
         printf("testInflaterInputStream, catched\n");
     } else {
         printf("testInflaterInputStream, UNCATCHED\n");
     }
 
-    ec = CInflater::New((IInflater **)&inflater);
-    ec = CInflaterInputStream::New((IInputStream *)NULL, inflater, (IInflaterInputStream **)&iis);
+    ec = CInflater::New((IInflater**)&inflater);
+    ec = CInflaterInputStream::New((IInputStream *)NULL, inflater, (IInflaterInputStream**)&iis);
     if (ec == (ECode)E_NULL_POINTER_EXCEPTION) {
         printf("testInflaterInputStream, catched\n");
     } else {
         printf("testInflaterInputStream, UNCATCHED\n");
     }
 
-    ec = CInflaterInputStream::New((IInputStream *)NULL, inflater, 1024, (IInflaterInputStream **)&iis);
+    ec = CInflaterInputStream::New((IInputStream *)NULL, inflater, 1024, (IInflaterInputStream**)&iis);
     if (ec == (ECode)E_NULL_POINTER_EXCEPTION) {
         printf("testInflaterInputStream, catched\n");
     } else {
@@ -307,7 +307,7 @@ static void testLineNumberInputStream()
     AutoPtr<ILineNumberInputStream> lis;
     AutoPtr<IInputStream> in;
 
-    ec = CLineNumberInputStream::New((IInputStream *)NULL, (ILineNumberInputStream **)&lis);
+    ec = CLineNumberInputStream::New((IInputStream *)NULL, (ILineNumberInputStream**)&lis);
 
     in = IInputStream::Probe(lis);
 
@@ -326,13 +326,13 @@ static void testPushbackInputStream()
     AutoPtr<IPushbackInputStream> pis;
     AutoPtr<IInputStream> in;
 
-    ec = CPushbackInputStream::New((IInputStream *)NULL, (IPushbackInputStream **)&pis);
+    ec = CPushbackInputStream::New((IInputStream *)NULL, (IPushbackInputStream**)&pis);
     in = IInputStream::Probe(pis);
     assertReadsFailWithIoException(in);
 
     pis = NULL;
     in = NULL;
-    ec = CPushbackInputStream::New((IInputStream *)NULL, 1024, (IPushbackInputStream **)&pis);
+    ec = CPushbackInputStream::New((IInputStream *)NULL, 1024, (IPushbackInputStream**)&pis);
     in = IInputStream::Probe(pis);
     assertReadsFailWithIoException(in);
 }

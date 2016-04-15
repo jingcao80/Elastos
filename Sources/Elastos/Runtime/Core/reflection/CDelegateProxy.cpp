@@ -124,7 +124,7 @@ ECode CDelegateProxy::EventHander(
 {
     AutoPtr<ICallbackArgumentList> obj;
     ECode ec = ((CCallbackMethodInfo *)mCallbackMethodInfo.Get())->CreateCBArgumentList(
-            (ICallbackArgumentList **)&obj);
+            (ICallbackArgumentList**)&obj);
     if (FAILED(ec)) {
         return ec;
     }

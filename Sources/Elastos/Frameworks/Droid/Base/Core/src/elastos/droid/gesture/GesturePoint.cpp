@@ -67,7 +67,7 @@ AutoPtr<IGesturePoint> GesturePoint::Deserialize(
     Int64 timeStamp = 0;
     IDataInput::Probe(in)->ReadInt64(&timeStamp);
 
-    ECode ec = CGesturePoint::New(x, y, timeStamp, (IGesturePoint **)&instance);
+    ECode ec = CGesturePoint::New(x, y, timeStamp, (IGesturePoint**)&instance);
 
     if (FAILED(ec))
         return  NULL;

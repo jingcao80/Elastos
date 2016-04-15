@@ -101,6 +101,7 @@ ECode SelectPopupAdapter::GetView(
     }
 
     *view = convertView;
+    REFCOUNT_ADD(*view)
 
     return NOERROR;
 }

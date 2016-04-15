@@ -69,13 +69,13 @@ int main(int argc, char *argv[])
         } else {
             dflag = 0;
         }
-        ec = CFile::New(String(path), (IFile **)&outfile);
+        ec = CFile::New(String(path), (IFile**)&outfile);
         if (FAILED(ec)) {
             printf("Cann't Open the File the name is %s\n", path);
             return -1;
         }
 
-        ec = CFileOutputStream::New((IFile *)outfile, (IFileOutputStream **)&pos);
+        ec = CFileOutputStream::New((IFile *)outfile, (IFileOutputStream**)&pos);
         if (FAILED(ec)) {
             return -1;
         }

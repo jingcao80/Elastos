@@ -3,13 +3,13 @@
 using namespace Elastos::Text;
 
 CTest::CTest() {
-    CCalendarHelper::AcquireSingleton((ICalendarHelper **)&cdh);
-    CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lch);
-    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper **)&tzh);
-    tzh->GetTimeZone(String("America/Sao_Paulo") , (ITimeZone **)&AMERICA_SAO_PAULO);
-    tzh->GetTimeZone(String("Australia/Lord_Howe") , (ITimeZone **)&AUSTRALIA_LORD_HOWE);
-    tzh->GetTimeZone(String("Asia/Kuala_Lumpur") , (ITimeZone **)&ASIA_KUALA_LUMPUR);
-    tzh->GetTimeZone(String("Asia/Seoul"),(ITimeZone **)&ASIA_SEOUL);
+    CCalendarHelper::AcquireSingleton((ICalendarHelper**)&cdh);
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lch);
+    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&tzh);
+    tzh->GetTimeZone(String("America/Sao_Paulo") , (ITimeZone**)&AMERICA_SAO_PAULO);
+    tzh->GetTimeZone(String("Australia/Lord_Howe") , (ITimeZone**)&AUSTRALIA_LORD_HOWE);
+    tzh->GetTimeZone(String("Asia/Kuala_Lumpur") , (ITimeZone**)&ASIA_KUALA_LUMPUR);
+    tzh->GetTimeZone(String("Asia/Seoul"),(ITimeZone**)&ASIA_SEOUL);
 }
 
 void assertCalendarEquals(AutoPtr<ICalendar> calendar, int year, int month, int day, int hour, int minute) {
@@ -38,7 +38,7 @@ void testSetSelfConsistent(ITimeZone * timeZone, int year, int month, int day) {
     int hour = 0;
     int minute = 0;
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(timeZone , (IGregorianCalendar **)&calendar);
+    CGregorianCalendar::New(timeZone , (IGregorianCalendar**)&calendar);
     calendar->Clear();
     calendar->SetEx2(year, month, day, hour, minute);
     Int32 value = 0;
@@ -61,15 +61,15 @@ int CTest::test_setTimeZone(int argc, char* argv[])
     // get(Calendar.ZONE_OFFSET) returns the zone offset of the time zone passed to setTimeZone.
     AutoPtr<ICalendar> cal;
     AutoPtr<ILocale> locus;
-    lch->GetUS((ILocale **)&locus);
+    lch->GetUS((ILocale**)&locus);
     AutoPtr<ITimeZone> utczone;
-    tzh->GetTimeZone(String("UTC") , (ITimeZone **)&utczone);
-    cdh->GetInstanceEx3(utczone , locus ,(ICalendar **)&cal);
+    tzh->GetTimeZone(String("UTC") , (ITimeZone**)&utczone);
+    cdh->GetInstanceEx3(utczone , locus ,(ICalendar**)&cal);
     Int32 value = 0;
     cal->Get(ICalendar::ZONE_OFFSET , &value);
     assert(0 == value);
     AutoPtr<ITimeZone> tz;
-    tzh->GetTimeZone(String("GMT+7") , (ITimeZone **)&tz);
+    tzh->GetTimeZone(String("GMT+7") , (ITimeZone**)&tz);
     cal->SetTimeZone(tz);
     cal->Get(ICalendar::ZONE_OFFSET , &value);
     assert(25200000 == value);
@@ -80,7 +80,7 @@ int CTest::test_setTimeZone(int argc, char* argv[])
 int CTest::testAddOneDayOverDstForwardAdds23HoursAt0100(int argc, char* argv[])
 {
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(AMERICA_SAO_PAULO , (IGregorianCalendar **)&calendar);
+    CGregorianCalendar::New(AMERICA_SAO_PAULO , (IGregorianCalendar**)&calendar);
     Int32 offset = 0;
     AMERICA_SAO_PAULO->GetRawOffset(&offset);
     PFL_EX("offset : %d" , offset)
@@ -109,7 +109,7 @@ int CTest::testAddOneDayOverDstForwardAdds23HoursAt0100(int argc, char* argv[])
 int CTest::testAddOneDayOverDstForwardAdds24HoursAt0000(int argc, char* argv[])
 {
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(AMERICA_SAO_PAULO , (IGregorianCalendar **)&calendar);
+    CGregorianCalendar::New(AMERICA_SAO_PAULO , (IGregorianCalendar**)&calendar);
     calendar->SetEx2(2011, 9, 15, 0, 0); // 00:00 GMT-3
     double hoursSinceEpoch1 = hoursSinceEpoch(calendar);
     calendar->Add(ICalendar::DATE, 1);
@@ -122,7 +122,7 @@ int CTest::testAddOneDayOverDstForwardAdds24HoursAt0000(int argc, char* argv[])
 int CTest::testAddOneDayOverDstBackAdds25HoursAt0000(int argc, char* argv[])
 {
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(AMERICA_SAO_PAULO , (IGregorianCalendar **)&calendar);
+    CGregorianCalendar::New(AMERICA_SAO_PAULO , (IGregorianCalendar**)&calendar);
     calendar->SetEx2(2011, 1, 19, 0, 0); // 00:00 GMT-2
     double hoursSinceEpoch1 = hoursSinceEpoch(calendar);
 
@@ -137,7 +137,7 @@ int CTest::testAddOneDayOverDstBackAdds25HoursAt0000(int argc, char* argv[])
 int CTest::testAddOneDayOverDstBackAdds25HoursAt0100(int argc, char* argv[])
 {
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(AMERICA_SAO_PAULO, (IGregorianCalendar **)&calendar);
+    CGregorianCalendar::New(AMERICA_SAO_PAULO, (IGregorianCalendar**)&calendar);
     calendar->SetEx2(2011, 1, 19, 1, 0); // 00:00 GMT-2
     double hoursSinceEpoch1 = hoursSinceEpoch(calendar);
     calendar->Add(ICalendar::DATE, 1);
@@ -151,7 +151,7 @@ int CTest::testAddOneDayOverDstBackAdds25HoursAt0100(int argc, char* argv[])
 int CTest::testAddTwoHalfDaysOverDstForwardAdds23HoursAt0100(int argc, char* argv[])
 {
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(AMERICA_SAO_PAULO , (IGregorianCalendar **)&calendar);
+    CGregorianCalendar::New(AMERICA_SAO_PAULO , (IGregorianCalendar**)&calendar);
     calendar->SetEx2(2011, 9, 15, 1, 0); // 01:00 GMT-3
     double hoursSinceEpoch1 = hoursSinceEpoch(calendar);
     calendar->Add(ICalendar::AM_PM, 2);
@@ -165,7 +165,7 @@ int CTest::testAddTwoHalfDaysOverDstForwardAdds23HoursAt0100(int argc, char* arg
 int CTest::testAdd24HoursOverDstForwardAdds24Hours(int argc, char* argv[])
 {
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(AMERICA_SAO_PAULO , (IGregorianCalendar **)&calendar);
+    CGregorianCalendar::New(AMERICA_SAO_PAULO , (IGregorianCalendar**)&calendar);
     calendar->SetEx2(2011, 9, 15, 1, 0); // 01:00 GMT-3
     double hoursSinceEpoch1 = hoursSinceEpoch(calendar);
     calendar->Add(ICalendar::HOUR, 24);
@@ -179,7 +179,7 @@ int CTest::testAdd24HoursOverDstForwardAdds24Hours(int argc, char* argv[])
 int CTest::testAddOneDayAndOneDayOver30MinuteDstForwardAdds48Hours(int argc, char* argv[])
 {
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(AUSTRALIA_LORD_HOWE , (IGregorianCalendar **)&calendar);
+    CGregorianCalendar::New(AUSTRALIA_LORD_HOWE , (IGregorianCalendar**)&calendar);
     calendar->SetEx2(2011, 9, 1, 2, 10); // 02:10 GMT+10:30
     double hoursSinceEpoch1 = hoursSinceEpoch(calendar);
     calendar->Add(ICalendar::DATE, 1);
@@ -195,7 +195,7 @@ int CTest::testAddOneDayAndOneDayOver30MinuteDstForwardAdds48Hours(int argc, cha
 int CTest::testAddTwoDaysOver30MinuteDstForwardAdds47AndAHalfHours(int argc, char* argv[])
 {
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(AUSTRALIA_LORD_HOWE , (IGregorianCalendar **)&calendar);
+    CGregorianCalendar::New(AUSTRALIA_LORD_HOWE , (IGregorianCalendar**)&calendar);
     calendar->SetEx2(2011, 9, 1, 2, 10); // 02:10 GMT+10:30
     double hoursSinceEpoch1 = hoursSinceEpoch(calendar);
     calendar->Add(ICalendar::DATE, 2);
@@ -253,9 +253,9 @@ int CTest::testCalendarSerialization(int argc, char* argv[])
             + String("00000a4cb7c187571007e00060000000a000007b2000000010000000100000001fe488c000000000")
             + String("10000000500000001000000200000000178");
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(1970, 1, 1, 0, 0, 0 , (IGregorianCalendar **)&calendar);
+    CGregorianCalendar::New(1970, 1, 1, 0, 0, 0 , (IGregorianCalendar**)&calendar);
     AutoPtr<ITimeZone> gmtzone;
-    tzh->GetTimeZone(String("GMT-08:00") , (ITimeZone **)&gmtzone);
+    tzh->GetTimeZone(String("GMT-08:00") , (ITimeZone**)&gmtzone);
     calendar->SetTimeZone(gmtzone);
     // Starting from ICU4.8 release, the default minimalDaysInFirstWeek changed from 4 to 1.
     calendar->SetMinimalDaysInFirstWeek(4);

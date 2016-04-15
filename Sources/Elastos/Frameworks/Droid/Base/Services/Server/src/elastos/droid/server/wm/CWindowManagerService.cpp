@@ -13118,7 +13118,7 @@ void CWindowManagerService::SaveANRStateLocked(
     AutoPtr<IDate> date;
     CDate::New((IDate**)&date);
     AutoPtr<IDateFormatHelper> dfh;
-    CDateFormatHelper::AcquireSingleton((IDateFormatHelper **)&dfh);
+    CDateFormatHelper::AcquireSingleton((IDateFormatHelper**)&dfh);
     AutoPtr<IDateFormat> format;
     dfh->GetInstance((IDateFormat**)&format);
     String dStr;

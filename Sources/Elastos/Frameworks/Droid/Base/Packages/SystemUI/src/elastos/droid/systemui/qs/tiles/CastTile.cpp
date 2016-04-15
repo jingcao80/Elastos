@@ -127,6 +127,7 @@ ECode CastTile::CastDetailAdapter::CreateDetailView(
     UpdateItems(devices);
     mHost->mController->SetDiscovering(TRUE);
     *result = IView::Probe(mItems);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

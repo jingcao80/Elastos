@@ -19920,7 +19920,7 @@ ECode CActivityManagerService::BroadcastIntentLocked(
     *result = IActivityManager::BROADCAST_STICKY_CANT_HAVE_PERMISSION;
 
     AutoPtr<IIntent> intent;
-    CIntent::New(_intent, (IIntent **)&intent);
+    CIntent::New(_intent, (IIntent**)&intent);
 
     // By default broadcasts do not go to stopped apps.
     intent->AddFlags(IIntent::FLAG_EXCLUDE_STOPPED_PACKAGES);
@@ -20376,7 +20376,7 @@ ECode CActivityManagerService::BroadcastIntentLocked(
                         receivers->Get(it, (IInterface**)&item);
                         AutoPtr<IResolveInfo> curt = IResolveInfo::Probe(item);
                         AutoPtr<IActivityInfo> aInfo;
-                        curt->GetActivityInfo((IActivityInfo **)&aInfo);
+                        curt->GetActivityInfo((IActivityInfo**)&aInfo);
                         String cname;
                         IPackageItemInfo::Probe(aInfo)->GetPackageName(&cname);
                         if (cname.Equals(skipPackage)) {

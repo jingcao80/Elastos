@@ -47,7 +47,7 @@ ECode GestureStroke::constructor(
 
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> obj;
-        points->Get(i, (IInterface **)&obj);
+        points->Get(i, (IInterface**)&obj);
         IGesturePoint* p = IGesturePoint::Probe(obj);
         p->GetX(&(*tmpPoints)[i * 2]);
         p->GetY(&(*tmpPoints)[i * 2 + 1]);
@@ -86,7 +86,7 @@ GestureStroke::GestureStroke(
     Float left, top, right, bottom;
 
     bbx->Get(&left, &top, &right, &bottom);
-    CRectF::New(left, top, right, bottom, (IRectF **)&mBoundingBox);
+    CRectF::New(left, top, right, bottom, (IRectF**)&mBoundingBox);
 
     mPoints = pts->Clone();
     mTimestamps = times->Clone();

@@ -97,7 +97,7 @@ ECode CDriverManager::GetConnection(
     VALIDATE_NOT_NULL(conn);
 
     AutoPtr<IProperties> mprope;
-    CProperties::New((IProperties **)&mprope);
+    CProperties::New((IProperties**)&mprope);
     return GetConnection(url, mprope , conn);
 }
 
@@ -125,7 +125,7 @@ ECode CDriverManager::GetConnection(
         List<AutoPtr<IDriver> >::Iterator iter = mTheDrivers.Begin();
         while (iter != mTheDrivers.End()) {
             AutoPtr<IConnection> theConnection;
-            (*iter)->Connect(url, info, (IConnection **)&theConnection);
+            (*iter)->Connect(url, info, (IConnection**)&theConnection);
             if (theConnection != NULL) {
                 *conn = theConnection;
                 REFCOUNT_ADD(*conn)
@@ -147,7 +147,7 @@ ECode CDriverManager::GetConnection(
     *conn = NULL;
 
     AutoPtr<IProperties> theProperties;
-    CProperties::New((IProperties **)&theProperties);
+    CProperties::New((IProperties**)&theProperties);
 
     String temp;
     if (!user.IsNull()) {

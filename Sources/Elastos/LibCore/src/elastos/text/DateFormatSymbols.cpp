@@ -137,10 +137,10 @@ ECode DateFormatSymbols::Clone(
 
     AutoPtr<IDateFormatSymbols> outfs;
     if (mLocale) {
-        FAIL_RETURN(CDateFormatSymbols::New(mLocale, (IDateFormatSymbols **)&outfs));
+        FAIL_RETURN(CDateFormatSymbols::New(mLocale, (IDateFormatSymbols**)&outfs));
     }
     else {
-        FAIL_RETURN(CDateFormatSymbols::New((IDateFormatSymbols **)&outfs));
+        FAIL_RETURN(CDateFormatSymbols::New((IDateFormatSymbols**)&outfs));
     }
 
     CloneImpl(outfs);

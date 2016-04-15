@@ -404,7 +404,7 @@ void CGregorianCalendar::FullFieldsCalc()
 ECode CGregorianCalendar::ComputeFields()
 {
     AutoPtr<ITimeZone> timeZone;
-    GetTimeZone((ITimeZone **)&timeZone);
+    GetTimeZone((ITimeZone**)&timeZone);
 
     AutoPtr<CDate> date;
     CDate::NewByFriend(mTime, (CDate**)&date);
@@ -674,7 +674,7 @@ ECode CGregorianCalendar::ComputeTime()
     // then wall time in the interval 1:00 - 2:00 is invalid and is
     // treated as UTC time.
     AutoPtr<ITimeZone> tz;
-    GetTimeZone((ITimeZone **)&tz);
+    GetTimeZone((ITimeZone**)&tz);
     Int32 rawOffset;
     tz->GetRawOffset(&rawOffset);
 
@@ -966,7 +966,7 @@ Int32 CGregorianCalendar::GetOffset(
     /* [in] */ Int64 localTime)
 {
     AutoPtr<ITimeZone> timeZone;
-    GetTimeZone((ITimeZone **)&timeZone);
+    GetTimeZone((ITimeZone**)&timeZone);
     Int32 rawOffset;
 
     Int64 dayCount = localTime / 86400000;
@@ -1194,7 +1194,7 @@ ECode CGregorianCalendar::SetGregorianChange(
     date->GetTime(&mGregorianCutover);
     AutoPtr<IGregorianCalendar> cal;
     AutoPtr<ITimeZone> timezone = TimeZone::GMT();
-    CGregorianCalendar::New(timezone, (IGregorianCalendar **)&cal);
+    CGregorianCalendar::New(timezone, (IGregorianCalendar**)&cal);
     (ICalendar::Probe(cal))->SetTime(date);
     (ICalendar::Probe(cal))->Get(YEAR, &mChangeYear);
     Int32 value;

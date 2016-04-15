@@ -126,7 +126,7 @@ ECode CRuleBasedCollatorICU::GetCollationKey(
             *outkey = NULL;
         } else {
             AutoPtr<ICollationKeyICU> ans;
-            FAIL_RETURN(CCollationKeyICU::New(source, key ,(ICollationKeyICU **)&ans));
+            FAIL_RETURN(CCollationKeyICU::New(source, key ,(ICollationKeyICU**)&ans));
             *outkey = ICollationKey::Probe(ans);
             REFCOUNT_ADD(*outkey);
         }

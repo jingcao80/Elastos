@@ -17,7 +17,7 @@ void testSqlDatabase()
     AutoPtr<IDatabase> db;
     Int32 mode = 0x00000004;
     String basename("test.db");
-    ECode ec = CDatabase::New((IDatabase **)&db);
+    ECode ec = CDatabase::New((IDatabase**)&db);
     // printf("==== ec: 0x%x ====\n", ec);
     String sql(NULL);
     if (db != NULL) {
@@ -31,7 +31,7 @@ void testSqlDatabase()
         }
 
         AutoPtr<IStmt> stmt;
-        CStmt::New((IStmt **)&stmt);
+        CStmt::New((IStmt**)&stmt);
 
         // test create table
         // sql = String("create table student (_id integer PRIMARY KEY , name text);");
@@ -84,9 +84,9 @@ void testSqlDatabase()
         // (*args)[0] = String("3");
         // Int32 rows = 5;
         // AutoPtr<ITableResult> otable = NULL;
-        // CTableResult::New((ITableResult **)&otable);
+        // CTableResult::New((ITableResult**)&otable);
         // printf("otable first===>%lld\n", (Int64)otable.Get());
-        // // db->GetTableEx3(sql,*args,(ITableResult **)&otable);
+        // // db->GetTableEx3(sql,*args,(ITableResult**)&otable);
         // db->GetTableEx4(sql,*args,otable);
         // printf("otable second===>%lld\n", (Int64)otable.Get());
         // otable->ToString(&sql);

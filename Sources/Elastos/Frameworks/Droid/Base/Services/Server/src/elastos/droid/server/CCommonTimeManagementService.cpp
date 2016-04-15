@@ -217,8 +217,8 @@ ECode CCommonTimeManagementService::constructor(
     /* [in] */ IContext* context)
 {
     mContext = context;
-    CHandler::New((IHandler **)&mReconnectHandler);
-    CHandler::New((IHandler **)&mNoInterfaceHandler);
+    CHandler::New((IHandler**)&mReconnectHandler);
+    CHandler::New((IHandler**)&mNoInterfaceHandler);
 
     AutoPtr<IINetworkManagementEventObserver> nmeo;
     CCommonTimeManagementServiceIfaceObserver::New(this, (IINetworkManagementEventObserver**)&nmeo);
@@ -264,10 +264,10 @@ ECode CCommonTimeManagementService::SystemReady()
 
     // Register with the connectivity manager for connectivity changed intents.
     AutoPtr<IIntentFilter> filter;
-    CIntentFilter::New((IIntentFilter **)&filter);
+    CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IConnectivityManager::CONNECTIVITY_ACTION);
     AutoPtr<IIntent> intent;
-    mContext->RegisterReceiver((IBroadcastReceiver*)mConnectivityMangerObserver, filter, (IIntent **)&intent);
+    mContext->RegisterReceiver((IBroadcastReceiver*)mConnectivityMangerObserver, filter, (IIntent**)&intent);
 
     // Connect to the common time config service and apply the initial configuration.
     ConnectToTimeConfig();

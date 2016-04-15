@@ -228,7 +228,7 @@ GestureLibraries::ResourceGestureLibrary::ResourceGestureLibrary(
 {
     AutoPtr<IWeakReference> iwp;
 
-    IWeakReferenceSource::Probe(context)->GetWeakReference((IWeakReference **)&iwp);
+    IWeakReferenceSource::Probe(context)->GetWeakReference((IWeakReference**)&iwp);
     mContext = iwp;
 }
 

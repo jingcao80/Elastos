@@ -1634,6 +1634,7 @@ ECode CKeyguardViewMediator::GetViewMediatorCallback(
 {
     VALIDATE_NOT_NULL(cb)
     *cb = mViewMediatorCallback;
+    REFCOUNT_ADD(*cb)
     return NOERROR;
 }
 

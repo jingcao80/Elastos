@@ -2,10 +2,10 @@
 
 CTest::CTest()
 {
-    CBreakIteratorHelper::AcquireSingleton((IBreakIteratorHelper **)&breakhelper);
-    CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lochelper);
-    lochelper->GetUS((ILocale **)&locUS);
-    breakhelper->GetCharacterInstanceEx(locUS,(IBreakIterator **)&iterator);
+    CBreakIteratorHelper::AcquireSingleton((IBreakIteratorHelper**)&breakhelper);
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lochelper);
+    lochelper->GetUS((ILocale**)&locUS);
+    breakhelper->GetCharacterInstanceEx(locUS,(IBreakIterator**)&iterator);
 }
 
 CTest::~CTest()
@@ -36,16 +36,16 @@ int CTest::testGetWordInstanceLocale(int argc, char* argv[])
 {
     AutoPtr<IBreakIterator> it1;
     AutoPtr<ILocale> locCANADA;
-    lochelper->GetCANADA_FRENCH((ILocale **)&locCANADA);
-    breakhelper->GetWordInstanceEx(locCANADA,(IBreakIterator **)&it1);
+    lochelper->GetCANADA_FRENCH((ILocale**)&locCANADA);
+    breakhelper->GetWordInstanceEx(locCANADA,(IBreakIterator**)&it1);
     AutoPtr<IBreakIterator> wordit;
-    breakhelper->GetWordInstance((IBreakIterator **)&wordit);
+    breakhelper->GetWordInstance((IBreakIterator**)&wordit);
     assert(it1 != wordit); // "Incorrect BreakIterator"
 
     AutoPtr<ILocale> newloc;
-    CLocale::New(String("bad locale"), (ILocale **)&newloc);
+    CLocale::New(String("bad locale"), (ILocale**)&newloc);
     AutoPtr<IBreakIterator> it2;
-    breakhelper->GetWordInstanceEx(newloc,(IBreakIterator **)&it2);
+    breakhelper->GetWordInstanceEx(newloc,(IBreakIterator**)&it2);
     assert( it2 != wordit); // "Incorrect BreakIterator"
     return 0;
 }
@@ -81,7 +81,7 @@ int CTest::testWordBoundaries(int argc, char* argv[])
     String s = sb.ToString();
 
     AutoPtr<IBreakIterator> it;
-    breakhelper->GetWordInstanceEx(locUS,(IBreakIterator **)&it);
+    breakhelper->GetWordInstanceEx(locUS,(IBreakIterator**)&it);
     it->SetText(s);
     // Check we're not leaking global references. 2048 would bust the VM's hard-coded limit.
     for (int i = 0; i < 2048; ++i) {
@@ -89,7 +89,7 @@ int CTest::testWordBoundaries(int argc, char* argv[])
     }
 
     AutoPtr<IBreakIterator> clone;
-    it->Clone((IInterface **)&clone);
+    it->Clone((IInterface**)&clone);
     assertExpectedWordBoundaries(it, s);
     assertExpectedWordBoundaries(clone, s);
     return 0;
@@ -98,7 +98,7 @@ int CTest::testWordBoundaries(int argc, char* argv[])
 int CTest::testIsBoundary(int argc, char* argv[])
 {
     AutoPtr<IBreakIterator> it;
-    breakhelper->GetCharacterInstanceEx(locUS, (IBreakIterator **)&it);
+    breakhelper->GetCharacterInstanceEx(locUS, (IBreakIterator**)&it);
     it->SetText(String("hello"));
 
     Boolean flagbound(FALSE);
@@ -132,7 +132,7 @@ int CTest::testIsBoundary(int argc, char* argv[])
 int CTest::testFollowing(int argc, char* argv[])
 {
     AutoPtr<IBreakIterator> it;
-    breakhelper->GetCharacterInstanceEx(locUS, (IBreakIterator **)&it);
+    breakhelper->GetCharacterInstanceEx(locUS, (IBreakIterator**)&it);
     ECode ec = it->SetText(String("hello"));
 
     Int32 flagfollow(0);
@@ -164,7 +164,7 @@ int CTest::testFollowing(int argc, char* argv[])
 int CTest::testPreceding(int argc, char* argv[])
 {
     AutoPtr<IBreakIterator> it;
-    breakhelper->GetCharacterInstanceEx(locUS,(IBreakIterator **)&it);
+    breakhelper->GetCharacterInstanceEx(locUS,(IBreakIterator**)&it);
     it->SetText(String("hello"));
 
     Int32 flagpreced(0);

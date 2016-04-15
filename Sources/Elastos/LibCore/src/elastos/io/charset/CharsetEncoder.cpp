@@ -69,7 +69,7 @@ ECode CharsetEncoder::Init(
     mMaxBytesPerChar = maxBytesPerChar;
 
     AutoPtr<ICodingErrorAction> report;
-    CCodingErrorAction::GetREPORT((ICodingErrorAction **)&report);
+    CCodingErrorAction::GetREPORT((ICodingErrorAction**)&report);
     mMalformedInputAction = report;
     mUnmappableCharacterAction = report;
 
@@ -133,7 +133,7 @@ ECode CharsetEncoder::CanEncode(
     AutoPtr<ICodingErrorAction> originalUnmappableCharacterAction = mUnmappableCharacterAction;
 
     AutoPtr<ICodingErrorAction> report;
-    CCodingErrorAction::GetREPORT((ICodingErrorAction **)&report);
+    CCodingErrorAction::GetREPORT((ICodingErrorAction**)&report);
     FAIL_RETURN(OnMalformedInput(report))
     FAIL_RETURN(OnUnmappableCharacter(report))
 
@@ -216,7 +216,7 @@ ECode CharsetEncoder::CheckCoderResult(
     VALIDATE_NOT_NULL(result);
 
     AutoPtr<ICodingErrorAction> REPORT;
-    CCodingErrorAction::GetREPORT((ICodingErrorAction **)&REPORT);
+    CCodingErrorAction::GetREPORT((ICodingErrorAction**)&REPORT);
     Boolean isEnable = FALSE;
 
     if ((mMalformedInputAction == REPORT) && (result->IsMalformed(&isEnable), isEnable)) {
@@ -272,8 +272,8 @@ ECode CharsetEncoder::Encode(
     CCoderResult::GetOVERFLOW((ICoderResult**)&OVERFLOW);
 
     AutoPtr<ICodingErrorAction> REPLACE, REPORT;
-    CCodingErrorAction::GetREPLACE((ICodingErrorAction **)&REPLACE);
-    CCodingErrorAction::GetREPORT((ICodingErrorAction **)&REPORT);
+    CCodingErrorAction::GetREPLACE((ICodingErrorAction**)&REPLACE);
+    CCodingErrorAction::GetREPORT((ICodingErrorAction**)&REPORT);
 
     IBuffer* cb = IBuffer::Probe(charBuffer);
     IBuffer* bb = IBuffer::Probe(byteBuffer);
@@ -399,7 +399,7 @@ ECode CharsetEncoder::IsLegalReplacement(
         FAIL_RETURN(mCharset->NewDecoder((ICharsetDecoder**)&mDecoder));
 
         AutoPtr<ICodingErrorAction> REPORT;
-        CCodingErrorAction::GetREPORT((ICodingErrorAction **)&REPORT);
+        CCodingErrorAction::GetREPORT((ICodingErrorAction**)&REPORT);
 
         FAIL_RETURN(mDecoder->OnMalformedInput(REPORT.Get()))
         FAIL_RETURN(mDecoder->OnUnmappableCharacter(REPORT.Get()))

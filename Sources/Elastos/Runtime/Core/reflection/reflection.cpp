@@ -98,7 +98,7 @@ ELAPI _CObject_ReflectClassInfo(
 
     AutoPtr<IModuleInfo> iModuleInfo;
     ec = g_objInfoList.AcquireModuleInfo(String(clsid.mUunm),
-            (IModuleInfo **)&iModuleInfo);
+            (IModuleInfo**)&iModuleInfo);
     if (FAILED(ec)) {
         return ec;
     }
@@ -143,7 +143,7 @@ ELAPI _CObject_ReflectInterfaceInfo(
     if (FAILED(ec)) return E_INVALID_ARGUMENT;
 
     AutoPtr<IModuleInfo> obj;
-    ec = _CReflector_AcquireModuleInfo(String(clsid.mUunm), (IModuleInfo **)&obj);
+    ec = _CReflector_AcquireModuleInfo(String(clsid.mUunm), (IModuleInfo**)&obj);
     if (FAILED(ec)) {
         return ec;
     }

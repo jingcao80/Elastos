@@ -237,7 +237,7 @@ void MemoryBlock::PokeInt16(
 {
     Boolean isflag = FALSE;
     AutoPtr<CByteOrderHelper> obj;
-    CByteOrderHelper::AcquireSingletonByFriend((CByteOrderHelper **)&obj);
+    CByteOrderHelper::AcquireSingletonByFriend((CByteOrderHelper**)&obj);
     AutoPtr<IByteOrderHelper> boh = (IByteOrderHelper*)obj.Get();
     boh->IsNeedsSwap(order , &isflag);
     Memory::PokeInt16(mAddress + offset, value, isflag);
@@ -249,7 +249,7 @@ Int16 MemoryBlock::PeekInt16(
 {
     Boolean isflag = FALSE;
     AutoPtr<CByteOrderHelper> obj;
-    CByteOrderHelper::AcquireSingletonByFriend((CByteOrderHelper **)&obj);
+    CByteOrderHelper::AcquireSingletonByFriend((CByteOrderHelper**)&obj);
     AutoPtr<IByteOrderHelper> boh = (IByteOrderHelper*)obj.Get();
     boh->IsNeedsSwap(order , &isflag);
     return Memory::PeekInt16(mAddress + offset, isflag);
@@ -262,7 +262,7 @@ void MemoryBlock::PokeInt32(
 {
     Boolean isflag = FALSE;
     AutoPtr<CByteOrderHelper> obj;
-    CByteOrderHelper::AcquireSingletonByFriend((CByteOrderHelper **)&obj);
+    CByteOrderHelper::AcquireSingletonByFriend((CByteOrderHelper**)&obj);
     AutoPtr<IByteOrderHelper> boh = (IByteOrderHelper*)obj.Get();
     boh->IsNeedsSwap(order , &isflag);
     Memory::PokeInt32(mAddress + offset, value, isflag);
@@ -274,7 +274,7 @@ Int32 MemoryBlock::PeekInt32(
 {
     Boolean isflag = FALSE;
     AutoPtr<CByteOrderHelper> obj;
-    CByteOrderHelper::AcquireSingletonByFriend((CByteOrderHelper **)&obj);
+    CByteOrderHelper::AcquireSingletonByFriend((CByteOrderHelper**)&obj);
     AutoPtr<IByteOrderHelper> boh = (IByteOrderHelper*)obj.Get();
     boh->IsNeedsSwap(order , &isflag);
     return Memory::PeekInt32(mAddress + offset, isflag);
@@ -287,7 +287,7 @@ void MemoryBlock::PokeInt64(
 {
     Boolean isflag = FALSE;
     AutoPtr<CByteOrderHelper> obj;
-    CByteOrderHelper::AcquireSingletonByFriend((CByteOrderHelper **)&obj);
+    CByteOrderHelper::AcquireSingletonByFriend((CByteOrderHelper**)&obj);
     AutoPtr<IByteOrderHelper> boh = (IByteOrderHelper*)obj.Get();
     boh->IsNeedsSwap(order , &isflag);
     Memory::PokeInt64(mAddress + offset, value, isflag);
@@ -299,7 +299,7 @@ Int64 MemoryBlock::PeekInt64(
 {
     Boolean isflag = FALSE;
     AutoPtr<CByteOrderHelper> obj;
-    CByteOrderHelper::AcquireSingletonByFriend((CByteOrderHelper **)&obj);
+    CByteOrderHelper::AcquireSingletonByFriend((CByteOrderHelper**)&obj);
     AutoPtr<IByteOrderHelper> boh = (IByteOrderHelper*)obj.Get();
     boh->IsNeedsSwap(order , &isflag);
     return Memory::PeekInt64(mAddress + offset, isflag);

@@ -149,7 +149,7 @@ ECode CGeckoInputConnection::GetExtractedText(
     }
 
     AutoPtr<IExtractedText> extract;
-//    ECode ec = CExtractedText::New((IExtractedText **)&extract);
+//    ECode ec = CExtractedText::New((IExtractedText**)&extract);
 //    if (FAILED(ec)) return ec;
     //extract->mFlags = 0;
     //extract->mPartialStartOffset = -1;

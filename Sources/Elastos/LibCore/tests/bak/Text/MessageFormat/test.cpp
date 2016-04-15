@@ -28,8 +28,8 @@ int CTest::test_applyPattern(int argc, char* argv[])
     CMessageFormat::New(String("test"), (IMessageFormat**)&format);
     AutoPtr<ILocale> Locale_FRENCH;
     AutoPtr<ILocaleHelper> lochelp;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lochelp);
-    lochelp->GetFRENCH((ILocale **)&Locale_FRENCH);
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lochelp);
+    lochelp->GetFRENCH((ILocale**)&Locale_FRENCH);
     format->SetLocale(Locale_FRENCH);
     // same LONG and FULL time patterns
     format->ApplyPattern(String("{0,time, Full}"));
@@ -132,19 +132,19 @@ int CTest::test_setFormat(int argc, char* argv[])
     AutoPtr<IMessageFormat> f1 = format1;
     AutoPtr<IDateFormat> df;
     AutoPtr<IDateFormatHelper> dfh;
-    CDateFormatHelper::AcquireSingleton((IDateFormatHelper **)&dfh);
-    dfh->GetTimeInstance((IDateFormat **)&df);
+    CDateFormatHelper::AcquireSingleton((IDateFormatHelper**)&dfh);
+    dfh->GetTimeInstance((IDateFormat**)&df);
     AutoPtr<INumberFormat> nf;
     AutoPtr<INumberFormatHelper> nfh;
-    CNumberFormatHelper::AcquireSingleton((INumberFormatHelper **)&nfh);
-    nfh->GetInstance((INumberFormat **)&nf);
+    CNumberFormatHelper::AcquireSingleton((INumberFormatHelper**)&nfh);
+    nfh->GetInstance((INumberFormat**)&nf);
     // case 1: Compare getFormats() results after calls to setFormat()
     f1->SetFormat(0, df);
     f1->SetFormat(1, df);
     f1->SetFormat(2, nf);
     AutoPtr<IChoiceFormat> cf1, cf2;
-    CChoiceFormat::New(String("0#off|1#on") , (IChoiceFormat **)&cf1);
-    CChoiceFormat::New(String("1#few|2#ok|3#a lot") , (IChoiceFormat **)&cf2);
+    CChoiceFormat::New(String("0#off|1#on") , (IChoiceFormat**)&cf1);
+    CChoiceFormat::New(String("1#few|2#ok|3#a lot") , (IChoiceFormat**)&cf2);
     f1->SetFormat(3, cf1);
     f1->SetFormat(4, cf2);
     f1->SetFormat(5, df);
@@ -174,7 +174,7 @@ int CTest::test_setFormat(int argc, char* argv[])
         PFL_EX("Expected ArrayIndexOutOfBoundsException was not thrown");
     }
     AutoPtr<IDateFormat> df2;
-    dfh->GetDateTimeInstance((IDateFormat **)&df2);
+    dfh->GetDateTimeInstance((IDateFormat**)&df2);
     ec = f1->SetFormat(formats->GetLength(), df2);
     if (ec != NOERROR)
     {

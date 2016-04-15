@@ -89,8 +89,8 @@ ECode CJDBCDatabaseMetaData::GetBestRowIdentifier(
     *resultSet = NULL;
 
     AutoPtr<IJDBCStatement> s0Obj, s1Obj;
-    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s0Obj));
-    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s1Obj));
+    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement**)&s0Obj));
+    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement**)&s1Obj));
     CJDBCStatement* s0 = (CJDBCStatement*)s0Obj.Get();
     CJDBCStatement* s1 = (CJDBCStatement*)s1Obj.Get();
     AutoPtr<IResultSet> rs0Obj, rs1Obj;
@@ -104,10 +104,10 @@ ECode CJDBCDatabaseMetaData::GetBestRowIdentifier(
     //     }
         s0->ExecuteQuery(String("PRAGMA index_list(") +
                          Elastos::Sql::SQLite::CShell::SqlQuote(table) +
-                         String(")"),(IResultSet **)&rs0Obj);
+                         String(")"),(IResultSet**)&rs0Obj);
         s1->ExecuteQuery(String("PRAGMA table_info(") +
                          Elastos::Sql::SQLite::CShell::SqlQuote(table) +
-                         String(")"),(IResultSet **)&rs1Obj);
+                         String(")"),(IResultSet**)&rs1Obj);
     CJDBCResultSet* rs0 = (CJDBCResultSet*)rs0Obj.Get();
     CJDBCResultSet* rs1 = (CJDBCResultSet*)rs1Obj.Get();
     // } catch (SQLException e) {
@@ -136,12 +136,12 @@ ECode CJDBCDatabaseMetaData::GetBestRowIdentifier(
     (*types)[6] = ITypes::SMALLINT;
     (*types)[7] = ITypes::SMALLINT;
     AutoPtr<ITableResultX> trObj;
-    FAIL_RETURN(CTableResultX::New((ITableResultX **)&trObj));
+    FAIL_RETURN(CTableResultX::New((ITableResultX**)&trObj));
     CTableResultX* tr = (CTableResultX*)trObj.Get();
     tr->Columns(cols);
     tr->Sql_types(types);
     AutoPtr<IJDBCResultSet> rs ;
-    FAIL_RETURN(CJDBCResultSet::New(ITableResult::Probe(trObj), NULL,(IJDBCResultSet **)&rs));
+    FAIL_RETURN(CJDBCResultSet::New(ITableResult::Probe(trObj), NULL,(IJDBCResultSet**)&rs));
     if (rs0 != NULL && rs0->tr != NULL && rs0->tr->mNrows > 0 &&
         rs1 != NULL && rs1->tr != NULL && rs1->tr->mNrows > 0) {
 
@@ -163,13 +163,13 @@ ECode CJDBCDatabaseMetaData::GetBestRowIdentifier(
                 continue;
             }
             AutoPtr<IJDBCStatement> s2Obj;
-            FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s2Obj));
+            FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement**)&s2Obj));
             CJDBCStatement* s2 = (CJDBCStatement*)s2Obj.Get();
             AutoPtr<IResultSet> rs2Obj;
             // try {
                 s2->ExecuteQuery(String("PRAGMA index_info(") +
                                  Elastos::Sql::SQLite::CShell::SqlQuote(iname) +
-                                 String(")"),(IResultSet **)&rs2Obj);
+                                 String(")"),(IResultSet**)&rs2Obj);
                 CJDBCResultSet* rs2 = (CJDBCResultSet*)rs2Obj.Get();
             // } catch (SQLException e) {
             // } finally {
@@ -233,14 +233,14 @@ ECode CJDBCDatabaseMetaData::GetCatalogs(
     AutoPtr<ArrayOf<String> > cols = ArrayOf<String>::Alloc(1);
     (*cols)[0] = String("TABLE_CAT");
     AutoPtr<CTableResult> tr;
-    FAIL_RETURN(CTableResult::New((ITableResult **)&tr));
+    FAIL_RETURN(CTableResult::New((ITableResult**)&tr));
     tr->Columns(cols);
     AutoPtr<ArrayOf<String> > row = ArrayOf<String>::Alloc(1) ;
     (*row)[0] = String("");
     Boolean flag = FALSE;
     tr->Newrow(row, &flag);
     AutoPtr<IJDBCResultSet> jrs;
-    FAIL_RETURN(CJDBCResultSet::New(tr,NULL,(IJDBCResultSet **)&jrs));
+    FAIL_RETURN(CJDBCResultSet::New(tr,NULL,(IJDBCResultSet**)&jrs));
     *resultSet = IResultSet::Probe(jrs);
     REFCOUNT_ADD(*resultSet)
     return NOERROR;
@@ -291,11 +291,11 @@ ECode CJDBCDatabaseMetaData::GetColumnPrivileges(
     (*types)[7] = ITypes::VARCHAR;
 
     AutoPtr<CTableResultX> tr;
-    FAIL_RETURN(CTableResultX::New((ITableResultX **)&tr));
+    FAIL_RETURN(CTableResultX::New((ITableResultX**)&tr));
     tr->Columns(cols);
     tr->Sql_types(types);
     AutoPtr<IJDBCResultSet> rs;
-    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL ,(IJDBCResultSet **)&rs));
+    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL ,(IJDBCResultSet**)&rs));
     *resultSet = (IResultSet *)rs.Get();
     REFCOUNT_ADD(*resultSet);
     return NOERROR;
@@ -313,7 +313,7 @@ ECode CJDBCDatabaseMetaData::GetColumns(
         // throw new SQLException("connection closed.");
     }
     AutoPtr<IJDBCStatement> sObj ;
-    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&sObj));
+    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement**)&sObj));
     CJDBCStatement* s = (CJDBCStatement*)sObj.Get();
     AutoPtr<IResultSet> rs0Obj ;
     // try {
@@ -324,7 +324,7 @@ ECode CJDBCDatabaseMetaData::GetColumns(
     //     }
              s->ExecuteQuery(String("PRAGMA table_info(") +
                      SQLite::CShell::SqlQuote(tableNamePattern) +
-                     String(")"),(IResultSet **)&rs0Obj);
+                     String(")"),(IResultSet**)&rs0Obj);
              s->Close();
             CJDBCResultSet* rs0 = (CJDBCResultSet*)rs0Obj.Get();
     // } catch (SQLException e) {
@@ -375,12 +375,12 @@ ECode CJDBCDatabaseMetaData::GetColumns(
     (*types)[16] = ITypes::INTEGER;
     (*types)[17] = ITypes::VARCHAR;
     AutoPtr<ITableResultX> trObj;
-    FAIL_RETURN(CTableResultX::New((ITableResultX **)&trObj));
+    FAIL_RETURN(CTableResultX::New((ITableResultX**)&trObj));
     CTableResultX* tr = (CTableResultX*)trObj.Get();
     tr->Columns(cols);
     tr->Sql_types(types);
     AutoPtr<IJDBCResultSet> rsObj;
-    FAIL_RETURN(CJDBCResultSet::New(ITableResult::Probe(tr),NULL,(IJDBCResultSet **)&rsObj));
+    FAIL_RETURN(CJDBCResultSet::New(ITableResult::Probe(tr),NULL,(IJDBCResultSet**)&rsObj));
     CJDBCResultSet* rs = (CJDBCResultSet*)rsObj.Get();
     if (rs0 != NULL && rs0->tr != NULL && rs0->tr->mNrows > 0) {
         HashMap<String, Int32> h ;
@@ -454,7 +454,7 @@ ECode CJDBCDatabaseMetaData::GetCrossReference(
     AutoPtr<CJDBCResultSet> rs0 ;
     if (!foreignTable.IsNull() && foreignTable.GetChar(0) != '%') {
         AutoPtr<CJDBCStatement> s0;
-        FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s0));
+        FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement**)&s0));
         // try {
         // try {
             conn->mDb->Exec(String("SELECT 1 FROM sqlite_master LIMIT 1"), NULL);
@@ -463,7 +463,7 @@ ECode CJDBCDatabaseMetaData::GetCrossReference(
         // }
             s0->ExecuteQuery(String("PRAGMA foreign_key_list(") +
                          Elastos::Sql::SQLite::CShell::SqlQuote(foreignTable) +
-                         String(")"),(IResultSet **)&rs0);
+                         String(")"),(IResultSet**)&rs0);
         // } catch (SQLException e) {
         // throw e;
         // } finally {
@@ -502,11 +502,11 @@ ECode CJDBCDatabaseMetaData::GetCrossReference(
     (*types)[12] = ITypes::VARCHAR;
     (*types)[13] = ITypes::SMALLINT;
     AutoPtr<CTableResultX> tr;
-    FAIL_RETURN(CTableResultX::New((ITableResultX **)&tr));
+    FAIL_RETURN(CTableResultX::New((ITableResultX**)&tr));
     tr->Columns(cols);
     tr->Sql_types(types);
     AutoPtr<CJDBCResultSet> rs ;
-    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL,(IJDBCResultSet **)&rs));
+    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL,(IJDBCResultSet**)&rs));
     if (rs0 != NULL && rs0->tr != NULL && rs0->tr->mNrows > 0) {
         String pktable = String(NULL);
         if (!primaryTable.IsNull() && primaryTable.GetChar(0) != '%') {
@@ -621,11 +621,11 @@ ECode CJDBCDatabaseMetaData::GetExportedKeys(
     (*types)[12] = ITypes::VARCHAR;
     (*types)[13] = ITypes::SMALLINT;
     AutoPtr<CTableResultX> tr;
-    FAIL_RETURN(CTableResultX::New((ITableResultX **)&tr));
+    FAIL_RETURN(CTableResultX::New((ITableResultX**)&tr));
     tr->Columns(cols);
     tr->Sql_types(types);
     AutoPtr<CJDBCResultSet> rs ;
-    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL,(IJDBCResultSet **)&rs));
+    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL,(IJDBCResultSet**)&rs));
     *resultSet = (IResultSet *)rs.Get();
     REFCOUNT_ADD(*resultSet);
     return NOERROR;
@@ -652,7 +652,7 @@ ECode CJDBCDatabaseMetaData::GetImportedKeys(
     /* [out] */ IResultSet ** resultSet)
 {
     AutoPtr<CJDBCStatement> s0;
-    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s0));
+    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement**)&s0));
     AutoPtr<CJDBCResultSet> rs0;
     // try {
     //     try {
@@ -663,7 +663,7 @@ ECode CJDBCDatabaseMetaData::GetImportedKeys(
     //     }
             s0->ExecuteQuery(String("PRAGMA foreign_key_list(") +
                          Elastos::Sql::SQLite::CShell::SqlQuote(table) +
-                         String(")"),(IResultSet **)&rs0);
+                         String(")"),(IResultSet**)&rs0);
     // } catch (SQLException e) {
     //     throw e;
     // } finally {
@@ -701,11 +701,11 @@ ECode CJDBCDatabaseMetaData::GetImportedKeys(
     (*types)[12] = ITypes::VARCHAR;
     (*types)[13] = ITypes::SMALLINT;
     AutoPtr<CTableResultX> tr;
-    FAIL_RETURN(CTableResultX::New((ITableResultX **)&tr));
+    FAIL_RETURN(CTableResultX::New((ITableResultX**)&tr));
     tr->Columns(cols);
     tr->Sql_types(types);
     AutoPtr<CJDBCResultSet> rs ;
-    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL,(IJDBCResultSet **)&rs));
+    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL,(IJDBCResultSet**)&rs));
     if (rs0 != NULL && rs0->tr != NULL && rs0->tr->mNrows > 0) {
         InternalImportedKeys(table, String(NULL), rs0, tr);
     }
@@ -723,7 +723,7 @@ ECode CJDBCDatabaseMetaData::GetIndexInfo(
     /* [out] */ IResultSet ** resultSet)
 {
     AutoPtr<CJDBCStatement> s0;
-    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s0));
+    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement**)&s0));
     AutoPtr<CJDBCResultSet> rs0;
     // try {
     //     try {
@@ -733,7 +733,7 @@ ECode CJDBCDatabaseMetaData::GetIndexInfo(
     //     }
             s0->ExecuteQuery(String("PRAGMA index_list(") +
                          Elastos::Sql::SQLite::CShell::SqlQuote(table) +
-                         String(")"),(IResultSet **)&rs0);
+                         String(")"),(IResultSet**)&rs0);
     // } catch (SQLException e) {
     //     throw e;
     // } finally {
@@ -768,11 +768,11 @@ ECode CJDBCDatabaseMetaData::GetIndexInfo(
     (*types)[11] = ITypes::INTEGER;
     (*types)[12] = ITypes::VARCHAR;
     AutoPtr<CTableResultX> tr;
-    FAIL_RETURN(CTableResultX::New((ITableResultX **)&tr));
+    FAIL_RETURN(CTableResultX::New((ITableResultX**)&tr));
     tr->Columns(cols);
     tr->Sql_types(types);
     AutoPtr<CJDBCResultSet> rs ;
-    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL,(IJDBCResultSet **)&rs));
+    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL,(IJDBCResultSet**)&rs));
     if (rs0 != NULL && rs0->tr != NULL && rs0->tr->mNrows > 0) {
         HashMap<String, Int32> h0 ;
         for (Int32 i = 0; i < rs0->tr->mNcolumns; i++) {
@@ -788,12 +788,12 @@ ECode CJDBCDatabaseMetaData::GetIndexInfo(
                 continue;
             }
             AutoPtr<CJDBCStatement> s1;
-            FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s1));
+            FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement**)&s1));
             AutoPtr<CJDBCResultSet> rs1;
             // try {
                 s1->ExecuteQuery(String("PRAGMA index_info(") +
                          Elastos::Sql::SQLite::CShell::SqlQuote(iname) +
-                         String(")"),(IResultSet **)&rs1);
+                         String(")"),(IResultSet**)&rs1);
             // } catch (SQLException e) {
             // } finally {
             //     s1.close();
@@ -830,7 +830,7 @@ ECode CJDBCDatabaseMetaData::GetIndexInfo(
             }
         }
     }
-    resultSet = (IResultSet **)&rs;
+    resultSet = (IResultSet**)&rs;
     return NOERROR;
 }
 
@@ -1002,7 +1002,7 @@ ECode CJDBCDatabaseMetaData::GetPrimaryKeys(
     /* [out] */ IResultSet ** resultSet)
 {
     AutoPtr<CJDBCStatement> s0;
-    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s0));
+    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement**)&s0));
     AutoPtr<CJDBCResultSet> rs0;
     // try {
     //     try {
@@ -1012,7 +1012,7 @@ ECode CJDBCDatabaseMetaData::GetPrimaryKeys(
     //     }
             s0->ExecuteQuery(String("PRAGMA index_list(") +
                          Elastos::Sql::SQLite::CShell::SqlQuote(table) +
-                         String(")"),(IResultSet **)&rs0);
+                         String(")"),(IResultSet**)&rs0);
     // } catch (SQLException e) {
     //     throw e;
     // } finally {
@@ -1033,12 +1033,12 @@ ECode CJDBCDatabaseMetaData::GetPrimaryKeys(
     (*types)[4] = ITypes::SMALLINT;
     (*types)[5] = ITypes::VARCHAR;
     AutoPtr<CTableResultX> tr;
-    FAIL_RETURN(CTableResultX::New((ITableResultX **)&tr));
+    FAIL_RETURN(CTableResultX::New((ITableResultX**)&tr));
     tr->Columns(cols);
     tr->Sql_types(types);
 
     AutoPtr<CJDBCResultSet> rs ;
-    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL,(IJDBCResultSet **)&rs));
+    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL,(IJDBCResultSet**)&rs));
     if (rs0 != NULL && rs0->tr != NULL && rs0->tr->mNrows > 0) {
         HashMap<String, Int32> h0;
         for (Int32 i = 0; i < rs0->tr->mNcolumns; i++) {
@@ -1054,12 +1054,12 @@ ECode CJDBCDatabaseMetaData::GetPrimaryKeys(
                 continue;
             }
             AutoPtr<CJDBCStatement> s1;
-            FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s1));
+            FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement**)&s1));
             AutoPtr<CJDBCResultSet> rs1;
             // try {
                 s1->ExecuteQuery(String("PRAGMA index_info(") +
                                  Elastos::Sql::SQLite::CShell::SqlQuote(iname) +
-                                 String(")"),(IResultSet **)&rs1);
+                                 String(")"),(IResultSet**)&rs1);
             // } catch (SQLException e) {
             // } finally {
             //     s2.close();
@@ -1094,11 +1094,11 @@ ECode CJDBCDatabaseMetaData::GetPrimaryKeys(
         return NOERROR;
     }
     AutoPtr<CJDBCStatement> s1;
-    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s1));
+    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement**)&s1));
     // try {
         s1->ExecuteQuery(String("PRAGMA table_info(") +
                                  Elastos::Sql::SQLite::CShell::SqlQuote(table) +
-                                 String(")"),(IResultSet **)&rs0);
+                                 String(")"),(IResultSet**)&rs0);
     // } catch (SQLException e) {
     //     throw e;
     // } finally {
@@ -1180,7 +1180,7 @@ ECode CJDBCDatabaseMetaData::GetSchemas(
     AutoPtr<ArrayOf<String> > cols = ArrayOf<String>::Alloc(1) ;
     (*cols)[0] = String("TABLE_SCHEM");
     AutoPtr<CTableResult> tr;
-    FAIL_RETURN(CTableResult::New((ITableResult **)&tr));
+    FAIL_RETURN(CTableResult::New((ITableResult**)&tr));
     tr->Columns(cols);
     AutoPtr<ArrayOf<String> > row = ArrayOf<String>::Alloc(1) ;
     (*row)[0] = String("");
@@ -1279,11 +1279,11 @@ ECode CJDBCDatabaseMetaData::GetTablePrivileges(
     (*types)[7] = ITypes::VARCHAR;
 
     AutoPtr<CTableResultX> tr;
-    FAIL_RETURN(CTableResultX::New((ITableResultX **)&tr));
+    FAIL_RETURN(CTableResultX::New((ITableResultX**)&tr));
     tr->Columns(cols);
     tr->Sql_types(types);
     AutoPtr<IJDBCResultSet> rs;
-    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL ,(IJDBCResultSet **)&rs));
+    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL ,(IJDBCResultSet**)&rs));
     *resultSet = (IResultSet *)rs.Get();
     REFCOUNT_ADD(*resultSet);
     return NOERROR;
@@ -1297,7 +1297,7 @@ ECode CJDBCDatabaseMetaData::GetTables(
     /* [out] */ IResultSet ** resultSet)
 {
     AutoPtr<CJDBCStatement> s;
-    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement **)&s));
+    FAIL_RETURN(CJDBCStatement::New(conn,(IJDBCStatement**)&s));
     StringBuffer sb;
     sb += "SELECT '' AS 'TABLE_CAT', ";
     sb += "'' AS 'TABLE_SCHEM', ";
@@ -1343,7 +1343,7 @@ ECode CJDBCDatabaseMetaData::GetTableTypes(
     AutoPtr<ArrayOf<String> > cols = ArrayOf<String>::Alloc(1) ;
     (*cols)[0] = String("TABLE_TYPE");
     AutoPtr<CTableResult> tr;
-    FAIL_RETURN(CTableResult::New((ITableResult **)&tr));
+    FAIL_RETURN(CTableResult::New((ITableResult**)&tr));
     tr->Columns(cols);
     AutoPtr<ArrayOf<String> > row = ArrayOf<String>::Alloc(1) ;
     (*row)[0] = String("TABLE");
@@ -1404,11 +1404,11 @@ ECode CJDBCDatabaseMetaData::GetTypeInfo(
     (*types)[16] = ITypes::INTEGER;
     (*types)[17] = ITypes::INTEGER;
     AutoPtr<CTableResultX> tr;
-    FAIL_RETURN(CTableResultX::New((ITableResultX **)&tr));
+    FAIL_RETURN(CTableResultX::New((ITableResultX**)&tr));
     tr->Columns(cols);
     tr->Sql_types(types);
     AutoPtr<CJDBCResultSet> rs ;
-    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL,(IJDBCResultSet **)&rs));
+    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL,(IJDBCResultSet**)&rs));
     AutoPtr<ArrayOf<String> > row1 = ArrayOf<String>::Alloc(18);
     (*row1)[0] = String("VARCHAR");
     (*row1)[1] = String("") + StringUtils::ToString(ITypes::VARCHAR);
@@ -1708,11 +1708,11 @@ ECode CJDBCDatabaseMetaData::GetVersionColumns(
     (*types)[7] = ITypes::SMALLINT;
 
     AutoPtr<CTableResultX> tr;
-    FAIL_RETURN(CTableResultX::New((ITableResultX **)&tr));
+    FAIL_RETURN(CTableResultX::New((ITableResultX**)&tr));
     tr->Columns(cols);
     tr->Sql_types(types);
     AutoPtr<IJDBCResultSet> rs;
-    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL ,(IJDBCResultSet **)&rs));
+    FAIL_RETURN(CJDBCResultSet::New((ITableResult *)tr, NULL ,(IJDBCResultSet**)&rs));
     *resultSet = (IResultSet *)rs.Get();
     REFCOUNT_ADD(*resultSet);
     return NOERROR;

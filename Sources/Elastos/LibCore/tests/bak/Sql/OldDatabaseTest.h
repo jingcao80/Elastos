@@ -49,14 +49,14 @@ public:
     void setUp() {
         String tmp("/data/data/com.elastos.runtime/elastos");
         AutoPtr<IFile> tmpDir;
-        CFile::New(tmp,(IFile **)&(tmpDir));
-        CFileHelper::AcquireSingleton((IFileHelper **)&dbFileHelper);
+        CFile::New(tmp,(IFile**)&(tmpDir));
+        CFileHelper::AcquireSingleton((IFileHelper**)&dbFileHelper);
 
-        CDriverManager::AcquireSingleton((IDriverManager **)&driverManager);
+        CDriverManager::AcquireSingleton((IDriverManager**)&driverManager);
         Boolean isflag = FALSE;
         tmpDir->IsDirectory(&isflag);
         if (isflag) {
-            // dbFileHelper->CreateTempFileEx(String("sqliteTest"), String(".db"), tmpDir,(IFile **)&dbFile);
+            // dbFileHelper->CreateTempFileEx(String("sqliteTest"), String(".db"), tmpDir,(IFile**)&dbFile);
             // dbFile.deleteOnExit();
         } else {
             printf("ctsdir does not exist \n");
@@ -69,7 +69,7 @@ public:
             // dbFile->GetPath(&filepath);
             filepath = tmp + String("/sqliteTest.db");
             printf("filepath==>%s\n", filepath.string());
-            driverManager->GetConnection(String("jdbc:sqlite:/") + filepath,(IConnection **)&conn);
+            driverManager->GetConnection(String("jdbc:sqlite:/") + filepath,(IConnection**)&conn);
         }
     }
 
@@ -102,15 +102,15 @@ public:
         OldSQLiteTest::setUp();
         // VALIDATE_NOT_NULL(conn);
 
-        // conn->CreateStatement((IStatement **)&statement);
+        // conn->CreateStatement((IStatement**)&statement);
         // VALIDATE_NOT_NULL(statement);
         // // Cleanup tables if necessary
         // AutoPtr<IDatabaseMetaData> meta;
-        // conn->GetMetaData((IDatabaseMetaData **)&meta);
+        // conn->GetMetaData((IDatabaseMetaData**)&meta);
         // VALIDATE_NOT_NULL(meta);
         // AutoPtr<IResultSet> userTab;
         // AutoPtr<ArrayOf<String> > types = NULL;
-        // meta->GetTables(String(NULL), String(NULL), String(NULL), *types,(IResultSet **)&userTab);
+        // meta->GetTables(String(NULL), String(NULL), String(NULL), *types,(IResultSet**)&userTab);
         // Boolean tabflag(FALSE);
         // userTab->Next(&tabflag);
         // while (tabflag) {
@@ -130,7 +130,7 @@ public:
         db->Open(filepath, 0);
         // db->Exec(CREATE_TABLE_SIMPLE1,NULL);
         db->BusyHandler(NULL);
-        ec = CDatabaseHelper::AcquireSingleton((IDatabaseHelper **)&dbhelper);
+        ec = CDatabaseHelper::AcquireSingleton((IDatabaseHelper**)&dbhelper);
         if (!dbhelper) {
             PRINT_FILE_LINE_EX("dbhelper: %p, ec: 0x%08x", dbhelper.Get(), ec);
         }
@@ -149,7 +149,7 @@ public:
     void testDatabase() {
         // db closed
         AutoPtr<IDatabase> db2;
-        CDatabase::New((IDatabase **)&db2);
+        CDatabase::New((IDatabase**)&db2);
         if (db)
         {
             db->Close();
@@ -170,7 +170,7 @@ public:
         db->Open(filepath, 0);
         // open second db while db1 still open
         AutoPtr<IDatabase> db2;
-        CDatabase::New((IDatabase **)&db2);
+        CDatabase::New((IDatabase**)&db2);
         db2->Open(filepath, 0);
         db2->Open(filepath, 0);
         db2->Close();
@@ -194,10 +194,10 @@ public:
             printf("open should fail \n");
         }
         AutoPtr<IFileHelper> temphelper;
-        CFileHelper::AcquireSingleton((IFileHelper **)&temphelper);
+        CFileHelper::AcquireSingleton((IFileHelper**)&temphelper);
         // if (temphelper)
         // {
-        //     ECode ec = temphelper->CreateTempFileEx(String("openAuxMethod"), String(".db"),String(NULL),(IFile **)&temp);
+        //     ECode ec = temphelper->CreateTempFileEx(String("openAuxMethod"), String(".db"),String(NULL),(IFile**)&temp);
         //     printf("ec: %d\n", ec);
         // } else {
         //     printf("temphelper failed\n");
@@ -234,7 +234,7 @@ public:
 
         db->Close();
         AutoPtr<ITableResult> outtable;
-        db->GetTableEx(String("test"),(ITableResult **)&outtable);
+        db->GetTableEx(String("test"),(ITableResult**)&outtable);
             // fail();
         // catch (Exception e) {
         //     assertTrue(e.getMessage().equals("database already closed"));
@@ -259,7 +259,7 @@ public:
 
     void testExecStringCallback() {
         AutoPtr<ITableResult> res;
-        CTableResult::New((ITableResult **)&res);
+        CTableResult::New((ITableResult**)&res);
 
         db->Exec(String("insert into simple_table1 VALUES(1, 10, 20)"), NULL);
         db->Exec(String("select * from simple_table1 "),(ICallback *)res.Get());
@@ -274,7 +274,7 @@ public:
 
     void testExecStringCallbackStringArray() {
         AutoPtr<ITableResult> res;
-        CTableResult::New((ITableResult **)&res);
+        CTableResult::New((ITableResult**)&res);
         AutoPtr<ArrayOf<String> > args = ArrayOf<String>::Alloc(1);
         (*args)[0] = String("table");
         db->ExecEx(String("select name from sqlite_master where type = '%q';"), (ICallback *)res.Get(), *args);
@@ -358,7 +358,7 @@ public:
      */
     void testChanges() {
         AutoPtr<ITableResult> res;
-        CTableResult::New((ITableResult **)&res);
+        CTableResult::New((ITableResult**)&res);
         Int64 value(0);
         db->Changes(&value);
         printf("value 0 ==> 0 ?= %lld \n", value);
@@ -551,10 +551,10 @@ public:
 
     void testGetTableString() {
         AutoPtr<ITableResult> emptyTable;
-        CTableResult::New((ITableResult **)&emptyTable);
+        CTableResult::New((ITableResult**)&emptyTable);
         //select from empty table
         AutoPtr<ITableResult> res;
-        db->GetTableEx(String("select * from SIMPLE_TABLE1 ;"),(ITableResult **)&res);
+        db->GetTableEx(String("select * from SIMPLE_TABLE1 ;"),(ITableResult**)&res);
         String emptystr;
         String resstr;
         emptyTable->ToString(&emptystr);
@@ -567,7 +567,7 @@ public:
 //        assertFalse(emptyTable.toString().equals(res.toString()));
 
         db->Exec(String("insert into SIMPLE_TABLE1 VALUES(1, 10, 20)"), NULL);
-        db->GetTableEx(String("select * from SIMPLE_TABLE1 ;"),(ITableResult **)&res);
+        db->GetTableEx(String("select * from SIMPLE_TABLE1 ;"),(ITableResult**)&res);
         db->Exec(String("delete from SIMPLE_TABLE1 where 1 ;"), NULL);
         String outstr;
         res->ToString(&outstr);
@@ -584,7 +584,7 @@ public:
         //     printf("Testmethod should fail\n");
         // }
         AutoPtr<ITableResult> res;
-        db->GetTableEx3( String("select name from sqlite_master where type = '%q'"), *args, (ITableResult **)&res);
+        db->GetTableEx3( String("select name from sqlite_master where type = '%q'"), *args, (ITableResult**)&res);
         String outstr;
         res->ToString(&outstr);
         printf("testGetTableStringStringArray===> %s\n", outstr.string());
@@ -595,15 +595,15 @@ public:
         AutoPtr<ArrayOf<String> > argsFail = ArrayOf<String>::Alloc(1);
         AutoPtr<ITableResult> res ;
         AutoPtr<ITableResult> defaultTableRes;
-        CTableResult::New((ITableResult **)&defaultTableRes);
+        CTableResult::New((ITableResult**)&defaultTableRes);
         (*args)[0] = String("table");
-        db->GetTableEx3(String("select name from sqlite_master where type = '%q'"), *argsFail, (ITableResult **)&res);
+        db->GetTableEx3(String("select name from sqlite_master where type = '%q'"), *argsFail, (ITableResult**)&res);
         String resstr;
         String defaultStr;
         res->ToString(&resstr);
         defaultTableRes->ToString(&defaultStr);
         printf("resstr : %s, defaultStr : %s\n", resstr.string(),defaultStr.string());
-        db->GetTableEx3(String("select name from sqlite_master where type = '%q'"), *args, (ITableResult **)&res);
+        db->GetTableEx3(String("select name from sqlite_master where type = '%q'"), *args, (ITableResult**)&res);
         res->ToString(&resstr);
         printf("resstr : %s, defaultStr : %s\n", resstr.string(),defaultStr.string());
 
@@ -649,9 +649,9 @@ public:
         db->Exec(String("create table TEST (res double)"), NULL);
         db->Exec(String("insert into TEST values (") + StringUtils::DoubleToString(input) + String(")"), NULL);
         AutoPtr<ITableResult> res;
-        CTableResult::New((ITableResult **)&res);
+        CTableResult::New((ITableResult**)&res);
         AutoPtr<IFunction> sinFunc;
-        CSinFunc::New((IFunction **)&sinFunc);
+        CSinFunc::New((IFunction**)&sinFunc);
         if (!sinFunc)
         {
             PRINT_FILE_LINE_EX("sinFunc is null\n")
@@ -672,9 +672,9 @@ public:
      */
     void testCreate_aggregate() {
         AutoPtr<ITrace> t;
-        CTestTrace::New((ITrace **)&t);
+        CTestTrace::New((ITrace**)&t);
         AutoPtr<IMockFunction> aggFunction;
-        CMockFunction::New((IMockFunction **)&aggFunction);
+        CMockFunction::New((IMockFunction**)&aggFunction);
         db->Exec(String("drop table TEST "), NULL);
         db->Exec(String("create table TEST(id integer, firstname text, lastname text)"), NULL);
         db->Exec(String("insert into TEST values(3, 'James', 'Bond'); "), NULL);
@@ -711,7 +711,7 @@ public:
         Double input = 1.0;
         AutoPtr<ITableResult> res;
         AutoPtr<IFunction> sinFunc;
-        CSinFunc::New((IFunction **)&sinFunc);
+        CSinFunc::New((IFunction**)&sinFunc);
 
         db->Exec(String("PRAGMA show_datatypes = on"), NULL);
         db->Exec(String("create table TEST (res double)"), NULL);
@@ -720,7 +720,7 @@ public:
         db->CreateFunction(String("sin"), 1, sinFunc);
         db->FunctionType(String("sin"), IConstants::SQLITE_FLOAT);
         db->GetTableEx(String("select sin(res) from TEST WHERE res = ")
-                        + StringUtils::DoubleToString(input),(ITableResult **)&res);
+                        + StringUtils::DoubleToString(input),(ITableResult**)&res);
 
         // AutoPtr<ArrayOf<String> > row = res.rows.elementAt(0);
         // String val = row[0];
@@ -733,13 +733,13 @@ public:
         // function determines return type: test that Double type is returned.
         db->FunctionType(String("sin"), IConstants::SQLITE_BLOB);
         AutoPtr<IStmt> s;
-        db->Prepare(String("select sin(res) from TEST WHERE res = ?"), (IStmt **)&s);
+        db->Prepare(String("select sin(res) from TEST WHERE res = ?"), (IStmt**)&s);
         s->BindEx2(1, input);
         Boolean stepflag(FALSE);
         s->Step(&stepflag);
 
         db->GetTableEx(String("select sin(res) from TEST WHERE res = ")
-                        + StringUtils::DoubleToString(input), (ITableResult **)&res);
+                        + StringUtils::DoubleToString(input), (ITableResult**)&res);
         // assertTrue("double".equalsIgnoreCase(res.types[0]));
         // row = (String[]) res.rows.elementAt(0);
         // val = row[0];
@@ -800,7 +800,7 @@ public:
 
     void testError_string() {
         AutoPtr<ITrace> t;
-        CTestTrace::New((ITrace **)&t);
+        CTestTrace::New((ITrace**)&t);
         Int32 lasterr(0) ;
         db->LastError(&lasterr);
         printf("lasterr: %d , SQLITE_OK: %d\n", lasterr , IConstants::SQLITE_OK);
@@ -830,13 +830,13 @@ public:
     void testSet_encoding() {
         String input("\u00bfMa\u00f1ana\u003f"); // ?Manana?
         AutoPtr<ITableResult> res;
-        CTableResult::New((ITableResult **)&res);
+        CTableResult::New((ITableResult**)&res);
         String refOutput(NULL);
         AutoPtr<IStmt> stat;
 
         // DB setup
         db->Exec(String("create table encodingTest (encoded text DEFAULT NULL);"),NULL);
-        ECode ec = db->Prepare(String("insert into encodingTest(encoded) values(:one);"),(IStmt **)&stat);
+        ECode ec = db->Prepare(String("insert into encodingTest(encoded) values(:one);"),(IStmt**)&stat);
         ec = stat->BindEx4(1, input);
         Boolean stepflag(FALSE);
         ec = stat->Step(&stepflag);
@@ -903,7 +903,7 @@ public:
         AutoPtr<ITableResult> resPriv;
         AutoPtr<ITableResult> resPub ;
         AutoPtr<ITableResult> emptyTable;
-        CTableResult::New((ITableResult **)&emptyTable);
+        CTableResult::New((ITableResult**)&emptyTable);
         String insertPublic("insert into public_table values(1,2)");
         String insertPrivate("insert into private_table values(1,2)");
         // prepare, authorizer is not activated yet
@@ -913,15 +913,15 @@ public:
         db->Exec(insertPublic, NULL);
         db->Exec(insertPrivate, NULL);
         // selects
-        db->GetTableEx(String("select * from private_table"), (ITableResult **)&resPriv);
-        db->GetTableEx(String("select * from public_table"), (ITableResult **)&resPub);
+        db->GetTableEx(String("select * from private_table"), (ITableResult**)&resPriv);
+        db->GetTableEx(String("select * from public_table"), (ITableResult**)&resPub);
 
 //        db->Exec("delete from public_table where 1", NULL);
 //        TableResult emptyPubTable = db->Exec("select * from public");
 
         // set Authorizer (positive case): denies private table
         AutoPtr<IAuthorizer> cb;
-        CAuthorizerCallback::New((IAuthorizer **)&cb);
+        CAuthorizerCallback::New((IAuthorizer**)&cb);
         db->SetAuthorizer(cb);
         //select
         db->Exec(String("select * from private_table"), (ICallback *)cb->Probe(EIID_ICallback));
@@ -957,7 +957,7 @@ public:
     void testTrace() {
         String stmt("create table TEST (res double);");
         AutoPtr<ITrace> t;
-        CTestTrace::New((ITrace **)&t);
+        CTestTrace::New((ITrace**)&t);
         // assertFalse(t.traceCalled);
         Int32 lasterr(0);
         db->LastError(&lasterr);
@@ -1005,7 +1005,7 @@ public:
         AutoPtr<IStmt> st;
         AutoPtr<IStmt> st2;
         // test empty statement
-        db->Prepare(String(""),(IStmt **)&st);
+        db->Prepare(String(""),(IStmt**)&st);
         Int32 outbind(0);
         st->BindParameterCount(&outbind);
         printf("outbind:%d\n", outbind);
@@ -1017,7 +1017,7 @@ public:
         }
 
         // test statement with unbound arguments
-        db->Prepare(String("insert into SIMPLE_TABLE1 values (:one,:two,:three)"),(IStmt **)&st2);
+        db->Prepare(String("insert into SIMPLE_TABLE1 values (:one,:two,:three)"),(IStmt**)&st2);
         st2->BindParameterCount(&outbind);
         printf("outbind:%d\n", outbind);
 
@@ -1082,7 +1082,7 @@ public:
         // assertNotNull(inStream);
 
         // insert byte array in db
-        db->Prepare(String("insert into TEST(res) values (?)"),(IStmt **)&statement2);
+        db->Prepare(String("insert into TEST(res) values (?)"),(IStmt**)&statement2);
         ECode ec = statement2->BindEx3(1, *in);
         if (ec != NOERROR)
         {
@@ -1109,7 +1109,7 @@ public:
         }
         //read from blob and compare values (positive case)
         AutoPtr<IInputStream> is;
-        blob->GetInputStream((IInputStream **)&is);
+        blob->GetInputStream((IInputStream**)&is);
 
         Int32 i = 0;
         Int32 outByte = 0;
@@ -1130,7 +1130,7 @@ public:
         db->Exec(String("insert into TEST values(zeroblob(128))"), NULL);
         AutoPtr<Elastos::Sql::SQLite::IBlob> blob2 ;
         db->OpenBlob(filepath, String("TEST"), String("res"), 2, TRUE , (Elastos::Sql::SQLite::IBlob **)&blob2);
-        blob2->GetInputStream((IInputStream **)&is);
+        blob2->GetInputStream((IInputStream**)&is);
         for (i = 0; i < 128; i++)  {
             is->Read(&outByte);
             if (outByte)
@@ -1160,14 +1160,14 @@ public:
     void testProgress_handler() {
         Int32 inputVal = 3;
         AutoPtr<IProgressHandler> prog;
-        CTestProgressHandler::New((IProgressHandler **)&prog);
+        CTestProgressHandler::New((IProgressHandler**)&prog);
         db->Exec(String("create table TEST5(id integer, firstname text, lastname text)"),NULL);
         AutoPtr<IVm> vm;
         ECode ec = db->Compile(String("select * from TEST5; ")
                     + String("insert into TEST5 values(3, 'James', 'Bond'); ")
                     + String("delete from TEST5 where id = 3; ")
                     + String("select * from TEST5"),
-                    (IVm **)&vm);
+                    (IVm**)&vm);
         if (ec != NOERROR)
         {
             PRINT_FILE_LINE_EX("Compile error:ec = %p",ec)
@@ -1197,14 +1197,14 @@ public:
         // Boundary value test
         inputVal = 0;
         AutoPtr<IProgressHandler> progBoundary;
-        CTestProgressHandler::New((IProgressHandler **)&progBoundary);
+        CTestProgressHandler::New((IProgressHandler**)&progBoundary);
         db->ProgressHandler(inputVal, progBoundary);
         AutoPtr<IVm> vm2;
         db->Compile(String("select * from TEST5; ")
                     + String("insert into TEST5 values(3, 'James', 'Bond'); ")
                     + String("delete from TEST5 where id = 3; ")
                     + String("select * from TEST5"),
-                    (IVm **)&vm2);
+                    (IVm**)&vm2);
         vmflag = TRUE;
         do {
             Boolean progflag(TRUE);

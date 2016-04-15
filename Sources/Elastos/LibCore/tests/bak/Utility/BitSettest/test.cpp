@@ -12,7 +12,7 @@ using namespace Elastos::Core;
 int CTest::test_toString(int argc, char* argv[]) {
     // From the RI javadoc.
     AutoPtr<IBitSet> bs;
-    CBitSet::New((IBitSet **)&bs);
+    CBitSet::New((IBitSet**)&bs);
     String str;
     bs->ToString(&str);
     assert(String("{}").Equals(str));
@@ -58,8 +58,8 @@ void assertBitSet(ArrayOf<Int64>& longs, String s) {
     // Test BitSet.valueOf(long[]).
     AutoPtr<IBitSetHelper>  bsh;
     AutoPtr<IBitSet> bs;
-    CBitSetHelper::AcquireSingleton((IBitSetHelper **)&bsh);
-    bsh->ValueOfInt64Array(longs,(IBitSet **)&bs);
+    CBitSetHelper::AcquireSingleton((IBitSetHelper**)&bsh);
+    bsh->ValueOfInt64Array(longs,(IBitSet**)&bs);
     assertBitSet(bs, longs, s);
     // // Test BitSet.valueOf(LongBuffer).
     // assertBitSet(BitSet.valueOf(LongBuffer.wrap(longs)), longs, s);
@@ -73,7 +73,7 @@ void assertBitSet(ArrayOf<Int64>& longs, String s) {
     if (longs.GetLength() > 0) {
         longs[0] = ~longs[0];
         AutoPtr<IBitSet> bs2;
-        bsh->ValueOfInt64Array(longs, (IBitSet **)&bs2);
+        bsh->ValueOfInt64Array(longs, (IBitSet**)&bs2);
         Boolean flag2;
         bs2->Equals(bs, &flag2);
         assert( flag2 == 0);
@@ -134,9 +134,9 @@ void assertBitSet(ArrayOf<Byte>& bytes, String s) {
     // Test BitSet.valueOf(byte[]).
     AutoPtr<IBitSetHelper>  bsh;
     AutoPtr<IBitSet> bs;
-    CBitSetHelper::AcquireSingleton((IBitSetHelper **)&bsh);
+    CBitSetHelper::AcquireSingleton((IBitSetHelper**)&bsh);
 PFL_EX("bytes :%p ,len :%d " , &bytes , bytes.GetLength())
-    bsh->ValueOfByteArray(bytes,(IBitSet **)&bs);
+    bsh->ValueOfByteArray(bytes,(IBitSet**)&bs);
 PFL
     assertBitSet(bs, bytes, s);
     // // Test BitSet.valueOf(ByteBuffer).
@@ -151,7 +151,7 @@ PFL
     if (bytes.GetLength() > 0) {
         bytes[0] = (byte) ~bytes[0];
         AutoPtr<IBitSet> bs2;
-        bsh->ValueOfByteArray(bytes , (IBitSet **)&bs2);
+        bsh->ValueOfByteArray(bytes , (IBitSet**)&bs2);
         Boolean flag2;
         bs2->Equals(bs , &flag2);
         assert(flag2 == 0);
@@ -231,8 +231,8 @@ void assertEqualsLong(AutoPtr<ArrayOf<Int64> > nlog)
 {
     AutoPtr<IBitSetHelper>  bsh;
     AutoPtr<IBitSet> bs;
-    CBitSetHelper::AcquireSingleton((IBitSetHelper **)&bsh);
-    bsh->ValueOfInt64Array(*nlog,(IBitSet **)&bs);
+    CBitSetHelper::AcquireSingleton((IBitSetHelper**)&bsh);
+    bsh->ValueOfInt64Array(*nlog,(IBitSet**)&bs);
     AutoPtr<ArrayOf<Int64> > outlog ;
     bs->ToInt64Array((ArrayOf<Int64> **)&outlog);
     for (int i = 0; i < outlog->GetLength(); ++i)
@@ -254,10 +254,10 @@ int CTest::test_toLongArray(int argc, char* argv[]) {
 
     // Check that we're not returning trailing empty space.
     AutoPtr<IBitSet> bs ;
-    CBitSet::New(128, (IBitSet **)&bs);
+    CBitSet::New(128, (IBitSet**)&bs);
     bs->ToInt64Array((ArrayOf<Int64> **)&nlog);
     assertEqualsLong(nlog);
-    CBitSet::New((IBitSet **)&bs);
+    CBitSet::New((IBitSet**)&bs);
     bs->Set(0);
     bs->SetEx(64, 66);
     bs->ClearEx(64, 66);
@@ -269,8 +269,8 @@ void assertEqualsByte(AutoPtr<ArrayOf<Int64> > nlog)
 {
     AutoPtr<IBitSetHelper>  bsh;
     AutoPtr<IBitSet> bs;
-    CBitSetHelper::AcquireSingleton((IBitSetHelper **)&bsh);
-    bsh->ValueOfInt64Array(*nlog,(IBitSet **)&bs);
+    CBitSetHelper::AcquireSingleton((IBitSetHelper**)&bsh);
+    bsh->ValueOfInt64Array(*nlog,(IBitSet**)&bs);
     AutoPtr<ArrayOf<Byte> > outlog ;
     bs->ToByteArray((ArrayOf<Byte> **)&outlog);
     for (int i = 0; i < outlog->GetLength(); ++i)
@@ -296,12 +296,12 @@ int CTest::test_toByteArray(int argc, char* argv[]) {
 
 int CTest::test_previousSetBit(int argc, char* argv[]) {
     AutoPtr<IBitSet> bs;
-    CBitSet::New((IBitSet **)&bs);
+    CBitSet::New((IBitSet**)&bs);
     Int32 value;
     bs->PreviousSetBit(666,&value);
     assert(-1 == value);
 
-    CBitSet::New((IBitSet **)&bs);
+    CBitSet::New((IBitSet**)&bs);
     bs->Set(32);
     bs->PreviousSetBit(999,&value);
     assert(32 == value);
@@ -312,7 +312,7 @@ int CTest::test_previousSetBit(int argc, char* argv[]) {
     bs->PreviousSetBit(31,&value);
     assert(-1 == value);
 
-    CBitSet::New((IBitSet **)&bs);
+    CBitSet::New((IBitSet**)&bs);
     bs->Set(0);
     bs->Set(1);
     bs->Set(32);
@@ -339,14 +339,14 @@ int CTest::test_previousSetBit(int argc, char* argv[]) {
 
 AutoPtr<IBitSet> big() {
     AutoPtr<IBitSet> result;
-    CBitSet::New((IBitSet **)&result);
+    CBitSet::New((IBitSet**)&result);
     result->Set(1000);
     return result;
 }
 
 AutoPtr<IBitSet> small() {
     AutoPtr<IBitSet> result;
-    CBitSet::New((IBitSet **)&result);
+    CBitSet::New((IBitSet**)&result);
     result->Set(10);
     return result;
 }

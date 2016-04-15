@@ -4170,6 +4170,7 @@ ECode MediaProvider::InsertInternal(
                }
            }
            *result = attachedVolume.Get();
+           REFCOUNT_ADD(*result)
            return NOERROR;
         }
 

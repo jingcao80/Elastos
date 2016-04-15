@@ -792,7 +792,7 @@ ECode CRemoteParcel::ReadArrayOfInner(
                             ec = StdUnmarshalInterface(
                                     UnmarshalFlag_Noncoexisting,
                                     &ipack,
-                                    (IInterface **)&itfBuf[i]);
+                                    (IInterface**)&itfBuf[i]);
                             if (FAILED(ec)) {
                                 MARSHAL_DBGOUT(MSHDBG_ERROR, printf(
                                         "MshProc: unmsh interface, ec = %x\n", ec));

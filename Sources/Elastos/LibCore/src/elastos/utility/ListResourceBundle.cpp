@@ -131,10 +131,12 @@ ECode ListResourceBundle::GetKeys(
     if (mParent) {
         result = new _FirstEnumeration(this);
         *enu = result;
+        REFCOUNT_ADD(*enu)
         return NOERROR;
     } else {
         result = new _SecondEnumeration(this);
         *enu = result;
+        REFCOUNT_ADD(*enu)
         return NOERROR;
     }
 }

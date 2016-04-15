@@ -489,7 +489,7 @@ ECode CJDBCResultSet::GetMetaData(
     /* [out] */ IResultSetMetaData ** metaData)
 {
     if (md == NULL) {
-        FAIL_RETURN(CJDBCResultSetMetaData::New((IJDBCResultSet *)this,(IJDBCResultSetMetaData **)&md));
+        FAIL_RETURN(CJDBCResultSetMetaData::New((IJDBCResultSet *)this,(IJDBCResultSetMetaData**)&md));
     }
     *metaData = (IResultSetMetaData *)md.Get();
     REFCOUNT_ADD(*metaData);
@@ -747,7 +747,7 @@ ECode CJDBCResultSet::InsertRow()
         return E_SQL_EXCEPTION;
     }
     AutoPtr<IResultSetMetaData> obj;
-    GetMetaData((IResultSetMetaData **)&obj);
+    GetMetaData((IResultSetMetaData**)&obj);
     CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj.Get();
     StringBuffer sb;
     sb.Append("INSERT INTO ");
@@ -886,7 +886,7 @@ ECode CJDBCResultSet::RefreshRow()
         return E_SQL_EXCEPTION;
     }
     AutoPtr<IResultSetMetaData> obj;
-    GetMetaData((IResultSetMetaData **)&obj);
+    GetMetaData((IResultSetMetaData**)&obj);
     CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj.Get();
     StringBuffer sb;
     AutoPtr<ArrayOf<String> > rd = tr->mRows[mRow];
@@ -912,7 +912,7 @@ ECode CJDBCResultSet::RefreshRow()
         (*args)[i] = (*rd)[(*pkcoli)[i]];
     }
     AutoPtr<ITableResult> trnew ;
-    ((CDatabaseX *)((CJDBCConnection *)((JDBCStatement *)s.Get())->conn.Get())->mDb.Get())->GetTable(sb.ToString(), args,(ITableResult **)&trnew);
+    ((CDatabaseX *)((CJDBCConnection *)((JDBCStatement *)s.Get())->conn.Get())->mDb.Get())->GetTable(sb.ToString(), args,(ITableResult**)&trnew);
     if (trnew == NULL) {
         return E_SQL_EXCEPTION;
     }
@@ -1371,7 +1371,7 @@ ECode CJDBCResultSet::UpdateRow()
     }
     AutoPtr<ArrayOf<String> > rd = tr->mRows[mRow];
     AutoPtr<IResultSetMetaData> obj;
-    GetMetaData((IResultSetMetaData **)&obj);
+    GetMetaData((IResultSetMetaData**)&obj);
     CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj.Get();
     AutoPtr<ArrayOf<String> > args = ArrayOf<String>::Alloc(tr->mNcolumns + pkcols->GetLength());
     StringBuffer sb;
@@ -2060,7 +2060,7 @@ ECode CJDBCResultSet::IsUpdatable(
 {
     if (updatable == UPD_UNKNOWN) {
         AutoPtr<IResultSetMetaData> obj;
-        GetMetaData((IResultSetMetaData **)&obj);
+        GetMetaData((IResultSetMetaData**)&obj);
         CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj.Get();
         HashSet<String> h;
         String lastt = String(NULL);
@@ -2075,7 +2075,7 @@ ECode CJDBCResultSet::IsUpdatable(
         updatable = UPD_INS;
         uptable = lastt;
         AutoPtr<IDatabaseMetaData> mdatabase;
-        ECode ec1 = IConnection::Probe(((JDBCStatement *)s.Get())->conn)->GetMetaData((IDatabaseMetaData **)&mdatabase);
+        ECode ec1 = IConnection::Probe(((JDBCStatement *)s.Get())->conn)->GetMetaData((IDatabaseMetaData**)&mdatabase);
         AutoPtr<IResultSet> res;
         ECode ec2 = mdatabase->GetPrimaryKeys(String(NULL), String(NULL), uptable, (IResultSet**)&res);
         AutoPtr<CJDBCResultSet> pk = (CJDBCResultSet*)res.Get();
@@ -2128,7 +2128,7 @@ ECode CJDBCResultSet::FindColumn(
     /* [out] */ Int32 * value)
 {
     AutoPtr<IResultSetMetaData> obj;
-    GetMetaData((IResultSetMetaData **)&obj);
+    GetMetaData((IResultSetMetaData**)&obj);
     CJDBCResultSetMetaData* m = (CJDBCResultSetMetaData*)obj.Get();
     m->FindColByName(colName,value);
     return NOERROR;
@@ -2182,7 +2182,7 @@ AutoPtr<ITime> CJDBCResultSet::InternalGetTime(
     lastg = (*rd)[colIndex - 1];
 
     if (((CJDBCConnection *)((JDBCStatement *)s.Get())->conn.Get())->mUseJulian) {
-        ec = CTime::New(SQLite::Database::LongFromJulian(lastg),(ITime **)&otime);
+        ec = CTime::New(SQLite::Database::LongFromJulian(lastg),(ITime**)&otime);
         if (ec != NOERROR) {
             otime = NULL;
             CTime::ValueOf(lastg, (ITime**)&otime);
@@ -2195,7 +2195,7 @@ AutoPtr<ITime> CJDBCResultSet::InternalGetTime(
             return otime;
         }
         else{
-            CTime::New(SQLite::Database::LongFromJulian(lastg),(ITime **)&otime);
+            CTime::New(SQLite::Database::LongFromJulian(lastg),(ITime**)&otime);
             return otime;
         }
     }
@@ -2220,7 +2220,7 @@ AutoPtr<ITimestamp> CJDBCResultSet::InternalGetTimestamp(
     ECode ec = NOERROR;
 
     if (((CJDBCConnection *)((JDBCStatement *)s.Get())->conn.Get())->mUseJulian) {
-        ec = CTimestamp::New(SQLite::Database::LongFromJulian(lastg),(ITimestamp ** )&otime);
+        ec = CTimestamp::New(SQLite::Database::LongFromJulian(lastg),(ITimestamp**)&otime);
         if (ec != NOERROR) {
             otime = NULL;
             CTimestamp::ValueOf(lastg, (ITimestamp**)&otime);
@@ -2233,7 +2233,7 @@ AutoPtr<ITimestamp> CJDBCResultSet::InternalGetTimestamp(
             return otime;
         }
         else{
-            CTimestamp::New(SQLite::Database::LongFromJulian(lastg),(ITimestamp ** )&otime);
+            CTimestamp::New(SQLite::Database::LongFromJulian(lastg),(ITimestamp**)&otime);
             return otime;
         }
     }
@@ -2256,7 +2256,7 @@ AutoPtr<ISQLDate> CJDBCResultSet::InternalGetDate(
     ECode ec = NOERROR;
 
     if (((CJDBCConnection *)((JDBCStatement *)s.Get())->conn.Get())->mUseJulian) {
-        ec = CSqlDate::New(SQLite::Database::LongFromJulian(lastg), (ISQLDate **)&otime);
+        ec = CSqlDate::New(SQLite::Database::LongFromJulian(lastg), (ISQLDate**)&otime);
         if (ec != NOERROR) {
             otime = NULL;
             CSqlDate::ValueOf(lastg, (ISQLDate**)&otime);
@@ -2269,7 +2269,7 @@ AutoPtr<ISQLDate> CJDBCResultSet::InternalGetDate(
                 return otime;
             }
             else {
-                CSqlDate::New(SQLite::Database::LongFromJulian(lastg),(ISQLDate **)&otime);
+                CSqlDate::New(SQLite::Database::LongFromJulian(lastg),(ISQLDate**)&otime);
                 return otime;
             }
     }

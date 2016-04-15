@@ -18,14 +18,14 @@ Int32 deflate(IFile *file, IZipOutputStream *pzos, const char *path, Int32 flag)
 
     AutoPtr<IFileInputStream> pfs = NULL;
     ECode ec;
-    ec = CFileInputStream::New((IFile *)file, (IFileInputStream **)&pfs);
+    ec = CFileInputStream::New((IFile *)file, (IFileInputStream**)&pfs);
     if (FAILED(ec)) {
         printf("Cann't open CFileInputStream, ec = %x\n", ec);
         return -1;
     }
 
     AutoPtr<IBufferedInputStream> pbis = NULL;
-    ec = CBufferedInputStream::New((IFileInputStream *) pfs, (IBufferedInputStream **)&pbis);
+    ec = CBufferedInputStream::New((IFileInputStream *) pfs, (IBufferedInputStream**)&pbis);
     if (FAILED(ec)) {
         printf("Cann't open CFileInputStream, ec = %x\n", ec);
         return -1;
@@ -48,7 +48,7 @@ Int32 deflate(IFile *file, IZipOutputStream *pzos, const char *path, Int32 flag)
 
     printf("@@@@@@@@@@entry name is %s\n", entryname);
 
-    CZipEntry::New(String(entryname), (IZipEntry **)&entry);
+    CZipEntry::New(String(entryname), (IZipEntry**)&entry);
     ec = pzos->PutNextEntry(entry);
     if (FAILED(ec)) {
         printf("PutNextEntry Failed ec = %x\n", ec);
@@ -104,8 +104,8 @@ Int32 compress_dir(IFile *file, IZipOutputStream *pzos, const char *path)
                 printf("the dir name is %s\n", (const char *) relname);
                 deflate(file, pzos, relname, 1);
                 printf("deflate a new directory\n");
-                file->ListFiles((IObjectContainer **)&container);
-                container->GetObjectEnumerator((IObjectEnumerator **)&objenu);
+                file->ListFiles((IObjectContainer**)&container);
+                container->GetObjectEnumerator((IObjectEnumerator**)&objenu);
                 while(objenu->MoveNext(&hasNext), hasNext) {
                     AutoPtr<IInterface> itf;
                     IFile *curfile;
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
     printf("-------------------------------dfdfd\n");
 */
     AutoPtr<IFileOutputStream> pfo = NULL;
-    ec = CFileOutputStream::New(String("/data/data/com.elastos.runtime/elastos.zip"), (IFileOutputStream **)&pfo);
+    ec = CFileOutputStream::New(String("/data/data/com.elastos.runtime/elastos.zip"), (IFileOutputStream**)&pfo);
     if (FAILED(ec)) {
         printf("Cann't Create CFileOutputStream, ec = %x\n", ec);
         return -1;
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 
 
     /*AutoPtr<IBufferedOutputStream> pbos = NULL;
-    ec = CBufferedOutputStream::New((IFileOutputStream *)pfo, (IBufferedOutputStream **)&pbos);
+    ec = CBufferedOutputStream::New((IFileOutputStream *)pfo, (IBufferedOutputStream**)&pbos);
     if (FAILED(ec)) {
         printf("Cann't Create CZipOutputStream, ec = %x\n", ec);
         return -1;
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     */
 
     AutoPtr<IZipOutputStream> pzos;
-    ec = CZipOutputStream::New(pfo, (IZipOutputStream **)&pzos);
+    ec = CZipOutputStream::New(pfo, (IZipOutputStream**)&pzos);
     if (FAILED(ec)) {
         printf("Cann't Create ZipOutputStream %x\n", ec);
         return -1;

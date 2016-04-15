@@ -35,7 +35,7 @@ ECode Learner::RemoveInstance(
     instances->GetSize(&size);
     for (Int32 i = 0;  i < size;  i++) {
         AutoPtr<IInterface> obj;
-        instances->Get(i, (IInterface **)&obj);
+        instances->Get(i, (IInterface**)&obj);
         IInstance* instance = IInstance::Probe(obj);
 
         assert(0 && "TODO");
@@ -58,7 +58,7 @@ ECode Learner::RemoveInstances(
     instances->GetSize(&size);
     for (Int32 i = 0;  i < size;  i++) {
         AutoPtr<IInterface> obj;
-        instances->Get(i, (IInterface **)&obj);
+        instances->Get(i, (IInterface**)&obj);
         IInstance* instance = IInstance::Probe(obj);
 
         assert(0 && "TODO");

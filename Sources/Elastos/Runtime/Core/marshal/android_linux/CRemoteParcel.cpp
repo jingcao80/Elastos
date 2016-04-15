@@ -305,7 +305,7 @@ ECode CRemoteParcel::ReadValue(
                                         ec = StdUnmarshalInterface(
                                                 UnmarshalFlag_Noncoexisting,
                                                 &ipack,
-                                                (IInterface **)&pBuf[i]);
+                                                (IInterface**)&pBuf[i]);
                                         if (FAILED(ec)) {
                                             MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(
                                                     "MshProc: unmsh interface, ec = %x\n", ec));

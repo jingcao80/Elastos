@@ -111,9 +111,9 @@ static void testBufferedOutputStream()
     AutoPtr<IBufferedOutputStream> a;
     AutoPtr<IOutputStream> outs;
 
-    ec = CByteArrayOutputStream::New((IByteArrayOutputStream **)&aa);
+    ec = CByteArrayOutputStream::New((IByteArrayOutputStream**)&aa);
     outs = IOutputStream::Probe((IByteArrayOutputStream *)aa);
-    ec = CBufferedOutputStream::New((IOutputStream *)outs, 15, (IBufferedOutputStream **)&a);
+    ec = CBufferedOutputStream::New((IOutputStream *)outs, 15, (IBufferedOutputStream**)&a);
 
     AutoPtr<IOutputStream> ios;
     AutoPtr<IFlushable> ifs;

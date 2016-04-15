@@ -248,10 +248,10 @@ ECode Charset::Encode(
     VALIDATE_NOT_NULL(buffer);
 
     AutoPtr<ICharsetEncoder> encoder;
-    FAIL_RETURN(NewEncoder((ICharsetEncoder **)&encoder));
+    FAIL_RETURN(NewEncoder((ICharsetEncoder**)&encoder));
 
     AutoPtr<ICodingErrorAction> replace;
-    CCodingErrorAction::GetREPLACE((ICodingErrorAction **)&replace);
+    CCodingErrorAction::GetREPLACE((ICodingErrorAction**)&replace);
 
     FAIL_RETURN(encoder->OnMalformedInput(replace));
     FAIL_RETURN(encoder->OnUnmappableCharacter(replace));
@@ -283,10 +283,10 @@ ECode Charset::Decode(
     VALIDATE_NOT_NULL(buffer);
 
     AutoPtr<ICharsetDecoder> decoder;
-    FAIL_RETURN(NewDecoder((ICharsetDecoder **)&decoder));
+    FAIL_RETURN(NewDecoder((ICharsetDecoder**)&decoder));
 
     AutoPtr<ICodingErrorAction> replace;
-    CCodingErrorAction::GetREPLACE((ICodingErrorAction **)&replace);
+    CCodingErrorAction::GetREPLACE((ICodingErrorAction**)&replace);
 
     FAIL_RETURN(decoder->OnMalformedInput(replace))
     FAIL_RETURN(decoder->OnUnmappableCharacter(replace))

@@ -61,7 +61,7 @@ ECode InputStreamReader::constructor(
     FAIL_RETURN(charset->NewDecoder((ICharsetDecoder**)&mDecoder));
 
     AutoPtr<ICodingErrorAction> replace;
-    CCodingErrorAction::GetREPLACE((ICodingErrorAction **)&replace);
+    CCodingErrorAction::GetREPLACE((ICodingErrorAction**)&replace);
 
     mDecoder->OnMalformedInput(replace);
     mDecoder->OnUnmappableCharacter(replace);
@@ -91,7 +91,7 @@ ECode InputStreamReader::constructor(
     mIn = in;
     charset->NewDecoder((ICharsetDecoder**)&mDecoder);
     AutoPtr<ICodingErrorAction> replace;
-    CCodingErrorAction::GetREPLACE((ICodingErrorAction **)&replace);
+    CCodingErrorAction::GetREPLACE((ICodingErrorAction**)&replace);
 
     mDecoder->OnMalformedInput(replace);
     mDecoder->OnUnmappableCharacter(replace);

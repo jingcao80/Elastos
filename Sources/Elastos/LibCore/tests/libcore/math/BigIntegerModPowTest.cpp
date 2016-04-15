@@ -125,7 +125,7 @@ void testModPowException_1()
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    ec = aNumber->ModPow(eNumber, mNumber, (IBigInteger **)&result);
+    ec = aNumber->ModPow(eNumber, mNumber, (IBigInteger**)&result);
     if (FAILED(ec) || result == NULL) {
         printf(" ArithmeticException has been caught. Error %08X\n", ec);
     } else {
@@ -170,7 +170,7 @@ void testModPowException()
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    ec = aNumber->ModPow(eNumber, mNumber, (IBigInteger **)&result);
+    ec = aNumber->ModPow(eNumber, mNumber, (IBigInteger**)&result);
     if (FAILED(ec) || result == NULL) {
         printf(" ArithmeticException has been caught. Error %08X\n", ec);
     } else {
@@ -247,7 +247,7 @@ void testModPowPosExp()
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->ModPow(eNumber, mNumber, (IBigInteger **)&result);
+    aNumber->ModPow(eNumber, mNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {

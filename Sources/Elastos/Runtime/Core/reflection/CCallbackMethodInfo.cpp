@@ -55,7 +55,7 @@ ECode CCallbackMethodInfo::Init(
 
     AutoPtr<IInterface> obj;
     ECode ec = g_objInfoList.AcquireMethodInfo(clsModule, methodDescriptor,
-            uIndex, (IInterface **)&obj);
+            uIndex, (IInterface**)&obj);
     mMethodInfo = (CMethodInfo*)IMethodInfo::Probe(obj);
     return ec;
 }

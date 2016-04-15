@@ -85,8 +85,8 @@ int CTest::test_StandAloneNames(int argc, char* argv[])
 
     AutoPtr<ILocale> en;
     AutoPtr<ILocaleHelper> lochelp;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lochelp);
-    lochelp->GetENGLISH((ILocale **)&en);
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lochelp);
+    lochelp->GetENGLISH((ILocale**)&en);
     AutoPtr<ILocale> pl;
     ECode ec1 = CLocale::New(String("pl"), (ILocale**)&pl);
     AutoPtr<ILocale> ru;
@@ -128,37 +128,37 @@ int CTest::test2038(int argc, char* argv[]) {
     AutoPtr<ISimpleDateFormat> format ;
     AutoPtr<ILocale> usloc;
     AutoPtr<ILocaleHelper> lochelp;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lochelp);
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lochelp);
     lochelp->GetUS((ILocale **) &usloc);
-    CSimpleDateFormat::New(String("EEE MMM dd HH:mm:ss yyyy") , usloc , (ISimpleDateFormat **)&format);
+    CSimpleDateFormat::New(String("EEE MMM dd HH:mm:ss yyyy") , usloc , (ISimpleDateFormat**)&format);
 
     AutoPtr<ITimeZone> utczone;
     AutoPtr<ITimeZoneHelper> zonehelp;
-    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper **)&zonehelp);
+    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&zonehelp);
     zonehelp->GetTimeZone(String("UTC") , (ITimeZone **) &utczone);
     format->SetTimeZone(utczone);
 
     Int32 MIN_VALUE = 0x80000000;
     AutoPtr<IDate> longdate;
-    CDate::New(((Int64) MIN_VALUE + MIN_VALUE) * 1000L , (IDate **)&longdate);
+    CDate::New(((Int64) MIN_VALUE + MIN_VALUE) * 1000L , (IDate**)&longdate);
     String outstr;
     format->FormatDate(longdate,&outstr);
     assert(String("Sun Nov 24 17:31:44 1833") == outstr);
 
-    CDate::New(((Int64) MIN_VALUE) * 1000L , (IDate **)&longdate);
+    CDate::New(((Int64) MIN_VALUE) * 1000L , (IDate**)&longdate);
     format->FormatDate(longdate,&outstr);
     assert(String("Fri Dec 13 20:45:52 1901") == outstr);
 
-    CDate::New((Int64)0L , (IDate **)&longdate);
+    CDate::New((Int64)0L , (IDate**)&longdate);
     format->FormatDate(longdate,&outstr);
     assert(String("Thu Jan 01 00:00:00 1970") == outstr);
 
     Int32 MAX_VALUE = 0x7FFFFFFF;
-    CDate::New((Int64)MAX_VALUE  * 1000L, (IDate **)&longdate);
+    CDate::New((Int64)MAX_VALUE  * 1000L, (IDate**)&longdate);
     format->FormatDate(longdate,&outstr);
     assert(String("Tue Jan 19 03:14:07 2038") == outstr);
 
-    CDate::New(((Int64)2L + MAX_VALUE + MAX_VALUE) * 1000L, (IDate **)&longdate);
+    CDate::New(((Int64)2L + MAX_VALUE + MAX_VALUE) * 1000L, (IDate**)&longdate);
     format->FormatDate(longdate,&outstr);
     assert(String("Sun Feb 07 06:28:16 2106") == outstr);
 }
@@ -193,20 +193,20 @@ int CTest::testFormattingUncommonTimeZoneAbbreviations(int argc, char* argv[]) {
     lochelp->GetUS((ILocale **) &usloc);
 
     AutoPtr<ISimpleDateFormat> sdf;
-    CSimpleDateFormat::New(fmt, usloc , (ISimpleDateFormat **)&sdf);
+    CSimpleDateFormat::New(fmt, usloc , (ISimpleDateFormat**)&sdf);
     AutoPtr<ITimeZoneHelper> zonehelp;
-    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper **)&zonehelp);
+    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&zonehelp);
     AutoPtr<ITimeZone> ebzone;
-    zonehelp->GetTimeZone(String("Europe/Berlin"),(ITimeZone **)&ebzone);
+    zonehelp->GetTimeZone(String("Europe/Berlin"),(ITimeZone**)&ebzone);
     sdf->SetTimeZone(ebzone);
     AutoPtr<IDate> adate;
-    CDate::New(0,(IDate **)&adate);
+    CDate::New(0,(IDate**)&adate);
     String outstr;
     sdf->FormatDate(adate ,&outstr);
     assert(date  == outstr);
 
-    CSimpleDateFormat::New(fmt, usloc , (ISimpleDateFormat **)&sdf);
-    zonehelp->GetTimeZone(String("Europe/Zurich"),(ITimeZone **)&ebzone);
+    CSimpleDateFormat::New(fmt, usloc , (ISimpleDateFormat**)&sdf);
+    zonehelp->GetTimeZone(String("Europe/Zurich"),(ITimeZone**)&ebzone);
     sdf->SetTimeZone(ebzone);
     sdf->FormatDate(adate ,&outstr);
     assert(date == outstr);
@@ -219,13 +219,13 @@ int CTest::testTimeZoneFormatting(int argc, char* argv[]) {
 
     // Create a SimpleDateFormat that defaults to America/Chicago...
     AutoPtr<ITimeZoneHelper> zonehelp;
-    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper **)&zonehelp);
+    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&zonehelp);
     AutoPtr<ITimeZone> aczone;
-    zonehelp->GetTimeZone(String("America/Chicago"),(ITimeZone **)&aczone);
+    zonehelp->GetTimeZone(String("America/Chicago"),(ITimeZone**)&aczone);
     zonehelp->SetDefault(aczone);
 
     AutoPtr<ISimpleDateFormat> sdf;
-    CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm:ss Z"),(ISimpleDateFormat **)&sdf);
+    CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm:ss Z"),(ISimpleDateFormat**)&sdf);
     // We should see something appropriate to America/Chicago...
     String result;
     sdf->FormatDate(epoch,&result);
@@ -233,22 +233,22 @@ int CTest::testTimeZoneFormatting(int argc, char* argv[]) {
     // We can set any TimeZone we want:
 
     AutoPtr<ITimeZone> AMERICA_LOS_ANGELES;
-    zonehelp->GetTimeZone(String("America/Los_Angeles"), (ITimeZone **)&AMERICA_LOS_ANGELES);
+    zonehelp->GetTimeZone(String("America/Los_Angeles"), (ITimeZone**)&AMERICA_LOS_ANGELES);
     sdf->SetTimeZone(AMERICA_LOS_ANGELES);
     sdf->FormatDate(epoch,&result);
     assert(String("1969-12-31 16:00:00 -0800") == result);
 
     AutoPtr<ITimeZone> utczone;
-    zonehelp->GetTimeZone(String("UTC") , (ITimeZone **)&utczone);
+    zonehelp->GetTimeZone(String("UTC") , (ITimeZone**)&utczone);
     sdf->SetTimeZone(utczone);
     sdf->FormatDate(epoch, &result);
     assert(String("1970-01-01 00:00:00 +0000") == result);
 
     // A new SimpleDateFormat will default to America/Chicago...
-    CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm:ss Z") , (ISimpleDateFormat **)&sdf);
+    CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm:ss Z") , (ISimpleDateFormat**)&sdf);
     // ...and parsing an America/Los_Angeles time will *not* change that...
     AutoPtr<IDate> outdate;
-    sdf->Parse(String("2010-12-03 00:00:00 -0800"),(IDate **)&outdate);
+    sdf->Parse(String("2010-12-03 00:00:00 -0800"),(IDate**)&outdate);
     // ...so our time zone here is "America/Chicago":
     sdf->FormatDate(epoch,&result);
     assert(String("1969-12-31 18:00:00 -0600") == result);
@@ -261,15 +261,15 @@ int CTest::testTimeZoneFormatting(int argc, char* argv[]) {
     sdf->FormatDate(epoch , &result);
     assert(String("1970-01-01 00:00:00 +0000") == result);
 
-    CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm:ss") , (ISimpleDateFormat **)&sdf);
+    CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm:ss") , (ISimpleDateFormat**)&sdf);
     sdf->SetTimeZone(utczone);
     AutoPtr<IDate> date;
-    sdf->Parse(String("2010-07-08 02:44:48") , (IDate **)&date);
+    sdf->Parse(String("2010-07-08 02:44:48") , (IDate**)&date);
     Int64 outtime;
     date->GetTime(&outtime);
     assert(1278557088000L == outtime );
 
-    CSimpleDateFormat::New(String("yyyy-MM-dd'T'HH:mm:ssZ") , (ISimpleDateFormat **)&sdf);
+    CSimpleDateFormat::New(String("yyyy-MM-dd'T'HH:mm:ssZ") , (ISimpleDateFormat**)&sdf);
     sdf->SetTimeZone(AMERICA_LOS_ANGELES);
     Int32 offset = 0;
     AMERICA_LOS_ANGELES->GetRawOffset(&offset);
@@ -295,13 +295,13 @@ int CTest::testObsoleteDstZoneName(int argc, char* argv[]) {
     lochelp->GetUS((ILocale **) &usloc);
 
     AutoPtr<ISimpleDateFormat> format;
-    CSimpleDateFormat::New(String("yyyy-MM-dd'T'HH:mm zzzz"), usloc , (ISimpleDateFormat **)&format);
+    CSimpleDateFormat::New(String("yyyy-MM-dd'T'HH:mm zzzz"), usloc , (ISimpleDateFormat**)&format);
 
     AutoPtr<IDate> normal;
-    format->Parse(String("1970-01-01T00:00 EET") , (IDate **)&normal);
+    format->Parse(String("1970-01-01T00:00 EET") , (IDate**)&normal);
     AutoPtr<IDate> dst;
 PFL
-    ECode ec = format->Parse(String("1970-01-01T00:00 EEST") , (IDate **)&dst);
+    ECode ec = format->Parse(String("1970-01-01T00:00 EEST") , (IDate**)&dst);
     Int64 nortime , dsttime;
     PFL_EX("normal: %p , dst:%p, ec :%p", normal.Get(), dst.Get(), ec)
     normal->GetTime(&nortime);
@@ -316,19 +316,19 @@ int CTest::testDstZoneNameWithNonDstTimestamp(int argc, char* argv[]) {
     AutoPtr<ILocale> usloc;
     lochelp->GetUS((ILocale **) &usloc);
     AutoPtr<ITimeZoneHelper> zonehelp;
-    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper **)&zonehelp);
+    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&zonehelp);
     AutoPtr<ITimeZone> AMERICA_LOS_ANGELES;
-    zonehelp->GetTimeZone(String("America/Los_Angeles"), (ITimeZone **)&AMERICA_LOS_ANGELES);
+    zonehelp->GetTimeZone(String("America/Los_Angeles"), (ITimeZone**)&AMERICA_LOS_ANGELES);
 
     AutoPtr<ISimpleDateFormat> format;
-    CSimpleDateFormat::New(String("yyyy-MM-dd'T'HH:mm zzzz"), usloc ,(ISimpleDateFormat **)&format);
+    CSimpleDateFormat::New(String("yyyy-MM-dd'T'HH:mm zzzz"), usloc ,(ISimpleDateFormat**)&format);
 
     AutoPtr<IGregorianCalendar> igc;
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(AMERICA_LOS_ANGELES , (IGregorianCalendar **)&igc);
+    CGregorianCalendar::New(AMERICA_LOS_ANGELES , (IGregorianCalendar**)&igc);
     calendar = igc;
     AutoPtr<IDate> adate;
-    format->Parse(String("2011-06-21T10:00 Pacific Standard Time") , (IDate **)&adate);
+    format->Parse(String("2011-06-21T10:00 Pacific Standard Time") , (IDate**)&adate);
     calendar->SetDate(adate); // 18:00 GMT-8
     Int32 hod;
     calendar->Get(ICalendar::HOUR_OF_DAY, &hod);
@@ -344,16 +344,16 @@ int CTest::testNonDstZoneNameWithDstTimestamp(int argc, char* argv[]) {
     AutoPtr<ILocale> usloc;
     lochelp->GetUS((ILocale **) &usloc);
     AutoPtr<ITimeZoneHelper> zonehelp;
-    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper **)&zonehelp);
+    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&zonehelp);
     AutoPtr<ITimeZone> AMERICA_LOS_ANGELES;
-    zonehelp->GetTimeZone(String("America/Los_Angeles"), (ITimeZone **)&AMERICA_LOS_ANGELES);
+    zonehelp->GetTimeZone(String("America/Los_Angeles"), (ITimeZone**)&AMERICA_LOS_ANGELES);
 
     AutoPtr<ISimpleDateFormat> format;
-    CSimpleDateFormat::New(String("yyyy-MM-dd'T'HH:mm zzzz"), usloc , (ISimpleDateFormat **)&format);
+    CSimpleDateFormat::New(String("yyyy-MM-dd'T'HH:mm zzzz"), usloc , (ISimpleDateFormat**)&format);
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(AMERICA_LOS_ANGELES , (IGregorianCalendar **)&calendar);
+    CGregorianCalendar::New(AMERICA_LOS_ANGELES , (IGregorianCalendar**)&calendar);
     AutoPtr<IDate> adate;
-    format->Parse(String("2010-12-21T10:00 Pacific Daylight Time") , (IDate **)&adate);
+    format->Parse(String("2010-12-21T10:00 Pacific Daylight Time") , (IDate**)&adate);
     calendar->SetDate(adate); // 17:00 GMT-7
     Int32 hod;
     calendar->Get(ICalendar::HOUR_OF_DAY,&hod);
@@ -370,17 +370,17 @@ int CTest::testDstZoneWithNonDstTimestampForNonHourDstZone(int argc, char* argv[
     AutoPtr<ILocale> usloc;
     lochelp->GetUS((ILocale **) &usloc);
     AutoPtr<ITimeZoneHelper> zonehelp;
-    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper **)&zonehelp);
+    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&zonehelp);
     AutoPtr<ITimeZone> AUSTRALIA_LORD_HOWE;
-    zonehelp->GetTimeZone(String("Australia/Lord_Howe"), (ITimeZone **)&AUSTRALIA_LORD_HOWE);
+    zonehelp->GetTimeZone(String("Australia/Lord_Howe"), (ITimeZone**)&AUSTRALIA_LORD_HOWE);
 
     AutoPtr<ISimpleDateFormat> format;
-    CSimpleDateFormat::New(String("yyyy-MM-dd'T'HH:mm zzzz"), usloc , (ISimpleDateFormat **)&format);
+    CSimpleDateFormat::New(String("yyyy-MM-dd'T'HH:mm zzzz"), usloc , (ISimpleDateFormat**)&format);
 
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(AUSTRALIA_LORD_HOWE , (IGregorianCalendar **)&calendar);
+    CGregorianCalendar::New(AUSTRALIA_LORD_HOWE , (IGregorianCalendar**)&calendar);
     AutoPtr<IDate> adate;
-    format->Parse(String("2011-06-21T20:00 Lord Howe Daylight Time"), (IDate **)&adate);
+    format->Parse(String("2011-06-21T20:00 Lord Howe Daylight Time"), (IDate**)&adate);
     calendar->SetDate(adate);  // 9:00 GMT+11
     Int32 hod;
     calendar->Get(ICalendar::HOUR_OF_DAY , &hod);
@@ -397,16 +397,16 @@ int CTest::testNonDstZoneWithDstTimestampForNonHourDstZone(int argc, char* argv[
     AutoPtr<ILocale> usloc;
     lochelp->GetUS((ILocale **) &usloc);
     AutoPtr<ITimeZoneHelper> zonehelp;
-    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper **)&zonehelp);
+    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&zonehelp);
     AutoPtr<ITimeZone> AUSTRALIA_LORD_HOWE;
-    zonehelp->GetTimeZone(String("Australia/Lord_Howe"), (ITimeZone **)&AUSTRALIA_LORD_HOWE);
+    zonehelp->GetTimeZone(String("Australia/Lord_Howe"), (ITimeZone**)&AUSTRALIA_LORD_HOWE);
 
     AutoPtr<ISimpleDateFormat> format;
-    CSimpleDateFormat::New(String("yyyy-MM-dd'T'HH:mm zzzz"), usloc , (ISimpleDateFormat **)&format);
+    CSimpleDateFormat::New(String("yyyy-MM-dd'T'HH:mm zzzz"), usloc , (ISimpleDateFormat**)&format);
     AutoPtr<ICalendar> calendar;
-    CGregorianCalendar::New(AUSTRALIA_LORD_HOWE, (IGregorianCalendar **)&calendar);
+    CGregorianCalendar::New(AUSTRALIA_LORD_HOWE, (IGregorianCalendar**)&calendar);
     AutoPtr<IDate> adate;
-    format->Parse(String("2010-12-21T19:30 Lord Howe Standard Time"), (IDate **)&adate);
+    format->Parse(String("2010-12-21T19:30 Lord Howe Standard Time"), (IDate**)&adate);
 
     calendar->SetDate(adate); //9:00 GMT+10:30
     Int32 hod;
@@ -422,14 +422,14 @@ int CTest::testLocales(int argc, char* argv[]) {
     // Just run through them all. Handy as a poor man's benchmark, and a sanity check.
     ArrayOf<ILocale*>* arrloc;
     AutoPtr<ILocaleHelper> lochelp;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lochelp);
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lochelp);
     lochelp->GetAvailableLocales(&arrloc);
     for (int i = 0; i < arrloc->GetLength(); i++) {
         AutoPtr<ILocale> l = (*arrloc)[i];
         AutoPtr<ISimpleDateFormat> sdf;
-        CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm:ss zzzz"), l , (ISimpleDateFormat **)&sdf);
+        CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm:ss zzzz"), l , (ISimpleDateFormat**)&sdf);
         AutoPtr<IDate> adate;
-        CDate::New(0,(IDate **)&adate);
+        CDate::New(0,(IDate**)&adate);
         String str;
         sdf->FormatDate(adate,&str);
         PFL_EX("str:%s " ,str.string())
@@ -441,16 +441,16 @@ int CTest::testParseTimezoneOnly(int argc, char* argv[]) {
     AutoPtr<ISimpleDateFormat> sdf1;
     AutoPtr<ISimpleDateFormat> sdf2;
     AutoPtr<ILocaleHelper> lochelp;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lochelp);
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lochelp);
     AutoPtr<ILocale> frloc, usloc;
-    lochelp->GetFRANCE((ILocale **)&frloc);
-    lochelp->GetUS((ILocale **)&usloc);
-    CSimpleDateFormat::New(String("z"), frloc , (ISimpleDateFormat **)&sdf1);
-    CSimpleDateFormat::New(String("z"), usloc , (ISimpleDateFormat **)&sdf2);
+    lochelp->GetFRANCE((ILocale**)&frloc);
+    lochelp->GetUS((ILocale**)&usloc);
+    CSimpleDateFormat::New(String("z"), frloc , (ISimpleDateFormat**)&sdf1);
+    CSimpleDateFormat::New(String("z"), usloc , (ISimpleDateFormat**)&sdf2);
     AutoPtr<IDate> adate1;
     AutoPtr<IDate> adate2;
-    sdf1->Parse(String("UTC") , (IDate **)&adate1);
-    sdf2->Parse(String("UTC") , (IDate **)&adate2);
+    sdf1->Parse(String("UTC") , (IDate**)&adate1);
+    sdf2->Parse(String("UTC") , (IDate**)&adate2);
     PFL_EX("adate1: %s , adate2 :%s " ,adate1.Get() ,adate2.Get())
 
 }
@@ -459,18 +459,18 @@ int CTest::testParseTimezoneOnly(int argc, char* argv[]) {
 int CTest::testParseArabic(int argc, char* argv[]) {
 
     AutoPtr<ILocale> egloc;
-    CLocale::New(String("ar") , String("EG") , (ILocale **)&egloc);
+    CLocale::New(String("ar") , String("EG") , (ILocale**)&egloc);
     AutoPtr<ISimpleDateFormat> sdf;
     CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm:ss") , egloc ,(ISimpleDateFormat **) &sdf);
     AutoPtr<ITimeZoneHelper> tzh;
-    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper **)&tzh);
+    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&tzh);
     AutoPtr<ITimeZone> tz;
-    tzh->GetTimeZone(String("America/Los_Angeles"),(ITimeZone **)&tz);
+    tzh->GetTimeZone(String("America/Los_Angeles"),(ITimeZone**)&tz);
     sdf->SetTimeZone(tz);
 
     // Can we parse an ASCII-formatted date in an Arabic locale?
     AutoPtr<IDate> d ;
-    sdf->Parse(String("2012-08-29 10:02:45") , (IDate **)&d);
+    sdf->Parse(String("2012-08-29 10:02:45") , (IDate**)&d);
     Int64 miltime;
     d->GetTime(&miltime);
     PFL_EX("1346259765000L == %lld" , miltime)
@@ -485,7 +485,7 @@ int CTest::testParseArabic(int argc, char* argv[]) {
     // Can we parse the Arabic-formatted date in an Arabic locale, and get the same date
     // we started with?
     AutoPtr<IDate> d2;
-    sdf->Parse(formatted , (IDate **)&d2);
+    sdf->Parse(formatted , (IDate**)&d2);
     PFL_EX("d : %p ,d2 :%p " , d.Get() , d2.Get())
     // assertEquals(d, d2);
 }

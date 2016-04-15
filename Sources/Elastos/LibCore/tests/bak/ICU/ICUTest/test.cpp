@@ -8,7 +8,7 @@ using namespace Elastos::Core;
 
 CTest::CTest()
 {
-    CICUUtil::AcquireSingleton((IICUUtil **)&icuhep);
+    CICUUtil::AcquireSingleton((IICUUtil**)&icuhep);
 }
 
 void assertNotNull(String str)
@@ -82,37 +82,37 @@ int CTest::test_localeFromString(int argc, char* argv[])
     // localeFromString is pretty lenient. Some of these can't be round-tripped
     // through Locale.toString.
     AutoPtr<ILocaleHelper> lochep;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lochep);
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lochep);
     AutoPtr<ILocale> enloc;
     AutoPtr<ILocale> usloc;
-    lochep->GetENGLISH((ILocale **)&enloc);
-    lochep->GetUS((ILocale **)&usloc);
+    lochep->GetENGLISH((ILocale**)&enloc);
+    lochep->GetUS((ILocale**)&usloc);
 
     AutoPtr<ILocale> enloc2;
     AutoPtr<ILocale> usloc2;
-    icuhep->LocaleFromString(String("en") , (ILocale **)&enloc2);
+    icuhep->LocaleFromString(String("en") , (ILocale**)&enloc2);
     assertEqualsLocale(enloc ,  enloc2);
-    icuhep->LocaleFromString(String("en_") , (ILocale **)&enloc2);
+    icuhep->LocaleFromString(String("en_") , (ILocale**)&enloc2);
     assertEqualsLocale(enloc ,  enloc2);
-    icuhep->LocaleFromString(String("en__") , (ILocale **)&enloc2);
+    icuhep->LocaleFromString(String("en__") , (ILocale**)&enloc2);
     assertEqualsLocale(enloc ,  enloc2);
 
-    icuhep->LocaleFromString(String("en_US") , (ILocale **)&usloc2);
+    icuhep->LocaleFromString(String("en_US") , (ILocale**)&usloc2);
     assertEqualsLocale(usloc ,  usloc2);
-    icuhep->LocaleFromString(String("en_US_") , (ILocale **)&usloc2);
+    icuhep->LocaleFromString(String("en_US_") , (ILocale**)&usloc2);
     assertEqualsLocale(usloc ,  usloc2);
 
-    CLocale::New(String(""),String("US") , String("") ,(ILocale **)&usloc);
-    icuhep->LocaleFromString(String("_US") , (ILocale **)&usloc2);
+    CLocale::New(String(""),String("US") , String("") ,(ILocale**)&usloc);
+    icuhep->LocaleFromString(String("_US") , (ILocale**)&usloc2);
     assertEqualsLocale(usloc , usloc2);
-    icuhep->LocaleFromString(String("_US_") , (ILocale **)&usloc2);
+    icuhep->LocaleFromString(String("_US_") , (ILocale**)&usloc2);
     assertEqualsLocale(usloc , usloc2);
 
-    CLocale::New(String(""),String("") , String("POSIX"), (ILocale **)&usloc);
-    icuhep->LocaleFromString(String("__POSIX") , (ILocale **)&usloc2);
+    CLocale::New(String(""),String("") , String("POSIX"), (ILocale**)&usloc);
+    icuhep->LocaleFromString(String("__POSIX") , (ILocale**)&usloc2);
     assertEqualsLocale(usloc , usloc2);
-    CLocale::New(String("aa"),String("BB") , String("CC"), (ILocale **)&usloc);
-    icuhep->LocaleFromString(String("aa_BB_CC") , (ILocale **)&usloc2);
+    CLocale::New(String("aa"),String("BB") , String("CC"), (ILocale**)&usloc);
+    icuhep->LocaleFromString(String("aa_BB_CC") , (ILocale**)&usloc2);
     assertEqualsLocale(usloc , usloc2);
 
     return 0;

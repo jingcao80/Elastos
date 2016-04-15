@@ -93,7 +93,7 @@ void testAbsNeg()
     }
 
     AutoPtr<IBigDecimal> rDecimal;
-    aDecimal->Abs((IBigDecimal **)&rDecimal);
+    aDecimal->Abs((IBigDecimal**)&rDecimal);
 
     String str;
     str = Object::ToString(rDecimal);
@@ -126,7 +126,7 @@ void testAbsPos()
     }
 
     AutoPtr<IBigDecimal> rDecimal;
-    aDecimal->Abs((IBigDecimal **)&rDecimal);
+    aDecimal->Abs((IBigDecimal**)&rDecimal);
 
     String str;
     str = Object::ToString(rDecimal);
@@ -173,7 +173,7 @@ void testAbsMathContextNeg()
     }
 
     AutoPtr<IBigDecimal> rDecimal;
-    aDecimal->Abs(mc, (IBigDecimal **)&rDecimal);
+    aDecimal->Abs(mc, (IBigDecimal**)&rDecimal);
 
     String str;
     str = Object::ToString(rDecimal);
@@ -223,7 +223,7 @@ void testAbsMathContextPos()
     }
 
     AutoPtr<IBigDecimal> rDecimal;
-    aDecimal->Abs(mc, (IBigDecimal **)&rDecimal);
+    aDecimal->Abs(mc, (IBigDecimal**)&rDecimal);
 
     String str;
     str = Object::ToString(rDecimal);

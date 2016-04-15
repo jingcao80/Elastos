@@ -10,12 +10,12 @@ void testContructor1()
 {
     String str1("abcdefg");
 	AutoPtr<IStringBufferInputStream> sbis1;
-	CStringBufferInputStream::New(str1, (IStringBufferInputStream **)&sbis1);
+	CStringBufferInputStream::New(str1, (IStringBufferInputStream**)&sbis1);
     String str2("abcdefg");
 	AutoPtr<IStringBufferInputStream> sbis2;
-	CStringBufferInputStream::New(str2, (IStringBufferInputStream **)&sbis2);
+	CStringBufferInputStream::New(str2, (IStringBufferInputStream**)&sbis2);
 	AutoPtr<IInputStream> is;
-	CSequenceInputStream::New(sbis1, sbis2, (IInputStream **)&is);
+	CSequenceInputStream::New(sbis1, sbis2, (IInputStream**)&is);
 }
 void testConstructor2()
 {
@@ -27,12 +27,12 @@ void testAvailable()
     Int32 number = 0;
     String str1("abcdefg");
 	AutoPtr<IStringBufferInputStream> sbis1;
-	CStringBufferInputStream::New(str1, (IStringBufferInputStream **)&sbis1);
+	CStringBufferInputStream::New(str1, (IStringBufferInputStream**)&sbis1);
     String str2("jhhj");
 	AutoPtr<IStringBufferInputStream> sbis2;
-	CStringBufferInputStream::New(str2, (IStringBufferInputStream **)&sbis2);
+	CStringBufferInputStream::New(str2, (IStringBufferInputStream**)&sbis2);
 	AutoPtr<IInputStream> is;
-	CSequenceInputStream::New(sbis1, sbis2, (IInputStream **)&is);
+	CSequenceInputStream::New(sbis1, sbis2, (IInputStream**)&is);
     is->Available(&number);
 	printf("number=%d\n",number);//7 ���⣺it should be 11,currently it only includes the first inputstream,not consisting of the second stream .
 	is->Close();
@@ -45,12 +45,12 @@ void testRead()
     Int32 value = 0;
     String str1("abcdefg");
 	AutoPtr<IStringBufferInputStream> sbis1;
-	CStringBufferInputStream::New(str1, (IStringBufferInputStream **)&sbis1);
+	CStringBufferInputStream::New(str1, (IStringBufferInputStream**)&sbis1);
     String str2("jhhj");
 	AutoPtr<IStringBufferInputStream> sbis2;
-	CStringBufferInputStream::New(str2, (IStringBufferInputStream **)&sbis2);
+	CStringBufferInputStream::New(str2, (IStringBufferInputStream**)&sbis2);
 	AutoPtr<IInputStream> is;
-	CSequenceInputStream::New(sbis1, sbis2, (IInputStream **)&is);
+	CSequenceInputStream::New(sbis1, sbis2, (IInputStream**)&is);
     Int32 number = 0;
 	is->Available(&number);
 	for(Int32 i = 0; i < number; i++)
@@ -70,12 +70,12 @@ void testReadBufferEx()
 	Int32 number = 0;
 	String str1("abcdefg");
 	AutoPtr<IStringBufferInputStream> sbis1;
-	CStringBufferInputStream::New(str1, (IStringBufferInputStream **)&sbis1);
+	CStringBufferInputStream::New(str1, (IStringBufferInputStream**)&sbis1);
     String str2("jhhj");
 	AutoPtr<IStringBufferInputStream> sbis2;
-	CStringBufferInputStream::New(str2, (IStringBufferInputStream **)&sbis2);
+	CStringBufferInputStream::New(str2, (IStringBufferInputStream**)&sbis2);
 	AutoPtr<IInputStream> is;
-	CSequenceInputStream::New(sbis1, sbis2, (IInputStream **)&is);
+	CSequenceInputStream::New(sbis1, sbis2, (IInputStream**)&is);
 	is->ReadBufferEx(offset, count, &bytes, &number);
 	for(Int32 i = offset; i < offset + count; i++)
 	{

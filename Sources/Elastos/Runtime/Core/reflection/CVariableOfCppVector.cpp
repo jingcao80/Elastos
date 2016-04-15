@@ -276,7 +276,7 @@ ECode CVariableOfCppVector::GetRank(
         rank++;
         elementTypeInfo = NULL;
         ec = ((ICppVectorInfo *)elementTypeInfo2.Get())->GetElementTypeInfo(
-                (IDataTypeInfo **)&elementTypeInfo);
+                (IDataTypeInfo**)&elementTypeInfo);
         if (FAILED(ec)) return ec;
 
         ec = elementTypeInfo->GetDataType(&type);
@@ -500,7 +500,7 @@ ECode CVariableOfCppVector::AcquireCppVectorSGetter(
 
         AutoPtr<IDataTypeInfo> elementTypeInfo;
         ec = ((ICppVectorInfo *)mElementTypeInfo.Get())->GetElementTypeInfo(
-                (IDataTypeInfo **)&elementTypeInfo);
+                (IDataTypeInfo**)&elementTypeInfo);
         if (FAILED(ec)) {
             g_objInfoList.UnlockHashTable(EntryType_Struct);
             return ec;

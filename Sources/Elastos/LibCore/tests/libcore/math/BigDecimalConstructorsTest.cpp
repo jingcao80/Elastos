@@ -140,7 +140,7 @@ void testConstrBI()
     }
 
     AutoPtr<IBigInteger> rInteger;
-    aNumber->GetUnscaledValue((IBigInteger **)&rInteger);
+    aNumber->GetUnscaledValue((IBigInteger**)&rInteger);
 
     IComparable* comp = (IComparable *)rInteger->Probe(EIID_IComparable);
     Int32 r;
@@ -187,7 +187,7 @@ void testConstrBIScale()
     }
 
     AutoPtr<IBigInteger> rInteger;
-    aNumber->GetUnscaledValue((IBigInteger **)&rInteger);
+    aNumber->GetUnscaledValue((IBigInteger**)&rInteger);
 
     IComparable* comp = (IComparable *)rInteger->Probe(EIID_IComparable);
     Int32 r;
@@ -247,7 +247,7 @@ void testConstrBigIntegerMathContext()
     }
 
     AutoPtr<IBigInteger> rInteger;
-    result->GetUnscaledValue((IBigInteger **)&rInteger);
+    result->GetUnscaledValue((IBigInteger**)&rInteger);
 
     String str;
     str = Object::ToString(rInteger);
@@ -306,7 +306,7 @@ void testConstrBigIntegerScaleMathContext()
     }
 
     AutoPtr<IBigInteger> rInteger;
-    result->GetUnscaledValue((IBigInteger **)&rInteger);
+    result->GetUnscaledValue((IBigInteger**)&rInteger);
 
     String str;
     str = Object::ToString(rInteger);

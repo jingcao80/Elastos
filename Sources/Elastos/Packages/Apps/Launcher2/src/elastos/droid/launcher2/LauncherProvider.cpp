@@ -1356,6 +1356,7 @@ ECode LauncherProvider::DatabaseHelper::GetProviderInPackage(
             provider->GetPackageName(&_packageName);
             if (_packageName.Equals(packageName)) {
                 *name = provider;
+                REFCOUNT_ADD(*name)
                 return NOERROR;
             }
         }

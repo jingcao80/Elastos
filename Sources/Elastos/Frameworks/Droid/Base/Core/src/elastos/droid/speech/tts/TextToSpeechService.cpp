@@ -677,7 +677,7 @@ TextToSpeechService::SynthesisSpeechItemV1::SynthesisSpeechItemV1(
 {
     AutoPtr<ICharSequence> str;
 
-    CString::New(utteranceId, (ICharSequence **)&str);
+    CString::New(utteranceId, (ICharSequence**)&str);
     mText = str;
     CSynthesisRequest::New(mText, mParams, (ISynthesisRequest**)&mSynthesisRequest);
     mDefaultLocale = mTtss->GetSettingsLocale();

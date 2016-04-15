@@ -152,7 +152,7 @@ ECode UiModeManagerService::BinderService::SetNightMode(
             AutoPtr<IContext> context;
             mHost->GetContext((IContext**)&context);
             AutoPtr<IContentResolver> resolver;
-            context->GetContentResolver((IContentResolver **)&resolver);
+            context->GetContentResolver((IContentResolver**)&resolver);
             Boolean result;
             Settings::Secure::PutInt32(resolver,
                 ISettingsSecure::UI_NIGHT_MODE, mode, &result);
@@ -337,7 +337,7 @@ ECode UiModeManagerService::constructor(
     /* [in] */ IContext* context)
 {
     CHandler::New((IHandler**)&mHandler);
-    CConfiguration::New((IConfiguration **)&mConfiguration);
+    CConfiguration::New((IConfiguration**)&mConfiguration);
 
     mResultReceiver = new ResultReceiver(this);
     mDockModeReceiver = new DockModeReceiver(this);
@@ -577,7 +577,7 @@ ECode UiModeManagerService::UpdateLocked(
 
             if (!oldAction.IsNull()) {
                 AutoPtr<IIntent> intent;
-                CIntent::New(oldAction, (IIntent **)&intent);
+                CIntent::New(oldAction, (IIntent**)&intent);
                 context->SendBroadcastAsUser(intent, UserHandle::ALL);
             }
             mLastBroadcastState = IIntent::EXTRA_DOCK_STATE_CAR;
@@ -588,7 +588,7 @@ ECode UiModeManagerService::UpdateLocked(
         if (!IsDeskDockState(mLastBroadcastState)) {
             if (!oldAction.IsNull()) {
                 AutoPtr<IIntent> intent;
-                CIntent::New(oldAction, (IIntent **)&intent);
+                CIntent::New(oldAction, (IIntent**)&intent);
                 context->SendBroadcastAsUser(intent, UserHandle::ALL);
             }
             mLastBroadcastState = mDockState;
@@ -773,7 +773,7 @@ ECode UiModeManagerService::AdjustStatusBarCarModeLocked()
     GetContext((IContext**)&context);
     if (mStatusBarManager == NULL) {
         AutoPtr<IInterface> obj;
-        context->GetSystemService(IContext::STATUS_BAR_SERVICE, (IInterface **)&obj);
+        context->GetSystemService(IContext::STATUS_BAR_SERVICE, (IInterface**)&obj);
         mStatusBarManager = IStatusBarManager::Probe(obj);
     }
 
@@ -799,7 +799,7 @@ ECode UiModeManagerService::AdjustStatusBarCarModeLocked()
         if (mCarModeEnabled) {
             AutoPtr<IIntent> carModeOffIntent;
             CIntent::New(context, ECLSID_CDisableCarModeActivity,
-               (IIntent **)&carModeOffIntent);
+               (IIntent**)&carModeOffIntent);
 
             AutoPtr<INotification> n;
             CNotification::New((INotification**)&n);
@@ -853,7 +853,7 @@ ECode UiModeManagerService::UpdateComputedNightModeLocked()
 {
     if (mTwilightManager) {
         AutoPtr<ITwilightState> state;
-        mTwilightManager->GetCurrentState((ITwilightState **)&state);
+        mTwilightManager->GetCurrentState((ITwilightState**)&state);
         if (state != NULL) {
             state->IsNight(&mComputedNightMode);
         }

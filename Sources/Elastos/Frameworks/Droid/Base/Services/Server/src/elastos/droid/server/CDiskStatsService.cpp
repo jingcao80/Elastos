@@ -60,7 +60,7 @@ ECode CDiskStatsService::Dump(
     env->GetDataDirectory((IFile**)&dataDirectory);
     AutoPtr<IFile> tmp;
     CFile::New(dataDirectory, String("system/perftest.tmp"),
-        (IFile **)&tmp);
+        (IFile**)&tmp);
 
     AutoPtr<IOutputStream> fos;
     ECode ec = NOERROR;
@@ -102,7 +102,7 @@ ECode CDiskStatsService::Dump(
     ReportFreeSpace(cacheDir, String("Cache"), pw);
 
     AutoPtr<IFile> newfile;
-    CFile::New(String("/system"), (IFile **)&newfile);
+    CFile::New(String("/system"), (IFile**)&newfile);
     ReportFreeSpace(newfile, String("System"), pw);
 
     return NOERROR;

@@ -208,7 +208,7 @@ ECode JDBCStatement::ExecuteQuery(
                         flagreturn = TRUE;
                     }
                 } else {
-                    ecreturn = ((CJDBCConnection *)&conn)->mDb->GetTable(sql, maxrows,(ITableResult **)&tr);
+                    ecreturn = ((CJDBCConnection *)&conn)->mDb->GetTable(sql, maxrows,(ITableResult**)&tr);
                     if (ecreturn != NOERROR)
                     {
                         flagreturn = TRUE;
@@ -223,7 +223,7 @@ ECode JDBCStatement::ExecuteQuery(
                         flagreturn = TRUE;
                     }
                 } else {
-                    ecreturn = ((CJDBCConnection *)&conn)->mDb->GetTable(sql, maxrows, args, (ITableResult **)&tr);
+                    ecreturn = ((CJDBCConnection *)&conn)->mDb->GetTable(sql, maxrows, args, (ITableResult**)&tr);
                     if (ecreturn != NOERROR)
                     {
                         flagreturn = TRUE;
@@ -272,7 +272,7 @@ ECode JDBCStatement::ExecuteQuery(
         return E_SQL_EXCEPTION;
     }
     if (!updonly && tr != NULL) {
-        CJDBCResultSet::New(tr, this,(IJDBCResultSet **)&rs);
+        CJDBCResultSet::New(tr, this,(IJDBCResultSet**)&rs);
     }
 
     *resultset = IResultSet::Probe(rs);

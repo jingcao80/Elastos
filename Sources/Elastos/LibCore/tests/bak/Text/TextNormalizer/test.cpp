@@ -11,7 +11,7 @@ using namespace Libcore::ICU;
 void assertEquals(String src ,String instr, NormalizerForm inform)
 {
     AutoPtr<INormalizerHelper> nh;
-    CNormalizerHelper::AcquireSingleton((INormalizerHelper **)&nh);
+    CNormalizerHelper::AcquireSingleton((INormalizerHelper**)&nh);
     AutoPtr<ICharSequence> csq;
     CString::New(instr, (ICharSequence**)&csq);
     String strout;
@@ -50,7 +50,7 @@ int CTest::testTextNormalize(int argc, char* argv[])
 void assertTrueOrFalse(String src, NormalizerForm inform , Boolean trueflag)
 {
     AutoPtr<INormalizerHelper> nh;
-    CNormalizerHelper::AcquireSingleton((INormalizerHelper **)&nh);
+    CNormalizerHelper::AcquireSingleton((INormalizerHelper**)&nh);
     AutoPtr<ICharSequence> csq;
     CString::New(src, (ICharSequence**)&csq);
     Boolean outflag;

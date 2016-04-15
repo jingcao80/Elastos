@@ -289,8 +289,8 @@ ECode TimeZoneNames::GetZoneStrings(
     AutoPtr<ILocale> locale = l;
     if (locale == NULL) {
         AutoPtr<CLocaleHelper> lh;
-        CLocaleHelper::AcquireSingletonByFriend((CLocaleHelper **)&lh);
-        lh->GetDefault((ILocale **)&locale);
+        CLocaleHelper::AcquireSingletonByFriend((CLocaleHelper**)&lh);
+        lh->GetDefault((ILocale**)&locale);
     }
 
     AutoPtr<IInterface> cache;

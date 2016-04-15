@@ -10,7 +10,7 @@ void testConstructor()
 {
     AutoPtr<IOutputStream> os;
 	AutoPtr<IFilterOutputStream> fos;
-	CFilterOutputStream::New(os,(IFilterOutputStream **)&fos);
+	CFilterOutputStream::New(os,(IFilterOutputStream**)&fos);
 }
 void testWrite()
 {
@@ -19,7 +19,7 @@ void testWrite()
     AutoPtr<IFileOutputStream> fos;
     CFileOutputStream::New(fp, (IFileOutputStream**)&fos);
 	AutoPtr<IFilterOutputStream> ftos;
-	CFilterOutputStream::New(fos,(IFilterOutputStream **)&ftos);
+	CFilterOutputStream::New(fos,(IFilterOutputStream**)&ftos);
 	ftos->Write(oneByte);
 	oneByte = 98;
 	ftos->Write(oneByte);
@@ -39,7 +39,7 @@ void testWriteBuffer()
     AutoPtr<IFileOutputStream> fos;
     CFileOutputStream::New(fp, (IFileOutputStream**)&fos);
 	AutoPtr<IFilterOutputStream> ftos;
-	CFilterOutputStream::New(fos,(IFilterOutputStream **)&ftos);
+	CFilterOutputStream::New(fos,(IFilterOutputStream**)&ftos);
 	ftos->WriteBuffer(bytes);
 	ftos->Flush();
     ftos->Close();

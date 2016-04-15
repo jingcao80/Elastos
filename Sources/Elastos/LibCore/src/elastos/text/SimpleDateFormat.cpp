@@ -166,7 +166,7 @@ ECode SimpleDateFormat::constructor(
     FAIL_RETURN(ValidatePattern(tem))
     mPattern = tem;
     AutoPtr<IInterface> obj;
-    ICloneable::Probe(value)->Clone((IInterface **)&obj);
+    ICloneable::Probe(value)->Clone((IInterface**)&obj);
     mFormatData = IDateFormatSymbols::Probe(obj);
     return NOERROR;
 }
@@ -224,12 +224,12 @@ ECode SimpleDateFormat::DefaultPattern(
 
     AutoPtr<ILocale> locdef;
     AutoPtr<ILocaleHelper>  lochelper;
-    FAIL_RETURN(CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lochelper));
-    lochelper->GetDefault((ILocale **)&locdef);
+    FAIL_RETURN(CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lochelper));
+    lochelper->GetDefault((ILocale**)&locdef);
     AutoPtr<ILocaleData> localeData;
     AutoPtr<ILocaleDataHelper> locdatahelper;
-    FAIL_RETURN(CLocaleDataHelper::AcquireSingleton((ILocaleDataHelper **)&locdatahelper));
-    locdatahelper->Get(locdef,(ILocaleData **)&localeData);
+    FAIL_RETURN(CLocaleDataHelper::AcquireSingleton((ILocaleDataHelper**)&locdatahelper));
+    locdatahelper->Get(locdef,(ILocaleData**)&localeData);
     String datestr , timestr;
     localeData->GetDateFormat(Libcore::ICU::DateFormat_SHORT,&datestr);
     localeData->GetTimeFormat(Libcore::ICU::DateFormat_SHORT,&timestr);
@@ -1127,7 +1127,7 @@ ECode SimpleDateFormat::ParseNumber(
     }
     position->SetIndex(index);
     AutoPtr<INumber> outn;
-    CInteger32::New(result,(INumber **)&outn);
+    CInteger32::New(result,(INumber**)&outn);
     *number = outn;
     REFCOUNT_ADD(*number);
     //return Integer.valueOf(result);
@@ -1378,7 +1378,7 @@ ECode SimpleDateFormat::SetDateFormatSymbols(
 {
     mFormatData = NULL;
     AutoPtr<IInterface> object;
-    ICloneable::Probe(value)->Clone((IInterface **)&object);
+    ICloneable::Probe(value)->Clone((IInterface**)&object);
     mFormatData = IDateFormatSymbols::Probe(object);
     return NOERROR;
 }

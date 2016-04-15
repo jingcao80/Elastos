@@ -536,7 +536,7 @@ ECode MediaRouterRouteInfo::ToString(
     GetStatus((ICharSequence**)&cs);
     cs->ToString(&status);
     AutoPtr<IMediaRouterRouteCategory> rc;
-    GetCategory((IMediaRouterRouteCategory **)&rc);
+    GetCategory((IMediaRouterRouteCategory**)&rc);
     String category;
     IObject::Probe(rc)->ToString(&category);
     String presentationDisplay;

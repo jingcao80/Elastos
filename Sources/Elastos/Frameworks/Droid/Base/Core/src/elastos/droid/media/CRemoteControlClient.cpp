@@ -493,7 +493,7 @@ void CRemoteControlClient::SetPlaybackStateInt(
                 bob->SetState(pbState, position, playbackSpeed, SystemClock::GetElapsedRealtime());
                 bob->SetErrorMessage(NULL);
                 bob->Build((IPlaybackState**)&mSessionPlaybackState);
-                bob->Build((IPlaybackState **)&mSessionPlaybackState);
+                bob->Build((IPlaybackState**)&mSessionPlaybackState);
 
                 mSession->SetPlaybackState(mSessionPlaybackState.Get());
             }

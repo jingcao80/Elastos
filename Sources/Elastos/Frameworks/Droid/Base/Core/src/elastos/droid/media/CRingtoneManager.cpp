@@ -471,14 +471,19 @@ ECode CRingtoneManager::GetDefaultUri(
     AutoPtr<IUri> uri;
     if ((type & TYPE_RINGTONE) != 0) {
         *result = Settings::System::DEFAULT_RINGTONE_URI;
-    } else if ((type & TYPE_NOTIFICATION) != 0) {
+        REFCOUNT_ADD(*result);
+    }
+    else if ((type & TYPE_NOTIFICATION) != 0) {
         *result = Settings::System::DEFAULT_NOTIFICATION_URI;
-    } else if ((type & TYPE_ALARM) != 0) {
+        REFCOUNT_ADD(*result);
+    }
+    else if ((type & TYPE_ALARM) != 0) {
         *result = Settings::System::DEFAULT_ALARM_ALERT_URI;
-    } else {
+        REFCOUNT_ADD(*result);
+    }
+    else {
         *result = NULL;
     }
-    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 

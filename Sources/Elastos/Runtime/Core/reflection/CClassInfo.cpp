@@ -613,7 +613,7 @@ ECode CClassInfo::GetConstructorInfoByParamCount(
     Int32 iCount = 0;
     for (UInt32 i = 0; i < mCtorList->mTotalCount; i++) {
         AutoPtr<IInterface> obj;
-        ec = mCtorList->AcquireObjByIndex(i, (IInterface **)&obj);
+        ec = mCtorList->AcquireObjByIndex(i, (IInterface**)&obj);
         if (FAILED(ec)) return ec;
 
         constructorInfo = IConstructorInfo::Probe(obj);

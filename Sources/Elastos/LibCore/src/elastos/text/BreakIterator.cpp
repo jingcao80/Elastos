@@ -77,10 +77,10 @@ ECode BreakIterator::GetCharacterInstance(
 
     AutoPtr<INativeBreakIterator> iter;
     AutoPtr<INativeBreakIteratorHelper> iterhelper;
-    CNativeBreakIteratorHelper::AcquireSingleton((INativeBreakIteratorHelper **)&iterhelper);
-    iterhelper->GetCharacterInstance(where,(INativeBreakIterator **)&iter);
+    CNativeBreakIteratorHelper::AcquireSingleton((INativeBreakIteratorHelper**)&iterhelper);
+    iterhelper->GetCharacterInstance(where,(INativeBreakIterator**)&iter);
     AutoPtr<IBreakIterator> rbbi;
-    CRuleBasedBreakIterator::New(iter,(IBreakIterator **)&rbbi);
+    CRuleBasedBreakIterator::New(iter,(IBreakIterator**)&rbbi);
     *instance = rbbi;
     REFCOUNT_ADD(*instance);
 
@@ -108,10 +108,10 @@ ECode BreakIterator::GetLineInstance(
 
     AutoPtr<INativeBreakIterator> iter;
     AutoPtr<INativeBreakIteratorHelper> iterhelper;
-    CNativeBreakIteratorHelper::AcquireSingleton((INativeBreakIteratorHelper **)&iterhelper);
-    iterhelper->GetLineInstance(where,(INativeBreakIterator **)&iter);
+    CNativeBreakIteratorHelper::AcquireSingleton((INativeBreakIteratorHelper**)&iterhelper);
+    iterhelper->GetLineInstance(where,(INativeBreakIterator**)&iter);
     AutoPtr<IBreakIterator> rbbi;
-    CRuleBasedBreakIterator::New(iter,(IBreakIterator **)&rbbi);
+    CRuleBasedBreakIterator::New(iter,(IBreakIterator**)&rbbi);
     *instance = rbbi;
     REFCOUNT_ADD(*instance);
     return NOERROR;
@@ -138,10 +138,10 @@ ECode BreakIterator::GetSentenceInstance(
 
     AutoPtr<INativeBreakIterator> iter;
     AutoPtr<INativeBreakIteratorHelper> iterhelper;
-    CNativeBreakIteratorHelper::AcquireSingleton((INativeBreakIteratorHelper **)&iterhelper);
-    iterhelper->GetSentenceInstance(where,(INativeBreakIterator **)&iter);
+    CNativeBreakIteratorHelper::AcquireSingleton((INativeBreakIteratorHelper**)&iterhelper);
+    iterhelper->GetSentenceInstance(where,(INativeBreakIterator**)&iter);
     AutoPtr<IBreakIterator> rbbi;
-    CRuleBasedBreakIterator::New(iter,(IBreakIterator **)&rbbi);
+    CRuleBasedBreakIterator::New(iter,(IBreakIterator**)&rbbi);
     *instance = rbbi;
     REFCOUNT_ADD(*instance);
     return NOERROR;
@@ -168,10 +168,10 @@ ECode BreakIterator::GetWordInstance(
 
     AutoPtr<INativeBreakIterator> iter;
     AutoPtr<INativeBreakIteratorHelper> iterhelper;
-    CNativeBreakIteratorHelper::AcquireSingleton((INativeBreakIteratorHelper **)&iterhelper);
-    iterhelper->GetWordInstance(where,(INativeBreakIterator **)&iter);
+    CNativeBreakIteratorHelper::AcquireSingleton((INativeBreakIteratorHelper**)&iterhelper);
+    iterhelper->GetWordInstance(where,(INativeBreakIterator**)&iter);
     AutoPtr<IBreakIterator> rbbi;
-    FAIL_RETURN(CRuleBasedBreakIterator::New(iter,(IBreakIterator **)&rbbi));
+    FAIL_RETURN(CRuleBasedBreakIterator::New(iter,(IBreakIterator**)&rbbi));
     *instance = rbbi;
     REFCOUNT_ADD(*instance);
     return NOERROR;

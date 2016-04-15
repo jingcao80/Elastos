@@ -133,10 +133,10 @@ static void testBufferedReader()
     AutoPtr<IStringReader> da;
 
 
-    ec = CStringReader::New(str, (IStringReader **)&aa);
-    ec = CStringReader::New(str, (IStringReader **)&ba);
-    ec = CStringReader::New(str, (IStringReader **)&ca);
-    ec = CStringReader::New(str, (IStringReader **)&da);
+    ec = CStringReader::New(str, (IStringReader**)&aa);
+    ec = CStringReader::New(str, (IStringReader**)&ba);
+    ec = CStringReader::New(str, (IStringReader**)&ca);
+    ec = CStringReader::New(str, (IStringReader**)&da);
 
     {
         AutoPtr<IReader> ir;
@@ -145,7 +145,7 @@ static void testBufferedReader()
 
         ir = IReader::Probe((IStringReader *)aa);
         ac = ICloseable::Probe((IStringReader *)aa);
-//        ec = CBufferedReader::New((IReader *)ir, 5, (IBufferedReader **)&iba);
+//        ec = CBufferedReader::New((IReader *)ir, 5, (IBufferedReader**)&iba);
 
         ir = IReader::Probe((IBufferedReader *)iba);
         assertEquals("", str, read((IReader *)ir));
@@ -160,7 +160,7 @@ static void testBufferedReader()
 
         ir = IReader::Probe((IStringReader *)aa);
         ac = ICloseable::Probe((IStringReader *)aa);
-//        ec = CBufferedReader::New((IReader *)ir, 15, (IBufferedReader **)&iba);
+//        ec = CBufferedReader::New((IReader *)ir, 15, (IBufferedReader**)&iba);
 
         ir = IReader::Probe((IBufferedReader *)iba);
         assertEquals("", String("AbCdEfGhIj"), read((IReader *)ir));
@@ -176,7 +176,7 @@ static void testBufferedReader()
 
         ir = IReader::Probe((IStringReader *)aa);
         ac = ICloseable::Probe((IStringReader *)aa);
-//        ec = CBufferedReader::New((IReader *)ir, 15, (IBufferedReader **)&iba);
+//        ec = CBufferedReader::New((IReader *)ir, 15, (IBufferedReader**)&iba);
 
         ir = IReader::Probe((IBufferedReader *)iba);
         assertEquals("", String("AbCdEfGhIj"), read((IReader *)ir, 10));
@@ -192,7 +192,7 @@ static void testBufferedReader()
 
         ir = IReader::Probe((IStringReader *)aa);
         ac = ICloseable::Probe((IStringReader *)aa);
-//        ec = CBufferedReader::New((IReader *)ir, 15, (IBufferedReader **)&iba);
+//        ec = CBufferedReader::New((IReader *)ir, 15, (IBufferedReader**)&iba);
 
         ir = IReader::Probe((IBufferedReader *)iba);
         assertEquals("", String("bdfhjlnprtvxz"), skipRead((IReader *)ir));
@@ -208,7 +208,7 @@ static void testBufferedReader()
 
         ir = IReader::Probe((IStringReader *)aa);
         ac = ICloseable::Probe((IStringReader *)aa);
-//        ec = CBufferedReader::New((IReader *)ir, 15, (IBufferedReader **)&iba);
+//        ec = CBufferedReader::New((IReader *)ir, 15, (IBufferedReader**)&iba);
 
         ir = IReader::Probe((IBufferedReader *)iba);
         assertEquals("", String("AbCdEfGdEfGhIjKlMnOpQrStUvWxYz"), markRead((IReader *)ir, 3, 4));

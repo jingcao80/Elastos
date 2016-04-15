@@ -120,7 +120,7 @@ void testAddEqualScalePosPos()
     }
 
     AutoPtr<IBigDecimal> result;
-    aDecimal->Add(bDecimal, (IBigDecimal **)&result);
+    aDecimal->Add(bDecimal, (IBigDecimal**)&result);
 
     String str;
     str = Object::ToString(result);
@@ -192,7 +192,7 @@ void testAddMathContextEqualScalePosPos()
     }
 
     AutoPtr<IBigDecimal> result;
-    aDecimal->Add(bDecimal, mc, (IBigDecimal **)&result);
+    aDecimal->Add(bDecimal, mc, (IBigDecimal**)&result);
 
     String str;
     str = Object::ToString(result);
@@ -257,7 +257,7 @@ void testAddEqualScaleNegNeg()
     }
 
     AutoPtr<IBigDecimal> result;
-    aDecimal->Add(bDecimal, (IBigDecimal **)&result);
+    aDecimal->Add(bDecimal, (IBigDecimal**)&result);
 
     String str;
     str = Object::ToString(result);
@@ -329,7 +329,7 @@ void testAddMathContextEqualScaleNegNeg()
     }
 
     AutoPtr<IBigDecimal> result;
-    aDecimal->Add(bDecimal, mc, (IBigDecimal **)&result);
+    aDecimal->Add(bDecimal, mc, (IBigDecimal**)&result);
 
     String str;
     str = Object::ToString(result);

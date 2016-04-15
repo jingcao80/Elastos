@@ -113,7 +113,7 @@ ECode CPlainDatagramSocketImpl::OnClose()
 ECode CPlainDatagramSocketImpl::Create()
 {
     AutoPtr<IFileDescriptor> fd;
-    FAIL_RETURN(IoBridge::Socket(FALSE, (IFileDescriptor **)&fd));
+    FAIL_RETURN(IoBridge::Socket(FALSE, (IFileDescriptor**)&fd));
     mFd = fd;
     return NOERROR;
 }

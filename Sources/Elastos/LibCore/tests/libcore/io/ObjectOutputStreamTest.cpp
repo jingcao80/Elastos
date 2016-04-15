@@ -105,8 +105,8 @@ static void testLongString()
     AutoPtr<IObjectOutputStream> oos;
     AutoPtr<IObjectOutput> os;
 
-    ec = CByteArrayOutputStream::New((IByteArrayOutputStream **)&baos);
-//    ec = CObjectOutputStream::New((IObjectOutputStream **)&oos);
+    ec = CByteArrayOutputStream::New((IByteArrayOutputStream**)&baos);
+//    ec = CObjectOutputStream::New((IObjectOutputStream**)&oos);
 
     os = IObjectOutput::Probe(oos);
 

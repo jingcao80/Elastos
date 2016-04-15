@@ -205,12 +205,12 @@ static ArrayOf<ISocket> *newSocketChannelPair()
     AutoPtr<IInetSocketAddress> isa;
 
 /*
-    CServerSocketChannelHelper::AcquireSingleton((IServerSocketChannelHelper **)&issch);
+    CServerSocketChannelHelper::AcquireSingleton((IServerSocketChannelHelper**)&issch);
 
-    issch->Open((IServerSocketChannel **)&serverSocketChannel);
-    serverSocketChannel->GetSocket((IServerSocket **)&serverSocket);
+    issch->Open((IServerSocketChannel**)&serverSocketChannel);
+    serverSocketChannel->GetSocket((IServerSocket**)&serverSocket);
 
-    CInetSocketAddress::New(0, (IInetSocketAddress **)&isa);
+    CInetSocketAddress::New(0, (IInetSocketAddress**)&isa);
 
     AutoPtr<ISocketAddress> localAddr;
 
@@ -222,14 +222,14 @@ static ArrayOf<ISocket> *newSocketChannelPair()
     AutoPtr<ISocketAddress> address;
     Boolean result;
 
-    CSocketChannelHelper::AcquireSingleton((ISocketChannelHelper **)&isch);
-    isch->Open((ISocketChannel **)&clientSocketChannel);
+    CSocketChannelHelper::AcquireSingleton((ISocketChannelHelper**)&isch);
+    isch->Open((ISocketChannel**)&clientSocketChannel);
 
-    serverSocket->GetLocalSocketAddress((ISocketAddress **)&address);
+    serverSocket->GetLocalSocketAddress((ISocketAddress**)&address);
     clientSocketChannel->Connect((ISocketAddress *)address, &result);
 
     AutoPtr<ISocketChannel> server;
-    serverSocketChannel->Accept((ISocketChannel **)&server);
+    serverSocketChannel->Accept((ISocketChannel**)&server);
 
     serverSocketChannel->Close();
 
@@ -239,8 +239,8 @@ static ArrayOf<ISocket> *newSocketChannelPair()
     ArrayOf<ISocket> ret;
     ret = ArrayOf<ISocket>::Alloc(2);
 
-    clientSocketChannel->GetSocket((ISocket **)&socket1);
-    server->GetSocket((ISocket **)&socket2);
+    clientSocketChannel->GetSocket((ISocket**)&socket1);
+    server->GetSocket((ISocket**)&socket2);
 
     (*ret)[0] = socket1;
     (*ret)[1] = socket2;

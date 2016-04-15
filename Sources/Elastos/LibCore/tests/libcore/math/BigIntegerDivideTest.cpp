@@ -107,7 +107,7 @@ static void testCase1() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    ec = aNumber->Divide(bNumber, (IBigInteger **)&result);
+    ec = aNumber->Divide(bNumber, (IBigInteger**)&result);
     if (FAILED(ec) || result == NULL) {
         printf(" ArithmeticException has been caught. Error %08X\n", ec);
     } else {
@@ -185,7 +185,7 @@ static void testCase3() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Divide(bNumber, (IBigInteger **)&result);
+    aNumber->Divide(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -249,7 +249,7 @@ static void testCase4() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Divide(bNumber, (IBigInteger **)&result);
+    aNumber->Divide(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -314,7 +314,7 @@ static void testCase5() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Divide(bNumber, (IBigInteger **)&result);
+    aNumber->Divide(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -379,7 +379,7 @@ static void testCase6() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Divide(bNumber, (IBigInteger **)&result);
+    aNumber->Divide(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -443,7 +443,7 @@ static void testCase7() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Divide(bNumber, (IBigInteger **)&result);
+    aNumber->Divide(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -507,7 +507,7 @@ static void testCase8() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Divide(bNumber, (IBigInteger **)&result);
+    aNumber->Divide(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -571,7 +571,7 @@ static void testCase9() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Divide(bNumber, (IBigInteger **)&result);
+    aNumber->Divide(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -635,7 +635,7 @@ static void testCase10() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->Divide(bNumber, (IBigInteger **)&result);
+    aNumber->Divide(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {

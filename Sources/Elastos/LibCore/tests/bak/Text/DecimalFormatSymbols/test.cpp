@@ -16,8 +16,8 @@ void CheckLocaleIsEquivalentToRoot(ILocale* locale)
     dfsh->GetInstanceEx(locale, (IDecimalFormatSymbols**)&dfs);
     AutoPtr<ILocale> Locale_ROOT;
     AutoPtr<ILocaleHelper> lochep;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lochep);
-    lochep->GetROOT((ILocale **)&Locale_ROOT);
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lochep);
+    lochep->GetROOT((ILocale**)&Locale_ROOT);
     dfsh->GetInstanceEx(Locale_ROOT, (IDecimalFormatSymbols**)&dfs2);
 PFL_EX("dfs2 : %p , dfs : %p" , dfs2.Get() , dfs.Get())
     assert(dfs2 != dfs);
@@ -44,13 +44,13 @@ int CTest::testSerialization(int argc, char* argv[]) {
     CDecimalFormatSymbolsHelper::AcquireSingleton((IDecimalFormatSymbolsHelper**)&dfsh);
     AutoPtr<ILocale> geloc;
     AutoPtr<ILocaleHelper> lochep;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lochep);
-    lochep->GetGERMANY((ILocale **)&geloc);
-    dfsh->GetInstanceEx(geloc , (IDecimalFormatSymbols **)&originalDfs);
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lochep);
+    lochep->GetGERMANY((ILocale**)&geloc);
+    dfsh->GetInstanceEx(geloc , (IDecimalFormatSymbols**)&originalDfs);
 
     // Serialize...
     // AutoPtr<IByteArrayOutputStream> out;
-    // CByteArrayOutputStream::New((IByteArrayOutputStream **)&out);
+    // CByteArrayOutputStream::New((IByteArrayOutputStream**)&out);
 
     // new ObjectOutputStream(out).writeObject(originalDfs);
     // byte[] bytes = out.toByteArray();

@@ -1154,21 +1154,25 @@ ECode CMediaRouter::GetSelectedRoute(
     /* [out] */ IMediaRouterRouteInfo** result)
 {
     VALIDATE_NOT_NULL(result);
+    Static* s = (Static*)sStatic.Get();
     Int32 temp;
-    if (((Static*)(sStatic.Get()))->mSelectedRoute != NULL &&
-           (((Static*)(sStatic.Get()))->mSelectedRoute->GetSupportedTypes(&temp) & type) != 0) {
-       // If the selected route supports any of the types supplied, it's still considered
-       // 'selected' for that type.
-       *result = ((Static*)(sStatic.Get()))->mSelectedRoute;
-    } else if (type == ROUTE_TYPE_USER) {
-       // The caller specifically asked for a user route and the currently selected route
-       // doesn't qualify.
-       *result = NULL;
+    if (s->mSelectedRoute != NULL && (s->mSelectedRoute->GetSupportedTypes(&temp) & type) != 0) {
+        // If the selected route supports any of the types supplied, it's still considered
+        // 'selected' for that type.
+        *result = s->mSelectedRoute;
+        REFCOUNT_ADD(*result);
+        return NOERROR;
     }
+    else if (type == ROUTE_TYPE_USER) {
+        // The caller specifically asked for a user route and the currently selected route
+        // doesn't qualify.
+        *result = NULL;
+        return NOERROR;
+    }
+
     // If the above didn't match and we're not specifically asking for a user route,
     // consider the default selected.
-    *result = ((Static*)(sStatic.Get()))->mDefaultAudioVideo;//
-
+    *result = s->mDefaultAudioVideo;//
     REFCOUNT_ADD(*result);
     return NOERROR;
 }

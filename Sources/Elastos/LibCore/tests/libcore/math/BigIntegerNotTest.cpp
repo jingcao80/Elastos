@@ -110,7 +110,7 @@ void testAndNotPosPosFirstLonger() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->AndNot(bNumber, (IBigInteger **)&result);
+    aNumber->AndNot(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -174,7 +174,7 @@ void testAndNotPosPosFirstShorter() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->AndNot(bNumber, (IBigInteger **)&result);
+    aNumber->AndNot(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {
@@ -238,7 +238,7 @@ void testAndNotNegNegFirstLonger() {
     AutoPtr<IBigInteger> result;
     AutoPtr<ArrayOf<Byte> > resBytes;
 
-    aNumber->AndNot(bNumber, (IBigInteger **)&result);
+    aNumber->AndNot(bNumber, (IBigInteger**)&result);
     result->ToByteArray((ArrayOf<Byte> **)&resBytes);
 
     for(int i = 0; i < resBytes->GetLength(); i++) {

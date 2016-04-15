@@ -199,12 +199,12 @@ void testSkipInPipes()
     AutoPtr<ILibcore> libcore;
     AutoPtr<IOs> os;
 
-    CLibcore::AcquireSingleton((ILibcore **)&libcore);
+    CLibcore::AcquireSingleton((ILibcore**)&libcore);
     libcore->GetOs((IOs**)&os);
     os->Pipe((ArrayOf<IFileDescriptor*> **)&pipe);
 
     AutoPtr<IThread> feeder;
-    CMyThread::New((*pipe)[1], (IThread **)&feeder);
+    CMyThread::New((*pipe)[1], (IThread**)&feeder);
     assert(feeder.Get() != NULL && "Thread is null!");
     feeder->Start();
 
@@ -212,7 +212,7 @@ void testSkipInPipes()
     Int64 number;
     Int32 value;
 
-    CFileInputStream::New((*pipe)[0], (IInputStream **)&fis);
+    CFileInputStream::New((*pipe)[0], (IInputStream**)&fis);
     fis->Skip((Int64)SKIP_SIZE, &number);
     verifyData(fis, SKIP_SIZE, TOTAL_SIZE - SKIP_SIZE);
     fis->Read(&value);
@@ -225,7 +225,7 @@ void testSkipInPipes()
     assertEquals("", FALSE, b);
 
     AutoPtr<IIoUtils> iou;
-    CIoUtils::AcquireSingleton((IIoUtils **)&iou);
+    CIoUtils::AcquireSingleton((IIoUtils**)&iou);
     iou->CloseQuietly((*pipe)[0]);
 }
 
@@ -242,7 +242,7 @@ void testDirectories()
 {
     AutoPtr<IFileInputStream> fis;
 
-    ECode ec = CFileInputStream::New(String(""), (IFileInputStream **)&fis);
+    ECode ec = CFileInputStream::New(String(""), (IFileInputStream**)&fis);
     if (FAILED(ec) || fis == NULL) {
         printf(" catched (FileNotFoundException expected), Error %08X\n", ec);
     } else {
@@ -346,7 +346,7 @@ void testFileDescriptorOwnership()
     AutoPtr<IFileInputStream> fis1;
     AutoPtr<IFileInputStream> fis2;
 
-    ECode ec = CFileInputStream::New(tmp, (IFileInputStream **)&fis1);
+    ECode ec = CFileInputStream::New(tmp, (IFileInputStream**)&fis1);
     if (FAILED(ec) || fis1 == NULL) {
         printf("Failed to create CFileInputStream, Error %08X\n", ec);
     }
@@ -357,7 +357,7 @@ void testFileDescriptorOwnership()
         printf(" Failed to GetFD. Error %08X\n", ec);
     }
 
-    ec = CFileInputStream::New(tmp, (IFileInputStream **)&fis2);
+    ec = CFileInputStream::New(tmp, (IFileInputStream**)&fis2);
     if (FAILED(ec) || fis2 == NULL) {
         printf("Failed to create CFileInputStream, Error %08X\n", ec);
     }
@@ -461,7 +461,7 @@ void testClose()
 
     AutoPtr<IFileInputStream> fis;
 
-    ECode ec = CFileInputStream::New(tmp, (IFileInputStream **)&fis);
+    ECode ec = CFileInputStream::New(tmp, (IFileInputStream**)&fis);
     if (FAILED(ec) || fis == NULL) {
         printf("Failed to create CFileInputStream, Error %08X\n", ec);
     }

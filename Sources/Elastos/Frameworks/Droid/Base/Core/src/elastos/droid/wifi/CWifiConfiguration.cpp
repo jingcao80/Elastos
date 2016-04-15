@@ -1907,6 +1907,7 @@ ECode CWifiConfiguration::SetVisibility(
 
     mVisibility = status;
     *resultOut = status;
+    REFCOUNT_ADD(*resultOut)
 
     return NOERROR;
 }

@@ -277,7 +277,7 @@ ECode PlainSocketImpl::Create(
 {
     mStreaming = streaming;
     AutoPtr<IFileDescriptor> outfd;
-    FAIL_RETURN(IoBridge::Socket(streaming, (IFileDescriptor **)&outfd));
+    FAIL_RETURN(IoBridge::Socket(streaming, (IFileDescriptor**)&outfd));
     mFd = outfd;
     return NOERROR;
 }

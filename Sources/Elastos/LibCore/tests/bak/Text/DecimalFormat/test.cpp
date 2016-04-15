@@ -34,12 +34,12 @@ int CTest::test_setMaximumFractionDigitsAffectsRoundingMode(int argc, char* argv
 
     AutoPtr<IDecimalFormat> df;
     AutoPtr<INumberFormatHelper> numhelper;
-    CNumberFormatHelper::AcquireSingleton((INumberFormatHelper **)&numhelper);
+    CNumberFormatHelper::AcquireSingleton((INumberFormatHelper**)&numhelper);
     AutoPtr<ILocaleHelper> lochelper;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lochelper);
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lochelper);
     AutoPtr<ILocale> loc;
-    lochelper->GetUS((ILocale **)&loc);
-    numhelper->GetInstanceEx(loc,(INumberFormat **)&df);
+    lochelper->GetUS((ILocale**)&loc);
+    numhelper->GetInstanceEx(loc,(INumberFormat**)&df);
     PFL_EX("df : %p , loc : %p" , df.Get() ,loc.Get())
     df->SetMaximumFractionDigits(0);
     df->SetRoundingMode(RoundingMode_HALF_UP);
@@ -74,9 +74,9 @@ int CTest::test_setMaximumIntegerDigits(int argc, char* argv[])
     }
 
     AutoPtr<IBigIntegerHelper> bighelper;
-    CBigIntegerHelper::AcquireSingleton((IBigIntegerHelper **)&bighelper);
+    CBigIntegerHelper::AcquireSingleton((IBigIntegerHelper**)&bighelper);
     AutoPtr<IBigInteger> bigint;
-    bighelper->ValueOf(123L,(IBigInteger **)&bigint);
+    bighelper->ValueOf(123L,(IBigInteger**)&bigint);
     str = String("");
     AutoPtr<IFieldPosition> position;
     CFieldPosition::New(0, (IFieldPosition**)&position);
@@ -107,11 +107,11 @@ int CTest::test_BigDecimalBug1897917(int argc, char* argv[]) {
     AutoPtr<INumberFormatHelper> pfhelper;
     CNumberFormatHelper::AcquireSingleton((INumberFormatHelper **) &pfhelper);
     AutoPtr<INumberFormat> pf;
-    pfhelper->GetPercentInstance((INumberFormat **)&pf);
+    pfhelper->GetPercentInstance((INumberFormat**)&pf);
     AutoPtr<IBigDecimalHelper> bdhelper;
     CBigDecimalHelper::AcquireSingleton((IBigDecimalHelper **) &bdhelper);
     AutoPtr<IBigDecimal> bd;
-    bdhelper->ValueOfEx2(0.17,(IBigDecimal **)&bd);
+    bdhelper->ValueOfEx2(0.17,(IBigDecimal**)&bd);
     AutoPtr<IFieldPosition> position;
     CFieldPosition::New(0, (IFieldPosition**)&position);
     String outstr;
@@ -127,7 +127,7 @@ int CTest::test_BigDecimalBug1897917(int argc, char* argv[]) {
 
     // Test long decimal formatted in PercentInstance with various fractions.
     String longDec("11.2345678901234567890123456789012345678901234567890");
-    CBigDecimal::New(longDec,(IBigDecimal **)&bd);
+    CBigDecimal::New(longDec,(IBigDecimal**)&bd);
 
     assertBigDecimalWithFraction(bd, String("1,123.46%"), 2);
     assertBigDecimalWithFraction(bd, String("1,123.45678901%"), 8);
@@ -143,7 +143,7 @@ int CTest::test_BigDecimalBug1897917(int argc, char* argv[]) {
     AutoPtr<ILocaleHelper> lh;
     CLocaleHelper::AcquireSingleton((ILocaleHelper **) &lh);
     AutoPtr<ILocale> locale;
-    lh->GetUS((ILocale **)&locale);
+    lh->GetUS((ILocale**)&locale);
     assertDecFmtWithMultiplierAndFractionByLocale(String("3330000000000000000000000000000000"), 3, 4,
                                             locale, String("9,990,000,000,000,000,000,000,000,000,000,000"));
 }
@@ -165,7 +165,7 @@ int CTest::testBigDecimalTestBigIntWithMultiplier(int argc, char* argv[]) {
             String("-987,654,321,098,765,432,109,876,543,210"));
 
     AutoPtr<ILocale> inLocale;
-    CLocale::New(String("en"), String("IN"), (ILocale **)&inLocale);
+    CLocale::New(String("en"), String("IN"), (ILocale**)&inLocale);
     assertDecFmtWithMultiplierAndFractionByLocale(String("123456789012345"), 10, 0,
             inLocale, String("1,23,45,67,89,01,23,450"));
     assertDecFmtWithMultiplierAndFractionByLocale(String("12345678901234567890"), 10, 0,
@@ -185,15 +185,15 @@ int CTest::testBigDecimalICUConsistency(int argc, char* argv[]) {
 
     // AutoPtr<IDecimalFormat> df;
     // AutoPtr<INumberFormatHelper> nfhelper;
-    // CNumberFormatHelper::AcquireSingleton((INumberFormatHelper **)&nfhelper);
-    // nfhelper->GetInstance((INumberFormat **)&df);
+    // CNumberFormatHelper::AcquireSingleton((INumberFormatHelper**)&nfhelper);
+    // nfhelper->GetInstance((INumberFormat**)&df);
     // df->SetMaximumFractionDigits(2);
     // df->setMultiplier(2);
 
     // AutoPtr<IBigDecimalHelper> bdhelper;
     // CBigDecimalHelper::AcquireSingleton((IBigDecimalHelper **) &bdhelper);
     // AutoPtr<IBigDecimal> bd;
-    // bdhelper->ValueOfEx2(0.17,(IBigDecimal **)&bd);
+    // bdhelper->ValueOfEx2(0.17,(IBigDecimal**)&bd);
     // AutoPtr<IFieldPosition> position;
     // CFieldPosition::New(0, (IFieldPosition**)&position);
     // String outstr;
@@ -234,7 +234,7 @@ void assertBigDecimalWithFraction(AutoPtr<IBigDecimal> bd, String expectedResult
     AutoPtr<INumberFormatHelper> pfhelper;
     CNumberFormatHelper::AcquireSingleton((INumberFormatHelper **) &pfhelper);
     AutoPtr<INumberFormat> pf;
-    pfhelper->GetPercentInstance((INumberFormat **)&pf);
+    pfhelper->GetPercentInstance((INumberFormat**)&pf);
     pf->SetMaximumFractionDigits(fraction);
     AutoPtr<IFieldPosition> position;
     CFieldPosition::New(0, (IFieldPosition**)&position);
@@ -254,12 +254,12 @@ void assertBigDecimalWithFraction(AutoPtr<IBigDecimal> bd, String expectedResult
 void assertDecFmtWithMultiplierAndFraction(String value, int multiplier, int fraction, String expectedResult) {
     AutoPtr<IDecimalFormat> df;
     AutoPtr<INumberFormatHelper> nfhelper;
-    CNumberFormatHelper::AcquireSingleton((INumberFormatHelper **)&nfhelper);
-    nfhelper->GetInstance((INumberFormat **)&df);
+    CNumberFormatHelper::AcquireSingleton((INumberFormatHelper**)&nfhelper);
+    nfhelper->GetInstance((INumberFormat**)&df);
     df->SetMultiplier(multiplier);
     df->SetMaximumFractionDigits(fraction);
     AutoPtr<IBigDecimal> d;
-    CBigDecimal::New(value,(IBigDecimal **)&d);
+    CBigDecimal::New(value,(IBigDecimal**)&d);
     String str2;
     d->ToString(&str2);
     // PFL_EX("value:%s, str2:%s",value.string(),str2.string())
@@ -283,13 +283,13 @@ void assertDecFmtWithMultiplierAndFractionByLocale(String value, int multiplier,
                                                     AutoPtr<ILocale> locale, String expectedResult) {
     AutoPtr<IDecimalFormat> df;
     AutoPtr<INumberFormatHelper> nfh;
-    CNumberFormatHelper::AcquireSingleton((INumberFormatHelper **)&nfh);
-    ECode ec = nfh->GetIntegerInstanceEx(locale,(INumberFormat **)&df);
+    CNumberFormatHelper::AcquireSingleton((INumberFormatHelper**)&nfh);
+    ECode ec = nfh->GetIntegerInstanceEx(locale,(INumberFormat**)&df);
     df->SetMultiplier(multiplier);
     df->SetMaximumFractionDigits(fraction);
 
     AutoPtr<IBigDecimal> d;
-    CBigDecimal::New(value,(IBigDecimal **)&d);
+    CBigDecimal::New(value,(IBigDecimal**)&d);
     AutoPtr<IFieldPosition> position;
     CFieldPosition::New(0, (IFieldPosition**)&position);
     String outstr ,outstr2;

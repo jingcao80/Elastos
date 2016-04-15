@@ -400,7 +400,7 @@ ECode Database::GetTable(
     *tableresult = NULL;
 
     AutoPtr<ITableResult> ret ;
-    CTableResult::New(maxrows,(ITableResult **)&ret);
+    CTableResult::New(maxrows,(ITableResult**)&ret);
     Boolean is3 = FALSE;
     if (Is3(&is3), !is3) {
         ECode ec = Exec(sql, ICallback::Probe(ret));
@@ -454,7 +454,7 @@ ECode Database::GetTable(
     *tableresult = NULL;
 
     AutoPtr<ITableResult> ret ;
-    CTableResult::New(maxrows,(ITableResult **)&ret);
+    CTableResult::New(maxrows,(ITableResult**)&ret);
     Boolean is3 = FALSE;
     if (Is3(&is3), !is3) {
         ECode ec = Exec(sql, ICallback::Probe(ret), args);
@@ -674,7 +674,7 @@ ECode Database::Backup(
     VALIDATE_NOT_NULL(backup);
     synchronized(this) {
         AutoPtr<IBackup> b;
-        CBackup::New((IBackup **)&b);
+        CBackup::New((IBackup**)&b);
         _Backup(b, dest, destName, (IDatabase *)(this->Probe(EIID_IDatabase)), srcName);
         *backup = b;
         REFCOUNT_ADD(*backup);
@@ -713,7 +713,7 @@ ECode Database::Compile(
     VALIDATE_NOT_NULL(ivm);
     synchronized(this) {
         AutoPtr<IVm> vm;
-        CVm::New((IVm **)&vm);
+        CVm::New((IVm**)&vm);
         Vm_compile(sql, vm);
         *ivm = vm;
         REFCOUNT_ADD(*ivm);
@@ -730,7 +730,7 @@ ECode Database::Compile(
     VALIDATE_NOT_NULL(ivm);
     synchronized(this) {
         AutoPtr<IVm> vm;
-        CVm::New((IVm **)&vm);
+        CVm::New((IVm**)&vm);
         Vm_compile_args(sql, vm, args);
         *ivm = vm;
         REFCOUNT_ADD(*ivm);
@@ -746,7 +746,7 @@ ECode Database::Prepare(
 
     synchronized(this) {
         AutoPtr<IStmt> stmt;
-        CStmt::New((IStmt **)&stmt);
+        CStmt::New((IStmt**)&stmt);
         FAIL_RETURN(Stmt_prepare(sql, stmt));
         *st = stmt;
         REFCOUNT_ADD(*st);
@@ -767,7 +767,7 @@ ECode Database::OpenBlob(
 
     synchronized(this) {
         AutoPtr<IBlob> bl;
-        CBlob::New((IBlob **)&bl);
+        CBlob::New((IBlob**)&bl);
         _OpenBlob(db, table, column, row, rw, bl);
         *blob = bl;
         REFCOUNT_ADD(*blob);
@@ -1709,7 +1709,7 @@ static ECode Mkfunc_common(handle * ihandle,AutoPtr<IDatabase> obj,Int32 isagg, 
     hfunc *f;
     Int32 ret = 0;
     AutoPtr<IFunctionContext> fc;
-    CFunctionContext::New((IFunctionContext **)&fc);
+    CFunctionContext::New((IFunctionContext**)&fc);
     if (!fi) {
         return E_NULL_POINTER_EXCEPTION;
     }

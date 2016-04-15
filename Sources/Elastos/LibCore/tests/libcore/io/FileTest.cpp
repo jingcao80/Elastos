@@ -169,7 +169,7 @@ static IFile *createDeepStructure(IFile *base)
     for (int i = 0; len <= 1024; ++i) {
         AutoPtr<IFile> f2;
 
-        ec = CFile::New(f, lstr, (IFile **)&f2);
+        ec = CFile::New(f, lstr, (IFile**)&f2);
         f2->Mkdir(&succeeded);
 
         f = NULL;
@@ -218,7 +218,7 @@ static void test_longReadlink()
     AutoPtr<IFile> target = createDeepStructure(base);
 
     AutoPtr<IFile> source;
-    ec = CFile::New((IFile *)base, String("source"), (IFile **)&source);
+    ec = CFile::New((IFile *)base, String("source"), (IFile**)&source);
 
     Boolean b;
     source->Exists(&b);
@@ -296,7 +296,7 @@ static void test_emptyFilename()
     // The behavior of the empty filename is an odd mixture.
     AutoPtr<IFile> f;
 
-    ec = CFile::New(String(""), (IFile **)&f);
+    ec = CFile::New(String(""), (IFile**)&f);
     f->CanExecute(&b);
     assertEquals("", FALSE, b);
 
@@ -386,11 +386,11 @@ static void test_getCanonicalPath()
     AutoPtr<IFile> base = createTemporaryDirectory();
     AutoPtr<IFile> target;
 
-    ec = CFile::New(base, String("target"), (IFile **)&target);
+    ec = CFile::New(base, String("target"), (IFile**)&target);
     target->CreateNewFile(&b); // The RI won't follow a dangling symlink, which seems like a bug!
 
     AutoPtr<IFile> linkName;
-    ec = CFile::New(base, String("link"), (IFile **)&linkName);
+    ec = CFile::New(base, String("link"), (IFile**)&linkName);
 
     ln_s(target, linkName);
 
@@ -403,14 +403,14 @@ static void test_getCanonicalPath()
 
 
     AutoPtr<IFile> subdir;
-    ec = CFile::New(base, String("subdir"), (IFile **)&subdir);
+    ec = CFile::New(base, String("subdir"), (IFile**)&subdir);
     // .../subdir/shorter -> .../target (using a link to ../target).
     subdir->Mkdir(&b);
     assertEquals("subdir.mkdir()", TRUE, b);
 
     AutoPtr<IFile> linkName2;
     String str3;
-    ec = CFile::New(subdir, String("shorter"), (IFile **)&linkName2);
+    ec = CFile::New(subdir, String("shorter"), (IFile**)&linkName2);
     str3 = Object::ToString(linkName2);
     ln_s(String("../target"), str3);
 
@@ -424,10 +424,10 @@ static void test_getCanonicalPath()
     AutoPtr<IFile> linkName3;
     AutoPtr<IFile> longer;
     String str4;
-    ec = CFile::New(base, String("l"), (IFile **)&linkName3);
+    ec = CFile::New(base, String("l"), (IFile**)&linkName3);
     str4 = Object::ToString(linkName3);
     ln_s(String("subdir/longer"), str4);
-    ec = CFile::New(base, String("subdir/longer"), (IFile **)&longer);
+    ec = CFile::New(base, String("subdir/longer"), (IFile**)&longer);
     longer->CreateNewFile(&b);
     str1 = NULL;
     str2 = NULL;
@@ -438,7 +438,7 @@ static void test_getCanonicalPath()
     // .../double -> .../target (via a link into subdir and a link back out).
     AutoPtr<IFile> linkName4;
     String str5;
-    ec = CFile::New(base, String("double"), (IFile **)&linkName4);
+    ec = CFile::New(base, String("double"), (IFile**)&linkName4);
     str5 = Object::ToString(linkName4);
     ln_s(String("subdir/shorter"), str5);
     str1 = NULL;
@@ -472,7 +472,7 @@ static void ln_s(String target, String linkName)
     AutoPtr<ILibcore> libcore;
     AutoPtr<IOs> os;
 
-    CLibcore::AcquireSingleton((ILibcore **)&libcore);
+    CLibcore::AcquireSingleton((ILibcore**)&libcore);
     libcore->GetOs((IOs**)&os);
     os->Symlink(target, linkName);
 }

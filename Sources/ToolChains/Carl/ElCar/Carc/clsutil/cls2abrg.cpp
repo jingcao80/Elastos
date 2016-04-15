@@ -220,7 +220,7 @@ int CLS2AbrgCpp_(FILE *pFile, const CLSModule *pModule)
     if (!pszUpperName) goto ErrorExit;
     _strupr(pszUpperName);
 
-    nRet = AbridgeCLS(pModule, (void **)&pAbridged);
+    nRet = AbridgeCLS(pModule, (void**)&pAbridged);
     if (nRet < 0) goto ErrorExit;
 
     fprintf(pFile,

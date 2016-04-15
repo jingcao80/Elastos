@@ -564,8 +564,10 @@ ECode CBluetoothAdapter::GetControllerActivityEnergyInfo(
             Boolean isValid;
             if (record->IsValid(&isValid)) {
                 *btActivityEnergyInfo = record;
+                REFCOUNT_ADD(*btActivityEnergyInfo)
                 return NOERROR;
-            } else {
+            }
+            else {
                 return NOERROR;
             }
         }

@@ -110,10 +110,10 @@ void testBufferedWriter()
     AutoPtr<IBufferedWriter> a;
     AutoPtr<IWriter> iw;
 
-    ec = CStringWriter::New((IStringWriter **)&aa);
+    ec = CStringWriter::New((IStringWriter**)&aa);
 
     iw = IWriter::Probe(aa);
-    ec = CBufferedWriter::New(iw, 20, (IBufferedWriter **)&a);
+    ec = CBufferedWriter::New(iw, 20, (IBufferedWriter**)&a);
     iw = NULL;
 
     AutoPtr<IBufferedWriter> iba;

@@ -53,7 +53,7 @@ ECode CDBDump::Newrow(
         ECode ec = NOERROR;
         if (isflag) {
             AutoPtr<ITableResult> t ;
-            s2.mDb->GetTable(String("PRAGMA table_info('%q')")  , qargs,(ITableResult **)&t);
+            s2.mDb->GetTable(String("PRAGMA table_info('%q')")  , qargs,(ITableResult**)&t);
             String query;
             if (t != NULL) {
                 StringBuffer sb;

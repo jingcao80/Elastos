@@ -37,8 +37,8 @@ CARAPI CShell::constructor(
     /* [in] */ IPrintStream* ps,
     /* [in] */ IPrintStream* errs)
 {
-    FAIL_RETURN(CPrintWriter::New(IOutputStream::Probe(ps), (IPrintWriter **)&mPw));
-    FAIL_RETURN(CPrintWriter::New(IOutputStream::Probe(errs), (IPrintWriter **)&mErr));
+    FAIL_RETURN(CPrintWriter::New(IOutputStream::Probe(ps), (IPrintWriter**)&mPw));
+    FAIL_RETURN(CPrintWriter::New(IOutputStream::Probe(errs), (IPrintWriter**)&mErr));
     return NOERROR;
 }
 

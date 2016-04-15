@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
    /*
     AutoPtr<IPattern> pattern;
     ECode ec;
-    ec = CPattern::New((IPattern **)&pattern);
+    ec = CPattern::New((IPattern**)&pattern);
     if (FAILED(ec)) {
         printf("Cann't Create the pattern!\n");
         return -1;

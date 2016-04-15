@@ -142,7 +142,7 @@ ECode ObjectContainer::Current(
 {
     *obj = NULL;
     ObjectNode* node;
-    ECode ec = SimpleContainer::Current((DLinkNode **)&node);
+    ECode ec = SimpleContainer::Current((DLinkNode**)&node);
     if (SUCCEEDED(ec)) *obj = node->mObject;
     return ec;
 }

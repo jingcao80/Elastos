@@ -18,7 +18,7 @@ AutoPtr<ICharset> CreateCharSet(
     /* [in] */ const String& name)
 {
     AutoPtr<ICharset> charset;
-    Charset::ForName(name, (ICharset **)&charset);
+    Charset::ForName(name, (ICharset**)&charset);
     return charset;
 }
 

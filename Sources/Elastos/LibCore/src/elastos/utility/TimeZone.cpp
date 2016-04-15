@@ -351,7 +351,7 @@ AutoPtr<ITimeZone> TimeZone::GetCustomTimeZone(
     String cleanId("");
     cleanId.AppendFormat("GMT%c%02d:%02d", sign, hour, minute);
     AutoPtr<ITimeZone> tz;
-    CSimpleTimeZone::New(raw, cleanId , (ITimeZone **)&tz);
+    CSimpleTimeZone::New(raw, cleanId , (ITimeZone**)&tz);
     return tz;
 }
 

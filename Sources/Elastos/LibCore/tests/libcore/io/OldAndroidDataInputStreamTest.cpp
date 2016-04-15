@@ -184,10 +184,10 @@ static void testDataInputStream()
     AutoPtr<IByteArrayInputStream> ca;
     AutoPtr<IByteArrayInputStream> da;
 
-    ec = CByteArrayInputStream::New(str.GetBytes(), (IByteArrayInputStream **)&aa);
-    ec = CByteArrayInputStream::New(str.GetBytes(), (IByteArrayInputStream **)&ba);
-    ec = CByteArrayInputStream::New(str.GetBytes(), (IByteArrayInputStream **)&ca);
-    ec = CByteArrayInputStream::New(str.GetBytes(), (IByteArrayInputStream **)&da);
+    ec = CByteArrayInputStream::New(str.GetBytes(), (IByteArrayInputStream**)&aa);
+    ec = CByteArrayInputStream::New(str.GetBytes(), (IByteArrayInputStream**)&ba);
+    ec = CByteArrayInputStream::New(str.GetBytes(), (IByteArrayInputStream**)&ca);
+    ec = CByteArrayInputStream::New(str.GetBytes(), (IByteArrayInputStream**)&da);
 
     AutoPtr<IDataInputStream> a;
     AutoPtr<IDataInputStream> b;
@@ -209,22 +209,22 @@ static void testDataInputStream()
     isc = IInputStream::Probe(ca);
     isd = IInputStream::Probe(da);
 
-    ec = CDataInputStream::New(isa, (IDataInputStream **)&a);
+    ec = CDataInputStream::New(isa, (IDataInputStream**)&a);
     isa2 = IInputStream::Probe(a);
     assertEquals("testDataInputStream", str, read(isa2));
     ICloseable::Probe(isa)->Close();
 
-    ec = CDataInputStream::New(isb, (IDataInputStream **)&b);
+    ec = CDataInputStream::New(isb, (IDataInputStream**)&b);
     isb2 = IInputStream::Probe(b);
     assertEquals("testDataInputStream", str, read(isb2, 10));
     ICloseable::Probe(isb)->Close();
 
-    ec = CDataInputStream::New(isc, (IDataInputStream **)&c);
+    ec = CDataInputStream::New(isc, (IDataInputStream**)&c);
     isc2 = IInputStream::Probe(c);
     assertEquals("testDataInputStream", str, skipRead(isc2));
     ICloseable::Probe(isc)->Close();
 
-    ec = CDataInputStream::New(isd, (IDataInputStream **)&d);
+    ec = CDataInputStream::New(isd, (IDataInputStream**)&d);
     isd2 = IInputStream::Probe(d);
     AutoPtr<IDataInput> idi;
     idi = IDataInput::Probe(d);
@@ -255,9 +255,9 @@ static void testDataInputStream()
     AutoPtr<IDataOutputStream> f;
     AutoPtr<IDataOutput> ido;
 
-    ec = CByteArrayOutputStream::New((IByteArrayOutputStream **)&e);
+    ec = CByteArrayOutputStream::New((IByteArrayOutputStream**)&e);
     os = IOutputStream::Probe(e);
-    ec = CDataOutputStream::New(os, (IDataOutputStream **)&f);
+    ec = CDataOutputStream::New(os, (IDataOutputStream**)&f);
     ido = IDataOutput::Probe(f);
     ido->WriteBoolean(true);
     ido->WriteByte('a');
@@ -280,8 +280,8 @@ static void testDataInputStream()
     e->ToByteArray((ArrayOf<Byte> **)&bytes);
 
     is = IInputStream::Probe(ga);
-    ec = CByteArrayInputStream::New(bytes, (IByteArrayInputStream **)&ga);
-    ec = CDataInputStream::New(is, (IDataInputStream **)&g);
+    ec = CByteArrayInputStream::New(bytes, (IByteArrayInputStream**)&ga);
+    ec = CDataInputStream::New(is, (IDataInputStream**)&g);
 
     di = IDataInput::Probe(g);
 

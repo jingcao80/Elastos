@@ -115,7 +115,7 @@ ECode PreferenceScreen::ShowDialog(
     Int32 resID;
     context->GetThemeResId((Int32*)&resID);
     AutoPtr<IDialog> dialog;
-    CDialog::New(context, resID, (IDialog **)&dialog);
+    CDialog::New(context, resID, (IDialog**)&dialog);
     mDialog = dialog;
     if (TextUtils::IsEmpty(title)) {
         AutoPtr<IWindow> window;

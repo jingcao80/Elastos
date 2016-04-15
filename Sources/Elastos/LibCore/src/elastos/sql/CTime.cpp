@@ -128,7 +128,7 @@ ECode CTime::ValueOf(
     FAIL_RETURN(StringUtils::Parse(
         timeString.Substring(secondIndex + 1, timeString.GetLength()), &second))
     AutoPtr<CTime> theTime;
-    CTime::NewByFriend(hour, minute, second, (CTime **)&theTime);
+    CTime::NewByFriend(hour, minute, second, (CTime**)&theTime);
     *t = (CTime*)theTime.Get();
     REFCOUNT_ADD(*t)
     return NOERROR;

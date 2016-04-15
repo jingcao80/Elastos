@@ -14,9 +14,9 @@ int CTest::test_toString(int argc, char* argv[])
     // Ensure that no matter where this is run, we know what time zone
     // to expect. (Though we still assume an "en" locale.)
     AutoPtr<ITimeZoneHelper> tzh;
-    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper **)&tzh);
+    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&tzh);
     AutoPtr<ITimeZone> tz;
-    tzh->GetTimeZone(String("America/Chicago") , (ITimeZone **)&tz);
+    tzh->GetTimeZone(String("America/Chicago") , (ITimeZone**)&tz);
     Int32 value ;
     tz->GetRawOffset(&value);
     PFL_EX("value : %d" , value)
@@ -24,7 +24,7 @@ int CTest::test_toString(int argc, char* argv[])
     PFL_EX("ec : %p" , ec)
     String str;
     AutoPtr<IDate> date;
-    CDate::New(0 ,(IDate **)&date);
+    CDate::New(0 ,(IDate**)&date);
     date->ToString(&str);
     PFL_EX("Wed Dec 31 18:00:00 CST 1969 == %s" ,str.string())
     assert(String("Wed Dec 31 18:00:00 CST 1969").Equals(str));
@@ -35,21 +35,21 @@ int CTest::test_toGMTString(int argc, char* argv[])
 {
     // Based on https://issues.apache.org/jira/browse/HARMONY-501
     AutoPtr<ITimeZoneHelper> tzh;
-    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper **)&tzh);
+    CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&tzh);
     AutoPtr<ITimeZone> tz;
-    tzh->GetTimeZone(String("America/Los_Angeles") , (ITimeZone **)&tz);
+    tzh->GetTimeZone(String("America/Los_Angeles") , (ITimeZone**)&tz);
     tzh->SetDefault(tz);
 
     AutoPtr<ICalendarHelper> cdh;
-    CCalendarHelper::AcquireSingleton((ICalendarHelper **)&cdh);
+    CCalendarHelper::AcquireSingleton((ICalendarHelper**)&cdh);
     AutoPtr<ICalendar> c;
-    cdh->GetInstance((ICalendar **)&c);
+    cdh->GetInstance((ICalendar**)&c);
 
     c->Clear();
     c->Set(ICalendar::YEAR, 21);
     AutoPtr<IDate> date;
     String outstr;
-    c->GetDate((IDate **)&date);
+    c->GetDate((IDate**)&date);
     date->ToString(&outstr);
     PFL_EX("Wed Jan 01 00:00:00 PST 21 == %s " , outstr.string())
     assert(String("Wed Jan 01 00:00:00 PST 21").Equals(outstr));
@@ -58,7 +58,7 @@ int CTest::test_toGMTString(int argc, char* argv[])
     PFL_EX("1 Jan 21 08:00:00 GMT == %s" , outstr.string())
     assert(String("1 Jan 21 08:00:00 GMT").Equals(outstr));
     c->Set(ICalendar::YEAR, 321);
-    c->GetDate((IDate **)&date);
+    c->GetDate((IDate**)&date);
     date->ToString(&outstr);
     PFL_EX("Sun Jan 01 00:00:00 PST 321 == %s " , outstr.string())
     assert(String("Sun Jan 01 00:00:00 PST 321").Equals(outstr));

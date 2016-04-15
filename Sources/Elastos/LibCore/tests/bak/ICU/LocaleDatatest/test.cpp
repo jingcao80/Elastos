@@ -8,8 +8,8 @@ using namespace Elastos::Core;
 
 CTest::CTest()
 {
-    CLocaleDataHelper::AcquireSingleton((ILocaleDataHelper **)&locdatahep);
-    CLocaleHelper::AcquireSingleton((ILocaleHelper **)&lochep );
+    CLocaleDataHelper::AcquireSingleton((ILocaleDataHelper**)&locdatahep);
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&lochep );
 }
 
 int CTest::testAll(int argc, char* argv[]) {
@@ -19,7 +19,7 @@ int CTest::testAll(int argc, char* argv[]) {
     for (int i = 0; i < arrloc->GetLength() ; i++ ) {
 
         AutoPtr<ILocaleData> d;
-        locdatahep->Get((*arrloc)[i] , (ILocaleData **)&d);
+        locdatahep->Get((*arrloc)[i] , (ILocaleData**)&d);
         String yesterday, today,tomorrow;
         d->GetYesterday(&yesterday);
         d->GetToday(&today);
@@ -31,9 +31,9 @@ int CTest::testAll(int argc, char* argv[]) {
 
 int CTest::test_en_US(int argc, char* argv[]) {
     AutoPtr<ILocale> usloc;
-    lochep->GetUS((ILocale **)&usloc);
+    lochep->GetUS((ILocale**)&usloc);
     AutoPtr<ILocaleData> l;
-    locdatahep->Get(usloc , (ILocaleData **)&l);
+    locdatahep->Get(usloc , (ILocaleData**)&l);
     AutoPtr<ArrayOf<String> > amPm;
     l->GetAmPm((ArrayOf<String> **)&amPm);
     assert(String("AM").Equals((*amPm)[0]));
@@ -88,9 +88,9 @@ int CTest::test_en_US(int argc, char* argv[]) {
 
 int CTest::test_de_DE(int argc, char* argv[]) {
     AutoPtr<ILocale> deloc;
-    CLocale::New(String("de") , String("DE") , (ILocale **)&deloc);
+    CLocale::New(String("de") , String("DE") , (ILocale**)&deloc);
     AutoPtr<ILocaleData> l;
-    locdatahep->Get(deloc , (ILocaleData **)&l);
+    locdatahep->Get(deloc , (ILocaleData**)&l);
     String yesterday, today,tomorrow;
     l->GetYesterday(&yesterday);
     l->GetToday(&today);
@@ -102,9 +102,9 @@ int CTest::test_de_DE(int argc, char* argv[]) {
 
 int CTest::test_cs_CZ(int argc, char* argv[]) {
     AutoPtr<ILocale> deloc;
-    CLocale::New(String("cs") , String("CZ") , (ILocale **)&deloc);
+    CLocale::New(String("cs") , String("CZ") , (ILocale**)&deloc);
     AutoPtr<ILocaleData> l;
-    locdatahep->Get(deloc , (ILocaleData **)&l);
+    locdatahep->Get(deloc , (ILocaleData**)&l);
 
     AutoPtr<ArrayOf<String> > amPm;
     l->GetLongMonthNames((ArrayOf<String> **)&amPm);
@@ -124,9 +124,9 @@ int CTest::test_cs_CZ(int argc, char* argv[]) {
 
 int CTest::test_ru_RU(int argc, char* argv[]) {
     AutoPtr<ILocale> deloc;
-    CLocale::New(String("ru") , String("RU") , (ILocale **)&deloc);
+    CLocale::New(String("ru") , String("RU") , (ILocale**)&deloc);
     AutoPtr<ILocaleData> l;
-    locdatahep->Get(deloc , (ILocaleData **)&l);
+    locdatahep->Get(deloc , (ILocaleData**)&l);
 
     AutoPtr<ArrayOf<String> > amPm;
     l->GetLongWeekdayNames((ArrayOf<String> **)&amPm);

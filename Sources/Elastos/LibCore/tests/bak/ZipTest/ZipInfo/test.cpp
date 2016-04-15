@@ -43,13 +43,13 @@ void testGetEntries(IZipFile *pZipFile)
     }
 
     AutoPtr<IObjectEnumerator> emu;
-    container->GetObjectEnumerator((IObjectEnumerator **)&emu);
+    container->GetObjectEnumerator((IObjectEnumerator**)&emu);
 
     String name;
     Boolean hasNext;
     while(emu->MoveNext(&hasNext), hasNext) {
         AutoPtr<IInterface> itf;
-        emu->Current((IInterface **)&itf);
+        emu->Current((IInterface**)&itf);
         AutoPtr<IZipEntry> entry = IZipEntry::Probe(itf);
         entry->GetName(&name);
         printf(" >> the entry name is %s\n", name.string());

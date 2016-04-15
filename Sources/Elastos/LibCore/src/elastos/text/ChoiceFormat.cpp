@@ -152,7 +152,7 @@ ECode ChoiceFormat::Clone(
     VALIDATE_NOT_NULL(object);
 
     AutoPtr<IChoiceFormat> clone;
-    FAIL_RETURN(CChoiceFormat::New(mChoiceLimits, mChoiceFormats,(IChoiceFormat **)&clone));
+    FAIL_RETURN(CChoiceFormat::New(mChoiceLimits, mChoiceFormats,(IChoiceFormat**)&clone));
 
     CloneImpl(clone);
 

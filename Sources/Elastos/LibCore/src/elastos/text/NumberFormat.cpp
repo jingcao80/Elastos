@@ -206,8 +206,8 @@ ECode NumberFormat::GetIntegerInstance(
     AutoPtr<INumberFormat> result;
     AutoPtr<ILocaleDataHelper> datahelper;
     AutoPtr<ILocaleData> data;
-    FAIL_RETURN(CLocaleDataHelper::AcquireSingleton((ILocaleDataHelper **)&datahelper));
-    datahelper->Get(locale,(ILocaleData **)&data);
+    FAIL_RETURN(CLocaleDataHelper::AcquireSingleton((ILocaleDataHelper**)&datahelper));
+    datahelper->Get(locale,(ILocaleData**)&data);
 
     String integerPattern;
     data->GetIntegerPattern(&integerPattern);

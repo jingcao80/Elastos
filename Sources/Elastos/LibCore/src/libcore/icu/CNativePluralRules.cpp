@@ -28,7 +28,7 @@ AutoPtr<INativePluralRules> CNativePluralRules::ForLocale(
     String s;
     locale->ToString(&s);
     AutoPtr<INativePluralRules> cres;
-    CNativePluralRules::New(ForLocaleImpl(s), (INativePluralRules **)&cres);
+    CNativePluralRules::New(ForLocaleImpl(s), (INativePluralRules**)&cres);
     return cres;
 }
 

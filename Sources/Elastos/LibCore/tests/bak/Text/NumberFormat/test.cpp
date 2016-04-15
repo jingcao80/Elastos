@@ -198,7 +198,7 @@ int CTest::test_10514(int argc, char* argv[])
     String formats[5] = { String("Tiny Apple") , String("Small Apple") , String("Medium Apple") , String("Large Apple") , String("Huge Apple")};
     ArrayOf<Double> appleLimits(limits , 5);
     ArrayOf<String> appleFormats(formats , 5);
-    ECode ec = CChoiceFormat::New(appleLimits , appleFormats , (IChoiceFormat **)&pTCF);
+    ECode ec = CChoiceFormat::New(appleLimits , appleFormats , (IChoiceFormat**)&pTCF);
     ASSERT_SUCCEEDED(ec);
     ec = pTCF->FormatDouble(Elastos::Core::Math::DOUBLE_NEGATIVE_INFINITY , &fms);
     ASSERT_SUCCEEDED(ec);
@@ -224,11 +224,11 @@ int CTest::test_10522(int argc, char* argv[])
     ArrayOf<String> tstSetChoicesFms(tstFms , 2);
     AutoPtr<ArrayOf<ICharSequence *> > pGetCS = ArrayOf<ICharSequence *>::Alloc(2);
     AutoPtr<ArrayOf<IInterface *> > pGetFms = ArrayOf<IInterface *>::Alloc(2);
-    CString::New(String(""), (ICharSequence **)&(*pGetCS)[0]);
-    CString::New(String(""), (ICharSequence **)&(*pGetCS)[1]);
+    CString::New(String(""), (ICharSequence**)&(*pGetCS)[0]);
+    CString::New(String(""), (ICharSequence**)&(*pGetCS)[1]);
     (*pGetFms)[0] = (IInterface *)(*pGetCS)[0]->Probe(EIID_IInterface);
     (*pGetFms)[1] = (IInterface *)(*pGetCS)[1]->Probe(EIID_IInterface);
-    ECode ec = CChoiceFormat::New(appleLimits, appleFormats, (IChoiceFormat **)&pTCF);
+    ECode ec = CChoiceFormat::New(appleLimits, appleFormats, (IChoiceFormat**)&pTCF);
     ASSERT_SUCCEEDED(ec);
     ec = pTCF->SetChoices(tstSetChoicesLim, tstSetChoicesFms);
     ASSERT_SUCCEEDED(ec);

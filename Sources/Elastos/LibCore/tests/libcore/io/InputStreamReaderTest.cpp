@@ -101,8 +101,8 @@ static void testReadDoesNotBlockUnnecessarily()
     AutoPtr<IInputStream> is;
     AutoPtr<IOutputStream> os ;
 
-    ec = CPipedInputStream::New((IPipedInputStream **)&pin);
-    ec = CPipedOutputStream::New((IPipedInputStream *)pin, (IPipedOutputStream **)&pos);
+    ec = CPipedInputStream::New((IPipedInputStream**)&pin);
+    ec = CPipedOutputStream::New((IPipedInputStream *)pin, (IPipedOutputStream**)&pos);
 
     String str = String("hello");
     AutoPtr<ArrayOf<Byte> > aBytes;
@@ -112,7 +112,7 @@ static void testReadDoesNotBlockUnnecessarily()
     os->Write(aBytes);
 
     is = IInputStream::Probe(pin);
-    ec = CInputStreamReader::New((IInputStream *)is, (IInputStreamReader **)&isr);
+    ec = CInputStreamReader::New((IInputStream *)is, (IInputStreamReader**)&isr);
 
     is = NULL;
     is = IInputStream::Probe(isr);

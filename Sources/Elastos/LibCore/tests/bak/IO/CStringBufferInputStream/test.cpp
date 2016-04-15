@@ -9,7 +9,7 @@ void testConstructor()
 {
     String str("abcdefgh");
 	AutoPtr<IStringBufferInputStream> sbis;
-	CStringBufferInputStream::New(str, (IStringBufferInputStream **)&sbis);
+	CStringBufferInputStream::New(str, (IStringBufferInputStream**)&sbis);
 
 }
 void testAvailable()
@@ -17,7 +17,7 @@ void testAvailable()
     Int32 number = 0;
     String str("abcdefgh");
 	AutoPtr<IStringBufferInputStream> sbis;
-	CStringBufferInputStream::New(str, (IStringBufferInputStream **)&sbis);
+	CStringBufferInputStream::New(str, (IStringBufferInputStream**)&sbis);
     sbis->Available(&number);
     printf("number=%d\n",number);//8
 }
@@ -26,7 +26,7 @@ void testRead()
     Int32 value = 0;
 	String str("abcdefgh");
 	AutoPtr<IStringBufferInputStream> sbis;
-	CStringBufferInputStream::New(str, (IStringBufferInputStream **)&sbis);
+	CStringBufferInputStream::New(str, (IStringBufferInputStream**)&sbis);
     sbis->Read(&value);
 	printf("value=%c\n", value);//a
     sbis->Read(&value);
@@ -50,7 +50,7 @@ void testReadBufferEx()
 	Int32 number = 0;
 	String str("abcdefgh");
 	AutoPtr<IStringBufferInputStream> sbis;
-	CStringBufferInputStream::New(str, (IStringBufferInputStream **)&sbis);
+	CStringBufferInputStream::New(str, (IStringBufferInputStream**)&sbis);
     sbis->ReadBufferEx(offset, length, &characters, &number);
     for(Int32 i = offset; i < offset+length; i++)
     {

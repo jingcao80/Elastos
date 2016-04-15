@@ -8,12 +8,12 @@ using namespace Elastos::Core;
 
 CTest::CTest()
 {
-    CNativePluralRulesHelper::AcquireSingleton((INativePluralRulesHelper **)&nprhep);
+    CNativePluralRulesHelper::AcquireSingleton((INativePluralRulesHelper**)&nprhep);
 }
 
 int CTest::testEnglish(int argc, char* argv[]) {
     AutoPtr<ILocale> usloc;
-    CLocale::New(String("en") , String("US") , (ILocale **)&usloc);
+    CLocale::New(String("en") , String("US") , (ILocale**)&usloc);
     nprhep->ForLocale(usloc , (INativePluralRules **) &npr);
     Int32 value;
     npr->QuantityForInt(-1,&value);
@@ -28,7 +28,7 @@ int CTest::testEnglish(int argc, char* argv[]) {
 
 int CTest::testCzech(int argc, char* argv[]) {
     AutoPtr<ILocale> usloc;
-    CLocale::New(String("cs") , String("CZ") , (ILocale **)&usloc);
+    CLocale::New(String("cs") , String("CZ") , (ILocale**)&usloc);
     nprhep->ForLocale(usloc , (INativePluralRules **) &npr);
     Int32 value;
     npr->QuantityForInt(-1,&value);
@@ -49,7 +49,7 @@ int CTest::testCzech(int argc, char* argv[]) {
 
 int CTest::testArabic(int argc, char* argv[]) {
     AutoPtr<ILocale> usloc;
-    CLocale::New(String("ar") , (ILocale **)&usloc);
+    CLocale::New(String("ar") , (ILocale**)&usloc);
     nprhep->ForLocale(usloc , (INativePluralRules **) &npr);
     Int32 value;
     npr->QuantityForInt(-1,&value);

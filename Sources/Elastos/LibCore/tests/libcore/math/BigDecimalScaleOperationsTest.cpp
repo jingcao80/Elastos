@@ -244,7 +244,7 @@ void testUnscaledValue()
     }
 
     AutoPtr<IBigInteger> rInteger;
-    aNumber->GetUnscaledValue((IBigInteger **)&rInteger);
+    aNumber->GetUnscaledValue((IBigInteger**)&rInteger);
 
     IComparable* comp = (IComparable *)rInteger->Probe(EIID_IComparable);
     Int32 r;

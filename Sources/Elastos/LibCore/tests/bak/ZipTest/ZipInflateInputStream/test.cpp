@@ -53,7 +53,7 @@ void ShowAllEntries(const String& zipFilename)
     }
 
     AutoPtr<IObjectEnumerator> emu;
-    container->GetObjectEnumerator((IObjectEnumerator **)&emu);
+    container->GetObjectEnumerator((IObjectEnumerator**)&emu);
 
     String name;
     Boolean hasNext;
@@ -62,7 +62,7 @@ void ShowAllEntries(const String& zipFilename)
     Boolean isDirectory;
     while(emu->MoveNext(&hasNext), hasNext) {
         AutoPtr<IInterface> itf;
-        emu->Current((IInterface **)&itf);
+        emu->Current((IInterface**)&itf);
         AutoPtr<IZipEntry> entry = IZipEntry::Probe(itf);
         entry->IsDirectory(&isDirectory);
         entry->GetName(&name);

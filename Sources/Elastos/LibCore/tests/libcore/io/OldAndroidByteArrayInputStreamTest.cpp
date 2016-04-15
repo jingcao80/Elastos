@@ -107,10 +107,10 @@ void testByteArrayInputStream()
     AutoPtr<IByteArrayInputStream> c;
     AutoPtr<IByteArrayInputStream> d;
 
-    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)str.GetBytes(), (IByteArrayInputStream **)&a);
-    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)str.GetBytes(), (IByteArrayInputStream **)&b);
-    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)str.GetBytes(), (IByteArrayInputStream **)&c);
-    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)str.GetBytes(), (IByteArrayInputStream **)&d);
+    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)str.GetBytes(), (IByteArrayInputStream**)&a);
+    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)str.GetBytes(), (IByteArrayInputStream**)&b);
+    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)str.GetBytes(), (IByteArrayInputStream**)&c);
+    ec = CByteArrayInputStream::New((ArrayOf<Byte> *)str.GetBytes(), (IByteArrayInputStream**)&d);
 
     AutoPtr<IInputStream> ia;
     AutoPtr<IInputStream> ib;

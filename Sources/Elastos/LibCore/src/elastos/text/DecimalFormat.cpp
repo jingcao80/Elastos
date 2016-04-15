@@ -47,7 +47,7 @@ CAR_INTERFACE_IMPL(DecimalFormat, NumberFormat, IDecimalFormat)
 static AutoPtr<IDouble>  IntNEGATIVE_ZERO_DOUBLE()
 {
     AutoPtr<CDouble> out;
-    CDouble::NewByFriend(-0.0, (CDouble **)&out);
+    CDouble::NewByFriend(-0.0, (CDouble**)&out);
     return (IDouble*)out->Probe(EIID_IDouble);
 }
 
@@ -430,7 +430,7 @@ ECode DecimalFormat::Parse(
             Int64 lnum(0);
             number->Int64Value(&lnum);
             AutoPtr<IBigDecimal> bd;
-            FAIL_RETURN(CBigDecimal::New(lnum,(IBigDecimal **)&bd));
+            FAIL_RETURN(CBigDecimal::New(lnum,(IBigDecimal**)&bd));
             *value = INumber::Probe(bd);
             REFCOUNT_ADD(*value);
             return NOERROR;
@@ -441,7 +441,7 @@ ECode DecimalFormat::Parse(
         if (dobj && (dobj->IsInfinite(&flagdouble), !flagdouble) && (dobj->IsNaN(&flagdouble), !flagdouble)) {
             String str = Object::ToString(number);
             AutoPtr<IBigDecimal> bd;
-            FAIL_RETURN(CBigDecimal::New(str,(IBigDecimal **)&bd));
+            FAIL_RETURN(CBigDecimal::New(str,(IBigDecimal**)&bd));
             *value = INumber::Probe(bd);
             REFCOUNT_ADD(*value);
             return NOERROR;
@@ -451,7 +451,7 @@ ECode DecimalFormat::Parse(
         if (number->Probe(EIID_IBigInteger)) {
             String str = Object::ToString(number);
             AutoPtr<IBigDecimal> bd;
-            FAIL_RETURN(CBigDecimal::New(str,(IBigDecimal **)&bd));
+            FAIL_RETURN(CBigDecimal::New(str,(IBigDecimal**)&bd));
             *value = INumber::Probe(bd);
             REFCOUNT_ADD(*value);
             return NOERROR;
@@ -466,7 +466,7 @@ ECode DecimalFormat::Parse(
         Double lnum(0);
         number->DoubleValue(&lnum);
         AutoPtr<IDouble> bd;
-        FAIL_RETURN(CDouble::New(lnum,(IDouble **)&bd));
+        FAIL_RETURN(CDouble::New(lnum,(IDouble**)&bd));
         *value = INumber::Probe(bd);
         REFCOUNT_ADD(*value);
         return NOERROR;
@@ -477,7 +477,7 @@ ECode DecimalFormat::Parse(
 
     if (isParseIntegerOnly && Object::Equals(number, NEGATIVE_ZERO_DOUBLE)) {
         AutoPtr<IInteger64> Inum;
-        FAIL_RETURN(CInteger64::New(0L,(IInteger64 **)&Inum));
+        FAIL_RETURN(CInteger64::New(0L,(IInteger64**)&Inum));
         *value = INumber::Probe(Inum);
         REFCOUNT_ADD(*value);
         return NOERROR;

@@ -103,8 +103,8 @@ void testByteArrayOutputStream()
     AutoPtr<IByteArrayOutputStream> a;
     AutoPtr<IByteArrayOutputStream> b;
 
-    ec = CByteArrayOutputStream::New((IByteArrayOutputStream **)&a);
-    ec = CByteArrayOutputStream::New(10, (IByteArrayOutputStream **)&b);
+    ec = CByteArrayOutputStream::New((IByteArrayOutputStream**)&a);
+    ec = CByteArrayOutputStream::New(10, (IByteArrayOutputStream**)&b);
 
     AutoPtr<IOutputStream> foa;
     AutoPtr<IOutputStream> fob;

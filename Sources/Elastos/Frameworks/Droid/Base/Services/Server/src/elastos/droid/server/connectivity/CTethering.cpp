@@ -1639,7 +1639,7 @@ void CTethering::ShowTetheredNotification(
     }
 
     AutoPtr<IIntent> intent;
-    CIntent::New((IIntent **)&intent);
+    CIntent::New((IIntent**)&intent);
     intent->SetClassName(String("com.android.settings"), String("com.android.settings.TetherSettings"));
     intent->SetFlags(IIntent::FLAG_ACTIVITY_NO_HISTORY);
 
@@ -1754,7 +1754,7 @@ Boolean CTethering::ConfigureUsbIface(
                 NetworkUtils::NumericToInetAddress(USB_NEAR_IFACE_ADDR, (IInetAddress**)&addr);
 
                 AutoPtr<ILinkAddress> linkAddr;
-                CLinkAddress::New(addr, USB_PREFIX_LENGTH, (ILinkAddress **)&linkAddr);
+                CLinkAddress::New(addr, USB_PREFIX_LENGTH, (ILinkAddress**)&linkAddr);
                 ifcg->SetLinkAddress(linkAddr);
                 if (enabled) {
                     ec = ifcg->SetInterfaceUp();

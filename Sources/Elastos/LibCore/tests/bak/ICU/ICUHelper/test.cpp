@@ -20,7 +20,7 @@ int CTest::test1(int argc, char* argv[])
 //    ArrayOf<String> *languages;
 //    AutoPtr<IICUUtil> pICUHelper;
 //    ECode ec = NOERROR;
-//    ec = CICUUtil::AcquireSingleton((IICUUtil **)&pICUHelper);
+//    ec = CICUUtil::AcquireSingleton((IICUUtil**)&pICUHelper);
 //
 //    //Get ICUHelper
 //    printf("========================================\n");
@@ -34,7 +34,7 @@ int CTest::test1(int argc, char* argv[])
 //
 //    String localName("jp_JPddd_TRANDITIONAL");
 //    AutoPtr<ILocale> locale;
-//    pICUHelper->LocaleFromString(localName, (ILocale **)&locale);
+//    pICUHelper->LocaleFromString(localName, (ILocale**)&locale);
     return 0;
 }
 
@@ -47,7 +47,7 @@ int CTest::test2(int argc, char* argv[])
 //    ArrayOf<ILocale*> *ppLocales;
 //    AutoPtr<IICUUtil> pICUHelper;
 //    ECode ec = NOERROR;
-//    ec = CICUUtil::AcquireSingleton((IICUUtil **)&pICUHelper);
+//    ec = CICUUtil::AcquireSingleton((IICUUtil**)&pICUHelper);
 //
 //    pICUHelper->LocalesFromStrings((*str), &ppLocales);
 //    printf("***%s %d\n", __FILE__, __LINE__);
@@ -78,7 +78,7 @@ int CTest::test3(int argc, char* argv[])
 {
     AutoPtr<IDate> date;
     ECode ec = NOERROR;
-    ec = CDate::New((IDate **)&date);
+    ec = CDate::New((IDate**)&date);
     return 0;
 }
 

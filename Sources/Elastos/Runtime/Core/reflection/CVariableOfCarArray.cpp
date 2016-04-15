@@ -289,7 +289,7 @@ ECode CVariableOfCarArray::GetStructElementSetter(
     }
 
     AutoPtr<IDataTypeInfo> elementTypeInfo;
-    ECode ec = mCarArrayInfo->GetElementTypeInfo((IDataTypeInfo **)&elementTypeInfo);
+    ECode ec = mCarArrayInfo->GetElementTypeInfo((IDataTypeInfo**)&elementTypeInfo);
     if (FAILED(ec)) {
         return ec;
     }
@@ -298,7 +298,7 @@ ECode CVariableOfCarArray::GetStructElementSetter(
 
     AutoPtr<IVariableOfStruct> variable;
     ec = structInfo->CreateVariableBox(
-            (PByte)mCq->mBuf + mElementSize * index, (IVariableOfStruct **)&variable);
+            (PByte)mCq->mBuf + mElementSize * index, (IVariableOfStruct**)&variable);
     if (FAILED(ec)) {
         return ec;
     }
@@ -482,7 +482,7 @@ ECode CVariableOfCarArray::GetStructElementGetter(
     }
 
     AutoPtr<IDataTypeInfo> elementTypeInfo;
-    ECode ec = mCarArrayInfo->GetElementTypeInfo((IDataTypeInfo **)&elementTypeInfo);
+    ECode ec = mCarArrayInfo->GetElementTypeInfo((IDataTypeInfo**)&elementTypeInfo);
     if (FAILED(ec)) {
         return ec;
     }
@@ -491,7 +491,7 @@ ECode CVariableOfCarArray::GetStructElementGetter(
 
     AutoPtr<IVariableOfStruct> variable;
     ec = structInfo->CreateVariableBox(
-            (PByte)mCq->mBuf + mElementSize * index, (IVariableOfStruct **)&variable);
+            (PByte)mCq->mBuf + mElementSize * index, (IVariableOfStruct**)&variable);
     if (FAILED(ec)) {
         return ec;
     }

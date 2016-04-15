@@ -950,6 +950,7 @@ ECode CNotificationStackScrollLayout::GetChildAtPosition(
 
         if (touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
             *view = slidingChild;
+            REFCOUNT_ADD(*view)
             return NOERROR;
         }
     }
@@ -1747,6 +1748,7 @@ ECode CNotificationStackScrollLayout::GetLastChildNotGone(
         Int32 v = 0;
         if ((child->GetVisibility(&v), v) != IView::GONE) {
             *view = child;
+            REFCOUNT_ADD(*view)
             return NOERROR;
         }
     }

@@ -64,21 +64,21 @@ static AutoPtr<IAccelerateDecelerateInterpolator> CreateInterpolator()
 static AutoPtr<IFadeOutRunnable> CreateFadingOutRunnable()
 {
     AutoPtr<IFadeOutRunnable> f;
-    CFadeOutRunnable::New((IFadeOutRunnable **)&f);
+    CFadeOutRunnable::New((IFadeOutRunnable**)&f);
     return f.Get();
 }
 
 static AutoPtr<IPath> CreatePath()
 {
     AutoPtr<IPath> p;
-    CPath::New((IPath **)&p);
+    CPath::New((IPath**)&p);
     return p.Get();
 }
 
 static AutoPtr<IArrayList> CreateList()
 {
     AutoPtr<IArrayList> list;
-    CArrayList::New((IArrayList **)&list);
+    CArrayList::New((IArrayList**)&list);
     return list.Get();
 }
 
@@ -407,9 +407,9 @@ ECode GestureOverlayView::SetGesture(
     mCurrentGesture = gesture;
 
     const AutoPtr<IPath> path;
-    mCurrentGesture->ToPath((IPath **)&path);
+    mCurrentGesture->ToPath((IPath**)&path);
     const AutoPtr<IRectF> bounds;
-    CRectF::New((IRectF **)&bounds);
+    CRectF::New((IRectF**)&bounds);
     path->ComputeBounds(bounds, TRUE);
 
     // TODO: The path should also be scaled to fit inside this view

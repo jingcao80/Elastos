@@ -82,7 +82,7 @@ ECode CUpdateLockService::SendLockChangedBroadcast(
     Int64 oldIdent = Binder::ClearCallingIdentity();
     //try {
     AutoPtr<IIntent> intent;
-    CIntent::New(IUpdateLock::UPDATE_LOCK_CHANGED, (IIntent **)&intent);
+    CIntent::New(IUpdateLock::UPDATE_LOCK_CHANGED, (IIntent**)&intent);
     intent->PutBooleanExtra(IUpdateLock::NOW_IS_CONVENIENT, state);
     AutoPtr<ISystem> system;
     Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
