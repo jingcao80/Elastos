@@ -2,7 +2,7 @@
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/os/CMessage.h"
 #include "elastos/droid/os/Build.h"
-//#include "elastos/droid/os/CBundle.h"
+#include "elastos/droid/os/CBundle.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/AutoLock.h>
 
@@ -347,8 +347,7 @@ ECode CMessage::GetData(
 {
     VALIDATE_NOT_NULL(data);
     if (mData == NULL) {
-        assert(0);
-        //CBundle::New((IBundle**)&mData);
+        CBundle::New((IBundle**)&mData);
     }
 
     *data = mData;
