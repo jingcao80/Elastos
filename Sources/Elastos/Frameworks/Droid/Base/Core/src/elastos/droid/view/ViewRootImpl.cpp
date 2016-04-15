@@ -5462,19 +5462,18 @@ ECode ViewRootImpl::LoadSystemProperties()
 
 void ViewRootImpl::DestroyHardwareRenderer()
 {
-    assert(0 && "TODO");
-    // HardwareRenderer* hardwareRenderer = mAttachInfo->mHardwareRenderer;
+    AutoPtr<IHardwareRenderer> hardwareRenderer = mAttachInfo->mHardwareRenderer;
 
-    // if (hardwareRenderer != NULL) {
-    //     if (mView != NULL) {
-    //         hardwareRenderer->DestroyHardwareResources(mView);
-    //     }
-    //     hardwareRenderer->Destroy(TRUE);
-    //     hardwareRenderer->SetRequested(FALSE);
+    if (hardwareRenderer != NULL) {
+        if (mView != NULL) {
+            hardwareRenderer->DestroyHardwareResources(mView);
+        }
+        hardwareRenderer->Destroy();
+        hardwareRenderer->SetRequested(FALSE);
 
-    //     mAttachInfo->mHardwareRenderer = NULL;
-    //     mAttachInfo->mHardwareAccelerated = FALSE;
-    // }
+        mAttachInfo->mHardwareRenderer = NULL;
+        mAttachInfo->mHardwareAccelerated = FALSE;
+    }
 }
 
 ECode ViewRootImpl::DispatchFinishInputConnection(

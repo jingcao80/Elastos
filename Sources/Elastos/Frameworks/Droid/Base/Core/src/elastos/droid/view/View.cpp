@@ -11790,8 +11790,7 @@ void View::ResetDisplayList()
     if (isValid) {
         mRenderNode->DestroyDisplayListData();
     }
-    mBackgroundRenderNode->IsValid(&isValid);
-    if (mBackgroundRenderNode != NULL && isValid) {
+    if (mBackgroundRenderNode != NULL && (mBackgroundRenderNode->IsValid(&isValid), isValid)) {
         mBackgroundRenderNode->DestroyDisplayListData();
     }
 }
