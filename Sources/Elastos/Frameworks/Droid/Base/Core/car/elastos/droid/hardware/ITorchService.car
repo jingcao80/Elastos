@@ -1,0 +1,44 @@
+
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Hardware.IITorchCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+
+    /**
+     * {@hide}
+     */
+    interface IITorchService {
+        OnCameraOpened(
+            [in] IBinder* token,
+            [in] Int32 cameraId);
+
+        OnCameraClosed(
+            [in] IBinder* token,
+            [in] Int32 cameraId);
+
+        SetTorchEnabled(
+            [in] Boolean on);
+
+        ToggleTorch();
+
+        IsTorchOn(
+            [out] Boolean* result);
+
+        IsAvailable(
+            [out] Boolean* result);
+
+        AddListener(
+            [in] IITorchCallback* listener);
+
+        RemoveListener(
+            [in] IITorchCallback* listener);
+    }
+
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

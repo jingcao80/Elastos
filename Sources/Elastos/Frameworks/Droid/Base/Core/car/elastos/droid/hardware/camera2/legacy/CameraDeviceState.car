@@ -18,6 +18,7 @@ module
         OnError(
             [in] Int32 errorCode,
             [in] IRequestHolder* holder);
+
         OnConfiguring();
 
         OnIdle();

@@ -25,6 +25,8 @@ module
     merge("hardware/ICameraService.car");
     merge("hardware/ICmHardwareService.car");
     merge("hardware/IProCameraCallbacks.car");
+    merge("hardware/ITorchCallback.car");
+    merge("hardware/ITorchService.car");
 
     merge("hardware/display/DisplayManager.car");
     merge("hardware/display/DisplayManagerGlobal.car");

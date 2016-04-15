@@ -160,6 +160,7 @@ module
     using interface Elastos.Droid.Hardware.IISerialManager;
     using interface Elastos.Droid.Hardware.IIConsumerIrService;
     using interface Elastos.Droid.Hardware.IICmHardwareService;
+    using interface Elastos.Droid.Hardware.IITorchService;
     using interface Elastos.Droid.Hardware.Display.IIDisplayManager;
     using interface Elastos.Droid.Hardware.Hdmi.IHdmiDeviceInfo;
     using interface Elastos.Droid.Hardware.Hdmi.IIHdmiControlCallback;
@@ -289,6 +290,14 @@ module
             [in] IContext* context);
 
         interface IICmHardwareService;
+    }
+
+    [local]
+    class CTorchService {
+        constructor(
+            [in] IContext* context);
+
+        interface IITorchService;
     }
 
     [local]
