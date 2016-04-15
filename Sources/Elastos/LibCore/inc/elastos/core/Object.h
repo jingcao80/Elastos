@@ -432,7 +432,7 @@ using Elastos::Core::Object;
 
 #ifndef TO_STRING_IMPL
 #define TO_STRING_IMPL(className)                                                       \
-    CARAPT ToString(                                                                    \
+    CARAPI ToString(                                                                    \
         /* [out] */ String* str)                                                        \
     {                                                                                   \
         VALIDATE_NOT_NULL(str)                                                          \
