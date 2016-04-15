@@ -327,16 +327,14 @@ android::status_t CBatteryService::BatteryListener::onTransact(uint32_t code, co
     Slogger::E(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@ ontransact");
     switch(code) {
         case android::TRANSACT_BATTERYPROPERTIESCHANGED: {
-            struct android::BatteryProperties* props = new android::BatteryProperties();
-            props->readFromParcel(const_cast<android::Parcel*>(&data));
-            batteryPropertiesChanged(*props);
-            delete props;
+            struct android::BatteryProperties props;
+            props.readFromParcel(const_cast<android::Parcel*>(&data));
+            batteryPropertiesChanged(props);
             return android::OK;
         }
     }
     return BBinder::onTransact(code, data, reply, flags);
 }
-
 
 //=====================================================================
 // CBatteryService::BinderService
@@ -639,20 +637,53 @@ ECode CBatteryService::constructor(
     return NOERROR;
 }
 
+class BpBatteryPropertiesRegistrar
+    : public android::BpInterface<android::IBatteryPropertiesRegistrar>
+{
+public:
+    BpBatteryPropertiesRegistrar(const android::sp<android::IBinder>& impl)
+        : android::BpInterface<android::IBatteryPropertiesRegistrar>(impl) {}
+
+        void registerListener(const android::sp<android::IBatteryPropertiesListener>& listener) {
+            android::Parcel data;
+            data.writeInterfaceToken(IBatteryPropertiesRegistrar::getInterfaceDescriptor());
+            data.writeStrongBinder(listener->asBinder());
+            remote()->transact(android::REGISTER_LISTENER, data, NULL);
+        }
+
+        void unregisterListener(const android::sp<android::IBatteryPropertiesListener>& listener) {
+            android::Parcel data;
+            data.writeInterfaceToken(IBatteryPropertiesRegistrar::getInterfaceDescriptor());
+            data.writeStrongBinder(listener->asBinder());
+            remote()->transact(android::UNREGISTER_LISTENER, data, NULL);
+        }
+
+        android::status_t getProperty(int id, struct android::BatteryProperty *val) {
+            android::Parcel data, reply;
+            data.writeInterfaceToken(IBatteryPropertiesRegistrar::getInterfaceDescriptor());
+            data.writeInt32(id);
+            remote()->transact(android::GET_PROPERTY, data, &reply);
+            int32_t ret = reply.readExceptionCode();
+            if (ret != 0) {
+                return ret;
+            }
+            ret = reply.readInt32();
+            int parcelpresent = reply.readInt32();
+            if (parcelpresent)
+                val->readFromParcel(&reply);
+            return ret;
+        }
+};
+
 // @Override
 ECode CBatteryService::OnStart()
 {
     android::sp<android::IServiceManager> sm = android::defaultServiceManager();
-    android::sp<android::IBinder> b =  sm->getService(android::String16("batteryproperties"));
-    android::sp<android::IBatteryPropertiesRegistrar> batteryPropertiesRegistrar =
-            static_cast<android::IBatteryPropertiesRegistrar*>(b->queryLocalInterface(
-                    android::IBatteryPropertiesRegistrar::descriptor).get());
-    if (batteryPropertiesRegistrar != NULL) {
-        Slogger::I(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        batteryPropertiesRegistrar->registerListener(new BatteryListener(this));
-    }
+    android::sp<android::IBinder> b = sm->getService(android::String16("batteryproperties"));
+    android::sp<BpBatteryPropertiesRegistrar> batteryPropertiesRegistrar =
+            new BpBatteryPropertiesRegistrar(b);
     // try {
-    // batteryPropertiesRegistrar->RegisterListener(new BatteryListener());
+    batteryPropertiesRegistrar->registerListener(new BatteryListener(this));
     // } catch (RemoteException e) {
     //     // Should never happen.
     // }

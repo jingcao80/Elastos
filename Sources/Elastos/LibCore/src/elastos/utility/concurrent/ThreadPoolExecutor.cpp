@@ -510,9 +510,8 @@ AutoPtr<IRunnable> ThreadPoolExecutor::GetTask()
 
         // Are workers subject to culling?
         Boolean timed = mAllowCoreThreadTimeOut || wc > mCorePoolSize;
-        Boolean bIsEmp = FALSE;
         if ((wc > mMaximumPoolSize || (timed && timedOut))
-            && (wc > 1 || (IQueue::Probe(mWorkQueue)->IsEmpty(&bIsEmp), bIsEmp))) {
+            && (wc > 1 || (IQueue::Probe(mWorkQueue)->IsEmpty(&isEmpty), isEmpty))) {
             if (CompareAndDecrementWorkerCount(c))
                 return NULL;
             continue;
@@ -560,13 +559,14 @@ ECode ThreadPoolExecutor::RunWorker(
             if ((RunStateAtLeast(n, STOP) ||
                  (Thread::Interrupted() &&
                   RunStateAtLeast(n, STOP))) &&
-                !(wt->IsInterrupted(&bIsInter), bIsInter))
+                !(wt->IsInterrupted(&bIsInter), bIsInter)) {
                 wt->Interrupt();
+            }
 //            try {
-                BeforeExecute(wt, task);
-                AutoPtr<IThrowable> thrown;
+            BeforeExecute(wt, task);
+            AutoPtr<IThrowable> thrown;
 //                try {
-                    ec = task->Run();
+            ec = task->Run();
                 // } catch (RuntimeException x) {
                 //     thrown = x; throw x;
                 // } catch (Error x) {
@@ -574,13 +574,13 @@ ECode ThreadPoolExecutor::RunWorker(
                 // } catch (Throwable x) {
                 //     thrown = x; throw new Error(x);
                 // } finally {
-                    AfterExecute(task, thrown);
+            AfterExecute(task, thrown);
 //                }
 //            } finally {
-                task = NULL;
-                w->mCompletedTasks++;
-                w->Unlock();
-                if (FAILED(ec)) goto EXIT2;
+            task = NULL;
+            w->mCompletedTasks++;
+            w->Unlock();
+            if (FAILED(ec)) goto EXIT2;
 //            }
         }
         completedAbruptly = FALSE;

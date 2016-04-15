@@ -99,7 +99,7 @@ public:
         void batteryPropertiesChanged(struct android::BatteryProperties props);
 
         android::status_t onTransact(uint32_t code, const android::Parcel& data,
-                                android::Parcel* reply, uint32_t flags = 0);
+                android::Parcel* reply, uint32_t flags = 0);
 
     private:
         CBatteryService* mHost;
