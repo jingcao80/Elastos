@@ -11687,8 +11687,9 @@ AutoPtr<IList> CActivityManagerService::GenerateApplicationProvidersLocked(
             STOCK_PM_FLAGS | IPackageManager::GET_URI_PERMISSION_PATTERNS,
             (IList**)&providers);
 
-    if (DEBUG_MU)
+    if (DEBUG_MU) {
         Slogger::V(TAG_MU, "generateApplicationProvidersLocked, app.info.uid = %d", app->mUid);
+    }
     Int32 userId = app->mUserId;
     if (providers != NULL) {
         Int32 N;
@@ -12780,7 +12781,6 @@ ECode CActivityManagerService::InstallSystemProviders()
             for (Int32 i = size - 1; i >= 0; i--) {
                 AutoPtr<IInterface> item;
                 providers->Get(i, (IInterface**)&item);
-                // AutoPtr<IProviderInfo> pi = IProviderInfo::Probe(item);
                 AutoPtr<IApplicationInfo> appInfo;
                 IComponentInfo::Probe(item)->GetApplicationInfo((IApplicationInfo**)&appInfo);
                 appInfo->GetFlags(&flags);
@@ -12788,6 +12788,9 @@ ECode CActivityManagerService::InstallSystemProviders()
                 if ((flags&IApplicationInfo::FLAG_SYSTEM) == 0) {
                     Slogger::W(TAG, "Not installing system proc provider %s: not system .apk", name.string());
                     providers->Remove(item);
+                }
+                else {
+                    Slogger::I(TAG, "installing system proc provider %s", name.string());
                 }
             }
         }

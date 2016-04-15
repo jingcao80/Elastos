@@ -375,7 +375,7 @@ Boolean Object::Equals(
     /* [in] */ T1* lhs,
     /* [in] */ T2* rhs)
 {
-    if (lhs == NULL && rhs == NULL) {
+    if (lhs == rhs) {
         return TRUE;
     }
     else if (lhs == NULL || rhs == NULL) {
@@ -430,5 +430,17 @@ Boolean Object::Equals(
 
 using Elastos::Core::Object;
 
+#ifndef TO_STRING_IMPL
+#define TO_STRING_IMPL(className)                                                       \
+    CARAPTI ToString(                                                                   \
+        /* [out] */ String* str)                                                        \
+    {                                                                                   \
+        VALIDATE_NOT_NULL(str)                                                          \
+        String info("");                                                                \
+        info.AppendFormat("Object[0x%08x], Class[%s]", this, className);                \
+        *str = info;                                                                    \
+        return NOERROR;                                                                 \
+    }
+#endif
 
 #endif //__ELASTOS_CORE_OBJECT_H__

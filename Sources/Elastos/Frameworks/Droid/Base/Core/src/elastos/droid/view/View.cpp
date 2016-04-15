@@ -722,7 +722,7 @@ ECode View::AccessibilityDelegate::SendAccessibilityEvent(
     /* [in] */ IView* host,
     /* [in] */ Int32 eventType)
 {
-    VIEW_PROBE(host)->SendAccessibilityEventInternal(eventType);
+    ((View*)host)->SendAccessibilityEventInternal(eventType);
     return NOERROR;
 }
 
@@ -733,7 +733,7 @@ ECode View::AccessibilityDelegate::PerformAccessibilityAction(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = VIEW_PROBE(host)->PerformAccessibilityActionInternal(action, args);
+    *res = ((View*)host)->PerformAccessibilityActionInternal(action, args);
     return NOERROR;
 }
 
@@ -741,7 +741,7 @@ ECode View::AccessibilityDelegate::SendAccessibilityEventUnchecked(
     /* [in] */ IView* host,
     /* [in] */ IAccessibilityEvent* event)
 {
-    VIEW_PROBE(host)->SendAccessibilityEventUncheckedInternal(event);
+    ((View*)host)->SendAccessibilityEventUncheckedInternal(event);
     return NOERROR;
 }
 
@@ -751,7 +751,7 @@ ECode View::AccessibilityDelegate::DispatchPopulateAccessibilityEvent(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = VIEW_PROBE(host)->DispatchPopulateAccessibilityEventInternal(event);
+    *res = ((View*)host)->DispatchPopulateAccessibilityEventInternal(event);
     return NOERROR;
 }
 
@@ -759,7 +759,7 @@ ECode View::AccessibilityDelegate::OnPopulateAccessibilityEvent(
     /* [in] */ IView* host,
     /* [in] */ IAccessibilityEvent* event)
 {
-    VIEW_PROBE(host)->OnPopulateAccessibilityEventInternal(event);
+    ((View*)host)->OnPopulateAccessibilityEventInternal(event);
     return NOERROR;
 }
 
@@ -767,7 +767,7 @@ ECode View::AccessibilityDelegate::OnInitializeAccessibilityEvent(
     /* [in] */ IView* host,
     /* [in] */ IAccessibilityEvent* event)
 {
-    VIEW_PROBE(host)->OnInitializeAccessibilityEventInternal(event);
+    ((View*)host)->OnInitializeAccessibilityEventInternal(event);
     return NOERROR;
 }
 
@@ -775,7 +775,7 @@ ECode View::AccessibilityDelegate::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IView* host,
     /* [in] */ IAccessibilityNodeInfo* info)
 {
-    VIEW_PROBE(host)->OnInitializeAccessibilityNodeInfoInternal(info);
+    ((View*)host)->OnInitializeAccessibilityNodeInfoInternal(info);
     return NOERROR;
 }
 
@@ -1061,7 +1061,7 @@ ECode View::_Predicate::Apply(
     /* [out] */ Boolean* result)
 {
     assert(result != NULL && t != NULL && IView::Probe(t) != NULL);
-    View* v = VIEW_PROBE(t);
+    View* v = (View*)IView::Probe(v);
     assert(v != NULL);
     *result = v->mNextFocusForwardId == mId;
     return NOERROR;
@@ -1091,8 +1091,10 @@ ECode View::MatchIdPredicate::Apply(
     /* [in] */ IInterface* view,
     /* [out] */ Boolean* apply)
 {
-    assert(apply != NULL && view != NULL && IView::Probe(view) != NULL);
-    *apply = VIEW_PROBE(view)->mID == mId;
+    VALIDATE_NOT_NULL(apply)
+    IView* v = IView::Probe(view);
+    assert(apply != NULL && v != NULL );
+    *apply = ((View*)v)->mID == mId;
     return NOERROR;
 }
 
@@ -1107,8 +1109,10 @@ ECode View::MatchLabelForPredicate::Apply(
     /* [in] */ IInterface* view,
     /* [out] */ Boolean* apply)
 {
-    assert(apply != NULL && view != NULL && IView::Probe(view) != NULL);
-    *apply = VIEW_PROBE(view)->mLabelForId == mLabeledId;
+    VALIDATE_NOT_NULL(apply)
+    IView* v = IView::Probe(view);
+    assert(apply != NULL && v != NULL );
+    *apply = ((View*)v)->mLabelForId == mLabeledId;
     return NOERROR;
 }
 
@@ -11790,6 +11794,7 @@ void View::ResetDisplayList()
     if (isValid) {
         mRenderNode->DestroyDisplayListData();
     }
+
     if (mBackgroundRenderNode != NULL && (mBackgroundRenderNode->IsValid(&isValid), isValid)) {
         mBackgroundRenderNode->DestroyDisplayListData();
     }
@@ -11852,7 +11857,8 @@ ECode View::GetDrawingCache(
     if (autoScale) {
         *res = mDrawingCache;
         REFCOUNT_ADD(*res)
-    } else {
+    }
+    else {
         *res = mUnscaledDrawingCache;
         REFCOUNT_ADD(*res)
     }
@@ -12213,7 +12219,7 @@ ECode View::CreateSnapshot(
         if (mOverlay != NULL && (mOverlay->IsEmpty(&mOverlayIsEmpty), !mOverlayIsEmpty)) {
             AutoPtr<IViewGroup> group;
             mOverlay->GetOverlayView((IViewGroup**)&group);
-            (IView::Probe(group))->Draw(canvas);
+            IView::Probe(group)->Draw(canvas);
         }
     }
     else {

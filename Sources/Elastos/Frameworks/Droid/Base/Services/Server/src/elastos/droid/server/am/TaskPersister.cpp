@@ -248,13 +248,11 @@ TaskPersister::TaskPersister(
     Boolean exists;
     sTasksDir->Exists(&exists);
     if (!exists) {
-        String str;
-        IObject::Probe(sTasksDir)->ToString(&str);
-        if (DEBUG) Slogger::D(TAG, "Creating tasks directory %s", str.string());
+        if (DEBUG) Slogger::D(TAG, "Creating tasks directory %s", TO_CSTR(sTasksDir));
         Boolean res;
         sTasksDir->Mkdir(&res);
         if (!res) {
-            Slogger::E(TAG, "Failure creating tasks directory %s", str.string());
+            Slogger::E(TAG, "Failure creating tasks directory %s", TO_CSTR(sTasksDir));
         }
     }
 
@@ -262,13 +260,11 @@ TaskPersister::TaskPersister(
     CFile::New(systemDir, IMAGES_DIRNAME, (IFile**)&sImagesDir);
     sImagesDir->Exists(&exists);
     if (!exists) {
-        String str;
-        IObject::Probe(sImagesDir)->ToString(&str);
-        if (DEBUG) Slogger::D(TAG, "Creating images directory %s", str.string());
+        if (DEBUG) Slogger::D(TAG, "Creating images directory %s", TO_CSTR(sImagesDir));
         Boolean res;
         sImagesDir->Mkdir(&res);
         if (!res) {
-            Slogger::E(TAG, "Failure creating images directory %s", str.string());
+            Slogger::E(TAG, "Failure creating images directory %s", TO_CSTR(sImagesDir));
         }
     }
 
@@ -435,6 +431,11 @@ ECode TaskPersister::SaveToXml(
     /* [out] */ IStringWriter** writer)
 {
     VALIDATE_NOT_NULL(writer)
+    *writer = NULL;
+
+    Slogger::I(TAG, "TODO: just disable task persister SaveToXml for debug!!");
+    return NOERROR;
+
     if (DEBUG) Slogger::D(TAG, "saveToXml: task=%s", task->ToString().string());
     AutoPtr<IXmlSerializer> xmlSerializer;
     CFastXmlSerializer::New((IXmlSerializer**)&xmlSerializer);
@@ -515,9 +516,7 @@ AutoPtr<List<AutoPtr<TaskRecord> > > TaskPersister::RestoreTasksLocked()
     AutoPtr<ArrayOf<IFile*> > recentFiles;
     sTasksDir->ListFiles((ArrayOf<IFile*>**)&recentFiles);
     if (recentFiles == NULL) {
-        String str;
-        IObject::Probe(sTasksDir)->ToString(&str);
-        Slogger::E(TAG, "Unable to list files from %s", str.string());
+        Slogger::E(TAG, "Unable to list files from %s", TO_CSTR(sTasksDir));
         return tasks;
     }
 

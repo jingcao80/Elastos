@@ -224,6 +224,7 @@ ECode Activity::constructor()
     mFragments = new FragmentManagerImpl();
     mContainer = new FragmentContainerLocal(this);
 
+    Logger::I(TAG, "TODO TrackActivity");
     // assert(0 && "TODO");
     // AutoPtr<IStrictMode> strictMode;
     // CStrictMode::AcquireSingleton((IStrictMode**)&strictMode);
@@ -594,7 +595,8 @@ ECode Activity::OnStart()
     if (!mLoadersStarted) {
         mLoadersStarted = TRUE;
         if (mLoaderManager != NULL) {
-            assert(0 && "TODO");
+            Logger::I(TAG, "TODO LoaderManagerImpl");
+            // assert(0 && "TODO");
             // LoaderManagerImpl* lmi = (LoaderManagerImpl*)mLoaderManager.Get();
             // lmi->DoStart();
         }
@@ -978,7 +980,9 @@ ECode Activity::RetainNonConfigurationInstances(
             mAllLoaderManagers->GetValueAt(i, (IInterface**)&obj);
             loaders->Set(i, ILoaderManagerImpl::Probe(obj));
         }
-        assert(0 && "TODO");
+
+        // assert(0 && "TODO");
+        Logger::I(TAG, "TODO LoaderManagerImpl");
         // for (Int32 i = 0; i < N; i++) {
         //     LoaderManagerImpl* lm = (LoaderManagerImpl*)(*loaders)[i];
         //     lm->IsRetaining(&isRetaining);
@@ -1041,7 +1045,8 @@ ECode Activity::InvalidateFragment(
         mAllLoaderManagers->Get(keyObj, (IInterface**)&obj);
         ILoaderManagerImpl* lm = ILoaderManagerImpl::Probe(obj);
         if (lm != NULL) {
-            assert(0 && "TODO");
+            // assert(0 && "TODO");
+            Logger::I(TAG, "TODO LoaderManagerImpl");
             // LoaderManagerImpl* lmi = (LoaderManagerImpl*)lm.Get();
             // Boolean retaining;
             // lmi->IsRetaining(&retaining);
@@ -4181,8 +4186,10 @@ ECode Activity::PerformStart()
             mAllLoaderManagers->GetValueAt(i, (IInterface**)&obj);
             loaders->Set(i, ILoaderManagerImpl::Probe(obj));
         }
+
+        Logger::I(TAG, "TODO LoaderManagerImpl");
+        // assert(0 && "TODO");
         for (Int32 i = 0; i < N; i++) {
-            assert(0 && "TODO");
             // LoaderManagerImpl* lm = (LoaderManagerImpl*)(*loaders)[i];
             // lm->FinishRetain();
             // lm->DoReportStart();
@@ -4330,7 +4337,8 @@ ECode Activity::PerformStop()
     if (mLoadersStarted) {
         mLoadersStarted = FALSE;
         if (mLoaderManager != NULL) {
-            assert(0 && "TODO");
+            Logger::I(TAG, "TODO LoaderManagerImpl");
+            // assert(0 && "TODO");
             // LoaderManagerImpl* lmi = (LoaderManagerImpl*)mLoaderManager.Get();
             // if (!mChangingConfigurations) {
             //     lmi->DoStop();
@@ -4393,7 +4401,8 @@ ECode Activity::PerformDestroy()
     FAIL_RETURN(fmi->DispatchDestroy());
     OnDestroy();
     if (mLoaderManager != NULL) {
-        assert(0 && "TODO");
+        Logger::I(TAG, "TODO LoaderManagerImpl");
+        // assert(0 && "TODO");
         //LoaderManagerImpl* lmi = (LoaderManagerImpl*)mLoaderManager.Get();
         //lmi->DoDestroy();
     }

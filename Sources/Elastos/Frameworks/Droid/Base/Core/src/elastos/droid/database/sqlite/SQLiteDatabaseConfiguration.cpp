@@ -43,16 +43,6 @@ SQLiteDatabaseConfiguration::SQLiteDatabaseConfiguration(
         // throw new IllegalArgumentException("path must not be null.");
     }
 
-#ifdef _DEBUG
-    AutoPtr<IFile> file;
-    CFile::New(path, (IFile**)&file);
-    Boolean exists;
-    file->Exists(&exists);
-    if (!exists) {
-        assert(0 && "not exists" && path.string());
-    }
-#endif
-
     mPath = path;
     mLabel = StripPathForLogs(path);
 

@@ -161,8 +161,9 @@ void TaskStack::AddTask(
         }
         it = (--(taskRit.GetBase()));
     }
-    if (CWindowManagerService::DEBUG_TASK_MOVEMENT)
+    if (CWindowManagerService::DEBUG_TASK_MOVEMENT) {
         Slogger::D(CWindowManagerService::TAG, "addTask: task=%p toTop=%d pos=", task, toTop /*, stackNdx*/);
+    }
     mTasks.Insert(it, task);
 
     task->mStack = this;

@@ -5782,7 +5782,7 @@ void CWindowManagerService::DumpAppTokensLocked()
             AppTokenList tokens = task->mAppTokens;
             AppTokenList::Iterator tokensIt = tokens.Begin();
             for (; tokensIt != tokens.End(); ++tokensIt) {
-                Slogger::V(TAG, "      activity # : %p"/*, tokenNdx*/, (*tokensIt)->mToken.Get());
+                Slogger::V(TAG, "      activity # : %s"/*, tokenNdx*/, TO_CSTR((*tokensIt)->mToken));
             }
         }
     }
@@ -5800,7 +5800,7 @@ void CWindowManagerService::DumpWindowsLocked()
         AutoPtr<WindowList> windows = displayContent->GetWindowList();
         WindowList::ReverseIterator rit = windows->RBegin();
         for (; rit != windows->REnd(); ++rit) {
-            Slogger::V(TAG, "  #: %p"/*, winNdx*/, (*rit).Get());
+            Slogger::V(TAG, "  #: %s"/*, winNdx*/, TO_CSTR((*rit)));
         }
     }
 }
@@ -5814,13 +5814,12 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::FindAppWindowInsert
     mTaskIdToTask->Get(taskId, (IInterface**)&value);
     AutoPtr<Task> targetTask = (Task*)IObject::Probe(value);
     if (targetTask == NULL) {
-        Slogger::W(TAG, "findAppWindowInsertionPointLocked: no Task for %p taskId=%d"
-                , target, taskId);
+        Slogger::W(TAG, "findAppWindowInsertionPointLocked: no Task for %s taskId=%d", TO_CSTR(target), taskId);
         return windows->Begin();
     }
     AutoPtr<DisplayContent> displayContent = targetTask->GetDisplayContent();
     if (displayContent == NULL) {
-        Slogger::W(TAG, "findAppWindowInsertionPointLocked: no DisplayContent for %p", target);
+        Slogger::W(TAG, "findAppWindowInsertionPointLocked: no DisplayContent for %s", TO_CSTR(target));
         return windows->Begin();
     }
     windows = displayContent->GetWindowList();
@@ -5843,7 +5842,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::FindAppWindowInsert
             if (found) {
                 // Find the first app token below the new position that has
                 // a window displayed.
-                if (DEBUG_REORDER) Slogger::V(TAG, "Looking for lower windows in %p", wtoken->mToken.Get());
+                if (DEBUG_REORDER) Slogger::V(TAG, "Looking for lower windows in %s", TO_CSTR(wtoken->mToken));
                 if (wtoken->mSendingToBottom) {
                     if (DEBUG_REORDER) Slogger::V(TAG, "Skipping token -- currently sending to bottom");
                     continue;
@@ -9427,12 +9426,12 @@ ECode CWindowManagerService::HandleReportFocusChange()
 
         mLastFocus = newFocus;
         if (DEBUG_FOCUS_LIGHT)
-            Slogger::I(TAG, "Focus moving from %p to %p", lastFocus.Get(), newFocus.Get());
+            Slogger::I(TAG, "Focus moving from %s to %s", TO_CSTR(lastFocus), TO_CSTR(newFocus));
 
         Boolean isDisplayed;
         if (newFocus != NULL && lastFocus != NULL
                 && (newFocus->IsDisplayedLw(&isDisplayed), !isDisplayed)) {
-            Slogger::I(TAG, "Delaying loss of focus...");
+            Slogger::I(TAG, "Delaying loss of focus %s...", TO_CSTR(lastFocus));
             mLosingFocus.PushBack(lastFocus);
             lastFocus = NULL;
         }
@@ -9441,13 +9440,13 @@ ECode CWindowManagerService::HandleReportFocusChange()
     //System.out.println("Changing focus from " + lastFocus
     //                   + " to " + newFocus);
     if (newFocus != NULL) {
-        if (DEBUG_FOCUS_LIGHT) Slogger::I(TAG, "Gaining focus: %p", newFocus.Get());
+        if (DEBUG_FOCUS_LIGHT) Slogger::I(TAG, "Gaining focus: %s", TO_CSTR(newFocus));
         newFocus->ReportFocusChangedSerialized(TRUE, mInTouchMode);
         NotifyFocusChanged();
     }
 
     if (lastFocus != NULL) {
-        if (DEBUG_FOCUS_LIGHT) Slogger::I(TAG, "Losing focus: %p", lastFocus.Get());
+        if (DEBUG_FOCUS_LIGHT) Slogger::I(TAG, "Losing focus: %s", TO_CSTR(lastFocus));
         lastFocus->ReportFocusChangedSerialized(FALSE, mInTouchMode);
     }
 
@@ -9465,7 +9464,7 @@ ECode CWindowManagerService::HandleReportLosingFocus()
 
     WindowList::Iterator it;
     for (it = losers.Begin(); it != losers.End(); ++it) {
-        if (DEBUG_FOCUS_LIGHT) Slogger::I(TAG, "Losing delayed focus: %p", (*it).Get());
+        if (DEBUG_FOCUS_LIGHT) Slogger::I(TAG, "Losing delayed focus: %s", TO_CSTR(*it));
         (*it)->ReportFocusChangedSerialized(FALSE, mInTouchMode);
     }
 
@@ -9499,7 +9498,8 @@ ECode CWindowManagerService::HandleAddStarting(
             wtoken->mToken, sd->mPkg,
             sd->mTheme, sd->mCompatInfo, sd->mNonLocalizedLabel, sd->mLabelRes,
             sd->mIcon, sd->mLogo, sd->mWindowFlags, (IView**)&view))) {
-        Slogger::W(TAG, "Exception when adding starting window %s: pkg=%s", TO_CSTR(wtoken), sd->mPkg.string());
+        Slogger::W(TAG, "Exception when adding starting window %s: pkg=%s, view:%s",
+            TO_CSTR(wtoken), sd->mPkg.string(), TO_CSTR(view));
     }
 
     if (view != NULL) {
@@ -9531,7 +9531,6 @@ ECode CWindowManagerService::HandleAddStarting(
         }
 
         if (abort) {
-            Slogger::V(TAG, " >>>> RemoveStartingWindow line %d, token:%s, view:%s", __LINE__, TO_CSTR(wtoken->mToken), TO_CSTR(view));
             if (FAILED(mPolicy->RemoveStartingWindow(wtoken->mToken, view))) {
                 Slogger::W(TAG, "Exception when removing starting window");
             }
@@ -9565,7 +9564,6 @@ ECode CWindowManagerService::HandleRemoveStarting(
     }
 
     if (view != NULL) {
-        Slogger::V(TAG, " >>>> RemoveStartingWindow line %d, token:%s, view:%s", __LINE__, TO_CSTR(token), TO_CSTR(view));
         if (FAILED(mPolicy->RemoveStartingWindow(token, view))) {
             Slogger::W(TAG, "Exception when removing starting window");
         }
@@ -9604,7 +9602,6 @@ ECode CWindowManagerService::HandleFinishedStarting()
             wtoken->mStartingDisplayed = FALSE;
         }
 
-        Slogger::V(TAG, " >>>> RemoveStartingWindow line %d, token:%s, view:%s", __LINE__, TO_CSTR(token), TO_CSTR(view));
         if (FAILED(mPolicy->RemoveStartingWindow(token, view))) {
             Slogger::W(TAG, "Exception when removing starting window");
         }
@@ -10395,7 +10392,7 @@ void CWindowManagerService::RebuildAppWindowListLocked(
             mRebuildTmp->Set(numRemoved, w);
             it = windows->Erase(it);
             mWindowsChanged = TRUE;
-            if (DEBUG_WINDOW_MOVEMENT) Slogger::V(TAG, "Rebuild removing window: %p", w.Get());
+            if (DEBUG_WINDOW_MOVEMENT) Slogger::V(TAG, "Rebuild removing window: %s", TO_CSTR(w));
             numRemoved++;
             continue;
         }
@@ -10450,8 +10447,8 @@ void CWindowManagerService::RebuildAppWindowListLocked(
 
     indexOfIt -= indexofLastBelow;
     if (indexOfIt != numRemoved) {
-        Slogger::W(TAG, "On display=%d Rebuild removed %d windows but added %d"
-                , displayContent->GetDisplayId(),numRemoved, indexOfIt/*, new RuntimeException("here").fillInStackTrace()*/);
+        Slogger::W(TAG, "On display=%d Rebuild removed %d windows but added %d",
+            displayContent->GetDisplayId(),numRemoved, indexOfIt);
         for (Int32 i = 0; i < numRemoved; i++) {
             AutoPtr<WindowState> ws = (*mRebuildTmp)[i];
             if (ws->mRebuilding) {
@@ -10467,10 +10464,10 @@ void CWindowManagerService::RebuildAppWindowListLocked(
             }
         }
 
-        // Slogger::W(TAG, "Current app token list:");
-        // DumpAppTokensLocked();
-        // Slogger::W(TAG, "Final window list:");
-        // DumpWindowsLocked();
+        Slogger::W(TAG, "Current app token list:");
+        DumpAppTokensLocked();
+        Slogger::W(TAG, "Final window list:");
+        DumpWindowsLocked();
     }
 }
 

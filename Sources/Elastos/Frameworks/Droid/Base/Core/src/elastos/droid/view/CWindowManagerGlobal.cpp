@@ -191,8 +191,8 @@ ECode CWindowManagerGlobal::GetRootView(
     /* [in] */ const String& name,
     /* [out] */ IView** result)
 {
-    AutoLock lock(sDefaultWindowManagerLock);
     VALIDATE_NOT_NULL(result);
+    AutoLock lock(sDefaultWindowManagerLock);
 
     Int32 rootSize = 0;
     mRoots->GetSize(&rootSize);
@@ -246,23 +246,18 @@ ECode CWindowManagerGlobal::AddView(
     /* [in] */ IDisplay* display,
     /* [in] */ IWindow* parentWindow)
 {
-    VALIDATE_NOT_NULL(view);
-    VALIDATE_NOT_NULL(params);
-    VALIDATE_NOT_NULL(display);
-    VALIDATE_NOT_NULL(parentWindow);
-
     if (view == NULL) {
-        Logger::E(TAG, "view must not be NULL");
+        Logger::E(TAG, "AddView: view must not be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     if (display == NULL) {
-        Logger::E(TAG, "display must not be NULL");
+        Logger::E(TAG, "AddView: display must not be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     if (IWindowManagerLayoutParams::Probe(params) == NULL) {
-        Logger::E(TAG, "Params must be WindowManager.LayoutParams");
+        Logger::E(TAG, "AddView: Params must be WindowManager.LayoutParams");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -320,7 +315,7 @@ ECode CWindowManagerGlobal::AddView(
                 IViewRootImpl::Probe(temp)->DoDie();
             }
             else {
-                Logger::E(TAG, "View 0x%08x has already been added to the window manager.", view);
+                Logger::E(TAG, "View %s has already been added to the window manager.", TO_CSTR(view));
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
             // The previous removeView() had not completed executing. Now it has.
@@ -375,9 +370,6 @@ ECode CWindowManagerGlobal::UpdateViewLayout(
     /* [in] */ IView* view,
     /* [in] */ IViewGroupLayoutParams* params)
 {
-    VALIDATE_NOT_NULL(view);
-    VALIDATE_NOT_NULL(params);
-
     if (view == NULL) {
         Logger::E(TAG, "view must not be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -407,7 +399,6 @@ ECode CWindowManagerGlobal::RemoveView(
     /* [in] */ IView* view,
     /* [in] */ Boolean immediate)
 {
-    VALIDATE_NOT_NULL(view);
     if (view == NULL) {
         Logger::E(TAG, "view must not be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -436,7 +427,6 @@ ECode CWindowManagerGlobal::CloseAll(
     /* [in] */ const String& who,
     /* [in] */ const String& what)
 {
-    VALIDATE_NOT_NULL(token);
     AutoLock lock(mLock);
     Logger::I(TAG, "Closing all windows of %p", token);
 

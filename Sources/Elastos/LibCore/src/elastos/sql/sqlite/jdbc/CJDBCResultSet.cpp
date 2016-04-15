@@ -11,8 +11,9 @@
 #include "CShell.h"
 #include "CDatabaseX.h"
 #include <elastos/utility/etl/HashSet.h>
-#include "StringBuffer.h"
+#include "elastos/core/StringBuffer.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
 #include "CURL.h"
 #include "CByteArrayInputStream.h"
 #include "CCharArrayReader.h"
@@ -21,6 +22,7 @@
 using Elastos::Utility::Etl::HashSet;
 using Elastos::Core::StringBuffer;
 using Elastos::Core::StringUtils;
+using Elastos::Core::CoreUtils;
 using Elastos::Net::CURL;
 using Elastos::IO::IByteArrayInputStream;
 using Elastos::IO::CByteArrayInputStream;
@@ -2140,13 +2142,13 @@ AutoPtr<IInteger32> CJDBCResultSet::InternalGetInt(
     }
     AutoPtr<ArrayOf<String> > rd = tr->mRows[mRow];
     lastg = (*rd)[colIndex - 1];
-    // try {
-    // AutoPtr<IInteger32> out;
-    //     return Integer.valueOf(lastg);
-    // } catch (java.lang.Exception e) {
-    //     lastg = null;
-    // }
-    return NULL;
+    Int32 ival = 0;
+    ECode ec = StringUtils::Parse(lastg, &ival);
+    if (FAILED(ec)) {
+        return NULL;
+    }
+
+    return CoreUtils::Convert(ival);
 }
 
 AutoPtr<IInteger16> CJDBCResultSet::InternalGetShort(
@@ -2157,12 +2159,14 @@ AutoPtr<IInteger16> CJDBCResultSet::InternalGetShort(
     }
     AutoPtr<ArrayOf<String> > rd = tr->mRows[mRow];
     lastg = (*rd)[colIndex - 1];
-    // try {
-    //     return Short.valueOf(lastg);
-    // } catch (java.lang.Exception e) {
-    //     lastg = null;
-    // }
-    return NULL;
+
+    Int16 ival = 0;
+    ECode ec = StringUtils::Parse(lastg, &ival);
+    if (FAILED(ec)) {
+        return NULL;
+    }
+
+    return CoreUtils::Convert(ival);
 }
 
 AutoPtr<ITime> CJDBCResultSet::InternalGetTime(

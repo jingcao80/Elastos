@@ -539,17 +539,6 @@ ECode PhoneWindow::_DecorView::constructor(
     return CBackgroundFallback::New((IBackgroundFallback**)&mBackgroundFallback);
 }
 
-ECode PhoneWindow::_DecorView::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str)
-    StringBuilder sb("Object[0X");
-    sb += StringUtils::ToHexString((Int32)this);
-    sb += "], Class[PhoneWindow::DecorView]";
-    *str = sb.ToString();
-    return NOERROR;
-}
-
 ECode PhoneWindow::_DecorView::WillYouTakeTheSurface(
     /* [out] */ ISurfaceHolderCallback2** cback)
 {
@@ -1619,9 +1608,9 @@ ECode PhoneWindow::_DecorView::SendAccessibilityEvent(
             && childCount == 1) {
         AutoPtr<IView> view;
         GetChildAt(0, (IView**)&view);
-        //VIEW_PROBE(GetChildAt(0))->SendAccessibilityEvent(eventType);
         view->SendAccessibilityEvent(eventType);
-    } else {
+    }
+    else {
         FrameLayout::SendAccessibilityEvent(eventType);
     }
 
@@ -2186,7 +2175,7 @@ ECode PhoneWindow::_DecorView::StartActionMode(
                     Post(mShowActionModePopup, &res);
                 }
 
-                VIEW_PROBE(mActionModeView)->SendAccessibilityEvent(
+                ((View*)amView)->SendAccessibilityEvent(
                         IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED);
             } else {
                 mActionMode = NULL;

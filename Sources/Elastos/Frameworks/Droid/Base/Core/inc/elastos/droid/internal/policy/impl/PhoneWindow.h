@@ -319,15 +319,14 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("PhoneWindow::DecorView")
+
         _DecorView(
             /* [in] */ PhoneWindow* host);
 
         CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ Int32 featureId);
-
-        CARAPI ToString(
-            /* [out] */ String* str);
 
         CARAPI WillYouTakeTheSurface(
             /* [out] */ ISurfaceHolderCallback2** cback);

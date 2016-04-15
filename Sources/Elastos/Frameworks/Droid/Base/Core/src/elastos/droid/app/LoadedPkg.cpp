@@ -112,11 +112,11 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
     }
     // Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastReceiveReg");
     // try {
-//TODO: Need ClassLoader
     Slogger::W(TAG, "SetPendingResult: Need ClassLoader.");
+    AutoPtr<IClassLoader> cl;
     // ClassLoader cl =  mReceiver.getClass().getClassLoader();
-    // intent.setExtrasClassLoader(cl);
-    // setExtrasClassLoader(cl);
+    intent->SetExtrasClassLoader(cl);
+    SetExtrasClassLoader(cl);
     receiver->SetPendingResult(this);
     ECode ec = receiver->OnReceive(mHost->mContext, intent);
     if (FAILED(ec)) {

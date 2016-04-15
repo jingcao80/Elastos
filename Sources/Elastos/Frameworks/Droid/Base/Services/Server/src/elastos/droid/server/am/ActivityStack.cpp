@@ -5130,57 +5130,64 @@ Boolean ActivityStack::RelaunchActivityLocked(
         results = r->mResults;
         newIntents = r->mNewIntents;
     }
-    //if (CActivityManagerService::DEBUG_SWITCH)
-    //  Slogger::V(TAG, "Relaunching: " + r
-    //        + " with results=" + results + " newIntents=" + newIntents
-    //        + " andResume=" + andResume);
+    if (CActivityManagerService::DEBUG_SWITCH) {
+        Slogger::V(TAG, "Relaunching: %s with results=%d newIntents=%d andResume=%d",
+            TO_CSTR(r), results != NULL ? results->GetSize() : 0,
+            newIntents != NULL ? newIntents->GetSize() : 0, andResume);
+    }
     //TODO EventLog.writeEvent(andResume ? EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY
     //        : EventLogTags.AM_RELAUNCH_ACTIVITY, r.userId, System.identityHashCode(r),
     //        r.task.taskId, r.shortComponentName);
 
     r->StartFreezingScreenLocked(r->mApp, 0);
-
     mStackSupervisor->RemoveChildActivityContainers(r);
-    AutoPtr<IList> iResults;
-    AutoPtr<IList> iNewIntents;
-    CArrayList::New((IList**)&iResults);
-    CArrayList::New((IList**)&iNewIntents);
-    List< AutoPtr<ActivityResult> >::Iterator resultIter = results->Begin();
-    while (resultIter != results->End()) {
-        AutoPtr<ActivityResult> ar = *resultIter;
-        iResults->Add(TO_IINTERFACE(ar));
-        ++resultIter;
+
+    AutoPtr<IList> iResults, iNewIntents;
+    if (results) {
+        CArrayList::New((IList**)&iResults);
+        List< AutoPtr<ActivityResult> >::Iterator it = results->Begin();
+        while (it != results->End()) {
+            AutoPtr<ActivityResult> ar = *it;
+            iResults->Add(TO_IINTERFACE(ar));
+            ++it;
+        }
     }
-    List< AutoPtr<IIntent> >::Iterator newIntentsIter = newIntents->Begin();
-    while (newIntentsIter != newIntents->End()) {
-        AutoPtr<IIntent> intent = *newIntentsIter;
-        iNewIntents->Add(TO_IINTERFACE(intent));
-        ++newIntentsIter;
+
+    if (newIntents) {
+        CArrayList::New((IList**)&iNewIntents);
+        List< AutoPtr<IIntent> >::Iterator it = newIntents->Begin();
+        while (it != newIntents->End()) {
+            AutoPtr<IIntent> intent = *it;
+            iNewIntents->Add(TO_IINTERFACE(intent));
+            ++it;
+        }
     }
 
     //try {
-        //if (CActivityManagerService::DEBUG_SWITCH || ActivityStackSupervisor::DEBUG_STATES)
-        //  Slogger::I(TAG,
-        //        (andResume ? "Relaunching to RESUMED " : "Relaunching to PAUSED ")
-        //        + r);
-        r->mForceNewConfig = FALSE;
-        AutoPtr<IConfiguration> config;
-        CConfiguration::New(mService->mConfiguration, (IConfiguration**)&config);
-        r->mApp->mThread->ScheduleRelaunchActivity(IBinder::Probe(r->mAppToken), iResults, iNewIntents,
-                changes, !andResume, config);
+    if (CActivityManagerService::DEBUG_SWITCH || ActivityStackSupervisor::DEBUG_STATES) {
+        Slogger::I(TAG, (andResume ? "Relaunching to RESUMED %s" : "Relaunching to PAUSED %s"), TO_CSTR(r));
+    }
+    r->mForceNewConfig = FALSE;
+    AutoPtr<IConfiguration> config;
+    CConfiguration::New(mService->mConfiguration, (IConfiguration**)&config);
+    ECode ec = r->mApp->mThread->ScheduleRelaunchActivity(
+        IBinder::Probe(r->mAppToken), iResults, iNewIntents, changes, !andResume, config);
         // Note: don't need to call pauseIfSleepingLocked() here, because
         // the caller will only pass in 'andResume' if this activity is
         // currently resumed, which implies we aren't sleeping.
     //} catch (RemoteException e) {
-        //if (CActivityManagerService::DEBUG_SWITCH || ActivityStackSupervisor::DEBUG_STATES)
-        //  Slogger::I(TAG, "Relaunch failed", e);
+    if (FAILED(ec)) {
+        if (CActivityManagerService::DEBUG_SWITCH || ActivityStackSupervisor::DEBUG_STATES)
+            Slogger::I(TAG, "Relaunch failed, ec=%08x", ec);
+    }
     //}
 
     if (andResume) {
         r->mResults = NULL;
         r->mNewIntents = NULL;
         r->mState = ActivityState_RESUMED;
-    } else {
+    }
+    else {
         mHandler->RemoveMessages(PAUSE_TIMEOUT_MSG, TO_IINTERFACE(r));
         r->mState = ActivityState_PAUSED;
     }

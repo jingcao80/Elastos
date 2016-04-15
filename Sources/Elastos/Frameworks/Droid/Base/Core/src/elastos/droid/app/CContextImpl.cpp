@@ -3746,11 +3746,11 @@ void CContextImpl::SetOuterContext(
 
 AutoPtr<IContext> CContextImpl::GetOuterContext()
 {
-    AutoPtr<IContext> context;
+    AutoPtr<IInterface> context;
     if (mOuterContext != NULL) {
         mOuterContext->Resolve(EIID_IContext, (IInterface**)&context);
     }
-    return context;
+    return IContext::Probe(context);
 }
 
 AutoPtr<IBinder> CContextImpl::GetActivityToken()

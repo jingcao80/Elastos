@@ -2931,14 +2931,15 @@ ECode PhoneWindowManager::AddStartingWindow(
     //try {
         AutoPtr<IContext> context = mContext;
         if (DEBUG_STARTING_WINDOW) {
-            Slogger::D(TAG, "addStartingWindow %s: nonLocalizedLabel=%p  theme=%08x",
-                packageName.string(), nonLocalizedLabel, theme);
+            Slogger::D(TAG, "addStartingWindow %s: nonLocalizedLabel=%s  theme=%08x",
+                packageName.string(), TO_CSTR(nonLocalizedLabel), theme);
         }
         Int32 resId = 0;
         if (theme != (context->GetThemeResId(&resId), resId) || labelRes != 0) {
             AutoPtr<IContext> temp;
             ec = context->CreatePackageContext(packageName, 0, (IContext**)&temp);
             if (FAILED(ec)) {
+                Slogger::E(TAG, "failed to create package context when addStartingWindow. ec=%08x", ec);
                 return ec;
             }
 
@@ -2949,12 +2950,14 @@ ECode PhoneWindowManager::AddStartingWindow(
         AutoPtr<IPolicyManager> pm;
         ec = CPolicyManager::AcquireSingleton((IPolicyManager**)&pm);
         if (FAILED(ec)) {
+            Slogger::E(TAG, "failed to acquire CPolicyManager when addStartingWindow. ec=%08x", ec);
             return ec;
         }
 
         AutoPtr<IWindow> win;
         ec = pm->MakeNewWindow(context, (IWindow**)&win);
         if (FAILED(ec)) {
+            Slogger::E(TAG, "failed to MakeNewWindow when addStartingWindow. ec=%08x", ec);
             return ec;
         }
 
@@ -3043,6 +3046,7 @@ ECode PhoneWindowManager::AddStartingWindow(
 
         ec = vm->AddView(view, IViewGroupLayoutParams::Probe(lp));
         if (FAILED(ec)) {
+            Slogger::E(TAG, "failed to AddView %s when addStartingWindow. ec=%08x", TO_CSTR(view), ec);
             return ec;
         }
 
@@ -3055,8 +3059,8 @@ ECode PhoneWindowManager::AddStartingWindow(
         REFCOUNT_ADD(*window);
 
         if (DEBUG_STARTING_WINDOW) {
-            Slogger::V(TAG, "Adding starting window for %s/%p: window %p",
-                packageName.string(), appToken, *window);
+            Slogger::V(TAG, "Adding starting window for %s/%p: view %s",
+                packageName.string(), appToken, TO_CSTR(*window));
         }
     //} catch (WindowManagerImpl.BadTokenException e) {
     //    // ignore
@@ -3083,7 +3087,7 @@ ECode PhoneWindowManager::RemoveStartingWindow(
     /* [in] */ IView* window)
 {
     if (DEBUG_STARTING_WINDOW) {
-        Slogger::V(TAG, "Removing starting window for %p: window %p", appToken, window);
+        Slogger::V(TAG, "Removing starting window for %s: view %s", TO_CSTR(appToken), TO_CSTR(window));
     }
 
     if (window != NULL) {
@@ -5746,8 +5750,6 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
     VALIDATE_NOT_NULL(bitwise)
     *bitwise = 0;
 
-    Logger::I(TAG, " >>> InterceptKeyBeforeQueueing %s", TO_CSTR(event));
-
     if (!mSystemBooted) {
         // If we have not yet booted, don't let key events do anything.
         return NOERROR;
@@ -6111,7 +6113,6 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
     }
 
     *bitwise = result;
-    Logger::I(TAG, " <<< InterceptKeyBeforeQueueing %s", TO_CSTR(event));
     return NOERROR;
 }
 

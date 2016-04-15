@@ -5463,7 +5463,6 @@ ECode ViewRootImpl::LoadSystemProperties()
 void ViewRootImpl::DestroyHardwareRenderer()
 {
     AutoPtr<IHardwareRenderer> hardwareRenderer = mAttachInfo->mHardwareRenderer;
-
     if (hardwareRenderer != NULL) {
         if (mView != NULL) {
             hardwareRenderer->DestroyHardwareResources(mView);

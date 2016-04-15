@@ -266,7 +266,7 @@ void WindowAnimator::UpdateWindowsLocked(
             Boolean nowAnimating = winAnimator->StepAnimationLocked(mCurrentTime);
 
             if (CWindowManagerService::DEBUG_WALLPAPER) {
-                Slogger::V(TAG, "%p: wasAnimating=%d, nowAnimating=%d", win.Get(), wasAnimating, nowAnimating);
+                Slogger::V(TAG, "%s: wasAnimating=%d, nowAnimating=%d", TO_CSTR(win), wasAnimating, nowAnimating);
             }
 
             if (wasAnimating && !winAnimator->mAnimating && mService->mWallpaperTarget == win) {

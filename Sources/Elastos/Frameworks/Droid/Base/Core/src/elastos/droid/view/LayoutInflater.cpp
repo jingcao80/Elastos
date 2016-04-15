@@ -688,13 +688,17 @@ String LayoutInflater::GetReflectionClassName(
 
 ECode LayoutInflater::CreateView(
     /* [in] */ const String& name,
-    /* [in] */ const String& prefix,
+    /* [in] */ const String& inPrefix,
     /* [in] */ IAttributeSet* attrs,
     /* [out] */ IView** view)
 {
+    String prefix = inPrefix;
+    if (name.Equals("ViewStub") && !inPrefix.IsNull()) {
+        prefix = "Elastos.Droid.View."; // speed up for ViewStub
+    }
     String reflectionClassName = GetReflectionClassName(prefix, name);
 
-    Slogger::I(TAG, " CreateView: name:%s, prefix:%s, reflectionClassName:%s",
+    Slogger::I(TAG, " >> CreateView: name:%s, prefix:%s, reflectionClassName:%s",
         name.string(), prefix.string(), reflectionClassName.string());
     AutoPtr<IConstructorInfo> constructor;
     AutoPtr<IClassInfo> clazz;
@@ -781,11 +785,12 @@ ECode LayoutInflater::CreateView(
     }
 
 #if defined(_DEBUG) || defined(_ELASTOS_DEBUG)
-    // Int32 viewId;
-    // (*view)->GetId(&viewId);
-    // Slogger::D(TAG, "Created view: %p, id: 0x%08x, type: %s%s ",
-    //     *view, viewId, prefix.IsNull() ? "" : prefix.string(), name.string());
+    Int32 viewId;
+    (*view)->GetId(&viewId);
+    Slogger::D(TAG, " << CreateView: %s, id: 0x%08x, type: %sC%s ",
+        TO_CSTR(*view), viewId, prefix.IsNull() ? "" : prefix.string(), name.string());
 #endif
+
     return NOERROR;
 
 //    } catch (NoSuchMethodException e) {

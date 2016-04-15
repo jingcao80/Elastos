@@ -681,7 +681,7 @@ Boolean AccessibilityInteractionController::IsShown(
         return FALSE;
     }
 
-    View* viewObj = VIEW_PROBE(view);
+    View* viewObj = (View*)view;
     assert(viewObj != NULL);
     Boolean res;
 
@@ -1469,7 +1469,7 @@ void AccessibilityInteractionController::ComputeClickPointInScreenUiThread(
         }
         else if (virtualDescendantId == IAccessibilityNodeInfo::UNDEFINED_ITEM_ID) {
             // For a real view, ask the view to compute the click point.
-            VIEW_PROBE(target)->ComputeClickPointInScreenForAccessibility(interactiveRegion, point, &succeeded);
+            ((View*)target.Get())->ComputeClickPointInScreenForAccessibility(interactiveRegion, point, &succeeded);
         }
     }
     // } finally {
@@ -1494,7 +1494,7 @@ AutoPtr<IView> AccessibilityInteractionController::FindViewByAccessibilityId(
         return NULL;
     }
 
-    AutoPtr<IView> foundView = VIEW_PROBE(root)->FindViewByAccessibilityId(accessibilityId);
+    AutoPtr<IView> foundView = ((View*)root.Get())->FindViewByAccessibilityId(accessibilityId);
     if (foundView != NULL && !IsShown(foundView)) {
         return NULL;
     }

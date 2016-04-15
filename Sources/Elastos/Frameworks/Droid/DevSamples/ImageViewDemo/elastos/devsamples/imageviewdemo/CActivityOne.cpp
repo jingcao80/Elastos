@@ -51,6 +51,7 @@ ECode CActivityOne::MyListener::OnClick(
     String action("android.intent.action.MAIN");
     String nullStr;
 
+    Logger::I(TAG, " trying to StartActivity %s", package.string());
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
     intent->SetPackage(package);
