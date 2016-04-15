@@ -342,13 +342,13 @@ ECode CActivityOne::OnCreate(
             AutoPtr<IMap> map;
             CHashMap::New((IMap**)&map);
 
-            StringBuilder sb("Itemkey1 ");
-            sb += i;
-            map->Put(CoreUtils::Convert(key1), sb.ToCharSequence());
+            StringBuilder sb1("Itemkey1 ");
+            sb1 += i;
+            map->Put(CoreUtils::Convert(key1), sb1.ToCharSequence());
 
             StringBuilder sb2("Itemkey2 ");
             sb2 += i;
-            map->Put(CoreUtils::Convert(key2), sb.ToCharSequence());
+            map->Put(CoreUtils::Convert(key2), sb2.ToCharSequence());
             listData->Add(map);
         }
 
