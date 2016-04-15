@@ -3287,8 +3287,8 @@ ECode Collections::_UnmodifiableList::AddAll(
     /* [in] */ Int32 location,
     /* [in] */ ICollection* collection)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean modified = FALSE;
+    return _UnmodifiableList::AddAll(location, collection, &modified);
 }
 
 ECode Collections::_UnmodifiableList::Equals(
@@ -5996,8 +5996,8 @@ ECode Collections::_CheckedCollection::Add(
 ECode Collections::_CheckedCollection::Add(
     /* [in] */ IInterface* object)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean modified;
+    return mC->Add(object, &modified);;
 }
 
 ECode Collections::_CheckedCollection::Remove(
@@ -6943,8 +6943,8 @@ ECode Collections::_CheckedMap::Put(
     /* [in] */ PInterface key,
     /* [in] */ PInterface value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    AutoPtr<IInterface> oldValue;
+    return Put(key, value, (IInterface**)&oldValue);
 }
 
 ECode Collections::_CheckedMap::Remove(
