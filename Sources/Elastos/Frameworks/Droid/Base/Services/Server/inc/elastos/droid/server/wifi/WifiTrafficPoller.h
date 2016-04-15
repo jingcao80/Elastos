@@ -1,50 +1,23 @@
-/*
-  * Copyright (C) 2013 The Android Open Source Project
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *      http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
 #ifndef __ELASTOS_DROID_SERVER_WIFI_WIFITRAFFICPOLLER_H__
 #define __ELASTOS_DROID_SERVER_WIFI_WIFITRAFFICPOLLER_H__
 
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.Net.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/os/Handler.h"
 
-// package com.android.server.wifi;
-// import android.content.BroadcastReceiver;
-// import android.content.Context;
-// import android.content.Intent;
-// import android.content.IntentFilter;
-// import android.net.NetworkInfo;
-// import static android.net.NetworkInfo.DetailedState.CONNECTED;
-// import android.net.TrafficStats;
-// import android.net.wifi.WifiManager;
-// import android.os.Messenger;
-// import android.os.RemoteException;
-// import android.os.Handler;
-// import android.os.Message;
-// import android.util.Log;
-// import java.io.FileDescriptor;
-// import java.io.PrintWriter;
-// import java.util.ArrayList;
-// import java.util.List;
-// import java.util.concurrent.atomic.AtomicBoolean;
-
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Net::INetworkInfo;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IMessenger;
-using Elastos::Io::IFileDescriptor;
-using Elastos::Io::IPrintWriter;
+using Elastos::Droid::Os::Handler;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
+using Elastos::Utility::IList;
+using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
 
 namespace Elastos {
 namespace Droid {
@@ -57,8 +30,7 @@ class WifiTrafficPoller
 {
 private:
     class InnerBroadcastReceiver1
-        : public Object
-        , public IBroadcastReceiver
+        : public BroadcastReceiver
     {
     public:
         InnerBroadcastReceiver1(
@@ -74,8 +46,7 @@ private:
     };
 
     class TrafficHandler
-        : public Object
-        , public IHandler
+        : public Handler
     {
     public:
         virtual CARAPI HandleMessage(
@@ -109,7 +80,7 @@ private:
 private:
     Boolean DBG;
     Boolean VDBG;
-    /*const*/ String TAG;
+    String TAG;
     /**
       * Interval in milliseconds between polling for traffic
       * statistics
@@ -125,13 +96,13 @@ private:
     Int64 mRxPkts;
     /* Tracks last reported data activity */
     Int32 mDataActivity;
-    /*const*/ AutoPtr< IList<IMessenger> > mClients;
+    AutoPtr<IList> mClients;// IMessenger
     // err on the side of updating at boot since screen on broadcast may be missed
     // the first time
     AutoPtr<IAtomicBoolean> mScreenOn;
-    /*const*/ AutoPtr<TrafficHandler> mTrafficHandler;
+    AutoPtr<TrafficHandler> mTrafficHandler;
     AutoPtr<INetworkInfo> mNetworkInfo;
-    /*const*/ String mInterface;
+    String mInterface;
 };
 
 } // namespace Wifi

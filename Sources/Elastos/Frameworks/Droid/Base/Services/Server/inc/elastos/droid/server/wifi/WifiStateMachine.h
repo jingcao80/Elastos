@@ -1,6 +1,7 @@
 #ifndef __ELASTOS_DROID_SERVER_WIFI_WIFISTATEMACHINE_H__
 #define __ELASTOS_DROID_SERVER_WIFI_WIFISTATEMACHINE_H__
 
+#include "Elastos.Droid.Internal.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/internal/utility/State.h"
 #include "elastos/droid/internal/utility/StateMachine.h"
@@ -8,10 +9,10 @@
 #include "elastos/droid/net/NetworkFactory.h"
 #include "elastos/droid/server/wifi/SupplicantStateTracker.h"
 #include "elastos/droid/server/wifi/WifiTrafficPoller.h"
-#include "elastos/droid/wifi/WifiAutoJoinController.h"
-#include "elastos/droid/wifi/WifiConfigStore.h"
-#include "elastos/droid/wifi/WifiMonitor.h"
-#include "elastos/droid/wifi/WifiNative.h"
+#include "elastos/droid/server/wifi/WifiAutoJoinController.h"
+#include "elastos/droid/server/wifi/WifiConfigStore.h"
+#include "elastos/droid/server//wifi/WifiMonitor.h"
+#include "elastos/droid/server/wifi/WifiNative.h"
 #include "elastos/droid/utility/LruCache.h"
 #include <elastos/core/Object.h>
 
@@ -21,6 +22,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::App::IIBatteryStats;
 using Elastos::Droid::Internal::Utility::IAsyncChannel;
 using Elastos::Droid::Internal::Utility::State;
+using Elastos::Droid::Internal::Utility::IState;
 using Elastos::Droid::Internal::Utility::StateMachine;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Net::IDhcpResults;
@@ -45,14 +47,11 @@ using Elastos::Droid::Server::Wifi::WifiTrafficPoller;
 using Elastos::Droid::Wifi::IBatchedScanSettings;
 using Elastos::Droid::Wifi::IRssiPacketCountInfo;
 using Elastos::Droid::Wifi::IScanSettings;
+using Elastos::Droid::Wifi::IScanResult;
 using Elastos::Droid::Wifi::IWifiConfiguration;
 using Elastos::Droid::Wifi::IWifiConnectionStatistics;
 using Elastos::Droid::Wifi::IWifiInfo;
 using Elastos::Droid::Wifi::IWifiLinkLayerStats;
-using Elastos::Droid::Wifi::WifiAutoJoinController;
-using Elastos::Droid::Wifi::WifiConfigStore;
-using Elastos::Droid::Wifi::WifiMonitor;
-using Elastos::Droid::Wifi::WifiNative;
 using Elastos::Droid::Utility::LruCache;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
@@ -440,7 +439,7 @@ private:
             /* [in] */ Int32 score);
 
     protected:
-        CARAPI_(void) Unwanted();
+        CARAPI Unwanted();
 
         CARAPI_(void) NetworkStatus(
             /* [in] */ Int32 status);
@@ -877,7 +876,8 @@ public:
     CARAPI ClearCurrentConfigBSSID(
         /* [in] */ const String& dbg);
 
-    CARAPI ClearConfigBSSID(WifiConfiguration config,
+    CARAPI ClearConfigBSSID(
+        /* [in] */ IWifiConfiguration* config,
         /* [in] */ const String& dbg);
 
     CARAPI HandleGsmAuthRequest(
@@ -1182,7 +1182,7 @@ private:
         /* [in] */ IMessage* srcMsg);
 
     static CARAPI_(Int32) ParseHex(
-        /* [in] */ Char ch);
+        /* [in] */ Byte ch);
 
     CARAPI_(AutoPtr<ArrayOf<Byte> >) ParseHex(
         /* [in] */ const String& hex);
@@ -1486,7 +1486,7 @@ private:
     AutoPtr<IList> mScanResults; //= new ArrayList<ScanResult>();
     static AutoPtr<IPattern> scanResultPattern; //= Pattern.compile("\t+");
     static const Int32 SCAN_RESULT_CACHE_SIZE; //= 160;
-    AutoPtr<LruCache<String, ScanResult> > mScanResultCache;
+    AutoPtr<LruCache<String, IScanResult*> > mScanResultCache;
     // For debug, number of known scan results that were found as part of last scan result event,
     // as well the number of scans results returned by the supplicant with that message
     Int32 mNumScanResultsKnown;
@@ -1621,7 +1621,7 @@ private:
     AutoPtr<IWifiInfo> mWifiInfo;
     AutoPtr<INetworkInfo> mNetworkInfo;
     AutoPtr<INetworkCapabilities> mNetworkCapabilities;
-    AutoPtr<ISupplicantStateTracker> mSupplicantStateTracker;
+    AutoPtr<SupplicantStateTracker> mSupplicantStateTracker;
     AutoPtr<IDhcpStateMachine> mDhcpStateMachine;
     Boolean mDhcpActive; //= FALSE;
 

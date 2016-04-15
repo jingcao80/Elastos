@@ -1,6 +1,5 @@
-
-#include "elastos/droid/ext/frameworkdef.h"
-#include "elastos/droid/wifi/CStateChangeResult.h"
+#include "Elastos.Droid.Wifi.h"
+#include "elastos/droid/server/wifi/CStateChangeResult.h"
 #include "elastos/core/StringBuffer.h"
 
 using Elastos::Core::StringBuffer;
@@ -10,12 +9,12 @@ namespace Droid {
 namespace Server {
 namespace Wifi {
 
-CStateChangeResult::CStateChangeResult()
-    : mNetworkId(0)
-    , mState(SupplicantState_INVALID)
-{}
+//CStateChangeResult::CStateChangeResult()
+//    : mNetworkId(0)
+//    , mState(SupplicantState_INVALID)
+//{}
 
-ECode CStateChangeResult::constructor(
+CStateChangeResult::CStateChangeResult(
     /* [in] */ Int32 networkId,
     /* [in] */ IWifiSsid* wifiSsid,
     /* [in] */ const String& BSSID,
@@ -25,7 +24,6 @@ ECode CStateChangeResult::constructor(
     mWifiSsid = wifiSsid;
     mBSSID = BSSID;
     mState = state;
-    return NOERROR;
 }
 
 ECode CStateChangeResult::GetWifiSsid(
@@ -96,7 +94,7 @@ ECode CStateChangeResult::ToString(
     AutoPtr<StringBuffer> sb = new StringBuffer();
     sb->Append(" SSID: ");
     String wifissid;
-    mWifiSsid->ToString(&wifissid);
+    IObject::Probe(mWifiSsid)->ToString(&wifissid);
     sb->Append(wifissid);
     sb->Append(" BSSID: ");
     sb->Append(mBSSID);

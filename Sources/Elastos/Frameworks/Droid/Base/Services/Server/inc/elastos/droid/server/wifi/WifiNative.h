@@ -6,6 +6,12 @@
 #include "elastos/core/Thread.h"
 
 using Elastos::Droid::Wifi::IBatchedScanSettings;
+using Elastos::Droid::Wifi::IScanResult;
+using Elastos::Droid::Wifi::IRttManagerRttResult;
+using Elastos::Droid::Wifi::IWifiScannerHotlistSettings;
+using Elastos::Droid::Wifi::IWifiScannerWifiChangeSettings;
+using Elastos::Droid::Wifi::IWifiLinkLayerStats;
+using Elastos::Droid::Wifi::IRttManagerRttParams;
 using Elastos::Droid::Wifi::P2p::IWifiP2pConfig;
 using Elastos::Droid::Wifi::P2p::IWifiP2pGroup;
 using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceInfo;
@@ -68,33 +74,33 @@ public:
 
     class ScanEventHandler : public Object {
     public:
-        CARAPI_(void) OnScanResultsAvailable() = 0;
+        virtual CARAPI_(void) OnScanResultsAvailable() = 0;
 
-        CARAPI_(void) OnFullScanResult(
+        virtual CARAPI_(void) OnFullScanResult(
             /* [in] */ IScanResult* fullScanResult);
 
-        CARAPI_(void) OnSingleScanComplete() = 0;
+        virtual CARAPI_(void) OnSingleScanComplete() = 0;
 
-        CARAPI_(void) OnScanPaused() = 0;
+        virtual CARAPI_(void) OnScanPaused() = 0;
 
-        CARAPI_(void) OnScanRestarted() = 0;
+        virtual CARAPI_(void) OnScanRestarted() = 0;
     };
 
     class HotlistEventHandler : public Object {
     public:
-        CARAPI_(void) OnHotlistApFound(
+        virtual CARAPI_(void) OnHotlistApFound(
             /* [in] */ ArrayOf<IScanResult*>* result) = 0;
     };
 
     class SignificantWifiChangeEventHandler : public Object {
     public:
-        CARAPI_(void) OnChangesFound(
+        virtual CARAPI_(void) OnChangesFound(
             /* [in] */ ArrayOf<IScanResult*>* result) = 0;
     };
 
     class RttEventHandler : public Object {
     public:
-        CARAPI_(void) OnRttResults(
+        virtual CARAPI OnRttResults(
             /* [in] */ ArrayOf<IRttManagerRttResult*>* result) = 0;
     };
 
@@ -189,7 +195,7 @@ public:
     CARAPI_(String) Status();
 
     CARAPI_(String) Status(
-        /* [in] */ Boolean noEvent);
+        /* [in] */ Boolean noEvents);
 
     CARAPI_(String) GetMacAddress();
 
@@ -668,6 +674,13 @@ public:
     CARAPI_(Boolean) Disable5GHzFrequencies(
         /* [in] */ Boolean disable);
 
+    static CARAPI_(void) OnRttResults(
+        /* [in] */ Int32 id,
+        /* [in] */ ArrayOf<IRttManagerRttResult*>* results);
+
+    static CARAPI_(void) SetWifiHalHandle(
+        /* [in] */ Int64 handle);
+
 private:
     static CARAPI_(Int32) GetNewCmdIdLocked();
 
@@ -743,7 +756,7 @@ private:
         /* [in] */ Int32 iface,
         /* [in] */ Boolean flush);
 
-    static CARAPI_(AutoPtr<IWifiLinkLayerStats>) getWifiLinkLayerStatsNative(
+    static CARAPI_(AutoPtr<IWifiLinkLayerStats>) GetWifiLinkLayerStatsNative(
         /* [in] */ Int32 iface);
 
     static CARAPI_(Boolean) SetHotlistNative(
@@ -764,14 +777,10 @@ private:
         /* [in] */ Int32 iface,
         /* [in] */ Int32 id);
 
-    static CARAPI_(void) OnRttResults(
-        /* [in] */ Int32 id,
-        /* [in] */ ArrayOf<IRttManagerRttResult*>* results);
-
     static CARAPI_(Boolean) RequestRangeNative(
         /* [in] */ Int32 iface,
         /* [in] */ Int32 id,
-        /* [in] */ Arrayof<IRttManagerRttParams*>* params);
+        /* [in] */ ArrayOf<IRttManagerRttParams*>* params);
 
     static CARAPI_(Boolean) CancelRangeRequestNative(
         /* [in] */ Int32 iface,
@@ -816,23 +825,23 @@ private:
     /* WIFI HAL support */
 
     static String TAG;// = "WifiNative-HAL";
-    static Int64 sWifiHalHandle = 0;  /* used by JNI to save wifi_handle */
+    static Int64 sWifiHalHandle;// = 0;  /* used by JNI to save wifi_handle */
     static AutoPtr<ArrayOf<Int64> > sWifiIfaceHandles;  /* used by JNI to save interface handles */
-    static Int32 sWlan0Index = -1;
-    static Int32 sP2p0Index = -1;
+    static Int32 sWlan0Index;// = -1;
+    static Int32 sP2p0Index;// = -1;
 
     static Boolean sHalIsStarted;// = false;
     static Object mClassLock;
 
     /* scan status, keep these values in sync with gscan.h */
-    static Int32 WIFI_SCAN_BUFFER_FULL = 0;
-    static Int32 WIFI_SCAN_COMPLETE = 1;
+    static Int32 WIFI_SCAN_BUFFER_FULL;// = 0;
+    static Int32 WIFI_SCAN_COMPLETE;// = 1;
 
-    static Int32 sScanCmdId = 0;
+    static Int32 sScanCmdId;// = 0;
     static AutoPtr<ScanEventHandler> sScanEventHandler;
     static AutoPtr<ScanSettings> sScanSettings;
 
-    static Int32 sHotlistCmdId = 0;
+    static Int32 sHotlistCmdId;// = 0;
     static AutoPtr<HotlistEventHandler> sHotlistEventHandler;
 
     static AutoPtr<SignificantWifiChangeEventHandler> sSignificantWifiChangeHandler;

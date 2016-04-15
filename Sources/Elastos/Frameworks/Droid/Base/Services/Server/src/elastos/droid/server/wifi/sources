@@ -1,0 +1,26 @@
+TARGET_NAME= wifi
+TARGET_TYPE= lib
+
+INCLUDES += ../
+#INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(PREBUILD_INC)/hardware_legacy
+#INCLUDES += $(PREBUILD_INC)/skia/core
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = CStateChangeResult.cpp
+SOURCES += NetworkUpdateResult.cpp
+SOURCES += RttService.cpp
+SOURCES += CRttServiceImpl.cpp
+SOURCES += SupplicantStateTracker.cpp
+SOURCES += WifiApConfigStore.cpp
+SOURCES += WifiAutoJoinController.cpp
+SOURCES += WifiConfigStore.cpp
+SOURCES += WifiController.cpp
+SOURCES += WifiMonitor.cpp
+SOURCES += WifiNative.cpp
+#SOURCES += WifiNetworkScoreCache.cpp
+

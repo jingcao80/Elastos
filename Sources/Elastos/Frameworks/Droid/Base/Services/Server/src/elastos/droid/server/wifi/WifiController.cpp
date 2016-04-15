@@ -1,5 +1,11 @@
 
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Net.h"
 #include "elastos/droid/server/wifi/WifiController.h"
+
+using Elastos::Droid::Os::CWorkSource;
+using Elastos::Droid::Net::CNetworkInfo;
 
 namespace Elastos {
 namespace Droid {
@@ -627,6 +633,21 @@ WifiController::WifiController(
     /* [in] */ WifiServiceImpl* service,
     /* [in] */ ILooper* looper)
 {
+    CNetworkInfo::New(IConnectivityManager::TYPE_WIFI, 0, String("WIFI"), String(""), (INetworkInfo**)&mNetworkInfo);
+    CWorkSource::New((IWorkSource**)&mTmpWorkSource);
+    mDefaultState = new DefaultState();
+    mStaEnabledState = new StaEnabledState();
+    mApStaDisabledState = new ApStaDisabledState();
+    mStaDisabledWithScanState = new StaDisabledWithScanState();
+    mApEnabledState = new ApEnabledState();
+    mDeviceActiveState = new DeviceActiveState();
+    mDeviceActiveHighPerfState = new DeviceActiveHighPerfState();
+    mDeviceInactiveState = new DeviceInactiveState();
+    mScanOnlyLockHeldState = new ScanOnlyLockHeldState();
+    mFullLockHeldState = new FullLockHeldState();
+    mFullHighPerfLockHeldState = new FullHighPerfLockHeldState();
+    mNoLockHeldState = new NoLockHeldState();
+    mEcmState = new EcmState();
     // ==================before translated======================
     // super(TAG, looper);
     // mContext = context;

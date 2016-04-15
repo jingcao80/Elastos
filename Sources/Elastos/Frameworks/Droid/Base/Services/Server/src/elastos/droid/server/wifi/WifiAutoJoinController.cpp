@@ -1,6 +1,8 @@
 
 #include "elastos/droid/server/wifi/WifiAutoJoinController.h"
 
+using Elastos::Utility::CHashMap;
+
 namespace Elastos {
 namespace Droid {
 namespace Server {
@@ -9,7 +11,7 @@ namespace Wifi {
 //=====================================================================
 //                        WifiAutoJoinController
 //=====================================================================
-Int32 WifiAutoJoinController::mScanResultMaximumAge;
+Int32 WifiAutoJoinController::mScanResultMaximumAge = 40000;
 const Int32 WifiAutoJoinController::AUTO_JOIN_IDLE;
 const Int32 WifiAutoJoinController::AUTO_JOIN_ROAMING;
 const Int32 WifiAutoJoinController::AUTO_JOIN_EXTENDED_ROAMING;
@@ -27,17 +29,10 @@ WifiAutoJoinController::WifiAutoJoinController(
     /* [in] */ IContext* c,
     /* [in] */ WifiStateMachine* w,
     /* [in] */ WifiConfigStore* s,
-    /* [in] */ WifiConnectionStatistics* st,
+    /* [in] */ IWifiConnectionStatistics* st,
     /* [in] */ WifiNative* n)
-    : Couldnt register as a WiFi score Manager
-    : type="
-                     + Integer.toString(NetworkKey.TYPE_WIFI)
-                     + " service " + Context.NETWORK_SCORE_SERVICE);
-             mNetworkScoreCache = null;
-         }
-         mBlacklistedBssids = new ArrayList<String>();
-     }
 {
+    CHashMap::New((IHashMap**)&scanResultCache);
     // ==================before translated======================
     // mContext = c;
     // mWifiStateMachine = w;
@@ -78,7 +73,7 @@ ECode WifiAutoJoinController::EnableVerboseLogging(
 }
 
 ECode WifiAutoJoinController::AddToScanCache(
-    /* [in] */ IList<ScanResult*>* scanList,
+    /* [in] */ IList* scanList,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(scanList);
@@ -187,7 +182,7 @@ ECode WifiAutoJoinController::AddToScanCache(
 }
 
 ECode WifiAutoJoinController::LogDbg(
-    /* [in] */ String message)
+    /* [in] */ const String& message)
 {
     // ==================before translated======================
     // logDbg(message, false);
@@ -196,7 +191,7 @@ ECode WifiAutoJoinController::LogDbg(
 }
 
 ECode WifiAutoJoinController::LogDbg(
-    /* [in] */ String message,
+    /* [in] */ const String& message,
     /* [in] */ Boolean stackTrace)
 {
     // ==================before translated======================
@@ -414,8 +409,8 @@ ECode WifiAutoJoinController::UpdateConfigurationHistory(
 }
 
 ECode WifiAutoJoinController::GetConnectChoice(
-    /* [in] */ WifiConfiguration* source,
-    /* [in] */ WifiConfiguration* target,
+    /* [in] */ IWifiConfiguration* source,
+    /* [in] */ IWifiConfiguration* target,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(source);
@@ -455,9 +450,9 @@ ECode WifiAutoJoinController::GetConnectChoice(
 }
 
 ECode WifiAutoJoinController::GetScoreFromVisibility(
-    /* [in] */ WifiConfiguration* ::Visibility* visibility,
+    /* [in] */ IWifiConfigurationVisibility* visibility,
     /* [in] */ Int32 rssiBoost,
-    /* [in] */ String dbg,
+    /* [in] */ const String& dbg,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(visibility);
@@ -490,9 +485,9 @@ ECode WifiAutoJoinController::GetScoreFromVisibility(
 }
 
 ECode WifiAutoJoinController::CompareWifiConfigurationsRSSI(
-    /* [in] */ WifiConfiguration* a,
-    /* [in] */ WifiConfiguration* b,
-    /* [in] */ String currentConfiguration,
+    /* [in] */ IWifiConfiguration* a,
+    /* [in] */ IWifiConfiguration* b,
+    /* [in] */ const String& currentConfiguration,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(a);
@@ -580,8 +575,8 @@ ECode WifiAutoJoinController::CompareWifiConfigurationsRSSI(
 }
 
 ECode WifiAutoJoinController::CompareWifiConfigurationsWithScorer(
-    /* [in] */ WifiConfiguration* a,
-    /* [in] */ WifiConfiguration* b,
+    /* [in] */ IWifiConfiguration* a,
+    /* [in] */ IWifiConfiguration* b,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(a);
@@ -646,8 +641,8 @@ ECode WifiAutoJoinController::CompareWifiConfigurationsWithScorer(
 }
 
 ECode WifiAutoJoinController::CompareWifiConfigurations(
-    /* [in] */ WifiConfiguration* a,
-    /* [in] */ WifiConfiguration* b,
+    /* [in] */ IWifiConfiguration* a,
+    /* [in] */ IWifiConfiguration* b,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(a);
@@ -766,8 +761,8 @@ ECode WifiAutoJoinController::IsBadCandidate(
 }
 
 ECode WifiAutoJoinController::CompareWifiConfigurationsTop(
-    /* [in] */ WifiConfiguration* a,
-    /* [in] */ WifiConfiguration* b,
+    /* [in] */ IWifiConfiguration* a,
+    /* [in] */ IWifiConfiguration* b,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(a);
@@ -801,7 +796,7 @@ ECode WifiAutoJoinController::CompareWifiConfigurationsTop(
 
 ECode WifiAutoJoinController::RssiBoostFrom5GHzRssi(
     /* [in] */ Int32 rssi,
-    /* [in] */ String dbg,
+    /* [in] */ const String& dbg,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -842,11 +837,11 @@ ECode WifiAutoJoinController::RssiBoostFrom5GHzRssi(
 }
 
 ECode WifiAutoJoinController::AttemptRoam(
-    /* [in] */ ScanResult* a,
-    /* [in] */ WifiConfiguration* current,
+    /* [in] */ IScanResult* a,
+    /* [in] */ IWifiConfiguration* current,
     /* [in] */ Int32 age,
-    /* [in] */ String currentBSSID,
-    /* [out] */ ScanResult** result)
+    /* [in] */ const String& currentBSSID,
+    /* [out] */ IScanResult** result)
 {
     VALIDATE_NOT_NULL(a);
     VALIDATE_NOT_NULL(current);
@@ -942,8 +937,8 @@ ECode WifiAutoJoinController::AttemptRoam(
     //     //   Are given a boost of 30DB which is enough to overcome the current BSSID
     //     //   hysteresis (+14) plus 2.4/5 GHz signal strength difference on most cases
     //     //
-    //     // The "current BSSID" Boost must be added to the BSSID's level so as to introduce\
-    //     // soem amount of hysteresis
+    //     // The "current BSSID" Boost must be added to the BSSID's level so as to introduce
+    //     // some amount of hysteresis
     //     if (b.is5GHz()) {
     //         bRssiBoost5 = rssiBoostFrom5GHzRssi(b.level + bRssiBoost, b.BSSID);
     //     }
@@ -989,7 +984,7 @@ ECode WifiAutoJoinController::AttemptRoam(
 }
 
 ECode WifiAutoJoinController::GetConfigNetworkScore(
-    /* [in] */ WifiConfiguration* config,
+    /* [in] */ IWifiConfiguration* config,
     /* [in] */ Int32 age,
     /* [in] */ Int32 rssiBoost,
     /* [out] */ Int32* result)
@@ -1048,7 +1043,7 @@ ECode WifiAutoJoinController::GetConfigNetworkScore(
 
 ECode WifiAutoJoinController::HandleBSSIDBlackList(
     /* [in] */ Boolean enable,
-    /* [in] */ String bssid,
+    /* [in] */ const String& bssid,
     /* [in] */ Int32 reason)
 {
     // ==================before translated======================
@@ -1073,7 +1068,7 @@ ECode WifiAutoJoinController::HandleBSSIDBlackList(
 }
 
 ECode WifiAutoJoinController::IsBlacklistedBSSID(
-    /* [in] */ String bssid,
+    /* [in] */ const String& bssid,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -1670,8 +1665,8 @@ void WifiAutoJoinController::AgeScanResultsOut(
 }
 
 Int32 WifiAutoJoinController::CompareNetwork(
-    /* [in] */ WifiConfiguration* candidate,
-    /* [in] */ String lastSelectedConfiguration)
+    /* [in] */ IWifiConfiguration* candidate,
+    /* [in] */ const String& lastSelectedConfiguration)
 {
     // ==================before translated======================
     // if (candidate == null)

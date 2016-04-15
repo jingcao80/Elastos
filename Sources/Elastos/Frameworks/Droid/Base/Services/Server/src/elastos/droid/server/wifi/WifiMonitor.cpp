@@ -1,33 +1,28 @@
 
+#include "Elastos.Droid.Wifi.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/ext/frameworkdef.h"
-#include "elastos/droid/wifi/WifiMonitor.h"
-#include <elastos/utility/logging/Logger.h>
-#include <elastos/core/StringUtils.h>
+#include "elastos/droid/server/wifi/WifiMonitor.h"
+#include "elastos/droid/server/wifi/CStateChangeResult.h"
 #include <cutils/properties.h>
-#ifdef DROID_CORE
-#include "elastos/droid/wifi/CWifiSsidHelper.h"
-#include "elastos/droid/wifi/CStateChangeResult.h"
-#include "elastos/droid/wifi/p2p/CWifiP2pDevice.h"
-#include "elastos/droid/wifi/p2p/CWifiP2pConfig.h"
-#include "elastos/droid/wifi/p2p/CWifiP2pGroup.h"
-#include "elastos/droid/wifi/p2p/CWifiP2pProvDiscEvent.h"
-#include "elastos/droid/wifi/p2p/nsd/CWifiP2pServiceResponse.h"
-#include "elastos/droid/wifi/p2p/nsd/CWifiP2pServiceResponseHelper.h"
-#endif
-#include "elastos/droid/utility/ArrayUtils.h"
+//#ifdef DROID_CORE
+//#include "elastos/droid/wifi/CWifiSsidHelper.h"
+//#include "elastos/droid/wifi/CStateChangeResult.h"
+//#include "elastos/droid/wifi/p2p/CWifiP2pDevice.h"
+//#include "elastos/droid/wifi/p2p/CWifiP2pConfig.h"
+//#include "elastos/droid/wifi/p2p/CWifiP2pGroup.h"
+//#include "elastos/droid/wifi/p2p/CWifiP2pProvDiscEvent.h"
+//#include "elastos/droid/wifi/p2p/nsd/CWifiP2pServiceResponse.h"
+//#include "elastos/droid/wifi/p2p/nsd/CWifiP2pServiceResponseHelper.h"
+//#endif
+#include "elastos/droid/internal/utility/ArrayUtils.h"
 #include "elastos/core/AutoLock.h"
+#include <elastos/core/StringUtils.h>
+#include "elastos/core/CoreUtils.h"
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Core::AutoLock;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
-using Elastos::Core::StringUtils;
-using Elastos::Core::IInteger32;
-using Elastos::Core::CInteger32;
-using Elastos::Utility::Regex::IPatternHelper;
-using Elastos::Utility::Regex::CPatternHelper;
-using Elastos::Utility::Regex::IMatcher;
-using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::Wifi::P2p::P2pStatus_UNKNOWN;
+using Elastos::Droid::Net::NetworkInfoDetailedState;
+//TODO using Elastos::Droid::Wifi::P2p::P2pStatus_UNKNOWN;
 using Elastos::Droid::Wifi::P2p::IWifiP2pDevice;
 using Elastos::Droid::Wifi::P2p::CWifiP2pDevice;
 using Elastos::Droid::Wifi::P2p::IWifiP2pConfig;
@@ -40,7 +35,26 @@ using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceResponse;
 using Elastos::Droid::Wifi::P2p::Nsd::CWifiP2pServiceResponse;
 using Elastos::Droid::Wifi::P2p::Nsd::IWifiP2pServiceResponseHelper;
 using Elastos::Droid::Wifi::P2p::Nsd::CWifiP2pServiceResponseHelper;
+using Elastos::Droid::Wifi::IWifiManager;
+using Elastos::Droid::Wifi::IWifiSsidHelper;
+using Elastos::Droid::Wifi::CWifiSsidHelper;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::AutoLock;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CString;
+using Elastos::Core::StringUtils;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CInteger32;
+using Elastos::Utility::IList;
+using Elastos::Utility::ISet;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::Regex::IPatternHelper;
+using Elastos::Utility::Regex::CPatternHelper;
+using Elastos::Utility::Regex::IMatcher;
+using Elastos::Utility::Regex::IMatchResult;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -146,7 +160,7 @@ const String WifiMonitor::GAS_QUERY_PREFIX_STR("GAS-QUERY-");
 const String WifiMonitor::GAS_QUERY_START_STR("GAS-QUERY-START");
 const String WifiMonitor::GAS_QUERY_DONE_STR("GAS-QUERY-DONE");
 const String WifiMonitor::RX_HS20_ANQP_ICON_STR("RX-HS20-ANQP-ICON");
-const Int32 WifiMonitor::RX_HS20_ANQP_ICON_STR_LEN = WifiMonitor::RX_HS20_ANQP_ICON_STR->GetLength();
+const Int32 WifiMonitor::RX_HS20_ANQP_ICON_STR_LEN = WifiMonitor::RX_HS20_ANQP_ICON_STR.GetLength();
 
 const String WifiMonitor::HS20_PREFIX_STR("HS20-");
 const String WifiMonitor::HS20_SUB_REM_STR("HS20-SUBSCRIPTION-REMEDIATION");
@@ -222,24 +236,28 @@ AutoPtr<IPattern> WifiMonitor::mRequestIdentityPattern = InitPattern(String("IDE
 //================================================================================
 // WifiMonitor::WifiMonitorSingleton
 //================================================================================
-AutoPtr<WifiMonitorSingleton sInstance = new WifiMonitorSingleton();
+AutoPtr<WifiMonitor::WifiMonitorSingleton> WifiMonitor::WifiMonitorSingleton::sInstance
+                                        = new WifiMonitor::WifiMonitorSingleton();
 
 WifiMonitor::WifiMonitorSingleton::WifiMonitorSingleton()
 {
     mConnected = FALSE;
 }
 
-void WifiMonitor::WifiMonitorSingleton::startMonitoring(
+void WifiMonitor::WifiMonitorSingleton::StartMonitoring(
     /* [in] */ const String& iface)
 {
-    AutoPtr<AutoLock> lock(mLock);
-    AutoPtr<WifiMonitor> m = mIfaceMap[iface];
+    AutoLock lock(mLock);
+    AutoPtr<IInterface> obj;
+    AutoPtr<IInterface> key = TO_IINTERFACE(CoreUtils::Convert(iface));
+    mIfaceMap->Get(key, (IInterface**)&obj);
+    AutoPtr<WifiMonitor> m = (WifiMonitor*)(IObject::Probe(obj));
     if (m == NULL) {
         Logger::E(WifiMonitor::TAG, "startMonitor called with unknown iface=%s", iface.string());
         return;
     }
 
-    Logger::D(WifiMonitor::TAG, "startMonitoring(%s) with mConnected = %d", iface, mConnected);
+    Logger::D(WifiMonitor::TAG, "startMonitoring(%s) with mConnected = %d", iface.string(), mConnected);
 
     if (mConnected) {
         m->mMonitoring = TRUE;
@@ -252,7 +270,7 @@ void WifiMonitor::WifiMonitorSingleton::startMonitoring(
             if (mWifiNative->ConnectToSupplicant()) {
                 m->mMonitoring = TRUE;
                 m->mStateMachine->SendMessage(WifiMonitor::SUP_CONNECTION_EVENT);
-                new MonitorThread(mWifiNative, this)->Start();
+                (new MonitorThread(m, mWifiNative, this))->Start();
                 mConnected = TRUE;
                 break;
             }
@@ -263,7 +281,7 @@ void WifiMonitor::WifiMonitorSingleton::startMonitoring(
                 //}
             } else {
                 m->mStateMachine->SendMessage(SUP_DISCONNECTION_EVENT);
-                Logger::E(TAG, "startMonitoring(%s) failed!", iface);
+                Logger::E(TAG, "startMonitoring(%s) failed!", iface.string());
                 break;
             }
         }
@@ -273,8 +291,11 @@ void WifiMonitor::WifiMonitorSingleton::startMonitoring(
 void WifiMonitor::WifiMonitorSingleton::StopMonitoring(
     /* [in] */ const String& iface)
 {
-    AutoPtr<AutoLock> lock(mLock);
-    AutoPtr<WifiMonitor> m = mIfaceMap[iface];
+    AutoLock lock(mLock);
+    AutoPtr<IInterface> obj;
+    AutoPtr<IInterface> key = TO_IINTERFACE(CoreUtils::Convert(iface));
+    mIfaceMap->Get(key, (IInterface**)&obj);
+    AutoPtr<WifiMonitor> m = (WifiMonitor*)(IObject::Probe(obj));
     if (DBG) Logger::D(TAG, "stopMonitoring(%s) = ", iface.string());//m.mStateMachine);
     m->mMonitoring = FALSE;
     m->mStateMachine->SendMessage(SUP_DISCONNECTION_EVENT);
@@ -284,9 +305,11 @@ void WifiMonitor::WifiMonitorSingleton::RegisterInterfaceMonitor(
     /* [in] */ const String& iface,
     /* [in] */ WifiMonitor* m)
 {
-    AutoPtr<AutoLock> lock(mLock);
+    AutoLock lock(mLock);
     if (DBG) Logger::D(TAG, "registerInterface(%s)", iface.string());//+" + m.mStateMachine + ")");
-    mIfaceMap[iface] = m;
+    AutoPtr<IInterface> key = TO_IINTERFACE(CoreUtils::Convert(iface));
+    AutoPtr<IInterface> value = TO_IINTERFACE(m);
+    mIfaceMap->Put(key, value);
     if (mWifiNative == NULL) {
         mWifiNative = m->mWifiNative;
     }
@@ -297,42 +320,59 @@ void WifiMonitor::WifiMonitorSingleton::UnregisterInterfaceMonitor(
 {
     // REVIEW: When should we call this? If this isn't called, then WifiMonitor
     // objects will remain in the mIfaceMap; and won't ever get deleted
-    AutoPtr<AutoLock> lock(mLock);
-    AutoPtr<WifiMonitor> m = mIfaceMap[iface];
-    mIfaceMap.Erase(iface);
+    AutoLock lock(mLock);
+    AutoPtr<IInterface> obj;
+    AutoPtr<IInterface> key = TO_IINTERFACE(CoreUtils::Convert(iface));
+    mIfaceMap->Get(key, (IInterface**)&obj);
+    AutoPtr<WifiMonitor> m = (WifiMonitor*)(IObject::Probe(obj));
+    mIfaceMap->Remove(key);
     if (DBG) Logger::D(TAG, "unregisterInterface(%s)", iface.string());// "+" + m.mStateMachine + ")");
 }
 
 void WifiMonitor::WifiMonitorSingleton::StopSupplicant()
 {
-    AutoPtr<AutoLock> lock(mLock);
+    AutoLock lock(mLock);
     mWifiNative->StopSupplicant();
 }
 
 void WifiMonitor::WifiMonitorSingleton::KillSupplicant(
     /* [in] */ Boolean p2pSupported)
 {
-    AutoPtr<AutoLock> lock(mLock);
+    AutoLock lock(mLock);
     WifiNative::KillSupplicant(p2pSupported);
     mConnected = FALSE;
-    HashMap<String, AutoPtr<WifiMonitor> >::Iterator iter = mIfaceMap.Begin();
-    for (; iter != mIfaceMap.End(); ++iter){
-        AutoPtr<WifiMonitor> m = iter->mSecond;
+    AutoPtr<ISet> entrySet;
+    mIfaceMap->GetEntrySet((ISet**)&entrySet);
+    AutoPtr<IIterator> it;
+    entrySet->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    AutoPtr<IMapEntry> entry;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> mapEntry;
+        it->GetNext((IInterface**)&mapEntry);
+        entry = IMapEntry::Probe(mapEntry);
+        AutoPtr<IInterface> vo;
+        entry->GetValue((IInterface**)&vo);
+        AutoPtr<WifiMonitor> m = (WifiMonitor*)(IObject::Probe(vo));
         m->mMonitoring = FALSE;
     }
 }
 
 Boolean WifiMonitor::WifiMonitorSingleton::DispatchEvent(
-    /* [in] */ const String& eventStr)
+    /* [in] */ const String& _eventStr)
 {
-    AutoPtr<AutoLock> lock(mLock);
+    AutoLock lock(mLock);
     String iface;
+    String eventStr = _eventStr;
     if (eventStr.StartWith("IFNAME=")) {
         Int32 space = eventStr.IndexOf(' ');
         if (space != -1) {
             iface = eventStr.Substring(7, space);
-            HashMap<String, AutoPtr<WifiMonitor> >::Iterator iter = mIfaceMap.Find(iface);
-            if (iter == mIfaceMap.End() && iface.StartsWith("p2p-")) {
+            AutoPtr<IInterface> obj;
+            AutoPtr<IInterface> key = TO_IINTERFACE(CoreUtils::Convert(iface));
+            mIfaceMap->Get(key, (IInterface**)&obj);
+            AutoPtr<WifiMonitor> m = (WifiMonitor*)(IObject::Probe(obj));
+            if (m == NULL && iface.StartWith("p2p-")) {
                 // p2p interfaces are created dynamically, but we have
                 // only one P2p state machine monitoring all of them; look
                 // for it explicitly, and send messages there ..
@@ -353,7 +393,10 @@ Boolean WifiMonitor::WifiMonitorSingleton::DispatchEvent(
 
     if (VDBG) Logger::D(TAG, "Dispatching event to interface: %s", iface.string());
 
-    AutoPtr<WifiMonitor> m = mIfaceMap[iface];
+    AutoPtr<IInterface> obj;
+    AutoPtr<IInterface> key = TO_IINTERFACE(CoreUtils::Convert(iface));
+    mIfaceMap->Get(key, (IInterface**)&obj);
+    AutoPtr<WifiMonitor> m = (WifiMonitor*)(IObject::Probe(obj));
     if (m != NULL) {
         if (m->mMonitoring) {
             if (m->DispatchEvent(eventStr, iface)) {
@@ -369,9 +412,21 @@ Boolean WifiMonitor::WifiMonitorSingleton::DispatchEvent(
     } else {
         if (DBG) Logger::D(TAG, "Sending to all monitors because there's no matching iface");
         Boolean done = FALSE;
-        HashMap<String, AutoPtr<WifiMonitor> >::Iterator iter = mIfaceMap.Begin();
-        for (; iter != mIfaceMap.End(); ++iter){
-            AutoPtr<WifiMonitor> m = iter->mSecond;
+
+        AutoPtr<ISet> entrySet;
+        mIfaceMap->GetEntrySet((ISet**)&entrySet);
+        AutoPtr<IIterator> it;
+        entrySet->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        AutoPtr<IMapEntry> entry;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> mapEntry;
+            it->GetNext((IInterface**)&mapEntry);
+            entry = IMapEntry::Probe(mapEntry);
+            AutoPtr<IInterface> vo;
+            entry->GetValue((IInterface**)&vo);
+            AutoPtr<WifiMonitor> m = (WifiMonitor*)(IObject::Probe(vo));
+            m->mMonitoring = FALSE;
             if (m->mMonitoring && m->DispatchEvent(eventStr, iface)) {
                 done = TRUE;
             }
@@ -415,6 +470,7 @@ ECode WifiMonitor::MonitorThread::Run()
             break;
         }
     }
+    return NOERROR;
 }
 
 void WifiMonitor::LogDbg(
@@ -429,8 +485,7 @@ void WifiMonitor::LogDbg(
 /* @return true if the event was supplicant disconnection */
 Boolean WifiMonitor::DispatchEvent(
     /* [in] */ const String& eventStr,
-    /* [in] */ const String& iface);
-
+    /* [in] */ const String& iface)
 {
     if (DBG) {
         // Dont log CTRL-EVENT-BSS-ADDED which are too verbose and not handled
@@ -444,19 +499,19 @@ Boolean WifiMonitor::DispatchEvent(
     if (!eventStr.StartWith(EVENT_PREFIX_STR)) {
         if (eventStr.StartWith(WPA_EVENT_PREFIX_STR) &&
                 0 < eventStr.IndexOf(PASSWORD_MAY_BE_INCORRECT_STR)) {
-            mHost->mStateMachine->SendMessage(AUTHENTICATION_FAILURE_EVENT, eventLogCounter);
+            mStateMachine->SendMessage(AUTHENTICATION_FAILURE_EVENT, eventLogCounter);
         }
         else if (eventStr.StartWith(WPS_SUCCESS_STR)) {
-            mHost->mStateMachine->SendMessage(WPS_SUCCESS_EVENT);
+            mStateMachine->SendMessage(WPS_SUCCESS_EVENT);
         }
         else if (eventStr.StartWith(WPS_FAIL_STR)) {
             HandleWpsFailEvent(eventStr);
         }
         else if (eventStr.StartWith(WPS_OVERLAP_STR)) {
-            mHost->mStateMachine->SendMessage(WPS_OVERLAP_EVENT);
+            mStateMachine->SendMessage(WPS_OVERLAP_EVENT);
         }
         else if (eventStr.StartWith(WPS_TIMEOUT_STR)) {
-            mHost->mStateMachine->SendMessage(WPS_TIMEOUT_EVENT);
+            mStateMachine->SendMessage(WPS_TIMEOUT_EVENT);
         }
         else if (eventStr.StartWith(P2P_EVENT_PREFIX_STR)) {
             HandleP2pEvents(eventStr);
@@ -468,9 +523,11 @@ Boolean WifiMonitor::DispatchEvent(
             HandleGasQueryEvents(eventStr);
         }
         else if (eventStr.StartWith(RX_HS20_ANQP_ICON_STR)) {
-            if (mStateMachine2 != NULL)
-                mStateMachine2->SendMessage(RX_HS20_ANQP_ICON_EVENT,
-                        eventStr.Substring(RX_HS20_ANQP_ICON_STR_LEN + 1));
+            if (mStateMachine2 != NULL) {
+                AutoPtr<IInterface> arg =
+                    TO_IINTERFACE(CoreUtils::Convert(eventStr.Substring(RX_HS20_ANQP_ICON_STR_LEN + 1)));
+                mStateMachine2->SendMessage(RX_HS20_ANQP_ICON_EVENT,arg);
+            }
         }
         else if (eventStr.StartWith(HS20_PREFIX_STR)) {
             HandleHs20Events(eventStr);
@@ -597,7 +654,8 @@ Boolean WifiMonitor::DispatchEvent(
                 }
             }
         }
-        mStateMachine->SendMessage((event == SSID_TEMP_DISABLE)? SSID_TEMP_DISABLED:SSID_REENABLED, netId, 0, substr);
+        AutoPtr<IInterface> arg = TO_IINTERFACE(CoreUtils::Convert(substr));
+        mStateMachine->SendMessage((event == SSID_TEMP_DISABLE)? SSID_TEMP_DISABLED:SSID_REENABLED, netId, 0, arg);
     }
     else if (event == STATE_CHANGE) {
         HandleSupplicantStateChange(eventData);
@@ -611,7 +669,7 @@ Boolean WifiMonitor::DispatchEvent(
          * too many recv errors
          */
         if (eventData.StartWith(WPA_RECV_ERROR_STR)) {
-            if (++mHost->sRecvErrors > MAX_RECV_ERRORS) {
+            if (++sRecvErrors > MAX_RECV_ERRORS) {
                 if (DBG) {
                     Logger::D(TAG, "too many recv errors, closing connection");
                 }
@@ -623,13 +681,13 @@ Boolean WifiMonitor::DispatchEvent(
         }
 
         // notify and exit
-        mHost->mStateMachine->SendMessage(SUP_DISCONNECTION_EVENT, eventLogCounter);
+        mStateMachine->SendMessage(SUP_DISCONNECTION_EVENT, eventLogCounter);
         return TRUE;
     }
     else if (event == EAP_FAILURE) {
         if (eventData.StartWith(EAP_AUTH_FAILURE_STR)) {
             Logger::E(TAG, "WifiMonitor send auth failure (EAP_AUTH_FAILURE) ");
-            mHost->mStateMachine->SendMessage(AUTHENTICATION_FAILURE_EVENT);
+            mStateMachine->SendMessage(AUTHENTICATION_FAILURE_EVENT);
         }
     }
     else if (event == ASSOC_REJECT) {
@@ -687,11 +745,11 @@ void WifiMonitor::HandleDriverEvent(
         return;
     }
     if (state.Equals("HANGED")) {
-        mHost->mStateMachine->SendMessage(DRIVER_HUNG_EVENT);
+        mStateMachine->SendMessage(DRIVER_HUNG_EVENT);
     }
 }
 
-void WifiMonitor::MonitorThread::HandleEvent(
+void WifiMonitor::HandleEvent(
     /* [in] */ Int32 event,
     /* [in] */ const String& remainder)
 {
@@ -703,17 +761,17 @@ void WifiMonitor::MonitorThread::HandleEvent(
         case DISCONNECTED:
             Logger::D(WifiMonitor::TAG, "TODO: should be delete");
             property_set("net.state", "0");
-            mHost->HandleNetworkStateChange(NetworkInfoDetailedState_DISCONNECTED, remainder);
+            HandleNetworkStateChange(Elastos::Droid::Net::NetworkInfoDetailedState_DISCONNECTED, remainder);
             break;
 
         case CONNECTED:
             Logger::D(WifiMonitor::TAG, "TODO: should be delete");
             property_set("net.state", "1");
-            mHost->HandleNetworkStateChange(NetworkInfoDetailedState_CONNECTED, remainder);
+            HandleNetworkStateChange(Elastos::Droid::Net::NetworkInfoDetailedState_CONNECTED, remainder);
             break;
 
         case SCAN_RESULTS:
-            mHost->mStateMachine->SendMessage(SCAN_RESULTS_EVENT);
+            mStateMachine->SendMessage(SCAN_RESULTS_EVENT);
             break;
 
         case UNKNOWN:
@@ -786,19 +844,20 @@ void WifiMonitor::HandleWpsFailEvent(
     Boolean find;
     if (match->Find(&find), find) {
         String cfgErrStr;
-        match->Group(1, &cfgErrStr);
+        IMatchResult* matchResult = IMatchResult::Probe(match);
+        matchResult->Group(1, &cfgErrStr);
         String reasonStr;
-        match->Group(2, &reasonStr);
+        matchResult->Group(2, &reasonStr);
 
         if (!reasonStr.IsNull()) {
             Int32 reasonInt = StringUtils::ParseInt32(reasonStr);
             switch(reasonInt) {
                 case WifiMonitor::REASON_TKIP_ONLY_PROHIBITED:
-                    mHost->mStateMachine->SendMessage(mHost->mStateMachine->ObtainMessage(WPS_FAIL_EVENT,
+                    mStateMachine->SendMessage(mStateMachine->ObtainMessage(WPS_FAIL_EVENT,
                             IWifiManager::WPS_TKIP_ONLY_PROHIBITED, 0));
                     return;
                 case WifiMonitor::REASON_WEP_PROHIBITED:
-                    mHost->mStateMachine->SendMessage(mHost->mStateMachine->ObtainMessage(WPS_FAIL_EVENT,
+                    mStateMachine->SendMessage(mStateMachine->ObtainMessage(WPS_FAIL_EVENT,
                             IWifiManager::WPS_WEP_PROHIBITED, 0));
                     return;
                 default:
@@ -807,14 +866,14 @@ void WifiMonitor::HandleWpsFailEvent(
             }
         }
         if (!cfgErrStr.IsNull()) {
-            Int32 cfgErrInt = StringUtils::ParseInt32(cfgErr);
+            Int32 cfgErrInt = StringUtils::ParseInt32(cfgErrStr);
             switch(cfgErrInt) {
                 case CONFIG_AUTH_FAILURE:
-                    mHost->mStateMachine->SendMessage(mHost->mStateMachine->ObtainMessage(WPS_FAIL_EVENT,
+                    mStateMachine->SendMessage(mStateMachine->ObtainMessage(WPS_FAIL_EVENT,
                             IWifiManager::WPS_AUTH_FAILURE, 0));
                     return;
                 case CONFIG_MULTIPLE_PBC_DETECTED:
-                    mHost->mStateMachine->SendMessage(mHost->mStateMachine->ObtainMessage(WPS_FAIL_EVENT,
+                    mStateMachine->SendMessage(mStateMachine->ObtainMessage(WPS_FAIL_EVENT,
                             IWifiManager::WPS_OVERLAP_ERROR, 0));
                     return;
                 default:
@@ -824,75 +883,76 @@ void WifiMonitor::HandleWpsFailEvent(
         }
     }
     //For all other errors, return a generic internal error
-    mHost->mStateMachine->SendMessage(mHost->mStateMachine->ObtainMessage(WPS_FAIL_EVENT,
-            IWifiManager::ERROR, reason));
+    AutoPtr<IMessage> msg;
+    mStateMachine->ObtainMessage(WPS_FAIL_EVENT,IWifiManager::ERROR, reason, (IMessage**)&msg);
+    mStateMachine->SendMessage(msg);
 }
 
-P2pStatus WifiMonitor::ValueOf(
-    /* [in] */ Int32 error)
-{
-    using namespace Elastos::Droid::Wifi::P2p;
-    switch(error) {
-    case 0 :
-        return P2pStatus_SUCCESS;
-    case 1:
-        return P2pStatus_INFORMATION_IS_CURRENTLY_UNAVAILABLE;
-    case 2:
-        return P2pStatus_INCOMPATIBLE_PARAMETERS;
-    case 3:
-        return P2pStatus_LIMIT_REACHED;
-    case 4:
-        return P2pStatus_INVALID_PARAMETER;
-    case 5:
-        return P2pStatus_UNABLE_TO_ACCOMMODATE_REQUEST;
-    case 6:
-        return P2pStatus_PREVIOUS_PROTOCOL_ERROR;
-    case 7:
-        return P2pStatus_NO_COMMON_CHANNEL;
-    case 8:
-        return P2pStatus_UNKNOWN_P2P_GROUP;
-    case 9:
-        return P2pStatus_BOTH_GO_INTENT_15;
-    case 10:
-        return P2pStatus_INCOMPATIBLE_PROVISIONING_METHOD;
-    case 11:
-        return P2pStatus_REJECTED_BY_USER;
-    default:
-        return P2pStatus_UNKNOWN;
-    }
-}
-
-P2pStatus WifiMonitor::P2pError(
-   /* [in] */ const String& dataString)
-{
-    P2pStatus err = P2pStatus_UNKNOWN;
-    AutoPtr< ArrayOf<String> > tokens;
-    StringUtils::Split(dataString, String(" "), (ArrayOf<String>**)&tokens);
-
-    if (tokens == NULL || tokens->GetLength() < 2) return err;
-
-    AutoPtr< ArrayOf<String> > nameValue;
-    StringUtils::Split((*tokens)[1], String("="), (ArrayOf<String>**)&nameValue);
-    if (nameValue == NULL || nameValue->GetLength() < 2) return err;
-
-    /* Handle the special case of reason=FREQ+CONFLICT */
-    if ((*nameValue)[1].Equals("FREQ_CONFLICT")) {
-        return Elastos::Droid::Wifi::P2p::P2pStatus_NO_COMMON_CHANNEL;
-    }
-    // try {
-    Int32 value;
-    ECode ec = StringUtils::ParseInt32((*nameValue)[1], 10, &value);
-    if (SUCCEEDED(ec)) {
-        err = ValueOf(value);
-    }
-    else {
-        Logger::E(WifiMonitor::TAG, "NumberFormatException %s", (*nameValue)[1].string());
-    }
-   // } catch (NumberFormatException e) {
-   //     e.printStackTrace();
-   // }
-   return err;
-}
+//P2pStatus WifiMonitor::ValueOf(
+//    /* [in] */ Int32 error)
+//{
+//    using namespace Elastos::Droid::Wifi::P2p;
+//    switch(error) {
+//    case 0 :
+//        return P2pStatus_SUCCESS;
+//    case 1:
+//        return P2pStatus_INFORMATION_IS_CURRENTLY_UNAVAILABLE;
+//    case 2:
+//        return P2pStatus_INCOMPATIBLE_PARAMETERS;
+//    case 3:
+//        return P2pStatus_LIMIT_REACHED;
+//    case 4:
+//        return P2pStatus_INVALID_PARAMETER;
+//    case 5:
+//        return P2pStatus_UNABLE_TO_ACCOMMODATE_REQUEST;
+//    case 6:
+//        return P2pStatus_PREVIOUS_PROTOCOL_ERROR;
+//    case 7:
+//        return P2pStatus_NO_COMMON_CHANNEL;
+//    case 8:
+//        return P2pStatus_UNKNOWN_P2P_GROUP;
+//    case 9:
+//        return P2pStatus_BOTH_GO_INTENT_15;
+//    case 10:
+//        return P2pStatus_INCOMPATIBLE_PROVISIONING_METHOD;
+//    case 11:
+//        return P2pStatus_REJECTED_BY_USER;
+//    default:
+//        return P2pStatus_UNKNOWN;
+//    }
+//}
+//
+//P2pStatus WifiMonitor::P2pError(
+//   /* [in] */ const String& dataString)
+//{
+//    P2pStatus err = P2pStatus_UNKNOWN;
+//    AutoPtr< ArrayOf<String> > tokens;
+//    StringUtils::Split(dataString, String(" "), (ArrayOf<String>**)&tokens);
+//
+//    if (tokens == NULL || tokens->GetLength() < 2) return err;
+//
+//    AutoPtr< ArrayOf<String> > nameValue;
+//    StringUtils::Split((*tokens)[1], String("="), (ArrayOf<String>**)&nameValue);
+//    if (nameValue == NULL || nameValue->GetLength() < 2) return err;
+//
+//    /* Handle the special case of reason=FREQ+CONFLICT */
+//    if ((*nameValue)[1].Equals("FREQ_CONFLICT")) {
+//        return Elastos::Droid::Wifi::P2p::P2pStatus_NO_COMMON_CHANNEL;
+//    }
+//    // try {
+//    Int32 value;
+//    ECode ec = StringUtils::ParseInt32((*nameValue)[1], 10, &value);
+//    if (SUCCEEDED(ec)) {
+//        err = ValueOf(value);
+//    }
+//    else {
+//        Logger::E(WifiMonitor::TAG, "NumberFormatException %s", (*nameValue)[1].string());
+//    }
+//   // } catch (NumberFormatException e) {
+//   //     e.printStackTrace();
+//   // }
+//   return err;
+//}
 
 void WifiMonitor::HandleP2pEvents(
     /* [in]*/ const String& dataString)
@@ -904,91 +964,91 @@ void WifiMonitor::HandleP2pEvents(
     if (dataString.StartWith(P2P_DEVICE_FOUND_STR)) {
         AutoPtr<IWifiP2pDevice> device;
         ASSERT_SUCCEEDED(CWifiP2pDevice::New(dataString, (IWifiP2pDevice**)&device));
-        mHost->mStateMachine->SendMessage(P2P_DEVICE_FOUND_EVENT, device);
+        mStateMachine->SendMessage(P2P_DEVICE_FOUND_EVENT, device);
     }
     else if (dataString.StartWith(P2P_DEVICE_LOST_STR)) {
         AutoPtr<IWifiP2pDevice> device;
         ASSERT_SUCCEEDED(CWifiP2pDevice::New(dataString, (IWifiP2pDevice**)&device));
-        mHost->mStateMachine->SendMessage(P2P_DEVICE_LOST_EVENT, device);
+        mStateMachine->SendMessage(P2P_DEVICE_LOST_EVENT, device);
     }
     else if (dataString.StartWith(P2P_FIND_STOPPED_STR)) {
-        mHost->mStateMachine->SendMessage(P2P_FIND_STOPPED_EVENT);
+        mStateMachine->SendMessage(P2P_FIND_STOPPED_EVENT);
     }
     else if (dataString.StartWith(P2P_GO_NEG_REQUEST_STR)) {
         AutoPtr<IWifiP2pConfig> config;
         ASSERT_SUCCEEDED(CWifiP2pConfig::New(dataString, (IWifiP2pConfig**)&config));
-        mHost->mStateMachine->SendMessage(P2P_GO_NEGOTIATION_REQUEST_EVENT, config);
+        mStateMachine->SendMessage(P2P_GO_NEGOTIATION_REQUEST_EVENT, config);
     }
     else if (dataString.StartWith(P2P_GO_NEG_SUCCESS_STR)) {
-        mHost->mStateMachine->SendMessage(P2P_GO_NEGOTIATION_SUCCESS_EVENT);
+        mStateMachine->SendMessage(P2P_GO_NEGOTIATION_SUCCESS_EVENT);
     }
     else if (dataString.StartWith(P2P_GO_NEG_FAILURE_STR)) {
-        Int32 value = P2pError(dataString);
+        Int32 value = 0;//TODO = P2pError(dataString);
         AutoPtr<IInteger32> iobj;
         CInteger32::New(value, (IInteger32**)&iobj);
-        mHost->mStateMachine->SendMessage(P2P_GO_NEGOTIATION_FAILURE_EVENT, iobj);
+        mStateMachine->SendMessage(P2P_GO_NEGOTIATION_FAILURE_EVENT, iobj);
     }
     else if (dataString.StartWith(P2P_GROUP_FORMATION_SUCCESS_STR)) {
-        mHost->mStateMachine->SendMessage(P2P_GROUP_FORMATION_SUCCESS_EVENT);
+        mStateMachine->SendMessage(P2P_GROUP_FORMATION_SUCCESS_EVENT);
     }
     else if (dataString.StartWith(P2P_GROUP_FORMATION_FAILURE_STR)) {
-        Int32 value = P2pError(dataString);
+        Int32 value = 0;//TODO  = P2pError(dataString);
         AutoPtr<IInteger32> iobj;
         CInteger32::New(value, (IInteger32**)&iobj);
-        mHost->mStateMachine->SendMessage(P2P_GROUP_FORMATION_FAILURE_EVENT, iobj);
+        mStateMachine->SendMessage(P2P_GROUP_FORMATION_FAILURE_EVENT, iobj);
     }
     else if (dataString.StartWith(P2P_GROUP_STARTED_STR)) {
         AutoPtr<IWifiP2pGroup> group;
         ASSERT_SUCCEEDED(CWifiP2pGroup::New(dataString, (IWifiP2pGroup**)&group));
-        mHost->mStateMachine->SendMessage(P2P_GROUP_STARTED_EVENT, group);
+        mStateMachine->SendMessage(P2P_GROUP_STARTED_EVENT, group);
     }
     else if (dataString.StartWith(P2P_GROUP_REMOVED_STR)) {
         AutoPtr<IWifiP2pGroup> group;
         ASSERT_SUCCEEDED(CWifiP2pGroup::New(dataString, (IWifiP2pGroup**)&group));
-        mHost->mStateMachine->SendMessage(P2P_GROUP_REMOVED_EVENT, group);
+        mStateMachine->SendMessage(P2P_GROUP_REMOVED_EVENT, group);
     }
     else if (dataString.StartWith(P2P_INVITATION_RECEIVED_STR)) {
         AutoPtr<IWifiP2pGroup> group;
         ASSERT_SUCCEEDED(CWifiP2pGroup::New(dataString, (IWifiP2pGroup**)&group));
-        mHost->mStateMachine->SendMessage(P2P_INVITATION_RECEIVED_EVENT, group);
+        mStateMachine->SendMessage(P2P_INVITATION_RECEIVED_EVENT, group);
     }
     else if (dataString.StartWith(P2P_INVITATION_RESULT_STR)) {
-        Int32 value = P2pError(dataString);
+        Int32 value = 0;//TODO  = P2pError(dataString);
         AutoPtr<IInteger32> iobj;
         CInteger32::New(value, (IInteger32**)&iobj);
-        mHost->mStateMachine->SendMessage(P2P_INVITATION_RESULT_EVENT, iobj);
+        mStateMachine->SendMessage(P2P_INVITATION_RESULT_EVENT, iobj);
     }
     else if (dataString.StartWith(P2P_PROV_DISC_PBC_REQ_STR)) {
         AutoPtr<IWifiP2pProvDiscEvent> event;
         ASSERT_SUCCEEDED(CWifiP2pProvDiscEvent::New(dataString, (IWifiP2pProvDiscEvent**)&event));
-        mHost->mStateMachine->SendMessage(P2P_PROV_DISC_PBC_REQ_EVENT, event);
+        mStateMachine->SendMessage(P2P_PROV_DISC_PBC_REQ_EVENT, event);
     }
     else if (dataString.StartWith(P2P_PROV_DISC_PBC_RSP_STR)) {
         AutoPtr<IWifiP2pProvDiscEvent> event;
         ASSERT_SUCCEEDED(CWifiP2pProvDiscEvent::New(dataString, (IWifiP2pProvDiscEvent**)&event));
-        mHost->mStateMachine->SendMessage(P2P_PROV_DISC_PBC_RSP_EVENT, event);
+        mStateMachine->SendMessage(P2P_PROV_DISC_PBC_RSP_EVENT, event);
     }
     else if (dataString.StartWith(P2P_PROV_DISC_ENTER_PIN_STR)) {
         AutoPtr<IWifiP2pProvDiscEvent> event;
         ASSERT_SUCCEEDED(CWifiP2pProvDiscEvent::New(dataString, (IWifiP2pProvDiscEvent**)&event));
-        mHost->mStateMachine->SendMessage(P2P_PROV_DISC_ENTER_PIN_EVENT, event);
+        mStateMachine->SendMessage(P2P_PROV_DISC_ENTER_PIN_EVENT, event);
     }
     else if (dataString.StartWith(P2P_PROV_DISC_SHOW_PIN_STR)) {
         AutoPtr<IWifiP2pProvDiscEvent> event;
         ASSERT_SUCCEEDED(CWifiP2pProvDiscEvent::New(dataString, (IWifiP2pProvDiscEvent**)&event));
-        mHost->mStateMachine->SendMessage(P2P_PROV_DISC_SHOW_PIN_EVENT, event);
+        mStateMachine->SendMessage(P2P_PROV_DISC_SHOW_PIN_EVENT, event);
     }
     else if (dataString.StartWith(P2P_PROV_DISC_FAILURE_STR)) {
-        mHost->mStateMachine->SendMessage(P2P_PROV_DISC_FAILURE_EVENT);
+        mStateMachine->SendMessage(P2P_PROV_DISC_FAILURE_EVENT);
     }
     else if (dataString.StartWith(P2P_SERV_DISC_RESP_STR)) {
         AutoPtr<IWifiP2pServiceResponseHelper> helper;
         CWifiP2pServiceResponseHelper::AcquireSingleton((IWifiP2pServiceResponseHelper**)&helper);
-        AutoPtr<ArrayOf<IWifiP2pServiceResponse*> > array;
-        ASSERT_SUCCEEDED(helper->NewInstance(dataString, (ArrayOf<IWifiP2pServiceResponse*>**)&array));
-        if (array != NULL && array->GetLength() > 0) {
-            AutoPtr<IObjectContainer> container = ArrayUtils::ToObjectContainer(array);
-            mHost->mStateMachine->SendMessage(P2P_SERV_DISC_RESP_EVENT, container);
+        AutoPtr<IList> list;
+        ASSERT_SUCCEEDED(helper->NewInstance(dataString, (IList**)&list));
+        Int32 size;
+        if (list != NULL && (list->GetSize(&size), size) > 0) {
+            mStateMachine->SendMessage(P2P_SERV_DISC_RESP_EVENT, TO_IINTERFACE(list));
         }
         else {
             Logger::E(WifiMonitor::TAG, "Null service resp %s", dataString.string());
@@ -1015,13 +1075,13 @@ void WifiMonitor::HandleHostApEvents(
     if ((*tokens)[0].Equals(AP_STA_CONNECTED_STR)) {
         AutoPtr<IWifiP2pDevice> device;
         CWifiP2pDevice::New(dataString, (IWifiP2pDevice**)&device);
-        mHost->mStateMachine->SendMessage(AP_STA_CONNECTED_EVENT, device);
+        mStateMachine->SendMessage(AP_STA_CONNECTED_EVENT, device);
     /* AP-STA-DISCONNECTED 42:fc:89:a8:96:09 p2p_dev_addr=02:90:4c:a0:92:54 */
     }
     else if ((*tokens)[0].Equals(AP_STA_DISCONNECTED_STR)) {
         AutoPtr<IWifiP2pDevice> device;
         CWifiP2pDevice::New(dataString, (IWifiP2pDevice**)&device);
-        mHost->mStateMachine->SendMessage(AP_STA_DISCONNECTED_EVENT, device);
+        mStateMachine->SendMessage(AP_STA_DISCONNECTED_EVENT, device);
     }
 }
 
@@ -1163,7 +1223,7 @@ void WifiMonitor::HandleSupplicantStateChange(
     Int32 networkId = -1;
     Int32 newState  = -1;
     if (dataTokens && dataTokens->GetLength() > 0) {
-        ECode ec;
+        //ECode ec;
         String token;
         for (Int32 i = 0; i < dataTokens->GetLength(); ++i) {
             token = (*dataTokens)[i];
@@ -1179,9 +1239,8 @@ void WifiMonitor::HandleSupplicantStateChange(
                 continue;
             }
 
-            Int32 value = 0;
-            ec = StringUtils::ParseInt32((*nameValue)[1], &value);
-            if (ec == (ECode)E_NUMBER_FORMAT_EXCEPTION) continue;
+            Int32 value = StringUtils::ParseInt32((*nameValue)[1]);
+            //if (ec == (ECode)E_NUMBER_FORMAT_EXCEPTION) continue;
 
             if ((*nameValue)[0].Equals("id")) {
                 networkId = value;
@@ -1194,11 +1253,11 @@ void WifiMonitor::HandleSupplicantStateChange(
 
     if (newState == -1) return;
 
-    if (newState == SupplicantState_INVALID) {
+    if (newState == Elastos::Droid::Wifi::SupplicantState_INVALID) {
         Logger::W(TAG, "Invalid supplicant state: %d", newState);
     }
 
-    mHost->NotifySupplicantStateChange(networkId, wifiSsid, BSSID, newState);
+    NotifySupplicantStateChange(networkId, wifiSsid, BSSID, newState);
 }
 
 //================================================================================
@@ -1211,7 +1270,7 @@ WifiMonitor::WifiMonitor(
     , mStateMachine(wifiStateMachine)
 {
     if (DBG) Logger::D(TAG, "Creating WifiMonitor");
-    mInterfaceName = wifiNative->GetInterfaceName();//TODO
+    mInterfaceName = wifiNative->mInterfaceName;
     mMonitoring = FALSE;
     WifiMonitorSingleton::sInstance->RegisterInterfaceMonitor(mInterfaceName, this);
 }
@@ -1262,20 +1321,21 @@ void WifiMonitor::HandleNetworkStateChange(
     String BSSID;
     Int32 networkId = -1;
     Int32 reason = 0;
-    Int32 ind = -1;
+    //Int32 ind = -1;
     Int32 local = 0;
     AutoPtr<IMatcher> match;
-    if (newState == NetworkInfoDetailedState_CONNECTED) {
+    if (newState == Elastos::Droid::Net::NetworkInfoDetailedState_CONNECTED) {
         mConnectedEventPattern->Matcher(data, (IMatcher**)&match);
         Boolean found;
         if (match->Find(&found), !found) {
             if (DBG) Logger::D(TAG, "handleNetworkStateChange: Could not find BSSID in CONNECTED event string");
         }
         else {
-            match->Group(1, &BSSID);
+            IMatchResult* matchResult = IMatchResult::Probe(match);
+            matchResult->Group(1, &BSSID);
             // try {
             String id;
-            match->Group(2, &id);
+            matchResult->Group(2, &id);
             networkId = StringUtils::ParseInt32(id);
             // } catch (NumberFormatException e) {
             //     networkId = -1;
@@ -1283,29 +1343,30 @@ void WifiMonitor::HandleNetworkStateChange(
         }
         NotifyNetworkStateChange(newState, BSSID, networkId, reason);
     }
-    else if (newState == NetworkInfoDetailedState_DISCONNECTED) {
+    else if (newState == Elastos::Droid::Net::NetworkInfoDetailedState_DISCONNECTED) {
         mDisconnectedEventPattern->Matcher(data, (IMatcher**)&match);
         Boolean found;
         if (match->Find(&found), !found) {
             if (DBG) Logger::D(TAG, "handleNetworkStateChange: Could not parse disconnect string");
         } else {
-            match->Group(1, &BSSID);
+            IMatchResult* matchResult = IMatchResult::Probe(match);
+            matchResult->Group(1, &BSSID);
             //try {
             String id;
-            match->Group(2, &id);
+            matchResult->Group(2, &id);
             reason = StringUtils::ParseInt32(id);
             //} catch (NumberFormatException e) {
             //    reason = -1;
             //}
             //try {
             String lStr;
-            match->Group(3, &lStr);
+            matchResult->Group(3, &lStr);
             local = StringUtils::ParseInt32(lStr);
             //} catch (NumberFormatException e) {
             //    local = -1;
             //}
         }
-        notifyNetworkStateChange(newState, BSSID, local, reason);
+        NotifyNetworkStateChange(newState, BSSID, local, reason);
     }
 }
 
@@ -1317,14 +1378,16 @@ void WifiMonitor::NotifyNetworkStateChange(
 {
     AutoPtr<ICharSequence> cs;
     CString::New(BSSID, (ICharSequence**)&cs);
-    if (newState == NetworkInfoDetailedState_CONNECTED) {
-        AutoPtr<IMessage> m = mStateMachine->ObtainMessage(NETWORK_CONNECTION_EVENT,
-                netId, reason, cs);
+    if (newState == Elastos::Droid::Net::NetworkInfoDetailedState_CONNECTED) {
+        AutoPtr<IMessage> m;
+        mStateMachine->ObtainMessage(NETWORK_CONNECTION_EVENT,
+                netId, reason, TO_IINTERFACE(cs), (IMessage**)&m);
         mStateMachine->SendMessage(m);
     }
     else {
-        AutoPtr<IMessage> m = mStateMachine->ObtainMessage(NETWORK_DISCONNECTION_EVENT,
-                netId, reason, cs);
+        AutoPtr<IMessage> m;
+        mStateMachine->ObtainMessage(NETWORK_DISCONNECTION_EVENT,
+                netId, reason, TO_IINTERFACE(cs), (IMessage**)&m);
         if (DBG) Logger::E(TAG, "WifiMonitor notify network disconnect: %s, reason=%d", BSSID.string(), reason);
         mStateMachine->SendMessage(m);
     }
@@ -1340,10 +1403,9 @@ void WifiMonitor::NotifySupplicantStateChange(
         Logger::W("MonitorThread", "NotifySupplicantStateChange BSSID %s, wifiSsid: %p", BSSID.string(), wifiSsid);
     }
 
-    AutoPtr<IStateChangeResult> result;
-    CStateChangeResult::New(networkId, wifiSsid, BSSID, newState, (IStateChangeResult**)&result);
-    AutoPtr<IInterface> temp = result->Probe(EIID_IInterface);
-    AutoPtr<IMessage> m = mStateMachine->ObtainMessage(SUPPLICANT_STATE_CHANGE_EVENT, eventLogCounter, 0, temp);
+    AutoPtr<CStateChangeResult> result = new CStateChangeResult(networkId, wifiSsid, BSSID, newState);
+    AutoPtr<IMessage> m;
+    mStateMachine->ObtainMessage(SUPPLICANT_STATE_CHANGE_EVENT, eventLogCounter, 0, TO_IINTERFACE(result), (IMessage**)&m);
     mStateMachine->SendMessage(m);
 }
 

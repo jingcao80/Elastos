@@ -34,7 +34,7 @@ namespace Net {
  * request that passes their current filters.
  * @hide
  **/
-class NetworkFactory
+class ECO_PUBLIC NetworkFactory
     : public Handler
     , public INetworkFactory
 {

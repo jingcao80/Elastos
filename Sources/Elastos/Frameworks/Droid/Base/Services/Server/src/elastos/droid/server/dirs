@@ -37,5 +37,6 @@ DIRS += twilight
 #DIRS += voiceinteraction
 DIRS += wallpaper
 DIRS += webkit
+DIRS += wifi
 DIRS += wm
 #DIRS += zigbee

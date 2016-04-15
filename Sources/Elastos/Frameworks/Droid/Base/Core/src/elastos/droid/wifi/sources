@@ -15,6 +15,7 @@ SOURCES += CScanResult.cpp
 SOURCES += CScanResultHelper.cpp
 SOURCES += CScanResultInformationElement.cpp
 SOURCES += CRssiPacketCountInfo.cpp
+SOURCES += SupplicantStateHelper.cpp
 SOURCES += CSupplicantStateHelper.cpp
 SOURCES += CSupplicantState.cpp
 SOURCES += CWpsInfo.cpp

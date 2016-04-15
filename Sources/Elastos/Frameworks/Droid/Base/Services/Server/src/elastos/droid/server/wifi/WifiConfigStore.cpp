@@ -1,5 +1,17 @@
 
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Security.h"
+#include "Elastos.Droid.Wifi.h"
 #include "elastos/droid/server/wifi/WifiConfigStore.h"
+
+using Elastos::Droid::Os::IEnvironment;
+using Elastos::Droid::Os::CEnvironment;
+using Elastos::IO::IFile;
+using Elastos::Utility::Regex::IPatternHelper;
+using Elastos::Utility::Regex::CPatternHelper;
+using Elastos::Utility::CHashMap;
+using Elastos::Security::IKeyStoreHelper;
+//TODO using Elastos::Security::CKeyStoreHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -17,7 +29,7 @@ WifiConfigStore::WpaConfigFileObserver::WpaConfigFileObserver()
 
 ECode WifiConfigStore::WpaConfigFileObserver::OnEvent(
     /* [in] */ Int32 event,
-    /* [in] */ String path)
+    /* [in] */ const String& path)
 {
     // ==================before translated======================
     // if (event == CLOSE_WRITE) {
@@ -38,11 +50,21 @@ const Boolean WifiConfigStore::DBG = true;
 Boolean WifiConfigStore::VDBG = false;
 Boolean WifiConfigStore::VVDBG = false;
 const String WifiConfigStore::SUPPLICANT_CONFIG_FILE("/data/misc/wifi/wpa_supplicant.conf");
-const String WifiConfigStore::ipConfigFile(Environment.getDataDirectory() +
+static String GetDataDirectory()
+{
+    AutoPtr<IEnvironment> env;
+    CEnvironment::AcquireSingleton((IEnvironment**)&env);
+    AutoPtr<IFile> dFile;
+    env->GetDataDirectory((IFile**)&dFile);
+    String dir;
+    dFile->GetAbsolutePath(&dir);
+    return dir;
+}
+const String WifiConfigStore::ipConfigFile(GetDataDirectory() +
              "/misc/wifi/ipconfig.txt");
-const String WifiConfigStore::networkHistoryConfigFile(Environment.getDataDirectory() +
+const String WifiConfigStore::networkHistoryConfigFile(GetDataDirectory() +
              "/misc/wifi/networkHistory.txt");
-const String WifiConfigStore::autoJoinConfigFile(Environment.getDataDirectory() +
+const String WifiConfigStore::autoJoinConfigFile(GetDataDirectory() +
              "/misc/wifi/autojoinconfig.txt");
 const String WifiConfigStore::SSID_KEY("SSID:  ");
 const String WifiConfigStore::CONFIG_KEY("CONFIG:  ");
@@ -117,7 +139,15 @@ const String WifiConfigStore::ENABLE_CHIP_WAKE_UP_WHILE_ASSOCIATED_KEY("ENABLE_C
 const String WifiConfigStore::ENABLE_RSSI_POLL_WHILE_ASSOCIATED_KEY("ENABLE_RSSI_POLL_WHILE_ASSOCIATED_KEY:   ");
 const String WifiConfigStore::WIFI_VERBOSE_LOGS_KEY("WIFI_VERBOSE_LOGS:   ");
 const String WifiConfigStore::DELETED_CONFIG_PSK("Mjkd86jEMGn79KhKll298Uu7-deleted");
-AutoPtr<IPattern> WifiConfigStore::mConnectChoice = IPattern::compile("(.*)=([0-9]+)");
+static AutoPtr<IPattern> InitConnectChoice()
+{
+    AutoPtr<IPatternHelper> helper;
+    CPatternHelper::AcquireSingleton((IPatternHelper**)&helper);
+    AutoPtr<IPattern> pattern;
+    helper->Compile(String("(.*)=([0-9]+)"), (IPattern**)&pattern);
+    return pattern;
+}
+AutoPtr<IPattern> WifiConfigStore::mConnectChoice = InitConnectChoice();
 AutoPtr< ArrayOf<String> > WifiConfigStore::ENTERPRISE_CONFIG_SUPPLICANT_KEYS = WifiConfigStore::MiddleInitEnterpriseConfigSupplicantKeys();
 const Int32 WifiConfigStore::DEFAULT_MAX_DHCP_RETRIES;
 
@@ -125,6 +155,14 @@ WifiConfigStore::WifiConfigStore(
     /* [in] */ IContext* c,
     /* [in] */ WifiNative* wn)
 {
+    CHashMap::New((IHashMap**)&mConfiguredNetworks);
+    CHashMap::New((IHashMap**)&mNetworkIds);
+    AutoPtr<IKeyStoreHelper> keyStoreHelper;
+    //TODO CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&keyStoreHelper);
+    String type;
+    keyStoreHelper->GetDefaultType(&type);
+    keyStoreHelper->GetInstance(type, (IKeyStore**)&mKeyStore);
+
     // ==================before translated======================
     // mContext = c;
     // mWifiNative = wn;
@@ -254,7 +292,7 @@ ECode WifiConfigStore::GetConfiguredNetworksSize(
 }
 
 ECode WifiConfigStore::GetConfiguredNetworks(
-    /* [out] */ List<WifiConfiguration>** result)
+    /* [out] */ IList** result)//WifiConfiguration
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -264,7 +302,7 @@ ECode WifiConfigStore::GetConfiguredNetworks(
 }
 
 ECode WifiConfigStore::GetPrivilegedConfiguredNetworks(
-    /* [out] */ List<WifiConfiguration>** result)
+    /* [out] */ IList** result)//WifiConfiguration
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -289,7 +327,7 @@ ECode WifiConfigStore::GetconfiguredNetworkSize(
 ECode WifiConfigStore::GetRecentConfiguredNetworks(
     /* [in] */ Int32 milli,
     /* [in] */ Boolean copy,
-    /* [out] */ List<WifiConfiguration>** result)
+    /* [out] */ IList** result)//WifiConfiguration
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -358,7 +396,7 @@ ECode WifiConfigStore::UpdateConfiguration(
 
 ECode WifiConfigStore::GetWifiConfiguration(
     /* [in] */ Int32 netId,
-    /* [out] */ WifiConfiguration** result)
+    /* [out] */ IWifiConfiguration** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -370,8 +408,8 @@ ECode WifiConfigStore::GetWifiConfiguration(
 }
 
 ECode WifiConfigStore::GetWifiConfiguration(
-    /* [in] */ String key,
-    /* [out] */ WifiConfiguration** result)
+    /* [in] */ const String& key,
+    /* [out] */ IWifiConfiguration** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -597,7 +635,7 @@ ECode WifiConfigStore::SaveWifiConfigBSSID(
 
 ECode WifiConfigStore::UpdateStatus(
     /* [in] */ Int32 netId,
-    /* [in] */ IDetailedState* state)
+    /* [in] */ NetworkInfoDetailedState* state)
 {
     VALIDATE_NOT_NULL(state);
     // ==================before translated======================
@@ -830,7 +868,7 @@ ECode WifiConfigStore::SaveConfig(
 
 ECode WifiConfigStore::StartWpsWithPinFromAccessPoint(
     /* [in] */ IWpsInfo* config,
-    /* [out] */ WpsResult** result)
+    /* [out] */ IWpsResult** result)
 {
     VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
@@ -851,7 +889,7 @@ ECode WifiConfigStore::StartWpsWithPinFromAccessPoint(
 
 ECode WifiConfigStore::StartWpsWithPinFromDevice(
     /* [in] */ IWpsInfo* config,
-    /* [out] */ WpsResult** result)
+    /* [out] */ IWpsResult** result)
 {
     VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
@@ -873,7 +911,7 @@ ECode WifiConfigStore::StartWpsWithPinFromDevice(
 
 ECode WifiConfigStore::StartWpsPbc(
     /* [in] */ IWpsInfo* config,
-    /* [out] */ WpsResult** result)
+    /* [out] */ IWpsResult** result)
 {
     VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
@@ -894,7 +932,7 @@ ECode WifiConfigStore::StartWpsPbc(
 
 ECode WifiConfigStore::GetStaticIpConfiguration(
     /* [in] */ Int32 netId,
-    /* [out] */ StaticIpConfiguration** result)
+    /* [out] */ IStaticIpConfiguration** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -923,7 +961,7 @@ ECode WifiConfigStore::SetStaticIpConfiguration(
 
 ECode WifiConfigStore::SetDefaultGwMacAddress(
     /* [in] */ Int32 netId,
-    /* [in] */ String macAddress)
+    /* [in] */ const String& macAddress)
 {
     // ==================before translated======================
     // WifiConfiguration config = mConfiguredNetworks.get(netId);
@@ -937,7 +975,7 @@ ECode WifiConfigStore::SetDefaultGwMacAddress(
 
 ECode WifiConfigStore::GetProxyProperties(
     /* [in] */ Int32 netId,
-    /* [out] */ ProxyInfo** result)
+    /* [out] */ IProxyInfo** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -1103,7 +1141,7 @@ ECode WifiConfigStore::LoadConfiguredNetworks()
 }
 
 ECode WifiConfigStore::GetNetworkIdFromSsid(
-    /* [in] */ String ssid,
+    /* [in] */ const String& ssid,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -1522,10 +1560,10 @@ ECode WifiConfigStore::LinkConfiguration(
 
 ECode WifiConfigStore::AssociateWithConfiguration(
     /* [in] */ IScanResult* result,
-    /* [out] */ WifiConfiguration** result)
+    /* [out] */ IWifiConfiguration** wifiConfig)
 {
     VALIDATE_NOT_NULL(result);
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(wifiConfig);
     // ==================before translated======================
     // String configKey = WifiConfiguration.configKey(result);
     // if (configKey == null) {
@@ -1629,8 +1667,8 @@ ECode WifiConfigStore::AssociateWithConfiguration(
 ECode WifiConfigStore::MakeChannelList(
     /* [in] */ IWifiConfiguration* config,
     /* [in] */ Int32 age,
-    /* [in] */ Boolean restrict,
-    /* [out] */ HashSet<Integer>** result)
+    /* [in] */ Boolean _restrict,
+    /* [out] */ IHashSet** result)
 {
     VALIDATE_NOT_NULL(config);
     VALIDATE_NOT_NULL(result);
@@ -1672,7 +1710,7 @@ ECode WifiConfigStore::MakeChannelList(
     //             loge("has " + result.BSSID + " freq=" + Integer.toString(result.frequency)
     //                     + " age=" + Long.toString(now_ms - result.seen) + " ?=" + test);
     //         }
-    //         if (((now_ms - result.seen) < age)/*||(!restrict || result.is24GHz())*/) {
+    //         if (((now_ms - result.seen) < age)/*||(!_restrict || result.is24GHz())*/) {
     //             channels.add(result.frequency);
     //             numChannels++;
     //         }
@@ -1697,7 +1735,7 @@ ECode WifiConfigStore::MakeChannelList(
     //             if (numChannels > maxNumActiveChannelsForPartialScans) {
     //                 break;
     //             }
-    //             if (((now_ms - result.seen) < age)/*||(!restrict || result.is24GHz())*/) {
+    //             if (((now_ms - result.seen) < age)/*||(!_restrict || result.is24GHz())*/) {
     //                 channels.add(result.frequency);
     //                 numChannels++;
     //             }
@@ -1816,10 +1854,10 @@ ECode WifiConfigStore::UpdateSavedNetworkHistory(
 
 ECode WifiConfigStore::WifiConfigurationFromScanResult(
     /* [in] */ IScanResult* result,
-    /* [out] */ WifiConfiguration** result)
+    /* [out] */ IWifiConfiguration** wifiConfig)
 {
     VALIDATE_NOT_NULL(result);
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(wifiConfig);
     // ==================before translated======================
     // WifiConfiguration config = new WifiConfiguration();
     //
@@ -2016,7 +2054,7 @@ ECode WifiConfigStore::HandleBadNetworkDisconnectReport(
 
 ECode WifiConfigStore::HandleBSSIDBlackList(
     /* [in] */ Int32 netId,
-    /* [in] */ String BSSID,
+    /* [in] */ const String& BSSID,
     /* [in] */ Boolean enable,
     /* [out] */ Boolean* result)
 {
@@ -2051,7 +2089,7 @@ ECode WifiConfigStore::HandleBSSIDBlackList(
 
 ECode WifiConfigStore::HandleDisabledAPs(
     /* [in] */ Boolean enable,
-    /* [in] */ String BSSID,
+    /* [in] */ const String& BSSID,
     /* [in] */ Int32 reason)
 {
     // ==================before translated======================
@@ -2094,8 +2132,8 @@ ECode WifiConfigStore::GetMaxDhcpRetries(
 ECode WifiConfigStore::HandleSSIDStateChange(
     /* [in] */ Int32 netId,
     /* [in] */ Boolean enabled,
-    /* [in] */ String message,
-    /* [in] */ String BSSID)
+    /* [in] */ const String& message,
+    /* [in] */ const String& BSSID)
 {
     // ==================before translated======================
     // WifiConfiguration config = mConfiguredNetworks.get(netId);
@@ -2215,7 +2253,7 @@ ECode WifiConfigStore::HandleSSIDStateChange(
 
 ECode WifiConfigStore::InstallKeys(
     /* [in] */ IWifiEnterpriseConfig* config,
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(config);
@@ -2391,7 +2429,7 @@ ECode WifiConfigStore::MigrateCerts(
 }
 
 void WifiConfigStore::Loge(
-    /* [in] */ String s)
+    /* [in] */ const String& s)
 {
     // ==================before translated======================
     // loge(s, false);
@@ -2399,7 +2437,7 @@ void WifiConfigStore::Loge(
 }
 
 void WifiConfigStore::Loge(
-    /* [in] */ String s,
+    /* [in] */ const String& s,
     /* [in] */ Boolean stack)
 {
     // ==================before translated======================
@@ -2415,30 +2453,34 @@ void WifiConfigStore::Loge(
 }
 
 void WifiConfigStore::Log(
-    /* [in] */ String s)
+    /* [in] */ const String& s)
 {
     // ==================before translated======================
     // Log.d(TAG, s);
     assert(0);
 }
 
-AutoPtr< ArrayOf<String> > WifiConfigStore::MiddleInitEnterpriseConfigSupplicantKeys()
+AutoPtr<ArrayOf<String> > WifiConfigStore::MiddleInitEnterpriseConfigSupplicantKeys()
 {
-    // ==================before translated======================
-    // String[] result = new String[] {
-    //              WifiEnterpriseConfig.EAP_KEY, WifiEnterpriseConfig.PHASE2_KEY,
-    //              WifiEnterpriseConfig.IDENTITY_KEY, WifiEnterpriseConfig.ANON_IDENTITY_KEY,
-    //              WifiEnterpriseConfig.PASSWORD_KEY, WifiEnterpriseConfig.CLIENT_CERT_KEY,
-    //              WifiEnterpriseConfig.CA_CERT_KEY, WifiEnterpriseConfig.SUBJECT_MATCH_KEY,
-    //              WifiEnterpriseConfig.ENGINE_KEY, WifiEnterpriseConfig.ENGINE_ID_KEY,
-    //              WifiEnterpriseConfig.PRIVATE_KEY_ID_KEY };
-    assert(0);
-    AutoPtr< ArrayOf<String> > empty;
-    return empty;
+    AutoPtr<ArrayOf<String> > result = ArrayOf<String>::Alloc(11);
+    result->Set(0, IWifiEnterpriseConfig::EAP_KEY);
+    result->Set(1, IWifiEnterpriseConfig::PHASE2_KEY);
+    result->Set(2, IWifiEnterpriseConfig::IDENTITY_KEY);
+    result->Set(3, IWifiEnterpriseConfig::ANON_IDENTITY_KEY);
+    result->Set(4, IWifiEnterpriseConfig::PASSWORD_KEY);
+    result->Set(5, IWifiEnterpriseConfig::CLIENT_CERT_KEY);
+    result->Set(6, IWifiEnterpriseConfig::CA_CERT_KEY);
+    result->Set(7, IWifiEnterpriseConfig::SUBJECT_MATCH_KEY);
+    result->Set(8, IWifiEnterpriseConfig::ENGINE_KEY);
+    result->Set(9, IWifiEnterpriseConfig::ENGINE_ID_KEY);
+    result->Set(10, IWifiEnterpriseConfig::PRIVATE_KEY_ID_KEY);
+
+    return result;
 }
 
-AutoPtr< List< AutoPtr<IWifiConfiguration> > > WifiConfigStore::GetConfiguredNetworks(
-    /* [in] */ Map<String, String>* pskMap)
+//IWifiConfiguration
+AutoPtr<IList> WifiConfigStore::GetConfiguredNetworks(
+    /* [in] */ IMap* pskMap)//String, String
 {
     // ==================before translated======================
     // List<WifiConfiguration> networks = new ArrayList<>();
@@ -2461,16 +2503,17 @@ AutoPtr< List< AutoPtr<IWifiConfiguration> > > WifiConfigStore::GetConfiguredNet
     // }
     // return networks;
     assert(0);
-    AutoPtr< List< AutoPtr<IWifiConfiguration> > > empty;
+    AutoPtr<IList> empty;//IWifiConfiguration
     return empty;
 }
 
-AutoPtr< Map<String, String> > WifiConfigStore::GetCredentialsBySsidMap()
+//String, String
+AutoPtr<IMap> WifiConfigStore::GetCredentialsBySsidMap()
 {
     // ==================before translated======================
     // return readNetworkVariablesFromSupplicantFile("psk");
     assert(0);
-    AutoPtr< Map<String, String> > empty;
+    AutoPtr<IMap> empty;//String,String
     return empty;
 }
 
@@ -2585,8 +2628,8 @@ void WifiConfigStore::SendConfiguredNetworksChangedBroadcast()
     assert(0);
 }
 
-AutoPtr< Map<String, String> > WifiConfigStore::ReadNetworkVariablesFromSupplicantFile(
-    /* [in] */ String key)
+AutoPtr<IMap> WifiConfigStore::ReadNetworkVariablesFromSupplicantFile(
+    /* [in] */ const String& key)
 {
     // ==================before translated======================
     // Map<String, String> result = new HashMap<>();
@@ -2640,13 +2683,13 @@ AutoPtr< Map<String, String> > WifiConfigStore::ReadNetworkVariablesFromSupplica
     //
     // return result;
     assert(0);
-    AutoPtr< Map<String, String> > empty;
+    AutoPtr<IMap> empty;
     return empty;
 }
 
 String WifiConfigStore::ReadNetworkVariableFromSupplicantFile(
-    /* [in] */ String ssid,
-    /* [in] */ String key)
+    /* [in] */ const String& ssid,
+    /* [in] */ const String& key)
 {
     // ==================before translated======================
     // Map<String, String> data = readNetworkVariablesFromSupplicantFile(key);
@@ -3454,7 +3497,7 @@ void WifiConfigStore::ReadIpAndProxyConfigurations()
 }
 
 String WifiConfigStore::EncodeSSID(
-    /* [in] */ String str)
+    /* [in] */ const String& str)
 {
     // ==================before translated======================
     // String tmp = removeDoubleQuotes(str);
@@ -3920,7 +3963,7 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::WriteIpAndProxyConfigurationsOnCha
 }
 
 Boolean WifiConfigStore::EnterpriseConfigKeyShouldBeQuoted(
-    /* [in] */ String key)
+    /* [in] */ const String& key)
 {
     // ==================before translated======================
     // switch (key) {
@@ -4123,7 +4166,7 @@ void WifiConfigStore::ReadNetworkVariables(
 }
 
 String WifiConfigStore::RemoveDoubleQuotes(
-    /* [in] */ String string)
+    /* [in] */ const String& string)
 {
     // ==================before translated======================
     // int length = string.length();
@@ -4137,7 +4180,7 @@ String WifiConfigStore::RemoveDoubleQuotes(
 }
 
 String WifiConfigStore::MakeString(
-    /* [in] */ BitSet* set,
+    /* [in] */ IBitSet* set,
     /* [in] */ ArrayOf<String>* strings)
 {
     // ==================before translated======================
@@ -4163,7 +4206,7 @@ String WifiConfigStore::MakeString(
 }
 
 Int32 WifiConfigStore::LookupString(
-    /* [in] */ String string,
+    /* [in] */ const String& string,
     /* [in] */ ArrayOf<String>* strings)
 {
     // ==================before translated======================
@@ -4196,7 +4239,7 @@ Int32 WifiConfigStore::ConfigKey(
 }
 
 void WifiConfigStore::LocalLog(
-    /* [in] */ String s)
+    /* [in] */ const String& s)
 {
     // ==================before translated======================
     // if (mLocalLog != null) {
@@ -4206,7 +4249,7 @@ void WifiConfigStore::LocalLog(
 }
 
 void WifiConfigStore::LocalLog(
-    /* [in] */ String s,
+    /* [in] */ const String& s,
     /* [in] */ Boolean force)
 {
     // ==================before translated======================
@@ -4216,7 +4259,7 @@ void WifiConfigStore::LocalLog(
 }
 
 void WifiConfigStore::LocalLog(
-    /* [in] */ String s,
+    /* [in] */ const String& s,
     /* [in] */ Int32 netId)
 {
     // ==================before translated======================
@@ -4240,7 +4283,7 @@ void WifiConfigStore::LocalLog(
 }
 
 Boolean WifiConfigStore::PutCertInKeyStore(
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [in] */ ICertificate* cert)
 {
     // ==================before translated======================

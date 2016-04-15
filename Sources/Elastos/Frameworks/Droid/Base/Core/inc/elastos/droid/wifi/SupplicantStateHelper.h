@@ -11,6 +11,9 @@ namespace Wifi {
 class SupplicantStateHelper
 {
 public:
+    static CARAPI_(Boolean) IsValidState(
+        /* [in] */ SupplicantState state);
+
     /** Supplicant associating or authenticating is considered a handshake state {@hide} */
     static CARAPI_(Boolean) IsHandshakeState(
         /* [in] */ SupplicantState state);

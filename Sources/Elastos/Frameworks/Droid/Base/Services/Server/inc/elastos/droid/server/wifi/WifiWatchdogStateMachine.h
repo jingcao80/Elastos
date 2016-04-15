@@ -3,9 +3,9 @@
 #define __ELASTOS_DROID_SERVER_WIFI_WIFIWATCHDOGSTATEMACHINE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/utility/AsyncChannel.h"
-#include "elastos/droid/utility/State.h"
-#include "elastos/droid/utility/StateMachine.h"
+#include "elastos/droid/internal/utility/AsyncChannel.h"
+#include "elastos/droid/internal/utility/State.h"
+#include "elastos/droid/internal/utility/StateMachine.h"
 #include <elastos/utility/etl/HashMap.h>
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/database/ContentObserver.h"
@@ -25,7 +25,7 @@ using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Wifi::ISupplicantState;
 using Elastos::Droid::Wifi::IWifiInfo;
 using Elastos::Droid::Wifi::IWifiManager;
-using Elastos::Droid::Utility::IProtocol;
+using Elastos::Droid::Internal::Utility::IProtocol;
 using Elastos::Droid::Internal::Utility::AsyncChannel;
 using Elastos::Droid::Internal::Utility::State;
 using Elastos::Droid::Internal::Utility::StateMachine;
@@ -439,10 +439,11 @@ private:
             /* [in] */ IHandler* handler,
             /* [in] */ Int32 msg,
             /* [in] */ WifiWatchdogStateMachine* owner)
-            : ContentObserver(handler)
-            , mOwner(owner)
+            : mOwner(owner)
             , mMsg(msg)
-        {}
+        {
+            ContentObserver::constructor(handler);
+        }
 
         virtual CARAPI OnChange(
             /* [in] */ Boolean selfChange);

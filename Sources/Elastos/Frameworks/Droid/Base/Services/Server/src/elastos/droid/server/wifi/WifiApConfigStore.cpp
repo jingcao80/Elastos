@@ -1,6 +1,8 @@
-
-#include "elastos/droid/wifi/WifiApConfigStore.h"
-#include "elastos/droid/wifi/WifiStateMachine.h"
+#include "Elastos.Droid.Wifi.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/server/wifi/WifiApConfigStore.h"
+//TODO #include "elastos/droid/server/wifi/WifiStateMachine.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Logger.h>
 #ifdef DROID_CORE
@@ -8,9 +10,22 @@
 #include "elastos/droid/os/CMessenger.h"
 #include "elastos/droid/os/CEnvironment.h"
 #endif
-#include "elastos/droid/utility/AsyncChannel.h"
+#include "elastos/droid/text/TextUtils.h"
 
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Internal::Utility::AsyncChannel;
+using Elastos::Droid::Os::CMessenger;
+using Elastos::Droid::Os::IEnvironment;
+using Elastos::Droid::Os::CEnvironment;
+using Elastos::Droid::R;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Wifi::CWifiConfiguration;
+using Elastos::Droid::Wifi::IWifiConfigurationKeyMgmt;
+using Elastos::Core::IThread;
 using Elastos::Core::CThread;
+using Elastos::IO::ICloseable;
+using Elastos::IO::IInputStream;
+using Elastos::IO::IOutputStream;
 using Elastos::IO::IFile;
 using Elastos::IO::IFileInputStream;
 using Elastos::IO::CFileInputStream;
@@ -24,18 +39,15 @@ using Elastos::IO::IFileOutputStream;
 using Elastos::IO::IDataOutputStream;
 using Elastos::IO::IBufferedInputStream;
 using Elastos::IO::CDataInputStream;
-using Elastos::IO::CDataInputStreamHelper;
+//TODO using Elastos::IO::CDataInputStreamHelper;
 using Elastos::IO::IDataInputStreamHelper;
 using Elastos::IO::IDataInput;
 using Elastos::IO::IDataOutput;
-using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::IBitSet;
 using Elastos::Utility::IUUID;
 using Elastos::Utility::IUUIDHelper;
 using Elastos::Utility::CUUIDHelper;
-using Elastos::Droid::R;
-using Elastos::Droid::Os::CMessenger;
-using Elastos::Droid::Os::CEnvironment;
-using Elastos::Droid::Internal::Utility::AsyncChannel;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -70,6 +82,7 @@ ECode WifiApConfigStore::DefaultState::ProcessMessage(
     Int32 what;
     msg->GetWhat(&what);
 
+    /*TODO WifiStateMachine
     switch(what) {
         case WifiStateMachine::CMD_SET_AP_CONFIG:
         case WifiStateMachine::CMD_SET_AP_CONFIG_COMPLETED:
@@ -88,6 +101,7 @@ ECode WifiApConfigStore::DefaultState::ProcessMessage(
             Logger::E(WifiApConfigStore::TAG, "Failed to handle %d", what);
             break;
     }
+    */
 
     return NOERROR;
 }
@@ -104,6 +118,7 @@ ECode WifiApConfigStore::InactiveState::ProcessMessage(
     Int32 what;
     msg->GetWhat(&what);
 
+    /*TODO WifiStateMachine
     switch (what) {
         case WifiStateMachine::CMD_SET_AP_CONFIG: {
             AutoPtr<IInterface> obj;
@@ -124,6 +139,7 @@ ECode WifiApConfigStore::InactiveState::ProcessMessage(
         default:
             break;
     }
+    */
 
     return NOERROR;
 }
@@ -131,7 +147,7 @@ ECode WifiApConfigStore::InactiveState::ProcessMessage(
 ECode WifiApConfigStore::ActiveStateRunnable::Run()
 {
     mOwner->WriteApConfiguration(mOwner->mWifiApConfig);
-    mOwner->SendMessage(WifiStateMachine::CMD_SET_AP_CONFIG_COMPLETED);
+    //TODO mOwner->SendMessage(WifiStateMachine::CMD_SET_AP_CONFIG_COMPLETED);
     return NOERROR;
 }
 
@@ -156,6 +172,7 @@ ECode WifiApConfigStore::ActiveState::ProcessMessage(
     Int32 what;
     msg->GetWhat(&what);
 
+    /*TODO WifiStateMachine
     switch (what) {
         //TODO: have feedback to the user when we do this
         //to indicate the write is currently in progress
@@ -169,6 +186,7 @@ ECode WifiApConfigStore::ActiveState::ProcessMessage(
             *result = NOT_HANDLED;
             break;
     }
+    */
 
     return NOERROR;
 }
@@ -210,7 +228,7 @@ AutoPtr<WifiApConfigStore> WifiApConfigStore::MakeWifiApConfigStore(
 void WifiApConfigStore::LoadApConfiguration()
 {
     AutoPtr<IDataInputStream> in;
-    // try {
+    // try
     AutoPtr<IWifiConfiguration> config;
     CWifiConfiguration::New((IWifiConfiguration**)&config);
 
@@ -222,22 +240,22 @@ void WifiApConfigStore::LoadApConfiguration()
     }
 
     AutoPtr<IBufferedInputStream> bis;
-    CBufferedInputStream::New(fis, (IBufferedInputStream**)&bis);
+    CBufferedInputStream::New(IInputStream::Probe(fis), (IBufferedInputStream**)&bis);
     if (bis == NULL) {
         SetDefaultApConfiguration();
         return;
     }
 
-    CDataInputStream::New(bis, (IDataInputStream**)&in);
+    CDataInputStream::New(IInputStream::Probe(bis), (IDataInputStream**)&in);
     if (in == NULL) {
         SetDefaultApConfiguration();
         return;
     }
 
     Int32 version = 0;
-    in->Read(&version);
+    IInputStream::Probe(in)->Read(&version);
     if (version != 1) {
-        in->Close();
+        ICloseable::Probe(in)->Close();
 
         Logger::E(TAG, "Bad version on hotspot configuration file, set defaults");
         SetDefaultApConfiguration();
@@ -246,13 +264,13 @@ void WifiApConfigStore::LoadApConfiguration()
 
     AutoPtr<IDataInputStreamHelper> helper;
     assert(IDataInput::Probe(in) != NULL);
-    CDataInputStreamHelper::AcquireSingleton((IDataInputStreamHelper**)&helper);
+    //TODO CDataInputStreamHelper::AcquireSingleton((IDataInputStreamHelper**)&helper);
     String ssid;
     helper->ReadUTF(IDataInput::Probe(in), &ssid);
     config->SetSSID(ssid);
 
     Int32 authType = 0;
-    in->Read(&authType);
+    IInputStream::Probe(in)->Read(&authType);
     AutoPtr<IBitSet> bs;
     config->GetAllowedKeyManagement((IBitSet**)&bs);
     bs->Set(authType);
@@ -265,7 +283,7 @@ void WifiApConfigStore::LoadApConfiguration()
 
     mWifiApConfig = config;
     if (in != NULL) {
-        in->Close();
+        ICloseable::Probe(in)->Close();
     }
 }
 
@@ -273,7 +291,8 @@ ECode WifiApConfigStore::GetMessenger(
     /* [out] */ IMessenger** msg)
 {
     VALIDATE_NOT_NULL(msg);
-    AutoPtr<IHandler> handler = GetHandler();
+    AutoPtr<IHandler> handler;
+    GetHandler((IHandler**)&handler);
     return CMessenger::New(handler, msg);
 }
 
@@ -284,14 +303,14 @@ void WifiApConfigStore::WriteApConfiguration(
     AutoPtr<IFileOutputStream> fos;
     CFileOutputStream::New(AP_CONFIG_FILE, (IFileOutputStream**)&fos);
     AutoPtr<IBufferedOutputStream> bos;
-    CBufferedOutputStream::New(fos, (IBufferedOutputStream**)&bos);
+    CBufferedOutputStream::New(IOutputStream::Probe(fos), (IBufferedOutputStream**)&bos);
     if (bos == NULL) {
         Logger::E(TAG, "Error writing hotspot configuration");
         return;
     }
 
     AutoPtr<IDataOutputStream> out;
-    CDataOutputStream::New(bos, (IDataOutputStream**)&out);
+    CDataOutputStream::New(IOutputStream::Probe(bos), (IDataOutputStream**)&out);
     if (out == NULL) {
         Logger::E(TAG, "Error writing hotspot configuration");
         return;
@@ -312,7 +331,7 @@ void WifiApConfigStore::WriteApConfiguration(
         output->WriteUTF(temp);
     }
 
-    out->Close();
+    ICloseable::Probe(out)->Close();
 }
 
 void WifiApConfigStore::SetDefaultApConfiguration()
@@ -333,7 +352,7 @@ void WifiApConfigStore::SetDefaultApConfiguration()
     Boolean wifihotspotsecuritynone;
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
-    res->GetBool(R::_bool::set_wifi_hotspot_security_none, &wifihotspotsecuritynone);
+    res->GetBoolean(R::bool_::set_wifi_hotspot_security_none, &wifihotspotsecuritynone);
     AutoPtr<IBitSet> bs;
     config->GetAllowedKeyManagement((IBitSet**)&bs);
     bs->Set(wifihotspotsecuritynone? IWifiConfigurationKeyMgmt::NONE : IWifiConfigurationKeyMgmt::WPA2_PSK);
@@ -357,7 +376,7 @@ void WifiApConfigStore::SetDefaultApConfiguration()
         config->SetPreSharedKey(psk);
     }
 
-    SendMessage(WifiStateMachine::CMD_SET_AP_CONFIG, config.Get());
+    //TODO SendMessage(WifiStateMachine::CMD_SET_AP_CONFIG, config.Get());
 }
 
 

@@ -1,6 +1,11 @@
 
 #include "elastos/droid/server/wifi/RttService.h"
 
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Wifi::EIID_IIRttManager;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::CLinkedList;
+
 namespace Elastos {
 namespace Droid {
 namespace Server {
@@ -9,8 +14,9 @@ namespace Wifi {
 //=====================================================================
 //      RttService::RttServiceImpl::RttStateMachine::DefaultState
 //=====================================================================
-Boolean RttService::RttServiceImpl::RttStateMachine::DefaultState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode RttService::RttServiceImpl::RttStateMachine::DefaultState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
     // ==================before translated======================
     // if (DBG) Log.d(TAG, "DefaultState got" + msg);
@@ -31,14 +37,15 @@ Boolean RttService::RttServiceImpl::RttStateMachine::DefaultState::ProcessMessag
     // }
     // return HANDLED;
     assert(0);
-    return FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
 //      RttService::RttServiceImpl::RttStateMachine::EnabledState
 //=====================================================================
-Boolean RttService::RttServiceImpl::RttStateMachine::EnabledState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode RttService::RttServiceImpl::RttStateMachine::EnabledState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
     // ==================before translated======================
     // if (DBG) Log.d(TAG, "EnabledState got" + msg);
@@ -83,14 +90,15 @@ Boolean RttService::RttServiceImpl::RttStateMachine::EnabledState::ProcessMessag
     // }
     // return HANDLED;
     assert(0);
-    return FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
 //   RttService::RttServiceImpl::RttStateMachine::RequestPendingState
 //=====================================================================
-Boolean RttService::RttServiceImpl::RttStateMachine::RequestPendingState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode RttService::RttServiceImpl::RttStateMachine::RequestPendingState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
     // ==================before translated======================
     // if (DBG) Log.d(TAG, "RequestPendingState got" + msg);
@@ -140,7 +148,7 @@ Boolean RttService::RttServiceImpl::RttStateMachine::RequestPendingState::Proces
     // }
     // return HANDLED;
     assert(0);
-    return FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -163,7 +171,7 @@ RttService::RttServiceImpl::RttStateMachine::RttStateMachine(
 //              RttService::RttServiceImpl::ClientHandler
 //=====================================================================
 RttService::RttServiceImpl::ClientHandler::ClientHandler(
-    /* [in] */  android)
+    /* [in] */ ILooper* looper)
 {
     // ==================before translated======================
     // super(looper);
@@ -270,11 +278,12 @@ RttService::RttServiceImpl::ClientInfo::ClientInfo(
     // ==================before translated======================
     // mChannel = c;
     // mMessenger = m;
+    CHashMap::New((IHashMap**)&mRequests);
 }
 
 ECode RttService::RttServiceImpl::ClientInfo::AddRttRequest(
     /* [in] */ Int32 key,
-    /* [in] */  RttManager,
+    /* [in] */ IRttManagerParcelableRttParams* parcelableParams,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -307,7 +316,7 @@ ECode RttService::RttServiceImpl::ClientInfo::RemoveRttRequest(
 
 ECode RttService::RttServiceImpl::ClientInfo::ReportResult(
     /* [in] */ RttRequest* request,
-    /* [in] */  RttManager)
+    /* [in] */ ArrayOf<IRttManagerRttResult*>* results)
 {
     VALIDATE_NOT_NULL(request);
     // ==================before translated======================
@@ -324,7 +333,7 @@ ECode RttService::RttServiceImpl::ClientInfo::ReportResult(
 ECode RttService::RttServiceImpl::ClientInfo::ReportFailed(
     /* [in] */ RttRequest* request,
     /* [in] */ Int32 reason,
-    /* [in] */ String description)
+    /* [in] */ const String& description)
 {
     VALIDATE_NOT_NULL(request);
     // ==================before translated======================
@@ -374,24 +383,31 @@ const Int32 RttService::RttServiceImpl::CMD_DRIVER_UNLOADED;
 const Int32 RttService::RttServiceImpl::CMD_ISSUE_NEXT_REQUEST;
 const Int32 RttService::RttServiceImpl::CMD_RTT_RESPONSE;
 
+CAR_INTERFACE_IMPL_2(RttService::RttServiceImpl, Object, IIRttManager, IBinder);
+
 RttService::RttServiceImpl::RttServiceImpl()
 {
+    AutoPtr<ILinkedList> ll;
+    CLinkedList::New((ILinkedList**)&ll);
+    mRequestQueue = IQueue::Probe(ll);
+    CHashMap::New(4, (IHashMap**)&mClients);
 }
 
-RttService::RttServiceImpl::RttServiceImpl(
+ECode RttService::RttServiceImpl::constructor(
     /* [in] */ IContext* context)
 {
     // ==================before translated======================
     // mContext = context;
+    return NOERROR;
 }
 
-AutoPtr<IMessenger> RttService::RttServiceImpl::GetMessenger()
+ECode RttService::RttServiceImpl::GetMessenger(
+    /* [out] */ IMessenger** messenger)
 {
     // ==================before translated======================
     // return new Messenger(mClientHandler);
     assert(0);
-    AutoPtr<IMessenger> empty;
-    return empty;
+    return NOERROR;
 }
 
 ECode RttService::RttServiceImpl::StartService(
@@ -429,7 +445,7 @@ ECode RttService::RttServiceImpl::StartService(
 
 ECode RttService::RttServiceImpl::ReplySucceeded(
     /* [in] */ IMessage* msg,
-    /* [in] */ Object* obj)
+    /* [in] */ IObject* obj)
 {
     VALIDATE_NOT_NULL(msg);
     VALIDATE_NOT_NULL(obj);
@@ -454,7 +470,7 @@ ECode RttService::RttServiceImpl::ReplySucceeded(
 ECode RttService::RttServiceImpl::ReplyFailed(
     /* [in] */ IMessage* msg,
     /* [in] */ Int32 reason,
-    /* [in] */ String description)
+    /* [in] */ const String& description)
 {
     VALIDATE_NOT_NULL(msg);
     // ==================before translated======================
@@ -512,7 +528,7 @@ RttService::InnerWifiNativeRttEventHandler::InnerWifiNativeRttEventHandler(
 }
 
 ECode RttService::InnerWifiNativeRttEventHandler::OnRttResults(
-    /* [in] */  RttManager)
+    /* [in] */ ArrayOf<IRttManagerRttResult*>* result)
 {
     // ==================before translated======================
     // mStateMachine.sendMessage(CMD_RTT_RESPONSE, result);
@@ -523,7 +539,7 @@ ECode RttService::InnerWifiNativeRttEventHandler::OnRttResults(
 //=====================================================================
 //                              RttService
 //=====================================================================
-const Boolean RttService::DBG = true;
+const Boolean RttService::DBG = TRUE;
 const String RttService::TAG("RttService");
 
 RttService::RttService(

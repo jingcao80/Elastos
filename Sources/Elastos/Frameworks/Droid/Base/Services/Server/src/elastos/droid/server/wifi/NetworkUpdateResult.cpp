@@ -1,6 +1,8 @@
 
 #include "Elastos.Droid.Wifi.h"
-#include "elastos/droid/wifi/NetworkUpdateResult.h"
+#include "elastos/droid/server/wifi/NetworkUpdateResult.h"
+
+using Elastos::Droid::Wifi::IWifiConfiguration;
 
 namespace Elastos {
 namespace Droid {

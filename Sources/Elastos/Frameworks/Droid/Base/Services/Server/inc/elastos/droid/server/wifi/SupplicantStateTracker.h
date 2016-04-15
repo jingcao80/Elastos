@@ -6,12 +6,15 @@
 #ifdef DROID_CORE
 #include "elastos/droid/net/wifi/CStateChangeResult.h"
 #endif
-#include "elastos/droid/net/wifi/WifiConfigStore.h"
-#include "elastos/droid/utility/State.h"
-#include "elastos/droid/utility/StateMachine.h"
+#include "elastos/droid/server/wifi/WifiConfigStore.h"
+#include "elastos/droid/internal/utility/State.h"
+#include "elastos/droid/internal/utility/StateMachine.h"
+#include "elastos/droid/server/wifi/CStateChangeResult.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Wifi::SupplicantState;
+using Elastos::Droid::Internal::App::IIBatteryStats;
 using Elastos::Droid::Internal::Utility::State;
 using Elastos::Droid::Internal::Utility::StateMachine;
 
@@ -49,6 +52,11 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName()
+        {
+            return String("DefaultState");
+        }
+
     private:
         SupplicantStateTracker* mOwner;
     };
@@ -71,6 +79,11 @@ private:
         // @Override
         CARAPI Enter();
 
+        CARAPI_(String) GetName()
+        {
+            return String("UninitializedState");
+        }
+
     private:
         SupplicantStateTracker* mOwner;
     };
@@ -84,6 +97,11 @@ private:
 
         // @Override
         CARAPI Enter();
+
+        CARAPI_(String) GetName()
+        {
+            return String("InactiveState");
+        }
 
     private:
         SupplicantStateTracker* mOwner;
@@ -99,6 +117,11 @@ private:
         // @Override
         CARAPI Enter();
 
+        CARAPI_(String) GetName()
+        {
+            return String("DisconnectedState");
+        }
+
     private:
         SupplicantStateTracker* mOwner;
     };
@@ -112,6 +135,11 @@ private:
 
         // @Override
         CARAPI Enter();
+
+        CARAPI_(String) GetName()
+        {
+            return String("ScanState");
+        }
 
     private:
         SupplicantStateTracker* mOwner;
@@ -135,6 +163,11 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName()
+        {
+            return String("HandshakeState");
+        }
+
     private:
         /**
          * The max number of the WPA supplicant loop iterations before we
@@ -156,6 +189,11 @@ private:
         // @Override
         CARAPI Enter();
 
+        CARAPI_(String) GetName()
+        {
+            return String("CompletedState");
+        }
+
         // @Override
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
@@ -176,6 +214,11 @@ private:
         // @Override
         CARAPI Enter();
 
+        CARAPI_(String) GetName()
+        {
+            return String("DormantState");
+        }
+
     private:
         SupplicantStateTracker* mOwner;
     };
@@ -192,17 +235,18 @@ public:
 
     CARAPI_(String) GetSupplicantStateName();
 
-    CARAPI_(void) Dump(
+    CARAPI Dump(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IPrintWriter* pw,
-        /* [in] */ ArrayOf<String>* args)
+        /* [in] */ ArrayOf<String>* args);
+
 private:
     CARAPI_(void) HandleNetworkConnectionFailure(
         /* [in] */ Int32 netId,
         /* [in] */ Int32 disableReason);
 
     CARAPI_(void) TransitionOnSupplicantStateChange(
-        /* [in] */ IStateChangeResult* stateChangeResult);
+        /* [in] */ CStateChangeResult* stateChangeResult);
 
     CARAPI_(void) SendSupplicantStateChangedBroadcast(
         /* [in] */ SupplicantState state,
@@ -210,7 +254,7 @@ private:
 
 private:
     static const String TAG;
-    static const Boolean DBG;
+    static Boolean DBG;
 
     WifiStateMachine* mWifiStateMachine;
     AutoPtr<WifiConfigStore> mWifiConfigStore;

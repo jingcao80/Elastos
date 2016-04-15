@@ -19,31 +19,27 @@ public:
     CAR_SINGLETON_DECL()
 
     CARAPI IsValidState(
-        /* [in] */ Elastos::Droid::Wifi::SupplicantState state,
+        /* [in] */ SupplicantState state,
         /* [out] */ Boolean* isValidState);
 
+    /** Supplicant associating or authenticating is considered a handshake state {@hide} */
     CARAPI IsHandshakeState(
-        /* [in] */ Elastos::Droid::Wifi::SupplicantState state,
+        /* [in] */ SupplicantState state,
         /* [out] */ Boolean* isHandshakeState);
 
-    CARAPI WriteToParcel(
-        /* [in] */ IParcel* dest);
-
-    CARAPI ReadFromParcel(
-        /* [in] */ IParcel* source);
-
-private:
+    /** @hide */
     CARAPI IsConnecting(
-        /* [in] */ Elastos::Droid::Wifi::SupplicantState state,
-        /* [out] */ Boolean* isConnecting);
+        /* [in] */ SupplicantState state,
+        /* [out] */ Boolean* result);
 
+    /** @hide */
     CARAPI IsDriverActive(
-        /* [in] */ Elastos::Droid::Wifi::SupplicantState state,
-        /* [out] */ Boolean* isDriverActive);
+        /* [in] */ SupplicantState state,
+        /* [out] */ Boolean* result);
 };
 
 } // namespace Wifi
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_NET_WIFI_CSUPPLICANTSTATEHELPER_H__
+#endif //__ELASTOS_DROID_NET_WIFI_CSUPPLICANTSTATEHELPER_H__

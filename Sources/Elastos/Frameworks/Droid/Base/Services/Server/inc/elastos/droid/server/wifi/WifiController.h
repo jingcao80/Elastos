@@ -1,94 +1,80 @@
-/*
-  * Copyright (C) 2013 The Android Open Source Project
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *      http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
 #ifndef __ELASTOS_DROID_SERVER_WIFI_WIFICONTROLLER_H__
 #define __ELASTOS_DROID_SERVER_WIFI_WIFICONTROLLER_H__
 
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/database/ContentObserver.h"
+#include "elastos/droid/internal/utility/State.h"
+#include "elastos/droid/internal/utility/StateMachine.h"
+#include "elastos/droid/server/wifi/WifiStateMachine.h"
+#include "elastos/droid/server/wifi/WifiSettingsStore.h"
+//TODO #include "elastos/droid/server/wifi/WifiServiceImpl.h"
 
-// package com.android.server.wifi;
-// import android.app.AlarmManager;
-// import android.app.PendingIntent;
-// import android.content.BroadcastReceiver;
-// import android.content.Context;
-// import android.content.Intent;
-// import android.content.IntentFilter;
-// import android.database.ContentObserver;
-// import android.net.ConnectivityManager;
-// import android.net.NetworkInfo;
-// import android.net.wifi.WifiConfiguration;
-// import android.net.wifi.WifiManager;
-// import static android.net.wifi.WifiManager.WIFI_MODE_FULL;
-// import static android.net.wifi.WifiManager.WIFI_MODE_FULL_HIGH_PERF;
-// import static android.net.wifi.WifiManager.WIFI_MODE_SCAN_ONLY;
-// import static android.net.wifi.WifiManager.WIFI_STATE_ENABLED;
-// import static android.net.wifi.WifiManager.WIFI_STATE_ENABLING;
-// import android.os.Handler;
-// import android.os.Looper;
-// import android.os.Message;
-// import android.os.SystemClock;
-// import android.os.WorkSource;
-// import android.provider.Settings;
-// import android.util.Slog;
-// import com.android.internal.util.Protocol;
-// import com.android.internal.util.State;
-// import com.android.internal.util.StateMachine;
-// import com.android.server.wifi.WifiServiceImpl.LockList;
-// import java.io.FileDescriptor;
-// import java.io.PrintWriter;
-
-using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::App::IAlarmManager;
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::ILooper;
-using Elastos::Io::IFileDescriptor;
-using Elastos::Io::IPrintWriter;
+using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Internal::Utility::State;
+using Elastos::Droid::Internal::Utility::StateMachine;
+using Elastos::Droid::Internal::Utility::IProtocol;
 using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IWorkSource;
+//TODO using Elastos::Droid::Server::Wifi::WifiServiceImpl::LockList;//crossing-reference
+using Elastos::Droid::Net::INetworkInfo;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wifi {
 
+class WifiServiceImpl;
+
 class WifiController
-    : public Object
-    , public IStateMachine
+    : public StateMachine
 {
 public:
     class DefaultState
-        : public Object
-        , public IState
+        : public State
     {
     public:
         // @Override
         CARAPI_(Boolean) ProcessMessage(
             /* [in] */ IMessage* msg);
+
+        CARAPI_(String) GetName()
+        {
+            return String("DefaultState");
+        }
     };
 
     class ApStaDisabledState
-        : public Object
-        , public IState
+        : public State
     {
     public:
+        ApStaDisabledState()
+            : mDeferredEnableSerialNumber(0)
+            , mHaveDeferredEnable(FALSE)
+            , mDisabledTimestamp(0)
+        {
+        }
         // @Override
         CARAPI Enter();
 
         // @Override
         CARAPI_(Boolean) ProcessMessage(
             /* [in] */ IMessage* msg);
+
+        CARAPI_(String) GetName()
+        {
+            return String("ApStaDisabledState");
+        }
 
     private:
         CARAPI_(Boolean) DoDeferEnable(
@@ -101,8 +87,7 @@ public:
     };
 
     class StaEnabledState
-        : public Object
-        , public IState
+        : public State
     {
     public:
         // @Override
@@ -111,19 +96,36 @@ public:
         // @Override
         CARAPI_(Boolean) ProcessMessage(
             /* [in] */ IMessage* msg);
+
+        CARAPI_(String) GetName()
+        {
+            return String("StaEnabledState");
+        }
+
     };
 
     class StaDisabledWithScanState
-        : public Object
-        , public IState
+        : public State
     {
     public:
+        StaDisabledWithScanState()
+            : mDeferredEnableSerialNumber(0)
+            , mHaveDeferredEnable(FALSE)
+            , mDisabledTimestamp(0)
+        {
+        }
+
         // @Override
         CARAPI Enter();
 
         // @Override
         CARAPI_(Boolean) ProcessMessage(
             /* [in] */ IMessage* msg);
+
+        CARAPI_(String) GetName()
+        {
+            return String("StaDisabledWithScanState");
+        }
 
     private:
         CARAPI_(Boolean) DoDeferEnable(
@@ -136,18 +138,22 @@ public:
     };
 
     class ApEnabledState
-        : public Object
-        , public IState
+        : public State
     {
     public:
         // @Override
         CARAPI_(Boolean) ProcessMessage(
             /* [in] */ IMessage* msg);
+
+        CARAPI_(String) GetName()
+        {
+            return String("ApEnabledState");
+        }
+
     };
 
     class EcmState
-        : public Object
-        , public IState
+        : public State
     {
     public:
         // @Override
@@ -156,12 +162,17 @@ public:
         // @Override
         CARAPI_(Boolean) ProcessMessage(
             /* [in] */ IMessage* msg);
+
+        CARAPI_(String) GetName()
+        {
+            return String("EcmState");
+        }
+
     };
 
     /* Parent: StaEnabledState */
     class DeviceActiveState
-        : public Object
-        , public IState
+        : public State
     {
     public:
         // @Override
@@ -170,73 +181,108 @@ public:
         // @Override
         CARAPI_(Boolean) ProcessMessage(
             /* [in] */ IMessage* msg);
+
+        CARAPI_(String) GetName()
+        {
+            return String("DeviceActiveState");
+        }
+
     };
 
     /* Parent: DeviceActiveState. Device is active, and an app is holding a high perf lock. */
     class DeviceActiveHighPerfState
-        : public Object
-        , public IState
+        : public State
     {
     public:
         // @Override
         CARAPI Enter();
+
+        CARAPI_(String) GetName()
+        {
+            return String("DeviceActiveHighPerfState");
+        }
+
     };
 
     /* Parent: StaEnabledState */
     class DeviceInactiveState
-        : public Object
-        , public IState
+        : public State
     {
     public:
         // @Override
         CARAPI_(Boolean) ProcessMessage(
             /* [in] */ IMessage* msg);
+
+        CARAPI_(String) GetName()
+        {
+            return String("DeviceInactiveState");
+        }
+
     };
 
     /* Parent: DeviceInactiveState. Device is inactive, but an app is holding a scan only lock. */
     class ScanOnlyLockHeldState
-        : public Object
-        , public IState
+        : public State
     {
     public:
         // @Override
         CARAPI Enter();
+
+        CARAPI_(String) GetName()
+        {
+            return String("ScanOnlyLockHeldState");
+        }
+
     };
 
     /* Parent: DeviceInactiveState. Device is inactive, but an app is holding a full lock. */
     class FullLockHeldState
-        : public Object
-        , public IState
+        : public State
     {
     public:
         // @Override
         CARAPI Enter();
+
+        CARAPI_(String) GetName()
+        {
+            return String("FullLockHeldState");
+        }
+
     };
 
     /* Parent: DeviceInactiveState. Device is inactive, but an app is holding a high perf lock. */
     class FullHighPerfLockHeldState
-        : public Object
-        , public IState
+        : public State
     {
     public:
         // @Override
         CARAPI Enter();
+
+        CARAPI_(String) GetName()
+        {
+            return String("FullHighPerfLockHeldState");
+        }
+
     };
 
     /* Parent: DeviceInactiveState. Device is inactive and no app is holding a wifi lock. */
     class NoLockHeldState
-        : public Object
-        , public IState
+        : public State
     {
     public:
         // @Override
         CARAPI Enter();
+
+        CARAPI_(String) GetName()
+        {
+            return String("NoLockHeldState");
+        }
+
     };
 
 private:
     class InnerBroadcastReceiver1
-        : public Object
-        , public IBroadcastReceiver
+        : public BroadcastReceiver
     {
     public:
         InnerBroadcastReceiver1(
@@ -252,8 +298,7 @@ private:
     };
 
     class InnerContentObserver1
-        : public Object
-        , public IContentObserver
+        : public ContentObserver
     {
     public:
         InnerContentObserver1(
@@ -268,8 +313,7 @@ private:
     };
 
     class InnerContentObserver3
-        : public Object
-        , public IContentObserver
+        : public ContentObserver
     {
     public:
         InnerContentObserver3(
@@ -284,8 +328,7 @@ private:
     };
 
     class InnerContentObserver5
-        : public Object
-        , public IContentObserver
+        : public ContentObserver
     {
     public:
         InnerContentObserver5(
@@ -373,9 +416,10 @@ private:
 public:
     AutoPtr<INetworkInfo> mNetworkInfo;
     /* References to values tracked in WifiService */
-    /*const*/ AutoPtr<WifiStateMachine> mWifiStateMachine;
-    /*const*/ AutoPtr<WifiSettingsStore> mSettingsStore;
-    /*const*/ AutoPtr<ILockList> mLocks;
+    AutoPtr<WifiStateMachine> mWifiStateMachine;
+    AutoPtr<WifiSettingsStore> mSettingsStore;
+    //TODO AutoPtr<LockList> mLocks;
+    static const Int32 BASE = IProtocol::BASE_WIFI_CONTROLLER;
     static const Int32 CMD_EMERGENCY_MODE_CHANGED = BASE + 1;
     static const Int32 CMD_SCREEN_ON = BASE + 2;
     static const Int32 CMD_SCREEN_OFF = BASE + 3;
@@ -426,9 +470,8 @@ private:
       * Temporary for computing UIDS that are responsible for starting WIFI.
       * Protected by mWifiStateTracker lock.
       */
-    /*const*/ AutoPtr<IWorkSource> mTmpWorkSource;
+    AutoPtr<IWorkSource> mTmpWorkSource;
     Int64 mReEnableDelayMillis;
-    static const Int32 BASE = Protocol.BASE_WIFI_CONTROLLER;
     AutoPtr<DefaultState> mDefaultState;
     AutoPtr<StaEnabledState> mStaEnabledState;
     AutoPtr<ApStaDisabledState> mApStaDisabledState;
@@ -450,4 +493,3 @@ private:
 } // namespace Elastos
 
 #endif // __ELASTOS_DROID_SERVER_WIFI_WIFICONTROLLER_H__
-

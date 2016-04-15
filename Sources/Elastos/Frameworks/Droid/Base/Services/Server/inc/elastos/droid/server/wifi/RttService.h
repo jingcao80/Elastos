@@ -2,42 +2,37 @@
 #ifndef __ELASTOS_DROID_SERVER_WIFI_RTTSERVICE_H__
 #define __ELASTOS_DROID_SERVER_WIFI_RTTSERVICE_H__
 
+#include "Elastos.Droid.Wifi.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/internal/utility/StateMachine.h"
+#include "elastos/droid/internal/utility/State.h"
+#include "elastos/droid/server/SystemService.h"
+#include "elastos/droid/server/wifi/WifiNative.h"
 
-// package com.android.server.wifi;
-// import android.content.BroadcastReceiver;
-// import android.content.Context;
-// import android.content.Intent;
-// import android.content.IntentFilter;
-// import android.net.wifi.RttManager;
-// import android.net.wifi.WifiManager;
-// import android.os.Bundle;
-// import android.os.Handler;
-// import android.os.HandlerThread;
-// import android.os.Looper;
-// import android.os.Message;
-// import android.os.Messenger;
-// import android.os.Parcel;
-// import android.os.RemoteException;
-// import android.util.Log;
-// import android.net.wifi.IRttManager;
-// import android.util.Slog;
-// import com.android.internal.util.AsyncChannel;
-// import com.android.internal.util.Protocol;
-// import com.android.internal.util.StateMachine;
-// import com.android.internal.util.State;
-// import com.android.server.SystemService;
-// import java.util.HashMap;
-// import java.util.Iterator;
-// import java.util.LinkedList;
-// import java.util.Queue;
-
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
-using Com.android.internal.Utility.AsyncChannel;
+using Elastos::Droid::Internal::Utility::IAsyncChannel;
+using Elastos::Droid::Internal::Utility::IProtocol;
+using Elastos::Droid::Internal::Utility::StateMachine;
+using Elastos::Droid::Internal::Utility::State;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IMessenger;
+using Elastos::Droid::Server::SystemService;
+using Elastos::Droid::Server::Wifi::WifiNative;
+using Elastos::Droid::Wifi::IIRttManager;
+using Elastos::Droid::Wifi::IRttManagerParcelableRttParams;
+using Elastos::Droid::Wifi::IRttManagerRttParams;
+using Elastos::Droid::Wifi::IRttManagerRttResult;
+using Elastos::Core::IInteger32;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IQueue;
+using Elastos::Utility::ILinkedList;
 
 namespace Elastos {
 namespace Droid {
@@ -45,48 +40,99 @@ namespace Server {
 namespace Wifi {
 
 class RttService
-    : public Object
-    , public ISystemService
+    : public SystemService
 {
 public:
     class RttServiceImpl
         : public Object
-        , public IRttManager::Stub
+        , public IIRttManager
+        , public IBinder
     {
     public:
+        class ClientInfo;
+
+        class RttRequest : public Object
+        {
+        public:
+            AutoPtr<IInteger32> key;
+            ClientInfo* ci;//avoid crossing-reference
+            AutoPtr<ArrayOf<IRttManagerRttParams*> > params;
+        };
+
+        class ClientInfo : public Object
+        {
+        public:
+            ClientInfo(
+                /* [in] */ IAsyncChannel* c,
+                /* [in] */ IMessenger* m);
+
+            virtual CARAPI AddRttRequest(
+                /* [in] */ Int32 key,
+                /* [in] */ IRttManagerParcelableRttParams* parcelableParams,
+                /* [out] */ Boolean* result);
+
+            virtual CARAPI RemoveRttRequest(
+                /* [in] */ Int32 key);
+
+            virtual CARAPI ReportResult(
+                /* [in] */ RttRequest* request,
+                /* [in] */ ArrayOf<IRttManagerRttResult*>* results);
+
+            virtual CARAPI ReportFailed(
+                /* [in] */ RttRequest* request,
+                /* [in] */ Int32 reason,
+                /* [in] */ const String& description);
+
+            virtual CARAPI ReportFailed(
+                /* [in] */ Int32 key,
+                /* [in] */ Int32 reason,
+                /* [in] */ String description);
+
+            virtual CARAPI ReportAborted(
+                /* [in] */ Int32 key);
+
+            virtual CARAPI Cleanup();
+
+        public:
+            AutoPtr<IHashMap> mRequests;//<Integer, RttRequest>
+
+        private:
+            /*const*/ AutoPtr<IAsyncChannel> mChannel;
+            /*const*/ AutoPtr<IMessenger> mMessenger;
+        };
+
         class RttStateMachine
-            : public Object
-            , public IStateMachine
+            : public StateMachine
         {
         public:
             class DefaultState
-                : public Object
-                , public IState
+                : public State
             {
             public:
                 // @Override
-                CARAPI_(Boolean) ProcessMessage(
-                    /* [in] */ IMessage* msg);
+                CARAPI ProcessMessage(
+                    /* [in] */ IMessage* msg,
+                    /* [out] */ Boolean* result);
             };
 
             class EnabledState
-                : public Object
-                , public IState
+                : public State
             {
             public:
                 // @Override
-                CARAPI_(Boolean) ProcessMessage(
-                    /* [in] */ IMessage* msg);
+                CARAPI ProcessMessage(
+                    /* [in] */ IMessage* msg,
+                    /* [out] */ Boolean* result);
             };
 
             class RequestPendingState
-                : public Object
-                , public IState
+                : public State
             {
             public:
                 // @Override
-                CARAPI_(Boolean) ProcessMessage(
-                    /* [in] */ IMessage* msg);
+                CARAPI ProcessMessage(
+                    /* [in] */ IMessage* msg,
+                    /* [out] */ Boolean* result);
 
             public:
                 AutoPtr<RttRequest> mOutstandingRequest;
@@ -104,12 +150,11 @@ public:
 
     private:
         class ClientHandler
-            : public Object
-            , public IHandler
+            : public Handler
         {
         public:
             ClientHandler(
-                /* [in] */  android);
+                /* [in] */ ILooper* looper);
 
             // @Override
             CARAPI HandleMessage(
@@ -117,8 +162,7 @@ public:
         };
 
         class InnerBroadcastReceiver1
-            : public Object
-            , public IBroadcastReceiver
+            : public BroadcastReceiver
         {
         public:
             InnerBroadcastReceiver1(
@@ -133,88 +177,47 @@ public:
             RttServiceImpl* mOwner;
         };
 
-        class RttRequest
-        {
-        public:
-            AutoPtr<Integer> key;
-            AutoPtr<ClientInfo> ci;
-            AutoPtr<IRttManager> AutoPtr<::RttParams[]> params;
-        };
-
-        class ClientInfo
-            : public Object
-        {
-        public:
-            ClientInfo(
-                /* [in] */ IAsyncChannel* c,
-                /* [in] */ IMessenger* m);
-
-            virtual CARAPI AddRttRequest(
-                /* [in] */ Int32 key,
-                /* [in] */  RttManager,
-                /* [out] */ Boolean* result);
-
-            virtual CARAPI RemoveRttRequest(
-                /* [in] */ Int32 key);
-
-            virtual CARAPI ReportResult(
-                /* [in] */ RttRequest* request,
-                /* [in] */  RttManager);
-
-            virtual CARAPI ReportFailed(
-                /* [in] */ RttRequest* request,
-                /* [in] */ Int32 reason,
-                /* [in] */ String description);
-
-            virtual CARAPI ReportFailed(
-                /* [in] */ Int32 key,
-                /* [in] */ Int32 reason,
-                /* [in] */ String description);
-
-            virtual CARAPI ReportAborted(
-                /* [in] */ Int32 key);
-
-            virtual CARAPI Cleanup();
-
-        public:
-            AutoPtr< IHashMap<Integer, RttRequest> > mRequests;
-
-        private:
-            /*const*/ AutoPtr<IAsyncChannel> mChannel;
-            /*const*/ AutoPtr<IMessenger> mMessenger;
-        };
-
     public:
+        CAR_INTERFACE_DECL();
+
         RttServiceImpl();
 
-        RttServiceImpl(
+        CARAPI constructor(
             /* [in] */ IContext* context);
 
         // @Override
-        CARAPI_(AutoPtr<IMessenger>) GetMessenger();
+        CARAPI GetMessenger(
+            /* [out] */ IMessenger** messenger);
 
         virtual CARAPI StartService(
             /* [in] */ IContext* context);
 
         virtual CARAPI ReplySucceeded(
             /* [in] */ IMessage* msg,
-            /* [in] */ Object* obj);
+            /* [in] */ IObject* obj);
 
         virtual CARAPI ReplyFailed(
             /* [in] */ IMessage* msg,
             /* [in] */ Int32 reason,
-            /* [in] */ String description);
+            /* [in] */ const String& description);
 
         virtual CARAPI IssueNextRequest(
             /* [out] */ RttRequest** result);
+
+        CARAPI ToString(
+            /* [out] */ String* info)
+        {
+            VALIDATE_NOT_NULL(info)
+                return Object::ToString(info);
+        }
 
     private:
         AutoPtr<IContext> mContext;
         AutoPtr<RttStateMachine> mStateMachine;
         AutoPtr<ClientHandler> mClientHandler;
-        AutoPtr< IQueue<RttRequest> > mRequestQueue;
-        AutoPtr< IHashMap<IMessenger, ClientInfo> > mClients;
-        static const Int32 BASE = Protocol.BASE_WIFI_RTT_SERVICE;
+        AutoPtr<IQueue> mRequestQueue;//RttRequest
+        AutoPtr<IHashMap> mClients;//<IMessenger, ClientInfo>
+        static const Int32 BASE = IProtocol::BASE_WIFI_RTT_SERVICE;
         static const Int32 CMD_DRIVER_LOADED = BASE + 0;
         static const Int32 CMD_DRIVER_UNLOADED = BASE + 1;
         static const Int32 CMD_ISSUE_NEXT_REQUEST = BASE + 2;
@@ -224,8 +227,7 @@ public:
 
 private:
     class InnerWifiNativeRttEventHandler
-        : public Object
-        , public WifiNative::RttEventHandler
+        : public WifiNative::RttEventHandler
     {
     public:
         InnerWifiNativeRttEventHandler(
@@ -233,7 +235,7 @@ private:
 
         // @Override
         CARAPI OnRttResults(
-            /* [in] */  RttManager);
+            /* [in] */ ArrayOf<IRttManagerRttResult*>* result);
 
     private:
         RttServiceImpl* mOwner;

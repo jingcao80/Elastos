@@ -130,6 +130,7 @@ ELASTOS_LIBS += trust/trust.lib
 ELASTOS_LIBS += twilight/twilight.lib
 ELASTOS_LIBS += wallpaper/wallpaper.lib
 ELASTOS_LIBS += webkit/webkit.lib
+ELASTOS_LIBS += wifi/wifi.lib
 ELASTOS_LIBS += media/media.lib
 
 

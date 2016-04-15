@@ -1,6 +1,11 @@
-
 #ifndef __ELASTOS_DROID_SERVER_WIFI_STATECHANGERESULT_H__
 #define __ELASTOS_DROID_SERVER_WIFI_STATECHANGERESULT_H__
+
+#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Wifi::IWifiSsid;
+using Elastos::Droid::Wifi::SupplicantState;
 
 namespace Elastos {
 namespace Droid {
@@ -57,4 +62,4 @@ private:
 } // namespace Droid
 } // namepsace Elastos
 
-#endif // __ELASTOS_DROID_SERVER_WIFI_STATECHANGERESULT_H__
+#endif // __ELASTOS_DROID_SERVER_WIFI_CSTATECHANGERESULT_H__

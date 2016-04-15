@@ -102,6 +102,7 @@ WifiTrafficPoller::WifiTrafficPoller(
     /* [in] */ IContext* context,
     /* [in] */ String iface)
 {
+    CArrayList::New((IList**)&mClients);
     // ==================before translated======================
     // mInterface = iface;
     // mTrafficHandler = new TrafficHandler();

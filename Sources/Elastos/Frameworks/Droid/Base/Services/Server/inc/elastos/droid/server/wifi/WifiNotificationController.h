@@ -1,51 +1,21 @@
-/*
-  * Copyright (C) 2013 The Android Open Source Project
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *      http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
 #ifndef __ELASTOS_DROID_SERVER_WIFI_WIFINOTIFICATIONCONTROLLER_H__
 #define __ELASTOS_DROID_SERVER_WIFI_WIFINOTIFICATIONCONTROLLER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/database/ContentObserver.h"
+#include "elastos/droid/server/wifi/WifiStateMachine.h"
 
-// package com.android.server.wifi;
-// import android.app.Notification;
-// import android.app.NotificationManager;
-// import android.app.TaskStackBuilder;
-// import android.content.BroadcastReceiver;
-// import android.content.ContentResolver;
-// import android.content.Context;
-// import android.content.Intent;
-// import android.content.IntentFilter;
-// import android.database.ContentObserver;
-// import android.net.NetworkInfo;
-// import android.net.wifi.ScanResult;
-// import android.net.wifi.WifiManager;
-// import android.os.Handler;
-// import android.os.Message;
-// import android.os.UserHandle;
-// import android.provider.Settings;
-// import java.io.FileDescriptor;
-// import java.io.PrintWriter;
-// import java.util.List;
-
+using Elastos::Droid::App::INotification;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Io::IFileDescriptor;
-using Elastos::Io::IPrintWriter;
 using Elastos::Droid::Net::INetworkInfo;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -58,8 +28,7 @@ class WifiNotificationController
 {
 private:
     class InnerBroadcastReceiver1
-        : public Object
-        , public IBroadcastReceiver
+        : public BroadcastReceiver
     {
     public:
         InnerBroadcastReceiver1(
@@ -75,8 +44,7 @@ private:
     };
 
     class NotificationEnabledSettingObserver
-        : public Object
-        , public IContentObserver
+        : public ContentObserver
     {
     public:
         NotificationEnabledSettingObserver(
@@ -106,7 +74,7 @@ private:
     // synchronized
     CARAPI_(void) CheckAndSetNotification(
         /* [in] */ INetworkInfo* networkInfo,
-        /* [in] */ IList<IScanResult>* scanResults);
+        /* [in] */ IList* scanResults);//IScanResult
 
     /**
       * Clears variables related to tracking whether a notification has been
@@ -135,11 +103,11 @@ private:
       * The icon to show in the 'available networks' notification. This will also
       * be the ID of the Notification given to the NotificationManager.
       */
-    static const Int32 ICON_NETWORKS_AVAILABLE = com.android.internal.R.drawable.stat_notify_wifi_in_range;
+    static const Int32 ICON_NETWORKS_AVAILABLE;// = com.android.internal.R.drawable.stat_notify_wifi_in_range;
     /**
       * When a notification is shown, we wait this amount before possibly showing it again.
       */
-    /*const*/ Int64 NOTIFICATION_REPEAT_DELAY_MS;
+    Int64 NOTIFICATION_REPEAT_DELAY_MS;
     /**
       * Whether the user has set the setting to show the 'available networks' notification.
       */
@@ -177,10 +145,10 @@ private:
       * something other than scanning, we reset this to 0.
       */
     Int32 mNumScansSinceNetworkStateChange;
-    /*const*/ AutoPtr<IContext> mContext;
-    /*const*/ AutoPtr<WifiStateMachine> mWifiStateMachine;
+    AutoPtr<IContext> mContext;
+    AutoPtr<WifiStateMachine> mWifiStateMachine;
     AutoPtr<INetworkInfo> mNetworkInfo;
-    AutoPtr<volatile> Int32 mWifiState;
+    volatile Int32 mWifiState;
 };
 
 } // namespace Wifi

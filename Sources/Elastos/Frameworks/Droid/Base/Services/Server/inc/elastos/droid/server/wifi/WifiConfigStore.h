@@ -1,98 +1,41 @@
-/*
-  * Copyright (C) 2010 The Android Open Source Project
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *      http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
 #ifndef __ELASTOS_DROID_SERVER_WIFI_WIFICONFIGSTORE_H__
 #define __ELASTOS_DROID_SERVER_WIFI_WIFICONFIGSTORE_H__
 
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/ext/frameworkext.h"
-
-// package com.android.server.wifi;
-// import android.content.Context;
-// import android.content.Intent;
-// import android.net.IpConfiguration;
-// import android.net.IpConfiguration.IpAssignment;
-// import android.net.IpConfiguration.ProxySettings;
-// import android.net.LinkAddress;
-// import android.net.NetworkInfo.DetailedState;
-// import android.net.ProxyInfo;
-// import android.net.RouteInfo;
-// import android.net.StaticIpConfiguration;
-// import android.net.wifi.WifiConfiguration;
-// import android.net.wifi.WifiConfiguration.KeyMgmt;
-// import android.net.wifi.WifiConfiguration.Status;
-// import static android.net.wifi.WifiConfiguration.INVALID_NETWORK_ID;
-// import android.net.wifi.WifiEnterpriseConfig;
-// import android.net.wifi.WifiManager;
-// import android.net.wifi.WifiSsid;
-// import android.net.wifi.WpsInfo;
-// import android.net.wifi.WpsResult;
-// import android.net.wifi.ScanResult;
-// import android.net.wifi.WifiInfo;
-// import android.os.Environment;
-// import android.os.FileObserver;
-// import android.os.Process;
-// import android.os.SystemClock;
-// import android.os.UserHandle;
-// import android.provider.Settings;
-// import android.security.Credentials;
-// import android.security.KeyChain;
-// import android.security.KeyStore;
-// import android.text.TextUtils;
-// import android.util.LocalLog;
-// import android.util.Log;
-// import android.util.SparseArray;
-// import com.android.server.net.DelayedDiskWrite;
-// import com.android.server.net.IpConfigStore;
-// import com.android.internal.R;
-// import java.io.BufferedReader;
-// import java.io.BufferedInputStream;
-// import java.io.DataInputStream;
-// import java.io.DataOutputStream;
-// import java.io.EOFException;
-// import java.io.File;
-// import java.io.FileDescriptor;
-// import java.io.FileInputStream;
-// import java.io.FileNotFoundException;
-// import java.io.FileReader;
-// import java.io.IOException;
-// import java.io.PrintWriter;
-// import java.math.BigInteger;
-// import java.net.InetAddress;
-// import java.nio.charset.Charset;
-// import java.security.PrivateKey;
-// import java.security.cert.Certificate;
-// import java.security.cert.CertificateException;
-// import java.text.SimpleDateFormat;
-// import java.text.DateFormat;
-// import java.util.regex.Matcher;
-// import java.util.regex.Pattern;
-// import java.util.*;
+#include "elastos/droid/os/FileObserver.h"
+#include "elastos/droid/server/wifi/NetworkUpdateResult.h"
+#include "elastos/droid/server/wifi/WifiNative.h"
+#include "elastos/droid/server/net/IpConfigStore.h"
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Net::Wifi::IWifiInfo;
-using Elastos::Droid::Net::Wifi::IWifiConfiguration;
-using Elastos::Droid::Net::NetworkInfo::IDetailedState;
-using Elastos::Droid::Net::Wifi::IWpsInfo;
 using Elastos::Droid::Net::IStaticIpConfiguration;
-using Elastos::Droid::Net::Wifi::IScanResult;
-using Elastos::Io::IFileDescriptor;
-using Elastos::Io::IPrintWriter;
-using Elastos::Droid::Net::Wifi::IWifiEnterpriseConfig;
+using Elastos::Droid::Net::NetworkInfoDetailedState;//enum
+using Elastos::Droid::Net::IProxyInfo;
+using Elastos::Droid::Os::FileObserver;
+using Elastos::Droid::Server::Net::IpConfigStore;
+using Elastos::Droid::Wifi::IWifiInfo;
+using Elastos::Droid::Wifi::IWifiConfiguration;
+using Elastos::Droid::Wifi::IWpsInfo;
+using Elastos::Droid::Wifi::IWpsResult;
+using Elastos::Droid::Wifi::IScanResult;
+using Elastos::Droid::Wifi::IWifiEnterpriseConfig;
+using Elastos::Droid::Utility::ILocalLog;
+using Elastos::Core::IInteger32;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
+using Elastos::Security::IKeyStore;
 using Elastos::Security::IPrivateKey;
 using Elastos::Security::Cert::ICertificate;
+using Elastos::Utility::IBitSet;
+using Elastos::Utility::IList;
+using Elastos::Utility::IMap;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::Regex::IPattern;
 
 namespace Elastos {
 namespace Droid {
@@ -145,13 +88,11 @@ namespace Wifi {
   *
   */
 class WifiConfigStore
-    : public Object
-    , public IIpConfigStore
+    : public IpConfigStore
 {
 public:
     class WpaConfigFileObserver
-        : public Object
-        , public IFileObserver
+        : public FileObserver
     {
     public:
         WpaConfigFileObserver();
@@ -159,7 +100,7 @@ public:
         // @Override
         CARAPI OnEvent(
             /* [in] */ Int32 event,
-            /* [in] */ String path);
+            /* [in] */ const String& path);
     };
 
 public:
@@ -184,14 +125,14 @@ public:
       * @return List of networks
       */
     virtual CARAPI GetConfiguredNetworks(
-        /* [out] */ List<WifiConfiguration>** result);
+        /* [out] */ IList** result);//WifiConfiguration
 
     /**
       * Fetch the list of currently configured networks, filled with real preSharedKeys
       * @return List of networks
       */
     virtual CARAPI GetPrivilegedConfiguredNetworks(
-        /* [out] */ List<WifiConfiguration>** result);
+        /* [out] */ IList** result);//WifiConfiguration
 
     virtual CARAPI GetconfiguredNetworkSize(
         /* [out] */ Int32* result);
@@ -204,7 +145,7 @@ public:
     virtual CARAPI GetRecentConfiguredNetworks(
         /* [in] */ Int32 milli,
         /* [in] */ Boolean copy,
-        /* [out] */ List<WifiConfiguration>** result);
+        /* [out] */ IList** result);//WifiConfiguration
 
     /**
       *  Update the configuration and BSSID with latest RSSI value.
@@ -219,15 +160,15 @@ public:
       */
     virtual CARAPI GetWifiConfiguration(
         /* [in] */ Int32 netId,
-        /* [out] */ WifiConfiguration** result);
+        /* [out] */ IWifiConfiguration** result);
 
     /**
       * Get the Wificonfiguration for this key
       * @return Wificonfiguration
       */
     virtual CARAPI GetWifiConfiguration(
-        /* [in] */ String key,
-        /* [out] */ WifiConfiguration** result);
+        /* [in] */ const String& key,
+        /* [out] */ IWifiConfiguration** result);
 
     /**
       * Enable all networks and save config. This will be a no-op if the list
@@ -280,7 +221,7 @@ public:
 
     virtual CARAPI UpdateStatus(
         /* [in] */ Int32 netId,
-        /* [in] */ IDetailedState* state);
+        /* [in] */ NetworkInfoDetailedState* state);
 
     /**
       * Forget the specified network and save config
@@ -375,7 +316,7 @@ public:
       */
     virtual CARAPI StartWpsWithPinFromAccessPoint(
         /* [in] */ IWpsInfo* config,
-        /* [out] */ WpsResult** result);
+        /* [out] */ IWpsResult** result);
 
     /**
       * Start WPS pin method configuration with pin obtained
@@ -384,7 +325,7 @@ public:
       */
     virtual CARAPI StartWpsWithPinFromDevice(
         /* [in] */ IWpsInfo* config,
-        /* [out] */ WpsResult** result);
+        /* [out] */ IWpsResult** result);
 
     /**
       * Start WPS push button configuration
@@ -393,14 +334,14 @@ public:
       */
     virtual CARAPI StartWpsPbc(
         /* [in] */ IWpsInfo* config,
-        /* [out] */ WpsResult** result);
+        /* [out] */ IWpsResult** result);
 
     /**
       * Fetch the static IP configuration for a given network id
       */
     virtual CARAPI GetStaticIpConfiguration(
         /* [in] */ Int32 netId,
-        /* [out] */ StaticIpConfiguration** result);
+        /* [out] */ IStaticIpConfiguration** result);
 
     /**
       * Set the static IP configuration for a given network id
@@ -414,7 +355,7 @@ public:
       */
     virtual CARAPI SetDefaultGwMacAddress(
         /* [in] */ Int32 netId,
-        /* [in] */ String macAddress);
+        /* [in] */ const String& macAddress);
 
     /**
       * Fetch the proxy properties for a given network id
@@ -423,7 +364,7 @@ public:
       */
     virtual CARAPI GetProxyProperties(
         /* [in] */ Int32 netId,
-        /* [out] */ ProxyInfo** result);
+        /* [out] */ IProxyInfo** result);
 
     /**
       * Return if the specified network is using static IP
@@ -437,7 +378,7 @@ public:
     virtual CARAPI LoadConfiguredNetworks();
 
     virtual CARAPI GetNetworkIdFromSsid(
-        /* [in] */ String ssid,
+        /* [in] */ const String& ssid,
         /* [out] */ Int32* result);
 
     virtual CARAPI NeedsUnlockedKeyStore(
@@ -477,13 +418,13 @@ public:
       */
     virtual CARAPI AssociateWithConfiguration(
         /* [in] */ IScanResult* result,
-        /* [out] */ WifiConfiguration** result);
+        /* [out] */ IWifiConfiguration** wificonfig);
 
     virtual CARAPI MakeChannelList(
         /* [in] */ IWifiConfiguration* config,
         /* [in] */ Int32 age,
-        /* [in] */ Boolean restrict,
-        /* [out] */ HashSet<Integer>** result);
+        /* [in] */ Boolean _restrict,
+        /* [out] */ IHashSet** result);// IInteger32*
 
     // Update the WifiConfiguration database with the new scan result
     // A scan result can be associated to multiple WifiConfigurations
@@ -494,7 +435,7 @@ public:
     /* return the allowed key management based on a scan result */
     virtual CARAPI WifiConfigurationFromScanResult(
         /* [in] */ IScanResult* result,
-        /* [out] */ WifiConfiguration** result);
+        /* [out] */ IWifiConfiguration** wifiConfig);
 
     virtual CARAPI Dump(
         /* [in] */ IFileDescriptor* fd,
@@ -526,13 +467,13 @@ public:
 
     virtual CARAPI HandleBSSIDBlackList(
         /* [in] */ Int32 netId,
-        /* [in] */ String BSSID,
+        /* [in] */ const String& BSSID,
         /* [in] */ Boolean enable,
         /* [out] */ Boolean* result);
 
     virtual CARAPI HandleDisabledAPs(
         /* [in] */ Boolean enable,
-        /* [in] */ String BSSID,
+        /* [in] */ const String& BSSID,
         /* [in] */ Int32 reason);
 
     virtual CARAPI GetMaxDhcpRetries(
@@ -541,12 +482,12 @@ public:
     virtual CARAPI HandleSSIDStateChange(
         /* [in] */ Int32 netId,
         /* [in] */ Boolean enabled,
-        /* [in] */ String message,
-        /* [in] */ String BSSID);
+        /* [in] */ const String& message,
+        /* [in] */ const String& BSSID);
 
     virtual CARAPI InstallKeys(
         /* [in] */ IWifiEnterpriseConfig* config,
-        /* [in] */ String name,
+        /* [in] */ const String& name,
         /* [out] */ Boolean* result);
 
     virtual CARAPI RemoveKeys(
@@ -569,26 +510,28 @@ public:
 
 protected:
     virtual CARAPI_(void) Loge(
-        /* [in] */ String s);
+        /* [in] */ const String& s);
 
     virtual CARAPI_(void) Loge(
-        /* [in] */ String s,
+        /* [in] */ const String& s,
         /* [in] */ Boolean stack);
 
     virtual CARAPI_(void) Log(
-        /* [in] */ String s);
+        /* [in] */ const String& s);
 
 private:
     static CARAPI_(AutoPtr< ArrayOf<String> >) MiddleInitEnterpriseConfigSupplicantKeys();
 
-    CARAPI_(AutoPtr< List< AutoPtr<IWifiConfiguration> > >) GetConfiguredNetworks(
-        /* [in] */ Map<String, String>* pskMap);
+    //IWifiConfiguration
+    CARAPI_(AutoPtr<IList>) GetConfiguredNetworks(
+        /* [in] */ IMap* pskMap);//String, String
 
     /**
       * Fetch the preSharedKeys for all networks.
       * @return a map from Ssid to preSharedKey.
       */
-    CARAPI_(AutoPtr< Map<String, String> >) GetCredentialsBySsidMap();
+    //String, String
+    CARAPI_(AutoPtr<IMap>) GetCredentialsBySsidMap();
 
     CARAPI_(Boolean) RemoveConfigAndSendBroadcastIfNeeded(
         /* [in] */ Int32 netId);
@@ -608,12 +551,13 @@ private:
       */
     CARAPI_(void) SendConfiguredNetworksChangedBroadcast();
 
-    CARAPI_(AutoPtr< Map<String, String> >) ReadNetworkVariablesFromSupplicantFile(
-        /* [in] */ String key);
+    // return map<String, String>
+    CARAPI_(AutoPtr<IMap>) ReadNetworkVariablesFromSupplicantFile(
+        /* [in] */ const String& key);
 
     CARAPI_(String) ReadNetworkVariableFromSupplicantFile(
-        /* [in] */ String ssid,
-        /* [in] */ String key);
+        /* [in] */ const String& ssid,
+        /* [in] */ const String& key);
 
     /* Mark all networks except specified netId as disabled */
     CARAPI_(void) MarkAllNetworksDisabledExcept(
@@ -636,7 +580,7 @@ private:
       * and that can confuses the supplicant because it uses space charaters as delimiters
       */
     CARAPI_(String) EncodeSSID(
-        /* [in] */ String str);
+        /* [in] */ const String& str);
 
     CARAPI_(AutoPtr<NetworkUpdateResult>) AddOrUpdateNetworkNative(
         /* [in] */ IWifiConfiguration* config,
@@ -649,7 +593,7 @@ private:
 
     /** Returns true if a particular config key needs to be quoted when passed to the supplicant. */
     CARAPI_(Boolean) EnterpriseConfigKeyShouldBeQuoted(
-        /* [in] */ String key);
+        /* [in] */ const String& key);
 
     /**
       * Read the variables from the supplicant daemon that are needed to
@@ -661,14 +605,14 @@ private:
         /* [in] */ IWifiConfiguration* config);
 
     static CARAPI_(String) RemoveDoubleQuotes(
-        /* [in] */ String string);
+        /* [in] */ const String& string);
 
     static CARAPI_(String) MakeString(
-        /* [in] */ BitSet* set,
+        /* [in] */ IBitSet* set,
         /* [in] */ ArrayOf<String>* strings);
 
     CARAPI_(Int32) LookupString(
-        /* [in] */ String string,
+        /* [in] */ const String& string,
         /* [in] */ ArrayOf<String>* strings);
 
     /* Returns a unique for a given configuration */
@@ -676,18 +620,18 @@ private:
         /* [in] */ IWifiConfiguration* config);
 
     CARAPI_(void) LocalLog(
-        /* [in] */ String s);
+        /* [in] */ const String& s);
 
     CARAPI_(void) LocalLog(
-        /* [in] */ String s,
+        /* [in] */ const String& s,
         /* [in] */ Boolean force);
 
     CARAPI_(void) LocalLog(
-        /* [in] */ String s,
+        /* [in] */ const String& s,
         /* [in] */ Int32 netId);
 
     CARAPI_(Boolean) PutCertInKeyStore(
-        /* [in] */ String name,
+        /* [in] */ const String& name,
         /* [in] */ ICertificate* cert);
 
 public:
@@ -772,7 +716,7 @@ private:
     static Boolean VVDBG;
     static const String SUPPLICANT_CONFIG_FILE;
     /* configured networks with network id as the key */
-    AutoPtr< HashMap<Integer, IWifiConfiguration> > mConfiguredNetworks;
+    AutoPtr<IHashMap> mConfiguredNetworks;//Integer, IWifiConfiguration
     /* A network id is a unique identifier for a network configured in the
       * supplicant. Network ids are generated when the supplicant reads
       * the configuration file at start and can thus change for networks.
@@ -780,7 +724,7 @@ private:
       * that is generated from SSID and security type of the network. A mapping
       * from the generated unique id to network id of the network is needed to
       * map supplicant config to IP configuration. */
-    AutoPtr< HashMap<Integer, Integer> > mNetworkIds;
+    AutoPtr<IHashMap> mNetworkIds;//Integer, Integer
     /* Tracks the highest priority of configured networks */
     Int32 mLastPriority;
     static const String ipConfigFile;
@@ -874,7 +818,7 @@ private:
       */
     static AutoPtr<IPattern> mConnectChoice;
     // Internal use only
-    static AutoPtr< ArrayOf<String> > ENTERPRISE_CONFIG_SUPPLICANT_KEYS;
+    static AutoPtr<ArrayOf<String> > ENTERPRISE_CONFIG_SUPPLICANT_KEYS;
     /**
       * The maximum number of times we will retry a connection to an access point
       * for which we have failed in acquiring an IP address from DHCP. A value of

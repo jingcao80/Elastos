@@ -1,8 +1,10 @@
 
-#include "elastos/droid/wifi/SupplicantStateTracker.h"
-#include "elastos/droid/wifi/SupplicantStateHelper.h"
-#include "elastos/droid/wifi/WifiMonitor.h"
-#include "elastos/droid/wifi/WifiStateMachine.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Wifi.h"
+#include "Elastos.Droid.Os.h"
+#include "elastos/droid/server/wifi/SupplicantStateTracker.h"
+#include "elastos/droid/server/wifi/WifiMonitor.h"
+//TODO #include "elastos/droid/server/wifi/WifiStateMachine.h"
 #ifdef DROID_CORE
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/os/CUserHandleHelper.h"
@@ -11,12 +13,21 @@
 #endif
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Os::IBatteryStats;
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Wifi::IWifiManager;
+using Elastos::Droid::Wifi::IWifiConfiguration;
+using Elastos::Droid::Wifi::ISupplicantState;
+using Elastos::Droid::Wifi::ISupplicantStateHelper;
+using Elastos::Droid::Wifi::CSupplicantStateHelper;
+using Elastos::Droid::Wifi::CSupplicantState;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -24,7 +35,7 @@ namespace Server {
 namespace Wifi {
 
 const String SupplicantStateTracker::TAG("SupplicantStateTracker");
-const Boolean SupplicantStateTracker::DBG = FALSE;
+Boolean SupplicantStateTracker::DBG = FALSE;
 const Int32 SupplicantStateTracker::MAX_RETRIES_ON_AUTHENTICATION_FAILURE;
 
 
@@ -55,7 +66,7 @@ ECode SupplicantStateTracker::DefaultState::ProcessMessage(
         case WifiMonitor::SUPPLICANT_STATE_CHANGE_EVENT: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<IStateChangeResult> stateChangeResult = IStateChangeResult::Probe(obj.Get());
+            AutoPtr<CStateChangeResult> stateChangeResult = (CStateChangeResult*)(IObject::Probe(obj.Get()));
             SupplicantState state;
             stateChangeResult->GetSupplicantState(&state);
             mOwner->SendSupplicantStateChangedBroadcast(state, mOwner->mAuthFailureInSupplicantBroadcast);
@@ -63,16 +74,16 @@ ECode SupplicantStateTracker::DefaultState::ProcessMessage(
             mOwner->TransitionOnSupplicantStateChange(stateChangeResult);
             break;
         }
-        case WifiStateMachine::CMD_RESET_SUPPLICANT_STATE:
-            mOwner->TransitionTo(mOwner->mUninitializedState);
-            break;
+        //TODO case WifiStateMachine::CMD_RESET_SUPPLICANT_STATE:
+        //    mOwner->TransitionTo(mOwner->mUninitializedState);
+        //    break;
         case IWifiManager::CONNECT_NETWORK:
             if (DBG) Logger::D("SupplicantStateTracker::DefaultState", "ProcessMessage CONNECT_NETWORK");
             mOwner->mNetworksDisabledDuringConnect = TRUE;
-            mAssociationRejectCount = 0;
+            mOwner->mAssociationRejectCount = 0;
             break;
         case WifiMonitor::ASSOCIATION_REJECTION_EVENT:
-            mAssociationRejectCount++;
+            mOwner->mAssociationRejectCount++;
             break;
         default:
             Logger::E(TAG, "Ignoring %p", msg);
@@ -115,21 +126,21 @@ ECode SupplicantStateTracker::DisconnectedState::Enter()
     AutoPtr<IMessage> message = mOwner->GetCurrentMessage();
     AutoPtr<IInterface> obj;
     message->GetObj((IInterface**)&obj);
-    AutoPtr<IStateChangeResult> stateChangeResult = IStateChangeResult::Probe(obj.Get());
+    AutoPtr<CStateChangeResult> stateChangeResult = (CStateChangeResult*)(IObject::Probe(obj.Get()));
     if (mOwner->mAuthenticationFailuresCount >= MAX_RETRIES_ON_AUTHENTICATION_FAILURE) {
         Int32 networkId;
         stateChangeResult->GetNetworkId(&networkId);
         Logger::D(TAG, "Failed to authenticate, disabling network %d", networkId);
-        mOwner->HandleNetworkConnectionFailure(networkId, WifiConfiguration::DISABLED_AUTH_FAILURE);
+        mOwner->HandleNetworkConnectionFailure(networkId, IWifiConfiguration::DISABLED_AUTH_FAILURE);
         mOwner->mAuthenticationFailuresCount = 0;
     }
-    else if (mAssociationRejectCount >= MAX_RETRIES_ON_ASSOCIATION_REJECT) {
+    else if (mOwner->mAssociationRejectCount >= MAX_RETRIES_ON_ASSOCIATION_REJECT) {
         Int32 networkId;
         stateChangeResult->GetNetworkId(&networkId);
         Logger::D(TAG, "Association getting rejected, disabling network %d", networkId);
-        handleNetworkConnectionFailure(networkId,
-                WifiConfiguration::DISABLED_ASSOCIATION_REJECT);
-        mAssociationRejectCount = 0;
+        mOwner->HandleNetworkConnectionFailure(networkId,
+                IWifiConfiguration::DISABLED_ASSOCIATION_REJECT);
+        mOwner->mAssociationRejectCount = 0;
     }
     return NOERROR;
 }
@@ -169,20 +180,23 @@ ECode SupplicantStateTracker::HandshakeState::ProcessMessage(
         case WifiMonitor::SUPPLICANT_STATE_CHANGE_EVENT: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<IStateChangeResult> stateChangeResult = IStateChangeResult::Probe(obj.Get());
+            AutoPtr<CStateChangeResult> stateChangeResult = (CStateChangeResult*)(IObject::Probe(obj.Get()));
             SupplicantState state;
             stateChangeResult->GetSupplicantState(&state);
-            if (SupplicantStateHelper::IsHandshakeState(state)) {
-                if (mLoopDetectIndex > state - SupplicantState_DISCONNECTED/*state.ordinal()*/) {
+            AutoPtr<ISupplicantStateHelper> ssHelper;
+            CSupplicantStateHelper::AcquireSingleton((ISupplicantStateHelper**)&ssHelper);
+            Boolean bTmp;
+            if (ssHelper->IsHandshakeState(state, &bTmp), bTmp) {
+                if (mLoopDetectIndex > state - Elastos::Droid::Wifi::SupplicantState_DISCONNECTED/*state.ordinal()*/) {
                     mLoopDetectCount++;
                 }
                 if (mLoopDetectCount > MAX_SUPPLICANT_LOOP_ITERATIONS) {
                     Int32 networkId;
                     stateChangeResult->GetNetworkId(&networkId);
                     Logger::D(TAG, "Supplicant loop detected, disabling network %d", networkId);
-                    mOwner->HandleNetworkConnectionFailure(networkId, WifiConfiguration::DISABLED_AUTH_FAILURE);
+                    mOwner->HandleNetworkConnectionFailure(networkId, IWifiConfiguration::DISABLED_AUTH_FAILURE);
                 }
-                mLoopDetectIndex = state - SupplicantState_DISCONNECTED;//state.ordinal();
+                mLoopDetectIndex = state - Elastos::Droid::Wifi::SupplicantState_DISCONNECTED;//state.ordinal();
                 mOwner->SendSupplicantStateChangedBroadcast(state,
                         mOwner->mAuthFailureInSupplicantBroadcast);
             }
@@ -210,7 +224,7 @@ ECode SupplicantStateTracker::CompletedState::Enter()
     if (DBG) Logger::D("SupplicantStateTracker::CompletedState", "Enter");
     /* Reset authentication failure count */
     mOwner->mAuthenticationFailuresCount = 0;
-    mNetworksDisabledDuringConnect = 0;
+    mOwner->mNetworksDisabledDuringConnect = 0;
     if (mOwner->mNetworksDisabledDuringConnect) {
         mOwner->mWifiConfigStore->EnableAllNetworks();
         mOwner->mNetworksDisabledDuringConnect = FALSE;
@@ -232,7 +246,7 @@ ECode SupplicantStateTracker::CompletedState::ProcessMessage(
                 "ProcessMessage SUPPLICANT_STATE_CHANGE_EVENT");
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<IStateChangeResult> stateChangeResult = IStateChangeResult::Probe(obj.Get());
+            AutoPtr<CStateChangeResult> stateChangeResult = (CStateChangeResult*)(IObject::Probe(obj.Get()));
             SupplicantState state;
             stateChangeResult->GetSupplicantState(&state);
             mOwner->SendSupplicantStateChangedBroadcast(state, mOwner->mAuthFailureInSupplicantBroadcast);
@@ -240,18 +254,21 @@ ECode SupplicantStateTracker::CompletedState::ProcessMessage(
              * events and other auth events that do not affect connectivity are
              * ignored
              */
-            if (SupplicantStateHelper::IsConnecting(state)) {
+            AutoPtr<ISupplicantStateHelper> ssHelper;
+            CSupplicantStateHelper::AcquireSingleton((ISupplicantStateHelper**)&ssHelper);
+            Boolean bTmp;
+            if (ssHelper->IsConnecting(state, &bTmp), bTmp) {
                 break;
             }
             mOwner->TransitionOnSupplicantStateChange(stateChangeResult);
             break;
         }
-        case WifiStateMachine::CMD_RESET_SUPPLICANT_STATE:
-            if (DBG) Logger::D("SupplicantStateTracker::CompletedState",
-                "ProcessMessage CMD_RESET_SUPPLICANT_STATE");
-            mOwner->SendSupplicantStateChangedBroadcast(SupplicantState_DISCONNECTED, FALSE);
-            mOwner->TransitionTo(mOwner->mUninitializedState);
-            break;
+        //TODO case WifiStateMachine::CMD_RESET_SUPPLICANT_STATE:
+        //    if (DBG) Logger::D("SupplicantStateTracker::CompletedState",
+        //        "ProcessMessage CMD_RESET_SUPPLICANT_STATE");
+        //    mOwner->SendSupplicantStateChangedBroadcast(Elastos::Droid::Wifi::SupplicantState_DISCONNECTED, FALSE);
+        //    mOwner->TransitionTo(mOwner->mUninitializedState);
+        //    break;
         default:
             *result = NOT_HANDLED;
             return NOERROR;
@@ -350,11 +367,12 @@ void SupplicantStateTracker::HandleNetworkConnectionFailure(
         mNetworksDisabledDuringConnect = FALSE;
     }
     /* Disable failed network */
-    mWifiConfigStore->DisableNetwork(netId, IWifiConfiguration::DISABLED_AUTH_FAILURE, disableReason);
+    Boolean bTmp;
+    mWifiConfigStore->DisableNetwork(netId, disableReason, &bTmp);
 }
 
 void SupplicantStateTracker::TransitionOnSupplicantStateChange(
-    /* [in] */ IStateChangeResult* stateChangeResult)
+    /* [in] */ CStateChangeResult* stateChangeResult)
 {
     SupplicantState supState;
     stateChangeResult->GetSupplicantState(&supState);
@@ -362,33 +380,33 @@ void SupplicantStateTracker::TransitionOnSupplicantStateChange(
     // if (DBG) Logger::D(TAG, "Supplicant state: " + supState.toString() + "\n");
 
     switch (supState) {
-        case SupplicantState_DISCONNECTED:
+        case Elastos::Droid::Wifi::SupplicantState_DISCONNECTED:
             TransitionTo(mDisconnectState);
             break;
-        case SupplicantState_INTERFACE_DISABLED:
+        case Elastos::Droid::Wifi::SupplicantState_INTERFACE_DISABLED:
             //we should have received a disconnection already, do nothing
             break;
-        case SupplicantState_SCANNING:
+        case Elastos::Droid::Wifi::SupplicantState_SCANNING:
             TransitionTo(mScanState);
             break;
-        case SupplicantState_AUTHENTICATING:
-        case SupplicantState_ASSOCIATING:
-        case SupplicantState_ASSOCIATED:
-        case SupplicantState_FOUR_WAY_HANDSHAKE:
-        case SupplicantState_GROUP_HANDSHAKE:
+        case Elastos::Droid::Wifi::SupplicantState_AUTHENTICATING:
+        case Elastos::Droid::Wifi::SupplicantState_ASSOCIATING:
+        case Elastos::Droid::Wifi::SupplicantState_ASSOCIATED:
+        case Elastos::Droid::Wifi::SupplicantState_FOUR_WAY_HANDSHAKE:
+        case Elastos::Droid::Wifi::SupplicantState_GROUP_HANDSHAKE:
             TransitionTo(mHandshakeState);
             break;
-        case SupplicantState_COMPLETED:
+        case Elastos::Droid::Wifi::SupplicantState_COMPLETED:
             TransitionTo(mCompletedState);
             break;
-        case SupplicantState_DORMANT:
+        case Elastos::Droid::Wifi::SupplicantState_DORMANT:
             TransitionTo(mDormantState);
             break;
-        case SupplicantState_INACTIVE:
+        case Elastos::Droid::Wifi::SupplicantState_INACTIVE:
             TransitionTo(mInactiveState);
             break;
-        case SupplicantState_UNINITIALIZED:
-        case SupplicantState_INVALID:
+        case Elastos::Droid::Wifi::SupplicantState_UNINITIALIZED:
+        case Elastos::Droid::Wifi::SupplicantState_INVALID:
             TransitionTo(mUninitializedState);
             break;
         default:
@@ -403,21 +421,32 @@ void SupplicantStateTracker::SendSupplicantStateChangedBroadcast(
 {
     Int32 supplState;
     switch (state) {
-        case DISCONNECTED: supplState = IBatteryStats::WIFI_SUPPL_STATE_DISCONNECTED; break;
-        case INTERFACE_DISABLED:
-                           supplState = IBatteryStats::WIFI_SUPPL_STATE_INTERFACE_DISABLED; break;
-        case INACTIVE: supplState = IBatteryStats::WIFI_SUPPL_STATE_INACTIVE; break;
-        case SCANNING: supplState = IBatteryStats::WIFI_SUPPL_STATE_SCANNING; break;
-        case AUTHENTICATING: supplState = IBatteryStats::WIFI_SUPPL_STATE_AUTHENTICATING; break;
-        case ASSOCIATING: supplState = IBatteryStats::WIFI_SUPPL_STATE_ASSOCIATING; break;
-        case ASSOCIATED: supplState = IBatteryStats::WIFI_SUPPL_STATE_ASSOCIATED; break;
-        case FOUR_WAY_HANDSHAKE:
-                         supplState = IBatteryStats::WIFI_SUPPL_STATE_FOUR_WAY_HANDSHAKE; break;
-        case GROUP_HANDSHAKE: supplState = IBatteryStats::WIFI_SUPPL_STATE_GROUP_HANDSHAKE; break;
-        case COMPLETED: supplState = IBatteryStats::WIFI_SUPPL_STATE_COMPLETED; break;
-        case DORMANT: supplState = IBatteryStats::WIFI_SUPPL_STATE_DORMANT; break;
-        case UNINITIALIZED: supplState = IBatteryStats::WIFI_SUPPL_STATE_UNINITIALIZED; break;
-        case INVALID: supplState = IBatteryStats::WIFI_SUPPL_STATE_INVALID; break;
+        case Elastos::Droid::Wifi::SupplicantState_DISCONNECTED:
+            supplState = IBatteryStats::WIFI_SUPPL_STATE_DISCONNECTED; break;
+        case Elastos::Droid::Wifi::SupplicantState_INTERFACE_DISABLED:
+            supplState = IBatteryStats::WIFI_SUPPL_STATE_INTERFACE_DISABLED; break;
+        case Elastos::Droid::Wifi::SupplicantState_INACTIVE:
+            supplState = IBatteryStats::WIFI_SUPPL_STATE_INACTIVE; break;
+        case Elastos::Droid::Wifi::SupplicantState_SCANNING:
+            supplState = IBatteryStats::WIFI_SUPPL_STATE_SCANNING; break;
+        case Elastos::Droid::Wifi::SupplicantState_AUTHENTICATING:
+            supplState = IBatteryStats::WIFI_SUPPL_STATE_AUTHENTICATING; break;
+        case Elastos::Droid::Wifi::SupplicantState_ASSOCIATING:
+            supplState = IBatteryStats::WIFI_SUPPL_STATE_ASSOCIATING; break;
+        case Elastos::Droid::Wifi::SupplicantState_ASSOCIATED:
+            supplState = IBatteryStats::WIFI_SUPPL_STATE_ASSOCIATED; break;
+        case Elastos::Droid::Wifi::SupplicantState_FOUR_WAY_HANDSHAKE:
+             supplState = IBatteryStats::WIFI_SUPPL_STATE_FOUR_WAY_HANDSHAKE; break;
+        case Elastos::Droid::Wifi::SupplicantState_GROUP_HANDSHAKE:
+             supplState = IBatteryStats::WIFI_SUPPL_STATE_GROUP_HANDSHAKE; break;
+        case Elastos::Droid::Wifi::SupplicantState_COMPLETED:
+             supplState = IBatteryStats::WIFI_SUPPL_STATE_COMPLETED; break;
+        case Elastos::Droid::Wifi::SupplicantState_DORMANT:
+             supplState = IBatteryStats::WIFI_SUPPL_STATE_DORMANT; break;
+        case Elastos::Droid::Wifi::SupplicantState_UNINITIALIZED:
+             supplState = IBatteryStats::WIFI_SUPPL_STATE_UNINITIALIZED; break;
+        case Elastos::Droid::Wifi::SupplicantState_INVALID:
+             supplState = IBatteryStats::WIFI_SUPPL_STATE_INVALID; break;
         default:
               Logger::W(TAG, "Unknown supplicant state %d", state);
               supplState = IBatteryStats::WIFI_SUPPL_STATE_INVALID;
@@ -451,7 +480,7 @@ void SupplicantStateTracker::SendSupplicantStateChangedBroadcast(
     mContext->SendStickyBroadcastAsUser(intent, ALL);
 }
 
-void SupplicantStateTracker::Dump(
+ECode SupplicantStateTracker::Dump(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
@@ -465,6 +494,7 @@ void SupplicantStateTracker::Dump(
     pw.println("mNetworksDisabledDuringConnect " + mNetworksDisabledDuringConnect);
     pw.println();
     */
+    return NOERROR;
 }
 
 } // namespace Wifi

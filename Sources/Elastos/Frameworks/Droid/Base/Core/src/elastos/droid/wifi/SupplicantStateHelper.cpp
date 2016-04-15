@@ -5,6 +5,13 @@ namespace Elastos {
 namespace Droid {
 namespace Wifi {
 
+Boolean SupplicantStateHelper::IsValidState(
+    /* [in] */ SupplicantState state)
+{
+    return state != SupplicantState_UNINITIALIZED &&
+           state != SupplicantState_INVALID;
+}
+
 Boolean SupplicantStateHelper::IsHandshakeState(
     /* [in] */ SupplicantState state)
 {

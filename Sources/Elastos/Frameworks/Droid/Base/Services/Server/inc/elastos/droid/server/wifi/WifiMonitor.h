@@ -3,15 +3,19 @@
 #define __ELASTOS_DROID_SERVER_WIFI_WIFIMONITOR_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/net/wifi/WifiNative.h"
-#include "elastos/droid/utility/StateMachine.h"
+#include "elastos/droid/server/wifi/WifiNative.h"
+#include "elastos/droid/internal/utility/StateMachine.h"
 #include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Droid::Wifi::P2p::P2pStatus;
-using Elastos::Utility::Regex::IPattern;
-using Elastos::Droid::Utility::IProtocol;
 using Elastos::Droid::Internal::Utility::StateMachine;
+//TODO using Elastos::Droid::Server::Wifi::P2p::WifiP2pServiceImpl::P2pStatus;
+using Elastos::Droid::Internal::Utility::IProtocol;
+using Elastos::Droid::Net::NetworkInfoDetailedState;
+using Elastos::Droid::Wifi::SupplicantState;
+using Elastos::Droid::Wifi::IWifiSsid;
+using Elastos::Utility::Regex::IPattern;
 using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -43,8 +47,10 @@ public:
         CARAPI_(void) UnregisterInterfaceMonitor(
             /* [in] */ const String& iface);
 
+        CARAPI_(void) StopSupplicant();
+
         CARAPI_(void) KillSupplicant(
-             /* [in] */ Boolean p2pSupported)
+             /* [in] */ Boolean p2pSupported);
 
         CARAPI_(Boolean) DispatchEvent(
             /* [in] */ const String& eventStr);
@@ -53,14 +59,14 @@ public:
         WifiMonitorSingleton();
 
     public:
-        static AutoPtr<WifiMonitorSingleton sInstance;
+        static AutoPtr<WifiMonitorSingleton> sInstance;
 
     private:
-        HashMap<String, AutoPtr<WifiMonitor> > mIfaceMap;
+        AutoPtr<IHashMap> mIfaceMap;// <String, AutoPtr<WifiMonitor> >
         Boolean mConnected;
         AutoPtr<WifiNative> mWifiNative;
         Object mLock;
-    }
+    };
 
     class MonitorThread
         : public Thread
@@ -168,12 +174,12 @@ private:
     CARAPI_(void) HandleWpsFailEvent(
         /* [in] */ const String& dataString);
 
-    CARAPI_(P2pStatus) ValueOf(
-        /* [in] */ Int32 error);
+    //TODO CARAPI_(P2pStatus) ValueOf(
+    //    /* [in] */ Int32 error);
 
     /* <event> status=<err> and the special case of <event> reason=FREQ_CONFLICT */
-    ARAPI_(P2pStatus) P2pError(
-       /* [in] */ const String& dataString);
+    //TODO CARAPI_(P2pStatus) P2pError(
+    //   /* [in] */ const String& dataString);
 
     /**
      * Handle p2p events
@@ -359,7 +365,7 @@ private:
 
 
     //used to debug and detect if we miss an event
-    static Int32 eventLogCounter = 0;
+    static Int32 eventLogCounter;// = 0;
 
     /**
      * Names of events from wpa_supplicant (minus the prefix). In the

@@ -3,9 +3,9 @@
 #define __ELASTOS_DROID_SERVER_WIFI_WIFIAPCONFIGSTORE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/utility/AsyncChannel.h"
-#include "elastos/droid/utility/State.h"
-#include "elastos/droid/utility/StateMachine.h"
+#include "elastos/droid/internal/utility/AsyncChannel.h"
+#include "elastos/droid/internal/utility/State.h"
+#include "elastos/droid/internal/utility/StateMachine.h"
 #include "elastos/droid/os/Runnable.h"
 
 using Elastos::Droid::Content::IContext;
@@ -15,6 +15,7 @@ using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Internal::Utility::AsyncChannel;
 using Elastos::Droid::Internal::Utility::State;
 using Elastos::Droid::Internal::Utility::StateMachine;
+using Elastos::Droid::Wifi::IWifiConfiguration;
 
 namespace Elastos {
 namespace Droid {
@@ -54,11 +55,9 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
-        CARAPI GetName(
-            /* [out] */ String* name)
+        CARAPI_(String) GetName()
         {
-            *name = "DefaultState";
-            return NOERROR;
+            return String("DefaultState");
         }
 
     private:
@@ -77,11 +76,9 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
-        CARAPI GetName(
-            /* [out] */ String* name)
+        CARAPI_(String) GetName()
         {
-            *name = "InactiveState";
-            return NOERROR;
+            return String("InactiveState");
         }
 
     private:
@@ -115,11 +112,9 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
-        CARAPI GetName(
-            /* [out] */ String* name)
+        CARAPI_(String) GetName()
         {
-            *name = "ActiveState";
-            return NOERROR;
+            return String("ActiveState");
         }
 
     private:

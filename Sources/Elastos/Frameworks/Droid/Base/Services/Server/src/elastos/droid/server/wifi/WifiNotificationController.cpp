@@ -1,5 +1,6 @@
 
 #include "elastos/droid/server/wifi/WifiNotificationController.h"
+#include "elastos/droid/R.h"
 
 namespace Elastos {
 namespace Droid {
@@ -98,7 +99,7 @@ Boolean WifiNotificationController::NotificationEnabledSettingObserver::GetValue
 //=====================================================================
 //                      WifiNotificationController
 //=====================================================================
-const Int32 WifiNotificationController::ICON_NETWORKS_AVAILABLE;
+const Int32 WifiNotificationController::ICON_NETWORKS_AVAILABLE = Elastos::Droid::R::drawable::stat_notify_wifi_in_range;
 const Int32 WifiNotificationController::NUM_SCANS_BEFORE_ACTUALLY_SCANNING;
 
 WifiNotificationController::WifiNotificationController(

@@ -1,23 +1,14 @@
-/*
-  * Copyright (C) 2014 The Android Open Source Project
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *      http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
 #ifndef __ELASTOS_DROID_SERVER_WIFI_WIFIAUTOJOINCONTROLLER_H__
 #define __ELASTOS_DROID_SERVER_WIFI_WIFIAUTOJOINCONTROLLER_H__
 
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Wifi.h"
 #include "elastos/droid/ext/frameworkext.h"
+//TODO #include "elastos/droid/server/wifi/WifiStateMachine.h"
+#include "elastos/droid/server/wifi/WifiNative.h"
+#include "elastos/droid/server/wifi/WifiConfigStore.h"
+#include "elastos/droid/server/wifi/WifiNetworkScoreCache.h"
 
 // package com.android.server.wifi;
 // import android.content.Context;
@@ -35,11 +26,20 @@
 // import java.util.List;
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Net::INetworkScoreManager;
+using Elastos::Droid::Wifi::IWifiConfiguration;
+using Elastos::Droid::Wifi::IWifiConnectionStatistics;
+using Elastos::Droid::Wifi::IWifiConfigurationVisibility;
+using Elastos::Droid::Wifi::IScanResult;
+using Elastos::Utility::IList;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wifi {
+
+class WifiStateMachine;
 
 /**
   * AutoJoin controller is responsible for WiFi Connect decision
@@ -55,21 +55,21 @@ public:
         /* [in] */ IContext* c,
         /* [in] */ WifiStateMachine* w,
         /* [in] */ WifiConfigStore* s,
-        /* [in] */ WifiConnectionStatistics* st,
+        /* [in] */ IWifiConnectionStatistics* st,
         /* [in] */ WifiNative* n);
 
     virtual CARAPI EnableVerboseLogging(
         /* [in] */ Int32 verbose);
 
     virtual CARAPI AddToScanCache(
-        /* [in] */ IList<ScanResult*>* scanList,
+        /* [in] */ IList* scanList,//ScanResult
         /* [out] */ Int32* result);
 
     virtual CARAPI LogDbg(
-        /* [in] */ String message);
+        /* [in] */ const String& message);
 
     virtual CARAPI LogDbg(
-        /* [in] */ String message,
+        /* [in] */ const String& message,
         /* [in] */ Boolean stackTrace);
 
     // Called directly from WifiStateMachine
@@ -109,14 +109,14 @@ public:
         /* [in] */ Boolean connect);
 
     virtual CARAPI GetConnectChoice(
-        /* [in] */ WifiConfiguration* source,
-        /* [in] */ WifiConfiguration* target,
+        /* [in] */ IWifiConfiguration* source,
+        /* [in] */ IWifiConfiguration* target,
         /* [out] */ Int32* result);
 
     virtual CARAPI GetScoreFromVisibility(
-        /* [in] */ WifiConfiguration* ::Visibility* visibility,
+        /* [in] */ IWifiConfigurationVisibility* visibility,
         /* [in] */ Int32 rssiBoost,
-        /* [in] */ String dbg,
+        /* [in] */ const String& dbg,
         /* [out] */ Int32* result);
 
     // Compare WifiConfiguration by RSSI, and return a comparison value in the range [-50, +50]
@@ -127,19 +127,19 @@ public:
     // fact that at short range we prefer 5GHz band as it is cleaner of interference and
     // provides for wider channels
     virtual CARAPI CompareWifiConfigurationsRSSI(
-        /* [in] */ WifiConfiguration* a,
-        /* [in] */ WifiConfiguration* b,
-        /* [in] */ String currentConfiguration,
+        /* [in] */ IWifiConfiguration* a,
+        /* [in] */ IWifiConfiguration* b,
+        /* [in] */ const String& currentConfiguration,
         /* [out] */ Int32* result);
 
     virtual CARAPI CompareWifiConfigurationsWithScorer(
-        /* [in] */ WifiConfiguration* a,
-        /* [in] */ WifiConfiguration* b,
+        /* [in] */ IWifiConfiguration* a,
+        /* [in] */ IWifiConfiguration* b,
         /* [out] */ Int32* result);
 
     virtual CARAPI CompareWifiConfigurations(
-        /* [in] */ WifiConfiguration* a,
-        /* [in] */ WifiConfiguration* b,
+        /* [in] */ IWifiConfiguration* a,
+        /* [in] */ IWifiConfiguration* b,
         /* [out] */ Int32* result);
 
     virtual CARAPI IsBadCandidate(
@@ -148,13 +148,13 @@ public:
         /* [out] */ Boolean* result);
 
     virtual CARAPI CompareWifiConfigurationsTop(
-        /* [in] */ WifiConfiguration* a,
-        /* [in] */ WifiConfiguration* b,
+        /* [in] */ IWifiConfiguration* a,
+        /* [in] */ IWifiConfiguration* b,
         /* [out] */ Int32* result);
 
     virtual CARAPI RssiBoostFrom5GHzRssi(
         /* [in] */ Int32 rssi,
-        /* [in] */ String dbg,
+        /* [in] */ const String& dbg,
         /* [out] */ Int32* result);
 
     /**
@@ -164,11 +164,11 @@ public:
           * best one.
           */
     virtual CARAPI AttemptRoam(
-        /* [in] */ ScanResult* a,
-        /* [in] */ WifiConfiguration* current,
+        /* [in] */ IScanResult* a,
+        /* [in] */ IWifiConfiguration* current,
         /* [in] */ Int32 age,
-        /* [in] */ String currentBSSID,
-        /* [out] */ ScanResult** result);
+        /* [in] */ const String& currentBSSID,
+        /* [out] */ IScanResult** result);
 
     /**
       * getNetworkScore()
@@ -181,18 +181,18 @@ public:
       * @return score
       */
     virtual CARAPI GetConfigNetworkScore(
-        /* [in] */ WifiConfiguration* config,
+        /* [in] */ IWifiConfiguration* config,
         /* [in] */ Int32 age,
         /* [in] */ Int32 rssiBoost,
         /* [out] */ Int32* result);
 
     virtual CARAPI HandleBSSIDBlackList(
         /* [in] */ Boolean enable,
-        /* [in] */ String bssid,
+        /* [in] */ const String& bssid,
         /* [in] */ Int32 reason);
 
     virtual CARAPI IsBlacklistedBSSID(
-        /* [in] */ String bssid,
+        /* [in] */ const String& bssid,
         /* [out] */ Boolean* result);
 
     /**
@@ -217,11 +217,11 @@ private:
       * keep them distinct for debug purpose (i.e. -1, -2 etc...)
       */
     CARAPI_(Int32) CompareNetwork(
-        /* [in] */ WifiConfiguration* candidate,
-        /* [in] */ String lastSelectedConfiguration);
+        /* [in] */ IWifiConfiguration* candidate,
+        /* [in] */ const String& lastSelectedConfiguration);
 
 public:
-    static Int32 mScanResultMaximumAge = 40000;
+    static Int32 mScanResultMaximumAge;// = 40000;
     /* for debug purpose only : the untrusted SSID we would be connected to if we had VPN */
     String lastUntrustedBSSID;
     /* For debug purpose only: if the scored override a score */
@@ -246,7 +246,7 @@ public:
 
 private:
     AutoPtr<IContext> mContext;
-    AutoPtr<WifiStateMachine> mWifiStateMachine;
+    AutoPtr<IInterface/*TODO WifiStateMachine*/> mWifiStateMachine;
     AutoPtr<WifiConfigStore> mWifiConfigStore;
     AutoPtr<WifiNative> mWifiNative;
     AutoPtr<INetworkScoreManager> scoreManager;
@@ -259,9 +259,9 @@ private:
     /* milliseconds unit */
     String mCurrentConfigurationKey;
     //used by autojoin
-    AutoPtr< IHashMap<String, ScanResult> > scanResultCache;
-    AutoPtr< IArrayList<String> > mBlacklistedBssids;
-    AutoPtr<WifiConnectionStatistics> mWifiConnectionStatistics;
+    AutoPtr<IHashMap> scanResultCache;//<String, ScanResult>
+    AutoPtr<IArrayList> mBlacklistedBssids;//String
+    AutoPtr<IWifiConnectionStatistics> mWifiConnectionStatistics;
     // Lose the non-auth failure blacklisting after 8 hours
     static const Int64 loseBlackListHardMilli = 1000 * 60 * 60 * 8;
     // Lose some temporary blacklisting after 30 minutes
