@@ -2,14 +2,21 @@
 #define __ELASTOS_DROID_SERVER_ACCOUNTS_GRANTCREDENTIALSPERMISSIONACTIVITY_H__
 
 #include "elastos/droid/app/Activity.h"
+#include <elastos/core/Object.h>
+#include <Elastos.Droid.Accounts.h>
+#include <Elastos.Droid.Widget.h>
 
-using Elastos::Droid::App::Activity;
-using Elastos::Droid::View::IViewOnClickListener;
-using Elastos::Droid::View::ILayoutInflater;
-using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::IRunnable;
+using Elastos::Droid::Accounts::IAccount;
 using Elastos::Droid::Accounts::IAccountManagerCallback;
 using Elastos::Droid::Accounts::IAccountManagerFuture;
-using Elastos::Droid::Accounts::IAccount;
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::Widget::ITextView;
 
 namespace Elastos {
 namespace Droid {
@@ -22,20 +29,20 @@ class GrantCredentialsPermissionActivity
 {
 private:
     class OnCreateAccountManagerCallback
-        : public ElRefBase
+        : public Object
         , public IAccountManagerCallback
     {
     private:
         class  OnCreateAccountManagerCallbackRunnable
-            : public ElRefBase
+            : public Object
             , public IRunnable
         {
         public:
+            CAR_INTERFACE_DECL();
+
             OnCreateAccountManagerCallbackRunnable(
                 /* [in] */ ICharSequence* authTokenLabel,
                 /* [in] */ OnCreateAccountManagerCallback* host);
-
-            CAR_INTERFACE_DECL();
 
             CARAPI Run();
 
@@ -45,11 +52,11 @@ private:
         };
 
     public:
+        CAR_INTERFACE_DECL();
+
         OnCreateAccountManagerCallback(
             /* [in] */ ITextView* textView,
             /* [in] */ GrantCredentialsPermissionActivity* host);
-
-        CAR_INTERFACE_DECL();
 
         CARAPI Run(
             /* [in] */ IAccountManagerFuture* accountManagerFuture);
@@ -60,18 +67,9 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     GrantCredentialsPermissionActivity();
-
-    CARAPI_(PInterface) Probe(
-        /* [in]  */ REIID riid);
-
-    CARAPI_(UInt32) AddRef();
-
-    CARAPI_(UInt32) Release();
-
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface *pObject,
-        /* [out] */ InterfaceID *pIID);
 
     CARAPI OnClick(
         /* [in] */ IView* vs);

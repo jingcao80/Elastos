@@ -1,0 +1,77 @@
+
+module
+{
+    using interface Elastos.Droid.Accounts.IAuthenticatorDescription;
+    using interface Elastos.Droid.Content.Pm.IRegisteredServicesCacheServiceInfo;
+    using interface Elastos.Droid.Content.Pm.IRegisteredServicesCacheListener;
+    using interface Elastos.Droid.Os.IHandler;
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
+    using interface Elastos.Utility.ICollection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Accounts {
+
+    /**
+     * An interface to the Authenticator specialization of RegisteredServicesCache. The use of
+     * this interface by the AccountManagerService makes it easier to unit test it.
+     * @hide
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    [deprecated]
+    interface IIAccountAuthenticatorCache {
+        /**
+         * Accessor for the {@link android.content.pm.RegisteredServicesCache.ServiceInfo} that
+         * matched the specified {@link android.accounts.AuthenticatorDescription} or null
+         * if none match.
+         * @param type the authenticator type to return
+         * @return the {@link android.content.pm.RegisteredServicesCache.ServiceInfo} that
+         * matches the account type or null if none is present
+         */
+        GetServiceInfo(
+            [in] IAuthenticatorDescription* type,
+            [in] Int32 userId,
+            [out] IRegisteredServicesCacheServiceInfo** result);
+
+        /**
+         * @return A copy of a Collection of all the current Authenticators.
+         */
+        GetAllServices(
+            [in] Int32 userId,
+            [out] ICollection** result);
+
+        /**
+         * Dumps the state of the cache. See
+         * {@link android.os.Binder#dump(java.io.FileDescriptor, java.io.PrintWriter, String[])}
+         */
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* fout,
+            [in] ArrayOf<String>* args,
+            [in] Int32 userId);
+
+        /**
+         * Sets a listener that will be notified whenever the authenticator set changes
+         * @param listener the listener to notify, or null
+         * @param handler the {@link Handler} on which the notification will be posted. If null
+         * the notification will be posted on the main thread.
+         */
+        SetListener(
+            [in] IRegisteredServicesCacheListener* listener,
+            [in] IHandler* handler);
+
+        InvalidateCache(
+            [in] Int32 userId);
+    }
+
+    } // namespace Accounts
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}
+

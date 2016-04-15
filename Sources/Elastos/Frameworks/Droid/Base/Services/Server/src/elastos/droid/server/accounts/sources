@@ -9,15 +9,6 @@ INCLUDES += $(MAKEDIR)/../../../../../inc
 include $(MAKEDIR)/../../../../../../../../sources.inc
 
 SOURCES = AccountAuthenticatorCache.cpp
-#SOURCES += AccountManagerServiceSession.cpp
-#SOURCES += GrantCredentialsPermissionActivity.cpp
-#SOURCES += CAccountManagerService.cpp
-#SOURCES += CTestFeaturesSession.cpp
-#SOURCES += CRemoveAccountSession.cpp
-#SOURCES += CGetAuthTokenLabelSession.cpp
-#SOURCES += CGetAuthTokenSession.cpp
-#SOURCES += CAddAcountSession.cpp
-#SOURCES += CConfirmCredentialsAsUserSession.cpp
-#SOURCES += CUpdateCredentialsSession.cpp
-#SOURCES += CGetAccountsByTypeAndFeatureSession.cpp
-#SOURCES += CEditPropertiesSession.cpp
+SOURCES += CAccountManagerService.cpp
+SOURCES += accounts.cpp
+SOURCES += GrantCredentialsPermissionActivity.cpp

@@ -2187,6 +2187,15 @@ module
             [out, callee] ArrayOf<String>* result);
 
         /**
+         * @see #getAccountTypesWithManagementDisabled()
+         * @hide
+         */
+        GetAccountTypesWithManagementDisabledAsUser(
+            [in] Int32 userId,
+            [out, callee] ArrayOf<String>* result);
+
+
+        /**
          * Sets which packages may enter lock task mode.
          *
          * <p>Any packages that shares uid with an allowed package will also be allowed

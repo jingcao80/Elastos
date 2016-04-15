@@ -42,7 +42,7 @@ namespace Pm {
  *
  * @hide
  */
-class RegisteredServicesCache
+class ECO_PUBLIC RegisteredServicesCache
     : public Object
     , public IRegisteredServicesCache
 {
@@ -96,7 +96,7 @@ public:
     };
 
 private:
-    class UserServices
+    class ECO_LOCAL UserServices
         : public Object
     {
     public:
@@ -112,7 +112,7 @@ private:
         AutoPtr<HashMap<AutoPtr<IInterface>, AutoPtr<IRegisteredServicesCacheServiceInfo> > > mServices;
     };
 
-    class PackageReceiver
+    class ECO_LOCAL PackageReceiver
         : public BroadcastReceiver
     {
     public:
@@ -135,7 +135,7 @@ private:
         RegisteredServicesCache* mParent;
     };
 
-    class ExternalReceiver
+    class ECO_LOCAL ExternalReceiver
         : public BroadcastReceiver
     {
     public:
@@ -158,7 +158,7 @@ private:
         RegisteredServicesCache* mParent;
     };
 
-    class ListenerRunnable
+    class ECO_LOCAL ListenerRunnable
         : public Runnable
     {
     public:
@@ -241,57 +241,57 @@ public:
             /* [out] */ IInterface** attributes) = 0;
 
 private:
-    CARAPI_(AutoPtr<UserServices>) FindOrCreateUserLocked(
+    ECO_LOCAL CARAPI_(AutoPtr<UserServices>) FindOrCreateUserLocked(
         /* [in] */ Int32 userId);
 
-    CARAPI_(void) NotifyListener(
+    ECO_LOCAL CARAPI_(void) NotifyListener(
         /* [in] */ IInterface* type,
         /* [in] */ Int32 userId,
         /* [in] */ Boolean removed);
 
-    CARAPI_(Boolean) InSystemImage(
+    ECO_LOCAL CARAPI_(Boolean) InSystemImage(
         /* [in] */ Int32 callerUid);
 
     /**
      * Populate {@link UserServices#services} by scanning installed packages for
      * given {@link UserHandle}.
      */
-    CARAPI_(void) GenerateServicesMap(
+    ECO_LOCAL CARAPI_(void) GenerateServicesMap(
         /* [in] */ Int32 userId);
 
-    CARAPI_(Boolean) ContainsType(
+    ECO_LOCAL CARAPI_(Boolean) ContainsType(
         /* [in] */ List<AutoPtr<IRegisteredServicesCacheServiceInfo> >* serviceInfos,
         /* [in] */ IInterface* type);
 
-    CARAPI_(Boolean) ContainsTypeAndUid(
+    ECO_LOCAL CARAPI_(Boolean) ContainsTypeAndUid(
         /* [in] */ List<AutoPtr<IRegisteredServicesCacheServiceInfo> >* serviceInfos,
         /* [in] */ IInterface* type,
         /* [in] */ Int32 uid);
 
-    CARAPI ParseServiceInfo(
+    ECO_LOCAL CARAPI ParseServiceInfo(
         /* [in] */ IResolveInfo* service,
         /* [out] */ IRegisteredServicesCacheServiceInfo** info);
 
     /**
      * Read all sync status back in to the initial engine state.
      */
-    CARAPI_(void) ReadPersistentServicesLocked();
+    ECO_LOCAL CARAPI_(void) ReadPersistentServicesLocked();
 
     /**
      * Write all sync status to the sync status file.
      */
-    CARAPI_(void) WritePersistentServicesLocked();
+    ECO_LOCAL CARAPI_(void) WritePersistentServicesLocked();
 
-    CARAPI ErrorCheckAndClose(
+    ECO_LOCAL CARAPI ErrorCheckAndClose(
         /* [in] */ ECode ec,
         /* [in] */ IFileInputStream* fos);
 
-    CARAPI ErrorCheckAndFailWrite(
+    ECO_LOCAL CARAPI ErrorCheckAndFailWrite(
         /* [in] */ ECode ec,
         /* [in] */ IAtomicFile* atomicFile,
         /* [in] */ IFileOutputStream* fis);
 
-    CARAPI HandlePackageEvent(
+    ECO_LOCAL CARAPI HandlePackageEvent(
         /* [in] */ IIntent* intent,
         /* [in] */ Int32 userId);
 
@@ -299,7 +299,7 @@ public:
     AutoPtr<IContext> mContext;
 
 private:
-    static const String TAG;
+    ECO_LOCAL static const String TAG;
 
     String mInterfaceName;
     String mMetaDataName;

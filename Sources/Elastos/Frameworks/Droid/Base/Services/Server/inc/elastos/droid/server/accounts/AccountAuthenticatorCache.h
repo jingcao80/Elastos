@@ -1,22 +1,26 @@
 #ifndef __ELASTOS_DROID_SERVER_ACCOUNTS_ACCOUNTAUTHENTICATORCACHE_H__
 #define __ELASTOS_DROID_SERVER_ACCOUNTS_ACCOUNTAUTHENTICATORCACHE_H__
 
-#include "elastos/droid/content/pm/RegisteredServicesCache.h"
-#include "accounts/IAccountAuthenticatorCache.h"
+#include <_Elastos.Droid.Server.h>
+#include <elastos/core/Object.h>
+#include <elastos/droid/content/pm/RegisteredServicesCache.h>
+#include <elastos/droid/ext/frameworkext.h>
 
+using Elastos::Droid::Accounts::IAuthenticatorDescription;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Pm::IRegisteredServicesCacheListener;
+using Elastos::Droid::Content::Pm::IRegisteredServicesCacheServiceInfo;
+using Elastos::Droid::Content::Pm::IXmlSerializerAndParser;
+using Elastos::Droid::Content::Pm::RegisteredServicesCache;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Server::Accounts::IIAccountAuthenticatorCache;
+using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
-using Org::Xmlpull::V1::IXmlSerializer;
+using Elastos::Utility::ICollection;
 using Org::Xmlpull::V1::IXmlPullParser;
-using Elastos::Droid::Content::Pm::RegisteredServicesCache;
-using Elastos::Droid::Content::Pm::IRegisteredServicesCacheListener;
-using Elastos::Droid::Content::Pm::IXmlSerializerAndParser;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Utility::IAttributeSet;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Accounts::IAccountAuthenticatorCache;
-using Elastos::Droid::Accounts::IAuthenticatorDescription;
+using Org::Xmlpull::V1::IXmlSerializer;
 
 namespace Elastos {
 namespace Droid {
@@ -32,11 +36,11 @@ namespace Accounts {
  */
 class AccountAuthenticatorCache
     : public RegisteredServicesCache
-    , public IAccountAuthenticatorCache
+    , public IIAccountAuthenticatorCache
 {
 private:
     class MySerializer
-        : public ElRefBase
+        : public Object
         , public IXmlSerializerAndParser
     {
     public:
@@ -52,19 +56,10 @@ private:
     };
 
 public:
-    AccountAuthenticatorCache(
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
-
-    CARAPI_(PInterface) Probe(
-        /* [in]  */ REIID riid);
-
-    CARAPI_(UInt32) AddRef();
-
-    CARAPI_(UInt32) Release();
-
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface *pObject,
-        /* [out] */ InterfaceID *pIID);
 
     CARAPI ParseServiceAttributes(
         /* [in] */ IResources* res,
@@ -72,45 +67,26 @@ public:
         /* [in] */ IAttributeSet* attrs,
         /* [out] */ IInterface** attributes);
 
-    /**
-     * Accessor for the {@link android.content.pm.RegisteredServicesCache.ServiceInfo} that
-     * matched the specified {@link android.accounts.AuthenticatorDescription} or null
-     * if none match.
-     * @param type the authenticator type to return
-     * @return the {@link android.content.pm.RegisteredServicesCache.ServiceInfo} that
-     * matches the account type or null if none is present
-     */
-    CARAPI_(AutoPtr<IRegisteredServicesCacheServiceInfo>) GetServiceInfo(
+    CARAPI GetServiceInfo(
         /* [in] */ IAuthenticatorDescription* type,
-        /* [in] */ Int32 userId);
+        /* [in] */ Int32 userId,
+        /* [out] */ IRegisteredServicesCacheServiceInfo** result);
 
-    /**
-     * @return A copy of a Collection of all the current Authenticators.
-     */
-    CARAPI_(AutoPtr< List<AutoPtr<IRegisteredServicesCacheServiceInfo> > >) GetAllServices(
-        /* [in] */ Int32 userId);
+    CARAPI GetAllServices(
+        /* [in] */ Int32 userId,
+        /* [out] */ ICollection** result);
 
-    /**
-     * Dumps the state of the cache. See
-     * {@link android.os.Binder#dump(java.io.FileDescriptor, java.io.PrintWriter, String[])}
-     */
-    CARAPI_(void) Dump(
+    CARAPI Dump(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IPrintWriter* fout,
-        /* [in] */ const ArrayOf<String>& args,
+        /* [in] */ ArrayOf<String>* args,
         /* [in] */ Int32 userId);
 
-    /**
-     * Sets a listener that will be notified whenever the authenticator set changes
-     * @param listener the listener to notify, or null
-     * @param handler the {@link Handler} on which the notification will be posted. If null
-     * the notification will be posted on the main thread.
-     */
-    CARAPI_(void) SetListener(
+    CARAPI SetListener(
         /* [in] */ IRegisteredServicesCacheListener* listener,
         /* [in] */ IHandler* handler);
 
-    CARAPI_(void) InvalidateCache(
+    CARAPI InvalidateCache(
         /* [in] */ Int32 userId);
 
 private:

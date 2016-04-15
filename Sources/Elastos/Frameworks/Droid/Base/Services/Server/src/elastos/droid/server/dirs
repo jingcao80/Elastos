@@ -1,7 +1,7 @@
 
 
 DIRS = accessibility
-#DIRS += accounts
+DIRS += accounts
 DIRS += am
 DIRS += appwidget
 #DIRS += backup

@@ -1,25 +1,31 @@
 
-#include "elastos/droid/ext/frameworkdef.h"
-#include "accounts/AccountAuthenticatorCache.h"
-#include "elastos/droid/text/TextUtils.h"
-#include "elastos/droid/R.h"
+#include "elastos/droid/server/accounts/AccountAuthenticatorCache.h"
+#include <elastos/droid/R.h>
+#include <elastos/droid/text/TextUtils.h>
+#include <Elastos.CoreLibrary.External.h>
+#include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.Droid.Accounts.h>
 
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
-using Elastos::Droid::Text::TextUtils;
-using Elastos::Droid::Content::Pm::EIID_IXmlSerializerAndParser;
-using Elastos::Droid::Accounts::IAuthenticatorDescriptionHelper;
-using Elastos::Droid::Accounts::CAuthenticatorDescriptionHelper;
 using Elastos::Droid::Accounts::CAuthenticatorDescription;
+using Elastos::Droid::Accounts::CAuthenticatorDescriptionHelper;
 using Elastos::Droid::Accounts::IAccountManager;
+using Elastos::Droid::Accounts::IAuthenticatorDescriptionHelper;
+using Elastos::Droid::Content::Pm::EIID_IXmlSerializerAndParser;
 using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::R;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::CString;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Accounts {
 
-CAR_INTERFACE_IMPL(AccountAuthenticatorCache::MySerializer, IXmlSerializerAndParser);
+//=============================================================================
+// AccountAuthenticatorCache::MySerializer
+//=============================================================================
+CAR_INTERFACE_IMPL(AccountAuthenticatorCache::MySerializer, Object, IXmlSerializerAndParser);
 
 ECode AccountAuthenticatorCache::MySerializer::WriteAsXml(
     /* [in] */ IInterface* item,
@@ -51,39 +57,21 @@ ECode AccountAuthenticatorCache::MySerializer::CreateFromXml(
     return NOERROR;
 }
 
-
+//=============================================================================
+// AccountAuthenticatorCache
+//=============================================================================
 const String AccountAuthenticatorCache::TAG("Account");
 AutoPtr<AccountAuthenticatorCache::MySerializer> AccountAuthenticatorCache::sSerializer = new MySerializer();
 
-AccountAuthenticatorCache::AccountAuthenticatorCache(
+CAR_INTERFACE_IMPL(AccountAuthenticatorCache, RegisteredServicesCache, IIAccountAuthenticatorCache)
+
+ECode AccountAuthenticatorCache::constructor(
     /* [in] */ IContext* context)
-    : RegisteredServicesCache(context, IAccountManager::ACTION_AUTHENTICATOR_INTENT,
+{
+    return RegisteredServicesCache::constructor(context, IAccountManager::ACTION_AUTHENTICATOR_INTENT,
             IAccountManager::AUTHENTICATOR_META_DATA_NAME,
             IAccountManager::AUTHENTICATOR_ATTRIBUTES_NAME,
-            (IXmlSerializerAndParser*)sSerializer)
-{}
-
-PInterface AccountAuthenticatorCache::Probe(
-    /* [in]  */ REIID riid)
-{
-    return NULL;
-}
-
-UInt32 AccountAuthenticatorCache::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 AccountAuthenticatorCache::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode AccountAuthenticatorCache::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    return NOERROR;
+            (IXmlSerializerAndParser*)sSerializer);
 }
 
 ECode AccountAuthenticatorCache::ParseServiceAttributes(
@@ -156,37 +144,44 @@ ECode AccountAuthenticatorCache::ParseServiceAttributes(
     // }
 }
 
-AutoPtr<IRegisteredServicesCacheServiceInfo> AccountAuthenticatorCache::GetServiceInfo(
+ECode AccountAuthenticatorCache::GetServiceInfo(
     /* [in] */ IAuthenticatorDescription* type,
-    /* [in] */ Int32 userId)
+    /* [in] */ Int32 userId,
+    /* [out] */ IRegisteredServicesCacheServiceInfo** result)
 {
-    return RegisteredServicesCache::GetServiceInfo(type, userId);
+    return RegisteredServicesCache::GetServiceInfo(type, userId, result);
 }
 
-AutoPtr< List<AutoPtr<IRegisteredServicesCacheServiceInfo> > > AccountAuthenticatorCache::GetAllServices(
-    /* [in] */ Int32 userId)
+ECode AccountAuthenticatorCache::GetAllServices(
+    /* [in] */ Int32 userId,
+    /* [out] */ ICollection** result)
 {
-    return RegisteredServicesCache::GetAllServices(userId);
+    VALIDATE_NOT_NULL(result)
+
+    AutoPtr<IList> rev;
+    ECode ec = RegisteredServicesCache::GetAllServices(userId, (IList**)&rev);
+    *result = ICollection::Probe(rev);
+    REFCOUNT_ADD(*result)
+    return ec;
 }
 
-void AccountAuthenticatorCache::Dump(
+ECode AccountAuthenticatorCache::Dump(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ IPrintWriter* fout,
-    /* [in] */ const ArrayOf<String>& args,
+    /* [in] */ ArrayOf<String>* args,
     /* [in] */ Int32 userId)
 {
-    return RegisteredServicesCache::Dump(fd, fout,
-            const_cast<ArrayOf<String>*>(&args), userId);
+    return RegisteredServicesCache::Dump(fd, fout, args, userId);
 }
 
-void AccountAuthenticatorCache::SetListener(
+ECode AccountAuthenticatorCache::SetListener(
     /* [in] */ IRegisteredServicesCacheListener* listener,
     /* [in] */ IHandler* handler)
 {
     return RegisteredServicesCache::SetListener(listener, handler);
 }
 
-void AccountAuthenticatorCache::InvalidateCache(
+ECode AccountAuthenticatorCache::InvalidateCache(
     /* [in] */ Int32 userId)
 {
     return RegisteredServicesCache::InvalidateCache(userId);

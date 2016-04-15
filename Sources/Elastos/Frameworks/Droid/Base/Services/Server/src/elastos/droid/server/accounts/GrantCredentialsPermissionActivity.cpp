@@ -1,33 +1,46 @@
 
-#include "accounts/GrantCredentialsPermissionActivity.h"
 #include "elastos/droid/R.h"
+#include "elastos/droid/server/accounts/GrantCredentialsPermissionActivity.h"
 #include "elastos/droid/text/TextUtils.h"
-#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/droid/R.h>
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/utility/logging/Slogger.h>
+#include <Elastos.Droid.Os.h>
 
-using Elastos::Core::StringUtils;
-using Elastos::Core::EIID_IRunnable;
-using Elastos::Core::CString;
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Accounts::CAccount;
+using Elastos::Droid::Accounts::CAccountManagerHelper;
+using Elastos::Droid::Accounts::EIID_IAccount;
+using Elastos::Droid::Accounts::EIID_IAccountManagerCallback;
+using Elastos::Droid::Accounts::IAccountAuthenticatorResponse;
+using Elastos::Droid::Accounts::IAccountManager;
+using Elastos::Droid::Accounts::IAccountManagerHelper;
+using Elastos::Droid::Accounts::IAuthenticatorDescription;
+using Elastos::Droid::App::IActivity;
 using Elastos::Droid::Content::CIntent;
-using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::R;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::ILinearLayout;
-using Elastos::Droid::Accounts::EIID_IAccountManagerCallback;
-using Elastos::Droid::Accounts::IAccountManager;
-using Elastos::Droid::Accounts::CAccount;
-using Elastos::Droid::Accounts::IAccountManagerHelper;
-using Elastos::Droid::Accounts::CAccountManagerHelper;
-using Elastos::Droid::Accounts::IAuthenticatorDescription;
-using Elastos::Droid::Accounts::IAccountAuthenticatorResponse;
+using Elastos::Core::CString;
+using Elastos::Core::EIID_IRunnable;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Accounts {
 
+//=============================================================================
+// GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback::OnCreateAccountManagerCallbackRunnable
+//=============================================================================
 GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback::OnCreateAccountManagerCallbackRunnable::OnCreateAccountManagerCallbackRunnable(
     /* [in] */ ICharSequence* authTokenLabel,
     /* [in] */ OnCreateAccountManagerCallback* host)
@@ -37,7 +50,7 @@ GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback::OnCreateAcco
 
 CAR_INTERFACE_IMPL(
         GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback::OnCreateAccountManagerCallbackRunnable,
-        IRunnable);
+        Object, IRunnable);
 
 ECode GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback::
 OnCreateAccountManagerCallbackRunnable::Run()
@@ -46,12 +59,14 @@ OnCreateAccountManagerCallbackRunnable::Run()
     mHost->mHost->IsFinishing(&isFinishing);
     if (!isFinishing) {
         mHost->mAuthTokenTypeView->SetText(mAuthTokenLabel);
-        mHost->mAuthTokenTypeView->SetVisibility(IView::VISIBLE);
+        IView::Probe(mHost->mAuthTokenTypeView)->SetVisibility(IView::VISIBLE);
     }
     return NOERROR;
 }
 
-
+//=============================================================================
+// GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback
+//=============================================================================
 GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback::OnCreateAccountManagerCallback(
     /* [in] */ ITextView* textView,
     /* [in] */ GrantCredentialsPermissionActivity* host)
@@ -59,7 +74,7 @@ GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback::OnCreateAcco
     , mHost(host)
 {}
 
-CAR_INTERFACE_IMPL(GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback,
+CAR_INTERFACE_IMPL(GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback, Object,
         IAccountManagerCallback);
 
 ECode GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback::Run(
@@ -81,7 +96,9 @@ ECode GrantCredentialsPermissionActivity::OnCreateAccountManagerCallback::Run(
     // }
 }
 
-
+//=============================================================================
+// GrantCredentialsPermissionActivity
+//=============================================================================
 const String GrantCredentialsPermissionActivity::EXTRAS_ACCOUNT("account");
 const String GrantCredentialsPermissionActivity::EXTRAS_AUTH_TOKEN_LABEL("authTokenLabel");
 const String GrantCredentialsPermissionActivity::EXTRAS_AUTH_TOKEN_TYPE("authTokenType");
@@ -90,39 +107,11 @@ const String GrantCredentialsPermissionActivity::EXTRAS_ACCOUNT_TYPE_LABEL("acco
 const String GrantCredentialsPermissionActivity::EXTRAS_PACKAGES("application");
 const String GrantCredentialsPermissionActivity::EXTRAS_REQUESTING_UID("uid");
 
+CAR_INTERFACE_IMPL(GrantCredentialsPermissionActivity, Activity, IViewOnClickListener)
+
 GrantCredentialsPermissionActivity::GrantCredentialsPermissionActivity()
     : mUid(0)
 {}
-
-PInterface GrantCredentialsPermissionActivity::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == Elastos::Droid::View::EIID_IViewOnClickListener) {
-        return (IViewOnClickListener*)this;
-    }
-    return Activity::Probe(riid);
-}
-
-UInt32 GrantCredentialsPermissionActivity::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 GrantCredentialsPermissionActivity::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode GrantCredentialsPermissionActivity::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    if (pObject == (IInterface*)(IViewOnClickListener*)this) {
-        *pIID = Elastos::Droid::View::EIID_IViewOnClickListener;
-        return NOERROR;
-    }
-    return Activity::GetInterfaceID(pObject, pIID);
-}
 
 ECode GrantCredentialsPermissionActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
@@ -130,7 +119,7 @@ ECode GrantCredentialsPermissionActivity::OnCreate(
     FAIL_RETURN(Activity::OnCreate(savedInstanceState));
     ASSERT_SUCCEEDED(SetContentView(R::layout::grant_credentials_permission));
     AutoPtr<ICharSequence> csq;
-    CString::New(StringUtils::Int32ToString(R::string::grant_permissions_header_text),
+    CString::New(StringUtils::ToString(R::string::grant_permissions_header_text),
             (ICharSequence**)&csq);
     SetTitle(csq);
 
@@ -183,7 +172,7 @@ ECode GrantCredentialsPermissionActivity::OnCreate(
     AutoPtr<ITextView> authTokenTypeView;
     ASSERT_SUCCEEDED(FindViewById(R::id::authtoken_type,
             (IView**)(ITextView**)&authTokenTypeView));
-    authTokenTypeView->SetVisibility(IView::GONE);
+    IView::Probe(authTokenTypeView)->SetVisibility(IView::GONE);
 
     AutoPtr<IAccountManagerCallback> callback
             = (IAccountManagerCallback*)new OnCreateAccountManagerCallback(authTokenTypeView, this);
@@ -202,9 +191,9 @@ ECode GrantCredentialsPermissionActivity::OnCreate(
     AutoPtr<IButton> allowB;
     AutoPtr<IButton> denyB;
     ASSERT_SUCCEEDED(FindViewById(R::id::allow_button, (IView**)(IButton**)&allowB));
-    allowB->SetOnClickListener(this);
+    IView::Probe(allowB)->SetOnClickListener(this);
     ASSERT_SUCCEEDED(FindViewById(R::id::deny_button, (IView**)(IButton**)&denyB));
-    denyB->SetOnClickListener(this);
+    IView::Probe(denyB)->SetOnClickListener(this);
 
     AutoPtr<ILinearLayout> packagesListView;
     ASSERT_SUCCEEDED(FindViewById(R::id::packages_list,
@@ -217,20 +206,20 @@ ECode GrantCredentialsPermissionActivity::OnCreate(
         AutoPtr<IApplicationInfo> appInfo;
         if (FAILED(pm->GetApplicationInfo(pkg, 0, (IApplicationInfo**)&appInfo))) {
             packageLabel = pkg;
-            packagesListView->AddView(NewPackageView(packageLabel));
+            IViewGroup::Probe(packagesListView)->AddView(NewPackageView(packageLabel));
             continue;
         }
         AutoPtr<ICharSequence> csq;
         if (FAILED(pm->GetApplicationLabel(appInfo, (ICharSequence**)&csq))) {
             packageLabel = pkg;
-            packagesListView->AddView(NewPackageView(packageLabel));
+            IViewGroup::Probe(packagesListView)->AddView(NewPackageView(packageLabel));
             continue;
         }
         csq->ToString(&packageLabel);
         // } catch (PackageManager.NameNotFoundException e) {
         //     packageLabel = pkg;
         // }
-        packagesListView->AddView(NewPackageView(packageLabel));
+        IViewGroup::Probe(packagesListView)->AddView(NewPackageView(packageLabel));
     }
 
     AutoPtr<ITextView> nameT;

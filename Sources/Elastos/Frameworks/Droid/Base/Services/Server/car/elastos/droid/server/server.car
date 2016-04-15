@@ -16,6 +16,8 @@ module
     merge("accessibility/EventStreamTransformation.car");
     merge("accessibility/ScreenMagnifier.car");
 
+    merge("accounts/IAccountAuthenticatorCache.car");
+
     merge("am/ActivityRecord.car");
     merge("am/BroadcastFilter.car");
     merge("am/PendingIntentRecord.car");
@@ -118,6 +120,10 @@ module
 
     using interface Elastos.Droid.AccessibilityService.IAccessibilityServiceInfo;
     using interface Elastos.Droid.AccessibilityService.IIAccessibilityServiceConnection;
+    using interface Elastos.Droid.Accounts.IAccount;
+    using interface Elastos.Droid.Accounts.IAccountManagerResponse;
+    using interface Elastos.Droid.Accounts.IIAccountAuthenticatorResponse;
+    using interface Elastos.Droid.Accounts.IIAccountManager;
     using interface Elastos.Droid.App.IActivityContainerCallback;
     using interface Elastos.Droid.App.IIActivityContainer;
     using interface Elastos.Droid.App.IIActivityManager;
@@ -157,6 +163,8 @@ module
     using interface Elastos.Droid.Content.Pm.IIPackageManager;
     using interface Elastos.Droid.Content.Pm.IIPackageMoveObserver;
     using interface Elastos.Droid.Content.Pm.IPackageInstallerSessionParams;
+    using interface Elastos.Droid.Content.Pm.IPackageManager;
+    using interface Elastos.Droid.Content.Pm.IRegisteredServicesCacheListener;
     using interface Elastos.Droid.Hardware.IISerialManager;
     using interface Elastos.Droid.Hardware.IIConsumerIrService;
     using interface Elastos.Droid.Hardware.IICmHardwareService;
@@ -788,153 +796,221 @@ module
 //             interface IIPrivacySettingsManager;
 //     }
 
-//     namespace Accounts {
+    namespace Accounts {
 
-//     /**
-//      * A system service that provides  account, password, and authtoken management for all
-//      * accounts on the device. Some of these calls are implemented with the help of the corresponding
-//      * {@link IIAccountAuthenticator} services. This service is not accessed by users directly,
-//      * instead one uses an instance of {@link AccountManager}, which can be accessed as follows:
-//      *    AccountManager accountManager =
-//      *      (AccountManager)context.getSystemService(Context.ACCOUNT_SERVICE)
-//      * @hide
-//      */
-//     class CAccountManagerService {
-//         constructor(
-//             [in] IContext* ctx);
+    /**
+     * A system service that provides  account, password, and authtoken management for all
+     * accounts on the device. Some of these calls are implemented with the help of the corresponding
+     * {@link IIAccountAuthenticator} services. This service is not accessed by users directly,
+     * instead one uses an instance of {@link AccountManager}, which can be accessed as follows:
+     *    AccountManager accountManager =
+     *      (AccountManager)context.getSystemService(Context.ACCOUNT_SERVICE)
+     * @hide
+     */
+    [local]
+    class CAccountManagerService {
+        constructor(
+            [in] IContext* ctx);
 
-//         interface IIAccountManager;
-//         interface IRegisteredServicesCacheListener;
-//     }
+        constructor(
+            [in] IContext* context,
+            [in] IPackageManager* packageManager,
+            [in] IIAccountAuthenticatorCache* authenticatorCache);
 
-//     class CTestFeaturesSession {
-//         constructor(
-//             [in] Handle32 accounts,
-//             [in] IAccountManagerResponse* response,
-//             [in] IAccount* account,
-//             [in] ArrayOf<String> features,
-//             [in] IIAccountManager* host);
+        interface IBinder;
+        interface IIAccountManager;
+        interface IRegisteredServicesCacheListener;
+    }
 
-//         interface IIAccountAuthenticatorResponse;
-//         interface IProxyDeathRecipient;
-//         interface IServiceConnection;
-//     }
+    class CTestFeaturesSession {
+        constructor(
+            [in] IInterface* accounts,
+            [in] IAccountManagerResponse* response,
+            [in] IAccount* account,
+            [in] ArrayOf<String> features,
+            [in] IIAccountManager* host);
 
-//     class CRemoveAccountSession {
-//         constructor(
-//             [in] Handle32 accounts,
-//             [in] IAccountManagerResponse* response,
-//             [in] IAccount* account,
-//             [in] IIAccountManager* host);
+        interface IIAccountAuthenticatorResponse;
+        interface IBinder;
+        interface IProxyDeathRecipient;
+        interface IServiceConnection;
+    }
 
-//         interface IIAccountAuthenticatorResponse;
-//         interface IProxyDeathRecipient;
-//         interface IServiceConnection;
-//     }
+    class CRemoveAccountSession {
+        constructor(
+            [in] IInterface* accounts,
+            [in] IAccountManagerResponse* response,
+            [in] IAccount* account,
+            [in] IIAccountManager* host);
 
-//     class CGetAccountsByTypeAndFeatureSession {
-//         constructor(
-//             [in] Handle32 accounts,
-//             [in] IAccountManagerResponse* response,
-//             [in] String type,
-//             [in] ArrayOf<String> features,
-//             [in] IIAccountManager* host);
+        interface IIAccountAuthenticatorResponse;
+        interface IBinder;
+        interface IProxyDeathRecipient;
+        interface IServiceConnection;
+    }
 
-//         interface IIAccountAuthenticatorResponse;
-//         interface IProxyDeathRecipient;
-//         interface IServiceConnection;
-//     }
+    class CGetAuthTokenLabelSession {
+        constructor(
+            [in] IInterface* accounts,
+            [in] IAccountManagerResponse* response,
+            [in] String type,
+            [in] String authTokenType,
+            [in] IIAccountManager* host);
 
-//     class CGetAuthTokenLabelSession {
-//         constructor(
-//             [in] Handle32 accounts,
-//             [in] IAccountManagerResponse* response,
-//             [in] String type,
-//             [in] String authTokenType,
-//             [in] IIAccountManager* host);
+        interface IIAccountAuthenticatorResponse;
+        interface IBinder;
+        interface IProxyDeathRecipient;
+        interface IServiceConnection;
+    }
 
-//         interface IIAccountAuthenticatorResponse;
-//         interface IProxyDeathRecipient;
-//         interface IServiceConnection;
-//     }
+    class CGetAuthTokenSession {
+        constructor(
+            [in] IInterface* accounts,
+            [in] IAccountManagerResponse* response,
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] Boolean expectActivityLaunch,
+            [in] IBundle* loginOptions,
+            [in] Boolean notifyOnAuthFailure,
+            [in] Boolean permissionGranted,
+            [in] Boolean customTokens,
+            [in] IIAccountManager* host);
 
-//     class CGetAuthTokenSession {
-//         constructor(
-//             [in] Handle32 accounts,
-//             [in] IAccountManagerResponse* response,
-//             [in] IAccount* account,
-//             [in] String authTokenType,
-//             [in] Boolean expectActivityLaunch,
-//             [in] IBundle* loginOptions,
-//             [in] Boolean notifyOnAuthFailure,
-//             [in] Boolean permissionGranted,
-//             [in] Boolean customTokens,
-//             [in] IIAccountManager* host);
+        interface IIAccountAuthenticatorResponse;
+        interface IBinder;
+        interface IProxyDeathRecipient;
+        interface IServiceConnection;
+    }
 
-//         interface IIAccountAuthenticatorResponse;
-//         interface IProxyDeathRecipient;
-//         interface IServiceConnection;
-//     }
+    class CAddAcountSession {
+        constructor(
+            [in] IInterface* accounts,
+            [in] IAccountManagerResponse* response,
+            [in] String accountType,
+            [in] Boolean expectActivityLaunch,
+            [in] String authTokenType,
+            [in] ArrayOf<String> requiredFeatures,
+            [in] IBundle* options,
+            [in] IIAccountManager* host);
 
-//     class CAddAcountSession {
-//         constructor(
-//             [in] Handle32 accounts,
-//             [in] IAccountManagerResponse* response,
-//             [in] String accountType,
-//             [in] Boolean expectActivityLaunch,
-//             [in] String authTokenType,
-//             [in] ArrayOf<String> requiredFeatures,
-//             [in] IBundle* options,
-//             [in] IIAccountManager* host);
+        interface IIAccountAuthenticatorResponse;
+        interface IBinder;
+        interface IProxyDeathRecipient;
+        interface IServiceConnection;
+    }
 
-//         interface IIAccountAuthenticatorResponse;
-//         interface IProxyDeathRecipient;
-//         interface IServiceConnection;
-//     }
+    class CConfirmCredentialsAsUserSession {
+        constructor(
+            [in] IInterface* accounts,
+            [in] IAccountManagerResponse* response,
+            [in] Boolean expectActivityLaunch,
+            [in] IAccount* account,
+            [in] IBundle* options,
+            [in] IIAccountManager* host);
 
-//     class CConfirmCredentialsAsUserSession {
-//         constructor(
-//             [in] Handle32 accounts,
-//             [in] IAccountManagerResponse* response,
-//             [in] Boolean expectActivityLaunch,
-//             [in] IAccount* account,
-//             [in] IBundle* options,
-//             [in] IIAccountManager* host);
+        interface IIAccountAuthenticatorResponse;
+        interface IBinder;
+        interface IProxyDeathRecipient;
+        interface IServiceConnection;
+    }
 
-//         interface IIAccountAuthenticatorResponse;
-//         interface IProxyDeathRecipient;
-//         interface IServiceConnection;
-//     }
+    class CUpdateCredentialsSession {
+        constructor(
+            [in] IInterface* accounts,
+            [in] IAccountManagerResponse* response,
+            [in] Boolean expectActivityLaunch,
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] IBundle* loginOptions,
+            [in] IIAccountManager* host);
 
-//     class CUpdateCredentialsSession {
-//         constructor(
-//             [in] Handle32 accounts,
-//             [in] IAccountManagerResponse* response,
-//             [in] Boolean expectActivityLaunch,
-//             [in] IAccount* account,
-//             [in] String authTokenType,
-//             [in] IBundle* loginOptions,
-//             [in] IIAccountManager* host);
+        interface IIAccountAuthenticatorResponse;
+        interface IBinder;
+        interface IProxyDeathRecipient;
+        interface IServiceConnection;
+    }
 
-//         interface IIAccountAuthenticatorResponse;
-//         interface IProxyDeathRecipient;
-//         interface IServiceConnection;
-//     }
+    class CEditPropertiesSession {
+        constructor(
+            [in] IInterface* accounts,
+            [in] IAccountManagerResponse* response,
+            [in] String type,
+            [in] Boolean expectActivityLaunch,
+            [in] IIAccountManager* host);
 
-//     class CEditPropertiesSession {
-//         constructor(
-//             [in] Handle32 accounts,
-//             [in] IAccountManagerResponse* response,
-//             [in] String type,
-//             [in] Boolean expectActivityLaunch,
-//             [in] IIAccountManager* host);
+        interface IIAccountAuthenticatorResponse;
+        interface IBinder;
+        interface IProxyDeathRecipient;
+        interface IServiceConnection;
+    }
 
-//         interface IIAccountAuthenticatorResponse;
-//         interface IProxyDeathRecipient;
-//         interface IServiceConnection;
-//     }
+    class CGetAccountsByTypeAndFeatureSession {
+        constructor(
+            [in] IInterface* accounts,
+            [in] IAccountManagerResponse* response,
+            [in] String type,
+            [in] ArrayOf<String> features,
+            [in] Int32 callingUid,
+            [in] IIAccountManager* host);
 
-//     } // Accounts
+        interface IIAccountAuthenticatorResponse;
+        interface IBinder;
+        interface IProxyDeathRecipient;
+        interface IServiceConnection;
+    }
+
+    class CCopyAccountToUserSession {
+        constructor(
+            [in] IInterface* accounts,
+            [in] IAccountManagerResponse* response,
+            [in] IAccount* account,
+            [in] Boolean expectActivityLaunch,
+            [in] Boolean stripAuthTokenFromResult,
+            [in] IIAccountManager* host,
+            [in] IInterface* toAccounts);
+
+        interface IIAccountAuthenticatorResponse;
+        interface IBinder;
+        interface IProxyDeathRecipient;
+        interface IServiceConnection;
+    }
+
+    class CCompleteCloningAccountSession {
+        constructor(
+            [in] IInterface* accounts,
+            [in] IAccountManagerResponse* response,
+            [in] IAccount* account,
+            [in] Boolean expectActivityLaunch,
+            [in] Boolean stripAuthTokenFromResult,
+            [in] IIAccountManager* host,
+            [in] IBundle* result);
+
+        interface IIAccountAuthenticatorResponse;
+        interface IBinder;
+        interface IProxyDeathRecipient;
+        interface IServiceConnection;
+    }
+
+    [deprecated]
+    class CAddAccountAsUserSession {
+        constructor(
+            [in] IInterface* accounts,
+            [in] IAccountManagerResponse* response,
+            [in] String accountType,
+            [in] Boolean expectActivityLaunch,
+            [in] Boolean stripAuthTokenFromResult,
+            [in] IIAccountManager* host,
+            [in] String authTokenType,
+            [in] ArrayOf<String>* requiredFeatures,
+            [in] IBundle* options);
+
+        interface IIAccountAuthenticatorResponse;
+        interface IBinder;
+        interface IProxyDeathRecipient;
+        interface IServiceConnection;
+    }
+
+    } // namespace Accounts
 
     namespace Media {
     namespace Projection {

@@ -40,6 +40,7 @@ EXPORT_HEADERS += elastos/droid/content/Context.h
 EXPORT_HEADERS += elastos/droid/content/ContentProvider.h
 EXPORT_HEADERS += elastos/droid/content/pm/PackageParser.h
 EXPORT_HEADERS += elastos/droid/content/pm/PackageUserState.h
+EXPORT_HEADERS += elastos/droid/content/pm/RegisteredServicesCache.h
 EXPORT_HEADERS += elastos/droid/content/pm/ThemeUtils.h
 EXPORT_HEADERS += elastos/droid/database/sqlite/SQLiteOpenHelper.h
 EXPORT_HEADERS += elastos/droid/database/ContentObserver.h

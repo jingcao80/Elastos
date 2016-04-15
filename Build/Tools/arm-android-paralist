@@ -317,7 +317,7 @@
 #- Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid Elastos.Droid.System.eco
 #- Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid Org.Kxml2.IO.eco
 > Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/accessibility
-#  Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/accounts
+  Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/accounts
 > Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/am
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/appwidget
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/clipboard
