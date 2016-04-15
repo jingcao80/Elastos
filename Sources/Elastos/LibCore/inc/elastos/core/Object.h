@@ -375,7 +375,7 @@ Boolean Object::Equals(
     /* [in] */ T1* lhs,
     /* [in] */ T2* rhs)
 {
-    if (lhs == rhs) {
+    if (lhs == NULL && rhs == NULL) {
         return TRUE;
     }
     else if (lhs == NULL || rhs == NULL) {
@@ -432,7 +432,7 @@ using Elastos::Core::Object;
 
 #ifndef TO_STRING_IMPL
 #define TO_STRING_IMPL(className)                                                       \
-    CARAPTI ToString(                                                                   \
+    CARAPT ToString(                                                                    \
         /* [out] */ String* str)                                                        \
     {                                                                                   \
         VALIDATE_NOT_NULL(str)                                                          \

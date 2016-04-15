@@ -2683,12 +2683,10 @@ ECode View::GetBoundsOnScreen(
 
     position->Offset(mLeft, mTop);
 
-    AutoPtr<IViewParent> parent = mParent;
-    while (IView::Probe(parent) != NULL) {
-        View* parentView = VIEW_PROBE(parent);
-
+    AutoPtr<IView> parent = IView::Probe(mParent.Get());
+    while (parent != NULL) {
+        View* parentView = (View*)parent;
         position->Offset(-parentView->mScrollX, -parentView->mScrollY);
-
         if (!parentView->HasIdentityMatrix()) {
             AutoPtr<IMatrix> matrix;
             parentView->GetMatrix((IMatrix**)&matrix);
@@ -2697,12 +2695,12 @@ ECode View::GetBoundsOnScreen(
         }
 
         position->Offset(parentView->mLeft, parentView->mTop);
-
-        parent = parentView->mParent;
+        parent = IView::Probe(parentView->mParent.Get());
     }
 
-    if (IViewRootImpl::Probe(parent)) {
-        ViewRootImpl* viewRootImpl = (ViewRootImpl*)IViewRootImpl::Probe(parent);
+    IViewRootImpl* vri = IViewRootImpl::Probe(parent);
+    if (vri) {
+        ViewRootImpl* viewRootImpl = (ViewRootImpl*)vri;
         position->Offset(0, -(viewRootImpl->mCurScrollY));
     }
 
@@ -2741,7 +2739,7 @@ void View::OnInitializeAccessibilityNodeInfoInternal(
             rootView = this;
         }
 
-        AutoPtr<IView> label = VIEW_PROBE(rootView)->FindLabelForView(this, mID);
+        AutoPtr<IView> label = ((View*)rootView.Get())->FindLabelForView(this, mID);
         if (label != NULL) {
             info->SetLabeledBy(label);
         }
@@ -2766,7 +2764,7 @@ void View::OnInitializeAccessibilityNodeInfoInternal(
         if (rootView == NULL) {
             rootView = this;
         }
-        AutoPtr<IView> labeled = VIEW_PROBE(rootView)->FindViewInsideOutShouldExist(this, mLabelForId);
+        AutoPtr<IView> labeled = ((View*)rootView.Get())->FindViewInsideOutShouldExist(this, mLabelForId);
         if (labeled != NULL) {
             info->SetLabelFor(labeled);
         }
@@ -2882,9 +2880,9 @@ Boolean View::IsVisibleToUser(
         }
         // An invisible predecessor or one with alpha zero means
         // that this view is not visible to the user.
-        AutoPtr<IInterface> current = (IView*)this;
-        while (IView::Probe(current) != NULL) {
-            View* view = VIEW_PROBE(current);
+        AutoPtr<IView> current = (IView*)this;
+        while (current != NULL) {
+            View* view = (View*)current.Get();
             // We have attach info so this view is attached and there is no
             // need to check whether we reach to ViewRootImpl on the way up.
             Float alpha, transitionAlpha;
@@ -2896,7 +2894,7 @@ Boolean View::IsVisibleToUser(
                 return FALSE;
             }
 
-            current = view->mParent;
+            current = IView::Probe(view->mParent);
         }
 
         // Check if the view is entirely covered by its predecessors.
@@ -4935,7 +4933,7 @@ void View::SendAccessibilityHoverEvent(
     // is fine since the client has a clear idea which view is hovered at the
     // price of a couple more events being sent. This is a simple and
     // working solution.
-    View* source = this;
+    AutoPtr<View> source = this;
     Boolean res;
     while (TRUE) {
         if (source->IncludeForAccessibility(&res), res) {
@@ -4944,10 +4942,8 @@ void View::SendAccessibilityHoverEvent(
         }
         AutoPtr<IViewParent> parent;
         source->GetParent((IViewParent**)&parent);
-        if (IView::Probe(parent)) {
-            source = VIEW_PROBE(parent);
-        }
-        else {
+        source = (View*)IView::Probe(parent);
+        if (source == NULL) {
             return;
         }
     }
@@ -7319,9 +7315,10 @@ void View::SetFlags(
             ClearAccessibilityFocus();
             DestroyDrawingCache();
 
-            if (mParent != NULL && VIEW_PROBE(mParent) != NULL) {
+            IView* vp = IView::Probe(vp);
+            if (vp != NULL) {
                 // GONE views noop invalidation, so invalidate the parent
-                VIEW_PROBE(mParent)->Invalidate(TRUE);
+                ((View*)vp)->Invalidate(TRUE);
             }
             // Mark the view drawn to ensure that it gets invalidated properly the next
             // time it is visible and gets invalidated
@@ -7366,7 +7363,8 @@ void View::SetFlags(
         if (vg != NULL) {
             ((ViewGroup*)vg)->OnChildVisibilityChanged(this,
                     (changed & VISIBILITY_MASK), newVisibility);
-            VIEW_PROBE(mParent)->Invalidate(TRUE);
+            View* vp = (View*)IView::Probe(mParent);
+            vp->Invalidate(TRUE);
         }
         else if (mParent != NULL) {
             mParent->InvalidateChild(this, NULL);
@@ -15342,14 +15340,15 @@ ECode View::FindViewByPredicate(
 }
 
 ECode View::FindViewByPredicateInsideOut(
-    /* [in] */ IView* start,
+    /* [in] */ IView* inStart,
     /* [in] */ IPredicate* predicate,
     /* [out] */ IView** res)
 {
     VALIDATE_NOT_NULL(res)
     AutoPtr<IView> childToSkip;
+    AutoPtr<IView> start = inStart;
     for (;;) {
-        View* startView = VIEW_PROBE(start);
+        View* startView = (View*)start;
         AutoPtr<IView> view = startView->FindViewByPredicateTraversal(predicate, childToSkip);
         if (view != NULL || startView == this) {
             *res = view;
@@ -15359,13 +15358,14 @@ ECode View::FindViewByPredicateInsideOut(
 
         AutoPtr<IViewParent> parent;
         startView->GetParent((IViewParent**)&parent);
-        if (parent == NULL || !(IView::Probe(parent))) {
+        IView* vp = IView::Probe(parent);
+        if (vp == NULL) {
             *res = NULL;
             return NOERROR;
         }
 
         childToSkip = start;
-        start = IView::Probe(parent);
+        start = vp;
     }
 }
 
