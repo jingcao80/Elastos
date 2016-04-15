@@ -3448,11 +3448,11 @@ ECode AbsListView::GetVerticalScrollbarWidth(
 
     if (mFastScroll != NULL && mFastScroll->IsEnabled()) {
         Int32 w;
-        View::GetVerticalScrollbarWidth(&w);
+        AdapterView::GetVerticalScrollbarWidth(&w);
         *width = Elastos::Core::Math::Max(w, mFastScroll->GetWidth());
         return NOERROR;
     }
-    return View::GetVerticalScrollbarWidth(width);
+    return AdapterView::GetVerticalScrollbarWidth(width);
 }
 
 ECode AbsListView::IsFastScrollEnabled(
@@ -3473,7 +3473,7 @@ ECode AbsListView::IsFastScrollEnabled(
 ECode AbsListView::SetVerticalScrollbarPosition(
     /* [in] */ Int32 position)
 {
-    View::SetVerticalScrollbarPosition(position);
+    AdapterView::SetVerticalScrollbarPosition(position);
     if (mFastScroll != NULL) {
         mFastScroll->SetScrollbarPosition(position);
     }
@@ -3483,7 +3483,7 @@ ECode AbsListView::SetVerticalScrollbarPosition(
 ECode AbsListView::SetScrollBarStyle(
     /* [in] */ Int32 style)
 {
-    View::SetScrollBarStyle(style);
+    AdapterView::SetScrollBarStyle(style);
     if (mFastScroll != NULL) {
         mFastScroll->SetScrollBarStyle(style);
     }
@@ -3560,13 +3560,13 @@ ECode AbsListView::SendAccessibilityEvent(
             mLastAccessibilityScrollEventToIndex = lastVisiblePosition;
         }
     }
-    return View::SendAccessibilityEvent(eventType);
+    return AdapterView::SendAccessibilityEvent(eventType);
 }
 
 ECode AbsListView::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
-    FAIL_RETURN(View::OnInitializeAccessibilityEvent(event));
+    FAIL_RETURN(AdapterView::OnInitializeAccessibilityEvent(event));
     IAccessibilityRecord::Probe(event)->SetClassName(CoreUtils::Convert("AbsListView"));
 
     return NOERROR;
@@ -3575,7 +3575,7 @@ ECode AbsListView::OnInitializeAccessibilityEvent(
 ECode AbsListView::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
-    View::OnInitializeAccessibilityNodeInfo(info);
+    AdapterView::OnInitializeAccessibilityNodeInfo(info);
     info->SetClassName(CoreUtils::Convert("AbsListView"));
     Boolean res;
     if (IsEnabled(&res), res) {
@@ -3616,7 +3616,7 @@ ECode AbsListView::PerformAccessibilityAction(
     *res = FALSE;
 
     Boolean result;
-    if (View::PerformAccessibilityAction(action, arguments, &result), result) {
+    if (AdapterView::PerformAccessibilityAction(action, arguments, &result), result) {
         *res = TRUE;
         return NOERROR;
     }
@@ -3683,7 +3683,7 @@ ECode AbsListView::FindViewByAccessibilityIdTraversal(
         return NOERROR;
     }
 
-    return ViewGroup::FindViewByAccessibilityIdTraversal(accessibilityId, view);
+    return AdapterView::FindViewByAccessibilityIdTraversal(accessibilityId, view);
 }
 
 ECode AbsListView::IsScrollingCacheEnabled(
@@ -5242,7 +5242,7 @@ ECode AbsListView::ShowContextMenu(
 {
     VALIDATE_NOT_NULL(res);
 
-    return View::ShowContextMenu(res);
+    return AdapterView::ShowContextMenu(res);
 }
 
 ECode AbsListView::ShowContextMenu(
@@ -6531,7 +6531,7 @@ ECode AbsListView::OnInterceptHoverEvent(
         return NOERROR;
     }
 
-    return AbsListView::OnInterceptHoverEvent(event, res);
+    return AdapterView::OnInterceptHoverEvent(event, res);
 }
 
 ECode AbsListView::OnInterceptTouchEvent(
@@ -6885,7 +6885,8 @@ ECode AbsListView::SmoothScrollByOffset(
             }
             Int32 count;
             GetCount(&count);
-            SmoothScrollToPosition(Elastos::Core::Math::Max(0, Elastos::Core::Math::Min(count, index + position)));
+            using Elastos::Core::Math;
+            SmoothScrollToPosition(Math::Max(0, Math::Min(count, index + position)));
         }
     }
 
@@ -6908,7 +6909,7 @@ void AbsListView::ClearScrollingCache()
     if (IsHardwareAccelerated(&res), res) {
         if (mClearScrollingCache == NULL) {
             AutoPtr<ClearScrollingCacheRunnable> temp
-                = new ClearScrollingCacheRunnable(this);
+                    = new ClearScrollingCacheRunnable(this);
             mClearScrollingCache = temp;
         }
     }
@@ -6991,26 +6992,28 @@ Boolean AbsListView::TrackMotionScroll(
         effectivePaddingBottom = bottomTmp;
     }
 
-     // FIXME account for grid vertical spacing too?
+    // FIXME account for grid vertical spacing too?
     Int32 h;
     GetHeight(&h);
     Int32 spaceAbove = effectivePaddingTop - firstTop;
     Int32 end = h - effectivePaddingBottom;
     Int32 spaceBelow = lastBottom - end;
 
+    using Elastos::Core::Math;
+
     Int32 height = h - mPaddingBottom - mPaddingTop;
     if (deltaY < 0) {
-        deltaY = Elastos::Core::Math::Max(-(height - 1), deltaY);
+        deltaY = Math::Max(-(height - 1), deltaY);
     }
     else {
-        deltaY = Elastos::Core::Math::Min(height - 1, deltaY);
+        deltaY = Math::Min(height - 1, deltaY);
     }
 
     if (incrementalDeltaY < 0) {
-        incrementalDeltaY = Elastos::Core::Math::Max(-(height - 1), incrementalDeltaY);
+        incrementalDeltaY = Math::Max(-(height - 1), incrementalDeltaY);
     }
     else {
-        incrementalDeltaY = Elastos::Core::Math::Min(height - 1, incrementalDeltaY);
+        incrementalDeltaY = Math::Min(height - 1, incrementalDeltaY);
     }
 
     Int32 firstPosition = mFirstPosition;
@@ -7134,7 +7137,7 @@ Boolean AbsListView::TrackMotionScroll(
         mFirstPosition += count;
     }
 
-    Int32 absIncrementalDeltaY = Elastos::Core::Math::Abs(incrementalDeltaY);
+    Int32 absIncrementalDeltaY = Math::Abs(incrementalDeltaY);
     if (spaceAbove < absIncrementalDeltaY
         || spaceBelow < absIncrementalDeltaY) {
         FillGap(down);
@@ -8291,7 +8294,7 @@ ECode AbsListView::SetSelectionFromTop(
 
     Boolean res;
     if (IsInTouchMode(&res), !res) {
-        position = AbsListView::LookForSelectablePosition(position, TRUE);
+        position = LookForSelectablePosition(position, TRUE);
         if (position >= 0) {
             SetNextSelectedPositionInt(position);
         }

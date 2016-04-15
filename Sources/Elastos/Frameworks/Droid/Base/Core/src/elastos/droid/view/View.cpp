@@ -17004,7 +17004,9 @@ ECode View::StartNestedScroll(
             if (IView::Probe(p)) {
                 child = IView::Probe(p);
             }
-            p->GetParent((IViewParent**)&p);
+            AutoPtr<IViewParent> tmp;
+            p->GetParent((IViewParent**)&tmp);
+            p = tmp;
         }
     }
     *res = FALSE;

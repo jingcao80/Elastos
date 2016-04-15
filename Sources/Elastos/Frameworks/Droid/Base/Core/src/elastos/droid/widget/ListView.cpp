@@ -991,8 +991,7 @@ ECode ListView::SmoothScrollToPosition(
 ECode ListView::SmoothScrollByOffset(
     /* [in] */ Int32 offset)
 {
-    AbsListView::SmoothScrollByOffset(offset);
-    return NOERROR;
+    return AbsListView::SmoothScrollByOffset(offset);
 }
 
 AutoPtr<IView> ListView::MoveSelection(
@@ -2251,6 +2250,22 @@ Boolean ListView::CommonKey(
                 }
                 break;
 
+            case IKeyEvent::KEYCODE_SPACE:
+                Boolean isShowing;
+                if (mPopup == NULL || (mPopup->IsShowing(&isShowing), !isShowing)) {
+                    Boolean noModifiersPageSpace, hasModifiersPageSpace;
+                    event->HasNoModifiers(&noModifiersPageSpace);
+                    event->HasModifiers(IKeyEvent::META_SHIFT_ON ,&hasModifiersPageSpace);
+                    if (noModifiersPageSpace) {
+                        handled = ResurrectSelectionIfNeeded() || PageScroll(IView::FOCUS_DOWN);
+                    }
+                    else if (hasModifiersPageSpace) {
+                        handled = ResurrectSelectionIfNeeded() || PageScroll(IView::FOCUS_UP);
+                    }
+                    handled = TRUE;
+                }
+                break;
+
             case IKeyEvent::KEYCODE_PAGE_UP:
                 Boolean noModifiersPageUp, hasModifiersPageUp;
                 event->HasNoModifiers(&noModifiersPageUp);
@@ -2301,7 +2316,7 @@ Boolean ListView::CommonKey(
                 if (FALSE) {
                     Boolean noModifiersTab, hasModifiersTab;
                     event->HasNoModifiers(&noModifiersTab);
-                    event->HasModifiers(IKeyEvent::META_ALT_ON ,&hasModifiersTab);
+                    event->HasModifiers(IKeyEvent::META_SHIFT_ON ,&hasModifiersTab);
                     if (noModifiersTab) {
                         handled = ResurrectSelectionIfNeeded() || ArrowScroll(IView::FOCUS_DOWN);
                     }
@@ -2370,7 +2385,7 @@ Boolean ListView::PageScroll(
             Int32 childCount;
             GetChildCount(&childCount);
             if (down && (position > (mItemCount - childCount))) {
-                mLayoutMode = AbsListView::LAYOUT_FORCE_TOP;
+                mLayoutMode = AbsListView::LAYOUT_FORCE_BOTTOM;
             }
 
             if (!down && (position < childCount)) {
