@@ -109,9 +109,9 @@
             android:layout_height="50px"
             android:text="ConnectivityManager">
         </Button>
-     </LinearLayout>
+    </LinearLayout>
 
-     <ListView
+    <ListView
         android:id="@+id/myListView"
         android:layout_width="fill_parent"
         android:layout_height="250px">
