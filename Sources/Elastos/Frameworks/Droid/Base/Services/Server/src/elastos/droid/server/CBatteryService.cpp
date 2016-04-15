@@ -18,6 +18,8 @@
 #include <elastos/core/StringUtils.h>
 #include <Elastos.Droid.Provider.h>
 #include <Elastos.CoreLibrary.IO.h>
+#include <binder/IServiceManager.h>
+#include <batteryservice/IBatteryPropertiesRegistrar.h>
 
 using Elastos::Droid::R;
 using Elastos::Droid::Manifest;
@@ -300,33 +302,41 @@ ECode CBatteryService::Led::UpdateLightsLocked()
 // CBatteryService::BatteryListener
 //=====================================================================
 
-CAR_INTERFACE_IMPL_2(CBatteryService::BatteryListener, Object, IIBatteryPropertiesListener, IBinder)
-
-CBatteryService::BatteryListener::BatteryListener()
-{}
-
-ECode CBatteryService::BatteryListener::constructor(
-    /* [in] */ ISystemService* batteryService)
-{
-    mHost = (CBatteryService*)batteryService;
-    return NOERROR;
-}
-
-// //@Override
-ECode CBatteryService::BatteryListener::BatteryPropertiesChanged(
-    /* [in] */ IBatteryProperties* props)
+void CBatteryService::BatteryListener::batteryPropertiesChanged(struct android::BatteryProperties props)
 {
     Int64 identity = Binder::ClearCallingIdentity();
-    mHost->Update(props);
+    AutoPtr<IBatteryProperties> newProps;
+    CBatteryProperties::New((IBatteryProperties**)&newProps);
+    newProps->SetChargerAcOnline(props.chargerAcOnline);
+    newProps->SetChargerUsbOnline(props.chargerUsbOnline);
+    newProps->SetChargerWirelessOnline(props.chargerWirelessOnline);
+    newProps->SetBatteryStatus(props.batteryStatus);
+    newProps->SetBatteryHealth(props.batteryHealth);
+    newProps->SetBatteryPresent(props.batteryPresent);
+    newProps->SetBatteryLevel(props.batteryLevel);
+    newProps->SetBatteryVoltage(props.batteryVoltage);
+    newProps->SetBatteryTemperature(props.batteryTemperature);
+    newProps->SetBatteryTechnology(String(props.batteryTechnology.string()));
+    mHost->Update(newProps);
     Binder::RestoreCallingIdentity(identity);
-    return NOERROR;
 }
 
-ECode CBatteryService::BatteryListener::ToString(
-    /* [out] */ String* str)
+android::status_t CBatteryService::BatteryListener::onTransact(uint32_t code, const android::Parcel& data,
+    android::Parcel* reply, uint32_t flags)
 {
-    return Object::ToString(str);
+    Slogger::E(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@ ontransact");
+    switch(code) {
+        case android::TRANSACT_BATTERYPROPERTIESCHANGED: {
+            struct android::BatteryProperties* props = new android::BatteryProperties();
+            props->readFromParcel(const_cast<android::Parcel*>(&data));
+            batteryPropertiesChanged(*props);
+            delete props;
+            return android::OK;
+        }
+    }
+    return BBinder::onTransact(code, data, reply, flags);
 }
+
 
 //=====================================================================
 // CBatteryService::BinderService
@@ -632,13 +642,15 @@ ECode CBatteryService::constructor(
 // @Override
 ECode CBatteryService::OnStart()
 {
-    AutoPtr<IServiceManager> sm;
-    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
-    AutoPtr<IInterface> obj;
-    sm->GetService(String("batteryproperties"), (IInterface**)&obj);
-    AutoPtr<IIBatteryPropertiesRegistrar> batteryPropertiesRegistrar =
-            IIBatteryPropertiesRegistrar::Probe(obj);
-    // assert(0 && "TODO");
+    android::sp<android::IServiceManager> sm = android::defaultServiceManager();
+    android::sp<android::IBinder> b =  sm->getService(android::String16("batteryproperties"));
+    android::sp<android::IBatteryPropertiesRegistrar> batteryPropertiesRegistrar =
+            static_cast<android::IBatteryPropertiesRegistrar*>(b->queryLocalInterface(
+                    android::IBatteryPropertiesRegistrar::descriptor).get());
+    if (batteryPropertiesRegistrar != NULL) {
+        Slogger::I(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        batteryPropertiesRegistrar->registerListener(new BatteryListener(this));
+    }
     // try {
     // batteryPropertiesRegistrar->RegisterListener(new BatteryListener());
     // } catch (RemoteException e) {
@@ -787,6 +799,7 @@ void CBatteryService::Update(
     synchronized (mLock) {
         if (!mUpdatesStopped) {
             mBatteryProps = props;
+            Slogger::E(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!%p", props);
             // Process the new values.
             ProcessValuesLocked(FALSE);
         }
@@ -835,8 +848,8 @@ void CBatteryService::ProcessValuesLocked(
     // Let the battery stats keep track of the current level.
     // try {
 
-    mBatteryStats->SetBatteryState(status, health,
-        mPlugType, level, temperature, voltage);
+    // mBatteryStats->SetBatteryState(status, health,
+    //         mPlugType, level, temperature, voltage);
     // } catch (RemoteException e) {
     //     Should never happen.
     // }

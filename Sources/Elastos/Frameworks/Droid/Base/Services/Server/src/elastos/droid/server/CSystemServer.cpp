@@ -16,6 +16,7 @@
 #include "elastos/droid/server/CVibratorService.h"
 #include "elastos/droid/server/CUiModeManagerService.h"
 #include "elastos/droid/server/CNsdService.h"
+#include "elastos/droid/server/CBatteryService.h"
 
 #include "elastos/droid/server/appwidget/CAppWidgetService.h"
 #include "elastos/droid/server/clipboard/CClipboardService.h"

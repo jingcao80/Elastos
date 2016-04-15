@@ -1,6 +1,5 @@
 #include <elastos/droid/server/CAlarmManagerBinderService.h>
 #include <elastos/droid/server/CBatteryBinderService.h>
-#include <elastos/droid/server/CBatteryServiceBatteryListener.h>
 #include <elastos/droid/server/CBluetoothManagerServiceBluetoothCallback.h>
 #include <elastos/droid/server/CCommonTimeManagementServiceIfaceObserver.h>
 #include <elastos/droid/server/CEntropyMixer.h>
@@ -15,7 +14,6 @@ namespace Server {
 
 CAR_OBJECT_IMPL(CAlarmManagerBinderService)
 CAR_OBJECT_IMPL(CBatteryBinderService)
-CAR_OBJECT_IMPL(CBatteryServiceBatteryListener)
 CAR_OBJECT_IMPL(CBluetoothManagerServiceBluetoothCallback)
 CAR_OBJECT_IMPL(CCommonTimeManagementServiceIfaceObserver)
 CAR_OBJECT_IMPL(CEntropyMixer)
