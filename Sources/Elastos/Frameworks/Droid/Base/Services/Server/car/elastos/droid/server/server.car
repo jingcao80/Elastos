@@ -603,15 +603,6 @@ module
     }
 
     [local]
-    class CBatteryServiceBatteryListener {
-        constructor(
-            [in] ISystemService* batteryService);
-
-        interface IIBatteryPropertiesListener;
-        interface IBinder;
-    }
-
-    [local]
     class CLockSettingsService {
 
         constructor(

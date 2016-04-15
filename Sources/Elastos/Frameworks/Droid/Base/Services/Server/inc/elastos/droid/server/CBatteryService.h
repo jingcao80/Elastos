@@ -10,14 +10,13 @@
 #include "elastos/droid/database/ContentObserver.h"
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Internal.h>
+#include <batteryservice/IBatteryPropertiesListener.h>
 
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::UEventObserver;
 using Elastos::Droid::Os::IBatteryProperties;
-using Elastos::Droid::Os::IIBatteryPropertiesListener;
-using Elastos::Droid::Os::IIBatteryPropertiesRegistrar;
 using Elastos::Droid::Os::IBatteryManagerInternal;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Content::IContext;
@@ -89,24 +88,18 @@ public:
     };
 
     class BatteryListener
-        : public Object
-        , public IIBatteryPropertiesListener
-        , public IBinder
+        : public android::BnInterface<android::IBatteryPropertiesListener>
     {
     public:
-        CAR_INTERFACE_DECL()
+        BatteryListener(
+            /* [in] */ CBatteryService* host)
+            : mHost(host)
+        {}
 
-        BatteryListener();
+        void batteryPropertiesChanged(struct android::BatteryProperties props);
 
-        CARAPI constructor(
-            /* [in] */ ISystemService* batteryService);
-
-        // //@Override
-        CARAPI BatteryPropertiesChanged(
-            /* [in] */ IBatteryProperties* props);
-
-        CARAPI ToString(
-            /* [out] */ String* str);
+        android::status_t onTransact(uint32_t code, const android::Parcel& data,
+                                android::Parcel* reply, uint32_t flags = 0);
 
     private:
         CBatteryService* mHost;
