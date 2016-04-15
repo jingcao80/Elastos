@@ -1215,7 +1215,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
         }
         else {
             AutoPtr<AppWindowToken> atoken = win->mAppToken;
-            AutoPtr<WindowState> lastWindow = *(tokenWindowList->End());
+            AutoPtr<WindowState> lastWindow = *(tokenWindowList->RBegin());
             if (atoken != NULL && lastWindow == atoken->mStartingWindow) {
                 PlaceWindowBefore(lastWindow, win);
                 tokenWindowsIt = IndexOfWinInWindowList(lastWindow, token->mWindows);
@@ -1322,7 +1322,7 @@ List<AutoPtr<WindowState> >::Iterator CWindowManagerService::AddAppWindowToListL
             AutoPtr<AppWindowToken> t = *tokenRit;
             tokenWindowList = GetTokenWindowsOnDisplay(t, displayContent);
             if (!tokenWindowList->IsEmpty()) {
-                pos = *(tokenWindowList->End());
+                pos = *(tokenWindowList->RBegin());
                 break;
             }
         }
@@ -10547,7 +10547,7 @@ void CWindowManagerService::AssignLayersLocked(
 
     //TODO (multidisplay): Magnification is supported only for the default display.
     if (mAccessibilityController != NULL && anyLayerChanged
-            && (*windows->End())->GetDisplayId() == IDisplay::DEFAULT_DISPLAY) {
+            && (*(windows->RBegin()))->GetDisplayId() == IDisplay::DEFAULT_DISPLAY) {
         mAccessibilityController->OnWindowLayersChangedLocked();
     }
 }
