@@ -55,14 +55,14 @@ ECode AppWidgetResizeFrame::MyAnimatorUpdateListener::OnAnimationUpdate(
     return mHost->RequestLayout();
 }
 
-static AutoPtr<IRect> InitTmpRect()
+AutoPtr<IRect> AppWidgetResizeFrame::InitTmpRect()
 {
     AutoPtr<IRect> tmp;
     CRect::New((IRect**)&tmp);
     return tmp;
 }
 
-AutoPtr<IRect> mTmpRect = InitTmpRect();
+AutoPtr<IRect> AppWidgetResizeFrame::sTmpRect = InitTmpRect();
 
 CAR_INTERFACE_IMPL(AppWidgetResizeFrame, FrameLayout,
         IAppWidgetResizeFrame);
@@ -474,15 +474,15 @@ ECode AppWidgetResizeFrame::UpdateWidgetSizeRanges(
     /* [in] */ Int32 spanX,
     /* [in] */ Int32 spanY)
 {
-    GetWidgetSizeRanges(launcher, spanX, spanY, mTmpRect);
+    GetWidgetSizeRanges(launcher, spanX, spanY, sTmpRect);
     Int32 left;
-    mTmpRect->GetLeft(&left);
+    sTmpRect->GetLeft(&left);
     Int32 top;
-    mTmpRect->GetTop(&top);
+    sTmpRect->GetTop(&top);
     Int32 right;
-    mTmpRect->GetRight(&right);
+    sTmpRect->GetRight(&right);
     Int32 bottom;
-    mTmpRect->GetBottom(&bottom);
+    sTmpRect->GetBottom(&bottom);
     return widgetView->UpdateAppWidgetSize(NULL, left, top,
             right, bottom);
 }

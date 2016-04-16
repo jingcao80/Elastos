@@ -1780,6 +1780,7 @@ ECode NetworkControllerImpl::Dump(
     pw->Print(String("  mLastCombinedLabel="));
     pw->Print(mLastCombinedLabel);
     pw->Println(String(""));
+    return NOERROR;
 }
 
 String NetworkControllerImpl::GetResourceName(

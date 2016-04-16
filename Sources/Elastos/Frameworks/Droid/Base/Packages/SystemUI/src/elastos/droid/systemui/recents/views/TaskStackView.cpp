@@ -242,6 +242,7 @@ ECode TaskStackView::LastDecrementRunnable::Run()
         tv->RequestAccessibilityFocus(&res);
         mHost->mPrevAccessibilityFocusedIndex = mHost->mStack->IndexOfTask(tv->GetTask());
     }
+    return NOERROR;
 }
 
 TaskStackView::DeleteTaskRunnable::DeleteTaskRunnable(

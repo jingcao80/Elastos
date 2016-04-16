@@ -214,6 +214,7 @@ Boolean KeyguardBouncer::IsSecure()
 {
     assert(0 && "TODO: need the app Keyguard.");
     // return mKeyguardView == NULL || mKeyguardView.getSecurityMode() != SecurityMode.None;
+    return FALSE;
 }
 
 Boolean KeyguardBouncer::OnMenuPressed()

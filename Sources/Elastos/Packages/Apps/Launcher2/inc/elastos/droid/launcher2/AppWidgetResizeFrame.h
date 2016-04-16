@@ -127,6 +127,8 @@ private:
     CARAPI ResizeWidgetIfNeeded(
         /* [in] */ Boolean onDismiss);
 
+    static CARAPI_(AutoPtr<IRect>) InitTmpRect();
+
 public:
     AutoPtr<ArrayOf<Int32> > mDirectionVector;
     AutoPtr<ArrayOf<Int32> > mLastDirectionVector;
@@ -177,7 +179,7 @@ private:
     Int32 mTopTouchRegionAdjustment;
     Int32 mBottomTouchRegionAdjustment;
 
-    static AutoPtr<IRect> mTmpRect;
+    static AutoPtr<IRect> sTmpRect;
 
     AutoPtr<ILauncher> mLauncher;
 };

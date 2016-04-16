@@ -48,11 +48,11 @@ ECode CStmt::Prepare(
 #if HAVE_SQLITE3_PREPARE16_V2
     ret = sqlite3_prepare16_v2((sqlite3 *) v->h->sqlite,
                    v->tail, -1, (sqlite3_stmt **) &svm,
-                   (const void **) &tail);
+                   (const char **) &tail);
 #else
     ret = sqlite3_prepare((sqlite3 *) v->h->sqlite,
                 v->tail, -1, (sqlite3_stmt **) &svm,
-                (const void **) &tail);
+                (const char **) &tail);
 #endif
     if (ret != SQLITE_OK) {
         if (svm) {

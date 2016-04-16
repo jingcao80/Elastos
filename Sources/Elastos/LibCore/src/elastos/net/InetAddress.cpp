@@ -640,7 +640,7 @@ ECode InetAddress::LookupHostByName(
     return NOERROR;
 
 _EXIT_:
-    if (E_GAI_EXCEPTION == ec) {
+    if ((ECode)E_GAI_EXCEPTION == ec) {
         ADDRESS_CACHE->PutUnknownHost(host, netId, String("Unable to resolve") + host);
         ec = E_UNKNOWN_HOST_EXCEPTION;
     }

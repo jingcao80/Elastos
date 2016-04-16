@@ -1,5 +1,6 @@
 
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Media.h"
 #include "elastos/droid/os/CSystemVibrator.h"
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/os/ServiceManager.h"
@@ -77,7 +78,7 @@ ECode CSystemVibrator::Vibrate(
     /* [in] */ const String& opPkg,
     /* [in] */ ArrayOf<Int64>* pattern,
     /* [in] */ Int32 repeat,
-        /* [in] */ IAudioAttributes* attributes)
+    /* [in] */ IAudioAttributes* attributes)
 {
     if (mService == NULL) {
         Logger::W(TAG, "Failed to vibrate; no vibrator service.");
@@ -101,12 +102,12 @@ Int32 CSystemVibrator::UsageForAttributes(
     /* [in] */ IAudioAttributes* attributes)
 {
     Int32 result;
-    // if (attributes != NULL) {
-    //     attributes->GetUsage(&result);
-    // }
-    // else {
-    //     result = IAudioAttributes::USAGE_UNKNOWN;
-    // }
+    if (attributes != NULL) {
+        attributes->GetUsage(&result);
+    }
+    else {
+        result = IAudioAttributes::USAGE_UNKNOWN;
+    }
     return result;
 }
 

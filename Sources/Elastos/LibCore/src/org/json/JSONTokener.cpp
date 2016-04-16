@@ -236,7 +236,7 @@ ECode JSONTokener::ReadEscapeCharacter(
             }
             String hex = mIn.Substring(mPos, mPos + 4);
             mPos += 4;
-            return StringUtils::Parse(hex, 16, c);
+            return StringUtils::Parse(hex, 16, (Int32*)c);
         }
 
         case 't':
