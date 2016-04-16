@@ -4,6 +4,9 @@
 #include "_Launcher2.h"
 #include "_Elastos_Droid_Launcher2_CLauncherProviderHelper.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Net.h"
+
+using Elastos::Droid::Net::IUri;
 
 namespace Elastos {
 namespace Droid {
@@ -17,6 +20,9 @@ public:
     CAR_SINGLETON_DECL()
 
     CAR_INTERFACE_DECL()
+
+    CARAPI GetCONTENT_APPWIDGET_RESET_URI(
+        /* [out] */ IUri** uri);
 
     /**
      * Build a query string that will match any row where the column matches

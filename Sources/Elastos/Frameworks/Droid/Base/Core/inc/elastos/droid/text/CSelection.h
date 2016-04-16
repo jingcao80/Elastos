@@ -37,7 +37,7 @@ public:
         /* [in] */ Int32 start,
         /* [in] */ Int32 stop);
 
-    CARAPI SetSelection2(
+    CARAPI SetSelection(
         /* [in] */ ISpannable* text,
         /* [in] */ Int32 index);
 

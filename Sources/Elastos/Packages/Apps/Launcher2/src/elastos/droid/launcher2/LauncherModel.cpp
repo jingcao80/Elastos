@@ -2543,6 +2543,8 @@ Object LauncherModel::sBgLock;
 Int32 LauncherModel::mCellCountX;
 Int32 LauncherModel::mCellCountY;
 
+CAR_INTERFACE_IMPL(LauncherModel, BroadcastReceiver, ILauncherModel);
+
 LauncherModel::LauncherModel()
     : mPreviousConfigMcc(0)
     , mBatchSize(0)
@@ -2554,6 +2556,11 @@ LauncherModel::LauncherModel()
     , mAllAppsLoaded(FALSE)
 {
     mHandler = new DeferredHandler();
+}
+
+ECode LauncherModel::constructor()
+{
+    return NOERROR;
 }
 
 ECode LauncherModel::constructor(

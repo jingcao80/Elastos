@@ -29,6 +29,14 @@ module
      */
     [local, deprecated]
     interface ICellLayout {
+        const Int32 MODE_DRAG_OVER = 0;
+        const Int32 MODE_ON_DROP = 1;
+        const Int32 MODE_ON_DROP_EXTERNAL = 2;
+        const Int32 MODE_ACCEPT_DROP = 3;
+
+        const Int32 LANDSCAPE = 0;
+        const Int32 PORTRAIT = 1;
+
         EnableHardwareLayers();
 
         DisableHardwareLayers();
@@ -750,6 +758,9 @@ module
      */
     [local]
     interface ICellLayoutLayoutParams {
+    }
+
+    interface ICellLayoutCellInfo {
     }
 
     } // namespace Launcher2

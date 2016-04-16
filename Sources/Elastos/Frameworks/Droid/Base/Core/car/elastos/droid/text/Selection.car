@@ -69,7 +69,7 @@ module
         /**
          * Move the cursor to offset <code>index</code>.
          */
-        SetSelection2(
+        SetSelection(
             [in] ISpannable* text,
             [in] Int32 index);
 

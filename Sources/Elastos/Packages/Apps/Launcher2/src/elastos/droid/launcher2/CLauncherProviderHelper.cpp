@@ -10,6 +10,14 @@ CAR_SINGLETON_IMPL(CLauncherProviderHelper)
 
 CAR_INTERFACE_IMPL(CLauncherProviderHelper, Singleton, ILauncherProviderHelper)
 
+ECode CLauncherProviderHelper::GetCONTENT_APPWIDGET_RESET_URI(
+    /* [out] */ IUri** uri)
+{
+    VALIDATE_NOT_NULL(uri);
+
+    return LauncherProvider::GetCONTENT_APPWIDGET_RESET_URI(uri);
+}
+
 ECode CLauncherProviderHelper::BuildOrWhereString(
     /* [in] */ const String& column,
     /* [in] */ ArrayOf<Int32>* values,

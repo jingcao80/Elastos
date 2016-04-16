@@ -21,6 +21,10 @@ module
      */
     [deprecated]
     interface ICling {
+        const String WORKSPACE_CLING_DISMISSED_KEY = "cling.workspace.dismissed";
+        const String ALLAPPS_CLING_DISMISSED_KEY = "cling.allapps.dismissed";
+        const String FOLDER_CLING_DISMISSED_KEY = "cling.folder.dismissed";
+
         CCling_Init(
             [in] ILauncher* l,
             [in] ArrayOf<Int32>* positionData);

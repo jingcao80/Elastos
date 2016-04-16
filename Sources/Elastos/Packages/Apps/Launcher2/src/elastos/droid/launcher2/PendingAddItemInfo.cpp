@@ -14,6 +14,11 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+CAR_INTERFACE_IMPL(PendingAddItemInfo, ItemInfo, IPendingAddItemInfo);
+
+CAR_INTERFACE_IMPL(PendingAddShortcutInfo, PendingAddItemInfo,
+        IPendingAddShortcutInfo);
+
 ECode PendingAddShortcutInfo::constructor(
     /* [in] */ IActivityInfo* activityInfo)
 
@@ -34,6 +39,9 @@ ECode PendingAddShortcutInfo::ToString(
     sb += name;
     return sb.ToString(str);
 }
+
+CAR_INTERFACE_IMPL(PendingAddWidgetInfo, PendingAddItemInfo,
+        IPendingAddWidgetInfo);
 
 PendingAddWidgetInfo::PendingAddWidgetInfo()
     : mMimeType(NULL)

@@ -84,11 +84,6 @@ protected:
 private:
     CARAPI_(AutoPtr<ArrayOf<Int32> >) GetPunchThroughPositions();
 
-protected:
-    static const String WORKSPACE_CLING_DISMISSED_KEY;
-    static const String ALLAPPS_CLING_DISMISSED_KEY;
-    static const String FOLDER_CLING_DISMISSED_KEY;
-
 private:
     static String WORKSPACE_PORTRAIT;
     static String WORKSPACE_LANDSCAPE;

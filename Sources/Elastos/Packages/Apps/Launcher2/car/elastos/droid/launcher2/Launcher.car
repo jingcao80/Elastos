@@ -9,6 +9,14 @@ module
     namespace Droid {
     namespace Launcher2 {
 
+    /** The different states that Launcher can be in. */
+    enum LauncherState {
+        Launcher_NONE,
+        Launcher_WORKSPACE,
+        Launcher_APPS_CUSTOMIZE,
+        Launcher_APPS_CUSTOMIZE_SPRING_LOADED,
+    }
+
     /**
      * @Involve
      * interface Elastos.Droid.Content.IContext

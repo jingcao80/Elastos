@@ -21,9 +21,6 @@ module
         const String DEFAULT_WORKSPACE_RESOURCE_ID =
                 "DEFAULT_WORKSPACE_RESOURCE_ID";
 
-        GetCONTENT_APPWIDGET_RESET_URI(
-            [out] IUri** uri);
-
         GenerateNewId(
             [out] Int64* id);
 
@@ -39,6 +36,9 @@ module
 
     [deprecated]
     interface ILauncherProviderHelper {
+        GetCONTENT_APPWIDGET_RESET_URI(
+            [out] IUri** uri);
+
         /**
          * Build a query string that will match any row where the column matches
          * anything in the values list.

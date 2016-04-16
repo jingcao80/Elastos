@@ -17,6 +17,8 @@ class SpringLoadedDragController
     , public IAlarmOnAlarmListener
 {
 public:
+    CAR_INTERFACE_DECL();
+
     SpringLoadedDragController(
         /* [in] */ ILauncher* launcher);
 
@@ -32,9 +34,9 @@ public:
 
 public:
     // how long the user must hover over a mini-screen before it unshrinks
-    const Int64 ENTER_SPRING_LOAD_HOVER_TIME = 500;
-    const Int64 ENTER_SPRING_LOAD_CANCEL_HOVER_TIME = 950;
-    const Int64 EXIT_SPRING_LOAD_HOVER_TIME = 200;
+    const Int64 ENTER_SPRING_LOAD_HOVER_TIME;
+    const Int64 ENTER_SPRING_LOAD_CANCEL_HOVER_TIME;
+    const Int64 EXIT_SPRING_LOAD_HOVER_TIME;
 
     AutoPtr<IAlarm> mAlarm;
 

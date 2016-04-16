@@ -223,7 +223,7 @@ private:
 public:
     CAR_INTERFACE_DECL();
 
-    CARAPI GetCONTENT_APPWIDGET_RESET_URI(
+    static CARAPI GetCONTENT_APPWIDGET_RESET_URI(
         /* [out] */ IUri** uri);
 
     //@Override

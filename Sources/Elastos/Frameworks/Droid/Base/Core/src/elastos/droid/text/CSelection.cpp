@@ -43,7 +43,7 @@ ECode CSelection::SetSelection(
     return NOERROR;
 }
 
-ECode CSelection::SetSelection2(
+ECode CSelection::SetSelection(
     /* [in] */ ISpannable* text,
     /* [in] */ Int32 index)
 {

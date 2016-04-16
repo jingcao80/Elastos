@@ -56,8 +56,8 @@ String LocalizationUtils::GetDefaultLocale()
     AutoPtr<ILocale> locale;
     helper->GetDefault((ILocale**)&locale);
     String language;
-    String country;
     locale->GetLanguage(&language);
+    String country;
     locale->GetCountry(&country);
 
     // Android uses deprecated lanuages codes for Hebrew and Indonesian but Chromium uses the
