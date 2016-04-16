@@ -282,36 +282,6 @@
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid
 > Elastos/Frameworks/Droid/Base/Core
 
-# ==== build Webkit ====
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium Elastos.Droid.Chromium.car
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/android_webview/permission
-> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/android_webview
-  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/base
-  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/components
-> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/app
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/browser/accessibility
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/browser/crypto
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/browser/framehost
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/browser/input
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/browser/webcontents
-> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/browser
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/common
-> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content_public/browser
-> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content_public
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/media
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/net
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/api
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/ui/autofill
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/ui/base
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/ui/gfx
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/ui/gl
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/ui/interpolators
-> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/ui
-> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native
-#  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview
->  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium
-
 # ==== buid Framework Server ====
 - Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server Elastos.Droid.Server.car
 #- Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid Elastos.Droid.System.eco
@@ -360,6 +330,36 @@
 # ==== buid Framework JavaProxy ====
 > Elastos/Frameworks/Droid/JavaProxy/src/elastos/droid/javaproxy Elastos.Droid.JavaProxy.car
 > Elastos/Frameworks/Droid/JavaProxy/src/elastos/droid/javaproxy
+
+# # ==== build Webkit ====
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium Elastos.Droid.Chromium.car
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/android_webview/permission
+# > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/android_webview
+#   Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/base
+#   Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/components
+# > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/app
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/browser/accessibility
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/browser/crypto
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/browser/framehost
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/browser/input
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/browser/webcontents
+# > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/browser
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content/common
+# > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content_public/browser
+# > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/content_public
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/media
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/net
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/api
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/ui/autofill
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/ui/base
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/ui/gfx
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/ui/gl
+# - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/ui/interpolators
+# > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native/ui
+# > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium/native
+# #  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview
+# >  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium
 
 # ==== buid SystemUI ====
 - Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui SystemUI.car
