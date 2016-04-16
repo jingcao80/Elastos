@@ -1,7 +1,85 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_LAUNCHER_H__
 #define  __ELASTOS_DROID_LAUNCHER2_LAUNCHER_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/launcher2/ItemInfo.h"
+#include "elastos/droid/launcher2/HideFromAccessibilityHelper.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/os/AsyncTask.h"
+#include "elastos/droid/database/ContentObserver.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/os/Runnable.h"
+#include "elastos/droid/os/Handler.h"
+#include <elastos/core/Object.h>
+#include <elastos/core/Thread.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IAnimatorSet;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::AppWidget::IAppWidgetHostView;
+using Elastos::Droid::AppWidget::IAppWidgetManager;
+using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::ISharedPreferences;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IBroadcastReceiver;
+using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Database::IContentObserver;
+using Elastos::Droid::Graphics::Drawable::IDrawableConstantState;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IMenu;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IOnDrawListener;
+using Elastos::Droid::View::IOnGlobalLayoutListener;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewOnTouchListener;
+using Elastos::Droid::View::IViewOnLongClickListener;
+using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::AsyncTask;
+using Elastos::Droid::Text::ISpannableStringBuilder;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Core::Thread;
+using Elastos::Core::Object;
+using Elastos::Core::IComparator;
+using Elastos::Core::IRunnable;
+using Elastos::IO::IPrintWriter;
+using Elastos::IO::IFileDescriptor;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -14,12 +92,13 @@ class Launcher
     : public Activity
     , public ILauncher
     , public IViewOnClickListener
-    , public IOnLongClickListener
-    , public ILauncherModelCallbacks,
+    , public IViewOnLongClickListener
+    , public ILauncherModelCallbacks
     , public IViewOnTouchListener
 {
 public:
     class PendingAddArguments
+        : public Object
     {
     public:
         Int32 mRequestCode;
@@ -117,7 +196,7 @@ private:
     {
     public:
         MyRunnable3(
-            /* [in] */ Launcher* host
+            /* [in] */ Launcher* host,
             /* [in] */ Int32 resultCode);
 
         CARAPI Run();
@@ -132,7 +211,7 @@ private:
     {
     public:
         MyThread2(
-            /* [in] */ Launcher* host;
+            /* [in] */ Launcher* host,
             /* [in] */ const String& name,
             /* [in] */ Int32 appWidgetId);
 
@@ -159,25 +238,26 @@ private:
         AutoPtr<Launcher> mHost;
     };
 
-    class MyRunnable4
-        : public Runnable
-    {
-    public:
-        MyRunnable4(
-            /* [in] */ Launcher* host,
-            /* [in] */ IOnDrawListener* listener);
-
-        CARAPI Run();
-
-    private:
-        AutoPtr<Launcher> mHost;
-        AutoPtr<IOnDrawListener> mListener;
-    };
-
     class MyOnDrawListener
         : public Object
         , public IOnDrawListener
     {
+    private:
+        class MyRunnable4
+            : public Runnable
+        {
+        public:
+            MyRunnable4(
+                /* [in] */ Launcher* host,
+                /* [in] */ IOnDrawListener* listener);
+
+            CARAPI Run();
+
+        private:
+            AutoPtr<Launcher> mHost;
+            AutoPtr<IOnDrawListener> mListener;
+        };
+
     public:
         CAR_INTERFACE_DECL();
 
@@ -194,6 +274,20 @@ private:
     class MyHandler
         : public Handler
     {
+    private:
+        class MyRunnable5
+            : public Runnable
+        {
+        public:
+            MyRunnable5(
+                /* [in] */ IView* v);
+
+            CARAPI Run();
+
+        private:
+            AutoPtr<IView> mV;
+        };
+
     public:
         MyHandler(
             /* [in] */ Launcher* host);
@@ -203,19 +297,6 @@ private:
 
     private:
         AutoPtr<Launcher> mHost;
-    };
-
-    class MyRunnable5
-        : public Runnable
-    {
-    public:
-        MyRunnable5(
-            /* [in] */ IView* v);
-
-        CARAPI Run();
-
-    private:
-        AutoPtr<IView> mV;
     };
 
     class MyRunnable6
@@ -317,9 +398,9 @@ private:
 
     private:
         AutoPtr<Launcher> mHost;
-        AutoPtr<IAnimatorSet> mStateAnimation,
-        AutoPtr<IView> mFromView,
-        AutoPtr<IAppsCustomizeTabHost> mToView,
+        AutoPtr<IAnimatorSet> mStateAnimation;
+        AutoPtr<IView> mFromView;
+        AutoPtr<IAppsCustomizeTabHost> mToView;
         Boolean mAnimated;
         Float mScale;
     };
@@ -333,13 +414,13 @@ private:
 
         MyOnGlobalLayoutListener(
             /* [in] */ IRunnable* startAnimRunnable,
-            /* [in] */ IAppsCustomizeTabHost* toView,);
+            /* [in] */ IAppsCustomizeTabHost* toView);
 
         CARAPI OnGlobalLayout();
 
     private:
         AutoPtr<IRunnable> mStartAnimRunnable;
-        AutoPtr<IAppsCustomizeTabHost> mToView,
+        AutoPtr<IAppsCustomizeTabHost> mToView;
     };
 
      class MyAnimatorUpdateListener2
@@ -352,7 +433,7 @@ private:
         MyAnimatorUpdateListener2(
             /* [in] */ Launcher* host,
             /* [in] */ IView* fromView,
-            /* [in] */ IAppsCustomizeTabHost* toView);
+            /* [in] */ IView* toView);
 
         CARAPI OnAnimationUpdate(
             /* [in] */ IValueAnimator* animation);
@@ -360,7 +441,7 @@ private:
     private:
         AutoPtr<Launcher> mHost;
         AutoPtr<IView> mFromView;
-        AutoPtr<IAppsCustomizeTabHost> mToView;
+        AutoPtr<IView> mToView;
     };
 
     class MyAnimatorListenerAdapter3
@@ -370,7 +451,7 @@ private:
         MyAnimatorListenerAdapter3(
             /* [in] */ Launcher* host,
             /* [in] */ IView* fromView,
-            /* [in] */ IAppsCustomizeTabHost* toView,
+            /* [in] */ IView* toView,
             /* [in] */ Boolean animated,
             /* [in] */ IRunnable* onCompleteRunnable);
 
@@ -380,7 +461,7 @@ private:
     private:
         AutoPtr<Launcher> mHost;
         AutoPtr<IView> mFromView;
-        AutoPtr<IAppsCustomizeTabHost> mToView;
+        AutoPtr<IView> mToView;
         Boolean mAnimated;
         AutoPtr<IRunnable> mOnCompleteRunnable;
     };
@@ -629,7 +710,7 @@ private:
     private:
         AutoPtr<Launcher> mHost;
         AutoPtr<IArrayList> mPackageNames;
-        AutoPtr<IArrayList> mAppInfos
+        AutoPtr<IArrayList> mAppInfos;
         Boolean mMatchPackageNamesOnly;
         AutoPtr<IUserHandle> mUser;
     };
@@ -1574,7 +1655,7 @@ private:
         /* [in] */ const String& resourceName);
 
     // if successful in getting icon, return it; otherwise, set button to use default drawable
-    CARAPI_(AutoPtr<IDrawableConstantStatee>) UpdateTextButtonWithIconFromExternalActivity(
+    CARAPI_(AutoPtr<IDrawableConstantState>) UpdateTextButtonWithIconFromExternalActivity(
         /* [in] */ Int32 buttonId,
         /* [in] */ IComponentName* activityName,
         /* [in] */ Int32 fallbackDrawableId,
@@ -1723,14 +1804,7 @@ private:
     static const String TOOLBAR_SEARCH_ICON_METADATA_NAME;
     static const String TOOLBAR_VOICE_SEARCH_ICON_METADATA_NAME;
 
-    /** The different states that Launcher can be in. */
-    enum State {
-        NONE,
-        WORKSPACE,
-        APPS_CUSTOMIZE,
-        APPS_CUSTOMIZE_SPRING_LOADED
-    };
-    State mState;
+    LauncherState mState;
     AutoPtr<IAnimatorSet> mStateAnimation;
     AutoPtr<IAnimatorSet> mDividerAnimator;
 
@@ -1739,7 +1813,7 @@ private:
     static const Int32 SHOW_CLING_DURATION;
     static const Int32 DISMISS_CLING_DURATION;
 
-    static final Object sLock;
+    static Object sLock;
     static Int32 sScreen;
 
     // How long to wait before the new-shortcut animation automatically pans the workspace
@@ -1850,7 +1924,7 @@ private:
 
     AutoPtr<IBubbleTextView> mWaitingForResume;
 
-    AutoPtr<IHideFromAccessibilityHelper> mHideFromAccessibilityHelper;
+    AutoPtr<HideFromAccessibilityHelper> mHideFromAccessibilityHelper;
 
     AutoPtr<IRunnable> mBuildLayersRunnable;
 

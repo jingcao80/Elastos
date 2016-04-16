@@ -464,6 +464,7 @@ public:
     AutoPtr<IAlarmOnAlarmListener> mOnExitAlarmListener;
 
 protected:
+    friend class Launcher;
     AutoPtr<IDragController> mDragController;
     AutoPtr<ILauncher> mLauncher;
     AutoPtr<IFolderInfo> mInfo;

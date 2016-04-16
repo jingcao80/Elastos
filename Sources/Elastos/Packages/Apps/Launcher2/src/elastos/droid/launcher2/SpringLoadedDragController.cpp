@@ -8,9 +8,14 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+CAR_INTERFACE_IMPL(SpringLoadedDragController, Object, IAlarmOnAlarmListener);
+
 SpringLoadedDragController::SpringLoadedDragController(
     /* [in] */ ILauncher* launcher)
-    : mLauncher(launcher)
+    : ENTER_SPRING_LOAD_HOVER_TIME(500)
+    , ENTER_SPRING_LOAD_CANCEL_HOVER_TIME(950)
+    , EXIT_SPRING_LOAD_HOVER_TIME(200)
+    , mLauncher(launcher)
 {
     mAlarm = new Alarm();
     mAlarm->SetOnAlarmListener(this);

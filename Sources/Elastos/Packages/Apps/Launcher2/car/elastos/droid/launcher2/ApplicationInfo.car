@@ -8,6 +8,8 @@ module
     * @invoke interface IItemInfo
     */
     interface IApplicationInfo {
+        const Int32 DOWNLOADED_FLAG = 1;
+        const Int32 UPDATED_SYSTEM_APP_FLAG = 2;
     }
 
     } // namespace Launcher2

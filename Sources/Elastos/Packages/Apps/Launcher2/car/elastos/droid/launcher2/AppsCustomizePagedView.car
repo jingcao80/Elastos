@@ -5,12 +5,12 @@ module
     namespace Launcher2 {
 
     enum AsyncTaskPageDataType {
-        LoadWidgetPreviewData
+        AsyncTaskPageDataType_LoadWidgetPreviewData,
     }
 
     enum AppsCustomizePagedViewContentType {
         AppsCustomizePagedViewContentType_Applications,
-        AppsCustomizePagedViewContentType_Widgets
+        AppsCustomizePagedViewContentType_Widgets,
     }
 
     /**

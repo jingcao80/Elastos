@@ -1,10 +1,53 @@
 module
 {
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.Graphics.IBitmap;
+    using interface Elastos.Droid.Animation.IAnimator;
+    using interface Elastos.Droid.Graphics.ICanvas;
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Droid.Graphics.IMatrix;
+    using interface Elastos.Droid.Os.IUserHandle;
+    using interface Elastos.Utility.IArrayList;
+    using interface Elastos.Utility.IHashSet;
+    using interface Elastos.Droid.Graphics.IRect;
+
+    interface Elastos.Droid.Launcher2.IItemInfo;
+    interface Elastos.Droid.Launcher2.IDragSource;
+    interface Elastos.Droid.Launcher2.ICellLayout;
+    interface Elastos.Droid.Launcher2.IFolder;
+    interface Elastos.Droid.Launcher2.IDropTarget;
+    interface Elastos.Droid.Launcher2.IDragView;
+    interface Elastos.Droid.Launcher2.IPendingAddItemInfo;
+    interface Elastos.Droid.Launcher2.ICellLayoutCellInfo;
+    interface Elastos.Droid.Launcher2.IShortcutInfo;
+    interface Elastos.Droid.Launcher2.IDropTargetDragObject;
+    interface Elastos.Droid.Launcher2.IHotseat;
+    interface Elastos.Droid.Launcher2.IDragController;
+    interface Elastos.Droid.Launcher2.ICellLayout;
+
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
 
+    // State variable that indicates whether the pages are small (ie when you're
+    // in all apps or customize mode)
+    enum State {
+        State_NORMAL,
+        State_SPRING_LOADED,
+        State_SMALL,
+    }
+
+    enum WallpaperVerticalOffset {
+        WallpaperVerticalOffset_TOP,
+        WallpaperVerticalOffset_MIDDLE,
+        WallpaperVerticalOffset_BOTTOM,
+    }
+
     /**
+     * The workspace is a wide area with a wallpaper and a finite number of pages.
+     * Each page contains a number of icons, folders or widgets the user can
+     * interact with. A workspace is meant to be used with a fixed width only.
+     *
      * @Involve
      * interface IViewGroup;
      * interface IView;
@@ -23,6 +66,7 @@ module
      * interface ILauncherTransitionable,
      * interface IViewGroupOnHierarchyChangeListener
      */
+    [deprecated, local]
     interface IWorkspace {
         const Int32 DRAG_BITMAP_PADDING = 2;
 
@@ -32,6 +76,463 @@ module
         const Int32 ANIMATE_INTO_POSITION_AND_RESIZE = 2;
         const Int32 COMPLETE_TWO_STAGE_WIDGET_DROP_ANIMATION = 3;
         const Int32 CANCEL_TWO_STAGE_WIDGET_DROP_ANIMATION = 4;
+
+        // estimate the size of a widget with spans hSpan, vSpan. return MAX_VALUE for each
+        // dimension if unsuccessful
+        EstimateItemSize(
+            [in] Int32 hSpan,
+            [in] Int32 vSpan,
+            [in] IItemInfo* itemInfo,
+            [in] Boolean springLoaded,
+            [out, callee] ArrayOf<Int32>* outarray);
+
+        EstimateItemPosition(
+            [in] ICellLayout* cl,
+            [in] IItemInfo* pendingInfo,
+            [in] Int32 hCell,
+            [in] Int32 vCell,
+            [in] Int32 hSpan,
+            [in] Int32 vSpan,
+            [out] IRect** rect);
+
+        OnDragStart(
+            [in] IDragSource* source,
+            [in] IInterface* info,
+            [in] Int32 dragAction);
+
+        OnDragEnd();
+
+        /**
+         * @return The open folder on the current screen, or null if there is none
+         */
+        GetOpenFolder(
+            [out] IFolder** folder);
+
+        IsTouchActive(
+            [out] Boolean* result);
+
+        /**
+         * Adds the specified child in the specified screen. The position and dimension of
+         * the child are defined by x, y, spanX and spanY.
+         *
+         * @param child The child to add in one of the workspace's screens.
+         * @param screen The screen in which to add the child.
+         * @param x The X position of the child in the screen's grid.
+         * @param y The Y position of the child in the screen's grid.
+         * @param spanX The number of cells spanned horizontally by the child.
+         * @param spanY The number of cells spanned vertically by the child.
+         */
+        AddInScreen(
+            [in] IView* child,
+            [in] Int64 container,
+            [in] Int32 screen,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 spanX,
+            [in] Int32 spanY);
+
+        /**
+         * Adds the specified child in the specified screen. The position and dimension of
+         * the child are defined by x, y, spanX and spanY.
+         *
+         * @param child The child to add in one of the workspace's screens.
+         * @param screen The screen in which to add the child.
+         * @param x The X position of the child in the screen's grid.
+         * @param y The Y position of the child in the screen's grid.
+         * @param spanX The number of cells spanned horizontally by the child.
+         * @param spanY The number of cells spanned vertically by the child.
+         * @param insert When true, the child is inserted at the beginning of the children list.
+         */
+        AddInScreen(
+            [in] IView* child,
+            [in] Int64 container,
+            [in] Int32 screen,
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 spanX,
+            [in] Int32 spanY,
+            [in] Boolean insert);
+
+        IsSwitchingState(
+            [out] Boolean* result);
+
+        /** This differs from isSwitchingState in that we take into account how far the transition
+         *  has completed. */
+        IsFinishedSwitchingState(
+            [out] Boolean* result);
+
+        UpdateWallpaperOffsetImmediately();
+
+        ShowOutlines();
+
+        HideOutlines();
+
+        ShowOutlinesTemporarily();
+
+        SetChildrenOutlineAlpha(
+            [in] Float alpha);
+
+        GetChildrenOutlineAlpha(
+            [out] Float* result);
+
+        DisableBackground();
+
+        EnableBackground();
+
+        SetBackgroundAlpha(
+            [in] Float alpha);
+
+        GetBackgroundAlpha(
+            [out] Float* result);
+
+        BackgroundAlphaInterpolator(
+            [in] Float r,
+            [out] Float* result);
+
+        IsDrawingBackgroundGradient(
+            [out] Boolean* result);
+
+        IsSmall(
+            [out] Boolean* result);
+
+        EnableChildrenCache(
+            [in] Int32 fromPage,
+            [in] Int32 toPage);
+
+        ClearChildrenCache();
+
+        BuildPageHardwareLayers();
+
+        /*
+        *
+        * We call these methods (onDragStartedWithItemSpans/onDragStartedWithSize) whenever we
+        * start a drag in Launcher, regardless of whether the drag has ever entered the Workspace
+        *
+        * These methods mark the appropriate pages as accepting drops (which alters their visual
+        * appearance).
+        *
+        */
+        OnDragStartedWithItem(
+            [in] IView* v);
+
+        OnDragStartedWithItem(
+            [in] IPendingAddItemInfo* info,
+            [in] IBitmap* b,
+            [in] Boolean clipAlpha);
+
+        ExitWidgetResizeMode();
+
+        GetChangeStateAnimation(
+            [in] State state,
+            [in] Boolean animated,
+            [out] IAnimator** animator);
+
+        GetChangeStateAnimation(
+            [in] State state,
+            [in] Boolean animated,
+            [in] Int32 delay,
+            [out] IAnimator** animator);
+
+        /**
+         * Returns a new bitmap to show when the given View is being dragged around.
+         * Responsibility for the bitmap is transferred to the caller.
+         */
+        CreateDragBitmap(
+            [in] IView* v,
+            [in] ICanvas* canvas,
+            [in] Int32 padding,
+            [out] IBitmap** map);
+
+        StartDrag(
+            [in] ICellLayoutCellInfo* cellInfo);
+
+        BeginDragShared(
+            [in] IView* child,
+            [in] IDragSource* source);
+
+        AddApplicationShortcut(
+            [in] IShortcutInfo* info,
+            [in] ICellLayout* target,
+            [in] Int64 container,
+            [in] Int32 screen,
+            [in] Int32 cellX,
+            [in] Int32 cellY,
+            [in] Boolean insertAtFirst,
+            [in] Int32 intersectX,
+            [in] Int32 intersectY);
+
+        TransitionStateShouldAllowDrop(
+            [out] Boolean* result);
+
+        /**
+         * {@inheritDoc}
+         */
+        AcceptDrop(
+            [in] IDropTargetDragObject* d,
+            [out] Boolean* result);
+
+        WillCreateUserFolder(
+            [in] IItemInfo* info,
+            [in] ICellLayout* target,
+            [in] ArrayOf<Int32>* targetCell,
+            [in] Float distance,
+            [in] Boolean considerTimeout,
+            [out] Boolean* result);
+
+        WillAddToExistingUserFolder(
+            [in] IInterface* dragInfo,
+            [in] ICellLayout* target,
+            [in] ArrayOf<Int32>* targetCell,
+            [in] Float distance,
+            [out] Boolean* result);
+
+        CreateUserFolderIfNecessary(
+            [in] IView* newView,
+            [in] Int64 container,
+            [in] ICellLayout* target,
+            [in] ArrayOf<Int32>* targetCell,
+            [in] Float distance,
+            [in] Boolean external,
+            [in] IDragView* dragView,
+            [in] IRunnable* postAnimationRunnable,
+            [out] Boolean* result);
+
+        AddToExistingFolderIfNecessary(
+            [in] IView* newView,
+            [in] ICellLayout* target,
+            [in] ArrayOf<Int32>* targetCell,
+            [in] Float distance,
+            [in] IDropTargetDragObject* d,
+            [in] Boolean external,
+            [out] Boolean* result);
+
+        OnDrop(
+            [in] IDropTargetDragObject* d);
+
+        SetFinalScrollForPageChange(
+            [in] Int32 screen);
+
+        ResetFinalScrollForPageChange(
+            [in] Int32 screen);
+
+        GetViewLocationRelativeToSelf(
+            [in] IView* v,
+            [in] ArrayOf<Int32>* location);
+
+        OnDragEnter(
+            [in] IDropTargetDragObject* d);
+
+        OnDragExit(
+            [in] IDropTargetDragObject* d);
+
+        SetCurrentDropLayout(
+            [in] ICellLayout* layout);
+
+        SetCurrentDragOverlappingLayout(
+            [in] ICellLayout* layout);
+
+        SetCurrentDropOverCell(
+            [in] Int32 x,
+            [in] Int32 y);
+
+        SetDragMode(
+            [in] Int32 dragMode);
+
+        GetDropTargetDelegate(
+            [in] IDropTargetDragObject* d,
+            [out] IDropTarget** target);
+
+        /*
+        *
+        * Convert the 2D coordinate xy from the parent View's coordinate space to this CellLayout's
+        * coordinate space. The argument xy is modified with the return result.
+        *
+        */
+        MapPointFromSelfToChild(
+            [in] IView* v,
+            [in] ArrayOf<Float>* xy);
+
+        /*
+        *
+        * Convert the 2D coordinate xy from the parent View's coordinate space to this CellLayout's
+        * coordinate space. The argument xy is modified with the return result.
+        *
+        * if cachedInverseMatrix is not null, this method will just use that matrix instead of
+        * computing it itself; we use this to avoid redundant matrix inversions in
+        * findMatchingPageForDragOver
+        *
+        */
+        MapPointFromSelfToChild(
+            [in] IView* v,
+            [in] ArrayOf<Float>* xy,
+            [in] IMatrix* cachedInverseMatrix);
+
+
+        MapPointFromSelfToHotseatLayout(
+            [in] IHotseat* hotseat,
+            [in] ArrayOf<Float>* xy);
+
+        /*
+        *
+        * Convert the 2D coordinate xy from this CellLayout's coordinate space to
+        * the parent View's coordinate space. The argument xy is modified with the return result.
+        *
+        */
+        MapPointFromChildToSelf(
+            [in] IView* v,
+            [in] ArrayOf<Float>* xy);
+
+        /*
+         *
+         * Returns true if the passed CellLayout cl overlaps with dragView
+         *
+         */
+        Overlaps(
+            [in] ICellLayout* cl,
+            [in] IDragView* dragView,
+            [in] Int32 dragViewX,
+            [in] Int32 dragViewY,
+            [in] IMatrix* cachedInverseMatrix,
+            [out] Boolean* result);
+
+        OnDragOver(
+            [in] IDropTargetDragObject* d);
+
+        /**
+         * Add the item specified by dragInfo to the given layout.
+         * @return true if successful
+         */
+        AddExternalItemToScreen(
+            [in] IItemInfo* dragInfo,
+            [in] ICellLayout* layout,
+            [out] Boolean* result);
+
+        CreateWidgetBitmap(
+            [in] IItemInfo* widgetInfo,
+            [in] IView* layout,
+            [out] IBitmap** map);
+
+        AnimateWidgetDrop(
+            [in] IItemInfo* info,
+            [in] ICellLayout* cellLayout,
+            [in] IDragView* dragView,
+            [in] IRunnable* onCompleteRunnable,
+            [in] Int32 animationType,
+            [in] IView* finalView,
+            [in] Boolean external);
+
+        SetFinalTransitionTransform(
+            [in] ICellLayout* layout);
+
+        ResetTransitionTransform(
+            [in] ICellLayout* layout);
+
+        /**
+         * Return the current {@link CellLayout}, correctly picking the destination
+         * screen while a scroll is in progress.
+         */
+        GetCurrentDropLayout(
+            [out] ICellLayout** layout);
+
+        /**
+         * Return the current CellInfo describing our current drag; this method exists
+         * so that Launcher can sync this object with the correct info when the activity is created/
+         * destroyed
+         *
+         */
+        GetDragInfo(
+            [out] ICellLayoutCellInfo** info);
+
+        Setup(
+            [in] IDragController* dragController);
+
+        /**
+         * Called at the end of a drag which originated on the workspace.
+         */
+        OnDropCompleted(
+            [in] IView* target,
+            [in] IDropTargetDragObject* d,
+            [in] Boolean isFlingToDelete,
+            [in] Boolean success);
+
+        UpdateItemLocationsInDatabase(
+            [in] ICellLayout* cl);
+
+        IsDropEnabled(
+            [out] Boolean* result);
+
+        RestoreInstanceStateForChild(
+            [in] Int32 child);
+
+        RestoreInstanceStateForRemainingPages();
+
+        /**
+         * Returns a specific CellLayout
+         */
+        GetParentCellLayoutForView(
+            [in] IView* v,
+            [out] ICellLayout** cellLayout);
+
+        /**
+         * Returns a list of all the CellLayouts in the workspace.
+         */
+        GetWorkspaceAndHotseatCellLayouts(
+            [out] IArrayList** list);
+
+        /**
+         * We should only use this to search for specific children.  Do not use this method to modify
+         * ShortcutsAndWidgetsContainer directly. Includes ShortcutAndWidgetContainers from
+         * the hotseat and workspace pages
+         */
+        GetAllShortcutAndWidgetContainers(
+            [out] IArrayList** list);
+
+        GetFolderForTag(
+            [in] IInterface* tag,
+            [out] IFolder** folder);
+
+        GetViewForTag(
+            [in] IInterface* tag,
+            [out] IView** view);
+
+        ClearDropTargets();
+
+        // Removes ALL items that match a given package name, this is usually called when a package
+        // has been removed and we want to remove all components (widgets, shortcuts, apps) that
+        // belong to that package.
+        RemoveItemsByPackageName(
+            [in] IArrayList* packages,
+            [in] IUserHandle* user);
+
+        // Removes items that match the application info specified, when applications are removed
+        // as a part of an update, this is called to ensure that other widgets and application
+        // shortcuts are not removed.
+        RemoveItemsByApplicationInfo(
+            [in] IArrayList* appInfos,
+            [in] IUserHandle* user);
+
+        RemoveItemsByComponentName(
+            [in] IHashSet* componentNames,
+            [in] IUserHandle* user);
+
+        UpdateShortcuts(
+            [in] IArrayList* apps);
+
+        MoveToDefaultScreen(
+            [in] Boolean animate);
+
+        GetLocationInDragLayer(
+            [in] ArrayOf<Int32>* loc);
+
+        SetFadeForOverScroll(
+            [in] Float fade);
+    }
+
+    interface IWorkspaceHelper {
+        GetCellLayoutMetrics(
+            [in] ILauncher* launcher,
+            [in] Int32 orientation,
+            [out] IRect** rect);
     }
 
     } // namespace Launcher2

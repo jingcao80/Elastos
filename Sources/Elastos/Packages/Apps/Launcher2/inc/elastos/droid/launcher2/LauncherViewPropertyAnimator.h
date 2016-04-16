@@ -38,14 +38,15 @@ public:
     CARAPI Cancel();
 
     //@Override
-    CARAPI Clone();
+    CARAPI Clone(
+        /* [out] */ IInterface** result);
 
     //@Override
     CARAPI End();
 
     //@Override
     CARAPI GetDuration(
-        /* [out] */Int64* duration);
+        /* [out] */ Int64* duration);
 
     //@Override
     CARAPI GetListeners(

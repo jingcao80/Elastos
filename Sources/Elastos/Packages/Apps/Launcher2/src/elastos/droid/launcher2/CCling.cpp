@@ -26,10 +26,6 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-const String CCling::WORKSPACE_CLING_DISMISSED_KEY("cling.workspace.dismissed");
-const String CCling::ALLAPPS_CLING_DISMISSED_KEY("cling.allapps.dismissed");
-const String CCling::FOLDER_CLING_DISMISSED_KEY("cling.folder.dismissed");
-
 String CCling::WORKSPACE_PORTRAIT("workspace_portrait");
 String CCling::WORKSPACE_LANDSCAPE("workspace_landscape");
 String CCling::WORKSPACE_LARGE("workspace_large");

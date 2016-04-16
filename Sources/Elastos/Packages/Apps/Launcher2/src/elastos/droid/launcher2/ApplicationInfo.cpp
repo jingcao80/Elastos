@@ -18,9 +18,6 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-const Int32 ApplicationInfo::DOWNLOADED_FLAG = 1;
-const Int32 ApplicationInfo::UPDATED_SYSTEM_APP_FLAG = 2;
-
 const String ApplicationInfo::TAG("Launcher2.ApplicationInfo");
 
 CAR_INTERFACE_IMPL(ApplicationInfo, ItemInfo, IApplicationInfo);

@@ -1,7 +1,48 @@
-#ifndef  __ELASTOS_DROID_LAUNCHER2_PACKAGECHANGEDRECEIVER_H__
-#define  __ELASTOS_DROID_LAUNCHER2_PACKAGECHANGEDRECEIVER_H__
+#ifndef  __ELASTOS_DROID_LAUNCHER2_CPACKAGECHANGEDRECEIVER_H__
+#define  __ELASTOS_DROID_LAUNCHER2_CPACKAGECHANGEDRECEIVER_H__
 
+#include "_Elastos_Droid_Launcher2_CAppsCustomizePagedView.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/launcher2/PagedViewWithDraggableItems.h"
+#include "elastos/droid/launcher2/PendingAddItemInfo.h"
+#include "elastos/droid/launcher2/Workspace.h"
+#include "elastos/droid/launcher2/PagedViewCellLayout.h"
+#include "elastos/droid/os/AsyncTask.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.AppWidget.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IViewOnKeyListener;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::Animation::IAccelerateInterpolator;
+using Elastos::Droid::View::Animation::IDecelerateInterpolator;
+using Elastos::Droid::Os::AsyncTask;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::IBitmapCache;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -43,6 +84,8 @@ class AppsCustomizeAsyncTask
     , public IAppsCustomizePagedViewAppsCustomizeAsyncTask
 {
 public:
+    CAR_INTERFACE_DECL();
+
     AppsCustomizeAsyncTask(
         /* [in] */ Int32 p,
         /* [in] */ AsyncTaskPageDataType ty);
@@ -69,8 +112,8 @@ public:
     Int32 mThreadPriority;
 };
 
-class AppsCustomizePagedView
-    : public PagedViewWithDraggableItems
+CarClass(CAppsCustomizePagedView)
+    , public PagedViewWithDraggableItems
     , public IAppsCustomizePagedView
     , public IViewOnClickListener
     , public IViewOnKeyListener
@@ -85,12 +128,12 @@ private:
     {
     public:
         MyRunnable(
-            /* [in] */ AppsCustomizePagedView* host);
+            /* [in] */ CAppsCustomizePagedView* host);
 
         CARAPI Run();
 
     private:
-        AppsCustomizePagedView* mHost;
+        CAppsCustomizePagedView* mHost;
     };
 
     class MyRunnable2
@@ -98,14 +141,16 @@ private:
     {
     public:
         MyRunnable2(
-            /* [in] */ AppsCustomizePagedView* host,
-            /* [in] */ PendingAddWidgetInfo* info);
+            /* [in] */ CAppsCustomizePagedView* host,
+            /* [in] */ PendingAddWidgetInfo* info,
+            /* [in] */ IBundle* options);
 
         CARAPI Run();
 
     private:
-        AppsCustomizePagedView* mHost;
+        CAppsCustomizePagedView* mHost;
         PendingAddWidgetInfo* mInfo;
+        IBundle* mOptions;
     };
 
     class MyRunnable3
@@ -113,14 +158,16 @@ private:
     {
     public:
         MyRunnable3(
-            /* [in] */ AppsCustomizePagedView* host,
-            /* [in] */ PendingAddWidgetInfo* info);
+            /* [in] */ CAppsCustomizePagedView* host,
+            /* [in] */ PendingAddWidgetInfo* info,
+            /* [in] */ IAppWidgetProviderInfo* pInfo);
 
         CARAPI Run();
 
     private:
-        AppsCustomizePagedView* mHost;
+        CAppsCustomizePagedView* mHost;
         PendingAddWidgetInfo* mInfo;
+        IAppWidgetProviderInfo* mPInfo;
     };
 
     class MyRunnable4
@@ -128,12 +175,12 @@ private:
     {
     public:
         MyRunnable4(
-            /* [in] */ AppsCustomizePagedView* host);
+            /* [in] */ CAppsCustomizePagedView* host);
 
         CARAPI Run();
 
     private:
-        AppsCustomizePagedView* mHost;
+        CAppsCustomizePagedView* mHost;
     };
 
     class MyAsyncTaskCallback
@@ -144,7 +191,7 @@ private:
         CAR_INTERFACE_DECL();
 
         MyAsyncTaskCallback(
-            /* [in] */ AppsCustomizePagedView* host,
+            /* [in] */ CAppsCustomizePagedView* host,
             /* [in] */ Int32 sleepMs);
 
         //@Override
@@ -153,7 +200,7 @@ private:
             /* [in] */ IAppsCustomizePagedViewAsyncTaskPageData* data);
 
     private:
-        AppsCustomizePagedView* mHost;
+        CAppsCustomizePagedView* mHost;
         Int32 mSleepMs;
     };
 
@@ -165,7 +212,7 @@ private:
         CAR_INTERFACE_DECL();
 
         MyAsyncTaskCallback2(
-            /* [in] */ AppsCustomizePagedView* host);
+            /* [in] */ CAppsCustomizePagedView* host);
 
         //@Override
         CARAPI Run(
@@ -173,7 +220,7 @@ private:
             /* [in] */ IAppsCustomizePagedViewAsyncTaskPageData* data);
 
     private:
-        AppsCustomizePagedView* mHost;
+        CAppsCustomizePagedView* mHost;
     };
 
     class MyRunnable5
@@ -181,26 +228,34 @@ private:
     {
     public:
         MyRunnable5(
-            /* [in] */ AppsCustomizePagedView* host,
+            /* [in] */ CAppsCustomizePagedView* host,
             /* [in] */ Int32 cellWidth,
             /* [in] */ Int32 cellHeight,
             /* [in] */ IPagedViewGridLayout* layout,
-            /* [in] */ Boolean immediate);
+            /* [in] */ Boolean immediate,
+            /* [in] */ Int32 page,
+            /* [in] */ IArrayList* items);
 
         CARAPI Run();
 
     private:
-        AppsCustomizePagedView* mHost;
+        CAppsCustomizePagedView* mHost;
         Int32 mCellWidth;
         Int32 mCellHeight;
-        IPagedViewGridLayout* layout;
+        IPagedViewGridLayout* mLayout;
         Boolean mImmediate;
+        Int32 mPage;
+        IArrayList* mItems;
     };
 
 public:
     CAR_INTERFACE_DECL();
 
-    AppsCustomizePagedView();
+    CAR_OBJECT_DECL();
+
+    CAppsCustomizePagedView();
+
+    CARAPI constructor();
 
     CARAPI constructor(
         /* [in] */ IContext* context,
@@ -281,7 +336,7 @@ public:
     //@Override
     CARAPI OnDropCompleted(
         /* [in] */ IView* target,
-        /* [in] */ DragObject* d,
+        /* [in] */ IDropTargetDragObject* d,
         /* [in] */ Boolean isFlingToDelete,
         /* [in] */ Boolean success);
 
@@ -295,10 +350,10 @@ public:
     CARAPI ClearAllWidgetPages();
 
     CARAPI SetContentType(
-        /* [in] */ IContentType* type);
+        /* [in] */ AppsCustomizePagedViewContentType type);
 
     CARAPI SyncAppsPageItems(
-        /* [in] */ Int page,
+        /* [in] */ Int32 page,
         /* [in] */ Boolean immediate);
 
     CARAPI SyncWidgetPageItems(
@@ -366,7 +421,7 @@ protected:
         /* [in] */ Int32 height);
 
     //@Override
-    CARAPI OnMeasure(
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
@@ -525,7 +580,6 @@ private:
         /* [in] */ const String& label,
         /* [in] */ IArrayList* list);
 
-
 private:
     static const String TAG;
 
@@ -557,7 +611,7 @@ private:
     Int32 mMaxAppCellCountX, mMaxAppCellCountY;
     Int32 mWidgetCountX, mWidgetCountY;
     Int32 mWidgetWidthGap, mWidgetHeightGap;
-    AutoPtr<IPagedViewCellLayout> mWidgetSpacingLayout;
+    AutoPtr<PagedViewCellLayout> mWidgetSpacingLayout;
     Int32 mNumAppsPages;
     Int32 mNumWidgetPages;
 
@@ -596,17 +650,17 @@ private:
     AutoPtr<IRect> mTmpRect;
 
     // Used for drawing shortcut previews
-    AUtoPtr<IBitmapCache> mCachedShortcutPreviewBitmap;
-    AUtoPtr<IPaintCache> mCachedShortcutPreviewPaint;
-    AUtoPtr<ICanvasCache> mCachedShortcutPreviewCanvas;
+    //AutoPtr<IBitmapCache> mCachedShortcutPreviewBitmap;
+    //AutoPtr<IPaintCache> mCachedShortcutPreviewPaint;
+    //AutoPtr<ICanvasCache> mCachedShortcutPreviewCanvas;
 
     // Used for drawing widget previews
-    AUtoPtr<ICanvasCache> mCachedAppWidgetPreviewCanvas;
-    AUtoPtr<IRectCache> mCachedAppWidgetPreviewSrcRect;
-    AUtoPtr<IRectCache> mCachedAppWidgetPreviewDestRect;
-    AUtoPtr<IPaintCache> mCachedAppWidgetPreviewPaint;
+    //AutoPtr<ICanvasCache> mCachedAppWidgetPreviewCanvas;
+    //AutoPtr<IRectCache> mCachedAppWidgetPreviewSrcRect;
+    //AutoPtr<IRectCache> mCachedAppWidgetPreviewDestRect;
+    //AutoPtr<IPaintCache> mCachedAppWidgetPreviewPaint;
 
-    AUtoPtr<IWidgetPreviewLoader> mWidgetPreviewLoader;
+    AutoPtr<IWidgetPreviewLoader> mWidgetPreviewLoader;
 
     Boolean mInBulkBind;
     Boolean mNeedToUpdatePageCountsAndInvalidateData;
@@ -623,4 +677,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_LAUNCHER2_PACKAGECHANGEDRECEIVER_H__
+#endif // __ELASTOS_DROID_LAUNCHER2_CPACKAGECHANGEDRECEIVER_H__

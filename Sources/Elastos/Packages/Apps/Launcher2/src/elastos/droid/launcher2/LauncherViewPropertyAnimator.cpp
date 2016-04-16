@@ -45,8 +45,11 @@ ECode LauncherViewPropertyAnimator::Cancel()
     return NOERROR;
 }
 
-ECode LauncherViewPropertyAnimator::Clone()
+ECode LauncherViewPropertyAnimator::Clone(
+    /* [out] */ IInterface** result)
 {
+    VALIDATE_NOT_NULL(result);
+
     //throw new RuntimeException("Not implemented");
     Slogger::E("LauncherViewPropertyAnimator", "Not implemented");
     return E_RUNTIME_EXCEPTION;

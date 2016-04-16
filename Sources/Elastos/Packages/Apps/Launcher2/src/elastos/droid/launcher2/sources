@@ -10,6 +10,10 @@ LUBE_FLAGS += -n -u
 
 SOURCES = Launcher2.car
 SOURCES += R.cpp
+SOURCES += CAppsCustomizePagedView.cpp
+SOURCES += Launcher.cpp
+SOURCES += Workspace.cpp
+SOURCES += CWorkspaceHelper.cpp
 SOURCES += Folder.cpp
 SOURCES += CFolderHelper.cpp
 SOURCES += CAppsCustomizeTabHost.cpp

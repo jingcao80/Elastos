@@ -1,7 +1,55 @@
 #ifndef  __ELASTOS_DROID_LAUNCHER2_WORKSPACE_H__
 #define  __ELASTOS_DROID_LAUNCHER2_WORKSPACE_H__
 
+#include "_Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/launcher2/SmoothPagedView.h"
+#include "elastos/droid/launcher2/LauncherAnimatorUpdateListener.h"
+#include "elastos/droid/launcher2/SpringLoadedDragController.h"
+#include "elastos/droid/launcher2/PendingAddItemInfo.h"
+#include "elastos/droid/launcher2/CellLayout.h"
+#include "elastos/droid/launcher2/DropTarget.h"
+#include "elastos/droid/launcher2/ItemInfo.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Thread.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::App::IWallpaperManager;
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::IMatrix;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::IPointF;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::Animation::IDecelerateInterpolator;
+using Elastos::Droid::View::IViewOnTouchListener;
+using Elastos::Droid::View::IViewGroupOnHierarchyChangeListener;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Utility::ISparseArray;
+using Elastos::Core::Object;
+using Elastos::Core::Thread;
+using Elastos::Core::IRunnable;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -90,6 +138,9 @@ public:
             /* [in] */ Float input,
             /* [out] */ Float* result);
 
+        CARAPI HasNativeInterpolator(
+            /* [out] */ Boolean* res);
+
     private:
         Float mFocalLength;
     };
@@ -111,6 +162,9 @@ public:
             /* [in] */ Float input,
             /* [out] */ Float* result);
 
+        CARAPI HasNativeInterpolator(
+            /* [out] */ Boolean* res);
+
     private:
         AutoPtr<ZInterpolator> mZInterpolator;
     };
@@ -131,9 +185,12 @@ public:
             /* [in] */ Float input,
             /* [out] */ Float* result);
 
+        CARAPI HasNativeInterpolator(
+            /* [out] */ Boolean* res);
+
     private:
         AutoPtr<IDecelerateInterpolator> mDecelerate;
-        AutoPtr<ZInterpolator mZInterpolator;
+        AutoPtr<ZInterpolator> mZInterpolator;
     };
 
     /*
@@ -152,14 +209,17 @@ public:
             /* [in] */ Float input,
             /* [out] */ Float* result);
 
+        CARAPI HasNativeInterpolator(
+            /* [out] */ Boolean* res);
+
     private:
         AutoPtr<InverseZInterpolator> mInverseZInterpolator;
-        AutoPtr<IDecelerateInterpolator mDecelerate;
+        AutoPtr<IDecelerateInterpolator> mDecelerate;
     };
 
     class FolderCreationAlarmListener
         : public Object
-        , public IOnAlarmListener
+        , public IAlarmOnAlarmListener
     {
     public:
         CAR_INTERFACE_DECL();
@@ -184,7 +244,7 @@ public:
 
     class ReorderAlarmListener
         : public Object
-        , public IOnAlarmListener
+        , public IAlarmOnAlarmListener
     {
     public:
         CAR_INTERFACE_DECL();
@@ -235,7 +295,7 @@ private:
     public:
         MyThread(
             /* [in] */ const String& name,
-            /* [in] */ Workspace* host)
+            /* [in] */ Workspace* host);
 
         CARAPI Run();
 
@@ -294,9 +354,9 @@ private:
 
     private:
         AutoPtr<Workspace> mHost;
-        AutoPtr<ItemInfo> mInfo,
-        AutoPtr<ILauncherAppWidgetHostView> mHostView,
-        AutoPtr<ICellLayout> mCellLayout
+        AutoPtr<ItemInfo> mInfo;
+        AutoPtr<ILauncherAppWidgetHostView> mHostView;
+        AutoPtr<ICellLayout> mCellLayout;
     };
 
     class MyRunnable3
@@ -351,8 +411,7 @@ private:
             /* [in] */ PendingAddItemInfo* pendingInfo,
             /* [in] */ ItemInfo* item,
             /* [in] */ Int64 container,
-            /* [in] */ Int32 screen,
-            /* [in] */ ArrayOf<Int32>* span);
+            /* [in] */ Int32 screen);
 
         CARAPI Run();
 
@@ -362,14 +421,13 @@ private:
         AutoPtr<ItemInfo> mItem;
         Int64 mContainer;
         Int32 mScreen;
-        AutoPtr<ArrayOf<Int32> > mSpan;
     };
 
-    class MyRunnabl7
+    class MyRunnable7
         : public Runnable
     {
     public:
-        MyRunnabl7(
+        MyRunnable7(
             /* [in] */ IView* finalView,
             /* [in] */ IRunnable* onCompleteRunnable);
 
@@ -386,7 +444,7 @@ private:
     public:
         MyRunnabl8(
             /* [in] */ Workspace* host,
-            /* [in] */ IViewGroup layout,
+            /* [in] */ IViewGroup* layout,
             /* [in] */ IHashSet* componentNames,
             /* [in] */ IUserHandle* user,
             /* [in] */ ICellLayout* layoutParent);
@@ -420,6 +478,8 @@ public:
     CAR_INTERFACE_DECL();
 
     Workspace();
+
+    CARAPI constructor();
 
     /**
      * Used to inflate the Workspace from XML.
@@ -499,6 +559,7 @@ public:
      * @param spanY The number of cells spanned vertically by the child.
      */
     CARAPI AddInScreen(
+        /* [in] */ IView* child,
         /* [in] */ Int64 container,
         /* [in] */ Int32 screen,
         /* [in] */ Int32 x,
@@ -535,8 +596,8 @@ public:
      */
     //@Override
     CARAPI OnTouch(
-        /* [in] */ View v,
-        /* [in] */ MotionEvent event,
+        /* [in] */ IView* v,
+        /* [in] */ IMotionEvent* event,
         /* [out] */ Boolean* result);
 
     CARAPI IsSwitchingState(
@@ -705,7 +766,7 @@ public:
      * {@inheritDoc}
      */
     CARAPI AcceptDrop(
-        /* [in] */ IDragObject* d,
+        /* [in] */ IDropTargetDragObject* d,
         /* [out] */ Boolean* result);
 
     CARAPI WillCreateUserFolder(
@@ -739,12 +800,12 @@ public:
         /* [in] */ ICellLayout* target,
         /* [in] */ ArrayOf<Int32>* targetCell,
         /* [in] */ Float distance,
-        /* [in] */ IDragObject* d,
+        /* [in] */ IDropTargetDragObject* d,
         /* [in] */ Boolean external,
         /* [out] */ Boolean* result);
 
     CARAPI OnDrop(
-        /* [in] */ IDragObject* d);
+        /* [in] */ IDropTargetDragObject* d);
 
     CARAPI SetFinalScrollForPageChange(
         /* [in] */ Int32 screen);
@@ -757,7 +818,7 @@ public:
         /* [in] */ ArrayOf<Int32>* location);
 
     CARAPI OnDragEnter(
-        /* [in] */ IDragObject* d);
+        /* [in] */ IDropTargetDragObject* d);
 
     static CARAPI GetCellLayoutMetrics(
         /* [in] */ ILauncher* launcher,
@@ -765,7 +826,7 @@ public:
         /* [out] */ IRect** rect);
 
     CARAPI OnDragExit(
-        /* [in] */ IDragObject* d);
+        /* [in] */ IDropTargetDragObject* d);
 
     CARAPI SetCurrentDropLayout(
         /* [in] */ ICellLayout* layout);
@@ -781,7 +842,7 @@ public:
         /* [in] */ Int32 dragMode);
 
     CARAPI GetDropTargetDelegate(
-        /* [in] */ IDragObject* d,
+        /* [in] */ IDropTargetDragObject* d,
         /* [out] */ IDropTarget** target);
 
     /*
@@ -838,7 +899,7 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI OnDragOver(
-        /* [in] */ IDragObject* d);
+        /* [in] */ IDropTargetDragObject* d);
 
     //@Override
     CARAPI GetHitRect(
@@ -897,7 +958,7 @@ public:
      */
     CARAPI OnDropCompleted(
         /* [in] */ IView* target,
-        /* [in] */ IDragObject* d,
+        /* [in] */ IDropTargetDragObject* d,
         /* [in] */ Boolean isFlingToDelete,
         /* [in] */ Boolean success);
 
@@ -910,7 +971,7 @@ public:
 
     //@Override
     CARAPI OnFlingToDelete(
-        /* [in] */ IDragObject* d,
+        /* [in] */ IDropTargetDragObject* d,
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ IPointF* vec);
@@ -1038,7 +1099,7 @@ protected:
         /* [in] */ Float y,
         /* [out] */ Boolean* result);
 
-    CARAPI OnWindowVisibilityChanged(
+    CARAPI_(void) OnWindowVisibilityChanged(
         /* [in] */ Int32 visibility);
 
     CARAPI ReinflateWidgetsIfNecessary();
@@ -1093,7 +1154,7 @@ protected:
         /* [in] */ Int32 bottom);
 
     //@Override
-    CARAPI OnDraw(
+    CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
     //@Override
@@ -1106,7 +1167,7 @@ protected:
         /* [in] */ IMotionEvent* ev);
 
     //@Override
-    CARAPI OnRestoreInstanceState(
+    CARAPI_(void) OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
     //@Override
@@ -1225,7 +1286,7 @@ private:
     // used to visualize drop locations and determine where to drop an item. The idea is that
     // the visual center represents the user's interpretation of where the item is, and hence
     // is the appropriate point to use when determining drop location.
-    CARAPI_(AutoPtr<ArrayOf<Float> >) getDragViewVisualCenter(
+    CARAPI_(AutoPtr<ArrayOf<Float> >) GetDragViewVisualCenter(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ Int32 xOffset,
@@ -1242,7 +1303,7 @@ private:
     CARAPI_(void) ManageFolderFeedback(
         /* [in] */ ItemInfo* info,
         /* [in] */ ICellLayout* targetLayout,
-        /* [in] */ ArrayOf<Int32> targetCell,
+        /* [in] */ ArrayOf<Int32>* targetCell,
         /* [in] */ Float distance,
         /* [in] */ IView* dragOverView);
 
@@ -1265,7 +1326,7 @@ private:
         /* [in] */ IInterface* dragInfo,
         /* [in] */ ICellLayout* cellLayout,
         /* [in] */ Boolean insertAtFirst,
-        /* [in] */ IDragObject* d);
+        /* [in] */ DragObject* d);
 
     CARAPI_(void) GetFinalPositionForDropAnimation(
         /* [in] */ ArrayOf<Int32>* loc,
@@ -1377,13 +1438,6 @@ private:
     static const Int32 DEFAULT_CELL_COUNT_X;
     static const Int32 DEFAULT_CELL_COUNT_Y;
 
-    // State variable that indicates whether the pages are small (ie when you're
-    // in all apps or customize mode)
-
-    enum State {
-        NORMAL,
-        SPRING_LOADED,
-        SMALL };
     State mState;
     Boolean mIsSwitchingState;
 
@@ -1403,13 +1457,9 @@ private:
     Boolean mOverscrollTransformsSet;
     Boolean mWorkspaceFadeInAdjacentScreens;
 
-    enum WallpaperVerticalOffset {
-        TOP,
-        MIDDLE,
-        BOTTOM };
     Int32 mWallpaperWidth;
     Int32 mWallpaperHeight;
-    AutoPtr<IWallpaperOffsetInterpolator> mWallpaperOffset;
+    AutoPtr<WallpaperOffsetInterpolator> mWallpaperOffset;
     Boolean mUpdateWallpaperOffsetImmediately;
     AutoPtr<IRunnable> mDelayedResizeRunnable;
     AutoPtr<IRunnable> mDelayedSnapToPageRunnable;
@@ -1424,11 +1474,11 @@ private:
     static const Int32 REORDER_TIMEOUT;
     AutoPtr<IAlarm> mFolderCreationAlarm;
     AutoPtr<IAlarm> mReorderAlarm;
-    AutoPtr<IFolderRingAnimator> mDragFolderRingAnimator;
+    AutoPtr<IFolderIconFolderRingAnimator> mDragFolderRingAnimator;
     AutoPtr<IFolderIcon> mDragOverFolderIcon;
     Boolean mCreateUserFolderOnDrop;
     Boolean mAddToExistingFolderOnDrop;
-    AutoPtr<IDropTargetDragEnforcer> mDragEnforcer;
+    AutoPtr<DragEnforcer> mDragEnforcer;
     Float mMaxDistanceForFolderCreation;
 
     // Variables relating to touch disambiguation (scrolling workspace vs. scrolling a widget)

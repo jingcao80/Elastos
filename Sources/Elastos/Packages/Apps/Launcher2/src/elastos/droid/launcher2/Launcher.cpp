@@ -1,7 +1,157 @@
 
 #include "elastos/droid/launcher2/Launcher.h"
+#include "elastos/droid/launcher2/LauncherApplication.h"
+#include "elastos/droid/launcher2/LauncherAnimUtils.h"
+#include "elastos/droid/launcher2/CellLayout.h"
+#include "elastos/droid/launcher2/DragController.h"
+#include "elastos/droid/launcher2/LauncherAppWidgetHost.h"
+#include "elastos/droid/launcher2/FirstFrameAnimatorHelper.h"
+#include "elastos/droid/launcher2/InstallShortcutReceiver.h"
+#include "elastos/droid/launcher2/ShortcutInfo.h"
+#include "elastos/droid/launcher2/PendingAddItemInfo.h"
+#include "elastos/droid/launcher2/LauncherAppWidgetInfo.h"
+#include "elastos/droid/launcher2/FolderInfo.h"
+#include "elastos/droid/launcher2/LauncherProvider.h"
+#include "elastos/droid/launcher2/DragLayer.h"
+#include "elastos/droid/launcher2/LauncherAnimUtils.h"
+#include "elastos/droid/launcher2/LauncherSettings.h"
+#include "elastos/droid/launcher2/Folder.h"
+#include "elastos/droid/launcher2/LauncherViewPropertyAnimator.h"
+#include "elastos/droid/launcher2/Workspace.h"
+#include "elastos/droid/appwidget/AppWidgetHostView.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/Build.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/os/Process.h"
+#include "elastos/droid/R.h"
 #include "Elastos.Droid.Service.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/Character.h>
 #include "R.h"
+#include <elastos/utility/logging/Slogger.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/Math.h>
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Speech.h"
+#include "Elastos.Droid.Accounts.h"
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Core::StringBuilder;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::App::IApplication;
+using Elastos::Droid::App::ISearchManager;
+using Elastos::Droid::App::IActivityOptions;
+using Elastos::Droid::App::CActivityOptionsHelper;
+using Elastos::Droid::App::IActivityOptionsHelper;
+using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::App::IActivityManagerHelper;
+using Elastos::Droid::Accounts::IAccount;
+using Elastos::Droid::Accounts::IAccountManager;
+using Elastos::Droid::Accounts::IAccountManagerHelper;
+using Elastos::Droid::Accounts::CAccountManagerHelper;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Droid::Animation::IPropertyValuesHolderHelper;
+using Elastos::Droid::Animation::CPropertyValuesHolderHelper;
+using Elastos::Droid::Animation::IAnimatorSetBuilder;
+using Elastos::Droid::View::ISurface;
+using Elastos::Droid::View::Animation::CDecelerateInterpolator;
+using Elastos::Droid::View::Animation::IDecelerateInterpolator;
+using Elastos::Droid::View::Animation::CAccelerateInterpolator;
+using Elastos::Droid::View::Animation::IAccelerateInterpolator;
+using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Droid::AppWidget::IAppWidgetHost;
+using Elastos::Droid::AppWidget::CAppWidgetManagerHelper;
+using Elastos::Droid::AppWidget::IAppWidgetManagerHelper;
+using Elastos::Droid::AppWidget::AppWidgetHostView;
+using Elastos::Droid::Content::ISharedPreferencesEditor;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntentHelper;
+using Elastos::Droid::Content::CIntentHelper;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CBitmapHelper;
+using Elastos::Droid::Graphics::IBitmapHelper;
+using Elastos::Droid::Graphics::CCanvas;
+using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
+using Elastos::Droid::Graphics::PorterDuffMode_CLEAR;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Os::Build;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::CStrictMode;
+using Elastos::Droid::Os::IStrictMode;
+using Elastos::Droid::Os::IStrictModeVmPolicy;
+using Elastos::Droid::Os::IStrictModeThreadPolicy;
+using Elastos::Droid::Os::CStrictModeVmPolicyBuilder;
+using Elastos::Droid::Os::IStrictModeVmPolicyBuilder;
+using Elastos::Droid::Os::CStrictModeThreadPolicyBuilder;
+using Elastos::Droid::Os::IStrictModeThreadPolicyBuilder;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Provider::ISettings;
+using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Droid::View::IViewParent;
+using Elastos::Droid::View::EIID_IViewOnLongClickListener;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::EIID_IOnDrawListener;
+using Elastos::Droid::View::InputMethod::IInputMethodManager;
+using Elastos::Droid::View::EIID_IOnGlobalLayoutListener;
+using Elastos::Droid::View::EIID_IViewOnTouchListener;
+using Elastos::Droid::View::IHapticFeedbackConstants;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
+using Elastos::Droid::View::Animation::CAccelerateDecelerateInterpolator;
+using Elastos::Droid::View::Animation::IAccelerateDecelerateInterpolator;
+using Elastos::Droid::Widget::IAdvanceable;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Droid::Widget::CImageView;
+using Elastos::Droid::Text::CSpannableStringBuilder;
+using Elastos::Droid::Text::ISpannableStringBuilder;
+using Elastos::Droid::Text::CSelection;
+using Elastos::Droid::Text::ISelection;
+using Elastos::Droid::Text::ISpannable;
+using Elastos::Droid::Text::IEditable;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Text::Method::IKeyListener;
+using Elastos::Droid::Text::Method::ITextKeyListener;
+using Elastos::Droid::Text::Method::ITextKeyListenerHelper;
+using Elastos::Droid::Text::Method::CTextKeyListenerHelper;
+using Elastos::Droid::Speech::IRecognizerIntent;
+using Elastos::Core::IFloat;
+using Elastos::Core::IBoolean;
+using Elastos::Core::EIID_IComparator;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Core::Character;
+using Elastos::Core::IInteger32;
+using Elastos::Core::IInteger64;
+using Elastos::Core::ICharSequence;
+using Elastos::IO::IInputStream;
+using Elastos::IO::CDataInputStream;
+using Elastos::IO::IDataInputStream;
+using Elastos::IO::IDataInput;
+using Elastos::IO::ICloseable;
+using Elastos::IO::CDataOutputStream;
+using Elastos::IO::IDataOutputStream;
+using Elastos::IO::IDataOutput;
+using Elastos::IO::IOutputStream;
+using Elastos::IO::IFlushable;
+using Elastos::Utility::ISet;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::IMap;
+using Elastos::Utility::ICollections;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::ICollection;
 
 namespace Elastos {
 namespace Droid {
@@ -23,7 +173,7 @@ ECode Launcher::MyRunnable::Run()
 
 Launcher::MyAsyncTask::MyAsyncTask(
     /* [in] */ Launcher* owner)
-    : mHost(host)
+    : mHost(owner)
 {
 }
 
@@ -44,7 +194,8 @@ ECode Launcher::MyAsyncTask::OnPostExecute(
     /* [in] */ IInterface* result)
 {
     mHost->sLocaleConfiguration = (LocaleConfiguration*)IObject::Probe(result);
-    return mHost->CheckForLocaleChange();  // recursive, but now with a locale configuration
+    mHost->CheckForLocaleChange();  // recursive, but now with a locale configuration
+    return NOERROR;
 }
 
 Launcher::LocaleConfiguration::LocaleConfiguration()
@@ -59,14 +210,15 @@ Launcher::MyThread::MyThread(
     /* [in] */ const String& name,
     /* [in] */ LocaleConfiguration* localeConfiguration)
     : mHost(host)
-    , Thread(name);
     , mLocaleConfiguration(localeConfiguration)
 {
+    Thread::constructor(name);
 }
 
 ECode Launcher::MyThread::Run()
 {
-    return mHost->WriteConfiguration(mHost, mLocaleConfiguration);
+    mHost->WriteConfiguration(mHost, mLocaleConfiguration);
+    return NOERROR;
 }
 
 Launcher::MyRunnable2::MyRunnable2(
@@ -85,12 +237,12 @@ ECode Launcher::MyRunnable2::Run()
 {
     mHost->CompleteAddAppWidget(mAppWidgetId, mHost->mPendingAddInfo->mContainer,
             mHost->mPendingAddInfo->mScreen, mLayout, NULL);
-    return mHost->ExitSpringLoadedDragModeDelayed((resultCode != RESULT_CANCELED), FALSE,
+    return mHost->ExitSpringLoadedDragModeDelayed((mResultCode != RESULT_CANCELED), FALSE,
             NULL);
 }
 
 Launcher::MyRunnable3::MyRunnable3(
-    /* [in] */ Launcher* host
+    /* [in] */ Launcher* host,
     /* [in] */ Int32 resultCode)
     : mHost(host)
     , mResultCode(resultCode)
@@ -109,14 +261,14 @@ Launcher::MyThread2::MyThread2(
     /* [in] */ const String& name,
     /* [in] */ Int32 appWidgetId)
     : mHost(host)
-    , Thread(name)
     , mAppWidgetId(appWidgetId)
 {
+    Thread::constructor(name);
 }
 
 ECode Launcher::MyThread2::Run()
 {
-    return mHost->mAppWidgetHost->DeleteAppWidgetId(mAppWidgetId);
+    return IAppWidgetHost::Probe(mHost->mAppWidgetHost)->DeleteAppWidgetId(mAppWidgetId);
 }
 
 Launcher::MyBroadcastReceiver::MyBroadcastReceiver(
@@ -131,9 +283,7 @@ ECode Launcher::MyBroadcastReceiver::OnReceive(
 {
     String action;
     intent->GetAction(&action);
-    Boolean res;
-    Boolean res2;
-    if (IIntent::ACTION_SCREEN_OFF.Equals(action, &res), res) {
+    if (IIntent::ACTION_SCREEN_OFF.Equals(action)) {
         mHost->mUserPresent = FALSE;
         mHost->mDragLayer->ClearAllResizeFrames();
         mHost->UpdateRunning();
@@ -146,20 +296,21 @@ ECode Launcher::MyBroadcastReceiver::OnReceive(
             mHost->ShowWorkspace(FALSE);
         }
     }
-    else if (IIntent::ACTION_USER_PRESENT.Equals(action, &res), res) {
+    else if (IIntent::ACTION_USER_PRESENT.Equals(action)) {
         mHost->mUserPresent = TRUE;
         mHost->UpdateRunning();
     }
-    else if ((IIntent::ACTION_MANAGED_PROFILE_ADDED.Equals(action, &res), res)
-            || (IIntent::ACTION_MANAGED_PROFILE_REMOVED.Equals(action, &res2), res2)) {
+    else if ((IIntent::ACTION_MANAGED_PROFILE_ADDED.Equals(action))
+            || (IIntent::ACTION_MANAGED_PROFILE_REMOVED.Equals(action))) {
         AutoPtr<ILauncherModel> mode;
         mHost->GetModel((ILauncherModel**)&mode);
-        mode->ForceReload();
+        assert(0);
+        //mode->ForceReload();
     }
     return NOERROR;
 }
 
-Launcher::MyRunnable4::MyRunnable4(
+Launcher::MyOnDrawListener::MyRunnable4::MyRunnable4(
     /* [in] */ Launcher* host,
     /* [in] */ IOnDrawListener* listener)
     : mHost(host)
@@ -167,11 +318,11 @@ Launcher::MyRunnable4::MyRunnable4(
 {
 }
 
-ECode Launcher::MyRunnable4::Run()
+ECode Launcher::MyOnDrawListener::MyRunnable4::Run()
 {
     if (mHost->mWorkspace != NULL) {
         AutoPtr<IViewTreeObserver> observer;
-        mHost->mWorkspace->GetViewTreeObserver((IViewTreeObserver**)&observer);
+        IView::Probe(mHost->mWorkspace)->GetViewTreeObserver((IViewTreeObserver**)&observer);
         if (observer != NULL) {
             return observer->RemoveOnDrawListener(mListener);
         }
@@ -197,20 +348,20 @@ ECode Launcher::MyOnDrawListener::OnDraw()
     // this avoids a delay in hiding the IME if it was
     // currently shown, because doing that may involve
     // some communication back with the app.
-    mHost->mWorkspace->PostDelayed(mHost->mBuildLayersRunnable, 500);
+    Boolean tmp;
+    IView::Probe(mHost->mWorkspace)->PostDelayed(mHost->mBuildLayersRunnable, 500, &tmp);
     AutoPtr<IOnDrawListener> listener = this;
-    AutoPtr<IRunnable> r = new MyRunnable4(this, listener);
-    Boolean res;
-    return mHost->mWorkspace->Post(r, &res);
+    AutoPtr<IRunnable> r = new MyRunnable4(mHost, listener);
+    return IView::Probe(mHost->mWorkspace)->Post(r, &tmp);
 }
 
-Launcher::MyRunnable5::MyRunnable5(
+Launcher::MyHandler::MyRunnable5::MyRunnable5(
     /* [in] */ IView* v)
     : mV(v)
 {
 }
 
-ECode Launcher::MyRunnable5::Run()
+ECode Launcher::MyHandler::MyRunnable5::Run()
 {
     return IAdvanceable::Probe(mV)->Advance();
 }
@@ -226,9 +377,8 @@ ECode Launcher::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     Int32 what;
-    msg->GetWhat(what);
-    if (what == ADVANCE_MSG) {
-        Int32 i = 0;
+    msg->GetWhat(&what);
+    if (what == mHost->ADVANCE_MSG) {
         AutoPtr<ISet> keySet;
         mHost->mWidgetsToAdvance->GetKeySet((ISet**)&keySet);
         AutoPtr<ArrayOf<IInterface*> > array;
@@ -247,12 +397,13 @@ ECode Launcher::MyHandler::HandleMessage(
             if (IAdvanceable::Probe(v) != NULL) {
                 AutoPtr<IRunnable> r = new MyRunnable5(v);
                 Boolean res;
-                mHost->PostDelayed(r, delay, &res);
+                IView::Probe(mHost)->PostDelayed(r, delay, &res);
             }
             i++;
         }
-        return mHost->SendAdvanceMessage(mAdvanceInterval);
+        mHost->SendAdvanceMessage(mHost->mAdvanceInterval);
     }
+    return NOERROR;
 }
 
 Launcher::MyRunnable6::MyRunnable6(
@@ -274,7 +425,7 @@ ECode Launcher::MyRunnable6::Run()
     // In all these cases, only animate if we're already on home
     mHost->mWorkspace->ExitWidgetResizeMode();
     Boolean res;
-    if (alreadyOnHome && mState == State::WORKSPACE && (mHost->mWorkspace->IsTouchActive(&res), !res) &&
+    if (mAlreadyOnHome && mHost->mState == Launcher_WORKSPACE && (mHost->mWorkspace->IsTouchActive(&res), !res) &&
             openFolder == NULL) {
         mHost->mWorkspace->MoveToDefaultScreen(TRUE);
     }
@@ -284,11 +435,11 @@ ECode Launcher::MyRunnable6::Run()
 
     // If we are already on home, then just animate back to the workspace,
     // otherwise, just wait until onResume to set the state back to Workspace
-    if (alreadyOnHome) {
+    if (mAlreadyOnHome) {
         mHost->ShowWorkspace(TRUE);
     }
     else {
-        mHost->mOnResumeState = State::WORKSPACE;
+        mHost->mOnResumeState = Launcher_WORKSPACE;
     }
 
     AutoPtr<IWindow> window;
@@ -303,12 +454,13 @@ ECode Launcher::MyRunnable6::Run()
             AutoPtr<IInterface> obj;
             mHost->GetSystemService(INPUT_METHOD_SERVICE, (IInterface**)&obj);
             AutoPtr<IInputMethodManager> imm = IInputMethodManager::Probe(obj);
-            imm->HideSoftInputFromWindow(token, 0);
+            Boolean tmp;
+            imm->HideSoftInputFromWindow(token, 0, &tmp);
         }
     }
 
     // Reset AllApps to its initial state
-    if (!alreadyOnHome && mHost->mAppsCustomizeTabHost != NULL) {
+    if (!mAlreadyOnHome && mHost->mAppsCustomizeTabHost != NULL) {
         mHost->mAppsCustomizeTabHost->Reset();
     }
     return NOERROR;
@@ -330,8 +482,8 @@ ECode Launcher::MyAnimatorListenerAdapter::OnAnimationEnd(
     if (mCl != NULL) {
         mCl->ClearFolderLeaveBehind();
         // Remove the ImageView copy of the FolderIcon and make the original visible.
-        mHost->mDragLayer->RemoveView(mHost->mFolderIconImageView);
-        return mFi->SetVisibility(IView::VISIBLE);
+        IViewGroup::Probe(mHost->mDragLayer)->RemoveView(IView::Probe(mHost->mFolderIconImageView));
+        return IView::Probe(mFi)->SetVisibility(IView::VISIBLE);
     }
     return NOERROR;
 }
@@ -361,8 +513,9 @@ ECode Launcher::MyAnimatorUpdateListener::OnAnimationUpdate(
     AutoPtr<IFloat> obj = IFloat::Probe(value);
     Float t;
     obj->GetValue(&t);
-    mHost->DispatchOnLauncherTransitionStep(mFromView, t);
-    return mHost->DispatchOnLauncherTransitionStep(mToView, t);
+    mHost->DispatchOnLauncherTransitionStep(IView::Probe(mFromView), t);
+    mHost->DispatchOnLauncherTransitionStep(IView::Probe(mToView), t);
+    return NOERROR;
 }
 
 Launcher::MyAnimatorListenerAdapter2::MyAnimatorListenerAdapter2(
@@ -385,24 +538,25 @@ ECode Launcher::MyAnimatorListenerAdapter2::OnAnimationStart(
 {
     mHost->UpdateWallpaperVisibility(TRUE);
     // Prepare the position
-    toView->SetTranslationX(0.0f);
-    toView->SetTranslationY(0.0f);
-    toView->SetVisibility(IView::VISIBLE);
-    return toView->BringToFront();
+    IView::Probe(mToView)->SetTranslationX(0.0f);
+    IView::Probe(mToView)->SetTranslationY(0.0f);
+    IView::Probe(mToView)->SetVisibility(IView::VISIBLE);
+    return IView::Probe(mToView)->BringToFront();
 }
 
 ECode Launcher::MyAnimatorListenerAdapter2::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    mHost->DispatchOnLauncherTransitionEnd(mFromView, mAnimated, FALSE);
-    mHost->DispatchOnLauncherTransitionEnd(mToView, mAnimated, FALSE);
+    mHost->DispatchOnLauncherTransitionEnd(IView::Probe(mFromView), mAnimated, FALSE);
+    mHost->DispatchOnLauncherTransitionEnd(IView::Probe(mToView), mAnimated, FALSE);
 
     Boolean res;
     if (mHost->mWorkspace != NULL && !mSpringLoaded &&
             (LauncherApplication::IsScreenLarge(&res), !res)) {
         // Hide the workspace scrollbar
-        mHost->mWorkspace->HideScrollingIndicator(TRUE);
-        HideDockDivider();
+        assert(0);
+        //IPagedView::Probe(mHost->mWorkspace)->HideScrollingIndicator(TRUE);
+        mHost->HideDockDivider();
     }
     if (!mAnimationCancelled) {
         mHost->UpdateWallpaperVisibility(FALSE);
@@ -445,10 +599,12 @@ ECode Launcher::MyRunnable7::Run()
     if (TO_IINTERFACE(mHost->mStateAnimation) != TO_IINTERFACE(mStateAnimation)) {
         return NOERROR;
     }
-    mHost->SetPivotsForZoom(mToView, mScale);
+    mHost->SetPivotsForZoom(IView::Probe(mToView), mScale);
     mHost->DispatchOnLauncherTransitionStart(mFromView, mAnimated, FALSE);
-    mHost->DispatchOnLauncherTransitionStart(mToView, mAnimated, FALSE);
-    LauncherAnimUtils.startAnimationAfterNextDraw(mHost->mStateAnimation, mToView);
+    mHost->DispatchOnLauncherTransitionStart(IView::Probe(mToView), mAnimated, FALSE);
+    LauncherAnimUtils::StartAnimationAfterNextDraw(IAnimator::Probe(mHost->mStateAnimation),
+            IView::Probe(mToView));
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(Launcher::MyOnGlobalLayoutListener, Object, IOnGlobalLayoutListener);
@@ -474,7 +630,7 @@ CAR_INTERFACE_IMPL(Launcher::MyAnimatorUpdateListener2, Object, IAnimatorUpdateL
 Launcher::MyAnimatorUpdateListener2::MyAnimatorUpdateListener2(
     /* [in] */ Launcher* host,
     /* [in] */ IView* fromView,
-    /* [in] */ IAppsCustomizeTabHost* toView)
+    /* [in] */ IView* toView)
     : mHost(host)
     , mFromView(fromView)
     , mToView(toView)
@@ -490,13 +646,14 @@ ECode Launcher::MyAnimatorUpdateListener2::OnAnimationUpdate(
     Float t;
     obj->GetValue(&t);
     mHost->DispatchOnLauncherTransitionStep(mFromView, t);
-    return mHost->DispatchOnLauncherTransitionStep(mToView, t);
+    mHost->DispatchOnLauncherTransitionStep(mToView, t);
+    return NOERROR;
 }
 
 Launcher::MyAnimatorListenerAdapter3::MyAnimatorListenerAdapter3(
     /* [in] */ Launcher* host,
     /* [in] */ IView* fromView,
-    /* [in] */ IAppsCustomizeTabHost* toView,
+    /* [in] */ IView* toView,
     /* [in] */ Boolean animated,
     /* [in] */ IRunnable* onCompleteRunnable)
     : mHost(host)
@@ -511,17 +668,20 @@ ECode Launcher::MyAnimatorListenerAdapter3::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     mHost->UpdateWallpaperVisibility(TRUE);
-    mFromView->SetVisibility(View.GONE);
+    mFromView->SetVisibility(IView::GONE);
     mHost->DispatchOnLauncherTransitionEnd(mFromView, mAnimated, TRUE);
     mHost->DispatchOnLauncherTransitionEnd(mToView, mAnimated, TRUE);
     if (mHost->mWorkspace != NULL) {
-        mHost->mWorkspace->HideScrollingIndicator(FALSE);
+        assert(0);
+        //IPagedView::Probe(mHost->mWorkspace)->HideScrollingIndicator(FALSE);
     }
     if (mOnCompleteRunnable != NULL) {
         mOnCompleteRunnable->Run();
     }
-    mHost->mAppsCustomizeContent->UpdateCurrentPageScroll();
-    return mHost->mAppsCustomizeContent->ResumeScrolling();
+    assert(0);
+    //IPagedView::Probe(mHost->mAppsCustomizeContent)->UpdateCurrentPageScroll();
+    //return IPagedView::Probe(mHost->mAppsCustomizeContent)->ResumeScrolling();
+    return NOERROR;
 }
 
 Launcher::MyRunnable8::MyRunnable8(
@@ -551,8 +711,8 @@ ECode Launcher::MyRunnable9::Run()
         // Before we show workspace, hide all apps again because
         // exitSpringLoadedDragMode made it visible. This is a bit hacky; we should
         // clean up our state transition functions
-        mHost->mAppsCustomizeTabHost->SetVisibility(IView::GONE);
-        return mHost->ShowWorkspace(true, onCompleteRunnable);
+        IView::Probe(mHost->mAppsCustomizeTabHost)->SetVisibility(IView::GONE);
+        return mHost->ShowWorkspace(true, mOnCompleteRunnable);
     }
     else {
         return mHost->ExitSpringLoadedDragMode();
@@ -585,7 +745,8 @@ Launcher::AppWidgetResetObserver::AppWidgetResetObserver(
 ECode Launcher::AppWidgetResetObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
-    return mHost->OnAppWidgetReset();
+    mHost->OnAppWidgetReset();
+    return NOERROR;
 }
 
 Launcher::MyRunnable10::MyRunnable10(
@@ -650,7 +811,8 @@ Launcher::MyRunnable14::MyRunnable14(
 
 ECode Launcher::MyRunnable14::Run()
 {
-    return mHost->RunNewAppsAnimation(FALSE);
+    mHost->RunNewAppsAnimation(FALSE);
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(Launcher::MyComparator, Object, IComparator);
@@ -688,7 +850,9 @@ ECode Launcher::MyAnimatorListenerAdapter4::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     if (mHost->mWorkspace != NULL) {
-        return mHost->mWorkspace->PostDelayed(mHost->mBuildLayersRunnable, 500);
+        Boolean tmp;
+        return IView::Probe(mHost->mWorkspace)->PostDelayed(
+                mHost->mBuildLayersRunnable, 500, &tmp);
     }
     return NOERROR;
 }
@@ -697,16 +861,16 @@ Launcher::MyThread3::MyThread3(
     /* [in] */ Launcher* host,
     /* [in] */ const String& name)
     : mHost(host)
-    , Thread(name)
 {
+    Thread::constructor(name);
 }
 
 ECode Launcher::MyThread3::Run()
 {
     AutoPtr<ISharedPreferencesEditor> editor;
     mHost->mSharedPrefs->Edit((ISharedPreferencesEditor**)&editor);
-    editor->PutInt32(IInstallShortcutReceiver::NEW_APPS_PAGE_KEY, -1)
-    editor->PutStringSet(IInstallShortcutReceiver::NEW_APPS_LIST_KEY, NULL)
+    editor->PutInt32(IInstallShortcutReceiver::NEW_APPS_PAGE_KEY, -1);
+    editor->PutStringSet(IInstallShortcutReceiver::NEW_APPS_LIST_KEY, NULL);
     Boolean succeded;
     return editor->Commit(&succeded);
 }
@@ -722,7 +886,8 @@ Launcher::MyRunnable15::MyRunnable15(
 ECode Launcher::MyRunnable15::Run()
 {
     if (mHost->mAppsCustomizeContent != NULL) {
-        return mHost->mAppsCustomizeContent->SetApps(mApps);
+        assert(0);
+        //return mHost->mAppsCustomizeContent->SetApps(mApps);
     }
     return NOERROR;
 }
@@ -807,8 +972,9 @@ Launcher::MyRunnable21::MyRunnable21(
 
 ECode Launcher::MyRunnable21::Run()
 {
-    mCling->SetFocusable(TRUE);
-    return mCling->RequestFocus();
+    IView::Probe(mCling)->SetFocusable(TRUE);
+    Boolean tmp;
+    return IView::Probe(mCling)->RequestFocus(&tmp);
 }
 
 Launcher::MyThread4::MyThread4(
@@ -816,9 +982,9 @@ Launcher::MyThread4::MyThread4(
     /* [in] */ const String& name,
     /* [in] */ const String& flag)
     : mHost(host)
-    , Thread(name)
     , mFlag(flag)
 {
+    Thread::constructor(name);
 }
 
 ECode Launcher::MyThread4::Run()
@@ -826,7 +992,8 @@ ECode Launcher::MyThread4::Run()
     AutoPtr<ISharedPreferencesEditor> editor;
     mHost->mSharedPrefs->Edit((ISharedPreferencesEditor**)&editor);
     editor->PutBoolean(mFlag, TRUE);
-    return editor->Commit();
+    Boolean tmp;
+    return editor->Commit(&tmp);
 }
 
 Launcher::MyAnimatorListenerAdapter5::MyAnimatorListenerAdapter5(
@@ -842,7 +1009,7 @@ Launcher::MyAnimatorListenerAdapter5::MyAnimatorListenerAdapter5(
 ECode Launcher::MyAnimatorListenerAdapter5::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    mCling->SetVisibility(IView::GONE);
+    IView::Probe(mCling)->SetVisibility(IView::GONE);
     mCling->Cleanup();
     // We should update the shared preferences on a background thread
     AutoPtr<IThread> t = new MyThread4(mHost, String("dismissClingThread"), mFlag);
@@ -906,7 +1073,7 @@ const Int32 Launcher::EXIT_SPRINGLOADED_MODE_LONG_TIMEOUT = 600;
 const Int32 Launcher::SHOW_CLING_DURATION = 550;
 const Int32 Launcher::DISMISS_CLING_DURATION = 250;
 
-const Object Launcher::sLock;
+Object Launcher::sLock;
 Int32 Launcher::sScreen = DEFAULT_SCREEN;
 
 // How long to wait before the new-shortcut animation automatically pans the workspace
@@ -914,39 +1081,49 @@ Int32 Launcher::NEW_APPS_ANIMATION_INACTIVE_TIMEOUT_SECONDS = 10;
 
 Boolean Launcher::sPausedFromUserAction = FALSE;
 
-AutoPtr<LocaleConfiguration> Launcher::sLocaleConfiguration;
+AutoPtr<Launcher::LocaleConfiguration> Launcher::sLocaleConfiguration;
+
+AutoPtr<IHashMap> Launcher::sFolders;
+
+AutoPtr<ArrayOf<IDrawableConstantState*> > Launcher::sGlobalSearchIcon;
+AutoPtr<ArrayOf<IDrawableConstantState*> > Launcher::sVoiceSearchIcon;
+AutoPtr<ArrayOf<IDrawableConstantState*> > Launcher::sAppMarketIcon;
+
+AutoPtr<IArrayList> Launcher::sDumpLogs;
+
+AutoPtr<IArrayList> Launcher::sPendingAddList;
 
 Boolean Launcher::InitStaticBlock()
 {
     CHashMap::New((IHashMap**)&sFolders);
 
-    sGlobalSearchIcon = ArrayOf<IDrawableConstantState*>::Allco(2);
-    sVoiceSearchIcon = ArrayOf<IDrawableConstantState*>::Allco(2);
-    sAppMarketIcon = ArrayOf<IDrawableConstantState*>::Allco(2);
+    sGlobalSearchIcon = ArrayOf<IDrawableConstantState*>::Alloc(2);
+    sVoiceSearchIcon = ArrayOf<IDrawableConstantState*>::Alloc(2);
+    sAppMarketIcon = ArrayOf<IDrawableConstantState*>::Alloc(2);
 
     CArrayList::New((IArrayList**)&sDumpLogs);
     CArrayList::New((IArrayList**)&sPendingAddList);
     return TRUE;
 }
 
-Boolean initStaticBlock = InitStaticBlock();
+Boolean Launcher::initStaticBlock = InitStaticBlock();
 
 Boolean Launcher::IsPropertyEnabled(
         /* [in] */ const String& propertyName)
 {
-    return Logger::IsLoggable(propertyName, Logger::VERBOSE)
+    return Logger::IsLoggable(propertyName, Logger::VERBOSE);
 }
 
 Boolean Launcher::sForceEnableRotation = IsPropertyEnabled(FORCE_ENABLE_ROTATION_PROPERTY);
 
 CAR_INTERFACE_IMPL_5(Launcher, Activity, ILauncher, IViewOnClickListener,
-        IOnLongClickListener, ILauncherModelCallbacks, IViewOnTouchListener);
+        IViewOnLongClickListener, ILauncherModelCallbacks, IViewOnTouchListener);
 
 Launcher::Launcher()
-    : mState(State::WORKSPACE)
+    : mState(Launcher_WORKSPACE)
     , mPendingAddWidgetId(-1)
     , mAutoAdvanceRunning(FALSE)
-    , mOnResumeState(State::NONE)
+    , mOnResumeState(Launcher_NONE)
     , mWorkspaceLoading(TRUE)
     , mPaused(TRUE)
     , mRestoring(FALSE)
@@ -963,10 +1140,11 @@ Launcher::Launcher()
     , mRestoreScreenOrientationDelay(500)
     , mNewShortcutAnimatePage(-1)
 {
-    mCloseSystemDialogsReceiver = new CloseSystemDialogsIntentReceiver();
-    mWidgetObserver = new AppWidgetResetObserver();
+    mCloseSystemDialogsReceiver = new CloseSystemDialogsIntentReceiver(this);
+    mWidgetObserver = new AppWidgetResetObserver(this);
 
     mPendingAddInfo = new ItemInfo();
+    mPendingAddInfo->constructor();
 
     mTmpAddItemCellCoordinates = ArrayOf<Int32>::Alloc(2);
 
@@ -988,7 +1166,7 @@ Launcher::Launcher()
 
     mHandler = new MyHandler(this);
 
-    mBindPackagesUpdatedRunnable =
+    mBindPackagesUpdatedRunnable = new MyRunnable19(this);
 }
 
 ECode Launcher::OnCreate(
@@ -1009,10 +1187,10 @@ ECode Launcher::OnCreate(
 
         AutoPtr<IStrictModeVmPolicyBuilder> builder2;
         CStrictModeVmPolicyBuilder::New((IStrictModeVmPolicyBuilder**)&builder2);
-        builder2->DetectLeakedSqlLiteObjects()
-        builder2->DetectLeakedClosableObjects()
-        builder2->PenaltyLog()
-        builder2->PenaltyDeath()
+        builder2->DetectLeakedSqlLiteObjects();
+        builder2->DetectLeakedClosableObjects();
+        builder2->PenaltyLog();
+        builder2->PenaltyDeath();
         AutoPtr<IStrictModeVmPolicy> policy2;
         builder2->Build((IStrictModeVmPolicy**)&policy2);
         mode->SetVmPolicy(policy2);
@@ -1027,12 +1205,16 @@ ECode Launcher::OnCreate(
     GetSharedPreferences(spKey, IContext::MODE_PRIVATE, (ISharedPreferences**)&mSharedPrefs);
     app->SetLauncher(this, (ILauncherModel**)&mModel);
     app->GetIconCache((IIconCache**)&mIconCache);
-    mDragController = new DragController(this);
+    mDragController = new DragController();
+    ((DragController*)mDragController.Get())->constructor(ILauncher::Probe(this));
     GetLayoutInflater((ILayoutInflater**)&mInflater);
 
-    mAppWidgetManager = AppWidgetManager::GetInstance(this);
-    mAppWidgetHost = new LauncherAppWidgetHost(this, APPWIDGET_HOST_ID);
-    mAppWidgetHost->StartListening();
+    AutoPtr<IAppWidgetManagerHelper> helper;
+    CAppWidgetManagerHelper::AcquireSingleton((IAppWidgetManagerHelper**)&helper);
+    helper->GetInstance(IContext::Probe(this), (IAppWidgetManager**)&mAppWidgetManager);
+
+    mAppWidgetHost = new LauncherAppWidgetHost(ILauncher::Probe(this), APPWIDGET_HOST_ID);
+    IAppWidgetHost::Probe(mAppWidgetHost)->StartListening();
 
     // If we are getting an onCreate, we can actually preempt onResume and unset mPaused here,
     // this also ensures that any synchronous binding below doesn't re-trigger another
@@ -1059,8 +1241,9 @@ ECode Launcher::OnCreate(
 
     // Update customization drawer _after_ restoring the states
     if (mAppsCustomizeContent != NULL) {
-        mAppsCustomizeContent->OnPackagesUpdated(
-            LauncherModel::GetSortedWidgetsAndShortcuts(this));
+        assert(0);
+        // mAppsCustomizeContent->OnPackagesUpdated(
+        //     LauncherModel::GetSortedWidgetsAndShortcuts(this));
     }
 
     // if (PROFILE_STARTUP) {
@@ -1071,35 +1254,42 @@ ECode Launcher::OnCreate(
         if (sPausedFromUserAction) {
             // If the user leaves launcher, then we should just load items asynchronously when
             // they return.
-            mModel->StartLoader(TRUE, -1);
+            assert(0);
+            //mModel->StartLoader(TRUE, -1);
         }
         else {
             // We only load the page synchronously if the user rotates (or triggers a
             // configuration change) while launcher is in the foreground
             Int32 page;
-            mWorkspace->GetCurrentPage(&page);
-            mModel->StartLoader(TRUE, page);
+            assert(0);
+            //IPagedView::Proeb(mWorkspace)->GetCurrentPage(&page);
+            //mModel->StartLoader(TRUE, page);
         }
     }
 
     Boolean res;
-    mModel->IsAllAppsLoaded(&res);
+    assert(0);
+    //mModel->IsAllAppsLoaded(&res);
     if (!res) {
         AutoPtr<IViewParent> p;
-        mAppsCustomizeContent->GetParent((IViewParent**)&p);
+        IView::Probe(mAppsCustomizeContent)->GetParent((IViewParent**)&p);
         AutoPtr<IViewGroup> appsCustomizeContentParent = IViewGroup::Probe(p);
+        AutoPtr<IView> tmp;
         mInflater->Inflate(
                 Elastos::Droid::Launcher2::R::layout::apps_customize_progressbar,
-                appsCustomizeContentParent);
+                appsCustomizeContentParent, (IView**)&tmp);
     }
 
     // For handling default keys
     CSpannableStringBuilder::New((ISpannableStringBuilder**)&mDefaultKeySsb);
-    Selection->SetSelection(mDefaultKeySsb, 0);
+    AutoPtr<ISelection> helper2;
+    CSelection::AcquireSingleton((ISelection**)&helper2);
+    helper2->SetSelection(ISpannable::Probe(mDefaultKeySsb), 0);
 
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(IIntent::ACTION_CLOSE_SYSTEM_DIALOGS, (IIntentFilter**)&filter);
-    RegisterReceiver(mCloseSystemDialogsReceiver, filter);
+    AutoPtr<IIntent> tmp;
+    RegisterReceiver(mCloseSystemDialogsReceiver, filter, (IIntent**)&tmp);
 
     UpdateGlobalIcons();
 
@@ -1147,7 +1337,8 @@ void Launcher::CheckForLocaleChange()
 {
     if (sLocaleConfiguration == NULL) {
         AutoPtr<MyAsyncTask> task = new MyAsyncTask(this);
-        task->Execute();
+        assert(0);
+        //task->Execute();
         return;
     }
 
@@ -1156,28 +1347,29 @@ void Launcher::CheckForLocaleChange()
     AutoPtr<IConfiguration> configuration;
     resources->GetConfiguration((IConfiguration**)&configuration);
 
-    String previousLocale = sLocaleConfiguration->mLlocale;
-    AutoPtr<ILocale> locale;
-    configuration->GetLocale((ILocale**)&locale);
+    String previousLocale = sLocaleConfiguration->mLocale;
+    AutoPtr<ILocale> _locale;
+    configuration->GetLocale((ILocale**)&_locale);
     String locale;
-    locale->ToString(&locale);
+    _locale->ToString(&locale);
 
     Int32 previousMcc = sLocaleConfiguration->mMcc;
-    Int32 mcc = configuration->mMcc;
+    Int32 mcc;
+    configuration->GetMcc(&mcc);
 
     Int32 previousMnc = sLocaleConfiguration->mMnc;
-    Int32 mnc = configuration->mMnc;
+    Int32 mnc;
+    configuration->GetMnc(&mnc);
 
-    Boolean res;
-    locale.Equals(previousLocale, &res);
-    Boolean localeChanged = !res || mcc != previousMcc || mnc != previousMnc;
+    Boolean localeChanged = !locale.Equals(previousLocale) || mcc != previousMcc || mnc != previousMnc;
 
     if (localeChanged) {
         sLocaleConfiguration->mLocale = locale;
         sLocaleConfiguration->mMcc = mcc;
         sLocaleConfiguration->mMnc = mnc;
 
-        mIconCache->Flush();
+        assert(0);
+        //mIconCache->Flush();
 
         AutoPtr<LocaleConfiguration> localeConfiguration = sLocaleConfiguration;
         AutoPtr<MyThread> t = new MyThread(this, String("WriteLocaleConfiguration"), localeConfiguration);
@@ -1194,10 +1386,10 @@ void Launcher::ReadConfiguration(
     // try {
     AutoPtr<IFileInputStream> fileInputStream;
     FAIL_GOTO(context->OpenFileInput(PREFERENCES, (IFileInputStream**)&fileInputStream), FINALLY)
-    CDataInputStream::New(fileInputStream, (IDataInputStream**)&in);
-    FAIL_GOTO(in->ReadUTF(&(configuration->mLocale)), FINALLY)
-    FAIL_GOTO(in->ReadInt(&(configuration->mMcc)), FINALLY)
-    FAIL_GOTO(in->ReadInt(&(configuration->mMnc)), FINALLY)
+    CDataInputStream::New(IInputStream::Probe(fileInputStream), (IDataInputStream**)&in);
+    FAIL_GOTO(IDataInput::Probe(in)->ReadUTF(&(configuration->mLocale)), FINALLY)
+    FAIL_GOTO(IDataInput::Probe(in)->ReadInt32(&(configuration->mMcc)), FINALLY)
+    FAIL_GOTO(IDataInput::Probe(in)->ReadInt32(&(configuration->mMnc)), FINALLY)
     // } catch (FileNotFoundException e) {
     //     // Ignore
     // } catch (IOException e) {
@@ -1206,7 +1398,7 @@ void Launcher::ReadConfiguration(
 FINALLY:
     if (in != NULL) {
         // try {
-        in->Close();
+        ICloseable::Probe(in)->Close();
         // } catch (IOException e) {
         //     // Ignore
         // }
@@ -1225,17 +1417,17 @@ void Launcher::WriteConfiguration(
     ECode ec;
     FAIL_GOTO(ec = context->OpenFileOutput(PREFERENCES, MODE_PRIVATE,
             (IFileOutputStream**)&fileOutputStream), ERROR)
-    CDataOutputStream::New(fileOutputStream, (IDataOutputStream**)&out);
-    FAIL_GOTO(ec = out->WriteUTF(configuration->mLocale), ERROR)
-    FAIL_GOTO(ec = out->WriteInt(configuration->mMcc), ERROR)
-    FAIL_GOTO(ec = out->WriteInt(configuration->mMnc), ERROR)
-    FAIL_GOTO(ec = out->Flush(), ERROR)
+    CDataOutputStream::New(IOutputStream::Probe(fileOutputStream), (IDataOutputStream**)&out);
+    FAIL_GOTO(ec = IDataOutput::Probe(out)->WriteUTF(configuration->mLocale), ERROR)
+    FAIL_GOTO(ec = IDataOutput::Probe(out)->WriteInt32(configuration->mMcc), ERROR)
+    FAIL_GOTO(ec = IDataOutput::Probe(out)->WriteInt32(configuration->mMnc), ERROR)
+    FAIL_GOTO(ec = IFlushable::Probe(out)->Flush(), ERROR)
     // } catch (FileNotFoundException e) {
     //     // Ignore
     // } catch (IOException e) {
     //     //noinspection ResultOfMethodCallIgnored
 ERROR:
-    if ((ECode)ec == E_IO_EXCEPTION) {
+    if (ec == (ECode)E_IO_EXCEPTION) {
         AutoPtr<IFile> file;
         context->GetFileStreamPath(PREFERENCES, (IFile**)&file);
         file->Delete();
@@ -1243,7 +1435,7 @@ ERROR:
     // } finally {
     if (out != NULL) {
         // try {
-        out->Close();
+        ICloseable::Probe(out)->Close();
         // } catch (IOException e) {
             // Ignore
         // }
@@ -1270,9 +1462,10 @@ ECode Launcher::IsDraggingEnabled(
     // We prevent dragging when we are loading the workspace as it is possible to pick up a view
     // that is subsequently removed from the workspace in startBinding().
     Boolean res;
-    mModel->IsLoadingWorkspace(&res);
+    assert(0);
+    //mModel->IsLoadingWorkspace(&res);
     *result = !res;
-    return NOERROR
+    return NOERROR;
 }
 
 ECode Launcher::GetScreen(
@@ -1314,7 +1507,7 @@ Boolean Launcher::CompleteAdd(
             break;
         case REQUEST_CREATE_APPWIDGET:
             Int32 appWidgetId;
-            args->mIntent->GetIntExtra(IAppWidgetManager::EXTRA_APPWIDGET_ID, -1, &appWidgetId);
+            args->mIntent->GetInt32Extra(IAppWidgetManager::EXTRA_APPWIDGET_ID, -1, &appWidgetId);
             CompleteAddAppWidget(appWidgetId, args->mContainer, args->mScreen, NULL, NULL);
             result = TRUE;
             break;
@@ -1340,7 +1533,7 @@ ECode Launcher::OnActivityResult(
     if (requestCode == REQUEST_BIND_APPWIDGET) {
         Int32 appWidgetId;
         if (data != NULL) {
-            data->GetIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1, &appWidgetId);
+            data->GetInt32Extra(IAppWidgetManager::EXTRA_APPWIDGET_ID, -1, &appWidgetId);
         }
         else {
             appWidgetId = -1;
@@ -1363,7 +1556,7 @@ ECode Launcher::OnActivityResult(
         Int32 appWidgetId;
         Int32 widgetId;
         if (data != NULL) {
-            data->GetIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1, &widgetId);
+            data->GetInt32Extra(IAppWidgetManager::EXTRA_APPWIDGET_ID, -1, &widgetId);
         }
         else {
             widgetId = -1;
@@ -1376,7 +1569,7 @@ ECode Launcher::OnActivityResult(
         }
 
         if (appWidgetId < 0) {
-            Slogger::E(TAG, "Error: appWidgetId (EXTRA_APPWIDGET_ID) was not returned from the \\" +
+            Slogger::E(TAG, "Error: appWidgetId (EXTRA_APPWIDGET_ID) was not returned from the \\"
                     "widget configuration activity.");
             CompleteTwoStageWidgetDrop(RESULT_CANCELED, appWidgetId);
         }
@@ -1402,7 +1595,7 @@ ECode Launcher::OnActivityResult(
         Boolean res;
         IsWorkspaceLocked(&res);
         if (res) {
-            sPendingAddList->Add(args);
+            sPendingAddList->Add(TO_IINTERFACE(args));
         }
         else {
             delayExitSpringLoadedMode = CompleteAdd(args);
@@ -1419,7 +1612,7 @@ void Launcher::CompleteTwoStageWidgetDrop(
     /* [in] */ Int32 appWidgetId)
 {
     AutoPtr<IView> view;
-    mWorkspace->GetChildAt(mPendingAddInfo->mScreen, (IView**)&view);
+    IViewGroup::Probe(mWorkspace)->GetChildAt(mPendingAddInfo->mScreen, (IView**)&view);
     AutoPtr<ICellLayout> cellLayout = ICellLayout::Probe(view);
     AutoPtr<IRunnable> onCompleteRunnable;
     Int32 animationType = 0;
@@ -1428,13 +1621,13 @@ void Launcher::CompleteTwoStageWidgetDrop(
     if (resultCode == RESULT_OK) {
         animationType = IWorkspace::COMPLETE_TWO_STAGE_WIDGET_DROP_ANIMATION;
         AutoPtr<IAppWidgetHostView> layout;
-        mAppWidgetHost->CreateView(this, appWidgetId,
+        IAppWidgetHost::Probe(mAppWidgetHost)->CreateView(IContext::Probe(this), appWidgetId,
                 mPendingAddWidgetInfo, (IAppWidgetHostView**)&layout);
         boundWidget = layout;
         onCompleteRunnable = new MyRunnable2(this, appWidgetId, layout, resultCode);
     }
     else if (resultCode == RESULT_CANCELED) {
-        mAppWidgetHost->DeleteAppWidgetId(appWidgetId);
+        IAppWidgetHost::Probe(mAppWidgetHost)->DeleteAppWidgetId(appWidgetId);
         animationType = IWorkspace::CANCEL_TWO_STAGE_WIDGET_DROP_ANIMATION;
         onCompleteRunnable = new MyRunnable3(this, resultCode);
     }
@@ -1442,9 +1635,9 @@ void Launcher::CompleteTwoStageWidgetDrop(
     AutoPtr<IView> view2;
     mDragLayer->GetAnimatedView((IView**)&view2);
     if (view2 != NULL) {
-        mWorkspace->AnimateWidgetDrop(mPendingAddInfo, cellLayout,
+        mWorkspace->AnimateWidgetDrop(IItemInfo::Probe(mPendingAddInfo), cellLayout,
                 IDragView::Probe(view), onCompleteRunnable,
-                animationType, boundWidget, TRUE);
+                animationType, IView::Probe(boundWidget), TRUE);
     }
     else {
         // The animated view may be null in the case of a rotation during widget configuration
@@ -1469,30 +1662,33 @@ ECode Launcher::OnResume()
 {
     Int64 startTime = 0;
     if (DEBUG_RESUME_TIME) {
-        startTime = System::CurrentTimeMillis();
+        AutoPtr<ISystem> system;
+        CSystem::AcquireSingleton((ISystem**)&system);
+        system->GetCurrentTimeMillis(&startTime);
     }
     Activity::OnResume();
 
     // Restore the previous launcher state
-    if (mOnResumeState == State::WORKSPACE) {
+    if (mOnResumeState == Launcher_WORKSPACE) {
         ShowWorkspace(FALSE);
     }
-    else if (mOnResumeState == State::APPS_CUSTOMIZE) {
+    else if (mOnResumeState == Launcher_APPS_CUSTOMIZE) {
         ShowAllApps(FALSE);
     }
-    mOnResumeState = State::NONE;
+    mOnResumeState = Launcher_NONE;
 
     // Background was set to gradient in onPause(), restore to black if in all apps.
-    SetWorkspaceBackground(mState == State::WORKSPACE);
+    SetWorkspaceBackground(mState == Launcher_WORKSPACE);
 
     // Process any items that were added while Launcher was away
-    InstallShortcutReceiver->FlushInstallQueue(this);
+    InstallShortcutReceiver::FlushInstallQueue(this);
 
     mPaused = FALSE;
     sPausedFromUserAction = FALSE;
     if (mRestoring || mOnResumeNeedsLoad) {
         mWorkspaceLoading = TRUE;
-        mModel->StartLoader(TRUE, -1);
+        assert(0);
+        //mModel->StartLoader(TRUE, -1);
         mRestoring = FALSE;
         mOnResumeNeedsLoad = FALSE;
     }
@@ -1503,20 +1699,24 @@ ECode Launcher::OnResume()
         // execute them here
         Int64 startTimeCallbacks = 0;
         if (DEBUG_RESUME_TIME) {
-            startTimeCallbacks = System::CurrentTimeMillis();
+            AutoPtr<ISystem> system;
+            CSystem::AcquireSingleton((ISystem**)&system);
+            system->GetCurrentTimeMillis(&startTimeCallbacks);
         }
 
         if (mAppsCustomizeContent != NULL) {
-            mAppsCustomizeContent->SetBulkBind(TRUE);
+            assert(0);
+            //mAppsCustomizeContent->SetBulkBind(TRUE);
         }
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
-            mOnResumeCallbacks.get(i, (IInterface**)&obj);
+            mOnResumeCallbacks->Get(i, (IInterface**)&obj);
             AutoPtr<IRunnable> r = IRunnable::Probe(obj);
             r->Run();
         }
         if (mAppsCustomizeContent != NULL) {
-            mAppsCustomizeContent->SetBulkBind(FALSE);
+            assert(0);
+            //mAppsCustomizeContent->SetBulkBind(FALSE);
         }
         mOnResumeCallbacks->Clear();
         // if (DEBUG_RESUME_TIME) {
@@ -1533,7 +1733,8 @@ ECode Launcher::OnResume()
     }
     if (mAppsCustomizeContent != NULL) {
         // Resets the previous all apps icon press state
-        mAppsCustomizeContent->ResetDrawableState();
+        assert(0);
+        //mAppsCustomizeContent->ResetDrawableState();
     }
     // It is possible that widgets can receive updates while launcher is not in the foreground.
     // Consequently, the widgets will be inflated in the orientation of the foreground activity
@@ -1541,14 +1742,16 @@ ECode Launcher::OnResume()
     // orientation.
     AutoPtr<IWorkspace> workspace;
     GetWorkspace((IWorkspace**)&workspace);
-    workspace->ReinflateWidgetsIfNecessary();
+    assert(0);
+    //workspace->ReinflateWidgetsIfNecessary();
 
     // Again, as with the above scenario, it's possible that one or more of the global icons
     // were updated in the wrong orientation.
-    return UpdateGlobalIcons();
+    UpdateGlobalIcons();
     // if (DEBUG_RESUME_TIME) {
     //     Log.d(TAG, "Time spent in onResume: " + (System.currentTimeMillis() - startTime));
     // }
+    return NOERROR;
 }
 
 ECode Launcher::OnPause()
@@ -1570,9 +1773,11 @@ ECode Launcher::OnRetainNonConfigurationInstance(
     VALIDATE_NOT_NULL(obj);
 
     // Flag the loader to stop early before switching
-    mModel->StopLoader();
+    assert(0);
+    //mModel->StopLoader();
     if (mAppsCustomizeContent != NULL) {
-        mAppsCustomizeContent->Surrender();
+        assert(0);
+        //mAppsCustomizeContent->Surrender();
     }
     AutoPtr<IBoolean> b = CoreUtils::Convert(TRUE);
     *obj = TO_IINTERFACE(b);
@@ -1602,7 +1807,7 @@ ECode Launcher::OnKeyDown(
     Boolean handled;
     Activity::OnKeyDown(keyCode, event, &handled);
     Boolean res;
-    Boolean isKeyNotWhitespace = uniChar > 0 && (Character::IsWhitespace(uniChar, &res), !res);
+    Boolean isKeyNotWhitespace = uniChar > 0 && !Character::IsWhitespace(uniChar);
 
     if (!handled && AcceptFilter() && isKeyNotWhitespace) {
         AutoPtr<ITextKeyListenerHelper> listenerHelper;
@@ -1611,17 +1816,18 @@ ECode Launcher::OnKeyDown(
         listenerHelper->GetInstance((ITextKeyListener**)&listener);
 
         Boolean gotKey;
-        listener->OnKeyDown(mWorkspace, mDefaultKeySsb,
+        IKeyListener::Probe(listener)->OnKeyDown(IView::Probe(mWorkspace), IEditable::Probe(mDefaultKeySsb),
                 keyCode, event, &gotKey);
-        if (gotKey && mDefaultKeySsb != NULL && mDefaultKeySsb->GetLength() > 0) {
-            // something usable has been typed - start a search
-            // the typed text will be retrieved and cleared by
-            // showSearchDialog()
-            // If there are multiple keystrokes before the search dialog takes focus,
-            // onSearchRequested() will be called for every keystroke,
-            // but it is idempotent, so it's fine.
-            return OnSearchRequested(result);
-        }
+        assert(0);
+        // if (gotKey && mDefaultKeySsb != NULL && mDefaultKeySsb->Length() > 0) {
+        //     // something usable has been typed - start a search
+        //     // the typed text will be retrieved and cleared by
+        //     // showSearchDialog()
+        //     // If there are multiple keystrokes before the search dialog takes focus,
+        //     // onSearchRequested() will be called for every keystroke,
+        //     // but it is idempotent, so it's fine.
+        //     return OnSearchRequested(result);
+        // }
     }
 
     // Eat the long press event so the keyboard doesn't come up.
@@ -1638,15 +1844,18 @@ ECode Launcher::OnKeyDown(
 String Launcher::GetTypedText()
 {
     String str;
-    mDefaultKeySsb->ToString(&str);
+    IObject::Probe(mDefaultKeySsb)->ToString(&str);
     return str;
 }
 
 void Launcher::ClearTypedText()
 {
-    mDefaultKeySsb->Clear();
-    mDefaultKeySsb->ClearSpans();
-    Selection->SetSelection(mDefaultKeySsb, 0);
+    assert(0);
+    // mDefaultKeySsb->Clear();
+    // mDefaultKeySsb->ClearSpans();
+    AutoPtr<ISelection> helper;
+    CSelection::AcquireSingleton((ISelection**)&helper);
+    helper->SetSelection(ISpannable::Probe(mDefaultKeySsb), 0);
 }
 
 State Launcher::IntToState(
@@ -1655,19 +1864,19 @@ State Launcher::IntToState(
     State state;
     switch(stateOrdinal){
         case 0:
-            state = State::NONE;
+            state = Launcher_NONE;
             break;
         case 1:
-            state = State::WORKSPACE;
+            state = Launcher_WORKSPACE;
             break;
         case 2:
-            state = State::APPS_CUSTOMIZE;
+            state = Launcher_APPS_CUSTOMIZE;
             break;
         case 3:
-            state = State::APPS_CUSTOMIZE_SPRING_LOADED;
+            state = Launcher_APPS_CUSTOMIZE_SPRING_LOADED;
             break;
         default:
-            state = State::WORKSPACE;
+            state = Launcher_WORKSPACE;
             break;
     }
     return state;
@@ -1682,15 +1891,16 @@ void Launcher::RestoreState(
 
     Int32 s;
     savedState->GetInt32(RUNTIME_STATE, 1/*State.WORKSPACE.ordinal()*/, &s);
-    State state = IntToState(s);
-    if (state == State::APPS_CUSTOMIZE) {
-        mOnResumeState = State::APPS_CUSTOMIZE;
+    LauncherState state = IntToState(s);
+    if (state == Launcher_APPS_CUSTOMIZE) {
+        mOnResumeState = Launcher_APPS_CUSTOMIZE;
     }
 
     Int32 currentScreen;
     savedState->GetInt32(RUNTIME_STATE_CURRENT_SCREEN, -1, &currentScreen);
     if (currentScreen > -1) {
-        mWorkspace->SetCurrentPage(currentScreen);
+        assert(0);
+        //mWorkspace->SetCurrentPage(currentScreen);
     }
 
     Int64 pendingAddContainer;
@@ -1706,7 +1916,7 @@ void Launcher::RestoreState(
         savedState->GetInt32(RUNTIME_STATE_PENDING_ADD_SPAN_X, &(mPendingAddInfo->mSpanX));
         savedState->GetInt32(RUNTIME_STATE_PENDING_ADD_SPAN_Y, &(mPendingAddInfo->mSpanY));
         AutoPtr<IParcelable> p;
-        savedState->GetParcelable(RUNTIME_STATE_PENDING_ADD_WIDGET_INFO, (IParcelable)&p);
+        savedState->GetParcelable(RUNTIME_STATE_PENDING_ADD_WIDGET_INFO, (IParcelable**)&p);
         mPendingAddWidgetInfo = IAppWidgetProviderInfo::Probe(p);
         savedState->GetInt32(RUNTIME_STATE_PENDING_ADD_WIDGET_ID, &mPendingAddWidgetId);
         mWaitingForResult = TRUE;
@@ -1719,7 +1929,8 @@ void Launcher::RestoreState(
     if (renameFolder) {
         Int64 id;
         savedState->GetInt64(RUNTIME_STATE_PENDING_FOLDER_RENAME_ID, &id);
-        mModel->GetFolderById(this, sFolders, id, (IFolderInfo**)&mFolderInfo);
+        assert(0);
+        //mModel->GetFolderById(this, sFolders, id, (IFolderInfo**)&mFolderInfo);
         mRestoring = TRUE;
     }
 
@@ -1729,18 +1940,21 @@ void Launcher::RestoreState(
         String curTab;
         savedState->GetString(String("apps_customize_currentTab"), &curTab);
         if (!curTab.IsNull()) {
-            AutoPtr<AppsCustomizePagedView::ContentType> type;
-            mAppsCustomizeTabHost.getContentTypeForTabTag(curTab, (AppsCustomizePagedView::ContentType**)&type);
-            mAppsCustomizeTabHost->SetContentTypeImmediate(type);
+            assert(0);
+            // AutoPtr<AppsCustomizePagedView::ContentType> type;
+            // mAppsCustomizeTabHost->GetContentTypeForTabTag(curTab, (AppsCustomizePagedView::ContentType**)&type);
+            // mAppsCustomizeTabHost->SetContentTypeImmediate(type);
 
             Int32 page;
-            PagedView::Probe(mAppsCustomizeContent)->GetCurrentPage(&page);
-            PagedView::Probe(mAppsCustomizeContent)->LoadAssociatedPages(page);
+            assert(0);
+            // IPagedView::Probe(mAppsCustomizeContent)->GetCurrentPage(&page);
+            // IPagedView::Probe(mAppsCustomizeContent)->LoadAssociatedPages(page);
         }
 
         Int32 currentIndex;
         savedState->GetInt32(String("apps_customize_currentIndex"), &currentIndex);
-        mAppsCustomizeContent->RestorePageForIndex(currentIndex);
+        assert(0);
+        // mAppsCustomizeContent->RestorePageForIndex(currentIndex);
     }
 }
 
@@ -1753,7 +1967,7 @@ void Launcher::SetupViews()
     FindViewById(Elastos::Droid::Launcher2::R::id::drag_layer, (IView**)&view);
     mDragLayer = IDragLayer::Probe(view);
     AutoPtr<IView> view2;
-    mDragLayer->FindViewById(Elastos::Droid::Launcher2::R::id::workspace, (IView**)&view2);
+    IView::Probe(mDragLayer)->FindViewById(Elastos::Droid::Launcher2::R::id::workspace, (IView**)&view2);
     mWorkspace = IWorkspace::Probe(view2);
     FindViewById(Elastos::Droid::Launcher2::R::id::qsb_divider, (IView**)&mQsbDivider);
     FindViewById(Elastos::Droid::Launcher2::R::id::dock_divider, (IView**)&mDockDivider);
@@ -1776,14 +1990,14 @@ void Launcher::SetupViews()
     }
 
     // Setup the workspace
-    mWorkspace->SetHapticFeedbackEnabled(FALSE);
-    mWorkspace->SetOnLongClickListener(this);
+    IView::Probe(mWorkspace)->SetHapticFeedbackEnabled(FALSE);
+    IView::Probe(mWorkspace)->SetOnLongClickListener(this);
     mWorkspace->Setup(dragController);
-    dragController->AddDragListener(mWorkspace);
+    dragController->AddDragListener(IDragControllerDragListener::Probe(mWorkspace));
 
     // Get the search/delete bar
     AutoPtr<IView> view4;
-    mDragLayer->FindViewById(Elastos::Droid::Launcher2::R::id::qsb_bar, (IView**)&view4);
+    IView::Probe(mDragLayer)->FindViewById(Elastos::Droid::Launcher2::R::id::qsb_bar, (IView**)&view4);
     mSearchDropTargetBar = ISearchDropTargetBar::Probe(view4);
 
     // Setup AppsCustomize
@@ -1791,19 +2005,20 @@ void Launcher::SetupViews()
     FindViewById(Elastos::Droid::Launcher2::R::id::apps_customize_pane, (IView**)&view5);
     mAppsCustomizeTabHost = IAppsCustomizeTabHost::Probe(view5);
     AutoPtr<IView> view6;
-    mAppsCustomizeTabHost->FindViewById(Elastos::Droid::Launcher2::R::id::apps_customize_pane_content,
+    IView::Probe(mAppsCustomizeTabHost)->FindViewById(Elastos::Droid::Launcher2::R::id::apps_customize_pane_content,
             (IView**)&view6);
     mAppsCustomizeContent = IAppsCustomizePagedView::Probe(view6);
 
-    mAppsCustomizeContent->Setup(this, dragController);
+    assert(0);
+    //mAppsCustomizeContent->Setup(ILauncher::Probe(this), dragController);
 
     // Setup the drag controller (drop targets have to be added in reverse order in priority)
-    dragController->SetDragScoller(mWorkspace);
-    dragController->SetScrollView(mDragLayer);
-    dragController->SetMoveTarget(mWorkspace);
-    dragController->AddDropTarget(mWorkspace);
+    dragController->SetDragScoller(IDragScroller::Probe(mWorkspace));
+    dragController->SetScrollView(IView::Probe(mDragLayer));
+    dragController->SetMoveTarget(IView::Probe(mWorkspace));
+    dragController->AddDropTarget(IDropTarget::Probe(mWorkspace));
     if (mSearchDropTargetBar != NULL) {
-        mSearchDropTargetBar.->Setup(this, dragController);
+        mSearchDropTargetBar->Setup(this, dragController);
     }
 }
 
@@ -1814,9 +2029,11 @@ ECode Launcher::CreateShortcut(
     VALIDATE_NOT_NULL(outview);
 
     Int32 page;
-    mWorkspace->GetCurrentPage(&page);
+    assert(0);
+    //mWorkspace->GetCurrentPage(&page);
     AutoPtr<IView> view;
-    mWorkspace->GetChildAt(page, (IView**)&view);
+    assert(0);
+    //mWorkspace->GetChildAt(page, (IView**)&view);
     return CreateShortcut(
             Elastos::Droid::Launcher2::R::layout::application,
             IViewGroup::Probe(view) , info, outview);
@@ -1834,8 +2051,8 @@ ECode Launcher::CreateShortcut(
     mInflater->Inflate(layoutResId, parent, FALSE, (IView**)&view);
     AutoPtr<IBubbleTextView> favorite = IBubbleTextView::Probe(view);
     favorite->ApplyFromShortcutInfo(info, mIconCache);
-    favorite->SetOnClickListener(this);
-    *outview = favorite;
+    IView::Probe(favorite)->SetOnClickListener(this);
+    *outview = IView::Probe(favorite);
     REFCOUNT_ADD(*outview);
     return NOERROR;
 }
@@ -1859,7 +2076,7 @@ ECode Launcher::CompleteAddApplication(
     }
     else if (layout->FindCellForSpan(cellXY, 1, 1, &res), !res) {
         Boolean tmp;
-        IsHotseatLayout(layout, &tmp);
+        IsHotseatLayout(IView::Probe(layout), &tmp);
         ShowOutOfSpaceMessage(tmp);
         return NOERROR;
     }
@@ -1869,20 +2086,21 @@ ECode Launcher::CompleteAddApplication(
     AutoPtr<IUserHandle> user;
     Process::MyUserHandle((IUserHandle**)&user);
     AutoPtr<IShortcutInfo> info;
-    mModel->GetShortcutInfo(packageManager, data, user, this, (IShortcutInfo**)&info);
+    assert(0);
+    //mModel->GetShortcutInfo(packageManager, data, user, this, (IShortcutInfo**)&info);
 
     if (info != NULL) {
         // Necessary flags are added when the activity is launched via
         // LauncherApps
-        info->SetActivity(data);
-        info->mContainer = IItemInfo::NO_ID;
+        ((ShortcutInfo*)info.Get())->SetActivity(data);
+        ((ShortcutInfo*)info.Get())->mContainer = IItemInfo::NO_ID;
         Boolean res;
         IsWorkspaceLocked(&res);
         mWorkspace->AddApplicationShortcut(info, layout, container, screen, (*cellXY)[0], (*cellXY)[1],
                 res, cellX, cellY);
     }
     else {
-        Slogger::E(TAG, "Couldn't find ActivityInfo for selected application: " + data);
+        Slogger::E(TAG, String("Couldn't find ActivityInfo for selected application: ") + TO_STR(data));
     }
     return NOERROR;
 }
@@ -1902,7 +2120,8 @@ void Launcher::CompleteAddShortcut(
     Boolean foundCellSpan = FALSE;
 
     AutoPtr<IShortcutInfo> info;
-    mModel->InfoFromShortcutIntent(this, data, NULL, (IShortcutInfo**)&info);
+    assert(0);
+    //mModel->InfoFromShortcutIntent(this, data, NULL, (IShortcutInfo**)&info);
     if (info == NULL) {
         return;
     }
@@ -1925,7 +2144,7 @@ void Launcher::CompleteAddShortcut(
         AutoPtr<DragObject> dragObject = new DragObject();
         dragObject->mDragInfo = info;
         mWorkspace->AddToExistingFolderIfNecessary(view, layout, cellXY, 0, dragObject,
-                TRUE, &res)
+                TRUE, &res);
         if (res) {
             return;
         }
@@ -1942,12 +2161,13 @@ void Launcher::CompleteAddShortcut(
 
     if (!foundCellSpan) {
         Boolean res;
-        IsHotseatLayout(layout, &res);
+        IsHotseatLayout(IView::Probe(layout), &res);
         ShowOutOfSpaceMessage(res);
         return;
     }
 
-    LauncherModel::AddItemToDatabase(this, info, container, screen, (*cellXY)[0], (*cellXY)[1], FALSE);
+    LauncherModel::AddItemToDatabase(IContext::Probe(this), (ItemInfo*)IItemInfo::Probe(info),
+            container, screen, (*cellXY)[0], (*cellXY)[1], FALSE);
 
     if (!mRestoring) {
         Boolean res;
@@ -1966,8 +2186,8 @@ ECode Launcher::GetSpanForWidget(
 {
     VALIDATE_NOT_NULL(array);
 
-    AutoPtr<IRect> padding;
-    AppWidgetHostView::GetDefaultPaddingForWidget(context, component, NULL, (IRect**)&padding);
+    AutoPtr<IRect> padding = AppWidgetHostView::GetDefaultPaddingForWidget(context,
+            component, NULL);
     // We want to account for the extra amount of padding that we are adding to the widget
     // to ensure that it gets the full amount of space that it has requested
     Int32 left;
@@ -2103,7 +2323,7 @@ void Launcher::CompleteAddAppWidget(
             t->Start();
         }
         Boolean res;
-        IsHotseatLayout(layout, &res);
+        IsHotseatLayout(IView::Probe(layout), &res);
         ShowOutOfSpaceMessage(res);
         return;
     }
@@ -2111,7 +2331,8 @@ void Launcher::CompleteAddAppWidget(
     // Build Launcher-specific widget info and save to database
     AutoPtr<IComponentName> name;
     appWidgetInfo->GetProvider((IComponentName**)&name);
-    AutoPtr<LauncherAppWidgetInfo> launcherInfo = new LauncherAppWidgetInfo(appWidgetId, name);
+    AutoPtr<LauncherAppWidgetInfo> launcherInfo = new LauncherAppWidgetInfo();
+    launcherInfo->constructor(appWidgetId, name);
     launcherInfo->mSpanX = (*spanXY)[0];
     launcherInfo->mSpanY = (*spanXY)[1];
     launcherInfo->mMinSpanX = mPendingAddInfo->mMinSpanX;
@@ -2124,8 +2345,8 @@ void Launcher::CompleteAddAppWidget(
     if (!mRestoring) {
         if (hostView == NULL) {
             // Perform actual inflation because we're live
-            mAppWidgetHost->CreateView(this, appWidgetId, appWidgetInfo,
-                    (IAppWidgetHostView**)&(launcherInfo->mHostView));
+            IAppWidgetHost::Probe(mAppWidgetHost)->CreateView(IContext::Probe(this),
+                    appWidgetId, appWidgetInfo, (IAppWidgetHostView**)&(launcherInfo->mHostView));
             launcherInfo->mHostView->SetAppWidget(appWidgetId, appWidgetInfo);
         }
         else {
@@ -2133,16 +2354,16 @@ void Launcher::CompleteAddAppWidget(
             launcherInfo->mHostView = hostView;
         }
 
-        launcherInfo->mHostView->SetTag(launcherInfo);
-        launcherInfo->mHostView->SetVisibility(IView::VISIBLE);
+        IView::Probe(launcherInfo->mHostView)->SetTag(TO_IINTERFACE(launcherInfo));
+        IView::Probe(launcherInfo->mHostView)->SetVisibility(IView::VISIBLE);
         launcherInfo->NotifyWidgetSizeChanged(this);
 
         Boolean res;
         IsWorkspaceLocked(&res);
-        mWorkspace->AddInScreen(launcherInfo->mHostView, container, screen, (*cellXY)[0], (*cellXY)[1],
-                launcherInfo->mSpanX, launcherInfo->mSpanY, res);
+        mWorkspace->AddInScreen(IView::Probe(launcherInfo->mHostView), container, screen,
+                (*cellXY)[0], (*cellXY)[1], launcherInfo->mSpanX, launcherInfo->mSpanY, res);
 
-        AddWidgetToAutoAdvanceIfNeeded(launcherInfo->mHostView, appWidgetInfo);
+        AddWidgetToAutoAdvanceIfNeeded(IView::Probe(launcherInfo->mHostView), appWidgetInfo);
     }
     ResetAddInfo();
     return;
@@ -2159,7 +2380,9 @@ ECode Launcher::OnAttachedToWindow()
     filter->AddAction(IIntent::ACTION_USER_PRESENT);
     filter->AddAction(IIntent::ACTION_MANAGED_PROFILE_ADDED);
     filter->AddAction(IIntent::ACTION_MANAGED_PROFILE_REMOVED);
-    RegisterReceiver(mReceiver, filter);
+
+    AutoPtr<IIntent> tmp;
+    RegisterReceiver(mReceiver, filter, (IIntent**)&tmp);
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
     AutoPtr<IView> view;
@@ -2179,7 +2402,8 @@ ECode Launcher::OnDetachedFromWindow()
         UnregisterReceiver(mReceiver);
         mAttached = FALSE;
     }
-    return UpdateRunning();
+    UpdateRunning();
+    return NOERROR;
 }
 
 ECode Launcher::OnWindowVisibilityChanged(
@@ -2194,7 +2418,7 @@ ECode Launcher::OnWindowVisibilityChanged(
         mAppsCustomizeTabHost->OnWindowVisible();
         if (!mWorkspaceLoading) {
             AutoPtr<IViewTreeObserver> observer;
-            mWorkspace->GetViewTreeObserver((IViewTreeObserver**)&observer);
+            IView::Probe(mWorkspace)->GetViewTreeObserver((IViewTreeObserver**)&observer);
             // We want to let Launcher draw itself at least once before we force it to build
             // layers on all the workspace pages, so that transitioning to Launcher from other
             // apps is nice and speedy.
@@ -2215,8 +2439,11 @@ void Launcher::SendAdvanceMessage(
     mHandler->RemoveMessages(ADVANCE_MSG);
     AutoPtr<IMessage> msg;
     mHandler->ObtainMessage(ADVANCE_MSG, (IMessage**)&msg);
-    mHandler->SendMessageDelayed(msg, delay);
-    mAutoAdvanceSentTime = System::CurrentTimeMillis();
+    Boolean res;
+    mHandler->SendMessageDelayed(msg, delay, &res);
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetCurrentTimeMillis(&mAutoAdvanceSentTime);
 }
 
 void Launcher::UpdateRunning()
@@ -2233,8 +2460,12 @@ void Launcher::UpdateRunning()
             Boolean res;
             mWidgetsToAdvance->IsEmpty(&res);
             if (!res) {
-                mAutoAdvanceTimeLeft = Math::Max(0, mAdvanceInterval -
-                        (System::CurrentTimeMillis() - mAutoAdvanceSentTime));
+                AutoPtr<ISystem> system;
+                CSystem::AcquireSingleton((ISystem**)&system);
+                Int64 ctime;
+                system->GetCurrentTimeMillis(&ctime);
+                mAutoAdvanceTimeLeft = Elastos::Core::Math::Max((Int64)0, mAdvanceInterval -
+                        (ctime - mAutoAdvanceSentTime));
             }
             mHandler->RemoveMessages(ADVANCE_MSG);
             mHandler->RemoveMessages(0); // Remove messages sent using postDelayed()
@@ -2276,7 +2507,7 @@ ECode Launcher::RemoveAppWidget(
     /* [in] */ ILauncherAppWidgetInfo* launcherInfo)
 {
     LauncherAppWidgetInfo* info = (LauncherAppWidgetInfo*)launcherInfo;
-    RemoveWidgetToAutoAdvance(info->mHostView);
+    RemoveWidgetToAutoAdvance(IView::Probe(info->mHostView));
     info->mHostView = NULL;
     return NOERROR;
 }
@@ -2289,8 +2520,13 @@ ECode Launcher::ShowOutOfSpaceMessage(
             Elastos::Droid::Launcher2::R::string::out_of_space);
     String str;
     GetString(strId, &str);
+
+    AutoPtr<IToastHelper> helper;
+    CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
     AutoPtr<IToast> toast;
-    Toast::MakeText(this, str, IToast::LENGTH_SHORT, (IToast**)&toast);
+    helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
+
     return toast->Show();
 }
 
@@ -2330,15 +2566,16 @@ ECode Launcher::OnNewIntent(
 {
     Int64 startTime = 0;
     if (DEBUG_RESUME_TIME) {
-        startTime = System::CurrentTimeMillis();
+        AutoPtr<ISystem> system;
+        CSystem::AcquireSingleton((ISystem**)&system);
+        system->GetCurrentTimeMillis(&startTime);
     }
     Activity::OnNewIntent(intent);
 
     // Close the menu
     String action;
     intent->GetAction(&action);
-    Boolean res;
-    if (IIntent::ACTION_MAIN.Equals(action, &res), res) {
+    if (IIntent::ACTION_MAIN.Equals(action)) {
         // also will cancel mWaitingForResult.
         CloseSystemDialogs();
 
@@ -2350,10 +2587,10 @@ ECode Launcher::OnNewIntent(
 
         AutoPtr<IRunnable> processIntent = new MyRunnable6(this, alreadyOnHome);
         Boolean res;
-        if (alreadyOnHome && (mWorkspace->HasWindowFocus(&res), !res)) {
+        if (alreadyOnHome && (IView::Probe(mWorkspace)->HasWindowFocus(&res), !res)) {
             // Delay processing of the intent to allow the status bar animation to finish
             // first in order to avoid janky animations.
-            mWorkspace->PostDelayed(processIntent, 350);
+            IView::Probe(mWorkspace)->PostDelayed(processIntent, 350, &res);
         }
         else {
             // Process the intent immediately.
@@ -2362,7 +2599,11 @@ ECode Launcher::OnNewIntent(
 
     }
     if (DEBUG_RESUME_TIME) {
-        Slogger::D(TAG, "Time spent in onNewIntent: " + (System.currentTimeMillis() - startTime));
+        AutoPtr<ISystem> system;
+        CSystem::AcquireSingleton((ISystem**)&system);
+        Int64 ctime;
+        system->GetCurrentTimeMillis(&ctime);
+        Slogger::D(TAG, "Time spent in onNewIntent: " + (ctime - startTime));
     }
     return NOERROR;
 }
@@ -2372,10 +2613,10 @@ ECode Launcher::OnRestoreInstanceState(
 {
     Activity::OnRestoreInstanceState(state);
     Int32 size;
-    mSynchronouslyBoundPages->GetSize(size);
+    mSynchronouslyBoundPages->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
-        mSynchronouslyBoundPages->Get((IInterface**)&obj);
+        mSynchronouslyBoundPages->Get(i, (IInterface**)&obj);
         AutoPtr<IInteger32> intObj = IInteger32::Probe(obj);
         Int32 page;
         intObj->GetValue(&page);
@@ -2389,12 +2630,14 @@ ECode Launcher::OnSaveInstanceState(
     /* [in] */ IBundle* outState)
 {
     Int32 page;
-    mWorkspace->GetNextPage(&page);
+    assert(0);
+    //IPagedView::Probe(mWorkspace)->GetNextPage(&page);
     outState->PutInt32(RUNTIME_STATE_CURRENT_SCREEN, page);
     Activity::OnSaveInstanceState(outState);
 
     Int32 ordinal;
-    mState->Ordinal(&ordinal);
+    assert(0);
+    //mState->Ordinal(&ordinal);
     outState->PutInt32(RUNTIME_STATE, ordinal);
     // We close any open folder since it will not be re-opened, and we need to make sure
     // this state is reflected.
@@ -2408,24 +2651,26 @@ ECode Launcher::OnSaveInstanceState(
         outState->PutInt32(RUNTIME_STATE_PENDING_ADD_CELL_Y, mPendingAddInfo->mCellY);
         outState->PutInt32(RUNTIME_STATE_PENDING_ADD_SPAN_X, mPendingAddInfo->mSpanX);
         outState->PutInt32(RUNTIME_STATE_PENDING_ADD_SPAN_Y, mPendingAddInfo->mSpanY);
-        outState->PutParcelable(RUNTIME_STATE_PENDING_ADD_WIDGET_INFO, mPendingAddWidgetInfo);
+        outState->PutParcelable(RUNTIME_STATE_PENDING_ADD_WIDGET_INFO, IParcelable::Probe(mPendingAddWidgetInfo));
         outState->PutInt32(RUNTIME_STATE_PENDING_ADD_WIDGET_ID, mPendingAddWidgetId);
     }
 
     if (mFolderInfo != NULL && mWaitingForResult) {
         outState->PutBoolean(RUNTIME_STATE_PENDING_FOLDER_RENAME, TRUE);
-        outState->PutInt64(RUNTIME_STATE_PENDING_FOLDER_RENAME_ID, mFolderInfo->mId);
+        outState->PutInt64(RUNTIME_STATE_PENDING_FOLDER_RENAME_ID, ((FolderInfo*)mFolderInfo.Get())->mId);
     }
 
     // Save the current AppsCustomize tab
     if (mAppsCustomizeTabHost != NULL) {
         String currentTabTag;
-        mAppsCustomizeTabHost->GetCurrentTabTag(&currentTabTag);
-        if (!currentTabTag->IsNull()) {
+        assert(0);
+        //mAppsCustomizeTabHost->GetCurrentTabTag(&currentTabTag);
+        if (!currentTabTag.IsNull()) {
             outState->PutString(String("apps_customize_currentTab"), currentTabTag);
         }
         Int32 currentIndex;
-        mAppsCustomizeContent->GetSaveInstanceStateIndex(&currentIndex);
+        assert(0);
+        //mAppsCustomizeContent->GetSaveInstanceStateIndex(&currentIndex);
         outState->PutInt32(String("apps_customize_currentIndex"), currentIndex);
     }
     return NOERROR;
@@ -2438,18 +2683,20 @@ ECode Launcher::OnDestroy()
     // Remove all pending runnables
     mHandler->RemoveMessages(ADVANCE_MSG);
     mHandler->RemoveMessages(0);
-    mWorkspace->RemoveCallbacks(mBuildLayersRunnable);
+    Boolean res;
+    IView::Probe(mWorkspace)->RemoveCallbacks(mBuildLayersRunnable, &res);
 
     // Stop callbacks from LauncherModel
     AutoPtr<IApplication> appl;
     GetApplication((IApplication**)&appl);
     AutoPtr<ILauncherApplication> app = ILauncherApplication::Probe(appl);
-    mModel->StopLoader();
-    app->SetLauncher(NULL);
+    assert(0);
+    //mModel->StopLoader();
+    //app->SetLauncher(NULL);
 
     //try {
-    if ((ECode)E_NULL_POINTER_EXCEPTION == mAppWidgetHost->StopListening()){
-        Slogger::W(TAG, "problem while stopping AppWidgetHost during Launcher destruction", ex);
+    if ((ECode)E_NULL_POINTER_EXCEPTION == IAppWidgetHost::Probe(mAppWidgetHost)->StopListening()){
+        Slogger::W(TAG, "problem while stopping AppWidgetHost during Launcher destruction");
     }
     //} catch (NullPointerException ex) {
         //Log.w(TAG, "problem while stopping AppWidgetHost during Launcher destruction", ex);
@@ -2467,7 +2714,8 @@ ECode Launcher::OnDestroy()
     // Disconnect any of the callbacks and drawables associated with ItemInfos on the workspace
     // to prevent leaking Launcher activities on orientation change.
     if (mModel != NULL) {
-        mModel->UnbindItemInfosAndClearQueuedBindRunnables();
+        assert(0);
+        //mModel->UnbindItemInfosAndClearQueuedBindRunnables();
     }
 
     AutoPtr<IContentResolver> resolver;
@@ -2477,14 +2725,15 @@ ECode Launcher::OnDestroy()
 
     mDragLayer->ClearAllResizeFrames();
     AutoPtr<IViewParent> p;
-    mWorkspace->GetParent((IViewParent**)&p);
+    IView::Probe(mWorkspace)->GetParent((IViewParent**)&p);
     IViewGroup::Probe(p)->RemoveAllViews();
 
-    mWorkspace->RemoveAllViews();
+    IViewGroup::Probe(mWorkspace)->RemoveAllViews();
     mWorkspace = NULL;
     mDragController = NULL;
 
-    return LauncherAnimUtils::OnDestroyActivity();
+    LauncherAnimUtils::OnDestroyActivity();
+    return NOERROR;
 }
 
 ECode Launcher::GetDragController(
@@ -2515,13 +2764,15 @@ ECode Launcher::StartSearch(
 {
     ShowWorkspace(TRUE);
 
-    if (initialQuery == NULL) {
+    String _initialQuery;
+    if (initialQuery.IsNull()) {
         // Use any text typed in the launcher as the initial query
-        GetTypedText(&initialQuery);
+        _initialQuery = GetTypedText();
     }
     if (appSearchData == NULL) {
         CBundle::New((IBundle**)&appSearchData);
-        appSearchData->PutString(ISearch:SOURCE, String("launcher-search"));
+        assert(0);
+        //appSearchData->PutString(ISearch::SOURCE, String("launcher-search"));
     }
     AutoPtr<IRect> sourceBounds;
     CRect::New((IRect**)&sourceBounds);
@@ -2529,7 +2780,7 @@ ECode Launcher::StartSearch(
         mSearchDropTargetBar->GetSearchBarBounds((IRect**)&sourceBounds);
     }
 
-    return StartGlobalSearch(initialQuery, selectInitialQuery, appSearchData, sourceBounds);
+    return StartGlobalSearch(_initialQuery, selectInitialQuery, appSearchData, sourceBounds);
 }
 
 ECode Launcher::StartGlobalSearch(
@@ -2553,7 +2804,7 @@ ECode Launcher::StartGlobalSearch(
     intent->SetComponent(globalSearchActivity);
     // Make sure that we have a Bundle to put source in
     if (appSearchData == NULL) {
-        CBundlPe::New((IBundle**)&appSearchData);
+        CBundle::New((IBundle**)&appSearchData);
     }
     else {
         CBundle::New(appSearchData, (IBundle**)&appSearchData);
@@ -2575,9 +2826,10 @@ ECode Launcher::StartGlobalSearch(
     }
     intent->SetSourceBounds(sourceBounds);
     //try {
-    if ((ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION == StartActivity(intent)) {
-        Slogger::E(TAG, "Global search activity not found: " + globalSearchActivity);
-    }
+    assert(0);
+    // if ((ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION == StartActivity(intent)) {
+    //     Slogger::E(TAG, "Global search activity not found: " + globalSearchActivity);
+    // }
     //} catch (ActivityNotFoundException ex) {
         //Log.e(TAG, "Global search activity not found: " + globalSearchActivity);
     //}
@@ -2597,20 +2849,23 @@ ECode Launcher::OnCreateOptionsMenu(
         return NOERROR;
     }
 
-    Activity::OnCreateOptionsMenu(menu);
+    Activity::OnCreateOptionsMenu(menu, &res);
 
     AutoPtr<IIntent> manageApps;
     CIntent::New(ISettings::ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS, (IIntent**)&manageApps);
     manageApps->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK
             | IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
     AutoPtr<IIntent> settings;
-    CIntent::New(android.provider.Settings.ACTION_SETTINGS, (IIntent**)&settings);
+    CIntent::New(ISettings::ACTION_SETTINGS, (IIntent**)&settings);
     settings->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK
             | IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
     String helpUrl;
     GetString(Elastos::Droid::Launcher2::R::string::help_url, &helpUrl);
+
+    AutoPtr<IUriHelper> helper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     AutoPtr<IUri> uri;
-    Uri::Parse(helpUrl, (IUri**)&uri);
+    helper->Parse(helpUrl, (IUri**)&uri);
     AutoPtr<IIntent> help;
     CIntent::New(IIntent::ACTION_VIEW, uri, (IIntent**)&help);
     help->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK
@@ -2619,29 +2874,28 @@ ECode Launcher::OnCreateOptionsMenu(
     AutoPtr<IMenuItem> item;
     menu->Add(MENU_GROUP_WALLPAPER, MENU_WALLPAPER_SETTINGS,
             0, Elastos::Droid::Launcher2::R::string::menu_wallpaper, (IMenuItem**)&item);
-    item->SetIcon(android.R.drawable.ic_menu_gallery);
+    item->SetIcon(Elastos::Droid::R::drawable::ic_menu_gallery);
     item->SetAlphabeticShortcut('W');
 
     AutoPtr<IMenuItem> item2;
     menu->Add(0, MENU_MANAGE_APPS, 0,
             Elastos::Droid::Launcher2::R::string::menu_manage_apps, (IMenuItem**)&item2);
-    item2->SetIcon(android.R.drawable.ic_menu_manage);
+    item2->SetIcon(Elastos::Droid::R::drawable::ic_menu_manage);
     item2->SetIntent(manageApps);
     item2->SetAlphabeticShortcut('M');
 
     AutoPtr<IMenuItem> item3;
     menu->Add(0, MENU_SYSTEM_SETTINGS, 0,
             Elastos::Droid::Launcher2::R::string::menu_settings, (IMenuItem**)&item3);
-    item3->SetIcon(android.R.drawable.ic_menu_preferences);
+    item3->SetIcon(Elastos::Droid::R::drawable::ic_menu_preferences);
     item3->SetIntent(settings);
     item3->SetAlphabeticShortcut('P');
 
-    helpUrl->IsEmpty(&res);
-    if (!res) {
+    if (!helpUrl.IsEmpty()) {
         AutoPtr<IMenuItem> item4;
         menu->Add(0, MENU_HELP, 0,
                 Elastos::Droid::Launcher2::R::string::menu_help, (IMenuItem**)&item4);
-        item4->SetIcon(android.R.drawable.ic_menu_help);
+        item4->SetIcon(Elastos::Droid::R::drawable::ic_menu_help);
         item4->SetIntent(help);
         item4->SetAlphabeticShortcut('H');
     }
@@ -2655,9 +2909,8 @@ ECode Launcher::OnPrepareOptionsMenu(
 {
     VALIDATE_NOT_NULL(result);
 
-    Activity::OnPrepareOptionsMenu(menu);
-
     Boolean res;
+    Activity::OnPrepareOptionsMenu(menu, &res);
     mAppsCustomizeTabHost->IsTransitioning(&res);
     if (res) {
         *result = FALSE;
@@ -2696,7 +2949,7 @@ ECode Launcher::OnSearchRequested(
 {
     VALIDATE_NOT_NULL(result);
 
-    StartSearch(NULL, FALSE, NULL, TRUE);
+    StartSearch(String(NULL), FALSE, NULL, TRUE);
     // Use a custom animation for launching search
     *result = TRUE;
     return NOERROR;
@@ -2715,9 +2968,9 @@ void Launcher::ResetAddInfo()
 {
     mPendingAddInfo->mContainer = IItemInfo::NO_ID;
     mPendingAddInfo->mScreen = -1;
-    mPendingAddInfo->mCellX = mPendingAddInfo.cellY = -1;
-    mPendingAddInfo->mSpanX = mPendingAddInfo.spanY = -1;
-    mPendingAddInfo->mMinSpanX = mPendingAddInfo.minSpanY = -1;
+    mPendingAddInfo->mCellX = mPendingAddInfo->mCellY = -1;
+    mPendingAddInfo->mSpanX = mPendingAddInfo->mSpanY = -1;
+    mPendingAddInfo->mMinSpanX = mPendingAddInfo->mMinSpanY = -1;
     mPendingAddInfo->mDropPos = NULL;
     return;
 }
@@ -2787,11 +3040,11 @@ ECode Launcher::AddAppWidgetFromDrop(
     mPendingAddInfo->mMinSpanX = _info->mMinSpanX;
     mPendingAddInfo->mMinSpanY = _info->mMinSpanY;
 
-    if (cell != null) {
+    if (cell != NULL) {
         mPendingAddInfo->mCellX = (*cell)[0];
         mPendingAddInfo->mCellY = (*cell)[1];
     }
-    if (span != null) {
+    if (span != NULL) {
         mPendingAddInfo->mSpanX = (*span)[0];
         mPendingAddInfo->mSpanY = (*span)[1];
     }
@@ -2800,32 +3053,35 @@ ECode Launcher::AddAppWidgetFromDrop(
     Int32 appWidgetId;
     if (hostView != NULL) {
         hostView->GetAppWidgetId(&appWidgetId);
-        AddAppWidgetImpl(appWidgetId, info, hostView, _info->mInfo);
+        AddAppWidgetImpl(appWidgetId, IItemInfo::Probe(info), hostView, _info->mInfo);
     }
     else {
         // In this case, we either need to start an activity to get permission to bind
         // the widget, or we need to start an activity to configure the widget, or both.
         AutoPtr<ILauncherAppWidgetHost> host;
         GetAppWidgetHost((ILauncherAppWidgetHost**)&host);
-        host->AllocateAppWidgetId(&appWidgetId);
+        assert(0);
+        //IAppWidgetHost::Probe(host)->AllocateAppWidgetId(&appWidgetId);
 
         AutoPtr<IUserHandle> handle;
-        _info->mInfo->GetProfile((IUserHandle**)handle);
+        _info->mInfo->GetProfile((IUserHandle**)&handle);
         Boolean success;
         mAppWidgetManager->BindAppWidgetIdIfAllowed(appWidgetId,
                 handle, _info->mComponentName, _info->mBindOptions, &success);
         if (success) {
-            AddAppWidgetImpl(appWidgetId, info, NULL, _info->mInfo);
+            AddAppWidgetImpl(appWidgetId, IItemInfo::Probe(info), NULL, _info->mInfo);
         }
         else {
             mPendingAddWidgetInfo = _info->mInfo;
             AutoPtr<IIntent> intent;
             CIntent::New(IAppWidgetManager::ACTION_APPWIDGET_BIND, (IIntent**)&intent);
             intent->PutExtra(IAppWidgetManager::EXTRA_APPWIDGET_ID, appWidgetId);
-            intent->PutExtra(IAppWidgetManager::EXTRA_APPWIDGET_PROVIDER, _info->mComponentName);
+            intent->PutExtra(IAppWidgetManager::EXTRA_APPWIDGET_PROVIDER,
+                    IParcelable::Probe(_info->mComponentName));
             AutoPtr<IUserHandle> handle2;
-            _info->mInfo->GetProfile((IUserHandle**)handle2);
-            intent->PutExtra(IAppWidgetManager::EXTRA_APPWIDGET_PROVIDER_PROFILE, handle2);
+            _info->mInfo->GetProfile((IUserHandle**)&handle2);
+            intent->PutExtra(IAppWidgetManager::EXTRA_APPWIDGET_PROVIDER_PROFILE,
+                    IParcelable::Probe(handle2));
             // TODO: we need to make sure that this accounts for the options bundle.
             // intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options);
             StartActivityForResult(intent, REQUEST_BIND_APPWIDGET);
@@ -2847,14 +3103,14 @@ ECode Launcher::ProcessShortcut(
     intent->GetStringExtra(IIntent::EXTRA_SHORTCUT_NAME, &shortcutName);
 
     Boolean res;
-    if (!applicationName.IsNull() && (applicationName.Equals(shortcutName, &res), res)) {
+    if (!applicationName.IsNull() && (applicationName.Equals(shortcutName))) {
         AutoPtr<IIntent> mainIntent;
         CIntent::New(IIntent::ACTION_MAIN, NULL, (IIntent**)&mainIntent);
         mainIntent->AddCategory(IIntent::CATEGORY_LAUNCHER);
 
         AutoPtr<IIntent> pickIntent;
         CIntent::New(IIntent::ACTION_PICK_ACTIVITY, (IIntent**)&pickIntent);
-        pickIntent->PutExtra(IIntent::EXTRA_INTENT, mainIntent);
+        pickIntent->PutExtra(IIntent::EXTRA_INTENT, IParcelable::Probe(mainIntent));
         AutoPtr<ICharSequence> cchar;
         GetText(Elastos::Droid::Launcher2::R::string::title_select_application, (ICharSequence**)&cchar);
         pickIntent->PutExtra(IIntent::EXTRA_TITLE, cchar);
@@ -2888,15 +3144,17 @@ ECode Launcher::AddFolder(
     // Update the model
     LauncherModel::AddItemToDatabase(this, folderInfo, container, screen, cellX, cellY,
             FALSE);
-    sFolders->Put(folderInfo->mId, folderInfo);
+    AutoPtr<IInteger64> id = CoreUtils::Convert(folderInfo->mId);
+    sFolders->Put(TO_IINTERFACE(id), TO_IINTERFACE(folderInfo));
 
     // Create the view
     AutoPtr<IFolderIcon> newFolder;
-    FolderIcon::FromXml(Elastos::Droid::Launcher2::R::layout::folder_icon, this,
-            layout, folderInfo, mIconCache, (IFolderIcon**)&newFolder);
+    FolderIcon::FromXml(Elastos::Droid::Launcher2::R::layout::folder_icon, ILauncher::Probe(this),
+            IViewGroup::Probe(layout), IFolderInfo::Probe(folderInfo), mIconCache,
+            (IFolderIcon**)&newFolder);
     Boolean res;
-    isWorkspaceLocked(&res);
-    mWorkspace->AddInScreen(newFolder, container, screen, cellX, cellY, 1, 1, res);
+    IsWorkspaceLocked(&res);
+    mWorkspace->AddInScreen(IView::Probe(newFolder), container, screen, cellX, cellY, 1, 1, res);
     *icon = newFolder;
     REFCOUNT_ADD(*icon);
     return NOERROR;
@@ -2906,7 +3164,8 @@ ECode Launcher::RemoveFolder(
     /* [in] */ IFolderInfo* folder)
 {
     FolderInfo* _folder = (FolderInfo*)folder;
-    return sFolders->Remove(_folder->mId);
+    AutoPtr<IInteger64> id = CoreUtils::Convert(_folder->mId);
+    return sFolders->Remove(TO_IINTERFACE(id));
 }
 
 void Launcher::StartWallpaper()
@@ -2917,8 +3176,11 @@ void Launcher::StartWallpaper()
 
     AutoPtr<ICharSequence> cchar;
     GetText(Elastos::Droid::Launcher2::R::string::chooser_wallpaper, (ICharSequence**)&cchar);
+
+    AutoPtr<IIntentHelper> helper;
+    CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
     AutoPtr<IIntent> chooser;
-    Intent::CreateChooser(pickWallpaper, cchar, (IIntent**)&chooser);
+    helper->CreateChooser(pickWallpaper, cchar, (IIntent**)&chooser);
     // NOTE: Adds a configure option to the chooser if the wallpaper supports it
     //       Removed in Eclair MR1
 //        WallpaperManager wm = (WallpaperManager)
@@ -2938,8 +3200,10 @@ void Launcher::RegisterContentObservers()
 {
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
-    resolver->RegisterContentObserver(ILauncherProvider::CONTENT_APPWIDGET_RESET_URI,
-            TRUE, mWidgetObserver);
+
+    AutoPtr<IUri> uri;
+    LauncherProvider::GetCONTENT_APPWIDGET_RESET_URI((IUri**)&uri);
+    resolver->RegisterContentObserver(uri, TRUE, mWidgetObserver);
 }
 
 ECode Launcher::DispatchKeyEvent(
@@ -2954,14 +3218,12 @@ ECode Launcher::DispatchKeyEvent(
         Int32 code;
         event->GetKeyCode(&code);
         switch (code) {
-            case IKeyEvent:KEYCODE_HOME:
+            case IKeyEvent::KEYCODE_HOME:
                 *result = TRUE;
                 return NOERROR;
-            case IKeyEvent:KEYCODE_VOLUME_DOWN:
+            case IKeyEvent::KEYCODE_VOLUME_DOWN:
             {
-                Boolean res;
-                IsPropertyEnabled(DUMP_STATE_PROPERTY, &res);
-                if (res) {
+                if (IsPropertyEnabled(DUMP_STATE_PROPERTY)) {
                     DumpState();
                     *result = TRUE;
                     return NOERROR;
@@ -3015,7 +3277,7 @@ ECode Launcher::OnBackPressed()
 void Launcher::OnAppWidgetReset()
 {
     if (mAppWidgetHost != NULL) {
-        mAppWidgetHost->StartListening();
+        IAppWidgetHost::Probe(mAppWidgetHost)->StartListening();
     }
 }
 
@@ -3097,41 +3359,45 @@ ECode Launcher::OnTouch(
 ECode Launcher::OnClickSearchButton(
     /* [in] */ IView* v)
 {
-    v->PerformHapticFeedback(IHapticFeedbackConstants::VIRTUAL_KEY);
-
-    return OnSearchRequested();
+    Boolean res;
+    v->PerformHapticFeedback(IHapticFeedbackConstants::VIRTUAL_KEY, &res);
+    OnSearchRequested(&res);
+    return NOERROR;
 }
 
 ECode Launcher::OnClickVoiceButton(
     /* [in] */ IView* v)
 {
-    v->PerformHapticFeedback(IHapticFeedbackConstants::VIRTUAL_KEY);
+    Boolean res;
+    v->PerformHapticFeedback(IHapticFeedbackConstants::VIRTUAL_KEY, &res);
 
-    // try {
-    AutoPtr<IInterface> obj;
-    ECode ec;
-    FAIL_GOTO(ec = GetSystemService(IContext::SEARCH_SERVICE, &obj), ERROR)
-    AutoPtr<ISearchManager> searchManager = ISearchManager::Probe(obj);
-    AutoPtr<IComponentName> activityName;
-    FAIL_GOTO(ec = searchManager->GetGlobalSearchActivity((IComponentName**)&activityName), ERROR)
-    AutoPtr<IIntent> intent;
-    CIntent::New(IRecognizerIntent::ACTION_WEB_SEARCH, (IIntent**)&intent);
-    FAIL_GOTO(ec = intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK), ERROR)
-    if (activityName != NULL) {
-        String pname;
-        FAIL_GOTO(ec = activityName->GetPackageName(&pname), ERROR)
-        FAIL_GOTO(ec = intent->SetPackage(pname), ERROR)
-    }
-    FAIL_GOTO(ec = StartActivity(NULL, intent, String("onClickVoiceButton")), ERROR)
-    // } catch (ActivityNotFoundException e) {
-ERROR:
-    if ((ECode)ec == E_ACTIVITY_NOT_FOUND_EXCEPTION) {
-        AutoPtr<IIntent> intent;
-        CIntent::New(IRecognizerIntent::ACTION_WEB_SEARCH, (IIntent**)&intent);
-        intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
-        StartActivitySafely(NULL, intent, String("onClickVoiceButton"));
-    }
-    // }
+    assert(0);
+//     // try {
+//     AutoPtr<IInterface> obj;
+//     ECode ec;
+//     FAIL_GOTO(ec = GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj), ERROR)
+//     AutoPtr<ISearchManager> searchManager = ISearchManager::Probe(obj);
+//     AutoPtr<IComponentName> activityName;
+//     FAIL_GOTO(ec = searchManager->GetGlobalSearchActivity((IComponentName**)&activityName), ERROR)
+//     AutoPtr<IIntent> intent;
+//     CIntent::New(IRecognizerIntent::ACTION_WEB_SEARCH, (IIntent**)&intent);
+//     FAIL_GOTO(ec = intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK), ERROR)
+//     if (activityName != NULL) {
+//         String pname;
+//         FAIL_GOTO(ec = activityName->GetPackageName(&pname), ERROR)
+//         FAIL_GOTO(ec = intent->SetPackage(pname), ERROR)
+//     }
+//     AutoPtr<ICharSequence> cchar = CoreUtils::Convert(String("onClickVoiceButton"));
+//     FAIL_GOTO(ec = StartActivity(NULL, intent, cchar, &res), ERROR)
+//     // } catch (ActivityNotFoundException e) {
+// ERROR:
+//     if ((ECode)ec == E_ACTIVITY_NOT_FOUND_EXCEPTION) {
+//         AutoPtr<IIntent> intent;
+//         CIntent::New(IRecognizerIntent::ACTION_WEB_SEARCH, (IIntent**)&intent);
+//         intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
+//         StartActivitySafely(NULL, intent, String("onClickVoiceButton"));
+//     }
+//     // }
     return NOERROR;
 }
 
@@ -3145,18 +3411,22 @@ ECode Launcher::OnTouchDownAllAppsButton(
     /* [in] */ IView* v)
 {
     // Provide the same haptic feedback that the system offers for virtual keys.
-    return v->PerformHapticFeedback(IHapticFeedbackConstants::VIRTUAL_KEY);
+    Boolean res;
+    return v->PerformHapticFeedback(IHapticFeedbackConstants::VIRTUAL_KEY, &res);
 }
 
 ECode Launcher::OnClickAppMarketButton(
     /* [in] */ IView* v)
 {
     if (mAppMarketIntent != NULL) {
-        return StartActivitySafely(v, mAppMarketIntent, String("app market"));
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(String("app market"));
+        Boolean res;
+        return StartActivitySafely(v, mAppMarketIntent, cchar, &res);
     }
     else {
         Slogger::E(TAG, "Invalid app market intent.");
     }
+    return NOERROR;
 }
 
 ECode Launcher::StartApplicationDetailsActivity(
@@ -3169,22 +3439,30 @@ ECode Launcher::StartApplicationDetailsActivity(
     //try {
     ECode ec = launcherApps->StartAppDetailsActivity(componentName, user, NULL, NULL);
     //} catch (SecurityException e) {
-    if ((ECode)ec == E_SECURITY_EXCEPTION) {
-        AutoPtr<IToast> toast;
-        Toast::MakeText(this,
-                Elastos::Droid::Launcher2::R::string::activity_not_found,
-                IToast::LENGTH_SHORT, (IToast**)&toast);
-        toast->Show();
+    if (ec == (ECode)E_SECURITY_EXCEPTION) {
+        AutoPtr<IToastHelper> helper;
+        CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+        assert(0);
+        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
+        //         Elastos::Droid::Launcher2::R::string::activity_not_found);
+        // AutoPtr<IToast> toast;
+        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
+
+        // toast->Show();
         Slogger::E(TAG, "Launcher does not have permission to launch settings");
     }
     //} catch (ActivityNotFoundException e) {
-    if ((ECode)ec == E_ACTIVITY_NOT_FOUND_EXCEPTION) {
-        AutoPtr<IToast> toast;
-        Toast::MakeText(this,
-                Elastos::Droid::Launcher2::R::string::activity_not_found,
-                IToast::LENGTH_SHORT, (IToast**)&toast);
-        toast->Show();
-        Slogger::(TAG, "Unable to launch settings");
+    if (ec == (ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION) {
+        AutoPtr<IToastHelper> helper;
+        CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+        assert(0);
+        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
+        //         Elastos::Droid::Launcher2::R::string::activity_not_found);
+        // AutoPtr<IToast> toast;
+        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
+
+        // toast->Show();
+        Slogger::E(TAG, "Unable to launch settings");
     }
     //}
     return NOERROR;
@@ -3199,25 +3477,32 @@ ECode Launcher::StartApplicationUninstallActivity(
         // System applications cannot be installed. For now, show a toast explaining that.
         // We may give them the option of disabling apps this way.
         Int32 messageId = Elastos::Droid::Launcher2::R::string::uninstall_system_app_text;
-        AutoPtr<IToast> toast;
-        Toast::MakeText(this, messageId, IToast::LENGTH_SHORT, (IToast**)&toast);
-        return toast->Show();
+        AutoPtr<IToastHelper> helper;
+        CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+        assert(0);
+        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(messageId);
+        // AutoPtr<IToast> toast;
+        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
+        // return toast->Show();
+        return NOERROR;
     }
     else {
         String packageName;
         info->mComponentName->GetPackageName(&packageName);
         String className;
         info->mComponentName->GetClassName(&className);
+        AutoPtr<IUriHelper> helper;
+        CUriHelper::AcquireSingleton((IUriHelper**)&helper);
         AutoPtr<IUri> uri;
-        Uri::FromParts(String("package"), packageName, className, (IUri**)&uri);
+        helper->FromParts(String("package"), packageName, className, (IUri**)&uri);
         AutoPtr<IIntent> intent;
         CIntent::New(IIntent::ACTION_DELETE, uri, (IIntent**)&intent);
         intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK |
                 IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         if (user != NULL) {
-            intent->PutExtra(IIntent::EXTRA_USER, user);
+            intent->PutExtra(IIntent::EXTRA_USER, IParcelable::Probe(user));
         }
-        return StartActivity(intent);
+        return Activity::StartActivity(intent);
     }
     return NOERROR;
 }
@@ -3230,82 +3515,95 @@ ECode Launcher::StartActivity(
 
 {
     VALIDATE_NOT_NULL(result);
+    assert(0);
+//     intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
 
-    intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
+//     //try {
+//     // Only launch using the new animation if the shortcut has not opted out (this is a
+//     // private contract between launcher and may be ignored in the future).
+//     ECode ec;
+//     Boolean res;
+//     Boolean useLaunchAnimation = (v != NULL) &&
+//             (intent->HasExtra(INTENT_EXTRA_IGNORE_LAUNCH_ANIMATION, &res), !res);
+//     AutoPtr<IParcelable> parcelable;
+//     FAIL_GOTO(ec = intent->GetParcelableExtra(IItemInfo::EXTRA_PROFILE,
+//             (IParcelable**)&parcelable), ERROR)
+//     AutoPtr<IUserHandle> user = IUserHandle::Probe(parcelable);
+//     AutoPtr<IInterface> obj;
+//     FAIL_GOTO(ec = GetSystemService(IContext::LAUNCHER_APPS_SERVICE, (IInterface**)&obj), ERROR)
+//     AutoPtr<ILauncherApps> launcherApps = ILauncherApps::Probe(obj);
+//     if (useLaunchAnimation) {
+//         Int32 width;
+//         FAIL_GOTO(ec = v->GetMeasuredWidth(&width), ERROR)
+//         Int32 height;
+//         FAIL_GOTO(ec = v->GetMeasuredHeight(&height), ERROR)
 
-    //try {
-    // Only launch using the new animation if the shortcut has not opted out (this is a
-    // private contract between launcher and may be ignored in the future).
-    ECode ec;
-    Boolean res;
-    Boolean useLaunchAnimation = (v != NULL) &&
-            (intent->HasExtra(INTENT_EXTRA_IGNORE_LAUNCH_ANIMATION, &res), !res);
-    AutoPtr<IParcelable> parcelable;
-    FAIL_GOTO(ec = intent->GetParcelableExtra(IApplicationInfo::EXTRA_PROFILE,
-            (IParcelable**)&parcelable), ERROR)
-    AutoPtr<IUserHandle> user = IUserHandle::Probe(parcelable);
-    AutoPtr<IInterface> obj;
-    FAIL_GOTO(ec = GetSystemService(IContext::LAUNCHER_APPS_SERVICE, (IInterface**)&obj), ERROR)
-    AutoPtr<ILauncherApps> launcherApps = ILauncherApps::Probe(obj);
-    if (useLaunchAnimation) {
-        Int32 width;
-        FAIL_GOTO(ec = v->GetMeasuredWidth(&width), ERROR)
-        Int32 height;
-        FAIL_GOTO(ec = v->GetMeasuredHeight(&height), ERROR)
-        AutoPtr<IActivityOptions> opts;
-        FAIL_GOTO(ec = ActivityOptions::MakeScaleUpAnimation(v, 0, 0,
-                width, height, (IActivityOptions**)&opts), ERROR)
+//         AutoPtr<IActivityOptionsHelper> helper;
+//         CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&helper);
+//         AutoPtr<IActivityOptions> opts;
+//         FAIL_GOTO(ec = helper->MakeScaleUpAnimation(v, 0, 0, width, height,
+//                 (IActivityOptions**)&opts), ERROR)
 
-        AutoPtr<IUserHandle> _user;
-        FAIL_GOTO(ec = Process::MyUserHandle((IUserHandle**)&_user), ERROR)
-        Boolean res;
-        if (user == NULL || (user.Equals(_user, &res), res)) {
-            // Could be launching some bookkeeping activity
-            AutoPtr<IBundle> bundle;
-            FAIL_GOTO(ec = opts->ToBundle((IBundle**)&bundle), ERROR)
-            FAIL_GOTO(ec = StartActivity(intent, bundle), ERROR)
-        }
-        else {
-            AutoPtr<IComponentName> componentName;
-            FAIL_GOTO(ec = intent->GetComponent((IComponentName**)&componentName), ERROR)
-            AutoPtr<IRect> sourceBounds;
-            FAIL_GOTO(ec = intent->GetSourceBounds((IRect**)&sourceBounds), ERROR)
-            AutoPtr<IBundle> bundle;
-            FAIL_GOTO(ec = opts->ToBundle((IBundle**)&bundle), ERROR)
-            FAIL_GOTO(ec = launcherApps->StartMainActivity(componentName, user, sourceBounds, bundle), ERROR)
-        }
-    }
-    else {
-        AutoPtr<IUserHandle> _user;
-        FAIL_GOTO(ec = Process::MyUserHandle((IUserHandle**)&_user), ERROR)
-        Boolean res;
-        if (user == NULL || (user->Equals(_user, &res), res)) {
-            FAIL_GOTO(ec = StartActivity(intent), ERROR)
-        }
-        else {
-            AutoPtr<IComponentName> componentName;
-            FAIL_GOTO(ec = intent->GetComponent((IComponentName**)&componentName), ERROR)
-            AutoPtr<IRect> sourceBounds;
-            FAIL_GOTO(ec = intent->GetSourceBounds((IRect**)&sourceBounds), ERROR)
-            FAIL_GOTO(ec = launcherApps->StartMainActivity(componentName, user, sourceBounds, NULL), ERROR)
-        }
-    }
-    *result = TRUE;
-    return NOERROR;
-ERROR:
-    //} catch (SecurityException e) {
-    if ((ECode)ec == E_SECURITY_EXCEPTION) {
-        AutoPtr<IToast> toast;
-        Toast::MakeText(this, Elastos::Droid::Launcher2::R::string::activity_not_found,
-                IToast::LENGTH_SHORT, (IToast**)&toast);
-        toast->Show();
-        Slogger::E(TAG, "Launcher does not have the permission to launch " + intent +
-                ". Make sure to create a MAIN intent-filter for the corresponding activity " +
-                "or use the exported attribute for this activity. "
-                + "tag="+ tag + " intent=" + intent, e);
-    }
-    //}
-    *result = FALSE;
+//         AutoPtr<IUserHandle> _user;
+//         FAIL_GOTO(ec = Process::MyUserHandle((IUserHandle**)&_user), ERROR)
+//         Boolean res;
+//         if (user == NULL || (IObject::Probe(user)->Equals(_user, &res), res)) {
+//             // Could be launching some bookkeeping activity
+//             AutoPtr<IBundle> bundle;
+//             FAIL_GOTO(ec = opts->ToBundle((IBundle**)&bundle), ERROR)
+//             FAIL_GOTO(ec = Activity::StartActivity(intent, bundle), ERROR)
+//         }
+//         else {
+//             AutoPtr<IComponentName> componentName;
+//             FAIL_GOTO(ec = intent->GetComponent((IComponentName**)&componentName), ERROR)
+//             AutoPtr<IRect> sourceBounds;
+//             FAIL_GOTO(ec = intent->GetSourceBounds((IRect**)&sourceBounds), ERROR)
+//             AutoPtr<IBundle> bundle;
+//             FAIL_GOTO(ec = opts->ToBundle((IBundle**)&bundle), ERROR)
+//             FAIL_GOTO(ec = launcherApps->StartMainActivity(componentName, user, sourceBounds, bundle), ERROR)
+//         }
+//     }
+//     else {
+//         AutoPtr<IUserHandle> _user;
+//         FAIL_GOTO(ec = Process::MyUserHandle((IUserHandle**)&_user), ERROR)
+//         Boolean res;
+//         if (user == NULL || (user->Equals(_user, &res), res)) {
+//             FAIL_GOTO(ec = Activity::StartActivity(intent), ERROR)
+//         }
+//         else {
+//             AutoPtr<IComponentName> componentName;
+//             FAIL_GOTO(ec = intent->GetComponent((IComponentName**)&componentName), ERROR)
+//             AutoPtr<IRect> sourceBounds;
+//             FAIL_GOTO(ec = intent->GetSourceBounds((IRect**)&sourceBounds), ERROR)
+//             FAIL_GOTO(ec = launcherApps->StartMainActivity(componentName, user, sourceBounds, NULL), ERROR)
+//         }
+//     }
+//     *result = TRUE;
+//     return NOERROR;
+// ERROR:
+//     //} catch (SecurityException e) {
+//     if ((ECode)ec == E_SECURITY_EXCEPTION) {
+//         AutoPtr<IToastHelper> helper;
+//         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+//         AutoPtr<ICharSequence> cchar = CoreUtils::Convert(Elastos::Droid::Launcher2::R::string::activity_not_found);
+//         AutoPtr<IToast> toast;
+//         Toast::MakeText(IContext::Probe(this), cchar,
+//                 IToast::LENGTH_SHORT, (IToast**)&toast);
+//         toast->Show();
+//         StringBuilder sb;
+//         sb += "Launcher does not have the permission to launch ";
+//         sb += TO_STR(intent);
+//         sb += ". Make sure to create a MAIN intent-filter for the corresponding activity ";
+//         sb += "or use the exported attribute for this activity. ";
+//         sb += "tag=";
+//         sb += TO_STR(tag);
+//         sb += " intent=";
+//         sb += TO_STR(intent);
+//         sb += ec;
+//         Slogger::E(TAG, sb.ToString());
+//     }
+//     //}
+//     *result = FALSE;
     return NOERROR;
 }
 
@@ -3320,11 +3618,21 @@ ECode Launcher::StartActivitySafely(
     Boolean success = FALSE;
     // try {
     if ((ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION == StartActivity(v, intent, tag, &success)) {
-        AutoPtr<IToast> toast;
-        Toast::MakeText(this, Elastos::Droid::Launcher2::R::string::activity_not_found,
-                IToast::LENGTH_SHORT, (IToast**)&toast);
-        toast->Show();
-        Slogger::E(TAG, "Unable to launch. tag=" + tag + " intent=" + intent, e);
+        AutoPtr<IToastHelper> helper;
+        CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+        assert(0);
+        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
+        //         Elastos::Droid::Launcher2::R::string::activity_not_found);
+        // AutoPtr<IToast> toast;
+        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
+        // toast->Show();
+        StringBuilder sb;
+        sb += "Unable to launch. tag=";
+        sb += TO_STR(tag);
+        sb +=" intent=";
+        sb += TO_STR(intent);
+        sb += E_ACTIVITY_NOT_FOUND_EXCEPTION;
+        Slogger::E(TAG, sb.ToString());
     }
     // } catch (ActivityNotFoundException e) {
         // Toast.makeText(this, R.string.activity_not_found, Toast.LENGTH_SHORT).show();
@@ -3339,12 +3647,16 @@ ECode Launcher::StartAppWidgetConfigureActivitySafely(
 {
     // try {
     if ((ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION ==
-            mAppWidgetHost->StartAppWidgetConfigureActivityForResult(this, appWidgetId, 0,
-                REQUEST_CREATE_APPWIDGET, NULL) {
-        AutoPtr<IToast> toast;
-        Toast::MakeText(this, Elastos::Droid::Launcher2::R::string::activity_not_found,
-                IToast::LENGTH_SHORT, (IToast**)&toast);
-        toast->Show();
+            IAppWidgetHost::Probe(mAppWidgetHost)->StartAppWidgetConfigureActivityForResult(
+                IActivity::Probe(this), appWidgetId, 0, REQUEST_CREATE_APPWIDGET, NULL)) {
+        AutoPtr<IToastHelper> helper;
+        CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+        assert(0);
+        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
+        //         Elastos::Droid::Launcher2::R::string::activity_not_found);
+        // AutoPtr<IToast> toast;
+        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
+        // toast->Show();
     }
     // } catch (ActivityNotFoundException e) {
         // Toast.makeText(this, R.string.activity_not_found, Toast.LENGTH_SHORT).show();
@@ -3360,20 +3672,32 @@ ECode Launcher::StartActivityForResultSafely(
     ECode ec = StartActivityForResult(intent, requestCode);
     //} catch (ActivityNotFoundException e) {
     if (ec == (ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION) {
-        AutoPtr<IToast> toast;
-        Toast::MakeText(this, Elastos::Droid::Launcher2::R::string::activity_not_found,
-                IToast::LENGTH_SHORT, (IToast**)&toast);
-        toast->Show();
+        AutoPtr<IToastHelper> helper;
+        CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
+        assert(0);
+        //         Elastos::Droid::Launcher2::R::string::activity_not_found);
+        // AutoPtr<IToast> toast;
+        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
+        // toast->Show();
     }
     //} catch (SecurityException e) {
     if (ec == (ECode)E_SECURITY_EXCEPTION) {
-        AutoPtr<IToast> toast;
-        Toast::MakeText(this, Elastos::Droid::Launcher2::R::string::activity_not_found,
-                IToast::LENGTH_SHORT, (IToast**)&toast);
-        toast->Show();
-        Slogger::E(TAG, "Launcher does not have the permission to launch " + intent +
-                ". Make sure to create a MAIN intent-filter for the corresponding activity " +
-                "or use the exported attribute for this activity.", e);
+        AutoPtr<IToastHelper> helper;
+        CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+        assert(0);
+        // AutoPtr<ICharSequence> cchar = CoreUtils::Convert(
+        //         Elastos::Droid::Launcher2::R::string::activity_not_found);
+        // AutoPtr<IToast> toast;
+        // helper->MakeText(IContext::Probe(this), cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
+        // toast->Show();
+        StringBuilder sb;
+        sb += "Launcher does not have the permission to launch ";
+        sb += TO_STR(intent);
+        sb += ". Make sure to create a MAIN intent-filter for the corresponding activity ";
+        sb += "or use the exported attribute for this activity.";
+        sb += ec;
+        Slogger::E(TAG, sb.ToString());
     }
     //}
     return NOERROR;
@@ -3389,11 +3713,18 @@ void Launcher::HandleFolderClick(
 
     // If the folder info reports that the associated folder is open, then verify that
     // it is actually opened. There have been a few instances where this gets out of sync.
-    FolderInfo* _info = (FolderInfo*)info;
+    FolderInfo* _info = (FolderInfo*)info.Get();
     if (_info->mOpened && openFolder == NULL) {
-        Slogger::D(TAG, "Folder info marked as open, but associated folder is not open. Screen: "
-                + info.screen + " (" + info.cellX + ", " + info.cellY + ")");
-        _info->mOpened = false;
+        StringBuilder sb;
+        sb += "Folder info marked as open, but associated folder is not open. Screen: ";
+        sb += _info->mScreen;
+        sb += " (";
+        sb += _info->mCellX;
+        sb += ", ";
+        sb += _info->mCellY;
+        sb += ")";
+        Slogger::D(TAG, sb.ToString());
+        _info->mOpened = FALSE;
     }
 
     AutoPtr<IFolder> folder;
@@ -3410,11 +3741,13 @@ void Launcher::HandleFolderClick(
         // Find the open folder...
         Int32 folderScreen;
         if (openFolder != NULL) {
-            mWorkspace->GetPageForView(openFolder, &folderScreen);
+            assert(0);
+            //mWorkspace->GetPageForView(openFolder, &folderScreen);
             // .. and close it
             CloseFolder(openFolder);
             Int32 page;
-            mWorkspace->GetCurrentPage(&page);
+            assert(0);
+            //mWorkspace->GetCurrentPage(&page);
             if (folderScreen != page) {
                 // Close any folder open on the current screen
                 CloseFolder();
@@ -3429,9 +3762,9 @@ void Launcher::CopyFolderIconToImage(
     /* [in] */ IFolderIcon* fi)
 {
     Int32 width;
-    fi->GetMeasuredWidth(&width);
+    IView::Probe(fi)->GetMeasuredWidth(&width);
     Int32 height;
-    fi->GetMeasuredHeight(&height);
+    IView::Probe(fi)->GetMeasuredHeight(&height);
 
     // Lazy load ImageView, Bitmap and Canvas
     if (mFolderIconImageView == NULL) {
@@ -3442,35 +3775,39 @@ void Launcher::CopyFolderIconToImage(
     Int32 height2;
     mFolderIconBitmap->GetHeight(&height2);
     if (mFolderIconBitmap == NULL || width2 != width || height2 != height) {
-        Bitmap::CreateBitmap(width, height, Bitmap::Config::ARGB_8888, (IBitmap**)&mFolderIconBitmap);
+        AutoPtr<IBitmapHelper> helper;
+        CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
+        helper->CreateBitmap(width, height, BitmapConfig_ARGB_8888, (IBitmap**)&mFolderIconBitmap);
         CCanvas::New(mFolderIconBitmap, (ICanvas**)&mFolderIconCanvas);
     }
 
     AutoPtr<DragLayer::LayoutParams> lp;
     AutoPtr<IViewGroupLayoutParams> para;
-    mFolderIconImageView->GetLayoutParams((IViewGroupLayoutParams**)&para);
-    if (instanceof IDragLayerLayoutParams::Probe(para) != NULL) {
+    IView::Probe(mFolderIconImageView)->GetLayoutParams((IViewGroupLayoutParams**)&para);
+    if (IDragLayerLayoutParams::Probe(para) != NULL) {
         lp = (DragLayer::LayoutParams*)IDragLayerLayoutParams::Probe(para);
-    } else {
-        lp = new DragLayer::LayoutParams(width, height);
+    }
+    else {
+        lp = new DragLayer::LayoutParams();
+        lp->constructor(width, height);
     }
 
     // The layout from which the folder is being opened may be scaled, adjust the starting
     // view size by this scale factor.
     Float scale;
-    mDragLayer->GetDescendantRectRelativeToSelf(fi, mRectForFolderAnimation, &scale);
+    mDragLayer->GetDescendantRectRelativeToSelf(IView::Probe(fi), mRectForFolderAnimation, &scale);
     lp->mCustomPosition = TRUE;
     Int32 left;
     mRectForFolderAnimation->GetLeft(&left);
     lp->mX = left;
     Int32 top;
-    mRectForFolderAnimation->GetTop(top);
+    mRectForFolderAnimation->GetTop(&top);
     lp->mY = top;
     lp->mWidth = (Int32)(scale * width);
     lp->mHeight = (Int32)(scale * height);
 
-    mFolderIconCanvas->DrawColor(0, PorterDuff::Mode::CLEAR);
-    fi->Draw(mFolderIconCanvas);
+    mFolderIconCanvas->DrawColor(0, PorterDuffMode_CLEAR);
+    IView::Probe(fi)->Draw(mFolderIconCanvas);
     mFolderIconImageView->SetImageBitmap(mFolderIconBitmap);
 
     AutoPtr<IFolder> folder;
@@ -3478,21 +3815,22 @@ void Launcher::CopyFolderIconToImage(
     if (folder != NULL) {
         Float x;
         folder->GetPivotXForIconAnimation(&x);
-        mFolderIconImageView->SetPivotX(x);
+        IView::Probe(mFolderIconImageView)->SetPivotX(x);
         Float y;
         folder->GetPivotYForIconAnimation(&y);
-        mFolderIconImageView->SetPivotY(y);
+        IView::Probe(mFolderIconImageView)->SetPivotY(y);
     }
     // Just in case this image view is still in the drag layer from a previous animation,
     // we remove it and re-add it.
     Int32 index;
-    mDragLayer->IndexOfChild(mFolderIconImageView, &index);
+    IViewGroup::Probe(mDragLayer)->IndexOfChild(IView::Probe(mFolderIconImageView), &index);
     if (index != -1) {
-        mDragLayer->RemoveView(mFolderIconImageView);
+        IViewGroup::Probe(mDragLayer)->RemoveView(IView::Probe(mFolderIconImageView));
     }
-    mDragLayer->AddView(mFolderIconImageView, lp);
+    IViewGroup::Probe(mDragLayer)->AddView(IView::Probe(mFolderIconImageView),
+            IViewGroupLayoutParams::Probe(lp));
     if (folder != NULL) {
-        folder->BringToFront();
+        IView::Probe(folder)->BringToFront();
     }
 }
 
@@ -3500,25 +3838,58 @@ void Launcher::GrowAndFadeOutFolderIcon(
     /* [in] */ IFolderIcon* fi)
 {
     if (fi == NULL) return;
-    AutoPtr<IPropertyValuesHolder> alpha = PropertyValuesHolder.ofFloat("alpha", 0);
-    AutoPtr<IPropertyValuesHolder> scaleX = PropertyValuesHolder.ofFloat("scaleX", 1.5f);
-    AutoPtr<IPropertyValuesHolder> scaleY = PropertyValuesHolder.ofFloat("scaleY", 1.5f);
 
-    FolderInfo info = (FolderInfo) fi.getTag();
-    if (info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
-        CellLayout cl = (CellLayout) fi.getParent().getParent();
-        CellLayout.LayoutParams lp = (CellLayout.LayoutParams) fi.getLayoutParams();
-        cl.setFolderLeaveBehindCell(lp.cellX, lp.cellY);
+    AutoPtr<IPropertyValuesHolderHelper> helper;
+    CPropertyValuesHolderHelper::AcquireSingleton((IPropertyValuesHolderHelper**)&helper);
+    AutoPtr<ArrayOf<Float> > arr = ArrayOf<Float>::Alloc(1);
+    (*arr)[0] = 0.0f;
+    AutoPtr<IPropertyValuesHolder> alpha;
+    helper->OfFloat(String("alpha"), arr, (IPropertyValuesHolder**)&alpha);
+
+    AutoPtr<ArrayOf<Float> > arr2 = ArrayOf<Float>::Alloc(1);
+    (*arr2)[0] = 1.5f;
+    AutoPtr<IPropertyValuesHolder> scaleX;
+    helper->OfFloat(String("scaleX"), arr2, (IPropertyValuesHolder**)&scaleX);
+
+    AutoPtr<ArrayOf<Float> > arr3 = ArrayOf<Float>::Alloc(1);
+    (*arr3)[0] = 1.5f;
+    AutoPtr<IPropertyValuesHolder> scaleY;
+    helper->OfFloat(String("scaleY"), arr3, (IPropertyValuesHolder**)&scaleY);
+
+    AutoPtr<IInterface> obj;
+    IView::Probe(fi)->GetTag((IInterface**)&obj);
+    FolderInfo* info = (FolderInfo*)IFolderInfo::Probe(obj);
+    if (info->mContainer == LauncherSettings::Favorites::CONTAINER_HOTSEAT) {
+        AutoPtr<IViewParent> parent;
+        IView::Probe(fi)->GetParent((IViewParent**)&parent);
+        AutoPtr<IViewParent> parent2;
+        parent->GetParent((IViewParent**)&parent2);
+        AutoPtr<ICellLayout> cl = ICellLayout::Probe(parent2);
+
+        AutoPtr<IViewGroupLayoutParams> params;
+        IView::Probe(fi)->GetLayoutParams((IViewGroupLayoutParams**)&params);
+        CellLayout::LayoutParams* lp = (CellLayout::LayoutParams*)ICellLayoutLayoutParams::Probe(params);
+        cl->SetFolderLeaveBehindCell(lp->mCellX, lp->mCellY);
     }
 
     // Push an ImageView copy of the FolderIcon into the DragLayer and hide the original
-    copyFolderIconToImage(fi);
-    fi.setVisibility(View.INVISIBLE);
+    CopyFolderIconToImage(fi);
+    IView::Probe(fi)->SetVisibility(IView::INVISIBLE);
 
-    ObjectAnimator oa = LauncherAnimUtils.ofPropertyValuesHolder(mFolderIconImageView, alpha,
-            scaleX, scaleY);
-    oa.setDuration(getResources().getInteger(R.integer.config_folderAnimDuration));
-    oa.start();
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > array = ArrayOf<IPropertyValuesHolder*>::Alloc(3);
+    array->Set(0, alpha);
+    array->Set(1, scaleX);
+    array->Set(2, scaleY);
+    AutoPtr<IObjectAnimator> oa = LauncherAnimUtils::OfPropertyValuesHolder(
+            IView::Probe(mFolderIconImageView), array);
+
+    AutoPtr<IResources> resources;
+    GetResources((IResources**)&resources);
+    Int32 num;
+    assert(0);
+    //resources->GetInteger(Elastos::Droid::R::integer::config_folderAnimDuration, &num)
+    IAnimator::Probe(oa)->SetDuration(num);
+    IAnimator::Probe(oa)->Start();
 }
 
 void Launcher::ShrinkAndFadeInFolderIcon(
@@ -3527,34 +3898,40 @@ void Launcher::ShrinkAndFadeInFolderIcon(
     if (fi == NULL) return;
     AutoPtr<IPropertyValuesHolderHelper> helper;
     CPropertyValuesHolderHelper::AcquireSingleton((IPropertyValuesHolderHelper**)&helper);
+
+    AutoPtr<ArrayOf<Float> > arr = ArrayOf<Float>::Alloc(1);
+    (*arr)[0] = 1.0f;
     AutoPtr<IPropertyValuesHolder> alpha;
-    helper->OfFloat(Srting("alpha"), 1.0f, (IPropertyValuesHolder**)&alpha);
+    helper->OfFloat(String("alpha"), arr, (IPropertyValuesHolder**)&alpha);
     AutoPtr<IPropertyValuesHolder> scaleX;
-    helper->OfFloat(Srting("scaleX"), 1.0f, (IPropertyValuesHolder**)&scaleX);
+    helper->OfFloat(String("scaleX"), arr, (IPropertyValuesHolder**)&scaleX);
     AutoPtr<IPropertyValuesHolder> scaleY;
-    helper->OfFloat(Srting("scaleY"), 1.0f, (IPropertyValuesHolder**)&scaleY);
+    helper->OfFloat(String("scaleY"), arr, (IPropertyValuesHolder**)&scaleY);
 
     AutoPtr<IViewParent> parent;
-    fi->GetParent((IViewParent**)&parent);
+    IView::Probe(fi)->GetParent((IViewParent**)&parent);
     AutoPtr<IViewParent> parent2;
     parent->GetParent((IViewParent**)&parent2);
     AutoPtr<ICellLayout> cl = ICellLayout::Probe(parent2);
 
     // We remove and re-draw the FolderIcon in-case it has changed
-    mDragLayer->RemoveView(mFolderIconImageView);
+    IViewGroup::Probe(mDragLayer)->RemoveView(IView::Probe(mFolderIconImageView));
     CopyFolderIconToImage(fi);
-    AutoPtr<IObjectAnimator> oa;
-    LauncherAnimUtils::OfPropertyValuesHolder(mFolderIconImageView, alpha,
-            scaleX, scaleY, (IObjectAnimator**)&oa);
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > array = ArrayOf<IPropertyValuesHolder*>::Alloc(3);
+    array->Set(0, alpha);
+    array->Set(1, scaleX);
+    array->Set(2, scaleY);
+    AutoPtr<IObjectAnimator> oa = LauncherAnimUtils::OfPropertyValuesHolder(
+            IView::Probe(mFolderIconImageView), array);
     AutoPtr<IResources> resources;
-    getResources((IResources**)&resources);
+    GetResources((IResources**)&resources);
     Int32 tmp;
     resources->GetInteger(
             Elastos::Droid::Launcher2::R::integer::config_folderAnimDuration, &tmp);
-    oa->SetDuration(tmp);
+    IAnimator::Probe(oa)->SetDuration(tmp);
     AutoPtr<IAnimatorListener> lis =new MyAnimatorListenerAdapter(this, cl, fi);
-    oa->AddListener(lis);
-    oa->Start();
+    IAnimator::Probe(oa)->AddListener(lis);
+    IAnimator::Probe(oa)->Start();
 }
 
 ECode Launcher::OpenFolder(
@@ -3562,31 +3939,37 @@ ECode Launcher::OpenFolder(
 {
     AutoPtr<IFolder> folder;
     folderIcon->GetFolder((IFolder**)&folder);
-    AutoPtr<FolderInfo> info = (FolderInfo*)(folder->mInfo);
+    AutoPtr<IFolderInfo> info = ((Folder*)folder.Get())->mInfo;
 
-    info->mOpened = TRUE;
+    ((FolderInfo*)info.Get())->mOpened = TRUE;
 
     // Just verify that the folder hasn't already been added to the DragLayer.
     // There was a one-off crash where the folder had a parent already.
     AutoPtr<IViewParent> parent;
-    folder->GetParent((IViewParent**)&parent);
-    if (parent == null) {
-        mDragLayer->AddView(folder);
-        mDragController->AddDropTarget((DropTarget) folder);
+    IView::Probe(folder)->GetParent((IViewParent**)&parent);
+    if (parent == NULL) {
+        IViewGroup::Probe(mDragLayer)->AddView(IView::Probe(folder));
+        mDragController->AddDropTarget(IDropTarget::Probe(folder));
     }
     else {
-        Slogger::W(TAG, "Opening folder (" + folder + ") which already has a parent (" +
-                folder.getParent() + ").");
+        StringBuilder sb;
+        sb += "Opening folder (";
+        sb += TO_STR(folder);
+        sb += ") which already has a parent (";
+        sb += TO_STR(parent);
+        sb += ").";
+        Slogger::W(TAG, sb.ToString());
     }
     folder->AnimateOpen();
     GrowAndFadeOutFolderIcon(folderIcon);
 
     // Notify the accessibility manager that this folder "window" has appeared and occluded
     // the workspace items
-    folder->SendAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED);
+    IView::Probe(folder)->SendAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED);
     AutoPtr<IDragLayer> dragLayer;
     GetDragLayer((IDragLayer**)&dragLayer);
-    return dragLayer->SendAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_CONTENT_CHANGED);
+    IView::Probe(dragLayer)->SendAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_CONTENT_CHANGED);
+    return NOERROR;
 }
 
 ECode Launcher::CloseFolder()
@@ -3612,17 +3995,17 @@ ECode Launcher::CloseFolder(
 {
     AutoPtr<IFolderInfo> info;
     folder->GetInfo((IFolderInfo**)&info);
-    info->mOpened = FALSE;
+    ((FolderInfo*)info.Get())->mOpened = FALSE;
 
     AutoPtr<IViewParent> parent1;
-    folder->GetParent((IViewParent**)&parent1);
+    IView::Probe(folder)->GetParent((IViewParent**)&parent1);
     AutoPtr<IViewParent> parent2;
     parent1->GetParent((IViewParent**)&parent2);
     AutoPtr<IViewGroup> parent = IViewGroup::Probe(parent2);
 
     if (parent != NULL) {
         AutoPtr<IView> view;
-        mWorkspace.getViewForTag(folder->mInfo, (IView**)&view);
+        mWorkspace->GetViewForTag(((Folder*)folder)->mInfo, (IView**)&view);
         AutoPtr<IFolderIcon> fi = IFolderIcon::Probe(view);
         ShrinkAndFadeInFolderIcon(fi);
     }
@@ -3632,7 +4015,8 @@ ECode Launcher::CloseFolder(
     // longer occludeds the workspace items
     AutoPtr<IDragLayer> dragLayer;
     GetDragLayer((IDragLayer**)&dragLayer);
-    return dragLayer->SendAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED);
+    IView::Probe(dragLayer)->SendAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED);
+    return NOERROR;
 }
 
 ECode Launcher::OnLongClick(
@@ -3650,13 +4034,12 @@ ECode Launcher::OnLongClick(
         *result = FALSE;
         return NOERROR;
     }
-    if (mState != State::WORKSPACE) {
+    if (mState != Launcher_WORKSPACE) {
         *result = FALSE;
         return NOERROR;
     }
 
     if (ICellLayout::Probe(v) == NULL) {
-        v = (View) v.getParent().getParent();
         AutoPtr<IViewParent> parent1;
         v->GetParent((IViewParent**)&parent1);
         AutoPtr<IViewParent> parent2;
@@ -3680,19 +4063,22 @@ ECode Launcher::OnLongClick(
     AutoPtr<IView> itemUnderLongClick = longClickCellInfo->mCell;
     Boolean tmp1, tmp2;
     IsHotseatLayout(v, &tmp1);
-    mWorkspace->AllowLongPress(&tmp2);
+    assert(0);
+    //IPagedView::Probe(mWorkspace)->AllowLongPress(&tmp2);
     Boolean allowLongPress = tmp1 || tmp2;
     if (allowLongPress && (mDragController->IsDragging(&res), !res)) {
         if (itemUnderLongClick == NULL) {
             // User long pressed on empty space
-            mWorkspace->PerformHapticFeedback(IHapticFeedbackConstants::LONG_PRESS,
-                    IHapticFeedbackConstants::FLAG_IGNORE_VIEW_SETTING);
+            assert(0);
+            // mWorkspace->PerformHapticFeedback(IHapticFeedbackConstants::LONG_PRESS,
+            //         IHapticFeedbackConstants::FLAG_IGNORE_VIEW_SETTING);
             StartWallpaper();
         }
         else {
             if (IFolder::Probe(itemUnderLongClick) == NULL) {
                 // User long pressed on an item
-                mWorkspace->StartDrag(longClickCellInfo);
+                assert(0);
+                //mWorkspace->StartDrag(longClickCellInfo);
             }
         }
     }
@@ -3708,7 +4094,7 @@ ECode Launcher::IsHotseatLayout(
 
     AutoPtr<ICellLayout> lay;
     if (mHotseat != NULL) {
-        mHotseat->GetLayout(lay);
+        mHotseat->GetLayout((ICellLayout**)&lay);
     }
 
     *result = mHotseat != NULL && layout != NULL &&
@@ -3753,9 +4139,9 @@ ECode Launcher::GetCellLayout(
     }
     else {
         AutoPtr<IView> view;
-        mWorkspace->GetChildAt(screen, (IView)&view);
+        IViewGroup::Probe(mWorkspace)->GetChildAt(screen, (IView**)&view);
         AutoPtr<ICellLayout> tmp = ICellLayout::Probe(view);
-        *layout = view;
+        *layout = ICellLayout::Probe(view);
         REFCOUNT_ADD(*layout);
         return NOERROR;
     }
@@ -3777,7 +4163,8 @@ ECode Launcher::IsAllAppsVisible(
 {
     VALIDATE_NOT_NULL(result);
 
-    return (mState == State::APPS_CUSTOMIZE) || (mOnResumeState == State::APPS_CUSTOMIZE);
+    *result = (mState == Launcher_APPS_CUSTOMIZE) || (mOnResumeState == Launcher_APPS_CUSTOMIZE);
+    return NOERROR;
 }
 
 ECode Launcher::IsAllAppsButtonRank(
@@ -3826,7 +4213,7 @@ void Launcher::SetWorkspaceBackground(
 ECode Launcher::UpdateWallpaperVisibility(
     /* [in] */ Boolean visible)
 {
-    Int32 wpflags = visible ? WindowManager::LayoutParams::FLAG_SHOW_WALLPAPER : 0;
+    Int32 wpflags = visible ? IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER : 0;
 
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
@@ -3834,12 +4221,13 @@ ECode Launcher::UpdateWallpaperVisibility(
     window->GetAttributes((IWindowManagerLayoutParams**)&params);
     Int32 flags;
     params->GetFlags(&flags);
-    Int32 curflags = flags & WindowManager::LayoutParams::FLAG_SHOW_WALLPAPER;
+    Int32 curflags = flags & IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER;
 
     if (wpflags != curflags) {
-        window->SetFlags(wpflags, WindowManager::LayoutParams::FLAG_SHOW_WALLPAPER);
+        window->SetFlags(wpflags, IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER);
     }
-    return SetWorkspaceBackground(visible);
+    SetWorkspaceBackground(visible);
+    return NOERROR;
 }
 
 void Launcher::DispatchOnLauncherTransitionPrepare(
@@ -3864,7 +4252,7 @@ void Launcher::DispatchOnLauncherTransitionStart(
     }
 
     // Update the workspace transition step as well
-    DispatchOnLauncherTransitionStep(v, 0f);
+    DispatchOnLauncherTransitionStep(v, 0.0f);
 }
 
 void Launcher::DispatchOnLauncherTransitionStep(
@@ -3886,7 +4274,7 @@ void Launcher::DispatchOnLauncherTransitionEnd(
     }
 
     // Update the workspace transition step as well
-    DispatchOnLauncherTransitionStep(v, 1f);
+    DispatchOnLauncherTransitionStep(v, 1.0f);
 }
 
 void Launcher::ShowAppsCustomizeHelper(
@@ -3894,8 +4282,8 @@ void Launcher::ShowAppsCustomizeHelper(
     /* [in] */ Boolean springLoaded)
 {
     if (mStateAnimation != NULL) {
-        mStateAnimation->SetDuration(0);
-        mStateAnimation->Cancel();
+        IAnimator::Probe(mStateAnimation)->SetDuration(0);
+        IAnimator::Probe(mStateAnimation)->Cancel();
         mStateAnimation = NULL;
     }
     AutoPtr<IResources> res;
@@ -3914,42 +4302,43 @@ void Launcher::ShowAppsCustomizeHelper(
             Elastos::Droid::Launcher2::R::integer::config_appsCustomizeZoomScaleFactor,
             &tmp);
     Float scale = (Float)tmp;
-    AutoPtr<IView> fromView = mWorkspace;
+    AutoPtr<IView> fromView = IView::Probe(mWorkspace);
     AutoPtr<IAppsCustomizeTabHost> toView = mAppsCustomizeTabHost;
     Int32 startDelay;
     res->GetInteger(
             Elastos::Droid::Launcher2::R::integer::config_workspaceAppsCustomizeAnimationStagger,
             &startDelay);
 
-    SetPivotsForZoom(toView, scale);
+    SetPivotsForZoom(IView::Probe(toView), scale);
 
     // Shrink workspaces away if going to AppsCustomize from workspace
     AutoPtr<IAnimator> workspaceAnim;
-    mWorkspace->GetChangeStateAnimation(Workspace::State::SMALL, animated,
-            (IAnimator**)&workspaceAnim);
+    mWorkspace->GetChangeStateAnimation(State_SMALL, animated, (IAnimator**)&workspaceAnim);
 
     if (animated) {
-        toView->SetScaleX(scale);
-        toView->SetScaleY(scale);
-        AutoPtr<LauncherViewPropertyAnimator> scaleAnim = new LauncherViewPropertyAnimator(toView);
-        scaleAnim->ScaleX(1f);
-        scaleAnim->ScaleY(1f);
+        IView::Probe(toView)->SetScaleX(scale);
+        IView::Probe(toView)->SetScaleY(scale);
+        AutoPtr<LauncherViewPropertyAnimator> scaleAnim =
+                new LauncherViewPropertyAnimator(IView::Probe(toView));
+        scaleAnim->ScaleX(1.0f);
+        scaleAnim->ScaleY(1.0f);
         scaleAnim->SetDuration(duration);
         AutoPtr<ITimeInterpolator> polator = new Workspace::ZoomOutInterpolator();
         scaleAnim->SetInterpolator(polator);
 
-        toView->SetVisibility(IView::VISIBLE);
-        toView->SetAlpha(0f);
+        IView::Probe(toView)->SetVisibility(IView::VISIBLE);
+        IView::Probe(toView)->SetAlpha(0.0f);
         AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
-        (*array)[0] = 0f;
-        (*array)[1] = 1f;
-        AutoPtr<IObjectAnimator> alphaAnim = LauncherAnimUtils::OfFloat(toView, String("alpha"), array);
-        alphaAnim->SetDuration(fadeDuration);
+        (*array)[0] = 0.0f;
+        (*array)[1] = 1.0f;
+        AutoPtr<IObjectAnimator> alphaAnim = LauncherAnimUtils::OfFloat(IView::Probe(toView),
+                String("alpha"), array);
+        IAnimator::Probe(alphaAnim)->SetDuration(fadeDuration);
         AutoPtr<ITimeInterpolator> value;
         CDecelerateInterpolator::New(1.5f, (ITimeInterpolator**)&value);
-        alphaAnim->SetInterpolator(value);
+        IAnimator::Probe(alphaAnim)->SetInterpolator(value);
         AutoPtr<IAnimatorUpdateListener> lis = new MyAnimatorUpdateListener(this, fromView, toView);
-        alphaAnim->AddUpdateListener(lis);
+        IValueAnimator::Probe(alphaAnim)->AddUpdateListener(lis);
 
         // toView should appear right at the end of the workspace shrink
         // animation
@@ -3958,21 +4347,22 @@ void Launcher::ShowAppsCustomizeHelper(
         mStateAnimation->Play(scaleAnim, (IAnimatorSetBuilder**)&builder);
         builder->After(startDelay);
         AutoPtr<IAnimatorSetBuilder> builder2;
-        mStateAnimation->Play(alphaAnim, (IAnimatorSetBuilder**)&builder2);
-        builder2->Aafter(startDelay);
+        mStateAnimation->Play(IAnimator::Probe(alphaAnim), (IAnimatorSetBuilder**)&builder2);
+        builder2->After(startDelay);
 
         AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter2(this,
                 fromView, toView, animated, springLoaded);
-        mStateAnimation.addListener(listener);
+        IAnimator::Probe(mStateAnimation)->AddListener(listener);
 
         if (workspaceAnim != NULL) {
-            mStateAnimation->Play(workspaceAnim);
+            AutoPtr<IAnimatorSetBuilder> builder;
+            mStateAnimation->Play(IAnimator::Probe(workspaceAnim), (IAnimatorSetBuilder**)&builder);
         }
 
         Boolean delayAnim = FALSE;
 
-        DispatchOnLauncherTransitionPrepare(fromView, animated, FALSE);
-        DispatchOnLauncherTransitionPrepare(toView, animated, FALSE);
+        DispatchOnLauncherTransitionPrepare(IView::Probe(fromView), animated, FALSE);
+        DispatchOnLauncherTransitionPrepare(IView::Probe(toView), animated, FALSE);
 
         // If any of the objects being animated haven't been measured/laid out
         // yet, delay the animation until we get a layout pass
@@ -3982,9 +4372,9 @@ void Launcher::ShowAppsCustomizeHelper(
         Int32 width1;
         view->GetMeasuredWidth(&width1);
         Int32 width2;
-        mWorkspace->GetMeasuredWidth(&width2);
+        IView::Probe(mWorkspace)->GetMeasuredWidth(&width2);
         Int32 width3;
-        toView->GetMeasuredWidth(&width3);
+        IView::Probe(toView)->GetMeasuredWidth(&width3);
         if ((width1 == 0) || (width2 == 0) || (width3 == 0)) {
             delayAnim = TRUE;
         }
@@ -3994,8 +4384,8 @@ void Launcher::ShowAppsCustomizeHelper(
                 fromView, toView, animated, scale);
         if (delayAnim) {
             AutoPtr<IViewTreeObserver> observer;
-            toView->GetViewTreeObserver((IViewTreeObserver**)&observer);
-            AutoPtr<IOnGlobalLayoutListener> listener2 = MyOnGlobalLayoutListener(startAnimRunnable,
+            IView::Probe(toView)->GetViewTreeObserver((IViewTreeObserver**)&observer);
+            AutoPtr<IOnGlobalLayoutListener> listener2 = new MyOnGlobalLayoutListener(startAnimRunnable,
                     toView);
             observer->AddOnGlobalLayoutListener(listener2);
         }
@@ -4004,17 +4394,18 @@ void Launcher::ShowAppsCustomizeHelper(
         }
     }
     else {
-        toView->SetTranslationX(0.0f);
-        toView->SetTranslationY(0.0f);
-        toView->SetScaleX(1.0f);
-        toView->SetScaleY(1.0f);
-        toView->SetVisibility(View.VISIBLE);
-        toView->BringToFront();
+        IView::Probe(toView)->SetTranslationX(0.0f);
+        IView::Probe(toView)->SetTranslationY(0.0f);
+        IView::Probe(toView)->SetScaleX(1.0f);
+        IView::Probe(toView)->SetScaleY(1.0f);
+        IView::Probe(toView)->SetVisibility(IView::VISIBLE);
+        IView::Probe(toView)->BringToFront();
 
         Boolean res;
         if (!springLoaded && (LauncherApplication::IsScreenLarge(&res), !res)) {
             // Hide the workspace scrollbar
-            mWorkspace->HideScrollingIndicator(TRUE);
+            assert(0);
+            //IPagedView::Probe(mWorkspace)->HideScrollingIndicator(TRUE);
             HideDockDivider();
 
             // Hide the search bar
@@ -4022,12 +4413,12 @@ void Launcher::ShowAppsCustomizeHelper(
                 mSearchDropTargetBar->HideSearchBar(FALSE);
             }
         }
-        DispatchOnLauncherTransitionPrepare(fromView, animated, FALSE);
-        DispatchOnLauncherTransitionStart(fromView, animated, FALSE);
-        DispatchOnLauncherTransitionEnd(fromView, animated, FALSE);
-        DispatchOnLauncherTransitionPrepare(toView, animated, FALSE);
-        DispatchOnLauncherTransitionStart(toView, animated, FALSE);
-        DispatchOnLauncherTransitionEnd(toView, animated, FALSE);
+        DispatchOnLauncherTransitionPrepare(IView::Probe(fromView), animated, FALSE);
+        DispatchOnLauncherTransitionStart(IView::Probe(fromView), animated, FALSE);
+        DispatchOnLauncherTransitionEnd(IView::Probe(fromView), animated, FALSE);
+        DispatchOnLauncherTransitionPrepare(IView::Probe(toView), animated, FALSE);
+        DispatchOnLauncherTransitionStart(IView::Probe(toView), animated, FALSE);
+        DispatchOnLauncherTransitionEnd(IView::Probe(toView), animated, FALSE);
         UpdateWallpaperVisibility(FALSE);
     }
 }
@@ -4039,8 +4430,8 @@ void Launcher::HideAppsCustomizeHelper(
     /* [in] */ IRunnable* onCompleteRunnable)
 {
     if (mStateAnimation != NULL) {
-        mStateAnimation->SetDuration(0);
-        mStateAnimation->Cancel();
+        IAnimator::Probe(mStateAnimation)->SetDuration(0);
+        IAnimator::Probe(mStateAnimation)->Cancel();
         mStateAnimation = NULL;
     }
     AutoPtr<IResources> res;
@@ -4059,22 +4450,21 @@ void Launcher::HideAppsCustomizeHelper(
             Elastos::Droid::Launcher2::R::integer::config_appsCustomizeZoomScaleFactor,
             &tmp);
     Float scaleFactor = (Float)tmp;
-    AutoPtr<IView> fromView = mAppsCustomizeTabHost;
-    AutoPtr<IView> toView = mWorkspace;
+    AutoPtr<IView> fromView = IView::Probe(mAppsCustomizeTabHost);
+    AutoPtr<IView> toView = IView::Probe(mWorkspace);
     AutoPtr<IAnimator> workspaceAnim;
 
-    if (toState == State::WORKSPACE) {
+    if (toState == Launcher_WORKSPACE) {
         Int32 stagger;
         res->GetInteger(
-                Elastos::Droid::Launcher2::R:;integer::config_appsCustomizeWorkspaceAnimationStagger,
+                Elastos::Droid::Launcher2::R::integer::config_appsCustomizeWorkspaceAnimationStagger,
                 &stagger);
         mWorkspace->GetChangeStateAnimation(
-                Workspace::State::NORMAL, animated, stagger, (IAnimator**)&workspaceAnim);
+                State_NORMAL, animated, stagger, (IAnimator**)&workspaceAnim);
     }
-    else if (toState == State::APPS_CUSTOMIZE_SPRING_LOADED) {
-        workspaceAnim;
+    else if (toState == Launcher_APPS_CUSTOMIZE_SPRING_LOADED) {
         mWorkspace->GetChangeStateAnimation(
-                Workspace::State::SPRING_LOADED, animated, (IAnimator**)&workspaceAnim);
+                State_SPRING_LOADED, animated, (IAnimator**)&workspaceAnim);
     }
 
     SetPivotsForZoom(fromView, scaleFactor);
@@ -4090,34 +4480,39 @@ void Launcher::HideAppsCustomizeHelper(
         scaleAnim->SetInterpolator(polator);
 
         AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
-        (*array)[0] = 1f;
-        (*array)[1] = 0f;
+        (*array)[0] = 1.0f;
+        (*array)[1] = 0.0f;
         AutoPtr<IObjectAnimator> alphaAnim = LauncherAnimUtils::OfFloat(fromView, String("alpha"), array);
-        alphaAnim->SetDuration(fadeOutDuration);
+        IAnimator::Probe(alphaAnim)->SetDuration(fadeOutDuration);
         AutoPtr<IAccelerateDecelerateInterpolator> value;
-        CAccelerateDecelerateInterpolator::New(1.5f, (IAccelerateDecelerateInterpolator**)&value);
-        alphaAnim->SetInterpolator(value);
+        CAccelerateDecelerateInterpolator::New((IAccelerateDecelerateInterpolator**)&value);
+        IAnimator::Probe(alphaAnim)->SetInterpolator(ITimeInterpolator::Probe(value));
 
-        AutoPtr<IAnimatorUpdateListener> listener = MyAnimatorUpdateListener2(this, fromView, toView);
-        alphaAnim->SddUpdateListener(listener);
+        AutoPtr<IAnimatorUpdateListener> listener = new MyAnimatorUpdateListener2(this, fromView, toView);
+        IValueAnimator::Probe(alphaAnim)->AddUpdateListener(listener);
 
         mStateAnimation = LauncherAnimUtils::CreateAnimatorSet();
 
         DispatchOnLauncherTransitionPrepare(fromView, animated, TRUE);
         DispatchOnLauncherTransitionPrepare(toView, animated, TRUE);
-        mAppsCustomizeContent->PauseScrolling();
+        assert(0);
+        //IPagedView::Probe(mAppsCustomizeContent)->PauseScrolling();
 
         AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter3(this, fromView,
                 toView, animated, onCompleteRunnable);
-        mStateAnimation->AddListener(listener2);
+        IAnimator::Probe(mStateAnimation)->AddListener(listener2);
 
-        mStateAnimation->PlayTogether(scaleAnim, alphaAnim);
+        AutoPtr<ArrayOf<IAnimator*> > array2 = ArrayOf<IAnimator*>::Alloc(2);
+        array2->Set(0, IAnimator::Probe(scaleAnim));
+        array2->Set(1, IAnimator::Probe(alphaAnim));
+        mStateAnimation->PlayTogether(array2);
         if (workspaceAnim != NULL) {
-            mStateAnimation->Play(workspaceAnim);
+            AutoPtr<IAnimatorSetBuilder> builder;
+            mStateAnimation->Play(workspaceAnim, (IAnimatorSetBuilder**)&builder);
         }
         DispatchOnLauncherTransitionStart(fromView, animated, TRUE);
         DispatchOnLauncherTransitionStart(toView, animated, TRUE);
-        LauncherAnimUtils::StartAnimationAfterNextDraw(mStateAnimation, toView);
+        LauncherAnimUtils::StartAnimationAfterNextDraw(IAnimator::Probe(mStateAnimation), toView);
     }
     else {
         fromView->SetVisibility(IView::GONE);
@@ -4127,7 +4522,8 @@ void Launcher::HideAppsCustomizeHelper(
         DispatchOnLauncherTransitionPrepare(toView, animated, TRUE);
         DispatchOnLauncherTransitionStart(toView, animated, TRUE);
         DispatchOnLauncherTransitionEnd(toView, animated, TRUE);
-        mWorkspace.hideScrollingIndicator(FALSE);
+        assert(0);
+        //IPagedView::Probe(mWorkspace)->HideScrollingIndicator(FALSE);
     }
 }
 
@@ -4152,7 +4548,8 @@ ECode Launcher::OnWindowFocusChanged(
     else {
         // When launcher has focus again, disable the wallpaper if we are in AllApps
         AutoPtr<IRunnable> r = new MyRunnable8(this);
-        return mWorkspace->PostDelayed(r, 500);
+        Boolean res;
+        return IView::Probe(mWorkspace)->PostDelayed(r, 500, &res);
     }
     return NOERROR;
 }
@@ -4167,10 +4564,10 @@ ECode Launcher::ShowWorkspace(
     /* [in] */ Boolean animated,
     /* [in] */ IRunnable* onCompleteRunnable)
 {
-    if (mState != State::WORKSPACE) {
-        Boolean wasInSpringLoadedMode = (mState == State::APPS_CUSTOMIZE_SPRING_LOADED);
-        mWorkspace->SetVisibility(IView::VISIBLE);
-        HideAppsCustomizeHelper(State::WORKSPACE, animated, FALSE, onCompleteRunnable);
+    if (mState != Launcher_WORKSPACE) {
+        Boolean wasInSpringLoadedMode = (mState == Launcher_APPS_CUSTOMIZE_SPRING_LOADED);
+        IView::Probe(mWorkspace)->SetVisibility(IView::VISIBLE);
+        HideAppsCustomizeHelper(Launcher_WORKSPACE, animated, FALSE, onCompleteRunnable);
 
         // Show the search bar (only animate if we were showing the drop target bar in spring
         // loaded mode)
@@ -4183,14 +4580,16 @@ ECode Launcher::ShowWorkspace(
 
         // Set focus to the AppsCustomize button
         if (mAllAppsButton != NULL) {
-            mAllAppsButton->RequestFocus();
+            Boolean res;
+            mAllAppsButton->RequestFocus(&res);
         }
     }
 
-    mWorkspace->FlashScrollingIndicator(animated);
+    assert(0);
+    //IPagedView::Probe(mWorkspace)->FlashScrollingIndicator(animated);
 
     // Change the state *after* we've called all the transition code
-    mState = State::WORKSPACE;
+    mState = Launcher_WORKSPACE;
 
     // Resume the auto-advance of widgets
     mUserPresent = TRUE;
@@ -4207,13 +4606,14 @@ ECode Launcher::ShowWorkspace(
 ECode Launcher::ShowAllApps(
     /* [in] */ Boolean animated)
 {
-    if (mState != State::WORKSPACE) return NOERROR;
+    if (mState != Launcher_WORKSPACE) return NOERROR;
 
     ShowAppsCustomizeHelper(animated, FALSE);
-    mAppsCustomizeTabHost->RequestFocus();
+    Boolean res;
+    IView::Probe(mAppsCustomizeTabHost)->RequestFocus(&res);
 
     // Change the state *after* we've called all the transition code
-    mState = State::APPS_CUSTOMIZE;
+    mState = Launcher_APPS_CUSTOMIZE;
 
     // Pause the auto-advance of widgets until we are out of AllApps
     mUserPresent = FALSE;
@@ -4233,9 +4633,9 @@ ECode Launcher::EnterSpringLoadedDragMode()
     Boolean res;
     IsAllAppsVisible(&res);
     if (res) {
-        HideAppsCustomizeHelper(State::APPS_CUSTOMIZE_SPRING_LOADED, TRUE, TRUE, NULL);
+        HideAppsCustomizeHelper(Launcher_APPS_CUSTOMIZE_SPRING_LOADED, TRUE, TRUE, NULL);
         HideDockDivider();
-        mState = State::APPS_CUSTOMIZE_SPRING_LOADED;
+        mState = Launcher_APPS_CUSTOMIZE_SPRING_LOADED;
     }
     return NOERROR;
 }
@@ -4245,21 +4645,23 @@ ECode Launcher::ExitSpringLoadedDragModeDelayed(
     /* [in] */ Boolean extendedDelay,
     /* [in] */ IRunnable* onCompleteRunnable)
 {
-    if (mState != State::APPS_CUSTOMIZE_SPRING_LOADED) return NOERROR;
+    if (mState != Launcher_APPS_CUSTOMIZE_SPRING_LOADED) return NOERROR;
 
     AutoPtr<IRunnable> r = new MyRunnable9(this, successfulDrop, onCompleteRunnable);
-    return mHandler->PostDelayed(r, (extendedDelay ?
+    Boolean res;
+    mHandler->PostDelayed(r, (Int64)(extendedDelay ?
             EXIT_SPRINGLOADED_MODE_LONG_TIMEOUT :
-            EXIT_SPRINGLOADED_MODE_SHORT_TIMEOUT));
+            EXIT_SPRINGLOADED_MODE_SHORT_TIMEOUT), &res);
+    return NOERROR;
 }
 
 ECode Launcher::ExitSpringLoadedDragMode()
 {
-    if (mState == State::APPS_CUSTOMIZE_SPRING_LOADED) {
+    if (mState == Launcher_APPS_CUSTOMIZE_SPRING_LOADED) {
         Boolean animated = TRUE;
         Boolean springLoaded = TRUE;
         ShowAppsCustomizeHelper(animated, springLoaded);
-        mState = State::APPS_CUSTOMIZE;
+        mState = Launcher_APPS_CUSTOMIZE;
     }
     return NOERROR;
     // Otherwise, we are not in spring loaded mode, so don't do anything.
@@ -4268,8 +4670,8 @@ ECode Launcher::ExitSpringLoadedDragMode()
 ECode Launcher::HideDockDivider()
 {
     if (mQsbDivider != NULL && mDockDivider != NULL) {
-        mQsbDivider->SetVisibility(View.INVISIBLE);
-        return mDockDivider->SetVisibility(View.INVISIBLE);
+        mQsbDivider->SetVisibility(IView::INVISIBLE);
+        return mDockDivider->SetVisibility(IView::INVISIBLE);
     }
     return NOERROR;
 }
@@ -4281,28 +4683,32 @@ ECode Launcher::ShowDockDivider(
         mQsbDivider->SetVisibility(IView::VISIBLE);
         mDockDivider->SetVisibility(IView::VISIBLE);
         if (mDividerAnimator != NULL) {
-            mDividerAnimator->Cancel();
-            mQsbDivider->SetAlpha(1f);
-            mDockDivider->SetAlpha(1f);
+            IAnimator::Probe(mDividerAnimator)->Cancel();
+            mQsbDivider->SetAlpha(1.0f);
+            mDockDivider->SetAlpha(1.0f);
             mDividerAnimator = NULL;
         }
         if (animated) {
             mDividerAnimator = LauncherAnimUtils::CreateAnimatorSet();
             AutoPtr<ArrayOf<Float> > array1 = ArrayOf<Float>::Alloc(1);
-            (*array1)[0] = 1f;
+            (*array1)[0] = 1.0f;
             AutoPtr<IObjectAnimator> animator1 = LauncherAnimUtils::OfFloat(mQsbDivider,
                     String("alpha"), array1);
             AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(1);
-            (*array2)[0] = 1f;
+            (*array2)[0] = 1.0f;
             AutoPtr<IObjectAnimator> animator2 = LauncherAnimUtils::OfFloat(mDockDivider,
                     String("alpha"), array2);
-            mDividerAnimator->PlayTogether(animator1, animator2);
+
+            AutoPtr<ArrayOf<IAnimator*> > array3 = ArrayOf<IAnimator*>::Alloc(2);
+            array3->Set(0, IAnimator::Probe(animator1));
+            array3->Set(1, IAnimator::Probe(animator2));
+            mDividerAnimator->PlayTogether(array3);
             Int32 duration = 0;
             if (mSearchDropTargetBar != NULL) {
                 mSearchDropTargetBar->GetTransitionInDuration(&duration);
             }
-            mDividerAnimator->SetDuration(duration);
-            mDividerAnimator->Start();
+            IAnimator::Probe(mDividerAnimator)->SetDuration(duration);
+            IAnimator::Probe(mDividerAnimator)->Start();
         }
     }
     return NOERROR;
@@ -4326,20 +4732,20 @@ ECode Launcher::ShowHotseat(
     if (!res) {
         if (animated) {
             Float tmp;
-            mHotseat->GetAlpha(&tmp);
-            if (tmp != 1f) {
+            IView::Probe(mHotseat)->GetAlpha(&tmp);
+            if (tmp != 1.0f) {
                 Int32 duration = 0;
                 if (mSearchDropTargetBar != NULL) {
                     mSearchDropTargetBar->GetTransitionInDuration(&duration);
                 }
                 AutoPtr<IViewPropertyAnimator> res;
                 IView::Probe(mHotseat)->Animate((IViewPropertyAnimator**)&res);
-                res->Alpha(1f);
+                res->Alpha(1.0f);
                 res->SetDuration(duration);
             }
         }
         else {
-            mHotseat->SetAlpha(1f);
+            IView::Probe(mHotseat)->SetAlpha(1.0f);
         }
     }
     return NOERROR;
@@ -4353,20 +4759,20 @@ ECode Launcher::HideHotseat(
     if (!res) {
         if (animated) {
             Float tmp;
-            mHotseat->GetAlpha(&tmp);
-            if (tmp != 0f) {
+            IView::Probe(mHotseat)->GetAlpha(&tmp);
+            if (tmp != 0.0f) {
                 Int32 duration = 0;
                 if (mSearchDropTargetBar != NULL) {
                     mSearchDropTargetBar->GetTransitionOutDuration(&duration);
                 }
                 AutoPtr<IViewPropertyAnimator> res;
                 IView::Probe(mHotseat)->Animate((IViewPropertyAnimator**)&res);
-                res->Alpha(0f);
+                res->Alpha(0.0f);
                 res->SetDuration(duration);
             }
         }
         else {
-            mHotseat->SetAlpha(0f);
+            IView::Probe(mHotseat)->SetAlpha(0.0f);
         }
     }
     return NOERROR;
@@ -4380,7 +4786,7 @@ ECode Launcher::AddExternalItemToScreen(
     mWorkspace->AddExternalItemToScreen(itemInfo, layout, &res);
     if (!res) {
         Boolean tmp;
-        IsHotseatLayout(layout, &tmp);
+        IsHotseatLayout(IView::Probe(layout), &tmp);
         return ShowOutOfSpaceMessage(tmp);
     }
     return NOERROR;
@@ -4408,42 +4814,53 @@ AutoPtr<IDrawable> Launcher::GetExternalPackageToolbarIcon(
     /* [in] */ IComponentName* activityName,
     /* [in] */ const String& resourceName)
 {
-    //try {
-    ECode ec;
-    AutoPtr<IPackageManager> packageManager;
-    FAIL_GOTO(ec = GetPackageManager((IPackageManager**)&packageManager), ERROR)
-    // Look for the toolbar icon specified in the activity meta-data
-    AutoPtr<IActivityInfo> info;
-    AutoPtr<IBundle> metaData;
-    FAIL_GOTO(ec = packageManager->GetActivityInfo(
-            activityName, IPackageManager::GET_META_DATA, (IActivityInfo**)&info), ERROR)
-    IPackageItemInfo::Probe(info)->GetMetaData((IBundle**)&metaData);
-    if (metaData != NULL) {
-        Int32 iconResId;
-        FAIL_GOTO(ec = metaData->GetInt32(resourceName, &iconResId), ERROR)
-        if (iconResId != 0) {
-            AutoPtr<IResources> res;
-            FAIL_GOTO(ec = packageManager->GetResourcesForActivity(activityName,
-                    (IResources**)&res), ERROR)
-            AutoPtr<IDrawable> tmp;
-            FAIL_GOTO(ec = res->GetDrawable(iconResId, (IDrawable**)&tmp), ERROR)
-            return tmp;
-        }
-    }
-ERROR:
-    //} catch (NameNotFoundException e) {
-    if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
-        // This can happen if the activity defines an invalid drawable
-        Slogger::W(TAG, "Failed to load toolbar icon; " + activityName.flattenToShortString() +
-                " not found", e);
-    }
-    //} catch (Resources.NotFoundException nfe) {
-    if (ec == (ECode)E_RESOURCES_NOT_FOUND_EXCEPTION ) {
-        // This can happen if the activity defines an invalid drawable
-        Slogger::W(TAG, "Failed to load toolbar icon from " + activityName.flattenToShortString(),
-                nfe);
-    }
-    //}
+//     //try {
+//     ECode ec;
+//     AutoPtr<IPackageManager> packageManager;
+//     FAIL_GOTO(ec = GetPackageManager((IPackageManager**)&packageManager), ERROR)
+//     // Look for the toolbar icon specified in the activity meta-data
+//     AutoPtr<IActivityInfo> info;
+//     AutoPtr<IBundle> metaData;
+//     FAIL_GOTO(ec = packageManager->GetActivityInfo(
+//             activityName, IPackageManager::GET_META_DATA, (IActivityInfo**)&info), ERROR)
+//     IPackageItemInfo::Probe(info)->GetMetaData((IBundle**)&metaData);
+//     if (metaData != NULL) {
+//         Int32 iconResId;
+//         FAIL_GOTO(ec = metaData->GetInt32(resourceName, &iconResId), ERROR)
+//         if (iconResId != 0) {
+//             AutoPtr<IResources> res;
+//             FAIL_GOTO(ec = packageManager->GetResourcesForActivity(activityName,
+//                     (IResources**)&res), ERROR)
+//             AutoPtr<IDrawable> tmp;
+//             FAIL_GOTO(ec = res->GetDrawable(iconResId, (IDrawable**)&tmp), ERROR)
+//             return tmp;
+//         }
+//     }
+// ERROR:
+//     //} catch (NameNotFoundException e) {
+//     if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
+//         // This can happen if the activity defines an invalid drawable
+//         String name;
+//         activityName->FlattenToShortString(&name);
+//         StringBuilder sb;
+//         sb += "Failed to load toolbar icon; ";
+//         sb += name;
+//         sb += " not found";
+//         sb += ec;
+//         Slogger::W(TAG, sb.ToString());
+//     }
+//     //} catch (Resources.NotFoundException nfe) {
+//     if (ec == (ECode)E_RESOURCES_NOT_FOUND_EXCEPTION ) {
+//         // This can happen if the activity defines an invalid drawable
+//         String name;
+//         activityName->FlattenToShortString(&name);
+//         StringBuilder sb;
+//         sb += "Failed to load toolbar icon from ";
+//         sb += name;
+//         sb += ec;
+//         Slogger::W(TAG, sb.ToString());
+//     }
+//     //}
     return NULL;
 }
 
@@ -4536,9 +4953,9 @@ void Launcher::UpdateButtonWithDrawable(
     FindViewById(buttonId, (IView**)&view);
     AutoPtr<IImageView> button = IImageView::Probe(view);
     AutoPtr<IResources> resources;
-    getResources((IResources**)&resources);
+    GetResources((IResources**)&resources);
     AutoPtr<IDrawable> drawable;
-    NewDrawable(resources, (IDrawable**)&drawable)
+    d->NewDrawable(resources, (IDrawable**)&drawable);
     button->SetImageDrawable(drawable);
 }
 
@@ -4597,8 +5014,8 @@ Boolean Launcher::UpdateGlobalSearchIcon()
         if (searchButtonContainer != NULL) {
             searchButtonContainer->SetVisibility(IView::VISIBLE);
         }
-        searchButton->SetVisibility(IView::VISIBLE);
-        InvalidatePressedFocusedStates(searchButtonContainer, searchButton);
+        IView::Probe(searchButton)->SetVisibility(IView::VISIBLE);
+        InvalidatePressedFocusedStates(searchButtonContainer, IView::Probe(searchButton));
         return TRUE;
     }
     else {
@@ -4609,10 +5026,10 @@ Boolean Launcher::UpdateGlobalSearchIcon()
         if (voiceButtonContainer != NULL) {
             voiceButtonContainer->SetVisibility(IView::GONE);
         }
-        searchButton->SetVisibility(IView::GONE);
+        IView::Probe(searchButton)->SetVisibility(IView::GONE);
         voiceButton->SetVisibility(IView::GONE);
         if (voiceButtonProxy != NULL) {
-            voiceButtonProxy->SetVisibility(IView::GONE);
+            IView::Probe(voiceButtonProxy)->SetVisibility(IView::GONE);
         }
         return FALSE;
     }
@@ -4627,7 +5044,7 @@ void Launcher::UpdateGlobalSearchIcon(
             (IView**)&searchButtonContainer);
     AutoPtr<IView> searchButton;
     FindViewById(
-            Elastos::Droid::Launcher2::R::id:search_button,
+            Elastos::Droid::Launcher2::R::id::search_button,
             (IView**)&searchButton);
     UpdateButtonWithDrawable(Elastos::Droid::Launcher2::R::id::search_button, d);
     InvalidatePressedFocusedStates(searchButtonContainer, searchButton);
@@ -4651,7 +5068,7 @@ Boolean Launcher::UpdateVoiceSearchIcon(
 
     // We only show/update the voice search icon if the search icon is enabled as well
     AutoPtr<IInterface> obj;
-    GetSystemService(IContext::SEARCH_SERVICE, &obj);
+    GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
     AutoPtr<ISearchManager> searchManager = ISearchManager::Probe(obj);
     AutoPtr<IComponentName> globalSearchActivity;
     searchManager->GetGlobalSearchActivity((IComponentName**)&globalSearchActivity);
@@ -4664,8 +5081,8 @@ Boolean Launcher::UpdateVoiceSearchIcon(
         String str;
         globalSearchActivity->GetPackageName(&str);
         intent->SetPackage(str);
-        AutoPtr<IPackageManage> packageManage;
-        GetPackageManager((IPackageManage**)&packageManage);
+        AutoPtr<IPackageManager> packageManage;
+        GetPackageManager((IPackageManager**)&packageManage);
         intent->ResolveActivity(packageManage, (IComponentName**)&activityName);
     }
 
@@ -4674,8 +5091,8 @@ Boolean Launcher::UpdateVoiceSearchIcon(
         // resolves this
         AutoPtr<IIntent> intent;
         CIntent::New(IRecognizerIntent::ACTION_WEB_SEARCH, (IIntent**)&intent);
-        AutoPtr<IPackageManage> packageManage;
-        GetPackageManager((IPackageManage**)&packageManage);
+        AutoPtr<IPackageManager> packageManage;
+        GetPackageManager((IPackageManager**)&packageManage);
         intent->ResolveActivity(packageManage, (IComponentName**)&activityName);
     }
     if (searchVisible && activityName != NULL) {
@@ -4738,8 +5155,8 @@ void Launcher::UpdateAppMarketIcon()
     intent->AddCategory(IIntent::CATEGORY_APP_MARKET);
     // Find the app market activity by resolving an intent.
     // (If multiple app markets are installed, it will return the ResolverActivity.)
-    AutoPtr<IPackageManage> packageManage;
-    GetPackageManager((IPackageManage**)&packageManage);
+    AutoPtr<IPackageManager> packageManage;
+    GetPackageManager((IPackageManager**)&packageManage);
     AutoPtr<IComponentName> activityName;
     intent->ResolveActivity(packageManage, (IComponentName**)&activityName);
     if (activityName != NULL) {
@@ -4775,7 +5192,7 @@ void Launcher::UpdateAppMarketIcon(
             Elastos::Droid::Launcher2::R::dimen::toolbar_external_icon_height, &h);
     marketIconDrawable->SetBounds(0, 0, w, h);
 
-    UpdateTextButtonWithDrawable(Elastos::Droid::Launcher2::R:id::market_button, marketIconDrawable);
+    UpdateTextButtonWithDrawable(Elastos::Droid::Launcher2::R::id::market_button, marketIconDrawable);
 }
 
 ECode Launcher::DispatchPopulateAccessibilityEvent(
@@ -4790,11 +5207,11 @@ ECode Launcher::DispatchPopulateAccessibilityEvent(
     IAccessibilityRecord::Probe(event)->GetText((IList**)&text);
     text->Clear();
     // Populate event with a fake title based on the current state.
-    if (mState == State::APPS_CUSTOMIZE) {
+    if (mState == Launcher_APPS_CUSTOMIZE) {
         String str;
         GetString(
                 Elastos::Droid::Launcher2::R::string::all_apps_button_label,
-                &str)
+                &str);
         AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
         text->Add(TO_IINTERFACE(cchar));
     }
@@ -4802,7 +5219,7 @@ ECode Launcher::DispatchPopulateAccessibilityEvent(
         String str;
         GetString(
                 Elastos::Droid::Launcher2::R::string::all_apps_home_button_label,
-                &str)
+                &str);
         AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
         text->Add(TO_IINTERFACE(cchar));
     }
@@ -4855,8 +5272,10 @@ ECode Launcher::GetCurrentWorkspaceScreen(
     VALIDATE_NOT_NULL(screen);
 
     if (mWorkspace != NULL) {
-        return mWorkspace->GetCurrentPage(screen);
-    } else {
+        //return IPagedView::Probe(mWorkspace)->GetCurrentPage(screen);
+        return NOERROR;
+    }
+    else {
         *screen = SCREEN_COUNT / 2;
         return NOERROR;
     }
@@ -4875,13 +5294,13 @@ ECode Launcher::StartBinding()
     mNewShortcutAnimateViews->Clear();
     mWorkspace->ClearDropTargets();
     Int32 count;
-    workspace->GetChildCount(&count);
+    IViewGroup::Probe(workspace)->GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         // Use removeAllViewsInLayout() to avoid an extra requestLayout() and invalidate().
         AutoPtr<IView> view;
-        workspace->GetChildAt(i, (IView**)&view);
+        IViewGroup::Probe(workspace)->GetChildAt(i, (IView**)&view);
         AutoPtr<ICellLayout> layoutParent = ICellLayout::Probe(view);
-        layoutParent->RemoveAllViewsInLayout();
+        IViewGroup::Probe(layoutParent)->RemoveAllViewsInLayout();
     }
     mWidgetsToAdvance->Clear();
     if (mHotseat != NULL) {
@@ -4896,9 +5315,7 @@ ECode Launcher::BindItems(
     /* [in] */ Int32 end)
 {
     AutoPtr<IRunnable> r = new MyRunnable10(this, shortcuts, start, end);
-    Boolean res;
-    WaitUntilResume(r, &res);
-    if (res) {
+    if (WaitUntilResume(r)) {
         return NOERROR;
     }
 
@@ -4913,7 +5330,7 @@ ECode Launcher::BindItems(
         AutoPtr<IInterface> obj;
         shortcuts->Get(i, (IInterface**)&obj);
         AutoPtr<IItemInfo> item = IItemInfo::Probe(obj);
-        ItemInfo* _item = (ItemInfo*)item;
+        ItemInfo* _item = (ItemInfo*)item.Get();
 
         // Short circuit if we are loading dock items for a configuration which has no dock
         if (_item->mContainer == LauncherSettings::Favorites::CONTAINER_HOTSEAT &&
@@ -4926,32 +5343,31 @@ ECode Launcher::BindItems(
             case LauncherSettings::Favorites::ITEM_TYPE_SHORTCUT:
             {
                 ShortcutInfo* info = (ShortcutInfo*)IShortcutInfo::Probe(item);
-                AutoPtr<ICharSequence> obj;
-                info->mIntent->ToUri(0, (ICharSequence**)&obj);
                 String uri;
-                obj->ToString(&uri);
+                info->mIntent->ToUri(0, &uri);
                 AutoPtr<IView> shortcut;
                 CreateShortcut(info, (IView**)&shortcut);
                 workspace->AddInScreen(shortcut, _item->mContainer, _item->mScreen, _item->mCellX,
                         _item->mCellY, 1, 1, false);
                 Boolean animateIconUp = FALSE;
                 synchronized(newApps) {
+                    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(uri);
                     Boolean res;
-                    newApps->Contains(uri, &res);
+                    newApps->Contains(TO_IINTERFACE(cchar), &res);
                     if (res) {
-                        newApps->Remove(uri, &animateIconUp);
+                        newApps->Remove(TO_IINTERFACE(cchar), &animateIconUp);
                     }
                 }
                 if (animateIconUp) {
                     // Prepare the view to be animated up
-                    shortcut->SetAlpha(0f);
-                    shortcut->SetScaleX(0f);
-                    shortcut->SetScaleY(0f);
+                    shortcut->SetAlpha(0.0f);
+                    shortcut->SetScaleX(0.0f);
+                    shortcut->SetScaleY(0.0f);
                     mNewShortcutAnimatePage = _item->mScreen;
                     Boolean res;
                     mNewShortcutAnimateViews->Contains(shortcut, &res);
                     if (!res) {
-                        mNewShortcutAnimateViews->Add(YO_IINTERFACE(shortcut));
+                        mNewShortcutAnimateViews->Add(TO_IINTERFACE(shortcut));
                     }
                 }
                 break;
@@ -4959,50 +5375,52 @@ ECode Launcher::BindItems(
             case LauncherSettings::Favorites::ITEM_TYPE_FOLDER:
             {
                 Int32 page;
-                workspace->GetCurrentPage(&page);
+                assert(0);
+                //IPagedView::Probe(workspace)->GetCurrentPage(&page);
                 AutoPtr<IView> view;
-                workspace->GetChildAt(page, (IView**)&view);
+                IViewGroup::Probe(workspace)->GetChildAt(page, (IView**)&view);
                 AutoPtr<IFolderIcon> newFolder;
                 FolderIcon::FromXml(
                         Elastos::Droid::Launcher2::R::layout::folder_icon, this,
                         IViewGroup::Probe(view), IFolderInfo::Probe(item), mIconCache,
                         (IFolderIcon**)&newFolder);
-                workspace->AddInScreen(newFolder, _item->mContainer, _item->mScreen, _item->mCellX,
+                workspace->AddInScreen(IView::Probe(newFolder), _item->mContainer, _item->mScreen, _item->mCellX,
                         _item->mCellY, 1, 1, FALSE);
                 break;
             }
         }
     }
 
-    return workspace->RequestLayout();
+    IView::Probe(workspace)->RequestLayout();
+    return NOERROR;
 }
 
 ECode Launcher::BindFolders(
     /* [in] */ IHashMap* folders)
 {
     AutoPtr<IRunnable> r = new MyRunnable11(this, folders);
-    Boolean res;
-    WaitUntilResume(r, &res);
-    if (res) {
+    if (WaitUntilResume(r)) {
         return NOERROR;
     }
     sFolders->Clear();
-    return sFolders->PutAll(folders);
+    sFolders->PutAll(IMap::Probe(folders));
+    return NOERROR;
 }
 
 ECode Launcher::BindAppWidget(
     /* [in] */ ILauncherAppWidgetInfo* item)
 {
     AutoPtr<IRunnable> r = new MyRunnable12(this, item);
-    Boolean res;
-    WaitUntilResume(r, &res);
-    if (res) {
+    if (WaitUntilResume(r)) {
         return NOERROR;
     }
 
-    Int64 start = DEBUG_WIDGETS ? SystemClock::UptimeMillis() : 0;
+    Int64 start = DEBUG_WIDGETS ? SystemClock::GetUptimeMillis() : 0;
     if (DEBUG_WIDGETS) {
-        Slogger::D(TAG, "bindAppWidget: " + item);
+        StringBuilder sb;
+        sb += "bindAppWidget: ";
+        sb += TO_STR(item);
+        Slogger::D(TAG, sb.ToString());
     }
     AutoPtr<IWorkspace> workspace = mWorkspace;
 
@@ -5011,25 +5429,37 @@ ECode Launcher::BindAppWidget(
     AutoPtr<IAppWidgetProviderInfo> appWidgetInfo;
     mAppWidgetManager->GetAppWidgetInfo(appWidgetId, (IAppWidgetProviderInfo**)&appWidgetInfo);
     if (DEBUG_WIDGETS) {
-        Slogger::D(TAG, "bindAppWidget: id=" + item.appWidgetId + " belongs to component "
-                + appWidgetInfo.provider);
+        AutoPtr<IComponentName> name;
+        appWidgetInfo->GetProvider((IComponentName**)&name);
+        StringBuilder sb;
+        sb += "bindAppWidget: id=";
+        sb += _item->mAppWidgetId;
+        sb += " belongs to component ";
+        sb += TO_STR(name);
+        Slogger::D(TAG, sb.ToString());
     }
 
-    mAppWidgetHost->CreateView(this, appWidgetId,
+    IAppWidgetHost::Probe(mAppWidgetHost)->CreateView(this, appWidgetId,
             appWidgetInfo, (IAppWidgetHostView**)&(_item->mHostView));
 
-    _item->mHostView->SetTag(item);
-    item->OnBindAppWidget(this);
+    IView::Probe(_item->mHostView)->SetTag(TO_IINTERFACE(item));
+    assert(0);
+    //item->OnBindAppWidget(ILauncher::Probe(this));
 
-    workspace->AddInScreen(_item->mHostView, _item->mContainer, _item->mScreen, _item->mCellX,
+    workspace->AddInScreen(IView::Probe(_item->mHostView), _item->mContainer, _item->mScreen, _item->mCellX,
             _item->mCellY, _item->mSpanX, _item->mSpanY, FALSE);
-    AddWidgetToAutoAdvanceIfNeeded(item.hostView, appWidgetInfo);
+    AddWidgetToAutoAdvanceIfNeeded(IView::Probe(_item->mHostView), appWidgetInfo);
 
-    workspace->RequestLayout();
+    IView::Probe(workspace)->RequestLayout();
 
     if (DEBUG_WIDGETS) {
-        Slogger::D(TAG, "bound widget id="+item.appWidgetId+" in "
-                + (SystemClock.uptimeMillis()-start) + "ms");
+        StringBuilder sb;
+        sb += "bound widget id=";
+        sb += _item->mAppWidgetId;
+        sb += " in ";
+        sb += SystemClock::GetUptimeMillis() - start;
+        sb += "ms";
+        Slogger::D(TAG, sb.ToString());
     }
     return NOERROR;
 }
@@ -5037,26 +5467,27 @@ ECode Launcher::BindAppWidget(
 ECode Launcher::OnPageBoundSynchronously(
     /* [in] */ Int32 page)
 {
-    return mSynchronouslyBoundPages->Add(page);
+    AutoPtr<IInteger32> p = CoreUtils::Convert(page);
+    return mSynchronouslyBoundPages->Add(TO_IINTERFACE(p));
 }
 
 ECode Launcher::FinishBindingItems()
 {
     AutoPtr<IRunnable> r = new MyRunnable13(this);
-    Boolean res;
-    WaitUntilResume(r, &res);
-    if (res) {
+    if (WaitUntilResume(r)) {
         return NOERROR;
     }
     if (mSavedState != NULL) {
         Boolean res;
-        mWorkspace->HasFocus(&res);
+        IView::Probe(mWorkspace)->HasFocus(&res);
         if (!res) {
             Int32 page;
-            mWorkspace->GetCurrentPage(&page);
+            assert(0);
+            //IPagedView::Probe(mWorkspace)->GetCurrentPage(&page);
             AutoPtr<IView> view;
-            mWorkspace->GetChildAt(page, (IView**)&view);
-            view->RequestFocus();
+            IViewGroup::Probe(mWorkspace)->GetChildAt(page, (IView**)&view);
+            Boolean tmp;
+            view->RequestFocus(&tmp);
         }
         mSavedState = NULL;
     }
@@ -5069,8 +5500,8 @@ ECode Launcher::FinishBindingItems()
     sPendingAddList->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
-        sPendingAddList->Get(i, &obj);
-        CompleteAdd(obj);
+        sPendingAddList->Get(i, (IInterface**)&obj);
+        CompleteAdd((PendingAddArguments*)IObject::Probe(obj));
     }
     sPendingAddList->Clear();
 
@@ -5082,16 +5513,16 @@ ECode Launcher::FinishBindingItems()
     if (mVisible || mWorkspaceLoading) {
         AutoPtr<IRunnable> newAppsRunnable = new MyRunnable14(this);
         Int32 page;
-        mWorkspace->GetCurrentPage(&page);
+        assert(0);
+        //IPagedView::Probe(mWorkspace)->GetCurrentPage(&page);
         Boolean willSnapPage = mNewShortcutAnimatePage > -1 &&
                 mNewShortcutAnimatePage != page;
-        Boolean res;
-        CanRunNewAppsAnimation(&res);
-        if (res) {
+        if (CanRunNewAppsAnimation()) {
             // If the user has not interacted recently, then either snap to the new page to show
             // the new-apps animation or just run them if they are to appear on the current page
             if (willSnapPage) {
-                mWorkspace->SnapToPage(mNewShortcutAnimatePage, newAppsRunnable);
+                assert(0);
+                //IPagedView::Probe(mWorkspace)->SnapToPage(mNewShortcutAnimatePage, newAppsRunnable);
             }
             else {
                 RunNewAppsAnimation(FALSE);
@@ -5110,7 +5541,15 @@ ECode Launcher::FinishBindingItems()
 
 Boolean Launcher::CanRunNewAppsAnimation()
 {
-    Int64 diff = System::CurrentTimeMillis() - mDragController->GetLastGestureUpTime();
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    Int64 ctime;
+    system->GetCurrentTimeMillis(&ctime);
+
+    Int64 time;
+    assert(0);
+    //mDragController->GetLastGestureUpTime(&time);
+    Int64 diff = ctime - time;
     return diff > (NEW_APPS_ANIMATION_INACTIVE_TIMEOUT_SECONDS * 1000);
 }
 
@@ -5122,21 +5561,23 @@ void Launcher::RunNewAppsAnimation(
     CArrayList::New((ICollection**)&bounceAnims);
 
     // Order these new views spatially so that they animate in order
+    AutoPtr<ICollections> coll;
+    CCollections::AcquireSingleton((ICollections**)&coll);
     AutoPtr<IComparator> c = new MyComparator();
-    Collections::Sort(mNewShortcutAnimateViews, c);
+    coll->Sort(IList::Probe(mNewShortcutAnimateViews), c);
 
     // Animate each of the views in place (or show them immediately if requested)
     if (immediate) {
         Int32 size;
-        mNewShortcutAnimateViews->GetSize(size);
+        mNewShortcutAnimateViews->GetSize(&size);
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             mNewShortcutAnimateViews->Get(i, (IInterface**)&obj);
             AutoPtr<IView> v = IView::Probe(obj);
 
-            v->SetAlpha(1f);
-            v->SetScaleX(1f);
-            v->SetScaleY(1f);
+            v->SetAlpha(1.0f);
+            v->SetScaleX(1.0f);
+            v->SetScaleY(1.0f);
         }
     }
     else {
@@ -5151,32 +5592,36 @@ void Launcher::RunNewAppsAnimation(
             CPropertyValuesHolderHelper::AcquireSingleton((IPropertyValuesHolderHelper**)&helper);
 
             AutoPtr<ArrayOf<Float> > values1 = ArrayOf<Float>::Alloc(1);
-            (*values1)[0] = 1f;
+            (*values1)[0] = 1.0f;
             AutoPtr<IPropertyValuesHolder> holder1;
             helper->OfFloat(String("alpha"), values1, (IPropertyValuesHolder**)&holder1);
 
             AutoPtr<ArrayOf<Float> > values2 = ArrayOf<Float>::Alloc(1);
-            (*values2)[0] = 1f;
+            (*values2)[0] = 1.0f;
             AutoPtr<IPropertyValuesHolder> holder2;
             helper->OfFloat(String("scaleX"), values2, (IPropertyValuesHolder**)&holder2);
 
             AutoPtr<ArrayOf<Float> > values3 = ArrayOf<Float>::Alloc(1);
-            (*values3)[0] = 1f;
+            (*values3)[0] = 1.0f;
             AutoPtr<IPropertyValuesHolder> holder3;
             helper->OfFloat(String("scaleY"), values3, (IPropertyValuesHolder**)&holder3);
 
-            AutoPtr<IValueAnimator> bounceAnim = LauncherAnimUtils::OfPropertyValuesHolder(v,
-                    holder1, holder2, holder3);
+            AutoPtr<ArrayOf<IPropertyValuesHolder*> > array = ArrayOf<IPropertyValuesHolder*>::Alloc(3);
+            array->Set(0, holder1);
+            array->Set(1, holder2);
+            array->Set(2, holder3);
+            AutoPtr<IObjectAnimator> _bounceAnim = LauncherAnimUtils::OfPropertyValuesHolder(v, array);
+            AutoPtr<IValueAnimator> bounceAnim = IValueAnimator::Probe(_bounceAnim);
             bounceAnim->SetDuration(IInstallShortcutReceiver::NEW_SHORTCUT_BOUNCE_DURATION);
-            bounceAnim->SetStartDelay(i * IInstallShortcutReceiver::NEW_SHORTCUT_STAGGER_DELAY);
+            IAnimator::Probe(bounceAnim)->SetStartDelay(i * IInstallShortcutReceiver::NEW_SHORTCUT_STAGGER_DELAY);
             AutoPtr<IInterpolator> polator = new SmoothPagedView::OvershootInterpolator();
-            bounceAnim->SetInterpolator(polator);
+            IAnimator::Probe(bounceAnim)->SetInterpolator(ITimeInterpolator::Probe(polator));
             bounceAnims->Add(TO_IINTERFACE(bounceAnim));
         }
         anim->PlayTogether(bounceAnims);
         AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter4(this);
-        anim->AddListener(listener);
-        anim->Start();
+        IAnimator::Probe(anim)->AddListener(listener);
+        IAnimator::Probe(anim)->Start();
     }
 
     // Clean up
@@ -5188,10 +5633,8 @@ void Launcher::RunNewAppsAnimation(
 
 ECode Launcher::BindSearchablesChanged()
 {
-    Boolean searchVisible;
-    UpdateGlobalSearchIcon(&searchVisible);
-    Boolean voiceVisible;
-    UpdateVoiceSearchIcon(searchVisible, &voiceVisible);
+    Boolean searchVisible = UpdateGlobalSearchIcon();
+    Boolean voiceVisible = UpdateVoiceSearchIcon(searchVisible);
     if (mSearchDropTargetBar != NULL) {
         return mSearchDropTargetBar->OnSearchPackagesChanged(searchVisible, voiceVisible);
     }
@@ -5206,7 +5649,7 @@ ECode Launcher::BindAllApplications(
     // Remove the progress bar entirely; we could also make it GONE
     // but better to remove it since we know it's not going to be used
     AutoPtr<IView> progressBar;
-    mAppsCustomizeTabHost->FindViewById(
+    IView::Probe(mAppsCustomizeTabHost)->FindViewById(
             Elastos::Droid::Launcher2::R::id::apps_customize_progress_bar,
             (IView**)&progressBar);
     if (progressBar != NULL) {
@@ -5217,7 +5660,8 @@ ECode Launcher::BindAllApplications(
         // We just post the call to setApps so the user sees the progress bar
         // disappear-- otherwise, it just looks like the progress bar froze
         // which doesn't look great
-        mAppsCustomizeTabHost->Post(setAllAppsRunnable);
+        Boolean res;
+        IView::Probe(mAppsCustomizeTabHost)->Post(setAllAppsRunnable, &res);
     }
     else {
         // If we did not initialize the spinner in onCreate, then we can directly set the
@@ -5231,14 +5675,13 @@ ECode Launcher::BindAppsAdded(
     /* [in] */ IArrayList* apps)
 {
     AutoPtr<IRunnable> r = new MyRunnable16(this, apps);
-    Boolean res;
-    WaitUntilResume(r, &res);
-    if (res) {
+    if (WaitUntilResume(r)) {
         return NOERROR;
     }
 
     if (mAppsCustomizeContent != NULL) {
-        mAppsCustomizeContent->AddApps(apps);
+        assert(0);
+        //mAppsCustomizeContent->AddApps(apps);
     }
     return NOERROR;
 }
@@ -5247,9 +5690,7 @@ ECode Launcher::BindAppsUpdated(
     /* [in] */ IArrayList* apps)
 {
     AutoPtr<IRunnable> r = new MyRunnable17(this, apps);
-    Boolean res;
-    WaitUntilResume(r, &res);
-    if (res) {
+    if (WaitUntilResume(r)) {
         return NOERROR;
     }
 
@@ -5258,7 +5699,8 @@ ECode Launcher::BindAppsUpdated(
     }
 
     if (mAppsCustomizeContent != NULL) {
-        mAppsCustomizeContent->UpdateApps(apps);
+        assert(0);
+        //mAppsCustomizeContent->UpdateApps(apps);
     }
     return NOERROR;
 }
@@ -5271,9 +5713,7 @@ ECode Launcher::BindComponentsRemoved(
 {
     AutoPtr<IRunnable> r = new MyRunnable18(this, packageNames, appInfos,
             matchPackageNamesOnly, user);
-    Boolean res;
-    WaitUntilResume(r, &res);
-    if (res) {
+    if (WaitUntilResume(r)) {
         return NOERROR;
     }
 
@@ -5285,7 +5725,8 @@ ECode Launcher::BindComponentsRemoved(
     }
 
     if (mAppsCustomizeContent != NULL) {
-        mAppsCustomizeContent->RemoveApps(appInfos);
+        assert(0);
+        //mAppsCustomizeContent->RemoveApps(appInfos);
     }
 
     // Notify the drag controller
@@ -5295,15 +5736,14 @@ ECode Launcher::BindComponentsRemoved(
 ECode Launcher::BindPackagesUpdated(
     /* [in] */ IArrayList* widgetsAndShortcuts)
 {
-    Boolean res;
-    WaitUntilResume(mBindPackagesUpdatedRunnable, TRUE, &res);
-    if (res) {
+    if (WaitUntilResume(mBindPackagesUpdatedRunnable, TRUE)) {
         mWidgetsAndShortcuts = widgetsAndShortcuts;
         return NOERROR;
     }
 
     if (mAppsCustomizeContent != NULL) {
-        mAppsCustomizeContent->OnPackagesUpdated(widgetsAndShortcuts);
+        assert(0);
+        //mAppsCustomizeContent->OnPackagesUpdated(widgetsAndShortcuts);
     }
     return NOERROR;
 }
@@ -5319,7 +5759,7 @@ Int32 Launcher::MapConfigurationOriActivityInfoOri(
 
     Int32 rotation;
     d->GetRotation(&rotation);
-    switch (d.getRotation()) {
+    switch (rotation) {
         case ISurface::ROTATION_0:
         case ISurface::ROTATION_180:
             // We are currently in the same basic orientation as the natural orientation
@@ -5337,7 +5777,7 @@ Int32 Launcher::MapConfigurationOriActivityInfoOri(
     (*oriMap)[0] = IActivityInfo::SCREEN_ORIENTATION_PORTRAIT;
     (*oriMap)[1] = IActivityInfo::SCREEN_ORIENTATION_LANDSCAPE;
     (*oriMap)[2] = IActivityInfo::SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-    (*oriMap)[3] = IActivityInfo::SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+    (*oriMap)[3] = IActivityInfo::SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
     // Since the map starts at portrait, we need to offset if this device's natural orientation
     // is landscape.
     Int32 indexOffset = 0;
@@ -5362,8 +5802,8 @@ Int32 Launcher::IsRotationEnabled(
 
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
-    resources->getBoolean(
-            Elastos::Droid::Launcher2::R::bool::allow_rotation,
+    resources->GetBoolean(
+            Elastos::Droid::Launcher2::R::bool_::allow_rotation,
             &enableRotation);
     return enableRotation;
 }
@@ -5379,7 +5819,7 @@ ECode Launcher::LockScreenOrientation()
         resources->GetConfiguration((IConfiguration**)&config);
         Int32 orientation;
         config->GetOrientation(&orientation);
-        return SetRequestedOrientation(MapConfigurationOriActivityInfoOri(orientation);
+        return SetRequestedOrientation(MapConfigurationOriActivityInfoOri(orientation));
     }
     return NOERROR;
 }
@@ -5395,7 +5835,8 @@ ECode Launcher::UnlockScreenOrientation(
         }
         else {
             AutoPtr<IRunnable> r = new MyRunnable20(this);
-            mHandler->PostDelayed(r, mRestoreScreenOrientationDelay);
+            Boolean res;
+            mHandler->PostDelayed(r, mRestoreScreenOrientationDelay, &res);
         }
     }
     return NOERROR;
@@ -5405,7 +5846,9 @@ Boolean Launcher::IsClingsEnabled()
 {
     // disable clings when running in a test harness
     Boolean res;
-    ActivityManager->IsRunningInTestHarness(&res);
+    AutoPtr<IActivityManagerHelper> helper;
+    CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
+    helper->IsRunningInTestHarness(&res);
     if(res) {
         return FALSE;
     }
@@ -5413,12 +5856,12 @@ Boolean Launcher::IsClingsEnabled()
     // Restricted secondary users (child mode) will potentially have very few apps
     // seeded when they start up for the first time. Clings won't work well with that
     Boolean supportsLimitedUsers =
-            android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2;
+            Build::VERSION::SDK_INT >= Build::VERSION_CODES::JELLY_BEAN_MR2;
 
-    AutoPtr<IAccountManagerHelper> helper;
-    CAccountManagerHelper::AcquireSingleton((IAccountManagerHelper**)&helper);
+    AutoPtr<IAccountManagerHelper> helper2;
+    CAccountManagerHelper::AcquireSingleton((IAccountManagerHelper**)&helper2);
     AutoPtr<IAccountManager> accountManager;
-    helper->Get(IContext::Probe(this), (IAccountManager**)&accountManager);
+    helper2->Get(IContext::Probe(this), (IAccountManager**)&accountManager);
     AutoPtr<ArrayOf<IAccount*> > accounts;
     accountManager->GetAccounts((ArrayOf<IAccount*>**)&accounts);
     if (supportsLimitedUsers && accounts->GetLength() == 0) {
@@ -5428,14 +5871,14 @@ Boolean Launcher::IsClingsEnabled()
         AutoPtr<IBundle> restrictions;
         um->GetUserRestrictions((IBundle**)&restrictions);
         Boolean res;
-        restrictions->GetBoolean(IUserManager:DISALLOW_MODIFY_ACCOUNTS, FALSE, &res);
+        restrictions->GetBoolean(IUserManager::DISALLOW_MODIFY_ACCOUNTS, FALSE, &res);
         if (res) {
            return FALSE;
         }
     }
     // Check if the system has requested skipping of first-use hints.
     AutoPtr<IContentResolver> cr;
-    GetContentResolver((IContentResolver**)&cr),
+    GetContentResolver((IContentResolver**)&cr);
     AutoPtr<ISettingsSecure> ss;
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&ss);
     Int32 value;
@@ -5456,31 +5899,31 @@ AutoPtr<ICling> Launcher::InitCling(
     FindViewById(clingId, (IView**)&view);
     AutoPtr<ICling> cling = ICling::Probe(view);
     if (cling != NULL) {
-        cling->Init(this, positionData);
-        cling->SetVisibility(IView::VISIBLE);
-        cling->SetLayerType(IView::LAYER_TYPE_HARDWARE, NULL);
+        cling->CCling_Init(ILauncher::Probe(this), positionData);
+        IView::Probe(cling)->SetVisibility(IView::VISIBLE);
+        IView::Probe(cling)->SetLayerType(IView::LAYER_TYPE_HARDWARE, NULL);
         if (animate) {
-            cling->BuildLayer();
-            cling->SetAlpha(0f);
+            IView::Probe(cling)->BuildLayer();
+            IView::Probe(cling)->SetAlpha(0.0f);
             AutoPtr<IViewPropertyAnimator> res;
             IView::Probe(cling)->Animate((IViewPropertyAnimator**)&res);
-            res->Alpha(1f);
+            res->Alpha(1.0f);
             AutoPtr<ITimeInterpolator> interpolator;
             CAccelerateInterpolator::New((ITimeInterpolator**)&interpolator);
             res->SetInterpolator(interpolator);
-            res->SetDuration(SHOW_CLING_DURATION)
-            res->SetStartDelay(delay)
+            res->SetDuration(SHOW_CLING_DURATION);
+            res->SetStartDelay(delay);
             res->Start();
         }
         else {
-            cling->SetAlpha(1f);
+            IView::Probe(cling)->SetAlpha(1.0f);
         }
-        cling->SetFocusableInTouchMode(TRUE);
+        IView::Probe(cling)->SetFocusableInTouchMode(TRUE);
         AutoPtr<IRunnable> r = new MyRunnable21(this, cling);
         Boolean res;
-        cling->Post(r, &res);
+        IView::Probe(cling)->Post(r, &res);
         mHideFromAccessibilityHelper->SetImportantForAccessibilityToNo(
-                mDragLayer, clingId == Elastos::Droid::Launcher2::R::id::all_apps_cling);
+                IView::Probe(mDragLayer), clingId == Elastos::Droid::Launcher2::R::id::all_apps_cling);
     }
     return cling;
 }
@@ -5493,16 +5936,16 @@ void Launcher::DismissCling(
     // To catch cases where siblings of top-level views are made invisible, just check whether
     // the cling is directly set to GONE before dismissing it.
     Int32 visibility;
-    cling->GetVisibility(&visibility);
+    IView::Probe(cling)->GetVisibility(&visibility);
     if (cling != NULL && visibility != IView::GONE) {
         AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
-        (*array)[0] = 0f;
-        AutoPtr<IObjectAnimator> anim = LauncherAnimUtils::OfFloat(cling, String("alpha"), array);
-        anim->SetDuration(duration);
+        (*array)[0] = 0.0f;
+        AutoPtr<IObjectAnimator> anim = LauncherAnimUtils::OfFloat(IView::Probe(cling), String("alpha"), array);
+        IAnimator::Probe(anim)->SetDuration(duration);
         AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter5(this, cling, flag);
-        anim->AddListener(listener);
-        anim->Start();
-        mHideFromAccessibilityHelper->RestoreImportantForAccessibility(mDragLayer);
+        IAnimator::Probe(anim)->AddListener(listener);
+        IAnimator::Probe(anim)->Start();
+        mHideFromAccessibilityHelper->RestoreImportantForAccessibility(IView::Probe(mDragLayer));
     }
 }
 
@@ -5517,8 +5960,8 @@ void Launcher::RemoveCling(
         AutoPtr<IViewGroup> parent = IViewGroup::Probe(p);
         AutoPtr<IRunnable> r = new MyRunnable22(parent, cling);
         Boolean res;
-        parent->Post(r, &res);
-        mHideFromAccessibilityHelper->RestoreImportantForAccessibility(mDragLayer);
+        IView::Probe(parent)->Post(r, &res);
+        mHideFromAccessibilityHelper->RestoreImportantForAccessibility(IView::Probe(mDragLayer));
     }
 }
 
@@ -5529,9 +5972,8 @@ Boolean Launcher::SkipCustomClingIfNoAccounts()
             Elastos::Droid::Launcher2::R::id::workspace_cling, (IView**)&view);
     AutoPtr<ICling> cling = ICling::Probe(view);
     String identifier;
-    cling->GetDrawIdentifier(&identifier)
-    Boolean customCling;
-    identifier.Equals(String("workspace_custom"), &customCling);
+    cling->GetDrawIdentifier(&identifier);
+    Boolean customCling = identifier.Equals(String("workspace_custom"));
     if (customCling) {
 
         AutoPtr<IAccountManagerHelper> helper;
@@ -5539,7 +5981,7 @@ Boolean Launcher::SkipCustomClingIfNoAccounts()
         AutoPtr<IAccountManager> am;
         helper->Get(IContext::Probe(this), (IAccountManager**)&am);
         AutoPtr<ArrayOf<IAccount*> > accounts;
-        am->getAccountsByType(String("com.google"),(ArrayOf<IAccount*>**)&accounts);
+        am->GetAccountsByType(String("com.google"), (ArrayOf<IAccount*>**)&accounts);
         return accounts->GetLength() == 0;
     }
     return FALSE;
@@ -5560,7 +6002,7 @@ ECode Launcher::ShowFirstRunWorkspaceCling()
         GetResources((IResources**)&resources);
         Boolean res3;
         resources->GetBoolean(
-                Elastos::Droid::Launcher2::R::bool::config_useCustomClings, &res3);
+                Elastos::Droid::Launcher2::R::bool_::config_useCustomClings, &res3);
         if (id != 0 && res3) {
             // Use a custom cling
             AutoPtr<IView> cling;
@@ -5581,10 +6023,10 @@ ECode Launcher::ShowFirstRunWorkspaceCling()
                     Elastos::Droid::Launcher2::R::id::workspace_cling);
         }
         InitCling(
-                Elastos::Droid::Launcher2::R::id::workspace_cling, null, FALSE, 0);
+                Elastos::Droid::Launcher2::R::id::workspace_cling, NULL, FALSE, 0);
     }
     else {
-        RemoveCling(R.id.workspace_cling);
+        RemoveCling(Elastos::Droid::Launcher2::R::id::workspace_cling);
     }
     return NOERROR;
 }
@@ -5594,13 +6036,13 @@ ECode Launcher::ShowFirstRunAllAppsCling(
 {
     // Enable the clings only if they have not been dismissed before
     Boolean res;
-    mSharedPrefs->GetBoolean(ICling::ALLAPPS_CLING_DISMISSED_KEY, FALSE, &res)
+    mSharedPrefs->GetBoolean(ICling::ALLAPPS_CLING_DISMISSED_KEY, FALSE, &res);
     if (IsClingsEnabled() && !res) {
         InitCling(
                 Elastos::Droid::Launcher2::R::id::all_apps_cling, position, TRUE, 0);
     }
     else {
-        RemoveCling(R.id.all_apps_cling);
+        RemoveCling(Elastos::Droid::Launcher2::R::id::all_apps_cling);
     }
     return NOERROR;
 }
@@ -5614,11 +6056,14 @@ ECode Launcher::ShowFirstRunFoldersCling(
     Boolean res;
     mSharedPrefs->GetBoolean(ICling::FOLDER_CLING_DISMISSED_KEY, FALSE, &res);
     if (IsClingsEnabled() && !res) {
-        return InitCling(
-                Elastos::Droid::Launcher2::R::id::folder_cling, null, TRUE, 0, cling);
+        AutoPtr<ICling> c = InitCling(
+                Elastos::Droid::Launcher2::R::id::folder_cling, NULL, TRUE, 0);
+        *cling = c;
+        REFCOUNT_ADD(*cling);
+        return NOERROR;
     }
     else {
-        RemoveCling(R.id.folder_cling);
+        RemoveCling(Elastos::Droid::Launcher2::R::id::folder_cling);
         *cling = NULL;
         return NOERROR;
     }
@@ -5636,7 +6081,7 @@ ECode Launcher::IsFolderClingVisible(
     AutoPtr<ICling> cling = ICling::Probe(view);
     if (cling != NULL) {
         Int32 visibility;
-        cling->GetVisibility(&visibility);
+        IView::Probe(cling)->GetVisibility(&visibility);
         *result = visibility == IView::VISIBLE;
         return NOERROR;
     }
@@ -5679,17 +6124,30 @@ ECode Launcher::DismissFolderCling(
 
 ECode Launcher::DumpState()
 {
-    Slogger::D(TAG, "BEGIN launcher2 dump state for launcher " + this);
-    Slogger::D(TAG, "mSavedState=" + mSavedState);
-    Slogger::D(TAG, "mWorkspaceLoading=" + mWorkspaceLoading);
-    Slogger::D(TAG, "mRestoring=" + mRestoring);
-    Slogger::D(TAG, "mWaitingForResult=" + mWaitingForResult);
-    Slogger::D(TAG, "mSavedInstanceState=" + mSavedInstanceState);
-    Slogger::D(TAG, "sFolders.size=" + sFolders.size());
-    mModel->DumpState();
+    Slogger::D(TAG, String("BEGIN launcher2 dump state for launcher ") + TO_STR(this));
+    Slogger::D(TAG, String("mSavedState=") + TO_STR(mSavedState));
+    StringBuilder sb, sb1, sb2, sb3;
+    sb += "mWorkspaceLoading=";
+    sb += mWorkspaceLoading;
+    Slogger::D(TAG, sb.ToString());
+    sb1 += "mRestoring=";
+    sb1 += mRestoring;
+    Slogger::D(TAG, sb1.ToString());
+    sb2 += "mWaitingForResult=";
+    sb2 += mWaitingForResult;
+    Slogger::D(TAG, sb2.ToString());
+    Slogger::D(TAG, String("mSavedInstanceState=") + TO_STR(mSavedInstanceState));
+    Int32 size;
+    sFolders->GetSize(&size);
+    sb3 += "sFolders.size=";
+    sb3 += size;
+    Slogger::D(TAG, sb3.ToString());
+    assert(0);
+    //mModel->DumpState();
 
-    if (mAppsCustomizeContent != null) {
-        mAppsCustomizeContent->DumpState();
+    if (mAppsCustomizeContent != NULL) {
+        assert(0);
+        //mAppsCustomizeContent->DumpState();
     }
     Slogger::D(TAG, "END launcher2 dump state");
     return NOERROR;
@@ -5702,38 +6160,44 @@ ECode Launcher::Dump(
     /* [in] */ ArrayOf<String>* args)
 {
     Activity::Dump(prefix, fd, writer, args);
-    writer->Println(" ");
-    writer->Println("Debug logs: ");
+    writer->Println(String(" "));
+    writer->Println(String("Debug logs: "));
     Int32 size;
     sDumpLogs->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
-        sDumpLogs->Get(i, (IInterface**)&obj)
+        sDumpLogs->Get(i, (IInterface**)&obj);
         AutoPtr<ICharSequence> cchar = ICharSequence::Probe(obj);
         String str;
         cchar->ToString(&str);
-        writer->Println("  " + str);
+        StringBuilder sb;
+        sb += "  ";
+        sb += str;
+        writer->Println(sb.ToString());
     }
     return NOERROR;
 }
 
 ECode Launcher::DumpDebugLogsToConsole()
 {
-    Slogger::D(TAG, "");
-    Slogger::D(TAG, "*********************");
-    Slogger::D(TAG, "Launcher debug logs: ");
+    Slogger::D(TAG, String(""));
+    Slogger::D(TAG, String("*********************"));
+    Slogger::D(TAG, String("Launcher debug logs: "));
     Int32 size;
     sDumpLogs->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
-        sDumpLogs->Get(i, (IInterface**)&obj)
+        sDumpLogs->Get(i, (IInterface**)&obj);
         AutoPtr<ICharSequence> cchar = ICharSequence::Probe(obj);
         String str;
         cchar->ToString(&str);
-        Slogger::D(TAG, "  " + str);
+        StringBuilder sb;
+        sb += "  ";
+        sb += str;
+        Slogger::D(TAG, sb.ToString());
     }
-    Slogger::D(TAG, "*********************");
-    Slogger::D(TAG, "");
+    Slogger::D(TAG, String("*********************"));
+    Slogger::D(TAG, String(""));
     return NOERROR;
 }
 

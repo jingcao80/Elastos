@@ -86,9 +86,6 @@ public:
 
     AutoPtr<IComponentName> mComponentName;
 
-    static const Int32 DOWNLOADED_FLAG;
-    static const Int32 UPDATED_SYSTEM_APP_FLAG;
-
     Int32 mFlags;
 
 private:

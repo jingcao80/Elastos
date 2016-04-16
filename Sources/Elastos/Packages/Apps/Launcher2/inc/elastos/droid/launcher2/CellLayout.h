@@ -264,9 +264,13 @@ public:
     // 2. When long clicking on an empty cell in a CellLayout, we save information about the
     //    cellX and cellY coordinates and which page was clicked. We then set this as a tag on
     //    the CellLayout that was long clicked
-    class CellInfo : public Object
+    class CellInfo
+        : public Object
+        , public ICellLayoutCellInfo
     {
     public:
+        CAR_INTERFACE_DECL()
+
         CellInfo();
 
         // @Override
@@ -1290,6 +1294,8 @@ public:
         /* [out] */ Boolean* result);
 
 protected:
+    friend class Workspace;
+
     CARAPI SetOverscrollTransformsDirty(
         /* [in] */ Boolean dirty);
 
@@ -1501,14 +1507,6 @@ private:
 
 public:
     static const String TAG;
-
-    static const Int32 MODE_DRAG_OVER = 0;
-    static const Int32 MODE_ON_DROP = 1;
-    static const Int32 MODE_ON_DROP_EXTERNAL = 2;
-    static const Int32 MODE_ACCEPT_DROP = 3;
-
-    static const Int32 LANDSCAPE = 0;
-    static const Int32 PORTRAIT = 1;
 
     AutoPtr<ArrayOf<Int32> > mTempLocation;
 

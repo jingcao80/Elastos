@@ -63,8 +63,15 @@ module
             [in] Int32 page);
     }
 
+    /**
+     * interface IBroadcastReceiver
+     */
     interface ILauncherModel {
-     //~~~~~~~~~
+
+    }
+
+    interface ILauncherModelHelper {
+
     }
 
     } // namespace Launcher2

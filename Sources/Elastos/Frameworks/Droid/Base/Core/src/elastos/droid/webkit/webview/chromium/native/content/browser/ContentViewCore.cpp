@@ -938,7 +938,7 @@ ContentViewCore::ContentViewCore(
     AutoPtr<ISelection> select;
     CSelection::AcquireSingleton((ISelection**)&select);
     AutoPtr<ISpannable> spannable = ISpannable::Probe(mEditable);
-    select->SetSelection2(spannable, 0);
+    select->SetSelection(spannable, 0);
 }
 
 /**

@@ -342,6 +342,8 @@ Int32 CellLayout::LayoutParams::GetY()
     return mY;
 }
 
+CAR_INTERFACE_IMPL(CellLayout::CellInfo, Object, ICellLayoutCellInfo)
+
 CellLayout::CellInfo::CellInfo()
     : mCellX(-1)
     , mCellY(-1)
@@ -863,14 +865,6 @@ ECode CellLayout::CellAndSpan::ToString(
 }
 
 const String CellLayout::TAG("CellLayout");
-
-const Int32 CellLayout::MODE_DRAG_OVER;
-const Int32 CellLayout::MODE_ON_DROP;
-const Int32 CellLayout::MODE_ON_DROP_EXTERNAL;
-const Int32 CellLayout::MODE_ACCEPT_DROP;
-
-const Int32 CellLayout::LANDSCAPE;
-const Int32 CellLayout::PORTRAIT;
 
 const Boolean CellLayout::DESTRUCTIVE_REORDER;
 const Boolean CellLayout::DEBUG_VISUALIZE_OCCUPIED;

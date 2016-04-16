@@ -16,7 +16,6 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.CoreLibrary.Core.h"
-//#include "Elastos.CoreLibrary.Lang.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.CoreLibrary.Text.h"
 #include "elastos/droid/os/Runnable.h"
@@ -59,6 +58,7 @@ namespace Launcher2 {
  */
 class LauncherModel
     : public BroadcastReceiver
+    , public ILauncherModel
 {
 public:
     class ShortcutNameComparator
@@ -712,7 +712,11 @@ public:
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
     LauncherModel();
+
+    CARAPI constructor();
 
     CARAPI constructor(
         /* [in] */ ILauncherApplication* app,
@@ -915,8 +919,8 @@ public:
     CARAPI EnqueuePackageUpdated(
         /* [in] */ PackageUpdatedTask* task);
 
-     // Returns a list of ResolveInfos/AppWindowInfos in sorted order
-    CARAPI static GetSortedWidgetsAndShortcuts(
+    // Returns a list of ResolveInfos/AppWindowInfos in sorted order
+    static CARAPI GetSortedWidgetsAndShortcuts(
         /* [in] */ IContext* context,
         /* [out] */ IArrayList** list);
 
@@ -1004,13 +1008,13 @@ public:
         /* [in] */ ShortcutInfo* info,
         /* [in] */ ArrayOf<Byte>* data);
 
-    CARAPI static GetAppNameComparator(
+    static CARAPI GetAppNameComparator(
         /* [out] */ IComparator** comparator);
 
-    CARAPI static GetWidgetNameComparator(
+    static CARAPI GetWidgetNameComparator(
         /* [out] */ IComparator** comparator);
 
-    CARAPI static GetComponentNameFromResolveInfo(
+    static CARAPI GetComponentNameFromResolveInfo(
         /* [in] */ IResolveInfo* info,
         /* [out] */ IComponentName** name);
 
